@@ -88,9 +88,6 @@ if [ "$CONFIG_VP9_DECODER" = "yes" ]; then
 prototype void vp9_add_residual_4x4 "const int16_t *diff, uint8_t *dest, int stride"
 specialize vp9_add_residual_4x4 sse2
 
-prototype void vp9_add_residual_8x8 "const int16_t *diff, uint8_t *dest, int stride"
-specialize vp9_add_residual_8x8 sse2
-
 prototype void vp9_add_constant_residual_8x8 "const int16_t diff, uint8_t *dest, int stride"
 specialize vp9_add_constant_residual_8x8 sse2
 
@@ -188,11 +185,11 @@ specialize vp9_short_idct4x4_1
 prototype void vp9_short_idct4x4 "int16_t *input, int16_t *output, int pitch"
 specialize vp9_short_idct4x4 sse2
 
-prototype void vp9_short_idct8x8 "int16_t *input, int16_t *output, int pitch"
-specialize vp9_short_idct8x8 sse2
+prototype void vp9_short_idct8x8_add "int16_t *input, uint8_t *dest, int dest_stride"
+specialize vp9_short_idct8x8_add sse2
 
-prototype void vp9_short_idct10_8x8 "int16_t *input, int16_t *output, int pitch"
-specialize vp9_short_idct10_8x8 sse2
+prototype void vp9_short_idct10_8x8_add "int16_t *input, uint8_t *dest, int dest_stride"
+specialize vp9_short_idct10_8x8_add sse2
 
 prototype void vp9_short_idct1_8x8 "int16_t *input, int16_t *output"
 specialize vp9_short_idct1_8x8
@@ -215,8 +212,8 @@ specialize vp9_short_idct1_32x32
 prototype void vp9_short_idct10_32x32_add "int16_t *input, uint8_t *dest, int dest_stride"
 specialize vp9_short_idct10_32x32_add
 
-prototype void vp9_short_iht8x8 "int16_t *input, int16_t *output, int pitch, int tx_type"
-specialize vp9_short_iht8x8
+prototype void vp9_short_iht8x8_add "int16_t *input, uint8_t *dest, int dest_stride, int tx_type"
+specialize vp9_short_iht8x8_add
 
 prototype void vp9_short_iht4x4 "int16_t *input, int16_t *output, int pitch, int tx_type"
 specialize vp9_short_iht4x4

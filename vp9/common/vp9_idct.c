@@ -219,27 +219,27 @@ static void idct8_1d(int16_t *input, int16_t *output) {
   output[7] = step1[0] - step1[7];
 }
 
-void vp9_short_idct8x8_c(int16_t *input, int16_t *output, int pitch) {
+void vp9_short_idct8x8_add_c(int16_t *input, uint8_t *dest, int dest_stride) {
   int16_t out[8 * 8];
   int16_t *outptr = out;
-  const int half_pitch = pitch >> 1;
   int i, j;
   int16_t temp_in[8], temp_out[8];
 
-  // Rows
+  // First transform rows
   for (i = 0; i < 8; ++i) {
     idct8_1d(input, outptr);
     input += 8;
     outptr += 8;
   }
 
-  // Columns
+  // Then transform columns
   for (i = 0; i < 8; ++i) {
     for (j = 0; j < 8; ++j)
       temp_in[j] = out[j * 8 + i];
     idct8_1d(temp_in, temp_out);
     for (j = 0; j < 8; ++j)
-      output[j * half_pitch + i] = ROUND_POWER_OF_TWO(temp_out[j], 5);
+      dest[j * dest_stride + i] = clip_pixel(ROUND_POWER_OF_TWO(temp_out[j], 5)
+                                  + dest[j * dest_stride + i]);
   }
 }
 
@@ -400,8 +400,8 @@ static const transform_2d IHT_8[] = {
   { iadst8_1d, iadst8_1d }   // ADST_ADST = 3
 };
 
-void vp9_short_iht8x8_c(int16_t *input, int16_t *output,
-                        int pitch, int tx_type) {
+void vp9_short_iht8x8_add_c(int16_t *input, uint8_t *dest, int dest_stride,
+                            int tx_type) {
   int i, j;
   int16_t out[8 * 8];
   int16_t *outptr = out;
@@ -421,14 +421,14 @@ void vp9_short_iht8x8_c(int16_t *input, int16_t *output,
       temp_in[j] = out[j * 8 + i];
     ht.cols(temp_in, temp_out);
     for (j = 0; j < 8; ++j)
-      output[j * pitch + i] = ROUND_POWER_OF_TWO(temp_out[j], 5);
-  }
+      dest[j * dest_stride + i] = clip_pixel(ROUND_POWER_OF_TWO(temp_out[j], 5)
+                                  + dest[j * dest_stride + i]);  }
 }
 
-void vp9_short_idct10_8x8_c(int16_t *input, int16_t *output, int pitch) {
+void vp9_short_idct10_8x8_add_c(int16_t *input, uint8_t *dest,
+                                int dest_stride) {
   int16_t out[8 * 8];
   int16_t *outptr = out;
-  const int half_pitch = pitch >> 1;
   int i, j;
   int16_t temp_in[8], temp_out[8];
 
@@ -447,7 +447,8 @@ void vp9_short_idct10_8x8_c(int16_t *input, int16_t *output, int pitch) {
       temp_in[j] = out[j * 8 + i];
     idct8_1d(temp_in, temp_out);
     for (j = 0; j < 8; ++j)
-      output[j * half_pitch + i] = ROUND_POWER_OF_TWO(temp_out[j], 5);
+      dest[j * dest_stride + i] = clip_pixel(ROUND_POWER_OF_TWO(temp_out[j], 5)
+                                  + dest[j * dest_stride + i]);
   }
 }
 
