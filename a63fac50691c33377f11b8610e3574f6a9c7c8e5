@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAYH//+AQ\u003d",
+        "filename": "vp9/common/vp9_reconintra.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 387,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2013-05-16T00:49:48Z",
+      "side": 1,
+      "message": "Looks like a typo, should be \u0027subsampling_y\u0027",
+      "revId": "a63fac50691c33377f11b8610e3574f6a9c7c8e5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
