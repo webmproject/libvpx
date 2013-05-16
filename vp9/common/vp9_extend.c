@@ -119,29 +119,3 @@ void vp9_copy_and_extend_frame_with_rect(const YV12_BUFFER_CONFIG *src,
                         srcw_uv, srch_uv,
                         et_uv, el_uv, eb_uv, er_uv);
 }
-
-// note the extension is only for the last row, for intra prediction purpose
-void vp9_extend_mb_row(YV12_BUFFER_CONFIG *buf,
-                       uint8_t *y, uint8_t *u, uint8_t *v) {
-  int i;
-
-  y += buf->y_stride * 14;
-  u += buf->uv_stride * 6;
-  v += buf->uv_stride * 6;
-
-  for (i = 0; i < 4; i++) {
-    y[i] = y[-1];
-    u[i] = u[-1];
-    v[i] = v[-1];
-  }
-
-  y += buf->y_stride;
-  u += buf->uv_stride;
-  v += buf->uv_stride;
-
-  for (i = 0; i < 4; i++) {
-    y[i] = y[-1];
-    u[i] = u[-1];
-    v[i] = v[-1];
-  }
-}

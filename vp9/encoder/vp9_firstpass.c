@@ -688,9 +688,6 @@ void vp9_first_pass(VP9_COMP *cpi) {
     x->plane[1].src.buf += 8 * x->plane[1].src.stride - 8 * cm->mb_cols;
     x->plane[2].src.buf += 8 * x->plane[1].src.stride - 8 * cm->mb_cols;
 
-    // extend the recon for intra prediction
-    vp9_extend_mb_row(new_yv12, xd->plane[0].dst.buf + 16,
-                      xd->plane[1].dst.buf + 8, xd->plane[2].dst.buf + 8);
     vp9_clear_system_state();  // __asm emms;
   }
 

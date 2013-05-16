@@ -298,13 +298,6 @@ static void build_activity_map(VP9_COMP *cpi) {
 
     // adjust to the next row of mbs
     x->plane[0].src.buf += 16 * x->plane[0].src.stride - 16 * cm->mb_cols;
-
-#if ALT_ACT_MEASURE
-    // extend the recon for intra prediction
-    vp9_extend_mb_row(new_yv12, xd->plane[0].dst.buf + 16,
-                      xd->plane[1].dst.buf + 8, xd->plane[2].dst.buf + 8);
-#endif
-
   }
 
   // Calculate an "average" MB activity
