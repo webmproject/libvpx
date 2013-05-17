@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAYH//8FQ\u003d",
+        "filename": "vp8/encoder/onyx_if.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 368,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2013-05-17T16:01:07Z",
+      "side": 1,
+      "message": "we don\u0027t put \"|\" around variable names in comments elsewhere, so they should probably be removed here and from other instances in this patch.",
+      "revId": "6fecdeb8c4b276f33c8adf18d25032e3a7d2758f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAYH//8FM\u003d",
+        "filename": "vp8/encoder/onyx_if.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 385,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2013-05-17T16:01:07Z",
+      "side": 1,
+      "message": "remove \"|\"s",
+      "revId": "6fecdeb8c4b276f33c8adf18d25032e3a7d2758f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAYH//8FA\u003d",
+        "filename": "vp8/encoder/onyx_if.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 394,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2013-05-17T16:01:07Z",
+      "side": 1,
+      "message": "remove \"|\"s",
+      "revId": "6fecdeb8c4b276f33c8adf18d25032e3a7d2758f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAYH//8E0\u003d",
+        "filename": "vp8/encoder/onyx_if.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 1669,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2013-05-17T16:01:07Z",
+      "side": 1,
+      "message": "remove \"|\"s",
+      "revId": "6fecdeb8c4b276f33c8adf18d25032e3a7d2758f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
