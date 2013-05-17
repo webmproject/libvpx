@@ -569,23 +569,32 @@ void vp9_update_nmv_count(VP9_COMP *cpi, MACROBLOCK *x,
                          int_mv *best_ref_mv, int_mv *second_best_ref_mv) {
   MB_MODE_INFO * mbmi = &x->e_mbd.mode_info_context->mbmi;
   MV mv;
+  int bwl = b_width_log2(mbmi->sb_type), bw = 1 << bwl;
+  int bhl = b_height_log2(mbmi->sb_type), bh = 1 << bhl;
+  int idx, idy;
 
   if (mbmi->mode == SPLITMV) {
     int i;
     PARTITION_INFO *pi = x->partition_info;
-    for (i = 0; i < pi->count; i++) {
-      if (pi->bmi[i].mode == NEW4X4) {
-        mv.row = (pi->bmi[i].mv.as_mv.row - best_ref_mv->as_mv.row);
-        mv.col = (pi->bmi[i].mv.as_mv.col - best_ref_mv->as_mv.col);
-        vp9_increment_nmv(&mv, &best_ref_mv->as_mv, &cpi->NMVcount,
-                          x->e_mbd.allow_high_precision_mv);
-        if (x->e_mbd.mode_info_context->mbmi.second_ref_frame > 0) {
-          mv.row = pi->bmi[i].second_mv.as_mv.row -
-                       second_best_ref_mv->as_mv.row;
-          mv.col = pi->bmi[i].second_mv.as_mv.col -
-                       second_best_ref_mv->as_mv.col;
-          vp9_increment_nmv(&mv, &second_best_ref_mv->as_mv, &cpi->NMVcount,
+#if !CONFIG_AB4X4
+    bw = 1, bh = 1;
+#endif
+    for (idy = 0; idy < 2; idy += bh) {
+      for (idx = 0; idx < 2; idx += bw) {
+        i = idy * 2 + idx;
+        if (pi->bmi[i].mode == NEW4X4) {
+          mv.row = (pi->bmi[i].mv.as_mv.row - best_ref_mv->as_mv.row);
+          mv.col = (pi->bmi[i].mv.as_mv.col - best_ref_mv->as_mv.col);
+          vp9_increment_nmv(&mv, &best_ref_mv->as_mv, &cpi->NMVcount,
                             x->e_mbd.allow_high_precision_mv);
+          if (x->e_mbd.mode_info_context->mbmi.second_ref_frame > 0) {
+            mv.row = pi->bmi[i].second_mv.as_mv.row -
+                         second_best_ref_mv->as_mv.row;
+            mv.col = pi->bmi[i].second_mv.as_mv.col -
+                         second_best_ref_mv->as_mv.col;
+            vp9_increment_nmv(&mv, &second_best_ref_mv->as_mv, &cpi->NMVcount,
+                              x->e_mbd.allow_high_precision_mv);
+          }
         }
       }
     }
