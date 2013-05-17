@@ -682,24 +682,6 @@ static void update_stats(VP9_COMP *cpi, int mi_row, int mi_col) {
   }
 }
 
-static void set_block_index(MACROBLOCKD *xd, int idx,
-                            BLOCK_SIZE_TYPE bsize) {
-  if (bsize >= BLOCK_SIZE_SB32X32) {
-    xd->sb_index = idx;
-  } else if (bsize >= BLOCK_SIZE_MB16X16) {
-    xd->mb_index = idx;
-  } else {
-#if CONFIG_AB4X4
-    if (bsize >= BLOCK_SIZE_SB8X8)
-      xd->b_index = idx;
-    else
-      xd->ab_index = idx;
-#else
-    xd->b_index = idx;
-#endif
-  }
-}
-
 // TODO(jingning): the variables used here are little complicated. need further
 // refactoring on organizing the the temporary buffers, when recursive
 // partition down to 4x4 block size is enabled.
@@ -803,7 +785,7 @@ static void encode_b(VP9_COMP *cpi, TOKENEXTRA **tp,
     return;
 
   if (sub_index != -1)
-    set_block_index(xd, sub_index, bsize);
+    *(get_sb_index(xd, bsize)) = sub_index;
   set_offsets(cpi, mi_row, mi_col, bsize);
   update_state(cpi, get_block_context(x, bsize), bsize, output_enabled);
   encode_superblock(cpi, tp, output_enabled, mi_row, mi_col, bsize);
@@ -823,7 +805,7 @@ static void encode_sb(VP9_COMP *cpi, TOKENEXTRA **tp,
   MACROBLOCK *const x = &cpi->mb;
   MACROBLOCKD *const xd = &x->e_mbd;
   BLOCK_SIZE_TYPE c1 = BLOCK_SIZE_SB8X8;
-  const int bsl = mi_width_log2(bsize), bs = (1 << bsl) / 2;
+  const int bsl = b_width_log2(bsize), bs = (1 << bsl) / 4;
   int bwl, bhl;
   int UNINITIALIZED_IS_SAFE(pl);
 
@@ -842,7 +824,7 @@ static void encode_sb(VP9_COMP *cpi, TOKENEXTRA **tp,
     c1 = *(get_sb_partitioning(x, bsize));
   }
 
-  bwl = mi_width_log2(c1), bhl = mi_height_log2(c1);
+  bwl = b_width_log2(c1), bhl = b_height_log2(c1);
 
   if (bsl == bwl && bsl == bhl) {
 #if CONFIG_AB4X4
@@ -881,7 +863,7 @@ static void encode_sb(VP9_COMP *cpi, TOKENEXTRA **tp,
     for (i = 0; i < 4; i++) {
       const int x_idx = i & 1, y_idx = i >> 1;
 
-      set_block_index(xd, i, subsize);
+      *(get_sb_index(xd, subsize)) = i;
       encode_sb(cpi, tp, mi_row + y_idx * bs, mi_col + x_idx * bs,
                 output_enabled, subsize);
     }
