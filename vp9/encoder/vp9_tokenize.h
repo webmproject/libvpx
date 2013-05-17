@@ -26,8 +26,9 @@ typedef struct {
   int16_t         extra;
   uint8_t         token;
   uint8_t         skip_eob_node;
-#if CONFIG_CODE_ZEROGROUP
-  uint8_t         skip_coef_val;
+#if CONFIG_MODELCOEFPROB
+  uint8_t         block_type;
+  uint8_t         ref_type;
 #endif
 } TOKENEXTRA;
 

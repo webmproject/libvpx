@@ -38,6 +38,11 @@
 
 extern const vp9_tree_index vp9_coef_tree[];
 
+#if CONFIG_MODELCOEFPROB
+#define DCT_EOB_MODEL_TOKEN     3      /* EOB       Extra Bits 0+0 */
+extern const vp9_tree_index vp9_coefmodel_tree[];
+#endif
+
 extern struct vp9_token vp9_coef_encodings[MAX_ENTROPY_TOKENS];
 
 typedef struct {
@@ -152,23 +157,32 @@ extern int vp9_get_coef_context(const int *scan, const int *neighbors,
 const int *vp9_get_coef_neighbors_handle(const int *scan, int *pad);
 
 #if CONFIG_MODELCOEFPROB
-#define COEFPROB_BITS               8
-#define COEFPROB_MODELS             (1 << COEFPROB_BITS)
+#define COEFPROB_MODELS             128  // 128 lists stored for probs 1, 3, ..., 255
 
-// 2 => EOB and Zero nodes are unconstrained, rest are modeled
-// 3 => EOB, Zero and One nodes are unconstrained, rest are modeled
-#define UNCONSTRAINED_NODES         3   // Choose one of 2 or 3
-
-// whether forward updates are model-based
-#define MODEL_BASED_UPDATE          1
-// if model-based how many nodes are unconstrained
-#define UNCONSTRAINED_UPDATE_NODES  3
-// whether backward updates are model-based
-#define MODEL_BASED_ADAPT           1
-#define UNCONSTRAINED_ADAPT_NODES   3
+#define UNCONSTRAINED_NODES         3
+#define MODEL_NODES                 (ENTROPY_NODES - UNCONSTRAINED_NODES)
+#define PIVOT_NODE                  2   // which node is pivot
 
 typedef vp9_prob vp9_coeff_probs_model[REF_TYPES][COEF_BANDS]
-                                      [PREV_COEF_CONTEXTS][2];
+                                      [PREV_COEF_CONTEXTS]
+                                      [UNCONSTRAINED_NODES];
+
+typedef unsigned int vp9_coeff_count_model[REF_TYPES][COEF_BANDS]
+                                          [PREV_COEF_CONTEXTS]
+                                          [UNCONSTRAINED_NODES + 1];
+typedef unsigned int vp9_coeff_stats_model[REF_TYPES][COEF_BANDS]
+                                          [PREV_COEF_CONTEXTS]
+                                          [UNCONSTRAINED_NODES][2];
+extern void vp9_full_to_model_counts(
+    vp9_coeff_count_model *model_count, vp9_coeff_count *full_count);
+
+void vp9_model_to_full_probs(const vp9_prob *model, int b, int r, vp9_prob *full);
+
+void vp9_model_to_full_probs_sb(
+    vp9_prob model[COEF_BANDS][PREV_COEF_CONTEXTS][UNCONSTRAINED_NODES],
+    int b, int r,
+    vp9_prob full[COEF_BANDS][PREV_COEF_CONTEXTS][ENTROPY_NODES]);
+
 extern const vp9_prob vp9_modelcoefprobs[COEFPROB_MODELS][ENTROPY_NODES - 1];
 void vp9_get_model_distribution(vp9_prob model, vp9_prob *tree_probs,
                                 int b, int r);

@@ -58,11 +58,6 @@ typedef struct frame_contexts {
   vp9_prob sub_mv_ref_prob[SUBMVREF_COUNT][VP9_SUBMVREFS - 1];
   vp9_prob partition_prob[NUM_PARTITION_CONTEXTS][PARTITION_TYPES - 1];
 
-  vp9_coeff_probs coef_probs_4x4[BLOCK_TYPES];
-  vp9_coeff_probs coef_probs_8x8[BLOCK_TYPES];
-  vp9_coeff_probs coef_probs_16x16[BLOCK_TYPES];
-  vp9_coeff_probs coef_probs_32x32[BLOCK_TYPES];
-
   nmv_context nmvc;
   nmv_context pre_nmvc;
   vp9_prob pre_bmode_prob[VP9_NKF_BINTRAMODES - 1];
@@ -78,15 +73,33 @@ typedef struct frame_contexts {
   unsigned int sub_mv_ref_counts[SUBMVREF_COUNT][VP9_SUBMVREFS];
   unsigned int partition_counts[NUM_PARTITION_CONTEXTS][PARTITION_TYPES];
 
+#if CONFIG_MODELCOEFPROB
+  vp9_coeff_probs_model coef_probs_4x4[BLOCK_TYPES];
+  vp9_coeff_probs_model coef_probs_8x8[BLOCK_TYPES];
+  vp9_coeff_probs_model coef_probs_16x16[BLOCK_TYPES];
+  vp9_coeff_probs_model coef_probs_32x32[BLOCK_TYPES];
+  vp9_coeff_probs_model pre_coef_probs_4x4[BLOCK_TYPES];
+  vp9_coeff_probs_model pre_coef_probs_8x8[BLOCK_TYPES];
+  vp9_coeff_probs_model pre_coef_probs_16x16[BLOCK_TYPES];
+  vp9_coeff_probs_model pre_coef_probs_32x32[BLOCK_TYPES];
+  vp9_coeff_count_model coef_counts_4x4[BLOCK_TYPES];
+  vp9_coeff_count_model coef_counts_8x8[BLOCK_TYPES];
+  vp9_coeff_count_model coef_counts_16x16[BLOCK_TYPES];
+  vp9_coeff_count_model coef_counts_32x32[BLOCK_TYPES];
+#else
+  vp9_coeff_probs coef_probs_4x4[BLOCK_TYPES];
+  vp9_coeff_probs coef_probs_8x8[BLOCK_TYPES];
+  vp9_coeff_probs coef_probs_16x16[BLOCK_TYPES];
+  vp9_coeff_probs coef_probs_32x32[BLOCK_TYPES];
   vp9_coeff_probs pre_coef_probs_4x4[BLOCK_TYPES];
   vp9_coeff_probs pre_coef_probs_8x8[BLOCK_TYPES];
   vp9_coeff_probs pre_coef_probs_16x16[BLOCK_TYPES];
   vp9_coeff_probs pre_coef_probs_32x32[BLOCK_TYPES];
-
   vp9_coeff_count coef_counts_4x4[BLOCK_TYPES];
   vp9_coeff_count coef_counts_8x8[BLOCK_TYPES];
   vp9_coeff_count coef_counts_16x16[BLOCK_TYPES];
   vp9_coeff_count coef_counts_32x32[BLOCK_TYPES];
+#endif
   unsigned int eob_branch_counts[TX_SIZE_MAX_SB][BLOCK_TYPES][REF_TYPES]
                                 [COEF_BANDS][PREV_COEF_CONTEXTS];
 

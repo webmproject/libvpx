@@ -53,7 +53,6 @@ extern unsigned int active_section;
 #define vp9_cost_upd  ((int)(vp9_cost_one(upd) - vp9_cost_zero(upd)) >> 8)
 #define vp9_cost_upd256  ((int)(vp9_cost_one(upd) - vp9_cost_zero(upd)))
 
-#define SEARCH_NEWP
 static int update_bits[255];
 
 static INLINE void write_le16(uint8_t *p, int value) {
@@ -311,31 +310,33 @@ static int prob_diff_update_savings_search(const unsigned int *ct,
   return bestsavings;
 }
 
-#if CONFIG_MODELCOEFPROB && MODEL_BASED_UPDATE
+#if CONFIG_MODELCOEFPROB
 static int prob_diff_update_savings_search_model(const unsigned int *ct,
                                                  const vp9_prob *oldp,
                                                  vp9_prob *bestp,
                                                  const vp9_prob upd,
-                                                 int b, int r, int q) {
+                                                 int b, int r) {
   int i, old_b, new_b, update_b, savings, bestsavings, step;
   int newp;
-  vp9_prob bestnewp, newplist[ENTROPY_NODES];
-  for (i = UNCONSTRAINED_NODES - 1, old_b = 0; i < ENTROPY_NODES; ++i)
-    old_b += cost_branch256(ct + 2 * i, oldp[i]);
+  vp9_prob bestnewp, newplist[ENTROPY_NODES], oldplist[ENTROPY_NODES];
+  vp9_model_to_full_probs(oldp, b, r, oldplist);
+  for (i = UNCONSTRAINED_NODES, old_b = 0; i < ENTROPY_NODES; ++i)
+    old_b += cost_branch256(ct + 2 * i, oldplist[i]);
+  old_b += cost_branch256(ct + 2 * PIVOT_NODE, oldplist[PIVOT_NODE]);
 
   bestsavings = 0;
-  bestnewp = oldp[UNCONSTRAINED_NODES - 1];
+  bestnewp = oldp[PIVOT_NODE];
 
-  step = (*bestp > oldp[UNCONSTRAINED_NODES - 1] ? -1 : 1);
+  step = (*bestp > oldp[PIVOT_NODE] ? -1 : 1);
   newp = *bestp;
-  // newp = *bestp - step * (abs(*bestp - oldp[UNCONSTRAINED_NODES - 1]) >> 1);
-  for (; newp != oldp[UNCONSTRAINED_NODES - 1]; newp += step) {
+  for (; newp != oldp[PIVOT_NODE]; newp += step) {
     if (newp < 1 || newp > 255) continue;
-    newplist[UNCONSTRAINED_NODES - 1] = newp;
+    newplist[PIVOT_NODE] = newp;
     vp9_get_model_distribution(newp, newplist, b, r);
-    for (i = UNCONSTRAINED_NODES - 1, new_b = 0; i < ENTROPY_NODES; ++i)
+    for (i = UNCONSTRAINED_NODES, new_b = 0; i < ENTROPY_NODES; ++i)
       new_b += cost_branch256(ct + 2 * i, newplist[i]);
-    update_b = prob_diff_update_cost(newp, oldp[UNCONSTRAINED_NODES - 1]) +
+    new_b += cost_branch256(ct + 2 * PIVOT_NODE, newplist[PIVOT_NODE]);
+    update_b = prob_diff_update_cost(newp, oldp[PIVOT_NODE]) +
         vp9_cost_upd256;
     savings = old_b - new_b - update_b;
     if (savings > bestsavings) {
@@ -373,16 +374,29 @@ static void pack_mb_tokens(vp9_writer* const bc,
     const struct vp9_token *const a = vp9_coef_encodings + t;
     const vp9_extra_bit *const b = vp9_extra_bits + t;
     int i = 0;
-    const unsigned char *pp = p->context_tree;
+    const vp9_prob *pp;
     int v = a->value;
     int n = a->len;
     int ncount = n;
+#if CONFIG_MODELCOEFPROB
+    vp9_prob probs[ENTROPY_NODES];
+#endif
 
-    if (t == EOSB_TOKEN)
-    {
+    if (t == EOSB_TOKEN) {
       ++p;
       break;
     }
+#if CONFIG_MODELCOEFPROB
+    if (t >= TWO_TOKEN) {
+      vp9_model_to_full_probs(p->context_tree,
+                              p->block_type, p->ref_type, probs);
+      pp = probs;
+    } else {
+      pp = p->context_tree;
+    }
+#else
+    pp = p->context_tree;
+#endif
     assert(pp != 0);
 
     /* skip one or two nodes */
@@ -399,19 +413,18 @@ static void pack_mb_tokens(vp9_writer* const bc,
       ncount--;
     } while (n && ncount);
 
-
     if (b->base_val) {
       const int e = p->extra, l = b->len;
 
       if (l) {
-        const unsigned char *pp = b->prob;
+        const unsigned char *pb = b->prob;
         int v = e >> 1;
         int n = l;              /* number of bits in v, assumed nonzero */
         int i = 0;
 
         do {
           const int bb = (v >> --n) & 1;
-          vp9_write(bc, bb, pp[i >> 1]);
+          vp9_write(bc, bb, pb[i >> 1]);
           i = b->tree[i + bb];
         } while (n);
       }
@@ -1098,20 +1111,26 @@ static void build_coeff_contexts(VP9_COMP *cpi) {
                           cpi->frame_branch_ct_32x32, BLOCK_TYPES);
 }
 
-static void update_coef_probs_common(vp9_writer* const bc,
-                                     VP9_COMP *cpi,
+static void update_coef_probs_common(
+    vp9_writer* const bc,
+    VP9_COMP *cpi,
 #ifdef ENTROPY_STATS
-                                     vp9_coeff_stats *tree_update_hist,
+    vp9_coeff_stats *tree_update_hist,
 #endif
-                                     vp9_coeff_probs *new_frame_coef_probs,
-                                     vp9_coeff_probs *old_frame_coef_probs,
-                                     vp9_coeff_stats *frame_branch_ct,
-                                     TX_SIZE tx_size) {
+    vp9_coeff_probs *new_frame_coef_probs,
+#if CONFIG_MODELCOEFPROB
+    vp9_coeff_probs_model *old_frame_coef_probs,
+#else
+    vp9_coeff_probs *old_frame_coef_probs,
+#endif
+    vp9_coeff_stats *frame_branch_ct,
+    TX_SIZE tx_size) {
   int i, j, k, l, t;
   int update[2] = {0, 0};
   int savings;
-#if CONFIG_MODELCOEFPROB && MODEL_BASED_UPDATE
-  const int entropy_nodes_update = UNCONSTRAINED_UPDATE_NODES;
+
+#if CONFIG_MODELCOEFPROB
+  const int entropy_nodes_update = UNCONSTRAINED_NODES;
 #else
   const int entropy_nodes_update = ENTROPY_NODES;
 #endif
@@ -1134,13 +1153,11 @@ static void update_coef_probs_common(vp9_writer* const bc,
 
             if (l >= 3 && k == 0)
               continue;
-#if defined(SEARCH_NEWP)
-#if CONFIG_MODELCOEFPROB && MODEL_BASED_UPDATE
-            if (t == UNCONSTRAINED_NODES - 1)
+#if CONFIG_MODELCOEFPROB
+            if (t == PIVOT_NODE)
               s = prob_diff_update_savings_search_model(
                   frame_branch_ct[i][j][k][l][0],
-                  old_frame_coef_probs[i][j][k][l], &newp, upd, i, j,
-                  cpi->common.base_qindex);
+                  old_frame_coef_probs[i][j][k][l], &newp, upd, i, j);
             else
 #endif
               s = prob_diff_update_savings_search(
@@ -1151,15 +1168,6 @@ static void update_coef_probs_common(vp9_writer* const bc,
               savings += s - (int)(vp9_cost_zero(upd));
             else
               savings -= (int)(vp9_cost_zero(upd));
-#else
-            s = prob_update_savings(frame_branch_ct[i][j][k][l][t],
-                                    oldp, newp, upd);
-            if (s > 0)
-              u = 1;
-            if (u)
-              savings += s;
-#endif
-
             update[u]++;
           }
         }
@@ -1189,13 +1197,11 @@ static void update_coef_probs_common(vp9_writer* const bc,
             if (l >= 3 && k == 0)
               continue;
 
-#if defined(SEARCH_NEWP)
-#if CONFIG_MODELCOEFPROB && MODEL_BASED_UPDATE
-            if (t == UNCONSTRAINED_NODES - 1)
+#if CONFIG_MODELCOEFPROB
+            if (t == PIVOT_NODE)
               s = prob_diff_update_savings_search_model(
                   frame_branch_ct[i][j][k][l][0],
-                  old_frame_coef_probs[i][j][k][l], &newp, upd, i, j,
-                  cpi->common.base_qindex);
+                  old_frame_coef_probs[i][j][k][l], &newp, upd, i, j);
             else
 #endif
               s = prob_diff_update_savings_search(
@@ -1203,12 +1209,6 @@ static void update_coef_probs_common(vp9_writer* const bc,
                   *oldp, &newp, upd);
             if (s > 0 && newp != *oldp)
               u = 1;
-#else
-            s = prob_update_savings(frame_branch_ct[i][j][k][l][t],
-                                    *oldp, newp, upd);
-            if (s > 0)
-              u = 1;
-#endif
             vp9_write(bc, u, upd);
 #ifdef ENTROPY_STATS
             if (!cpi->dummy_packing)
@@ -1218,11 +1218,6 @@ static void update_coef_probs_common(vp9_writer* const bc,
               /* send/use new probability */
               write_prob_diff_update(bc, newp, *oldp);
               *oldp = newp;
-#if CONFIG_MODELCOEFPROB && MODEL_BASED_UPDATE
-              if (t == UNCONSTRAINED_NODES - 1)
-                vp9_get_model_distribution(
-                    newp, old_frame_coef_probs[i][j][k][l], i, j);
-#endif
             }
           }
         }

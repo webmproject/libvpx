@@ -550,11 +550,16 @@ static void init_frame(VP9D_COMP *pbi) {
   xd->mode_info_stride = pc->mode_info_stride;
 }
 
-static void read_coef_probs_common(vp9_coeff_probs *coef_probs,
-                                   TX_SIZE tx_size,
-                                   vp9_reader *r) {
-#if CONFIG_MODELCOEFPROB && MODEL_BASED_UPDATE
-  const int entropy_nodes_update = UNCONSTRAINED_UPDATE_NODES;
+static void read_coef_probs_common(
+#if CONFIG_MODELCOEFPROB
+    vp9_coeff_probs_model *coef_probs,
+#else
+    vp9_coeff_probs *coef_probs,
+#endif
+    TX_SIZE tx_size,
+    vp9_reader *r) {
+#if CONFIG_MODELCOEFPROB
+  const int entropy_nodes_update = UNCONSTRAINED_NODES;
 #else
   const int entropy_nodes_update = ENTROPY_NODES;
 #endif
@@ -575,10 +580,6 @@ static void read_coef_probs_common(vp9_coeff_probs *coef_probs,
 
               if (vp9_read(r, vp9_coef_update_prob[m])) {
                 *p = read_prob_diff_update(r, *p);
-#if CONFIG_MODELCOEFPROB && MODEL_BASED_UPDATE
-                if (m == UNCONSTRAINED_NODES - 1)
-                  vp9_get_model_distribution(*p, coef_probs[i][j][k][l], i, j);
-#endif
               }
             }
           }

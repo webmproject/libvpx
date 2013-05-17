@@ -3174,10 +3174,22 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
 
   release_scaled_references(cpi);
   update_reference_frames(cpi);
+
+#if CONFIG_MODELCOEFPROB
+  vp9_full_to_model_counts(cpi->common.fc.coef_counts_4x4,
+                           cpi->coef_counts_4x4);
+  vp9_full_to_model_counts(cpi->common.fc.coef_counts_8x8,
+                           cpi->coef_counts_8x8);
+  vp9_full_to_model_counts(cpi->common.fc.coef_counts_16x16,
+                           cpi->coef_counts_16x16);
+  vp9_full_to_model_counts(cpi->common.fc.coef_counts_32x32,
+                           cpi->coef_counts_32x32);
+#else
   vp9_copy(cpi->common.fc.coef_counts_4x4, cpi->coef_counts_4x4);
   vp9_copy(cpi->common.fc.coef_counts_8x8, cpi->coef_counts_8x8);
   vp9_copy(cpi->common.fc.coef_counts_16x16, cpi->coef_counts_16x16);
   vp9_copy(cpi->common.fc.coef_counts_32x32, cpi->coef_counts_32x32);
+#endif
   if (!cpi->common.error_resilient_mode &&
       !cpi->common.frame_parallel_decoding_mode) {
     vp9_adapt_coef_probs(&cpi->common);

@@ -76,10 +76,17 @@ typedef struct {
   // 0 = I4X4_PRED, ZERO_MV, MV, SPLIT
   signed char last_mode_lf_deltas[MAX_MODE_LF_DELTAS];
 
+#if CONFIG_MODELCOEFPROB
+  vp9_coeff_probs_model coef_probs_4x4[BLOCK_TYPES];
+  vp9_coeff_probs_model coef_probs_8x8[BLOCK_TYPES];
+  vp9_coeff_probs_model coef_probs_16x16[BLOCK_TYPES];
+  vp9_coeff_probs_model coef_probs_32x32[BLOCK_TYPES];
+#else
   vp9_coeff_probs coef_probs_4x4[BLOCK_TYPES];
   vp9_coeff_probs coef_probs_8x8[BLOCK_TYPES];
   vp9_coeff_probs coef_probs_16x16[BLOCK_TYPES];
   vp9_coeff_probs coef_probs_32x32[BLOCK_TYPES];
+#endif
 
   vp9_prob sb_ymode_prob[VP9_I32X32_MODES - 1];
   vp9_prob ymode_prob[VP9_YMODES - 1]; /* interframe intra mode probs */

@@ -136,7 +136,11 @@ static void tokenize_b(int plane, int block, BLOCK_SIZE_TYPE bsize,
   const int segment_id = mbmi->segment_id;
   const int *scan, *nb;
   vp9_coeff_count *counts;
+#if CONFIG_MODELCOEFPROB
+  vp9_coeff_probs_model *coef_probs;
+#else
   vp9_coeff_probs *coef_probs;
+#endif
   const int ref = mbmi->ref_frame != INTRA_FRAME;
   ENTROPY_CONTEXT above_ec, left_ec;
   uint8_t token_cache[1024];
@@ -224,7 +228,11 @@ static void tokenize_b(int plane, int block, BLOCK_SIZE_TYPE bsize,
 
     t->token = token;
     t->context_tree = coef_probs[type][ref][band][pt];
-      t->skip_eob_node = (c > 0) && (token_cache[scan[c - 1]] == 0);
+#if CONFIG_MODELCOEFPROB
+    t->block_type = type;
+    t->ref_type = ref;
+#endif
+    t->skip_eob_node = (c > 0) && (token_cache[scan[c - 1]] == 0);
     assert(vp9_coef_encodings[t->token].len - t->skip_eob_node > 0);
 
     if (!dry_run) {

@@ -106,16 +106,28 @@ const MODE_DEFINITION vp9_mode_order[MAX_MODES] = {
 };
 
 static void fill_token_costs(vp9_coeff_count *c,
+#if CONFIG_MODELCOEFPROB
+                             vp9_coeff_probs_model *p,
+#else
                              vp9_coeff_probs *p,
+#endif
                              TX_SIZE tx_size) {
   int i, j, k, l;
 
   for (i = 0; i < BLOCK_TYPES; i++)
     for (j = 0; j < REF_TYPES; j++)
       for (k = 0; k < COEF_BANDS; k++)
-        for (l = 0; l < PREV_COEF_CONTEXTS; l++)
+        for (l = 0; l < PREV_COEF_CONTEXTS; l++) {
+#if CONFIG_MODELCOEFPROB
+          vp9_prob probs[ENTROPY_NODES];
+          vp9_model_to_full_probs(p[i][j][k][l], i, j, probs);
+          vp9_cost_tokens_skip((int *)c[i][j][k][l], probs,
+                               vp9_coef_tree);
+#else
           vp9_cost_tokens_skip((int *)c[i][j][k][l], p[i][j][k][l],
                                vp9_coef_tree);
+#endif
+        }
 }
 
 static int rd_iifactor[32] =  { 4, 4, 3, 2, 1, 0, 0, 0,
@@ -268,8 +280,11 @@ static INLINE int cost_coeffs(VP9_COMMON *const cm, MACROBLOCK *mb,
   TX_TYPE tx_type = DCT_DCT;
 
   const int segment_id = xd->mode_info_context->mbmi.segment_id;
-  vp9_prob (*coef_probs)[REF_TYPES][COEF_BANDS][PREV_COEF_CONTEXTS]
-                        [ENTROPY_NODES];
+#if CONFIG_MODELCOEFPROB
+  vp9_prob coef_probs[COEF_BANDS][PREV_COEF_CONTEXTS][ENTROPY_NODES];
+#else
+  vp9_prob (*coef_probs)[PREV_COEF_CONTEXTS][ENTROPY_NODES];
+#endif
   int seg_eob, default_eob;
   uint8_t token_cache[1024];
   const uint8_t * band_translate;
@@ -289,7 +304,12 @@ static INLINE int cost_coeffs(VP9_COMMON *const cm, MACROBLOCK *mb,
           get_tx_type_4x4(xd, block) : DCT_DCT;
       above_ec = A[0] != 0;
       left_ec = L[0] != 0;
-      coef_probs = cm->fc.coef_probs_4x4;
+#if CONFIG_MODELCOEFPROB
+      vp9_model_to_full_probs_sb(cm->fc.coef_probs_4x4[type][ref],
+                                 type, ref, coef_probs);
+#else
+      coef_probs = cm->fc.coef_probs_4x4[type][ref];
+#endif
       seg_eob = 16;
       scan = get_scan_4x4(tx_type);
       band_translate = vp9_coefband_trans_4x4;
@@ -304,7 +324,12 @@ static INLINE int cost_coeffs(VP9_COMMON *const cm, MACROBLOCK *mb,
       above_ec = (A[0] + A[1]) != 0;
       left_ec = (L[0] + L[1]) != 0;
       scan = get_scan_8x8(tx_type);
-      coef_probs = cm->fc.coef_probs_8x8;
+#if CONFIG_MODELCOEFPROB
+      vp9_model_to_full_probs_sb(cm->fc.coef_probs_8x8[type][ref],
+                                 type, ref, coef_probs);
+#else
+      coef_probs = cm->fc.coef_probs_8x8[type][ref];
+#endif
       seg_eob = 64;
       band_translate = vp9_coefband_trans_8x8plus;
       break;
@@ -316,7 +341,12 @@ static INLINE int cost_coeffs(VP9_COMMON *const cm, MACROBLOCK *mb,
       TX_TYPE tx_type = (type == PLANE_TYPE_Y_WITH_DC) ?
           get_tx_type_16x16(xd, y + (x >> 2)) : DCT_DCT;
       scan = get_scan_16x16(tx_type);
-      coef_probs = cm->fc.coef_probs_16x16;
+#if CONFIG_MODELCOEFPROB
+      vp9_model_to_full_probs_sb(cm->fc.coef_probs_16x16[type][ref],
+                                 type, ref, coef_probs);
+#else
+      coef_probs = cm->fc.coef_probs_16x16[type][ref];
+#endif
       seg_eob = 256;
       above_ec = (A[0] + A[1] + A[2] + A[3]) != 0;
       left_ec = (L[0] + L[1] + L[2] + L[3]) != 0;
@@ -325,7 +355,12 @@ static INLINE int cost_coeffs(VP9_COMMON *const cm, MACROBLOCK *mb,
     }
     case TX_32X32:
       scan = vp9_default_zig_zag1d_32x32;
-      coef_probs = cm->fc.coef_probs_32x32;
+#if CONFIG_MODELCOEFPROB
+      vp9_model_to_full_probs_sb(cm->fc.coef_probs_32x32[type][ref],
+                                 type, ref, coef_probs);
+#else
+      coef_probs = cm->fc.coef_probs_32x32[type][ref];
+#endif
       seg_eob = 1024;
       above_ec = (A[0] + A[1] + A[2] + A[3] + A[4] + A[5] + A[6] + A[7]) != 0;
       left_ec = (L[0] + L[1] + L[2] + L[3] + L[4] + L[5] + L[6] + L[7]) != 0;
@@ -359,7 +394,7 @@ static INLINE int cost_coeffs(VP9_COMMON *const cm, MACROBLOCK *mb,
       cost += token_costs[band][pt][t] + vp9_dct_value_cost_ptr[v];
 
       if (!c || token_cache[scan[c - 1]])
-        cost += vp9_cost_bit(coef_probs[type][ref][band][pt][0], 1);
+        cost += vp9_cost_bit(coef_probs[band][pt][0], 1);
       token_cache[scan[c]] = t;
     }
     if (c < seg_eob) {

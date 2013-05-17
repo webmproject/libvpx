@@ -60,12 +60,23 @@ static const vp9_prob cat6_prob[15] = {
 
 DECLARE_ALIGNED(16, extern const uint8_t, vp9_norm[256]);
 
+#if CONFIG_MODELCOEFPROB
+#define INCREMENT_COUNT(token)               \
+  do {                                       \
+    coef_counts[type][ref][band][pt]         \
+               [token >= TWO_TOKEN ?     \
+                (token == DCT_EOB_TOKEN ? DCT_EOB_MODEL_TOKEN : TWO_TOKEN) : \
+                token]++;     \
+    token_cache[scan[c]] = token; \
+  } while (0)
+#else
 #define INCREMENT_COUNT(token)               \
   do {                                       \
     coef_counts[type][ref][band] \
                [pt][token]++;     \
     token_cache[scan[c]] = token; \
   } while (0)
+#endif
 
 #define WRITE_COEF_CONTINUE(val, token)                  \
   {                                                      \
@@ -91,9 +102,27 @@ static int decode_coefs(VP9D_COMP *dx, const MACROBLOCKD *xd,
   FRAME_CONTEXT *const fc = &dx->common.fc;
   int pt, c = 0, pad, default_eob;
   int band;
-  vp9_coeff_probs *coef_probs;
+#if CONFIG_MODELCOEFPROB
+  vp9_prob (*coef_probs)[PREV_COEF_CONTEXTS][UNCONSTRAINED_NODES];
+  vp9_prob coef_probs_full[COEF_BANDS][PREV_COEF_CONTEXTS][ENTROPY_NODES];
+  uint8_t load_map[COEF_BANDS][PREV_COEF_CONTEXTS] = {
+    {0, 0, 0, 0, 0, 0},
+    {0, 0, 0, 0, 0, 0},
+    {0, 0, 0, 0, 0, 0},
+    {0, 0, 0, 0, 0, 0},
+    {0, 0, 0, 0, 0, 0},
+    {0, 0, 0, 0, 0, 0},
+  };
+#else
+  vp9_prob (*coef_probs)[PREV_COEF_CONTEXTS][ENTROPY_NODES];
+#endif
+
   vp9_prob *prob;
+#if CONFIG_MODELCOEFPROB
+  vp9_coeff_count_model *coef_counts;
+#else
   vp9_coeff_count *coef_counts;
+#endif
   const int ref = xd->mode_info_context->mbmi.ref_frame != INTRA_FRAME;
   TX_TYPE tx_type = DCT_DCT;
   const int *scan, *nb;
@@ -108,7 +137,7 @@ static int decode_coefs(VP9D_COMP *dx, const MACROBLOCKD *xd,
       scan = get_scan_4x4(tx_type);
       above_ec = A[0] != 0;
       left_ec = L[0] != 0;
-      coef_probs  = fc->coef_probs_4x4;
+      coef_probs  = fc->coef_probs_4x4[type][ref];
       coef_counts = fc->coef_counts_4x4;
       default_eob = 16;
       band_translate = vp9_coefband_trans_4x4;
@@ -122,7 +151,7 @@ static int decode_coefs(VP9D_COMP *dx, const MACROBLOCKD *xd,
       tx_type = (type == PLANE_TYPE_Y_WITH_DC) ?
           get_tx_type_8x8(xd, y + (x >> 1)) : DCT_DCT;
       scan = get_scan_8x8(tx_type);
-      coef_probs  = fc->coef_probs_8x8;
+      coef_probs  = fc->coef_probs_8x8[type][ref];
       coef_counts = fc->coef_counts_8x8;
       above_ec = (A[0] + A[1]) != 0;
       left_ec = (L[0] + L[1]) != 0;
@@ -138,7 +167,7 @@ static int decode_coefs(VP9D_COMP *dx, const MACROBLOCKD *xd,
       tx_type = (type == PLANE_TYPE_Y_WITH_DC) ?
           get_tx_type_16x16(xd, y + (x >> 2)) : DCT_DCT;
       scan = get_scan_16x16(tx_type);
-      coef_probs  = fc->coef_probs_16x16;
+      coef_probs  = fc->coef_probs_16x16[type][ref];
       coef_counts = fc->coef_counts_16x16;
       above_ec = (A[0] + A[1] + A[2] + A[3]) != 0;
       left_ec = (L[0] + L[1] + L[2] + L[3]) != 0;
@@ -148,7 +177,7 @@ static int decode_coefs(VP9D_COMP *dx, const MACROBLOCKD *xd,
     }
     case TX_32X32:
       scan = vp9_default_zig_zag1d_32x32;
-      coef_probs = fc->coef_probs_32x32;
+      coef_probs = fc->coef_probs_32x32[type][ref];
       coef_counts = fc->coef_counts_32x32;
       above_ec = (A[0] + A[1] + A[2] + A[3] + A[4] + A[5] + A[6] + A[7]) != 0;
       left_ec = (L[0] + L[1] + L[2] + L[3] + L[4] + L[5] + L[6] + L[7]) != 0;
@@ -169,7 +198,7 @@ static int decode_coefs(VP9D_COMP *dx, const MACROBLOCKD *xd,
       pt = vp9_get_coef_context(scan, nb, pad, token_cache,
                                 c, default_eob);
     band = get_coef_band(band_translate, c);
-    prob = coef_probs[type][ref][band][pt];
+    prob = coef_probs[band][pt];
     fc->eob_branch_counts[txfm_size][type][ref][band][pt]++;
     if (!vp9_read(r, prob[EOB_CONTEXT_NODE]))
       break;
@@ -181,7 +210,7 @@ SKIP_START:
       pt = vp9_get_coef_context(scan, nb, pad, token_cache,
                                 c, default_eob);
     band = get_coef_band(band_translate, c);
-    prob = coef_probs[type][ref][band][pt];
+    prob = coef_probs[band][pt];
 
     if (!vp9_read(r, prob[ZERO_CONTEXT_NODE])) {
       INCREMENT_COUNT(ZERO_TOKEN);
@@ -192,6 +221,15 @@ SKIP_START:
     if (!vp9_read(r, prob[ONE_CONTEXT_NODE])) {
       WRITE_COEF_CONTINUE(1, ONE_TOKEN);
     }
+#if CONFIG_MODELCOEFPROB
+    // Load full probabilities if not already loaded
+    if (!load_map[band][pt]) {
+      vp9_model_to_full_probs(coef_probs[band][pt], type, ref,
+                              coef_probs_full[band][pt]);
+      load_map[band][pt] = 1;
+    }
+    prob = coef_probs_full[band][pt];
+#endif
     // LOW_VAL_CONTEXT_NODE_0_
     if (!vp9_read(r, prob[LOW_VAL_CONTEXT_NODE])) {
       if (!vp9_read(r, prob[TWO_CONTEXT_NODE])) {
@@ -249,7 +287,11 @@ SKIP_START:
   }
 
   if (c < seg_eob)
+#if CONFIG_MODELCOEFPROB
+    coef_counts[type][ref][band][pt][DCT_EOB_MODEL_TOKEN]++;
+#else
     coef_counts[type][ref][band][pt][DCT_EOB_TOKEN]++;
+#endif
 
   for (pt = 0; pt < (1 << txfm_size); pt++) {
     A[pt] = L[pt] = c > 0;
