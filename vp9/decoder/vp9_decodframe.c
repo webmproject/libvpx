@@ -986,7 +986,6 @@ int vp9_decode_frame(VP9D_COMP *pbi, const uint8_t **p_data_end) {
                        "Failed to allocate bool decoder 0");
 
   pc->clr_type = (YUV_TYPE)vp9_read_bit(&header_bc);
-  pc->clamp_type = (CLAMP_TYPE)vp9_read_bit(&header_bc);
   pc->error_resilient_mode = vp9_read_bit(&header_bc);
 
   setup_loopfilter(pc, xd, &header_bc);

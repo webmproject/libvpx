@@ -99,11 +99,6 @@ typedef struct frame_contexts {
 } FRAME_CONTEXT;
 
 typedef enum {
-  RECON_CLAMP_REQUIRED        = 0,
-  RECON_CLAMP_NOTREQUIRED     = 1
-} CLAMP_TYPE;
-
-typedef enum {
   SINGLE_PREDICTION_ONLY = 0,
   COMP_PREDICTION_ONLY   = 1,
   HYBRID_PREDICTION      = 2,
@@ -139,7 +134,6 @@ typedef struct VP9Common {
   int subsampling_y;
 
   YUV_TYPE clr_type;
-  CLAMP_TYPE  clamp_type;
 
   YV12_BUFFER_CONFIG *frame_to_show;
 

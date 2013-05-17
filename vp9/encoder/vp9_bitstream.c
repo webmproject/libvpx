@@ -1529,7 +1529,6 @@ void vp9_pack_bitstream(VP9_COMP *cpi, uint8_t *dest, unsigned long *size) {
 
   // TODO(jkoleszar): remove these two unused bits?
   vp9_write_bit(&header_bc, pc->clr_type);
-  vp9_write_bit(&header_bc, pc->clamp_type);
 
   // error resilient mode
   vp9_write_bit(&header_bc, pc->error_resilient_mode);
