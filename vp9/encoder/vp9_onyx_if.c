@@ -3170,6 +3170,15 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
   // Pick the loop filter level for the frame.
   loopfilter_frame(cpi, cm);
 
+#if WRITE_RECON_BUFFER
+  if (cm->show_frame)
+    write_cx_frame_to_file(cm->frame_to_show,
+                           cm->current_video_frame + 2000);
+  else
+    write_cx_frame_to_file(cm->frame_to_show,
+                           cm->current_video_frame + 3000);
+#endif
+
   // build the bitstream
   cpi->dummy_packing = 0;
   vp9_pack_bitstream(cpi, dest, size);

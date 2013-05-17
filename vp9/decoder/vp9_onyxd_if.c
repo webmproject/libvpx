@@ -352,6 +352,16 @@ int vp9_receive_compressed_data(VP9D_PTR ptr,
       vp9_loop_filter_frame(cm, &pbi->mb, cm->filter_level, 0,
                             cm->dering_enabled);
     }
+
+#if WRITE_RECON_BUFFER == 2
+    if (cm->show_frame)
+      write_dx_frame_to_file(cm->frame_to_show,
+                             cm->current_video_frame + 2000);
+    else
+      write_dx_frame_to_file(cm->frame_to_show,
+                             cm->current_video_frame + 3000);
+#endif
+
     vp9_extend_frame_borders(cm->frame_to_show,
                              cm->subsampling_x, cm->subsampling_y);
   }

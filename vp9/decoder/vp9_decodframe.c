@@ -239,6 +239,59 @@ static void decode_block(int plane, int block, BLOCK_SIZE_TYPE bsize,
   }
 }
 
+static void decode_block_intra(int plane, int block, BLOCK_SIZE_TYPE bsize,
+                               int ss_txfrm_size, void *arg) {
+  MACROBLOCKD* const xd = arg;
+  int16_t* const qcoeff = BLOCK_OFFSET(xd->plane[plane].qcoeff, block, 16);
+  const int stride = xd->plane[plane].dst.stride;
+  const int raster_block = txfrm_block_to_raster_block(xd, bsize, plane,
+                                                       block, ss_txfrm_size);
+  uint8_t* const dst = raster_block_offset_uint8(xd, bsize, plane,
+                                                 raster_block,
+                                                 xd->plane[plane].dst.buf,
+                                                 stride);
+  const TX_SIZE tx_size = (TX_SIZE)(ss_txfrm_size / 2);
+  TX_TYPE tx_type;
+  int mode, b_mode;
+  int plane_b_size;
+  int tx_ib = raster_block >> tx_size;
+  mode = plane == 0? xd->mode_info_context->mbmi.mode:
+                     xd->mode_info_context->mbmi.uv_mode;
+
+  if (bsize <= BLOCK_SIZE_SB8X8 && mode == I4X4_PRED && plane == 0)
+    b_mode = xd->mode_info_context->bmi[raster_block].as_mode.first;
+  else
+    b_mode = mode;
+
+  plane_b_size = b_width_log2(bsize) - xd->plane[plane].subsampling_x;
+  vp9_predict_intra_block(xd, tx_ib, plane_b_size, tx_size,
+                          b_mode, dst, xd->plane[plane].dst.stride);
+
+  switch (ss_txfrm_size / 2) {
+    case TX_4X4:
+      tx_type = plane == 0 ? get_tx_type_4x4(xd, raster_block) : DCT_DCT;
+      if (tx_type == DCT_DCT)
+        xd->itxm_add(qcoeff, dst, stride, xd->plane[plane].eobs[block]);
+      else
+        vp9_iht_add_c(tx_type, qcoeff, dst, stride,
+                      xd->plane[plane].eobs[block]);
+      break;
+    case TX_8X8:
+      tx_type = plane == 0 ? get_tx_type_8x8(xd, raster_block) : DCT_DCT;
+      vp9_iht_add_8x8_c(tx_type, qcoeff, dst, stride,
+                        xd->plane[plane].eobs[block]);
+      break;
+    case TX_16X16:
+      tx_type = plane == 0 ? get_tx_type_16x16(xd, raster_block) : DCT_DCT;
+      vp9_iht_add_16x16_c(tx_type, qcoeff, dst, stride,
+                          xd->plane[plane].eobs[block]);
+      break;
+    case TX_32X32:
+      vp9_idct_add_32x32(qcoeff, dst, stride, xd->plane[plane].eobs[block]);
+      break;
+  }
+}
+
 static void decode_atom_intra(VP9D_COMP *pbi, MACROBLOCKD *xd,
                               vp9_reader *r,
                               BLOCK_SIZE_TYPE bsize) {
@@ -294,6 +347,26 @@ static void decode_atom(VP9D_COMP *pbi, MACROBLOCKD *xd,
   else
     foreach_transformed_block(xd, bsize, decode_block, xd);
 }
+
+static void decode_sb_intra(VP9D_COMP *pbi, MACROBLOCKD *xd,
+                          int mi_row, int mi_col,
+                          vp9_reader *r, BLOCK_SIZE_TYPE bsize) {
+  MB_MODE_INFO *const mbmi = &xd->mode_info_context->mbmi;
+  if (mbmi->mb_skip_coeff) {
+    vp9_reset_sb_tokens_context(xd, bsize);
+  } else {
+    // re-initialize macroblock dequantizer before detokenization
+    if (xd->segmentation_enabled)
+      mb_init_dequantizer(&pbi->common, xd);
+
+    if (!vp9_reader_has_error(r)) {
+      vp9_decode_tokens(pbi, xd, r, bsize);
+    }
+  }
+
+  foreach_transformed_block(xd, bsize, decode_block_intra, xd);
+}
+
 
 static void decode_sb(VP9D_COMP *pbi, MACROBLOCKD *xd, int mi_row, int mi_col,
                       vp9_reader *r, BLOCK_SIZE_TYPE bsize) {
@@ -422,12 +495,13 @@ static void decode_modes_b(VP9D_COMP *pbi, int mi_row, int mi_col,
   vp9_decode_mb_mode_mv(pbi, xd, mi_row, mi_col, r);
   set_refs(pbi, mi_row, mi_col);
 
+  if (xd->mode_info_context->mbmi.ref_frame == INTRA_FRAME)
+    decode_sb_intra(pbi, xd, mi_row, mi_col, r, bsize);
 #if CONFIG_AB4X4
-  if (bsize < BLOCK_SIZE_SB8X8)
+  else if (bsize < BLOCK_SIZE_SB8X8)
 #else
-  if (bsize == BLOCK_SIZE_SB8X8 &&
-      (xd->mode_info_context->mbmi.mode == SPLITMV ||
-       xd->mode_info_context->mbmi.mode == I4X4_PRED))
+  else if (bsize == BLOCK_SIZE_SB8X8 &&
+      xd->mode_info_context->mbmi.mode == SPLITMV)
 #endif
     decode_atom(pbi, xd, mi_row, mi_col, r, BLOCK_SIZE_SB8X8);
   else
