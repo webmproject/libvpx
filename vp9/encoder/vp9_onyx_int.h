@@ -611,6 +611,10 @@ typedef struct VP9_COMP {
   int this_frame_weight;
   int max_arf_level;
 #endif
+
+#ifdef ENTROPY_STATS
+  int64_t mv_ref_stats[INTER_MODE_CONTEXTS][4][2];
+#endif
 } VP9_COMP;
 
 void vp9_encode_frame(VP9_COMP *cpi);

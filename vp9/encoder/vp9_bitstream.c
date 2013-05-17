@@ -804,9 +804,9 @@ static void write_mb_modes_kf(const VP9_COMP *cpi,
                                   left_block_mode(m, i) : B_DC_PRED;
       const int bm = m->bmi[i].as_mode.first;
 
-#ifdef ENTROPY_STATS
+/*#ifdef ENTROPY_STATS
       ++intra_mode_stats [A] [L] [bm];
-#endif
+#endif*/
       write_kf_bmode(bc, bm, c->kf_bmode_prob[a][l]);
     } while (++i < 4);
   }

@@ -15,10 +15,6 @@
 #include "vp9/encoder/vp9_block.h"
 #include "vp9/encoder/vp9_variance.h"
 
-#ifdef ENTROPY_STATS
-void print_mode_context(VP9_COMMON *pc);
-#endif
-
 // The maximum number of steps in a step search given the largest
 // allowed initial step
 #define MAX_MVSEARCH_STEPS 11

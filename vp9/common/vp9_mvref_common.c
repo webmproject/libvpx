@@ -165,6 +165,10 @@ void vp9_find_mv_refs(VP9_COMMON *cm, MACROBLOCKD *xd, MODE_INFO *here,
   int split_count = 0;
   int (*mv_ref_search)[2];
   const int mi_col = get_mi_col(xd);
+  int intra_count = 0;
+  int zero_count = 0;
+  int newmv_count = 0;
+
   // Blank the reference vector lists and other local structures.
   vpx_memset(mv_ref_list, 0, sizeof(int_mv) * MAX_MV_REF_CANDIDATES);
   vpx_memset(candidate_scores, 0, sizeof(candidate_scores));
@@ -196,8 +200,23 @@ void vp9_find_mv_refs(VP9_COMMON *cm, MACROBLOCKD *xd, MODE_INFO *here,
                          &refmv_count, c_refmv, 16);
       }
       split_count += (candidate_mi->mbmi.mode == SPLITMV);
+
+      // Count number of neihgbours coded intra and zeromv
+      intra_count += (candidate_mi->mbmi.mode < NEARESTMV);
+      zero_count += (candidate_mi->mbmi.mode == ZEROMV);
+      newmv_count += (candidate_mi->mbmi.mode >= NEWMV);
     }
   }
+
+  // If at this stage wwe have a 0 vector and a non zero vector from the
+  // correct reference frame then make sure that the non zero one is given
+  // precedence as we have other options for coding 0,0
+  /* if (refmv_count == MAX_MV_REF_CANDIDATES) {
+    if (mv_ref_list[1].as_int && !mv_ref_list[0].as_int) {
+      mv_ref_list[0].as_int = mv_ref_list[1].as_int;
+      mv_ref_list[1].as_int = 0;
+    }
+  } */
 
   // More distant neigbours
   for (i = 2; (i < MVREF_NEIGHBOURS) &&
@@ -278,24 +297,21 @@ void vp9_find_mv_refs(VP9_COMMON *cm, MACROBLOCKD *xd, MODE_INFO *here,
     }
   }
 
-  // Define inter mode coding context.
-  // 0,0 was best
-  if (mv_ref_list[0].as_int == 0) {
-    // 0,0 is only candidate
-    if (refmv_count <= 1) {
-      mbmi->mb_mode_context[ref_frame] = 0;
-    // non zero candidates candidates available
-    } else if (split_count == 0) {
-      mbmi->mb_mode_context[ref_frame] = 1;
+  if (!intra_count) {
+    if (!newmv_count) {
+      // 0 = both zero mv
+      // 1 = one zero mv + one a predicted mv
+      // 2 = two predicted mvs
+      mbmi->mb_mode_context[ref_frame] = 2 - zero_count;
     } else {
-      mbmi->mb_mode_context[ref_frame] = 2;
+      // 3 = one predicted/zero and one new mv
+      // 4 = two new mvs
+      mbmi->mb_mode_context[ref_frame] = 2 + newmv_count;
     }
-  } else if (split_count == 0) {
-    // Non zero best, No Split MV cases
-    mbmi->mb_mode_context[ref_frame] = candidate_scores[0] >= 16 ? 3 : 4;
   } else {
-    // Non zero best, some split mv
-    mbmi->mb_mode_context[ref_frame] = candidate_scores[0] >= 16 ? 5 : 6;
+    // 5 = one intra neighbour + x
+    // 6 = two intra neighbours
+    mbmi->mb_mode_context[ref_frame] = 4 + intra_count;
   }
 
   // Clamp vectors
