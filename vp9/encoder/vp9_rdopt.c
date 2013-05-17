@@ -1890,7 +1890,6 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
                                  int *rate_y, int *distortion_y,
                                  int *rate_uv, int *distortion_uv,
                                  int *mode_excluded, int *disable_skip,
-                                 int mode_index,
                                  INTERPOLATIONFILTERTYPE *best_filter,
                                  int_mv frame_mv[MB_MODE_COUNT]
                                                 [MAX_REF_FRAMES],
@@ -2869,7 +2868,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
                                   &rate_y, &distortion_y,
                                   &rate_uv, &distortion_uv,
                                   &mode_excluded, &disable_skip,
-                                  mode_index, &tmp_best_filter, frame_mv,
+                                  &tmp_best_filter, frame_mv,
                                   scaled_ref_frame, mi_row, mi_col,
                                   single_newmv);
       if (this_rd == INT64_MAX)
