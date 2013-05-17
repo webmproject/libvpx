@@ -9,135 +9,139 @@
  */
 
 #include <stdio.h>
-
+#include "vp9/common/vp9_onyxc_int.h"
 #include "vp9/common/vp9_blockd.h"
+#include "vp9/common/vp9_tile_common.h"
+typedef struct {
+  char *debug_array;
+  int w;
+  int h;
+} DEBUG_MODE_STRUCT;
 
-void vp9_print_modes_and_motion_vectors(MODE_INFO *mi, int rows, int cols,
-                                        int frame) {
-  int mb_row;
-  int mb_col;
-  int mb_index = 0;
-  FILE *mvs = fopen("mvs.stt", "a");
+static void draw_rect(int r, int c, int w, int h, DEBUG_MODE_STRUCT *da) {
+  int i;
+  da->debug_array[r / 2 * da->w + c] = '+';
+  for (i = r / 2 + 1; i < r / 2 + h / 2; i++) {
+    da->debug_array[i * da->w + c] = '|';
+  }
+  for (i = c + 1; i < c + w; i++) {
+    da->debug_array[r / 2 * da->w + i] = '-';
+  }
+}
+static void debug_partitioning(VP9_COMMON * cm, MODE_INFO *m, int mi_row,
+                               int mi_col, BLOCK_SIZE_TYPE bsize,
+                               DEBUG_MODE_STRUCT *da) {
+  const int mis = cm->mode_info_stride;
+  int bwl, bhl;
+  int bw, bh;
+  int bsl = mi_width_log2(bsize), bs = (1 << bsl) / 2;
+  int n;
+  PARTITION_TYPE partition;
+  BLOCK_SIZE_TYPE subsize;
 
-  // Print out the macroblock Y modes
-  fprintf(mvs, "Mb Modes for Frame %d\n", frame);
+  if (mi_row >= cm->mi_rows || mi_col >= cm->mi_cols)
+    return;
 
-  for (mb_row = 0; mb_row < rows; mb_row++) {
-    for (mb_col = 0; mb_col < cols; mb_col++) {
+  bwl = mi_width_log2(m->mbmi.sb_type);
+  bhl = mi_height_log2(m->mbmi.sb_type);
+  bw = 1 << bwl;
+  bh = 1 << bhl;
 
-      fprintf(mvs, "%2d ", mi[mb_index].mbmi.mode);
+  // parse the partition type
+  if ((bwl == bsl) && (bhl == bsl))
+    partition = PARTITION_NONE;
+  else if ((bwl == bsl) && (bhl < bsl))
+    partition = PARTITION_HORZ;
+  else if ((bwl < bsl) && (bhl == bsl))
+    partition = PARTITION_VERT;
+  else if ((bwl < bsl) && (bhl < bsl))
+    partition = PARTITION_SPLIT;
+  else
+    assert(0);
 
-      mb_index++;
-    }
+#if CONFIG_AB4X4
+  if (bsize == BLOCK_SIZE_SB8X8 && m->mbmi.sb_type < BLOCK_SIZE_SB8X8)
+  partition = PARTITION_SPLIT;
+  if (bsize < BLOCK_SIZE_SB8X8)
+  return;
+#endif
 
-    fprintf(mvs, "\n");
-    mb_index++;
+#if CONFIG_AB4X4
+  if (bsize >= BLOCK_SIZE_SB8X8) {
+#else
+  if (bsize > BLOCK_SIZE_SB8X8) {
+#endif
   }
 
-  fprintf(mvs, "\n");
-
-  mb_index = 0;
-  fprintf(mvs, "Mb mv ref for Frame %d\n", frame);
-
-  for (mb_row = 0; mb_row < rows; mb_row++) {
-    for (mb_col = 0; mb_col < cols; mb_col++) {
-
-      fprintf(mvs, "%2d ", mi[mb_index].mbmi.ref_frame);
-
-      mb_index++;
-    }
-
-    fprintf(mvs, "\n");
-    mb_index++;
-  }
-
-  fprintf(mvs, "\n");
-
-  /* print out the macroblock UV modes */
-  mb_index = 0;
-  fprintf(mvs, "UV Modes for Frame %d\n", frame);
-
-  for (mb_row = 0; mb_row < rows; mb_row++) {
-    for (mb_col = 0; mb_col < cols; mb_col++) {
-
-      fprintf(mvs, "%2d ", mi[mb_index].mbmi.uv_mode);
-
-      mb_index++;
-    }
-
-    mb_index++;
-    fprintf(mvs, "\n");
-  }
-
-  fprintf(mvs, "\n");
-
-  /* print out the block modes */
-  mb_index = 0;
-  fprintf(mvs, "Mbs for Frame %d\n", frame);
-  {
-    int b_row;
-
-    for (b_row = 0; b_row < 4 * rows; b_row++) {
-      int b_col;
-      int bindex;
-
-      for (b_col = 0; b_col < 4 * cols; b_col++) {
-        mb_index = (b_row >> 2) * (cols + 1) + (b_col >> 2);
-        bindex = (b_row & 3) * 4 + (b_col & 3);
-
-        if (mi[mb_index].mbmi.mode == I4X4_PRED) {
-          fprintf(mvs, "%2d ", mi[mb_index].bmi[bindex].as_mode.first);
-        } else
-          fprintf(mvs, "xx ");
-
+  subsize = get_subsize(bsize, partition);
+  switch (partition) {
+    case PARTITION_NONE:
+      draw_rect(mi_row * 8, mi_col * 8, bw * 8, bh * 8, da);
+      break;
+    case PARTITION_HORZ:
+      draw_rect(mi_row * 8, mi_col * 8, bw * 8, bh * 8, da);
+      if ((mi_row + bh) < cm->mi_rows)
+        draw_rect(8 * bs + mi_row * 8, mi_col * 8, bw * 8, bh * 8, da);
+      break;
+    case PARTITION_VERT:
+      draw_rect(mi_row * 8, mi_col * 8, bw * 8, bh * 8, da);
+      if ((mi_col + bw) < cm->mi_cols)
+        draw_rect(mi_row * 8, 8 * bs + mi_col * 8, bw * 8, bh * 8, da);
+      break;
+    case PARTITION_SPLIT:
+      for (n = 0; n < 4; n++) {
+        int j = n >> 1, i = n & 0x01;
+        debug_partitioning(cm, m + j * bs * mis + i * bs, mi_row + j * bs,
+                           mi_col + i * bs, subsize, da);
       }
+      break;
+    default:
+      assert(0);
+  }
+}
+static void debug_partitionings(VP9_COMMON *c, DEBUG_MODE_STRUCT *da) {
+  const int mis = c->mode_info_stride;
+  MODE_INFO *m, *m_ptr = c->mi;
+  int mi_row, mi_col;
 
-      fprintf(mvs, "\n");
+  m_ptr += c->cur_tile_mi_col_start + c->cur_tile_mi_row_start * mis;
+
+  for (mi_row = c->cur_tile_mi_row_start; mi_row < c->cur_tile_mi_row_end;
+      mi_row += 8, m_ptr += 8 * mis) {
+    m = m_ptr;
+    for (mi_col = c->cur_tile_mi_col_start; mi_col < c->cur_tile_mi_col_end;
+        mi_col += 8, m += 8) {
+      debug_partitioning(c, m, mi_row, mi_col, BLOCK_SIZE_SB64X64, da);
     }
   }
-  fprintf(mvs, "\n");
+}
+void vp9_debug_tile_partitionings(VP9_COMMON *pc) {
+  int tile_row, tile_col;
+  DEBUG_MODE_STRUCT da;
 
-  /* print out the macroblock mvs */
-  mb_index = 0;
-  fprintf(mvs, "MVs for Frame %d\n", frame);
+  da.w = pc->width;
+  da.h = pc->height / 2;
+  da.debug_array = vpx_malloc(da.h * da.w);
+  vpx_memset(da.debug_array, ' ', da.h * da.w);
+  for (tile_row = 0; tile_row < pc->tile_rows; tile_row++) {
+    vp9_get_tile_row_offsets(pc, tile_row);
+    for (tile_col = 0; tile_col < pc->tile_columns; tile_col++) {
+      vp9_get_tile_col_offsets(pc, tile_col);
 
-  for (mb_row = 0; mb_row < rows; mb_row++) {
-    for (mb_col = 0; mb_col < cols; mb_col++) {
-      fprintf(mvs, "%5d:%-5d", mi[mb_index].mbmi.mv[0].as_mv.row / 2,
-          mi[mb_index].mbmi.mv[0].as_mv.col / 2);
-
-      mb_index++;
+      debug_partitionings(pc, &da);
     }
-
-    mb_index++;
-    fprintf(mvs, "\n");
   }
-
-  fprintf(mvs, "\n");
-
-  /* print out the block modes */
-  mb_index = 0;
-  fprintf(mvs, "MVs for Frame %d\n", frame);
   {
-    int b_row;
-
-    for (b_row = 0; b_row < 4 * rows; b_row++) {
-      int b_col;
-      int bindex;
-
-      for (b_col = 0; b_col < 4 * cols; b_col++) {
-        mb_index = (b_row >> 2) * (cols + 1) + (b_col >> 2);
-        bindex = (b_row & 3) * 4 + (b_col & 3);
-        fprintf(mvs, "%3d:%-3d ",
-                mi[mb_index].bmi[bindex].as_mv[0].as_mv.row,
-                mi[mb_index].bmi[bindex].as_mv[0].as_mv.col);
-
+    FILE *f = fopen("partitionings.txt", "a");
+    int i, j;
+    fprintf(f, "\n\n\nFrame: %d \n", pc->current_video_frame);
+    for (i = 0; i < da.h; i++) {
+      for (j = 0; j < da.w; j++) {
+        fprintf(f, "%c", da.debug_array[i * da.w + j]);
       }
-
-      fprintf(mvs, "\n");
+      fprintf(f, "\n");
     }
+    fclose(f);
   }
-  fprintf(mvs, "\n");
-
-  fclose(mvs);
+  vpx_free(da.debug_array);
 }
