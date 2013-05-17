@@ -280,27 +280,6 @@ void vp9_default_bmode_probs(vp9_prob p[VP9_NKF_BINTRAMODES - 1]) {
   intra_bmode_probs_from_distribution(p, branch_ct, bmode_cts);
 }
 
-static void intra_kf_bmode_probs_from_distribution(
-  vp9_prob p[VP9_KF_BINTRAMODES - 1],
-  unsigned int branch_ct[VP9_KF_BINTRAMODES - 1][2],
-  const unsigned int events[VP9_KF_BINTRAMODES]) {
-  vp9_tree_probs_from_distribution(vp9_kf_bmode_tree, p, branch_ct, events, 0);
-}
-
-void vp9_kf_default_bmode_probs(vp9_prob p[VP9_KF_BINTRAMODES]
-                                          [VP9_KF_BINTRAMODES]
-                                          [VP9_KF_BINTRAMODES - 1]) {
-  unsigned int branch_ct[VP9_KF_BINTRAMODES - 1][2];
-  int i, j;
-
-  for (i = 0; i < VP9_KF_BINTRAMODES; ++i) {
-    for (j = 0; j < VP9_KF_BINTRAMODES; ++j) {
-      intra_kf_bmode_probs_from_distribution(
-          p[i][j], branch_ct, vp9_kf_default_bmode_counts[i][j]);
-    }
-  }
-}
-
 #if VP9_SWITCHABLE_FILTERS == 3
 const vp9_tree_index vp9_switchable_interp_tree[VP9_SWITCHABLE_FILTERS*2-2] = {
   -0, 2,
@@ -537,7 +516,8 @@ void vp9_setup_past_independence(VP9_COMMON *cm, MACROBLOCKD *xd) {
   vp9_default_coef_probs(cm);
   vp9_init_mbmode_probs(cm);
   vp9_default_bmode_probs(cm->fc.bmode_prob);
-  vp9_kf_default_bmode_probs(cm->kf_bmode_prob);
+  vpx_memcpy(cm->kf_bmode_prob, vp9_kf_default_bmode_probs,
+             sizeof(vp9_kf_default_bmode_probs));
   vp9_init_mv_probs(cm);
 
   // To force update of the sharpness
