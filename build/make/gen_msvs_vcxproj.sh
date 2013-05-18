@@ -155,7 +155,7 @@ generate_filter() {
 
                 objf=$(echo ${f%.*}.obj | sed -e 's/^[\./]\+//g' -e 's,/,_,g')
 
-                if [ "$pat" == "asm" ] && $asm_use_custom_step; then
+                if ([ "$pat" == "asm" ] || [ "$pat" == "s" ]) && $asm_use_custom_step; then
                     open_tag CustomBuild \
                         Include=".\\$f"
                     for plat in "${platforms[@]}"; do
@@ -258,7 +258,7 @@ for opt in "$@"; do
         *)
             file_list[${#file_list[@]}]="$opt"
             case "$opt" in
-                 *.asm) uses_asm=true
+                 *.asm|*.s) uses_asm=true
                  ;;
             esac
         ;;
@@ -312,6 +312,17 @@ case "$target" in
         asm_Debug_cmdline="yasm -Xvc -g cv8 -f \$(PlatformName) ${yasmincs} &quot;%(FullPath)&quot;"
         asm_Release_cmdline="yasm -Xvc -f \$(PlatformName) ${yasmincs} &quot;%(FullPath)&quot;"
     ;;
+    arm*)
+        asm_Debug_cmdline="armasm -nologo &quot;%(FullPath)&quot;"
+        asm_Release_cmdline="armasm -nologo &quot;%(FullPath)&quot;"
+        if [ "$name" = "obj_int_extract" ]; then
+            # We don't want to build this tool for the target architecture,
+            # but for an architecture we can run locally during the build.
+            platforms[0]="Win32"
+        else
+            platforms[0]="ARM"
+        fi
+    ;;
     *) die "Unsupported target $target!"
     ;;
 esac
@@ -359,7 +370,18 @@ generate_vcxproj() {
                 tag_content ConfigurationType StaticLibrary
             fi
             if [ "$vs_ver" = "11" ]; then
-                tag_content PlatformToolset v110
+                if [ "$plat" = "ARM" ]; then
+                    # Setting the wp80 toolchain automatically sets the
+                    # WINAPI_FAMILY define, which is required for building
+                    # code for arm with the windows headers. Alternatively,
+                    # one could add AppContainerApplication=true in the Globals
+                    # section and add PrecompiledHeader=NotUsing and
+                    # CompileAsWinRT=false in ClCompile and SubSystem=Console
+                    # in Link.
+                    tag_content PlatformToolset v110_wp80
+                else
+                    tag_content PlatformToolset v110
+                fi
             fi
             tag_content CharacterSet Unicode
             if [ "$config" = "Release" ]; then
@@ -470,7 +492,7 @@ generate_vcxproj() {
     done
 
     open_tag ItemGroup
-    generate_filter "Source Files"   "c;cc;def;odl;idl;hpj;bat;asm;asmx"
+    generate_filter "Source Files"   "c;cc;def;odl;idl;hpj;bat;asm;asmx;s"
     close_tag ItemGroup
     open_tag ItemGroup
     generate_filter "Header Files"   "h;hm;inl;inc;xsd"

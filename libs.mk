@@ -12,7 +12,7 @@
 # ARM assembly files are written in RVCT-style. We use some make magic to
 # filter those files to allow GCC compilation
 ifeq ($(ARCH_ARM),yes)
-  ASM:=$(if $(filter yes,$(CONFIG_GCC)),.asm.s,.asm)
+  ASM:=$(if $(filter yes,$(CONFIG_GCC)$(CONFIG_MSVS)),.asm.s,.asm)
 else
   ASM:=.asm
 endif
@@ -208,7 +208,7 @@ ifeq ($(CONFIG_EXTERNAL_BUILD),yes)
 ifeq ($(CONFIG_MSVS),yes)
 
 obj_int_extract.$(VCPROJ_SFX): $(SRC_PATH_BARE)/build/make/obj_int_extract.c
-	@cp $(SRC_PATH_BARE)/build/x86-msvs/obj_int_extract.bat .
+	@cp $(SRC_PATH_BARE)/build/$(MSVS_ARCH_DIR)/obj_int_extract.bat .
 	@echo "    [CREATE] $@"
 	$(qexec)$(GEN_VCPROJ) \
     --exe \

@@ -417,6 +417,7 @@ BUILD_PFX=${BUILD_PFX}
 TOOLCHAIN=${toolchain}
 ASM_CONVERSION=${asm_conversion_cmd:-${source_path}/build/make/ads2gas.pl}
 GEN_VCPROJ=${gen_vcproj_cmd}
+MSVS_ARCH_DIR=${msvs_arch_dir}
 
 CC=${CC}
 CXX=${CXX}
@@ -828,6 +829,13 @@ EOF
                 check_add_asflags -mthumb -mimplicit-it=always
             fi
             ;;
+        vs*)
+            asm_conversion_cmd="${source_path}/build/make/ads2armasm_ms.pl"
+            AS_SFX=.s
+            msvs_arch_dir=arm-msvs
+            disable multithread
+            disable unit_tests
+            ;;
         rvct)
             CC=armcc
             AR=armar
@@ -1070,6 +1078,7 @@ EOF
                 # invoked directly. Checking at configure time is unnecessary.
                 # Skip the check by setting AS arbitrarily
                 AS=msvs
+                msvs_arch_dir=x86-msvs
             ;;
         esac
 
