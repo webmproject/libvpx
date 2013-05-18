@@ -959,7 +959,7 @@ int vp9_decode_frame(VP9D_COMP *pbi, const uint8_t **p_data_end) {
       // When error concealment is enabled we should only check the sync
       // code if we have enough bits available
       if (data + 3 < data_end) {
-        if (data[0] != 0x9d || data[1] != 0x01 || data[2] != 0x2a)
+        if (data[0] != 0x49 || data[1] != 0x83 || data[2] != 0x42)
           vpx_internal_error(&pc->error, VPX_CODEC_UNSUP_BITSTREAM,
                              "Invalid frame sync code");
       }

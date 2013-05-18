@@ -1506,9 +1506,9 @@ void vp9_pack_bitstream(VP9_COMP *cpi, uint8_t *dest, unsigned long *size) {
    */
   if (oh.type == KEY_FRAME) {
     // Start / synch code
-    cx_data[0] = 0x9D;
-    cx_data[1] = 0x01;
-    cx_data[2] = 0x2a;
+    cx_data[0] = 0x49;
+    cx_data[1] = 0x83;
+    cx_data[2] = 0x42;
     extra_bytes_packed = 3;
     cx_data += extra_bytes_packed;
   }

@@ -217,7 +217,7 @@ static vpx_codec_err_t vp8_peek_si(const uint8_t         *data,
   else {
     /* Parse uncompresssed part of key frame header.
      * 3 bytes:- including version, frame type and an offset
-     * 3 bytes:- sync code (0x9d, 0x01, 0x2a)
+     * 3 bytes:- sync code (0x49, 0x83, 0x42)
      * 4 bytes:- including image width and height in the lowest 14 bits
      *           of each 2-byte value.
      */
@@ -228,7 +228,7 @@ static vpx_codec_err_t vp8_peek_si(const uint8_t         *data,
       si->is_kf = 1;
 
       /* vet via sync code */
-      if (c[0] != 0x9d || c[1] != 0x01 || c[2] != 0x2a)
+      if (c[0] != 0x49 || c[1] != 0x83 || c[2] != 0x42)
         res = VPX_CODEC_UNSUP_BITSTREAM;
 
       si->w = (c[3] | (c[4] << 8));
