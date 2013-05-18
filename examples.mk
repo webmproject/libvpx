@@ -231,7 +231,7 @@ endif
 # even though there is no real dependency there (the dependency is on
 # the makefiles). We may want to revisit this.
 define vcproj_template
-$(1): $($(1:.$(VCPROJ_SFX)=).SRCS)
+$(1): $($(1:.$(VCPROJ_SFX)=).SRCS) vpx.$(VCPROJ_SFX)
 	@echo "    [vcproj] $$@"
 	$$(GEN_VCPROJ)\
             --exe\

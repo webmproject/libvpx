@@ -230,7 +230,7 @@ vpx.def: $(call enabled,CODEC_EXPORTS)
             --out=$@ $^
 CLEAN-OBJS += vpx.def
 
-vpx.$(VCPROJ_SFX): $(CODEC_SRCS) vpx.def
+vpx.$(VCPROJ_SFX): $(CODEC_SRCS) vpx.def obj_int_extract.$(VCPROJ_SFX)
 	@echo "    [CREATE] $@"
 	$(qexec)$(GEN_VCPROJ) \
             $(if $(CONFIG_SHARED),--dll,--lib) \
@@ -419,7 +419,7 @@ gtest.$(VCPROJ_SFX): $(SRC_PATH_BARE)/third_party/googletest/src/src/gtest-all.c
 
 PROJECTS-$(CONFIG_MSVS) += gtest.$(VCPROJ_SFX)
 
-test_libvpx.$(VCPROJ_SFX): $(LIBVPX_TEST_SRCS)
+test_libvpx.$(VCPROJ_SFX): $(LIBVPX_TEST_SRCS) vpx.$(VCPROJ_SFX) gtest.$(VCPROJ_SFX)
 	@echo "    [CREATE] $@"
 	$(qexec)$(GEN_VCPROJ) \
             --exe \
