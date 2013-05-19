@@ -241,7 +241,7 @@ $(1): $($(1:.$(VCPROJ_SFX)=).SRCS) vpx.$(VCPROJ_SFX)
             --proj-guid=$$($$(@:.$(VCPROJ_SFX)=).GUID)\
             $$(if $$(CONFIG_STATIC_MSVCRT),--static-crt) \
             --out=$$@ $$(INTERNAL_CFLAGS) $$(CFLAGS) \
-            $$(INTERNAL_LDFLAGS) $$(LDFLAGS) -l$$(CODEC_LIB) -lwinmm $$^
+            $$(INTERNAL_LDFLAGS) $$(LDFLAGS) -l$$(CODEC_LIB) $$^
 endef
 PROJECTS-$(CONFIG_MSVS) += $(ALL_EXAMPLES:.c=.$(VCPROJ_SFX))
 INSTALL-BINS-$(CONFIG_MSVS) += $(foreach p,$(VS_PLATFORMS),\

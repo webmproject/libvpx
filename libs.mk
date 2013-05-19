@@ -431,7 +431,7 @@ test_libvpx.$(VCPROJ_SFX): $(LIBVPX_TEST_SRCS) vpx.$(VCPROJ_SFX) gtest.$(VCPROJ_
             $(if $(CONFIG_STATIC_MSVCRT),--static-crt) \
             --out=$@ $(INTERNAL_CFLAGS) $(CFLAGS) \
             -I. -I"$(SRC_PATH_BARE)/third_party/googletest/src/include" \
-            -L. -l$(CODEC_LIB) -lwinmm -l$(GTEST_LIB) $^
+            -L. -l$(CODEC_LIB) -l$(GTEST_LIB) $^
 
 PROJECTS-$(CONFIG_MSVS) += test_libvpx.$(VCPROJ_SFX)
 
