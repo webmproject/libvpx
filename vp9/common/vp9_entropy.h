@@ -157,7 +157,14 @@ extern int vp9_get_coef_context(const int *scan, const int *neighbors,
 const int *vp9_get_coef_neighbors_handle(const int *scan, int *pad);
 
 #if CONFIG_MODELCOEFPROB
-#define COEFPROB_MODELS             128  // 128 lists stored for probs 1, 3, ..., 255
+
+// 48 lists of probabilities are stored for the following ONE node probs:
+// 1, (count 1)
+// 3, 7, 11, 15, ..., 115, 119, (count 30)
+// 127, 135, 143, ..., 247, 255 (count 17)
+// In between probabilities are interpolated linearly
+
+#define COEFPROB_MODELS             48
 
 #define UNCONSTRAINED_NODES         3
 #define MODEL_NODES                 (ENTROPY_NODES - UNCONSTRAINED_NODES)
