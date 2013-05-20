@@ -624,6 +624,16 @@ typedef struct VP9_COMP {
 #endif
 } VP9_COMP;
 
+static int get_ref_frame_idx(VP9_COMP *cpi, MV_REFERENCE_FRAME ref_frame) {
+  if (ref_frame == LAST_FRAME) {
+    return cpi->lst_fb_idx;
+  } else if (ref_frame == GOLDEN_FRAME) {
+    return cpi->gld_fb_idx;
+  } else {
+    return cpi->alt_fb_idx;
+  }
+}
+
 void vp9_encode_frame(VP9_COMP *cpi);
 
 void vp9_pack_bitstream(VP9_COMP *cpi, unsigned char *dest,
