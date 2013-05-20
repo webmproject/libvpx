@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAYX///90\u003d",
+        "filename": "vp9/common/vp9_reconinter.c",
+        "patchSetId": 12
+      },
+      "lineNbr": 328,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2013-05-20T21:05:19Z",
+      "side": 1,
+      "message": "Removed the restriction on a[2] and a[3].",
+      "parentUuid": "AAAAYH//8SE\u003d",
+      "revId": "04a28ff370c08131b5388b2c8ca8309e76978490",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAYH//8Rs\u003d",
         "filename": "vp9/common/vp9_reconinter.c",
         "patchSetId": 12
@@ -30,6 +48,24 @@
       "writtenOn": "2013-05-17T09:40:13Z",
       "side": 1,
       "message": "Not under a flag ?",
+      "revId": "04a28ff370c08131b5388b2c8ca8309e76978490",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAYX///9k\u003d",
+        "filename": "vp9/common/vp9_reconinter.c",
+        "patchSetId": 12
+      },
+      "lineNbr": 602,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2013-05-20T21:05:19Z",
+      "side": 1,
+      "message": "Removed since not used.",
+      "parentUuid": "AAAAYH//8Rs\u003d",
       "revId": "04a28ff370c08131b5388b2c8ca8309e76978490",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAYX///9c\u003d",
+        "filename": "vp9/common/vp9_reconinter.c",
+        "patchSetId": 12
+      },
+      "lineNbr": 741,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2013-05-20T21:05:19Z",
+      "side": 1,
+      "message": "Removed since not used. Was originally intended for a better search from rdopt loop.",
+      "parentUuid": "AAAAYH//8Rk\u003d",
+      "revId": "04a28ff370c08131b5388b2c8ca8309e76978490",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAYH//8Ss\u003d",
         "filename": "vp9/encoder/vp9_rdopt.c",
         "patchSetId": 12
@@ -64,6 +118,24 @@
       "writtenOn": "2013-05-17T09:40:13Z",
       "side": 1,
       "message": "I assume you have checked that this is the same/no change without flag set.",
+      "revId": "04a28ff370c08131b5388b2c8ca8309e76978490",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAYX///9Y\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 12
+      },
+      "lineNbr": 2490,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2013-05-20T21:05:19Z",
+      "side": 1,
+      "message": "Yes - no change.",
+      "parentUuid": "AAAAYH//8Ss\u003d",
       "revId": "04a28ff370c08131b5388b2c8ca8309e76978490",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
