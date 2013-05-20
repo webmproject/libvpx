@@ -37,18 +37,9 @@ typedef struct {
 extern const unsigned int vp9_prob_cost[256];
 
 void vp9_start_encode(vp9_writer *bc, uint8_t *buffer);
-void vp9_encode_unsigned_max(vp9_writer *br, int data, int max);
 void vp9_stop_encode(vp9_writer *bc);
 
-
-void vp9_encode_uniform(vp9_writer *bc, int v, int n);
-void vp9_encode_term_subexp(vp9_writer *bc, int v, int k, int n);
-int vp9_count_uniform(int v, int n);
-int vp9_count_term_subexp(int v, int k, int n);
-int vp9_recenter_nonneg(int v, int m);
-
 DECLARE_ALIGNED(16, extern const unsigned char, vp9_norm[256]);
-
 
 static void vp9_write(vp9_writer *br, int bit, int probability) {
   unsigned int split;
