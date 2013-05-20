@@ -107,10 +107,10 @@ const vp9_prob vp9_partition_probs[NUM_PARTITION_CONTEXTS]
                                   [PARTITION_TYPES - 1] = {
   // FIXME(jingning,rbultje) put real probabilities here
 #if CONFIG_AB4X4
-  {202, 162, 107},
-  {16,  2,   169},
-  {3,   246,  19},
-  {104, 90,  134},
+  {105,  88,  252},
+  {113,  88,  249},
+  {113, 106,  251},
+  {126, 105,  107},
 #endif
   {202, 162, 107},
   {16,  2,   169},

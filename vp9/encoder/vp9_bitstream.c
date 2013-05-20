@@ -696,39 +696,50 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, MODE_INFO *m,
                         nmvc, xd->allow_high_precision_mv);
         break;
       case SPLITMV: {
-        int j = 0;
-
-        do {
-          B_PREDICTION_MODE blockmode;
-          int_mv blockmv;
-          int k = -1;  /* first block in subset j */
-          int mv_contz;
-          int_mv leftmv, abovemv;
-
-          blockmode = cpi->mb.partition_info->bmi[j].mode;
-          blockmv = cpi->mb.partition_info->bmi[j].mv;
-          k = j;
-          leftmv.as_int = left_block_mv(xd, m, k);
-          abovemv.as_int = above_block_mv(m, k, mis);
-          mv_contz = vp9_mv_cont(&leftmv, &abovemv);
-
-          write_sub_mv_ref(bc, blockmode,
-                           cpi->common.fc.sub_mv_ref_prob[mv_contz]);
-          cpi->sub_mv_ref_count[mv_contz][blockmode - LEFT4X4]++;
-          if (blockmode == NEW4X4) {
-#ifdef ENTROPY_STATS
-            active_section = 11;
+        int j;
+        B_PREDICTION_MODE blockmode;
+        int_mv blockmv;
+        int k = -1;  /* first block in subset j */
+        int mv_contz;
+        int_mv leftmv, abovemv;
+        int bwl = b_width_log2(mi->sb_type), bw = 1 << bwl;
+        int bhl = b_height_log2(mi->sb_type), bh = 1 << bhl;
+        int idx, idy;
+#if !CONFIG_AB4X4
+        bw = 1, bh = 1;
 #endif
-            vp9_encode_mv(bc, &blockmv.as_mv, &mi->best_mv.as_mv,
-                          nmvc, xd->allow_high_precision_mv);
+        for (idy = 0; idy < 2; idy += bh) {
+          for (idx = 0; idx < 2; idx += bw) {
+            j = idy * 2 + idx;
+            blockmode = cpi->mb.partition_info->bmi[j].mode;
+            blockmv = cpi->mb.partition_info->bmi[j].mv;
+            k = j;
+            leftmv.as_int = left_block_mv(xd, m, k);
+            abovemv.as_int = above_block_mv(m, k, mis);
+            mv_contz = vp9_mv_cont(&leftmv, &abovemv);
 
-            if (mi->second_ref_frame > 0)
-              vp9_encode_mv(bc,
-                            &cpi->mb.partition_info->bmi[j].second_mv.as_mv,
-                            &mi->best_second_mv.as_mv,
+            write_sub_mv_ref(bc, blockmode,
+                             cpi->common.fc.sub_mv_ref_prob[mv_contz]);
+            cpi->sub_mv_ref_count[mv_contz][blockmode - LEFT4X4]++;
+            if (blockmode == NEW4X4) {
+#ifdef ENTROPY_STATS
+              active_section = 11;
+#endif
+              vp9_encode_mv(bc, &blockmv.as_mv, &mi->best_mv.as_mv,
                             nmvc, xd->allow_high_precision_mv);
+
+              if (mi->second_ref_frame > 0)
+                vp9_encode_mv(bc,
+                              &cpi->mb.partition_info->bmi[j].second_mv.as_mv,
+                              &mi->best_second_mv.as_mv,
+                              nmvc, xd->allow_high_precision_mv);
+            }
           }
-        } while (++j < cpi->mb.partition_info->count);
+        }
+
+#ifdef MODE_STATS
+        ++count_mb_seg[mi->partitioning];
+#endif
         break;
       }
       default:
@@ -837,6 +848,11 @@ static void write_modes_b(VP9_COMP *cpi, MODE_INFO *m, vp9_writer *bc,
   VP9_COMMON *const cm = &cpi->common;
   MACROBLOCKD *const xd = &cpi->mb.e_mbd;
 
+#if CONFIG_AB4X4
+  if (m->mbmi.sb_type < BLOCK_SIZE_SB8X8)
+    if (xd->ab_index > 0)
+      return;
+#endif
   xd->mode_info_context = m;
   set_mi_row_col(&cpi->common, xd, mi_row,
                  1 << mi_height_log2(m->mbmi.sb_type),
@@ -891,7 +907,7 @@ static void write_modes_sb(VP9_COMP *cpi, MODE_INFO *m, vp9_writer *bc,
 
 #if CONFIG_AB4X4
   if (bsize < BLOCK_SIZE_SB8X8)
-    if (xd->ab_index != 0)
+    if (xd->ab_index > 0)
       return;
 #endif
 
@@ -910,6 +926,7 @@ static void write_modes_sb(VP9_COMP *cpi, MODE_INFO *m, vp9_writer *bc,
   }
 
   subsize = get_subsize(bsize, partition);
+  *(get_sb_index(xd, subsize)) = 0;
 
   switch (partition) {
     case PARTITION_NONE:
@@ -917,11 +934,13 @@ static void write_modes_sb(VP9_COMP *cpi, MODE_INFO *m, vp9_writer *bc,
       break;
     case PARTITION_HORZ:
       write_modes_b(cpi, m, bc, tok, tok_end, mi_row, mi_col);
+      *(get_sb_index(xd, subsize)) = 1;
       if ((mi_row + bs) < cm->mi_rows)
         write_modes_b(cpi, m + bs * mis, bc, tok, tok_end, mi_row + bs, mi_col);
       break;
     case PARTITION_VERT:
       write_modes_b(cpi, m, bc, tok, tok_end, mi_row, mi_col);
+      *(get_sb_index(xd, subsize)) = 1;
       if ((mi_col + bs) < cm->mi_cols)
         write_modes_b(cpi, m + bs, bc, tok, tok_end, mi_row, mi_col + bs);
       break;

@@ -417,6 +417,7 @@ typedef struct macroblockd {
 
 static int *get_sb_index(MACROBLOCKD *xd, BLOCK_SIZE_TYPE subsize) {
   switch (subsize) {
+    case BLOCK_SIZE_SB64X64:
     case BLOCK_SIZE_SB64X32:
     case BLOCK_SIZE_SB32X64:
     case BLOCK_SIZE_SB32X32:
@@ -444,10 +445,10 @@ static int *get_sb_index(MACROBLOCKD *xd, BLOCK_SIZE_TYPE subsize) {
 static INLINE void update_partition_context(MACROBLOCKD *xd,
                                             BLOCK_SIZE_TYPE sb_type,
                                             BLOCK_SIZE_TYPE sb_size) {
-  int bsl = mi_width_log2(sb_size), bs = 1 << bsl;
-  int bwl = mi_width_log2(sb_type);
-  int bhl = mi_height_log2(sb_type);
-  int boffset = mi_width_log2(BLOCK_SIZE_SB64X64) - bsl;
+  int bsl = b_width_log2(sb_size), bs = (1 << bsl) / 2;
+  int bwl = b_width_log2(sb_type);
+  int bhl = b_height_log2(sb_type);
+  int boffset = b_width_log2(BLOCK_SIZE_SB64X64) - bsl;
   int i;
 
 #if !CONFIG_AB4X4

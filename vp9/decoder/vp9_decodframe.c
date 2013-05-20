@@ -413,6 +413,11 @@ static void decode_modes_b(VP9D_COMP *pbi, int mi_row, int mi_col,
                            vp9_reader *r, BLOCK_SIZE_TYPE bsize) {
   MACROBLOCKD *const xd = &pbi->mb;
 
+#if CONFIG_AB4X4
+  if (bsize < BLOCK_SIZE_SB8X8)
+    if (xd->ab_index > 0)
+      return;
+#endif
   set_offsets(pbi, bsize, mi_row, mi_col);
   vp9_decode_mb_mode_mv(pbi, xd, mi_row, mi_col, r);
   set_refs(pbi, mi_row, mi_col);
@@ -465,6 +470,7 @@ static void decode_modes_sb(VP9D_COMP *pbi, int mi_row, int mi_col,
   }
 
   subsize = get_subsize(bsize, partition);
+  *(get_sb_index(xd, subsize)) = 0;
 
   switch (partition) {
     case PARTITION_NONE:
@@ -472,11 +478,13 @@ static void decode_modes_sb(VP9D_COMP *pbi, int mi_row, int mi_col,
       break;
     case PARTITION_HORZ:
       decode_modes_b(pbi, mi_row, mi_col, r, subsize);
+      *(get_sb_index(xd, subsize)) = 1;
       if (mi_row + bs < pc->mi_rows)
         decode_modes_b(pbi, mi_row + bs, mi_col, r, subsize);
       break;
     case PARTITION_VERT:
       decode_modes_b(pbi, mi_row, mi_col, r, subsize);
+      *(get_sb_index(xd, subsize)) = 1;
       if (mi_col + bs < pc->mi_cols)
         decode_modes_b(pbi, mi_row, mi_col + bs, r, subsize);
       break;

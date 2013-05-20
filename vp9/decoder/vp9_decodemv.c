@@ -540,8 +540,9 @@ static void read_mb_modes_mv(VP9D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
 
   int_mv *const mv0 = &mbmi->mv[0];
   int_mv *const mv1 = &mbmi->mv[1];
-  const int bw = 1 << mi_width_log2(mi->mbmi.sb_type);
-  const int bh = 1 << mi_height_log2(mi->mbmi.sb_type);
+  BLOCK_SIZE_TYPE bsize = mi->mbmi.sb_type;
+  int bw = 1 << b_width_log2(bsize);
+  int bh = 1 << b_height_log2(bsize);
 
   const int use_prev_in_find_mv_refs = cm->width == cm->last_width &&
                                        cm->height == cm->last_height &&
@@ -549,6 +550,7 @@ static void read_mb_modes_mv(VP9D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
                                        cm->last_show_frame;
 
   int mb_to_left_edge, mb_to_right_edge, mb_to_top_edge, mb_to_bottom_edge;
+  int j, idx, idy;
 
   mbmi->need_to_clamp_mvs = 0;
   mbmi->need_to_clamp_secondmv = 0;
@@ -562,7 +564,8 @@ static void read_mb_modes_mv(VP9D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
   // Distance of Mb to the various image edges.
   // These specified to 8th pel as they are always compared to MV values
   // that are in 1/8th pel units
-  set_mi_row_col(cm, xd, mi_row, bh, mi_col, bw);
+  set_mi_row_col(cm, xd, mi_row, 1 << mi_height_log2(bsize),
+                         mi_col, 1 << mi_width_log2(bsize));
 
   mb_to_top_edge = xd->mb_to_top_edge - LEFT_TOP_MARGIN;
   mb_to_bottom_edge = xd->mb_to_bottom_edge + RIGHT_BOTTOM_MARGIN;
@@ -613,14 +616,14 @@ static void read_mb_modes_mv(VP9D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
         mbmi->mode = ZEROMV;
       } else {
 #if CONFIG_AB4X4
-        if (mbmi->sb_type >= BLOCK_SIZE_SB8X8)
+        if (bsize >= BLOCK_SIZE_SB8X8)
           mbmi->mode = read_sb_mv_ref(r, mv_ref_p);
         else
           mbmi->mode = SPLITMV;
 #else
-        mbmi->mode = mbmi->sb_type > BLOCK_SIZE_SB8X8 ?
-                                     read_sb_mv_ref(r, mv_ref_p)
-                                   : read_mv_ref(r, mv_ref_p);
+        mbmi->mode = bsize > BLOCK_SIZE_SB8X8 ?
+                                   read_sb_mv_ref(r, mv_ref_p)
+                                 : read_mv_ref(r, mv_ref_p);
 #endif
         vp9_accum_mv_refs(cm, mbmi->mode, mbmi->mb_mode_context[ref_frame]);
       }
@@ -685,80 +688,87 @@ static void read_mb_modes_mv(VP9D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
 
     mbmi->uv_mode = DC_PRED;
     switch (mbmi->mode) {
-      case SPLITMV: {
-        const int num_p = 4;
-        int j = 0;
-
+      case SPLITMV:
+#if !CONFIG_AB4X4
+        bw = 1, bh = 1;
+#endif
         mbmi->need_to_clamp_mvs = 0;
-        do {  // for each subset j
-          int_mv leftmv, abovemv, second_leftmv, second_abovemv;
-          int_mv blockmv, secondmv;
-          int mv_contz;
-          int blockmode;
-          int k = j;
+        for (idy = 0; idy < 2; idy += bh) {
+          for (idx = 0; idx < 2; idx += bw) {
+            int_mv leftmv, abovemv, second_leftmv, second_abovemv;
+            int_mv blockmv, secondmv;
+            int mv_contz;
+            int blockmode;
+            int i, k;
+            j = idy * 2 + idx;
+            k = j;
 
-          leftmv.as_int = left_block_mv(xd, mi, k);
-          abovemv.as_int = above_block_mv(mi, k, mis);
-          second_leftmv.as_int = 0;
-          second_abovemv.as_int = 0;
-          if (mbmi->second_ref_frame > 0) {
-            second_leftmv.as_int = left_block_second_mv(xd, mi, k);
-            second_abovemv.as_int = above_block_second_mv(mi, k, mis);
+            leftmv.as_int = left_block_mv(xd, mi, k);
+            abovemv.as_int = above_block_mv(mi, k, mis);
+            second_leftmv.as_int = 0;
+            second_abovemv.as_int = 0;
+            if (mbmi->second_ref_frame > 0) {
+              second_leftmv.as_int = left_block_second_mv(xd, mi, k);
+              second_abovemv.as_int = above_block_second_mv(mi, k, mis);
+            }
+            mv_contz = vp9_mv_cont(&leftmv, &abovemv);
+            blockmode = read_sub_mv_ref(r, cm->fc.sub_mv_ref_prob[mv_contz]);
+            cm->fc.sub_mv_ref_counts[mv_contz][blockmode - LEFT4X4]++;
+
+            switch (blockmode) {
+              case NEW4X4:
+                decode_mv(r, &blockmv.as_mv, &best_mv.as_mv, nmvc,
+                           &cm->fc.NMVcount, xd->allow_high_precision_mv);
+
+                if (mbmi->second_ref_frame > 0)
+                  decode_mv(r, &secondmv.as_mv, &best_mv_second.as_mv, nmvc,
+                            &cm->fc.NMVcount, xd->allow_high_precision_mv);
+
+  #ifdef VPX_MODE_COUNT
+                vp9_mv_cont_count[mv_contz][3]++;
+  #endif
+                break;
+              case LEFT4X4:
+                blockmv.as_int = leftmv.as_int;
+                if (mbmi->second_ref_frame > 0)
+                  secondmv.as_int = second_leftmv.as_int;
+  #ifdef VPX_MODE_COUNT
+                vp9_mv_cont_count[mv_contz][0]++;
+  #endif
+                break;
+              case ABOVE4X4:
+                blockmv.as_int = abovemv.as_int;
+                if (mbmi->second_ref_frame > 0)
+                  secondmv.as_int = second_abovemv.as_int;
+  #ifdef VPX_MODE_COUNT
+                vp9_mv_cont_count[mv_contz][1]++;
+  #endif
+                break;
+              case ZERO4X4:
+                blockmv.as_int = 0;
+                if (mbmi->second_ref_frame > 0)
+                  secondmv.as_int = 0;
+  #ifdef VPX_MODE_COUNT
+                vp9_mv_cont_count[mv_contz][2]++;
+  #endif
+                break;
+              default:
+                break;
+            }
+            mi->bmi[j].as_mv[0].as_int = blockmv.as_int;
+            if (mbmi->second_ref_frame > 0)
+              mi->bmi[j].as_mv[1].as_int = secondmv.as_int;
+
+            for (i = 1; i < bh; ++i)
+              vpx_memcpy(&mi->bmi[j + i * 2], &mi->bmi[j], sizeof(mi->bmi[j]));
+            for (i = 1; i < bw; ++i)
+              vpx_memcpy(&mi->bmi[j + i], &mi->bmi[j], sizeof(mi->bmi[j]));
           }
-          mv_contz = vp9_mv_cont(&leftmv, &abovemv);
-          blockmode = read_sub_mv_ref(r, cm->fc.sub_mv_ref_prob[mv_contz]);
-          cm->fc.sub_mv_ref_counts[mv_contz][blockmode - LEFT4X4]++;
+        }
 
-          switch (blockmode) {
-            case NEW4X4:
-              decode_mv(r, &blockmv.as_mv, &best_mv.as_mv, nmvc,
-                        &cm->fc.NMVcount, xd->allow_high_precision_mv);
-
-              if (mbmi->second_ref_frame > 0)
-                decode_mv(r, &secondmv.as_mv, &best_mv_second.as_mv, nmvc,
-                          &cm->fc.NMVcount, xd->allow_high_precision_mv);
-
-#ifdef VPX_MODE_COUNT
-              vp9_mv_cont_count[mv_contz][3]++;
-#endif
-              break;
-            case LEFT4X4:
-              blockmv.as_int = leftmv.as_int;
-              if (mbmi->second_ref_frame > 0)
-                secondmv.as_int = second_leftmv.as_int;
-#ifdef VPX_MODE_COUNT
-              vp9_mv_cont_count[mv_contz][0]++;
-#endif
-              break;
-            case ABOVE4X4:
-              blockmv.as_int = abovemv.as_int;
-              if (mbmi->second_ref_frame > 0)
-                secondmv.as_int = second_abovemv.as_int;
-#ifdef VPX_MODE_COUNT
-              vp9_mv_cont_count[mv_contz][1]++;
-#endif
-              break;
-            case ZERO4X4:
-              blockmv.as_int = 0;
-              if (mbmi->second_ref_frame > 0)
-                secondmv.as_int = 0;
-#ifdef VPX_MODE_COUNT
-              vp9_mv_cont_count[mv_contz][2]++;
-#endif
-              break;
-            default:
-              break;
-          }
-          mi->bmi[j].as_mv[0].as_int = blockmv.as_int;
-          if (mbmi->second_ref_frame > 0)
-            mi->bmi[j].as_mv[1].as_int = secondmv.as_int;
-        } while (++j < num_p);
-      }
-
-      mv0->as_int = mi->bmi[3].as_mv[0].as_int;
-      mv1->as_int = mi->bmi[3].as_mv[1].as_int;
-
-      break;  /* done with SPLITMV */
+        mv0->as_int = mi->bmi[3].as_mv[0].as_int;
+        mv1->as_int = mi->bmi[3].as_mv[1].as_int;
+        break;  /* done with SPLITMV */
 
       case NEARMV:
         // Clip "next_nearest" so that it does not extend to far out of image
@@ -822,14 +832,14 @@ static void read_mb_modes_mv(VP9D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
     mv0->as_int = 0;
 
 #if CONFIG_AB4X4
-    if (mbmi->sb_type >= BLOCK_SIZE_SB8X8) {
+    if (bsize >= BLOCK_SIZE_SB8X8) {
       mbmi->mode = read_sb_ymode(r, cm->fc.sb_ymode_prob);
       cm->fc.sb_ymode_counts[mbmi->mode]++;
     } else {
       mbmi->mode = I4X4_PRED;
     }
 #else
-    if (mbmi->sb_type > BLOCK_SIZE_SB8X8) {
+    if (bsize > BLOCK_SIZE_SB8X8) {
       mbmi->mode = read_sb_ymode(r, cm->fc.sb_ymode_prob);
       cm->fc.sb_ymode_counts[mbmi->mode]++;
     } else {
@@ -840,7 +850,7 @@ static void read_mb_modes_mv(VP9D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
 
     // If MB mode is I4X4_PRED read the block modes
 #if CONFIG_AB4X4
-    if (mbmi->sb_type < BLOCK_SIZE_SB8X8) {
+    if (bsize < BLOCK_SIZE_SB8X8) {
 #else
     if (mbmi->mode == I4X4_PRED) {
 #endif
@@ -857,21 +867,21 @@ static void read_mb_modes_mv(VP9D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
   }
 
 #if CONFIG_AB4X4
-    if (cm->txfm_mode == TX_MODE_SELECT && mbmi->mb_skip_coeff == 0 &&
-        mbmi->sb_type >= BLOCK_SIZE_SB8X8) {
+  if (cm->txfm_mode == TX_MODE_SELECT && mbmi->mb_skip_coeff == 0 &&
+      bsize >= BLOCK_SIZE_SB8X8) {
 #else
   if (cm->txfm_mode == TX_MODE_SELECT && mbmi->mb_skip_coeff == 0 &&
       ((mbmi->ref_frame == INTRA_FRAME && mbmi->mode != I4X4_PRED) ||
        (mbmi->ref_frame != INTRA_FRAME && mbmi->mode != SPLITMV))) {
 #endif
-    const int allow_16x16 = mbmi->sb_type >= BLOCK_SIZE_MB16X16;
-    const int allow_32x32 = mbmi->sb_type >= BLOCK_SIZE_SB32X32;
+    const int allow_16x16 = bsize >= BLOCK_SIZE_MB16X16;
+    const int allow_32x32 = bsize >= BLOCK_SIZE_SB32X32;
     mbmi->txfm_size = select_txfm_size(cm, r, allow_16x16, allow_32x32);
-  } else if (mbmi->sb_type >= BLOCK_SIZE_SB32X32 &&
+  } else if (bsize >= BLOCK_SIZE_SB32X32 &&
              cm->txfm_mode >= ALLOW_32X32) {
     mbmi->txfm_size = TX_32X32;
   } else if (cm->txfm_mode >= ALLOW_16X16 &&
-             mbmi->sb_type >= BLOCK_SIZE_MB16X16
+             bsize >= BLOCK_SIZE_MB16X16
 #if !CONFIG_AB4X4
       && ((mbmi->ref_frame == INTRA_FRAME && mbmi->mode <= TM_PRED) ||
        (mbmi->ref_frame != INTRA_FRAME && mbmi->mode != SPLITMV))
@@ -880,7 +890,7 @@ static void read_mb_modes_mv(VP9D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
     mbmi->txfm_size = TX_16X16;
   } else if (cm->txfm_mode >= ALLOW_8X8 &&
 #if CONFIG_AB4X4
-      (mbmi->sb_type >= BLOCK_SIZE_SB8X8))
+      (bsize >= BLOCK_SIZE_SB8X8))
 #else
       (!(mbmi->ref_frame == INTRA_FRAME && mbmi->mode == I4X4_PRED) &&
        !(mbmi->ref_frame != INTRA_FRAME && mbmi->mode == SPLITMV)))
