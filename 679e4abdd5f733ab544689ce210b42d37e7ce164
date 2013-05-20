@@ -37,6 +37,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAYH//6nQ\u003d",
+        "filename": "vp9/common/vp9_extend.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 63,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2013-05-20T09:47:43Z",
+      "side": 1,
+      "message": "I think this is a reasonable thing to do given where we are and the time that we have.",
+      "parentUuid": "AAAAYH//7gk\u003d",
+      "revId": "679e4abdd5f733ab544689ce210b42d37e7ce164",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAYH//7jg\u003d",
         "filename": "vp9/common/vp9_onyxc_int.h",
         "patchSetId": 2
@@ -72,6 +90,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAYH//6nM\u003d",
+        "filename": "vp9/common/vp9_onyxc_int.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 196,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2013-05-20T09:47:43Z",
+      "side": 1,
+      "message": "Right...In any case well spotted.",
+      "parentUuid": "AAAAYH//7gQ\u003d",
+      "revId": "679e4abdd5f733ab544689ce210b42d37e7ce164",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAYH//7jc\u003d",
         "filename": "vp9/common/vp9_postproc.c",
         "patchSetId": 2
@@ -101,6 +137,24 @@
       "side": 1,
       "message": "I went with this approach since the necessary symbols are available not under the flag, and it doesn\u0027t impact the output of the code without the flag. I could put it all under a flag just to remove it next week, but it didn\u0027t seem all that useful. If you prefer it be done that way, let me know and I\u0027ll change it.\n\nThese could become [MAX_MB_PLANE] after the experiment is merged, but I don\u0027t like having these mapping arrays at all, and my plan is to move these into YV12_BUFFER_CONFIG or replace that structure entirely, but don\u0027t have time to do it before the freeze. It\u0027s a little messy to have to load alpha_buffer etc into these temp arrays if only 3 planes are in use. All these for loops up to MAX_MB_PLANE will become loops up to the number of planes in use before the experiment can be merged.",
       "parentUuid": "AAAAYH//7jc\u003d",
+      "revId": "679e4abdd5f733ab544689ce210b42d37e7ce164",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAYH//6nE\u003d",
+        "filename": "vp9/common/vp9_postproc.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 349,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2013-05-20T09:47:43Z",
+      "side": 1,
+      "message": "OK I looked through these responses in the wrong order.. It looks like we are on the same page re a cleaner post freeze solution and I think your rationale is reasonable. As I say in my other comment... perhaps it is worth a temporary extra #define used in all these places so that you can put a TODO alongside.. but either way I think it is not worth holding things up at all so I will LGTM as is and leave it to you.",
+      "parentUuid": "AAAAYH//7fw\u003d",
       "revId": "679e4abdd5f733ab544689ce210b42d37e7ce164",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -153,6 +207,24 @@
       "side": 1,
       "message": "Same case as before. Can\u0027t use MAX_MB_PLANE without adding additional ifdefs. Let me know if you want them added, but probably not necessary unless there\u0027s a chance we\u0027re not going to merge this.",
       "parentUuid": "AAAAYH//7jQ\u003d",
+      "revId": "679e4abdd5f733ab544689ce210b42d37e7ce164",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAYH//6nI\u003d",
+        "filename": "vp9/common/vp9_reconinter.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 102,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2013-05-20T09:47:43Z",
+      "side": 1,
+      "message": "I appreciate it would require extra ifdefs at this stage.  Even after merge though would we want to always set up 4 planes even if alpha is not used?\n\nI certainly don\u0027t think this is worth blocking or holding up the merge over though... just a thought as we go forward. Also perhaps another #define would be better than hard wired number.. then you can put a note next to the #define if you think this is something to come back to.",
+      "parentUuid": "AAAAYH//7fI\u003d",
       "revId": "679e4abdd5f733ab544689ce210b42d37e7ce164",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
