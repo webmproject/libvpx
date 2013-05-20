@@ -85,9 +85,6 @@ prototype void vp9_intra4x4_predict "struct macroblockd *xd, int block, enum BLO
 specialize vp9_intra4x4_predict;
 
 if [ "$CONFIG_VP9_DECODER" = "yes" ]; then
-prototype void vp9_add_residual_4x4 "const int16_t *diff, uint8_t *dest, int stride"
-specialize vp9_add_residual_4x4 sse2
-
 prototype void vp9_add_constant_residual_8x8 "const int16_t diff, uint8_t *dest, int stride"
 specialize vp9_add_constant_residual_8x8 sse2
 
@@ -179,11 +176,11 @@ specialize vp9_convolve8_avg_vert ssse3
 #
 # dct
 #
-prototype void vp9_short_idct4x4_1 "int16_t *input, int16_t *output, int pitch"
-specialize vp9_short_idct4x4_1
+prototype void vp9_short_idct4x4_1_add "int16_t *input, uint8_t *dest, int dest_stride"
+specialize vp9_short_idct4x4_1_add
 
-prototype void vp9_short_idct4x4 "int16_t *input, int16_t *output, int pitch"
-specialize vp9_short_idct4x4 sse2
+prototype void vp9_short_idct4x4_add "int16_t *input, uint8_t *dest, int dest_stride"
+specialize vp9_short_idct4x4_add sse2
 
 prototype void vp9_short_idct8x8_add "int16_t *input, uint8_t *dest, int dest_stride"
 specialize vp9_short_idct8x8_add sse2
@@ -212,11 +209,11 @@ specialize vp9_short_idct1_32x32
 prototype void vp9_short_idct10_32x32_add "int16_t *input, uint8_t *dest, int dest_stride"
 specialize vp9_short_idct10_32x32_add
 
+prototype void vp9_short_iht4x4_add "int16_t *input, uint8_t *dest, int dest_stride, int tx_type"
+specialize vp9_short_iht4x4_add
+
 prototype void vp9_short_iht8x8_add "int16_t *input, uint8_t *dest, int dest_stride, int tx_type"
 specialize vp9_short_iht8x8_add
-
-prototype void vp9_short_iht4x4 "int16_t *input, int16_t *output, int pitch, int tx_type"
-specialize vp9_short_iht4x4
 
 prototype void vp9_short_iht16x16_add "int16_t *input, uint8_t *output, int pitch, int tx_type"
 specialize vp9_short_iht16x16_add
@@ -229,12 +226,11 @@ specialize vp9_idct4_1d sse2
 prototype void vp9_dc_only_idct_add "int input_dc, uint8_t *pred_ptr, uint8_t *dst_ptr, int pitch, int stride"
 specialize vp9_dc_only_idct_add sse2
 
-prototype void vp9_short_iwalsh4x4_1 "int16_t *input, int16_t *output, int pitch"
-specialize vp9_short_iwalsh4x4_1
-prototype void vp9_short_iwalsh4x4 "int16_t *input, int16_t *output, int pitch"
-specialize vp9_short_iwalsh4x4
-prototype void vp9_dc_only_inv_walsh_add "int input_dc, uint8_t *pred_ptr, uint8_t *dst_ptr, int pitch, int stride"
-specialize vp9_dc_only_inv_walsh_add
+prototype void vp9_short_iwalsh4x4_1_add "int16_t *input, uint8_t *dest, int dest_stride"
+specialize vp9_short_iwalsh4x4_1_add
+
+prototype void vp9_short_iwalsh4x4_add "int16_t *input, uint8_t *dest, int dest_stride"
+specialize vp9_short_iwalsh4x4_add
 
 prototype unsigned int vp9_sad32x3 "const uint8_t *src_ptr, int  src_stride, const uint8_t *ref_ptr, int ref_stride, int max_sad"
 specialize vp9_sad32x3

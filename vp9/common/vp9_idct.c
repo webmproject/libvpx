@@ -18,12 +18,12 @@
 #include "vp9/common/vp9_common.h"
 #include "vp9/common/vp9_idct.h"
 
-void vp9_short_iwalsh4x4_c(int16_t *input, int16_t *output, int pitch) {
+void vp9_short_iwalsh4x4_add_c(int16_t *input, uint8_t *dest, int dest_stride) {
   int i;
+  int16_t output[16];
   int a1, b1, c1, d1;
   int16_t *ip = input;
   int16_t *op = output;
-  const int half_pitch = pitch >> 1;
 
   for (i = 0; i < 4; i++) {
     a1 = (ip[0] + ip[3]) >> WHT_UPSCALE_FACTOR;
@@ -37,63 +37,60 @@ void vp9_short_iwalsh4x4_c(int16_t *input, int16_t *output, int pitch) {
     op[3] = (d1 - c1) >> 1;
 
     ip += 4;
-    op += half_pitch;
+    op += 4;
   }
 
   ip = output;
-  op = output;
   for (i = 0; i < 4; i++) {
-    a1 = ip[half_pitch * 0] + ip[half_pitch * 3];
-    b1 = ip[half_pitch * 1] + ip[half_pitch * 2];
-    c1 = ip[half_pitch * 1] - ip[half_pitch * 2];
-    d1 = ip[half_pitch * 0] - ip[half_pitch * 3];
+    a1 = ip[4 * 0] + ip[4 * 3];
+    b1 = ip[4 * 1] + ip[4 * 2];
+    c1 = ip[4 * 1] - ip[4 * 2];
+    d1 = ip[4 * 0] - ip[4 * 3];
 
 
-    op[half_pitch * 0] = (a1 + b1 + 1) >> 1;
-    op[half_pitch * 1] = (c1 + d1) >> 1;
-    op[half_pitch * 2] = (a1 - b1) >> 1;
-    op[half_pitch * 3] = (d1 - c1) >> 1;
+    dest[dest_stride * 0] = clip_pixel(dest[dest_stride * 0] +
+                                       ((a1 + b1 + 1) >> 1));
+    dest[dest_stride * 1] = clip_pixel(dest[dest_stride * 1] +
+                                       ((c1 + d1) >> 1));
+    dest[dest_stride * 2] = clip_pixel(dest[dest_stride * 2] +
+                                       ((a1 - b1) >> 1));
+    dest[dest_stride * 3] = clip_pixel(dest[dest_stride * 3] +
+                                       ((d1 - c1) >> 1));
 
     ip++;
-    op++;
+    dest++;
   }
 }
 
-void vp9_short_iwalsh4x4_1_c(int16_t *in, int16_t *out, int pitch) {
+void vp9_short_iwalsh4x4_1_add_c(int16_t *in, uint8_t *dest, int dest_stride) {
   int i;
   int16_t tmp[4];
   int16_t *ip = in;
   int16_t *op = tmp;
-  const int half_pitch = pitch >> 1;
 
   op[0] = ((ip[0] >> WHT_UPSCALE_FACTOR) + 1) >> 1;
   op[1] = op[2] = op[3] = (ip[0] >> WHT_UPSCALE_FACTOR) >> 1;
 
   ip = tmp;
-  op = out;
   for (i = 0; i < 4; i++) {
-    op[half_pitch * 0] = (ip[0] + 1) >> 1;
-    op[half_pitch * 1] = op[half_pitch * 2] = op[half_pitch * 3] = ip[0] >> 1;
+    dest[dest_stride * 0] = clip_pixel(dest[dest_stride * 0] +
+                                       ((ip[0] + 1) >> 1));
+    dest[dest_stride * 1] = clip_pixel(dest[dest_stride * 1] +
+                                       (ip[0] >> 1));
+    dest[dest_stride * 2] = clip_pixel(dest[dest_stride * 2] +
+                                       (ip[0] >> 1));
+    dest[dest_stride * 3] = clip_pixel(dest[dest_stride * 3] +
+                                       (ip[0] >> 1));
     ip++;
-    op++;
+    dest++;
   }
 }
 
 void vp9_dc_only_inv_walsh_add_c(int input_dc, uint8_t *pred_ptr,
                                  uint8_t *dst_ptr,
                                  int pitch, int stride) {
-  int r, c;
   int16_t dc = input_dc;
-  int16_t tmp[4 * 4];
-  vp9_short_iwalsh4x4_1_c(&dc, tmp, 4 << 1);
-
-  for (r = 0; r < 4; r++) {
-    for (c = 0; c < 4; c++)
-      dst_ptr[c] = clip_pixel(tmp[r * 4 + c] + pred_ptr[c]);
-
-    dst_ptr += stride;
-    pred_ptr += pitch;
-  }
+  vp9_short_iwalsh4x4_1_add_c(&dc, dst_ptr, stride);
 }
 
 void vp9_idct4_1d_c(int16_t *input, int16_t *output) {
@@ -116,10 +113,9 @@ void vp9_idct4_1d_c(int16_t *input, int16_t *output) {
   output[3] = step[0] - step[3];
 }
 
-void vp9_short_idct4x4_c(int16_t *input, int16_t *output, int pitch) {
+void vp9_short_idct4x4_add_c(int16_t *input, uint8_t *dest, int dest_stride) {
   int16_t out[4 * 4];
   int16_t *outptr = out;
-  const int half_pitch = pitch >> 1;
   int i, j;
   int16_t temp_in[4], temp_out[4];
 
@@ -138,22 +134,24 @@ void vp9_short_idct4x4_c(int16_t *input, int16_t *output, int pitch) {
       temp_in[j] = out[j * 4 + i];
     vp9_idct4_1d(temp_in, temp_out);
     for (j = 0; j < 4; ++j)
-      output[j * half_pitch + i] = ROUND_POWER_OF_TWO(temp_out[j], 4);
+      dest[j * dest_stride + i] = clip_pixel(ROUND_POWER_OF_TWO(temp_out[j], 4)
+                                  + dest[j * dest_stride + i]);
   }
 }
 
-void vp9_short_idct4x4_1_c(int16_t *input, int16_t *output, int pitch) {
+void vp9_short_idct4x4_1_add_c(int16_t *input, uint8_t *dest, int dest_stride) {
   int i;
   int a1;
-  int16_t *op = output;
-  const int half_pitch = pitch >> 1;
   int16_t out = dct_const_round_shift(input[0] * cospi_16_64);
   out = dct_const_round_shift(out * cospi_16_64);
   a1 = ROUND_POWER_OF_TWO(out, 4);
 
   for (i = 0; i < 4; i++) {
-    op[0] = op[1] = op[2] = op[3] = a1;
-    op += half_pitch;
+    dest[0] = clip_pixel(dest[0] + a1);
+    dest[1] = clip_pixel(dest[1] + a1);
+    dest[2] = clip_pixel(dest[2] + a1);
+    dest[3] = clip_pixel(dest[3] + a1);
+    dest += dest_stride;
   }
 }
 
@@ -285,8 +283,8 @@ static void iadst4_1d(int16_t *input, int16_t *output) {
   output[3] = dct_const_round_shift(s3);
 }
 
-void vp9_short_iht4x4_c(int16_t *input, int16_t *output,
-                        int pitch, int tx_type) {
+void vp9_short_iht4x4_add_c(int16_t *input, uint8_t *dest, int dest_stride,
+                            int tx_type) {
   const transform_2d IHT_4[] = {
     { vp9_idct4_1d,  vp9_idct4_1d  },  // DCT_DCT  = 0
     { iadst4_1d, vp9_idct4_1d  },      // ADST_DCT = 1
@@ -312,10 +310,10 @@ void vp9_short_iht4x4_c(int16_t *input, int16_t *output,
       temp_in[j] = out[j * 4 + i];
     IHT_4[tx_type].cols(temp_in, temp_out);
     for (j = 0; j < 4; ++j)
-      output[j * pitch + i] = ROUND_POWER_OF_TWO(temp_out[j], 4);
+      dest[j * dest_stride + i] = clip_pixel(ROUND_POWER_OF_TWO(temp_out[j], 4)
+                                  + dest[j * dest_stride + i]);
   }
 }
-
 static void iadst8_1d(int16_t *input, int16_t *output) {
   int s0, s1, s2, s3, s4, s5, s6, s7;
 

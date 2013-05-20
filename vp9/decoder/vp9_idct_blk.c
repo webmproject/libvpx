@@ -84,23 +84,6 @@ void vp9_idct_add_uv_block_lossless_c(int16_t *q, uint8_t *dst, int stride,
   }
 }
 
-static void add_residual(const int16_t *diff, uint8_t *dest, int stride,
-                         int width, int height) {
-  int r, c;
-
-  for (r = 0; r < height; r++) {
-    for (c = 0; c < width; c++)
-      dest[c] = clip_pixel(diff[c] + dest[c]);
-
-    dest += stride;
-    diff += width;
-  }
-}
-
-void vp9_add_residual_4x4_c(const int16_t *diff, uint8_t *dest, int stride) {
-  add_residual(diff, dest, stride, 4, 4);
-}
-
 static void add_constant_residual(const int16_t diff, uint8_t *dest, int stride,
                                   int width, int height) {
   int r, c;
@@ -133,11 +116,8 @@ void vp9_iht_add_c(TX_TYPE tx_type, int16_t *input, uint8_t *dest, int stride,
   if (tx_type == DCT_DCT) {
     vp9_idct_add(input, dest, stride, eob);
   } else {
-    DECLARE_ALIGNED_ARRAY(16, int16_t, output, 16);
-
-    vp9_short_iht4x4(input, output, 4, tx_type);
+    vp9_short_iht4x4_add(input, dest, stride, tx_type);
     vpx_memset(input, 0, 32);
-    vp9_add_residual_4x4(output, dest, stride);
   }
 }
 
@@ -154,13 +134,9 @@ void vp9_iht_add_8x8_c(TX_TYPE tx_type, int16_t *input, uint8_t *dest,
 }
 
 void vp9_idct_add_c(int16_t *input, uint8_t *dest, int stride, int eob) {
-  DECLARE_ALIGNED_ARRAY(16, int16_t, output, 16);
-
   if (eob > 1) {
-    // the idct halves ( >> 1) the pitch
-    vp9_short_idct4x4(input, output, 4 << 1);
+    vp9_short_idct4x4_add(input, dest, stride);
     vpx_memset(input, 0, 32);
-    vp9_add_residual_4x4(output, dest, stride);
   } else {
     vp9_dc_only_idct_add(input[0], dest, dest, stride, stride);
     ((int *)input)[0] = 0;
@@ -168,38 +144,27 @@ void vp9_idct_add_c(int16_t *input, uint8_t *dest, int stride, int eob) {
 }
 
 void vp9_dc_idct_add_c(int16_t *input, uint8_t *dest, int stride, int dc) {
-  DECLARE_ALIGNED_ARRAY(16, int16_t, output, 16);
-
   input[0] = dc;
-
-  // the idct halves ( >> 1) the pitch
-  vp9_short_idct4x4(input, output, 4 << 1);
+  vp9_short_idct4x4_add(input, dest, stride);
   vpx_memset(input, 0, 32);
-  vp9_add_residual_4x4(output, dest, stride);
 }
 
 void vp9_idct_add_lossless_c(int16_t *input, uint8_t *dest, int stride,
                              int eob) {
-  DECLARE_ALIGNED_ARRAY(16, int16_t, output, 16);
-
   if (eob > 1) {
-    vp9_short_iwalsh4x4_c(input, output, 4 << 1);
+    vp9_short_iwalsh4x4_add(input, dest, stride);
     vpx_memset(input, 0, 32);
-    vp9_add_residual_4x4(output, dest, stride);
   } else {
-    vp9_dc_only_inv_walsh_add(input[0], dest, dest, stride, stride);
+    vp9_short_iwalsh4x4_1_add_c(input, dest, stride);
     ((int *)input)[0] = 0;
   }
 }
 
 void vp9_dc_idct_add_lossless_c(int16_t *input, uint8_t *dest,
                                 int stride, int dc) {
-  DECLARE_ALIGNED_ARRAY(16, int16_t, output, 16);
-
   input[0] = dc;
-  vp9_short_iwalsh4x4_c(input, output, 4 << 1);
+  vp9_short_iwalsh4x4_add(input, dest, stride);
   vpx_memset(input, 0, 32);
-  vp9_add_residual_4x4(output, dest, stride);
 }
 
 void vp9_idct_add_8x8_c(int16_t *input, uint8_t *dest, int stride, int eob) {

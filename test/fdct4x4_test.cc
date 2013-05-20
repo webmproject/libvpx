@@ -96,11 +96,15 @@ TEST(Vp9Fdct4x4Test, RoundTripErrorCheck) {
   for (int i = 0; i < count_test_block; ++i) {
     int16_t test_input_block[16];
     int16_t test_temp_block[16];
-    int16_t test_output_block[16];
+    uint8_t dst[16], src[16];
 
+    for (int j = 0; j < 16; ++j) {
+      src[j] = rnd.Rand8();
+      dst[j] = rnd.Rand8();
+    }
     // Initialize a test block with input range [-255, 255].
     for (int j = 0; j < 16; ++j)
-      test_input_block[j] = rnd.Rand8() - rnd.Rand8();
+      test_input_block[j] = src[j] - dst[j];
 
     // TODO(Yaowu): this should be converted to a parameterized test
     // to test optimized versions of this function.
@@ -120,10 +124,10 @@ TEST(Vp9Fdct4x4Test, RoundTripErrorCheck) {
     }
 
     // Because the bitstream is not frozen yet, use the idct in the codebase.
-    vp9_short_idct4x4_c(test_temp_block, test_output_block, pitch);
+    vp9_short_idct4x4_add_c(test_temp_block, dst, 4);
 
     for (int j = 0; j < 16; ++j) {
-      const int diff = test_input_block[j] - test_output_block[j];
+      const int diff = dst[j] - src[j];
       const int error = diff * diff;
       if (max_error < error)
         max_error = error;
