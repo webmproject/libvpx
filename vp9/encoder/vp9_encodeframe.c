@@ -1614,11 +1614,20 @@ static void sum_intra_stats(VP9_COMP *cpi, MACROBLOCK *x) {
   }
     ++cpi->y_uv_mode_count[m][uvm];
   if (m == I4X4_PRED) {
-    int b = 0;
-    do {
-      int m = xd->mode_info_context->bmi[b].as_mode.first;
-      ++cpi->bmode_count[m];
-    } while (++b < 4);
+    int idx, idy;
+    int bw = 1 << b_width_log2(xd->mode_info_context->mbmi.sb_type);
+    int bh = 1 << b_height_log2(xd->mode_info_context->mbmi.sb_type);
+    // FIXME(jingning): fix intra4x4 rate-distortion optimization, then
+    // use bw and bh as the increment values.
+#if !CONFIG_AB4X4 || CONFIG_AB4X4
+    bw = 1, bh = 1;
+#endif
+    for (idy = 0; idy < 2; idy += bh) {
+      for (idx = 0; idx < 2; idx += bw) {
+        int m = xd->mode_info_context->bmi[idy * 2 + idx].as_mode.first;
+        ++cpi->sb_ymode_count[m];
+      }
+    }
   }
 }
 

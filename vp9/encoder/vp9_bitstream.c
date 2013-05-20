@@ -269,10 +269,11 @@ static void write_uv_mode(vp9_writer *bc, int m, const vp9_prob *p) {
   write_token(bc, vp9_uv_mode_tree, p, vp9_uv_mode_encodings + m);
 }
 
-
+#if !CONFIG_AB4X4
 static void write_bmode(vp9_writer *bc, int m, const vp9_prob *p) {
   write_token(bc, vp9_bmode_tree, p, vp9_bmode_encodings + m);
 }
+#endif
 
 static void write_kf_bmode(vp9_writer *bc, int m, const vp9_prob *p) {
   write_token(bc, vp9_kf_bmode_tree, p, vp9_kf_bmode_encodings + m);
@@ -630,11 +631,18 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, MODE_INFO *m,
 #else
     if (mode == I4X4_PRED) {
 #endif
-      int j = 0;
-      do {
-        write_bmode(bc, m->bmi[j].as_mode.first,
-                    pc->fc.bmode_prob);
-      } while (++j < 4);
+      int idx, idy;
+      int bw = 1 << b_width_log2(mi->sb_type);
+      int bh = 1 << b_height_log2(mi->sb_type);
+      // FIXME(jingning): fix intra4x4 rate-distortion optimization, then
+      // use bw and bh as the increment values.
+#if !CONFIG_AB4X4 || CONFIG_AB4X4
+      bw = 1, bh = 1;
+#endif
+      for (idy = 0; idy < 2; idy += bh)
+        for (idx = 0; idx < 2; idx += bw)
+          write_sb_ymode(bc, m->bmi[idy * 2 + idx].as_mode.first,
+                         pc->fc.sb_ymode_prob);
     }
     write_uv_mode(bc, mi->uv_mode,
                   pc->fc.uv_mode_prob[mode]);
@@ -777,7 +785,6 @@ static void write_mb_modes_kf(const VP9_COMP *cpi,
                               vp9_writer *bc, int mi_row, int mi_col) {
   const VP9_COMMON *const c = &cpi->common;
   const MACROBLOCKD *const xd = &cpi->mb.e_mbd;
-  const int mis = c->mode_info_stride;
   const int ym = m->mbmi.mode;
   const int segment_id = m->mbmi.segment_id;
   int skip_coeff;
@@ -807,19 +814,18 @@ static void write_mb_modes_kf(const VP9_COMP *cpi,
 #else
   if (ym == I4X4_PRED) {
 #endif
-    int i = 0;
-    do {
-      const B_PREDICTION_MODE a = above_block_mode(m, i, mis);
-      const B_PREDICTION_MODE l = (xd->left_available ||
-                                  (i & 1)) ?
-                                  left_block_mode(m, i) : B_DC_PRED;
-      const int bm = m->bmi[i].as_mode.first;
-
-/*#ifdef ENTROPY_STATS
-      ++intra_mode_stats [A] [L] [bm];
-#endif*/
-      write_kf_bmode(bc, bm, c->kf_bmode_prob[a][l]);
-    } while (++i < 4);
+    int idx, idy;
+    int bw = 1 << b_width_log2(m->mbmi.sb_type);
+    int bh = 1 << b_height_log2(m->mbmi.sb_type);
+    // FIXME(jingning): fix intra4x4 rate-distortion optimization, then
+    // use bw and bh as the increment values.
+#if !CONFIG_AB4X4 || CONFIG_AB4X4
+    bw = 1, bh = 1;
+#endif
+    for (idy = 0; idy < 2; idy += bh)
+      for (idx = 0; idx < 2; idx += bw)
+        sb_kfwrite_ymode(bc, m->bmi[idy * 2 + idx].as_mode.first,
+                         c->sb_kf_ymode_prob[c->kf_ymode_probs_index]);
   }
 
   write_uv_mode(bc, m->mbmi.uv_mode, c->kf_uv_mode_prob[ym]);
