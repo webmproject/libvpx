@@ -86,13 +86,6 @@ void vp9_short_iwalsh4x4_1_add_c(int16_t *in, uint8_t *dest, int dest_stride) {
   }
 }
 
-void vp9_dc_only_inv_walsh_add_c(int input_dc, uint8_t *pred_ptr,
-                                 uint8_t *dst_ptr,
-                                 int pitch, int stride) {
-  int16_t dc = input_dc;
-  vp9_short_iwalsh4x4_1_add_c(&dc, dst_ptr, stride);
-}
-
 void vp9_idct4_1d_c(int16_t *input, int16_t *output) {
   int16_t step[4];
   int temp1, temp2;

@@ -35,8 +35,6 @@ VP9_DX_SRCS-yes += decoder/vp9_idct_blk.h
 
 VP9_DX_SRCS-yes := $(filter-out $(VP9_DX_SRCS_REMOVE-yes),$(VP9_DX_SRCS-yes))
 
-VP9_DX_SRCS-$(HAVE_SSE2) += decoder/x86/vp9_idct_blk_sse2.c
-
 VP9_DX_SRCS-$(HAVE_SSE2) += decoder/x86/vp9_dequantize_sse2.c
 
 $(eval $(call asm_offsets_template,\

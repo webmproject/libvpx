@@ -86,7 +86,6 @@ VP9_COMMON_SRCS-$(CONFIG_POSTPROC) += common/vp9_postproc.c
 VP9_COMMON_SRCS-$(HAVE_MMX) += common/x86/vp9_iwalsh_mmx.asm
 VP9_COMMON_SRCS-$(HAVE_MMX) += common/x86/vp9_recon_mmx.asm
 VP9_COMMON_SRCS-$(HAVE_MMX) += common/x86/vp9_loopfilter_mmx.asm
-VP9_COMMON_SRCS-$(HAVE_SSE2) += common/x86/vp9_idct_sse2.asm
 VP9_COMMON_SRCS-$(HAVE_SSE2) += common/x86/vp9_iwalsh_sse2.asm
 VP9_COMMON_SRCS-$(HAVE_SSE2) += common/x86/vp9_loopfilter_sse2.asm
 VP9_COMMON_SRCS-$(HAVE_SSE2) += common/x86/vp9_recon_sse2.asm
