@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAYX//+CQ\u003d",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 3
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 1002325
+      },
+      "writtenOn": "2013-05-21T22:49:12Z",
+      "side": 1,
+      "message": "I think MSVS normally uses .asm, but I think that could end up pretty messy, to distinguish the converted form (.asm.asm) from the original (.asm).",
+      "parentUuid": "AAAAYX//+Go\u003d",
+      "revId": "ce509bf0d5d1cd517d092e093c9496d9752889b2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAYX//+Gc\u003d",
         "filename": "/COMMIT_MSG",
         "patchSetId": 3
@@ -30,6 +48,24 @@
       "writtenOn": "2013-05-21T22:38:09Z",
       "side": 1,
       "message": "I guess that means changing the source files does not trigger the script, but I agree that it\u0027s acceptable.",
+      "revId": "ce509bf0d5d1cd517d092e093c9496d9752889b2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAYX//+Bw\u003d",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 3
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1002325
+      },
+      "writtenOn": "2013-05-21T22:49:12Z",
+      "side": 1,
+      "message": "Well, if you edit the original sources, the converted ones should be updated if you rerun \u0027make\u0027. (But if you\u0027ve loaded the visual studio project, you probably won\u0027t be rerunning make too often.) If you change the files within visual studio, you\u0027ll just touch the converted copy. Not ideal but probably the most straightforward solution, short of architecting something even bigger.",
+      "parentUuid": "AAAAYX//+Gc\u003d",
       "revId": "ce509bf0d5d1cd517d092e093c9496d9752889b2",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAYX//+Bo\u003d",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 3
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1002325
+      },
+      "writtenOn": "2013-05-21T22:49:12Z",
+      "side": 1,
+      "message": "Right, good to know. It might be good to disable those tests in this case. Other than that, things work just fine if building e.g. the vpx or vpxenc/dec targets, as long as you don\u0027t try to build the full solution.",
+      "parentUuid": "AAAAYX//+G0\u003d",
+      "revId": "ce509bf0d5d1cd517d092e093c9496d9752889b2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAYX//+GA\u003d",
         "filename": "build/make/Makefile",
         "patchSetId": 3
@@ -64,6 +118,24 @@
       "writtenOn": "2013-05-21T22:38:09Z",
       "side": 1,
       "message": "Is obj_int_extract functional for this? It\u0027s never been tested. If the encoder builds and runs, that should be enough confirmation for now.",
+      "revId": "ce509bf0d5d1cd517d092e093c9496d9752889b2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAYX//+Bg\u003d",
+        "filename": "build/make/Makefile",
+        "patchSetId": 3
+      },
+      "lineNbr": 379,
+      "author": {
+        "id": 1002325
+      },
+      "writtenOn": "2013-05-21T22:49:12Z",
+      "side": 1,
+      "message": "Yeah, the encoder builds and runs just fine (encoding one single frame).",
+      "parentUuid": "AAAAYX//+GA\u003d",
       "revId": "ce509bf0d5d1cd517d092e093c9496d9752889b2",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAYX//+A4\u003d",
+        "filename": "build/make/gen_msvs_vcxproj.sh",
+        "patchSetId": 3
+      },
+      "lineNbr": 158,
+      "author": {
+        "id": 1002325
+      },
+      "writtenOn": "2013-05-21T22:49:12Z",
+      "side": 1,
+      "message": "Hmm, good catch. IIRC, right now there\u0027s a vpx_config.asm that gets included that trigger this even if most of the files are named *.s - I\u0027ll amend this.",
+      "parentUuid": "AAAAYX//+Cw\u003d",
+      "revId": "ce509bf0d5d1cd517d092e093c9496d9752889b2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAYX//+DQ\u003d",
         "filename": "libs.mk",
         "patchSetId": 3
@@ -98,6 +188,24 @@
       "writtenOn": "2013-05-21T22:38:09Z",
       "side": 1,
       "message": "Does this break x86? We still expect those files to retain the .asm extension.",
+      "revId": "ce509bf0d5d1cd517d092e093c9496d9752889b2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAYX//+Aw\u003d",
+        "filename": "libs.mk",
+        "patchSetId": 3
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1002325
+      },
+      "writtenOn": "2013-05-21T22:49:12Z",
+      "side": 1,
+      "message": "It shouldn\u0027t break x86, since it\u0027s all within the ARCH_ARM section. I\u0027m pretty sure I tested building for x86 with this patchset applied.",
+      "parentUuid": "AAAAYX//+DQ\u003d",
       "revId": "ce509bf0d5d1cd517d092e093c9496d9752889b2",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
