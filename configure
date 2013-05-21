@@ -247,7 +247,6 @@ EXPERIMENT_LIST="
     non420
     alpha
     ab4x4
-    comp_inter_joint_search
 "
 CONFIG_LIST="
     external_build
