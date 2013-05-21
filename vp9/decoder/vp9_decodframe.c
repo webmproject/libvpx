@@ -1006,14 +1006,10 @@ int vp9_decode_frame(VP9D_COMP *pbi, const uint8_t **p_data_end) {
                  pc->uv_dc_delta_q == 0 &&
                  pc->uv_ac_delta_q == 0;
   if (xd->lossless) {
-    xd->inv_txm4x4_1      = vp9_short_iwalsh4x4_1;
-    xd->inv_txm4x4        = vp9_short_iwalsh4x4;
     xd->itxm_add          = vp9_idct_add_lossless_c;
     xd->itxm_add_y_block  = vp9_idct_add_y_block_lossless_c;
     xd->itxm_add_uv_block = vp9_idct_add_uv_block_lossless_c;
   } else {
-    xd->inv_txm4x4_1      = vp9_short_idct4x4_1;
-    xd->inv_txm4x4        = vp9_short_idct4x4;
     xd->itxm_add          = vp9_idct_add;
     xd->itxm_add_y_block  = vp9_idct_add_y_block;
     xd->itxm_add_uv_block = vp9_idct_add_uv_block;

@@ -15,7 +15,6 @@
 #include "vpx/vpx_integer.h"
 #include "vp9/common/vp9_blockd.h"
 
-void vp9_inverse_transform_b_4x4(MACROBLOCKD *xd, int eob,
-                                 int16_t *dqcoeff, int16_t *diff,
-                                 int pitch);
+void vp9_inverse_transform_b_4x4_add(MACROBLOCKD *xd, int eob, int16_t *dqcoeff,
+                                     uint8_t *dest, int stride);
 #endif  // VP9_COMMON_VP9_INVTRANS_H_

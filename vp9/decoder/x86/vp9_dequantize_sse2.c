@@ -15,49 +15,6 @@
 #include "vp9/common/vp9_common.h"
 #include "vp9/common/vp9_idct.h"
 
-void vp9_add_residual_4x4_sse2(const int16_t *diff, uint8_t *dest, int stride) {
-  const int width = 4;
-  const __m128i zero = _mm_setzero_si128();
-
-  // Diff data
-  const __m128i d0 = _mm_loadl_epi64((const __m128i *)(diff + 0 * width));
-  const __m128i d1 = _mm_loadl_epi64((const __m128i *)(diff + 1 * width));
-  const __m128i d2 = _mm_loadl_epi64((const __m128i *)(diff + 2 * width));
-  const __m128i d3 = _mm_loadl_epi64((const __m128i *)(diff + 3 * width));
-
-  // Prediction data.
-  __m128i p0 = _mm_cvtsi32_si128(*(const int *)(dest + 0 * stride));
-  __m128i p1 = _mm_cvtsi32_si128(*(const int *)(dest + 1 * stride));
-  __m128i p2 = _mm_cvtsi32_si128(*(const int *)(dest + 2 * stride));
-  __m128i p3 = _mm_cvtsi32_si128(*(const int *)(dest + 3 * stride));
-
-  p0 = _mm_unpacklo_epi8(p0, zero);
-  p1 = _mm_unpacklo_epi8(p1, zero);
-  p2 = _mm_unpacklo_epi8(p2, zero);
-  p3 = _mm_unpacklo_epi8(p3, zero);
-
-  p0 = _mm_add_epi16(p0, d0);
-  p1 = _mm_add_epi16(p1, d1);
-  p2 = _mm_add_epi16(p2, d2);
-  p3 = _mm_add_epi16(p3, d3);
-
-  p0 = _mm_packus_epi16(p0, p1);
-  p2 = _mm_packus_epi16(p2, p3);
-
-  *(int *)dest = _mm_cvtsi128_si32(p0);
-  dest += stride;
-
-  p0 = _mm_srli_si128(p0, 8);
-  *(int *)dest = _mm_cvtsi128_si32(p0);
-  dest += stride;
-
-  *(int *)dest = _mm_cvtsi128_si32(p2);
-  dest += stride;
-
-  p2 = _mm_srli_si128(p2, 8);
-  *(int *)dest = _mm_cvtsi128_si32(p2);
-}
-
 void vp9_add_constant_residual_8x8_sse2(const int16_t diff, uint8_t *dest,
                                         int stride) {
   uint8_t abs_diff;

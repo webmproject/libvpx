@@ -391,8 +391,8 @@ typedef struct macroblockd {
 
   int lossless;
   /* Inverse transform function pointers. */
-  void (*inv_txm4x4_1)(int16_t *input, int16_t *output, int pitch);
-  void (*inv_txm4x4)(int16_t *input, int16_t *output, int pitch);
+  void (*inv_txm4x4_1_add)(int16_t *input, uint8_t *dest, int stride);
+  void (*inv_txm4x4_add)(int16_t *input, uint8_t *dest, int stride);
   void (*itxm_add)(int16_t *input, uint8_t *dest, int stride, int eob);
   void (*itxm_add_y_block)(int16_t *q, uint8_t *dst, int stride,
     struct macroblockd *xd);

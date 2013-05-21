@@ -1178,11 +1178,11 @@ void vp9_change_config(VP9_PTR ptr, VP9_CONFIG *oxcf) {
 
   cpi->oxcf.lossless = oxcf->lossless;
   if (cpi->oxcf.lossless) {
-    cpi->mb.e_mbd.inv_txm4x4_1 = vp9_short_iwalsh4x4_1;
-    cpi->mb.e_mbd.inv_txm4x4   = vp9_short_iwalsh4x4;
+    cpi->mb.e_mbd.inv_txm4x4_1_add    = vp9_short_iwalsh4x4_1_add;
+    cpi->mb.e_mbd.inv_txm4x4_add      = vp9_short_iwalsh4x4_add;
   } else {
-    cpi->mb.e_mbd.inv_txm4x4_1 = vp9_short_idct4x4_1;
-    cpi->mb.e_mbd.inv_txm4x4   = vp9_short_idct4x4;
+    cpi->mb.e_mbd.inv_txm4x4_1_add    = vp9_short_idct4x4_1_add;
+    cpi->mb.e_mbd.inv_txm4x4_add      = vp9_short_idct4x4_add;
   }
 
   cpi->baseline_gf_interval = DEFAULT_GF_INTERVAL;

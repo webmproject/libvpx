@@ -53,9 +53,6 @@ static void encode_intra4x4block(MACROBLOCK *x, int ib,
   int16_t* const src_diff =
       raster_block_offset_int16(xd, bsize, 0, ib,
                                 x->plane[0].src_diff);
-  int16_t* const diff =
-      raster_block_offset_int16(xd, bsize, 0, ib,
-                                xd->plane[0].diff);
   int16_t* const coeff = BLOCK_OFFSET(x->plane[0].coeff, ib, 16);
   const int bwl = b_width_log2(bsize), bhl = b_height_log2(bsize);
 
@@ -72,17 +69,15 @@ static void encode_intra4x4block(MACROBLOCK *x, int ib,
   if (tx_type != DCT_DCT) {
     vp9_short_fht4x4(src_diff, coeff, 4 << bwl, tx_type);
     x->quantize_b_4x4(x, ib, tx_type, 16);
-    vp9_short_iht4x4(BLOCK_OFFSET(xd->plane[0].dqcoeff, ib, 16),
-                     diff, 4 << bwl, tx_type);
+    vp9_short_iht4x4_add(BLOCK_OFFSET(xd->plane[0].dqcoeff, ib, 16), dst,
+                         xd->plane[0].dst.stride, tx_type);
   } else {
     x->fwd_txm4x4(src_diff, coeff, 8 << bwl);
     x->quantize_b_4x4(x, ib, tx_type, 16);
-    vp9_inverse_transform_b_4x4(&x->e_mbd, xd->plane[0].eobs[ib],
+    vp9_inverse_transform_b_4x4_add(&x->e_mbd, xd->plane[0].eobs[ib],
                                 BLOCK_OFFSET(xd->plane[0].dqcoeff, ib, 16),
-                                diff, 8 << bwl);
+                                dst, xd->plane[0].dst.stride);
   }
-
-  vp9_recon_b(dst, diff, 4 << bwl, dst, xd->plane[0].dst.stride);
 }
 
 void vp9_encode_intra4x4mby(MACROBLOCK *mb, BLOCK_SIZE_TYPE bsize) {
