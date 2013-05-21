@@ -52,6 +52,24 @@
       "revId": "a33d93e90f1c08c1e7eb702222dcd1e18d576e02",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAYX//99M\u003d",
+        "filename": "nestegg/halloc/src/macros.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1002325
+      },
+      "writtenOn": "2013-05-21T23:07:24Z",
+      "side": 1,
+      "message": "Yeah, we can hold off this patch until further notice since it seems that it works just fine without it right now.",
+      "parentUuid": "AAAAYX//9+Q\u003d",
+      "revId": "a33d93e90f1c08c1e7eb702222dcd1e18d576e02",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
