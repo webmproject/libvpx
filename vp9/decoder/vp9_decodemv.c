@@ -103,7 +103,6 @@ static void kfread_modes(VP9D_COMP *pbi, MODE_INFO *m,
                          vp9_reader *r) {
   VP9_COMMON *const cm = &pbi->common;
   MACROBLOCKD *const xd = &pbi->mb;
-  const int mis = cm->mode_info_stride;
   m->mbmi.ref_frame = INTRA_FRAME;
 
   // Read segmentation map if it is being updated explicitly this frame
@@ -138,14 +137,18 @@ static void kfread_modes(VP9D_COMP *pbi, MODE_INFO *m,
 #else
   if (m->mbmi.mode == I4X4_PRED) {
 #endif
-    int i;
-    for (i = 0; i < 4; ++i) {
-      const B_PREDICTION_MODE a = above_block_mode(m, i, mis);
-      const B_PREDICTION_MODE l = xd->left_available ||
-                                  (i & 1) ?
-                                  left_block_mode(m, i) : B_DC_PRED;
-      m->bmi[i].as_mode.first = read_kf_bmode(r, cm->kf_bmode_prob[a][l]);
-    }
+    int idx, idy;
+    int bw = 1 << b_width_log2(m->mbmi.sb_type);
+    int bh = 1 << b_height_log2(m->mbmi.sb_type);
+    // FIXME(jingning): fix intra4x4 rate-distortion optimization, then
+    // use bw and bh as the increment values.
+#if !CONFIG_AB4X4 || CONFIG_AB4X4
+    bw = 1, bh = 1;
+#endif
+    for (idy = 0; idy < 2; idy += bh)
+      for (idx = 0; idx < 2; idx += bw)
+        m->bmi[idy * 2 + idx].as_mode.first =
+            read_kf_sb_ymode(r, cm->sb_kf_ymode_prob[cm->kf_ymode_probs_index]);
   }
 
   m->mbmi.uv_mode = read_uv_mode(r, cm->kf_uv_mode_prob[m->mbmi.mode]);
@@ -854,12 +857,19 @@ static void read_mb_modes_mv(VP9D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
 #else
     if (mbmi->mode == I4X4_PRED) {
 #endif
-      int j = 0;
-      do {
-        int m = read_bmode(r, cm->fc.bmode_prob);
-        mi->bmi[j].as_mode.first = m;
-        cm->fc.bmode_counts[m]++;
-      } while (++j < 4);
+      int idx, idy;
+      // FIXME(jingning): fix intra4x4 rate-distortion optimization, then
+      // use bw and bh as the increment values.
+#if !CONFIG_AB4X4 || CONFIG_AB4X4
+      bw = 1, bh = 1;
+#endif
+      for (idy = 0; idy < 2; idy += bh) {
+        for (idx = 0; idx < 2; idx += bw) {
+          int m = read_sb_ymode(r, cm->fc.sb_ymode_prob);
+          mi->bmi[idy * 2 + idx].as_mode.first = m;
+          cm->fc.sb_ymode_counts[m]++;
+        }
+      }
     }
 
     mbmi->uv_mode = read_uv_mode(r, cm->fc.uv_mode_prob[mbmi->mode]);
