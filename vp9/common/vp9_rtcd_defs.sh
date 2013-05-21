@@ -60,18 +60,6 @@ vp9_copy_mem8x8_dspr2=vp9_copy_mem8x8_dspr2
 prototype void vp9_copy_mem8x4 "const uint8_t *src, int src_pitch, uint8_t *dst, int dst_pitch"
 specialize vp9_copy_mem8x4 mmx
 
-prototype void vp9_recon_b "uint8_t *pred_ptr, int16_t *diff_ptr, int diff_stride, uint8_t *dst_ptr, int stride"
-specialize vp9_recon_b
-
-prototype void vp9_recon_sb "struct macroblockd *x, enum BLOCK_SIZE_TYPE bsize"
-specialize vp9_recon_sb
-
-prototype void vp9_recon_sby "struct macroblockd *x, enum BLOCK_SIZE_TYPE bsize"
-specialize vp9_recon_sby
-
-prototype void vp9_recon_sbuv "struct macroblockd *x, enum BLOCK_SIZE_TYPE bsize"
-specialize void vp9_recon_sbuv
-
 prototype void vp9_build_intra_predictors "uint8_t *src, int src_stride, uint8_t *pred, int y_stride, int mode, int bw, int bh, int up_available, int left_available, int right_available"
 specialize void vp9_build_intra_predictors
 
