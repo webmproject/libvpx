@@ -3080,28 +3080,12 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
       mbmi->mode = this_mode;
     } else {
       YV12_BUFFER_CONFIG *scaled_ref_frame[2] = {NULL, NULL};
-      int fb;
-
-      if (mbmi->ref_frame == LAST_FRAME) {
-        fb = cpi->lst_fb_idx;
-      } else if (mbmi->ref_frame == GOLDEN_FRAME) {
-        fb = cpi->gld_fb_idx;
-      } else {
-        fb = cpi->alt_fb_idx;
-      }
-
+      int fb = get_ref_frame_idx(cpi, mbmi->ref_frame);
       if (cpi->scaled_ref_idx[fb] != cm->ref_frame_map[fb])
         scaled_ref_frame[0] = &cm->yv12_fb[cpi->scaled_ref_idx[fb]];
 
       if (comp_pred) {
-        if (mbmi->second_ref_frame == LAST_FRAME) {
-          fb = cpi->lst_fb_idx;
-        } else if (mbmi->second_ref_frame == GOLDEN_FRAME) {
-          fb = cpi->gld_fb_idx;
-        } else {
-          fb = cpi->alt_fb_idx;
-        }
-
+        fb = get_ref_frame_idx(cpi, mbmi->second_ref_frame);
         if (cpi->scaled_ref_idx[fb] != cm->ref_frame_map[fb])
           scaled_ref_frame[1] = &cm->yv12_fb[cpi->scaled_ref_idx[fb]];
       }

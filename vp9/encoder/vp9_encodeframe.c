@@ -1650,8 +1650,9 @@ static void encode_superblock(VP9_COMP *cpi, TOKENEXTRA **t,
   MACROBLOCK *const x = &cpi->mb;
   MACROBLOCKD *const xd = &x->e_mbd;
   int n;
-  MODE_INFO *mi = x->e_mbd.mode_info_context;
-  unsigned int segment_id = mi->mbmi.segment_id;
+  MODE_INFO *mi = xd->mode_info_context;
+  MB_MODE_INFO *mbmi = &mi->mbmi;
+  unsigned int segment_id = mbmi->segment_id;
   const int mis = cm->mode_info_stride;
   const int bwl = mi_width_log2(bsize);
   const int bw = 1 << bwl, bh = 1 << mi_height_log2(bsize);
@@ -1662,7 +1663,7 @@ static void encode_superblock(VP9_COMP *cpi, TOKENEXTRA **t,
       vp9_update_zbin_extra(cpi, x);
     }
   } else {
-    vp9_setup_interp_filters(xd, xd->mode_info_context->mbmi.interp_filter, cm);
+    vp9_setup_interp_filters(xd, mbmi->interp_filter, cm);
 
     if (cpi->oxcf.tuning == VP8_TUNE_SSIM) {
       // Adjust the zbin based on this MB rate.
@@ -1673,13 +1674,13 @@ static void encode_superblock(VP9_COMP *cpi, TOKENEXTRA **t,
     // Increase zbin size to suppress noise
     cpi->zbin_mode_boost = 0;
     if (cpi->zbin_mode_boost_enabled) {
-      if (xd->mode_info_context->mbmi.ref_frame != INTRA_FRAME) {
-        if (xd->mode_info_context->mbmi.mode == ZEROMV) {
-          if (xd->mode_info_context->mbmi.ref_frame != LAST_FRAME)
+      if (mbmi->ref_frame != INTRA_FRAME) {
+        if (mbmi->mode == ZEROMV) {
+          if (mbmi->ref_frame != LAST_FRAME)
             cpi->zbin_mode_boost = GF_ZEROMV_ZBIN_BOOST;
           else
             cpi->zbin_mode_boost = LF_ZEROMV_ZBIN_BOOST;
-        } else if (xd->mode_info_context->mbmi.mode == SPLITMV) {
+        } else if (mbmi->mode == SPLITMV) {
           cpi->zbin_mode_boost = SPLIT_MV_ZBIN_BOOST;
         } else {
           cpi->zbin_mode_boost = MV_ZBIN_BOOST;
@@ -1693,73 +1694,60 @@ static void encode_superblock(VP9_COMP *cpi, TOKENEXTRA **t,
   }
 
 #if CONFIG_AB4X4
-  if (xd->mode_info_context->mbmi.ref_frame == INTRA_FRAME &&
+  if (mbmi->ref_frame == INTRA_FRAME &&
       bsize < BLOCK_SIZE_SB8X8) {
 #else
-  if (xd->mode_info_context->mbmi.mode == I4X4_PRED) {
-    assert(bsize == BLOCK_SIZE_SB8X8 &&
-           xd->mode_info_context->mbmi.txfm_size == TX_4X4);
+  if (mbmi->mode == I4X4_PRED) {
+    assert(bsize == BLOCK_SIZE_SB8X8 && mbmi->txfm_size == TX_4X4);
 #endif
     vp9_encode_intra4x4mby(x, BLOCK_SIZE_SB8X8);
-    vp9_build_intra_predictors_sbuv_s(&x->e_mbd, BLOCK_SIZE_SB8X8);
+    vp9_build_intra_predictors_sbuv_s(xd, BLOCK_SIZE_SB8X8);
     vp9_encode_sbuv(cm, x, BLOCK_SIZE_SB8X8);
 
     if (output_enabled)
       sum_intra_stats(cpi, x);
-  } else if (xd->mode_info_context->mbmi.ref_frame == INTRA_FRAME) {
-    vp9_build_intra_predictors_sby_s(&x->e_mbd, bsize);
-    vp9_build_intra_predictors_sbuv_s(&x->e_mbd, bsize);
+  } else if (mbmi->ref_frame == INTRA_FRAME) {
+    vp9_build_intra_predictors_sby_s(xd, bsize);
+    vp9_build_intra_predictors_sbuv_s(xd, bsize);
     if (output_enabled)
       sum_intra_stats(cpi, x);
   } else {
-    int ref_fb_idx, second_ref_fb_idx;
+    int idx = cm->ref_frame_map[get_ref_frame_idx(cpi, mbmi->ref_frame)];
+    YV12_BUFFER_CONFIG *ref_fb = &cm->yv12_fb[idx];
+    YV12_BUFFER_CONFIG *second_ref_fb = NULL;
+    if (mbmi->second_ref_frame > 0) {
+      idx = cm->ref_frame_map[get_ref_frame_idx(cpi, mbmi->second_ref_frame)];
+      second_ref_fb = &cm->yv12_fb[idx];
+    }
 
     assert(cm->frame_type != KEY_FRAME);
 
-    if (xd->mode_info_context->mbmi.ref_frame == LAST_FRAME)
-      ref_fb_idx = cpi->common.ref_frame_map[cpi->lst_fb_idx];
-    else if (xd->mode_info_context->mbmi.ref_frame == GOLDEN_FRAME)
-      ref_fb_idx = cpi->common.ref_frame_map[cpi->gld_fb_idx];
-    else
-      ref_fb_idx = cpi->common.ref_frame_map[cpi->alt_fb_idx];
-
-    if (xd->mode_info_context->mbmi.second_ref_frame > 0) {
-      if (xd->mode_info_context->mbmi.second_ref_frame == LAST_FRAME)
-        second_ref_fb_idx = cpi->common.ref_frame_map[cpi->lst_fb_idx];
-      else if (xd->mode_info_context->mbmi.second_ref_frame == GOLDEN_FRAME)
-        second_ref_fb_idx = cpi->common.ref_frame_map[cpi->gld_fb_idx];
-      else
-        second_ref_fb_idx = cpi->common.ref_frame_map[cpi->alt_fb_idx];
-    }
-
-    setup_pre_planes(xd,
-        &cpi->common.yv12_fb[ref_fb_idx],
-        xd->mode_info_context->mbmi.second_ref_frame > 0
-            ? &cpi->common.yv12_fb[second_ref_fb_idx] : NULL,
-        mi_row, mi_col, xd->scale_factor, xd->scale_factor_uv);
+    setup_pre_planes(xd, ref_fb, second_ref_fb,
+                     mi_row, mi_col, xd->scale_factor, xd->scale_factor_uv);
 
     vp9_build_inter_predictors_sb(xd, mi_row, mi_col,
-                     (bsize < BLOCK_SIZE_SB8X8) ? BLOCK_SIZE_SB8X8 : bsize);
+                                  bsize < BLOCK_SIZE_SB8X8 ? BLOCK_SIZE_SB8X8
+                                                           : bsize);
   }
 
 #if CONFIG_AB4X4
-  if (xd->mode_info_context->mbmi.ref_frame == INTRA_FRAME &&
+  if (mbmi->ref_frame == INTRA_FRAME &&
       bsize < BLOCK_SIZE_SB8X8) {
 #else
-  if (xd->mode_info_context->mbmi.mode == I4X4_PRED) {
+  if (mbmi->mode == I4X4_PRED) {
     assert(bsize == BLOCK_SIZE_SB8X8);
 #endif
-    vp9_tokenize_sb(cpi, &x->e_mbd, t, !output_enabled, BLOCK_SIZE_SB8X8);
+    vp9_tokenize_sb(cpi, xd, t, !output_enabled, BLOCK_SIZE_SB8X8);
   } else if (!x->skip) {
     vp9_encode_sb(cm, x, (bsize < BLOCK_SIZE_SB8X8) ? BLOCK_SIZE_SB8X8 : bsize);
-    vp9_tokenize_sb(cpi, &x->e_mbd, t, !output_enabled,
+    vp9_tokenize_sb(cpi, xd, t, !output_enabled,
                     (bsize < BLOCK_SIZE_SB8X8) ? BLOCK_SIZE_SB8X8 : bsize);
   } else {
     // FIXME(rbultje): not tile-aware (mi - 1)
     int mb_skip_context =
         (mi - 1)->mbmi.mb_skip_coeff + (mi - mis)->mbmi.mb_skip_coeff;
 
-    xd->mode_info_context->mbmi.mb_skip_coeff = 1;
+    mbmi->mb_skip_coeff = 1;
     if (output_enabled)
       cpi->skip_true_count[mb_skip_context]++;
     vp9_reset_sb_tokens_context(xd,
@@ -1776,14 +1764,14 @@ static void encode_superblock(VP9_COMP *cpi, TOKENEXTRA **t,
 
   if (output_enabled) {
     if (cm->txfm_mode == TX_MODE_SELECT &&
-        !(mi->mbmi.mb_skip_coeff ||
+        !(mbmi->mb_skip_coeff ||
           vp9_segfeature_active(xd, segment_id, SEG_LVL_SKIP))) {
       if (bsize >= BLOCK_SIZE_SB32X32) {
-        cpi->txfm_count_32x32p[mi->mbmi.txfm_size]++;
+        cpi->txfm_count_32x32p[mbmi->txfm_size]++;
       } else if (bsize >= BLOCK_SIZE_MB16X16) {
-        cpi->txfm_count_16x16p[mi->mbmi.txfm_size]++;
+        cpi->txfm_count_16x16p[mbmi->txfm_size]++;
       } else {
-        cpi->txfm_count_8x8p[mi->mbmi.txfm_size]++;
+        cpi->txfm_count_8x8p[mbmi->txfm_size]++;
       }
     } else {
       int x, y;
@@ -1796,8 +1784,8 @@ static void encode_superblock(VP9_COMP *cpi, TOKENEXTRA **t,
 #if CONFIG_AB4X4
       if (sz == TX_8X8 && bsize < BLOCK_SIZE_SB8X8)
 #else
-      if (sz == TX_8X8 && (xd->mode_info_context->mbmi.mode == SPLITMV ||
-                           xd->mode_info_context->mbmi.mode == I4X4_PRED))
+      if (sz == TX_8X8 && (mbmi->mode == SPLITMV ||
+                           mbmi->mode == I4X4_PRED))
 #endif
         sz = TX_4X4;
 
