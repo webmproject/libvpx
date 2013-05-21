@@ -258,9 +258,6 @@ void vp9_initialize_enc() {
     init_done = 1;
   }
 }
-#ifdef PACKET_TESTING
-extern FILE *vpxlogc;
-#endif
 
 static void setup_features(VP9_COMP *cpi) {
   MACROBLOCKD *xd = &cpi->mb.e_mbd;

@@ -224,7 +224,7 @@ static vpx_codec_err_t vp8_peek_si(const uint8_t         *data,
     si->is_kf = 0;
 
     if (data_sz >= 10 && !(data[0] & 0x01)) { /* I-Frame */
-      const uint8_t *c = data + 3;
+      const uint8_t *c = data + HEADER_SIZE_IN_BYTES;
       si->is_kf = 1;
 
       /* vet via sync code */

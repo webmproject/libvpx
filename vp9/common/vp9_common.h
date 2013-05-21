@@ -60,4 +60,8 @@ static INLINE int multiple16(int value) {
   return (value + 15) & ~15;
 }
 
+// TODO(dkovalev): remove later
+#define HEADER_SIZE_IN_BYTES 4
+
+
 #endif  // VP9_COMMON_VP9_COMMON_H_

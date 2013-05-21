@@ -38,7 +38,6 @@ VP9_COMMON_SRCS-yes += common/vp9_entropymv.h
 VP9_COMMON_SRCS-yes += common/vp9_enums.h
 VP9_COMMON_SRCS-yes += common/vp9_extend.h
 VP9_COMMON_SRCS-yes += common/vp9_findnearmv.h
-VP9_COMMON_SRCS-yes += common/vp9_header.h
 VP9_COMMON_SRCS-yes += common/vp9_idct.h
 VP9_COMMON_SRCS-yes += common/vp9_invtrans.h
 VP9_COMMON_SRCS-yes += common/vp9_loopfilter.h

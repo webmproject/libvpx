@@ -10,29 +10,31 @@
 
 #include <assert.h>
 
-#include "vp9/decoder/vp9_onyxd_int.h"
+#include "./vp9_rtcd.h"
+
+#include "vpx_scale/vpx_scale.h"
+#include "vpx_mem/vpx_mem.h"
+
 #include "vp9/common/vp9_common.h"
-#include "vp9/common/vp9_header.h"
 #include "vp9/common/vp9_reconintra.h"
 #include "vp9/common/vp9_reconinter.h"
 #include "vp9/common/vp9_entropy.h"
-#include "vp9/decoder/vp9_decodframe.h"
-#include "vp9/decoder/vp9_detokenize.h"
 #include "vp9/common/vp9_invtrans.h"
 #include "vp9/common/vp9_alloccommon.h"
 #include "vp9/common/vp9_entropymode.h"
 #include "vp9/common/vp9_quant_common.h"
-#include "vpx_scale/vpx_scale.h"
-
-#include "vp9/decoder/vp9_decodemv.h"
 #include "vp9/common/vp9_extend.h"
 #include "vp9/common/vp9_modecont.h"
-#include "vpx_mem/vpx_mem.h"
-#include "vp9/decoder/vp9_dboolhuff.h"
-
 #include "vp9/common/vp9_seg_common.h"
 #include "vp9/common/vp9_tile_common.h"
-#include "vp9_rtcd.h"
+
+#include "vp9/decoder/vp9_decodemv.h"
+#include "vp9/decoder/vp9_dboolhuff.h"
+#include "vp9/decoder/vp9_read_bit_buffer.h"
+#include "vp9/decoder/vp9_onyxd_int.h"
+#include "vp9/decoder/vp9_decodframe.h"
+#include "vp9/decoder/vp9_detokenize.h"
+
 
 // #define DEC_DEBUG
 #ifdef DEC_DEBUG
@@ -933,7 +935,7 @@ static void decode_tiles(VP9D_COMP *pbi,
 int vp9_decode_frame(VP9D_COMP *pbi, const uint8_t **p_data_end) {
   vp9_reader header_bc, residual_bc;
   VP9_COMMON *const pc = &pbi->common;
-  MACROBLOCKD *const xd  = &pbi->mb;
+  MACROBLOCKD *const xd = &pbi->mb;
   const uint8_t *data = pbi->source;
   const uint8_t *data_end = data + pbi->source_sz;
   size_t first_partition_size = 0;
@@ -943,24 +945,40 @@ int vp9_decode_frame(VP9D_COMP *pbi, const uint8_t **p_data_end) {
   xd->corrupted = 0;  // start with no corruption of current frame
   new_fb->corrupted = 0;
 
+
+
   if (data_end - data < 3) {
     vpx_internal_error(&pc->error, VPX_CODEC_CORRUPT_FRAME, "Truncated packet");
   } else {
+    struct vp9_read_bit_buffer rb = {data, 0};
+
     int scaling_active;
     pc->last_frame_type = pc->frame_type;
-    pc->frame_type = (FRAME_TYPE)(data[0] & 1);
-    pc->version = (data[0] >> 1) & 7;
-    pc->show_frame = (data[0] >> 4) & 1;
-    scaling_active = (data[0] >> 5) & 1;
-    pc->subsampling_x = (data[0] >> 6) & 1;
-    pc->subsampling_y = (data[0] >> 7) & 1;
-    first_partition_size = read_le16(data + 1);
+
+    pc->frame_type = (FRAME_TYPE) vp9_rb_read_bit(&rb);
+    pc->version = vp9_rb_read_literal(&rb, 3);
+    pc->show_frame = vp9_rb_read_bit(&rb);
+    scaling_active = vp9_rb_read_bit(&rb);
+    pc->subsampling_x = vp9_rb_read_bit(&rb);
+    pc->subsampling_y = vp9_rb_read_bit(&rb);
+
+    pc->clr_type = (YUV_TYPE)vp9_rb_read_bit(&rb);
+    pc->error_resilient_mode = vp9_rb_read_bit(&rb);
+    if (!pc->error_resilient_mode) {
+      pc->refresh_frame_context = vp9_rb_read_bit(&rb);
+      pc->frame_parallel_decoding_mode = vp9_rb_read_bit(&rb);
+    } else {
+      pc->refresh_frame_context = 0;
+      pc->frame_parallel_decoding_mode = 1;
+    }
+
+    first_partition_size = vp9_rb_read_literal(&rb, 16);
 
     if (!read_is_valid(data, first_partition_size, data_end))
       vpx_internal_error(&pc->error, VPX_CODEC_CORRUPT_FRAME,
                          "Truncated packet or corrupt partition 0 length");
 
-    data += 3;
+    data += HEADER_SIZE_IN_BYTES;  // header size
 
     vp9_setup_version(pc);
 
@@ -993,9 +1011,6 @@ int vp9_decode_frame(VP9D_COMP *pbi, const uint8_t **p_data_end) {
   if (vp9_reader_init(&header_bc, data, first_partition_size))
     vpx_internal_error(&pc->error, VPX_CODEC_MEM_ERROR,
                        "Failed to allocate bool decoder 0");
-
-  pc->clr_type = (YUV_TYPE)vp9_read_bit(&header_bc);
-  pc->error_resilient_mode = vp9_read_bit(&header_bc);
 
   setup_loopfilter(pc, xd, &header_bc);
 
@@ -1041,14 +1056,6 @@ int vp9_decode_frame(VP9D_COMP *pbi, const uint8_t **p_data_end) {
 
     // To enable choice of different interpolation filters
     vp9_setup_interp_filters(xd, pc->mcomp_filter_type, pc);
-  }
-
-  if (!pc->error_resilient_mode) {
-    pc->refresh_frame_context = vp9_read_bit(&header_bc);
-    pc->frame_parallel_decoding_mode = vp9_read_bit(&header_bc);
-  } else {
-    pc->refresh_frame_context = 0;
-    pc->frame_parallel_decoding_mode = 1;
   }
 
   pc->frame_context_idx = vp9_read_literal(&header_bc, NUM_FRAME_CONTEXTS_LG2);
