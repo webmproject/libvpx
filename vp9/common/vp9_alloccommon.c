@@ -205,7 +205,6 @@ void vp9_create_common(VP9_COMMON *oci) {
   oci->no_lpf = 0;
   oci->use_bilinear_mc_filter = 0;
   oci->clr_type = REG_YUV;
-  oci->clamp_type = RECON_CLAMP_REQUIRED;
 
   // Initialize reference frame sign bias structure to defaults
   vpx_memset(oci->ref_frame_sign_bias, 0, sizeof(oci->ref_frame_sign_bias));
