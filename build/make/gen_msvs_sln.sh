@@ -25,7 +25,7 @@ files.
 Options:
     --help                      Print this message
     --out=outfile               Redirect output to a file
-    --ver=version               Version (7,8,9) of visual studio to generate for
+    --ver=version               Version (7,8,9,10,11) of visual studio to generate for
     --target=isa-os-cc          Target specifier
 EOF
     exit 1
@@ -55,14 +55,19 @@ indent_pop() {
 
 parse_project() {
     local file=$1
-    local name=`grep Name "$file" | awk 'BEGIN {FS="\""}{if (NR==1) print $2}'`
-    local guid=`grep ProjectGUID "$file" | awk 'BEGIN {FS="\""}{if (NR==1) print $2}'`
+    if [ "$sfx" = "vcproj" ]; then
+        local name=`grep Name "$file" | awk 'BEGIN {FS="\""}{if (NR==1) print $2}'`
+        local guid=`grep ProjectGUID "$file" | awk 'BEGIN {FS="\""}{if (NR==1) print $2}'`
+    else
+        local name=`grep RootNamespace "$file" | sed 's,.*<.*>\(.*\)</.*>.*,\1,'`
+        local guid=`grep ProjectGuid "$file" | sed 's,.*<.*>\(.*\)</.*>.*,\1,'`
+    fi
 
     # save the project GUID to a varaible, normalizing to the basename of the
     # vcproj file without the extension
     local var
     var=${file##*/}
-    var=${var%%.vcproj}
+    var=${var%%.${sfx}}
     eval "${var}_file=\"$1\""
     eval "${var}_name=$name"
     eval "${var}_guid=$guid"
@@ -83,14 +88,14 @@ process_project() {
     # vcproj file without the extension
     local var
     var=${file##*/}
-    var=${var%%.vcproj}
+    var=${var%%.${sfx}}
     eval "${var}_guid=$guid"
 
     echo "Project(\"{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}\") = \"$name\", \"$file\", \"$guid\""
     indent_push
 
     eval "local deps=\"\${${var}_deps}\""
-    if [ -n "$deps" ]; then
+    if [ -n "$deps" ] && [ "$sfx" = "vcproj" ]; then
         echo "${indent}ProjectSection(ProjectDependencies) = postProject"
         indent_push
 
@@ -221,7 +226,7 @@ for opt in "$@"; do
     ;;
     --ver=*) vs_ver="$optval"
              case $optval in
-             [789])
+             [789]|10|11)
              ;;
              *) die Unrecognized Visual Studio Version in $opt
              ;;
@@ -256,6 +261,20 @@ case "${vs_ver:-8}" in
     ;;
     9) sln_vers="10.00"
        sln_vers_str="Visual Studio 2008"
+    ;;
+    10) sln_vers="11.00"
+       sln_vers_str="Visual Studio 2010"
+    ;;
+    11) sln_vers="12.00"
+       sln_vers_str="Visual Studio 2012"
+    ;;
+esac
+case "${vs_ver:-8}" in
+    [789])
+    sfx=vcproj
+    ;;
+    10|11)
+    sfx=vcxproj
     ;;
 esac
 

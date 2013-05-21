@@ -416,6 +416,7 @@ SRC_PATH_BARE=$source_path
 BUILD_PFX=${BUILD_PFX}
 TOOLCHAIN=${toolchain}
 ASM_CONVERSION=${asm_conversion_cmd:-${source_path}/build/make/ads2gas.pl}
+GEN_VCPROJ=${gen_vcproj_cmd}
 
 CC=${CC}
 CXX=${CXX}
@@ -433,6 +434,7 @@ ASFLAGS = ${ASFLAGS}
 extralibs = ${extralibs}
 AS_SFX    = ${AS_SFX:-.asm}
 EXE_SFX   = ${EXE_SFX}
+VCPROJ_SFX = ${VCPROJ_SFX}
 RTCD_OPTIONS = ${RTCD_OPTIONS}
 EOF
 
