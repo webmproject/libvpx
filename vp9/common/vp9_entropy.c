@@ -407,7 +407,6 @@ static const vp9_prob Pcat6[] = {
   254, 254, 254, 252, 249, 243, 230, 196, 177, 153, 140, 133, 130, 129
 };
 
-#if CONFIG_MODELCOEFPROB
 const vp9_tree_index vp9_coefmodel_tree[6] = {
   -DCT_EOB_MODEL_TOKEN, 2,                      /* 0 = EOB */
   -ZERO_TOKEN, 4,                               /* 1 = ZERO */
@@ -421,6 +420,8 @@ const vp9_tree_index vp9_coefmodel_tree[6] = {
 // For a given beta and a given probablity of the 1-node, the alpha
 // is first solved, and then the {alpha, beta} pair is used to generate
 // the probabilities for the rest of the nodes.
+
+// beta = 8
 const vp9_prob vp9_modelcoefprobs_pareto8[COEFPROB_MODELS][MODEL_NODES] = {
   {   3,  86, 128,   6,  86,  23,  88,  29},
   {   9,  86, 129,  17,  88,  61,  94,  76},
@@ -529,7 +530,6 @@ void vp9_model_to_full_probs_sb(
       vp9_model_to_full_probs(model[c][p], b, r, full[c][p]);
     }
 }
-#endif
 
 static vp9_tree_index cat1[2], cat2[4], cat3[6], cat4[8], cat5[10], cat6[28];
 
@@ -766,7 +766,6 @@ void vp9_coef_tree_initialize() {
 #define COEF_COUNT_SAT_AFTER_KEY 24
 #define COEF_MAX_UPDATE_FACTOR_AFTER_KEY 128
 
-#if CONFIG_MODELCOEFPROB
 void vp9_full_to_model_counts(
     vp9_coeff_count_model *model_count, vp9_coeff_count *full_count) {
   int i, j, k, l;
@@ -789,32 +788,19 @@ void vp9_full_to_model_counts(
               full_count[i][j][k][l][DCT_EOB_TOKEN];
         }
 }
-#endif
 
 static void adapt_coef_probs(
-#if CONFIG_MODELCOEFPROB
     vp9_coeff_probs_model *dst_coef_probs,
     vp9_coeff_probs_model *pre_coef_probs,
     vp9_coeff_count_model *coef_counts,
-#else
-    vp9_coeff_probs *dst_coef_probs,
-    vp9_coeff_probs *pre_coef_probs,
-    vp9_coeff_count *coef_counts,
-#endif
     unsigned int (*eob_branch_count)[REF_TYPES][COEF_BANDS][PREV_COEF_CONTEXTS],
     int count_sat,
     int update_factor) {
   int t, i, j, k, l, count;
   int factor;
-#if CONFIG_MODELCOEFPROB
   unsigned int branch_ct[UNCONSTRAINED_NODES][2];
   vp9_prob coef_probs[UNCONSTRAINED_NODES];
   int entropy_nodes_adapt = UNCONSTRAINED_NODES;
-#else
-  unsigned int branch_ct[ENTROPY_NODES][2];
-  vp9_prob coef_probs[ENTROPY_NODES];
-  int entropy_nodes_adapt = ENTROPY_NODES;
-#endif
 
   for (i = 0; i < BLOCK_TYPES; ++i)
     for (j = 0; j < REF_TYPES; ++j)
@@ -823,11 +809,7 @@ static void adapt_coef_probs(
           if (l >= 3 && k == 0)
             continue;
           vp9_tree_probs_from_distribution(
-#if CONFIG_MODELCOEFPROB
               vp9_coefmodel_tree,
-#else
-              vp9_coef_tree,
-#endif
               coef_probs, branch_ct,
               coef_counts[i][j][k][l], 0);
           branch_ct[0][1] = eob_branch_count[i][j][k][l] - branch_ct[0][0];

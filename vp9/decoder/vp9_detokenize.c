@@ -60,7 +60,6 @@ static const vp9_prob cat6_prob[15] = {
 
 DECLARE_ALIGNED(16, extern const uint8_t, vp9_norm[256]);
 
-#if CONFIG_MODELCOEFPROB
 #define INCREMENT_COUNT(token)               \
   do {                                       \
     coef_counts[type][ref][band][pt]         \
@@ -69,14 +68,6 @@ DECLARE_ALIGNED(16, extern const uint8_t, vp9_norm[256]);
                 token]++;     \
     token_cache[scan[c]] = token; \
   } while (0)
-#else
-#define INCREMENT_COUNT(token)               \
-  do {                                       \
-    coef_counts[type][ref][band] \
-               [pt][token]++;     \
-    token_cache[scan[c]] = token; \
-  } while (0)
-#endif
 
 #define WRITE_COEF_CONTINUE(val, token)                  \
   {                                                      \
@@ -102,7 +93,6 @@ static int decode_coefs(VP9D_COMP *dx, const MACROBLOCKD *xd,
   FRAME_CONTEXT *const fc = &dx->common.fc;
   int pt, c = 0, pad, default_eob;
   int band;
-#if CONFIG_MODELCOEFPROB
   vp9_prob (*coef_probs)[PREV_COEF_CONTEXTS][UNCONSTRAINED_NODES];
   vp9_prob coef_probs_full[COEF_BANDS][PREV_COEF_CONTEXTS][ENTROPY_NODES];
   uint8_t load_map[COEF_BANDS][PREV_COEF_CONTEXTS] = {
@@ -113,16 +103,9 @@ static int decode_coefs(VP9D_COMP *dx, const MACROBLOCKD *xd,
     {0, 0, 0, 0, 0, 0},
     {0, 0, 0, 0, 0, 0},
   };
-#else
-  vp9_prob (*coef_probs)[PREV_COEF_CONTEXTS][ENTROPY_NODES];
-#endif
 
   vp9_prob *prob;
-#if CONFIG_MODELCOEFPROB
   vp9_coeff_count_model *coef_counts;
-#else
-  vp9_coeff_count *coef_counts;
-#endif
   const int ref = xd->mode_info_context->mbmi.ref_frame != INTRA_FRAME;
   TX_TYPE tx_type = DCT_DCT;
   const int *scan, *nb;
@@ -221,7 +204,6 @@ SKIP_START:
     if (!vp9_read(r, prob[ONE_CONTEXT_NODE])) {
       WRITE_COEF_CONTINUE(1, ONE_TOKEN);
     }
-#if CONFIG_MODELCOEFPROB
     // Load full probabilities if not already loaded
     if (!load_map[band][pt]) {
       vp9_model_to_full_probs(coef_probs[band][pt], type, ref,
@@ -229,7 +211,6 @@ SKIP_START:
       load_map[band][pt] = 1;
     }
     prob = coef_probs_full[band][pt];
-#endif
     // LOW_VAL_CONTEXT_NODE_0_
     if (!vp9_read(r, prob[LOW_VAL_CONTEXT_NODE])) {
       if (!vp9_read(r, prob[TWO_CONTEXT_NODE])) {
@@ -287,11 +268,7 @@ SKIP_START:
   }
 
   if (c < seg_eob)
-#if CONFIG_MODELCOEFPROB
     coef_counts[type][ref][band][pt][DCT_EOB_MODEL_TOKEN]++;
-#else
-    coef_counts[type][ref][band][pt][DCT_EOB_TOKEN]++;
-#endif
 
   for (pt = 0; pt < (1 << txfm_size); pt++) {
     A[pt] = L[pt] = c > 0;

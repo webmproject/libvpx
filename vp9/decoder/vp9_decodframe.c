@@ -551,18 +551,10 @@ static void init_frame(VP9D_COMP *pbi) {
 }
 
 static void read_coef_probs_common(
-#if CONFIG_MODELCOEFPROB
     vp9_coeff_probs_model *coef_probs,
-#else
-    vp9_coeff_probs *coef_probs,
-#endif
     TX_SIZE tx_size,
     vp9_reader *r) {
-#if CONFIG_MODELCOEFPROB
   const int entropy_nodes_update = UNCONSTRAINED_NODES;
-#else
-  const int entropy_nodes_update = ENTROPY_NODES;
-#endif
 
   int i, j, k, l, m;
 
@@ -1068,10 +1060,9 @@ int vp9_decode_frame(VP9D_COMP *pbi, const uint8_t **p_data_end) {
         if (vp9_read(&header_bc, 252))
           pc->fc.vp9_mode_contexts[i][j] = vp9_read_prob(&header_bc);
   }
-#if CONFIG_MODELCOEFPROB
+  // Is this needed ?
   if (pc->frame_type == KEY_FRAME)
     vp9_default_coef_probs(pc);
-#endif
 
   update_frame_context(&pc->fc);
 

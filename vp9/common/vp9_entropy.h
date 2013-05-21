@@ -38,10 +38,8 @@
 
 extern const vp9_tree_index vp9_coef_tree[];
 
-#if CONFIG_MODELCOEFPROB
 #define DCT_EOB_MODEL_TOKEN     3      /* EOB       Extra Bits 0+0 */
 extern const vp9_tree_index vp9_coefmodel_tree[];
-#endif
 
 extern struct vp9_token vp9_coef_encodings[MAX_ENTROPY_TOKENS];
 
@@ -156,7 +154,6 @@ extern int vp9_get_coef_context(const int *scan, const int *neighbors,
                                 int nb_pad, uint8_t *token_cache, int c, int l);
 const int *vp9_get_coef_neighbors_handle(const int *scan, int *pad);
 
-#if CONFIG_MODELCOEFPROB
 
 // 48 lists of probabilities are stored for the following ONE node probs:
 // 1, (count 1)
@@ -193,7 +190,6 @@ void vp9_model_to_full_probs_sb(
 extern const vp9_prob vp9_modelcoefprobs[COEFPROB_MODELS][ENTROPY_NODES - 1];
 void vp9_get_model_distribution(vp9_prob model, vp9_prob *tree_probs,
                                 int b, int r);
-#endif  // CONFIG_MODELCOEFPROB
 
 static INLINE const int* get_scan_4x4(TX_TYPE tx_type) {
   switch (tx_type) {

@@ -411,7 +411,6 @@ static int prob_diff_update_savings_search(const unsigned int *ct,
   return bestsavings;
 }
 
-#if CONFIG_MODELCOEFPROB
 static int prob_diff_update_savings_search_model(const unsigned int *ct,
                                                  const vp9_prob *oldp,
                                                  vp9_prob *bestp,
@@ -448,7 +447,6 @@ static int prob_diff_update_savings_search_model(const unsigned int *ct,
   *bestp = bestnewp;
   return bestsavings;
 }
-#endif
 
 static void vp9_cond_prob_update(vp9_writer *bc, vp9_prob *oldp, vp9_prob upd,
                                  unsigned int *ct) {
@@ -479,15 +477,12 @@ static void pack_mb_tokens(vp9_writer* const bc,
     int v = a->value;
     int n = a->len;
     int ncount = n;
-#if CONFIG_MODELCOEFPROB
     vp9_prob probs[ENTROPY_NODES];
-#endif
 
     if (t == EOSB_TOKEN) {
       ++p;
       break;
     }
-#if CONFIG_MODELCOEFPROB
     if (t >= TWO_TOKEN) {
       vp9_model_to_full_probs(p->context_tree,
                               p->block_type, p->ref_type, probs);
@@ -495,9 +490,6 @@ static void pack_mb_tokens(vp9_writer* const bc,
     } else {
       pp = p->context_tree;
     }
-#else
-    pp = p->context_tree;
-#endif
     assert(pp != 0);
 
     /* skip one or two nodes */
@@ -1219,22 +1211,14 @@ static void update_coef_probs_common(
     vp9_coeff_stats *tree_update_hist,
 #endif
     vp9_coeff_probs *new_frame_coef_probs,
-#if CONFIG_MODELCOEFPROB
     vp9_coeff_probs_model *old_frame_coef_probs,
-#else
-    vp9_coeff_probs *old_frame_coef_probs,
-#endif
     vp9_coeff_stats *frame_branch_ct,
     TX_SIZE tx_size) {
   int i, j, k, l, t;
   int update[2] = {0, 0};
   int savings;
 
-#if CONFIG_MODELCOEFPROB
   const int entropy_nodes_update = UNCONSTRAINED_NODES;
-#else
-  const int entropy_nodes_update = ENTROPY_NODES;
-#endif
   // vp9_prob bestupd = find_coef_update_prob(cpi);
 
   const int tstart = 0;
@@ -1254,13 +1238,11 @@ static void update_coef_probs_common(
 
             if (l >= 3 && k == 0)
               continue;
-#if CONFIG_MODELCOEFPROB
             if (t == PIVOT_NODE)
               s = prob_diff_update_savings_search_model(
                   frame_branch_ct[i][j][k][l][0],
                   old_frame_coef_probs[i][j][k][l], &newp, upd, i, j);
             else
-#endif
               s = prob_diff_update_savings_search(
                   frame_branch_ct[i][j][k][l][t], oldp, &newp, upd);
             if (s > 0 && newp != oldp)
@@ -1298,13 +1280,11 @@ static void update_coef_probs_common(
             if (l >= 3 && k == 0)
               continue;
 
-#if CONFIG_MODELCOEFPROB
             if (t == PIVOT_NODE)
               s = prob_diff_update_savings_search_model(
                   frame_branch_ct[i][j][k][l][0],
                   old_frame_coef_probs[i][j][k][l], &newp, upd, i, j);
             else
-#endif
               s = prob_diff_update_savings_search(
                   frame_branch_ct[i][j][k][l][t],
                   *oldp, &newp, upd);

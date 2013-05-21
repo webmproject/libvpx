@@ -26,10 +26,8 @@ typedef struct {
   int16_t         extra;
   uint8_t         token;
   uint8_t         skip_eob_node;
-#if CONFIG_MODELCOEFPROB
   uint8_t         block_type;
   uint8_t         ref_type;
-#endif
 } TOKENEXTRA;
 
 typedef int64_t vp9_coeff_accum[REF_TYPES][COEF_BANDS][PREV_COEF_CONTEXTS]

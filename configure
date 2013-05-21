@@ -240,7 +240,6 @@ HAVE_LIST="
 EXPERIMENT_LIST="
     csm
     implicit_segmentation
-    modelcoefprob
     loop_dering
     scatterscan
     oneshotq
