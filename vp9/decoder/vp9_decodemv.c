@@ -530,7 +530,6 @@ static INLINE INTERPOLATIONFILTERTYPE read_switchable_filter_type(
 }
 
 static void read_mb_modes_mv(VP9D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
-                             MODE_INFO *prev_mi,
                              int mi_row, int mi_col,
                              vp9_reader *r) {
   VP9_COMMON *const cm = &pbi->common;
@@ -559,7 +558,6 @@ static void read_mb_modes_mv(VP9D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
   // Make sure the MACROBLOCKD mode info pointer is pointed at the
   // correct entry for the current macroblock.
   xd->mode_info_context = mi;
-  xd->prev_mode_info_context = prev_mi;
 
   // Distance of Mb to the various image edges.
   // These specified to 8th pel as they are always compared to MV values
@@ -605,7 +603,8 @@ static void read_mb_modes_mv(VP9D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
         printf("%d %d\n", xd->mode_info_context->mbmi.mv[0].as_mv.row,
                xd->mode_info_context->mbmi.mv[0].as_mv.col);
 #endif
-      vp9_find_mv_refs(cm, xd, mi, use_prev_in_find_mv_refs ? prev_mi : NULL,
+      vp9_find_mv_refs(cm, xd, mi, use_prev_in_find_mv_refs ?
+                       xd->prev_mode_info_context : NULL,
                        ref_frame, mbmi->ref_mvs[ref_frame],
                        cm->ref_frame_sign_bias);
 
@@ -671,7 +670,8 @@ static void read_mb_modes_mv(VP9D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
                          mi_row, mi_col, xd->scale_factor, xd->scale_factor_uv);
 
         vp9_find_mv_refs(cm, xd, mi,
-                         use_prev_in_find_mv_refs ? prev_mi : NULL,
+                         use_prev_in_find_mv_refs ?
+                         xd->prev_mode_info_context : NULL,
                          second_ref_frame, mbmi->ref_mvs[second_ref_frame],
                          cm->ref_frame_sign_bias);
 
@@ -921,13 +921,12 @@ void vp9_decode_mb_mode_mv(VP9D_COMP* const pbi,
                            vp9_reader *r) {
   VP9_COMMON *const cm = &pbi->common;
   MODE_INFO *mi = xd->mode_info_context;
-  MODE_INFO *prev_mi = xd->prev_mode_info_context;
   MB_MODE_INFO *const mbmi = &mi->mbmi;
 
   if (cm->frame_type == KEY_FRAME) {
     kfread_modes(pbi, mi, mi_row, mi_col, r);
   } else {
-    read_mb_modes_mv(pbi, mi, &mi->mbmi, prev_mi, mi_row, mi_col, r);
+    read_mb_modes_mv(pbi, mi, &mi->mbmi, mi_row, mi_col, r);
     set_scale_factors(xd,
                       mi->mbmi.ref_frame - 1, mi->mbmi.second_ref_frame - 1,
                       cm->active_ref_scale);
