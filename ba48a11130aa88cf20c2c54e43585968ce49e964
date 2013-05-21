@@ -16,6 +16,24 @@
       "revId": "ba48a11130aa88cf20c2c54e43585968ce49e964",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAYX//+sk\u003d",
+        "filename": "vp9/common/vp9_idct.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 91,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2013-05-21T17:24:22Z",
+      "side": 1,
+      "message": "No.  There are a couple more functions like this.  I was going to remove in a future commit, but I can remove now.",
+      "parentUuid": "AAAAYX//+v0\u003d",
+      "revId": "ba48a11130aa88cf20c2c54e43585968ce49e964",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
