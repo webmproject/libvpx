@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAYX///XE\u003d",
+        "filename": "build/make/gen_msvs_vcxproj.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 387,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-05-21T06:37:31Z",
+      "side": 1,
+      "message": "Warning\t48\twarning MSB8004: Output Directory does not end with a trailing slash.  This build instance will add the slash as it is required to allow proper evaluation of the Output Directory.\tC:\\Program Files (x86)\\MSBuild\\Microsoft.Cpp\\v4.0\\V110\\Microsoft.CppBuild.targets\t346",
+      "revId": "112e0b3ee243082b5015affb9a0a61283c83b2e0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAYX///XI\u003d",
+        "filename": "build/make/gen_msvs_vcxproj.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 388,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-05-21T06:37:31Z",
+      "side": 1,
+      "message": "Warning\t47\twarning MSB8004: Intermediate Directory does not end with a trailing slash.  This build instance will add the slash as it is required to allow proper evaluation of the Intermediate Directory.\tC:\\Program Files (x86)\\MSBuild\\Microsoft.Cpp\\v4.0\\V110\\Microsoft.CppBuild.targets\t345",
+      "revId": "112e0b3ee243082b5015affb9a0a61283c83b2e0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
