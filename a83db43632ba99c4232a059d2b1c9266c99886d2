@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAYX//+CA\u003d",
+        "filename": "build/make/ads2armasm_ms.pl",
+        "patchSetId": 3
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2013-05-21T22:41:25Z",
+      "side": 1,
+      "message": "Any reference for this? For my own curiosity.",
+      "revId": "a83db43632ba99c4232a059d2b1c9266c99886d2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAYX//+CM\u003d",
+        "filename": "build/make/ads2armasm_ms.pl",
+        "patchSetId": 3
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2013-05-21T22:41:25Z",
+      "side": 1,
+      "message": "Hmm I feel like we should be using this format by default. Oh well.",
+      "revId": "a83db43632ba99c4232a059d2b1c9266c99886d2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
