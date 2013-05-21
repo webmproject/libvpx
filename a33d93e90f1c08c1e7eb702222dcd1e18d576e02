@@ -88,6 +88,24 @@
       "revId": "a33d93e90f1c08c1e7eb702222dcd1e18d576e02",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAYX//94o\u003d",
+        "filename": "nestegg/halloc/src/macros.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1002325
+      },
+      "writtenOn": "2013-05-21T23:22:57Z",
+      "side": 1,
+      "message": "As far as I can read the standards, stackoverflow and the compiler warning/error, the negated unsigned value still is unsigned - a large value which in practice (as long as all arithmetic is done with the same word size) works as the corresponding negative value. So correct, no, not at all. But probably works in most cases. But I\u0027d say the compiler quite rightly complains about it.",
+      "parentUuid": "AAAAYX//95Q\u003d",
+      "revId": "a33d93e90f1c08c1e7eb702222dcd1e18d576e02",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
