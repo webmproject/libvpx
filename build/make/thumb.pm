@@ -53,9 +53,10 @@ sub FixThumbInstructions($)
 
     # Convert a conditional addition to the pc register into a series of
     # instructions. This converts "addlt pc, pc, r3, lsl #2" into
-    # "ittt lt", "addlt.w r12, pc, #10", "addlt.w r12, r12, r3, lsl #2",
-    # "movlt.n pc, r12". This assumes that r12 is free at this point.
-    s/^(\s*)addlt(\s+)pc,\s*pc,\s*(\w+),\s*lsl\s*#(\d+)/$1ittt$2lt\n$1addlt.w$2r12, pc, #10\n$1addlt.w$2r12, r12, $3, lsl #$4\n$1movlt.n$2pc, r12/g;
+    # "itttt lt", "movlt.n r12, pc", "addlt.w r12, #12",
+    # "addlt.w r12, r12, r3, lsl #2", "movlt.n pc, r12".
+    # This assumes that r12 is free at this point.
+    s/^(\s*)addlt(\s+)pc,\s*pc,\s*(\w+),\s*lsl\s*#(\d+)/$1itttt$2lt\n$1movlt.n$2r12, pc\n$1addlt.w$2r12, #12\n$1addlt.w$2r12, r12, $3, lsl #$4\n$1movlt.n$2pc, r12/g;
 
     # Convert "mov pc, lr" into "bx lr", since the former only works
     # for switching from arm to thumb (and only in armv7), but not
