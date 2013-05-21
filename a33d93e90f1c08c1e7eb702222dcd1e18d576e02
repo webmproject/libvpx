@@ -70,6 +70,24 @@
       "revId": "a33d93e90f1c08c1e7eb702222dcd1e18d576e02",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAYX//95Q\u003d",
+        "filename": "nestegg/halloc/src/macros.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1002833
+      },
+      "writtenOn": "2013-05-21T23:19:21Z",
+      "side": 1,
+      "message": "offsetof returns size_t, right?  what does it mean to negate a size_t value (which is unsigned)?  Is the original code correct at all?",
+      "parentUuid": "AAAAYX//9/Q\u003d",
+      "revId": "a33d93e90f1c08c1e7eb702222dcd1e18d576e02",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
