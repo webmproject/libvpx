@@ -307,7 +307,6 @@ struct macroblockd_plane {
   DECLARE_ALIGNED(16, int16_t,  qcoeff[64 * 64]);
   DECLARE_ALIGNED(16, int16_t,  dqcoeff[64 * 64]);
   DECLARE_ALIGNED(16, uint16_t, eobs[256]);
-  DECLARE_ALIGNED(16, int16_t,  diff[64 * 64]);
   PLANE_TYPE plane_type;
   int subsampling_x;
   int subsampling_y;
