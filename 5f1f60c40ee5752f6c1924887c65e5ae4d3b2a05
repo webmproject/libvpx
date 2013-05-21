@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAYX//+28\u003d",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-05-21T16:10:57Z",
+      "side": 1,
+      "message": "plane_block_height",
+      "revId": "5f1f60c40ee5752f6c1924887c65e5ae4d3b2a05",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
