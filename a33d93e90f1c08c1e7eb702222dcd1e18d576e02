@@ -16,6 +16,24 @@
       "revId": "a33d93e90f1c08c1e7eb702222dcd1e18d576e02",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAYX//9/Q\u003d",
+        "filename": "nestegg/halloc/src/macros.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1002325
+      },
+      "writtenOn": "2013-05-21T22:59:12Z",
+      "side": 1,
+      "message": "No, I haven\u0027t submitted this upstream yet, I guess I should do that as well... This only affected vpxdec, not the other subprojects. Also, for some reason this only produces warnings, not errors at the moment, so I guess it can be skipped for now, or at least reordered to come after the other patches.",
+      "parentUuid": "AAAAYX//+Ak\u003d",
+      "revId": "a33d93e90f1c08c1e7eb702222dcd1e18d576e02",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
