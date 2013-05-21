@@ -67,10 +67,111 @@ static INLINE void write_le32(uint8_t *p, int value) {
   p[3] = value >> 24;
 }
 
+void vp9_encode_unsigned_max(vp9_writer *br, int data, int max) {
+  assert(data <= max);
+  while (max) {
+    vp9_write_bit(br, data & 1);
+    data >>= 1;
+    max >>= 1;
+  }
+}
+
+int recenter_nonneg(int v, int m) {
+  if (v > (m << 1))
+    return v;
+  else if (v >= m)
+    return ((v - m) << 1);
+  else
+    return ((m - v) << 1) - 1;
+}
+
+static int get_unsigned_bits(unsigned num_values) {
+  int cat = 0;
+  if ((num_values--) <= 1) return 0;
+  while (num_values > 0) {
+    cat++;
+    num_values >>= 1;
+  }
+  return cat;
+}
+
+void encode_uniform(vp9_writer *w, int v, int n) {
+  int l = get_unsigned_bits(n);
+  int m;
+  if (l == 0)
+    return;
+  m = (1 << l) - n;
+  if (v < m) {
+    vp9_write_literal(w, v, l - 1);
+  } else {
+    vp9_write_literal(w, m + ((v - m) >> 1), l - 1);
+    vp9_write_literal(w, (v - m) & 1, 1);
+  }
+}
+
+int count_uniform(int v, int n) {
+  int l = get_unsigned_bits(n);
+  int m;
+  if (l == 0) return 0;
+  m = (1 << l) - n;
+  if (v < m)
+    return l - 1;
+  else
+    return l;
+}
+
+void encode_term_subexp(vp9_writer *w, int word, int k, int num_syms) {
+  int i = 0;
+  int mk = 0;
+  while (1) {
+    int b = (i ? k + i - 1 : k);
+    int a = (1 << b);
+    if (num_syms <= mk + 3 * a) {
+      encode_uniform(w, word - mk, num_syms - mk);
+      break;
+    } else {
+      int t = (word >= mk + a);
+      vp9_write_literal(w, t, 1);
+      if (t) {
+        i = i + 1;
+        mk += a;
+      } else {
+        vp9_write_literal(w, word - mk, b);
+        break;
+      }
+    }
+  }
+}
+
+int count_term_subexp(int word, int k, int num_syms) {
+  int count = 0;
+  int i = 0;
+  int mk = 0;
+  while (1) {
+    int b = (i ? k + i - 1 : k);
+    int a = (1 << b);
+    if (num_syms <= mk + 3 * a) {
+      count += count_uniform(word - mk, num_syms - mk);
+      break;
+    } else {
+      int t = (word >= mk + a);
+      count++;
+      if (t) {
+        i = i + 1;
+        mk += a;
+      } else {
+        count += b;
+        break;
+      }
+    }
+  }
+  return count;
+}
+
 static void compute_update_table() {
   int i;
   for (i = 0; i < 255; i++)
-    update_bits[i] = vp9_count_term_subexp(i, SUBEXP_PARAM, 255);
+    update_bits[i] = count_term_subexp(i, SUBEXP_PARAM, 255);
 }
 
 static int split_index(int i, int n, int modulus) {
@@ -85,18 +186,18 @@ static int remap_prob(int v, int m) {
   const int modulus = MODULUS_PARAM;
   int i;
   if ((m << 1) <= n)
-    i = vp9_recenter_nonneg(v, m) - 1;
+    i = recenter_nonneg(v, m) - 1;
   else
-    i = vp9_recenter_nonneg(n - 1 - v, n - 1 - m) - 1;
+    i = recenter_nonneg(n - 1 - v, n - 1 - m) - 1;
 
   i = split_index(i, n - 1, modulus);
   return i;
 }
 
-static void write_prob_diff_update(vp9_writer *const bc,
+static void write_prob_diff_update(vp9_writer *w,
                                    vp9_prob newp, vp9_prob oldp) {
   int delp = remap_prob(newp, oldp);
-  vp9_encode_term_subexp(bc, delp, SUBEXP_PARAM, 255);
+  encode_term_subexp(w, delp, SUBEXP_PARAM, 255);
 }
 
 static int prob_diff_update_cost(vp9_prob newp, vp9_prob oldp) {
@@ -105,7 +206,7 @@ static int prob_diff_update_cost(vp9_prob newp, vp9_prob oldp) {
 }
 
 static void update_mode(
-  vp9_writer *const bc,
+  vp9_writer *w,
   int n,
   const struct vp9_token tok[/* n */],
   vp9_tree tree,
@@ -128,15 +229,15 @@ static void update_mode(
   if (new_b + (n << 8) < old_b) {
     int i = 0;
 
-    vp9_write_bit(bc, 1);
+    vp9_write_bit(w, 1);
 
     do {
       const vp9_prob p = Pnew[i];
 
-      vp9_write_literal(bc, Pcur[i] = p ? p : 1, 8);
+      vp9_write_literal(w, Pcur[i] = p ? p : 1, 8);
     } while (++i < n);
   } else
-    vp9_write_bit(bc, 0);
+    vp9_write_bit(w, 0);
 }
 
 static void update_mbintra_mode_probs(VP9_COMP* const cpi,
