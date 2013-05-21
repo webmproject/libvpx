@@ -1,0 +1,106 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAYX//+Go\u003d",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 3
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2013-05-21T22:38:09Z",
+      "side": 1,
+      "message": "Is there a convention for MSVS or is .s acceptable?",
+      "revId": "ce509bf0d5d1cd517d092e093c9496d9752889b2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAYX//+Gc\u003d",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 3
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2013-05-21T22:38:09Z",
+      "side": 1,
+      "message": "I guess that means changing the source files does not trigger the script, but I agree that it\u0027s acceptable.",
+      "revId": "ce509bf0d5d1cd517d092e093c9496d9752889b2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAYX//+G0\u003d",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 3
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2013-05-21T22:38:09Z",
+      "side": 1,
+      "message": "Are the tests enabled by default? That can be adjusted in configure. If they are disabled someplace else, this doesn\u0027t need to be changed:\n\n    # Enable unit tests by default if we have a working C++ compiler.\n    case \"$toolchain\" in\n        *-vs*)\n            soft_enable unit_tests\n        ;;\n        *-android-*)\n            # GTestLog must be modified to use Android logging utilities.\n        ;;\n        *-darwin-*)\n            # iOS/ARM builds do not work with gtest. This does not match\n            # x86 targets.\n        ;;",
+      "revId": "ce509bf0d5d1cd517d092e093c9496d9752889b2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAYX//+GA\u003d",
+        "filename": "build/make/Makefile",
+        "patchSetId": 3
+      },
+      "lineNbr": 379,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2013-05-21T22:38:09Z",
+      "side": 1,
+      "message": "Is obj_int_extract functional for this? It\u0027s never been tested. If the encoder builds and runs, that should be enough confirmation for now.",
+      "revId": "ce509bf0d5d1cd517d092e093c9496d9752889b2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAYX//+Cw\u003d",
+        "filename": "build/make/gen_msvs_vcxproj.sh",
+        "patchSetId": 3
+      },
+      "lineNbr": 158,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2013-05-21T22:38:09Z",
+      "side": 1,
+      "message": "In order to set asm_use_custom_step, don\u0027t you need to change this (earlier in this file):\n        *)\n            file_list[${#file_list[@]}]\u003d\"$opt\"\n            case \"$opt\" in\n                 *.asm) uses_asm\u003dtrue\n                 ;;\n            esac",
+      "revId": "ce509bf0d5d1cd517d092e093c9496d9752889b2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAYX//+DQ\u003d",
+        "filename": "libs.mk",
+        "patchSetId": 3
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2013-05-21T22:38:09Z",
+      "side": 1,
+      "message": "Does this break x86? We still expect those files to retain the .asm extension.",
+      "revId": "ce509bf0d5d1cd517d092e093c9496d9752889b2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
