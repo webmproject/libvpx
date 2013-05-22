@@ -188,11 +188,11 @@ INSTANTIATE_TEST_CASE_P(
 #endif
 
 #if HAVE_SSE2
-const vp9_variance_fn_t variance4x4_wmt = vp9_variance4x4_wmt;
-const vp9_variance_fn_t variance8x8_wmt = vp9_variance8x8_wmt;
-const vp9_variance_fn_t variance8x16_wmt = vp9_variance8x16_wmt;
-const vp9_variance_fn_t variance16x8_wmt = vp9_variance16x8_wmt;
-const vp9_variance_fn_t variance16x16_wmt = vp9_variance16x16_wmt;
+const vp9_variance_fn_t variance4x4_wmt = vp9_variance4x4_sse2;
+const vp9_variance_fn_t variance8x8_wmt = vp9_variance8x8_sse2;
+const vp9_variance_fn_t variance8x16_wmt = vp9_variance8x16_sse2;
+const vp9_variance_fn_t variance16x8_wmt = vp9_variance16x8_sse2;
+const vp9_variance_fn_t variance16x16_wmt = vp9_variance16x16_sse2;
 INSTANTIATE_TEST_CASE_P(
     SSE2, VP9VarianceTest,
     ::testing::Values(make_tuple(4, 4, variance4x4_wmt),
