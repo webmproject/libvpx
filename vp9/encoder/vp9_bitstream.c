@@ -740,9 +740,7 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, MODE_INFO *m,
       int idx, idy;
       int bw = 1 << b_width_log2(mi->sb_type);
       int bh = 1 << b_height_log2(mi->sb_type);
-      // FIXME(jingning): fix intra4x4 rate-distortion optimization, then
-      // use bw and bh as the increment values.
-#if !CONFIG_AB4X4 || CONFIG_AB4X4
+#if !CONFIG_AB4X4
       bw = 1, bh = 1;
 #endif
       for (idy = 0; idy < 2; idy += bh)
@@ -893,6 +891,7 @@ static void write_mb_modes_kf(const VP9_COMP *cpi,
   const VP9_COMMON *const c = &cpi->common;
   const MACROBLOCKD *const xd = &cpi->mb.e_mbd;
   const int ym = m->mbmi.mode;
+  const int mis = c->mode_info_stride;
   const int segment_id = m->mbmi.segment_id;
   int skip_coeff;
 
@@ -907,8 +906,12 @@ static void write_mb_modes_kf(const VP9_COMP *cpi,
   }
 
 #if CONFIG_AB4X4
-  if (m->mbmi.sb_type >= BLOCK_SIZE_SB8X8)
-    sb_kfwrite_ymode(bc, ym, c->sb_kf_ymode_prob[c->kf_ymode_probs_index]);
+  if (m->mbmi.sb_type >= BLOCK_SIZE_SB8X8) {
+    const B_PREDICTION_MODE A = above_block_mode(m, 0, mis);
+    const B_PREDICTION_MODE L = xd->left_available ?
+                                 left_block_mode(m, 0) : DC_PRED;
+    write_kf_bmode(bc, ym, c->kf_bmode_prob[A][L]);
+  }
 #else
   if (m->mbmi.sb_type > BLOCK_SIZE_SB8X8)
     sb_kfwrite_ymode(bc, ym, c->sb_kf_ymode_prob[c->kf_ymode_probs_index]);
@@ -924,15 +927,19 @@ static void write_mb_modes_kf(const VP9_COMP *cpi,
     int idx, idy;
     int bw = 1 << b_width_log2(m->mbmi.sb_type);
     int bh = 1 << b_height_log2(m->mbmi.sb_type);
-    // FIXME(jingning): fix intra4x4 rate-distortion optimization, then
-    // use bw and bh as the increment values.
-#if !CONFIG_AB4X4 || CONFIG_AB4X4
+#if !CONFIG_AB4X4
     bw = 1, bh = 1;
 #endif
-    for (idy = 0; idy < 2; idy += bh)
-      for (idx = 0; idx < 2; idx += bw)
-        sb_kfwrite_ymode(bc, m->bmi[idy * 2 + idx].as_mode.first,
-                         c->sb_kf_ymode_prob[c->kf_ymode_probs_index]);
+    for (idy = 0; idy < 2; idy += bh) {
+      for (idx = 0; idx < 2; idx += bw) {
+        int i = idy * 2 + idx;
+        const B_PREDICTION_MODE A = above_block_mode(m, i, mis);
+        const B_PREDICTION_MODE L = (xd->left_available || idx) ?
+                                     left_block_mode(m, i) : DC_PRED;
+        write_kf_bmode(bc, m->bmi[i].as_mode.first,
+                       c->kf_bmode_prob[A][L]);
+      }
+    }
   }
 
   write_uv_mode(bc, m->mbmi.uv_mode, c->kf_uv_mode_prob[ym]);

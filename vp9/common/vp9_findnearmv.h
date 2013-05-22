@@ -153,7 +153,7 @@ static B_PREDICTION_MODE left_block_mode(const MODE_INFO *cur_mb, int b) {
     } else if (cur_mb->mbmi.mode == I4X4_PRED) {
       return ((cur_mb->bmi + 1 + b)->as_mode.first);
     } else {
-      return B_DC_PRED;
+      return DC_PRED;
     }
   }
   assert(b == 1 || b == 3);
@@ -171,7 +171,7 @@ static B_PREDICTION_MODE above_block_mode(const MODE_INFO *cur_mb,
     } else if (cur_mb->mbmi.mode == I4X4_PRED) {
       return ((cur_mb->bmi + 2 + b)->as_mode.first);
     } else {
-      return B_DC_PRED;
+      return DC_PRED;
     }
   }
 

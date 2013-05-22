@@ -103,6 +103,7 @@ static void kfread_modes(VP9D_COMP *pbi, MODE_INFO *m,
                          vp9_reader *r) {
   VP9_COMMON *const cm = &pbi->common;
   MACROBLOCKD *const xd = &pbi->mb;
+  const int mis = cm->mode_info_stride;
   m->mbmi.ref_frame = INTRA_FRAME;
 
   // Read segmentation map if it is being updated explicitly this frame
@@ -119,11 +120,14 @@ static void kfread_modes(VP9D_COMP *pbi, MODE_INFO *m,
 
   // luma mode
 #if CONFIG_AB4X4
-  if (m->mbmi.sb_type >= BLOCK_SIZE_SB8X8)
-    m->mbmi.mode = read_kf_sb_ymode(r,
-                     cm->sb_kf_ymode_prob[cm->kf_ymode_probs_index]);
-  else
+  if (m->mbmi.sb_type >= BLOCK_SIZE_SB8X8) {
+    const MB_PREDICTION_MODE A = above_block_mode(m, 0, mis);
+    const MB_PREDICTION_MODE L = xd->left_available ?
+                                  left_block_mode(m, 0) : DC_PRED;
+    m->mbmi.mode = read_kf_bmode(r, cm->kf_bmode_prob[A][L]);
+  } else {
      m->mbmi.mode = I4X4_PRED;
+  }
 #else
   m->mbmi.mode = m->mbmi.sb_type > BLOCK_SIZE_SB8X8 ?
       read_kf_sb_ymode(r, cm->sb_kf_ymode_prob[cm->kf_ymode_probs_index]):
@@ -140,15 +144,25 @@ static void kfread_modes(VP9D_COMP *pbi, MODE_INFO *m,
     int idx, idy;
     int bw = 1 << b_width_log2(m->mbmi.sb_type);
     int bh = 1 << b_height_log2(m->mbmi.sb_type);
-    // FIXME(jingning): fix intra4x4 rate-distortion optimization, then
-    // use bw and bh as the increment values.
-#if !CONFIG_AB4X4 || CONFIG_AB4X4
+
+#if !CONFIG_AB4X4
     bw = 1, bh = 1;
 #endif
-    for (idy = 0; idy < 2; idy += bh)
-      for (idx = 0; idx < 2; idx += bw)
-        m->bmi[idy * 2 + idx].as_mode.first =
-            read_kf_sb_ymode(r, cm->sb_kf_ymode_prob[cm->kf_ymode_probs_index]);
+    for (idy = 0; idy < 2; idy += bh) {
+      for (idx = 0; idx < 2; idx += bw) {
+        int ib = idy * 2 + idx;
+        int k;
+        const MB_PREDICTION_MODE A = above_block_mode(m, ib, mis);
+        const MB_PREDICTION_MODE L = (xd->left_available || idx) ?
+                                      left_block_mode(m, ib) : DC_PRED;
+        m->bmi[ib].as_mode.first =
+            read_kf_bmode(r, cm->kf_bmode_prob[A][L]);
+        for (k = 1; k < bh; ++k)
+          m->bmi[ib + k * 2].as_mode.first = m->bmi[ib].as_mode.first;
+        for (k = 1; k < bw; ++k)
+          m->bmi[ib + k].as_mode.first = m->bmi[ib].as_mode.first;
+      }
+    }
   }
 
   m->mbmi.uv_mode = read_uv_mode(r, cm->kf_uv_mode_prob[m->mbmi.mode]);
@@ -858,16 +872,19 @@ static void read_mb_modes_mv(VP9D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
     if (mbmi->mode == I4X4_PRED) {
 #endif
       int idx, idy;
-      // FIXME(jingning): fix intra4x4 rate-distortion optimization, then
-      // use bw and bh as the increment values.
-#if !CONFIG_AB4X4 || CONFIG_AB4X4
+#if !CONFIG_AB4X4
       bw = 1, bh = 1;
 #endif
       for (idy = 0; idy < 2; idy += bh) {
         for (idx = 0; idx < 2; idx += bw) {
+          int ib = idy * 2 + idx, k;
           int m = read_sb_ymode(r, cm->fc.sb_ymode_prob);
-          mi->bmi[idy * 2 + idx].as_mode.first = m;
+          mi->bmi[ib].as_mode.first = m;
           cm->fc.sb_ymode_counts[m]++;
+          for (k = 1; k < bh; ++k)
+            mi->bmi[ib + k * 2].as_mode.first = m;
+          for (k = 1; k < bw; ++k)
+            mi->bmi[ib + k].as_mode.first = m;
         }
       }
     }

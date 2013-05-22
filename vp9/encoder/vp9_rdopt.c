@@ -580,78 +580,104 @@ static int64_t rd_pick_intra4x4block(VP9_COMP *cpi, MACROBLOCK *x, int ib,
                                      int *bmode_costs,
                                      ENTROPY_CONTEXT *a, ENTROPY_CONTEXT *l,
                                      int *bestrate, int *bestratey,
-                                     int *bestdistortion) {
+                                     int *bestdistortion,
+                                     BLOCK_SIZE_TYPE bsize) {
+#if CONFIG_AB4X4
+  MB_PREDICTION_MODE mode;
+#else
   B_PREDICTION_MODE mode;
+#endif
   MACROBLOCKD *xd = &x->e_mbd;
   int64_t best_rd = INT64_MAX;
   int rate = 0;
   int distortion;
   VP9_COMMON *const cm = &cpi->common;
   const int src_stride = x->plane[0].src.stride;
-  uint8_t* const src =
-      raster_block_offset_uint8(xd,
-                                BLOCK_SIZE_SB8X8,
-                                0, ib,
-                                x->plane[0].src.buf, src_stride);
-  int16_t* const src_diff =
-      raster_block_offset_int16(xd,
-                                BLOCK_SIZE_SB8X8,
-                                0, ib,
-                                x->plane[0].src_diff);
-  int16_t* const coeff = BLOCK_OFFSET(x->plane[0].coeff, ib, 16);
-  uint8_t* const dst =
-      raster_block_offset_uint8(xd,
-                                BLOCK_SIZE_SB8X8,
-                                0, ib,
-                                xd->plane[0].dst.buf, xd->plane[0].dst.stride);
-  ENTROPY_CONTEXT ta = *a, tempa = *a;
-  ENTROPY_CONTEXT tl = *l, templ = *l;
+  uint8_t *src, *dst;
+  int16_t *src_diff, *coeff;
+
+  ENTROPY_CONTEXT ta[2], tempa[2];
+  ENTROPY_CONTEXT tl[2], templ[2];
   TX_TYPE tx_type = DCT_DCT;
   TX_TYPE best_tx_type = DCT_DCT;
-  /*
-   * The predictor buffer is a 2d buffer with a stride of 16.  Create
-   * a temp buffer that meets the stride requirements, but we are only
-   * interested in the left 4x4 block
-   * */
-  DECLARE_ALIGNED_ARRAY(16, int16_t, best_dqcoeff, 16);
+  int bw = 1 << b_width_log2(bsize);
+  int bh = 1 << b_height_log2(bsize);
+  int idx, idy, block;
+  DECLARE_ALIGNED(16, int16_t, best_dqcoeff[4][16]);
 
   assert(ib < 4);
+#if !CONFIG_AB4X4
+  bw = 1, bh = 1;
+#endif
 
+  vpx_memcpy(ta, a, sizeof(ta));
+  vpx_memcpy(tl, l, sizeof(tl));
   xd->mode_info_context->mbmi.txfm_size = TX_4X4;
+
+#if CONFIG_AB4X4
+  for (mode = DC_PRED; mode <= TM_PRED; ++mode) {
+#else
   for (mode = B_DC_PRED; mode < LEFT4X4; mode++) {
+#endif
     int64_t this_rd;
-    int ratey;
+    int ratey = 0;
 
     xd->mode_info_context->bmi[ib].as_mode.first = mode;
-    rate = bmode_costs[mode];
+    if (cm->frame_type == KEY_FRAME)
+      rate = bmode_costs[mode];
+    else
+      rate = x->mbmode_cost[cm->frame_type][mode];
+    distortion = 0;
 
-    vp9_intra4x4_predict(xd, ib,
-                         BLOCK_SIZE_SB8X8,
-                         mode, dst, xd->plane[0].dst.stride);
-    vp9_subtract_block(4, 4, src_diff, 8,
-                       src, src_stride,
-                       dst, xd->plane[0].dst.stride);
+    vpx_memcpy(tempa, ta, sizeof(ta));
+    vpx_memcpy(templ, tl, sizeof(tl));
 
-    xd->mode_info_context->bmi[ib].as_mode.first = mode;
-    tx_type = get_tx_type_4x4(xd, ib);
-    if (tx_type != DCT_DCT) {
-      vp9_short_fht4x4(src_diff, coeff, 8, tx_type);
-      x->quantize_b_4x4(x, ib, tx_type, 16);
-    } else {
-      x->fwd_txm4x4(src_diff, coeff, 16);
-      x->quantize_b_4x4(x, ib, tx_type, 16);
+    for (idy = 0; idy < bh; ++idy) {
+      for (idx = 0; idx < bw; ++idx) {
+        block = ib + idy * 2 + idx;
+        xd->mode_info_context->bmi[block].as_mode.first = mode;
+        src = raster_block_offset_uint8(xd, BLOCK_SIZE_SB8X8, 0, block,
+                                        x->plane[0].src.buf, src_stride);
+        src_diff = raster_block_offset_int16(xd, BLOCK_SIZE_SB8X8, 0, block,
+                                             x->plane[0].src_diff);
+        coeff = BLOCK_OFFSET(x->plane[0].coeff, block, 16);
+        dst = raster_block_offset_uint8(xd, BLOCK_SIZE_SB8X8, 0, block,
+                                        xd->plane[0].dst.buf,
+                                        xd->plane[0].dst.stride);
+        vp9_intra4x4_predict(xd, block,
+                             BLOCK_SIZE_SB8X8,
+                             mode, dst, xd->plane[0].dst.stride);
+        vp9_subtract_block(4, 4, src_diff, 8,
+                           src, src_stride,
+                           dst, xd->plane[0].dst.stride);
+
+        tx_type = get_tx_type_4x4(xd, block);
+        if (tx_type != DCT_DCT) {
+          vp9_short_fht4x4(src_diff, coeff, 8, tx_type);
+          x->quantize_b_4x4(x, block, tx_type, 16);
+        } else {
+          x->fwd_txm4x4(src_diff, coeff, 16);
+          x->quantize_b_4x4(x, block, tx_type, 16);
+        }
+
+        ratey += cost_coeffs(cm, x, 0, block, PLANE_TYPE_Y_WITH_DC,
+                             tempa + idx, templ + idy, TX_4X4, 16);
+        distortion += vp9_block_error(coeff, BLOCK_OFFSET(xd->plane[0].dqcoeff,
+                                                         block, 16), 16) >> 2;
+
+        vp9_intra4x4_predict(xd, block, BLOCK_SIZE_SB8X8, *best_mode,
+                             dst, xd->plane[0].dst.stride);
+
+        if (best_tx_type != DCT_DCT)
+          vp9_short_iht4x4_add(BLOCK_OFFSET(xd->plane[0].dqcoeff, block, 16),
+                               dst, xd->plane[0].dst.stride, best_tx_type);
+        else
+          xd->inv_txm4x4_add(BLOCK_OFFSET(xd->plane[0].dqcoeff, block, 16),
+                             dst, xd->plane[0].dst.stride);
+      }
     }
 
-    tempa = ta;
-    templ = tl;
-
-    ratey = cost_coeffs(cm, x, 0, ib,
-                        PLANE_TYPE_Y_WITH_DC, &tempa, &templ, TX_4X4, 16);
     rate += ratey;
-    distortion = vp9_block_error(coeff,
-                                 BLOCK_OFFSET(xd->plane[0].dqcoeff, ib, 16),
-                                 16) >> 2;
-
     this_rd = RDCOST(x->rdmult, x->rddiv, rate, distortion);
 
     if (this_rd < best_rd) {
@@ -661,25 +687,37 @@ static int64_t rd_pick_intra4x4block(VP9_COMP *cpi, MACROBLOCK *x, int ib,
       best_rd = this_rd;
       *best_mode = mode;
       best_tx_type = tx_type;
-      *a = tempa;
-      *l = templ;
-      vpx_memcpy(best_dqcoeff, BLOCK_OFFSET(xd->plane[0].dqcoeff, ib, 16), 32);
+      vpx_memcpy(a, tempa, sizeof(tempa));
+      vpx_memcpy(l, templ, sizeof(templ));
+      for (idy = 0; idy < bh; ++idy) {
+        for (idx = 0; idx < bw; ++idx) {
+          block = ib + idy * 2 + idx;
+          vpx_memcpy(best_dqcoeff[idy * 2 + idx],
+                     BLOCK_OFFSET(xd->plane[0].dqcoeff, block, 16),
+                     sizeof(best_dqcoeff[0]));
+        }
+      }
     }
   }
-  xd->mode_info_context->bmi[ib].as_mode.first =
-    (B_PREDICTION_MODE)(*best_mode);
 
-  vp9_intra4x4_predict(xd, ib,
-                       BLOCK_SIZE_SB8X8,
-                       *best_mode,
-                       dst, xd->plane[0].dst.stride);
+  for (idy = 0; idy < bh; ++idy) {
+    for (idx = 0; idx < bw; ++idx) {
+      block = ib + idy * 2 + idx;
+      xd->mode_info_context->bmi[block].as_mode.first = *best_mode;
+      dst = raster_block_offset_uint8(xd, BLOCK_SIZE_SB8X8, 0, block,
+                                      xd->plane[0].dst.buf,
+                                      xd->plane[0].dst.stride);
 
-  // inverse transform
-  if (best_tx_type != DCT_DCT) {
-    vp9_short_iht4x4_add(best_dqcoeff, dst, xd->plane[0].dst.stride,
-                           best_tx_type);
-  } else {
-    xd->inv_txm4x4_add(best_dqcoeff, dst, xd->plane[0].dst.stride);
+      vp9_intra4x4_predict(xd, block, BLOCK_SIZE_SB8X8, *best_mode,
+                           dst, xd->plane[0].dst.stride);
+      // inverse transform
+      if (best_tx_type != DCT_DCT)
+        vp9_short_iht4x4_add(best_dqcoeff[idy * 2 + idx], dst,
+                             xd->plane[0].dst.stride, best_tx_type);
+      else
+        xd->inv_txm4x4_add(best_dqcoeff[idy * 2 + idx], dst,
+                           xd->plane[0].dst.stride);
+    }
   }
 
   return best_rd;
@@ -688,8 +726,12 @@ static int64_t rd_pick_intra4x4block(VP9_COMP *cpi, MACROBLOCK *x, int ib,
 static int64_t rd_pick_intra4x4mby_modes(VP9_COMP *cpi, MACROBLOCK *mb,
                                          int *Rate, int *rate_y,
                                          int *Distortion, int64_t best_rd) {
-  int i;
+  int i, j;
   MACROBLOCKD *const xd = &mb->e_mbd;
+  BLOCK_SIZE_TYPE bsize = xd->mode_info_context->mbmi.sb_type;
+  int bw = 1 << b_width_log2(bsize);
+  int bh = 1 << b_height_log2(bsize);
+  int idx, idy;
 #if CONFIG_AB4X4
   int cost = 0;
 #else
@@ -698,7 +740,7 @@ static int64_t rd_pick_intra4x4mby_modes(VP9_COMP *cpi, MACROBLOCK *mb,
   int distortion = 0;
   int tot_rate_y = 0;
   int64_t total_rd = 0;
-  ENTROPY_CONTEXT t_above[2], t_left[2];
+  ENTROPY_CONTEXT t_above[4], t_left[4];
   int *bmode_costs;
 
   vpx_memcpy(t_above, xd->plane[0].above_context, sizeof(t_above));
@@ -707,31 +749,43 @@ static int64_t rd_pick_intra4x4mby_modes(VP9_COMP *cpi, MACROBLOCK *mb,
   xd->mode_info_context->mbmi.mode = I4X4_PRED;
   bmode_costs = mb->inter_bmode_costs;
 
-  for (i = 0; i < 4; i++) {
-    const int x_idx = i & 1, y_idx = i >> 1;
-    MODE_INFO *const mic = xd->mode_info_context;
-    const int mis = xd->mode_info_stride;
-    B_PREDICTION_MODE UNINITIALIZED_IS_SAFE(best_mode);
-    int UNINITIALIZED_IS_SAFE(r), UNINITIALIZED_IS_SAFE(ry), UNINITIALIZED_IS_SAFE(d);
+#if !CONFIG_AB4X4
+  bw = 1, bh = 1;
+#endif
 
-    if (xd->frame_type == KEY_FRAME) {
-      const B_PREDICTION_MODE A = above_block_mode(mic, i, mis);
-      const B_PREDICTION_MODE L = left_block_mode(mic, i);
+  for (idy = 0; idy < 2; idy += bh) {
+    for (idx = 0; idx < 2; idx += bw) {
+      MODE_INFO *const mic = xd->mode_info_context;
+      const int mis = xd->mode_info_stride;
+      B_PREDICTION_MODE UNINITIALIZED_IS_SAFE(best_mode);
+      int UNINITIALIZED_IS_SAFE(r), UNINITIALIZED_IS_SAFE(ry);
+      int UNINITIALIZED_IS_SAFE(d);
+      i = idy * 2 + idx;
 
-      bmode_costs  = mb->bmode_costs[A][L];
+      if (xd->frame_type == KEY_FRAME) {
+        const MB_PREDICTION_MODE A = above_block_mode(mic, i, mis);
+        const MB_PREDICTION_MODE L = (xd->left_available || idx) ?
+                                     left_block_mode(mic, i) : DC_PRED;
+
+        bmode_costs  = mb->bmode_costs[A][L];
+      }
+
+      total_rd += rd_pick_intra4x4block(cpi, mb, i, &best_mode, bmode_costs,
+                                        t_above + idx, t_left + idy,
+                                        &r, &ry, &d, bsize);
+      cost += r;
+      distortion += d;
+      tot_rate_y += ry;
+
+      mic->bmi[i].as_mode.first = best_mode;
+      for (j = 1; j < bh; ++j)
+        mic->bmi[i + j * 2].as_mode.first = best_mode;
+      for (j = 1; j < bw; ++j)
+        mic->bmi[i + j].as_mode.first = best_mode;
+
+      if (total_rd >= best_rd)
+        break;
     }
-
-    total_rd += rd_pick_intra4x4block(cpi, mb, i, &best_mode, bmode_costs,
-                                      t_above + x_idx, t_left + y_idx,
-                                      &r, &ry, &d);
-    cost += r;
-    distortion += d;
-    tot_rate_y += ry;
-
-    mic->bmi[i].as_mode.first = best_mode;
-
-    if (total_rd >= best_rd)
-      break;
   }
 
   if (total_rd >= best_rd)
@@ -751,6 +805,7 @@ static int64_t rd_pick_intra_sby_mode(VP9_COMP *cpi, MACROBLOCK *x,
                                       int64_t txfm_cache[NB_TXFM_MODES]) {
   MB_PREDICTION_MODE mode;
   MB_PREDICTION_MODE UNINITIALIZED_IS_SAFE(mode_selected);
+  MACROBLOCKD *xd = &x->e_mbd;
   int this_rate, this_rate_tokenonly;
   int this_distortion, s;
   int64_t best_rd = INT64_MAX, this_rd;
@@ -770,13 +825,20 @@ static int64_t rd_pick_intra_sby_mode(VP9_COMP *cpi, MACROBLOCK *x,
   /* Y Search for 32x32 intra prediction mode */
   for (mode = DC_PRED; mode <= TM_PRED; mode++) {
     int64_t local_txfm_cache[NB_TXFM_MODES];
+    MODE_INFO *const mic = xd->mode_info_context;
+    const int mis = xd->mode_info_stride;
+    const MB_PREDICTION_MODE A = above_block_mode(mic, 0, mis);
+    const MB_PREDICTION_MODE L = xd->left_available ?
+                                 left_block_mode(mic, 0) : DC_PRED;
+
+    int *bmode_costs  = x->bmode_costs[A][L];
 
     x->e_mbd.mode_info_context->mbmi.mode = mode;
     vp9_build_intra_predictors_sby_s(&x->e_mbd, bsize);
 
     super_block_yrd(cpi, x, &this_rate_tokenonly, &this_distortion, &s,
                     bsize, local_txfm_cache);
-    this_rate = this_rate_tokenonly + x->mbmode_cost[x->e_mbd.frame_type][mode];
+    this_rate = this_rate_tokenonly + bmode_costs[mode];
     this_rd = RDCOST(x->rdmult, x->rddiv, this_rate, this_distortion);
 
     if (this_rd < best_rd) {
