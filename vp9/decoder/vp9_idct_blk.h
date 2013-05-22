@@ -18,13 +18,6 @@
 void vp9_idct_add_lossless_c(int16_t *input, unsigned char *dest, int stride,
                              int eob);
 
-void vp9_dc_idct_add_lossless_c(int16_t *input, unsigned char *output,
-                                int stride, int dc);
-
-void vp9_dc_idct_add_y_block_lossless_c(int16_t *q, unsigned char *pre,
-                                        unsigned char *dst, int stride,
-                                        const int16_t *dc);
-
 void vp9_idct_add_y_block_lossless_c(int16_t *q, unsigned char *dst, int stride,
                                      struct macroblockd *xd);
 

@@ -143,12 +143,6 @@ void vp9_idct_add_c(int16_t *input, uint8_t *dest, int stride, int eob) {
   }
 }
 
-void vp9_dc_idct_add_c(int16_t *input, uint8_t *dest, int stride, int dc) {
-  input[0] = dc;
-  vp9_short_idct4x4_add(input, dest, stride);
-  vpx_memset(input, 0, 32);
-}
-
 void vp9_idct_add_lossless_c(int16_t *input, uint8_t *dest, int stride,
                              int eob) {
   if (eob > 1) {
@@ -158,13 +152,6 @@ void vp9_idct_add_lossless_c(int16_t *input, uint8_t *dest, int stride,
     vp9_short_iwalsh4x4_1_add_c(input, dest, stride);
     ((int *)input)[0] = 0;
   }
-}
-
-void vp9_dc_idct_add_lossless_c(int16_t *input, uint8_t *dest,
-                                int stride, int dc) {
-  input[0] = dc;
-  vp9_short_iwalsh4x4_add(input, dest, stride);
-  vpx_memset(input, 0, 32);
 }
 
 void vp9_idct_add_8x8_c(int16_t *input, uint8_t *dest, int stride, int eob) {
