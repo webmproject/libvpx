@@ -628,16 +628,23 @@ static void encode_block_intra(int plane, int block, BLOCK_SIZE_TYPE bsize,
 
   const int txfm_b_size = 4 << tx_size;
   int ib = raster_block;
+  int tx_ib = ib >> tx_size;
+  int plane_b_size;
 
   TX_TYPE tx_type;
+  int mode, b_mode;
 
-  if (tx_size <= TX_16X16)
-    tx_type = txfm_map(xd->mode_info_context->bmi[ib].as_mode.first);
+  mode = plane == 0? xd->mode_info_context->mbmi.mode:
+                     xd->mode_info_context->mbmi.uv_mode;
+  if (bsize <= BLOCK_SIZE_SB8X8 && mode == I4X4_PRED && plane == 0)
+    b_mode = xd->mode_info_context->bmi[ib].as_mode.first;
   else
-    tx_type = DCT_DCT;
+    b_mode = mode;
 
-  vp9_predict_intra_block(&x->e_mbd, ib, bsize, tx_size,
-                          xd->mode_info_context->bmi[ib].as_mode.first,
+  assert(b_mode >= B_DC_PRED && b_mode <= B_TM_PRED);
+
+  plane_b_size = b_width_log2(bsize) - xd->plane[plane].subsampling_x;
+  vp9_predict_intra_block(xd, tx_ib, plane_b_size, tx_size, b_mode,
                           dst, xd->plane[plane].dst.stride);
   vp9_subtract_block(txfm_b_size, txfm_b_size,
                      src_diff, bw,
@@ -650,7 +657,6 @@ static void encode_block_intra(int plane, int block, BLOCK_SIZE_TYPE bsize,
   if (x->optimize)
     vp9_optimize_b(plane, block, bsize, ss_txfrm_size, args->cm, x, args->ctx);
     */
-
   switch (ss_txfrm_size / 2) {
     case TX_32X32:
         vp9_short_idct32x32_add(BLOCK_OFFSET(xd->plane[plane].dqcoeff,
@@ -695,13 +701,21 @@ static void encode_block_intra(int plane, int block, BLOCK_SIZE_TYPE bsize,
   }
 }
 
-void vp9_encode_intra4x4mby(VP9_COMMON *const cm, MACROBLOCK *x,
-                            BLOCK_SIZE_TYPE bsize) {
+void vp9_encode_intra_block_y(VP9_COMMON *const cm, MACROBLOCK *x,
+                              BLOCK_SIZE_TYPE bsize) {
   MACROBLOCKD* const xd = &x->e_mbd;
   struct optimize_ctx ctx;
   struct encode_b_args arg = {cm, x, &ctx};
 
   foreach_transformed_block_in_plane(xd, bsize, 0,
                                      encode_block_intra, &arg);
+}
+void vp9_encode_intra_block_uv(VP9_COMMON *const cm, MACROBLOCK *x,
+                              BLOCK_SIZE_TYPE bsize) {
+  MACROBLOCKD* const xd = &x->e_mbd;
+  struct optimize_ctx ctx;
+  struct encode_b_args arg = {cm, x, &ctx};
+
+  foreach_transformed_block_uv(xd, bsize, encode_block_intra, &arg);
 }
 

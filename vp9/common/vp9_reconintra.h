@@ -23,7 +23,7 @@ B_PREDICTION_MODE vp9_find_bpred_context(MACROBLOCKD *xd, int block,
 
 void vp9_predict_intra_block(MACROBLOCKD *xd,
                             int block_idx,
-                            BLOCK_SIZE_TYPE bsize,
+                            int bwl_in,
                             TX_SIZE tx_size,
                             int mode,
                             uint8_t *predictor, int pre_stride);

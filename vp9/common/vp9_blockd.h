@@ -192,6 +192,7 @@ static INLINE int b_width_log2(BLOCK_SIZE_TYPE sb_type) {
     case BLOCK_SIZE_SB64X32:
     case BLOCK_SIZE_SB64X64: return 4;
     default: assert(0);
+      return -1;
   }
 }
 
@@ -215,6 +216,7 @@ static INLINE int b_height_log2(BLOCK_SIZE_TYPE sb_type) {
     case BLOCK_SIZE_SB32X64:
     case BLOCK_SIZE_SB64X64: return 4;
     default: assert(0);
+      return -1;
   }
 }
 

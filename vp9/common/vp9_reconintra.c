@@ -138,14 +138,10 @@ static void d135_predictor(uint8_t *ypred_ptr, int y_stride,
   ypred_ptr[y_stride] = ROUND_POWER_OF_TWO(yabove_row[-1] +
                                            yleft_col[0] * 2 +
                                            yleft_col[1], 2);
-  for (r = 2; r < bh - 1; ++r)
+  for (r = 2; r < bh; ++r)
     ypred_ptr[r * y_stride] = ROUND_POWER_OF_TWO(yleft_col[r - 2] +
                                                  yleft_col[r - 1] * 2 +
-                                                 yleft_col[r + 1], 2);
-
-  ypred_ptr[(bh - 1) * y_stride] = ROUND_POWER_OF_TWO(yleft_col[bh - 2] +
-                                                      yleft_col[bh - 1] * 3,
-                                                      2);
+                                                 yleft_col[r], 2);
 
   ypred_ptr += y_stride;
   for (r = 1; r < bh; ++r) {
@@ -396,11 +392,11 @@ void vp9_build_intra_predictors_sbuv_s(MACROBLOCKD *xd,
 
 void vp9_predict_intra_block(MACROBLOCKD *xd,
                             int block_idx,
-                            BLOCK_SIZE_TYPE bsize,
+                            int bwl_in,
                             TX_SIZE tx_size,
                             int mode,
                             uint8_t *predictor, int pre_stride) {
-  const int bwl = b_width_log2(bsize) - tx_size;
+  const int bwl = bwl_in - tx_size;
   const int wmask = (1 << bwl) - 1;
   const int have_top =
       (block_idx >> bwl) || xd->up_available;
@@ -424,6 +420,6 @@ void vp9_intra4x4_predict(MACROBLOCKD *xd,
                           BLOCK_SIZE_TYPE bsize,
                           int mode,
                           uint8_t *predictor, int pre_stride) {
-  vp9_predict_intra_block(xd, block_idx, bsize, TX_4X4,
+  vp9_predict_intra_block(xd, block_idx, b_width_log2(bsize), TX_4X4,
                           mode, predictor, pre_stride);
 }

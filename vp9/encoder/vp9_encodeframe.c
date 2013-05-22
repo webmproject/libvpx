@@ -1703,19 +1703,14 @@ static void encode_superblock(VP9_COMP *cpi, TOKENEXTRA **t,
 #if CONFIG_AB4X4
   if (mbmi->ref_frame == INTRA_FRAME &&
       bsize < BLOCK_SIZE_SB8X8) {
-#else
-  if (mbmi->mode == I4X4_PRED) {
-    assert(bsize == BLOCK_SIZE_SB8X8 && mbmi->txfm_size == TX_4X4);
-#endif
-    vp9_encode_intra4x4mby(cm, x, BLOCK_SIZE_SB8X8);
+    vp9_encode_intra_block_y(cm, x, BLOCK_SIZE_SB8X8);
     vp9_build_intra_predictors_sbuv_s(xd, BLOCK_SIZE_SB8X8);
     vp9_encode_sbuv(cm, x, BLOCK_SIZE_SB8X8);
-
-    if (output_enabled)
-      sum_intra_stats(cpi, x);
-  } else if (mbmi->ref_frame == INTRA_FRAME) {
-    vp9_build_intra_predictors_sby_s(xd, bsize);
-    vp9_build_intra_predictors_sbuv_s(xd, bsize);
+#else
+  if (xd->mode_info_context->mbmi.ref_frame == INTRA_FRAME) {
+    vp9_encode_intra_block_y(cm, x, bsize);
+    vp9_encode_intra_block_uv(cm, x, bsize);
+#endif
     if (output_enabled)
       sum_intra_stats(cpi, x);
   } else {
@@ -1741,10 +1736,10 @@ static void encode_superblock(VP9_COMP *cpi, TOKENEXTRA **t,
   if (mbmi->ref_frame == INTRA_FRAME &&
       bsize < BLOCK_SIZE_SB8X8) {
 #else
-  if (mbmi->mode == I4X4_PRED) {
-    assert(bsize == BLOCK_SIZE_SB8X8);
+  if (xd->mode_info_context->mbmi.ref_frame == INTRA_FRAME) {
 #endif
-    vp9_tokenize_sb(cpi, xd, t, !output_enabled, BLOCK_SIZE_SB8X8);
+    vp9_tokenize_sb(cpi, xd, t, !output_enabled,
+                    (bsize < BLOCK_SIZE_SB8X8) ? BLOCK_SIZE_SB8X8 : bsize);
   } else if (!x->skip) {
     vp9_encode_sb(cm, x, (bsize < BLOCK_SIZE_SB8X8) ? BLOCK_SIZE_SB8X8 : bsize);
     vp9_tokenize_sb(cpi, xd, t, !output_enabled,
@@ -1771,8 +1766,9 @@ static void encode_superblock(VP9_COMP *cpi, TOKENEXTRA **t,
 
   if (output_enabled) {
     if (cm->txfm_mode == TX_MODE_SELECT &&
+        (mbmi->ref_frame == INTRA_FRAME ||
         !(mbmi->mb_skip_coeff ||
-          vp9_segfeature_active(xd, segment_id, SEG_LVL_SKIP))) {
+          vp9_segfeature_active(xd, segment_id, SEG_LVL_SKIP)))) {
       if (bsize >= BLOCK_SIZE_SB32X32) {
         cpi->txfm_count_32x32p[mbmi->txfm_size]++;
       } else if (bsize >= BLOCK_SIZE_MB16X16) {
@@ -1783,18 +1779,23 @@ static void encode_superblock(VP9_COMP *cpi, TOKENEXTRA **t,
     } else {
       int x, y;
       TX_SIZE sz = (cm->txfm_mode == TX_MODE_SELECT) ? TX_32X32 : cm->txfm_mode;
-
-      if (sz == TX_32X32 && bsize < BLOCK_SIZE_SB32X32)
-        sz = TX_16X16;
-      if (sz == TX_16X16 && bsize < BLOCK_SIZE_MB16X16)
-        sz = TX_8X8;
+       // The new intra coding scheme requires no change of transform size
+      if (mi->mbmi.ref_frame != INTRA_FRAME) {
+        if (sz == TX_32X32 && bsize < BLOCK_SIZE_SB32X32)
+          sz = TX_16X16;
+        if (sz == TX_16X16 && bsize < BLOCK_SIZE_MB16X16)
+          sz = TX_8X8;
 #if CONFIG_AB4X4
-      if (sz == TX_8X8 && bsize < BLOCK_SIZE_SB8X8)
+        if (sz == TX_8X8 && bsize < BLOCK_SIZE_SB8X8)
 #else
-      if (sz == TX_8X8 && (mbmi->mode == SPLITMV ||
-                           mbmi->mode == I4X4_PRED))
+        if (sz == TX_8X8 && mbmi->mode == SPLITMV)
 #endif
+          sz = TX_4X4;
+      } else if (mbmi->mode != I4X4_PRED) {
+        sz = mbmi->txfm_size;
+      } else {
         sz = TX_4X4;
+      }
 
       for (y = 0; y < bh; y++) {
         for (x = 0; x < bw; x++) {
