@@ -206,7 +206,7 @@ SKIP_START:
     }
     // Load full probabilities if not already loaded
     if (!load_map[band][pt]) {
-      vp9_model_to_full_probs(coef_probs[band][pt], type, ref,
+      vp9_model_to_full_probs(coef_probs[band][pt],
                               coef_probs_full[band][pt]);
       load_map[band][pt] = 1;
     }
