@@ -15,7 +15,6 @@
 #include "vp9/common/vp9_onyxc_int.h"
 
 struct subpix_fn_table;
-
 void vp9_build_inter_predictors_sby(MACROBLOCKD *xd,
                                     int mb_row,
                                     int mb_col,
