@@ -292,43 +292,18 @@ static void decode_block_intra(int plane, int block, BLOCK_SIZE_TYPE bsize,
   }
 }
 
-static void decode_atom_intra(VP9D_COMP *pbi, MACROBLOCKD *xd,
-                              vp9_reader *r,
-                              BLOCK_SIZE_TYPE bsize) {
-  int i = 0;
-  int bwl = b_width_log2(bsize), bhl = b_height_log2(bsize);
-  int bc = 1 << (bwl + bhl);
-  int tx_type;
-
-  for (i = 0; i < bc; i++) {
-    int b_mode = xd->mode_info_context->bmi[i].as_mode.first;
-
-    uint8_t* dst = raster_block_offset_uint8(xd, bsize, 0, i,
-                                             xd->plane[0].dst.buf,
-                                             xd->plane[0].dst.stride);
-
-    vp9_intra4x4_predict(xd, i, bsize, b_mode, dst, xd->plane[0].dst.stride);
-    // TODO(jingning): refactor to use foreach_transformed_block_in_plane_
-    tx_type = get_tx_type_4x4(xd, i);
-    dequant_add_y(xd, tx_type, i, bsize);
-  }
-
-  foreach_transformed_block_uv(xd, bsize, decode_block, xd);
-}
-
 static void decode_atom(VP9D_COMP *pbi, MACROBLOCKD *xd,
                         int mi_row, int mi_col,
                         vp9_reader *r, BLOCK_SIZE_TYPE bsize) {
   MB_MODE_INFO *const mbmi = &xd->mode_info_context->mbmi;
 
+  assert(mbmi->ref_frame != INTRA_FRAME);
+
   if (pbi->common.frame_type != KEY_FRAME)
     vp9_setup_interp_filters(xd, mbmi->interp_filter, &pbi->common);
 
   // prediction
-  if (mbmi->ref_frame == INTRA_FRAME)
-    vp9_build_intra_predictors_sbuv_s(xd, bsize);
-  else
-    vp9_build_inter_predictors_sb(xd, mi_row, mi_col, bsize);
+  vp9_build_inter_predictors_sb(xd, mi_row, mi_col, bsize);
 
   if (mbmi->mb_skip_coeff) {
     vp9_reset_sb_tokens_context(xd, bsize);
@@ -341,11 +316,7 @@ static void decode_atom(VP9D_COMP *pbi, MACROBLOCKD *xd,
       vp9_decode_tokens(pbi, xd, r, bsize);
     }
   }
-
-  if (mbmi->ref_frame == INTRA_FRAME)
-    decode_atom_intra(pbi, xd, r, bsize);
-  else
-    foreach_transformed_block(xd, bsize, decode_block, xd);
+  foreach_transformed_block(xd, bsize, decode_block, xd);
 }
 
 static void decode_sb_intra(VP9D_COMP *pbi, MACROBLOCKD *xd,
@@ -379,17 +350,13 @@ static void decode_sb(VP9D_COMP *pbi, MACROBLOCKD *xd, int mi_row, int mi_col,
   const int mis = pc->mode_info_stride;
 
   assert(mbmi->sb_type == bsize);
+  assert(mbmi->ref_frame != INTRA_FRAME);
 
   if (pbi->common.frame_type != KEY_FRAME)
     vp9_setup_interp_filters(xd, mbmi->interp_filter, pc);
 
   // generate prediction
-  if (mbmi->ref_frame == INTRA_FRAME) {
-    vp9_build_intra_predictors_sby_s(xd, bsize);
-    vp9_build_intra_predictors_sbuv_s(xd, bsize);
-  } else {
-    vp9_build_inter_predictors_sb(xd, mi_row, mi_col, bsize);
-  }
+  vp9_build_inter_predictors_sb(xd, mi_row, mi_col, bsize);
 
   if (mbmi->mb_skip_coeff) {
     vp9_reset_sb_tokens_context(xd, bsize);
