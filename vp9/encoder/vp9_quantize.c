@@ -93,7 +93,7 @@ void vp9_quantize(MACROBLOCK *mb, int plane, int block, int n_coeffs,
       scan = get_scan_16x16(tx_type);
       break;
     default:
-      scan = vp9_default_zig_zag1d_32x32;
+      scan = vp9_default_scan_32x32;
       break;
   }
 
@@ -197,7 +197,7 @@ void vp9_init_quantizer(VP9_COMP *cpi) {
 #endif
     // all the 4x4 ac values =;
     for (i = 1; i < 16; i++) {
-      int rc = vp9_default_zig_zag1d_4x4[i];
+      int rc = vp9_default_scan_4x4[i];
 
       invert_quant(cpi->y_quant[q] + rc, cpi->y_quant_shift[q] + rc, quant_val);
       cpi->y_zbin[q][rc] = ROUND_POWER_OF_TWO(qzbin_factor * quant_val, 7);

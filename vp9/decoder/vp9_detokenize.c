@@ -159,7 +159,7 @@ static int decode_coefs(VP9D_COMP *dx, const MACROBLOCKD *xd,
       break;
     }
     case TX_32X32:
-      scan = vp9_default_zig_zag1d_32x32;
+      scan = vp9_default_scan_32x32;
       coef_probs = fc->coef_probs_32x32[type][ref];
       coef_counts = fc->coef_counts_32x32;
       above_ec = (A[0] + A[1] + A[2] + A[3] + A[4] + A[5] + A[6] + A[7]) != 0;

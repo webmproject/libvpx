@@ -241,7 +241,6 @@ EXPERIMENT_LIST="
     csm
     implicit_segmentation
     loop_dering
-    scatterscan
     oneshotq
     multiple_arf
     non420

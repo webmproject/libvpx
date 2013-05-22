@@ -174,14 +174,6 @@ void vp9_idct_add_8x8_c(int16_t *input, uint8_t *dest, int stride, int eob) {
       input[0] = 0;
 
       vp9_add_constant_residual_8x8(out, dest, stride);
-#if !CONFIG_SCATTERSCAN
-    } else if (eob <= 10) {
-      vp9_short_idct10_8x8_add(input, dest, stride);
-      input[0] = input[1] = input[2] = input[3] = 0;
-      input[8] = input[9] = input[10] = 0;
-      input[16] = input[17] = 0;
-      input[24] = 0;
-#endif
     } else {
       vp9_short_idct8x8_add(input, dest, stride);
       vpx_memset(input, 0, 128);
@@ -215,14 +207,6 @@ void vp9_idct_add_16x16_c(int16_t *input, uint8_t *dest, int stride, int eob) {
       input[0] = 0;
 
       vp9_add_constant_residual_16x16(out, dest, stride);
-#if !CONFIG_SCATTERSCAN
-    } else if (eob <= 10) {
-      vp9_short_idct10_16x16_add(input, dest, stride);
-      input[0] = input[1] = input[2] = input[3] = 0;
-      input[16] = input[17] = input[18] = 0;
-      input[32] = input[33] = 0;
-      input[48] = 0;
-#endif
     } else {
       vp9_short_idct16x16_add(input, dest, stride);
       vpx_memset(input, 0, 512);
@@ -238,15 +222,6 @@ void vp9_idct_add_32x32_c(int16_t *input, uint8_t *dest, int stride, int eob) {
       vp9_short_idct1_32x32(input, output);
       vp9_add_constant_residual_32x32(output[0], dest, stride);
       input[0] = 0;
-#if !CONFIG_SCATTERSCAN
-    } else if (eob <= 10) {
-      vp9_short_idct10_32x32_add_c(input, dest, stride);
-      input[0] = input[1] = input[2] = input[3] = 0;
-      input[32] = input[33] = input[34] = 0;
-      input[64] = input[65] = 0;
-      input[96] = 0;
-
-#endif
     } else {
       vp9_short_idct32x32_add(input, dest, stride);
       vpx_memset(input, 0, 2048);

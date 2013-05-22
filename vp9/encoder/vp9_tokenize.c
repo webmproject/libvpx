@@ -186,7 +186,7 @@ static void tokenize_b(int plane, int block, BLOCK_SIZE_TYPE bsize,
       above_ec = (A[0] + A[1] + A[2] + A[3] + A[4] + A[5] + A[6] + A[7]) != 0;
       left_ec = (L[0] + L[1] + L[2] + L[3] + L[4] + L[5] + L[6] + L[7]) != 0;
       seg_eob = 1024;
-      scan = vp9_default_zig_zag1d_32x32;
+      scan = vp9_default_scan_32x32;
       counts = cpi->coef_counts_32x32;
       coef_probs = cpi->common.fc.coef_probs_32x32;
       band_translate = vp9_coefband_trans_8x8plus;

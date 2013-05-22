@@ -167,7 +167,7 @@ static void optimize_b(VP9_COMMON *const cm, MACROBLOCK *mb,
       break;
     }
     case TX_32X32:
-      scan = vp9_default_zig_zag1d_32x32;
+      scan = vp9_default_scan_32x32;
       default_eob = 1024;
       band_translate = vp9_coefband_trans_8x8plus;
       break;

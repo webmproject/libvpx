@@ -100,22 +100,22 @@ typedef vp9_prob vp9_coeff_probs[REF_TYPES][COEF_BANDS][PREV_COEF_CONTEXTS]
 
 struct VP9Common;
 void vp9_default_coef_probs(struct VP9Common *);
-extern DECLARE_ALIGNED(16, const int, vp9_default_zig_zag1d_4x4[16]);
+extern DECLARE_ALIGNED(16, const int, vp9_default_scan_4x4[16]);
 
 extern DECLARE_ALIGNED(16, const int, vp9_col_scan_4x4[16]);
 extern DECLARE_ALIGNED(16, const int, vp9_row_scan_4x4[16]);
 
-extern DECLARE_ALIGNED(64, const int, vp9_default_zig_zag1d_8x8[64]);
+extern DECLARE_ALIGNED(64, const int, vp9_default_scan_8x8[64]);
 
 extern DECLARE_ALIGNED(16, const int, vp9_col_scan_8x8[64]);
 extern DECLARE_ALIGNED(16, const int, vp9_row_scan_8x8[64]);
 
-extern DECLARE_ALIGNED(16, const int, vp9_default_zig_zag1d_16x16[256]);
+extern DECLARE_ALIGNED(16, const int, vp9_default_scan_16x16[256]);
 
 extern DECLARE_ALIGNED(16, const int, vp9_col_scan_16x16[256]);
 extern DECLARE_ALIGNED(16, const int, vp9_row_scan_16x16[256]);
 
-extern DECLARE_ALIGNED(16, const int, vp9_default_zig_zag1d_32x32[1024]);
+extern DECLARE_ALIGNED(16, const int, vp9_default_scan_32x32[1024]);
 
 void vp9_coef_tree_initialize(void);
 void vp9_adapt_coef_probs(struct VP9Common *);
@@ -193,7 +193,7 @@ static INLINE const int* get_scan_4x4(TX_TYPE tx_type) {
     case DCT_ADST:
       return vp9_col_scan_4x4;
     default:
-      return vp9_default_zig_zag1d_4x4;
+      return vp9_default_scan_4x4;
   }
 }
 
@@ -204,7 +204,7 @@ static INLINE const int* get_scan_8x8(TX_TYPE tx_type) {
     case DCT_ADST:
       return vp9_col_scan_8x8;
     default:
-      return vp9_default_zig_zag1d_8x8;
+      return vp9_default_scan_8x8;
   }
 }
 
@@ -215,7 +215,7 @@ static INLINE const int* get_scan_16x16(TX_TYPE tx_type) {
     case DCT_ADST:
       return vp9_col_scan_16x16;
     default:
-      return vp9_default_zig_zag1d_16x16;
+      return vp9_default_scan_16x16;
   }
 }
 

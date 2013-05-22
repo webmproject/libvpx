@@ -329,7 +329,7 @@ static INLINE int cost_coeffs(VP9_COMMON *const cm, MACROBLOCK *mb,
       break;
     }
     case TX_32X32:
-      scan = vp9_default_zig_zag1d_32x32;
+      scan = vp9_default_scan_32x32;
       vp9_model_to_full_probs_sb(cm->fc.coef_probs_32x32[type][ref],
                                  coef_probs);
       seg_eob = 1024;
