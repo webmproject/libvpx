@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAYX//8pg\u003d",
+        "filename": "vp9/encoder/vp9_bitstream.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 1618,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-05-22T17:55:06Z",
+      "side": 1,
+      "message": "yes - this affects the rd of transform choices later. it\u0027s certainly not ideal, maybe we should set them back to defaults, but if you don\u0027t do this, they become 255 or 1, and the rd choice for the next frame is heavily biased towards one transform not by virtue of it being a good choice, but by virtue of it being cheaper to take that tx branch. That\u0027s not what we want.",
+      "revId": "759f46c8d5a305c84417220dd463bf088c7acede",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
