@@ -467,6 +467,12 @@ specialize vp9_sad8x16x8 sse4
 prototype void vp9_sad8x8x8 "const uint8_t *src_ptr, int  src_stride, const uint8_t *ref_ptr, int  ref_stride, uint32_t *sad_array"
 specialize vp9_sad8x8x8 sse4
 
+prototype void vp9_sad8x4x8 "const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride, uint32_t *sad_array"
+specialize vp9_sad8x4x8
+
+prototype void vp9_sad4x8x8 "const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride, uint32_t *sad_array"
+specialize vp9_sad4x8x8
+
 prototype void vp9_sad4x4x8 "const uint8_t *src_ptr, int  src_stride, const uint8_t *ref_ptr, int  ref_stride, uint32_t *sad_array"
 specialize vp9_sad4x4x8 sse4
 

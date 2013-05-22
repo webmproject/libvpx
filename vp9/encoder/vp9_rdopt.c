@@ -582,11 +582,7 @@ static int64_t rd_pick_intra4x4block(VP9_COMP *cpi, MACROBLOCK *x, int ib,
                                      int *bestrate, int *bestratey,
                                      int *bestdistortion,
                                      BLOCK_SIZE_TYPE bsize) {
-#if CONFIG_AB4X4
   MB_PREDICTION_MODE mode;
-#else
-  B_PREDICTION_MODE mode;
-#endif
   MACROBLOCKD *xd = &x->e_mbd;
   int64_t best_rd = INT64_MAX;
   int rate = 0;
@@ -606,19 +602,12 @@ static int64_t rd_pick_intra4x4block(VP9_COMP *cpi, MACROBLOCK *x, int ib,
   DECLARE_ALIGNED(16, int16_t, best_dqcoeff[4][16]);
 
   assert(ib < 4);
-#if !CONFIG_AB4X4
-  bw = 1, bh = 1;
-#endif
 
   vpx_memcpy(ta, a, sizeof(ta));
   vpx_memcpy(tl, l, sizeof(tl));
   xd->mode_info_context->mbmi.txfm_size = TX_4X4;
 
-#if CONFIG_AB4X4
   for (mode = DC_PRED; mode <= TM_PRED; ++mode) {
-#else
-  for (mode = B_DC_PRED; mode < LEFT4X4; mode++) {
-#endif
     int64_t this_rd;
     int ratey = 0;
 
@@ -732,11 +721,7 @@ static int64_t rd_pick_intra4x4mby_modes(VP9_COMP *cpi, MACROBLOCK *mb,
   int bw = 1 << b_width_log2(bsize);
   int bh = 1 << b_height_log2(bsize);
   int idx, idy;
-#if CONFIG_AB4X4
   int cost = 0;
-#else
-  int cost = mb->mbmode_cost[xd->frame_type][I4X4_PRED];
-#endif
   int distortion = 0;
   int tot_rate_y = 0;
   int64_t total_rd = 0;
@@ -748,10 +733,6 @@ static int64_t rd_pick_intra4x4mby_modes(VP9_COMP *cpi, MACROBLOCK *mb,
 
   xd->mode_info_context->mbmi.mode = I4X4_PRED;
   bmode_costs = mb->inter_bmode_costs;
-
-#if !CONFIG_AB4X4
-  bw = 1, bh = 1;
-#endif
 
   for (idy = 0; idy < 2; idy += bh) {
     for (idx = 0; idx < 2; idx += bw) {
@@ -812,12 +793,10 @@ static int64_t rd_pick_intra_sby_mode(VP9_COMP *cpi, MACROBLOCK *x,
   TX_SIZE UNINITIALIZED_IS_SAFE(best_tx);
   int i;
 
-#if CONFIG_AB4X4
   if (bsize < BLOCK_SIZE_SB8X8) {
     x->e_mbd.mode_info_context->mbmi.txfm_size = TX_4X4;
     return best_rd;
   }
-#endif
 
   for (i = 0; i < NB_TXFM_MODES; i++)
     txfm_cache[i] = INT64_MAX;
@@ -973,11 +952,9 @@ static int labels2mode(MACROBLOCK *x,
   MB_MODE_INFO * mbmi = &mic->mbmi;
   const int mis = xd->mode_info_stride;
   int i, cost = 0, thismvcost = 0;
-#if CONFIG_AB4X4
   int idx, idy;
   int bw = 1 << b_width_log2(mbmi->sb_type);
   int bh = 1 << b_height_log2(mbmi->sb_type);
-#endif
 
   /* We have to be careful retrieving previously-encoded motion vectors.
    Ones from this macroblock have to be pulled from the BLOCKD array
@@ -1061,7 +1038,6 @@ static int labels2mode(MACROBLOCK *x,
     x->partition_info->bmi[i].mv.as_int = this_mv->as_int;
     if (mbmi->second_ref_frame > 0)
       x->partition_info->bmi[i].second_mv.as_int = this_second_mv->as_int;
-#if CONFIG_AB4X4
     for (idy = 0; idy < bh; ++idy) {
       for (idx = 0; idx < bw; ++idx) {
         vpx_memcpy(&mic->bmi[i + idy * 2 + idx],
@@ -1071,7 +1047,6 @@ static int labels2mode(MACROBLOCK *x,
                    sizeof(x->partition_info->bmi[i]));
       }
     }
-#endif
   }
 
   cost += thismvcost;
@@ -1092,9 +1067,6 @@ static int64_t encode_inter_mb_segment(VP9_COMMON *const cm,
   int bwl = b_width_log2(bsize), bw = 1 << bwl;
   int bhl = b_height_log2(bsize), bh = 1 << bhl;
   int idx, idy;
-#if !CONFIG_AB4X4
-  bw = 1, bh = 1;
-#endif
 
   *labelyrate = 0;
   *distortion = 0;
@@ -1262,18 +1234,10 @@ static void rd_check_segment_txsize(VP9_COMP *cpi, MACROBLOCK *x,
   ENTROPY_CONTEXT t_above[4], t_left[4];
   ENTROPY_CONTEXT t_above_b[4], t_left_b[4];
 
-#if !CONFIG_AB4X4
-  bh = 1, bw = 1;
-#endif
-
   vpx_memcpy(t_above, x->e_mbd.plane[0].above_context, sizeof(t_above));
   vpx_memcpy(t_left, x->e_mbd.plane[0].left_context, sizeof(t_left));
 
-#if CONFIG_AB4X4
   v_fn_ptr = &cpi->fn_ptr[get_block_size(4 << bwl, 4 << bhl)];
-#else
-  v_fn_ptr = &cpi->fn_ptr[BLOCK_4X4];
-#endif
 
   // 64 makes this threshold really big effectively
   // making it so that we very rarely check mvs on
@@ -1282,19 +1246,13 @@ static void rd_check_segment_txsize(VP9_COMP *cpi, MACROBLOCK *x,
   label_mv_thresh = 1 * bsi->mvthresh / label_count;
 
   // Segmentation method overheads
-#if !CONFIG_AB4X4
-  rate += vp9_cost_mv_ref(cpi, SPLITMV,
-                          mbmi->mb_mode_context[mbmi->ref_frame]);
-  this_segment_rd += RDCOST(x->rdmult, x->rddiv, rate, 0);
-  br += rate;
-#endif
   other_segment_rd = this_segment_rd;
 
   for (idy = 0; idy < 2; idy += bh) {
     for (idx = 0; idx < 2; idx += bw) {
       // TODO(jingning,rbultje): rewrite the rate-distortion optimization
-      // loop for 4x4/4x8/8x4 block coding
-#if CONFIG_AB4X4
+      // loop for 4x4/4x8/8x4 block coding. to be replaced with new rd loop
+#if CONFIG_AB4X4 || 1
       int_mv mode_mv[B_MODE_COUNT], second_mode_mv[B_MODE_COUNT];
       int64_t best_label_rd = INT64_MAX, best_other_rd = INT64_MAX;
       B_PREDICTION_MODE mode_selected = ZERO4X4;
@@ -2148,6 +2106,8 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
         if (cpi->sf.comp_inter_joint_serach) {
           const int b_sz[BLOCK_SIZE_TYPES][2] = {
               {4, 4},
+              {4, 8},
+              {8, 4},
               {8, 8},
               {8, 16},
               {16, 8},
@@ -2617,11 +2577,7 @@ void vp9_rd_pick_intra_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
                           &dist_uv, &uv_skip,
                           (bsize < BLOCK_SIZE_SB8X8) ? BLOCK_SIZE_SB8X8 :
                                                        bsize);
-#if CONFIG_AB4X4
   if (bsize < BLOCK_SIZE_SB8X8)
-#else
-  if (bsize == BLOCK_SIZE_SB8X8)
-#endif
     err4x4 = rd_pick_intra4x4mby_modes(cpi, x, &rate4x4_y,
                                        &rate4x4_y_tokenonly,
                                        &dist4x4_y, err);
@@ -2633,11 +2589,7 @@ void vp9_rd_pick_intra_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
     memset(ctx->txfm_rd_diff, 0, sizeof(ctx->txfm_rd_diff));
     xd->mode_info_context->mbmi.mode = mode;
     xd->mode_info_context->mbmi.txfm_size = txfm_size;
-#if CONFIG_AB4X4
   } else if (bsize < BLOCK_SIZE_SB8X8 && err4x4 < err) {
-#else
-  } else if (bsize == BLOCK_SIZE_SB8X8 && err4x4 < err) {
-#endif
     *returnrate = rate4x4_y + rate_uv +
         vp9_cost_bit(vp9_get_pred_prob(cm, xd, PRED_MBSKIP), 0);
     *returndist = dist4x4_y + (dist_uv >> 2);
@@ -2802,17 +2754,10 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
       txfm_cache[i] = INT64_MAX;
 
     // Test best rd so far against threshold for trying this mode.
-#if CONFIG_AB4X4
     if (bsize >= BLOCK_SIZE_SB8X8 &&
         (best_rd < cpi->rd_threshes[mode_index] ||
          cpi->rd_threshes[mode_index] == INT_MAX))
       continue;
-#else
-    if (best_rd <= cpi->rd_threshes[mode_index] ||
-        cpi->rd_threshes[mode_index] == INT_MAX) {
-      continue;
-    }
-#endif
 
     x->skip = 0;
     this_mode = vp9_mode_order[mode_index].mode;
@@ -2823,11 +2768,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
       continue;
     }
 
-#if CONFIG_AB4X4
     if (cpi->speed > 0 && bsize >= BLOCK_SIZE_SB8X8) {
-#else
-    if (cpi->speed > 0) {
-#endif
       if (!(ref_frame_mask & (1 << ref_frame))) {
         continue;
       }
@@ -2873,18 +2814,12 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
     mbmi->interp_filter = cm->mcomp_filter_type;
     vp9_setup_interp_filters(xd, mbmi->interp_filter, &cpi->common);
 
-#if CONFIG_AB4X4
     if (bsize >= BLOCK_SIZE_SB8X8 &&
         (this_mode == I4X4_PRED || this_mode == SPLITMV))
       continue;
     if (bsize < BLOCK_SIZE_SB8X8 &&
         !(this_mode == I4X4_PRED || this_mode == SPLITMV))
       continue;
-#else
-    if (bsize != BLOCK_SIZE_SB8X8 &&
-        (this_mode == I4X4_PRED || this_mode == SPLITMV))
-      continue;
-#endif
 
     if (comp_pred) {
       if (ref_frame == ALTREF_FRAME) {
@@ -2959,11 +2894,9 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
       distortion2 += dist_uv[TX_4X4];
       distortion_uv = dist_uv[TX_4X4];
       mbmi->uv_mode = mode_uv[TX_4X4];
-#if CONFIG_AB4X4
       txfm_cache[ONLY_4X4] = RDCOST(x->rdmult, x->rddiv, rate2, distortion2);
       for (i = 0; i < NB_TXFM_MODES; ++i)
         txfm_cache[i] = txfm_cache[ONLY_4X4];
-#endif
     } else if (ref_frame == INTRA_FRAME) {
       TX_SIZE uv_tx;
       vp9_build_intra_predictors_sby_s(xd, bsize);
@@ -3097,11 +3030,9 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
       distortion2 += distortion_uv;
       skippable = skippable && uv_skippable;
 
-#if CONFIG_AB4X4
       txfm_cache[ONLY_4X4] = RDCOST(x->rdmult, x->rddiv, rate2, distortion2);
       for (i = 0; i < NB_TXFM_MODES; ++i)
         txfm_cache[i] = txfm_cache[ONLY_4X4];
-#endif
 
       if (!mode_excluded) {
         if (is_comp_pred)
@@ -3157,11 +3088,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
       // Is Mb level skip allowed (i.e. not coded at segment level).
       mb_skip_allowed = !vp9_segfeature_active(xd, segment_id, SEG_LVL_SKIP);
 
-#if CONFIG_AB4X4
       if (skippable && bsize >= BLOCK_SIZE_SB8X8) {
-#else
-      if (skippable) {
-#endif
         // Back out the coefficient coding costs
         rate2 -= (rate_y + rate_uv);
         // for best_yrd calculation
@@ -3342,13 +3269,11 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
     }
   }
 
-#if CONFIG_AB4X4
   if (best_rd == INT64_MAX && bsize < BLOCK_SIZE_SB8X8) {
     *returnrate = INT_MAX;
     *returndistortion = INT_MAX;
     return best_rd;
   }
-#endif
 
   assert((cm->mcomp_filter_type == SWITCHABLE) ||
          (cm->mcomp_filter_type == best_mbmode.interp_filter) ||
@@ -3381,10 +3306,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
       cpi->is_src_frame_alt_ref &&
       (cpi->oxcf.arnr_max_frames == 0) &&
       (best_mbmode.mode != ZEROMV || best_mbmode.ref_frame != ALTREF_FRAME)
-#if CONFIG_AB4X4
-      && bsize >= BLOCK_SIZE_SB8X8
-#endif
-     ) {
+      && bsize >= BLOCK_SIZE_SB8X8) {
     mbmi->mode = ZEROMV;
     mbmi->ref_frame = ALTREF_FRAME;
     mbmi->second_ref_frame = NONE;

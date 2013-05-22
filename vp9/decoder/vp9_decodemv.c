@@ -119,7 +119,6 @@ static void kfread_modes(VP9D_COMP *pbi, MODE_INFO *m,
     m->mbmi.mb_skip_coeff = vp9_read(r, vp9_get_pred_prob(cm, xd, PRED_MBSKIP));
 
   // luma mode
-#if CONFIG_AB4X4
   if (m->mbmi.sb_type >= BLOCK_SIZE_SB8X8) {
     const MB_PREDICTION_MODE A = above_block_mode(m, 0, mis);
     const MB_PREDICTION_MODE L = xd->left_available ?
@@ -128,26 +127,14 @@ static void kfread_modes(VP9D_COMP *pbi, MODE_INFO *m,
   } else {
      m->mbmi.mode = I4X4_PRED;
   }
-#else
-  m->mbmi.mode = m->mbmi.sb_type > BLOCK_SIZE_SB8X8 ?
-      read_kf_sb_ymode(r, cm->sb_kf_ymode_prob[cm->kf_ymode_probs_index]):
-      read_kf_mb_ymode(r, cm->kf_ymode_prob[cm->kf_ymode_probs_index]);
-#endif
 
   m->mbmi.ref_frame = INTRA_FRAME;
 
-#if CONFIG_AB4X4
   if (m->mbmi.sb_type < BLOCK_SIZE_SB8X8) {
-#else
-  if (m->mbmi.mode == I4X4_PRED) {
-#endif
     int idx, idy;
     int bw = 1 << b_width_log2(m->mbmi.sb_type);
     int bh = 1 << b_height_log2(m->mbmi.sb_type);
 
-#if !CONFIG_AB4X4
-    bw = 1, bh = 1;
-#endif
     for (idy = 0; idy < 2; idy += bh) {
       for (idx = 0; idx < 2; idx += bw) {
         int ib = idy * 2 + idx;
@@ -169,12 +156,7 @@ static void kfread_modes(VP9D_COMP *pbi, MODE_INFO *m,
 
   if (cm->txfm_mode == TX_MODE_SELECT &&
     !(m->mbmi.mb_skip_coeff && m->mbmi.ref_frame != INTRA_FRAME)
-#if CONFIG_AB4X4
-      && m->mbmi.sb_type >= BLOCK_SIZE_SB8X8
-#else
-      && m->mbmi.mode != I4X4_PRED
-#endif
-      ) {
+      && m->mbmi.sb_type >= BLOCK_SIZE_SB8X8) {
     const int allow_16x16 = m->mbmi.sb_type >= BLOCK_SIZE_MB16X16;
     const int allow_32x32 = m->mbmi.sb_type >= BLOCK_SIZE_SB32X32;
     m->mbmi.txfm_size = select_txfm_size(cm, r, allow_16x16, allow_32x32);
@@ -186,12 +168,7 @@ static void kfread_modes(VP9D_COMP *pbi, MODE_INFO *m,
              m->mbmi.mode <= TM_PRED) {
     m->mbmi.txfm_size = TX_16X16;
   } else if (cm->txfm_mode >= ALLOW_8X8 &&
-#if CONFIG_AB4X4
-             m->mbmi.sb_type >= BLOCK_SIZE_SB8X8
-#else
-             m->mbmi.mode != I4X4_PRED
-#endif
-             ) {
+             m->mbmi.sb_type >= BLOCK_SIZE_SB8X8) {
     m->mbmi.txfm_size = TX_8X8;
   } else {
     m->mbmi.txfm_size = TX_4X4;
@@ -631,16 +608,10 @@ static void read_mb_modes_mv(VP9D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
       if (vp9_segfeature_active(xd, mbmi->segment_id, SEG_LVL_SKIP)) {
         mbmi->mode = ZEROMV;
       } else {
-#if CONFIG_AB4X4
         if (bsize >= BLOCK_SIZE_SB8X8)
           mbmi->mode = read_sb_mv_ref(r, mv_ref_p);
         else
           mbmi->mode = SPLITMV;
-#else
-        mbmi->mode = bsize > BLOCK_SIZE_SB8X8 ?
-                                   read_sb_mv_ref(r, mv_ref_p)
-                                 : read_mv_ref(r, mv_ref_p);
-#endif
         vp9_accum_mv_refs(cm, mbmi->mode, mbmi->mb_mode_context[ref_frame]);
       }
 
@@ -706,9 +677,6 @@ static void read_mb_modes_mv(VP9D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
     mbmi->uv_mode = DC_PRED;
     switch (mbmi->mode) {
       case SPLITMV:
-#if !CONFIG_AB4X4
-        bw = 1, bh = 1;
-#endif
         mbmi->need_to_clamp_mvs = 0;
         for (idy = 0; idy < 2; idy += bh) {
           for (idx = 0; idx < 2; idx += bw) {
@@ -848,33 +816,16 @@ static void read_mb_modes_mv(VP9D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
     // required for left and above block mv
     mv0->as_int = 0;
 
-#if CONFIG_AB4X4
     if (bsize >= BLOCK_SIZE_SB8X8) {
       mbmi->mode = read_sb_ymode(r, cm->fc.sb_ymode_prob);
       cm->fc.sb_ymode_counts[mbmi->mode]++;
     } else {
       mbmi->mode = I4X4_PRED;
     }
-#else
-    if (bsize > BLOCK_SIZE_SB8X8) {
-      mbmi->mode = read_sb_ymode(r, cm->fc.sb_ymode_prob);
-      cm->fc.sb_ymode_counts[mbmi->mode]++;
-    } else {
-      mbmi->mode = read_ymode(r, cm->fc.ymode_prob);
-      cm->fc.ymode_counts[mbmi->mode]++;
-    }
-#endif
 
     // If MB mode is I4X4_PRED read the block modes
-#if CONFIG_AB4X4
     if (bsize < BLOCK_SIZE_SB8X8) {
-#else
-    if (mbmi->mode == I4X4_PRED) {
-#endif
       int idx, idy;
-#if !CONFIG_AB4X4
-      bw = 1, bh = 1;
-#endif
       for (idy = 0; idy < 2; idy += bh) {
         for (idx = 0; idx < 2; idx += bw) {
           int ib = idy * 2 + idx, k;
@@ -893,15 +844,9 @@ static void read_mb_modes_mv(VP9D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
     cm->fc.uv_mode_counts[mbmi->mode][mbmi->uv_mode]++;
   }
 
-#if CONFIG_AB4X4
-  if (cm->txfm_mode == TX_MODE_SELECT && mbmi->mb_skip_coeff == 0 &&
-      bsize >= BLOCK_SIZE_SB8X8) {
-#else
   if (cm->txfm_mode == TX_MODE_SELECT &&
       (mbmi->mb_skip_coeff == 0 || mbmi->ref_frame == INTRA_FRAME) &&
-      ((mbmi->ref_frame == INTRA_FRAME && mbmi->mode != I4X4_PRED) ||
-       (mbmi->ref_frame != INTRA_FRAME && mbmi->mode != SPLITMV))) {
-#endif
+      bsize >= BLOCK_SIZE_SB8X8) {
     const int allow_16x16 = bsize >= BLOCK_SIZE_MB16X16;
     const int allow_32x32 = bsize >= BLOCK_SIZE_SB32X32;
     mbmi->txfm_size = select_txfm_size(cm, r, allow_16x16, allow_32x32);
@@ -909,21 +854,9 @@ static void read_mb_modes_mv(VP9D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
              cm->txfm_mode >= ALLOW_32X32) {
     mbmi->txfm_size = TX_32X32;
   } else if (cm->txfm_mode >= ALLOW_16X16 &&
-             bsize >= BLOCK_SIZE_MB16X16
-#if !CONFIG_AB4X4
-      && ((mbmi->ref_frame == INTRA_FRAME && mbmi->mode <= TM_PRED) ||
-       (mbmi->ref_frame != INTRA_FRAME && mbmi->mode != SPLITMV))
-#endif
-       ) {
+             bsize >= BLOCK_SIZE_MB16X16) {
     mbmi->txfm_size = TX_16X16;
-  } else if (cm->txfm_mode >= ALLOW_8X8 &&
-#if CONFIG_AB4X4
-      (bsize >= BLOCK_SIZE_SB8X8))
-#else
-      (!(mbmi->ref_frame == INTRA_FRAME && mbmi->mode == I4X4_PRED) &&
-       !(mbmi->ref_frame != INTRA_FRAME && mbmi->mode == SPLITMV)))
-#endif
-  {
+  } else if (cm->txfm_mode >= ALLOW_8X8 && (bsize >= BLOCK_SIZE_SB8X8)) {
     mbmi->txfm_size = TX_8X8;
   } else {
     mbmi->txfm_size = TX_4X4;

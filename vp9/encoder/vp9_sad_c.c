@@ -593,6 +593,37 @@ void vp9_sad8x4x4d_c(const uint8_t *src_ptr,
                             ref_ptr[3], ref_stride, 0x7fffffff);
 }
 
+void vp9_sad8x4x8_c(const uint8_t *src_ptr,
+                     int  src_stride,
+                     const uint8_t *ref_ptr,
+                     int  ref_stride,
+                     uint32_t *sad_array) {
+  sad_array[0] = vp9_sad8x4(src_ptr, src_stride,
+                             ref_ptr, ref_stride,
+                             0x7fffffff);
+  sad_array[1] = vp9_sad8x4(src_ptr, src_stride,
+                             ref_ptr + 1, ref_stride,
+                             0x7fffffff);
+  sad_array[2] = vp9_sad8x4(src_ptr, src_stride,
+                             ref_ptr + 2, ref_stride,
+                             0x7fffffff);
+  sad_array[3] = vp9_sad8x4(src_ptr, src_stride,
+                             ref_ptr + 3, ref_stride,
+                             0x7fffffff);
+  sad_array[4] = vp9_sad8x4(src_ptr, src_stride,
+                             ref_ptr + 4, ref_stride,
+                             0x7fffffff);
+  sad_array[5] = vp9_sad8x4(src_ptr, src_stride,
+                             ref_ptr + 5, ref_stride,
+                             0x7fffffff);
+  sad_array[6] = vp9_sad8x4(src_ptr, src_stride,
+                             ref_ptr + 6, ref_stride,
+                             0x7fffffff);
+  sad_array[7] = vp9_sad8x4(src_ptr, src_stride,
+                             ref_ptr + 7, ref_stride,
+                             0x7fffffff);
+}
+
 void vp9_sad4x8x4d_c(const uint8_t *src_ptr,
                      int  src_stride,
                      const uint8_t* const ref_ptr[],
@@ -606,6 +637,37 @@ void vp9_sad4x8x4d_c(const uint8_t *src_ptr,
                             ref_ptr[2], ref_stride, 0x7fffffff);
   sad_array[3] = vp9_sad4x8(src_ptr, src_stride,
                             ref_ptr[3], ref_stride, 0x7fffffff);
+}
+
+void vp9_sad4x8x8_c(const uint8_t *src_ptr,
+                     int  src_stride,
+                     const uint8_t *ref_ptr,
+                     int  ref_stride,
+                     uint32_t *sad_array) {
+  sad_array[0] = vp9_sad4x8(src_ptr, src_stride,
+                             ref_ptr, ref_stride,
+                             0x7fffffff);
+  sad_array[1] = vp9_sad4x8(src_ptr, src_stride,
+                             ref_ptr + 1, ref_stride,
+                             0x7fffffff);
+  sad_array[2] = vp9_sad4x8(src_ptr, src_stride,
+                             ref_ptr + 2, ref_stride,
+                             0x7fffffff);
+  sad_array[3] = vp9_sad4x8(src_ptr, src_stride,
+                             ref_ptr + 3, ref_stride,
+                             0x7fffffff);
+  sad_array[4] = vp9_sad4x8(src_ptr, src_stride,
+                             ref_ptr + 4, ref_stride,
+                             0x7fffffff);
+  sad_array[5] = vp9_sad4x8(src_ptr, src_stride,
+                             ref_ptr + 5, ref_stride,
+                             0x7fffffff);
+  sad_array[6] = vp9_sad4x8(src_ptr, src_stride,
+                             ref_ptr + 6, ref_stride,
+                             0x7fffffff);
+  sad_array[7] = vp9_sad4x8(src_ptr, src_stride,
+                             ref_ptr + 7, ref_stride,
+                             0x7fffffff);
 }
 
 void vp9_sad4x4x4d_c(const uint8_t *src_ptr,

@@ -141,7 +141,7 @@ static int above_block_second_mv(const MODE_INFO *cur_mb, int b, int mi_stride) 
       (cur_mb->bmi + b - 2)->as_mv[0].as_int;
 }
 
-static B_PREDICTION_MODE left_block_mode(const MODE_INFO *cur_mb, int b) {
+static MB_PREDICTION_MODE left_block_mode(const MODE_INFO *cur_mb, int b) {
   // FIXME(rbultje, jingning): temporary hack because jenkins doesn't
   // understand this condition. This will go away soon.
   if (b == 0 || b == 2) {
@@ -160,7 +160,7 @@ static B_PREDICTION_MODE left_block_mode(const MODE_INFO *cur_mb, int b) {
   return (cur_mb->bmi + b - 1)->as_mode.first;
 }
 
-static B_PREDICTION_MODE above_block_mode(const MODE_INFO *cur_mb,
+static MB_PREDICTION_MODE above_block_mode(const MODE_INFO *cur_mb,
                                           int b, int mi_stride) {
   if (!(b >> 1)) {
     /* On top edge, get from MB above us */

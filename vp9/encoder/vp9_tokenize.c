@@ -119,12 +119,8 @@ static void tokenize_b(int plane, int block, BLOCK_SIZE_TYPE bsize,
   TOKENEXTRA *t = *tp;        /* store tokens starting here */
   const int eob = xd->plane[plane].eobs[block];
   const int16_t *qcoeff_ptr = BLOCK_OFFSET(xd->plane[plane].qcoeff, block, 16);
-#if CONFIG_AB4X4
   const BLOCK_SIZE_TYPE sb_type = (mbmi->sb_type < BLOCK_SIZE_SB8X8) ?
                                    BLOCK_SIZE_SB8X8 : mbmi->sb_type;
-#else
-  const BLOCK_SIZE_TYPE sb_type = mbmi->sb_type;
-#endif
   const int bwl = b_width_log2(sb_type);
   const int off = block >> (2 * tx_size);
   const int mod = bwl - tx_size - xd->plane[plane].subsampling_x;

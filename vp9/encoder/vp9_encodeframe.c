@@ -619,11 +619,9 @@ static void pick_sb_modes(VP9_COMP *cpi, int mi_row, int mi_col,
   MACROBLOCK *const x = &cpi->mb;
   MACROBLOCKD *const xd = &x->e_mbd;
 
-#if CONFIG_AB4X4
   if (bsize < BLOCK_SIZE_SB8X8)
     if (xd->ab_index != 0)
       return;
-#endif
 
   set_offsets(cpi, mi_row, mi_col, bsize);
   xd->mode_info_context->mbmi.sb_type = bsize;
@@ -708,14 +706,12 @@ static PICK_MODE_CONTEXT *get_block_context(MACROBLOCK *x,
       return &x->sb8x16_context[xd->sb_index][xd->mb_index][xd->b_index];
     case BLOCK_SIZE_SB8X8:
       return &x->sb8x8_context[xd->sb_index][xd->mb_index][xd->b_index];
-#if CONFIG_AB4X4
     case BLOCK_SIZE_SB8X4:
       return &x->sb8x4_context[xd->sb_index][xd->mb_index][xd->b_index];
     case BLOCK_SIZE_SB4X8:
       return &x->sb4x8_context[xd->sb_index][xd->mb_index][xd->b_index];
     case BLOCK_SIZE_AB4X4:
       return &x->ab4x4_context[xd->sb_index][xd->mb_index][xd->b_index];
-#endif
     default:
       assert(0);
       return NULL;
@@ -732,10 +728,8 @@ static BLOCK_SIZE_TYPE *get_sb_partitioning(MACROBLOCK *x,
       return &x->sb_partitioning[xd->sb_index];
     case BLOCK_SIZE_MB16X16:
       return &x->mb_partitioning[xd->sb_index][xd->mb_index];
-#if CONFIG_AB4X4
     case BLOCK_SIZE_SB8X8:
       return &x->b_partitioning[xd->sb_index][xd->mb_index][xd->b_index];
-#endif
     default:
       assert(0);
       return NULL;
@@ -785,11 +779,9 @@ static void encode_b(VP9_COMP *cpi, TOKENEXTRA **tp,
   if (sub_index != -1)
     *(get_sb_index(xd, bsize)) = sub_index;
 
-#if CONFIG_AB4X4
   if (bsize < BLOCK_SIZE_SB8X8)
     if (xd->ab_index > 0)
       return;
-#endif
   set_offsets(cpi, mi_row, mi_col, bsize);
   update_state(cpi, get_block_context(x, bsize), bsize, output_enabled);
   encode_superblock(cpi, tp, output_enabled, mi_row, mi_col, bsize);
@@ -816,13 +808,8 @@ static void encode_sb(VP9_COMP *cpi, TOKENEXTRA **tp,
   if (mi_row >= cm->mi_rows || mi_col >= cm->mi_cols)
     return;
 
-#if CONFIG_AB4X4
   c1 = BLOCK_SIZE_AB4X4;
-  if (bsize >= BLOCK_SIZE_SB8X8)
-#else
-  if (bsize > BLOCK_SIZE_SB8X8)
-#endif
-  {
+  if (bsize >= BLOCK_SIZE_SB8X8) {
     set_partition_seg_context(cm, xd, mi_row, mi_col);
     pl = partition_plane_context(xd, bsize);
     c1 = *(get_sb_partitioning(x, bsize));
@@ -831,13 +818,8 @@ static void encode_sb(VP9_COMP *cpi, TOKENEXTRA **tp,
   bwl = b_width_log2(c1), bhl = b_height_log2(c1);
 
   if (bsl == bwl && bsl == bhl) {
-#if CONFIG_AB4X4
     if (output_enabled && bsize >= BLOCK_SIZE_SB8X8)
         cpi->partition_count[pl][PARTITION_NONE]++;
-#else
-    if (output_enabled && bsize > BLOCK_SIZE_SB8X8)
-      cpi->partition_count[pl][PARTITION_NONE]++;
-#endif
     encode_b(cpi, tp, mi_row, mi_col, output_enabled, c1, -1);
   } else if (bsl == bhl && bsl > bwl) {
     if (output_enabled)
@@ -868,13 +850,8 @@ static void encode_sb(VP9_COMP *cpi, TOKENEXTRA **tp,
     }
   }
 
-#if CONFIG_AB4X4
   if (bsize >= BLOCK_SIZE_SB8X8 &&
       (bsize == BLOCK_SIZE_SB8X8 || bsl == bwl || bsl == bhl)) {
-#else
-  if (bsize > BLOCK_SIZE_SB8X8 &&
-      (bsize == BLOCK_SIZE_MB16X16 || bsl == bwl || bsl == bhl)) {
-#endif
     set_partition_seg_context(cm, xd, mi_row, mi_col);
     update_partition_context(xd, c1, bsize);
   }
@@ -900,14 +877,12 @@ static void rd_pick_partition(VP9_COMP *cpi, TOKENEXTRA **tp,
   BLOCK_SIZE_TYPE subsize;
   int srate = INT_MAX, sdist = INT_MAX;
 
-#if CONFIG_AB4X4
   if (bsize < BLOCK_SIZE_SB8X8)
     if (xd->ab_index != 0) {
       *rate = 0;
       *dist = 0;
       return;
     }
-#endif
   assert(mi_height_log2(bsize) == mi_width_log2(bsize));
 
   // buffer the above/left context information of the block in search.
@@ -925,11 +900,7 @@ static void rd_pick_partition(VP9_COMP *cpi, TOKENEXTRA **tp,
              sizeof(PARTITION_CONTEXT) * ms);
 
   // PARTITION_SPLIT
-#if CONFIG_AB4X4
   if (bsize >= BLOCK_SIZE_SB8X8) {
-#else
-  if (bsize >= BLOCK_SIZE_MB16X16) {
-#endif
     int r4 = 0, d4 = 0;
     subsize = get_subsize(bsize, PARTITION_SPLIT);
     *(get_sb_partitioning(x, bsize)) = subsize;
@@ -951,12 +922,8 @@ static void rd_pick_partition(VP9_COMP *cpi, TOKENEXTRA **tp,
     }
     set_partition_seg_context(cm, xd, mi_row, mi_col);
     pl = partition_plane_context(xd, bsize);
-#if CONFIG_AB4X4
     if (r4 < INT_MAX)
       r4 += x->partition_cost[pl][PARTITION_SPLIT];
-#else
-    r4 += x->partition_cost[pl][PARTITION_SPLIT];
-#endif
     assert(r4 >= 0);
     assert(d4 >= 0);
     srate = r4;
@@ -966,11 +933,7 @@ static void rd_pick_partition(VP9_COMP *cpi, TOKENEXTRA **tp,
 
   // PARTITION_HORZ
   if ((mi_col + ms <= cm->mi_cols) && (mi_row + (ms >> 1) <= cm->mi_rows) &&
-#if CONFIG_AB4X4
       (bsize >= BLOCK_SIZE_SB8X8)) {
-#else
-      (bsize >= BLOCK_SIZE_MB16X16)) {
-#endif
     int r2, d2;
     int mb_skip = 0;
     subsize = get_subsize(bsize, PARTITION_HORZ);
@@ -993,12 +956,8 @@ static void rd_pick_partition(VP9_COMP *cpi, TOKENEXTRA **tp,
     }
     set_partition_seg_context(cm, xd, mi_row, mi_col);
     pl = partition_plane_context(xd, bsize);
-#if CONFIG_AB4X4
     if (r2 < INT_MAX)
       r2 += x->partition_cost[pl][PARTITION_HORZ];
-#else
-    r2 += x->partition_cost[pl][PARTITION_HORZ];
-#endif
     if ((RDCOST(x->rdmult, x->rddiv, r2, d2) <
          RDCOST(x->rdmult, x->rddiv, srate, sdist)) && !mb_skip) {
       srate = r2;
@@ -1010,11 +969,7 @@ static void rd_pick_partition(VP9_COMP *cpi, TOKENEXTRA **tp,
 
   // PARTITION_VERT
   if ((mi_row + ms <= cm->mi_rows) && (mi_col + (ms >> 1) <= cm->mi_cols) &&
-#if CONFIG_AB4X4
       (bsize >= BLOCK_SIZE_SB8X8)) {
-#else
-      (bsize >= BLOCK_SIZE_MB16X16)) {
-#endif
     int r2, d2;
     int mb_skip = 0;
     subsize = get_subsize(bsize, PARTITION_VERT);
@@ -1036,12 +991,8 @@ static void rd_pick_partition(VP9_COMP *cpi, TOKENEXTRA **tp,
     }
     set_partition_seg_context(cm, xd, mi_row, mi_col);
     pl = partition_plane_context(xd, bsize);
-#if CONFIG_AB4X4
     if (r2 < INT_MAX)
       r2 += x->partition_cost[pl][PARTITION_VERT];
-#else
-    r2 += x->partition_cost[pl][PARTITION_VERT];
-#endif
     if ((RDCOST(x->rdmult, x->rddiv, r2, d2) <
          RDCOST(x->rdmult, x->rddiv, srate, sdist)) && !mb_skip) {
       srate = r2;
@@ -1056,11 +1007,7 @@ static void rd_pick_partition(VP9_COMP *cpi, TOKENEXTRA **tp,
     int r, d;
     pick_sb_modes(cpi, mi_row, mi_col, tp, &r, &d, bsize,
                   get_block_context(x, bsize));
-#if CONFIG_AB4X4
     if (bsize >= BLOCK_SIZE_SB8X8) {
-#else
-    if (bsize >= BLOCK_SIZE_MB16X16) {
-#endif
       set_partition_seg_context(cm, xd, mi_row, mi_col);
       pl = partition_plane_context(xd, bsize);
       r += x->partition_cost[pl][PARTITION_NONE];
@@ -1070,11 +1017,7 @@ static void rd_pick_partition(VP9_COMP *cpi, TOKENEXTRA **tp,
         RDCOST(x->rdmult, x->rddiv, srate, sdist)) {
       srate = r;
       sdist = d;
-#if CONFIG_AB4X4
       if (bsize >= BLOCK_SIZE_SB8X8)
-#else
-      if (bsize >= BLOCK_SIZE_MB16X16)
-#endif
         *(get_sb_partitioning(x, bsize)) = bsize;
     }
   }
@@ -1601,11 +1544,7 @@ static void sum_intra_stats(VP9_COMP *cpi, MACROBLOCK *x) {
   const MB_PREDICTION_MODE m = xd->mode_info_context->mbmi.mode;
   const MB_PREDICTION_MODE uvm = xd->mode_info_context->mbmi.uv_mode;
 
-#if CONFIG_AB4X4
   if (xd->mode_info_context->mbmi.sb_type >= BLOCK_SIZE_SB8X8) {
-#else
-  if (xd->mode_info_context->mbmi.sb_type > BLOCK_SIZE_SB8X8) {
-#endif
     ++cpi->sb_ymode_count[m];
   } else {
     ++cpi->ymode_count[m];
@@ -1615,9 +1554,6 @@ static void sum_intra_stats(VP9_COMP *cpi, MACROBLOCK *x) {
     int idx, idy;
     int bw = 1 << b_width_log2(xd->mode_info_context->mbmi.sb_type);
     int bh = 1 << b_height_log2(xd->mode_info_context->mbmi.sb_type);
-#if !CONFIG_AB4X4
-    bw = 1, bh = 1;
-#endif
     for (idy = 0; idy < 2; idy += bh) {
       for (idx = 0; idx < 2; idx += bw) {
         int m = xd->mode_info_context->bmi[idy * 2 + idx].as_mode.first;
@@ -1698,17 +1634,11 @@ static void encode_superblock(VP9_COMP *cpi, TOKENEXTRA **t,
     vp9_update_zbin_extra(cpi, x);
   }
 
-#if CONFIG_AB4X4
-  if (mbmi->ref_frame == INTRA_FRAME &&
-      bsize < BLOCK_SIZE_SB8X8) {
-    vp9_encode_intra_block_y(cm, x, BLOCK_SIZE_SB8X8);
-    vp9_build_intra_predictors_sbuv_s(xd, BLOCK_SIZE_SB8X8);
-    vp9_encode_sbuv(cm, x, BLOCK_SIZE_SB8X8);
-#else
-  if (xd->mode_info_context->mbmi.ref_frame == INTRA_FRAME) {
-    vp9_encode_intra_block_y(cm, x, bsize);
-    vp9_encode_intra_block_uv(cm, x, bsize);
-#endif
+  if (mbmi->ref_frame == INTRA_FRAME) {
+    vp9_encode_intra_block_y(cm, x, (bsize < BLOCK_SIZE_SB8X8) ?
+                                    BLOCK_SIZE_SB8X8 : bsize);
+    vp9_encode_intra_block_uv(cm, x, (bsize < BLOCK_SIZE_SB8X8) ?
+                                     BLOCK_SIZE_SB8X8 : bsize);
     if (output_enabled)
       sum_intra_stats(cpi, x);
   } else {
@@ -1730,12 +1660,7 @@ static void encode_superblock(VP9_COMP *cpi, TOKENEXTRA **t,
                                                            : bsize);
   }
 
-#if CONFIG_AB4X4
-  if (mbmi->ref_frame == INTRA_FRAME &&
-      bsize < BLOCK_SIZE_SB8X8) {
-#else
   if (xd->mode_info_context->mbmi.ref_frame == INTRA_FRAME) {
-#endif
     vp9_tokenize_sb(cpi, xd, t, !output_enabled,
                     (bsize < BLOCK_SIZE_SB8X8) ? BLOCK_SIZE_SB8X8 : bsize);
   } else if (!x->skip) {
@@ -1783,11 +1708,7 @@ static void encode_superblock(VP9_COMP *cpi, TOKENEXTRA **t,
           sz = TX_16X16;
         if (sz == TX_16X16 && bsize < BLOCK_SIZE_MB16X16)
           sz = TX_8X8;
-#if CONFIG_AB4X4
         if (sz == TX_8X8 && bsize < BLOCK_SIZE_SB8X8)
-#else
-        if (sz == TX_8X8 && mbmi->mode == SPLITMV)
-#endif
           sz = TX_4X4;
       } else if (mbmi->mode != I4X4_PRED) {
         sz = mbmi->txfm_size;

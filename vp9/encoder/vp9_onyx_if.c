@@ -1639,12 +1639,12 @@ VP9_PTR vp9_create_compressor(VP9_CONFIG *oxcf) {
 
   BFP(BLOCK_8X4, vp9_sad8x4, vp9_variance8x4, vp9_sub_pixel_variance8x4,
       vp9_sub_pixel_avg_variance8x4, NULL, NULL,
-      NULL, NULL, NULL,
+      NULL, NULL, vp9_sad8x4x8,
       vp9_sad8x4x4d)
 
   BFP(BLOCK_4X8, vp9_sad4x8, vp9_variance4x8, vp9_sub_pixel_variance4x8,
       vp9_sub_pixel_avg_variance4x8, NULL, NULL,
-      NULL, NULL, NULL,
+      NULL, NULL, vp9_sad4x8x8,
       vp9_sad4x8x4d)
 
   BFP(BLOCK_4X4, vp9_sad4x4, vp9_variance4x4, vp9_sub_pixel_variance4x4,

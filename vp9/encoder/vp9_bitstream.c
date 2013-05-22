@@ -369,12 +369,6 @@ static void write_uv_mode(vp9_writer *bc, int m, const vp9_prob *p) {
   write_token(bc, vp9_uv_mode_tree, p, vp9_uv_mode_encodings + m);
 }
 
-#if !CONFIG_AB4X4
-static void write_bmode(vp9_writer *bc, int m, const vp9_prob *p) {
-  write_token(bc, vp9_bmode_tree, p, vp9_bmode_encodings + m);
-}
-#endif
-
 static void write_kf_bmode(vp9_writer *bc, int m, const vp9_prob *p) {
   write_token(bc, vp9_kf_bmode_tree, p, vp9_kf_bmode_encodings + m);
 }
@@ -722,27 +716,13 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, MODE_INFO *m,
     active_section = 6;
 #endif
 
-#if CONFIG_AB4X4
     if (m->mbmi.sb_type >= BLOCK_SIZE_SB8X8)
       write_sb_ymode(bc, mode, pc->fc.sb_ymode_prob);
-#else
-    if (m->mbmi.sb_type > BLOCK_SIZE_SB8X8)
-      write_sb_ymode(bc, mode, pc->fc.sb_ymode_prob);
-    else
-      write_ymode(bc, mode, pc->fc.ymode_prob);
-#endif
 
-#if CONFIG_AB4X4
     if (m->mbmi.sb_type < BLOCK_SIZE_SB8X8) {
-#else
-    if (mode == I4X4_PRED) {
-#endif
       int idx, idy;
       int bw = 1 << b_width_log2(mi->sb_type);
       int bh = 1 << b_height_log2(mi->sb_type);
-#if !CONFIG_AB4X4
-      bw = 1, bh = 1;
-#endif
       for (idy = 0; idy < 2; idy += bh)
         for (idx = 0; idx < 2; idx += bw)
           write_sb_ymode(bc, m->bmi[idy * 2 + idx].as_mode.first,
@@ -761,16 +741,8 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, MODE_INFO *m,
 
     // If segment skip is not enabled code the mode.
     if (!vp9_segfeature_active(xd, segment_id, SEG_LVL_SKIP)) {
-#if CONFIG_AB4X4
       if (mi->sb_type >= BLOCK_SIZE_SB8X8)
         write_sb_mv_ref(bc, mode, mv_ref_p);
-#else
-      if (mi->sb_type > BLOCK_SIZE_SB8X8) {
-        write_sb_mv_ref(bc, mode, mv_ref_p);
-      } else {
-        write_mv_ref(bc, mode, mv_ref_p);
-      }
-#endif
       vp9_accum_mv_refs(&cpi->common, mode, mi->mb_mode_context[rf]);
     }
 
@@ -817,9 +789,6 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, MODE_INFO *m,
         int bwl = b_width_log2(mi->sb_type), bw = 1 << bwl;
         int bhl = b_height_log2(mi->sb_type), bh = 1 << bhl;
         int idx, idy;
-#if !CONFIG_AB4X4
-        bw = 1, bh = 1;
-#endif
         for (idy = 0; idy < 2; idy += bh) {
           for (idx = 0; idx < 2; idx += bw) {
             j = idy * 2 + idx;
@@ -859,21 +828,9 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, MODE_INFO *m,
     }
   }
 
-#if CONFIG_AB4X4
-  if (((rf == INTRA_FRAME && mi->sb_type >= BLOCK_SIZE_SB8X8) ||
-       (rf != INTRA_FRAME && mi->sb_type >= BLOCK_SIZE_SB8X8)) &&
-      pc->txfm_mode == TX_MODE_SELECT &&
-      !(skip_coeff || vp9_segfeature_active(xd, segment_id,
-                                            SEG_LVL_SKIP)))
-#else
-  if (((rf == INTRA_FRAME && mode != I4X4_PRED) ||
-       (rf != INTRA_FRAME && mode != SPLITMV)) &&
-      pc->txfm_mode == TX_MODE_SELECT &&
+  if (mi->sb_type >= BLOCK_SIZE_SB8X8 && pc->txfm_mode == TX_MODE_SELECT &&
       !(rf != INTRA_FRAME &&
-        (skip_coeff || vp9_segfeature_active(xd, segment_id,
-                                            SEG_LVL_SKIP))))
-#endif
-  {
+        (skip_coeff || vp9_segfeature_active(xd, segment_id, SEG_LVL_SKIP)))) {
     TX_SIZE sz = mi->txfm_size;
     // FIXME(rbultje) code ternary symbol once all experiments are merged
     vp9_write(bc, sz != TX_4X4, pc->prob_tx[0]);
@@ -905,31 +862,17 @@ static void write_mb_modes_kf(const VP9_COMP *cpi,
     vp9_write(bc, skip_coeff, vp9_get_pred_prob(c, xd, PRED_MBSKIP));
   }
 
-#if CONFIG_AB4X4
   if (m->mbmi.sb_type >= BLOCK_SIZE_SB8X8) {
     const B_PREDICTION_MODE A = above_block_mode(m, 0, mis);
     const B_PREDICTION_MODE L = xd->left_available ?
                                  left_block_mode(m, 0) : DC_PRED;
     write_kf_bmode(bc, ym, c->kf_bmode_prob[A][L]);
   }
-#else
-  if (m->mbmi.sb_type > BLOCK_SIZE_SB8X8)
-    sb_kfwrite_ymode(bc, ym, c->sb_kf_ymode_prob[c->kf_ymode_probs_index]);
-  else
-    kfwrite_ymode(bc, ym, c->kf_ymode_prob[c->kf_ymode_probs_index]);
-#endif
 
-#if CONFIG_AB4X4
   if (m->mbmi.sb_type < BLOCK_SIZE_SB8X8) {
-#else
-  if (ym == I4X4_PRED) {
-#endif
     int idx, idy;
     int bw = 1 << b_width_log2(m->mbmi.sb_type);
     int bh = 1 << b_height_log2(m->mbmi.sb_type);
-#if !CONFIG_AB4X4
-    bw = 1, bh = 1;
-#endif
     for (idy = 0; idy < 2; idy += bh) {
       for (idx = 0; idx < 2; idx += bw) {
         int i = idy * 2 + idx;
@@ -944,14 +887,8 @@ static void write_mb_modes_kf(const VP9_COMP *cpi,
 
   write_uv_mode(bc, m->mbmi.uv_mode, c->kf_uv_mode_prob[ym]);
 
-#if CONFIG_AB4X4
   if (m->mbmi.sb_type >= BLOCK_SIZE_SB8X8 && c->txfm_mode == TX_MODE_SELECT &&
-      !(skip_coeff || vp9_segfeature_active(xd, segment_id, SEG_LVL_SKIP))) {
-#else
-  if (ym != I4X4_PRED && c->txfm_mode == TX_MODE_SELECT &&
-    !(m->mbmi.ref_frame != INTRA_FRAME && (skip_coeff ||
-      vp9_segfeature_active(xd, segment_id, SEG_LVL_SKIP)))) {
-#endif
+      !((skip_coeff || vp9_segfeature_active(xd, segment_id, SEG_LVL_SKIP)))) {
     TX_SIZE sz = m->mbmi.txfm_size;
     // FIXME(rbultje) code ternary symbol once all experiments are merged
     vp9_write(bc, sz != TX_4X4, c->prob_tx[0]);
@@ -969,11 +906,9 @@ static void write_modes_b(VP9_COMP *cpi, MODE_INFO *m, vp9_writer *bc,
   VP9_COMMON *const cm = &cpi->common;
   MACROBLOCKD *const xd = &cpi->mb.e_mbd;
 
-#if CONFIG_AB4X4
   if (m->mbmi.sb_type < BLOCK_SIZE_SB8X8)
     if (xd->ab_index > 0)
       return;
-#endif
   xd->mode_info_context = m;
   set_mi_row_col(&cpi->common, xd, mi_row,
                  1 << mi_height_log2(m->mbmi.sb_type),
@@ -1026,17 +961,11 @@ static void write_modes_sb(VP9_COMP *cpi, MODE_INFO *m, vp9_writer *bc,
   else
     assert(0);
 
-#if CONFIG_AB4X4
   if (bsize < BLOCK_SIZE_SB8X8)
     if (xd->ab_index > 0)
       return;
-#endif
 
-#if CONFIG_AB4X4
   if (bsize >= BLOCK_SIZE_SB8X8) {
-#else
-  if (bsize > BLOCK_SIZE_SB8X8) {
-#endif
     int pl;
     xd->left_seg_context = cm->left_seg_context + (mi_row & MI_MASK);
     xd->above_seg_context = cm->above_seg_context + mi_col;
@@ -1078,13 +1007,8 @@ static void write_modes_sb(VP9_COMP *cpi, MODE_INFO *m, vp9_writer *bc,
   }
 
   // update partition context
-#if CONFIG_AB4X4
   if (bsize >= BLOCK_SIZE_SB8X8 &&
       (bsize == BLOCK_SIZE_SB8X8 || partition != PARTITION_SPLIT)) {
-#else
-  if (bsize > BLOCK_SIZE_SB8X8 &&
-      (bsize == BLOCK_SIZE_MB16X16 || partition != PARTITION_SPLIT)) {
-#endif
     set_partition_seg_context(cm, xd, mi_row, mi_col);
     update_partition_context(xd, subsize, bsize);
   }
