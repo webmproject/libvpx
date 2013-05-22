@@ -414,7 +414,6 @@ int vp9_find_best_sub_pixel_step_iteratively(MACROBLOCK *x,
   return besterr;
 }
 
-#if CONFIG_COMP_INTER_JOINT_SEARCH
 #undef DIST
 /* returns subpixel variance error function */
 #define DIST(r, c) \
@@ -606,7 +605,7 @@ int vp9_find_best_sub_pixel_comp(MACROBLOCK *x,
 
   return besterr;
 }
-#endif  // CONFIG_COMP_INTER_JOINT_SEARCH
+
 
 #undef MVC
 #undef PRE
@@ -2327,7 +2326,6 @@ int vp9_refining_search_sadx4(MACROBLOCK *x,
     return INT_MAX;
 }
 
-#if CONFIG_COMP_INTER_JOINT_SEARCH
 /* This function is called when we do joint motion search in comp_inter_inter
  * mode.
  */
@@ -2429,4 +2427,3 @@ int vp9_refining_search_8p_c(MACROBLOCK *x,
     return INT_MAX;
   }
 }
-#endif  // CONFIG_COMP_INTER_JOINT_SEARCH
