@@ -236,53 +236,43 @@ if [ "$CONFIG_VP9_ENCODER" = "yes" ]; then
 [ $arch = "x86_64" ] && mmx_x86_64=mmx && sse2_x86_64=sse2
 
 prototype unsigned int vp9_variance32x16 "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse"
-specialize vp9_variance32x16
+specialize vp9_variance32x16 sse2
 
 prototype unsigned int vp9_variance16x32 "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse"
-specialize vp9_variance16x32
+specialize vp9_variance16x32 sse2
 
 prototype unsigned int vp9_variance64x32 "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse"
-specialize vp9_variance64x32
+specialize vp9_variance64x32 sse2
 
 prototype unsigned int vp9_variance32x64 "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse"
-specialize vp9_variance32x64
+specialize vp9_variance32x64 sse2
 
 prototype unsigned int vp9_variance32x32 "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse"
-specialize vp9_variance32x32
+specialize vp9_variance32x32 sse2
 
 prototype unsigned int vp9_variance64x64 "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse"
-specialize vp9_variance64x64
+specialize vp9_variance64x64 sse2
 
 prototype unsigned int vp9_variance16x16 "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse"
 specialize vp9_variance16x16 mmx sse2
-vp9_variance16x16_sse2=vp9_variance16x16_wmt
-vp9_variance16x16_mmx=vp9_variance16x16_mmx
 
 prototype unsigned int vp9_variance16x8 "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse"
 specialize vp9_variance16x8 mmx sse2
-vp9_variance16x8_sse2=vp9_variance16x8_wmt
-vp9_variance16x8_mmx=vp9_variance16x8_mmx
 
 prototype unsigned int vp9_variance8x16 "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse"
 specialize vp9_variance8x16 mmx sse2
-vp9_variance8x16_sse2=vp9_variance8x16_wmt
-vp9_variance8x16_mmx=vp9_variance8x16_mmx
 
 prototype unsigned int vp9_variance8x8 "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse"
 specialize vp9_variance8x8 mmx sse2
-vp9_variance8x8_sse2=vp9_variance8x8_wmt
-vp9_variance8x8_mmx=vp9_variance8x8_mmx
 
 prototype unsigned int vp9_variance8x4 "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse"
-specialize vp9_variance8x4
+specialize vp9_variance8x4 sse2
 
 prototype unsigned int vp9_variance4x8 "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse"
-specialize vp9_variance4x8
+specialize vp9_variance4x8 sse2
 
 prototype unsigned int vp9_variance4x4 "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse"
 specialize vp9_variance4x4 mmx sse2
-vp9_variance4x4_sse2=vp9_variance4x4_wmt
-vp9_variance4x4_mmx=vp9_variance4x4_mmx
 
 prototype unsigned int vp9_sub_pixel_variance64x64 "const uint8_t *src_ptr, int source_stride, int xoffset, int  yoffset, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse"
 specialize vp9_sub_pixel_variance64x64 sse2
