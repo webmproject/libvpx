@@ -155,13 +155,11 @@ extern int vp9_get_coef_context(const int *scan, const int *neighbors,
 const int *vp9_get_coef_neighbors_handle(const int *scan, int *pad);
 
 
-// 48 lists of probabilities are stored for the following ONE node probs:
-// 1, (count 1)
-// 3, 7, 11, 15, ..., 115, 119, (count 30)
-// 127, 135, 143, ..., 247, 255 (count 17)
+// 128 lists of probabilities are stored for the following ONE node probs:
+// 1, 3, 5, 7, ..., 253, 255
 // In between probabilities are interpolated linearly
 
-#define COEFPROB_MODELS             48
+#define COEFPROB_MODELS             128
 
 #define UNCONSTRAINED_NODES         3
 #define MODEL_NODES                 (ENTROPY_NODES - UNCONSTRAINED_NODES)
@@ -180,16 +178,13 @@ typedef unsigned int vp9_coeff_stats_model[REF_TYPES][COEF_BANDS]
 extern void vp9_full_to_model_counts(
     vp9_coeff_count_model *model_count, vp9_coeff_count *full_count);
 
-void vp9_model_to_full_probs(const vp9_prob *model, int b, int r, vp9_prob *full);
+void vp9_model_to_full_probs(const vp9_prob *model, vp9_prob *full);
 
 void vp9_model_to_full_probs_sb(
     vp9_prob model[COEF_BANDS][PREV_COEF_CONTEXTS][UNCONSTRAINED_NODES],
-    int b, int r,
     vp9_prob full[COEF_BANDS][PREV_COEF_CONTEXTS][ENTROPY_NODES]);
 
 extern const vp9_prob vp9_modelcoefprobs[COEFPROB_MODELS][ENTROPY_NODES - 1];
-void vp9_get_model_distribution(vp9_prob model, vp9_prob *tree_probs,
-                                int b, int r);
 
 static INLINE const int* get_scan_4x4(TX_TYPE tx_type) {
   switch (tx_type) {

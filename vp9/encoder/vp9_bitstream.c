@@ -420,7 +420,8 @@ static int prob_diff_update_savings_search_model(const unsigned int *ct,
   int i, old_b, new_b, update_b, savings, bestsavings, step;
   int newp;
   vp9_prob bestnewp, newplist[ENTROPY_NODES], oldplist[ENTROPY_NODES];
-  vp9_model_to_full_probs(oldp, b, r, oldplist);
+  vp9_model_to_full_probs(oldp, oldplist);
+  vpx_memcpy(newplist, oldp, sizeof(vp9_prob) * UNCONSTRAINED_NODES);
   for (i = UNCONSTRAINED_NODES, old_b = 0; i < ENTROPY_NODES; ++i)
     old_b += cost_branch256(ct + 2 * i, oldplist[i]);
   old_b += cost_branch256(ct + 2 * PIVOT_NODE, oldplist[PIVOT_NODE]);
@@ -433,7 +434,7 @@ static int prob_diff_update_savings_search_model(const unsigned int *ct,
   for (; newp != oldp[PIVOT_NODE]; newp += step) {
     if (newp < 1 || newp > 255) continue;
     newplist[PIVOT_NODE] = newp;
-    vp9_get_model_distribution(newp, newplist, b, r);
+    vp9_model_to_full_probs(newplist, newplist);
     for (i = UNCONSTRAINED_NODES, new_b = 0; i < ENTROPY_NODES; ++i)
       new_b += cost_branch256(ct + 2 * i, newplist[i]);
     new_b += cost_branch256(ct + 2 * PIVOT_NODE, newplist[PIVOT_NODE]);
@@ -485,8 +486,7 @@ static void pack_mb_tokens(vp9_writer* const bc,
       break;
     }
     if (t >= TWO_TOKEN) {
-      vp9_model_to_full_probs(p->context_tree,
-                              p->block_type, p->ref_type, probs);
+      vp9_model_to_full_probs(p->context_tree, probs);
       pp = probs;
     } else {
       pp = p->context_tree;
