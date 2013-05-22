@@ -320,13 +320,19 @@ void vp9_deblock(const YV12_BUFFER_CONFIG *src, YV12_BUFFER_CONFIG *dst,
                         + 0.0065 + 0.5);
   int i;
 
-  const uint8_t *const srcs[3] = {src->y_buffer, src->u_buffer, src->v_buffer};
-  const int src_strides[3] = {src->y_stride, src->uv_stride, src->uv_stride};
-  const int src_widths[3] = {src->y_width, src->uv_width, src->uv_width};
-  const int src_heights[3] = {src->y_height, src->uv_height, src->uv_height};
+  const uint8_t *const srcs[4] = {src->y_buffer, src->u_buffer, src->v_buffer,
+                                  src->alpha_buffer};
+  const int src_strides[4] = {src->y_stride, src->uv_stride, src->uv_stride,
+                              src->alpha_stride};
+  const int src_widths[4] = {src->y_width, src->uv_width, src->uv_width,
+                             src->alpha_width};
+  const int src_heights[4] = {src->y_height, src->uv_height, src->uv_height,
+                              src->alpha_height};
 
-  uint8_t *const dsts[3] = {dst->y_buffer, dst->u_buffer, dst->v_buffer};
-  const int dst_strides[3] = {dst->y_stride, dst->uv_stride, dst->uv_stride};
+  uint8_t *const dsts[4] = {dst->y_buffer, dst->u_buffer, dst->v_buffer,
+                            dst->alpha_buffer};
+  const int dst_strides[4] = {dst->y_stride, dst->uv_stride, dst->uv_stride,
+                              dst->alpha_stride};
 
   for (i = 0; i < MAX_MB_PLANE; ++i)
     vp9_post_proc_down_and_across(srcs[i], dsts[i],
@@ -340,13 +346,19 @@ void vp9_denoise(const YV12_BUFFER_CONFIG *src, YV12_BUFFER_CONFIG *dst,
                         + 0.0065 + 0.5);
   int i;
 
-  const uint8_t *const srcs[3] = {src->y_buffer, src->u_buffer, src->v_buffer};
-  const int src_strides[3] = {src->y_stride, src->uv_stride, src->uv_stride};
-  const int src_widths[3] = {src->y_width, src->uv_width, src->uv_width};
-  const int src_heights[3] = {src->y_height, src->uv_height, src->uv_height};
+  const uint8_t *const srcs[4] = {src->y_buffer, src->u_buffer, src->v_buffer,
+                                  src->alpha_buffer};
+  const int src_strides[4] = {src->y_stride, src->uv_stride, src->uv_stride,
+                              src->alpha_stride};
+  const int src_widths[4] = {src->y_width, src->uv_width, src->uv_width,
+                             src->alpha_width};
+  const int src_heights[4] = {src->y_height, src->uv_height, src->uv_height,
+                              src->alpha_height};
 
-  uint8_t *const dsts[3] = {dst->y_buffer, dst->u_buffer, dst->v_buffer};
-  const int dst_strides[3] = {dst->y_stride, dst->uv_stride, dst->uv_stride};
+  uint8_t *const dsts[4] = {dst->y_buffer, dst->u_buffer, dst->v_buffer,
+                            dst->alpha_buffer};
+  const int dst_strides[4] = {dst->y_stride, dst->uv_stride, dst->uv_stride,
+                              dst->alpha_stride};
 
   for (i = 0; i < MAX_MB_PLANE; ++i) {
     const int src_stride = src_strides[i];

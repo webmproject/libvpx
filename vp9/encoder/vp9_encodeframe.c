@@ -503,21 +503,19 @@ static unsigned find_seg_id(uint8_t *buf, BLOCK_SIZE_TYPE bsize,
 void vp9_setup_src_planes(MACROBLOCK *x,
                           const YV12_BUFFER_CONFIG *src,
                           int mb_row, int mb_col) {
-  setup_pred_plane(&x->plane[0].src,
-                   src->y_buffer, src->y_stride,
-                   mb_row, mb_col, NULL,
-                   x->e_mbd.plane[0].subsampling_x,
-                   x->e_mbd.plane[0].subsampling_y);
-  setup_pred_plane(&x->plane[1].src,
-                   src->u_buffer, src->uv_stride,
-                   mb_row, mb_col, NULL,
-                   x->e_mbd.plane[1].subsampling_x,
-                   x->e_mbd.plane[1].subsampling_y);
-  setup_pred_plane(&x->plane[2].src,
-                   src->v_buffer, src->uv_stride,
-                   mb_row, mb_col, NULL,
-                   x->e_mbd.plane[2].subsampling_x,
-                   x->e_mbd.plane[2].subsampling_y);
+  uint8_t *buffers[4] = {src->y_buffer, src->u_buffer, src->v_buffer,
+                         src->alpha_buffer};
+  int strides[4] = {src->y_stride, src->uv_stride, src->uv_stride,
+                    src->alpha_stride};
+  int i;
+
+  for (i = 0; i < MAX_MB_PLANE; i++) {
+    setup_pred_plane(&x->plane[i].src,
+                     buffers[i], strides[i],
+                     mb_row, mb_col, NULL,
+                     x->e_mbd.plane[i].subsampling_x,
+                     x->e_mbd.plane[i].subsampling_y);
+  }
 }
 
 static void set_offsets(VP9_COMP *cpi,

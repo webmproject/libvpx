@@ -76,6 +76,13 @@ static vpx_codec_err_t image2yuvconfig(const vpx_image_t *img,
   yv12->border  = (img->stride[VPX_PLANE_Y] - img->w) / 2;
   yv12->clrtype = REG_YUV;
 
+#if CONFIG_ALPHA
+  // For development purposes, force alpha to hold the same data a Y for now.
+  yv12->alpha_buffer = yv12->y_buffer;
+  yv12->alpha_width = yv12->y_width;
+  yv12->alpha_height = yv12->y_height;
+  yv12->alpha_stride = yv12->y_stride;
+#endif
   return VPX_CODEC_OK;
 }
 

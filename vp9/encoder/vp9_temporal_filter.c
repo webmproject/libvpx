@@ -205,9 +205,11 @@ static void temporal_filter_iterate_c(VP9_COMP *cpi,
   DECLARE_ALIGNED_ARRAY(16, uint8_t,  predictor, 16 * 16 + 8 * 8 + 8 * 8);
 
   // Save input state
-  uint8_t *y_buffer = mbd->plane[0].pre[0].buf;
-  uint8_t *u_buffer = mbd->plane[1].pre[0].buf;
-  uint8_t *v_buffer = mbd->plane[2].pre[0].buf;
+  uint8_t* input_buffer[MAX_MB_PLANE];
+  int i;
+
+  for (i = 0; i < MAX_MB_PLANE; i++)
+    input_buffer[i] = mbd->plane[i].pre[0].buf;
 
   for (mb_row = 0; mb_row < mb_rows; mb_row++) {
 #if ALT_REF_MC_ENABLED
@@ -352,9 +354,8 @@ static void temporal_filter_iterate_c(VP9_COMP *cpi,
   }
 
   // Restore input state
-  mbd->plane[0].pre[0].buf = y_buffer;
-  mbd->plane[1].pre[0].buf = u_buffer;
-  mbd->plane[2].pre[0].buf = v_buffer;
+  for (i = 0; i < MAX_MB_PLANE; i++)
+    mbd->plane[i].pre[0].buf = input_buffer[i];
 }
 
 void vp9_temporal_filter_prepare(VP9_COMP *cpi, int distance) {

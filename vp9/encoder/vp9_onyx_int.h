@@ -258,6 +258,14 @@ typedef struct VP9_COMP {
   DECLARE_ALIGNED(16, short, uv_zbin[QINDEX_RANGE][16]);
   DECLARE_ALIGNED(16, short, uv_round[QINDEX_RANGE][16]);
 
+#if CONFIG_ALPHA
+  DECLARE_ALIGNED(16, short, a_quant[QINDEX_RANGE][16]);
+  DECLARE_ALIGNED(16, unsigned char, a_quant_shift[QINDEX_RANGE][16]);
+  DECLARE_ALIGNED(16, short, a_zbin[QINDEX_RANGE][16]);
+  DECLARE_ALIGNED(16, short, a_round[QINDEX_RANGE][16]);
+
+  DECLARE_ALIGNED(16, short, zrun_zbin_boost_a[QINDEX_RANGE][16]);
+#endif
   DECLARE_ALIGNED(16, short, zrun_zbin_boost_y[QINDEX_RANGE][16]);
   DECLARE_ALIGNED(16, short, zrun_zbin_boost_uv[QINDEX_RANGE][16]);
 

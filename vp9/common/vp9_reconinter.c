@@ -469,12 +469,27 @@ void vp9_build_inter_predictors_sbuv(MACROBLOCKD *xd,
                                      BLOCK_SIZE_TYPE bsize) {
   struct build_inter_predictors_args args = {
     xd, mi_col * MI_SIZE, mi_row * MI_SIZE,
+#if CONFIG_ALPHA
+    {NULL, xd->plane[1].dst.buf, xd->plane[2].dst.buf,
+     xd->plane[3].dst.buf},
+    {0, xd->plane[1].dst.stride, xd->plane[1].dst.stride,
+     xd->plane[3].dst.stride},
+    {{NULL, xd->plane[1].pre[0].buf, xd->plane[2].pre[0].buf,
+      xd->plane[3].pre[0].buf},
+     {NULL, xd->plane[1].pre[1].buf, xd->plane[2].pre[1].buf,
+      xd->plane[3].pre[1].buf}},
+    {{0, xd->plane[1].pre[0].stride, xd->plane[1].pre[0].stride,
+      xd->plane[3].pre[0].stride},
+     {0, xd->plane[1].pre[1].stride, xd->plane[1].pre[1].stride,
+      xd->plane[3].pre[1].stride}},
+#else
     {NULL, xd->plane[1].dst.buf, xd->plane[2].dst.buf},
     {0, xd->plane[1].dst.stride, xd->plane[1].dst.stride},
     {{NULL, xd->plane[1].pre[0].buf, xd->plane[2].pre[0].buf},
      {NULL, xd->plane[1].pre[1].buf, xd->plane[2].pre[1].buf}},
     {{0, xd->plane[1].pre[0].stride, xd->plane[1].pre[0].stride},
      {0, xd->plane[1].pre[1].stride, xd->plane[1].pre[1].stride}},
+#endif
   };
   foreach_predicted_block_uv(xd, bsize, build_inter_predictors, &args);
 }

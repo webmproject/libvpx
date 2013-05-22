@@ -74,8 +74,10 @@ static void setup_pred_plane(struct buf_2d *dst,
 static void setup_dst_planes(MACROBLOCKD *xd,
                              const YV12_BUFFER_CONFIG *src,
                              int mi_row, int mi_col) {
-  uint8_t *buffers[3] = {src->y_buffer, src->u_buffer, src->v_buffer};
-  int strides[3] = {src->y_stride, src->uv_stride, src->uv_stride};
+  uint8_t *buffers[4] = {src->y_buffer, src->u_buffer, src->v_buffer,
+                         src->alpha_buffer};
+  int strides[4] = {src->y_stride, src->uv_stride, src->uv_stride,
+                    src->alpha_stride};
   int i;
 
   for (i = 0; i < MAX_MB_PLANE; ++i) {
@@ -97,8 +99,10 @@ static void setup_pre_planes(MACROBLOCKD *xd,
   for (i = 0; i < 2; ++i) {
     const YV12_BUFFER_CONFIG *src = srcs[i];
     if (src) {
-      uint8_t* buffers[3] = {src->y_buffer, src->u_buffer, src->v_buffer};
-      int strides[3] = {src->y_stride, src->uv_stride, src->uv_stride};
+      uint8_t* buffers[4] = {src->y_buffer, src->u_buffer, src->v_buffer,
+                             src->alpha_buffer};
+      int strides[4] = {src->y_stride, src->uv_stride, src->uv_stride,
+                        src->alpha_stride};
 
       for (j = 0; j < MAX_MB_PLANE; ++j) {
         struct macroblockd_plane *pd = &xd->plane[j];

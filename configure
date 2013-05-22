@@ -245,6 +245,7 @@ EXPERIMENT_LIST="
     oneshotq
     multiple_arf
     non420
+    alpha
     ab4x4
     comp_inter_joint_search
 "

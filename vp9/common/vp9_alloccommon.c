@@ -144,15 +144,19 @@ int vp9_alloc_frame_buffers(VP9_COMMON *oci, int width, int height) {
   // FIXME(jkoleszar): allocate subsampled arrays for U/V once subsampling
   // information is exposed at this level
   mi_cols = mi_cols_aligned_to_sb(oci);
+# if CONFIG_ALPHA
+  // TODO(jkoleszar): Why is this * 2?
+  oci->above_context[0] = vpx_calloc(sizeof(ENTROPY_CONTEXT) * 8 * mi_cols, 1);
+#else
   oci->above_context[0] = vpx_calloc(sizeof(ENTROPY_CONTEXT) * 6 * mi_cols, 1);
+#endif
   if (!oci->above_context[0]) {
     vp9_free_frame_buffers(oci);
     return 1;
   }
-  oci->above_context[1] =
-    oci->above_context[0] + sizeof(ENTROPY_CONTEXT) * 2 * mi_cols;
-  oci->above_context[2] =
-    oci->above_context[1] + sizeof(ENTROPY_CONTEXT) * 2 * mi_cols;
+  for (i = 1; i < MAX_MB_PLANE; i++)
+    oci->above_context[i] =
+        oci->above_context[0] + i * sizeof(ENTROPY_CONTEXT) * 2 * mi_cols;
 
   oci->above_seg_context =
     vpx_calloc(sizeof(PARTITION_CONTEXT) * mi_cols, 1);
