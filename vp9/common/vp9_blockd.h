@@ -579,133 +579,32 @@ static TX_TYPE txfm_map(MB_PREDICTION_MODE bmode) {
   }
 }
 
-#define USE_ADST_FOR_I16X16_8X8   1
-#define USE_ADST_FOR_I16X16_4X4   1
-#define USE_ADST_FOR_I8X8_4X4     1
-#define USE_ADST_PERIPHERY_ONLY   1
-#define USE_ADST_FOR_SB           1
-#define USE_ADST_FOR_REMOTE_EDGE  0
 
 static TX_TYPE get_tx_type_4x4(const MACROBLOCKD *xd, int ib) {
-  // TODO(debargha): explore different patterns for ADST usage when blocksize
-  // is smaller than the prediction size
   TX_TYPE tx_type = DCT_DCT;
-  const BLOCK_SIZE_TYPE sb_type = xd->mode_info_context->mbmi.sb_type;
-  const int wb = b_width_log2(sb_type);
-#if !USE_ADST_FOR_SB
-  if (sb_type > BLOCK_SIZE_MB16X16)
-    return tx_type;
-#endif
   if (xd->lossless)
     return DCT_DCT;
   if (xd->mode_info_context->mbmi.mode == I4X4_PRED) {
     tx_type = txfm_map(
         xd->mode_info_context->bmi[ib].as_mode.first);
   } else if (xd->mode_info_context->mbmi.mode <= TM_PRED) {
-#if USE_ADST_FOR_I16X16_4X4
-#if USE_ADST_PERIPHERY_ONLY
-    const int hmax = 1 << wb;
     tx_type = txfm_map(pred_mode_conv(xd->mode_info_context->mbmi.mode));
-#if USE_ADST_FOR_REMOTE_EDGE
-    if ((ib & (hmax - 1)) != 0 && ib >= hmax)
-      tx_type = DCT_DCT;
-#else
-    if (ib >= 1 && ib < hmax) {
-      if (tx_type == ADST_ADST) tx_type = ADST_DCT;
-      else if (tx_type == DCT_ADST) tx_type = DCT_DCT;
-    } else if (ib >= 1 && (ib & (hmax - 1)) == 0) {
-      if (tx_type == ADST_ADST) tx_type = DCT_ADST;
-      else if (tx_type == ADST_DCT) tx_type = DCT_DCT;
-    } else if (ib != 0) {
-      tx_type = DCT_DCT;
-    }
-#endif
-#else
-    // Use ADST
-    tx_type = txfm_map(pred_mode_conv(xd->mode_info_context->mbmi.mode));
-#endif
-#else
-    // Use 2D DCT
-    tx_type = DCT_DCT;
-#endif
   }
   return tx_type;
 }
 
 static TX_TYPE get_tx_type_8x8(const MACROBLOCKD *xd, int ib) {
-  // TODO(debargha): explore different patterns for ADST usage when blocksize
-  // is smaller than the prediction size
   TX_TYPE tx_type = DCT_DCT;
-  const BLOCK_SIZE_TYPE sb_type = xd->mode_info_context->mbmi.sb_type;
-  const int wb = b_width_log2(sb_type), hb = b_height_log2(sb_type);
-#if !USE_ADST_FOR_SB
-  if (sb_type > BLOCK_SIZE_MB16X16)
-    return tx_type;
-#endif
-  if (ib >= (1 << (wb + hb)))  // no chroma adst
-    return tx_type;
   if (xd->mode_info_context->mbmi.mode <= TM_PRED) {
-#if USE_ADST_FOR_I16X16_8X8
-#if USE_ADST_PERIPHERY_ONLY
-    const int hmax = 1 << wb;
     tx_type = txfm_map(pred_mode_conv(xd->mode_info_context->mbmi.mode));
-#if USE_ADST_FOR_REMOTE_EDGE
-    if ((ib & (hmax - 1)) != 0 && ib >= hmax)
-      tx_type = DCT_DCT;
-#else
-    if (ib >= 1 && ib < hmax) {
-      if (tx_type == ADST_ADST) tx_type = ADST_DCT;
-      else if (tx_type == DCT_ADST) tx_type = DCT_DCT;
-    } else if (ib >= 1 && (ib & (hmax - 1)) == 0) {
-      if (tx_type == ADST_ADST) tx_type = DCT_ADST;
-      else if (tx_type == ADST_DCT) tx_type = DCT_DCT;
-    } else if (ib != 0) {
-      tx_type = DCT_DCT;
-    }
-#endif
-#else
-    // Use ADST
-    tx_type = txfm_map(pred_mode_conv(xd->mode_info_context->mbmi.mode));
-#endif
-#else
-    // Use 2D DCT
-    tx_type = DCT_DCT;
-#endif
   }
   return tx_type;
 }
 
 static TX_TYPE get_tx_type_16x16(const MACROBLOCKD *xd, int ib) {
   TX_TYPE tx_type = DCT_DCT;
-  const BLOCK_SIZE_TYPE sb_type = xd->mode_info_context->mbmi.sb_type;
-  const int wb = b_width_log2(sb_type), hb = b_height_log2(sb_type);
-#if !USE_ADST_FOR_SB
-  if (sb_type > BLOCK_SIZE_MB16X16)
-    return tx_type;
-#endif
-  if (ib >= (1 << (wb + hb)))
-    return tx_type;
   if (xd->mode_info_context->mbmi.mode <= TM_PRED) {
     tx_type = txfm_map(pred_mode_conv(xd->mode_info_context->mbmi.mode));
-#if USE_ADST_PERIPHERY_ONLY
-    if (sb_type > BLOCK_SIZE_MB16X16) {
-      const int hmax = 1 << wb;
-#if USE_ADST_FOR_REMOTE_EDGE
-      if ((ib & (hmax - 1)) != 0 && ib >= hmax)
-        tx_type = DCT_DCT;
-#else
-      if (ib >= 1 && ib < hmax) {
-        if (tx_type == ADST_ADST) tx_type = ADST_DCT;
-        else if (tx_type == DCT_ADST) tx_type = DCT_DCT;
-      } else if (ib >= 1 && (ib & (hmax - 1)) == 0) {
-        if (tx_type == ADST_ADST) tx_type = DCT_ADST;
-        else if (tx_type == ADST_DCT) tx_type = DCT_DCT;
-      } else if (ib != 0) {
-        tx_type = DCT_DCT;
-      }
-#endif
-    }
-#endif
   }
   return tx_type;
 }
