@@ -2104,26 +2104,10 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
 
       if (is_comp_pred) {
         if (cpi->sf.comp_inter_joint_serach) {
-          const int b_sz[BLOCK_SIZE_TYPES][2] = {
-              {4, 4},
-              {4, 8},
-              {8, 4},
-              {8, 8},
-              {8, 16},
-              {16, 8},
-              {16, 16},
-              {16, 32},
-              {32, 16},
-              {32, 32},
-              {32, 64},
-              {64, 32},
-              {64, 64}
-          };
-
+          int pw = 4 << b_width_log2(bsize), ph = 4 << b_height_log2(bsize);
           int ite;
           // Prediction buffer from second frame.
-          uint8_t *second_pred = vpx_memalign(16, b_sz[bsize][0] *
-                                              b_sz[bsize][1] * sizeof(uint8_t));
+          uint8_t *second_pred = vpx_memalign(16, pw * ph * sizeof(uint8_t));
 
           // Do joint motion search in compound mode to get more accurate mv.
           struct buf_2d backup_yv12[MAX_MB_PLANE] = {{0}};
@@ -2186,10 +2170,10 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
             // Get pred block from second frame.
             vp9_build_inter_predictor(ref_yv12[!id].buf,
                                       ref_yv12[!id].stride,
-                                      second_pred, b_sz[bsize][0],
+                                      second_pred, pw,
                                       &frame_mv[NEWMV][refs[!id]],
                                       &xd->scale_factor[!id],
-                                      b_sz[bsize][0], b_sz[bsize][1], 0,
+                                      pw, ph, 0,
                                       &xd->subpix);
 
             // Compound motion search on first ref frame.
@@ -2209,7 +2193,7 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
                                                &cpi->fn_ptr[block_size],
                                                x->nmvjointcost, x->mvcost,
                                                &ref_mv[id], second_pred,
-                                               b_sz[bsize][0], b_sz[bsize][1]);
+                                               pw, ph);
 
             x->mv_col_min = tmp_col_min;
             x->mv_col_max = tmp_col_max;
@@ -2226,8 +2210,7 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
                                                      &cpi->fn_ptr[block_size],
                                                      x->nmvjointcost, x->mvcost,
                                                      &dis, &sse, second_pred,
-                                                     b_sz[bsize][0],
-                                                     b_sz[bsize][1]);
+                                                     pw, ph);
             }
 
             if (id)
