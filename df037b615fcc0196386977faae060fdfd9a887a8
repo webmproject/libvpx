@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAYn//+TA\u003d",
+        "filename": "vp9/decoder/vp9_decodframe.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 968,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2013-05-23T19:42:39Z",
+      "side": 1,
+      "message": "Yes, but right now the goal is just to move bits from compressed header to uncompressed one. After that we can easily rearrange \nbits. I don\u0027t think that we should send these two bits unconditionally because it will be possible to create bitstream with contradictions and we\u0027ll have to handle this situation somehow.",
+      "parentUuid": "AAAAYn//+Vc\u003d",
+      "revId": "df037b615fcc0196386977faae060fdfd9a887a8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAYn//+VI\u003d",
         "filename": "vp9/decoder/vp9_read_bit_buffer.h",
         "patchSetId": 3
@@ -30,6 +48,24 @@
       "writtenOn": "2013-05-23T19:22:05Z",
       "side": 1,
       "message": "this seems weird that multibit literals are packed MSB first, but individual bits are packed LSB first. The bits get reversed when stored. Should probably make this consistently MSB first (big endian, network byte order) which is consistent with with the bool coded data too.",
+      "revId": "df037b615fcc0196386977faae060fdfd9a887a8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAYn//+TI\u003d",
+        "filename": "vp9/decoder/vp9_read_bit_buffer.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2013-05-23T19:42:39Z",
+      "side": 1,
+      "message": "Completely agree, will be done in the next patch set. Right now I\u0027m using LSB first for individual bits because there are some another parts of the code that assume this (e.g. in vp8_peek_si data[0] \u0026 0x01 to detect key frames).",
+      "parentUuid": "AAAAYn//+VI\u003d",
       "revId": "df037b615fcc0196386977faae060fdfd9a887a8",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAYn//+TM\u003d",
+        "filename": "vp9/encoder/vp9_bitstream.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 1610,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2013-05-23T19:42:39Z",
+      "side": 1,
+      "message": "I agree, but I\u0027d like to do all these changes incrementally. At least we need to define constants for these there numbers (we use them at 3 different places now). This will be done in the next patch set.",
+      "parentUuid": "AAAAYn//+VA\u003d",
+      "revId": "df037b615fcc0196386977faae060fdfd9a887a8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAYn//+Uw\u003d",
         "filename": "vp9/encoder/vp9_bitstream.c",
         "patchSetId": 3
@@ -64,6 +118,24 @@
       "writtenOn": "2013-05-23T19:22:05Z",
       "side": 1,
       "message": "if all the header bytes are eventually written with your API, then eventually this length should be provided by your API.",
+      "revId": "df037b615fcc0196386977faae060fdfd9a887a8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAYn//+TU\u003d",
+        "filename": "vp9/encoder/vp9_bitstream.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 1938,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2013-05-23T19:42:39Z",
+      "side": 1,
+      "message": "That\u0027s correct. This is just a temporary solution.",
+      "parentUuid": "AAAAYn//+Uw\u003d",
       "revId": "df037b615fcc0196386977faae060fdfd9a887a8",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
