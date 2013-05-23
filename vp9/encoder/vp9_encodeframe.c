@@ -1688,9 +1688,8 @@ static void encode_superblock(VP9_COMP *cpi, TOKENEXTRA **t,
   }
 
   if (output_enabled) {
-    if (cm->txfm_mode == TX_MODE_SELECT &&
-        (mbmi->ref_frame == INTRA_FRAME ||
-        !(mbmi->mb_skip_coeff ||
+    if (cm->txfm_mode == TX_MODE_SELECT && mbmi->mode != I4X4_PRED &&
+        !(mbmi->ref_frame != INTRA_FRAME && (mbmi->mb_skip_coeff ||
           vp9_segfeature_active(xd, segment_id, SEG_LVL_SKIP)))) {
       if (bsize >= BLOCK_SIZE_SB32X32) {
         cpi->txfm_count_32x32p[mbmi->txfm_size]++;
