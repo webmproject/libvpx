@@ -211,7 +211,7 @@ class ConvolveTest : public PARAMS(int, int, const ConvolveFunctions*) {
 
   virtual void SetUp() {
     UUT_ = GET_PARAM(2);
-    /* Set up guard blocks for an inner block cetered in the outer block */
+    /* Set up guard blocks for an inner block centered in the outer block */
     for (int i = 0; i < kOutputBufferSize; ++i) {
       if (IsIndexInBorder(i))
         output_[i] = 255;
@@ -545,5 +545,27 @@ INSTANTIATE_TEST_CASE_P(SSSE3, ConvolveTest, ::testing::Values(
     make_tuple(64, 32, &convolve8_ssse3),
     make_tuple(32, 64, &convolve8_ssse3),
     make_tuple(64, 64, &convolve8_ssse3)));
+#endif
+
+#if HAVE_NEON
+const ConvolveFunctions convolve8_neon(
+    vp9_convolve8_horiz_neon, vp9_convolve8_avg_horiz_c,
+    vp9_convolve8_vert_neon, vp9_convolve8_avg_vert_c,
+    vp9_convolve8_c, vp9_convolve8_avg_c);
+
+INSTANTIATE_TEST_CASE_P(NEON, ConvolveTest, ::testing::Values(
+    make_tuple(4, 4, &convolve8_neon),
+    make_tuple(8, 4, &convolve8_neon),
+    make_tuple(4, 8, &convolve8_neon),
+    make_tuple(8, 8, &convolve8_neon),
+    make_tuple(16, 8, &convolve8_neon),
+    make_tuple(8, 16, &convolve8_neon),
+    make_tuple(16, 16, &convolve8_neon),
+    make_tuple(32, 16, &convolve8_neon),
+    make_tuple(16, 32, &convolve8_neon),
+    make_tuple(32, 32, &convolve8_neon),
+    make_tuple(64, 32, &convolve8_neon),
+    make_tuple(32, 64, &convolve8_neon),
+    make_tuple(64, 64, &convolve8_neon)));
 #endif
 }  // namespace
