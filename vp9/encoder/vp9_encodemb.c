@@ -20,6 +20,9 @@
 #include "vp9/common/vp9_systemdependent.h"
 #include "vp9_rtcd.h"
 
+DECLARE_ALIGNED(16, extern const uint8_t,
+                vp9_pt_energy_class[MAX_ENTROPY_TOKENS]);
+
 void vp9_subtract_block(int rows, int cols,
                         int16_t *diff_ptr, int diff_stride,
                         const uint8_t *src_ptr, int src_stride,
@@ -105,7 +108,7 @@ static int trellis_get_coeff_context(const int *scan,
                                      uint8_t *token_cache,
                                      int pad, int l) {
   int bak = token_cache[scan[idx]], pt;
-  token_cache[scan[idx]] = token;
+  token_cache[scan[idx]] = vp9_pt_energy_class[token];
   pt = vp9_get_coef_context(scan, nb, pad, token_cache, idx + 1, l);
   token_cache[scan[idx]] = bak;
   return pt;
@@ -189,7 +192,8 @@ static void optimize_b(VP9_COMMON *const cm, MACROBLOCK *mb,
   *(tokens[eob] + 1) = *(tokens[eob] + 0);
   next = eob;
   for (i = 0; i < eob; i++)
-    token_cache[scan[i]] = vp9_dct_value_tokens_ptr[qcoeff_ptr[scan[i]]].token;
+    token_cache[scan[i]] = vp9_pt_energy_class[vp9_dct_value_tokens_ptr[
+        qcoeff_ptr[scan[i]]].token];
   nb = vp9_get_coef_neighbors_handle(scan, &pad);
 
   for (i = eob; i-- > i0;) {

@@ -468,7 +468,7 @@ int vp9_get_coef_context(const int *scan, const int *neighbors,
     } else {
       ctx = token_cache[scan[neighbors[MAX_NEIGHBORS * c + 0]]];
     }
-    return vp9_pt_energy_class[ctx];
+    return ctx;
   }
 };
 

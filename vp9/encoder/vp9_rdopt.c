@@ -46,6 +46,9 @@
 /* Factor to weigh the rate for switchable interp filters */
 #define SWITCHABLE_INTERP_RATE_FACTOR 1
 
+DECLARE_ALIGNED(16, extern const uint8_t,
+                vp9_pt_energy_class[MAX_ENTROPY_TOKENS]);
+
 const MODE_DEFINITION vp9_mode_order[MAX_MODES] = {
   {ZEROMV,    LAST_FRAME,   NONE},
   {DC_PRED,   INTRA_FRAME,  NONE},
@@ -366,7 +369,7 @@ static INLINE int cost_coeffs(VP9_COMMON *const cm, MACROBLOCK *mb,
 
       if (!c || token_cache[scan[c - 1]])
         cost += vp9_cost_bit(coef_probs[band][pt][0], 1);
-      token_cache[scan[c]] = t;
+      token_cache[scan[c]] = vp9_pt_energy_class[t];
     }
     if (c < seg_eob) {
       if (c)

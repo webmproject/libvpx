@@ -36,6 +36,9 @@ extern vp9_coeff_stats tree_update_hist_16x16[BLOCK_TYPES];
 extern vp9_coeff_stats tree_update_hist_32x32[BLOCK_TYPES];
 #endif  /* ENTROPY_STATS */
 
+DECLARE_ALIGNED(16, extern const uint8_t,
+                vp9_pt_energy_class[MAX_ENTROPY_TOKENS]);
+
 static TOKENVALUE dct_value_tokens[DCT_MAX_VALUE * 2];
 const TOKENVALUE *vp9_dct_value_tokens_ptr;
 static int dct_value_cost[DCT_MAX_VALUE * 2];
@@ -228,7 +231,7 @@ static void tokenize_b(int plane, int block, BLOCK_SIZE_TYPE bsize,
       if (!t->skip_eob_node)
         ++cpi->common.fc.eob_branch_counts[tx_size][type][ref][band][pt];
     }
-    token_cache[scan[c]] = token;
+    token_cache[scan[c]] = vp9_pt_energy_class[token];
     ++t;
   } while (c < eob && ++c < seg_eob);
 
