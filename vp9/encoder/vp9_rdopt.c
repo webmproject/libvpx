@@ -633,9 +633,8 @@ static int64_t rd_pick_intra4x4block(VP9_COMP *cpi, MACROBLOCK *x, int ib,
         dst = raster_block_offset_uint8(xd, BLOCK_SIZE_SB8X8, 0, block,
                                         xd->plane[0].dst.buf,
                                         xd->plane[0].dst.stride);
-        vp9_intra4x4_predict(xd, block,
-                             BLOCK_SIZE_SB8X8,
-                             mode, dst, xd->plane[0].dst.stride);
+        vp9_intra4x4_predict(xd, block, BLOCK_SIZE_SB8X8, mode,
+                             dst, xd->plane[0].dst.stride);
         vp9_subtract_block(4, 4, src_diff, 8,
                            src, src_stride,
                            dst, xd->plane[0].dst.stride);
@@ -654,7 +653,7 @@ static int64_t rd_pick_intra4x4block(VP9_COMP *cpi, MACROBLOCK *x, int ib,
         distortion += vp9_block_error(coeff, BLOCK_OFFSET(xd->plane[0].dqcoeff,
                                                          block, 16), 16) >> 2;
 
-        vp9_intra4x4_predict(xd, block, BLOCK_SIZE_SB8X8, *best_mode,
+        vp9_intra4x4_predict(xd, block, BLOCK_SIZE_SB8X8, mode,
                              dst, xd->plane[0].dst.stride);
 
         if (best_tx_type != DCT_DCT)
