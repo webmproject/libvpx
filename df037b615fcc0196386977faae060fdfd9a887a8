@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAYn//+Vc\u003d",
+        "filename": "vp9/decoder/vp9_decodframe.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 968,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-05-23T19:22:05Z",
+      "side": 1,
+      "message": "Avoid using this in a conditional context. It\u0027d probably be better to get rid of this top level bit, and send the referesh_frame_context and frame_parallel_decoding_mode unconditionally. If we have any conditionals, they should all happen after all the unconditional data.",
+      "revId": "df037b615fcc0196386977faae060fdfd9a887a8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAYn//+VI\u003d",
+        "filename": "vp9/decoder/vp9_read_bit_buffer.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-05-23T19:22:05Z",
+      "side": 1,
+      "message": "this seems weird that multibit literals are packed MSB first, but individual bits are packed LSB first. The bits get reversed when stored. Should probably make this consistently MSB first (big endian, network byte order) which is consistent with with the bool coded data too.",
+      "revId": "df037b615fcc0196386977faae060fdfd9a887a8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAYn//+VA\u003d",
+        "filename": "vp9/encoder/vp9_bitstream.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 1610,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-05-23T19:22:05Z",
+      "side": 1,
+      "message": "Don\u0027t do it now, as I think this patch is covering too many things already, but we should pack these cx_data and write_le16 fields with your new api too.",
+      "revId": "df037b615fcc0196386977faae060fdfd9a887a8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAYn//+Uw\u003d",
+        "filename": "vp9/encoder/vp9_bitstream.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 1938,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-05-23T19:22:05Z",
+      "side": 1,
+      "message": "if all the header bytes are eventually written with your API, then eventually this length should be provided by your API.",
+      "revId": "df037b615fcc0196386977faae060fdfd9a887a8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
