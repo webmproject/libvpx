@@ -610,6 +610,7 @@ static void encode_block_intra(int plane, int block, BLOCK_SIZE_TYPE bsize,
   struct encode_b_args* const args = arg;
   MACROBLOCK* const x = args->x;
   MACROBLOCKD* const xd = &x->e_mbd;
+  MB_MODE_INFO* const mbmi = &xd->mode_info_context->mbmi;
   const TX_SIZE tx_size = (TX_SIZE)(ss_txfrm_size / 2);
   const int bw = 4 << (b_width_log2(bsize) - xd->plane[plane].subsampling_x);
   const int raster_block = txfrm_block_to_raster_block(xd, bsize, plane,
@@ -634,9 +635,9 @@ static void encode_block_intra(int plane, int block, BLOCK_SIZE_TYPE bsize,
   TX_TYPE tx_type;
   int mode, b_mode;
 
-  mode = plane == 0? xd->mode_info_context->mbmi.mode:
-                     xd->mode_info_context->mbmi.uv_mode;
-  if (bsize <= BLOCK_SIZE_SB8X8 && mode == I4X4_PRED && plane == 0)
+  mode = plane == 0? mbmi->mode: mbmi->uv_mode;
+  if (mbmi->sb_type < BLOCK_SIZE_SB8X8 && plane == 0 &&
+      mbmi->ref_frame == INTRA_FRAME)
     b_mode = xd->mode_info_context->bmi[ib].as_mode.first;
   else
     b_mode = mode;
