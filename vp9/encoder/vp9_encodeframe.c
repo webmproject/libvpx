@@ -1201,6 +1201,7 @@ static void encode_frame_internal(VP9_COMP *cpi) {
   vpx_memset(cpi->txfm_count_16x16p, 0, sizeof(cpi->txfm_count_16x16p));
   vpx_memset(cpi->txfm_count_8x8p, 0, sizeof(cpi->txfm_count_8x8p));
   vpx_memset(cpi->rd_tx_select_diff, 0, sizeof(cpi->rd_tx_select_diff));
+  vpx_memset(cpi->rd_tx_select_threshes, 0, sizeof(cpi->rd_tx_select_threshes));
   {
     struct vpx_usec_timer  emr_timer;
     vpx_usec_timer_start(&emr_timer);
@@ -1688,7 +1689,8 @@ static void encode_superblock(VP9_COMP *cpi, TOKENEXTRA **t,
   }
 
   if (output_enabled) {
-    if (cm->txfm_mode == TX_MODE_SELECT && mbmi->mode != I4X4_PRED &&
+    if (cm->txfm_mode == TX_MODE_SELECT &&
+        mbmi->sb_type >= BLOCK_SIZE_SB8X8 &&
         !(mbmi->ref_frame != INTRA_FRAME && (mbmi->mb_skip_coeff ||
           vp9_segfeature_active(xd, segment_id, SEG_LVL_SKIP)))) {
       if (bsize >= BLOCK_SIZE_SB32X32) {
