@@ -31,8 +31,9 @@ int vp9_encode_intra(VP9_COMP *cpi, MACROBLOCK *x, int use_16x16_pred) {
   } else {
     int i;
 
-    for (i = 0; i < 16; i++)
+    for (i = 0; i < 16; i++) {
       encode_intra4x4block(x, i, BLOCK_SIZE_MB16X16);
+    }
   }
 
   return vp9_get_mb_ss(x->plane[0].src_diff);

@@ -370,7 +370,7 @@ static void write_uv_mode(vp9_writer *bc, int m, const vp9_prob *p) {
 }
 
 static void write_kf_bmode(vp9_writer *bc, int m, const vp9_prob *p) {
-  write_token(bc, vp9_kf_bmode_tree, p, vp9_kf_bmode_encodings + m);
+  write_token(bc, vp9_bmode_tree, p, vp9_kf_bmode_encodings + m);
 }
 
 static int prob_update_savings(const unsigned int *ct,
@@ -843,8 +843,8 @@ static void write_mb_modes_kf(const VP9_COMP *cpi,
   }
 
   if (m->mbmi.sb_type >= BLOCK_SIZE_SB8X8) {
-    const B_PREDICTION_MODE A = above_block_mode(m, 0, mis);
-    const B_PREDICTION_MODE L = xd->left_available ?
+    const MB_PREDICTION_MODE A = above_block_mode(m, 0, mis);
+    const MB_PREDICTION_MODE L = xd->left_available ?
                                  left_block_mode(m, 0) : DC_PRED;
     write_kf_bmode(bc, ym, c->kf_bmode_prob[A][L]);
   }
@@ -856,8 +856,8 @@ static void write_mb_modes_kf(const VP9_COMP *cpi,
     for (idy = 0; idy < 2; idy += bh) {
       for (idx = 0; idx < 2; idx += bw) {
         int i = idy * 2 + idx;
-        const B_PREDICTION_MODE A = above_block_mode(m, i, mis);
-        const B_PREDICTION_MODE L = (xd->left_available || idx) ?
+        const MB_PREDICTION_MODE A = above_block_mode(m, i, mis);
+        const MB_PREDICTION_MODE L = (xd->left_available || idx) ?
                                      left_block_mode(m, i) : DC_PRED;
         write_kf_bmode(bc, m->bmi[i].as_mode.first,
                        c->kf_bmode_prob[A][L]);

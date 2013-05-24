@@ -11,9 +11,9 @@
 
 #include "vp9/common/vp9_entropymode.h"
 
-const vp9_prob vp9_kf_default_bmode_probs[VP9_KF_BINTRAMODES]
-                                         [VP9_KF_BINTRAMODES]
-                                         [VP9_KF_BINTRAMODES-1] = {
+const vp9_prob vp9_kf_default_bmode_probs[VP9_BINTRAMODES]
+                                         [VP9_BINTRAMODES]
+                                         [VP9_BINTRAMODES-1] = {
   {  // Above 0
     { 231,    9,  124,  138,   96,  200,   76,   42,   88, },  // left 0
     { 152,   11,  187,  112,  170,  139,  130,   91,  113, },  // left 1

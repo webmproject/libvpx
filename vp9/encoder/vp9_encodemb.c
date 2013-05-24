@@ -641,7 +641,7 @@ static void encode_block_intra(int plane, int block, BLOCK_SIZE_TYPE bsize,
   else
     b_mode = mode;
 
-  assert(b_mode >= B_DC_PRED && b_mode <= B_TM_PRED);
+  assert(b_mode >= DC_PRED && b_mode <= TM_PRED);
 
   plane_b_size = b_width_log2(bsize) - xd->plane[plane].subsampling_x;
   vp9_predict_intra_block(xd, tx_ib, plane_b_size, tx_size, b_mode,

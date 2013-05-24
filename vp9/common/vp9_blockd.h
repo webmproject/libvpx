@@ -91,6 +91,7 @@ static INLINE int is_inter_mode(MB_PREDICTION_MODE mode) {
   return mode >= NEARESTMV && mode <= SPLITMV;
 }
 
+#define INTRA_MODE_COUNT (TM_PRED + 1)
 
 // Segment level features.
 typedef enum {
@@ -126,25 +127,7 @@ typedef enum {
 
 #define WHT_UPSCALE_FACTOR 2
 
-typedef enum {
-  B_DC_PRED,          /* average of above and left pixels */
-  B_V_PRED,          /* vertical prediction */
-  B_H_PRED,          /* horizontal prediction */
-  B_D45_PRED,
-  B_D135_PRED,
-  B_D117_PRED,
-  B_D153_PRED,
-  B_D27_PRED,
-  B_D63_PRED,
-  B_TM_PRED,
-
-  B_MODE_COUNT
-} B_PREDICTION_MODE;
-
-#define VP9_BINTRAMODES (B_MODE_COUNT)
-
-#define VP9_KF_BINTRAMODES (VP9_BINTRAMODES)   /* 10 */
-#define VP9_NKF_BINTRAMODES (VP9_BINTRAMODES)  /* 10 */
+#define VP9_BINTRAMODES INTRA_MODE_COUNT
 
 /* For keyframes, intra block modes are predicted by the (already decoded)
    modes for the Y blocks to the left and above us; for interframes, there
@@ -532,25 +515,6 @@ static BLOCK_SIZE_TYPE get_subsize(BLOCK_SIZE_TYPE bsize,
   return subsize;
 }
 
-// convert MB_PREDICTION_MODE to B_PREDICTION_MODE
-static MB_PREDICTION_MODE pred_mode_conv(MB_PREDICTION_MODE mode) {
-  switch (mode) {
-    case DC_PRED: return DC_PRED;
-    case V_PRED: return V_PRED;
-    case H_PRED: return H_PRED;
-    case TM_PRED: return TM_PRED;
-    case D45_PRED: return D45_PRED;
-    case D135_PRED: return D135_PRED;
-    case D117_PRED: return D117_PRED;
-    case D153_PRED: return D153_PRED;
-    case D27_PRED: return D27_PRED;
-    case D63_PRED: return D63_PRED;
-    default:
-       assert(0);
-       return MB_MODE_COUNT;  // Dummy value
-  }
-}
-
 // transform mapping
 static TX_TYPE txfm_map(MB_PREDICTION_MODE bmode) {
   switch (bmode) {
@@ -573,7 +537,6 @@ static TX_TYPE txfm_map(MB_PREDICTION_MODE bmode) {
   }
 }
 
-
 static TX_TYPE get_tx_type_4x4(const MACROBLOCKD *xd, int ib) {
   TX_TYPE tx_type = DCT_DCT;
   if (xd->lossless)
@@ -582,7 +545,7 @@ static TX_TYPE get_tx_type_4x4(const MACROBLOCKD *xd, int ib) {
     tx_type = txfm_map(
         xd->mode_info_context->bmi[ib].as_mode.first);
   } else if (xd->mode_info_context->mbmi.mode <= TM_PRED) {
-    tx_type = txfm_map(pred_mode_conv(xd->mode_info_context->mbmi.mode));
+    tx_type = txfm_map(xd->mode_info_context->mbmi.mode);
   }
   return tx_type;
 }
@@ -590,7 +553,7 @@ static TX_TYPE get_tx_type_4x4(const MACROBLOCKD *xd, int ib) {
 static TX_TYPE get_tx_type_8x8(const MACROBLOCKD *xd, int ib) {
   TX_TYPE tx_type = DCT_DCT;
   if (xd->mode_info_context->mbmi.mode <= TM_PRED) {
-    tx_type = txfm_map(pred_mode_conv(xd->mode_info_context->mbmi.mode));
+    tx_type = txfm_map(xd->mode_info_context->mbmi.mode);
   }
   return tx_type;
 }
@@ -598,7 +561,7 @@ static TX_TYPE get_tx_type_8x8(const MACROBLOCKD *xd, int ib) {
 static TX_TYPE get_tx_type_16x16(const MACROBLOCKD *xd, int ib) {
   TX_TYPE tx_type = DCT_DCT;
   if (xd->mode_info_context->mbmi.mode <= TM_PRED) {
-    tx_type = txfm_map(pred_mode_conv(xd->mode_info_context->mbmi.mode));
+    tx_type = txfm_map(xd->mode_info_context->mbmi.mode);
   }
   return tx_type;
 }

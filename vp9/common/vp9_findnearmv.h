@@ -88,7 +88,7 @@ static MB_PREDICTION_MODE left_block_mode(const MODE_INFO *cur_mb, int b) {
     --cur_mb;
 
     if (cur_mb->mbmi.mode <= TM_PRED) {
-      return pred_mode_conv(cur_mb->mbmi.mode);
+      return cur_mb->mbmi.mode;
     } else if (cur_mb->mbmi.mode == I4X4_PRED) {
       return ((cur_mb->bmi + 1 + b)->as_mode.first);
     } else {
@@ -106,7 +106,7 @@ static MB_PREDICTION_MODE above_block_mode(const MODE_INFO *cur_mb,
     cur_mb -= mi_stride;
 
     if (cur_mb->mbmi.mode <= TM_PRED) {
-      return pred_mode_conv(cur_mb->mbmi.mode);
+      return cur_mb->mbmi.mode;
     } else if (cur_mb->mbmi.mode == I4X4_PRED) {
       return ((cur_mb->bmi + 2 + b)->as_mode.first);
     } else {

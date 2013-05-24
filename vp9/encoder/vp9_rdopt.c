@@ -576,7 +576,7 @@ static void super_block_yrd(VP9_COMP *cpi,
 }
 
 static int64_t rd_pick_intra4x4block(VP9_COMP *cpi, MACROBLOCK *x, int ib,
-                                     B_PREDICTION_MODE *best_mode,
+                                     MB_PREDICTION_MODE *best_mode,
                                      int *bmode_costs,
                                      ENTROPY_CONTEXT *a, ENTROPY_CONTEXT *l,
                                      int *bestrate, int *bestratey,
@@ -737,7 +737,7 @@ static int64_t rd_pick_intra4x4mby_modes(VP9_COMP *cpi, MACROBLOCK *mb,
     for (idx = 0; idx < 2; idx += bw) {
       MODE_INFO *const mic = xd->mode_info_context;
       const int mis = xd->mode_info_stride;
-      B_PREDICTION_MODE UNINITIALIZED_IS_SAFE(best_mode);
+      MB_PREDICTION_MODE UNINITIALIZED_IS_SAFE(best_mode);
       int UNINITIALIZED_IS_SAFE(r), UNINITIALIZED_IS_SAFE(ry);
       int UNINITIALIZED_IS_SAFE(d);
       i = idy * 2 + idx;
@@ -940,7 +940,7 @@ void vp9_set_mbmode_and_mvs(MACROBLOCK *x, MB_PREDICTION_MODE mb, int_mv *mv) {
 
 static int labels2mode(MACROBLOCK *x,
                        int const *labelings, int which_label,
-                       B_PREDICTION_MODE this_mode,
+                       MB_PREDICTION_MODE this_mode,
                        int_mv *this_mv, int_mv *this_second_mv,
                        int_mv frame_mv[MB_MODE_COUNT][MAX_REF_FRAMES],
                        int_mv seg_mvs[MAX_REF_FRAMES - 1],
@@ -1129,7 +1129,7 @@ typedef struct {
   int r;
   int d;
   int segment_yrate;
-  B_PREDICTION_MODE modes[4];
+  MB_PREDICTION_MODE modes[4];
   int_mv mvs[4], second_mvs[4];
   int eobs[4];
   int mvthresh;
