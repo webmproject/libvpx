@@ -887,8 +887,7 @@ static void write_mb_modes_kf(const VP9_COMP *cpi,
 
   write_uv_mode(bc, m->mbmi.uv_mode, c->kf_uv_mode_prob[ym]);
 
-  if (m->mbmi.sb_type >= BLOCK_SIZE_SB8X8 && c->txfm_mode == TX_MODE_SELECT &&
-      !((skip_coeff || vp9_segfeature_active(xd, segment_id, SEG_LVL_SKIP)))) {
+  if (m->mbmi.sb_type >= BLOCK_SIZE_SB8X8 && c->txfm_mode == TX_MODE_SELECT) {
     TX_SIZE sz = m->mbmi.txfm_size;
     // FIXME(rbultje) code ternary symbol once all experiments are merged
     vp9_write(bc, sz != TX_4X4, c->prob_tx[0]);
@@ -1032,7 +1031,7 @@ static void write_modes(VP9_COMP *cpi, vp9_writer* const bc,
     vpx_memset(c->left_seg_context, 0, sizeof(c->left_seg_context));
     for (mi_col = c->cur_tile_mi_col_start;
          mi_col < c->cur_tile_mi_col_end;
-         mi_col += 8, m += 8)
+         mi_col += 64 / MI_SIZE, m += 64 / MI_SIZE)
       write_modes_sb(cpi, m, bc, tok, tok_end, mi_row, mi_col,
                      BLOCK_SIZE_SB64X64);
   }

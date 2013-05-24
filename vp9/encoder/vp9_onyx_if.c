@@ -2810,6 +2810,7 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
   }
 #endif
   loop_count = 0;
+  vpx_memset(cpi->rd_tx_select_threshes, 0, sizeof(cpi->rd_tx_select_threshes));
 
   if (cm->frame_type != KEY_FRAME) {
     /* TODO: Decide this more intelligently */

@@ -155,8 +155,7 @@ static void kfread_modes(VP9D_COMP *pbi, MODE_INFO *m,
   m->mbmi.uv_mode = read_uv_mode(r, cm->kf_uv_mode_prob[m->mbmi.mode]);
 
   if (cm->txfm_mode == TX_MODE_SELECT &&
-    !(m->mbmi.mb_skip_coeff && m->mbmi.ref_frame != INTRA_FRAME)
-      && m->mbmi.sb_type >= BLOCK_SIZE_SB8X8) {
+      m->mbmi.sb_type >= BLOCK_SIZE_SB8X8) {
     const int allow_16x16 = m->mbmi.sb_type >= BLOCK_SIZE_MB16X16;
     const int allow_32x32 = m->mbmi.sb_type >= BLOCK_SIZE_SB32X32;
     m->mbmi.txfm_size = select_txfm_size(cm, r, allow_16x16, allow_32x32);

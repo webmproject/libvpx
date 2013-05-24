@@ -1202,6 +1202,7 @@ static void encode_frame_internal(VP9_COMP *cpi) {
   vpx_memset(cpi->txfm_count_8x8p, 0, sizeof(cpi->txfm_count_8x8p));
   vpx_memset(cpi->rd_tx_select_diff, 0, sizeof(cpi->rd_tx_select_diff));
   vpx_memset(cpi->rd_tx_select_threshes, 0, sizeof(cpi->rd_tx_select_threshes));
+
   {
     struct vpx_usec_timer  emr_timer;
     vpx_usec_timer_start(&emr_timer);
@@ -1456,7 +1457,7 @@ void vp9_encode_frame(VP9_COMP *cpi) {
     } else
       txfm_type = ALLOW_8X8;
 #else
-    txfm_type = cpi->rd_tx_select_threshes[frame_type][ALLOW_32X32] >=
+    txfm_type = cpi->rd_tx_select_threshes[frame_type][ALLOW_32X32] >
                   cpi->rd_tx_select_threshes[frame_type][TX_MODE_SELECT] ?
                     ALLOW_32X32 : TX_MODE_SELECT;
 #endif
@@ -1711,7 +1712,7 @@ static void encode_superblock(VP9_COMP *cpi, TOKENEXTRA **t,
           sz = TX_8X8;
         if (sz == TX_8X8 && bsize < BLOCK_SIZE_SB8X8)
           sz = TX_4X4;
-      } else if (mbmi->mode != I4X4_PRED) {
+      } else if (bsize >= BLOCK_SIZE_SB8X8) {
         sz = mbmi->txfm_size;
       } else {
         sz = TX_4X4;
