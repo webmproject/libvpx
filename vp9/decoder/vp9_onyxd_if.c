@@ -349,8 +349,7 @@ int vp9_receive_compressed_data(VP9D_PTR ptr,
 
     if (cm->filter_level) {
       /* Apply the loop filter if appropriate. */
-      vp9_loop_filter_frame(cm, &pbi->mb, cm->filter_level, 0,
-                            cm->dering_enabled);
+      vp9_loop_filter_frame(cm, &pbi->mb, cm->filter_level, 0);
     }
 
 #if WRITE_RECON_BUFFER == 2

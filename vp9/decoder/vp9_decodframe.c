@@ -700,13 +700,6 @@ static void setup_loopfilter(VP9_COMMON *pc, MACROBLOCKD *xd, vp9_reader *r) {
   pc->filter_level = vp9_read_literal(r, 6);
   pc->sharpness_level = vp9_read_literal(r, 3);
 
-#if CONFIG_LOOP_DERING
-  if (vp9_read_bit(r))
-    pc->dering_enabled = 1 + vp9_read_literal(r, 4);
-  else
-    pc->dering_enabled = 0;
-#endif
-
   // Read in loop filter deltas applied at the MB level based on mode or ref
   // frame.
   xd->mode_ref_lf_delta_update = 0;

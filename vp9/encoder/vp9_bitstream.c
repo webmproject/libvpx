@@ -1351,14 +1351,6 @@ static void encode_loopfilter(VP9_COMMON *pc, MACROBLOCKD *xd, vp9_writer *w) {
   // Encode the loop filter level and type
   vp9_write_literal(w, pc->filter_level, 6);
   vp9_write_literal(w, pc->sharpness_level, 3);
-#if CONFIG_LOOP_DERING
-  if (pc->dering_enabled) {
-    vp9_write_bit(w, 1);
-    vp9_write_literal(w, pc->dering_enabled - 1, 4);
-  } else {
-    vp9_write_bit(w, 0);
-  }
-#endif
 
   // Write out loop filter deltas applied at the MB level based on mode or
   // ref frame (if they are enabled).

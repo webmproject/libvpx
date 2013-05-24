@@ -187,7 +187,7 @@ static void lpf_mb(VP9_COMMON *cm, const MODE_INFO *mi,
                    int do_left_mb_v, int do_above_mb_h,
                    int do_left_mbuv_v, int do_above_mbuv_h,
                    uint8_t *y_ptr, uint8_t *u_ptr, uint8_t *v_ptr,
-                   int y_stride, int uv_stride, int dering) {
+                   int y_stride, int uv_stride) {
   loop_filter_info_n *lfi_n = &cm->lf_info;
   struct loop_filter_info lfi;
   int mode = mi->mbmi.mode;
@@ -254,21 +254,6 @@ static void lpf_mb(VP9_COMMON *cm, const MODE_INFO *mi,
                            y_stride, uv_stride, &lfi);
       }
     }
-    if (dering) {
-#if CONFIG_LOOP_DERING
-      vp9_post_proc_down_and_across(y_ptr, y_ptr,
-        y_stride, y_stride,
-        16, 16, dering);
-      if (u_ptr && v_ptr) {
-        vp9_post_proc_down_and_across(u_ptr, u_ptr,
-          uv_stride, uv_stride,
-          8, 8, dering);
-        vp9_post_proc_down_and_across(v_ptr, v_ptr,
-          uv_stride, uv_stride,
-          8, 8, dering);
-      }
-#endif
-    }
   }
 }
 
@@ -276,7 +261,7 @@ static void lpf_sb32(VP9_COMMON *cm, const MODE_INFO *mode_info_context,
                      int mb_row, int mb_col,
                      uint8_t *y_ptr, uint8_t *u_ptr, uint8_t *v_ptr,
                      int y_stride, int uv_stride,
-                     int y_only, int dering) {
+                     int y_only) {
   BLOCK_SIZE_TYPE sb_type = mode_info_context->mbmi.sb_type;
   const int wbl = b_width_log2(sb_type), hbl = b_height_log2(sb_type);
   TX_SIZE tx_size = mode_info_context->mbmi.txfm_size;
@@ -298,7 +283,7 @@ static void lpf_sb32(VP9_COMMON *cm, const MODE_INFO *mode_info_context,
       y_ptr,
       y_only? 0 : u_ptr,
       y_only? 0 : v_ptr,
-      y_stride, uv_stride, dering);
+      y_stride, uv_stride);
   // process 2nd MB top-right
   mi = mode_info_context + 2;
   do_left_v = !(wbl >= 3 /* 32x16 or >=32x32 */ && (tx_size >= TX_32X32 ||
@@ -313,7 +298,7 @@ static void lpf_sb32(VP9_COMMON *cm, const MODE_INFO *mode_info_context,
       y_ptr + 16,
       y_only ? 0 : (u_ptr + 8),
       y_only ? 0 : (v_ptr + 8),
-      y_stride, uv_stride, dering);
+      y_stride, uv_stride);
 
   // process 3rd MB bottom-left
   mi = mode_info_context + (mis << 1);
@@ -329,7 +314,7 @@ static void lpf_sb32(VP9_COMMON *cm, const MODE_INFO *mode_info_context,
       y_ptr + 16 * y_stride,
       y_only ? 0 : (u_ptr + 8 * uv_stride),
       y_only ? 0 : (v_ptr + 8 * uv_stride),
-      y_stride, uv_stride, dering);
+      y_stride, uv_stride);
 
   // process 4th MB bottom right
   mi = mode_info_context + ((mis + 1) << 1);
@@ -346,39 +331,38 @@ static void lpf_sb32(VP9_COMMON *cm, const MODE_INFO *mode_info_context,
       y_ptr + 16 * y_stride + 16,
       y_only ? 0 : (u_ptr + 8 * uv_stride + 8),
       y_only ? 0 : (v_ptr + 8 * uv_stride + 8),
-      y_stride, uv_stride, dering);
+      y_stride, uv_stride);
 }
 
 static void lpf_sb64(VP9_COMMON *cm, const MODE_INFO *mode_info_context,
                      int mb_row, int mb_col,
                      uint8_t *y_ptr, uint8_t *u_ptr, uint8_t *v_ptr,
                      int y_stride, int uv_stride,
-                     int y_only, int dering) {
+                     int y_only) {
   lpf_sb32(cm, mode_info_context, mb_row, mb_col,
       y_ptr, u_ptr, v_ptr,
-      y_stride, uv_stride, y_only, dering);
+      y_stride, uv_stride, y_only);
   lpf_sb32(cm, mode_info_context + 4, mb_row, mb_col + 2,
       y_ptr + 32, u_ptr + 16, v_ptr + 16,
-      y_stride, uv_stride, y_only, dering);
+      y_stride, uv_stride, y_only);
   lpf_sb32(cm, mode_info_context + cm->mode_info_stride * 4,
       mb_row + 2, mb_col,
       y_ptr + 32 * y_stride,
       u_ptr + 16 * uv_stride,
       v_ptr + 16 * uv_stride,
-      y_stride, uv_stride, y_only, dering);
+      y_stride, uv_stride, y_only);
   lpf_sb32(cm, mode_info_context + cm->mode_info_stride * 4 + 4,
       mb_row + 2, mb_col + 2,
       y_ptr + 32 * y_stride + 32,
       u_ptr + 16 * uv_stride + 16,
       v_ptr + 16 * uv_stride + 16,
-      y_stride, uv_stride, y_only, dering);
+      y_stride, uv_stride, y_only);
 }
 
 void vp9_loop_filter_frame(VP9_COMMON *cm,
                            MACROBLOCKD *xd,
                            int frame_filter_level,
-                           int y_only,
-                           int dering) {
+                           int y_only) {
   YV12_BUFFER_CONFIG *post = cm->frame_to_show;
   int mb_row, mb_col;
   const int sb64_rows = cm->mb_rows / 4;
@@ -432,7 +416,7 @@ void vp9_loop_filter_frame(VP9_COMMON *cm,
     for (mb_col = 0; mb_col < sb64_cols * 4; mb_col += 4) {
       lpf_sb64(cm, mode_info_context, mb_row, mb_col,
                y_ptr, u_ptr, v_ptr,
-               y_stride, uv_stride, y_only, dering);
+               y_stride, uv_stride, y_only);
       y_ptr += 64;
       u_ptr = y_only? 0 : u_ptr + 32;
       v_ptr = y_only? 0 : v_ptr + 32;
@@ -442,13 +426,13 @@ void vp9_loop_filter_frame(VP9_COMMON *cm,
       // process 2 SB32s in the extra SB32 col
       lpf_sb32(cm, mode_info_context, mb_row, mb_col,
                y_ptr, u_ptr, v_ptr,
-               y_stride, uv_stride, y_only, dering);
+               y_stride, uv_stride, y_only);
       lpf_sb32(cm, mode_info_context + mis * 4,
                mb_row + 2, mb_col,
                y_ptr + 32 * y_stride,
                u_ptr + 16 * uv_stride,
                v_ptr + 16 * uv_stride,
-               y_stride, uv_stride, y_only, dering);
+               y_stride, uv_stride, y_only);
       y_ptr += 32;
       u_ptr = y_only? 0 : u_ptr + 16;
       v_ptr = y_only? 0 : v_ptr + 16;
@@ -469,7 +453,7 @@ void vp9_loop_filter_frame(VP9_COMMON *cm,
                y_ptr + (k * 16) * y_stride,
                y_only ? 0 : (u_ptr + (k * 8) * uv_stride),
                y_only ? 0 : (v_ptr + (k * 8) * uv_stride),
-               y_stride, uv_stride, dering);
+               y_stride, uv_stride);
       }
 
       y_ptr += 16;
@@ -491,7 +475,7 @@ void vp9_loop_filter_frame(VP9_COMMON *cm,
     for (mb_col = 0; mb_col < sb32_cols * 2; mb_col += 2) {
       lpf_sb32(cm, mode_info_context, mb_row, mb_col,
                y_ptr, u_ptr, v_ptr,
-               y_stride, uv_stride, y_only, dering);
+               y_stride, uv_stride, y_only);
       y_ptr += 32;
       u_ptr = y_only? 0 : u_ptr + 16;
       v_ptr = y_only? 0 : v_ptr + 16;
@@ -509,7 +493,7 @@ void vp9_loop_filter_frame(VP9_COMMON *cm,
              y_ptr,
              y_only? NULL : u_ptr,
              y_only? NULL : v_ptr,
-             y_stride, uv_stride, dering);
+             y_stride, uv_stride);
       // process 2nd MB
       mi = mode_info_context + (mis << 1);
       do_left_v = (mb_col > 0);
@@ -521,7 +505,7 @@ void vp9_loop_filter_frame(VP9_COMMON *cm,
              y_ptr + 16 * y_stride,
              y_only ? NULL : (u_ptr + 8 * uv_stride),
              y_only ? NULL : (v_ptr + 8 * uv_stride),
-             y_stride, uv_stride, dering);
+             y_stride, uv_stride);
       y_ptr += 16;
       u_ptr = y_only? 0 : u_ptr + 8;
       v_ptr = y_only? 0 : v_ptr + 8;
@@ -547,7 +531,7 @@ void vp9_loop_filter_frame(VP9_COMMON *cm,
              y_ptr,
              y_only? 0 : u_ptr,
              y_only? 0 : v_ptr,
-             y_stride, uv_stride, dering);
+             y_stride, uv_stride);
       y_ptr += 16;
       u_ptr = y_only? 0 : u_ptr + 8;
       v_ptr = y_only? 0 : v_ptr + 8;
