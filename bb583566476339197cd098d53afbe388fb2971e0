@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAZH//+dM\u003d",
+        "filename": "vp9/encoder/vp9_bitstream.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 492,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2013-05-24T23:19:46Z",
+      "side": 1,
+      "message": "this code is unreachable suggest removal",
+      "revId": "bb583566476339197cd098d53afbe388fb2971e0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAZX///20\u003d",
+        "filename": "vp9/encoder/vp9_bitstream.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 497,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2013-05-24T23:19:46Z",
+      "side": 1,
+      "message": "as discussed should keep separate probability counts for 0 and 1 node for when eob is not possible.",
+      "revId": "bb583566476339197cd098d53afbe388fb2971e0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAZX///3A\u003d",
+        "filename": "vp9/encoder/vp9_bitstream.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 508,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2013-05-24T23:19:46Z",
+      "side": 1,
+      "message": "2 counts ncount and n not needed remove one of them",
+      "revId": "bb583566476339197cd098d53afbe388fb2971e0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
