@@ -579,7 +579,7 @@ void vp9_update_nmv_count(VP9_COMP *cpi, MACROBLOCK *x,
     for (idy = 0; idy < 2; idy += bh) {
       for (idx = 0; idx < 2; idx += bw) {
         i = idy * 2 + idx;
-        if (pi->bmi[i].mode == NEW4X4) {
+        if (pi->bmi[i].mode == NEWMV) {
           mv.row = (pi->bmi[i].mv.as_mv.row - best_ref_mv->as_mv.row);
           mv.col = (pi->bmi[i].mv.as_mv.col - best_ref_mv->as_mv.col);
           vp9_increment_nmv(&mv, &best_ref_mv->as_mv, &cpi->NMVcount,

@@ -11,6 +11,7 @@
 #include <limits.h>
 
 #include "vp9/common/vp9_findnearmv.h"
+#include "vp9/common/vp9_mvref_common.h"
 #include "vp9/common/vp9_sadmxn.h"
 #include "vp9/common/vp9_subpelvar.h"
 
@@ -50,4 +51,60 @@ void vp9_find_best_ref_mvs(MACROBLOCKD *xd,
   }
   *nearest = mvlist[0];
   *near = mvlist[1];
+}
+
+void vp9_append_sub8x8_mvs_for_idx(VP9_COMMON *cm, MACROBLOCKD *xd,
+                                   int_mv *dst_nearest,
+                                   int_mv *dst_near,
+                                   int block_idx, int ref_idx) {
+  int_mv dst_list[MAX_MV_REF_CANDIDATES];
+  int_mv mv_list[MAX_MV_REF_CANDIDATES];
+  MODE_INFO *mi = xd->mode_info_context;
+  MB_MODE_INFO *const mbmi = &mi->mbmi;
+  int use_prev_in_find_mv_refs;
+
+  assert(ref_idx == 0 || ref_idx == 1);
+  assert(MAX_MV_REF_CANDIDATES == 2);  // makes code here slightly easier
+
+  use_prev_in_find_mv_refs = cm->width == cm->last_width &&
+                             cm->height == cm->last_height &&
+                             !cm->error_resilient_mode &&
+                             cm->last_show_frame;
+  vp9_find_mv_refs_idx(cm, xd, xd->mode_info_context,
+                       use_prev_in_find_mv_refs ?
+                           xd->prev_mode_info_context : NULL,
+                       ref_idx ? mbmi->second_ref_frame : mbmi->ref_frame,
+                       mv_list, cm->ref_frame_sign_bias, block_idx);
+
+  dst_list[1].as_int = 0;
+  if (block_idx == 0) {
+    memcpy(dst_list, mv_list, MAX_MV_REF_CANDIDATES * sizeof(int_mv));
+  } else if (block_idx == 1 || block_idx == 2) {
+    int dst = 0, n;
+    union b_mode_info *bmi = mi->bmi;
+
+    dst_list[dst++].as_int = bmi[0].as_mv[ref_idx].as_int;
+    for (n = 0; dst < MAX_MV_REF_CANDIDATES &&
+                n < MAX_MV_REF_CANDIDATES; n++)
+      if (mv_list[n].as_int != dst_list[0].as_int)
+        dst_list[dst++].as_int = mv_list[n].as_int;
+  } else {
+    int dst = 0, n;
+    union b_mode_info *bmi = mi->bmi;
+
+    assert(block_idx == 3);
+    dst_list[dst++].as_int = bmi[2].as_mv[ref_idx].as_int;
+    if (dst_list[0].as_int != bmi[1].as_mv[ref_idx].as_int)
+      dst_list[dst++].as_int = bmi[1].as_mv[ref_idx].as_int;
+    if (dst < MAX_MV_REF_CANDIDATES &&
+        dst_list[0].as_int != bmi[0].as_mv[ref_idx].as_int)
+      dst_list[dst++].as_int = bmi[0].as_mv[ref_idx].as_int;
+    for (n = 0; dst < MAX_MV_REF_CANDIDATES &&
+                n < MAX_MV_REF_CANDIDATES; n++)
+      if (mv_list[n].as_int != dst_list[0].as_int)
+        dst_list[dst++].as_int = mv_list[n].as_int;
+  }
+
+  dst_nearest->as_int = dst_list[0].as_int;
+  dst_near->as_int = dst_list[1].as_int;
 }

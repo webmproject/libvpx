@@ -18,8 +18,6 @@
 
 extern int vp9_mv_cont(const int_mv *l, const int_mv *a);
 
-extern const vp9_prob vp9_sub_mv_ref_prob2[SUBMVREF_COUNT][VP9_SUBMVREFS - 1];
-
 extern const vp9_prob vp9_kf_default_bmode_probs[VP9_KF_BINTRAMODES]
                                                 [VP9_KF_BINTRAMODES]
                                                 [VP9_KF_BINTRAMODES -1 ];
@@ -48,7 +46,6 @@ extern struct vp9_token vp9_uv_mode_encodings[VP9_UV_MODES];
 
 extern struct vp9_token vp9_mv_ref_encoding_array[VP9_MVREFS];
 extern struct vp9_token vp9_sb_mv_ref_encoding_array[VP9_MVREFS];
-extern struct vp9_token vp9_sub_mv_ref_encoding_array[VP9_SUBMVREFS];
 
 // probability models for partition information
 extern const vp9_tree_index  vp9_partition_tree[];

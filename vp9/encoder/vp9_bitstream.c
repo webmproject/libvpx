@@ -543,16 +543,6 @@ static void write_sb_mv_ref(vp9_writer *bc, MB_PREDICTION_MODE m,
               vp9_sb_mv_ref_encoding_array - NEARESTMV + m);
 }
 
-static void write_sub_mv_ref(vp9_writer *bc, B_PREDICTION_MODE m,
-                             const vp9_prob *p) {
-#if CONFIG_DEBUG
-  assert(LEFT4X4 <= m  &&  m <= NEW4X4);
-#endif
-  write_token(bc, vp9_sub_mv_ref_tree, p,
-              vp9_sub_mv_ref_encoding_array - LEFT4X4 + m);
-}
-
-
 // This function writes the current macro block's segnment id to the bitstream
 // It should only be called if a segment map update is indicated.
 static void write_mb_segid(vp9_writer *bc,
@@ -668,7 +658,6 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, MODE_INFO *m,
   const nmv_context *nmvc = &pc->fc.nmvc;
   MACROBLOCK *const x = &cpi->mb;
   MACROBLOCKD *const xd = &x->e_mbd;
-  const int mis = pc->mode_info_stride;
   MB_MODE_INFO *const mi = &m->mbmi;
   const MV_REFERENCE_FRAME rf = mi->ref_frame;
   const MB_PREDICTION_MODE mode = mi->mode;
@@ -781,11 +770,8 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, MODE_INFO *m,
         break;
       case SPLITMV: {
         int j;
-        B_PREDICTION_MODE blockmode;
+        MB_PREDICTION_MODE blockmode;
         int_mv blockmv;
-        int k = -1;  /* first block in subset j */
-        int mv_contz;
-        int_mv leftmv, abovemv;
         int bwl = b_width_log2(mi->sb_type), bw = 1 << bwl;
         int bhl = b_height_log2(mi->sb_type), bh = 1 << bhl;
         int idx, idy;
@@ -794,15 +780,9 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, MODE_INFO *m,
             j = idy * 2 + idx;
             blockmode = cpi->mb.partition_info->bmi[j].mode;
             blockmv = cpi->mb.partition_info->bmi[j].mv;
-            k = j;
-            leftmv.as_int = left_block_mv(xd, m, k);
-            abovemv.as_int = above_block_mv(m, k, mis);
-            mv_contz = vp9_mv_cont(&leftmv, &abovemv);
-
-            write_sub_mv_ref(bc, blockmode,
-                             cpi->common.fc.sub_mv_ref_prob[mv_contz]);
-            cpi->sub_mv_ref_count[mv_contz][blockmode - LEFT4X4]++;
-            if (blockmode == NEW4X4) {
+            write_sb_mv_ref(bc, blockmode, mv_ref_p);
+            vp9_accum_mv_refs(&cpi->common, blockmode, mi->mb_mode_context[rf]);
+            if (blockmode == NEWMV) {
 #ifdef ENTROPY_STATS
               active_section = 11;
 #endif
@@ -1738,10 +1718,8 @@ void vp9_pack_bitstream(VP9_COMP *cpi, uint8_t *dest, unsigned long *size) {
   vp9_copy(cpi->common.fc.pre_ymode_prob, cpi->common.fc.ymode_prob);
   vp9_copy(cpi->common.fc.pre_uv_mode_prob, cpi->common.fc.uv_mode_prob);
   vp9_copy(cpi->common.fc.pre_bmode_prob, cpi->common.fc.bmode_prob);
-  vp9_copy(cpi->common.fc.pre_sub_mv_ref_prob, cpi->common.fc.sub_mv_ref_prob);
   vp9_copy(cpi->common.fc.pre_partition_prob, cpi->common.fc.partition_prob);
   cpi->common.fc.pre_nmvc = cpi->common.fc.nmvc;
-  vp9_zero(cpi->sub_mv_ref_count);
   vp9_zero(cpi->common.fc.mv_ref_ct);
 
   update_coef_probs(cpi, &header_bc);

@@ -828,7 +828,6 @@ static void update_frame_context(FRAME_CONTEXT *fc) {
   vp9_copy(fc->pre_sb_ymode_prob, fc->sb_ymode_prob);
   vp9_copy(fc->pre_uv_mode_prob, fc->uv_mode_prob);
   vp9_copy(fc->pre_bmode_prob, fc->bmode_prob);
-  vp9_copy(fc->pre_sub_mv_ref_prob, fc->sub_mv_ref_prob);
   vp9_copy(fc->pre_partition_prob, fc->partition_prob);
   fc->pre_nmvc = fc->nmvc;
 
@@ -841,7 +840,6 @@ static void update_frame_context(FRAME_CONTEXT *fc) {
   vp9_zero(fc->sb_ymode_counts);
   vp9_zero(fc->uv_mode_counts);
   vp9_zero(fc->bmode_counts);
-  vp9_zero(fc->sub_mv_ref_counts);
   vp9_zero(fc->NMVcount);
   vp9_zero(fc->mv_ref_ct);
   vp9_zero(fc->partition_counts);

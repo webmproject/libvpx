@@ -46,11 +46,17 @@ static void clamp_mv_ref(const MACROBLOCKD *xd, int_mv *mv) {
 // structure if one exists that matches the given reference frame.
 static int get_matching_candidate(const MODE_INFO *candidate_mi,
                                   MV_REFERENCE_FRAME ref_frame,
-                                  int_mv *c_mv) {
+                                  int_mv *c_mv, int block_idx) {
   if (ref_frame == candidate_mi->mbmi.ref_frame) {
-    c_mv->as_int = candidate_mi->mbmi.mv[0].as_int;
+    if (block_idx >= 0 && candidate_mi->mbmi.sb_type < BLOCK_SIZE_SB8X8)
+      c_mv->as_int = candidate_mi->bmi[block_idx].as_mv[0].as_int;
+    else
+      c_mv->as_int = candidate_mi->mbmi.mv[0].as_int;
   } else if (ref_frame == candidate_mi->mbmi.second_ref_frame) {
-    c_mv->as_int = candidate_mi->mbmi.mv[1].as_int;
+    if (block_idx >= 0 && candidate_mi->mbmi.sb_type < BLOCK_SIZE_SB8X8)
+      c_mv->as_int = candidate_mi->bmi[block_idx].as_mv[1].as_int;
+    else
+      c_mv->as_int = candidate_mi->mbmi.mv[1].as_int;
   } else {
     return 0;
   }
@@ -150,9 +156,10 @@ static void add_candidate_mv(int_mv *mv_list,  int *mv_scores,
 // This function searches the neighbourhood of a given MB/SB
 // to try and find candidate reference vectors.
 //
-void vp9_find_mv_refs(VP9_COMMON *cm, MACROBLOCKD *xd, MODE_INFO *here,
-                      MODE_INFO *lf_here, MV_REFERENCE_FRAME ref_frame,
-                      int_mv *mv_ref_list, int *ref_sign_bias) {
+void vp9_find_mv_refs_idx(VP9_COMMON *cm, MACROBLOCKD *xd, MODE_INFO *here,
+                          MODE_INFO *lf_here, MV_REFERENCE_FRAME ref_frame,
+                          int_mv *mv_ref_list, int *ref_sign_bias,
+                          int block_idx) {
   int i;
   MODE_INFO *candidate_mi;
   MB_MODE_INFO * mbmi = &xd->mode_info_context->mbmi;
@@ -168,6 +175,7 @@ void vp9_find_mv_refs(VP9_COMMON *cm, MACROBLOCKD *xd, MODE_INFO *here,
   int intra_count = 0;
   int zero_count = 0;
   int newmv_count = 0;
+  int x_idx = 0, y_idx = 0;
 
   // Blank the reference vector lists and other local structures.
   vpx_memset(mv_ref_list, 0, sizeof(int_mv) * MAX_MV_REF_CANDIDATES);
@@ -181,6 +189,10 @@ void vp9_find_mv_refs(VP9_COMMON *cm, MACROBLOCKD *xd, MODE_INFO *here,
     mv_ref_search = mb_mv_ref_search;
   } else {
     mv_ref_search = b_mv_ref_search;
+    if (mbmi->sb_type < BLOCK_SIZE_SB8X8) {
+      x_idx = block_idx & 1;
+      y_idx = block_idx >> 1;
+    }
   }
 
   // We first scan for candidate vectors that match the current reference frame
@@ -191,11 +203,20 @@ void vp9_find_mv_refs(VP9_COMMON *cm, MACROBLOCKD *xd, MODE_INFO *here,
     if ((mi_search_col >= cm->cur_tile_mi_col_start) &&
         (mi_search_col < cm->cur_tile_mi_col_end) &&
         ((mv_ref_search[i][1] << 6) >= xd->mb_to_top_edge)) {
+      int b;
 
       candidate_mi = here + mv_ref_search[i][0] +
                      (mv_ref_search[i][1] * xd->mode_info_stride);
 
-      if (get_matching_candidate(candidate_mi, ref_frame, &c_refmv)) {
+      if (block_idx >= 0) {
+        if (mv_ref_search[i][0])
+          b = 1 + y_idx * 2;
+        else
+          b = 2 + x_idx;
+      } else {
+        b = -1;
+      }
+      if (get_matching_candidate(candidate_mi, ref_frame, &c_refmv, b)) {
         add_candidate_mv(mv_ref_list, candidate_scores,
                          &refmv_count, c_refmv, 16);
       }
@@ -229,7 +250,7 @@ void vp9_find_mv_refs(VP9_COMMON *cm, MACROBLOCKD *xd, MODE_INFO *here,
       candidate_mi = here + mv_ref_search[i][0] +
                      (mv_ref_search[i][1] * xd->mode_info_stride);
 
-      if (get_matching_candidate(candidate_mi, ref_frame, &c_refmv)) {
+      if (get_matching_candidate(candidate_mi, ref_frame, &c_refmv, -1)) {
         add_candidate_mv(mv_ref_list, candidate_scores,
                          &refmv_count, c_refmv, 16);
       }
@@ -239,7 +260,7 @@ void vp9_find_mv_refs(VP9_COMMON *cm, MACROBLOCKD *xd, MODE_INFO *here,
   // Look in the last frame if it exists
   if (lf_here && (refmv_count < MAX_MV_REF_CANDIDATES)) {
     candidate_mi = lf_here;
-    if (get_matching_candidate(candidate_mi, ref_frame, &c_refmv)) {
+    if (get_matching_candidate(candidate_mi, ref_frame, &c_refmv, block_idx)) {
       add_candidate_mv(mv_ref_list, candidate_scores,
                        &refmv_count, c_refmv, 16);
     }

@@ -51,7 +51,6 @@ typedef struct frame_contexts {
   vp9_prob ymode_prob[VP9_YMODES - 1]; /* interframe intra mode probs */
   vp9_prob sb_ymode_prob[VP9_I32X32_MODES - 1];
   vp9_prob uv_mode_prob[VP9_YMODES][VP9_UV_MODES - 1];
-  vp9_prob sub_mv_ref_prob[SUBMVREF_COUNT][VP9_SUBMVREFS - 1];
   vp9_prob partition_prob[NUM_PARTITION_CONTEXTS][PARTITION_TYPES - 1];
 
   nmv_context nmvc;
@@ -60,13 +59,11 @@ typedef struct frame_contexts {
   vp9_prob pre_ymode_prob[VP9_YMODES - 1]; /* interframe intra mode probs */
   vp9_prob pre_sb_ymode_prob[VP9_I32X32_MODES - 1];
   vp9_prob pre_uv_mode_prob[VP9_YMODES][VP9_UV_MODES - 1];
-  vp9_prob pre_sub_mv_ref_prob[SUBMVREF_COUNT][VP9_SUBMVREFS - 1];
   vp9_prob pre_partition_prob[NUM_PARTITION_CONTEXTS][PARTITION_TYPES - 1];
   unsigned int bmode_counts[VP9_NKF_BINTRAMODES];
   unsigned int ymode_counts[VP9_YMODES];   /* interframe intra mode probs */
   unsigned int sb_ymode_counts[VP9_I32X32_MODES];
   unsigned int uv_mode_counts[VP9_YMODES][VP9_UV_MODES];
-  unsigned int sub_mv_ref_counts[SUBMVREF_COUNT][VP9_SUBMVREFS];
   unsigned int partition_counts[NUM_PARTITION_CONTEXTS][PARTITION_TYPES];
 
   vp9_coeff_probs_model coef_probs_4x4[BLOCK_TYPES];

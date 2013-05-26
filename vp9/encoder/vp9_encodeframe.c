@@ -1093,7 +1093,6 @@ static void init_encode_frame_mb_context(VP9_COMP *cpi) {
   vp9_zero(cpi->bmode_count)
   vp9_zero(cpi->ymode_count)
   vp9_zero(cpi->y_uv_mode_count)
-  vp9_zero(cpi->sub_mv_ref_count)
   vp9_zero(cpi->common.fc.mv_ref_ct)
   vp9_zero(cpi->sb_ymode_count)
   vp9_zero(cpi->partition_count);

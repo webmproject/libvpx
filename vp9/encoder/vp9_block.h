@@ -26,7 +26,7 @@ typedef struct {
 typedef struct {
   int count;
   struct {
-    B_PREDICTION_MODE mode;
+    MB_PREDICTION_MODE mode;
     int_mv mv;
     int_mv second_mv;
   } bmi[4];

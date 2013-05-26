@@ -67,42 +67,6 @@ static const unsigned int bmode_cts[VP9_NKF_BINTRAMODES] = {
   43891, 10036, 3920, 3363, 2546, 5119, 2471, 1723, 3221, 17694
 };
 
-typedef enum {
-  SUBMVREF_NORMAL,
-  SUBMVREF_LEFT_ZED,
-  SUBMVREF_ABOVE_ZED,
-  SUBMVREF_LEFT_ABOVE_SAME,
-  SUBMVREF_LEFT_ABOVE_ZED
-} sumvfref_t;
-
-int vp9_mv_cont(const int_mv *l, const int_mv *a) {
-  const int lez = (l->as_int == 0);
-  const int aez = (a->as_int == 0);
-  const int lea = (l->as_int == a->as_int);
-
-  if (lea && lez)
-    return SUBMVREF_LEFT_ABOVE_ZED;
-
-  if (lea)
-    return SUBMVREF_LEFT_ABOVE_SAME;
-
-  if (aez)
-    return SUBMVREF_ABOVE_ZED;
-
-  if (lez)
-    return SUBMVREF_LEFT_ZED;
-
-  return SUBMVREF_NORMAL;
-}
-
-const vp9_prob vp9_sub_mv_ref_prob2 [SUBMVREF_COUNT][VP9_SUBMVREFS - 1] = {
-  { 147, 136, 18 },
-  { 106, 145, 1  },
-  { 179, 121, 1  },
-  { 223, 1, 34 },
-  { 208, 1, 1  }
-};
-
 const vp9_prob vp9_partition_probs[NUM_PARTITION_CONTEXTS]
                                   [PARTITION_TYPES - 1] = {
   // FIXME(jingning,rbultje) put real probabilities here
@@ -203,12 +167,6 @@ const vp9_tree_index vp9_sb_mv_ref_tree[6] = {
   -NEARMV, -NEWMV
 };
 
-const vp9_tree_index vp9_sub_mv_ref_tree[6] = {
-  -LEFT4X4, 2,
-  -ABOVE4X4, 4,
-  -ZERO4X4, -NEW4X4
-};
-
 const vp9_tree_index vp9_partition_tree[6] = {
   -PARTITION_NONE, 2,
   -PARTITION_HORZ, 4,
@@ -225,7 +183,6 @@ struct vp9_token vp9_uv_mode_encodings[VP9_UV_MODES];
 
 struct vp9_token vp9_mv_ref_encoding_array[VP9_MVREFS];
 struct vp9_token vp9_sb_mv_ref_encoding_array[VP9_MVREFS];
-struct vp9_token vp9_sub_mv_ref_encoding_array[VP9_SUBMVREFS];
 
 struct vp9_token vp9_partition_encodings[PARTITION_TYPES];
 
@@ -252,8 +209,6 @@ void vp9_init_mbmode_probs(VP9_COMMON *x) {
                                      bct, uv_mode_cts[i], 0);
   }
 
-  vpx_memcpy(x->fc.sub_mv_ref_prob, vp9_sub_mv_ref_prob2,
-             sizeof(vp9_sub_mv_ref_prob2));
   vpx_memcpy(x->fc.switchable_interp_prob, vp9_switchable_interp_prob,
              sizeof(vp9_switchable_interp_prob));
 
@@ -327,8 +282,6 @@ void vp9_entropy_mode_init() {
                               vp9_mv_ref_tree, NEARESTMV);
   vp9_tokens_from_tree_offset(vp9_sb_mv_ref_encoding_array,
                               vp9_sb_mv_ref_tree, NEARESTMV);
-  vp9_tokens_from_tree_offset(vp9_sub_mv_ref_encoding_array,
-                              vp9_sub_mv_ref_tree, LEFT4X4);
 }
 
 void vp9_init_mode_contexts(VP9_COMMON *pc) {
@@ -438,15 +391,6 @@ void vp9_adapt_mode_probs(VP9_COMMON *cm) {
   for (t = 0; t < VP9_I8X8_MODES; ++t)
     printf("%d, ", fc->i8x8_mode_counts[t]);
   printf("};\n");
-  printf("static const unsigned int\nsub_mv_ref_counts"
-         "[SUBMVREF_COUNT] [VP9_SUBMVREFS] = {\n");
-  for (i = 0; i < SUBMVREF_COUNT; ++i) {
-    printf("  {");
-    for (t = 0; t < VP9_SUBMVREFS; ++t)
-      printf("%d, ", fc->sub_mv_ref_counts[i][t]);
-    printf("},\n");
-  }
-  printf("};\n");
   printf("static const unsigned int\nmbsplit_counts"
          "[VP9_NUMMBSPLITS] = {\n");
   for (t = 0; t < VP9_NUMMBSPLITS; ++t)
@@ -469,12 +413,6 @@ void vp9_adapt_mode_probs(VP9_COMMON *cm) {
   update_mode_probs(VP9_NKF_BINTRAMODES, vp9_bmode_tree,
                     fc->bmode_counts, fc->pre_bmode_prob,
                     fc->bmode_prob, 0);
-
-  for (i = 0; i < SUBMVREF_COUNT; ++i)
-    update_mode_probs(VP9_SUBMVREFS,
-                      vp9_sub_mv_ref_tree, fc->sub_mv_ref_counts[i],
-                      fc->pre_sub_mv_ref_prob[i], fc->sub_mv_ref_prob[i],
-                      LEFT4X4);
 
   for (i = 0; i < NUM_PARTITION_CONTEXTS; i++)
     update_mode_probs(PARTITION_TYPES, vp9_partition_tree,

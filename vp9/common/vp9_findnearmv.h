@@ -74,72 +74,11 @@ vp9_prob *vp9_mv_ref_probs(VP9_COMMON *pc,
                            vp9_prob p[VP9_MVREFS - 1],
                            const int context);
 
-static int left_block_mv(const MACROBLOCKD *xd,
-                         const MODE_INFO *cur_mb, int b) {
-  if (!(b & 1)) {
-    if (!xd->left_available)
-      return 0;
-
-    // On L edge, get from MB to left of us
-    --cur_mb;
-
-    if (cur_mb->mbmi.mode != SPLITMV)
-      return cur_mb->mbmi.mv[0].as_int;
-
-    b += 2;
-  }
-
-  return (cur_mb->bmi + b - 1)->as_mv[0].as_int;
-}
-
-static int left_block_second_mv(const MACROBLOCKD *xd,
-                                const MODE_INFO *cur_mb, int b) {
-  if (!(b & 1)) {
-    if (!xd->left_available)
-      return 0;
-
-    /* On L edge, get from MB to left of us */
-    --cur_mb;
-
-    if (cur_mb->mbmi.mode != SPLITMV)
-      return cur_mb->mbmi.second_ref_frame > 0 ?
-          cur_mb->mbmi.mv[1].as_int : cur_mb->mbmi.mv[0].as_int;
-    b += 2;
-  }
-
-  return cur_mb->mbmi.second_ref_frame > 0 ?
-      (cur_mb->bmi + b - 1)->as_mv[1].as_int :
-      (cur_mb->bmi + b - 1)->as_mv[0].as_int;
-}
-
-static int above_block_mv(const MODE_INFO *cur_mb, int b, int mi_stride) {
-  if (!(b >> 1)) {
-    /* On top edge, get from MB above us */
-    cur_mb -= mi_stride;
-
-    if (cur_mb->mbmi.mode != SPLITMV)
-      return cur_mb->mbmi.mv[0].as_int;
-    b += 4;
-  }
-
-  return (cur_mb->bmi + b - 2)->as_mv[0].as_int;
-}
-
-static int above_block_second_mv(const MODE_INFO *cur_mb, int b, int mi_stride) {
-  if (!(b >> 1)) {
-    /* On top edge, get from MB above us */
-    cur_mb -= mi_stride;
-
-    if (cur_mb->mbmi.mode != SPLITMV)
-      return cur_mb->mbmi.second_ref_frame > 0 ?
-          cur_mb->mbmi.mv[1].as_int : cur_mb->mbmi.mv[0].as_int;
-    b += 4;
-  }
-
-  return cur_mb->mbmi.second_ref_frame > 0 ?
-      (cur_mb->bmi + b - 2)->as_mv[1].as_int :
-      (cur_mb->bmi + b - 2)->as_mv[0].as_int;
-}
+void vp9_append_sub8x8_mvs_for_idx(VP9_COMMON *pc,
+                                   MACROBLOCKD *xd,
+                                   int_mv *dst_nearest,
+                                   int_mv *dst_near,
+                                   int block_idx, int ref_idx);
 
 static MB_PREDICTION_MODE left_block_mode(const MODE_INFO *cur_mb, int b) {
   // FIXME(rbultje, jingning): temporary hack because jenkins doesn't
