@@ -1891,8 +1891,7 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
                                  int *rate_uv, int *distortion_uv,
                                  int *mode_excluded, int *disable_skip,
                                  INTERPOLATIONFILTERTYPE *best_filter,
-                                 int_mv frame_mv[MB_MODE_COUNT]
-                                                [MAX_REF_FRAMES],
+                                 int_mv *frame_mv,
                                  YV12_BUFFER_CONFIG **scaled_ref_frame,
                                  int mi_row, int mi_col,
                                  int_mv single_newmv[MAX_REF_FRAMES]) {
@@ -1967,8 +1966,8 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
           scaled_first_yv12 = xd->plane[0].pre[0];
 
           // Initialize mv using single prediction mode result.
-          frame_mv[NEWMV][refs[0]].as_int = single_newmv[refs[0]].as_int;
-          frame_mv[NEWMV][refs[1]].as_int = single_newmv[refs[1]].as_int;
+          frame_mv[refs[0]].as_int = single_newmv[refs[0]].as_int;
+          frame_mv[refs[1]].as_int = single_newmv[refs[1]].as_int;
 
           // Allow joint search multiple times iteratively for each ref frame
           // and break out the search loop if it couldn't find better mv.
@@ -1993,7 +1992,7 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
             vp9_build_inter_predictor(ref_yv12[!id].buf,
                                       ref_yv12[!id].stride,
                                       second_pred, pw,
-                                      &frame_mv[NEWMV][refs[!id]],
+                                      &frame_mv[refs[!id]],
                                       &xd->scale_factor[!id],
                                       pw, ph, 0,
                                       &xd->subpix);
@@ -2004,7 +2003,7 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
             vp9_clamp_mv_min_max(x, &ref_mv[id]);
 
             // Use mv result from single mode as mvp.
-            tmp_mv.as_int = frame_mv[NEWMV][refs[id]].as_int;
+            tmp_mv.as_int = frame_mv[refs[id]].as_int;
 
             tmp_mv.as_mv.col >>= 3;
             tmp_mv.as_mv.row >>= 3;
@@ -2039,7 +2038,7 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
               xd->plane[0].pre[0] = scaled_first_yv12;
 
             if (bestsme < last_besterr[id]) {
-            frame_mv[NEWMV][refs[id]].as_int =
+              frame_mv[refs[id]].as_int =
                   xd->mode_info_context->bmi[0].as_mv[1].as_int = tmp_mv.as_int;
               last_besterr[id] = bestsme;
             } else {
@@ -2065,14 +2064,14 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
           vpx_free(second_pred);
         }
 
-        if (frame_mv[NEWMV][refs[0]].as_int == INVALID_MV ||
-            frame_mv[NEWMV][refs[1]].as_int == INVALID_MV)
+        if (frame_mv[refs[0]].as_int == INVALID_MV ||
+            frame_mv[refs[1]].as_int == INVALID_MV)
           return INT64_MAX;
-        *rate2 += vp9_mv_bit_cost(&frame_mv[NEWMV][refs[0]],
+        *rate2 += vp9_mv_bit_cost(&frame_mv[refs[0]],
                                   &ref_mv[0],
                                   x->nmvjointcost, x->mvcost, 96,
                                   x->e_mbd.allow_high_precision_mv);
-        *rate2 += vp9_mv_bit_cost(&frame_mv[NEWMV][refs[1]],
+        *rate2 += vp9_mv_bit_cost(&frame_mv[refs[1]],
                                   &ref_mv[1],
                                   x->nmvjointcost, x->mvcost, 96,
                                   x->e_mbd.allow_high_precision_mv);
@@ -2139,7 +2138,7 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
                                        x->nmvjointcost, x->mvcost,
                                        &dis, &sse);
         }
-        frame_mv[NEWMV][refs[0]].as_int =
+        frame_mv[refs[0]].as_int =
           xd->mode_info_context->bmi[0].as_mv[0].as_int = tmp_mv.as_int;
         single_newmv[refs[0]].as_int = tmp_mv.as_int;
 
@@ -2164,7 +2163,7 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
       break;
   }
   for (i = 0; i < num_refs; ++i) {
-    cur_mv[i] = frame_mv[this_mode][refs[i]];
+    cur_mv[i] = frame_mv[refs[i]];
     // Clip "next_nearest" so that it does not extend to far out of image
     if (this_mode == NEWMV)
       assert(!clamp_mv2(&cur_mv[i], xd));
@@ -2868,7 +2867,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
                                   &rate_y, &distortion_y,
                                   &rate_uv, &distortion_uv,
                                   &mode_excluded, &disable_skip,
-                                  &tmp_best_filter, frame_mv,
+                                  &tmp_best_filter, frame_mv[this_mode],
                                   scaled_ref_frame, mi_row, mi_col,
                                   single_newmv);
       if (this_rd == INT64_MAX)
