@@ -254,7 +254,7 @@ typedef struct {
 
 typedef struct {
   MB_MODE_INFO mbmi;
-  union b_mode_info bmi[16];
+  union b_mode_info bmi[4];
 } MODE_INFO;
 
 struct scale_factors {
