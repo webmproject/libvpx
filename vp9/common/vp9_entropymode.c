@@ -29,7 +29,7 @@ static const unsigned int kf_y_mode_cts[8][VP9_YMODES] = {
 
 static const unsigned int y_mode_cts  [VP9_YMODES] = {
   /* DC V   H  D45 135 117 153 D27 D63 TM i4X4 */
-  98, 19, 15, 14, 14, 14, 14, 12, 12, 13, 70
+  98, 19, 15, 14, 14, 14, 14, 12, 12, 13, 0
 };
 
 static const unsigned int uv_mode_cts [VP9_YMODES] [VP9_UV_MODES] = {
@@ -62,7 +62,7 @@ static const unsigned int kf_uv_mode_cts [VP9_YMODES] [VP9_UV_MODES] = {
   { 122, 41, 35, 20, 20, 20, 20, 20, 20, 18}, /* I4X4 */
 };
 
-static const unsigned int bmode_cts[VP9_NKF_BINTRAMODES] = {
+static const unsigned int bmode_cts[VP9_BINTRAMODES] = {
   /* DC    V     H    D45   D135  D117  D153   D27   D63   TM  */
   43891, 10036, 3920, 3363, 2546, 5119, 2471, 1723, 3221, 17694
 };
@@ -89,29 +89,16 @@ const vp9_prob vp9_partition_probs[NUM_PARTITION_CONTEXTS]
 };
 
 /* Array indices are identical to previously-existing INTRAMODECONTEXTNODES. */
-
-const vp9_tree_index vp9_kf_bmode_tree[VP9_KF_BINTRAMODES * 2 - 2] = {
-  -B_DC_PRED, 2,                      /* 0 = DC_NODE */
-  -B_TM_PRED, 4,                      /* 1 = TM_NODE */
-  -B_V_PRED, 6,                       /* 2 = V_NODE */
-  8, 12,                              /* 3 = COM_NODE */
-  -B_H_PRED, 10,                      /* 4 = H_NODE */
-  -B_D135_PRED, -B_D117_PRED,         /* 5 = D135_NODE */
-  -B_D45_PRED, 14,                    /* 6 = D45_NODE */
-  -B_D63_PRED, 16,                    /* 7 = D63_NODE */
-  -B_D153_PRED, -B_D27_PRED           /* 8 = D153_NODE */
-};
-
-const vp9_tree_index vp9_bmode_tree[VP9_NKF_BINTRAMODES * 2 - 2] = {
-  -B_DC_PRED, 2,                      /* 0 = DC_NODE */
-  -B_TM_PRED, 4,                      /* 1 = TM_NODE */
-  -B_V_PRED, 6,                       /* 2 = V_NODE */
-  8, 12,                              /* 3 = COM_NODE */
-  -B_H_PRED, 10,                      /* 4 = H_NODE */
-  -B_D135_PRED, -B_D117_PRED,         /* 5 = D135_NODE */
-  -B_D45_PRED, 14,                    /* 6 = D45_NODE */
-  -B_D63_PRED, 16,                    /* 7 = D63_NODE */
-  -B_D153_PRED, -B_D27_PRED           /* 8 = D153_NODE */
+const vp9_tree_index vp9_bmode_tree[VP9_BINTRAMODES * 2 - 2] = {
+  -DC_PRED, 2,                      /* 0 = DC_NODE */
+  -TM_PRED, 4,                      /* 1 = TM_NODE */
+  -V_PRED, 6,                       /* 2 = V_NODE */
+  8, 12,                            /* 3 = COM_NODE */
+  -H_PRED, 10,                      /* 4 = H_NODE */
+  -D135_PRED, -D117_PRED,           /* 5 = D135_NODE */
+  -D45_PRED, 14,                    /* 6 = D45_NODE */
+  -D63_PRED, 16,                    /* 7 = D63_NODE */
+  -D153_PRED, -D27_PRED             /* 8 = D153_NODE */
 };
 
 /* Again, these trees use the same probability indices as their
@@ -173,8 +160,8 @@ const vp9_tree_index vp9_partition_tree[6] = {
   -PARTITION_VERT, -PARTITION_SPLIT
 };
 
-struct vp9_token vp9_bmode_encodings[VP9_NKF_BINTRAMODES];
-struct vp9_token vp9_kf_bmode_encodings[VP9_KF_BINTRAMODES];
+struct vp9_token vp9_bmode_encodings[VP9_BINTRAMODES];
+struct vp9_token vp9_kf_bmode_encodings[VP9_BINTRAMODES];
 struct vp9_token vp9_ymode_encodings[VP9_YMODES];
 struct vp9_token vp9_sb_ymode_encodings[VP9_I32X32_MODES];
 struct vp9_token vp9_sb_kf_ymode_encodings[VP9_I32X32_MODES];
@@ -222,14 +209,14 @@ void vp9_init_mbmode_probs(VP9_COMMON *x) {
 
 
 static void intra_bmode_probs_from_distribution(
-  vp9_prob p[VP9_NKF_BINTRAMODES - 1],
-  unsigned int branch_ct[VP9_NKF_BINTRAMODES - 1][2],
-  const unsigned int events[VP9_NKF_BINTRAMODES]) {
+  vp9_prob p[VP9_BINTRAMODES - 1],
+  unsigned int branch_ct[VP9_BINTRAMODES - 1][2],
+  const unsigned int events[VP9_BINTRAMODES]) {
   vp9_tree_probs_from_distribution(vp9_bmode_tree, p, branch_ct, events, 0);
 }
 
-void vp9_default_bmode_probs(vp9_prob p[VP9_NKF_BINTRAMODES - 1]) {
-  unsigned int branch_ct[VP9_NKF_BINTRAMODES - 1][2];
+void vp9_default_bmode_probs(vp9_prob p[VP9_BINTRAMODES - 1]) {
+  unsigned int branch_ct[VP9_BINTRAMODES - 1][2];
   intra_bmode_probs_from_distribution(p, branch_ct, bmode_cts);
 }
 
@@ -267,7 +254,7 @@ const int vp9_switchable_interp_map[SWITCHABLE+1] = {-1, 0, 1, -1, -1};
 const int vp9_is_interpolating_filter[SWITCHABLE + 1] = {0, 1, 1, 1, -1};
 
 void vp9_entropy_mode_init() {
-  vp9_tokens_from_tree(vp9_kf_bmode_encodings,   vp9_kf_bmode_tree);
+  vp9_tokens_from_tree(vp9_kf_bmode_encodings,   vp9_bmode_tree);
   vp9_tokens_from_tree(vp9_bmode_encodings,   vp9_bmode_tree);
   vp9_tokens_from_tree(vp9_ymode_encodings,   vp9_ymode_tree);
   vp9_tokens_from_tree(vp9_kf_ymode_encodings, vp9_kf_ymode_tree);
@@ -410,7 +397,7 @@ void vp9_adapt_mode_probs(VP9_COMMON *cm) {
                       fc->uv_mode_counts[i], fc->pre_uv_mode_prob[i],
                       fc->uv_mode_prob[i], 0);
 
-  update_mode_probs(VP9_NKF_BINTRAMODES, vp9_bmode_tree,
+  update_mode_probs(VP9_BINTRAMODES, vp9_bmode_tree,
                     fc->bmode_counts, fc->pre_bmode_prob,
                     fc->bmode_prob, 0);
 

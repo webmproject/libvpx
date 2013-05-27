@@ -35,13 +35,13 @@ int dec_mvcount = 0;
 extern int dec_debug;
 #endif
 
-static B_PREDICTION_MODE read_bmode(vp9_reader *r, const vp9_prob *p) {
-  B_PREDICTION_MODE m = treed_read(r, vp9_bmode_tree, p);
+static MB_PREDICTION_MODE read_bmode(vp9_reader *r, const vp9_prob *p) {
+  MB_PREDICTION_MODE m = treed_read(r, vp9_bmode_tree, p);
   return m;
 }
 
-static B_PREDICTION_MODE read_kf_bmode(vp9_reader *r, const vp9_prob *p) {
-  return (B_PREDICTION_MODE)treed_read(r, vp9_kf_bmode_tree, p);
+static MB_PREDICTION_MODE read_kf_bmode(vp9_reader *r, const vp9_prob *p) {
+  return (MB_PREDICTION_MODE)treed_read(r, vp9_bmode_tree, p);
 }
 
 static MB_PREDICTION_MODE read_ymode(vp9_reader *r, const vp9_prob *p) {
