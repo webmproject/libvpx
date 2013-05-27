@@ -124,6 +124,24 @@
       "revId": "a33d93e90f1c08c1e7eb702222dcd1e18d576e02",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAZX///G4\u003d",
+        "filename": "nestegg/halloc/src/macros.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1002325
+      },
+      "writtenOn": "2013-05-27T20:47:00Z",
+      "side": 1,
+      "message": "For what it\u0027s worth, I\u0027ve sent this patch upstream at https://github.com/kinetiknz/nestegg/pull/11 (which I assume is the upstream?), but haven\u0027t had any replies to it yet.",
+      "parentUuid": "AAAAYX//94I\u003d",
+      "revId": "a33d93e90f1c08c1e7eb702222dcd1e18d576e02",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
