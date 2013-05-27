@@ -118,6 +118,24 @@ static void kfread_modes(VP9D_COMP *pbi, MODE_INFO *m,
   if (!m->mbmi.mb_skip_coeff)
     m->mbmi.mb_skip_coeff = vp9_read(r, vp9_get_pred_prob(cm, xd, PRED_MBSKIP));
 
+  if (cm->txfm_mode == TX_MODE_SELECT &&
+      m->mbmi.sb_type >= BLOCK_SIZE_SB8X8) {
+    const int allow_16x16 = m->mbmi.sb_type >= BLOCK_SIZE_MB16X16;
+    const int allow_32x32 = m->mbmi.sb_type >= BLOCK_SIZE_SB32X32;
+    m->mbmi.txfm_size = select_txfm_size(cm, r, allow_16x16, allow_32x32);
+  } else if (cm->txfm_mode >= ALLOW_32X32 &&
+             m->mbmi.sb_type >= BLOCK_SIZE_SB32X32) {
+    m->mbmi.txfm_size = TX_32X32;
+  } else if (cm->txfm_mode >= ALLOW_16X16 &&
+             m->mbmi.sb_type >= BLOCK_SIZE_MB16X16) {
+    m->mbmi.txfm_size = TX_16X16;
+  } else if (cm->txfm_mode >= ALLOW_8X8 &&
+             m->mbmi.sb_type >= BLOCK_SIZE_SB8X8) {
+    m->mbmi.txfm_size = TX_8X8;
+  } else {
+    m->mbmi.txfm_size = TX_4X4;
+  }
+
   // luma mode
   if (m->mbmi.sb_type >= BLOCK_SIZE_SB8X8) {
     const MB_PREDICTION_MODE A = above_block_mode(m, 0, mis);
@@ -153,25 +171,6 @@ static void kfread_modes(VP9D_COMP *pbi, MODE_INFO *m,
   }
 
   m->mbmi.uv_mode = read_uv_mode(r, cm->kf_uv_mode_prob[m->mbmi.mode]);
-
-  if (cm->txfm_mode == TX_MODE_SELECT &&
-      m->mbmi.sb_type >= BLOCK_SIZE_SB8X8) {
-    const int allow_16x16 = m->mbmi.sb_type >= BLOCK_SIZE_MB16X16;
-    const int allow_32x32 = m->mbmi.sb_type >= BLOCK_SIZE_SB32X32;
-    m->mbmi.txfm_size = select_txfm_size(cm, r, allow_16x16, allow_32x32);
-  } else if (cm->txfm_mode >= ALLOW_32X32 &&
-             m->mbmi.sb_type >= BLOCK_SIZE_SB32X32) {
-    m->mbmi.txfm_size = TX_32X32;
-  } else if (cm->txfm_mode >= ALLOW_16X16 &&
-             m->mbmi.sb_type >= BLOCK_SIZE_MB16X16 &&
-             m->mbmi.mode <= TM_PRED) {
-    m->mbmi.txfm_size = TX_16X16;
-  } else if (cm->txfm_mode >= ALLOW_8X8 &&
-             m->mbmi.sb_type >= BLOCK_SIZE_SB8X8) {
-    m->mbmi.txfm_size = TX_8X8;
-  } else {
-    m->mbmi.txfm_size = TX_4X4;
-  }
 }
 
 static int read_mv_component(vp9_reader *r,
@@ -569,6 +568,24 @@ static void read_mb_modes_mv(VP9D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
   // Read the reference frame
   mbmi->ref_frame = read_ref_frame(pbi, r, mbmi->segment_id);
 
+  if (cm->txfm_mode == TX_MODE_SELECT &&
+      (mbmi->mb_skip_coeff == 0 || mbmi->ref_frame == INTRA_FRAME) &&
+      bsize >= BLOCK_SIZE_SB8X8) {
+    const int allow_16x16 = bsize >= BLOCK_SIZE_MB16X16;
+    const int allow_32x32 = bsize >= BLOCK_SIZE_SB32X32;
+    mbmi->txfm_size = select_txfm_size(cm, r, allow_16x16, allow_32x32);
+  } else if (bsize >= BLOCK_SIZE_SB32X32 &&
+             cm->txfm_mode >= ALLOW_32X32) {
+    mbmi->txfm_size = TX_32X32;
+  } else if (cm->txfm_mode >= ALLOW_16X16 &&
+             bsize >= BLOCK_SIZE_MB16X16) {
+    mbmi->txfm_size = TX_16X16;
+  } else if (cm->txfm_mode >= ALLOW_8X8 && (bsize >= BLOCK_SIZE_SB8X8)) {
+    mbmi->txfm_size = TX_8X8;
+  } else {
+    mbmi->txfm_size = TX_4X4;
+  }
+
   // If reference frame is an Inter frame
   if (mbmi->ref_frame) {
     int_mv nearest, nearby, best_mv;
@@ -832,24 +849,6 @@ static void read_mb_modes_mv(VP9D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
 
     mbmi->uv_mode = read_uv_mode(r, cm->fc.uv_mode_prob[mbmi->mode]);
     cm->fc.uv_mode_counts[mbmi->mode][mbmi->uv_mode]++;
-  }
-
-  if (cm->txfm_mode == TX_MODE_SELECT &&
-      (mbmi->mb_skip_coeff == 0 || mbmi->ref_frame == INTRA_FRAME) &&
-      bsize >= BLOCK_SIZE_SB8X8) {
-    const int allow_16x16 = bsize >= BLOCK_SIZE_MB16X16;
-    const int allow_32x32 = bsize >= BLOCK_SIZE_SB32X32;
-    mbmi->txfm_size = select_txfm_size(cm, r, allow_16x16, allow_32x32);
-  } else if (bsize >= BLOCK_SIZE_SB32X32 &&
-             cm->txfm_mode >= ALLOW_32X32) {
-    mbmi->txfm_size = TX_32X32;
-  } else if (cm->txfm_mode >= ALLOW_16X16 &&
-             bsize >= BLOCK_SIZE_MB16X16) {
-    mbmi->txfm_size = TX_16X16;
-  } else if (cm->txfm_mode >= ALLOW_8X8 && (bsize >= BLOCK_SIZE_SB8X8)) {
-    mbmi->txfm_size = TX_8X8;
-  } else {
-    mbmi->txfm_size = TX_4X4;
   }
 }
 
