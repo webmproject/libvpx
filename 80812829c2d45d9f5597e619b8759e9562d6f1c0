@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAZX///GI\u003d",
+        "filename": "vp9/decoder/vp9_decodemv.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 121,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-05-27T21:36:15Z",
+      "side": 1,
+      "message": "and over here, it seems we lost the skip check - that is, if we\u0027re a skip, we should never code the txfm_size, because it is implicit in the sb_type.",
+      "revId": "80812829c2d45d9f5597e619b8759e9562d6f1c0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAZX///GQ\u003d",
+        "filename": "vp9/decoder/vp9_decodemv.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 572,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-05-27T21:36:15Z",
+      "side": 1,
+      "message": "btw this looks like a refactoring gone wrong, why is there an intra frame check here? I\u0027m pretty sure this should go.",
+      "revId": "80812829c2d45d9f5597e619b8759e9562d6f1c0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
