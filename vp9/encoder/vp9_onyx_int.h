@@ -422,20 +422,20 @@ typedef struct VP9_COMP {
   nmv_context_counts NMVcount;
 
   vp9_coeff_count coef_counts_4x4[BLOCK_TYPES];
-  vp9_coeff_probs frame_coef_probs_4x4[BLOCK_TYPES];
-  vp9_coeff_stats frame_branch_ct_4x4[BLOCK_TYPES];
+  vp9_coeff_probs_model frame_coef_probs_4x4[BLOCK_TYPES];
+  vp9_coeff_stats_model frame_branch_ct_4x4[BLOCK_TYPES];
 
   vp9_coeff_count coef_counts_8x8[BLOCK_TYPES];
-  vp9_coeff_probs frame_coef_probs_8x8[BLOCK_TYPES];
-  vp9_coeff_stats frame_branch_ct_8x8[BLOCK_TYPES];
+  vp9_coeff_probs_model frame_coef_probs_8x8[BLOCK_TYPES];
+  vp9_coeff_stats_model frame_branch_ct_8x8[BLOCK_TYPES];
 
   vp9_coeff_count coef_counts_16x16[BLOCK_TYPES];
-  vp9_coeff_probs frame_coef_probs_16x16[BLOCK_TYPES];
-  vp9_coeff_stats frame_branch_ct_16x16[BLOCK_TYPES];
+  vp9_coeff_probs_model frame_coef_probs_16x16[BLOCK_TYPES];
+  vp9_coeff_stats_model frame_branch_ct_16x16[BLOCK_TYPES];
 
   vp9_coeff_count coef_counts_32x32[BLOCK_TYPES];
-  vp9_coeff_probs frame_coef_probs_32x32[BLOCK_TYPES];
-  vp9_coeff_stats frame_branch_ct_32x32[BLOCK_TYPES];
+  vp9_coeff_probs_model frame_coef_probs_32x32[BLOCK_TYPES];
+  vp9_coeff_stats_model frame_branch_ct_32x32[BLOCK_TYPES];
 
   int gfu_boost;
   int last_boost;

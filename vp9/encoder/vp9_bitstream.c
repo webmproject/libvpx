@@ -1045,7 +1045,7 @@ static void print_prob_tree(vp9_coeff_probs *coef_probs, int block_types) {
   fclose(f);
 }
 
-static void build_tree_distribution(vp9_coeff_probs *coef_probs,
+static void build_tree_distribution(vp9_coeff_probs_model *coef_probs,
                                     vp9_coeff_count *coef_counts,
                                     unsigned int (*eob_branch_ct)[REF_TYPES]
                                                                  [COEF_BANDS]
@@ -1054,12 +1054,13 @@ static void build_tree_distribution(vp9_coeff_probs *coef_probs,
                                     VP9_COMP *cpi,
                                     vp9_coeff_accum *context_counters,
 #endif
-                                    vp9_coeff_stats *coef_branch_ct,
+                                    vp9_coeff_stats_model *coef_branch_ct,
                                     int block_types) {
   int i, j, k, l;
 #ifdef ENTROPY_STATS
   int t = 0;
 #endif
+  unsigned int model_counts[UNCONSTRAINED_NODES + 1];
 
   for (i = 0; i < block_types; ++i) {
     for (j = 0; j < REF_TYPES; ++j) {
@@ -1067,10 +1068,11 @@ static void build_tree_distribution(vp9_coeff_probs *coef_probs,
         for (l = 0; l < PREV_COEF_CONTEXTS; ++l) {
           if (l >= 3 && k == 0)
             continue;
-          vp9_tree_probs_from_distribution(vp9_coef_tree,
+          vp9_full_to_model_count(model_counts, coef_counts[i][j][k][l]);
+          vp9_tree_probs_from_distribution(vp9_coefmodel_tree,
                                            coef_probs[i][j][k][l],
                                            coef_branch_ct[i][j][k][l],
-                                           coef_counts[i][j][k][l], 0);
+                                           model_counts, 0);
           coef_branch_ct[i][j][k][l][0][1] = eob_branch_ct[i][j][k][l] -
                                              coef_branch_ct[i][j][k][l][0][0];
           coef_probs[i][j][k][l][0] =
@@ -1127,9 +1129,9 @@ static void update_coef_probs_common(
 #ifdef ENTROPY_STATS
     vp9_coeff_stats *tree_update_hist,
 #endif
-    vp9_coeff_probs *new_frame_coef_probs,
+    vp9_coeff_probs_model *new_frame_coef_probs,
     vp9_coeff_probs_model *old_frame_coef_probs,
-    vp9_coeff_stats *frame_branch_ct,
+    vp9_coeff_stats_model *frame_branch_ct,
     TX_SIZE tx_size) {
   int i, j, k, l, t;
   int update[2] = {0, 0};
