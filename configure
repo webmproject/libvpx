@@ -240,7 +240,6 @@ HAVE_LIST="
 EXPERIMENT_LIST="
     csm
     implicit_segmentation
-    loop_dering
     oneshotq
     multiple_arf
     non420

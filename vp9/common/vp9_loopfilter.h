@@ -73,8 +73,7 @@ void vp9_loop_filter_frame_init(struct VP9Common *cm,
 void vp9_loop_filter_frame(struct VP9Common *cm,
                            struct macroblockd *mbd,
                            int filter_level,
-                           int y_only,
-                           int dering);
+                           int y_only);
 
 void vp9_loop_filter_partial_frame(struct VP9Common *cm,
                                    struct macroblockd *mbd,
