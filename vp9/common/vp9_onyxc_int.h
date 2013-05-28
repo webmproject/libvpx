@@ -24,6 +24,10 @@
 #include "vp9/common/vp9_postproc.h"
 #endif
 
+/*#ifdef PACKET_TESTING*/
+#include "vp9/common/vp9_header.h"
+/*#endif*/
+
 /* Create/destroy static data structures. */
 
 void vp9_initialize_common(void);
@@ -255,6 +259,9 @@ typedef struct VP9Common {
   int near_boffset[3];
   int version;
 
+#ifdef PACKET_TESTING
+  VP9_HEADER oh;
+#endif
   double bitrate;
   double framerate;
 

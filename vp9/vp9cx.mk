@@ -19,8 +19,6 @@ VP9_CX_SRCS-yes += vp9_cx_iface.c
 
 VP9_CX_SRCS-yes += encoder/vp9_bitstream.c
 VP9_CX_SRCS-yes += encoder/vp9_boolhuff.c
-VP9_CX_SRCS-yes += encoder/vp9_boolhuff.h
-VP9_CX_SRCS-yes += encoder/vp9_write_bit_buffer.h
 VP9_CX_SRCS-yes += encoder/vp9_dct.c
 VP9_CX_SRCS-yes += encoder/vp9_encodeframe.c
 VP9_CX_SRCS-yes += encoder/vp9_encodeframe.h
@@ -29,6 +27,7 @@ VP9_CX_SRCS-yes += encoder/vp9_encodemb.c
 VP9_CX_SRCS-yes += encoder/vp9_encodemv.c
 VP9_CX_SRCS-yes += encoder/vp9_firstpass.c
 VP9_CX_SRCS-yes += encoder/vp9_block.h
+VP9_CX_SRCS-yes += encoder/vp9_boolhuff.h
 VP9_CX_SRCS-yes += encoder/vp9_bitstream.h
 VP9_CX_SRCS-yes += encoder/vp9_encodeintra.h
 VP9_CX_SRCS-yes += encoder/vp9_encodemb.h
