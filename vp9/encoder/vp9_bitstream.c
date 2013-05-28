@@ -699,6 +699,19 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, MODE_INFO *m,
   // Encode the reference frame.
   encode_ref_frame(bc, pc, xd, segment_id, rf);
 
+  if (mi->sb_type >= BLOCK_SIZE_SB8X8 && pc->txfm_mode == TX_MODE_SELECT &&
+      !(rf != INTRA_FRAME &&
+        (skip_coeff || vp9_segfeature_active(xd, segment_id, SEG_LVL_SKIP)))) {
+    TX_SIZE sz = mi->txfm_size;
+    // FIXME(rbultje) code ternary symbol once all experiments are merged
+    vp9_write(bc, sz != TX_4X4, pc->prob_tx[0]);
+    if (mi->sb_type >= BLOCK_SIZE_MB16X16 && sz != TX_4X4) {
+      vp9_write(bc, sz != TX_8X8, pc->prob_tx[1]);
+      if (mi->sb_type >= BLOCK_SIZE_SB32X32 && sz != TX_8X8)
+        vp9_write(bc, sz != TX_16X16, pc->prob_tx[2]);
+    }
+  }
+
   if (rf == INTRA_FRAME) {
 #ifdef ENTROPY_STATS
     active_section = 6;
@@ -806,19 +819,6 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, MODE_INFO *m,
         break;
     }
   }
-
-  if (mi->sb_type >= BLOCK_SIZE_SB8X8 && pc->txfm_mode == TX_MODE_SELECT &&
-      !(rf != INTRA_FRAME &&
-        (skip_coeff || vp9_segfeature_active(xd, segment_id, SEG_LVL_SKIP)))) {
-    TX_SIZE sz = mi->txfm_size;
-    // FIXME(rbultje) code ternary symbol once all experiments are merged
-    vp9_write(bc, sz != TX_4X4, pc->prob_tx[0]);
-    if (mi->sb_type >= BLOCK_SIZE_MB16X16 && sz != TX_4X4) {
-      vp9_write(bc, sz != TX_8X8, pc->prob_tx[1]);
-      if (mi->sb_type >= BLOCK_SIZE_SB32X32 && sz != TX_8X8)
-        vp9_write(bc, sz != TX_16X16, pc->prob_tx[2]);
-    }
-  }
 }
 
 static void write_mb_modes_kf(const VP9_COMP *cpi,
@@ -839,6 +839,17 @@ static void write_mb_modes_kf(const VP9_COMP *cpi,
   } else {
     skip_coeff = m->mbmi.mb_skip_coeff;
     vp9_write(bc, skip_coeff, vp9_get_pred_prob(c, xd, PRED_MBSKIP));
+  }
+
+  if (m->mbmi.sb_type >= BLOCK_SIZE_SB8X8 && c->txfm_mode == TX_MODE_SELECT) {
+    TX_SIZE sz = m->mbmi.txfm_size;
+    // FIXME(rbultje) code ternary symbol once all experiments are merged
+    vp9_write(bc, sz != TX_4X4, c->prob_tx[0]);
+    if (m->mbmi.sb_type >= BLOCK_SIZE_MB16X16 && sz != TX_4X4) {
+      vp9_write(bc, sz != TX_8X8, c->prob_tx[1]);
+      if (m->mbmi.sb_type >= BLOCK_SIZE_SB32X32 && sz != TX_8X8)
+        vp9_write(bc, sz != TX_16X16, c->prob_tx[2]);
+    }
   }
 
   if (m->mbmi.sb_type >= BLOCK_SIZE_SB8X8) {
@@ -865,17 +876,6 @@ static void write_mb_modes_kf(const VP9_COMP *cpi,
   }
 
   write_uv_mode(bc, m->mbmi.uv_mode, c->kf_uv_mode_prob[ym]);
-
-  if (m->mbmi.sb_type >= BLOCK_SIZE_SB8X8 && c->txfm_mode == TX_MODE_SELECT) {
-    TX_SIZE sz = m->mbmi.txfm_size;
-    // FIXME(rbultje) code ternary symbol once all experiments are merged
-    vp9_write(bc, sz != TX_4X4, c->prob_tx[0]);
-    if (m->mbmi.sb_type >= BLOCK_SIZE_MB16X16 && sz != TX_4X4) {
-      vp9_write(bc, sz != TX_8X8, c->prob_tx[1]);
-      if (m->mbmi.sb_type >= BLOCK_SIZE_SB32X32 && sz != TX_8X8)
-        vp9_write(bc, sz != TX_16X16, c->prob_tx[2]);
-    }
-  }
 }
 
 static void write_modes_b(VP9_COMP *cpi, MODE_INFO *m, vp9_writer *bc,
