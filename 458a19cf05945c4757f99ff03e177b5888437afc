@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAZX//71k\u003d",
+        "filename": "vp9/common/vp9_default_coef_probs.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2013-05-29T23:20:27Z",
+      "side": 1,
+      "message": "Thanks. \nAnyway I will be firing a training run to get new stats with the expt on. That should handle this difference.\nHowever, in the meantime feel free to do a patch with your tables.\n\nBTW, the difference with rounding was -0.001% (with rounding a little worse).",
+      "parentUuid": "AAAAZX//72o\u003d",
+      "revId": "458a19cf05945c4757f99ff03e177b5888437afc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAZX//73I\u003d",
         "filename": "vp9/common/vp9_entropy.h",
         "patchSetId": 6
@@ -30,6 +48,24 @@
       "writtenOn": "2013-05-29T23:08:36Z",
       "side": 1,
       "message": "still remove :)",
+      "revId": "458a19cf05945c4757f99ff03e177b5888437afc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAZX//71c\u003d",
+        "filename": "vp9/common/vp9_entropy.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 88,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2013-05-29T23:20:27Z",
+      "side": 1,
+      "message": "Wanted to keep this to make it easy to turn stats generation on/off.",
+      "parentUuid": "AAAAZX//73I\u003d",
       "revId": "458a19cf05945c4757f99ff03e177b5888437afc",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
