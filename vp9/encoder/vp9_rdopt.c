@@ -2567,11 +2567,6 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
     this_mode = vp9_mode_order[mode_index].mode;
     ref_frame = vp9_mode_order[mode_index].ref_frame;
 
-    if (!(ref_frame == INTRA_FRAME
-        || (cpi->ref_frame_flags & flag_list[ref_frame]))) {
-      continue;
-    }
-
     if (cpi->speed > 0 && bsize >= BLOCK_SIZE_SB8X8) {
       if (!(ref_frame_mask & (1 << ref_frame))) {
         continue;
@@ -2588,6 +2583,15 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
 
     mbmi->ref_frame = ref_frame;
     mbmi->second_ref_frame = vp9_mode_order[mode_index].second_ref_frame;
+
+    if (!(ref_frame == INTRA_FRAME
+        || (cpi->ref_frame_flags & flag_list[ref_frame]))) {
+      continue;
+    }
+    if (!(mbmi->second_ref_frame == NONE
+        || (cpi->ref_frame_flags & flag_list[mbmi->second_ref_frame]))) {
+      continue;
+    }
 
     // TODO(jingning, jkoleszar): scaling reference frame not supported for
     // SPLITMV.
