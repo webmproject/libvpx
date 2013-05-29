@@ -614,7 +614,6 @@ static int64_t rd_pick_intra4x4block(VP9_COMP *cpi, MACROBLOCK *x, int ib,
     int64_t this_rd;
     int ratey = 0;
 
-    xd->mode_info_context->bmi[ib].as_mode.first = mode;
     if (cm->frame_type == KEY_FRAME)
       rate = bmode_costs[mode];
     else
@@ -655,9 +654,6 @@ static int64_t rd_pick_intra4x4block(VP9_COMP *cpi, MACROBLOCK *x, int ib,
                              tempa + idx, templ + idy, TX_4X4, 16);
         distortion += vp9_block_error(coeff, BLOCK_OFFSET(xd->plane[0].dqcoeff,
                                                          block, 16), 16) >> 2;
-
-        vp9_intra4x4_predict(xd, block, BLOCK_SIZE_SB8X8, mode,
-                             dst, xd->plane[0].dst.stride);
 
         if (best_tx_type != DCT_DCT)
           vp9_short_iht4x4_add(BLOCK_OFFSET(xd->plane[0].dqcoeff, block, 16),
@@ -734,7 +730,7 @@ static int64_t rd_pick_intra4x4mby_modes(VP9_COMP *cpi, MACROBLOCK *mb,
   vpx_memcpy(t_left, xd->plane[0].left_context, sizeof(t_left));
 
   xd->mode_info_context->mbmi.mode = I4X4_PRED;
-  bmode_costs = mb->inter_bmode_costs;
+  bmode_costs = mb->mbmode_cost[cpi->common.frame_type];
 
   for (idy = 0; idy < 2; idy += bh) {
     for (idx = 0; idx < 2; idx += bw) {
@@ -2687,8 +2683,6 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
     if (this_mode == I4X4_PRED) {
       int rate;
 
-      // Note the rate value returned here includes the cost of coding
-      // the I4X4_PRED mode : x->mbmode_cost[xd->frame_type][I4X4_PRED];
       mbmi->txfm_size = TX_4X4;
       rd_pick_intra4x4mby_modes(cpi, x, &rate, &rate_y,
                                 &distortion_y, INT64_MAX);

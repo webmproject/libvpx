@@ -402,7 +402,7 @@ void vp9_predict_intra_block(MACROBLOCKD *xd,
       (block_idx >> bwl) || xd->up_available;
   const int have_left =
       (block_idx & wmask) || xd->left_available;
-  const int have_right = ((block_idx & wmask) != wmask);
+  int have_right = ((block_idx & wmask) != wmask);
   const int txfm_block_size = 4 << tx_size;
 
   assert(bwl >= 0);
