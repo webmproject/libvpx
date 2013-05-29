@@ -551,7 +551,10 @@ static void set_offsets(VP9_COMP *cpi,
   x->partition_info          = x->pi + idx_str;
   xd->mode_info_context      = cm->mi + idx_str;
   mbmi = &xd->mode_info_context->mbmi;
-  xd->prev_mode_info_context = cm->prev_mi + idx_str;
+  // Special case: if prev_mi is NULL, the previous mode info context
+  // cannot be used.
+  xd->prev_mode_info_context = cm->prev_mi ?
+                                 cm->prev_mi + idx_str : NULL;
 
   // Set up destination pointers
   setup_dst_planes(xd, &cm->yv12_fb[dst_fb_idx], mi_row, mi_col);
@@ -1201,6 +1204,8 @@ static void encode_frame_internal(VP9_COMP *cpi) {
   vpx_memset(cpi->txfm_count_8x8p, 0, sizeof(cpi->txfm_count_8x8p));
   vpx_memset(cpi->rd_tx_select_diff, 0, sizeof(cpi->rd_tx_select_diff));
   vpx_memset(cpi->rd_tx_select_threshes, 0, sizeof(cpi->rd_tx_select_threshes));
+
+  set_prev_mi(cm);
 
   {
     struct vpx_usec_timer  emr_timer;

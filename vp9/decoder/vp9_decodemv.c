@@ -531,11 +531,6 @@ static void read_mb_modes_mv(VP9D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
   int bw = 1 << b_width_log2(bsize);
   int bh = 1 << b_height_log2(bsize);
 
-  const int use_prev_in_find_mv_refs = cm->width == cm->last_width &&
-                                       cm->height == cm->last_height &&
-                                       !cm->error_resilient_mode &&
-                                       cm->last_show_frame;
-
   int mb_to_left_edge, mb_to_right_edge, mb_to_top_edge, mb_to_bottom_edge;
   int j, idx, idy;
 
@@ -582,10 +577,8 @@ static void read_mb_modes_mv(VP9D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
         printf("%d %d\n", xd->mode_info_context->mbmi.mv[0].as_mv.row,
                xd->mode_info_context->mbmi.mv[0].as_mv.col);
 #endif
-      vp9_find_mv_refs(cm, xd, mi, use_prev_in_find_mv_refs ?
-                       xd->prev_mode_info_context : NULL,
-                       ref_frame, mbmi->ref_mvs[ref_frame],
-                       cm->ref_frame_sign_bias);
+      vp9_find_mv_refs(cm, xd, mi, xd->prev_mode_info_context, ref_frame,
+                       mbmi->ref_mvs[ref_frame], cm->ref_frame_sign_bias);
 
       vp9_mv_ref_probs(cm, mv_ref_p, mbmi->mb_mode_context[ref_frame]);
 
@@ -636,9 +629,7 @@ static void read_mb_modes_mv(VP9D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
       if (mbmi->second_ref_frame > 0) {
         const MV_REFERENCE_FRAME second_ref_frame = mbmi->second_ref_frame;
 
-        vp9_find_mv_refs(cm, xd, mi,
-                         use_prev_in_find_mv_refs ?
-                         xd->prev_mode_info_context : NULL,
+        vp9_find_mv_refs(cm, xd, mi, xd->prev_mode_info_context,
                          second_ref_frame, mbmi->ref_mvs[second_ref_frame],
                          cm->ref_frame_sign_bias);
 
