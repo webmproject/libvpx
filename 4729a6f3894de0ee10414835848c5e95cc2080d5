@@ -16,6 +16,24 @@
       "revId": "4729a6f3894de0ee10414835848c5e95cc2080d5",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAZX//8j4\u003d",
+        "filename": "vp9/common/vp9_reconintra.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 405,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2013-05-29T17:55:11Z",
+      "side": 1,
+      "message": "needed by refining 4x8 intra rd loop, which is half-way there.",
+      "parentUuid": "AAAAZX//8mY\u003d",
+      "revId": "4729a6f3894de0ee10414835848c5e95cc2080d5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
