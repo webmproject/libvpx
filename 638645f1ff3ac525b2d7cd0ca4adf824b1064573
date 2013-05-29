@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAZX//78k\u003d",
+        "filename": "vp9/common/vp9_default_coef_probs.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2013-05-29T21:54:32Z",
+      "side": 1,
+      "message": "Ok - I fixed the rounding. Not sure if that makes a difference, but am running a borg job.",
+      "parentUuid": "AAAAZX//794\u003d",
+      "revId": "638645f1ff3ac525b2d7cd0ca4adf824b1064573",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAZX//79s\u003d",
         "filename": "vp9/common/vp9_entropy.h",
         "patchSetId": 5
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAZX//79A\u003d",
+        "filename": "vp9/common/vp9_entropy.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 89,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2013-05-29T21:54:32Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAZX//79s\u003d",
+      "revId": "638645f1ff3ac525b2d7cd0ca4adf824b1064573",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAZX//79w\u003d",
         "filename": "vp9/common/vp9_entropy.h",
         "patchSetId": 5
@@ -47,6 +83,24 @@
       "writtenOn": "2013-05-29T21:41:27Z",
       "side": 1,
       "message": "cosmetic",
+      "revId": "638645f1ff3ac525b2d7cd0ca4adf824b1064573",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAZX//788\u003d",
+        "filename": "vp9/common/vp9_entropy.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 167,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2013-05-29T21:54:32Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAZX//79w\u003d",
       "revId": "638645f1ff3ac525b2d7cd0ca4adf824b1064573",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
