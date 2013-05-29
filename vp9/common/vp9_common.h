@@ -60,4 +60,9 @@ static INLINE int multiple16(int value) {
   return (value + 15) & ~15;
 }
 
+#define SYNC_CODE_0 0x49
+#define SYNC_CODE_1 0x83
+#define SYNC_CODE_2 0x42
+
+
 #endif  // VP9_COMMON_VP9_COMMON_H_

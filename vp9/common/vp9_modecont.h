@@ -11,6 +11,8 @@
 #ifndef VP9_COMMON_VP9_MODECONT_H_
 #define VP9_COMMON_VP9_MODECONT_H_
 
+#include "vp9/common/vp9_entropy.h"
+
 extern const int vp9_default_mode_contexts[INTER_MODE_CONTEXTS][4];
 
 #endif  // VP9_COMMON_VP9_MODECONT_H_

@@ -10,29 +10,30 @@
 
 #include <assert.h>
 
-#include "vp9/decoder/vp9_onyxd_int.h"
+#include "./vp9_rtcd.h"
+#include "vpx_mem/vpx_mem.h"
+#include "vpx_scale/vpx_scale.h"
+
+#include "vp9/common/vp9_extend.h"
+#include "vp9/common/vp9_modecont.h"
 #include "vp9/common/vp9_common.h"
-#include "vp9/common/vp9_header.h"
 #include "vp9/common/vp9_reconintra.h"
 #include "vp9/common/vp9_reconinter.h"
 #include "vp9/common/vp9_entropy.h"
-#include "vp9/decoder/vp9_decodframe.h"
-#include "vp9/decoder/vp9_detokenize.h"
 #include "vp9/common/vp9_invtrans.h"
 #include "vp9/common/vp9_alloccommon.h"
 #include "vp9/common/vp9_entropymode.h"
 #include "vp9/common/vp9_quant_common.h"
-#include "vpx_scale/vpx_scale.h"
-
-#include "vp9/decoder/vp9_decodemv.h"
-#include "vp9/common/vp9_extend.h"
-#include "vp9/common/vp9_modecont.h"
-#include "vpx_mem/vpx_mem.h"
-#include "vp9/decoder/vp9_dboolhuff.h"
-
 #include "vp9/common/vp9_seg_common.h"
 #include "vp9/common/vp9_tile_common.h"
-#include "./vp9_rtcd.h"
+
+#include "vp9/decoder/vp9_dboolhuff.h"
+#include "vp9/decoder/vp9_decodframe.h"
+#include "vp9/decoder/vp9_detokenize.h"
+#include "vp9/decoder/vp9_decodemv.h"
+#include "vp9/decoder/vp9_onyxd_int.h"
+#include "vp9/decoder/vp9_read_bit_buffer.h"
+
 
 // #define DEC_DEBUG
 #ifdef DEC_DEBUG
@@ -743,32 +744,24 @@ static INTERPOLATIONFILTERTYPE read_mcomp_filter_type(vp9_reader *r) {
                          : vp9_read_literal(r, 2);
 }
 
-static const uint8_t *read_frame_size(VP9_COMMON *const pc, const uint8_t *data,
-                                      const uint8_t *data_end,
-                                      int *width, int *height) {
-  if (data + 4 < data_end) {
-    const int w = read_le16(data);
-    const int h = read_le16(data + 2);
-    if (w <= 0)
-      vpx_internal_error(&pc->error, VPX_CODEC_CORRUPT_FRAME,
-                         "Invalid frame width");
+static void read_frame_size(VP9_COMMON *cm,
+                            struct vp9_read_bit_buffer *rb,
+                            int *width, int *height) {
+  const int w = vp9_rb_read_literal(rb, 16);
+  const int h = vp9_rb_read_literal(rb, 16);
+  if (w <= 0)
+    vpx_internal_error(&cm->error, VPX_CODEC_CORRUPT_FRAME,
+                       "Invalid frame width");
 
-    if (h <= 0)
-      vpx_internal_error(&pc->error, VPX_CODEC_CORRUPT_FRAME,
-                         "Invalid frame height");
-    *width = w;
-    *height = h;
-    data += 4;
-  } else {
-    vpx_internal_error(&pc->error, VPX_CODEC_CORRUPT_FRAME,
-                       "Failed to read frame size");
-  }
-  return data;
+  if (h <= 0)
+    vpx_internal_error(&cm->error, VPX_CODEC_CORRUPT_FRAME,
+                       "Invalid frame height");
+  *width = w;
+  *height = h;
 }
 
-static const uint8_t *setup_frame_size(VP9D_COMP *pbi, int scaling_active,
-                                       const uint8_t *data,
-                                       const uint8_t *data_end) {
+static void setup_frame_size(VP9D_COMP *pbi, int scaling_active,
+                             struct vp9_read_bit_buffer *rb) {
   // If error concealment is enabled we should only parse the new size
   // if we have enough data. Otherwise we will end up with the wrong size.
   VP9_COMMON *const pc = &pbi->common;
@@ -778,9 +771,9 @@ static const uint8_t *setup_frame_size(VP9D_COMP *pbi, int scaling_active,
   int height = pc->height;
 
   if (scaling_active)
-    data = read_frame_size(pc, data, data_end, &display_width, &display_height);
+    read_frame_size(pc, rb, &display_width, &display_height);
 
-  data = read_frame_size(pc, data, data_end, &width, &height);
+  read_frame_size(pc, rb, &width, &height);
 
   if (pc->width != width || pc->height != height) {
     if (!pbi->initial_width || !pbi->initial_height) {
@@ -806,8 +799,6 @@ static const uint8_t *setup_frame_size(VP9D_COMP *pbi, int scaling_active,
 
     vp9_update_frame_size(pc);
   }
-
-  return data;
 }
 
 static void update_frame_context(FRAME_CONTEXT *fc) {
@@ -937,58 +928,77 @@ static void decode_tiles(VP9D_COMP *pbi,
   }
 }
 
-int vp9_decode_frame(VP9D_COMP *pbi, const uint8_t **p_data_end) {
-  vp9_reader header_bc, residual_bc;
-  VP9_COMMON *const pc = &pbi->common;
-  MACROBLOCKD *const xd  = &pbi->mb;
-  const uint8_t *data = pbi->source;
-  const uint8_t *data_end = data + pbi->source_sz;
-  size_t first_partition_size = 0;
-  YV12_BUFFER_CONFIG *new_fb = &pc->yv12_fb[pc->new_fb_idx];
-  int i;
 
-  xd->corrupted = 0;  // start with no corruption of current frame
-  new_fb->corrupted = 0;
+static void error_handler(void *data, int bit_offset) {
+  VP9_COMMON *const cm = (VP9_COMMON *)data;
+  vpx_internal_error(&cm->error, VPX_CODEC_CORRUPT_FRAME, "Truncated packet");
+}
 
-  if (data_end - data < 3) {
-    vpx_internal_error(&pc->error, VPX_CODEC_CORRUPT_FRAME, "Truncated packet");
-  } else {
-    int scaling_active;
-    pc->last_frame_type = pc->frame_type;
-    pc->frame_type = (FRAME_TYPE)(data[0] & 1);
-    pc->version = (data[0] >> 1) & 7;
-    pc->show_frame = (data[0] >> 4) & 1;
-    scaling_active = (data[0] >> 5) & 1;
-    pc->subsampling_x = (data[0] >> 6) & 1;
-    pc->subsampling_y = (data[0] >> 7) & 1;
-    first_partition_size = read_le16(data + 1);
+size_t read_uncompressed_header(VP9D_COMP *pbi,
+                                struct vp9_read_bit_buffer *rb) {
+  VP9_COMMON *const cm = &pbi->common;
 
-    if (!read_is_valid(data, first_partition_size, data_end))
-      vpx_internal_error(&pc->error, VPX_CODEC_CORRUPT_FRAME,
-                         "Truncated packet or corrupt partition 0 length");
+  int scaling_active;
+  cm->last_frame_type = cm->frame_type;
+  cm->frame_type = (FRAME_TYPE) vp9_rb_read_bit(rb);
+  cm->version = vp9_rb_read_literal(rb, 3);
+  cm->show_frame = vp9_rb_read_bit(rb);
+  scaling_active = vp9_rb_read_bit(rb);
+  cm->subsampling_x = vp9_rb_read_bit(rb);
+  cm->subsampling_y = vp9_rb_read_bit(rb);
 
-    data += 3;
-
-    vp9_setup_version(pc);
-
-    if (pc->frame_type == KEY_FRAME) {
-      // When error concealment is enabled we should only check the sync
-      // code if we have enough bits available
-      if (data + 3 < data_end) {
-        if (data[0] != 0x49 || data[1] != 0x83 || data[2] != 0x42)
-          vpx_internal_error(&pc->error, VPX_CODEC_UNSUP_BITSTREAM,
-                             "Invalid frame sync code");
-      }
-      data += 3;
+  if (cm->frame_type == KEY_FRAME) {
+    if (vp9_rb_read_literal(rb, 8) != SYNC_CODE_0 ||
+        vp9_rb_read_literal(rb, 8) != SYNC_CODE_1 ||
+        vp9_rb_read_literal(rb, 8) != SYNC_CODE_2) {
+        vpx_internal_error(&cm->error, VPX_CODEC_UNSUP_BITSTREAM,
+                           "Invalid frame sync code");
     }
+  }
+  setup_frame_size(pbi, scaling_active, rb);
 
-    data = setup_frame_size(pbi, scaling_active, data, data_end);
+  cm->frame_context_idx = vp9_rb_read_literal(rb, NUM_FRAME_CONTEXTS_LG2);
+  cm->clr_type = (YUV_TYPE)vp9_rb_read_bit(rb);
+
+  cm->error_resilient_mode = vp9_rb_read_bit(rb);
+  if (!cm->error_resilient_mode) {
+    cm->refresh_frame_context = vp9_rb_read_bit(rb);
+    cm->frame_parallel_decoding_mode = vp9_rb_read_bit(rb);
+  } else {
+    cm->refresh_frame_context = 0;
+    cm->frame_parallel_decoding_mode = 1;
   }
 
-  if ((!pbi->decoded_key_frame && pc->frame_type != KEY_FRAME) ||
+  return vp9_rb_read_literal(rb, 16);
+}
+
+int vp9_decode_frame(VP9D_COMP *pbi, const uint8_t **p_data_end) {
+  int i;
+  vp9_reader header_bc, residual_bc;
+  VP9_COMMON *const pc = &pbi->common;
+  MACROBLOCKD *const xd = &pbi->mb;
+  YV12_BUFFER_CONFIG *new_fb = &pc->yv12_fb[pc->new_fb_idx];
+  const uint8_t *data = pbi->source;
+  const uint8_t *data_end = pbi->source + pbi->source_sz;
+
+  struct vp9_read_bit_buffer rb = { data, data_end, 0,
+                                    pc, error_handler };
+  const size_t first_partition_size = read_uncompressed_header(pbi, &rb);
+  const int keyframe = pc->frame_type == KEY_FRAME;
+
+  data += vp9_rb_bytes_read(&rb);
+  xd->corrupted = 0;
+  new_fb->corrupted = 0;
+
+  if ((!pbi->decoded_key_frame && !keyframe) ||
       pc->width == 0 || pc->height == 0) {
     return -1;
   }
+
+  vp9_setup_version(pc);
+  if (!read_is_valid(data, first_partition_size, data_end))
+      vpx_internal_error(&pc->error, VPX_CODEC_CORRUPT_FRAME,
+                         "Truncated packet or corrupt partition 0 length");
 
   init_frame(pbi);
 
@@ -1000,9 +1010,6 @@ int vp9_decode_frame(VP9D_COMP *pbi, const uint8_t **p_data_end) {
   if (vp9_reader_init(&header_bc, data, first_partition_size))
     vpx_internal_error(&pc->error, VPX_CODEC_MEM_ERROR,
                        "Failed to allocate bool decoder 0");
-
-  pc->clr_type = (YUV_TYPE)vp9_read_bit(&header_bc);
-  pc->error_resilient_mode = vp9_read_bit(&header_bc);
 
   setup_loopfilter(pc, xd, &header_bc);
 
@@ -1025,7 +1032,7 @@ int vp9_decode_frame(VP9D_COMP *pbi, const uint8_t **p_data_end) {
   // Determine if the golden frame or ARF buffer should be updated and how.
   // For all non key frames the GF and ARF refresh flags and sign bias
   // flags must be set explicitly.
-  if (pc->frame_type == KEY_FRAME) {
+  if (keyframe) {
     for (i = 0; i < ALLOWED_REFS_PER_FRAME; ++i)
       pc->active_ref_idx[i] = pc->new_fb_idx;
   } else {
@@ -1050,15 +1057,6 @@ int vp9_decode_frame(VP9D_COMP *pbi, const uint8_t **p_data_end) {
     vp9_setup_interp_filters(xd, pc->mcomp_filter_type, pc);
   }
 
-  if (!pc->error_resilient_mode) {
-    pc->refresh_frame_context = vp9_read_bit(&header_bc);
-    pc->frame_parallel_decoding_mode = vp9_read_bit(&header_bc);
-  } else {
-    pc->refresh_frame_context = 0;
-    pc->frame_parallel_decoding_mode = 1;
-  }
-
-  pc->frame_context_idx = vp9_read_literal(&header_bc, NUM_FRAME_CONTEXTS_LG2);
   pc->fc = pc->frame_contexts[pc->frame_context_idx];
 
   setup_segmentation(pc, xd, &header_bc);
@@ -1068,7 +1066,7 @@ int vp9_decode_frame(VP9D_COMP *pbi, const uint8_t **p_data_end) {
   setup_txfm_mode(pc, xd->lossless, &header_bc);
 
   // Read inter mode probability context updates
-  if (pc->frame_type != KEY_FRAME) {
+  if (!keyframe) {
     int i, j;
     for (i = 0; i < INTER_MODE_CONTEXTS; ++i)
       for (j = 0; j < 4; ++j)
@@ -1076,7 +1074,7 @@ int vp9_decode_frame(VP9D_COMP *pbi, const uint8_t **p_data_end) {
           pc->fc.vp9_mode_contexts[i][j] = vp9_read_prob(&header_bc);
   }
   // Is this needed ?
-  if (pc->frame_type == KEY_FRAME)
+  if (keyframe)
     vp9_default_coef_probs(pc);
 
   update_frame_context(&pc->fc);
@@ -1109,7 +1107,7 @@ int vp9_decode_frame(VP9D_COMP *pbi, const uint8_t **p_data_end) {
   new_fb->corrupted = vp9_reader_has_error(&header_bc) | xd->corrupted;
 
   if (!pbi->decoded_key_frame) {
-    if (pc->frame_type == KEY_FRAME && !new_fb->corrupted)
+    if (keyframe && !new_fb->corrupted)
       pbi->decoded_key_frame = 1;
     else
       vpx_internal_error(&pc->error, VPX_CODEC_CORRUPT_FRAME,
@@ -1120,7 +1118,7 @@ int vp9_decode_frame(VP9D_COMP *pbi, const uint8_t **p_data_end) {
   if (!pc->error_resilient_mode && !pc->frame_parallel_decoding_mode) {
     vp9_adapt_coef_probs(pc);
 
-    if (pc->frame_type != KEY_FRAME) {
+    if (!keyframe) {
       vp9_adapt_mode_probs(pc);
       vp9_adapt_mode_context(pc);
       vp9_adapt_nmv_probs(pc, xd->allow_high_precision_mv);

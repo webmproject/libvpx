@@ -215,26 +215,19 @@ static vpx_codec_err_t vp8_peek_si(const uint8_t         *data,
   if (data + data_sz <= data)
     res = VPX_CODEC_INVALID_PARAM;
   else {
-    /* Parse uncompresssed part of key frame header.
-     * 3 bytes:- including version, frame type and an offset
-     * 3 bytes:- sync code (0x49, 0x83, 0x42)
-     * 4 bytes:- including image width and height in the lowest 14 bits
-     *           of each 2-byte value.
-     */
     si->is_kf = 0;
 
-    if (data_sz >= 10 && !(data[0] & 0x01)) { /* I-Frame */
-      const uint8_t *c = data + 3;
+    if (data_sz >= 8 && !(data[0] & 0x80)) { /* I-Frame */
+      const uint8_t *c = data + 1;
       si->is_kf = 1;
 
-      /* vet via sync code */
-      if (c[0] != 0x49 || c[1] != 0x83 || c[2] != 0x42)
+      if (c[0] != SYNC_CODE_0 || c[1] != SYNC_CODE_1 || c[2] != SYNC_CODE_2)
         res = VPX_CODEC_UNSUP_BITSTREAM;
 
-      si->w = (c[3] | (c[4] << 8));
-      si->h = (c[5] | (c[6] << 8));
+      si->w = (c[3] << 8) | c[4];
+      si->h = (c[5] << 8) | c[6];
 
-      /*printf("w=%d, h=%d\n", si->w, si->h);*/
+      // printf("w=%d, h=%d\n", si->w, si->h);
       if (!(si->h | si->w))
         res = VPX_CODEC_UNSUP_BITSTREAM;
     } else
@@ -242,7 +235,6 @@ static vpx_codec_err_t vp8_peek_si(const uint8_t         *data,
   }
 
   return res;
-
 }
 
 static vpx_codec_err_t vp8_get_si(vpx_codec_alg_priv_t    *ctx,
