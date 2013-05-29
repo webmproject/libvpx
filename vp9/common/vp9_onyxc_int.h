@@ -24,10 +24,6 @@
 #include "vp9/common/vp9_postproc.h"
 #endif
 
-/*#ifdef PACKET_TESTING*/
-#include "vp9/common/vp9_header.h"
-/*#endif*/
-
 /* Create/destroy static data structures. */
 
 void vp9_initialize_common(void);
