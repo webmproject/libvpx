@@ -38,9 +38,9 @@ unsigned __int64 Sectionbits[500];
 #endif
 
 #ifdef ENTROPY_STATS
-int intra_mode_stats[VP9_KF_BINTRAMODES]
-                    [VP9_KF_BINTRAMODES]
-                    [VP9_KF_BINTRAMODES];
+int intra_mode_stats[VP9_BINTRAMODES]
+                    [VP9_BINTRAMODES]
+                    [VP9_BINTRAMODES];
 vp9_coeff_stats tree_update_hist_4x4[BLOCK_TYPES];
 vp9_coeff_stats tree_update_hist_8x8[BLOCK_TYPES];
 vp9_coeff_stats tree_update_hist_16x16[BLOCK_TYPES];
