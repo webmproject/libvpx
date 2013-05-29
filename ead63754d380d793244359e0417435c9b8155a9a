@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAZX//76U\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 1127,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2013-05-29T22:30:04Z",
+      "side": 1,
+      "message": "can pull this out of the condition (bsize \u003e\u003d BLOCK_SIZE_SB8X8)? If bsize is BLOCK_SIZE_AB4X4, partition type should be always PARTITION_NONE.",
+      "revId": "ead63754d380d793244359e0417435c9b8155a9a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
