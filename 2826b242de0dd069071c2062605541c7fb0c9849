@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAZX//8PU\u003d",
+        "filename": "vp9/common/vp9_default_coef_probs.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2013-05-29T21:20:45Z",
+      "side": 1,
+      "message": "Awesome! I think you found the bug.",
+      "parentUuid": "AAAAZX//8QM\u003d",
+      "revId": "2826b242de0dd069071c2062605541c7fb0c9849",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAZX//8QI\u003d",
         "filename": "vp9/encoder/vp9_tokenize.c",
         "patchSetId": 2
@@ -30,6 +48,24 @@
       "writtenOn": "2013-05-29T19:46:24Z",
       "side": 1,
       "message": "vp9_coeff_probs_model",
+      "revId": "2826b242de0dd069071c2062605541c7fb0c9849",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAZX//8PQ\u003d",
+        "filename": "vp9/encoder/vp9_tokenize.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 394,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2013-05-29T21:20:45Z",
+      "side": 1,
+      "message": "Actually this one is still correct.",
+      "parentUuid": "AAAAZX//8QI\u003d",
       "revId": "2826b242de0dd069071c2062605541c7fb0c9849",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
