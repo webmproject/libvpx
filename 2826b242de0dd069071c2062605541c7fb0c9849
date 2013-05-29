@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAZX//8QM\u003d",
+        "filename": "vp9/common/vp9_default_coef_probs.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-05-29T19:46:24Z",
+      "side": 1,
+      "message": "for review sake, the 5% drop is probably because of a type mismatch here: vp9_coeff_probs should be vp9_coeff_probs_model.",
+      "revId": "2826b242de0dd069071c2062605541c7fb0c9849",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAZX//8QI\u003d",
+        "filename": "vp9/encoder/vp9_tokenize.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 394,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-05-29T19:46:24Z",
+      "side": 1,
+      "message": "vp9_coeff_probs_model",
+      "revId": "2826b242de0dd069071c2062605541c7fb0c9849",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
