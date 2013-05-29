@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAZX//72o\u003d",
+        "filename": "vp9/common/vp9_default_coef_probs.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-05-29T23:08:36Z",
+      "side": 1,
+      "message": "I did a slight modification in these tables to account for the fact (in the 0-node prob) that the eob branch is only sometimes conveyed, where this prob then becomes the weighted average of the cases where the eob is or is not coded. Results improve slightly (+0.025% or so) if you do that, so still somewhat negative but within acceptable range. If you plan on redoing these stats, feel free to ignore, but may be worth using here if you\u0027re not sure we\u0027ll be able to get new tables.",
+      "revId": "458a19cf05945c4757f99ff03e177b5888437afc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAZX//73I\u003d",
+        "filename": "vp9/common/vp9_entropy.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 88,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-05-29T23:08:36Z",
+      "side": 1,
+      "message": "still remove :)",
+      "revId": "458a19cf05945c4757f99ff03e177b5888437afc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
