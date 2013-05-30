@@ -15,13 +15,6 @@
 #include "vp9/common/vp9_sadmxn.h"
 #include "vp9/common/vp9_subpelvar.h"
 
-const uint8_t vp9_mbsplit_offset[4][16] = {
-  { 0,  8,  0,  0,  0,  0,  0,  0,  0,  0,   0,  0,  0,  0,  0,  0},
-  { 0,  2,  0,  0,  0,  0,  0,  0,  0,  0,   0,  0,  0,  0,  0,  0},
-  { 0,  2,  8, 10,  0,  0,  0,  0,  0,  0,   0,  0,  0,  0,  0,  0},
-  { 0,  1,  2,  3,  4,  5,  6,  7,  8,  9,  10, 11, 12, 13, 14, 15}
-};
-
 static void lower_mv_precision(int_mv *mv, int usehp) {
   if (!usehp || !vp9_use_nmv_hp(&mv->as_mv)) {
     if (mv->as_mv.row & 1)
