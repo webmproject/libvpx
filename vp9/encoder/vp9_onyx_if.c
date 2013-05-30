@@ -537,7 +537,7 @@ void vp9_update_mode_context_stats(VP9_COMP *cpi) {
 
   // Add in the values for this frame
   for (i = 0; i < INTER_MODE_CONTEXTS; i++) {
-    for (j = 0; j < 4; j++) {
+    for (j = 0; j < VP9_MVREFS - 1; j++) {
       mv_ref_stats[i][j][0] += (int64_t)mv_ref_ct[i][j][0];
       mv_ref_stats[i][j][1] += (int64_t)mv_ref_ct[i][j][1];
     }
@@ -554,12 +554,13 @@ void print_mode_context(VP9_COMP *cpi) {
   int i, j;
 
   fprintf(f, "#include \"vp9_entropy.h\"\n");
-  fprintf(f, "const int vp9_mode_contexts[INTER_MODE_CONTEXTS][4] =");
+  fprintf(f,
+          "const int vp9_mode_contexts[INTER_MODE_CONTEXTS][VP9_MVREFS - 1] =");
   fprintf(f, "{\n");
   for (j = 0; j < INTER_MODE_CONTEXTS; j++) {
     fprintf(f, "  {/* %d */ ", j);
     fprintf(f, "    ");
-    for (i = 0; i < 4; i++) {
+    for (i = 0; i < VP9_MVREFS - 1; i++) {
       int this_prob;
       int64_t count = cpi->mv_ref_stats[j][i][0] + cpi->mv_ref_stats[j][i][1];
       if (count)

@@ -321,15 +321,15 @@ static void update_refpred_stats(VP9_COMP *cpi) {
 // The branch counts table is re-populated during the actual pack stage and in
 // the decoder to facilitate backwards update of the context.
 static void update_inter_mode_probs(VP9_COMMON *cm,
-                                    int mode_context[INTER_MODE_CONTEXTS][4]) {
+    int mode_context[INTER_MODE_CONTEXTS][VP9_MVREFS - 1]) {
   int i, j;
-  unsigned int (*mv_ref_ct)[4][2] = cm->fc.mv_ref_ct;
+  unsigned int (*mv_ref_ct)[VP9_MVREFS - 1][2] = cm->fc.mv_ref_ct;
 
   vpx_memcpy(mode_context, cm->fc.vp9_mode_contexts,
              sizeof(cm->fc.vp9_mode_contexts));
 
   for (i = 0; i < INTER_MODE_CONTEXTS; i++) {
-    for (j = 0; j < 4; j++) {
+    for (j = 0; j < VP9_MVREFS - 1; j++) {
       int new_prob, old_cost, new_cost;
 
       // Work out cost of coding branches with the old and optimal probability
@@ -1637,7 +1637,7 @@ void vp9_pack_bitstream(VP9_COMP *cpi, uint8_t *dest, unsigned long *size) {
   // changes in the bitstream.
   if (pc->frame_type != KEY_FRAME) {
     int i, j;
-    int new_context[INTER_MODE_CONTEXTS][4];
+    int new_context[INTER_MODE_CONTEXTS][VP9_MVREFS - 1];
     if (!cpi->dummy_packing) {
       update_inter_mode_probs(pc, new_context);
     } else {
@@ -1647,7 +1647,7 @@ void vp9_pack_bitstream(VP9_COMP *cpi, uint8_t *dest, unsigned long *size) {
     }
 
     for (i = 0; i < INTER_MODE_CONTEXTS; i++) {
-      for (j = 0; j < 4; j++) {
+      for (j = 0; j < VP9_MVREFS - 1; j++) {
         if (new_context[i][j] != pc->fc.vp9_mode_contexts[i][j]) {
           vp9_write(&header_bc, 1, 252);
           vp9_write_prob(&header_bc, new_context[i][j]);
