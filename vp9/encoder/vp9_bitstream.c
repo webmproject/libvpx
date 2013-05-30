@@ -1056,13 +1056,13 @@ static void build_tree_distribution(vp9_coeff_probs_model *coef_probs,
                                     VP9_COMP *cpi,
                                     vp9_coeff_accum *context_counters,
 #endif
-                                    vp9_coeff_stats_model *coef_branch_ct,
+                                    vp9_coeff_stats *coef_branch_ct,
                                     int block_types) {
   int i, j, k, l;
 #ifdef ENTROPY_STATS
   int t = 0;
 #endif
-  unsigned int model_counts[UNCONSTRAINED_NODES + 1];
+  vp9_prob full_probs[ENTROPY_NODES];
 
   for (i = 0; i < block_types; ++i) {
     for (j = 0; j < REF_TYPES; ++j) {
@@ -1070,11 +1070,12 @@ static void build_tree_distribution(vp9_coeff_probs_model *coef_probs,
         for (l = 0; l < PREV_COEF_CONTEXTS; ++l) {
           if (l >= 3 && k == 0)
             continue;
-          vp9_full_to_model_count(model_counts, coef_counts[i][j][k][l]);
-          vp9_tree_probs_from_distribution(vp9_coefmodel_tree,
-                                           coef_probs[i][j][k][l],
+          vp9_tree_probs_from_distribution(vp9_coef_tree,
+                                           full_probs,
                                            coef_branch_ct[i][j][k][l],
-                                           model_counts, 0);
+                                           coef_counts[i][j][k][l], 0);
+          vpx_memcpy(coef_probs[i][j][k][l], full_probs,
+                     sizeof(vp9_prob) * UNCONSTRAINED_NODES);
 #if CONFIG_BALANCED_COEFTREE
           coef_branch_ct[i][j][k][l][1][1] = eob_branch_ct[i][j][k][l] -
                                              coef_branch_ct[i][j][k][l][1][0];
@@ -1141,14 +1142,13 @@ static void update_coef_probs_common(
 #endif
     vp9_coeff_probs_model *new_frame_coef_probs,
     vp9_coeff_probs_model *old_frame_coef_probs,
-    vp9_coeff_stats_model *frame_branch_ct,
+    vp9_coeff_stats *frame_branch_ct,
     TX_SIZE tx_size) {
   int i, j, k, l, t;
   int update[2] = {0, 0};
   int savings;
 
   const int entropy_nodes_update = UNCONSTRAINED_NODES;
-  // vp9_prob bestupd = find_coef_update_prob(cpi);
 
   const int tstart = 0;
   /* dry run to see if there is any udpate at all needed */
@@ -1162,7 +1162,7 @@ static void update_coef_probs_common(
             vp9_prob newp = new_frame_coef_probs[i][j][k][l][t];
             const vp9_prob oldp = old_frame_coef_probs[i][j][k][l][t];
             const vp9_prob upd = vp9_coef_update_prob[t];
-            int s;  // = prev_coef_savings[t];
+            int s;
             int u = 0;
 
             if (l >= 3 && k == 0)
@@ -1204,11 +1204,10 @@ static void update_coef_probs_common(
             vp9_prob newp = new_frame_coef_probs[i][j][k][l][t];
             vp9_prob *oldp = old_frame_coef_probs[i][j][k][l] + t;
             const vp9_prob upd = vp9_coef_update_prob[t];
-            int s;  // = prev_coef_savings[t];
+            int s;
             int u = 0;
             if (l >= 3 && k == 0)
               continue;
-
             if (t == PIVOT_NODE)
               s = prob_diff_update_savings_search_model(
                   frame_branch_ct[i][j][k][l][0],
