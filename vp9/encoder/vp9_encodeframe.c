@@ -1835,6 +1835,7 @@ void vp9_encode_frame(VP9_COMP *cpi) {
     if (txfm_type != TX_MODE_SELECT) {
       cpi->common.prob_tx[0] = 128;
       cpi->common.prob_tx[1] = 128;
+      cpi->common.prob_tx[2] = 128;
     }
     cpi->common.comp_pred_mode = pred_type;
     encode_frame_internal(cpi);
