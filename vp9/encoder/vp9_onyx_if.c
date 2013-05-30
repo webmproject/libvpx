@@ -267,9 +267,6 @@ static void setup_features(VP9_COMP *cpi) {
 
   xd->update_mb_segmentation_map = 0;
   xd->update_mb_segmentation_data = 0;
-#if CONFIG_IMPLICIT_SEGMENTATION
-  xd->allow_implicit_segment_update = 0;
-#endif
   vpx_memset(xd->mb_segment_tree_probs, 255, sizeof(xd->mb_segment_tree_probs));
 
   vp9_clearall_segfeatures(xd);
@@ -355,9 +352,6 @@ static void configure_static_seg_features(VP9_COMP *cpi) {
     vpx_memset(cpi->segmentation_map, 0, cm->mi_rows * cm->mi_cols);
     xd->update_mb_segmentation_map = 0;
     xd->update_mb_segmentation_data = 0;
-#if CONFIG_IMPLICIT_SEGMENTATION
-    xd->allow_implicit_segment_update = 0;
-#endif
     cpi->static_mb_pct = 0;
 
     // Disable segmentation
@@ -371,9 +365,6 @@ static void configure_static_seg_features(VP9_COMP *cpi) {
     vpx_memset(cpi->segmentation_map, 0, cm->mi_rows * cm->mi_cols);
     xd->update_mb_segmentation_map = 0;
     xd->update_mb_segmentation_data = 0;
-#if CONFIG_IMPLICIT_SEGMENTATION
-    xd->allow_implicit_segment_update = 0;
-#endif
     cpi->static_mb_pct = 0;
 
     // Disable segmentation and individual segment features by default
@@ -471,53 +462,6 @@ static void configure_static_seg_features(VP9_COMP *cpi) {
     }
   }
 }
-
-#if CONFIG_IMPLICIT_SEGMENTATION
-static double implict_seg_q_modifiers[MAX_MB_SEGMENTS] =
-  {1.0, 0.95, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0};
-static void configure_implicit_segmentation(VP9_COMP *cpi, int frame_qindex) {
-  VP9_COMMON *cm = &cpi->common;
-  MACROBLOCKD *xd = &cpi->mb.e_mbd;
-  int i;
-  int qi_delta;
-  double q_baseline = vp9_convert_qindex_to_q(frame_qindex);
-
-  // Set the flags to allow implicit segment update but disallow explicit update
-  xd->segmentation_enabled = 1;
-  xd->allow_implicit_segment_update = 1;
-  xd->update_mb_segmentation_map = 0;
-
-  // For key frames clear down the segment map to a default state.
-  if (cm->frame_type == KEY_FRAME) {
-    // Clear down the global segmentation map
-    vpx_memset(cpi->segmentation_map, 0, (cm->mb_rows * cm->mb_cols));
-
-    // Clear down the segment features.
-    vp9_clearall_segfeatures(xd);
-
-    xd->update_mb_segmentation_data = 0;
-
-  // Update the segment data if it is an arf or non overlay gf.
-  } else if (cpi->refresh_alt_ref_frame ||
-             (cpi->refresh_golden_frame && !cpi->is_src_frame_alt_ref)) {
-    xd->update_mb_segmentation_data = 1;
-
-    // Enable use of q deltas on segments 1 and up
-    // Segment 0 is treated as a neutral segment with no changes
-    for (i = 1; i < MAX_MB_SEGMENTS; ++i) {
-      qi_delta = compute_qdelta(cpi, q_baseline,
-                                implict_seg_q_modifiers[i] * q_baseline);
-      vp9_set_segdata(xd, i, SEG_LVL_ALT_Q, qi_delta);
-      vp9_enable_segfeature(xd, i, SEG_LVL_ALT_Q);
-    }
-
-    // Where relevant assume segment data is delta data
-    xd->mb_segment_abs_delta = SEGMENT_DELTADATA;
-  } else {
-    xd->update_mb_segmentation_data = 0;
-  }
-}
-#endif
 
 #ifdef ENTROPY_STATS
 void vp9_update_mode_context_stats(VP9_COMP *cpi) {
@@ -780,11 +724,7 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
   // Switch segmentation off.
   sf->static_segmentation = 0;
 #else
-#if CONFIG_IMPLICIT_SEGMENTATION
   sf->static_segmentation = 0;
-#else
-  sf->static_segmentation = 0;
-#endif
 #endif
   sf->mb16_breakout = 0;
 
@@ -798,11 +738,7 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
       // Switch segmentation off.
       sf->static_segmentation = 0;
 #else
-#if CONFIG_IMPLICIT_SEGMENTATION
   sf->static_segmentation = 0;
-#else
-  sf->static_segmentation = 0;
-#endif
 #endif
       sf->mb16_breakout = 0;
 
@@ -2928,12 +2864,6 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
       }
     }
 
-#if CONFIG_IMPLICIT_SEGMENTATION
-    if (!cm->error_resilient_mode && !cpi->sf.static_segmentation) {
-      configure_implicit_segmentation(cpi, q);
-    }
-#endif
-
     // transform / motion compensation build reconstruction frame
     if (cm->frame_type == KEY_FRAME) {
       vp9_default_coef_probs(cm);
@@ -3180,15 +3110,7 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
   cpi->dummy_packing = 0;
   vp9_pack_bitstream(cpi, dest, size);
 
-#if CONFIG_IMPLICIT_SEGMENTATION
-  // Should we allow implicit update of the segment map.
-  if (xd->allow_implicit_segment_update && !cm->error_resilient_mode) {
-    vp9_implicit_segment_map_update(cm);
-  // or has there been an explicit update
-  } else if (xd->update_mb_segmentation_map) {
-#else
   if (xd->update_mb_segmentation_map) {
-#endif
     update_reference_segmentation_map(cpi);
   }
 
