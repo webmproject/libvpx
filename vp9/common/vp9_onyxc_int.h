@@ -154,6 +154,12 @@ typedef struct VP9Common {
   int show_frame;
   int last_show_frame;
 
+  // Flag signaling that the frame is encoded using only INTRA modes.
+  int intra_only;
+
+  // Flag signaling that the frame context should be reset to default values.
+  int reset_frame_context;
+
   int frame_flags;
   // MBs, mb_rows/cols is in 16-pixel units; mi_rows/cols is in
   // MODE_INFO (8-pixel) units.
