@@ -225,7 +225,7 @@ typedef struct {
   int search_best_filter;
   int mb16_breakout;
   int static_segmentation;
-  int comp_inter_joint_serach;
+  int comp_inter_joint_search;
 } SPEED_FEATURES;
 
 enum BlockSize {
