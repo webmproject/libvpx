@@ -806,10 +806,8 @@ static void update_frame_context(FRAME_CONTEXT *fc) {
   vp9_copy(fc->pre_coef_probs_8x8, fc->coef_probs_8x8);
   vp9_copy(fc->pre_coef_probs_16x16, fc->coef_probs_16x16);
   vp9_copy(fc->pre_coef_probs_32x32, fc->coef_probs_32x32);
-  vp9_copy(fc->pre_ymode_prob, fc->ymode_prob);
-  vp9_copy(fc->pre_sb_ymode_prob, fc->sb_ymode_prob);
+  vp9_copy(fc->pre_y_mode_prob, fc->y_mode_prob);
   vp9_copy(fc->pre_uv_mode_prob, fc->uv_mode_prob);
-  vp9_copy(fc->pre_bmode_prob, fc->bmode_prob);
   vp9_copy(fc->pre_partition_prob, fc->partition_prob);
   fc->pre_nmvc = fc->nmvc;
 
@@ -818,10 +816,8 @@ static void update_frame_context(FRAME_CONTEXT *fc) {
   vp9_zero(fc->coef_counts_16x16);
   vp9_zero(fc->coef_counts_32x32);
   vp9_zero(fc->eob_branch_counts);
-  vp9_zero(fc->ymode_counts);
-  vp9_zero(fc->sb_ymode_counts);
+  vp9_zero(fc->y_mode_counts);
   vp9_zero(fc->uv_mode_counts);
-  vp9_zero(fc->bmode_counts);
   vp9_zero(fc->NMVcount);
   vp9_zero(fc->mv_ref_ct);
   vp9_zero(fc->partition_counts);

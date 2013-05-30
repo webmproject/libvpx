@@ -202,8 +202,6 @@ void vp9_create_common(VP9_COMMON *oci) {
 
   vp9_init_mbmode_probs(oci);
 
-  vp9_default_bmode_probs(oci->fc.bmode_prob);
-
   oci->txfm_mode = ONLY_4X4;
   oci->comp_pred_mode = HYBRID_PREDICTION;
   oci->no_lpf = 0;
@@ -212,8 +210,6 @@ void vp9_create_common(VP9_COMMON *oci) {
 
   // Initialize reference frame sign bias structure to defaults
   vpx_memset(oci->ref_frame_sign_bias, 0, sizeof(oci->ref_frame_sign_bias));
-
-  oci->kf_ymode_probs_update = 0;
 }
 
 void vp9_remove_common(VP9_COMMON *oci) {
