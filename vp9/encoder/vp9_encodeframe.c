@@ -1090,11 +1090,9 @@ static void init_encode_frame_mb_context(VP9_COMP *cpi) {
   xd->mode_info_context->mbmi.uv_mode = DC_PRED;
 
   vp9_zero(cpi->count_mb_ref_frame_usage)
-  vp9_zero(cpi->bmode_count)
-  vp9_zero(cpi->ymode_count)
+  vp9_zero(cpi->y_mode_count)
   vp9_zero(cpi->y_uv_mode_count)
   vp9_zero(cpi->common.fc.mv_ref_ct)
-  vp9_zero(cpi->sb_ymode_count)
   vp9_zero(cpi->partition_count);
 
   // Note: this memset assumes above_context[0], [1] and [2]
@@ -1545,20 +1543,17 @@ static void sum_intra_stats(VP9_COMP *cpi, MACROBLOCK *x) {
   const MB_PREDICTION_MODE m = xd->mode_info_context->mbmi.mode;
   const MB_PREDICTION_MODE uvm = xd->mode_info_context->mbmi.uv_mode;
 
+  ++cpi->y_uv_mode_count[m][uvm];
   if (xd->mode_info_context->mbmi.sb_type >= BLOCK_SIZE_SB8X8) {
-    ++cpi->sb_ymode_count[m];
+    ++cpi->y_mode_count[m];
   } else {
-    ++cpi->ymode_count[m];
-  }
-    ++cpi->y_uv_mode_count[m][uvm];
-  if (m == I4X4_PRED) {
     int idx, idy;
     int bw = 1 << b_width_log2(xd->mode_info_context->mbmi.sb_type);
     int bh = 1 << b_height_log2(xd->mode_info_context->mbmi.sb_type);
     for (idy = 0; idy < 2; idy += bh) {
       for (idx = 0; idx < 2; idx += bw) {
         int m = xd->mode_info_context->bmi[idy * 2 + idx].as_mode.first;
-        ++cpi->sb_ymode_count[m];
+        ++cpi->y_mode_count[m];
       }
     }
   }

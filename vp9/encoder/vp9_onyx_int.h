@@ -81,10 +81,8 @@ typedef struct {
   vp9_coeff_probs_model coef_probs_16x16[BLOCK_TYPES];
   vp9_coeff_probs_model coef_probs_32x32[BLOCK_TYPES];
 
-  vp9_prob sb_ymode_prob[VP9_I32X32_MODES - 1];
-  vp9_prob ymode_prob[VP9_YMODES - 1]; /* interframe intra mode probs */
+  vp9_prob y_mode_prob[VP9_YMODES - 1]; /* interframe intra mode probs */
   vp9_prob uv_mode_prob[VP9_YMODES][VP9_UV_MODES - 1];
-  vp9_prob bmode_prob[VP9_BINTRAMODES - 1];
   vp9_prob partition_prob[NUM_PARTITION_CONTEXTS][PARTITION_TYPES - 1];
 
   vp9_prob switchable_interp_prob[VP9_SWITCHABLE_FILTERS + 1]
@@ -413,9 +411,7 @@ typedef struct VP9_COMP {
 
   int cq_target_quality;
 
-  int sb_ymode_count [VP9_I32X32_MODES];
-  int ymode_count[VP9_YMODES];        /* intra MB type cts this frame */
-  int bmode_count[VP9_BINTRAMODES];
+  int y_mode_count[VP9_YMODES];
   int y_uv_mode_count[VP9_YMODES][VP9_UV_MODES];
   unsigned int partition_count[NUM_PARTITION_CONTEXTS][PARTITION_TYPES];
 

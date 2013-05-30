@@ -114,9 +114,9 @@ struct macroblock {
   int *nmvsadcost_hp[2];
   int **mvsadcost;
 
-  int mbmode_cost[2][MB_MODE_COUNT];
+  int mbmode_cost[MB_MODE_COUNT];
   int intra_uv_mode_cost[2][MB_MODE_COUNT];
-  int bmode_costs[VP9_BINTRAMODES][VP9_BINTRAMODES][VP9_BINTRAMODES];
+  int y_mode_costs[VP9_BINTRAMODES][VP9_BINTRAMODES][VP9_BINTRAMODES];
   int switchable_interp_costs[VP9_SWITCHABLE_FILTERS + 1]
                              [VP9_SWITCHABLE_FILTERS];
 

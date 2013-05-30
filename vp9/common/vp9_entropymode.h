@@ -23,21 +23,10 @@ extern const vp9_prob vp9_kf_default_bmode_probs[VP9_BINTRAMODES]
                                                 [VP9_BINTRAMODES]
                                                 [VP9_BINTRAMODES -1 ];
 
-extern const vp9_tree_index vp9_bmode_tree[];
-extern const vp9_tree_index  vp9_ymode_tree[];
-extern const vp9_tree_index  vp9_kf_ymode_tree[];
-extern const vp9_tree_index  vp9_uv_mode_tree[];
-#define vp9_sb_ymode_tree vp9_uv_mode_tree
-#define vp9_sb_kf_ymode_tree vp9_uv_mode_tree
+extern const vp9_tree_index vp9_intra_mode_tree[];
 extern const vp9_tree_index  vp9_sb_mv_ref_tree[];
 
-extern struct vp9_token vp9_bmode_encodings[VP9_BINTRAMODES];
-extern struct vp9_token vp9_kf_bmode_encodings[VP9_BINTRAMODES];
-extern struct vp9_token vp9_ymode_encodings[VP9_YMODES];
-extern struct vp9_token vp9_sb_ymode_encodings[VP9_I32X32_MODES];
-extern struct vp9_token vp9_sb_kf_ymode_encodings[VP9_I32X32_MODES];
-extern struct vp9_token vp9_kf_ymode_encodings[VP9_YMODES];
-extern struct vp9_token vp9_uv_mode_encodings[VP9_UV_MODES];
+extern struct vp9_token vp9_intra_mode_encodings[VP9_BINTRAMODES];
 
 /* Inter mode values do not start at zero */
 
@@ -63,8 +52,6 @@ extern void vp9_adapt_mode_context(struct VP9Common *pc);
 extern void vp9_accum_mv_refs(struct VP9Common *pc,
                               MB_PREDICTION_MODE m,
                               const int context);
-
-void vp9_default_bmode_probs(vp9_prob dest[VP9_BINTRAMODES - 1]);
 
 void vp9_adapt_mode_probs(struct VP9Common *);
 
