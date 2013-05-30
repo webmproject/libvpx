@@ -36,12 +36,15 @@ typedef unsigned int (*sad_m_by_n_fn_t)(const unsigned char *source_ptr,
                                         const unsigned char *reference_ptr,
                                         int reference_stride,
                                         unsigned int max_sad);
+typedef std::tr1::tuple<int, int, sad_m_by_n_fn_t> sad_m_by_n_test_param_t;
 
 typedef void (*sad_n_by_n_by_4_fn_t)(const uint8_t *src_ptr,
                                      int src_stride,
                                      const unsigned char * const ref_ptr[],
                                      int ref_stride,
                                      unsigned int *sad_array);
+typedef std::tr1::tuple<int, int, sad_n_by_n_by_4_fn_t>
+        sad_n_by_n_by_4_test_param_t;
 
 using libvpx_test::ACMRandom;
 
@@ -124,8 +127,7 @@ class SADTestBase : public ::testing::Test {
 };
 
 class SADTest : public SADTestBase,
-    public ::testing::WithParamInterface<
-        std::tr1::tuple<int, int, sad_m_by_n_fn_t> > {
+    public ::testing::WithParamInterface<sad_m_by_n_test_param_t> {
  public:
   SADTest() : SADTestBase(GET_PARAM(0), GET_PARAM(1)) {}
 
@@ -156,8 +158,7 @@ class SADTest : public SADTestBase,
 };
 
 class SADx4Test : public SADTestBase,
-    public ::testing::WithParamInterface<
-        std::tr1::tuple<int, int, sad_n_by_n_by_4_fn_t> > {
+    public ::testing::WithParamInterface<sad_n_by_n_by_4_test_param_t> {
  public:
   SADx4Test() : SADTestBase(GET_PARAM(0), GET_PARAM(1)) {}
 
@@ -293,12 +294,6 @@ TEST_P(SADTest, MaxSAD) {
 
 using std::tr1::make_tuple;
 
-#if CONFIG_VP8_ENCODER && CONFIG_VP9_ENCODER
-#define VP8_VP9_SEPARATOR ,
-#else
-#define VP8_VP9_SEPARATOR
-#endif
-
 #if CONFIG_VP8_ENCODER
 const sad_m_by_n_fn_t sad_16x16_c = vp8_sad16x16_c;
 const sad_m_by_n_fn_t sad_8x16_c = vp8_sad8x16_c;
@@ -315,25 +310,25 @@ const sad_m_by_n_fn_t sad_16x8_c_vp9 = vp9_sad16x8_c;
 const sad_m_by_n_fn_t sad_8x8_c_vp9 = vp9_sad8x8_c;
 const sad_m_by_n_fn_t sad_4x4_c_vp9 = vp9_sad4x4_c;
 #endif
-INSTANTIATE_TEST_CASE_P(C, SADTest, ::testing::Values(
+const sad_m_by_n_test_param_t c_tests[] = {
 #if CONFIG_VP8_ENCODER
-                        make_tuple(16, 16, sad_16x16_c),
-                        make_tuple(8, 16, sad_8x16_c),
-                        make_tuple(16, 8, sad_16x8_c),
-                        make_tuple(8, 8, sad_8x8_c),
-                        make_tuple(4, 4, sad_4x4_c)
+  make_tuple(16, 16, sad_16x16_c),
+  make_tuple(8, 16, sad_8x16_c),
+  make_tuple(16, 8, sad_16x8_c),
+  make_tuple(8, 8, sad_8x8_c),
+  make_tuple(4, 4, sad_4x4_c),
 #endif
-                        VP8_VP9_SEPARATOR
 #if CONFIG_VP9_ENCODER
-                        make_tuple(64, 64, sad_64x64_c_vp9),
-                        make_tuple(32, 32, sad_32x32_c_vp9),
-                        make_tuple(16, 16, sad_16x16_c_vp9),
-                        make_tuple(8, 16, sad_8x16_c_vp9),
-                        make_tuple(16, 8, sad_16x8_c_vp9),
-                        make_tuple(8, 8, sad_8x8_c_vp9),
-                        make_tuple(4, 4, sad_4x4_c_vp9)
+  make_tuple(64, 64, sad_64x64_c_vp9),
+  make_tuple(32, 32, sad_32x32_c_vp9),
+  make_tuple(16, 16, sad_16x16_c_vp9),
+  make_tuple(8, 16, sad_8x16_c_vp9),
+  make_tuple(16, 8, sad_16x8_c_vp9),
+  make_tuple(8, 8, sad_8x8_c_vp9),
+  make_tuple(4, 4, sad_4x4_c_vp9),
 #endif
-                        ));
+};
+INSTANTIATE_TEST_CASE_P(C, SADTest, ::testing::ValuesIn(c_tests));
 
 #if CONFIG_VP9_ENCODER
 const sad_n_by_n_by_4_fn_t sad_64x64x4d_c = vp9_sad64x64x4d_c;
@@ -387,23 +382,23 @@ const sad_m_by_n_fn_t sad_8x8_mmx_vp9 = vp9_sad8x8_mmx;
 const sad_m_by_n_fn_t sad_4x4_mmx_vp9 = vp9_sad4x4_mmx;
 #endif
 
-INSTANTIATE_TEST_CASE_P(MMX, SADTest, ::testing::Values(
+const sad_m_by_n_test_param_t mmx_tests[] = {
 #if CONFIG_VP8_ENCODER
-                        make_tuple(16, 16, sad_16x16_mmx),
-                        make_tuple(8, 16, sad_8x16_mmx),
-                        make_tuple(16, 8, sad_16x8_mmx),
-                        make_tuple(8, 8, sad_8x8_mmx),
-                        make_tuple(4, 4, sad_4x4_mmx)
+  make_tuple(16, 16, sad_16x16_mmx),
+  make_tuple(8, 16, sad_8x16_mmx),
+  make_tuple(16, 8, sad_16x8_mmx),
+  make_tuple(8, 8, sad_8x8_mmx),
+  make_tuple(4, 4, sad_4x4_mmx),
 #endif
-                        VP8_VP9_SEPARATOR
 #if CONFIG_VP9_ENCODER
-                        make_tuple(16, 16, sad_16x16_mmx_vp9),
-                        make_tuple(8, 16, sad_8x16_mmx_vp9),
-                        make_tuple(16, 8, sad_16x8_mmx_vp9),
-                        make_tuple(8, 8, sad_8x8_mmx_vp9),
-                        make_tuple(4, 4, sad_4x4_mmx_vp9)
+  make_tuple(16, 16, sad_16x16_mmx_vp9),
+  make_tuple(8, 16, sad_8x16_mmx_vp9),
+  make_tuple(16, 8, sad_16x8_mmx_vp9),
+  make_tuple(8, 8, sad_8x8_mmx_vp9),
+  make_tuple(4, 4, sad_4x4_mmx_vp9),
 #endif
-                        ));
+};
+INSTANTIATE_TEST_CASE_P(MMX, SADTest, ::testing::ValuesIn(mmx_tests));
 #endif
 
 #if HAVE_SSE
@@ -434,24 +429,24 @@ const sad_m_by_n_fn_t sad_8x16_sse2_vp9 = vp9_sad8x16_sse2;
 const sad_m_by_n_fn_t sad_16x8_sse2_vp9 = vp9_sad16x8_sse2;
 const sad_m_by_n_fn_t sad_8x8_sse2_vp9 = vp9_sad8x8_sse2;
 #endif
-INSTANTIATE_TEST_CASE_P(SSE2, SADTest, ::testing::Values(
+const sad_m_by_n_test_param_t sse2_tests[] = {
 #if CONFIG_VP8_ENCODER
-                        make_tuple(16, 16, sad_16x16_wmt),
-                        make_tuple(8, 16, sad_8x16_wmt),
-                        make_tuple(16, 8, sad_16x8_wmt),
-                        make_tuple(8, 8, sad_8x8_wmt),
-                        make_tuple(4, 4, sad_4x4_wmt)
+  make_tuple(16, 16, sad_16x16_wmt),
+  make_tuple(8, 16, sad_8x16_wmt),
+  make_tuple(16, 8, sad_16x8_wmt),
+  make_tuple(8, 8, sad_8x8_wmt),
+  make_tuple(4, 4, sad_4x4_wmt),
 #endif
-                        VP8_VP9_SEPARATOR
 #if CONFIG_VP9_ENCODER
-                        make_tuple(64, 64, sad_64x64_sse2_vp9),
-                        make_tuple(32, 32, sad_32x32_sse2_vp9),
-                        make_tuple(16, 16, sad_16x16_sse2_vp9),
-                        make_tuple(8, 16, sad_8x16_sse2_vp9),
-                        make_tuple(16, 8, sad_16x8_sse2_vp9),
-                        make_tuple(8, 8, sad_8x8_sse2_vp9)
+  make_tuple(64, 64, sad_64x64_sse2_vp9),
+  make_tuple(32, 32, sad_32x32_sse2_vp9),
+  make_tuple(16, 16, sad_16x16_sse2_vp9),
+  make_tuple(8, 16, sad_8x16_sse2_vp9),
+  make_tuple(16, 8, sad_16x8_sse2_vp9),
+  make_tuple(8, 8, sad_8x8_sse2_vp9),
 #endif
-                        ));
+};
+INSTANTIATE_TEST_CASE_P(SSE2, SADTest, ::testing::ValuesIn(sse2_tests));
 
 #if CONFIG_VP9_ENCODER
 const sad_n_by_n_by_4_fn_t sad_64x64x4d_sse2 = vp9_sad64x64x4d_sse2;
