@@ -606,14 +606,13 @@ void vp9_short_walsh4x4_c(short *input, short *output, int pitch) {
     c1 = ip[2 * pitch_short];
     d1 = ip[3 * pitch_short];
 
-    b1 = a1 - b1;
-    c1 += d1;
-    e1 = (c1 - b1) >> 1;
-    a1 += e1;
-    d1 -= e1;
-    c1 = a1 - c1;
-    b1 -= d1;
-
+    a1 += b1;
+    d1 = d1 - c1;
+    e1 = (a1 - d1) >> 1;
+    b1 = e1 - b1;
+    c1 = e1 - c1;
+    a1 -= c1;
+    d1 += b1;
     op[0] = a1;
     op[4] = c1;
     op[8] = d1;
@@ -631,14 +630,13 @@ void vp9_short_walsh4x4_c(short *input, short *output, int pitch) {
     c1 = ip[2];
     d1 = ip[3];
 
-    b1 = a1 - b1;
-    c1 += d1;
-    e1 = (c1 - b1) >> 1;
-    a1 += e1;
-    d1 -= e1;
-    c1 = a1 - c1;
-    b1 -= d1;
-
+    a1 += b1;
+    d1 -= c1;
+    e1 = (a1 - d1) >> 1;
+    b1 = e1 - b1;
+    c1 = e1 - c1;
+    a1 -= c1;
+    d1 += b1;
     op[0] = a1 << WHT_UPSCALE_FACTOR;
     op[1] = c1 << WHT_UPSCALE_FACTOR;
     op[2] = d1 << WHT_UPSCALE_FACTOR;

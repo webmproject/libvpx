@@ -17,6 +17,7 @@
 #include "vpx/vpx_integer.h"
 #include "vp9/common/vp9_common.h"
 
+
 // Constants and Macros used by all idct/dct functions
 #define DCT_CONST_BITS 14
 #define DCT_CONST_ROUNDING  (1 << (DCT_CONST_BITS - 1))
