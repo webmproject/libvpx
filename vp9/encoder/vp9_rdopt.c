@@ -2442,16 +2442,14 @@ void vp9_rd_pick_intra_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
     *returnrate = rate4x4_y + rate_uv +
         vp9_cost_bit(vp9_get_pred_prob(cm, xd, PRED_MBSKIP), 0);
     *returndist = dist4x4_y + (dist_uv >> 2);
-    for (i = 0; i < NB_TXFM_MODES; i++) {
-      ctx->txfm_rd_diff[i] = MIN(err4x4, err - txfm_cache[i]);
-    }
+    vpx_memset(ctx->txfm_rd_diff, 0, sizeof(ctx->txfm_rd_diff));
     xd->mode_info_context->mbmi.txfm_size = TX_4X4;
   } else {
     *returnrate = rate_y + rate_uv +
         vp9_cost_bit(vp9_get_pred_prob(cm, xd, PRED_MBSKIP), 0);
     *returndist = dist_y + (dist_uv >> 2);
     for (i = 0; i < NB_TXFM_MODES; i++) {
-      ctx->txfm_rd_diff[i] = MIN(err4x4, err - txfm_cache[i]);
+      ctx->txfm_rd_diff[i] = txfm_cache[i] - txfm_cache[cm->txfm_mode];
     }
     xd->mode_info_context->mbmi.txfm_size = txfm_size;
     xd->mode_info_context->mbmi.mode = mode;
