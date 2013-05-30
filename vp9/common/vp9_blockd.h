@@ -82,12 +82,11 @@ typedef enum {
   NEARMV,
   ZEROMV,
   NEWMV,
-  SPLITMV,
   MB_MODE_COUNT
 } MB_PREDICTION_MODE;
 
 static INLINE int is_inter_mode(MB_PREDICTION_MODE mode) {
-  return mode >= NEARESTMV && mode <= SPLITMV;
+  return mode >= NEARESTMV && mode <= NEWMV;
 }
 
 #define INTRA_MODE_COUNT (TM_PRED + 1)
@@ -122,7 +121,7 @@ typedef enum {
 #define VP9_UV_MODES (TM_PRED + 1)
 #define VP9_I32X32_MODES (TM_PRED + 1)
 
-#define VP9_MVREFS (1 + SPLITMV - NEARESTMV)
+#define VP9_MVREFS (1 + NEWMV - NEARESTMV)
 
 #define WHT_UPSCALE_FACTOR 2
 
@@ -690,7 +689,6 @@ static INLINE void foreach_predicted_block_in_plane(
     const MACROBLOCKD* const xd, BLOCK_SIZE_TYPE bsize, int plane,
     foreach_predicted_block_visitor visit, void *arg) {
   int i, x, y;
-  const MB_PREDICTION_MODE mode = xd->mode_info_context->mbmi.mode;
 
   // block sizes in number of 4x4 blocks log 2 ("*_b")
   // 4x4=0, 8x8=2, 16x16=4, 32x32=6, 64x64=8
@@ -701,7 +699,8 @@ static INLINE void foreach_predicted_block_in_plane(
   // size of the predictor to use.
   int pred_w, pred_h;
 
-  if (mode == SPLITMV) {
+  if (xd->mode_info_context->mbmi.sb_type < BLOCK_SIZE_SB8X8) {
+    assert(bsize == BLOCK_SIZE_SB8X8);
     pred_w = 0;
     pred_h = 0;
   } else {

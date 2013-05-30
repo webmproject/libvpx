@@ -392,8 +392,10 @@ static void build_inter_predictors(int plane, int block,
 
   assert(x < bw);
   assert(y < bh);
-  assert(xd->mode_info_context->mbmi.mode == SPLITMV || 4 << pred_w == bw);
-  assert(xd->mode_info_context->mbmi.mode == SPLITMV || 4 << pred_h == bh);
+  assert(xd->mode_info_context->mbmi.sb_type < BLOCK_SIZE_SB8X8 ||
+         4 << pred_w == bw);
+  assert(xd->mode_info_context->mbmi.sb_type < BLOCK_SIZE_SB8X8 ||
+         4 << pred_h == bh);
 
   for (which_mv = 0; which_mv < 1 + use_second_ref; ++which_mv) {
     // source
@@ -412,7 +414,7 @@ static void build_inter_predictors(int plane, int block,
     MV split_chroma_mv;
     int_mv clamped_mv;
 
-    if (xd->mode_info_context->mbmi.mode == SPLITMV) {
+    if (xd->mode_info_context->mbmi.sb_type < BLOCK_SIZE_SB8X8) {
       if (plane == 0) {
         mv = &xd->mode_info_context->bmi[block].as_mv[which_mv].as_mv;
       } else {

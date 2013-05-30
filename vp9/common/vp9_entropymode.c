@@ -192,11 +192,6 @@ void vp9_accum_mv_refs(VP9_COMMON *pc,
         ++mv_ref_ct[context][2][0];
       } else {
         ++mv_ref_ct[context][2][1];
-        if (m == NEWMV) {
-          ++mv_ref_ct[context][3][0];
-        } else {
-          ++mv_ref_ct[context][3][1];
-        }
       }
     }
   }

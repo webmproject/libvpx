@@ -30,7 +30,6 @@ static void lf_init_lut(loop_filter_info_n *lfi) {
   lfi->mode_lf_lut[NEARESTMV] = 2;
   lfi->mode_lf_lut[NEARMV] = 2;
   lfi->mode_lf_lut[NEWMV] = 2;
-  lfi->mode_lf_lut[SPLITMV] = 3;
 }
 
 void vp9_loop_filter_update_sharpness(loop_filter_info_n *lfi,

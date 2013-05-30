@@ -50,6 +50,7 @@ DECLARE_ALIGNED(16, extern const uint8_t,
                 vp9_pt_energy_class[MAX_ENTROPY_TOKENS]);
 
 #define I4X4_PRED 0x8000
+#define SPLITMV 0x10000
 
 const MODE_DEFINITION vp9_mode_order[MAX_MODES] = {
   {ZEROMV,    LAST_FRAME,   NONE},
@@ -988,7 +989,7 @@ int vp9_cost_mv_ref(VP9_COMP *cpi,
     VP9_COMMON *pc = &cpi->common;
 
     vp9_prob p [VP9_MVREFS - 1];
-    assert(NEARESTMV <= m  &&  m <= SPLITMV);
+    assert(NEARESTMV <= m  &&  m <= NEWMV);
     vp9_mv_ref_probs(pc, p, mode_context);
     return cost_token(vp9_sb_mv_ref_tree, p,
                       vp9_sb_mv_ref_encoding_array - NEARESTMV + m);
@@ -1536,6 +1537,7 @@ static int rd_pick_best_mbsegmentation(VP9_COMP *cpi, MACROBLOCK *x,
   *returndistortion = bsi.d;
   *returnyrate = bsi.segment_yrate;
   *skippable = vp9_sby_is_skippable(&x->e_mbd, BLOCK_SIZE_SB8X8);
+  mbmi->mode = bsi.modes[3];
 
   return (int)(bsi.segment_rd);
 }
@@ -2896,7 +2898,6 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
 
       compmode_cost =
           vp9_cost_bit(vp9_get_pred_prob(cm, xd, PRED_COMP), is_comp_pred);
-      mbmi->mode = this_mode;
     } else {
       YV12_BUFFER_CONFIG *scaled_ref_frame[2] = {NULL, NULL};
       int fb = get_ref_frame_idx(cpi, mbmi->ref_frame);
@@ -2991,7 +2992,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
       best_mode = this_mode;
     }
 
-    if (this_mode != I4X4_PRED) {
+    if (this_mode != I4X4_PRED && this_mode != SPLITMV) {
       // Store the respective mode distortions for later use.
       if (mode_distortions[this_mode] == -1
           || distortion2 < mode_distortions[this_mode]) {
@@ -3107,8 +3108,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
   // Flag all modes that have a distortion thats > 2x the best we found at
   // this level.
   for (mode_index = 0; mode_index < MB_MODE_COUNT; ++mode_index) {
-    if (mode_index == NEARESTMV || mode_index == NEARMV || mode_index == NEWMV
-        || mode_index == SPLITMV)
+    if (mode_index == NEARESTMV || mode_index == NEARMV || mode_index == NEWMV)
       continue;
 
     if (mode_distortions[mode_index] > 2 * *returndistortion) {
@@ -3191,7 +3191,8 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
     }
   }
 
-  if (best_mbmode.mode == SPLITMV) {
+  if (best_mbmode.ref_frame != INTRA_FRAME &&
+      best_mbmode.sb_type < BLOCK_SIZE_SB8X8) {
     for (i = 0; i < 4; i++)
       xd->mode_info_context->bmi[i].as_mv[0].as_int =
           best_bmodes[i].as_mv[0].as_int;

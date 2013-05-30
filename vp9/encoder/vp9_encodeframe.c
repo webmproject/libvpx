@@ -332,7 +332,9 @@ static void update_state(VP9_COMP *cpi,
   MACROBLOCKD *const xd = &x->e_mbd;
   MODE_INFO *mi = &ctx->mic;
   MB_MODE_INFO *const mbmi = &xd->mode_info_context->mbmi;
-  int mb_mode = mi->mbmi.mode;
+#if CONFIG_DEBUG || CONFIG_INTERNAL_STATS
+  MB_PREDICTION_MODE mb_mode = mi->mbmi.mode;
+#endif
   int mb_mode_index = ctx->best_mode_index;
   const int mis = cpi->common.mode_info_stride;
   const int bh = 1 << mi_height_log2(bsize), bw = 1 << mi_width_log2(bsize);
@@ -362,7 +364,8 @@ static void update_state(VP9_COMP *cpi,
     ctx->txfm_rd_diff[ALLOW_32X32] = ctx->txfm_rd_diff[ALLOW_16X16];
   }
 
-  if (mb_mode == SPLITMV) {
+  if (mbmi->ref_frame != INTRA_FRAME &&
+      mbmi->sb_type < BLOCK_SIZE_SB8X8) {
     vpx_memcpy(x->partition_info, &ctx->partition_info,
                sizeof(PARTITION_INFO));
 
@@ -448,7 +451,8 @@ static void update_state(VP9_COMP *cpi,
     */
     // Note how often each mode chosen as best
     cpi->mode_chosen_counts[mb_mode_index]++;
-    if (mbmi->mode == SPLITMV || mbmi->mode == NEWMV) {
+    if (mbmi->ref_frame != INTRA_FRAME &&
+        (mbmi->sb_type < BLOCK_SIZE_SB8X8 || mbmi->mode == NEWMV)) {
       int_mv best_mv, best_second_mv;
       MV_REFERENCE_FRAME rf = mbmi->ref_frame;
       best_mv.as_int = ctx->best_ref_mv.as_int;
@@ -1617,7 +1621,7 @@ static void encode_superblock(VP9_COMP *cpi, TOKENEXTRA **t,
             cpi->zbin_mode_boost = GF_ZEROMV_ZBIN_BOOST;
           else
             cpi->zbin_mode_boost = LF_ZEROMV_ZBIN_BOOST;
-        } else if (mbmi->mode == SPLITMV) {
+        } else if (mbmi->sb_type < BLOCK_SIZE_SB8X8) {
           cpi->zbin_mode_boost = SPLIT_MV_ZBIN_BOOST;
         } else {
           cpi->zbin_mode_boost = MV_ZBIN_BOOST;
