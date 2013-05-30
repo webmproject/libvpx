@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAZX//7w8\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 101,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2013-05-30T00:15:07Z",
+      "side": 1,
+      "message": "This is temporary - works for now but eventually intend to do variance on difference signal.  Local to a function meant bigger stack and I wasn\u0027t sure if I was going to be recursive when I did this. Lots of the assembly has local statics why is this different?",
+      "parentUuid": "AAAAZX//7yE\u003d",
+      "revId": "d371340aad47813e5aefd99ed4d9c685d21f750e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAZX//7yA\u003d",
         "filename": "vp9/encoder/vp9_encodeframe.c",
         "patchSetId": 9
@@ -30,6 +48,24 @@
       "writtenOn": "2013-05-29T23:53:51Z",
       "side": 1,
       "message": "experimental code should be under a config flag",
+      "revId": "d371340aad47813e5aefd99ed4d9c685d21f750e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAZX//7w4\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 892,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2013-05-30T00:15:07Z",
+      "side": 1,
+      "message": "this doesn\u0027t change the bitstream at all  .   I don\u0027t think it fits the requirement of being under a config option.",
+      "parentUuid": "AAAAZX//7yA\u003d",
       "revId": "d371340aad47813e5aefd99ed4d9c685d21f750e",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAZX//7w0\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 948,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2013-05-30T00:15:07Z",
+      "side": 1,
+      "message": "I did this before you guys will done.   Subsequent patches will go down to 4x4",
+      "parentUuid": "AAAAZX//7x8\u003d",
+      "revId": "d371340aad47813e5aefd99ed4d9c685d21f750e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAZX//7xs\u003d",
         "filename": "vp9/encoder/vp9_encodeframe.c",
         "patchSetId": 9
@@ -64,6 +118,24 @@
       "writtenOn": "2013-05-29T23:53:51Z",
       "side": 1,
       "message": "you\u0027re not allowing for \u003csb8x8 here",
+      "revId": "d371340aad47813e5aefd99ed4d9c685d21f750e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAZX//7ww\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 1075,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2013-05-30T00:15:07Z",
+      "side": 1,
+      "message": "right I did this before you guys were done.   Subsequent patches will allow for smaller sizes.",
+      "parentUuid": "AAAAZX//7xs\u003d",
       "revId": "d371340aad47813e5aefd99ed4d9c685d21f750e",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAZX//7wY\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 578,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2013-05-30T00:15:07Z",
+      "side": 1,
+      "message": "I imagined this code getting significantly different in subsequent patches.   Maybe even being folded in to a full encode path that only does realtime.   \n\nnonetheless happy to move it in.",
+      "parentUuid": "AAAAZX//7yg\u003d",
+      "revId": "d371340aad47813e5aefd99ed4d9c685d21f750e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAZX//7yI\u003d",
         "filename": "vp9/encoder/vp9_rdopt.c",
         "patchSetId": 9
@@ -98,6 +188,24 @@
       "writtenOn": "2013-05-29T23:53:51Z",
       "side": 1,
       "message": "move to callee",
+      "revId": "d371340aad47813e5aefd99ed4d9c685d21f750e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAZX//7vI\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 830,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2013-05-30T00:15:07Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAZX//7yI\u003d",
       "revId": "d371340aad47813e5aefd99ed4d9c685d21f750e",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -121,6 +229,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAZX//7vw\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 2214,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2013-05-30T00:15:07Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAZX//7yY\u003d",
+      "revId": "d371340aad47813e5aefd99ed4d9c685d21f750e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAZX//7yU\u003d",
         "filename": "vp9/encoder/vp9_rdopt.c",
         "patchSetId": 9
@@ -132,6 +258,24 @@
       "writtenOn": "2013-05-29T23:53:51Z",
       "side": 1,
       "message": "why?",
+      "revId": "d371340aad47813e5aefd99ed4d9c685d21f750e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAZX//7vg\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 2298,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2013-05-30T00:15:07Z",
+      "side": 1,
+      "message": "as of right now I took over encode-breakout to be the variance threshold passed in from the command line.  Before +2 ing this we should undo this...",
+      "parentUuid": "AAAAZX//7yU\u003d",
       "revId": "d371340aad47813e5aefd99ed4d9c685d21f750e",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -155,6 +299,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAZX//7vM\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 2353,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2013-05-30T00:15:07Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAZX//7yM\u003d",
+      "revId": "d371340aad47813e5aefd99ed4d9c685d21f750e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAZX//7zE\u003d",
         "filename": "vp9/encoder/vp9_variance_c.c",
         "patchSetId": 9
@@ -166,6 +328,24 @@
       "writtenOn": "2013-05-29T23:53:51Z",
       "side": 1,
       "message": "please specify size (8x8) as input argument, or as part of function name.",
+      "revId": "d371340aad47813e5aefd99ed4d9c685d21f750e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAZX//7u8\u003d",
+        "filename": "vp9/encoder/vp9_variance_c.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 324,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2013-05-30T00:15:07Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAZX//7zE\u003d",
       "revId": "d371340aad47813e5aefd99ed4d9c685d21f750e",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
