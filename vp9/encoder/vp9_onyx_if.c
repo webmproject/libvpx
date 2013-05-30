@@ -774,7 +774,7 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
   sf->optimize_coefficients = !cpi->oxcf.lossless;
   sf->first_step = 0;
   sf->max_step_search_steps = MAX_MVSEARCH_STEPS;
-  sf->comp_inter_joint_serach = 1;
+  sf->comp_inter_joint_search = 1;
 #if CONFIG_MULTIPLE_ARF
   // Switch segmentation off.
   sf->static_segmentation = 0;
@@ -809,7 +809,7 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
         /* Disable coefficient optimization above speed 0 */
         sf->optimize_coefficients = 0;
         sf->no_skip_block4x4_search = 0;
-        sf->comp_inter_joint_serach = 0;
+        sf->comp_inter_joint_search = 0;
 
         sf->first_step = 1;
 
