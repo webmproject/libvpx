@@ -113,8 +113,7 @@ typedef struct {
   double new_mv_count;
   double duration;
   double count;
-}
-FIRSTPASS_STATS;
+} FIRSTPASS_STATS;
 
 typedef struct {
   int frames_so_far;
@@ -126,7 +125,6 @@ typedef struct {
   double frame_mvr_abs;
   double frame_mvc;
   double frame_mvc_abs;
-
 } ONEPASS_FRAMESTATS;
 
 typedef struct {
@@ -198,8 +196,7 @@ typedef enum {
   THR_COMP_SPLITLG,
   THR_COMP_SPLITLA,
   THR_COMP_SPLITGA,
-}
-THR_MODES;
+} THR_MODES;
 
 typedef enum {
   DIAMOND = 0,
