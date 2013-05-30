@@ -20,7 +20,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-struct vp8_extracfg {
+struct vp9_extracfg {
   struct vpx_codec_pkt_list *pkt_list;
   int                         cpu_used;                    /** available cpu percentage in 1/16*/
   unsigned int                enable_auto_alt_ref;           /** if encoder decides to uses alternate reference frame */
@@ -42,7 +42,7 @@ struct vp8_extracfg {
 
 struct extraconfig_map {
   int                 usage;
-  struct vp8_extracfg cfg;
+  struct vp9_extracfg cfg;
 };
 
 static const struct extraconfig_map extracfg_map[] = {
@@ -73,7 +73,7 @@ static const struct extraconfig_map extracfg_map[] = {
 struct vpx_codec_alg_priv {
   vpx_codec_priv_t        base;
   vpx_codec_enc_cfg_t     cfg;
-  struct vp8_extracfg     vp8_cfg;
+  struct vp9_extracfg     vp8_cfg;
   VP9_CONFIG              oxcf;
   VP9_PTR             cpi;
   unsigned char          *cx_data;
@@ -131,7 +131,7 @@ update_error_state(vpx_codec_alg_priv_t                 *ctx,
 
 static vpx_codec_err_t validate_config(vpx_codec_alg_priv_t      *ctx,
                                        const vpx_codec_enc_cfg_t *cfg,
-                                       const struct vp8_extracfg *vp8_cfg) {
+                                       const struct vp9_extracfg *vp8_cfg) {
   RANGE_CHECK(cfg, g_w,                   1, 65535); /* 16 bits available */
   RANGE_CHECK(cfg, g_h,                   1, 65535); /* 16 bits available */
   RANGE_CHECK(cfg, g_timebase.den,        1, 1000000000);
@@ -226,9 +226,9 @@ static vpx_codec_err_t validate_img(vpx_codec_alg_priv_t *ctx,
 }
 
 
-static vpx_codec_err_t set_vp8e_config(VP9_CONFIG *oxcf,
+static vpx_codec_err_t set_vp9e_config(VP9_CONFIG *oxcf,
                                        vpx_codec_enc_cfg_t cfg,
-                                       struct vp8_extracfg vp8_cfg) {
+                                       struct vp9_extracfg vp8_cfg) {
   oxcf->version = cfg.g_profile | (vp8_cfg.experimental ? 0x4 : 0);
   oxcf->width   = cfg.g_w;
   oxcf->height  = cfg.g_h;
@@ -351,7 +351,7 @@ static vpx_codec_err_t set_vp8e_config(VP9_CONFIG *oxcf,
   return VPX_CODEC_OK;
 }
 
-static vpx_codec_err_t vp8e_set_config(vpx_codec_alg_priv_t       *ctx,
+static vpx_codec_err_t vp9e_set_config(vpx_codec_alg_priv_t       *ctx,
                                        const vpx_codec_enc_cfg_t  *cfg) {
   vpx_codec_err_t res;
 
@@ -370,7 +370,7 @@ static vpx_codec_err_t vp8e_set_config(vpx_codec_alg_priv_t       *ctx,
 
   if (!res) {
     ctx->cfg = *cfg;
-    set_vp8e_config(&ctx->oxcf, ctx->cfg, ctx->vp8_cfg);
+    set_vp9e_config(&ctx->oxcf, ctx->cfg, ctx->vp8_cfg);
     vp9_change_config(ctx->cpi, &ctx->oxcf);
   }
 
@@ -406,7 +406,7 @@ static vpx_codec_err_t set_param(vpx_codec_alg_priv_t *ctx,
                                  int                   ctrl_id,
                                  va_list               args) {
   vpx_codec_err_t     res  = VPX_CODEC_OK;
-  struct vp8_extracfg xcfg = ctx->vp8_cfg;
+  struct vp9_extracfg xcfg = ctx->vp8_cfg;
 
 #define MAP(id, var) case id: var = CAST(id, args); break;
 
@@ -433,7 +433,7 @@ static vpx_codec_err_t set_param(vpx_codec_alg_priv_t *ctx,
 
   if (!res) {
     ctx->vp8_cfg = xcfg;
-    set_vp8e_config(&ctx->oxcf, ctx->cfg, ctx->vp8_cfg);
+    set_vp9e_config(&ctx->oxcf, ctx->cfg, ctx->vp8_cfg);
     vp9_change_config(ctx->cpi, &ctx->oxcf);
   }
 
@@ -442,7 +442,7 @@ static vpx_codec_err_t set_param(vpx_codec_alg_priv_t *ctx,
 }
 
 
-static vpx_codec_err_t vp8e_common_init(vpx_codec_ctx_t *ctx,
+static vpx_codec_err_t vp9e_common_init(vpx_codec_ctx_t *ctx,
                                         int              experimental) {
   vpx_codec_err_t            res = VPX_CODEC_OK;
   struct vpx_codec_alg_priv *priv;
@@ -488,7 +488,7 @@ static vpx_codec_err_t vp8e_common_init(vpx_codec_ctx_t *ctx,
     priv->vp8_cfg.experimental = experimental;
 
     // TODO(agrange) Check the limits set on this buffer, or the check that is
-    // applied in vp8e_encode.
+    // applied in vp9e_encode.
     priv->cx_data_sz = priv->cfg.g_w * priv->cfg.g_h * 3 / 2 * 8;
 //    priv->cx_data_sz = priv->cfg.g_w * priv->cfg.g_h * 3 / 2 * 2;
 
@@ -505,7 +505,7 @@ static vpx_codec_err_t vp8e_common_init(vpx_codec_ctx_t *ctx,
     res = validate_config(priv, &priv->cfg, &priv->vp8_cfg);
 
     if (!res) {
-      set_vp8e_config(&ctx->priv->alg_priv->oxcf,
+      set_vp9e_config(&ctx->priv->alg_priv->oxcf,
                       ctx->priv->alg_priv->cfg,
                       ctx->priv->alg_priv->vp8_cfg);
       optr = vp9_create_compressor(&ctx->priv->alg_priv->oxcf);
@@ -521,21 +521,21 @@ static vpx_codec_err_t vp8e_common_init(vpx_codec_ctx_t *ctx,
 }
 
 
-static vpx_codec_err_t vp8e_init(vpx_codec_ctx_t *ctx,
+static vpx_codec_err_t vp9e_init(vpx_codec_ctx_t *ctx,
                                  vpx_codec_priv_enc_mr_cfg_t *data) {
-  return vp8e_common_init(ctx, 0);
+  return vp9e_common_init(ctx, 0);
 }
 
 
 #if CONFIG_EXPERIMENTAL
-static vpx_codec_err_t vp8e_exp_init(vpx_codec_ctx_t *ctx,
+static vpx_codec_err_t vp9e_exp_init(vpx_codec_ctx_t *ctx,
                                      vpx_codec_priv_enc_mr_cfg_t *data) {
-  return vp8e_common_init(ctx, 1);
+  return vp9e_common_init(ctx, 1);
 }
 #endif
 
 
-static vpx_codec_err_t vp8e_destroy(vpx_codec_alg_priv_t *ctx) {
+static vpx_codec_err_t vp9e_destroy(vpx_codec_alg_priv_t *ctx) {
 
   free(ctx->cx_data);
   vp9_remove_compressor(&ctx->cpi);
@@ -608,7 +608,7 @@ static int write_superframe_index(vpx_codec_alg_priv_t *ctx) {
   return index_sz;
 }
 
-static vpx_codec_err_t vp8e_encode(vpx_codec_alg_priv_t  *ctx,
+static vpx_codec_err_t vp9e_encode(vpx_codec_alg_priv_t  *ctx,
                                    const vpx_image_t     *img,
                                    vpx_codec_pts_t        pts,
                                    unsigned long          duration,
@@ -831,12 +831,12 @@ static vpx_codec_err_t vp8e_encode(vpx_codec_alg_priv_t  *ctx,
 }
 
 
-static const vpx_codec_cx_pkt_t *vp8e_get_cxdata(vpx_codec_alg_priv_t  *ctx,
+static const vpx_codec_cx_pkt_t *vp9e_get_cxdata(vpx_codec_alg_priv_t  *ctx,
                                                  vpx_codec_iter_t      *iter) {
   return vpx_codec_pkt_list_get(&ctx->pkt_list.head, iter);
 }
 
-static vpx_codec_err_t vp8e_set_reference(vpx_codec_alg_priv_t *ctx,
+static vpx_codec_err_t vp9e_set_reference(vpx_codec_alg_priv_t *ctx,
                                           int ctr_id,
                                           va_list args) {
   vpx_ref_frame_t *data = va_arg(args, vpx_ref_frame_t *);
@@ -853,7 +853,7 @@ static vpx_codec_err_t vp8e_set_reference(vpx_codec_alg_priv_t *ctx,
 
 }
 
-static vpx_codec_err_t vp8e_copy_reference(vpx_codec_alg_priv_t *ctx,
+static vpx_codec_err_t vp9e_copy_reference(vpx_codec_alg_priv_t *ctx,
                                            int ctr_id,
                                            va_list args) {
 
@@ -886,7 +886,7 @@ static vpx_codec_err_t get_reference(vpx_codec_alg_priv_t *ctx,
   }
 }
 
-static vpx_codec_err_t vp8e_set_previewpp(vpx_codec_alg_priv_t *ctx,
+static vpx_codec_err_t vp9e_set_previewpp(vpx_codec_alg_priv_t *ctx,
                                           int ctr_id,
                                           va_list args) {
 #if CONFIG_POSTPROC
@@ -907,7 +907,7 @@ static vpx_codec_err_t vp8e_set_previewpp(vpx_codec_alg_priv_t *ctx,
 }
 
 
-static vpx_image_t *vp8e_get_preview(vpx_codec_alg_priv_t *ctx) {
+static vpx_image_t *vp9e_get_preview(vpx_codec_alg_priv_t *ctx) {
 
   YV12_BUFFER_CONFIG sd;
   vp9_ppflags_t flags = {0};
@@ -925,7 +925,7 @@ static vpx_image_t *vp8e_get_preview(vpx_codec_alg_priv_t *ctx) {
     return NULL;
 }
 
-static vpx_codec_err_t vp8e_update_entropy(vpx_codec_alg_priv_t *ctx,
+static vpx_codec_err_t vp9e_update_entropy(vpx_codec_alg_priv_t *ctx,
                                            int ctr_id,
                                            va_list args) {
   int update = va_arg(args, int);
@@ -934,7 +934,7 @@ static vpx_codec_err_t vp8e_update_entropy(vpx_codec_alg_priv_t *ctx,
 
 }
 
-static vpx_codec_err_t vp8e_update_reference(vpx_codec_alg_priv_t *ctx,
+static vpx_codec_err_t vp9e_update_reference(vpx_codec_alg_priv_t *ctx,
                                              int ctr_id,
                                              va_list args) {
   int update = va_arg(args, int);
@@ -942,7 +942,7 @@ static vpx_codec_err_t vp8e_update_reference(vpx_codec_alg_priv_t *ctx,
   return VPX_CODEC_OK;
 }
 
-static vpx_codec_err_t vp8e_use_reference(vpx_codec_alg_priv_t *ctx,
+static vpx_codec_err_t vp9e_use_reference(vpx_codec_alg_priv_t *ctx,
                                           int ctr_id,
                                           va_list args) {
   int reference_flag = va_arg(args, int);
@@ -950,7 +950,7 @@ static vpx_codec_err_t vp8e_use_reference(vpx_codec_alg_priv_t *ctx,
   return VPX_CODEC_OK;
 }
 
-static vpx_codec_err_t vp8e_set_roi_map(vpx_codec_alg_priv_t *ctx,
+static vpx_codec_err_t vp9e_set_roi_map(vpx_codec_alg_priv_t *ctx,
                                         int ctr_id,
                                         va_list args) {
   vpx_roi_map_t *data = va_arg(args, vpx_roi_map_t *);
@@ -968,7 +968,7 @@ static vpx_codec_err_t vp8e_set_roi_map(vpx_codec_alg_priv_t *ctx,
 }
 
 
-static vpx_codec_err_t vp8e_set_activemap(vpx_codec_alg_priv_t *ctx,
+static vpx_codec_err_t vp9e_set_activemap(vpx_codec_alg_priv_t *ctx,
                                           int ctr_id,
                                           va_list args) {
   vpx_active_map_t *data = va_arg(args, vpx_active_map_t *);
@@ -985,7 +985,7 @@ static vpx_codec_err_t vp8e_set_activemap(vpx_codec_alg_priv_t *ctx,
     return VPX_CODEC_INVALID_PARAM;
 }
 
-static vpx_codec_err_t vp8e_set_scalemode(vpx_codec_alg_priv_t *ctx,
+static vpx_codec_err_t vp9e_set_scalemode(vpx_codec_alg_priv_t *ctx,
                                           int ctr_id,
                                           va_list args) {
 
@@ -1006,16 +1006,16 @@ static vpx_codec_err_t vp8e_set_scalemode(vpx_codec_alg_priv_t *ctx,
 }
 
 
-static vpx_codec_ctrl_fn_map_t vp8e_ctf_maps[] = {
-  {VP8_SET_REFERENCE,                 vp8e_set_reference},
-  {VP8_COPY_REFERENCE,                vp8e_copy_reference},
-  {VP8_SET_POSTPROC,                  vp8e_set_previewpp},
-  {VP8E_UPD_ENTROPY,                  vp8e_update_entropy},
-  {VP8E_UPD_REFERENCE,                vp8e_update_reference},
-  {VP8E_USE_REFERENCE,                vp8e_use_reference},
-  {VP8E_SET_ROI_MAP,                  vp8e_set_roi_map},
-  {VP8E_SET_ACTIVEMAP,                vp8e_set_activemap},
-  {VP8E_SET_SCALEMODE,                vp8e_set_scalemode},
+static vpx_codec_ctrl_fn_map_t vp9e_ctf_maps[] = {
+  {VP8_SET_REFERENCE,                 vp9e_set_reference},
+  {VP8_COPY_REFERENCE,                vp9e_copy_reference},
+  {VP8_SET_POSTPROC,                  vp9e_set_previewpp},
+  {VP8E_UPD_ENTROPY,                  vp9e_update_entropy},
+  {VP8E_UPD_REFERENCE,                vp9e_update_reference},
+  {VP8E_USE_REFERENCE,                vp9e_use_reference},
+  {VP8E_SET_ROI_MAP,                  vp9e_set_roi_map},
+  {VP8E_SET_ACTIVEMAP,                vp9e_set_activemap},
+  {VP8E_SET_SCALEMODE,                vp9e_set_scalemode},
   {VP8E_SET_CPUUSED,                  set_param},
   {VP8E_SET_NOISE_SENSITIVITY,        set_param},
   {VP8E_SET_ENABLEAUTOALTREF,         set_param},
@@ -1036,7 +1036,7 @@ static vpx_codec_ctrl_fn_map_t vp8e_ctf_maps[] = {
   { -1, NULL},
 };
 
-static vpx_codec_enc_cfg_map_t vp8e_usage_cfg_map[] = {
+static vpx_codec_enc_cfg_map_t vp9e_usage_cfg_map[] = {
   {
     0,
     {
@@ -1101,9 +1101,9 @@ CODEC_INTERFACE(vpx_codec_vp9_cx) = {
   VPX_CODEC_CAP_ENCODER | VPX_CODEC_CAP_PSNR |
   VPX_CODEC_CAP_OUTPUT_PARTITION,
   /* vpx_codec_caps_t          caps; */
-  vp8e_init,          /* vpx_codec_init_fn_t       init; */
-  vp8e_destroy,       /* vpx_codec_destroy_fn_t    destroy; */
-  vp8e_ctf_maps,      /* vpx_codec_ctrl_fn_map_t  *ctrl_maps; */
+  vp9e_init,          /* vpx_codec_init_fn_t       init; */
+  vp9e_destroy,       /* vpx_codec_destroy_fn_t    destroy; */
+  vp9e_ctf_maps,      /* vpx_codec_ctrl_fn_map_t  *ctrl_maps; */
   NOT_IMPLEMENTED,    /* vpx_codec_get_mmap_fn_t   get_mmap; */
   NOT_IMPLEMENTED,    /* vpx_codec_set_mmap_fn_t   set_mmap; */
   {
@@ -1113,12 +1113,12 @@ CODEC_INTERFACE(vpx_codec_vp9_cx) = {
     NOT_IMPLEMENTED,    /* vpx_codec_frame_get_fn_t  frame_get; */
   },
   {
-    vp8e_usage_cfg_map, /* vpx_codec_enc_cfg_map_t    peek_si; */
-    vp8e_encode,        /* vpx_codec_encode_fn_t      encode; */
-    vp8e_get_cxdata,    /* vpx_codec_get_cx_data_fn_t   frame_get; */
-    vp8e_set_config,
+    vp9e_usage_cfg_map, /* vpx_codec_enc_cfg_map_t    peek_si; */
+    vp9e_encode,        /* vpx_codec_encode_fn_t      encode; */
+    vp9e_get_cxdata,    /* vpx_codec_get_cx_data_fn_t   frame_get; */
+    vp9e_set_config,
     NOT_IMPLEMENTED,
-    vp8e_get_preview,
+    vp9e_get_preview,
   } /* encoder functions */
 };
 
@@ -1130,9 +1130,9 @@ CODEC_INTERFACE(vpx_codec_vp9x_cx) = {
   VPX_CODEC_INTERNAL_ABI_VERSION,
   VPX_CODEC_CAP_ENCODER | VPX_CODEC_CAP_PSNR,
   /* vpx_codec_caps_t          caps; */
-  vp8e_exp_init,      /* vpx_codec_init_fn_t       init; */
-  vp8e_destroy,       /* vpx_codec_destroy_fn_t    destroy; */
-  vp8e_ctf_maps,      /* vpx_codec_ctrl_fn_map_t  *ctrl_maps; */
+  vp9e_exp_init,      /* vpx_codec_init_fn_t       init; */
+  vp9e_destroy,       /* vpx_codec_destroy_fn_t    destroy; */
+  vp9e_ctf_maps,      /* vpx_codec_ctrl_fn_map_t  *ctrl_maps; */
   NOT_IMPLEMENTED,    /* vpx_codec_get_mmap_fn_t   get_mmap; */
   NOT_IMPLEMENTED,    /* vpx_codec_set_mmap_fn_t   set_mmap; */
   {
@@ -1142,12 +1142,12 @@ CODEC_INTERFACE(vpx_codec_vp9x_cx) = {
     NOT_IMPLEMENTED,    /* vpx_codec_frame_get_fn_t  frame_get; */
   },
   {
-    vp8e_usage_cfg_map, /* vpx_codec_enc_cfg_map_t    peek_si; */
-    vp8e_encode,        /* vpx_codec_encode_fn_t      encode; */
-    vp8e_get_cxdata,    /* vpx_codec_get_cx_data_fn_t   frame_get; */
-    vp8e_set_config,
+    vp9e_usage_cfg_map, /* vpx_codec_enc_cfg_map_t    peek_si; */
+    vp9e_encode,        /* vpx_codec_encode_fn_t      encode; */
+    vp9e_get_cxdata,    /* vpx_codec_get_cx_data_fn_t   frame_get; */
+    vp9e_set_config,
     NOT_IMPLEMENTED,
-    vp8e_get_preview,
+    vp9e_get_preview,
   } /* encoder functions */
 };
 #endif
