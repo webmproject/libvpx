@@ -18,7 +18,6 @@ VP9_COMMON_SRCS-yes += common/vp9_asm_com_offsets.c
 VP9_COMMON_SRCS-yes += common/vp9_coefupdateprobs.h
 VP9_COMMON_SRCS-yes += common/vp9_convolve.c
 VP9_COMMON_SRCS-yes += common/vp9_convolve.h
-VP9_COMMON_SRCS-yes += common/vp9_debugmodes.c
 VP9_COMMON_SRCS-yes += common/vp9_default_coef_probs.h
 VP9_COMMON_SRCS-yes += common/vp9_entropy.c
 VP9_COMMON_SRCS-yes += common/vp9_entropymode.c

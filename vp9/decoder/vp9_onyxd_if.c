@@ -387,9 +387,6 @@ int vp9_receive_compressed_data(VP9D_PTR ptr,
     cm->current_video_frame++;
   }
 
-  /*vp9_print_modes_and_motion_vectors(cm->mi, cm->mb_rows,cm->mb_cols,
-                                       cm->current_video_frame);*/
-
   pbi->ready_for_new_data = 0;
   pbi->last_time_stamp = time_stamp;
   pbi->source_sz = 0;
