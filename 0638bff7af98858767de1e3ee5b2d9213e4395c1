@@ -16,6 +16,24 @@
       "revId": "0638bff7af98858767de1e3ee5b2d9213e4395c1",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAZn///NA\u003d",
+        "filename": "vp9/vp9_cx_iface.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 76,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2013-05-30T18:03:58Z",
+      "side": 1,
+      "message": "I\u0027ll try to fix this in the next similar patch for vp9_dx_iface.c.",
+      "parentUuid": "AAAAZn///O0\u003d",
+      "revId": "0638bff7af98858767de1e3ee5b2d9213e4395c1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
