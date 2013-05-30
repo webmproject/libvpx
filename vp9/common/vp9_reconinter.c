@@ -106,14 +106,14 @@ void vp9_setup_scale_factors_for_frame(struct scale_factors *scale,
     scale->scale_value_x = unscaled_value;
     scale->scale_value_y = unscaled_value;
     scale->set_scaled_offsets = set_offsets_without_scaling;
-    scale->scale_motion_vector_q3_to_q4 = mv_q3_to_q4_without_scaling;
-    scale->scale_motion_vector_component_q4 = mv_component_q4_without_scaling;
+    scale->scale_mv_q3_to_q4 = mv_q3_to_q4_without_scaling;
+    scale->scale_mv_component_q4 = mv_component_q4_without_scaling;
   } else {
     scale->scale_value_x = scale_value_x_with_scaling;
     scale->scale_value_y = scale_value_y_with_scaling;
     scale->set_scaled_offsets = set_offsets_with_scaling;
-    scale->scale_motion_vector_q3_to_q4 = mv_q3_to_q4_with_scaling;
-    scale->scale_motion_vector_component_q4 = mv_component_q4_with_scaling;
+    scale->scale_mv_q3_to_q4 = mv_q3_to_q4_with_scaling;
+    scale->scale_mv_component_q4 = mv_component_q4_with_scaling;
   }
 
   // TODO(agrange): Investigate the best choice of functions to use here
@@ -287,7 +287,7 @@ void vp9_build_inter_predictor(const uint8_t *src, int src_stride,
                                const struct scale_factors *scale,
                                int w, int h, int weight,
                                const struct subpix_fn_table *subpix) {
-  int_mv32 mv = scale->scale_motion_vector_q3_to_q4(mv_q3, scale);
+  int_mv32 mv = scale->scale_mv_q3_to_q4(mv_q3, scale);
   src += (mv.as_mv.row >> 4) * src_stride + (mv.as_mv.col >> 4);
   scale->predict[!!(mv.as_mv.col & 15)][!!(mv.as_mv.row & 15)][weight](
       src, src_stride, dst, dst_stride,
@@ -302,14 +302,14 @@ void vp9_build_inter_predictor_q4(const uint8_t *src, int src_stride,
                                   const struct scale_factors *scale,
                                   int w, int h, int weight,
                                   const struct subpix_fn_table *subpix) {
-  const int scaled_mv_row_q4 =
-      scale->scale_motion_vector_component_q4(mv_q4->as_mv.row,
-                                              scale->y_num, scale->y_den,
-                                              scale->y_offset_q4);
-  const int scaled_mv_col_q4 =
-      scale->scale_motion_vector_component_q4(mv_q4->as_mv.col,
-                                              scale->x_num, scale->x_den,
-                                              scale->x_offset_q4);
+  const int scaled_mv_row_q4 = scale->scale_mv_component_q4(mv_q4->as_mv.row,
+                                                            scale->y_num,
+                                                            scale->y_den,
+                                                            scale->y_offset_q4);
+  const int scaled_mv_col_q4 = scale->scale_mv_component_q4(mv_q4->as_mv.col,
+                                                            scale->x_num,
+                                                            scale->x_den,
+                                                            scale->x_offset_q4);
   const int subpel_x = scaled_mv_col_q4 & 15;
   const int subpel_y = scaled_mv_row_q4 & 15;
 
