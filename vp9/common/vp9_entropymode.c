@@ -15,12 +15,12 @@
 #include "vp9/common/vp9_alloccommon.h"
 #include "vpx_mem/vpx_mem.h"
 
-static const unsigned int y_mode_cts[VP9_BINTRAMODES] = {
+static const unsigned int y_mode_cts[VP9_INTRA_MODES] = {
   /* DC V  H D45 D135 D117 D153 D27 D63 TM */
   98, 19, 15, 14, 14, 14, 14, 12, 12, 13,
 };
 
-static const unsigned int uv_mode_cts[VP9_YMODES][VP9_UV_MODES] = {
+static const unsigned int uv_mode_cts[VP9_INTRA_MODES][VP9_INTRA_MODES] = {
   /* DC   V   H  D45 135 117 153 D27 D63 TM */
   { 200, 15, 15, 10, 10, 10, 10, 10, 10,  6}, /* DC */
   { 130, 75, 10, 10, 10, 10, 10, 10, 10,  6}, /* V */
@@ -34,7 +34,7 @@ static const unsigned int uv_mode_cts[VP9_YMODES][VP9_UV_MODES] = {
   { 160, 30, 30, 10, 10, 10, 10, 10, 10, 16}, /* TM */
 };
 
-static const unsigned int kf_uv_mode_cts[VP9_YMODES][VP9_UV_MODES] = {
+static const unsigned int kf_uv_mode_cts[VP9_INTRA_MODES][VP9_INTRA_MODES] = {
   // DC   V   H  D45 135 117 153 D27 D63 TM
   { 160, 24, 24, 20, 20, 20, 20, 20, 20,  8}, /* DC */
   { 102, 64, 30, 20, 20, 20, 20, 20, 20, 10}, /* V */
@@ -70,7 +70,7 @@ const vp9_prob vp9_partition_probs[NUM_PARTITION_CONTEXTS]
 };
 
 /* Array indices are identical to previously-existing INTRAMODECONTEXTNODES. */
-const vp9_tree_index vp9_intra_mode_tree[VP9_BINTRAMODES * 2 - 2] = {
+const vp9_tree_index vp9_intra_mode_tree[VP9_INTRA_MODES * 2 - 2] = {
   -DC_PRED, 2,                      /* 0 = DC_NODE */
   -TM_PRED, 4,                      /* 1 = TM_NODE */
   -V_PRED, 6,                       /* 2 = V_NODE */
@@ -94,20 +94,20 @@ const vp9_tree_index vp9_partition_tree[6] = {
   -PARTITION_VERT, -PARTITION_SPLIT
 };
 
-struct vp9_token vp9_intra_mode_encodings[VP9_BINTRAMODES];
+struct vp9_token vp9_intra_mode_encodings[VP9_INTRA_MODES];
 
 struct vp9_token vp9_sb_mv_ref_encoding_array[VP9_MVREFS];
 
 struct vp9_token vp9_partition_encodings[PARTITION_TYPES];
 
 void vp9_init_mbmode_probs(VP9_COMMON *x) {
-  unsigned int bct[VP9_YMODES][2];  // num Ymodes > num UV modes
+  unsigned int bct[VP9_INTRA_MODES][2];  // num Ymodes > num UV modes
   int i;
 
   vp9_tree_probs_from_distribution(vp9_intra_mode_tree, x->fc.y_mode_prob,
                                    bct, y_mode_cts, 0);
 
-  for (i = 0; i < VP9_YMODES; i++) {
+  for (i = 0; i < VP9_INTRA_MODES; i++) {
     vp9_tree_probs_from_distribution(vp9_intra_mode_tree, x->kf_uv_mode_prob[i],
                                      bct, kf_uv_mode_cts[i], 0);
     vp9_tree_probs_from_distribution(vp9_intra_mode_tree, x->fc.uv_mode_prob[i],
@@ -247,15 +247,15 @@ void vp9_adapt_mode_probs(VP9_COMMON *cm) {
   int t;
 
   printf("static const unsigned int\nymode_counts"
-         "[VP9_YMODES] = {\n");
-  for (t = 0; t < VP9_YMODES; ++t)
+         "[VP9_INTRA_MODES] = {\n");
+  for (t = 0; t < VP9_INTRA_MODES; ++t)
     printf("%d, ", fc->ymode_counts[t]);
   printf("};\n");
   printf("static const unsigned int\nuv_mode_counts"
-         "[VP9_YMODES] [VP9_UV_MODES] = {\n");
-  for (i = 0; i < VP9_YMODES; ++i) {
+         "[VP9_INTRA_MODES] [VP9_INTRA_MODES] = {\n");
+  for (i = 0; i < VP9_INTRA_MODES; ++i) {
     printf("  {");
-    for (t = 0; t < VP9_UV_MODES; ++t)
+    for (t = 0; t < VP9_INTRA_MODES; ++t)
       printf("%d, ", fc->uv_mode_counts[i][t]);
     printf("},\n");
   }
@@ -277,12 +277,12 @@ void vp9_adapt_mode_probs(VP9_COMMON *cm) {
   printf("};\n");
 #endif
 
-  update_mode_probs(VP9_YMODES, vp9_intra_mode_tree,
+  update_mode_probs(VP9_INTRA_MODES, vp9_intra_mode_tree,
                     fc->y_mode_counts, fc->pre_y_mode_prob,
                     fc->y_mode_prob, 0);
 
-  for (i = 0; i < VP9_YMODES; ++i)
-    update_mode_probs(VP9_UV_MODES, vp9_intra_mode_tree,
+  for (i = 0; i < VP9_INTRA_MODES; ++i)
+    update_mode_probs(VP9_INTRA_MODES, vp9_intra_mode_tree,
                       fc->uv_mode_counts[i], fc->pre_uv_mode_prob[i],
                       fc->uv_mode_prob[i], 0);
 
