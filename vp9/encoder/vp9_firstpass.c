@@ -523,6 +523,7 @@ void vp9_first_pass(VP9_COMP *cpi) {
       xd->left_available = (mb_col != 0);
 
       xd->mode_info_context->mbmi.sb_type = BLOCK_SIZE_MB16X16;
+      xd->mode_info_context->mbmi.ref_frame = INTRA_FRAME;
 
       // do intra 16x16 prediction
       this_error = vp9_encode_intra(cpi, x, use_dc_pred);
@@ -619,6 +620,7 @@ void vp9_first_pass(VP9_COMP *cpi) {
           this_error = motion_error;
           vp9_set_mbmode_and_mvs(x, NEWMV, &mv);
           xd->mode_info_context->mbmi.txfm_size = TX_4X4;
+          xd->mode_info_context->mbmi.ref_frame = LAST_FRAME;
           vp9_build_inter_predictors_sby(xd, mb_row << 1,
                                          mb_col << 1,
                                          BLOCK_SIZE_MB16X16);

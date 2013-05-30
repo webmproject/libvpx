@@ -78,7 +78,6 @@ typedef enum {
   D27_PRED,        // Directional 27  deg = round(arctan(1/2) * 180/pi)
   D63_PRED,        // Directional 63  deg = round(arctan(2/1) * 180/pi)
   TM_PRED,         // True-motion
-  I4X4_PRED,       // Each 4x4 subblock has its own mode
   NEARESTMV,
   NEARMV,
   ZEROMV,
@@ -119,7 +118,7 @@ typedef enum {
   ADST_ADST = 3                       // ADST in both directions
 } TX_TYPE;
 
-#define VP9_YMODES  (I4X4_PRED + 1)
+#define VP9_YMODES  (TM_PRED + 1)
 #define VP9_UV_MODES (TM_PRED + 1)
 #define VP9_I32X32_MODES (TM_PRED + 1)
 
@@ -538,14 +537,16 @@ static TX_TYPE txfm_map(MB_PREDICTION_MODE bmode) {
 }
 
 static TX_TYPE get_tx_type_4x4(const MACROBLOCKD *xd, int ib) {
-  TX_TYPE tx_type = DCT_DCT;
-  if (xd->lossless)
+  TX_TYPE tx_type;
+  MODE_INFO *mi = xd->mode_info_context;
+  MB_MODE_INFO *const mbmi = &mi->mbmi;
+  if (xd->lossless || mbmi->ref_frame != INTRA_FRAME)
     return DCT_DCT;
-  if (xd->mode_info_context->mbmi.mode == I4X4_PRED) {
-    tx_type = txfm_map(
-        xd->mode_info_context->bmi[ib].as_mode.first);
-  } else if (xd->mode_info_context->mbmi.mode <= TM_PRED) {
-    tx_type = txfm_map(xd->mode_info_context->mbmi.mode);
+  if (mbmi->sb_type < BLOCK_SIZE_SB8X8) {
+    tx_type = txfm_map(mi->bmi[ib].as_mode.first);
+  } else {
+    assert(mbmi->mode <= TM_PRED);
+    tx_type = txfm_map(mbmi->mode);
   }
   return tx_type;
 }

@@ -15,24 +15,12 @@
 #include "vp9/common/vp9_alloccommon.h"
 #include "vpx_mem/vpx_mem.h"
 
-static const unsigned int kf_y_mode_cts[8][VP9_YMODES] = {
-  /* DC V   H  D45 135 117 153 D27 D63 TM i4X4 */
-  {12,  6,  5,  5,  5,  5,  5,  5,  5,  2, 200},
-  {25, 13, 13,  7,  7,  7,  7,  7,  7,  6, 160},
-  {31, 17, 18,  8,  8,  8,  8,  8,  8,  9, 139},
-  {40, 22, 23,  8,  8,  8,  8,  8,  8, 12, 116},
-  {53, 26, 28,  8,  8,  8,  8,  8,  8, 13,  94},
-  {68, 33, 35,  8,  8,  8,  8,  8,  8, 17,  68},
-  {78, 38, 38,  8,  8,  8,  8,  8,  8, 19,  52},
-  {89, 42, 42,  8,  8,  8,  8,  8,  8, 21,  34},
+static const unsigned int y_mode_cts[VP9_BINTRAMODES] = {
+  /* DC V  H D45 D135 D117 D153 D27 D63 TM */
+  98, 19, 15, 14, 14, 14, 14, 12, 12, 13,
 };
 
-static const unsigned int y_mode_cts  [VP9_YMODES] = {
-  /* DC V   H  D45 135 117 153 D27 D63 TM i4X4 */
-  98, 19, 15, 14, 14, 14, 14, 12, 12, 13, 0
-};
-
-static const unsigned int uv_mode_cts [VP9_YMODES] [VP9_UV_MODES] = {
+static const unsigned int uv_mode_cts[VP9_YMODES][VP9_UV_MODES] = {
   /* DC   V   H  D45 135 117 153 D27 D63 TM */
   { 200, 15, 15, 10, 10, 10, 10, 10, 10,  6}, /* DC */
   { 130, 75, 10, 10, 10, 10, 10, 10, 10,  6}, /* V */
@@ -44,10 +32,9 @@ static const unsigned int uv_mode_cts [VP9_YMODES] [VP9_UV_MODES] = {
   { 150, 15, 10, 10, 10, 10, 10, 75, 10,  6}, /* D27 */
   { 150, 15, 10, 10, 10, 10, 10, 10, 75,  6}, /* D63 */
   { 160, 30, 30, 10, 10, 10, 10, 10, 10, 16}, /* TM */
-  { 150, 35, 41, 10, 10, 10, 10, 10, 10, 10}, /* i4X4 */
 };
 
-static const unsigned int kf_uv_mode_cts [VP9_YMODES] [VP9_UV_MODES] = {
+static const unsigned int kf_uv_mode_cts[VP9_YMODES][VP9_UV_MODES] = {
   // DC   V   H  D45 135 117 153 D27 D63 TM
   { 160, 24, 24, 20, 20, 20, 20, 20, 20,  8}, /* DC */
   { 102, 64, 30, 20, 20, 20, 20, 20, 20, 10}, /* V */
@@ -59,12 +46,6 @@ static const unsigned int kf_uv_mode_cts [VP9_YMODES] [VP9_UV_MODES] = {
   { 102, 33, 20, 20, 20, 20, 20, 64, 20, 14}, /* D27 */
   { 102, 33, 20, 20, 20, 20, 20, 20, 64, 14}, /* D63 */
   { 132, 36, 30, 20, 20, 20, 20, 20, 20, 18}, /* TM */
-  { 122, 41, 35, 20, 20, 20, 20, 20, 20, 18}, /* I4X4 */
-};
-
-static const unsigned int bmode_cts[VP9_BINTRAMODES] = {
-  /* DC    V     H    D45   D135  D117  D153   D27   D63   TM  */
-  43891, 10036, 3920, 3363, 2546, 5119, 2471, 1723, 3221, 17694
 };
 
 const vp9_prob vp9_partition_probs[NUM_PARTITION_CONTEXTS]
