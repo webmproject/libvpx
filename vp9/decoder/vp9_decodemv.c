@@ -862,9 +862,6 @@ void vp9_decode_mb_mode_mv(VP9D_COMP* const pbi,
     kfread_modes(pbi, mi, mi_row, mi_col, r);
   } else {
     read_mb_modes_mv(pbi, mi, &mi->mbmi, mi_row, mi_col, r);
-    set_scale_factors(xd,
-                      mi->mbmi.ref_frame - 1, mi->mbmi.second_ref_frame - 1,
-                      cm->active_ref_scale);
   }
 
   if (1) {
