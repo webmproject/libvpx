@@ -526,15 +526,6 @@ static void pack_mb_tokens(vp9_writer* const bc,
   *tp = p;
 }
 
-static void write_mv_ref(vp9_writer *bc, MB_PREDICTION_MODE m,
-                         const vp9_prob *p) {
-#if CONFIG_DEBUG
-  assert(NEARESTMV <= m  &&  m <= SPLITMV);
-#endif
-  write_token(bc, vp9_mv_ref_tree, p,
-              vp9_mv_ref_encoding_array - NEARESTMV + m);
-}
-
 static void write_sb_mv_ref(vp9_writer *bc, MB_PREDICTION_MODE m,
                             const vp9_prob *p) {
 #if CONFIG_DEBUG

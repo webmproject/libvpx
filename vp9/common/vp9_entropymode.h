@@ -29,9 +29,7 @@ extern const vp9_tree_index  vp9_kf_ymode_tree[];
 extern const vp9_tree_index  vp9_uv_mode_tree[];
 #define vp9_sb_ymode_tree vp9_uv_mode_tree
 #define vp9_sb_kf_ymode_tree vp9_uv_mode_tree
-extern const vp9_tree_index  vp9_mv_ref_tree[];
 extern const vp9_tree_index  vp9_sb_mv_ref_tree[];
-extern const vp9_tree_index  vp9_sub_mv_ref_tree[];
 
 extern struct vp9_token vp9_bmode_encodings[VP9_BINTRAMODES];
 extern struct vp9_token vp9_kf_bmode_encodings[VP9_BINTRAMODES];
@@ -43,7 +41,6 @@ extern struct vp9_token vp9_uv_mode_encodings[VP9_UV_MODES];
 
 /* Inter mode values do not start at zero */
 
-extern struct vp9_token vp9_mv_ref_encoding_array[VP9_MVREFS];
 extern struct vp9_token vp9_sb_mv_ref_encoding_array[VP9_MVREFS];
 
 // probability models for partition information

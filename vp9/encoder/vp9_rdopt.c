@@ -926,8 +926,8 @@ int vp9_cost_mv_ref(VP9_COMP *cpi,
     vp9_prob p [VP9_MVREFS - 1];
     assert(NEARESTMV <= m  &&  m <= SPLITMV);
     vp9_mv_ref_probs(pc, p, mode_context);
-    return cost_token(vp9_mv_ref_tree, p,
-                      vp9_mv_ref_encoding_array - NEARESTMV + m);
+    return cost_token(vp9_sb_mv_ref_tree, p,
+                      vp9_sb_mv_ref_encoding_array - NEARESTMV + m);
   } else
     return 0;
 }

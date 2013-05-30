@@ -362,10 +362,6 @@ static MB_PREDICTION_MODE read_sb_mv_ref(vp9_reader *r, const vp9_prob *p) {
   return (MB_PREDICTION_MODE) treed_read(r, vp9_sb_mv_ref_tree, p);
 }
 
-static MB_PREDICTION_MODE read_mv_ref(vp9_reader *r, const vp9_prob *p) {
-  return (MB_PREDICTION_MODE) treed_read(r, vp9_mv_ref_tree, p);
-}
-
 #ifdef VPX_MODE_COUNT
 unsigned int vp9_mv_cont_count[5][4] = {
   { 0, 0, 0, 0 },
