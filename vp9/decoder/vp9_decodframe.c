@@ -955,16 +955,25 @@ size_t read_uncompressed_header(VP9D_COMP *pbi,
                            "Invalid frame sync code");
     }
   }
+
   setup_frame_size(pbi, scaling_active, rb);
+
+  if (!cm->show_frame) {
+    cm->intra_only = vp9_rb_read_bit(rb);
+  } else {
+    cm->intra_only = 0;
+  }
 
   cm->frame_context_idx = vp9_rb_read_literal(rb, NUM_FRAME_CONTEXTS_LG2);
   cm->clr_type = (YUV_TYPE)vp9_rb_read_bit(rb);
 
   cm->error_resilient_mode = vp9_rb_read_bit(rb);
   if (!cm->error_resilient_mode) {
+    cm->reset_frame_context = vp9_rb_read_bit(rb);
     cm->refresh_frame_context = vp9_rb_read_bit(rb);
     cm->frame_parallel_decoding_mode = vp9_rb_read_bit(rb);
   } else {
+    cm->reset_frame_context = 0;
     cm->refresh_frame_context = 0;
     cm->frame_parallel_decoding_mode = 1;
   }

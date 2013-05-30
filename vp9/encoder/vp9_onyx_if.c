@@ -1190,6 +1190,7 @@ void vp9_change_config(VP9_PTR ptr, VP9_CONFIG *oxcf) {
   cpi->refresh_golden_frame = 0;
   cpi->refresh_last_frame = 1;
   cm->refresh_frame_context = 1;
+  cm->reset_frame_context = 0;
 
   setup_features(cpi);
   cpi->mb.e_mbd.allow_high_precision_mv = 0;   // Default mv precision adaptation
@@ -2617,6 +2618,7 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
       (cpi->oxcf.frame_parallel_decoding_mode != 0);
     if (cm->error_resilient_mode) {
       cm->frame_parallel_decoding_mode = 1;
+      cm->reset_frame_context = 0;
       cm->refresh_frame_context = 0;
     }
   }
@@ -3671,6 +3673,7 @@ int vp9_get_compressed_data(VP9_PTR ptr, unsigned int *frame_flags,
       }
 
       cm->show_frame = 0;
+      cm->intra_only = 0;
       cpi->refresh_alt_ref_frame = 1;
       cpi->refresh_golden_frame = 0;
       cpi->refresh_last_frame = 0;
@@ -3875,6 +3878,7 @@ int vp9_get_compressed_data(VP9_PTR ptr, unsigned int *frame_flags,
     cpi->droppable = !frame_is_reference(cpi);
 
     // return to normal state
+    cm->reset_frame_context = 0;
     cm->refresh_frame_context = 1;
     cpi->refresh_alt_ref_frame = 0;
     cpi->refresh_golden_frame = 0;

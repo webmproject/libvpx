@@ -1490,7 +1490,6 @@ static void encode_segmentation(VP9_COMP *cpi, vp9_writer *w) {
   }
 }
 
-
 void write_uncompressed_header(VP9_COMMON *cm,
                                struct vp9_write_bit_buffer *wb) {
   const int scaling_active = cm->width != cm->display_width ||
@@ -1517,11 +1516,16 @@ void write_uncompressed_header(VP9_COMMON *cm,
   vp9_wb_write_literal(wb, cm->width, 16);
   vp9_wb_write_literal(wb, cm->height, 16);
 
+  if (!cm->show_frame) {
+      vp9_wb_write_bit(wb, cm->intra_only);
+  }
+
   vp9_wb_write_literal(wb, cm->frame_context_idx, NUM_FRAME_CONTEXTS_LG2);
   vp9_wb_write_bit(wb, cm->clr_type);
 
   vp9_wb_write_bit(wb, cm->error_resilient_mode);
   if (!cm->error_resilient_mode) {
+    vp9_wb_write_bit(wb, cm->reset_frame_context);
     vp9_wb_write_bit(wb, cm->refresh_frame_context);
     vp9_wb_write_bit(wb, cm->frame_parallel_decoding_mode);
   }
