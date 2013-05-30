@@ -224,11 +224,21 @@ static void tokenize_b(int plane, int block, BLOCK_SIZE_TYPE bsize,
     t->token = token;
     t->context_tree = coef_probs[type][ref][band][pt];
     t->skip_eob_node = (c > 0) && (token_cache[scan[c - 1]] == 0);
+
+#if CONFIG_BALANCED_COEFTREE
+    assert(token <= ZERO_TOKEN ||
+           vp9_coef_encodings[t->token].len - t->skip_eob_node > 0);
+#else
     assert(vp9_coef_encodings[t->token].len - t->skip_eob_node > 0);
+#endif
 
     if (!dry_run) {
       ++counts[type][ref][band][pt][token];
+#if CONFIG_BALANCED_COEFTREE
+      if (!t->skip_eob_node && token > ZERO_TOKEN)
+#else
       if (!t->skip_eob_node)
+#endif
         ++cpi->common.fc.eob_branch_counts[tx_size][type][ref][band][pt];
     }
     token_cache[scan[c]] = vp9_pt_energy_class[token];
