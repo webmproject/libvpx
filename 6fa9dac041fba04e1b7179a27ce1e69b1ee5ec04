@@ -2,6 +2,23 @@
   "comments": [
     {
       "key": {
+        "uuid": "AAAAZn///Ng\u003d",
+        "filename": "vp9/common/vp9_entropymode.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2013-05-30T18:08:12Z",
+      "side": 1,
+      "message": "Shall we make the counts to be consistent with the rest counts below? the rest seem to be fit in 8bits?",
+      "revId": "6fa9dac041fba04e1b7179a27ce1e69b1ee5ec04",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAZn///NU\u003d",
         "filename": "vp9/decoder/vp9_decodemv.c",
         "patchSetId": 3
@@ -13,6 +30,23 @@
       "writtenOn": "2013-05-30T18:00:31Z",
       "side": 1,
       "message": "why doing this?",
+      "revId": "6fa9dac041fba04e1b7179a27ce1e69b1ee5ec04",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAZn///Mg\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 90,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2013-05-30T18:08:12Z",
+      "side": 1,
+      "message": "why do we need this here?",
       "revId": "6fa9dac041fba04e1b7179a27ce1e69b1ee5ec04",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
