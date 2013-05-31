@@ -466,8 +466,8 @@ static void configure_static_seg_features(VP9_COMP *cpi) {
 void vp9_update_mode_context_stats(VP9_COMP *cpi) {
   VP9_COMMON *cm = &cpi->common;
   int i, j;
-  unsigned int (*mv_ref_ct)[4][2] = cm->fc.mv_ref_ct;
-  int64_t (*mv_ref_stats)[4][2] = cpi->mv_ref_stats;
+  unsigned int (*mv_ref_ct)[VP9_MVREFS - 1][2] = cm->fc.mv_ref_ct;
+  int64_t (*mv_ref_stats)[VP9_MVREFS - 1][2] = cpi->mv_ref_stats;
   FILE *f;
 
   // Read the past stats counters
@@ -2422,7 +2422,7 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
                                       unsigned int *frame_flags) {
   VP9_COMMON *cm = &cpi->common;
   MACROBLOCKD *xd = &cpi->mb.e_mbd;
-
+  TX_SIZE t;
   int q;
   int frame_over_shoot_limit;
   int frame_under_shoot_limit;
@@ -3100,14 +3100,9 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
   release_scaled_references(cpi);
   update_reference_frames(cpi);
 
-  vp9_full_to_model_counts(cpi->common.fc.coef_counts_4x4,
-                           cpi->coef_counts_4x4);
-  vp9_full_to_model_counts(cpi->common.fc.coef_counts_8x8,
-                           cpi->coef_counts_8x8);
-  vp9_full_to_model_counts(cpi->common.fc.coef_counts_16x16,
-                           cpi->coef_counts_16x16);
-  vp9_full_to_model_counts(cpi->common.fc.coef_counts_32x32,
-                           cpi->coef_counts_32x32);
+  for (t = TX_4X4; t <= TX_32X32; t++)
+    vp9_full_to_model_counts(cpi->common.fc.coef_counts[t],
+                             cpi->coef_counts[t]);
   if (!cpi->common.error_resilient_mode &&
       !cpi->common.frame_parallel_decoding_mode) {
     vp9_adapt_coef_probs(&cpi->common);

@@ -577,11 +577,10 @@ static void init_frame(VP9D_COMP *pbi) {
   xd->mode_info_stride = pc->mode_info_stride;
 }
 
-static void read_coef_probs_common(
-    vp9_coeff_probs_model *coef_probs,
-    TX_SIZE tx_size,
-    vp9_reader *r) {
+static void read_coef_probs_common(FRAME_CONTEXT *fc, TX_SIZE tx_size,
+                                   vp9_reader *r) {
   const int entropy_nodes_update = UNCONSTRAINED_NODES;
+  vp9_coeff_probs_model *coef_probs = fc->coef_probs[tx_size];
 
   int i, j, k, l, m;
 
@@ -612,16 +611,16 @@ static void read_coef_probs(VP9D_COMP *pbi, vp9_reader *r) {
   const TXFM_MODE mode = pbi->common.txfm_mode;
   FRAME_CONTEXT *const fc = &pbi->common.fc;
 
-  read_coef_probs_common(fc->coef_probs_4x4, TX_4X4, r);
+  read_coef_probs_common(fc, TX_4X4, r);
 
   if (mode > ONLY_4X4)
-    read_coef_probs_common(fc->coef_probs_8x8, TX_8X8, r);
+    read_coef_probs_common(fc, TX_8X8, r);
 
   if (mode > ALLOW_8X8)
-    read_coef_probs_common(fc->coef_probs_16x16, TX_16X16, r);
+    read_coef_probs_common(fc, TX_16X16, r);
 
   if (mode > ALLOW_16X16)
-    read_coef_probs_common(fc->coef_probs_32x32, TX_32X32, r);
+    read_coef_probs_common(fc, TX_32X32, r);
 }
 
 static void setup_segmentation(VP9_COMMON *pc, MACROBLOCKD *xd, vp9_reader *r) {
@@ -798,19 +797,13 @@ static void setup_frame_size(VP9D_COMP *pbi, int scaling_active,
 }
 
 static void update_frame_context(FRAME_CONTEXT *fc) {
-  vp9_copy(fc->pre_coef_probs_4x4, fc->coef_probs_4x4);
-  vp9_copy(fc->pre_coef_probs_8x8, fc->coef_probs_8x8);
-  vp9_copy(fc->pre_coef_probs_16x16, fc->coef_probs_16x16);
-  vp9_copy(fc->pre_coef_probs_32x32, fc->coef_probs_32x32);
+  vp9_copy(fc->pre_coef_probs, fc->coef_probs);
   vp9_copy(fc->pre_y_mode_prob, fc->y_mode_prob);
   vp9_copy(fc->pre_uv_mode_prob, fc->uv_mode_prob);
   vp9_copy(fc->pre_partition_prob, fc->partition_prob);
   fc->pre_nmvc = fc->nmvc;
 
-  vp9_zero(fc->coef_counts_4x4);
-  vp9_zero(fc->coef_counts_8x8);
-  vp9_zero(fc->coef_counts_16x16);
-  vp9_zero(fc->coef_counts_32x32);
+  vp9_zero(fc->coef_counts);
   vp9_zero(fc->eob_branch_counts);
   vp9_zero(fc->y_mode_counts);
   vp9_zero(fc->uv_mode_counts);

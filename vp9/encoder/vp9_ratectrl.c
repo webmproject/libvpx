@@ -139,10 +139,7 @@ void vp9_save_coding_context(VP9_COMP *cpi) {
   vp9_copy(cc->last_ref_lf_deltas, xd->last_ref_lf_deltas);
   vp9_copy(cc->last_mode_lf_deltas, xd->last_mode_lf_deltas);
 
-  vp9_copy(cc->coef_probs_4x4, cm->fc.coef_probs_4x4);
-  vp9_copy(cc->coef_probs_8x8, cm->fc.coef_probs_8x8);
-  vp9_copy(cc->coef_probs_16x16, cm->fc.coef_probs_16x16);
-  vp9_copy(cc->coef_probs_32x32, cm->fc.coef_probs_32x32);
+  vp9_copy(cc->coef_probs, cm->fc.coef_probs);
   vp9_copy(cc->switchable_interp_prob, cm->fc.switchable_interp_prob);
 }
 
@@ -177,10 +174,7 @@ void vp9_restore_coding_context(VP9_COMP *cpi) {
   vp9_copy(xd->last_ref_lf_deltas, cc->last_ref_lf_deltas);
   vp9_copy(xd->last_mode_lf_deltas, cc->last_mode_lf_deltas);
 
-  vp9_copy(cm->fc.coef_probs_4x4, cc->coef_probs_4x4);
-  vp9_copy(cm->fc.coef_probs_8x8, cc->coef_probs_8x8);
-  vp9_copy(cm->fc.coef_probs_16x16, cc->coef_probs_16x16);
-  vp9_copy(cm->fc.coef_probs_32x32, cc->coef_probs_32x32);
+  vp9_copy(cm->fc.coef_probs, cc->coef_probs);
   vp9_copy(cm->fc.switchable_interp_prob, cc->switchable_interp_prob);
 }
 

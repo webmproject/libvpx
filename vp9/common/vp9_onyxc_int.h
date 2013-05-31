@@ -62,18 +62,9 @@ typedef struct frame_contexts {
   unsigned int uv_mode_counts[VP9_INTRA_MODES][VP9_INTRA_MODES];
   unsigned int partition_counts[NUM_PARTITION_CONTEXTS][PARTITION_TYPES];
 
-  vp9_coeff_probs_model coef_probs_4x4[BLOCK_TYPES];
-  vp9_coeff_probs_model coef_probs_8x8[BLOCK_TYPES];
-  vp9_coeff_probs_model coef_probs_16x16[BLOCK_TYPES];
-  vp9_coeff_probs_model coef_probs_32x32[BLOCK_TYPES];
-  vp9_coeff_probs_model pre_coef_probs_4x4[BLOCK_TYPES];
-  vp9_coeff_probs_model pre_coef_probs_8x8[BLOCK_TYPES];
-  vp9_coeff_probs_model pre_coef_probs_16x16[BLOCK_TYPES];
-  vp9_coeff_probs_model pre_coef_probs_32x32[BLOCK_TYPES];
-  vp9_coeff_count_model coef_counts_4x4[BLOCK_TYPES];
-  vp9_coeff_count_model coef_counts_8x8[BLOCK_TYPES];
-  vp9_coeff_count_model coef_counts_16x16[BLOCK_TYPES];
-  vp9_coeff_count_model coef_counts_32x32[BLOCK_TYPES];
+  vp9_coeff_probs_model coef_probs[TX_SIZE_MAX_SB][BLOCK_TYPES];
+  vp9_coeff_probs_model pre_coef_probs[TX_SIZE_MAX_SB][BLOCK_TYPES];
+  vp9_coeff_count_model coef_counts[TX_SIZE_MAX_SB][BLOCK_TYPES];
   unsigned int eob_branch_counts[TX_SIZE_MAX_SB][BLOCK_TYPES][REF_TYPES]
                                 [COEF_BANDS][PREV_COEF_CONTEXTS];
 

@@ -1534,10 +1534,7 @@ static void encode_frame_internal(VP9_COMP *cpi) {
   xd->prev_mode_info_context = cm->prev_mi;
 
   vp9_zero(cpi->NMVcount);
-  vp9_zero(cpi->coef_counts_4x4);
-  vp9_zero(cpi->coef_counts_8x8);
-  vp9_zero(cpi->coef_counts_16x16);
-  vp9_zero(cpi->coef_counts_32x32);
+  vp9_zero(cpi->coef_counts);
   vp9_zero(cm->fc.eob_branch_counts);
 
   cpi->mb.e_mbd.lossless = cm->base_qindex == 0 &&
