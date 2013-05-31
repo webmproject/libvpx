@@ -611,6 +611,16 @@ static INLINE struct plane_block_idx plane_block_idx(int y_blocks,
   return res;
 }
 
+static INLINE int plane_block_width(BLOCK_SIZE_TYPE bsize,
+                                    const struct macroblockd_plane* plane) {
+  return 4 << (b_width_log2(bsize) - plane->subsampling_x);
+}
+
+static INLINE int plane_block_height(BLOCK_SIZE_TYPE bsize,
+                                     const struct macroblockd_plane* plane) {
+  return 4 << (b_height_log2(bsize) - plane->subsampling_y);
+}
+
 typedef void (*foreach_transformed_block_visitor)(int plane, int block,
                                                   BLOCK_SIZE_TYPE bsize,
                                                   int ss_txfrm_size,
@@ -681,8 +691,8 @@ static INLINE void foreach_predicted_block_in_plane(
   // block sizes in number of 4x4 blocks log 2 ("*_b")
   // 4x4=0, 8x8=2, 16x16=4, 32x32=6, 64x64=8
   // subsampled size of the block
-  const int bw = b_width_log2(bsize) - xd->plane[plane].subsampling_x;
-  const int bh = b_height_log2(bsize) - xd->plane[plane].subsampling_y;
+  const int bwl = b_width_log2(bsize) - xd->plane[plane].subsampling_x;
+  const int bhl = b_height_log2(bsize) - xd->plane[plane].subsampling_y;
 
   // size of the predictor to use.
   int pred_w, pred_h;
@@ -692,21 +702,20 @@ static INLINE void foreach_predicted_block_in_plane(
     pred_w = 0;
     pred_h = 0;
   } else {
-    pred_w = bw;
-    pred_h = bh;
+    pred_w = bwl;
+    pred_h = bhl;
   }
-  assert(pred_w <= bw);
-  assert(pred_h <= bh);
+  assert(pred_w <= bwl);
+  assert(pred_h <= bhl);
 
   // visit each subblock in raster order
   i = 0;
-  for (y = 0; y < 1 << bh; y += 1 << pred_h) {
-    for (x = 0; x < 1 << bw; x += 1 << pred_w) {
+  for (y = 0; y < 1 << bhl; y += 1 << pred_h) {
+    for (x = 0; x < 1 << bwl; x += 1 << pred_w) {
       visit(plane, i, bsize, pred_w, pred_h, arg);
       i += 1 << pred_w;
     }
-    i -= 1 << bw;
-    i += 1 << (bw + pred_h);
+    i += (1 << (bwl + pred_h)) - (1 << bwl);
   }
 }
 static INLINE void foreach_predicted_block(
@@ -736,8 +745,7 @@ static int raster_block_offset(MACROBLOCKD *xd, BLOCK_SIZE_TYPE bsize,
 static int16_t* raster_block_offset_int16(MACROBLOCKD *xd,
                                          BLOCK_SIZE_TYPE bsize,
                                          int plane, int block, int16_t *base) {
-  const int bw = b_width_log2(bsize) - xd->plane[plane].subsampling_x;
-  const int stride = 4 << bw;
+  const int stride = plane_block_width(bsize, &xd->plane[plane]);
   return base + raster_block_offset(xd, bsize, plane, block, stride);
 }
 static uint8_t* raster_block_offset_uint8(MACROBLOCKD *xd,
