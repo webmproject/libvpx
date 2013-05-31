@@ -205,7 +205,7 @@ void vp9_adapt_mode_context(VP9_COMMON *pc) {
   int (*mode_context)[VP9_MVREFS - 1] = pc->fc.vp9_mode_contexts;
 
   for (j = 0; j < INTER_MODE_CONTEXTS; j++) {
-    for (i = 0; i < 4; i++) {
+    for (i = 0; i < VP9_MVREFS - 1; i++) {
       int count = mv_ref_ct[j][i][0] + mv_ref_ct[j][i][1], factor;
 
       count = count > MVREF_COUNT_SAT ? MVREF_COUNT_SAT : count;
