@@ -1364,9 +1364,6 @@ static void encode_segmentation(VP9_COMP *cpi, vp9_writer *w) {
 
   // Segmentation map
   vp9_write_bit(w, xd->update_mb_segmentation_map);
-#if CONFIG_IMPLICIT_SEGMENTATION
-  vp9_write_bit(w, xd->allow_implicit_segment_update);
-#endif
   if (xd->update_mb_segmentation_map) {
     // Select the coding strategy (temporal or spatial)
     vp9_choose_segmap_coding_method(cpi);

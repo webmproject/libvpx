@@ -55,11 +55,6 @@ int vp9_check_segref(const MACROBLOCKD *xd,
                      int segment_id,
                      MV_REFERENCE_FRAME ref_frame);
 
-#if CONFIG_IMPLICIT_SEGMENTATION
-void vp9_implicit_segment_map_update(VP9_COMMON * cm);
-#endif
-
-
 extern const vp9_tree_index vp9_segment_tree[14];
 
 #endif  // VP9_COMMON_VP9_SEG_COMMON_H_

@@ -238,8 +238,6 @@ HAVE_LIST="
     unistd_h
 "
 EXPERIMENT_LIST="
-    csm
-    implicit_segmentation
     oneshotq
     multiple_arf
     non420

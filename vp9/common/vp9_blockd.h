@@ -306,10 +306,6 @@ typedef struct macroblockd {
   /* 0 (do not update) 1 (update) the macroblock segmentation map. */
   unsigned char update_mb_segmentation_map;
 
-#if CONFIG_IMPLICIT_SEGMENTATION
-  unsigned char allow_implicit_segment_update;
-#endif
-
   /* 0 (do not update) 1 (update) the macroblock segmentation feature data. */
   unsigned char update_mb_segmentation_data;
 
