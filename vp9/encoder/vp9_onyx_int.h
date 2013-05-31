@@ -334,8 +334,8 @@ typedef struct VP9_COMP {
   int single_pred_count[COMP_PRED_CONTEXTS];
   // FIXME contextualize
   int txfm_count_32x32p[TX_SIZE_MAX_SB];
-  int txfm_count_16x16p[TX_SIZE_MAX_MB];
-  int txfm_count_8x8p[TX_SIZE_MAX_MB - 1];
+  int txfm_count_16x16p[TX_SIZE_MAX_SB - 1];
+  int txfm_count_8x8p[TX_SIZE_MAX_SB - 2];
   int64_t rd_tx_select_diff[NB_TXFM_MODES];
   int rd_tx_select_threshes[4][NB_TXFM_MODES];
 
