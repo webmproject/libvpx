@@ -1017,10 +1017,6 @@ static void build_tree_distribution(VP9_COMP *cpi, TX_SIZE txfm_size) {
   unsigned int (*eob_branch_ct)[REF_TYPES][COEF_BANDS][PREV_COEF_CONTEXTS] =
       cpi->common.fc.eob_branch_counts[txfm_size];
   vp9_coeff_stats *coef_branch_ct = cpi->frame_branch_ct[txfm_size];
-#ifdef ENTROPY_STATS
-  vp9_coeff_accum *context_counters = context_counters[txfm_size];
-  int t = 0;
-#endif
   vp9_prob full_probs[ENTROPY_NODES];
   int i, j, k, l;
 
@@ -1051,9 +1047,11 @@ static void build_tree_distribution(VP9_COMP *cpi, TX_SIZE txfm_size) {
 #endif
 #ifdef ENTROPY_STATS
           if (!cpi->dummy_packing) {
+            int t;
             for (t = 0; t < MAX_ENTROPY_TOKENS; ++t)
-              context_counters[i][j][k][l][t] += coef_counts[i][j][k][l][t];
-            context_counters[i][j][k][l][MAX_ENTROPY_TOKENS] +=
+              context_counters[txfm_size][i][j][k][l][t] +=
+                  coef_counts[i][j][k][l][t];
+            context_counters[txfm_size][i][j][k][l][MAX_ENTROPY_TOKENS] +=
                 eob_branch_ct[i][j][k][l];
           }
 #endif
@@ -1071,9 +1069,6 @@ static void build_coeff_contexts(VP9_COMP *cpi) {
 
 static void update_coef_probs_common(vp9_writer* const bc, VP9_COMP *cpi,
                                      TX_SIZE tx_size) {
-#ifdef ENTROPY_STATS
-  vp9_coeff_stats *tree_update_hist = tree_update_hist[tx_size];
-#endif
   vp9_coeff_probs_model *new_frame_coef_probs = cpi->frame_coef_probs[tx_size];
   vp9_coeff_probs_model *old_frame_coef_probs =
       cpi->common.fc.coef_probs[tx_size];
@@ -1155,7 +1150,7 @@ static void update_coef_probs_common(vp9_writer* const bc, VP9_COMP *cpi,
             vp9_write(bc, u, upd);
 #ifdef ENTROPY_STATS
             if (!cpi->dummy_packing)
-              ++tree_update_hist[i][j][k][l][t][u];
+              ++tree_update_hist[tx_size][i][j][k][l][t][u];
 #endif
             if (u) {
               /* send/use new probability */
