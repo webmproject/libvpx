@@ -382,10 +382,11 @@ int vp9_receive_compressed_data(VP9D_PTR ptr,
 
     // update the upper left visible macroblock ptrs
     cm->mi = cm->mip + cm->mode_info_stride + 1;
-    cm->prev_mi = cm->prev_mip + cm->mode_info_stride + 1;
 
     cm->current_video_frame++;
   }
+  // restore prev_mi
+  cm->prev_mi = cm->prev_mip + cm->mode_info_stride + 1;
 
   pbi->ready_for_new_data = 0;
   pbi->last_time_stamp = time_stamp;
