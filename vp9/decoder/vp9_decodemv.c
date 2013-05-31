@@ -384,9 +384,9 @@ static void mb_mode_mv_init(VP9D_COMP *pbi, vp9_reader *r) {
       for (i = 0; i < COMP_PRED_CONTEXTS; i++)
         cm->prob_comppred[i] = vp9_read_prob(r);
 
-    // VP9_YMODES
+    // VP9_INTRA_MODES
     if (vp9_read_bit(r))
-      for (i = 0; i < VP9_YMODES - 1; ++i)
+      for (i = 0; i < VP9_INTRA_MODES - 1; ++i)
         cm->fc.y_mode_prob[i] = vp9_read_prob(r);
 
     for (j = 0; j < NUM_PARTITION_CONTEXTS; ++j)

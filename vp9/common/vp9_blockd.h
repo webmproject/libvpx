@@ -89,8 +89,6 @@ static INLINE int is_inter_mode(MB_PREDICTION_MODE mode) {
   return mode >= NEARESTMV && mode <= NEWMV;
 }
 
-#define INTRA_MODE_COUNT (TM_PRED + 1)
-
 // Segment level features.
 typedef enum {
   SEG_LVL_ALT_Q = 0,               // Use alternate Quantizer ....
@@ -116,15 +114,11 @@ typedef enum {
   ADST_ADST = 3                       // ADST in both directions
 } TX_TYPE;
 
-#define VP9_YMODES  (TM_PRED + 1)
-#define VP9_UV_MODES (TM_PRED + 1)
-#define VP9_I32X32_MODES (TM_PRED + 1)
+#define VP9_INTRA_MODES (TM_PRED + 1)
 
 #define VP9_MVREFS (1 + NEWMV - NEARESTMV)
 
 #define WHT_UPSCALE_FACTOR 2
-
-#define VP9_BINTRAMODES INTRA_MODE_COUNT
 
 /* For keyframes, intra block modes are predicted by the (already decoded)
    modes for the Y blocks to the left and above us; for interframes, there

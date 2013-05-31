@@ -19,14 +19,14 @@
 extern int vp9_mv_cont(const int_mv *l, const int_mv *a);
 
 
-extern const vp9_prob vp9_kf_default_bmode_probs[VP9_BINTRAMODES]
-                                                [VP9_BINTRAMODES]
-                                                [VP9_BINTRAMODES -1 ];
+extern const vp9_prob vp9_kf_default_bmode_probs[VP9_INTRA_MODES]
+                                                [VP9_INTRA_MODES]
+                                                [VP9_INTRA_MODES -1 ];
 
 extern const vp9_tree_index vp9_intra_mode_tree[];
 extern const vp9_tree_index  vp9_sb_mv_ref_tree[];
 
-extern struct vp9_token vp9_intra_mode_encodings[VP9_BINTRAMODES];
+extern struct vp9_token vp9_intra_mode_encodings[VP9_INTRA_MODES];
 
 /* Inter mode values do not start at zero */
 
