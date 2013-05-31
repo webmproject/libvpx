@@ -16,6 +16,24 @@
       "revId": "353642bc53de23e3e51940960c8c2b8f6602566e",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAZn//99k\u003d",
+        "filename": "vp9/encoder/vp9_onyx_if.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 3549,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2013-05-31T16:22:49Z",
+      "side": 1,
+      "message": "The next frame requires that prev_mi point to a valid buffer.  See vp9_update_frame_size().  Actually, we should make this work like the decoder where prev_mip and mip ptrs are swapped instead of the memset/memcpy (vp9_onyxd_if.c).  Then prev_mi will be updated correctly.  Will do that in a future commit.",
+      "parentUuid": "AAAAZn///8Q\u003d",
+      "revId": "353642bc53de23e3e51940960c8c2b8f6602566e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
