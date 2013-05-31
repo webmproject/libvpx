@@ -483,14 +483,14 @@ int vp9_get_coef_context(const int *scan, const int *neighbors,
 };
 
 void vp9_default_coef_probs(VP9_COMMON *pc) {
-  vpx_memcpy(pc->fc.coef_probs_4x4, default_coef_probs_4x4,
-             sizeof(pc->fc.coef_probs_4x4));
-  vpx_memcpy(pc->fc.coef_probs_8x8, default_coef_probs_8x8,
-             sizeof(pc->fc.coef_probs_8x8));
-  vpx_memcpy(pc->fc.coef_probs_16x16, default_coef_probs_16x16,
-             sizeof(pc->fc.coef_probs_16x16));
-  vpx_memcpy(pc->fc.coef_probs_32x32, default_coef_probs_32x32,
-             sizeof(pc->fc.coef_probs_32x32));
+  vpx_memcpy(pc->fc.coef_probs[TX_4X4], default_coef_probs_4x4,
+             sizeof(pc->fc.coef_probs[TX_4X4]));
+  vpx_memcpy(pc->fc.coef_probs[TX_8X8], default_coef_probs_8x8,
+             sizeof(pc->fc.coef_probs[TX_8X8]));
+  vpx_memcpy(pc->fc.coef_probs[TX_16X16], default_coef_probs_16x16,
+             sizeof(pc->fc.coef_probs[TX_16X16]));
+  vpx_memcpy(pc->fc.coef_probs[TX_32X32], default_coef_probs_32x32,
+             sizeof(pc->fc.coef_probs[TX_32X32]));
 }
 
 // Neighborhood 5-tuples for various scans and blocksizes,
@@ -677,13 +677,13 @@ void vp9_full_to_model_counts(
         }
 }
 
-static void adapt_coef_probs(
-    vp9_coeff_probs_model *dst_coef_probs,
-    vp9_coeff_probs_model *pre_coef_probs,
-    vp9_coeff_count_model *coef_counts,
-    unsigned int (*eob_branch_count)[REF_TYPES][COEF_BANDS][PREV_COEF_CONTEXTS],
-    int count_sat,
-    int update_factor) {
+static void adapt_coef_probs(VP9_COMMON *cm, TX_SIZE txfm_size,
+                             int count_sat, int update_factor) {
+  vp9_coeff_probs_model *dst_coef_probs = cm->fc.coef_probs[txfm_size];
+  vp9_coeff_probs_model *pre_coef_probs = cm->fc.pre_coef_probs[txfm_size];
+  vp9_coeff_count_model *coef_counts = cm->fc.coef_counts[txfm_size];
+  unsigned int (*eob_branch_count)[REF_TYPES][COEF_BANDS][PREV_COEF_CONTEXTS] =
+      cm->fc.eob_branch_counts[txfm_size];
   int t, i, j, k, l, count;
   int factor;
   unsigned int branch_ct[UNCONSTRAINED_NODES][2];
@@ -719,6 +719,7 @@ static void adapt_coef_probs(
 }
 
 void vp9_adapt_coef_probs(VP9_COMMON *cm) {
+  TX_SIZE t;
   int count_sat;
   int update_factor; /* denominator 256 */
 
@@ -732,20 +733,6 @@ void vp9_adapt_coef_probs(VP9_COMMON *cm) {
     update_factor = COEF_MAX_UPDATE_FACTOR;
     count_sat = COEF_COUNT_SAT;
   }
-  adapt_coef_probs(cm->fc.coef_probs_4x4, cm->fc.pre_coef_probs_4x4,
-                   cm->fc.coef_counts_4x4,
-                   cm->fc.eob_branch_counts[TX_4X4],
-                   count_sat, update_factor);
-  adapt_coef_probs(cm->fc.coef_probs_8x8, cm->fc.pre_coef_probs_8x8,
-                   cm->fc.coef_counts_8x8,
-                   cm->fc.eob_branch_counts[TX_8X8],
-                   count_sat, update_factor);
-  adapt_coef_probs(cm->fc.coef_probs_16x16, cm->fc.pre_coef_probs_16x16,
-                   cm->fc.coef_counts_16x16,
-                   cm->fc.eob_branch_counts[TX_16X16],
-                   count_sat, update_factor);
-  adapt_coef_probs(cm->fc.coef_probs_32x32, cm->fc.pre_coef_probs_32x32,
-                   cm->fc.coef_counts_32x32,
-                   cm->fc.eob_branch_counts[TX_32X32],
-                   count_sat, update_factor);
+  for (t = TX_4X4; t <= TX_32X32; t++)
+    adapt_coef_probs(cm, t, count_sat, update_factor);
 }

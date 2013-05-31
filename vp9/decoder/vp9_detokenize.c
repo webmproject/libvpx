@@ -120,6 +120,8 @@ static int decode_coefs(VP9D_COMP *dx, const MACROBLOCKD *xd,
   int skip_eob_node = 0;
 #endif
 
+  coef_probs  = fc->coef_probs[txfm_size][type][ref];
+  coef_counts = fc->coef_counts[txfm_size];
   switch (txfm_size) {
     default:
     case TX_4X4: {
@@ -128,8 +130,6 @@ static int decode_coefs(VP9D_COMP *dx, const MACROBLOCKD *xd,
       scan = get_scan_4x4(tx_type);
       above_ec = A[0] != 0;
       left_ec = L[0] != 0;
-      coef_probs  = fc->coef_probs_4x4[type][ref];
-      coef_counts = fc->coef_counts_4x4;
       default_eob = 16;
       band_translate = vp9_coefband_trans_4x4;
       break;
@@ -142,8 +142,6 @@ static int decode_coefs(VP9D_COMP *dx, const MACROBLOCKD *xd,
       tx_type = (type == PLANE_TYPE_Y_WITH_DC) ?
           get_tx_type_8x8(xd, y + (x >> 1)) : DCT_DCT;
       scan = get_scan_8x8(tx_type);
-      coef_probs  = fc->coef_probs_8x8[type][ref];
-      coef_counts = fc->coef_counts_8x8;
       above_ec = (A[0] + A[1]) != 0;
       left_ec = (L[0] + L[1]) != 0;
       default_eob = 64;
@@ -158,8 +156,6 @@ static int decode_coefs(VP9D_COMP *dx, const MACROBLOCKD *xd,
       tx_type = (type == PLANE_TYPE_Y_WITH_DC) ?
           get_tx_type_16x16(xd, y + (x >> 2)) : DCT_DCT;
       scan = get_scan_16x16(tx_type);
-      coef_probs  = fc->coef_probs_16x16[type][ref];
-      coef_counts = fc->coef_counts_16x16;
       above_ec = (A[0] + A[1] + A[2] + A[3]) != 0;
       left_ec = (L[0] + L[1] + L[2] + L[3]) != 0;
       default_eob = 256;
@@ -168,8 +164,6 @@ static int decode_coefs(VP9D_COMP *dx, const MACROBLOCKD *xd,
     }
     case TX_32X32:
       scan = vp9_default_scan_32x32;
-      coef_probs = fc->coef_probs_32x32[type][ref];
-      coef_counts = fc->coef_counts_32x32;
       above_ec = (A[0] + A[1] + A[2] + A[3] + A[4] + A[5] + A[6] + A[7]) != 0;
       left_ec = (L[0] + L[1] + L[2] + L[3] + L[4] + L[5] + L[6] + L[7]) != 0;
       default_eob = 1024;

@@ -43,10 +43,7 @@ void vp9_tokenize_sb(struct VP9_COMP *cpi, MACROBLOCKD *xd,
 void init_context_counters();
 void print_context_counters();
 
-extern vp9_coeff_accum context_counters_4x4[BLOCK_TYPES];
-extern vp9_coeff_accum context_counters_8x8[BLOCK_TYPES];
-extern vp9_coeff_accum context_counters_16x16[BLOCK_TYPES];
-extern vp9_coeff_accum context_counters_32x32[BLOCK_TYPES];
+extern vp9_coeff_accum context_counters[TX_SIZE_MAX_SB][BLOCK_TYPES];
 #endif
 
 extern const int *vp9_dct_value_cost_ptr;

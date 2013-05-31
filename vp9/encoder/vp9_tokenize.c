@@ -25,15 +25,8 @@
    compressions, then generating vp9_context.c = initial stats. */
 
 #ifdef ENTROPY_STATS
-vp9_coeff_accum context_counters_4x4[BLOCK_TYPES];
-vp9_coeff_accum context_counters_8x8[BLOCK_TYPES];
-vp9_coeff_accum context_counters_16x16[BLOCK_TYPES];
-vp9_coeff_accum context_counters_32x32[BLOCK_TYPES];
-
-extern vp9_coeff_stats tree_update_hist_4x4[BLOCK_TYPES];
-extern vp9_coeff_stats tree_update_hist_8x8[BLOCK_TYPES];
-extern vp9_coeff_stats tree_update_hist_16x16[BLOCK_TYPES];
-extern vp9_coeff_stats tree_update_hist_32x32[BLOCK_TYPES];
+vp9_coeff_accum context_counters[TX_SIZE_MAX_SB][BLOCK_TYPES];
+extern vp9_coeff_stats tree_update_hist[TX_SIZE_MAX_SB][BLOCK_TYPES];
 #endif  /* ENTROPY_STATS */
 
 DECLARE_ALIGNED(16, extern const uint8_t,
@@ -143,6 +136,8 @@ static void tokenize_b(int plane, int block, BLOCK_SIZE_TYPE bsize,
   const uint8_t * band_translate;
   assert((!type && !plane) || (type && plane));
 
+  counts = cpi->coef_counts[tx_size];
+  coef_probs = cpi->common.fc.coef_probs[tx_size];
   switch (tx_size) {
     default:
     case TX_4X4: {
@@ -152,8 +147,6 @@ static void tokenize_b(int plane, int block, BLOCK_SIZE_TYPE bsize,
       left_ec = L[0] != 0;
       seg_eob = 16;
       scan = get_scan_4x4(tx_type);
-      counts = cpi->coef_counts_4x4;
-      coef_probs = cpi->common.fc.coef_probs_4x4;
       band_translate = vp9_coefband_trans_4x4;
       break;
     }
@@ -166,8 +159,6 @@ static void tokenize_b(int plane, int block, BLOCK_SIZE_TYPE bsize,
       left_ec = (L[0] + L[1]) != 0;
       seg_eob = 64;
       scan = get_scan_8x8(tx_type);
-      counts = cpi->coef_counts_8x8;
-      coef_probs = cpi->common.fc.coef_probs_8x8;
       band_translate = vp9_coefband_trans_8x8plus;
       break;
     }
@@ -180,8 +171,6 @@ static void tokenize_b(int plane, int block, BLOCK_SIZE_TYPE bsize,
       left_ec = (L[0] + L[1] + L[2] + L[3]) != 0;
       seg_eob = 256;
       scan = get_scan_16x16(tx_type);
-      counts = cpi->coef_counts_16x16;
-      coef_probs = cpi->common.fc.coef_probs_16x16;
       band_translate = vp9_coefband_trans_8x8plus;
       break;
     }
@@ -190,8 +179,6 @@ static void tokenize_b(int plane, int block, BLOCK_SIZE_TYPE bsize,
       left_ec = (L[0] + L[1] + L[2] + L[3] + L[4] + L[5] + L[6] + L[7]) != 0;
       seg_eob = 1024;
       scan = vp9_default_scan_32x32;
-      counts = cpi->coef_counts_32x32;
-      coef_probs = cpi->common.fc.coef_probs_32x32;
       band_translate = vp9_coefband_trans_8x8plus;
       break;
   }
@@ -322,29 +309,17 @@ void vp9_tokenize_sb(VP9_COMP *cpi,
 void init_context_counters(void) {
   FILE *f = fopen("context.bin", "rb");
   if (!f) {
-    vpx_memset(context_counters_4x4, 0, sizeof(context_counters_4x4));
-    vpx_memset(context_counters_8x8, 0, sizeof(context_counters_8x8));
-    vpx_memset(context_counters_16x16, 0, sizeof(context_counters_16x16));
-    vpx_memset(context_counters_32x32, 0, sizeof(context_counters_32x32));
+    vp9_zero(context_counters);
   } else {
-    fread(context_counters_4x4, sizeof(context_counters_4x4), 1, f);
-    fread(context_counters_8x8, sizeof(context_counters_8x8), 1, f);
-    fread(context_counters_16x16, sizeof(context_counters_16x16), 1, f);
-    fread(context_counters_32x32, sizeof(context_counters_32x32), 1, f);
+    fread(context_counters, sizeof(context_counters), 1, f);
     fclose(f);
   }
 
   f = fopen("treeupdate.bin", "rb");
   if (!f) {
-    vpx_memset(tree_update_hist_4x4, 0, sizeof(tree_update_hist_4x4));
-    vpx_memset(tree_update_hist_8x8, 0, sizeof(tree_update_hist_8x8));
-    vpx_memset(tree_update_hist_16x16, 0, sizeof(tree_update_hist_16x16));
-    vpx_memset(tree_update_hist_32x32, 0, sizeof(tree_update_hist_32x32));
+    vpx_memset(tree_update_hist, 0, sizeof(tree_update_hist));
   } else {
-    fread(tree_update_hist_4x4, sizeof(tree_update_hist_4x4), 1, f);
-    fread(tree_update_hist_8x8, sizeof(tree_update_hist_8x8), 1, f);
-    fread(tree_update_hist_16x16, sizeof(tree_update_hist_16x16), 1, f);
-    fread(tree_update_hist_32x32, sizeof(tree_update_hist_32x32), 1, f);
+    fread(tree_update_hist, sizeof(tree_update_hist), 1, f);
     fclose(f);
   }
 }
@@ -446,32 +421,29 @@ void print_context_counters() {
   fprintf(f, "\n/* *** GENERATED FILE: DO NOT EDIT *** */\n\n");
 
   /* print counts */
-  print_counter(f, context_counters_4x4, BLOCK_TYPES,
+  print_counter(f, context_counters[TX_4X4], BLOCK_TYPES,
                 "vp9_default_coef_counts_4x4[BLOCK_TYPES]");
-  print_counter(f, context_counters_8x8, BLOCK_TYPES,
+  print_counter(f, context_counters[TX_8X8], BLOCK_TYPES,
                 "vp9_default_coef_counts_8x8[BLOCK_TYPES]");
-  print_counter(f, context_counters_16x16, BLOCK_TYPES,
+  print_counter(f, context_counters[TX_16X16], BLOCK_TYPES,
                 "vp9_default_coef_counts_16x16[BLOCK_TYPES]");
-  print_counter(f, context_counters_32x32, BLOCK_TYPES,
+  print_counter(f, context_counters[TX_32X32], BLOCK_TYPES,
                 "vp9_default_coef_counts_32x32[BLOCK_TYPES]");
 
   /* print coefficient probabilities */
-  print_probs(f, context_counters_4x4, BLOCK_TYPES,
+  print_probs(f, context_counters[TX_4X4], BLOCK_TYPES,
               "default_coef_probs_4x4[BLOCK_TYPES]");
-  print_probs(f, context_counters_8x8, BLOCK_TYPES,
+  print_probs(f, context_counters[TX_8X8], BLOCK_TYPES,
               "default_coef_probs_8x8[BLOCK_TYPES]");
-  print_probs(f, context_counters_16x16, BLOCK_TYPES,
+  print_probs(f, context_counters[TX_16X16], BLOCK_TYPES,
               "default_coef_probs_16x16[BLOCK_TYPES]");
-  print_probs(f, context_counters_32x32, BLOCK_TYPES,
+  print_probs(f, context_counters[TX_32X32], BLOCK_TYPES,
               "default_coef_probs_32x32[BLOCK_TYPES]");
 
   fclose(f);
 
   f = fopen("context.bin", "wb");
-  fwrite(context_counters_4x4, sizeof(context_counters_4x4), 1, f);
-  fwrite(context_counters_8x8, sizeof(context_counters_8x8), 1, f);
-  fwrite(context_counters_16x16, sizeof(context_counters_16x16), 1, f);
-  fwrite(context_counters_32x32, sizeof(context_counters_32x32), 1, f);
+  fwrite(context_counters, sizeof(context_counters), 1, f);
   fclose(f);
 }
 #endif

@@ -112,39 +112,41 @@ const MODE_DEFINITION vp9_mode_order[MAX_MODES] = {
 };
 
 #if CONFIG_BALANCED_COEFTREE
-static void fill_token_costs(vp9_coeff_count *c,
-                             vp9_coeff_count *cnoskip,
-                             vp9_coeff_probs_model *p,
-                             TX_SIZE tx_size) {
+static void fill_token_costs(vp9_coeff_count (*c)[BLOCK_TYPES],
+                             vp9_coeff_count (*cnoskip)[BLOCK_TYPES],
+                             vp9_coeff_probs_model (*p)[BLOCK_TYPES]) {
   int i, j, k, l;
-  for (i = 0; i < BLOCK_TYPES; i++)
-    for (j = 0; j < REF_TYPES; j++)
-      for (k = 0; k < COEF_BANDS; k++)
-        for (l = 0; l < PREV_COEF_CONTEXTS; l++) {
-          vp9_prob probs[ENTROPY_NODES];
-          vp9_model_to_full_probs(p[i][j][k][l], probs);
-          vp9_cost_tokens((int *)cnoskip[i][j][k][l], probs,
-                          vp9_coef_tree);
-          // Replace the eob node prob with a very small value so that the
-          // cost approximately equals the cost without the eob node
-          probs[1] = 1;
-          vp9_cost_tokens((int *)c[i][j][k][l], probs, vp9_coef_tree);
-        }
+  TX_SIZE t;
+  for (t = TX_4X4; t <= TX_32X32; t++)
+    for (i = 0; i < BLOCK_TYPES; i++)
+      for (j = 0; j < REF_TYPES; j++)
+        for (k = 0; k < COEF_BANDS; k++)
+          for (l = 0; l < PREV_COEF_CONTEXTS; l++) {
+            vp9_prob probs[ENTROPY_NODES];
+            vp9_model_to_full_probs(p[t][i][j][k][l], probs);
+            vp9_cost_tokens((int *)cnoskip[t][i][j][k][l], probs,
+                            vp9_coef_tree);
+            // Replace the eob node prob with a very small value so that the
+            // cost approximately equals the cost without the eob node
+            probs[1] = 1;
+            vp9_cost_tokens((int *)c[t][i][j][k][l], probs, vp9_coef_tree);
+          }
 }
 #else
-static void fill_token_costs(vp9_coeff_count *c,
-                             vp9_coeff_probs_model *p,
-                             TX_SIZE tx_size) {
+static void fill_token_costs(vp9_coeff_count (*c)[BLOCK_TYPES],
+                             vp9_coeff_probs_model (*p)[BLOCK_TYPES]) {
   int i, j, k, l;
-  for (i = 0; i < BLOCK_TYPES; i++)
-    for (j = 0; j < REF_TYPES; j++)
-      for (k = 0; k < COEF_BANDS; k++)
-        for (l = 0; l < PREV_COEF_CONTEXTS; l++) {
-          vp9_prob probs[ENTROPY_NODES];
-          vp9_model_to_full_probs(p[i][j][k][l], probs);
-          vp9_cost_tokens_skip((int *)c[i][j][k][l], probs,
-                               vp9_coef_tree);
-        }
+  TX_SIZE t;
+  for (t = TX_4X4; t <= TX_32X32; t++)
+    for (i = 0; i < BLOCK_TYPES; i++)
+      for (j = 0; j < REF_TYPES; j++)
+        for (k = 0; k < COEF_BANDS; k++)
+          for (l = 0; l < PREV_COEF_CONTEXTS; l++) {
+            vp9_prob probs[ENTROPY_NODES];
+            vp9_model_to_full_probs(p[t][i][j][k][l], probs);
+            vp9_cost_tokens_skip((int *)c[t][i][j][k][l], probs,
+                                 vp9_coef_tree);
+          }
 }
 #endif
 
@@ -238,27 +240,12 @@ void vp9_initialize_rd_consts(VP9_COMP *cpi, int qindex) {
   }
 
 #if CONFIG_BALANCED_COEFTREE
-  fill_token_costs(cpi->mb.token_costs[TX_4X4],
-                   cpi->mb.token_costs_noskip[TX_4X4],
-                   cpi->common.fc.coef_probs_4x4, TX_4X4);
-  fill_token_costs(cpi->mb.token_costs[TX_8X8],
-                   cpi->mb.token_costs_noskip[TX_8X8],
-                   cpi->common.fc.coef_probs_8x8, TX_8X8);
-  fill_token_costs(cpi->mb.token_costs[TX_16X16],
-                   cpi->mb.token_costs_noskip[TX_16X16],
-                   cpi->common.fc.coef_probs_16x16, TX_16X16);
-  fill_token_costs(cpi->mb.token_costs[TX_32X32],
-                   cpi->mb.token_costs_noskip[TX_32X32],
-                   cpi->common.fc.coef_probs_32x32, TX_32X32);
+  fill_token_costs(cpi->mb.token_costs,
+                   cpi->mb.token_costs_noskip,
+                   cpi->common.fc.coef_probs);
 #else
-  fill_token_costs(cpi->mb.token_costs[TX_4X4],
-                   cpi->common.fc.coef_probs_4x4, TX_4X4);
-  fill_token_costs(cpi->mb.token_costs[TX_8X8],
-                   cpi->common.fc.coef_probs_8x8, TX_8X8);
-  fill_token_costs(cpi->mb.token_costs[TX_16X16],
-                   cpi->common.fc.coef_probs_16x16, TX_16X16);
-  fill_token_costs(cpi->mb.token_costs[TX_32X32],
-                   cpi->common.fc.coef_probs_32x32, TX_32X32);
+  fill_token_costs(cpi->mb.token_costs,
+                   cpi->common.fc.coef_probs);
 #endif
 
   for (i = 0; i < NUM_PARTITION_CONTEXTS; i++)
@@ -332,16 +319,15 @@ static INLINE int cost_coeffs(VP9_COMMON *const cm, MACROBLOCK *mb,
     assert(tx_size == tx_size_uv);
   }
 
+#if !CONFIG_BALANCED_COEFTREE
+  vp9_model_to_full_probs_sb(cm->fc.coef_probs[tx_size][type][ref], coef_probs);
+#endif
   switch (tx_size) {
     case TX_4X4: {
       tx_type = (type == PLANE_TYPE_Y_WITH_DC) ?
           get_tx_type_4x4(xd, block) : DCT_DCT;
       above_ec = A[0] != 0;
       left_ec = L[0] != 0;
-#if !CONFIG_BALANCED_COEFTREE
-      vp9_model_to_full_probs_sb(cm->fc.coef_probs_4x4[type][ref],
-                                 coef_probs);
-#endif
       seg_eob = 16;
       scan = get_scan_4x4(tx_type);
       band_translate = vp9_coefband_trans_4x4;
@@ -356,10 +342,6 @@ static INLINE int cost_coeffs(VP9_COMMON *const cm, MACROBLOCK *mb,
       above_ec = (A[0] + A[1]) != 0;
       left_ec = (L[0] + L[1]) != 0;
       scan = get_scan_8x8(tx_type);
-#if !CONFIG_BALANCED_COEFTREE
-      vp9_model_to_full_probs_sb(cm->fc.coef_probs_8x8[type][ref],
-                                 coef_probs);
-#endif
       seg_eob = 64;
       band_translate = vp9_coefband_trans_8x8plus;
       break;
@@ -371,10 +353,6 @@ static INLINE int cost_coeffs(VP9_COMMON *const cm, MACROBLOCK *mb,
       TX_TYPE tx_type = (type == PLANE_TYPE_Y_WITH_DC) ?
           get_tx_type_16x16(xd, y + (x >> 2)) : DCT_DCT;
       scan = get_scan_16x16(tx_type);
-#if !CONFIG_BALANCED_COEFTREE
-      vp9_model_to_full_probs_sb(cm->fc.coef_probs_16x16[type][ref],
-                                 coef_probs);
-#endif
       seg_eob = 256;
       above_ec = (A[0] + A[1] + A[2] + A[3]) != 0;
       left_ec = (L[0] + L[1] + L[2] + L[3]) != 0;
@@ -383,10 +361,6 @@ static INLINE int cost_coeffs(VP9_COMMON *const cm, MACROBLOCK *mb,
     }
     case TX_32X32:
       scan = vp9_default_scan_32x32;
-#if !CONFIG_BALANCED_COEFTREE
-      vp9_model_to_full_probs_sb(cm->fc.coef_probs_32x32[type][ref],
-                                 coef_probs);
-#endif
       seg_eob = 1024;
       above_ec = (A[0] + A[1] + A[2] + A[3] + A[4] + A[5] + A[6] + A[7]) != 0;
       left_ec = (L[0] + L[1] + L[2] + L[3] + L[4] + L[5] + L[6] + L[7]) != 0;

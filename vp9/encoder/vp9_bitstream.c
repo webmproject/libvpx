@@ -43,10 +43,7 @@ unsigned __int64 Sectionbits[500];
 int intra_mode_stats[VP9_INTRA_MODES]
                     [VP9_INTRA_MODES]
                     [VP9_INTRA_MODES];
-vp9_coeff_stats tree_update_hist_4x4[BLOCK_TYPES];
-vp9_coeff_stats tree_update_hist_8x8[BLOCK_TYPES];
-vp9_coeff_stats tree_update_hist_16x16[BLOCK_TYPES];
-vp9_coeff_stats tree_update_hist_32x32[BLOCK_TYPES];
+vp9_coeff_stats tree_update_hist[TX_SIZE_MAX_SB][BLOCK_TYPES];
 
 extern unsigned int active_section;
 #endif
@@ -1014,24 +1011,20 @@ static void print_prob_tree(vp9_coeff_probs *coef_probs, int block_types) {
   fclose(f);
 }
 
-static void build_tree_distribution(vp9_coeff_probs_model *coef_probs,
-                                    vp9_coeff_count *coef_counts,
-                                    unsigned int (*eob_branch_ct)[REF_TYPES]
-                                                                 [COEF_BANDS]
-                                                          [PREV_COEF_CONTEXTS],
+static void build_tree_distribution(VP9_COMP *cpi, TX_SIZE txfm_size) {
+  vp9_coeff_probs_model *coef_probs = cpi->frame_coef_probs[txfm_size];
+  vp9_coeff_count *coef_counts = cpi->coef_counts[txfm_size];
+  unsigned int (*eob_branch_ct)[REF_TYPES][COEF_BANDS][PREV_COEF_CONTEXTS] =
+      cpi->common.fc.eob_branch_counts[txfm_size];
+  vp9_coeff_stats *coef_branch_ct = cpi->frame_branch_ct[txfm_size];
 #ifdef ENTROPY_STATS
-                                    VP9_COMP *cpi,
-                                    vp9_coeff_accum *context_counters,
-#endif
-                                    vp9_coeff_stats *coef_branch_ct,
-                                    int block_types) {
-  int i, j, k, l;
-#ifdef ENTROPY_STATS
+  vp9_coeff_accum *context_counters = context_counters[txfm_size];
   int t = 0;
 #endif
   vp9_prob full_probs[ENTROPY_NODES];
+  int i, j, k, l;
 
-  for (i = 0; i < block_types; ++i) {
+  for (i = 0; i < BLOCK_TYPES; ++i) {
     for (j = 0; j < REF_TYPES; ++j) {
       for (k = 0; k < COEF_BANDS; ++k) {
         for (l = 0; l < PREV_COEF_CONTEXTS; ++l) {
@@ -1071,46 +1064,20 @@ static void build_tree_distribution(vp9_coeff_probs_model *coef_probs,
 }
 
 static void build_coeff_contexts(VP9_COMP *cpi) {
-  build_tree_distribution(cpi->frame_coef_probs_4x4,
-                          cpi->coef_counts_4x4,
-                          cpi->common.fc.eob_branch_counts[TX_4X4],
-#ifdef ENTROPY_STATS
-                          cpi, context_counters_4x4,
-#endif
-                          cpi->frame_branch_ct_4x4, BLOCK_TYPES);
-  build_tree_distribution(cpi->frame_coef_probs_8x8,
-                          cpi->coef_counts_8x8,
-                          cpi->common.fc.eob_branch_counts[TX_8X8],
-#ifdef ENTROPY_STATS
-                          cpi, context_counters_8x8,
-#endif
-                          cpi->frame_branch_ct_8x8, BLOCK_TYPES);
-  build_tree_distribution(cpi->frame_coef_probs_16x16,
-                          cpi->coef_counts_16x16,
-                          cpi->common.fc.eob_branch_counts[TX_16X16],
-#ifdef ENTROPY_STATS
-                          cpi, context_counters_16x16,
-#endif
-                          cpi->frame_branch_ct_16x16, BLOCK_TYPES);
-  build_tree_distribution(cpi->frame_coef_probs_32x32,
-                          cpi->coef_counts_32x32,
-                          cpi->common.fc.eob_branch_counts[TX_32X32],
-#ifdef ENTROPY_STATS
-                          cpi, context_counters_32x32,
-#endif
-                          cpi->frame_branch_ct_32x32, BLOCK_TYPES);
+  TX_SIZE t;
+  for (t = TX_4X4; t <= TX_32X32; t++)
+    build_tree_distribution(cpi, t);
 }
 
-static void update_coef_probs_common(
-    vp9_writer* const bc,
-    VP9_COMP *cpi,
+static void update_coef_probs_common(vp9_writer* const bc, VP9_COMP *cpi,
+                                     TX_SIZE tx_size) {
 #ifdef ENTROPY_STATS
-    vp9_coeff_stats *tree_update_hist,
+  vp9_coeff_stats *tree_update_hist = tree_update_hist[tx_size];
 #endif
-    vp9_coeff_probs_model *new_frame_coef_probs,
-    vp9_coeff_probs_model *old_frame_coef_probs,
-    vp9_coeff_stats *frame_branch_ct,
-    TX_SIZE tx_size) {
+  vp9_coeff_probs_model *new_frame_coef_probs = cpi->frame_coef_probs[tx_size];
+  vp9_coeff_probs_model *old_frame_coef_probs =
+      cpi->common.fc.coef_probs[tx_size];
+  vp9_coeff_stats *frame_branch_ct = cpi->frame_branch_ct[tx_size];
   int i, j, k, l, t;
   int update[2] = {0, 0};
   int savings;
@@ -1208,51 +1175,19 @@ static void update_coef_probs(VP9_COMP* const cpi, vp9_writer* const bc) {
   // Build the cofficient contexts based on counts collected in encode loop
   build_coeff_contexts(cpi);
 
-  update_coef_probs_common(bc,
-                           cpi,
-#ifdef ENTROPY_STATS
-                           tree_update_hist_4x4,
-#endif
-                           cpi->frame_coef_probs_4x4,
-                           cpi->common.fc.coef_probs_4x4,
-                           cpi->frame_branch_ct_4x4,
-                           TX_4X4);
+  update_coef_probs_common(bc, cpi, TX_4X4);
 
   /* do not do this if not even allowed */
   if (cpi->common.txfm_mode != ONLY_4X4) {
-    update_coef_probs_common(bc,
-                             cpi,
-#ifdef ENTROPY_STATS
-                             tree_update_hist_8x8,
-#endif
-                             cpi->frame_coef_probs_8x8,
-                             cpi->common.fc.coef_probs_8x8,
-                             cpi->frame_branch_ct_8x8,
-                             TX_8X8);
+    update_coef_probs_common(bc, cpi, TX_8X8);
   }
 
   if (cpi->common.txfm_mode > ALLOW_8X8) {
-    update_coef_probs_common(bc,
-                             cpi,
-#ifdef ENTROPY_STATS
-                             tree_update_hist_16x16,
-#endif
-                             cpi->frame_coef_probs_16x16,
-                             cpi->common.fc.coef_probs_16x16,
-                             cpi->frame_branch_ct_16x16,
-                             TX_16X16);
+    update_coef_probs_common(bc, cpi, TX_16X16);
   }
 
   if (cpi->common.txfm_mode > ALLOW_16X16) {
-    update_coef_probs_common(bc,
-                             cpi,
-#ifdef ENTROPY_STATS
-                             tree_update_hist_32x32,
-#endif
-                             cpi->frame_coef_probs_32x32,
-                             cpi->common.fc.coef_probs_32x32,
-                             cpi->frame_branch_ct_32x32,
-                             TX_32X32);
+    update_coef_probs_common(bc, cpi, TX_32X32);
   }
 }
 
@@ -1665,15 +1600,7 @@ void vp9_pack_bitstream(VP9_COMP *cpi, uint8_t *dest, unsigned long *size) {
 
   vp9_clear_system_state();  // __asm emms;
 
-  vp9_copy(cpi->common.fc.pre_coef_probs_4x4,
-           cpi->common.fc.coef_probs_4x4);
-  vp9_copy(cpi->common.fc.pre_coef_probs_8x8,
-           cpi->common.fc.coef_probs_8x8);
-  vp9_copy(cpi->common.fc.pre_coef_probs_16x16,
-           cpi->common.fc.coef_probs_16x16);
-  vp9_copy(cpi->common.fc.pre_coef_probs_32x32,
-           cpi->common.fc.coef_probs_32x32);
-
+  vp9_copy(cpi->common.fc.pre_coef_probs, cpi->common.fc.coef_probs);
   vp9_copy(cpi->common.fc.pre_y_mode_prob, cpi->common.fc.y_mode_prob);
   vp9_copy(cpi->common.fc.pre_uv_mode_prob, cpi->common.fc.uv_mode_prob);
   vp9_copy(cpi->common.fc.pre_partition_prob, cpi->common.fc.partition_prob);
@@ -1839,21 +1766,18 @@ void print_tree_update_probs() {
   FILE *f = fopen("coefupdprob.h", "w");
   fprintf(f, "\n/* Update probabilities for token entropy tree. */\n\n");
 
-  print_tree_update_for_type(f, tree_update_hist_4x4, BLOCK_TYPES,
+  print_tree_update_for_type(f, tree_update_hist[TX_4X4],   BLOCK_TYPES,
                              "vp9_coef_update_probs_4x4[BLOCK_TYPES]");
-  print_tree_update_for_type(f, tree_update_hist_8x8, BLOCK_TYPES,
+  print_tree_update_for_type(f, tree_update_hist[TX_8X8],   BLOCK_TYPES,
                              "vp9_coef_update_probs_8x8[BLOCK_TYPES]");
-  print_tree_update_for_type(f, tree_update_hist_16x16, BLOCK_TYPES,
+  print_tree_update_for_type(f, tree_update_hist[TX_16X16], BLOCK_TYPES,
                              "vp9_coef_update_probs_16x16[BLOCK_TYPES]");
-  print_tree_update_for_type(f, tree_update_hist_32x32, BLOCK_TYPES,
+  print_tree_update_for_type(f, tree_update_hist[TX_32X32], BLOCK_TYPES,
                              "vp9_coef_update_probs_32x32[BLOCK_TYPES]");
 
   fclose(f);
   f = fopen("treeupdate.bin", "wb");
-  fwrite(tree_update_hist_4x4, sizeof(tree_update_hist_4x4), 1, f);
-  fwrite(tree_update_hist_8x8, sizeof(tree_update_hist_8x8), 1, f);
-  fwrite(tree_update_hist_16x16, sizeof(tree_update_hist_16x16), 1, f);
-  fwrite(tree_update_hist_32x32, sizeof(tree_update_hist_32x32), 1, f);
+  fwrite(tree_update_hist, sizeof(tree_update_hist), 1, f);
   fclose(f);
 }
 #endif
