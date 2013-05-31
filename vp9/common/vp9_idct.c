@@ -32,20 +32,17 @@ void vp9_short_iwalsh4x4_add_c(int16_t *input, uint8_t *dest, int dest_stride) {
     c1 = ip[1] >> WHT_UPSCALE_FACTOR;
     d1 = ip[2] >> WHT_UPSCALE_FACTOR;
     b1 = ip[3] >> WHT_UPSCALE_FACTOR;
-
-    c1 = a1 - c1;
-    b1 += d1;
-    e1 = (c1 - b1) >> 1;
-    a1 -= e1;
-    d1 += e1;
-    b1 = a1 - b1;
-    c1 -= d1;
-
+    a1 += c1;
+    d1 -= b1;
+    e1 = (a1 - d1) >> 1;
+    b1 = e1 - b1;
+    c1 = e1 - c1;
+    a1 -= b1;
+    d1 += c1;
     op[0] = a1;
     op[1] = b1;
     op[2] = c1;
     op[3] = d1;
-
     ip += 4;
     op += 4;
   }
@@ -56,15 +53,13 @@ void vp9_short_iwalsh4x4_add_c(int16_t *input, uint8_t *dest, int dest_stride) {
     c1 = ip[4 * 1];
     d1 = ip[4 * 2];
     b1 = ip[4 * 3];
-
-    c1 = a1 - c1;
-    b1 += d1;
-    e1 = (c1 - b1) >> 1;
-    a1 -= e1;
-    d1 += e1;
-    b1 = a1 - b1;
-    c1 -= d1;
-
+    a1 += c1;
+    d1 -= b1;
+    e1 = (a1 - d1) >> 1;
+    b1 = e1 - b1;
+    c1 = e1 - c1;
+    a1 -= b1;
+    d1 += c1;
     dest[dest_stride * 0] = clip_pixel(dest[dest_stride * 0] + a1);
     dest[dest_stride * 1] = clip_pixel(dest[dest_stride * 1] + b1);
     dest[dest_stride * 2] = clip_pixel(dest[dest_stride * 2] + c1);
@@ -84,16 +79,17 @@ void vp9_short_iwalsh4x4_1_add_c(int16_t *in, uint8_t *dest, int dest_stride) {
 
   a1 = ip[0] >> WHT_UPSCALE_FACTOR;
   e1 = a1 >> 1;
-  op[0] = op[1] = op[2] = a1 - e1;
-  op[3] = e1;
+  a1 -= e1;
+  op[0] = a1;
+  op[1] = op[2] = op[3] = e1;
 
   ip = tmp;
   for (i = 0; i < 4; i++) {
     e1 = ip[0] >> 1;
     a1 = ip[0] - e1;
     dest[dest_stride * 0] = clip_pixel(dest[dest_stride * 0] + a1);
-    dest[dest_stride * 1] = clip_pixel(dest[dest_stride * 1] + a1);
-    dest[dest_stride * 2] = clip_pixel(dest[dest_stride * 2] + a1);
+    dest[dest_stride * 1] = clip_pixel(dest[dest_stride * 1] + e1);
+    dest[dest_stride * 2] = clip_pixel(dest[dest_stride * 2] + e1);
     dest[dest_stride * 3] = clip_pixel(dest[dest_stride * 3] + e1);
     ip++;
     dest++;
