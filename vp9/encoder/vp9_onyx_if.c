@@ -760,6 +760,13 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
   sf->static_segmentation = 0;
 #endif
       sf->mb16_breakout = 0;
+
+      if (speed > 0) {
+        sf->optimize_coefficients = 0;
+        sf->no_skip_block4x4_search = 0;
+        sf->comp_inter_joint_search = 0;
+        sf->first_step = 1;
+      }
       break;
 
   }; /* switch */
