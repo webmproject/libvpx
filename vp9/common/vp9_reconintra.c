@@ -362,14 +362,13 @@ void vp9_build_intra_predictors(uint8_t *src, int src_stride,
 
 void vp9_build_intra_predictors_sby_s(MACROBLOCKD *xd,
                                       BLOCK_SIZE_TYPE bsize) {
-  const int bwl = b_width_log2(bsize),  bw = 4 << bwl;
-  const int bhl = b_height_log2(bsize), bh = 4 << bhl;
-
-  vp9_build_intra_predictors(xd->plane[0].dst.buf, xd->plane[0].dst.stride,
-                             xd->plane[0].dst.buf, xd->plane[0].dst.stride,
+  const struct macroblockd_plane* const pd = &xd->plane[0];
+  const int bw = plane_block_width(bsize, pd);
+  const int bh = plane_block_height(bsize, pd);
+  vp9_build_intra_predictors(pd->dst.buf, pd->dst.stride,
+                             pd->dst.buf, pd->dst.stride,
                              xd->mode_info_context->mbmi.mode,
-                             bw, bh,
-                             xd->up_available, xd->left_available,
+                             bw, bh, xd->up_available, xd->left_available,
                              0 /*xd->right_available*/);
 }
 
@@ -398,11 +397,9 @@ void vp9_predict_intra_block(MACROBLOCKD *xd,
                             uint8_t *predictor, int pre_stride) {
   const int bwl = bwl_in - tx_size;
   const int wmask = (1 << bwl) - 1;
-  const int have_top =
-      (block_idx >> bwl) || xd->up_available;
-  const int have_left =
-      (block_idx & wmask) || xd->left_available;
-  int have_right = ((block_idx & wmask) != wmask);
+  const int have_top = (block_idx >> bwl) || xd->up_available;
+  const int have_left = (block_idx & wmask) || xd->left_available;
+  const int have_right = ((block_idx & wmask) != wmask);
   const int txfm_block_size = 4 << tx_size;
 
   assert(bwl >= 0);

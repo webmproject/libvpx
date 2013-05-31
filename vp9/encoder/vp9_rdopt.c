@@ -1854,9 +1854,8 @@ static void model_rd_from_var_lapndz(int var, int n, int qstep,
 
 static enum BlockSize get_plane_block_size(BLOCK_SIZE_TYPE bsize,
                                            struct macroblockd_plane *pd) {
-  const int bwl = b_width_log2(bsize) - pd->subsampling_x;
-  const int bhl = b_height_log2(bsize) - pd->subsampling_y;
-  return get_block_size(4 << bwl, 4 << bhl);
+  return get_block_size(plane_block_width(bsize, pd),
+                        plane_block_height(bsize, pd));
 }
 
 static void model_rd_for_sb(VP9_COMP *cpi, BLOCK_SIZE_TYPE bsize,
@@ -1873,14 +1872,13 @@ static void model_rd_for_sb(VP9_COMP *cpi, BLOCK_SIZE_TYPE bsize,
     struct macroblockd_plane *const pd = &xd->plane[i];
 
     // TODO(dkovalev) the same code in get_plane_block_size
-    const int bwl = b_width_log2(bsize) - pd->subsampling_x;
-    const int bhl = b_height_log2(bsize) - pd->subsampling_y;
-    const enum BlockSize bs = get_block_size(4 << bwl, 4 << bhl);
+    const int bw = plane_block_width(bsize, pd);
+    const int bh = plane_block_height(bsize, pd);
+    const enum BlockSize bs = get_block_size(bw, bh);
     int rate, dist;
     var = cpi->fn_ptr[bs].vf(p->src.buf, p->src.stride,
                              pd->dst.buf, pd->dst.stride, &sse);
-    model_rd_from_var_lapndz(var, 16 << (bwl + bhl),
-                             pd->dequant[1] >> 3, &rate, &dist);
+    model_rd_from_var_lapndz(var, bw * bh, pd->dequant[1] >> 3, &rate, &dist);
 
     rate_sum += rate;
     dist_sum += dist;

@@ -384,9 +384,8 @@ static void build_inter_predictors(int plane, int block,
   MACROBLOCKD * const xd = arg->xd;
   const int bwl = b_width_log2(bsize) - xd->plane[plane].subsampling_x;
   const int bhl = b_height_log2(bsize) - xd->plane[plane].subsampling_y;
-  const int bh = 4 << bhl,  bw = 4 << bwl;
-  const int x_idx = block & ((1 << bwl) - 1), y_idx = block >> bwl;
-  const int x = x_idx * 4, y = y_idx * 4;
+  const int bh = 4 << bhl, bw = 4 << bwl;
+  const int x = 4 * (block & ((1 << bwl) - 1)), y = 4 * (block >> bwl);
   const int use_second_ref = xd->mode_info_context->mbmi.second_ref_frame > 0;
   int which_mv;
 
