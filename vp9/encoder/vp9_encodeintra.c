@@ -16,72 +16,18 @@
 #include "vp9/common/vp9_invtrans.h"
 #include "vp9/encoder/vp9_encodeintra.h"
 
-static void encode_intra4x4block(MACROBLOCK *x, int ib, BLOCK_SIZE_TYPE bs);
-
 int vp9_encode_intra(VP9_COMP *cpi, MACROBLOCK *x, int use_16x16_pred) {
   MB_MODE_INFO * mbmi = &x->e_mbd.mode_info_context->mbmi;
   (void) cpi;
-
+  mbmi->mode = DC_PRED;
+  mbmi->ref_frame = INTRA_FRAME;
   if (use_16x16_pred) {
-    mbmi->mode = DC_PRED;
-    mbmi->uv_mode = DC_PRED;
-    mbmi->ref_frame = INTRA_FRAME;
-
-    vp9_encode_intra16x16mby(&cpi->common, x);
+    mbmi->txfm_size = TX_16X16;
+    vp9_encode_intra_block_y(&cpi->common, x, BLOCK_SIZE_MB16X16);
   } else {
-    int i;
-
-    for (i = 0; i < 16; i++) {
-      encode_intra4x4block(x, i, BLOCK_SIZE_MB16X16);
-    }
+    mbmi->txfm_size = TX_4X4;
+    vp9_encode_intra_block_y(&cpi->common, x, BLOCK_SIZE_MB16X16);
   }
 
   return vp9_get_mb_ss(x->plane[0].src_diff);
 }
-
-// This function is used only by the firstpass encoding.
-static void encode_intra4x4block(MACROBLOCK *x, int ib,
-                                 BLOCK_SIZE_TYPE bsize) {
-  MACROBLOCKD * const xd = &x->e_mbd;
-  uint8_t* const src =
-      raster_block_offset_uint8(xd, bsize, 0, ib,
-                                x->plane[0].src.buf, x->plane[0].src.stride);
-  uint8_t* const dst =
-      raster_block_offset_uint8(xd, bsize, 0, ib,
-                                xd->plane[0].dst.buf, xd->plane[0].dst.stride);
-  int16_t* const src_diff =
-      raster_block_offset_int16(xd, bsize, 0, ib,
-                                x->plane[0].src_diff);
-  int16_t* const coeff = BLOCK_OFFSET(x->plane[0].coeff, ib, 16);
-  const int bwl = b_width_log2(bsize), bhl = b_height_log2(bsize);
-
-  assert(ib < (1 << (bwl + bhl)));
-
-  vp9_intra4x4_predict(&x->e_mbd, ib, bsize, DC_PRED,
-                       dst, xd->plane[0].dst.stride);
-  vp9_subtract_block(4, 4, src_diff, 4 << bwl,
-                     src, x->plane[0].src.stride,
-                     dst, xd->plane[0].dst.stride);
-
-  x->fwd_txm4x4(src_diff, coeff, 8 << bwl);
-  x->quantize_b_4x4(x, ib, DCT_DCT, 16);
-  vp9_inverse_transform_b_4x4_add(&x->e_mbd, xd->plane[0].eobs[ib],
-                              BLOCK_OFFSET(xd->plane[0].dqcoeff, ib, 16),
-                              dst, xd->plane[0].dst.stride);
-}
-
-void vp9_encode_intra16x16mby(VP9_COMMON *const cm, MACROBLOCK *x) {
-  MACROBLOCKD *xd = &x->e_mbd;
-
-  vp9_build_intra_predictors_sby_s(xd, BLOCK_SIZE_MB16X16);
-  vp9_encode_sby(cm, x, BLOCK_SIZE_MB16X16);
-}
-
-void vp9_encode_intra16x16mbuv(VP9_COMMON *const cm, MACROBLOCK *x) {
-  MACROBLOCKD *xd = &x->e_mbd;
-
-  vp9_build_intra_predictors_sbuv_s(xd, BLOCK_SIZE_MB16X16);
-  vp9_encode_sbuv(cm, x, BLOCK_SIZE_MB16X16);
-}
-
-
