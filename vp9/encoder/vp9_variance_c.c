@@ -318,6 +318,11 @@ unsigned int vp9_variance16x8_c(const uint8_t *src_ptr,
   return (var - (((unsigned int)avg * avg) >> 7));
 }
 
+void vp9_get_sse_sum_8x8_c(const uint8_t *src_ptr, int source_stride,
+                       const uint8_t *ref_ptr, int ref_stride,
+                       unsigned int *sse, int *sum) {
+  variance(src_ptr, source_stride, ref_ptr, ref_stride, 8, 8, sse, sum);
+}
 
 unsigned int vp9_variance8x8_c(const uint8_t *src_ptr,
                                int  source_stride,
