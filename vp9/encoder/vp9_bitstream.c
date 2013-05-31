@@ -1356,6 +1356,49 @@ static void encode_segmentation(VP9_COMP *cpi, vp9_writer *w) {
   }
 }
 
+
+static void encode_txfm(VP9_COMP *cpi, vp9_writer *w) {
+  VP9_COMMON *const cm = &cpi->common;
+
+  // Mode
+  vp9_write_literal(w, MIN(cm->txfm_mode, ALLOW_32X32), 2);
+  if (cm->txfm_mode >= ALLOW_32X32)
+    vp9_write_bit(w, cm->txfm_mode == TX_MODE_SELECT);
+
+  // Probabilities
+  if (cm->txfm_mode == TX_MODE_SELECT) {
+    cm->prob_tx[0] = get_prob(cpi->txfm_count_32x32p[TX_4X4] +
+                              cpi->txfm_count_16x16p[TX_4X4] +
+                              cpi->txfm_count_8x8p[TX_4X4],
+                              cpi->txfm_count_32x32p[TX_4X4] +
+                              cpi->txfm_count_32x32p[TX_8X8] +
+                              cpi->txfm_count_32x32p[TX_16X16] +
+                              cpi->txfm_count_32x32p[TX_32X32] +
+                              cpi->txfm_count_16x16p[TX_4X4] +
+                              cpi->txfm_count_16x16p[TX_8X8] +
+                              cpi->txfm_count_16x16p[TX_16X16] +
+                              cpi->txfm_count_8x8p[TX_4X4] +
+                              cpi->txfm_count_8x8p[TX_8X8]);
+    cm->prob_tx[1] = get_prob(cpi->txfm_count_32x32p[TX_8X8] +
+                              cpi->txfm_count_16x16p[TX_8X8],
+                              cpi->txfm_count_32x32p[TX_8X8] +
+                              cpi->txfm_count_32x32p[TX_16X16] +
+                              cpi->txfm_count_32x32p[TX_32X32] +
+                              cpi->txfm_count_16x16p[TX_8X8] +
+                              cpi->txfm_count_16x16p[TX_16X16]);
+    cm->prob_tx[2] = get_prob(cpi->txfm_count_32x32p[TX_16X16],
+                              cpi->txfm_count_32x32p[TX_16X16] +
+                              cpi->txfm_count_32x32p[TX_32X32]);
+    vp9_write_prob(w, cm->prob_tx[0]);
+    vp9_write_prob(w, cm->prob_tx[1]);
+    vp9_write_prob(w, cm->prob_tx[2]);
+  } else {
+    cm->prob_tx[0] = 128;
+    cm->prob_tx[1] = 128;
+    cm->prob_tx[2] = 128;
+  }
+}
+
 void write_uncompressed_header(VP9_COMMON *cm,
                                struct vp9_write_bit_buffer *wb) {
   const int scaling_active = cm->width != cm->display_width ||
@@ -1521,47 +1564,10 @@ void vp9_pack_bitstream(VP9_COMP *cpi, uint8_t *dest, unsigned long *size) {
     }
   }
 
-  if (cpi->mb.e_mbd.lossless) {
+  if (xd->lossless)
     pc->txfm_mode = ONLY_4X4;
-  } else {
-    if (pc->txfm_mode == TX_MODE_SELECT) {
-      pc->prob_tx[0] = get_prob(cpi->txfm_count_32x32p[TX_4X4] +
-                                cpi->txfm_count_16x16p[TX_4X4] +
-                                cpi->txfm_count_8x8p[TX_4X4],
-                                cpi->txfm_count_32x32p[TX_4X4] +
-                                cpi->txfm_count_32x32p[TX_8X8] +
-                                cpi->txfm_count_32x32p[TX_16X16] +
-                                cpi->txfm_count_32x32p[TX_32X32] +
-                                cpi->txfm_count_16x16p[TX_4X4] +
-                                cpi->txfm_count_16x16p[TX_8X8] +
-                                cpi->txfm_count_16x16p[TX_16X16] +
-                                cpi->txfm_count_8x8p[TX_4X4] +
-                                cpi->txfm_count_8x8p[TX_8X8]);
-      pc->prob_tx[1] = get_prob(cpi->txfm_count_32x32p[TX_8X8] +
-                                cpi->txfm_count_16x16p[TX_8X8],
-                                cpi->txfm_count_32x32p[TX_8X8] +
-                                cpi->txfm_count_32x32p[TX_16X16] +
-                                cpi->txfm_count_32x32p[TX_32X32] +
-                                cpi->txfm_count_16x16p[TX_8X8] +
-                                cpi->txfm_count_16x16p[TX_16X16]);
-      pc->prob_tx[2] = get_prob(cpi->txfm_count_32x32p[TX_16X16],
-                                cpi->txfm_count_32x32p[TX_16X16] +
-                                cpi->txfm_count_32x32p[TX_32X32]);
-    } else {
-      pc->prob_tx[0] = 128;
-      pc->prob_tx[1] = 128;
-      pc->prob_tx[2] = 128;
-    }
-    vp9_write_literal(&header_bc, pc->txfm_mode <= 3 ? pc->txfm_mode : 3, 2);
-    if (pc->txfm_mode > ALLOW_16X16) {
-      vp9_write_bit(&header_bc, pc->txfm_mode == TX_MODE_SELECT);
-    }
-    if (pc->txfm_mode == TX_MODE_SELECT) {
-      vp9_write_prob(&header_bc, pc->prob_tx[0]);
-      vp9_write_prob(&header_bc, pc->prob_tx[1]);
-      vp9_write_prob(&header_bc, pc->prob_tx[2]);
-    }
-  }
+  else
+    encode_txfm(cpi, &header_bc);
 
   // If appropriate update the inter mode probability context and code the
   // changes in the bitstream.
