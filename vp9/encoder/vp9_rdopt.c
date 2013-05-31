@@ -49,6 +49,8 @@
 DECLARE_ALIGNED(16, extern const uint8_t,
                 vp9_pt_energy_class[MAX_ENTROPY_TOKENS]);
 
+#define I4X4_PRED 0x8000
+
 const MODE_DEFINITION vp9_mode_order[MAX_MODES] = {
   {ZEROMV,    LAST_FRAME,   NONE},
   {DC_PRED,   INTRA_FRAME,  NONE},
@@ -84,7 +86,7 @@ const MODE_DEFINITION vp9_mode_order[MAX_MODES] = {
   {SPLITMV,   GOLDEN_FRAME, NONE},
   {SPLITMV,   ALTREF_FRAME, NONE},
 
-  {I4X4_PRED,    INTRA_FRAME,  NONE},
+  {I4X4_PRED, INTRA_FRAME,  NONE},
 
   /* compound prediction modes */
   {ZEROMV,    LAST_FRAME,   GOLDEN_FRAME},
@@ -783,16 +785,15 @@ static int64_t rd_pick_intra4x4mby_modes(VP9_COMP *cpi, MACROBLOCK *mb,
   int64_t total_rd = 0;
   ENTROPY_CONTEXT t_above[4], t_left[4];
   int *bmode_costs;
+  MODE_INFO *const mic = xd->mode_info_context;
 
   vpx_memcpy(t_above, xd->plane[0].above_context, sizeof(t_above));
   vpx_memcpy(t_left, xd->plane[0].left_context, sizeof(t_left));
 
-  xd->mode_info_context->mbmi.mode = I4X4_PRED;
   bmode_costs = mb->mbmode_cost;
 
   for (idy = 0; idy < 2; idy += bh) {
     for (idx = 0; idx < 2; idx += bw) {
-      MODE_INFO *const mic = xd->mode_info_context;
       const int mis = xd->mode_info_stride;
       MB_PREDICTION_MODE UNINITIALIZED_IS_SAFE(best_mode);
       int UNINITIALIZED_IS_SAFE(r), UNINITIALIZED_IS_SAFE(ry);
@@ -831,6 +832,7 @@ static int64_t rd_pick_intra4x4mby_modes(VP9_COMP *cpi, MACROBLOCK *mb,
   *Rate = cost;
   *rate_y = tot_rate_y;
   *Distortion = distortion;
+  xd->mode_info_context->mbmi.mode = mic->bmi[3].as_mode.first;
 
   return RDCOST(mb->rdmult, mb->rddiv, cost, distortion);
 }
@@ -3022,14 +3024,16 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
       best_mode = this_mode;
     }
 
-    // Store the respective mode distortions for later use.
-    if (mode_distortions[this_mode] == -1
-        || distortion2 < mode_distortions[this_mode]) {
-      mode_distortions[this_mode] = distortion2;
-    }
-    if (frame_distortions[mbmi->ref_frame] == -1
-        || distortion2 < frame_distortions[mbmi->ref_frame]) {
-      frame_distortions[mbmi->ref_frame] = distortion2;
+    if (this_mode != I4X4_PRED) {
+      // Store the respective mode distortions for later use.
+      if (mode_distortions[this_mode] == -1
+          || distortion2 < mode_distortions[this_mode]) {
+        mode_distortions[this_mode] = distortion2;
+      }
+      if (frame_distortions[mbmi->ref_frame] == -1
+          || distortion2 < frame_distortions[mbmi->ref_frame]) {
+        frame_distortions[mbmi->ref_frame] = distortion2;
+      }
     }
 
     // Did this mode help.. i.e. is it the new best mode
@@ -3038,7 +3042,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
         // Note index of best mode so far
         best_mode_index = mode_index;
 
-        if (this_mode <= I4X4_PRED) {
+        if (ref_frame == INTRA_FRAME) {
           /* required for left and above block mv */
           mbmi->mv[0].as_int = 0;
         }
@@ -3161,7 +3165,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
 
   assert((cm->mcomp_filter_type == SWITCHABLE) ||
          (cm->mcomp_filter_type == best_mbmode.interp_filter) ||
-         (best_mbmode.mode <= I4X4_PRED));
+         (best_mbmode.ref_frame == INTRA_FRAME));
 
   // Accumulate filter usage stats
   // TODO(agrange): Use RD criteria to select interpolation filter mode.
@@ -3213,7 +3217,8 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
 
   // macroblock modes
   vpx_memcpy(mbmi, &best_mbmode, sizeof(MB_MODE_INFO));
-  if (best_mbmode.mode == I4X4_PRED) {
+  if (best_mbmode.ref_frame == INTRA_FRAME &&
+      best_mbmode.sb_type < BLOCK_SIZE_SB8X8) {
     for (i = 0; i < 4; i++) {
       xd->mode_info_context->bmi[i].as_mode = best_bmodes[i].as_mode;
     }

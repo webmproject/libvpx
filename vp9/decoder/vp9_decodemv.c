@@ -124,7 +124,6 @@ static void kfread_modes(VP9D_COMP *pbi, MODE_INFO *m,
     int bw = 1 << b_width_log2(m->mbmi.sb_type);
     int bh = 1 << b_height_log2(m->mbmi.sb_type);
 
-    m->mbmi.mode = I4X4_PRED;
     for (idy = 0; idy < 2; idy += bh) {
       for (idx = 0; idx < 2; idx += bw) {
         int ib = idy * 2 + idx;
@@ -140,6 +139,7 @@ static void kfread_modes(VP9D_COMP *pbi, MODE_INFO *m,
           m->bmi[ib + k].as_mode.first = m->bmi[ib].as_mode.first;
       }
     }
+    m->mbmi.mode = m->bmi[3].as_mode.first;
   }
 
   m->mbmi.uv_mode = read_intra_mode(r, cm->kf_uv_mode_prob[m->mbmi.mode]);
@@ -773,7 +773,6 @@ static void read_mb_modes_mv(VP9D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
       cm->fc.y_mode_counts[mbmi->mode]++;
     } else {
       int idx, idy;
-      mbmi->mode = I4X4_PRED;
       for (idy = 0; idy < 2; idy += bh) {
         for (idx = 0; idx < 2; idx += bw) {
           int ib = idy * 2 + idx, k;
@@ -786,6 +785,7 @@ static void read_mb_modes_mv(VP9D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
             mi->bmi[ib + k].as_mode.first = m;
         }
       }
+      mbmi->mode = mi->bmi[3].as_mode.first;
     }
 
     mbmi->uv_mode = read_intra_mode(r, cm->fc.uv_mode_prob[mbmi->mode]);

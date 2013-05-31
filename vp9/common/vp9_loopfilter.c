@@ -26,7 +26,6 @@ static void lf_init_lut(loop_filter_info_n *lfi) {
   lfi->mode_lf_lut[V_PRED] = 1;
   lfi->mode_lf_lut[H_PRED] = 1;
   lfi->mode_lf_lut[TM_PRED] = 1;
-  lfi->mode_lf_lut[I4X4_PRED]  = 0;
   lfi->mode_lf_lut[ZEROMV]  = 1;
   lfi->mode_lf_lut[NEARESTMV] = 2;
   lfi->mode_lf_lut[NEARMV] = 2;

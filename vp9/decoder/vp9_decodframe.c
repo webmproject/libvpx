@@ -259,10 +259,12 @@ static void decode_block_intra(int plane, int block, BLOCK_SIZE_TYPE bsize,
   mode = plane == 0? xd->mode_info_context->mbmi.mode:
                      xd->mode_info_context->mbmi.uv_mode;
 
-  if (bsize <= BLOCK_SIZE_SB8X8 && mode == I4X4_PRED && plane == 0)
+  if (xd->mode_info_context->mbmi.sb_type < BLOCK_SIZE_SB8X8 && plane == 0) {
+    assert(bsize == BLOCK_SIZE_SB8X8);
     b_mode = xd->mode_info_context->bmi[raster_block].as_mode.first;
-  else
+  } else {
     b_mode = mode;
+  }
 
   plane_b_size = b_width_log2(bsize) - xd->plane[plane].subsampling_x;
   vp9_predict_intra_block(xd, tx_ib, plane_b_size, tx_size,
