@@ -774,5 +774,4 @@ static void txfrm_block_to_raster_xy(MACROBLOCKD *xd,
   *x = (raster_mb & (tx_cols - 1)) << (txwl);
   *y = raster_mb >> tx_cols_lg2 << (txwl);
 }
-
 #endif  // VP9_COMMON_VP9_BLOCKD_H_

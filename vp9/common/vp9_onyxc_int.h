@@ -327,4 +327,15 @@ static int get_mi_col(const MACROBLOCKD *xd) {
 static int get_token_alloc(int mb_rows, int mb_cols) {
   return mb_rows * mb_cols * (48 * 16 + 4);
 }
+
+static void set_prev_mi(VP9_COMMON *cm) {
+  const int use_prev_in_find_mv_refs = cm->width == cm->last_width &&
+                                       cm->height == cm->last_height &&
+                                       !cm->error_resilient_mode &&
+                                       cm->last_show_frame;
+  // Special case: set prev_mi to NULL when the previous mode info
+  // context cannot be used.
+  cm->prev_mi = use_prev_in_find_mv_refs ?
+                  cm->prev_mip + cm->mode_info_stride + 1 : NULL;
+}
 #endif  // VP9_COMMON_VP9_ONYXC_INT_H_

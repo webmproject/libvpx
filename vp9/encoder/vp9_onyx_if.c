@@ -3445,6 +3445,8 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
                cm->mode_info_stride * (cm->mi_rows + 1) *
                sizeof(MODE_INFO));
   }
+  // restore prev_mi
+  cm->prev_mi = cm->prev_mip + cm->mode_info_stride + 1;
 }
 
 static void Pass2Encode(VP9_COMP *cpi, unsigned long *size,
