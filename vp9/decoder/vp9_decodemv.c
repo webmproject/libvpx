@@ -569,15 +569,12 @@ static void read_mb_modes_mv(VP9D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
       // If the segment level skip mode enabled
       if (vp9_segfeature_active(xd, mbmi->segment_id, SEG_LVL_SKIP)) {
         mbmi->mode = ZEROMV;
-      } else {
-        if (bsize >= BLOCK_SIZE_SB8X8)
-          mbmi->mode = read_sb_mv_ref(r, mv_ref_p);
-        else
-          mbmi->mode = SPLITMV;
+      } else if (bsize >= BLOCK_SIZE_SB8X8) {
+        mbmi->mode = read_sb_mv_ref(r, mv_ref_p);
         vp9_accum_mv_refs(cm, mbmi->mode, mbmi->mb_mode_context[ref_frame]);
       }
 
-      if (mbmi->mode != ZEROMV) {
+      if (bsize < BLOCK_SIZE_SB8X8 || mbmi->mode != ZEROMV) {
         vp9_find_best_ref_mvs(xd,
                               mbmi->ref_mvs[ref_frame],
                               &nearest, &nearby);
@@ -619,7 +616,7 @@ static void read_mb_modes_mv(VP9D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
                          second_ref_frame, mbmi->ref_mvs[second_ref_frame],
                          cm->ref_frame_sign_bias);
 
-        if (mbmi->mode != ZEROMV) {
+        if (bsize < BLOCK_SIZE_SB8X8 || mbmi->mode != ZEROMV) {
           vp9_find_best_ref_mvs(xd,
                                 mbmi->ref_mvs[second_ref_frame],
                                 &nearest_second,
@@ -627,142 +624,142 @@ static void read_mb_modes_mv(VP9D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
           best_mv_second.as_int = mbmi->ref_mvs[second_ref_frame][0].as_int;
         }
       }
-
     }
 
     mbmi->uv_mode = DC_PRED;
-    switch (mbmi->mode) {
-      case SPLITMV:
-        mbmi->need_to_clamp_mvs = 0;
-        for (idy = 0; idy < 2; idy += bh) {
-          for (idx = 0; idx < 2; idx += bw) {
-            int_mv blockmv, secondmv;
-            int blockmode;
-            int i;
-            j = idy * 2 + idx;
+    if (mbmi->sb_type < BLOCK_SIZE_SB8X8) {
+      mbmi->need_to_clamp_mvs = 0;
+      for (idy = 0; idy < 2; idy += bh) {
+        for (idx = 0; idx < 2; idx += bw) {
+          int_mv blockmv, secondmv;
+          int blockmode;
+          int i;
+          j = idy * 2 + idx;
 
-            blockmode = read_sb_mv_ref(r, mv_ref_p);
-            vp9_accum_mv_refs(cm, blockmode, mbmi->mb_mode_context[ref_frame]);
-            if (blockmode == NEARESTMV || blockmode == NEARMV) {
-              MV_REFERENCE_FRAME rf2 = mbmi->second_ref_frame;
-              vp9_append_sub8x8_mvs_for_idx(cm, xd, &nearest, &nearby, j, 0);
-              if (rf2 > 0) {
-                vp9_append_sub8x8_mvs_for_idx(cm, xd,  &nearest_second,
-                                              &nearby_second, j, 1);
-              }
+          blockmode = read_sb_mv_ref(r, mv_ref_p);
+          vp9_accum_mv_refs(cm, blockmode, mbmi->mb_mode_context[ref_frame]);
+          if (blockmode == NEARESTMV || blockmode == NEARMV) {
+            MV_REFERENCE_FRAME rf2 = mbmi->second_ref_frame;
+            vp9_append_sub8x8_mvs_for_idx(cm, xd, &nearest, &nearby, j, 0);
+            if (rf2 > 0) {
+              vp9_append_sub8x8_mvs_for_idx(cm, xd,  &nearest_second,
+                                            &nearby_second, j, 1);
             }
-
-            switch (blockmode) {
-              case NEWMV:
-                decode_mv(r, &blockmv.as_mv, &best_mv.as_mv, nmvc,
-                           &cm->fc.NMVcount, xd->allow_high_precision_mv);
-
-                if (mbmi->second_ref_frame > 0)
-                  decode_mv(r, &secondmv.as_mv, &best_mv_second.as_mv, nmvc,
-                            &cm->fc.NMVcount, xd->allow_high_precision_mv);
-
-  #ifdef VPX_MODE_COUNT
-                vp9_mv_cont_count[mv_contz][3]++;
-  #endif
-                break;
-              case NEARESTMV:
-                blockmv.as_int = nearest.as_int;
-                if (mbmi->second_ref_frame > 0)
-                  secondmv.as_int = nearest_second.as_int;
-  #ifdef VPX_MODE_COUNT
-                vp9_mv_cont_count[mv_contz][0]++;
-  #endif
-                break;
-              case NEARMV:
-                blockmv.as_int = nearby.as_int;
-                if (mbmi->second_ref_frame > 0)
-                  secondmv.as_int = nearby_second.as_int;
-  #ifdef VPX_MODE_COUNT
-                vp9_mv_cont_count[mv_contz][1]++;
-  #endif
-                break;
-              case ZEROMV:
-                blockmv.as_int = 0;
-                if (mbmi->second_ref_frame > 0)
-                  secondmv.as_int = 0;
-  #ifdef VPX_MODE_COUNT
-                vp9_mv_cont_count[mv_contz][2]++;
-  #endif
-                break;
-              default:
-                break;
-            }
-            mi->bmi[j].as_mv[0].as_int = blockmv.as_int;
-            if (mbmi->second_ref_frame > 0)
-              mi->bmi[j].as_mv[1].as_int = secondmv.as_int;
-
-            for (i = 1; i < bh; ++i)
-              vpx_memcpy(&mi->bmi[j + i * 2], &mi->bmi[j], sizeof(mi->bmi[j]));
-            for (i = 1; i < bw; ++i)
-              vpx_memcpy(&mi->bmi[j + i], &mi->bmi[j], sizeof(mi->bmi[j]));
           }
+
+          switch (blockmode) {
+            case NEWMV:
+              decode_mv(r, &blockmv.as_mv, &best_mv.as_mv, nmvc,
+                         &cm->fc.NMVcount, xd->allow_high_precision_mv);
+
+              if (mbmi->second_ref_frame > 0)
+                decode_mv(r, &secondmv.as_mv, &best_mv_second.as_mv, nmvc,
+                          &cm->fc.NMVcount, xd->allow_high_precision_mv);
+
+#ifdef VPX_MODE_COUNT
+              vp9_mv_cont_count[mv_contz][3]++;
+#endif
+              break;
+            case NEARESTMV:
+              blockmv.as_int = nearest.as_int;
+              if (mbmi->second_ref_frame > 0)
+                secondmv.as_int = nearest_second.as_int;
+#ifdef VPX_MODE_COUNT
+              vp9_mv_cont_count[mv_contz][0]++;
+#endif
+              break;
+            case NEARMV:
+              blockmv.as_int = nearby.as_int;
+              if (mbmi->second_ref_frame > 0)
+                secondmv.as_int = nearby_second.as_int;
+#ifdef VPX_MODE_COUNT
+              vp9_mv_cont_count[mv_contz][1]++;
+#endif
+              break;
+            case ZEROMV:
+              blockmv.as_int = 0;
+              if (mbmi->second_ref_frame > 0)
+                secondmv.as_int = 0;
+#ifdef VPX_MODE_COUNT
+              vp9_mv_cont_count[mv_contz][2]++;
+#endif
+              break;
+            default:
+              break;
+          }
+          mi->bmi[j].as_mv[0].as_int = blockmv.as_int;
+          if (mbmi->second_ref_frame > 0)
+            mi->bmi[j].as_mv[1].as_int = secondmv.as_int;
+
+          for (i = 1; i < bh; ++i)
+            vpx_memcpy(&mi->bmi[j + i * 2], &mi->bmi[j], sizeof(mi->bmi[j]));
+          for (i = 1; i < bw; ++i)
+            vpx_memcpy(&mi->bmi[j + i], &mi->bmi[j], sizeof(mi->bmi[j]));
+          mi->mbmi.mode = blockmode;
         }
+      }
 
-        mv0->as_int = mi->bmi[3].as_mv[0].as_int;
-        mv1->as_int = mi->bmi[3].as_mv[1].as_int;
-        break;  /* done with SPLITMV */
+      mv0->as_int = mi->bmi[3].as_mv[0].as_int;
+      mv1->as_int = mi->bmi[3].as_mv[1].as_int;
+    } else {
+      switch (mbmi->mode) {
+        case NEARMV:
+          // Clip "next_nearest" so that it does not extend to far out of image
+          assign_and_clamp_mv(mv0, &nearby, mb_to_left_edge,
+                                            mb_to_right_edge,
+                                            mb_to_top_edge,
+                                            mb_to_bottom_edge);
+          if (mbmi->second_ref_frame > 0)
+            assign_and_clamp_mv(mv1, &nearby_second, mb_to_left_edge,
+                                                     mb_to_right_edge,
+                                                     mb_to_top_edge,
+                                                     mb_to_bottom_edge);
+          break;
 
-      case NEARMV:
-        // Clip "next_nearest" so that it does not extend to far out of image
-        assign_and_clamp_mv(mv0, &nearby, mb_to_left_edge,
-                                          mb_to_right_edge,
-                                          mb_to_top_edge,
-                                          mb_to_bottom_edge);
-        if (mbmi->second_ref_frame > 0)
-          assign_and_clamp_mv(mv1, &nearby_second, mb_to_left_edge,
-                                                   mb_to_right_edge,
-                                                   mb_to_top_edge,
-                                                   mb_to_bottom_edge);
-        break;
+        case NEARESTMV:
+          // Clip "next_nearest" so that it does not extend to far out of image
+          assign_and_clamp_mv(mv0, &nearest, mb_to_left_edge,
+                                             mb_to_right_edge,
+                                             mb_to_top_edge,
+                                             mb_to_bottom_edge);
+          if (mbmi->second_ref_frame > 0)
+            assign_and_clamp_mv(mv1, &nearest_second, mb_to_left_edge,
+                                                      mb_to_right_edge,
+                                                      mb_to_top_edge,
+                                                      mb_to_bottom_edge);
+          break;
 
-      case NEARESTMV:
-        // Clip "next_nearest" so that it does not extend to far out of image
-        assign_and_clamp_mv(mv0, &nearest, mb_to_left_edge,
-                                           mb_to_right_edge,
-                                           mb_to_top_edge,
-                                           mb_to_bottom_edge);
-        if (mbmi->second_ref_frame > 0)
-          assign_and_clamp_mv(mv1, &nearest_second, mb_to_left_edge,
+        case ZEROMV:
+          mv0->as_int = 0;
+          if (mbmi->second_ref_frame > 0)
+            mv1->as_int = 0;
+          break;
+
+        case NEWMV:
+          decode_mv(r, &mv0->as_mv, &best_mv.as_mv, nmvc, &cm->fc.NMVcount,
+                    xd->allow_high_precision_mv);
+          mbmi->need_to_clamp_mvs = check_mv_bounds(mv0,
+                                                    mb_to_left_edge,
                                                     mb_to_right_edge,
                                                     mb_to_top_edge,
                                                     mb_to_bottom_edge);
-        break;
 
-      case ZEROMV:
-        mv0->as_int = 0;
-        if (mbmi->second_ref_frame > 0)
-          mv1->as_int = 0;
-        break;
-
-      case NEWMV:
-        decode_mv(r, &mv0->as_mv, &best_mv.as_mv, nmvc, &cm->fc.NMVcount,
-                  xd->allow_high_precision_mv);
-        mbmi->need_to_clamp_mvs = check_mv_bounds(mv0,
-                                                  mb_to_left_edge,
-                                                  mb_to_right_edge,
-                                                  mb_to_top_edge,
-                                                  mb_to_bottom_edge);
-
-        if (mbmi->second_ref_frame > 0) {
-          decode_mv(r, &mv1->as_mv, &best_mv_second.as_mv, nmvc,
-                    &cm->fc.NMVcount, xd->allow_high_precision_mv);
-          mbmi->need_to_clamp_secondmv = check_mv_bounds(mv1,
-                                                         mb_to_left_edge,
-                                                         mb_to_right_edge,
-                                                         mb_to_top_edge,
-                                                         mb_to_bottom_edge);
-        }
-        break;
-      default:
-;
+          if (mbmi->second_ref_frame > 0) {
+            decode_mv(r, &mv1->as_mv, &best_mv_second.as_mv, nmvc,
+                      &cm->fc.NMVcount, xd->allow_high_precision_mv);
+            mbmi->need_to_clamp_secondmv = check_mv_bounds(mv1,
+                                                             mb_to_left_edge,
+                                                             mb_to_right_edge,
+                                                             mb_to_top_edge,
+                                                             mb_to_bottom_edge);
+          }
+          break;
+        default:
 #if CONFIG_DEBUG
-        assert(0);
+          assert(0);
 #endif
+          break;
+      }
     }
   } else {
     // required for left and above block mv

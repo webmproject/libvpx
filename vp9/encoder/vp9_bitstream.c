@@ -512,7 +512,7 @@ static void pack_mb_tokens(vp9_writer* const bc,
 static void write_sb_mv_ref(vp9_writer *bc, MB_PREDICTION_MODE m,
                             const vp9_prob *p) {
 #if CONFIG_DEBUG
-  assert(NEARESTMV <= m  &&  m < SPLITMV);
+  assert(NEARESTMV <= m && m <= NEWMV);
 #endif
   write_token(bc, vp9_sb_mv_ref_tree, p,
               vp9_sb_mv_ref_encoding_array - NEARESTMV + m);
@@ -717,21 +717,20 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, MODE_INFO *m,
 
     // If segment skip is not enabled code the mode.
     if (!vp9_segfeature_active(xd, segment_id, SEG_LVL_SKIP)) {
-      if (mi->sb_type >= BLOCK_SIZE_SB8X8)
+      if (mi->sb_type >= BLOCK_SIZE_SB8X8) {
         write_sb_mv_ref(bc, mode, mv_ref_p);
-      vp9_accum_mv_refs(&cpi->common, mode, mi->mb_mode_context[rf]);
+        vp9_accum_mv_refs(&cpi->common, mode, mi->mb_mode_context[rf]);
+      }
     }
 
-    if (is_inter_mode(mode)) {
-      if (cpi->common.mcomp_filter_type == SWITCHABLE) {
-        write_token(bc, vp9_switchable_interp_tree,
-                    vp9_get_pred_probs(&cpi->common, xd,
-                                       PRED_SWITCHABLE_INTERP),
-                    vp9_switchable_interp_encodings +
-                    vp9_switchable_interp_map[mi->interp_filter]);
-      } else {
-        assert(mi->interp_filter == cpi->common.mcomp_filter_type);
-      }
+    if (cpi->common.mcomp_filter_type == SWITCHABLE) {
+      write_token(bc, vp9_switchable_interp_tree,
+                  vp9_get_pred_probs(&cpi->common, xd,
+                                     PRED_SWITCHABLE_INTERP),
+                  vp9_switchable_interp_encodings +
+                  vp9_switchable_interp_map[mi->interp_filter]);
+    } else {
+      assert(mi->interp_filter == cpi->common.mcomp_filter_type);
     }
 
     // does the feature use compound prediction or not
@@ -741,57 +740,51 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, MODE_INFO *m,
                 vp9_get_pred_prob(pc, xd, PRED_COMP));
     }
 
-    switch (mode) { /* new, split require MVs */
-      case NEWMV:
+    if (xd->mode_info_context->mbmi.sb_type < BLOCK_SIZE_SB8X8) {
+      int j;
+      MB_PREDICTION_MODE blockmode;
+      int_mv blockmv;
+      int bwl = b_width_log2(mi->sb_type), bw = 1 << bwl;
+      int bhl = b_height_log2(mi->sb_type), bh = 1 << bhl;
+      int idx, idy;
+      for (idy = 0; idy < 2; idy += bh) {
+        for (idx = 0; idx < 2; idx += bw) {
+          j = idy * 2 + idx;
+          blockmode = cpi->mb.partition_info->bmi[j].mode;
+          blockmv = cpi->mb.partition_info->bmi[j].mv;
+          write_sb_mv_ref(bc, blockmode, mv_ref_p);
+          vp9_accum_mv_refs(&cpi->common, blockmode, mi->mb_mode_context[rf]);
+          if (blockmode == NEWMV) {
 #ifdef ENTROPY_STATS
-        active_section = 5;
+            active_section = 11;
 #endif
-        vp9_encode_mv(bc,
-                      &mi->mv[0].as_mv, &mi->best_mv.as_mv,
-                      nmvc, xd->allow_high_precision_mv);
+            vp9_encode_mv(bc, &blockmv.as_mv, &mi->best_mv.as_mv,
+                          nmvc, xd->allow_high_precision_mv);
 
-        if (mi->second_ref_frame > 0)
-          vp9_encode_mv(bc,
-                        &mi->mv[1].as_mv, &mi->best_second_mv.as_mv,
-                        nmvc, xd->allow_high_precision_mv);
-        break;
-      case SPLITMV: {
-        int j;
-        MB_PREDICTION_MODE blockmode;
-        int_mv blockmv;
-        int bwl = b_width_log2(mi->sb_type), bw = 1 << bwl;
-        int bhl = b_height_log2(mi->sb_type), bh = 1 << bhl;
-        int idx, idy;
-        for (idy = 0; idy < 2; idy += bh) {
-          for (idx = 0; idx < 2; idx += bw) {
-            j = idy * 2 + idx;
-            blockmode = cpi->mb.partition_info->bmi[j].mode;
-            blockmv = cpi->mb.partition_info->bmi[j].mv;
-            write_sb_mv_ref(bc, blockmode, mv_ref_p);
-            vp9_accum_mv_refs(&cpi->common, blockmode, mi->mb_mode_context[rf]);
-            if (blockmode == NEWMV) {
-#ifdef ENTROPY_STATS
-              active_section = 11;
-#endif
-              vp9_encode_mv(bc, &blockmv.as_mv, &mi->best_mv.as_mv,
+            if (mi->second_ref_frame > 0)
+              vp9_encode_mv(bc,
+                            &cpi->mb.partition_info->bmi[j].second_mv.as_mv,
+                            &mi->best_second_mv.as_mv,
                             nmvc, xd->allow_high_precision_mv);
-
-              if (mi->second_ref_frame > 0)
-                vp9_encode_mv(bc,
-                              &cpi->mb.partition_info->bmi[j].second_mv.as_mv,
-                              &mi->best_second_mv.as_mv,
-                              nmvc, xd->allow_high_precision_mv);
-            }
           }
         }
+      }
 
 #ifdef MODE_STATS
-        ++count_mb_seg[mi->partitioning];
+      ++count_mb_seg[mi->partitioning];
 #endif
-        break;
-      }
-      default:
-        break;
+    } else if (mode == NEWMV) {
+#ifdef ENTROPY_STATS
+      active_section = 5;
+#endif
+      vp9_encode_mv(bc,
+                    &mi->mv[0].as_mv, &mi->best_mv.as_mv,
+                    nmvc, xd->allow_high_precision_mv);
+
+      if (mi->second_ref_frame > 0)
+        vp9_encode_mv(bc,
+                      &mi->mv[1].as_mv, &mi->best_second_mv.as_mv,
+                      nmvc, xd->allow_high_precision_mv);
     }
   }
 }
