@@ -88,8 +88,8 @@ typedef struct {
   vp9_prob switchable_interp_prob[VP9_SWITCHABLE_FILTERS + 1]
                                  [VP9_SWITCHABLE_FILTERS - 1];
 
-  int mv_ref_ct[INTER_MODE_CONTEXTS][4][2];
-  int vp9_mode_contexts[INTER_MODE_CONTEXTS][4];
+  int mv_ref_ct[INTER_MODE_CONTEXTS][VP9_MVREFS - 1][2];
+  int vp9_mode_contexts[INTER_MODE_CONTEXTS][VP9_MVREFS - 1];
 
 } CODING_CONTEXT;
 
@@ -615,7 +615,7 @@ typedef struct VP9_COMP {
 #endif
 
 #ifdef ENTROPY_STATS
-  int64_t mv_ref_stats[INTER_MODE_CONTEXTS][4][2];
+  int64_t mv_ref_stats[INTER_MODE_CONTEXTS][VP9_MVREFS - 1][2];
 #endif
 } VP9_COMP;
 

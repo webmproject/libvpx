@@ -79,8 +79,8 @@ typedef struct frame_contexts {
   vp9_prob switchable_interp_prob[VP9_SWITCHABLE_FILTERS + 1]
                                  [VP9_SWITCHABLE_FILTERS - 1];
 
-  int vp9_mode_contexts[INTER_MODE_CONTEXTS][4];
-  unsigned int mv_ref_ct[INTER_MODE_CONTEXTS][4][2];
+  int vp9_mode_contexts[INTER_MODE_CONTEXTS][VP9_MVREFS - 1];
+  unsigned int mv_ref_ct[INTER_MODE_CONTEXTS][VP9_MVREFS - 1][2];
 } FRAME_CONTEXT;
 
 typedef enum {

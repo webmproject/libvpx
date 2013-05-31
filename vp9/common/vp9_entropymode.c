@@ -178,7 +178,7 @@ void vp9_init_mode_contexts(VP9_COMMON *pc) {
 void vp9_accum_mv_refs(VP9_COMMON *pc,
                        MB_PREDICTION_MODE m,
                        const int context) {
-  unsigned int (*mv_ref_ct)[4][2] = pc->fc.mv_ref_ct;
+  unsigned int (*mv_ref_ct)[VP9_MVREFS - 1][2] = pc->fc.mv_ref_ct;
 
   if (m == ZEROMV) {
     ++mv_ref_ct[context][0][0];
@@ -201,8 +201,8 @@ void vp9_accum_mv_refs(VP9_COMMON *pc,
 #define MVREF_MAX_UPDATE_FACTOR 128
 void vp9_adapt_mode_context(VP9_COMMON *pc) {
   int i, j;
-  unsigned int (*mv_ref_ct)[4][2] = pc->fc.mv_ref_ct;
-  int (*mode_context)[4] = pc->fc.vp9_mode_contexts;
+  unsigned int (*mv_ref_ct)[VP9_MVREFS - 1][2] = pc->fc.mv_ref_ct;
+  int (*mode_context)[VP9_MVREFS - 1] = pc->fc.vp9_mode_contexts;
 
   for (j = 0; j < INTER_MODE_CONTEXTS; j++) {
     for (i = 0; i < 4; i++) {

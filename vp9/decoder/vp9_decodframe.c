@@ -1076,7 +1076,7 @@ int vp9_decode_frame(VP9D_COMP *pbi, const uint8_t **p_data_end) {
   if (!keyframe) {
     int i, j;
     for (i = 0; i < INTER_MODE_CONTEXTS; ++i)
-      for (j = 0; j < 4; ++j)
+      for (j = 0; j < VP9_MVREFS - 1; ++j)
         if (vp9_read(&header_bc, 252))
           pc->fc.vp9_mode_contexts[i][j] = vp9_read_prob(&header_bc);
   }

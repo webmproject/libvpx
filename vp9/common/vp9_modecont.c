@@ -11,12 +11,12 @@
 
 #include "vp9/common/vp9_entropy.h"
 
-const int vp9_default_mode_contexts[INTER_MODE_CONTEXTS][4] = {
-  {2,       173,   34,   229},  // 0 = both zero mv
-  {7,       145,   85,   225},  // 1 = one zero mv + one a predicted mv
-  {7,       166,   63,   231},  // 2 = two predicted mvs
-  {7,       94,    66,   219},  // 3 = one predicted/zero and one new mv
-  {8,       64,    46,   213},  // 4 = two new mvs
-  {17,      81,    31,   231},  // 5 = one intra neighbour + x
-  {25,      29,    30,   246},  // 6 = two intra neighbours
+const int vp9_default_mode_contexts[INTER_MODE_CONTEXTS][VP9_MVREFS - 1] = {
+  {2,       173,   34},  // 0 = both zero mv
+  {7,       145,   85},  // 1 = one zero mv + one a predicted mv
+  {7,       166,   63},  // 2 = two predicted mvs
+  {7,       94,    66},  // 3 = one predicted/zero and one new mv
+  {8,       64,    46},  // 4 = two new mvs
+  {17,      81,    31},  // 5 = one intra neighbour + x
+  {25,      29,    30},  // 6 = two intra neighbours
 };
