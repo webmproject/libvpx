@@ -49,10 +49,15 @@ void vp9_get_tile_n_bits(VP9_COMMON *cm, int *min_log2_n_tiles_ptr,
   for (max_log2_n_tiles = 0;
        (sb_cols >> max_log2_n_tiles) >= MIN_TILE_WIDTH_SBS;
        max_log2_n_tiles++) {}
+  max_log2_n_tiles--;
+  if (max_log2_n_tiles <  0)
+    max_log2_n_tiles = 0;
+
   for (min_log2_n_tiles = 0;
        (MAX_TILE_WIDTH_SBS << min_log2_n_tiles) < sb_cols;
        min_log2_n_tiles++) {}
 
+  assert(max_log2_n_tiles >= min_log2_n_tiles);
   *min_log2_n_tiles_ptr = min_log2_n_tiles;
   *delta_log2_n_tiles = max_log2_n_tiles - min_log2_n_tiles;
 }
