@@ -356,8 +356,7 @@ static void update_state(VP9_COMP *cpi,
       if ((xd->mb_to_right_edge >> (3 + LOG2_MI_SIZE)) + bw > x_idx &&
           (xd->mb_to_bottom_edge >> (3 + LOG2_MI_SIZE)) + bh > y) {
         MODE_INFO *mi_addr = xd->mode_info_context + x_idx + y * mis;
-
-        vpx_memcpy(mi_addr, mi, sizeof(MODE_INFO));
+        *mi_addr = *mi;
       }
     }
   }
@@ -367,15 +366,10 @@ static void update_state(VP9_COMP *cpi,
     ctx->txfm_rd_diff[ALLOW_32X32] = ctx->txfm_rd_diff[ALLOW_16X16];
   }
 
-  if (mbmi->ref_frame != INTRA_FRAME &&
-      mbmi->sb_type < BLOCK_SIZE_SB8X8) {
-    vpx_memcpy(x->partition_info, &ctx->partition_info,
-               sizeof(PARTITION_INFO));
-
-    mbmi->mv[0].as_int =
-        x->partition_info->bmi[3].mv.as_int;
-    mbmi->mv[1].as_int =
-        x->partition_info->bmi[3].second_mv.as_int;
+  if (mbmi->ref_frame != INTRA_FRAME && mbmi->sb_type < BLOCK_SIZE_SB8X8) {
+    *x->partition_info = ctx->partition_info;
+    mbmi->mv[0].as_int = x->partition_info->bmi[3].mv.as_int;
+    mbmi->mv[1].as_int = x->partition_info->bmi[3].second_mv.as_int;
   }
 
   x->skip = ctx->skip;
