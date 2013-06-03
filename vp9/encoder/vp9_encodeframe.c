@@ -1928,7 +1928,10 @@ static void sum_intra_stats(VP9_COMP *cpi, MACROBLOCK *x) {
 
   ++cpi->y_uv_mode_count[m][uvm];
   if (xd->mode_info_context->mbmi.sb_type >= BLOCK_SIZE_SB8X8) {
-    ++cpi->y_mode_count[m];
+    const BLOCK_SIZE_TYPE bsize = xd->mode_info_context->mbmi.sb_type;
+    const int bwl = b_width_log2(bsize), bhl = b_height_log2(bsize);
+    const int bsl = MIN(bwl, bhl);
+    ++cpi->y_mode_count[MIN(bsl, 3)][m];
   } else {
     int idx, idy;
     int bw = 1 << b_width_log2(xd->mode_info_context->mbmi.sb_type);
@@ -1936,7 +1939,7 @@ static void sum_intra_stats(VP9_COMP *cpi, MACROBLOCK *x) {
     for (idy = 0; idy < 2; idy += bh) {
       for (idx = 0; idx < 2; idx += bw) {
         int m = xd->mode_info_context->bmi[idy * 2 + idx].as_mode.first;
-        ++cpi->y_mode_count[m];
+        ++cpi->y_mode_count[0][m];
       }
     }
   }

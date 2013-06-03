@@ -264,7 +264,7 @@ void vp9_initialize_rd_consts(VP9_COMP *cpi, int qindex) {
 
   for (i = 0; i < NUM_PARTITION_CONTEXTS; i++)
     vp9_cost_tokens(cpi->mb.partition_cost[i],
-                    cpi->common.fc.partition_prob[i],
+                    cpi->common.fc.partition_prob[cpi->common.frame_type][i],
                     vp9_partition_tree);
 
   /*rough estimate for costing*/

@@ -21,6 +21,7 @@
 #include "vp9/common/vp9_common.h"
 #include "vp9/common/vp9_enums.h"
 
+#define BLOCK_SIZE_GROUPS   4
 #define MAX_MB_SEGMENTS     8
 #define MB_SEG_TREE_PROBS   (MAX_MB_SEGMENTS-1)
 #define PREDICTION_PROBS 3
@@ -55,7 +56,8 @@ static INLINE int combine_entropy_contexts(ENTROPY_CONTEXT a,
 
 typedef enum {
   KEY_FRAME = 0,
-  INTER_FRAME = 1
+  INTER_FRAME = 1,
+  NUM_FRAME_TYPES,
 } FRAME_TYPE;
 
 typedef enum {

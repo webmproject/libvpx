@@ -15,58 +15,87 @@
 #include "vp9/common/vp9_alloccommon.h"
 #include "vpx_mem/vpx_mem.h"
 
-static const unsigned int y_mode_cts[VP9_INTRA_MODES] = {
-  /* DC V  H D45 D135 D117 D153 D27 D63 TM */
-  98, 19, 15, 14, 14, 14, 14, 12, 12, 13,
+static const vp9_prob default_kf_uv_probs[VP9_INTRA_MODES]
+                                         [VP9_INTRA_MODES - 1] = {
+  { 149,  13,  48, 141, 174, 131,  54,  61, 109 } /* y = dc */,
+  { 120,  17, 119, 132, 103, 103,  54, 100, 130 } /* y = v */,
+  { 114,  16,  19, 177, 220, 145,  31,  33, 122 } /* y = h */,
+  { 119,  12,  43, 102, 133, 133,  77,  90, 102 } /* y = d45 */,
+  { 110,  10,  28, 144,  78, 158,  40,  49, 161 } /* y = d135 */,
+  { 114,  10,  46, 169,  50,  96,  48,  70, 150 } /* y = d117 */,
+  { 116,  10,  24, 125, 134, 168,  26,  27, 193 } /* y = d153 */,
+  { 121,  14,  26, 124, 175, 143,  36,  37,  79 } /* y = d27 */,
+  { 116,  13,  54, 100, 105, 122,  58, 126, 122 } /* y = d63 */,
+  {  98,  22,  60, 147, 159, 124,  45,  68, 128 } /* y = tm */
 };
 
-static const unsigned int uv_mode_cts[VP9_INTRA_MODES][VP9_INTRA_MODES] = {
-  /* DC   V   H  D45 135 117 153 D27 D63 TM */
-  { 200, 15, 15, 10, 10, 10, 10, 10, 10,  6}, /* DC */
-  { 130, 75, 10, 10, 10, 10, 10, 10, 10,  6}, /* V */
-  { 130, 10, 75, 10, 10, 10, 10, 10, 10,  6}, /* H */
-  { 130, 15, 10, 75, 10, 10, 10, 10, 10,  6}, /* D45 */
-  { 150, 15, 10, 10, 75, 10, 10, 10, 10,  6}, /* D135 */
-  { 150, 15, 10, 10, 10, 75, 10, 10, 10,  6}, /* D117 */
-  { 150, 15, 10, 10, 10, 10, 75, 10, 10,  6}, /* D153 */
-  { 150, 15, 10, 10, 10, 10, 10, 75, 10,  6}, /* D27 */
-  { 150, 15, 10, 10, 10, 10, 10, 10, 75,  6}, /* D63 */
-  { 160, 30, 30, 10, 10, 10, 10, 10, 10, 16}, /* TM */
+static const vp9_prob default_if_y_probs[BLOCK_SIZE_GROUPS]
+                                        [VP9_INTRA_MODES - 1] = {
+  {  42,  31,  23, 150, 161, 193,  32,  53, 100 } /* block_size < 8x8 */,
+  { 132,  58,  30, 160, 209, 195,  52,  47,  76 } /* block_size < 16x16 */,
+  { 179,  85,  24, 168, 236, 198,  87,  45,  46 } /* block_size < 32x32 */,
+  { 221, 176,  63, 133, 233, 121, 125, 105,  34 } /* block_size >= 32x32 */
 };
 
-static const unsigned int kf_uv_mode_cts[VP9_INTRA_MODES][VP9_INTRA_MODES] = {
-  // DC   V   H  D45 135 117 153 D27 D63 TM
-  { 160, 24, 24, 20, 20, 20, 20, 20, 20,  8}, /* DC */
-  { 102, 64, 30, 20, 20, 20, 20, 20, 20, 10}, /* V */
-  { 102, 30, 64, 20, 20, 20, 20, 20, 20, 10}, /* H */
-  { 102, 33, 20, 64, 20, 20, 20, 20, 20, 14}, /* D45 */
-  { 102, 33, 20, 20, 64, 20, 20, 20, 20, 14}, /* D135 */
-  { 122, 33, 20, 20, 20, 64, 20, 20, 20, 14}, /* D117 */
-  { 102, 33, 20, 20, 20, 20, 64, 20, 20, 14}, /* D153 */
-  { 102, 33, 20, 20, 20, 20, 20, 64, 20, 14}, /* D27 */
-  { 102, 33, 20, 20, 20, 20, 20, 20, 64, 14}, /* D63 */
-  { 132, 36, 30, 20, 20, 20, 20, 20, 20, 18}, /* TM */
+static const vp9_prob default_if_uv_probs[VP9_INTRA_MODES]
+                                         [VP9_INTRA_MODES - 1] = {
+  { 115,   7,  78, 180, 210, 127,  34,  57, 104 } /* y = dc */,
+  {  43,   9, 165, 140, 112,  93,  45, 125, 117 } /* y = v */,
+  {  68,   6,  25, 206, 241, 154,  16,  23, 102 } /* y = h */,
+  {  90,   5,  48, 117, 155, 134,  61,  88,  96 } /* y = d45 */,
+  {  77,   5,  43, 148, 100, 147,  37,  60, 146 } /* y = d135 */,
+  {  75,   5,  57, 167,  62,  91,  45,  76, 139 } /* y = d117 */,
+  {  86,   4,  34, 155, 185, 163,  22,  29, 160 } /* y = d153 */,
+  {  82,   5,  34, 155, 207, 144,  26,  38,  79 } /* y = d27 */,
+  {  69,   6,  65, 105, 104, 122,  48, 131, 116 } /* y = d63 */,
+  {  86,  16, 114, 177, 189, 108,  28,  72, 120 } /* y = tm */
 };
 
-const vp9_prob vp9_partition_probs[NUM_PARTITION_CONTEXTS]
+const vp9_prob vp9_partition_probs[NUM_FRAME_TYPES][NUM_PARTITION_CONTEXTS]
                                   [PARTITION_TYPES - 1] = {
-  // FIXME(jingning,rbultje) put real probabilities here
-  {202, 162, 107},
-  {16,  2,   169},
-  {3,   246,  19},
-  {104, 90,  134},
-  {202, 162, 107},
-  {16,  2,   169},
-  {3,   246,  19},
-  {104, 90,  134},
-  {202, 162, 107},
-  {16,  2,   169},
-  {3,   246,  19},
-  {104, 90,  134},
-  {183, 70,  109},
-  {30,  14,  162},
-  {67,  208,  22},
-  {4,   17,   5},
+  { /* frame_type = keyframe */
+    /* 8x8 -> 4x4 */
+    { 164, 121, 109 } /* a/l both not split */,
+    {  69,  11, 129 } /* a split, l not split */,
+    {  52, 181,  37 } /* l split, a not split */,
+    {  66,  71,  93 } /* a/l both split */,
+    /* 16x16 -> 8x8 */
+    { 154,  48,  43 } /* a/l both not split */,
+    {  81,  11,  63 } /* a split, l not split */,
+    {  67,  65,  17 } /* l split, a not split */,
+    {  57,  18,  24 } /* a/l both split */,
+    /* 32x32 -> 16x16 */
+    { 156,  42,  35 } /* a/l both not split */,
+    {  74,  10,  40 } /* a split, l not split */,
+    {  59,  53,  10 } /* l split, a not split */,
+    {  28,  10,   9 } /* a/l both split */,
+    /* 64x64 -> 32x32 */
+    { 168,  32,  43 } /* a/l both not split */,
+    {  59,  13,  41 } /* a split, l not split */,
+    {  60,  25,  10 } /* l split, a not split */,
+    {  13,   5,   4 } /* a/l both split */
+  }, { /* frame_type = interframe */
+    /* 8x8 -> 4x4 */
+    { 192, 121, 151 } /* a/l both not split */,
+    { 134,  63, 162 } /* a split, l not split */,
+    { 136, 134, 127 } /* l split, a not split */,
+    { 101,  97, 131 } /* a/l both split */,
+    /* 16x16 -> 8x8 */
+    { 167,  67,  80 } /* a/l both not split */,
+    {  87,  36,  70 } /* a split, l not split */,
+    {  90,  61,  45 } /* l split, a not split */,
+    {  46,  31,  32 } /* a/l both split */,
+    /* 32x32 -> 16x16 */
+    { 167,  63,  75 } /* a/l both not split */,
+    {  67,  27,  61 } /* a split, l not split */,
+    {  56,  87,  31 } /* l split, a not split */,
+    {  15,  13,  11 } /* a/l both split */,
+    /* 64x64 -> 32x32 */
+    { 222,  45,  44 } /* a/l both not split */,
+    {  62,  17,  62 } /* a split, l not split */,
+    {  52,  65,  16 } /* l split, a not split */,
+    {   9,   7,   6 } /* a/l both split */
+  }
 };
 
 /* Array indices are identical to previously-existing INTRAMODECONTEXTNODES. */
@@ -101,18 +130,12 @@ struct vp9_token vp9_sb_mv_ref_encoding_array[VP9_INTER_MODES];
 struct vp9_token vp9_partition_encodings[PARTITION_TYPES];
 
 void vp9_init_mbmode_probs(VP9_COMMON *x) {
-  unsigned int bct[VP9_INTRA_MODES][2];  // num Ymodes > num UV modes
-  int i;
-
-  vp9_tree_probs_from_distribution(vp9_intra_mode_tree, x->fc.y_mode_prob,
-                                   bct, y_mode_cts, 0);
-
-  for (i = 0; i < VP9_INTRA_MODES; i++) {
-    vp9_tree_probs_from_distribution(vp9_intra_mode_tree, x->kf_uv_mode_prob[i],
-                                     bct, kf_uv_mode_cts[i], 0);
-    vp9_tree_probs_from_distribution(vp9_intra_mode_tree, x->fc.uv_mode_prob[i],
-                                     bct, uv_mode_cts[i], 0);
-  }
+  vpx_memcpy(x->fc.uv_mode_prob, default_if_uv_probs,
+             sizeof(default_if_uv_probs));
+  vpx_memcpy(x->kf_uv_mode_prob, default_kf_uv_probs,
+             sizeof(default_kf_uv_probs));
+  vpx_memcpy(x->fc.y_mode_prob, default_if_y_probs,
+             sizeof(default_if_y_probs));
 
   vpx_memcpy(x->fc.switchable_interp_prob, vp9_switchable_interp_prob,
              sizeof(vp9_switchable_interp_prob));
@@ -280,9 +303,10 @@ void vp9_adapt_mode_probs(VP9_COMMON *cm) {
   printf("};\n");
 #endif
 
-  update_mode_probs(VP9_INTRA_MODES, vp9_intra_mode_tree,
-                    fc->y_mode_counts, fc->pre_y_mode_prob,
-                    fc->y_mode_prob, 0);
+  for (i = 0; i < BLOCK_SIZE_GROUPS; i++)
+    update_mode_probs(VP9_INTRA_MODES, vp9_intra_mode_tree,
+                      fc->y_mode_counts[i], fc->pre_y_mode_prob[i],
+                      fc->y_mode_prob[i], 0);
 
   for (i = 0; i < VP9_INTRA_MODES; ++i)
     update_mode_probs(VP9_INTRA_MODES, vp9_intra_mode_tree,
@@ -292,7 +316,7 @@ void vp9_adapt_mode_probs(VP9_COMMON *cm) {
   for (i = 0; i < NUM_PARTITION_CONTEXTS; i++)
     update_mode_probs(PARTITION_TYPES, vp9_partition_tree,
                       fc->partition_counts[i], fc->pre_partition_prob[i],
-                      fc->partition_prob[i], 0);
+                      fc->partition_prob[INTER_FRAME][i], 0);
 
   if (cm->mcomp_filter_type == SWITCHABLE) {
     for (i = 0; i <= VP9_SWITCHABLE_FILTERS; i++) {

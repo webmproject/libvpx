@@ -45,18 +45,19 @@
 #define MAX_LAG_BUFFERS 25
 
 typedef struct frame_contexts {
-  vp9_prob y_mode_prob[VP9_INTRA_MODES - 1]; /* interframe intra mode probs */
+  vp9_prob y_mode_prob[BLOCK_SIZE_GROUPS][VP9_INTRA_MODES - 1];
   vp9_prob uv_mode_prob[VP9_INTRA_MODES][VP9_INTRA_MODES - 1];
-  vp9_prob partition_prob[NUM_PARTITION_CONTEXTS][PARTITION_TYPES - 1];
+  vp9_prob partition_prob[NUM_FRAME_TYPES][NUM_PARTITION_CONTEXTS]
+                         [PARTITION_TYPES - 1];
 
   nmv_context nmvc;
   nmv_context pre_nmvc;
   /* interframe intra mode probs */
-  vp9_prob pre_y_mode_prob[VP9_INTRA_MODES - 1];
+  vp9_prob pre_y_mode_prob[BLOCK_SIZE_GROUPS][VP9_INTRA_MODES - 1];
   vp9_prob pre_uv_mode_prob[VP9_INTRA_MODES][VP9_INTRA_MODES - 1];
   vp9_prob pre_partition_prob[NUM_PARTITION_CONTEXTS][PARTITION_TYPES - 1];
   /* interframe intra mode probs */
-  unsigned int y_mode_counts[VP9_INTRA_MODES];
+  unsigned int y_mode_counts[BLOCK_SIZE_GROUPS][VP9_INTRA_MODES];
   unsigned int uv_mode_counts[VP9_INTRA_MODES][VP9_INTRA_MODES];
   unsigned int partition_counts[NUM_PARTITION_CONTEXTS][PARTITION_TYPES];
 

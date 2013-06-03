@@ -21,7 +21,7 @@ extern int vp9_mv_cont(const int_mv *l, const int_mv *a);
 
 extern const vp9_prob vp9_kf_default_bmode_probs[VP9_INTRA_MODES]
                                                 [VP9_INTRA_MODES]
-                                                [VP9_INTRA_MODES -1 ];
+                                                [VP9_INTRA_MODES - 1];
 
 extern const vp9_tree_index vp9_intra_mode_tree[];
 extern const vp9_tree_index  vp9_sb_mv_ref_tree[];
@@ -35,6 +35,9 @@ extern struct vp9_token vp9_sb_mv_ref_encoding_array[VP9_INTER_MODES];
 // probability models for partition information
 extern const vp9_tree_index  vp9_partition_tree[];
 extern struct vp9_token vp9_partition_encodings[PARTITION_TYPES];
+extern const vp9_prob vp9_partition_probs[NUM_FRAME_TYPES]
+                                         [NUM_PARTITION_CONTEXTS]
+                                         [PARTITION_TYPES - 1];
 
 void vp9_entropy_mode_init(void);
 

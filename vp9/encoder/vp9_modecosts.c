@@ -28,7 +28,7 @@ void vp9_init_mode_costs(VP9_COMP *c) {
   }
 
   // TODO(rbultje) separate tables for superblock costing?
-  vp9_cost_tokens(c->mb.mbmode_cost, x->fc.y_mode_prob,
+  vp9_cost_tokens(c->mb.mbmode_cost, x->fc.y_mode_prob[1],
                   vp9_intra_mode_tree);
   vp9_cost_tokens(c->mb.intra_uv_mode_cost[1],
                   x->fc.uv_mode_prob[VP9_INTRA_MODES - 1], vp9_intra_mode_tree);

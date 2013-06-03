@@ -474,7 +474,7 @@ static void decode_modes_sb(VP9D_COMP *pbi, int mi_row, int mi_col,
     xd->above_seg_context = pc->above_seg_context + mi_col;
     pl = partition_plane_context(xd, bsize);
     partition = treed_read(r, vp9_partition_tree,
-                           pc->fc.partition_prob[pl]);
+                           pc->fc.partition_prob[pc->frame_type][pl]);
     pc->fc.partition_counts[pl][partition]++;
   }
 
@@ -757,7 +757,7 @@ static void update_frame_context(FRAME_CONTEXT *fc) {
   vp9_copy(fc->pre_coef_probs, fc->coef_probs);
   vp9_copy(fc->pre_y_mode_prob, fc->y_mode_prob);
   vp9_copy(fc->pre_uv_mode_prob, fc->uv_mode_prob);
-  vp9_copy(fc->pre_partition_prob, fc->partition_prob);
+  vp9_copy(fc->pre_partition_prob, fc->partition_prob[1]);
   fc->pre_nmvc = fc->nmvc;
   vp9_copy(fc->pre_switchable_interp_prob, fc->switchable_interp_prob);
   vp9_copy(fc->pre_inter_mode_probs, fc->inter_mode_probs);
