@@ -549,7 +549,11 @@ static void super_block_yrd_for_txfm(VP9_COMMON *const cm, MACROBLOCK *x,
                                      BLOCK_SIZE_TYPE bsize, TX_SIZE tx_size) {
   MACROBLOCKD *const xd = &x->e_mbd;
   xd->mode_info_context->mbmi.txfm_size = tx_size;
-  vp9_xform_quant_sby(cm, x, bsize);
+
+  if (xd->mode_info_context->mbmi.ref_frame == INTRA_FRAME)
+    vp9_encode_intra_block_y(cm, x, bsize);
+  else
+    vp9_xform_quant_sby(cm, x, bsize);
 
   *distortion = block_error_sby(x, bsize, tx_size == TX_32X32 ? 0 : 2);
   *rate       = rdcost_plane(cm, x, 0, bsize, tx_size);
@@ -565,7 +569,8 @@ static void super_block_yrd(VP9_COMP *cpi,
   MACROBLOCKD *xd = &x->e_mbd;
   MB_MODE_INFO *const mbmi = &xd->mode_info_context->mbmi;
 
-  vp9_subtract_sby(x, bs);
+  if (mbmi->ref_frame > INTRA_FRAME)
+    vp9_subtract_sby(x, bs);
 
   if (cpi->speed > 4) {
     if (bs >= BLOCK_SIZE_SB32X32) {
@@ -829,7 +834,6 @@ static int64_t rd_pick_intra_sby_mode(VP9_COMP *cpi, MACROBLOCK *x,
       bmode_costs = x->y_mode_costs[A][L];
     }
     x->e_mbd.mode_info_context->mbmi.mode = mode;
-    vp9_build_intra_predictors_sby_s(&x->e_mbd, bsize);
 
     super_block_yrd(cpi, x, &this_rate_tokenonly, &this_distortion, &s,
                     bsize, local_txfm_cache);
@@ -2406,6 +2410,7 @@ void vp9_rd_pick_intra_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
 
   ctx->skip = 0;
   xd->mode_info_context->mbmi.mode = DC_PRED;
+  xd->mode_info_context->mbmi.ref_frame = INTRA_FRAME;
   err = rd_pick_intra_sby_mode(cpi, x, &rate_y, &rate_y_tokenonly,
                                &dist_y, &y_skip, bsize, txfm_cache);
   mode = xd->mode_info_context->mbmi.mode;
@@ -2736,7 +2741,6 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
         txfm_cache[i] = txfm_cache[ONLY_4X4];
     } else if (ref_frame == INTRA_FRAME) {
       TX_SIZE uv_tx;
-      vp9_build_intra_predictors_sby_s(xd, bsize);
       super_block_yrd(cpi, x, &rate_y, &distortion_y, &skippable,
                       bsize, txfm_cache);
 
