@@ -1205,20 +1205,21 @@ static void segment_reference_frames(VP9_COMP *cpi) {
   }
 }
 
-static void encode_loopfilter(VP9_COMMON *pc, MACROBLOCKD *xd, vp9_writer *w) {
+static void encode_loopfilter(VP9_COMMON *pc, MACROBLOCKD *xd,
+                              struct vp9_write_bit_buffer *wb) {
   int i;
 
   // Encode the loop filter level and type
-  vp9_write_literal(w, pc->filter_level, 6);
-  vp9_write_literal(w, pc->sharpness_level, 3);
+  vp9_wb_write_literal(wb, pc->filter_level, 6);
+  vp9_wb_write_literal(wb, pc->sharpness_level, 3);
 
   // Write out loop filter deltas applied at the MB level based on mode or
   // ref frame (if they are enabled).
-  vp9_write_bit(w, xd->mode_ref_lf_delta_enabled);
+  vp9_wb_write_bit(wb, xd->mode_ref_lf_delta_enabled);
 
   if (xd->mode_ref_lf_delta_enabled) {
     // Do the deltas need to be updated
-    vp9_write_bit(w, xd->mode_ref_lf_delta_update);
+    vp9_wb_write_bit(wb, xd->mode_ref_lf_delta_update);
     if (xd->mode_ref_lf_delta_update) {
       // Send update
       for (i = 0; i < MAX_REF_LF_DELTAS; i++) {
@@ -1227,18 +1228,13 @@ static void encode_loopfilter(VP9_COMMON *pc, MACROBLOCKD *xd, vp9_writer *w) {
         // Frame level data
         if (delta != xd->last_ref_lf_deltas[i]) {
           xd->last_ref_lf_deltas[i] = delta;
-          vp9_write_bit(w, 1);
+          vp9_wb_write_bit(wb, 1);
 
-          if (delta > 0) {
-            vp9_write_literal(w, delta & 0x3F, 6);
-            vp9_write_bit(w, 0);  // sign
-          } else {
-            assert(delta < 0);
-            vp9_write_literal(w, (-delta) & 0x3F, 6);
-            vp9_write_bit(w, 1);  // sign
-          }
+          assert(delta != 0);
+          vp9_wb_write_literal(wb, abs(delta) & 0x3F, 6);
+          vp9_wb_write_bit(wb, delta < 0);
         } else {
-          vp9_write_bit(w, 0);
+          vp9_wb_write_bit(wb, 0);
         }
       }
 
@@ -1247,39 +1243,35 @@ static void encode_loopfilter(VP9_COMMON *pc, MACROBLOCKD *xd, vp9_writer *w) {
         const int delta = xd->mode_lf_deltas[i];
         if (delta != xd->last_mode_lf_deltas[i]) {
           xd->last_mode_lf_deltas[i] = delta;
-          vp9_write_bit(w, 1);
+          vp9_wb_write_bit(wb, 1);
 
-          if (delta > 0) {
-            vp9_write_literal(w, delta & 0x3F, 6);
-            vp9_write_bit(w, 0);  // sign
-          } else {
-            assert(delta < 0);
-            vp9_write_literal(w, (-delta) & 0x3F, 6);
-            vp9_write_bit(w, 1);  // sign
-          }
+          assert(delta != 0);
+          vp9_wb_write_literal(wb, abs(delta) & 0x3F, 6);
+          vp9_wb_write_bit(wb, delta < 0);
         } else {
-          vp9_write_bit(w, 0);
+          vp9_wb_write_bit(wb, 0);
         }
       }
     }
   }
 }
 
-static void put_delta_q(vp9_writer *bc, int delta_q) {
+static void write_delta_q(struct vp9_write_bit_buffer *wb, int delta_q) {
   if (delta_q != 0) {
-    vp9_write_bit(bc, 1);
-    vp9_write_literal(bc, abs(delta_q), 4);
-    vp9_write_bit(bc, delta_q < 0);
+    vp9_wb_write_bit(wb, 1);
+    vp9_wb_write_literal(wb, abs(delta_q), 4);
+    vp9_wb_write_bit(wb, delta_q < 0);
   } else {
-    vp9_write_bit(bc, 0);
+    vp9_wb_write_bit(wb, 0);
   }
 }
 
-static void encode_quantization(VP9_COMMON *pc, vp9_writer *w) {
-  vp9_write_literal(w, pc->base_qindex, QINDEX_BITS);
-  put_delta_q(w, pc->y_dc_delta_q);
-  put_delta_q(w, pc->uv_dc_delta_q);
-  put_delta_q(w, pc->uv_ac_delta_q);
+static void encode_quantization(VP9_COMMON *cm,
+                                struct vp9_write_bit_buffer *wb) {
+  vp9_wb_write_literal(wb, cm->base_qindex, QINDEX_BITS);
+  write_delta_q(wb, cm->y_dc_delta_q);
+  write_delta_q(wb, cm->uv_dc_delta_q);
+  write_delta_q(wb, cm->uv_ac_delta_q);
 }
 
 
@@ -1399,8 +1391,11 @@ static void encode_txfm(VP9_COMP *cpi, vp9_writer *w) {
   }
 }
 
-void write_uncompressed_header(VP9_COMMON *cm,
+void write_uncompressed_header(VP9_COMP *cpi,
                                struct vp9_write_bit_buffer *wb) {
+  VP9_COMMON *const cm = &cpi->common;
+  MACROBLOCKD *const xd = &cpi->mb.e_mbd;
+
   const int scaling_active = cm->width != cm->display_width ||
                              cm->height != cm->display_height;
 
@@ -1438,6 +1433,9 @@ void write_uncompressed_header(VP9_COMMON *cm,
     vp9_wb_write_bit(wb, cm->refresh_frame_context);
     vp9_wb_write_bit(wb, cm->frame_parallel_decoding_mode);
   }
+
+  encode_loopfilter(cm, xd, wb);
+  encode_quantization(cm, wb);
 }
 
 void vp9_pack_bitstream(VP9_COMP *cpi, uint8_t *dest, unsigned long *size) {
@@ -1450,7 +1448,7 @@ void vp9_pack_bitstream(VP9_COMP *cpi, uint8_t *dest, unsigned long *size) {
   struct vp9_write_bit_buffer wb = {dest, 0};
   struct vp9_write_bit_buffer first_partition_size_wb;
 
-  write_uncompressed_header(pc, &wb);
+  write_uncompressed_header(cpi, &wb);
   first_partition_size_wb = wb;
   vp9_wb_write_literal(&wb, 0, 16);  // don't know in advance first part. size
 
@@ -1460,10 +1458,6 @@ void vp9_pack_bitstream(VP9_COMP *cpi, uint8_t *dest, unsigned long *size) {
   compute_update_table();
 
   vp9_start_encode(&header_bc, cx_data);
-
-  encode_loopfilter(pc, xd, &header_bc);
-
-  encode_quantization(pc, &header_bc);
 
   // When there is a key frame all reference buffers are updated using the new key frame
   if (pc->frame_type != KEY_FRAME) {

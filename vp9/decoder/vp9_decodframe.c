@@ -40,10 +40,6 @@
 int dec_debug = 0;
 #endif
 
-static int read_le16(const uint8_t *p) {
-  return (p[1] << 8) | p[0];
-}
-
 static int read_le32(const uint8_t *p) {
   return (p[3] << 24) | (p[2] << 16) | (p[1] << 8) | p[0];
 }
@@ -184,21 +180,6 @@ static void mb_init_dequantizer(VP9_COMMON *pc, MACROBLOCKD *xd) {
   xd->plane[0].dequant = pc->y_dequant[xd->q_index];
   for (i = 1; i < MAX_MB_PLANE; i++)
     xd->plane[i].dequant = pc->uv_dequant[xd->q_index];
-}
-
-static INLINE void dequant_add_y(MACROBLOCKD *xd, TX_TYPE tx_type, int idx,
-                                 BLOCK_SIZE_TYPE bsize) {
-  struct macroblockd_plane *const y = &xd->plane[0];
-  uint8_t* const dst = raster_block_offset_uint8(xd, bsize, 0, idx,
-                                                 xd->plane[0].dst.buf,
-                                                 xd->plane[0].dst.stride);
-  if (tx_type != DCT_DCT) {
-    vp9_iht_add_c(tx_type, BLOCK_OFFSET(y->qcoeff, idx, 16),
-                  dst, xd->plane[0].dst.stride, y->eobs[idx]);
-  } else {
-    xd->itxm_add(BLOCK_OFFSET(y->qcoeff, idx, 16),
-                 dst, xd->plane[0].dst.stride, y->eobs[idx]);
-  }
 }
 
 static void decode_block(int plane, int block, BLOCK_SIZE_TYPE bsize,
@@ -381,18 +362,6 @@ static void decode_sb(VP9D_COMP *pbi, MACROBLOCKD *xd, int mi_row, int mi_col,
       foreach_transformed_block(xd, bsize, decode_block, xd);
     }
   }
-}
-
-static int get_delta_q(vp9_reader *r, int *dq) {
-  const int old_value = *dq;
-
-  if (vp9_read_bit(r)) {  // Update bit
-    const int value = vp9_read_literal(r, 4);
-    *dq = vp9_read_and_apply_sign(r, value);
-  }
-
-  // Trigger a quantizer update if the delta-q value has changed
-  return old_value != *dq;
 }
 
 static void set_offsets(VP9D_COMP *pbi, BLOCK_SIZE_TYPE bsize,
@@ -693,48 +662,58 @@ static void setup_pred_probs(VP9_COMMON *pc, vp9_reader *r) {
   }
 }
 
-static void setup_loopfilter(VP9_COMMON *pc, MACROBLOCKD *xd, vp9_reader *r) {
-  pc->filter_level = vp9_read_literal(r, 6);
-  pc->sharpness_level = vp9_read_literal(r, 3);
+static void setup_loopfilter(VP9D_COMP *pbi, struct vp9_read_bit_buffer *rb) {
+  VP9_COMMON *const cm = &pbi->common;
+  MACROBLOCKD *const xd = &pbi->mb;
+
+  cm->filter_level = vp9_rb_read_literal(rb, 6);
+  cm->sharpness_level = vp9_rb_read_literal(rb, 3);
 
   // Read in loop filter deltas applied at the MB level based on mode or ref
   // frame.
   xd->mode_ref_lf_delta_update = 0;
 
-  xd->mode_ref_lf_delta_enabled = vp9_read_bit(r);
+  xd->mode_ref_lf_delta_enabled = vp9_rb_read_bit(rb);
   if (xd->mode_ref_lf_delta_enabled) {
-    xd->mode_ref_lf_delta_update = vp9_read_bit(r);
+    xd->mode_ref_lf_delta_update = vp9_rb_read_bit(rb);
     if (xd->mode_ref_lf_delta_update) {
       int i;
 
       for (i = 0; i < MAX_REF_LF_DELTAS; i++) {
-        if (vp9_read_bit(r)) {
-          const int value = vp9_read_literal(r, 6);
-          xd->ref_lf_deltas[i] = vp9_read_and_apply_sign(r, value);
+        if (vp9_rb_read_bit(rb)) {
+          const int value = vp9_rb_read_literal(rb, 6);
+          xd->ref_lf_deltas[i] = vp9_rb_read_bit(rb) ? -value : value;
         }
       }
 
       for (i = 0; i < MAX_MODE_LF_DELTAS; i++) {
-        if (vp9_read_bit(r)) {
-          const int value = vp9_read_literal(r, 6);
-          xd->mode_lf_deltas[i] = vp9_read_and_apply_sign(r, value);
+        if (vp9_rb_read_bit(rb)) {
+          const int value = vp9_rb_read_literal(rb, 6);
+          xd->mode_lf_deltas[i] = vp9_rb_read_bit(rb) ? -value : value;
         }
       }
     }
   }
 }
 
-static void setup_quantization(VP9D_COMP *pbi, vp9_reader *r) {
-  // Read the default quantizers
-  VP9_COMMON *const pc = &pbi->common;
+static int read_delta_q(struct vp9_read_bit_buffer *rb, int *delta_q) {
+  const int old = *delta_q;
+  if (vp9_rb_read_bit(rb)) {
+    const int value = vp9_rb_read_literal(rb, 4);
+    *delta_q = vp9_rb_read_bit(rb) ? -value : value;
+  }
+  return old != *delta_q;
+}
 
-  pc->base_qindex = vp9_read_literal(r, QINDEX_BITS);
-  if (get_delta_q(r, &pc->y_dc_delta_q) |
-      get_delta_q(r, &pc->uv_dc_delta_q) |
-      get_delta_q(r, &pc->uv_ac_delta_q))
-    vp9_init_dequantizer(pc);
-
-  mb_init_dequantizer(pc, &pbi->mb);  // MB level dequantizer setup
+static void setup_quantization(VP9D_COMP *pbi, struct vp9_read_bit_buffer *rb) {
+  VP9_COMMON *const cm = &pbi->common;
+  int update = 0;
+  cm->base_qindex = vp9_rb_read_literal(rb, QINDEX_BITS);
+  update |= read_delta_q(rb, &cm->y_dc_delta_q);
+  update |= read_delta_q(rb, &cm->uv_dc_delta_q);
+  update |= read_delta_q(rb, &cm->uv_ac_delta_q);
+  if (update)
+    vp9_init_dequantizer(cm);
 }
 
 static INTERPOLATIONFILTERTYPE read_mcomp_filter_type(vp9_reader *r) {
@@ -966,6 +945,9 @@ size_t read_uncompressed_header(VP9D_COMP *pbi,
     cm->frame_parallel_decoding_mode = 1;
   }
 
+  setup_loopfilter(pbi, rb);
+  setup_quantization(pbi, rb);
+
   return vp9_rb_read_literal(rb, 16);
 }
 
@@ -1008,9 +990,7 @@ int vp9_decode_frame(VP9D_COMP *pbi, const uint8_t **p_data_end) {
     vpx_internal_error(&pc->error, VPX_CODEC_MEM_ERROR,
                        "Failed to allocate bool decoder 0");
 
-  setup_loopfilter(pc, xd, &header_bc);
-
-  setup_quantization(pbi, &header_bc);
+  mb_init_dequantizer(pc, &pbi->mb);  // MB level dequantizer setup
 
   xd->lossless = pc->base_qindex == 0 &&
                  pc->y_dc_delta_q == 0 &&
