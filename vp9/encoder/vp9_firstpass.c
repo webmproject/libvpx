@@ -746,9 +746,7 @@ void vp9_first_pass(VP9_COMP *cpi) {
                             - cpi->source->ts_start);
 
     // don't want to do output stats with a stack variable!
-    memcpy(&cpi->twopass.this_frame_stats,
-           &fps,
-           sizeof(FIRSTPASS_STATS));
+    cpi->twopass.this_frame_stats = fps;
     output_stats(cpi, cpi->output_pkt_list, &cpi->twopass.this_frame_stats);
     accumulate_stats(&cpi->twopass.total_stats, &fps);
   }
@@ -1673,7 +1671,7 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
       break;
     }
 
-    vpx_memcpy(this_frame, &next_frame, sizeof(*this_frame));
+    *this_frame = next_frame;
 
     old_boost_score = boost_score;
   }
@@ -2107,14 +2105,14 @@ void vp9_second_pass(VP9_COMP *cpi) {
   // keyframe and section processing !
   if (cpi->twopass.frames_to_key == 0) {
     // Define next KF group and assign bits to it
-    vpx_memcpy(&this_frame_copy, &this_frame, sizeof(this_frame));
+    this_frame_copy = this_frame;
     find_next_key_frame(cpi, &this_frame_copy);
   }
 
   // Is this a GF / ARF (Note that a KF is always also a GF)
   if (cpi->frames_till_gf_update_due == 0) {
     // Define next gf group and assign bits to it
-    vpx_memcpy(&this_frame_copy, &this_frame, sizeof(this_frame));
+    this_frame_copy = this_frame;
 
 #if CONFIG_MULTIPLE_ARF
     if (cpi->multi_arf_enabled) {
@@ -2136,14 +2134,14 @@ void vp9_second_pass(VP9_COMP *cpi) {
       // Assign a standard frames worth of bits from those allocated
       // to the GF group
       int bak = cpi->per_frame_bandwidth;
-      vpx_memcpy(&this_frame_copy, &this_frame, sizeof(this_frame));
+      this_frame_copy = this_frame;
       assign_std_frame_bits(cpi, &this_frame_copy);
       cpi->per_frame_bandwidth = bak;
     }
   } else {
     // Otherwise this is an ordinary frame
     // Assign bits from those allocated to the GF group
-    vpx_memcpy(&this_frame_copy, &this_frame, sizeof(this_frame));
+    this_frame_copy =  this_frame;
     assign_std_frame_bits(cpi, &this_frame_copy);
   }
 
@@ -2201,7 +2199,7 @@ static int test_candidate_kf(VP9_COMP *cpi,
     double decay_accumulator = 1.0;
     double next_iiratio;
 
-    vpx_memcpy(&local_next_frame, next_frame, sizeof(*next_frame));
+    local_next_frame = *next_frame;
 
     // Note the starting file position so we can reset to it
     start_pos = cpi->twopass.stats_in;
@@ -2294,7 +2292,7 @@ static void find_next_key_frame(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   cpi->twopass.frames_to_key = 1;
 
   // Take a copy of the initial frame details
-  vpx_memcpy(&first_frame, this_frame, sizeof(*this_frame));
+  first_frame = *this_frame;
 
   cpi->twopass.kf_group_bits = 0;        // Total bits available to kf group
   cpi->twopass.kf_group_error_left = 0;  // Group modified error score.
@@ -2313,7 +2311,7 @@ static void find_next_key_frame(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
     kf_group_coded_err += this_frame->coded_error;
 
     // load a the next frame's stats
-    vpx_memcpy(&last_frame, this_frame, sizeof(*this_frame));
+    last_frame = *this_frame;
     input_stats(cpi, this_frame);
 
     // Provided that we are not at the end of the file...
@@ -2366,7 +2364,7 @@ static void find_next_key_frame(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
     cpi->twopass.frames_to_key /= 2;
 
     // Copy first frame details
-    vpx_memcpy(&tmp_frame, &first_frame, sizeof(first_frame));
+    tmp_frame = first_frame;
 
     // Reset to the start of the group
     reset_fpf_position(cpi, start_position);

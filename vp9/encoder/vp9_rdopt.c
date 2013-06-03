@@ -1719,11 +1719,11 @@ static void store_coding_context(MACROBLOCK *x, PICK_MODE_CONTEXT *ctx,
   // restored if we decide to encode this way
   ctx->skip = x->skip;
   ctx->best_mode_index = mode_index;
-  vpx_memcpy(&ctx->mic, xd->mode_info_context,
-             sizeof(MODE_INFO));
+  ctx->mic = *xd->mode_info_context;
+
   if (partition)
-    vpx_memcpy(&ctx->partition_info, partition,
-               sizeof(PARTITION_INFO));
+    ctx->partition_info = *partition;
+
   ctx->best_ref_mv.as_int = ref_mv->as_int;
   ctx->second_best_ref_mv.as_int = second_ref_mv->as_int;
 
@@ -2443,7 +2443,7 @@ void vp9_rd_pick_intra_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
     xd->mode_info_context->mbmi.mode = mode;
   }
 
-  vpx_memcpy(&ctx->mic, xd->mode_info_context, sizeof(MODE_INFO));
+  ctx->mic = *xd->mode_info_context;
 }
 
 int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
@@ -2811,12 +2811,10 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
               tmp_best_ratey = rate_y;
               tmp_best_distortion = distortion;
               tmp_best_skippable = skippable;
-              vpx_memcpy(&tmp_best_mbmode, mbmi, sizeof(MB_MODE_INFO));
-              vpx_memcpy(&tmp_best_partition, x->partition_info,
-                         sizeof(PARTITION_INFO));
-              for (i = 0; i < 4; i++) {
+              tmp_best_mbmode = *mbmi;
+              tmp_best_partition = *x->partition_info;
+              for (i = 0; i < 4; i++)
                 tmp_best_bmodes[i] = xd->mode_info_context->bmi[i];
-              }
               pred_exists = 1;
             }
       }  // switchable_filter_index loop
@@ -2844,12 +2842,10 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
         rate_y = tmp_best_ratey;
         distortion = tmp_best_distortion;
         skippable = tmp_best_skippable;
-        vpx_memcpy(mbmi, &tmp_best_mbmode, sizeof(MB_MODE_INFO));
-        vpx_memcpy(x->partition_info, &tmp_best_partition,
-                   sizeof(PARTITION_INFO));
-        for (i = 0; i < 4; i++) {
+        *mbmi = tmp_best_mbmode;
+        *x->partition_info = tmp_best_partition;
+        for (i = 0; i < 4; i++)
           xd->mode_info_context->bmi[i] = tmp_best_bmodes[i];
-        }
       }
 
       rate2 += rate;
@@ -3003,14 +2999,12 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
         *returnrate = rate2;
         *returndistortion = distortion2;
         best_rd = this_rd;
-        vpx_memcpy(&best_mbmode, mbmi, sizeof(MB_MODE_INFO));
-        vpx_memcpy(&best_partition, x->partition_info, sizeof(PARTITION_INFO));
+        best_mbmode = *mbmi;
+        best_partition = *x->partition_info;
 
-        if (this_mode == I4X4_PRED || this_mode == SPLITMV) {
-          for (i = 0; i < 4; i++) {
+        if (this_mode == I4X4_PRED || this_mode == SPLITMV)
+          for (i = 0; i < 4; i++)
             best_bmodes[i] = xd->mode_info_context->bmi[i];
-          }
-        }
       }
 #if 0
       // Testing this mode gave rise to an improvement in best error score.
@@ -3167,12 +3161,11 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
   }
 
   // macroblock modes
-  vpx_memcpy(mbmi, &best_mbmode, sizeof(MB_MODE_INFO));
+  *mbmi = best_mbmode;
   if (best_mbmode.ref_frame == INTRA_FRAME &&
       best_mbmode.sb_type < BLOCK_SIZE_SB8X8) {
-    for (i = 0; i < 4; i++) {
+    for (i = 0; i < 4; i++)
       xd->mode_info_context->bmi[i].as_mode = best_bmodes[i].as_mode;
-    }
   }
 
   if (best_mbmode.ref_frame != INTRA_FRAME &&
@@ -3180,12 +3173,13 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
     for (i = 0; i < 4; i++)
       xd->mode_info_context->bmi[i].as_mv[0].as_int =
           best_bmodes[i].as_mv[0].as_int;
+
     if (mbmi->second_ref_frame > 0)
       for (i = 0; i < 4; i++)
         xd->mode_info_context->bmi[i].as_mv[1].as_int =
             best_bmodes[i].as_mv[1].as_int;
 
-    vpx_memcpy(x->partition_info, &best_partition, sizeof(PARTITION_INFO));
+    *x->partition_info = best_partition;
 
     mbmi->mv[0].as_int = x->partition_info->bmi[3].mv.as_int;
     mbmi->mv[1].as_int = x->partition_info->bmi[3].second_mv.as_int;
