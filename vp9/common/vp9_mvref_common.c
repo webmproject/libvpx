@@ -101,39 +101,12 @@ static void get_non_matching_candidates(const MODE_INFO *candidate_mi,
 static void scale_mv(MACROBLOCKD *xd, MV_REFERENCE_FRAME this_ref_frame,
                      MV_REFERENCE_FRAME candidate_ref_frame,
                      int_mv *candidate_mv, int *ref_sign_bias) {
-  // int frame_distances[MAX_REF_FRAMES];
-  // int last_distance = 1;
-  // int gf_distance = xd->frames_since_golden;
-  // int arf_distance = xd->frames_till_alt_ref_frame;
 
   // Sign inversion where appropriate.
   if (ref_sign_bias[candidate_ref_frame] != ref_sign_bias[this_ref_frame]) {
     candidate_mv->as_mv.row = -candidate_mv->as_mv.row;
     candidate_mv->as_mv.col = -candidate_mv->as_mv.col;
   }
-
-  /*
-  // Scale based on frame distance if the reference frames not the same.
-  frame_distances[INTRA_FRAME] = 1;   // should never be used
-  frame_distances[LAST_FRAME] = 1;
-  frame_distances[GOLDEN_FRAME] =
-    (xd->frames_since_golden) ? xd->frames_si nce_golden : 1;
-  frame_distances[ALTREF_FRAME] =
-    (xd->frames_till_alt_ref_frame) ? xd->frames_till_alt_ref_frame : 1;
-
-  if (frame_distances[this_ref_frame] &&
-      frame_distances[candidate_ref_frame]) {
-    candidate_mv->as_mv.row =
-      (short)(((int)(candidate_mv->as_mv.row) *
-               frame_distances[this_ref_frame]) /
-              frame_distances[candidate_ref_frame]);
-
-    candidate_mv->as_mv.col =
-      (short)(((int)(candidate_mv->as_mv.col) *
-               frame_distances[this_ref_frame]) /
-              frame_distances[candidate_ref_frame]);
-  }
-  */
 }
 
 // Add a candidate mv.
@@ -230,16 +203,6 @@ void vp9_find_mv_refs_idx(VP9_COMMON *cm, MACROBLOCKD *xd, MODE_INFO *here,
     }
   }
 
-  // If at this stage wwe have a 0 vector and a non zero vector from the
-  // correct reference frame then make sure that the non zero one is given
-  // precedence as we have other options for coding 0,0
-  /* if (refmv_count == MAX_MV_REF_CANDIDATES) {
-    if (mv_ref_list[1].as_int && !mv_ref_list[0].as_int) {
-      mv_ref_list[0].as_int = mv_ref_list[1].as_int;
-      mv_ref_list[1].as_int = 0;
-    }
-  } */
-
   // More distant neigbours
   for (i = 2; (i < MVREF_NEIGHBOURS) &&
               (refmv_count < MAX_MV_REF_CANDIDATES); ++i) {
@@ -261,7 +224,7 @@ void vp9_find_mv_refs_idx(VP9_COMMON *cm, MACROBLOCKD *xd, MODE_INFO *here,
   // Look in the last frame if it exists
   if (lf_here && (refmv_count < MAX_MV_REF_CANDIDATES)) {
     candidate_mi = lf_here;
-    if (get_matching_candidate(candidate_mi, ref_frame, &c_refmv, block_idx)) {
+    if (get_matching_candidate(candidate_mi, ref_frame, &c_refmv, -1)) {
       add_candidate_mv(mv_ref_list, candidate_scores,
                        &refmv_count, c_refmv, 16);
     }
