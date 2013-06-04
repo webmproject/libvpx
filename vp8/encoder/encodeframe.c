@@ -1299,8 +1299,9 @@ int vp8cx_encode_inter_macroblock
     }
 
     {
-        /* Experimental code. Special case for gf and arf zeromv modes.
-         * Increase zbin size to supress noise
+        /* Experimental code.
+         * Special case for gf and arf zeromv modes, for 1 temporal layer.
+         * Increase zbin size to supress noise.
          */
         x->zbin_mode_boost = 0;
         if (x->zbin_mode_boost_enabled)
@@ -1309,7 +1310,8 @@ int vp8cx_encode_inter_macroblock
             {
                 if (xd->mode_info_context->mbmi.mode == ZEROMV)
                 {
-                    if (xd->mode_info_context->mbmi.ref_frame != LAST_FRAME)
+                    if (xd->mode_info_context->mbmi.ref_frame != LAST_FRAME &&
+                        cpi->oxcf.number_of_layers == 1)
                         x->zbin_mode_boost = GF_ZEROMV_ZBIN_BOOST;
                     else
                         x->zbin_mode_boost = LF_ZEROMV_ZBIN_BOOST;
