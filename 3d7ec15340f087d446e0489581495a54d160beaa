@@ -2,6 +2,23 @@
   "comments": [
     {
       "key": {
+        "uuid": "AAAAZ3//8nc\u003d",
+        "filename": "vp9/common/vp9_entropymode.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 302,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2013-06-04T10:40:09Z",
+      "side": 1,
+      "message": "might be nice to have the 4 replaced by meaningfull #define name too.",
+      "revId": "3d7ec15340f087d446e0489581495a54d160beaa",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAZ3//9WM\u003d",
         "filename": "vp9/common/vp9_entropymode.c",
         "patchSetId": 3
