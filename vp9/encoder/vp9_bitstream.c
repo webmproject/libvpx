@@ -259,24 +259,6 @@ void vp9_update_skip_probs(VP9_COMP *cpi) {
                                                cpi->skip_true_count[k]);
 }
 
-static void update_switchable_interp_probs(VP9_COMP *cpi,
-                                           vp9_writer* const bc) {
-  VP9_COMMON *const pc = &cpi->common;
-  unsigned int branch_ct[32][2];
-  int i, j;
-  for (j = 0; j <= VP9_SWITCHABLE_FILTERS; ++j) {
-    vp9_tree_probs_from_distribution(
-        vp9_switchable_interp_tree,
-        pc->fc.switchable_interp_prob[j], branch_ct,
-        cpi->switchable_interp_count[j], 0);
-    for (i = 0; i < VP9_SWITCHABLE_FILTERS - 1; ++i) {
-      if (pc->fc.switchable_interp_prob[j][i] < 1)
-        pc->fc.switchable_interp_prob[j][i] = 1;
-      vp9_write_prob(bc, pc->fc.switchable_interp_prob[j][i]);
-    }
-  }
-}
-
 // This function updates the reference frame prediction stats
 static void update_refpred_stats(VP9_COMP *cpi) {
   VP9_COMMON *const cm = &cpi->common;
@@ -307,39 +289,6 @@ static void update_refpred_stats(VP9_COMP *cpi) {
         cm->ref_pred_probs[i] = new_pred_probs[i];
       } else
         cpi->ref_pred_probs_update[i] = 0;
-    }
-  }
-}
-
-// This function is called to update the mode probability context used to encode
-// inter modes. It assumes the branch counts table has already been populated
-// prior to the actual packing of the bitstream (in rd stage or dummy pack)
-//
-// The branch counts table is re-populated during the actual pack stage and in
-// the decoder to facilitate backwards update of the context.
-static void update_inter_mode_probs(VP9_COMMON *cm,
-    int mode_context[INTER_MODE_CONTEXTS][VP9_MVREFS - 1]) {
-  int i, j;
-  unsigned int (*mv_ref_ct)[VP9_MVREFS - 1][2] = cm->fc.mv_ref_ct;
-
-  vpx_memcpy(mode_context, cm->fc.vp9_mode_contexts,
-             sizeof(cm->fc.vp9_mode_contexts));
-
-  for (i = 0; i < INTER_MODE_CONTEXTS; i++) {
-    for (j = 0; j < VP9_MVREFS - 1; j++) {
-      int new_prob, old_cost, new_cost;
-
-      // Work out cost of coding branches with the old and optimal probability
-      old_cost = cost_branch256(mv_ref_ct[i][j], mode_context[i][j]);
-      new_prob = get_binary_prob(mv_ref_ct[i][j][0], mv_ref_ct[i][j][1]);
-      new_cost = cost_branch256(mv_ref_ct[i][j], new_prob);
-
-      // If cost saving is >= 14 bits then update the mode probability.
-      // This is the approximate net cost of updating one probability given
-      // that the no update case ismuch more common than the update case.
-      if (new_cost <= (old_cost - (14 << 8))) {
-        mode_context[i][j] = new_prob;
-      }
     }
   }
 }
@@ -424,6 +373,7 @@ static void vp9_cond_prob_update(vp9_writer *bc, vp9_prob *oldp, vp9_prob upd,
   vp9_prob newp;
   int savings;
   newp = get_binary_prob(ct[0], ct[1]);
+  assert(newp >= 1);
   savings = prob_update_savings(ct, *oldp, newp, upd);
   if (savings > 0) {
     vp9_write(bc, 1, upd);
@@ -431,6 +381,60 @@ static void vp9_cond_prob_update(vp9_writer *bc, vp9_prob *oldp, vp9_prob upd,
     *oldp = newp;
   } else {
     vp9_write(bc, 0, upd);
+  }
+}
+
+static void vp9_cond_prob_diff_update(vp9_writer *bc, vp9_prob *oldp,
+                                      vp9_prob upd,
+                                      unsigned int *ct) {
+  vp9_prob newp;
+  int savings;
+  newp = get_binary_prob(ct[0], ct[1]);
+  assert(newp >= 1);
+  savings = prob_diff_update_savings_search(ct, *oldp, &newp, upd);
+  if (savings > 0) {
+    vp9_write(bc, 1, upd);
+    write_prob_diff_update(bc, newp, *oldp);
+    *oldp = newp;
+  } else {
+    vp9_write(bc, 0, upd);
+  }
+}
+
+static void update_switchable_interp_probs(VP9_COMMON *const pc,
+                                           vp9_writer* const bc) {
+  unsigned int branch_ct[VP9_SWITCHABLE_FILTERS + 1]
+                        [VP9_SWITCHABLE_FILTERS - 1][2];
+  vp9_prob new_prob[VP9_SWITCHABLE_FILTERS + 1][VP9_SWITCHABLE_FILTERS - 1];
+  int i, j;
+  for (j = 0; j <= VP9_SWITCHABLE_FILTERS; ++j) {
+    vp9_tree_probs_from_distribution(
+        vp9_switchable_interp_tree,
+        new_prob[j], branch_ct[j],
+        pc->fc.switchable_interp_count[j], 0);
+  }
+  for (j = 0; j <= VP9_SWITCHABLE_FILTERS; ++j) {
+    for (i = 0; i < VP9_SWITCHABLE_FILTERS - 1; ++i) {
+      // vp9_cond_prob_update(bc, &pc->fc.switchable_interp_prob[j][i],
+      //                      VP9_DEF_UPDATE_PROB, branch_ct[j][i]);
+      vp9_cond_prob_diff_update(bc, &pc->fc.switchable_interp_prob[j][i],
+                                VP9_DEF_UPDATE_PROB, branch_ct[j][i]);
+    }
+  }
+}
+
+static void update_inter_mode_probs(VP9_COMMON *pc, vp9_writer* const bc) {
+  int i, j;
+
+  for (i = 0; i < INTER_MODE_CONTEXTS; i++) {
+    for (j = 0; j < VP9_MVREFS - 1; j++) {
+      vp9_cond_prob_diff_update(bc, &pc->fc.inter_mode_probs[i][j],
+                                VP9_DEF_UPDATE_PROB,
+                                pc->fc.inter_mode_counts[i][j]);
+      // vp9_cond_prob_update(
+      //     bc, &pc->fc.inter_mode_probs[i][j],
+      //     VP9_DEF_UPDATE_PROB, pc->fc.inter_mode_counts[i][j]);
+    }
   }
 }
 
@@ -1516,7 +1520,7 @@ void vp9_pack_bitstream(VP9_COMP *cpi, uint8_t *dest, unsigned long *size) {
       for (i = 0; i < VP9_SWITCHABLE_FILTERS; ++i) {
         count[i] = 0;
         for (j = 0; j <= VP9_SWITCHABLE_FILTERS; ++j)
-          count[i] += cpi->switchable_interp_count[j][i];
+          count[i] += cpi->common.fc.switchable_interp_count[j][i];
         c += (count[i] > 0);
       }
       if (c == 1) {
@@ -1563,36 +1567,6 @@ void vp9_pack_bitstream(VP9_COMP *cpi, uint8_t *dest, unsigned long *size) {
   else
     encode_txfm(cpi, &header_bc);
 
-  // If appropriate update the inter mode probability context and code the
-  // changes in the bitstream.
-  if (pc->frame_type != KEY_FRAME) {
-    int i, j;
-    int new_context[INTER_MODE_CONTEXTS][VP9_MVREFS - 1];
-    if (!cpi->dummy_packing) {
-      update_inter_mode_probs(pc, new_context);
-    } else {
-      // In dummy pack assume context unchanged.
-      vpx_memcpy(new_context, pc->fc.vp9_mode_contexts,
-                 sizeof(pc->fc.vp9_mode_contexts));
-    }
-
-    for (i = 0; i < INTER_MODE_CONTEXTS; i++) {
-      for (j = 0; j < VP9_MVREFS - 1; j++) {
-        if (new_context[i][j] != pc->fc.vp9_mode_contexts[i][j]) {
-          vp9_write(&header_bc, 1, 252);
-          vp9_write_prob(&header_bc, new_context[i][j]);
-
-          // Only update the persistent copy if this is the "real pack"
-          if (!cpi->dummy_packing) {
-            pc->fc.vp9_mode_contexts[i][j] = new_context[i][j];
-          }
-        } else {
-          vp9_write(&header_bc, 0, 252);
-        }
-      }
-    }
-  }
-
   vp9_clear_system_state();  // __asm emms;
 
   vp9_copy(cpi->common.fc.pre_coef_probs, cpi->common.fc.coef_probs);
@@ -1600,7 +1574,10 @@ void vp9_pack_bitstream(VP9_COMP *cpi, uint8_t *dest, unsigned long *size) {
   vp9_copy(cpi->common.fc.pre_uv_mode_prob, cpi->common.fc.uv_mode_prob);
   vp9_copy(cpi->common.fc.pre_partition_prob, cpi->common.fc.partition_prob);
   cpi->common.fc.pre_nmvc = cpi->common.fc.nmvc;
-  vp9_zero(cpi->common.fc.mv_ref_ct);
+  vp9_copy(cpi->common.fc.pre_switchable_interp_prob,
+           cpi->common.fc.switchable_interp_prob);
+  vp9_copy(cpi->common.fc.pre_inter_mode_probs,
+           cpi->common.fc.inter_mode_probs);
 
   update_coef_probs(cpi, &header_bc);
 
@@ -1614,15 +1591,19 @@ void vp9_pack_bitstream(VP9_COMP *cpi, uint8_t *dest, unsigned long *size) {
   }
 
   if (pc->frame_type != KEY_FRAME) {
-    // Update the probabilities used to encode reference frame data
-    update_ref_probs(cpi);
 
 #ifdef ENTROPY_STATS
     active_section = 1;
 #endif
 
+    update_inter_mode_probs(pc, &header_bc);
+    vp9_zero(cpi->common.fc.inter_mode_counts);
+
     if (pc->mcomp_filter_type == SWITCHABLE)
-      update_switchable_interp_probs(cpi, &header_bc);
+      update_switchable_interp_probs(pc, &header_bc);
+
+    // Update the probabilities used to encode reference frame data
+    update_ref_probs(cpi);
 
     vp9_write_prob(&header_bc, pc->prob_intra_coded);
     vp9_write_prob(&header_bc, pc->prob_last_coded);

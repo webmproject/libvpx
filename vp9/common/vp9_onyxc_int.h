@@ -71,9 +71,14 @@ typedef struct frame_contexts {
   nmv_context_counts NMVcount;
   vp9_prob switchable_interp_prob[VP9_SWITCHABLE_FILTERS + 1]
                                  [VP9_SWITCHABLE_FILTERS - 1];
+  vp9_prob pre_switchable_interp_prob[VP9_SWITCHABLE_FILTERS + 1]
+      [VP9_SWITCHABLE_FILTERS - 1];
+  unsigned int switchable_interp_count[VP9_SWITCHABLE_FILTERS + 1]
+                                      [VP9_SWITCHABLE_FILTERS];
 
-  int vp9_mode_contexts[INTER_MODE_CONTEXTS][VP9_MVREFS - 1];
-  unsigned int mv_ref_ct[INTER_MODE_CONTEXTS][VP9_MVREFS - 1][2];
+  vp9_prob inter_mode_probs[INTER_MODE_CONTEXTS][VP9_MVREFS - 1];
+  vp9_prob pre_inter_mode_probs[INTER_MODE_CONTEXTS][VP9_MVREFS - 1];
+  unsigned int inter_mode_counts[INTER_MODE_CONTEXTS][VP9_MVREFS - 1][2];
 } FRAME_CONTEXT;
 
 typedef enum {

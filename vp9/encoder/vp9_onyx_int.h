@@ -85,8 +85,8 @@ typedef struct {
   vp9_prob switchable_interp_prob[VP9_SWITCHABLE_FILTERS + 1]
                                  [VP9_SWITCHABLE_FILTERS - 1];
 
-  int mv_ref_ct[INTER_MODE_CONTEXTS][VP9_MVREFS - 1][2];
-  int vp9_mode_contexts[INTER_MODE_CONTEXTS][VP9_MVREFS - 1];
+  int inter_mode_counts[INTER_MODE_CONTEXTS][VP9_MVREFS - 1][2];
+  vp9_prob inter_mode_probs[INTER_MODE_CONTEXTS][VP9_MVREFS - 1];
 
 } CODING_CONTEXT;
 

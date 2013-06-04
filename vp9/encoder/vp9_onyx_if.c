@@ -466,7 +466,8 @@ static void configure_static_seg_features(VP9_COMP *cpi) {
 void vp9_update_mode_context_stats(VP9_COMP *cpi) {
   VP9_COMMON *cm = &cpi->common;
   int i, j;
-  unsigned int (*mv_ref_ct)[VP9_MVREFS - 1][2] = cm->fc.mv_ref_ct;
+  unsigned int (*inter_mode_counts)[VP9_MVREFS - 1][2] =
+      cm->fc.inter_mode_counts;
   int64_t (*mv_ref_stats)[VP9_MVREFS - 1][2] = cpi->mv_ref_stats;
   FILE *f;
 
@@ -482,8 +483,8 @@ void vp9_update_mode_context_stats(VP9_COMP *cpi) {
   // Add in the values for this frame
   for (i = 0; i < INTER_MODE_CONTEXTS; i++) {
     for (j = 0; j < VP9_MVREFS - 1; j++) {
-      mv_ref_stats[i][j][0] += (int64_t)mv_ref_ct[i][j][0];
-      mv_ref_stats[i][j][1] += (int64_t)mv_ref_ct[i][j][1];
+      mv_ref_stats[i][j][0] += (int64_t)inter_mode_counts[i][j][0];
+      mv_ref_stats[i][j][1] += (int64_t)inter_mode_counts[i][j][1];
     }
   }
 
@@ -499,7 +500,7 @@ void print_mode_context(VP9_COMP *cpi) {
 
   fprintf(f, "#include \"vp9_entropy.h\"\n");
   fprintf(f,
-          "const int vp9_mode_contexts[INTER_MODE_CONTEXTS][VP9_MVREFS - 1] =");
+          "const int inter_mode_probs[INTER_MODE_CONTEXTS][VP9_MVREFS - 1] =");
   fprintf(f, "{\n");
   for (j = 0; j < INTER_MODE_CONTEXTS; j++) {
     fprintf(f, "  {/* %d */ ", j);

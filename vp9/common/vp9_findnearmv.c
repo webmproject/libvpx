@@ -25,9 +25,9 @@ static void lower_mv_precision(int_mv *mv, int usehp) {
 }
 
 vp9_prob *vp9_mv_ref_probs(VP9_COMMON *pc, vp9_prob *p, int context) {
-  p[0] = pc->fc.vp9_mode_contexts[context][0];
-  p[1] = pc->fc.vp9_mode_contexts[context][1];
-  p[2] = pc->fc.vp9_mode_contexts[context][2];
+  p[0] = pc->fc.inter_mode_probs[context][0];
+  p[1] = pc->fc.inter_mode_probs[context][1];
+  p[2] = pc->fc.inter_mode_probs[context][2];
   return p;
 }
 

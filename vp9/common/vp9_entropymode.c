@@ -169,29 +169,30 @@ void vp9_entropy_mode_init() {
 }
 
 void vp9_init_mode_contexts(VP9_COMMON *pc) {
-  vpx_memset(pc->fc.mv_ref_ct, 0, sizeof(pc->fc.mv_ref_ct));
-  vpx_memcpy(pc->fc.vp9_mode_contexts,
-             vp9_default_mode_contexts,
-             sizeof(vp9_default_mode_contexts));
+  vpx_memset(pc->fc.inter_mode_counts, 0, sizeof(pc->fc.inter_mode_counts));
+  vpx_memcpy(pc->fc.inter_mode_probs,
+             vp9_default_inter_mode_probs,
+             sizeof(vp9_default_inter_mode_probs));
 }
 
 void vp9_accum_mv_refs(VP9_COMMON *pc,
                        MB_PREDICTION_MODE m,
                        const int context) {
-  unsigned int (*mv_ref_ct)[VP9_MVREFS - 1][2] = pc->fc.mv_ref_ct;
+  unsigned int (*inter_mode_counts)[VP9_MVREFS - 1][2] =
+      pc->fc.inter_mode_counts;
 
   if (m == ZEROMV) {
-    ++mv_ref_ct[context][0][0];
+    ++inter_mode_counts[context][0][0];
   } else {
-    ++mv_ref_ct[context][0][1];
+    ++inter_mode_counts[context][0][1];
     if (m == NEARESTMV) {
-      ++mv_ref_ct[context][1][0];
+      ++inter_mode_counts[context][1][0];
     } else {
-      ++mv_ref_ct[context][1][1];
+      ++inter_mode_counts[context][1][1];
       if (m == NEARMV) {
-        ++mv_ref_ct[context][2][0];
+        ++inter_mode_counts[context][2][0];
       } else {
-        ++mv_ref_ct[context][2][1];
+        ++inter_mode_counts[context][2][1];
       }
     }
   }
@@ -201,19 +202,21 @@ void vp9_accum_mv_refs(VP9_COMMON *pc,
 #define MVREF_MAX_UPDATE_FACTOR 128
 void vp9_adapt_mode_context(VP9_COMMON *pc) {
   int i, j;
-  unsigned int (*mv_ref_ct)[VP9_MVREFS - 1][2] = pc->fc.mv_ref_ct;
-  int (*mode_context)[VP9_MVREFS - 1] = pc->fc.vp9_mode_contexts;
+  unsigned int (*inter_mode_counts)[VP9_MVREFS - 1][2] =
+      pc->fc.inter_mode_counts;
+  vp9_prob (*mode_context)[VP9_MVREFS - 1] = pc->fc.inter_mode_probs;
 
   for (j = 0; j < INTER_MODE_CONTEXTS; j++) {
     for (i = 0; i < VP9_MVREFS - 1; i++) {
-      int count = mv_ref_ct[j][i][0] + mv_ref_ct[j][i][1], factor;
-
+      int count = inter_mode_counts[j][i][0] + inter_mode_counts[j][i][1];
+      int factor;
       count = count > MVREF_COUNT_SAT ? MVREF_COUNT_SAT : count;
       factor = (MVREF_MAX_UPDATE_FACTOR * count / MVREF_COUNT_SAT);
-      mode_context[j][i] = weighted_prob(pc->fc.vp9_mode_contexts[j][i],
-                                         get_binary_prob(mv_ref_ct[j][i][0],
-                                                         mv_ref_ct[j][i][1]),
-                                         factor);
+      mode_context[j][i] = weighted_prob(
+          pc->fc.pre_inter_mode_probs[j][i],
+          get_binary_prob(inter_mode_counts[j][i][0],
+                          inter_mode_counts[j][i][1]),
+          factor);
     }
   }
 }
@@ -290,6 +293,15 @@ void vp9_adapt_mode_probs(VP9_COMMON *cm) {
     update_mode_probs(PARTITION_TYPES, vp9_partition_tree,
                       fc->partition_counts[i], fc->pre_partition_prob[i],
                       fc->partition_prob[i], 0);
+
+  if (cm->mcomp_filter_type == SWITCHABLE) {
+    for (i = 0; i <= VP9_SWITCHABLE_FILTERS; i++) {
+      update_mode_probs(VP9_SWITCHABLE_FILTERS, vp9_switchable_interp_tree,
+                        fc->switchable_interp_count[i],
+                        fc->pre_switchable_interp_prob[i],
+                        fc->switchable_interp_prob[i], 0);
+    }
+  }
 }
 
 static void set_default_lf_deltas(MACROBLOCKD *xd) {

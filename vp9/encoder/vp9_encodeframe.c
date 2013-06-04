@@ -472,7 +472,7 @@ static void update_state(VP9_COMP *cpi,
 
     if (cpi->common.mcomp_filter_type == SWITCHABLE &&
         is_inter_mode(mbmi->mode)) {
-      ++cpi->switchable_interp_count
+      ++cpi->common.fc.switchable_interp_count
           [vp9_get_pred_context(&cpi->common, xd, PRED_SWITCHABLE_INTERP)]
           [vp9_switchable_interp_map[mbmi->interp_filter]];
     }
@@ -1460,7 +1460,7 @@ static void init_encode_frame_mb_context(VP9_COMP *cpi) {
   vp9_zero(cpi->count_mb_ref_frame_usage)
   vp9_zero(cpi->y_mode_count)
   vp9_zero(cpi->y_uv_mode_count)
-  vp9_zero(cpi->common.fc.mv_ref_ct)
+  vp9_zero(cpi->common.fc.inter_mode_counts)
   vp9_zero(cpi->partition_count);
 
   // Note: this memset assumes above_context[0], [1] and [2]
@@ -1524,7 +1524,7 @@ static void encode_frame_internal(VP9_COMP *cpi) {
   cpi->skip_true_count[0] = cpi->skip_true_count[1] = cpi->skip_true_count[2] = 0;
   cpi->skip_false_count[0] = cpi->skip_false_count[1] = cpi->skip_false_count[2] = 0;
 
-  vp9_zero(cpi->switchable_interp_count);
+  vp9_zero(cm->fc.switchable_interp_count);
   vp9_zero(cpi->best_switchable_interp_count);
 
   xd->mode_info_context = cm->mi;

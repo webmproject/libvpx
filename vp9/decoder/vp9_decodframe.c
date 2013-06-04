@@ -153,7 +153,7 @@ static int inv_remap_prob(int v, int m) {
   }
 }
 
-static vp9_prob read_prob_diff_update(vp9_reader *r, int oldp) {
+vp9_prob vp9_read_prob_diff_update(vp9_reader *r, int oldp) {
   int delp = decode_term_subexp(r, SUBEXP_PARAM, 255);
   return (vp9_prob)inv_remap_prob(delp, oldp);
 }
@@ -569,7 +569,7 @@ static void read_coef_probs_common(FRAME_CONTEXT *fc, TX_SIZE tx_size,
               vp9_prob *const p = coef_probs[i][j][k][l] + m;
 
               if (vp9_read(r, vp9_coef_update_prob[m])) {
-                *p = read_prob_diff_update(r, *p);
+                *p = vp9_read_prob_diff_update(r, *p);
               }
             }
           }
@@ -784,14 +784,19 @@ static void update_frame_context(FRAME_CONTEXT *fc) {
   vp9_copy(fc->pre_uv_mode_prob, fc->uv_mode_prob);
   vp9_copy(fc->pre_partition_prob, fc->partition_prob);
   fc->pre_nmvc = fc->nmvc;
+  vp9_copy(fc->pre_switchable_interp_prob,
+           fc->switchable_interp_prob);
+  vp9_copy(fc->pre_inter_mode_probs,
+           fc->inter_mode_probs);
 
   vp9_zero(fc->coef_counts);
   vp9_zero(fc->eob_branch_counts);
   vp9_zero(fc->y_mode_counts);
   vp9_zero(fc->uv_mode_counts);
   vp9_zero(fc->NMVcount);
-  vp9_zero(fc->mv_ref_ct);
+  vp9_zero(fc->inter_mode_counts);
   vp9_zero(fc->partition_counts);
+  vp9_zero(fc->switchable_interp_count);
 }
 
 static void decode_tile(VP9D_COMP *pbi, vp9_reader *r) {
@@ -1043,13 +1048,6 @@ int vp9_decode_frame(VP9D_COMP *pbi, const uint8_t **p_data_end) {
   setup_txfm_mode(pc, xd->lossless, &header_bc);
 
   // Read inter mode probability context updates
-  if (!keyframe) {
-    int i, j;
-    for (i = 0; i < INTER_MODE_CONTEXTS; ++i)
-      for (j = 0; j < VP9_MVREFS - 1; ++j)
-        if (vp9_read(&header_bc, 252))
-          pc->fc.vp9_mode_contexts[i][j] = vp9_read_prob(&header_bc);
-  }
 
   update_frame_context(&pc->fc);
 
