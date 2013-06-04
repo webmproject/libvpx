@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAZ3//8NA\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 1276,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2013-06-04T16:25:25Z",
+      "side": 1,
+      "message": "keep the condition if (((RDCOST(x-\u003erdmult, x-\u003erddiv, r2, d2) \u003cRDCOST(x-\u003erdmult, x-\u003erddiv, srate, sdist)) \u0026\u0026 !mb_skip) ?\nsince srate and sdist are initialized as INT_MAX anyway.\n\nmb_skip tells if there is an area that wasn\u0027t covered by this partition (e.g., the frame height is not a multiple of 64 pixels, and we are testing 64x32 block sizes)",
+      "revId": "04eebd68874523791fd54b225fa0f41337830409",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
