@@ -16,6 +16,24 @@
       "revId": "9608f973a0f40c7b92873097625400a262ed52cf",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAZ3//7ew\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 574,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2013-06-04T20:53:08Z",
+      "side": 1,
+      "message": "changed the condition to mbmi-\u003eref_frame \u003e INTRA_FRAME to be consistent with other places.\n\nfor inter prediction modes, maybe we want to do the subtract once, and test different transform sizes on the residual block(?)",
+      "parentUuid": "AAAAZ3//7s8\u003d",
+      "revId": "9608f973a0f40c7b92873097625400a262ed52cf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
