@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAZ3//7s8\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 574,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2013-06-04T19:05:56Z",
+      "side": 1,
+      "message": "how about moving this into super_block_yrd_for_txfm() and merged with the check on xd-\u003emode_info_context-\u003embmi.ref_frame \u003d\u003d INTRA_FRAME above?",
+      "revId": "9608f973a0f40c7b92873097625400a262ed52cf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
