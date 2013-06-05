@@ -5254,7 +5254,7 @@ int vp8_get_compressed_data(VP8_COMP *cpi, unsigned int *frame_flags, unsigned l
 
         if (cm->show_frame)
         {
-
+            cpi->common.show_frame_mi = cpi->common.mi;
             cpi->count ++;
 
             if (cpi->b_calculate_psnr)
