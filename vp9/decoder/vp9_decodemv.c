@@ -404,14 +404,20 @@ static void mb_mode_mv_init(VP9D_COMP *pbi, vp9_reader *r) {
         cm->prob_comppred[i] = vp9_read_prob(r);
 
     // VP9_INTRA_MODES
-    if (vp9_read_bit(r))
-      for (i = 0; i < VP9_INTRA_MODES - 1; ++i)
-        cm->fc.y_mode_prob[i] = vp9_read_prob(r);
-
-    for (j = 0; j < NUM_PARTITION_CONTEXTS; ++j)
-      if (vp9_read_bit(r))
-        for (i = 0; i < PARTITION_TYPES - 1; ++i)
-          cm->fc.partition_prob[j][i] = vp9_read_prob(r);
+    for (i = 0; i < VP9_INTRA_MODES - 1; ++i) {
+      if (vp9_read(r, VP9_DEF_UPDATE_PROB)) {
+        cm->fc.y_mode_prob[i] =
+            vp9_read_prob_diff_update(r, cm->fc.y_mode_prob[i]);
+      }
+    }
+    for (j = 0; j < NUM_PARTITION_CONTEXTS; ++j) {
+      for (i = 0; i < PARTITION_TYPES - 1; ++i) {
+        if (vp9_read(r, VP9_DEF_UPDATE_PROB)) {
+          cm->fc.partition_prob[j][i] =
+              vp9_read_prob_diff_update(r, cm->fc.partition_prob[j][i]);
+        }
+      }
+    }
 
     read_nmvprobs(r, nmvc, xd->allow_high_precision_mv);
   }
