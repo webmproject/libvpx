@@ -946,7 +946,7 @@ int vp9_cost_mv_ref(VP9_COMP *cpi,
   if (!vp9_segfeature_active(xd, segment_id, SEG_LVL_SKIP)) {
     VP9_COMMON *pc = &cpi->common;
 
-    vp9_prob p [VP9_MVREFS - 1];
+    vp9_prob p[VP9_INTER_MODES - 1];
     assert(NEARESTMV <= m  &&  m <= NEWMV);
     vp9_mv_ref_probs(pc, p, mode_context);
     return cost_token(vp9_sb_mv_ref_tree, p,

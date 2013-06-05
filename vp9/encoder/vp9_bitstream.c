@@ -427,7 +427,7 @@ static void update_inter_mode_probs(VP9_COMMON *pc, vp9_writer* const bc) {
   int i, j;
 
   for (i = 0; i < INTER_MODE_CONTEXTS; i++) {
-    for (j = 0; j < VP9_MVREFS - 1; j++) {
+    for (j = 0; j < VP9_INTER_MODES - 1; j++) {
       vp9_cond_prob_diff_update(bc, &pc->fc.inter_mode_probs[i][j],
                                 VP9_DEF_UPDATE_PROB,
                                 pc->fc.inter_mode_counts[i][j]);
@@ -708,7 +708,7 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, MODE_INFO *m,
     write_intra_mode(bc, mi->uv_mode,
                      pc->fc.uv_mode_prob[mode]);
   } else {
-    vp9_prob mv_ref_p[VP9_MVREFS - 1];
+    vp9_prob mv_ref_p[VP9_INTER_MODES - 1];
 
     vp9_mv_ref_probs(&cpi->common, mv_ref_p, mi->mb_mode_context[rf]);
 

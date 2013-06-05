@@ -115,7 +115,7 @@ typedef enum {
 
 #define VP9_INTRA_MODES (TM_PRED + 1)
 
-#define VP9_MVREFS (1 + NEWMV - NEARESTMV)
+#define VP9_INTER_MODES (1 + NEWMV - NEARESTMV)
 
 #define WHT_UPSCALE_FACTOR 2
 

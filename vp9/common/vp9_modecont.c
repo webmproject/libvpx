@@ -12,7 +12,7 @@
 #include "vp9/common/vp9_entropy.h"
 
 const vp9_prob vp9_default_inter_mode_probs[INTER_MODE_CONTEXTS]
-                                           [VP9_MVREFS - 1] = {
+                                           [VP9_INTER_MODES - 1] = {
   {2,       173,   34},  // 0 = both zero mv
   {7,       145,   85},  // 1 = one zero mv + one a predicted mv
   {7,       166,   63},  // 2 = two predicted mvs

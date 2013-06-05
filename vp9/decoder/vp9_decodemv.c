@@ -360,7 +360,7 @@ static void read_switchable_interp_probs(VP9_COMMON* const cm, vp9_reader *r) {
 static void read_inter_mode_probs(VP9_COMMON *const cm, vp9_reader *r) {
   int i, j;
   for (i = 0; i < INTER_MODE_CONTEXTS; ++i)
-    for (j = 0; j < VP9_MVREFS - 1; ++j) {
+    for (j = 0; j < VP9_INTER_MODES - 1; ++j) {
       if (vp9_read(r, VP9_DEF_UPDATE_PROB)) {
         // cm->fc.inter_mode_probs[i][j] = vp9_read_prob(r);
         cm->fc.inter_mode_probs[i][j] =
@@ -567,7 +567,7 @@ static void read_mb_modes_mv(VP9D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
   if (mbmi->ref_frame) {
     int_mv nearest, nearby, best_mv;
     int_mv nearest_second, nearby_second, best_mv_second;
-    vp9_prob mv_ref_p[VP9_MVREFS - 1];
+    vp9_prob mv_ref_p[VP9_INTER_MODES - 1];
     const MV_REFERENCE_FRAME ref_frame = mbmi->ref_frame;
 
     {

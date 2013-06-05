@@ -30,7 +30,7 @@ extern struct vp9_token vp9_intra_mode_encodings[VP9_INTRA_MODES];
 
 /* Inter mode values do not start at zero */
 
-extern struct vp9_token vp9_sb_mv_ref_encoding_array[VP9_MVREFS];
+extern struct vp9_token vp9_sb_mv_ref_encoding_array[VP9_INTER_MODES];
 
 // probability models for partition information
 extern const vp9_tree_index  vp9_partition_tree[];

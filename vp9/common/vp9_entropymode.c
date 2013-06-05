@@ -96,7 +96,7 @@ const vp9_tree_index vp9_partition_tree[6] = {
 
 struct vp9_token vp9_intra_mode_encodings[VP9_INTRA_MODES];
 
-struct vp9_token vp9_sb_mv_ref_encoding_array[VP9_MVREFS];
+struct vp9_token vp9_sb_mv_ref_encoding_array[VP9_INTER_MODES];
 
 struct vp9_token vp9_partition_encodings[PARTITION_TYPES];
 
@@ -178,7 +178,7 @@ void vp9_init_mode_contexts(VP9_COMMON *pc) {
 void vp9_accum_mv_refs(VP9_COMMON *pc,
                        MB_PREDICTION_MODE m,
                        const int context) {
-  unsigned int (*inter_mode_counts)[VP9_MVREFS - 1][2] =
+  unsigned int (*inter_mode_counts)[VP9_INTER_MODES - 1][2] =
       pc->fc.inter_mode_counts;
 
   if (m == ZEROMV) {
@@ -202,12 +202,12 @@ void vp9_accum_mv_refs(VP9_COMMON *pc,
 #define MVREF_MAX_UPDATE_FACTOR 128
 void vp9_adapt_mode_context(VP9_COMMON *pc) {
   int i, j;
-  unsigned int (*inter_mode_counts)[VP9_MVREFS - 1][2] =
+  unsigned int (*inter_mode_counts)[VP9_INTER_MODES - 1][2] =
       pc->fc.inter_mode_counts;
-  vp9_prob (*mode_context)[VP9_MVREFS - 1] = pc->fc.inter_mode_probs;
+  vp9_prob (*mode_context)[VP9_INTER_MODES - 1] = pc->fc.inter_mode_probs;
 
   for (j = 0; j < INTER_MODE_CONTEXTS; j++) {
-    for (i = 0; i < VP9_MVREFS - 1; i++) {
+    for (i = 0; i < VP9_INTER_MODES - 1; i++) {
       int count = inter_mode_counts[j][i][0] + inter_mode_counts[j][i][1];
       int factor;
       count = count > MVREF_COUNT_SAT ? MVREF_COUNT_SAT : count;
