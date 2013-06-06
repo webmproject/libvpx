@@ -111,6 +111,17 @@ const MODE_DEFINITION vp9_mode_order[MAX_MODES] = {
   {SPLITMV,   GOLDEN_FRAME, ALTREF_FRAME},
 };
 
+// The baseline rd thresholds for breaking out of the rd loop for
+// certain modes are assumed to be based on 8x8 blocks.
+// This table is used to correct for blocks size.
+// The factors here are << 2 (2 = x0.5, 32 = x8 etc).
+static int rd_thresh_block_size_factor[BLOCK_SIZE_TYPES] =
+  {2, 3, 3, 4, 6, 6, 8, 12, 12, 16, 24, 24, 32};
+
+#define BASE_RD_THRESH_FREQ_FACT 16
+#define MAX_RD_THRESH_FREQ_FACT 32
+#define MAX_RD_THRESH_FREQ_INC 1
+
 static void fill_token_costs(vp9_coeff_count (*c)[BLOCK_TYPES],
                              vp9_coeff_count (*cnoskip)[BLOCK_TYPES],
                              vp9_coeff_probs_model (*p)[BLOCK_TYPES]) {
@@ -175,7 +186,7 @@ void vp9_initialize_me_consts(VP9_COMP *cpi, int qindex) {
 
 
 void vp9_initialize_rd_consts(VP9_COMP *cpi, int qindex) {
-  int q, i;
+  int q, i, bsize;
 
   vp9_clear_system_state();  // __asm emms;
 
@@ -207,24 +218,43 @@ void vp9_initialize_rd_consts(VP9_COMP *cpi, int qindex) {
     cpi->RDDIV = 1;
     cpi->RDMULT /= 100;
 
-    for (i = 0; i < MAX_MODES; i++) {
-      if (cpi->sf.thresh_mult[i] < INT_MAX) {
-        cpi->rd_threshes[i] = cpi->sf.thresh_mult[i] * q / 100;
-      } else {
-        cpi->rd_threshes[i] = INT_MAX;
+    for (bsize = 0; bsize < BLOCK_SIZE_TYPES; ++bsize) {
+      for (i = 0; i < MAX_MODES; ++i) {
+        // Threshold here seem unecessarily harsh but fine given actual
+        // range of values used for cpi->sf.thresh_mult[]
+        int thresh_max = INT_MAX / (q * rd_thresh_block_size_factor[bsize]);
+
+        // *4 relates to the scaling of rd_thresh_block_size_factor[]
+        if ((int64_t)cpi->sf.thresh_mult[i] < thresh_max) {
+          cpi->rd_threshes[bsize][i] =
+            cpi->sf.thresh_mult[i] * q *
+            rd_thresh_block_size_factor[bsize] / (4 * 100);
+        } else {
+          cpi->rd_threshes[bsize][i] = INT_MAX;
+        }
+        cpi->rd_baseline_thresh[bsize][i] = cpi->rd_threshes[bsize][i];
+        cpi->rd_thresh_freq_fact[bsize][i] = BASE_RD_THRESH_FREQ_FACT;
       }
-      cpi->rd_baseline_thresh[i] = cpi->rd_threshes[i];
     }
   } else {
     cpi->RDDIV = 100;
 
-    for (i = 0; i < MAX_MODES; i++) {
-      if (cpi->sf.thresh_mult[i] < (INT_MAX / q)) {
-        cpi->rd_threshes[i] = cpi->sf.thresh_mult[i] * q;
-      } else {
-        cpi->rd_threshes[i] = INT_MAX;
+    for (bsize = 0; bsize < BLOCK_SIZE_TYPES; ++bsize) {
+      for (i = 0; i < MAX_MODES; i++) {
+        // Threshold here seem unecessarily harsh but fine given actual
+        // range of values used for cpi->sf.thresh_mult[]
+        int thresh_max = INT_MAX / (q * rd_thresh_block_size_factor[bsize]);
+
+        if (cpi->sf.thresh_mult[i] < thresh_max) {
+          cpi->rd_threshes[bsize][i] =
+            cpi->sf.thresh_mult[i] * q *
+            rd_thresh_block_size_factor[bsize] / 4;
+        } else {
+          cpi->rd_threshes[bsize][i] = INT_MAX;
+        }
+        cpi->rd_baseline_thresh[bsize][i] = cpi->rd_threshes[bsize][i];
+        cpi->rd_thresh_freq_fact[bsize][i] = BASE_RD_THRESH_FREQ_FACT;
       }
-      cpi->rd_baseline_thresh[i] = cpi->rd_threshes[i];
     }
   }
 
@@ -2619,9 +2649,9 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
       txfm_cache[i] = INT64_MAX;
 
     // Test best rd so far against threshold for trying this mode.
-    if (bsize >= BLOCK_SIZE_SB8X8 &&
-        (best_rd < cpi->rd_threshes[mode_index] ||
-         cpi->rd_threshes[mode_index] == INT_MAX))
+    if ((best_rd < ((cpi->rd_threshes[bsize][mode_index] *
+                     cpi->rd_thresh_freq_fact[bsize][mode_index]) >> 4)) ||
+        cpi->rd_threshes[bsize][mode_index] == INT_MAX)
       continue;
 
     x->skip = 0;
@@ -2812,9 +2842,10 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
       int uv_skippable;
 
       this_rd_thresh = (mbmi->ref_frame == LAST_FRAME) ?
-          cpi->rd_threshes[THR_NEWMV] : cpi->rd_threshes[THR_NEWA];
+          cpi->rd_threshes[bsize][THR_NEWMV] :
+          cpi->rd_threshes[bsize][THR_NEWA];
       this_rd_thresh = (mbmi->ref_frame == GOLDEN_FRAME) ?
-          cpi->rd_threshes[THR_NEWG] : this_rd_thresh;
+          cpi->rd_threshes[bsize][THR_NEWG] : this_rd_thresh;
       xd->mode_info_context->mbmi.txfm_size = TX_4X4;
 
       for (switchable_filter_index = 0;
@@ -3155,7 +3186,27 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
   if (is_inter_mode(best_mode))
     ++cpi->best_switchable_interp_count[vp9_switchable_interp_map[best_filter]];
 
-  // TODO(rbultje) integrate with RD thresholding
+  // Updating rd_thresh_freq_fact[] here means that the differnt
+  // partition/block sizes are handled independently based on the best
+  // choice for the current partition. It may well be better to keep a scaled
+  // best rd so far value and update rd_thresh_freq_fact based on the mode/size
+  // combination that wins out.
+  if (cpi->sf.adpative_rd_thresh) {
+    for (mode_index = 0; mode_index < MAX_MODES; ++mode_index) {
+      if (mode_index == best_mode_index) {
+        cpi->rd_thresh_freq_fact[bsize][mode_index] = BASE_RD_THRESH_FREQ_FACT;
+      } else {
+        cpi->rd_thresh_freq_fact[bsize][mode_index] += MAX_RD_THRESH_FREQ_INC;
+        if (cpi->rd_thresh_freq_fact[bsize][mode_index] >
+            (cpi->sf.adpative_rd_thresh * MAX_RD_THRESH_FREQ_FACT)) {
+          cpi->rd_thresh_freq_fact[bsize][mode_index] =
+            cpi->sf.adpative_rd_thresh * MAX_RD_THRESH_FREQ_FACT;
+        }
+      }
+    }
+  }
+
+  // TODO(rbultje) integrate with RD trd_thresh_freq_facthresholding
 #if 0
   // Reduce the activation RD thresholds for the best choice mode
   if ((cpi->rd_baseline_thresh[best_mode_index] > 0) &&
