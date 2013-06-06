@@ -26,8 +26,6 @@
 
 /* Create/destroy static data structures. */
 
-void vp9_initialize_common(void);
-
 // Define the number of candidate reference buffers.
 #define NUM_REF_FRAMES 8
 #define NUM_REF_FRAMES_LG2 3
@@ -248,9 +246,6 @@ typedef struct VP9Common {
   int near_boffset[3];
   int version;
 
-#ifdef PACKET_TESTING
-  VP9_HEADER oh;
-#endif
   double bitrate;
   double framerate;
 

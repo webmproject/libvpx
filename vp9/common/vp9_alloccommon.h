@@ -14,6 +14,8 @@
 
 #include "vp9/common/vp9_onyxc_int.h"
 
+void vp9_initialize_common();
+
 void vp9_update_mode_info_border(VP9_COMMON *cpi, MODE_INFO *mi);
 void vp9_update_mode_info_in_image(VP9_COMMON *cpi, MODE_INFO *mi);
 
