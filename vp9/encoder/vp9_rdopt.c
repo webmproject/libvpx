@@ -2750,7 +2750,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
     // should fix this either by making the motion search just work on
     // a representative block in the boundary ( first ) and then implement a
     // function that does sads when inside the border..
-    if (((mi_row + bhs) < cm->mi_rows || (mi_col + bws) < cm->mi_cols) &&
+    if (((mi_row + bhs) > cm->mi_rows || (mi_col + bws) > cm->mi_cols) &&
         this_mode == NEWMV) {
       continue;
     }
