@@ -89,7 +89,9 @@ typedef struct {
   int inter_mode_counts[INTER_MODE_CONTEXTS][VP9_INTER_MODES - 1][2];
   vp9_prob inter_mode_probs[INTER_MODE_CONTEXTS][VP9_INTER_MODES - 1];
 
-  vp9_prob tx_probs[TX_SIZE_PROBS];
+  vp9_prob tx_probs_8x8p[TX_SIZE_MAX_SB - 2][TX_SIZE_MAX_SB - 3];
+  vp9_prob tx_probs_16x16p[TX_SIZE_MAX_SB - 1][TX_SIZE_MAX_SB - 2];
+  vp9_prob tx_probs_32x32p[TX_SIZE_MAX_SB][TX_SIZE_MAX_SB - 1];
   vp9_prob mbskip_probs[MBSKIP_CONTEXTS];
 } CODING_CONTEXT;
 

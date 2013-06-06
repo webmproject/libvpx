@@ -1866,15 +1866,34 @@ void vp9_encode_frame(VP9_COMP *cpi) {
     }
 
     if (cpi->common.txfm_mode == TX_MODE_SELECT) {
-      const int count4x4 = cm->fc.tx_count_16x16p[TX_4X4] +
-                           cm->fc.tx_count_32x32p[TX_4X4] +
-                           cm->fc.tx_count_8x8p[TX_4X4];
-      const int count8x8_lp = cm->fc.tx_count_32x32p[TX_8X8] +
-                              cm->fc.tx_count_16x16p[TX_8X8];
-      const int count8x8_8x8p = cm->fc.tx_count_8x8p[TX_8X8];
-      const int count16x16_16x16p = cm->fc.tx_count_16x16p[TX_16X16];
-      const int count16x16_lp = cm->fc.tx_count_32x32p[TX_16X16];
-      const int count32x32 = cm->fc.tx_count_32x32p[TX_32X32];
+      int count4x4 = 0;
+      int count8x8_lp = 0, count8x8_8x8p = 0;
+      int count16x16_16x16p = 0, count16x16_lp = 0;
+      int count32x32 = 0;
+
+      for (i = 0; i < TX_SIZE_MAX_SB; i++)
+        count4x4 += cm->fc.tx_count_32x32p[i][TX_4X4];
+      for (i = 0; i < TX_SIZE_MAX_SB - 1; i++)
+        count4x4 += cm->fc.tx_count_16x16p[i][TX_4X4];
+      for (i = 0; i < TX_SIZE_MAX_SB - 2; i++)
+        count4x4 += cm->fc.tx_count_8x8p[i][TX_4X4];
+
+      for (i = 0; i < TX_SIZE_MAX_SB; i++)
+        count8x8_lp += cm->fc.tx_count_32x32p[i][TX_8X8];
+      for (i = 0; i < TX_SIZE_MAX_SB - 1; i++)
+        count8x8_lp += cm->fc.tx_count_16x16p[i][TX_8X8];
+
+      for (i = 0; i < TX_SIZE_MAX_SB - 2; i++)
+        count8x8_8x8p += cm->fc.tx_count_8x8p[i][TX_8X8];
+
+      for (i = 0; i < TX_SIZE_MAX_SB - 1; i++)
+        count16x16_16x16p += cm->fc.tx_count_16x16p[i][TX_16X16];
+
+      for (i = 0; i < TX_SIZE_MAX_SB; i++)
+        count16x16_lp += cm->fc.tx_count_32x32p[i][TX_16X16];
+
+      for (i = 0; i < TX_SIZE_MAX_SB; i++)
+        count32x32 += cm->fc.tx_count_32x32p[i][TX_32X32];
 
       if (count4x4 == 0 && count16x16_lp == 0 && count16x16_16x16p == 0 &&
           count32x32 == 0) {
@@ -2057,12 +2076,13 @@ static void encode_superblock(VP9_COMP *cpi, TOKENEXTRA **t,
         mbmi->sb_type >= BLOCK_SIZE_SB8X8 &&
         !(mbmi->ref_frame[0] != INTRA_FRAME && (mbmi->mb_skip_coeff ||
           vp9_segfeature_active(xd, segment_id, SEG_LVL_SKIP)))) {
+      const int context = vp9_get_pred_context(cm, xd, PRED_TX_SIZE);
       if (bsize >= BLOCK_SIZE_SB32X32) {
-        cm->fc.tx_count_32x32p[mbmi->txfm_size]++;
+        cm->fc.tx_count_32x32p[context][mbmi->txfm_size]++;
       } else if (bsize >= BLOCK_SIZE_MB16X16) {
-        cm->fc.tx_count_16x16p[mbmi->txfm_size]++;
+        cm->fc.tx_count_16x16p[context][mbmi->txfm_size]++;
       } else {
-        cm->fc.tx_count_8x8p[mbmi->txfm_size]++;
+        cm->fc.tx_count_8x8p[context][mbmi->txfm_size]++;
       }
     } else {
       int x, y;

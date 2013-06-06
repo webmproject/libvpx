@@ -107,6 +107,10 @@ extern int intra_mode_stats[VP9_INTRA_MODES]
 extern void init_nmvstats();
 extern void print_nmvstats();
 #endif
+#ifdef MODE_STATS
+extern void init_tx_count_stats();
+extern void write_tx_count_stats();
+#endif
 
 #ifdef SPEEDSTATS
 unsigned int frames_at_speed[16] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
@@ -1287,6 +1291,9 @@ VP9_PTR vp9_create_compressor(VP9_CONFIG *oxcf) {
 #ifdef NMV_STATS
   init_nmvstats();
 #endif
+#ifdef MODE_STATS
+  init_tx_count_stats();
+#endif
 
   /*Initialize the feed-forward activity masking.*/
   cpi->activity_avg = 90 << 12;
@@ -1534,6 +1541,10 @@ void vp9_remove_compressor(VP9_PTR *ptr) {
 #ifdef NMV_STATS
     if (cpi->pass != 1)
       print_nmvstats();
+#endif
+#ifdef MODE_STATS
+    if (cpi->pass != 1)
+      write_tx_count_stats();
 #endif
 
 #if CONFIG_INTERNAL_STATS

@@ -348,6 +348,37 @@ unsigned char vp9_get_pred_context(const VP9_COMMON *const cm,
       break;
     }
 
+    case PRED_TX_SIZE: {
+      int above_context = TX_16X16, left_context = TX_16X16;
+      int max_tx_size;
+      if (mi->mbmi.sb_type < BLOCK_SIZE_SB8X8)
+        max_tx_size = TX_4X4;
+      else if (mi->mbmi.sb_type < BLOCK_SIZE_MB16X16)
+        max_tx_size = TX_8X8;
+      else if (mi->mbmi.sb_type < BLOCK_SIZE_SB32X32)
+        max_tx_size = TX_16X16;
+      else
+        max_tx_size = TX_32X32;
+      if (xd->up_available) {
+        above_context = (above_mi->mbmi.mb_skip_coeff ?
+                         max_tx_size : above_mi->mbmi.txfm_size);
+      }
+      if (xd->left_available) {
+        left_context = (left_mi->mbmi.mb_skip_coeff ?
+                        max_tx_size : left_mi->mbmi.txfm_size);
+      }
+      if (!xd->left_available) {
+        left_context = above_context;
+      }
+      if (!xd->up_available) {
+        above_context = left_context;
+      }
+      pred_context = (above_context + left_context + 1) >> 1;
+      if (pred_context > max_tx_size)
+        pred_context = max_tx_size;
+      break;
+    }
+
     default:
       assert(0);
       pred_context = 0;  // *** add error trap code.
@@ -390,11 +421,21 @@ vp9_prob vp9_get_pred_prob(const VP9_COMMON *const cm,
 const vp9_prob *vp9_get_pred_probs(const VP9_COMMON *const cm,
                                    const MACROBLOCKD *const xd,
                                    PRED_ID pred_id) {
+  const MODE_INFO *const mi = xd->mode_info_context;
   const int pred_context = vp9_get_pred_context(cm, xd, pred_id);
 
   switch (pred_id) {
     case PRED_SWITCHABLE_INTERP:
       return &cm->fc.switchable_interp_prob[pred_context][0];
+
+    case PRED_TX_SIZE:
+      if (mi->mbmi.sb_type < BLOCK_SIZE_MB16X16)
+        return cm->fc.tx_probs_8x8p[pred_context];
+      else if (mi->mbmi.sb_type < BLOCK_SIZE_SB32X32)
+        return cm->fc.tx_probs_16x16p[pred_context];
+      else
+        return cm->fc.tx_probs_32x32p[pred_context];
+
     default:
       assert(0);
       return NULL;  // *** add error trap code.

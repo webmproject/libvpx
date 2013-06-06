@@ -24,6 +24,7 @@ typedef enum {
   PRED_SINGLE_REF_P1 = 5,
   PRED_SINGLE_REF_P2 = 6,
   PRED_COMP_REF_P = 7,
+  PRED_TX_SIZE = 8
 } PRED_ID;
 
 unsigned char vp9_get_pred_context(const VP9_COMMON *const cm,

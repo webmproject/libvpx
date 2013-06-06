@@ -149,53 +149,52 @@ static const vp9_prob default_single_ref_p[REF_CONTEXTS][2] = {
   { 235, 248 },
 };
 
-void tx_counts_to_branch_counts(unsigned int *tx_count_32x32p,
-                                unsigned int *tx_count_16x16p,
-                                unsigned int *tx_count_8x8p,
-                                unsigned int (*ct)[2]) {
-#if TX_SIZE_PROBS == 6
-  ct[0][0] = tx_count_8x8p[TX_4X4];
-  ct[0][1] = tx_count_8x8p[TX_8X8];
-  ct[1][0] = tx_count_16x16p[TX_4X4];
-  ct[1][1] = tx_count_16x16p[TX_8X8] + tx_count_16x16p[TX_16X16];
-  ct[2][0] = tx_count_16x16p[TX_8X8];
-  ct[2][1] = tx_count_16x16p[TX_16X16];
-  ct[3][0] = tx_count_32x32p[TX_4X4];
-  ct[3][1] = tx_count_32x32p[TX_8X8] + tx_count_32x32p[TX_16X16] +
-             tx_count_32x32p[TX_32X32];
-  ct[4][0] = tx_count_32x32p[TX_8X8];
-  ct[4][1] = tx_count_32x32p[TX_16X16] + tx_count_32x32p[TX_32X32];
-  ct[5][0] = tx_count_32x32p[TX_16X16];
-  ct[5][1] = tx_count_32x32p[TX_32X32];
-#else
-  ct[0][0] = tx_count_32x32p[TX_4X4] +
-             tx_count_16x16p[TX_4X4] +
-             tx_count_8x8p[TX_4X4];
-  ct[0][1] = tx_count_32x32p[TX_8X8] +
-             tx_count_32x32p[TX_16X16] +
-             tx_count_32x32p[TX_32X32] +
-             tx_count_16x16p[TX_8X8] +
-             tx_count_16x16p[TX_16X16] +
-             tx_count_8x8p[TX_8X8];
-  ct[1][0] = tx_count_32x32p[TX_8X8] +
-             tx_count_16x16p[TX_8X8];
-  ct[1][1] = tx_count_32x32p[TX_16X16] +
-             tx_count_32x32p[TX_32X32] +
-             tx_count_16x16p[TX_16X16];
-  ct[2][0] = tx_count_32x32p[TX_16X16];
-  ct[2][1] = tx_count_32x32p[TX_32X32];
-#endif
+const vp9_prob vp9_default_tx_probs_32x32p[TX_SIZE_MAX_SB]
+                                          [TX_SIZE_MAX_SB - 1] = {
+  { 16, 64, 96, },
+  { 32, 64, 96, },
+  { 32, 64, 96, },
+  { 32, 64, 96, },
+};
+const vp9_prob vp9_default_tx_probs_16x16p[TX_SIZE_MAX_SB - 1]
+                                          [TX_SIZE_MAX_SB - 2] = {
+  { 32, 96, },
+  { 64, 96, },
+  { 64, 96, },
+};
+const vp9_prob vp9_default_tx_probs_8x8p[TX_SIZE_MAX_SB - 2]
+                                        [TX_SIZE_MAX_SB - 3] = {
+  { 96, },
+  { 96, },
+};
+
+void tx_counts_to_branch_counts_32x32(unsigned int *tx_count_32x32p,
+                                      unsigned int (*ct_32x32p)[2]) {
+  ct_32x32p[0][0] = tx_count_32x32p[TX_4X4];
+  ct_32x32p[0][1] = tx_count_32x32p[TX_8X8] +
+                    tx_count_32x32p[TX_16X16] +
+                    tx_count_32x32p[TX_32X32];
+  ct_32x32p[1][0] = tx_count_32x32p[TX_8X8];
+  ct_32x32p[1][1] = tx_count_32x32p[TX_16X16] +
+                    tx_count_32x32p[TX_32X32];
+  ct_32x32p[2][0] = tx_count_32x32p[TX_16X16];
+  ct_32x32p[2][1] = tx_count_32x32p[TX_32X32];
 }
 
-#if TX_SIZE_PROBS == 6
-const vp9_prob vp9_default_tx_probs[TX_SIZE_PROBS] = {
-  96, 96, 96, 96, 96, 96
-};
-#else
-const vp9_prob vp9_default_tx_probs[TX_SIZE_PROBS] = {
-  96, 96, 96
-};
-#endif
+void tx_counts_to_branch_counts_16x16(unsigned int *tx_count_16x16p,
+                                      unsigned int (*ct_16x16p)[2]) {
+  ct_16x16p[0][0] = tx_count_16x16p[TX_4X4];
+  ct_16x16p[0][1] = tx_count_16x16p[TX_8X8] +
+                    tx_count_16x16p[TX_16X16];
+  ct_16x16p[1][0] = tx_count_16x16p[TX_8X8];
+  ct_16x16p[1][1] = tx_count_16x16p[TX_16X16];
+}
+
+void tx_counts_to_branch_counts_8x8(unsigned int *tx_count_8x8p,
+                                    unsigned int (*ct_8x8p)[2]) {
+  ct_8x8p[0][0] =   tx_count_8x8p[TX_4X4];
+  ct_8x8p[0][1] =   tx_count_8x8p[TX_8X8];
+}
 
 const vp9_prob vp9_default_mbskip_probs[MBSKIP_CONTEXTS] = {
   192, 128, 64
@@ -223,8 +222,12 @@ void vp9_init_mbmode_probs(VP9_COMMON *x) {
              sizeof(default_comp_ref_p));
   vpx_memcpy(x->fc.single_ref_prob, default_single_ref_p,
              sizeof(default_single_ref_p));
-  vpx_memcpy(x->fc.tx_probs, vp9_default_tx_probs,
-             sizeof(vp9_default_tx_probs));
+  vpx_memcpy(x->fc.tx_probs_32x32p, vp9_default_tx_probs_32x32p,
+             sizeof(vp9_default_tx_probs_32x32p));
+  vpx_memcpy(x->fc.tx_probs_16x16p, vp9_default_tx_probs_16x16p,
+             sizeof(vp9_default_tx_probs_16x16p));
+  vpx_memcpy(x->fc.tx_probs_8x8p, vp9_default_tx_probs_8x8p,
+             sizeof(vp9_default_tx_probs_8x8p));
   vpx_memcpy(x->fc.mbskip_probs, vp9_default_mbskip_probs,
              sizeof(vp9_default_mbskip_probs));
 }
@@ -431,17 +434,51 @@ void vp9_adapt_mode_probs(VP9_COMMON *cm) {
     }
   }
   if (cm->txfm_mode == TX_MODE_SELECT) {
-    unsigned int branch_ct[TX_SIZE_PROBS][2];
-    tx_counts_to_branch_counts(cm->fc.tx_count_32x32p,
-                               cm->fc.tx_count_16x16p,
-                               cm->fc.tx_count_8x8p, branch_ct);
-    for (i = 0; i < TX_SIZE_PROBS; ++i) {
-      int factor;
-      int count = branch_ct[i][0] + branch_ct[i][1];
-      vp9_prob prob = get_binary_prob(branch_ct[i][0], branch_ct[i][1]);
-      count = count > MODE_COUNT_SAT ? MODE_COUNT_SAT : count;
-      factor = (MODE_MAX_UPDATE_FACTOR * count / MODE_COUNT_SAT);
-      cm->fc.tx_probs[i] = weighted_prob(cm->fc.pre_tx_probs[i], prob, factor);
+    int j;
+    unsigned int branch_ct_8x8p[TX_SIZE_MAX_SB - 3][2];
+    unsigned int branch_ct_16x16p[TX_SIZE_MAX_SB - 2][2];
+    unsigned int branch_ct_32x32p[TX_SIZE_MAX_SB - 1][2];
+    for (i = 0; i < TX_SIZE_MAX_SB - 2; ++i) {
+      tx_counts_to_branch_counts_8x8(cm->fc.tx_count_8x8p[i],
+                                     branch_ct_8x8p);
+      for (j = 0; j < TX_SIZE_MAX_SB - 3; ++j) {
+        int factor;
+        int count = branch_ct_8x8p[j][0] + branch_ct_8x8p[j][1];
+        vp9_prob prob = get_binary_prob(branch_ct_8x8p[j][0],
+                                        branch_ct_8x8p[j][1]);
+        count = count > MODE_COUNT_SAT ? MODE_COUNT_SAT : count;
+        factor = (MODE_MAX_UPDATE_FACTOR * count / MODE_COUNT_SAT);
+        cm->fc.tx_probs_8x8p[i][j] = weighted_prob(
+            cm->fc.pre_tx_probs_8x8p[i][j], prob, factor);
+      }
+    }
+    for (i = 0; i < TX_SIZE_MAX_SB - 1; ++i) {
+      tx_counts_to_branch_counts_16x16(cm->fc.tx_count_16x16p[i],
+                                       branch_ct_16x16p);
+      for (j = 0; j < TX_SIZE_MAX_SB - 2; ++j) {
+        int factor;
+        int count = branch_ct_16x16p[j][0] + branch_ct_16x16p[j][1];
+        vp9_prob prob = get_binary_prob(branch_ct_16x16p[j][0],
+                                        branch_ct_16x16p[j][1]);
+        count = count > MODE_COUNT_SAT ? MODE_COUNT_SAT : count;
+        factor = (MODE_MAX_UPDATE_FACTOR * count / MODE_COUNT_SAT);
+        cm->fc.tx_probs_16x16p[i][j] = weighted_prob(
+            cm->fc.pre_tx_probs_16x16p[i][j], prob, factor);
+      }
+    }
+    for (i = 0; i < TX_SIZE_MAX_SB; ++i) {
+      tx_counts_to_branch_counts_32x32(cm->fc.tx_count_32x32p[i],
+                                       branch_ct_32x32p);
+      for (j = 0; j < TX_SIZE_MAX_SB - 1; ++j) {
+        int factor;
+        int count = branch_ct_32x32p[j][0] + branch_ct_32x32p[j][1];
+        vp9_prob prob = get_binary_prob(branch_ct_32x32p[j][0],
+                                        branch_ct_32x32p[j][1]);
+        count = count > MODE_COUNT_SAT ? MODE_COUNT_SAT : count;
+        factor = (MODE_MAX_UPDATE_FACTOR * count / MODE_COUNT_SAT);
+        cm->fc.tx_probs_32x32p[i][j] = weighted_prob(
+            cm->fc.pre_tx_probs_32x32p[i][j], prob, factor);
+      }
     }
   }
   for (i = 0; i < MBSKIP_CONTEXTS; ++i)

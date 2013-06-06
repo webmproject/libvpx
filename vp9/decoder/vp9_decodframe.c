@@ -58,15 +58,35 @@ static void setup_txfm_mode(VP9_COMMON *pc, int lossless, vp9_reader *r) {
     if (pc->txfm_mode == ALLOW_32X32)
       pc->txfm_mode += vp9_read_bit(r);
     if (pc->txfm_mode == TX_MODE_SELECT) {
-      int i;
-      for (i = 0; i < TX_SIZE_PROBS; ++i) {
-        if (vp9_read(r, VP9_DEF_UPDATE_PROB))
-           pc->fc.tx_probs[i] =
-               vp9_read_prob_diff_update(r, pc->fc.tx_probs[i]);
+      int i, j;
+      for (i = 0; i < TX_SIZE_MAX_SB - 2; ++i) {
+        for (j = 0; j < TX_SIZE_MAX_SB - 3; ++j) {
+          if (vp9_read(r, VP9_DEF_UPDATE_PROB))
+            pc->fc.tx_probs_8x8p[i][j] =
+                vp9_read_prob_diff_update(r, pc->fc.tx_probs_8x8p[i][j]);
+        }
+      }
+      for (i = 0; i < TX_SIZE_MAX_SB - 1; ++i) {
+        for (j = 0; j < TX_SIZE_MAX_SB - 2; ++j) {
+          if (vp9_read(r, VP9_DEF_UPDATE_PROB))
+            pc->fc.tx_probs_16x16p[i][j] =
+                vp9_read_prob_diff_update(r, pc->fc.tx_probs_16x16p[i][j]);
+        }
+      }
+      for (i = 0; i < TX_SIZE_MAX_SB; ++i) {
+        for (j = 0; j < TX_SIZE_MAX_SB - 1; ++j) {
+          if (vp9_read(r, VP9_DEF_UPDATE_PROB))
+            pc->fc.tx_probs_32x32p[i][j] =
+                vp9_read_prob_diff_update(r, pc->fc.tx_probs_32x32p[i][j]);
+        }
       }
     } else {
-      vpx_memcpy(pc->fc.tx_probs, vp9_default_tx_probs,
-                 sizeof(vp9_default_tx_probs));
+      vpx_memcpy(pc->fc.tx_probs_8x8p, vp9_default_tx_probs_8x8p,
+                 sizeof(vp9_default_tx_probs_8x8p));
+      vpx_memcpy(pc->fc.tx_probs_16x16p, vp9_default_tx_probs_16x16p,
+                 sizeof(vp9_default_tx_probs_16x16p));
+      vpx_memcpy(pc->fc.tx_probs_32x32p, vp9_default_tx_probs_32x32p,
+                 sizeof(vp9_default_tx_probs_32x32p));
     }
   }
 }
@@ -793,7 +813,9 @@ static void update_frame_context(FRAME_CONTEXT *fc) {
   fc->pre_nmvc = fc->nmvc;
   vp9_copy(fc->pre_switchable_interp_prob, fc->switchable_interp_prob);
   vp9_copy(fc->pre_inter_mode_probs, fc->inter_mode_probs);
-  vp9_copy(fc->pre_tx_probs, fc->tx_probs);
+  vp9_copy(fc->pre_tx_probs_8x8p, fc->tx_probs_8x8p);
+  vp9_copy(fc->pre_tx_probs_16x16p, fc->tx_probs_16x16p);
+  vp9_copy(fc->pre_tx_probs_32x32p, fc->tx_probs_32x32p);
   vp9_copy(fc->pre_mbskip_probs, fc->mbskip_probs);
 
   vp9_zero(fc->coef_counts);

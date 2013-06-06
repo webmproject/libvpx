@@ -16,6 +16,8 @@
 
 #define SUBMVREF_COUNT 5
 
+// #define MODE_STATS
+
 extern int vp9_mv_cont(const int_mv *l, const int_mv *a);
 
 
@@ -75,11 +77,17 @@ extern struct vp9_token vp9_switchable_interp_encodings[VP9_SWITCHABLE_FILTERS];
 extern const  vp9_prob vp9_switchable_interp_prob[VP9_SWITCHABLE_FILTERS + 1]
                                                  [VP9_SWITCHABLE_FILTERS - 1];
 
-extern const vp9_prob vp9_default_tx_probs[TX_SIZE_PROBS];
+extern const vp9_prob vp9_default_tx_probs_32x32p[TX_SIZE_MAX_SB]
+                                                 [TX_SIZE_MAX_SB - 1];
+extern const vp9_prob vp9_default_tx_probs_16x16p[TX_SIZE_MAX_SB - 1]
+                                                 [TX_SIZE_MAX_SB - 2];
+extern const vp9_prob vp9_default_tx_probs_8x8p[TX_SIZE_MAX_SB - 2]
+                                               [TX_SIZE_MAX_SB - 3];
 
-extern void tx_counts_to_branch_counts(unsigned int *tx_count_32x32p,
-                                       unsigned int *tx_count_16x16p,
-                                       unsigned int *tx_count_8x8p,
-                                       unsigned int (*ct)[2]);
-
+extern void tx_counts_to_branch_counts_32x32(unsigned int *tx_count_32x32p,
+                                             unsigned int (*ct_32x32p)[2]);
+extern void tx_counts_to_branch_counts_16x16(unsigned int *tx_count_16x16p,
+                                             unsigned int (*ct_16x16p)[2]);
+extern void tx_counts_to_branch_counts_8x8(unsigned int *tx_count_8x8p,
+                                           unsigned int (*ct_8x8p)[2]);
 #endif  // VP9_COMMON_VP9_ENTROPYMODE_H_
