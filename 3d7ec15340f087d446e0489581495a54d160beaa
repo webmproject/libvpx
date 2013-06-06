@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAZ3//4xI\u003d",
+        "filename": "vp9/common/vp9_entropymode.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 302,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-06-06T17:35:20Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAZ3//8nc\u003d",
+      "revId": "3d7ec15340f087d446e0489581495a54d160beaa",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAZ3//9WM\u003d",
         "filename": "vp9/common/vp9_entropymode.c",
         "patchSetId": 3
@@ -30,6 +48,24 @@
       "writtenOn": "2013-06-03T22:48:14Z",
       "side": 1,
       "message": "what is \"1\"?",
+      "revId": "3d7ec15340f087d446e0489581495a54d160beaa",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAZ3//4xE\u003d",
+        "filename": "vp9/common/vp9_entropymode.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 315,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-06-06T17:35:20Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAZ3//9WM\u003d",
       "revId": "3d7ec15340f087d446e0489581495a54d160beaa",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAZ3//4xA\u003d",
+        "filename": "vp9/common/vp9_entropymode.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-06-06T17:35:20Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAZ3//9WY\u003d",
+      "revId": "3d7ec15340f087d446e0489581495a54d160beaa",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAZ3//9V4\u003d",
         "filename": "vp9/common/vp9_onyxc_int.h",
         "patchSetId": 3
@@ -64,6 +118,24 @@
       "writtenOn": "2013-06-03T22:48:14Z",
       "side": 1,
       "message": "Using a macro for 4 and the 4s below? or maybe a comment?",
+      "revId": "3d7ec15340f087d446e0489581495a54d160beaa",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAZ3//4ww\u003d",
+        "filename": "vp9/common/vp9_onyxc_int.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-06-06T17:35:20Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAZ3//9V4\u003d",
       "revId": "3d7ec15340f087d446e0489581495a54d160beaa",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAZ3//4w0\u003d",
+        "filename": "vp9/common/vp9_onyxc_int.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-06-06T17:35:20Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAZ3//9V0\u003d",
+      "revId": "3d7ec15340f087d446e0489581495a54d160beaa",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAZ3//9VY\u003d",
         "filename": "vp9/encoder/vp9_bitstream.c",
         "patchSetId": 3
@@ -98,6 +188,24 @@
       "writtenOn": "2013-06-03T22:48:14Z",
       "side": 1,
       "message": "maybe use frame type constant macro instead of \"1\"? Similar for few other places.",
+      "revId": "3d7ec15340f087d446e0489581495a54d160beaa",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAZ3//4ws\u003d",
+        "filename": "vp9/encoder/vp9_bitstream.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 1609,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-06-06T17:35:20Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAZ3//9VY\u003d",
       "revId": "3d7ec15340f087d446e0489581495a54d160beaa",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -121,6 +229,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAZ3//4wo\u003d",
+        "filename": "vp9/encoder/vp9_modecosts.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-06-06T17:35:20Z",
+      "side": 1,
+      "message": "Not yet, the RD isn\u0027t exactly optimal yet. Will fix, but later.",
+      "parentUuid": "AAAAZ3//9VU\u003d",
+      "revId": "3d7ec15340f087d446e0489581495a54d160beaa",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAZ3//9Wo\u003d",
         "filename": "vp9/encoder/vp9_onyx_int.h",
         "patchSetId": 3
@@ -132,6 +258,24 @@
       "writtenOn": "2013-06-03T22:48:14Z",
       "side": 1,
       "message": "Using a meaningful macro or adding a comment might be helpful in readability.",
+      "revId": "3d7ec15340f087d446e0489581495a54d160beaa",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAZ3//4wk\u003d",
+        "filename": "vp9/encoder/vp9_onyx_int.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 408,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-06-06T17:35:20Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAZ3//9Wo\u003d",
       "revId": "3d7ec15340f087d446e0489581495a54d160beaa",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
