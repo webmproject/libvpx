@@ -1298,8 +1298,6 @@ VP9_PTR vp9_create_compressor(VP9_CONFIG *oxcf) {
   cpi->frames_till_gf_update_due    = 0;
   cpi->gf_overspend_bits            = 0;
   cpi->non_gf_bitrate_adjustment    = 0;
-  for (i = 0; i < TX_SIZE_MAX_SB - 1; i++)
-    cm->prob_tx[i]               = 128;
 
   // Set reference frame sign bias for ALTREF frame to 1 (for now)
   cpi->common.ref_frame_sign_bias[ALTREF_FRAME] = 1;

@@ -75,4 +75,11 @@ extern struct vp9_token vp9_switchable_interp_encodings[VP9_SWITCHABLE_FILTERS];
 extern const  vp9_prob vp9_switchable_interp_prob[VP9_SWITCHABLE_FILTERS + 1]
                                                  [VP9_SWITCHABLE_FILTERS - 1];
 
+extern const vp9_prob vp9_default_tx_probs[TX_SIZE_PROBS];
+
+extern void tx_counts_to_branch_counts(unsigned int *tx_count_32x32p,
+                                       unsigned int *tx_count_16x16p,
+                                       unsigned int *tx_count_8x8p,
+                                       unsigned int (*ct)[2]);
+
 #endif  // VP9_COMMON_VP9_ENTROPYMODE_H_

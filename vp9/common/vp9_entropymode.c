@@ -149,6 +149,54 @@ static const vp9_prob default_single_ref_p[REF_CONTEXTS][2] = {
   { 235, 248 },
 };
 
+void tx_counts_to_branch_counts(unsigned int *tx_count_32x32p,
+                                unsigned int *tx_count_16x16p,
+                                unsigned int *tx_count_8x8p,
+                                unsigned int (*ct)[2]) {
+#if TX_SIZE_PROBS == 6
+  ct[0][0] = tx_count_8x8p[TX_4X4];
+  ct[0][1] = tx_count_8x8p[TX_8X8];
+  ct[1][0] = tx_count_16x16p[TX_4X4];
+  ct[1][1] = tx_count_16x16p[TX_8X8] + tx_count_16x16p[TX_16X16];
+  ct[2][0] = tx_count_16x16p[TX_8X8];
+  ct[2][1] = tx_count_16x16p[TX_16X16];
+  ct[3][0] = tx_count_32x32p[TX_4X4];
+  ct[3][1] = tx_count_32x32p[TX_8X8] + tx_count_32x32p[TX_16X16] +
+             tx_count_32x32p[TX_32X32];
+  ct[4][0] = tx_count_32x32p[TX_8X8];
+  ct[4][1] = tx_count_32x32p[TX_16X16] + tx_count_32x32p[TX_32X32];
+  ct[5][0] = tx_count_32x32p[TX_16X16];
+  ct[5][1] = tx_count_32x32p[TX_32X32];
+#else
+  ct[0][0] = tx_count_32x32p[TX_4X4] +
+             tx_count_16x16p[TX_4X4] +
+             tx_count_8x8p[TX_4X4];
+  ct[0][1] = tx_count_32x32p[TX_8X8] +
+             tx_count_32x32p[TX_16X16] +
+             tx_count_32x32p[TX_32X32] +
+             tx_count_16x16p[TX_8X8] +
+             tx_count_16x16p[TX_16X16] +
+             tx_count_8x8p[TX_8X8];
+  ct[1][0] = tx_count_32x32p[TX_8X8] +
+             tx_count_16x16p[TX_8X8];
+  ct[1][1] = tx_count_32x32p[TX_16X16] +
+             tx_count_32x32p[TX_32X32] +
+             tx_count_16x16p[TX_16X16];
+  ct[2][0] = tx_count_32x32p[TX_16X16];
+  ct[2][1] = tx_count_32x32p[TX_32X32];
+#endif
+}
+
+#if TX_SIZE_PROBS == 6
+const vp9_prob vp9_default_tx_probs[TX_SIZE_PROBS] = {
+  96, 96, 96, 96, 96, 96
+};
+#else
+const vp9_prob vp9_default_tx_probs[TX_SIZE_PROBS] = {
+  96, 96, 96
+};
+#endif
+
 void vp9_init_mbmode_probs(VP9_COMMON *x) {
   vpx_memcpy(x->fc.uv_mode_prob, default_if_uv_probs,
              sizeof(default_if_uv_probs));
@@ -171,6 +219,8 @@ void vp9_init_mbmode_probs(VP9_COMMON *x) {
              sizeof(default_comp_ref_p));
   vpx_memcpy(x->fc.single_ref_prob, default_single_ref_p,
              sizeof(default_single_ref_p));
+  vpx_memcpy(x->fc.tx_probs, vp9_default_tx_probs,
+             sizeof(vp9_default_tx_probs));
 }
 
 #if VP9_SWITCHABLE_FILTERS == 3
@@ -372,6 +422,20 @@ void vp9_adapt_mode_probs(VP9_COMMON *cm) {
                         fc->switchable_interp_count[i],
                         fc->pre_switchable_interp_prob[i],
                         fc->switchable_interp_prob[i], 0);
+    }
+  }
+  if (cm->txfm_mode == TX_MODE_SELECT) {
+    unsigned int branch_ct[TX_SIZE_PROBS][2];
+    tx_counts_to_branch_counts(cm->fc.tx_count_32x32p,
+                               cm->fc.tx_count_16x16p,
+                               cm->fc.tx_count_8x8p, branch_ct);
+    for (i = 0; i < TX_SIZE_PROBS; ++i) {
+      int factor;
+      int count = branch_ct[i][0] + branch_ct[i][1];
+      vp9_prob prob = get_binary_prob(branch_ct[i][0], branch_ct[i][1]);
+      count = count > MODE_COUNT_SAT ? MODE_COUNT_SAT : count;
+      factor = (MODE_MAX_UPDATE_FACTOR * count / MODE_COUNT_SAT);
+      cm->fc.tx_probs[i] = weighted_prob(cm->fc.pre_tx_probs[i], prob, factor);
     }
   }
 }

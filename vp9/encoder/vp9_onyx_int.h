@@ -89,6 +89,7 @@ typedef struct {
   int inter_mode_counts[INTER_MODE_CONTEXTS][VP9_INTER_MODES - 1][2];
   vp9_prob inter_mode_probs[INTER_MODE_CONTEXTS][VP9_INTER_MODES - 1];
 
+  vp9_prob tx_probs[TX_SIZE_PROBS];
 } CODING_CONTEXT;
 
 typedef struct {
@@ -326,9 +327,7 @@ typedef struct VP9_COMP {
   unsigned int comp_ref_count[REF_CONTEXTS][2];
 
   // FIXME contextualize
-  int txfm_count_32x32p[TX_SIZE_MAX_SB];
-  int txfm_count_16x16p[TX_SIZE_MAX_SB - 1];
-  int txfm_count_8x8p[TX_SIZE_MAX_SB - 2];
+
   int64_t rd_tx_select_diff[NB_TXFM_MODES];
   int rd_tx_select_threshes[4][NB_TXFM_MODES];
 

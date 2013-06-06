@@ -420,6 +420,7 @@ static void choose_txfm_size_from_rd(VP9_COMP *cpi, MACROBLOCK *x,
                                      int *d, int *distortion,
                                      int *s, int *skip,
                                      int64_t txfm_cache[NB_TXFM_MODES],
+                                     BLOCK_SIZE_TYPE bs,
                                      TX_SIZE max_txfm_size) {
   VP9_COMMON *const cm = &cpi->common;
   MACROBLOCKD *const xd = &x->e_mbd;
@@ -429,13 +430,15 @@ static void choose_txfm_size_from_rd(VP9_COMP *cpi, MACROBLOCK *x,
   int n, m;
   int s0, s1;
 
+  int tx_probs_offset = get_tx_probs_offset(bs);
+
   for (n = TX_4X4; n <= max_txfm_size; n++) {
     r[n][1] = r[n][0];
     for (m = 0; m <= n - (n == max_txfm_size); m++) {
       if (m == n)
-        r[n][1] += vp9_cost_zero(cm->prob_tx[m]);
+        r[n][1] += vp9_cost_zero(cm->fc.tx_probs[tx_probs_offset + m]);
       else
-        r[n][1] += vp9_cost_one(cm->prob_tx[m]);
+        r[n][1] += vp9_cost_one(cm->fc.tx_probs[tx_probs_offset + m]);
     }
   }
 
@@ -608,6 +611,8 @@ static void super_block_yrd(VP9_COMP *cpi,
   MACROBLOCKD *xd = &x->e_mbd;
   MB_MODE_INFO *const mbmi = &xd->mode_info_context->mbmi;
 
+  assert(bs == mbmi->sb_type);
+
   if (mbmi->ref_frame[0] > INTRA_FRAME)
     vp9_subtract_sby(x, bs);
 
@@ -637,7 +642,8 @@ static void super_block_yrd(VP9_COMP *cpi,
   super_block_yrd_for_txfm(cm, x, &r[TX_4X4][0], &d[TX_4X4], &s[TX_4X4], bs,
                            TX_4X4);
 
-  choose_txfm_size_from_rd(cpi, x, r, rate, d, distortion, s, skip, txfm_cache,
+  choose_txfm_size_from_rd(cpi, x, r, rate, d, distortion, s,
+                           skip, txfm_cache, bs,
                            TX_32X32 - (bs < BLOCK_SIZE_SB32X32)
                            - (bs < BLOCK_SIZE_MB16X16));
 }
