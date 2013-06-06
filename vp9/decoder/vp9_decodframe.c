@@ -117,13 +117,8 @@ static int decode_term_subexp(vp9_reader *r, int k, int num_syms) {
   return word;
 }
 
-static int decode_unsigned_max(vp9_reader *r, int max) {
-  int data = 0, bit = 0, lmax = max;
-
-  while (lmax) {
-    data |= vp9_read_bit(r) << bit++;
-    lmax >>= 1;
-  }
+static int decode_unsigned_max(struct vp9_read_bit_buffer *rb, int max) {
+  const int data = vp9_rb_read_literal(rb, get_unsigned_bits(max));
   return data > max ? max : data;
 }
 
@@ -566,65 +561,68 @@ static void read_coef_probs_common(FRAME_CONTEXT *fc, TX_SIZE tx_size,
 }
 
 static void read_coef_probs(VP9D_COMP *pbi, vp9_reader *r) {
-  const TXFM_MODE mode = pbi->common.txfm_mode;
+  const TXFM_MODE txfm_mode = pbi->common.txfm_mode;
   FRAME_CONTEXT *const fc = &pbi->common.fc;
 
   read_coef_probs_common(fc, TX_4X4, r);
 
-  if (mode > ONLY_4X4)
+  if (txfm_mode > ONLY_4X4)
     read_coef_probs_common(fc, TX_8X8, r);
 
-  if (mode > ALLOW_8X8)
+  if (txfm_mode > ALLOW_8X8)
     read_coef_probs_common(fc, TX_16X16, r);
 
-  if (mode > ALLOW_16X16)
+  if (txfm_mode > ALLOW_16X16)
     read_coef_probs_common(fc, TX_32X32, r);
 }
 
-static void setup_segmentation(VP9_COMMON *pc, MACROBLOCKD *xd, vp9_reader *r) {
+static void setup_segmentation(VP9D_COMP *pbi, struct vp9_read_bit_buffer *rb) {
   int i, j;
+
+  VP9_COMMON *const cm = &pbi->common;
+  MACROBLOCKD *const xd = &pbi->mb;
 
   xd->update_mb_segmentation_map = 0;
   xd->update_mb_segmentation_data = 0;
 
-  xd->segmentation_enabled = vp9_read_bit(r);
+  xd->segmentation_enabled = vp9_rb_read_bit(rb);
   if (!xd->segmentation_enabled)
     return;
 
   // Segmentation map update
-  xd->update_mb_segmentation_map = vp9_read_bit(r);
+  xd->update_mb_segmentation_map = vp9_rb_read_bit(rb);
   if (xd->update_mb_segmentation_map) {
     for (i = 0; i < MB_SEG_TREE_PROBS; i++)
-      xd->mb_segment_tree_probs[i] = vp9_read_bit(r) ? vp9_read_prob(r)
-                                                     : MAX_PROB;
+      xd->mb_segment_tree_probs[i] = vp9_rb_read_bit(rb) ?
+                                         vp9_rb_read_literal(rb, 8) : MAX_PROB;
 
-    pc->temporal_update = vp9_read_bit(r);
-    if (pc->temporal_update) {
+    cm->temporal_update = vp9_rb_read_bit(rb);
+    if (cm->temporal_update) {
       for (i = 0; i < PREDICTION_PROBS; i++)
-        pc->segment_pred_probs[i] = vp9_read_bit(r) ? vp9_read_prob(r)
-                                                    : MAX_PROB;
+        cm->segment_pred_probs[i] = vp9_rb_read_bit(rb) ?
+                                        vp9_rb_read_literal(rb, 8) : MAX_PROB;
     } else {
       for (i = 0; i < PREDICTION_PROBS; i++)
-        pc->segment_pred_probs[i] = MAX_PROB;
+        cm->segment_pred_probs[i] = MAX_PROB;
     }
   }
 
   // Segmentation data update
-  xd->update_mb_segmentation_data = vp9_read_bit(r);
+  xd->update_mb_segmentation_data = vp9_rb_read_bit(rb);
   if (xd->update_mb_segmentation_data) {
-    xd->mb_segment_abs_delta = vp9_read_bit(r);
+    xd->mb_segment_abs_delta = vp9_rb_read_bit(rb);
 
     vp9_clearall_segfeatures(xd);
 
     for (i = 0; i < MAX_MB_SEGMENTS; i++) {
       for (j = 0; j < SEG_LVL_MAX; j++) {
         int data = 0;
-        const int feature_enabled = vp9_read_bit(r);
+        const int feature_enabled = vp9_rb_read_bit(rb);
         if (feature_enabled) {
           vp9_enable_segfeature(xd, i, j);
-          data = decode_unsigned_max(r, vp9_seg_feature_data_max(j));
+          data = decode_unsigned_max(rb, vp9_seg_feature_data_max(j));
           if (vp9_is_segfeature_signed(j))
-            data = vp9_read_and_apply_sign(r, data);
+            data = vp9_rb_read_bit(rb) ? -data : data;
         }
         vp9_set_segdata(xd, i, j, data);
       }
@@ -676,14 +674,30 @@ static int read_delta_q(struct vp9_read_bit_buffer *rb, int *delta_q) {
 }
 
 static void setup_quantization(VP9D_COMP *pbi, struct vp9_read_bit_buffer *rb) {
+  MACROBLOCKD *const xd = &pbi->mb;
   VP9_COMMON *const cm = &pbi->common;
   int update = 0;
+
   cm->base_qindex = vp9_rb_read_literal(rb, QINDEX_BITS);
   update |= read_delta_q(rb, &cm->y_dc_delta_q);
   update |= read_delta_q(rb, &cm->uv_dc_delta_q);
   update |= read_delta_q(rb, &cm->uv_ac_delta_q);
   if (update)
     vp9_init_dequantizer(cm);
+
+  xd->lossless = cm->base_qindex == 0 &&
+                 cm->y_dc_delta_q == 0 &&
+                 cm->uv_dc_delta_q == 0 &&
+                 cm->uv_ac_delta_q == 0;
+  if (xd->lossless) {
+    xd->itxm_add          = vp9_idct_add_lossless_c;
+    xd->itxm_add_y_block  = vp9_idct_add_y_block_lossless_c;
+    xd->itxm_add_uv_block = vp9_idct_add_uv_block_lossless_c;
+  } else {
+    xd->itxm_add          = vp9_idct_add;
+    xd->itxm_add_y_block  = vp9_idct_add_y_block;
+    xd->itxm_add_uv_block = vp9_idct_add_uv_block;
+  }
 }
 
 static INTERPOLATIONFILTERTYPE read_interp_filter_type(
@@ -787,27 +801,33 @@ static void decode_tile(VP9D_COMP *pbi, vp9_reader *r) {
   }
 }
 
-static void decode_tiles(VP9D_COMP *pbi,
-                         const uint8_t *data, int first_partition_size,
-                         vp9_reader *header_bc, vp9_reader *residual_bc) {
-  VP9_COMMON *const pc = &pbi->common;
+static void setup_tile_info(VP9_COMMON *cm, struct vp9_read_bit_buffer *rb) {
+  int delta_log2_tiles;
 
-  const uint8_t *data_ptr = data + first_partition_size;
-  int tile_row, tile_col, delta_log2_tiles;
-
-  vp9_get_tile_n_bits(pc, &pc->log2_tile_columns, &delta_log2_tiles);
+  vp9_get_tile_n_bits(cm, &cm->log2_tile_columns, &delta_log2_tiles);
   while (delta_log2_tiles--) {
-    if (vp9_read_bit(header_bc)) {
-      pc->log2_tile_columns++;
+    if (vp9_rb_read_bit(rb)) {
+      cm->log2_tile_columns++;
     } else {
       break;
     }
   }
-  pc->log2_tile_rows = vp9_read_bit(header_bc);
-  if (pc->log2_tile_rows)
-    pc->log2_tile_rows += vp9_read_bit(header_bc);
-  pc->tile_columns = 1 << pc->log2_tile_columns;
-  pc->tile_rows    = 1 << pc->log2_tile_rows;
+
+  cm->log2_tile_rows = vp9_rb_read_bit(rb);
+  if (cm->log2_tile_rows)
+    cm->log2_tile_rows += vp9_rb_read_bit(rb);
+
+  cm->tile_columns = 1 << cm->log2_tile_columns;
+  cm->tile_rows    = 1 << cm->log2_tile_rows;
+}
+
+static void decode_tiles(VP9D_COMP *pbi,
+                         const uint8_t *data, size_t first_partition_size,
+                         vp9_reader *residual_bc) {
+  VP9_COMMON *const pc = &pbi->common;
+
+  const uint8_t *data_ptr = data + first_partition_size;
+  int tile_row, tile_col;
 
   // Note: this memset assumes above_context[0], [1] and [2]
   // are allocated as part of the same buffer.
@@ -955,6 +975,9 @@ size_t read_uncompressed_header(VP9D_COMP *pbi,
 
   setup_loopfilter(pbi, rb);
   setup_quantization(pbi, rb);
+  setup_segmentation(pbi, rb);
+
+  setup_tile_info(cm, rb);
 
   return vp9_rb_read_literal(rb, 16);
 }
@@ -999,26 +1022,10 @@ int vp9_decode_frame(VP9D_COMP *pbi, const uint8_t **p_data_end) {
 
   mb_init_dequantizer(pc, &pbi->mb);  // MB level dequantizer setup
 
-  xd->lossless = pc->base_qindex == 0 &&
-                 pc->y_dc_delta_q == 0 &&
-                 pc->uv_dc_delta_q == 0 &&
-                 pc->uv_ac_delta_q == 0;
-  if (xd->lossless) {
-    xd->itxm_add          = vp9_idct_add_lossless_c;
-    xd->itxm_add_y_block  = vp9_idct_add_y_block_lossless_c;
-    xd->itxm_add_uv_block = vp9_idct_add_uv_block_lossless_c;
-  } else {
-    xd->itxm_add          = vp9_idct_add;
-    xd->itxm_add_y_block  = vp9_idct_add_y_block;
-    xd->itxm_add_uv_block = vp9_idct_add_uv_block;
-  }
-
   if (!keyframe)
     vp9_setup_interp_filters(xd, pc->mcomp_filter_type, pc);
 
   pc->fc = pc->frame_contexts[pc->frame_context_idx];
-
-  setup_segmentation(pc, xd, &header_bc);
 
   setup_txfm_mode(pc, xd->lossless, &header_bc);
 
@@ -1046,7 +1053,7 @@ int vp9_decode_frame(VP9D_COMP *pbi, const uint8_t **p_data_end) {
 
   vp9_decode_mode_mvs_init(pbi, &header_bc);
 
-  decode_tiles(pbi, data, first_partition_size, &header_bc, &residual_bc);
+  decode_tiles(pbi, data, first_partition_size, &residual_bc);
 
   pc->last_width = pc->width;
   pc->last_height = pc->height;
