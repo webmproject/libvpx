@@ -803,13 +803,18 @@ static void write_modes_sb(VP9_COMP *cpi, MODE_INFO *m, vp9_writer *bc,
 
   if (bsize >= BLOCK_SIZE_SB8X8) {
     int pl;
+    int idx = check_bsize_coverage(cm, xd, mi_row, mi_col, bsize);
     xd->left_seg_context = cm->left_seg_context + (mi_row & MI_MASK);
     xd->above_seg_context = cm->above_seg_context + mi_col;
     pl = partition_plane_context(xd, bsize);
     // encode the partition information
-    write_token(bc, vp9_partition_tree,
-                cm->fc.partition_prob[cm->frame_type][pl],
-                vp9_partition_encodings + partition);
+    if (idx == 0)
+      write_token(bc, vp9_partition_tree,
+                  cm->fc.partition_prob[cm->frame_type][pl],
+                  vp9_partition_encodings + partition);
+    else if (idx > 0)
+      vp9_write(bc, partition == PARTITION_SPLIT,
+                cm->fc.partition_prob[cm->frame_type][pl][idx]);
   }
 
   subsize = get_subsize(bsize, partition);

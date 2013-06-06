@@ -815,7 +815,7 @@ static int alloc_partition_data(VP9_COMP *cpi) {
   vpx_free(cpi->mb.pip);
 
   cpi->mb.pip = vpx_calloc((cpi->common.mode_info_stride) *
-                           (cpi->common.mi_rows + 1),
+                           (cpi->common.mi_rows + 64 / MI_SIZE),
                            sizeof(PARTITION_INFO));
   if (!cpi->mb.pip)
     return 1;
@@ -3385,11 +3385,11 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
 
   if (cm->show_frame) {
     vpx_memcpy(cm->prev_mip, cm->mip,
-               cm->mode_info_stride * (cm->mi_rows + 1) *
+               cm->mode_info_stride * (cm->mi_rows + 64 / MI_SIZE) *
                sizeof(MODE_INFO));
   } else {
     vpx_memset(cm->prev_mip, 0,
-               cm->mode_info_stride * (cm->mi_rows + 1) *
+               cm->mode_info_stride * (cm->mi_rows + 64 / MI_SIZE) *
                sizeof(MODE_INFO));
   }
   // restore prev_mi
