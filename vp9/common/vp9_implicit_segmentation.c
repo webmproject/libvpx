@@ -140,11 +140,11 @@ void segment_via_mode_info(VP9_COMMON *oci, int how) {
           break;
         case SEGMENT_MV:
           n = mi[mb_index].mbmi.mv[0].as_int;
-          if (mi[mb_index].mbmi.ref_frame == INTRA_FRAME)
+          if (mi[mb_index].mbmi.ref_frame[0] == INTRA_FRAME)
             n = -9999999;
           break;
         case SEGMENT_REFFRAME:
-          n = mi[mb_index].mbmi.ref_frame;
+          n = mi[mb_index].mbmi.ref_frame[0];
           break;
         case SEGMENT_SKIPPED:
           n = mi[mb_index].mbmi.mb_skip_coeff;

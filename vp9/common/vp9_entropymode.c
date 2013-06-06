@@ -129,6 +129,26 @@ struct vp9_token vp9_sb_mv_ref_encoding_array[VP9_INTER_MODES];
 
 struct vp9_token vp9_partition_encodings[PARTITION_TYPES];
 
+static const vp9_prob default_intra_inter_p[INTRA_INTER_CONTEXTS] = {
+  6, 87, 165, 213
+};
+
+static const vp9_prob default_comp_inter_p[COMP_INTER_CONTEXTS] = {
+  25, 66, 106, 142, 183
+};
+
+static const vp9_prob default_comp_ref_p[REF_CONTEXTS] = {
+  36, 93, 136, 205, 236
+};
+
+static const vp9_prob default_single_ref_p[REF_CONTEXTS][2] = {
+  { 30, 17 },
+  { 80, 66 },
+  { 142, 129 },
+  { 192, 178 },
+  { 235, 248 },
+};
+
 void vp9_init_mbmode_probs(VP9_COMMON *x) {
   vpx_memcpy(x->fc.uv_mode_prob, default_if_uv_probs,
              sizeof(default_if_uv_probs));
@@ -143,9 +163,14 @@ void vp9_init_mbmode_probs(VP9_COMMON *x) {
   vpx_memcpy(x->fc.partition_prob, vp9_partition_probs,
              sizeof(vp9_partition_probs));
 
-  x->ref_pred_probs[0] = DEFAULT_PRED_PROB_0;
-  x->ref_pred_probs[1] = DEFAULT_PRED_PROB_1;
-  x->ref_pred_probs[2] = DEFAULT_PRED_PROB_2;
+  vpx_memcpy(x->fc.intra_inter_prob, default_intra_inter_p,
+             sizeof(default_intra_inter_p));
+  vpx_memcpy(x->fc.comp_inter_prob, default_comp_inter_p,
+             sizeof(default_comp_inter_p));
+  vpx_memcpy(x->fc.comp_ref_prob, default_comp_ref_p,
+             sizeof(default_comp_ref_p));
+  vpx_memcpy(x->fc.single_ref_prob, default_single_ref_p,
+             sizeof(default_single_ref_p));
 }
 
 #if VP9_SWITCHABLE_FILTERS == 3
@@ -246,6 +271,14 @@ void vp9_adapt_mode_context(VP9_COMMON *pc) {
 
 #define MODE_COUNT_SAT 20
 #define MODE_MAX_UPDATE_FACTOR 144
+static int update_mode_ct(int pre_prob, int prob,
+                          unsigned int branch_ct[2]) {
+  int factor, count = branch_ct[0] + branch_ct[1];
+  count = count > MODE_COUNT_SAT ? MODE_COUNT_SAT : count;
+  factor = (MODE_MAX_UPDATE_FACTOR * count / MODE_COUNT_SAT);
+  return weighted_prob(pre_prob, prob, factor);
+}
+
 static void update_mode_probs(int n_modes,
                               const vp9_tree_index *tree, unsigned int *cnt,
                               vp9_prob *pre_probs, vp9_prob *dst_probs,
@@ -253,21 +286,22 @@ static void update_mode_probs(int n_modes,
 #define MAX_PROBS 32
   vp9_prob probs[MAX_PROBS];
   unsigned int branch_ct[MAX_PROBS][2];
-  int t, count, factor;
+  int t;
 
   assert(n_modes - 1 < MAX_PROBS);
   vp9_tree_probs_from_distribution(tree, probs, branch_ct, cnt, tok0_offset);
-  for (t = 0; t < n_modes - 1; ++t) {
-    count = branch_ct[t][0] + branch_ct[t][1];
-    count = count > MODE_COUNT_SAT ? MODE_COUNT_SAT : count;
-    factor = (MODE_MAX_UPDATE_FACTOR * count / MODE_COUNT_SAT);
-    dst_probs[t] = weighted_prob(pre_probs[t], probs[t], factor);
-  }
+  for (t = 0; t < n_modes - 1; ++t)
+    dst_probs[t] = update_mode_ct(pre_probs[t], probs[t], branch_ct[t]);
+}
+
+static int update_mode_ct2(int pre_prob, unsigned int branch_ct[2]) {
+  return update_mode_ct(pre_prob, get_binary_prob(branch_ct[0],
+                                                  branch_ct[1]), branch_ct);
 }
 
 // #define MODE_COUNT_TESTING
 void vp9_adapt_mode_probs(VP9_COMMON *cm) {
-  int i;
+  int i, j;
   FRAME_CONTEXT *fc = &cm->fc;
 #ifdef MODE_COUNT_TESTING
   int t;
@@ -302,6 +336,20 @@ void vp9_adapt_mode_probs(VP9_COMMON *cm) {
     printf("%d, ", fc->mbsplit_counts[t]);
   printf("};\n");
 #endif
+
+  for (i = 0; i < INTRA_INTER_CONTEXTS; i++)
+    fc->intra_inter_prob[i] = update_mode_ct2(fc->pre_intra_inter_prob[i],
+                                              fc->intra_inter_count[i]);
+  for (i = 0; i < COMP_INTER_CONTEXTS; i++)
+    fc->comp_inter_prob[i] = update_mode_ct2(fc->pre_comp_inter_prob[i],
+                                             fc->comp_inter_count[i]);
+  for (i = 0; i < REF_CONTEXTS; i++)
+    fc->comp_ref_prob[i] = update_mode_ct2(fc->pre_comp_ref_prob[i],
+                                           fc->comp_ref_count[i]);
+  for (i = 0; i < REF_CONTEXTS; i++)
+    for (j = 0; j < 2; j++)
+      fc->single_ref_prob[i][j] = update_mode_ct2(fc->pre_single_ref_prob[i][j],
+                                                  fc->single_ref_count[i][j]);
 
   for (i = 0; i < BLOCK_SIZE_GROUPS; i++)
     update_mode_probs(VP9_INTRA_MODES, vp9_intra_mode_tree,

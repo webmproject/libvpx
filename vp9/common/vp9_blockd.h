@@ -24,11 +24,8 @@
 #define BLOCK_SIZE_GROUPS   4
 #define MAX_MB_SEGMENTS     8
 #define MB_SEG_TREE_PROBS   (MAX_MB_SEGMENTS-1)
-#define PREDICTION_PROBS 3
 
-#define DEFAULT_PRED_PROB_0 120
-#define DEFAULT_PRED_PROB_1 80
-#define DEFAULT_PRED_PROB_2 40
+#define PREDICTION_PROBS 3
 
 #define MBSKIP_CONTEXTS 3
 
@@ -39,6 +36,10 @@
 #define SEGMENT_DELTADATA   0
 #define SEGMENT_ABSDATA     1
 #define MAX_MV_REF_CANDIDATES 2
+
+#define INTRA_INTER_CONTEXTS 4
+#define COMP_INTER_CONTEXTS 5
+#define REF_CONTEXTS 5
 
 typedef enum {
   PLANE_TYPE_Y_WITH_DC,
@@ -200,7 +201,7 @@ static INLINE int mi_height_log2(BLOCK_SIZE_TYPE sb_type) {
 
 typedef struct {
   MB_PREDICTION_MODE mode, uv_mode;
-  MV_REFERENCE_FRAME ref_frame, second_ref_frame;
+  MV_REFERENCE_FRAME ref_frame[2];
   TX_SIZE txfm_size;
   int_mv mv[2]; // for each reference frame used
   int_mv ref_mvs[MAX_REF_FRAMES][MAX_MV_REF_CANDIDATES];
@@ -215,7 +216,6 @@ typedef struct {
 
   // Flags used for prediction status of various bistream signals
   unsigned char seg_id_predicted;
-  unsigned char ref_predicted;
 
   // Indicates if the mb is part of the image (1) vs border (0)
   // This can be useful in determining whether the MB provides
@@ -526,7 +526,7 @@ static TX_TYPE get_tx_type_4x4(const MACROBLOCKD *xd, int ib) {
   TX_TYPE tx_type;
   MODE_INFO *mi = xd->mode_info_context;
   MB_MODE_INFO *const mbmi = &mi->mbmi;
-  if (xd->lossless || mbmi->ref_frame != INTRA_FRAME)
+  if (xd->lossless || mbmi->ref_frame[0] != INTRA_FRAME)
     return DCT_DCT;
   if (mbmi->sb_type < BLOCK_SIZE_SB8X8) {
     tx_type = txfm_map(mi->bmi[ib].as_mode.first);

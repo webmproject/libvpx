@@ -623,25 +623,20 @@ static void set_rd_speed_thresholds(VP9_COMP *cpi, int mode, int speed) {
   sf->thresh_mult[THR_SPLITG   ] += speed_multiplier * 2500;
   sf->thresh_mult[THR_SPLITA   ] += speed_multiplier * 2500;
 
-  sf->thresh_mult[THR_COMP_ZEROLG   ] += speed_multiplier * 1500;
   sf->thresh_mult[THR_COMP_ZEROLA   ] += speed_multiplier * 1500;
   sf->thresh_mult[THR_COMP_ZEROGA   ] += speed_multiplier * 1500;
 
-  sf->thresh_mult[THR_COMP_NEARESTLG] += speed_multiplier * 1500;
   sf->thresh_mult[THR_COMP_NEARESTLA] += speed_multiplier * 1500;
   sf->thresh_mult[THR_COMP_NEARESTGA] += speed_multiplier * 1500;
 
-  sf->thresh_mult[THR_COMP_NEARLG   ] += speed_multiplier * 1500;
   sf->thresh_mult[THR_COMP_NEARLA   ] += speed_multiplier * 1500;
   sf->thresh_mult[THR_COMP_NEARGA   ] += speed_multiplier * 1500;
 
-  sf->thresh_mult[THR_COMP_NEWLG    ] += speed_multiplier * 2000;
   sf->thresh_mult[THR_COMP_NEWLA    ] += speed_multiplier * 2000;
   sf->thresh_mult[THR_COMP_NEWGA    ] += speed_multiplier * 2000;
 
   sf->thresh_mult[THR_COMP_SPLITLA  ] += speed_multiplier * 4500;
   sf->thresh_mult[THR_COMP_SPLITGA  ] += speed_multiplier * 4500;
-  sf->thresh_mult[THR_COMP_SPLITLG  ] += speed_multiplier * 4500;
 
   if (speed > 4) {
     for (i = 0; i < MAX_MODES; ++i)
@@ -685,14 +680,6 @@ static void set_rd_speed_thresholds(VP9_COMP *cpi, int mode, int speed) {
     sf->thresh_mult[THR_SPLITA   ] = INT_MAX;
   }
 
-  if ((cpi->ref_frame_flags & (VP9_LAST_FLAG | VP9_GOLD_FLAG)) !=
-      (VP9_LAST_FLAG | VP9_GOLD_FLAG)) {
-    sf->thresh_mult[THR_COMP_ZEROLG   ] = INT_MAX;
-    sf->thresh_mult[THR_COMP_NEARESTLG] = INT_MAX;
-    sf->thresh_mult[THR_COMP_NEARLG   ] = INT_MAX;
-    sf->thresh_mult[THR_COMP_NEWLG    ] = INT_MAX;
-    sf->thresh_mult[THR_COMP_SPLITLG  ] = INT_MAX;
-  }
   if ((cpi->ref_frame_flags & (VP9_LAST_FLAG | VP9_ALT_FLAG)) !=
       (VP9_LAST_FLAG | VP9_ALT_FLAG)) {
     sf->thresh_mult[THR_COMP_ZEROLA   ] = INT_MAX;
@@ -1311,20 +1298,8 @@ VP9_PTR vp9_create_compressor(VP9_CONFIG *oxcf) {
   cpi->frames_till_gf_update_due    = 0;
   cpi->gf_overspend_bits            = 0;
   cpi->non_gf_bitrate_adjustment    = 0;
-  cm->prob_last_coded               = 128;
-  cm->prob_gf_coded                 = 128;
-  cm->prob_intra_coded              = 63;
-  for (i = 0; i < COMP_PRED_CONTEXTS; i++)
-    cm->prob_comppred[i]         = 128;
   for (i = 0; i < TX_SIZE_MAX_SB - 1; i++)
     cm->prob_tx[i]               = 128;
-
-  // Prime the recent reference frame usage counters.
-  // Hereafter they will be maintained as a sort of moving average
-  cpi->recent_ref_frame_usage[INTRA_FRAME]  = 1;
-  cpi->recent_ref_frame_usage[LAST_FRAME]   = 1;
-  cpi->recent_ref_frame_usage[GOLDEN_FRAME] = 1;
-  cpi->recent_ref_frame_usage[ALTREF_FRAME] = 1;
 
   // Set reference frame sign bias for ALTREF frame to 1 (for now)
   cpi->common.ref_frame_sign_bias[ALTREF_FRAME] = 1;
@@ -2083,22 +2058,6 @@ static void update_golden_frame_stats(VP9_COMP *cpi) {
     cpi->refresh_golden_frame = 0;
     cpi->common.frames_since_golden = 0;
 
-    // if ( cm->frame_type == KEY_FRAME )
-    // {
-    cpi->recent_ref_frame_usage[INTRA_FRAME] = 1;
-    cpi->recent_ref_frame_usage[LAST_FRAME] = 1;
-    cpi->recent_ref_frame_usage[GOLDEN_FRAME] = 1;
-    cpi->recent_ref_frame_usage[ALTREF_FRAME] = 1;
-    // }
-    // else
-    // {
-    //  // Carry a portion of count over to beginning of next gf sequence
-    //  cpi->recent_ref_frame_usage[INTRA_FRAME] >>= 5;
-    //  cpi->recent_ref_frame_usage[LAST_FRAME] >>= 5;
-    //  cpi->recent_ref_frame_usage[GOLDEN_FRAME] >>= 5;
-    //  cpi->recent_ref_frame_usage[ALTREF_FRAME] >>= 5;
-    // }
-
     // ******** Fixed Q test code only ************
     // If we are going to use the ALT reference for the next group of frames set a flag to say so.
     if (cpi->oxcf.fixed_q >= 0 &&
@@ -2123,13 +2082,6 @@ static void update_golden_frame_stats(VP9_COMP *cpi) {
       cpi->common.frames_till_alt_ref_frame--;
 
     cpi->common.frames_since_golden++;
-
-    if (cpi->common.frames_since_golden > 1) {
-      cpi->recent_ref_frame_usage[INTRA_FRAME] += cpi->count_mb_ref_frame_usage[INTRA_FRAME];
-      cpi->recent_ref_frame_usage[LAST_FRAME] += cpi->count_mb_ref_frame_usage[LAST_FRAME];
-      cpi->recent_ref_frame_usage[GOLDEN_FRAME] += cpi->count_mb_ref_frame_usage[GOLDEN_FRAME];
-      cpi->recent_ref_frame_usage[ALTREF_FRAME] += cpi->count_mb_ref_frame_usage[ALTREF_FRAME];
-    }
   }
 }
 
@@ -3113,6 +3065,10 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
     vp9_copy(cpi->common.fc.y_mode_counts, cpi->y_mode_count);
     vp9_copy(cpi->common.fc.uv_mode_counts, cpi->y_uv_mode_count);
     vp9_copy(cpi->common.fc.partition_counts, cpi->partition_count);
+    vp9_copy(cm->fc.intra_inter_count, cpi->intra_inter_count);
+    vp9_copy(cm->fc.comp_inter_count, cpi->comp_inter_count);
+    vp9_copy(cm->fc.single_ref_count, cpi->single_ref_count);
+    vp9_copy(cm->fc.comp_ref_count, cpi->comp_ref_count);
     cpi->common.fc.NMVcount = cpi->NMVcount;
     if (!cpi->common.error_resilient_mode &&
         !cpi->common.frame_parallel_decoding_mode) {

@@ -40,8 +40,6 @@
 #define NUM_FRAME_CONTEXTS_LG2 2
 #define NUM_FRAME_CONTEXTS (1 << NUM_FRAME_CONTEXTS_LG2)
 
-#define COMP_PRED_CONTEXTS   2
-
 #define MAX_LAG_BUFFERS 25
 
 typedef struct frame_contexts {
@@ -78,6 +76,19 @@ typedef struct frame_contexts {
   vp9_prob inter_mode_probs[INTER_MODE_CONTEXTS][VP9_INTER_MODES - 1];
   vp9_prob pre_inter_mode_probs[INTER_MODE_CONTEXTS][VP9_INTER_MODES - 1];
   unsigned int inter_mode_counts[INTER_MODE_CONTEXTS][VP9_INTER_MODES - 1][2];
+
+  vp9_prob intra_inter_prob[INTRA_INTER_CONTEXTS];
+  vp9_prob comp_inter_prob[COMP_INTER_CONTEXTS];
+  vp9_prob single_ref_prob[REF_CONTEXTS][2];
+  vp9_prob comp_ref_prob[REF_CONTEXTS];
+  vp9_prob pre_intra_inter_prob[INTRA_INTER_CONTEXTS];
+  vp9_prob pre_comp_inter_prob[COMP_INTER_CONTEXTS];
+  vp9_prob pre_single_ref_prob[REF_CONTEXTS][2];
+  vp9_prob pre_comp_ref_prob[REF_CONTEXTS];
+  unsigned int intra_inter_count[INTRA_INTER_CONTEXTS][2];
+  unsigned int comp_inter_count[COMP_INTER_CONTEXTS][2];
+  unsigned int single_ref_count[REF_CONTEXTS][2][2];
+  unsigned int comp_ref_count[REF_CONTEXTS][2];
 } FRAME_CONTEXT;
 
 typedef enum {
@@ -162,7 +173,6 @@ typedef struct VP9Common {
   /* profile settings */
   int experimental;
   TXFM_MODE txfm_mode;
-  COMPPREDMODE_TYPE comp_pred_mode;
   int no_lpf;
   int use_bilinear_mc_filter;
 
@@ -219,20 +229,15 @@ typedef struct VP9Common {
                          [VP9_INTRA_MODES - 1];
   vp9_prob kf_uv_mode_prob[VP9_INTRA_MODES] [VP9_INTRA_MODES - 1];
 
-  vp9_prob prob_intra_coded;
-  vp9_prob prob_last_coded;
-  vp9_prob prob_gf_coded;
-
   // Context probabilities when using predictive coding of segment id
   vp9_prob segment_pred_probs[PREDICTION_PROBS];
   unsigned char temporal_update;
 
   // Context probabilities for reference frame prediction
-  unsigned char ref_scores[MAX_REF_FRAMES];
-  vp9_prob ref_pred_probs[PREDICTION_PROBS];
-  vp9_prob mod_refprobs[MAX_REF_FRAMES][PREDICTION_PROBS];
-
-  vp9_prob prob_comppred[COMP_PRED_CONTEXTS];
+  int allow_comp_inter_inter;
+  MV_REFERENCE_FRAME comp_fixed_ref;
+  MV_REFERENCE_FRAME comp_var_ref[2];
+  COMPPREDMODE_TYPE comp_pred_mode;
 
   // FIXME contextualize
   vp9_prob prob_tx[TX_SIZE_MAX_SB - 1];

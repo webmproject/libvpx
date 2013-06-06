@@ -111,7 +111,7 @@ static int decode_coefs(VP9D_COMP *dx, const MACROBLOCKD *xd,
 
   vp9_prob *prob;
   vp9_coeff_count_model *coef_counts;
-  const int ref = xd->mode_info_context->mbmi.ref_frame != INTRA_FRAME;
+  const int ref = xd->mode_info_context->mbmi.ref_frame[0] != INTRA_FRAME;
   TX_TYPE tx_type = DCT_DCT;
   const int *scan, *nb;
   uint8_t token_cache[1024];

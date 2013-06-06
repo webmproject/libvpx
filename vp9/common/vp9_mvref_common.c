@@ -47,12 +47,12 @@ static void clamp_mv_ref(const MACROBLOCKD *xd, int_mv *mv) {
 static int get_matching_candidate(const MODE_INFO *candidate_mi,
                                   MV_REFERENCE_FRAME ref_frame,
                                   int_mv *c_mv, int block_idx) {
-  if (ref_frame == candidate_mi->mbmi.ref_frame) {
+  if (ref_frame == candidate_mi->mbmi.ref_frame[0]) {
     if (block_idx >= 0 && candidate_mi->mbmi.sb_type < BLOCK_SIZE_SB8X8)
       c_mv->as_int = candidate_mi->bmi[block_idx].as_mv[0].as_int;
     else
       c_mv->as_int = candidate_mi->mbmi.mv[0].as_int;
-  } else if (ref_frame == candidate_mi->mbmi.second_ref_frame) {
+  } else if (ref_frame == candidate_mi->mbmi.ref_frame[1]) {
     if (block_idx >= 0 && candidate_mi->mbmi.sb_type < BLOCK_SIZE_SB8X8)
       c_mv->as_int = candidate_mi->bmi[block_idx].as_mv[1].as_int;
     else
@@ -79,18 +79,18 @@ static void get_non_matching_candidates(const MODE_INFO *candidate_mi,
   *c2_ref_frame = INTRA_FRAME;
 
   // If first candidate not valid neither will be.
-  if (candidate_mi->mbmi.ref_frame > INTRA_FRAME) {
+  if (candidate_mi->mbmi.ref_frame[0] > INTRA_FRAME) {
     // First candidate
-    if (candidate_mi->mbmi.ref_frame != ref_frame) {
-      *c_ref_frame = candidate_mi->mbmi.ref_frame;
+    if (candidate_mi->mbmi.ref_frame[0] != ref_frame) {
+      *c_ref_frame = candidate_mi->mbmi.ref_frame[0];
       c_mv->as_int = candidate_mi->mbmi.mv[0].as_int;
     }
 
     // Second candidate
-    if ((candidate_mi->mbmi.second_ref_frame > INTRA_FRAME) &&
-        (candidate_mi->mbmi.second_ref_frame != ref_frame) &&
+    if ((candidate_mi->mbmi.ref_frame[1] > INTRA_FRAME) &&
+        (candidate_mi->mbmi.ref_frame[1] != ref_frame) &&
         (candidate_mi->mbmi.mv[1].as_int != candidate_mi->mbmi.mv[0].as_int)) {
-      *c2_ref_frame = candidate_mi->mbmi.second_ref_frame;
+      *c2_ref_frame = candidate_mi->mbmi.ref_frame[1];
       c2_mv->as_int = candidate_mi->mbmi.mv[1].as_int;
     }
   }
@@ -226,7 +226,7 @@ void vp9_find_mv_refs_idx(VP9_COMMON *cm, MACROBLOCKD *xd, MODE_INFO *here,
                          &refmv_count, c_refmv, 16);
       }
       split_count += (candidate_mi->mbmi.sb_type < BLOCK_SIZE_SB8X8 &&
-                      candidate_mi->mbmi.ref_frame != INTRA_FRAME);
+                      candidate_mi->mbmi.ref_frame[0] != INTRA_FRAME);
 
       // Count number of neihgbours coded intra and zeromv
       intra_count += (candidate_mi->mbmi.mode < NEARESTMV);

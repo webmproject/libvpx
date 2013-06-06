@@ -118,7 +118,7 @@ static void optimize_b(VP9_COMMON *const cm, MACROBLOCK *mb,
                        int plane, int block, BLOCK_SIZE_TYPE bsize,
                        ENTROPY_CONTEXT *a, ENTROPY_CONTEXT *l,
                        TX_SIZE tx_size) {
-  const int ref = mb->e_mbd.mode_info_context->mbmi.ref_frame != INTRA_FRAME;
+  const int ref = mb->e_mbd.mode_info_context->mbmi.ref_frame[0] != INTRA_FRAME;
   MACROBLOCKD *const xd = &mb->e_mbd;
   vp9_token_state tokens[1025][2];
   unsigned best_index[1025][2];
@@ -179,7 +179,7 @@ static void optimize_b(VP9_COMMON *const cm, MACROBLOCK *mb,
 
   /* Now set up a Viterbi trellis to evaluate alternative roundings. */
   rdmult = mb->rdmult * err_mult;
-  if (mb->e_mbd.mode_info_context->mbmi.ref_frame == INTRA_FRAME)
+  if (mb->e_mbd.mode_info_context->mbmi.ref_frame[0] == INTRA_FRAME)
     rdmult = (rdmult * 9) >> 4;
   rddiv = mb->rddiv;
   memset(best_index, 0, sizeof(best_index));
@@ -622,7 +622,7 @@ static void encode_block_intra(int plane, int block, BLOCK_SIZE_TYPE bsize,
   mode = plane == 0? mbmi->mode: mbmi->uv_mode;
   if (plane == 0 &&
       mbmi->sb_type < BLOCK_SIZE_SB8X8 &&
-      mbmi->ref_frame == INTRA_FRAME)
+      mbmi->ref_frame[0] == INTRA_FRAME)
     b_mode = xd->mode_info_context->bmi[ib].as_mode.first;
   else
     b_mode = mode;

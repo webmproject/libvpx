@@ -130,7 +130,7 @@ static void tokenize_b(int plane, int block, BLOCK_SIZE_TYPE bsize,
   const int *scan, *nb;
   vp9_coeff_count *counts;
   vp9_coeff_probs_model *coef_probs;
-  const int ref = mbmi->ref_frame != INTRA_FRAME;
+  const int ref = mbmi->ref_frame[0] != INTRA_FRAME;
   ENTROPY_CONTEXT above_ec, left_ec;
   uint8_t token_cache[1024];
   TX_TYPE tx_type = DCT_DCT;

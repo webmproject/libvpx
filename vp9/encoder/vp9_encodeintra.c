@@ -20,7 +20,7 @@ int vp9_encode_intra(VP9_COMP *cpi, MACROBLOCK *x, int use_16x16_pred) {
   MB_MODE_INFO * mbmi = &x->e_mbd.mode_info_context->mbmi;
   (void) cpi;
   mbmi->mode = DC_PRED;
-  mbmi->ref_frame = INTRA_FRAME;
+  mbmi->ref_frame[0] = INTRA_FRAME;
   if (use_16x16_pred) {
     mbmi->txfm_size = TX_16X16;
     vp9_encode_intra_block_y(&cpi->common, x, BLOCK_SIZE_MB16X16);

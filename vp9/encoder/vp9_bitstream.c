@@ -343,41 +343,6 @@ void vp9_update_skip_probs(VP9_COMP *cpi) {
                                                cpi->skip_true_count[k]);
 }
 
-// This function updates the reference frame prediction stats
-static void update_refpred_stats(VP9_COMP *cpi) {
-  VP9_COMMON *const cm = &cpi->common;
-  int i;
-  vp9_prob new_pred_probs[PREDICTION_PROBS];
-  int old_cost, new_cost;
-
-  // Set the prediction probability structures to defaults
-  if (cm->frame_type != KEY_FRAME) {
-    // From the prediction counts set the probabilities for each context
-    for (i = 0; i < PREDICTION_PROBS; i++) {
-      const int c0 = cpi->ref_pred_count[i][0];
-      const int c1 = cpi->ref_pred_count[i][1];
-
-      new_pred_probs[i] = get_binary_prob(c0, c1);
-
-      // Decide whether or not to update the reference frame probs.
-      // Returned costs are in 1/256 bit units.
-      old_cost = c0 * vp9_cost_zero(cm->ref_pred_probs[i]) +
-                 c1 * vp9_cost_one(cm->ref_pred_probs[i]);
-
-      new_cost = c0 * vp9_cost_zero(new_pred_probs[i]) +
-                 c1 * vp9_cost_one(new_pred_probs[i]);
-
-      // Cost saving must be >= 8 bits (2048 in these units)
-      if ((old_cost - new_cost) >= 2048) {
-        cpi->ref_pred_probs_update[i] = 1;
-        cm->ref_pred_probs[i] = new_pred_probs[i];
-      } else {
-        cpi->ref_pred_probs_update[i] = 0;
-      }
-    }
-  }
-}
-
 static void write_intra_mode(vp9_writer *bc, int m, const vp9_prob *p) {
   write_token(bc, vp9_intra_mode_tree, p, vp9_intra_mode_encodings + m);
 }
@@ -510,16 +475,15 @@ static void write_mb_segid(vp9_writer *bc,
 }
 
 // This function encodes the reference frame
-static void encode_ref_frame(vp9_writer *const bc,
-                             VP9_COMMON *const cm,
-                             MACROBLOCKD *xd,
-                             int segment_id,
-                             MV_REFERENCE_FRAME rf) {
-  int seg_ref_active;
+static void encode_ref_frame(VP9_COMP *cpi, vp9_writer *bc) {
+  VP9_COMMON *const pc = &cpi->common;
+  MACROBLOCK *const x = &cpi->mb;
+  MACROBLOCKD *const xd = &x->e_mbd;
+  MB_MODE_INFO *mi = &xd->mode_info_context->mbmi;
+  const int segment_id = mi->segment_id;
+  int seg_ref_active = vp9_segfeature_active(xd, segment_id,
+                                             SEG_LVL_REF_FRAME);
   int seg_ref_count = 0;
-  seg_ref_active = vp9_segfeature_active(xd,
-                                         segment_id,
-                                         SEG_LVL_REF_FRAME);
 
   if (seg_ref_active) {
     seg_ref_count = vp9_check_segref(xd, segment_id, INTRA_FRAME) +
@@ -531,82 +495,33 @@ static void encode_ref_frame(vp9_writer *const bc,
   // If segment level coding of this signal is disabled...
   // or the segment allows multiple reference frame options
   if (!seg_ref_active || (seg_ref_count > 1)) {
-    // Values used in prediction model coding
-    unsigned char prediction_flag;
-    vp9_prob pred_prob;
-    MV_REFERENCE_FRAME pred_rf;
-
-    // Get the context probability the prediction flag
-    pred_prob = vp9_get_pred_prob(cm, xd, PRED_REF);
-
-    // Get the predicted value.
-    pred_rf = vp9_get_pred_ref(cm, xd);
-
-    // Did the chosen reference frame match its predicted value.
-    prediction_flag =
-      (xd->mode_info_context->mbmi.ref_frame == pred_rf);
-
-    vp9_set_pred_flag(xd, PRED_REF, prediction_flag);
-    vp9_write(bc, prediction_flag, pred_prob);
-
-    // If not predicted correctly then code value explicitly
-    if (!prediction_flag) {
-      vp9_prob mod_refprobs[PREDICTION_PROBS];
-
-      vpx_memcpy(mod_refprobs,
-                 cm->mod_refprobs[pred_rf], sizeof(mod_refprobs));
-
-      // If segment coding enabled blank out options that cant occur by
-      // setting the branch probability to 0.
-      if (seg_ref_active) {
-        mod_refprobs[INTRA_FRAME] *=
-          vp9_check_segref(xd, segment_id, INTRA_FRAME);
-        mod_refprobs[LAST_FRAME] *=
-          vp9_check_segref(xd, segment_id, LAST_FRAME);
-        mod_refprobs[GOLDEN_FRAME] *=
-          (vp9_check_segref(xd, segment_id, GOLDEN_FRAME) *
-           vp9_check_segref(xd, segment_id, ALTREF_FRAME));
-      }
-
-      if (mod_refprobs[0]) {
-        vp9_write(bc, (rf != INTRA_FRAME), mod_refprobs[0]);
-      }
-
-      // Inter coded
-      if (rf != INTRA_FRAME) {
-        if (mod_refprobs[1]) {
-          vp9_write(bc, (rf != LAST_FRAME), mod_refprobs[1]);
-        }
-
-        if (rf != LAST_FRAME) {
-          if (mod_refprobs[2]) {
-            vp9_write(bc, (rf != GOLDEN_FRAME), mod_refprobs[2]);
-          }
-        }
-      }
+    // does the feature use compound prediction or not
+    // (if not specified at the frame/segment level)
+    if (pc->comp_pred_mode == HYBRID_PREDICTION) {
+      vp9_write(bc, mi->ref_frame[1] > INTRA_FRAME,
+                vp9_get_pred_prob(pc, xd, PRED_COMP_INTER_INTER));
+    } else {
+      assert((mi->ref_frame[1] <= INTRA_FRAME) ==
+                 (pc->comp_pred_mode == SINGLE_PREDICTION_ONLY));
     }
+
+    if (mi->ref_frame[1] > INTRA_FRAME) {
+      vp9_write(bc, mi->ref_frame[0] == GOLDEN_FRAME,
+                vp9_get_pred_prob(pc, xd, PRED_COMP_REF_P));
+    } else {
+      vp9_write(bc, mi->ref_frame[0] != LAST_FRAME,
+                vp9_get_pred_prob(pc, xd, PRED_SINGLE_REF_P1));
+      if (mi->ref_frame[0] != LAST_FRAME)
+        vp9_write(bc, mi->ref_frame[0] != GOLDEN_FRAME,
+                  vp9_get_pred_prob(pc, xd, PRED_SINGLE_REF_P2));
+    }
+  } else {
+    assert(mi->ref_frame[1] <= INTRA_FRAME);
+    assert(vp9_check_segref(xd, segment_id, mi->ref_frame[0]));
   }
 
   // if using the prediction mdoel we have nothing further to do because
   // the reference frame is fully coded by the segment
-}
-
-// Update the probabilities used to encode reference frame data
-static void update_ref_probs(VP9_COMP *const cpi) {
-  VP9_COMMON *const cm = &cpi->common;
-
-  const int *const rfct = cpi->count_mb_ref_frame_usage;
-  const int rf_intra = rfct[INTRA_FRAME];
-  const int rf_inter = rfct[LAST_FRAME] +
-                       rfct[GOLDEN_FRAME] + rfct[ALTREF_FRAME];
-
-  cm->prob_intra_coded = get_binary_prob(rf_intra, rf_inter);
-  cm->prob_last_coded = get_prob(rfct[LAST_FRAME], rf_inter);
-  cm->prob_gf_coded = get_binary_prob(rfct[GOLDEN_FRAME], rfct[ALTREF_FRAME]);
-
-  // Compute a modified set of probabilities to use when prediction of the
-  // reference frame fails
-  vp9_compute_mod_refprobs(cm);
 }
 
 static void pack_inter_mode_mvs(VP9_COMP *cpi, MODE_INFO *m,
@@ -616,7 +531,7 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, MODE_INFO *m,
   MACROBLOCK *const x = &cpi->mb;
   MACROBLOCKD *const xd = &x->e_mbd;
   MB_MODE_INFO *const mi = &m->mbmi;
-  const MV_REFERENCE_FRAME rf = mi->ref_frame;
+  const MV_REFERENCE_FRAME rf = mi->ref_frame[0];
   const MB_PREDICTION_MODE mode = mi->mode;
   const int segment_id = mi->segment_id;
   int skip_coeff;
@@ -654,8 +569,7 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, MODE_INFO *m,
               vp9_get_pred_prob(pc, xd, PRED_MBSKIP));
   }
 
-  // Encode the reference frame.
-  encode_ref_frame(bc, pc, xd, segment_id, rf);
+  vp9_write(bc, rf != INTRA_FRAME, vp9_get_pred_prob(pc, xd, PRED_INTRA_INTER));
 
   if (mi->sb_type >= BLOCK_SIZE_SB8X8 && pc->txfm_mode == TX_MODE_SELECT &&
       !(rf != INTRA_FRAME &&
@@ -695,6 +609,8 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, MODE_INFO *m,
   } else {
     vp9_prob mv_ref_p[VP9_INTER_MODES - 1];
 
+    encode_ref_frame(cpi, bc);
+
     vp9_mv_ref_probs(&cpi->common, mv_ref_p, mi->mb_mode_context[rf]);
 
 #ifdef ENTROPY_STATS
@@ -719,13 +635,6 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, MODE_INFO *m,
       assert(mi->interp_filter == cpi->common.mcomp_filter_type);
     }
 
-    // does the feature use compound prediction or not
-    // (if not specified at the frame/segment level)
-    if (cpi->common.comp_pred_mode == HYBRID_PREDICTION) {
-      vp9_write(bc, mi->second_ref_frame > INTRA_FRAME,
-                vp9_get_pred_prob(pc, xd, PRED_COMP));
-    }
-
     if (xd->mode_info_context->mbmi.sb_type < BLOCK_SIZE_SB8X8) {
       int j;
       MB_PREDICTION_MODE blockmode;
@@ -747,7 +656,7 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, MODE_INFO *m,
             vp9_encode_mv(bc, &blockmv.as_mv, &mi->best_mv.as_mv,
                           nmvc, xd->allow_high_precision_mv);
 
-            if (mi->second_ref_frame > 0)
+            if (mi->ref_frame[1] > INTRA_FRAME)
               vp9_encode_mv(bc,
                             &cpi->mb.partition_info->bmi[j].second_mv.as_mv,
                             &mi->best_second_mv.as_mv,
@@ -767,7 +676,7 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, MODE_INFO *m,
                     &mi->mv[0].as_mv, &mi->best_mv.as_mv,
                     nmvc, xd->allow_high_precision_mv);
 
-      if (mi->second_ref_frame > 0)
+      if (mi->ref_frame[1] > INTRA_FRAME)
         vp9_encode_mv(bc,
                       &mi->mv[1].as_mv, &mi->best_second_mv.as_mv,
                       nmvc, xd->allow_high_precision_mv);
@@ -1175,25 +1084,6 @@ static void update_coef_probs(VP9_COMP* const cpi, vp9_writer* const bc) {
     update_coef_probs_common(bc, cpi, TX_32X32);
 }
 
-static void segment_reference_frames(VP9_COMP *cpi) {
-  VP9_COMMON *oci = &cpi->common;
-  MODE_INFO *mi = oci->mi;
-  int ref[MAX_MB_SEGMENTS] = {0};
-  int i, j;
-  int mb_index = 0;
-  MACROBLOCKD *const xd = &cpi->mb.e_mbd;
-
-  for (i = 0; i < oci->mb_rows; i++) {
-    for (j = 0; j < oci->mb_cols; j++, mb_index++)
-      ref[mi[mb_index].mbmi.segment_id] |= (1 << mi[mb_index].mbmi.ref_frame);
-    mb_index++;
-  }
-  for (i = 0; i < MAX_MB_SEGMENTS; i++) {
-    vp9_enable_segfeature(xd, i, SEG_LVL_REF_FRAME);
-    vp9_set_segdata(xd, i, SEG_LVL_REF_FRAME, ref[i]);
-  }
-}
-
 static void encode_loopfilter(VP9_COMMON *pc, MACROBLOCKD *xd,
                               struct vp9_write_bit_buffer *wb) {
   int i;
@@ -1303,7 +1193,6 @@ static void encode_segmentation(VP9_COMP *cpi,
 
   // Segmentation data
   vp9_wb_write_bit(wb, xd->update_mb_segmentation_data);
-  // segment_reference_frames(cpi);
   if (xd->update_mb_segmentation_data) {
     vp9_wb_write_bit(wb, xd->mb_segment_abs_delta);
 
@@ -1502,16 +1391,6 @@ void write_uncompressed_header(VP9_COMP *cpi,
     for (i = 0; i < ALLOWED_REFS_PER_FRAME; ++i)
       vp9_wb_write_bit(wb, cm->ref_frame_sign_bias[LAST_FRAME + i]);
 
-    // Encode the common prediction model status flag probability updates for
-    // the reference frame
-    update_refpred_stats(cpi);
-    for (i = 0; i < PREDICTION_PROBS; i++) {
-      const int update = cpi->ref_pred_probs_update[i];
-      vp9_wb_write_bit(wb, update);
-      if (update)
-        vp9_wb_write_literal(wb, cm->ref_pred_probs[i], 8);
-    }
-
     // Signal whether to allow high MV precision
     vp9_wb_write_bit(wb, xd->allow_high_precision_mv);
 
@@ -1576,6 +1455,11 @@ void vp9_pack_bitstream(VP9_COMP *cpi, uint8_t *dest, unsigned long *size) {
   pc->fc.pre_nmvc = pc->fc.nmvc;
   vp9_copy(pc->fc.pre_switchable_interp_prob, pc->fc.switchable_interp_prob);
   vp9_copy(pc->fc.pre_inter_mode_probs, pc->fc.inter_mode_probs);
+  vp9_copy(pc->fc.pre_intra_inter_prob, pc->fc.intra_inter_prob);
+  vp9_copy(pc->fc.pre_comp_inter_prob, pc->fc.comp_inter_prob);
+  vp9_copy(pc->fc.pre_comp_ref_prob, pc->fc.comp_ref_prob);
+  vp9_copy(pc->fc.pre_single_ref_prob, pc->fc.single_ref_prob);
+  cpi->common.fc.pre_nmvc = cpi->common.fc.nmvc;
 
   update_coef_probs(cpi, &header_bc);
 
@@ -1588,7 +1472,6 @@ void vp9_pack_bitstream(VP9_COMP *cpi, uint8_t *dest, unsigned long *size) {
     vp9_write_prob(&header_bc, pc->mbskip_pred_probs[i]);
 
   if (pc->frame_type != KEY_FRAME) {
-
 #ifdef ENTROPY_STATS
     active_section = 1;
 #endif
@@ -1599,14 +1482,11 @@ void vp9_pack_bitstream(VP9_COMP *cpi, uint8_t *dest, unsigned long *size) {
     if (pc->mcomp_filter_type == SWITCHABLE)
       update_switchable_interp_probs(pc, &header_bc);
 
-    // Update the probabilities used to encode reference frame data
-    update_ref_probs(cpi);
+    for (i = 0; i < INTRA_INTER_CONTEXTS; i++)
+      vp9_cond_prob_diff_update(&header_bc, &pc->fc.intra_inter_prob[i],
+                                VP9_DEF_UPDATE_PROB, cpi->intra_inter_count[i]);
 
-    vp9_write_prob(&header_bc, pc->prob_intra_coded);
-    vp9_write_prob(&header_bc, pc->prob_last_coded);
-    vp9_write_prob(&header_bc, pc->prob_gf_coded);
-
-    {
+    if (pc->allow_comp_inter_inter) {
       const int comp_pred_mode = cpi->common.comp_pred_mode;
       const int use_compound_pred = (comp_pred_mode != SINGLE_PREDICTION_ONLY);
       const int use_hybrid_pred = (comp_pred_mode == HYBRID_PREDICTION);
@@ -1615,14 +1495,32 @@ void vp9_pack_bitstream(VP9_COMP *cpi, uint8_t *dest, unsigned long *size) {
       if (use_compound_pred) {
         vp9_write_bit(&header_bc, use_hybrid_pred);
         if (use_hybrid_pred) {
-          for (i = 0; i < COMP_PRED_CONTEXTS; i++) {
-            pc->prob_comppred[i] = get_binary_prob(cpi->single_pred_count[i],
-                                                   cpi->comp_pred_count[i]);
-            vp9_write_prob(&header_bc, pc->prob_comppred[i]);
-          }
+          for (i = 0; i < COMP_INTER_CONTEXTS; i++)
+            vp9_cond_prob_diff_update(&header_bc, &pc->fc.comp_inter_prob[i],
+                                      VP9_DEF_UPDATE_PROB,
+                                      cpi->comp_inter_count[i]);
         }
       }
     }
+
+    if (pc->comp_pred_mode != COMP_PREDICTION_ONLY) {
+      for (i = 0; i < REF_CONTEXTS; i++) {
+        vp9_cond_prob_diff_update(&header_bc, &pc->fc.single_ref_prob[i][0],
+                                  VP9_DEF_UPDATE_PROB,
+                                  cpi->single_ref_count[i][0]);
+        vp9_cond_prob_diff_update(&header_bc, &pc->fc.single_ref_prob[i][1],
+                                  VP9_DEF_UPDATE_PROB,
+                                  cpi->single_ref_count[i][1]);
+      }
+    }
+
+    if (pc->comp_pred_mode != SINGLE_PREDICTION_ONLY) {
+      for (i = 0; i < REF_CONTEXTS; i++)
+        vp9_cond_prob_diff_update(&header_bc, &pc->fc.comp_ref_prob[i],
+                                  VP9_DEF_UPDATE_PROB,
+                                  cpi->comp_ref_count[i]);
+    }
+
     update_mbintra_mode_probs(cpi, &header_bc);
 
     for (i = 0; i < NUM_PARTITION_CONTEXTS; ++i) {

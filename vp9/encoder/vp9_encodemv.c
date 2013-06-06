@@ -584,7 +584,7 @@ void vp9_update_nmv_count(VP9_COMP *cpi, MACROBLOCK *x,
           mv.col = (pi->bmi[i].mv.as_mv.col - best_ref_mv->as_mv.col);
           vp9_increment_nmv(&mv, &best_ref_mv->as_mv, &cpi->NMVcount,
                             x->e_mbd.allow_high_precision_mv);
-          if (x->e_mbd.mode_info_context->mbmi.second_ref_frame > 0) {
+          if (x->e_mbd.mode_info_context->mbmi.ref_frame[1] > INTRA_FRAME) {
             mv.row = pi->bmi[i].second_mv.as_mv.row -
                          second_best_ref_mv->as_mv.row;
             mv.col = pi->bmi[i].second_mv.as_mv.col -
@@ -600,7 +600,7 @@ void vp9_update_nmv_count(VP9_COMP *cpi, MACROBLOCK *x,
     mv.col = (mbmi->mv[0].as_mv.col - best_ref_mv->as_mv.col);
     vp9_increment_nmv(&mv, &best_ref_mv->as_mv, &cpi->NMVcount,
                       x->e_mbd.allow_high_precision_mv);
-    if (mbmi->second_ref_frame > 0) {
+    if (mbmi->ref_frame[1] > INTRA_FRAME) {
       mv.row = (mbmi->mv[1].as_mv.row - second_best_ref_mv->as_mv.row);
       mv.col = (mbmi->mv[1].as_mv.col - second_best_ref_mv->as_mv.col);
       vp9_increment_nmv(&mv, &second_best_ref_mv->as_mv, &cpi->NMVcount,

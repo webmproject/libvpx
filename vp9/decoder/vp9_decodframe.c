@@ -281,7 +281,7 @@ static void decode_atom(VP9D_COMP *pbi, MACROBLOCKD *xd,
                         vp9_reader *r, BLOCK_SIZE_TYPE bsize) {
   MB_MODE_INFO *const mbmi = &xd->mode_info_context->mbmi;
 
-  assert(mbmi->ref_frame != INTRA_FRAME);
+  assert(mbmi->ref_frame[0] != INTRA_FRAME);
 
   if (pbi->common.frame_type != KEY_FRAME)
     vp9_setup_interp_filters(xd, mbmi->interp_filter, &pbi->common);
@@ -334,7 +334,7 @@ static void decode_sb(VP9D_COMP *pbi, MACROBLOCKD *xd, int mi_row, int mi_col,
   const int mis = pc->mode_info_stride;
 
   assert(mbmi->sb_type == bsize);
-  assert(mbmi->ref_frame != INTRA_FRAME);
+  assert(mbmi->ref_frame[0] != INTRA_FRAME);
 
   if (pbi->common.frame_type != KEY_FRAME)
     vp9_setup_interp_filters(xd, mbmi->interp_filter, pc);
@@ -401,22 +401,22 @@ static void set_refs(VP9D_COMP *pbi, int mi_row, int mi_col) {
   MACROBLOCKD *const xd = &pbi->mb;
   MB_MODE_INFO *const mbmi = &xd->mode_info_context->mbmi;
 
-  if (mbmi->ref_frame > INTRA_FRAME) {
+  if (mbmi->ref_frame[0] > INTRA_FRAME) {
     // Select the appropriate reference frame for this MB
-    const int fb_idx = cm->active_ref_idx[mbmi->ref_frame - 1];
+    const int fb_idx = cm->active_ref_idx[mbmi->ref_frame[0] - 1];
     const YV12_BUFFER_CONFIG *cfg = &cm->yv12_fb[fb_idx];
-    xd->scale_factor[0]    = cm->active_ref_scale[mbmi->ref_frame - 1];
-    xd->scale_factor_uv[0] = cm->active_ref_scale[mbmi->ref_frame - 1];
+    xd->scale_factor[0]    = cm->active_ref_scale[mbmi->ref_frame[0] - 1];
+    xd->scale_factor_uv[0] = cm->active_ref_scale[mbmi->ref_frame[0] - 1];
     setup_pre_planes(xd, cfg, NULL, mi_row, mi_col,
                      xd->scale_factor, xd->scale_factor_uv);
     xd->corrupted |= cfg->corrupted;
 
-    if (mbmi->second_ref_frame > INTRA_FRAME) {
+    if (mbmi->ref_frame[1] > INTRA_FRAME) {
       // Select the appropriate reference frame for this MB
-      const int second_fb_idx = cm->active_ref_idx[mbmi->second_ref_frame - 1];
+      const int second_fb_idx = cm->active_ref_idx[mbmi->ref_frame[1] - 1];
       const YV12_BUFFER_CONFIG *second_cfg = &cm->yv12_fb[second_fb_idx];
-      xd->scale_factor[1]    = cm->active_ref_scale[mbmi->second_ref_frame - 1];
-      xd->scale_factor_uv[1] = cm->active_ref_scale[mbmi->second_ref_frame - 1];
+      xd->scale_factor[1]    = cm->active_ref_scale[mbmi->ref_frame[1] - 1];
+      xd->scale_factor_uv[1] = cm->active_ref_scale[mbmi->ref_frame[1] - 1];
       setup_pre_planes(xd, NULL, second_cfg, mi_row, mi_col,
                        xd->scale_factor, xd->scale_factor_uv);
       xd->corrupted |= second_cfg->corrupted;
@@ -435,7 +435,7 @@ static void decode_modes_b(VP9D_COMP *pbi, int mi_row, int mi_col,
   vp9_decode_mb_mode_mv(pbi, xd, mi_row, mi_col, r);
   set_refs(pbi, mi_row, mi_col);
 
-  if (xd->mode_info_context->mbmi.ref_frame == INTRA_FRAME)
+  if (xd->mode_info_context->mbmi.ref_frame[0] == INTRA_FRAME)
     decode_sb_intra(pbi, xd, mi_row, mi_col, r, (bsize < BLOCK_SIZE_SB8X8) ?
                                      BLOCK_SIZE_SB8X8 : bsize);
   else if (bsize < BLOCK_SIZE_SB8X8)
@@ -772,6 +772,10 @@ static void update_frame_context(FRAME_CONTEXT *fc) {
   vp9_copy(fc->pre_y_mode_prob, fc->y_mode_prob);
   vp9_copy(fc->pre_uv_mode_prob, fc->uv_mode_prob);
   vp9_copy(fc->pre_partition_prob, fc->partition_prob[1]);
+  vp9_copy(fc->pre_intra_inter_prob, fc->intra_inter_prob);
+  vp9_copy(fc->pre_comp_inter_prob, fc->comp_inter_prob);
+  vp9_copy(fc->pre_single_ref_prob, fc->single_ref_prob);
+  vp9_copy(fc->pre_comp_ref_prob, fc->comp_ref_prob);
   fc->pre_nmvc = fc->nmvc;
   vp9_copy(fc->pre_switchable_interp_prob, fc->switchable_interp_prob);
   vp9_copy(fc->pre_inter_mode_probs, fc->inter_mode_probs);
@@ -784,6 +788,10 @@ static void update_frame_context(FRAME_CONTEXT *fc) {
   vp9_zero(fc->inter_mode_counts);
   vp9_zero(fc->partition_counts);
   vp9_zero(fc->switchable_interp_count);
+  vp9_zero(fc->intra_inter_count);
+  vp9_zero(fc->comp_inter_count);
+  vp9_zero(fc->single_ref_count);
+  vp9_zero(fc->comp_ref_count);
 }
 
 static void decode_tile(VP9D_COMP *pbi, vp9_reader *r) {
@@ -942,10 +950,6 @@ size_t read_uncompressed_header(VP9D_COMP *pbi,
 
     for (i = 0; i < ALLOWED_REFS_PER_FRAME; ++i)
       cm->active_ref_idx[i] = cm->new_fb_idx;
-
-    cm->ref_pred_probs[0] = DEFAULT_PRED_PROB_0;
-    cm->ref_pred_probs[1] = DEFAULT_PRED_PROB_1;
-    cm->ref_pred_probs[2] = DEFAULT_PRED_PROB_2;
   } else {
     if (cm->error_resilient_mode)
       vp9_setup_past_independence(cm, xd);
@@ -958,12 +962,31 @@ size_t read_uncompressed_header(VP9D_COMP *pbi,
       vp9_setup_scale_factors(cm, i);
     }
 
-    for (i = 0; i < ALLOWED_REFS_PER_FRAME; ++i)
+    // Read the sign bias for each reference frame buffer.
+    cm->allow_comp_inter_inter = 0;
+    for (i = 0; i < ALLOWED_REFS_PER_FRAME; ++i) {
       cm->ref_frame_sign_bias[i + 1] = vp9_rb_read_bit(rb);
-
-    for (i = 0; i < PREDICTION_PROBS; ++i)
-      if (vp9_rb_read_bit(rb))
-        cm->ref_pred_probs[i] = vp9_rb_read_literal(rb, 8);
+      cm->allow_comp_inter_inter |= i > 0 &&
+          cm->ref_frame_sign_bias[i + 1] != cm->ref_frame_sign_bias[1];
+    }
+    if (cm->allow_comp_inter_inter) {
+      // which one is always-on in comp inter-inter?
+      if (cm->ref_frame_sign_bias[LAST_FRAME] ==
+          cm->ref_frame_sign_bias[GOLDEN_FRAME]) {
+        cm->comp_fixed_ref = ALTREF_FRAME;
+        cm->comp_var_ref[0] = LAST_FRAME;
+        cm->comp_var_ref[1] = GOLDEN_FRAME;
+      } else if (cm->ref_frame_sign_bias[LAST_FRAME] ==
+                 cm->ref_frame_sign_bias[ALTREF_FRAME]) {
+        cm->comp_fixed_ref = GOLDEN_FRAME;
+        cm->comp_var_ref[0] = LAST_FRAME;
+        cm->comp_var_ref[1] = ALTREF_FRAME;
+      } else {
+        cm->comp_fixed_ref = LAST_FRAME;
+        cm->comp_var_ref[0] = GOLDEN_FRAME;
+        cm->comp_var_ref[1] = ALTREF_FRAME;
+      }
+    }
 
     xd->allow_high_precision_mv = vp9_rb_read_bit(rb);
     cm->mcomp_filter_type = read_interp_filter_type(rb);

@@ -177,8 +177,8 @@ static int sb_mb_lf_skip(const MODE_INFO *const mip0,
   const MB_MODE_INFO *mbmi0 = &mip0->mbmi;
   const MB_MODE_INFO *mbmi1 = &mip1->mbmi;
   return mb_lf_skip(mbmi0) && mb_lf_skip(mbmi1) &&
-         mbmi0->ref_frame != INTRA_FRAME &&
-         mbmi1->ref_frame != INTRA_FRAME;
+         mbmi0->ref_frame[0] != INTRA_FRAME &&
+         mbmi1->ref_frame[0] != INTRA_FRAME;
 }
 
 static void lpf_mb(VP9_COMMON *cm, const MODE_INFO *mi,
@@ -191,7 +191,7 @@ static void lpf_mb(VP9_COMMON *cm, const MODE_INFO *mi,
   int mode = mi->mbmi.mode;
   int mode_index = lfi_n->mode_lf_lut[mode];
   int seg = mi->mbmi.segment_id;
-  int ref_frame = mi->mbmi.ref_frame;
+  MV_REFERENCE_FRAME ref_frame = mi->mbmi.ref_frame[0];
   int filter_level = lfi_n->lvl[seg][ref_frame][mode_index];
 
   if (filter_level) {

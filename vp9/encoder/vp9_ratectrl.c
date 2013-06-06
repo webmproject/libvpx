@@ -129,9 +129,11 @@ void vp9_save_coding_context(VP9_COMP *cpi) {
   vp9_copy(cc->partition_prob, cm->fc.partition_prob);
 
   vp9_copy(cc->segment_pred_probs, cm->segment_pred_probs);
-  vp9_copy(cc->ref_pred_probs_update, cpi->ref_pred_probs_update);
-  vp9_copy(cc->ref_pred_probs, cm->ref_pred_probs);
-  vp9_copy(cc->prob_comppred, cm->prob_comppred);
+
+  vp9_copy(cc->intra_inter_prob, cm->fc.intra_inter_prob);
+  vp9_copy(cc->comp_inter_prob, cm->fc.comp_inter_prob);
+  vp9_copy(cc->single_ref_prob, cm->fc.single_ref_prob);
+  vp9_copy(cc->comp_ref_prob, cm->fc.comp_ref_prob);
 
   vpx_memcpy(cpi->coding_context.last_frame_seg_map_copy,
              cm->last_frame_seg_map, (cm->mi_rows * cm->mi_cols));
@@ -163,9 +165,11 @@ void vp9_restore_coding_context(VP9_COMP *cpi) {
   vp9_copy(cm->fc.partition_prob, cc->partition_prob);
 
   vp9_copy(cm->segment_pred_probs, cc->segment_pred_probs);
-  vp9_copy(cpi->ref_pred_probs_update, cc->ref_pred_probs_update);
-  vp9_copy(cm->ref_pred_probs, cc->ref_pred_probs);
-  vp9_copy(cm->prob_comppred, cc->prob_comppred);
+
+  vp9_copy(cm->fc.intra_inter_prob, cc->intra_inter_prob);
+  vp9_copy(cm->fc.comp_inter_prob, cc->comp_inter_prob);
+  vp9_copy(cm->fc.single_ref_prob, cc->single_ref_prob);
+  vp9_copy(cm->fc.comp_ref_prob, cc->comp_ref_prob);
 
   vpx_memcpy(cm->last_frame_seg_map,
              cpi->coding_context.last_frame_seg_map_copy,
