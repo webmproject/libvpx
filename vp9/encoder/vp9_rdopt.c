@@ -2552,7 +2552,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
   PARTITION_INFO best_partition;
   int bwsl = b_width_log2(bsize);
   int bws = (1 << bwsl) / 4;  // mode_info step for subsize
-  int bhsl = b_width_log2(bsize);
+  int bhsl = b_height_log2(bsize);
   int bhs = (1 << bhsl) / 4;  // mode_info step for subsize
 
   for (i = 0; i < 4; i++) {
