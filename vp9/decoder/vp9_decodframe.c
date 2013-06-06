@@ -530,25 +530,6 @@ static void setup_token_decoder(VP9D_COMP *pbi,
                        "Failed to allocate bool decoder %d", 1);
 }
 
-static void init_frame(VP9D_COMP *pbi) {
-  VP9_COMMON *const pc = &pbi->common;
-  MACROBLOCKD *const xd = &pbi->mb;
-
-  if (pc->frame_type == KEY_FRAME) {
-    vp9_setup_past_independence(pc, xd);
-    // All buffers are implicitly updated on key frames.
-    pbi->refresh_frame_flags = (1 << NUM_REF_FRAMES) - 1;
-  } else if (pc->error_resilient_mode) {
-    vp9_setup_past_independence(pc, xd);
-  }
-
-  xd->mode_info_context = pc->mi;
-  xd->prev_mode_info_context = pc->prev_mi;
-  xd->frame_type = pc->frame_type;
-  xd->mode_info_context->mbmi.mode = DC_PRED;
-  xd->mode_info_stride = pc->mode_info_stride;
-}
-
 static void read_coef_probs_common(FRAME_CONTEXT *fc, TX_SIZE tx_size,
                                    vp9_reader *r) {
   const int entropy_nodes_update = UNCONSTRAINED_NODES;
@@ -646,22 +627,6 @@ static void setup_segmentation(VP9_COMMON *pc, MACROBLOCKD *xd, vp9_reader *r) {
   }
 }
 
-static void setup_pred_probs(VP9_COMMON *pc, vp9_reader *r) {
-  // Read common prediction model status flag probability updates for the
-  // reference frame
-  if (pc->frame_type == KEY_FRAME) {
-    // Set the prediction probabilities to defaults
-    pc->ref_pred_probs[0] = DEFAULT_PRED_PROB_0;
-    pc->ref_pred_probs[1] = DEFAULT_PRED_PROB_1;
-    pc->ref_pred_probs[2] = DEFAULT_PRED_PROB_2;
-  } else {
-    int i;
-    for (i = 0; i < PREDICTION_PROBS; ++i)
-      if (vp9_read_bit(r))
-        pc->ref_pred_probs[i] = vp9_read_prob(r);
-  }
-}
-
 static void setup_loopfilter(VP9D_COMP *pbi, struct vp9_read_bit_buffer *rb) {
   VP9_COMMON *const cm = &pbi->common;
   MACROBLOCKD *const xd = &pbi->mb;
@@ -716,9 +681,10 @@ static void setup_quantization(VP9D_COMP *pbi, struct vp9_read_bit_buffer *rb) {
     vp9_init_dequantizer(cm);
 }
 
-static INTERPOLATIONFILTERTYPE read_mcomp_filter_type(vp9_reader *r) {
-  return vp9_read_bit(r) ? SWITCHABLE
-                         : vp9_read_literal(r, 2);
+static INTERPOLATIONFILTERTYPE read_interp_filter_type(
+    struct vp9_read_bit_buffer *rb) {
+  return vp9_rb_read_bit(rb) ? SWITCHABLE
+                             : vp9_rb_read_literal(rb, 2);
 }
 
 static void read_frame_size(VP9_COMMON *cm,
@@ -757,8 +723,8 @@ static void setup_frame_size(VP9D_COMP *pbi, int scaling_active,
       if (vp9_alloc_frame_buffers(pc, width, height))
         vpx_internal_error(&pc->error, VPX_CODEC_MEM_ERROR,
                            "Failed to allocate frame buffers");
-        pbi->initial_width = width;
-        pbi->initial_height = height;
+      pbi->initial_width = width;
+      pbi->initial_height = height;
     } else {
       if (width > pbi->initial_width)
         vpx_internal_error(&pc->error, VPX_CODEC_CORRUPT_FRAME,
@@ -776,6 +742,10 @@ static void setup_frame_size(VP9D_COMP *pbi, int scaling_active,
 
     vp9_update_frame_size(pc);
   }
+
+  vp9_realloc_frame_buffer(&pc->yv12_fb[pc->new_fb_idx], pc->width, pc->height,
+                           pc->subsampling_x, pc->subsampling_y,
+                           VP9BORDERINPIXELS);
 }
 
 static void update_frame_context(FRAME_CONTEXT *fc) {
@@ -784,10 +754,8 @@ static void update_frame_context(FRAME_CONTEXT *fc) {
   vp9_copy(fc->pre_uv_mode_prob, fc->uv_mode_prob);
   vp9_copy(fc->pre_partition_prob, fc->partition_prob);
   fc->pre_nmvc = fc->nmvc;
-  vp9_copy(fc->pre_switchable_interp_prob,
-           fc->switchable_interp_prob);
-  vp9_copy(fc->pre_inter_mode_probs,
-           fc->inter_mode_probs);
+  vp9_copy(fc->pre_switchable_interp_prob, fc->switchable_interp_prob);
+  vp9_copy(fc->pre_inter_mode_probs, fc->inter_mode_probs);
 
   vp9_zero(fc->coef_counts);
   vp9_zero(fc->eob_branch_counts);
@@ -909,8 +877,9 @@ static void error_handler(void *data, int bit_offset) {
 size_t read_uncompressed_header(VP9D_COMP *pbi,
                                 struct vp9_read_bit_buffer *rb) {
   VP9_COMMON *const cm = &pbi->common;
+  MACROBLOCKD *const xd = &pbi->mb;
 
-  int scaling_active;
+  int scaling_active, i;
   cm->last_frame_type = cm->frame_type;
   cm->frame_type = (FRAME_TYPE) vp9_rb_read_bit(rb);
   cm->version = vp9_rb_read_literal(rb, 3);
@@ -923,21 +892,12 @@ size_t read_uncompressed_header(VP9D_COMP *pbi,
     if (vp9_rb_read_literal(rb, 8) != SYNC_CODE_0 ||
         vp9_rb_read_literal(rb, 8) != SYNC_CODE_1 ||
         vp9_rb_read_literal(rb, 8) != SYNC_CODE_2) {
-        vpx_internal_error(&cm->error, VPX_CODEC_UNSUP_BITSTREAM,
-                           "Invalid frame sync code");
+      vpx_internal_error(&cm->error, VPX_CODEC_UNSUP_BITSTREAM,
+                         "Invalid frame sync code");
     }
   }
 
   setup_frame_size(pbi, scaling_active, rb);
-
-  if (!cm->show_frame) {
-    cm->intra_only = vp9_rb_read_bit(rb);
-  } else {
-    cm->intra_only = 0;
-  }
-
-  cm->frame_context_idx = vp9_rb_read_literal(rb, NUM_FRAME_CONTEXTS_LG2);
-  cm->clr_type = (YUV_TYPE)vp9_rb_read_bit(rb);
 
   cm->error_resilient_mode = vp9_rb_read_bit(rb);
   if (!cm->error_resilient_mode) {
@@ -950,6 +910,44 @@ size_t read_uncompressed_header(VP9D_COMP *pbi,
     cm->frame_parallel_decoding_mode = 1;
   }
 
+  if (cm->frame_type == KEY_FRAME) {
+    vp9_setup_past_independence(cm, xd);
+
+    pbi->refresh_frame_flags = (1 << NUM_REF_FRAMES) - 1;
+
+    for (i = 0; i < ALLOWED_REFS_PER_FRAME; ++i)
+      cm->active_ref_idx[i] = cm->new_fb_idx;
+
+    cm->ref_pred_probs[0] = DEFAULT_PRED_PROB_0;
+    cm->ref_pred_probs[1] = DEFAULT_PRED_PROB_1;
+    cm->ref_pred_probs[2] = DEFAULT_PRED_PROB_2;
+  } else {
+    if (cm->error_resilient_mode)
+      vp9_setup_past_independence(cm, xd);
+
+    pbi->refresh_frame_flags = vp9_rb_read_literal(rb, NUM_REF_FRAMES);
+
+    for (i = 0; i < ALLOWED_REFS_PER_FRAME; ++i) {
+      const int ref = vp9_rb_read_literal(rb, NUM_REF_FRAMES_LG2);
+      cm->active_ref_idx[i] = cm->ref_frame_map[ref];
+      vp9_setup_scale_factors(cm, i);
+    }
+
+    for (i = 0; i < ALLOWED_REFS_PER_FRAME; ++i)
+      cm->ref_frame_sign_bias[i + 1] = vp9_rb_read_bit(rb);
+
+    for (i = 0; i < PREDICTION_PROBS; ++i)
+      if (vp9_rb_read_bit(rb))
+        cm->ref_pred_probs[i] = vp9_rb_read_literal(rb, 8);
+
+    xd->allow_high_precision_mv = vp9_rb_read_bit(rb);
+    cm->mcomp_filter_type = read_interp_filter_type(rb);
+  }
+
+  cm->intra_only = cm->show_frame ? 0 : vp9_rb_read_bit(rb);
+  cm->frame_context_idx = vp9_rb_read_literal(rb, NUM_FRAME_CONTEXTS_LG2);
+  cm->clr_type = (YUV_TYPE)vp9_rb_read_bit(rb);
+
   setup_loopfilter(pbi, rb);
   setup_quantization(pbi, rb);
 
@@ -961,7 +959,7 @@ int vp9_decode_frame(VP9D_COMP *pbi, const uint8_t **p_data_end) {
   vp9_reader header_bc, residual_bc;
   VP9_COMMON *const pc = &pbi->common;
   MACROBLOCKD *const xd = &pbi->mb;
-  YV12_BUFFER_CONFIG *new_fb = &pc->yv12_fb[pc->new_fb_idx];
+
   const uint8_t *data = pbi->source;
   const uint8_t *data_end = pbi->source + pbi->source_sz;
 
@@ -969,6 +967,7 @@ int vp9_decode_frame(VP9D_COMP *pbi, const uint8_t **p_data_end) {
                                     pc, error_handler };
   const size_t first_partition_size = read_uncompressed_header(pbi, &rb);
   const int keyframe = pc->frame_type == KEY_FRAME;
+  YV12_BUFFER_CONFIG *new_fb = &pc->yv12_fb[pc->new_fb_idx];
 
   data += vp9_rb_bytes_read(&rb);
   xd->corrupted = 0;
@@ -981,15 +980,13 @@ int vp9_decode_frame(VP9D_COMP *pbi, const uint8_t **p_data_end) {
 
   vp9_setup_version(pc);
   if (!read_is_valid(data, first_partition_size, data_end))
-      vpx_internal_error(&pc->error, VPX_CODEC_CORRUPT_FRAME,
-                         "Truncated packet or corrupt partition 0 length");
+    vpx_internal_error(&pc->error, VPX_CODEC_CORRUPT_FRAME,
+                       "Truncated packet or corrupt partition 0 length");
 
-  init_frame(pbi);
-
-  // Reset the frame pointers to the current frame size
-  vp9_realloc_frame_buffer(new_fb, pc->width, pc->height,
-                           pc->subsampling_x, pc->subsampling_y,
-                           VP9BORDERINPIXELS);
+  xd->mode_info_context = pc->mi;
+  xd->prev_mode_info_context = pc->prev_mi;
+  xd->frame_type = pc->frame_type;
+  xd->mode_info_stride = pc->mode_info_stride;
 
   if (vp9_reader_init(&header_bc, data, first_partition_size))
     vpx_internal_error(&pc->error, VPX_CODEC_MEM_ERROR,
@@ -1011,43 +1008,14 @@ int vp9_decode_frame(VP9D_COMP *pbi, const uint8_t **p_data_end) {
     xd->itxm_add_uv_block = vp9_idct_add_uv_block;
   }
 
-  // Determine if the golden frame or ARF buffer should be updated and how.
-  // For all non key frames the GF and ARF refresh flags and sign bias
-  // flags must be set explicitly.
-  if (keyframe) {
-    for (i = 0; i < ALLOWED_REFS_PER_FRAME; ++i)
-      pc->active_ref_idx[i] = pc->new_fb_idx;
-  } else {
-    // Should the GF or ARF be updated from the current frame
-    pbi->refresh_frame_flags = vp9_read_literal(&header_bc, NUM_REF_FRAMES);
-
-    // Select active reference frames and calculate scaling factors
-    for (i = 0; i < ALLOWED_REFS_PER_FRAME; ++i) {
-      const int ref = vp9_read_literal(&header_bc, NUM_REF_FRAMES_LG2);
-      pc->active_ref_idx[i] = pc->ref_frame_map[ref];
-      vp9_setup_scale_factors(pc, i);
-    }
-
-    // Read the sign bias for each reference frame buffer.
-    for (i = 0; i < ALLOWED_REFS_PER_FRAME; ++i)
-      pc->ref_frame_sign_bias[i + 1] = vp9_read_bit(&header_bc);
-
-    xd->allow_high_precision_mv = vp9_read_bit(&header_bc);
-    pc->mcomp_filter_type = read_mcomp_filter_type(&header_bc);
-
-    // To enable choice of different interpolation filters
+  if (!keyframe)
     vp9_setup_interp_filters(xd, pc->mcomp_filter_type, pc);
-  }
 
   pc->fc = pc->frame_contexts[pc->frame_context_idx];
 
   setup_segmentation(pc, xd, &header_bc);
 
-  setup_pred_probs(pc, &header_bc);
-
   setup_txfm_mode(pc, xd->lossless, &header_bc);
-
-  // Read inter mode probability context updates
 
   update_frame_context(&pc->fc);
 

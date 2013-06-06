@@ -16,8 +16,6 @@
 #define LOG2_MI_SIZE 3
 
 #define MI_SIZE (1 << LOG2_MI_SIZE)
-#define MI_UV_SIZE (1 << (LOG2_MI_SIZE - 1))
-
 #define MI_MASK ((64 >> LOG2_MI_SIZE) - 1)
 
 typedef enum BLOCK_SIZE_TYPE {
