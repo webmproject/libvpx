@@ -871,7 +871,10 @@ static void super_block_uvrd_for_txfm(VP9_COMMON *const cm, MACROBLOCK *x,
                                       int *skippable, BLOCK_SIZE_TYPE bsize,
                                       TX_SIZE uv_tx_size) {
   MACROBLOCKD *const xd = &x->e_mbd;
-  vp9_xform_quant_sbuv(cm, x, bsize);
+  if (xd->mode_info_context->mbmi.ref_frame == INTRA_FRAME)
+    vp9_encode_intra_block_uv(cm, x, bsize);
+  else
+    vp9_xform_quant_sbuv(cm, x, bsize);
 
   *distortion = block_error_sbuv(x, bsize, uv_tx_size == TX_32X32 ? 0 : 2);
   *rate       = rdcost_uv(cm, x, bsize, uv_tx_size);
@@ -884,7 +887,8 @@ static void super_block_uvrd(VP9_COMMON *const cm, MACROBLOCK *x,
   MACROBLOCKD *const xd = &x->e_mbd;
   MB_MODE_INFO *const mbmi = &xd->mode_info_context->mbmi;
 
-  vp9_subtract_sbuv(x, bsize);
+  if (mbmi->ref_frame > INTRA_FRAME)
+    vp9_subtract_sbuv(x, bsize);
 
   if (mbmi->txfm_size >= TX_32X32 && bsize >= BLOCK_SIZE_SB64X64) {
     super_block_uvrd_for_txfm(cm, x, rate, distortion, skippable, bsize,
@@ -913,8 +917,6 @@ static int64_t rd_pick_intra_sbuv_mode(VP9_COMP *cpi, MACROBLOCK *x,
 
   for (mode = DC_PRED; mode <= TM_PRED; mode++) {
     x->e_mbd.mode_info_context->mbmi.uv_mode = mode;
-    vp9_build_intra_predictors_sbuv_s(&x->e_mbd, bsize);
-
     super_block_uvrd(&cpi->common, x, &this_rate_tokenonly,
                      &this_distortion, &s, bsize);
     this_rate = this_rate_tokenonly +
@@ -2565,6 +2567,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
   if (cpi->speed == 0
       || (cpi->speed > 0 && (ref_frame_mask & (1 << INTRA_FRAME)))) {
     mbmi->mode = DC_PRED;
+    mbmi->ref_frame = INTRA_FRAME;
     for (i = 0; i <= (bsize < BLOCK_SIZE_MB16X16 ? TX_4X4 :
                       (bsize < BLOCK_SIZE_SB32X32 ? TX_8X8 :
                        (bsize < BLOCK_SIZE_SB64X64 ? TX_16X16 : TX_32X32)));
