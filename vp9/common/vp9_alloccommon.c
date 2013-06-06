@@ -147,8 +147,9 @@ int vp9_alloc_frame_buffers(VP9_COMMON *oci, int width, int height) {
   // information is exposed at this level
   mi_cols = mi_cols_aligned_to_sb(oci);
 
+  // 2 contexts per 'mi unit', so that we have one context per 4x4 txfm
+  // block where mi unit size is 8x8.
 # if CONFIG_ALPHA
-  // TODO(jkoleszar): Why is this * 2?
   oci->above_context[0] = vpx_calloc(sizeof(ENTROPY_CONTEXT) * 8 * mi_cols, 1);
 #else
   oci->above_context[0] = vpx_calloc(sizeof(ENTROPY_CONTEXT) * 6 * mi_cols, 1);
