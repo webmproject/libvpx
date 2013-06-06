@@ -26,8 +26,12 @@ static void vp9_wb_write_bit(struct vp9_write_bit_buffer *wb, int bit) {
   const int off = wb->bit_offset;
   const int p = off / CHAR_BIT;
   const int q = CHAR_BIT - 1 - off % CHAR_BIT;
-  wb->bit_buffer[p] &= ~(1 << q);
-  wb->bit_buffer[p] |= bit << q;
+  if (q == CHAR_BIT -1) {
+    wb->bit_buffer[p] = bit << q;
+  } else {
+    wb->bit_buffer[p] &= ~(1 << q);
+    wb->bit_buffer[p] |= bit << q;
+  }
   wb->bit_offset = off + 1;
 }
 
