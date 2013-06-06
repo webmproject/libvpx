@@ -467,7 +467,9 @@ static void update_state(VP9_COMP *cpi,
       int i, j;
       for (j = 0; j < bh; ++j)
         for (i = 0; i < bw; ++i)
-          xd->mode_info_context[mis * j + i].mbmi = *mbmi;
+          if ((xd->mb_to_right_edge >> (3 + LOG2_MI_SIZE)) + bw > j &&
+              (xd->mb_to_bottom_edge >> (3 + LOG2_MI_SIZE)) + bh > i)
+            xd->mode_info_context[mis * j + i].mbmi = *mbmi;
     }
 
     if (cpi->common.mcomp_filter_type == SWITCHABLE &&
@@ -915,13 +917,16 @@ static void set_block_size(VP9_COMMON *const cm,
                            MODE_INFO *m, BLOCK_SIZE_TYPE bsize, int mis,
                            int mi_row, int mi_col) {
   int row, col;
-  int bsl = b_width_log2(bsize);
+  int bwl = b_width_log2(bsize);
+  int bhl = b_height_log2(bsize);
+  int bsl = (bwl > bhl ? bwl : bhl);
+
   int bs = (1 << bsl) / 2;  //
   MODE_INFO *m2 = m + mi_row * mis + mi_col;
   for (row = 0; row < bs; row++) {
     for (col = 0; col < bs; col++) {
       if (mi_row + row >= cm->mi_rows || mi_col + col >= cm->mi_cols)
-        return;
+        continue;
       m2[row*mis+col].mbmi.sb_type = bsize;
     }
   }
@@ -959,21 +964,6 @@ static void fill_variance(var *v, int64_t s2, int64_t s, int c) {
   v->variance = 256
       * (v->sum_square_error - v->sum_error * v->sum_error / v->count)
       / v->count;
-}
-
-// Fills a 16x16 variance tree node by calling get var8x8 var..
-static void fill_16x16_variance(const unsigned char *s, int sp,
-                                const unsigned char *d, int dp, v16x16 *vt) {
-  unsigned int sse;
-  int sum;
-  vp9_get_sse_sum_8x8(s, sp, d, dp, &sse, &sum);
-  fill_variance(&vt->split[0].none, sse, sum, 64);
-  vp9_get_sse_sum_8x8(s + 8, sp, d + 8, dp, &sse, &sum);
-  fill_variance(&vt->split[1].none, sse, sum, 64);
-  vp9_get_sse_sum_8x8(s + 8 * sp, sp, d + 8 * dp, dp, &sse, &sum);
-  fill_variance(&vt->split[2].none, sse, sum, 64);
-  vp9_get_sse_sum_8x8(s + 8 * sp + 8, sp, d + 8 + 8 * dp, dp, &sse, &sum);
-  fill_variance(&vt->split[3].none, sse, sum, 64);
 }
 
 // Combine 2 variance structures by summing the sum_error, sum_square_error,
@@ -1021,8 +1011,18 @@ static void choose_partitioning(VP9_COMP *cpi, MODE_INFO *m, int mi_row,
   int sp;
   const unsigned char * d = xd->plane[0].pre->buf;
   int dp = xd->plane[0].pre->stride;
+  int pixels_wide = 64, pixels_high = 64;
+
+  vpx_memset(&vt, 0, sizeof(vt));
 
   set_offsets(cpi, mi_row, mi_col, BLOCK_SIZE_SB64X64);
+
+  if (xd->mb_to_right_edge < 0)
+    pixels_wide += (xd->mb_to_right_edge >> 3);
+
+  if (xd->mb_to_bottom_edge < 0)
+    pixels_high += (xd->mb_to_bottom_edge >> 3);
+
   s = x->plane[0].src.buf;
   sp = x->plane[0].src.stride;
 
@@ -1034,6 +1034,7 @@ static void choose_partitioning(VP9_COMP *cpi, MODE_INFO *m, int mi_row,
   d = vp9_64x64_zeros;
   dp = 64;
   // }
+
   // Fill in the entire tree of 8x8 variances for splits.
   for (i = 0; i < 4; i++) {
     const int x32_idx = ((i & 1) << 5);
@@ -1041,8 +1042,28 @@ static void choose_partitioning(VP9_COMP *cpi, MODE_INFO *m, int mi_row,
     for (j = 0; j < 4; j++) {
       const int x_idx = x32_idx + ((j & 1) << 4);
       const int y_idx = y32_idx + ((j >> 1) << 4);
-      fill_16x16_variance(s + y_idx * sp + x_idx, sp, d + y_idx * dp + x_idx,
-                          dp, &vt.split[i].split[j]);
+      const uint8_t *st = s + y_idx * sp + x_idx;
+      const uint8_t *dt = d + y_idx * dp + x_idx;
+      unsigned int sse = 0;
+      int sum = 0;
+      v16x16 *vst = &vt.split[i].split[j];
+      sse = sum = 0;
+      if (x_idx < pixels_wide && y_idx < pixels_high)
+        vp9_get_sse_sum_8x8(st, sp, dt, dp, &sse, &sum);
+      fill_variance(&vst->split[0].none, sse, sum, 64);
+      sse = sum = 0;
+      if (x_idx + 8 < pixels_wide && y_idx < pixels_high)
+        vp9_get_sse_sum_8x8(st + 8, sp, dt + 8, dp, &sse, &sum);
+      fill_variance(&vst->split[1].none, sse, sum, 64);
+      sse = sum = 0;
+      if (x_idx < pixels_wide && y_idx + 8 < pixels_high)
+        vp9_get_sse_sum_8x8(st + 8 * sp, sp, dt + 8 * dp, dp, &sse, &sum);
+      fill_variance(&vst->split[2].none, sse, sum, 64);
+      sse = sum = 0;
+      if (x_idx + 8 < pixels_wide && y_idx + 8 < pixels_high)
+        vp9_get_sse_sum_8x8(st + 8 * sp + 8, sp, dt + 8 + 8 * dp, dp, &sse,
+                            &sum);
+      fill_variance(&vst->split[3].none, sse, sum, 64);
     }
   }
   // Fill the rest of the variance tree by summing the split partition
@@ -1088,8 +1109,10 @@ static void rd_use_partition(VP9_COMP *cpi, MODE_INFO *m, TOKENEXTRA **tp,
   MACROBLOCK * const x = &cpi->mb;
   MACROBLOCKD *xd = &cpi->mb.e_mbd;
   const int mis = cm->mode_info_stride;
-  int bwl, bhl;
+  int bwl = b_width_log2(m->mbmi.sb_type);
+  int bhl = b_height_log2(m->mbmi.sb_type);
   int bsl = b_width_log2(bsize);
+  int bh = (1 << bhl);
   int bs = (1 << bsl);
   int bss = (1 << bsl)/4;
   int i, pl;
@@ -1102,9 +1125,6 @@ static void rd_use_partition(VP9_COMP *cpi, MODE_INFO *m, TOKENEXTRA **tp,
   if (mi_row >= cm->mi_rows || mi_col >= cm->mi_cols)
     return;
 
-
-  bwl = b_width_log2(m->mbmi.sb_type);
-  bhl = b_height_log2(m->mbmi.sb_type);
 
   // parse the partition type
   if ((bwl == bsl) && (bhl == bsl))
@@ -1144,7 +1164,7 @@ static void rd_use_partition(VP9_COMP *cpi, MODE_INFO *m, TOKENEXTRA **tp,
       *(get_sb_index(xd, subsize)) = 0;
       pick_sb_modes(cpi, mi_row, mi_col, tp, &r, &d, subsize,
                     get_block_context(x, subsize));
-      if (mi_row + (bs >> 1) <= cm->mi_rows) {
+      if (mi_row + (bh >> 1) <= cm->mi_rows) {
         int rt, dt;
         update_state(cpi, get_block_context(x, subsize), subsize, 0);
         encode_superblock(cpi, tp, 0, mi_row, mi_col, subsize);
@@ -1404,18 +1424,13 @@ static void encode_sb_row(VP9_COMP *cpi, int mi_row,
   for (mi_col = cm->cur_tile_mi_col_start;
        mi_col < cm->cur_tile_mi_col_end; mi_col += 8) {
     int dummy_rate, dummy_dist;
-    // TODO(JBB): remove the border conditions for 64x64 blocks once its fixed
-    // without this border check choose will fail on the border of every
-    // non 64x64.
-    if (cpi->speed < 5 ||
-        mi_col + 8 > cm->cur_tile_mi_col_end ||
-        mi_row + 8 > cm->cur_tile_mi_row_end) {
+    if (cpi->speed < 5) {
       rd_pick_partition(cpi, tp, mi_row, mi_col, BLOCK_SIZE_SB64X64,
                         &dummy_rate, &dummy_dist);
     } else {
       const int idx_str = cm->mode_info_stride * mi_row + mi_col;
       MODE_INFO *m = cm->mi + idx_str;
-      // set_partitioning(cpi, m, BLOCK_SIZE_SB8X8);
+      // set_partitioning(cpi, m, BLOCK_SIZE_SB64X64);
       choose_partitioning(cpi, cm->mi, mi_row, mi_col);
       rd_use_partition(cpi, m, tp, mi_row, mi_col, BLOCK_SIZE_SB64X64,
                        &dummy_rate, &dummy_dist);

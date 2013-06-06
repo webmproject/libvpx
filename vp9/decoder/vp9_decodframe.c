@@ -240,11 +240,16 @@ static void decode_block_intra(int plane, int block, BLOCK_SIZE_TYPE bsize,
   mode = plane == 0? xd->mode_info_context->mbmi.mode:
                      xd->mode_info_context->mbmi.uv_mode;
 
+
   if (xd->mode_info_context->mbmi.sb_type < BLOCK_SIZE_SB8X8 && plane == 0) {
     assert(bsize == BLOCK_SIZE_SB8X8);
     b_mode = xd->mode_info_context->bmi[raster_block].as_mode.first;
   } else {
     b_mode = mode;
+  }
+
+  if (xd->mb_to_right_edge < 0 || xd->mb_to_bottom_edge < 0) {
+    extend_for_intra(xd, plane, block, bsize, ss_txfrm_size);
   }
 
   plane_b_size = b_width_log2(bsize) - xd->plane[plane].subsampling_x;

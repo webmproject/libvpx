@@ -288,9 +288,6 @@ SKIP_START:
   if (c < seg_eob)
     coef_counts[type][ref][band][pt][DCT_EOB_MODEL_TOKEN]++;
 
-  for (pt = 0; pt < (1 << txfm_size); pt++) {
-    A[pt] = L[pt] = c > 0;
-  }
 
   return c;
 }
@@ -298,7 +295,6 @@ SKIP_START:
 static int get_eob(MACROBLOCKD* const xd, int segment_id, int eob_max) {
   return vp9_get_segdata(xd, segment_id, SEG_LVL_SKIP) ? 0 : eob_max;
 }
-
 
 struct decode_block_args {
   VP9D_COMP *pbi;
@@ -314,6 +310,7 @@ static void decode_block(int plane, int block,
   const int bw = b_width_log2(bsize);
 
   // find the maximum eob for this transform size, adjusted by segment
+  MACROBLOCKD *xd = arg->xd;
   const int segment_id = arg->xd->mode_info_context->mbmi.segment_id;
   const TX_SIZE ss_tx_size = ss_txfrm_size / 2;
   const int seg_eob = get_eob(arg->xd, segment_id, 16 << ss_txfrm_size);
@@ -322,14 +319,23 @@ static void decode_block(int plane, int block,
   const int mod = bw - ss_tx_size - arg->xd->plane[plane].subsampling_x;
   const int aoff = (off & ((1 << mod) - 1)) << ss_tx_size;
   const int loff = (off >> mod) << ss_tx_size;
-
+  int pt;
+  ENTROPY_CONTEXT *A = arg->xd->plane[plane].above_context + aoff;
+  ENTROPY_CONTEXT *L = arg->xd->plane[plane].left_context + loff;
   const int eob = decode_coefs(arg->pbi, arg->xd, arg->r, block,
                                arg->xd->plane[plane].plane_type, seg_eob,
                                BLOCK_OFFSET(qcoeff_base, block, 16),
                                ss_tx_size, arg->xd->plane[plane].dequant,
-                               arg->xd->plane[plane].above_context + aoff,
-                               arg->xd->plane[plane].left_context + loff);
+                               A,
+                               L);
 
+  if (xd->mb_to_right_edge < 0 || xd->mb_to_bottom_edge < 0) {
+    set_contexts_on_border(xd, bsize, plane, ss_tx_size, eob, aoff, loff, A, L);
+  } else {
+    for (pt = 0; pt < (1 << ss_tx_size); pt++) {
+      A[pt] = L[pt] = eob > 0;
+    }
+  }
   arg->xd->plane[plane].eobs[block] = eob;
   arg->eobtotal[0] += eob;
 }

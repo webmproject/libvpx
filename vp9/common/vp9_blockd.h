@@ -631,14 +631,14 @@ static INLINE void foreach_transformed_block_in_plane(
   // block and transform sizes, in number of 4x4 blocks log 2 ("*_b")
   // 4x4=0, 8x8=2, 16x16=4, 32x32=6, 64x64=8
   // transform size varies per plane, look it up in a common way.
-  const TX_SIZE tx_size = plane ? get_uv_tx_size(xd)
-                                : xd->mode_info_context->mbmi.txfm_size;
+  const TX_SIZE tx_size =
+      plane ? get_uv_tx_size(xd) : xd->mode_info_context->mbmi.txfm_size;
   const int block_size_b = bw + bh;
   const int txfrm_size_b = tx_size * 2;
 
   // subsampled size of the block
-  const int ss_sum = xd->plane[plane].subsampling_x +
-                     xd->plane[plane].subsampling_y;
+  const int ss_sum = xd->plane[plane].subsampling_x
+      + xd->plane[plane].subsampling_y;
   const int ss_block_size = block_size_b - ss_sum;
 
   const int step = 1 << txfrm_size_b;
@@ -647,8 +647,42 @@ static INLINE void foreach_transformed_block_in_plane(
 
   assert(txfrm_size_b <= block_size_b);
   assert(txfrm_size_b <= ss_block_size);
-  for (i = 0; i < (1 << ss_block_size); i += step) {
-    visit(plane, i, bsize, txfrm_size_b, arg);
+
+  // If mb_to_right_edge is < 0 we are in a situation in which
+  // the current block size extends into the UMV and we won't
+  // visit the sub blocks that are wholly within the UMV.
+  if (xd->mb_to_right_edge < 0 || xd->mb_to_bottom_edge < 0) {
+    int r, c;
+    const int sw = bw - xd->plane[plane].subsampling_x;
+    const int sh = bh - xd->plane[plane].subsampling_y;
+    int max_blocks_wide = 1 << sw;
+    int max_blocks_high = 1 << sh;
+
+    // xd->mb_to_right_edge is in units of pixels * 8.  This converts
+    // it to 4x4 block sizes.
+    if (xd->mb_to_right_edge < 0)
+      max_blocks_wide +=
+          + (xd->mb_to_right_edge >> (5 + xd->plane[plane].subsampling_x));
+
+    if (xd->mb_to_bottom_edge < 0)
+      max_blocks_high +=
+          + (xd->mb_to_bottom_edge >> (5 + xd->plane[plane].subsampling_y));
+
+    i = 0;
+    // Unlike the normal case - in here we have to keep track of the
+    // row and column of the blocks we use so that we know if we are in
+    // the unrestricted motion border..
+    for (r = 0; r < (1 << sh); r += (1 << tx_size)) {
+      for (c = 0; c < (1 << sw); c += (1 << tx_size)) {
+        if (r < max_blocks_high && c < max_blocks_wide)
+          visit(plane, i, bsize, txfrm_size_b, arg);
+        i += step;
+      }
+    }
+  } else {
+    for (i = 0; i < (1 << ss_block_size); i += step) {
+      visit(plane, i, bsize, txfrm_size_b, arg);
+    }
   }
 }
 
@@ -780,4 +814,89 @@ static void txfrm_block_to_raster_xy(MACROBLOCKD *xd,
   *x = (raster_mb & (tx_cols - 1)) << (txwl);
   *y = raster_mb >> tx_cols_lg2 << (txwl);
 }
+
+static void extend_for_intra(MACROBLOCKD* const xd, int plane, int block,
+                             BLOCK_SIZE_TYPE bsize, int ss_txfrm_size) {
+  const int bw = plane_block_width(bsize, &xd->plane[plane]);
+  const int bh = plane_block_height(bsize, &xd->plane[plane]);
+  int x, y;
+  txfrm_block_to_raster_xy(xd, bsize, plane, block, ss_txfrm_size, &x, &y);
+  x = x * 4 - 1;
+  y = y * 4 - 1;
+  // Copy a pixel into the umv if we are in a situation where the block size
+  // extends into the UMV.
+  // TODO(JBB): Should be able to do the full extend in place so we don't have
+  // to do this multiple times.
+  if (xd->mb_to_right_edge < 0) {
+    int umv_border_start = bw
+        + (xd->mb_to_right_edge >> (3 + xd->plane[plane].subsampling_x));
+
+    if (x + bw > umv_border_start)
+      vpx_memset(
+          xd->plane[plane].dst.buf + y * xd->plane[plane].dst.stride
+              + umv_border_start,
+          *(xd->plane[plane].dst.buf + y * xd->plane[plane].dst.stride
+              + umv_border_start - 1),
+          bw);
+  }
+  if (xd->mb_to_bottom_edge < 0) {
+    int umv_border_start = bh
+        + (xd->mb_to_bottom_edge >> (3 + xd->plane[plane].subsampling_y));
+    int i;
+    uint8_t c = *(xd->plane[plane].dst.buf
+        + (umv_border_start - 1) * xd->plane[plane].dst.stride + x);
+
+    uint8_t *d = xd->plane[plane].dst.buf
+        + umv_border_start * xd->plane[plane].dst.stride + x;
+
+    if (y + bh > umv_border_start)
+      for (i = 0; i < bh; i++, d += xd->plane[plane].dst.stride)
+        *d = c;
+  }
+}
+static void set_contexts_on_border(MACROBLOCKD *xd, BLOCK_SIZE_TYPE bsize,
+                                   int plane, int ss_tx_size, int eob, int aoff,
+                                   int loff, ENTROPY_CONTEXT *A,
+                                   ENTROPY_CONTEXT *L) {
+  const int bw = b_width_log2(bsize), bh = b_height_log2(bsize);
+  const int sw = bw - xd->plane[plane].subsampling_x;
+  const int sh = bh - xd->plane[plane].subsampling_y;
+  int mi_blocks_wide = 1 << sw;
+  int mi_blocks_high = 1 << sh;
+  int tx_size_in_blocks = (1 << ss_tx_size);
+  int above_contexts = tx_size_in_blocks;
+  int left_contexts = tx_size_in_blocks;
+  int pt;
+
+  // xd->mb_to_right_edge is in units of pixels * 8.  This converts
+  // it to 4x4 block sizes.
+  if (xd->mb_to_right_edge < 0) {
+    mi_blocks_wide += (xd->mb_to_right_edge
+        >> (5 + xd->plane[plane].subsampling_x));
+  }
+
+  // this code attempts to avoid copying into contexts that are outside
+  // our border.  Any blocks that do are set to 0...
+  if (above_contexts + aoff > mi_blocks_wide)
+    above_contexts = mi_blocks_wide - aoff;
+
+  if (xd->mb_to_bottom_edge < 0) {
+    mi_blocks_high += (xd->mb_to_bottom_edge
+        >> (5 + xd->plane[plane].subsampling_y));
+  }
+  if (left_contexts + loff > mi_blocks_high) {
+    left_contexts = mi_blocks_high - loff;
+  }
+
+  for (pt = 0; pt < above_contexts; pt++)
+    A[pt] = eob > 0;
+  for (pt = above_contexts; pt < (1 << ss_tx_size); pt++)
+    A[pt] = 0;
+  for (pt = 0; pt < left_contexts; pt++)
+    L[pt] = eob > 0;
+  for (pt = left_contexts; pt < (1 << ss_tx_size); pt++)
+    L[pt] = 0;
+}
+
+
 #endif  // VP9_COMMON_VP9_BLOCKD_H_

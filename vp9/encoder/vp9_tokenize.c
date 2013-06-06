@@ -99,6 +99,7 @@ struct tokenize_b_args {
   TX_SIZE tx_size;
   int dry_run;
 };
+
 static void tokenize_b(int plane, int block, BLOCK_SIZE_TYPE bsize,
                        int ss_txfrm_size, void *arg) {
   struct tokenize_b_args* const args = arg;
@@ -233,8 +234,12 @@ static void tokenize_b(int plane, int block, BLOCK_SIZE_TYPE bsize,
   } while (c < eob && ++c < seg_eob);
 
   *tp = t;
-  for (pt = 0; pt < (1 << tx_size); pt++) {
-    A[pt] = L[pt] = c > 0;
+  if (xd->mb_to_right_edge < 0 || xd->mb_to_bottom_edge < 0) {
+    set_contexts_on_border(xd, bsize, plane, tx_size, c, aoff, loff, A, L);
+  } else {
+    for (pt = 0; pt < (1 << tx_size); pt++) {
+      A[pt] = L[pt] = c > 0;
+    }
   }
 }
 
