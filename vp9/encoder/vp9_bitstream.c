@@ -60,14 +60,7 @@ static INLINE void write_le32(uint8_t *p, int value) {
   p[3] = value >> 24;
 }
 
-void vp9_encode_unsigned_max(vp9_writer *br, int data, int max) {
-  assert(data <= max);
-  while (max) {
-    vp9_write_bit(br, data & 1);
-    data >>= 1;
-    max >>= 1;
-  }
-}
+
 
 int recenter_nonneg(int v, int m) {
   if (v > (m << 1))
@@ -86,6 +79,11 @@ static int get_unsigned_bits(unsigned num_values) {
     num_values >>= 1;
   }
   return cat;
+}
+
+void vp9_encode_unsigned_max(struct vp9_write_bit_buffer *wb,
+                             int data, int max) {
+  vp9_wb_write_literal(wb, data, get_unsigned_bits(max));
 }
 
 void encode_uniform(vp9_writer *w, int v, int n) {
@@ -1266,73 +1264,63 @@ static void encode_quantization(VP9_COMMON *cm,
 }
 
 
-static void encode_segmentation(VP9_COMP *cpi, vp9_writer *w) {
+static void encode_segmentation(VP9_COMP *cpi,
+                               struct vp9_write_bit_buffer *wb) {
   int i, j;
-  VP9_COMMON *const pc = &cpi->common;
+  VP9_COMMON *const cm = &cpi->common;
   MACROBLOCKD *const xd = &cpi->mb.e_mbd;
 
-  vp9_write_bit(w, xd->segmentation_enabled);
+  vp9_wb_write_bit(wb, xd->segmentation_enabled);
   if (!xd->segmentation_enabled)
     return;
 
   // Segmentation map
-  vp9_write_bit(w, xd->update_mb_segmentation_map);
+  vp9_wb_write_bit(wb, xd->update_mb_segmentation_map);
   if (xd->update_mb_segmentation_map) {
     // Select the coding strategy (temporal or spatial)
     vp9_choose_segmap_coding_method(cpi);
     // Write out probabilities used to decode unpredicted  macro-block segments
     for (i = 0; i < MB_SEG_TREE_PROBS; i++) {
       const int prob = xd->mb_segment_tree_probs[i];
-      if (prob != MAX_PROB) {
-        vp9_write_bit(w, 1);
-        vp9_write_prob(w, prob);
-      } else {
-        vp9_write_bit(w, 0);
-      }
+      const int update = prob != MAX_PROB;
+      vp9_wb_write_bit(wb, update);
+      if (update)
+        vp9_wb_write_literal(wb, prob, 8);
     }
 
     // Write out the chosen coding method.
-    vp9_write_bit(w, pc->temporal_update);
-    if (pc->temporal_update) {
+    vp9_wb_write_bit(wb, cm->temporal_update);
+    if (cm->temporal_update) {
       for (i = 0; i < PREDICTION_PROBS; i++) {
-        const int prob = pc->segment_pred_probs[i];
-        if (prob != MAX_PROB) {
-          vp9_write_bit(w, 1);
-          vp9_write_prob(w, prob);
-        } else {
-          vp9_write_bit(w, 0);
-        }
+        const int prob = cm->segment_pred_probs[i];
+        const int update = prob != MAX_PROB;
+        vp9_wb_write_bit(wb, update);
+        if (update)
+          vp9_wb_write_literal(wb, prob, 8);
       }
     }
   }
 
   // Segmentation data
-  vp9_write_bit(w, xd->update_mb_segmentation_data);
+  vp9_wb_write_bit(wb, xd->update_mb_segmentation_data);
   // segment_reference_frames(cpi);
   if (xd->update_mb_segmentation_data) {
-    vp9_write_bit(w, xd->mb_segment_abs_delta);
+    vp9_wb_write_bit(wb, xd->mb_segment_abs_delta);
 
     for (i = 0; i < MAX_MB_SEGMENTS; i++) {
       for (j = 0; j < SEG_LVL_MAX; j++) {
-        const int data = vp9_get_segdata(xd, i, j);
-        const int data_max = vp9_seg_feature_data_max(j);
-
-        if (vp9_segfeature_active(xd, i, j)) {
-          vp9_write_bit(w, 1);
+        const int active = vp9_segfeature_active(xd, i, j);
+        vp9_wb_write_bit(wb, active);
+        if (active) {
+          const int data = vp9_get_segdata(xd, i, j);
+          const int data_max = vp9_seg_feature_data_max(j);
 
           if (vp9_is_segfeature_signed(j)) {
-            if (data < 0) {
-              vp9_encode_unsigned_max(w, -data, data_max);
-              vp9_write_bit(w, 1);
-            } else {
-              vp9_encode_unsigned_max(w, data, data_max);
-              vp9_write_bit(w, 0);
-            }
+            vp9_encode_unsigned_max(wb, abs(data), data_max);
+            vp9_wb_write_bit(wb, data < 0);
           } else {
-            vp9_encode_unsigned_max(w, data, data_max);
+            vp9_encode_unsigned_max(wb, data, data_max);
           }
-        } else {
-          vp9_write_bit(w, 0);
         }
       }
     }
@@ -1412,6 +1400,24 @@ static void fix_mcomp_filter_type(VP9_COMP *cpi) {
       }
     }
   }
+}
+
+static void write_tile_info(VP9_COMMON *cm, struct vp9_write_bit_buffer *wb) {
+  int min_log2_tiles, delta_log2_tiles, n_tile_bits, n;
+  vp9_get_tile_n_bits(cm, &min_log2_tiles, &delta_log2_tiles);
+  n_tile_bits = cm->log2_tile_columns - min_log2_tiles;
+  for (n = 0; n < delta_log2_tiles; n++) {
+    if (n_tile_bits--) {
+      vp9_wb_write_bit(wb, 1);
+    } else {
+      vp9_wb_write_bit(wb, 0);
+      break;
+    }
+  }
+
+  vp9_wb_write_bit(wb, cm->log2_tile_rows != 0);
+  if (cm->log2_tile_rows != 0)
+    vp9_wb_write_bit(wb, cm->log2_tile_rows != 1);
 }
 
 void write_uncompressed_header(VP9_COMP *cpi,
@@ -1522,6 +1528,9 @@ void write_uncompressed_header(VP9_COMP *cpi,
 
   encode_loopfilter(cm, xd, wb);
   encode_quantization(cm, wb);
+  encode_segmentation(cpi, wb);
+
+  write_tile_info(cm, wb);
 }
 
 void vp9_pack_bitstream(VP9_COMP *cpi, uint8_t *dest, unsigned long *size) {
@@ -1551,8 +1560,6 @@ void vp9_pack_bitstream(VP9_COMP *cpi, uint8_t *dest, unsigned long *size) {
   else
     active_section = 7;
 #endif
-
-  encode_segmentation(cpi, &header_bc);
 
   if (xd->lossless)
     pc->txfm_mode = ONLY_4X4;
@@ -1630,24 +1637,6 @@ void vp9_pack_bitstream(VP9_COMP *cpi, uint8_t *dest, unsigned long *size) {
     vp9_write_nmv_probs(cpi, xd->allow_high_precision_mv, &header_bc);
   }
 
-  /* tiling */
-  {
-    int min_log2_tiles, delta_log2_tiles, n_tile_bits, n;
-
-    vp9_get_tile_n_bits(pc, &min_log2_tiles, &delta_log2_tiles);
-    n_tile_bits = pc->log2_tile_columns - min_log2_tiles;
-    for (n = 0; n < delta_log2_tiles; n++) {
-      if (n_tile_bits--) {
-        vp9_write_bit(&header_bc, 1);
-      } else {
-        vp9_write_bit(&header_bc, 0);
-        break;
-      }
-    }
-    vp9_write_bit(&header_bc, pc->log2_tile_rows != 0);
-    if (pc->log2_tile_rows != 0)
-      vp9_write_bit(&header_bc, pc->log2_tile_rows != 1);
-  }
 
   vp9_stop_encode(&header_bc);
 
