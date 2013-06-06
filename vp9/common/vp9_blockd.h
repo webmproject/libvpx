@@ -622,6 +622,7 @@ typedef void (*foreach_transformed_block_visitor)(int plane, int block,
                                                   BLOCK_SIZE_TYPE bsize,
                                                   int ss_txfrm_size,
                                                   void *arg);
+
 static INLINE void foreach_transformed_block_in_plane(
     const MACROBLOCKD* const xd, BLOCK_SIZE_TYPE bsize, int plane,
     foreach_transformed_block_visitor visit, void *arg) {
