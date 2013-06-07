@@ -56,8 +56,8 @@ static INLINE double fclamp(double value, double low, double high) {
   return value < low ? low : (value > high ? high : value);
 }
 
-static INLINE int multiple8(int value) {
-  return (value + 7) & ~7;
+static INLINE int multiple16(int value) {
+  return (value + 15) & ~15;
 }
 
 #define SYNC_CODE_0 0x49
