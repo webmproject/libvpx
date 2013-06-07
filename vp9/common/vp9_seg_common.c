@@ -13,7 +13,7 @@
 #include "vp9/common/vp9_seg_common.h"
 
 static const int seg_feature_data_signed[SEG_LVL_MAX] = { 1, 1, 0, 0 };
-static const int seg_feature_data_max[SEG_LVL_MAX] = { MAXQ, 63, 15, 15 };
+static const int seg_feature_data_max[SEG_LVL_MAX] = { MAXQ, 63, 15, 0 };
 
 // These functions provide access to new segment level features.
 // Eventually these function may be "optimized out" but for the moment,

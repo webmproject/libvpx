@@ -293,7 +293,7 @@ SKIP_START:
 }
 
 static int get_eob(MACROBLOCKD* const xd, int segment_id, int eob_max) {
-  return vp9_get_segdata(xd, segment_id, SEG_LVL_SKIP) ? 0 : eob_max;
+  return vp9_segfeature_active(xd, segment_id, SEG_LVL_SKIP) ? 0 : eob_max;
 }
 
 struct decode_block_args {

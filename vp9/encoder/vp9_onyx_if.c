@@ -746,7 +746,7 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
       // Switch segmentation off.
       sf->static_segmentation = 0;
 #else
-  sf->static_segmentation = 0;
+      sf->static_segmentation = 0;
 #endif
       sf->comp_inter_joint_search_thresh = BLOCK_SIZE_SB8X8;
       sf->adpative_rd_thresh = 1;
