@@ -54,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAZ3//3gk\u003d",
+        "filename": "vp9/encoder/vp9_bitstream.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1329,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2013-06-07T13:22:26Z",
+      "side": 1,
+      "message": "i think it\u0027s more of a spec problem than a code problem.\n\nDo you want the spec to allow width\u003d0 / height\u003d0 ?\n\nIf not, then you should code cm-\u003ewidth - 1 and cm-\u003eheight - 1 in the bitstream.\n\n\n(e.g., speaking of corner case: what if cm-\u003ewidth \u003d 0 and cm-\u003edisplay_width \u003e 0 ?? What are you going to show on display?)",
+      "parentUuid": "AAAAZ3//3iA\u003d",
+      "revId": "d0f49300cc0a0051a39ac891f819e41adb61737e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAZ3//3yc\u003d",
         "filename": "vp9/encoder/vp9_bitstream.c",
         "patchSetId": 2
