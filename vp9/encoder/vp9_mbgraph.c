@@ -265,6 +265,9 @@ static void update_mbgraph_frame_stats(VP9_COMP *cpi,
   xd->plane[0].pre[0].stride  = buf->y_stride;
   xd->plane[1].dst.stride = buf->uv_stride;
   xd->mode_info_context = &mi_local;
+  mi_local.mbmi.sb_type = BLOCK_SIZE_MB16X16;
+  mi_local.mbmi.ref_frame[0] = LAST_FRAME;
+  mi_local.mbmi.ref_frame[1] = NONE;
 
   for (mb_row = 0; mb_row < cm->mb_rows; mb_row++) {
     int_mv arf_left_mv, gld_left_mv;
