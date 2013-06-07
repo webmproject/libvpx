@@ -16,6 +16,24 @@
       "revId": "c3ae212e80f599c2cee40301c7b619383db33896",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAZ3//3Ek\u003d",
+        "filename": "vpxdec.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 988,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2013-06-07T19:04:03Z",
+      "side": 1,
+      "message": "I see what you mean.  Will pay attention to this later.",
+      "parentUuid": "AAAAZ3//3SM\u003d",
+      "revId": "c3ae212e80f599c2cee40301c7b619383db33896",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
