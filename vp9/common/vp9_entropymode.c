@@ -385,10 +385,8 @@ static void set_default_lf_deltas(MACROBLOCKD *xd) {
   xd->ref_lf_deltas[GOLDEN_FRAME] = -1;
   xd->ref_lf_deltas[ALTREF_FRAME] = -1;
 
-  xd->mode_lf_deltas[0] = 2;               // I4X4_PRED
-  xd->mode_lf_deltas[1] = -1;              // Zero
-  xd->mode_lf_deltas[2] = 1;               // New mv
-  xd->mode_lf_deltas[3] = 2;               // Split mv
+  xd->mode_lf_deltas[0] = 0;              // Zero
+  xd->mode_lf_deltas[1] = 0;               // New mv
 }
 
 void vp9_setup_past_independence(VP9_COMMON *cm, MACROBLOCKD *xd) {

@@ -74,7 +74,7 @@ typedef struct {
 
   // 0 = Intra, Last, GF, ARF
   signed char last_ref_lf_deltas[MAX_REF_LF_DELTAS];
-  // 0 = I4X4_PRED, ZERO_MV, MV, SPLIT
+  // 0 = ZERO_MV, MV
   signed char last_mode_lf_deltas[MAX_MODE_LF_DELTAS];
 
   vp9_coeff_probs_model coef_probs[TX_SIZE_MAX_SB][BLOCK_TYPES];
