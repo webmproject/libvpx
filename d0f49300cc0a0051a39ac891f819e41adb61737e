@@ -107,6 +107,23 @@
     },
     {
       "key": {
+        "uuid": "AAAAZ3//3ek\u003d",
+        "filename": "vp9/encoder/vp9_bitstream.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1376,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2013-06-07T14:54:44Z",
+      "side": 1,
+      "message": "if (cm-\u003eframe_type \u003d\u003d KEY_FRAME || cm-\u003eintra_only ) \n\nThis would make this work for out of order keyframe work adrian\u0027s doing.     \n\n( this comment thanks to agrange.   :)  )",
+      "revId": "d0f49300cc0a0051a39ac891f819e41adb61737e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAZ3//3yE\u003d",
         "filename": "vp9/encoder/vp9_bitstream.c",
         "patchSetId": 2
