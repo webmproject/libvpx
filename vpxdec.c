@@ -1025,7 +1025,7 @@ int main(int argc, const char **argv_) {
       show_progress(frame_in, frame_out, dx_time);
 
     if (!noblit) {
-      if (frame_out == 1 && use_y4m) {
+      if (frame_out == 1 && img && use_y4m) {
         /* Write out the color format to terminate the header line */
         const char *color =
             img->fmt == VPX_IMG_FMT_444A ? "C444alpha\n" :
