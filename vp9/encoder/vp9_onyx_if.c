@@ -405,7 +405,6 @@ static void configure_static_seg_features(VP9_COMP *cpi) {
         qi_delta = compute_qdelta(cpi, cpi->avg_q,
                                   (cpi->avg_q * 1.125));
         vp9_set_segdata(xd, 1, SEG_LVL_ALT_Q, (qi_delta + 2));
-        vp9_set_segdata(xd, 1, SEG_LVL_ALT_Q, 0);
         vp9_enable_segfeature(xd, 1, SEG_LVL_ALT_Q);
 
         vp9_set_segdata(xd, 1, SEG_LVL_ALT_LF, -2);
