@@ -794,6 +794,7 @@ static void update_frame_context(FRAME_CONTEXT *fc) {
   vp9_copy(fc->pre_switchable_interp_prob, fc->switchable_interp_prob);
   vp9_copy(fc->pre_inter_mode_probs, fc->inter_mode_probs);
   vp9_copy(fc->pre_tx_probs, fc->tx_probs);
+  vp9_copy(fc->pre_mbskip_probs, fc->mbskip_probs);
 
   vp9_zero(fc->coef_counts);
   vp9_zero(fc->eob_branch_counts);
@@ -810,6 +811,7 @@ static void update_frame_context(FRAME_CONTEXT *fc) {
   vp9_zero(fc->tx_count_8x8p);
   vp9_zero(fc->tx_count_16x16p);
   vp9_zero(fc->tx_count_32x32p);
+  vp9_zero(fc->mbskip_count);
 }
 
 static void decode_tile(VP9D_COMP *pbi, vp9_reader *r) {

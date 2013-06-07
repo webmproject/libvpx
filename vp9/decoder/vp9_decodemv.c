@@ -99,8 +99,11 @@ static void kfread_modes(VP9D_COMP *pbi, MODE_INFO *m,
 
   m->mbmi.mb_skip_coeff = vp9_segfeature_active(xd, m->mbmi.segment_id,
                                                 SEG_LVL_SKIP);
-  if (!m->mbmi.mb_skip_coeff)
+  if (!m->mbmi.mb_skip_coeff) {
     m->mbmi.mb_skip_coeff = vp9_read(r, vp9_get_pred_prob(cm, xd, PRED_MBSKIP));
+    cm->fc.mbskip_count[vp9_get_pred_context(cm, xd, PRED_MBSKIP)]
+                       [m->mbmi.mb_skip_coeff]++;
+  }
 
   if (cm->txfm_mode == TX_MODE_SELECT &&
       m->mbmi.sb_type >= BLOCK_SIZE_SB8X8) {
@@ -521,8 +524,11 @@ static void read_mb_modes_mv(VP9D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
 
   mbmi->mb_skip_coeff = vp9_segfeature_active(xd, mbmi->segment_id,
                                               SEG_LVL_SKIP);
-  if (!mbmi->mb_skip_coeff)
+  if (!mbmi->mb_skip_coeff) {
     mbmi->mb_skip_coeff = vp9_read(r, vp9_get_pred_prob(cm, xd, PRED_MBSKIP));
+    cm->fc.mbskip_count[vp9_get_pred_context(cm, xd, PRED_MBSKIP)]
+                       [mbmi->mb_skip_coeff]++;
+  }
 
   // Read the reference frame
   if (!vp9_segfeature_active(xd, mbmi->segment_id, SEG_LVL_REF_FRAME)) {
@@ -788,9 +794,14 @@ void vp9_decode_mode_mvs_init(VP9D_COMP* const pbi, vp9_reader *r) {
   int k;
 
   // TODO(jkoleszar): does this clear more than MBSKIP_CONTEXTS? Maybe remove.
-  vpx_memset(cm->mbskip_pred_probs, 0, sizeof(cm->mbskip_pred_probs));
-  for (k = 0; k < MBSKIP_CONTEXTS; ++k)
-    cm->mbskip_pred_probs[k] = vp9_read_prob(r);
+  // vpx_memset(cm->fc.mbskip_probs, 0, sizeof(cm->fc.mbskip_probs));
+  for (k = 0; k < MBSKIP_CONTEXTS; ++k) {
+    if (vp9_read(r, VP9_DEF_UPDATE_PROB)) {
+      cm->fc.mbskip_probs[k] =
+          vp9_read_prob_diff_update(r, cm->fc.mbskip_probs[k]);
+    }
+    // cm->fc.mbskip_probs[k] = vp9_read_prob(r);
+  }
 
   mb_mode_mv_init(pbi, r);
 }

@@ -368,7 +368,7 @@ vp9_prob vp9_get_pred_prob(const VP9_COMMON *const cm,
     case PRED_SEG_ID:
       return cm->segment_pred_probs[pred_context];
     case PRED_MBSKIP:
-      return cm->mbskip_pred_probs[pred_context];
+      return cm->fc.mbskip_probs[pred_context];
     case PRED_INTRA_INTER:
       return cm->fc.intra_inter_prob[pred_context];
     case PRED_COMP_INTER_INTER:

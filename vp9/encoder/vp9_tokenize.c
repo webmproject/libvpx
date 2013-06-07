@@ -294,7 +294,7 @@ void vp9_tokenize_sb(VP9_COMP *cpi,
 
   if (mbmi->mb_skip_coeff) {
     if (!dry_run)
-      cpi->skip_true_count[mb_skip_context] += skip_inc;
+      cm->fc.mbskip_count[mb_skip_context][1] += skip_inc;
     vp9_reset_sb_tokens_context(xd, bsize);
     if (dry_run)
       *t = t_backup;
@@ -302,7 +302,7 @@ void vp9_tokenize_sb(VP9_COMP *cpi,
   }
 
   if (!dry_run)
-    cpi->skip_false_count[mb_skip_context] += skip_inc;
+    cm->fc.mbskip_count[mb_skip_context][0] += skip_inc;
 
   foreach_transformed_block(xd, bsize, tokenize_b, &arg);
 

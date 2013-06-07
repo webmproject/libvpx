@@ -96,11 +96,6 @@ FILE *kf_list;
 FILE *keyfile;
 #endif
 
-#if 0
-extern int skip_true_count;
-extern int skip_false_count;
-#endif
-
 
 #ifdef ENTROPY_STATS
 extern int intra_mode_stats[VP9_INTRA_MODES]
@@ -122,8 +117,6 @@ extern unsigned __int64 Sectionbits[500];
 #endif
 
 extern void vp9_init_quantizer(VP9_COMP *cpi);
-
-static int base_skip_false_prob[QINDEX_RANGE][3];
 
 // Tables relating active max Q to active min Q
 static int kf_low_motion_minq[QINDEX_RANGE];
@@ -201,49 +194,6 @@ static void set_mvcost(MACROBLOCK *mb) {
     mb->mvsadcost = mb->nmvsadcost;
   }
 }
-static void init_base_skip_probs(void) {
-  int i;
-
-  for (i = 0; i < QINDEX_RANGE; i++) {
-    const double q = vp9_convert_qindex_to_q(i);
-
-    // Exponential decay caluclation of baseline skip prob with clamping
-    // Based on crude best fit of old table.
-    const int t = (int)(564.25 * pow(2.71828, (-0.012 * q)));
-
-    base_skip_false_prob[i][1] = clip_prob(t);
-    base_skip_false_prob[i][2] = clip_prob(t * 3 / 4);
-    base_skip_false_prob[i][0] = clip_prob(t * 5 / 4);
-  }
-}
-
-static void update_base_skip_probs(VP9_COMP *cpi) {
-  VP9_COMMON *cm = &cpi->common;
-  int k;
-
-  if (cm->frame_type != KEY_FRAME) {
-    vp9_update_skip_probs(cpi);
-
-    if (cpi->refresh_alt_ref_frame) {
-      for (k = 0; k < MBSKIP_CONTEXTS; ++k)
-        cpi->last_skip_false_probs[2][k] = cm->mbskip_pred_probs[k];
-      cpi->last_skip_probs_q[2] = cm->base_qindex;
-    } else if (cpi->refresh_golden_frame) {
-      for (k = 0; k < MBSKIP_CONTEXTS; ++k)
-        cpi->last_skip_false_probs[1][k] = cm->mbskip_pred_probs[k];
-      cpi->last_skip_probs_q[1] = cm->base_qindex;
-    } else {
-      for (k = 0; k < MBSKIP_CONTEXTS; ++k)
-        cpi->last_skip_false_probs[0][k] = cm->mbskip_pred_probs[k];
-      cpi->last_skip_probs_q[0] = cm->base_qindex;
-
-      // update the baseline table for the current q
-      for (k = 0; k < MBSKIP_CONTEXTS; ++k)
-        cpi->base_skip_false_prob[cm->base_qindex][k] =
-            cm->mbskip_pred_probs[k];
-    }
-  }
-}
 
 void vp9_initialize_enc() {
   static int init_done = 0;
@@ -254,7 +204,7 @@ void vp9_initialize_enc() {
     vp9_init_quant_tables();
     vp9_init_me_luts();
     init_minq_luts();
-    init_base_skip_probs();
+    // init_base_skip_probs();
     init_done = 1;
   }
 }
@@ -1288,7 +1238,6 @@ VP9_PTR vp9_create_compressor(VP9_CONFIG *oxcf) {
 
   init_config((VP9_PTR)cpi, oxcf);
 
-  memcpy(cpi->base_skip_false_prob, base_skip_false_prob, sizeof(base_skip_false_prob));
   cpi->common.current_video_frame   = 0;
   cpi->kf_overspend_bits            = 0;
   cpi->kf_bitrate_adjustment        = 0;
@@ -2741,44 +2690,6 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
     vp9_set_quantizer(cpi, q);
 
     if (loop_count == 0) {
-      int k;
-
-      // setup skip prob for costing in mode/mv decision
-      for (k = 0; k < MBSKIP_CONTEXTS; k++)
-        cm->mbskip_pred_probs[k] = cpi->base_skip_false_prob[q][k];
-
-      if (cm->frame_type != KEY_FRAME) {
-        if (cpi->refresh_alt_ref_frame) {
-          for (k = 0; k < MBSKIP_CONTEXTS; k++) {
-            if (cpi->last_skip_false_probs[2][k] != 0)
-              cm->mbskip_pred_probs[k] = cpi->last_skip_false_probs[2][k];
-          }
-        } else if (cpi->refresh_golden_frame) {
-          for (k = 0; k < MBSKIP_CONTEXTS; k++) {
-            if (cpi->last_skip_false_probs[1][k] != 0)
-              cm->mbskip_pred_probs[k] = cpi->last_skip_false_probs[1][k];
-          }
-        } else {
-          int k;
-          for (k = 0; k < MBSKIP_CONTEXTS; k++) {
-            if (cpi->last_skip_false_probs[0][k] != 0)
-              cm->mbskip_pred_probs[k] = cpi->last_skip_false_probs[0][k];
-          }
-        }
-
-        // as this is for cost estimate, let's make sure it does not
-        // get extreme either way
-        {
-          int k;
-          for (k = 0; k < MBSKIP_CONTEXTS; ++k) {
-            cm->mbskip_pred_probs[k] = clamp(cm->mbskip_pred_probs[k],
-                                             5, 250);
-
-            if (cpi->is_src_frame_alt_ref)
-              cm->mbskip_pred_probs[k] = 1;
-          }
-        }
-      }
 
       // Set up entropy depending on frame type.
       if (cm->frame_type == KEY_FRAME) {
@@ -2804,7 +2715,7 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
 
     // Update the skip mb flag probabilities based on the distribution
     // seen in the last encoder iteration.
-    update_base_skip_probs(cpi);
+    // update_base_skip_probs(cpi);
 
     vp9_clear_system_state();  // __asm emms;
 
@@ -3170,7 +3081,7 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
 
   // Update the skip mb flag probabilities based on the distribution seen
   // in this frame.
-  update_base_skip_probs(cpi);
+  // update_base_skip_probs(cpi);
 
 #if 0 && CONFIG_INTERNAL_STATS
   {

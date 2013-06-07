@@ -334,13 +334,18 @@ static void update_mbintra_mode_probs(VP9_COMP* const cpi,
                 (unsigned int *)cpi->y_mode_count[j]);
 }
 
-void vp9_update_skip_probs(VP9_COMP *cpi) {
+void vp9_update_skip_probs(VP9_COMP *cpi, vp9_writer *bc) {
   VP9_COMMON *const pc = &cpi->common;
   int k;
 
-  for (k = 0; k < MBSKIP_CONTEXTS; ++k)
-    pc->mbskip_pred_probs[k] = get_binary_prob(cpi->skip_false_count[k],
-                                               cpi->skip_true_count[k]);
+  for (k = 0; k < MBSKIP_CONTEXTS; ++k) {
+    vp9_cond_prob_diff_update(bc, &pc->fc.mbskip_probs[k],
+                              VP9_DEF_UPDATE_PROB, pc->fc.mbskip_count[k]);
+    /*
+    pc->fc.mbskip_probs[k] = get_binary_prob(pc->fc.mbskip_count[k][0],
+                                                  pc->fc.mbskip_count[k][1]);
+                                                  */
+  }
 }
 
 static void write_intra_mode(vp9_writer *bc, int m, const vp9_prob *p) {
@@ -1471,6 +1476,7 @@ void vp9_pack_bitstream(VP9_COMP *cpi, uint8_t *dest, unsigned long *size) {
   vp9_copy(pc->fc.pre_comp_ref_prob, pc->fc.comp_ref_prob);
   vp9_copy(pc->fc.pre_single_ref_prob, pc->fc.single_ref_prob);
   vp9_copy(pc->fc.pre_tx_probs, pc->fc.tx_probs);
+  vp9_copy(pc->fc.pre_mbskip_probs, pc->fc.mbskip_probs);
 
   if (xd->lossless) {
     pc->txfm_mode = ONLY_4X4;
@@ -1484,9 +1490,7 @@ void vp9_pack_bitstream(VP9_COMP *cpi, uint8_t *dest, unsigned long *size) {
   active_section = 2;
 #endif
 
-  vp9_update_skip_probs(cpi);
-  for (i = 0; i < MBSKIP_CONTEXTS; ++i)
-    vp9_write_prob(&header_bc, pc->mbskip_pred_probs[i]);
+  vp9_update_skip_probs(cpi, &header_bc);
 
   if (pc->frame_type != KEY_FRAME) {
 #ifdef ENTROPY_STATS

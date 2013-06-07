@@ -197,6 +197,10 @@ const vp9_prob vp9_default_tx_probs[TX_SIZE_PROBS] = {
 };
 #endif
 
+const vp9_prob vp9_default_mbskip_probs[MBSKIP_CONTEXTS] = {
+  192, 128, 64
+};
+
 void vp9_init_mbmode_probs(VP9_COMMON *x) {
   vpx_memcpy(x->fc.uv_mode_prob, default_if_uv_probs,
              sizeof(default_if_uv_probs));
@@ -221,6 +225,8 @@ void vp9_init_mbmode_probs(VP9_COMMON *x) {
              sizeof(default_single_ref_p));
   vpx_memcpy(x->fc.tx_probs, vp9_default_tx_probs,
              sizeof(vp9_default_tx_probs));
+  vpx_memcpy(x->fc.mbskip_probs, vp9_default_mbskip_probs,
+             sizeof(vp9_default_mbskip_probs));
 }
 
 #if VP9_SWITCHABLE_FILTERS == 3
@@ -321,7 +327,7 @@ void vp9_adapt_mode_context(VP9_COMMON *pc) {
 
 #define MODE_COUNT_SAT 20
 #define MODE_MAX_UPDATE_FACTOR 144
-static int update_mode_ct(int pre_prob, int prob,
+static int update_mode_ct(vp9_prob pre_prob, vp9_prob prob,
                           unsigned int branch_ct[2]) {
   int factor, count = branch_ct[0] + branch_ct[1];
   count = count > MODE_COUNT_SAT ? MODE_COUNT_SAT : count;
@@ -344,7 +350,7 @@ static void update_mode_probs(int n_modes,
     dst_probs[t] = update_mode_ct(pre_probs[t], probs[t], branch_ct[t]);
 }
 
-static int update_mode_ct2(int pre_prob, unsigned int branch_ct[2]) {
+static int update_mode_ct2(vp9_prob pre_prob, unsigned int branch_ct[2]) {
   return update_mode_ct(pre_prob, get_binary_prob(branch_ct[0],
                                                   branch_ct[1]), branch_ct);
 }
@@ -438,6 +444,9 @@ void vp9_adapt_mode_probs(VP9_COMMON *cm) {
       cm->fc.tx_probs[i] = weighted_prob(cm->fc.pre_tx_probs[i], prob, factor);
     }
   }
+  for (i = 0; i < MBSKIP_CONTEXTS; ++i)
+    fc->mbskip_probs[i] = update_mode_ct2(fc->pre_mbskip_probs[i],
+                                          fc->mbskip_count[i]);
 }
 
 static void set_default_lf_deltas(MACROBLOCKD *xd) {

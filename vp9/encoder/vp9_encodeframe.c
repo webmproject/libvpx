@@ -1464,6 +1464,7 @@ static void init_encode_frame_mb_context(VP9_COMP *cpi) {
   vp9_zero(cm->fc.tx_count_32x32p);
   vp9_zero(cm->fc.tx_count_16x16p);
   vp9_zero(cm->fc.tx_count_8x8p);
+  vp9_zero(cm->fc.mbskip_count);
 
   // Note: this memset assumes above_context[0], [1] and [2]
   // are allocated as part of the same buffer.
@@ -1517,9 +1518,6 @@ static void encode_frame_internal(VP9_COMP *cpi) {
 
   // Reset frame count of inter 0,0 motion vector usage.
   cpi->inter_zz_count = 0;
-
-  cpi->skip_true_count[0] = cpi->skip_true_count[1] = cpi->skip_true_count[2] = 0;
-  cpi->skip_false_count[0] = cpi->skip_false_count[1] = cpi->skip_false_count[2] = 0;
 
   vp9_zero(cm->fc.switchable_interp_count);
   vp9_zero(cpi->best_switchable_interp_count);
@@ -2041,7 +2039,7 @@ static void encode_superblock(VP9_COMP *cpi, TOKENEXTRA **t,
 
     mbmi->mb_skip_coeff = 1;
     if (output_enabled)
-      cpi->skip_true_count[mb_skip_context]++;
+      cm->fc.mbskip_count[mb_skip_context][1]++;
     vp9_reset_sb_tokens_context(xd,
                  (bsize < BLOCK_SIZE_SB8X8) ? BLOCK_SIZE_SB8X8 : bsize);
   }
