@@ -30,7 +30,7 @@
 #define MBSKIP_CONTEXTS 3
 
 #define MAX_REF_LF_DELTAS       4
-#define MAX_MODE_LF_DELTAS      4
+#define MAX_MODE_LF_DELTAS      2
 
 /* Segment Feature Masks */
 #define SEGMENT_DELTADATA   0
@@ -339,9 +339,9 @@ typedef struct macroblockd {
   signed char last_ref_lf_deltas[MAX_REF_LF_DELTAS];
   /* 0 = Intra, Last, GF, ARF */
   signed char ref_lf_deltas[MAX_REF_LF_DELTAS];
-  /* 0 = I4X4_PRED, ZERO_MV, MV, SPLIT */
+  /* 0 = ZERO_MV, MV */
   signed char last_mode_lf_deltas[MAX_MODE_LF_DELTAS];
-  /* 0 = I4X4_PRED, ZERO_MV, MV, SPLIT */
+  /* 0 = ZERO_MV, MV */
   signed char mode_lf_deltas[MAX_MODE_LF_DELTAS];
 
   /* Distance of MB away from frame edges */

@@ -17,20 +17,20 @@
 #include "vp9/common/vp9_seg_common.h"
 
 static void lf_init_lut(loop_filter_info_n *lfi) {
-  lfi->mode_lf_lut[DC_PRED] = 1;
-  lfi->mode_lf_lut[D45_PRED] = 1;
-  lfi->mode_lf_lut[D135_PRED] = 1;
-  lfi->mode_lf_lut[D117_PRED] = 1;
-  lfi->mode_lf_lut[D153_PRED] = 1;
-  lfi->mode_lf_lut[D27_PRED] = 1;
-  lfi->mode_lf_lut[D63_PRED] = 1;
-  lfi->mode_lf_lut[V_PRED] = 1;
-  lfi->mode_lf_lut[H_PRED] = 1;
-  lfi->mode_lf_lut[TM_PRED] = 1;
-  lfi->mode_lf_lut[ZEROMV]  = 1;
-  lfi->mode_lf_lut[NEARESTMV] = 2;
-  lfi->mode_lf_lut[NEARMV] = 2;
-  lfi->mode_lf_lut[NEWMV] = 2;
+  lfi->mode_lf_lut[DC_PRED] = 0;
+  lfi->mode_lf_lut[D45_PRED] = 0;
+  lfi->mode_lf_lut[D135_PRED] = 0;
+  lfi->mode_lf_lut[D117_PRED] = 0;
+  lfi->mode_lf_lut[D153_PRED] = 0;
+  lfi->mode_lf_lut[D27_PRED] = 0;
+  lfi->mode_lf_lut[D63_PRED] = 0;
+  lfi->mode_lf_lut[V_PRED] = 0;
+  lfi->mode_lf_lut[H_PRED] = 0;
+  lfi->mode_lf_lut[TM_PRED] = 0;
+  lfi->mode_lf_lut[ZEROMV]  = 0;
+  lfi->mode_lf_lut[NEARESTMV] = 1;
+  lfi->mode_lf_lut[NEARMV] = 1;
+  lfi->mode_lf_lut[NEWMV] = 1;
 }
 
 void vp9_loop_filter_update_sharpness(loop_filter_info_n *lfi,
@@ -132,13 +132,7 @@ void vp9_loop_filter_frame_init(VP9_COMMON *cm,
     /* Apply delta for reference frame */
     lvl_ref += xd->ref_lf_deltas[ref] << n_shift;
 
-    /* Apply delta for Intra modes */
-    mode = 0; /* I4X4_PRED */
-    /* Only the split mode I4X4_PRED has a further special case */
-    lvl_mode = lvl_ref + (xd->mode_lf_deltas[mode] << n_shift);
-    lfi->lvl[seg][ref][mode] = clamp(lvl_mode, 0, 63);
-
-    mode = 1; /* all the rest of Intra modes */
+    mode = 0; /* all the rest of Intra modes */
     lvl_mode = lvl_ref;
     lfi->lvl[seg][ref][mode] = clamp(lvl_mode, 0, 63);
 
@@ -150,7 +144,7 @@ void vp9_loop_filter_frame_init(VP9_COMMON *cm,
       lvl_ref += xd->ref_lf_deltas[ref] << n_shift;
 
       /* Apply delta for Inter modes */
-      for (mode = 1; mode < 4; mode++) {
+      for (mode = 0; mode < MAX_MODE_LF_DELTAS; mode++) {
         lvl_mode = lvl_ref + (xd->mode_lf_deltas[mode] << n_shift);
         lfi->lvl[seg][ref][mode] = clamp(lvl_mode, 0, 63);
       }

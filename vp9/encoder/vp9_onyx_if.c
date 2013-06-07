@@ -575,10 +575,8 @@ static void set_default_lf_deltas(VP9_COMP *cpi) {
   cpi->mb.e_mbd.ref_lf_deltas[GOLDEN_FRAME] = -2;
   cpi->mb.e_mbd.ref_lf_deltas[ALTREF_FRAME] = -2;
 
-  cpi->mb.e_mbd.mode_lf_deltas[0] = 4;               // I4X4_PRED
-  cpi->mb.e_mbd.mode_lf_deltas[1] = -2;              // Zero
-  cpi->mb.e_mbd.mode_lf_deltas[2] = 2;               // New mv
-  cpi->mb.e_mbd.mode_lf_deltas[3] = 4;               // Split mv
+  cpi->mb.e_mbd.mode_lf_deltas[0] = 0;              // Zero
+  cpi->mb.e_mbd.mode_lf_deltas[1] = 0;               // New mv
 }
 
 static void set_rd_speed_thresholds(VP9_COMP *cpi, int mode, int speed) {
