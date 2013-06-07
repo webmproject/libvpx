@@ -68,8 +68,8 @@ void vp9_free_frame_buffers(VP9_COMMON *oci) {
 }
 
 static void set_mb_mi(VP9_COMMON *cm, int aligned_width, int aligned_height) {
-  cm->mb_cols = (aligned_width + 8) >> 4;
-  cm->mb_rows = (aligned_height + 8) >> 4;
+  cm->mb_cols = aligned_width >> 4;
+  cm->mb_rows = aligned_height >> 4;
   cm->MBs = cm->mb_rows * cm->mb_cols;
 
   cm->mi_cols = aligned_width >> LOG2_MI_SIZE;
@@ -95,8 +95,8 @@ int vp9_alloc_frame_buffers(VP9_COMMON *oci, int width, int height) {
   int i, mi_cols;
 
   // Our internal buffers are always multiples of 16
-  const int aligned_width = multiple8(width);
-  const int aligned_height = multiple8(height);
+  const int aligned_width = multiple16(width);
+  const int aligned_height = multiple16(height);
   const int ss_x = oci->subsampling_x;
   const int ss_y = oci->subsampling_y;
 
@@ -222,8 +222,8 @@ void vp9_initialize_common() {
 }
 
 void vp9_update_frame_size(VP9_COMMON *cm) {
-  const int aligned_width = multiple8(cm->width);
-  const int aligned_height = multiple8(cm->height);
+  const int aligned_width = multiple16(cm->width);
+  const int aligned_height = multiple16(cm->height);
 
   set_mb_mi(cm, aligned_width, aligned_height);
   setup_mi(cm);

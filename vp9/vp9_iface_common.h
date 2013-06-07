@@ -29,7 +29,7 @@ static void yuvconfig2image(vpx_image_t *img, const YV12_BUFFER_CONFIG  *yv12,
     img->fmt = VPX_IMG_FMT_I420;
   }
   img->w = yv12->y_stride;
-  img->h = multiple8(yv12->y_height + 2 * VP9BORDERINPIXELS);
+  img->h = multiple16(yv12->y_height + 2 * VP9BORDERINPIXELS);
   img->d_w = yv12->y_crop_width;
   img->d_h = yv12->y_crop_height;
   img->x_chroma_shift = yv12->uv_width < yv12->y_width;
