@@ -68,6 +68,9 @@ TEST(VP9, TestBitIO) {
 
         vp9_stop_encode(&bw);
 
+        // First bit should be zero
+        GTEST_ASSERT_EQ(bw_buffer[0] & 0x80, 0);
+
         vp9_reader br;
         vp9_reader_init(&br, bw_buffer, buffer_size);
         bit_rnd.Reset(random_seed);
