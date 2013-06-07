@@ -525,9 +525,15 @@ static void read_mb_modes_mv(VP9D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
     mbmi->mb_skip_coeff = vp9_read(r, vp9_get_pred_prob(cm, xd, PRED_MBSKIP));
 
   // Read the reference frame
-  mbmi->ref_frame[0] = vp9_read(r, vp9_get_pred_prob(cm, xd, PRED_INTRA_INTER));
-  cm->fc.intra_inter_count[vp9_get_pred_context(cm, xd, PRED_INTRA_INTER)]
-                          [mbmi->ref_frame[0] != INTRA_FRAME]++;
+  if (!vp9_segfeature_active(xd, mbmi->segment_id, SEG_LVL_REF_FRAME)) {
+    mbmi->ref_frame[0] =
+        vp9_read(r, vp9_get_pred_prob(cm, xd, PRED_INTRA_INTER));
+    cm->fc.intra_inter_count[vp9_get_pred_context(cm, xd, PRED_INTRA_INTER)]
+                            [mbmi->ref_frame[0] != INTRA_FRAME]++;
+  } else {
+    mbmi->ref_frame[0] =
+        vp9_get_segdata(xd, mbmi->segment_id, SEG_LVL_REF_FRAME) != INTRA_FRAME;
+  }
 
   if (cm->txfm_mode == TX_MODE_SELECT &&
       (mbmi->mb_skip_coeff == 0 || mbmi->ref_frame[0] == INTRA_FRAME) &&

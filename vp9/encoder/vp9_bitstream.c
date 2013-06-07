@@ -561,7 +561,9 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, MODE_INFO *m,
               vp9_get_pred_prob(pc, xd, PRED_MBSKIP));
   }
 
-  vp9_write(bc, rf != INTRA_FRAME, vp9_get_pred_prob(pc, xd, PRED_INTRA_INTER));
+  if (!vp9_segfeature_active(xd, segment_id, SEG_LVL_REF_FRAME))
+    vp9_write(bc, rf != INTRA_FRAME,
+              vp9_get_pred_prob(pc, xd, PRED_INTRA_INTER));
 
   if (mi->sb_type >= BLOCK_SIZE_SB8X8 && pc->txfm_mode == TX_MODE_SELECT &&
       !(rf != INTRA_FRAME &&

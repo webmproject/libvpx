@@ -631,15 +631,17 @@ static void update_stats(VP9_COMP *cpi, int mi_row, int mi_col) {
   if (cm->frame_type != KEY_FRAME) {
     int segment_id, seg_ref_active;
 
-    cpi->intra_inter_count[vp9_get_pred_context(cm, xd, PRED_INTRA_INTER)]
-                          [mbmi->ref_frame[0] > INTRA_FRAME]++;
+    segment_id = mbmi->segment_id;
+    seg_ref_active = vp9_segfeature_active(xd, segment_id,
+                                           SEG_LVL_REF_FRAME);
+
+    if (!seg_ref_active)
+      cpi->intra_inter_count[vp9_get_pred_context(cm, xd, PRED_INTRA_INTER)]
+                            [mbmi->ref_frame[0] > INTRA_FRAME]++;
 
     // If the segment reference feature is enabled we have only a single
     // reference frame allowed for the segment so exclude it from
     // the reference frame counts used to work out probabilities.
-    segment_id = mbmi->segment_id;
-    seg_ref_active = vp9_segfeature_active(xd, segment_id,
-                                           SEG_LVL_REF_FRAME);
     if ((mbmi->ref_frame[0] > INTRA_FRAME) && !seg_ref_active) {
       if (cm->comp_pred_mode == HYBRID_PREDICTION)
         cpi->comp_inter_count[vp9_get_pred_context(cm, xd,
