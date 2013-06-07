@@ -47,6 +47,7 @@ void vp9_start_encode(vp9_writer *br, uint8_t *source) {
   br->count    = -24;
   br->buffer   = source;
   br->pos      = 0;
+  vp9_write_bit(br, 0);
 }
 
 void vp9_stop_encode(vp9_writer *br) {

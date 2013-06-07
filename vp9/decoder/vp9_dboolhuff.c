@@ -14,6 +14,8 @@
 #include "vp9/decoder/vp9_dboolhuff.h"
 
 int vp9_reader_init(vp9_reader *r, const uint8_t *buffer, size_t size) {
+  int marker_bit;
+
   r->buffer_end = buffer + size;
   r->buffer = buffer;
   r->value = 0;
@@ -24,7 +26,8 @@ int vp9_reader_init(vp9_reader *r, const uint8_t *buffer, size_t size) {
     return 1;
 
   vp9_reader_fill(r);
-  return 0;
+  marker_bit = vp9_read_bit(r);
+  return marker_bit != 0;
 }
 
 void vp9_reader_fill(vp9_reader *r) {
