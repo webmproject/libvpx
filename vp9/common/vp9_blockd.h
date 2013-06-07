@@ -327,7 +327,7 @@ typedef struct macroblockd {
   vp9_prob mb_segment_tree_probs[MB_SEG_TREE_PROBS];
 
   // Segment features
-  signed char segment_feature_data[MAX_MB_SEGMENTS][SEG_LVL_MAX];
+  int16_t segment_feature_data[MAX_MB_SEGMENTS][SEG_LVL_MAX];
   unsigned int segment_feature_mask[MAX_MB_SEGMENTS];
 
   /* mode_based Loop filter adjustment */
