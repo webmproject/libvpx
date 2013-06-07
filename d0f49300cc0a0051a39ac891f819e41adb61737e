@@ -19,6 +19,23 @@
     },
     {
       "key": {
+        "uuid": "AAAAZ3//3tM\u003d",
+        "filename": "vp9/encoder/vp9_bitstream.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1329,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-06-07T08:35:44Z",
+      "side": 1,
+      "message": "I think we want the display w/h on keyframes, and the coded w/h on all farmes.",
+      "revId": "d0f49300cc0a0051a39ac891f819e41adb61737e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAZ3//3yc\u003d",
         "filename": "vp9/encoder/vp9_bitstream.c",
         "patchSetId": 2
