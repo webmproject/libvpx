@@ -11,6 +11,10 @@
 #ifndef VP9_READ_BIT_BUFFER_
 #define VP9_READ_BIT_BUFFER_
 
+#include <limits.h>
+
+#include "vpx/vpx_integer.h"
+
 typedef void (*vp9_rb_error_handler)(void *data, int bit_offset);
 
 struct vp9_read_bit_buffer {
