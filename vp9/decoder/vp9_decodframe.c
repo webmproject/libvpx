@@ -907,6 +907,11 @@ static void error_handler(void *data, int bit_offset) {
   vpx_internal_error(&cm->error, VPX_CODEC_CORRUPT_FRAME, "Truncated packet");
 }
 
+#define RESERVED \
+  if (vp9_rb_read_bit(rb)) \
+      vpx_internal_error(&cm->error, VPX_CODEC_UNSUP_BITSTREAM, \
+                         "Reserved bit must be unset")
+
 size_t read_uncompressed_header(VP9D_COMP *pbi,
                                 struct vp9_read_bit_buffer *rb) {
   VP9_COMMON *const cm = &pbi->common;
@@ -914,12 +919,17 @@ size_t read_uncompressed_header(VP9D_COMP *pbi,
 
   int scaling_active, i;
   cm->last_frame_type = cm->frame_type;
+  if (vp9_rb_read_literal(rb, 2) != 0x2)
+      vpx_internal_error(&cm->error, VPX_CODEC_UNSUP_BITSTREAM,
+                         "Invalid frame marker");
+
+  cm->version = vp9_rb_read_bit(rb);
+  RESERVED;
+
   cm->frame_type = (FRAME_TYPE) vp9_rb_read_bit(rb);
-  cm->version = vp9_rb_read_literal(rb, 3);
   cm->show_frame = vp9_rb_read_bit(rb);
   scaling_active = vp9_rb_read_bit(rb);
-  cm->subsampling_x = vp9_rb_read_bit(rb);
-  cm->subsampling_y = vp9_rb_read_bit(rb);
+  RESERVED;
 
   if (cm->frame_type == KEY_FRAME) {
     if (vp9_rb_read_literal(rb, 8) != SYNC_CODE_0 ||
@@ -927,6 +937,14 @@ size_t read_uncompressed_header(VP9D_COMP *pbi,
         vp9_rb_read_literal(rb, 8) != SYNC_CODE_2) {
       vpx_internal_error(&cm->error, VPX_CODEC_UNSUP_BITSTREAM,
                          "Invalid frame sync code");
+    }
+    vp9_rb_read_literal(rb, 3);  // colorspace
+    if (cm->version == 1) {
+      cm->subsampling_x = vp9_rb_read_bit(rb);
+      cm->subsampling_y = vp9_rb_read_bit(rb);
+      vp9_rb_read_bit(rb);  // has extra plane
+    } else {
+      cm->subsampling_y = cm->subsampling_x = 1;
     }
   }
 
