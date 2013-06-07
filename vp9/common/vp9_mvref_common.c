@@ -11,27 +11,34 @@
 #include "vp9/common/vp9_mvref_common.h"
 
 #define MVREF_NEIGHBOURS 8
-
-static int b_mv_ref_search[MVREF_NEIGHBOURS][2] = {
-  {0, -1}, {-1, 0}, {-1, -1}, {0, -2},
-  {-2, 0}, {-1, -2}, {-2, -1}, {-2, -2}
+static int mv_ref_blocks[BLOCK_SIZE_TYPES][MVREF_NEIGHBOURS][2] = {
+  // SB4X4
+  {{0, -1}, {-1, 0}, {-1, -1}, {0, -2}, {-2, 0}, {-1, -2}, {-2, -1}, {-2, -2}},
+  // SB4X8
+  {{0, -1}, {-1, 0}, {-1, -1}, {0, -2}, {-2, 0}, {-1, -2}, {-2, -1}, {-2, -2}},
+  // SB8X4
+  {{0, -1}, {-1, 0}, {-1, -1}, {0, -2}, {-2, 0}, {-1, -2}, {-2, -1}, {-2, -2}},
+  // SB8X8
+  {{0, -1}, {-1, 0}, {-1, -1}, {0, -2}, {-2, 0}, {-1, -2}, {-2, -1}, {-2, -2}},
+  // SB8X16
+  {{-1, 0}, {0, -1}, {-1, 1}, {-1, -1}, {-2, 0}, {0, -2}, {-1, -2}, {-2, -1}},
+  // SB16X8
+  {{0, -1}, {-1, 0}, {1, -1}, {-1, -1}, {0, -2}, {-2, 0}, {-2, -1}, {-1, -2}},
+  // SB16X16
+  {{0, -1}, {-1, 0}, {1, -1}, {-1, 1}, {-1, -1}, {0, -3}, {-3, 0}, {-3, -3}},
+  // SB16X32
+  {{-1, 0}, {0, -1}, {-1, 2}, {-1, -1}, {1, -1}, {-3, 0}, {0, -3}, {-3, -3}},
+  // SB32X16
+  {{0, -1}, {-1, 0}, {2, -1}, {-1, -1}, {-1, 1}, {0, -3}, {-3, 0}, {-3, -3}},
+  // SB32X32
+  {{1, -1}, {-1, 1}, {2, -1}, {-1, 2}, {-1, -1}, {0, -3}, {-3, 0}, {-3, -3}},
+  // SB32X64
+  {{-1, 0}, {0, -1}, {-1, 4}, {2, -1}, {-1, -1}, {-3, 0}, {0, -3}, {-1, 2}},
+  // SB64X32
+  {{0, -1}, {-1, 0}, {4, -1}, {-1, 2}, {-1, -1}, {0, -3}, {-3, 0}, {2, -1}},
+  // SB64X64
+  {{3, -1}, {-1, 3}, {4, -1}, {-1, 4}, {-1, -1}, {0, -1}, {-1, 0}, {6, -1}}
 };
-
-static int mb_mv_ref_search[MVREF_NEIGHBOURS][2] = {
-    {0, -1}, {-1, 0}, {-1, -1}, {0, -3},
-    {-3, 0}, {-1, -3}, {-3, -1}, {-3, -3}
-};
-
-static int sb_mv_ref_search[MVREF_NEIGHBOURS][2] = {
-    {0, -1}, {-1, 0}, {2, -1}, {-1, 2},
-    {-1, -1}, {0, -3}, {-3, 0}, {-1, -3}
-};
-
-static int sb64_mv_ref_search[MVREF_NEIGHBOURS][2] = {
-    {0, -1}, {-1, 0}, {2, -1}, {-1,  2},
-    {4, -1}, {-1, 4}, {6, -1}, {-1, -1}
-};
-
 // clamp_mv_ref
 #define MV_BORDER (16 << 3) // Allow 16 pels in 1/8th pel units
 
@@ -42,7 +49,7 @@ static void clamp_mv_ref(const MACROBLOCKD *xd, int_mv *mv) {
                                        xd->mb_to_bottom_edge + MV_BORDER);
 }
 
-// Gets a candidate refenence motion vector from the given mode info
+// Gets a candidate reference motion vector from the given mode info
 // structure if one exists that matches the given reference frame.
 static int get_matching_candidate(const MODE_INFO *candidate_mi,
                                   MV_REFERENCE_FRAME ref_frame,
@@ -64,7 +71,7 @@ static int get_matching_candidate(const MODE_INFO *candidate_mi,
   return 1;
 }
 
-// Gets candidate refenence motion vector(s) from the given mode info
+// Gets candidate reference motion vector(s) from the given mode info
 // structure if they exists and do NOT match the given reference frame.
 static void get_non_matching_candidates(const MODE_INFO *candidate_mi,
                                         MV_REFERENCE_FRAME ref_frame,
@@ -171,13 +178,13 @@ void vp9_find_mv_refs_idx(VP9_COMMON *cm, MACROBLOCKD *xd, MODE_INFO *here,
       pixels_square = pixels_high;
 
     if (pixels_square == 64) {
-      mv_ref_search = sb64_mv_ref_search;
+      mv_ref_search = mv_ref_blocks[BLOCK_SIZE_SB64X64];
     } else if (pixels_square == 32) {
-      mv_ref_search = sb_mv_ref_search;
+      mv_ref_search = mv_ref_blocks[BLOCK_SIZE_SB32X32];
     } else if (pixels_square == 16) {
-      mv_ref_search = mb_mv_ref_search;
+      mv_ref_search = mv_ref_blocks[BLOCK_SIZE_MB16X16];
     } else {
-      mv_ref_search = b_mv_ref_search;
+      mv_ref_search = mv_ref_blocks[BLOCK_SIZE_SB8X8];
       if (mbmi->sb_type < BLOCK_SIZE_SB8X8) {
         x_idx = block_idx & 1;
         y_idx = block_idx >> 1;
@@ -185,26 +192,17 @@ void vp9_find_mv_refs_idx(VP9_COMMON *cm, MACROBLOCKD *xd, MODE_INFO *here,
     }
   }
   else {
-    if (mbmi->sb_type == BLOCK_SIZE_SB64X64) {
-      mv_ref_search = sb64_mv_ref_search;
-    } else if (mbmi->sb_type >= BLOCK_SIZE_SB32X32) {
-      mv_ref_search = sb_mv_ref_search;
-    } else if (mbmi->sb_type >= BLOCK_SIZE_MB16X16) {
-      mv_ref_search = mb_mv_ref_search;
-    } else {
-      mv_ref_search = b_mv_ref_search;
-      if (mbmi->sb_type < BLOCK_SIZE_SB8X8) {
-        x_idx = block_idx & 1;
-        y_idx = block_idx >> 1;
+  mv_ref_search = mv_ref_blocks[mbmi->sb_type];
+    if (mbmi->sb_type < BLOCK_SIZE_SB8X8) {
+      x_idx = block_idx & 1;
+      y_idx = block_idx >> 1;
       }
-    }
   }
 
   // We first scan for candidate vectors that match the current reference frame
   // Look at nearest neigbours
   for (i = 0; i < 2; ++i) {
     const int mi_search_col = mi_col + mv_ref_search[i][0];
-
     if ((mi_search_col >= cm->cur_tile_mi_col_start) &&
         (mi_search_col < cm->cur_tile_mi_col_end) &&
         ((mv_ref_search[i][1] << 6) >= xd->mb_to_top_edge)) {
