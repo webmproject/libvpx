@@ -1293,17 +1293,60 @@ static void write_tile_info(VP9_COMMON *cm, struct vp9_write_bit_buffer *wb) {
     vp9_wb_write_bit(wb, cm->log2_tile_rows != 1);
 }
 
-void write_uncompressed_header(VP9_COMP *cpi,
-                               struct vp9_write_bit_buffer *wb) {
+static int get_refresh_mask(VP9_COMP *cpi) {
+    // Should the GF or ARF be updated using the transmitted frame or buffer
+#if CONFIG_MULTIPLE_ARF
+    if (!cpi->multi_arf_enabled && cpi->refresh_golden_frame &&
+        !cpi->refresh_alt_ref_frame) {
+#else
+    if (cpi->refresh_golden_frame && !cpi->refresh_alt_ref_frame) {
+#endif
+      // Preserve the previously existing golden frame and update the frame in
+      // the alt ref slot instead. This is highly specific to the use of
+      // alt-ref as a forward reference, and this needs to be generalized as
+      // other uses are implemented (like RTC/temporal scaling)
+      //
+      // gld_fb_idx and alt_fb_idx need to be swapped for future frames, but
+      // that happens in vp9_onyx_if.c:update_reference_frames() so that it can
+      // be done outside of the recode loop.
+      return (cpi->refresh_last_frame << cpi->lst_fb_idx) |
+             (cpi->refresh_golden_frame << cpi->alt_fb_idx);
+    } else {
+      int arf_idx = cpi->alt_fb_idx;
+#if CONFIG_MULTIPLE_ARF
+      // Determine which ARF buffer to use to encode this ARF frame.
+      if (cpi->multi_arf_enabled) {
+        int sn = cpi->sequence_number;
+        arf_idx = (cpi->frame_coding_order[sn] < 0) ?
+            cpi->arf_buffer_idx[sn + 1] :
+            cpi->arf_buffer_idx[sn];
+      }
+#endif
+      return (cpi->refresh_last_frame << cpi->lst_fb_idx) |
+             (cpi->refresh_golden_frame << cpi->gld_fb_idx) |
+             (cpi->refresh_alt_ref_frame << arf_idx);
+    }
+}
+
+static void write_display_size(VP9_COMP *cpi, struct vp9_write_bit_buffer *wb) {
   VP9_COMMON *const cm = &cpi->common;
-  MACROBLOCKD *const xd = &cpi->mb.e_mbd;
 
   const int scaling_active = cm->width != cm->display_width ||
                              cm->height != cm->display_height;
+  vp9_wb_write_bit(wb, scaling_active);
+  if (scaling_active) {
+    vp9_wb_write_literal(wb, cm->display_width, 16);
+    vp9_wb_write_literal(wb, cm->display_height, 16);
+  }
+}
+
+static void write_uncompressed_header(VP9_COMP *cpi,
+                                      struct vp9_write_bit_buffer *wb) {
+  VP9_COMMON *const cm = &cpi->common;
+  MACROBLOCKD *const xd = &cpi->mb.e_mbd;
 
   // frame marker bits
-  vp9_wb_write_bit(wb, 1);
-  vp9_wb_write_bit(wb, 0);
+  vp9_wb_write_literal(wb, 0x2, 2);
 
   // bitstream version.
   // 00 - profile 0. 4:2:0 only
@@ -1314,7 +1357,7 @@ void write_uncompressed_header(VP9_COMP *cpi,
   vp9_wb_write_bit(wb, 0);
   vp9_wb_write_bit(wb, cm->frame_type);
   vp9_wb_write_bit(wb, cm->show_frame);
-  vp9_wb_write_bit(wb, scaling_active);
+  vp9_wb_write_bit(wb, cm->error_resilient_mode);
 
   if (cm->frame_type == KEY_FRAME) {
     vp9_wb_write_literal(wb, SYNC_CODE_0, 8);
@@ -1332,68 +1375,29 @@ void write_uncompressed_header(VP9_COMP *cpi,
       vp9_wb_write_bit(wb, cm->subsampling_y);
       vp9_wb_write_bit(wb, 0);  // has extra plane
     }
-  }
 
-  if (scaling_active) {
-    vp9_wb_write_literal(wb, cm->display_width, 16);
-    vp9_wb_write_literal(wb, cm->display_height, 16);
-  }
+    // frame size
+    vp9_wb_write_literal(wb, cm->width, 16);
+    vp9_wb_write_literal(wb, cm->height, 16);
+    write_display_size(cpi, wb);
+  } else {
+    // When there is a key frame all reference buffers are updated using the
+    // new key frame
 
-  vp9_wb_write_literal(wb, cm->width, 16);
-  vp9_wb_write_literal(wb, cm->height, 16);
+    int i;
+    int refs[ALLOWED_REFS_PER_FRAME] = {cpi->lst_fb_idx, cpi->gld_fb_idx,
+                                        cpi->alt_fb_idx};
 
-  vp9_wb_write_bit(wb, cm->error_resilient_mode);
-  if (!cm->error_resilient_mode) {
-    vp9_wb_write_bit(wb, cm->reset_frame_context);
-    vp9_wb_write_bit(wb, cm->refresh_frame_context);
-    vp9_wb_write_bit(wb, cm->frame_parallel_decoding_mode);
-  }
-
-  // When there is a key frame all reference buffers are updated using the new key frame
-  if (cm->frame_type != KEY_FRAME) {
-    int refresh_mask, i;
-
-    // Should the GF or ARF be updated using the transmitted frame or buffer
-#if CONFIG_MULTIPLE_ARF
-    if (!cpi->multi_arf_enabled && cpi->refresh_golden_frame &&
-        !cpi->refresh_alt_ref_frame) {
-#else
-    if (cpi->refresh_golden_frame && !cpi->refresh_alt_ref_frame) {
-#endif
-      // Preserve the previously existing golden frame and update the frame in
-      // the alt ref slot instead. This is highly specific to the use of
-      // alt-ref as a forward reference, and this needs to be generalized as
-      // other uses are implemented (like RTC/temporal scaling)
-      //
-      // gld_fb_idx and alt_fb_idx need to be swapped for future frames, but
-      // that happens in vp9_onyx_if.c:update_reference_frames() so that it can
-      // be done outside of the recode loop.
-      refresh_mask = (cpi->refresh_last_frame << cpi->lst_fb_idx) |
-                     (cpi->refresh_golden_frame << cpi->alt_fb_idx);
-    } else {
-      int arf_idx = cpi->alt_fb_idx;
-#if CONFIG_MULTIPLE_ARF
-      // Determine which ARF buffer to use to encode this ARF frame.
-      if (cpi->multi_arf_enabled) {
-        int sn = cpi->sequence_number;
-        arf_idx = (cpi->frame_coding_order[sn] < 0) ?
-            cpi->arf_buffer_idx[sn + 1] :
-            cpi->arf_buffer_idx[sn];
-      }
-#endif
-      refresh_mask = (cpi->refresh_last_frame << cpi->lst_fb_idx) |
-                     (cpi->refresh_golden_frame << cpi->gld_fb_idx) |
-                     (cpi->refresh_alt_ref_frame << arf_idx);
+    vp9_wb_write_literal(wb, get_refresh_mask(cpi), NUM_REF_FRAMES);
+    for (i = 0; i < ALLOWED_REFS_PER_FRAME; ++i) {
+      vp9_wb_write_literal(wb, refs[i], NUM_REF_FRAMES_LG2);
+      vp9_wb_write_bit(wb, cm->ref_frame_sign_bias[LAST_FRAME + i]);
     }
 
-    vp9_wb_write_literal(wb, refresh_mask, NUM_REF_FRAMES);
-    vp9_wb_write_literal(wb, cpi->lst_fb_idx, NUM_REF_FRAMES_LG2);
-    vp9_wb_write_literal(wb, cpi->gld_fb_idx, NUM_REF_FRAMES_LG2);
-    vp9_wb_write_literal(wb, cpi->alt_fb_idx, NUM_REF_FRAMES_LG2);
-
-    // Indicate the sign bias for each reference frame buffer.
-    for (i = 0; i < ALLOWED_REFS_PER_FRAME; ++i)
-      vp9_wb_write_bit(wb, cm->ref_frame_sign_bias[LAST_FRAME + i]);
+    // frame size
+    vp9_wb_write_literal(wb, cm->width, 16);
+    vp9_wb_write_literal(wb, cm->height, 16);
+    write_display_size(cpi, wb);
 
     // Signal whether to allow high MV precision
     vp9_wb_write_bit(wb, xd->allow_high_precision_mv);
@@ -1401,6 +1405,12 @@ void write_uncompressed_header(VP9_COMP *cpi,
     // Signal the type of subpel filter to use
     fix_mcomp_filter_type(cpi);
     write_interp_filter_type(cm->mcomp_filter_type, wb);
+  }
+
+  if (!cm->error_resilient_mode) {
+    vp9_wb_write_bit(wb, cm->reset_frame_context);
+    vp9_wb_write_bit(wb, cm->refresh_frame_context);
+    vp9_wb_write_bit(wb, cm->frame_parallel_decoding_mode);
   }
 
   if (!cm->show_frame)
@@ -1449,8 +1459,7 @@ void vp9_pack_bitstream(VP9_COMP *cpi, uint8_t *dest, unsigned long *size) {
   vp9_copy(pc->fc.pre_coef_probs, pc->fc.coef_probs);
   vp9_copy(pc->fc.pre_y_mode_prob, pc->fc.y_mode_prob);
   vp9_copy(pc->fc.pre_uv_mode_prob, pc->fc.uv_mode_prob);
-  vp9_copy(cpi->common.fc.pre_partition_prob,
-           cpi->common.fc.partition_prob[INTER_FRAME]);
+  vp9_copy(pc->fc.pre_partition_prob, pc->fc.partition_prob[INTER_FRAME]);
   pc->fc.pre_nmvc = pc->fc.nmvc;
   vp9_copy(pc->fc.pre_switchable_interp_prob, pc->fc.switchable_interp_prob);
   vp9_copy(pc->fc.pre_inter_mode_probs, pc->fc.inter_mode_probs);
@@ -1458,8 +1467,7 @@ void vp9_pack_bitstream(VP9_COMP *cpi, uint8_t *dest, unsigned long *size) {
   vp9_copy(pc->fc.pre_comp_inter_prob, pc->fc.comp_inter_prob);
   vp9_copy(pc->fc.pre_comp_ref_prob, pc->fc.comp_ref_prob);
   vp9_copy(pc->fc.pre_single_ref_prob, pc->fc.single_ref_prob);
-  cpi->common.fc.pre_nmvc = cpi->common.fc.nmvc;
-  vp9_copy(cpi->common.fc.pre_tx_probs, cpi->common.fc.tx_probs);
+  vp9_copy(pc->fc.pre_tx_probs, pc->fc.tx_probs);
 
   if (xd->lossless) {
     pc->txfm_mode = ONLY_4X4;

@@ -11,6 +11,8 @@
 #ifndef VP9_BIT_WRITE_BUFFER_H_
 #define VP9_BIT_WRITE_BUFFER_H_
 
+#include <limits.h>
+
 #include "vpx/vpx_integer.h"
 
 struct vp9_write_bit_buffer {
