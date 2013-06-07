@@ -448,8 +448,8 @@ static void update_state(VP9_COMP *cpi,
       int i, j;
       for (j = 0; j < bh; ++j)
         for (i = 0; i < bw; ++i)
-          if ((xd->mb_to_right_edge >> (3 + LOG2_MI_SIZE)) + bw > j &&
-              (xd->mb_to_bottom_edge >> (3 + LOG2_MI_SIZE)) + bh > i)
+          if ((xd->mb_to_right_edge >> (3 + LOG2_MI_SIZE)) + bw > i &&
+              (xd->mb_to_bottom_edge >> (3 + LOG2_MI_SIZE)) + bh > j)
             xd->mode_info_context[mis * j + i].mbmi = *mbmi;
     }
 
