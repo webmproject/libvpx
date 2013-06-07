@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAZ3//3Qo\u003d",
+        "filename": "vp9/decoder/vp9_decodemv.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 529,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-06-07T17:42:56Z",
+      "side": 1,
+      "message": "don\u0027t do these bits and counts if ref_frame feature is enabled. also, if it is enabled, set intra vs inter bit appropriately here so the below code works correctly.",
+      "revId": "ceaccc031f265a3eb820fd0452a9da395bb83ef6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAZ3//3Qw\u003d",
+        "filename": "vp9/encoder/vp9_bitstream.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 563,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-06-07T17:42:56Z",
+      "side": 1,
+      "message": "if the ref frame seg feature is enabled, we should skip this bit also.",
+      "revId": "ceaccc031f265a3eb820fd0452a9da395bb83ef6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAZ3//3Qs\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 635,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-06-07T17:42:56Z",
+      "side": 1,
+      "message": "if the ref frame seg feature is enabled, we should increase the intra_inter count either",
+      "revId": "ceaccc031f265a3eb820fd0452a9da395bb83ef6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
