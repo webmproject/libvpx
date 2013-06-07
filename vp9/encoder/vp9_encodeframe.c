@@ -1752,10 +1752,16 @@ static void reset_skip_txfm_size(VP9_COMP *cpi, TX_SIZE txfm_max) {
 void vp9_encode_frame(VP9_COMP *cpi) {
   VP9_COMMON *const cm = &cpi->common;
 
-  if (cm->ref_frame_sign_bias[LAST_FRAME] ==
-      cm->ref_frame_sign_bias[GOLDEN_FRAME] &&
-      cm->ref_frame_sign_bias[LAST_FRAME] ==
-      cm->ref_frame_sign_bias[ALTREF_FRAME]) {
+  // In the longer term the encoder should be generalized to match the
+  // decoder such that we allow compound where one of the 3 buffers has a
+  // differnt sign bias and that buffer is then the fixed ref. However, this
+  // requires further work in the rd loop. For now the only supported encoder
+  // side behaviour is where the ALT ref buffer has oppositie sign bias to
+  // the other two.
+  if ((cm->ref_frame_sign_bias[ALTREF_FRAME] ==
+       cm->ref_frame_sign_bias[GOLDEN_FRAME]) ||
+      (cm->ref_frame_sign_bias[ALTREF_FRAME] ==
+       cm->ref_frame_sign_bias[LAST_FRAME])) {
     cm->allow_comp_inter_inter = 0;
   } else {
     cm->allow_comp_inter_inter = 1;
