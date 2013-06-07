@@ -16,6 +16,24 @@
       "revId": "07ba7539800a24ce58df2eb58b30b5d6b0b62cc2",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAZ3//4NY\u003d",
+        "filename": "vp9/common/vp9_onyxc_int.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 299,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2013-06-07T00:11:29Z",
+      "side": 1,
+      "message": "bsize should always be a square block, i.e., bhl \u003d bwl \u003d bsl.\n\nwe then consider the possible partition type of this block, depending on its relative position to the frame boundary.",
+      "parentUuid": "AAAAZ3//4SI\u003d",
+      "revId": "07ba7539800a24ce58df2eb58b30b5d6b0b62cc2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
