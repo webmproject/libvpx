@@ -16,6 +16,24 @@
       "revId": "281cd54c1532bdc715afad1277a1a8dc88103fcf",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAZ3//2ps\u003d",
+        "filename": "vp9/encoder/vp9_onyx_if.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 216,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2013-06-07T22:29:37Z",
+      "side": 1,
+      "message": "All legacy code removed",
+      "parentUuid": "AAAAZ3//21s\u003d",
+      "revId": "281cd54c1532bdc715afad1277a1a8dc88103fcf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
