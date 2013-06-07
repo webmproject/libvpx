@@ -1464,12 +1464,15 @@ static void init_encode_frame_mb_context(VP9_COMP *cpi) {
 
   vp9_zero(cpi->y_mode_count)
   vp9_zero(cpi->y_uv_mode_count)
-  vp9_zero(cpi->common.fc.inter_mode_counts)
+  vp9_zero(cm->fc.inter_mode_counts)
   vp9_zero(cpi->partition_count);
   vp9_zero(cpi->intra_inter_count);
   vp9_zero(cpi->comp_inter_count);
   vp9_zero(cpi->single_ref_count);
   vp9_zero(cpi->comp_ref_count);
+  vp9_zero(cm->fc.tx_count_32x32p);
+  vp9_zero(cm->fc.tx_count_16x16p);
+  vp9_zero(cm->fc.tx_count_8x8p);
 
   // Note: this memset assumes above_context[0], [1] and [2]
   // are allocated as part of the same buffer.
@@ -1560,9 +1563,6 @@ static void encode_frame_internal(VP9_COMP *cpi) {
   init_encode_frame_mb_context(cpi);
 
   vpx_memset(cpi->rd_comp_pred_diff, 0, sizeof(cpi->rd_comp_pred_diff));
-  vpx_memset(cpi->txfm_count_32x32p, 0, sizeof(cpi->txfm_count_32x32p));
-  vpx_memset(cpi->txfm_count_16x16p, 0, sizeof(cpi->txfm_count_16x16p));
-  vpx_memset(cpi->txfm_count_8x8p, 0, sizeof(cpi->txfm_count_8x8p));
   vpx_memset(cpi->rd_tx_select_diff, 0, sizeof(cpi->rd_tx_select_diff));
   vpx_memset(cpi->rd_tx_select_threshes, 0, sizeof(cpi->rd_tx_select_threshes));
 
@@ -1847,11 +1847,6 @@ void vp9_encode_frame(VP9_COMP *cpi) {
                     ALLOW_32X32 : TX_MODE_SELECT;
 #endif
     cpi->common.txfm_mode = txfm_type;
-    if (txfm_type != TX_MODE_SELECT) {
-      cpi->common.prob_tx[0] = 128;
-      cpi->common.prob_tx[1] = 128;
-      cpi->common.prob_tx[2] = 128;
-    }
     cpi->common.comp_pred_mode = pred_type;
     encode_frame_internal(cpi);
 
@@ -1891,15 +1886,15 @@ void vp9_encode_frame(VP9_COMP *cpi) {
     }
 
     if (cpi->common.txfm_mode == TX_MODE_SELECT) {
-      const int count4x4 = cpi->txfm_count_16x16p[TX_4X4] +
-                           cpi->txfm_count_32x32p[TX_4X4] +
-                           cpi->txfm_count_8x8p[TX_4X4];
-      const int count8x8_lp = cpi->txfm_count_32x32p[TX_8X8] +
-                              cpi->txfm_count_16x16p[TX_8X8];
-      const int count8x8_8x8p = cpi->txfm_count_8x8p[TX_8X8];
-      const int count16x16_16x16p = cpi->txfm_count_16x16p[TX_16X16];
-      const int count16x16_lp = cpi->txfm_count_32x32p[TX_16X16];
-      const int count32x32 = cpi->txfm_count_32x32p[TX_32X32];
+      const int count4x4 = cm->fc.tx_count_16x16p[TX_4X4] +
+                           cm->fc.tx_count_32x32p[TX_4X4] +
+                           cm->fc.tx_count_8x8p[TX_4X4];
+      const int count8x8_lp = cm->fc.tx_count_32x32p[TX_8X8] +
+                              cm->fc.tx_count_16x16p[TX_8X8];
+      const int count8x8_8x8p = cm->fc.tx_count_8x8p[TX_8X8];
+      const int count16x16_16x16p = cm->fc.tx_count_16x16p[TX_16X16];
+      const int count16x16_lp = cm->fc.tx_count_32x32p[TX_16X16];
+      const int count32x32 = cm->fc.tx_count_32x32p[TX_32X32];
 
       if (count4x4 == 0 && count16x16_lp == 0 && count16x16_16x16p == 0 &&
           count32x32 == 0) {
@@ -2083,11 +2078,11 @@ static void encode_superblock(VP9_COMP *cpi, TOKENEXTRA **t,
         !(mbmi->ref_frame[0] != INTRA_FRAME && (mbmi->mb_skip_coeff ||
           vp9_segfeature_active(xd, segment_id, SEG_LVL_SKIP)))) {
       if (bsize >= BLOCK_SIZE_SB32X32) {
-        cpi->txfm_count_32x32p[mbmi->txfm_size]++;
+        cm->fc.tx_count_32x32p[mbmi->txfm_size]++;
       } else if (bsize >= BLOCK_SIZE_MB16X16) {
-        cpi->txfm_count_16x16p[mbmi->txfm_size]++;
+        cm->fc.tx_count_16x16p[mbmi->txfm_size]++;
       } else {
-        cpi->txfm_count_8x8p[mbmi->txfm_size]++;
+        cm->fc.tx_count_8x8p[mbmi->txfm_size]++;
       }
     } else {
       int x, y;

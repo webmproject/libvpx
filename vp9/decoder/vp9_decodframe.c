@@ -57,11 +57,16 @@ static void setup_txfm_mode(VP9_COMMON *pc, int lossless, vp9_reader *r) {
     pc->txfm_mode = vp9_read_literal(r, 2);
     if (pc->txfm_mode == ALLOW_32X32)
       pc->txfm_mode += vp9_read_bit(r);
-
     if (pc->txfm_mode == TX_MODE_SELECT) {
-      pc->prob_tx[0] = vp9_read_prob(r);
-      pc->prob_tx[1] = vp9_read_prob(r);
-      pc->prob_tx[2] = vp9_read_prob(r);
+      int i;
+      for (i = 0; i < TX_SIZE_PROBS; ++i) {
+        if (vp9_read(r, VP9_DEF_UPDATE_PROB))
+           pc->fc.tx_probs[i] =
+               vp9_read_prob_diff_update(r, pc->fc.tx_probs[i]);
+      }
+    } else {
+      vpx_memcpy(pc->fc.tx_probs, vp9_default_tx_probs,
+                 sizeof(vp9_default_tx_probs));
     }
   }
 }
@@ -779,6 +784,7 @@ static void update_frame_context(FRAME_CONTEXT *fc) {
   fc->pre_nmvc = fc->nmvc;
   vp9_copy(fc->pre_switchable_interp_prob, fc->switchable_interp_prob);
   vp9_copy(fc->pre_inter_mode_probs, fc->inter_mode_probs);
+  vp9_copy(fc->pre_tx_probs, fc->tx_probs);
 
   vp9_zero(fc->coef_counts);
   vp9_zero(fc->eob_branch_counts);
@@ -792,6 +798,9 @@ static void update_frame_context(FRAME_CONTEXT *fc) {
   vp9_zero(fc->comp_inter_count);
   vp9_zero(fc->single_ref_count);
   vp9_zero(fc->comp_ref_count);
+  vp9_zero(fc->tx_count_8x8p);
+  vp9_zero(fc->tx_count_16x16p);
+  vp9_zero(fc->tx_count_32x32p);
 }
 
 static void decode_tile(VP9D_COMP *pbi, vp9_reader *r) {
@@ -1050,9 +1059,9 @@ int vp9_decode_frame(VP9D_COMP *pbi, const uint8_t **p_data_end) {
 
   pc->fc = pc->frame_contexts[pc->frame_context_idx];
 
-  setup_txfm_mode(pc, xd->lossless, &header_bc);
-
   update_frame_context(&pc->fc);
+
+  setup_txfm_mode(pc, xd->lossless, &header_bc);
 
   read_coef_probs(pbi, &header_bc);
 
