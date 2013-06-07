@@ -632,7 +632,7 @@ TALIGN16(const uint16, scaleab2[8]) =
   { 65536 / 3, 65536 / 3, 65536 / 2, 65536 / 3, 65536 / 3, 65536 / 2, 0, 0 };
 #endif
 
-#if defined(_M_IX86) && !defined(YUV_DISABLE_ASM)
+#if defined(_M_IX86) && !defined(YUV_DISABLE_ASM) && defined(_MSC_VER)
 
 #define HAS_SCALEROWDOWN2_SSE2
 // Reads 32 pixels, throws half away and writes 16 pixels.
