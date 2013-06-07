@@ -243,7 +243,6 @@ EXPERIMENT_LIST="
     non420
     alpha
     balanced_coeftree
-    new_loopfilter
 "
 CONFIG_LIST="
     external_build
