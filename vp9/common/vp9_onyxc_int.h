@@ -174,6 +174,8 @@ typedef struct VP9Common {
   int intra_only;
 
   // Flag signaling that the frame context should be reset to default values.
+  // 0 or 1 implies don't reset, 2 reset just the context specified in the
+  // frame header, 3 reset all contexts.
   int reset_frame_context;
 
   int frame_flags;

@@ -1480,40 +1480,50 @@ static void write_uncompressed_header(VP9_COMP *cpi,
     vp9_wb_write_literal(wb, cm->height, 16);
     write_display_size(cpi, wb);
   } else {
-    // When there is a key frame all reference buffers are updated using the
-    // new key frame
-
     int i;
     int refs[ALLOWED_REFS_PER_FRAME] = {cpi->lst_fb_idx, cpi->gld_fb_idx,
                                         cpi->alt_fb_idx};
 
-    vp9_wb_write_literal(wb, get_refresh_mask(cpi), NUM_REF_FRAMES);
-    for (i = 0; i < ALLOWED_REFS_PER_FRAME; ++i) {
-      vp9_wb_write_literal(wb, refs[i], NUM_REF_FRAMES_LG2);
-      vp9_wb_write_bit(wb, cm->ref_frame_sign_bias[LAST_FRAME + i]);
+    if (!cm->show_frame)
+      vp9_wb_write_bit(wb, cm->intra_only);
+
+    if (cm->intra_only) {
+      vp9_wb_write_literal(wb, SYNC_CODE_0, 8);
+      vp9_wb_write_literal(wb, SYNC_CODE_1, 8);
+      vp9_wb_write_literal(wb, SYNC_CODE_2, 8);
+
+      vp9_wb_write_literal(wb, get_refresh_mask(cpi), NUM_REF_FRAMES);
+
+      // frame size
+      vp9_wb_write_literal(wb, cm->width, 16);
+      vp9_wb_write_literal(wb, cm->height, 16);
+      write_display_size(cpi, wb);
+    } else {
+      vp9_wb_write_literal(wb, get_refresh_mask(cpi), NUM_REF_FRAMES);
+      for (i = 0; i < ALLOWED_REFS_PER_FRAME; ++i) {
+        vp9_wb_write_literal(wb, refs[i], NUM_REF_FRAMES_LG2);
+        vp9_wb_write_bit(wb, cm->ref_frame_sign_bias[LAST_FRAME + i]);
+      }
+
+      // frame size
+      vp9_wb_write_literal(wb, cm->width, 16);
+      vp9_wb_write_literal(wb, cm->height, 16);
+      write_display_size(cpi, wb);
+
+      // Signal whether to allow high MV precision
+      vp9_wb_write_bit(wb, xd->allow_high_precision_mv);
+
+      // Signal the type of subpel filter to use
+      fix_mcomp_filter_type(cpi);
+      write_interp_filter_type(cm->mcomp_filter_type, wb);
     }
-
-    // frame size
-    vp9_wb_write_literal(wb, cm->width, 16);
-    vp9_wb_write_literal(wb, cm->height, 16);
-    write_display_size(cpi, wb);
-
-    // Signal whether to allow high MV precision
-    vp9_wb_write_bit(wb, xd->allow_high_precision_mv);
-
-    // Signal the type of subpel filter to use
-    fix_mcomp_filter_type(cpi);
-    write_interp_filter_type(cm->mcomp_filter_type, wb);
   }
 
   if (!cm->error_resilient_mode) {
-    vp9_wb_write_bit(wb, cm->reset_frame_context);
+    vp9_wb_write_literal(wb, cm->reset_frame_context, 2);
     vp9_wb_write_bit(wb, cm->refresh_frame_context);
     vp9_wb_write_bit(wb, cm->frame_parallel_decoding_mode);
   }
-
-  if (!cm->show_frame)
-    vp9_wb_write_bit(wb, cm->intra_only);
 
   vp9_wb_write_literal(wb, cm->frame_context_idx, NUM_FRAME_CONTEXTS_LG2);
   vp9_wb_write_bit(wb, cm->clr_type);

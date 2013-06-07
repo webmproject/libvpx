@@ -1021,52 +1021,67 @@ static size_t read_uncompressed_header(VP9D_COMP *pbi,
 
     setup_frame_size(pbi, rb);
   } else {
+    cm->intra_only = cm->show_frame ? 0 : vp9_rb_read_bit(rb);
+
     if (cm->error_resilient_mode)
       vp9_setup_past_independence(cm, xd);
 
-    pbi->refresh_frame_flags = vp9_rb_read_literal(rb, NUM_REF_FRAMES);
+    if (cm->intra_only) {
+       if (vp9_rb_read_literal(rb, 8) != SYNC_CODE_0 ||
+           vp9_rb_read_literal(rb, 8) != SYNC_CODE_1 ||
+           vp9_rb_read_literal(rb, 8) != SYNC_CODE_2) {
+         vpx_internal_error(&cm->error, VPX_CODEC_UNSUP_BITSTREAM,
+                            "Invalid frame sync code");
+       }
 
-    for (i = 0; i < ALLOWED_REFS_PER_FRAME; ++i) {
-      const int ref = vp9_rb_read_literal(rb, NUM_REF_FRAMES_LG2);
-      cm->active_ref_idx[i] = cm->ref_frame_map[ref];
-      cm->ref_frame_sign_bias[LAST_FRAME + i] = vp9_rb_read_bit(rb);
-    }
+       pbi->refresh_frame_flags = vp9_rb_read_literal(rb, NUM_REF_FRAMES);
 
-    setup_frame_size(pbi, rb);
+       setup_frame_size(pbi, rb);
+    } else {
+       pbi->refresh_frame_flags = vp9_rb_read_literal(rb, NUM_REF_FRAMES);
 
-    // Read the sign bias for each reference frame buffer.
-    cm->allow_comp_inter_inter = 0;
-    for (i = 0; i < ALLOWED_REFS_PER_FRAME; ++i) {
-      vp9_setup_scale_factors(cm, i);
-      cm->allow_comp_inter_inter |= i > 0 &&
-          cm->ref_frame_sign_bias[i + 1] != cm->ref_frame_sign_bias[1];
-    }
-
-    if (cm->allow_comp_inter_inter) {
-      // which one is always-on in comp inter-inter?
-      if (cm->ref_frame_sign_bias[LAST_FRAME] ==
-          cm->ref_frame_sign_bias[GOLDEN_FRAME]) {
-        cm->comp_fixed_ref = ALTREF_FRAME;
-        cm->comp_var_ref[0] = LAST_FRAME;
-        cm->comp_var_ref[1] = GOLDEN_FRAME;
-      } else if (cm->ref_frame_sign_bias[LAST_FRAME] ==
-                 cm->ref_frame_sign_bias[ALTREF_FRAME]) {
-        cm->comp_fixed_ref = GOLDEN_FRAME;
-        cm->comp_var_ref[0] = LAST_FRAME;
-        cm->comp_var_ref[1] = ALTREF_FRAME;
-      } else {
-        cm->comp_fixed_ref = LAST_FRAME;
-        cm->comp_var_ref[0] = GOLDEN_FRAME;
-        cm->comp_var_ref[1] = ALTREF_FRAME;
+      for (i = 0; i < ALLOWED_REFS_PER_FRAME; ++i) {
+        const int ref = vp9_rb_read_literal(rb, NUM_REF_FRAMES_LG2);
+        cm->active_ref_idx[i] = cm->ref_frame_map[ref];
+        cm->ref_frame_sign_bias[LAST_FRAME + i] = vp9_rb_read_bit(rb);
       }
-    }
 
-    xd->allow_high_precision_mv = vp9_rb_read_bit(rb);
-    cm->mcomp_filter_type = read_interp_filter_type(rb);
+      setup_frame_size(pbi, rb);
+
+      // Read the sign bias for each reference frame buffer.
+      cm->allow_comp_inter_inter = 0;
+      for (i = 0; i < ALLOWED_REFS_PER_FRAME; ++i) {
+        vp9_setup_scale_factors(cm, i);
+        cm->allow_comp_inter_inter |= i > 0 &&
+           cm->ref_frame_sign_bias[i + 1] != cm->ref_frame_sign_bias[1];
+      }
+
+      if (cm->allow_comp_inter_inter) {
+        // which one is always-on in comp inter-inter?
+        if (cm->ref_frame_sign_bias[LAST_FRAME] ==
+            cm->ref_frame_sign_bias[GOLDEN_FRAME]) {
+          cm->comp_fixed_ref = ALTREF_FRAME;
+          cm->comp_var_ref[0] = LAST_FRAME;
+          cm->comp_var_ref[1] = GOLDEN_FRAME;
+        } else if (cm->ref_frame_sign_bias[LAST_FRAME] ==
+                   cm->ref_frame_sign_bias[ALTREF_FRAME]) {
+          cm->comp_fixed_ref = GOLDEN_FRAME;
+          cm->comp_var_ref[0] = LAST_FRAME;
+          cm->comp_var_ref[1] = ALTREF_FRAME;
+        } else {
+          cm->comp_fixed_ref = LAST_FRAME;
+          cm->comp_var_ref[0] = GOLDEN_FRAME;
+          cm->comp_var_ref[1] = ALTREF_FRAME;
+        }
+      }
+
+      xd->allow_high_precision_mv = vp9_rb_read_bit(rb);
+      cm->mcomp_filter_type = read_interp_filter_type(rb);
+    }
   }
 
   if (!cm->error_resilient_mode) {
-    cm->reset_frame_context = vp9_rb_read_bit(rb);
+    cm->reset_frame_context = vp9_rb_read_literal(rb, 2);
     cm->refresh_frame_context = vp9_rb_read_bit(rb);
     cm->frame_parallel_decoding_mode = vp9_rb_read_bit(rb);
   } else {
@@ -1075,7 +1090,6 @@ static size_t read_uncompressed_header(VP9D_COMP *pbi,
     cm->frame_parallel_decoding_mode = 1;
   }
 
-  cm->intra_only = cm->show_frame ? 0 : vp9_rb_read_bit(rb);
   cm->frame_context_idx = vp9_rb_read_literal(rb, NUM_FRAME_CONTEXTS_LG2);
   cm->clr_type = (YUV_TYPE)vp9_rb_read_bit(rb);
 
