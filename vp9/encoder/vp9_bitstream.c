@@ -1301,17 +1301,37 @@ void write_uncompressed_header(VP9_COMP *cpi,
   const int scaling_active = cm->width != cm->display_width ||
                              cm->height != cm->display_height;
 
+  // frame marker bits
+  vp9_wb_write_bit(wb, 1);
+  vp9_wb_write_bit(wb, 0);
+
+  // bitstream version.
+  // 00 - profile 0. 4:2:0 only
+  // 10 - profile 1. adds 4:4:4, 4:2:2, alpha
+  vp9_wb_write_bit(wb, cm->version);
+  vp9_wb_write_bit(wb, 0);
+
   vp9_wb_write_bit(wb, cm->frame_type);
-  vp9_wb_write_literal(wb, cm->version, 3);
   vp9_wb_write_bit(wb, cm->show_frame);
   vp9_wb_write_bit(wb, scaling_active);
-  vp9_wb_write_bit(wb, cm->subsampling_x);
-  vp9_wb_write_bit(wb, cm->subsampling_y);
+  vp9_wb_write_bit(wb, 0);
 
   if (cm->frame_type == KEY_FRAME) {
     vp9_wb_write_literal(wb, SYNC_CODE_0, 8);
     vp9_wb_write_literal(wb, SYNC_CODE_1, 8);
     vp9_wb_write_literal(wb, SYNC_CODE_2, 8);
+    // colorspaces
+    // 000 - Unknown
+    // 001 - BT.601
+    // 010 - BT.709
+    // 011 - xvYCC
+    // 1xx - Reserved
+    vp9_wb_write_literal(wb, 0, 3);
+    if (cm->version == 1) {
+      vp9_wb_write_bit(wb, cm->subsampling_x);
+      vp9_wb_write_bit(wb, cm->subsampling_y);
+      vp9_wb_write_bit(wb, 0);  // has extra plane
+    }
   }
 
   if (scaling_active) {

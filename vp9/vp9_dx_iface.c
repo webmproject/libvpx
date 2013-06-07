@@ -217,7 +217,7 @@ static vpx_codec_err_t vp8_peek_si(const uint8_t         *data,
   else {
     si->is_kf = 0;
 
-    if (data_sz >= 8 && !(data[0] & 0x80)) { /* I-Frame */
+    if (data_sz >= 8 && (data[0] & 0xD8) == 0x80) { /* I-Frame */
       const uint8_t *c = data + 1;
       si->is_kf = 1;
 
