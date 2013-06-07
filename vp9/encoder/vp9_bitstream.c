@@ -483,18 +483,9 @@ static void encode_ref_frame(VP9_COMP *cpi, vp9_writer *bc) {
   const int segment_id = mi->segment_id;
   int seg_ref_active = vp9_segfeature_active(xd, segment_id,
                                              SEG_LVL_REF_FRAME);
-  int seg_ref_count = 0;
-
-  if (seg_ref_active) {
-    seg_ref_count = vp9_check_segref(xd, segment_id, INTRA_FRAME) +
-                    vp9_check_segref(xd, segment_id, LAST_FRAME) +
-                    vp9_check_segref(xd, segment_id, GOLDEN_FRAME) +
-                    vp9_check_segref(xd, segment_id, ALTREF_FRAME);
-  }
-
   // If segment level coding of this signal is disabled...
   // or the segment allows multiple reference frame options
-  if (!seg_ref_active || (seg_ref_count > 1)) {
+  if (!seg_ref_active) {
     // does the feature use compound prediction or not
     // (if not specified at the frame/segment level)
     if (pc->comp_pred_mode == HYBRID_PREDICTION) {
@@ -517,7 +508,8 @@ static void encode_ref_frame(VP9_COMP *cpi, vp9_writer *bc) {
     }
   } else {
     assert(mi->ref_frame[1] <= INTRA_FRAME);
-    assert(vp9_check_segref(xd, segment_id, mi->ref_frame[0]));
+    assert(vp9_get_segdata(xd, segment_id, SEG_LVL_REF_FRAME) ==
+           mi->ref_frame[0]);
   }
 
   // if using the prediction mdoel we have nothing further to do because

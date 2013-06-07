@@ -1635,16 +1635,7 @@ static void estimate_ref_frame_costs(VP9_COMP *cpi, int segment_id,
   MACROBLOCKD *const xd = &cpi->mb.e_mbd;
   int seg_ref_active = vp9_segfeature_active(xd, segment_id,
                                              SEG_LVL_REF_FRAME);
-  int seg_ref_count = 0;
-
   if (seg_ref_active) {
-    seg_ref_count = vp9_check_segref(xd, segment_id, INTRA_FRAME)  +
-                    vp9_check_segref(xd, segment_id, LAST_FRAME)   +
-                    vp9_check_segref(xd, segment_id, GOLDEN_FRAME) +
-                    vp9_check_segref(xd, segment_id, ALTREF_FRAME);
-  }
-
-  if (seg_ref_active && seg_ref_count == 1) {
     vpx_memset(ref_costs_single, 0, MAX_REF_FRAMES * sizeof(*ref_costs_single));
     vpx_memset(ref_costs_comp,   0, MAX_REF_FRAMES * sizeof(*ref_costs_comp));
     *comp_mode_p = 128;
@@ -2685,7 +2676,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
     // If the segment reference frame feature is enabled....
     // then do nothing if the current ref frame is not allowed..
     if (vp9_segfeature_active(xd, segment_id, SEG_LVL_REF_FRAME) &&
-        !vp9_check_segref(xd, segment_id, ref_frame)) {
+        vp9_get_segdata(xd, segment_id, SEG_LVL_REF_FRAME) != (int)ref_frame) {
       continue;
     // If the segment skip feature is enabled....
     // then do nothing if the current mode is not allowed..

@@ -413,7 +413,7 @@ static void configure_static_seg_features(VP9_COMP *cpi) {
 
         // Segment coding disabled for compred testing
         if (high_q || (cpi->static_mb_pct == 100)) {
-          vp9_set_segref(xd, 1, ALTREF_FRAME);
+          vp9_set_segdata(xd, 1, SEG_LVL_REF_FRAME, ALTREF_FRAME);
           vp9_enable_segfeature(xd, 1, SEG_LVL_REF_FRAME);
           vp9_enable_segfeature(xd, 1, SEG_LVL_SKIP);
         }
@@ -440,10 +440,10 @@ static void configure_static_seg_features(VP9_COMP *cpi) {
       vp9_enable_segfeature(xd, 1, SEG_LVL_REF_FRAME);
 
       // All mbs should use ALTREF_FRAME
-      vp9_clear_segref(xd, 0);
-      vp9_set_segref(xd, 0, ALTREF_FRAME);
-      vp9_clear_segref(xd, 1);
-      vp9_set_segref(xd, 1, ALTREF_FRAME);
+      vp9_clear_segdata(xd, 0, SEG_LVL_REF_FRAME);
+      vp9_set_segdata(xd, 0, SEG_LVL_REF_FRAME, ALTREF_FRAME);
+      vp9_clear_segdata(xd, 1, SEG_LVL_REF_FRAME);
+      vp9_set_segdata(xd, 1, SEG_LVL_REF_FRAME, ALTREF_FRAME);
 
       // Skip all MBs if high Q (0,0 mv and skip coeffs)
       if (high_q) {

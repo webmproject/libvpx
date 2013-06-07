@@ -241,22 +241,11 @@ static void read_ref_frame(VP9D_COMP *pbi, vp9_reader *r,
                            int segment_id, MV_REFERENCE_FRAME ref_frame[2]) {
   VP9_COMMON *const cm = &pbi->common;
   MACROBLOCKD *const xd = &pbi->mb;
-  int seg_ref_count = 0;
   const int seg_ref_active = vp9_segfeature_active(xd, segment_id,
                                                    SEG_LVL_REF_FRAME);
-  const int intra = vp9_check_segref(xd, segment_id, INTRA_FRAME);
-  const int last = vp9_check_segref(xd, segment_id, LAST_FRAME);
-  const int golden = vp9_check_segref(xd, segment_id, GOLDEN_FRAME);
-  const int altref = vp9_check_segref(xd, segment_id, ALTREF_FRAME);
 
-  // If segment coding enabled does the segment allow for more than one
-  // possible reference frame
-  if (seg_ref_active)
-    seg_ref_count = intra + last + golden + altref;
-
-  // Segment reference frame features not available or allows for
-  // multiple reference frame options
-  if (!seg_ref_active || seg_ref_count > 1) {
+  // Segment reference frame features not available.
+  if (!seg_ref_active) {
     int is_comp;
     int comp_ctx = vp9_get_pred_context(cm, xd, PRED_COMP_INTER_INTER);
 
@@ -291,7 +280,7 @@ static void read_ref_frame(VP9D_COMP *pbi, vp9_reader *r,
       }
     }
   } else {
-    ref_frame[0] = last ? LAST_FRAME : golden ? GOLDEN_FRAME : ALTREF_FRAME;
+    ref_frame[0] = vp9_get_segdata(xd, segment_id, SEG_LVL_REF_FRAME);
     ref_frame[1] = NONE;
   }
 }

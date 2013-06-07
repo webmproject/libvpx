@@ -70,21 +70,6 @@ int vp9_get_segdata(const MACROBLOCKD *xd, int segment_id,
   return xd->segment_feature_data[segment_id][feature_id];
 }
 
-void vp9_clear_segref(MACROBLOCKD *xd, int segment_id) {
-  xd->segment_feature_data[segment_id][SEG_LVL_REF_FRAME] = 0;
-}
-
-void vp9_set_segref(MACROBLOCKD *xd, int segment_id,
-                    MV_REFERENCE_FRAME ref_frame) {
-  xd->segment_feature_data[segment_id][SEG_LVL_REF_FRAME] |= 1 << ref_frame;
-}
-
-int vp9_check_segref(const MACROBLOCKD *xd, int segment_id,
-                     MV_REFERENCE_FRAME ref_frame) {
-  return (xd->segment_feature_data[segment_id][SEG_LVL_REF_FRAME] &
-         (1 << ref_frame)) ? 1 : 0;
-}
-
 
 const vp9_tree_index vp9_segment_tree[14] = {
   2,  4,  6,  8, 10, 12,

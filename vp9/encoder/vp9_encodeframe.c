@@ -575,11 +575,7 @@ static void set_offsets(VP9_COMP *cpi,
 
     if (xd->segmentation_enabled && cpi->seg0_cnt > 0 &&
         !vp9_segfeature_active(xd, 0, SEG_LVL_REF_FRAME) &&
-        vp9_segfeature_active(xd, 1, SEG_LVL_REF_FRAME) &&
-        vp9_check_segref(xd, 1, INTRA_FRAME)  +
-        vp9_check_segref(xd, 1, LAST_FRAME)   +
-        vp9_check_segref(xd, 1, GOLDEN_FRAME) +
-        vp9_check_segref(xd, 1, ALTREF_FRAME) == 1) {
+        vp9_segfeature_active(xd, 1, SEG_LVL_REF_FRAME)) {
       cpi->seg0_progress = (cpi->seg0_idx << 16) / cpi->seg0_cnt;
     } else {
       const int y = mb_row & ~3;
@@ -638,20 +634,13 @@ static void update_stats(VP9_COMP *cpi, int mi_row, int mi_col) {
     cpi->intra_inter_count[vp9_get_pred_context(cm, xd, PRED_INTRA_INTER)]
                           [mbmi->ref_frame[0] > INTRA_FRAME]++;
 
-    // If we have just a single reference frame coded for a segment then
-    // exclude from the reference frame counts used to work out
-    // probabilities. NOTE: At the moment we dont support custom trees
-    // for the reference frame coding for each segment but this is a
-    // possible future action.
+    // If the segment reference feature is enabled we have only a single
+    // reference frame allowed for the segment so exclude it from
+    // the reference frame counts used to work out probabilities.
     segment_id = mbmi->segment_id;
     seg_ref_active = vp9_segfeature_active(xd, segment_id,
                                            SEG_LVL_REF_FRAME);
-    if (mbmi->ref_frame[0] > INTRA_FRAME &&
-        (!seg_ref_active ||
-         ((vp9_check_segref(xd, segment_id, INTRA_FRAME) +
-           vp9_check_segref(xd, segment_id, LAST_FRAME) +
-           vp9_check_segref(xd, segment_id, GOLDEN_FRAME) +
-           vp9_check_segref(xd, segment_id, ALTREF_FRAME)) > 1))) {
+    if ((mbmi->ref_frame[0] > INTRA_FRAME) && !seg_ref_active) {
       if (cm->comp_pred_mode == HYBRID_PREDICTION)
         cpi->comp_inter_count[vp9_get_pred_context(cm, xd,
                                                    PRED_COMP_INTER_INTER)]
@@ -1616,15 +1605,6 @@ static int check_dual_ref_flags(VP9_COMP *cpi) {
   int ref_flags = cpi->ref_frame_flags;
 
   if (vp9_segfeature_active(xd, 1, SEG_LVL_REF_FRAME)) {
-    if ((ref_flags & (VP9_LAST_FLAG | VP9_GOLD_FLAG)) == (VP9_LAST_FLAG | VP9_GOLD_FLAG) &&
-        vp9_check_segref(xd, 1, LAST_FRAME))
-      return 1;
-    if ((ref_flags & (VP9_GOLD_FLAG | VP9_ALT_FLAG)) == (VP9_GOLD_FLAG | VP9_ALT_FLAG) &&
-        vp9_check_segref(xd, 1, GOLDEN_FRAME))
-      return 1;
-    if ((ref_flags & (VP9_ALT_FLAG  | VP9_LAST_FLAG)) == (VP9_ALT_FLAG  | VP9_LAST_FLAG) &&
-        vp9_check_segref(xd, 1, ALTREF_FRAME))
-      return 1;
     return 0;
   } else {
     return (!!(ref_flags & VP9_GOLD_FLAG) +
