@@ -16,6 +16,40 @@
       "revId": "d0f49300cc0a0051a39ac891f819e41adb61737e",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAZ3//3yc\u003d",
+        "filename": "vp9/encoder/vp9_bitstream.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1340,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2013-06-07T06:45:43Z",
+      "side": 1,
+      "message": "I think it would be better to have the oldest frame be the first one we use by default ...   so gld_fb first",
+      "revId": "d0f49300cc0a0051a39ac891f819e41adb61737e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAZ3//3yE\u003d",
+        "filename": "vp9/encoder/vp9_bitstream.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1381,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2013-06-07T06:45:43Z",
+      "side": 1,
+      "message": "I think adrian has another case for you tocheck.",
+      "revId": "d0f49300cc0a0051a39ac891f819e41adb61737e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
