@@ -547,7 +547,7 @@ static int build_lfi(const VP9_COMMON *cm, const MB_MODE_INFO *mbmi,
   int mode = mbmi->mode;
   int mode_index = lfi_n->mode_lf_lut[mode];
   int seg = mbmi->segment_id;
-  int ref_frame = mbmi->ref_frame;
+  int ref_frame = mbmi->ref_frame[0];
   int filter_level = lfi_n->lvl[seg][ref_frame][mode_index];
 
   if (filter_level) {
