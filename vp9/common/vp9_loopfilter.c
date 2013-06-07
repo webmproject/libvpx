@@ -683,8 +683,14 @@ static void filter_block_plane(VP9_COMMON *cm, MACROBLOCKD *xd,
       const int skip_left =
           (c + mi_col > 0) ? mi[c - 1].mbmi.mb_skip_coeff : 0;
       const int skip_this = mi[c].mbmi.mb_skip_coeff;
-      const int skip_this_c = skip_this && skip_left;
-      const int skip_this_r = skip_this && skip_above;
+      // left edge of current unit is block/partition edge -> no skip
+      const int block_edge_left = b_width_log2(mi->mbmi.sb_type) ?
+          !(c & ((1 << (b_width_log2(mi->mbmi.sb_type)-1)) - 1)) : 1;
+      const int skip_this_c = skip_this && skip_left && !block_edge_left;
+      // top edge of current unit is block/partition edge -> no skip
+      const int block_edge_above = b_height_log2(mi->mbmi.sb_type) ?
+          !(r & ((1 << (b_height_log2(mi->mbmi.sb_type)-1)) - 1)) : 1;
+      const int skip_this_r = skip_this && skip_above && !block_edge_above;
       const TX_SIZE tx_size = plane ? get_uv_tx_size(xd) : mi[c].mbmi.txfm_size;
 
       // Filter level can vary per MI
