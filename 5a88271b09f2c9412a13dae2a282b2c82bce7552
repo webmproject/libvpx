@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAZ3//334\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 27
+      },
+      "lineNbr": 471,
+      "author": {
+        "id": 1002476
+      },
+      "writtenOn": "2013-06-07T04:42:08Z",
+      "side": 1,
+      "message": "j used to loop height (or rows), i to loop width (or cols), is this comparison correct?",
+      "revId": "5a88271b09f2c9412a13dae2a282b2c82bce7552",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
