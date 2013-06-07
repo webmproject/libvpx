@@ -206,6 +206,7 @@ void vp9_mbloop_filter_vertical_edge_c(uint8_t *s, int pitch,
   }
 }
 
+#if !CONFIG_NEW_LOOPFILTER
 /* Vertical MB Filtering */
 void vp9_loop_filter_mbv_c(uint8_t *y_ptr, uint8_t *u_ptr,
                            uint8_t *v_ptr, int y_stride, int uv_stride,
@@ -308,6 +309,7 @@ void vp9_loop_filter_bv8x8_c(uint8_t *y, uint8_t *u, uint8_t *v,
     vp9_loop_filter_vertical_edge_c(v + 4, uv_stride,
                                     lfi->blim, lfi->lim, lfi->hev_thr, 1);
 }
+#endif
 
 static INLINE void wide_mbfilter(int8_t mask, uint8_t hev,
                                  uint8_t flat, uint8_t flat2,
@@ -412,6 +414,7 @@ void vp9_mb_lpf_vertical_edge_w(uint8_t *s, int p,
   }
 }
 
+#if !CONFIG_NEW_LOOPFILTER
 void vp9_lpf_mbv_w_c(uint8_t *y, uint8_t *u, uint8_t *v,
                      int y_stride, int uv_stride,
                      struct loop_filter_info *lfi) {
@@ -441,4 +444,4 @@ void vp9_lpf_mbh_w_c(uint8_t *y, uint8_t *u, uint8_t *v,
     vp9_mbloop_filter_horizontal_edge_c(v, uv_stride,
                                         lfi->mblim, lfi->lim, lfi->hev_thr, 1);
 }
-
+#endif
