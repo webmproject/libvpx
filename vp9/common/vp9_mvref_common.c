@@ -161,42 +161,10 @@ void vp9_find_mv_refs_idx(VP9_COMMON *cm, MACROBLOCKD *xd, MODE_INFO *here,
   vpx_memset(mv_ref_list, 0, sizeof(int_mv) * MAX_MV_REF_CANDIDATES);
   vpx_memset(candidate_scores, 0, sizeof(candidate_scores));
 
-  if (xd->mb_to_right_edge < 0 || xd->mb_to_bottom_edge < 0) {
-    int pixels_wide = 4 * b_width_log2(mbmi->sb_type);
-    int pixels_high = 4 * b_height_log2(mbmi->sb_type);
-    int pixels_square = 0;
-
-    if (xd->mb_to_right_edge < 0)
-      pixels_wide += (xd->mb_to_right_edge >> 3);
-
-    if (xd->mb_to_bottom_edge < 0)
-      pixels_high += (xd->mb_to_bottom_edge >> 3);
-
-    if ( pixels_wide < pixels_high )
-      pixels_square = pixels_wide;
-    else
-      pixels_square = pixels_high;
-
-    if (pixels_square == 64) {
-      mv_ref_search = mv_ref_blocks[BLOCK_SIZE_SB64X64];
-    } else if (pixels_square == 32) {
-      mv_ref_search = mv_ref_blocks[BLOCK_SIZE_SB32X32];
-    } else if (pixels_square == 16) {
-      mv_ref_search = mv_ref_blocks[BLOCK_SIZE_MB16X16];
-    } else {
-      mv_ref_search = mv_ref_blocks[BLOCK_SIZE_SB8X8];
-      if (mbmi->sb_type < BLOCK_SIZE_SB8X8) {
-        x_idx = block_idx & 1;
-        y_idx = block_idx >> 1;
-      }
-    }
-  }
-  else {
   mv_ref_search = mv_ref_blocks[mbmi->sb_type];
-    if (mbmi->sb_type < BLOCK_SIZE_SB8X8) {
-      x_idx = block_idx & 1;
-      y_idx = block_idx >> 1;
-      }
+  if (mbmi->sb_type < BLOCK_SIZE_SB8X8) {
+    x_idx = block_idx & 1;
+    y_idx = block_idx >> 1;
   }
 
   // We first scan for candidate vectors that match the current reference frame
@@ -205,7 +173,8 @@ void vp9_find_mv_refs_idx(VP9_COMMON *cm, MACROBLOCKD *xd, MODE_INFO *here,
     const int mi_search_col = mi_col + mv_ref_search[i][0];
     if ((mi_search_col >= cm->cur_tile_mi_col_start) &&
         (mi_search_col < cm->cur_tile_mi_col_end) &&
-        ((mv_ref_search[i][1] << 6) >= xd->mb_to_top_edge)) {
+        ((mv_ref_search[i][1] << 6) >= xd->mb_to_top_edge) &&
+        ((-mv_ref_search[i][1] << 6) <= xd->mb_to_bottom_edge)) {
       int b;
 
       candidate_mi = here + mv_ref_search[i][0] +
@@ -240,7 +209,8 @@ void vp9_find_mv_refs_idx(VP9_COMMON *cm, MACROBLOCKD *xd, MODE_INFO *here,
 
     if ((mi_search_col >= cm->cur_tile_mi_col_start) &&
         (mi_search_col < cm->cur_tile_mi_col_end) &&
-        ((mv_ref_search[i][1] << 6) >= xd->mb_to_top_edge)) {
+        ((mv_ref_search[i][1] << 6) >= xd->mb_to_top_edge) &&
+        ((-mv_ref_search[i][1] << 6) <= xd->mb_to_bottom_edge)) {
       candidate_mi = here + mv_ref_search[i][0] +
                      (mv_ref_search[i][1] * xd->mode_info_stride);
 
@@ -270,7 +240,8 @@ void vp9_find_mv_refs_idx(VP9_COMMON *cm, MACROBLOCKD *xd, MODE_INFO *here,
 
     if ((mi_search_col >= cm->cur_tile_mi_col_start) &&
         (mi_search_col < cm->cur_tile_mi_col_end) &&
-        ((mv_ref_search[i][1] << 6) >= xd->mb_to_top_edge)) {
+        ((mv_ref_search[i][1] << 6) >= xd->mb_to_top_edge) &&
+        ((-mv_ref_search[i][1] << 6) <= xd->mb_to_bottom_edge)) {
       candidate_mi = here + mv_ref_search[i][0] +
                      (mv_ref_search[i][1] * xd->mode_info_stride);
 
