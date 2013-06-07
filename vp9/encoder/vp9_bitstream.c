@@ -1361,12 +1361,21 @@ static void write_uncompressed_header(VP9_COMP *cpi,
     // 000 - Unknown
     // 001 - BT.601
     // 010 - BT.709
-    // 011 - xvYCC
-    // 1xx - Reserved
+    // 011 - SMPTE-170
+    // 100 - SMPTE-240
+    // 101 - Reserved
+    // 110 - Reserved
+    // 111 - sRGB (RGB)
     vp9_wb_write_literal(wb, 0, 3);
-    if (cm->version == 1) {
-      vp9_wb_write_bit(wb, cm->subsampling_x);
-      vp9_wb_write_bit(wb, cm->subsampling_y);
+    if (1 /* colorspace != sRGB */) {
+      vp9_wb_write_bit(wb, 0);  // 0: [16, 235] (i.e. xvYCC), 1: [0, 255]
+      if (cm->version == 1) {
+        vp9_wb_write_bit(wb, cm->subsampling_x);
+        vp9_wb_write_bit(wb, cm->subsampling_y);
+        vp9_wb_write_bit(wb, 0);  // has extra plane
+      }
+    } else {
+      assert(cm->version == 1);
       vp9_wb_write_bit(wb, 0);  // has extra plane
     }
 

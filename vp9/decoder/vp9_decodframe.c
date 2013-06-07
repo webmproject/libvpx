@@ -959,6 +959,8 @@ static size_t read_uncompressed_header(VP9D_COMP *pbi,
   cm->error_resilient_mode = vp9_rb_read_bit(rb);
 
   if (cm->frame_type == KEY_FRAME) {
+    int csp;
+
     if (vp9_rb_read_literal(rb, 8) != SYNC_CODE_0 ||
         vp9_rb_read_literal(rb, 8) != SYNC_CODE_1 ||
         vp9_rb_read_literal(rb, 8) != SYNC_CODE_2) {
@@ -966,13 +968,24 @@ static size_t read_uncompressed_header(VP9D_COMP *pbi,
                          "Invalid frame sync code");
     }
 
-    vp9_rb_read_literal(rb, 3);  // colorspace
-    if (cm->version == 1) {
-      cm->subsampling_x = vp9_rb_read_bit(rb);
-      cm->subsampling_y = vp9_rb_read_bit(rb);
-      vp9_rb_read_bit(rb);  // has extra plane
+    csp = vp9_rb_read_literal(rb, 3);  // colorspace
+    if (csp != 7) {  // != sRGB
+      vp9_rb_read_bit(rb);  // [16,235] (including xvycc) vs [0,255] range
+      if (cm->version == 1) {
+        cm->subsampling_x = vp9_rb_read_bit(rb);
+        cm->subsampling_y = vp9_rb_read_bit(rb);
+        vp9_rb_read_bit(rb);  // has extra plane
+      } else {
+        cm->subsampling_y = cm->subsampling_x = 1;
+      }
     } else {
-      cm->subsampling_y = cm->subsampling_x = 1;
+      if (cm->version == 1) {
+        cm->subsampling_y = cm->subsampling_x = 0;
+        vp9_rb_read_bit(rb);  // has extra plane
+      } else {
+        vpx_internal_error(&cm->error, VPX_CODEC_UNSUP_BITSTREAM,
+                           "RGB not supported in profile 0");
+      }
     }
 
     vp9_setup_past_independence(cm, xd);
