@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAZ3//3SM\u003d",
+        "filename": "vpxdec.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 988,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2013-06-07T17:33:21Z",
+      "side": 1,
+      "message": "When multithread is turned on and the file only has a few frames it might not work. You might get into a situation where (frame_avail || got_data) eval to 0. But I think it is fine for now.",
+      "revId": "c3ae212e80f599c2cee40301c7b619383db33896",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
