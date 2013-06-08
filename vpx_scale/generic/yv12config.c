@@ -125,8 +125,8 @@ int vp9_realloc_frame_buffer(YV12_BUFFER_CONFIG *ybf,
                              int width, int height,
                              int ss_x, int ss_y, int border) {
   if (ybf) {
-    const int aligned_width = (width + 15) & ~15;
-    const int aligned_height = (height + 15) & ~15;
+    const int aligned_width = (width + 7) & ~7;
+    const int aligned_height = (height + 7) & ~7;
     const int y_stride = ((aligned_width + 2 * border) + 31) & ~31;
     const int yplane_size = (aligned_height + 2 * border) * y_stride;
     const int uv_width = aligned_width >> ss_x;

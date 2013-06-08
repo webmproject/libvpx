@@ -2409,8 +2409,8 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
   int64_t mcomp_filter_cost[4];
 
   /* Scale the source buffer, if required */
-  if (cm->mb_cols * 16 != cpi->un_scaled_source->y_width ||
-      cm->mb_rows * 16 != cpi->un_scaled_source->y_height) {
+  if (cm->mi_cols * 8 != cpi->un_scaled_source->y_width ||
+      cm->mi_rows * 8 != cpi->un_scaled_source->y_height) {
     scale_and_extend_frame(cpi->un_scaled_source, &cpi->scaled_source);
     cpi->Source = &cpi->scaled_source;
   } else {
