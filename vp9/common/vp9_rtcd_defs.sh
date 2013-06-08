@@ -545,6 +545,15 @@ prototype unsigned int vp9_mse16x16 "const uint8_t *src_ptr, int  source_stride,
 specialize vp9_mse16x16 mmx sse2
 vp9_mse16x16_sse2=vp9_mse16x16_wmt
 
+prototype unsigned int vp9_mse8x16 "const uint8_t *src_ptr, int  source_stride, const uint8_t *ref_ptr, int  recon_stride, unsigned int *sse"
+specialize vp9_mse8x16
+
+prototype unsigned int vp9_mse16x8 "const uint8_t *src_ptr, int  source_stride, const uint8_t *ref_ptr, int  recon_stride, unsigned int *sse"
+specialize vp9_mse16x8
+
+prototype unsigned int vp9_mse8x8 "const uint8_t *src_ptr, int  source_stride, const uint8_t *ref_ptr, int  recon_stride, unsigned int *sse"
+specialize vp9_mse8x8
+
 prototype unsigned int vp9_sub_pixel_mse64x64 "const uint8_t *src_ptr, int  source_stride, int  xoffset, int  yoffset, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse"
 specialize vp9_sub_pixel_mse64x64
 

@@ -22,11 +22,11 @@ int vp9_encode_intra(VP9_COMP *cpi, MACROBLOCK *x, int use_16x16_pred) {
   mbmi->mode = DC_PRED;
   mbmi->ref_frame[0] = INTRA_FRAME;
   if (use_16x16_pred) {
-    mbmi->txfm_size = TX_16X16;
-    vp9_encode_intra_block_y(&cpi->common, x, BLOCK_SIZE_MB16X16);
+    mbmi->txfm_size = mbmi->sb_type >= BLOCK_SIZE_MB16X16 ? TX_16X16 : TX_8X8;
+    vp9_encode_intra_block_y(&cpi->common, x, mbmi->sb_type);
   } else {
     mbmi->txfm_size = TX_4X4;
-    vp9_encode_intra_block_y(&cpi->common, x, BLOCK_SIZE_MB16X16);
+    vp9_encode_intra_block_y(&cpi->common, x, mbmi->sb_type);
   }
 
   return vp9_get_mb_ss(x->plane[0].src_diff);
