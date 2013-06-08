@@ -149,24 +149,36 @@ static const vp9_prob default_single_ref_p[REF_CONTEXTS][2] = {
   { 235, 248 },
 };
 
-const vp9_prob vp9_default_tx_probs_32x32p[TX_SIZE_MAX_SB]
+#if TX_SIZE_CONTEXTS == 2
+const vp9_prob vp9_default_tx_probs_32x32p[TX_SIZE_CONTEXTS]
                                           [TX_SIZE_MAX_SB - 1] = {
-  { 16, 64, 96, },
-  { 32, 64, 96, },
-  { 32, 64, 96, },
-  { 32, 64, 96, },
+  { 16, 32, 64, },
+  { 16, 32, 64, },
 };
-const vp9_prob vp9_default_tx_probs_16x16p[TX_SIZE_MAX_SB - 1]
+const vp9_prob vp9_default_tx_probs_16x16p[TX_SIZE_CONTEXTS]
                                           [TX_SIZE_MAX_SB - 2] = {
-  { 32, 96, },
-  { 64, 96, },
-  { 64, 96, },
+  { 32, 64, },
+  { 32, 64, },
 };
-const vp9_prob vp9_default_tx_probs_8x8p[TX_SIZE_MAX_SB - 2]
+const vp9_prob vp9_default_tx_probs_8x8p[TX_SIZE_CONTEXTS]
                                         [TX_SIZE_MAX_SB - 3] = {
-  { 96, },
-  { 96, },
+  { 64, },
+  { 64, },
 };
+#else
+const vp9_prob vp9_default_tx_probs_32x32p[TX_SIZE_CONTEXTS]
+                                          [TX_SIZE_MAX_SB - 1] = {
+  { 16, 32, 64, },
+};
+const vp9_prob vp9_default_tx_probs_16x16p[TX_SIZE_CONTEXTS]
+                                          [TX_SIZE_MAX_SB - 2] = {
+  { 32, 64, },
+};
+const vp9_prob vp9_default_tx_probs_8x8p[TX_SIZE_CONTEXTS]
+                                        [TX_SIZE_MAX_SB - 3] = {
+  { 64, },
+};
+#endif
 
 void tx_counts_to_branch_counts_32x32(unsigned int *tx_count_32x32p,
                                       unsigned int (*ct_32x32p)[2]) {
@@ -438,7 +450,7 @@ void vp9_adapt_mode_probs(VP9_COMMON *cm) {
     unsigned int branch_ct_8x8p[TX_SIZE_MAX_SB - 3][2];
     unsigned int branch_ct_16x16p[TX_SIZE_MAX_SB - 2][2];
     unsigned int branch_ct_32x32p[TX_SIZE_MAX_SB - 1][2];
-    for (i = 0; i < TX_SIZE_MAX_SB - 2; ++i) {
+    for (i = 0; i < TX_SIZE_CONTEXTS; ++i) {
       tx_counts_to_branch_counts_8x8(cm->fc.tx_count_8x8p[i],
                                      branch_ct_8x8p);
       for (j = 0; j < TX_SIZE_MAX_SB - 3; ++j) {
@@ -452,7 +464,7 @@ void vp9_adapt_mode_probs(VP9_COMMON *cm) {
             cm->fc.pre_tx_probs_8x8p[i][j], prob, factor);
       }
     }
-    for (i = 0; i < TX_SIZE_MAX_SB - 1; ++i) {
+    for (i = 0; i < TX_SIZE_CONTEXTS; ++i) {
       tx_counts_to_branch_counts_16x16(cm->fc.tx_count_16x16p[i],
                                        branch_ct_16x16p);
       for (j = 0; j < TX_SIZE_MAX_SB - 2; ++j) {
@@ -466,7 +478,7 @@ void vp9_adapt_mode_probs(VP9_COMMON *cm) {
             cm->fc.pre_tx_probs_16x16p[i][j], prob, factor);
       }
     }
-    for (i = 0; i < TX_SIZE_MAX_SB; ++i) {
+    for (i = 0; i < TX_SIZE_CONTEXTS; ++i) {
       tx_counts_to_branch_counts_32x32(cm->fc.tx_count_32x32p[i],
                                        branch_ct_32x32p);
       for (j = 0; j < TX_SIZE_MAX_SB - 1; ++j) {

@@ -59,21 +59,21 @@ static void setup_txfm_mode(VP9_COMMON *pc, int lossless, vp9_reader *r) {
       pc->txfm_mode += vp9_read_bit(r);
     if (pc->txfm_mode == TX_MODE_SELECT) {
       int i, j;
-      for (i = 0; i < TX_SIZE_MAX_SB - 2; ++i) {
+      for (i = 0; i < TX_SIZE_CONTEXTS; ++i) {
         for (j = 0; j < TX_SIZE_MAX_SB - 3; ++j) {
           if (vp9_read(r, VP9_DEF_UPDATE_PROB))
             pc->fc.tx_probs_8x8p[i][j] =
                 vp9_read_prob_diff_update(r, pc->fc.tx_probs_8x8p[i][j]);
         }
       }
-      for (i = 0; i < TX_SIZE_MAX_SB - 1; ++i) {
+      for (i = 0; i < TX_SIZE_CONTEXTS; ++i) {
         for (j = 0; j < TX_SIZE_MAX_SB - 2; ++j) {
           if (vp9_read(r, VP9_DEF_UPDATE_PROB))
             pc->fc.tx_probs_16x16p[i][j] =
                 vp9_read_prob_diff_update(r, pc->fc.tx_probs_16x16p[i][j]);
         }
       }
-      for (i = 0; i < TX_SIZE_MAX_SB; ++i) {
+      for (i = 0; i < TX_SIZE_CONTEXTS; ++i) {
         for (j = 0; j < TX_SIZE_MAX_SB - 1; ++j) {
           if (vp9_read(r, VP9_DEF_UPDATE_PROB))
             pc->fc.tx_probs_32x32p[i][j] =

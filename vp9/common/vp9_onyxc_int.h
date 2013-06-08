@@ -90,15 +90,15 @@ typedef struct frame_contexts {
   unsigned int single_ref_count[REF_CONTEXTS][2][2];
   unsigned int comp_ref_count[REF_CONTEXTS][2];
 
-  vp9_prob tx_probs_32x32p[TX_SIZE_MAX_SB][TX_SIZE_MAX_SB - 1];
-  vp9_prob tx_probs_16x16p[TX_SIZE_MAX_SB - 1][TX_SIZE_MAX_SB - 2];
-  vp9_prob tx_probs_8x8p[TX_SIZE_MAX_SB - 2][TX_SIZE_MAX_SB - 3];
-  vp9_prob pre_tx_probs_32x32p[TX_SIZE_MAX_SB][TX_SIZE_MAX_SB - 1];
-  vp9_prob pre_tx_probs_16x16p[TX_SIZE_MAX_SB - 1][TX_SIZE_MAX_SB - 2];
-  vp9_prob pre_tx_probs_8x8p[TX_SIZE_MAX_SB - 2][TX_SIZE_MAX_SB - 3];
-  unsigned int tx_count_32x32p[TX_SIZE_MAX_SB][TX_SIZE_MAX_SB];
-  unsigned int tx_count_16x16p[TX_SIZE_MAX_SB - 1][TX_SIZE_MAX_SB - 1];
-  unsigned int tx_count_8x8p[TX_SIZE_MAX_SB - 2][TX_SIZE_MAX_SB - 2];
+  vp9_prob tx_probs_32x32p[TX_SIZE_CONTEXTS][TX_SIZE_MAX_SB - 1];
+  vp9_prob tx_probs_16x16p[TX_SIZE_CONTEXTS][TX_SIZE_MAX_SB - 2];
+  vp9_prob tx_probs_8x8p[TX_SIZE_CONTEXTS][TX_SIZE_MAX_SB - 3];
+  vp9_prob pre_tx_probs_32x32p[TX_SIZE_CONTEXTS][TX_SIZE_MAX_SB - 1];
+  vp9_prob pre_tx_probs_16x16p[TX_SIZE_CONTEXTS][TX_SIZE_MAX_SB - 2];
+  vp9_prob pre_tx_probs_8x8p[TX_SIZE_CONTEXTS][TX_SIZE_MAX_SB - 3];
+  unsigned int tx_count_32x32p[TX_SIZE_CONTEXTS][TX_SIZE_MAX_SB];
+  unsigned int tx_count_16x16p[TX_SIZE_CONTEXTS][TX_SIZE_MAX_SB - 1];
+  unsigned int tx_count_8x8p[TX_SIZE_CONTEXTS][TX_SIZE_MAX_SB - 2];
 
   vp9_prob mbskip_probs[MBSKIP_CONTEXTS];
   vp9_prob pre_mbskip_probs[MBSKIP_CONTEXTS];

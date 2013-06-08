@@ -52,9 +52,9 @@ extern unsigned int active_section;
 #define vp9_cost_upd256  ((int)(vp9_cost_one(upd) - vp9_cost_zero(upd)))
 
 #ifdef MODE_STATS
-int64_t tx_count_32x32p_stats[TX_SIZE_MAX_SB][TX_SIZE_MAX_SB];
-int64_t tx_count_16x16p_stats[TX_SIZE_MAX_SB - 1][TX_SIZE_MAX_SB - 1];
-int64_t tx_count_8x8p_stats[TX_SIZE_MAX_SB - 2][TX_SIZE_MAX_SB - 2];
+int64_t tx_count_32x32p_stats[TX_SIZE_CONTEXTS][TX_SIZE_MAX_SB];
+int64_t tx_count_16x16p_stats[TX_SIZE_CONTEXTS][TX_SIZE_MAX_SB - 1];
+int64_t tx_count_8x8p_stats[TX_SIZE_CONTEXTS][TX_SIZE_MAX_SB - 2];
 
 void init_tx_count_stats() {
   vp9_zero(tx_count_32x32p_stats);
@@ -64,17 +64,17 @@ void init_tx_count_stats() {
 
 static void update_tx_count_stats(VP9_COMMON *cm) {
   int i, j;
-  for (i = 0; i < TX_SIZE_MAX_SB; i++) {
+  for (i = 0; i < TX_SIZE_CONTEXTS; i++) {
     for (j = 0; j < TX_SIZE_MAX_SB; j++) {
       tx_count_32x32p_stats[i][j] += cm->fc.tx_count_32x32p[i][j];
     }
   }
-  for (i = 0; i < TX_SIZE_MAX_SB - 1; i++) {
+  for (i = 0; i < TX_SIZE_CONTEXTS; i++) {
     for (j = 0; j < TX_SIZE_MAX_SB - 1; j++) {
       tx_count_16x16p_stats[i][j] += cm->fc.tx_count_16x16p[i][j];
     }
   }
-  for (i = 0; i < TX_SIZE_MAX_SB - 2; i++) {
+  for (i = 0; i < TX_SIZE_CONTEXTS; i++) {
     for (j = 0; j < TX_SIZE_MAX_SB - 2; j++) {
       tx_count_8x8p_stats[i][j] += cm->fc.tx_count_8x8p[i][j];
     }
@@ -89,27 +89,30 @@ void write_tx_count_stats() {
   fwrite(tx_count_8x8p_stats, sizeof(tx_count_8x8p_stats), 1, fp);
   fclose(fp);
 
-  printf("vp9_default_tx_count_32x32p[TX_SIZE_MAX_SB][TX_SIZE_MAX_SB] = {\n");
-  for (i = 0; i < TX_SIZE_MAX_SB; i++) {
-    printf("{ ");
+  printf(
+      "vp9_default_tx_count_32x32p[TX_SIZE_CONTEXTS][TX_SIZE_MAX_SB] = {\n");
+  for (i = 0; i < TX_SIZE_CONTEXTS; i++) {
+    printf("  { ");
     for (j = 0; j < TX_SIZE_MAX_SB; j++) {
       printf("%"PRId64", ", tx_count_32x32p_stats[i][j]);
     }
     printf("},\n");
   }
   printf("};\n");
-  printf("vp9_default_tx_count_16x16p[TX_SIZE_MAX_SB-1][TX_SIZE_MAX_SB-1] = {\n");
-  for (i = 0; i < TX_SIZE_MAX_SB - 1; i++) {
-    printf("{ ");
+  printf(
+      "vp9_default_tx_count_16x16p[TX_SIZE_CONTEXTS][TX_SIZE_MAX_SB-1] = {\n");
+  for (i = 0; i < TX_SIZE_CONTEXTS; i++) {
+    printf("  { ");
     for (j = 0; j < TX_SIZE_MAX_SB - 1; j++) {
       printf("%"PRId64", ", tx_count_16x16p_stats[i][j]);
     }
     printf("},\n");
   }
   printf("};\n");
-  printf("vp9_default_tx_count_8x8p[TX_SIZE_MAX_SB-2][TX_SIZE_MAX_SB-2] = {\n");
-  for (i = 0; i < TX_SIZE_MAX_SB - 2; i++) {
-    printf("{ ");
+  printf(
+      "vp9_default_tx_count_8x8p[TX_SIZE_CONTEXTS][TX_SIZE_MAX_SB-2] = {\n");
+  for (i = 0; i < TX_SIZE_CONTEXTS; i++) {
+    printf("  { ");
     for (j = 0; j < TX_SIZE_MAX_SB - 2; j++) {
       printf("%"PRId64", ", tx_count_8x8p_stats[i][j]);
     }
@@ -1301,7 +1304,7 @@ static void encode_txfm_probs(VP9_COMP *cpi, vp9_writer *w) {
     unsigned int ct_32x32p[TX_SIZE_MAX_SB - 1][2];
 
 
-    for (i = 0; i < TX_SIZE_MAX_SB - 2; i++) {
+    for (i = 0; i < TX_SIZE_CONTEXTS; i++) {
       tx_counts_to_branch_counts_8x8(cm->fc.tx_count_8x8p[i],
                                      ct_8x8p);
       for (j = 0; j < TX_SIZE_MAX_SB - 3; j++) {
@@ -1309,7 +1312,7 @@ static void encode_txfm_probs(VP9_COMP *cpi, vp9_writer *w) {
                                   VP9_DEF_UPDATE_PROB, ct_8x8p[j]);
       }
     }
-    for (i = 0; i < TX_SIZE_MAX_SB - 1; i++) {
+    for (i = 0; i < TX_SIZE_CONTEXTS; i++) {
       tx_counts_to_branch_counts_16x16(cm->fc.tx_count_16x16p[i],
                                        ct_16x16p);
       for (j = 0; j < TX_SIZE_MAX_SB - 2; j++) {
@@ -1317,7 +1320,7 @@ static void encode_txfm_probs(VP9_COMP *cpi, vp9_writer *w) {
                                   VP9_DEF_UPDATE_PROB, ct_16x16p[j]);
       }
     }
-    for (i = 0; i < TX_SIZE_MAX_SB; i++) {
+    for (i = 0; i < TX_SIZE_CONTEXTS; i++) {
       tx_counts_to_branch_counts_32x32(cm->fc.tx_count_32x32p[i],
                                        ct_32x32p);
       for (j = 0; j < TX_SIZE_MAX_SB - 1; j++) {

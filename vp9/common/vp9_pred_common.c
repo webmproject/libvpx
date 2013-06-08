@@ -349,7 +349,8 @@ unsigned char vp9_get_pred_context(const VP9_COMMON *const cm,
     }
 
     case PRED_TX_SIZE: {
-      int above_context = TX_16X16, left_context = TX_16X16;
+#if TX_SIZE_CONTEXTS == 2
+      int above_context, left_context;
       int max_tx_size;
       if (mi->mbmi.sb_type < BLOCK_SIZE_SB8X8)
         max_tx_size = TX_4X4;
@@ -359,6 +360,7 @@ unsigned char vp9_get_pred_context(const VP9_COMMON *const cm,
         max_tx_size = TX_16X16;
       else
         max_tx_size = TX_32X32;
+      above_context = left_context = max_tx_size;
       if (above_in_image) {
         above_context = (above_mi->mbmi.mb_skip_coeff ?
                          max_tx_size : above_mi->mbmi.txfm_size);
@@ -373,9 +375,10 @@ unsigned char vp9_get_pred_context(const VP9_COMMON *const cm,
       if (!above_in_image) {
         above_context = left_context;
       }
-      pred_context = (above_context + left_context + 1) >> 1;
-      if (pred_context > max_tx_size)
-        pred_context = max_tx_size;
+      pred_context = (above_context + left_context > max_tx_size);
+#else
+      pred_context = 0;
+#endif
       break;
     }
 

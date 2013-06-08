@@ -1869,28 +1869,28 @@ void vp9_encode_frame(VP9_COMP *cpi) {
       int count16x16_16x16p = 0, count16x16_lp = 0;
       int count32x32 = 0;
 
-      for (i = 0; i < TX_SIZE_MAX_SB; i++)
+      for (i = 0; i < TX_SIZE_CONTEXTS; i++)
         count4x4 += cm->fc.tx_count_32x32p[i][TX_4X4];
-      for (i = 0; i < TX_SIZE_MAX_SB - 1; i++)
+      for (i = 0; i < TX_SIZE_CONTEXTS; i++)
         count4x4 += cm->fc.tx_count_16x16p[i][TX_4X4];
-      for (i = 0; i < TX_SIZE_MAX_SB - 2; i++)
+      for (i = 0; i < TX_SIZE_CONTEXTS; i++)
         count4x4 += cm->fc.tx_count_8x8p[i][TX_4X4];
 
-      for (i = 0; i < TX_SIZE_MAX_SB; i++)
+      for (i = 0; i < TX_SIZE_CONTEXTS; i++)
         count8x8_lp += cm->fc.tx_count_32x32p[i][TX_8X8];
-      for (i = 0; i < TX_SIZE_MAX_SB - 1; i++)
+      for (i = 0; i < TX_SIZE_CONTEXTS; i++)
         count8x8_lp += cm->fc.tx_count_16x16p[i][TX_8X8];
 
-      for (i = 0; i < TX_SIZE_MAX_SB - 2; i++)
+      for (i = 0; i < TX_SIZE_CONTEXTS; i++)
         count8x8_8x8p += cm->fc.tx_count_8x8p[i][TX_8X8];
 
-      for (i = 0; i < TX_SIZE_MAX_SB - 1; i++)
+      for (i = 0; i < TX_SIZE_CONTEXTS; i++)
         count16x16_16x16p += cm->fc.tx_count_16x16p[i][TX_16X16];
 
-      for (i = 0; i < TX_SIZE_MAX_SB; i++)
+      for (i = 0; i < TX_SIZE_CONTEXTS; i++)
         count16x16_lp += cm->fc.tx_count_32x32p[i][TX_16X16];
 
-      for (i = 0; i < TX_SIZE_MAX_SB; i++)
+      for (i = 0; i < TX_SIZE_CONTEXTS; i++)
         count32x32 += cm->fc.tx_count_32x32p[i][TX_32X32];
 
       if (count4x4 == 0 && count16x16_lp == 0 && count16x16_16x16p == 0 &&
