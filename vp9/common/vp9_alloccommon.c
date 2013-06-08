@@ -74,7 +74,7 @@ static void set_mb_mi(VP9_COMMON *cm, int aligned_width, int aligned_height) {
 
   cm->mi_cols = aligned_width >> LOG2_MI_SIZE;
   cm->mi_rows = aligned_height >> LOG2_MI_SIZE;
-  cm->mode_info_stride = cm->mi_cols + 1;
+  cm->mode_info_stride = cm->mi_cols + 64 / MI_SIZE;
 }
 
 static void setup_mi(VP9_COMMON *cm) {
@@ -131,12 +131,13 @@ int vp9_alloc_frame_buffers(VP9_COMMON *oci, int width, int height) {
   set_mb_mi(oci, aligned_width, aligned_height);
 
   // Allocation
-  oci->mip = vpx_calloc(oci->mode_info_stride * (oci->mi_rows + 1),
+  oci->mip = vpx_calloc(oci->mode_info_stride * (oci->mi_rows + 64 / MI_SIZE),
                         sizeof(MODE_INFO));
   if (!oci->mip)
     goto fail;
 
-  oci->prev_mip = vpx_calloc(oci->mode_info_stride * (oci->mi_rows + 1),
+  oci->prev_mip = vpx_calloc(oci->mode_info_stride *
+                             (oci->mi_rows + 64 / MI_SIZE),
                              sizeof(MODE_INFO));
   if (!oci->prev_mip)
     goto fail;
