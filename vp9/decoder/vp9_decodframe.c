@@ -731,34 +731,20 @@ static INTERPOLATIONFILTERTYPE read_interp_filter_type(
                              : vp9_rb_read_literal(rb, 2);
 }
 
-static void read_frame_size(VP9_COMMON *cm,
-                            struct vp9_read_bit_buffer *rb,
+static void read_frame_size(VP9_COMMON *cm, struct vp9_read_bit_buffer *rb,
                             int *width, int *height) {
-  const int w = vp9_rb_read_literal(rb, 16);
-  const int h = vp9_rb_read_literal(rb, 16);
-  if (w <= 0)
-    vpx_internal_error(&cm->error, VPX_CODEC_CORRUPT_FRAME,
-                       "Invalid frame width");
-
-  if (h <= 0)
-    vpx_internal_error(&cm->error, VPX_CODEC_CORRUPT_FRAME,
-                       "Invalid frame height");
+  const int w = vp9_rb_read_literal(rb, 16) + 1;
+  const int h = vp9_rb_read_literal(rb, 16) + 1;
   *width = w;
   *height = h;
 }
 
-static void setup_display_size(VP9D_COMP *pbi,
-                               struct vp9_read_bit_buffer *rb) {
+static void setup_display_size(VP9D_COMP *pbi, struct vp9_read_bit_buffer *rb) {
   VP9_COMMON *const cm = &pbi->common;
-  if (vp9_rb_read_bit(rb)) {
-    int width, height;
-    read_frame_size(cm, rb, &width, &height);
-    cm->display_width = width;
-    cm->display_height = height;
-  } else {
-    cm->display_width = cm->width;
-    cm->display_height = cm->height;
-  }
+  cm->display_width = cm->width;
+  cm->display_height = cm->height;
+  if (vp9_rb_read_bit(rb))
+    read_frame_size(cm, rb, &cm->display_width, &cm->display_height);
 }
 
 static void apply_frame_size(VP9D_COMP *pbi, int width, int height) {
@@ -797,6 +783,29 @@ static void setup_frame_size(VP9D_COMP *pbi,
   VP9_COMMON *const cm = &pbi->common;
   int width, height;
   read_frame_size(cm, rb, &width, &height);
+  setup_display_size(pbi, rb);
+  apply_frame_size(pbi, width, height);
+}
+
+static void setup_frame_size_with_refs(VP9D_COMP *pbi,
+                                       struct vp9_read_bit_buffer *rb) {
+  VP9_COMMON *const cm = &pbi->common;
+
+  int width, height;
+  int found = 0, i;
+  for (i = 0; i < ALLOWED_REFS_PER_FRAME; ++i) {
+    if (vp9_rb_read_bit(rb)) {
+      YV12_BUFFER_CONFIG *cfg = &cm->yv12_fb[cm->active_ref_idx[i]];
+      width = cfg->y_crop_width;
+      height = cfg->y_crop_height;
+      found = 1;
+      break;
+    }
+  }
+
+  if (!found)
+    read_frame_size(cm, rb, &width, &height);
+
   setup_display_size(pbi, rb);
   apply_frame_size(pbi, width, height);
 }
@@ -943,10 +952,47 @@ static void decode_tiles(VP9D_COMP *pbi,
   }
 }
 
+static void check_sync_code(VP9_COMMON *cm, struct vp9_read_bit_buffer *rb) {
+  if (vp9_rb_read_literal(rb, 8) != SYNC_CODE_0 ||
+      vp9_rb_read_literal(rb, 8) != SYNC_CODE_1 ||
+      vp9_rb_read_literal(rb, 8) != SYNC_CODE_2) {
+    vpx_internal_error(&cm->error, VPX_CODEC_UNSUP_BITSTREAM,
+                       "Invalid frame sync code");
+  }
+}
 
 static void error_handler(void *data, int bit_offset) {
   VP9_COMMON *const cm = (VP9_COMMON *)data;
   vpx_internal_error(&cm->error, VPX_CODEC_CORRUPT_FRAME, "Truncated packet");
+}
+
+static void setup_inter_inter(VP9_COMMON *cm) {
+  int i;
+
+  cm->allow_comp_inter_inter = 0;
+  for (i = 0; i < ALLOWED_REFS_PER_FRAME; ++i) {
+    cm->allow_comp_inter_inter |= i > 0 &&
+        cm->ref_frame_sign_bias[i + 1] != cm->ref_frame_sign_bias[1];
+  }
+
+  if (cm->allow_comp_inter_inter) {
+    // which one is always-on in comp inter-inter?
+    if (cm->ref_frame_sign_bias[LAST_FRAME] ==
+        cm->ref_frame_sign_bias[GOLDEN_FRAME]) {
+      cm->comp_fixed_ref = ALTREF_FRAME;
+      cm->comp_var_ref[0] = LAST_FRAME;
+      cm->comp_var_ref[1] = GOLDEN_FRAME;
+    } else if (cm->ref_frame_sign_bias[LAST_FRAME] ==
+               cm->ref_frame_sign_bias[ALTREF_FRAME]) {
+      cm->comp_fixed_ref = GOLDEN_FRAME;
+      cm->comp_var_ref[0] = LAST_FRAME;
+      cm->comp_var_ref[1] = ALTREF_FRAME;
+    } else {
+      cm->comp_fixed_ref = LAST_FRAME;
+      cm->comp_var_ref[0] = GOLDEN_FRAME;
+      cm->comp_var_ref[1] = ALTREF_FRAME;
+    }
+  }
 }
 
 #define RESERVED \
@@ -985,12 +1031,7 @@ static size_t read_uncompressed_header(VP9D_COMP *pbi,
   if (cm->frame_type == KEY_FRAME) {
     int csp;
 
-    if (vp9_rb_read_literal(rb, 8) != SYNC_CODE_0 ||
-        vp9_rb_read_literal(rb, 8) != SYNC_CODE_1 ||
-        vp9_rb_read_literal(rb, 8) != SYNC_CODE_2) {
-      vpx_internal_error(&cm->error, VPX_CODEC_UNSUP_BITSTREAM,
-                         "Invalid frame sync code");
-    }
+    check_sync_code(cm, rb);
 
     csp = vp9_rb_read_literal(rb, 3);  // colorspace
     if (csp != 7) {  // != sRGB
@@ -1027,16 +1068,9 @@ static size_t read_uncompressed_header(VP9D_COMP *pbi,
       vp9_setup_past_independence(cm, xd);
 
     if (cm->intra_only) {
-       if (vp9_rb_read_literal(rb, 8) != SYNC_CODE_0 ||
-           vp9_rb_read_literal(rb, 8) != SYNC_CODE_1 ||
-           vp9_rb_read_literal(rb, 8) != SYNC_CODE_2) {
-         vpx_internal_error(&cm->error, VPX_CODEC_UNSUP_BITSTREAM,
-                            "Invalid frame sync code");
-       }
-
-       pbi->refresh_frame_flags = vp9_rb_read_literal(rb, NUM_REF_FRAMES);
-
-       setup_frame_size(pbi, rb);
+      check_sync_code(cm, rb);
+      pbi->refresh_frame_flags = vp9_rb_read_literal(rb, NUM_REF_FRAMES);
+      setup_frame_size(pbi, rb);
     } else {
        pbi->refresh_frame_flags = vp9_rb_read_literal(rb, NUM_REF_FRAMES);
 
@@ -1046,37 +1080,15 @@ static size_t read_uncompressed_header(VP9D_COMP *pbi,
         cm->ref_frame_sign_bias[LAST_FRAME + i] = vp9_rb_read_bit(rb);
       }
 
-      setup_frame_size(pbi, rb);
-
-      // Read the sign bias for each reference frame buffer.
-      cm->allow_comp_inter_inter = 0;
-      for (i = 0; i < ALLOWED_REFS_PER_FRAME; ++i) {
-        vp9_setup_scale_factors(cm, i);
-        cm->allow_comp_inter_inter |= i > 0 &&
-           cm->ref_frame_sign_bias[i + 1] != cm->ref_frame_sign_bias[1];
-      }
-
-      if (cm->allow_comp_inter_inter) {
-        // which one is always-on in comp inter-inter?
-        if (cm->ref_frame_sign_bias[LAST_FRAME] ==
-            cm->ref_frame_sign_bias[GOLDEN_FRAME]) {
-          cm->comp_fixed_ref = ALTREF_FRAME;
-          cm->comp_var_ref[0] = LAST_FRAME;
-          cm->comp_var_ref[1] = GOLDEN_FRAME;
-        } else if (cm->ref_frame_sign_bias[LAST_FRAME] ==
-                   cm->ref_frame_sign_bias[ALTREF_FRAME]) {
-          cm->comp_fixed_ref = GOLDEN_FRAME;
-          cm->comp_var_ref[0] = LAST_FRAME;
-          cm->comp_var_ref[1] = ALTREF_FRAME;
-        } else {
-          cm->comp_fixed_ref = LAST_FRAME;
-          cm->comp_var_ref[0] = GOLDEN_FRAME;
-          cm->comp_var_ref[1] = ALTREF_FRAME;
-        }
-      }
+      setup_frame_size_with_refs(pbi, rb);
 
       xd->allow_high_precision_mv = vp9_rb_read_bit(rb);
       cm->mcomp_filter_type = read_interp_filter_type(rb);
+
+      for (i = 0; i < ALLOWED_REFS_PER_FRAME; ++i)
+        vp9_setup_scale_factors(cm, i);
+
+      setup_inter_inter(cm);
     }
   }
 
@@ -1091,7 +1103,6 @@ static size_t read_uncompressed_header(VP9D_COMP *pbi,
   }
 
   cm->frame_context_idx = vp9_rb_read_literal(rb, NUM_FRAME_CONTEXTS_LG2);
-  cm->clr_type = (YUV_TYPE)vp9_rb_read_bit(rb);
 
   setup_loopfilter(pbi, rb);
   setup_quantization(pbi, rb);
@@ -1126,10 +1137,8 @@ int vp9_decode_frame(VP9D_COMP *pbi, const uint8_t **p_data_end) {
   xd->corrupted = 0;
   new_fb->corrupted = 0;
 
-  if ((!pbi->decoded_key_frame && !keyframe) ||
-      pc->width == 0 || pc->height == 0) {
+  if (!pbi->decoded_key_frame && !keyframe)
     return -1;
-  }
 
   vp9_setup_version(pc);
   if (!read_is_valid(data, first_partition_size, data_end))

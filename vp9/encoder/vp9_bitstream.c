@@ -1425,9 +1425,48 @@ static void write_display_size(VP9_COMP *cpi, struct vp9_write_bit_buffer *wb) {
                              cm->height != cm->display_height;
   vp9_wb_write_bit(wb, scaling_active);
   if (scaling_active) {
-    vp9_wb_write_literal(wb, cm->display_width, 16);
-    vp9_wb_write_literal(wb, cm->display_height, 16);
+    vp9_wb_write_literal(wb, cm->display_width - 1, 16);
+    vp9_wb_write_literal(wb, cm->display_height - 1, 16);
   }
+}
+
+static void write_frame_size(VP9_COMP *cpi,
+                             struct vp9_write_bit_buffer *wb) {
+  VP9_COMMON *const cm = &cpi->common;
+  vp9_wb_write_literal(wb, cm->width - 1, 16);
+  vp9_wb_write_literal(wb, cm->height - 1, 16);
+
+  write_display_size(cpi, wb);
+}
+
+static void write_frame_size_with_refs(VP9_COMP *cpi,
+                                       struct vp9_write_bit_buffer *wb) {
+  VP9_COMMON *const cm = &cpi->common;
+  int refs[ALLOWED_REFS_PER_FRAME] = {cpi->lst_fb_idx, cpi->gld_fb_idx,
+                                      cpi->alt_fb_idx};
+  int i, found = 0;
+
+  for (i = 0; i < ALLOWED_REFS_PER_FRAME; ++i) {
+    YV12_BUFFER_CONFIG *cfg = &cm->yv12_fb[cm->ref_frame_map[refs[i]]];
+    found = cm->width == cfg->y_crop_width &&
+            cm->height == cfg->y_crop_height;
+    vp9_wb_write_bit(wb, found);
+    if (found)
+      break;
+  }
+
+  if (!found) {
+    vp9_wb_write_literal(wb, cm->width - 1, 16);
+    vp9_wb_write_literal(wb, cm->height - 1, 16);
+  }
+
+  write_display_size(cpi, wb);
+}
+
+static void write_sync_code(struct vp9_write_bit_buffer *wb) {
+  vp9_wb_write_literal(wb, SYNC_CODE_0, 8);
+  vp9_wb_write_literal(wb, SYNC_CODE_1, 8);
+  vp9_wb_write_literal(wb, SYNC_CODE_2, 8);
 }
 
 static void write_uncompressed_header(VP9_COMP *cpi,
@@ -1450,9 +1489,7 @@ static void write_uncompressed_header(VP9_COMP *cpi,
   vp9_wb_write_bit(wb, cm->error_resilient_mode);
 
   if (cm->frame_type == KEY_FRAME) {
-    vp9_wb_write_literal(wb, SYNC_CODE_0, 8);
-    vp9_wb_write_literal(wb, SYNC_CODE_1, 8);
-    vp9_wb_write_literal(wb, SYNC_CODE_2, 8);
+    write_sync_code(wb);
     // colorspaces
     // 000 - Unknown
     // 001 - BT.601
@@ -1475,45 +1512,29 @@ static void write_uncompressed_header(VP9_COMP *cpi,
       vp9_wb_write_bit(wb, 0);  // has extra plane
     }
 
-    // frame size
-    vp9_wb_write_literal(wb, cm->width, 16);
-    vp9_wb_write_literal(wb, cm->height, 16);
-    write_display_size(cpi, wb);
+    write_frame_size(cpi, wb);
   } else {
-    int i;
-    int refs[ALLOWED_REFS_PER_FRAME] = {cpi->lst_fb_idx, cpi->gld_fb_idx,
-                                        cpi->alt_fb_idx};
-
+    const int refs[ALLOWED_REFS_PER_FRAME] = {cpi->lst_fb_idx, cpi->gld_fb_idx,
+                                              cpi->alt_fb_idx};
     if (!cm->show_frame)
       vp9_wb_write_bit(wb, cm->intra_only);
 
     if (cm->intra_only) {
-      vp9_wb_write_literal(wb, SYNC_CODE_0, 8);
-      vp9_wb_write_literal(wb, SYNC_CODE_1, 8);
-      vp9_wb_write_literal(wb, SYNC_CODE_2, 8);
-
+      write_sync_code(wb);
       vp9_wb_write_literal(wb, get_refresh_mask(cpi), NUM_REF_FRAMES);
-
-      // frame size
-      vp9_wb_write_literal(wb, cm->width, 16);
-      vp9_wb_write_literal(wb, cm->height, 16);
-      write_display_size(cpi, wb);
+      write_frame_size(cpi, wb);
     } else {
+      int i;
       vp9_wb_write_literal(wb, get_refresh_mask(cpi), NUM_REF_FRAMES);
       for (i = 0; i < ALLOWED_REFS_PER_FRAME; ++i) {
         vp9_wb_write_literal(wb, refs[i], NUM_REF_FRAMES_LG2);
         vp9_wb_write_bit(wb, cm->ref_frame_sign_bias[LAST_FRAME + i]);
       }
 
-      // frame size
-      vp9_wb_write_literal(wb, cm->width, 16);
-      vp9_wb_write_literal(wb, cm->height, 16);
-      write_display_size(cpi, wb);
+      write_frame_size_with_refs(cpi, wb);
 
-      // Signal whether to allow high MV precision
       vp9_wb_write_bit(wb, xd->allow_high_precision_mv);
 
-      // Signal the type of subpel filter to use
       fix_mcomp_filter_type(cpi);
       write_interp_filter_type(cm->mcomp_filter_type, wb);
     }
@@ -1526,7 +1547,6 @@ static void write_uncompressed_header(VP9_COMP *cpi,
   }
 
   vp9_wb_write_literal(wb, cm->frame_context_idx, NUM_FRAME_CONTEXTS_LG2);
-  vp9_wb_write_bit(wb, cm->clr_type);
 
   encode_loopfilter(cm, xd, wb);
   encode_quantization(cm, wb);
