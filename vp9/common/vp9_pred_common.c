@@ -359,18 +359,18 @@ unsigned char vp9_get_pred_context(const VP9_COMMON *const cm,
         max_tx_size = TX_16X16;
       else
         max_tx_size = TX_32X32;
-      if (xd->up_available) {
+      if (above_in_image) {
         above_context = (above_mi->mbmi.mb_skip_coeff ?
                          max_tx_size : above_mi->mbmi.txfm_size);
       }
-      if (xd->left_available) {
+      if (left_in_image) {
         left_context = (left_mi->mbmi.mb_skip_coeff ?
                         max_tx_size : left_mi->mbmi.txfm_size);
       }
-      if (!xd->left_available) {
+      if (!left_in_image) {
         left_context = above_context;
       }
-      if (!xd->up_available) {
+      if (!above_in_image) {
         above_context = left_context;
       }
       pred_context = (above_context + left_context + 1) >> 1;
