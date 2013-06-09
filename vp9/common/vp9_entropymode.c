@@ -134,7 +134,7 @@ static const vp9_prob default_intra_inter_p[INTRA_INTER_CONTEXTS] = {
 };
 
 static const vp9_prob default_comp_inter_p[COMP_INTER_CONTEXTS] = {
-  25, 66, 106, 142, 183
+  239, 183, 119,  96,  41
 };
 
 static const vp9_prob default_comp_ref_p[REF_CONTEXTS] = {
