@@ -308,7 +308,7 @@ static void decode_atom(VP9D_COMP *pbi, MACROBLOCKD *xd,
 
   assert(mbmi->ref_frame[0] != INTRA_FRAME);
 
-  if (pbi->common.frame_type != KEY_FRAME)
+  if ((pbi->common.frame_type != KEY_FRAME) && (!pbi->common.intra_only))
     vp9_setup_interp_filters(xd, mbmi->interp_filter, &pbi->common);
 
   // prediction
@@ -1062,8 +1062,6 @@ static size_t read_uncompressed_header(VP9D_COMP *pbi,
       }
     }
 
-    vp9_setup_past_independence(cm, xd);
-
     pbi->refresh_frame_flags = (1 << NUM_REF_FRAMES) - 1;
 
     for (i = 0; i < ALLOWED_REFS_PER_FRAME; ++i)
@@ -1073,11 +1071,12 @@ static size_t read_uncompressed_header(VP9D_COMP *pbi,
   } else {
     cm->intra_only = cm->show_frame ? 0 : vp9_rb_read_bit(rb);
 
-    if (cm->error_resilient_mode)
-      vp9_setup_past_independence(cm, xd);
+    cm->reset_frame_context = cm->error_resilient_mode ?
+        0 : vp9_rb_read_literal(rb, 2);
 
     if (cm->intra_only) {
       check_sync_code(cm, rb);
+
       pbi->refresh_frame_flags = vp9_rb_read_literal(rb, NUM_REF_FRAMES);
       setup_frame_size(pbi, rb);
     } else {
@@ -1102,16 +1101,18 @@ static size_t read_uncompressed_header(VP9D_COMP *pbi,
   }
 
   if (!cm->error_resilient_mode) {
-    cm->reset_frame_context = vp9_rb_read_literal(rb, 2);
     cm->refresh_frame_context = vp9_rb_read_bit(rb);
     cm->frame_parallel_decoding_mode = vp9_rb_read_bit(rb);
   } else {
-    cm->reset_frame_context = 0;
     cm->refresh_frame_context = 0;
     cm->frame_parallel_decoding_mode = 1;
   }
 
   cm->frame_context_idx = vp9_rb_read_literal(rb, NUM_FRAME_CONTEXTS_LG2);
+
+  if ((cm->frame_type == KEY_FRAME) ||
+      cm->error_resilient_mode || cm->intra_only)
+    vp9_setup_past_independence(cm, xd);
 
   setup_loopfilter(pbi, rb);
   setup_quantization(pbi, rb);
@@ -1215,7 +1216,7 @@ int vp9_decode_frame(VP9D_COMP *pbi, const uint8_t **p_data_end) {
   if (!pc->error_resilient_mode && !pc->frame_parallel_decoding_mode) {
     vp9_adapt_coef_probs(pc);
 
-    if (!keyframe) {
+    if ((!keyframe) && (!pc->intra_only)) {
       vp9_adapt_mode_probs(pc);
       vp9_adapt_mode_context(pc);
       vp9_adapt_nmv_probs(pc, xd->allow_high_precision_mv);

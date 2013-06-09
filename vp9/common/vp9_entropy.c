@@ -723,7 +723,7 @@ void vp9_adapt_coef_probs(VP9_COMMON *cm) {
   int count_sat;
   int update_factor; /* denominator 256 */
 
-  if (cm->frame_type == KEY_FRAME) {
+  if ((cm->frame_type == KEY_FRAME) || cm->intra_only) {
     update_factor = COEF_MAX_UPDATE_FACTOR_KEY;
     count_sat = COEF_COUNT_SAT_KEY;
   } else if (cm->last_frame_type == KEY_FRAME) {

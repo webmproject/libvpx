@@ -364,6 +364,7 @@ static void set_prev_mi(VP9_COMMON *cm) {
   const int use_prev_in_find_mv_refs = cm->width == cm->last_width &&
                                        cm->height == cm->last_height &&
                                        !cm->error_resilient_mode &&
+                                       !cm->intra_only &&
                                        cm->last_show_frame;
   // Special case: set prev_mi to NULL when the previous mode info
   // context cannot be used.
