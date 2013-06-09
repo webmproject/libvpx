@@ -676,7 +676,8 @@ static void filter_block_plane(VP9_COMMON *cm, MACROBLOCKD *xd,
     // Determine the vertical edges that need filtering
     for (c = 0; c < 64 / MI_SIZE && mi_col + c < cm->mi_cols; c += col_step) {
       const MODE_INFO const *mi = xd->mode_info_context;
-      const int skip_this = mi[c].mbmi.mb_skip_coeff;
+      const int skip_this = mi[c].mbmi.mb_skip_coeff
+                            && mi[c].mbmi.ref_frame != INTRA_FRAME;
       // left edge of current unit is block/partition edge -> no skip
       const int block_edge_left = b_width_log2(mi->mbmi.sb_type) ?
           !(c & ((1 << (b_width_log2(mi->mbmi.sb_type)-1)) - 1)) : 1;
