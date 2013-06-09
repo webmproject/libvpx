@@ -346,9 +346,41 @@ static void zz_motion_search(VP9_COMP *cpi, MACROBLOCK *x, YV12_BUFFER_CONFIG *r
   // Set up pointers for this macro block recon buffer
   xd->plane[0].pre[0].buf = recon_buffer->y_buffer + recon_yoffset;
 
-  vp9_mse16x16(x->plane[0].src.buf, x->plane[0].src.stride,
-               xd->plane[0].pre[0].buf, xd->plane[0].pre[0].stride,
-               (unsigned int *)(best_motion_err));
+  switch (xd->mode_info_context->mbmi.sb_type) {
+    case BLOCK_SIZE_SB8X8:
+      vp9_mse8x8(x->plane[0].src.buf, x->plane[0].src.stride,
+                 xd->plane[0].pre[0].buf, xd->plane[0].pre[0].stride,
+                 (unsigned int *)(best_motion_err));
+      break;
+    case BLOCK_SIZE_SB16X8:
+      vp9_mse16x8(x->plane[0].src.buf, x->plane[0].src.stride,
+                  xd->plane[0].pre[0].buf, xd->plane[0].pre[0].stride,
+                  (unsigned int *)(best_motion_err));
+      break;
+    case BLOCK_SIZE_SB8X16:
+      vp9_mse8x16(x->plane[0].src.buf, x->plane[0].src.stride,
+                  xd->plane[0].pre[0].buf, xd->plane[0].pre[0].stride,
+                  (unsigned int *)(best_motion_err));
+      break;
+    default:
+      vp9_mse16x16(x->plane[0].src.buf, x->plane[0].src.stride,
+                   xd->plane[0].pre[0].buf, xd->plane[0].pre[0].stride,
+                   (unsigned int *)(best_motion_err));
+      break;
+  }
+}
+
+static enum BlockSize get_bs(BLOCK_SIZE_TYPE b) {
+  switch (b) {
+    case BLOCK_SIZE_SB8X8:
+      return BLOCK_8X8;
+    case BLOCK_SIZE_SB16X8:
+      return BLOCK_16X8;
+    case BLOCK_SIZE_SB8X16:
+      return BLOCK_8X16;
+    default:
+      return BLOCK_16X16;
+  }
 }
 
 static void first_pass_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
@@ -365,7 +397,8 @@ static void first_pass_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
   int step_param = 3;
   int further_steps = (MAX_MVSEARCH_STEPS - 1) - step_param;
   int n;
-  vp9_variance_fn_ptr_t v_fn_ptr = cpi->fn_ptr[BLOCK_16X16];
+  vp9_variance_fn_ptr_t v_fn_ptr =
+      cpi->fn_ptr[get_bs(xd->mode_info_context->mbmi.sb_type)];
   int new_mv_mode_penalty = 256;
 
   int sr = 0;
@@ -382,7 +415,20 @@ static void first_pass_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
   further_steps -= sr;
 
   // override the default variance function to use MSE
-  v_fn_ptr.vf = vp9_mse16x16;
+  switch (xd->mode_info_context->mbmi.sb_type) {
+    case BLOCK_SIZE_SB8X8:
+      v_fn_ptr.vf = vp9_mse8x8;
+      break;
+    case BLOCK_SIZE_SB16X8:
+      v_fn_ptr.vf = vp9_mse16x8;
+      break;
+    case BLOCK_SIZE_SB8X16:
+      v_fn_ptr.vf = vp9_mse8x16;
+      break;
+    default:
+      v_fn_ptr.vf = vp9_mse16x16;
+      break;
+  }
 
   // Set up pointers for this macro block recon buffer
   xd->plane[0].pre[0].buf = recon_buffer->y_buffer + recon_yoffset;
@@ -511,19 +557,30 @@ void vp9_first_pass(VP9_COMP *cpi) {
       int gf_motion_error = INT_MAX;
       int use_dc_pred = (mb_col || mb_row) && (!mb_col || !mb_row);
 
-      set_mi_row_col(cm, xd,
-                     mb_row << 1,
-                     1 << mi_height_log2(BLOCK_SIZE_MB16X16),
-                     mb_col << 1,
-                     1 << mi_height_log2(BLOCK_SIZE_MB16X16));
-
       xd->plane[0].dst.buf = new_yv12->y_buffer + recon_yoffset;
       xd->plane[1].dst.buf = new_yv12->u_buffer + recon_uvoffset;
       xd->plane[2].dst.buf = new_yv12->v_buffer + recon_uvoffset;
       xd->left_available = (mb_col != 0);
 
-      xd->mode_info_context->mbmi.sb_type = BLOCK_SIZE_MB16X16;
+      if (mb_col * 2 + 1 < cm->mi_cols) {
+        if (mb_row * 2 + 1 < cm->mi_rows) {
+          xd->mode_info_context->mbmi.sb_type = BLOCK_SIZE_MB16X16;
+        } else {
+          xd->mode_info_context->mbmi.sb_type = BLOCK_SIZE_SB16X8;
+        }
+      } else {
+        if (mb_row * 2 + 1 < cm->mi_rows) {
+          xd->mode_info_context->mbmi.sb_type = BLOCK_SIZE_SB8X16;
+        } else {
+          xd->mode_info_context->mbmi.sb_type = BLOCK_SIZE_SB8X8;
+        }
+      }
       xd->mode_info_context->mbmi.ref_frame[0] = INTRA_FRAME;
+      set_mi_row_col(cm, xd,
+                     mb_row << 1,
+                     1 << mi_height_log2(xd->mode_info_context->mbmi.sb_type),
+                     mb_col << 1,
+                     1 << mi_height_log2(xd->mode_info_context->mbmi.sb_type));
 
       // do intra 16x16 prediction
       this_error = vp9_encode_intra(cpi, x, use_dc_pred);
@@ -624,8 +681,8 @@ void vp9_first_pass(VP9_COMP *cpi) {
           xd->mode_info_context->mbmi.ref_frame[1] = NONE;
           vp9_build_inter_predictors_sby(xd, mb_row << 1,
                                          mb_col << 1,
-                                         BLOCK_SIZE_MB16X16);
-          vp9_encode_sby(cm, x, BLOCK_SIZE_MB16X16);
+                                         xd->mode_info_context->mbmi.sb_type);
+          vp9_encode_sby(cm, x, xd->mode_info_context->mbmi.sb_type);
           sum_mvr += mv.as_mv.row;
           sum_mvr_abs += abs(mv.as_mv.row);
           sum_mvc += mv.as_mv.col;

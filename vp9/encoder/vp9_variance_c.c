@@ -390,6 +390,45 @@ unsigned int vp9_mse16x16_c(const uint8_t *src_ptr,
   return var;
 }
 
+unsigned int vp9_mse16x8_c(const uint8_t *src_ptr,
+                           int  source_stride,
+                           const uint8_t *ref_ptr,
+                           int  recon_stride,
+                           unsigned int *sse) {
+  unsigned int var;
+  int avg;
+
+  variance(src_ptr, source_stride, ref_ptr, recon_stride, 16, 8, &var, &avg);
+  *sse = var;
+  return var;
+}
+
+unsigned int vp9_mse8x16_c(const uint8_t *src_ptr,
+                           int  source_stride,
+                           const uint8_t *ref_ptr,
+                           int  recon_stride,
+                           unsigned int *sse) {
+  unsigned int var;
+  int avg;
+
+  variance(src_ptr, source_stride, ref_ptr, recon_stride, 8, 16, &var, &avg);
+  *sse = var;
+  return var;
+}
+
+unsigned int vp9_mse8x8_c(const uint8_t *src_ptr,
+                          int  source_stride,
+                          const uint8_t *ref_ptr,
+                          int  recon_stride,
+                          unsigned int *sse) {
+  unsigned int var;
+  int avg;
+
+  variance(src_ptr, source_stride, ref_ptr, recon_stride, 8, 8, &var, &avg);
+  *sse = var;
+  return var;
+}
+
 
 unsigned int vp9_sub_pixel_variance4x4_c(const uint8_t *src_ptr,
                                          int  src_pixels_per_line,
