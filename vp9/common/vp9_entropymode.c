@@ -244,7 +244,6 @@ void vp9_init_mbmode_probs(VP9_COMMON *x) {
              sizeof(vp9_default_mbskip_probs));
 }
 
-#if VP9_SWITCHABLE_FILTERS == 3
 const vp9_tree_index vp9_switchable_interp_tree[VP9_SWITCHABLE_FILTERS*2-2] = {
   -0, 2,
   -1, -2
@@ -257,25 +256,9 @@ const vp9_prob vp9_switchable_interp_prob [VP9_SWITCHABLE_FILTERS+1]
                                           [VP9_SWITCHABLE_FILTERS-1] = {
   {248, 192}, { 32, 248}, { 32,  32}, {192, 160}
 };
-#elif VP9_SWITCHABLE_FILTERS == 2
-const vp9_tree_index vp9_switchable_interp_tree[VP9_SWITCHABLE_FILTERS*2-2] = {
-  -0, -1,
-};
-struct vp9_token vp9_switchable_interp_encodings[VP9_SWITCHABLE_FILTERS];
-const vp9_prob vp9_switchable_interp_prob [VP9_SWITCHABLE_FILTERS+1]
-                                          [VP9_SWITCHABLE_FILTERS-1] = {
-  {248},
-  { 64},
-  {192},
-};
-const INTERPOLATIONFILTERTYPE vp9_switchable_interp[VP9_SWITCHABLE_FILTERS] = {
-  EIGHTTAP, EIGHTTAP_SHARP};
-const int vp9_switchable_interp_map[SWITCHABLE+1] = {-1, 0, 1, -1, -1};
-#endif  // VP9_SWITCHABLE_FILTERS
 
 // Indicates if the filter is interpolating or non-interpolating
-// Note currently only the EIGHTTAP_SMOOTH is non-interpolating
-const int vp9_is_interpolating_filter[SWITCHABLE + 1] = {0, 1, 1, 1, -1};
+const int vp9_is_interpolating_filter[SWITCHABLE + 1] = {1, 1, 1, 1, -1};
 
 void vp9_entropy_mode_init() {
   vp9_tokens_from_tree(vp9_intra_mode_encodings, vp9_intra_mode_tree);

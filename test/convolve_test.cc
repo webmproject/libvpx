@@ -303,7 +303,6 @@ TEST_P(ConvolveTest, Copy2D) {
 
 const int16_t (*kTestFilterList[])[8] = {
   vp9_bilinear_filters,
-  vp9_sub_pel_filters_6,
   vp9_sub_pel_filters_8,
   vp9_sub_pel_filters_8s,
   vp9_sub_pel_filters_8lp
