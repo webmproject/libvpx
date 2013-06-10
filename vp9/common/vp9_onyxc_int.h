@@ -187,10 +187,7 @@ typedef struct VP9Common {
   int mode_info_stride;
 
   /* profile settings */
-  int experimental;
   TXFM_MODE txfm_mode;
-  int no_lpf;
-  int use_bilinear_mc_filter;
 
   int base_qindex;
   int last_kf_gf_q;  /* Q used on the last GF or KF */

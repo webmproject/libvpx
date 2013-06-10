@@ -953,7 +953,6 @@ static void init_config(VP9_PTR ptr, VP9_CONFIG *oxcf) {
   cpi->goldfreq = 7;
 
   cm->version = oxcf->version;
-  vp9_setup_version(cm);
 
   cm->width = oxcf->width;
   cm->height = oxcf->height;
@@ -1004,7 +1003,6 @@ void vp9_change_config(VP9_PTR ptr, VP9_CONFIG *oxcf) {
 
   if (cm->version != oxcf->version) {
     cm->version = oxcf->version;
-    vp9_setup_version(cm);
   }
 
   cpi->oxcf = *oxcf;
@@ -1112,8 +1110,7 @@ void vp9_change_config(VP9_PTR ptr, VP9_CONFIG *oxcf) {
 
   cpi->cq_target_quality = cpi->oxcf.cq_level;
 
-  cm->mcomp_filter_type = cm->use_bilinear_mc_filter ? BILINEAR
-                                                     : DEFAULT_INTERP_FILTER;
+  cm->mcomp_filter_type = DEFAULT_INTERP_FILTER;
 
   cpi->target_bandwidth = cpi->oxcf.target_bandwidth;
 
@@ -2228,7 +2225,7 @@ static void update_reference_frames(VP9_COMP * const cpi) {
 }
 
 static void loopfilter_frame(VP9_COMP *cpi, VP9_COMMON *cm) {
-  if (cm->no_lpf || cpi->mb.e_mbd.lossless) {
+  if (cpi->mb.e_mbd.lossless) {
     cm->filter_level = 0;
   } else {
     struct vpx_usec_timer timer;

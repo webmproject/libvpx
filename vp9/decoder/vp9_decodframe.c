@@ -1150,7 +1150,6 @@ int vp9_decode_frame(VP9D_COMP *pbi, const uint8_t **p_data_end) {
   if (!pbi->decoded_key_frame && !keyframe)
     return -1;
 
-  vp9_setup_version(pc);
   if (!read_is_valid(data, first_partition_size, data_end))
     vpx_internal_error(&pc->error, VPX_CODEC_CORRUPT_FRAME,
                        "Truncated packet or corrupt partition 0 length");

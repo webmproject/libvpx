@@ -25,7 +25,6 @@ void vp9_remove_common(VP9_COMMON *oci);
 int vp9_alloc_frame_buffers(VP9_COMMON *oci, int width, int height);
 void vp9_free_frame_buffers(VP9_COMMON *oci);
 
-void vp9_setup_version(VP9_COMMON *oci);
 
 void vp9_update_frame_size(VP9_COMMON *cm);
 

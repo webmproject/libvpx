@@ -173,31 +173,6 @@ int vp9_alloc_frame_buffers(VP9_COMMON *oci, int width, int height) {
   return 1;
 }
 
-void vp9_setup_version(VP9_COMMON *cm) {
-  if (cm->version & 0x4) {
-    if (!CONFIG_EXPERIMENTAL)
-      vpx_internal_error(&cm->error, VPX_CODEC_UNSUP_BITSTREAM,
-                         "Bitstream was created by an experimental "
-                         "encoder");
-    cm->experimental = 1;
-  }
-
-  switch (cm->version & 0x3) {
-    case 0:
-      cm->no_lpf = 0;
-      cm->use_bilinear_mc_filter = 0;
-      break;
-    case 1:
-      cm->no_lpf = 0;
-      cm->use_bilinear_mc_filter = 1;
-      break;
-    case 2:
-    case 3:
-      cm->no_lpf = 1;
-      cm->use_bilinear_mc_filter = 1;
-      break;
-  }
-}
 void vp9_create_common(VP9_COMMON *oci) {
   vp9_machine_specific_config(oci);
 
@@ -205,8 +180,6 @@ void vp9_create_common(VP9_COMMON *oci) {
 
   oci->txfm_mode = ONLY_4X4;
   oci->comp_pred_mode = HYBRID_PREDICTION;
-  oci->no_lpf = 0;
-  oci->use_bilinear_mc_filter = 0;
   oci->clr_type = REG_YUV;
 
   // Initialize reference frame sign bias structure to defaults
