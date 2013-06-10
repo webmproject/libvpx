@@ -61,32 +61,25 @@ static void setup_txfm_mode(VP9_COMMON *pc, int lossless, vp9_reader *r) {
       int i, j;
       for (i = 0; i < TX_SIZE_CONTEXTS; ++i) {
         for (j = 0; j < TX_SIZE_MAX_SB - 3; ++j) {
-          if (vp9_read(r, VP9_DEF_UPDATE_PROB))
+          if (vp9_read(r, VP9_MODE_UPDATE_PROB))
             pc->fc.tx_probs_8x8p[i][j] =
                 vp9_read_prob_diff_update(r, pc->fc.tx_probs_8x8p[i][j]);
         }
       }
       for (i = 0; i < TX_SIZE_CONTEXTS; ++i) {
         for (j = 0; j < TX_SIZE_MAX_SB - 2; ++j) {
-          if (vp9_read(r, VP9_DEF_UPDATE_PROB))
+          if (vp9_read(r, VP9_MODE_UPDATE_PROB))
             pc->fc.tx_probs_16x16p[i][j] =
                 vp9_read_prob_diff_update(r, pc->fc.tx_probs_16x16p[i][j]);
         }
       }
       for (i = 0; i < TX_SIZE_CONTEXTS; ++i) {
         for (j = 0; j < TX_SIZE_MAX_SB - 1; ++j) {
-          if (vp9_read(r, VP9_DEF_UPDATE_PROB))
+          if (vp9_read(r, VP9_MODE_UPDATE_PROB))
             pc->fc.tx_probs_32x32p[i][j] =
                 vp9_read_prob_diff_update(r, pc->fc.tx_probs_32x32p[i][j]);
         }
       }
-    } else {
-      vpx_memcpy(pc->fc.tx_probs_8x8p, vp9_default_tx_probs_8x8p,
-                 sizeof(vp9_default_tx_probs_8x8p));
-      vpx_memcpy(pc->fc.tx_probs_16x16p, vp9_default_tx_probs_16x16p,
-                 sizeof(vp9_default_tx_probs_16x16p));
-      vpx_memcpy(pc->fc.tx_probs_32x32p, vp9_default_tx_probs_32x32p,
-                 sizeof(vp9_default_tx_probs_32x32p));
     }
   }
 }

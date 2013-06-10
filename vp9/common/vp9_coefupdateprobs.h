@@ -14,8 +14,6 @@
 /* Update probabilities for the nodes in the token entropy tree.
    Generated file included by vp9_entropy.c */
 
-#define VP9_DEF_UPDATE_PROB 252
-
 static const vp9_prob vp9_coef_update_prob[UNCONSTRAINED_NODES] = {
   252, 252, 252,
 };

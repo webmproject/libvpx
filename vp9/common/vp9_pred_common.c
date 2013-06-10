@@ -349,7 +349,6 @@ unsigned char vp9_get_pred_context(const VP9_COMMON *const cm,
     }
 
     case PRED_TX_SIZE: {
-#if TX_SIZE_CONTEXTS == 2
       int above_context, left_context;
       int max_tx_size;
       if (mi->mbmi.sb_type < BLOCK_SIZE_SB8X8)
@@ -376,9 +375,6 @@ unsigned char vp9_get_pred_context(const VP9_COMMON *const cm,
         above_context = left_context;
       }
       pred_context = (above_context + left_context > max_tx_size);
-#else
-      pred_context = 0;
-#endif
       break;
     }
 
