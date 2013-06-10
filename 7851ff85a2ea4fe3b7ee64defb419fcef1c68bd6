@@ -2,6 +2,23 @@
   "comments": [
     {
       "key": {
+        "uuid": "AAAAZ3//1fY\u003d",
+        "filename": "vp9/common/vp9_reconinter.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 102,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2013-06-10T15:09:42Z",
+      "side": 1,
+      "message": "suggest trying:\n\nreturn ((other_size \u003c\u003c VP9_REF_SCALE_SHIFT) + 1) / this_size;\n\nand see if it helps with overall precision...",
+      "revId": "7851ff85a2ea4fe3b7ee64defb419fcef1c68bd6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAZ3//1fw\u003d",
         "filename": "vp9/encoder/vp9_rdopt.c",
         "patchSetId": 2
@@ -13,6 +30,23 @@
       "writtenOn": "2013-06-10T15:01:24Z",
       "side": 1,
       "message": "maybe this rounding should stay though -- in my test I only removed it in reconinter.c",
+      "revId": "7851ff85a2ea4fe3b7ee64defb419fcef1c68bd6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAZ3//1fc\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1788,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2013-06-10T15:09:42Z",
+      "side": 1,
+      "message": "this looks like there should be a boolean \u0027unscaled_frame\u0027 in the top-level frame struct, instead of doing this test over and over...",
       "revId": "7851ff85a2ea4fe3b7ee64defb419fcef1c68bd6",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
