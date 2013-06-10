@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAZ3//1hE\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 2616,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-06-10T14:18:01Z",
+      "side": 1,
+      "message": "1\u003c\u003cVP9_REF_SCALE_SHIFT? This might explain your unit test failure too.",
+      "revId": "e33ac584fce4337f57ff644bad4af2e1b3df326f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
