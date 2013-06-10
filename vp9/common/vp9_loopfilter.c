@@ -687,7 +687,8 @@ static void filter_block_plane(VP9_COMMON *cm, MACROBLOCKD *xd,
       const int block_edge_above = b_height_log2(mi[c].mbmi.sb_type) ?
           !(r & ((1 << (b_height_log2(mi[c].mbmi.sb_type)-1)) - 1)) : 1;
       const int skip_this_r = skip_this && !block_edge_above;
-      const TX_SIZE tx_size = plane ? get_uv_tx_size(xd) : mi[c].mbmi.txfm_size;
+      const TX_SIZE tx_size = plane ? get_uv_tx_size(&mi[c].mbmi)
+                                    : mi[c].mbmi.txfm_size;
 
       // Filter level can vary per MI
       if (!build_lfi(cm, &mi[c].mbmi,

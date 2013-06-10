@@ -319,7 +319,7 @@ static INLINE int cost_coeffs(VP9_COMMON *const cm, MACROBLOCK *mb,
   if (type == PLANE_TYPE_Y_WITH_DC) {
     assert(xd->mode_info_context->mbmi.txfm_size == tx_size);
   } else {
-    TX_SIZE tx_size_uv = get_uv_tx_size(xd);
+    TX_SIZE tx_size_uv = get_uv_tx_size(mbmi);
     assert(tx_size == tx_size_uv);
   }
 
