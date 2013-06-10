@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAZ3//1W8\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 477,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-06-10T17:18:03Z",
+      "side": 1,
+      "message": "When does this happen? My understanding is that calling this with a block completely outside the frame boundary is a bug, we should assert() and fix the caller.",
+      "revId": "cdec7517e907859d776d9c21529cb5a421c7f954",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
