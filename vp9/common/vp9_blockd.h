@@ -239,13 +239,12 @@ typedef struct {
   union b_mode_info bmi[4];
 } MODE_INFO;
 
+#define VP9_REF_SCALE_SHIFT 14
 struct scale_factors {
-  int x_num;
-  int x_den;
+  int x_scale_fp;   // horizontal fixed point scale factor
+  int y_scale_fp;   // vertical fixed point scale factor
   int x_offset_q4;
   int x_step_q4;
-  int y_num;
-  int y_den;
   int y_offset_q4;
   int y_step_q4;
 
@@ -254,7 +253,7 @@ struct scale_factors {
   void (*set_scaled_offsets)(struct scale_factors *scale, int row, int col);
   int_mv32 (*scale_mv_q3_to_q4)(const int_mv *src_mv,
                                 const struct scale_factors *scale);
-  int32_t (*scale_mv_component_q4)(int mv_q4, int num, int den, int offset_q4);
+  int32_t (*scale_mv_component_q4)(int mv_q4, int scale_fp, int offset_q4);
 
   convolve_fn_t predict[2][2][2];  // horiz, vert, avg
 };

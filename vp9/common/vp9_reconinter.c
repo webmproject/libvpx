@@ -19,12 +19,12 @@
 
 static int scale_value_x_with_scaling(int val,
                                       const struct scale_factors *scale) {
-  return val * scale->x_num / scale->x_den;
+  return (val * scale->x_scale_fp >> VP9_REF_SCALE_SHIFT);
 }
 
 static int scale_value_y_with_scaling(int val,
                                       const struct scale_factors *scale) {
-  return val * scale->y_num / scale->y_den;
+  return (val * scale->y_scale_fp >> VP9_REF_SCALE_SHIFT);
 }
 
 static int unscaled_value(int val, const struct scale_factors *scale) {
@@ -39,10 +39,9 @@ static int_mv32 mv_q3_to_q4_with_scaling(const int_mv *src_mv,
   const int32_t mv_row_q4 = src_mv->as_mv.row << 1;
   const int32_t mv_col_q4 = src_mv->as_mv.col << 1;
 
-  /* TODO(jkoleszar): make fixed point, or as a second multiply? */
-  result.as_mv.row =  mv_row_q4 * scale->y_num / scale->y_den
+  result.as_mv.row = (mv_row_q4 * scale->y_scale_fp >> VP9_REF_SCALE_SHIFT)
                       + scale->y_offset_q4;
-  result.as_mv.col =  mv_col_q4 * scale->x_num / scale->x_den
+  result.as_mv.col = (mv_col_q4 * scale->x_scale_fp >> VP9_REF_SCALE_SHIFT)
                       + scale->x_offset_q4;
   return result;
 }
@@ -57,19 +56,19 @@ static int_mv32 mv_q3_to_q4_without_scaling(const int_mv *src_mv,
   return result;
 }
 
-static int32_t mv_component_q4_with_scaling(int mv_q4, int num, int den,
+static int32_t mv_component_q4_with_scaling(int mv_q4, int scale_fp,
                                             int offset_q4) {
+  int32_t scaled_mv;
   // returns the scaled and offset value of the mv component.
+  scaled_mv = (mv_q4 * scale_fp >> VP9_REF_SCALE_SHIFT) + offset_q4;
 
-  /* TODO(jkoleszar): make fixed point, or as a second multiply? */
-  return mv_q4 * num / den + offset_q4;
+  return scaled_mv;
 }
 
-static int32_t mv_component_q4_without_scaling(int mv_q4, int num, int den,
+static int32_t mv_component_q4_without_scaling(int mv_q4, int scale_fp,
                                                int offset_q4) {
   // returns the scaled and offset value of the mv component.
-  (void)num;
-  (void)den;
+  (void)scale_fp;
   (void)offset_q4;
   return mv_q4;
 }
@@ -79,8 +78,8 @@ static void set_offsets_with_scaling(struct scale_factors *scale,
   const int x_q4 = 16 * col;
   const int y_q4 = 16 * row;
 
-  scale->x_offset_q4 = (x_q4 * scale->x_num / scale->x_den) & 0xf;
-  scale->y_offset_q4 = (y_q4 * scale->y_num / scale->y_den) & 0xf;
+  scale->x_offset_q4 = (x_q4 * scale->x_scale_fp >> VP9_REF_SCALE_SHIFT) & 0xf;
+  scale->y_offset_q4 = (y_q4 * scale->y_scale_fp >> VP9_REF_SCALE_SHIFT) & 0xf;
 }
 
 static void set_offsets_without_scaling(struct scale_factors *scale,
@@ -89,20 +88,26 @@ static void set_offsets_without_scaling(struct scale_factors *scale,
   scale->y_offset_q4 = 0;
 }
 
+static int get_fixed_point_scale_factor(int other_size, int this_size) {
+  // Calculate scaling factor once for each reference frame
+  // and use fixed point scaling factors in decoding and encoding routines.
+  // Hardware implementations can calculate scale factor in device driver
+  // and use multiplication and shifting on hardware instead of division.
+  return (other_size << VP9_REF_SCALE_SHIFT) / this_size;
+}
+
 void vp9_setup_scale_factors_for_frame(struct scale_factors *scale,
                                        int other_w, int other_h,
                                        int this_w, int this_h) {
-  scale->x_num = other_w;
-  scale->x_den = this_w;
+  scale->x_scale_fp = get_fixed_point_scale_factor(other_w, this_w);
   scale->x_offset_q4 = 0;  // calculated per-mb
-  scale->x_step_q4 = 16 * other_w / this_w;
+  scale->x_step_q4 = (16 * scale->x_scale_fp >> VP9_REF_SCALE_SHIFT);
 
-  scale->y_num = other_h;
-  scale->y_den = this_h;
+  scale->y_scale_fp = get_fixed_point_scale_factor(other_h, this_h);
   scale->y_offset_q4 = 0;  // calculated per-mb
-  scale->y_step_q4 = 16 * other_h / this_h;
+  scale->y_step_q4 = (16 * scale->y_scale_fp >> VP9_REF_SCALE_SHIFT);
 
-  if (scale->x_num == scale->x_den && scale->y_num == scale->y_den) {
+  if ((other_w == this_w) && (other_h == this_h)) {
     scale->scale_value_x = unscaled_value;
     scale->scale_value_y = unscaled_value;
     scale->set_scaled_offsets = set_offsets_without_scaling;
@@ -303,12 +308,10 @@ void vp9_build_inter_predictor_q4(const uint8_t *src, int src_stride,
                                   int w, int h, int weight,
                                   const struct subpix_fn_table *subpix) {
   const int scaled_mv_row_q4 = scale->scale_mv_component_q4(mv_q4->as_mv.row,
-                                                            scale->y_num,
-                                                            scale->y_den,
+                                                            scale->y_scale_fp,
                                                             scale->y_offset_q4);
   const int scaled_mv_col_q4 = scale->scale_mv_component_q4(mv_q4->as_mv.col,
-                                                            scale->x_num,
-                                                            scale->x_den,
+                                                            scale->x_scale_fp,
                                                             scale->x_offset_q4);
   const int subpel_x = scaled_mv_col_q4 & 15;
   const int subpel_y = scaled_mv_row_q4 & 15;
