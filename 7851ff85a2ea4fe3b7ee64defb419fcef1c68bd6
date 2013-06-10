@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAZ3//1fw\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1761,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-06-10T15:01:24Z",
+      "side": 1,
+      "message": "maybe this rounding should stay though -- in my test I only removed it in reconinter.c",
+      "revId": "7851ff85a2ea4fe3b7ee64defb419fcef1c68bd6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
