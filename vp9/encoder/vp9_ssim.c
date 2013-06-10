@@ -105,16 +105,16 @@ double vp9_calc_ssim(YV12_BUFFER_CONFIG *source, YV12_BUFFER_CONFIG *dest,
   double ssimv;
 
   a = vp9_ssim2(source->y_buffer, dest->y_buffer,
-                source->y_stride, dest->y_stride, source->y_width,
-                source->y_height);
+                source->y_stride, dest->y_stride,
+                source->y_crop_width, source->y_crop_height);
 
   b = vp9_ssim2(source->u_buffer, dest->u_buffer,
-                source->uv_stride, dest->uv_stride, source->uv_width,
-                source->uv_height);
+                source->uv_stride, dest->uv_stride,
+                source->uv_crop_width, source->uv_crop_height);
 
   c = vp9_ssim2(source->v_buffer, dest->v_buffer,
-                source->uv_stride, dest->uv_stride, source->uv_width,
-                source->uv_height);
+                source->uv_stride, dest->uv_stride,
+                source->uv_crop_width, source->uv_crop_height);
 
   ssimv = a * .8 + .1 * (b + c);
 
@@ -129,16 +129,16 @@ double vp9_calc_ssimg(YV12_BUFFER_CONFIG *source, YV12_BUFFER_CONFIG *dest,
   double a, b, c;
 
   a = vp9_ssim2(source->y_buffer, dest->y_buffer,
-                source->y_stride, dest->y_stride, source->y_width,
-                source->y_height);
+                source->y_stride, dest->y_stride,
+                source->y_crop_width, source->y_crop_height);
 
   b = vp9_ssim2(source->u_buffer, dest->u_buffer,
-                source->uv_stride, dest->uv_stride, source->uv_width,
-                source->uv_height);
+                source->uv_stride, dest->uv_stride,
+                source->uv_crop_width, source->uv_crop_height);
 
   c = vp9_ssim2(source->v_buffer, dest->v_buffer,
-                source->uv_stride, dest->uv_stride, source->uv_width,
-                source->uv_height);
+                source->uv_stride, dest->uv_stride,
+                source->uv_crop_width, source->uv_crop_height);
   *ssim_y = a;
   *ssim_u = b;
   *ssim_v = c;

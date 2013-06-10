@@ -170,6 +170,8 @@ int vp9_realloc_frame_buffer(YV12_BUFFER_CONFIG *ybf,
     ybf->y_height = aligned_height;
     ybf->y_stride = y_stride;
 
+    ybf->uv_crop_width = (width + ss_x) >> ss_x;
+    ybf->uv_crop_height = (height + ss_y) >> ss_y;
     ybf->uv_width = uv_width;
     ybf->uv_height = uv_height;
     ybf->uv_stride = uv_stride;
