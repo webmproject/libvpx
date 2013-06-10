@@ -2680,7 +2680,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
     // If the segment skip feature is enabled....
     // then do nothing if the current mode is not allowed..
     } else if (vp9_segfeature_active(xd, segment_id, SEG_LVL_SKIP) &&
-               (this_mode != ZEROMV)) {
+               (this_mode != ZEROMV && ref_frame != INTRA_FRAME)) {
       continue;
     // Disable this drop out case if the ref frame
     // segment level feature is enabled for this segment. This is to
