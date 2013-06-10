@@ -562,8 +562,7 @@ static TX_TYPE get_tx_type_16x16(const MACROBLOCKD *xd, int ib) {
 void vp9_setup_block_dptrs(MACROBLOCKD *xd,
                            int subsampling_x, int subsampling_y);
 
-static TX_SIZE get_uv_tx_size(const MACROBLOCKD *xd) {
-  MB_MODE_INFO *mbmi = &xd->mode_info_context->mbmi;
+static TX_SIZE get_uv_tx_size(const MB_MODE_INFO *mbmi) {
   const TX_SIZE size = mbmi->txfm_size;
 
   switch (mbmi->sb_type) {
@@ -639,8 +638,9 @@ static INLINE void foreach_transformed_block_in_plane(
   // block and transform sizes, in number of 4x4 blocks log 2 ("*_b")
   // 4x4=0, 8x8=2, 16x16=4, 32x32=6, 64x64=8
   // transform size varies per plane, look it up in a common way.
-  const TX_SIZE tx_size =
-      plane ? get_uv_tx_size(xd) : xd->mode_info_context->mbmi.txfm_size;
+  const MB_MODE_INFO* mbmi = &xd->mode_info_context->mbmi;
+  const TX_SIZE tx_size = plane ? get_uv_tx_size(mbmi)
+                                : mbmi->txfm_size;
   const int block_size_b = bw + bh;
   const int txfrm_size_b = tx_size * 2;
 
