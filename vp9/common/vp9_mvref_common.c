@@ -152,6 +152,7 @@ void vp9_find_mv_refs_idx(VP9_COMMON *cm, MACROBLOCKD *xd, MODE_INFO *here,
   int split_count = 0;
   int (*mv_ref_search)[2];
   const int mi_col = get_mi_col(xd);
+  const int mi_row = get_mi_row(xd);
   int intra_count = 0;
   int zero_count = 0;
   int newmv_count = 0;
@@ -171,10 +172,10 @@ void vp9_find_mv_refs_idx(VP9_COMMON *cm, MACROBLOCKD *xd, MODE_INFO *here,
   // Look at nearest neigbours
   for (i = 0; i < 2; ++i) {
     const int mi_search_col = mi_col + mv_ref_search[i][0];
+    const int mi_search_row = mi_row + mv_ref_search[i][1];
     if ((mi_search_col >= cm->cur_tile_mi_col_start) &&
         (mi_search_col < cm->cur_tile_mi_col_end) &&
-        ((mv_ref_search[i][1] << 6) >= xd->mb_to_top_edge) &&
-        ((-mv_ref_search[i][1] << 6) <= xd->mb_to_bottom_edge)) {
+        (mi_search_row >= 0) && (mi_search_row < cm->mi_rows)) {
       int b;
 
       candidate_mi = here + mv_ref_search[i][0] +
@@ -206,11 +207,10 @@ void vp9_find_mv_refs_idx(VP9_COMMON *cm, MACROBLOCKD *xd, MODE_INFO *here,
   for (i = 2; (i < MVREF_NEIGHBOURS) &&
               (refmv_count < MAX_MV_REF_CANDIDATES); ++i) {
     const int mi_search_col = mi_col + mv_ref_search[i][0];
-
+    const int mi_search_row = mi_row + mv_ref_search[i][1];
     if ((mi_search_col >= cm->cur_tile_mi_col_start) &&
         (mi_search_col < cm->cur_tile_mi_col_end) &&
-        ((mv_ref_search[i][1] << 6) >= xd->mb_to_top_edge) &&
-        ((-mv_ref_search[i][1] << 6) <= xd->mb_to_bottom_edge)) {
+        (mi_search_row >= 0) && (mi_search_row < cm->mi_rows)) {
       candidate_mi = here + mv_ref_search[i][0] +
                      (mv_ref_search[i][1] * xd->mode_info_stride);
 
@@ -237,11 +237,10 @@ void vp9_find_mv_refs_idx(VP9_COMMON *cm, MACROBLOCKD *xd, MODE_INFO *here,
   for (i = 0; (i < MVREF_NEIGHBOURS) &&
               (refmv_count < MAX_MV_REF_CANDIDATES); ++i) {
     const int mi_search_col = mi_col + mv_ref_search[i][0];
-
+    const int mi_search_row = mi_row + mv_ref_search[i][1];
     if ((mi_search_col >= cm->cur_tile_mi_col_start) &&
         (mi_search_col < cm->cur_tile_mi_col_end) &&
-        ((mv_ref_search[i][1] << 6) >= xd->mb_to_top_edge) &&
-        ((-mv_ref_search[i][1] << 6) <= xd->mb_to_bottom_edge)) {
+        (mi_search_row >= 0) && (mi_search_row < cm->mi_rows)) {
       candidate_mi = here + mv_ref_search[i][0] +
                      (mv_ref_search[i][1] * xd->mode_info_stride);
 
