@@ -1823,8 +1823,8 @@ static void generate_psnr_packet(VP9_COMP *cpi) {
   struct vpx_codec_cx_pkt  pkt;
   uint64_t                 sse;
   int                      i;
-  unsigned int             width = cpi->common.width;
-  unsigned int             height = cpi->common.height;
+  unsigned int             width = orig->y_crop_width;
+  unsigned int             height = orig->y_crop_height;
 
   pkt.kind = VPX_CODEC_PSNR_PKT;
   sse = calc_plane_error(orig->y_buffer, orig->y_stride,
@@ -1835,8 +1835,8 @@ static void generate_psnr_packet(VP9_COMP *cpi) {
   pkt.data.psnr.samples[0] = width * height;
   pkt.data.psnr.samples[1] = width * height;
 
-  width = orig->uv_width;
-  height = orig->uv_height;
+  width = orig->uv_crop_width;
+  height = orig->uv_crop_height;
 
   sse = calc_plane_error(orig->u_buffer, orig->uv_stride,
                          recon->u_buffer, recon->uv_stride,
@@ -3758,16 +3758,16 @@ int vp9_get_compressed_data(VP9_PTR ptr, unsigned int *frame_flags,
         double sq_error;
 
         ye = (double)calc_plane_error(orig->y_buffer, orig->y_stride,
-                              recon->y_buffer, recon->y_stride, orig->y_width,
-                              orig->y_height);
+                              recon->y_buffer, recon->y_stride,
+                              orig->y_crop_width, orig->y_crop_height);
 
         ue = (double)calc_plane_error(orig->u_buffer, orig->uv_stride,
-                              recon->u_buffer, recon->uv_stride, orig->uv_width,
-                              orig->uv_height);
+                              recon->u_buffer, recon->uv_stride,
+                              orig->uv_crop_width, orig->uv_crop_height);
 
         ve = (double)calc_plane_error(orig->v_buffer, orig->uv_stride,
-                              recon->v_buffer, recon->uv_stride, orig->uv_width,
-                              orig->uv_height);
+                              recon->v_buffer, recon->uv_stride,
+                              orig->uv_crop_width, orig->uv_crop_height);
 
         sq_error = ye + ue + ve;
 
@@ -3788,16 +3788,16 @@ int vp9_get_compressed_data(VP9_PTR ptr, unsigned int *frame_flags,
           vp9_clear_system_state();
 
           ye = (double)calc_plane_error(orig->y_buffer, orig->y_stride,
-                                pp->y_buffer, pp->y_stride, orig->y_width,
-                                orig->y_height);
+                                pp->y_buffer, pp->y_stride,
+                                orig->y_crop_width, orig->y_crop_height);
 
           ue = (double)calc_plane_error(orig->u_buffer, orig->uv_stride,
-                                pp->u_buffer, pp->uv_stride, orig->uv_width,
-                                orig->uv_height);
+                                pp->u_buffer, pp->uv_stride,
+                                orig->uv_crop_width, orig->uv_crop_height);
 
           ve = (double)calc_plane_error(orig->v_buffer, orig->uv_stride,
-                                pp->v_buffer, pp->uv_stride, orig->uv_width,
-                                orig->uv_height);
+                                pp->v_buffer, pp->uv_stride,
+                                orig->uv_crop_width, orig->uv_crop_height);
 
           sq_error = ye + ue + ve;
 
