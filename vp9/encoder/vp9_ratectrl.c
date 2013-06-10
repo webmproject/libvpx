@@ -206,7 +206,7 @@ void vp9_setup_key_frame(VP9_COMP *cpi) {
 void vp9_setup_inter_frame(VP9_COMP *cpi) {
   VP9_COMMON *cm = &cpi->common;
   MACROBLOCKD *xd = &cpi->mb.e_mbd;
-  if (cm->error_resilient_mode)
+  if (cm->error_resilient_mode || cm->intra_only)
     vp9_setup_past_independence(cm, xd);
 
   assert(cm->frame_context_idx < NUM_FRAME_CONTEXTS);

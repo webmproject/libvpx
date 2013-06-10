@@ -337,7 +337,7 @@ static INLINE COMPPREDMODE_TYPE read_comp_pred_mode(vp9_reader *r) {
 static void mb_mode_mv_init(VP9D_COMP *pbi, vp9_reader *r) {
   VP9_COMMON *const cm = &pbi->common;
 
-  if (cm->frame_type != KEY_FRAME) {
+  if ((cm->frame_type != KEY_FRAME) && (!cm->intra_only)) {
     nmv_context *const nmvc = &pbi->common.fc.nmvc;
     MACROBLOCKD *const xd = &pbi->mb;
     int i, j;
@@ -816,7 +816,7 @@ void vp9_decode_mb_mode_mv(VP9D_COMP* const pbi,
   MODE_INFO *mi = xd->mode_info_context;
   MB_MODE_INFO *const mbmi = &mi->mbmi;
 
-  if (cm->frame_type == KEY_FRAME) {
+  if ((cm->frame_type == KEY_FRAME) || cm->intra_only) {
     kfread_modes(pbi, mi, mi_row, mi_col, r);
   } else {
     read_mb_modes_mv(pbi, mi, &mi->mbmi, mi_row, mi_col, r);

@@ -519,8 +519,16 @@ void vp9_setup_past_independence(VP9_COMMON *cm, MACROBLOCKD *xd) {
 
   vp9_init_mode_contexts(cm);
 
-  for (i = 0; i < NUM_FRAME_CONTEXTS; i++)
-    vpx_memcpy(&cm->frame_contexts[i], &cm->fc, sizeof(cm->fc));
+  if ((cm->frame_type == KEY_FRAME) ||
+      cm->error_resilient_mode || (cm->reset_frame_context == 3)) {
+    // Reset all frame contexts.
+    for (i = 0; i < NUM_FRAME_CONTEXTS; ++i)
+      vpx_memcpy(&cm->frame_contexts[i], &cm->fc, sizeof(cm->fc));
+  } else if (cm->reset_frame_context == 2) {
+    // Reset only the frame context specified in the frame header.
+    vpx_memcpy(&cm->frame_contexts[cm->frame_context_idx], &cm->fc,
+               sizeof(cm->fc));
+  }
 
   vpx_memset(cm->prev_mip, 0,
              cm->mode_info_stride * (cm->mi_rows + 1) * sizeof(MODE_INFO));
