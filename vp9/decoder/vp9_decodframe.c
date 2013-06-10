@@ -40,8 +40,8 @@
 int dec_debug = 0;
 #endif
 
-static int read_le32(const uint8_t *p) {
-  return (p[3] << 24) | (p[2] << 16) | (p[1] << 8) | p[0];
+static int read_be32(const uint8_t *p) {
+  return (p[0] << 24) | (p[1] << 16) | (p[2] << 8) | p[3];
 }
 
 // len == 0 is not allowed
@@ -907,13 +907,13 @@ static void decode_tiles(VP9D_COMP *pbi,
     data_ptr2[0][0] = data_ptr;
     for (tile_row = 0; tile_row < pc->tile_rows; tile_row++) {
       if (tile_row) {
-        const int size = read_le32(data_ptr2[tile_row - 1][n_cols - 1]);
+        const int size = read_be32(data_ptr2[tile_row - 1][n_cols - 1]);
         data_ptr2[tile_row - 1][n_cols - 1] += 4;
         data_ptr2[tile_row][0] = data_ptr2[tile_row - 1][n_cols - 1] + size;
       }
 
       for (tile_col = 1; tile_col < n_cols; tile_col++) {
-        const int size = read_le32(data_ptr2[tile_row][tile_col - 1]);
+        const int size = read_be32(data_ptr2[tile_row][tile_col - 1]);
         data_ptr2[tile_row][tile_col - 1] += 4;
         data_ptr2[tile_row][tile_col] =
             data_ptr2[tile_row][tile_col - 1] + size;
@@ -946,7 +946,7 @@ static void decode_tiles(VP9D_COMP *pbi,
         decode_tile(pbi, residual_bc);
 
         if (has_more) {
-          const int size = read_le32(data_ptr);
+          const int size = read_be32(data_ptr);
           data_ptr += 4 + size;
         }
       }

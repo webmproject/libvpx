@@ -157,11 +157,11 @@ void write_switchable_interp_stats() {
 
 static int update_bits[255];
 
-static INLINE void write_le32(uint8_t *p, int value) {
-  p[0] = value;
-  p[1] = value >> 8;
-  p[2] = value >> 16;
-  p[3] = value >> 24;
+static INLINE void write_be32(uint8_t *p, int value) {
+  p[0] = value >> 24;
+  p[1] = value >> 16;
+  p[2] = value >> 8;
+  p[3] = value;
 }
 
 
@@ -1747,7 +1747,7 @@ void vp9_pack_bitstream(VP9_COMP *cpi, uint8_t *dest, unsigned long *size) {
         vp9_stop_encode(&residual_bc);
         if (tile_col < pc->tile_columns - 1 || tile_row < pc->tile_rows - 1) {
           // size of this tile
-          write_le32(data_ptr + total_size, residual_bc.pos);
+          write_be32(data_ptr + total_size, residual_bc.pos);
           total_size += 4;
         }
 
