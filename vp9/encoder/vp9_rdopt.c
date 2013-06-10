@@ -2580,6 +2580,12 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
         cpi->rd_threshes[bsize][mode_index] == INT_MAX)
       continue;
 
+    // Do not allow compound prediction if the segment level reference
+    // frame feature is in use as in this case there can only be one reference.
+    if ((vp9_mode_order[mode_index].second_ref_frame > INTRA_FRAME) &&
+         vp9_segfeature_active(xd, segment_id, SEG_LVL_REF_FRAME))
+      continue;
+
     x->skip = 0;
     this_mode = vp9_mode_order[mode_index].mode;
     ref_frame = vp9_mode_order[mode_index].ref_frame;
