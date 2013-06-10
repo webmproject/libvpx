@@ -1755,12 +1755,13 @@ static void setup_buffer_inter(VP9_COMP *cpi, MACROBLOCK *x,
 
   // set up scaling factors
   scale[frame_type] = cpi->common.active_ref_scale[frame_type - 1];
+
   scale[frame_type].x_offset_q4 =
-      (mi_col * MI_SIZE * scale[frame_type].x_num /
-       scale[frame_type].x_den) & 0xf;
+      ROUND_POWER_OF_TWO(mi_col * MI_SIZE * scale[frame_type].x_scale_fp,
+       VP9_REF_SCALE_SHIFT) & 0xf;
   scale[frame_type].y_offset_q4 =
-      (mi_row * MI_SIZE * scale[frame_type].y_num /
-       scale[frame_type].y_den) & 0xf;
+      ROUND_POWER_OF_TWO(mi_row * MI_SIZE * scale[frame_type].y_scale_fp,
+       VP9_REF_SCALE_SHIFT) & 0xf;
 
   // TODO(jkoleszar): Is the UV buffer ever used here? If so, need to make this
   // use the UV scaling factors.
@@ -1783,8 +1784,8 @@ static void setup_buffer_inter(VP9_COMP *cpi, MACROBLOCK *x,
   // Further refinement that is encode side only to test the top few candidates
   // in full and choose the best as the centre point for subsequent searches.
   // The current implementation doesn't support scaling.
-  if (scale[frame_type].x_num == scale[frame_type].x_den &&
-      scale[frame_type].y_num == scale[frame_type].y_den)
+  if (scale[frame_type].x_scale_fp == (1 << VP9_REF_SCALE_SHIFT) &&
+      scale[frame_type].y_scale_fp == (1 << VP9_REF_SCALE_SHIFT))
     mv_pred(cpi, x, yv12_mb[frame_type][0].buf, yv12->y_stride,
             frame_type, block_size);
 }
@@ -2612,18 +2613,18 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
     // TODO(jingning, jkoleszar): scaling reference frame not supported for
     // SPLITMV.
     if (mbmi->ref_frame[0] > 0 &&
-          (scale_factor[mbmi->ref_frame[0]].x_num !=
-           scale_factor[mbmi->ref_frame[0]].x_den ||
-           scale_factor[mbmi->ref_frame[0]].y_num !=
-           scale_factor[mbmi->ref_frame[0]].y_den) &&
+          (scale_factor[mbmi->ref_frame[0]].x_scale_fp !=
+           (1 << VP9_REF_SCALE_SHIFT) ||
+           scale_factor[mbmi->ref_frame[0]].y_scale_fp !=
+           (1 << VP9_REF_SCALE_SHIFT)) &&
         this_mode == SPLITMV)
       continue;
 
     if (mbmi->ref_frame[1] > 0 &&
-          (scale_factor[mbmi->ref_frame[1]].x_num !=
-           scale_factor[mbmi->ref_frame[1]].x_den ||
-           scale_factor[mbmi->ref_frame[1]].y_num !=
-           scale_factor[mbmi->ref_frame[1]].y_den) &&
+          (scale_factor[mbmi->ref_frame[1]].x_scale_fp !=
+           (1 << VP9_REF_SCALE_SHIFT) ||
+           scale_factor[mbmi->ref_frame[1]].y_scale_fp !=
+           (1 << VP9_REF_SCALE_SHIFT)) &&
         this_mode == SPLITMV)
       continue;
 
