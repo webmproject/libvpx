@@ -307,7 +307,7 @@ static void read_switchable_interp_probs(VP9_COMMON* const cm, vp9_reader *r) {
   int i, j;
   for (j = 0; j <= VP9_SWITCHABLE_FILTERS; ++j)
     for (i = 0; i < VP9_SWITCHABLE_FILTERS - 1; ++i) {
-      if (vp9_read(r, VP9_DEF_UPDATE_PROB)) {
+      if (vp9_read(r, VP9_MODE_UPDATE_PROB)) {
         cm->fc.switchable_interp_prob[j][i] =
             // vp9_read_prob(r);
             vp9_read_prob_diff_update(r, cm->fc.switchable_interp_prob[j][i]);
@@ -319,7 +319,7 @@ static void read_inter_mode_probs(VP9_COMMON *const cm, vp9_reader *r) {
   int i, j;
   for (i = 0; i < INTER_MODE_CONTEXTS; ++i)
     for (j = 0; j < VP9_INTER_MODES - 1; ++j) {
-      if (vp9_read(r, VP9_DEF_UPDATE_PROB)) {
+      if (vp9_read(r, VP9_MODE_UPDATE_PROB)) {
         // cm->fc.inter_mode_probs[i][j] = vp9_read_prob(r);
         cm->fc.inter_mode_probs[i][j] =
             vp9_read_prob_diff_update(r, cm->fc.inter_mode_probs[i][j]);
@@ -348,7 +348,7 @@ static void mb_mode_mv_init(VP9D_COMP *pbi, vp9_reader *r) {
       read_switchable_interp_probs(cm, r);
 
     for (i = 0; i < INTRA_INTER_CONTEXTS; i++) {
-      if (vp9_read(r, VP9_DEF_UPDATE_PROB))
+      if (vp9_read(r, VP9_MODE_UPDATE_PROB))
         cm->fc.intra_inter_prob[i] =
             vp9_read_prob_diff_update(r, cm->fc.intra_inter_prob[i]);
     }
@@ -357,7 +357,7 @@ static void mb_mode_mv_init(VP9D_COMP *pbi, vp9_reader *r) {
       cm->comp_pred_mode = read_comp_pred_mode(r);
       if (cm->comp_pred_mode == HYBRID_PREDICTION)
         for (i = 0; i < COMP_INTER_CONTEXTS; i++)
-          if (vp9_read(r, VP9_DEF_UPDATE_PROB))
+          if (vp9_read(r, VP9_MODE_UPDATE_PROB))
             cm->fc.comp_inter_prob[i] =
                 vp9_read_prob_diff_update(r, cm->fc.comp_inter_prob[i]);
     } else {
@@ -366,24 +366,24 @@ static void mb_mode_mv_init(VP9D_COMP *pbi, vp9_reader *r) {
 
     if (cm->comp_pred_mode != COMP_PREDICTION_ONLY)
       for (i = 0; i < REF_CONTEXTS; i++) {
-        if (vp9_read(r, VP9_DEF_UPDATE_PROB))
+        if (vp9_read(r, VP9_MODE_UPDATE_PROB))
           cm->fc.single_ref_prob[i][0] =
               vp9_read_prob_diff_update(r, cm->fc.single_ref_prob[i][0]);
-        if (vp9_read(r, VP9_DEF_UPDATE_PROB))
+        if (vp9_read(r, VP9_MODE_UPDATE_PROB))
           cm->fc.single_ref_prob[i][1] =
               vp9_read_prob_diff_update(r, cm->fc.single_ref_prob[i][1]);
       }
 
     if (cm->comp_pred_mode != SINGLE_PREDICTION_ONLY)
       for (i = 0; i < REF_CONTEXTS; i++)
-        if (vp9_read(r, VP9_DEF_UPDATE_PROB))
+        if (vp9_read(r, VP9_MODE_UPDATE_PROB))
           cm->fc.comp_ref_prob[i] =
               vp9_read_prob_diff_update(r, cm->fc.comp_ref_prob[i]);
 
     // VP9_INTRA_MODES
     for (j = 0; j < BLOCK_SIZE_GROUPS; j++) {
       for (i = 0; i < VP9_INTRA_MODES - 1; ++i) {
-        if (vp9_read(r, VP9_DEF_UPDATE_PROB)) {
+        if (vp9_read(r, VP9_MODE_UPDATE_PROB)) {
           cm->fc.y_mode_prob[j][i] =
               vp9_read_prob_diff_update(r, cm->fc.y_mode_prob[j][i]);
         }
@@ -391,7 +391,7 @@ static void mb_mode_mv_init(VP9D_COMP *pbi, vp9_reader *r) {
     }
     for (j = 0; j < NUM_PARTITION_CONTEXTS; ++j) {
       for (i = 0; i < PARTITION_TYPES - 1; ++i) {
-        if (vp9_read(r, VP9_DEF_UPDATE_PROB)) {
+        if (vp9_read(r, VP9_MODE_UPDATE_PROB)) {
           cm->fc.partition_prob[INTER_FRAME][j][i] =
               vp9_read_prob_diff_update(r,
                   cm->fc.partition_prob[INTER_FRAME][j][i]);
@@ -797,7 +797,7 @@ void vp9_decode_mode_mvs_init(VP9D_COMP* const pbi, vp9_reader *r) {
   // TODO(jkoleszar): does this clear more than MBSKIP_CONTEXTS? Maybe remove.
   // vpx_memset(cm->fc.mbskip_probs, 0, sizeof(cm->fc.mbskip_probs));
   for (k = 0; k < MBSKIP_CONTEXTS; ++k) {
-    if (vp9_read(r, VP9_DEF_UPDATE_PROB)) {
+    if (vp9_read(r, VP9_MODE_UPDATE_PROB)) {
       cm->fc.mbskip_probs[k] =
           vp9_read_prob_diff_update(r, cm->fc.mbskip_probs[k]);
     }

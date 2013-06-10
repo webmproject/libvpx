@@ -24,7 +24,7 @@ void vp9_init_mv_probs(struct VP9Common *cm);
 void vp9_adapt_nmv_probs(struct VP9Common *cm, int usehp);
 int vp9_use_nmv_hp(const MV *ref);
 
-#define VP9_NMV_UPDATE_PROB  255
+#define VP9_NMV_UPDATE_PROB  252
 
 //#define MV_GROUP_UPDATE
 

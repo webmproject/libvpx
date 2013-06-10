@@ -110,6 +110,8 @@ extern void print_nmvstats();
 #ifdef MODE_STATS
 extern void init_tx_count_stats();
 extern void write_tx_count_stats();
+extern void init_switchable_interp_stats();
+extern void write_switchable_interp_stats();
 #endif
 
 #ifdef SPEEDSTATS
@@ -1293,6 +1295,7 @@ VP9_PTR vp9_create_compressor(VP9_CONFIG *oxcf) {
 #endif
 #ifdef MODE_STATS
   init_tx_count_stats();
+  init_switchable_interp_stats();
 #endif
 
   /*Initialize the feed-forward activity masking.*/
@@ -1543,8 +1546,10 @@ void vp9_remove_compressor(VP9_PTR *ptr) {
       print_nmvstats();
 #endif
 #ifdef MODE_STATS
-    if (cpi->pass != 1)
+    if (cpi->pass != 1) {
       write_tx_count_stats();
+      write_switchable_interp_stats();
+    }
 #endif
 
 #if CONFIG_INTERNAL_STATS

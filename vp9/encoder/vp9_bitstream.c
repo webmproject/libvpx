@@ -55,11 +55,17 @@ extern unsigned int active_section;
 int64_t tx_count_32x32p_stats[TX_SIZE_CONTEXTS][TX_SIZE_MAX_SB];
 int64_t tx_count_16x16p_stats[TX_SIZE_CONTEXTS][TX_SIZE_MAX_SB - 1];
 int64_t tx_count_8x8p_stats[TX_SIZE_CONTEXTS][TX_SIZE_MAX_SB - 2];
+int64_t switchable_interp_stats[VP9_SWITCHABLE_FILTERS+1]
+                               [VP9_SWITCHABLE_FILTERS];
 
 void init_tx_count_stats() {
   vp9_zero(tx_count_32x32p_stats);
   vp9_zero(tx_count_16x16p_stats);
   vp9_zero(tx_count_8x8p_stats);
+}
+
+void init_switchable_interp_stats() {
+  vp9_zero(switchable_interp_stats);
 }
 
 static void update_tx_count_stats(VP9_COMMON *cm) {
@@ -79,6 +85,14 @@ static void update_tx_count_stats(VP9_COMMON *cm) {
       tx_count_8x8p_stats[i][j] += cm->fc.tx_count_8x8p[i][j];
     }
   }
+}
+
+static void update_switchable_interp_stats(VP9_COMMON *cm) {
+  int i, j;
+  for (i = 0; i < VP9_SWITCHABLE_FILTERS+1; ++i)
+    for (j = 0; j < VP9_SWITCHABLE_FILTERS; ++j) {
+      switchable_interp_stats[i][j] += cm->fc.switchable_interp_count[i][j];
+    }
 }
 
 void write_tx_count_stats() {
@@ -115,6 +129,25 @@ void write_tx_count_stats() {
     printf("  { ");
     for (j = 0; j < TX_SIZE_MAX_SB - 2; j++) {
       printf("%"PRId64", ", tx_count_8x8p_stats[i][j]);
+    }
+    printf("},\n");
+  }
+  printf("};\n");
+}
+
+void write_switchable_interp_stats() {
+  int i, j;
+  FILE *fp = fopen("switchable_interp.bin", "wb");
+  fwrite(switchable_interp_stats, sizeof(switchable_interp_stats), 1, fp);
+  fclose(fp);
+
+  printf(
+      "vp9_default_switchable_filter_count[VP9_SWITCHABLE_FILTERS+1]"
+      "[VP9_SWITCHABLE_FILTERS] = {\n");
+  for (i = 0; i < VP9_SWITCHABLE_FILTERS+1; i++) {
+    printf("  { ");
+    for (j = 0; j < VP9_SWITCHABLE_FILTERS; j++) {
+      printf("%"PRId64", ", switchable_interp_stats[i][j]);
     }
     printf("},\n");
   }
@@ -387,7 +420,7 @@ static void update_mode(
   n--;
 
   for (i = 0; i < n; ++i) {
-    vp9_cond_prob_diff_update(w, &Pcur[i], VP9_DEF_UPDATE_PROB, bct[i]);
+    vp9_cond_prob_diff_update(w, &Pcur[i], VP9_MODE_UPDATE_PROB, bct[i]);
   }
 }
 
@@ -411,11 +444,7 @@ void vp9_update_skip_probs(VP9_COMP *cpi, vp9_writer *bc) {
 
   for (k = 0; k < MBSKIP_CONTEXTS; ++k) {
     vp9_cond_prob_diff_update(bc, &pc->fc.mbskip_probs[k],
-                              VP9_DEF_UPDATE_PROB, pc->fc.mbskip_count[k]);
-    /*
-    pc->fc.mbskip_probs[k] = get_binary_prob(pc->fc.mbskip_count[k][0],
-                                                  pc->fc.mbskip_count[k][1]);
-                                                  */
+                              VP9_MODE_UPDATE_PROB, pc->fc.mbskip_count[k]);
   }
 }
 
@@ -423,8 +452,9 @@ static void write_intra_mode(vp9_writer *bc, int m, const vp9_prob *p) {
   write_token(bc, vp9_intra_mode_tree, p, vp9_intra_mode_encodings + m);
 }
 
-static void update_switchable_interp_probs(VP9_COMMON *const pc,
+static void update_switchable_interp_probs(VP9_COMP *const cpi,
                                            vp9_writer* const bc) {
+  VP9_COMMON *const pc = &cpi->common;
   unsigned int branch_ct[VP9_SWITCHABLE_FILTERS + 1]
                         [VP9_SWITCHABLE_FILTERS - 1][2];
   vp9_prob new_prob[VP9_SWITCHABLE_FILTERS + 1][VP9_SWITCHABLE_FILTERS - 1];
@@ -437,12 +467,14 @@ static void update_switchable_interp_probs(VP9_COMMON *const pc,
   }
   for (j = 0; j <= VP9_SWITCHABLE_FILTERS; ++j) {
     for (i = 0; i < VP9_SWITCHABLE_FILTERS - 1; ++i) {
-      // vp9_cond_prob_update(bc, &pc->fc.switchable_interp_prob[j][i],
-      //                      VP9_DEF_UPDATE_PROB, branch_ct[j][i]);
       vp9_cond_prob_diff_update(bc, &pc->fc.switchable_interp_prob[j][i],
-                                VP9_DEF_UPDATE_PROB, branch_ct[j][i]);
+                                VP9_MODE_UPDATE_PROB, branch_ct[j][i]);
     }
   }
+#ifdef MODE_STATS
+  if (!cpi->dummy_packing)
+    update_switchable_interp_stats(pc);
+#endif
 }
 
 static void update_inter_mode_probs(VP9_COMMON *pc, vp9_writer* const bc) {
@@ -451,11 +483,8 @@ static void update_inter_mode_probs(VP9_COMMON *pc, vp9_writer* const bc) {
   for (i = 0; i < INTER_MODE_CONTEXTS; i++) {
     for (j = 0; j < VP9_INTER_MODES - 1; j++) {
       vp9_cond_prob_diff_update(bc, &pc->fc.inter_mode_probs[i][j],
-                                VP9_DEF_UPDATE_PROB,
+                                VP9_MODE_UPDATE_PROB,
                                 pc->fc.inter_mode_counts[i][j]);
-      // vp9_cond_prob_update(
-      //     bc, &pc->fc.inter_mode_probs[i][j],
-      //     VP9_DEF_UPDATE_PROB, pc->fc.inter_mode_counts[i][j]);
     }
   }
 }
@@ -1309,7 +1338,7 @@ static void encode_txfm_probs(VP9_COMP *cpi, vp9_writer *w) {
                                      ct_8x8p);
       for (j = 0; j < TX_SIZE_MAX_SB - 3; j++) {
         vp9_cond_prob_diff_update(w, &cm->fc.tx_probs_8x8p[i][j],
-                                  VP9_DEF_UPDATE_PROB, ct_8x8p[j]);
+                                  VP9_MODE_UPDATE_PROB, ct_8x8p[j]);
       }
     }
     for (i = 0; i < TX_SIZE_CONTEXTS; i++) {
@@ -1317,7 +1346,7 @@ static void encode_txfm_probs(VP9_COMP *cpi, vp9_writer *w) {
                                        ct_16x16p);
       for (j = 0; j < TX_SIZE_MAX_SB - 2; j++) {
         vp9_cond_prob_diff_update(w, &cm->fc.tx_probs_16x16p[i][j],
-                                  VP9_DEF_UPDATE_PROB, ct_16x16p[j]);
+                                  VP9_MODE_UPDATE_PROB, ct_16x16p[j]);
       }
     }
     for (i = 0; i < TX_SIZE_CONTEXTS; i++) {
@@ -1325,19 +1354,13 @@ static void encode_txfm_probs(VP9_COMP *cpi, vp9_writer *w) {
                                        ct_32x32p);
       for (j = 0; j < TX_SIZE_MAX_SB - 1; j++) {
         vp9_cond_prob_diff_update(w, &cm->fc.tx_probs_32x32p[i][j],
-                                  VP9_DEF_UPDATE_PROB, ct_32x32p[j]);
+                                  VP9_MODE_UPDATE_PROB, ct_32x32p[j]);
       }
     }
 #ifdef MODE_STATS
-    update_tx_count_stats(cm);
+    if (!cpi->dummy_packing)
+      update_tx_count_stats(cm);
 #endif
-  } else {
-    vpx_memcpy(cm->fc.tx_probs_32x32p, vp9_default_tx_probs_32x32p,
-               sizeof(vp9_default_tx_probs_32x32p));
-    vpx_memcpy(cm->fc.tx_probs_16x16p, vp9_default_tx_probs_16x16p,
-               sizeof(vp9_default_tx_probs_16x16p));
-    vpx_memcpy(cm->fc.tx_probs_8x8p, vp9_default_tx_probs_8x8p,
-               sizeof(vp9_default_tx_probs_8x8p));
   }
 }
 
@@ -1635,11 +1658,12 @@ void vp9_pack_bitstream(VP9_COMP *cpi, uint8_t *dest, unsigned long *size) {
     vp9_zero(cpi->common.fc.inter_mode_counts);
 
     if (pc->mcomp_filter_type == SWITCHABLE)
-      update_switchable_interp_probs(pc, &header_bc);
+      update_switchable_interp_probs(cpi, &header_bc);
 
     for (i = 0; i < INTRA_INTER_CONTEXTS; i++)
       vp9_cond_prob_diff_update(&header_bc, &pc->fc.intra_inter_prob[i],
-                                VP9_DEF_UPDATE_PROB, cpi->intra_inter_count[i]);
+                                VP9_MODE_UPDATE_PROB,
+                                cpi->intra_inter_count[i]);
 
     if (pc->allow_comp_inter_inter) {
       const int comp_pred_mode = cpi->common.comp_pred_mode;
@@ -1652,7 +1676,7 @@ void vp9_pack_bitstream(VP9_COMP *cpi, uint8_t *dest, unsigned long *size) {
         if (use_hybrid_pred) {
           for (i = 0; i < COMP_INTER_CONTEXTS; i++)
             vp9_cond_prob_diff_update(&header_bc, &pc->fc.comp_inter_prob[i],
-                                      VP9_DEF_UPDATE_PROB,
+                                      VP9_MODE_UPDATE_PROB,
                                       cpi->comp_inter_count[i]);
         }
       }
@@ -1661,10 +1685,10 @@ void vp9_pack_bitstream(VP9_COMP *cpi, uint8_t *dest, unsigned long *size) {
     if (pc->comp_pred_mode != COMP_PREDICTION_ONLY) {
       for (i = 0; i < REF_CONTEXTS; i++) {
         vp9_cond_prob_diff_update(&header_bc, &pc->fc.single_ref_prob[i][0],
-                                  VP9_DEF_UPDATE_PROB,
+                                  VP9_MODE_UPDATE_PROB,
                                   cpi->single_ref_count[i][0]);
         vp9_cond_prob_diff_update(&header_bc, &pc->fc.single_ref_prob[i][1],
-                                  VP9_DEF_UPDATE_PROB,
+                                  VP9_MODE_UPDATE_PROB,
                                   cpi->single_ref_count[i][1]);
       }
     }
@@ -1672,7 +1696,7 @@ void vp9_pack_bitstream(VP9_COMP *cpi, uint8_t *dest, unsigned long *size) {
     if (pc->comp_pred_mode != SINGLE_PREDICTION_ONLY) {
       for (i = 0; i < REF_CONTEXTS; i++)
         vp9_cond_prob_diff_update(&header_bc, &pc->fc.comp_ref_prob[i],
-                                  VP9_DEF_UPDATE_PROB,
+                                  VP9_MODE_UPDATE_PROB,
                                   cpi->comp_ref_count[i]);
     }
 

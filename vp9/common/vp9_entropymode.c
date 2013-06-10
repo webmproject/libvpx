@@ -149,36 +149,21 @@ static const vp9_prob default_single_ref_p[REF_CONTEXTS][2] = {
   { 238, 247 }
 };
 
-#if TX_SIZE_CONTEXTS == 2
 const vp9_prob vp9_default_tx_probs_32x32p[TX_SIZE_CONTEXTS]
                                           [TX_SIZE_MAX_SB - 1] = {
-  { 16, 32, 64, },
-  { 16, 32, 64, },
+  { 3, 136, 37, },
+  { 5, 52, 13, },
 };
 const vp9_prob vp9_default_tx_probs_16x16p[TX_SIZE_CONTEXTS]
                                           [TX_SIZE_MAX_SB - 2] = {
-  { 32, 64, },
-  { 32, 64, },
+  { 20, 152, },
+  { 15, 101, },
 };
 const vp9_prob vp9_default_tx_probs_8x8p[TX_SIZE_CONTEXTS]
                                         [TX_SIZE_MAX_SB - 3] = {
-  { 64, },
-  { 64, },
+  { 100, },
+  { 66, },
 };
-#else
-const vp9_prob vp9_default_tx_probs_32x32p[TX_SIZE_CONTEXTS]
-                                          [TX_SIZE_MAX_SB - 1] = {
-  { 16, 32, 64, },
-};
-const vp9_prob vp9_default_tx_probs_16x16p[TX_SIZE_CONTEXTS]
-                                          [TX_SIZE_MAX_SB - 2] = {
-  { 32, 64, },
-};
-const vp9_prob vp9_default_tx_probs_8x8p[TX_SIZE_CONTEXTS]
-                                        [TX_SIZE_MAX_SB - 3] = {
-  { 64, },
-};
-#endif
 
 void tx_counts_to_branch_counts_32x32(unsigned int *tx_count_32x32p,
                                       unsigned int (*ct_32x32p)[2]) {
@@ -254,7 +239,10 @@ const INTERPOLATIONFILTERTYPE vp9_switchable_interp[VP9_SWITCHABLE_FILTERS] = {
 const int vp9_switchable_interp_map[SWITCHABLE+1] = {1, 0, 2, -1, -1};
 const vp9_prob vp9_switchable_interp_prob [VP9_SWITCHABLE_FILTERS+1]
                                           [VP9_SWITCHABLE_FILTERS-1] = {
-  {248, 192}, { 32, 248}, { 32,  32}, {192, 160}
+  { 235, 162, },
+  { 36, 255, },
+  { 34, 3, },
+  { 149, 144, },
 };
 
 // Indicates if the filter is interpolating or non-interpolating
@@ -324,7 +312,7 @@ void vp9_adapt_mode_context(VP9_COMMON *pc) {
 }
 
 #define MODE_COUNT_SAT 20
-#define MODE_MAX_UPDATE_FACTOR 144
+#define MODE_MAX_UPDATE_FACTOR 128
 static int update_mode_ct(vp9_prob pre_prob, vp9_prob prob,
                           unsigned int branch_ct[2]) {
   int factor, count = branch_ct[0] + branch_ct[1];

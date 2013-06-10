@@ -17,6 +17,8 @@
 #define SUBMVREF_COUNT 5
 #define TX_SIZE_CONTEXTS 2
 
+#define VP9_MODE_UPDATE_PROB  252
+
 // #define MODE_STATS
 
 extern int vp9_mv_cont(const int_mv *l, const int_mv *a);
