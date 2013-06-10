@@ -466,7 +466,7 @@ static void update_state(VP9_COMP *cpi,
   }
 }
 
-static unsigned find_seg_id(uint8_t *buf, BLOCK_SIZE_TYPE bsize,
+static unsigned find_seg_id(VP9_COMMON *cm, uint8_t *buf, BLOCK_SIZE_TYPE bsize,
                             int start_y, int height, int start_x, int width) {
   const int bw = 1 << mi_width_log2(bsize), bh = 1 << mi_height_log2(bsize);
   const int end_x = MIN(start_x + bw, width);
@@ -475,6 +475,7 @@ static unsigned find_seg_id(uint8_t *buf, BLOCK_SIZE_TYPE bsize,
   unsigned seg_id = -1;
 
   buf += width * start_y;
+  assert(start_y < cm->mi_rows && start_x < cm->cur_tile_mi_col_end);
   for (y = start_y; y < end_y; y++, buf += width) {
     for (x = start_x; x < end_x; x++) {
       seg_id = MIN(seg_id, buf[x]);
@@ -567,7 +568,7 @@ static void set_offsets(VP9_COMP *cpi,
   if (xd->segmentation_enabled) {
     uint8_t *map = xd->update_mb_segmentation_map ? cpi->segmentation_map
                                                   : cm->last_frame_seg_map;
-    mbmi->segment_id = find_seg_id(map, bsize, mi_row,
+    mbmi->segment_id = find_seg_id(cm, map, bsize, mi_row,
                                    cm->mi_rows, mi_col, cm->mi_cols);
 
     assert(mbmi->segment_id <= (MAX_MB_SEGMENTS-1));
@@ -1264,7 +1265,7 @@ static void rd_pick_partition(VP9_COMP *cpi, TOKENEXTRA **tp,
       int y_idx = (i >> 1) * (ms >> 1);
       int r = 0, d = 0;
 
-      if ((mi_row >= cm->mi_rows) || (mi_col >= cm->mi_cols))
+      if ((mi_row + y_idx >= cm->mi_rows) || (mi_col + x_idx >= cm->mi_cols))
         continue;
 
       *(get_sb_index(xd, subsize)) = i;
@@ -1293,7 +1294,7 @@ static void rd_pick_partition(VP9_COMP *cpi, TOKENEXTRA **tp,
     pick_sb_modes(cpi, mi_row, mi_col, tp, &r2, &d2, subsize,
                   get_block_context(x, subsize));
 
-    if (mi_row < cm->mi_rows) {
+    if (mi_row + (ms >> 1) < cm->mi_rows) {
       int r = 0, d = 0;
       update_state(cpi, get_block_context(x, subsize), subsize, 0);
       encode_superblock(cpi, tp, 0, mi_row, mi_col, subsize);
@@ -1323,7 +1324,7 @@ static void rd_pick_partition(VP9_COMP *cpi, TOKENEXTRA **tp,
     *(get_sb_index(xd, subsize)) = 0;
     pick_sb_modes(cpi, mi_row, mi_col, tp, &r2, &d2, subsize,
                   get_block_context(x, subsize));
-    if (mi_col < cm->mi_cols) {
+    if (mi_col + (ms >> 1) < cm->mi_cols) {
       int r = 0, d = 0;
       update_state(cpi, get_block_context(x, subsize), subsize, 0);
       encode_superblock(cpi, tp, 0, mi_row, mi_col, subsize);
