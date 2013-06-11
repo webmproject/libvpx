@@ -1517,7 +1517,7 @@ static void find_mismatch(vpx_image_t *img1, vpx_image_t *img2,
 
   uloc[0] = uloc[1] = uloc[2] = uloc[3] = -1;
   for (i = 0, match = 1; match && i < c_h; i += bsizey) {
-    for (j = 0; j < match && c_w; j += bsizex) {
+    for (j = 0; match && j < c_w; j += bsizex) {
       int k, l;
       int si = mmin(i + bsizey, c_h - i);
       int sj = mmin(j + bsizex, c_w - j);
@@ -1541,7 +1541,7 @@ static void find_mismatch(vpx_image_t *img1, vpx_image_t *img2,
   }
   vloc[0] = vloc[1] = vloc[2] = vloc[3] = -1;
   for (i = 0, match = 1; match && i < c_h; i += bsizey) {
-    for (j = 0; j < match && c_w; j += bsizex) {
+    for (j = 0; match && j < c_w; j += bsizex) {
       int k, l;
       int si = mmin(i + bsizey, c_h - i);
       int sj = mmin(j + bsizex, c_w - j);
