@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAZ3//zrM\u003d",
+        "filename": "vp9/common/vp9_idct.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 70,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-06-11T17:12:21Z",
+      "side": 1,
+      "message": "Maybe under #if CONFIG_DEBUG? I agree they shouldn\u0027t appear in release-builds.",
+      "revId": "c962c1e54d5f1f4fa54222045a0095d6850fda48",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
