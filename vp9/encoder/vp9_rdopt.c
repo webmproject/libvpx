@@ -1803,7 +1803,10 @@ static void model_rd_from_var_lapndz(int var, int n, int qstep,
   // TODO(debargha): Implement the functions by interpolating from a
   // look-up table
   vp9_clear_system_state();
-  {
+  if (var == 0 || n == 0) {
+    *rate = 0;
+    *dist = 0;
+  } else {
     double D, R;
     double s2 = (double) var / n;
     double s = sqrt(s2);
