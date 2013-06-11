@@ -265,7 +265,7 @@ int count_term_subexp(int word, int k, int num_syms) {
 
 static void compute_update_table() {
   int i;
-  for (i = 0; i < 255; i++)
+  for (i = 0; i < 254; i++)
     update_bits[i] = count_term_subexp(i, SUBEXP_PARAM, 255);
 }
 
@@ -277,9 +277,11 @@ static int split_index(int i, int n, int modulus) {
 }
 
 static int remap_prob(int v, int m) {
-  const int n = 256;
+  const int n = 255;
   const int modulus = MODULUS_PARAM;
   int i;
+  v--;
+  m--;
   if ((m << 1) <= n)
     i = recenter_nonneg(v, m) - 1;
   else
