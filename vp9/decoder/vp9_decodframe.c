@@ -807,6 +807,10 @@ static void setup_frame_size_with_refs(VP9D_COMP *pbi,
   if (!found)
     read_frame_size(cm, rb, &width, &height);
 
+  if (!width || !height)
+    vpx_internal_error(&cm->error, VPX_CODEC_CORRUPT_FRAME,
+                       "Referenced frame with invalid size");
+
   setup_display_size(pbi, rb);
   apply_frame_size(pbi, width, height);
 }
