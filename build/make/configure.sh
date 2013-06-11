@@ -88,6 +88,7 @@ Build options:
   ${toggle_debug}             enable/disable debug mode
   ${toggle_gprof}             enable/disable gprof profiling instrumentation
   ${toggle_gcov}              enable/disable gcov coverage instrumentation
+  ${toggle_thumb}             enable/disable building arm assembly in thumb mode
 
 Install options:
   ${toggle_install_docs}      control whether docs are installed
@@ -416,6 +417,8 @@ SRC_PATH_BARE=$source_path
 BUILD_PFX=${BUILD_PFX}
 TOOLCHAIN=${toolchain}
 ASM_CONVERSION=${asm_conversion_cmd:-${source_path}/build/make/ads2gas.pl}
+GEN_VCPROJ=${gen_vcproj_cmd}
+MSVS_ARCH_DIR=${msvs_arch_dir}
 
 CC=${CC}
 CXX=${CXX}
@@ -433,6 +436,7 @@ ASFLAGS = ${ASFLAGS}
 extralibs = ${extralibs}
 AS_SFX    = ${AS_SFX:-.asm}
 EXE_SFX   = ${EXE_SFX}
+VCPROJ_SFX = ${VCPROJ_SFX}
 RTCD_OPTIONS = ${RTCD_OPTIONS}
 EOF
 
@@ -794,7 +798,13 @@ process_common_toolchain() {
             check_add_asflags --defsym ARCHITECTURE=${arch_int}
             tune_cflags="-mtune="
             if [ ${tgt_isa} == "armv7" ]; then
-                [ -z "${float_abi}" ] && float_abi=softfp
+                if [ -z "${float_abi}" ]; then
+                    check_cpp <<EOF && float_abi=hard || float_abi=softfp
+#ifndef __ARM_PCS_VFP
+#error "not hardfp"
+#endif
+EOF
+                fi
                 check_add_cflags  -march=armv7-a -mfloat-abi=${float_abi}
                 check_add_asflags -march=armv7-a -mfloat-abi=${float_abi}
 
@@ -814,6 +824,18 @@ process_common_toolchain() {
 
             enabled debug && add_asflags -g
             asm_conversion_cmd="${source_path}/build/make/ads2gas.pl"
+            if enabled thumb; then
+                asm_conversion_cmd="$asm_conversion_cmd -thumb"
+                check_add_cflags -mthumb
+                check_add_asflags -mthumb -mimplicit-it=always
+            fi
+            ;;
+        vs*)
+            asm_conversion_cmd="${source_path}/build/make/ads2armasm_ms.pl"
+            AS_SFX=.s
+            msvs_arch_dir=arm-msvs
+            disable multithread
+            disable unit_tests
             ;;
         rvct)
             CC=armcc
@@ -1057,6 +1079,7 @@ EOF
                 # invoked directly. Checking at configure time is unnecessary.
                 # Skip the check by setting AS arbitrarily
                 AS=msvs
+                msvs_arch_dir=x86-msvs
             ;;
         esac
 
@@ -1180,7 +1203,7 @@ EOF
     check_cc <<EOF && INLINE="inline"
     static inline function() {}
 EOF
-    check_cc <<EOF && INLINE="__attribute__((always_inline))"
+    check_cc <<EOF && INLINE="__inline__ __attribute__((always_inline))"
     static __attribute__((always_inline)) function() {}
 EOF
 

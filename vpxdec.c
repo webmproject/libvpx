@@ -715,6 +715,7 @@ int main(int argc, const char **argv_) {
   int                     do_scale = 0;
   int                     stream_w = 0, stream_h = 0;
   vpx_image_t             *scaled_img = NULL;
+  int                     frame_avail, got_data;
 
   /* Parse command line */
   exec_name = argv_[0];
@@ -982,29 +983,49 @@ int main(int argc, const char **argv_) {
     arg_skip--;
   }
 
+  frame_avail = 1;
+  got_data = 0;
+
   /* Decode file */
-  while (!read_frame(&input, &buf, &buf_sz, &buf_alloc_sz)) {
+  while (frame_avail || got_data) {
     vpx_codec_iter_t  iter = NULL;
     vpx_image_t    *img;
     struct vpx_usec_timer timer;
     int                   corrupted;
 
+    frame_avail = 0;
+    if (!stop_after || frame_in < stop_after) {
+      if(!read_frame(&input, &buf, &buf_sz, &buf_alloc_sz)) {
+        frame_avail = 1;
+        frame_in++;
+
+        vpx_usec_timer_start(&timer);
+
+        if (vpx_codec_decode(&decoder, buf, (unsigned int)buf_sz, NULL, 0)) {
+          const char *detail = vpx_codec_error_detail(&decoder);
+          fprintf(stderr, "Failed to decode frame: %s\n",
+                  vpx_codec_error(&decoder));
+
+          if (detail)
+            fprintf(stderr, "  Additional information: %s\n", detail);
+          goto fail;
+        }
+
+        vpx_usec_timer_mark(&timer);
+        dx_time += (unsigned int)vpx_usec_timer_elapsed(&timer);
+      }
+    }
+
     vpx_usec_timer_start(&timer);
 
-    if (vpx_codec_decode(&decoder, buf, (unsigned int)buf_sz, NULL, 0)) {
-      const char *detail = vpx_codec_error_detail(&decoder);
-      fprintf(stderr, "Failed to decode frame: %s\n", vpx_codec_error(&decoder));
-
-      if (detail)
-        fprintf(stderr, "  Additional information: %s\n", detail);
-
-      goto fail;
+    got_data = 0;
+    if ((img = vpx_codec_get_frame(&decoder, &iter))) {
+      ++frame_out;
+      got_data = 1;
     }
 
     vpx_usec_timer_mark(&timer);
     dx_time += (unsigned int)vpx_usec_timer_elapsed(&timer);
-
-    ++frame_in;
 
     if (vpx_codec_control(&decoder, VP8D_GET_FRAME_CORRUPTED, &corrupted)) {
       fprintf(stderr, "Failed VP8_GET_FRAME_CORRUPTED: %s\n",
@@ -1012,14 +1033,6 @@ int main(int argc, const char **argv_) {
       goto fail;
     }
     frames_corrupted += corrupted;
-
-    vpx_usec_timer_start(&timer);
-
-    if ((img = vpx_codec_get_frame(&decoder, &iter)))
-      ++frame_out;
-
-    vpx_usec_timer_mark(&timer);
-    dx_time += (unsigned int)vpx_usec_timer_elapsed(&timer);
 
     if (progress)
       show_progress(frame_in, frame_out, dx_time);

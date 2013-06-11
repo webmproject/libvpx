@@ -362,14 +362,14 @@ void vp9_short_fdct8x8_sse2(int16_t *input, int16_t *output, int pitch) {
     in6 = _mm_srai_epi16(in6, 1);
     in7 = _mm_srai_epi16(in7, 1);
     // store results
-    _mm_storeu_si128 ((__m128i *)(output + 0 * 8), in0);
-    _mm_storeu_si128 ((__m128i *)(output + 1 * 8), in1);
-    _mm_storeu_si128 ((__m128i *)(output + 2 * 8), in2);
-    _mm_storeu_si128 ((__m128i *)(output + 3 * 8), in3);
-    _mm_storeu_si128 ((__m128i *)(output + 4 * 8), in4);
-    _mm_storeu_si128 ((__m128i *)(output + 5 * 8), in5);
-    _mm_storeu_si128 ((__m128i *)(output + 6 * 8), in6);
-    _mm_storeu_si128 ((__m128i *)(output + 7 * 8), in7);
+    _mm_storeu_si128((__m128i *)(output + 0 * 8), in0);
+    _mm_storeu_si128((__m128i *)(output + 1 * 8), in1);
+    _mm_storeu_si128((__m128i *)(output + 2 * 8), in2);
+    _mm_storeu_si128((__m128i *)(output + 3 * 8), in3);
+    _mm_storeu_si128((__m128i *)(output + 4 * 8), in4);
+    _mm_storeu_si128((__m128i *)(output + 5 * 8), in5);
+    _mm_storeu_si128((__m128i *)(output + 6 * 8), in6);
+    _mm_storeu_si128((__m128i *)(output + 7 * 8), in7);
   }
 }
 
@@ -915,14 +915,14 @@ void vp9_short_fdct16x16_sse2(int16_t *input, int16_t *output, int pitch) {
         // 05 15 25 35 45 55 65 75
         // 06 16 26 36 46 56 66 76
         // 07 17 27 37 47 57 67 77
-        _mm_storeu_si128 ((__m128i *)(out + 0 * 16), tr2_0);
-        _mm_storeu_si128 ((__m128i *)(out + 1 * 16), tr2_1);
-        _mm_storeu_si128 ((__m128i *)(out + 2 * 16), tr2_2);
-        _mm_storeu_si128 ((__m128i *)(out + 3 * 16), tr2_3);
-        _mm_storeu_si128 ((__m128i *)(out + 4 * 16), tr2_4);
-        _mm_storeu_si128 ((__m128i *)(out + 5 * 16), tr2_5);
-        _mm_storeu_si128 ((__m128i *)(out + 6 * 16), tr2_6);
-        _mm_storeu_si128 ((__m128i *)(out + 7 * 16), tr2_7);
+        _mm_storeu_si128((__m128i *)(out + 0 * 16), tr2_0);
+        _mm_storeu_si128((__m128i *)(out + 1 * 16), tr2_1);
+        _mm_storeu_si128((__m128i *)(out + 2 * 16), tr2_2);
+        _mm_storeu_si128((__m128i *)(out + 3 * 16), tr2_3);
+        _mm_storeu_si128((__m128i *)(out + 4 * 16), tr2_4);
+        _mm_storeu_si128((__m128i *)(out + 5 * 16), tr2_5);
+        _mm_storeu_si128((__m128i *)(out + 6 * 16), tr2_6);
+        _mm_storeu_si128((__m128i *)(out + 7 * 16), tr2_7);
       }
       {
         // 00 01 02 03 04 05 06 07
@@ -982,14 +982,14 @@ void vp9_short_fdct16x16_sse2(int16_t *input, int16_t *output, int pitch) {
         // 06 16 26 36 46 56 66 76
         // 07 17 27 37 47 57 67 77
         // Store results
-        _mm_storeu_si128 ((__m128i *)(out + 8 + 0 * 16), tr2_0);
-        _mm_storeu_si128 ((__m128i *)(out + 8 + 1 * 16), tr2_1);
-        _mm_storeu_si128 ((__m128i *)(out + 8 + 2 * 16), tr2_2);
-        _mm_storeu_si128 ((__m128i *)(out + 8 + 3 * 16), tr2_3);
-        _mm_storeu_si128 ((__m128i *)(out + 8 + 4 * 16), tr2_4);
-        _mm_storeu_si128 ((__m128i *)(out + 8 + 5 * 16), tr2_5);
-        _mm_storeu_si128 ((__m128i *)(out + 8 + 6 * 16), tr2_6);
-        _mm_storeu_si128 ((__m128i *)(out + 8 + 7 * 16), tr2_7);
+        _mm_storeu_si128((__m128i *)(out + 8 + 0 * 16), tr2_0);
+        _mm_storeu_si128((__m128i *)(out + 8 + 1 * 16), tr2_1);
+        _mm_storeu_si128((__m128i *)(out + 8 + 2 * 16), tr2_2);
+        _mm_storeu_si128((__m128i *)(out + 8 + 3 * 16), tr2_3);
+        _mm_storeu_si128((__m128i *)(out + 8 + 4 * 16), tr2_4);
+        _mm_storeu_si128((__m128i *)(out + 8 + 5 * 16), tr2_5);
+        _mm_storeu_si128((__m128i *)(out + 8 + 6 * 16), tr2_6);
+        _mm_storeu_si128((__m128i *)(out + 8 + 7 * 16), tr2_7);
       }
       out += 8*16;
     }

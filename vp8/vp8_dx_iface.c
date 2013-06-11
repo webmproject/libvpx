@@ -659,7 +659,7 @@ static vpx_image_t *vp8_get_frame(vpx_codec_alg_priv_t  *ctx,
     /* iter acts as a flip flop, so an image is only returned on the first
      * call to get_frame.
      */
-    if (!(*iter))
+    if (!(*iter) && ctx->yv12_frame_buffers.pbi[0])
     {
         YV12_BUFFER_CONFIG sd;
         int64_t time_stamp = 0, time_end_stamp = 0;
@@ -943,10 +943,10 @@ static vpx_codec_err_t vp8_get_frame_corrupted(vpx_codec_alg_priv_t *ctx,
 {
 
     int *corrupted = va_arg(args, int *);
+    VP8D_COMP *pbi = (VP8D_COMP *)ctx->yv12_frame_buffers.pbi[0];
 
-    if (corrupted)
+    if (corrupted && pbi)
     {
-        VP8D_COMP *pbi = (VP8D_COMP *)ctx->yv12_frame_buffers.pbi[0];
         *corrupted = pbi->common.frame_to_show->corrupted;
 
         return VPX_CODEC_OK;
