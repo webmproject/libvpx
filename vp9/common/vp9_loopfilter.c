@@ -299,6 +299,7 @@ static void filter_block_plane(VP9_COMMON *cm, MACROBLOCKD *xd,
       const TX_SIZE tx_size = plane ? get_uv_tx_size(&mi[c].mbmi)
                                     : mi[c].mbmi.txfm_size;
       const int skip_border_4x4_c = ss_x && mi_col + c == cm->mi_cols - 1;
+      const int skip_border_4x4_r = ss_y && mi_row + r == cm->mi_rows - 1;
 
       // Filter level can vary per MI
       if (!build_lfi(cm, &mi[c].mbmi,
@@ -307,15 +308,31 @@ static void filter_block_plane(VP9_COMMON *cm, MACROBLOCKD *xd,
 
       // Build masks based on the transform size of each block
       if (tx_size == TX_32X32) {
-        if (!skip_this_c && ((c >> ss_x) & 3) == 0)
-          mask_16x16_c |= 1 << (c >> ss_x);
-        if (!skip_this_r && ((r >> ss_y) & 3) == 0)
-          mask_16x16[r] |= 1 << (c >> ss_x);
+        if (!skip_this_c && ((c >> ss_x) & 3) == 0) {
+          if (!skip_border_4x4_c)
+            mask_16x16_c |= 1 << (c >> ss_x);
+          else
+            mask_8x8_c |= 1 << (c >> ss_x);
+        }
+        if (!skip_this_r && ((r >> ss_y) & 3) == 0) {
+          if (!skip_border_4x4_r)
+            mask_16x16[r] |= 1 << (c >> ss_x);
+          else
+            mask_8x8[r] |= 1 << (c >> ss_x);
+        }
       } else if (tx_size == TX_16X16) {
-        if (!skip_this_c && ((c >> ss_x) & 1) == 0)
-          mask_16x16_c |= 1 << (c >> ss_x);
-        if (!skip_this_r && ((r >> ss_y) & 1) == 0)
-          mask_16x16[r] |= 1 << (c >> ss_x);
+        if (!skip_this_c && ((c >> ss_x) & 1) == 0) {
+          if (!skip_border_4x4_c)
+            mask_16x16_c |= 1 << (c >> ss_x);
+          else
+            mask_8x8_c |= 1 << (c >> ss_x);
+        }
+        if (!skip_this_r && ((r >> ss_y) & 1) == 0) {
+          if (!skip_border_4x4_r)
+            mask_16x16[r] |= 1 << (c >> ss_x);
+          else
+            mask_8x8[r] |= 1 << (c >> ss_x);
+        }
       } else {
         // force 8x8 filtering on 32x32 boundaries
         if (!skip_this_c) {
