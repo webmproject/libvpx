@@ -313,9 +313,7 @@ static int check_bsize_coverage(VP9_COMMON *cm, MACROBLOCKD *xd,
   int bsl = mi_width_log2(bsize), bs = 1 << bsl;
   int ms = bs / 2;
 
-  if ((mi_row + bs <= cm->mi_rows) && (mi_col + ms < cm->mi_cols))
-    return 0;
-  if ((mi_col + bs <= cm->mi_cols) && (mi_row + ms < cm->mi_rows))
+  if ((mi_row + ms < cm->mi_rows) && (mi_col + ms < cm->mi_cols))
     return 0;
 
   // frame width/height are multiples of 8, hence 8x8 block should always
@@ -323,9 +321,11 @@ static int check_bsize_coverage(VP9_COMMON *cm, MACROBLOCKD *xd,
   assert(bsize > BLOCK_SIZE_SB8X8);
 
   // return the node index in the prob tree for binary coding
-  if ((mi_col + bs <= cm->mi_cols) && (mi_row + ms >= cm->mi_rows))
+  // skip horizontal/none partition types
+  if ((mi_col + ms < cm->mi_cols) && (mi_row + ms >= cm->mi_rows))
     return 1;
-  if ((mi_row + bs <= cm->mi_rows) && (mi_col + ms >= cm->mi_cols))
+  // skip vertical/none partition types
+  if ((mi_row + ms < cm->mi_rows) && (mi_col + ms >= cm->mi_cols))
     return 2;
 
   return -1;
