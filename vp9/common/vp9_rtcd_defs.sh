@@ -505,13 +505,14 @@ specialize vp9_sad8x8x4d sse2
 
 # TODO(jingning): need to convert these 4x8/8x4 functions into sse2 form
 prototype void vp9_sad8x4x4d "const uint8_t *src_ptr, int src_stride, const uint8_t* const ref_ptr[], int ref_stride, unsigned int *sad_array"
-specialize vp9_sad8x4x4d
+specialize vp9_sad8x4x4d sse2
 
 prototype void vp9_sad4x8x4d "const uint8_t *src_ptr, int src_stride, const uint8_t* const ref_ptr[], int ref_stride, unsigned int *sad_array"
-specialize vp9_sad4x8x4d
+specialize vp9_sad4x8x4d sse
 
 prototype void vp9_sad4x4x4d "const uint8_t *src_ptr, int  src_stride, const uint8_t* const ref_ptr[], int  ref_stride, unsigned int *sad_array"
 specialize vp9_sad4x4x4d sse
+
 prototype unsigned int vp9_sub_pixel_mse16x16 "const uint8_t *src_ptr, int  src_pixels_per_line, int  xoffset, int  yoffset, const uint8_t *dst_ptr, int dst_pixels_per_line, unsigned int *sse"
 specialize vp9_sub_pixel_mse16x16 sse2 mmx
 
