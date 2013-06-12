@@ -362,7 +362,7 @@ static void reset_temporal_layer_change(VP8_COMP *cpi,
                                         VP8_CONFIG *oxcf,
                                         const int prev_num_layers)
 {
-    unsigned int i;
+    int i;
     double prev_layer_frame_rate = 0;
     const int curr_num_layers = cpi->oxcf.number_of_layers;
     // If the previous state was 1 layer, get current layer context from cpi.
