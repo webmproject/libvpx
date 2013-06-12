@@ -16,6 +16,24 @@
       "revId": "8a0808a1457a9e426d029637856b3d8f44c6f29b",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAZ3//x7I\u003d",
+        "filename": "vp9/encoder/vp9_bitstream.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1732,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-06-12T17:49:52Z",
+      "side": 1,
+      "message": "only for left, not for above; above uses different offsets for each col tile and is thus always independent between col tiles. For row tiles, the decoder expects it to _not_ be independent between row tiles, and this change adjusts the encoder to do that too. Other contexts work alike (independent between col tiles, but not row tiles).",
+      "parentUuid": "AAAAZ3//x7c\u003d",
+      "revId": "8a0808a1457a9e426d029637856b3d8f44c6f29b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
