@@ -184,7 +184,7 @@ static void filter_selectively_vert(uint8_t *s, int pitch,
     if (mask & 1) {
       if (mask_16x16 & 1) {
         vp9_mb_lpf_vertical_edge_w(s, pitch, lfi->mblim, lfi->lim,
-                                   lfi->hev_thr, 1);
+                                   lfi->hev_thr);
         assert(!(mask_8x8 & 1));
         assert(!(mask_4x4 & 1));
         assert(!(mask_4x4_int & 1));
@@ -229,7 +229,7 @@ static void filter_selectively_horiz(uint8_t *s, int pitch,
       if (!only_4x4_1) {
         if (mask_16x16 & 1) {
           vp9_mb_lpf_horizontal_edge_w(s, pitch, lfi->mblim, lfi->lim,
-                                       lfi->hev_thr, 1);
+                                       lfi->hev_thr);
           assert(!(mask_8x8 & 1));
           assert(!(mask_4x4 & 1));
           assert(!(mask_4x4_int & 1));
