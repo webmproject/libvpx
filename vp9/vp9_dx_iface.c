@@ -496,6 +496,7 @@ static vpx_image_t *vp8_get_frame(vpx_codec_alg_priv_t  *ctx,
       *iter = img;
     }
   }
+  ctx->img_avail = 0;
 
   return img;
 }
