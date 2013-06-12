@@ -186,14 +186,22 @@ static void filter_selectively_horiz(uint8_t *s, int pitch,
                                      int only_4x4_1,
                                      const struct loop_filter_info *lfi) {
   unsigned int mask;
+  int count;
 
   for (mask = mask_16x16 | mask_8x8 | mask_4x4 | mask_4x4_int;
-       mask; mask >>= 1) {
+       mask; mask >>= count) {
+    count =1;
     if (mask & 1) {
       if (!only_4x4_1) {
         if (mask_16x16 & 1) {
-          vp9_mb_lpf_horizontal_edge_w(s, pitch, lfi->mblim, lfi->lim,
-                                       lfi->hev_thr);
+          if ((mask_16x16 & 3) == 3) {
+            vp9_mb_lpf_horizontal_edge_w(s, pitch, lfi->mblim, lfi->lim,
+                                         lfi->hev_thr, 2);
+            count = 2;
+          } else {
+            vp9_mb_lpf_horizontal_edge_w(s, pitch, lfi->mblim, lfi->lim,
+                                         lfi->hev_thr, 1);
+          }
           assert(!(mask_8x8 & 1));
           assert(!(mask_4x4 & 1));
           assert(!(mask_4x4_int & 1));
@@ -214,12 +222,12 @@ static void filter_selectively_horiz(uint8_t *s, int pitch,
         vp9_loop_filter_horizontal_edge(s + 4 * pitch, pitch, lfi->mblim,
                                         lfi->lim, lfi->hev_thr, 1);
     }
-    s += 8;
-    lfi++;
-    mask_16x16 >>= 1;
-    mask_8x8 >>= 1;
-    mask_4x4 >>= 1;
-    mask_4x4_int >>= 1;
+    s += 8 * count;
+    lfi += count;
+    mask_16x16 >>= count;
+    mask_8x8 >>= count;
+    mask_4x4 >>= count;
+    mask_4x4_int >>= count;
   }
 }
 
