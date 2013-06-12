@@ -12,8 +12,11 @@
 #ifndef VP9_DECODER_VP9_DECODFRAME_H_
 #define VP9_DECODER_VP9_DECODFRAME_H_
 
+struct VP9Common;
 struct VP9Decompressor;
 
-void vp9_init_de_quantizer(struct VP9Decompressor *pbi);
+void vp9_init_dequantizer(struct VP9Common *pc);
+int vp9_decode_frame(struct VP9Decompressor *cpi, const uint8_t **p_data_end);
+vp9_prob vp9_read_prob_diff_update(vp9_reader *r, int oldp);
 
 #endif  // VP9_DECODER_VP9_DECODFRAME_H_

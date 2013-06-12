@@ -215,26 +215,19 @@ static vpx_codec_err_t vp8_peek_si(const uint8_t         *data,
   if (data + data_sz <= data)
     res = VPX_CODEC_INVALID_PARAM;
   else {
-    /* Parse uncompresssed part of key frame header.
-     * 3 bytes:- including version, frame type and an offset
-     * 3 bytes:- sync code (0x9d, 0x01, 0x2a)
-     * 4 bytes:- including image width and height in the lowest 14 bits
-     *           of each 2-byte value.
-     */
     si->is_kf = 0;
 
-    if (data_sz >= 10 && !(data[0] & 0x01)) { /* I-Frame */
-      const uint8_t *c = data + 3;
+    if (data_sz >= 8 && (data[0] & 0xD8) == 0x80) { /* I-Frame */
+      const uint8_t *c = data + 1;
       si->is_kf = 1;
 
-      /* vet via sync code */
-      if (c[0] != 0x9d || c[1] != 0x01 || c[2] != 0x2a)
+      if (c[0] != SYNC_CODE_0 || c[1] != SYNC_CODE_1 || c[2] != SYNC_CODE_2)
         res = VPX_CODEC_UNSUP_BITSTREAM;
 
-      si->w = (c[3] | (c[4] << 8));
-      si->h = (c[5] | (c[6] << 8));
+      si->w = (c[3] << 8) | c[4];
+      si->h = (c[5] << 8) | c[6];
 
-      /*printf("w=%d, h=%d\n", si->w, si->h);*/
+      // printf("w=%d, h=%d\n", si->w, si->h);
       if (!(si->h | si->w))
         res = VPX_CODEC_UNSUP_BITSTREAM;
     } else
@@ -242,7 +235,6 @@ static vpx_codec_err_t vp8_peek_si(const uint8_t         *data,
   }
 
   return res;
-
 }
 
 static vpx_codec_err_t vp8_get_si(vpx_codec_alg_priv_t    *ctx,
@@ -329,9 +321,9 @@ static vpx_codec_err_t decode_one(vpx_codec_alg_priv_t  *ctx,
 
       vp9_initialize_dec();
 
-      oxcf.Width = ctx->si.w;
-      oxcf.Height = ctx->si.h;
-      oxcf.Version = 9;
+      oxcf.width = ctx->si.w;
+      oxcf.height = ctx->si.h;
+      oxcf.version = 9;
       oxcf.postprocess = 0;
       oxcf.max_threads = ctx->cfg.threads;
       oxcf.inv_tile_order = ctx->invert_tile_order;
@@ -574,30 +566,6 @@ static vpx_codec_err_t vp8_xma_set_mmap(vpx_codec_ctx_t         *ctx,
     vp8_finalize_mmaps(ctx->priv->alg_priv);
     res = ctx->iface->init(ctx, NULL);
   }
-
-  return res;
-}
-
-static vpx_codec_err_t image2yuvconfig(const vpx_image_t   *img,
-                                       YV12_BUFFER_CONFIG  *yv12) {
-  vpx_codec_err_t        res = VPX_CODEC_OK;
-  yv12->y_buffer = img->planes[VPX_PLANE_Y];
-  yv12->u_buffer = img->planes[VPX_PLANE_U];
-  yv12->v_buffer = img->planes[VPX_PLANE_V];
-
-  yv12->y_crop_width  = img->d_w;
-  yv12->y_crop_height = img->d_h;
-  yv12->y_width  = img->d_w;
-  yv12->y_height = img->d_h;
-  yv12->uv_width = yv12->y_width / 2;
-  yv12->uv_height = yv12->y_height / 2;
-
-  yv12->y_stride = img->stride[VPX_PLANE_Y];
-  yv12->uv_stride = img->stride[VPX_PLANE_U];
-
-  yv12->border  = (img->stride[VPX_PLANE_Y] - img->d_w) / 2;
-  yv12->clrtype = (img->fmt == VPX_IMG_FMT_VPXI420 ||
-                   img->fmt == VPX_IMG_FMT_VPXYV12);
 
   return res;
 }

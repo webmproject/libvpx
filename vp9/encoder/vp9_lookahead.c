@@ -46,7 +46,7 @@ void vp9_lookahead_destroy(struct lookahead_ctx *ctx) {
       unsigned int i;
 
       for (i = 0; i < ctx->max_sz; i++)
-        vp8_yv12_de_alloc_frame_buffer(&ctx->buf[i].img);
+        vp9_free_frame_buffer(&ctx->buf[i].img);
       free(ctx->buf);
     }
     free(ctx);
@@ -56,6 +56,8 @@ void vp9_lookahead_destroy(struct lookahead_ctx *ctx) {
 
 struct lookahead_ctx * vp9_lookahead_init(unsigned int width,
                                           unsigned int height,
+                                          unsigned int subsampling_x,
+                                          unsigned int subsampling_y,
                                           unsigned int depth) {
   struct lookahead_ctx *ctx = NULL;
 
@@ -71,8 +73,9 @@ struct lookahead_ctx * vp9_lookahead_init(unsigned int width,
     if (!ctx->buf)
       goto bail;
     for (i = 0; i < depth; i++)
-      if (vp8_yv12_alloc_frame_buffer(&ctx->buf[i].img,
-                                      width, height, VP9BORDERINPIXELS))
+      if (vp9_alloc_frame_buffer(&ctx->buf[i].img,
+                                 width, height, subsampling_x, subsampling_y,
+                                 VP9BORDERINPIXELS))
         goto bail;
   }
   return ctx;
@@ -81,19 +84,26 @@ bail:
   return NULL;
 }
 
+#define USE_PARTIAL_COPY 0
 
 int vp9_lookahead_push(struct lookahead_ctx *ctx, YV12_BUFFER_CONFIG   *src,
                        int64_t ts_start, int64_t ts_end, unsigned int flags,
                        unsigned char *active_map) {
   struct lookahead_entry *buf;
+#if USE_PARTIAL_COPY
   int row, col, active_end;
   int mb_rows = (src->y_height + 15) >> 4;
   int mb_cols = (src->y_width + 15) >> 4;
+#endif
 
   if (ctx->sz + 1 > ctx->max_sz)
     return 1;
   ctx->sz++;
   buf = pop(ctx, &ctx->write_idx);
+
+#if USE_PARTIAL_COPY
+  // TODO(jkoleszar): This is disabled for now, as
+  // vp9_copy_and_extend_frame_with_rect is not subsampling/alpha aware.
 
   // Only do this partial copy if the following conditions are all met:
   // 1. Lookahead queue has has size of 1.
@@ -137,6 +147,11 @@ int vp9_lookahead_push(struct lookahead_ctx *ctx, YV12_BUFFER_CONFIG   *src,
   } else {
     vp9_copy_and_extend_frame(src, &buf->img);
   }
+#else
+  // Partial copy not implemented yet
+  vp9_copy_and_extend_frame(src, &buf->img);
+#endif
+
   buf->ts_start = ts_start;
   buf->ts_end = ts_end;
   buf->flags = flags;

@@ -215,9 +215,13 @@ typedef struct vpx_roi_map {
   unsigned char *roi_map;      /**< specify an id between 0 and 3 for each 16x16 region within a frame */
   unsigned int   rows;         /**< number of rows */
   unsigned int   cols;         /**< number of cols */
-  int     delta_q[4];          /**< quantizer delta [-63, 63] off baseline for regions with id between 0 and 3*/
-  int     delta_lf[4];         /**< loop filter strength delta [-63, 63] for regions with id between 0 and 3 */
-  unsigned int   static_threshold[4];/**< threshold for region to be treated as static */
+  // TODO(paulwilkins): broken for VP9 which has 8 segments
+  // q and loop filter deltas for each segment
+  // (see MAX_MB_SEGMENTS)
+  int     delta_q[4];
+  int     delta_lf[4];
+  // Static breakout threshold for each segment
+  unsigned int   static_threshold[4];
 } vpx_roi_map_t;
 
 /*!\brief  vpx active region map

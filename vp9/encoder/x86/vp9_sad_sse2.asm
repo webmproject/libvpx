@@ -14,11 +14,11 @@ SECTION .text
 
 ; unsigned int vp9_sad64x64_sse2(uint8_t *src, int src_stride,
 ;                                uint8_t *ref, int ref_stride);
-INIT_XMM sse2
-cglobal sad64x64, 4, 5, 5, src, src_stride, ref, ref_stride, n_rows
+%macro SAD64XN 1
+cglobal sad64x%1, 4, 5, 5, src, src_stride, ref, ref_stride, n_rows
   movsxdifnidn src_strideq, src_strided
   movsxdifnidn ref_strideq, ref_strided
-  mov              n_rowsd, 64
+  mov              n_rowsd, %1
   pxor                  m0, m0
 .loop:
   movu                  m1, [refq]
@@ -42,14 +42,19 @@ cglobal sad64x64, 4, 5, 5, src, src_stride, ref, ref_stride, n_rows
   paddd                 m0, m1
   movd                 eax, m0
   RET
+%endmacro
+
+INIT_XMM sse2
+SAD64XN 64 ; sad64x64_sse2
+SAD64XN 32 ; sad64x32_sse2
 
 ; unsigned int vp9_sad32x32_sse2(uint8_t *src, int src_stride,
 ;                                uint8_t *ref, int ref_stride);
-INIT_XMM sse2
-cglobal sad32x32, 4, 5, 5, src, src_stride, ref, ref_stride, n_rows
+%macro SAD32XN 1
+cglobal sad32x%1, 4, 5, 5, src, src_stride, ref, ref_stride, n_rows
   movsxdifnidn src_strideq, src_strided
   movsxdifnidn ref_strideq, ref_strided
-  mov              n_rowsd, 16
+  mov              n_rowsd, %1/2
   pxor                  m0, m0
 
 .loop:
@@ -74,6 +79,12 @@ cglobal sad32x32, 4, 5, 5, src, src_stride, ref, ref_stride, n_rows
   paddd                 m0, m1
   movd                 eax, m0
   RET
+%endmacro
+
+INIT_XMM sse2
+SAD32XN 64 ; sad32x64_sse2
+SAD32XN 32 ; sad32x32_sse2
+SAD32XN 16 ; sad32x16_sse2
 
 ; unsigned int vp9_sad16x{8,16}_sse2(uint8_t *src, int src_stride,
 ;                                    uint8_t *ref, int ref_stride);
@@ -112,6 +123,7 @@ cglobal sad16x%1, 4, 7, 5, src, src_stride, ref, ref_stride, \
 %endmacro
 
 INIT_XMM sse2
+SAD16XN 32 ; sad16x32_sse2
 SAD16XN 16 ; sad16x16_sse2
 SAD16XN  8 ; sad16x8_sse2
 

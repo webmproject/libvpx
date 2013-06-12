@@ -15,260 +15,100 @@
 #include "vp9/common/vp9_alloccommon.h"
 #include "vpx_mem/vpx_mem.h"
 
-static const unsigned int kf_y_mode_cts[8][VP9_YMODES] = {
-  /* DC V   H  D45 135 117 153 D27 D63 TM i8x8 BPRED */
-  {12,  6,  5,  5,  5,  5,  5,  5,  5,  2, 22, 200},
-  {25, 13, 13,  7,  7,  7,  7,  7,  7,  6, 27, 160},
-  {31, 17, 18,  8,  8,  8,  8,  8,  8,  9, 26, 139},
-  {40, 22, 23,  8,  8,  8,  8,  8,  8, 12, 27, 116},
-  {53, 26, 28,  8,  8,  8,  8,  8,  8, 13, 26,  94},
-  {68, 33, 35,  8,  8,  8,  8,  8,  8, 17, 20,  68},
-  {78, 38, 38,  8,  8,  8,  8,  8,  8, 19, 16,  52},
-  {89, 42, 42,  8,  8,  8,  8,  8,  8, 21, 12,  34},
+static const vp9_prob default_kf_uv_probs[VP9_INTRA_MODES]
+                                         [VP9_INTRA_MODES - 1] = {
+  { 144,  11,  54, 157, 195, 130,  46,  58, 108 } /* y = dc */,
+  { 118,  15, 123, 148, 131, 101,  44,  93, 131 } /* y = v */,
+  { 113,  12,  23, 188, 226, 142,  26,  32, 125 } /* y = h */,
+  { 120,  11,  50, 123, 163, 135,  64,  77, 103 } /* y = d45 */,
+  { 113,   9,  36, 155, 111, 157,  32,  44, 161 } /* y = d135 */,
+  { 116,   9,  55, 176,  76,  96,  37,  61, 149 } /* y = d117 */,
+  { 115,   9,  28, 141, 161, 167,  21,  25, 193 } /* y = d153 */,
+  { 120,  12,  32, 145, 195, 142,  32,  38,  86 } /* y = d27 */,
+  { 116,  12,  64, 120, 140, 125,  49, 115, 121 } /* y = d63 */,
+  { 102,  19,  66, 162, 182, 122,  35,  59, 128 } /* y = tm */
 };
 
-static const unsigned int y_mode_cts  [VP9_YMODES] = {
-  /* DC V   H  D45 135 117 153 D27 D63 TM i8x8 BPRED */
-  98, 19, 15, 14, 14, 14, 14, 12, 12, 13, 16, 70
+static const vp9_prob default_if_y_probs[BLOCK_SIZE_GROUPS]
+                                        [VP9_INTRA_MODES - 1] = {
+  {  65,  32,  18, 144, 162, 194,  41,  51,  98 } /* block_size < 8x8 */,
+  { 132,  68,  18, 165, 217, 196,  45,  40,  78 } /* block_size < 16x16 */,
+  { 173,  80,  19, 176, 240, 193,  64,  35,  46 } /* block_size < 32x32 */,
+  { 221, 135,  38, 194, 248, 121,  96,  85,  29 } /* block_size >= 32x32 */
 };
 
-static const unsigned int uv_mode_cts [VP9_YMODES] [VP9_UV_MODES] = {
-  /* DC   V   H  D45 135 117 153 D27 D63 TM */
-  { 200, 15, 15, 10, 10, 10, 10, 10, 10,  6}, /* DC */
-  { 130, 75, 10, 10, 10, 10, 10, 10, 10,  6}, /* V */
-  { 130, 10, 75, 10, 10, 10, 10, 10, 10,  6}, /* H */
-  { 130, 15, 10, 75, 10, 10, 10, 10, 10,  6}, /* D45 */
-  { 150, 15, 10, 10, 75, 10, 10, 10, 10,  6}, /* D135 */
-  { 150, 15, 10, 10, 10, 75, 10, 10, 10,  6}, /* D117 */
-  { 150, 15, 10, 10, 10, 10, 75, 10, 10,  6}, /* D153 */
-  { 150, 15, 10, 10, 10, 10, 10, 75, 10,  6}, /* D27 */
-  { 150, 15, 10, 10, 10, 10, 10, 10, 75,  6}, /* D63 */
-  { 160, 30, 30, 10, 10, 10, 10, 10, 10, 16}, /* TM */
-  { 132, 46, 40, 10, 10, 10, 10, 10, 10, 18}, /* i8x8 - never used */
-  { 150, 35, 41, 10, 10, 10, 10, 10, 10, 10}, /* BPRED */
+static const vp9_prob default_if_uv_probs[VP9_INTRA_MODES]
+                                         [VP9_INTRA_MODES - 1] = {
+  { 120,   7,  76, 176, 208, 126,  28,  54, 103 } /* y = dc */,
+  {  48,  12, 154, 155, 139,  90,  34, 117, 119 } /* y = v */,
+  {  67,   6,  25, 204, 243, 158,  13,  21,  96 } /* y = h */,
+  {  97,   5,  44, 131, 176, 139,  48,  68,  97 } /* y = d45 */,
+  {  83,   5,  42, 156, 111, 152,  26,  49, 152 } /* y = d135 */,
+  {  80,   5,  58, 178,  74,  83,  33,  62, 145 } /* y = d117 */,
+  {  86,   5,  32, 154, 192, 168,  14,  22, 163 } /* y = d153 */,
+  {  85,   5,  32, 156, 216, 148,  19,  29,  73 } /* y = d27 */,
+  {  77,   7,  64, 116, 132, 122,  37, 126, 120 } /* y = d63 */,
+  { 101,  21, 107, 181, 192, 103,  19,  67, 125 } /* y = tm */
 };
 
-static const unsigned int i8x8_mode_cts  [VP9_I8X8_MODES] = {
-  /* DC V   H D45 135 117 153 D27 D63  TM */
-  73, 49, 61, 30, 30, 30, 30, 30, 30, 13
+const vp9_prob vp9_partition_probs[NUM_FRAME_TYPES][NUM_PARTITION_CONTEXTS]
+                                  [PARTITION_TYPES - 1] = {
+  { /* frame_type = keyframe */
+    /* 8x8 -> 4x4 */
+    { 158,  97,  94 } /* a/l both not split */,
+    {  93,  24,  99 } /* a split, l not split */,
+    {  85, 119,  44 } /* l split, a not split */,
+    {  62,  59,  67 } /* a/l both split */,
+    /* 16x16 -> 8x8 */
+    { 149,  53,  53 } /* a/l both not split */,
+    {  94,  20,  48 } /* a split, l not split */,
+    {  83,  53,  24 } /* l split, a not split */,
+    {  52,  18,  18 } /* a/l both split */,
+    /* 32x32 -> 16x16 */
+    { 150,  40,  39 } /* a/l both not split */,
+    {  78,  12,  26 } /* a split, l not split */,
+    {  67,  33,  11 } /* l split, a not split */,
+    {  24,   7,   5 } /* a/l both split */,
+    /* 64x64 -> 32x32 */
+    { 174,  35,  49 } /* a/l both not split */,
+    {  68,  11,  27 } /* a split, l not split */,
+    {  57,  15,   9 } /* l split, a not split */,
+    {  12,   3,   3 } /* a/l both split */
+  }, { /* frame_type = interframe */
+    /* 8x8 -> 4x4 */
+    { 199, 122, 141 } /* a/l both not split */,
+    { 147,  63, 159 } /* a split, l not split */,
+    { 148, 133, 118 } /* l split, a not split */,
+    { 121, 104, 114 } /* a/l both split */,
+    /* 16x16 -> 8x8 */
+    { 174,  73,  87 } /* a/l both not split */,
+    {  92,  41,  83 } /* a split, l not split */,
+    {  82,  99,  50 } /* l split, a not split */,
+    {  53,  39,  39 } /* a/l both split */,
+    /* 32x32 -> 16x16 */
+    { 177,  58,  59 } /* a/l both not split */,
+    {  68,  26,  63 } /* a split, l not split */,
+    {  52,  79,  25 } /* l split, a not split */,
+    {  17,  14,  12 } /* a/l both split */,
+    /* 64x64 -> 32x32 */
+    { 222,  34,  30 } /* a/l both not split */,
+    {  72,  16,  44 } /* a split, l not split */,
+    {  58,  32,  12 } /* l split, a not split */,
+    {  10,   7,   6 } /* a/l both split */
+  }
 };
-
-static const unsigned int kf_uv_mode_cts [VP9_YMODES] [VP9_UV_MODES] = {
-  // DC   V   H  D45 135 117 153 D27 D63 TM
-  { 160, 24, 24, 20, 20, 20, 20, 20, 20,  8}, /* DC */
-  { 102, 64, 30, 20, 20, 20, 20, 20, 20, 10}, /* V */
-  { 102, 30, 64, 20, 20, 20, 20, 20, 20, 10}, /* H */
-  { 102, 33, 20, 64, 20, 20, 20, 20, 20, 14}, /* D45 */
-  { 102, 33, 20, 20, 64, 20, 20, 20, 20, 14}, /* D135 */
-  { 122, 33, 20, 20, 20, 64, 20, 20, 20, 14}, /* D117 */
-  { 102, 33, 20, 20, 20, 20, 64, 20, 20, 14}, /* D153 */
-  { 102, 33, 20, 20, 20, 20, 20, 64, 20, 14}, /* D27 */
-  { 102, 33, 20, 20, 20, 20, 20, 20, 64, 14}, /* D63 */
-  { 132, 36, 30, 20, 20, 20, 20, 20, 20, 18}, /* TM */
-  { 122, 41, 35, 20, 20, 20, 20, 20, 20, 18}, /* i8x8 - never used */
-  { 122, 41, 35, 20, 20, 20, 20, 20, 20, 18}, /* BPRED */
-};
-
-static const unsigned int bmode_cts[VP9_NKF_BINTRAMODES] = {
-#if CONFIG_NEWBINTRAMODES
-#if CONTEXT_PRED_REPLACEMENTS == 6
-  /* DC    TM     VE     HE   CONTEXT */
-  43891, 17694, 10036, 3920, 20000
-#elif CONTEXT_PRED_REPLACEMENTS == 4
-  /* DC    TM     VE     HE   LD    RD   CONTEXT */
-  43891, 17694, 10036, 3920, 3363, 2546, 14000
-#elif CONTEXT_PRED_REPLACEMENTS == 0
-  /* DC    TM     VE     HE   LD    RD   VR    VL    HD    HU   CONTEXT */
-  43891, 17694, 10036, 3920, 3363, 2546, 5119, 3221, 2471, 1723, 50000
-#endif
-#else
-  /* DC    TM     VE     HE   LD    RD    VR    VL    HD    HU */
-  43891, 17694, 10036, 3920, 3363, 2546, 5119, 3221, 2471, 1723
-#endif
-};
-
-typedef enum {
-  SUBMVREF_NORMAL,
-  SUBMVREF_LEFT_ZED,
-  SUBMVREF_ABOVE_ZED,
-  SUBMVREF_LEFT_ABOVE_SAME,
-  SUBMVREF_LEFT_ABOVE_ZED
-} sumvfref_t;
-
-int vp9_mv_cont(const int_mv *l, const int_mv *a) {
-  int lez = (l->as_int == 0);
-  int aez = (a->as_int == 0);
-  int lea = (l->as_int == a->as_int);
-
-  if (lea && lez)
-    return SUBMVREF_LEFT_ABOVE_ZED;
-
-  if (lea)
-    return SUBMVREF_LEFT_ABOVE_SAME;
-
-  if (aez)
-    return SUBMVREF_ABOVE_ZED;
-
-  if (lez)
-    return SUBMVREF_LEFT_ZED;
-
-  return SUBMVREF_NORMAL;
-}
-
-const vp9_prob vp9_sub_mv_ref_prob2 [SUBMVREF_COUNT][VP9_SUBMVREFS - 1] = {
-  { 147, 136, 18 },
-  { 106, 145, 1  },
-  { 179, 121, 1  },
-  { 223, 1, 34 },
-  { 208, 1, 1  }
-};
-
-vp9_mbsplit vp9_mbsplits [VP9_NUMMBSPLITS] = {
-  {
-    0,  0,  0,  0,
-    0,  0,  0,  0,
-    1,  1,  1,  1,
-    1,  1,  1,  1,
-  }, {
-    0,  0,  1,  1,
-    0,  0,  1,  1,
-    0,  0,  1,  1,
-    0,  0,  1,  1,
-  }, {
-    0,  0,  1,  1,
-    0,  0,  1,  1,
-    2,  2,  3,  3,
-    2,  2,  3,  3,
-  }, {
-    0,  1,  2,  3,
-    4,  5,  6,  7,
-    8,  9,  10, 11,
-    12, 13, 14, 15,
-  },
-};
-
-const int vp9_mbsplit_count [VP9_NUMMBSPLITS] = { 2, 2, 4, 16};
-
-const vp9_prob vp9_mbsplit_probs [VP9_NUMMBSPLITS - 1] = { 110, 111, 150};
 
 /* Array indices are identical to previously-existing INTRAMODECONTEXTNODES. */
-
-const vp9_tree_index vp9_kf_bmode_tree[VP9_KF_BINTRAMODES * 2 - 2] = {
-  -B_DC_PRED, 2,                      /* 0 = DC_NODE */
-  -B_TM_PRED, 4,                      /* 1 = TM_NODE */
-  -B_VE_PRED, 6,                      /* 2 = VE_NODE */
-  8, 12,                              /* 3 = COM_NODE */
-  -B_HE_PRED, 10,                     /* 4 = HE_NODE */
-  -B_RD_PRED, -B_VR_PRED,             /* 5 = RD_NODE */
-  -B_LD_PRED, 14,                     /* 6 = LD_NODE */
-  -B_VL_PRED, 16,                     /* 7 = VL_NODE */
-  -B_HD_PRED, -B_HU_PRED              /* 8 = HD_NODE */
-};
-
-const vp9_tree_index vp9_bmode_tree[VP9_NKF_BINTRAMODES * 2 - 2] = {
-#if CONFIG_NEWBINTRAMODES
-#if CONTEXT_PRED_REPLACEMENTS == 6
-  -B_DC_PRED, 2,
-  -B_TM_PRED, 4,
-  6, -(B_CONTEXT_PRED - CONTEXT_PRED_REPLACEMENTS),
-  -B_VE_PRED, -B_HE_PRED
-#elif CONTEXT_PRED_REPLACEMENTS == 4
-  -B_DC_PRED, 2,
-  -B_TM_PRED, 4,
-  6, 8,
-  -B_VE_PRED, -B_HE_PRED,
-  10, -(B_CONTEXT_PRED - CONTEXT_PRED_REPLACEMENTS),
-  -B_RD_PRED, -B_LD_PRED,
-#elif CONTEXT_PRED_REPLACEMENTS == 0
-  -B_DC_PRED, 2,                      /* 0 = DC_NODE */
-  -B_TM_PRED, 4,                      /* 1 = TM_NODE */
-  -B_VE_PRED, 6,                      /* 2 = VE_NODE */
-  8, 12,                              /* 3 = COM_NODE */
-  -B_HE_PRED, 10,                     /* 4 = HE_NODE */
-  -B_RD_PRED, -B_VR_PRED,             /* 5 = RD_NODE */
-  -B_LD_PRED, 14,                     /* 6 = LD_NODE */
-  -B_VL_PRED, 16,                     /* 7 = VL_NODE */
-  -B_HD_PRED, 18,
-  -B_HU_PRED, -B_CONTEXT_PRED
-#endif
-#else
-  -B_DC_PRED, 2,                      /* 0 = DC_NODE */
-  -B_TM_PRED, 4,                      /* 1 = TM_NODE */
-  -B_VE_PRED, 6,                      /* 2 = VE_NODE */
-  8, 12,                              /* 3 = COM_NODE */
-  -B_HE_PRED, 10,                     /* 4 = HE_NODE */
-  -B_RD_PRED, -B_VR_PRED,             /* 5 = RD_NODE */
-  -B_LD_PRED, 14,                     /* 6 = LD_NODE */
-  -B_VL_PRED, 16,                     /* 7 = VL_NODE */
-  -B_HD_PRED, -B_HU_PRED              /* 8 = HD_NODE */
-#endif
-};
-
-/* Again, these trees use the same probability indices as their
-   explicitly-programmed predecessors. */
-const vp9_tree_index vp9_ymode_tree[VP9_YMODES * 2 - 2] = {
-  2, 14,
-  -DC_PRED, 4,
-  6, 8,
-  -D45_PRED, -D135_PRED,
-  10, 12,
-  -D117_PRED, -D153_PRED,
-  -D27_PRED, -D63_PRED,
-  16, 18,
-  -V_PRED, -H_PRED,
-  -TM_PRED, 20,
-  -B_PRED, -I8X8_PRED
-};
-
-const vp9_tree_index vp9_kf_ymode_tree[VP9_YMODES * 2 - 2] = {
-  2, 14,
-  -DC_PRED, 4,
-  6, 8,
-  -D45_PRED, -D135_PRED,
-  10, 12,
-  -D117_PRED, -D153_PRED,
-  -D27_PRED, -D63_PRED,
-  16, 18,
-  -V_PRED, -H_PRED,
-  -TM_PRED, 20,
-  -B_PRED, -I8X8_PRED
-};
-
-const vp9_tree_index vp9_i8x8_mode_tree[VP9_I8X8_MODES * 2 - 2] = {
-  2, 14,
-  -DC_PRED, 4,
-  6, 8,
-  -D45_PRED, -D135_PRED,
-  10, 12,
-  -D117_PRED, -D153_PRED,
-  -D27_PRED, -D63_PRED,
-  -V_PRED, 16,
-  -H_PRED, -TM_PRED
-};
-
-const vp9_tree_index vp9_uv_mode_tree[VP9_UV_MODES * 2 - 2] = {
-  2, 14,
-  -DC_PRED, 4,
-  6, 8,
-  -D45_PRED, -D135_PRED,
-  10, 12,
-  -D117_PRED, -D153_PRED,
-  -D27_PRED, -D63_PRED,
-  -V_PRED, 16,
-  -H_PRED, -TM_PRED
-};
-
-const vp9_tree_index vp9_mbsplit_tree[6] = {
-  -PARTITIONING_4X4,   2,
-  -PARTITIONING_8X8,   4,
-  -PARTITIONING_16X8, -PARTITIONING_8X16,
-};
-
-const vp9_tree_index vp9_mv_ref_tree[8] = {
-  -ZEROMV, 2,
-  -NEARESTMV, 4,
-  -NEARMV, 6,
-  -NEWMV, -SPLITMV
+const vp9_tree_index vp9_intra_mode_tree[VP9_INTRA_MODES * 2 - 2] = {
+  -DC_PRED, 2,                      /* 0 = DC_NODE */
+  -TM_PRED, 4,                      /* 1 = TM_NODE */
+  -V_PRED, 6,                       /* 2 = V_NODE */
+  8, 12,                            /* 3 = COM_NODE */
+  -H_PRED, 10,                      /* 4 = H_NODE */
+  -D135_PRED, -D117_PRED,           /* 5 = D135_NODE */
+  -D45_PRED, 14,                    /* 6 = D45_NODE */
+  -D63_PRED, 16,                    /* 7 = D63_NODE */
+  -D153_PRED, -D27_PRED             /* 8 = D153_NODE */
 };
 
 const vp9_tree_index vp9_sb_mv_ref_tree[6] = {
@@ -277,202 +117,172 @@ const vp9_tree_index vp9_sb_mv_ref_tree[6] = {
   -NEARMV, -NEWMV
 };
 
-const vp9_tree_index vp9_sub_mv_ref_tree[6] = {
-  -LEFT4X4, 2,
-  -ABOVE4X4, 4,
-  -ZERO4X4, -NEW4X4
+const vp9_tree_index vp9_partition_tree[6] = {
+  -PARTITION_NONE, 2,
+  -PARTITION_HORZ, 4,
+  -PARTITION_VERT, -PARTITION_SPLIT
 };
 
-struct vp9_token_struct vp9_bmode_encodings[VP9_NKF_BINTRAMODES];
-struct vp9_token_struct vp9_kf_bmode_encodings[VP9_KF_BINTRAMODES];
-struct vp9_token_struct vp9_ymode_encodings[VP9_YMODES];
-struct vp9_token_struct vp9_sb_ymode_encodings[VP9_I32X32_MODES];
-struct vp9_token_struct vp9_sb_kf_ymode_encodings[VP9_I32X32_MODES];
-struct vp9_token_struct vp9_kf_ymode_encodings[VP9_YMODES];
-struct vp9_token_struct vp9_uv_mode_encodings[VP9_UV_MODES];
-struct vp9_token_struct vp9_i8x8_mode_encodings[VP9_I8X8_MODES];
-struct vp9_token_struct vp9_mbsplit_encodings[VP9_NUMMBSPLITS];
+struct vp9_token vp9_intra_mode_encodings[VP9_INTRA_MODES];
 
-struct vp9_token_struct vp9_mv_ref_encoding_array[VP9_MVREFS];
-struct vp9_token_struct vp9_sb_mv_ref_encoding_array[VP9_MVREFS];
-struct vp9_token_struct vp9_sub_mv_ref_encoding_array[VP9_SUBMVREFS];
+struct vp9_token vp9_sb_mv_ref_encoding_array[VP9_INTER_MODES];
+
+struct vp9_token vp9_partition_encodings[PARTITION_TYPES];
+
+static const vp9_prob default_intra_inter_p[INTRA_INTER_CONTEXTS] = {
+  9, 102, 187, 225
+};
+
+static const vp9_prob default_comp_inter_p[COMP_INTER_CONTEXTS] = {
+  239, 183, 119,  96,  41
+};
+
+static const vp9_prob default_comp_ref_p[REF_CONTEXTS] = {
+  50, 126, 123, 221, 226
+};
+
+static const vp9_prob default_single_ref_p[REF_CONTEXTS][2] = {
+  {  33,  16 },
+  {  77,  74 },
+  { 142, 142 },
+  { 172, 170 },
+  { 238, 247 }
+};
+
+const vp9_prob vp9_default_tx_probs_32x32p[TX_SIZE_CONTEXTS]
+                                          [TX_SIZE_MAX_SB - 1] = {
+  { 3, 136, 37, },
+  { 5, 52, 13, },
+};
+const vp9_prob vp9_default_tx_probs_16x16p[TX_SIZE_CONTEXTS]
+                                          [TX_SIZE_MAX_SB - 2] = {
+  { 20, 152, },
+  { 15, 101, },
+};
+const vp9_prob vp9_default_tx_probs_8x8p[TX_SIZE_CONTEXTS]
+                                        [TX_SIZE_MAX_SB - 3] = {
+  { 100, },
+  { 66, },
+};
+
+void tx_counts_to_branch_counts_32x32(unsigned int *tx_count_32x32p,
+                                      unsigned int (*ct_32x32p)[2]) {
+  ct_32x32p[0][0] = tx_count_32x32p[TX_4X4];
+  ct_32x32p[0][1] = tx_count_32x32p[TX_8X8] +
+                    tx_count_32x32p[TX_16X16] +
+                    tx_count_32x32p[TX_32X32];
+  ct_32x32p[1][0] = tx_count_32x32p[TX_8X8];
+  ct_32x32p[1][1] = tx_count_32x32p[TX_16X16] +
+                    tx_count_32x32p[TX_32X32];
+  ct_32x32p[2][0] = tx_count_32x32p[TX_16X16];
+  ct_32x32p[2][1] = tx_count_32x32p[TX_32X32];
+}
+
+void tx_counts_to_branch_counts_16x16(unsigned int *tx_count_16x16p,
+                                      unsigned int (*ct_16x16p)[2]) {
+  ct_16x16p[0][0] = tx_count_16x16p[TX_4X4];
+  ct_16x16p[0][1] = tx_count_16x16p[TX_8X8] +
+                    tx_count_16x16p[TX_16X16];
+  ct_16x16p[1][0] = tx_count_16x16p[TX_8X8];
+  ct_16x16p[1][1] = tx_count_16x16p[TX_16X16];
+}
+
+void tx_counts_to_branch_counts_8x8(unsigned int *tx_count_8x8p,
+                                    unsigned int (*ct_8x8p)[2]) {
+  ct_8x8p[0][0] =   tx_count_8x8p[TX_4X4];
+  ct_8x8p[0][1] =   tx_count_8x8p[TX_8X8];
+}
+
+const vp9_prob vp9_default_mbskip_probs[MBSKIP_CONTEXTS] = {
+  192, 128, 64
+};
 
 void vp9_init_mbmode_probs(VP9_COMMON *x) {
-  unsigned int bct [VP9_YMODES] [2];      /* num Ymodes > num UV modes */
+  vpx_memcpy(x->fc.uv_mode_prob, default_if_uv_probs,
+             sizeof(default_if_uv_probs));
+  vpx_memcpy(x->kf_uv_mode_prob, default_kf_uv_probs,
+             sizeof(default_kf_uv_probs));
+  vpx_memcpy(x->fc.y_mode_prob, default_if_y_probs,
+             sizeof(default_if_y_probs));
 
-  vp9_tree_probs_from_distribution(vp9_ymode_tree, x->fc.ymode_prob,
-                                   bct, y_mode_cts, 0);
-  vp9_tree_probs_from_distribution(vp9_sb_ymode_tree, x->fc.sb_ymode_prob,
-                                   bct, y_mode_cts, 0);
-  {
-    int i;
-    for (i = 0; i < 8; i++) {
-      vp9_tree_probs_from_distribution(vp9_kf_ymode_tree, x->kf_ymode_prob[i],
-                                       bct, kf_y_mode_cts[i], 0);
-      vp9_tree_probs_from_distribution(vp9_sb_kf_ymode_tree,
-                                       x->sb_kf_ymode_prob[i], bct,
-                                       kf_y_mode_cts[i], 0);
-    }
-  }
-  {
-    int i;
-    for (i = 0; i < VP9_YMODES; i++) {
-      vp9_tree_probs_from_distribution(vp9_uv_mode_tree, x->kf_uv_mode_prob[i],
-                                       bct, kf_uv_mode_cts[i], 0);
-      vp9_tree_probs_from_distribution(vp9_uv_mode_tree, x->fc.uv_mode_prob[i],
-                                       bct, uv_mode_cts[i], 0);
-    }
-  }
-
-  vp9_tree_probs_from_distribution(vp9_i8x8_mode_tree, x->fc.i8x8_mode_prob,
-                                   bct, i8x8_mode_cts, 0);
-
-  vpx_memcpy(x->fc.sub_mv_ref_prob, vp9_sub_mv_ref_prob2,
-             sizeof(vp9_sub_mv_ref_prob2));
-  vpx_memcpy(x->fc.mbsplit_prob, vp9_mbsplit_probs, sizeof(vp9_mbsplit_probs));
   vpx_memcpy(x->fc.switchable_interp_prob, vp9_switchable_interp_prob,
              sizeof(vp9_switchable_interp_prob));
-#if CONFIG_COMP_INTERINTRA_PRED
-  x->fc.interintra_prob = VP9_DEF_INTERINTRA_PROB;
-#endif
-  x->ref_pred_probs[0] = 120;
-  x->ref_pred_probs[1] = 80;
-  x->ref_pred_probs[2] = 40;
+
+  vpx_memcpy(x->fc.partition_prob, vp9_partition_probs,
+             sizeof(vp9_partition_probs));
+
+  vpx_memcpy(x->fc.intra_inter_prob, default_intra_inter_p,
+             sizeof(default_intra_inter_p));
+  vpx_memcpy(x->fc.comp_inter_prob, default_comp_inter_p,
+             sizeof(default_comp_inter_p));
+  vpx_memcpy(x->fc.comp_ref_prob, default_comp_ref_p,
+             sizeof(default_comp_ref_p));
+  vpx_memcpy(x->fc.single_ref_prob, default_single_ref_p,
+             sizeof(default_single_ref_p));
+  vpx_memcpy(x->fc.tx_probs_32x32p, vp9_default_tx_probs_32x32p,
+             sizeof(vp9_default_tx_probs_32x32p));
+  vpx_memcpy(x->fc.tx_probs_16x16p, vp9_default_tx_probs_16x16p,
+             sizeof(vp9_default_tx_probs_16x16p));
+  vpx_memcpy(x->fc.tx_probs_8x8p, vp9_default_tx_probs_8x8p,
+             sizeof(vp9_default_tx_probs_8x8p));
+  vpx_memcpy(x->fc.mbskip_probs, vp9_default_mbskip_probs,
+             sizeof(vp9_default_mbskip_probs));
 }
 
-
-static void intra_bmode_probs_from_distribution(
-  vp9_prob p[VP9_NKF_BINTRAMODES - 1],
-  unsigned int branch_ct[VP9_NKF_BINTRAMODES - 1][2],
-  const unsigned int events[VP9_NKF_BINTRAMODES]) {
-  vp9_tree_probs_from_distribution(vp9_bmode_tree, p, branch_ct, events, 0);
-}
-
-void vp9_default_bmode_probs(vp9_prob p[VP9_NKF_BINTRAMODES - 1]) {
-  unsigned int branch_ct[VP9_NKF_BINTRAMODES - 1][2];
-  intra_bmode_probs_from_distribution(p, branch_ct, bmode_cts);
-}
-
-static void intra_kf_bmode_probs_from_distribution(
-  vp9_prob p[VP9_KF_BINTRAMODES - 1],
-  unsigned int branch_ct[VP9_KF_BINTRAMODES - 1][2],
-  const unsigned int events[VP9_KF_BINTRAMODES]) {
-  vp9_tree_probs_from_distribution(vp9_kf_bmode_tree, p, branch_ct, events, 0);
-}
-
-void vp9_kf_default_bmode_probs(vp9_prob p[VP9_KF_BINTRAMODES]
-                                          [VP9_KF_BINTRAMODES]
-                                          [VP9_KF_BINTRAMODES - 1]) {
-  unsigned int branch_ct[VP9_KF_BINTRAMODES - 1][2];
-  int i, j;
-
-  for (i = 0; i < VP9_KF_BINTRAMODES; ++i) {
-    for (j = 0; j < VP9_KF_BINTRAMODES; ++j) {
-      intra_kf_bmode_probs_from_distribution(
-          p[i][j], branch_ct, vp9_kf_default_bmode_counts[i][j]);
-    }
-  }
-}
-
-#if VP9_SWITCHABLE_FILTERS == 3
 const vp9_tree_index vp9_switchable_interp_tree[VP9_SWITCHABLE_FILTERS*2-2] = {
   -0, 2,
   -1, -2
 };
-struct vp9_token_struct vp9_switchable_interp_encodings[VP9_SWITCHABLE_FILTERS];
-#if CONFIG_ENABLE_6TAP
-const INTERPOLATIONFILTERTYPE vp9_switchable_interp[VP9_SWITCHABLE_FILTERS] = {
-  SIXTAP, EIGHTTAP, EIGHTTAP_SHARP};
-const int vp9_switchable_interp_map[SWITCHABLE+1] = {0, -1, 1, 2, -1, -1};
-#else
+struct vp9_token vp9_switchable_interp_encodings[VP9_SWITCHABLE_FILTERS];
 const INTERPOLATIONFILTERTYPE vp9_switchable_interp[VP9_SWITCHABLE_FILTERS] = {
   EIGHTTAP, EIGHTTAP_SMOOTH, EIGHTTAP_SHARP};
 const int vp9_switchable_interp_map[SWITCHABLE+1] = {1, 0, 2, -1, -1};
-#endif
 const vp9_prob vp9_switchable_interp_prob [VP9_SWITCHABLE_FILTERS+1]
                                           [VP9_SWITCHABLE_FILTERS-1] = {
-  {248, 192}, { 32, 248}, { 32,  32}, {192, 160}
+  { 235, 162, },
+  { 36, 255, },
+  { 34, 3, },
+  { 149, 144, },
 };
-#elif VP9_SWITCHABLE_FILTERS == 2
-const vp9_tree_index vp9_switchable_interp_tree[VP9_SWITCHABLE_FILTERS*2-2] = {
-  -0, -1,
-};
-struct vp9_token_struct vp9_switchable_interp_encodings[VP9_SWITCHABLE_FILTERS];
-const vp9_prob vp9_switchable_interp_prob [VP9_SWITCHABLE_FILTERS+1]
-                                          [VP9_SWITCHABLE_FILTERS-1] = {
-  {248},
-  { 64},
-  {192},
-};
-const INTERPOLATIONFILTERTYPE vp9_switchable_interp[VP9_SWITCHABLE_FILTERS] = {
-  EIGHTTAP, EIGHTTAP_SHARP};
-#if CONFIG_ENABLE_6TAP
-const int vp9_switchable_interp_map[SWITCHABLE+1] = {-1, -1, 0, 1, -1, -1};
-#else
-const int vp9_switchable_interp_map[SWITCHABLE+1] = {-1, 0, 1, -1, -1};
-#endif
-#endif  // VP9_SWITCHABLE_FILTERS
 
 // Indicates if the filter is interpolating or non-interpolating
-// Note currently only the EIGHTTAP_SMOOTH is non-interpolating
-#if CONFIG_ENABLE_6TAP
-const int vp9_is_interpolating_filter[SWITCHABLE + 1] = {1, 0, 1, 1, 1, -1};
-#else
-const int vp9_is_interpolating_filter[SWITCHABLE + 1] = {0, 1, 1, 1, -1};
-#endif
+const int vp9_is_interpolating_filter[SWITCHABLE + 1] = {1, 1, 1, 1, -1};
 
 void vp9_entropy_mode_init() {
-  vp9_tokens_from_tree(vp9_kf_bmode_encodings,   vp9_kf_bmode_tree);
-  vp9_tokens_from_tree(vp9_bmode_encodings,   vp9_bmode_tree);
-  vp9_tokens_from_tree(vp9_ymode_encodings,   vp9_ymode_tree);
-  vp9_tokens_from_tree(vp9_kf_ymode_encodings, vp9_kf_ymode_tree);
-  vp9_tokens_from_tree(vp9_sb_ymode_encodings, vp9_sb_ymode_tree);
-  vp9_tokens_from_tree(vp9_sb_kf_ymode_encodings, vp9_sb_kf_ymode_tree);
-  vp9_tokens_from_tree(vp9_uv_mode_encodings,  vp9_uv_mode_tree);
-  vp9_tokens_from_tree(vp9_i8x8_mode_encodings,  vp9_i8x8_mode_tree);
-  vp9_tokens_from_tree(vp9_mbsplit_encodings, vp9_mbsplit_tree);
+  vp9_tokens_from_tree(vp9_intra_mode_encodings, vp9_intra_mode_tree);
   vp9_tokens_from_tree(vp9_switchable_interp_encodings,
                        vp9_switchable_interp_tree);
+  vp9_tokens_from_tree(vp9_partition_encodings, vp9_partition_tree);
 
-  vp9_tokens_from_tree_offset(vp9_mv_ref_encoding_array,
-                              vp9_mv_ref_tree, NEARESTMV);
   vp9_tokens_from_tree_offset(vp9_sb_mv_ref_encoding_array,
                               vp9_sb_mv_ref_tree, NEARESTMV);
-  vp9_tokens_from_tree_offset(vp9_sub_mv_ref_encoding_array,
-                              vp9_sub_mv_ref_tree, LEFT4X4);
 }
 
 void vp9_init_mode_contexts(VP9_COMMON *pc) {
-  vpx_memset(pc->fc.mv_ref_ct, 0, sizeof(pc->fc.mv_ref_ct));
-  vpx_memcpy(pc->fc.vp9_mode_contexts,
-             vp9_default_mode_contexts,
-             sizeof(vp9_default_mode_contexts));
+  vpx_memset(pc->fc.inter_mode_counts, 0, sizeof(pc->fc.inter_mode_counts));
+  vpx_memcpy(pc->fc.inter_mode_probs,
+             vp9_default_inter_mode_probs,
+             sizeof(vp9_default_inter_mode_probs));
 }
 
 void vp9_accum_mv_refs(VP9_COMMON *pc,
                        MB_PREDICTION_MODE m,
                        const int context) {
-  unsigned int (*mv_ref_ct)[4][2];
-
-  mv_ref_ct = pc->fc.mv_ref_ct;
+  unsigned int (*inter_mode_counts)[VP9_INTER_MODES - 1][2] =
+      pc->fc.inter_mode_counts;
 
   if (m == ZEROMV) {
-    ++mv_ref_ct[context][0][0];
+    ++inter_mode_counts[context][0][0];
   } else {
-    ++mv_ref_ct[context][0][1];
+    ++inter_mode_counts[context][0][1];
     if (m == NEARESTMV) {
-      ++mv_ref_ct[context][1][0];
+      ++inter_mode_counts[context][1][0];
     } else {
-      ++mv_ref_ct[context][1][1];
+      ++inter_mode_counts[context][1][1];
       if (m == NEARMV) {
-        ++mv_ref_ct[context][2][0];
+        ++inter_mode_counts[context][2][0];
       } else {
-        ++mv_ref_ct[context][2][1];
-        if (m == NEWMV) {
-          ++mv_ref_ct[context][3][0];
-        } else {
-          ++mv_ref_ct[context][3][1];
-        }
+        ++inter_mode_counts[context][2][1];
       }
     }
   }
@@ -482,50 +292,35 @@ void vp9_accum_mv_refs(VP9_COMMON *pc,
 #define MVREF_MAX_UPDATE_FACTOR 128
 void vp9_adapt_mode_context(VP9_COMMON *pc) {
   int i, j;
-  unsigned int (*mv_ref_ct)[4][2];
-  int (*mode_context)[4];
-
-  mode_context = pc->fc.vp9_mode_contexts;
-
-  mv_ref_ct = pc->fc.mv_ref_ct;
+  unsigned int (*inter_mode_counts)[VP9_INTER_MODES - 1][2] =
+      pc->fc.inter_mode_counts;
+  vp9_prob (*mode_context)[VP9_INTER_MODES - 1] = pc->fc.inter_mode_probs;
 
   for (j = 0; j < INTER_MODE_CONTEXTS; j++) {
-    for (i = 0; i < 4; i++) {
-      int count = mv_ref_ct[j][i][0] + mv_ref_ct[j][i][1], factor;
-
+    for (i = 0; i < VP9_INTER_MODES - 1; i++) {
+      int count = inter_mode_counts[j][i][0] + inter_mode_counts[j][i][1];
+      int factor;
       count = count > MVREF_COUNT_SAT ? MVREF_COUNT_SAT : count;
       factor = (MVREF_MAX_UPDATE_FACTOR * count / MVREF_COUNT_SAT);
-      mode_context[j][i] = weighted_prob(pc->fc.vp9_mode_contexts[j][i],
-                                         get_binary_prob(mv_ref_ct[j][i][0],
-                                                         mv_ref_ct[j][i][1]),
-                                         factor);
+      mode_context[j][i] = weighted_prob(
+          pc->fc.pre_inter_mode_probs[j][i],
+          get_binary_prob(inter_mode_counts[j][i][0],
+                          inter_mode_counts[j][i][1]),
+          factor);
     }
   }
 }
-
-#ifdef MODE_STATS
-#include "vp9/common/vp9_modecont.h"
-void print_mode_contexts(VP9_COMMON *pc) {
-  int j, i;
-  printf("\n====================\n");
-  for (j = 0; j < INTER_MODE_CONTEXTS; j++) {
-    for (i = 0; i < 4; i++) {
-      printf("%4d ", pc->fc.mode_context[j][i]);
-    }
-    printf("\n");
-  }
-  printf("====================\n");
-  for (j = 0; j < INTER_MODE_CONTEXTS; j++) {
-    for (i = 0; i < 4; i++) {
-      printf("%4d ", pc->fc.mode_context_a[j][i]);
-    }
-    printf("\n");
-  }
-}
-#endif
 
 #define MODE_COUNT_SAT 20
-#define MODE_MAX_UPDATE_FACTOR 144
+#define MODE_MAX_UPDATE_FACTOR 128
+static int update_mode_ct(vp9_prob pre_prob, vp9_prob prob,
+                          unsigned int branch_ct[2]) {
+  int factor, count = branch_ct[0] + branch_ct[1];
+  count = count > MODE_COUNT_SAT ? MODE_COUNT_SAT : count;
+  factor = (MODE_MAX_UPDATE_FACTOR * count / MODE_COUNT_SAT);
+  return weighted_prob(pre_prob, prob, factor);
+}
+
 static void update_mode_probs(int n_modes,
                               const vp9_tree_index *tree, unsigned int *cnt,
                               vp9_prob *pre_probs, vp9_prob *dst_probs,
@@ -533,119 +328,158 @@ static void update_mode_probs(int n_modes,
 #define MAX_PROBS 32
   vp9_prob probs[MAX_PROBS];
   unsigned int branch_ct[MAX_PROBS][2];
-  int t, count, factor;
+  int t;
 
   assert(n_modes - 1 < MAX_PROBS);
   vp9_tree_probs_from_distribution(tree, probs, branch_ct, cnt, tok0_offset);
-  for (t = 0; t < n_modes - 1; ++t) {
-    count = branch_ct[t][0] + branch_ct[t][1];
-    count = count > MODE_COUNT_SAT ? MODE_COUNT_SAT : count;
-    factor = (MODE_MAX_UPDATE_FACTOR * count / MODE_COUNT_SAT);
-    dst_probs[t] = weighted_prob(pre_probs[t], probs[t], factor);
-  }
+  for (t = 0; t < n_modes - 1; ++t)
+    dst_probs[t] = update_mode_ct(pre_probs[t], probs[t], branch_ct[t]);
+}
+
+static int update_mode_ct2(vp9_prob pre_prob, unsigned int branch_ct[2]) {
+  return update_mode_ct(pre_prob, get_binary_prob(branch_ct[0],
+                                                  branch_ct[1]), branch_ct);
 }
 
 // #define MODE_COUNT_TESTING
 void vp9_adapt_mode_probs(VP9_COMMON *cm) {
-  int i;
+  int i, j;
+  FRAME_CONTEXT *fc = &cm->fc;
 #ifdef MODE_COUNT_TESTING
   int t;
 
   printf("static const unsigned int\nymode_counts"
-         "[VP9_YMODES] = {\n");
-  for (t = 0; t < VP9_YMODES; ++t) printf("%d, ", cm->fc.ymode_counts[t]);
+         "[VP9_INTRA_MODES] = {\n");
+  for (t = 0; t < VP9_INTRA_MODES; ++t)
+    printf("%d, ", fc->ymode_counts[t]);
   printf("};\n");
   printf("static const unsigned int\nuv_mode_counts"
-         "[VP9_YMODES] [VP9_UV_MODES] = {\n");
-  for (i = 0; i < VP9_YMODES; ++i) {
+         "[VP9_INTRA_MODES] [VP9_INTRA_MODES] = {\n");
+  for (i = 0; i < VP9_INTRA_MODES; ++i) {
     printf("  {");
-    for (t = 0; t < VP9_UV_MODES; ++t) printf("%d, ", cm->fc.uv_mode_counts[i][t]);
+    for (t = 0; t < VP9_INTRA_MODES; ++t)
+      printf("%d, ", fc->uv_mode_counts[i][t]);
     printf("},\n");
   }
   printf("};\n");
   printf("static const unsigned int\nbmode_counts"
          "[VP9_NKF_BINTRAMODES] = {\n");
   for (t = 0; t < VP9_NKF_BINTRAMODES; ++t)
-    printf("%d, ", cm->fc.bmode_counts[t]);
+    printf("%d, ", fc->bmode_counts[t]);
   printf("};\n");
   printf("static const unsigned int\ni8x8_mode_counts"
          "[VP9_I8X8_MODES] = {\n");
-  for (t = 0; t < VP9_I8X8_MODES; ++t) printf("%d, ", cm->fc.i8x8_mode_counts[t]);
-  printf("};\n");
-  printf("static const unsigned int\nsub_mv_ref_counts"
-         "[SUBMVREF_COUNT] [VP9_SUBMVREFS] = {\n");
-  for (i = 0; i < SUBMVREF_COUNT; ++i) {
-    printf("  {");
-    for (t = 0; t < VP9_SUBMVREFS; ++t) printf("%d, ", cm->fc.sub_mv_ref_counts[i][t]);
-    printf("},\n");
-  }
+  for (t = 0; t < VP9_I8X8_MODES; ++t)
+    printf("%d, ", fc->i8x8_mode_counts[t]);
   printf("};\n");
   printf("static const unsigned int\nmbsplit_counts"
          "[VP9_NUMMBSPLITS] = {\n");
-  for (t = 0; t < VP9_NUMMBSPLITS; ++t) printf("%d, ", cm->fc.mbsplit_counts[t]);
-  printf("};\n");
-#if CONFIG_COMP_INTERINTRA_PRED
-  printf("static const unsigned int\ninterintra_counts"
-         "[2] = {\n");
-  for (t = 0; t < 2; ++t) printf("%d, ", cm->fc.interintra_counts[t]);
+  for (t = 0; t < VP9_NUMMBSPLITS; ++t)
+    printf("%d, ", fc->mbsplit_counts[t]);
   printf("};\n");
 #endif
-#endif
 
-  update_mode_probs(VP9_YMODES, vp9_ymode_tree,
-                    cm->fc.ymode_counts, cm->fc.pre_ymode_prob,
-                    cm->fc.ymode_prob, 0);
-  update_mode_probs(VP9_I32X32_MODES, vp9_sb_ymode_tree,
-                    cm->fc.sb_ymode_counts, cm->fc.pre_sb_ymode_prob,
-                    cm->fc.sb_ymode_prob, 0);
-  for (i = 0; i < VP9_YMODES; ++i) {
-    update_mode_probs(VP9_UV_MODES, vp9_uv_mode_tree,
-                      cm->fc.uv_mode_counts[i], cm->fc.pre_uv_mode_prob[i],
-                      cm->fc.uv_mode_prob[i], 0);
-  }
-  update_mode_probs(VP9_NKF_BINTRAMODES, vp9_bmode_tree,
-                    cm->fc.bmode_counts, cm->fc.pre_bmode_prob,
-                    cm->fc.bmode_prob, 0);
-  update_mode_probs(VP9_I8X8_MODES,
-                    vp9_i8x8_mode_tree, cm->fc.i8x8_mode_counts,
-                    cm->fc.pre_i8x8_mode_prob, cm->fc.i8x8_mode_prob, 0);
-  for (i = 0; i < SUBMVREF_COUNT; ++i) {
-    update_mode_probs(VP9_SUBMVREFS,
-                      vp9_sub_mv_ref_tree, cm->fc.sub_mv_ref_counts[i],
-                      cm->fc.pre_sub_mv_ref_prob[i], cm->fc.sub_mv_ref_prob[i],
-                      LEFT4X4);
-  }
-  update_mode_probs(VP9_NUMMBSPLITS, vp9_mbsplit_tree,
-                    cm->fc.mbsplit_counts, cm->fc.pre_mbsplit_prob,
-                    cm->fc.mbsplit_prob, 0);
-#if CONFIG_COMP_INTERINTRA_PRED
-  if (cm->use_interintra) {
-    int factor, interintra_prob, count;
+  for (i = 0; i < INTRA_INTER_CONTEXTS; i++)
+    fc->intra_inter_prob[i] = update_mode_ct2(fc->pre_intra_inter_prob[i],
+                                              fc->intra_inter_count[i]);
+  for (i = 0; i < COMP_INTER_CONTEXTS; i++)
+    fc->comp_inter_prob[i] = update_mode_ct2(fc->pre_comp_inter_prob[i],
+                                             fc->comp_inter_count[i]);
+  for (i = 0; i < REF_CONTEXTS; i++)
+    fc->comp_ref_prob[i] = update_mode_ct2(fc->pre_comp_ref_prob[i],
+                                           fc->comp_ref_count[i]);
+  for (i = 0; i < REF_CONTEXTS; i++)
+    for (j = 0; j < 2; j++)
+      fc->single_ref_prob[i][j] = update_mode_ct2(fc->pre_single_ref_prob[i][j],
+                                                  fc->single_ref_count[i][j]);
 
-    interintra_prob = get_binary_prob(cm->fc.interintra_counts[0],
-                                      cm->fc.interintra_counts[1]);
-    count = cm->fc.interintra_counts[0] + cm->fc.interintra_counts[1];
-    count = count > MODE_COUNT_SAT ? MODE_COUNT_SAT : count;
-    factor = (MODE_MAX_UPDATE_FACTOR * count / MODE_COUNT_SAT);
-    cm->fc.interintra_prob = weighted_prob(cm->fc.pre_interintra_prob,
-                                           interintra_prob, factor);
+  for (i = 0; i < BLOCK_SIZE_GROUPS; i++)
+    update_mode_probs(VP9_INTRA_MODES, vp9_intra_mode_tree,
+                      fc->y_mode_counts[i], fc->pre_y_mode_prob[i],
+                      fc->y_mode_prob[i], 0);
+
+  for (i = 0; i < VP9_INTRA_MODES; ++i)
+    update_mode_probs(VP9_INTRA_MODES, vp9_intra_mode_tree,
+                      fc->uv_mode_counts[i], fc->pre_uv_mode_prob[i],
+                      fc->uv_mode_prob[i], 0);
+
+  for (i = 0; i < NUM_PARTITION_CONTEXTS; i++)
+    update_mode_probs(PARTITION_TYPES, vp9_partition_tree,
+                      fc->partition_counts[i], fc->pre_partition_prob[i],
+                      fc->partition_prob[INTER_FRAME][i], 0);
+
+  if (cm->mcomp_filter_type == SWITCHABLE) {
+    for (i = 0; i <= VP9_SWITCHABLE_FILTERS; i++) {
+      update_mode_probs(VP9_SWITCHABLE_FILTERS, vp9_switchable_interp_tree,
+                        fc->switchable_interp_count[i],
+                        fc->pre_switchable_interp_prob[i],
+                        fc->switchable_interp_prob[i], 0);
+    }
   }
-#endif
+  if (cm->txfm_mode == TX_MODE_SELECT) {
+    int j;
+    unsigned int branch_ct_8x8p[TX_SIZE_MAX_SB - 3][2];
+    unsigned int branch_ct_16x16p[TX_SIZE_MAX_SB - 2][2];
+    unsigned int branch_ct_32x32p[TX_SIZE_MAX_SB - 1][2];
+    for (i = 0; i < TX_SIZE_CONTEXTS; ++i) {
+      tx_counts_to_branch_counts_8x8(cm->fc.tx_count_8x8p[i],
+                                     branch_ct_8x8p);
+      for (j = 0; j < TX_SIZE_MAX_SB - 3; ++j) {
+        int factor;
+        int count = branch_ct_8x8p[j][0] + branch_ct_8x8p[j][1];
+        vp9_prob prob = get_binary_prob(branch_ct_8x8p[j][0],
+                                        branch_ct_8x8p[j][1]);
+        count = count > MODE_COUNT_SAT ? MODE_COUNT_SAT : count;
+        factor = (MODE_MAX_UPDATE_FACTOR * count / MODE_COUNT_SAT);
+        cm->fc.tx_probs_8x8p[i][j] = weighted_prob(
+            cm->fc.pre_tx_probs_8x8p[i][j], prob, factor);
+      }
+    }
+    for (i = 0; i < TX_SIZE_CONTEXTS; ++i) {
+      tx_counts_to_branch_counts_16x16(cm->fc.tx_count_16x16p[i],
+                                       branch_ct_16x16p);
+      for (j = 0; j < TX_SIZE_MAX_SB - 2; ++j) {
+        int factor;
+        int count = branch_ct_16x16p[j][0] + branch_ct_16x16p[j][1];
+        vp9_prob prob = get_binary_prob(branch_ct_16x16p[j][0],
+                                        branch_ct_16x16p[j][1]);
+        count = count > MODE_COUNT_SAT ? MODE_COUNT_SAT : count;
+        factor = (MODE_MAX_UPDATE_FACTOR * count / MODE_COUNT_SAT);
+        cm->fc.tx_probs_16x16p[i][j] = weighted_prob(
+            cm->fc.pre_tx_probs_16x16p[i][j], prob, factor);
+      }
+    }
+    for (i = 0; i < TX_SIZE_CONTEXTS; ++i) {
+      tx_counts_to_branch_counts_32x32(cm->fc.tx_count_32x32p[i],
+                                       branch_ct_32x32p);
+      for (j = 0; j < TX_SIZE_MAX_SB - 1; ++j) {
+        int factor;
+        int count = branch_ct_32x32p[j][0] + branch_ct_32x32p[j][1];
+        vp9_prob prob = get_binary_prob(branch_ct_32x32p[j][0],
+                                        branch_ct_32x32p[j][1]);
+        count = count > MODE_COUNT_SAT ? MODE_COUNT_SAT : count;
+        factor = (MODE_MAX_UPDATE_FACTOR * count / MODE_COUNT_SAT);
+        cm->fc.tx_probs_32x32p[i][j] = weighted_prob(
+            cm->fc.pre_tx_probs_32x32p[i][j], prob, factor);
+      }
+    }
+  }
+  for (i = 0; i < MBSKIP_CONTEXTS; ++i)
+    fc->mbskip_probs[i] = update_mode_ct2(fc->pre_mbskip_probs[i],
+                                          fc->mbskip_count[i]);
 }
 
 static void set_default_lf_deltas(MACROBLOCKD *xd) {
   xd->mode_ref_lf_delta_enabled = 1;
   xd->mode_ref_lf_delta_update = 1;
 
-  xd->ref_lf_deltas[INTRA_FRAME] = 2;
+  xd->ref_lf_deltas[INTRA_FRAME] = 1;
   xd->ref_lf_deltas[LAST_FRAME] = 0;
-  xd->ref_lf_deltas[GOLDEN_FRAME] = -2;
-  xd->ref_lf_deltas[ALTREF_FRAME] = -2;
+  xd->ref_lf_deltas[GOLDEN_FRAME] = -1;
+  xd->ref_lf_deltas[ALTREF_FRAME] = -1;
 
-  xd->mode_lf_deltas[0] = 4;               // BPRED
-  xd->mode_lf_deltas[1] = -2;              // Zero
-  xd->mode_lf_deltas[2] = 2;               // New mv
-  xd->mode_lf_deltas[3] = 4;               // Split mv
+  xd->mode_lf_deltas[0] = 0;              // Zero
+  xd->mode_lf_deltas[1] = 0;               // New mv
 }
 
 void vp9_setup_past_independence(VP9_COMMON *cm, MACROBLOCKD *xd) {
@@ -655,42 +489,47 @@ void vp9_setup_past_independence(VP9_COMMON *cm, MACROBLOCKD *xd) {
   vp9_clearall_segfeatures(xd);
   xd->mb_segment_abs_delta = SEGMENT_DELTADATA;
   if (cm->last_frame_seg_map)
-    vpx_memset(cm->last_frame_seg_map, 0, (cm->mb_rows * cm->mb_cols));
+    vpx_memset(cm->last_frame_seg_map, 0, (cm->mi_rows * cm->mi_cols));
 
-  /* reset the mode ref deltas for loop filter */
+  // Reset the mode ref deltas for loop filter
   vpx_memset(xd->last_ref_lf_deltas, 0, sizeof(xd->last_ref_lf_deltas));
   vpx_memset(xd->last_mode_lf_deltas, 0, sizeof(xd->last_mode_lf_deltas));
   set_default_lf_deltas(xd);
 
   vp9_default_coef_probs(cm);
   vp9_init_mbmode_probs(cm);
-  vp9_default_bmode_probs(cm->fc.bmode_prob);
-  vp9_kf_default_bmode_probs(cm->kf_bmode_prob);
+  vpx_memcpy(cm->kf_y_mode_prob, vp9_kf_default_bmode_probs,
+             sizeof(vp9_kf_default_bmode_probs));
   vp9_init_mv_probs(cm);
+
   // To force update of the sharpness
   cm->last_sharpness_level = -1;
 
   vp9_init_mode_contexts(cm);
 
-  for (i = 0; i < NUM_FRAME_CONTEXTS; i++) {
-    vpx_memcpy(&cm->frame_contexts[i], &cm->fc, sizeof(cm->fc));
+  if ((cm->frame_type == KEY_FRAME) ||
+      cm->error_resilient_mode || (cm->reset_frame_context == 3)) {
+    // Reset all frame contexts.
+    for (i = 0; i < NUM_FRAME_CONTEXTS; ++i)
+      vpx_memcpy(&cm->frame_contexts[i], &cm->fc, sizeof(cm->fc));
+  } else if (cm->reset_frame_context == 2) {
+    // Reset only the frame context specified in the frame header.
+    vpx_memcpy(&cm->frame_contexts[cm->frame_context_idx], &cm->fc,
+               sizeof(cm->fc));
   }
 
   vpx_memset(cm->prev_mip, 0,
-             (cm->mb_cols + 1) * (cm->mb_rows + 1)* sizeof(MODE_INFO));
+             cm->mode_info_stride * (cm->mi_rows + 1) * sizeof(MODE_INFO));
   vpx_memset(cm->mip, 0,
-             (cm->mb_cols + 1) * (cm->mb_rows + 1)* sizeof(MODE_INFO));
+             cm->mode_info_stride * (cm->mi_rows + 1) * sizeof(MODE_INFO));
 
   vp9_update_mode_info_border(cm, cm->mip);
   vp9_update_mode_info_in_image(cm, cm->mi);
 
-#if CONFIG_NEW_MVREF
-  // Defaults probabilities for encoding the MV ref id signal
-  vpx_memset(xd->mb_mv_ref_probs, VP9_DEFAULT_MV_REF_PROB,
-             sizeof(xd->mb_mv_ref_probs));
-#endif
-  cm->ref_frame_sign_bias[GOLDEN_FRAME] = 0;
-  cm->ref_frame_sign_bias[ALTREF_FRAME] = 0;
+  vp9_update_mode_info_border(cm, cm->prev_mip);
+  vp9_update_mode_info_in_image(cm, cm->prev_mi);
+
+  vpx_memset(cm->ref_frame_sign_bias, 0, sizeof(cm->ref_frame_sign_bias));
 
   cm->frame_context_idx = 0;
 }

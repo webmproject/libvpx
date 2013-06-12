@@ -22,82 +22,32 @@ typedef struct {
   MV_REFERENCE_FRAME second_ref_frame;
 } MODE_DEFINITION;
 
+struct optimize_ctx {
+  ENTROPY_CONTEXT ta[MAX_MB_PLANE][16];
+  ENTROPY_CONTEXT tl[MAX_MB_PLANE][16];
+};
 
-struct VP9_ENCODER_RTCD;
-void vp9_encode_inter16x16(VP9_COMMON *const cm, MACROBLOCK *x,
-                           int mb_row, int mb_col);
+void vp9_optimize_init(MACROBLOCKD *xd, BLOCK_SIZE_TYPE bsize,
+                       struct optimize_ctx *ctx);
+void vp9_optimize_b(int plane, int block, BLOCK_SIZE_TYPE bsize,
+                    int ss_txfrm_size, VP9_COMMON *cm, MACROBLOCK *x,
+                    struct optimize_ctx *ctx);
+void vp9_optimize_sby(VP9_COMMON *cm, MACROBLOCK *x, BLOCK_SIZE_TYPE bsize);
+void vp9_optimize_sbuv(VP9_COMMON *cm, MACROBLOCK *x, BLOCK_SIZE_TYPE bsize);
 
-void vp9_transform_mbuv_4x4(MACROBLOCK *x);
-void vp9_transform_mby_4x4(MACROBLOCK *x);
+void vp9_encode_sb(VP9_COMMON *cm, MACROBLOCK *x, BLOCK_SIZE_TYPE bsize);
+void vp9_encode_sby(VP9_COMMON *cm, MACROBLOCK *x, BLOCK_SIZE_TYPE bsize);
+void vp9_encode_sbuv(VP9_COMMON *cm, MACROBLOCK *x, BLOCK_SIZE_TYPE bsize);
 
-void vp9_optimize_mby_4x4(VP9_COMMON *const cm, MACROBLOCK *x);
-void vp9_optimize_mbuv_4x4(VP9_COMMON *const cm, MACROBLOCK *x);
-void vp9_encode_inter16x16y(MACROBLOCK *x, int mb_row, int mb_col);
+void vp9_xform_quant_sby(VP9_COMMON *cm, MACROBLOCK *x, BLOCK_SIZE_TYPE bsize);
+void vp9_xform_quant_sbuv(VP9_COMMON *cm, MACROBLOCK *x, BLOCK_SIZE_TYPE bsize);
 
-void vp9_transform_mb_8x8(MACROBLOCK *mb);
-void vp9_transform_mby_8x8(MACROBLOCK *x);
-void vp9_transform_mbuv_8x8(MACROBLOCK *x);
-void vp9_optimize_mby_8x8(VP9_COMMON *const cm, MACROBLOCK *x);
-void vp9_optimize_mbuv_8x8(VP9_COMMON *const cm, MACROBLOCK *x);
-
-void vp9_transform_mb_16x16(MACROBLOCK *mb);
-void vp9_transform_mby_16x16(MACROBLOCK *x);
-void vp9_optimize_mby_16x16(VP9_COMMON *const cm, MACROBLOCK *x);
-
-void vp9_transform_sby_32x32(MACROBLOCK *x);
-void vp9_optimize_sby_32x32(VP9_COMMON *const cm, MACROBLOCK *x);
-void vp9_transform_sby_16x16(MACROBLOCK *x);
-void vp9_optimize_sby_16x16(VP9_COMMON *const cm, MACROBLOCK *x);
-void vp9_transform_sby_8x8(MACROBLOCK *x);
-void vp9_optimize_sby_8x8(VP9_COMMON *const cm, MACROBLOCK *x);
-void vp9_transform_sby_4x4(MACROBLOCK *x);
-void vp9_optimize_sby_4x4(VP9_COMMON *const cm, MACROBLOCK *x);
-void vp9_transform_sbuv_16x16(MACROBLOCK *x);
-void vp9_optimize_sbuv_16x16(VP9_COMMON *const cm, MACROBLOCK *x);
-void vp9_transform_sbuv_8x8(MACROBLOCK *x);
-void vp9_optimize_sbuv_8x8(VP9_COMMON *const cm, MACROBLOCK *x);
-void vp9_transform_sbuv_4x4(MACROBLOCK *x);
-void vp9_optimize_sbuv_4x4(VP9_COMMON *const cm, MACROBLOCK *x);
-
-void vp9_transform_sb64y_32x32(MACROBLOCK *x);
-void vp9_optimize_sb64y_32x32(VP9_COMMON *const cm, MACROBLOCK *x);
-void vp9_transform_sb64y_16x16(MACROBLOCK *x);
-void vp9_optimize_sb64y_16x16(VP9_COMMON *const cm, MACROBLOCK *x);
-void vp9_transform_sb64y_8x8(MACROBLOCK *x);
-void vp9_optimize_sb64y_8x8(VP9_COMMON *const cm, MACROBLOCK *x);
-void vp9_transform_sb64y_4x4(MACROBLOCK *x);
-void vp9_optimize_sb64y_4x4(VP9_COMMON *const cm, MACROBLOCK *x);
-void vp9_transform_sb64uv_32x32(MACROBLOCK *x);
-void vp9_optimize_sb64uv_32x32(VP9_COMMON *const cm, MACROBLOCK *x);
-void vp9_transform_sb64uv_16x16(MACROBLOCK *x);
-void vp9_optimize_sb64uv_16x16(VP9_COMMON *const cm, MACROBLOCK *x);
-void vp9_transform_sb64uv_8x8(MACROBLOCK *x);
-void vp9_optimize_sb64uv_8x8(VP9_COMMON *const cm, MACROBLOCK *x);
-void vp9_transform_sb64uv_4x4(MACROBLOCK *x);
-void vp9_optimize_sb64uv_4x4(VP9_COMMON *const cm, MACROBLOCK *x);
-
-void vp9_fidct_mb(VP9_COMMON *const cm, MACROBLOCK *x);
-
-void vp9_subtract_4b_c(BLOCK *be, BLOCKD *bd, int pitch);
-
-void vp9_subtract_mbuv_s_c(int16_t *diff, const uint8_t *usrc,
-                           const uint8_t *vsrc, int src_stride,
-                           const uint8_t *upred,
-                           const uint8_t *vpred, int dst_stride);
-void vp9_subtract_mby_s_c(int16_t *diff, const uint8_t *src,
-                          int src_stride, const uint8_t *pred,
-                          int dst_stride);
-void vp9_subtract_sby_s_c(int16_t *diff, const uint8_t *src, int src_stride,
-                          const uint8_t *pred, int dst_stride);
-void vp9_subtract_sbuv_s_c(int16_t *diff, const uint8_t *usrc,
-                           const uint8_t *vsrc, int src_stride,
-                           const uint8_t *upred,
-                           const uint8_t *vpred, int dst_stride);
-void vp9_subtract_sb64y_s_c(int16_t *diff, const uint8_t *src, int src_stride,
-                            const uint8_t *pred, int dst_stride);
-void vp9_subtract_sb64uv_s_c(int16_t *diff, const uint8_t *usrc,
-                             const uint8_t *vsrc, int src_stride,
-                             const uint8_t *upred,
-                             const uint8_t *vpred, int dst_stride);
+void vp9_subtract_block(int rows, int cols,
+                        int16_t *diff_ptr, int diff_stride,
+                        const uint8_t *src_ptr, int src_stride,
+                        const uint8_t *pred_ptr, int pred_stride);
+void vp9_subtract_sby(MACROBLOCK *x, BLOCK_SIZE_TYPE bsize);
+void vp9_subtract_sbuv(MACROBLOCK *x, BLOCK_SIZE_TYPE bsize);
+void vp9_subtract_sb(MACROBLOCK *xd, BLOCK_SIZE_TYPE bsize);
 
 #endif  // VP9_ENCODER_VP9_ENCODEMB_H_

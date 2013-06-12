@@ -17,7 +17,7 @@ void vp9_decode_mb_mode_mv(VP9D_COMP* const pbi,
                            MACROBLOCKD* const xd,
                            int mb_row,
                            int mb_col,
-                           BOOL_DECODER* const bc);
-void vp9_decode_mode_mvs_init(VP9D_COMP* const pbi, BOOL_DECODER* const bc);
+                           vp9_reader *r);
+void vp9_decode_mode_mvs_init(VP9D_COMP* const pbi, vp9_reader *r);
 
 #endif  // VP9_DECODER_VP9_DECODEMV_H_

@@ -591,23 +591,32 @@ void vp9_short_fht8x8_c(int16_t *input, int16_t *output,
   }
 }
 
+/* 4-point reversible, orthonormal Walsh-Hadamard in 3.5 adds, 0.5 shifts per
+   pixel. */
 void vp9_short_walsh4x4_c(short *input, short *output, int pitch) {
   int i;
-  int a1, b1, c1, d1;
+  int a1, b1, c1, d1, e1;
   short *ip = input;
   short *op = output;
   int pitch_short = pitch >> 1;
 
   for (i = 0; i < 4; i++) {
-    a1 = ip[0 * pitch_short] + ip[3 * pitch_short];
-    b1 = ip[1 * pitch_short] + ip[2 * pitch_short];
-    c1 = ip[1 * pitch_short] - ip[2 * pitch_short];
-    d1 = ip[0 * pitch_short] - ip[3 * pitch_short];
+    a1 = ip[0 * pitch_short];
+    b1 = ip[1 * pitch_short];
+    c1 = ip[2 * pitch_short];
+    d1 = ip[3 * pitch_short];
 
-    op[0] = (a1 + b1 + 1) >> 1;
-    op[4] = (c1 + d1) >> 1;
-    op[8] = (a1 - b1) >> 1;
-    op[12] = (d1 - c1) >> 1;
+    a1 += b1;
+    d1 = d1 - c1;
+    e1 = (a1 - d1) >> 1;
+    b1 = e1 - b1;
+    c1 = e1 - c1;
+    a1 -= c1;
+    d1 += b1;
+    op[0] = a1;
+    op[4] = c1;
+    op[8] = d1;
+    op[12] = b1;
 
     ip++;
     op++;
@@ -616,15 +625,22 @@ void vp9_short_walsh4x4_c(short *input, short *output, int pitch) {
   op = output;
 
   for (i = 0; i < 4; i++) {
-    a1 = ip[0] + ip[3];
-    b1 = ip[1] + ip[2];
-    c1 = ip[1] - ip[2];
-    d1 = ip[0] - ip[3];
+    a1 = ip[0];
+    b1 = ip[1];
+    c1 = ip[2];
+    d1 = ip[3];
 
-    op[0] = ((a1 + b1 + 1) >> 1) << WHT_UPSCALE_FACTOR;
-    op[1] = ((c1 + d1) >> 1) << WHT_UPSCALE_FACTOR;
-    op[2] = ((a1 - b1) >> 1) << WHT_UPSCALE_FACTOR;
-    op[3] = ((d1 - c1) >> 1) << WHT_UPSCALE_FACTOR;
+    a1 += b1;
+    d1 -= c1;
+    e1 = (a1 - d1) >> 1;
+    b1 = e1 - b1;
+    c1 = e1 - c1;
+    a1 -= c1;
+    d1 += b1;
+    op[0] = a1 << WHT_UPSCALE_FACTOR;
+    op[1] = c1 << WHT_UPSCALE_FACTOR;
+    op[2] = d1 << WHT_UPSCALE_FACTOR;
+    op[3] = b1 << WHT_UPSCALE_FACTOR;
 
     ip += 4;
     op += 4;

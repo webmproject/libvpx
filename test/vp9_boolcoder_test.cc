@@ -52,7 +52,7 @@ TEST(VP9, TestBitIO) {
         const int random_seed = 6432;
         const int buffer_size = 10000;
         ACMRandom bit_rnd(random_seed);
-        BOOL_CODER bw;
+        vp9_writer bw;
         uint8_t bw_buffer[buffer_size];
         vp9_start_encode(&bw, bw_buffer);
 
@@ -63,13 +63,16 @@ TEST(VP9, TestBitIO) {
           } else if (bit_method == 3) {
             bit = bit_rnd(2);
           }
-          encode_bool(&bw, bit, static_cast<int>(probas[i]));
+          vp9_write(&bw, bit, static_cast<int>(probas[i]));
         }
 
         vp9_stop_encode(&bw);
 
-        BOOL_DECODER br;
-        vp9_start_decode(&br, bw_buffer, buffer_size);
+        // First bit should be zero
+        GTEST_ASSERT_EQ(bw_buffer[0] & 0x80, 0);
+
+        vp9_reader br;
+        vp9_reader_init(&br, bw_buffer, buffer_size);
         bit_rnd.Reset(random_seed);
         for (int i = 0; i < bits_to_test; ++i) {
           if (bit_method == 2) {
@@ -77,7 +80,7 @@ TEST(VP9, TestBitIO) {
           } else if (bit_method == 3) {
             bit = bit_rnd(2);
           }
-          GTEST_ASSERT_EQ(decode_bool(&br, probas[i]), bit)
+          GTEST_ASSERT_EQ(vp9_read(&br, probas[i]), bit)
               << "pos: " << i << " / " << bits_to_test
               << " bit_method: " << bit_method
               << " method: " << method;

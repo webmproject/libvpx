@@ -14,7 +14,7 @@
 #include "vp9/decoder/vp9_onyxd.h"
 #include "vp9/decoder/vp9_treereader.h"
 #include "vp9/common/vp9_onyxc_int.h"
-#include "vp9/decoder/vp9_dequantize.h"
+#include "vp9/decoder/vp9_idct_blk.h"
 
 // #define DEC_DEBUG
 
@@ -25,13 +25,12 @@ typedef struct VP9Decompressor {
 
   VP9D_CONFIG oxcf;
 
-
-  const unsigned char *Source;
-  unsigned int   source_sz;
+  const uint8_t *source;
+  uint32_t source_sz;
 
   vp9_reader *mbc;
   int64_t last_time_stamp;
-  int   ready_for_new_data;
+  int ready_for_new_data;
 
   int refresh_frame_flags;
   vp9_prob prob_skip_false;
@@ -41,8 +40,6 @@ typedef struct VP9Decompressor {
   int initial_width;
   int initial_height;
 } VP9D_COMP;
-
-int vp9_decode_frame(VP9D_COMP *cpi, const unsigned char **p_data_end);
 
 
 #if CONFIG_DEBUG

@@ -1115,16 +1115,6 @@ void vp9_loop_filter_bh_sse2(unsigned char *y_ptr,
                                             v_ptr + 4 * uv_stride);
 }
 
-void vp9_loop_filter_bhs_sse2(unsigned char *y_ptr, int y_stride,
-                              const unsigned char *blimit) {
-  vp9_loop_filter_simple_horizontal_edge_sse2(y_ptr + 4 * y_stride,
-                                              y_stride, blimit);
-  vp9_loop_filter_simple_horizontal_edge_sse2(y_ptr + 8 * y_stride,
-                                              y_stride, blimit);
-  vp9_loop_filter_simple_horizontal_edge_sse2(y_ptr + 12 * y_stride,
-                                              y_stride, blimit);
-}
-
 /* Vertical B Filtering */
 void vp9_loop_filter_bv_sse2(unsigned char *y_ptr,
                              unsigned char *u_ptr, unsigned char *v_ptr,
@@ -1143,9 +1133,3 @@ void vp9_loop_filter_bv_sse2(unsigned char *y_ptr,
                                           v_ptr + 4);
 }
 
-void vp9_loop_filter_bvs_sse2(unsigned char *y_ptr, int y_stride,
-                              const unsigned char *blimit) {
-  vp9_loop_filter_simple_vertical_edge_sse2(y_ptr + 4, y_stride, blimit);
-  vp9_loop_filter_simple_vertical_edge_sse2(y_ptr + 8, y_stride, blimit);
-  vp9_loop_filter_simple_vertical_edge_sse2(y_ptr + 12, y_stride, blimit);
-}

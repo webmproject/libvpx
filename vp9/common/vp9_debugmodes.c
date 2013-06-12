@@ -13,130 +13,124 @@
 #include "vp9/common/vp9_blockd.h"
 
 void vp9_print_modes_and_motion_vectors(MODE_INFO *mi, int rows, int cols,
-                                        int frame) {
-  int mb_row;
-  int mb_col;
-  int mb_index = 0;
-  FILE *mvs = fopen("mvs.stt", "a");
+                                        int frame, char *file) {
+  int mi_row;
+  int mi_col;
+  int mi_index = 0;
+  FILE *mvs = fopen(file, "a");
 
   // Print out the macroblock Y modes
-  fprintf(mvs, "Mb Modes for Frame %d\n", frame);
+  fprintf(mvs, "SB Types for Frame %d\n", frame);
 
-  for (mb_row = 0; mb_row < rows; mb_row++) {
-    for (mb_col = 0; mb_col < cols; mb_col++) {
+  for (mi_row = 0; mi_row < rows; mi_row++) {
+    for (mi_col = 0; mi_col < cols; mi_col++) {
+      fprintf(mvs, "%2d ", mi[mi_index].mbmi.sb_type);
 
-      fprintf(mvs, "%2d ", mi[mb_index].mbmi.mode);
-
-      mb_index++;
+      mi_index++;
     }
 
     fprintf(mvs, "\n");
-    mb_index++;
+    mi_index += 8;
+  }
+
+  // Print out the macroblock Y modes
+  fprintf(mvs, "Mb Modes for Frame %d\n", frame);
+  mi_index = 0;
+  for (mi_row = 0; mi_row < rows; mi_row++) {
+    for (mi_col = 0; mi_col < cols; mi_col++) {
+      fprintf(mvs, "%2d ", mi[mi_index].mbmi.mode);
+
+      mi_index++;
+    }
+
+    fprintf(mvs, "\n");
+    mi_index += 8;
   }
 
   fprintf(mvs, "\n");
 
-  mb_index = 0;
+  mi_index = 0;
   fprintf(mvs, "Mb mv ref for Frame %d\n", frame);
 
-  for (mb_row = 0; mb_row < rows; mb_row++) {
-    for (mb_col = 0; mb_col < cols; mb_col++) {
+  for (mi_row = 0; mi_row < rows; mi_row++) {
+    for (mi_col = 0; mi_col < cols; mi_col++) {
+      fprintf(mvs, "%2d ", mi[mi_index].mbmi.ref_frame[0]);
 
-      fprintf(mvs, "%2d ", mi[mb_index].mbmi.ref_frame);
-
-      mb_index++;
+      mi_index++;
     }
 
     fprintf(mvs, "\n");
-    mb_index++;
+    mi_index += 8;
+  }
+  fprintf(mvs, "\n");
+
+  mi_index = 0;
+  fprintf(mvs, "Mb mv ref for Frame %d\n", frame);
+
+  for (mi_row = 0; mi_row < rows; mi_row++) {
+    for (mi_col = 0; mi_col < cols; mi_col++) {
+      fprintf(mvs, "%4d:%4d ", mi[mi_index].mbmi.mv[0].as_mv.row,
+              mi[mi_index].mbmi.mv[0].as_mv.col);
+
+      mi_index++;
+    }
+
+    fprintf(mvs, "\n");
+    mi_index += 8;
+  }
+
+  fprintf(mvs, "\n");
+
+  /* print out the macroblock txform sizes */
+  mi_index = 0;
+  fprintf(mvs, "TXFM size for Frame %d\n", frame);
+
+  for (mi_row = 0; mi_row < rows; mi_row++) {
+    for (mi_col = 0; mi_col < cols; mi_col++) {
+      fprintf(mvs, "%2d ", mi[mi_index].mbmi.txfm_size);
+
+      mi_index++;
+    }
+
+    mi_index += 8;
+    fprintf(mvs, "\n");
   }
 
   fprintf(mvs, "\n");
 
   /* print out the macroblock UV modes */
-  mb_index = 0;
+  mi_index = 0;
   fprintf(mvs, "UV Modes for Frame %d\n", frame);
 
-  for (mb_row = 0; mb_row < rows; mb_row++) {
-    for (mb_col = 0; mb_col < cols; mb_col++) {
+  for (mi_row = 0; mi_row < rows; mi_row++) {
+    for (mi_col = 0; mi_col < cols; mi_col++) {
+      fprintf(mvs, "%2d ", mi[mi_index].mbmi.uv_mode);
 
-      fprintf(mvs, "%2d ", mi[mb_index].mbmi.uv_mode);
-
-      mb_index++;
+      mi_index++;
     }
 
-    mb_index++;
+    mi_index += 8;
     fprintf(mvs, "\n");
   }
 
-  fprintf(mvs, "\n");
-
-  /* print out the block modes */
-  mb_index = 0;
-  fprintf(mvs, "Mbs for Frame %d\n", frame);
-  {
-    int b_row;
-
-    for (b_row = 0; b_row < 4 * rows; b_row++) {
-      int b_col;
-      int bindex;
-
-      for (b_col = 0; b_col < 4 * cols; b_col++) {
-        mb_index = (b_row >> 2) * (cols + 1) + (b_col >> 2);
-        bindex = (b_row & 3) * 4 + (b_col & 3);
-
-        if (mi[mb_index].mbmi.mode == B_PRED) {
-          fprintf(mvs, "%2d ", mi[mb_index].bmi[bindex].as_mode.first);
-        } else
-          fprintf(mvs, "xx ");
-
-      }
-
-      fprintf(mvs, "\n");
-    }
-  }
   fprintf(mvs, "\n");
 
   /* print out the macroblock mvs */
-  mb_index = 0;
+  mi_index = 0;
   fprintf(mvs, "MVs for Frame %d\n", frame);
 
-  for (mb_row = 0; mb_row < rows; mb_row++) {
-    for (mb_col = 0; mb_col < cols; mb_col++) {
-      fprintf(mvs, "%5d:%-5d", mi[mb_index].mbmi.mv[0].as_mv.row / 2,
-          mi[mb_index].mbmi.mv[0].as_mv.col / 2);
+  for (mi_row = 0; mi_row < rows; mi_row++) {
+    for (mi_col = 0; mi_col < cols; mi_col++) {
+      fprintf(mvs, "%5d:%-5d", mi[mi_index].mbmi.mv[0].as_mv.row / 2,
+              mi[mi_index].mbmi.mv[0].as_mv.col / 2);
 
-      mb_index++;
+      mi_index++;
     }
 
-    mb_index++;
+    mi_index += 8;
     fprintf(mvs, "\n");
   }
 
-  fprintf(mvs, "\n");
-
-  /* print out the block modes */
-  mb_index = 0;
-  fprintf(mvs, "MVs for Frame %d\n", frame);
-  {
-    int b_row;
-
-    for (b_row = 0; b_row < 4 * rows; b_row++) {
-      int b_col;
-      int bindex;
-
-      for (b_col = 0; b_col < 4 * cols; b_col++) {
-        mb_index = (b_row >> 2) * (cols + 1) + (b_col >> 2);
-        bindex = (b_row & 3) * 4 + (b_col & 3);
-        fprintf(mvs, "%3d:%-3d ",
-                mi[mb_index].bmi[bindex].as_mv[0].as_mv.row,
-                mi[mb_index].bmi[bindex].as_mv[0].as_mv.col);
-
-      }
-
-      fprintf(mvs, "\n");
-    }
-  }
   fprintf(mvs, "\n");
 
   fclose(mvs);

@@ -16,6 +16,7 @@
 
 extern "C" {
 #include "vp9_rtcd.h"
+void vp9_short_idct8x8_add_c(short *input, uint8_t *output, int pitch);
 }
 
 #include "acm_random.h"
@@ -100,11 +101,15 @@ TEST(VP9Fdct8x8Test, RoundTripErrorCheck) {
   for (int i = 0; i < count_test_block; ++i) {
     int16_t test_input_block[64];
     int16_t test_temp_block[64];
-    int16_t test_output_block[64];
+    uint8_t dst[64], src[64];
 
+    for (int j = 0; j < 64; ++j) {
+      src[j] = rnd.Rand8();
+      dst[j] = rnd.Rand8();
+    }
     // Initialize a test block with input range [-255, 255].
     for (int j = 0; j < 64; ++j)
-      test_input_block[j] = rnd.Rand8() - rnd.Rand8();
+      test_input_block[j] = src[j] - dst[j];
 
     const int pitch = 16;
     vp9_short_fdct8x8_c(test_input_block, test_temp_block, pitch);
@@ -119,10 +124,10 @@ TEST(VP9Fdct8x8Test, RoundTripErrorCheck) {
           test_temp_block[j] *= 4;
         }
     }
-    vp9_short_idct8x8_c(test_temp_block, test_output_block, pitch);
+    vp9_short_idct8x8_add_c(test_temp_block, dst, 8);
 
     for (int j = 0; j < 64; ++j) {
-      const int diff = test_input_block[j] - test_output_block[j];
+      const int diff = dst[j] - src[j];
       const int error = diff * diff;
       if (max_error < error)
         max_error = error;
@@ -145,18 +150,22 @@ TEST(VP9Fdct8x8Test, ExtremalCheck) {
   for (int i = 0; i < count_test_block; ++i) {
     int16_t test_input_block[64];
     int16_t test_temp_block[64];
-    int16_t test_output_block[64];
+    uint8_t dst[64], src[64];
 
-    // Initialize a test block with input range {-255, 255}.
+    for (int j = 0; j < 64; ++j) {
+      src[j] = rnd.Rand8() % 2 ? 255 : 0;
+      dst[j] = src[j] > 0 ? 0 : 255;
+    }
+    // Initialize a test block with input range [-255, 255].
     for (int j = 0; j < 64; ++j)
-      test_input_block[j] = rnd.Rand8() % 2 ? 255 : -256;
+      test_input_block[j] = src[j] - dst[j];
 
     const int pitch = 16;
     vp9_short_fdct8x8_c(test_input_block, test_temp_block, pitch);
-    vp9_short_idct8x8_c(test_temp_block, test_output_block, pitch);
+    vp9_short_idct8x8_add_c(test_temp_block, dst, 8);
 
     for (int j = 0; j < 64; ++j) {
-      const int diff = test_input_block[j] - test_output_block[j];
+      const int diff = dst[j] - src[j];
       const int error = diff * diff;
       if (max_error < error)
         max_error = error;

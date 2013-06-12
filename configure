@@ -243,19 +243,11 @@ HAVE_LIST="
     unistd_h
 "
 EXPERIMENT_LIST="
-    csm
-    new_mvref
-    implicit_segmentation
-    newbintramodes
-    comp_interintra_pred
-    enable_6tap
-    abovesprefmv
-    code_nonzerocount
-    useselectrefmv
-    modelcoefprob
-    loop_dering
-    implicit_compoundinter_weight
-    scatterscan
+    oneshotq
+    multiple_arf
+    non420
+    alpha
+    balanced_coeftree
 "
 CONFIG_LIST="
     external_build
@@ -608,7 +600,10 @@ process_toolchain() {
         check_add_cflags -Wimplicit-function-declaration
         check_add_cflags -Wuninitialized
         check_add_cflags -Wunused-variable
-        check_add_cflags -Wunused-but-set-variable
+        case ${CC} in
+          *clang*) ;;
+          *) check_add_cflags -Wunused-but-set-variable ;;
+        esac
         enabled extra_warnings || check_add_cflags -Wno-unused-function
     fi
 

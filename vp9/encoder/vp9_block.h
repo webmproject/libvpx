@@ -23,43 +23,13 @@ typedef struct {
   int offset;
 } search_site;
 
-typedef struct block {
-  // 16 Y blocks, 4 U blocks, 4 V blocks each with 16 entries
-  int16_t *src_diff;
-  int16_t *coeff;
-
-  // 16 Y blocks, 4 U blocks, 4 V blocks each with 16 entries
-  int16_t *quant;
-  int16_t *quant_fast;      // fast quant deprecated for now
-  uint8_t *quant_shift;
-  int16_t *zbin;
-  int16_t *zbin_8x8;
-  int16_t *zbin_16x16;
-  int16_t *zbin_32x32;
-  int16_t *zrun_zbin_boost;
-  int16_t *zrun_zbin_boost_8x8;
-  int16_t *zrun_zbin_boost_16x16;
-  int16_t *zrun_zbin_boost_32x32;
-  int16_t *round;
-
-  // Zbin Over Quant value
-  short zbin_extra;
-
-  uint8_t **base_src;
-  uint8_t **base_second_src;
-  int src;
-  int src_stride;
-
-  int skip_block;
-} BLOCK;
-
 typedef struct {
   int count;
   struct {
-    B_PREDICTION_MODE mode;
+    MB_PREDICTION_MODE mode;
     int_mv mv;
     int_mv second_mv;
-  } bmi[16];
+  } bmi[4];
 } PARTITION_INFO;
 
 // Structure to hold snapshot of coding context during the mode picking process
@@ -81,18 +51,36 @@ typedef struct {
   int comp_pred_diff;
   int single_pred_diff;
   int64_t txfm_rd_diff[NB_TXFM_MODES];
+
+  // Bit flag for each mode whether it has high error in comparison to others.
+  unsigned int modes_with_high_error;
+
+  // Bit flag for each ref frame whether it has high error compared to others.
+  unsigned int frames_with_high_error;
 } PICK_MODE_CONTEXT;
+
+struct macroblock_plane {
+  DECLARE_ALIGNED(16, int16_t, src_diff[64*64]);
+  DECLARE_ALIGNED(16, int16_t, coeff[64*64]);
+  struct buf_2d src;
+
+  // Quantizer setings
+  int16_t *quant;
+  uint8_t *quant_shift;
+  int16_t *zbin;
+  int16_t *zrun_zbin_boost;
+  int16_t *round;
+
+  // Zbin Over Quant value
+  int16_t zbin_extra;
+};
 
 typedef struct macroblock MACROBLOCK;
 struct macroblock {
-  DECLARE_ALIGNED(16, int16_t, src_diff[64*64+32*32*2]);
-  DECLARE_ALIGNED(16, int16_t, coeff[64*64+32*32*2]);
-  // 16 Y blocks, 4 U blocks, 4 V blocks,
-  BLOCK block[24];
-
-  YV12_BUFFER_CONFIG src;
+  struct macroblock_plane plane[MAX_MB_PLANE];
 
   MACROBLOCKD e_mbd;
+  int skip_block;
   PARTITION_INFO *partition_info; /* work pointer */
   PARTITION_INFO *pi;   /* Corresponds to upper left visible macroblock */
   PARTITION_INFO *pip;  /* Base of allocated array */
@@ -126,11 +114,9 @@ struct macroblock {
   int *nmvsadcost_hp[2];
   int **mvsadcost;
 
-  int mbmode_cost[2][MB_MODE_COUNT];
+  int mbmode_cost[MB_MODE_COUNT];
   int intra_uv_mode_cost[2][MB_MODE_COUNT];
-  int bmode_costs[VP9_KF_BINTRAMODES][VP9_KF_BINTRAMODES][VP9_KF_BINTRAMODES];
-  int i8x8_mode_costs[MB_MODE_COUNT];
-  int inter_bmode_costs[B_MODE_COUNT];
+  int y_mode_costs[VP9_INTRA_MODES][VP9_INTRA_MODES][VP9_INTRA_MODES];
   int switchable_interp_costs[VP9_SWITCHABLE_FILTERS + 1]
                              [VP9_SWITCHABLE_FILTERS];
 
@@ -145,36 +131,43 @@ struct macroblock {
 
   int encode_breakout;
 
-  // char * gf_active_ptr;
-  signed char *gf_active_ptr;
-
   unsigned char *active_ptr;
 
+  // note that token_costs is the cost when eob node is skipped
   vp9_coeff_count token_costs[TX_SIZE_MAX_SB][BLOCK_TYPES];
-#if CONFIG_CODE_NONZEROCOUNT
-  unsigned int nzc_costs_4x4[MAX_NZC_CONTEXTS][REF_TYPES][BLOCK_TYPES][17];
-  unsigned int nzc_costs_8x8[MAX_NZC_CONTEXTS][REF_TYPES][BLOCK_TYPES][65];
-  unsigned int nzc_costs_16x16[MAX_NZC_CONTEXTS][REF_TYPES][BLOCK_TYPES][257];
-  unsigned int nzc_costs_32x32[MAX_NZC_CONTEXTS][REF_TYPES][BLOCK_TYPES][1025];
-#endif
+  vp9_coeff_count token_costs_noskip[TX_SIZE_MAX_SB][BLOCK_TYPES];
 
   int optimize;
 
-  // Structure to hold context for each of the 4 MBs within a SB:
-  // when encoded as 4 independent MBs:
+  // TODO(jingning): Need to refactor the structure arrays that buffers the
+  // coding mode decisions of each partition type.
+  PICK_MODE_CONTEXT ab4x4_context[4][4][4];
+  PICK_MODE_CONTEXT sb8x4_context[4][4][4];
+  PICK_MODE_CONTEXT sb4x8_context[4][4][4];
+  PICK_MODE_CONTEXT sb8x8_context[4][4][4];
+  PICK_MODE_CONTEXT sb8x16_context[4][4][2];
+  PICK_MODE_CONTEXT sb16x8_context[4][4][2];
   PICK_MODE_CONTEXT mb_context[4][4];
+  PICK_MODE_CONTEXT sb32x16_context[4][2];
+  PICK_MODE_CONTEXT sb16x32_context[4][2];
   // when 4 MBs share coding parameters:
   PICK_MODE_CONTEXT sb32_context[4];
+  PICK_MODE_CONTEXT sb32x64_context[2];
+  PICK_MODE_CONTEXT sb64x32_context[2];
   PICK_MODE_CONTEXT sb64_context;
+  int partition_cost[NUM_PARTITION_CONTEXTS][PARTITION_TYPES];
+
+  BLOCK_SIZE_TYPE b_partitioning[4][4][4];
+  BLOCK_SIZE_TYPE mb_partitioning[4][4];
+  BLOCK_SIZE_TYPE sb_partitioning[4];
+  BLOCK_SIZE_TYPE sb64_partitioning;
 
   void (*fwd_txm4x4)(int16_t *input, int16_t *output, int pitch);
   void (*fwd_txm8x4)(int16_t *input, int16_t *output, int pitch);
   void (*fwd_txm8x8)(int16_t *input, int16_t *output, int pitch);
   void (*fwd_txm16x16)(int16_t *input, int16_t *output, int pitch);
-  void (*quantize_b_4x4)(MACROBLOCK *x, int b_idx);
-  void (*quantize_b_4x4_pair)(MACROBLOCK *x, int b_idx1, int b_idx2);
-  void (*quantize_b_16x16)(MACROBLOCK *x, int b_idx, TX_TYPE tx_type);
-  void (*quantize_b_8x8)(MACROBLOCK *x, int b_idx, TX_TYPE tx_type);
+  void (*quantize_b_4x4)(MACROBLOCK *x, int b_idx, TX_TYPE tx_type,
+                         int y_blocks);
 };
 
 #endif  // VP9_ENCODER_VP9_BLOCK_H_

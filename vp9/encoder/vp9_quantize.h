@@ -22,46 +22,15 @@
 #define prototype_quantize_mb(sym) \
   void (sym)(MACROBLOCK *x)
 
-#if ARCH_X86 || ARCH_X86_64
-#include "x86/vp9_quantize_x86.h"
-#endif
+void vp9_quantize(MACROBLOCK *mb, int plane, int block, int n_coefs,
+                  TX_TYPE tx_type);
 
-void vp9_ht_quantize_b_4x4(MACROBLOCK *mb, int b_ix, TX_TYPE type);
-void vp9_regular_quantize_b_4x4(MACROBLOCK *mb, int b_idx);
-void vp9_regular_quantize_b_4x4_pair(MACROBLOCK *mb, int b_idx1, int b_idx2);
-void vp9_regular_quantize_b_8x8(MACROBLOCK *mb, int b_idx, TX_TYPE tx_type);
-void vp9_regular_quantize_b_16x16(MACROBLOCK *mb, int b_idx, TX_TYPE tx_type);
-void vp9_regular_quantize_b_32x32(MACROBLOCK *mb, int b_idx);
-
-void vp9_quantize_mb_4x4(MACROBLOCK *x);
-void vp9_quantize_mb_8x8(MACROBLOCK *x);
-
-void vp9_quantize_mbuv_4x4(MACROBLOCK *x);
-void vp9_quantize_mby_4x4(MACROBLOCK *x);
-
-void vp9_quantize_mby_8x8(MACROBLOCK *x);
-void vp9_quantize_mbuv_8x8(MACROBLOCK *x);
-
-void vp9_quantize_mb_16x16(MACROBLOCK *x);
-void vp9_quantize_mby_16x16(MACROBLOCK *x);
-
-void vp9_quantize_sby_32x32(MACROBLOCK *x);
-void vp9_quantize_sby_16x16(MACROBLOCK *x);
-void vp9_quantize_sby_8x8(MACROBLOCK *x);
-void vp9_quantize_sby_4x4(MACROBLOCK *x);
-void vp9_quantize_sbuv_16x16(MACROBLOCK *x);
-void vp9_quantize_sbuv_8x8(MACROBLOCK *x);
-void vp9_quantize_sbuv_4x4(MACROBLOCK *x);
-
-void vp9_quantize_sb64y_32x32(MACROBLOCK *x);
-void vp9_quantize_sb64y_16x16(MACROBLOCK *x);
-void vp9_quantize_sb64y_8x8(MACROBLOCK *x);
-void vp9_quantize_sb64y_4x4(MACROBLOCK *x);
-void vp9_quantize_sb64uv_32x32(MACROBLOCK *x);
-void vp9_quantize_sb64uv_16x16(MACROBLOCK *x);
-void vp9_quantize_sb64uv_8x8(MACROBLOCK *x);
-void vp9_quantize_sb64uv_4x4(MACROBLOCK *x);
-
+void vp9_regular_quantize_b_4x4_pair(MACROBLOCK *mb, int b_idx1, int b_idx2,
+                                     int y_blocks);
+void vp9_regular_quantize_b_4x4(MACROBLOCK *mb, int b_idx, TX_TYPE tx_type,
+                                int y_blocks);
+void vp9_regular_quantize_b_8x8(MACROBLOCK *mb, int b_idx, TX_TYPE tx_type,
+                                int y_blocks);
 struct VP9_COMP;
 
 extern void vp9_set_quantizer(struct VP9_COMP *cpi, int Q);

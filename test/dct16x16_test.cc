@@ -17,6 +17,7 @@
 extern "C" {
 #include "vp9/common/vp9_entropy.h"
 #include "vp9_rtcd.h"
+void vp9_short_idct16x16_add_c(short *input, uint8_t *output, int pitch);
 }
 
 #include "acm_random.h"
@@ -269,19 +270,23 @@ TEST(VP9Idct16x16Test, AccuracyCheck) {
   const int count_test_block = 1000;
   for (int i = 0; i < count_test_block; ++i) {
     int16_t in[256], coeff[256];
-    int16_t out_c[256];
+    uint8_t dst[256], src[256];
     double out_r[256];
 
+    for (int j = 0; j < 256; ++j) {
+      src[j] = rnd.Rand8();
+      dst[j] = rnd.Rand8();
+    }
     // Initialize a test block with input range [-255, 255].
     for (int j = 0; j < 256; ++j)
-      in[j] = rnd.Rand8() - rnd.Rand8();
+      in[j] = src[j] - dst[j];
 
     reference_16x16_dct_2d(in, out_r);
     for (int j = 0; j < 256; j++)
       coeff[j] = round(out_r[j]);
-    vp9_short_idct16x16_c(coeff, out_c, 32);
+    vp9_short_idct16x16_add_c(coeff, dst, 16);
     for (int j = 0; j < 256; ++j) {
-      const int diff = out_c[j] - in[j];
+      const int diff = dst[j] - src[j];
       const int error = diff * diff;
       EXPECT_GE(1, error)
           << "Error: 16x16 IDCT has error " << error
@@ -289,7 +294,7 @@ TEST(VP9Idct16x16Test, AccuracyCheck) {
     }
   }
 }
-#if 1
+
 // we need enable fdct test once we re-do the 16 point fdct.
 TEST(VP9Fdct16x16Test, AccuracyCheck) {
   ACMRandom rnd(ACMRandom::DeterministicSeed());
@@ -299,18 +304,22 @@ TEST(VP9Fdct16x16Test, AccuracyCheck) {
   for (int i = 0; i < count_test_block; ++i) {
     int16_t test_input_block[256];
     int16_t test_temp_block[256];
-    int16_t test_output_block[256];
+    uint8_t dst[256], src[256];
 
+    for (int j = 0; j < 256; ++j) {
+      src[j] = rnd.Rand8();
+      dst[j] = rnd.Rand8();
+    }
     // Initialize a test block with input range [-255, 255].
     for (int j = 0; j < 256; ++j)
-      test_input_block[j] = rnd.Rand8() - rnd.Rand8();
+      test_input_block[j] = src[j] - dst[j];
 
     const int pitch = 32;
     vp9_short_fdct16x16_c(test_input_block, test_temp_block, pitch);
-    vp9_short_idct16x16_c(test_temp_block, test_output_block, pitch);
+    vp9_short_idct16x16_add_c(test_temp_block, dst, 16);
 
     for (int j = 0; j < 256; ++j) {
-      const int diff = test_input_block[j] - test_output_block[j];
+      const int diff = dst[j] - src[j];
       const int error = diff * diff;
       if (max_error < error)
         max_error = error;
@@ -354,6 +363,4 @@ TEST(VP9Fdct16x16Test, CoeffSizeCheck) {
     }
   }
 }
-#endif
-
 }  // namespace

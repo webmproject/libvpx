@@ -11,54 +11,56 @@
 #ifndef VP9_COMMON_VP9_ONYXD_H_
 #define VP9_COMMON_VP9_ONYXD_H_
 
-/* Create/destroy static data structures. */
 #ifdef __cplusplus
 extern "C" {
 #endif
+
 #include "vpx_scale/yv12config.h"
 #include "vp9/common/vp9_ppflags.h"
-#include "vpx_ports/mem.h"
 #include "vpx/vpx_codec.h"
 
-  typedef void   *VP9D_PTR;
-  typedef struct {
-    int     Width;
-    int     Height;
-    int     Version;
-    int     postprocess;
-    int     max_threads;
-    int     inv_tile_order;
-    int     input_partition;
-  } VP9D_CONFIG;
-  typedef enum {
-    VP9_LAST_FLAG = 1,
-    VP9_GOLD_FLAG = 2,
-    VP9_ALT_FLAG = 4
-  } VP9_REFFRAME;
+typedef void *VP9D_PTR;
 
-  void vp9_initialize_dec(void);
+typedef struct {
+  int width;
+  int height;
+  int version;
+  int postprocess;
+  int max_threads;
+  int inv_tile_order;
+  int input_partition;
+} VP9D_CONFIG;
 
-  int vp9_receive_compressed_data(VP9D_PTR comp, unsigned long size,
-                                  const unsigned char **dest,
-                                  int64_t time_stamp);
+typedef enum {
+  VP9_LAST_FLAG = 1,
+  VP9_GOLD_FLAG = 2,
+  VP9_ALT_FLAG = 4
+} VP9_REFFRAME;
 
-  int vp9_get_raw_frame(VP9D_PTR comp, YV12_BUFFER_CONFIG *sd,
-                        int64_t *time_stamp, int64_t *time_end_stamp,
-                        vp9_ppflags_t *flags);
+void vp9_initialize_dec();
 
-  vpx_codec_err_t vp9_copy_reference_dec(VP9D_PTR comp,
-                                         VP9_REFFRAME ref_frame_flag,
-                                         YV12_BUFFER_CONFIG *sd);
+int vp9_receive_compressed_data(VP9D_PTR comp,
+                                uint64_t size, const uint8_t **dest,
+                                int64_t time_stamp);
 
-  vpx_codec_err_t vp9_set_reference_dec(VP9D_PTR comp,
-                                        VP9_REFFRAME ref_frame_flag,
-                                        YV12_BUFFER_CONFIG *sd);
+int vp9_get_raw_frame(VP9D_PTR comp, YV12_BUFFER_CONFIG *sd,
+                      int64_t *time_stamp, int64_t *time_end_stamp,
+                      vp9_ppflags_t *flags);
 
-  int vp9_get_reference_dec(VP9D_PTR ptr, int index, YV12_BUFFER_CONFIG **fb);
+vpx_codec_err_t vp9_copy_reference_dec(VP9D_PTR comp,
+                                       VP9_REFFRAME ref_frame_flag,
+                                       YV12_BUFFER_CONFIG *sd);
 
-  VP9D_PTR vp9_create_decompressor(VP9D_CONFIG *oxcf);
+vpx_codec_err_t vp9_set_reference_dec(VP9D_PTR comp,
+                                      VP9_REFFRAME ref_frame_flag,
+                                      YV12_BUFFER_CONFIG *sd);
 
-  void vp9_remove_decompressor(VP9D_PTR comp);
+int vp9_get_reference_dec(VP9D_PTR ptr, int index, YV12_BUFFER_CONFIG **fb);
+
+
+VP9D_PTR vp9_create_decompressor(VP9D_CONFIG *oxcf);
+
+void vp9_remove_decompressor(VP9D_PTR comp);
 
 #ifdef __cplusplus
 }

@@ -45,17 +45,7 @@ int vp9_get_segdata(const MACROBLOCKD *xd,
                     int segment_id,
                     SEG_LVL_FEATURES feature_id);
 
-void vp9_clear_segref(MACROBLOCKD *xd, int segment_id);
-
-void vp9_set_segref(MACROBLOCKD *xd,
-                    int segment_id,
-                    MV_REFERENCE_FRAME ref_frame);
-
-int vp9_check_segref(const MACROBLOCKD *xd,
-                     int segment_id,
-                     MV_REFERENCE_FRAME ref_frame);
-
-int vp9_check_segref_inter(MACROBLOCKD *xd, int segment_id);
+extern const vp9_tree_index vp9_segment_tree[14];
 
 #endif  // VP9_COMMON_VP9_SEG_COMMON_H_
 

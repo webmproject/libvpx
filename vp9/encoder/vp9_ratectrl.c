@@ -30,16 +30,6 @@
 #define MIN_BPB_FACTOR 0.005
 #define MAX_BPB_FACTOR 50
 
-#ifdef MODE_STATS
-extern unsigned int y_modes[VP9_YMODES];
-extern unsigned int uv_modes[VP9_UV_MODES];
-extern unsigned int b_modes[B_MODE_COUNT];
-
-extern unsigned int inter_y_modes[MB_MODE_COUNT];
-extern unsigned int inter_uv_modes[VP9_UV_MODES];
-extern unsigned int inter_b_modes[B_MODE_COUNT];
-#endif
-
 // Bits Per MB at different Q (Multiplied by 512)
 #define BPER_MB_NORMBITS    9
 
@@ -89,7 +79,7 @@ static const unsigned int prior_key_frame_weight[KEY_FRAME_CONTEXT] = { 1, 2, 3,
 // tables if and when things settle down in the experimental bitstream
 double vp9_convert_qindex_to_q(int qindex) {
   // Convert the index to a real Q value (scaled down to match old Q values)
-  return vp9_ac_yquant(qindex) / 4.0;
+  return vp9_ac_quant(qindex, 0) / 4.0;
 }
 
 int vp9_gfboost_qadjust(int qindex) {
@@ -112,7 +102,7 @@ int vp9_bits_per_mb(FRAME_TYPE frame_type, int qindex,
   const double q = vp9_convert_qindex_to_q(qindex);
   int enumerator = frame_type == KEY_FRAME ? 4000000 : 2500000;
 
-  // q based adjustment to baseline enumberator
+  // q based adjustment to baseline enumerator
   enumerator += (int)(enumerator * q) >> 12;
   return (int)(0.5 + (enumerator * correction_factor / q));
 }
@@ -132,52 +122,31 @@ void vp9_save_coding_context(VP9_COMP *cpi) {
   vp9_copy(cc->nmvcosts,  cpi->mb.nmvcosts);
   vp9_copy(cc->nmvcosts_hp,  cpi->mb.nmvcosts_hp);
 
-  vp9_copy(cc->vp9_mode_contexts, cm->fc.vp9_mode_contexts);
+  vp9_copy(cc->inter_mode_probs, cm->fc.inter_mode_probs);
 
-  vp9_copy(cc->ymode_prob, cm->fc.ymode_prob);
-  vp9_copy(cc->sb_ymode_prob, cm->fc.sb_ymode_prob);
-  vp9_copy(cc->bmode_prob, cm->fc.bmode_prob);
+  vp9_copy(cc->y_mode_prob, cm->fc.y_mode_prob);
   vp9_copy(cc->uv_mode_prob, cm->fc.uv_mode_prob);
-  vp9_copy(cc->i8x8_mode_prob, cm->fc.i8x8_mode_prob);
-  vp9_copy(cc->sub_mv_ref_prob, cm->fc.sub_mv_ref_prob);
-  vp9_copy(cc->mbsplit_prob, cm->fc.mbsplit_prob);
-
-  // Stats
-#ifdef MODE_STATS
-  vp9_copy(cc->y_modes,       y_modes);
-  vp9_copy(cc->uv_modes,      uv_modes);
-  vp9_copy(cc->b_modes,       b_modes);
-  vp9_copy(cc->inter_y_modes,  inter_y_modes);
-  vp9_copy(cc->inter_uv_modes, inter_uv_modes);
-  vp9_copy(cc->inter_b_modes,  inter_b_modes);
-#endif
+  vp9_copy(cc->partition_prob, cm->fc.partition_prob);
 
   vp9_copy(cc->segment_pred_probs, cm->segment_pred_probs);
-  vp9_copy(cc->ref_pred_probs_update, cpi->ref_pred_probs_update);
-  vp9_copy(cc->ref_pred_probs, cm->ref_pred_probs);
-  vp9_copy(cc->prob_comppred, cm->prob_comppred);
+
+  vp9_copy(cc->intra_inter_prob, cm->fc.intra_inter_prob);
+  vp9_copy(cc->comp_inter_prob, cm->fc.comp_inter_prob);
+  vp9_copy(cc->single_ref_prob, cm->fc.single_ref_prob);
+  vp9_copy(cc->comp_ref_prob, cm->fc.comp_ref_prob);
 
   vpx_memcpy(cpi->coding_context.last_frame_seg_map_copy,
-             cm->last_frame_seg_map, (cm->mb_rows * cm->mb_cols));
+             cm->last_frame_seg_map, (cm->mi_rows * cm->mi_cols));
 
   vp9_copy(cc->last_ref_lf_deltas, xd->last_ref_lf_deltas);
   vp9_copy(cc->last_mode_lf_deltas, xd->last_mode_lf_deltas);
 
-  vp9_copy(cc->coef_probs_4x4, cm->fc.coef_probs_4x4);
-  vp9_copy(cc->coef_probs_8x8, cm->fc.coef_probs_8x8);
-  vp9_copy(cc->coef_probs_16x16, cm->fc.coef_probs_16x16);
-  vp9_copy(cc->coef_probs_32x32, cm->fc.coef_probs_32x32);
+  vp9_copy(cc->coef_probs, cm->fc.coef_probs);
   vp9_copy(cc->switchable_interp_prob, cm->fc.switchable_interp_prob);
-#if CONFIG_COMP_INTERINTRA_PRED
-  cc->interintra_prob = cm->fc.interintra_prob;
-#endif
-#if CONFIG_CODE_NONZEROCOUNT
-  vp9_copy(cc->nzc_probs_4x4, cm->fc.nzc_probs_4x4);
-  vp9_copy(cc->nzc_probs_8x8, cm->fc.nzc_probs_8x8);
-  vp9_copy(cc->nzc_probs_16x16, cm->fc.nzc_probs_16x16);
-  vp9_copy(cc->nzc_probs_32x32, cm->fc.nzc_probs_32x32);
-  vp9_copy(cc->nzc_pcat_probs, cm->fc.nzc_pcat_probs);
-#endif
+  vp9_copy(cc->tx_probs_8x8p, cm->fc.tx_probs_8x8p);
+  vp9_copy(cc->tx_probs_16x16p, cm->fc.tx_probs_16x16p);
+  vp9_copy(cc->tx_probs_32x32p, cm->fc.tx_probs_32x32p);
+  vp9_copy(cc->mbskip_probs, cm->fc.mbskip_probs);
 }
 
 void vp9_restore_coding_context(VP9_COMP *cpi) {
@@ -193,53 +162,32 @@ void vp9_restore_coding_context(VP9_COMP *cpi) {
   vp9_copy(cpi->mb.nmvcosts, cc->nmvcosts);
   vp9_copy(cpi->mb.nmvcosts_hp, cc->nmvcosts_hp);
 
-  vp9_copy(cm->fc.vp9_mode_contexts, cc->vp9_mode_contexts);
+  vp9_copy(cm->fc.inter_mode_probs, cc->inter_mode_probs);
 
-  vp9_copy(cm->fc.ymode_prob, cc->ymode_prob);
-  vp9_copy(cm->fc.sb_ymode_prob, cc->sb_ymode_prob);
-  vp9_copy(cm->fc.bmode_prob, cc->bmode_prob);
-  vp9_copy(cm->fc.i8x8_mode_prob, cc->i8x8_mode_prob);
+  vp9_copy(cm->fc.y_mode_prob, cc->y_mode_prob);
   vp9_copy(cm->fc.uv_mode_prob, cc->uv_mode_prob);
-  vp9_copy(cm->fc.sub_mv_ref_prob, cc->sub_mv_ref_prob);
-  vp9_copy(cm->fc.mbsplit_prob, cc->mbsplit_prob);
-
-  // Stats
-#ifdef MODE_STATS
-  vp9_copy(y_modes, cc->y_modes);
-  vp9_copy(uv_modes, cc->uv_modes);
-  vp9_copy(b_modes, cc->b_modes);
-  vp9_copy(inter_y_modes, cc->inter_y_modes);
-  vp9_copy(inter_uv_modes, cc->inter_uv_modes);
-  vp9_copy(inter_b_modes, cc->inter_b_modes);
-#endif
+  vp9_copy(cm->fc.partition_prob, cc->partition_prob);
 
   vp9_copy(cm->segment_pred_probs, cc->segment_pred_probs);
-  vp9_copy(cpi->ref_pred_probs_update, cc->ref_pred_probs_update);
-  vp9_copy(cm->ref_pred_probs, cc->ref_pred_probs);
-  vp9_copy(cm->prob_comppred, cc->prob_comppred);
+
+  vp9_copy(cm->fc.intra_inter_prob, cc->intra_inter_prob);
+  vp9_copy(cm->fc.comp_inter_prob, cc->comp_inter_prob);
+  vp9_copy(cm->fc.single_ref_prob, cc->single_ref_prob);
+  vp9_copy(cm->fc.comp_ref_prob, cc->comp_ref_prob);
 
   vpx_memcpy(cm->last_frame_seg_map,
              cpi->coding_context.last_frame_seg_map_copy,
-             (cm->mb_rows * cm->mb_cols));
+             (cm->mi_rows * cm->mi_cols));
 
   vp9_copy(xd->last_ref_lf_deltas, cc->last_ref_lf_deltas);
   vp9_copy(xd->last_mode_lf_deltas, cc->last_mode_lf_deltas);
 
-  vp9_copy(cm->fc.coef_probs_4x4, cc->coef_probs_4x4);
-  vp9_copy(cm->fc.coef_probs_8x8, cc->coef_probs_8x8);
-  vp9_copy(cm->fc.coef_probs_16x16, cc->coef_probs_16x16);
-  vp9_copy(cm->fc.coef_probs_32x32, cc->coef_probs_32x32);
+  vp9_copy(cm->fc.coef_probs, cc->coef_probs);
   vp9_copy(cm->fc.switchable_interp_prob, cc->switchable_interp_prob);
-#if CONFIG_COMP_INTERINTRA_PRED
-  cm->fc.interintra_prob = cc->interintra_prob;
-#endif
-#if CONFIG_CODE_NONZEROCOUNT
-  vp9_copy(cm->fc.nzc_probs_4x4, cc->nzc_probs_4x4);
-  vp9_copy(cm->fc.nzc_probs_8x8, cc->nzc_probs_8x8);
-  vp9_copy(cm->fc.nzc_probs_16x16, cc->nzc_probs_16x16);
-  vp9_copy(cm->fc.nzc_probs_32x32, cc->nzc_probs_32x32);
-  vp9_copy(cm->fc.nzc_pcat_probs, cc->nzc_pcat_probs);
-#endif
+  vp9_copy(cm->fc.tx_probs_8x8p, cc->tx_probs_8x8p);
+  vp9_copy(cm->fc.tx_probs_16x16p, cc->tx_probs_16x16p);
+  vp9_copy(cm->fc.tx_probs_32x32p, cc->tx_probs_32x32p);
+  vp9_copy(cm->fc.mbskip_probs, cc->mbskip_probs);
 }
 
 void vp9_setup_key_frame(VP9_COMP *cpi) {
@@ -258,12 +206,11 @@ void vp9_setup_key_frame(VP9_COMP *cpi) {
 void vp9_setup_inter_frame(VP9_COMP *cpi) {
   VP9_COMMON *cm = &cpi->common;
   MACROBLOCKD *xd = &cpi->mb.e_mbd;
-  if (cm->error_resilient_mode)
+  if (cm->error_resilient_mode || cm->intra_only)
     vp9_setup_past_independence(cm, xd);
 
   assert(cm->frame_context_idx < NUM_FRAME_CONTEXTS);
-  vpx_memcpy(&cm->fc, &cm->frame_contexts[cm->frame_context_idx],
-             sizeof(cm->fc));
+  cm->fc = cm->frame_contexts[cm->frame_context_idx];
 }
 
 static int estimate_bits_at_q(int frame_kind, int q, int mbs,
@@ -300,7 +247,7 @@ static void calc_iframe_target_size(VP9_COMP *cpi) {
 }
 
 
-//  Do the best we can to define the parameteres for the next GF based
+//  Do the best we can to define the parameters for the next GF based
 //  on what information we have available.
 //
 //  In this experimental code only two pass is supported
@@ -358,16 +305,13 @@ static void calc_pframe_target_size(VP9_COMP *cpi) {
           (estimate_bits_at_q(1, q, cpi->common.MBs, 1.0)
            * cpi->last_boost) / 100;
       }
-
     } else {
       // If there is an active ARF at this location use the minimum
-      // bits on this frame even if it is a contructed arf.
+      // bits on this frame even if it is a constructed arf.
       // The active maximum quantizer insures that an appropriate
-      // number of bits will be spent if needed for contstructed ARFs.
+      // number of bits will be spent if needed for constructed ARFs.
       cpi->this_frame_target = 0;
     }
-
-    cpi->current_gf_interval = cpi->frames_till_gf_update_due;
   }
 }
 

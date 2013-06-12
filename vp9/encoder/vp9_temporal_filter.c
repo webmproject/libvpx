@@ -26,7 +26,6 @@
 #include "vp9/common/vp9_quant_common.h"
 #include "vp9/encoder/vp9_segmentation.h"
 #include "vpx_mem/vpx_mem.h"
-#include "vp9/common/vp9_swapyv12buffer.h"
 #include "vpx_ports/vpx_timer.h"
 
 #define ALT_REF_MC_ENABLED 1    // dis/enable MC in AltRef filtering
@@ -41,42 +40,35 @@ static void temporal_filter_predictors_mb_c(MACROBLOCKD *xd,
                                             int mv_col,
                                             uint8_t *pred) {
   const int which_mv = 0;
-  int_mv subpel_mv;
-  int_mv fullpel_mv;
+  int_mv mv;
 
-  subpel_mv.as_mv.row = mv_row;
-  subpel_mv.as_mv.col = mv_col;
-  // TODO(jkoleszar): Make this rounding consistent with the rest of the code
-  fullpel_mv.as_mv.row = (mv_row >> 1) & ~7;
-  fullpel_mv.as_mv.col = (mv_col >> 1) & ~7;
+  mv.as_mv.row = mv_row;
+  mv.as_mv.col = mv_col;
 
   vp9_build_inter_predictor(y_mb_ptr, stride,
                             &pred[0], 16,
-                            &subpel_mv,
+                            &mv,
                             &xd->scale_factor[which_mv],
                             16, 16,
-                            which_mv <<
-                            (2 * CONFIG_IMPLICIT_COMPOUNDINTER_WEIGHT),
+                            which_mv,
                             &xd->subpix);
 
   stride = (stride + 1) >> 1;
 
   vp9_build_inter_predictor_q4(u_mb_ptr, stride,
                                &pred[256], 8,
-                               &fullpel_mv, &subpel_mv,
+                               &mv,
                                &xd->scale_factor_uv[which_mv],
                                8, 8,
-                               which_mv <<
-                               (2 * CONFIG_IMPLICIT_COMPOUNDINTER_WEIGHT),
+                               which_mv,
                                &xd->subpix);
 
   vp9_build_inter_predictor_q4(v_mb_ptr, stride,
                                &pred[320], 8,
-                               &fullpel_mv, &subpel_mv,
+                               &mv,
                                &xd->scale_factor_uv[which_mv],
                                8, 8,
-                               which_mv <<
-                               (2 * CONFIG_IMPLICIT_COMPOUNDINTER_WEIGHT),
+                               which_mv,
                                &xd->subpix);
 }
 
@@ -126,53 +118,45 @@ void vp9_temporal_filter_apply_c(uint8_t *frame1,
 #if ALT_REF_MC_ENABLED
 
 static int temporal_filter_find_matching_mb_c(VP9_COMP *cpi,
-                                              YV12_BUFFER_CONFIG *arf_frame,
-                                              YV12_BUFFER_CONFIG *frame_ptr,
-                                              int mb_offset,
+                                              uint8_t *arf_frame_buf,
+                                              uint8_t *frame_ptr_buf,
+                                              int stride,
                                               int error_thresh) {
   MACROBLOCK *x = &cpi->mb;
+  MACROBLOCKD* const xd = &x->e_mbd;
   int step_param;
   int sadpb = x->sadperbit16;
   int bestsme = INT_MAX;
 
-  BLOCK *b = &x->block[0];
-  BLOCKD *d = &x->e_mbd.block[0];
   int_mv best_ref_mv1;
   int_mv best_ref_mv1_full; /* full-pixel value of best_ref_mv1 */
+  int_mv *ref_mv;
 
   // Save input state
-  uint8_t **base_src = b->base_src;
-  int src = b->src;
-  int src_stride = b->src_stride;
-  uint8_t **base_pre = d->base_pre;
-  int pre = d->pre;
-  int pre_stride = d->pre_stride;
+  struct buf_2d src = x->plane[0].src;
+  struct buf_2d pre = xd->plane[0].pre[0];
 
   best_ref_mv1.as_int = 0;
   best_ref_mv1_full.as_mv.col = best_ref_mv1.as_mv.col >> 3;
   best_ref_mv1_full.as_mv.row = best_ref_mv1.as_mv.row >> 3;
 
   // Setup frame pointers
-  b->base_src = &arf_frame->y_buffer;
-  b->src_stride = arf_frame->y_stride;
-  b->src = mb_offset;
-
-  d->base_pre = &frame_ptr->y_buffer;
-  d->pre_stride = frame_ptr->y_stride;
-  d->pre = mb_offset;
+  x->plane[0].src.buf = arf_frame_buf;
+  x->plane[0].src.stride = stride;
+  xd->plane[0].pre[0].buf = frame_ptr_buf;
+  xd->plane[0].pre[0].stride = stride;
 
   // Further step/diamond searches as necessary
-  if (cpi->Speed < 8) {
-    step_param = cpi->sf.first_step +
-                 ((cpi->Speed > 5) ? 1 : 0);
-  } else {
+  if (cpi->speed < 8)
+    step_param = cpi->sf.first_step + ((cpi->speed > 5) ? 1 : 0);
+  else
     step_param = cpi->sf.first_step + 2;
-  }
 
   /*cpi->sf.search_method == HEX*/
   // TODO Check that the 16x16 vf & sdf are selected here
   // Ignore mv costing by sending NULL pointer instead of cost arrays
-  bestsme = vp9_hex_search(x, b, d, &best_ref_mv1_full, &d->bmi.as_mv[0],
+  ref_mv = &x->e_mbd.mode_info_context->bmi[0].as_mv[0];
+  bestsme = vp9_hex_search(x, &best_ref_mv1_full, ref_mv,
                            step_param, sadpb, &cpi->fn_ptr[BLOCK_16X16],
                            NULL, NULL, NULL, NULL,
                            &best_ref_mv1);
@@ -184,7 +168,7 @@ static int temporal_filter_find_matching_mb_c(VP9_COMP *cpi,
     int distortion;
     unsigned int sse;
     // Ignore mv costing by sending NULL pointer instead of cost array
-    bestsme = cpi->find_fractional_mv_step(x, b, d, &d->bmi.as_mv[0],
+    bestsme = cpi->find_fractional_mv_step(x, ref_mv,
                                            &best_ref_mv1,
                                            x->errorperbit,
                                            &cpi->fn_ptr[BLOCK_16X16],
@@ -193,13 +177,9 @@ static int temporal_filter_find_matching_mb_c(VP9_COMP *cpi,
   }
 #endif
 
-  // Save input state
-  b->base_src = base_src;
-  b->src = src;
-  b->src_stride = src_stride;
-  d->base_pre = base_pre;
-  d->pre = pre;
-  d->pre_stride = pre_stride;
+  // Restore input state
+  x->plane[0].src = src;
+  xd->plane[0].pre[0] = pre;
 
   return bestsme;
 }
@@ -225,9 +205,11 @@ static void temporal_filter_iterate_c(VP9_COMP *cpi,
   DECLARE_ALIGNED_ARRAY(16, uint8_t,  predictor, 16 * 16 + 8 * 8 + 8 * 8);
 
   // Save input state
-  uint8_t *y_buffer = mbd->pre.y_buffer;
-  uint8_t *u_buffer = mbd->pre.u_buffer;
-  uint8_t *v_buffer = mbd->pre.v_buffer;
+  uint8_t* input_buffer[MAX_MB_PLANE];
+  int i;
+
+  for (i = 0; i < MAX_MB_PLANE; i++)
+    input_buffer[i] = mbd->plane[i].pre[0].buf;
 
   for (mb_row = 0; mb_row < mb_rows; mb_row++) {
 #if ALT_REF_MC_ENABLED
@@ -264,8 +246,8 @@ static void temporal_filter_iterate_c(VP9_COMP *cpi,
         if (cpi->frames[frame] == NULL)
           continue;
 
-        mbd->block[0].bmi.as_mv[0].as_mv.row = 0;
-        mbd->block[0].bmi.as_mv[0].as_mv.col = 0;
+        mbd->mode_info_context->bmi[0].as_mv[0].as_mv.row = 0;
+        mbd->mode_info_context->bmi[0].as_mv[0].as_mv.col = 0;
 
         if (frame == alt_ref_index) {
           filter_weight = 2;
@@ -278,9 +260,9 @@ static void temporal_filter_iterate_c(VP9_COMP *cpi,
           // Find best match in this frame by MC
           err = temporal_filter_find_matching_mb_c
                 (cpi,
-                 cpi->frames[alt_ref_index],
-                 cpi->frames[frame],
-                 mb_y_offset,
+                 cpi->frames[alt_ref_index]->y_buffer + mb_y_offset,
+                 cpi->frames[frame]->y_buffer + mb_y_offset,
+                 cpi->frames[frame]->y_stride,
                  THRESH_LOW);
 #endif
           // Assign higher weight to matching MB if it's error
@@ -298,8 +280,8 @@ static void temporal_filter_iterate_c(VP9_COMP *cpi,
            cpi->frames[frame]->u_buffer + mb_uv_offset,
            cpi->frames[frame]->v_buffer + mb_uv_offset,
            cpi->frames[frame]->y_stride,
-           mbd->block[0].bmi.as_mv[0].as_mv.row,
-           mbd->block[0].bmi.as_mv[0].as_mv.col,
+           mbd->mode_info_context->bmi[0].as_mv[0].as_mv.row,
+           mbd->mode_info_context->bmi[0].as_mv[0].as_mv.col,
            predictor);
 
           // Apply the filter (YUV)
@@ -372,16 +354,15 @@ static void temporal_filter_iterate_c(VP9_COMP *cpi,
   }
 
   // Restore input state
-  mbd->pre.y_buffer = y_buffer;
-  mbd->pre.u_buffer = u_buffer;
-  mbd->pre.v_buffer = v_buffer;
+  for (i = 0; i < MAX_MB_PLANE; i++)
+    mbd->plane[i].pre[0].buf = input_buffer[i];
 }
 
 void vp9_temporal_filter_prepare(VP9_COMP *cpi, int distance) {
+  VP9_COMMON *const cm = &cpi->common;
+
   int frame = 0;
 
-  int num_frames_backward = 0;
-  int num_frames_forward = 0;
   int frames_to_blur_backward = 0;
   int frames_to_blur_forward = 0;
   int frames_to_blur = 0;
@@ -391,15 +372,13 @@ void vp9_temporal_filter_prepare(VP9_COMP *cpi, int distance) {
   int blur_type = cpi->oxcf.arnr_type;
   int max_frames = cpi->active_arnr_frames;
 
-  num_frames_backward = distance;
-  num_frames_forward = vp9_lookahead_depth(cpi->lookahead)
-                       - (num_frames_backward + 1);
+  const int num_frames_backward = distance;
+  const int num_frames_forward = vp9_lookahead_depth(cpi->lookahead)
+                               - (num_frames_backward + 1);
 
   switch (blur_type) {
     case 1:
-      /////////////////////////////////////////
       // Backward Blur
-
       frames_to_blur_backward = num_frames_backward;
 
       if (frames_to_blur_backward >= max_frames)
@@ -409,7 +388,6 @@ void vp9_temporal_filter_prepare(VP9_COMP *cpi, int distance) {
       break;
 
     case 2:
-      /////////////////////////////////////////
       // Forward Blur
 
       frames_to_blur_forward = num_frames_forward;
@@ -422,7 +400,6 @@ void vp9_temporal_filter_prepare(VP9_COMP *cpi, int distance) {
 
     case 3:
     default:
-      /////////////////////////////////////////
       // Center Blur
       frames_to_blur_forward = num_frames_forward;
       frames_to_blur_backward = num_frames_backward;
@@ -462,23 +439,91 @@ void vp9_temporal_filter_prepare(VP9_COMP *cpi, int distance) {
 
   // Setup scaling factors. Scaling on each of the arnr frames is not supported
   vp9_setup_scale_factors_for_frame(&cpi->mb.e_mbd.scale_factor[0],
-      &cpi->common.yv12_fb[cpi->common.new_fb_idx],
-      cpi->common.width,
-      cpi->common.height);
+      cm->yv12_fb[cm->new_fb_idx].y_crop_width,
+      cm->yv12_fb[cm->new_fb_idx].y_crop_height,
+      cm->width, cm->height);
   cpi->mb.e_mbd.scale_factor_uv[0] = cpi->mb.e_mbd.scale_factor[0];
 
   // Setup frame pointers, NULL indicates frame not included in filter
   vpx_memset(cpi->frames, 0, max_frames * sizeof(YV12_BUFFER_CONFIG *));
   for (frame = 0; frame < frames_to_blur; frame++) {
-    int which_buffer =  start_frame - frame;
+    int which_buffer = start_frame - frame;
     struct lookahead_entry *buf = vp9_lookahead_peek(cpi->lookahead,
                                                      which_buffer);
     cpi->frames[frames_to_blur - 1 - frame] = &buf->img;
   }
 
-  temporal_filter_iterate_c(
-    cpi,
-    frames_to_blur,
-    frames_to_blur_backward,
-    strength);
+  temporal_filter_iterate_c(cpi, frames_to_blur, frames_to_blur_backward,
+                            strength);
+}
+
+void configure_arnr_filter(VP9_COMP *cpi, const unsigned int this_frame,
+                           const int group_boost) {
+  int half_gf_int;
+  int frames_after_arf;
+  int frames_bwd = cpi->oxcf.arnr_max_frames - 1;
+  int frames_fwd = cpi->oxcf.arnr_max_frames - 1;
+  int q;
+
+  // Define the arnr filter width for this group of frames:
+  // We only filter frames that lie within a distance of half
+  // the GF interval from the ARF frame. We also have to trap
+  // cases where the filter extends beyond the end of clip.
+  // Note: this_frame->frame has been updated in the loop
+  // so it now points at the ARF frame.
+  half_gf_int = cpi->baseline_gf_interval >> 1;
+  frames_after_arf = (int)(cpi->twopass.total_stats.count - this_frame - 1);
+
+  switch (cpi->oxcf.arnr_type) {
+    case 1:  // Backward filter
+      frames_fwd = 0;
+      if (frames_bwd > half_gf_int)
+        frames_bwd = half_gf_int;
+      break;
+
+    case 2:  // Forward filter
+      if (frames_fwd > half_gf_int)
+        frames_fwd = half_gf_int;
+      if (frames_fwd > frames_after_arf)
+        frames_fwd = frames_after_arf;
+      frames_bwd = 0;
+      break;
+
+    case 3:  // Centered filter
+    default:
+      frames_fwd >>= 1;
+      if (frames_fwd > frames_after_arf)
+        frames_fwd = frames_after_arf;
+      if (frames_fwd > half_gf_int)
+        frames_fwd = half_gf_int;
+
+      frames_bwd = frames_fwd;
+
+      // For even length filter there is one more frame backward
+      // than forward: e.g. len=6 ==> bbbAff, len=7 ==> bbbAfff.
+      if (frames_bwd < half_gf_int)
+        frames_bwd += (cpi->oxcf.arnr_max_frames + 1) & 0x1;
+      break;
+  }
+
+  cpi->active_arnr_frames = frames_bwd + 1 + frames_fwd;
+
+  // Adjust the strength based on active max q
+  q = ((int)vp9_convert_qindex_to_q(cpi->active_worst_quality) >> 1);
+  if (q > 8) {
+    cpi->active_arnr_strength = cpi->oxcf.arnr_strength;
+  } else {
+    cpi->active_arnr_strength = cpi->oxcf.arnr_strength - (8 - q);
+    if (cpi->active_arnr_strength < 0)
+      cpi->active_arnr_strength = 0;
+  }
+
+  // Adjust number of frames in filter and strength based on gf boost level.
+  if (cpi->active_arnr_frames > (group_boost / 150)) {
+    cpi->active_arnr_frames = (group_boost / 150);
+    cpi->active_arnr_frames += !(cpi->active_arnr_frames & 1);
+  }
+  if (cpi->active_arnr_strength > (group_boost / 300)) {
+    cpi->active_arnr_strength = (group_boost / 300);
+  }
 }

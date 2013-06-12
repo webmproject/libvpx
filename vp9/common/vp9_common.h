@@ -19,9 +19,6 @@
 #include "vpx_mem/vpx_mem.h"
 #include "vpx/vpx_integer.h"
 
-#define TRUE    1
-#define FALSE   0
-
 #define MIN(x, y) (((x) < (y)) ? (x) : (y))
 #define MAX(x, y) (((x) > (y)) ? (x) : (y))
 
@@ -54,5 +51,18 @@ static INLINE uint8_t clip_pixel(int val) {
 static INLINE int clamp(int value, int low, int high) {
   return value < low ? low : (value > high ? high : value);
 }
+
+static INLINE double fclamp(double value, double low, double high) {
+  return value < low ? low : (value > high ? high : value);
+}
+
+static INLINE int multiple8(int value) {
+  return (value + 7) & ~7;
+}
+
+#define SYNC_CODE_0 0x49
+#define SYNC_CODE_1 0x83
+#define SYNC_CODE_2 0x42
+
 
 #endif  // VP9_COMMON_VP9_COMMON_H_

@@ -10,6 +10,7 @@
 
 #include <assert.h>
 #include "vp9/encoder/vp9_boolhuff.h"
+#include "vp9/common/vp9_entropy.h"
 
 #if defined(SECTIONBITS_OUTPUT)
 unsigned __int64 Sectionbits[500];
@@ -39,127 +40,24 @@ const unsigned int vp9_prob_cost[256] = {
   22,   21,   19,   18,   16,   15,   13,   12,   10,    9,    7,    6,    4,    3,    1,   1
 };
 
-void vp9_start_encode(BOOL_CODER *br, unsigned char *source) {
+void vp9_start_encode(vp9_writer *br, uint8_t *source) {
   br->lowvalue = 0;
   br->range    = 255;
   br->value    = 0;
   br->count    = -24;
   br->buffer   = source;
   br->pos      = 0;
+  vp9_write_bit(br, 0);
 }
 
-void vp9_stop_encode(BOOL_CODER *br) {
+void vp9_stop_encode(vp9_writer *br) {
   int i;
 
   for (i = 0; i < 32; i++)
-    encode_bool(br, 0, 128);
+    vp9_write_bit(br, 0);
 
   // Ensure there's no ambigous collision with any index marker bytes
   if ((br->buffer[br->pos - 1] & 0xe0) == 0xc0)
     br->buffer[br->pos++] = 0;
 }
 
-
-void vp9_encode_value(BOOL_CODER *br, int data, int bits) {
-  int bit;
-
-  for (bit = bits - 1; bit >= 0; bit--)
-    encode_bool(br, (1 & (data >> bit)), 0x80);
-}
-
-void vp9_encode_unsigned_max(BOOL_CODER *br, int data, int max) {
-  assert(data <= max);
-  while (max) {
-    encode_bool(br, data & 1, 128);
-    data >>= 1;
-    max >>= 1;
-  }
-}
-
-int vp9_recenter_nonneg(int v, int m) {
-  if (v > (m << 1)) return v;
-  else if (v >= m) return ((v - m) << 1);
-  else return ((m - v) << 1) - 1;
-}
-
-static int get_unsigned_bits(unsigned num_values) {
-  int cat = 0;
-  if ((num_values--) <= 1) return 0;
-  while (num_values > 0) {
-    cat++;
-    num_values >>= 1;
-  }
-  return cat;
-}
-
-void vp9_encode_uniform(BOOL_CODER *br, int v, int n) {
-  int l = get_unsigned_bits(n);
-  int m;
-  if (l == 0) return;
-  m = (1 << l) - n;
-  if (v < m)
-    vp9_encode_value(br, v, l - 1);
-  else {
-    vp9_encode_value(br, m + ((v - m) >> 1), l - 1);
-    vp9_encode_value(br, (v - m) & 1, 1);
-  }
-}
-
-int vp9_count_uniform(int v, int n) {
-  int l = get_unsigned_bits(n);
-  int m;
-  if (l == 0) return 0;
-  m = (1 << l) - n;
-  if (v < m)
-    return l - 1;
-  else
-    return l;
-}
-
-void vp9_encode_term_subexp(BOOL_CODER *br, int word, int k, int num_syms) {
-  int i = 0;
-  int mk = 0;
-  while (1) {
-    int b = (i ? k + i - 1 : k);
-    int a = (1 << b);
-    if (num_syms <= mk + 3 * a) {
-      vp9_encode_uniform(br, word - mk, num_syms - mk);
-      break;
-    } else {
-      int t = (word >= mk + a);
-      vp9_encode_value(br, t, 1);
-      if (t) {
-        i = i + 1;
-        mk += a;
-      } else {
-        vp9_encode_value(br, word - mk, b);
-        break;
-      }
-    }
-  }
-}
-
-int vp9_count_term_subexp(int word, int k, int num_syms) {
-  int count = 0;
-  int i = 0;
-  int mk = 0;
-  while (1) {
-    int b = (i ? k + i - 1 : k);
-    int a = (1 << b);
-    if (num_syms <= mk + 3 * a) {
-      count += vp9_count_uniform(word - mk, num_syms - mk);
-      break;
-    } else {
-      int t = (word >= mk + a);
-      count++;
-      if (t) {
-        i = i + 1;
-        mk += a;
-      } else {
-        count += b;
-        break;
-      }
-    }
-  }
-  return count;
-}

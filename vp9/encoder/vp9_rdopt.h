@@ -19,26 +19,14 @@ void vp9_initialize_rd_consts(VP9_COMP *cpi, int qindex);
 
 void vp9_initialize_me_consts(VP9_COMP *cpi, int qindex);
 
-void vp9_rd_pick_intra_mode(VP9_COMP *cpi, MACROBLOCK *x,
-                            int *r, int *d);
+void vp9_rd_pick_intra_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
+                               int *r, int *d, BLOCK_SIZE_TYPE bsize,
+                               PICK_MODE_CONTEXT *ctx);
 
-void vp9_rd_pick_intra_mode_sb32(VP9_COMP *cpi, MACROBLOCK *x,
-                                 int *r, int *d);
-
-void vp9_rd_pick_intra_mode_sb64(VP9_COMP *cpi, MACROBLOCK *x,
-                                 int *r, int *d);
-
-void vp9_pick_mode_inter_macroblock(VP9_COMP *cpi, MACROBLOCK *x,
-                                    int mb_row, int mb_col,
-                                    int *r, int *d);
-
-int64_t vp9_rd_pick_inter_mode_sb32(VP9_COMP *cpi, MACROBLOCK *x,
-                                    int mb_row, int mb_col,
-                                    int *r, int *d);
-
-int64_t vp9_rd_pick_inter_mode_sb64(VP9_COMP *cpi, MACROBLOCK *x,
-                                    int mb_row, int mb_col,
-                                    int *r, int *d);
+int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
+                                  int mi_row, int mi_col,
+                                  int *r, int *d, BLOCK_SIZE_TYPE bsize,
+                                  PICK_MODE_CONTEXT *ctx);
 
 void vp9_init_me_luts();
 

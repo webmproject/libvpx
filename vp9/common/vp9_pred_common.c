@@ -9,6 +9,8 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
+#include <limits.h>
+
 #include "vp9/common/vp9_common.h"
 #include "vp9/common/vp9_pred_common.h"
 #include "vp9/common/vp9_seg_common.h"
@@ -21,85 +23,363 @@ unsigned char vp9_get_pred_context(const VP9_COMMON *const cm,
                                    const MACROBLOCKD *const xd,
                                    PRED_ID pred_id) {
   int pred_context;
-  MODE_INFO *m = xd->mode_info_context;
-
+  const MODE_INFO *const mi = xd->mode_info_context;
+  const MODE_INFO *const above_mi = mi - cm->mode_info_stride;
+  const MODE_INFO *const left_mi = mi - 1;
+  const int left_in_image = xd->left_available && left_mi->mbmi.mb_in_image;
+  const int above_in_image = xd->up_available && above_mi->mbmi.mb_in_image;
   // Note:
   // The mode info data structure has a one element border above and to the
   // left of the entries correpsonding to real macroblocks.
   // The prediction flags in these dummy entries are initialised to 0.
   switch (pred_id) {
     case PRED_SEG_ID:
-      pred_context = (m - cm->mode_info_stride)->mbmi.seg_id_predicted;
+      pred_context = above_mi->mbmi.seg_id_predicted;
       if (xd->left_available)
-        pred_context += (m - 1)->mbmi.seg_id_predicted;
-      break;
-
-    case PRED_REF:
-      pred_context = (m - cm->mode_info_stride)->mbmi.ref_predicted;
-      if (xd->left_available)
-        pred_context += (m - 1)->mbmi.ref_predicted;
-      break;
-
-    case PRED_COMP:
-      // Context based on use of comp pred flag by neighbours
-      // pred_context =
-      //   ((m - 1)->mbmi.second_ref_frame > INTRA_FRAME) +
-      //    ((m - cm->mode_info_stride)->mbmi.second_ref_frame > INTRA_FRAME);
-
-      // Context based on mode and reference frame
-      // if ( m->mbmi.ref_frame == LAST_FRAME )
-      //    pred_context = 0 + (m->mbmi.mode != ZEROMV);
-      // else if ( m->mbmi.ref_frame == GOLDEN_FRAME )
-      //    pred_context = 2 + (m->mbmi.mode != ZEROMV);
-      // else
-      //    pred_context = 4 + (m->mbmi.mode != ZEROMV);
-
-      if (m->mbmi.ref_frame == LAST_FRAME)
-        pred_context = 0;
-      else
-        pred_context = 1;
-
+        pred_context += left_mi->mbmi.seg_id_predicted;
       break;
 
     case PRED_MBSKIP:
-      pred_context = (m - cm->mode_info_stride)->mbmi.mb_skip_coeff;
+      pred_context = above_mi->mbmi.mb_skip_coeff;
       if (xd->left_available)
-        pred_context += (m - 1)->mbmi.mb_skip_coeff;
+        pred_context += left_mi->mbmi.mb_skip_coeff;
       break;
 
-    case PRED_SWITCHABLE_INTERP:
-      {
-        int left_in_image = xd->left_available && (m - 1)->mbmi.mb_in_image;
-        int above_in_image = (m - cm->mode_info_stride)->mbmi.mb_in_image;
-        int left_mode = (m - 1)->mbmi.mode;
-        int above_mode = (m - cm->mode_info_stride)->mbmi.mode;
-        int left_interp, above_interp;
-        if (left_in_image && left_mode >= NEARESTMV && left_mode <= SPLITMV)
-          left_interp = vp9_switchable_interp_map[(m - 1)->mbmi.interp_filter];
-        else
-          left_interp = VP9_SWITCHABLE_FILTERS;
-        assert(left_interp != -1);
-        if (above_in_image && above_mode >= NEARESTMV && above_mode <= SPLITMV)
-          above_interp = vp9_switchable_interp_map[
-              (m - cm->mode_info_stride)->mbmi.interp_filter];
-        else
-          above_interp = VP9_SWITCHABLE_FILTERS;
-        assert(above_interp != -1);
+    case PRED_SWITCHABLE_INTERP: {
+      // left
+      const int left_mv_pred = is_inter_mode(left_mi->mbmi.mode);
+      const int left_interp = left_in_image && left_mv_pred ?
+                    vp9_switchable_interp_map[left_mi->mbmi.interp_filter] :
+                    VP9_SWITCHABLE_FILTERS;
 
-        if (left_interp == above_interp)
-          pred_context = left_interp;
-        else if (left_interp == VP9_SWITCHABLE_FILTERS &&
-                 above_interp != VP9_SWITCHABLE_FILTERS)
-          pred_context = above_interp;
-        else if (left_interp != VP9_SWITCHABLE_FILTERS &&
-                 above_interp == VP9_SWITCHABLE_FILTERS)
-          pred_context = left_interp;
-        else
-          pred_context = VP9_SWITCHABLE_FILTERS;
+      // above
+      const int above_mv_pred = is_inter_mode(above_mi->mbmi.mode);
+      const int above_interp = above_in_image && above_mv_pred ?
+                    vp9_switchable_interp_map[above_mi->mbmi.interp_filter] :
+                    VP9_SWITCHABLE_FILTERS;
+
+      assert(left_interp != -1);
+      assert(above_interp != -1);
+
+      if (left_interp == above_interp)
+        pred_context = left_interp;
+      else if (left_interp == VP9_SWITCHABLE_FILTERS &&
+               above_interp != VP9_SWITCHABLE_FILTERS)
+         pred_context = above_interp;
+      else if (left_interp != VP9_SWITCHABLE_FILTERS &&
+               above_interp == VP9_SWITCHABLE_FILTERS)
+        pred_context = left_interp;
+      else
+        pred_context = VP9_SWITCHABLE_FILTERS;
+
+      break;
+    }
+
+    case PRED_INTRA_INTER: {
+      if (above_in_image && left_in_image) {  // both edges available
+        if (left_mi->mbmi.ref_frame[0] == INTRA_FRAME &&
+            above_mi->mbmi.ref_frame[0] == INTRA_FRAME) {  // intra/intra (3)
+          pred_context = 3;
+        } else {  // intra/inter (1) or inter/inter (0)
+          pred_context = left_mi->mbmi.ref_frame[0] == INTRA_FRAME ||
+                         above_mi->mbmi.ref_frame[0] == INTRA_FRAME;
+        }
+      } else if (above_in_image || left_in_image) {  // one edge available
+        const MODE_INFO *edge = above_in_image ? above_mi : left_mi;
+
+        // inter: 0, intra: 2
+        pred_context = 2 * (edge->mbmi.ref_frame[0] == INTRA_FRAME);
+      } else {
+        pred_context = 0;
       }
+      assert(pred_context >= 0 && pred_context < INTRA_INTER_CONTEXTS);
       break;
+    }
+
+    case PRED_COMP_INTER_INTER: {
+      if (above_in_image && left_in_image) {  // both edges available
+        if (above_mi->mbmi.ref_frame[1] <= INTRA_FRAME &&
+            left_mi->mbmi.ref_frame[1] <= INTRA_FRAME) {
+          // neither edge uses comp pred (0/1)
+          pred_context = ((above_mi->mbmi.ref_frame[0] == cm->comp_fixed_ref) ^
+                          (left_mi->mbmi.ref_frame[0] == cm->comp_fixed_ref));
+        } else if (above_mi->mbmi.ref_frame[1] <= INTRA_FRAME) {
+          // one of two edges uses comp pred (2/3)
+          pred_context = 2 +
+              (above_mi->mbmi.ref_frame[0] == cm->comp_fixed_ref ||
+               above_mi->mbmi.ref_frame[0] == INTRA_FRAME);
+        } else if (left_mi->mbmi.ref_frame[1] <= INTRA_FRAME) {
+          // one of two edges uses comp pred (2/3)
+          pred_context = 2 +
+              (left_mi->mbmi.ref_frame[0] == cm->comp_fixed_ref ||
+               left_mi->mbmi.ref_frame[0] == INTRA_FRAME);
+        } else {  // both edges use comp pred (4)
+          pred_context = 4;
+        }
+      } else if (above_in_image || left_in_image) {  // one edge available
+        const MODE_INFO *edge = above_in_image ? above_mi : left_mi;
+
+        if (edge->mbmi.ref_frame[1] <= INTRA_FRAME) {
+          // edge does not use comp pred (0/1)
+          pred_context = edge->mbmi.ref_frame[0] == cm->comp_fixed_ref;
+        } else {  // edge uses comp pred (3)
+          pred_context = 3;
+        }
+      } else {  // no edges available (1)
+        pred_context = 1;
+      }
+      assert(pred_context >= 0 && pred_context < COMP_INTER_CONTEXTS);
+      break;
+    }
+
+    case PRED_COMP_REF_P: {
+      const int fix_ref_idx = cm->ref_frame_sign_bias[cm->comp_fixed_ref];
+      const int var_ref_idx = !fix_ref_idx;
+
+      if (above_in_image && left_in_image) {  // both edges available
+        if (above_mi->mbmi.ref_frame[0] == INTRA_FRAME &&
+            left_mi->mbmi.ref_frame[0] == INTRA_FRAME) {  // intra/intra (2)
+          pred_context = 2;
+        } else if (above_mi->mbmi.ref_frame[0] == INTRA_FRAME ||
+                   left_mi->mbmi.ref_frame[0] == INTRA_FRAME) {  // intra/inter
+          const MODE_INFO *edge = above_mi->mbmi.ref_frame[0] == INTRA_FRAME ?
+                                  left_mi : above_mi;
+
+          if (edge->mbmi.ref_frame[1] <= INTRA_FRAME) {  // single pred (1/3)
+            pred_context = 1 +
+                2 * edge->mbmi.ref_frame[0] != cm->comp_var_ref[1];
+          } else {  // comp pred (1/3)
+            pred_context = 1 +
+                2 * edge->mbmi.ref_frame[var_ref_idx] != cm->comp_var_ref[1];
+          }
+        } else {  // inter/inter
+          int l_sg = left_mi->mbmi.ref_frame[1] <= INTRA_FRAME;
+          int a_sg = above_mi->mbmi.ref_frame[1] <= INTRA_FRAME;
+          MV_REFERENCE_FRAME vrfa = a_sg ? above_mi->mbmi.ref_frame[0] :
+              above_mi->mbmi.ref_frame[var_ref_idx];
+          MV_REFERENCE_FRAME vrfl = l_sg ? left_mi->mbmi.ref_frame[0] :
+              left_mi->mbmi.ref_frame[var_ref_idx];
+
+          if (vrfa == vrfl && cm->comp_var_ref[1] == vrfa) {
+            pred_context = 0;
+          } else if (l_sg && a_sg) {  // single/single
+            if ((vrfa == cm->comp_fixed_ref && vrfl == cm->comp_var_ref[0]) ||
+                (vrfl == cm->comp_fixed_ref && vrfa == cm->comp_var_ref[0])) {
+              pred_context = 4;
+            } else if (vrfa == vrfl) {
+              pred_context = 3;
+            } else {
+              pred_context = 1;
+            }
+          } else if (l_sg || a_sg) {  // single/comp
+            MV_REFERENCE_FRAME vrfc = l_sg ? vrfa : vrfl;
+            MV_REFERENCE_FRAME rfs = a_sg ? vrfa : vrfl;
+
+            if (vrfc == cm->comp_var_ref[1] && rfs != cm->comp_var_ref[1]) {
+              pred_context = 1;
+            } else if (rfs == cm->comp_var_ref[1] &&
+                       vrfc != cm->comp_var_ref[1]) {
+              pred_context = 2;
+            } else {
+              pred_context = 4;
+            }
+          } else if (vrfa == vrfl) {  // comp/comp
+            pred_context = 4;
+          } else {
+            pred_context = 2;
+          }
+        }
+      } else if (above_in_image || left_in_image) {  // one edge available
+        const MODE_INFO *edge = above_in_image ? above_mi : left_mi;
+
+        if (edge->mbmi.ref_frame[0] == INTRA_FRAME) {
+          pred_context = 2;
+        } else if (edge->mbmi.ref_frame[1] > INTRA_FRAME) {
+          pred_context =
+              4 * edge->mbmi.ref_frame[var_ref_idx] != cm->comp_var_ref[1];
+        } else {
+          pred_context = 3 * edge->mbmi.ref_frame[0] != cm->comp_var_ref[1];
+        }
+      } else {  // no edges available (2)
+        pred_context = 2;
+      }
+      assert(pred_context >= 0 && pred_context < REF_CONTEXTS);
+      break;
+    }
+
+    case PRED_SINGLE_REF_P1: {
+      if (above_in_image && left_in_image) {  // both edges available
+        if (above_mi->mbmi.ref_frame[0] == INTRA_FRAME &&
+            left_mi->mbmi.ref_frame[0] == INTRA_FRAME) {
+          pred_context = 2;
+        } else if (above_mi->mbmi.ref_frame[0] == INTRA_FRAME ||
+                   left_mi->mbmi.ref_frame[0] == INTRA_FRAME) {
+          const MODE_INFO *edge = above_mi->mbmi.ref_frame[0] == INTRA_FRAME ?
+                                  left_mi : above_mi;
+
+          if (edge->mbmi.ref_frame[1] <= INTRA_FRAME) {
+            pred_context = 4 * (edge->mbmi.ref_frame[0] == LAST_FRAME);
+          } else {
+            pred_context = 1 + (edge->mbmi.ref_frame[0] == LAST_FRAME ||
+                                edge->mbmi.ref_frame[1] == LAST_FRAME);
+          }
+        } else if (above_mi->mbmi.ref_frame[1] <= INTRA_FRAME &&
+                   left_mi->mbmi.ref_frame[1] <= INTRA_FRAME) {
+          pred_context = 2 * (above_mi->mbmi.ref_frame[0] == LAST_FRAME) +
+                         2 * (left_mi->mbmi.ref_frame[0] == LAST_FRAME);
+        } else if (above_mi->mbmi.ref_frame[1] > INTRA_FRAME &&
+                   left_mi->mbmi.ref_frame[1] > INTRA_FRAME) {
+          pred_context = 1 + (above_mi->mbmi.ref_frame[0] == LAST_FRAME ||
+                              above_mi->mbmi.ref_frame[1] == LAST_FRAME ||
+                              left_mi->mbmi.ref_frame[0] == LAST_FRAME ||
+                              left_mi->mbmi.ref_frame[1] == LAST_FRAME);
+        } else {
+          MV_REFERENCE_FRAME rfs = above_mi->mbmi.ref_frame[1] <= INTRA_FRAME ?
+              above_mi->mbmi.ref_frame[0] : left_mi->mbmi.ref_frame[0];
+          MV_REFERENCE_FRAME crf1 = above_mi->mbmi.ref_frame[1] > INTRA_FRAME ?
+              above_mi->mbmi.ref_frame[0] : left_mi->mbmi.ref_frame[0];
+          MV_REFERENCE_FRAME crf2 = above_mi->mbmi.ref_frame[1] > INTRA_FRAME ?
+              above_mi->mbmi.ref_frame[1] : left_mi->mbmi.ref_frame[1];
+
+          if (rfs == LAST_FRAME) {
+            pred_context = 3 + (crf1 == LAST_FRAME || crf2 == LAST_FRAME);
+          } else {
+            pred_context = crf1 == LAST_FRAME || crf2 == LAST_FRAME;
+          }
+        }
+      } else if (above_in_image || left_in_image) {  // one edge available
+        const MODE_INFO *edge = above_in_image ? above_mi : left_mi;
+
+        if (edge->mbmi.ref_frame[0] == INTRA_FRAME) {
+          pred_context = 2;
+        } else if (edge->mbmi.ref_frame[1] <= INTRA_FRAME) {
+          pred_context = 4 * (edge->mbmi.ref_frame[0] == LAST_FRAME);
+        } else {
+          pred_context = 1 + (edge->mbmi.ref_frame[0] == LAST_FRAME ||
+                              edge->mbmi.ref_frame[1] == LAST_FRAME);
+        }
+      } else {  // no edges available (2)
+        pred_context = 2;
+      }
+      assert(pred_context >= 0 && pred_context < REF_CONTEXTS);
+      break;
+    }
+
+    case PRED_SINGLE_REF_P2: {
+      if (above_in_image && left_in_image) {  // both edges available
+        if (above_mi->mbmi.ref_frame[0] == INTRA_FRAME &&
+            left_mi->mbmi.ref_frame[0] == INTRA_FRAME) {
+          pred_context = 2;
+        } else if (above_mi->mbmi.ref_frame[0] == INTRA_FRAME ||
+                   left_mi->mbmi.ref_frame[0] == INTRA_FRAME) {
+          const MODE_INFO *edge = above_mi->mbmi.ref_frame[0] == INTRA_FRAME ?
+                                  left_mi : above_mi;
+
+          if (edge->mbmi.ref_frame[1] <= INTRA_FRAME) {
+            if (edge->mbmi.ref_frame[0] == LAST_FRAME) {
+              pred_context = 3;
+            } else {
+              pred_context = 4 * (edge->mbmi.ref_frame[0] == GOLDEN_FRAME);
+            }
+          } else {
+            pred_context = 1 + 2 * (edge->mbmi.ref_frame[0] == GOLDEN_FRAME ||
+                                    edge->mbmi.ref_frame[1] == GOLDEN_FRAME);
+          }
+        } else if (above_mi->mbmi.ref_frame[1] <= INTRA_FRAME &&
+                   left_mi->mbmi.ref_frame[1] <= INTRA_FRAME) {
+          if (above_mi->mbmi.ref_frame[0] == LAST_FRAME &&
+              left_mi->mbmi.ref_frame[0] == LAST_FRAME) {
+            pred_context = 3;
+          } else if (above_mi->mbmi.ref_frame[0] == LAST_FRAME ||
+                     left_mi->mbmi.ref_frame[0] == LAST_FRAME) {
+            const MODE_INFO *edge = above_mi->mbmi.ref_frame[0] == LAST_FRAME ?
+                                    left_mi : above_mi;
+
+            pred_context = 4 * (edge->mbmi.ref_frame[0] == GOLDEN_FRAME);
+          } else {
+            pred_context = 2 * (above_mi->mbmi.ref_frame[0] == GOLDEN_FRAME) +
+                           2 * (left_mi->mbmi.ref_frame[0] == GOLDEN_FRAME);
+          }
+        } else if (above_mi->mbmi.ref_frame[1] > INTRA_FRAME &&
+                   left_mi->mbmi.ref_frame[1] > INTRA_FRAME) {
+          if (above_mi->mbmi.ref_frame[0] == left_mi->mbmi.ref_frame[0] &&
+              above_mi->mbmi.ref_frame[1] == left_mi->mbmi.ref_frame[1]) {
+            pred_context = 3 * (above_mi->mbmi.ref_frame[0] == GOLDEN_FRAME ||
+                                above_mi->mbmi.ref_frame[1] == GOLDEN_FRAME ||
+                                left_mi->mbmi.ref_frame[0] == GOLDEN_FRAME ||
+                                left_mi->mbmi.ref_frame[1] == GOLDEN_FRAME);
+          } else {
+            pred_context = 2;
+          }
+        } else {
+          MV_REFERENCE_FRAME rfs = above_mi->mbmi.ref_frame[1] <= INTRA_FRAME ?
+              above_mi->mbmi.ref_frame[0] : left_mi->mbmi.ref_frame[0];
+          MV_REFERENCE_FRAME crf1 = above_mi->mbmi.ref_frame[1] > INTRA_FRAME ?
+              above_mi->mbmi.ref_frame[0] : left_mi->mbmi.ref_frame[0];
+          MV_REFERENCE_FRAME crf2 = above_mi->mbmi.ref_frame[1] > INTRA_FRAME ?
+              above_mi->mbmi.ref_frame[1] : left_mi->mbmi.ref_frame[1];
+
+          if (rfs == GOLDEN_FRAME) {
+            pred_context = 3 + (crf1 == GOLDEN_FRAME || crf2 == GOLDEN_FRAME);
+          } else if (rfs == ALTREF_FRAME) {
+            pred_context = crf1 == GOLDEN_FRAME || crf2 == GOLDEN_FRAME;
+          } else {
+            pred_context =
+                1 + 2 * (crf1 == GOLDEN_FRAME || crf2 == GOLDEN_FRAME);
+          }
+        }
+      } else if (above_in_image || left_in_image) {  // one edge available
+        const MODE_INFO *edge = above_in_image ? above_mi : left_mi;
+
+        if (edge->mbmi.ref_frame[0] == INTRA_FRAME ||
+            (edge->mbmi.ref_frame[0] == LAST_FRAME &&
+             edge->mbmi.ref_frame[1] <= INTRA_FRAME)) {
+          pred_context = 2;
+        } else if (edge->mbmi.ref_frame[1] <= INTRA_FRAME) {
+          pred_context = 4 * (edge->mbmi.ref_frame[0] == GOLDEN_FRAME);
+        } else {
+          pred_context = 3 * (edge->mbmi.ref_frame[0] == GOLDEN_FRAME ||
+                              edge->mbmi.ref_frame[1] == GOLDEN_FRAME);
+        }
+      } else {  // no edges available (2)
+        pred_context = 2;
+      }
+      assert(pred_context >= 0 && pred_context < REF_CONTEXTS);
+      break;
+    }
+
+    case PRED_TX_SIZE: {
+      int above_context, left_context;
+      int max_tx_size;
+      if (mi->mbmi.sb_type < BLOCK_SIZE_SB8X8)
+        max_tx_size = TX_4X4;
+      else if (mi->mbmi.sb_type < BLOCK_SIZE_MB16X16)
+        max_tx_size = TX_8X8;
+      else if (mi->mbmi.sb_type < BLOCK_SIZE_SB32X32)
+        max_tx_size = TX_16X16;
+      else
+        max_tx_size = TX_32X32;
+      above_context = left_context = max_tx_size;
+      if (above_in_image) {
+        above_context = (above_mi->mbmi.mb_skip_coeff ?
+                         max_tx_size : above_mi->mbmi.txfm_size);
+      }
+      if (left_in_image) {
+        left_context = (left_mi->mbmi.mb_skip_coeff ?
+                        max_tx_size : left_mi->mbmi.txfm_size);
+      }
+      if (!left_in_image) {
+        left_context = above_context;
+      }
+      if (!above_in_image) {
+        above_context = left_context;
+      }
+      pred_context = (above_context + left_context > max_tx_size);
+      break;
+    }
 
     default:
+      assert(0);
       pred_context = 0;  // *** add error trap code.
       break;
   }
@@ -117,16 +397,20 @@ vp9_prob vp9_get_pred_prob(const VP9_COMMON *const cm,
   switch (pred_id) {
     case PRED_SEG_ID:
       return cm->segment_pred_probs[pred_context];
-    case PRED_REF:
-      return cm->ref_pred_probs[pred_context];
-    case PRED_COMP:
-      // In keeping with convention elsewhre the probability returned is
-      // the probability of a "0" outcome which in this case means the
-      // probability of comp pred off.
-      return cm->prob_comppred[pred_context];
     case PRED_MBSKIP:
-      return cm->mbskip_pred_probs[pred_context];
+      return cm->fc.mbskip_probs[pred_context];
+    case PRED_INTRA_INTER:
+      return cm->fc.intra_inter_prob[pred_context];
+    case PRED_COMP_INTER_INTER:
+      return cm->fc.comp_inter_prob[pred_context];
+    case PRED_COMP_REF_P:
+      return cm->fc.comp_ref_prob[pred_context];
+    case PRED_SINGLE_REF_P1:
+      return cm->fc.single_ref_prob[pred_context][0];
+    case PRED_SINGLE_REF_P2:
+      return cm->fc.single_ref_prob[pred_context][1];
     default:
+      assert(0);
       return 128;  // *** add error trap code.
   }
 }
@@ -136,23 +420,23 @@ vp9_prob vp9_get_pred_prob(const VP9_COMMON *const cm,
 const vp9_prob *vp9_get_pred_probs(const VP9_COMMON *const cm,
                                    const MACROBLOCKD *const xd,
                                    PRED_ID pred_id) {
+  const MODE_INFO *const mi = xd->mode_info_context;
   const int pred_context = vp9_get_pred_context(cm, xd, pred_id);
 
   switch (pred_id) {
-    case PRED_SEG_ID:
-      return &cm->segment_pred_probs[pred_context];
-    case PRED_REF:
-      return &cm->ref_pred_probs[pred_context];
-    case PRED_COMP:
-      // In keeping with convention elsewhre the probability returned is
-      // the probability of a "0" outcome which in this case means the
-      // probability of comp pred off.
-      return &cm->prob_comppred[pred_context];
-    case PRED_MBSKIP:
-      return &cm->mbskip_pred_probs[pred_context];
     case PRED_SWITCHABLE_INTERP:
       return &cm->fc.switchable_interp_prob[pred_context][0];
+
+    case PRED_TX_SIZE:
+      if (mi->mbmi.sb_type < BLOCK_SIZE_MB16X16)
+        return cm->fc.tx_probs_8x8p[pred_context];
+      else if (mi->mbmi.sb_type < BLOCK_SIZE_SB32X32)
+        return cm->fc.tx_probs_16x16p[pred_context];
+      else
+        return cm->fc.tx_probs_32x32p[pred_context];
+
     default:
+      assert(0);
       return NULL;  // *** add error trap code.
   }
 }
@@ -164,11 +448,10 @@ unsigned char vp9_get_pred_flag(const MACROBLOCKD *const xd,
   switch (pred_id) {
     case PRED_SEG_ID:
       return xd->mode_info_context->mbmi.seg_id_predicted;
-    case PRED_REF:
-      return  xd->mode_info_context->mbmi.ref_predicted;
     case PRED_MBSKIP:
       return xd->mode_info_context->mbmi.mb_skip_coeff;
     default:
+      assert(0);
       return 0;  // *** add error trap code.
   }
 }
@@ -179,59 +462,34 @@ void vp9_set_pred_flag(MACROBLOCKD *const xd,
                        PRED_ID pred_id,
                        unsigned char pred_flag) {
   const int mis = xd->mode_info_stride;
+  BLOCK_SIZE_TYPE bsize = xd->mode_info_context->mbmi.sb_type;
+  const int bh = 1 << mi_height_log2(bsize);
+  const int bw = 1 << mi_width_log2(bsize);
+#define sub(a, b) (b) < 0 ? (a) + (b) : (a)
+  const int x_mis = sub(bw, xd->mb_to_right_edge >> (3 + LOG2_MI_SIZE));
+  const int y_mis = sub(bh, xd->mb_to_bottom_edge >> (3 + LOG2_MI_SIZE));
+#undef sub
+  int x, y;
 
   switch (pred_id) {
     case PRED_SEG_ID:
-      xd->mode_info_context->mbmi.seg_id_predicted = pred_flag;
-      if (xd->mode_info_context->mbmi.sb_type) {
-#define sub(a, b) (b) < 0 ? (a) + (b) : (a)
-        const int n_mbs = 1 << xd->mode_info_context->mbmi.sb_type;
-        const int x_mbs = sub(n_mbs, xd->mb_to_right_edge >> 7);
-        const int y_mbs = sub(n_mbs, xd->mb_to_bottom_edge >> 7);
-        int x, y;
-
-        for (y = 0; y < y_mbs; y++) {
-          for (x = !y; x < x_mbs; x++) {
-            xd->mode_info_context[y * mis + x].mbmi.seg_id_predicted =
-                pred_flag;
-          }
-        }
-      }
-      break;
-
-    case PRED_REF:
-      xd->mode_info_context->mbmi.ref_predicted = pred_flag;
-      if (xd->mode_info_context->mbmi.sb_type) {
-        const int n_mbs = 1 << xd->mode_info_context->mbmi.sb_type;
-        const int x_mbs = sub(n_mbs, xd->mb_to_right_edge >> 7);
-        const int y_mbs = sub(n_mbs, xd->mb_to_bottom_edge >> 7);
-        int x, y;
-
-        for (y = 0; y < y_mbs; y++) {
-          for (x = !y; x < x_mbs; x++) {
-            xd->mode_info_context[y * mis + x].mbmi.ref_predicted = pred_flag;
-          }
+      for (y = 0; y < y_mis; y++) {
+        for (x = 0; x < x_mis; x++) {
+          xd->mode_info_context[y * mis + x].mbmi.seg_id_predicted = pred_flag;
         }
       }
       break;
 
     case PRED_MBSKIP:
-      xd->mode_info_context->mbmi.mb_skip_coeff = pred_flag;
-      if (xd->mode_info_context->mbmi.sb_type) {
-        const int n_mbs = 1 << xd->mode_info_context->mbmi.sb_type;
-        const int x_mbs = sub(n_mbs, xd->mb_to_right_edge >> 7);
-        const int y_mbs = sub(n_mbs, xd->mb_to_bottom_edge >> 7);
-        int x, y;
-
-        for (y = 0; y < y_mbs; y++) {
-          for (x = !y; x < x_mbs; x++) {
-            xd->mode_info_context[y * mis + x].mbmi.mb_skip_coeff = pred_flag;
-          }
+      for (y = 0; y < y_mis; y++) {
+        for (x = 0; x < x_mis; x++) {
+          xd->mode_info_context[y * mis + x].mbmi.mb_skip_coeff = pred_flag;
         }
       }
       break;
 
     default:
+      assert(0);
       // *** add error trap code.
       break;
   }
@@ -242,162 +500,21 @@ void vp9_set_pred_flag(MACROBLOCKD *const xd,
 // peredict various bitstream signals.
 
 // Macroblock segment id prediction function
-unsigned char vp9_get_pred_mb_segid(const VP9_COMMON *const cm,
-                                    const MACROBLOCKD *const xd, int MbIndex) {
-  // Currently the prediction for the macroblock segment ID is
-  // the value stored for this macroblock in the previous frame.
-  if (!xd->mode_info_context->mbmi.sb_type) {
-    return cm->last_frame_seg_map[MbIndex];
-  } else {
-    const int n_mbs = 1 << xd->mode_info_context->mbmi.sb_type;
-    const int mb_col = MbIndex % cm->mb_cols;
-    const int mb_row = MbIndex / cm->mb_cols;
-    const int x_mbs = MIN(n_mbs, cm->mb_cols - mb_col);
-    const int y_mbs = MIN(n_mbs, cm->mb_rows - mb_row);
-    int x, y;
-    unsigned seg_id = -1;
+int vp9_get_pred_mi_segid(VP9_COMMON *cm, BLOCK_SIZE_TYPE sb_type,
+                          int mi_row, int mi_col) {
+  const int mi_index = mi_row * cm->mi_cols + mi_col;
+  const int bw = 1 << mi_width_log2(sb_type);
+  const int bh = 1 << mi_height_log2(sb_type);
+  const int ymis = MIN(cm->mi_rows - mi_row, bh);
+  const int xmis = MIN(cm->mi_cols - mi_col, bw);
+  int segment_id = INT_MAX;
+  int x, y;
 
-    for (y = mb_row; y < mb_row + y_mbs; y++) {
-      for (x = mb_col; x < mb_col + x_mbs; x++) {
-        seg_id = MIN(seg_id, cm->last_frame_seg_map[cm->mb_cols * y + x]);
-      }
-    }
-
-    return seg_id;
-  }
-}
-
-MV_REFERENCE_FRAME vp9_get_pred_ref(const VP9_COMMON *const cm,
-                                    const MACROBLOCKD *const xd) {
-  MODE_INFO *m = xd->mode_info_context;
-
-  MV_REFERENCE_FRAME left;
-  MV_REFERENCE_FRAME above;
-  MV_REFERENCE_FRAME above_left;
-  MV_REFERENCE_FRAME pred_ref = LAST_FRAME;
-
-  int segment_id = xd->mode_info_context->mbmi.segment_id;
-  int i;
-
-  unsigned char frame_allowed[MAX_REF_FRAMES] = {1, 1, 1, 1};
-  unsigned char ref_score[MAX_REF_FRAMES];
-  unsigned char best_score = 0;
-  unsigned char left_in_image;
-  unsigned char above_in_image;
-  unsigned char above_left_in_image;
-
-  // Is segment coding ennabled
-  int seg_ref_active = vp9_segfeature_active(xd, segment_id, SEG_LVL_REF_FRAME);
-
-  // Special case treatment if segment coding is enabled.
-  // Dont allow prediction of a reference frame that the segment
-  // does not allow
-  if (seg_ref_active) {
-    for (i = 0; i < MAX_REF_FRAMES; i++) {
-      frame_allowed[i] =
-        vp9_check_segref(xd, segment_id, i);
-
-      // Score set to 0 if ref frame not allowed
-      ref_score[i] = cm->ref_scores[i] * frame_allowed[i];
-    }
-  } else
-    vpx_memcpy(ref_score, cm->ref_scores, sizeof(ref_score));
-
-  // Reference frames used by neighbours
-  left = (m - 1)->mbmi.ref_frame;
-  above = (m - cm->mode_info_stride)->mbmi.ref_frame;
-  above_left = (m - 1 - cm->mode_info_stride)->mbmi.ref_frame;
-
-  // Are neighbours in image
-  left_in_image = (m - 1)->mbmi.mb_in_image && xd->left_available;
-  above_in_image = (m - cm->mode_info_stride)->mbmi.mb_in_image;
-  above_left_in_image = (m - 1 - cm->mode_info_stride)->mbmi.mb_in_image &&
-                        xd->left_available;
-
-  // Adjust scores for candidate reference frames based on neigbours
-  if (frame_allowed[left] && left_in_image) {
-    ref_score[left] += 16;
-    if (above_left_in_image && (left == above_left))
-      ref_score[left] += 4;
-  }
-  if (frame_allowed[above] && above_in_image) {
-    ref_score[above] += 16;
-    if (above_left_in_image && (above == above_left))
-      ref_score[above] += 4;
-  }
-
-  // Now choose the candidate with the highest score
-  for (i = 0; i < MAX_REF_FRAMES; i++) {
-    if (ref_score[i] > best_score) {
-      pred_ref = i;
-      best_score = ref_score[i];
+  for (y = 0; y < ymis; y++) {
+    for (x = 0; x < xmis; x++) {
+      const int index = mi_index + (y * cm->mi_cols + x);
+      segment_id = MIN(segment_id, cm->last_frame_seg_map[index]);
     }
   }
-
-  return pred_ref;
-}
-
-// Functions to computes a set of modified reference frame probabilities
-// to use when the prediction of the reference frame value fails
-void vp9_calc_ref_probs(int *count, vp9_prob *probs) {
-  int tot_count = count[0] + count[1] + count[2] + count[3];
-  probs[0] = get_prob(count[0], tot_count);
-
-  tot_count -= count[0];
-  probs[1] = get_prob(count[1], tot_count);
-
-  tot_count -= count[1];
-  probs[2] = get_prob(count[2], tot_count);
-}
-
-// Computes a set of modified conditional probabilities for the reference frame
-// Values willbe set to 0 for reference frame options that are not possible
-// because wither they were predicted and prediction has failed or because
-// they are not allowed for a given segment.
-void vp9_compute_mod_refprobs(VP9_COMMON *const cm) {
-  int norm_cnt[MAX_REF_FRAMES];
-  const int intra_count = cm->prob_intra_coded;
-  const int inter_count = (255 - intra_count);
-  const int last_count = (inter_count * cm->prob_last_coded) / 255;
-  const int gfarf_count = inter_count - last_count;
-  const int gf_count = (gfarf_count * cm->prob_gf_coded) / 255;
-  const int arf_count = gfarf_count - gf_count;
-
-  // Work out modified reference frame probabilities to use where prediction
-  // of the reference frame fails
-  norm_cnt[0] = 0;
-  norm_cnt[1] = last_count;
-  norm_cnt[2] = gf_count;
-  norm_cnt[3] = arf_count;
-  vp9_calc_ref_probs(norm_cnt, cm->mod_refprobs[INTRA_FRAME]);
-  cm->mod_refprobs[INTRA_FRAME][0] = 0;    // This branch implicit
-
-  norm_cnt[0] = intra_count;
-  norm_cnt[1] = 0;
-  norm_cnt[2] = gf_count;
-  norm_cnt[3] = arf_count;
-  vp9_calc_ref_probs(norm_cnt, cm->mod_refprobs[LAST_FRAME]);
-  cm->mod_refprobs[LAST_FRAME][1] = 0;    // This branch implicit
-
-  norm_cnt[0] = intra_count;
-  norm_cnt[1] = last_count;
-  norm_cnt[2] = 0;
-  norm_cnt[3] = arf_count;
-  vp9_calc_ref_probs(norm_cnt, cm->mod_refprobs[GOLDEN_FRAME]);
-  cm->mod_refprobs[GOLDEN_FRAME][2] = 0;  // This branch implicit
-
-  norm_cnt[0] = intra_count;
-  norm_cnt[1] = last_count;
-  norm_cnt[2] = gf_count;
-  norm_cnt[3] = 0;
-  vp9_calc_ref_probs(norm_cnt, cm->mod_refprobs[ALTREF_FRAME]);
-  cm->mod_refprobs[ALTREF_FRAME][2] = 0;  // This branch implicit
-
-  // Score the reference frames based on overal frequency.
-  // These scores contribute to the prediction choices.
-  // Max score 17 min 1
-  cm->ref_scores[INTRA_FRAME] = 1 + (intra_count * 16 / 255);
-  cm->ref_scores[LAST_FRAME] = 1 + (last_count * 16 / 255);
-  cm->ref_scores[GOLDEN_FRAME] = 1 + (gf_count * 16 / 255);
-  cm->ref_scores[ALTREF_FRAME] = 1 + (arf_count * 16 / 255);
+  return segment_id;
 }

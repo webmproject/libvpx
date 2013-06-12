@@ -16,8 +16,6 @@
 #include "vp9/common/vp9_blockd.h"
 #include "vp9/common/vp9_common.h"
 
-extern const int vp9_i8x8_block[4];
-
 /* Coefficient token alphabet */
 
 #define ZERO_TOKEN              0       /* 0         Extra Bits 0+0 */
@@ -40,16 +38,19 @@ extern const int vp9_i8x8_block[4];
 
 extern const vp9_tree_index vp9_coef_tree[];
 
-extern struct vp9_token_struct vp9_coef_encodings[MAX_ENTROPY_TOKENS];
+#define DCT_EOB_MODEL_TOKEN     3      /* EOB       Extra Bits 0+0 */
+extern const vp9_tree_index vp9_coefmodel_tree[];
+
+extern struct vp9_token vp9_coef_encodings[MAX_ENTROPY_TOKENS];
 
 typedef struct {
   vp9_tree_p tree;
   const vp9_prob *prob;
-  int Len;
+  int len;
   int base_val;
-} vp9_extra_bit_struct;
+} vp9_extra_bit;
 
-extern vp9_extra_bit_struct vp9_extra_bits[12];    /* indexed by token value */
+extern vp9_extra_bit vp9_extra_bits[12];    /* indexed by token value */
 
 #define PROB_UPDATE_BASELINE_COST   7
 
@@ -84,6 +85,8 @@ extern vp9_extra_bit_struct vp9_extra_bits[12];    /* indexed by token value */
 /*# define DC_TOKEN_CONTEXTS        3*/ /* 00, 0!0, !0!0 */
 #define PREV_COEF_CONTEXTS          6
 
+// #define ENTROPY_STATS
+
 typedef unsigned int vp9_coeff_count[REF_TYPES][COEF_BANDS][PREV_COEF_CONTEXTS]
                                     [MAX_ENTROPY_TOKENS];
 typedef unsigned int vp9_coeff_stats[REF_TYPES][COEF_BANDS][PREV_COEF_CONTEXTS]
@@ -96,173 +99,126 @@ typedef vp9_prob vp9_coeff_probs[REF_TYPES][COEF_BANDS][PREV_COEF_CONTEXTS]
 
 struct VP9Common;
 void vp9_default_coef_probs(struct VP9Common *);
-extern DECLARE_ALIGNED(16, const int, vp9_default_zig_zag1d_4x4[16]);
+extern DECLARE_ALIGNED(16, const int, vp9_default_scan_4x4[16]);
 
 extern DECLARE_ALIGNED(16, const int, vp9_col_scan_4x4[16]);
 extern DECLARE_ALIGNED(16, const int, vp9_row_scan_4x4[16]);
 
-extern DECLARE_ALIGNED(64, const int, vp9_default_zig_zag1d_8x8[64]);
+extern DECLARE_ALIGNED(64, const int, vp9_default_scan_8x8[64]);
 
 extern DECLARE_ALIGNED(16, const int, vp9_col_scan_8x8[64]);
 extern DECLARE_ALIGNED(16, const int, vp9_row_scan_8x8[64]);
 
-extern DECLARE_ALIGNED(16, const int, vp9_default_zig_zag1d_16x16[256]);
+extern DECLARE_ALIGNED(16, const int, vp9_default_scan_16x16[256]);
 
 extern DECLARE_ALIGNED(16, const int, vp9_col_scan_16x16[256]);
 extern DECLARE_ALIGNED(16, const int, vp9_row_scan_16x16[256]);
 
-extern DECLARE_ALIGNED(16, const int, vp9_default_zig_zag1d_32x32[1024]);
+extern DECLARE_ALIGNED(16, const int, vp9_default_scan_32x32[1024]);
 
 void vp9_coef_tree_initialize(void);
 void vp9_adapt_coef_probs(struct VP9Common *);
 
-static INLINE void vp9_reset_mb_tokens_context(MACROBLOCKD* const xd) {
+static INLINE void vp9_reset_sb_tokens_context(MACROBLOCKD* const xd,
+                                               BLOCK_SIZE_TYPE bsize) {
   /* Clear entropy contexts */
-  vpx_memset(xd->above_context, 0, sizeof(ENTROPY_CONTEXT_PLANES));
-  vpx_memset(xd->left_context, 0, sizeof(ENTROPY_CONTEXT_PLANES));
-}
-
-static INLINE void vp9_reset_sb_tokens_context(MACROBLOCKD* const xd) {
-  /* Clear entropy contexts */
-  vpx_memset(xd->above_context, 0, sizeof(ENTROPY_CONTEXT_PLANES) * 2);
-  vpx_memset(xd->left_context, 0, sizeof(ENTROPY_CONTEXT_PLANES) * 2);
-}
-
-static INLINE void vp9_reset_sb64_tokens_context(MACROBLOCKD* const xd) {
-  /* Clear entropy contexts */
-  vpx_memset(xd->above_context, 0, sizeof(ENTROPY_CONTEXT_PLANES) * 4);
-  vpx_memset(xd->left_context, 0, sizeof(ENTROPY_CONTEXT_PLANES) * 4);
-}
-
-extern const int vp9_coef_bands8x8[64];
-extern const int vp9_coef_bands4x4[16];
-
-static int get_coef_band(const int *scan, TX_SIZE tx_size, int coef_index) {
-  if (tx_size == TX_4X4) {
-    return vp9_coef_bands4x4[scan[coef_index]];
-  } else {
-    const int pos = scan[coef_index];
-    const int sz = 1 << (2 + tx_size);
-    const int x = pos & (sz - 1), y = pos >> (2 + tx_size);
-    if (x >= 8 || y >= 8)
-      return 5;
-    else
-      return vp9_coef_bands8x8[y * 8 + x];
+  const int bw = 1 << b_width_log2(bsize);
+  const int bh = 1 << b_height_log2(bsize);
+  int i;
+  for (i = 0; i < MAX_MB_PLANE; i++) {
+    vpx_memset(xd->plane[i].above_context, 0,
+               sizeof(ENTROPY_CONTEXT) * bw >> xd->plane[i].subsampling_x);
+    vpx_memset(xd->plane[i].left_context, 0,
+               sizeof(ENTROPY_CONTEXT) * bh >> xd->plane[i].subsampling_y);
   }
 }
+
+// This is the index in the scan order beyond which all coefficients for
+// 8x8 transform and above are in the top band.
+// For 4x4 blocks the index is less but to keep things common the lookup
+// table for 4x4 is padded out to this index.
+#define MAXBAND_INDEX 21
+
+extern const uint8_t vp9_coefband_trans_8x8plus[MAXBAND_INDEX + 1];
+extern const uint8_t vp9_coefband_trans_4x4[MAXBAND_INDEX + 1];
+
+
+static int get_coef_band(const uint8_t * band_translate, int coef_index) {
+  return (coef_index > MAXBAND_INDEX)
+    ? (COEF_BANDS-1) : band_translate[coef_index];
+}
+
 extern int vp9_get_coef_context(const int *scan, const int *neighbors,
                                 int nb_pad, uint8_t *token_cache, int c, int l);
 const int *vp9_get_coef_neighbors_handle(const int *scan, int *pad);
 
-#if CONFIG_MODELCOEFPROB
-#define COEFPROB_BITS               8
-#define COEFPROB_MODELS             (1 << COEFPROB_BITS)
 
-// 2 => EOB and Zero nodes are unconstrained, rest are modeled
-// 3 => EOB, Zero and One nodes are unconstrained, rest are modeled
-#define UNCONSTRAINED_NODES         3   // Choose one of 2 or 3
+// 128 lists of probabilities are stored for the following ONE node probs:
+// 1, 3, 5, 7, ..., 253, 255
+// In between probabilities are interpolated linearly
 
-// whether forward updates are model-based
-#define MODEL_BASED_UPDATE          0
-// if model-based how many nodes are unconstrained
-#define UNCONSTRAINED_UPDATE_NODES  3
-// whether backward updates are model-based
-#define MODEL_BASED_ADAPT           0
-#define UNCONSTRAINED_ADAPT_NODES   3
+#define COEFPROB_MODELS             128
 
-// whether to adjust the coef probs for key frames based on qindex
-#define ADJUST_KF_COEF_PROBS        0
+#define UNCONSTRAINED_NODES         3
+#define MODEL_NODES                 (ENTROPY_NODES - UNCONSTRAINED_NODES)
+
+#define PIVOT_NODE                  2   // which node is pivot
 
 typedef vp9_prob vp9_coeff_probs_model[REF_TYPES][COEF_BANDS]
-                                      [PREV_COEF_CONTEXTS][2];
+                                      [PREV_COEF_CONTEXTS]
+                                      [UNCONSTRAINED_NODES];
+
+typedef unsigned int vp9_coeff_count_model[REF_TYPES][COEF_BANDS]
+                                          [PREV_COEF_CONTEXTS]
+                                          [UNCONSTRAINED_NODES + 1];
+typedef unsigned int vp9_coeff_stats_model[REF_TYPES][COEF_BANDS]
+                                          [PREV_COEF_CONTEXTS]
+                                          [UNCONSTRAINED_NODES][2];
+extern void vp9_full_to_model_count(unsigned int *model_count,
+                                    unsigned int *full_count);
+extern void vp9_full_to_model_counts(
+    vp9_coeff_count_model *model_count, vp9_coeff_count *full_count);
+
+void vp9_model_to_full_probs(const vp9_prob *model, vp9_prob *full);
+
+void vp9_model_to_full_probs_sb(
+    vp9_prob model[COEF_BANDS][PREV_COEF_CONTEXTS][UNCONSTRAINED_NODES],
+    vp9_prob full[COEF_BANDS][PREV_COEF_CONTEXTS][ENTROPY_NODES]);
+
 extern const vp9_prob vp9_modelcoefprobs[COEFPROB_MODELS][ENTROPY_NODES - 1];
-void vp9_get_model_distribution(vp9_prob model, vp9_prob *tree_probs,
-                                int b, int r);
-void vp9_adjust_default_coef_probs(struct VP9Common *cm);
-#endif  // CONFIG_MODELCOEFPROB
 
-#if CONFIG_CODE_NONZEROCOUNT
-/* Alphabet for number of non-zero symbols in block */
-#define NZC_0                   0       /* Used for all blocks */
-#define NZC_1                   1       /* Used for all blocks */
-#define NZC_2                   2       /* Used for all blocks */
-#define NZC_3TO4                3       /* Used for all blocks */
-#define NZC_5TO8                4       /* Used for all blocks */
-#define NZC_9TO16               5       /* Used for all blocks */
-#define NZC_17TO32              6       /* Used for 8x8 and larger blocks */
-#define NZC_33TO64              7       /* Used for 8x8 and larger blocks */
-#define NZC_65TO128             8       /* Used for 16x16 and larger blocks */
-#define NZC_129TO256            9       /* Used for 16x16 and larger blocks */
-#define NZC_257TO512           10       /* Used for 32x32 and larger blocks */
-#define NZC_513TO1024          11       /* Used for 32x32 and larger blocks */
+static INLINE const int* get_scan_4x4(TX_TYPE tx_type) {
+  switch (tx_type) {
+    case ADST_DCT:
+      return vp9_row_scan_4x4;
+    case DCT_ADST:
+      return vp9_col_scan_4x4;
+    default:
+      return vp9_default_scan_4x4;
+  }
+}
 
-/* Number of tokens for each block size */
-#define NZC4X4_TOKENS           6
-#define NZC8X8_TOKENS           8
-#define NZC16X16_TOKENS        10
-#define NZC32X32_TOKENS        12
+static INLINE const int* get_scan_8x8(TX_TYPE tx_type) {
+  switch (tx_type) {
+    case ADST_DCT:
+      return vp9_row_scan_8x8;
+    case DCT_ADST:
+      return vp9_col_scan_8x8;
+    default:
+      return vp9_default_scan_8x8;
+  }
+}
 
-/* Number of nodes for each block size */
-#define NZC4X4_NODES            5
-#define NZC8X8_NODES            7
-#define NZC16X16_NODES          9
-#define NZC32X32_NODES         11
-
-/* Max number of tokens with extra bits */
-#define NZC_TOKENS_EXTRA        9
-
-/* Max number of extra bits */
-#define NZC_BITS_EXTRA          9
-
-/* Tokens without extra bits */
-#define NZC_TOKENS_NOEXTRA      (NZC32X32_TOKENS - NZC_TOKENS_EXTRA)
-
-#define MAX_NZC_CONTEXTS        3
-
-/* whether to update extra bit probabilities */
-#define NZC_PCAT_UPDATE
-
-/* nzc trees */
-extern const vp9_tree_index    vp9_nzc4x4_tree[];
-extern const vp9_tree_index    vp9_nzc8x8_tree[];
-extern const vp9_tree_index    vp9_nzc16x16_tree[];
-extern const vp9_tree_index    vp9_nzc32x32_tree[];
-
-/* nzc encodings */
-extern struct vp9_token_struct  vp9_nzc4x4_encodings[NZC4X4_TOKENS];
-extern struct vp9_token_struct  vp9_nzc8x8_encodings[NZC8X8_TOKENS];
-extern struct vp9_token_struct  vp9_nzc16x16_encodings[NZC16X16_TOKENS];
-extern struct vp9_token_struct  vp9_nzc32x32_encodings[NZC32X32_TOKENS];
-
-#define codenzc(x) (\
-  (x) <= 3 ? (x) : (x) <= 4 ? 3 : (x) <= 8 ? 4 : \
-  (x) <= 16 ? 5 : (x) <= 32 ? 6 : (x) <= 64 ? 7 :\
-  (x) <= 128 ? 8 : (x) <= 256 ? 9 : (x) <= 512 ? 10 : 11)
-
-int vp9_get_nzc_context_y_sb64(struct VP9Common *cm, MODE_INFO *cur,
-                               int mb_row, int mb_col, int block);
-int vp9_get_nzc_context_y_sb32(struct VP9Common *cm, MODE_INFO *cur,
-                               int mb_row, int mb_col, int block);
-int vp9_get_nzc_context_y_mb16(struct VP9Common *cm, MODE_INFO *cur,
-                               int mb_row, int mb_col, int block);
-int vp9_get_nzc_context_uv_sb64(struct VP9Common *cm, MODE_INFO *cur,
-                                int mb_row, int mb_col, int block);
-int vp9_get_nzc_context_uv_sb32(struct VP9Common *cm, MODE_INFO *cur,
-                                int mb_row, int mb_col, int block);
-int vp9_get_nzc_context_uv_mb16(struct VP9Common *cm, MODE_INFO *cur,
-                                int mb_row, int mb_col, int block);
-int vp9_get_nzc_context(struct VP9Common *cm, MACROBLOCKD *xd, int block);
-void vp9_update_nzc_counts(struct VP9Common *cm, MACROBLOCKD *xd,
-                           int mb_row, int mb_col);
-void vp9_adapt_nzc_probs(struct VP9Common *cm);
-
-/* Extra bits array */
-extern const int vp9_extranzcbits[NZC32X32_TOKENS];
-
-/* Base nzc values */
-extern const int vp9_basenzcvalue[NZC32X32_TOKENS];
-
-#endif  // CONFIG_CODE_NONZEROCOUNT
+static INLINE const int* get_scan_16x16(TX_TYPE tx_type) {
+  switch (tx_type) {
+    case ADST_DCT:
+      return vp9_row_scan_16x16;
+    case DCT_ADST:
+      return vp9_col_scan_16x16;
+    default:
+      return vp9_default_scan_16x16;
+  }
+}
 
 #include "vp9/common/vp9_coefupdateprobs.h"
 

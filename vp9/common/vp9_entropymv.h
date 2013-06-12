@@ -24,13 +24,7 @@ void vp9_init_mv_probs(struct VP9Common *cm);
 void vp9_adapt_nmv_probs(struct VP9Common *cm, int usehp);
 int vp9_use_nmv_hp(const MV *ref);
 
-#define VP9_NMV_UPDATE_PROB  255
-
-#if CONFIG_NEW_MVREF
-#define VP9_MVREF_UPDATE_PROB 252
-#define VP9_DEFAULT_MV_REF_PROB 192
-#define VP9_MV_REF_UPDATE_COST (14 << 8)
-#endif
+#define VP9_NMV_UPDATE_PROB  252
 
 //#define MV_GROUP_UPDATE
 
@@ -45,8 +39,16 @@ typedef enum {
   MV_JOINT_HNZVNZ = 3,           /* Both components nonzero */
 } MV_JOINT_TYPE;
 
+static INLINE int mv_joint_vertical(MV_JOINT_TYPE type) {
+  return type == MV_JOINT_HZVNZ || type == MV_JOINT_HNZVNZ;
+}
+
+static INLINE int mv_joint_horizontal(MV_JOINT_TYPE type) {
+  return type == MV_JOINT_HNZVZ || type == MV_JOINT_HNZVNZ;
+}
+
 extern const vp9_tree_index vp9_mv_joint_tree[2 * MV_JOINTS - 2];
-extern struct vp9_token_struct vp9_mv_joint_encodings [MV_JOINTS];
+extern struct vp9_token vp9_mv_joint_encodings[MV_JOINTS];
 
 /* Symbols for coding magnitude class of nonzero components */
 #define MV_CLASSES     11
@@ -65,7 +67,7 @@ typedef enum {
 } MV_CLASS_TYPE;
 
 extern const vp9_tree_index vp9_mv_class_tree[2 * MV_CLASSES - 2];
-extern struct vp9_token_struct vp9_mv_class_encodings [MV_CLASSES];
+extern struct vp9_token vp9_mv_class_encodings[MV_CLASSES];
 
 #define CLASS0_BITS    1  /* bits at integer precision for class 0 */
 #define CLASS0_SIZE    (1 << CLASS0_BITS)
@@ -76,10 +78,10 @@ extern struct vp9_token_struct vp9_mv_class_encodings [MV_CLASSES];
 #define MV_VALS        ((MV_MAX << 1) + 1)
 
 extern const vp9_tree_index vp9_mv_class0_tree[2 * CLASS0_SIZE - 2];
-extern struct vp9_token_struct vp9_mv_class0_encodings[CLASS0_SIZE];
+extern struct vp9_token vp9_mv_class0_encodings[CLASS0_SIZE];
 
 extern const vp9_tree_index vp9_mv_fp_tree[2 * 4 - 2];
-extern struct vp9_token_struct vp9_mv_fp_encodings[4];
+extern struct vp9_token vp9_mv_fp_encodings[4];
 
 typedef struct {
   vp9_prob sign;
@@ -97,7 +99,7 @@ typedef struct {
   nmv_component comps[2];
 } nmv_context;
 
-MV_JOINT_TYPE vp9_get_mv_joint(MV mv);
+MV_JOINT_TYPE vp9_get_mv_joint(const MV *mv);
 MV_CLASS_TYPE vp9_get_mv_class(int z, int *offset);
 int vp9_get_mv_mag(MV_CLASS_TYPE c, int offset);
 

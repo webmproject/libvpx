@@ -14,12 +14,24 @@
 #ifndef VP9_COMMON_VP9_MVREF_COMMON_H_
 #define VP9_COMMON_VP9_MVREF_COMMON_H_
 
-void vp9_find_mv_refs(VP9_COMMON *cm,
-                      MACROBLOCKD *xd,
-                      MODE_INFO *here,
-                      MODE_INFO *lf_here,
-                      MV_REFERENCE_FRAME ref_frame,
-                      int_mv *mv_ref_list,
-                      int *ref_sign_bias);
+void vp9_find_mv_refs_idx(VP9_COMMON *cm,
+                          MACROBLOCKD *xd,
+                          MODE_INFO *here,
+                          MODE_INFO *lf_here,
+                          MV_REFERENCE_FRAME ref_frame,
+                          int_mv *mv_ref_list,
+                          int *ref_sign_bias,
+                          int block_idx);
+
+static INLINE void vp9_find_mv_refs(VP9_COMMON *cm,
+                                    MACROBLOCKD *xd,
+                                    MODE_INFO *here,
+                                    MODE_INFO *lf_here,
+                                    MV_REFERENCE_FRAME ref_frame,
+                                    int_mv *mv_ref_list,
+                                    int *ref_sign_bias) {
+  vp9_find_mv_refs_idx(cm, xd, here, lf_here, ref_frame,
+                       mv_ref_list, ref_sign_bias, -1);
+}
 
 #endif  // VP9_COMMON_VP9_MVREF_COMMON_H_

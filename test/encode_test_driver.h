@@ -10,9 +10,10 @@
 #ifndef TEST_ENCODE_TEST_DRIVER_H_
 #define TEST_ENCODE_TEST_DRIVER_H_
 
-#include "./vpx_config.h"
 #include <string>
 #include <vector>
+
+#include "./vpx_config.h"
 #include "third_party/googletest/src/include/gtest/gtest.h"
 #include "vpx/vpx_encoder.h"
 
@@ -46,7 +47,7 @@ enum TestMode {
 class CxDataIterator {
  public:
   explicit CxDataIterator(vpx_codec_ctx_t *encoder)
-    : encoder_(encoder), iter_(NULL) {}
+      : encoder_(encoder), iter_(NULL) {}
 
   const vpx_codec_cx_pkt_t *Next() {
     return vpx_codec_get_cx_data(encoder_, &iter_);
@@ -92,7 +93,7 @@ class Encoder {
     memset(&encoder_, 0, sizeof(encoder_));
   }
 
-  ~Encoder() {
+  virtual ~Encoder() {
     vpx_codec_destroy(&encoder_);
   }
 

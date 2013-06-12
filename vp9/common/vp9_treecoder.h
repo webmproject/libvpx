@@ -13,6 +13,7 @@
 
 #include "./vpx_config.h"
 #include "vpx/vpx_integer.h"
+#include "vp9/common/vp9_common.h"
 
 typedef uint8_t vp9_prob;
 
@@ -31,16 +32,15 @@ typedef int8_t vp9_tree_index;
 
 typedef const vp9_tree_index vp9_tree[], *vp9_tree_p;
 
-typedef const struct vp9_token_struct {
+struct vp9_token {
   int value;
-  int Len;
-} vp9_token;
+  int len;
+};
 
 /* Construct encoding array from tree. */
 
-void vp9_tokens_from_tree(struct vp9_token_struct *, vp9_tree);
-void vp9_tokens_from_tree_offset(struct vp9_token_struct *, vp9_tree,
-                                 int offset);
+void vp9_tokens_from_tree(struct vp9_token*, vp9_tree);
+void vp9_tokens_from_tree_offset(struct vp9_token*, vp9_tree, int offset);
 
 /* Convert array of token occurrence counts into a table of probabilities
    for the associated binary encoding tree.  Also writes count of branches
@@ -76,7 +76,7 @@ static INLINE vp9_prob get_binary_prob(int n0, int n1) {
 
 /* this function assumes prob1 and prob2 are already within [1,255] range */
 static INLINE vp9_prob weighted_prob(int prob1, int prob2, int factor) {
-  return (prob1 * (256 - factor) + prob2 * factor + 128) >> 8;
+  return ROUND_POWER_OF_TWO(prob1 * (256 - factor) + prob2 * factor, 8);
 }
 
 #endif  // VP9_COMMON_VP9_TREECODER_H_

@@ -11,46 +11,26 @@
 #include "vpx_config.h"
 #include "vp9/common/vp9_loopfilter.h"
 #include "vp9/common/vp9_onyxc_int.h"
+#include "vp9/common/vp9_reconinter.h"
 #include "vpx_mem/vpx_mem.h"
 
 #include "vp9/common/vp9_seg_common.h"
 
 static void lf_init_lut(loop_filter_info_n *lfi) {
-  int filt_lvl;
-
-  for (filt_lvl = 0; filt_lvl <= MAX_LOOP_FILTER; filt_lvl++) {
-    if (filt_lvl >= 40) {
-      lfi->hev_thr_lut[KEY_FRAME][filt_lvl] = 2;
-      lfi->hev_thr_lut[INTER_FRAME][filt_lvl] = 3;
-    } else if (filt_lvl >= 20) {
-      lfi->hev_thr_lut[KEY_FRAME][filt_lvl] = 1;
-      lfi->hev_thr_lut[INTER_FRAME][filt_lvl] = 2;
-    } else if (filt_lvl >= 15) {
-      lfi->hev_thr_lut[KEY_FRAME][filt_lvl] = 1;
-      lfi->hev_thr_lut[INTER_FRAME][filt_lvl] = 1;
-    } else {
-      lfi->hev_thr_lut[KEY_FRAME][filt_lvl] = 0;
-      lfi->hev_thr_lut[INTER_FRAME][filt_lvl] = 0;
-    }
-  }
-
-  lfi->mode_lf_lut[DC_PRED] = 1;
-  lfi->mode_lf_lut[D45_PRED] = 1;
-  lfi->mode_lf_lut[D135_PRED] = 1;
-  lfi->mode_lf_lut[D117_PRED] = 1;
-  lfi->mode_lf_lut[D153_PRED] = 1;
-  lfi->mode_lf_lut[D27_PRED] = 1;
-  lfi->mode_lf_lut[D63_PRED] = 1;
-  lfi->mode_lf_lut[V_PRED] = 1;
-  lfi->mode_lf_lut[H_PRED] = 1;
-  lfi->mode_lf_lut[TM_PRED] = 1;
-  lfi->mode_lf_lut[B_PRED]  = 0;
-  lfi->mode_lf_lut[I8X8_PRED] = 0;
-  lfi->mode_lf_lut[ZEROMV]  = 1;
-  lfi->mode_lf_lut[NEARESTMV] = 2;
-  lfi->mode_lf_lut[NEARMV] = 2;
-  lfi->mode_lf_lut[NEWMV] = 2;
-  lfi->mode_lf_lut[SPLITMV] = 3;
+  lfi->mode_lf_lut[DC_PRED] = 0;
+  lfi->mode_lf_lut[D45_PRED] = 0;
+  lfi->mode_lf_lut[D135_PRED] = 0;
+  lfi->mode_lf_lut[D117_PRED] = 0;
+  lfi->mode_lf_lut[D153_PRED] = 0;
+  lfi->mode_lf_lut[D27_PRED] = 0;
+  lfi->mode_lf_lut[D63_PRED] = 0;
+  lfi->mode_lf_lut[V_PRED] = 0;
+  lfi->mode_lf_lut[H_PRED] = 0;
+  lfi->mode_lf_lut[TM_PRED] = 0;
+  lfi->mode_lf_lut[ZEROMV]  = 0;
+  lfi->mode_lf_lut[NEARESTMV] = 1;
+  lfi->mode_lf_lut[NEARMV] = 1;
+  lfi->mode_lf_lut[NEWMV] = 1;
 }
 
 void vp9_loop_filter_update_sharpness(loop_filter_info_n *lfi,
@@ -86,25 +66,28 @@ void vp9_loop_filter_init(VP9_COMMON *cm) {
   loop_filter_info_n *lfi = &cm->lf_info;
   int i;
 
-  /* init limits for given sharpness*/
+  // init limits for given sharpness
   vp9_loop_filter_update_sharpness(lfi, cm->sharpness_level);
   cm->last_sharpness_level = cm->sharpness_level;
 
-  /* init LUT for lvl  and hev thr picking */
+  // init LUT for lvl  and hev thr picking
   lf_init_lut(lfi);
 
-  /* init hev threshold const vectors */
-  for (i = 0; i < 4; i++) {
+  // init hev threshold const vectors
+  for (i = 0; i < 4; i++)
     vpx_memset(lfi->hev_thr[i], i, SIMD_WIDTH);
-  }
 }
 
 void vp9_loop_filter_frame_init(VP9_COMMON *cm,
                                 MACROBLOCKD *xd,
                                 int default_filt_lvl) {
-  int seg,  /* segment number */
-      ref,  /* index in ref_lf_deltas */
-      mode; /* index in mode_lf_deltas */
+  int seg,    // segment number
+      ref,    // index in ref_lf_deltas
+      mode;   // index in mode_lf_deltas
+  // n_shift is the a multiplier for lf_deltas
+  // the multiplier is 1 for when filter_lvl is between 0 and 31;
+  // 2 when filter_lvl is between 32 and 63
+  int n_shift = default_filt_lvl >> 5;
 
   loop_filter_info_n *lfi = &cm->lf_info;
 
@@ -147,360 +130,278 @@ void vp9_loop_filter_frame_init(VP9_COMMON *cm,
     ref = INTRA_FRAME;
 
     /* Apply delta for reference frame */
-    lvl_ref += xd->ref_lf_deltas[ref];
+    lvl_ref += xd->ref_lf_deltas[ref] << n_shift;
 
-    /* Apply delta for Intra modes */
-    mode = 0; /* B_PRED */
-    /* Only the split mode BPRED has a further special case */
-    lvl_mode = clamp(lvl_ref +  xd->mode_lf_deltas[mode], 0, 63);
-
-    lfi->lvl[seg][ref][mode] = lvl_mode;
-
-    mode = 1; /* all the rest of Intra modes */
-    lvl_mode = clamp(lvl_ref, 0, 63);
-    lfi->lvl[seg][ref][mode] = lvl_mode;
+    mode = 0; /* all the rest of Intra modes */
+    lvl_mode = lvl_ref;
+    lfi->lvl[seg][ref][mode] = clamp(lvl_mode, 0, 63);
 
     /* LAST, GOLDEN, ALT */
     for (ref = 1; ref < MAX_REF_FRAMES; ref++) {
       int lvl_ref = lvl_seg;
 
       /* Apply delta for reference frame */
-      lvl_ref += xd->ref_lf_deltas[ref];
+      lvl_ref += xd->ref_lf_deltas[ref] << n_shift;
 
       /* Apply delta for Inter modes */
-      for (mode = 1; mode < 4; mode++) {
-        lvl_mode = clamp(lvl_ref + xd->mode_lf_deltas[mode], 0, 63);
-        lfi->lvl[seg][ref][mode] = lvl_mode;
+      for (mode = 0; mode < MAX_MODE_LF_DELTAS; mode++) {
+        lvl_mode = lvl_ref + (xd->mode_lf_deltas[mode] << n_shift);
+        lfi->lvl[seg][ref][mode] = clamp(lvl_mode, 0, 63);
       }
     }
   }
 }
 
-// Determine if we should skip inner-MB loop filtering within a MB
-// The current condition is that the loop filtering is skipped only
-// the MB uses a prediction size of 16x16 and either 16x16 transform
-// is used or there is no residue at all.
-static int mb_lf_skip(const MB_MODE_INFO *const mbmi) {
-  const MB_PREDICTION_MODE mode = mbmi->mode;
-  const int skip_coef = mbmi->mb_skip_coeff;
-  const int tx_size = mbmi->txfm_size;
-  return mode != B_PRED && mode != I8X8_PRED && mode != SPLITMV &&
-         (tx_size >= TX_16X16 || skip_coef);
+static int build_lfi(const VP9_COMMON *cm, const MB_MODE_INFO *mbmi,
+                      struct loop_filter_info *lfi) {
+  const loop_filter_info_n *lfi_n = &cm->lf_info;
+  int mode = mbmi->mode;
+  int mode_index = lfi_n->mode_lf_lut[mode];
+  int seg = mbmi->segment_id;
+  int ref_frame = mbmi->ref_frame[0];
+  int filter_level = lfi_n->lvl[seg][ref_frame][mode_index];
+
+  if (filter_level) {
+    const int hev_index = filter_level >> 4;
+    lfi->mblim = lfi_n->mblim[filter_level];
+    lfi->blim = lfi_n->blim[filter_level];
+    lfi->lim = lfi_n->lim[filter_level];
+    lfi->hev_thr = lfi_n->hev_thr[hev_index];
+    return 1;
+  }
+  return 0;
 }
 
-// Determine if we should skip MB loop filtering on a MB edge within
-// a superblock, the current condition is that MB loop filtering is
-// skipped only when both MBs do not use inner MB loop filtering, and
-// same motion vector with same reference frame
-static int sb_mb_lf_skip(const MODE_INFO *const mip0,
-                         const MODE_INFO *const mip1) {
-  const MB_MODE_INFO *mbmi0 = &mip0->mbmi;
-  const MB_MODE_INFO *mbmi1 = &mip0->mbmi;
-  return mb_lf_skip(mbmi0) && mb_lf_skip(mbmi1) &&
-         (mbmi0->ref_frame == mbmi1->ref_frame) &&
-         (mbmi0->mv[mbmi0->ref_frame].as_int ==
-          mbmi1->mv[mbmi1->ref_frame].as_int) &&
-         mbmi0->ref_frame != INTRA_FRAME;
+static void filter_selectively_vert(uint8_t *s, int pitch,
+                                    unsigned int mask_16x16,
+                                    unsigned int mask_8x8,
+                                    unsigned int mask_4x4,
+                                    unsigned int mask_4x4_int,
+                                    const struct loop_filter_info *lfi) {
+  unsigned int mask;
+
+  for (mask = mask_16x16 | mask_8x8 | mask_4x4; mask; mask >>= 1) {
+    if (mask & 1) {
+      if (mask_16x16 & 1) {
+        vp9_mb_lpf_vertical_edge_w(s, pitch, lfi->mblim, lfi->lim,
+                                   lfi->hev_thr, 1);
+        assert(!(mask_8x8 & 1));
+        assert(!(mask_4x4 & 1));
+        assert(!(mask_4x4_int & 1));
+      } else if (mask_8x8 & 1) {
+        vp9_mbloop_filter_vertical_edge(s, pitch, lfi->mblim, lfi->lim,
+                                        lfi->hev_thr, 1);
+        assert(!(mask_16x16 & 1));
+        assert(!(mask_4x4 & 1));
+      } else if (mask_4x4 & 1) {
+        vp9_loop_filter_vertical_edge(s, pitch, lfi->mblim, lfi->lim,
+                                      lfi->hev_thr, 1);
+        assert(!(mask_16x16 & 1));
+        assert(!(mask_8x8 & 1));
+      } else {
+        assert(0);
+      }
+
+      if (mask_4x4_int & 1)
+        vp9_loop_filter_vertical_edge(s + 4, pitch, lfi->mblim, lfi->lim,
+                                      lfi->hev_thr, 1);
+    }
+    s += 8;
+    lfi++;
+    mask_16x16 >>= 1;
+    mask_8x8 >>= 1;
+    mask_4x4 >>= 1;
+    mask_4x4_int >>= 1;
+  }
+}
+
+static void filter_selectively_horiz(uint8_t *s, int pitch,
+                                     unsigned int mask_16x16,
+                                     unsigned int mask_8x8,
+                                     unsigned int mask_4x4,
+                                     unsigned int mask_4x4_int,
+                                     int only_4x4_1,
+                                     const struct loop_filter_info *lfi) {
+  unsigned int mask;
+
+  for (mask = mask_16x16 | mask_8x8 | mask_4x4; mask; mask >>= 1) {
+    if (mask & 1) {
+      if (!only_4x4_1) {
+        if (mask_16x16 & 1) {
+          vp9_mb_lpf_horizontal_edge_w(s, pitch, lfi->mblim, lfi->lim,
+                                       lfi->hev_thr, 1);
+          assert(!(mask_8x8 & 1));
+          assert(!(mask_4x4 & 1));
+          assert(!(mask_4x4_int & 1));
+        } else if (mask_8x8 & 1) {
+          vp9_mbloop_filter_horizontal_edge(s, pitch, lfi->mblim, lfi->lim,
+                                            lfi->hev_thr, 1);
+          assert(!(mask_16x16 & 1));
+          assert(!(mask_4x4 & 1));
+        } else if (mask_4x4 & 1) {
+          vp9_loop_filter_horizontal_edge(s, pitch, lfi->mblim, lfi->lim,
+                                          lfi->hev_thr, 1);
+          assert(!(mask_16x16 & 1));
+          assert(!(mask_8x8 & 1));
+        } else {
+          assert(0);
+        }
+      }
+
+      if (mask_4x4_int & 1)
+        vp9_loop_filter_horizontal_edge(s + 4 * pitch, pitch, lfi->mblim,
+                                        lfi->lim, lfi->hev_thr, 1);
+    }
+    s += 8;
+    lfi++;
+    mask_16x16 >>= 1;
+    mask_8x8 >>= 1;
+    mask_4x4 >>= 1;
+    mask_4x4_int >>= 1;
+  }
+}
+
+static void filter_block_plane(VP9_COMMON *cm, MACROBLOCKD *xd,
+                               int plane, int mi_row, int mi_col) {
+  const int ss_x = xd->plane[plane].subsampling_x;
+  const int ss_y = xd->plane[plane].subsampling_y;
+  const int row_step = 1 << xd->plane[plane].subsampling_y;
+  const int col_step = 1 << xd->plane[plane].subsampling_x;
+  struct buf_2d * const dst = &xd->plane[plane].dst;
+  uint8_t* const dst0 = dst->buf;
+  MODE_INFO* const mi0 = xd->mode_info_context;
+  unsigned int mask_16x16[64 / MI_SIZE] = {0};
+  unsigned int mask_8x8[64 / MI_SIZE] = {0};
+  unsigned int mask_4x4[64 / MI_SIZE] = {0};
+  unsigned int mask_4x4_int[64 / MI_SIZE] = {0};
+  struct loop_filter_info lfi[64 / MI_SIZE][64 / MI_SIZE];
+  int r, c;
+
+  for (r = 0; r < 64 / MI_SIZE && mi_row + r < cm->mi_rows; r += row_step) {
+    unsigned int mask_16x16_c = 0;
+    unsigned int mask_8x8_c = 0;
+    unsigned int mask_4x4_c = 0;
+    unsigned int border_mask;
+
+    // Determine the vertical edges that need filtering
+    for (c = 0; c < 64 / MI_SIZE && mi_col + c < cm->mi_cols; c += col_step) {
+      const MODE_INFO const *mi = xd->mode_info_context;
+      const int skip_this = mi[c].mbmi.mb_skip_coeff
+                            && mi[c].mbmi.ref_frame != INTRA_FRAME;
+      // left edge of current unit is block/partition edge -> no skip
+      const int block_edge_left = b_width_log2(mi[c].mbmi.sb_type) ?
+          !(c & ((1 << (b_width_log2(mi[c].mbmi.sb_type)-1)) - 1)) : 1;
+      const int skip_this_c = skip_this && !block_edge_left;
+      // top edge of current unit is block/partition edge -> no skip
+      const int block_edge_above = b_height_log2(mi[c].mbmi.sb_type) ?
+          !(r & ((1 << (b_height_log2(mi[c].mbmi.sb_type)-1)) - 1)) : 1;
+      const int skip_this_r = skip_this && !block_edge_above;
+      const TX_SIZE tx_size = plane ? get_uv_tx_size(&mi[c].mbmi)
+                                    : mi[c].mbmi.txfm_size;
+      const int skip_border_4x4_c = ss_x && mi_col + c == cm->mi_cols - 1;
+      const int skip_border_4x4_r = ss_y && mi_row + r == cm->mi_rows - 1;
+
+      // Filter level can vary per MI
+      if (!build_lfi(cm, &mi[c].mbmi,
+                     lfi[r] + (c >> xd->plane[plane].subsampling_x)))
+        continue;
+
+      // Build masks based on the transform size of each block
+      if (tx_size == TX_32X32) {
+        if (!skip_this_c && ((c >> ss_x) & 3) == 0) {
+          if (!skip_border_4x4_c)
+            mask_16x16_c |= 1 << (c >> ss_x);
+          else
+            mask_8x8_c |= 1 << (c >> ss_x);
+        }
+        if (!skip_this_r && ((r >> ss_y) & 3) == 0) {
+          if (!skip_border_4x4_r)
+            mask_16x16[r] |= 1 << (c >> ss_x);
+          else
+            mask_8x8[r] |= 1 << (c >> ss_x);
+        }
+      } else if (tx_size == TX_16X16) {
+        if (!skip_this_c && ((c >> ss_x) & 1) == 0) {
+          if (!skip_border_4x4_c)
+            mask_16x16_c |= 1 << (c >> ss_x);
+          else
+            mask_8x8_c |= 1 << (c >> ss_x);
+        }
+        if (!skip_this_r && ((r >> ss_y) & 1) == 0) {
+          if (!skip_border_4x4_r)
+            mask_16x16[r] |= 1 << (c >> ss_x);
+          else
+            mask_8x8[r] |= 1 << (c >> ss_x);
+        }
+      } else {
+        // force 8x8 filtering on 32x32 boundaries
+        if (!skip_this_c) {
+          if (tx_size == TX_8X8 || ((c >> ss_x) & 3) == 0)
+            mask_8x8_c |= 1 << (c >> ss_x);
+          else
+            mask_4x4_c |= 1 << (c >> ss_x);
+        }
+
+        if (!skip_this_r) {
+          if (tx_size == TX_8X8 || ((r >> ss_y) & 3) == 0)
+            mask_8x8[r] |= 1 << (c >> ss_x);
+          else
+            mask_4x4[r] |= 1 << (c >> ss_x);
+        }
+
+        if (!skip_this && tx_size < TX_8X8 && !skip_border_4x4_c)
+          mask_4x4_int[r] |= 1 << (c >> ss_x);
+      }
+    }
+
+    // Disable filtering on the leftmost column
+    border_mask = ~(mi_col == 0);
+    filter_selectively_vert(dst->buf, dst->stride,
+                            mask_16x16_c & border_mask,
+                            mask_8x8_c & border_mask,
+                            mask_4x4_c & border_mask,
+                            mask_4x4_int[r], lfi[r]);
+    dst->buf += 8 * dst->stride;
+    xd->mode_info_context += cm->mode_info_stride * row_step;
+  }
+
+  // Now do horizontal pass
+  dst->buf = dst0;
+  xd->mode_info_context = mi0;
+  for (r = 0; r < 64 / MI_SIZE && mi_row + r < cm->mi_rows; r += row_step) {
+    const int skip_border_4x4_r = ss_y && mi_row + r == cm->mi_rows - 1;
+    const unsigned int mask_4x4_int_r = skip_border_4x4_r ? 0 : mask_4x4_int[r];
+
+    filter_selectively_horiz(dst->buf, dst->stride,
+                             mask_16x16[r],
+                             mask_8x8[r],
+                             mask_4x4[r],
+                             mask_4x4_int_r, mi_row + r == 0, lfi[r]);
+    dst->buf += 8 * dst->stride;
+    xd->mode_info_context += cm->mode_info_stride * row_step;
+  }
 }
 
 void vp9_loop_filter_frame(VP9_COMMON *cm,
                            MACROBLOCKD *xd,
                            int frame_filter_level,
-                           int y_only,
-                           int dering) {
-  YV12_BUFFER_CONFIG *post = cm->frame_to_show;
-  loop_filter_info_n *lfi_n = &cm->lf_info;
-  struct loop_filter_info lfi;
-  const FRAME_TYPE frame_type = cm->frame_type;
-  int mb_row, mb_col;
-  uint8_t *y_ptr, *u_ptr, *v_ptr;
+                           int y_only) {
+  int mi_row, mi_col;
 
-  /* Point at base of Mb MODE_INFO list */
-  const MODE_INFO *mode_info_context = cm->mi;
-  const int mis = cm->mode_info_stride;
-
-  /* Initialize the loop filter for this frame. */
+  // Initialize the loop filter for this frame.
   vp9_loop_filter_frame_init(cm, xd, frame_filter_level);
-  /* Set up the buffer pointers */
-  y_ptr = post->y_buffer;
-  if (y_only) {
-    u_ptr = 0;
-    v_ptr = 0;
-  } else {
-    u_ptr = post->u_buffer;
-    v_ptr = post->v_buffer;
-  }
 
-  /* vp9_filter each macro block */
-  for (mb_row = 0; mb_row < cm->mb_rows; mb_row++) {
-    for (mb_col = 0; mb_col < cm->mb_cols; mb_col++) {
-      const MB_PREDICTION_MODE mode = mode_info_context->mbmi.mode;
-      const int mode_index = lfi_n->mode_lf_lut[mode];
-      const int seg = mode_info_context->mbmi.segment_id;
-      const int ref_frame = mode_info_context->mbmi.ref_frame;
-      const int filter_level = lfi_n->lvl[seg][ref_frame][mode_index];
-      if (filter_level) {
-        const int skip_lf = mb_lf_skip(&mode_info_context->mbmi);
-        const int tx_size = mode_info_context->mbmi.txfm_size;
-        if (cm->filter_type == NORMAL_LOOPFILTER) {
-          const int hev_index = lfi_n->hev_thr_lut[frame_type][filter_level];
-          lfi.mblim = lfi_n->mblim[filter_level];
-          lfi.blim = lfi_n->blim[filter_level];
-          lfi.lim = lfi_n->lim[filter_level];
-          lfi.hev_thr = lfi_n->hev_thr[hev_index];
+  for (mi_row = 0; mi_row < cm->mi_rows; mi_row += 64 / MI_SIZE) {
+    MODE_INFO* const mi = cm->mi + mi_row * cm->mode_info_stride;
 
-          if (mb_col > 0 &&
-              !((mb_col & 1) && mode_info_context->mbmi.sb_type &&
-                (sb_mb_lf_skip(mode_info_context - 1, mode_info_context) ||
-                 tx_size >= TX_32X32))
-              ) {
-            if (tx_size >= TX_16X16)
-              vp9_lpf_mbv_w(y_ptr, u_ptr, v_ptr, post->y_stride,
-                            post->uv_stride, &lfi);
-            else
-              vp9_loop_filter_mbv(y_ptr, u_ptr, v_ptr, post->y_stride,
-                                  post->uv_stride, &lfi);
-          }
-          if (!skip_lf) {
-            if (tx_size >= TX_8X8) {
-              if (tx_size == TX_8X8 && (mode == I8X8_PRED || mode == SPLITMV))
-                vp9_loop_filter_bv8x8(y_ptr, u_ptr, v_ptr, post->y_stride,
-                                      post->uv_stride, &lfi);
-              else
-                vp9_loop_filter_bv8x8(y_ptr, NULL, NULL, post->y_stride,
-                                      post->uv_stride, &lfi);
-            } else {
-              vp9_loop_filter_bv(y_ptr, u_ptr, v_ptr, post->y_stride,
-                                 post->uv_stride, &lfi);
-            }
-          }
-          /* don't apply across umv border */
-          if (mb_row > 0 &&
-              !((mb_row & 1) && mode_info_context->mbmi.sb_type &&
-                (sb_mb_lf_skip(mode_info_context - mis, mode_info_context) ||
-                tx_size >= TX_32X32))
-              ) {
-            if (tx_size >= TX_16X16)
-              vp9_lpf_mbh_w(y_ptr, u_ptr, v_ptr, post->y_stride,
-                            post->uv_stride, &lfi);
-            else
-              vp9_loop_filter_mbh(y_ptr, u_ptr, v_ptr, post->y_stride,
-                                  post->uv_stride, &lfi);
-          }
-          if (!skip_lf) {
-            if (tx_size >= TX_8X8) {
-              if (tx_size == TX_8X8 && (mode == I8X8_PRED || mode == SPLITMV))
-                vp9_loop_filter_bh8x8(y_ptr, u_ptr, v_ptr, post->y_stride,
-                                      post->uv_stride, &lfi);
-              else
-                vp9_loop_filter_bh8x8(y_ptr, NULL, NULL, post->y_stride,
-                                      post->uv_stride, &lfi);
-            } else {
-              vp9_loop_filter_bh(y_ptr, u_ptr, v_ptr, post->y_stride,
-                                 post->uv_stride, &lfi);
-            }
-          }
-#if CONFIG_LOOP_DERING
-          if (dering) {
-            if (mb_row && mb_row < cm->mb_rows - 1 &&
-                mb_col && mb_col < cm->mb_cols - 1) {
-              vp9_post_proc_down_and_across(y_ptr, y_ptr,
-                                            post->y_stride, post->y_stride,
-                                            16, 16, dering);
-              if (!y_only) {
-                vp9_post_proc_down_and_across(u_ptr, u_ptr,
-                                              post->uv_stride, post->uv_stride,
-                                              8, 8, dering);
-                vp9_post_proc_down_and_across(v_ptr, v_ptr,
-                                              post->uv_stride, post->uv_stride,
-                                              8, 8, dering);
-              }
-            } else {
-              // Adjust the filter so that no out-of-frame data is used.
-              uint8_t *dr_y = y_ptr, *dr_u = u_ptr, *dr_v = v_ptr;
-              int w_adjust = 0;
-              int h_adjust = 0;
+    for (mi_col = 0; mi_col < cm->mi_cols; mi_col += 64 / MI_SIZE) {
+      int plane;
 
-              if (mb_col == 0) {
-                dr_y += 2;
-                dr_u += 2;
-                dr_v += 2;
-                w_adjust += 2;
-              }
-              if (mb_col == cm->mb_cols - 1)
-                w_adjust += 2;
-              if (mb_row == 0) {
-                dr_y += 2 * post->y_stride;
-                dr_u += 2 * post->uv_stride;
-                dr_v += 2 * post->uv_stride;
-                h_adjust += 2;
-              }
-              if (mb_row == cm->mb_rows - 1)
-                h_adjust += 2;
-              vp9_post_proc_down_and_across_c(dr_y, dr_y,
-                                              post->y_stride, post->y_stride,
-                                              16 - w_adjust, 16 - h_adjust,
-                                              dering);
-              if (!y_only) {
-                vp9_post_proc_down_and_across_c(dr_u, dr_u,
-                                                post->uv_stride,
-                                                post->uv_stride,
-                                                8 - w_adjust, 8 - h_adjust,
-                                                dering);
-                vp9_post_proc_down_and_across_c(dr_v, dr_v,
-                                                post->uv_stride,
-                                                post->uv_stride,
-                                                8 - w_adjust, 8 - h_adjust,
-                                                dering);
-              }
-            }
-          }
-#endif
-        } else {
-          // FIXME: Not 8x8 aware
-          if (mb_col > 0 &&
-              !(skip_lf && mb_lf_skip(&mode_info_context[-1].mbmi)) &&
-              !((mb_col & 1) && mode_info_context->mbmi.sb_type))
-            vp9_loop_filter_simple_mbv(y_ptr, post->y_stride,
-                                       lfi_n->mblim[filter_level]);
-          if (!skip_lf)
-            vp9_loop_filter_simple_bv(y_ptr, post->y_stride,
-                                      lfi_n->blim[filter_level]);
-
-          /* don't apply across umv border */
-          if (mb_row > 0 &&
-              !(skip_lf && mb_lf_skip(&mode_info_context[-mis].mbmi)) &&
-              !((mb_row & 1) && mode_info_context->mbmi.sb_type))
-            vp9_loop_filter_simple_mbh(y_ptr, post->y_stride,
-                                       lfi_n->mblim[filter_level]);
-          if (!skip_lf)
-            vp9_loop_filter_simple_bh(y_ptr, post->y_stride,
-                                      lfi_n->blim[filter_level]);
-        }
-      }
-      y_ptr += 16;
-      if (!y_only) {
-        u_ptr += 8;
-        v_ptr += 8;
-      }
-      mode_info_context++;     /* step to next MB */
-    }
-    y_ptr += post->y_stride  * 16 - post->y_width;
-    if (!y_only) {
-      u_ptr += post->uv_stride *  8 - post->uv_width;
-      v_ptr += post->uv_stride *  8 - post->uv_width;
-    }
-    mode_info_context++;         /* Skip border mb */
-  }
-}
-
-
-void vp9_loop_filter_partial_frame(VP9_COMMON *cm, MACROBLOCKD *xd,
-                                   int default_filt_lvl) {
-  YV12_BUFFER_CONFIG *post = cm->frame_to_show;
-
-  uint8_t *y_ptr;
-  int mb_row;
-  int mb_col;
-  int mb_cols = post->y_width  >> 4;
-
-  int linestocopy, i;
-
-  loop_filter_info_n *lfi_n = &cm->lf_info;
-  struct loop_filter_info lfi;
-
-  int filter_level;
-  int alt_flt_enabled = xd->segmentation_enabled;
-  FRAME_TYPE frame_type = cm->frame_type;
-
-  const MODE_INFO *mode_info_context;
-
-  int lvl_seg[MAX_MB_SEGMENTS];
-
-  mode_info_context = cm->mi + (post->y_height >> 5) * (mb_cols + 1);
-
-  /* 3 is a magic number. 4 is probably magic too */
-  linestocopy = (post->y_height >> (4 + 3));
-
-  if (linestocopy < 1)
-    linestocopy = 1;
-
-  linestocopy <<= 4;
-
-  /* Note the baseline filter values for each segment */
-  /* See vp9_loop_filter_frame_init. Rather than call that for each change
-   * to default_filt_lvl, copy the relevant calculation here.
-   */
-  if (alt_flt_enabled) {
-    for (i = 0; i < MAX_MB_SEGMENTS; i++) {
-      if (xd->mb_segment_abs_delta == SEGMENT_ABSDATA) {
-        // Abs value
-        lvl_seg[i] = vp9_get_segdata(xd, i, SEG_LVL_ALT_LF);
-      } else {
-        // Delta Value
-        lvl_seg[i] = default_filt_lvl + vp9_get_segdata(xd, i, SEG_LVL_ALT_LF);
-        lvl_seg[i] = clamp(lvl_seg[i], 0, 63);
+      setup_dst_planes(xd, cm->frame_to_show, mi_row, mi_col);
+      for (plane = 0; plane < (y_only ? 1 : MAX_MB_PLANE); plane++) {
+        xd->mode_info_context = mi + mi_col;
+        filter_block_plane(cm, xd, plane, mi_row, mi_col);
       }
     }
-  }
-
-  /* Set up the buffer pointers */
-  y_ptr = post->y_buffer + (post->y_height >> 5) * 16 * post->y_stride;
-
-  /* vp9_filter each macro block */
-  for (mb_row = 0; mb_row < (linestocopy >> 4); mb_row++) {
-    for (mb_col = 0; mb_col < mb_cols; mb_col++) {
-      int skip_lf = (mode_info_context->mbmi.mode != B_PRED &&
-                     mode_info_context->mbmi.mode != I8X8_PRED &&
-                     mode_info_context->mbmi.mode != SPLITMV &&
-                     mode_info_context->mbmi.mb_skip_coeff);
-
-      if (alt_flt_enabled)
-        filter_level = lvl_seg[mode_info_context->mbmi.segment_id];
-      else
-        filter_level = default_filt_lvl;
-
-      if (filter_level) {
-        if (cm->filter_type == NORMAL_LOOPFILTER) {
-          const int hev_index = lfi_n->hev_thr_lut[frame_type][filter_level];
-          lfi.mblim = lfi_n->mblim[filter_level];
-          lfi.blim = lfi_n->blim[filter_level];
-          lfi.lim = lfi_n->lim[filter_level];
-          lfi.hev_thr = lfi_n->hev_thr[hev_index];
-
-          if (mb_col > 0)
-            vp9_loop_filter_mbv(y_ptr, 0, 0, post->y_stride, 0, &lfi);
-
-          if (!skip_lf)
-            vp9_loop_filter_bv(y_ptr, 0, 0, post->y_stride, 0, &lfi);
-
-          vp9_loop_filter_mbh(y_ptr, 0, 0, post->y_stride, 0, &lfi);
-
-          if (!skip_lf)
-            vp9_loop_filter_bh(y_ptr, 0, 0, post->y_stride, 0, &lfi);
-        } else {
-          if (mb_col > 0)
-            vp9_loop_filter_simple_mbv (y_ptr, post->y_stride,
-                                        lfi_n->mblim[filter_level]);
-
-          if (!skip_lf)
-            vp9_loop_filter_simple_bv(y_ptr, post->y_stride,
-                                      lfi_n->blim[filter_level]);
-
-          vp9_loop_filter_simple_mbh(y_ptr, post->y_stride,
-                                     lfi_n->mblim[filter_level]);
-
-          if (!skip_lf)
-            vp9_loop_filter_simple_bh(y_ptr, post->y_stride,
-                                      lfi_n->blim[filter_level]);
-        }
-      }
-
-      y_ptr += 16;
-      mode_info_context += 1;      /* step to next MB */
-    }
-
-    y_ptr += post->y_stride  * 16 - post->y_width;
-    mode_info_context += 1;          /* Skip border mb */
   }
 }

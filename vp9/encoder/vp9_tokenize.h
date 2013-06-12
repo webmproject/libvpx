@@ -17,65 +17,33 @@
 void vp9_tokenize_initialize();
 
 typedef struct {
-  int16_t Token;
-  int16_t Extra;
+  int16_t token;
+  int16_t extra;
 } TOKENVALUE;
 
 typedef struct {
   const vp9_prob *context_tree;
-  int16_t         Extra;
-  uint8_t         Token;
+  int16_t         extra;
+  uint8_t         token;
   uint8_t         skip_eob_node;
 } TOKENEXTRA;
 
 typedef int64_t vp9_coeff_accum[REF_TYPES][COEF_BANDS][PREV_COEF_CONTEXTS]
                                [MAX_ENTROPY_TOKENS + 1];
 
-int vp9_mby_is_skippable_4x4(MACROBLOCKD *xd);
-int vp9_mbuv_is_skippable_4x4(MACROBLOCKD *xd);
-int vp9_mby_is_skippable_8x8(MACROBLOCKD *xd);
-int vp9_mbuv_is_skippable_8x8(MACROBLOCKD *xd);
-int vp9_mby_is_skippable_16x16(MACROBLOCKD *xd);
-int vp9_sby_is_skippable_32x32(MACROBLOCKD *xd);
-int vp9_sby_is_skippable_16x16(MACROBLOCKD *xd);
-int vp9_sby_is_skippable_8x8(MACROBLOCKD *xd);
-int vp9_sby_is_skippable_4x4(MACROBLOCKD *xd);
-int vp9_sbuv_is_skippable_16x16(MACROBLOCKD *xd);
-int vp9_sbuv_is_skippable_8x8(MACROBLOCKD *xd);
-int vp9_sbuv_is_skippable_4x4(MACROBLOCKD *xd);
-int vp9_sb64y_is_skippable_32x32(MACROBLOCKD *xd);
-int vp9_sb64y_is_skippable_16x16(MACROBLOCKD *xd);
-int vp9_sb64y_is_skippable_8x8(MACROBLOCKD *xd);
-int vp9_sb64y_is_skippable_4x4(MACROBLOCKD *xd);
-int vp9_sb64uv_is_skippable_32x32(MACROBLOCKD *xd);
-int vp9_sb64uv_is_skippable_16x16(MACROBLOCKD *xd);
-int vp9_sb64uv_is_skippable_8x8(MACROBLOCKD *xd);
-int vp9_sb64uv_is_skippable_4x4(MACROBLOCKD *xd);
-
+int vp9_sb_is_skippable(MACROBLOCKD *xd, BLOCK_SIZE_TYPE bsize);
+int vp9_sby_is_skippable(MACROBLOCKD *xd, BLOCK_SIZE_TYPE bsize);
+int vp9_sbuv_is_skippable(MACROBLOCKD *xd, BLOCK_SIZE_TYPE bsize);
 struct VP9_COMP;
 
-void vp9_tokenize_mb(struct VP9_COMP *cpi, MACROBLOCKD *xd,
-                     TOKENEXTRA **t, int dry_run);
 void vp9_tokenize_sb(struct VP9_COMP *cpi, MACROBLOCKD *xd,
-                     TOKENEXTRA **t, int dry_run);
-void vp9_tokenize_sb64(struct VP9_COMP *cpi, MACROBLOCKD *xd,
-                       TOKENEXTRA **t, int dry_run);
-
-void vp9_stuff_mb(struct VP9_COMP *cpi, MACROBLOCKD *xd,
-                  TOKENEXTRA **t, int dry_run);
-void vp9_stuff_sb(struct VP9_COMP *cpi, MACROBLOCKD *xd,
-                  TOKENEXTRA **t, int dry_run);
-void vp9_stuff_sb64(struct VP9_COMP *cpi, MACROBLOCKD *xd,
-                    TOKENEXTRA **t, int dry_run);
+                     TOKENEXTRA **t, int dry_run, BLOCK_SIZE_TYPE bsize);
 
 #ifdef ENTROPY_STATS
 void init_context_counters();
 void print_context_counters();
 
-extern vp9_coeff_accum context_counters_4x4[BLOCK_TYPES];
-extern vp9_coeff_accum context_counters_8x8[BLOCK_TYPES];
-extern vp9_coeff_accum context_counters_16x16[BLOCK_TYPES];
-extern vp9_coeff_accum context_counters_32x32[BLOCK_TYPES];
+extern vp9_coeff_accum context_counters[TX_SIZE_MAX_SB][BLOCK_TYPES];
 #endif
 
 extern const int *vp9_dct_value_cost_ptr;

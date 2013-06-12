@@ -14,36 +14,30 @@
 #if defined(CONFIG_DEBUG) && CONFIG_DEBUG
 #include <assert.h>
 #endif
-#include <stdio.h>
 
 #include "vp9/common/vp9_treecoder.h"
 
-static void tree2tok(
-  struct vp9_token_struct *const p,
-  vp9_tree t,
-  int i,
-  int v,
-  int L
-) {
+static void tree2tok(struct vp9_token *const p, vp9_tree t,
+                    int i, int v, int l) {
   v += v;
-  ++L;
+  ++l;
 
   do {
     const vp9_tree_index j = t[i++];
 
     if (j <= 0) {
       p[-j].value = v;
-      p[-j].Len = L;
+      p[-j].len = l;
     } else
-      tree2tok(p, t, j, v, L);
+      tree2tok(p, t, j, v, l);
   } while (++v & 1);
 }
 
-void vp9_tokens_from_tree(struct vp9_token_struct *p, vp9_tree t) {
+void vp9_tokens_from_tree(struct vp9_token *p, vp9_tree t) {
   tree2tok(p, t, 0, 0, 0);
 }
 
-void vp9_tokens_from_tree_offset(struct vp9_token_struct *p, vp9_tree t,
+void vp9_tokens_from_tree_offset(struct vp9_token *p, vp9_tree t,
                                  int offset) {
   tree2tok(p - offset, t, 0, 0, 0);
 }
@@ -62,12 +56,12 @@ static unsigned int convert_distribution(unsigned int i,
     left = convert_distribution(tree[i], tree, probs, branch_ct,
                                 num_events, tok0_offset);
   }
-  if (tree[i + 1] <= 0) {
+  if (tree[i + 1] <= 0)
     right = num_events[-tree[i + 1] - tok0_offset];
-  } else {
+  else
     right = convert_distribution(tree[i + 1], tree, probs, branch_ct,
-                                num_events, tok0_offset);
-  }
+                                 num_events, tok0_offset);
+
   probs[i>>1] = get_binary_prob(left, right);
   branch_ct[i>>1][0] = left;
   branch_ct[i>>1][1] = right;

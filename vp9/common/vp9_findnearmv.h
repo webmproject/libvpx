@@ -17,16 +17,13 @@
 #include "vp9/common/vp9_treecoder.h"
 #include "vp9/common/vp9_onyxc_int.h"
 
-#define LEFT_TOP_MARGIN (16 << 3)
-#define RIGHT_BOTTOM_MARGIN (16 << 3)
+#define LEFT_TOP_MARGIN     ((VP9BORDERINPIXELS - VP9_INTERP_EXTEND) << 3)
+#define RIGHT_BOTTOM_MARGIN ((VP9BORDERINPIXELS - VP9_INTERP_EXTEND) << 3)
 
-/* check a list of motion vectors by sad score using a number rows of pixels
- * above and a number cols of pixels in the left to select the one with best
- * score to use as ref motion vector
- */
+// check a list of motion vectors by sad score using a number rows of pixels
+// above and a number cols of pixels in the left to select the one with best
+// score to use as ref motion vector
 void vp9_find_best_ref_mvs(MACROBLOCKD *xd,
-                           uint8_t *ref_y_buffer,
-                           int ref_y_stride,
                            int_mv *mvlist,
                            int_mv *nearest,
                            int_mv *near);
@@ -43,35 +40,30 @@ static void mv_bias(int refmb_ref_frame_sign_bias, int refframe,
   mvp->as_mv = xmv;
 }
 
-
+// TODO(jingning): this mv clamping function should be block size dependent.
 static void clamp_mv(int_mv *mv,
                      int mb_to_left_edge,
                      int mb_to_right_edge,
                      int mb_to_top_edge,
                      int mb_to_bottom_edge) {
-  mv->as_mv.col = (mv->as_mv.col < mb_to_left_edge) ?
-                  mb_to_left_edge : mv->as_mv.col;
-  mv->as_mv.col = (mv->as_mv.col > mb_to_right_edge) ?
-                  mb_to_right_edge : mv->as_mv.col;
-  mv->as_mv.row = (mv->as_mv.row < mb_to_top_edge) ?
-                  mb_to_top_edge : mv->as_mv.row;
-  mv->as_mv.row = (mv->as_mv.row > mb_to_bottom_edge) ?
-                  mb_to_bottom_edge : mv->as_mv.row;
+  mv->as_mv.col = clamp(mv->as_mv.col, mb_to_left_edge, mb_to_right_edge);
+  mv->as_mv.row = clamp(mv->as_mv.row, mb_to_top_edge, mb_to_bottom_edge);
 }
 
-static void clamp_mv2(int_mv *mv, const MACROBLOCKD *xd) {
+static int clamp_mv2(int_mv *mv, const MACROBLOCKD *xd) {
+  int_mv tmp_mv;
+  tmp_mv.as_int = mv->as_int;
   clamp_mv(mv,
            xd->mb_to_left_edge - LEFT_TOP_MARGIN,
            xd->mb_to_right_edge + RIGHT_BOTTOM_MARGIN,
            xd->mb_to_top_edge - LEFT_TOP_MARGIN,
            xd->mb_to_bottom_edge + RIGHT_BOTTOM_MARGIN);
+  return tmp_mv.as_int != mv->as_int;
 }
 
-static unsigned int check_mv_bounds(int_mv *mv,
-                                    int mb_to_left_edge,
-                                    int mb_to_right_edge,
-                                    int mb_to_top_edge,
-                                    int mb_to_bottom_edge) {
+static int check_mv_bounds(int_mv *mv,
+                           int mb_to_left_edge, int mb_to_right_edge,
+                           int mb_to_top_edge, int mb_to_bottom_edge) {
   return mv->as_mv.col < mb_to_left_edge ||
          mv->as_mv.col > mb_to_right_edge ||
          mv->as_mv.row < mb_to_top_edge ||
@@ -79,116 +71,50 @@ static unsigned int check_mv_bounds(int_mv *mv,
 }
 
 vp9_prob *vp9_mv_ref_probs(VP9_COMMON *pc,
-                           vp9_prob p[VP9_MVREFS - 1],
+                           vp9_prob p[VP9_INTER_MODES - 1],
                            const int context);
 
-extern const uint8_t vp9_mbsplit_offset[4][16];
+void vp9_append_sub8x8_mvs_for_idx(VP9_COMMON *pc,
+                                   MACROBLOCKD *xd,
+                                   int_mv *dst_nearest,
+                                   int_mv *dst_near,
+                                   int block_idx, int ref_idx);
 
-static int left_block_mv(const MACROBLOCKD *xd,
-                         const MODE_INFO *cur_mb, int b) {
-  if (!(b & 3)) {
-    if (!xd->left_available)
-      return 0;
-
-    // On L edge, get from MB to left of us
-    --cur_mb;
-
-    if (cur_mb->mbmi.mode != SPLITMV)
-      return cur_mb->mbmi.mv[0].as_int;
-
-    b += 4;
-  }
-
-  return (cur_mb->bmi + b - 1)->as_mv[0].as_int;
-}
-
-static int left_block_second_mv(const MACROBLOCKD *xd,
-                                const MODE_INFO *cur_mb, int b) {
-  if (!(b & 3)) {
-    if (!xd->left_available)
-      return 0;
-
+static MB_PREDICTION_MODE left_block_mode(const MODE_INFO *cur_mb, int b) {
+  // FIXME(rbultje, jingning): temporary hack because jenkins doesn't
+  // understand this condition. This will go away soon.
+  if (b == 0 || b == 2) {
     /* On L edge, get from MB to left of us */
     --cur_mb;
 
-    if (cur_mb->mbmi.mode != SPLITMV)
-      return cur_mb->mbmi.second_ref_frame > 0 ?
-          cur_mb->mbmi.mv[1].as_int : cur_mb->mbmi.mv[0].as_int;
-    b += 4;
-  }
-
-  return cur_mb->mbmi.second_ref_frame > 0 ?
-      (cur_mb->bmi + b - 1)->as_mv[1].as_int :
-      (cur_mb->bmi + b - 1)->as_mv[0].as_int;
-}
-
-static int above_block_mv(const MODE_INFO *cur_mb, int b, int mi_stride) {
-  if (!(b >> 2)) {
-    /* On top edge, get from MB above us */
-    cur_mb -= mi_stride;
-
-    if (cur_mb->mbmi.mode != SPLITMV)
-      return cur_mb->mbmi.mv[0].as_int;
-    b += 16;
-  }
-
-  return (cur_mb->bmi + b - 4)->as_mv[0].as_int;
-}
-
-static int above_block_second_mv(const MODE_INFO *cur_mb, int b, int mi_stride) {
-  if (!(b >> 2)) {
-    /* On top edge, get from MB above us */
-    cur_mb -= mi_stride;
-
-    if (cur_mb->mbmi.mode != SPLITMV)
-      return cur_mb->mbmi.second_ref_frame > 0 ?
-          cur_mb->mbmi.mv[1].as_int : cur_mb->mbmi.mv[0].as_int;
-    b += 16;
-  }
-
-  return cur_mb->mbmi.second_ref_frame > 0 ?
-      (cur_mb->bmi + b - 4)->as_mv[1].as_int :
-      (cur_mb->bmi + b - 4)->as_mv[0].as_int;
-}
-
-static B_PREDICTION_MODE left_block_mode(const MODE_INFO *cur_mb, int b) {
-  if (!(b & 3)) {
-    /* On L edge, get from MB to left of us */
-    --cur_mb;
-
-    if (cur_mb->mbmi.mode < I8X8_PRED) {
-      return pred_mode_conv(cur_mb->mbmi.mode);
-    } else if (cur_mb->mbmi.mode == I8X8_PRED) {
-      return pred_mode_conv(
-          (MB_PREDICTION_MODE)(cur_mb->bmi + 3 + b)->as_mode.first);
-    } else if (cur_mb->mbmi.mode == B_PRED) {
-      return ((cur_mb->bmi + 3 + b)->as_mode.first);
+    if (cur_mb->mbmi.ref_frame[0] != INTRA_FRAME) {
+      return DC_PRED;
+    } else if (cur_mb->mbmi.sb_type < BLOCK_SIZE_SB8X8) {
+      return ((cur_mb->bmi + 1 + b)->as_mode.first);
     } else {
-      return B_DC_PRED;
+      return cur_mb->mbmi.mode;
     }
   }
+  assert(b == 1 || b == 3);
   return (cur_mb->bmi + b - 1)->as_mode.first;
 }
 
-static B_PREDICTION_MODE above_block_mode(const MODE_INFO *cur_mb,
+static MB_PREDICTION_MODE above_block_mode(const MODE_INFO *cur_mb,
                                           int b, int mi_stride) {
-  if (!(b >> 2)) {
+  if (!(b >> 1)) {
     /* On top edge, get from MB above us */
     cur_mb -= mi_stride;
 
-    if (cur_mb->mbmi.mode < I8X8_PRED) {
-      return pred_mode_conv(cur_mb->mbmi.mode);
-    } else if (cur_mb->mbmi.mode == I8X8_PRED) {
-      return pred_mode_conv(
-          (MB_PREDICTION_MODE)(cur_mb->bmi + 12 + b)->as_mode.first);
-    } else if (cur_mb->mbmi.mode == B_PRED) {
-      return ((cur_mb->bmi + 12 + b)->as_mode.first);
+    if (cur_mb->mbmi.ref_frame[0] != INTRA_FRAME) {
+      return DC_PRED;
+    } else if (cur_mb->mbmi.sb_type < BLOCK_SIZE_SB8X8) {
+      return ((cur_mb->bmi + 2 + b)->as_mode.first);
     } else {
-      return B_DC_PRED;
+      return cur_mb->mbmi.mode;
     }
   }
 
-  return (cur_mb->bmi + b - 4)->as_mode.first;
+  return (cur_mb->bmi + b - 2)->as_mode.first;
 }
 
 #endif  // VP9_COMMON_VP9_FINDNEARMV_H_

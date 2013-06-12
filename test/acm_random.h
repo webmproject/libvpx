@@ -34,6 +34,13 @@ class ACMRandom {
     return (value >> 24) & 0xff;
   }
 
+  uint8_t Rand8Extremes(void) {
+    // Returns a random value near 0 or near 255, to better exercise
+    // saturation behavior.
+    const uint8_t r = Rand8();
+    return r < 128 ? r << 4 : r >> 4;
+  }
+
   int PseudoUniform(int range) {
     return random_.Generate(range);
   }

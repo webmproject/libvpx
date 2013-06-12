@@ -15,61 +15,26 @@
 #include "vp9/common/vp9_onyxc_int.h"
 
 struct subpix_fn_table;
+void vp9_build_inter_predictors_sby(MACROBLOCKD *xd,
+                                    int mb_row,
+                                    int mb_col,
+                                    BLOCK_SIZE_TYPE bsize);
 
-void vp9_build_inter16x16_predictors_mby(MACROBLOCKD *xd,
-                                         uint8_t *dst_y,
-                                         int dst_ystride,
-                                         int mb_row,
-                                         int mb_col);
+void vp9_build_inter_predictors_sbuv(MACROBLOCKD *xd,
+                                     int mb_row,
+                                     int mb_col,
+                                     BLOCK_SIZE_TYPE bsize);
 
-void vp9_build_inter16x16_predictors_mbuv(MACROBLOCKD *xd,
-                                          uint8_t *dst_u,
-                                          uint8_t *dst_v,
-                                          int dst_uvstride,
-                                          int mb_row,
-                                          int mb_col);
-
-void vp9_build_inter16x16_predictors_mb(MACROBLOCKD *xd,
-                                        uint8_t *dst_y,
-                                        uint8_t *dst_u,
-                                        uint8_t *dst_v,
-                                        int dst_ystride,
-                                        int dst_uvstride,
-                                        int mb_row,
-                                        int mb_col);
-
-void vp9_build_inter32x32_predictors_sb(MACROBLOCKD *x,
-                                        uint8_t *dst_y,
-                                        uint8_t *dst_u,
-                                        uint8_t *dst_v,
-                                        int dst_ystride,
-                                        int dst_uvstride,
-                                        int mb_row,
-                                        int mb_col);
-
-void vp9_build_inter64x64_predictors_sb(MACROBLOCKD *x,
-                                        uint8_t *dst_y,
-                                        uint8_t *dst_u,
-                                        uint8_t *dst_v,
-                                        int dst_ystride,
-                                        int dst_uvstride,
-                                        int mb_row,
-                                        int mb_col);
-
-void vp9_build_inter_predictors_mb(MACROBLOCKD *xd,
-                                   int mb_row,
-                                   int mb_col);
-
-void vp9_build_inter4x4_predictors_mbuv(MACROBLOCKD *xd,
-                                        int mb_row,
-                                        int mb_col);
+void vp9_build_inter_predictors_sb(MACROBLOCKD *mb,
+                                   int mb_row, int mb_col,
+                                   BLOCK_SIZE_TYPE bsize);
 
 void vp9_setup_interp_filters(MACROBLOCKD *xd,
                               INTERPOLATIONFILTERTYPE filter,
                               VP9_COMMON *cm);
 
 void vp9_setup_scale_factors_for_frame(struct scale_factors *scale,
-                                       YV12_BUFFER_CONFIG *other,
+                                       int other_w, int other_h,
                                        int this_w, int this_h);
 
 void vp9_build_inter_predictor(const uint8_t *src, int src_stride,
@@ -81,51 +46,73 @@ void vp9_build_inter_predictor(const uint8_t *src, int src_stride,
 
 void vp9_build_inter_predictor_q4(const uint8_t *src, int src_stride,
                                   uint8_t *dst, int dst_stride,
-                                  const int_mv *fullpel_mv_q3,
-                                  const int_mv *frac_mv_q4,
+                                  const int_mv *mv_q4,
                                   const struct scale_factors *scale,
                                   int w, int h, int do_avg,
                                   const struct subpix_fn_table *subpix);
 
-static int scale_value_x(int val, const struct scale_factors *scale) {
-  return val * scale->x_num / scale->x_den;
-}
-
-static int scale_value_y(int val, const struct scale_factors *scale) {
-  return val * scale->y_num / scale->y_den;
-}
-
-static int scaled_buffer_offset(int x_offset,
-                                int y_offset,
-                                int stride,
+static int scaled_buffer_offset(int x_offset, int y_offset, int stride,
                                 const struct scale_factors *scale) {
-  return scale_value_y(y_offset, scale) * stride +
-      scale_value_x(x_offset, scale);
+  const int x = scale ? scale->scale_value_x(x_offset, scale) : x_offset;
+  const int y = scale ? scale->scale_value_y(y_offset, scale) : y_offset;
+  return y * stride + x;
 }
 
-static void setup_pred_block(YV12_BUFFER_CONFIG *dst,
+static void setup_pred_plane(struct buf_2d *dst,
+                             uint8_t *src, int stride,
+                             int mi_row, int mi_col,
+                             const struct scale_factors *scale,
+                             int subsampling_x, int subsampling_y) {
+  const int x = (MI_SIZE * mi_col) >> subsampling_x;
+  const int y = (MI_SIZE * mi_row) >> subsampling_y;
+  dst->buf = src + scaled_buffer_offset(x, y, stride, scale);
+  dst->stride = stride;
+}
+
+// TODO(jkoleszar): audit all uses of this that don't set mb_row, mb_col
+static void setup_dst_planes(MACROBLOCKD *xd,
                              const YV12_BUFFER_CONFIG *src,
-                             int mb_row, int mb_col,
+                             int mi_row, int mi_col) {
+  uint8_t *buffers[4] = {src->y_buffer, src->u_buffer, src->v_buffer,
+                         src->alpha_buffer};
+  int strides[4] = {src->y_stride, src->uv_stride, src->uv_stride,
+                    src->alpha_stride};
+  int i;
+
+  for (i = 0; i < MAX_MB_PLANE; ++i) {
+    struct macroblockd_plane *pd = &xd->plane[i];
+    setup_pred_plane(&pd->dst, buffers[i], strides[i], mi_row, mi_col, NULL,
+                     pd->subsampling_x, pd->subsampling_y);
+  }
+}
+
+static void setup_pre_planes(MACROBLOCKD *xd,
+                             const YV12_BUFFER_CONFIG *src0,
+                             const YV12_BUFFER_CONFIG *src1,
+                             int mi_row, int mi_col,
                              const struct scale_factors *scale,
                              const struct scale_factors *scale_uv) {
-  const int recon_y_stride = src->y_stride;
-  const int recon_uv_stride = src->uv_stride;
-  int recon_yoffset;
-  int recon_uvoffset;
+  const YV12_BUFFER_CONFIG *srcs[2] = {src0, src1};
+  int i, j;
 
-  if (scale) {
-    recon_yoffset = scaled_buffer_offset(16 * mb_col, 16 * mb_row,
-                                         recon_y_stride, scale);
-    recon_uvoffset = scaled_buffer_offset(8 * mb_col, 8 * mb_row,
-                                          recon_uv_stride, scale_uv);
-  } else {
-    recon_yoffset = 16 * mb_row * recon_y_stride + 16 * mb_col;
-    recon_uvoffset = 8 * mb_row * recon_uv_stride + 8 * mb_col;
+  for (i = 0; i < 2; ++i) {
+    const YV12_BUFFER_CONFIG *src = srcs[i];
+    if (src) {
+      uint8_t* buffers[4] = {src->y_buffer, src->u_buffer, src->v_buffer,
+                             src->alpha_buffer};
+      int strides[4] = {src->y_stride, src->uv_stride, src->uv_stride,
+                        src->alpha_stride};
+
+      for (j = 0; j < MAX_MB_PLANE; ++j) {
+        struct macroblockd_plane *pd = &xd->plane[j];
+        const struct scale_factors *sf = j ? scale_uv : scale;
+        setup_pred_plane(&pd->pre[i],
+                         buffers[j], strides[j],
+                         mi_row, mi_col, sf ? &sf[i] : NULL,
+                         pd->subsampling_x, pd->subsampling_y);
+      }
+    }
   }
-  *dst = *src;
-  dst->y_buffer += recon_yoffset;
-  dst->u_buffer += recon_uvoffset;
-  dst->v_buffer += recon_uvoffset;
 }
 
 static void set_scale_factors(MACROBLOCKD *xd,
@@ -137,5 +124,7 @@ static void set_scale_factors(MACROBLOCKD *xd,
   xd->scale_factor_uv[0] = xd->scale_factor[0];
   xd->scale_factor_uv[1] = xd->scale_factor[1];
 }
+
+void vp9_setup_scale_factors(VP9_COMMON *cm, int i);
 
 #endif  // VP9_COMMON_VP9_RECONINTER_H_

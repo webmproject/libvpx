@@ -27,30 +27,21 @@ typedef struct {
   unsigned int value;
   int count;
   unsigned int pos;
-  unsigned char *buffer;
+  uint8_t *buffer;
 
   // Variables used to track bit costs without outputing to the bitstream
   unsigned int  measure_cost;
   unsigned long bit_counter;
-} BOOL_CODER;
+} vp9_writer;
 
-extern void vp9_start_encode(BOOL_CODER *bc, unsigned char *buffer);
-
-extern void vp9_encode_value(BOOL_CODER *br, int data, int bits);
-extern void vp9_encode_unsigned_max(BOOL_CODER *br, int data, int max);
-extern void vp9_stop_encode(BOOL_CODER *bc);
 extern const unsigned int vp9_prob_cost[256];
 
-extern void vp9_encode_uniform(BOOL_CODER *bc, int v, int n);
-extern void vp9_encode_term_subexp(BOOL_CODER *bc, int v, int k, int n);
-extern int vp9_count_uniform(int v, int n);
-extern int vp9_count_term_subexp(int v, int k, int n);
-extern int vp9_recenter_nonneg(int v, int m);
+void vp9_start_encode(vp9_writer *bc, uint8_t *buffer);
+void vp9_stop_encode(vp9_writer *bc);
 
 DECLARE_ALIGNED(16, extern const unsigned char, vp9_norm[256]);
 
-
-static void encode_bool(BOOL_CODER *br, int bit, int probability) {
+static void vp9_write(vp9_writer *br, int bit, int probability) {
   unsigned int split;
   int count = br->count;
   unsigned int range = br->range;
@@ -89,7 +80,7 @@ static void encode_bool(BOOL_CODER *br, int bit, int probability) {
       int x = br->pos - 1;
 
       while (x >= 0 && br->buffer[x] == 0xff) {
-        br->buffer[x] = (unsigned char)0;
+        br->buffer[x] = 0;
         x--;
       }
 
@@ -108,5 +99,17 @@ static void encode_bool(BOOL_CODER *br, int bit, int probability) {
   br->lowvalue = lowvalue;
   br->range = range;
 }
+
+static void vp9_write_bit(vp9_writer *w, int bit) {
+  vp9_write(w, bit, 128);  // vp9_prob_half
+}
+
+static void vp9_write_literal(vp9_writer *w, int data, int bits) {
+  int bit;
+
+  for (bit = bits - 1; bit >= 0; bit--)
+    vp9_write_bit(w, 1 & (data >> bit));
+}
+
 
 #endif  // VP9_ENCODER_VP9_BOOLHUFF_H_

@@ -81,10 +81,10 @@
     pmaddubsw   xmm4, k4k5
     pmaddubsw   xmm6, k6k7
 
+    paddsw      xmm0, xmm6
     paddsw      xmm0, xmm2
-    paddsw      xmm0, krd
-    paddsw      xmm4, xmm6
     paddsw      xmm0, xmm4
+    paddsw      xmm0, krd
 
     psraw       xmm0, 7
     packuswb    xmm0, xmm0
@@ -165,10 +165,10 @@
     pmaddubsw   xmm4, k4k5
     pmaddubsw   xmm6, k6k7
 
+    paddsw      xmm0, xmm6
     paddsw      xmm0, xmm2
-    paddsw      xmm0, krd
-    paddsw      xmm4, xmm6
     paddsw      xmm0, xmm4
+    paddsw      xmm0, krd
 
     psraw       xmm0, 7
     packuswb    xmm0, xmm0
@@ -250,10 +250,10 @@
     pmaddubsw   xmm4, k4k5
     pmaddubsw   xmm6, k6k7
 
+    paddsw      xmm0, xmm6
     paddsw      xmm0, xmm2
-    paddsw      xmm0, krd
-    paddsw      xmm4, xmm6
     paddsw      xmm0, xmm4
+    paddsw      xmm0, krd
 
     psraw       xmm0, 7
     packuswb    xmm0, xmm0
@@ -285,10 +285,10 @@
     pmaddubsw   xmm4, k4k5
     pmaddubsw   xmm6, k6k7
 
+    paddsw      xmm0, xmm6
     paddsw      xmm0, xmm2
-    paddsw      xmm4, xmm6
-    paddsw      xmm0, krd
     paddsw      xmm0, xmm4
+    paddsw      xmm0, krd
 
     psraw       xmm0, 7
     packuswb    xmm0, xmm0

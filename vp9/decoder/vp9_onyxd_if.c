@@ -21,8 +21,6 @@
 #include "vpx_mem/vpx_mem.h"
 #include "vp9/common/vp9_alloccommon.h"
 #include "vp9/common/vp9_loopfilter.h"
-#include "vp9/common/vp9_swapyv12buffer.h"
-
 #include "vp9/common/vp9_quant_common.h"
 #include "vpx_scale/vpx_scale.h"
 #include "vp9/common/vp9_systemdependent.h"
@@ -36,7 +34,7 @@
 static void recon_write_yuv_frame(const char *name,
                                   const YV12_BUFFER_CONFIG *s,
                                   int w, int _h) {
-  FILE *yuv_file = fopen((char *)name, "ab");
+  FILE *yuv_file = fopen(name, "ab");
   const uint8_t *src = s->y_buffer;
   int h = _h;
 
@@ -111,7 +109,7 @@ void vp9_initialize_dec() {
 }
 
 VP9D_PTR vp9_create_decompressor(VP9D_CONFIG *oxcf) {
-  VP9D_COMP *pbi = vpx_memalign(32, sizeof(VP9D_COMP));
+  VP9D_COMP *const pbi = vpx_memalign(32, sizeof(VP9D_COMP));
 
   if (!pbi)
     return NULL;
@@ -121,40 +119,37 @@ VP9D_PTR vp9_create_decompressor(VP9D_CONFIG *oxcf) {
   if (setjmp(pbi->common.error.jmp)) {
     pbi->common.error.setjmp = 0;
     vp9_remove_decompressor(pbi);
-    return 0;
+    return NULL;
   }
 
   pbi->common.error.setjmp = 1;
   vp9_initialize_dec();
 
   vp9_create_common(&pbi->common);
-  pbi->oxcf = *oxcf;
 
+  pbi->oxcf = *oxcf;
   pbi->common.current_video_frame = 0;
   pbi->ready_for_new_data = 1;
 
-  /* vp9_init_de_quantizer() is first called here. Add check in
-   * frame_init_dequantizer() to avoid unnecessary calling of
-   * vp9_init_de_quantizer() for every frame.
-   */
-  vp9_init_de_quantizer(pbi);
+  // vp9_init_dequantizer() is first called here. Add check in
+  // frame_init_dequantizer() to avoid unnecessary calling of
+  // vp9_init_dequantizer() for every frame.
+  vp9_init_dequantizer(&pbi->common);
 
   vp9_loop_filter_init(&pbi->common);
 
   pbi->common.error.setjmp = 0;
-
   pbi->decoded_key_frame = 0;
 
-  return (VP9D_PTR) pbi;
+  return pbi;
 }
 
 void vp9_remove_decompressor(VP9D_PTR ptr) {
-  VP9D_COMP *pbi = (VP9D_COMP *) ptr;
+  VP9D_COMP *const pbi = (VP9D_COMP *)ptr;
 
   if (!pbi)
     return;
 
-  // Delete segmentation map
   if (pbi->common.last_frame_seg_map)
     vpx_free(pbi->common.last_frame_seg_map);
 
@@ -252,7 +247,7 @@ int vp9_get_reference_dec(VP9D_PTR ptr, int index, YV12_BUFFER_CONFIG **fb) {
   return 0;
 }
 
-/* If any buffer updating is signalled it should be done here. */
+/* If any buffer updating is signaled it should be done here. */
 static void swap_frame_buffers(VP9D_COMP *pbi) {
   int ref_index = 0, mask;
 
@@ -273,24 +268,23 @@ static void swap_frame_buffers(VP9D_COMP *pbi) {
     pbi->common.active_ref_idx[ref_index] = INT_MAX;
 }
 
-int vp9_receive_compressed_data(VP9D_PTR ptr, unsigned long size,
-                                const unsigned char **psource,
+int vp9_receive_compressed_data(VP9D_PTR ptr,
+                                uint64_t size, const uint8_t **psource,
                                 int64_t time_stamp) {
   VP9D_COMP *pbi = (VP9D_COMP *) ptr;
   VP9_COMMON *cm = &pbi->common;
-  const unsigned char *source = *psource;
+  const uint8_t *source = *psource;
   int retcode = 0;
 
   /*if(pbi->ready_for_new_data == 0)
       return -1;*/
 
-  if (ptr == 0) {
+  if (ptr == 0)
     return -1;
-  }
 
   pbi->common.error.error_code = VPX_CODEC_OK;
 
-  pbi->Source = source;
+  pbi->source = source;
   pbi->source_sz = size;
 
   if (pbi->source_sz == 0) {
@@ -325,6 +319,7 @@ int vp9_receive_compressed_data(VP9D_PTR ptr, unsigned long size,
 
     if (cm->fb_idx_ref_cnt[cm->new_fb_idx] > 0)
       cm->fb_idx_ref_cnt[cm->new_fb_idx]--;
+
     return -1;
   }
 
@@ -354,10 +349,20 @@ int vp9_receive_compressed_data(VP9D_PTR ptr, unsigned long size,
 
     if (cm->filter_level) {
       /* Apply the loop filter if appropriate. */
-      vp9_loop_filter_frame(cm, &pbi->mb, cm->filter_level, 0,
-                            cm->dering_enabled);
+      vp9_loop_filter_frame(cm, &pbi->mb, cm->filter_level, 0);
     }
-    vp8_yv12_extend_frame_borders(cm->frame_to_show);
+
+#if WRITE_RECON_BUFFER == 2
+    if (cm->show_frame)
+      write_dx_frame_to_file(cm->frame_to_show,
+                             cm->current_video_frame + 2000);
+    else
+      write_dx_frame_to_file(cm->frame_to_show,
+                             cm->current_video_frame + 3000);
+#endif
+
+    vp9_extend_frame_borders(cm->frame_to_show,
+                             cm->subsampling_x, cm->subsampling_y);
   }
 
 #if WRITE_RECON_BUFFER == 1
@@ -368,19 +373,19 @@ int vp9_receive_compressed_data(VP9D_PTR ptr, unsigned long size,
 
   vp9_clear_system_state();
 
+  cm->last_show_frame = cm->show_frame;
   if (cm->show_frame) {
-    vpx_memcpy(cm->prev_mip, cm->mip,
-               (cm->mb_cols + 1) * (cm->mb_rows + 1)* sizeof(MODE_INFO));
-  } else {
-    vpx_memset(cm->prev_mip, 0,
-               (cm->mb_cols + 1) * (cm->mb_rows + 1)* sizeof(MODE_INFO));
-  }
+    // current mip will be the prev_mip for the next frame
+    MODE_INFO *temp = cm->prev_mip;
+    cm->prev_mip = cm->mip;
+    cm->mip = temp;
 
-  /*vp9_print_modes_and_motion_vectors(cm->mi, cm->mb_rows,cm->mb_cols,
-                                       cm->current_video_frame);*/
+    // update the upper left visible macroblock ptrs
+    cm->mi = cm->mip + cm->mode_info_stride + 1;
+    cm->prev_mi = cm->prev_mip + cm->mode_info_stride + 1;
 
-  if (cm->show_frame)
     cm->current_video_frame++;
+  }
 
   pbi->ready_for_new_data = 0;
   pbi->last_time_stamp = time_stamp;

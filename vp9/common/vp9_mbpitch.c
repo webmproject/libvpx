@@ -11,105 +11,18 @@
 
 #include "vp9/common/vp9_blockd.h"
 
-typedef enum {
-  PRED = 0,
-  DEST = 1
-} BLOCKSET;
+void vp9_setup_block_dptrs(MACROBLOCKD *mb,
+                           int subsampling_x, int subsampling_y) {
+  int i;
 
-static void setup_block(BLOCKD *b,
-                        int mv_stride,
-                        uint8_t **base,
-                        uint8_t **base2,
-                        int stride,
-                        int offset,
-                        BLOCKSET bs) {
-  if (bs == DEST) {
-    b->dst_stride = stride;
-    b->dst = offset;
-    b->base_dst = base;
-  } else {
-    b->pre_stride = stride;
-    b->pre = offset;
-    b->base_pre = base;
-    b->base_second_pre = base2;
+  for (i = 0; i < MAX_MB_PLANE; i++) {
+    mb->plane[i].plane_type = i ? PLANE_TYPE_UV : PLANE_TYPE_Y_WITH_DC;
+    mb->plane[i].subsampling_x = i ? subsampling_x : 0;
+    mb->plane[i].subsampling_y = i ? subsampling_y : 0;
   }
-}
-
-static void setup_macroblock(MACROBLOCKD *xd, BLOCKSET bs) {
-  int block;
-
-  uint8_t **y, **u, **v;
-  uint8_t **y2 = NULL, **u2 = NULL, **v2 = NULL;
-  BLOCKD *blockd = xd->block;
-  int stride;
-
-  if (bs == DEST) {
-    y = &xd->dst.y_buffer;
-    u = &xd->dst.u_buffer;
-    v = &xd->dst.v_buffer;
-  } else {
-    y = &xd->pre.y_buffer;
-    u = &xd->pre.u_buffer;
-    v = &xd->pre.v_buffer;
-
-    y2 = &xd->second_pre.y_buffer;
-    u2 = &xd->second_pre.u_buffer;
-    v2 = &xd->second_pre.v_buffer;
-  }
-
-  stride = xd->dst.y_stride;
-  for (block = 0; block < 16; block++) { /* y blocks */
-    setup_block(&blockd[block], stride, y, y2, stride,
-                (block >> 2) * 4 * stride + (block & 3) * 4, bs);
-  }
-
-  stride = xd->dst.uv_stride;
-  for (block = 16; block < 20; block++) { /* U and V blocks */
-    setup_block(&blockd[block], stride, u, u2, stride,
-      ((block - 16) >> 1) * 4 * stride + (block & 1) * 4, bs);
-
-    setup_block(&blockd[block + 4], stride, v, v2, stride,
-      ((block - 16) >> 1) * 4 * stride + (block & 1) * 4, bs);
-  }
-}
-
-void vp9_setup_block_dptrs(MACROBLOCKD *xd) {
-  int r, c;
-  BLOCKD *blockd = xd->block;
-
-  for (r = 0; r < 4; r++) {
-    for (c = 0; c < 4; c++) {
-      blockd[r * 4 + c].diff = &xd->diff[r * 4 * 16 + c * 4];
-      blockd[r * 4 + c].predictor = xd->predictor + r * 4 * 16 + c * 4;
-    }
-  }
-
-  for (r = 0; r < 2; r++) {
-    for (c = 0; c < 2; c++) {
-      blockd[16 + r * 2 + c].diff = &xd->diff[256 + r * 4 * 8 + c * 4];
-      blockd[16 + r * 2 + c].predictor =
-        xd->predictor + 256 + r * 4 * 8 + c * 4;
-
-    }
-  }
-
-  for (r = 0; r < 2; r++) {
-    for (c = 0; c < 2; c++) {
-      blockd[20 + r * 2 + c].diff = &xd->diff[320 + r * 4 * 8 + c * 4];
-      blockd[20 + r * 2 + c].predictor =
-        xd->predictor + 320 + r * 4 * 8 + c * 4;
-
-    }
-  }
-
-  for (r = 0; r < 24; r++) {
-    blockd[r].qcoeff  = xd->qcoeff  + r * 16;
-    blockd[r].dqcoeff = xd->dqcoeff + r * 16;
-  }
-}
-
-void vp9_build_block_doffsets(MACROBLOCKD *xd) {
-  /* handle the destination pitch features */
-  setup_macroblock(xd, DEST);
-  setup_macroblock(xd, PRED);
+#if CONFIG_ALPHA
+  // TODO(jkoleszar): Using the Y w/h for now
+  mb->plane[3].subsampling_x = 0;
+  mb->plane[3].subsampling_y = 0;
+#endif
 }

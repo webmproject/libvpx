@@ -18,7 +18,7 @@ extern "C" {
 #include "vpx/vpx_integer.h"
 
 #define VP8BORDERINPIXELS       32
-#define VP9BORDERINPIXELS       64
+#define VP9BORDERINPIXELS       96
 #define VP9_INTERP_EXTEND        4
 
   /*************************************
@@ -52,9 +52,14 @@ extern "C" {
     int   uv_stride;
     /*    int   uvinternal_width; */
 
+    int   alpha_width;
+    int   alpha_height;
+    int   alpha_stride;
+
     uint8_t *y_buffer;
     uint8_t *u_buffer;
     uint8_t *v_buffer;
+    uint8_t *alpha_buffer;
 
     uint8_t *buffer_alloc;
     int buffer_alloc_sz;
@@ -71,6 +76,14 @@ extern "C" {
   int vp8_yv12_realloc_frame_buffer(YV12_BUFFER_CONFIG *ybf,
                                     int width, int height, int border);
   int vp8_yv12_de_alloc_frame_buffer(YV12_BUFFER_CONFIG *ybf);
+
+  int vp9_alloc_frame_buffer(YV12_BUFFER_CONFIG *ybf,
+                             int width, int height, int ss_x, int ss_y,
+                             int border);
+  int vp9_realloc_frame_buffer(YV12_BUFFER_CONFIG *ybf,
+                               int width, int height, int ss_x, int ss_y,
+                               int border);
+  int vp9_free_frame_buffer(YV12_BUFFER_CONFIG *ybf);
 
 #ifdef __cplusplus
 }

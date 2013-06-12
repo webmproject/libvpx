@@ -15,15 +15,6 @@
 
 #define HALFNDX 8
 
-extern unsigned int vp9_get16x16var_sse2
-(
-  const unsigned char *src_ptr,
-  int source_stride,
-  const unsigned char *ref_ptr,
-  int recon_stride,
-  unsigned int *SSE,
-  int *Sum
-);
 extern void vp9_half_horiz_vert_variance16x_h_sse2
 (
   const unsigned char *ref_ptr,

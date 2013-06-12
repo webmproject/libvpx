@@ -83,7 +83,7 @@ class I420VideoSource : public VideoSource {
   void SetSize(unsigned int width, unsigned int height) {
     if (width != width_ || height != height_) {
       vpx_img_free(img_);
-      img_ = vpx_img_alloc(NULL, VPX_IMG_FMT_VPXI420, width, height, 1);
+      img_ = vpx_img_alloc(NULL, VPX_IMG_FMT_I420, width, height, 1);
       ASSERT_TRUE(img_ != NULL);
       width_ = width;
       height_ = height;

@@ -17,10 +17,14 @@
 // Predicted items
 typedef enum {
   PRED_SEG_ID = 0,  // Segment identifier
-  PRED_REF = 1,
-  PRED_COMP = 2,
-  PRED_MBSKIP = 3,
-  PRED_SWITCHABLE_INTERP = 4
+  PRED_MBSKIP = 1,
+  PRED_SWITCHABLE_INTERP = 2,
+  PRED_INTRA_INTER = 3,
+  PRED_COMP_INTER_INTER = 4,
+  PRED_SINGLE_REF_P1 = 5,
+  PRED_SINGLE_REF_P2 = 6,
+  PRED_COMP_REF_P = 7,
+  PRED_TX_SIZE = 8
 } PRED_ID;
 
 unsigned char vp9_get_pred_context(const VP9_COMMON *const cm,
@@ -43,13 +47,7 @@ void vp9_set_pred_flag(MACROBLOCKD *const xd,
                        unsigned char pred_flag);
 
 
-unsigned char vp9_get_pred_mb_segid(const VP9_COMMON *const cm,
-                                    const MACROBLOCKD *const xd,
-                                    int MbIndex);
-
-MV_REFERENCE_FRAME vp9_get_pred_ref(const VP9_COMMON *const cm,
-                                    const MACROBLOCKD *const xd);
-
-void vp9_compute_mod_refprobs(VP9_COMMON *const cm);
+int vp9_get_pred_mi_segid(VP9_COMMON *cm, BLOCK_SIZE_TYPE sb_type,
+                          int mi_row, int mi_col);
 
 #endif  // VP9_COMMON_VP9_PRED_COMMON_H_

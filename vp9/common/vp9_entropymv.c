@@ -14,16 +14,11 @@
 
 //#define MV_COUNT_TESTING
 
-#define MV_COUNT_SAT 16
-#define MV_MAX_UPDATE_FACTOR 160
+#define MV_COUNT_SAT 20
+#define MV_MAX_UPDATE_FACTOR 128
 
-#if CONFIG_NEW_MVREF
-/* Integer pel reference mv threshold for use of high-precision 1/8 mv */
-#define COMPANDED_MVREF_THRESH    1000000
-#else
 /* Integer pel reference mv threshold for use of high-precision 1/8 mv */
 #define COMPANDED_MVREF_THRESH    8
-#endif
 
 /* Smooth or bias the mv-counts before prob computation */
 /* #define SMOOTH_MV_COUNTS */
@@ -33,7 +28,7 @@ const vp9_tree_index vp9_mv_joint_tree[2 * MV_JOINTS - 2] = {
   -MV_JOINT_HNZVZ, 4,
   -MV_JOINT_HZVNZ, -MV_JOINT_HNZVNZ
 };
-struct vp9_token_struct vp9_mv_joint_encodings[MV_JOINTS];
+struct vp9_token vp9_mv_joint_encodings[MV_JOINTS];
 
 const vp9_tree_index vp9_mv_class_tree[2 * MV_CLASSES - 2] = {
   -MV_CLASS_0, 2,
@@ -47,19 +42,19 @@ const vp9_tree_index vp9_mv_class_tree[2 * MV_CLASSES - 2] = {
   -MV_CLASS_7, -MV_CLASS_8,
   -MV_CLASS_9, -MV_CLASS_10,
 };
-struct vp9_token_struct vp9_mv_class_encodings[MV_CLASSES];
+struct vp9_token vp9_mv_class_encodings[MV_CLASSES];
 
 const vp9_tree_index vp9_mv_class0_tree [2 * CLASS0_SIZE - 2] = {
   -0, -1,
 };
-struct vp9_token_struct vp9_mv_class0_encodings[CLASS0_SIZE];
+struct vp9_token vp9_mv_class0_encodings[CLASS0_SIZE];
 
 const vp9_tree_index vp9_mv_fp_tree [2 * 4 - 2] = {
   -0, 2,
   -1, 4,
   -2, -3
 };
-struct vp9_token_struct vp9_mv_fp_encodings[4];
+struct vp9_token vp9_mv_fp_encodings[4];
 
 const nmv_context vp9_default_nmv_context = {
   {32, 64, 96},
@@ -87,11 +82,15 @@ const nmv_context vp9_default_nmv_context = {
   },
 };
 
-MV_JOINT_TYPE vp9_get_mv_joint(MV mv) {
-  if (mv.row == 0 && mv.col == 0) return MV_JOINT_ZERO;
-  else if (mv.row == 0 && mv.col != 0) return MV_JOINT_HNZVZ;
-  else if (mv.row != 0 && mv.col == 0) return MV_JOINT_HZVNZ;
-  else return MV_JOINT_HNZVNZ;
+MV_JOINT_TYPE vp9_get_mv_joint(const MV *mv) {
+  if (mv->row == 0 && mv->col == 0)
+    return MV_JOINT_ZERO;
+  else if (mv->row == 0 && mv->col != 0)
+    return MV_JOINT_HNZVZ;
+  else if (mv->row != 0 && mv->col == 0)
+    return MV_JOINT_HZVNZ;
+  else
+    return MV_JOINT_HNZVNZ;
 }
 
 #define mv_class_base(c) ((c) ? (CLASS0_SIZE << (c + 2)) : 0)
@@ -137,7 +136,8 @@ static void increment_nmv_component(int v,
                                     int incr,
                                     int usehp) {
   int s, z, c, o, d, e, f;
-  if (!incr) return;
+  if (!incr)
+    return;
   assert (v != 0);            /* should not be zero */
   s = v < 0;
   mvcomp->sign[s] += incr;
@@ -152,8 +152,8 @@ static void increment_nmv_component(int v,
   if (c == MV_CLASS_0) {
     mvcomp->class0[d] += incr;
   } else {
-    int i, b;
-    b = c + CLASS0_BITS - 1;  /* number of bits */
+    int i;
+    int b = c + CLASS0_BITS - 1;  // number of bits
     for (i = 0; i < b; ++i)
       mvcomp->bits[i][((d >> i) & 1)] += incr;
   }
@@ -204,25 +204,22 @@ static void counts_to_context(nmv_component_counts *mvcomp, int usehp) {
 
 void vp9_increment_nmv(const MV *mv, const MV *ref, nmv_context_counts *mvctx,
                        int usehp) {
-  MV_JOINT_TYPE j = vp9_get_mv_joint(*mv);
+  const MV_JOINT_TYPE j = vp9_get_mv_joint(mv);
   mvctx->joints[j]++;
   usehp = usehp && vp9_use_nmv_hp(ref);
-  if (j == MV_JOINT_HZVNZ || j == MV_JOINT_HNZVNZ) {
+  if (mv_joint_vertical(j))
     increment_nmv_component_count(mv->row, &mvctx->comps[0], 1, usehp);
-  }
-  if (j == MV_JOINT_HNZVZ || j == MV_JOINT_HNZVNZ) {
+
+  if (mv_joint_horizontal(j))
     increment_nmv_component_count(mv->col, &mvctx->comps[1], 1, usehp);
-  }
 }
 
-static void adapt_prob(vp9_prob *dest, vp9_prob prep,
-                       unsigned int ct[2]) {
-  int count = ct[0] + ct[1];
+static void adapt_prob(vp9_prob *dest, vp9_prob prep, unsigned int ct[2]) {
+  const int count = MIN(ct[0] + ct[1], MV_COUNT_SAT);
   if (count) {
-    vp9_prob newp = get_binary_prob(ct[0], ct[1]);
-    count = count > MV_COUNT_SAT ? MV_COUNT_SAT : count;
-    *dest = weighted_prob(prep, newp,
-                          MV_MAX_UPDATE_FACTOR * count / MV_COUNT_SAT);
+    const vp9_prob newp = get_binary_prob(ct[0], ct[1]);
+    const int factor = MV_MAX_UPDATE_FACTOR * count / MV_COUNT_SAT;
+    *dest = weighted_prob(prep, newp, factor);
   } else {
     *dest = prep;
   }
@@ -253,10 +250,12 @@ void vp9_counts_to_nmv_context(
                                    branch_ct_joint,
                                    nmv_count->joints, 0);
   for (i = 0; i < 2; ++i) {
-    prob->comps[i].sign = get_binary_prob(nmv_count->comps[i].sign[0],
-                                          nmv_count->comps[i].sign[1]);
-    branch_ct_sign[i][0] = nmv_count->comps[i].sign[0];
-    branch_ct_sign[i][1] = nmv_count->comps[i].sign[1];
+    const uint32_t s0 = nmv_count->comps[i].sign[0];
+    const uint32_t s1 = nmv_count->comps[i].sign[1];
+
+    prob->comps[i].sign = get_binary_prob(s0, s1);
+    branch_ct_sign[i][0] = s0;
+    branch_ct_sign[i][1] = s1;
     vp9_tree_probs_from_distribution(vp9_mv_class_tree,
                                      prob->comps[i].classes,
                                      branch_ct_classes[i],
@@ -266,10 +265,12 @@ void vp9_counts_to_nmv_context(
                                      branch_ct_class0[i],
                                      nmv_count->comps[i].class0, 0);
     for (j = 0; j < MV_OFFSET_BITS; ++j) {
-      prob->comps[i].bits[j] = get_binary_prob(nmv_count->comps[i].bits[j][0],
-                                               nmv_count->comps[i].bits[j][1]);
-      branch_ct_bits[i][j][0] = nmv_count->comps[i].bits[j][0];
-      branch_ct_bits[i][j][1] = nmv_count->comps[i].bits[j][1];
+      const uint32_t b0 = nmv_count->comps[i].bits[j][0];
+      const uint32_t b1 = nmv_count->comps[i].bits[j][1];
+
+      prob->comps[i].bits[j] = get_binary_prob(b0, b1);
+      branch_ct_bits[i][j][0] = b0;
+      branch_ct_bits[i][j][1] = b1;
     }
   }
   for (i = 0; i < 2; ++i) {
@@ -286,16 +287,18 @@ void vp9_counts_to_nmv_context(
   }
   if (usehp) {
     for (i = 0; i < 2; ++i) {
-      prob->comps[i].class0_hp =
-          get_binary_prob(nmv_count->comps[i].class0_hp[0],
-                          nmv_count->comps[i].class0_hp[1]);
-      branch_ct_class0_hp[i][0] = nmv_count->comps[i].class0_hp[0];
-      branch_ct_class0_hp[i][1] = nmv_count->comps[i].class0_hp[1];
+      const uint32_t c0_hp0 = nmv_count->comps[i].class0_hp[0];
+      const uint32_t c0_hp1 = nmv_count->comps[i].class0_hp[1];
+      const uint32_t hp0 = nmv_count->comps[i].hp[0];
+      const uint32_t hp1 = nmv_count->comps[i].hp[1];
 
-      prob->comps[i].hp = get_binary_prob(nmv_count->comps[i].hp[0],
-                                          nmv_count->comps[i].hp[1]);
-      branch_ct_hp[i][0] = nmv_count->comps[i].hp[0];
-      branch_ct_hp[i][1] = nmv_count->comps[i].hp[1];
+      prob->comps[i].class0_hp = get_binary_prob(c0_hp0, c0_hp1);
+      branch_ct_class0_hp[i][0] = c0_hp0;
+      branch_ct_class0_hp[i][1] = c0_hp1;
+
+      prob->comps[i].hp = get_binary_prob(hp0, hp1);
+      branch_ct_hp[i][0] = hp0;
+      branch_ct_hp[i][1] = hp1;
     }
   }
 }

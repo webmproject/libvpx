@@ -120,111 +120,6 @@ static int get_max_filter_level(VP9_COMP *cpi, int base_qindex) {
   return max_filter_level;
 }
 
-void vp9_pick_filter_level_fast(YV12_BUFFER_CONFIG *sd, VP9_COMP *cpi) {
-  VP9_COMMON *cm = &cpi->common;
-
-  int best_err = 0;
-  int filt_err = 0;
-  int min_filter_level = get_min_filter_level(cpi, cm->base_qindex);
-  int max_filter_level = get_max_filter_level(cpi, cm->base_qindex);
-  int filt_val;
-  int best_filt_val = cm->filter_level;
-
-  //  Make a copy of the unfiltered / processed recon buffer
-  vp9_yv12_copy_partial_frame(cm->frame_to_show, &cpi->last_frame_uf, 3);
-
-  if (cm->frame_type == KEY_FRAME)
-    cm->sharpness_level = 0;
-  else
-    cm->sharpness_level = cpi->oxcf.Sharpness;
-
-  if (cm->sharpness_level != cm->last_sharpness_level) {
-    vp9_loop_filter_update_sharpness(&cm->lf_info, cm->sharpness_level);
-    cm->last_sharpness_level = cm->sharpness_level;
-  }
-
-  // Start the search at the previous frame filter level unless it is now out of range.
-  if (cm->filter_level < min_filter_level)
-    cm->filter_level = min_filter_level;
-  else if (cm->filter_level > max_filter_level)
-    cm->filter_level = max_filter_level;
-
-  filt_val = cm->filter_level;
-  best_filt_val = filt_val;
-
-  // Get the err using the previous frame's filter value.
-  vp9_loop_filter_partial_frame(cm, &cpi->mb.e_mbd, filt_val);
-
-  best_err = calc_partial_ssl_err(sd, cm->frame_to_show, 3);
-
-  //  Re-instate the unfiltered frame
-  vp9_yv12_copy_partial_frame(&cpi->last_frame_uf, cm->frame_to_show, 3);
-
-  filt_val -= (1 + ((filt_val > 10) ? 1 : 0));
-
-  // Search lower filter levels
-  while (filt_val >= min_filter_level) {
-    // Apply the loop filter
-    vp9_loop_filter_partial_frame(cm, &cpi->mb.e_mbd, filt_val);
-
-    // Get the err for filtered frame
-    filt_err = calc_partial_ssl_err(sd, cm->frame_to_show, 3);
-
-    //  Re-instate the unfiltered frame
-    vp9_yv12_copy_partial_frame(&cpi->last_frame_uf, cm->frame_to_show, 3);
-
-
-    // Update the best case record or exit loop.
-    if (filt_err < best_err) {
-      best_err = filt_err;
-      best_filt_val = filt_val;
-    } else
-      break;
-
-    // Adjust filter level
-    filt_val -= (1 + ((filt_val > 10) ? 1 : 0));
-  }
-
-  // Search up (note that we have already done filt_val = cm->filter_level)
-  filt_val = cm->filter_level + (1 + ((filt_val > 10) ? 1 : 0));
-
-  if (best_filt_val == cm->filter_level) {
-    // Resist raising filter level for very small gains
-    best_err -= (best_err >> 10);
-
-    while (filt_val < max_filter_level) {
-      // Apply the loop filter
-      vp9_loop_filter_partial_frame(cm, &cpi->mb.e_mbd, filt_val);
-
-      // Get the err for filtered frame
-      filt_err = calc_partial_ssl_err(sd, cm->frame_to_show, 3);
-
-      //  Re-instate the unfiltered frame
-      vp9_yv12_copy_partial_frame(&cpi->last_frame_uf,
-                                      cm->frame_to_show, 3);
-
-      // Update the best case record or exit loop.
-      if (filt_err < best_err) {
-        // Do not raise filter level if improvement is < 1 part in 4096
-        best_err = filt_err - (filt_err >> 10);
-
-        best_filt_val = filt_val;
-      } else
-        break;
-
-      // Adjust filter level
-      filt_val += (1 + ((filt_val > 10) ? 1 : 0));
-    }
-  }
-
-  cm->filter_level = best_filt_val;
-
-  if (cm->filter_level < min_filter_level)
-    cm->filter_level = min_filter_level;
-
-  if (cm->filter_level > max_filter_level)
-    cm->filter_level = max_filter_level;
-}
 
 // Stub function for now Alt LF not used
 void vp9_set_alt_lf_level(VP9_COMP *cpi, int filt_val) {
@@ -268,7 +163,7 @@ void vp9_pick_filter_level(YV12_BUFFER_CONFIG *sd, VP9_COMP *cpi) {
 
   // Get baseline error score
   vp9_set_alt_lf_level(cpi, filt_mid);
-  vp9_loop_filter_frame(cm, &cpi->mb.e_mbd, filt_mid, 1, 0);
+  vp9_loop_filter_frame(cm, &cpi->mb.e_mbd, filt_mid, 1);
 
   best_err = vp9_calc_ss_err(sd, cm->frame_to_show);
   filt_best = filt_mid;
@@ -293,7 +188,7 @@ void vp9_pick_filter_level(YV12_BUFFER_CONFIG *sd, VP9_COMP *cpi) {
     if ((filt_direction <= 0) && (filt_low != filt_mid)) {
       // Get Low filter error score
       vp9_set_alt_lf_level(cpi, filt_low);
-      vp9_loop_filter_frame(cm, &cpi->mb.e_mbd, filt_low, 1, 0);
+      vp9_loop_filter_frame(cm, &cpi->mb.e_mbd, filt_low, 1);
 
       filt_err = vp9_calc_ss_err(sd, cm->frame_to_show);
 
@@ -313,7 +208,7 @@ void vp9_pick_filter_level(YV12_BUFFER_CONFIG *sd, VP9_COMP *cpi) {
     // Now look at filt_high
     if ((filt_direction >= 0) && (filt_high != filt_mid)) {
       vp9_set_alt_lf_level(cpi, filt_high);
-      vp9_loop_filter_frame(cm, &cpi->mb.e_mbd, filt_high, 1, 0);
+      vp9_loop_filter_frame(cm, &cpi->mb.e_mbd, filt_high, 1);
 
       filt_err = vp9_calc_ss_err(sd, cm->frame_to_show);
 
@@ -338,30 +233,4 @@ void vp9_pick_filter_level(YV12_BUFFER_CONFIG *sd, VP9_COMP *cpi) {
   }
 
   cm->filter_level = filt_best;
-
-#if CONFIG_LOOP_DERING
-  /* Decide whether to turn on deringing filter */
-  {  // NOLINT
-    int best_dering = 0;
-    int this_dering;
-    int last_err_diff = INT_MAX;
-
-    for (this_dering = 1; this_dering <= 16; this_dering++) {
-      vp9_set_alt_lf_level(cpi, filt_best);
-      vp9_loop_filter_frame(cm, &cpi->mb.e_mbd, filt_high, 1, this_dering);
-      filt_err = vp9_calc_ss_err(sd, cm->frame_to_show);
-      vp8_yv12_copy_y(&cpi->last_frame_uf, cm->frame_to_show);
-      if (filt_err < best_err) {
-        best_err = filt_err;
-        best_dering = this_dering;
-        last_err_diff = INT_MAX;
-      } else {
-        if (filt_err - best_err > last_err_diff)
-          break;
-        last_err_diff = filt_err - best_err;
-      }
-    }
-    cm->dering_enabled = best_dering;
-  }
-#endif
 }

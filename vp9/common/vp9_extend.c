@@ -60,10 +60,22 @@ void vp9_copy_and_extend_frame(const YV12_BUFFER_CONFIG *src,
   const int eb_y = dst->border + dst->y_height - src->y_height;
   const int er_y = dst->border + dst->y_width - src->y_width;
 
-  const int et_uv = dst->border >> 1;
-  const int el_uv = dst->border >> 1;
-  const int eb_uv = (dst->border >> 1) + dst->uv_height - src->uv_height;
-  const int er_uv = (dst->border >> 1) + dst->uv_width - src->uv_width;
+  const int et_uv = dst->border >> (dst->uv_height != dst->y_height);
+  const int el_uv = dst->border >> (dst->uv_width != dst->y_width);
+  const int eb_uv = et_uv + dst->uv_height - src->uv_height;
+  const int er_uv = el_uv + dst->uv_width - src->uv_width;
+
+#if CONFIG_ALPHA
+  const int et_a = dst->border >> (dst->alpha_height != dst->y_height);
+  const int el_a = dst->border >> (dst->alpha_width != dst->y_width);
+  const int eb_a = et_a + dst->alpha_height - src->alpha_height;
+  const int er_a = el_a + dst->alpha_width - src->alpha_width;
+
+  copy_and_extend_plane(src->alpha_buffer, src->alpha_stride,
+                        dst->alpha_buffer, dst->alpha_stride,
+                        src->alpha_width, src->alpha_height,
+                        et_a, el_a, eb_a, er_a);
+#endif
 
   copy_and_extend_plane(src->y_buffer, src->y_stride,
                         dst->y_buffer, dst->y_stride,
@@ -78,7 +90,7 @@ void vp9_copy_and_extend_frame(const YV12_BUFFER_CONFIG *src,
   copy_and_extend_plane(src->v_buffer, src->uv_stride,
                         dst->v_buffer, dst->uv_stride,
                         src->uv_width, src->uv_height,
-                        et_y, el_y, eb_uv, er_uv);
+                        et_uv, el_uv, eb_uv, er_uv);
 }
 
 void vp9_copy_and_extend_frame_with_rect(const YV12_BUFFER_CONFIG *src,
@@ -118,30 +130,4 @@ void vp9_copy_and_extend_frame_with_rect(const YV12_BUFFER_CONFIG *src,
                         dst->v_buffer + dst_uv_offset, dst->uv_stride,
                         srcw_uv, srch_uv,
                         et_uv, el_uv, eb_uv, er_uv);
-}
-
-// note the extension is only for the last row, for intra prediction purpose
-void vp9_extend_mb_row(YV12_BUFFER_CONFIG *buf,
-                       uint8_t *y, uint8_t *u, uint8_t *v) {
-  int i;
-
-  y += buf->y_stride * 14;
-  u += buf->uv_stride * 6;
-  v += buf->uv_stride * 6;
-
-  for (i = 0; i < 4; i++) {
-    y[i] = y[-1];
-    u[i] = u[-1];
-    v[i] = v[-1];
-  }
-
-  y += buf->y_stride;
-  u += buf->uv_stride;
-  v += buf->uv_stride;
-
-  for (i = 0; i < 4; i++) {
-    y[i] = y[-1];
-    u[i] = u[-1];
-    v[i] = v[-1];
-  }
 }
