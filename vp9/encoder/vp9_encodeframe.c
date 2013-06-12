@@ -1572,7 +1572,7 @@ static void encode_frame_internal(VP9_COMP *cpi) {
                mi_row < cm->cur_tile_mi_row_end;
                mi_row += 8)
             encode_sb_row(cpi, mi_row, &tp, &totalrate);
-          cpi->tok_count[tile_col] = (unsigned int)(tp - tp_old);
+          cpi->tok_count[tile_row][tile_col] = (unsigned int)(tp - tp_old);
           assert(tp - cpi->tok <=
                  get_token_alloc(cm->mb_rows, cm->mb_cols));
         }
