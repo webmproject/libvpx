@@ -2146,7 +2146,7 @@ static void scale_and_extend_frame(YV12_BUFFER_CONFIG *src_fb,
         const int dst_stride = dst_strides[i];
         uint8_t *src = srcs[i] + y / factor * in_h / out_h * src_stride +
                                  x / factor * in_w / out_w;
-        uint8_t *dst = dsts[i] + y * dst_stride + x;
+        uint8_t *dst = dsts[i] + y / factor * dst_stride + x / factor;
 
         vp9_convolve8(src, src_stride, dst, dst_stride,
                       vp9_sub_pel_filters_8[x_q4 & 0xf], 16 * in_w / out_w,
