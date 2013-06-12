@@ -717,12 +717,8 @@ static void setup_quantization(VP9D_COMP *pbi, struct vp9_read_bit_buffer *rb) {
                  cm->uv_ac_delta_q == 0;
   if (xd->lossless) {
     xd->itxm_add          = vp9_idct_add_lossless_c;
-    xd->itxm_add_y_block  = vp9_idct_add_y_block_lossless_c;
-    xd->itxm_add_uv_block = vp9_idct_add_uv_block_lossless_c;
   } else {
     xd->itxm_add          = vp9_idct_add;
-    xd->itxm_add_y_block  = vp9_idct_add_y_block;
-    xd->itxm_add_uv_block = vp9_idct_add_uv_block;
   }
 }
 
