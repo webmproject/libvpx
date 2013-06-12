@@ -34,6 +34,24 @@
       "revId": "8a0808a1457a9e426d029637856b3d8f44c6f29b",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAZ3//x6k\u003d",
+        "filename": "vp9/encoder/vp9_bitstream.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1732,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2013-06-12T17:55:05Z",
+      "side": 1,
+      "message": "maybe a side question, what is the purpose for doing row tiles? got little confused here(?)",
+      "parentUuid": "AAAAZ3//x7I\u003d",
+      "revId": "8a0808a1457a9e426d029637856b3d8f44c6f29b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
