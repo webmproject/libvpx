@@ -487,7 +487,8 @@ void vp9_mbloop_filter_horizontal_edge_sse2(unsigned char *s,
                                             int p,
                                             const unsigned char *_blimit,
                                             const unsigned char *_limit,
-                                            const unsigned char *_thresh) {
+                                            const unsigned char *_thresh,
+                                            int count) {
   DECLARE_ALIGNED(16, unsigned char, flat_op2[16]);
   DECLARE_ALIGNED(16, unsigned char, flat_op1[16]);
   DECLARE_ALIGNED(16, unsigned char, flat_op0[16]);
@@ -507,14 +508,15 @@ void vp9_mbloop_filter_horizontal_edge_sse2(unsigned char *s,
   const __m128i blimit =
       _mm_shuffle_epi32(_mm_cvtsi32_si128((int)extended_blimit), 0);
 
-  p3 = _mm_loadu_si128((__m128i *)(s - 4 * p));
-  p2 = _mm_loadu_si128((__m128i *)(s - 3 * p));
-  p1 = _mm_loadu_si128((__m128i *)(s - 2 * p));
-  p0 = _mm_loadu_si128((__m128i *)(s - 1 * p));
-  q0 = _mm_loadu_si128((__m128i *)(s - 0 * p));
-  q1 = _mm_loadu_si128((__m128i *)(s + 1 * p));
-  q2 = _mm_loadu_si128((__m128i *)(s + 2 * p));
-  q3 = _mm_loadu_si128((__m128i *)(s + 3 * p));
+  (void)count;
+  p3 = _mm_loadl_epi64((__m128i *)(s - 4 * p));
+  p2 = _mm_loadl_epi64((__m128i *)(s - 3 * p));
+  p1 = _mm_loadl_epi64((__m128i *)(s - 2 * p));
+  p0 = _mm_loadl_epi64((__m128i *)(s - 1 * p));
+  q0 = _mm_loadl_epi64((__m128i *)(s - 0 * p));
+  q1 = _mm_loadl_epi64((__m128i *)(s + 1 * p));
+  q2 = _mm_loadl_epi64((__m128i *)(s + 2 * p));
+  q3 = _mm_loadl_epi64((__m128i *)(s + 3 * p));
   {
     const __m128i abs_p1p0 = _mm_or_si128(_mm_subs_epu8(p1, p0),
                                           _mm_subs_epu8(p0, p1));
@@ -570,8 +572,7 @@ void vp9_mbloop_filter_horizontal_edge_sse2(unsigned char *s,
   {
     const __m128i four = _mm_set1_epi16(4);
     unsigned char *src = s;
-    int i = 0;
-    do {
+    {
       __m128i workp_a, workp_b, workp_shft;
       p3 = _mm_unpacklo_epi8(_mm_loadl_epi64((__m128i *)(src - 4 * p)), zero);
       p2 = _mm_unpacklo_epi8(_mm_loadl_epi64((__m128i *)(src - 3 * p)), zero);
@@ -586,40 +587,38 @@ void vp9_mbloop_filter_horizontal_edge_sse2(unsigned char *s,
       workp_a = _mm_add_epi16(_mm_add_epi16(workp_a, four), p0);
       workp_b = _mm_add_epi16(_mm_add_epi16(q0, p2), p3);
       workp_shft = _mm_srli_epi16(_mm_add_epi16(workp_a, workp_b), 3);
-      _mm_storel_epi64((__m128i *)&flat_op2[i*8],
+      _mm_storel_epi64((__m128i *)&flat_op2[0],
                        _mm_packus_epi16(workp_shft, workp_shft));
 
       workp_b = _mm_add_epi16(_mm_add_epi16(q0, q1), p1);
       workp_shft = _mm_srli_epi16(_mm_add_epi16(workp_a, workp_b), 3);
-      _mm_storel_epi64((__m128i *)&flat_op1[i*8],
+      _mm_storel_epi64((__m128i *)&flat_op1[0],
                        _mm_packus_epi16(workp_shft, workp_shft));
 
       workp_a = _mm_add_epi16(_mm_sub_epi16(workp_a, p3), q2);
       workp_b = _mm_add_epi16(_mm_sub_epi16(workp_b, p1), p0);
       workp_shft = _mm_srli_epi16(_mm_add_epi16(workp_a, workp_b), 3);
-      _mm_storel_epi64((__m128i *)&flat_op0[i*8],
+      _mm_storel_epi64((__m128i *)&flat_op0[0],
                        _mm_packus_epi16(workp_shft, workp_shft));
 
       workp_a = _mm_add_epi16(_mm_sub_epi16(workp_a, p3), q3);
       workp_b = _mm_add_epi16(_mm_sub_epi16(workp_b, p0), q0);
       workp_shft = _mm_srli_epi16(_mm_add_epi16(workp_a, workp_b), 3);
-      _mm_storel_epi64((__m128i *)&flat_oq0[i*8],
+      _mm_storel_epi64((__m128i *)&flat_oq0[0],
                        _mm_packus_epi16(workp_shft, workp_shft));
 
       workp_a = _mm_add_epi16(_mm_sub_epi16(workp_a, p2), q3);
       workp_b = _mm_add_epi16(_mm_sub_epi16(workp_b, q0), q1);
       workp_shft = _mm_srli_epi16(_mm_add_epi16(workp_a, workp_b), 3);
-      _mm_storel_epi64((__m128i *)&flat_oq1[i*8],
+      _mm_storel_epi64((__m128i *)&flat_oq1[0],
                        _mm_packus_epi16(workp_shft, workp_shft));
 
       workp_a = _mm_add_epi16(_mm_sub_epi16(workp_a, p1), q3);
       workp_b = _mm_add_epi16(_mm_sub_epi16(workp_b, q1), q2);
       workp_shft = _mm_srli_epi16(_mm_add_epi16(workp_a, workp_b), 3);
-      _mm_storel_epi64((__m128i *)&flat_oq2[i*8],
+      _mm_storel_epi64((__m128i *)&flat_oq2[0],
                        _mm_packus_epi16(workp_shft, workp_shft));
-
-      src += 8;
-    } while (++i < 2);
+    }
   }
   // lp filter
   {
@@ -631,13 +630,13 @@ void vp9_mbloop_filter_horizontal_edge_sse2(unsigned char *s,
     const __m128i t1 = _mm_set1_epi8(0x1);
     const __m128i t7f = _mm_set1_epi8(0x7f);
 
-    const __m128i ps1 = _mm_xor_si128(_mm_loadu_si128((__m128i *)(s - 2 * p)),
+    const __m128i ps1 = _mm_xor_si128(_mm_loadl_epi64((__m128i *)(s - 2 * p)),
                                       t80);
-    const __m128i ps0 = _mm_xor_si128(_mm_loadu_si128((__m128i *)(s - 1 * p)),
+    const __m128i ps0 = _mm_xor_si128(_mm_loadl_epi64((__m128i *)(s - 1 * p)),
                                       t80);
-    const __m128i qs0 = _mm_xor_si128(_mm_loadu_si128((__m128i *)(s + 0 * p)),
+    const __m128i qs0 = _mm_xor_si128(_mm_loadl_epi64((__m128i *)(s + 0 * p)),
                                       t80);
-    const __m128i qs1 = _mm_xor_si128(_mm_loadu_si128((__m128i *)(s + 1 * p)),
+    const __m128i qs1 = _mm_xor_si128(_mm_loadl_epi64((__m128i *)(s + 1 * p)),
                                       t80);
     __m128i filt;
     __m128i work_a;
@@ -679,47 +678,47 @@ void vp9_mbloop_filter_horizontal_edge_sse2(unsigned char *s,
     filt = _mm_andnot_si128(hev, filt);
 
     work_a = _mm_xor_si128(_mm_subs_epi8(qs0, filter1), t80);
-    q0 = _mm_load_si128((__m128i *)flat_oq0);
+    q0 = _mm_loadl_epi64((__m128i *)flat_oq0);
     work_a = _mm_andnot_si128(flat, work_a);
     q0 = _mm_and_si128(flat, q0);
     q0 = _mm_or_si128(work_a, q0);
 
     work_a = _mm_xor_si128(_mm_subs_epi8(qs1, filt), t80);
-    q1 = _mm_load_si128((__m128i *)flat_oq1);
+    q1 = _mm_loadl_epi64((__m128i *)flat_oq1);
     work_a = _mm_andnot_si128(flat, work_a);
     q1 = _mm_and_si128(flat, q1);
     q1 = _mm_or_si128(work_a, q1);
 
     work_a = _mm_loadu_si128((__m128i *)(s + 2 * p));
-    q2 = _mm_load_si128((__m128i *)flat_oq2);
+    q2 = _mm_loadl_epi64((__m128i *)flat_oq2);
     work_a = _mm_andnot_si128(flat, work_a);
     q2 = _mm_and_si128(flat, q2);
     q2 = _mm_or_si128(work_a, q2);
 
     work_a = _mm_xor_si128(_mm_adds_epi8(ps0, filter2), t80);
-    p0 = _mm_load_si128((__m128i *)flat_op0);
+    p0 = _mm_loadl_epi64((__m128i *)flat_op0);
     work_a = _mm_andnot_si128(flat, work_a);
     p0 = _mm_and_si128(flat, p0);
     p0 = _mm_or_si128(work_a, p0);
 
     work_a = _mm_xor_si128(_mm_adds_epi8(ps1, filt), t80);
-    p1 = _mm_load_si128((__m128i *)flat_op1);
+    p1 = _mm_loadl_epi64((__m128i *)flat_op1);
     work_a = _mm_andnot_si128(flat, work_a);
     p1 = _mm_and_si128(flat, p1);
     p1 = _mm_or_si128(work_a, p1);
 
     work_a = _mm_loadu_si128((__m128i *)(s - 3 * p));
-    p2 = _mm_load_si128((__m128i *)flat_op2);
+    p2 = _mm_loadl_epi64((__m128i *)flat_op2);
     work_a = _mm_andnot_si128(flat, work_a);
     p2 = _mm_and_si128(flat, p2);
     p2 = _mm_or_si128(work_a, p2);
 
-    _mm_storeu_si128((__m128i *)(s - 3 * p), p2);
-    _mm_storeu_si128((__m128i *)(s - 2 * p), p1);
-    _mm_storeu_si128((__m128i *)(s - 1 * p), p0);
-    _mm_storeu_si128((__m128i *)(s + 0 * p), q0);
-    _mm_storeu_si128((__m128i *)(s + 1 * p), q1);
-    _mm_storeu_si128((__m128i *)(s + 2 * p), q2);
+    _mm_storel_epi64((__m128i *)(s - 3 * p), p2);
+    _mm_storel_epi64((__m128i *)(s - 2 * p), p1);
+    _mm_storel_epi64((__m128i *)(s - 1 * p), p0);
+    _mm_storel_epi64((__m128i *)(s + 0 * p), q0);
+    _mm_storel_epi64((__m128i *)(s + 1 * p), q1);
+    _mm_storel_epi64((__m128i *)(s + 2 * p), q2);
   }
 }
 
@@ -766,7 +765,7 @@ void vp9_mbloop_filter_horizontal_edge_uv_sse2(unsigned char *u,
 
   /* Loop filtering */
   vp9_mbloop_filter_horizontal_edge_sse2(src + 80, 16, _blimit, _limit,
-                                         _thresh);
+                                         _thresh, 1);
 
   /* Store result */
   _mm_storel_epi64((__m128i *)(u - 3 * p),
@@ -929,18 +928,20 @@ void vp9_mbloop_filter_vertical_edge_sse2(unsigned char *s,
                                           int p,
                                           const unsigned char *blimit,
                                           const unsigned char *limit,
-                                          const unsigned char *thresh) {
+                                          const unsigned char *thresh,
+                                          int count) {
   DECLARE_ALIGNED_ARRAY(16, unsigned char, t_dst, 256);
   unsigned char *src[2];
   unsigned char *dst[2];
 
+  (void)count;
   /* Transpose 16x16 */
   transpose8x16(s - 8, s - 8 + p * 8, p, t_dst, 16);
   transpose8x16(s, s + p * 8, p, t_dst + 16 * 8, 16);
 
   /* Loop filtering */
   vp9_mbloop_filter_horizontal_edge_sse2(t_dst + 8 * 16, 16, blimit, limit,
-                                           thresh);
+                                           thresh, 1);
   src[0] = t_dst + 3 * 16;
   src[1] = t_dst + 3 * 16 + 8;
 
@@ -999,7 +1000,7 @@ void vp9_mbloop_filter_vertical_edge_uv_sse2(unsigned char *u,
 
   /* Loop filtering */
   vp9_mbloop_filter_horizontal_edge_sse2(t_dst + 8 * 16, 16, blimit, limit,
-                                           thresh);
+                                           thresh, 1);
 
   src[0] = t_dst + 3 * 16;
   src[1] = t_dst + 3 * 16 + 8;
