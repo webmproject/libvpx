@@ -321,10 +321,10 @@ static int check_bsize_coverage(VP9_COMMON *cm, MACROBLOCKD *xd,
   assert(bsize > BLOCK_SIZE_SB8X8);
 
   // return the node index in the prob tree for binary coding
-  // skip horizontal/none partition types
+  // only allow horizontal/split partition types
   if ((mi_col + ms < cm->mi_cols) && (mi_row + ms >= cm->mi_rows))
     return 1;
-  // skip vertical/none partition types
+  // only allow vertical/split partition types
   if ((mi_row + ms < cm->mi_rows) && (mi_col + ms >= cm->mi_cols))
     return 2;
 
