@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAZ3//x7c\u003d",
+        "filename": "vp9/encoder/vp9_bitstream.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1732,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2013-06-12T17:47:16Z",
+      "side": 1,
+      "message": "Should this be moved into the for-loop over tile_row (line 1745)? We need to reset the context conditions for every tile, to remove the dependency(?)",
+      "revId": "8a0808a1457a9e426d029637856b3d8f44c6f29b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
