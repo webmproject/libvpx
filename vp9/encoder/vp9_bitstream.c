@@ -967,8 +967,6 @@ static void write_modes(VP9_COMP *cpi, vp9_writer* const bc,
   int mi_row, mi_col;
 
   m_ptr += c->cur_tile_mi_col_start + c->cur_tile_mi_row_start * mis;
-  vpx_memset(c->above_seg_context, 0, sizeof(PARTITION_CONTEXT) *
-             mi_cols_aligned_to_sb(c));
 
   for (mi_row = c->cur_tile_mi_row_start;
        mi_row < c->cur_tile_mi_row_end;
@@ -1728,24 +1726,34 @@ void vp9_pack_bitstream(VP9_COMP *cpi, uint8_t *dest, unsigned long *size) {
   {
     int tile_row, tile_col, total_size = 0;
     unsigned char *data_ptr = cx_data + header_bc.pos;
-    TOKENEXTRA *tok[1 << 6], *tok_end;
+    TOKENEXTRA *tok[4][1 << 6], *tok_end;
 
-    tok[0] = cpi->tok;
-    for (tile_col = 1; tile_col < pc->tile_columns; tile_col++)
-      tok[tile_col] = tok[tile_col - 1] + cpi->tok_count[tile_col - 1];
+    vpx_memset(cpi->common.above_seg_context, 0, sizeof(PARTITION_CONTEXT) *
+               mi_cols_aligned_to_sb(&cpi->common));
+    tok[0][0] = cpi->tok;
+    for (tile_row = 0; tile_row < pc->tile_rows; tile_row++) {
+      if (tile_row) {
+        tok[tile_row][0] = tok[tile_row - 1][pc->tile_columns - 1] +
+                           cpi->tok_count[tile_row - 1][pc->tile_columns - 1];
+      }
+      for (tile_col = 1; tile_col < pc->tile_columns; tile_col++) {
+        tok[tile_row][tile_col] = tok[tile_row][tile_col - 1] +
+                                  cpi->tok_count[tile_row][tile_col - 1];
+      }
+    }
 
     for (tile_row = 0; tile_row < pc->tile_rows; tile_row++) {
       vp9_get_tile_row_offsets(pc, tile_row);
-      tok_end = cpi->tok + cpi->tok_count[0];
-      for (tile_col = 0; tile_col < pc->tile_columns;
-           tile_col++, tok_end += cpi->tok_count[tile_col]) {
+      for (tile_col = 0; tile_col < pc->tile_columns; tile_col++) {
         vp9_get_tile_col_offsets(pc, tile_col);
+        tok_end = tok[tile_row][tile_col] + cpi->tok_count[tile_row][tile_col];
 
         if (tile_col < pc->tile_columns - 1 || tile_row < pc->tile_rows - 1)
           vp9_start_encode(&residual_bc, data_ptr + total_size + 4);
         else
           vp9_start_encode(&residual_bc, data_ptr + total_size);
-        write_modes(cpi, &residual_bc, &tok[tile_col], tok_end);
+        write_modes(cpi, &residual_bc, &tok[tile_row][tile_col], tok_end);
+        assert(tok[tile_row][tile_col] == tok_end);
         vp9_stop_encode(&residual_bc);
         if (tile_col < pc->tile_columns - 1 || tile_row < pc->tile_rows - 1) {
           // size of this tile
@@ -1756,11 +1764,6 @@ void vp9_pack_bitstream(VP9_COMP *cpi, uint8_t *dest, unsigned long *size) {
         total_size += residual_bc.pos;
       }
     }
-
-    assert((unsigned int)(tok[0] - cpi->tok) == cpi->tok_count[0]);
-    for (tile_col = 1; tile_col < pc->tile_columns; tile_col++)
-      assert((unsigned int)(tok[tile_col] - tok[tile_col - 1]) ==
-                  cpi->tok_count[tile_col]);
 
     *size += total_size;
   }
