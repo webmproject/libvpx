@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAZ3//wS8\u003d",
+        "filename": "vp9/encoder/x86/vp9_sad_sse2.asm",
+        "patchSetId": 1
+      },
+      "lineNbr": 171,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2013-06-13T18:23:25Z",
+      "side": 1,
+      "message": "why not 4x{4,8}",
+      "revId": "716165f8848df0c75d14dcffdcddf7ec59997b18",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAZ3//wSk\u003d",
+        "filename": "vp9/encoder/x86/vp9_sad_sse2.asm",
+        "patchSetId": 1
+      },
+      "lineNbr": 198,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2013-06-13T18:23:25Z",
+      "side": 1,
+      "message": "why not delete this with macro above?",
+      "revId": "716165f8848df0c75d14dcffdcddf7ec59997b18",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
