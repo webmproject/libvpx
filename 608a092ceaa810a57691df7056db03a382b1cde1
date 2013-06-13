@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAZ3//v44\u003d",
+        "filename": "vp9/encoder/x86/vp9_sad_sse2.asm",
+        "patchSetId": 3
+      },
+      "lineNbr": 191,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-06-13T22:03:36Z",
+      "side": 1,
+      "message": "It\u0027s a little odd that the x8 is unrolled to handle 4 rows per iteration, and this one does only 2. Can you try unrolling to do 4 per iteration and see if that\u0027s faster in a cycle timer? If not, this is fine, and maybe we should change the x8 also to do 2 rows per iteration instead of 4.",
+      "revId": "608a092ceaa810a57691df7056db03a382b1cde1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
