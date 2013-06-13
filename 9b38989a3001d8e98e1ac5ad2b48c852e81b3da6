@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAZ3//vzQ\u003d",
+        "filename": "vp9/decoder/vp9_read_bit_buffer.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2013-06-13T22:42:42Z",
+      "side": 1,
+      "message": "I agree size_t would be a better fix. It would also need to be updated in vp9_decodeframe.c:\n\nstatic void error_handler(void *data, int bit_offset) {\n\nBut given that it isn\u0027t used there, is it worth even keeping? Or does vpx_internal_error pick it up somehow?",
+      "parentUuid": "AAAAZ3//v0s\u003d",
+      "revId": "9b38989a3001d8e98e1ac5ad2b48c852e81b3da6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAZ3//v0o\u003d",
         "filename": "vp9/decoder/vp9_read_bit_buffer.h",
         "patchSetId": 1
