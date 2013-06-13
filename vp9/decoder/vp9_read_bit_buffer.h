@@ -15,7 +15,7 @@
 
 #include "vpx/vpx_integer.h"
 
-typedef void (*vp9_rb_error_handler)(void *data, int bit_offset);
+typedef void (*vp9_rb_error_handler)(void *data, size_t bit_offset);
 
 struct vp9_read_bit_buffer {
   const uint8_t *bit_buffer;
@@ -31,9 +31,9 @@ static size_t vp9_rb_bytes_read(struct vp9_read_bit_buffer *rb) {
 }
 
 static int vp9_rb_read_bit(struct vp9_read_bit_buffer *rb) {
-  const int off = rb->bit_offset;
-  const int p = off / CHAR_BIT;
-  const int q = CHAR_BIT - 1 - off % CHAR_BIT;
+  const size_t off = rb->bit_offset;
+  const size_t p = off / CHAR_BIT;
+  const int q = CHAR_BIT - 1 - (int)off % CHAR_BIT;
   if (rb->bit_buffer + p >= rb->bit_buffer_end) {
     rb->error_handler(rb->error_handler_data, rb->bit_offset);
     return 0;
