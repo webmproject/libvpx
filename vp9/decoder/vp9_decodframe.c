@@ -973,7 +973,7 @@ static void check_sync_code(VP9_COMMON *cm, struct vp9_read_bit_buffer *rb) {
   }
 }
 
-static void error_handler(void *data, int bit_offset) {
+static void error_handler(void *data, size_t bit_offset) {
   VP9_COMMON *const cm = (VP9_COMMON *)data;
   vpx_internal_error(&cm->error, VPX_CODEC_CORRUPT_FRAME, "Truncated packet");
 }
