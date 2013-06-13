@@ -16,6 +16,24 @@
       "revId": "608a092ceaa810a57691df7056db03a382b1cde1",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAZ3//vr4\u003d",
+        "filename": "vp9/encoder/x86/vp9_sad_sse2.asm",
+        "patchSetId": 3
+      },
+      "lineNbr": 191,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2013-06-13T23:29:49Z",
+      "side": 1,
+      "message": "Done\n\nIt seems the runtime is similar to that of 2 rows per iteration case. But this reduces the number of branch jumps, maybe good for later parallel optimization(?)",
+      "parentUuid": "AAAAZ3//v44\u003d",
+      "revId": "608a092ceaa810a57691df7056db03a382b1cde1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
