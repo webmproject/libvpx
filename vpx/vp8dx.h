@@ -63,11 +63,11 @@ enum vp8_dec_control_id {
    */
   VP8D_GET_LAST_REF_USED,
 
-  /** decryption key to protect encoded data buffer before decoding,
-   *  pointer to 32 byte array which is copied, so the array passed
-   *  does not need to be preserved
+  /** decryption function to decrypt encoded buffer data immediately
+   * before decoding. Takes a vp8_decrypt_init, which contains
+   * a callback function and opaque context pointer.
    */
-  VP8_SET_DECRYPT_KEY,
+  VP8D_SET_DECRYPTOR,
 
   /** For testing. */
   VP9_INVERT_TILE_DECODE_ORDER,
@@ -75,6 +75,17 @@ enum vp8_dec_control_id {
   VP8_DECODER_CTRL_ID_MAX
 };
 
+
+/*Decrypt n bytes of data from input -> output, using the decrypt_state
+   passed in VP8D_SET_DECRYPTOR.
+*/
+typedef void (vp8_decrypt_cb)(void *decrypt_state, const unsigned char *input,
+                              unsigned char *output, int count);
+
+typedef struct vp8_decrypt_init {
+    vp8_decrypt_cb *decrypt_cb;
+    void *decrypt_state;
+} vp8_decrypt_init;
 
 /*!\brief VP8 decoder control function parameter type
  *
@@ -87,7 +98,7 @@ enum vp8_dec_control_id {
 VPX_CTRL_USE_TYPE(VP8D_GET_LAST_REF_UPDATES,   int *)
 VPX_CTRL_USE_TYPE(VP8D_GET_FRAME_CORRUPTED,    int *)
 VPX_CTRL_USE_TYPE(VP8D_GET_LAST_REF_USED,      int *)
-VPX_CTRL_USE_TYPE(VP8_SET_DECRYPT_KEY,         const unsigned char *)
+VPX_CTRL_USE_TYPE(VP8D_SET_DECRYPTOR,          vp8_decrypt_init *)
 VPX_CTRL_USE_TYPE(VP9_INVERT_TILE_DECODE_ORDER, int)
 
 /*! @} - end defgroup vp8_decoder */

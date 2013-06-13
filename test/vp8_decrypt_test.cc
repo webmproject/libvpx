@@ -11,55 +11,61 @@
 #include <cstdio>
 #include <cstdlib>
 #include <string>
+#include <vector>
 #include "third_party/googletest/src/include/gtest/gtest.h"
-#include "test/decode_test_driver.h"
+#include "test/codec_factory.h"
 #include "test/ivf_video_source.h"
 
-#if CONFIG_DECRYPT
-
 namespace {
-
-const uint8_t decrypt_key[32] = {
-  255, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0,
+// In a real use the 'decrypt_state' parameter will be a pointer to a struct
+// with whatever internal state the decryptor uses. For testing we'll just
+// xor with a constant key, and decrypt_state will point to the start of
+// the original buffer.
+const uint8_t test_key[16] = {
+  0x01, 0x12, 0x23, 0x34, 0x45, 0x56, 0x67, 0x78,
+  0x89, 0x9a, 0xab, 0xbc, 0xcd, 0xde, 0xef, 0xf0
 };
 
-}  // namespace
+void encrypt_buffer(const uint8_t *src, uint8_t *dst, int size, int offset = 0) {
+  for (int i = 0; i < size; ++i) {
+    dst[i] = src[i] ^ test_key[(offset + i) & 15];
+  }
+}
+
+void test_decrypt_cb(void *decrypt_state, const uint8_t *input,
+                     uint8_t *output, int count) {
+  encrypt_buffer(input, output, count, input - (uint8_t *)decrypt_state);
+}
+
+} // namespace
 
 namespace libvpx_test {
-
-TEST(TestDecrypt, NullKey) {
-  vpx_codec_dec_cfg_t cfg = {0};
-  vpx_codec_ctx_t decoder = {0};
-  vpx_codec_err_t res = vpx_codec_dec_init(&decoder, &vpx_codec_vp8_dx_algo,
-                                           &cfg, 0);
-  ASSERT_EQ(VPX_CODEC_OK, res);
-
-  res = vpx_codec_control(&decoder, VP8_SET_DECRYPT_KEY, NULL);
-  ASSERT_EQ(VPX_CODEC_INVALID_PARAM, res);
-}
 
 TEST(TestDecrypt, DecryptWorks) {
   libvpx_test::IVFVideoSource video("vp80-00-comprehensive-001.ivf");
   video.Init();
 
   vpx_codec_dec_cfg_t dec_cfg = {0};
-  Decoder decoder(dec_cfg, 0);
+  VP8Decoder decoder(dec_cfg, 0);
 
-  // Zero decrypt key (by default)
   video.Begin();
+
+  // no decryption
   vpx_codec_err_t res = decoder.DecodeFrame(video.cxdata(), video.frame_size());
   ASSERT_EQ(VPX_CODEC_OK, res) << decoder.DecodeError();
 
-  // Non-zero decrypt key
+  // decrypt frame
   video.Next();
-  decoder.Control(VP8_SET_DECRYPT_KEY, decrypt_key);
+
+#if CONFIG_DECRYPT
+  std::vector<uint8_t> encrypted(video.frame_size());
+  encrypt_buffer(video.cxdata(), &encrypted[0], video.frame_size());
+  vp8_decrypt_init di = { test_decrypt_cb, &encrypted[0] };
+  decoder.Control(VP8D_SET_DECRYPTOR, &di);
+#endif  // CONFIG_DECRYPT
+
   res = decoder.DecodeFrame(video.cxdata(), video.frame_size());
-  ASSERT_NE(VPX_CODEC_OK, res) << decoder.DecodeError();
+  ASSERT_EQ(VPX_CODEC_OK, res) << decoder.DecodeError();
 }
 
 }  // namespace libvpx_test
-
-#endif  // CONFIG_DECRYPT
