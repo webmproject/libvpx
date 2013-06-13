@@ -308,6 +308,8 @@ const sad_m_by_n_fn_t sad_16x16_c_vp9 = vp9_sad16x16_c;
 const sad_m_by_n_fn_t sad_8x16_c_vp9 = vp9_sad8x16_c;
 const sad_m_by_n_fn_t sad_16x8_c_vp9 = vp9_sad16x8_c;
 const sad_m_by_n_fn_t sad_8x8_c_vp9 = vp9_sad8x8_c;
+const sad_m_by_n_fn_t sad_8x4_c_vp9 = vp9_sad8x4_c;
+const sad_m_by_n_fn_t sad_4x8_c_vp9 = vp9_sad4x8_c;
 const sad_m_by_n_fn_t sad_4x4_c_vp9 = vp9_sad4x4_c;
 #endif
 const sad_m_by_n_test_param_t c_tests[] = {
@@ -325,6 +327,8 @@ const sad_m_by_n_test_param_t c_tests[] = {
   make_tuple(8, 16, sad_8x16_c_vp9),
   make_tuple(16, 8, sad_16x8_c_vp9),
   make_tuple(8, 8, sad_8x8_c_vp9),
+  make_tuple(8, 4, sad_8x4_c_vp9),
+  make_tuple(4, 8, sad_4x8_c_vp9),
   make_tuple(4, 4, sad_4x4_c_vp9),
 #endif
 };
@@ -404,8 +408,10 @@ INSTANTIATE_TEST_CASE_P(MMX, SADTest, ::testing::ValuesIn(mmx_tests));
 #if HAVE_SSE
 #if CONFIG_VP9_ENCODER
 const sad_m_by_n_fn_t sad_4x4_sse_vp9 = vp9_sad4x4_sse;
+const sad_m_by_n_fn_t sad_4x8_sse_vp9 = vp9_sad4x8_sse;
 INSTANTIATE_TEST_CASE_P(SSE, SADTest, ::testing::Values(
-                        make_tuple(4, 4, sad_4x4_sse_vp9)));
+                        make_tuple(4, 4, sad_4x4_sse_vp9),
+                        make_tuple(4, 8, sad_4x8_sse_vp9)));
 
 const sad_n_by_n_by_4_fn_t sad_4x4x4d_sse = vp9_sad4x4x4d_sse;
 INSTANTIATE_TEST_CASE_P(SSE, SADx4Test, ::testing::Values(
@@ -428,6 +434,7 @@ const sad_m_by_n_fn_t sad_16x16_sse2_vp9 = vp9_sad16x16_sse2;
 const sad_m_by_n_fn_t sad_8x16_sse2_vp9 = vp9_sad8x16_sse2;
 const sad_m_by_n_fn_t sad_16x8_sse2_vp9 = vp9_sad16x8_sse2;
 const sad_m_by_n_fn_t sad_8x8_sse2_vp9 = vp9_sad8x8_sse2;
+const sad_m_by_n_fn_t sad_8x4_sse2_vp9 = vp9_sad8x4_sse2;
 #endif
 const sad_m_by_n_test_param_t sse2_tests[] = {
 #if CONFIG_VP8_ENCODER
@@ -444,6 +451,7 @@ const sad_m_by_n_test_param_t sse2_tests[] = {
   make_tuple(8, 16, sad_8x16_sse2_vp9),
   make_tuple(16, 8, sad_16x8_sse2_vp9),
   make_tuple(8, 8, sad_8x8_sse2_vp9),
+  make_tuple(8, 4, sad_8x4_sse2_vp9),
 #endif
 };
 INSTANTIATE_TEST_CASE_P(SSE2, SADTest, ::testing::ValuesIn(sse2_tests));
