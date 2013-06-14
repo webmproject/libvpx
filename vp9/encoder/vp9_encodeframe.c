@@ -603,6 +603,8 @@ static void pick_sb_modes(VP9_COMP *cpi, int mi_row, int mi_col,
   MACROBLOCK *const x = &cpi->mb;
   MACROBLOCKD *const xd = &x->e_mbd;
 
+  x->rd_search = 1;
+
   if (bsize < BLOCK_SIZE_SB8X8)
     if (xd->ab_index != 0)
       return;
@@ -1975,6 +1977,7 @@ static void encode_superblock(VP9_COMP *cpi, TOKENEXTRA **t,
   const int mis = cm->mode_info_stride;
   const int bwl = mi_width_log2(bsize);
   const int bw = 1 << bwl, bh = 1 << mi_height_log2(bsize);
+  x->rd_search = 0;
 
   if (cm->frame_type == KEY_FRAME) {
     if (cpi->oxcf.tuning == VP8_TUNE_SSIM) {

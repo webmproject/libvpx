@@ -454,7 +454,10 @@ static void xform_quant(int plane, int block, BLOCK_SIZE_TYPE bsize,
 
   switch (ss_txfrm_size / 2) {
     case TX_32X32:
-      vp9_short_fdct32x32(src_diff, coeff, bw * 2);
+      if (x->rd_search)
+        vp9_short_fdct32x32_rd(src_diff, coeff, bw * 2);
+      else
+        vp9_short_fdct32x32(src_diff, coeff, bw * 2);
       break;
     case TX_16X16:
       tx_type = plane == 0 ? get_tx_type_16x16(xd, raster_block) : DCT_DCT;
