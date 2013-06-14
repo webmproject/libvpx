@@ -9,7 +9,7 @@
  */
 
 
-#include "vp9/common/vp9_entropy.h"
+#include "vp9/common/vp9_modecont.h"
 
 const vp9_prob vp9_default_inter_mode_probs[INTER_MODE_CONTEXTS]
                                            [VP9_INTER_MODES - 1] = {
