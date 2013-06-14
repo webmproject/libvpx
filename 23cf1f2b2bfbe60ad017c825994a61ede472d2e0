@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAZ3//umY\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1233,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2013-06-14T17:29:15Z",
+      "side": 1,
+      "message": "In my patch variant I did H and V first. Then you already know srate and sdist correspond to the best of the two and have a simpler test.",
+      "revId": "23cf1f2b2bfbe60ad017c825994a61ede472d2e0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
