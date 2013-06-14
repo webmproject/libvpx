@@ -387,10 +387,10 @@ specialize vp9_sad8x8 mmx sse2
 
 # TODO(jingning): need to covert these functions into mmx/sse2 form
 prototype unsigned int vp9_sad8x4 "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int max_sad"
-specialize vp9_sad8x4
+specialize vp9_sad8x4 sse2
 
 prototype unsigned int vp9_sad4x8 "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int max_sad"
-specialize vp9_sad4x8
+specialize vp9_sad4x8 sse
 
 prototype unsigned int vp9_sad4x4 "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int  ref_stride, unsigned int max_sad"
 specialize vp9_sad4x4 mmx sse
