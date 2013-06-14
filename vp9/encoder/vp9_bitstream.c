@@ -1089,7 +1089,7 @@ static void update_coef_probs_common(vp9_writer* const bc, VP9_COMP *cpi,
           for (t = tstart; t < entropy_nodes_update; ++t) {
             vp9_prob newp = new_frame_coef_probs[i][j][k][l][t];
             const vp9_prob oldp = old_frame_coef_probs[i][j][k][l][t];
-            const vp9_prob upd = vp9_coef_update_prob[t];
+            const vp9_prob upd = VP9_COEF_UPDATE_PROB;
             int s;
             int u = 0;
 
@@ -1131,7 +1131,7 @@ static void update_coef_probs_common(vp9_writer* const bc, VP9_COMP *cpi,
           for (t = tstart; t < entropy_nodes_update; ++t) {
             vp9_prob newp = new_frame_coef_probs[i][j][k][l][t];
             vp9_prob *oldp = old_frame_coef_probs[i][j][k][l] + t;
-            const vp9_prob upd = vp9_coef_update_prob[t];
+            const vp9_prob upd = VP9_COEF_UPDATE_PROB;
             int s;
             int u = 0;
             if (l >= 3 && k == 0)

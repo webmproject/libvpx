@@ -220,6 +220,6 @@ static INLINE const int* get_scan_16x16(TX_TYPE tx_type) {
   }
 }
 
-#include "vp9/common/vp9_coefupdateprobs.h"
+enum { VP9_COEF_UPDATE_PROB = 252 };
 
 #endif  // VP9_COMMON_VP9_ENTROPY_H_

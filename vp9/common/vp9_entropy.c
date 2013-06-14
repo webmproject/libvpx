@@ -14,7 +14,6 @@
 #include "vp9/common/vp9_entropymode.h"
 #include "vpx_mem/vpx_mem.h"
 #include "vpx/vpx_integer.h"
-#include "vp9/common/vp9_coefupdateprobs.h"
 
 DECLARE_ALIGNED(16, const uint8_t, vp9_norm[256]) = {
   0, 7, 6, 6, 5, 5, 5, 5, 4, 4, 4, 4, 4, 4, 4, 4,
