@@ -580,7 +580,7 @@ static void read_coef_probs_common(FRAME_CONTEXT *fc, TX_SIZE tx_size,
             for (m = mstart; m < entropy_nodes_update; m++) {
               vp9_prob *const p = coef_probs[i][j][k][l] + m;
 
-              if (vp9_read(r, vp9_coef_update_prob[m])) {
+              if (vp9_read(r, VP9_COEF_UPDATE_PROB)) {
                 *p = vp9_read_prob_diff_update(r, *p);
               }
             }
