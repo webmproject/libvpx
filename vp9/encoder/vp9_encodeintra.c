@@ -13,7 +13,6 @@
 #include "vp9/encoder/vp9_quantize.h"
 #include "vp9/common/vp9_reconintra.h"
 #include "vp9/encoder/vp9_encodemb.h"
-#include "vp9/common/vp9_invtrans.h"
 #include "vp9/encoder/vp9_encodeintra.h"
 
 int vp9_encode_intra(VP9_COMP *cpi, MACROBLOCK *x, int use_16x16_pred) {

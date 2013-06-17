@@ -20,7 +20,6 @@
 #include "vp9/common/vp9_reconintra.h"
 #include "vp9/common/vp9_reconinter.h"
 #include "vp9/common/vp9_entropy.h"
-#include "vp9/common/vp9_invtrans.h"
 #include "vp9/common/vp9_alloccommon.h"
 #include "vp9/common/vp9_entropymode.h"
 #include "vp9/common/vp9_quant_common.h"
