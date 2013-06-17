@@ -217,8 +217,6 @@ typedef struct {
   int mb_mode_context[MAX_REF_FRAMES];
 
   unsigned char mb_skip_coeff;                                /* does this mb has coefficients at all, 1=no coefficients, 0=need decode tokens */
-  unsigned char need_to_clamp_mvs;
-  unsigned char need_to_clamp_secondmv;
   unsigned char segment_id;           // Segment id for current frame
 
   // Flags used for prediction status of various bistream signals

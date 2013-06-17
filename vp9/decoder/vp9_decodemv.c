@@ -501,8 +501,6 @@ static void read_mb_modes_mv(VP9D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
   int mb_to_left_edge, mb_to_right_edge, mb_to_top_edge, mb_to_bottom_edge;
   int j, idx, idy;
 
-  mbmi->need_to_clamp_mvs = 0;
-  mbmi->need_to_clamp_secondmv = 0;
   mbmi->ref_frame[1] = NONE;
 
   // Make sure the MACROBLOCKD mode info pointer is pointed at the
@@ -624,7 +622,6 @@ static void read_mb_modes_mv(VP9D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
 
     mbmi->uv_mode = DC_PRED;
     if (mbmi->sb_type < BLOCK_SIZE_SB8X8) {
-      mbmi->need_to_clamp_mvs = 0;
       for (idy = 0; idy < 2; idy += bh) {
         for (idx = 0; idx < 2; idx += bw) {
           int_mv blockmv, secondmv;
@@ -735,21 +732,9 @@ static void read_mb_modes_mv(VP9D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
         case NEWMV:
           decode_mv(r, &mv0->as_mv, &best_mv.as_mv, nmvc, &cm->fc.NMVcount,
                     xd->allow_high_precision_mv);
-          mbmi->need_to_clamp_mvs = check_mv_bounds(mv0,
-                                                    mb_to_left_edge,
-                                                    mb_to_right_edge,
-                                                    mb_to_top_edge,
-                                                    mb_to_bottom_edge);
-
-          if (mbmi->ref_frame[1] > 0) {
+          if (mbmi->ref_frame[1] > 0)
             decode_mv(r, &mv1->as_mv, &best_mv_second.as_mv, nmvc,
                       &cm->fc.NMVcount, xd->allow_high_precision_mv);
-            mbmi->need_to_clamp_secondmv = check_mv_bounds(mv1,
-                                                             mb_to_left_edge,
-                                                             mb_to_right_edge,
-                                                             mb_to_top_edge,
-                                                             mb_to_bottom_edge);
-          }
           break;
         default:
 #if CONFIG_DEBUG
