@@ -67,6 +67,8 @@ static const struct {
 };
 
 #include "args.h"
+static const arg_def_t looparg = ARG_DEF(NULL, "loops", 1,
+                                          "Number of times to decode the file");
 static const arg_def_t codecarg = ARG_DEF(NULL, "codec", 1,
                                           "Codec to use");
 static const arg_def_t use_yv12 = ARG_DEF(NULL, "yv12", 0,
@@ -676,7 +678,7 @@ void generate_filename(const char *pattern, char *out, size_t q_len,
 }
 
 
-int main(int argc, const char **argv_) {
+int main_loop(int argc, const char **argv_) {
   vpx_codec_ctx_t          decoder;
   char                  *fn = NULL;
   int                    i;
@@ -737,6 +739,8 @@ int main(int argc, const char **argv_) {
       else
         die("Error: Unrecognized argument (%s) to --codec\n",
             arg.val);
+    } else if (arg_match(&arg, &looparg, argi)) {
+      // no-op
     } else if (arg_match(&arg, &outputfile, argi))
       outfile_pattern = arg.val;
     else if (arg_match(&arg, &use_yv12, argi)) {
@@ -1151,4 +1155,26 @@ fail:
   free(argv);
 
   return frames_corrupted ? EXIT_FAILURE : EXIT_SUCCESS;
+}
+
+int main(int argc, const char **argv_) {
+  unsigned int loops = 1, i;
+  char **argv, **argi, **argj;
+  struct arg arg;
+  int error = 0;
+
+  argv = argv_dup(argc - 1, argv_ + 1);
+  for (argi = argj = argv; (*argj = *argi); argi += arg.argv_step) {
+    memset(&arg, 0, sizeof(arg));
+    arg.argv_step = 1;
+
+    if (arg_match(&arg, &looparg, argi)) {
+      loops = arg_parse_uint(&arg);
+      break;
+    }
+  }
+  free(argv);
+  for (i = 0; !error && i < loops; i++)
+    error = main_loop(argc, argv_);
+  return error;
 }
