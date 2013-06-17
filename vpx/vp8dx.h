@@ -75,15 +75,12 @@ enum vp8_dec_control_id {
   VP8_DECODER_CTRL_ID_MAX
 };
 
-
-/*Decrypt n bytes of data from input -> output, using the decrypt_state
-   passed in VP8D_SET_DECRYPTOR.
-*/
-typedef void (vp8_decrypt_cb)(void *decrypt_state, const unsigned char *input,
-                              unsigned char *output, int count);
-
 typedef struct vp8_decrypt_init {
-    vp8_decrypt_cb *decrypt_cb;
+    /** Decrypt n bytes of data from input -> output, using the decrypt_state
+     *  passed in VP8D_SET_DECRYPTOR.
+     */
+    void (*decrypt_cb)(void *decrypt_state, const unsigned char *input,
+                       unsigned char *output, int count);
     void *decrypt_state;
 } vp8_decrypt_init;
 
