@@ -1759,7 +1759,6 @@ static void parse_global_config(struct global_config *global, char **argv) {
     else
       argj++;
   }
-global->limit = 50;
 
   /* Validate global config */
 
