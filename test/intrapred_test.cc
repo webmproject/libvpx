@@ -11,6 +11,7 @@
 
 #include <string.h>
 #include "test/acm_random.h"
+#include "test/clear_system_state.h"
 #include "test/register_state_check.h"
 #include "third_party/googletest/src/include/gtest/gtest.h"
 extern "C" {
@@ -25,6 +26,11 @@ namespace {
 using libvpx_test::ACMRandom;
 
 class IntraPredBase {
+ public:
+  virtual void TearDown() {
+    libvpx_test::ClearSystemState();
+  }
+
  protected:
   void SetupMacroblock(uint8_t *data, int block_size, int stride,
                        int num_planes) {
