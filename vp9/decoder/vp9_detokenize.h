@@ -14,9 +14,6 @@
 
 #include "vp9/decoder/vp9_onyxd_int.h"
 
-int vp9_decode_tokens(VP9D_COMP* const pbi,
-                      MACROBLOCKD* const xd,
-                      vp9_reader *r,
-                      BLOCK_SIZE_TYPE bsize);
+int vp9_decode_tokens(VP9D_COMP* pbi, vp9_reader *r, BLOCK_SIZE_TYPE bsize);
 
 #endif  // VP9_DECODER_VP9_DETOKENIZE_H_

@@ -198,14 +198,14 @@ static void mb_init_dequantizer(VP9_COMMON *pc, MACROBLOCKD *xd) {
 static void decode_block(int plane, int block, BLOCK_SIZE_TYPE bsize,
                          int ss_txfrm_size, void *arg) {
   MACROBLOCKD* const xd = arg;
-  int16_t* const qcoeff = BLOCK_OFFSET(xd->plane[plane].qcoeff, block, 16);
-  const int stride = xd->plane[plane].dst.stride;
+  struct macroblockd_plane *pd = &xd->plane[plane];
+  int16_t* const qcoeff = BLOCK_OFFSET(pd->qcoeff, block, 16);
+  const int stride = pd->dst.stride;
   const int raster_block = txfrm_block_to_raster_block(xd, bsize, plane,
                                                        block, ss_txfrm_size);
   uint8_t* const dst = raster_block_offset_uint8(xd, bsize, plane,
                                                  raster_block,
-                                                 xd->plane[plane].dst.buf,
-                                                 stride);
+                                                 pd->dst.buf, stride);
 
   TX_TYPE tx_type;
 
@@ -213,23 +213,20 @@ static void decode_block(int plane, int block, BLOCK_SIZE_TYPE bsize,
     case TX_4X4:
       tx_type = plane == 0 ? get_tx_type_4x4(xd, raster_block) : DCT_DCT;
       if (tx_type == DCT_DCT)
-        xd->itxm_add(qcoeff, dst, stride, xd->plane[plane].eobs[block]);
+        xd->itxm_add(qcoeff, dst, stride, pd->eobs[block]);
       else
-        vp9_iht_add_c(tx_type, qcoeff, dst, stride,
-                      xd->plane[plane].eobs[block]);
+        vp9_iht_add_c(tx_type, qcoeff, dst, stride, pd->eobs[block]);
       break;
     case TX_8X8:
       tx_type = plane == 0 ? get_tx_type_8x8(xd, raster_block) : DCT_DCT;
-      vp9_iht_add_8x8_c(tx_type, qcoeff, dst, stride,
-                        xd->plane[plane].eobs[block]);
+      vp9_iht_add_8x8_c(tx_type, qcoeff, dst, stride, pd->eobs[block]);
       break;
     case TX_16X16:
       tx_type = plane == 0 ? get_tx_type_16x16(xd, raster_block) : DCT_DCT;
-      vp9_iht_add_16x16_c(tx_type, qcoeff, dst, stride,
-                          xd->plane[plane].eobs[block]);
+      vp9_iht_add_16x16_c(tx_type, qcoeff, dst, stride, pd->eobs[block]);
       break;
     case TX_32X32:
-      vp9_idct_add_32x32(qcoeff, dst, stride, xd->plane[plane].eobs[block]);
+      vp9_idct_add_32x32(qcoeff, dst, stride, pd->eobs[block]);
       break;
   }
 }
@@ -237,65 +234,40 @@ static void decode_block(int plane, int block, BLOCK_SIZE_TYPE bsize,
 static void decode_block_intra(int plane, int block, BLOCK_SIZE_TYPE bsize,
                                int ss_txfrm_size, void *arg) {
   MACROBLOCKD* const xd = arg;
-  int16_t* const qcoeff = BLOCK_OFFSET(xd->plane[plane].qcoeff, block, 16);
-  const int stride = xd->plane[plane].dst.stride;
+  struct macroblockd_plane *pd = &xd->plane[plane];
+
   const int raster_block = txfrm_block_to_raster_block(xd, bsize, plane,
                                                        block, ss_txfrm_size);
   uint8_t* const dst = raster_block_offset_uint8(xd, bsize, plane,
                                                  raster_block,
-                                                 xd->plane[plane].dst.buf,
-                                                 stride);
+                                                 pd->dst.buf, pd->dst.stride);
   const TX_SIZE tx_size = (TX_SIZE)(ss_txfrm_size / 2);
-  TX_TYPE tx_type;
-  int mode, b_mode;
+  int b_mode;
   int plane_b_size;
-  int tx_ib = raster_block >> tx_size;
-  mode = plane == 0? xd->mode_info_context->mbmi.mode:
-                     xd->mode_info_context->mbmi.uv_mode;
+  const int tx_ib = raster_block >> tx_size;
+  const int mode = plane == 0 ? xd->mode_info_context->mbmi.mode
+                              : xd->mode_info_context->mbmi.uv_mode;
 
 
-  if (xd->mode_info_context->mbmi.sb_type < BLOCK_SIZE_SB8X8 && plane == 0) {
+  if (plane == 0 && xd->mode_info_context->mbmi.sb_type < BLOCK_SIZE_SB8X8) {
     assert(bsize == BLOCK_SIZE_SB8X8);
     b_mode = xd->mode_info_context->bmi[raster_block].as_mode.first;
   } else {
     b_mode = mode;
   }
 
-  if (xd->mb_to_right_edge < 0 || xd->mb_to_bottom_edge < 0) {
+  if (xd->mb_to_right_edge < 0 || xd->mb_to_bottom_edge < 0)
     extend_for_intra(xd, plane, block, bsize, ss_txfrm_size);
-  }
 
-  plane_b_size = b_width_log2(bsize) - xd->plane[plane].subsampling_x;
-  vp9_predict_intra_block(xd, tx_ib, plane_b_size, tx_size,
-                          b_mode, dst, xd->plane[plane].dst.stride);
+  plane_b_size = b_width_log2(bsize) - pd->subsampling_x;
+  vp9_predict_intra_block(xd, tx_ib, plane_b_size, tx_size, b_mode,
+                          dst, pd->dst.stride);
 
   // Early exit if there are no coefficients
   if (xd->mode_info_context->mbmi.mb_skip_coeff)
     return;
 
-  switch (ss_txfrm_size / 2) {
-    case TX_4X4:
-      tx_type = plane == 0 ? get_tx_type_4x4(xd, raster_block) : DCT_DCT;
-      if (tx_type == DCT_DCT)
-        xd->itxm_add(qcoeff, dst, stride, xd->plane[plane].eobs[block]);
-      else
-        vp9_iht_add_c(tx_type, qcoeff, dst, stride,
-                      xd->plane[plane].eobs[block]);
-      break;
-    case TX_8X8:
-      tx_type = plane == 0 ? get_tx_type_8x8(xd, raster_block) : DCT_DCT;
-      vp9_iht_add_8x8_c(tx_type, qcoeff, dst, stride,
-                        xd->plane[plane].eobs[block]);
-      break;
-    case TX_16X16:
-      tx_type = plane == 0 ? get_tx_type_16x16(xd, raster_block) : DCT_DCT;
-      vp9_iht_add_16x16_c(tx_type, qcoeff, dst, stride,
-                          xd->plane[plane].eobs[block]);
-      break;
-    case TX_32X32:
-      vp9_idct_add_32x32(qcoeff, dst, stride, xd->plane[plane].eobs[block]);
-      break;
-  }
+  decode_block(plane, block, bsize, ss_txfrm_size, arg);
 }
 
 static void decode_atom(VP9D_COMP *pbi, MACROBLOCKD *xd,
@@ -314,13 +286,11 @@ static void decode_atom(VP9D_COMP *pbi, MACROBLOCKD *xd,
   if (mbmi->mb_skip_coeff) {
     vp9_reset_sb_tokens_context(xd, bsize);
   } else {
-    // re-initialize macroblock dequantizer before detokenization
     if (xd->segmentation_enabled)
       mb_init_dequantizer(&pbi->common, xd);
 
-    if (!vp9_reader_has_error(r)) {
-      vp9_decode_tokens(pbi, xd, r, bsize);
-    }
+    if (!vp9_reader_has_error(r))
+      vp9_decode_tokens(pbi, r, bsize);
 
     foreach_transformed_block(xd, bsize, decode_block, xd);
   }
@@ -333,13 +303,11 @@ static void decode_sb_intra(VP9D_COMP *pbi, MACROBLOCKD *xd,
   if (mbmi->mb_skip_coeff) {
     vp9_reset_sb_tokens_context(xd, bsize);
   } else {
-    // re-initialize macroblock dequantizer before detokenization
     if (xd->segmentation_enabled)
       mb_init_dequantizer(&pbi->common, xd);
 
-    if (!vp9_reader_has_error(r)) {
-      vp9_decode_tokens(pbi, xd, r, bsize);
-    }
+    if (!vp9_reader_has_error(r))
+      vp9_decode_tokens(pbi, r, bsize);
   }
 
   foreach_transformed_block(xd, bsize, decode_block_intra, xd);
@@ -373,7 +341,7 @@ static void decode_sb(VP9D_COMP *pbi, MACROBLOCKD *xd, int mi_row, int mi_col,
       mb_init_dequantizer(pc, xd);
 
     // dequantization and idct
-    eobtotal = vp9_decode_tokens(pbi, xd, r, bsize);
+    eobtotal = vp9_decode_tokens(pbi, r, bsize);
     if (eobtotal == 0) {  // skip loopfilter
       for (n = 0; n < bw * bh; n++) {
         const int x_idx = n & (bw - 1), y_idx = n >> bwl;
@@ -389,10 +357,10 @@ static void decode_sb(VP9D_COMP *pbi, MACROBLOCKD *xd, int mi_row, int mi_col,
 
 static void set_offsets(VP9D_COMP *pbi, BLOCK_SIZE_TYPE bsize,
                         int mi_row, int mi_col) {
-  const int bh = 1 << mi_height_log2(bsize);
-  const int bw = 1 << mi_width_log2(bsize);
   VP9_COMMON *const cm = &pbi->common;
   MACROBLOCKD *const xd = &pbi->mb;
+  const int bh = 1 << mi_height_log2(bsize);
+  const int bw = 1 << mi_width_log2(bsize);
   const int mi_idx = mi_row * cm->mode_info_stride + mi_col;
   int i;
 
@@ -400,14 +368,14 @@ static void set_offsets(VP9D_COMP *pbi, BLOCK_SIZE_TYPE bsize,
   xd->mode_info_context->mbmi.sb_type = bsize;
   // Special case: if prev_mi is NULL, the previous mode info context
   // cannot be used.
-  xd->prev_mode_info_context = cm->prev_mi ?
-                                 cm->prev_mi + mi_idx : NULL;
+  xd->prev_mode_info_context = cm->prev_mi ? cm->prev_mi + mi_idx : NULL;
 
   for (i = 0; i < MAX_MB_PLANE; i++) {
-    xd->plane[i].above_context = cm->above_context[i] +
-        (mi_col * 2 >> xd->plane[i].subsampling_x);
-    xd->plane[i].left_context = cm->left_context[i] +
-        (((mi_row * 2) & 15) >> xd->plane[i].subsampling_y);
+    struct macroblockd_plane *pd = &xd->plane[i];
+    pd->above_context = cm->above_context[i] +
+                            (mi_col * 2 >> pd->subsampling_x);
+    pd->left_context = cm->left_context[i] +
+                           (((mi_row * 2) & 15) >> pd->subsampling_y);
   }
   xd->above_seg_context = cm->above_seg_context + mi_col;
   xd->left_seg_context  = cm->left_seg_context + (mi_row & MI_MASK);
@@ -473,8 +441,7 @@ static void decode_modes_sb(VP9D_COMP *pbi, int mi_row, int mi_col,
                             vp9_reader* r, BLOCK_SIZE_TYPE bsize) {
   VP9_COMMON *const pc = &pbi->common;
   MACROBLOCKD *const xd = &pbi->mb;
-  int bsl = mi_width_log2(bsize), bs = (1 << bsl) / 2;
-  int n;
+  int bs = (1 << mi_width_log2(bsize)) / 2, n;
   PARTITION_TYPE partition = PARTITION_NONE;
   BLOCK_SIZE_TYPE subsize;
 
@@ -562,26 +529,22 @@ static void setup_token_decoder(VP9D_COMP *pbi,
 
 static void read_coef_probs_common(FRAME_CONTEXT *fc, TX_SIZE tx_size,
                                    vp9_reader *r) {
-  const int entropy_nodes_update = UNCONSTRAINED_NODES;
   vp9_coeff_probs_model *coef_probs = fc->coef_probs[tx_size];
 
-  int i, j, k, l, m;
-
   if (vp9_read_bit(r)) {
+    int i, j, k, l, m;
     for (i = 0; i < BLOCK_TYPES; i++) {
       for (j = 0; j < REF_TYPES; j++) {
         for (k = 0; k < COEF_BANDS; k++) {
           for (l = 0; l < PREV_COEF_CONTEXTS; l++) {
-            const int mstart = 0;
             if (l >= 3 && k == 0)
               continue;
 
-            for (m = mstart; m < entropy_nodes_update; m++) {
+            for (m = 0; m < UNCONSTRAINED_NODES; m++) {
               vp9_prob *const p = coef_probs[i][j][k][l] + m;
 
-              if (vp9_read(r, VP9_COEF_UPDATE_PROB)) {
+              if (vp9_read(r, VP9_COEF_UPDATE_PROB))
                 *p = vp9_read_prob_diff_update(r, *p);
-              }
             }
           }
         }
@@ -1117,8 +1080,7 @@ static size_t read_uncompressed_header(VP9D_COMP *pbi,
 
   cm->frame_context_idx = vp9_rb_read_literal(rb, NUM_FRAME_CONTEXTS_LG2);
 
-  if ((cm->frame_type == KEY_FRAME) ||
-      cm->error_resilient_mode || cm->intra_only)
+  if (cm->frame_type == KEY_FRAME || cm->error_resilient_mode || cm->intra_only)
     vp9_setup_past_independence(cm, xd);
 
   setup_loopfilter(pbi, rb);
