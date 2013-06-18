@@ -18,6 +18,7 @@
 #include <stdlib.h>
 #include <stdarg.h>
 #include <string.h>
+#include <time.h>
 #define VPX_CODEC_DISABLE_COMPAT 1
 #include "vpx/vpx_encoder.h"
 #include "vpx/vp8cx.h"
@@ -137,6 +138,8 @@ int main(int argc, char **argv) {
     int                  layer_flags[VPX_TS_MAX_PERIODICITY] = {0};
     int                  flag_periodicity;
     int                  max_intra_size_pct;
+    clock_t              before;
+    clock_t              after;
 
     /* Check usage and arguments */
     if (argc < 9)
@@ -639,6 +642,7 @@ int main(int argc, char **argv) {
     vpx_codec_control(&codec, VP8E_SET_MAX_INTRA_BITRATE_PCT,
                       max_intra_size_pct);
 
+    before = clock();
     frame_avail = 1;
     while (frame_avail || got_data) {
         vpx_codec_iter_t iter = NULL;
@@ -660,8 +664,8 @@ int main(int argc, char **argv) {
             got_data = 1;
             switch (pkt->kind) {
             case VPX_CODEC_CX_FRAME_PKT:
-                for (i=cfg.ts_layer_id[frame_cnt % cfg.ts_periodicity];
-                                              i<cfg.ts_number_layers; i++)
+                for (i = cfg.ts_layer_id[frame_cnt % cfg.ts_periodicity];
+                                              i < cfg.ts_number_layers; i++)
                 {
                     write_ivf_frame_header(outfile[i], pkt);
                     (void) fwrite(pkt->data.frame.buf, 1, pkt->data.frame.sz,
@@ -676,9 +680,13 @@ int main(int argc, char **argv) {
         frame_cnt++;
         pts += frame_duration;
     }
+    after = clock();
+
+    printf("Processed %d frames in %ld ms.\n", frame_cnt-1,
+           (int) (after - before) / (CLOCKS_PER_SEC / 1000));
+
     fclose (infile);
 
-    printf ("Processed %d frames.\n",frame_cnt-1);
     if (vpx_codec_destroy(&codec))
             die_codec (&codec, "Failed to destroy codec");
 
