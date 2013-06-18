@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAaH//83s\u003d",
+        "filename": "test/fdct4x4_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 144,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-06-18T20:50:58Z",
+      "side": 1,
+      "message": "Is this just cut and paste from the existing tests? Maybe these should be made parametric, so that the code isn\u0027t duplicated.",
+      "revId": "33d5f398192af215ae252149ef78af9a385d2947",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAaH//83c\u003d",
+        "filename": "test/fdct4x4_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 185,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-06-18T20:50:58Z",
+      "side": 1,
+      "message": "Can the other hybrid cases be tested with this test too, or would they require something different?",
+      "revId": "33d5f398192af215ae252149ef78af9a385d2947",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
