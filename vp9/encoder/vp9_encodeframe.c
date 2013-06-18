@@ -23,7 +23,6 @@
 #include "vp9/encoder/vp9_segmentation.h"
 #include "vp9/encoder/vp9_encodeintra.h"
 #include "vp9/common/vp9_reconinter.h"
-#include "vp9/common/vp9_invtrans.h"
 #include "vp9/encoder/vp9_rdopt.h"
 #include "vp9/common/vp9_findnearmv.h"
 #include "vp9/common/vp9_reconintra.h"
