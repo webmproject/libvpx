@@ -253,7 +253,7 @@ TEST_P(ConvolveTest, GuardBlocks) {
 TEST_P(ConvolveTest, CopyHoriz) {
   uint8_t* const in = input();
   uint8_t* const out = output();
-  const int16_t filter8[8] = {0, 0, 0, 128, 0, 0, 0, 0};
+  DECLARE_ALIGNED(256, const int16_t, filter8[8]) = {0, 0, 0, 128, 0, 0, 0, 0};
 
   REGISTER_STATE_CHECK(
       UUT_->h8_(in, kInputStride, out, kOutputStride, filter8, 16, filter8, 16,
@@ -270,7 +270,7 @@ TEST_P(ConvolveTest, CopyHoriz) {
 TEST_P(ConvolveTest, CopyVert) {
   uint8_t* const in = input();
   uint8_t* const out = output();
-  const int16_t filter8[8] = {0, 0, 0, 128, 0, 0, 0, 0};
+  DECLARE_ALIGNED(256, const int16_t, filter8[8]) = {0, 0, 0, 128, 0, 0, 0, 0};
 
   REGISTER_STATE_CHECK(
       UUT_->v8_(in, kInputStride, out, kOutputStride, filter8, 16, filter8, 16,
@@ -287,7 +287,7 @@ TEST_P(ConvolveTest, CopyVert) {
 TEST_P(ConvolveTest, Copy2D) {
   uint8_t* const in = input();
   uint8_t* const out = output();
-  const int16_t filter8[8] = {0, 0, 0, 128, 0, 0, 0, 0};
+  DECLARE_ALIGNED(256, const int16_t, filter8[8]) = {0, 0, 0, 128, 0, 0, 0, 0};
 
   REGISTER_STATE_CHECK(
       UUT_->hv8_(in, kInputStride, out, kOutputStride, filter8, 16, filter8, 16,
