@@ -26,6 +26,7 @@ extern "C" {
 }
 
 #include "test/acm_random.h"
+#include "test/clear_system_state.h"
 #include "test/register_state_check.h"
 #include "test/util.h"
 #include "third_party/googletest/src/include/gtest/gtest.h"
@@ -65,6 +66,10 @@ class SADTestBase : public ::testing::Test {
     source_data_ = NULL;
     vpx_free(reference_data_);
     reference_data_ = NULL;
+  }
+
+  virtual void TearDown() {
+    libvpx_test::ClearSystemState();
   }
 
  protected:

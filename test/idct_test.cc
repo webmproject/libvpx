@@ -13,6 +13,7 @@ extern "C" {
 #include "./vpx_config.h"
 #include "./vp8_rtcd.h"
 }
+#include "test/clear_system_state.h"
 #include "test/register_state_check.h"
 #include "third_party/googletest/src/include/gtest/gtest.h"
 
@@ -30,6 +31,10 @@ class IDCTTest : public ::testing::TestWithParam<idct_fn_t> {
         /* Set up guard blocks */
         for (i = 0; i < 256; i++)
             output[i] = ((i & 0xF) < 4 && (i < 64)) ? 0 : -1;
+    }
+
+    virtual void TearDown() {
+      libvpx_test::ClearSystemState();
     }
 
     idct_fn_t UUT;

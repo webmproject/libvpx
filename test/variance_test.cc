@@ -12,6 +12,8 @@
 
 #include "third_party/googletest/src/include/gtest/gtest.h"
 
+#include "test/clear_system_state.h"
+
 #include "vpx/vpx_integer.h"
 #include "vpx_config.h"
 extern "C" {
@@ -51,6 +53,7 @@ class VarianceTest :
   virtual void TearDown() {
     delete[] src_;
     delete[] ref_;
+    libvpx_test::ClearSystemState();
   }
 
  protected:

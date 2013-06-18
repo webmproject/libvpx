@@ -10,6 +10,7 @@
 
 #include "third_party/googletest/src/include/gtest/gtest.h"
 #include "test/acm_random.h"
+#include "test/clear_system_state.h"
 #include "test/register_state_check.h"
 extern "C" {
 #include "vpx_config.h"
@@ -23,7 +24,12 @@ typedef void (*subtract_b_fn_t)(BLOCK *be, BLOCKD *bd, int pitch);
 
 namespace {
 
-class SubtractBlockTest : public ::testing::TestWithParam<subtract_b_fn_t> {};
+class SubtractBlockTest : public ::testing::TestWithParam<subtract_b_fn_t> {
+ public:
+  virtual void TearDown() {
+    libvpx_test::ClearSystemState();
+  }
+};
 
 using libvpx_test::ACMRandom;
 

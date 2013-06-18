@@ -7,6 +7,7 @@
  *  in the file PATENTS.  All contributing project authors may
  *  be found in the AUTHORS file in the root of the source tree.
  */
+#include "test/clear_system_state.h"
 #include "test/register_state_check.h"
 #include "third_party/googletest/src/include/gtest/gtest.h"
 extern "C" {
@@ -27,7 +28,12 @@ typedef void (*post_proc_func_t)(unsigned char *src_ptr,
 namespace {
 
 class Vp8PostProcessingFilterTest
-    : public ::testing::TestWithParam<post_proc_func_t> {};
+    : public ::testing::TestWithParam<post_proc_func_t> {
+ public:
+  virtual void TearDown() {
+    libvpx_test::ClearSystemState();
+  }
+};
 
 // Test routine for the VP8 post-processing function
 // vp8_post_proc_down_and_across_mb_row_c.
