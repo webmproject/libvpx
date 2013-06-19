@@ -366,7 +366,7 @@ int vp9_find_best_sub_pixel_step_iteratively(MACROBLOCK *x,
   }
 
   if (xd->allow_high_precision_mv) {
-    usehp = vp9_use_nmv_hp(&ref_mv->as_mv);
+    usehp = vp9_use_mv_hp(&ref_mv->as_mv);
   } else {
     usehp = 0;
   }
@@ -556,7 +556,7 @@ int vp9_find_best_sub_pixel_comp(MACROBLOCK *x,
   }
 
   if (xd->allow_high_precision_mv) {
-    usehp = vp9_use_nmv_hp(&ref_mv->as_mv);
+    usehp = vp9_use_mv_hp(&ref_mv->as_mv);
   } else {
     usehp = 0;
   }
@@ -930,7 +930,7 @@ int vp9_find_best_sub_pixel_step(MACROBLOCK *x,
   }
 
   if (x->e_mbd.allow_high_precision_mv) {
-    usehp = vp9_use_nmv_hp(&ref_mv->as_mv);
+    usehp = vp9_use_mv_hp(&ref_mv->as_mv);
   } else {
     usehp = 0;
   }
