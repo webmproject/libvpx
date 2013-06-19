@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAaH//6cQ\u003d",
+        "filename": "test/variance_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 137,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-06-19T22:41:54Z",
+      "side": 1,
+      "message": "perhaps Rand8Extremes() rather than Rand8(). Also, a test like OneQuarterTest() that maximizes the variance for the whole block could be useful to check the overflow conditions.",
+      "revId": "c97d16627268f08cf116cd188a4a5cc97da83911",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
