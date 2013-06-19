@@ -216,6 +216,7 @@ typedef struct {
   int static_segmentation;
   int comp_inter_joint_search_thresh;
   int adpative_rd_thresh;
+  int use_lastframe_partitioning;
 } SPEED_FEATURES;
 
 enum BlockSize {

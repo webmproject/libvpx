@@ -539,6 +539,9 @@ static void set_rd_speed_thresholds(VP9_COMP *cpi, int mode, int speed) {
   int speed_multiplier = speed + 1;
   int i;
 
+  if (speed == 2)
+    speed_multiplier = 1;
+
   // Set baseline threshold values
   for (i = 0; i < MAX_MODES; ++i)
     sf->thresh_mult[i] = mode == 0 ? -500 : 0;
@@ -595,18 +598,21 @@ static void set_rd_speed_thresholds(VP9_COMP *cpi, int mode, int speed) {
     for (i = 0; i < MAX_MODES; ++i)
       sf->thresh_mult[i] = INT_MAX;
 
-    sf->thresh_mult[THR_DC       ] = 0;
-    sf->thresh_mult[THR_TM       ] = 0;
-    sf->thresh_mult[THR_NEWMV    ] = 4000;
-    sf->thresh_mult[THR_NEWG     ] = 4000;
-    sf->thresh_mult[THR_NEWA     ] = 4000;
+    sf->thresh_mult[THR_DC] = 0;
+    sf->thresh_mult[THR_TM] = 0;
+    sf->thresh_mult[THR_NEWMV] = 4000;
+    sf->thresh_mult[THR_NEWG] = 4000;
+    sf->thresh_mult[THR_NEWA] = 4000;
     sf->thresh_mult[THR_NEARESTMV] = 0;
-    sf->thresh_mult[THR_NEARESTG ] = 0;
-    sf->thresh_mult[THR_NEARESTA ] = 0;
-    sf->thresh_mult[THR_NEARMV   ] = 2000;
-    sf->thresh_mult[THR_NEARG    ] = 2000;
-    sf->thresh_mult[THR_NEARA    ] = 2000;
+    sf->thresh_mult[THR_NEARESTG] = 0;
+    sf->thresh_mult[THR_NEARESTA] = 0;
+    sf->thresh_mult[THR_NEARMV] = 2000;
+    sf->thresh_mult[THR_NEARG] = 2000;
+    sf->thresh_mult[THR_NEARA] = 2000;
     sf->thresh_mult[THR_COMP_NEARESTLA] = 2000;
+    sf->thresh_mult[THR_SPLITMV] = 2500;
+    sf->thresh_mult[THR_SPLITG] = 2500;
+    sf->thresh_mult[THR_SPLITA] = 2500;
     sf->recode_loop = 0;
   }
 
@@ -681,6 +687,7 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
   sf->max_step_search_steps = MAX_MVSEARCH_STEPS;
   sf->comp_inter_joint_search_thresh = BLOCK_SIZE_AB4X4;
   sf->adpative_rd_thresh = 0;
+  sf->use_lastframe_partitioning = 0;
 
 #if CONFIG_MULTIPLE_ARF
   // Switch segmentation off.
@@ -708,7 +715,10 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
         sf->optimize_coefficients = 0;
         sf->first_step = 1;
       }
-      break;
+      if (speed == 2)
+        sf->use_lastframe_partitioning = 1;
+
+     break;
 
   }; /* switch */
 
@@ -3327,7 +3337,7 @@ static void Pass2Encode(VP9_COMP *cpi, unsigned long *size,
     vp9_second_pass(cpi);
 
   encode_frame_to_data_rate(cpi, size, dest, frame_flags);
-
+  //vp9_print_modes_and_motion_vectors(&cpi->common, "encode.stt");
 #ifdef DISABLE_RC_LONG_TERM_MEM
   cpi->twopass.bits_left -=  cpi->this_frame_target;
 #else
