@@ -992,11 +992,9 @@ int vp9_cost_mv_ref(VP9_COMP *cpi,
   // Dont account for mode here if segment skip is enabled.
   if (!vp9_segfeature_active(xd, segment_id, SEG_LVL_SKIP)) {
     VP9_COMMON *pc = &cpi->common;
-
-    vp9_prob p[VP9_INTER_MODES - 1];
     assert(NEARESTMV <= m  &&  m <= NEWMV);
-    vp9_mv_ref_probs(pc, p, mode_context);
-    return cost_token(vp9_sb_mv_ref_tree, p,
+    return cost_token(vp9_sb_mv_ref_tree,
+                      pc->fc.inter_mode_probs[mode_context],
                       vp9_sb_mv_ref_encoding_array - NEARESTMV + m);
   } else
     return 0;

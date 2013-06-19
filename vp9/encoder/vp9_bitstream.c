@@ -708,11 +708,11 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, MODE_INFO *m,
     write_intra_mode(bc, mi->uv_mode,
                      pc->fc.uv_mode_prob[mode]);
   } else {
-    vp9_prob mv_ref_p[VP9_INTER_MODES - 1];
+    vp9_prob *mv_ref_p;
 
     encode_ref_frame(cpi, bc);
 
-    vp9_mv_ref_probs(&cpi->common, mv_ref_p, mi->mb_mode_context[rf]);
+    mv_ref_p = cpi->common.fc.inter_mode_probs[mi->mb_mode_context[rf]];
 
 #ifdef ENTROPY_STATS
     active_section = 3;

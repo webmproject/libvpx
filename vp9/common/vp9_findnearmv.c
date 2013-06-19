@@ -13,7 +13,6 @@
 #include "vp9/common/vp9_findnearmv.h"
 #include "vp9/common/vp9_mvref_common.h"
 #include "vp9/common/vp9_sadmxn.h"
-#include "vp9/common/vp9_subpelvar.h"
 
 static void lower_mv_precision(int_mv *mv, int usehp) {
   if (!usehp || !vp9_use_nmv_hp(&mv->as_mv)) {
@@ -24,12 +23,6 @@ static void lower_mv_precision(int_mv *mv, int usehp) {
   }
 }
 
-vp9_prob *vp9_mv_ref_probs(VP9_COMMON *pc, vp9_prob *p, int context) {
-  p[0] = pc->fc.inter_mode_probs[context][0];
-  p[1] = pc->fc.inter_mode_probs[context][1];
-  p[2] = pc->fc.inter_mode_probs[context][2];
-  return p;
-}
 
 void vp9_find_best_ref_mvs(MACROBLOCKD *xd,
                            int_mv *mvlist,

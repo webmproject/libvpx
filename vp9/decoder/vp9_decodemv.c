@@ -560,7 +560,7 @@ static void read_mb_modes_mv(VP9D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
   if (mbmi->ref_frame[0] != INTRA_FRAME) {
     int_mv nearest, nearby, best_mv;
     int_mv nearest_second, nearby_second, best_mv_second;
-    vp9_prob mv_ref_p[VP9_INTER_MODES - 1];
+    vp9_prob *mv_ref_p;
 
     read_ref_frame(pbi, r, mbmi->segment_id, mbmi->ref_frame);
 
@@ -574,7 +574,8 @@ static void read_mb_modes_mv(VP9D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
                        mbmi->ref_frame[0], mbmi->ref_mvs[mbmi->ref_frame[0]],
                        cm->ref_frame_sign_bias);
 
-      vp9_mv_ref_probs(cm, mv_ref_p, mbmi->mb_mode_context[mbmi->ref_frame[0]]);
+      mv_ref_p = cm->fc.inter_mode_probs[
+        mbmi->mb_mode_context[mbmi->ref_frame[0]]];
 
       // If the segment level skip mode enabled
       if (vp9_segfeature_active(xd, mbmi->segment_id, SEG_LVL_SKIP)) {
