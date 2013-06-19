@@ -1800,18 +1800,133 @@ static YV12_BUFFER_CONFIG *get_scaled_ref_frame(VP9_COMP *cpi, int ref_frame) {
   return scaled_ref_frame;
 }
 
-static void model_rd_from_var_lapndz(int var, int n, int qstep,
-                                     int *rate, int *dist) {
-  // This function models the rate and distortion for a Laplacian
+static double linear_interpolate(double x, int ntab, double step,
+                                 const double *tab) {
+  double y = x / step;
+  int d = (int) y;
+  double a = y - d;
+  if (d >= ntab - 1)
+    return tab[ntab - 1];
+  else
+    return tab[d] * (1 - a) + tab[d + 1] * a;
+}
+
+static double model_rate_norm(double x) {
+  // Normalized rate
+  // This function models the rate for a Laplacian source
   // source with given variance when quantized with a uniform quantizer
   // with given stepsize. The closed form expressions are in:
   // Hang and Chen, "Source Model for transform video coder and its
   // application - Part I: Fundamental Theory", IEEE Trans. Circ.
   // Sys. for Video Tech., April 1997.
-  // The function is implemented as piecewise approximation to the
-  // exact computation.
-  // TODO(debargha): Implement the functions by interpolating from a
-  // look-up table
+  static const double rate_tab_step = 0.125;
+  static const double rate_tab[] = {
+    256.0000, 4.944453, 3.949276, 3.371593,
+    2.965771, 2.654550, 2.403348, 2.193612,
+    2.014208, 1.857921, 1.719813, 1.596364,
+    1.484979, 1.383702, 1.291025, 1.205767,
+    1.126990, 1.053937, 0.985991, 0.922644,
+    0.863472, 0.808114, 0.756265, 0.707661,
+    0.662070, 0.619287, 0.579129, 0.541431,
+    0.506043, 0.472828, 0.441656, 0.412411,
+    0.384980, 0.359260, 0.335152, 0.312563,
+    0.291407, 0.271600, 0.253064, 0.235723,
+    0.219508, 0.204351, 0.190189, 0.176961,
+    0.164611, 0.153083, 0.142329, 0.132298,
+    0.122945, 0.114228, 0.106106, 0.098541,
+    0.091496, 0.084937, 0.078833, 0.073154,
+    0.067872, 0.062959, 0.058392, 0.054147,
+    0.050202, 0.046537, 0.043133, 0.039971,
+    0.037036, 0.034312, 0.031783, 0.029436,
+    0.027259, 0.025240, 0.023367, 0.021631,
+    0.020021, 0.018528, 0.017145, 0.015863,
+    0.014676, 0.013575, 0.012556, 0.011612,
+    0.010738, 0.009929, 0.009180, 0.008487,
+    0.007845, 0.007251, 0.006701, 0.006193,
+    0.005722, 0.005287, 0.004884, 0.004512,
+    0.004168, 0.003850, 0.003556, 0.003284,
+    0.003032, 0.002800, 0.002585, 0.002386,
+    0.002203, 0.002034, 0.001877, 0.001732,
+    0.001599, 0.001476, 0.001362, 0.001256,
+    0.001159, 0.001069, 0.000987, 0.000910,
+    0.000840, 0.000774, 0.000714, 0.000659,
+    0.000608, 0.000560, 0.000517, 0.000476,
+    0.000439, 0.000405, 0.000373, 0.000344,
+    0.000317, 0.000292, 0.000270, 0.000248,
+    0.000229, 0.000211, 0.000195, 0.000179,
+    0.000165, 0.000152, 0.000140, 0.000129,
+    0.000119, 0.000110, 0.000101, 0.000093,
+    0.000086, 0.000079, 0.000073, 0.000067,
+    0.000062, 0.000057, 0.000052, 0.000048,
+    0.000044, 0.000041, 0.000038, 0.000035,
+    0.000032, 0.000029, 0.000027, 0.000025,
+    0.000023, 0.000021, 0.000019, 0.000018,
+    0.000016, 0.000015, 0.000014, 0.000013,
+    0.000012, 0.000011, 0.000010, 0.000009,
+    0.000008, 0.000008, 0.000007, 0.000007,
+    0.000006, 0.000006, 0.000005, 0.000005,
+    0.000004, 0.000004, 0.000004, 0.000003,
+    0.000003, 0.000003, 0.000003, 0.000002,
+    0.000002, 0.000002, 0.000002, 0.000002,
+    0.000002, 0.000001, 0.000001, 0.000001,
+    0.000001, 0.000001, 0.000001, 0.000001,
+    0.000001, 0.000001, 0.000001, 0.000001,
+    0.000001, 0.000001, 0.000000, 0.000000,
+  };
+  const int rate_tab_num = sizeof(rate_tab)/sizeof(rate_tab[0]);
+  assert(x >= 0.0);
+  return linear_interpolate(x, rate_tab_num, rate_tab_step, rate_tab);
+}
+
+static double model_dist_norm(double x) {
+  // Normalized distortion
+  // This function models the normalized distortion for a Laplacian source
+  // source with given variance when quantized with a uniform quantizer
+  // with given stepsize. The closed form expression is:
+  // Dn(x) = 1 - 1/sqrt(2) * x / sinh(x/sqrt(2))
+  // where x = qpstep / sqrt(variance)
+  // Note the actual distortion is Dn * variance.
+  static const double dist_tab_step = 0.25;
+  static const double dist_tab[] = {
+    0.000000, 0.005189, 0.020533, 0.045381,
+    0.078716, 0.119246, 0.165508, 0.215979,
+    0.269166, 0.323686, 0.378318, 0.432034,
+    0.484006, 0.533607, 0.580389, 0.624063,
+    0.664475, 0.701581, 0.735418, 0.766092,
+    0.793751, 0.818575, 0.840761, 0.860515,
+    0.878045, 0.893554, 0.907238, 0.919281,
+    0.929857, 0.939124, 0.947229, 0.954306,
+    0.960475, 0.965845, 0.970512, 0.974563,
+    0.978076, 0.981118, 0.983750, 0.986024,
+    0.987989, 0.989683, 0.991144, 0.992402,
+    0.993485, 0.994417, 0.995218, 0.995905,
+    0.996496, 0.997002, 0.997437, 0.997809,
+    0.998128, 0.998401, 0.998635, 0.998835,
+    0.999006, 0.999152, 0.999277, 0.999384,
+    0.999475, 0.999553, 0.999619, 0.999676,
+    0.999724, 0.999765, 0.999800, 0.999830,
+    0.999855, 0.999877, 0.999895, 0.999911,
+    0.999924, 0.999936, 0.999945, 0.999954,
+    0.999961, 0.999967, 0.999972, 0.999976,
+    0.999980, 0.999983, 0.999985, 0.999988,
+    0.999989, 0.999991, 0.999992, 0.999994,
+    0.999995, 0.999995, 0.999996, 0.999997,
+    0.999997, 0.999998, 0.999998, 0.999998,
+    0.999999, 0.999999, 0.999999, 0.999999,
+    0.999999, 0.999999, 0.999999, 1.000000,
+  };
+  const int dist_tab_num = sizeof(dist_tab)/sizeof(dist_tab[0]);
+  assert(x >= 0.0);
+  return linear_interpolate(x, dist_tab_num, dist_tab_step, dist_tab);
+}
+
+static void model_rd_from_var_lapndz(int var, int n, int qstep,
+                                     int *rate, int *dist) {
+  // This function models the rate and distortion for a Laplacian
+  // source with given variance when quantized with a uniform quantizer
+  // with given stepsize. The closed form expression is:
+  // Rn(x) = H(sqrt(r)) + sqrt(r)*[1 + H(r)/(1 - r)],
+  // where r = exp(-sqrt(2) * x) and x = qpstep / sqrt(variance)
   vp9_clear_system_state();
   if (var == 0 || n == 0) {
     *rate = 0;
@@ -1819,29 +1934,18 @@ static void model_rd_from_var_lapndz(int var, int n, int qstep,
   } else {
     double D, R;
     double s2 = (double) var / n;
-    double s = sqrt(s2);
-    double x = qstep / s;
-    if (x > 1.0) {
-      double y = exp(-x / 2);
-      double y2 = y * y;
-      D = 2.069981728764738 * y2 - 2.764286806516079 * y + 1.003956960819275;
-      R = 0.924056758535089 * y2 + 2.738636469814024 * y - 0.005169662030017;
-    } else {
-      double x2 = x * x;
-      D = 0.075303187668830 * x2 + 0.004296954321112 * x - 0.000413209252807;
-      if (x > 0.125)
-        R = 1 / (-0.03459733614226 * x2 + 0.36561675733603 * x +
-                 0.1626989668625);
-      else
-        R = -1.442252874826093 * log(x) + 1.944647760719664;
-    }
+    double x = qstep / sqrt(s2);
+    // TODO(debargha): Make the modeling functions take (qstep^2 / s2)
+    // as argument rather than qstep / sqrt(s2) to obviate the need for
+    // the sqrt() operation.
+    D = model_dist_norm(x);
+    R = model_rate_norm(x);
     if (R < 0) {
-      *rate = 0;
-      *dist = var;
-    } else {
-      *rate = (n * R * 256 + 0.5);
-      *dist = (n * D * s2 + 0.5);
+      R = 0;
+      D = var;
     }
+    *rate = (n * R * 256 + 0.5);
+    *dist = (n * D * s2 + 0.5);
   }
   vp9_clear_system_state();
 }
@@ -1872,14 +1976,15 @@ static void model_rd_for_sb(VP9_COMP *cpi, BLOCK_SIZE_TYPE bsize,
     int rate, dist;
     var = cpi->fn_ptr[bs].vf(p->src.buf, p->src.stride,
                              pd->dst.buf, pd->dst.stride, &sse);
-    model_rd_from_var_lapndz(var, bw * bh, pd->dequant[1] >> 3, &rate, &dist);
+    // sse works better than var, since there is no dc prediction used
+    model_rd_from_var_lapndz(sse, bw * bh, pd->dequant[1] >> 3, &rate, &dist);
 
     rate_sum += rate;
     dist_sum += dist;
   }
 
   *out_rate_sum = rate_sum;
-  *out_dist_sum = dist_sum;
+  *out_dist_sum = dist_sum << 4;
 }
 
 static INLINE int get_switchable_rate(VP9_COMMON *cm, MACROBLOCK *x) {
