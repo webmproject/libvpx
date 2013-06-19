@@ -683,7 +683,7 @@ process_toolchain() {
             # x86 targets.
         ;;
         *)
-            enabled pthread_h && check_cxx "$@" <<EOF && soft_enable unit_tests
+            check_cxx "$@" <<EOF && soft_enable unit_tests
 int z;
 EOF
         ;;
