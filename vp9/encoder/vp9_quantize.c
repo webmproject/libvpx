@@ -35,6 +35,153 @@ static void quantize(int16_t *zbin_boost_orig_ptr,
                      uint16_t *eob_ptr,
                      const int *scan, int mul) {
   int i, rc, eob;
+  int zbins[2], nzbins[2], zbin;
+  int x, y, z, sz;
+  int zero_run = 0;
+  int16_t *zbin_boost_ptr = zbin_boost_orig_ptr;
+  int zero_flag = n_coeffs;
+
+  vpx_memset(qcoeff_ptr, 0, n_coeffs*sizeof(int16_t));
+  vpx_memset(dqcoeff_ptr, 0, n_coeffs*sizeof(int16_t));
+
+  eob = -1;
+
+  // Base ZBIN
+  zbins[0] = zbin_ptr[0] + zbin_oq_value;
+  zbins[1] = zbin_ptr[1] + zbin_oq_value;
+  nzbins[0] = zbins[0] * -1;
+  nzbins[1] = zbins[1] * -1;
+
+  if (!skip_block) {
+    // Pre-scan pass
+    for (i = n_coeffs - 1; i >= 0; i--) {
+      rc = scan[i];
+      z = coeff_ptr[rc] * mul;
+
+      if (z < zbins[rc != 0] && z > nzbins[rc != 0]) {
+        zero_flag--;
+      } else {
+        break;
+      }
+    }
+
+    // Quantization pass: All coefficients with index >= zero_flag are
+    // skippable. Note: zero_flag can be zero.
+    for (i = 0; i < zero_flag; i++) {
+      rc = scan[i];
+      z  = coeff_ptr[rc] * mul;
+
+      zbin = (zbins[rc != 0] + zbin_boost_ptr[zero_run]);
+      zero_run += (zero_run < 15);
+
+      sz = (z >> 31);                               // sign of z
+      x  = (z ^ sz) - sz;
+
+      if (x >= zbin) {
+        x += (round_ptr[rc != 0]);
+        y  = ((int)(((int)(x * quant_ptr[rc != 0]) >> 16) + x))
+            >> quant_shift_ptr[rc != 0];            // quantize (x)
+        x  = (y ^ sz) - sz;                         // get the sign back
+        qcoeff_ptr[rc]  = x;                        // write to destination
+        dqcoeff_ptr[rc] = x * dequant_ptr[rc != 0] / mul;  // dequantized value
+
+        if (y) {
+          eob = i;                                  // last nonzero coeffs
+          zero_run = 0;                             // set zero_run
+        }
+      }
+    }
+  }
+  *eob_ptr = eob + 1;
+}
+
+// This function works well for large transform size.
+static void quantize_sparse(int16_t *zbin_boost_orig_ptr,
+                            int16_t *coeff_ptr, int n_coeffs, int skip_block,
+                            int16_t *zbin_ptr, int16_t *round_ptr,
+                            int16_t *quant_ptr, uint8_t *quant_shift_ptr,
+                            int16_t *qcoeff_ptr, int16_t *dqcoeff_ptr,
+                            int16_t *dequant_ptr, int zbin_oq_value,
+                            uint16_t *eob_ptr, const int *scan, int mul,
+                            int *idx_arr) {
+  int i, rc, eob;
+  int zbins[2], pzbins[2], nzbins[2], zbin;
+  int x, y, z, sz;
+  int zero_run = 0;
+  int16_t *zbin_boost_ptr = zbin_boost_orig_ptr;
+  int idx = 0;
+  int pre_idx = 0;
+
+  vpx_memset(qcoeff_ptr, 0, n_coeffs*sizeof(int16_t));
+  vpx_memset(dqcoeff_ptr, 0, n_coeffs*sizeof(int16_t));
+
+  eob = -1;
+
+  // Base ZBIN
+  zbins[0] = zbin_ptr[0] + zbin_oq_value;
+  zbins[1] = zbin_ptr[1] + zbin_oq_value;
+  // Positive and negative ZBIN
+  pzbins[0] = zbins[0]/mul;
+  pzbins[1] = zbins[1]/mul;
+  nzbins[0] = pzbins[0] * -1;
+  nzbins[1] = pzbins[1] * -1;
+
+  if (!skip_block) {
+    // Pre-scan pass
+    for (i = 0; i < n_coeffs; i++) {
+      rc = scan[i];
+      z = coeff_ptr[rc];
+
+      // If the coefficient is out of the base ZBIN range, keep it for
+      // quantization.
+      if (z >= pzbins[rc != 0] || z <= nzbins[rc != 0])
+        idx_arr[idx++] = i;
+    }
+
+    // Quantization pass: only process the coefficients selected in
+    // pre-scan pass. Note: idx can be zero.
+    for (i = 0; i < idx; i++) {
+      rc = scan[idx_arr[i]];
+
+      // Calculate ZBIN
+      zero_run += idx_arr[i] - pre_idx;
+      if(zero_run > 15) zero_run = 15;
+      zbin = (zbins[rc != 0] + zbin_boost_ptr[zero_run]);
+
+      pre_idx = idx_arr[i];
+      z = coeff_ptr[rc] * mul;
+      sz = (z >> 31);                               // sign of z
+      x  = (z ^ sz) - sz;                           // x = abs(z)
+
+      if (x >= zbin) {
+        x += (round_ptr[rc != 0]);
+        y  = ((int)(((int)(x * quant_ptr[rc != 0]) >> 16) + x))
+            >> quant_shift_ptr[rc != 0];            // quantize (x)
+
+        x  = (y ^ sz) - sz;                         // get the sign back
+        qcoeff_ptr[rc]  = x;                        // write to destination
+        dqcoeff_ptr[rc] = x * dequant_ptr[rc != 0] / mul;  // dequantized value
+
+        if (y) {
+          eob = idx_arr[i];                         // last nonzero coeffs
+          zero_run = -1;                            // set zero_run
+        }
+      }
+    }
+  }
+  *eob_ptr = eob + 1;
+}
+#if 0
+// Original quantize function
+static void quantize(int16_t *zbin_boost_orig_ptr,
+                     int16_t *coeff_ptr, int n_coeffs, int skip_block,
+                     int16_t *zbin_ptr, int16_t *round_ptr, int16_t *quant_ptr,
+                     uint8_t *quant_shift_ptr,
+                     int16_t *qcoeff_ptr, int16_t *dqcoeff_ptr,
+                     int16_t *dequant_ptr, int zbin_oq_value,
+                     uint16_t *eob_ptr,
+                     const int *scan, int mul) {
+  int i, rc, eob;
   int zbin;
   int x, y, z, sz;
   int zero_run = 0;
@@ -74,6 +221,7 @@ static void quantize(int16_t *zbin_boost_orig_ptr,
 
   *eob_ptr = eob + 1;
 }
+#endif
 
 void vp9_quantize(MACROBLOCK *mb, int plane, int block, int n_coeffs,
                   TX_TYPE tx_type) {
@@ -97,19 +245,40 @@ void vp9_quantize(MACROBLOCK *mb, int plane, int block, int n_coeffs,
       break;
   }
 
-  quantize(mb->plane[plane].zrun_zbin_boost,
-           BLOCK_OFFSET(mb->plane[plane].coeff, block, 16),
-           n_coeffs, mb->skip_block,
-           mb->plane[plane].zbin,
-           mb->plane[plane].round,
-           mb->plane[plane].quant,
-           mb->plane[plane].quant_shift,
-           BLOCK_OFFSET(xd->plane[plane].qcoeff, block, 16),
-           BLOCK_OFFSET(xd->plane[plane].dqcoeff, block, 16),
-           xd->plane[plane].dequant,
-           mb->plane[plane].zbin_extra,
-           &xd->plane[plane].eobs[block],
-           scan, mul);
+  // Call different quantization for different transform size.
+  if (n_coeffs >= 1024) {
+    // Save index of picked coefficient in pre-scan pass.
+    int idx_arr[1024];
+
+    quantize_sparse(mb->plane[plane].zrun_zbin_boost,
+                    BLOCK_OFFSET(mb->plane[plane].coeff, block, 16),
+                    n_coeffs, mb->skip_block,
+                    mb->plane[plane].zbin,
+                    mb->plane[plane].round,
+                    mb->plane[plane].quant,
+                    mb->plane[plane].quant_shift,
+                    BLOCK_OFFSET(xd->plane[plane].qcoeff, block, 16),
+                    BLOCK_OFFSET(xd->plane[plane].dqcoeff, block, 16),
+                    xd->plane[plane].dequant,
+                    mb->plane[plane].zbin_extra,
+                    &xd->plane[plane].eobs[block],
+                    scan, mul, idx_arr);
+  }
+  else {
+    quantize(mb->plane[plane].zrun_zbin_boost,
+             BLOCK_OFFSET(mb->plane[plane].coeff, block, 16),
+             n_coeffs, mb->skip_block,
+             mb->plane[plane].zbin,
+             mb->plane[plane].round,
+             mb->plane[plane].quant,
+             mb->plane[plane].quant_shift,
+             BLOCK_OFFSET(xd->plane[plane].qcoeff, block, 16),
+             BLOCK_OFFSET(xd->plane[plane].dqcoeff, block, 16),
+             xd->plane[plane].dequant,
+             mb->plane[plane].zbin_extra,
+             &xd->plane[plane].eobs[block],
+             scan, mul);
+  }
 }
 
 void vp9_regular_quantize_b_4x4(MACROBLOCK *mb, int b_idx, TX_TYPE tx_type,
