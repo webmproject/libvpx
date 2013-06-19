@@ -1405,8 +1405,9 @@ static void encode_sb_row(VP9_COMP *cpi, int mi_row,
       MODE_INFO *m = cm->mi + idx_str;
       MODE_INFO *p = cm->prev_mi + idx_str;
 
-      if ((cpi->common.current_video_frame & 1) == 0 || cm->prev_mi == 0 ||
-          cpi->is_src_frame_alt_ref) {
+      if ((cpi->common.current_video_frame & 1) == 0 || cm->prev_mi == 0
+          || cpi->common.show_frame == 0 || cpi->common.frame_type == KEY_FRAME
+          || cpi->is_src_frame_alt_ref) {
         rd_pick_partition(cpi, tp, mi_row, mi_col, BLOCK_SIZE_SB64X64,
                           &dummy_rate, &dummy_dist);
       } else {
