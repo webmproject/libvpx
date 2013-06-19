@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAaH//7X0\u003d",
+        "filename": "test/fdct4x4_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 87,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-06-19T16:05:50Z",
+      "side": 1,
+      "message": "This TestWrapper and tx_type loop duplicate a lot of what you get from gunit parameterized test cases for free. ie, if you convert from TEST() to TEST_P(), and use the VP9_INSTANTIATE_TEST_CASE stuff, you\u0027ll get nicer error output (for instance, if this test fails, how will you know what tx_type it fails for) and it\u0027ll shard across machines automatically. There are a bunch of tests that use TEST_P for examples, and look at https://code.google.com/p/googletest/wiki/AdvancedGuide",
+      "revId": "40f3a42988f7616582860703338b5589fc16d19c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
