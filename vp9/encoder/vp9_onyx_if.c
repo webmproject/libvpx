@@ -594,7 +594,7 @@ static void set_rd_speed_thresholds(VP9_COMP *cpi, int mode, int speed) {
   sf->thresh_mult[THR_COMP_SPLITLA  ] += speed_multiplier * 4500;
   sf->thresh_mult[THR_COMP_SPLITGA  ] += speed_multiplier * 4500;
 
-  if (speed > 4) {
+  if (cpi->sf.skip_lots_of_modes) {
     for (i = 0; i < MAX_MODES; ++i)
       sf->thresh_mult[i] = INT_MAX;
 
@@ -688,6 +688,11 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
   sf->comp_inter_joint_search_thresh = BLOCK_SIZE_AB4X4;
   sf->adpative_rd_thresh = 0;
   sf->use_lastframe_partitioning = 0;
+  sf->use_largest_txform = 0;
+  sf->use_8tap_always = 0;
+  sf->use_avoid_tested_higherror = 0;
+  sf->skip_lots_of_modes = 0;
+  sf->adjust_thresholds_by_speed = 0;
 
 #if CONFIG_MULTIPLE_ARF
   // Switch segmentation off.
@@ -715,15 +720,21 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
         sf->optimize_coefficients = 0;
         sf->first_step = 1;
       }
-      if (speed == 2)
+      if (speed == 2) {
+        sf->comp_inter_joint_search_thresh = BLOCK_SIZE_SB8X8;
         sf->use_lastframe_partitioning = 1;
+        sf->first_step = 0;
+      }
 
      break;
 
   }; /* switch */
 
   // Set rd thresholds based on mode and speed setting
-  set_rd_speed_thresholds(cpi, mode, speed);
+  if(cpi->sf.adjust_thresholds_by_speed)
+    set_rd_speed_thresholds(cpi, mode, speed);
+  else
+    set_rd_speed_thresholds(cpi, mode, 0);
 
   // Slow quant, dct and trellis not worthwhile for first pass
   // so make sure they are always turned off.

@@ -614,7 +614,7 @@ static void super_block_yrd(VP9_COMP *cpi,
   if (mbmi->ref_frame[0] > INTRA_FRAME)
     vp9_subtract_sby(x, bs);
 
-  if (cpi->speed > 4) {
+  if (cpi->sf.use_largest_txform) {
     if (bs >= BLOCK_SIZE_SB32X32) {
       mbmi->txfm_size = TX_32X32;
     } else if (bs >= BLOCK_SIZE_MB16X16) {
@@ -2236,7 +2236,7 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
         (mbmi->mv[1].as_mv.col & 15) == 0;
   // Search for best switchable filter by checking the variance of
   // pred error irrespective of whether the filter will be used
-  if (cpi->speed > 4) {
+  if (cpi->sf.use_8tap_always) {
     *best_filter = EIGHTTAP;
   } else {
     int i, newbest;
@@ -2536,7 +2536,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
     best_txfm_rd[i] = INT64_MAX;
 
   // Create a mask set to 1 for each frame used by a smaller resolution.
-  if (cpi->speed > 0) {
+  if (cpi->sf.use_avoid_tested_higherror) {
     switch (block_size) {
       case BLOCK_64X64:
         for (i = 0; i < 4; i++) {
@@ -2576,8 +2576,9 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
     frame_mv[NEWMV][ref_frame].as_int = INVALID_MV;
     frame_mv[ZEROMV][ref_frame].as_int = 0;
   }
-  if (cpi->speed == 0
-      || (cpi->speed > 0 && (ref_frame_mask & (1 << INTRA_FRAME)))) {
+  if (!cpi->sf.use_avoid_tested_higherror
+      || (cpi->sf.use_avoid_tested_higherror
+          && (ref_frame_mask & (1 << INTRA_FRAME)))) {
     mbmi->mode = DC_PRED;
     mbmi->ref_frame[0] = INTRA_FRAME;
     for (i = 0; i <= (bsize < BLOCK_SIZE_MB16X16 ? TX_4X4 :
@@ -2623,7 +2624,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
     this_mode = vp9_mode_order[mode_index].mode;
     ref_frame = vp9_mode_order[mode_index].ref_frame;
 
-    if (cpi->speed > 0 && bsize >= BLOCK_SIZE_SB8X8) {
+    if (cpi->sf.use_avoid_tested_higherror && bsize >= BLOCK_SIZE_SB8X8) {
       if (!(ref_frame_mask & (1 << ref_frame))) {
         continue;
       }
