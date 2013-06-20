@@ -16,6 +16,41 @@
       "revId": "462e6ca70b1a5679f45b2b542906fbe2918bdf91",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAaH//4Qw\u003d",
+        "filename": "vp9/common/vp9_reconinter.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 391,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2013-06-20T20:05:39Z",
+      "side": 1,
+      "message": "I agree with John regarding the performance.",
+      "parentUuid": "AAAAaH//5Ko\u003d",
+      "revId": "462e6ca70b1a5679f45b2b542906fbe2918bdf91",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAaH//4RA\u003d",
+        "filename": "vp9/common/vp9_reconintra.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 294,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2013-06-20T20:05:39Z",
+      "side": 1,
+      "message": "It looks like intrapred_test.cc uses these functions.  Did you try running the unit tests?",
+      "revId": "462e6ca70b1a5679f45b2b542906fbe2918bdf91",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
