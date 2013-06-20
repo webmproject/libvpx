@@ -276,9 +276,7 @@ static void decode_atom(VP9D_COMP *pbi, MACROBLOCKD *xd,
   MB_MODE_INFO *const mbmi = &xd->mode_info_context->mbmi;
 
   assert(mbmi->ref_frame[0] != INTRA_FRAME);
-
-  if ((pbi->common.frame_type != KEY_FRAME) && (!pbi->common.intra_only))
-    vp9_setup_interp_filters(xd, mbmi->interp_filter, &pbi->common);
+  vp9_setup_interp_filters(xd, mbmi->interp_filter, &pbi->common);
 
   // prediction
   vp9_build_inter_predictors_sb(xd, mi_row, mi_col, bsize);
@@ -327,8 +325,7 @@ static void decode_sb(VP9D_COMP *pbi, MACROBLOCKD *xd, int mi_row, int mi_col,
   assert(mbmi->sb_type == bsize);
   assert(mbmi->ref_frame[0] != INTRA_FRAME);
 
-  if (pbi->common.frame_type != KEY_FRAME)
-    vp9_setup_interp_filters(xd, mbmi->interp_filter, pc);
+  vp9_setup_interp_filters(xd, mbmi->interp_filter, pc);
 
   // generate prediction
   vp9_build_inter_predictors_sb(xd, mi_row, mi_col, bsize);
@@ -392,26 +389,24 @@ static void set_refs(VP9D_COMP *pbi, int mi_row, int mi_col) {
   MACROBLOCKD *const xd = &pbi->mb;
   MB_MODE_INFO *const mbmi = &xd->mode_info_context->mbmi;
 
-  if (mbmi->ref_frame[0] > INTRA_FRAME) {
-    // Select the appropriate reference frame for this MB
-    const int fb_idx = cm->active_ref_idx[mbmi->ref_frame[0] - 1];
-    const YV12_BUFFER_CONFIG *cfg = &cm->yv12_fb[fb_idx];
-    xd->scale_factor[0]    = cm->active_ref_scale[mbmi->ref_frame[0] - 1];
-    xd->scale_factor_uv[0] = cm->active_ref_scale[mbmi->ref_frame[0] - 1];
-    setup_pre_planes(xd, cfg, NULL, mi_row, mi_col,
-                     xd->scale_factor, xd->scale_factor_uv);
-    xd->corrupted |= cfg->corrupted;
+  // Select the appropriate reference frame for this MB
+  const int fb_idx = cm->active_ref_idx[mbmi->ref_frame[0] - 1];
+  const YV12_BUFFER_CONFIG *cfg = &cm->yv12_fb[fb_idx];
+  xd->scale_factor[0] = cm->active_ref_scale[mbmi->ref_frame[0] - 1];
+  xd->scale_factor_uv[0] = cm->active_ref_scale[mbmi->ref_frame[0] - 1];
+  setup_pre_planes(xd, cfg, NULL, mi_row, mi_col, xd->scale_factor,
+                   xd->scale_factor_uv);
+  xd->corrupted |= cfg->corrupted;
 
-    if (mbmi->ref_frame[1] > INTRA_FRAME) {
-      // Select the appropriate reference frame for this MB
-      const int second_fb_idx = cm->active_ref_idx[mbmi->ref_frame[1] - 1];
-      const YV12_BUFFER_CONFIG *second_cfg = &cm->yv12_fb[second_fb_idx];
-      xd->scale_factor[1]    = cm->active_ref_scale[mbmi->ref_frame[1] - 1];
-      xd->scale_factor_uv[1] = cm->active_ref_scale[mbmi->ref_frame[1] - 1];
-      setup_pre_planes(xd, NULL, second_cfg, mi_row, mi_col,
-                       xd->scale_factor, xd->scale_factor_uv);
-      xd->corrupted |= second_cfg->corrupted;
-    }
+  if (mbmi->ref_frame[1] > INTRA_FRAME) {
+    // Select the appropriate reference frame for this MB
+    const int second_fb_idx = cm->active_ref_idx[mbmi->ref_frame[1] - 1];
+    const YV12_BUFFER_CONFIG *second_cfg = &cm->yv12_fb[second_fb_idx];
+    xd->scale_factor[1] = cm->active_ref_scale[mbmi->ref_frame[1] - 1];
+    xd->scale_factor_uv[1] = cm->active_ref_scale[mbmi->ref_frame[1] - 1];
+    setup_pre_planes(xd, NULL, second_cfg, mi_row, mi_col, xd->scale_factor,
+                     xd->scale_factor_uv);
+    xd->corrupted |= second_cfg->corrupted;
   }
 }
 
@@ -424,16 +419,17 @@ static void decode_modes_b(VP9D_COMP *pbi, int mi_row, int mi_col,
       return;
   set_offsets(pbi, bsize, mi_row, mi_col);
   vp9_decode_mb_mode_mv(pbi, xd, mi_row, mi_col, r);
-  set_refs(pbi, mi_row, mi_col);
 
-  if (xd->mode_info_context->mbmi.ref_frame[0] == INTRA_FRAME)
+  if (xd->mode_info_context->mbmi.ref_frame[0] == INTRA_FRAME) {
     decode_sb_intra(pbi, xd, mi_row, mi_col, r, (bsize < BLOCK_SIZE_SB8X8) ?
                                      BLOCK_SIZE_SB8X8 : bsize);
-  else if (bsize < BLOCK_SIZE_SB8X8)
-    decode_atom(pbi, xd, mi_row, mi_col, r, BLOCK_SIZE_SB8X8);
-  else
-    decode_sb(pbi, xd, mi_row, mi_col, r, bsize);
-
+  } else {
+    set_refs(pbi, mi_row, mi_col);
+    if (bsize < BLOCK_SIZE_SB8X8)
+      decode_atom(pbi, xd, mi_row, mi_col, r, BLOCK_SIZE_SB8X8);
+    else
+      decode_sb(pbi, xd, mi_row, mi_col, r, bsize);
+  }
   xd->corrupted |= vp9_reader_has_error(r);
 }
 
