@@ -223,6 +223,8 @@ typedef struct {
   int skip_lots_of_modes;
   int adjust_thresholds_by_speed;
   int partition_by_variance;
+  int use_one_partition_size_always;
+  BLOCK_SIZE_TYPE always_this_block_size;
 } SPEED_FEATURES;
 
 enum BlockSize {

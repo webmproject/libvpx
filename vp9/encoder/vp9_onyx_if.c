@@ -691,6 +691,7 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
   sf->skip_lots_of_modes = 0;
   sf->adjust_thresholds_by_speed = 0;
   sf->partition_by_variance = 0;
+  sf->use_one_partition_size_always = 0;
 
 #if CONFIG_MULTIPLE_ARF
   // Switch segmentation off.
@@ -727,6 +728,12 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
         sf->comp_inter_joint_search_thresh = BLOCK_SIZE_SB8X8;
         sf->partition_by_variance = 1;
         sf->first_step = 0;
+      }
+      if (speed == 4) {
+        sf->first_step = 0;
+        sf->comp_inter_joint_search_thresh = BLOCK_SIZE_SB8X8;
+        sf->use_one_partition_size_always = 1;
+        sf->always_this_block_size = BLOCK_SIZE_MB16X16;
       }
      break;
 

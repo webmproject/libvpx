@@ -857,22 +857,14 @@ static void encode_sb(VP9_COMP *cpi, TOKENEXTRA **tp, int mi_row, int mi_col,
   }
 }
 
-static void set_partitioning(VP9_COMP *cpi, MODE_INFO *m, BLOCK_SIZE_TYPE bsize) {
-  VP9_COMMON * const cm = &cpi->common;
+static void set_partitioning(VP9_COMP *cpi, MODE_INFO *m,
+                             BLOCK_SIZE_TYPE bsize) {
+  VP9_COMMON *const cm = &cpi->common;
   const int mis = cm->mode_info_stride;
-  int bsl = b_width_log2(bsize);
-  int bs = (1 << bsl) / 2;  //
   int block_row, block_col;
-  int row, col;
-
-  // this test function sets the entire macroblock to the same bsize
-  for (block_row = 0; block_row < 8; block_row += bs) {
-    for (block_col = 0; block_col < 8; block_col += bs) {
-      for (row = 0; row < bs; row++) {
-        for (col = 0; col < bs; col++) {
-          m[(block_row + row) * mis + block_col + col].mbmi.sb_type = bsize;
-        }
-      }
+  for (block_row = 0; block_row < 8; ++block_row) {
+    for (block_col = 0; block_col < 8; ++block_col) {
+      m[block_row * mis + block_col].mbmi.sb_type = bsize;
     }
   }
 }
@@ -1500,12 +1492,18 @@ static void encode_sb_row(VP9_COMP *cpi, int mi_row, TOKENEXTRA **tp,
   for (mi_col = cm->cur_tile_mi_col_start; mi_col < cm->cur_tile_mi_col_end;
       mi_col += 64 / MI_SIZE) {
     int dummy_rate, dummy_dist;
-    if (cpi->sf.partition_by_variance || cpi->sf.use_lastframe_partitioning) {
+    if (cpi->sf.partition_by_variance || cpi->sf.use_lastframe_partitioning ||
+        cpi->sf.use_one_partition_size_always ) {
       const int idx_str = cm->mode_info_stride * mi_row + mi_col;
       MODE_INFO *m = cm->mi + idx_str;
       MODE_INFO *p = cm->prev_mi + idx_str;
 
-      if (cpi->sf.partition_by_variance) {
+      if (cpi->sf.use_one_partition_size_always) {
+        set_offsets(cpi, mi_row, mi_col, BLOCK_SIZE_SB64X64);
+        set_partitioning(cpi, m, cpi->sf.always_this_block_size);
+        rd_use_partition(cpi, m, tp, mi_row, mi_col, BLOCK_SIZE_SB64X64,
+                         &dummy_rate, &dummy_dist);
+      } else if (cpi->sf.partition_by_variance) {
         choose_partitioning(cpi, cm->mi, mi_row, mi_col);
         rd_use_partition(cpi, m, tp, mi_row, mi_col, BLOCK_SIZE_SB64X64,
                          &dummy_rate, &dummy_dist);
@@ -1517,8 +1515,6 @@ static void encode_sb_row(VP9_COMP *cpi, int mi_row, TOKENEXTRA **tp,
           rd_pick_partition(cpi, tp, mi_row, mi_col, BLOCK_SIZE_SB64X64,
                             &dummy_rate, &dummy_dist);
         } else {
-          // set_partitioning(cpi, m, BLOCK_SIZE_SB64X64);
-
           copy_partitioning(cpi, m, p);
           rd_use_partition(cpi, m, tp, mi_row, mi_col, BLOCK_SIZE_SB64X64,
                            &dummy_rate, &dummy_dist);
