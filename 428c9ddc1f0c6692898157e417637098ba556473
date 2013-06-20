@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAaH//5IY\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1820,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-06-20T15:53:44Z",
+      "side": 1,
+      "message": "Could you document the equations for these curves next to their lookup tables?",
+      "revId": "428c9ddc1f0c6692898157e417637098ba556473",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
