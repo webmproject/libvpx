@@ -895,6 +895,17 @@ static void set_partitioning(VP9_COMP *cpi, MODE_INFO *m,
     }
   }
 }
+static void copy_partitioning(VP9_COMP *cpi, MODE_INFO *m, MODE_INFO *p) {
+  VP9_COMMON *const cm = &cpi->common;
+  const int mis = cm->mode_info_stride;
+  int block_row, block_col;
+  for (block_row = 0; block_row < 8; ++block_row) {
+    for (block_col = 0; block_col < 8; ++block_col) {
+      m[block_row * mis + block_col].mbmi.sb_type =
+          p[block_row * mis + block_col].mbmi.sb_type;
+    }
+  }
+}
 
 static void set_block_size(VP9_COMMON *const cm,
                            MODE_INFO *m, BLOCK_SIZE_TYPE bsize, int mis,
@@ -1108,7 +1119,6 @@ static void rd_use_partition(VP9_COMP *cpi, MODE_INFO *m, TOKENEXTRA **tp,
   if (mi_row >= cm->mi_rows || mi_col >= cm->mi_cols)
     return;
 
-
   // parse the partition type
   if ((bwl == bsl) && (bhl == bsl))
     partition = PARTITION_NONE;
@@ -1123,18 +1133,15 @@ static void rd_use_partition(VP9_COMP *cpi, MODE_INFO *m, TOKENEXTRA **tp,
 
   subsize = get_subsize(bsize, partition);
 
-  // TODO(JBB): this restriction is here because pick_sb_modes can return
-  // r's that are INT_MAX meaning we can't select a mode / mv for this block.
-  // when the code is made to work for less than sb8x8 we need to come up with
-  // a solution to this problem.
-  assert(subsize >= BLOCK_SIZE_SB8X8);
-
-  if (bsize >= BLOCK_SIZE_SB8X8) {
-    xd->left_seg_context = cm->left_seg_context + (mi_row & MI_MASK);
-    xd->above_seg_context = cm->above_seg_context + mi_col;
+  if (bsize < BLOCK_SIZE_SB8X8) {
+    if (xd->ab_index != 0) {
+      *rate = 0;
+      *dist = 0;
+      return;
+    }
+  } else {
     *(get_sb_partitioning(x, bsize)) = subsize;
   }
-
   pl = partition_plane_context(xd, bsize);
   save_context(cpi, mi_row, mi_col, a, l, sa, sl, bsize);
   switch (partition) {
@@ -1205,17 +1212,6 @@ static void rd_use_partition(VP9_COMP *cpi, MODE_INFO *m, TOKENEXTRA **tp,
       assert(0);
   }
 
-  // update partition context
-#if CONFIG_AB4X4
-  if (bsize >= BLOCK_SIZE_SB8X8 &&
-      (bsize == BLOCK_SIZE_SB8X8 || partition != PARTITION_SPLIT)) {
-#else
-  if (bsize > BLOCK_SIZE_SB8X8
-      && (bsize == BLOCK_SIZE_MB16X16 || partition != PARTITION_SPLIT)) {
-#endif
-    set_partition_seg_context(cm, xd, mi_row, mi_col);
-    update_partition_context(xd, subsize, bsize);
-  }
   restore_context(cpi, mi_row, mi_col, a, l, sa, sl, bsize);
 
   if (r < INT_MAX && d < INT_MAX)
@@ -1406,10 +1402,20 @@ static void encode_sb_row(VP9_COMP *cpi, int mi_row,
     } else {
       const int idx_str = cm->mode_info_stride * mi_row + mi_col;
       MODE_INFO *m = cm->mi + idx_str;
-      // set_partitioning(cpi, m, BLOCK_SIZE_SB64X64);
-      choose_partitioning(cpi, cm->mi, mi_row, mi_col);
-      rd_use_partition(cpi, m, tp, mi_row, mi_col, BLOCK_SIZE_SB64X64,
-                       &dummy_rate, &dummy_dist);
+      MODE_INFO *p = cm->prev_mi + idx_str;
+
+      if ((cpi->common.current_video_frame & 1) == 0 || cm->prev_mi == 0 ||
+          cpi->is_src_frame_alt_ref) {
+        rd_pick_partition(cpi, tp, mi_row, mi_col, BLOCK_SIZE_SB64X64,
+                          &dummy_rate, &dummy_dist);
+      } else {
+        // set_partitioning(cpi, m, BLOCK_SIZE_SB64X64);
+        // choose_partitioning(cpi, cm->mi, mi_row, mi_col);
+
+        copy_partitioning(cpi, m, p);
+        rd_use_partition(cpi, m, tp, mi_row, mi_col, BLOCK_SIZE_SB64X64,
+                         &dummy_rate, &dummy_dist);
+      }
     }
   }
 }
