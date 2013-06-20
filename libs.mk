@@ -202,6 +202,7 @@ INSTALL-SRCS-$(CONFIG_CODEC_SRCS) += $(call enabled,CODEC_EXPORTS)
 libvpx_srcs.txt:
 	@echo "    [CREATE] $@"
 	@echo $(CODEC_SRCS) | xargs -n1 echo | sort -u > $@
+CLEAN-OBJS += libvpx_srcs.txt
 
 
 ifeq ($(CONFIG_EXTERNAL_BUILD),yes)
