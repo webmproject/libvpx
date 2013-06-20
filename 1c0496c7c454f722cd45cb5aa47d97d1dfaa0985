@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAaH//5EI\u003d",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 8,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2013-06-20T16:09:28Z",
+      "side": 1,
+      "message": "it looks like that copy partitions for every other frame ? maybe a few more words can give useful info here.",
+      "revId": "1c0496c7c454f722cd45cb5aa47d97d1dfaa0985",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAaH//5Ek\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1151,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2013-06-20T16:09:28Z",
+      "side": 1,
+      "message": "remove if it is no longer needed. \nalso, are above and left seg context never required here?",
+      "revId": "1c0496c7c454f722cd45cb5aa47d97d1dfaa0985",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
