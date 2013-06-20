@@ -541,7 +541,7 @@ void vp9_encode_mv(vp9_writer* w, const MV* mv, const MV* ref,
   const MV diff = {mv->row - ref->row,
                    mv->col - ref->col};
   const MV_JOINT_TYPE j = vp9_get_mv_joint(&diff);
-  usehp = usehp && vp9_use_nmv_hp(ref);
+  usehp = usehp && vp9_use_mv_hp(ref);
 
   write_token(w, vp9_mv_joint_tree, mvctx->joints, &vp9_mv_joint_encodings[j]);
   if (mv_joint_vertical(j))

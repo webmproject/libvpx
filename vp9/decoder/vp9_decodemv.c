@@ -459,7 +459,7 @@ static INLINE void decode_mv(vp9_reader *r, MV *mv, const MV *ref,
   const MV_JOINT_TYPE j = treed_read(r, vp9_mv_joint_tree, ctx->joints);
   MV diff = {0, 0};
 
-  usehp = usehp && vp9_use_nmv_hp(ref);
+  usehp = usehp && vp9_use_mv_hp(ref);
   if (mv_joint_vertical(j))
     diff.row = read_mv_component(r, &ctx->comps[0], usehp);
 
