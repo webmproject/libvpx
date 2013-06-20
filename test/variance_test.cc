@@ -76,6 +76,34 @@ static unsigned int subpel_variance_ref(const uint8_t *ref, const uint8_t *src,
   return sse - (((int64_t) se * se) >> (l2w + l2h));
 }
 
+static unsigned int subpel_avg_variance_ref(const uint8_t *ref,
+                                            const uint8_t *src,
+                                            const uint8_t *second_pred,
+                                            int l2w, int l2h,
+                                            int xoff, int yoff,
+                                            unsigned int *sse_ptr) {
+  int se = 0;
+  unsigned int sse = 0;
+  const int w = 1 << l2w, h = 1 << l2h;
+  for (int y = 0; y < h; y++) {
+    for (int x = 0; x < w; x++) {
+      // bilinear interpolation at a 16th pel step
+      const int a1 = ref[(w + 1) * (y + 0) + x + 0];
+      const int a2 = ref[(w + 1) * (y + 0) + x + 1];
+      const int b1 = ref[(w + 1) * (y + 1) + x + 0];
+      const int b2 = ref[(w + 1) * (y + 1) + x + 1];
+      const int a = a1 + (((a2 - a1) * xoff + 8) >> 4);
+      const int b = b1 + (((b2 - b1) * xoff + 8) >> 4);
+      const int r = a + (((b - a) * yoff + 8) >> 4);
+      int diff = ((r + second_pred[w * y + x] + 1) >> 1) - src[w * y + x];
+      se += diff;
+      sse += diff * diff;
+    }
+  }
+  *sse_ptr = sse;
+  return sse - (((int64_t) se * se) >> (l2w + l2h));
+}
+
 template<typename VarianceFunctionType>
 class VarianceTest :
     public ::testing::TestWithParam<tuple<int, int, VarianceFunctionType> > {
@@ -174,6 +202,7 @@ class SubpelVarianceTest :
     rnd(ACMRandom::DeterministicSeed());
     block_size_ = width_ * height_;
     src_ = new uint8_t[block_size_];
+    sec_ = new uint8_t[block_size_];
     ref_ = new uint8_t[block_size_ + width_ + height_ + 1];
     ASSERT_TRUE(src_ != NULL);
     ASSERT_TRUE(ref_ != NULL);
@@ -182,14 +211,16 @@ class SubpelVarianceTest :
   virtual void TearDown() {
     delete[] src_;
     delete[] ref_;
+    delete[] sec_;
   }
 
  protected:
   void RefTest();
 
   ACMRandom rnd;
-  uint8_t* src_;
-  uint8_t* ref_;
+  uint8_t *src_;
+  uint8_t *ref_;
+  uint8_t *sec_;
   int width_, log2width_;
   int height_, log2height_;
   int block_size_;
@@ -211,6 +242,29 @@ void SubpelVarianceTest<SubpelVarianceFunctionType>::RefTest() {
                                                  src_, width_, &sse1);
       const unsigned int var2 = subpel_variance_ref(ref_, src_, log2width_,
                                                     log2height_, x, y, &sse2);
+      EXPECT_EQ(sse1, sse2) << "at position " << x << ", " << y;
+      EXPECT_EQ(var1, var2) << "at position " << x << ", " << y;
+    }
+  }
+}
+
+template<>
+void SubpelVarianceTest<vp9_subp_avg_variance_fn_t>::RefTest() {
+  for (int x = 0; x < 16; ++x) {
+    for (int y = 0; y < 16; ++y) {
+      for (int j = 0; j < block_size_; j++) {
+        src_[j] = rnd.Rand8();
+        sec_[j] = rnd.Rand8();
+      }
+      for (int j = 0; j < block_size_ + width_ + height_ + 1; j++) {
+        ref_[j] = rnd.Rand8();
+      }
+      unsigned int sse1, sse2;
+      const unsigned int var1 = subpel_variance_(ref_, width_ + 1, x, y,
+                                                 src_, width_, &sse1, sec_);
+      const unsigned int var2 = subpel_avg_variance_ref(ref_, src_, sec_,
+                                                        log2width_, log2height_,
+                                                        x, y, &sse2);
       EXPECT_EQ(sse1, sse2) << "at position " << x << ", " << y;
       EXPECT_EQ(var1, var2) << "at position " << x << ", " << y;
     }
@@ -283,10 +337,12 @@ namespace vp9 {
 #if CONFIG_VP9_ENCODER
 typedef VarianceTest<vp9_variance_fn_t> VP9VarianceTest;
 typedef SubpelVarianceTest<vp9_subpixvariance_fn_t> VP9SubpelVarianceTest;
+typedef SubpelVarianceTest<vp9_subp_avg_variance_fn_t> VP9SubpelAvgVarianceTest;
 
 TEST_P(VP9VarianceTest, Zero) { ZeroTest(); }
 TEST_P(VP9VarianceTest, Ref) { RefTest(); }
 TEST_P(VP9SubpelVarianceTest, Ref) { RefTest(); }
+TEST_P(VP9SubpelAvgVarianceTest, Ref) { RefTest(); }
 TEST_P(VP9VarianceTest, OneQuarter) { OneQuarterTest(); }
 
 const vp9_variance_fn_t variance4x4_c = vp9_variance4x4_c;
@@ -359,6 +415,48 @@ INSTANTIATE_TEST_CASE_P(
                       make_tuple(5, 6, subpel_variance32x64_c),
                       make_tuple(6, 5, subpel_variance64x32_c),
                       make_tuple(6, 6, subpel_variance64x64_c)));
+
+const vp9_subp_avg_variance_fn_t subpel_avg_variance4x4_c =
+    vp9_sub_pixel_avg_variance4x4_c;
+const vp9_subp_avg_variance_fn_t subpel_avg_variance4x8_c =
+    vp9_sub_pixel_avg_variance4x8_c;
+const vp9_subp_avg_variance_fn_t subpel_avg_variance8x4_c =
+    vp9_sub_pixel_avg_variance8x4_c;
+const vp9_subp_avg_variance_fn_t subpel_avg_variance8x8_c =
+    vp9_sub_pixel_avg_variance8x8_c;
+const vp9_subp_avg_variance_fn_t subpel_avg_variance8x16_c =
+    vp9_sub_pixel_avg_variance8x16_c;
+const vp9_subp_avg_variance_fn_t subpel_avg_variance16x8_c =
+    vp9_sub_pixel_avg_variance16x8_c;
+const vp9_subp_avg_variance_fn_t subpel_avg_variance16x16_c =
+    vp9_sub_pixel_avg_variance16x16_c;
+const vp9_subp_avg_variance_fn_t subpel_avg_variance16x32_c =
+    vp9_sub_pixel_avg_variance16x32_c;
+const vp9_subp_avg_variance_fn_t subpel_avg_variance32x16_c =
+    vp9_sub_pixel_avg_variance32x16_c;
+const vp9_subp_avg_variance_fn_t subpel_avg_variance32x32_c =
+    vp9_sub_pixel_avg_variance32x32_c;
+const vp9_subp_avg_variance_fn_t subpel_avg_variance32x64_c =
+    vp9_sub_pixel_avg_variance32x64_c;
+const vp9_subp_avg_variance_fn_t subpel_avg_variance64x32_c =
+    vp9_sub_pixel_avg_variance64x32_c;
+const vp9_subp_avg_variance_fn_t subpel_avg_variance64x64_c =
+    vp9_sub_pixel_avg_variance64x64_c;
+INSTANTIATE_TEST_CASE_P(
+    C, VP9SubpelAvgVarianceTest,
+    ::testing::Values(make_tuple(2, 2, subpel_avg_variance4x4_c),
+                      make_tuple(2, 3, subpel_avg_variance4x8_c),
+                      make_tuple(3, 2, subpel_avg_variance8x4_c),
+                      make_tuple(3, 3, subpel_avg_variance8x8_c),
+                      make_tuple(3, 4, subpel_avg_variance8x16_c),
+                      make_tuple(4, 3, subpel_avg_variance16x8_c),
+                      make_tuple(4, 4, subpel_avg_variance16x16_c),
+                      make_tuple(4, 5, subpel_avg_variance16x32_c),
+                      make_tuple(5, 4, subpel_avg_variance32x16_c),
+                      make_tuple(5, 5, subpel_avg_variance32x32_c),
+                      make_tuple(5, 6, subpel_avg_variance32x64_c),
+                      make_tuple(6, 5, subpel_avg_variance64x32_c),
+                      make_tuple(6, 6, subpel_avg_variance64x64_c)));
 
 #if HAVE_MMX
 const vp9_variance_fn_t variance4x4_mmx = vp9_variance4x4_mmx;
@@ -446,6 +544,48 @@ INSTANTIATE_TEST_CASE_P(
                       make_tuple(5, 6, subpel_variance32x64_sse2),
                       make_tuple(6, 5, subpel_variance64x32_sse2),
                       make_tuple(6, 6, subpel_variance64x64_sse2)));
+
+const vp9_subp_avg_variance_fn_t subpel_avg_variance4x4_sse =
+    vp9_sub_pixel_avg_variance4x4_sse;
+const vp9_subp_avg_variance_fn_t subpel_avg_variance4x8_sse =
+    vp9_sub_pixel_avg_variance4x8_sse;
+const vp9_subp_avg_variance_fn_t subpel_avg_variance8x4_sse2 =
+    vp9_sub_pixel_avg_variance8x4_sse2;
+const vp9_subp_avg_variance_fn_t subpel_avg_variance8x8_sse2 =
+    vp9_sub_pixel_avg_variance8x8_sse2;
+const vp9_subp_avg_variance_fn_t subpel_avg_variance8x16_sse2 =
+    vp9_sub_pixel_avg_variance8x16_sse2;
+const vp9_subp_avg_variance_fn_t subpel_avg_variance16x8_sse2 =
+    vp9_sub_pixel_avg_variance16x8_sse2;
+const vp9_subp_avg_variance_fn_t subpel_avg_variance16x16_sse2 =
+    vp9_sub_pixel_avg_variance16x16_sse2;
+const vp9_subp_avg_variance_fn_t subpel_avg_variance16x32_sse2 =
+    vp9_sub_pixel_avg_variance16x32_sse2;
+const vp9_subp_avg_variance_fn_t subpel_avg_variance32x16_sse2 =
+    vp9_sub_pixel_avg_variance32x16_sse2;
+const vp9_subp_avg_variance_fn_t subpel_avg_variance32x32_sse2 =
+    vp9_sub_pixel_avg_variance32x32_sse2;
+const vp9_subp_avg_variance_fn_t subpel_avg_variance32x64_sse2 =
+    vp9_sub_pixel_avg_variance32x64_sse2;
+const vp9_subp_avg_variance_fn_t subpel_avg_variance64x32_sse2 =
+    vp9_sub_pixel_avg_variance64x32_sse2;
+const vp9_subp_avg_variance_fn_t subpel_avg_variance64x64_sse2 =
+    vp9_sub_pixel_avg_variance64x64_sse2;
+INSTANTIATE_TEST_CASE_P(
+    SSE2, VP9SubpelAvgVarianceTest,
+    ::testing::Values(make_tuple(2, 2, subpel_avg_variance4x4_sse),
+                      make_tuple(2, 3, subpel_avg_variance4x8_sse),
+                      make_tuple(3, 2, subpel_avg_variance8x4_sse2),
+                      make_tuple(3, 3, subpel_avg_variance8x8_sse2),
+                      make_tuple(3, 4, subpel_avg_variance8x16_sse2),
+                      make_tuple(4, 3, subpel_avg_variance16x8_sse2),
+                      make_tuple(4, 4, subpel_avg_variance16x16_sse2),
+                      make_tuple(4, 5, subpel_avg_variance16x32_sse2),
+                      make_tuple(5, 4, subpel_avg_variance32x16_sse2),
+                      make_tuple(5, 5, subpel_avg_variance32x32_sse2),
+                      make_tuple(5, 6, subpel_avg_variance32x64_sse2),
+                      make_tuple(6, 5, subpel_avg_variance64x32_sse2),
+                      make_tuple(6, 6, subpel_avg_variance64x64_sse2)));
 #endif
 
 #if HAVE_SSSE3
@@ -490,6 +630,48 @@ INSTANTIATE_TEST_CASE_P(
                       make_tuple(5, 6, subpel_variance32x64_ssse3),
                       make_tuple(6, 5, subpel_variance64x32_ssse3),
                       make_tuple(6, 6, subpel_variance64x64_ssse3)));
+
+const vp9_subp_avg_variance_fn_t subpel_avg_variance4x4_ssse3 =
+    vp9_sub_pixel_avg_variance4x4_ssse3;
+const vp9_subp_avg_variance_fn_t subpel_avg_variance4x8_ssse3 =
+    vp9_sub_pixel_avg_variance4x8_ssse3;
+const vp9_subp_avg_variance_fn_t subpel_avg_variance8x4_ssse3 =
+    vp9_sub_pixel_avg_variance8x4_ssse3;
+const vp9_subp_avg_variance_fn_t subpel_avg_variance8x8_ssse3 =
+    vp9_sub_pixel_avg_variance8x8_ssse3;
+const vp9_subp_avg_variance_fn_t subpel_avg_variance8x16_ssse3 =
+    vp9_sub_pixel_avg_variance8x16_ssse3;
+const vp9_subp_avg_variance_fn_t subpel_avg_variance16x8_ssse3 =
+    vp9_sub_pixel_avg_variance16x8_ssse3;
+const vp9_subp_avg_variance_fn_t subpel_avg_variance16x16_ssse3 =
+    vp9_sub_pixel_avg_variance16x16_ssse3;
+const vp9_subp_avg_variance_fn_t subpel_avg_variance16x32_ssse3 =
+    vp9_sub_pixel_avg_variance16x32_ssse3;
+const vp9_subp_avg_variance_fn_t subpel_avg_variance32x16_ssse3 =
+    vp9_sub_pixel_avg_variance32x16_ssse3;
+const vp9_subp_avg_variance_fn_t subpel_avg_variance32x32_ssse3 =
+    vp9_sub_pixel_avg_variance32x32_ssse3;
+const vp9_subp_avg_variance_fn_t subpel_avg_variance32x64_ssse3 =
+    vp9_sub_pixel_avg_variance32x64_ssse3;
+const vp9_subp_avg_variance_fn_t subpel_avg_variance64x32_ssse3 =
+    vp9_sub_pixel_avg_variance64x32_ssse3;
+const vp9_subp_avg_variance_fn_t subpel_avg_variance64x64_ssse3 =
+    vp9_sub_pixel_avg_variance64x64_ssse3;
+INSTANTIATE_TEST_CASE_P(
+    SSSE3, VP9SubpelAvgVarianceTest,
+    ::testing::Values(make_tuple(2, 2, subpel_avg_variance4x4_ssse3),
+                      make_tuple(2, 3, subpel_avg_variance4x8_ssse3),
+                      make_tuple(3, 2, subpel_avg_variance8x4_ssse3),
+                      make_tuple(3, 3, subpel_avg_variance8x8_ssse3),
+                      make_tuple(3, 4, subpel_avg_variance8x16_ssse3),
+                      make_tuple(4, 3, subpel_avg_variance16x8_ssse3),
+                      make_tuple(4, 4, subpel_avg_variance16x16_ssse3),
+                      make_tuple(4, 5, subpel_avg_variance16x32_ssse3),
+                      make_tuple(5, 4, subpel_avg_variance32x16_ssse3),
+                      make_tuple(5, 5, subpel_avg_variance32x32_ssse3),
+                      make_tuple(5, 6, subpel_avg_variance32x64_ssse3),
+                      make_tuple(6, 5, subpel_avg_variance64x32_ssse3),
+                      make_tuple(6, 6, subpel_avg_variance64x64_ssse3)));
 #endif
 #endif  // CONFIG_VP9_ENCODER
 
