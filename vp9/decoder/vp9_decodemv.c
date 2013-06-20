@@ -428,6 +428,7 @@ static int read_mb_segment_id(VP9D_COMP *pbi, int mi_row, int mi_col,
       // If the value is flagged as correctly predicted
       // then use the predicted value, otherwise decode it explicitly
       segment_id = pred_flag ? vp9_get_pred_mi_segid(cm, mbmi->sb_type,
+                                                     cm->last_frame_seg_map,
                                                      mi_row, mi_col)
                              : read_mb_segid(r, xd);
     } else {
@@ -437,7 +438,8 @@ static int read_mb_segment_id(VP9D_COMP *pbi, int mi_row, int mi_col,
     set_segment_id(cm, mbmi, mi_row, mi_col, segment_id);  // Side effect
     return segment_id;
   } else {
-    return vp9_get_pred_mi_segid(cm, mbmi->sb_type, mi_row, mi_col);
+    return vp9_get_pred_mi_segid(cm, mbmi->sb_type, cm->last_frame_seg_map,
+                                 mi_row, mi_col);
   }
 }
 

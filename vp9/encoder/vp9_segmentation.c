@@ -139,6 +139,7 @@ static void count_segs(VP9_COMP *cpi,
   if (cm->frame_type != KEY_FRAME) {
     // Test to see if the segment id matches the predicted value.
     const int pred_seg_id = vp9_get_pred_mi_segid(cm, mi->mbmi.sb_type,
+                                                  cm->last_frame_seg_map,
                                                   mi_row, mi_col);
     const int seg_predicted = (segment_id == pred_seg_id);
 
