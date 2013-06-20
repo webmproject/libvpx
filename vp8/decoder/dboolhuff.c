@@ -47,8 +47,8 @@ void vp8dx_bool_decoder_fill(BOOL_DECODER *br)
     unsigned char decrypted[sizeof(VP8_BD_VALUE) + 1];
 
     if (br->decrypt_cb) {
-        int n = bytes_left > sizeof(decrypted) ? sizeof(decrypted) : bytes_left;
-        br->decrypt_cb(br->decrypt_state, bufptr, decrypted, n);
+        size_t n = bytes_left > sizeof(decrypted) ? sizeof(decrypted) : bytes_left;
+        br->decrypt_cb(br->decrypt_state, bufptr, decrypted, (int)n);
         bufptr = decrypted;
     }
 
