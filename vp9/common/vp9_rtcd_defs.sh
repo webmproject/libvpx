@@ -551,7 +551,7 @@ prototype void vp9_short_fht4x4 "int16_t *InputData, int16_t *OutputData, int pi
 specialize vp9_short_fht4x4
 
 prototype void vp9_short_fht8x8 "int16_t *InputData, int16_t *OutputData, int pitch, int tx_type"
-specialize vp9_short_fht8x8
+specialize vp9_short_fht8x8 sse2
 
 prototype void vp9_short_fht16x16 "int16_t *InputData, int16_t *OutputData, int pitch, int tx_type"
 specialize vp9_short_fht16x16
