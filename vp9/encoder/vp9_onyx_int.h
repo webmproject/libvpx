@@ -225,6 +225,10 @@ typedef struct {
   int partition_by_variance;
   int use_one_partition_size_always;
   BLOCK_SIZE_TYPE always_this_block_size;
+  int use_partitions_greater_than;
+  BLOCK_SIZE_TYPE greater_than_block_size;
+  int use_partitions_less_than;
+  BLOCK_SIZE_TYPE less_than_block_size;
 } SPEED_FEATURES;
 
 enum BlockSize {
