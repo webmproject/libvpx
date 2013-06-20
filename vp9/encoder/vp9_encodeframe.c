@@ -1116,7 +1116,7 @@ static void choose_partitioning(VP9_COMP *cpi, MODE_INFO *m, int mi_row,
   d = vp9_64x64_zeros;
   dp = 64;
   if (cm->frame_type != KEY_FRAME) {
-    int_mv nearest, near;
+    int_mv nearest_mv, near_mv;
     YV12_BUFFER_CONFIG *ref_fb = &cm->yv12_fb[0];
     YV12_BUFFER_CONFIG *second_ref_fb = NULL;
 
@@ -1124,10 +1124,10 @@ static void choose_partitioning(VP9_COMP *cpi, MODE_INFO *m, int mi_row,
                      xd->scale_factor, xd->scale_factor_uv);
     xd->mode_info_context->mbmi.ref_frame[0] = LAST_FRAME;
     xd->mode_info_context->mbmi.sb_type = BLOCK_SIZE_SB64X64;
-    vp9_find_best_ref_mvs(xd, m->mbmi.ref_mvs[m->mbmi.ref_frame[0]], &nearest,
-                          &near);
+    vp9_find_best_ref_mvs(xd, m->mbmi.ref_mvs[m->mbmi.ref_frame[0]],
+                          &nearest_mv, &near_mv);
 
-    xd->mode_info_context->mbmi.mv[0] = nearest;
+    xd->mode_info_context->mbmi.mv[0] = nearest_mv;
     vp9_build_inter_predictors_sby(xd, mi_row, mi_col, BLOCK_SIZE_SB64X64);
     d = xd->plane[0].dst.buf;
     dp = xd->plane[0].dst.stride;
