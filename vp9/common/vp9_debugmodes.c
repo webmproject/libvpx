@@ -23,7 +23,7 @@ static void log_frame_info(VP9_COMMON *cm, const char *str, FILE *f) {
  * for each mbmi member value in the mi structure.
  */
 static void print_mi_data(VP9_COMMON *common, FILE *file, char *descriptor,
-                          int member_offset) {
+                          size_t member_offset) {
   int mi_row;
   int mi_col;
   int mi_index = 0;
