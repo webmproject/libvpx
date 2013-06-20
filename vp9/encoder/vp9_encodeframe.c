@@ -1130,7 +1130,7 @@ static void choose_partitioning(VP9_COMP *cpi, MODE_INFO *m, int mi_row,
 
     setup_pre_planes(xd, ref_fb, second_ref_fb, mi_row, mi_col,
                      xd->scale_factor, xd->scale_factor_uv);
-    m->mbmi.ref_frame[0] = LAST_FRAME;
+    xd->mode_info_context->mbmi.ref_frame[0] = LAST_FRAME;
     xd->mode_info_context->mbmi.sb_type = BLOCK_SIZE_SB64X64;
     vp9_find_best_ref_mvs(xd, m->mbmi.ref_mvs[m->mbmi.ref_frame[0]], &nearest,
                           &near);
@@ -1500,28 +1500,33 @@ static void encode_sb_row(VP9_COMP *cpi, int mi_row, TOKENEXTRA **tp,
   for (mi_col = cm->cur_tile_mi_col_start; mi_col < cm->cur_tile_mi_col_end;
       mi_col += 64 / MI_SIZE) {
     int dummy_rate, dummy_dist;
-    if (!cpi->sf.use_lastframe_partitioning) {
-      rd_pick_partition(cpi, tp, mi_row, mi_col, BLOCK_SIZE_SB64X64,
-                        &dummy_rate, &dummy_dist);
-    } else {
-
+    if (cpi->sf.partition_by_variance || cpi->sf.use_lastframe_partitioning) {
       const int idx_str = cm->mode_info_stride * mi_row + mi_col;
       MODE_INFO *m = cm->mi + idx_str;
       MODE_INFO *p = cm->prev_mi + idx_str;
 
-      if ((cpi->common.current_video_frame & 1) == 0 || cm->prev_mi == 0
-          || cpi->common.show_frame == 0 || cpi->common.frame_type == KEY_FRAME
-          || cpi->is_src_frame_alt_ref) {
-        rd_pick_partition(cpi, tp, mi_row, mi_col, BLOCK_SIZE_SB64X64,
-                          &dummy_rate, &dummy_dist);
-      } else {
-        // set_partitioning(cpi, m, BLOCK_SIZE_SB64X64);
-        // choose_partitioning(cpi, cm->mi, mi_row, mi_col);
-
-        copy_partitioning(cpi, m, p);
+      if (cpi->sf.partition_by_variance) {
+        choose_partitioning(cpi, cm->mi, mi_row, mi_col);
         rd_use_partition(cpi, m, tp, mi_row, mi_col, BLOCK_SIZE_SB64X64,
                          &dummy_rate, &dummy_dist);
+      } else {
+        if ((cpi->common.current_video_frame & 1) == 0 || cm->prev_mi == 0
+            || cpi->common.show_frame == 0
+            || cpi->common.frame_type == KEY_FRAME
+            || cpi->is_src_frame_alt_ref) {
+          rd_pick_partition(cpi, tp, mi_row, mi_col, BLOCK_SIZE_SB64X64,
+                            &dummy_rate, &dummy_dist);
+        } else {
+          // set_partitioning(cpi, m, BLOCK_SIZE_SB64X64);
+
+          copy_partitioning(cpi, m, p);
+          rd_use_partition(cpi, m, tp, mi_row, mi_col, BLOCK_SIZE_SB64X64,
+                           &dummy_rate, &dummy_dist);
+        }
       }
+    } else {
+      rd_pick_partition(cpi, tp, mi_row, mi_col, BLOCK_SIZE_SB64X64,
+                        &dummy_rate, &dummy_dist);
     }
   }
 }
