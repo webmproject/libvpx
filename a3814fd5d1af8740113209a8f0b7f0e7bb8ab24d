@@ -16,6 +16,24 @@
       "revId": "a3814fd5d1af8740113209a8f0b7f0e7bb8ab24d",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAaH//5E8\u003d",
+        "filename": "test/fdct4x4_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2013-06-20T16:23:41Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAaH//5Fs\u003d",
+      "revId": "a3814fd5d1af8740113209a8f0b7f0e7bb8ab24d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
