@@ -718,10 +718,12 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
 #endif
       sf->comp_inter_joint_search_thresh = BLOCK_SIZE_SB8X8;
       sf->adpative_rd_thresh = 1;
-      if (speed > 0) {
+      if (speed == 1) {
         sf->comp_inter_joint_search_thresh = BLOCK_SIZE_TYPES;
         sf->optimize_coefficients = 0;
         sf->first_step = 1;
+        sf->use_avoid_tested_higherror = 1;
+        sf->adjust_thresholds_by_speed = 1;
       }
       if (speed == 2) {
         sf->comp_inter_joint_search_thresh = BLOCK_SIZE_SB8X8;
