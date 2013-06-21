@@ -701,7 +701,7 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
   sf->comp_inter_joint_search_thresh = BLOCK_SIZE_AB4X4;
   sf->adaptive_rd_thresh = 0;
   sf->use_lastframe_partitioning = 0;
-  sf->use_largest_txform = 0;
+  sf->tx_size_search_method = USE_FULL_RD;
   sf->use_8tap_always = 0;
   sf->use_avoid_tested_higherror = 0;
   sf->skip_lots_of_modes = 0;
@@ -744,17 +744,15 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
       if (speed == 1) {
         sf->comp_inter_joint_search_thresh = BLOCK_SIZE_TYPES;
         sf->less_rectangular_check  = 1;
-        sf->use_largest_txform        = !(cpi->common.frame_type == KEY_FRAME ||
-                                          cpi->common.intra_only ||
-                                          cpi->common.show_frame == 0);
-
+        sf->tx_size_search_method = ((cpi->common.frame_type == KEY_FRAME ||
+                                      cpi->common.intra_only ||
+                                      cpi->common.show_frame == 0) ?
+                                     USE_FULL_RD :
+                                     USE_LARGESTINTRA);
         sf->disable_splitmv =
             (MIN(cpi->common.width, cpi->common.height) >= 720)? 1 : 0;
       }
       if (speed == 2) {
-        sf->use_largest_txform        = !(cpi->common.frame_type == KEY_FRAME ||
-                                                  cpi->common.intra_only ||
-                                                  cpi->common.show_frame == 0);
         sf->adjust_thresholds_by_speed = 1;
         sf->less_rectangular_check  = 1;
         sf->comp_inter_joint_search_thresh = BLOCK_SIZE_TYPES;
@@ -763,15 +761,30 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
         sf->use_lastframe_partitioning = 1;
         sf->adjust_partitioning_from_last_frame = 1;
         sf->last_partitioning_redo_frequency = 3;
+        sf->tx_size_search_method = ((cpi->common.frame_type == KEY_FRAME ||
+                                      cpi->common.intra_only ||
+                                      cpi->common.show_frame == 0) ?
+                                     USE_FULL_RD :
+                                     USE_LARGESTALL);
       }
       if (speed == 3) {
         sf->comp_inter_joint_search_thresh = BLOCK_SIZE_TYPES;
         sf->partition_by_variance = 1;
+        sf->tx_size_search_method = ((cpi->common.frame_type == KEY_FRAME ||
+                                      cpi->common.intra_only ||
+                                      cpi->common.show_frame == 0) ?
+                                     USE_FULL_RD :
+                                     USE_LARGESTALL);
       }
       if (speed == 4) {
         sf->comp_inter_joint_search_thresh = BLOCK_SIZE_TYPES;
         sf->use_one_partition_size_always = 1;
         sf->always_this_block_size = BLOCK_SIZE_MB16X16;
+        sf->tx_size_search_method = ((cpi->common.frame_type == KEY_FRAME ||
+                                      cpi->common.intra_only ||
+                                      cpi->common.show_frame == 0) ?
+                                     USE_FULL_RD :
+                                     USE_LARGESTALL);
       }
       /*
       if (speed == 2) {
@@ -788,7 +801,7 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
       }
       */
 
-     break;
+      break;
 
   }; /* switch */
 
