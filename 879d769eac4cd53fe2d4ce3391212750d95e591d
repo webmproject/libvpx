@@ -1,0 +1,293 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAaH//2Wo\u003d",
+        "filename": "vp9/common/arm/neon/vp9_loopfilter_neon.asm",
+        "patchSetId": 3
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2013-06-21T23:46:05Z",
+      "side": 1,
+      "message": "offset (#0) is not necessary. don\u0027t specify r4 in the comment. too easy to get out of sync",
+      "revId": "879d769eac4cd53fe2d4ce3391212750d95e591d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAaH//2WQ\u003d",
+        "filename": "vp9/common/arm/neon/vp9_loopfilter_neon.asm",
+        "patchSetId": 3
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2013-06-21T23:46:05Z",
+      "side": 1,
+      "message": "load r6 before r4 to avoid stall. also better to use r12 so it\u0027s not waiting for the \u0027push\u0027 to complete.\n\nvp8 manages to ignore the count variable. saves a lot of pushing.",
+      "revId": "879d769eac4cd53fe2d4ce3391212750d95e591d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAaH//2VA\u003d",
+        "filename": "vp9/common/arm/neon/vp9_loopfilter_neon.asm",
+        "patchSetId": 3
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2013-06-21T23:46:05Z",
+      "side": 1,
+      "message": "move both of these outside the loop. there are 32 d registers. minus q4-q7, so 28 you can use.\n\nacademic because loop \u003d\u003d 1 for now. maybe just drop it?",
+      "revId": "879d769eac4cd53fe2d4ce3391212750d95e591d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAaH//2S8\u003d",
+        "filename": "vp9/common/arm/neon/vp9_loopfilter_neon.asm",
+        "patchSetId": 3
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2013-06-21T23:46:05Z",
+      "side": 1,
+      "message": "also outside the loop. again, academic. and looking where the code is from, this makes sense. it didn\u0027t have a loop before.",
+      "revId": "879d769eac4cd53fe2d4ce3391212750d95e591d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAaH//2Ro\u003d",
+        "filename": "vp9/common/arm/neon/vp9_loopfilter_neon.asm",
+        "patchSetId": 3
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2013-06-21T23:46:05Z",
+      "side": 1,
+      "message": "attilanagy@ changed the indexing method to this. not sure what the benefit was. my understanding of dual issue was that a memory operation and a processing operation could issue at the same time, but not two memory operations.",
+      "revId": "879d769eac4cd53fe2d4ce3391212750d95e591d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAaH//2Pc\u003d",
+        "filename": "vp9/common/arm/neon/vp9_loopfilter_neon.asm",
+        "patchSetId": 3
+      },
+      "lineNbr": 61,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2013-06-21T23:46:05Z",
+      "side": 1,
+      "message": "q4-q7 / d8-d14 are callee saved. not sure why vp8 wasn\u0027t managing them. we have some code to do this at a higher level but i\u0027m not sure if it\u0027s in vp9",
+      "revId": "879d769eac4cd53fe2d4ce3391212750d95e591d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAaH//2Pw\u003d",
+        "filename": "vp9/common/arm/neon/vp9_loopfilter_neon.asm",
+        "patchSetId": 3
+      },
+      "lineNbr": 113,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2013-06-21T23:46:05Z",
+      "side": 1,
+      "message": "Pick an indexing style and stick with it. I prefer this one. Adding Attila for comment.",
+      "revId": "879d769eac4cd53fe2d4ce3391212750d95e591d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAaH//2Ls\u003d",
+        "filename": "vp9/common/arm/neon/vp9_loopfilter_neon.asm",
+        "patchSetId": 3
+      },
+      "lineNbr": 188,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2013-06-21T23:46:05Z",
+      "side": 1,
+      "message": "; only compare the largest value to limit",
+      "revId": "879d769eac4cd53fe2d4ce3391212750d95e591d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAaH//2Lo\u003d",
+        "filename": "vp9/common/arm/neon/vp9_loopfilter_neon.asm",
+        "patchSetId": 3
+      },
+      "lineNbr": 201,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2013-06-21T23:46:05Z",
+      "side": 1,
+      "message": "comment is unnecessary.",
+      "revId": "879d769eac4cd53fe2d4ce3391212750d95e591d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAaH//2Lg\u003d",
+        "filename": "vp9/common/arm/neon/vp9_loopfilter_neon.asm",
+        "patchSetId": 3
+      },
+      "lineNbr": 206,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2013-06-21T23:46:05Z",
+      "side": 1,
+      "message": "; abs () \u003e limit",
+      "revId": "879d769eac4cd53fe2d4ce3391212750d95e591d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAaH//2LA\u003d",
+        "filename": "vp9/common/arm/neon/vp9_loopfilter_neon.asm",
+        "patchSetId": 3
+      },
+      "lineNbr": 223,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2013-06-21T23:46:05Z",
+      "side": 1,
+      "message": "flimit no longer used? compared to blimit?",
+      "revId": "879d769eac4cd53fe2d4ce3391212750d95e591d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAaH//2KY\u003d",
+        "filename": "vp9/common/arm/neon/vp9_loopfilter_neon.asm",
+        "patchSetId": 3
+      },
+      "lineNbr": 225,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2013-06-21T23:46:05Z",
+      "side": 1,
+      "message": "just filter, not vp9_filter",
+      "revId": "879d769eac4cd53fe2d4ce3391212750d95e591d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAaH//2KU\u003d",
+        "filename": "vp9/common/arm/neon/vp9_loopfilter_neon.asm",
+        "patchSetId": 3
+      },
+      "lineNbr": 226,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2013-06-21T23:46:05Z",
+      "side": 1,
+      "message": "just hev, not vp9 not mask",
+      "revId": "879d769eac4cd53fe2d4ce3391212750d95e591d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAaH//2KQ\u003d",
+        "filename": "vp9/common/arm/neon/vp9_loopfilter_neon.asm",
+        "patchSetId": 3
+      },
+      "lineNbr": 231,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2013-06-21T23:46:05Z",
+      "side": 1,
+      "message": "just mask",
+      "revId": "879d769eac4cd53fe2d4ce3391212750d95e591d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAaH//2Ko\u003d",
+        "filename": "vp9/common/arm/neon/vp9_loopfilter_neon.asm",
+        "patchSetId": 3
+      },
+      "lineNbr": 233,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2013-06-21T23:46:05Z",
+      "side": 1,
+      "message": "; filter + 3 * (qs0 - ps0)",
+      "revId": "879d769eac4cd53fe2d4ce3391212750d95e591d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAaH//2Kc\u003d",
+        "filename": "vp9/common/arm/neon/vp9_loopfilter_neon.asm",
+        "patchSetId": 3
+      },
+      "lineNbr": 242,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2013-06-21T23:46:05Z",
+      "side": 1,
+      "message": "lowercase filter2",
+      "revId": "879d769eac4cd53fe2d4ce3391212750d95e591d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAaH//2J8\u003d",
+        "filename": "vp9/common/arm/neon/vp9_loopfilter_neon.asm",
+        "patchSetId": 3
+      },
+      "lineNbr": 254,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2013-06-21T23:46:05Z",
+      "side": 1,
+      "message": "probably some way to keep 0x80 in a register (used above as well)",
+      "revId": "879d769eac4cd53fe2d4ce3391212750d95e591d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
