@@ -100,6 +100,8 @@ endif
 VP9_COMMON_SRCS-$(HAVE_SSE2) += common/x86/vp9_idct_intrin_sse2.c
 VP9_COMMON_SRCS-$(HAVE_SSE2) += common/x86/vp9_sadmxn_sse2.c
 
+VP9_COMMON_SRCS-$(HAVE_NEON) += common/arm/neon/vp9_loopfilter_neon$(ASM)
+
 $(eval $(call asm_offsets_template,\
          vp9_asm_com_offsets.asm, $(VP9_PREFIX)common/vp9_asm_com_offsets.c))
 
