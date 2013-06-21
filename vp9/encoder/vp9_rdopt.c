@@ -1962,7 +1962,7 @@ static void model_rd_for_sb(VP9_COMP *cpi, BLOCK_SIZE_TYPE bsize,
   // Note our transform coeffs are 8 times an orthogonal transform.
   // Hence quantizer step is also 8 times. To get effective quantizer
   // we need to divide by 8 before sending to modeling function.
-  unsigned int sse, var;
+  unsigned int sse;
   int i, rate_sum = 0, dist_sum = 0;
 
   for (i = 0; i < MAX_MB_PLANE; ++i) {
@@ -1974,9 +1974,8 @@ static void model_rd_for_sb(VP9_COMP *cpi, BLOCK_SIZE_TYPE bsize,
     const int bh = plane_block_height(bsize, pd);
     const enum BlockSize bs = get_block_size(bw, bh);
     int rate, dist;
-    var = cpi->fn_ptr[bs].vf(p->src.buf, p->src.stride,
-                             pd->dst.buf, pd->dst.stride, &sse);
-    // sse works better than var, since there is no dc prediction used
+    cpi->fn_ptr[bs].vf(p->src.buf, p->src.stride,
+                       pd->dst.buf, pd->dst.stride, &sse);
     model_rd_from_var_lapndz(sse, bw * bh, pd->dequant[1] >> 3, &rate, &dist);
 
     rate_sum += rate;
