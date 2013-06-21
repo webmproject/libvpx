@@ -22,10 +22,10 @@
 DECLARE_ALIGNED(16, extern const uint8_t,
                 vp9_pt_energy_class[MAX_ENTROPY_TOKENS]);
 
-void vp9_subtract_block(int rows, int cols,
-                        int16_t *diff_ptr, int diff_stride,
-                        const uint8_t *src_ptr, int src_stride,
-                        const uint8_t *pred_ptr, int pred_stride) {
+void vp9_subtract_block_c(int rows, int cols,
+                          int16_t *diff_ptr, ptrdiff_t diff_stride,
+                          const uint8_t *src_ptr, ptrdiff_t src_stride,
+                          const uint8_t *pred_ptr, ptrdiff_t pred_stride) {
   int r, c;
 
   for (r = 0; r < rows; r++) {
