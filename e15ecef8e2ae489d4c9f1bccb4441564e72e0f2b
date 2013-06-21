@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAaH//2fM\u003d",
+        "filename": "vp9/common/vp9_reconinter.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-06-21T21:32:43Z",
+      "side": 1,
+      "message": "The scaled result of the MV won\u0027t fit in 16 bits, I think this needs an MV32 type.",
+      "revId": "e15ecef8e2ae489d4c9f1bccb4441564e72e0f2b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAaH//2e0\u003d",
+        "filename": "vp9/common/vp9_reconinter.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 429,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-06-21T21:32:43Z",
+      "side": 1,
+      "message": "Maybe an enum mv_precision {MV_PRECISION_Q3, MV_PRECISION_Q4} rather than the bare 1 here?",
+      "revId": "e15ecef8e2ae489d4c9f1bccb4441564e72e0f2b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
