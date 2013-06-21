@@ -587,7 +587,7 @@ void vp9_short_fht8x8_c(int16_t *input, int16_t *output,
       temp_in[j] = out[j + i * 8];
     ht.rows(temp_in, temp_out);
     for (j = 0; j < 8; ++j)
-      output[j + i * 8] = temp_out[j] >> 1;
+      output[j + i * 8] = (temp_out[j] + (temp_out[j] < 0)) >> 1;
   }
 }
 
