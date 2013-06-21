@@ -116,7 +116,7 @@ bilin_filter_m_ssse3: times  8 db 16,  0
   RET
 %endmacro
 
-%macro SUBPEL_VARIANCE 1 ; W
+%macro SUBPEL_VARIANCE 1-2 0 ; W
 %if cpuflag(ssse3)
 %define bilin_filter_m bilin_filter_m_ssse3
 %define filter_idx_shift 4
@@ -128,12 +128,38 @@ bilin_filter_m_ssse3: times  8 db 16,  0
 ; 11, not 13, if the registers are ordered correctly. May make a minor speed
 ; difference on Win64
 %ifdef PIC
+%if %2 == 1 ; avg
+cglobal sub_pixel_avg_variance%1xh, 9, 10, 13, src, src_stride, \
+                                              x_offset, y_offset, \
+                                              dst, dst_stride, \
+                                              sec, sec_stride, height, sse
+%define sec_str sec_strideq
+%else
 cglobal sub_pixel_variance%1xh, 7, 8, 13, src, src_stride, x_offset, y_offset, \
                                           dst, dst_stride, height, sse
+%endif
+%define h heightd
 %define bilin_filter sseq
+%else
+%if %2 == 1 ; avg
+cglobal sub_pixel_avg_variance%1xh, 7 + 2 * ARCH_X86_64, \
+                                    7 + 2 * ARCH_X86_64, 13, src, src_stride, \
+                                                         x_offset, y_offset, \
+                                                         dst, dst_stride, \
+                                                         sec, sec_stride, \
+                                                         height, sse
+%if ARCH_X86_64
+%define h heightd
+%define sec_str sec_strideq
+%else
+%define h dword heightm
+%define sec_str sec_stridemp
+%endif
 %else
 cglobal sub_pixel_variance%1xh, 7, 7, 13, src, src_stride, x_offset, y_offset, \
                                           dst, dst_stride, height, sse
+%define h heightd
+%endif
 %define bilin_filter bilin_filter_m
 %endif
   ASSERT               %1 <= 16         ; m6 overflows if w > 16
@@ -143,7 +169,10 @@ cglobal sub_pixel_variance%1xh, 7, 7, 13, src, src_stride, x_offset, y_offset, \
   ; could perhaps use it for something more productive then
   pxor                 m5, m5           ; dedicated zero register
 %if %1 < 16
-  sar             heightd, 1
+  sar                   h, 1
+%if %2 == 1 ; avg
+  shl             sec_str, 1
+%endif
 %endif
 
   ; FIXME(rbultje) replace by jumptable?
@@ -158,30 +187,55 @@ cglobal sub_pixel_variance%1xh, 7, 7, 13, src, src_stride, x_offset, y_offset, \
 %if %1 == 16
   movu                 m0, [srcq]
   mova                 m1, [dstq]
-  punpckhbw            m2, m0, m5
-  punpcklbw            m0, m5
+%if %2 == 1 ; avg
+  pavgb                m0, [secq]
   punpckhbw            m3, m1, m5
   punpcklbw            m1, m5
+%endif
+  punpckhbw            m2, m0, m5
+  punpcklbw            m0, m5
+%if %2 == 0 ; !avg
+  punpckhbw            m3, m1, m5
+  punpcklbw            m1, m5
+%endif
   SUM_SSE              m0, m1, m2, m3, m6, m7
 
   add                srcq, src_strideq
   add                dstq, dst_strideq
-  dec             heightd
 %else ; %1 < 16
   movh                 m0, [srcq]
+%if %2 == 1 ; avg
+%if mmsize == 16
+  movhps               m0, [srcq+src_strideq]
+%else ; mmsize == 8
+  punpckldq            m0, [srcq+src_strideq]
+%endif
+%else ; !avg
   movh                 m2, [srcq+src_strideq]
+%endif
   movh                 m1, [dstq]
   movh                 m3, [dstq+dst_strideq]
+%if %2 == 1 ; avg
+  pavgb                m0, [secq]
+  punpcklbw            m3, m5
+  punpcklbw            m1, m5
+  punpckhbw            m2, m0, m5
+  punpcklbw            m0, m5
+%else ; !avg
   punpcklbw            m0, m5
   punpcklbw            m2, m5
   punpcklbw            m3, m5
   punpcklbw            m1, m5
+%endif
   SUM_SSE              m0, m1, m2, m3, m6, m7
 
   lea                srcq, [srcq+src_strideq*2]
   lea                dstq, [dstq+dst_strideq*2]
-  dec             heightd
 %endif
+%if %2 == 1 ; avg
+  add                secq, sec_str
+%endif
+  dec                   h
   jg .x_zero_y_zero_loop
   STORE_AND_RET
 
@@ -196,18 +250,40 @@ cglobal sub_pixel_variance%1xh, 7, 7, 13, src, src_stride, x_offset, y_offset, \
   movu                 m4, [srcq+src_strideq]
   mova                 m1, [dstq]
   pavgb                m0, m4
+  punpckhbw            m3, m1, m5
+%if %2 == 1 ; avg
+  pavgb                m0, [secq]
+%endif
+  punpcklbw            m1, m5
   punpckhbw            m2, m0, m5
   punpcklbw            m0, m5
-  punpckhbw            m3, m1, m5
-  punpcklbw            m1, m5
   SUM_SSE              m0, m1, m2, m3, m6, m7
 
   add                srcq, src_strideq
   add                dstq, dst_strideq
-  dec             heightd
 %else ; %1 < 16
   movh                 m0, [srcq]
   movh                 m2, [srcq+src_strideq]
+%if %2 == 1 ; avg
+%if mmsize == 16
+  movhps               m2, [srcq+src_strideq*2]
+%else ; mmsize == 8
+  punpckldq            m2, [srcq+src_strideq*2]
+%endif
+  movh                 m1, [dstq]
+%if mmsize == 16
+  movlhps              m0, m2
+%else ; mmsize == 8
+  punpckldq            m0, m2
+%endif
+  movh                 m3, [dstq+dst_strideq]
+  pavgb                m0, m2
+  punpcklbw            m1, m5
+  pavgb                m0, [secq]
+  punpcklbw            m3, m5
+  punpckhbw            m2, m0, m5
+  punpcklbw            m0, m5
+%else ; !avg
   movh                 m4, [srcq+src_strideq*2]
   movh                 m1, [dstq]
   pavgb                m0, m2
@@ -217,12 +293,16 @@ cglobal sub_pixel_variance%1xh, 7, 7, 13, src, src_stride, x_offset, y_offset, \
   punpcklbw            m2, m5
   punpcklbw            m3, m5
   punpcklbw            m1, m5
+%endif
   SUM_SSE              m0, m1, m2, m3, m6, m7
 
   lea                srcq, [srcq+src_strideq*2]
   lea                dstq, [dstq+dst_strideq*2]
-  dec             heightd
 %endif
+%if %2 == 1 ; avg
+  add                secq, sec_str
+%endif
+  dec                   h
   jg .x_zero_y_half_loop
   STORE_AND_RET
 
@@ -280,13 +360,19 @@ cglobal sub_pixel_variance%1xh, 7, 7, 13, src, src_stride, x_offset, y_offset, \
 %endif
   psraw                m2, 4
   psraw                m0, 4
+%if %2 == 1 ; avg
+  ; FIXME(rbultje) pipeline
+  packuswb             m0, m2
+  pavgb                m0, [secq]
+  punpckhbw            m2, m0, m5
+  punpcklbw            m0, m5
+%endif
   punpckhbw            m3, m1, m5
   punpcklbw            m1, m5
   SUM_SSE              m0, m1, m2, m3, m6, m7
 
   add                srcq, src_strideq
   add                dstq, dst_strideq
-  dec             heightd
 %else ; %1 < 16
   movh                 m0, [srcq]
   movh                 m2, [srcq+src_strideq]
@@ -318,13 +404,23 @@ cglobal sub_pixel_variance%1xh, 7, 7, 13, src, src_stride, x_offset, y_offset, \
 %endif
   psraw                m0, 4
   psraw                m2, 4
+%if %2 == 1 ; avg
+  ; FIXME(rbultje) pipeline
+  packuswb             m0, m2
+  pavgb                m0, [secq]
+  punpckhbw            m2, m0, m5
+  punpcklbw            m0, m5
+%endif
   punpcklbw            m1, m5
   SUM_SSE              m0, m1, m2, m3, m6, m7
 
   lea                srcq, [srcq+src_strideq*2]
   lea                dstq, [dstq+dst_strideq*2]
-  dec             heightd
 %endif
+%if %2 == 1 ; avg
+  add                secq, sec_str
+%endif
+  dec                   h
   jg .x_zero_y_other_loop
 %undef filter_y_a
 %undef filter_y_b
@@ -345,18 +441,37 @@ cglobal sub_pixel_variance%1xh, 7, 7, 13, src, src_stride, x_offset, y_offset, \
   movu                 m4, [srcq+1]
   mova                 m1, [dstq]
   pavgb                m0, m4
+  punpckhbw            m3, m1, m5
+%if %2 == 1 ; avg
+  pavgb                m0, [secq]
+%endif
+  punpcklbw            m1, m5
   punpckhbw            m2, m0, m5
   punpcklbw            m0, m5
-  punpckhbw            m3, m1, m5
-  punpcklbw            m1, m5
   SUM_SSE              m0, m1, m2, m3, m6, m7
 
   add                srcq, src_strideq
   add                dstq, dst_strideq
-  dec             heightd
 %else ; %1 < 16
   movh                 m0, [srcq]
   movh                 m4, [srcq+1]
+%if %2 == 1 ; avg
+%if mmsize == 16
+  movhps               m0, [srcq+src_strideq]
+  movhps               m4, [srcq+src_strideq+1]
+%else ; mmsize == 8
+  punpckldq            m0, [srcq+src_strideq]
+  punpckldq            m4, [srcq+src_strideq+1]
+%endif
+  movh                 m1, [dstq]
+  movh                 m3, [dstq+dst_strideq]
+  pavgb                m0, m4
+  punpcklbw            m3, m5
+  pavgb                m0, [secq]
+  punpcklbw            m1, m5
+  punpckhbw            m2, m0, m5
+  punpcklbw            m0, m5
+%else ; !avg
   movh                 m2, [srcq+src_strideq]
   movh                 m1, [dstq]
   pavgb                m0, m4
@@ -367,12 +482,16 @@ cglobal sub_pixel_variance%1xh, 7, 7, 13, src, src_stride, x_offset, y_offset, \
   punpcklbw            m2, m5
   punpcklbw            m3, m5
   punpcklbw            m1, m5
+%endif
   SUM_SSE              m0, m1, m2, m3, m6, m7
 
   lea                srcq, [srcq+src_strideq*2]
   lea                dstq, [dstq+dst_strideq*2]
-  dec             heightd
 %endif
+%if %2 == 1 ; avg
+  add                secq, sec_str
+%endif
+  dec                   h
   jg .x_half_y_zero_loop
   STORE_AND_RET
 
@@ -391,17 +510,23 @@ cglobal sub_pixel_variance%1xh, 7, 7, 13, src, src_stride, x_offset, y_offset, \
   movu                 m3, [srcq+1]
   mova                 m1, [dstq]
   pavgb                m4, m3
+  punpckhbw            m3, m1, m5
   pavgb                m0, m4
+%if %2 == 1 ; avg
+  punpcklbw            m1, m5
+  pavgb                m0, [secq]
   punpckhbw            m2, m0, m5
   punpcklbw            m0, m5
-  punpckhbw            m3, m1, m5
+%else
+  punpckhbw            m2, m0, m5
+  punpcklbw            m0, m5
   punpcklbw            m1, m5
+%endif
   SUM_SSE              m0, m1, m2, m3, m6, m7
   mova                 m0, m4
 
   add                srcq, src_strideq
   add                dstq, dst_strideq
-  dec             heightd
 %else ; %1 < 16
   movh                 m0, [srcq]
   movh                 m3, [srcq+1]
@@ -410,6 +535,31 @@ cglobal sub_pixel_variance%1xh, 7, 7, 13, src, src_stride, x_offset, y_offset, \
 .x_half_y_half_loop:
   movh                 m2, [srcq]
   movh                 m3, [srcq+1]
+%if %2 == 1 ; avg
+%if mmsize == 16
+  movhps               m2, [srcq+src_strideq]
+  movhps               m3, [srcq+src_strideq+1]
+%else
+  punpckldq            m2, [srcq+src_strideq]
+  punpckldq            m3, [srcq+src_strideq+1]
+%endif
+  pavgb                m2, m3
+%if mmsize == 16
+  movlhps              m0, m2
+  movhlps              m4, m2
+%else ; mmsize == 8
+  punpckldq            m0, m2
+  pshufw               m4, m2, 0xe
+%endif
+  movh                 m1, [dstq]
+  pavgb                m0, m2
+  movh                 m3, [dstq+dst_strideq]
+  pavgb                m0, [secq]
+  punpcklbw            m3, m5
+  punpcklbw            m1, m5
+  punpckhbw            m2, m0, m5
+  punpcklbw            m0, m5
+%else ; !avg
   movh                 m4, [srcq+src_strideq]
   movh                 m1, [srcq+src_strideq+1]
   pavgb                m2, m3
@@ -422,13 +572,17 @@ cglobal sub_pixel_variance%1xh, 7, 7, 13, src, src_stride, x_offset, y_offset, \
   punpcklbw            m2, m5
   punpcklbw            m3, m5
   punpcklbw            m1, m5
+%endif
   SUM_SSE              m0, m1, m2, m3, m6, m7
   mova                 m0, m4
 
   lea                srcq, [srcq+src_strideq*2]
   lea                dstq, [dstq+dst_strideq*2]
-  dec             heightd
 %endif
+%if %2 == 1 ; avg
+  add                secq, sec_str
+%endif
+  dec                   h
   jg .x_half_y_half_loop
   STORE_AND_RET
 
@@ -488,13 +642,19 @@ cglobal sub_pixel_variance%1xh, 7, 7, 13, src, src_stride, x_offset, y_offset, \
 %endif
   punpckhbw            m3, m1, m5
   psraw                m0, 4
+%if %2 == 1 ; avg
+  ; FIXME(rbultje) pipeline
+  packuswb             m0, m2
+  pavgb                m0, [secq]
+  punpckhbw            m2, m0, m5
+  punpcklbw            m0, m5
+%endif
   punpcklbw            m1, m5
   SUM_SSE              m0, m1, m2, m3, m6, m7
   mova                 m0, m4
 
   add                srcq, src_strideq
   add                dstq, dst_strideq
-  dec             heightd
 %else ; %1 < 16
   movh                 m0, [srcq]
   movh                 m3, [srcq+1]
@@ -536,14 +696,24 @@ cglobal sub_pixel_variance%1xh, 7, 7, 13, src, src_stride, x_offset, y_offset, \
 %endif
   psraw                m0, 4
   psraw                m2, 4
+%if %2 == 1 ; avg
+  ; FIXME(rbultje) pipeline
+  packuswb             m0, m2
+  pavgb                m0, [secq]
+  punpckhbw            m2, m0, m5
+  punpcklbw            m0, m5
+%endif
   punpcklbw            m1, m5
   SUM_SSE              m0, m1, m2, m3, m6, m7
   mova                 m0, m4
 
   lea                srcq, [srcq+src_strideq*2]
   lea                dstq, [dstq+dst_strideq*2]
-  dec             heightd
 %endif
+%if %2 == 1 ; avg
+  add                secq, sec_str
+%endif
+  dec                   h
   jg .x_half_y_other_loop
 %undef filter_y_a
 %undef filter_y_b
@@ -602,13 +772,19 @@ cglobal sub_pixel_variance%1xh, 7, 7, 13, src, src_stride, x_offset, y_offset, \
 %endif
   psraw                m2, 4
   psraw                m0, 4
+%if %2 == 1 ; avg
+  ; FIXME(rbultje) pipeline
+  packuswb             m0, m2
+  pavgb                m0, [secq]
+  punpckhbw            m2, m0, m5
+  punpcklbw            m0, m5
+%endif
   punpckhbw            m3, m1, m5
   punpcklbw            m1, m5
   SUM_SSE              m0, m1, m2, m3, m6, m7
 
   add                srcq, src_strideq
   add                dstq, dst_strideq
-  dec             heightd
 %else ; %1 < 16
   movh                 m0, [srcq]
   movh                 m1, [srcq+1]
@@ -642,13 +818,23 @@ cglobal sub_pixel_variance%1xh, 7, 7, 13, src, src_stride, x_offset, y_offset, \
 %endif
   psraw                m0, 4
   psraw                m2, 4
+%if %2 == 1 ; avg
+  ; FIXME(rbultje) pipeline
+  packuswb             m0, m2
+  pavgb                m0, [secq]
+  punpckhbw            m2, m0, m5
+  punpcklbw            m0, m5
+%endif
   punpcklbw            m1, m5
   SUM_SSE              m0, m1, m2, m3, m6, m7
 
   lea                srcq, [srcq+src_strideq*2]
   lea                dstq, [dstq+dst_strideq*2]
-  dec             heightd
 %endif
+%if %2 == 1 ; avg
+  add                secq, sec_str
+%endif
+  dec                   h
   jg .x_other_y_zero_loop
 %undef filter_x_a
 %undef filter_x_b
@@ -724,8 +910,6 @@ cglobal sub_pixel_variance%1xh, 7, 7, 13, src, src_stride, x_offset, y_offset, \
   pavgb                m0, m4
   punpckhbw            m3, m1, m5
   punpcklbw            m1, m5
-  punpckhbw            m2, m0, m5
-  punpcklbw            m0, m5
 %else
   punpckhbw            m2, m4, m5
   punpckhbw            m1, m3, m5
@@ -750,15 +934,18 @@ cglobal sub_pixel_variance%1xh, 7, 7, 13, src, src_stride, x_offset, y_offset, \
   packuswb             m4, m2
   punpcklbw            m1, m5
   pavgb                m0, m4
+%endif
+%if %2 == 1 ; avg
+  ; FIXME(rbultje) pipeline
+  pavgb                m0, [secq]
+%endif
   punpckhbw            m2, m0, m5
   punpcklbw            m0, m5
-%endif
   SUM_SSE              m0, m1, m2, m3, m6, m7
   mova                 m0, m4
 
   add                srcq, src_strideq
   add                dstq, dst_strideq
-  dec             heightd
 %else ; %1 < 16
   movh                 m0, [srcq]
   movh                 m1, [srcq+1]
@@ -810,6 +997,13 @@ cglobal sub_pixel_variance%1xh, 7, 7, 13, src, src_stride, x_offset, y_offset, \
   psraw                m4, 4
   pavgw                m0, m2
   pavgw                m2, m4
+%if %2 == 1 ; avg
+  ; FIXME(rbultje) pipeline - also consider going to bytes here
+  packuswb             m0, m2
+  pavgb                m0, [secq]
+  punpckhbw            m2, m0, m5
+  punpcklbw            m0, m5
+%endif
   punpcklbw            m3, m5
   punpcklbw            m1, m5
   SUM_SSE              m0, m1, m2, m3, m6, m7
@@ -817,8 +1011,11 @@ cglobal sub_pixel_variance%1xh, 7, 7, 13, src, src_stride, x_offset, y_offset, \
 
   lea                srcq, [srcq+src_strideq*2]
   lea                dstq, [dstq+dst_strideq*2]
-  dec             heightd
 %endif
+%if %2 == 1 ; avg
+  add                secq, sec_str
+%endif
+  dec                   h
   jg .x_other_y_half_loop
 %undef filter_x_a
 %undef filter_x_b
@@ -942,12 +1139,18 @@ cglobal sub_pixel_variance%1xh, 7, 7, 13, src, src_stride, x_offset, y_offset, \
   psraw                m0, 4
   punpcklbw            m1, m5
 %endif
+%if %2 == 1 ; avg
+  ; FIXME(rbultje) pipeline
+  packuswb             m0, m2
+  pavgb                m0, [secq]
+  punpckhbw            m2, m0, m5
+  punpcklbw            m0, m5
+%endif
   SUM_SSE              m0, m1, m2, m3, m6, m7
   mova                 m0, m4
 
   add                srcq, src_strideq
   add                dstq, dst_strideq
-  dec             heightd
 %else ; %1 < 16
   movh                 m0, [srcq]
   movh                 m1, [srcq+1]
@@ -1026,13 +1229,23 @@ cglobal sub_pixel_variance%1xh, 7, 7, 13, src, src_stride, x_offset, y_offset, \
   punpcklbw            m3, m5
   punpcklbw            m1, m5
 %endif
+%if %2 == 1 ; avg
+  ; FIXME(rbultje) pipeline
+  packuswb             m0, m2
+  pavgb                m0, [secq]
+  punpckhbw            m2, m0, m5
+  punpcklbw            m0, m5
+%endif
   SUM_SSE              m0, m1, m2, m3, m6, m7
   mova                 m0, m4
 
   lea                srcq, [srcq+src_strideq*2]
   lea                dstq, [dstq+dst_strideq*2]
-  dec             heightd
 %endif
+%if %2 == 1 ; avg
+  add                secq, sec_str
+%endif
+  dec                   h
   jg .x_other_y_other_loop
 %undef filter_x_a
 %undef filter_x_b
@@ -1059,3 +1272,15 @@ SUBPEL_VARIANCE  4
 INIT_XMM ssse3
 SUBPEL_VARIANCE  8
 SUBPEL_VARIANCE 16
+
+INIT_MMX sse
+SUBPEL_VARIANCE  4, 1
+INIT_XMM sse2
+SUBPEL_VARIANCE  8, 1
+SUBPEL_VARIANCE 16, 1
+
+INIT_MMX ssse3
+SUBPEL_VARIANCE  4, 1
+INIT_XMM ssse3
+SUBPEL_VARIANCE  8, 1
+SUBPEL_VARIANCE 16, 1
