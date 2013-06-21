@@ -406,16 +406,6 @@ void vp9_model_to_full_probs(const vp9_prob *model, vp9_prob *full) {
   extend_model_to_full_distribution(model[PIVOT_NODE], full);
 }
 
-void vp9_model_to_full_probs_sb(
-    vp9_prob model[COEF_BANDS][PREV_COEF_CONTEXTS][UNCONSTRAINED_NODES],
-    vp9_prob full[COEF_BANDS][PREV_COEF_CONTEXTS][ENTROPY_NODES]) {
-  int c, p;
-  for (c = 0; c < COEF_BANDS; ++c)
-    for (p = 0; p < PREV_COEF_CONTEXTS; ++p) {
-      vp9_model_to_full_probs(model[c][p], full[c][p]);
-    }
-}
-
 static vp9_tree_index cat1[2], cat2[4], cat3[6], cat4[8], cat5[10], cat6[28];
 
 static void init_bit_tree(vp9_tree_index *p, int n) {

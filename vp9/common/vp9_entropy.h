@@ -181,10 +181,6 @@ extern void vp9_full_to_model_counts(
 
 void vp9_model_to_full_probs(const vp9_prob *model, vp9_prob *full);
 
-void vp9_model_to_full_probs_sb(
-    vp9_prob model[COEF_BANDS][PREV_COEF_CONTEXTS][UNCONSTRAINED_NODES],
-    vp9_prob full[COEF_BANDS][PREV_COEF_CONTEXTS][ENTROPY_NODES]);
-
 extern const vp9_prob vp9_modelcoefprobs[COEFPROB_MODELS][ENTROPY_NODES - 1];
 
 static INLINE const int* get_scan_4x4(TX_TYPE tx_type) {
