@@ -16,6 +16,7 @@ extern "C" {
 #include "./vpx_config.h"
 #include "./vp9_rtcd.h"
 #include "vp9/common/vp9_blockd.h"
+#include "vpx_mem/vpx_mem.h"
 }
 
 typedef void (*subtract_fn_t)(int rows, int cols,
@@ -42,9 +43,12 @@ TEST_P(VP9SubtractBlockTest, SimpleSubtract) {
        bsize = static_cast<BLOCK_SIZE_TYPE>(static_cast<int>(bsize) + 1)) {
     const int block_width  = 4 << b_width_log2(bsize);
     const int block_height = 4 << b_height_log2(bsize);
-    int16_t *diff = new int16_t[block_width * block_height * 2];
-    uint8_t *pred = new uint8_t[block_width * block_height * 2];
-    uint8_t *src  = new uint8_t[block_width * block_height * 2];
+    int16_t *diff = reinterpret_cast<int16_t *>(
+        vpx_memalign(16, sizeof(*diff) * block_width * block_height * 2));
+    uint8_t *pred = reinterpret_cast<uint8_t *>(
+        vpx_memalign(16, block_width * block_height * 2));
+    uint8_t *src  = reinterpret_cast<uint8_t *>(
+        vpx_memalign(16, block_width * block_height * 2));
 
     for (int n = 0; n < 100; n++) {
       for (int r = 0; r < block_height; ++r) {
@@ -80,9 +84,9 @@ TEST_P(VP9SubtractBlockTest, SimpleSubtract) {
         }
       }
     }
-    delete[] diff;
-    delete[] pred;
-    delete[] src;
+    vpx_free(diff);
+    vpx_free(pred);
+    vpx_free(src);
   }
 }
 

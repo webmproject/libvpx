@@ -18,6 +18,7 @@
 #include "vpx/vpx_integer.h"
 #include "vpx_config.h"
 extern "C" {
+#include "vpx_mem/vpx_mem.h"
 #if CONFIG_VP8_ENCODER
 # include "vp8/common/variance.h"
 # include "vp8_rtcd.h"
@@ -205,17 +206,18 @@ class SubpelVarianceTest :
 
     rnd(ACMRandom::DeterministicSeed());
     block_size_ = width_ * height_;
-    src_ = new uint8_t[block_size_];
-    sec_ = new uint8_t[block_size_];
+    src_ = reinterpret_cast<uint8_t *>(vpx_memalign(16, block_size_));
+    sec_ = reinterpret_cast<uint8_t *>(vpx_memalign(16, block_size_));
     ref_ = new uint8_t[block_size_ + width_ + height_ + 1];
     ASSERT_TRUE(src_ != NULL);
+    ASSERT_TRUE(sec_ != NULL);
     ASSERT_TRUE(ref_ != NULL);
   }
 
   virtual void TearDown() {
-    delete[] src_;
+    vpx_free(src_);
     delete[] ref_;
-    delete[] sec_;
+    vpx_free(sec_);
   }
 
  protected:
