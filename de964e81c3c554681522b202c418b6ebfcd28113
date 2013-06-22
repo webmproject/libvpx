@@ -16,6 +16,24 @@
       "revId": "de964e81c3c554681522b202c418b6ebfcd28113",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAaH//2Ec\u003d",
+        "filename": "vp9/common/vp9_loopfilter.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 207,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-06-22T00:47:15Z",
+      "side": 1,
+      "message": "I don\u0027t think so. It handles the top row case slightly differently via the only_4x4_1 variable. If only_4x4_1, then we want to skip the top row for all columns, but still apply mask_4x4_int. The masks are which columns the horizontal filter is applied to, the loop over rows happens in the caller.",
+      "parentUuid": "AAAAaH//2FQ\u003d",
+      "revId": "de964e81c3c554681522b202c418b6ebfcd28113",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
