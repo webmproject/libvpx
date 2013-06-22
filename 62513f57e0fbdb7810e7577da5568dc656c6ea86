@@ -1,0 +1,123 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAaH//1xI\u003d",
+        "filename": "vp9/encoder/x86/vp9_dct_sse2.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 392,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-06-22T15:20:52Z",
+      "side": 1,
+      "message": "load, not loadu; these are aligned addresses.",
+      "revId": "62513f57e0fbdb7810e7577da5568dc656c6ea86",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAaH//1xE\u003d",
+        "filename": "vp9/encoder/x86/vp9_dct_sse2.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 596,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-06-22T15:20:52Z",
+      "side": 1,
+      "message": "store, not storeu; these are also aligned addresses.",
+      "revId": "62513f57e0fbdb7810e7577da5568dc656c6ea86",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAaH//1w8\u003d",
+        "filename": "vp9/encoder/x86/vp9_dct_sse2.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 622,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-06-22T15:20:52Z",
+      "side": 1,
+      "message": "so, looking at disassembly (same for dct), are these actually loaded into registers? At this number, this is actually very significant, and it may make more sense to have rodata constants that we directly multiply from.",
+      "revId": "62513f57e0fbdb7810e7577da5568dc656c6ea86",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAaH//1xA\u003d",
+        "filename": "vp9/encoder/x86/vp9_dct_sse2.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 625,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-06-22T15:20:52Z",
+      "side": 1,
+      "message": "load, not loadu",
+      "revId": "62513f57e0fbdb7810e7577da5568dc656c6ea86",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAaH//1w0\u003d",
+        "filename": "vp9/encoder/x86/vp9_dct_sse2.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 856,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-06-22T15:20:52Z",
+      "side": 1,
+      "message": "can the transpose be separated in its own function so its not duplicate between the adst and dct? You can mark as INLINE to make sure it doesn\u0027t affect speed.",
+      "revId": "62513f57e0fbdb7810e7577da5568dc656c6ea86",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAaH//1w4\u003d",
+        "filename": "vp9/encoder/x86/vp9_dct_sse2.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 907,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-06-22T15:20:52Z",
+      "side": 1,
+      "message": "store, not storeu",
+      "revId": "62513f57e0fbdb7810e7577da5568dc656c6ea86",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAaH//1ww\u003d",
+        "filename": "vp9/encoder/x86/vp9_dct_sse2.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 936,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-06-22T15:20:52Z",
+      "side": 1,
+      "message": "so, I understand the general principle here, and this is OK for now. What would be really nice is if you would switch between the four tx types here, the  inline the actual two functions inside the body here, rather than calling them like this. The advantage of that is that the round argument is inlined, leading to more optimal code because less branching.\n\nThen also, once that is the case, we can perhaps try to optimize the store/load between the two 1d dcts/adsts, i.e. only load if round\u003d0 and only store if round\u003d1; in between, simply reuse the loaded registers as-is. Perhaps even load before calling the cols-1d version and store after the rows-1d version, and just make the registers an argument to the 1d function.",
+      "revId": "62513f57e0fbdb7810e7577da5568dc656c6ea86",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
