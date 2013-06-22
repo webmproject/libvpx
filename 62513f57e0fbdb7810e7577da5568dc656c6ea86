@@ -104,6 +104,23 @@
     },
     {
       "key": {
+        "uuid": "AAAAaH//1wA\u003d",
+        "filename": "vp9/encoder/x86/vp9_dct_sse2.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 931,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-06-22T17:53:12Z",
+      "side": 1,
+      "message": "for proper alignment here - use DECLARE_ALIGNED_ARRAY(16, int16_t, buf, 64); - you\u0027ll need similar stack alignment in the unit test to get it to work correctly.",
+      "revId": "62513f57e0fbdb7810e7577da5568dc656c6ea86",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAaH//1ww\u003d",
         "filename": "vp9/encoder/x86/vp9_dct_sse2.c",
         "patchSetId": 2
