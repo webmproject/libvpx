@@ -447,7 +447,7 @@ int vp9_find_best_sub_pixel_comp(MACROBLOCK *x,
   int offset;
   int usehp = xd->allow_high_precision_mv;
 
-  uint8_t *comp_pred = vpx_memalign(16, w * h * sizeof(uint8_t));
+  DECLARE_ALIGNED_ARRAY(16, uint8_t, comp_pred, 64 * 64);
   uint8_t *y = xd->plane[0].pre[0].buf +
                (bestmv->as_mv.row) * xd->plane[0].pre[0].stride +
                bestmv->as_mv.col;
@@ -596,8 +596,6 @@ int vp9_find_best_sub_pixel_comp(MACROBLOCK *x,
   }
   bestmv->as_mv.row = br;
   bestmv->as_mv.col = bc;
-
-  vpx_free(comp_pred);
 
   if ((abs(bestmv->as_mv.col - ref_mv->as_mv.col) > (MAX_FULL_PEL_VAL << 3)) ||
       (abs(bestmv->as_mv.row - ref_mv->as_mv.row) > (MAX_FULL_PEL_VAL << 3)))
@@ -2356,7 +2354,7 @@ int vp9_refining_search_8p_c(MACROBLOCK *x,
   int *mvsadcost[2] = {x->nmvsadcost[0], x->nmvsadcost[1]};
 
   /* Compound pred buffer */
-  uint8_t *comp_pred = vpx_memalign(16, w * h * sizeof(uint8_t));
+  DECLARE_ALIGNED_ARRAY(16, uint8_t, comp_pred, 64 * 64);
 
   fcenter_mv.as_mv.row = center_mv->as_mv.row >> 3;
   fcenter_mv.as_mv.col = center_mv->as_mv.col >> 3;
@@ -2420,10 +2418,8 @@ int vp9_refining_search_8p_c(MACROBLOCK *x,
         (unsigned int *)(&thissad)) +
         mv_err_cost(&this_mv, center_mv, mvjcost, mvcost, x->errorperbit,
                     xd->allow_high_precision_mv);
-    vpx_free(comp_pred);
     return besterr;
   } else {
-    vpx_free(comp_pred);
     return INT_MAX;
   }
 }
