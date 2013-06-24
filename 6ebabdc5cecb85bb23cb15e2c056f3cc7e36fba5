@@ -16,6 +16,24 @@
       "revId": "6ebabdc5cecb85bb23cb15e2c056f3cc7e36fba5",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAaH//1Ig\u003d",
+        "filename": "vp9/encoder/vp9_mcomp.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 450,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-06-24T16:04:29Z",
+      "side": 1,
+      "message": "Maybe. I think ideally we would get rid of this altogether, since we can merge the comp_avg_pred+sad into a single sad_avg function, which removes the memory stores altogether.",
+      "parentUuid": "AAAAaH//1sk\u003d",
+      "revId": "6ebabdc5cecb85bb23cb15e2c056f3cc7e36fba5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
