@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAaX///3Y\u003d",
+        "filename": "vp9/encoder/x86/vp9_dct_sse2.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 392,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2013-06-24T22:03:04Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAaH//1xI\u003d",
+      "revId": "62513f57e0fbdb7810e7577da5568dc656c6ea86",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAaH//1xE\u003d",
         "filename": "vp9/encoder/x86/vp9_dct_sse2.c",
         "patchSetId": 2
@@ -30,6 +48,24 @@
       "writtenOn": "2013-06-22T15:20:52Z",
       "side": 1,
       "message": "store, not storeu; these are also aligned addresses.",
+      "revId": "62513f57e0fbdb7810e7577da5568dc656c6ea86",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAaX///3U\u003d",
+        "filename": "vp9/encoder/x86/vp9_dct_sse2.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 596,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2013-06-24T22:03:04Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAaH//1xE\u003d",
       "revId": "62513f57e0fbdb7810e7577da5568dc656c6ea86",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAan///7g\u003d",
+        "filename": "vp9/encoder/x86/vp9_dct_sse2.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 622,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2013-06-24T22:03:04Z",
+      "side": 1,
+      "message": "this will be addressed together with other transform modules.",
+      "parentUuid": "AAAAaH//1w8\u003d",
+      "revId": "62513f57e0fbdb7810e7577da5568dc656c6ea86",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAaH//1xA\u003d",
         "filename": "vp9/encoder/x86/vp9_dct_sse2.c",
         "patchSetId": 2
@@ -64,6 +118,24 @@
       "writtenOn": "2013-06-22T15:20:52Z",
       "side": 1,
       "message": "load, not loadu",
+      "revId": "62513f57e0fbdb7810e7577da5568dc656c6ea86",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAaX///3Q\u003d",
+        "filename": "vp9/encoder/x86/vp9_dct_sse2.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 625,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2013-06-24T22:03:04Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAaH//1xA\u003d",
       "revId": "62513f57e0fbdb7810e7577da5568dc656c6ea86",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAan///1A\u003d",
+        "filename": "vp9/encoder/x86/vp9_dct_sse2.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 856,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2013-06-24T22:03:04Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAaH//1w0\u003d",
+      "revId": "62513f57e0fbdb7810e7577da5568dc656c6ea86",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAaH//1w4\u003d",
         "filename": "vp9/encoder/x86/vp9_dct_sse2.c",
         "patchSetId": 2
@@ -98,6 +188,24 @@
       "writtenOn": "2013-06-22T15:20:52Z",
       "side": 1,
       "message": "store, not storeu",
+      "revId": "62513f57e0fbdb7810e7577da5568dc656c6ea86",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAaX///2A\u003d",
+        "filename": "vp9/encoder/x86/vp9_dct_sse2.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 907,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2013-06-24T22:03:04Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAaH//1w4\u003d",
       "revId": "62513f57e0fbdb7810e7577da5568dc656c6ea86",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -121,6 +229,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAaX///0A\u003d",
+        "filename": "vp9/encoder/x86/vp9_dct_sse2.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 931,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2013-06-24T22:03:04Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAaH//1wA\u003d",
+      "revId": "62513f57e0fbdb7810e7577da5568dc656c6ea86",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAaH//1ww\u003d",
         "filename": "vp9/encoder/x86/vp9_dct_sse2.c",
         "patchSetId": 2
@@ -132,6 +258,24 @@
       "writtenOn": "2013-06-22T15:20:52Z",
       "side": 1,
       "message": "so, I understand the general principle here, and this is OK for now. What would be really nice is if you would switch between the four tx types here, the  inline the actual two functions inside the body here, rather than calling them like this. The advantage of that is that the round argument is inlined, leading to more optimal code because less branching.\n\nThen also, once that is the case, we can perhaps try to optimize the store/load between the two 1d dcts/adsts, i.e. only load if round\u003d0 and only store if round\u003d1; in between, simply reuse the loaded registers as-is. Perhaps even load before calling the cols-1d version and store after the rows-1d version, and just make the registers an argument to the 1d function.",
+      "revId": "62513f57e0fbdb7810e7577da5568dc656c6ea86",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAan///W8\u003d",
+        "filename": "vp9/encoder/x86/vp9_dct_sse2.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 936,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2013-06-24T22:03:04Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAaH//1ww\u003d",
       "revId": "62513f57e0fbdb7810e7577da5568dc656c6ea86",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
