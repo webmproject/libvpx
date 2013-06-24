@@ -24,15 +24,15 @@
 #define MAX_FIRST_STEP (1 << (MAX_MVSEARCH_STEPS-1))
 
 void vp9_clamp_mv_min_max(MACROBLOCK *x, int_mv *ref_mv);
-int vp9_init_search_range(int width, int height);
-
 int vp9_mv_bit_cost(int_mv *mv, int_mv *ref, int *mvjcost,
                            int *mvcost[2], int weight, int ishp);
 void vp9_init_dsmotion_compensation(MACROBLOCK *x, int stride);
 void vp9_init3smotion_compensation(MACROBLOCK *x,  int stride);
 
-// Runs sequence of diamond searches in smaller steps for RD
 struct VP9_COMP;
+int vp9_init_search_range(struct VP9_COMP *cpi, int size);
+
+// Runs sequence of diamond searches in smaller steps for RD
 int vp9_full_pixel_diamond(struct VP9_COMP *cpi, MACROBLOCK *x,
                            int_mv *mvp_full, int step_param,
                            int sadpb, int further_steps, int do_refine,

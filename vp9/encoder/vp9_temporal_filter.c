@@ -148,9 +148,10 @@ static int temporal_filter_find_matching_mb_c(VP9_COMP *cpi,
 
   // Further step/diamond searches as necessary
   if (cpi->speed < 8)
-    step_param = cpi->sf.first_step + ((cpi->speed > 5) ? 1 : 0);
+    step_param = cpi->sf.reduce_first_step_size + ((cpi->speed > 5) ? 1 : 0);
   else
-    step_param = cpi->sf.first_step + 2;
+    step_param = cpi->sf.reduce_first_step_size + 2;
+  step_param = MIN(step_param, (cpi->sf.max_step_search_steps - 2));
 
   /*cpi->sf.search_method == HEX*/
   // TODO Check that the 16x16 vf & sdf are selected here

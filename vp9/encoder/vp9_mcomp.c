@@ -38,16 +38,17 @@ void vp9_clamp_mv_min_max(MACROBLOCK *x, int_mv *ref_mv) {
     x->mv_row_max = row_max;
 }
 
-int vp9_init_search_range(int width, int height) {
+int vp9_init_search_range(VP9_COMP *cpi, int size) {
   int sr = 0;
-  int frm = MIN(width, height);
 
-  while ((frm << sr) < MAX_FULL_PEL_VAL)
+  while ((size << sr) < MAX_FULL_PEL_VAL)
     sr++;
 
   if (sr)
     sr--;
 
+  sr += cpi->sf.reduce_first_step_size;
+  sr = MIN(sr, (cpi->sf.max_step_search_steps - 2));
   return sr;
 }
 
