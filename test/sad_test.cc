@@ -452,10 +452,14 @@ const sad_m_by_n_fn_t sad_4x4_wmt = vp8_sad4x4_wmt;
 #endif
 #if CONFIG_VP9_ENCODER
 const sad_m_by_n_fn_t sad_64x64_sse2_vp9 = vp9_sad64x64_sse2;
+const sad_m_by_n_fn_t sad_64x32_sse2_vp9 = vp9_sad64x32_sse2;
+const sad_m_by_n_fn_t sad_32x64_sse2_vp9 = vp9_sad32x64_sse2;
 const sad_m_by_n_fn_t sad_32x32_sse2_vp9 = vp9_sad32x32_sse2;
+const sad_m_by_n_fn_t sad_32x16_sse2_vp9 = vp9_sad32x16_sse2;
+const sad_m_by_n_fn_t sad_16x32_sse2_vp9 = vp9_sad16x32_sse2;
 const sad_m_by_n_fn_t sad_16x16_sse2_vp9 = vp9_sad16x16_sse2;
-const sad_m_by_n_fn_t sad_8x16_sse2_vp9 = vp9_sad8x16_sse2;
 const sad_m_by_n_fn_t sad_16x8_sse2_vp9 = vp9_sad16x8_sse2;
+const sad_m_by_n_fn_t sad_8x16_sse2_vp9 = vp9_sad8x16_sse2;
 const sad_m_by_n_fn_t sad_8x8_sse2_vp9 = vp9_sad8x8_sse2;
 const sad_m_by_n_fn_t sad_8x4_sse2_vp9 = vp9_sad8x4_sse2;
 #endif
@@ -469,10 +473,14 @@ const sad_m_by_n_test_param_t sse2_tests[] = {
 #endif
 #if CONFIG_VP9_ENCODER
   make_tuple(64, 64, sad_64x64_sse2_vp9),
+  make_tuple(64, 32, sad_64x32_sse2_vp9),
+  make_tuple(32, 64, sad_32x64_sse2_vp9),
   make_tuple(32, 32, sad_32x32_sse2_vp9),
+  make_tuple(32, 16, sad_32x16_sse2_vp9),
+  make_tuple(16, 32, sad_16x32_sse2_vp9),
   make_tuple(16, 16, sad_16x16_sse2_vp9),
-  make_tuple(8, 16, sad_8x16_sse2_vp9),
   make_tuple(16, 8, sad_16x8_sse2_vp9),
+  make_tuple(8, 16, sad_8x16_sse2_vp9),
   make_tuple(8, 8, sad_8x8_sse2_vp9),
   make_tuple(8, 4, sad_8x4_sse2_vp9),
 #endif
