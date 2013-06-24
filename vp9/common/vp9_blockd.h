@@ -214,7 +214,7 @@ typedef struct {
   int_mv ref_mvs[MAX_REF_FRAMES][MAX_MV_REF_CANDIDATES];
   int_mv best_mv, best_second_mv;
 
-  int mb_mode_context[MAX_REF_FRAMES];
+  uint8_t mb_mode_context[MAX_REF_FRAMES];
 
   unsigned char mb_skip_coeff;                                /* does this mb has coefficients at all, 1=no coefficients, 0=need decode tokens */
   unsigned char segment_id;           // Segment id for current frame
