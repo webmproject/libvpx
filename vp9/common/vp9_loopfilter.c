@@ -201,11 +201,10 @@ static void filter_selectively_vert(uint8_t *s, int pitch,
       } else {
         assert(0);
       }
-
-      if (mask_4x4_int & 1)
-        vp9_loop_filter_vertical_edge(s + 4, pitch, lfi->mblim, lfi->lim,
-                                      lfi->hev_thr, 1);
     }
+    if (mask_4x4_int & 1)
+      vp9_loop_filter_vertical_edge(s + 4, pitch, lfi->mblim, lfi->lim,
+                                    lfi->hev_thr, 1);
     s += 8;
     lfi++;
     mask_16x16 >>= 1;
