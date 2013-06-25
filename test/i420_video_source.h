@@ -108,8 +108,8 @@ class I420VideoSource : public VideoSource {
   unsigned int frame_;
   unsigned int width_;
   unsigned int height_;
-  unsigned int framerate_numerator_;
-  unsigned int framerate_denominator_;
+  int framerate_numerator_;
+  int framerate_denominator_;
 };
 
 }  // namespace libvpx_test
