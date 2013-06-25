@@ -501,7 +501,7 @@ void vp9_set_pred_flag(MACROBLOCKD *const xd,
 
 // Macroblock segment id prediction function
 int vp9_get_pred_mi_segid(VP9_COMMON *cm, BLOCK_SIZE_TYPE sb_type,
-                          int mi_row, int mi_col) {
+                          uint8_t *segment_ids, int mi_row, int mi_col) {
   const int mi_index = mi_row * cm->mi_cols + mi_col;
   const int bw = 1 << mi_width_log2(sb_type);
   const int bh = 1 << mi_height_log2(sb_type);
@@ -513,7 +513,7 @@ int vp9_get_pred_mi_segid(VP9_COMMON *cm, BLOCK_SIZE_TYPE sb_type,
   for (y = 0; y < ymis; y++) {
     for (x = 0; x < xmis; x++) {
       const int index = mi_index + (y * cm->mi_cols + x);
-      segment_id = MIN(segment_id, cm->last_frame_seg_map[index]);
+      segment_id = MIN(segment_id, segment_ids[index]);
     }
   }
   return segment_id;

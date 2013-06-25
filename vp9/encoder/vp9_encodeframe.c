@@ -455,25 +455,6 @@ static void update_state(VP9_COMP *cpi, PICK_MODE_CONTEXT *ctx,
   }
 }
 
-static unsigned find_seg_id(VP9_COMMON *cm, uint8_t *buf, BLOCK_SIZE_TYPE bsize,
-                            int start_y, int height, int start_x, int width) {
-  const int bw = 1 << mi_width_log2(bsize), bh = 1 << mi_height_log2(bsize);
-  const int end_x = MIN(start_x + bw, width);
-  const int end_y = MIN(start_y + bh, height);
-  int x, y;
-  unsigned seg_id = -1;
-
-  buf += width * start_y;
-  assert(start_y < cm->mi_rows && start_x < cm->cur_tile_mi_col_end);
-  for (y = start_y; y < end_y; y++, buf += width) {
-    for (x = start_x; x < end_x; x++) {
-      seg_id = MIN(seg_id, buf[x]);
-    }
-  }
-
-  return seg_id;
-}
-
 void vp9_setup_src_planes(MACROBLOCK *x, const YV12_BUFFER_CONFIG *src,
                           int mb_row, int mb_col) {
   uint8_t *buffers[4] = {src->y_buffer, src->u_buffer, src->v_buffer, src
@@ -551,11 +532,9 @@ static void set_offsets(VP9_COMP *cpi, int mi_row, int mi_col,
 
   /* segment ID */
   if (xd->segmentation_enabled) {
-    uint8_t *map =
-        xd->update_mb_segmentation_map ?
-            cpi->segmentation_map : cm->last_frame_seg_map;
-    mbmi->segment_id = find_seg_id(cm, map, bsize, mi_row, cm->mi_rows, mi_col,
-                                   cm->mi_cols);
+    uint8_t *map = xd->update_mb_segmentation_map ? cpi->segmentation_map
+                                                  : cm->last_frame_seg_map;
+    mbmi->segment_id = vp9_get_pred_mi_segid(cm, bsize, map, mi_row, mi_col);
 
     assert(mbmi->segment_id <= (MAX_MB_SEGMENTS-1));
     vp9_mb_init_quantizer(cpi, x);

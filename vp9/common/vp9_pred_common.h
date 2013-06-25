@@ -48,6 +48,6 @@ void vp9_set_pred_flag(MACROBLOCKD *const xd,
 
 
 int vp9_get_pred_mi_segid(VP9_COMMON *cm, BLOCK_SIZE_TYPE sb_type,
-                          int mi_row, int mi_col);
+                          uint8_t *segment_ids, int mi_row, int mi_col);
 
 #endif  // VP9_COMMON_VP9_PRED_COMMON_H_
