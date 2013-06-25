@@ -49,6 +49,8 @@ extern "C" {
 
     int   uv_width;
     int   uv_height;
+    int   uv_crop_width;
+    int   uv_crop_height;
     int   uv_stride;
     /*    int   uvinternal_width; */
 
