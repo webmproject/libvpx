@@ -268,13 +268,14 @@ static void filter_block_plane(VP9_COMMON *cm, MACROBLOCKD *xd,
   const int col_step = 1 << xd->plane[plane].subsampling_x;
   struct buf_2d * const dst = &xd->plane[plane].dst;
   uint8_t* const dst0 = dst->buf;
-  MODE_INFO* const mi0 = xd->mode_info_context;
   unsigned int mask_16x16[64 / MI_SIZE] = {0};
   unsigned int mask_8x8[64 / MI_SIZE] = {0};
   unsigned int mask_4x4[64 / MI_SIZE] = {0};
   unsigned int mask_4x4_int[64 / MI_SIZE] = {0};
   struct loop_filter_info lfi[64 / MI_SIZE][64 / MI_SIZE];
   int r, c;
+  MODE_INFO *mi = xd->mode_info_context;
+  int row_step_stride = cm->mode_info_stride * row_step;
 
   for (r = 0; r < 64 / MI_SIZE && mi_row + r < cm->mi_rows; r += row_step) {
     unsigned int mask_16x16_c = 0;
@@ -284,7 +285,6 @@ static void filter_block_plane(VP9_COMMON *cm, MACROBLOCKD *xd,
 
     // Determine the vertical edges that need filtering
     for (c = 0; c < 64 / MI_SIZE && mi_col + c < cm->mi_cols; c += col_step) {
-      const MODE_INFO * const mi = xd->mode_info_context;
       const int skip_this = mi[c].mbmi.mb_skip_coeff
                             && mi[c].mbmi.ref_frame[0] != INTRA_FRAME;
       // left edge of current unit is block/partition edge -> no skip
@@ -361,12 +361,11 @@ static void filter_block_plane(VP9_COMMON *cm, MACROBLOCKD *xd,
                             mask_4x4_c & border_mask,
                             mask_4x4_int[r], lfi[r]);
     dst->buf += 8 * dst->stride;
-    xd->mode_info_context += cm->mode_info_stride * row_step;
+    mi += row_step_stride;
   }
 
   // Now do horizontal pass
   dst->buf = dst0;
-  xd->mode_info_context = mi0;
   for (r = 0; r < 64 / MI_SIZE && mi_row + r < cm->mi_rows; r += row_step) {
     const int skip_border_4x4_r = ss_y && mi_row + r == cm->mi_rows - 1;
     const unsigned int mask_4x4_int_r = skip_border_4x4_r ? 0 : mask_4x4_int[r];
@@ -377,7 +376,6 @@ static void filter_block_plane(VP9_COMMON *cm, MACROBLOCKD *xd,
                              mask_4x4[r],
                              mask_4x4_int_r, mi_row + r == 0, lfi[r]);
     dst->buf += 8 * dst->stride;
-    xd->mode_info_context += cm->mode_info_stride * row_step;
   }
 }
 
