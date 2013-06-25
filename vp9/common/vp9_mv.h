@@ -23,14 +23,14 @@ typedef union int_mv {
   MV as_mv;
 } int_mv; /* facilitates faster equality tests and copies */
 
-struct mv32 {
+typedef struct {
   int32_t row;
   int32_t col;
-};
+} MV32;
 
 typedef union int_mv32 {
-  uint64_t    as_int;
-  struct mv32 as_mv;
+  uint64_t as_int;
+  MV32 as_mv;
 } int_mv32; /* facilitates faster equality tests and copies */
 
 #endif  // VP9_COMMON_VP9_MV_H_
