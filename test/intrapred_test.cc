@@ -27,6 +27,8 @@ using libvpx_test::ACMRandom;
 
 class IntraPredBase {
  public:
+  virtual ~IntraPredBase() {}
+
   virtual void TearDown() {
     libvpx_test::ClearSystemState();
   }
