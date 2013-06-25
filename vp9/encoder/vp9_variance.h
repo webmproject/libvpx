@@ -20,6 +20,13 @@ typedef unsigned int(*vp9_sad_fn_t)(const uint8_t *src_ptr,
                                     int ref_stride,
                                     unsigned int max_sad);
 
+typedef unsigned int(*vp9_sad_avg_fn_t)(const uint8_t *src_ptr,
+                                        int source_stride,
+                                        const uint8_t *ref_ptr,
+                                        int ref_stride,
+                                        const uint8_t *second_pred,
+                                        unsigned int max_sad);
+
 typedef void (*vp9_sad_multi_fn_t)(const uint8_t *src_ptr,
                                    int source_stride,
                                    const uint8_t *ref_ptr,
@@ -74,20 +81,21 @@ typedef unsigned int (*vp9_get16x16prederror_fn_t)(const uint8_t *src_ptr,
                                                    int  ref_stride);
 
 typedef struct vp9_variance_vtable {
-    vp9_sad_fn_t               sdf;
-    vp9_variance_fn_t          vf;
-    vp9_subpixvariance_fn_t    svf;
-    vp9_subp_avg_variance_fn_t svaf;
-    vp9_variance_fn_t          svf_halfpix_h;
-    vp9_variance_fn_t          svf_halfpix_v;
-    vp9_variance_fn_t          svf_halfpix_hv;
-    vp9_sad_multi_fn_t         sdx3f;
-    vp9_sad_multi1_fn_t        sdx8f;
-    vp9_sad_multi_d_fn_t       sdx4df;
+  vp9_sad_fn_t               sdf;
+  vp9_sad_avg_fn_t           sdaf;
+  vp9_variance_fn_t          vf;
+  vp9_subpixvariance_fn_t    svf;
+  vp9_subp_avg_variance_fn_t svaf;
+  vp9_variance_fn_t          svf_halfpix_h;
+  vp9_variance_fn_t          svf_halfpix_v;
+  vp9_variance_fn_t          svf_halfpix_hv;
+  vp9_sad_multi_fn_t         sdx3f;
+  vp9_sad_multi1_fn_t        sdx8f;
+  vp9_sad_multi_d_fn_t       sdx4df;
 } vp9_variance_fn_ptr_t;
 
 static void comp_avg_pred(uint8_t *comp_pred, const uint8_t *pred, int width,
-                          int height, uint8_t *ref, int ref_stride) {
+                          int height, const uint8_t *ref, int ref_stride) {
   int i, j;
 
   for (i = 0; i < height; i++) {
