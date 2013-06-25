@@ -88,8 +88,9 @@ double vp9_ssim2(uint8_t *img1, uint8_t *img2, int stride_img1,
   double ssim_total = 0;
 
   // sample point start with each 4x4 location
-  for (i = 0; i < height - 8; i += 4, img1 += stride_img1 * 4, img2 += stride_img2 * 4) {
-    for (j = 0; j < width - 8; j += 4) {
+  for (i = 0; i <= height - 8;
+       i += 4, img1 += stride_img1 * 4, img2 += stride_img2 * 4) {
+    for (j = 0; j <= width - 8; j += 4) {
       double v = ssim_8x8(img1 + j, stride_img1, img2 + j, stride_img2);
       ssim_total += v;
       samples++;
