@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAan///TY\u003d",
+        "filename": "vp9/common/arm/neon/vp9_loopfilter_neon.asm",
+        "patchSetId": 3
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2013-06-25T17:09:21Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAaH//2Wo\u003d",
+      "revId": "879d769eac4cd53fe2d4ce3391212750d95e591d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAaH//2WQ\u003d",
         "filename": "vp9/common/arm/neon/vp9_loopfilter_neon.asm",
         "patchSetId": 3
@@ -30,6 +48,24 @@
       "writtenOn": "2013-06-21T23:46:05Z",
       "side": 1,
       "message": "load r6 before r4 to avoid stall. also better to use r12 so it\u0027s not waiting for the \u0027push\u0027 to complete.\n\nvp8 manages to ignore the count variable. saves a lot of pushing.",
+      "revId": "879d769eac4cd53fe2d4ce3391212750d95e591d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAan///RY\u003d",
+        "filename": "vp9/common/arm/neon/vp9_loopfilter_neon.asm",
+        "patchSetId": 3
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2013-06-25T17:09:21Z",
+      "side": 1,
+      "message": "Done.\n\nCurrently count is always 1 for VP9. Maybe we should change the C code to not pass the count.",
+      "parentUuid": "AAAAaH//2WQ\u003d",
       "revId": "879d769eac4cd53fe2d4ce3391212750d95e591d",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAa3////4\u003d",
+        "filename": "vp9/common/arm/neon/vp9_loopfilter_neon.asm",
+        "patchSetId": 3
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2013-06-25T17:09:21Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAaH//2VA\u003d",
+      "revId": "879d769eac4cd53fe2d4ce3391212750d95e591d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAaH//2S8\u003d",
         "filename": "vp9/common/arm/neon/vp9_loopfilter_neon.asm",
         "patchSetId": 3
@@ -64,6 +118,24 @@
       "writtenOn": "2013-06-21T23:46:05Z",
       "side": 1,
       "message": "also outside the loop. again, academic. and looking where the code is from, this makes sense. it didn\u0027t have a loop before.",
+      "revId": "879d769eac4cd53fe2d4ce3391212750d95e591d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAa3////0\u003d",
+        "filename": "vp9/common/arm/neon/vp9_loopfilter_neon.asm",
+        "patchSetId": 3
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2013-06-25T17:09:21Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAaH//2S8\u003d",
       "revId": "879d769eac4cd53fe2d4ce3391212750d95e591d",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -104,6 +176,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAbn///Uo\u003d",
+        "filename": "vp9/common/arm/neon/vp9_loopfilter_neon.asm",
+        "patchSetId": 3
+      },
+      "lineNbr": 61,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2013-06-25T17:09:21Z",
+      "side": 1,
+      "message": "Changed code to not use d8-d15.",
+      "parentUuid": "AAAAaH//2Pc\u003d",
+      "revId": "879d769eac4cd53fe2d4ce3391212750d95e591d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAaH//2Pw\u003d",
         "filename": "vp9/common/arm/neon/vp9_loopfilter_neon.asm",
         "patchSetId": 3
@@ -138,6 +228,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAbn///Mk\u003d",
+        "filename": "vp9/common/arm/neon/vp9_loopfilter_neon.asm",
+        "patchSetId": 3
+      },
+      "lineNbr": 188,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2013-06-25T17:09:21Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAaH//2Ls\u003d",
+      "revId": "879d769eac4cd53fe2d4ce3391212750d95e591d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAaH//2Lo\u003d",
         "filename": "vp9/common/arm/neon/vp9_loopfilter_neon.asm",
         "patchSetId": 3
@@ -149,6 +257,24 @@
       "writtenOn": "2013-06-21T23:46:05Z",
       "side": 1,
       "message": "comment is unnecessary.",
+      "revId": "879d769eac4cd53fe2d4ce3391212750d95e591d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAbn///Mc\u003d",
+        "filename": "vp9/common/arm/neon/vp9_loopfilter_neon.asm",
+        "patchSetId": 3
+      },
+      "lineNbr": 201,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2013-06-25T17:09:21Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAaH//2Lo\u003d",
       "revId": "879d769eac4cd53fe2d4ce3391212750d95e591d",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -189,6 +315,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAbn///MA\u003d",
+        "filename": "vp9/common/arm/neon/vp9_loopfilter_neon.asm",
+        "patchSetId": 3
+      },
+      "lineNbr": 223,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2013-06-25T17:09:21Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAaH//2LA\u003d",
+      "revId": "879d769eac4cd53fe2d4ce3391212750d95e591d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAaH//2KY\u003d",
         "filename": "vp9/common/arm/neon/vp9_loopfilter_neon.asm",
         "patchSetId": 3
@@ -200,6 +344,24 @@
       "writtenOn": "2013-06-21T23:46:05Z",
       "side": 1,
       "message": "just filter, not vp9_filter",
+      "revId": "879d769eac4cd53fe2d4ce3391212750d95e591d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAbn///L8\u003d",
+        "filename": "vp9/common/arm/neon/vp9_loopfilter_neon.asm",
+        "patchSetId": 3
+      },
+      "lineNbr": 225,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2013-06-25T17:09:21Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAaH//2KY\u003d",
       "revId": "879d769eac4cd53fe2d4ce3391212750d95e591d",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -223,6 +385,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAbn///L4\u003d",
+        "filename": "vp9/common/arm/neon/vp9_loopfilter_neon.asm",
+        "patchSetId": 3
+      },
+      "lineNbr": 226,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2013-06-25T17:09:21Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAaH//2KU\u003d",
+      "revId": "879d769eac4cd53fe2d4ce3391212750d95e591d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAaH//2KQ\u003d",
         "filename": "vp9/common/arm/neon/vp9_loopfilter_neon.asm",
         "patchSetId": 3
@@ -234,6 +414,24 @@
       "writtenOn": "2013-06-21T23:46:05Z",
       "side": 1,
       "message": "just mask",
+      "revId": "879d769eac4cd53fe2d4ce3391212750d95e591d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAbn///Ls\u003d",
+        "filename": "vp9/common/arm/neon/vp9_loopfilter_neon.asm",
+        "patchSetId": 3
+      },
+      "lineNbr": 231,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2013-06-25T17:09:21Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAaH//2KQ\u003d",
       "revId": "879d769eac4cd53fe2d4ce3391212750d95e591d",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -257,6 +455,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAbn///Lo\u003d",
+        "filename": "vp9/common/arm/neon/vp9_loopfilter_neon.asm",
+        "patchSetId": 3
+      },
+      "lineNbr": 233,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2013-06-25T17:09:21Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAaH//2Ko\u003d",
+      "revId": "879d769eac4cd53fe2d4ce3391212750d95e591d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAaH//2Kc\u003d",
         "filename": "vp9/common/arm/neon/vp9_loopfilter_neon.asm",
         "patchSetId": 3
@@ -274,6 +490,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAbn///Lg\u003d",
+        "filename": "vp9/common/arm/neon/vp9_loopfilter_neon.asm",
+        "patchSetId": 3
+      },
+      "lineNbr": 242,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2013-06-25T17:09:21Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAaH//2Kc\u003d",
+      "revId": "879d769eac4cd53fe2d4ce3391212750d95e591d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAaH//2J8\u003d",
         "filename": "vp9/common/arm/neon/vp9_loopfilter_neon.asm",
         "patchSetId": 3
@@ -285,6 +519,24 @@
       "writtenOn": "2013-06-21T23:46:05Z",
       "side": 1,
       "message": "probably some way to keep 0x80 in a register (used above as well)",
+      "revId": "879d769eac4cd53fe2d4ce3391212750d95e591d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAbn///KE\u003d",
+        "filename": "vp9/common/arm/neon/vp9_loopfilter_neon.asm",
+        "patchSetId": 3
+      },
+      "lineNbr": 254,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2013-06-25T17:09:21Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAaH//2J8\u003d",
       "revId": "879d769eac4cd53fe2d4ce3391212750d95e591d",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
