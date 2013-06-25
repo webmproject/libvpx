@@ -198,7 +198,7 @@ static void counts_to_context(nmv_component_counts *mvcomp, int usehp) {
   }
 }
 
-void vp9_increment_nmv(const MV *mv, const MV *ref, nmv_context_counts *mvctx,
+void vp9_inc_mv(const MV *mv, const MV *ref, nmv_context_counts *mvctx,
                        int usehp) {
   const MV_JOINT_TYPE j = vp9_get_mv_joint(mv);
   mvctx->joints[j]++;

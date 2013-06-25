@@ -194,7 +194,7 @@ static int read_mv_component(vp9_reader *r,
   return sign ? -mag : mag;
 }
 
-static void update_nmv(vp9_reader *r, vp9_prob *const p,
+static void update_mv(vp9_reader *r, vp9_prob *const p,
                        const vp9_prob upd_p) {
   if (vp9_read(r, upd_p)) {
 #ifdef LOW_PRECISION_MV_UPDATE
@@ -205,8 +205,7 @@ static void update_nmv(vp9_reader *r, vp9_prob *const p,
   }
 }
 
-static void read_nmvprobs(vp9_reader *r, nmv_context *mvctx,
-                          int usehp) {
+static void read_mv_probs(vp9_reader *r, nmv_context *mvc, int usehp) {
   int i, j, k;
 
 #ifdef MV_GROUP_UPDATE
@@ -214,33 +213,33 @@ static void read_nmvprobs(vp9_reader *r, nmv_context *mvctx,
     return;
 #endif
   for (j = 0; j < MV_JOINTS - 1; ++j)
-    update_nmv(r, &mvctx->joints[j], VP9_NMV_UPDATE_PROB);
+    update_mv(r, &mvc->joints[j], VP9_NMV_UPDATE_PROB);
 
   for (i = 0; i < 2; ++i) {
-    update_nmv(r, &mvctx->comps[i].sign, VP9_NMV_UPDATE_PROB);
+    update_mv(r, &mvc->comps[i].sign, VP9_NMV_UPDATE_PROB);
     for (j = 0; j < MV_CLASSES - 1; ++j)
-      update_nmv(r, &mvctx->comps[i].classes[j], VP9_NMV_UPDATE_PROB);
+      update_mv(r, &mvc->comps[i].classes[j], VP9_NMV_UPDATE_PROB);
 
     for (j = 0; j < CLASS0_SIZE - 1; ++j)
-      update_nmv(r, &mvctx->comps[i].class0[j], VP9_NMV_UPDATE_PROB);
+      update_mv(r, &mvc->comps[i].class0[j], VP9_NMV_UPDATE_PROB);
 
     for (j = 0; j < MV_OFFSET_BITS; ++j)
-      update_nmv(r, &mvctx->comps[i].bits[j], VP9_NMV_UPDATE_PROB);
+      update_mv(r, &mvc->comps[i].bits[j], VP9_NMV_UPDATE_PROB);
   }
 
   for (i = 0; i < 2; ++i) {
     for (j = 0; j < CLASS0_SIZE; ++j)
       for (k = 0; k < 3; ++k)
-        update_nmv(r, &mvctx->comps[i].class0_fp[j][k], VP9_NMV_UPDATE_PROB);
+        update_mv(r, &mvc->comps[i].class0_fp[j][k], VP9_NMV_UPDATE_PROB);
 
     for (j = 0; j < 3; ++j)
-      update_nmv(r, &mvctx->comps[i].fp[j], VP9_NMV_UPDATE_PROB);
+      update_mv(r, &mvc->comps[i].fp[j], VP9_NMV_UPDATE_PROB);
   }
 
   if (usehp) {
     for (i = 0; i < 2; ++i) {
-      update_nmv(r, &mvctx->comps[i].class0_hp, VP9_NMV_UPDATE_PROB);
-      update_nmv(r, &mvctx->comps[i].hp, VP9_NMV_UPDATE_PROB);
+      update_mv(r, &mvc->comps[i].class0_hp, VP9_NMV_UPDATE_PROB);
+      update_mv(r, &mvc->comps[i].hp, VP9_NMV_UPDATE_PROB);
     }
   }
 }
@@ -397,7 +396,7 @@ static void mb_mode_mv_init(VP9D_COMP *pbi, vp9_reader *r) {
       }
     }
 
-    read_nmvprobs(r, nmvc, xd->allow_high_precision_mv);
+    read_mv_probs(r, nmvc, xd->allow_high_precision_mv);
   }
 }
 
@@ -468,7 +467,7 @@ static INLINE void decode_mv(vp9_reader *r, MV *mv, const MV *ref,
   if (mv_joint_horizontal(j))
     diff.col = read_mv_component(r, &ctx->comps[1], usehp);
 
-  vp9_increment_nmv(&diff, ref, counts, usehp);
+  vp9_inc_mv(&diff, ref, counts, usehp);
 
   mv->row = diff.row + ref->row;
   mv->col = diff.col + ref->col;
