@@ -24,17 +24,19 @@ extern "C" {
 using libvpx_test::ACMRandom;
 
 namespace {
-void fdct4x4(int16_t *in, int16_t *out, uint8_t *dst, int stride, int tx_type) {
+void fdct4x4(int16_t *in, int16_t *out, uint8_t */*dst*/,
+             int stride, int /*tx_type*/) {
   vp9_short_fdct4x4_c(in, out, stride);
 }
-void idct4x4_add(int16_t *in, int16_t *out, uint8_t *dst,
-                 int stride, int tx_type) {
+void idct4x4_add(int16_t */*in*/, int16_t *out, uint8_t *dst,
+                 int stride, int /*tx_type*/) {
   vp9_short_idct4x4_add_c(out, dst, stride >> 1);
 }
-void fht4x4(int16_t *in, int16_t *out, uint8_t *dst, int stride, int tx_type) {
+void fht4x4(int16_t *in, int16_t *out, uint8_t */*dst*/,
+            int stride, int tx_type) {
   vp9_short_fht4x4_c(in, out, stride >> 1, tx_type);
 }
-void iht4x4_add(int16_t *in, int16_t *out, uint8_t *dst,
+void iht4x4_add(int16_t */*in*/, int16_t *out, uint8_t *dst,
                 int stride, int tx_type) {
   vp9_short_iht4x4_add_c(out, dst, stride >> 1, tx_type);
 }
@@ -47,29 +49,29 @@ class FwdTrans4x4Test : public ::testing::TestWithParam<int> {
   void SetUpTestTxfm() {
     tx_type_ = GetParam();
     if (tx_type_ == 0) {
-      fwd_txfm = fdct4x4;
-      inv_txfm = idct4x4_add;
+      fwd_txfm_ = fdct4x4;
+      inv_txfm_ = idct4x4_add;
     } else {
-      fwd_txfm = fht4x4;
-      inv_txfm = iht4x4_add;
+      fwd_txfm_ = fht4x4;
+      inv_txfm_ = iht4x4_add;
     }
   }
 
  protected:
   void RunFwdTxfm(int16_t *in, int16_t *out, uint8_t *dst,
                   int stride, int tx_type) {
-    (*fwd_txfm)(in, out, dst, stride, tx_type);
+    (*fwd_txfm_)(in, out, dst, stride, tx_type);
   }
 
   void RunInvTxfm(int16_t *in, int16_t *out, uint8_t *dst,
                   int stride, int tx_type) {
-    (*inv_txfm)(in, out, dst, stride, tx_type);
+    (*inv_txfm_)(in, out, dst, stride, tx_type);
   }
 
   int tx_type_;
-  void (*fwd_txfm)(int16_t *in, int16_t *out, uint8_t *dst,
+  void (*fwd_txfm_)(int16_t *in, int16_t *out, uint8_t *dst,
                    int stride, int tx_type);
-  void (*inv_txfm)(int16_t *in, int16_t *out, uint8_t *dst,
+  void (*inv_txfm_)(int16_t *in, int16_t *out, uint8_t *dst,
                    int stride, int tx_type);
 };
 
@@ -181,7 +183,7 @@ TEST_P(FwdTrans4x4Test, RoundTripErrorCheck) {
 
   EXPECT_GE(count_test_block, total_error)
       << "Error: FDCT/IDCT or FHT/IHT has average "
-          "roundtrip error > 1 per block";
+      << "roundtrip error > 1 per block";
 }
 
 INSTANTIATE_TEST_CASE_P(VP9, FwdTrans4x4Test, ::testing::Range(0, 4));
