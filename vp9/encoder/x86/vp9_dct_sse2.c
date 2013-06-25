@@ -134,14 +134,14 @@ void vp9_short_fdct8x8_sse2(int16_t *input, int16_t *output, int pitch) {
   const __m128i k__cospi_m20_p12 = pair_set_epi16(-cospi_20_64, cospi_12_64);
   const __m128i k__DCT_CONST_ROUNDING = _mm_set1_epi32(DCT_CONST_ROUNDING);
   // Load input
-  __m128i in0  = _mm_loadu_si128((const __m128i *)(input + 0 * stride));
-  __m128i in1  = _mm_loadu_si128((const __m128i *)(input + 1 * stride));
-  __m128i in2  = _mm_loadu_si128((const __m128i *)(input + 2 * stride));
-  __m128i in3  = _mm_loadu_si128((const __m128i *)(input + 3 * stride));
-  __m128i in4  = _mm_loadu_si128((const __m128i *)(input + 4 * stride));
-  __m128i in5  = _mm_loadu_si128((const __m128i *)(input + 5 * stride));
-  __m128i in6  = _mm_loadu_si128((const __m128i *)(input + 6 * stride));
-  __m128i in7  = _mm_loadu_si128((const __m128i *)(input + 7 * stride));
+  __m128i in0  = _mm_load_si128((const __m128i *)(input + 0 * stride));
+  __m128i in1  = _mm_load_si128((const __m128i *)(input + 1 * stride));
+  __m128i in2  = _mm_load_si128((const __m128i *)(input + 2 * stride));
+  __m128i in3  = _mm_load_si128((const __m128i *)(input + 3 * stride));
+  __m128i in4  = _mm_load_si128((const __m128i *)(input + 4 * stride));
+  __m128i in5  = _mm_load_si128((const __m128i *)(input + 5 * stride));
+  __m128i in6  = _mm_load_si128((const __m128i *)(input + 6 * stride));
+  __m128i in7  = _mm_load_si128((const __m128i *)(input + 7 * stride));
   // Pre-condition input (shift by two)
   in0 = _mm_slli_epi16(in0, 2);
   in1 = _mm_slli_epi16(in1, 2);
@@ -363,14 +363,14 @@ void vp9_short_fdct8x8_sse2(int16_t *input, int16_t *output, int pitch) {
     in6 = _mm_srai_epi16(in6, 1);
     in7 = _mm_srai_epi16(in7, 1);
     // store results
-    _mm_storeu_si128((__m128i *)(output + 0 * 8), in0);
-    _mm_storeu_si128((__m128i *)(output + 1 * 8), in1);
-    _mm_storeu_si128((__m128i *)(output + 2 * 8), in2);
-    _mm_storeu_si128((__m128i *)(output + 3 * 8), in3);
-    _mm_storeu_si128((__m128i *)(output + 4 * 8), in4);
-    _mm_storeu_si128((__m128i *)(output + 5 * 8), in5);
-    _mm_storeu_si128((__m128i *)(output + 6 * 8), in6);
-    _mm_storeu_si128((__m128i *)(output + 7 * 8), in7);
+    _mm_store_si128((__m128i *)(output + 0 * 8), in0);
+    _mm_store_si128((__m128i *)(output + 1 * 8), in1);
+    _mm_store_si128((__m128i *)(output + 2 * 8), in2);
+    _mm_store_si128((__m128i *)(output + 3 * 8), in3);
+    _mm_store_si128((__m128i *)(output + 4 * 8), in4);
+    _mm_store_si128((__m128i *)(output + 5 * 8), in5);
+    _mm_store_si128((__m128i *)(output + 6 * 8), in6);
+    _mm_store_si128((__m128i *)(output + 7 * 8), in7);
   }
 }
 
@@ -876,7 +876,7 @@ void vp9_short_fdct16x16_sse2(int16_t *input, int16_t *output, int pitch) {
   const int stride = pitch >> 1;
   int pass;
   // We need an intermediate buffer between passes.
-  int16_t intermediate[256];
+  DECLARE_ALIGNED_ARRAY(16, int16_t, intermediate, 256);
   int16_t *in = input;
   int16_t *out = intermediate;
   // Constants
@@ -919,22 +919,22 @@ void vp9_short_fdct16x16_sse2(int16_t *input, int16_t *output, int pitch) {
       __m128i res08, res09, res10, res11, res12, res13, res14, res15;
       // Load and pre-condition input.
       if (0 == pass) {
-        in00  = _mm_loadu_si128((const __m128i *)(in +  0 * stride));
-        in01  = _mm_loadu_si128((const __m128i *)(in +  1 * stride));
-        in02  = _mm_loadu_si128((const __m128i *)(in +  2 * stride));
-        in03  = _mm_loadu_si128((const __m128i *)(in +  3 * stride));
-        in04  = _mm_loadu_si128((const __m128i *)(in +  4 * stride));
-        in05  = _mm_loadu_si128((const __m128i *)(in +  5 * stride));
-        in06  = _mm_loadu_si128((const __m128i *)(in +  6 * stride));
-        in07  = _mm_loadu_si128((const __m128i *)(in +  7 * stride));
-        in08  = _mm_loadu_si128((const __m128i *)(in +  8 * stride));
-        in09  = _mm_loadu_si128((const __m128i *)(in +  9 * stride));
-        in10  = _mm_loadu_si128((const __m128i *)(in + 10 * stride));
-        in11  = _mm_loadu_si128((const __m128i *)(in + 11 * stride));
-        in12  = _mm_loadu_si128((const __m128i *)(in + 12 * stride));
-        in13  = _mm_loadu_si128((const __m128i *)(in + 13 * stride));
-        in14  = _mm_loadu_si128((const __m128i *)(in + 14 * stride));
-        in15  = _mm_loadu_si128((const __m128i *)(in + 15 * stride));
+        in00  = _mm_load_si128((const __m128i *)(in +  0 * stride));
+        in01  = _mm_load_si128((const __m128i *)(in +  1 * stride));
+        in02  = _mm_load_si128((const __m128i *)(in +  2 * stride));
+        in03  = _mm_load_si128((const __m128i *)(in +  3 * stride));
+        in04  = _mm_load_si128((const __m128i *)(in +  4 * stride));
+        in05  = _mm_load_si128((const __m128i *)(in +  5 * stride));
+        in06  = _mm_load_si128((const __m128i *)(in +  6 * stride));
+        in07  = _mm_load_si128((const __m128i *)(in +  7 * stride));
+        in08  = _mm_load_si128((const __m128i *)(in +  8 * stride));
+        in09  = _mm_load_si128((const __m128i *)(in +  9 * stride));
+        in10  = _mm_load_si128((const __m128i *)(in + 10 * stride));
+        in11  = _mm_load_si128((const __m128i *)(in + 11 * stride));
+        in12  = _mm_load_si128((const __m128i *)(in + 12 * stride));
+        in13  = _mm_load_si128((const __m128i *)(in + 13 * stride));
+        in14  = _mm_load_si128((const __m128i *)(in + 14 * stride));
+        in15  = _mm_load_si128((const __m128i *)(in + 15 * stride));
         // x = x << 2
         in00 = _mm_slli_epi16(in00, 2);
         in01 = _mm_slli_epi16(in01, 2);
@@ -953,22 +953,22 @@ void vp9_short_fdct16x16_sse2(int16_t *input, int16_t *output, int pitch) {
         in14 = _mm_slli_epi16(in14, 2);
         in15 = _mm_slli_epi16(in15, 2);
       } else {
-        in00  = _mm_loadu_si128((const __m128i *)(in +  0 * 16));
-        in01  = _mm_loadu_si128((const __m128i *)(in +  1 * 16));
-        in02  = _mm_loadu_si128((const __m128i *)(in +  2 * 16));
-        in03  = _mm_loadu_si128((const __m128i *)(in +  3 * 16));
-        in04  = _mm_loadu_si128((const __m128i *)(in +  4 * 16));
-        in05  = _mm_loadu_si128((const __m128i *)(in +  5 * 16));
-        in06  = _mm_loadu_si128((const __m128i *)(in +  6 * 16));
-        in07  = _mm_loadu_si128((const __m128i *)(in +  7 * 16));
-        in08  = _mm_loadu_si128((const __m128i *)(in +  8 * 16));
-        in09  = _mm_loadu_si128((const __m128i *)(in +  9 * 16));
-        in10  = _mm_loadu_si128((const __m128i *)(in + 10 * 16));
-        in11  = _mm_loadu_si128((const __m128i *)(in + 11 * 16));
-        in12  = _mm_loadu_si128((const __m128i *)(in + 12 * 16));
-        in13  = _mm_loadu_si128((const __m128i *)(in + 13 * 16));
-        in14  = _mm_loadu_si128((const __m128i *)(in + 14 * 16));
-        in15  = _mm_loadu_si128((const __m128i *)(in + 15 * 16));
+        in00  = _mm_load_si128((const __m128i *)(in +  0 * 16));
+        in01  = _mm_load_si128((const __m128i *)(in +  1 * 16));
+        in02  = _mm_load_si128((const __m128i *)(in +  2 * 16));
+        in03  = _mm_load_si128((const __m128i *)(in +  3 * 16));
+        in04  = _mm_load_si128((const __m128i *)(in +  4 * 16));
+        in05  = _mm_load_si128((const __m128i *)(in +  5 * 16));
+        in06  = _mm_load_si128((const __m128i *)(in +  6 * 16));
+        in07  = _mm_load_si128((const __m128i *)(in +  7 * 16));
+        in08  = _mm_load_si128((const __m128i *)(in +  8 * 16));
+        in09  = _mm_load_si128((const __m128i *)(in +  9 * 16));
+        in10  = _mm_load_si128((const __m128i *)(in + 10 * 16));
+        in11  = _mm_load_si128((const __m128i *)(in + 11 * 16));
+        in12  = _mm_load_si128((const __m128i *)(in + 12 * 16));
+        in13  = _mm_load_si128((const __m128i *)(in + 13 * 16));
+        in14  = _mm_load_si128((const __m128i *)(in + 14 * 16));
+        in15  = _mm_load_si128((const __m128i *)(in + 15 * 16));
         // x = (x + 1) >> 2
         in00 = _mm_add_epi16(in00, kOne);
         in01 = _mm_add_epi16(in01, kOne);
@@ -1475,14 +1475,14 @@ void vp9_short_fdct16x16_sse2(int16_t *input, int16_t *output, int pitch) {
         // 06 16 26 36 46 56 66 76
         // 07 17 27 37 47 57 67 77
         // Store results
-        _mm_storeu_si128((__m128i *)(out + 8 + 0 * 16), tr2_0);
-        _mm_storeu_si128((__m128i *)(out + 8 + 1 * 16), tr2_1);
-        _mm_storeu_si128((__m128i *)(out + 8 + 2 * 16), tr2_2);
-        _mm_storeu_si128((__m128i *)(out + 8 + 3 * 16), tr2_3);
-        _mm_storeu_si128((__m128i *)(out + 8 + 4 * 16), tr2_4);
-        _mm_storeu_si128((__m128i *)(out + 8 + 5 * 16), tr2_5);
-        _mm_storeu_si128((__m128i *)(out + 8 + 6 * 16), tr2_6);
-        _mm_storeu_si128((__m128i *)(out + 8 + 7 * 16), tr2_7);
+        _mm_store_si128((__m128i *)(out + 8 + 0 * 16), tr2_0);
+        _mm_store_si128((__m128i *)(out + 8 + 1 * 16), tr2_1);
+        _mm_store_si128((__m128i *)(out + 8 + 2 * 16), tr2_2);
+        _mm_store_si128((__m128i *)(out + 8 + 3 * 16), tr2_3);
+        _mm_store_si128((__m128i *)(out + 8 + 4 * 16), tr2_4);
+        _mm_store_si128((__m128i *)(out + 8 + 5 * 16), tr2_5);
+        _mm_store_si128((__m128i *)(out + 8 + 6 * 16), tr2_6);
+        _mm_store_si128((__m128i *)(out + 8 + 7 * 16), tr2_7);
       }
       out += 8*16;
     }
