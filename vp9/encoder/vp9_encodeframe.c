@@ -1617,6 +1617,12 @@ static void switch_lossless_mode(VP9_COMP *cpi, int lossless) {
   }
 }
 
+static void switch_txfm_mode(VP9_COMP *cpi) {
+  if (cpi->sf.use_largest_txform &&
+      cpi->common.txfm_mode >= ALLOW_32X32)
+    cpi->common.txfm_mode = ALLOW_32X32;
+}
+
 static void encode_frame_internal(VP9_COMP *cpi) {
   int mi_row;
   MACROBLOCK * const x = &cpi->mb;
@@ -1661,6 +1667,7 @@ static void encode_frame_internal(VP9_COMP *cpi) {
 
   vp9_initialize_rd_consts(cpi, cm->base_qindex + cm->y_dc_delta_q);
   vp9_initialize_me_consts(cpi, cm->base_qindex);
+  switch_txfm_mode(cpi);
 
   if (cpi->oxcf.tuning == VP8_TUNE_SSIM) {
     // Initialize encode frame context.
