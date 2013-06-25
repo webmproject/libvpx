@@ -175,16 +175,6 @@ int recenter_nonneg(int v, int m) {
     return ((m - v) << 1) - 1;
 }
 
-static int get_unsigned_bits(unsigned num_values) {
-  int cat = 0;
-  if ((num_values--) <= 1) return 0;
-  while (num_values > 0) {
-    cat++;
-    num_values >>= 1;
-  }
-  return cat;
-}
-
 void vp9_encode_unsigned_max(struct vp9_write_bit_buffer *wb,
                              int data, int max) {
   vp9_wb_write_literal(wb, data, get_unsigned_bits(max));
