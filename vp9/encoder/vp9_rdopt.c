@@ -337,11 +337,8 @@ static INLINE int cost_coeffs(VP9_COMMON *const cm, MACROBLOCK *mb,
       break;
     }
     case TX_8X8: {
-      const BLOCK_SIZE_TYPE sb_type = xd->mode_info_context->mbmi.sb_type;
-      const int sz = 1 + b_width_log2(sb_type);
-      const int x = block & ((1 << sz) - 1), y = block - x;
-      TX_TYPE tx_type = (type == PLANE_TYPE_Y_WITH_DC) ?
-          get_tx_type_8x8(xd, y + (x >> 1)) : DCT_DCT;
+      const TX_TYPE tx_type = type == PLANE_TYPE_Y_WITH_DC ?
+                                  get_tx_type_8x8(xd) : DCT_DCT;
       above_ec = (A[0] + A[1]) != 0;
       left_ec = (L[0] + L[1]) != 0;
       scan = get_scan_8x8(tx_type);
@@ -350,11 +347,8 @@ static INLINE int cost_coeffs(VP9_COMMON *const cm, MACROBLOCK *mb,
       break;
     }
     case TX_16X16: {
-      const BLOCK_SIZE_TYPE sb_type = xd->mode_info_context->mbmi.sb_type;
-      const int sz = 2 + b_width_log2(sb_type);
-      const int x = block & ((1 << sz) - 1), y = block - x;
-      TX_TYPE tx_type = (type == PLANE_TYPE_Y_WITH_DC) ?
-          get_tx_type_16x16(xd, y + (x >> 2)) : DCT_DCT;
+      const TX_TYPE tx_type = type == PLANE_TYPE_Y_WITH_DC ?
+                                  get_tx_type_16x16(xd) : DCT_DCT;
       scan = get_scan_16x16(tx_type);
       seg_eob = 256;
       above_ec = (A[0] + A[1] + A[2] + A[3]) != 0;
@@ -370,7 +364,7 @@ static INLINE int cost_coeffs(VP9_COMMON *const cm, MACROBLOCK *mb,
       band_translate = vp9_coefband_trans_8x8plus;
       break;
     default:
-      abort();
+      assert(0);
       break;
   }
   assert(eob <= seg_eob);

@@ -164,14 +164,14 @@ static void optimize_b(VP9_COMMON *const cm, MACROBLOCK *mb,
       break;
     }
     case TX_8X8: {
-      const TX_TYPE tx_type = plane == 0 ? get_tx_type_8x8(xd, ib) : DCT_DCT;
+      const TX_TYPE tx_type = plane == 0 ? get_tx_type_8x8(xd) : DCT_DCT;
       scan = get_scan_8x8(tx_type);
       default_eob = 64;
       band_translate = vp9_coefband_trans_8x8plus;
       break;
     }
     case TX_16X16: {
-      const TX_TYPE tx_type = plane == 0 ? get_tx_type_16x16(xd, ib) : DCT_DCT;
+      const TX_TYPE tx_type = plane == 0 ? get_tx_type_16x16(xd) : DCT_DCT;
       scan = get_scan_16x16(tx_type);
       default_eob = 256;
       band_translate = vp9_coefband_trans_8x8plus;
@@ -468,14 +468,14 @@ static void xform_quant(int plane, int block, BLOCK_SIZE_TYPE bsize,
         vp9_short_fdct32x32(src_diff, coeff, bw * 2);
       break;
     case TX_16X16:
-      tx_type = plane == 0 ? get_tx_type_16x16(xd, raster_block) : DCT_DCT;
+      tx_type = plane == 0 ? get_tx_type_16x16(xd) : DCT_DCT;
       if (tx_type != DCT_DCT)
         vp9_short_fht16x16(src_diff, coeff, bw, tx_type);
       else
         x->fwd_txm16x16(src_diff, coeff, bw * 2);
       break;
     case TX_8X8:
-      tx_type = plane == 0 ? get_tx_type_8x8(xd, raster_block) : DCT_DCT;
+      tx_type = plane == 0 ? get_tx_type_8x8(xd) : DCT_DCT;
       if (tx_type != DCT_DCT)
         vp9_short_fht8x8(src_diff, coeff, bw, tx_type);
       else
@@ -519,14 +519,14 @@ static void encode_block(int plane, int block, BLOCK_SIZE_TYPE bsize,
       vp9_short_idct32x32_add(dqcoeff, dst, pd->dst.stride);
       break;
     case TX_16X16:
-      tx_type = plane == 0 ? get_tx_type_16x16(xd, raster_block) : DCT_DCT;
+      tx_type = plane == 0 ? get_tx_type_16x16(xd) : DCT_DCT;
       if (tx_type == DCT_DCT)
         vp9_short_idct16x16_add(dqcoeff, dst, pd->dst.stride);
       else
         vp9_short_iht16x16_add(dqcoeff, dst, pd->dst.stride, tx_type);
       break;
     case TX_8X8:
-      tx_type = plane == 0 ? get_tx_type_8x8(xd, raster_block) : DCT_DCT;
+      tx_type = plane == 0 ? get_tx_type_8x8(xd) : DCT_DCT;
       if (tx_type == DCT_DCT)
         vp9_short_idct8x8_add(dqcoeff, dst, pd->dst.stride);
       else
@@ -659,14 +659,14 @@ static void encode_block_intra(int plane, int block, BLOCK_SIZE_TYPE bsize,
         vp9_short_idct32x32_add(dqcoeff, dst, pd->dst.stride);
       break;
     case TX_16X16:
-      tx_type = plane == 0 ? get_tx_type_16x16(xd, raster_block) : DCT_DCT;
+      tx_type = plane == 0 ? get_tx_type_16x16(xd) : DCT_DCT;
       if (tx_type == DCT_DCT)
         vp9_short_idct16x16_add(dqcoeff, dst, pd->dst.stride);
       else
         vp9_short_iht16x16_add(dqcoeff, dst, pd->dst.stride, tx_type);
       break;
     case TX_8X8:
-      tx_type = plane == 0 ? get_tx_type_8x8(xd, raster_block) : DCT_DCT;
+      tx_type = plane == 0 ? get_tx_type_8x8(xd) : DCT_DCT;
       if (tx_type == DCT_DCT)
         vp9_short_idct8x8_add(dqcoeff, dst, pd->dst.stride);
       else

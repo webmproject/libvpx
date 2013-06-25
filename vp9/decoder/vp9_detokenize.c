@@ -113,7 +113,6 @@ static int decode_coefs(FRAME_CONTEXT *fc, const MACROBLOCKD *xd,
   vp9_prob *prob;
   vp9_coeff_count_model *coef_counts;
   const int ref = xd->mode_info_context->mbmi.ref_frame[0] != INTRA_FRAME;
-  TX_TYPE tx_type = DCT_DCT;
   const int *scan, *nb;
   uint8_t token_cache[1024];
   const uint8_t * band_translate;
@@ -126,8 +125,8 @@ static int decode_coefs(FRAME_CONTEXT *fc, const MACROBLOCKD *xd,
   switch (txfm_size) {
     default:
     case TX_4X4: {
-      tx_type = (type == PLANE_TYPE_Y_WITH_DC) ?
-          get_tx_type_4x4(xd, block_idx) : DCT_DCT;
+      const TX_TYPE tx_type = type == PLANE_TYPE_Y_WITH_DC ?
+                                  get_tx_type_4x4(xd, block_idx) : DCT_DCT;
       scan = get_scan_4x4(tx_type);
       above_ec = A[0] != 0;
       left_ec = L[0] != 0;
@@ -136,12 +135,8 @@ static int decode_coefs(FRAME_CONTEXT *fc, const MACROBLOCKD *xd,
       break;
     }
     case TX_8X8: {
-      const BLOCK_SIZE_TYPE sb_type = xd->mode_info_context->mbmi.sb_type;
-      const int sz = 1 + b_width_log2(sb_type);
-      const int x = block_idx & ((1 << sz) - 1);
-      const int y = block_idx - x;
-      tx_type = (type == PLANE_TYPE_Y_WITH_DC) ?
-          get_tx_type_8x8(xd, y + (x >> 1)) : DCT_DCT;
+      const TX_TYPE tx_type = type == PLANE_TYPE_Y_WITH_DC ?
+                                  get_tx_type_8x8(xd) : DCT_DCT;
       scan = get_scan_8x8(tx_type);
       above_ec = (A[0] + A[1]) != 0;
       left_ec = (L[0] + L[1]) != 0;
@@ -150,12 +145,8 @@ static int decode_coefs(FRAME_CONTEXT *fc, const MACROBLOCKD *xd,
       break;
     }
     case TX_16X16: {
-      const BLOCK_SIZE_TYPE sb_type = xd->mode_info_context->mbmi.sb_type;
-      const int sz = 2 + b_width_log2(sb_type);
-      const int x = block_idx & ((1 << sz) - 1);
-      const int y = block_idx - x;
-      tx_type = (type == PLANE_TYPE_Y_WITH_DC) ?
-          get_tx_type_16x16(xd, y + (x >> 2)) : DCT_DCT;
+      const TX_TYPE tx_type = type == PLANE_TYPE_Y_WITH_DC ?
+                                  get_tx_type_16x16(xd) : DCT_DCT;
       scan = get_scan_16x16(tx_type);
       above_ec = (A[0] + A[1] + A[2] + A[3]) != 0;
       left_ec = (L[0] + L[1] + L[2] + L[3]) != 0;
