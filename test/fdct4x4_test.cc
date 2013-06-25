@@ -41,12 +41,12 @@ void iht4x4_add(int16_t *in, int16_t *out, uint8_t *dst,
 
 class FwdTrans4x4Test : public ::testing::TestWithParam<int> {
  public:
-  FwdTrans4x4Test() {SetUpTestTxfm();}
+  FwdTrans4x4Test() { SetUpTestTxfm(); }
   ~FwdTrans4x4Test() {}
 
   void SetUpTestTxfm() {
-    tx_type = GetParam();
-    if (tx_type == 0) {
+    tx_type_ = GetParam();
+    if (tx_type_ == 0) {
       fwd_txfm = fdct4x4;
       inv_txfm = idct4x4_add;
     } else {
@@ -66,7 +66,7 @@ class FwdTrans4x4Test : public ::testing::TestWithParam<int> {
     (*inv_txfm)(in, out, dst, stride, tx_type);
   }
 
-  int tx_type;
+  int tx_type_;
   void (*fwd_txfm)(int16_t *in, int16_t *out, uint8_t *dst,
                    int stride, int tx_type);
   void (*inv_txfm)(int16_t *in, int16_t *out, uint8_t *dst,
@@ -87,7 +87,7 @@ TEST_P(FwdTrans4x4Test, SignBiasCheck) {
     for (int j = 0; j < 16; ++j)
       test_input_block[j] = rnd.Rand8() - rnd.Rand8();
 
-    RunFwdTxfm(test_input_block, test_output_block, NULL, pitch, tx_type);
+    RunFwdTxfm(test_input_block, test_output_block, NULL, pitch, tx_type_);
 
     for (int j = 0; j < 16; ++j) {
       if (test_output_block[j] < 0)
@@ -103,7 +103,7 @@ TEST_P(FwdTrans4x4Test, SignBiasCheck) {
     EXPECT_TRUE(bias_acceptable)
         << "Error: 4x4 FDCT/FHT has a sign bias > 1%"
         << " for input range [-255, 255] at index " << j
-        << " tx_type " << tx_type;
+        << " tx_type " << tx_type_;
   }
 
   memset(count_sign_block, 0, sizeof(count_sign_block));
@@ -112,7 +112,7 @@ TEST_P(FwdTrans4x4Test, SignBiasCheck) {
     for (int j = 0; j < 16; ++j)
       test_input_block[j] = (rnd.Rand8() >> 4) - (rnd.Rand8() >> 4);
 
-    RunFwdTxfm(test_input_block, test_output_block, NULL, pitch, tx_type);
+    RunFwdTxfm(test_input_block, test_output_block, NULL, pitch, tx_type_);
 
     for (int j = 0; j < 16; ++j) {
       if (test_output_block[j] < 0)
@@ -151,7 +151,7 @@ TEST_P(FwdTrans4x4Test, RoundTripErrorCheck) {
       test_input_block[j] = src[j] - dst[j];
 
     const int pitch = 8;
-    RunFwdTxfm(test_input_block, test_temp_block, dst, pitch, tx_type);
+    RunFwdTxfm(test_input_block, test_temp_block, dst, pitch, tx_type_);
 
     for (int j = 0; j < 16; ++j) {
         if(test_temp_block[j] > 0) {
@@ -166,7 +166,7 @@ TEST_P(FwdTrans4x4Test, RoundTripErrorCheck) {
     }
 
     // inverse transform and reconstruct the pixel block
-    RunInvTxfm(test_input_block, test_temp_block, dst, pitch, tx_type);
+    RunInvTxfm(test_input_block, test_temp_block, dst, pitch, tx_type_);
 
     for (int j = 0; j < 16; ++j) {
       const int diff = dst[j] - src[j];
