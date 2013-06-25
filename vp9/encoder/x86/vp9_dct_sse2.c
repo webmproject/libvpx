@@ -397,6 +397,24 @@ static INLINE void load_buffer_8x8(int16_t *input, __m128i in[8], int stride) {
 
 // write 8x8 array
 static INLINE void write_buffer_8x8(int16_t *output, __m128i res[8]) {
+  __m128i sign0 = _mm_srai_epi16(res[0], 15);
+  __m128i sign1 = _mm_srai_epi16(res[1], 15);
+  __m128i sign2 = _mm_srai_epi16(res[2], 15);
+  __m128i sign3 = _mm_srai_epi16(res[3], 15);
+  __m128i sign4 = _mm_srai_epi16(res[4], 15);
+  __m128i sign5 = _mm_srai_epi16(res[5], 15);
+  __m128i sign6 = _mm_srai_epi16(res[6], 15);
+  __m128i sign7 = _mm_srai_epi16(res[7], 15);
+
+  res[0] = _mm_sub_epi16(res[0], sign0);
+  res[1] = _mm_sub_epi16(res[1], sign1);
+  res[2] = _mm_sub_epi16(res[2], sign2);
+  res[3] = _mm_sub_epi16(res[3], sign3);
+  res[4] = _mm_sub_epi16(res[4], sign4);
+  res[5] = _mm_sub_epi16(res[5], sign5);
+  res[6] = _mm_sub_epi16(res[6], sign6);
+  res[7] = _mm_sub_epi16(res[7], sign7);
+
   res[0] = _mm_srai_epi16(res[0], 1);
   res[1] = _mm_srai_epi16(res[1], 1);
   res[2] = _mm_srai_epi16(res[2], 1);
