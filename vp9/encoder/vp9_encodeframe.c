@@ -397,24 +397,6 @@ static void update_state(VP9_COMP *cpi, PICK_MODE_CONTEXT *ctx,
     cpi->mode_chosen_counts[kf_mode_index[mb_mode]]++;
 #endif
   } else {
-    /*
-     // Reduce the activation RD thresholds for the best choice mode
-     if ((cpi->rd_baseline_thresh[mb_mode_index] > 0) &&
-     (cpi->rd_baseline_thresh[mb_mode_index] < (INT_MAX >> 2)))
-     {
-     int best_adjustment = (cpi->rd_thresh_mult[mb_mode_index] >> 2);
-
-     cpi->rd_thresh_mult[mb_mode_index] =
-     (cpi->rd_thresh_mult[mb_mode_index]
-     >= (MIN_THRESHMULT + best_adjustment)) ?
-     cpi->rd_thresh_mult[mb_mode_index] - best_adjustment :
-     MIN_THRESHMULT;
-     cpi->rd_threshes[mb_mode_index] =
-     (cpi->rd_baseline_thresh[mb_mode_index] >> 7)
-     * cpi->rd_thresh_mult[mb_mode_index];
-
-     }
-     */
     // Note how often each mode chosen as best
     cpi->mode_chosen_counts[mb_mode_index]++;
     if (mbmi->ref_frame[0] != INTRA_FRAME

@@ -227,7 +227,8 @@ void vp9_initialize_rd_consts(VP9_COMP *cpi, int qindex) {
           cpi->rd_threshes[bsize][i] = INT_MAX;
         }
         cpi->rd_baseline_thresh[bsize][i] = cpi->rd_threshes[bsize][i];
-        cpi->rd_thresh_freq_fact[bsize][i] = BASE_RD_THRESH_FREQ_FACT;
+
+        cpi->rd_thresh_freq_fact[bsize][i] = MAX_RD_THRESH_FREQ_FACT;
       }
     }
   } else {
@@ -247,7 +248,7 @@ void vp9_initialize_rd_consts(VP9_COMP *cpi, int qindex) {
           cpi->rd_threshes[bsize][i] = INT_MAX;
         }
         cpi->rd_baseline_thresh[bsize][i] = cpi->rd_threshes[bsize][i];
-        cpi->rd_thresh_freq_fact[bsize][i] = BASE_RD_THRESH_FREQ_FACT;
+        cpi->rd_thresh_freq_fact[bsize][i] = MAX_RD_THRESH_FREQ_FACT;
       }
     }
   }
