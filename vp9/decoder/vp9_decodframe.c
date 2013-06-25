@@ -218,11 +218,11 @@ static void decode_block(int plane, int block, BLOCK_SIZE_TYPE bsize,
         vp9_iht_add_c(tx_type, qcoeff, dst, stride, pd->eobs[block]);
       break;
     case TX_8X8:
-      tx_type = plane == 0 ? get_tx_type_8x8(xd, raster_block) : DCT_DCT;
+      tx_type = plane == 0 ? get_tx_type_8x8(xd) : DCT_DCT;
       vp9_iht_add_8x8_c(tx_type, qcoeff, dst, stride, pd->eobs[block]);
       break;
     case TX_16X16:
-      tx_type = plane == 0 ? get_tx_type_16x16(xd, raster_block) : DCT_DCT;
+      tx_type = plane == 0 ? get_tx_type_16x16(xd) : DCT_DCT;
       vp9_iht_add_16x16_c(tx_type, qcoeff, dst, stride, pd->eobs[block]);
       break;
     case TX_32X32:

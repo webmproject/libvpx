@@ -527,34 +527,30 @@ static TX_TYPE txfm_map(MB_PREDICTION_MODE bmode) {
 }
 
 static TX_TYPE get_tx_type_4x4(const MACROBLOCKD *xd, int ib) {
-  TX_TYPE tx_type;
-  MODE_INFO *mi = xd->mode_info_context;
+  MODE_INFO *const mi = xd->mode_info_context;
   MB_MODE_INFO *const mbmi = &mi->mbmi;
+
   if (xd->lossless || mbmi->ref_frame[0] != INTRA_FRAME)
     return DCT_DCT;
+
   if (mbmi->sb_type < BLOCK_SIZE_SB8X8) {
-    tx_type = txfm_map(mi->bmi[ib].as_mode.first);
+    return txfm_map(mi->bmi[ib].as_mode.first);
   } else {
     assert(mbmi->mode <= TM_PRED);
-    tx_type = txfm_map(mbmi->mode);
+    return txfm_map(mbmi->mode);
   }
-  return tx_type;
 }
 
-static TX_TYPE get_tx_type_8x8(const MACROBLOCKD *xd, int ib) {
-  TX_TYPE tx_type = DCT_DCT;
-  if (xd->mode_info_context->mbmi.mode <= TM_PRED) {
-    tx_type = txfm_map(xd->mode_info_context->mbmi.mode);
-  }
-  return tx_type;
+static TX_TYPE get_tx_type_8x8(const MACROBLOCKD *xd) {
+  return xd->mode_info_context->mbmi.mode <= TM_PRED
+             ? txfm_map(xd->mode_info_context->mbmi.mode)
+             : DCT_DCT;
 }
 
-static TX_TYPE get_tx_type_16x16(const MACROBLOCKD *xd, int ib) {
-  TX_TYPE tx_type = DCT_DCT;
-  if (xd->mode_info_context->mbmi.mode <= TM_PRED) {
-    tx_type = txfm_map(xd->mode_info_context->mbmi.mode);
-  }
-  return tx_type;
+static TX_TYPE get_tx_type_16x16(const MACROBLOCKD *xd) {
+  return xd->mode_info_context->mbmi.mode <= TM_PRED
+             ? txfm_map(xd->mode_info_context->mbmi.mode)
+             : DCT_DCT;
 }
 
 void vp9_setup_block_dptrs(MACROBLOCKD *xd,
