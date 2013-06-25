@@ -317,12 +317,3 @@ void vp9_predict_intra_block(MACROBLOCKD *xd,
                              have_top, have_left,
                              have_right);
 }
-
-void vp9_intra4x4_predict(MACROBLOCKD *xd,
-                          int block_idx,
-                          BLOCK_SIZE_TYPE bsize,
-                          int mode,
-                          uint8_t *predictor, int pre_stride) {
-  vp9_predict_intra_block(xd, block_idx, b_width_log2(bsize), TX_4X4,
-                          mode, predictor, pre_stride);
-}
