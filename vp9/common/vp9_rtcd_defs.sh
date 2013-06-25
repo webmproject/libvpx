@@ -369,7 +369,6 @@ specialize vp9_sad8x16 mmx sse2
 prototype unsigned int vp9_sad8x8 "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int  ref_stride, unsigned int max_sad"
 specialize vp9_sad8x8 mmx sse2
 
-# TODO(jingning): need to covert these functions into mmx/sse2 form
 prototype unsigned int vp9_sad8x4 "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int max_sad"
 specialize vp9_sad8x4 sse2
 
@@ -378,6 +377,45 @@ specialize vp9_sad4x8 sse
 
 prototype unsigned int vp9_sad4x4 "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int  ref_stride, unsigned int max_sad"
 specialize vp9_sad4x4 mmx sse
+
+prototype unsigned int vp9_sad64x64_avg "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int  ref_stride, const uint8_t *second_pred, unsigned int max_sad"
+specialize vp9_sad64x64_avg sse2
+
+prototype unsigned int vp9_sad32x64_avg "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, const uint8_t *second_pred, unsigned int max_sad"
+specialize vp9_sad32x64_avg sse2
+
+prototype unsigned int vp9_sad64x32_avg "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, const uint8_t *second_pred, unsigned int max_sad"
+specialize vp9_sad64x32_avg sse2
+
+prototype unsigned int vp9_sad32x16_avg "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, const uint8_t *second_pred, unsigned int max_sad"
+specialize vp9_sad32x16_avg sse2
+
+prototype unsigned int vp9_sad16x32_avg "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, const uint8_t *second_pred, unsigned int max_sad"
+specialize vp9_sad16x32_avg sse2
+
+prototype unsigned int vp9_sad32x32_avg "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int  ref_stride, const uint8_t *second_pred, unsigned int max_sad"
+specialize vp9_sad32x32_avg sse2
+
+prototype unsigned int vp9_sad16x16_avg "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int  ref_stride, const uint8_t *second_pred, unsigned int max_sad"
+specialize vp9_sad16x16_avg sse2
+
+prototype unsigned int vp9_sad16x8_avg "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int  ref_stride, const uint8_t *second_pred, unsigned int max_sad"
+specialize vp9_sad16x8_avg sse2
+
+prototype unsigned int vp9_sad8x16_avg "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int  ref_stride, const uint8_t *second_pred, unsigned int max_sad"
+specialize vp9_sad8x16_avg sse2
+
+prototype unsigned int vp9_sad8x8_avg "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int  ref_stride, const uint8_t *second_pred, unsigned int max_sad"
+specialize vp9_sad8x8_avg sse2
+
+prototype unsigned int vp9_sad8x4_avg "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, const uint8_t *second_pred, unsigned int max_sad"
+specialize vp9_sad8x4_avg sse2
+
+prototype unsigned int vp9_sad4x8_avg "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, const uint8_t *second_pred, unsigned int max_sad"
+specialize vp9_sad4x8_avg sse
+
+prototype unsigned int vp9_sad4x4_avg "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int  ref_stride, const uint8_t *second_pred, unsigned int max_sad"
+specialize vp9_sad4x4_avg sse
 
 prototype unsigned int vp9_variance_halfpixvar16x16_h "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse"
 specialize vp9_variance_halfpixvar16x16_h sse2

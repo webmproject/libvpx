@@ -2353,16 +2353,12 @@ int vp9_refining_search_8p_c(MACROBLOCK *x,
   int *mvjsadcost = x->nmvjointsadcost;
   int *mvsadcost[2] = {x->nmvsadcost[0], x->nmvsadcost[1]};
 
-  /* Compound pred buffer */
-  DECLARE_ALIGNED_ARRAY(16, uint8_t, comp_pred, 64 * 64);
-
   fcenter_mv.as_mv.row = center_mv->as_mv.row >> 3;
   fcenter_mv.as_mv.col = center_mv->as_mv.col >> 3;
 
   /* Get compound pred by averaging two pred blocks. */
-  comp_avg_pred(comp_pred, second_pred, w, h, best_address, in_what_stride);
-
-  bestsad = fn_ptr->sdf(what, what_stride, comp_pred, w, 0x7fffffff) +
+  bestsad = fn_ptr->sdaf(what, what_stride, best_address, in_what_stride,
+                         second_pred, 0x7fffffff) +
       mvsad_err_cost(ref_mv, &fcenter_mv, mvjsadcost, mvsadcost, error_per_bit);
 
   for (i = 0; i < search_range; i++) {
@@ -2380,9 +2376,8 @@ int vp9_refining_search_8p_c(MACROBLOCK *x,
             best_address;
 
         /* Get compound block and use it to calculate SAD. */
-        comp_avg_pred(comp_pred, second_pred, w, h, check_here,
-                      in_what_stride);
-        thissad = fn_ptr->sdf(what, what_stride, comp_pred, w, bestsad);
+        thissad = fn_ptr->sdaf(what, what_stride, check_here, in_what_stride,
+                               second_pred, bestsad);
 
         if (thissad < bestsad) {
           this_mv.as_mv.row = this_row_offset;
@@ -2412,10 +2407,11 @@ int vp9_refining_search_8p_c(MACROBLOCK *x,
   this_mv.as_mv.col = ref_mv->as_mv.col << 3;
 
   if (bestsad < INT_MAX) {
-    int besterr;
-    comp_avg_pred(comp_pred, second_pred, w, h, best_address, in_what_stride);
-    besterr = fn_ptr->vf(what, what_stride, comp_pred, w,
-        (unsigned int *)(&thissad)) +
+    // FIXME(rbultje, yunqing): add full-pixel averaging variance functions
+    // so we don't have to use the subpixel with xoff=0,yoff=0 here.
+    int besterr = fn_ptr->svaf(best_address, in_what_stride, 0, 0,
+                               what, what_stride, (unsigned int *)(&thissad),
+                               second_pred) +
         mv_err_cost(&this_mv, center_mv, mvjcost, mvcost, x->errorperbit,
                     xd->allow_high_precision_mv);
     return besterr;
