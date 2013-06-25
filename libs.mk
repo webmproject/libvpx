@@ -383,6 +383,11 @@ LIBVPX_TEST_DATA=$(addprefix $(LIBVPX_TEST_DATA_PATH)/,\
                      $(call enabled,LIBVPX_TEST_DATA))
 libvpx_test_data_url=http://downloads.webmproject.org/test_data/libvpx/$(1)
 
+libvpx_test_srcs.txt:
+	@echo "    [CREATE] $@"
+	@echo $(LIBVPX_TEST_SRCS) | xargs -n1 echo | sort -u > $@
+CLEAN-OBJS += libvpx_test_srcs.txt
+
 $(LIBVPX_TEST_DATA):
 	@echo "    [DOWNLOAD] $@"
 	$(qexec)trap 'rm -f $@' INT TERM &&\
