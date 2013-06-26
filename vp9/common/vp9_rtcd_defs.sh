@@ -57,9 +57,6 @@ specialize vp9_copy_mem8x4 mmx
 prototype void vp9_build_intra_predictors "uint8_t *src, int src_stride, uint8_t *pred, int y_stride, int mode, int bw, int bh, int up_available, int left_available, int right_available"
 specialize void vp9_build_intra_predictors
 
-prototype void vp9_intra4x4_predict "struct macroblockd *xd, int block, enum BLOCK_SIZE_TYPE bsize, int b_mode, uint8_t *predictor, int pre_stride"
-specialize vp9_intra4x4_predict;
-
 if [ "$CONFIG_VP9_DECODER" = "yes" ]; then
 prototype void vp9_add_constant_residual_8x8 "const int16_t diff, uint8_t *dest, int stride"
 specialize vp9_add_constant_residual_8x8 sse2

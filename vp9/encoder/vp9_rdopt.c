@@ -685,8 +685,8 @@ static int64_t rd_pick_intra4x4block(VP9_COMP *cpi, MACROBLOCK *x, int ib,
         dst = raster_block_offset_uint8(xd, BLOCK_SIZE_SB8X8, 0, block,
                                         xd->plane[0].dst.buf,
                                         xd->plane[0].dst.stride);
-        vp9_intra4x4_predict(xd, block, BLOCK_SIZE_SB8X8, mode,
-                             dst, xd->plane[0].dst.stride);
+        vp9_predict_intra_block(xd, block, b_width_log2(BLOCK_SIZE_SB8X8),
+                                TX_4X4, mode, dst, xd->plane[0].dst.stride);
         vp9_subtract_block(4, 4, src_diff, 8,
                            src, src_stride,
                            dst, xd->plane[0].dst.stride);
@@ -745,8 +745,8 @@ static int64_t rd_pick_intra4x4block(VP9_COMP *cpi, MACROBLOCK *x, int ib,
                                       xd->plane[0].dst.buf,
                                       xd->plane[0].dst.stride);
 
-      vp9_intra4x4_predict(xd, block, BLOCK_SIZE_SB8X8, *best_mode,
-                           dst, xd->plane[0].dst.stride);
+      vp9_predict_intra_block(xd, block, b_width_log2(BLOCK_SIZE_SB8X8), TX_4X4,
+                              *best_mode, dst, xd->plane[0].dst.stride);
       // inverse transform
       if (best_tx_type != DCT_DCT)
         vp9_short_iht4x4_add(best_dqcoeff[idy * 2 + idx], dst,
