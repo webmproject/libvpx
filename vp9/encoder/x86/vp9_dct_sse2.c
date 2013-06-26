@@ -375,7 +375,7 @@ void vp9_short_fdct8x8_sse2(int16_t *input, int16_t *output, int pitch) {
 }
 
 // load 8x8 array
-static INLINE void load_buffer_8x8(int16_t *input, __m128i in[8], int stride) {
+static INLINE void load_buffer_8x8(int16_t *input, __m128i *in, int stride) {
   in[0]  = _mm_load_si128((__m128i *)(input + 0 * stride));
   in[1]  = _mm_load_si128((__m128i *)(input + 1 * stride));
   in[2]  = _mm_load_si128((__m128i *)(input + 2 * stride));
@@ -396,7 +396,7 @@ static INLINE void load_buffer_8x8(int16_t *input, __m128i in[8], int stride) {
 }
 
 // write 8x8 array
-static INLINE void write_buffer_8x8(int16_t *output, __m128i res[8]) {
+static INLINE void write_buffer_8x8(int16_t *output, __m128i *res) {
   __m128i sign0 = _mm_srai_epi16(res[0], 15);
   __m128i sign1 = _mm_srai_epi16(res[1], 15);
   __m128i sign2 = _mm_srai_epi16(res[2], 15);
@@ -435,7 +435,7 @@ static INLINE void write_buffer_8x8(int16_t *output, __m128i res[8]) {
 }
 
 // perform in-place transpose
-static INLINE void array_transpose_8x8(__m128i res[8]) {
+static INLINE void array_transpose_8x8(__m128i *res) {
   const __m128i tr0_0 = _mm_unpacklo_epi16(res[0], res[1]);
   const __m128i tr0_1 = _mm_unpacklo_epi16(res[2], res[3]);
   const __m128i tr0_2 = _mm_unpackhi_epi16(res[0], res[1]);
@@ -486,7 +486,7 @@ static INLINE void array_transpose_8x8(__m128i res[8]) {
   // 07 17 27 37 47 57 67 77
 }
 
-void fdct8_1d_sse2(__m128i in[8]) {
+void fdct8_1d_sse2(__m128i *in) {
   // constants
   const __m128i k__cospi_p16_p16 = _mm_set1_epi16(cospi_16_64);
   const __m128i k__cospi_p16_m16 = pair_set_epi16(cospi_16_64, -cospi_16_64);
@@ -626,7 +626,7 @@ void fdct8_1d_sse2(__m128i in[8]) {
   array_transpose_8x8(in);
 }
 
-void fadst8_1d_sse2(__m128i in[8]) {
+void fadst8_1d_sse2(__m128i *in) {
   // Constants
   const __m128i k__cospi_p02_p30 = pair_set_epi16(cospi_2_64, cospi_30_64);
   const __m128i k__cospi_p30_m02 = pair_set_epi16(cospi_30_64, -cospi_2_64);
