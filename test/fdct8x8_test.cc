@@ -25,14 +25,16 @@ void vp9_short_idct8x8_add_c(short *input, uint8_t *output, int pitch);
 using libvpx_test::ACMRandom;
 
 namespace {
-void fdct8x8(int16_t *in, int16_t *out, uint8_t *dst, int stride, int tx_type) {
+void fdct8x8(int16_t *in, int16_t *out, uint8_t* /*dst*/,
+             int stride, int /*tx_type*/) {
   vp9_short_fdct8x8_c(in, out, stride);
 }
-void idct8x8_add(int16_t *in, int16_t *out, uint8_t *dst,
-                 int stride, int tx_type) {
+void idct8x8_add(int16_t* /*in*/, int16_t *out, uint8_t *dst,
+                 int stride, int /*tx_type*/) {
   vp9_short_idct8x8_add_c(out, dst, stride >> 1);
 }
-void fht8x8(int16_t *in, int16_t *out, uint8_t *dst, int stride, int tx_type) {
+void fht8x8(int16_t *in, int16_t *out, uint8_t* /*dst*/,
+            int stride, int tx_type) {
   // TODO(jingning): need to refactor this to test both _c and _sse2 functions,
   // when we have all inverse dct functions done sse2.
 #if HAVE_SSE2
@@ -41,7 +43,7 @@ void fht8x8(int16_t *in, int16_t *out, uint8_t *dst, int stride, int tx_type) {
   vp9_short_fht8x8_c(in, out, stride >> 1, tx_type);
 #endif
 }
-void iht8x8_add(int16_t *in, int16_t *out, uint8_t *dst,
+void iht8x8_add(int16_t* /*in*/, int16_t *out, uint8_t *dst,
                 int stride, int tx_type) {
   vp9_short_iht8x8_add_c(out, dst, stride >> 1, tx_type);
 }
