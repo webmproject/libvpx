@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAbn//9VQ\u003d",
+        "filename": "vp9/common/vp9_blockd.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 508,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-06-26T05:26:05Z",
+      "side": 1,
+      "message": "this shouldn\u0027t be a static const in a header file, the table will end up being duplicated in every .c that includes it. Make an extern, and put the actual definition in some .c file.",
+      "revId": "c51208308defa7203cf06f070e207ae075755d40",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
