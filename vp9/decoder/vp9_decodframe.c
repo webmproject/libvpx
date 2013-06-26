@@ -261,6 +261,7 @@ static void decode_block_intra(int plane, int block, BLOCK_SIZE_TYPE bsize,
 
   plane_b_size = b_width_log2(bsize) - pd->subsampling_x;
   vp9_predict_intra_block(xd, tx_ib, plane_b_size, tx_size, b_mode,
+                          dst, pd->dst.stride,
                           dst, pd->dst.stride);
 
   // Early exit if there are no coefficients

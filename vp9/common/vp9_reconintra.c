@@ -300,6 +300,7 @@ void vp9_predict_intra_block(MACROBLOCKD *xd,
                             int bwl_in,
                             TX_SIZE tx_size,
                             int mode,
+                            uint8_t *reference, int ref_stride,
                             uint8_t *predictor, int pre_stride) {
   const int bwl = bwl_in - tx_size;
   const int wmask = (1 << bwl) - 1;
@@ -309,7 +310,7 @@ void vp9_predict_intra_block(MACROBLOCKD *xd,
   const int txfm_block_size = 4 << tx_size;
 
   assert(bwl >= 0);
-  vp9_build_intra_predictors(predictor, pre_stride,
+  vp9_build_intra_predictors(reference, ref_stride,
                              predictor, pre_stride,
                              mode,
                              txfm_block_size,
