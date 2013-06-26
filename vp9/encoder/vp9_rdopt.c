@@ -494,23 +494,26 @@ static void choose_txfm_size_from_rd(VP9_COMP *cpi, MACROBLOCK *x,
 
 static int64_t block_error_sby(MACROBLOCK *x, BLOCK_SIZE_TYPE bsize,
                                int shift) {
-  const int bwl = b_width_log2(bsize), bhl = b_height_log2(bsize);
+  struct macroblockd_plane *p = &x->e_mbd.plane[0];
+  const int bw = plane_block_width(bsize, p);
+  const int bh = plane_block_height(bsize, p);
   return vp9_block_error(x->plane[0].coeff, x->e_mbd.plane[0].dqcoeff,
-                         16 << (bwl + bhl)) >> shift;
+                         bw * bh) >> shift;
 }
 
 static int64_t block_error_sbuv(MACROBLOCK *x, BLOCK_SIZE_TYPE bsize,
                                 int shift) {
-  const int bwl = b_width_log2(bsize), bhl = b_height_log2(bsize);
   int64_t sum = 0;
   int plane;
 
   for (plane = 1; plane < MAX_MB_PLANE; plane++) {
-    const int subsampling = x->e_mbd.plane[plane].subsampling_x +
-                            x->e_mbd.plane[plane].subsampling_y;
+    struct macroblockd_plane *p = &x->e_mbd.plane[plane];
+    const int bw = plane_block_width(bsize, p);
+    const int bh = plane_block_height(bsize, p);
     sum += vp9_block_error(x->plane[plane].coeff, x->e_mbd.plane[plane].dqcoeff,
-                           16 << (bwl + bhl - subsampling));
+                           bw * bh);
   }
+
   return sum >> shift;
 }
 
@@ -1092,25 +1095,22 @@ static int64_t encode_inter_mb_segment(VP9_COMMON *const cm,
   int k;
   MACROBLOCKD *xd = &x->e_mbd;
   BLOCK_SIZE_TYPE bsize = xd->mode_info_context->mbmi.sb_type;
-  int bwl = b_width_log2(bsize), bw = 1 << bwl;
-  int bhl = b_height_log2(bsize), bh = 1 << bhl;
+  const int bw = plane_block_width(bsize, &xd->plane[0]);
+  const int bh = plane_block_height(bsize, &xd->plane[0]);
   int idx, idy;
   const int src_stride = x->plane[0].src.stride;
-  uint8_t* const src =
-  raster_block_offset_uint8(xd, BLOCK_SIZE_SB8X8, 0, i,
-                            x->plane[0].src.buf, src_stride);
-  int16_t* src_diff =
-  raster_block_offset_int16(xd, BLOCK_SIZE_SB8X8, 0, i,
-                            x->plane[0].src_diff);
+  uint8_t* const src = raster_block_offset_uint8(xd, BLOCK_SIZE_SB8X8, 0, i,
+                                                 x->plane[0].src.buf,
+                                                 src_stride);
+  int16_t* src_diff = raster_block_offset_int16(xd, BLOCK_SIZE_SB8X8, 0, i,
+                                                x->plane[0].src_diff);
   int16_t* coeff = BLOCK_OFFSET(x->plane[0].coeff, 16, i);
-  uint8_t* const pre =
-  raster_block_offset_uint8(xd, BLOCK_SIZE_SB8X8, 0, i,
-                            xd->plane[0].pre[0].buf,
-                            xd->plane[0].pre[0].stride);
-  uint8_t* const dst =
-  raster_block_offset_uint8(xd, BLOCK_SIZE_SB8X8, 0, i,
-                            xd->plane[0].dst.buf,
-                            xd->plane[0].dst.stride);
+  uint8_t* const pre = raster_block_offset_uint8(xd, BLOCK_SIZE_SB8X8, 0, i,
+                                                 xd->plane[0].pre[0].buf,
+                                                 xd->plane[0].pre[0].stride);
+  uint8_t* const dst = raster_block_offset_uint8(xd, BLOCK_SIZE_SB8X8, 0, i,
+                                                 xd->plane[0].dst.buf,
+                                                 xd->plane[0].dst.stride);
   int64_t thisdistortion = 0;
   int thisrate = 0;
 
@@ -1123,7 +1123,7 @@ static int64_t encode_inter_mb_segment(VP9_COMMON *const cm,
                             xd->plane[0].dst.stride,
                             &xd->mode_info_context->bmi[i].as_mv[0],
                             &xd->scale_factor[0],
-                            4 * bw, 4 * bh, 0 /* no avg */, &xd->subpix,
+                            bw, bh, 0 /* no avg */, &xd->subpix,
                             MV_PRECISION_Q3);
 
   // TODO(debargha): Make this work properly with the
@@ -1137,17 +1137,17 @@ static int64_t encode_inter_mb_segment(VP9_COMMON *const cm,
     vp9_build_inter_predictor(second_pre, xd->plane[0].pre[1].stride,
                               dst, xd->plane[0].dst.stride,
                               &xd->mode_info_context->bmi[i].as_mv[1],
-                              &xd->scale_factor[1], 4 * bw, 4 * bh, 1,
+                              &xd->scale_factor[1], bw, bh, 1,
                               &xd->subpix, MV_PRECISION_Q3);
   }
 
-  vp9_subtract_block(4 * bh, 4 * bw, src_diff, 8,
+  vp9_subtract_block(bh, bw, src_diff, 8,
                      src, src_stride,
                      dst, xd->plane[0].dst.stride);
 
   k = i;
-  for (idy = 0; idy < bh; ++idy) {
-    for (idx = 0; idx < bw; ++idx) {
+  for (idy = 0; idy < bh / 4; ++idy) {
+    for (idx = 0; idx < bw / 4; ++idx) {
       k += (idy * 2 + idx);
       src_diff = raster_block_offset_int16(xd, BLOCK_SIZE_SB8X8, 0, k,
                                            x->plane[0].src_diff);
@@ -2233,13 +2233,8 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
                                  int_mv *frame_mv,
                                  int mi_row, int mi_col,
                                  int_mv single_newmv[MAX_REF_FRAMES]) {
-  const int bw = 1 << mi_width_log2(bsize), bh = 1 << mi_height_log2(bsize);
-
   VP9_COMMON *cm = &cpi->common;
   MACROBLOCKD *xd = &x->e_mbd;
-  const enum BlockSize block_size = get_plane_block_size(bsize, &xd->plane[0]);
-  const enum BlockSize uv_block_size = get_plane_block_size(bsize,
-                                                            &xd->plane[1]);
   MB_MODE_INFO *mbmi = &xd->mode_info_context->mbmi;
   const int is_comp_pred = (mbmi->ref_frame[1] > 0);
   const int num_refs = is_comp_pred ? 2 : 1;
@@ -2370,13 +2365,14 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
         int p;
 
         for (p = 0; p < MAX_MB_PLANE; p++) {
-          const int y = (MI_SIZE * bh) >> xd->plane[p].subsampling_y;
-          const int x = (MI_SIZE * bw) >> xd->plane[p].subsampling_x;
+          struct macroblockd_plane *pd = &xd->plane[p];
+          const int bw = plane_block_width(bsize, pd);
+          const int bh = plane_block_height(bsize, pd);
           int i;
 
-          for (i = 0; i < y; i++)
-            vpx_memcpy(&tmp_buf[p][64 * i],
-                       xd->plane[p].dst.buf + i * xd->plane[p].dst.stride, x);
+          for (i = 0; i < bh; i++)
+            vpx_memcpy(&tmp_buf[p][64 * i], pd->dst.buf + i * pd->dst.stride,
+                                   bw);
         }
         pred_exists = 1;
       }
@@ -2394,13 +2390,13 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
     int p;
 
     for (p = 0; p < MAX_MB_PLANE; p++) {
-      const int y = (MI_SIZE * bh) >> xd->plane[p].subsampling_y;
-      const int x = (MI_SIZE * bw) >> xd->plane[p].subsampling_x;
+      struct macroblockd_plane *pd = &xd->plane[p];
+      const int bw = plane_block_width(bsize, pd);
+      const int bh = plane_block_height(bsize, pd);
       int i;
 
-      for (i = 0; i < y; i++)
-        vpx_memcpy(xd->plane[p].dst.buf + i * xd->plane[p].dst.stride,
-                   &tmp_buf[p][64 * i], x);
+      for (i = 0; i < bh; i++)
+        vpx_memcpy(pd->dst.buf + i * pd->dst.stride, &tmp_buf[p][64 * i], bw);
     }
   } else {
     // Handles the special case when a filter that is not in the
@@ -2414,36 +2410,37 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
   if (cpi->active_map_enabled && x->active_ptr[0] == 0)
     x->skip = 1;
   else if (x->encode_breakout) {
+    const enum BlockSize y_size = get_plane_block_size(bsize, &xd->plane[0]);
+    const enum BlockSize uv_size = get_plane_block_size(bsize, &xd->plane[1]);
+
     unsigned int var, sse;
-    int threshold = (xd->plane[0].dequant[1]
-                     * xd->plane[0].dequant[1] >> 4);
+    int threshold = (xd->plane[0].dequant[1] * xd->plane[0].dequant[1] >> 4);
+
 
     if (threshold < x->encode_breakout)
       threshold = x->encode_breakout;
 
-    var = cpi->fn_ptr[block_size].vf(x->plane[0].src.buf,
-                                     x->plane[0].src.stride,
-                                     xd->plane[0].dst.buf,
-                                     xd->plane[0].dst.stride,
-                                     &sse);
+    var = cpi->fn_ptr[y_size].vf(x->plane[0].src.buf, x->plane[0].src.stride,
+                                 xd->plane[0].dst.buf, xd->plane[0].dst.stride,
+                                 &sse);
 
     if ((int)sse < threshold) {
       unsigned int q2dc = xd->plane[0].dequant[0];
-      /* If there is no codeable 2nd order dc
-         or a very small uniform pixel change change */
+      // If there is no codeable 2nd order dc
+      // or a very small uniform pixel change change
       if ((sse - var < q2dc * q2dc >> 4) ||
           (sse / 2 > var && sse - var < 64)) {
         // Check u and v to make sure skip is ok
         int sse2;
         unsigned int sse2u, sse2v;
-        var = cpi->fn_ptr[uv_block_size].vf(x->plane[1].src.buf,
-                                            x->plane[1].src.stride,
-                                            xd->plane[1].dst.buf,
-                                            xd->plane[1].dst.stride, &sse2u);
-        var = cpi->fn_ptr[uv_block_size].vf(x->plane[2].src.buf,
-                                            x->plane[1].src.stride,
-                                            xd->plane[2].dst.buf,
-                                            xd->plane[1].dst.stride, &sse2v);
+        var = cpi->fn_ptr[uv_size].vf(x->plane[1].src.buf,
+                                      x->plane[1].src.stride,
+                                      xd->plane[1].dst.buf,
+                                      xd->plane[1].dst.stride, &sse2u);
+        var = cpi->fn_ptr[uv_size].vf(x->plane[2].src.buf,
+                                      x->plane[2].src.stride,
+                                      xd->plane[2].dst.buf,
+                                      xd->plane[2].dst.stride, &sse2v);
         sse2 = sse2u + sse2v;
 
         if (sse2 * 2 < threshold) {
@@ -2451,7 +2448,7 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
           *distortion = sse + sse2;
           *rate2 = 500;
 
-          /* for best_yrd calculation */
+          // for best_yrd calculation
           *rate_uv = 0;
           *distortion_uv = sse2;
 
