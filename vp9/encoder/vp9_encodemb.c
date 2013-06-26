@@ -78,7 +78,6 @@ void vp9_subtract_sb(MACROBLOCK *x, BLOCK_SIZE_TYPE bsize) {
 
 
 #define RDTRUNC(RM,DM,R,D) ( (128+(R)*(RM)) & 0xFF )
-#define RDTRUNC_8x8(RM,DM,R,D) ( (128+(R)*(RM)) & 0xFF )
 typedef struct vp9_token_state vp9_token_state;
 
 struct vp9_token_state {
