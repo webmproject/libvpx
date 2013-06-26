@@ -754,11 +754,11 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, MODE_INFO *m,
 #ifdef ENTROPY_STATS
             active_section = 11;
 #endif
-            vp9_encode_mv(bc, &blockmv.as_mv, &mi->best_mv.as_mv,
+            vp9_encode_mv(cpi, bc, &blockmv.as_mv, &mi->best_mv.as_mv,
                           nmvc, xd->allow_high_precision_mv);
 
             if (mi->ref_frame[1] > INTRA_FRAME)
-              vp9_encode_mv(bc,
+              vp9_encode_mv(cpi, bc,
                             &cpi->mb.partition_info->bmi[j].second_mv.as_mv,
                             &mi->best_second_mv.as_mv,
                             nmvc, xd->allow_high_precision_mv);
@@ -769,12 +769,12 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, MODE_INFO *m,
 #ifdef ENTROPY_STATS
       active_section = 5;
 #endif
-      vp9_encode_mv(bc,
+      vp9_encode_mv(cpi, bc,
                     &mi->mv[0].as_mv, &mi->best_mv.as_mv,
                     nmvc, xd->allow_high_precision_mv);
 
       if (mi->ref_frame[1] > INTRA_FRAME)
-        vp9_encode_mv(bc,
+        vp9_encode_mv(cpi, bc,
                       &mi->mv[1].as_mv, &mi->best_second_mv.as_mv,
                       nmvc, xd->allow_high_precision_mv);
     }

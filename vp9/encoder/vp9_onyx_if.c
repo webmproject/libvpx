@@ -671,6 +671,12 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
     cpi->mode_chosen_counts[i] = 0;
   }
 
+  // Initialize cpi->max_mv_magnitude if appropriate.
+  if ((cpi->common.frame_type == KEY_FRAME) || cpi->common.intra_only ||
+    (cpi->common.show_frame == 0)) {
+    cpi->max_mv_magnitude = 0;
+  }
+
   // best quality defaults
   sf->RD = 1;
   sf->search_method = NSTEP;
@@ -681,6 +687,7 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
   sf->iterative_sub_pixel = 1;
   sf->optimize_coefficients = !cpi->oxcf.lossless;
   sf->reduce_first_step_size = 0;
+  sf->auto_mv_step_size = 0;
   sf->max_step_search_steps = MAX_MVSEARCH_STEPS;
   sf->comp_inter_joint_search_thresh = BLOCK_SIZE_AB4X4;
   sf->adpative_rd_thresh = 0;
@@ -716,35 +723,36 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
 #else
       sf->static_segmentation = 0;
 #endif
-      sf->comp_inter_joint_search_thresh = BLOCK_SIZE_SB8X8;
+      sf->comp_inter_joint_search_thresh = BLOCK_SIZE_MB16X16;
+      sf->auto_mv_step_size = 1;
+      sf->use_avoid_tested_higherror = 1;
       sf->adpative_rd_thresh = 1;
+
       if (speed == 1) {
         sf->comp_inter_joint_search_thresh = BLOCK_SIZE_TYPES;
-        sf->optimize_coefficients = 0;
-        sf->reduce_first_step_size = 1;
-        sf->use_avoid_tested_higherror = 1;
-        sf->adjust_thresholds_by_speed = 1;
         sf->use_largest_txform = !(cpi->common.frame_type == KEY_FRAME ||
                                    cpi->common.intra_only ||
                                    cpi->common.show_frame == 0);
       }
       if (speed == 2) {
-        sf->comp_inter_joint_search_thresh = BLOCK_SIZE_SB8X8;
+        sf->adjust_thresholds_by_speed = 1;
+        sf->comp_inter_joint_search_thresh = BLOCK_SIZE_TYPES;
+        sf->reduce_first_step_size = 1;
+        sf->optimize_coefficients = 0;
         sf->use_lastframe_partitioning = 1;
-        sf->reduce_first_step_size = 0;
       }
       if (speed == 3) {
-        sf->comp_inter_joint_search_thresh = BLOCK_SIZE_SB8X8;
+        sf->comp_inter_joint_search_thresh = BLOCK_SIZE_TYPES;
         sf->partition_by_variance = 1;
-        sf->reduce_first_step_size = 0;
+        sf->reduce_first_step_size = 1;
       }
       if (speed == 4) {
-        sf->reduce_first_step_size = 0;
-        sf->comp_inter_joint_search_thresh = BLOCK_SIZE_SB8X8;
+        sf->reduce_first_step_size = 1;
+        sf->comp_inter_joint_search_thresh = BLOCK_SIZE_TYPES;
         sf->use_one_partition_size_always = 1;
         sf->always_this_block_size = BLOCK_SIZE_MB16X16;
       }
-      if (speed == 2) {
+/*      if (speed == 2) {
         sf->reduce_first_step_size = 0;
         sf->comp_inter_joint_search_thresh = BLOCK_SIZE_SB8X8;
         sf->use_partitions_less_than = 1;
@@ -755,7 +763,7 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
         sf->comp_inter_joint_search_thresh = BLOCK_SIZE_SB8X8;
         sf->use_partitions_greater_than = 1;
         sf->greater_than_block_size = BLOCK_SIZE_SB8X8;
-      }
+      }*/
 
      break;
 

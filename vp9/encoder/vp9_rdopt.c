@@ -228,7 +228,10 @@ void vp9_initialize_rd_consts(VP9_COMP *cpi, int qindex) {
         }
         cpi->rd_baseline_thresh[bsize][i] = cpi->rd_threshes[bsize][i];
 
-        cpi->rd_thresh_freq_fact[bsize][i] = MAX_RD_THRESH_FREQ_FACT;
+        if (cpi->sf.adpative_rd_thresh)
+          cpi->rd_thresh_freq_fact[bsize][i] = MAX_RD_THRESH_FREQ_FACT;
+        else
+          cpi->rd_thresh_freq_fact[bsize][i] = BASE_RD_THRESH_FREQ_FACT;
       }
     }
   } else {
@@ -248,7 +251,11 @@ void vp9_initialize_rd_consts(VP9_COMP *cpi, int qindex) {
           cpi->rd_threshes[bsize][i] = INT_MAX;
         }
         cpi->rd_baseline_thresh[bsize][i] = cpi->rd_threshes[bsize][i];
-        cpi->rd_thresh_freq_fact[bsize][i] = MAX_RD_THRESH_FREQ_FACT;
+
+        if (cpi->sf.adpative_rd_thresh)
+          cpi->rd_thresh_freq_fact[bsize][i] = MAX_RD_THRESH_FREQ_FACT;
+        else
+          cpi->rd_thresh_freq_fact[bsize][i] = BASE_RD_THRESH_FREQ_FACT;
       }
     }
   }
@@ -2018,8 +2025,14 @@ static void single_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
 
   vp9_clamp_mv_min_max(x, &ref_mv);
 
-  step_param = vp9_init_search_range(
-                 cpi, MIN(cpi->common.width, cpi->common.height));
+  // Work out the size of the first step in the mv step search.
+  // 0 here is maximum length first step. 1 is MAX >> 1 etc.
+  if (cpi->sf.auto_mv_step_size && cpi->common.show_frame) {
+    step_param = vp9_init_search_range(cpi, cpi->max_mv_magnitude);
+  } else {
+    step_param = vp9_init_search_range(
+                   cpi, MIN(cpi->common.width, cpi->common.height));
+  }
 
   // mvp_full.as_int = ref_mv[0].as_int;
   mvp_full.as_int =

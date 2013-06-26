@@ -591,7 +591,8 @@ void vp9_write_nmv_probs(VP9_COMP* const cpi, int usehp, vp9_writer* const bc) {
   }
 }
 
-void vp9_encode_mv(vp9_writer* w, const MV* mv, const MV* ref,
+void vp9_encode_mv(VP9_COMP* cpi, vp9_writer* w,
+                   const MV* mv, const MV* ref,
                    const nmv_context* mvctx, int usehp) {
   const MV diff = {mv->row - ref->row,
                    mv->col - ref->col};
@@ -604,6 +605,13 @@ void vp9_encode_mv(vp9_writer* w, const MV* mv, const MV* ref,
 
   if (mv_joint_horizontal(j))
     encode_mv_component(w, diff.col, &mvctx->comps[1], usehp);
+
+  // If auto_mv_step_size is enabled and it is an arf/non shown frame
+  // then keep track of the largest motion vector component used.
+  if (cpi->sf.auto_mv_step_size && !cpi->common.show_frame) {
+    cpi->max_mv_magnitude = MAX((MAX(abs(mv->row), abs(mv->col)) >> 3),
+                                cpi->max_mv_magnitude);
+  }
 }
 
 void vp9_build_nmv_cost_table(int *mvjoint,

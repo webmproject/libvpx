@@ -211,6 +211,7 @@ typedef struct {
   int thresh_mult[MAX_MODES];
   int max_step_search_steps;
   int reduce_first_step_size;
+  int auto_mv_step_size;
   int optimize_coefficients;
   int search_best_filter;
   int static_segmentation;
@@ -470,6 +471,8 @@ typedef struct VP9_COMP {
 
   SPEED_FEATURES sf;
   int error_bins[1024];
+
+  unsigned int max_mv_magnitude;
 
   // Data used for real time conferencing mode to help determine if it would be good to update the gf
   int inter_zz_count;
