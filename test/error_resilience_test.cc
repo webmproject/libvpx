@@ -50,10 +50,6 @@ class ErrorResilienceTest : public ::libvpx_test::EncoderTest,
     mismatch_nframes_ = 0;
   }
 
-  virtual bool Continue() const {
-    return !HasFatalFailure() && !abort_;
-  }
-
   virtual void PSNRPktHook(const vpx_codec_cx_pkt_t *pkt) {
     psnr_ += pkt->data.psnr.psnr[0];
     nframes_++;
