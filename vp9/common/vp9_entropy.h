@@ -174,10 +174,6 @@ typedef unsigned int vp9_coeff_count_model[REF_TYPES][COEF_BANDS]
 typedef unsigned int vp9_coeff_stats_model[REF_TYPES][COEF_BANDS]
                                           [PREV_COEF_CONTEXTS]
                                           [UNCONSTRAINED_NODES][2];
-extern void vp9_full_to_model_count(unsigned int *model_count,
-                                    unsigned int *full_count);
-extern void vp9_full_to_model_counts(
-    vp9_coeff_count_model *model_count, vp9_coeff_count *full_count);
 
 void vp9_model_to_full_probs(const vp9_prob *model, vp9_prob *full);
 

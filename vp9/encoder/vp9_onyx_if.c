@@ -2393,6 +2393,32 @@ static void release_scaled_references(VP9_COMP *cpi) {
     cm->fb_idx_ref_cnt[cpi->scaled_ref_idx[i]]--;
 }
 
+static void full_to_model_count(unsigned int *model_count,
+                                unsigned int *full_count) {
+  int n;
+  model_count[ZERO_TOKEN] = full_count[ZERO_TOKEN];
+  model_count[ONE_TOKEN] = full_count[ONE_TOKEN];
+  model_count[TWO_TOKEN] = full_count[TWO_TOKEN];
+  for (n = THREE_TOKEN; n < DCT_EOB_TOKEN; ++n)
+    model_count[TWO_TOKEN] += full_count[n];
+  model_count[DCT_EOB_MODEL_TOKEN] = full_count[DCT_EOB_TOKEN];
+}
+
+static void full_to_model_counts(
+    vp9_coeff_count_model *model_count, vp9_coeff_count *full_count) {
+  int i, j, k, l;
+  for (i = 0; i < BLOCK_TYPES; ++i)
+    for (j = 0; j < REF_TYPES; ++j)
+      for (k = 0; k < COEF_BANDS; ++k)
+        for (l = 0; l < PREV_COEF_CONTEXTS; ++l) {
+          if (l >= 3 && k == 0)
+            continue;
+          full_to_model_count(model_count[i][j][k][l],
+                              full_count[i][j][k][l]);
+        }
+}
+
+
 static void encode_frame_to_data_rate(VP9_COMP *cpi,
                                       unsigned long *size,
                                       unsigned char *dest,
@@ -3040,8 +3066,8 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
   update_reference_frames(cpi);
 
   for (t = TX_4X4; t <= TX_32X32; t++)
-    vp9_full_to_model_counts(cpi->common.fc.coef_counts[t],
-                             cpi->coef_counts[t]);
+    full_to_model_counts(cpi->common.fc.coef_counts[t],
+                         cpi->coef_counts[t]);
   if (!cpi->common.error_resilient_mode &&
       !cpi->common.frame_parallel_decoding_mode) {
     vp9_adapt_coef_probs(&cpi->common);
