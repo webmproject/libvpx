@@ -534,9 +534,8 @@ static void set_offsets(VP9_COMP *cpi, int mi_row, int mi_col,
   if (xd->segmentation_enabled) {
     uint8_t *map = xd->update_mb_segmentation_map ? cpi->segmentation_map
                                                   : cm->last_frame_seg_map;
-    mbmi->segment_id = vp9_get_pred_mi_segid(cm, bsize, map, mi_row, mi_col);
+    mbmi->segment_id = vp9_get_segment_id(cm, map, bsize, mi_row, mi_col);
 
-    assert(mbmi->segment_id <= (MAX_MB_SEGMENTS-1));
     vp9_mb_init_quantizer(cpi, x);
 
     if (xd->segmentation_enabled && cpi->seg0_cnt > 0

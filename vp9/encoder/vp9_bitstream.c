@@ -572,13 +572,11 @@ static void write_sb_mv_ref(vp9_writer *bc, MB_PREDICTION_MODE m,
               vp9_sb_mv_ref_encoding_array - NEARESTMV + m);
 }
 
-// This function writes the current macro block's segnment id to the bitstream
-// It should only be called if a segment map update is indicated.
-static void write_mb_segid(vp9_writer *bc,
-                           const MB_MODE_INFO *mi, const MACROBLOCKD *xd) {
+
+static void write_segment_id(vp9_writer *w, const MACROBLOCKD *xd,
+                             int segment_id) {
   if (xd->segmentation_enabled && xd->update_mb_segmentation_map)
-    treed_write(bc, vp9_segment_tree, xd->mb_segment_tree_probs,
-                mi->segment_id, 3);
+    treed_write(w, vp9_segment_tree, xd->mb_segment_tree_probs, segment_id, 3);
 }
 
 // This function encodes the reference frame
@@ -653,10 +651,10 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, MODE_INFO *m,
 
       // If the mb segment id wasn't predicted code explicitly
       if (!prediction_flag)
-        write_mb_segid(bc, mi, &cpi->mb.e_mbd);
+        write_segment_id(bc, xd, mi->segment_id);
     } else {
       // Normal unpredicted coding
-      write_mb_segid(bc, mi, &cpi->mb.e_mbd);
+        write_segment_id(bc, xd, mi->segment_id);
     }
   }
 
@@ -792,7 +790,7 @@ static void write_mb_modes_kf(const VP9_COMP *cpi,
   int skip_coeff;
 
   if (xd->update_mb_segmentation_map)
-    write_mb_segid(bc, &m->mbmi, xd);
+    write_segment_id(bc, xd, m->mbmi.segment_id);
 
   if (vp9_segfeature_active(xd, segment_id, SEG_LVL_SKIP)) {
     skip_coeff = 1;

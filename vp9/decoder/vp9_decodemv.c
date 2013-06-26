@@ -41,7 +41,7 @@ static MB_PREDICTION_MODE read_intra_mode(vp9_reader *r, const vp9_prob *p) {
   return treed_read(r, vp9_intra_mode_tree, p);
 }
 
-static int read_mb_segid(vp9_reader *r, MACROBLOCKD *xd) {
+static int read_segment_id(vp9_reader *r, MACROBLOCKD *xd) {
   return treed_read(r, vp9_segment_tree, xd->mb_segment_tree_probs);
 }
 
@@ -84,21 +84,34 @@ static TX_SIZE get_txfm_size(VP9D_COMP *pbi, TXFM_MODE txfm_mode,
     return TX_4X4;
 }
 
-static void set_segment_id(VP9_COMMON *cm, MB_MODE_INFO *mbmi,
+static void set_segment_id(VP9_COMMON *cm, BLOCK_SIZE_TYPE bsize,
                            int mi_row, int mi_col, int segment_id) {
-  const int mi_index = mi_row * cm->mi_cols + mi_col;
-  const BLOCK_SIZE_TYPE sb_type = mbmi->sb_type;
-  const int bw = 1 << mi_width_log2(sb_type);
-  const int bh = 1 << mi_height_log2(sb_type);
-  const int ymis = MIN(cm->mi_rows - mi_row, bh);
+  const int mi_offset = mi_row * cm->mi_cols + mi_col;
+  const int bw = 1 << mi_width_log2(bsize);
+  const int bh = 1 << mi_height_log2(bsize);
   const int xmis = MIN(cm->mi_cols - mi_col, bw);
+  const int ymis = MIN(cm->mi_rows - mi_row, bh);
   int x, y;
 
-  for (y = 0; y < ymis; y++) {
-    for (x = 0; x < xmis; x++) {
-      const int index = mi_index + (y * cm->mi_cols + x);
-      cm->last_frame_seg_map[index] = segment_id;
-    }
+  assert(segment_id >= 0 && segment_id < MAX_MB_SEGMENTS);
+
+  for (y = 0; y < ymis; y++)
+    for (x = 0; x < xmis; x++)
+      cm->last_frame_seg_map[mi_offset + y * cm->mi_cols + x] = segment_id;
+}
+
+static int read_intra_segment_id(VP9D_COMP *pbi, int mi_row, int mi_col,
+                                 vp9_reader *r) {
+  VP9_COMMON *const cm = &pbi->common;
+  MACROBLOCKD *const xd = &pbi->mb;
+  const BLOCK_SIZE_TYPE bsize = xd->mode_info_context->mbmi.sb_type;
+
+  if (xd->segmentation_enabled && xd->update_mb_segmentation_map) {
+    const int segment_id = read_segment_id(r, xd);
+    set_segment_id(cm, bsize, mi_row, mi_col, segment_id);
+    return segment_id;
+  } else {
+    return 0;
   }
 }
 
@@ -109,13 +122,7 @@ static void kfread_modes(VP9D_COMP *pbi, MODE_INFO *m,
   MACROBLOCKD *const xd = &pbi->mb;
   const int mis = cm->mode_info_stride;
 
-  // Read segmentation map if it is being updated explicitly this frame
-  m->mbmi.segment_id = 0;
-  if (xd->segmentation_enabled && xd->update_mb_segmentation_map) {
-    m->mbmi.segment_id = read_mb_segid(r, xd);
-    set_segment_id(cm, &m->mbmi, mi_row, mi_col, m->mbmi.segment_id);
-  }
-
+  m->mbmi.segment_id = read_intra_segment_id(pbi, mi_row, mi_col, r);
   m->mbmi.mb_skip_coeff = vp9_segfeature_active(xd, m->mbmi.segment_id,
                                                 SEG_LVL_SKIP);
   if (!m->mbmi.mb_skip_coeff) {
@@ -401,46 +408,32 @@ static void mb_mode_mv_init(VP9D_COMP *pbi, vp9_reader *r) {
   }
 }
 
-// This function either reads the segment id for the current macroblock from
-// the bitstream or if the value is temporally predicted asserts the predicted
-// value
-static int read_mb_segment_id(VP9D_COMP *pbi, int mi_row, int mi_col,
-                              vp9_reader *r) {
+static int read_inter_segment_id(VP9D_COMP *pbi, int mi_row, int mi_col,
+                                 vp9_reader *r) {
   VP9_COMMON *const cm = &pbi->common;
   MACROBLOCKD *const xd = &pbi->mb;
-  MODE_INFO *const mi = xd->mode_info_context;
-  MB_MODE_INFO *const mbmi = &mi->mbmi;
+  const BLOCK_SIZE_TYPE bsize = xd->mode_info_context->mbmi.sb_type;
+  const int pred_segment_id = vp9_get_segment_id(cm, cm->last_frame_seg_map,
+                                                 bsize, mi_row, mi_col);
+  int segment_id;
 
   if (!xd->segmentation_enabled)
     return 0;  // Default for disabled segmentation
 
-  if (xd->update_mb_segmentation_map) {
-    int segment_id;
+  if (!xd->update_mb_segmentation_map)
+    return pred_segment_id;
 
-    if (cm->temporal_update) {
-      // Temporal coding of the segment id for this mb is enabled.
-      // Get the context based probability for reading the
-      // prediction status flag
-      const vp9_prob pred_prob = vp9_get_pred_prob(cm, xd, PRED_SEG_ID);
-      const int pred_flag = vp9_read(r, pred_prob);
-      vp9_set_pred_flag(xd, PRED_SEG_ID, pred_flag);
-
-      // If the value is flagged as correctly predicted
-      // then use the predicted value, otherwise decode it explicitly
-      segment_id = pred_flag ? vp9_get_pred_mi_segid(cm, mbmi->sb_type,
-                                                     cm->last_frame_seg_map,
-                                                     mi_row, mi_col)
-                             : read_mb_segid(r, xd);
-    } else {
-      segment_id = read_mb_segid(r, xd);  // Normal unpredicted coding mode
-    }
-
-    set_segment_id(cm, mbmi, mi_row, mi_col, segment_id);  // Side effect
-    return segment_id;
+  if (cm->temporal_update) {
+    const vp9_prob pred_prob = vp9_get_pred_prob(cm, xd, PRED_SEG_ID);
+    const int pred_flag = vp9_read(r, pred_prob);
+    vp9_set_pred_flag(xd, PRED_SEG_ID, pred_flag);
+    segment_id = pred_flag ? pred_segment_id
+                           : read_segment_id(r, xd);
   } else {
-    return vp9_get_pred_mi_segid(cm, mbmi->sb_type, cm->last_frame_seg_map,
-                                 mi_row, mi_col);
+    segment_id = read_segment_id(r, xd);
   }
+  set_segment_id(cm, bsize, mi_row, mi_col, segment_id);
+  return segment_id;
 }
 
 
@@ -572,7 +565,7 @@ static void read_mb_modes_mv(VP9D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
   mb_to_right_edge = xd->mb_to_right_edge + RIGHT_BOTTOM_MARGIN;
 
   // Read the macroblock segment id.
-  mbmi->segment_id = read_mb_segment_id(pbi, mi_row, mi_col, r);
+  mbmi->segment_id = read_inter_segment_id(pbi, mi_row, mi_col, r);
 
   mbmi->mb_skip_coeff = vp9_segfeature_active(xd, mbmi->segment_id,
                                               SEG_LVL_SKIP);
