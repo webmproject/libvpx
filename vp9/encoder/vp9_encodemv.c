@@ -184,6 +184,80 @@ static int update_mv(vp9_writer *bc, const unsigned int ct[2],
   }
 }
 
+static void counts_to_nmv_context(
+    nmv_context_counts *nmv_count,
+    nmv_context *prob,
+    int usehp,
+    unsigned int (*branch_ct_joint)[2],
+    unsigned int (*branch_ct_sign)[2],
+    unsigned int (*branch_ct_classes)[MV_CLASSES - 1][2],
+    unsigned int (*branch_ct_class0)[CLASS0_SIZE - 1][2],
+    unsigned int (*branch_ct_bits)[MV_OFFSET_BITS][2],
+    unsigned int (*branch_ct_class0_fp)[CLASS0_SIZE][4 - 1][2],
+    unsigned int (*branch_ct_fp)[4 - 1][2],
+    unsigned int (*branch_ct_class0_hp)[2],
+    unsigned int (*branch_ct_hp)[2]) {
+  int i, j, k;
+  vp9_counts_process(nmv_count, usehp);
+  vp9_tree_probs_from_distribution(vp9_mv_joint_tree,
+                                   prob->joints,
+                                   branch_ct_joint,
+                                   nmv_count->joints, 0);
+  for (i = 0; i < 2; ++i) {
+    const uint32_t s0 = nmv_count->comps[i].sign[0];
+    const uint32_t s1 = nmv_count->comps[i].sign[1];
+
+    prob->comps[i].sign = get_binary_prob(s0, s1);
+    branch_ct_sign[i][0] = s0;
+    branch_ct_sign[i][1] = s1;
+    vp9_tree_probs_from_distribution(vp9_mv_class_tree,
+                                     prob->comps[i].classes,
+                                     branch_ct_classes[i],
+                                     nmv_count->comps[i].classes, 0);
+    vp9_tree_probs_from_distribution(vp9_mv_class0_tree,
+                                     prob->comps[i].class0,
+                                     branch_ct_class0[i],
+                                     nmv_count->comps[i].class0, 0);
+    for (j = 0; j < MV_OFFSET_BITS; ++j) {
+      const uint32_t b0 = nmv_count->comps[i].bits[j][0];
+      const uint32_t b1 = nmv_count->comps[i].bits[j][1];
+
+      prob->comps[i].bits[j] = get_binary_prob(b0, b1);
+      branch_ct_bits[i][j][0] = b0;
+      branch_ct_bits[i][j][1] = b1;
+    }
+  }
+  for (i = 0; i < 2; ++i) {
+    for (k = 0; k < CLASS0_SIZE; ++k) {
+      vp9_tree_probs_from_distribution(vp9_mv_fp_tree,
+                                       prob->comps[i].class0_fp[k],
+                                       branch_ct_class0_fp[i][k],
+                                       nmv_count->comps[i].class0_fp[k], 0);
+    }
+    vp9_tree_probs_from_distribution(vp9_mv_fp_tree,
+                                     prob->comps[i].fp,
+                                     branch_ct_fp[i],
+                                     nmv_count->comps[i].fp, 0);
+  }
+  if (usehp) {
+    for (i = 0; i < 2; ++i) {
+      const uint32_t c0_hp0 = nmv_count->comps[i].class0_hp[0];
+      const uint32_t c0_hp1 = nmv_count->comps[i].class0_hp[1];
+      const uint32_t hp0 = nmv_count->comps[i].hp[0];
+      const uint32_t hp1 = nmv_count->comps[i].hp[1];
+
+      prob->comps[i].class0_hp = get_binary_prob(c0_hp0, c0_hp1);
+      branch_ct_class0_hp[i][0] = c0_hp0;
+      branch_ct_class0_hp[i][1] = c0_hp1;
+
+      prob->comps[i].hp = get_binary_prob(hp0, hp1);
+      branch_ct_hp[i][0] = hp0;
+      branch_ct_hp[i][1] = hp1;
+    }
+  }
+}
+
+
 void print_nmvcounts(nmv_context_counts tnmvcounts) {
   int i, j, k;
   printf("\nCounts =\n  { ");
@@ -249,11 +323,11 @@ void print_nmvstats() {
   unsigned int branch_ct_class0_hp[2][2];
   unsigned int branch_ct_hp[2][2];
   int i, j, k;
-  vp9_counts_to_nmv_context(&tnmvcounts, &prob, 1,
-                            branch_ct_joint, branch_ct_sign, branch_ct_classes,
-                            branch_ct_class0, branch_ct_bits,
-                            branch_ct_class0_fp, branch_ct_fp,
-                            branch_ct_class0_hp, branch_ct_hp);
+  counts_to_nmv_context(&tnmvcounts, &prob, 1,
+                        branch_ct_joint, branch_ct_sign, branch_ct_classes,
+                        branch_ct_class0, branch_ct_bits,
+                        branch_ct_class0_fp, branch_ct_fp,
+                        branch_ct_class0_hp, branch_ct_hp);
 
   printf("\nCounts =\n  { ");
   for (j = 0; j < MV_JOINTS; ++j)
@@ -400,11 +474,11 @@ void vp9_write_nmv_probs(VP9_COMP* const cpi, int usehp, vp9_writer* const bc) {
   if (!cpi->dummy_packing)
     add_nmvcount(&tnmvcounts, &cpi->NMVcount);
 #endif
-  vp9_counts_to_nmv_context(&cpi->NMVcount, &prob, usehp,
-                            branch_ct_joint, branch_ct_sign, branch_ct_classes,
-                            branch_ct_class0, branch_ct_bits,
-                            branch_ct_class0_fp, branch_ct_fp,
-                            branch_ct_class0_hp, branch_ct_hp);
+  counts_to_nmv_context(&cpi->NMVcount, &prob, usehp,
+                        branch_ct_joint, branch_ct_sign, branch_ct_classes,
+                        branch_ct_class0, branch_ct_bits,
+                        branch_ct_class0_fp, branch_ct_fp,
+                        branch_ct_class0_hp, branch_ct_hp);
   /* write updates if they help */
 #ifdef MV_GROUP_UPDATE
   for (j = 0; j < MV_JOINTS - 1; ++j) {

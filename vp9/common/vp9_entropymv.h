@@ -124,19 +124,7 @@ typedef struct {
 void vp9_inc_mv(const MV *mv, const MV *ref, nmv_context_counts *mvctx,
                 int usehp);
 extern const nmv_context vp9_default_nmv_context;
-void vp9_counts_to_nmv_context(
-    nmv_context_counts *NMVcount,
-    nmv_context *prob,
-    int usehp,
-    unsigned int (*branch_ct_joint)[2],
-    unsigned int (*branch_ct_sign)[2],
-    unsigned int (*branch_ct_classes)[MV_CLASSES - 1][2],
-    unsigned int (*branch_ct_class0)[CLASS0_SIZE - 1][2],
-    unsigned int (*branch_ct_bits)[MV_OFFSET_BITS][2],
-    unsigned int (*branch_ct_class0_fp)[CLASS0_SIZE][4 - 1][2],
-    unsigned int (*branch_ct_fp)[4 - 1][2],
-    unsigned int (*branch_ct_class0_hp)[2],
-    unsigned int (*branch_ct_hp)[2]);
+
 void vp9_counts_process(nmv_context_counts *NMVcount, int usehp);
 
 #endif  // VP9_COMMON_VP9_ENTROPYMV_H_
