@@ -190,7 +190,9 @@ class EncoderTest {
   virtual void PSNRPktHook(const vpx_codec_cx_pkt_t *pkt) {}
 
   // Hook to determine whether the encode loop should continue.
-  virtual bool Continue() const { return !abort_; }
+  virtual bool Continue() const {
+    return !(::testing::Test::HasFatalFailure() || abort_);
+  }
 
   const CodecFactory   *codec_;
   // Hook to determine whether to decode frame after encoding

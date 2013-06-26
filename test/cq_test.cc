@@ -42,10 +42,6 @@ class CQTest : public ::libvpx_test::EncoderTest,
     n_frames_ = 0;
   }
 
-  virtual bool Continue() const {
-    return !HasFatalFailure() && !abort_;
-  }
-
   virtual void PreEncodeFrameHook(libvpx_test::VideoSource *video,
                                   libvpx_test::Encoder *encoder) {
     if (video->frame() == 1) {
