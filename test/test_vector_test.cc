@@ -149,6 +149,7 @@ class TestVectorTest : public ::libvpx_test::DecoderTest,
 
   virtual void DecompressedFrameHook(const vpx_image_t& img,
                                      const unsigned int frame_number) {
+    ASSERT_TRUE(md5_file_ != NULL);
     char expected_md5[33];
     char junk[128];
 

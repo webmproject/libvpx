@@ -99,7 +99,7 @@ class WebMVideoSource : public CompressedVideoSource {
 
   virtual void Begin() {
     input_file_ = OpenTestDataFile(file_name_);
-    ASSERT_TRUE(input_file_) << "Input file open failed. Filename: "
+    ASSERT_TRUE(input_file_ != NULL) << "Input file open failed. Filename: "
         << file_name_;
 
     nestegg_io io = {nestegg_read_cb, nestegg_seek_cb, nestegg_tell_cb,
@@ -130,6 +130,7 @@ class WebMVideoSource : public CompressedVideoSource {
   }
 
   void FillFrame() {
+    ASSERT_TRUE(input_file_ != NULL);
     if (chunk_ >= chunks_) {
       unsigned int track;
 
