@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAbn//8II\u003d",
+        "filename": "vp9/common/vp9_reconintra.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 303,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2013-06-26T23:43:57Z",
+      "side": 1,
+      "message": "It looks like ref and ref_stride were used in .h file, maybe that pair are less confusing, as src can be thought as the source frame buffer.",
+      "revId": "e497b54379e5ab305f7715a8020f86219f8bc6b3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAbn//8IA\u003d",
+        "filename": "vp9/encoder/vp9_onyx_int.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 219,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2013-06-26T23:43:57Z",
+      "side": 1,
+      "message": "does this do anything in this commit? or does it belong to another commit?",
+      "revId": "e497b54379e5ab305f7715a8020f86219f8bc6b3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
