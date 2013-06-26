@@ -20,6 +20,7 @@ extern "C" {
 
 #include "acm_random.h"
 #include "vpx/vpx_integer.h"
+#include "vpx_ports/mem.h"
 
 using libvpx_test::ACMRandom;
 
@@ -77,8 +78,8 @@ class FwdTrans4x4Test : public ::testing::TestWithParam<int> {
 
 TEST_P(FwdTrans4x4Test, SignBiasCheck) {
   ACMRandom rnd(ACMRandom::DeterministicSeed());
-  int16_t test_input_block[16];
-  int16_t test_output_block[16];
+  DECLARE_ALIGNED_ARRAY(16, int16_t, test_input_block, 16);
+  DECLARE_ALIGNED_ARRAY(16, int16_t, test_output_block, 16);
   const int pitch = 8;
   int count_sign_block[16][2];
   const int count_test_block = 1000000;
@@ -140,9 +141,10 @@ TEST_P(FwdTrans4x4Test, RoundTripErrorCheck) {
   double total_error = 0;
   const int count_test_block = 1000000;
   for (int i = 0; i < count_test_block; ++i) {
-    int16_t test_input_block[16];
-    int16_t test_temp_block[16];
-    uint8_t dst[16], src[16];
+    DECLARE_ALIGNED_ARRAY(16, int16_t, test_input_block, 16);
+    DECLARE_ALIGNED_ARRAY(16, int16_t, test_temp_block, 16);
+    DECLARE_ALIGNED_ARRAY(16, uint8_t, dst, 16);
+    DECLARE_ALIGNED_ARRAY(16, uint8_t, src, 16);
 
     for (int j = 0; j < 16; ++j) {
       src[j] = rnd.Rand8();

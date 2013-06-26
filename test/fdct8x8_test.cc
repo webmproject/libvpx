@@ -13,6 +13,7 @@
 #include <string.h>
 
 #include "third_party/googletest/src/include/gtest/gtest.h"
+#include "vpx_ports/mem.h"
 
 extern "C" {
 #include "vp9_rtcd.h"
@@ -81,8 +82,8 @@ class FwdTrans8x8Test : public ::testing::TestWithParam<int> {
 
 TEST_P(FwdTrans8x8Test, SignBiasCheck) {
   ACMRandom rnd(ACMRandom::DeterministicSeed());
-  int16_t test_input_block[64];
-  int16_t test_output_block[64];
+  DECLARE_ALIGNED_ARRAY(16, int16_t, test_input_block, 64);
+  DECLARE_ALIGNED_ARRAY(16, int16_t, test_output_block, 64);
   const int pitch = 16;
   int count_sign_block[64][2];
   const int count_test_block = 100000;
@@ -152,9 +153,10 @@ TEST_P(FwdTrans8x8Test, RoundTripErrorCheck) {
   double total_error = 0;
   const int count_test_block = 100000;
   for (int i = 0; i < count_test_block; ++i) {
-    int16_t test_input_block[64];
-    int16_t test_temp_block[64];
-    uint8_t dst[64], src[64];
+    DECLARE_ALIGNED_ARRAY(16, int16_t, test_input_block, 64);
+    DECLARE_ALIGNED_ARRAY(16, int16_t, test_temp_block, 64);
+    DECLARE_ALIGNED_ARRAY(16, uint8_t, dst, 64);
+    DECLARE_ALIGNED_ARRAY(16, uint8_t, src, 64);
 
     for (int j = 0; j < 64; ++j) {
       src[j] = rnd.Rand8();
@@ -202,9 +204,10 @@ TEST_P(FwdTrans8x8Test, ExtremalCheck) {
   double total_error = 0;
   const int count_test_block = 100000;
   for (int i = 0; i < count_test_block; ++i) {
-    int16_t test_input_block[64];
-    int16_t test_temp_block[64];
-    uint8_t dst[64], src[64];
+    DECLARE_ALIGNED_ARRAY(16, int16_t, test_input_block, 64);
+    DECLARE_ALIGNED_ARRAY(16, int16_t, test_temp_block, 64);
+    DECLARE_ALIGNED_ARRAY(16, uint8_t, dst, 64);
+    DECLARE_ALIGNED_ARRAY(16, uint8_t, src, 64);
 
     for (int j = 0; j < 64; ++j) {
       src[j] = rnd.Rand8() % 2 ? 255 : 0;
