@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAbn//7Qw\u003d",
+        "filename": "vp9/common/arm/neon/vp9_dequantize_neon.asm",
+        "patchSetId": 2
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2013-06-27T18:09:49Z",
+      "side": 1,
+      "message": "Use unix-style newlines. dos2unix can convert the file.",
+      "revId": "bb50c0684208bac63aa1e2402dac3253856219c0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAbn//7Qs\u003d",
+        "filename": "vp9/common/arm/neon/vp9_dequantize_neon.asm",
+        "patchSetId": 2
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2013-06-27T18:09:49Z",
+      "side": 1,
+      "message": "2013",
+      "revId": "bb50c0684208bac63aa1e2402dac3253856219c0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAbn//7Q4\u003d",
+        "filename": "vp9/common/arm/neon/vp9_dequantize_neon.asm",
+        "patchSetId": 2
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2013-06-27T18:09:49Z",
+      "side": 1,
+      "message": "Use vp8/common/arm/armv6/loopfilter_v6.asm as an example for the macro syntax",
+      "revId": "bb50c0684208bac63aa1e2402dac3253856219c0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
