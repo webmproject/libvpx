@@ -30,6 +30,7 @@
 #include "vp9/decoder/vp9_decodframe.h"
 #include "vp9/decoder/vp9_detokenize.h"
 #include "vp9/decoder/vp9_decodemv.h"
+#include "vp9/decoder/vp9_dsubexp.h"
 #include "vp9/decoder/vp9_onyxd_int.h"
 #include "vp9/decoder/vp9_read_bit_buffer.h"
 
@@ -49,6 +50,11 @@ static int read_is_valid(const uint8_t *start, size_t len,
   return start + len > start && start + len <= end;
 }
 
+static int decode_unsigned_max(struct vp9_read_bit_buffer *rb, int max) {
+  const int data = vp9_rb_read_literal(rb, get_unsigned_bits(max));
+  return data > max ? max : data;
+}
+
 static void setup_txfm_mode(VP9_COMMON *pc, int lossless, vp9_reader *r) {
   if (lossless) {
     pc->txfm_mode = ONLY_4X4;
@@ -56,132 +62,24 @@ static void setup_txfm_mode(VP9_COMMON *pc, int lossless, vp9_reader *r) {
     pc->txfm_mode = vp9_read_literal(r, 2);
     if (pc->txfm_mode == ALLOW_32X32)
       pc->txfm_mode += vp9_read_bit(r);
+
     if (pc->txfm_mode == TX_MODE_SELECT) {
       int i, j;
-      for (i = 0; i < TX_SIZE_CONTEXTS; ++i) {
-        for (j = 0; j < TX_SIZE_MAX_SB - 3; ++j) {
+      for (i = 0; i < TX_SIZE_CONTEXTS; ++i)
+        for (j = 0; j < TX_SIZE_MAX_SB - 3; ++j)
           if (vp9_read(r, VP9_MODE_UPDATE_PROB))
-            pc->fc.tx_probs_8x8p[i][j] =
-                vp9_read_prob_diff_update(r, pc->fc.tx_probs_8x8p[i][j]);
-        }
-      }
-      for (i = 0; i < TX_SIZE_CONTEXTS; ++i) {
-        for (j = 0; j < TX_SIZE_MAX_SB - 2; ++j) {
+            vp9_diff_update_prob(r, &pc->fc.tx_probs_8x8p[i][j]);
+
+      for (i = 0; i < TX_SIZE_CONTEXTS; ++i)
+        for (j = 0; j < TX_SIZE_MAX_SB - 2; ++j)
           if (vp9_read(r, VP9_MODE_UPDATE_PROB))
-            pc->fc.tx_probs_16x16p[i][j] =
-                vp9_read_prob_diff_update(r, pc->fc.tx_probs_16x16p[i][j]);
-        }
-      }
-      for (i = 0; i < TX_SIZE_CONTEXTS; ++i) {
-        for (j = 0; j < TX_SIZE_MAX_SB - 1; ++j) {
+            vp9_diff_update_prob(r, &pc->fc.tx_probs_16x16p[i][j]);
+
+      for (i = 0; i < TX_SIZE_CONTEXTS; ++i)
+        for (j = 0; j < TX_SIZE_MAX_SB - 1; ++j)
           if (vp9_read(r, VP9_MODE_UPDATE_PROB))
-            pc->fc.tx_probs_32x32p[i][j] =
-                vp9_read_prob_diff_update(r, pc->fc.tx_probs_32x32p[i][j]);
-        }
-      }
+            vp9_diff_update_prob(r, &pc->fc.tx_probs_32x32p[i][j]);
     }
-  }
-}
-
-static int get_unsigned_bits(unsigned int num_values) {
-  int cat = 0;
-  if (num_values <= 1)
-    return 0;
-  num_values--;
-  while (num_values > 0) {
-    cat++;
-    num_values >>= 1;
-  }
-  return cat;
-}
-
-static int inv_recenter_nonneg(int v, int m) {
-  if (v > 2 * m)
-    return v;
-
-  return v % 2 ? m - (v + 1) / 2 : m + v / 2;
-}
-
-static int decode_uniform(vp9_reader *r, int n) {
-  int v;
-  const int l = get_unsigned_bits(n);
-  const int m = (1 << l) - n;
-  if (!l)
-    return 0;
-
-  v = vp9_read_literal(r, l - 1);
-  return v < m ?  v : (v << 1) - m + vp9_read_bit(r);
-}
-
-static int decode_term_subexp(vp9_reader *r, int k, int num_syms) {
-  int i = 0, mk = 0, word;
-  while (1) {
-    const int b = i ? k + i - 1 : k;
-    const int a = 1 << b;
-    if (num_syms <= mk + 3 * a) {
-      word = decode_uniform(r, num_syms - mk) + mk;
-      break;
-    } else {
-      if (vp9_read_bit(r)) {
-        i++;
-        mk += a;
-      } else {
-        word = vp9_read_literal(r, b) + mk;
-        break;
-      }
-    }
-  }
-  return word;
-}
-
-static int decode_unsigned_max(struct vp9_read_bit_buffer *rb, int max) {
-  const int data = vp9_rb_read_literal(rb, get_unsigned_bits(max));
-  return data > max ? max : data;
-}
-
-static int merge_index(int v, int n, int modulus) {
-  int max1 = (n - 1 - modulus / 2) / modulus + 1;
-  if (v < max1) {
-    v = v * modulus + modulus / 2;
-  } else {
-    int w;
-    v -= max1;
-    w = v;
-    v += (v + modulus - modulus / 2) / modulus;
-    while (v % modulus == modulus / 2 ||
-           w != v - (v + modulus - modulus / 2) / modulus) v++;
-  }
-  return v;
-}
-
-static int inv_remap_prob(int v, int m) {
-  const int n = 255;
-
-  v = merge_index(v, n - 1, MODULUS_PARAM);
-  m--;
-  if ((m << 1) <= n) {
-    return 1 + inv_recenter_nonneg(v + 1, m);
-  } else {
-    return n - inv_recenter_nonneg(v + 1, n - 1 - m);
-  }
-}
-
-vp9_prob vp9_read_prob_diff_update(vp9_reader *r, int oldp) {
-  int delp = decode_term_subexp(r, SUBEXP_PARAM, 255);
-  return (vp9_prob)inv_remap_prob(delp, oldp);
-}
-
-void vp9_init_dequantizer(VP9_COMMON *pc) {
-  int q;
-
-  for (q = 0; q < QINDEX_RANGE; q++) {
-    // DC value
-    pc->y_dequant[q][0] = vp9_dc_quant(q, pc->y_dc_delta_q);
-    pc->uv_dequant[q][0] = vp9_dc_quant(q, pc->uv_dc_delta_q);
-
-    // AC values
-    pc->y_dequant[q][1] = vp9_ac_quant(q, 0);
-    pc->uv_dequant[q][1] = vp9_ac_quant(q, pc->uv_ac_delta_q);
   }
 }
 
@@ -541,7 +439,7 @@ static void read_coef_probs_common(FRAME_CONTEXT *fc, TX_SIZE tx_size,
               vp9_prob *const p = coef_probs[i][j][k][l] + m;
 
               if (vp9_read(r, VP9_COEF_UPDATE_PROB))
-                *p = vp9_read_prob_diff_update(r, *p);
+                vp9_diff_update_prob(r, p);
             }
           }
         }
@@ -679,11 +577,9 @@ static void setup_quantization(VP9D_COMP *pbi, struct vp9_read_bit_buffer *rb) {
                  cm->y_dc_delta_q == 0 &&
                  cm->uv_dc_delta_q == 0 &&
                  cm->uv_ac_delta_q == 0;
-  if (xd->lossless) {
-    xd->itxm_add          = vp9_idct_add_lossless_c;
-  } else {
-    xd->itxm_add          = vp9_idct_add;
-  }
+
+  xd->itxm_add = xd->lossless ? vp9_idct_add_lossless_c
+                              : vp9_idct_add;
 }
 
 static INTERPOLATIONFILTERTYPE read_interp_filter_type(
@@ -1087,6 +983,20 @@ static size_t read_uncompressed_header(VP9D_COMP *pbi,
   setup_tile_info(cm, rb);
 
   return vp9_rb_read_literal(rb, 16);
+}
+
+void vp9_init_dequantizer(VP9_COMMON *pc) {
+  int q;
+
+  for (q = 0; q < QINDEX_RANGE; q++) {
+    // DC value
+    pc->y_dequant[q][0] = vp9_dc_quant(q, pc->y_dc_delta_q);
+    pc->uv_dequant[q][0] = vp9_dc_quant(q, pc->uv_dc_delta_q);
+
+    // AC values
+    pc->y_dequant[q][1] = vp9_ac_quant(q, 0);
+    pc->uv_dequant[q][1] = vp9_ac_quant(q, pc->uv_ac_delta_q);
+  }
 }
 
 int vp9_decode_frame(VP9D_COMP *pbi, const uint8_t **p_data_end) {
