@@ -16,6 +16,24 @@
 #include "vp9/common/vp9_onyxc_int.h"
 #include "vpx_mem/vpx_mem.h"
 
+const TX_TYPE mode2txfm_map[MB_MODE_COUNT] = {
+    DCT_DCT,    // DC
+    ADST_DCT,   // V
+    DCT_ADST,   // H
+    DCT_DCT,    // D45
+    ADST_ADST,  // D135
+    ADST_DCT,   // D117
+    DCT_ADST,   // D153
+    DCT_ADST,   // D27
+    ADST_DCT,   // D63
+    ADST_ADST,  // TM
+    DCT_DCT,    // NEARESTMV
+    DCT_DCT,    // NEARMV
+    DCT_DCT,    // ZEROMV
+    DCT_DCT     // NEWMV
+};
+
+
 static void d27_predictor(uint8_t *ypred_ptr, int y_stride,
                           int bw, int bh,
                           uint8_t *yabove_row, uint8_t *yleft_col) {

@@ -338,6 +338,7 @@ typedef struct macroblockd {
   signed char last_ref_lf_deltas[MAX_REF_LF_DELTAS];
   /* 0 = Intra, Last, GF, ARF */
   signed char ref_lf_deltas[MAX_REF_LF_DELTAS];
+
   /* 0 = ZERO_MV, MV */
   signed char last_mode_lf_deltas[MAX_MODE_LF_DELTAS];
   /* 0 = ZERO_MV, MV */
@@ -504,53 +505,25 @@ static BLOCK_SIZE_TYPE get_subsize(BLOCK_SIZE_TYPE bsize,
   return subsize;
 }
 
-// transform mapping
-static TX_TYPE txfm_map(MB_PREDICTION_MODE bmode) {
-  switch (bmode) {
-    case TM_PRED :
-    case D135_PRED :
-      return ADST_ADST;
+extern const TX_TYPE mode2txfm_map[MB_MODE_COUNT];
 
-    case V_PRED :
-    case D117_PRED :
-    case D63_PRED:
-      return ADST_DCT;
-
-    case H_PRED :
-    case D153_PRED :
-    case D27_PRED :
-      return DCT_ADST;
-
-    default:
-      return DCT_DCT;
-  }
-}
-
-static TX_TYPE get_tx_type_4x4(const MACROBLOCKD *xd, int ib) {
+static INLINE TX_TYPE get_tx_type_4x4(const MACROBLOCKD *xd, int ib) {
   MODE_INFO *const mi = xd->mode_info_context;
   MB_MODE_INFO *const mbmi = &mi->mbmi;
 
   if (xd->lossless || mbmi->ref_frame[0] != INTRA_FRAME)
     return DCT_DCT;
 
-  if (mbmi->sb_type < BLOCK_SIZE_SB8X8) {
-    return txfm_map(mi->bmi[ib].as_mode.first);
-  } else {
-    assert(mbmi->mode <= TM_PRED);
-    return txfm_map(mbmi->mode);
-  }
+  return mode2txfm_map[mbmi->sb_type < BLOCK_SIZE_SB8X8 ?
+                       mi->bmi[ib].as_mode.first : mbmi->mode];
 }
 
-static TX_TYPE get_tx_type_8x8(const MACROBLOCKD *xd) {
-  return xd->mode_info_context->mbmi.mode <= TM_PRED
-             ? txfm_map(xd->mode_info_context->mbmi.mode)
-             : DCT_DCT;
+static INLINE TX_TYPE get_tx_type_8x8(const MACROBLOCKD *xd) {
+  return mode2txfm_map[xd->mode_info_context->mbmi.mode];
 }
 
-static TX_TYPE get_tx_type_16x16(const MACROBLOCKD *xd) {
-  return xd->mode_info_context->mbmi.mode <= TM_PRED
-             ? txfm_map(xd->mode_info_context->mbmi.mode)
-             : DCT_DCT;
+static INLINE TX_TYPE get_tx_type_16x16(const MACROBLOCKD *xd) {
+  return  mode2txfm_map[xd->mode_info_context->mbmi.mode];
 }
 
 void vp9_setup_block_dptrs(MACROBLOCKD *xd,
