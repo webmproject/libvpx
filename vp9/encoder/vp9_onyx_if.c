@@ -709,6 +709,7 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
   sf->partition_by_variance = 0;
   sf->use_one_partition_size_always = 0;
   sf->less_rectangular_check = 0;
+  sf->use_square_partition_only = 0;
   sf->use_partitions_less_than = 0;
   sf->less_than_block_size = BLOCK_SIZE_MB16X16;
   sf->use_partitions_greater_than = 0;
@@ -749,25 +750,25 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
                                       cpi->common.intra_only ||
                                       cpi->common.show_frame == 0) ?
                                      USE_FULL_RD :
-                                     USE_LARGESTINTRA);
+                                     USE_LARGESTALL);
+        sf->conditional_oblique_intramodes = 1;
         sf->disable_splitmv =
             (MIN(cpi->common.width, cpi->common.height) >= 720)? 1 : 0;
-        sf->conditional_oblique_intramodes = 1;
+        sf->use_square_partition_only = !(cpi->common.frame_type == KEY_FRAME ||
+                                   cpi->common.intra_only ||
+                                   cpi->common.show_frame == 0);
       }
       if (speed == 2) {
         sf->adjust_thresholds_by_speed = 1;
         sf->less_rectangular_check  = 1;
+        sf->use_square_partition_only = 1;
         sf->comp_inter_joint_search_thresh = BLOCK_SIZE_TYPES;
         sf->reduce_first_step_size = 1;
         sf->optimize_coefficients = 0;
         sf->use_lastframe_partitioning = 1;
         sf->adjust_partitioning_from_last_frame = 1;
         sf->last_partitioning_redo_frequency = 3;
-        sf->tx_size_search_method = ((cpi->common.frame_type == KEY_FRAME ||
-                                      cpi->common.intra_only ||
-                                      cpi->common.show_frame == 0) ?
-                                     USE_FULL_RD :
-                                     USE_LARGESTALL);
+        sf->tx_size_search_method = USE_LARGESTALL;
         sf->conditional_oblique_intramodes = 1;
       }
       if (speed == 3) {
