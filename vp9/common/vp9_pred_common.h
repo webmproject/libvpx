@@ -27,27 +27,21 @@ typedef enum {
   PRED_TX_SIZE = 8
 } PRED_ID;
 
-unsigned char vp9_get_pred_context(const VP9_COMMON *const cm,
-                                   const MACROBLOCKD *const xd,
+unsigned char vp9_get_pred_context(const VP9_COMMON *cm, const MACROBLOCKD *xd,
                                    PRED_ID pred_id);
 
-vp9_prob vp9_get_pred_prob(const VP9_COMMON *const cm,
-                           const MACROBLOCKD *const xd,
+vp9_prob vp9_get_pred_prob(const VP9_COMMON *cm, const MACROBLOCKD *xd,
                            PRED_ID pred_id);
 
-const vp9_prob *vp9_get_pred_probs(const VP9_COMMON *const cm,
-                                   const MACROBLOCKD *const xd,
+const vp9_prob *vp9_get_pred_probs(const VP9_COMMON *cm, const MACROBLOCKD *xd,
                                    PRED_ID pred_id);
 
-unsigned char vp9_get_pred_flag(const MACROBLOCKD *const xd,
-                                PRED_ID pred_id);
+unsigned char vp9_get_pred_flag(const MACROBLOCKD *xd, PRED_ID pred_id);
 
-void vp9_set_pred_flag(MACROBLOCKD *const xd,
-                       PRED_ID pred_id,
+void vp9_set_pred_flag(MACROBLOCKD *xd, PRED_ID pred_id,
                        unsigned char pred_flag);
 
-
-int vp9_get_pred_mi_segid(VP9_COMMON *cm, BLOCK_SIZE_TYPE sb_type,
-                          uint8_t *segment_ids, int mi_row, int mi_col);
+int vp9_get_segment_id(VP9_COMMON *cm, const uint8_t *segment_ids,
+                       BLOCK_SIZE_TYPE bsize, int mi_row, int mi_col);
 
 #endif  // VP9_COMMON_VP9_PRED_COMMON_H_

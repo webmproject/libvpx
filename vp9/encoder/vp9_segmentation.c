@@ -115,8 +115,7 @@ static int cost_segmap(MACROBLOCKD *xd, int *segcounts, vp9_prob *probs) {
   return cost;
 }
 
-static void count_segs(VP9_COMP *cpi,
-                       MODE_INFO *mi,
+static void count_segs(VP9_COMP *cpi, MODE_INFO *mi,
                        int *no_pred_segcounts,
                        int (*temporal_predictor_count)[2],
                        int *t_unpred_seg_counts,
@@ -138,20 +137,18 @@ static void count_segs(VP9_COMP *cpi,
   // Temporal prediction not allowed on key frames
   if (cm->frame_type != KEY_FRAME) {
     // Test to see if the segment id matches the predicted value.
-    const int pred_seg_id = vp9_get_pred_mi_segid(cm, mi->mbmi.sb_type,
-                                                  cm->last_frame_seg_map,
-                                                  mi_row, mi_col);
-    const int seg_predicted = (segment_id == pred_seg_id);
-
-    // Get the segment id prediction context
+    const int pred_segment_id = vp9_get_segment_id(cm, cm->last_frame_seg_map,
+                                                   mi->mbmi.sb_type,
+                                                   mi_row, mi_col);
+    const int pred_flag = pred_segment_id == segment_id;
     const int pred_context = vp9_get_pred_context(cm, xd, PRED_SEG_ID);
 
     // Store the prediction status for this mb and update counts
     // as appropriate
-    vp9_set_pred_flag(xd, PRED_SEG_ID, seg_predicted);
-    temporal_predictor_count[pred_context][seg_predicted]++;
+    vp9_set_pred_flag(xd, PRED_SEG_ID, pred_flag);
+    temporal_predictor_count[pred_context][pred_flag]++;
 
-    if (!seg_predicted)
+    if (!pred_flag)
       // Update the "unpredicted" segment count
       t_unpred_seg_counts[segment_id]++;
   }
