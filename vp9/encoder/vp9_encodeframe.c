@@ -1549,8 +1549,6 @@ static void init_encode_frame_mb_context(VP9_COMP *cpi) {
                    0, 0, NULL, NULL );
   setup_dst_planes(xd, &cm->yv12_fb[cm->new_fb_idx], 0, 0);
 
-  vp9_build_block_offsets(x);
-
   vp9_setup_block_dptrs(&x->e_mbd, cm->subsampling_x, cm->subsampling_y);
 
   xd->mode_info_context->mbmi.mode = DC_PRED;
@@ -2022,9 +2020,6 @@ void vp9_encode_frame(VP9_COMP *cpi) {
     encode_frame_internal(cpi);
   }
 
-}
-
-void vp9_build_block_offsets(MACROBLOCK *x) {
 }
 
 static void sum_intra_stats(VP9_COMP *cpi, MACROBLOCK *x) {
