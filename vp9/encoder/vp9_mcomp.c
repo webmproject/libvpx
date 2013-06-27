@@ -41,6 +41,9 @@ void vp9_clamp_mv_min_max(MACROBLOCK *x, int_mv *ref_mv) {
 int vp9_init_search_range(VP9_COMP *cpi, int size) {
   int sr = 0;
 
+  // Minimum search size no matter what the passed in value.
+  size = MAX(16, size);
+
   while ((size << sr) < MAX_FULL_PEL_VAL)
     sr++;
 
