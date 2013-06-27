@@ -216,6 +216,7 @@ typedef struct {
   int static_segmentation;
   int comp_inter_joint_search_thresh;
   int adpative_rd_thresh;
+  int skip_encode_sb;
   int use_lastframe_partitioning;
   int use_largest_txform;
   int use_8tap_always;
