@@ -1994,12 +1994,11 @@ static void single_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
   MB_MODE_INFO *mbmi = &xd->mode_info_context->mbmi;
   struct buf_2d backup_yv12[MAX_MB_PLANE] = {{0}};
   int bestsme = INT_MAX;
-  int further_steps, step_param = cpi->sf.first_step;
+  int further_steps, step_param;
   int sadpb = x->sadperbit16;
   int_mv mvp_full;
   int ref = mbmi->ref_frame[0];
   int_mv ref_mv = mbmi->ref_mvs[ref][0];
-  int sr = 0;
   const enum BlockSize block_size = get_plane_block_size(bsize, &xd->plane[0]);
 
   int tmp_col_min = x->mv_col_min;
@@ -2023,7 +2022,8 @@ static void single_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
 
   vp9_clamp_mv_min_max(x, &ref_mv);
 
-  sr = vp9_init_search_range(cpi->common.width, cpi->common.height);
+  step_param = vp9_init_search_range(
+                 cpi, MIN(cpi->common.width, cpi->common.height));
 
   // mvp_full.as_int = ref_mv[0].as_int;
   mvp_full.as_int =
@@ -2031,9 +2031,6 @@ static void single_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
 
   mvp_full.as_mv.col >>= 3;
   mvp_full.as_mv.row >>= 3;
-
-  // adjust search range according to sr from mv prediction
-  step_param = MAX(step_param, sr);
 
   // Further step/diamond searches as necessary
   further_steps = (cpi->sf.max_step_search_steps - 1) - step_param;

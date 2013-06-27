@@ -210,7 +210,7 @@ typedef struct {
   int quarter_pixel_search;
   int thresh_mult[MAX_MODES];
   int max_step_search_steps;
-  int first_step;
+  int reduce_first_step_size;
   int optimize_coefficients;
   int search_best_filter;
   int static_segmentation;
