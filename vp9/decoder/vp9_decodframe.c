@@ -14,15 +14,16 @@
 #include "vpx_mem/vpx_mem.h"
 #include "vpx_scale/vpx_scale.h"
 
+#include "vp9/common/vp9_alloccommon.h"
+#include "vp9/common/vp9_common.h"
+#include "vp9/common/vp9_entropy.h"
+#include "vp9/common/vp9_entropymode.h"
 #include "vp9/common/vp9_extend.h"
 #include "vp9/common/vp9_modecont.h"
-#include "vp9/common/vp9_common.h"
+#include "vp9/common/vp9_pred_common.h"
+#include "vp9/common/vp9_quant_common.h"
 #include "vp9/common/vp9_reconintra.h"
 #include "vp9/common/vp9_reconinter.h"
-#include "vp9/common/vp9_entropy.h"
-#include "vp9/common/vp9_alloccommon.h"
-#include "vp9/common/vp9_entropymode.h"
-#include "vp9/common/vp9_quant_common.h"
 #include "vp9/common/vp9_seg_common.h"
 #include "vp9/common/vp9_tile_common.h"
 
@@ -133,6 +134,7 @@ static void decode_block_intra(int plane, int block, BLOCK_SIZE_TYPE bsize,
                                int ss_txfrm_size, void *arg) {
   MACROBLOCKD* const xd = arg;
   struct macroblockd_plane *pd = &xd->plane[plane];
+  MODE_INFO *const mi = xd->mode_info_context;
 
   const int raster_block = txfrm_block_to_raster_block(xd, bsize, plane,
                                                        block, ss_txfrm_size);
@@ -143,13 +145,12 @@ static void decode_block_intra(int plane, int block, BLOCK_SIZE_TYPE bsize,
   int b_mode;
   int plane_b_size;
   const int tx_ib = raster_block >> tx_size;
-  const int mode = plane == 0 ? xd->mode_info_context->mbmi.mode
-                              : xd->mode_info_context->mbmi.uv_mode;
+  const int mode = plane == 0 ? mi->mbmi.mode
+                              : mi->mbmi.uv_mode;
 
-
-  if (plane == 0 && xd->mode_info_context->mbmi.sb_type < BLOCK_SIZE_SB8X8) {
+  if (plane == 0 && mi->mbmi.sb_type < BLOCK_SIZE_SB8X8) {
     assert(bsize == BLOCK_SIZE_SB8X8);
-    b_mode = xd->mode_info_context->bmi[raster_block].as_mode.first;
+    b_mode = mi->bmi[raster_block].as_mode.first;
   } else {
     b_mode = mode;
   }
@@ -163,91 +164,66 @@ static void decode_block_intra(int plane, int block, BLOCK_SIZE_TYPE bsize,
                           dst, pd->dst.stride);
 
   // Early exit if there are no coefficients
-  if (xd->mode_info_context->mbmi.mb_skip_coeff)
+  if (mi->mbmi.mb_skip_coeff)
     return;
 
   decode_block(plane, block, bsize, ss_txfrm_size, arg);
 }
 
-static void decode_atom(VP9D_COMP *pbi, MACROBLOCKD *xd,
-                        int mi_row, int mi_col,
-                        vp9_reader *r, BLOCK_SIZE_TYPE bsize) {
+static int decode_tokens(VP9D_COMP *pbi, BLOCK_SIZE_TYPE bsize, vp9_reader *r) {
+  MACROBLOCKD *const xd = &pbi->mb;
+
+  if (xd->mode_info_context->mbmi.mb_skip_coeff) {
+    vp9_reset_sb_tokens_context(xd, bsize);
+    return -1;
+  } else {
+    if (xd->segmentation_enabled)
+      mb_init_dequantizer(&pbi->common, xd);
+
+    // TODO(dkovalev) if (!vp9_reader_has_error(r))
+    return vp9_decode_tokens(pbi, r, bsize);
+  }
+}
+
+static void decode_atom(VP9D_COMP *pbi, int mi_row, int mi_col,
+                        vp9_reader *r) {
+  BLOCK_SIZE_TYPE bsize = BLOCK_SIZE_SB8X8;
+  MACROBLOCKD *const xd = &pbi->mb;
   MB_MODE_INFO *const mbmi = &xd->mode_info_context->mbmi;
 
   assert(mbmi->ref_frame[0] != INTRA_FRAME);
   vp9_setup_interp_filters(xd, mbmi->interp_filter, &pbi->common);
-
-  // prediction
   vp9_build_inter_predictors_sb(xd, mi_row, mi_col, bsize);
-
-  if (mbmi->mb_skip_coeff) {
-    vp9_reset_sb_tokens_context(xd, bsize);
-  } else {
-    if (xd->segmentation_enabled)
-      mb_init_dequantizer(&pbi->common, xd);
-
-    if (!vp9_reader_has_error(r))
-      vp9_decode_tokens(pbi, r, bsize);
-
+  if (decode_tokens(pbi, bsize, r) >= 0)
     foreach_transformed_block(xd, bsize, decode_block, xd);
-  }
 }
 
-static void decode_sb_intra(VP9D_COMP *pbi, MACROBLOCKD *xd,
-                          int mi_row, int mi_col,
-                          vp9_reader *r, BLOCK_SIZE_TYPE bsize) {
-  MB_MODE_INFO *const mbmi = &xd->mode_info_context->mbmi;
-  if (mbmi->mb_skip_coeff) {
-    vp9_reset_sb_tokens_context(xd, bsize);
-  } else {
-    if (xd->segmentation_enabled)
-      mb_init_dequantizer(&pbi->common, xd);
-
-    if (!vp9_reader_has_error(r))
-      vp9_decode_tokens(pbi, r, bsize);
-  }
-
+static void decode_sb_intra(VP9D_COMP *pbi, int mi_row, int mi_col,
+                            vp9_reader *r, BLOCK_SIZE_TYPE bsize) {
+  MACROBLOCKD *const xd = &pbi->mb;
+  decode_tokens(pbi, bsize, r);
   foreach_transformed_block(xd, bsize, decode_block_intra, xd);
 }
 
-
-static void decode_sb(VP9D_COMP *pbi, MACROBLOCKD *xd, int mi_row, int mi_col,
-                      vp9_reader *r, BLOCK_SIZE_TYPE bsize) {
-  const int bwl = mi_width_log2(bsize), bhl = mi_height_log2(bsize);
-  const int bw = 1 << bwl, bh = 1 << bhl;
-  int n, eobtotal;
-  VP9_COMMON *const pc = &pbi->common;
+static void decode_sb(VP9D_COMP *pbi, int mi_row, int mi_col, vp9_reader *r,
+                      BLOCK_SIZE_TYPE bsize) {
+  VP9_COMMON *const cm = &pbi->common;
+  MACROBLOCKD *const xd = &pbi->mb;
   MODE_INFO *const mi = xd->mode_info_context;
   MB_MODE_INFO *const mbmi = &mi->mbmi;
-  const int mis = pc->mode_info_stride;
+  int  eobtotal;
 
   assert(mbmi->sb_type == bsize);
   assert(mbmi->ref_frame[0] != INTRA_FRAME);
 
-  vp9_setup_interp_filters(xd, mbmi->interp_filter, pc);
-
-  // generate prediction
+  vp9_setup_interp_filters(xd, mbmi->interp_filter, cm);
   vp9_build_inter_predictors_sb(xd, mi_row, mi_col, bsize);
 
-  if (mbmi->mb_skip_coeff) {
-    vp9_reset_sb_tokens_context(xd, bsize);
-  } else {
-    // re-initialize macroblock dequantizer before detokenization
-    if (xd->segmentation_enabled)
-      mb_init_dequantizer(pc, xd);
-
-    // dequantization and idct
-    eobtotal = vp9_decode_tokens(pbi, r, bsize);
-    if (eobtotal == 0) {  // skip loopfilter
-      for (n = 0; n < bw * bh; n++) {
-        const int x_idx = n & (bw - 1), y_idx = n >> bwl;
-
-        if (mi_col + x_idx < pc->mi_cols && mi_row + y_idx < pc->mi_rows)
-          mi[y_idx * mis + x_idx].mbmi.mb_skip_coeff = 1;
-      }
-    } else {
-      foreach_transformed_block(xd, bsize, decode_block, xd);
-    }
+  eobtotal = decode_tokens(pbi, bsize, r);
+  if (eobtotal == 0) {
+    vp9_set_pred_flag(xd, bsize, PRED_MBSKIP, 1);  //  skip loopfilter
+  } else if (eobtotal > 0) {
+    foreach_transformed_block(xd, bsize, decode_block, xd);
   }
 }
 
@@ -316,18 +292,19 @@ static void decode_modes_b(VP9D_COMP *pbi, int mi_row, int mi_col,
   if (bsize < BLOCK_SIZE_SB8X8)
     if (xd->ab_index > 0)
       return;
+
   set_offsets(pbi, bsize, mi_row, mi_col);
   vp9_decode_mb_mode_mv(pbi, xd, mi_row, mi_col, r);
 
   if (xd->mode_info_context->mbmi.ref_frame[0] == INTRA_FRAME) {
-    decode_sb_intra(pbi, xd, mi_row, mi_col, r, (bsize < BLOCK_SIZE_SB8X8) ?
-                                     BLOCK_SIZE_SB8X8 : bsize);
+    decode_sb_intra(pbi, mi_row, mi_col, r,
+                    (bsize < BLOCK_SIZE_SB8X8) ? BLOCK_SIZE_SB8X8 : bsize);
   } else {
     set_refs(pbi, mi_row, mi_col);
     if (bsize < BLOCK_SIZE_SB8X8)
-      decode_atom(pbi, xd, mi_row, mi_col, r, BLOCK_SIZE_SB8X8);
+      decode_atom(pbi, mi_row, mi_col, r);
     else
-      decode_sb(pbi, xd, mi_row, mi_col, r, bsize);
+      decode_sb(pbi, mi_row, mi_col, r, bsize);
   }
   xd->corrupted |= vp9_reader_has_error(r);
 }

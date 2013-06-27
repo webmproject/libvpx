@@ -38,7 +38,7 @@ const vp9_prob *vp9_get_pred_probs(const VP9_COMMON *cm, const MACROBLOCKD *xd,
 
 unsigned char vp9_get_pred_flag(const MACROBLOCKD *xd, PRED_ID pred_id);
 
-void vp9_set_pred_flag(MACROBLOCKD *xd, PRED_ID pred_id,
+void vp9_set_pred_flag(MACROBLOCKD *xd, BLOCK_SIZE_TYPE bsize, PRED_ID pred_id,
                        unsigned char pred_flag);
 
 int vp9_get_segment_id(VP9_COMMON *cm, const uint8_t *segment_ids,
