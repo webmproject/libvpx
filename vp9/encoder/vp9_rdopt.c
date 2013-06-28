@@ -932,23 +932,13 @@ static void super_block_uvrd(VP9_COMMON *const cm, MACROBLOCK *x,
                              BLOCK_SIZE_TYPE bsize) {
   MACROBLOCKD *const xd = &x->e_mbd;
   MB_MODE_INFO *const mbmi = &xd->mode_info_context->mbmi;
+  TX_SIZE uv_txfm_size = get_uv_tx_size(mbmi);
 
   if (mbmi->ref_frame[0] > INTRA_FRAME)
     vp9_subtract_sbuv(x, bsize);
 
-  if (mbmi->txfm_size >= TX_32X32 && bsize >= BLOCK_SIZE_SB64X64) {
-    super_block_uvrd_for_txfm(cm, x, rate, distortion, skippable, bsize,
-                              TX_32X32);
-  } else if (mbmi->txfm_size >= TX_16X16 && bsize >= BLOCK_SIZE_SB32X32) {
-    super_block_uvrd_for_txfm(cm, x, rate, distortion, skippable, bsize,
-                              TX_16X16);
-  } else if (mbmi->txfm_size >= TX_8X8 && bsize >= BLOCK_SIZE_MB16X16) {
-    super_block_uvrd_for_txfm(cm, x, rate, distortion, skippable, bsize,
-                              TX_8X8);
-  } else {
-    super_block_uvrd_for_txfm(cm, x, rate, distortion, skippable, bsize,
-                              TX_4X4);
-  }
+  super_block_uvrd_for_txfm(cm, x, rate, distortion, skippable, bsize,
+                            uv_txfm_size);
 }
 
 static int64_t rd_pick_intra_sbuv_mode(VP9_COMP *cpi, MACROBLOCK *x,
