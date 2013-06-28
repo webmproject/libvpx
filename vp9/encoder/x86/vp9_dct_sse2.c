@@ -863,7 +863,7 @@ void vp9_short_fht8x8_sse2(int16_t *input, int16_t *output,
   switch (tx_type) {
     case 0:  // DCT_DCT
       fdct8_1d_sse2(in);
-      fadst8_1d_sse2(in);
+      fdct8_1d_sse2(in);
       break;
     case 1:  // ADST_DCT
       fadst8_1d_sse2(in);
