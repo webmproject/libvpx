@@ -871,7 +871,7 @@ void vp9_alloc_compressor_data(VP9_COMP *cpi) {
   {
     unsigned int tokens = get_token_alloc(cm->mb_rows, cm->mb_cols);
 
-    CHECK_MEM_ERROR(cpi->tok, vpx_calloc(tokens, sizeof(*cpi->tok)));
+    CHECK_MEM_ERROR(cm, cpi->tok, vpx_calloc(tokens, sizeof(*cpi->tok)));
   }
 
   // Data used for real time vc mode to see if gf needs refreshing
@@ -880,12 +880,12 @@ void vp9_alloc_compressor_data(VP9_COMP *cpi) {
   cpi->gf_update_recommended = 0;
 
   vpx_free(cpi->mb_activity_map);
-  CHECK_MEM_ERROR(cpi->mb_activity_map,
+  CHECK_MEM_ERROR(cm, cpi->mb_activity_map,
                   vpx_calloc(sizeof(unsigned int),
                              cm->mb_rows * cm->mb_cols));
 
   vpx_free(cpi->mb_norm_activity_map);
-  CHECK_MEM_ERROR(cpi->mb_norm_activity_map,
+  CHECK_MEM_ERROR(cm, cpi->mb_norm_activity_map,
                   vpx_calloc(sizeof(unsigned int),
                              cm->mb_rows * cm->mb_cols));
 }
@@ -1293,15 +1293,16 @@ VP9_PTR vp9_create_compressor(VP9_CONFIG *oxcf) {
     return 0;
   }
 
-  cpi->common.error.setjmp = 1;
+  cm->error.setjmp = 1;
 
-  CHECK_MEM_ERROR(cpi->mb.ss, vpx_calloc(sizeof(search_site), (MAX_MVSEARCH_STEPS * 8) + 1));
+  CHECK_MEM_ERROR(cm, cpi->mb.ss, vpx_calloc(sizeof(search_site),
+                                             (MAX_MVSEARCH_STEPS * 8) + 1));
 
-  vp9_create_common(&cpi->common);
+  vp9_create_common(cm);
 
   init_config((VP9_PTR)cpi, oxcf);
 
-  cpi->common.current_video_frame   = 0;
+  cm->current_video_frame   = 0;
   cpi->kf_overspend_bits            = 0;
   cpi->kf_bitrate_adjustment        = 0;
   cpi->frames_till_gf_update_due    = 0;
@@ -1309,7 +1310,7 @@ VP9_PTR vp9_create_compressor(VP9_CONFIG *oxcf) {
   cpi->non_gf_bitrate_adjustment    = 0;
 
   // Set reference frame sign bias for ALTREF frame to 1 (for now)
-  cpi->common.ref_frame_sign_bias[ALTREF_FRAME] = 1;
+  cm->ref_frame_sign_bias[ALTREF_FRAME] = 1;
 
   cpi->baseline_gf_interval = DEFAULT_GF_INTERVAL;
 
@@ -1318,28 +1319,27 @@ VP9_PTR vp9_create_compressor(VP9_CONFIG *oxcf) {
   cpi->gold_is_alt  = 0;
 
   // Create the encoder segmentation map and set all entries to 0
-  CHECK_MEM_ERROR(cpi->segmentation_map,
-                  vpx_calloc(cpi->common.mi_rows * cpi->common.mi_cols, 1));
+  CHECK_MEM_ERROR(cm, cpi->segmentation_map,
+                  vpx_calloc(cm->mi_rows * cm->mi_cols, 1));
 
   // And a copy in common for temporal coding
-  CHECK_MEM_ERROR(cm->last_frame_seg_map,
-                  vpx_calloc(cpi->common.mi_rows * cpi->common.mi_cols, 1));
+  CHECK_MEM_ERROR(cm, cm->last_frame_seg_map,
+                  vpx_calloc(cm->mi_rows * cm->mi_cols, 1));
 
   // And a place holder structure is the coding context
   // for use if we want to save and restore it
-  CHECK_MEM_ERROR(cpi->coding_context.last_frame_seg_map_copy,
-                  vpx_calloc(cpi->common.mi_rows * cpi->common.mi_cols, 1));
+  CHECK_MEM_ERROR(cm, cpi->coding_context.last_frame_seg_map_copy,
+                  vpx_calloc(cm->mi_rows * cm->mi_cols, 1));
 
-  CHECK_MEM_ERROR(cpi->active_map, vpx_calloc(cpi->common.mb_rows * cpi->common.mb_cols, 1));
-  vpx_memset(cpi->active_map, 1, (cpi->common.mb_rows * cpi->common.mb_cols));
+  CHECK_MEM_ERROR(cm, cpi->active_map, vpx_calloc(cm->MBs, 1));
+  vpx_memset(cpi->active_map, 1, cm->MBs);
   cpi->active_map_enabled = 0;
 
   for (i = 0; i < (sizeof(cpi->mbgraph_stats) /
                    sizeof(cpi->mbgraph_stats[0])); i++) {
-    CHECK_MEM_ERROR(cpi->mbgraph_stats[i].mb_stats,
-                    vpx_calloc(cpi->common.mb_rows * cpi->common.mb_cols *
-                               sizeof(*cpi->mbgraph_stats[i].mb_stats),
-                               1));
+    CHECK_MEM_ERROR(cm, cpi->mbgraph_stats[i].mb_stats,
+                    vpx_calloc(cm->MBs *
+                               sizeof(*cpi->mbgraph_stats[i].mb_stats), 1));
   }
 
 #ifdef ENTROPY_STATS
@@ -2421,8 +2421,7 @@ static void full_to_model_counts(
         for (l = 0; l < PREV_COEF_CONTEXTS; ++l) {
           if (l >= 3 && k == 0)
             continue;
-          full_to_model_count(model_count[i][j][k][l],
-                              full_count[i][j][k][l]);
+          full_to_model_count(model_count[i][j][k][l], full_count[i][j][k][l]);
         }
 }
 

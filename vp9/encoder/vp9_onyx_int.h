@@ -634,21 +634,4 @@ extern int vp9_calc_ss_err(YV12_BUFFER_CONFIG *source,
 
 extern void vp9_alloc_compressor_data(VP9_COMP *cpi);
 
-#if CONFIG_DEBUG
-#define CHECK_MEM_ERROR(lval,expr) do {\
-    lval = (expr); \
-    if(!lval) \
-      vpx_internal_error(&cpi->common.error, VPX_CODEC_MEM_ERROR,\
-                         "Failed to allocate "#lval" at %s:%d", \
-                         __FILE__,__LINE__);\
-  } while(0)
-#else
-#define CHECK_MEM_ERROR(lval,expr) do {\
-    lval = (expr); \
-    if(!lval) \
-      vpx_internal_error(&cpi->common.error, VPX_CODEC_MEM_ERROR,\
-                         "Failed to allocate "#lval);\
-  } while(0)
-#endif
-
 #endif  // VP9_ENCODER_VP9_ONYX_INT_H_
