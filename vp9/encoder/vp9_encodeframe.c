@@ -2132,9 +2132,8 @@ static void encode_superblock(VP9_COMP *cpi, TOKENEXTRA **t, int output_enabled,
     vp9_tokenize_sb(cpi, xd, t, !output_enabled,
                     (bsize < BLOCK_SIZE_SB8X8) ? BLOCK_SIZE_SB8X8 : bsize);
   } else {
-    // FIXME(rbultje): not tile-aware (mi - 1)
-    int mb_skip_context = (mi - 1)->mbmi.mb_skip_coeff
-        + (mi - mis)->mbmi.mb_skip_coeff;
+    int mb_skip_context = xd->left_available ? (mi - 1)->mbmi.mb_skip_coeff : 0;
+    mb_skip_context += (mi - mis)->mbmi.mb_skip_coeff;
 
     mbmi->mb_skip_coeff = 1;
     if (output_enabled)
