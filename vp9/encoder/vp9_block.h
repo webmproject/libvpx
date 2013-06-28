@@ -133,8 +133,7 @@ struct macroblock {
   unsigned char *active_ptr;
 
   // note that token_costs is the cost when eob node is skipped
-  vp9_coeff_count token_costs[TX_SIZE_MAX_SB][BLOCK_TYPES];
-  vp9_coeff_count token_costs_noskip[TX_SIZE_MAX_SB][BLOCK_TYPES];
+  vp9_coeff_count token_costs[TX_SIZE_MAX_SB][BLOCK_TYPES][2];
 
   int optimize;
 
