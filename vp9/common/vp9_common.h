@@ -72,6 +72,23 @@ static int get_unsigned_bits(unsigned int num_values) {
   return cat;
 }
 
+#if CONFIG_DEBUG
+#define CHECK_MEM_ERROR(cm, lval, expr) do { \
+  lval = (expr); \
+  if (!lval) \
+    vpx_internal_error(&cm->error, VPX_CODEC_MEM_ERROR, \
+                       "Failed to allocate "#lval" at %s:%d", \
+                       __FILE__, __LINE__); \
+  } while (0)
+#else
+#define CHECK_MEM_ERROR(cm, lval, expr) do { \
+  lval = (expr); \
+  if (!lval) \
+    vpx_internal_error(&cm->error, VPX_CODEC_MEM_ERROR, \
+                       "Failed to allocate "#lval); \
+  } while (0)
+#endif
+
 #define SYNC_CODE_0 0x49
 #define SYNC_CODE_1 0x83
 #define SYNC_CODE_2 0x42

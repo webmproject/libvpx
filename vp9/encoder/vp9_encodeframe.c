@@ -129,9 +129,8 @@ static void calc_av_activity(VP9_COMP *cpi, int64_t activity_sum) {
     unsigned int tmp;
 
     // Create a list to sort to
-    CHECK_MEM_ERROR(sortlist,
-        vpx_calloc(sizeof(unsigned int),
-            cpi->common.MBs));
+    CHECK_MEM_ERROR(&cpi->common, sortlist, vpx_calloc(sizeof(unsigned int),
+                    cpi->common.MBs));
 
     // Copy map to sort list
     vpx_memcpy(sortlist, cpi->mb_activity_map,
@@ -323,21 +322,17 @@ static void update_state(VP9_COMP *cpi, PICK_MODE_CONTEXT *ctx,
   MACROBLOCKD * const xd = &x->e_mbd;
   MODE_INFO *mi = &ctx->mic;
   MB_MODE_INFO * const mbmi = &xd->mode_info_context->mbmi;
-#if CONFIG_DEBUG || CONFIG_INTERNAL_STATS
-  MB_PREDICTION_MODE mb_mode = mi->mbmi.mode;
-#endif
   int mb_mode_index = ctx->best_mode_index;
   const int mis = cpi->common.mode_info_stride;
   const int bh = 1 << mi_height_log2(bsize), bw = 1 << mi_width_log2(bsize);
+  const MB_PREDICTION_MODE mb_mode = mi->mbmi.mode;
 
-#if CONFIG_DEBUG
   assert(mb_mode < MB_MODE_COUNT);
   assert(mb_mode_index < MAX_MODES);
   assert(mi->mbmi.ref_frame[0] < MAX_REF_FRAMES);
   assert(mi->mbmi.ref_frame[1] < MAX_REF_FRAMES);
-#endif
-
   assert(mi->mbmi.sb_type == bsize);
+
   // Restore the coding context of the MB to that that was in place
   // when the mode was picked for it
   for (y = 0; y < bh; y++) {

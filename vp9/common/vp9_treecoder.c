@@ -9,12 +9,9 @@
  */
 
 
-#include "vpx_config.h"
-
-#if defined(CONFIG_DEBUG) && CONFIG_DEBUG
 #include <assert.h>
-#endif
 
+#include "./vpx_config.h"
 #include "vp9/common/vp9_treecoder.h"
 
 static void tree2tok(struct vp9_token *const p, vp9_tree t,

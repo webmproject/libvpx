@@ -8,6 +8,8 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
+#include <assert.h>
+
 #include "vp9/common/vp9_common.h"
 #include "vp9/common/vp9_entropy.h"
 #include "vp9/common/vp9_entropymode.h"
@@ -23,11 +25,6 @@
 #include "vp9/decoder/vp9_onyxd_int.h"
 #include "vp9/decoder/vp9_dsubexp.h"
 #include "vp9/decoder/vp9_treereader.h"
-
-
-#if CONFIG_DEBUG
-#include <assert.h>
-#endif
 
 // #define DEBUG_DEC_MV
 #ifdef DEBUG_DEC_MV
@@ -748,9 +745,7 @@ static void read_mb_modes_mv(VP9D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
                       &cm->fc.NMVcount, xd->allow_high_precision_mv);
           break;
         default:
-#if CONFIG_DEBUG
           assert(0);
-#endif
           break;
       }
     }
