@@ -283,15 +283,17 @@ void vp9_initialize_rd_consts(VP9_COMP *cpi, int qindex) {
 }
 
 int64_t vp9_block_error_c(int16_t *coeff, int16_t *dqcoeff,
-                          intptr_t block_size) {
+                          intptr_t block_size, int64_t *ssz) {
   int i;
-  int64_t error = 0;
+  int64_t error = 0, sqcoeff = 0;
 
   for (i = 0; i < block_size; i++) {
     int this_diff = coeff[i] - dqcoeff[i];
     error += (unsigned)this_diff * this_diff;
+    sqcoeff += (unsigned) coeff[i] * coeff[i];
   }
 
+  *ssz = sqcoeff;
   return error;
 }
 
@@ -501,27 +503,31 @@ static void choose_txfm_size_from_rd(VP9_COMP *cpi, MACROBLOCK *x,
 }
 
 static int64_t block_error_sby(MACROBLOCK *x, BLOCK_SIZE_TYPE bsize,
-                               int shift) {
+                               int shift, int64_t *sse) {
   struct macroblockd_plane *p = &x->e_mbd.plane[0];
   const int bw = plane_block_width(bsize, p);
   const int bh = plane_block_height(bsize, p);
-  return vp9_block_error(x->plane[0].coeff, x->e_mbd.plane[0].dqcoeff,
-                         bw * bh) >> shift;
+  int64_t e = vp9_block_error(x->plane[0].coeff, x->e_mbd.plane[0].dqcoeff,
+                              bw * bh, sse) >> shift;
+  *sse >>= shift;
+  return e;
 }
 
 static int64_t block_error_sbuv(MACROBLOCK *x, BLOCK_SIZE_TYPE bsize,
-                                int shift) {
-  int64_t sum = 0;
+                                int shift, int64_t *sse) {
+  int64_t sum = 0, this_sse;
   int plane;
 
+  *sse = 0;
   for (plane = 1; plane < MAX_MB_PLANE; plane++) {
     struct macroblockd_plane *p = &x->e_mbd.plane[plane];
     const int bw = plane_block_width(bsize, p);
     const int bh = plane_block_height(bsize, p);
     sum += vp9_block_error(x->plane[plane].coeff, x->e_mbd.plane[plane].dqcoeff,
-                           bw * bh);
+                           bw * bh, &this_sse);
+    *sse += this_sse;
   }
-
+  *sse >>= shift;
   return sum >> shift;
 }
 
@@ -581,7 +587,7 @@ static int rdcost_uv(VP9_COMMON *const cm, MACROBLOCK *x,
 
 static void super_block_yrd_for_txfm(VP9_COMMON *const cm, MACROBLOCK *x,
                                      int *rate, int64_t *distortion,
-                                     int *skippable,
+                                     int *skippable, int64_t *sse,
                                      BLOCK_SIZE_TYPE bsize, TX_SIZE tx_size) {
   MACROBLOCKD *const xd = &x->e_mbd;
   xd->mode_info_context->mbmi.txfm_size = tx_size;
@@ -591,18 +597,18 @@ static void super_block_yrd_for_txfm(VP9_COMMON *const cm, MACROBLOCK *x,
   else
     vp9_xform_quant_sby(cm, x, bsize);
 
-  *distortion = block_error_sby(x, bsize, tx_size == TX_32X32 ? 0 : 2);
+  *distortion = block_error_sby(x, bsize, tx_size == TX_32X32 ? 0 : 2, sse);
   *rate       = rdcost_plane(cm, x, 0, bsize, tx_size);
   *skippable  = vp9_sby_is_skippable(xd, bsize);
 }
 
 static void super_block_yrd(VP9_COMP *cpi,
                             MACROBLOCK *x, int *rate, int64_t *distortion,
-                            int *skip, BLOCK_SIZE_TYPE bs,
+                            int *skip, int64_t *psse, BLOCK_SIZE_TYPE bs,
                             int64_t txfm_cache[NB_TXFM_MODES]) {
   VP9_COMMON *const cm = &cpi->common;
   int r[TX_SIZE_MAX_SB][2], s[TX_SIZE_MAX_SB];
-  int64_t d[TX_SIZE_MAX_SB];
+  int64_t d[TX_SIZE_MAX_SB], sse[TX_SIZE_MAX_SB];
   MACROBLOCKD *xd = &x->e_mbd;
   MB_MODE_INFO *const mbmi = &xd->mode_info_context->mbmi;
 
@@ -621,25 +627,27 @@ static void super_block_yrd(VP9_COMP *cpi,
       mbmi->txfm_size = TX_4X4;
     }
     vpx_memset(txfm_cache, 0, NB_TXFM_MODES * sizeof(int64_t));
-    super_block_yrd_for_txfm(cm, x, rate, distortion, skip, bs,
+    super_block_yrd_for_txfm(cm, x, rate, distortion, skip, &sse[0], bs,
                              mbmi->txfm_size);
     return;
   }
   if (bs >= BLOCK_SIZE_SB32X32)
     super_block_yrd_for_txfm(cm, x, &r[TX_32X32][0], &d[TX_32X32], &s[TX_32X32],
-                             bs, TX_32X32);
+                             &sse[TX_32X32], bs, TX_32X32);
   if (bs >= BLOCK_SIZE_MB16X16)
     super_block_yrd_for_txfm(cm, x, &r[TX_16X16][0], &d[TX_16X16], &s[TX_16X16],
-                             bs, TX_16X16);
-  super_block_yrd_for_txfm(cm, x, &r[TX_8X8][0], &d[TX_8X8], &s[TX_8X8], bs,
-                           TX_8X8);
-  super_block_yrd_for_txfm(cm, x, &r[TX_4X4][0], &d[TX_4X4], &s[TX_4X4], bs,
-                           TX_4X4);
+                             &sse[TX_16X16], bs, TX_16X16);
+  super_block_yrd_for_txfm(cm, x, &r[TX_8X8][0], &d[TX_8X8], &s[TX_8X8],
+                           &sse[TX_8X8], bs, TX_8X8);
+  super_block_yrd_for_txfm(cm, x, &r[TX_4X4][0], &d[TX_4X4], &s[TX_4X4],
+                           &sse[TX_4X4], bs, TX_4X4);
 
   choose_txfm_size_from_rd(cpi, x, r, rate, d, distortion, s,
                            skip, txfm_cache,
                            TX_32X32 - (bs < BLOCK_SIZE_SB32X32)
                            - (bs < BLOCK_SIZE_MB16X16));
+  if (psse)
+    *psse = sse[mbmi->txfm_size];
 }
 
 static int64_t rd_pick_intra4x4block(VP9_COMP *cpi, MACROBLOCK *x, int ib,
@@ -688,6 +696,8 @@ static int64_t rd_pick_intra4x4block(VP9_COMP *cpi, MACROBLOCK *x, int ib,
 
     for (idy = 0; idy < bh; ++idy) {
       for (idx = 0; idx < bw; ++idx) {
+        int64_t ssz;
+
         block = ib + idy * 2 + idx;
         xd->mode_info_context->bmi[block].as_mode.first = mode;
         src = raster_block_offset_uint8(xd, BLOCK_SIZE_SB8X8, 0, block,
@@ -718,7 +728,8 @@ static int64_t rd_pick_intra4x4block(VP9_COMP *cpi, MACROBLOCK *x, int ib,
         ratey += cost_coeffs(cm, x, 0, block, PLANE_TYPE_Y_WITH_DC,
                              tempa + idx, templ + idy, TX_4X4, 16);
         distortion += vp9_block_error(coeff, BLOCK_OFFSET(pd->dqcoeff,
-                                                          block, 16), 16) >> 2;
+                                                          block, 16),
+                                      16, &ssz) >> 2;
 
         if (best_tx_type != DCT_DCT)
           vp9_short_iht4x4_add(BLOCK_OFFSET(pd->dqcoeff, block, 16),
@@ -881,7 +892,7 @@ static int64_t rd_pick_intra_sby_mode(VP9_COMP *cpi, MACROBLOCK *x,
     }
     x->e_mbd.mode_info_context->mbmi.mode = mode;
 
-    super_block_yrd(cpi, x, &this_rate_tokenonly, &this_distortion, &s,
+    super_block_yrd(cpi, x, &this_rate_tokenonly, &this_distortion, &s, NULL,
                     bsize, local_txfm_cache);
 
     this_rate = this_rate_tokenonly + bmode_costs[mode];
@@ -914,22 +925,25 @@ static int64_t rd_pick_intra_sby_mode(VP9_COMP *cpi, MACROBLOCK *x,
 
 static void super_block_uvrd_for_txfm(VP9_COMMON *const cm, MACROBLOCK *x,
                                       int *rate, int64_t *distortion,
-                                      int *skippable, BLOCK_SIZE_TYPE bsize,
+                                      int *skippable, int64_t *sse,
+                                      BLOCK_SIZE_TYPE bsize,
                                       TX_SIZE uv_tx_size) {
   MACROBLOCKD *const xd = &x->e_mbd;
+  int64_t dummy;
   if (xd->mode_info_context->mbmi.ref_frame[0] == INTRA_FRAME)
     vp9_encode_intra_block_uv(cm, x, bsize);
   else
     vp9_xform_quant_sbuv(cm, x, bsize);
 
-  *distortion = block_error_sbuv(x, bsize, uv_tx_size == TX_32X32 ? 0 : 2);
+  *distortion = block_error_sbuv(x, bsize, uv_tx_size == TX_32X32 ? 0 : 2,
+                                 sse ? sse : &dummy);
   *rate       = rdcost_uv(cm, x, bsize, uv_tx_size);
   *skippable  = vp9_sbuv_is_skippable(xd, bsize);
 }
 
 static void super_block_uvrd(VP9_COMMON *const cm, MACROBLOCK *x,
                              int *rate, int64_t *distortion, int *skippable,
-                             BLOCK_SIZE_TYPE bsize) {
+                             int64_t *sse, BLOCK_SIZE_TYPE bsize) {
   MACROBLOCKD *const xd = &x->e_mbd;
   MB_MODE_INFO *const mbmi = &xd->mode_info_context->mbmi;
   TX_SIZE uv_txfm_size = get_uv_tx_size(mbmi);
@@ -937,7 +951,7 @@ static void super_block_uvrd(VP9_COMMON *const cm, MACROBLOCK *x,
   if (mbmi->ref_frame[0] > INTRA_FRAME)
     vp9_subtract_sbuv(x, bsize);
 
-  super_block_uvrd_for_txfm(cm, x, rate, distortion, skippable, bsize,
+  super_block_uvrd_for_txfm(cm, x, rate, distortion, skippable, sse, bsize,
                             uv_txfm_size);
 }
 
@@ -954,7 +968,7 @@ static int64_t rd_pick_intra_sbuv_mode(VP9_COMP *cpi, MACROBLOCK *x,
   for (mode = DC_PRED; mode <= TM_PRED; mode++) {
     x->e_mbd.mode_info_context->mbmi.uv_mode = mode;
     super_block_uvrd(&cpi->common, x, &this_rate_tokenonly,
-                     &this_distortion, &s, bsize);
+                     &this_distortion, &s, NULL, bsize);
     this_rate = this_rate_tokenonly +
                 x->intra_uv_mode_cost[x->e_mbd.frame_type][mode];
     this_rd = RDCOST(x->rdmult, x->rddiv, this_rate, this_distortion);
@@ -1151,6 +1165,8 @@ static int64_t encode_inter_mb_segment(VP9_COMMON *const cm,
   k = i;
   for (idy = 0; idy < bh / 4; ++idy) {
     for (idx = 0; idx < bw / 4; ++idx) {
+      int64_t ssz;
+
       k += (idy * 2 + idx);
       src_diff = raster_block_offset_int16(xd, BLOCK_SIZE_SB8X8, 0, k,
                                            x->plane[0].src_diff);
@@ -1159,7 +1175,7 @@ static int64_t encode_inter_mb_segment(VP9_COMMON *const cm,
       x->quantize_b_4x4(x, k, DCT_DCT, 16);
       thisdistortion += vp9_block_error(coeff,
                                         BLOCK_OFFSET(xd->plane[0].dqcoeff,
-                                                     k, 16), 16);
+                                                     k, 16), 16, &ssz);
       thisrate += cost_coeffs(cm, x, 0, k, PLANE_TYPE_Y_WITH_DC,
                               ta + (k & 1),
                               tl + (k >> 1), TX_4X4, 16);
@@ -2238,7 +2254,8 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
                                  INTERPOLATIONFILTERTYPE *best_filter,
                                  int_mv *frame_mv,
                                  int mi_row, int mi_col,
-                                 int_mv single_newmv[MAX_REF_FRAMES]) {
+                                 int_mv single_newmv[MAX_REF_FRAMES],
+                                 int64_t *psse) {
   VP9_COMMON *cm = &cpi->common;
   MACROBLOCKD *xd = &x->e_mbd;
   MB_MODE_INFO *mbmi = &xd->mode_info_context->mbmi;
@@ -2467,17 +2484,19 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
 
   if (!x->skip) {
     int skippable_y, skippable_uv;
+    int64_t sseuv = INT_MAX;
 
     // Y cost and distortion
-    super_block_yrd(cpi, x, rate_y, distortion_y, &skippable_y,
+    super_block_yrd(cpi, x, rate_y, distortion_y, &skippable_y, psse,
                     bsize, txfm_cache);
 
     *rate2 += *rate_y;
     *distortion += *distortion_y;
 
     super_block_uvrd(cm, x, rate_uv, distortion_uv,
-                     &skippable_uv, bsize);
+                     &skippable_uv, &sseuv, bsize);
 
+    *psse += sseuv;
     *rate2 += *rate_uv;
     *distortion += *distortion_uv;
     *skippable = skippable_y && skippable_uv;
@@ -2611,6 +2630,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
   int bws = (1 << bwsl) / 4;  // mode_info step for subsize
   int bhsl = b_height_log2(bsize);
   int bhs = (1 << bhsl) / 4;  // mode_info step for subsize
+  int best_skip2 = 0;
 
   for (i = 0; i < 4; i++) {
     int j;
@@ -2702,6 +2722,8 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
     int skippable;
     int64_t txfm_cache[NB_TXFM_MODES];
     int i;
+    int this_skip2 = 0;
+    int64_t total_sse = INT_MAX;
 
     for (i = 0; i < NB_TXFM_MODES; ++i)
       txfm_cache[i] = INT64_MAX;
@@ -2863,7 +2885,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
         txfm_cache[i] = txfm_cache[ONLY_4X4];
     } else if (ref_frame == INTRA_FRAME) {
       TX_SIZE uv_tx;
-      super_block_yrd(cpi, x, &rate_y, &distortion_y, &skippable,
+      super_block_yrd(cpi, x, &rate_y, &distortion_y, &skippable, NULL,
                       bsize, txfm_cache);
 
       uv_tx = mbmi->txfm_size;
@@ -2989,7 +3011,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
                                       BLOCK_SIZE_SB8X8);
       vp9_subtract_sbuv(x, BLOCK_SIZE_SB8X8);
       super_block_uvrd_for_txfm(cm, x, &rate_uv, &distortion_uv,
-                                &uv_skippable, BLOCK_SIZE_SB8X8, TX_4X4);
+                                &uv_skippable, NULL, BLOCK_SIZE_SB8X8, TX_4X4);
       rate2 += rate_uv;
       distortion2 += distortion_uv;
       skippable = skippable && uv_skippable;
@@ -3017,7 +3039,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
                                   &mode_excluded, &disable_skip,
                                   &tmp_best_filter, frame_mv[this_mode],
                                   mi_row, mi_col,
-                                  single_newmv);
+                                  single_newmv, &total_sse);
       if (this_rd == INT64_MAX)
         continue;
     }
@@ -3062,10 +3084,29 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
             rate2 += prob_skip_cost;
           }
         }
+      } else if (mb_skip_allowed && ref_frame != INTRA_FRAME &&
+                 this_mode != SPLITMV) {
+        if (RDCOST(x->rdmult, x->rddiv, rate_y + rate_uv, distortion2) <
+            RDCOST(x->rdmult, x->rddiv, 0, total_sse)) {
+          // Add in the cost of the no skip flag.
+          int prob_skip_cost = vp9_cost_bit(vp9_get_pred_prob(cm, xd,
+                                                          PRED_MBSKIP), 0);
+          rate2 += prob_skip_cost;
+        } else {
+          int prob_skip_cost = vp9_cost_bit(vp9_get_pred_prob(cm, xd,
+                                                              PRED_MBSKIP), 1);
+          rate2 += prob_skip_cost;
+          distortion2 = total_sse;
+          assert(total_sse >= 0);
+          rate2 -= (rate_y + rate_uv);
+          rate_y = 0;
+          rate_uv = 0;
+          this_skip2 = 1;
+        }
       } else if (mb_skip_allowed) {
         // Add in the cost of the no skip flag.
         int prob_skip_cost = vp9_cost_bit(vp9_get_pred_prob(cm, xd,
-                                                        PRED_MBSKIP), 0);
+                                                            PRED_MBSKIP), 0);
         rate2 += prob_skip_cost;
       }
 
@@ -3119,6 +3160,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
         *returndistortion = distortion2;
         best_rd = this_rd;
         best_mbmode = *mbmi;
+        best_skip2 = this_skip2;
         best_partition = *x->partition_info;
 
         if (this_mode == I4X4_PRED || this_mode == SPLITMV)
@@ -3301,6 +3343,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
 
   // macroblock modes
   *mbmi = best_mbmode;
+  x->skip |= best_skip2;
   if (best_mbmode.ref_frame[0] == INTRA_FRAME &&
       best_mbmode.sb_type < BLOCK_SIZE_SB8X8) {
     for (i = 0; i < 4; i++)
