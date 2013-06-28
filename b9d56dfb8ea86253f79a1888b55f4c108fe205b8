@@ -1,0 +1,157 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAbn//6MU\u003d",
+        "filename": "vp9/common/arm/neon/vp9_dequantize_neon.asm",
+        "patchSetId": 3
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2013-06-28T06:13:02Z",
+      "side": 1,
+      "message": "It looks like you copied the file name from the x86 optimizations. Sorry about that. I\u0027m not sure why the file was named dequantize but it doesn\u0027t have anything to do with dequantization. A more appropriate name would be vp9_idct_neon.asm or vp9_add_constant_residual_neon.asm",
+      "revId": "b9d56dfb8ea86253f79a1888b55f4c108fe205b8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAbn//6MQ\u003d",
+        "filename": "vp9/common/arm/neon/vp9_dequantize_neon.asm",
+        "patchSetId": 3
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2013-06-28T06:13:02Z",
+      "side": 1,
+      "message": "Since the file implements decoder-specific functions, it should be in vp9/decoder/arm/neon. That folder does not exist yet but you can create it.",
+      "revId": "b9d56dfb8ea86253f79a1888b55f4c108fe205b8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAbn//6Lw\u003d",
+        "filename": "vp9/common/arm/neon/vp9_dequantize_neon.asm",
+        "patchSetId": 3
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2013-06-28T06:13:02Z",
+      "side": 1,
+      "message": "q4-q7 are callee-saved. If possible, it\u0027s better not to use them.\n\nq8-q15 can be safely used.\n http://infocenter.arm.com/help/topic/com.arm.doc.ihi0042e/IHI0042E_aapcs.pdf\n 5.1.2.1 VFP register usage conventions (VFP v2, v3 and the Advanced SIMD Extension)\n ...\n Registers s16-s31 (d8-d15, q4-q7) must be preserved across subroutine calls; registers s0-s15 (d0-d7, q0-q3) do \nnot need to be preserved (and can be used for passing arguments or returning results in standard procedure-call \nvariants). Registers d16-d31 (q8-q15), if present, do not need to be preserved.",
+      "revId": "b9d56dfb8ea86253f79a1888b55f4c108fe205b8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAbn//6Kw\u003d",
+        "filename": "vp9/common/arm/neon/vp9_dequantize_neon.asm",
+        "patchSetId": 3
+      },
+      "lineNbr": 70,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2013-06-28T06:13:02Z",
+      "side": 1,
+      "message": "Description does not match actual functions.",
+      "revId": "b9d56dfb8ea86253f79a1888b55f4c108fe205b8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAbn//6Lo\u003d",
+        "filename": "vp9/common/arm/neon/vp9_dequantize_neon.asm",
+        "patchSetId": 3
+      },
+      "lineNbr": 72,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2013-06-28T06:13:02Z",
+      "side": 1,
+      "message": "Please don\u0027t put author information in the file. It\u0027s available in the git history and will be added to libvpx/AUTHORS next time the file is updated.",
+      "revId": "b9d56dfb8ea86253f79a1888b55f4c108fe205b8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAbn//6K0\u003d",
+        "filename": "vp9/common/arm/neon/vp9_dequantize_neon.asm",
+        "patchSetId": 3
+      },
+      "lineNbr": 73,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2013-06-28T06:13:02Z",
+      "side": 1,
+      "message": "These don\u0027t match the function prototype in vp9_idct_blk.c:\n void vp9_add_constant_residual_8x8_c(const int16_t diff, uint8_t *dest, int stride) {",
+      "revId": "b9d56dfb8ea86253f79a1888b55f4c108fe205b8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAbn//6Ks\u003d",
+        "filename": "vp9/common/arm/neon/vp9_dequantize_neon.asm",
+        "patchSetId": 3
+      },
+      "lineNbr": 80,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2013-06-28T06:13:02Z",
+      "side": 1,
+      "message": "This appears to use the arguments correctly (r1 \u003d dest, r2 \u003d stride)",
+      "revId": "b9d56dfb8ea86253f79a1888b55f4c108fe205b8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAbn//6Lg\u003d",
+        "filename": "vp9/common/arm/neon/vp9_dequantize_neon.asm",
+        "patchSetId": 3
+      },
+      "lineNbr": 94,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2013-06-28T06:13:02Z",
+      "side": 1,
+      "message": "NEGATIVE (throughout file)",
+      "revId": "b9d56dfb8ea86253f79a1888b55f4c108fe205b8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAbn//6K8\u003d",
+        "filename": "vp9/common/arm/neon/vp9_dequantize_neon.asm",
+        "patchSetId": 3
+      },
+      "lineNbr": 131,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2013-06-28T06:13:02Z",
+      "side": 1,
+      "message": "stride is in r2, not on the stack.",
+      "revId": "b9d56dfb8ea86253f79a1888b55f4c108fe205b8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
