@@ -13,11 +13,8 @@
 
 #include "vp9/decoder/vp9_onyxd_int.h"
 
-void vp9_decode_mb_mode_mv(VP9D_COMP* const pbi,
-                           MACROBLOCKD* const xd,
-                           int mb_row,
-                           int mb_col,
-                           vp9_reader *r);
-void vp9_decode_mode_mvs_init(VP9D_COMP* const pbi, vp9_reader *r);
+void vp9_prepare_read_mode_info(VP9D_COMP* pbi, vp9_reader *r);
+
+void vp9_read_mode_info(VP9D_COMP* pbi, int mi_row, int mi_col, vp9_reader *r);
 
 #endif  // VP9_DECODER_VP9_DECODEMV_H_

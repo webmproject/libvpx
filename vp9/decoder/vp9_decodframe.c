@@ -294,7 +294,7 @@ static void decode_modes_b(VP9D_COMP *pbi, int mi_row, int mi_col,
       return;
 
   set_offsets(pbi, bsize, mi_row, mi_col);
-  vp9_decode_mb_mode_mv(pbi, xd, mi_row, mi_col, r);
+  vp9_read_mode_info(pbi, mi_row, mi_col, r);
 
   if (xd->mode_info_context->mbmi.ref_frame[0] == INTRA_FRAME) {
     decode_sb_intra(pbi, mi_row, mi_col, r,
@@ -1047,7 +1047,7 @@ int vp9_decode_frame(VP9D_COMP *pbi, const uint8_t **p_data_end) {
 
   set_prev_mi(pc);
 
-  vp9_decode_mode_mvs_init(pbi, &header_bc);
+  vp9_prepare_read_mode_info(pbi, &header_bc);
 
   decode_tiles(pbi, data, first_partition_size, &residual_bc);
 
