@@ -68,7 +68,6 @@ struct macroblock_plane {
   int16_t *quant;
   uint8_t *quant_shift;
   int16_t *zbin;
-  int16_t *zrun_zbin_boost;
   int16_t *round;
 
   // Zbin Over Quant value

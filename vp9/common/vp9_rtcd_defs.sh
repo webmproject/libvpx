@@ -558,7 +558,7 @@ prototype unsigned int vp9_get_mb_ss "const int16_t *"
 specialize vp9_get_mb_ss mmx sse2
 # ENCODEMB INVOKE
 
-prototype int64_t vp9_block_error "int16_t *coeff, int16_t *dqcoeff, intptr_t block_size"
+prototype int64_t vp9_block_error "int16_t *coeff, int16_t *dqcoeff, intptr_t block_size, int64_t *ssz"
 specialize vp9_block_error sse2
 
 prototype void vp9_subtract_block "int rows, int cols, int16_t *diff_ptr, ptrdiff_t diff_stride, const uint8_t *src_ptr, ptrdiff_t src_stride, const uint8_t *pred_ptr, ptrdiff_t pred_stride"

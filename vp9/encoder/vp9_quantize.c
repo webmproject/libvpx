@@ -21,8 +21,7 @@
 extern int enc_debug;
 #endif
 
-static void quantize(int16_t *zbin_boost_orig_ptr,
-                     int16_t *coeff_ptr, int n_coeffs, int skip_block,
+static void quantize(int16_t *coeff_ptr, int n_coeffs, int skip_block,
                      int16_t *zbin_ptr, int16_t *round_ptr, int16_t *quant_ptr,
                      uint8_t *quant_shift_ptr,
                      int16_t *qcoeff_ptr, int16_t *dqcoeff_ptr,
@@ -31,8 +30,6 @@ static void quantize(int16_t *zbin_boost_orig_ptr,
   int i, rc, eob;
   int zbins[2], nzbins[2], zbin;
   int x, y, z, sz;
-  int zero_run = 0;
-  int16_t *zbin_boost_ptr = zbin_boost_orig_ptr;
   int zero_flag = n_coeffs;
 
   vpx_memset(qcoeff_ptr, 0, n_coeffs*sizeof(int16_t));
@@ -65,8 +62,7 @@ static void quantize(int16_t *zbin_boost_orig_ptr,
       rc = scan[i];
       z  = coeff_ptr[rc];
 
-      zbin = (zbins[rc != 0] + zbin_boost_ptr[zero_run]);
-      zero_run += (zero_run < 15);
+      zbin = (zbins[rc != 0]);
 
       sz = (z >> 31);                               // sign of z
       x  = (z ^ sz) - sz;
@@ -81,7 +77,6 @@ static void quantize(int16_t *zbin_boost_orig_ptr,
 
         if (y) {
           eob = i;                                  // last nonzero coeffs
-          zero_run = 0;                             // set zero_run
         }
       }
     }
@@ -90,8 +85,7 @@ static void quantize(int16_t *zbin_boost_orig_ptr,
 }
 
 // This function works well for large transform size.
-static void quantize_sparse(int16_t *zbin_boost_orig_ptr,
-                            int16_t *coeff_ptr, int n_coeffs, int skip_block,
+static void quantize_sparse(int16_t *coeff_ptr, int n_coeffs, int skip_block,
                             int16_t *zbin_ptr, int16_t *round_ptr,
                             int16_t *quant_ptr, uint8_t *quant_shift_ptr,
                             int16_t *qcoeff_ptr, int16_t *dqcoeff_ptr,
@@ -101,10 +95,7 @@ static void quantize_sparse(int16_t *zbin_boost_orig_ptr,
   int i, rc, eob;
   int zbins[2], nzbins[2], zbin;
   int x, y, z, sz;
-  int zero_run = 0;
-  int16_t *zbin_boost_ptr = zbin_boost_orig_ptr;
   int idx = 0;
-  int pre_idx = 0;
 
   vpx_memset(qcoeff_ptr, 0, n_coeffs*sizeof(int16_t));
   vpx_memset(dqcoeff_ptr, 0, n_coeffs*sizeof(int16_t));
@@ -135,11 +126,8 @@ static void quantize_sparse(int16_t *zbin_boost_orig_ptr,
       rc = scan[idx_arr[i]];
 
       // Calculate ZBIN
-      zero_run += idx_arr[i] - pre_idx;
-      if(zero_run > 15) zero_run = 15;
-      zbin = (zbins[rc != 0] + zbin_boost_ptr[zero_run]);
+      zbin = (zbins[rc != 0]);
 
-      pre_idx = idx_arr[i];
       z = coeff_ptr[rc] * 2;
       sz = (z >> 31);                               // sign of z
       x  = (z ^ sz) - sz;                           // x = abs(z)
@@ -155,7 +143,6 @@ static void quantize_sparse(int16_t *zbin_boost_orig_ptr,
 
         if (y) {
           eob = idx_arr[i];                         // last nonzero coeffs
-          zero_run = -1;                            // set zero_run
         }
       }
     }
@@ -189,8 +176,7 @@ void vp9_quantize(MACROBLOCK *mb, int plane, int block, int n_coeffs,
     // Save index of picked coefficient in pre-scan pass.
     int idx_arr[1024];
 
-    quantize_sparse(mb->plane[plane].zrun_zbin_boost,
-                    BLOCK_OFFSET(mb->plane[plane].coeff, block, 16),
+    quantize_sparse(BLOCK_OFFSET(mb->plane[plane].coeff, block, 16),
                     n_coeffs, mb->skip_block,
                     mb->plane[plane].zbin,
                     mb->plane[plane].round,
@@ -204,8 +190,7 @@ void vp9_quantize(MACROBLOCK *mb, int plane, int block, int n_coeffs,
                     scan, idx_arr);
   }
   else {
-    quantize(mb->plane[plane].zrun_zbin_boost,
-             BLOCK_OFFSET(mb->plane[plane].coeff, block, 16),
+    quantize(BLOCK_OFFSET(mb->plane[plane].coeff, block, 16),
              n_coeffs, mb->skip_block,
              mb->plane[plane].zbin,
              mb->plane[plane].round,
@@ -226,8 +211,7 @@ void vp9_regular_quantize_b_4x4(MACROBLOCK *mb, int b_idx, TX_TYPE tx_type,
   const struct plane_block_idx pb_idx = plane_block_idx(y_blocks, b_idx);
   const int *pt_scan = get_scan_4x4(tx_type);
 
-  quantize(mb->plane[pb_idx.plane].zrun_zbin_boost,
-           BLOCK_OFFSET(mb->plane[pb_idx.plane].coeff, pb_idx.block, 16),
+  quantize(BLOCK_OFFSET(mb->plane[pb_idx.plane].coeff, pb_idx.block, 16),
            16, mb->skip_block,
            mb->plane[pb_idx.plane].zbin,
            mb->plane[pb_idx.plane].round,
@@ -261,9 +245,6 @@ void vp9_init_quantizer(VP9_COMP *cpi) {
 #endif
   int q;
 
-  static const int zbin_boost[16] = { 0,  0,  0,  8,  8,  8, 10, 12,
-                                     14, 16, 20, 24, 28, 32, 36, 40 };
-
   for (q = 0; q < QINDEX_RANGE; q++) {
     int qzbin_factor = (vp9_dc_quant(q, 0) < 148) ? 84 : 80;
     int qrounding_factor = 48;
@@ -277,14 +258,12 @@ void vp9_init_quantizer(VP9_COMP *cpi) {
     cpi->y_zbin[q][0] = ROUND_POWER_OF_TWO(qzbin_factor * quant_val, 7);
     cpi->y_round[q][0] = (qrounding_factor * quant_val) >> 7;
     cpi->common.y_dequant[q][0] = quant_val;
-    cpi->zrun_zbin_boost_y[q][0] = (quant_val * zbin_boost[0]) >> 7;
 
     quant_val = vp9_dc_quant(q, cpi->common.uv_dc_delta_q);
     invert_quant(cpi->uv_quant[q] + 0, cpi->uv_quant_shift[q] + 0, quant_val);
     cpi->uv_zbin[q][0] = ROUND_POWER_OF_TWO(qzbin_factor * quant_val, 7);
     cpi->uv_round[q][0] = (qrounding_factor * quant_val) >> 7;
     cpi->common.uv_dequant[q][0] = quant_val;
-    cpi->zrun_zbin_boost_uv[q][0] = (quant_val * zbin_boost[0]) >> 7;
 
 #if CONFIG_ALPHA
     quant_val = vp9_dc_quant(q, cpi->common.a_dc_delta_q);
@@ -292,7 +271,6 @@ void vp9_init_quantizer(VP9_COMP *cpi) {
     cpi->a_zbin[q][0] = ROUND_POWER_OF_TWO(qzbin_factor * quant_val, 7);
     cpi->a_round[q][0] = (qrounding_factor * quant_val) >> 7;
     cpi->common.a_dequant[q][0] = quant_val;
-    cpi->zrun_zbin_boost_a[q][0] = (quant_val * zbin_boost[0]) >> 7;
 #endif
 
     quant_val = vp9_ac_quant(q, 0);
@@ -310,15 +288,11 @@ void vp9_init_quantizer(VP9_COMP *cpi) {
       invert_quant(cpi->y_quant[q] + rc, cpi->y_quant_shift[q] + rc, quant_val);
       cpi->y_zbin[q][rc] = ROUND_POWER_OF_TWO(qzbin_factor * quant_val, 7);
       cpi->y_round[q][rc] = (qrounding_factor * quant_val) >> 7;
-      cpi->zrun_zbin_boost_y[q][i] =
-          ROUND_POWER_OF_TWO(quant_val * zbin_boost[i], 7);
 
       invert_quant(cpi->uv_quant[q] + rc, cpi->uv_quant_shift[q] + rc,
         quant_uv_val);
       cpi->uv_zbin[q][rc] = ROUND_POWER_OF_TWO(qzbin_factor * quant_uv_val, 7);
       cpi->uv_round[q][rc] = (qrounding_factor * quant_uv_val) >> 7;
-      cpi->zrun_zbin_boost_uv[q][i] =
-          ROUND_POWER_OF_TWO(quant_uv_val * zbin_boost[i], 7);
 
 #if CONFIG_ALPHA
       invert_quant(cpi->a_quant[q] + rc, cpi->a_quant_shift[q] + rc,
@@ -326,8 +300,6 @@ void vp9_init_quantizer(VP9_COMP *cpi) {
       cpi->a_zbin[q][rc] =
           ROUND_POWER_OF_TWO(qzbin_factor * quant_alpha_val, 7);
       cpi->a_round[q][rc] = (qrounding_factor * quant_alpha_val) >> 7;
-      cpi->zrun_zbin_boost_a[q][i] =
-          ROUND_POWER_OF_TWO(quant_alpha_val * zbin_boost[i], 7);
 #endif
     }
   }
@@ -348,7 +320,6 @@ void vp9_mb_init_quantizer(VP9_COMP *cpi, MACROBLOCK *x) {
   x->plane[0].quant_shift = cpi->y_quant_shift[qindex];
   x->plane[0].zbin = cpi->y_zbin[qindex];
   x->plane[0].round = cpi->y_round[qindex];
-  x->plane[0].zrun_zbin_boost = cpi->zrun_zbin_boost_y[qindex];
   x->plane[0].zbin_extra = (int16_t)zbin_extra;
   x->e_mbd.plane[0].dequant = cpi->common.y_dequant[qindex];
 
@@ -361,7 +332,6 @@ void vp9_mb_init_quantizer(VP9_COMP *cpi, MACROBLOCK *x) {
     x->plane[i].quant_shift = cpi->uv_quant_shift[qindex];
     x->plane[i].zbin = cpi->uv_zbin[qindex];
     x->plane[i].round = cpi->uv_round[qindex];
-    x->plane[i].zrun_zbin_boost = cpi->zrun_zbin_boost_uv[qindex];
     x->plane[i].zbin_extra = (int16_t)zbin_extra;
     x->e_mbd.plane[i].dequant = cpi->common.uv_dequant[qindex];
   }
@@ -371,7 +341,6 @@ void vp9_mb_init_quantizer(VP9_COMP *cpi, MACROBLOCK *x) {
   x->plane[3].quant_shift = cpi->a_quant_shift[qindex];
   x->plane[3].zbin = cpi->a_zbin[qindex];
   x->plane[3].round = cpi->a_round[qindex];
-  x->plane[3].zrun_zbin_boost = cpi->zrun_zbin_boost_a[qindex];
   x->plane[3].zbin_extra = (int16_t)zbin_extra;
   x->e_mbd.plane[3].dequant = cpi->common.a_dequant[qindex];
 #endif
