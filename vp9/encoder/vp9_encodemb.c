@@ -116,7 +116,7 @@ static int trellis_get_coeff_context(const int *scan,
                                      int pad, int l) {
   int bak = token_cache[scan[idx]], pt;
   token_cache[scan[idx]] = vp9_pt_energy_class[token];
-  pt = vp9_get_coef_context(scan, nb, pad, token_cache, idx + 1, l);
+  pt = get_coef_context(scan, nb, pad, token_cache, idx + 1, l);
   token_cache[scan[idx]] = bak;
   return pt;
 }

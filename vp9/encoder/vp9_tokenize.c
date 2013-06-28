@@ -193,7 +193,7 @@ static void tokenize_b(int plane, int block, BLOCK_SIZE_TYPE bsize,
     int v = 0;
     rc = scan[c];
     if (c)
-      pt = vp9_get_coef_context(scan, nb, pad, token_cache, c, default_eob);
+      pt = get_coef_context(scan, nb, pad, token_cache, c, default_eob);
     if (c < eob) {
       v = qcoeff_ptr[rc];
       assert(-DCT_MAX_VALUE <= v  &&  v < DCT_MAX_VALUE);

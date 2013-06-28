@@ -172,8 +172,8 @@ static int decode_coefs(FRAME_CONTEXT *fc, const MACROBLOCKD *xd,
     if (c >= seg_eob)
       break;
     if (c)
-      pt = vp9_get_coef_context(scan, nb, pad, token_cache,
-                                c, default_eob);
+      pt = get_coef_context(scan, nb, pad, token_cache,
+                            c, default_eob);
     band = get_coef_band(band_translate, c);
     prob = coef_probs[band][pt];
 #if !CONFIG_BALANCED_COEFTREE
@@ -186,8 +186,8 @@ SKIP_START:
     if (c >= seg_eob)
       break;
     if (c)
-      pt = vp9_get_coef_context(scan, nb, pad, token_cache,
-                                c, default_eob);
+      pt = get_coef_context(scan, nb, pad, token_cache,
+                            c, default_eob);
     band = get_coef_band(band_translate, c);
     prob = coef_probs[band][pt];
 

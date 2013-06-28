@@ -148,8 +148,27 @@ static int get_coef_band(const uint8_t * band_translate, int coef_index) {
     ? (COEF_BANDS-1) : band_translate[coef_index];
 }
 
-extern int vp9_get_coef_context(const int *scan, const int *neighbors,
-                                int nb_pad, uint8_t *token_cache, int c, int l);
+#define MAX_NEIGHBORS 2
+static INLINE int get_coef_context(const int *scan, const int *neighbors,
+                                   int nb_pad, uint8_t *token_cache,
+                                   int c, int l) {
+  int eob = l;
+  assert(nb_pad == MAX_NEIGHBORS);
+  if (c == eob) {
+    return 0;
+  } else {
+    int ctx;
+    assert(neighbors[MAX_NEIGHBORS * c + 0] >= 0);
+    if (neighbors[MAX_NEIGHBORS * c + 1] >= 0) {
+      ctx = (1 + token_cache[scan[neighbors[MAX_NEIGHBORS * c + 0]]] +
+             token_cache[scan[neighbors[MAX_NEIGHBORS * c + 1]]]) >> 1;
+    } else {
+      ctx = token_cache[scan[neighbors[MAX_NEIGHBORS * c + 0]]];
+    }
+    return ctx;
+  }
+}
+
 const int *vp9_get_coef_neighbors_handle(const int *scan, int *pad);
 
 
