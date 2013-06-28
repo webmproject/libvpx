@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAbn//58w\u003d",
+        "filename": "vp9/decoder/vp9_decodemv.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 549,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-06-28T15:34:26Z",
+      "side": 0,
+      "message": "Could you make this change in another patch? It\u0027s unrelated to the debug assertions, and I seem to remember we kept it here for a  (possibly no longer valid) reason during one of your earlier refactorings. I\u0027d at least like to consider it separately.",
+      "revId": "a3664258c5cb8295c128c157bf73363434635960",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
