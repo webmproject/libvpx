@@ -60,6 +60,18 @@ static INLINE int multiple8(int value) {
   return (value + 7) & ~7;
 }
 
+static int get_unsigned_bits(unsigned int num_values) {
+  int cat = 0;
+  if (num_values <= 1)
+    return 0;
+  num_values--;
+  while (num_values > 0) {
+    cat++;
+    num_values >>= 1;
+  }
+  return cat;
+}
+
 #define SYNC_CODE_0 0x49
 #define SYNC_CODE_1 0x83
 #define SYNC_CODE_2 0x42

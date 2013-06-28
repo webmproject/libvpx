@@ -587,7 +587,7 @@ void vp9_short_fht8x8_c(int16_t *input, int16_t *output,
       temp_in[j] = out[j + i * 8];
     ht.rows(temp_in, temp_out);
     for (j = 0; j < 8; ++j)
-      output[j + i * 8] = temp_out[j] >> 1;
+      output[j + i * 8] = (temp_out[j] + (temp_out[j] < 0)) >> 1;
   }
 }
 
@@ -991,8 +991,18 @@ void vp9_short_fht16x16_c(int16_t *input, int16_t *output,
   }
 }
 
+static INLINE int dct_32_round(int input) {
+  int rv = ROUND_POWER_OF_TWO(input, DCT_CONST_BITS);
+  assert(-131072 <= rv && rv <= 131071);
+  return rv;
+}
 
-static void dct32_1d(int *input, int *output) {
+static INLINE int half_round_shift(int input) {
+  int rv = (input + 1 + (input < 0)) >> 2;
+  return rv;
+}
+
+static void dct32_1d(int *input, int *output, int round) {
   int step[32];
   // Stage 1
   step[0] = input[0] + input[(32 - 1)];
@@ -1100,6 +1110,44 @@ static void dct32_1d(int *input, int *output) {
   step[29] = output[29] + output[26];
   step[30] = output[30] + output[25];
   step[31] = output[31] + output[24];
+
+  // dump the magnitude by half, hence the intermediate values are within 1108
+  // the range of 16 bits.
+  if (round) {
+    step[0] = half_round_shift(step[0]);
+    step[1] = half_round_shift(step[1]);
+    step[2] = half_round_shift(step[2]);
+    step[3] = half_round_shift(step[3]);
+    step[4] = half_round_shift(step[4]);
+    step[5] = half_round_shift(step[5]);
+    step[6] = half_round_shift(step[6]);
+    step[7] = half_round_shift(step[7]);
+    step[8] = half_round_shift(step[8]);
+    step[9] = half_round_shift(step[9]);
+    step[10] = half_round_shift(step[10]);
+    step[11] = half_round_shift(step[11]);
+    step[12] = half_round_shift(step[12]);
+    step[13] = half_round_shift(step[13]);
+    step[14] = half_round_shift(step[14]);
+    step[15] = half_round_shift(step[15]);
+
+    step[16] = half_round_shift(step[16]);
+    step[17] = half_round_shift(step[17]);
+    step[18] = half_round_shift(step[18]);
+    step[19] = half_round_shift(step[19]);
+    step[20] = half_round_shift(step[20]);
+    step[21] = half_round_shift(step[21]);
+    step[22] = half_round_shift(step[22]);
+    step[23] = half_round_shift(step[23]);
+    step[24] = half_round_shift(step[24]);
+    step[25] = half_round_shift(step[25]);
+    step[26] = half_round_shift(step[26]);
+    step[27] = half_round_shift(step[27]);
+    step[28] = half_round_shift(step[28]);
+    step[29] = half_round_shift(step[29]);
+    step[30] = half_round_shift(step[30]);
+    step[31] = half_round_shift(step[31]);
+  }
 
   // Stage 4
   output[0] = step[0] + step[3];
@@ -1283,12 +1331,12 @@ void vp9_short_fdct32x32_c(int16_t *input, int16_t *out, int pitch) {
   int output[32 * 32];
 
   // Columns
-  for (i = 0; i < 32; i++) {
+  for (i = 0; i < 32; ++i) {
     int temp_in[32], temp_out[32];
-    for (j = 0; j < 32; j++)
+    for (j = 0; j < 32; ++j)
       temp_in[j] = input[j * shortpitch + i] << 2;
-    dct32_1d(temp_in, temp_out);
-    for (j = 0; j < 32; j++)
+    dct32_1d(temp_in, temp_out, 0);
+    for (j = 0; j < 32; ++j)
       output[j * 32 + i] = (temp_out[j] + 1 + (temp_out[j] > 0)) >> 2;
   }
 
@@ -1297,8 +1345,37 @@ void vp9_short_fdct32x32_c(int16_t *input, int16_t *out, int pitch) {
     int temp_in[32], temp_out[32];
     for (j = 0; j < 32; ++j)
       temp_in[j] = output[j + i * 32];
-    dct32_1d(temp_in, temp_out);
+    dct32_1d(temp_in, temp_out, 0);
     for (j = 0; j < 32; ++j)
       out[j + i * 32] = (temp_out[j] + 1 + (temp_out[j] < 0)) >> 2;
+  }
+}
+
+// Note that although we use dct_32_round in dct32_1d computation flow,
+// this 2d fdct32x32 for rate-distortion optimization loop is operating
+// within 16 bits precision.
+void vp9_short_fdct32x32_rd_c(int16_t *input, int16_t *out, int pitch) {
+  int shortpitch = pitch >> 1;
+  int i, j;
+  int output[32 * 32];
+
+  // Columns
+  for (i = 0; i < 32; ++i) {
+    int temp_in[32], temp_out[32];
+    for (j = 0; j < 32; ++j)
+      temp_in[j] = input[j * shortpitch + i] << 2;
+    dct32_1d(temp_in, temp_out, 0);
+    for (j = 0; j < 32; ++j)
+      output[j * 32 + i] = (temp_out[j] + 1 + (temp_out[j] > 0)) >> 2;
+  }
+
+  // Rows
+  for (i = 0; i < 32; ++i) {
+    int temp_in[32], temp_out[32];
+    for (j = 0; j < 32; ++j)
+      temp_in[j] = output[j + i * 32];
+    dct32_1d(temp_in, temp_out, 1);
+    for (j = 0; j < 32; ++j)
+      out[j + i * 32] = temp_out[j];
   }
 }

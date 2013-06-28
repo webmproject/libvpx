@@ -51,25 +51,25 @@ static void temporal_filter_predictors_mb_c(MACROBLOCKD *xd,
                             &xd->scale_factor[which_mv],
                             16, 16,
                             which_mv,
-                            &xd->subpix);
+                            &xd->subpix, MV_PRECISION_Q3);
 
   stride = (stride + 1) >> 1;
 
-  vp9_build_inter_predictor_q4(u_mb_ptr, stride,
-                               &pred[256], 8,
-                               &mv,
-                               &xd->scale_factor_uv[which_mv],
-                               8, 8,
-                               which_mv,
-                               &xd->subpix);
+  vp9_build_inter_predictor(u_mb_ptr, stride,
+                            &pred[256], 8,
+                            &mv,
+                            &xd->scale_factor_uv[which_mv],
+                            8, 8,
+                            which_mv,
+                            &xd->subpix, MV_PRECISION_Q4);
 
-  vp9_build_inter_predictor_q4(v_mb_ptr, stride,
-                               &pred[320], 8,
-                               &mv,
-                               &xd->scale_factor_uv[which_mv],
-                               8, 8,
-                               which_mv,
-                               &xd->subpix);
+  vp9_build_inter_predictor(v_mb_ptr, stride,
+                            &pred[320], 8,
+                            &mv,
+                            &xd->scale_factor_uv[which_mv],
+                            8, 8,
+                            which_mv,
+                            &xd->subpix, MV_PRECISION_Q4);
 }
 
 void vp9_temporal_filter_apply_c(uint8_t *frame1,
@@ -148,9 +148,10 @@ static int temporal_filter_find_matching_mb_c(VP9_COMP *cpi,
 
   // Further step/diamond searches as necessary
   if (cpi->speed < 8)
-    step_param = cpi->sf.first_step + ((cpi->speed > 5) ? 1 : 0);
+    step_param = cpi->sf.reduce_first_step_size + ((cpi->speed > 5) ? 1 : 0);
   else
-    step_param = cpi->sf.first_step + 2;
+    step_param = cpi->sf.reduce_first_step_size + 2;
+  step_param = MIN(step_param, (cpi->sf.max_step_search_steps - 2));
 
   /*cpi->sf.search_method == HEX*/
   // TODO Check that the 16x16 vf & sdf are selected here

@@ -27,18 +27,28 @@ extern "C" {
 namespace {
 const int num_tests = 10;
 
-void encrypt_buffer(uint8_t *buffer, int size, const uint8_t *key) {
+// In a real use the 'decrypt_state' parameter will be a pointer to a struct
+// with whatever internal state the decryptor uses. For testing we'll just
+// xor with a constant key, and decrypt_state will point to the start of
+// the original buffer.
+const uint8_t secret_key[16] = {
+  0x01, 0x12, 0x23, 0x34, 0x45, 0x56, 0x67, 0x78,
+  0x89, 0x9a, 0xab, 0xbc, 0xcd, 0xde, 0xef, 0xf0
+};
+
+void encrypt_buffer(uint8_t *buffer, int size) {
   for (int i = 0; i < size; ++i) {
-    buffer[i] ^= key[i % 32];
+    buffer[i] ^= secret_key[i & 15];
   }
 }
 
-const uint8_t secret_key[32] = {
-  234,  32,   2,  3,  4, 230,   6,  11,
-    0, 132,  22, 23, 45,  21, 124, 255,
-    0,  43,  52,  3, 23,  63,  99,   7,
-  120,   8, 252, 84,  4,  83,   6,  13
-};
+void test_decrypt_cb(void *decrypt_state, const uint8_t *input,
+                           uint8_t *output, int count) {
+  int offset = input - (uint8_t *)decrypt_state;
+  for (int i = 0; i < count; i++) {
+    output[i] = input[i] ^ secret_key[(offset + i) & 15];
+  }
+}
 
 }  // namespace
 
@@ -85,12 +95,13 @@ TEST(VP8, TestBitIO) {
         vp8_stop_encode(&bw);
 
         BOOL_DECODER br;
-
 #if CONFIG_DECRYPT
-        encrypt_buffer(bw_buffer, buffer_size, secret_key);
+        encrypt_buffer(bw_buffer, buffer_size);
+        vp8dx_start_decode(&br, bw_buffer, buffer_size,
+                           test_decrypt_cb, (void *)bw_buffer);
+#else
+        vp8dx_start_decode(&br, bw_buffer, buffer_size, NULL, NULL);
 #endif
-
-        vp8dx_start_decode(&br, bw_buffer, buffer_size, bw_buffer, secret_key);
         bit_rnd.Reset(random_seed);
         for (int i = 0; i < bits_to_test; ++i) {
           if (bit_method == 2) {

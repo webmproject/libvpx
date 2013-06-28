@@ -175,16 +175,6 @@ int recenter_nonneg(int v, int m) {
     return ((m - v) << 1) - 1;
 }
 
-static int get_unsigned_bits(unsigned num_values) {
-  int cat = 0;
-  if ((num_values--) <= 1) return 0;
-  while (num_values > 0) {
-    cat++;
-    num_values >>= 1;
-  }
-  return cat;
-}
-
 void vp9_encode_unsigned_max(struct vp9_write_bit_buffer *wb,
                              int data, int max) {
   vp9_wb_write_literal(wb, data, get_unsigned_bits(max));
@@ -572,13 +562,11 @@ static void write_sb_mv_ref(vp9_writer *bc, MB_PREDICTION_MODE m,
               vp9_sb_mv_ref_encoding_array - NEARESTMV + m);
 }
 
-// This function writes the current macro block's segnment id to the bitstream
-// It should only be called if a segment map update is indicated.
-static void write_mb_segid(vp9_writer *bc,
-                           const MB_MODE_INFO *mi, const MACROBLOCKD *xd) {
+
+static void write_segment_id(vp9_writer *w, const MACROBLOCKD *xd,
+                             int segment_id) {
   if (xd->segmentation_enabled && xd->update_mb_segmentation_map)
-    treed_write(bc, vp9_segment_tree, xd->mb_segment_tree_probs,
-                mi->segment_id, 3);
+    treed_write(w, vp9_segment_tree, xd->mb_segment_tree_probs, segment_id, 3);
 }
 
 // This function encodes the reference frame
@@ -653,10 +641,10 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, MODE_INFO *m,
 
       // If the mb segment id wasn't predicted code explicitly
       if (!prediction_flag)
-        write_mb_segid(bc, mi, &cpi->mb.e_mbd);
+        write_segment_id(bc, xd, mi->segment_id);
     } else {
       // Normal unpredicted coding
-      write_mb_segid(bc, mi, &cpi->mb.e_mbd);
+        write_segment_id(bc, xd, mi->segment_id);
     }
   }
 
@@ -708,11 +696,11 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, MODE_INFO *m,
     write_intra_mode(bc, mi->uv_mode,
                      pc->fc.uv_mode_prob[mode]);
   } else {
-    vp9_prob mv_ref_p[VP9_INTER_MODES - 1];
+    vp9_prob *mv_ref_p;
 
     encode_ref_frame(cpi, bc);
 
-    vp9_mv_ref_probs(&cpi->common, mv_ref_p, mi->mb_mode_context[rf]);
+    mv_ref_p = cpi->common.fc.inter_mode_probs[mi->mb_mode_context[rf]];
 
 #ifdef ENTROPY_STATS
     active_section = 3;
@@ -754,11 +742,11 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, MODE_INFO *m,
 #ifdef ENTROPY_STATS
             active_section = 11;
 #endif
-            vp9_encode_mv(bc, &blockmv.as_mv, &mi->best_mv.as_mv,
+            vp9_encode_mv(cpi, bc, &blockmv.as_mv, &mi->best_mv.as_mv,
                           nmvc, xd->allow_high_precision_mv);
 
             if (mi->ref_frame[1] > INTRA_FRAME)
-              vp9_encode_mv(bc,
+              vp9_encode_mv(cpi, bc,
                             &cpi->mb.partition_info->bmi[j].second_mv.as_mv,
                             &mi->best_second_mv.as_mv,
                             nmvc, xd->allow_high_precision_mv);
@@ -769,12 +757,12 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, MODE_INFO *m,
 #ifdef ENTROPY_STATS
       active_section = 5;
 #endif
-      vp9_encode_mv(bc,
+      vp9_encode_mv(cpi, bc,
                     &mi->mv[0].as_mv, &mi->best_mv.as_mv,
                     nmvc, xd->allow_high_precision_mv);
 
       if (mi->ref_frame[1] > INTRA_FRAME)
-        vp9_encode_mv(bc,
+        vp9_encode_mv(cpi, bc,
                       &mi->mv[1].as_mv, &mi->best_second_mv.as_mv,
                       nmvc, xd->allow_high_precision_mv);
     }
@@ -792,7 +780,7 @@ static void write_mb_modes_kf(const VP9_COMP *cpi,
   int skip_coeff;
 
   if (xd->update_mb_segmentation_map)
-    write_mb_segid(bc, &m->mbmi, xd);
+    write_segment_id(bc, xd, m->mbmi.segment_id);
 
   if (vp9_segfeature_active(xd, segment_id, SEG_LVL_SKIP)) {
     skip_coeff = 1;
@@ -1089,7 +1077,7 @@ static void update_coef_probs_common(vp9_writer* const bc, VP9_COMP *cpi,
           for (t = tstart; t < entropy_nodes_update; ++t) {
             vp9_prob newp = new_frame_coef_probs[i][j][k][l][t];
             const vp9_prob oldp = old_frame_coef_probs[i][j][k][l][t];
-            const vp9_prob upd = vp9_coef_update_prob[t];
+            const vp9_prob upd = VP9_COEF_UPDATE_PROB;
             int s;
             int u = 0;
 
@@ -1131,7 +1119,7 @@ static void update_coef_probs_common(vp9_writer* const bc, VP9_COMP *cpi,
           for (t = tstart; t < entropy_nodes_update; ++t) {
             vp9_prob newp = new_frame_coef_probs[i][j][k][l][t];
             vp9_prob *oldp = old_frame_coef_probs[i][j][k][l] + t;
-            const vp9_prob upd = vp9_coef_update_prob[t];
+            const vp9_prob upd = VP9_COEF_UPDATE_PROB;
             int s;
             int u = 0;
             if (l >= 3 && k == 0)

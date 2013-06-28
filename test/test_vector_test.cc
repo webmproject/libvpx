@@ -15,6 +15,7 @@
 #include "test/codec_factory.h"
 #include "test/decode_test_driver.h"
 #include "test/ivf_video_source.h"
+#include "test/webm_video_source.h"
 #include "test/util.h"
 #include "test/md5_helper.h"
 extern "C" {
@@ -22,8 +23,8 @@ extern "C" {
 }
 
 namespace {
-// There are 61 test vectors in total.
-const char *kTestVectors[] = {
+#if CONFIG_VP8_DECODER
+const char *kVP8TestVectors[] = {
   "vp80-00-comprehensive-001.ivf",
   "vp80-00-comprehensive-002.ivf", "vp80-00-comprehensive-003.ivf",
   "vp80-00-comprehensive-004.ivf", "vp80-00-comprehensive-005.ivf",
@@ -56,6 +57,79 @@ const char *kTestVectors[] = {
   "vp80-05-sharpness-1438.ivf", "vp80-05-sharpness-1439.ivf",
   "vp80-05-sharpness-1440.ivf", "vp80-05-sharpness-1443.ivf"
 };
+#endif
+#if CONFIG_VP9_DECODER
+const char *kVP9TestVectors[] = {
+  "vp90-00-quantizer-00.webm", "vp90-00-quantizer-01.webm",
+  "vp90-00-quantizer-02.webm", "vp90-00-quantizer-03.webm",
+  "vp90-00-quantizer-04.webm", "vp90-00-quantizer-05.webm",
+  "vp90-00-quantizer-06.webm", "vp90-00-quantizer-07.webm",
+  "vp90-00-quantizer-08.webm", "vp90-00-quantizer-09.webm",
+  "vp90-00-quantizer-10.webm", "vp90-00-quantizer-11.webm",
+  "vp90-00-quantizer-12.webm", "vp90-00-quantizer-13.webm",
+  "vp90-00-quantizer-14.webm", "vp90-00-quantizer-15.webm",
+  "vp90-00-quantizer-16.webm", "vp90-00-quantizer-17.webm",
+  "vp90-00-quantizer-18.webm", "vp90-00-quantizer-19.webm",
+  "vp90-00-quantizer-20.webm", "vp90-00-quantizer-21.webm",
+  "vp90-00-quantizer-22.webm", "vp90-00-quantizer-23.webm",
+  "vp90-00-quantizer-24.webm", "vp90-00-quantizer-25.webm",
+  "vp90-00-quantizer-26.webm", "vp90-00-quantizer-27.webm",
+  "vp90-00-quantizer-28.webm", "vp90-00-quantizer-29.webm",
+  "vp90-00-quantizer-30.webm", "vp90-00-quantizer-31.webm",
+  "vp90-00-quantizer-32.webm", "vp90-00-quantizer-33.webm",
+  "vp90-00-quantizer-34.webm", "vp90-00-quantizer-35.webm",
+  "vp90-00-quantizer-36.webm", "vp90-00-quantizer-37.webm",
+  "vp90-00-quantizer-38.webm", "vp90-00-quantizer-39.webm",
+  "vp90-00-quantizer-40.webm", "vp90-00-quantizer-41.webm",
+  "vp90-00-quantizer-42.webm", "vp90-00-quantizer-43.webm",
+  "vp90-00-quantizer-44.webm", "vp90-00-quantizer-45.webm",
+  "vp90-00-quantizer-46.webm", "vp90-00-quantizer-47.webm",
+  "vp90-00-quantizer-48.webm", "vp90-00-quantizer-49.webm",
+  "vp90-00-quantizer-50.webm", "vp90-00-quantizer-51.webm",
+  "vp90-00-quantizer-52.webm", "vp90-00-quantizer-53.webm",
+  "vp90-00-quantizer-54.webm", "vp90-00-quantizer-55.webm",
+  "vp90-00-quantizer-56.webm", "vp90-00-quantizer-57.webm",
+  "vp90-00-quantizer-58.webm", "vp90-00-quantizer-59.webm",
+  "vp90-00-quantizer-60.webm", "vp90-00-quantizer-61.webm",
+  "vp90-00-quantizer-62.webm", "vp90-00-quantizer-63.webm",
+  "vp90-01-sharpness-1.webm", "vp90-01-sharpness-2.webm",
+  "vp90-01-sharpness-3.webm", "vp90-01-sharpness-4.webm",
+  "vp90-01-sharpness-5.webm", "vp90-01-sharpness-6.webm",
+  "vp90-01-sharpness-7.webm", "vp90-02-size-08x08.webm",
+  "vp90-02-size-08x10.webm", "vp90-02-size-08x16.webm",
+  "vp90-02-size-08x18.webm", "vp90-02-size-08x32.webm",
+  "vp90-02-size-08x34.webm", "vp90-02-size-08x64.webm",
+  "vp90-02-size-08x66.webm", "vp90-02-size-10x08.webm",
+  "vp90-02-size-10x10.webm", "vp90-02-size-10x16.webm",
+  "vp90-02-size-10x18.webm", "vp90-02-size-10x32.webm",
+  "vp90-02-size-10x34.webm", "vp90-02-size-10x64.webm",
+  "vp90-02-size-10x66.webm", "vp90-02-size-16x08.webm",
+  "vp90-02-size-16x10.webm", "vp90-02-size-16x16.webm",
+  "vp90-02-size-16x18.webm", "vp90-02-size-16x32.webm",
+  "vp90-02-size-16x34.webm", "vp90-02-size-16x64.webm",
+  "vp90-02-size-16x66.webm", "vp90-02-size-18x08.webm",
+  "vp90-02-size-18x10.webm", "vp90-02-size-18x16.webm",
+  "vp90-02-size-18x18.webm", "vp90-02-size-18x32.webm",
+  "vp90-02-size-18x34.webm", "vp90-02-size-18x64.webm",
+  "vp90-02-size-18x66.webm", "vp90-02-size-32x08.webm",
+  "vp90-02-size-32x10.webm", "vp90-02-size-32x16.webm",
+  "vp90-02-size-32x18.webm", "vp90-02-size-32x32.webm",
+  "vp90-02-size-32x34.webm", "vp90-02-size-32x64.webm",
+  "vp90-02-size-32x66.webm", "vp90-02-size-34x08.webm",
+  "vp90-02-size-34x10.webm", "vp90-02-size-34x16.webm",
+  "vp90-02-size-34x18.webm", "vp90-02-size-34x32.webm",
+  "vp90-02-size-34x34.webm", "vp90-02-size-34x64.webm",
+  "vp90-02-size-34x66.webm", "vp90-02-size-64x08.webm",
+  "vp90-02-size-64x10.webm", "vp90-02-size-64x16.webm",
+  "vp90-02-size-64x18.webm", "vp90-02-size-64x32.webm",
+  "vp90-02-size-64x34.webm", "vp90-02-size-64x64.webm",
+  "vp90-02-size-64x66.webm", "vp90-02-size-66x08.webm",
+  "vp90-02-size-66x10.webm", "vp90-02-size-66x16.webm",
+  "vp90-02-size-66x18.webm", "vp90-02-size-66x32.webm",
+  "vp90-02-size-66x34.webm", "vp90-02-size-66x64.webm",
+  "vp90-02-size-66x66.webm",
+};
+#endif
 
 class TestVectorTest : public ::libvpx_test::DecoderTest,
     public ::libvpx_test::CodecTestWithParam<const char*> {
@@ -75,6 +149,7 @@ class TestVectorTest : public ::libvpx_test::DecoderTest,
 
   virtual void DecompressedFrameHook(const vpx_image_t& img,
                                      const unsigned int frame_number) {
+    ASSERT_TRUE(md5_file_ != NULL);
     char expected_md5[33];
     char junk[128];
 
@@ -102,20 +177,28 @@ class TestVectorTest : public ::libvpx_test::DecoderTest,
 // the test failed.
 TEST_P(TestVectorTest, MD5Match) {
   const std::string filename = GET_PARAM(1);
-  // Open compressed video file.
-  libvpx_test::IVFVideoSource video(filename);
+  libvpx_test::CompressedVideoSource *video = NULL;
 
-  video.Init();
+  // Open compressed video file.
+  if (filename.substr(filename.length() - 3, 3) == "ivf") {
+    video = new libvpx_test::IVFVideoSource(filename);
+  } else if (filename.substr(filename.length() - 4, 4) == "webm") {
+    video = new libvpx_test::WebMVideoSource(filename);
+  }
+  video->Init();
 
   // Construct md5 file name.
   const std::string md5_filename = filename + ".md5";
   OpenMD5File(md5_filename);
 
   // Decode frame, and check the md5 matching.
-  ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
+  ASSERT_NO_FATAL_FAILURE(RunLoop(video));
+  delete video;
 }
 
 VP8_INSTANTIATE_TEST_CASE(TestVectorTest,
-                          ::testing::ValuesIn(kTestVectors));
+                          ::testing::ValuesIn(kVP8TestVectors));
+VP9_INSTANTIATE_TEST_CASE(TestVectorTest,
+                          ::testing::ValuesIn(kVP9TestVectors));
 
 }  // namespace

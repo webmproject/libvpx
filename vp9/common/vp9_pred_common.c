@@ -19,8 +19,7 @@
 // TBD prediction functions for various bitstream signals
 
 // Returns a context number for the given MB prediction signal
-unsigned char vp9_get_pred_context(const VP9_COMMON *const cm,
-                                   const MACROBLOCKD *const xd,
+unsigned char vp9_get_pred_context(const VP9_COMMON *cm, const MACROBLOCKD *xd,
                                    PRED_ID pred_id) {
   int pred_context;
   const MODE_INFO *const mi = xd->mode_info_context;
@@ -389,9 +388,8 @@ unsigned char vp9_get_pred_context(const VP9_COMMON *const cm,
 
 // This function returns a context probability for coding a given
 // prediction signal
-vp9_prob vp9_get_pred_prob(const VP9_COMMON *const cm,
-                          const MACROBLOCKD *const xd,
-                          PRED_ID pred_id) {
+vp9_prob vp9_get_pred_prob(const VP9_COMMON *cm, const MACROBLOCKD *xd,
+                           PRED_ID pred_id) {
   const int pred_context = vp9_get_pred_context(cm, xd, pred_id);
 
   switch (pred_id) {
@@ -417,8 +415,7 @@ vp9_prob vp9_get_pred_prob(const VP9_COMMON *const cm,
 
 // This function returns a context probability ptr for coding a given
 // prediction signal
-const vp9_prob *vp9_get_pred_probs(const VP9_COMMON *const cm,
-                                   const MACROBLOCKD *const xd,
+const vp9_prob *vp9_get_pred_probs(const VP9_COMMON *cm, const MACROBLOCKD * xd,
                                    PRED_ID pred_id) {
   const MODE_INFO *const mi = xd->mode_info_context;
   const int pred_context = vp9_get_pred_context(cm, xd, pred_id);
@@ -458,8 +455,7 @@ unsigned char vp9_get_pred_flag(const MACROBLOCKD *const xd,
 
 // This function sets the status of the given prediction signal.
 // I.e. is the predicted value for the given signal correct.
-void vp9_set_pred_flag(MACROBLOCKD *const xd,
-                       PRED_ID pred_id,
+void vp9_set_pred_flag(MACROBLOCKD *xd, PRED_ID pred_id,
                        unsigned char pred_flag) {
   const int mis = xd->mode_info_stride;
   BLOCK_SIZE_TYPE bsize = xd->mode_info_context->mbmi.sb_type;
@@ -473,19 +469,15 @@ void vp9_set_pred_flag(MACROBLOCKD *const xd,
 
   switch (pred_id) {
     case PRED_SEG_ID:
-      for (y = 0; y < y_mis; y++) {
-        for (x = 0; x < x_mis; x++) {
+      for (y = 0; y < y_mis; y++)
+        for (x = 0; x < x_mis; x++)
           xd->mode_info_context[y * mis + x].mbmi.seg_id_predicted = pred_flag;
-        }
-      }
       break;
 
     case PRED_MBSKIP:
-      for (y = 0; y < y_mis; y++) {
-        for (x = 0; x < x_mis; x++) {
+      for (y = 0; y < y_mis; y++)
+        for (x = 0; x < x_mis; x++)
           xd->mode_info_context[y * mis + x].mbmi.mb_skip_coeff = pred_flag;
-        }
-      }
       break;
 
     default:
@@ -495,26 +487,20 @@ void vp9_set_pred_flag(MACROBLOCKD *const xd,
   }
 }
 
-
-// The following contain the guts of the prediction code used to
-// peredict various bitstream signals.
-
-// Macroblock segment id prediction function
-int vp9_get_pred_mi_segid(VP9_COMMON *cm, BLOCK_SIZE_TYPE sb_type,
-                          int mi_row, int mi_col) {
-  const int mi_index = mi_row * cm->mi_cols + mi_col;
-  const int bw = 1 << mi_width_log2(sb_type);
-  const int bh = 1 << mi_height_log2(sb_type);
-  const int ymis = MIN(cm->mi_rows - mi_row, bh);
+int vp9_get_segment_id(VP9_COMMON *cm, const uint8_t *segment_ids,
+                       BLOCK_SIZE_TYPE bsize, int mi_row, int mi_col) {
+  const int mi_offset = mi_row * cm->mi_cols + mi_col;
+  const int bw = 1 << mi_width_log2(bsize);
+  const int bh = 1 << mi_height_log2(bsize);
   const int xmis = MIN(cm->mi_cols - mi_col, bw);
-  int segment_id = INT_MAX;
-  int x, y;
+  const int ymis = MIN(cm->mi_rows - mi_row, bh);
+  int x, y, segment_id = INT_MAX;
 
-  for (y = 0; y < ymis; y++) {
-    for (x = 0; x < xmis; x++) {
-      const int index = mi_index + (y * cm->mi_cols + x);
-      segment_id = MIN(segment_id, cm->last_frame_seg_map[index]);
-    }
-  }
+  for (y = 0; y < ymis; y++)
+    for (x = 0; x < xmis; x++)
+      segment_id = MIN(segment_id,
+                       segment_ids[mi_offset + y * cm->mi_cols + x]);
+
+  assert(segment_id >= 0 && segment_id < MAX_MB_SEGMENTS);
   return segment_id;
 }

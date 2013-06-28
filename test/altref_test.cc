@@ -33,10 +33,6 @@ class AltRefTest : public ::libvpx_test::EncoderTest,
     altref_count_ = 0;
   }
 
-  virtual bool Continue() const {
-    return !HasFatalFailure() && !abort_;
-  }
-
   virtual void PreEncodeFrameHook(libvpx_test::VideoSource *video,
                                   libvpx_test::Encoder *encoder) {
     if (video->frame() == 1) {

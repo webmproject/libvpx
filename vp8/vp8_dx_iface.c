@@ -29,8 +29,6 @@
 #define VP8_CAP_ERROR_CONCEALMENT (CONFIG_ERROR_CONCEALMENT ? \
                                     VPX_CODEC_CAP_ERROR_CONCEALMENT : 0)
 
-#define VP8_DECRYPT_KEY_SIZE 32
-
 typedef vpx_codec_stream_info_t  vp8_stream_info_t;
 
 /* Structures for handling memory allocations */
@@ -75,7 +73,8 @@ struct vpx_codec_alg_priv
     int                     dbg_color_b_modes_flag;
     int                     dbg_display_mv_flag;
 #endif
-    unsigned char           decrypt_key[VP8_DECRYPT_KEY_SIZE];
+    vp8_decrypt_cb          *decrypt_cb;
+    void                    *decrypt_state;
     vpx_image_t             img;
     int                     img_setup;
     struct frame_buffers    yv12_frame_buffers;
@@ -153,8 +152,6 @@ static vpx_codec_err_t vp8_validate_mmaps(const vp8_stream_info_t *si,
     return res;
 }
 
-static const unsigned char fake_decrypt_key[VP8_DECRYPT_KEY_SIZE] = { 0 };
-
 static void vp8_init_ctx(vpx_codec_ctx_t *ctx, const vpx_codec_mmap_t *mmap)
 {
     int i;
@@ -169,8 +166,8 @@ static void vp8_init_ctx(vpx_codec_ctx_t *ctx, const vpx_codec_mmap_t *mmap)
 
     ctx->priv->alg_priv->mmaps[0] = *mmap;
     ctx->priv->alg_priv->si.sz = sizeof(ctx->priv->alg_priv->si);
-    memcpy(ctx->priv->alg_priv->decrypt_key, fake_decrypt_key,
-           VP8_DECRYPT_KEY_SIZE);
+    ctx->priv->alg_priv->decrypt_cb = NULL;
+    ctx->priv->alg_priv->decrypt_state = NULL;
     ctx->priv->init_flags = ctx->init_flags;
 
     if (ctx->config.dec)
@@ -269,10 +266,11 @@ static vpx_codec_err_t vp8_destroy(vpx_codec_alg_priv_t *ctx)
     return VPX_CODEC_OK;
 }
 
-static vpx_codec_err_t vp8_peek_si_external(const uint8_t         *data,
-                                            unsigned int           data_sz,
+static vpx_codec_err_t vp8_peek_si_internal(const uint8_t *data,
+                                            unsigned int data_sz,
                                             vpx_codec_stream_info_t *si,
-                                            const unsigned char *decrypt_key)
+                                            vp8_decrypt_cb *decrypt_cb,
+                                            void *decrypt_state)
 {
     vpx_codec_err_t res = VPX_CODEC_OK;
 
@@ -288,27 +286,26 @@ static vpx_codec_err_t vp8_peek_si_external(const uint8_t         *data,
          * 4 bytes:- including image width and height in the lowest 14 bits
          *           of each 2-byte value.
          */
-
-        const uint8_t data0 = decrypt_byte(data, data, decrypt_key);
-        si->is_kf = 0;
-        if (data_sz >= 10 && !(data0 & 0x01))  /* I-Frame */
+        uint8_t clear_buffer[10];
+        const uint8_t *clear = data;
+        if (decrypt_cb)
         {
-            const uint8_t data3 = decrypt_byte(data + 3, data, decrypt_key);
-            const uint8_t data4 = decrypt_byte(data + 4, data, decrypt_key);
-            const uint8_t data5 = decrypt_byte(data + 5, data, decrypt_key);
-            const uint8_t data6 = decrypt_byte(data + 6, data, decrypt_key);
-            const uint8_t data7 = decrypt_byte(data + 7, data, decrypt_key);
-            const uint8_t data8 = decrypt_byte(data + 8, data, decrypt_key);
-            const uint8_t data9 = decrypt_byte(data + 9, data, decrypt_key);
+            int n = data_sz > 10 ? 10 : data_sz;
+            decrypt_cb(decrypt_state, data, clear_buffer, n);
+            clear = clear_buffer;
+        }
+        si->is_kf = 0;
 
+        if (data_sz >= 10 && !(clear[0] & 0x01))  /* I-Frame */
+        {
             si->is_kf = 1;
 
             /* vet via sync code */
-            if (data3 != 0x9d || data4 != 0x01 || data5 != 0x2a)
+            if (clear[3] != 0x9d || clear[4] != 0x01 || clear[5] != 0x2a)
                 res = VPX_CODEC_UNSUP_BITSTREAM;
 
-            si->w = (data6 | (data7 << 8)) & 0x3fff;
-            si->h = (data8 | (data9 << 8)) & 0x3fff;
+            si->w = (clear[6] | (clear[7] << 8)) & 0x3fff;
+            si->h = (clear[8] | (clear[9] << 8)) & 0x3fff;
 
             /*printf("w=%d, h=%d\n", si->w, si->h);*/
             if (!(si->h | si->w))
@@ -326,7 +323,7 @@ static vpx_codec_err_t vp8_peek_si_external(const uint8_t         *data,
 static vpx_codec_err_t vp8_peek_si(const uint8_t *data,
                                    unsigned int data_sz,
                                    vpx_codec_stream_info_t *si) {
-    return vp8_peek_si_external(data, data_sz, si, fake_decrypt_key);
+    return vp8_peek_si_internal(data, data_sz, si, NULL, NULL);
 }
 
 static vpx_codec_err_t vp8_get_si(vpx_codec_alg_priv_t    *ctx,
@@ -455,10 +452,8 @@ static vpx_codec_err_t vp8_decode(vpx_codec_alg_priv_t  *ctx,
     w = ctx->si.w;
     h = ctx->si.h;
 
-    res = vp8_peek_si_external(ctx->fragments.ptrs[0],
-                               ctx->fragments.sizes[0],
-                               &ctx->si,
-                               ctx->decrypt_key);
+    res = vp8_peek_si_internal(ctx->fragments.ptrs[0], ctx->fragments.sizes[0],
+                               &ctx->si, ctx->decrypt_cb, ctx->decrypt_state);
 
     if((res == VPX_CODEC_UNSUP_BITSTREAM) && !ctx->si.is_kf)
     {
@@ -532,7 +527,8 @@ static vpx_codec_err_t vp8_decode(vpx_codec_alg_priv_t  *ctx,
             }
 
             res = vp8_create_decoder_instances(&ctx->yv12_frame_buffers, &oxcf);
-            ctx->yv12_frame_buffers.pbi[0]->decrypt_key = ctx->decrypt_key;
+            ctx->yv12_frame_buffers.pbi[0]->decrypt_cb = ctx->decrypt_cb;
+            ctx->yv12_frame_buffers.pbi[0]->decrypt_state = ctx->decrypt_state;
         }
 
         ctx->decoder_init = 1;
@@ -956,17 +952,22 @@ static vpx_codec_err_t vp8_get_frame_corrupted(vpx_codec_alg_priv_t *ctx,
 
 }
 
-
-static vpx_codec_err_t vp8_set_decrypt_key(vpx_codec_alg_priv_t *ctx,
-                                           int ctr_id,
-                                           va_list args)
+static vpx_codec_err_t vp8_set_decryptor(vpx_codec_alg_priv_t *ctx,
+                                         int ctrl_id,
+                                         va_list args)
 {
-    const unsigned char *data = va_arg(args, const unsigned char *);
-    if (data == NULL) {
-        return VPX_CODEC_INVALID_PARAM;
-    }
+    vp8_decrypt_init *init = va_arg(args, vp8_decrypt_init *);
 
-    memcpy(ctx->decrypt_key, data, VP8_DECRYPT_KEY_SIZE);
+    if (init)
+    {
+        ctx->decrypt_cb = init->decrypt_cb;
+        ctx->decrypt_state = init->decrypt_state;
+    }
+    else
+    {
+        ctx->decrypt_cb = NULL;
+        ctx->decrypt_state = NULL;
+    }
     return VPX_CODEC_OK;
 }
 
@@ -982,7 +983,7 @@ vpx_codec_ctrl_fn_map_t vp8_ctf_maps[] =
     {VP8D_GET_LAST_REF_UPDATES,     vp8_get_last_ref_updates},
     {VP8D_GET_FRAME_CORRUPTED,      vp8_get_frame_corrupted},
     {VP8D_GET_LAST_REF_USED,        vp8_get_last_ref_frame},
-    {VP8_SET_DECRYPT_KEY,           vp8_set_decrypt_key},
+    {VP8D_SET_DECRYPTOR,            vp8_set_decryptor},
     { -1, NULL},
 };
 

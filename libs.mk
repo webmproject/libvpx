@@ -202,6 +202,7 @@ INSTALL-SRCS-$(CONFIG_CODEC_SRCS) += $(call enabled,CODEC_EXPORTS)
 libvpx_srcs.txt:
 	@echo "    [CREATE] $@"
 	@echo $(CODEC_SRCS) | xargs -n1 echo | sort -u > $@
+CLEAN-OBJS += libvpx_srcs.txt
 
 
 ifeq ($(CONFIG_EXTERNAL_BUILD),yes)
@@ -382,6 +383,11 @@ LIBVPX_TEST_DATA=$(addprefix $(LIBVPX_TEST_DATA_PATH)/,\
                      $(call enabled,LIBVPX_TEST_DATA))
 libvpx_test_data_url=http://downloads.webmproject.org/test_data/libvpx/$(1)
 
+libvpx_test_srcs.txt:
+	@echo "    [CREATE] $@"
+	@echo $(LIBVPX_TEST_SRCS) | xargs -n1 echo | sort -u > $@
+CLEAN-OBJS += libvpx_test_srcs.txt
+
 $(LIBVPX_TEST_DATA):
 	@echo "    [DOWNLOAD] $@"
 	$(qexec)trap 'rm -f $@' INT TERM &&\
@@ -435,8 +441,7 @@ test_libvpx.$(VCPROJ_SFX): $(LIBVPX_TEST_SRCS) vpx.$(VCPROJ_SFX) gtest.$(VCPROJ_
 
 PROJECTS-$(CONFIG_MSVS) += test_libvpx.$(VCPROJ_SFX)
 
-test:: testdata
-	@set -e; for t in $(addprefix $(TGT_OS:win64=x64)/Release/,$(notdir $(LIBVPX_TEST_BINS:.cc=.exe))); do $$t; done
+LIBVPX_TEST_BINS := $(addprefix $(TGT_OS:win64=x64)/Release/,$(notdir $(LIBVPX_TEST_BINS)))
 endif
 else
 
@@ -471,10 +476,24 @@ $(foreach bin,$(LIBVPX_TEST_BINS),\
         )))\
     $(if $(LIPO_LIBS),$(eval $(call lipo_bin_template,$(bin))))\
 
-test:: $(LIBVPX_TEST_BINS) testdata
-	@set -e; for t in $(LIBVPX_TEST_BINS); do $$t; done
-
 endif
+
+define test_shard_template
+test:: test_shard.$(1)
+test_shard.$(1): $(LIBVPX_TEST_BINS) testdata
+	@set -e; \
+	 for t in $(LIBVPX_TEST_BINS); do \
+	   export GTEST_SHARD_INDEX=$(1); \
+	   export GTEST_TOTAL_SHARDS=$(2); \
+	   $$$$t; \
+	 done
+.PHONY: test_shard.$(1)
+endef
+
+NUM_SHARDS := 10
+SHARDS := 0 1 2 3 4 5 6 7 8 9
+$(foreach s,$(SHARDS),$(eval $(call test_shard_template,$(s),$(NUM_SHARDS))))
+
 endif
 
 ##

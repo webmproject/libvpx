@@ -49,7 +49,7 @@ class I420VideoSource : public VideoSource {
     if (input_file_)
       fclose(input_file_);
     input_file_ = OpenTestDataFile(file_name_);
-    ASSERT_TRUE(input_file_) << "Input file open failed. Filename: "
+    ASSERT_TRUE(input_file_ != NULL) << "Input file open failed. Filename: "
         << file_name_;
     if (start_) {
       fseek(input_file_, raw_sz_ * start_, SEEK_SET);
@@ -92,6 +92,7 @@ class I420VideoSource : public VideoSource {
   }
 
   virtual void FillFrame() {
+    ASSERT_TRUE(input_file_ != NULL);
     // Read a frame from input_file.
     if (fread(img_->img_data, raw_sz_, 1, input_file_) == 0) {
       limit_ = frame_;
@@ -108,8 +109,8 @@ class I420VideoSource : public VideoSource {
   unsigned int frame_;
   unsigned int width_;
   unsigned int height_;
-  unsigned int framerate_numerator_;
-  unsigned int framerate_denominator_;
+  int framerate_numerator_;
+  int framerate_denominator_;
 };
 
 }  // namespace libvpx_test

@@ -133,8 +133,7 @@ static void tokenize_b(int plane, int block, BLOCK_SIZE_TYPE bsize,
   const int ref = mbmi->ref_frame[0] != INTRA_FRAME;
   ENTROPY_CONTEXT above_ec, left_ec;
   uint8_t token_cache[1024];
-  TX_TYPE tx_type = DCT_DCT;
-  const uint8_t * band_translate;
+  const uint8_t *band_translate;
   assert((!type && !plane) || (type && plane));
 
   counts = cpi->coef_counts[tx_size];
@@ -142,8 +141,8 @@ static void tokenize_b(int plane, int block, BLOCK_SIZE_TYPE bsize,
   switch (tx_size) {
     default:
     case TX_4X4: {
-      tx_type = (type == PLANE_TYPE_Y_WITH_DC) ?
-          get_tx_type_4x4(xd, block) : DCT_DCT;
+      const TX_TYPE tx_type = type == PLANE_TYPE_Y_WITH_DC ?
+                                  get_tx_type_4x4(xd, block) : DCT_DCT;
       above_ec = A[0] != 0;
       left_ec = L[0] != 0;
       seg_eob = 16;
@@ -152,10 +151,8 @@ static void tokenize_b(int plane, int block, BLOCK_SIZE_TYPE bsize,
       break;
     }
     case TX_8X8: {
-      const int sz = 1 + b_width_log2(sb_type);
-      const int x = block & ((1 << sz) - 1), y = block - x;
-      tx_type = (type == PLANE_TYPE_Y_WITH_DC) ?
-          get_tx_type_8x8(xd, y + (x >> 1)) : DCT_DCT;
+      const TX_TYPE tx_type = type == PLANE_TYPE_Y_WITH_DC ?
+                                  get_tx_type_8x8(xd) : DCT_DCT;
       above_ec = (A[0] + A[1]) != 0;
       left_ec = (L[0] + L[1]) != 0;
       seg_eob = 64;
@@ -164,10 +161,8 @@ static void tokenize_b(int plane, int block, BLOCK_SIZE_TYPE bsize,
       break;
     }
     case TX_16X16: {
-      const int sz = 2 + b_width_log2(sb_type);
-      const int x = block & ((1 << sz) - 1), y = block - x;
-      tx_type = (type == PLANE_TYPE_Y_WITH_DC) ?
-          get_tx_type_16x16(xd, y + (x >> 2)) : DCT_DCT;
+      const TX_TYPE tx_type = type == PLANE_TYPE_Y_WITH_DC ?
+                                  get_tx_type_16x16(xd) : DCT_DCT;
       above_ec = (A[0] + A[1] + A[2] + A[3]) != 0;
       left_ec = (L[0] + L[1] + L[2] + L[3]) != 0;
       seg_eob = 256;
@@ -263,8 +258,7 @@ int vp9_sb_is_skippable(MACROBLOCKD *xd, BLOCK_SIZE_TYPE bsize) {
 int vp9_sby_is_skippable(MACROBLOCKD *xd, BLOCK_SIZE_TYPE bsize) {
   int result = 1;
   struct is_skippable_args args = {xd, &result};
-  foreach_transformed_block_in_plane(xd, bsize, 0,
-                                     is_skippable, &args);
+  foreach_transformed_block_in_plane(xd, bsize, 0, is_skippable, &args);
   return result;
 }
 

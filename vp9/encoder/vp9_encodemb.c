@@ -13,7 +13,6 @@
 #include "vp9/common/vp9_reconinter.h"
 #include "vp9/encoder/vp9_quantize.h"
 #include "vp9/encoder/vp9_tokenize.h"
-#include "vp9/common/vp9_invtrans.h"
 #include "vp9/common/vp9_reconintra.h"
 #include "vpx_mem/vpx_mem.h"
 #include "vp9/encoder/vp9_rdopt.h"
@@ -23,10 +22,10 @@
 DECLARE_ALIGNED(16, extern const uint8_t,
                 vp9_pt_energy_class[MAX_ENTROPY_TOKENS]);
 
-void vp9_subtract_block(int rows, int cols,
-                        int16_t *diff_ptr, int diff_stride,
-                        const uint8_t *src_ptr, int src_stride,
-                        const uint8_t *pred_ptr, int pred_stride) {
+void vp9_subtract_block_c(int rows, int cols,
+                          int16_t *diff_ptr, ptrdiff_t diff_stride,
+                          const uint8_t *src_ptr, ptrdiff_t src_stride,
+                          const uint8_t *pred_ptr, ptrdiff_t pred_stride) {
   int r, c;
 
   for (r = 0; r < rows; r++) {
@@ -37,6 +36,15 @@ void vp9_subtract_block(int rows, int cols,
     pred_ptr += pred_stride;
     src_ptr  += src_stride;
   }
+}
+
+static void inverse_transform_b_4x4_add(MACROBLOCKD *xd, int eob,
+                                        int16_t *dqcoeff, uint8_t *dest,
+                                        int stride) {
+  if (eob <= 1)
+    xd->inv_txm4x4_1_add(dqcoeff, dest, stride);
+  else
+    xd->inv_txm4x4_add(dqcoeff, dest, stride);
 }
 
 
@@ -70,7 +78,6 @@ void vp9_subtract_sb(MACROBLOCK *x, BLOCK_SIZE_TYPE bsize) {
 
 
 #define RDTRUNC(RM,DM,R,D) ( (128+(R)*(RM)) & 0xFF )
-#define RDTRUNC_8x8(RM,DM,R,D) ( (128+(R)*(RM)) & 0xFF )
 typedef struct vp9_token_state vp9_token_state;
 
 struct vp9_token_state {
@@ -156,14 +163,14 @@ static void optimize_b(VP9_COMMON *const cm, MACROBLOCK *mb,
       break;
     }
     case TX_8X8: {
-      const TX_TYPE tx_type = plane == 0 ? get_tx_type_8x8(xd, ib) : DCT_DCT;
+      const TX_TYPE tx_type = plane == 0 ? get_tx_type_8x8(xd) : DCT_DCT;
       scan = get_scan_8x8(tx_type);
       default_eob = 64;
       band_translate = vp9_coefband_trans_8x8plus;
       break;
     }
     case TX_16X16: {
-      const TX_TYPE tx_type = plane == 0 ? get_tx_type_16x16(xd, ib) : DCT_DCT;
+      const TX_TYPE tx_type = plane == 0 ? get_tx_type_16x16(xd) : DCT_DCT;
       scan = get_scan_16x16(tx_type);
       default_eob = 256;
       band_translate = vp9_coefband_trans_8x8plus;
@@ -454,17 +461,20 @@ static void xform_quant(int plane, int block, BLOCK_SIZE_TYPE bsize,
 
   switch (ss_txfrm_size / 2) {
     case TX_32X32:
-      vp9_short_fdct32x32(src_diff, coeff, bw * 2);
+      if (x->rd_search)
+        vp9_short_fdct32x32_rd(src_diff, coeff, bw * 2);
+      else
+        vp9_short_fdct32x32(src_diff, coeff, bw * 2);
       break;
     case TX_16X16:
-      tx_type = plane == 0 ? get_tx_type_16x16(xd, raster_block) : DCT_DCT;
+      tx_type = plane == 0 ? get_tx_type_16x16(xd) : DCT_DCT;
       if (tx_type != DCT_DCT)
         vp9_short_fht16x16(src_diff, coeff, bw, tx_type);
       else
         x->fwd_txm16x16(src_diff, coeff, bw * 2);
       break;
     case TX_8X8:
-      tx_type = plane == 0 ? get_tx_type_8x8(xd, raster_block) : DCT_DCT;
+      tx_type = plane == 0 ? get_tx_type_8x8(xd) : DCT_DCT;
       if (tx_type != DCT_DCT)
         vp9_short_fht8x8(src_diff, coeff, bw, tx_type);
       else
@@ -508,14 +518,14 @@ static void encode_block(int plane, int block, BLOCK_SIZE_TYPE bsize,
       vp9_short_idct32x32_add(dqcoeff, dst, pd->dst.stride);
       break;
     case TX_16X16:
-      tx_type = plane == 0 ? get_tx_type_16x16(xd, raster_block) : DCT_DCT;
+      tx_type = plane == 0 ? get_tx_type_16x16(xd) : DCT_DCT;
       if (tx_type == DCT_DCT)
         vp9_short_idct16x16_add(dqcoeff, dst, pd->dst.stride);
       else
         vp9_short_iht16x16_add(dqcoeff, dst, pd->dst.stride, tx_type);
       break;
     case TX_8X8:
-      tx_type = plane == 0 ? get_tx_type_8x8(xd, raster_block) : DCT_DCT;
+      tx_type = plane == 0 ? get_tx_type_8x8(xd) : DCT_DCT;
       if (tx_type == DCT_DCT)
         vp9_short_idct8x8_add(dqcoeff, dst, pd->dst.stride);
       else
@@ -527,8 +537,8 @@ static void encode_block(int plane, int block, BLOCK_SIZE_TYPE bsize,
         // this is like vp9_short_idct4x4 but has a special case around eob<=1
         // which is significant (not just an optimization) for the lossless
         // case.
-        vp9_inverse_transform_b_4x4_add(xd, pd->eobs[block], dqcoeff,
-                                        dst, pd->dst.stride);
+        inverse_transform_b_4x4_add(xd, pd->eobs[block], dqcoeff,
+                                    dst, pd->dst.stride);
       else
         vp9_short_iht4x4_add(dqcoeff, dst, pd->dst.stride, tx_type);
       break;
@@ -632,6 +642,7 @@ static void encode_block_intra(int plane, int block, BLOCK_SIZE_TYPE bsize,
 
   plane_b_size = b_width_log2(bsize) - pd->subsampling_x;
   vp9_predict_intra_block(xd, tx_ib, plane_b_size, tx_size, b_mode,
+                          dst, pd->dst.stride,
                           dst, pd->dst.stride);
   vp9_subtract_block(txfm_b_size, txfm_b_size, src_diff, bw,
                      src, p->src.stride, dst, pd->dst.stride);
@@ -648,14 +659,14 @@ static void encode_block_intra(int plane, int block, BLOCK_SIZE_TYPE bsize,
         vp9_short_idct32x32_add(dqcoeff, dst, pd->dst.stride);
       break;
     case TX_16X16:
-      tx_type = plane == 0 ? get_tx_type_16x16(xd, raster_block) : DCT_DCT;
+      tx_type = plane == 0 ? get_tx_type_16x16(xd) : DCT_DCT;
       if (tx_type == DCT_DCT)
         vp9_short_idct16x16_add(dqcoeff, dst, pd->dst.stride);
       else
         vp9_short_iht16x16_add(dqcoeff, dst, pd->dst.stride, tx_type);
       break;
     case TX_8X8:
-      tx_type = plane == 0 ? get_tx_type_8x8(xd, raster_block) : DCT_DCT;
+      tx_type = plane == 0 ? get_tx_type_8x8(xd) : DCT_DCT;
       if (tx_type == DCT_DCT)
         vp9_short_idct8x8_add(dqcoeff, dst, pd->dst.stride);
       else
@@ -667,8 +678,8 @@ static void encode_block_intra(int plane, int block, BLOCK_SIZE_TYPE bsize,
         // this is like vp9_short_idct4x4 but has a special case around eob<=1
         // which is significant (not just an optimization) for the lossless
         // case.
-        vp9_inverse_transform_b_4x4_add(xd, pd->eobs[block], dqcoeff,
-                                        dst, pd->dst.stride);
+        inverse_transform_b_4x4_add(xd, pd->eobs[block], dqcoeff,
+                                    dst, pd->dst.stride);
       else
         vp9_short_iht4x4_add(dqcoeff, dst, pd->dst.stride, tx_type);
       break;

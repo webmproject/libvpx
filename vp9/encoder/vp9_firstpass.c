@@ -521,8 +521,6 @@ void vp9_first_pass(VP9_COMP *cpi) {
 
   xd->mode_info_context = cm->mi;
 
-  vp9_build_block_offsets(x);
-
   vp9_setup_block_dptrs(&x->e_mbd, cm->subsampling_x, cm->subsampling_y);
 
   vp9_frame_init_quantizer(cpi);
@@ -986,9 +984,11 @@ static int estimate_max_q(VP9_COMP *cpi,
 
   // Corrections for higher compression speed settings
   // (reduced compression expected)
+  // FIXME(jimbankoski): Once we settle on vp9 speed features we need to
+  // change this code.
   if (cpi->compressor_speed == 1)
     speed_correction = cpi->oxcf.cpu_used <= 5 ?
-                          1.04 + (cpi->oxcf.cpu_used * 0.04) :
+                          1.04 + (/*cpi->oxcf.cpu_used*/0 * 0.04) :
                           1.25;
 
   // Try and pick a max Q that will be high enough to encode the
@@ -1051,7 +1051,7 @@ static int estimate_cq(VP9_COMP *cpi,
   // (reduced compression expected)
   if (cpi->compressor_speed == 1) {
     if (cpi->oxcf.cpu_used <= 5)
-      speed_correction = 1.04 + (cpi->oxcf.cpu_used * 0.04);
+      speed_correction = 1.04 + (/*cpi->oxcf.cpu_used*/ 0 * 0.04);
     else
       speed_correction = 1.25;
   }

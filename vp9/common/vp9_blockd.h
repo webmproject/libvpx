@@ -214,11 +214,9 @@ typedef struct {
   int_mv ref_mvs[MAX_REF_FRAMES][MAX_MV_REF_CANDIDATES];
   int_mv best_mv, best_second_mv;
 
-  int mb_mode_context[MAX_REF_FRAMES];
+  uint8_t mb_mode_context[MAX_REF_FRAMES];
 
   unsigned char mb_skip_coeff;                                /* does this mb has coefficients at all, 1=no coefficients, 0=need decode tokens */
-  unsigned char need_to_clamp_mvs;
-  unsigned char need_to_clamp_secondmv;
   unsigned char segment_id;           // Segment id for current frame
 
   // Flags used for prediction status of various bistream signals
@@ -239,6 +237,11 @@ typedef struct {
   union b_mode_info bmi[4];
 } MODE_INFO;
 
+enum mv_precision {
+  MV_PRECISION_Q3,
+  MV_PRECISION_Q4
+};
+
 #define VP9_REF_SCALE_SHIFT 14
 struct scale_factors {
   int x_scale_fp;   // horizontal fixed point scale factor
@@ -251,9 +254,8 @@ struct scale_factors {
   int (*scale_value_x)(int val, const struct scale_factors *scale);
   int (*scale_value_y)(int val, const struct scale_factors *scale);
   void (*set_scaled_offsets)(struct scale_factors *scale, int row, int col);
-  int_mv32 (*scale_mv_q3_to_q4)(const int_mv *src_mv,
-                                const struct scale_factors *scale);
-  int32_t (*scale_mv_component_q4)(int mv_q4, int scale_fp, int offset_q4);
+  MV32 (*scale_mv_q3_to_q4)(const MV *mv, const struct scale_factors *scale);
+  MV32 (*scale_mv_q4)(const MV *mv, const struct scale_factors *scale);
 
   convolve_fn_t predict[2][2][2];  // horiz, vert, avg
 };
@@ -336,6 +338,7 @@ typedef struct macroblockd {
   signed char last_ref_lf_deltas[MAX_REF_LF_DELTAS];
   /* 0 = Intra, Last, GF, ARF */
   signed char ref_lf_deltas[MAX_REF_LF_DELTAS];
+
   /* 0 = ZERO_MV, MV */
   signed char last_mode_lf_deltas[MAX_MODE_LF_DELTAS];
   /* 0 = ZERO_MV, MV */
@@ -355,10 +358,6 @@ typedef struct macroblockd {
   void (*inv_txm4x4_1_add)(int16_t *input, uint8_t *dest, int stride);
   void (*inv_txm4x4_add)(int16_t *input, uint8_t *dest, int stride);
   void (*itxm_add)(int16_t *input, uint8_t *dest, int stride, int eob);
-  void (*itxm_add_y_block)(int16_t *q, uint8_t *dst, int stride,
-    struct macroblockd *xd);
-  void (*itxm_add_uv_block)(int16_t *q, uint8_t *dst, int stride,
-    uint16_t *eobs);
 
   struct subpix_fn_table  subpix;
 
@@ -406,34 +405,15 @@ static INLINE void update_partition_context(MACROBLOCKD *xd,
   int bwl = b_width_log2(sb_type);
   int bhl = b_height_log2(sb_type);
   int boffset = b_width_log2(BLOCK_SIZE_SB64X64) - bsl;
-  int i;
+  char pcvalue[2] = {~(0xe << boffset), ~(0xf <<boffset)};
+
+  assert(MAX(bwl, bhl) <= bsl);
 
   // update the partition context at the end notes. set partition bits
   // of block sizes larger than the current one to be one, and partition
   // bits of smaller block sizes to be zero.
-  if ((bwl == bsl) && (bhl == bsl)) {
-    for (i = 0; i < bs; i++)
-      xd->left_seg_context[i] = ~(0xf << boffset);
-    for (i = 0; i < bs; i++)
-      xd->above_seg_context[i] = ~(0xf << boffset);
-  } else if ((bwl == bsl) && (bhl < bsl)) {
-    for (i = 0; i < bs; i++)
-      xd->left_seg_context[i] = ~(0xe << boffset);
-    for (i = 0; i < bs; i++)
-      xd->above_seg_context[i] = ~(0xf << boffset);
-  }  else if ((bwl < bsl) && (bhl == bsl)) {
-    for (i = 0; i < bs; i++)
-      xd->left_seg_context[i] = ~(0xf << boffset);
-    for (i = 0; i < bs; i++)
-      xd->above_seg_context[i] = ~(0xe << boffset);
-  } else if ((bwl < bsl) && (bhl < bsl)) {
-    for (i = 0; i < bs; i++)
-      xd->left_seg_context[i] = ~(0xe << boffset);
-    for (i = 0; i < bs; i++)
-      xd->above_seg_context[i] = ~(0xe << boffset);
-  } else {
-    assert(0);
-  }
+  vpx_memset(xd->above_seg_context, pcvalue[bwl == bsl], bs);
+  vpx_memset(xd->left_seg_context, pcvalue[bhl == bsl], bs);
 }
 
 static INLINE int partition_plane_context(MACROBLOCKD *xd,
@@ -506,57 +486,25 @@ static BLOCK_SIZE_TYPE get_subsize(BLOCK_SIZE_TYPE bsize,
   return subsize;
 }
 
-// transform mapping
-static TX_TYPE txfm_map(MB_PREDICTION_MODE bmode) {
-  switch (bmode) {
-    case TM_PRED :
-    case D135_PRED :
-      return ADST_ADST;
+extern const TX_TYPE mode2txfm_map[MB_MODE_COUNT];
 
-    case V_PRED :
-    case D117_PRED :
-    case D63_PRED:
-      return ADST_DCT;
-
-    case H_PRED :
-    case D153_PRED :
-    case D27_PRED :
-      return DCT_ADST;
-
-    default:
-      return DCT_DCT;
-  }
-}
-
-static TX_TYPE get_tx_type_4x4(const MACROBLOCKD *xd, int ib) {
-  TX_TYPE tx_type;
-  MODE_INFO *mi = xd->mode_info_context;
+static INLINE TX_TYPE get_tx_type_4x4(const MACROBLOCKD *xd, int ib) {
+  MODE_INFO *const mi = xd->mode_info_context;
   MB_MODE_INFO *const mbmi = &mi->mbmi;
+
   if (xd->lossless || mbmi->ref_frame[0] != INTRA_FRAME)
     return DCT_DCT;
-  if (mbmi->sb_type < BLOCK_SIZE_SB8X8) {
-    tx_type = txfm_map(mi->bmi[ib].as_mode.first);
-  } else {
-    assert(mbmi->mode <= TM_PRED);
-    tx_type = txfm_map(mbmi->mode);
-  }
-  return tx_type;
+
+  return mode2txfm_map[mbmi->sb_type < BLOCK_SIZE_SB8X8 ?
+                       mi->bmi[ib].as_mode.first : mbmi->mode];
 }
 
-static TX_TYPE get_tx_type_8x8(const MACROBLOCKD *xd, int ib) {
-  TX_TYPE tx_type = DCT_DCT;
-  if (xd->mode_info_context->mbmi.mode <= TM_PRED) {
-    tx_type = txfm_map(xd->mode_info_context->mbmi.mode);
-  }
-  return tx_type;
+static INLINE TX_TYPE get_tx_type_8x8(const MACROBLOCKD *xd) {
+  return mode2txfm_map[xd->mode_info_context->mbmi.mode];
 }
 
-static TX_TYPE get_tx_type_16x16(const MACROBLOCKD *xd, int ib) {
-  TX_TYPE tx_type = DCT_DCT;
-  if (xd->mode_info_context->mbmi.mode <= TM_PRED) {
-    tx_type = txfm_map(xd->mode_info_context->mbmi.mode);
-  }
-  return tx_type;
+static INLINE TX_TYPE get_tx_type_16x16(const MACROBLOCKD *xd) {
+  return  mode2txfm_map[xd->mode_info_context->mbmi.mode];
 }
 
 void vp9_setup_block_dptrs(MACROBLOCKD *xd,

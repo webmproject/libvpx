@@ -31,10 +31,6 @@ class KeyframeTest : public ::libvpx_test::EncoderTest,
     set_cpu_used_ = 0;
   }
 
-  virtual bool Continue() const {
-    return !HasFatalFailure() && !abort_;
-  }
-
   virtual void PreEncodeFrameHook(::libvpx_test::VideoSource *video,
                                   ::libvpx_test::Encoder *encoder) {
     if (kf_do_force_kf_)

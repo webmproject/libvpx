@@ -14,7 +14,6 @@
 #include "vp9/common/vp9_entropymode.h"
 #include "vpx_mem/vpx_mem.h"
 #include "vpx/vpx_integer.h"
-#include "vp9/common/vp9_coefupdateprobs.h"
 
 DECLARE_ALIGNED(16, const uint8_t, vp9_norm[256]) = {
   0, 7, 6, 6, 5, 5, 5, 5, 4, 4, 4, 4, 4, 4, 4, 4,
@@ -407,16 +406,6 @@ void vp9_model_to_full_probs(const vp9_prob *model, vp9_prob *full) {
   extend_model_to_full_distribution(model[PIVOT_NODE], full);
 }
 
-void vp9_model_to_full_probs_sb(
-    vp9_prob model[COEF_BANDS][PREV_COEF_CONTEXTS][UNCONSTRAINED_NODES],
-    vp9_prob full[COEF_BANDS][PREV_COEF_CONTEXTS][ENTROPY_NODES]) {
-  int c, p;
-  for (c = 0; c < COEF_BANDS; ++c)
-    for (p = 0; p < PREV_COEF_CONTEXTS; ++p) {
-      vp9_model_to_full_probs(model[c][p], full[c][p]);
-    }
-}
-
 static vp9_tree_index cat1[2], cat2[4], cat3[6], cat4[8], cat5[10], cat6[28];
 
 static void init_bit_tree(vp9_tree_index *p, int n) {
@@ -651,31 +640,6 @@ void vp9_coef_tree_initialize() {
 #define COEF_MAX_UPDATE_FACTOR_KEY 112
 #define COEF_COUNT_SAT_AFTER_KEY 24
 #define COEF_MAX_UPDATE_FACTOR_AFTER_KEY 128
-
-void vp9_full_to_model_count(unsigned int *model_count,
-                             unsigned int *full_count) {
-  int n;
-  model_count[ZERO_TOKEN] = full_count[ZERO_TOKEN];
-  model_count[ONE_TOKEN] = full_count[ONE_TOKEN];
-  model_count[TWO_TOKEN] = full_count[TWO_TOKEN];
-  for (n = THREE_TOKEN; n < DCT_EOB_TOKEN; ++n)
-    model_count[TWO_TOKEN] += full_count[n];
-  model_count[DCT_EOB_MODEL_TOKEN] = full_count[DCT_EOB_TOKEN];
-}
-
-void vp9_full_to_model_counts(
-    vp9_coeff_count_model *model_count, vp9_coeff_count *full_count) {
-  int i, j, k, l;
-  for (i = 0; i < BLOCK_TYPES; ++i)
-    for (j = 0; j < REF_TYPES; ++j)
-      for (k = 0; k < COEF_BANDS; ++k)
-        for (l = 0; l < PREV_COEF_CONTEXTS; ++l) {
-          if (l >= 3 && k == 0)
-            continue;
-          vp9_full_to_model_count(model_count[i][j][k][l],
-                                  full_count[i][j][k][l]);
-        }
-}
 
 static void adapt_coef_probs(VP9_COMMON *cm, TX_SIZE txfm_size,
                              int count_sat, int update_factor) {

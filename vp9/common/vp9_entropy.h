@@ -174,16 +174,8 @@ typedef unsigned int vp9_coeff_count_model[REF_TYPES][COEF_BANDS]
 typedef unsigned int vp9_coeff_stats_model[REF_TYPES][COEF_BANDS]
                                           [PREV_COEF_CONTEXTS]
                                           [UNCONSTRAINED_NODES][2];
-extern void vp9_full_to_model_count(unsigned int *model_count,
-                                    unsigned int *full_count);
-extern void vp9_full_to_model_counts(
-    vp9_coeff_count_model *model_count, vp9_coeff_count *full_count);
 
 void vp9_model_to_full_probs(const vp9_prob *model, vp9_prob *full);
-
-void vp9_model_to_full_probs_sb(
-    vp9_prob model[COEF_BANDS][PREV_COEF_CONTEXTS][UNCONSTRAINED_NODES],
-    vp9_prob full[COEF_BANDS][PREV_COEF_CONTEXTS][ENTROPY_NODES]);
 
 extern const vp9_prob vp9_modelcoefprobs[COEFPROB_MODELS][ENTROPY_NODES - 1];
 
@@ -220,6 +212,6 @@ static INLINE const int* get_scan_16x16(TX_TYPE tx_type) {
   }
 }
 
-#include "vp9/common/vp9_coefupdateprobs.h"
+enum { VP9_COEF_UPDATE_PROB = 252 };
 
 #endif  // VP9_COMMON_VP9_ENTROPY_H_

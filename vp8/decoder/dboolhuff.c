@@ -14,16 +14,16 @@
 int vp8dx_start_decode(BOOL_DECODER *br,
                        const unsigned char *source,
                        unsigned int source_sz,
-                       const unsigned char *origin,
-                       const unsigned char *key)
+                       vp8_decrypt_cb *decrypt_cb,
+                       void *decrypt_state)
 {
     br->user_buffer_end = source+source_sz;
     br->user_buffer     = source;
     br->value    = 0;
     br->count    = -8;
     br->range    = 255;
-    br->origin = origin;
-    br->key = key;
+    br->decrypt_cb = decrypt_cb;
+    br->decrypt_state = decrypt_state;
 
     if (source_sz && !source)
         return 1;
@@ -37,13 +37,20 @@ int vp8dx_start_decode(BOOL_DECODER *br,
 void vp8dx_bool_decoder_fill(BOOL_DECODER *br)
 {
     const unsigned char *bufptr = br->user_buffer;
-    const unsigned char *bufend = br->user_buffer_end;
     VP8_BD_VALUE value = br->value;
     int count = br->count;
     int shift = VP8_BD_VALUE_SIZE - 8 - (count + 8);
-    size_t bits_left = (bufend - bufptr)*CHAR_BIT;
+    size_t bytes_left = br->user_buffer_end - bufptr;
+    size_t bits_left = bytes_left * CHAR_BIT;
     int x = (int)(shift + CHAR_BIT - bits_left);
     int loop_end = 0;
+    unsigned char decrypted[sizeof(VP8_BD_VALUE) + 1];
+
+    if (br->decrypt_cb) {
+        size_t n = bytes_left > sizeof(decrypted) ? sizeof(decrypted) : bytes_left;
+        br->decrypt_cb(br->decrypt_state, bufptr, decrypted, (int)n);
+        bufptr = decrypted;
+    }
 
     if(x >= 0)
     {
@@ -56,14 +63,13 @@ void vp8dx_bool_decoder_fill(BOOL_DECODER *br)
         while(shift >= loop_end)
         {
             count += CHAR_BIT;
-            value |= ((VP8_BD_VALUE)decrypt_byte(bufptr, br->origin,
-                                                 br->key)) << shift;
+            value |= (VP8_BD_VALUE)*bufptr << shift;
             ++bufptr;
+            ++br->user_buffer;
             shift -= CHAR_BIT;
         }
     }
 
-    br->user_buffer = bufptr;
     br->value = value;
     br->count = count;
 }

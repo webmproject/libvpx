@@ -255,16 +255,15 @@ static INLINE void wide_mbfilter(int8_t mask, uint8_t hev,
   }
 }
 
-void vp9_mb_lpf_horizontal_edge_w(uint8_t *s, int p,
-                                 const uint8_t *blimit,
-                                 const uint8_t *limit,
-                                 const uint8_t *thresh,
-                                 int count) {
+void vp9_mb_lpf_horizontal_edge_w_c(uint8_t *s, int p,
+                                    const uint8_t *blimit,
+                                    const uint8_t *limit,
+                                    const uint8_t *thresh) {
   int i;
 
   // loop filter designed to work using chars so that we can make maximum use
   // of 8 bit simd instructions.
-  for (i = 0; i < 8 * count; ++i) {
+  for (i = 0; i < 8; ++i) {
     const uint8_t p3 = s[-4 * p], p2 = s[-3 * p], p1 = s[-2 * p], p0 = s[-p];
     const uint8_t q0 = s[0 * p], q1 = s[1 * p], q2 = s[2 * p], q3 = s[3 * p];
     const int8_t mask = filter_mask(*limit, *blimit,
@@ -285,14 +284,13 @@ void vp9_mb_lpf_horizontal_edge_w(uint8_t *s, int p,
   }
 }
 
-void vp9_mb_lpf_vertical_edge_w(uint8_t *s, int p,
-                                const uint8_t *blimit,
-                                const uint8_t *limit,
-                                const uint8_t *thresh,
-                                int count) {
+void vp9_mb_lpf_vertical_edge_w_c(uint8_t *s, int p,
+                                  const uint8_t *blimit,
+                                  const uint8_t *limit,
+                                  const uint8_t *thresh) {
   int i;
 
-  for (i = 0; i < 8 * count; ++i) {
+  for (i = 0; i < 8; ++i) {
     const uint8_t p3 = s[-4], p2 = s[-3], p1 = s[-2], p0 = s[-1];
     const uint8_t q0 = s[0], q1 = s[1],  q2 = s[2], q3 = s[3];
     const int8_t mask = filter_mask(*limit, *blimit,

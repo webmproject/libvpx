@@ -71,12 +71,6 @@ static INLINE int dct_const_round_shift(int input) {
   return rv;
 }
 
-static INLINE int dct_32_round(int input) {
-  int rv = ROUND_POWER_OF_TWO(input, DCT_CONST_BITS);
-  assert(-131072 <= rv && rv <= 131071);
-  return rv;
-}
-
 typedef void (*transform_1d)(int16_t*, int16_t*);
 
 typedef struct {

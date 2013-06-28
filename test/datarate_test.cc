@@ -36,10 +36,6 @@ class DatarateTest : public ::libvpx_test::EncoderTest,
     duration_ = 0.0;
   }
 
-  virtual bool Continue() const {
-    return !HasFatalFailure() && !abort_;
-  }
-
   virtual void PreEncodeFrameHook(::libvpx_test::VideoSource *video,
                                   ::libvpx_test::Encoder *encoder) {
     const vpx_rational_t tb = video->timebase();

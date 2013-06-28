@@ -210,12 +210,28 @@ typedef struct {
   int quarter_pixel_search;
   int thresh_mult[MAX_MODES];
   int max_step_search_steps;
-  int first_step;
+  int reduce_first_step_size;
+  int auto_mv_step_size;
   int optimize_coefficients;
   int search_best_filter;
   int static_segmentation;
   int comp_inter_joint_search_thresh;
   int adpative_rd_thresh;
+  int skip_encode_sb;
+  int use_lastframe_partitioning;
+  int use_largest_txform;
+  int use_8tap_always;
+  int use_avoid_tested_higherror;
+  int skip_lots_of_modes;
+  int adjust_thresholds_by_speed;
+  int partition_by_variance;
+  int use_one_partition_size_always;
+  int less_rectangular_check;
+  BLOCK_SIZE_TYPE always_this_block_size;
+  int use_partitions_greater_than;
+  BLOCK_SIZE_TYPE greater_than_block_size;
+  int use_partitions_less_than;
+  BLOCK_SIZE_TYPE less_than_block_size;
 } SPEED_FEATURES;
 
 enum BlockSize {
@@ -457,6 +473,8 @@ typedef struct VP9_COMP {
 
   SPEED_FEATURES sf;
   int error_bins[1024];
+
+  unsigned int max_mv_magnitude;
 
   // Data used for real time conferencing mode to help determine if it would be good to update the gf
   int inter_zz_count;

@@ -15,7 +15,6 @@ VP9_COMMON_SRCS-yes += common/vp9_ppflags.h
 VP9_COMMON_SRCS-yes += common/vp9_onyx.h
 VP9_COMMON_SRCS-yes += common/vp9_alloccommon.c
 VP9_COMMON_SRCS-yes += common/vp9_asm_com_offsets.c
-VP9_COMMON_SRCS-yes += common/vp9_coefupdateprobs.h
 VP9_COMMON_SRCS-yes += common/vp9_convolve.c
 VP9_COMMON_SRCS-yes += common/vp9_convolve.h
 VP9_COMMON_SRCS-yes += common/vp9_debugmodes.c
@@ -39,7 +38,6 @@ VP9_COMMON_SRCS-yes += common/vp9_enums.h
 VP9_COMMON_SRCS-yes += common/vp9_extend.h
 VP9_COMMON_SRCS-yes += common/vp9_findnearmv.h
 VP9_COMMON_SRCS-yes += common/vp9_idct.h
-VP9_COMMON_SRCS-yes += common/vp9_invtrans.h
 VP9_COMMON_SRCS-yes += common/vp9_loopfilter.h
 VP9_COMMON_SRCS-yes += common/vp9_modecont.h
 VP9_COMMON_SRCS-yes += common/vp9_mv.h
@@ -60,7 +58,6 @@ VP9_COMMON_SRCS-yes += common/vp9_textblit.h
 VP9_COMMON_SRCS-yes += common/vp9_tile_common.h
 VP9_COMMON_SRCS-yes += common/vp9_tile_common.c
 VP9_COMMON_SRCS-yes += common/vp9_treecoder.h
-VP9_COMMON_SRCS-yes += common/vp9_invtrans.c
 VP9_COMMON_SRCS-yes += common/vp9_loopfilter.c
 VP9_COMMON_SRCS-yes += common/vp9_loopfilter_filters.c
 VP9_COMMON_SRCS-yes += common/vp9_mbpitch.c
@@ -78,7 +75,6 @@ VP9_COMMON_SRCS-$(CONFIG_IMPLICIT_SEGMENTATION) += common/vp9_implicit_segmentat
 VP9_COMMON_SRCS-$(ARCH_X86)$(ARCH_X86_64) += common/x86/vp9_loopfilter_x86.h
 VP9_COMMON_SRCS-$(ARCH_X86)$(ARCH_X86_64) += common/x86/vp9_postproc_x86.h
 VP9_COMMON_SRCS-$(ARCH_X86)$(ARCH_X86_64) += common/x86/vp9_asm_stubs.c
-VP9_COMMON_SRCS-$(ARCH_X86)$(ARCH_X86_64) += common/x86/vp9_loopfilter_intrin_mmx.c
 VP9_COMMON_SRCS-$(ARCH_X86)$(ARCH_X86_64) += common/x86/vp9_loopfilter_intrin_sse2.c
 VP9_COMMON_SRCS-$(CONFIG_POSTPROC) += common/vp9_postproc.h
 VP9_COMMON_SRCS-$(CONFIG_POSTPROC) += common/vp9_postproc.c
@@ -89,8 +85,6 @@ VP9_COMMON_SRCS-$(HAVE_SSE2) += common/x86/vp9_iwalsh_sse2.asm
 VP9_COMMON_SRCS-$(HAVE_SSE2) += common/x86/vp9_loopfilter_sse2.asm
 VP9_COMMON_SRCS-$(HAVE_SSE2) += common/x86/vp9_recon_sse2.asm
 VP9_COMMON_SRCS-$(HAVE_SSE2) += common/x86/vp9_recon_wrapper_sse2.c
-VP9_COMMON_SRCS-$(HAVE_SSE2) += common/x86/vp9_subpel_variance_impl_sse2.asm
-VP9_COMMON_SRCS-$(HAVE_SSE2) += common/x86/vp9_subpixel_variance_sse2.c
 VP9_COMMON_SRCS-$(HAVE_SSSE3) += common/x86/vp9_subpixel_8t_ssse3.asm
 ifeq ($(CONFIG_POSTPROC),yes)
 VP9_COMMON_SRCS-$(HAVE_MMX) += common/x86/vp9_postproc_mmx.asm
@@ -105,6 +99,8 @@ endif
 
 VP9_COMMON_SRCS-$(HAVE_SSE2) += common/x86/vp9_idct_intrin_sse2.c
 VP9_COMMON_SRCS-$(HAVE_SSE2) += common/x86/vp9_sadmxn_sse2.c
+
+VP9_COMMON_SRCS-$(HAVE_NEON) += common/arm/neon/vp9_loopfilter_neon$(ASM)
 
 $(eval $(call asm_offsets_template,\
          vp9_asm_com_offsets.asm, $(VP9_PREFIX)common/vp9_asm_com_offsets.c))

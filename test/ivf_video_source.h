@@ -52,7 +52,7 @@ class IVFVideoSource : public CompressedVideoSource {
 
   virtual void Begin() {
     input_file_ = OpenTestDataFile(file_name_);
-    ASSERT_TRUE(input_file_) << "Input file open failed. Filename: "
+    ASSERT_TRUE(input_file_ != NULL) << "Input file open failed. Filename: "
         << file_name_;
 
     // Read file header
@@ -72,6 +72,7 @@ class IVFVideoSource : public CompressedVideoSource {
   }
 
   void FillFrame() {
+    ASSERT_TRUE(input_file_ != NULL);
     uint8_t frame_hdr[kIvfFrameHdrSize];
     // Check frame header and read a frame from input_file.
     if (fread(frame_hdr, 1, kIvfFrameHdrSize, input_file_)

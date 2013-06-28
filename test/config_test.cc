@@ -40,10 +40,6 @@ class ConfigTest : public ::libvpx_test::EncoderTest,
     ++frame_count_out_;
   }
 
-  virtual bool Continue() const {
-    return !HasFatalFailure() && !abort_;
-  }
-
   unsigned int frame_count_in_;
   unsigned int frame_count_out_;
   unsigned int frame_count_max_;

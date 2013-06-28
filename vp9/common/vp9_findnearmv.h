@@ -70,10 +70,6 @@ static int check_mv_bounds(int_mv *mv,
          mv->as_mv.row > mb_to_bottom_edge;
 }
 
-vp9_prob *vp9_mv_ref_probs(VP9_COMMON *pc,
-                           vp9_prob p[VP9_INTER_MODES - 1],
-                           const int context);
-
 void vp9_append_sub8x8_mvs_for_idx(VP9_COMMON *pc,
                                    MACROBLOCKD *xd,
                                    int_mv *dst_nearest,

@@ -27,10 +27,6 @@ class BordersTest : public ::libvpx_test::EncoderTest,
     SetMode(GET_PARAM(1));
   }
 
-  virtual bool Continue() const {
-    return !HasFatalFailure() && !abort_;
-  }
-
   virtual void PreEncodeFrameHook(::libvpx_test::VideoSource *video,
                                   ::libvpx_test::Encoder *encoder) {
     if ( video->frame() == 1) {
