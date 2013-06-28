@@ -2056,7 +2056,6 @@ static void encode_superblock(VP9_COMP *cpi, TOKENEXTRA **t, int output_enabled,
   VP9_COMMON * const cm = &cpi->common;
   MACROBLOCK * const x = &cpi->mb;
   MACROBLOCKD * const xd = &x->e_mbd;
-  int n;
   MODE_INFO *mi = xd->mode_info_context;
   MB_MODE_INFO *mbmi = &mi->mbmi;
   unsigned int segment_id = mbmi->segment_id;
@@ -2147,11 +2146,7 @@ static void encode_superblock(VP9_COMP *cpi, TOKENEXTRA **t, int output_enabled,
 
   // copy skip flag on all mb_mode_info contexts in this SB
   // if this was a skip at this txfm size
-  for (n = 1; n < bw * bh; n++) {
-    const int x_idx = n & (bw - 1), y_idx = n >> bwl;
-    if (mi_col + x_idx < cm->mi_cols && mi_row + y_idx < cm->mi_rows)
-      mi[x_idx + y_idx * mis].mbmi.mb_skip_coeff = mi->mbmi.mb_skip_coeff;
-  }
+  vp9_set_pred_flag(xd, bsize, PRED_MBSKIP, mi->mbmi.mb_skip_coeff);
 
   if (output_enabled) {
     if (cm->txfm_mode == TX_MODE_SELECT && mbmi->sb_type >= BLOCK_SIZE_SB8X8

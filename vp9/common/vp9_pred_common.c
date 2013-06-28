@@ -455,10 +455,9 @@ unsigned char vp9_get_pred_flag(const MACROBLOCKD *const xd,
 
 // This function sets the status of the given prediction signal.
 // I.e. is the predicted value for the given signal correct.
-void vp9_set_pred_flag(MACROBLOCKD *xd, PRED_ID pred_id,
+void vp9_set_pred_flag(MACROBLOCKD *xd, BLOCK_SIZE_TYPE bsize, PRED_ID pred_id,
                        unsigned char pred_flag) {
   const int mis = xd->mode_info_stride;
-  BLOCK_SIZE_TYPE bsize = xd->mode_info_context->mbmi.sb_type;
   const int bh = 1 << mi_height_log2(bsize);
   const int bw = 1 << mi_width_log2(bsize);
 #define sub(a, b) (b) < 0 ? (a) + (b) : (a)

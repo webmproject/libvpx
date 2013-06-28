@@ -172,9 +172,7 @@ void vp9_setup_interp_filters(MACROBLOCKD *xd,
   if (xd->mode_info_context) {
     MB_MODE_INFO *mbmi = &xd->mode_info_context->mbmi;
 
-    set_scale_factors(xd,
-                      mbmi->ref_frame[0] - 1,
-                      mbmi->ref_frame[1] - 1,
+    set_scale_factors(xd, mbmi->ref_frame[0] - 1, mbmi->ref_frame[1] - 1,
                       cm->active_ref_scale);
   }
 
