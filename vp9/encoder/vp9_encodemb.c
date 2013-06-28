@@ -223,11 +223,11 @@ static void optimize_b(VP9_COMMON *const cm, MACROBLOCK *mb,
         pt = trellis_get_coeff_context(scan, nb, i, t0, token_cache,
                                        pad, default_eob);
         rate0 +=
-          mb->token_costs_noskip[tx_size][type][ref][band][pt]
-                                [tokens[next][0].token];
+          mb->token_costs[tx_size][type][ref][0][band][pt]
+                         [tokens[next][0].token];
         rate1 +=
-          mb->token_costs_noskip[tx_size][type][ref][band][pt]
-                                [tokens[next][1].token];
+          mb->token_costs[tx_size][type][ref][0][band][pt]
+                         [tokens[next][1].token];
       }
       UPDATE_RD_COST();
       /* And pick the best. */
@@ -275,22 +275,14 @@ static void optimize_b(VP9_COMMON *const cm, MACROBLOCK *mb,
         if (t0 != DCT_EOB_TOKEN) {
           pt = trellis_get_coeff_context(scan, nb, i, t0, token_cache,
                                          pad, default_eob);
-          if (!x)
-            rate0 += mb->token_costs[tx_size][type][ref][band][pt][
-                tokens[next][0].token];
-          else
-            rate0 += mb->token_costs_noskip[tx_size][type][ref][band][pt][
-                tokens[next][0].token];
+          rate0 += mb->token_costs[tx_size][type][ref][!x][band][pt]
+                                  [tokens[next][0].token];
         }
         if (t1 != DCT_EOB_TOKEN) {
           pt = trellis_get_coeff_context(scan, nb, i, t1, token_cache,
                                          pad, default_eob);
-          if (!x)
-            rate1 += mb->token_costs[tx_size][type][ref][band][pt][
-                tokens[next][1].token];
-          else
-            rate1 += mb->token_costs_noskip[tx_size][type][ref][band][pt][
-                tokens[next][1].token];
+          rate1 += mb->token_costs[tx_size][type][ref][!x][band][pt]
+                                  [tokens[next][1].token];
         }
       }
 
@@ -322,12 +314,12 @@ static void optimize_b(VP9_COMMON *const cm, MACROBLOCK *mb,
       /* Update the cost of each path if we're past the EOB token. */
       if (t0 != DCT_EOB_TOKEN) {
         tokens[next][0].rate +=
-            mb->token_costs[tx_size][type][ref][band][0][t0];
+            mb->token_costs[tx_size][type][ref][1][band][0][t0];
         tokens[next][0].token = ZERO_TOKEN;
       }
       if (t1 != DCT_EOB_TOKEN) {
         tokens[next][1].rate +=
-            mb->token_costs[tx_size][type][ref][band][0][t1];
+            mb->token_costs[tx_size][type][ref][1][band][0][t1];
         tokens[next][1].token = ZERO_TOKEN;
       }
       /* Don't update next, because we didn't add a new node. */
@@ -343,8 +335,8 @@ static void optimize_b(VP9_COMMON *const cm, MACROBLOCK *mb,
   error1 = tokens[next][1].error;
   t0 = tokens[next][0].token;
   t1 = tokens[next][1].token;
-  rate0 += mb->token_costs_noskip[tx_size][type][ref][band][pt][t0];
-  rate1 += mb->token_costs_noskip[tx_size][type][ref][band][pt][t1];
+  rate0 += mb->token_costs[tx_size][type][ref][0][band][pt][t0];
+  rate1 += mb->token_costs[tx_size][type][ref][0][band][pt][t1];
   UPDATE_RD_COST();
   best = rd_cost1 < rd_cost0;
   final_eob = i0 - 1;
