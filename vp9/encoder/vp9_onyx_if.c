@@ -659,7 +659,6 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
   int mode = cpi->compressor_speed;
   int speed = cpi->speed;
   int i;
-
   // Only modes 0 and 1 supported for now in experimental code basae
   if (mode > 1)
     mode = 1;
@@ -699,6 +698,7 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
   sf->adjust_thresholds_by_speed = 0;
   sf->partition_by_variance = 0;
   sf->use_one_partition_size_always = 0;
+  sf->less_rectangular_check = 0;
   sf->use_partitions_less_than = 0;
   sf->less_than_block_size = BLOCK_SIZE_MB16X16;
   sf->use_partitions_greater_than = 0;
@@ -730,12 +730,17 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
 
       if (speed == 1) {
         sf->comp_inter_joint_search_thresh = BLOCK_SIZE_TYPES;
-        sf->use_largest_txform = !(cpi->common.frame_type == KEY_FRAME ||
-                                   cpi->common.intra_only ||
-                                   cpi->common.show_frame == 0);
+        sf->less_rectangular_check  = 1;
+        sf->use_largest_txform        = !(cpi->common.frame_type == KEY_FRAME ||
+                                          cpi->common.intra_only ||
+                                          cpi->common.show_frame == 0);
       }
       if (speed == 2) {
+        sf->use_largest_txform        = !(cpi->common.frame_type == KEY_FRAME ||
+                                          cpi->common.intra_only ||
+                                          cpi->common.show_frame == 0);
         sf->adjust_thresholds_by_speed = 1;
+        sf->less_rectangular_check  = 1;
         sf->comp_inter_joint_search_thresh = BLOCK_SIZE_TYPES;
         sf->reduce_first_step_size = 1;
         sf->optimize_coefficients = 0;
