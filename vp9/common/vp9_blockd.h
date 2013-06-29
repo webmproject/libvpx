@@ -401,11 +401,13 @@ static int *get_sb_index(MACROBLOCKD *xd, BLOCK_SIZE_TYPE subsize) {
 static INLINE void update_partition_context(MACROBLOCKD *xd,
                                             BLOCK_SIZE_TYPE sb_type,
                                             BLOCK_SIZE_TYPE sb_size) {
-  int bsl = b_width_log2(sb_size), bs = (1 << bsl) / 2;
-  int bwl = b_width_log2(sb_type);
-  int bhl = b_height_log2(sb_type);
-  int boffset = b_width_log2(BLOCK_SIZE_SB64X64) - bsl;
-  char pcvalue[2] = {~(0xe << boffset), ~(0xf <<boffset)};
+  const int bsl = b_width_log2(sb_size), bs = (1 << bsl) / 2;
+  const int bwl = b_width_log2(sb_type);
+  const int bhl = b_height_log2(sb_type);
+  const int boffset = b_width_log2(BLOCK_SIZE_SB64X64) - bsl;
+  const char pcval0 = ~(0xe << boffset);
+  const char pcval1 = ~(0xf << boffset);
+  const char pcvalue[2] = {pcval0, pcval1};
 
   assert(MAX(bwl, bhl) <= bsl);
 
