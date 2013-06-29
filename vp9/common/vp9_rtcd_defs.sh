@@ -59,13 +59,13 @@ specialize void vp9_build_intra_predictors
 
 if [ "$CONFIG_VP9_DECODER" = "yes" ]; then
 prototype void vp9_add_constant_residual_8x8 "const int16_t diff, uint8_t *dest, int stride"
-specialize vp9_add_constant_residual_8x8 sse2
+specialize vp9_add_constant_residual_8x8 sse2 neon
 
 prototype void vp9_add_constant_residual_16x16 "const int16_t diff, uint8_t *dest, int stride"
-specialize vp9_add_constant_residual_16x16 sse2
+specialize vp9_add_constant_residual_16x16 sse2 neon
 
 prototype void vp9_add_constant_residual_32x32 "const int16_t diff, uint8_t *dest, int stride"
-specialize vp9_add_constant_residual_32x32 sse2
+specialize vp9_add_constant_residual_32x32 sse2 neon
 fi
 
 #
