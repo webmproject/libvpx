@@ -386,27 +386,26 @@ static INLINE int cost_coeffs(VP9_COMMON *const cm, MACROBLOCK *mb,
     // single eob token
     cost += token_costs[0][0][pt][DCT_EOB_TOKEN];
   } else {
-    int t, v, prev_rc = 0;
+    int v, prev_t;
 
     // dc token
     v = qcoeff_ptr[0];
-    t = vp9_dct_value_tokens_ptr[v].token;
-    cost += token_costs[0][0][pt][t] + vp9_dct_value_cost_ptr[v];
-    token_cache[0] = vp9_pt_energy_class[t];
+    prev_t = vp9_dct_value_tokens_ptr[v].token;
+    cost += token_costs[0][0][pt][prev_t] + vp9_dct_value_cost_ptr[v];
+    token_cache[0] = vp9_pt_energy_class[prev_t];
 
     // ac tokens
     for (c = 1; c < eob; c++) {
       const int rc = scan[c];
-      int band = get_coef_band(band_translate, c);
+      const int band = get_coef_band(band_translate, c);
+      int t;
 
       v = qcoeff_ptr[rc];
       t = vp9_dct_value_tokens_ptr[v].token;
       pt = vp9_get_coef_context(scan, nb, pad, token_cache, c, default_eob);
-      // as an index at some level
-      cost += token_costs[!token_cache[prev_rc]][band][pt][t] +
-              vp9_dct_value_cost_ptr[v];
+      cost += token_costs[!prev_t][band][pt][t] + vp9_dct_value_cost_ptr[v];
       token_cache[rc] = vp9_pt_energy_class[t];
-      prev_rc = rc;
+      prev_t = t;
     }
 
     // eob token
