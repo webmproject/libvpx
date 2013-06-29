@@ -445,32 +445,6 @@ vp9_extra_bit vp9_extra_bits[12] = {
 
 #include "vp9/common/vp9_default_coef_probs.h"
 
-// This function updates and then returns n AC coefficient context
-// This is currently a placeholder function to allow experimentation
-// using various context models based on the energy earlier tokens
-// within the current block.
-//
-// For now it just returns the previously used context.
-#define MAX_NEIGHBORS 2
-int vp9_get_coef_context(const int *scan, const int *neighbors,
-                         int nb_pad, uint8_t *token_cache, int c, int l) {
-  int eob = l;
-  assert(nb_pad == MAX_NEIGHBORS);
-  if (c == eob) {
-    return 0;
-  } else {
-    int ctx;
-    assert(neighbors[MAX_NEIGHBORS * c + 0] >= 0);
-    if (neighbors[MAX_NEIGHBORS * c + 1] >= 0) {
-      ctx = (1 + token_cache[scan[neighbors[MAX_NEIGHBORS * c + 0]]] +
-             token_cache[scan[neighbors[MAX_NEIGHBORS * c + 1]]]) >> 1;
-    } else {
-      ctx = token_cache[scan[neighbors[MAX_NEIGHBORS * c + 0]]];
-    }
-    return ctx;
-  }
-};
-
 void vp9_default_coef_probs(VP9_COMMON *pc) {
   vpx_memcpy(pc->fc.coef_probs[TX_4X4], default_coef_probs_4x4,
              sizeof(pc->fc.coef_probs[TX_4X4]));

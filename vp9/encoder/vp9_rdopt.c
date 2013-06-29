@@ -402,7 +402,7 @@ static INLINE int cost_coeffs(VP9_COMMON *const cm, MACROBLOCK *mb,
 
       v = qcoeff_ptr[rc];
       t = vp9_dct_value_tokens_ptr[v].token;
-      pt = vp9_get_coef_context(scan, nb, pad, token_cache, c, default_eob);
+      pt = get_coef_context(scan, nb, pad, token_cache, c, default_eob);
       cost += token_costs[!prev_t][band][pt][t] + vp9_dct_value_cost_ptr[v];
       token_cache[rc] = vp9_pt_energy_class[t];
       prev_t = t;
@@ -410,7 +410,7 @@ static INLINE int cost_coeffs(VP9_COMMON *const cm, MACROBLOCK *mb,
 
     // eob token
     if (c < seg_eob) {
-      pt = vp9_get_coef_context(scan, nb, pad, token_cache, c, default_eob);
+      pt = get_coef_context(scan, nb, pad, token_cache, c, default_eob);
       cost += token_costs[0][get_coef_band(band_translate, c)][pt]
                          [DCT_EOB_TOKEN];
     }
