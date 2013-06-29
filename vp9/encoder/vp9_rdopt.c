@@ -633,6 +633,8 @@ static void super_block_yrd(VP9_COMP *cpi,
     vpx_memset(txfm_cache, 0, NB_TXFM_MODES * sizeof(int64_t));
     super_block_yrd_for_txfm(cm, x, rate, distortion, skip, &sse[0], bs,
                              mbmi->txfm_size);
+    if (psse)
+      *psse = sse[0];
     return;
   }
   if (bs >= BLOCK_SIZE_SB32X32)
