@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAbn//414\u003d",
+        "filename": "vp9/encoder/x86/vp9_dct_sse2.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 2702,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-06-29T16:20:48Z",
+      "side": 1,
+      "message": "This looks rather annoying. I realize this isn\u0027t a lot of cycles altogether, but still, since this is only the \"fast\" rd-pass of the transform, maybe we want to simplify this? E.g. you could remove the +\u003d output[j] \u003e 0 step, which would save 2x8x4 instructions. (This would need some quality assessment, so can be marked as a TODO - possibly in the C code - for later analysis.)",
+      "revId": "f2e93a9146811984cae78ccc5fb3767016e849f8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
