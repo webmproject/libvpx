@@ -234,6 +234,7 @@ typedef struct {
   BLOCK_SIZE_TYPE less_than_block_size;
   int adjust_partitioning_from_last_frame;
   int last_partitioning_redo_frequency;
+  int disable_splitmv;
 } SPEED_FEATURES;
 
 enum BlockSize {
