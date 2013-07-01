@@ -17,7 +17,6 @@
 #include <math.h>
 
 #include "vp9/common/vp9_alloccommon.h"
-#include "vp9/common/vp9_modecont.h"
 #include "vp9/common/vp9_common.h"
 #include "vp9/encoder/vp9_ratectrl.h"
 #include "vp9/common/vp9_entropymode.h"

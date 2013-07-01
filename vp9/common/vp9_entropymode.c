@@ -10,7 +10,6 @@
 
 
 #include "vp9/common/vp9_onyxc_int.h"
-#include "vp9/common/vp9_modecont.h"
 #include "vp9/common/vp9_seg_common.h"
 #include "vp9/common/vp9_alloccommon.h"
 #include "vpx_mem/vpx_mem.h"
@@ -96,6 +95,17 @@ const vp9_prob vp9_partition_probs[NUM_FRAME_TYPES][NUM_PARTITION_CONTEXTS]
     {  58,  32,  12 } /* l split, a not split */,
     {  10,   7,   6 } /* a/l both split */
   }
+};
+
+static const vp9_prob default_inter_mode_probs[INTER_MODE_CONTEXTS]
+                                              [VP9_INTER_MODES - 1] = {
+  {2,       173,   34},  // 0 = both zero mv
+  {7,       145,   85},  // 1 = one zero mv + one a predicted mv
+  {7,       166,   63},  // 2 = two predicted mvs
+  {7,       94,    66},  // 3 = one predicted/zero and one new mv
+  {8,       64,    46},  // 4 = two new mvs
+  {17,      81,    31},  // 5 = one intra neighbour + x
+  {25,      29,    30},  // 6 = two intra neighbours
 };
 
 /* Array indices are identical to previously-existing INTRAMODECONTEXTNODES. */
@@ -242,8 +252,8 @@ void vp9_entropy_mode_init() {
 
 void vp9_init_mode_contexts(VP9_COMMON *pc) {
   vpx_memset(pc->fc.inter_mode_counts, 0, sizeof(pc->fc.inter_mode_counts));
-  vpx_memcpy(pc->fc.inter_mode_probs, vp9_default_inter_mode_probs,
-             sizeof(vp9_default_inter_mode_probs));
+  vpx_memcpy(pc->fc.inter_mode_probs, default_inter_mode_probs,
+             sizeof(default_inter_mode_probs));
 }
 
 void vp9_accum_mv_refs(VP9_COMMON *pc,
