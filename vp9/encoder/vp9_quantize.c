@@ -85,18 +85,19 @@ void vp9_quantize_b_c(int16_t *coeff_ptr, intptr_t n_coeffs, int skip_block,
 }
 
 // This function works well for large transform size.
-static void quantize_sparse(int16_t *coeff_ptr, intptr_t n_coeffs,
+void vp9_quantize_b_32x32_c(int16_t *coeff_ptr, intptr_t n_coeffs,
                             int skip_block,
                             int16_t *zbin_ptr, int16_t *round_ptr,
                             int16_t *quant_ptr, int16_t *quant_shift_ptr,
                             int16_t *qcoeff_ptr, int16_t *dqcoeff_ptr,
                             int16_t *dequant_ptr, int zbin_oq_value,
                             uint16_t *eob_ptr, const int16_t *scan,
-                            int *idx_arr) {
+                            const int16_t *iscan) {
   int i, rc, eob;
   int zbins[2], nzbins[2], zbin;
   int x, y, z, sz;
   int idx = 0;
+  int idx_arr[1024];
 
   vpx_memset(qcoeff_ptr, 0, n_coeffs*sizeof(int16_t));
   vpx_memset(dqcoeff_ptr, 0, n_coeffs*sizeof(int16_t));
@@ -179,20 +180,18 @@ void vp9_quantize(MACROBLOCK *mb, int plane, int block, int n_coeffs,
   // Call different quantization for different transform size.
   if (n_coeffs >= 1024) {
     // Save index of picked coefficient in pre-scan pass.
-    int idx_arr[1024];
-
-    quantize_sparse(BLOCK_OFFSET(mb->plane[plane].coeff, block, 16),
-                    n_coeffs, mb->skip_block,
-                    mb->plane[plane].zbin,
-                    mb->plane[plane].round,
-                    mb->plane[plane].quant,
-                    mb->plane[plane].quant_shift,
-                    BLOCK_OFFSET(xd->plane[plane].qcoeff, block, 16),
-                    BLOCK_OFFSET(xd->plane[plane].dqcoeff, block, 16),
-                    xd->plane[plane].dequant,
-                    mb->plane[plane].zbin_extra,
-                    &xd->plane[plane].eobs[block],
-                    scan, idx_arr);
+    vp9_quantize_b_32x32(BLOCK_OFFSET(mb->plane[plane].coeff, block, 16),
+                         n_coeffs, mb->skip_block,
+                         mb->plane[plane].zbin,
+                         mb->plane[plane].round,
+                         mb->plane[plane].quant,
+                         mb->plane[plane].quant_shift,
+                         BLOCK_OFFSET(xd->plane[plane].qcoeff, block, 16),
+                         BLOCK_OFFSET(xd->plane[plane].dqcoeff, block, 16),
+                         xd->plane[plane].dequant,
+                         mb->plane[plane].zbin_extra,
+                         &xd->plane[plane].eobs[block],
+                         scan, iscan);
   }
   else {
     vp9_quantize_b(BLOCK_OFFSET(mb->plane[plane].coeff, block, 16),
