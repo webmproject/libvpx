@@ -216,14 +216,15 @@ typedef struct {
   int search_best_filter;
   int static_segmentation;
   int comp_inter_joint_search_thresh;
-  int adpative_rd_thresh;
   int skip_encode_sb;
   int use_lastframe_partitioning;
   int use_largest_txform;
   int use_8tap_always;
   int use_avoid_tested_higherror;
   int skip_lots_of_modes;
+  int adpative_rd_thresh;
   int adjust_thresholds_by_speed;
+  int new_motion_thresh_factor;
   int partition_by_variance;
   int use_one_partition_size_always;
   int less_rectangular_check;
