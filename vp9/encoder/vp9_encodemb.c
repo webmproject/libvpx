@@ -109,8 +109,8 @@ static const int plane_rd_mult[4] = {
 
 // This function is a place holder for now but may ultimately need
 // to scan previous tokens to work out the correct context.
-static int trellis_get_coeff_context(const int *scan,
-                                     const int *nb,
+static int trellis_get_coeff_context(const int16_t *scan,
+                                     const int16_t *nb,
                                      int idx, int token,
                                      uint8_t *token_cache,
                                      int pad, int l) {
@@ -142,7 +142,7 @@ static void optimize_b(VP9_COMMON *const cm, MACROBLOCK *mb,
   PLANE_TYPE type = xd->plane[plane].plane_type;
   int err_mult = plane_rd_mult[type];
   int default_eob, pad;
-  int const *scan, *nb;
+  const int16_t *scan, *nb;
   const int mul = 1 + (tx_size == TX_32X32);
   uint8_t token_cache[1024];
   const int ib = txfrm_block_to_raster_block(xd, bsize, plane,

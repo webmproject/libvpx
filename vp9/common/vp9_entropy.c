@@ -50,28 +50,28 @@ DECLARE_ALIGNED(16, const uint8_t, vp9_pt_energy_class[MAX_ENTROPY_TOKENS]) = {
   0, 1, 2, 3, 3, 4, 4, 5, 5, 5, 5, 5
 };
 
-DECLARE_ALIGNED(16, const int, vp9_default_scan_4x4[16]) = {
+DECLARE_ALIGNED(16, const int16_t, vp9_default_scan_4x4[16]) = {
   0,  4,  1,  5,
   8,  2, 12,  9,
   3,  6, 13, 10,
   7, 14, 11, 15,
 };
 
-DECLARE_ALIGNED(16, const int, vp9_col_scan_4x4[16]) = {
+DECLARE_ALIGNED(16, const int16_t, vp9_col_scan_4x4[16]) = {
   0,  4,  8,  1,
   12,  5,  9,  2,
   13,  6, 10,  3,
   7, 14, 11, 15,
 };
 
-DECLARE_ALIGNED(16, const int, vp9_row_scan_4x4[16]) = {
+DECLARE_ALIGNED(16, const int16_t, vp9_row_scan_4x4[16]) = {
   0,  1,  4,  2,
   5,  3,  6,  8,
   9,  7, 12, 10,
   13, 11, 14, 15,
 };
 
-DECLARE_ALIGNED(64, const int, vp9_default_scan_8x8[64]) = {
+DECLARE_ALIGNED(64, const int16_t, vp9_default_scan_8x8[64]) = {
   0,  8,  1, 16,  9,  2, 17, 24,
   10,  3, 18, 25, 32, 11,  4, 26,
   33, 19, 40, 12, 34, 27,  5, 41,
@@ -82,7 +82,7 @@ DECLARE_ALIGNED(64, const int, vp9_default_scan_8x8[64]) = {
   46, 39, 61, 54, 47, 62, 55, 63,
 };
 
-DECLARE_ALIGNED(16, const int, vp9_col_scan_8x8[64]) = {
+DECLARE_ALIGNED(16, const int16_t, vp9_col_scan_8x8[64]) = {
   0,  8, 16,  1, 24,  9, 32, 17,
   2, 40, 25, 10, 33, 18, 48,  3,
   26, 41, 11, 56, 19, 34,  4, 49,
@@ -93,7 +93,7 @@ DECLARE_ALIGNED(16, const int, vp9_col_scan_8x8[64]) = {
   31, 61, 39, 54, 47, 62, 55, 63,
 };
 
-DECLARE_ALIGNED(16, const int, vp9_row_scan_8x8[64]) = {
+DECLARE_ALIGNED(16, const int16_t, vp9_row_scan_8x8[64]) = {
   0,  1,  2,  8,  9,  3, 16, 10,
   4, 17, 11, 24,  5, 18, 25, 12,
   19, 26, 32,  6, 13, 20, 33, 27,
@@ -104,7 +104,7 @@ DECLARE_ALIGNED(16, const int, vp9_row_scan_8x8[64]) = {
   60, 39, 61, 47, 54, 55, 62, 63,
 };
 
-DECLARE_ALIGNED(16, const int, vp9_default_scan_16x16[256]) = {
+DECLARE_ALIGNED(16, const int16_t, vp9_default_scan_16x16[256]) = {
   0,  16,   1,  32,  17,   2,  48,  33,  18,   3,  64,  34,  49,  19,  65,  80,
   50,   4,  35,  66,  20,  81,  96,  51,   5,  36,  82,  97,  67, 112,  21,  52,
   98,  37,  83, 113,   6,  68, 128,  53,  22,  99, 114,  84,   7, 129,  38,  69,
@@ -123,7 +123,7 @@ DECLARE_ALIGNED(16, const int, vp9_default_scan_16x16[256]) = {
   190, 221, 175, 236, 237, 191, 206, 252, 222, 253, 207, 238, 223, 254, 239, 255,
 };
 
-DECLARE_ALIGNED(16, const int, vp9_col_scan_16x16[256]) = {
+DECLARE_ALIGNED(16, const int16_t, vp9_col_scan_16x16[256]) = {
   0,  16,  32,  48,   1,  64,  17,  80,  33,  96,  49,   2,  65, 112,  18,  81,
   34, 128,  50,  97,   3,  66, 144,  19, 113,  35,  82, 160,  98,  51, 129,   4,
   67, 176,  20, 114, 145,  83,  36,  99, 130,  52, 192,   5, 161,  68, 115,  21,
@@ -142,7 +142,7 @@ DECLARE_ALIGNED(16, const int, vp9_col_scan_16x16[256]) = {
   159, 190, 221, 252, 175, 206, 237, 191, 253, 222, 238, 207, 254, 223, 239, 255,
 };
 
-DECLARE_ALIGNED(16, const int, vp9_row_scan_16x16[256]) = {
+DECLARE_ALIGNED(16, const int16_t, vp9_row_scan_16x16[256]) = {
   0,   1,   2,  16,   3,  17,   4,  18,  32,   5,  33,  19,   6,  34,  48,  20,
   49,   7,  35,  21,  50,  64,   8,  36,  65,  22,  51,  37,  80,   9,  66,  52,
   23,  38,  81,  67,  10,  53,  24,  82,  68,  96,  39,  11,  54,  83,  97,  69,
@@ -161,7 +161,7 @@ DECLARE_ALIGNED(16, const int, vp9_row_scan_16x16[256]) = {
   190, 251, 221, 191, 206, 236, 207, 237, 252, 222, 253, 223, 238, 239, 254, 255,
 };
 
-DECLARE_ALIGNED(16, const int, vp9_default_scan_32x32[1024]) = {
+DECLARE_ALIGNED(16, const int16_t, vp9_default_scan_32x32[1024]) = {
   0,   32,    1,   64,   33,    2,   96,   65,   34,  128,    3,   97,   66,  160,  129,   35,   98,    4,   67,  130,  161,  192,   36,   99,  224,    5,  162,  193,   68,  131,   37,  100,
   225,  194,  256,  163,   69,  132,    6,  226,  257,  288,  195,  101,  164,   38,  258,    7,  227,  289,  133,  320,   70,  196,  165,  290,  259,  228,   39,  321,  102,  352,    8,  197,
   71,  134,  322,  291,  260,  353,  384,  229,  166,  103,   40,  354,  323,  292,  135,  385,  198,  261,   72,    9,  416,  167,  386,  355,  230,  324,  104,  293,   41,  417,  199,  136,
@@ -460,28 +460,39 @@ void vp9_default_coef_probs(VP9_COMMON *pc) {
 // in {top, left, topleft, topright, bottomleft} order
 // for each position in raster scan order.
 // -1 indicates the neighbor does not exist.
-DECLARE_ALIGNED(16, int,
+DECLARE_ALIGNED(16, int16_t,
                 vp9_default_scan_4x4_neighbors[16 * MAX_NEIGHBORS]);
-DECLARE_ALIGNED(16, int,
+DECLARE_ALIGNED(16, int16_t,
                 vp9_col_scan_4x4_neighbors[16 * MAX_NEIGHBORS]);
-DECLARE_ALIGNED(16, int,
+DECLARE_ALIGNED(16, int16_t,
                 vp9_row_scan_4x4_neighbors[16 * MAX_NEIGHBORS]);
-DECLARE_ALIGNED(16, int,
+DECLARE_ALIGNED(16, int16_t,
                 vp9_col_scan_8x8_neighbors[64 * MAX_NEIGHBORS]);
-DECLARE_ALIGNED(16, int,
+DECLARE_ALIGNED(16, int16_t,
                 vp9_row_scan_8x8_neighbors[64 * MAX_NEIGHBORS]);
-DECLARE_ALIGNED(16, int,
+DECLARE_ALIGNED(16, int16_t,
                 vp9_default_scan_8x8_neighbors[64 * MAX_NEIGHBORS]);
-DECLARE_ALIGNED(16, int,
+DECLARE_ALIGNED(16, int16_t,
                 vp9_col_scan_16x16_neighbors[256 * MAX_NEIGHBORS]);
-DECLARE_ALIGNED(16, int,
+DECLARE_ALIGNED(16, int16_t,
                 vp9_row_scan_16x16_neighbors[256 * MAX_NEIGHBORS]);
-DECLARE_ALIGNED(16, int,
+DECLARE_ALIGNED(16, int16_t,
                 vp9_default_scan_16x16_neighbors[256 * MAX_NEIGHBORS]);
-DECLARE_ALIGNED(16, int,
+DECLARE_ALIGNED(16, int16_t,
                 vp9_default_scan_32x32_neighbors[1024 * MAX_NEIGHBORS]);
 
-static int find_in_scan(const int *scan, int l, int idx) {
+DECLARE_ALIGNED(16, int16_t, vp9_default_iscan_4x4[16]);
+DECLARE_ALIGNED(16, int16_t, vp9_col_iscan_4x4[16]);
+DECLARE_ALIGNED(16, int16_t, vp9_row_iscan_4x4[16]);
+DECLARE_ALIGNED(16, int16_t, vp9_col_iscan_8x8[64]);
+DECLARE_ALIGNED(16, int16_t, vp9_row_iscan_8x8[64]);
+DECLARE_ALIGNED(16, int16_t, vp9_default_iscan_8x8[64]);
+DECLARE_ALIGNED(16, int16_t, vp9_col_iscan_16x16[256]);
+DECLARE_ALIGNED(16, int16_t, vp9_row_iscan_16x16[256]);
+DECLARE_ALIGNED(16, int16_t, vp9_default_iscan_16x16[256]);
+DECLARE_ALIGNED(16, int16_t, vp9_default_iscan_32x32[1024]);
+
+static int find_in_scan(const int16_t *scan, int l, int idx) {
   int n, l2 = l * l;
   for (n = 0; n < l2; n++) {
     int rc = scan[n];
@@ -491,13 +502,16 @@ static int find_in_scan(const int *scan, int l, int idx) {
   assert(0);
   return -1;
 }
-static void init_scan_neighbors(const int *scan, int l, int *neighbors,
+static void init_scan_neighbors(const int16_t *scan,
+                                int16_t *iscan,
+                                int l, int16_t *neighbors,
                                 int max_neighbors) {
   int l2 = l * l;
   int n, i, j;
 
   for (n = 0; n < l2; n++) {
     int rc = scan[n];
+    iscan[n] = find_in_scan(scan, l, n);
     assert(max_neighbors == MAX_NEIGHBORS);
     i = rc / l;
     j = rc % l;
@@ -541,29 +555,29 @@ static void init_scan_neighbors(const int *scan, int l, int *neighbors,
 }
 
 void vp9_init_neighbors() {
-  init_scan_neighbors(vp9_default_scan_4x4, 4,
+  init_scan_neighbors(vp9_default_scan_4x4, vp9_default_iscan_4x4, 4,
                       vp9_default_scan_4x4_neighbors, MAX_NEIGHBORS);
-  init_scan_neighbors(vp9_row_scan_4x4, 4,
+  init_scan_neighbors(vp9_row_scan_4x4, vp9_row_iscan_4x4, 4,
                       vp9_row_scan_4x4_neighbors, MAX_NEIGHBORS);
-  init_scan_neighbors(vp9_col_scan_4x4, 4,
+  init_scan_neighbors(vp9_col_scan_4x4, vp9_col_iscan_4x4, 4,
                       vp9_col_scan_4x4_neighbors, MAX_NEIGHBORS);
-  init_scan_neighbors(vp9_default_scan_8x8, 8,
+  init_scan_neighbors(vp9_default_scan_8x8, vp9_default_iscan_8x8, 8,
                       vp9_default_scan_8x8_neighbors, MAX_NEIGHBORS);
-  init_scan_neighbors(vp9_row_scan_8x8, 8,
+  init_scan_neighbors(vp9_row_scan_8x8, vp9_row_iscan_8x8, 8,
                       vp9_row_scan_8x8_neighbors, MAX_NEIGHBORS);
-  init_scan_neighbors(vp9_col_scan_8x8, 8,
+  init_scan_neighbors(vp9_col_scan_8x8, vp9_col_iscan_8x8, 8,
                       vp9_col_scan_8x8_neighbors, MAX_NEIGHBORS);
-  init_scan_neighbors(vp9_default_scan_16x16, 16,
+  init_scan_neighbors(vp9_default_scan_16x16, vp9_default_iscan_16x16, 16,
                       vp9_default_scan_16x16_neighbors, MAX_NEIGHBORS);
-  init_scan_neighbors(vp9_row_scan_16x16, 16,
+  init_scan_neighbors(vp9_row_scan_16x16, vp9_row_iscan_16x16, 16,
                       vp9_row_scan_16x16_neighbors, MAX_NEIGHBORS);
-  init_scan_neighbors(vp9_col_scan_16x16, 16,
+  init_scan_neighbors(vp9_col_scan_16x16, vp9_col_iscan_16x16, 16,
                       vp9_col_scan_16x16_neighbors, MAX_NEIGHBORS);
-  init_scan_neighbors(vp9_default_scan_32x32, 32,
+  init_scan_neighbors(vp9_default_scan_32x32, vp9_default_iscan_32x32, 32,
                       vp9_default_scan_32x32_neighbors, MAX_NEIGHBORS);
 }
 
-const int *vp9_get_coef_neighbors_handle(const int *scan, int *pad) {
+const int16_t *vp9_get_coef_neighbors_handle(const int16_t *scan, int *pad) {
   if (scan == vp9_default_scan_4x4) {
     *pad = MAX_NEIGHBORS;
     return vp9_default_scan_4x4_neighbors;

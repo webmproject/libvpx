@@ -305,7 +305,7 @@ static INLINE int cost_coeffs(VP9_COMMON *const cm, MACROBLOCK *mb,
   int pt;
   int c = 0;
   int cost = 0, pad;
-  const int *scan, *nb;
+  const int16_t *scan, *nb;
   const int eob = xd->plane[plane].eobs[block];
   const int16_t *qcoeff_ptr = BLOCK_OFFSET(xd->plane[plane].qcoeff, block, 16);
   const int ref = mbmi->ref_frame[0] != INTRA_FRAME;

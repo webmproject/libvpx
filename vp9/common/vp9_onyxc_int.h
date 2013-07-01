@@ -129,10 +129,10 @@ typedef enum {
 typedef struct VP9Common {
   struct vpx_internal_error_info  error;
 
-  DECLARE_ALIGNED(16, int16_t, y_dequant[QINDEX_RANGE][2]);
-  DECLARE_ALIGNED(16, int16_t, uv_dequant[QINDEX_RANGE][2]);
+  DECLARE_ALIGNED(16, int16_t, y_dequant[QINDEX_RANGE][8]);
+  DECLARE_ALIGNED(16, int16_t, uv_dequant[QINDEX_RANGE][8]);
 #if CONFIG_ALPHA
-  DECLARE_ALIGNED(16, int16_t, a_dequant[QINDEX_RANGE][2]);
+  DECLARE_ALIGNED(16, int16_t, a_dequant[QINDEX_RANGE][8]);
 #endif
 
   int width;

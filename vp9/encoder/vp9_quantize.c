@@ -21,12 +21,12 @@
 extern int enc_debug;
 #endif
 
-static void quantize(int16_t *coeff_ptr, int n_coeffs, int skip_block,
-                     int16_t *zbin_ptr, int16_t *round_ptr, int16_t *quant_ptr,
-                     uint8_t *quant_shift_ptr,
-                     int16_t *qcoeff_ptr, int16_t *dqcoeff_ptr,
-                     int16_t *dequant_ptr, int zbin_oq_value,
-                     uint16_t *eob_ptr, const int *scan) {
+void vp9_quantize_b_c(int16_t *coeff_ptr, intptr_t n_coeffs, int skip_block,
+                      int16_t *zbin_ptr, int16_t *round_ptr, int16_t *quant_ptr,
+                      int16_t *quant_shift_ptr, int16_t *qcoeff_ptr,
+                      int16_t *dqcoeff_ptr, int16_t *dequant_ptr,
+                      int zbin_oq_value, uint16_t *eob_ptr, const int16_t *scan,
+                      const int16_t *iscan) {
   int i, rc, eob;
   int zbins[2], nzbins[2], zbin;
   int x, y, z, sz;
@@ -69,8 +69,8 @@ static void quantize(int16_t *coeff_ptr, int n_coeffs, int skip_block,
 
       if (x >= zbin) {
         x += (round_ptr[rc != 0]);
-        y  = ((int)(((int)(x * quant_ptr[rc != 0]) >> 16) + x))
-            >> quant_shift_ptr[rc != 0];            // quantize (x)
+        y  = (((int)(((int)(x * quant_ptr[rc != 0]) >> 16) + x)) *
+              quant_shift_ptr[rc != 0]) >> 16;      // quantize (x)
         x  = (y ^ sz) - sz;                         // get the sign back
         qcoeff_ptr[rc]  = x;                        // write to destination
         dqcoeff_ptr[rc] = x * dequant_ptr[rc != 0];  // dequantized value
@@ -85,12 +85,13 @@ static void quantize(int16_t *coeff_ptr, int n_coeffs, int skip_block,
 }
 
 // This function works well for large transform size.
-static void quantize_sparse(int16_t *coeff_ptr, int n_coeffs, int skip_block,
+static void quantize_sparse(int16_t *coeff_ptr, intptr_t n_coeffs,
+                            int skip_block,
                             int16_t *zbin_ptr, int16_t *round_ptr,
-                            int16_t *quant_ptr, uint8_t *quant_shift_ptr,
+                            int16_t *quant_ptr, int16_t *quant_shift_ptr,
                             int16_t *qcoeff_ptr, int16_t *dqcoeff_ptr,
                             int16_t *dequant_ptr, int zbin_oq_value,
-                            uint16_t *eob_ptr, const int *scan,
+                            uint16_t *eob_ptr, const int16_t *scan,
                             int *idx_arr) {
   int i, rc, eob;
   int zbins[2], nzbins[2], zbin;
@@ -134,8 +135,8 @@ static void quantize_sparse(int16_t *coeff_ptr, int n_coeffs, int skip_block,
 
       if (x >= zbin) {
         x += (round_ptr[rc != 0]);
-        y  = ((int)(((int)(x * quant_ptr[rc != 0]) >> 16) + x))
-            >> quant_shift_ptr[rc != 0];            // quantize (x)
+        y  = (((int)(((int)(x * quant_ptr[rc != 0]) >> 16) + x)) *
+              quant_shift_ptr[rc != 0]) >> 16;      // quantize (x)
 
         x  = (y ^ sz) - sz;                         // get the sign back
         qcoeff_ptr[rc]  = x;                        // write to destination
@@ -153,21 +154,25 @@ static void quantize_sparse(int16_t *coeff_ptr, int n_coeffs, int skip_block,
 void vp9_quantize(MACROBLOCK *mb, int plane, int block, int n_coeffs,
                   TX_TYPE tx_type) {
   MACROBLOCKD *const xd = &mb->e_mbd;
-  const int *scan;
+  const int16_t *scan, *iscan;
 
   // These contexts may be available in the caller
   switch (n_coeffs) {
     case 4 * 4:
       scan = get_scan_4x4(tx_type);
+      iscan = get_iscan_4x4(tx_type);
       break;
     case 8 * 8:
       scan = get_scan_8x8(tx_type);
+      iscan = get_iscan_8x8(tx_type);
       break;
     case 16 * 16:
       scan = get_scan_16x16(tx_type);
+      iscan = get_iscan_16x16(tx_type);
       break;
     default:
       scan = vp9_default_scan_32x32;
+      iscan = vp9_default_iscan_32x32;
       break;
   }
 
@@ -190,18 +195,18 @@ void vp9_quantize(MACROBLOCK *mb, int plane, int block, int n_coeffs,
                     scan, idx_arr);
   }
   else {
-    quantize(BLOCK_OFFSET(mb->plane[plane].coeff, block, 16),
-             n_coeffs, mb->skip_block,
-             mb->plane[plane].zbin,
-             mb->plane[plane].round,
-             mb->plane[plane].quant,
-             mb->plane[plane].quant_shift,
-             BLOCK_OFFSET(xd->plane[plane].qcoeff, block, 16),
-             BLOCK_OFFSET(xd->plane[plane].dqcoeff, block, 16),
-             xd->plane[plane].dequant,
-             mb->plane[plane].zbin_extra,
-             &xd->plane[plane].eobs[block],
-             scan);
+    vp9_quantize_b(BLOCK_OFFSET(mb->plane[plane].coeff, block, 16),
+                   n_coeffs, mb->skip_block,
+                   mb->plane[plane].zbin,
+                   mb->plane[plane].round,
+                   mb->plane[plane].quant,
+                   mb->plane[plane].quant_shift,
+                   BLOCK_OFFSET(xd->plane[plane].qcoeff, block, 16),
+                   BLOCK_OFFSET(xd->plane[plane].dqcoeff, block, 16),
+                   xd->plane[plane].dequant,
+                   mb->plane[plane].zbin_extra,
+                   &xd->plane[plane].eobs[block],
+                   scan, iscan);
   }
 }
 
@@ -209,9 +214,10 @@ void vp9_regular_quantize_b_4x4(MACROBLOCK *mb, int b_idx, TX_TYPE tx_type,
                                 int y_blocks) {
   MACROBLOCKD *const xd = &mb->e_mbd;
   const struct plane_block_idx pb_idx = plane_block_idx(y_blocks, b_idx);
-  const int *pt_scan = get_scan_4x4(tx_type);
+  const int16_t *scan = get_scan_4x4(tx_type);
+  const int16_t *iscan = get_iscan_4x4(tx_type);
 
-  quantize(BLOCK_OFFSET(mb->plane[pb_idx.plane].coeff, pb_idx.block, 16),
+  vp9_quantize_b(BLOCK_OFFSET(mb->plane[pb_idx.plane].coeff, pb_idx.block, 16),
            16, mb->skip_block,
            mb->plane[pb_idx.plane].zbin,
            mb->plane[pb_idx.plane].round,
@@ -222,10 +228,10 @@ void vp9_regular_quantize_b_4x4(MACROBLOCK *mb, int b_idx, TX_TYPE tx_type,
            xd->plane[pb_idx.plane].dequant,
            mb->plane[pb_idx.plane].zbin_extra,
            &xd->plane[pb_idx.plane].eobs[pb_idx.block],
-           pt_scan);
+           scan, iscan);
 }
 
-static void invert_quant(int16_t *quant, uint8_t *shift, int d) {
+static void invert_quant(int16_t *quant, int16_t *shift, int d) {
   unsigned t;
   int l;
   t = d;
@@ -233,7 +239,7 @@ static void invert_quant(int16_t *quant, uint8_t *shift, int d) {
     t >>= 1;
   t = 1 + (1 << (16 + l)) / d;
   *quant = (int16_t)(t - (1 << 16));
-  *shift = l;
+  *shift = 1 << (16 - l);
 }
 
 void vp9_init_quantizer(VP9_COMP *cpi) {
@@ -252,6 +258,7 @@ void vp9_init_quantizer(VP9_COMP *cpi) {
       qzbin_factor = 64;
       qrounding_factor = 64;
     }
+
     // dc values
     quant_val = vp9_dc_quant(q, cpi->common.y_dc_delta_q);
     invert_quant(cpi->y_quant[q] + 0, cpi->y_quant_shift[q] + 0, quant_val);
@@ -274,32 +281,46 @@ void vp9_init_quantizer(VP9_COMP *cpi) {
 #endif
 
     quant_val = vp9_ac_quant(q, 0);
+    invert_quant(cpi->y_quant[q] + 1, cpi->y_quant_shift[q] + 1, quant_val);
+    cpi->y_zbin[q][1] = ROUND_POWER_OF_TWO(qzbin_factor * quant_val, 7);
+    cpi->y_round[q][1] = (qrounding_factor * quant_val) >> 7;
     cpi->common.y_dequant[q][1] = quant_val;
+
     quant_uv_val = vp9_ac_quant(q, cpi->common.uv_ac_delta_q);
+    invert_quant(cpi->uv_quant[q] + 1, cpi->uv_quant_shift[q] + 1,
+                 quant_uv_val);
+    cpi->uv_zbin[q][1] = ROUND_POWER_OF_TWO(qzbin_factor * quant_uv_val, 7);
+    cpi->uv_round[q][1] = (qrounding_factor * quant_uv_val) >> 7;
     cpi->common.uv_dequant[q][1] = quant_uv_val;
+
 #if CONFIG_ALPHA
     quant_alpha_val = vp9_ac_quant(q, cpi->common.a_ac_delta_q);
+    invert_quant(cpi->a_quant[q] + 1, cpi->a_quant_shift[q] + 1,
+                 quant_alpha_val);
+    cpi->a_zbin[q][1] = ROUND_POWER_OF_TWO(qzbin_factor * quant_alpha_val, 7);
+    cpi->a_round[q][1] = (qrounding_factor * quant_alpha_val) >> 7;
     cpi->common.a_dequant[q][1] = quant_alpha_val;
 #endif
-    // all the 4x4 ac values =;
-    for (i = 1; i < 16; i++) {
-      int rc = vp9_default_scan_4x4[i];
 
-      invert_quant(cpi->y_quant[q] + rc, cpi->y_quant_shift[q] + rc, quant_val);
-      cpi->y_zbin[q][rc] = ROUND_POWER_OF_TWO(qzbin_factor * quant_val, 7);
-      cpi->y_round[q][rc] = (qrounding_factor * quant_val) >> 7;
+    for (i = 2; i < 8; i++) {
+      cpi->y_quant[q][i] = cpi->y_quant[q][1];
+      cpi->y_quant_shift[q][i] = cpi->y_quant_shift[q][1];
+      cpi->y_zbin[q][i] = cpi->y_zbin[q][1];
+      cpi->y_round[q][i] = cpi->y_round[q][1];
+      cpi->common.y_dequant[q][i] = cpi->common.y_dequant[q][1];
 
-      invert_quant(cpi->uv_quant[q] + rc, cpi->uv_quant_shift[q] + rc,
-        quant_uv_val);
-      cpi->uv_zbin[q][rc] = ROUND_POWER_OF_TWO(qzbin_factor * quant_uv_val, 7);
-      cpi->uv_round[q][rc] = (qrounding_factor * quant_uv_val) >> 7;
+      cpi->uv_quant[q][i] = cpi->uv_quant[q][1];
+      cpi->uv_quant_shift[q][i] = cpi->uv_quant_shift[q][1];
+      cpi->uv_zbin[q][i] = cpi->uv_zbin[q][1];
+      cpi->uv_round[q][i] = cpi->uv_round[q][1];
+      cpi->common.uv_dequant[q][i] = cpi->common.uv_dequant[q][1];
 
 #if CONFIG_ALPHA
-      invert_quant(cpi->a_quant[q] + rc, cpi->a_quant_shift[q] + rc,
-          quant_alpha_val);
-      cpi->a_zbin[q][rc] =
-          ROUND_POWER_OF_TWO(qzbin_factor * quant_alpha_val, 7);
-      cpi->a_round[q][rc] = (qrounding_factor * quant_alpha_val) >> 7;
+      cpi->a_quant[q][i] = cpi->a_quant[q][1];
+      cpi->a_quant_shift[q][i] = cpi->a_quant_shift[q][1];
+      cpi->a_zbin[q][i] = cpi->a_zbin[q][1];
+      cpi->a_round[q][i] = cpi->a_round[q][1];
+      cpi->common.a_dequant[q][i] = cpi->common.a_dequant[q][1];
 #endif
     }
   }

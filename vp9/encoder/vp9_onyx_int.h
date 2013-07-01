@@ -253,21 +253,21 @@ enum BlockSize {
 
 typedef struct VP9_COMP {
 
-  DECLARE_ALIGNED(16, short, y_quant[QINDEX_RANGE][16]);
-  DECLARE_ALIGNED(16, unsigned char, y_quant_shift[QINDEX_RANGE][16]);
-  DECLARE_ALIGNED(16, short, y_zbin[QINDEX_RANGE][16]);
-  DECLARE_ALIGNED(16, short, y_round[QINDEX_RANGE][16]);
+  DECLARE_ALIGNED(16, int16_t, y_quant[QINDEX_RANGE][8]);
+  DECLARE_ALIGNED(16, int16_t, y_quant_shift[QINDEX_RANGE][8]);
+  DECLARE_ALIGNED(16, int16_t, y_zbin[QINDEX_RANGE][8]);
+  DECLARE_ALIGNED(16, int16_t, y_round[QINDEX_RANGE][8]);
 
-  DECLARE_ALIGNED(16, short, uv_quant[QINDEX_RANGE][16]);
-  DECLARE_ALIGNED(16, unsigned char, uv_quant_shift[QINDEX_RANGE][16]);
-  DECLARE_ALIGNED(16, short, uv_zbin[QINDEX_RANGE][16]);
-  DECLARE_ALIGNED(16, short, uv_round[QINDEX_RANGE][16]);
+  DECLARE_ALIGNED(16, int16_t, uv_quant[QINDEX_RANGE][8]);
+  DECLARE_ALIGNED(16, int16_t, uv_quant_shift[QINDEX_RANGE][8]);
+  DECLARE_ALIGNED(16, int16_t, uv_zbin[QINDEX_RANGE][8]);
+  DECLARE_ALIGNED(16, int16_t, uv_round[QINDEX_RANGE][8]);
 
 #if CONFIG_ALPHA
-  DECLARE_ALIGNED(16, short, a_quant[QINDEX_RANGE][16]);
-  DECLARE_ALIGNED(16, unsigned char, a_quant_shift[QINDEX_RANGE][16]);
-  DECLARE_ALIGNED(16, short, a_zbin[QINDEX_RANGE][16]);
-  DECLARE_ALIGNED(16, short, a_round[QINDEX_RANGE][16]);
+  DECLARE_ALIGNED(16, int16_t, a_quant[QINDEX_RANGE][8]);
+  DECLARE_ALIGNED(16, int16_t, a_quant_shift[QINDEX_RANGE][8]);
+  DECLARE_ALIGNED(16, int16_t, a_zbin[QINDEX_RANGE][8]);
+  DECLARE_ALIGNED(16, int16_t, a_round[QINDEX_RANGE][8]);
 #endif
 
   MACROBLOCK mb;
