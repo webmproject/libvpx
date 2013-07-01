@@ -185,48 +185,6 @@ static int decode_tokens(VP9D_COMP *pbi, BLOCK_SIZE_TYPE bsize, vp9_reader *r) {
   }
 }
 
-static void decode_atom(VP9D_COMP *pbi, int mi_row, int mi_col,
-                        vp9_reader *r) {
-  BLOCK_SIZE_TYPE bsize = BLOCK_SIZE_SB8X8;
-  MACROBLOCKD *const xd = &pbi->mb;
-  MB_MODE_INFO *const mbmi = &xd->mode_info_context->mbmi;
-
-  assert(mbmi->ref_frame[0] != INTRA_FRAME);
-  vp9_setup_interp_filters(xd, mbmi->interp_filter, &pbi->common);
-  vp9_build_inter_predictors_sb(xd, mi_row, mi_col, bsize);
-  if (decode_tokens(pbi, bsize, r) >= 0)
-    foreach_transformed_block(xd, bsize, decode_block, xd);
-}
-
-static void decode_sb_intra(VP9D_COMP *pbi, int mi_row, int mi_col,
-                            vp9_reader *r, BLOCK_SIZE_TYPE bsize) {
-  MACROBLOCKD *const xd = &pbi->mb;
-  decode_tokens(pbi, bsize, r);
-  foreach_transformed_block(xd, bsize, decode_block_intra, xd);
-}
-
-static void decode_sb(VP9D_COMP *pbi, int mi_row, int mi_col, vp9_reader *r,
-                      BLOCK_SIZE_TYPE bsize) {
-  VP9_COMMON *const cm = &pbi->common;
-  MACROBLOCKD *const xd = &pbi->mb;
-  MODE_INFO *const mi = xd->mode_info_context;
-  MB_MODE_INFO *const mbmi = &mi->mbmi;
-  int  eobtotal;
-
-  assert(mbmi->sb_type == bsize);
-  assert(mbmi->ref_frame[0] != INTRA_FRAME);
-
-  vp9_setup_interp_filters(xd, mbmi->interp_filter, cm);
-  vp9_build_inter_predictors_sb(xd, mi_row, mi_col, bsize);
-
-  eobtotal = decode_tokens(pbi, bsize, r);
-  if (eobtotal == 0) {
-    vp9_set_pred_flag(xd, bsize, PRED_MBSKIP, 1);  //  skip loopfilter
-  } else if (eobtotal > 0) {
-    foreach_transformed_block(xd, bsize, decode_block, xd);
-  }
-}
-
 static void set_offsets(VP9D_COMP *pbi, BLOCK_SIZE_TYPE bsize,
                         int mi_row, int mi_col) {
   VP9_COMMON *const cm = &pbi->common;
@@ -287,24 +245,45 @@ static void set_refs(VP9D_COMP *pbi, int mi_row, int mi_col) {
 
 static void decode_modes_b(VP9D_COMP *pbi, int mi_row, int mi_col,
                            vp9_reader *r, BLOCK_SIZE_TYPE bsize) {
+  VP9_COMMON *const cm = &pbi->common;
   MACROBLOCKD *const xd = &pbi->mb;
+  const int less8x8 = bsize < BLOCK_SIZE_SB8X8;
+  MB_MODE_INFO *mbmi;
 
-  if (bsize < BLOCK_SIZE_SB8X8)
+  if (less8x8)
     if (xd->ab_index > 0)
       return;
 
   set_offsets(pbi, bsize, mi_row, mi_col);
   vp9_read_mode_info(pbi, mi_row, mi_col, r);
 
-  if (xd->mode_info_context->mbmi.ref_frame[0] == INTRA_FRAME) {
-    decode_sb_intra(pbi, mi_row, mi_col, r,
-                    (bsize < BLOCK_SIZE_SB8X8) ? BLOCK_SIZE_SB8X8 : bsize);
+  if (less8x8)
+    bsize = BLOCK_SIZE_SB8X8;
+
+  // Has to be called after set_offsets
+  mbmi = &xd->mode_info_context->mbmi;
+
+  if (mbmi->ref_frame[0] == INTRA_FRAME) {
+    // Intra reconstruction
+    decode_tokens(pbi, bsize, r);
+    foreach_transformed_block(xd, bsize, decode_block_intra, xd);
   } else {
+    // Inter reconstruction
+    int eobtotal;
     set_refs(pbi, mi_row, mi_col);
-    if (bsize < BLOCK_SIZE_SB8X8)
-      decode_atom(pbi, mi_row, mi_col, r);
-    else
-      decode_sb(pbi, mi_row, mi_col, r, bsize);
+    vp9_setup_interp_filters(xd, mbmi->interp_filter, cm);
+    vp9_build_inter_predictors_sb(xd, mi_row, mi_col, bsize);
+    eobtotal = decode_tokens(pbi, bsize, r);
+    if (less8x8) {
+      if (eobtotal >= 0)
+        foreach_transformed_block(xd, bsize, decode_block, xd);
+    } else {
+      assert(mbmi->sb_type == bsize);
+      if (eobtotal == 0)
+        vp9_set_pred_flag(xd, bsize, PRED_MBSKIP, 1);  // skip loopfilter
+      else if (eobtotal > 0)
+        foreach_transformed_block(xd, bsize, decode_block, xd);
+    }
   }
   xd->corrupted |= vp9_reader_has_error(r);
 }
