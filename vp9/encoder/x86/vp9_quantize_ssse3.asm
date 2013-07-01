@@ -15,10 +15,10 @@ pw_1: times 8 dw 1
 
 SECTION .text
 
-%macro QUANTIZE_FN 1
-cglobal quantize_%1, 0, 6, 15, coeff, ncoeff, skip, zbin, round, quant, \
-                               shift, qcoeff, dqcoeff, dequant, zbin_oq, \
-                               eob, scan, iscan
+%macro QUANTIZE_FN 2
+cglobal quantize_%1, 0, %2, 15, coeff, ncoeff, skip, zbin, round, quant, \
+                                shift, qcoeff, dqcoeff, dequant, zbin_oq, \
+                                eob, scan, iscan
   cmp                    dword skipm, 0
   jne .blank
 
@@ -43,9 +43,8 @@ cglobal quantize_%1, 0, 6, 15, coeff, ncoeff, skip, zbin, round, quant, \
   mova                            m4, [r2]                 ; m4 = shift
   mov                             r4, dqcoeffmp
   mov                             r5, iscanmp
-  mov                             r2, eobmp
   pxor                            m5, m5                   ; m5 = dedicated zero
-  DEFINE_ARGS coeff, ncoeff, eob, qcoeff, dqcoeff, iscan
+  DEFINE_ARGS coeff, ncoeff, d1, qcoeff, dqcoeff, iscan, d2, d3, d4, d5, d6, eob
   lea                         coeffq, [  coeffq+ncoeffq*2]
   lea                         iscanq, [  iscanq+ncoeffq*2]
   lea                        qcoeffq, [ qcoeffq+ncoeffq*2]
@@ -119,6 +118,12 @@ cglobal quantize_%1, 0, 6, 15, coeff, ncoeff, skip, zbin, round, quant, \
 %endif
   pcmpgtw                         m7, m6, m0               ; m7 = c[i] >= zbin
   pcmpgtw                        m12, m11, m0              ; m12 = c[i] >= zbin
+%ifidn %1, b_32x32
+  pmovmskb                        r6, m7
+  pmovmskb                        r2, m12
+  or                              r6, r2
+  jz .skip_iter
+%endif
   paddw                           m6, m1                   ; m6 += round
   paddw                          m11, m1                   ; m11 += round
   pmulhw                         m14, m6, m2               ; m14 = m6*q>>16
@@ -159,16 +164,27 @@ cglobal quantize_%1, 0, 6, 15, coeff, ncoeff, skip, zbin, round, quant, \
   pmaxsw                          m8, m13
   add                        ncoeffq, mmsize
   jl .ac_only_loop
+%ifidn %1, b_32x32
+  jmp .accumulate_eob
+.skip_iter:
+  mova        [qcoeffq+ncoeffq*2+ 0], m5
+  mova        [qcoeffq+ncoeffq*2+16], m5
+  mova       [dqcoeffq+ncoeffq*2+ 0], m5
+  mova       [dqcoeffq+ncoeffq*2+16], m5
+  add                        ncoeffq, mmsize
+  jl .ac_only_loop
+%endif
 
 .accumulate_eob:
   ; horizontally accumulate/max eobs and write into [eob] memory pointer
+  mov                             r2, eobmp
   pshufd                          m7, m8, 0xe
   pmaxsw                          m8, m7
   pshuflw                         m7, m8, 0xe
   pmaxsw                          m8, m7
   pshuflw                         m7, m8, 0x1
   pmaxsw                          m8, m7
-  pextrw                      [eobq], m8, 0
+  pextrw                        [r2], m8, 0
   RET
 
   ; skip-block, i.e. just write all zeroes
@@ -194,5 +210,5 @@ cglobal quantize_%1, 0, 6, 15, coeff, ncoeff, skip, zbin, round, quant, \
 %endmacro
 
 INIT_XMM ssse3
-QUANTIZE_FN b
-QUANTIZE_FN b_32x32
+QUANTIZE_FN b, 6
+QUANTIZE_FN b_32x32, 7
