@@ -37,15 +37,19 @@ extern int dec_debug;
 #endif
 
 static MB_PREDICTION_MODE read_intra_mode(vp9_reader *r, const vp9_prob *p) {
-  return treed_read(r, vp9_intra_mode_tree, p);
+  return (MB_PREDICTION_MODE)treed_read(r, vp9_intra_mode_tree, p);
+}
+
+static MB_PREDICTION_MODE read_inter_mode(vp9_reader *r, const vp9_prob *p) {
+  return (MB_PREDICTION_MODE)treed_read(r, vp9_sb_mv_ref_tree, p);
 }
 
 static int read_segment_id(vp9_reader *r, MACROBLOCKD *xd) {
   return treed_read(r, vp9_segment_tree, xd->mb_segment_tree_probs);
 }
 
-static TX_SIZE select_txfm_size(VP9_COMMON *cm, MACROBLOCKD *xd,
-                                vp9_reader *r, BLOCK_SIZE_TYPE bsize) {
+static TX_SIZE read_selected_txfm_size(VP9_COMMON *cm, MACROBLOCKD *xd,
+                                       BLOCK_SIZE_TYPE bsize, vp9_reader *r) {
   const int context = vp9_get_pred_context(cm, xd, PRED_TX_SIZE);
   const vp9_prob *tx_probs = vp9_get_pred_probs(cm, xd, PRED_TX_SIZE);
   TX_SIZE txfm_size = vp9_read(r, tx_probs[0]);
@@ -65,14 +69,14 @@ static TX_SIZE select_txfm_size(VP9_COMMON *cm, MACROBLOCKD *xd,
   return txfm_size;
 }
 
-static TX_SIZE get_txfm_size(VP9D_COMP *pbi, TXFM_MODE txfm_mode,
-                             BLOCK_SIZE_TYPE bsize, int select_cond,
-                             vp9_reader *r) {
+static TX_SIZE read_txfm_size(VP9D_COMP *pbi, TXFM_MODE txfm_mode,
+                              BLOCK_SIZE_TYPE bsize, int select_cond,
+                              vp9_reader *r) {
   VP9_COMMON *const cm = &pbi->common;
   MACROBLOCKD *const xd = &pbi->mb;
 
   if (txfm_mode == TX_MODE_SELECT && bsize >= BLOCK_SIZE_SB8X8 && select_cond)
-    return select_txfm_size(cm, xd, r, bsize);
+    return read_selected_txfm_size(cm, xd, bsize, r);
   else if (txfm_mode >= ALLOW_32X32 && bsize >= BLOCK_SIZE_SB32X32)
     return TX_32X32;
   else if (txfm_mode >= ALLOW_16X16 && bsize >= BLOCK_SIZE_MB16X16)
@@ -136,7 +140,7 @@ static void read_intra_mode_info(VP9D_COMP *pbi, MODE_INFO *m,
 
   mbmi->segment_id = read_intra_segment_id(pbi, mi_row, mi_col, r);
   mbmi->mb_skip_coeff = read_skip_coeff(pbi, mbmi->segment_id, r);
-  mbmi->txfm_size = get_txfm_size(pbi, cm->txfm_mode, bsize, 1, r);
+  mbmi->txfm_size = read_txfm_size(pbi, cm->txfm_mode, bsize, 1, r);
   mbmi->ref_frame[0] = INTRA_FRAME;
 
   if (bsize >= BLOCK_SIZE_SB8X8) {
@@ -178,9 +182,10 @@ static int read_mv_component(vp9_reader *r,
   int mag, d, fr, hp;
   const int sign = vp9_read(r, mvcomp->sign);
   const int mv_class = treed_read(r, vp9_mv_class_tree, mvcomp->classes);
+  const int class0 = mv_class == MV_CLASS_0;
 
   // Integer part
-  if (mv_class == MV_CLASS_0) {
+  if (class0) {
     d = treed_read(r, vp9_mv_class0_tree, mvcomp->class0);
   } else {
     int i;
@@ -193,15 +198,14 @@ static int read_mv_component(vp9_reader *r,
 
   // Fractional part
   fr = treed_read(r, vp9_mv_fp_tree,
-                  mv_class == MV_CLASS_0 ? mvcomp->class0_fp[d] : mvcomp->fp);
+                  class0 ? mvcomp->class0_fp[d] : mvcomp->fp);
 
 
   // High precision part (if hp is not used, the default value of the hp is 1)
-  hp = usehp ? vp9_read(r,
-                        mv_class == MV_CLASS_0 ? mvcomp->class0_hp : mvcomp->hp)
+  hp = usehp ? vp9_read(r, class0 ? mvcomp->class0_hp : mvcomp->hp)
              : 1;
 
-  // result
+  // Result
   mag = vp9_get_mv_mag(mv_class, (d << 3) | (fr << 1) | hp) + 1;
   return sign ? -mag : mag;
 }
@@ -225,13 +229,12 @@ static INLINE void read_mv(vp9_reader *r, MV *mv, const MV *ref,
   mv->col = ref->col + diff.col;
 }
 
-static void update_mv(vp9_reader *r, vp9_prob *const p,
-                       const vp9_prob upd_p) {
+static void update_mv(vp9_reader *r, vp9_prob *p, vp9_prob upd_p) {
   if (vp9_read(r, upd_p)) {
 #ifdef LOW_PRECISION_MV_UPDATE
     *p = (vp9_read_literal(r, 7) << 1) | 1;
 #else
-    *p = (vp9_read_literal(r, 8));
+    *p = vp9_read_literal(r, 8);
 #endif
   }
 }
@@ -243,28 +246,33 @@ static void read_mv_probs(vp9_reader *r, nmv_context *mvc, int usehp) {
   if (!vp9_read_bit(r))
     return;
 #endif
+
   for (j = 0; j < MV_JOINTS - 1; ++j)
     update_mv(r, &mvc->joints[j], VP9_NMV_UPDATE_PROB);
 
   for (i = 0; i < 2; ++i) {
-    update_mv(r, &mvc->comps[i].sign, VP9_NMV_UPDATE_PROB);
+    nmv_component *const comp = &mvc->comps[i];
+
+    update_mv(r, &comp->sign, VP9_NMV_UPDATE_PROB);
     for (j = 0; j < MV_CLASSES - 1; ++j)
-      update_mv(r, &mvc->comps[i].classes[j], VP9_NMV_UPDATE_PROB);
+      update_mv(r, &comp->classes[j], VP9_NMV_UPDATE_PROB);
 
     for (j = 0; j < CLASS0_SIZE - 1; ++j)
-      update_mv(r, &mvc->comps[i].class0[j], VP9_NMV_UPDATE_PROB);
+      update_mv(r, &comp->class0[j], VP9_NMV_UPDATE_PROB);
 
     for (j = 0; j < MV_OFFSET_BITS; ++j)
-      update_mv(r, &mvc->comps[i].bits[j], VP9_NMV_UPDATE_PROB);
+      update_mv(r, &comp->bits[j], VP9_NMV_UPDATE_PROB);
   }
 
   for (i = 0; i < 2; ++i) {
+    nmv_component *const comp = &mvc->comps[i];
+
     for (j = 0; j < CLASS0_SIZE; ++j)
       for (k = 0; k < 3; ++k)
-        update_mv(r, &mvc->comps[i].class0_fp[j][k], VP9_NMV_UPDATE_PROB);
+        update_mv(r, &comp->class0_fp[j][k], VP9_NMV_UPDATE_PROB);
 
     for (j = 0; j < 3; ++j)
-      update_mv(r, &mvc->comps[i].fp[j], VP9_NMV_UPDATE_PROB);
+      update_mv(r, &comp->fp[j], VP9_NMV_UPDATE_PROB);
   }
 
   if (usehp) {
@@ -280,52 +288,45 @@ static void read_ref_frame(VP9D_COMP *pbi, vp9_reader *r,
                            int segment_id, MV_REFERENCE_FRAME ref_frame[2]) {
   VP9_COMMON *const cm = &pbi->common;
   MACROBLOCKD *const xd = &pbi->mb;
-  const int seg_ref_active = vp9_segfeature_active(xd, segment_id,
-                                                   SEG_LVL_REF_FRAME);
+  FRAME_CONTEXT *const fc = &cm->fc;
 
-  // Segment reference frame features not available.
-  if (!seg_ref_active) {
+  if (vp9_segfeature_active(xd, segment_id, SEG_LVL_REF_FRAME)) {
+    ref_frame[0] = vp9_get_segdata(xd, segment_id, SEG_LVL_REF_FRAME);
+    ref_frame[1] = NONE;
+  } else {
+    const int comp_ctx = vp9_get_pred_context(cm, xd, PRED_COMP_INTER_INTER);
     int is_comp;
-    int comp_ctx = vp9_get_pred_context(cm, xd, PRED_COMP_INTER_INTER);
 
     if (cm->comp_pred_mode == HYBRID_PREDICTION) {
-      is_comp = vp9_read(r, cm->fc.comp_inter_prob[comp_ctx]);
-      cm->fc.comp_inter_count[comp_ctx][is_comp]++;
+      is_comp = vp9_read(r, fc->comp_inter_prob[comp_ctx]);
+      fc->comp_inter_count[comp_ctx][is_comp]++;
     } else {
       is_comp = cm->comp_pred_mode == COMP_PREDICTION_ONLY;
     }
 
     // FIXME(rbultje) I'm pretty sure this breaks segmentation ref frame coding
     if (is_comp) {
-      int b, fix_ref_idx = cm->ref_frame_sign_bias[cm->comp_fixed_ref];
-      int ref_ctx = vp9_get_pred_context(cm, xd, PRED_COMP_REF_P);
-
-      ref_frame[fix_ref_idx]  = cm->comp_fixed_ref;
-      b = vp9_read(r, cm->fc.comp_ref_prob[ref_ctx]);
-      cm->fc.comp_ref_count[ref_ctx][b]++;
+      const int fix_ref_idx = cm->ref_frame_sign_bias[cm->comp_fixed_ref];
+      const int ref_ctx = vp9_get_pred_context(cm, xd, PRED_COMP_REF_P);
+      const int b = vp9_read(r, fc->comp_ref_prob[ref_ctx]);
+      fc->comp_ref_count[ref_ctx][b]++;
+      ref_frame[fix_ref_idx] = cm->comp_fixed_ref;
       ref_frame[!fix_ref_idx] = cm->comp_var_ref[b];
     } else {
-      int ref1_ctx = vp9_get_pred_context(cm, xd, PRED_SINGLE_REF_P1);
+      const int ref1_ctx = vp9_get_pred_context(cm, xd, PRED_SINGLE_REF_P1);
       ref_frame[1] = NONE;
-      if (vp9_read(r, cm->fc.single_ref_prob[ref1_ctx][0])) {
-        int ref2_ctx = vp9_get_pred_context(cm, xd, PRED_SINGLE_REF_P2);
-        int b2 = vp9_read(r, cm->fc.single_ref_prob[ref2_ctx][1]);
-        ref_frame[0] = b2 ? ALTREF_FRAME : GOLDEN_FRAME;
-        cm->fc.single_ref_count[ref1_ctx][0][1]++;
-        cm->fc.single_ref_count[ref2_ctx][1][b2]++;
+      if (vp9_read(r, fc->single_ref_prob[ref1_ctx][0])) {
+        const int ref2_ctx = vp9_get_pred_context(cm, xd, PRED_SINGLE_REF_P2);
+        const int b = vp9_read(r, fc->single_ref_prob[ref2_ctx][1]);
+        ref_frame[0] = b ? ALTREF_FRAME : GOLDEN_FRAME;
+        fc->single_ref_count[ref1_ctx][0][1]++;
+        fc->single_ref_count[ref2_ctx][1][b]++;
       } else {
         ref_frame[0] = LAST_FRAME;
-        cm->fc.single_ref_count[ref1_ctx][0][0]++;
+        fc->single_ref_count[ref1_ctx][0][0]++;
       }
     }
-  } else {
-    ref_frame[0] = vp9_get_segdata(xd, segment_id, SEG_LVL_REF_FRAME);
-    ref_frame[1] = NONE;
   }
-}
-
-static MB_PREDICTION_MODE read_sb_mv_ref(vp9_reader *r, const vp9_prob *p) {
-  return (MB_PREDICTION_MODE) treed_read(r, vp9_sb_mv_ref_tree, p);
 }
 
 #ifdef VPX_MODE_COUNT
@@ -478,10 +479,7 @@ static void read_inter_mode_info(VP9D_COMP *pbi, MODE_INFO *mi,
   const int bw = 1 << b_width_log2(bsize);
   const int bh = 1 << b_height_log2(bsize);
 
-  int mb_to_left_edge, mb_to_right_edge, mb_to_top_edge, mb_to_bottom_edge;
   int idx, idy;
-
-  mbmi->ref_frame[1] = NONE;
 
   // Make sure the MACROBLOCKD mode info pointer is pointed at the
   // correct entry for the current macroblock.
@@ -493,96 +491,81 @@ static void read_inter_mode_info(VP9D_COMP *pbi, MODE_INFO *mi,
   set_mi_row_col(cm, xd, mi_row, 1 << mi_height_log2(bsize),
                          mi_col, 1 << mi_width_log2(bsize));
 
-  mb_to_top_edge = xd->mb_to_top_edge - LEFT_TOP_MARGIN;
-  mb_to_bottom_edge = xd->mb_to_bottom_edge + RIGHT_BOTTOM_MARGIN;
-  mb_to_left_edge = xd->mb_to_left_edge - LEFT_TOP_MARGIN;
-  mb_to_right_edge = xd->mb_to_right_edge + RIGHT_BOTTOM_MARGIN;
-
   mbmi->segment_id = read_inter_segment_id(pbi, mi_row, mi_col, r);
   mbmi->mb_skip_coeff = read_skip_coeff(pbi, mbmi->segment_id, r);
   mbmi->ref_frame[0] = read_reference_frame(pbi, mbmi->segment_id, r);
-  mbmi->txfm_size = get_txfm_size(pbi, cm->txfm_mode, bsize,
-     (mbmi->mb_skip_coeff == 0 || mbmi->ref_frame[0] == INTRA_FRAME), r);
+  mbmi->ref_frame[1] = NONE;
+  mbmi->txfm_size = read_txfm_size(pbi, cm->txfm_mode, bsize,
+     (!mbmi->mb_skip_coeff || mbmi->ref_frame[0] == INTRA_FRAME), r);
 
-  // If reference frame is an Inter frame
   if (mbmi->ref_frame[0] != INTRA_FRAME) {
     int_mv nearest, nearby, best_mv;
     int_mv nearest_second, nearby_second, best_mv_second;
     vp9_prob *mv_ref_p;
+    MV_REFERENCE_FRAME ref0, ref1;
 
     read_ref_frame(pbi, r, mbmi->segment_id, mbmi->ref_frame);
-
-    {
-#ifdef DEC_DEBUG
-      if (dec_debug)
-        printf("%d %d\n", xd->mode_info_context->mbmi.mv[0].as_mv.row,
-               xd->mode_info_context->mbmi.mv[0].as_mv.col);
-#endif
-      vp9_find_mv_refs(cm, xd, mi, xd->prev_mode_info_context,
-                       mbmi->ref_frame[0], mbmi->ref_mvs[mbmi->ref_frame[0]],
-                       cm->ref_frame_sign_bias);
-
-      mv_ref_p = cm->fc.inter_mode_probs[
-        mbmi->mb_mode_context[mbmi->ref_frame[0]]];
-
-      // If the segment level skip mode enabled
-      if (vp9_segfeature_active(xd, mbmi->segment_id, SEG_LVL_SKIP)) {
-        mbmi->mode = ZEROMV;
-      } else if (bsize >= BLOCK_SIZE_SB8X8) {
-        mbmi->mode = read_sb_mv_ref(r, mv_ref_p);
-        vp9_accum_mv_refs(cm, mbmi->mode,
-                          mbmi->mb_mode_context[mbmi->ref_frame[0]]);
-      }
-
-      if (bsize < BLOCK_SIZE_SB8X8 || mbmi->mode != ZEROMV) {
-        vp9_find_best_ref_mvs(xd,
-                              mbmi->ref_mvs[mbmi->ref_frame[0]],
-                              &nearest, &nearby);
-
-        best_mv.as_int = mbmi->ref_mvs[mbmi->ref_frame[0]][0].as_int;
-      }
+    ref0 = mbmi->ref_frame[0];
+    ref1 = mbmi->ref_frame[1];
 
 #ifdef DEC_DEBUG
-      if (dec_debug)
-        printf("[D %d %d] %d %d %d %d\n", ref_frame,
-               mbmi->mb_mode_context[ref_frame],
-               mv_ref_p[0], mv_ref_p[1], mv_ref_p[2], mv_ref_p[3]);
+    if (dec_debug)
+      printf("%d %d\n", xd->mode_info_context->mbmi.mv[0].as_mv.row,
+             xd->mode_info_context->mbmi.mv[0].as_mv.col);
 #endif
+    vp9_find_mv_refs(cm, xd, mi, xd->prev_mode_info_context,
+                     ref0, mbmi->ref_mvs[ref0], cm->ref_frame_sign_bias);
+
+    mv_ref_p = cm->fc.inter_mode_probs[mbmi->mb_mode_context[ref0]];
+
+    if (vp9_segfeature_active(xd, mbmi->segment_id, SEG_LVL_SKIP)) {
+      mbmi->mode = ZEROMV;
+    } else if (bsize >= BLOCK_SIZE_SB8X8) {
+      mbmi->mode = read_inter_mode(r, mv_ref_p);
+      vp9_accum_mv_refs(cm, mbmi->mode, mbmi->mb_mode_context[ref0]);
     }
+    mbmi->uv_mode = DC_PRED;
+
+    // nearest, nearby
+    if (bsize < BLOCK_SIZE_SB8X8 || mbmi->mode != ZEROMV) {
+      vp9_find_best_ref_mvs(xd, mbmi->ref_mvs[ref0], &nearest, &nearby);
+      best_mv.as_int = mbmi->ref_mvs[ref0][0].as_int;
+    }
+
+#ifdef DEC_DEBUG
+    if (dec_debug)
+      printf("[D %d %d] %d %d %d %d\n", ref_frame,
+             mbmi->mb_mode_context[ref_frame],
+             mv_ref_p[0], mv_ref_p[1], mv_ref_p[2], mv_ref_p[3]);
+#endif
 
     mbmi->interp_filter = cm->mcomp_filter_type == SWITCHABLE
                               ? read_switchable_filter_type(pbi, r)
                               : cm->mcomp_filter_type;
 
-    if (mbmi->ref_frame[1] > INTRA_FRAME) {
+    if (ref1 > INTRA_FRAME) {
       vp9_find_mv_refs(cm, xd, mi, xd->prev_mode_info_context,
-                       mbmi->ref_frame[1],
-                       mbmi->ref_mvs[mbmi->ref_frame[1]],
-                       cm->ref_frame_sign_bias);
+                       ref1, mbmi->ref_mvs[ref1], cm->ref_frame_sign_bias);
 
       if (bsize < BLOCK_SIZE_SB8X8 || mbmi->mode != ZEROMV) {
-        vp9_find_best_ref_mvs(xd,
-                              mbmi->ref_mvs[mbmi->ref_frame[1]],
-                              &nearest_second,
-                              &nearby_second);
-        best_mv_second.as_int = mbmi->ref_mvs[mbmi->ref_frame[1]][0].as_int;
+        vp9_find_best_ref_mvs(xd, mbmi->ref_mvs[ref1],
+                              &nearest_second, &nearby_second);
+        best_mv_second.as_int = mbmi->ref_mvs[ref1][0].as_int;
       }
     }
 
-    mbmi->uv_mode = DC_PRED;
+
     if (mbmi->sb_type < BLOCK_SIZE_SB8X8) {
       for (idy = 0; idy < 2; idy += bh) {
         for (idx = 0; idx < 2; idx += bw) {
           int_mv blockmv, secondmv;
           const int j = idy * 2 + idx;
-          const int blockmode = read_sb_mv_ref(r, mv_ref_p);
+          const int blockmode = read_inter_mode(r, mv_ref_p);
 
-          vp9_accum_mv_refs(cm, blockmode,
-                            mbmi->mb_mode_context[mbmi->ref_frame[0]]);
+          vp9_accum_mv_refs(cm, blockmode, mbmi->mb_mode_context[ref0]);
           if (blockmode == NEARESTMV || blockmode == NEARMV) {
-            const MV_REFERENCE_FRAME rf2 = mbmi->ref_frame[1];
             vp9_append_sub8x8_mvs_for_idx(cm, xd, &nearest, &nearby, j, 0);
-            if (rf2 > 0)
+            if (ref1 > 0)
               vp9_append_sub8x8_mvs_for_idx(cm, xd,  &nearest_second,
                                             &nearby_second, j, 1);
           }
@@ -592,7 +575,7 @@ static void read_inter_mode_info(VP9D_COMP *pbi, MODE_INFO *mi,
               read_mv(r, &blockmv.as_mv, &best_mv.as_mv, nmvc,
                       &cm->fc.NMVcount, xd->allow_high_precision_mv);
 
-              if (mbmi->ref_frame[1] > 0)
+              if (ref1 > 0)
                 read_mv(r, &secondmv.as_mv, &best_mv_second.as_mv, nmvc,
                         &cm->fc.NMVcount, xd->allow_high_precision_mv);
 
@@ -602,7 +585,7 @@ static void read_inter_mode_info(VP9D_COMP *pbi, MODE_INFO *mi,
               break;
             case NEARESTMV:
               blockmv.as_int = nearest.as_int;
-              if (mbmi->ref_frame[1] > 0)
+              if (ref1 > 0)
                 secondmv.as_int = nearest_second.as_int;
 #ifdef VPX_MODE_COUNT
               vp9_mv_cont_count[mv_contz][0]++;
@@ -610,7 +593,7 @@ static void read_inter_mode_info(VP9D_COMP *pbi, MODE_INFO *mi,
               break;
             case NEARMV:
               blockmv.as_int = nearby.as_int;
-              if (mbmi->ref_frame[1] > 0)
+              if (ref1 > 0)
                 secondmv.as_int = nearby_second.as_int;
 #ifdef VPX_MODE_COUNT
               vp9_mv_cont_count[mv_contz][1]++;
@@ -618,17 +601,17 @@ static void read_inter_mode_info(VP9D_COMP *pbi, MODE_INFO *mi,
               break;
             case ZEROMV:
               blockmv.as_int = 0;
-              if (mbmi->ref_frame[1] > 0)
+              if (ref1 > 0)
                 secondmv.as_int = 0;
 #ifdef VPX_MODE_COUNT
               vp9_mv_cont_count[mv_contz][2]++;
 #endif
               break;
             default:
-              break;
+              assert(!"Invalid inter mode value");
           }
           mi->bmi[j].as_mv[0].as_int = blockmv.as_int;
-          if (mbmi->ref_frame[1] > 0)
+          if (ref1 > 0)
             mi->bmi[j].as_mv[1].as_int = secondmv.as_int;
 
           if (bh == 2)
@@ -642,6 +625,11 @@ static void read_inter_mode_info(VP9D_COMP *pbi, MODE_INFO *mi,
       mv0->as_int = mi->bmi[3].as_mv[0].as_int;
       mv1->as_int = mi->bmi[3].as_mv[1].as_int;
     } else {
+      const int mb_to_top_edge = xd->mb_to_top_edge - LEFT_TOP_MARGIN;
+      const int mb_to_bottom_edge = xd->mb_to_bottom_edge + RIGHT_BOTTOM_MARGIN;
+      const int mb_to_left_edge = xd->mb_to_left_edge - LEFT_TOP_MARGIN;
+      const int mb_to_right_edge = xd->mb_to_right_edge + RIGHT_BOTTOM_MARGIN;
+
       switch (mbmi->mode) {
         case NEARMV:
           // Clip "next_nearest" so that it does not extend to far out of image
@@ -649,7 +637,7 @@ static void read_inter_mode_info(VP9D_COMP *pbi, MODE_INFO *mi,
                                             mb_to_right_edge,
                                             mb_to_top_edge,
                                             mb_to_bottom_edge);
-          if (mbmi->ref_frame[1] > 0)
+          if (ref1 > 0)
             assign_and_clamp_mv(mv1, &nearby_second, mb_to_left_edge,
                                                      mb_to_right_edge,
                                                      mb_to_top_edge,
@@ -662,7 +650,7 @@ static void read_inter_mode_info(VP9D_COMP *pbi, MODE_INFO *mi,
                                              mb_to_right_edge,
                                              mb_to_top_edge,
                                              mb_to_bottom_edge);
-          if (mbmi->ref_frame[1] > 0)
+          if (ref1 > 0)
             assign_and_clamp_mv(mv1, &nearest_second, mb_to_left_edge,
                                                       mb_to_right_edge,
                                                       mb_to_top_edge,
@@ -671,20 +659,19 @@ static void read_inter_mode_info(VP9D_COMP *pbi, MODE_INFO *mi,
 
         case ZEROMV:
           mv0->as_int = 0;
-          if (mbmi->ref_frame[1] > 0)
+          if (ref1 > 0)
             mv1->as_int = 0;
           break;
 
         case NEWMV:
           read_mv(r, &mv0->as_mv, &best_mv.as_mv, nmvc, &cm->fc.NMVcount,
                   xd->allow_high_precision_mv);
-          if (mbmi->ref_frame[1] > 0)
+          if (ref1 > 0)
             read_mv(r, &mv1->as_mv, &best_mv_second.as_mv, nmvc,
                     &cm->fc.NMVcount, xd->allow_high_precision_mv);
           break;
         default:
-          assert(0);
-          break;
+          assert(!"Invalid inter mode value");
       }
     }
   } else {
@@ -772,11 +759,10 @@ void vp9_read_mode_info(VP9D_COMP* pbi, int mi_row, int mi_col, vp9_reader *r) {
     const int bh = 1 << mi_height_log2(bsize);
     const int y_mis = MIN(bh, cm->mi_rows - mi_row);
     const int x_mis = MIN(bw, cm->mi_cols - mi_col);
-    const int mis = cm->mode_info_stride;
     int x, y;
 
     for (y = 0; y < y_mis; y++)
       for (x = !y; x < x_mis; x++)
-        mi[y * mis + x] = *mi;
+        mi[y * cm->mode_info_stride + x] = *mi;
   }
 }
