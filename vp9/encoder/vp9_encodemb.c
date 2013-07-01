@@ -431,14 +431,8 @@ void vp9_optimize_sbuv(VP9_COMMON *const cm, MACROBLOCK *x,
   foreach_transformed_block_uv(&x->e_mbd, bsize, optimize_block, &arg);
 }
 
-struct encode_b_args {
-  VP9_COMMON *cm;
-  MACROBLOCK *x;
-  struct optimize_ctx *ctx;
-};
-
-static void xform_quant(int plane, int block, BLOCK_SIZE_TYPE bsize,
-                         int ss_txfrm_size, void *arg) {
+void xform_quant(int plane, int block, BLOCK_SIZE_TYPE bsize,
+                 int ss_txfrm_size, void *arg) {
   struct encode_b_args* const args = arg;
   MACROBLOCK* const x = args->x;
   MACROBLOCKD* const xd = &x->e_mbd;
@@ -588,7 +582,7 @@ void vp9_encode_sb(VP9_COMMON *cm, MACROBLOCK *x, BLOCK_SIZE_TYPE bsize) {
   foreach_transformed_block(xd, bsize, encode_block, &arg);
 }
 
-static void encode_block_intra(int plane, int block, BLOCK_SIZE_TYPE bsize,
+void encode_block_intra(int plane, int block, BLOCK_SIZE_TYPE bsize,
                                int ss_txfrm_size, void *arg) {
   struct encode_b_args* const args = arg;
   MACROBLOCK *const x = args->x;

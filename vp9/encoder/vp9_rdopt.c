@@ -505,17 +505,6 @@ static void choose_txfm_size_from_rd(VP9_COMP *cpi, MACROBLOCK *x,
                                  rd[TX_4X4][1] : rd[TX_8X8][1];
 }
 
-static int64_t block_error_sby(MACROBLOCK *x, BLOCK_SIZE_TYPE bsize,
-                               int shift, int64_t *sse) {
-  struct macroblockd_plane *p = &x->e_mbd.plane[0];
-  const int bw = plane_block_width(bsize, p);
-  const int bh = plane_block_height(bsize, p);
-  int64_t e = vp9_block_error(x->plane[0].coeff, x->e_mbd.plane[0].dqcoeff,
-                              bw * bh, sse) >> shift;
-  *sse >>= shift;
-  return e;
-}
-
 static int64_t block_error_sbuv(MACROBLOCK *x, BLOCK_SIZE_TYPE bsize,
                                 int shift, int64_t *sse) {
   int64_t sum = 0, this_sse;
@@ -542,11 +531,31 @@ struct rdcost_block_args {
   TX_SIZE tx_size;
   int bw;
   int bh;
-  int cost;
+  int rate;
+  int64_t dist;
+  int64_t sse;
+  int64_t best_rd;
+  int skip;
 };
 
-static void rdcost_block(int plane, int block, BLOCK_SIZE_TYPE bsize,
-                         int ss_txfrm_size, void *arg) {
+static void dist_block(int plane, int block, BLOCK_SIZE_TYPE bsize,
+                       int ss_txfrm_size, void *arg) {
+  struct rdcost_block_args* args = arg;
+  MACROBLOCK* const x = args->x;
+  MACROBLOCKD* const xd = &x->e_mbd;
+  struct macroblock_plane *const p = &x->plane[0];
+  struct macroblockd_plane *const pd = &xd->plane[0];
+  int64_t this_sse;
+  int shift = args->tx_size == TX_32X32 ? 0 : 2;
+  int16_t *const coeff = BLOCK_OFFSET(p->coeff, block, 16);
+  int16_t *const dqcoeff = BLOCK_OFFSET(pd->dqcoeff, block, 16);
+  args->dist += vp9_block_error(coeff, dqcoeff, 16 << ss_txfrm_size,
+                                &this_sse) >> shift;
+  args->sse += this_sse >> shift;
+}
+
+static void rate_block(int plane, int block, BLOCK_SIZE_TYPE bsize,
+                       int ss_txfrm_size, void *arg) {
   struct rdcost_block_args* args = arg;
   int x_idx, y_idx;
   MACROBLOCKD * const xd = &args->x->e_mbd;
@@ -554,7 +563,7 @@ static void rdcost_block(int plane, int block, BLOCK_SIZE_TYPE bsize,
   txfrm_block_to_raster_xy(xd, bsize, plane, block, args->tx_size * 2, &x_idx,
                            &y_idx);
 
-  args->cost += cost_coeffs(args->cm, args->x, plane, block,
+  args->rate += cost_coeffs(args->cm, args->x, plane, block,
                             xd->plane[plane].plane_type, args->t_above + x_idx,
                             args->t_left + y_idx, args->tx_size,
                             args->bw * args->bh);
@@ -566,16 +575,17 @@ static int rdcost_plane(VP9_COMMON * const cm, MACROBLOCK *x, int plane,
   const int bwl = b_width_log2(bsize) - xd->plane[plane].subsampling_x;
   const int bhl = b_height_log2(bsize) - xd->plane[plane].subsampling_y;
   const int bw = 1 << bwl, bh = 1 << bhl;
-  struct rdcost_block_args args = { cm, x, { 0 }, { 0 }, tx_size, bw, bh, 0 };
+  struct rdcost_block_args args = { cm, x, { 0 }, { 0 }, tx_size, bw, bh,
+                                    0, 0, 0, 0, 0 };
 
   vpx_memcpy(&args.t_above, xd->plane[plane].above_context,
              sizeof(ENTROPY_CONTEXT) * bw);
   vpx_memcpy(&args.t_left, xd->plane[plane].left_context,
              sizeof(ENTROPY_CONTEXT) * bh);
 
-  foreach_transformed_block_in_plane(xd, bsize, plane, rdcost_block, &args);
+  foreach_transformed_block_in_plane(xd, bsize, plane, rate_block, &args);
 
-  return args.cost;
+  return args.rate;
 }
 
 static int rdcost_uv(VP9_COMMON *const cm, MACROBLOCK *x,
@@ -588,20 +598,41 @@ static int rdcost_uv(VP9_COMMON *const cm, MACROBLOCK *x,
   return cost;
 }
 
+static void block_yrd_txfm(int plane, int block, BLOCK_SIZE_TYPE bsize,
+                           int ss_txfrm_size, void *arg) {
+  struct rdcost_block_args *args = arg;
+  MACROBLOCK *const x = args->x;
+  MACROBLOCKD *const xd = &x->e_mbd;
+  struct encode_b_args encode_args = {args->cm, x, NULL};
+
+  if (xd->mode_info_context->mbmi.ref_frame[0] == INTRA_FRAME)
+    encode_block_intra(plane, block, bsize, ss_txfrm_size, &encode_args);
+  else
+    xform_quant(plane, block, bsize, ss_txfrm_size, &encode_args);
+
+  dist_block(plane, block, bsize, ss_txfrm_size, args);
+  rate_block(plane, block, bsize, ss_txfrm_size, args);
+}
+
 static void super_block_yrd_for_txfm(VP9_COMMON *const cm, MACROBLOCK *x,
                                      int *rate, int64_t *distortion,
                                      int *skippable, int64_t *sse,
                                      BLOCK_SIZE_TYPE bsize, TX_SIZE tx_size) {
   MACROBLOCKD *const xd = &x->e_mbd;
+  struct macroblockd_plane *const pd = &xd->plane[0];
+  const int bwl = b_width_log2(bsize) - xd->plane[0].subsampling_x;
+  const int bhl = b_height_log2(bsize) - xd->plane[0].subsampling_y;
+  const int bw = 1 << bwl, bh = 1 << bhl;
+  struct rdcost_block_args args = { cm, x, { 0 }, { 0 }, tx_size, bw, bh,
+                                    0, 0, 0, 0, 0 };
   xd->mode_info_context->mbmi.txfm_size = tx_size;
+  vpx_memcpy(&args.t_above, pd->above_context, sizeof(ENTROPY_CONTEXT) * bw);
+  vpx_memcpy(&args.t_left, pd->left_context, sizeof(ENTROPY_CONTEXT) * bh);
 
-  if (xd->mode_info_context->mbmi.ref_frame[0] == INTRA_FRAME)
-    vp9_encode_intra_block_y(cm, x, bsize);
-  else
-    vp9_xform_quant_sby(cm, x, bsize);
-
-  *distortion = block_error_sby(x, bsize, tx_size == TX_32X32 ? 0 : 2, sse);
-  *rate       = rdcost_plane(cm, x, 0, bsize, tx_size);
+  foreach_transformed_block_in_plane(xd, bsize, 0, block_yrd_txfm, &args);
+  *distortion = args.dist;
+  *rate       = args.rate;
+  *sse        = args.sse;
   *skippable  = vp9_sby_is_skippable(xd, bsize);
 }
 
