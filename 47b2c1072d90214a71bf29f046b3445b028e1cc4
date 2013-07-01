@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAbn//3lA\u003d",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 13
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2013-07-01T23:18:47Z",
+      "side": 1,
+      "message": "? do you mean use partition from last frame?",
+      "revId": "47b2c1072d90214a71bf29f046b3445b028e1cc4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
