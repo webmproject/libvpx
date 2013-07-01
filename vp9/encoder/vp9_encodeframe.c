@@ -1208,8 +1208,8 @@ static void rd_use_partition(VP9_COMP *cpi, MODE_INFO *m, TOKENEXTRA **tp,
       pick_sb_modes(cpi, mi_row, mi_col, tp, &r, &d, subsize,
                     get_block_context(x, subsize));
       if (mi_row + (bh >> 1) <= cm->mi_rows) {
-        int rt;
-        int64_t dt;
+        int rt = 0;
+        int64_t dt = 0;
         update_state(cpi, get_block_context(x, subsize), subsize, 0);
         encode_superblock(cpi, tp, 0, mi_row, mi_col, subsize);
         *(get_sb_index(xd, subsize)) = 1;
@@ -1227,8 +1227,8 @@ static void rd_use_partition(VP9_COMP *cpi, MODE_INFO *m, TOKENEXTRA **tp,
       pick_sb_modes(cpi, mi_row, mi_col, tp, &r, &d, subsize,
                     get_block_context(x, subsize));
       if (mi_col + (bs >> 1) <= cm->mi_cols) {
-        int rt;
-        int64_t dt;
+        int rt = 0;
+        int64_t dt = 0;
         update_state(cpi, get_block_context(x, subsize), subsize, 0);
         encode_superblock(cpi, tp, 0, mi_row, mi_col, subsize);
         *(get_sb_index(xd, subsize)) = 1;
@@ -1247,8 +1247,8 @@ static void rd_use_partition(VP9_COMP *cpi, MODE_INFO *m, TOKENEXTRA **tp,
         int x_idx = (i & 1) * (bs >> 2);
         int y_idx = (i >> 1) * (bs >> 2);
         int jj = i >> 1, ii = i & 0x01;
-        int rt;
-        int64_t dt;
+        int rt = 0;
+        int64_t dt = 0;
 
         if ((mi_row + y_idx >= cm->mi_rows) || (mi_col + x_idx >= cm->mi_cols))
           continue;
