@@ -99,22 +99,39 @@ typedef vp9_prob vp9_coeff_probs[REF_TYPES][COEF_BANDS][PREV_COEF_CONTEXTS]
 
 struct VP9Common;
 void vp9_default_coef_probs(struct VP9Common *);
-extern DECLARE_ALIGNED(16, const int, vp9_default_scan_4x4[16]);
+extern DECLARE_ALIGNED(16, const int16_t, vp9_default_scan_4x4[16]);
 
-extern DECLARE_ALIGNED(16, const int, vp9_col_scan_4x4[16]);
-extern DECLARE_ALIGNED(16, const int, vp9_row_scan_4x4[16]);
+extern DECLARE_ALIGNED(16, const int16_t, vp9_col_scan_4x4[16]);
+extern DECLARE_ALIGNED(16, const int16_t, vp9_row_scan_4x4[16]);
 
-extern DECLARE_ALIGNED(64, const int, vp9_default_scan_8x8[64]);
+extern DECLARE_ALIGNED(64, const int16_t, vp9_default_scan_8x8[64]);
 
-extern DECLARE_ALIGNED(16, const int, vp9_col_scan_8x8[64]);
-extern DECLARE_ALIGNED(16, const int, vp9_row_scan_8x8[64]);
+extern DECLARE_ALIGNED(16, const int16_t, vp9_col_scan_8x8[64]);
+extern DECLARE_ALIGNED(16, const int16_t, vp9_row_scan_8x8[64]);
 
-extern DECLARE_ALIGNED(16, const int, vp9_default_scan_16x16[256]);
+extern DECLARE_ALIGNED(16, const int16_t, vp9_default_scan_16x16[256]);
 
-extern DECLARE_ALIGNED(16, const int, vp9_col_scan_16x16[256]);
-extern DECLARE_ALIGNED(16, const int, vp9_row_scan_16x16[256]);
+extern DECLARE_ALIGNED(16, const int16_t, vp9_col_scan_16x16[256]);
+extern DECLARE_ALIGNED(16, const int16_t, vp9_row_scan_16x16[256]);
 
-extern DECLARE_ALIGNED(16, const int, vp9_default_scan_32x32[1024]);
+extern DECLARE_ALIGNED(16, const int16_t, vp9_default_scan_32x32[1024]);
+
+extern DECLARE_ALIGNED(16, int16_t, vp9_default_iscan_4x4[16]);
+
+extern DECLARE_ALIGNED(16, int16_t, vp9_col_iscan_4x4[16]);
+extern DECLARE_ALIGNED(16, int16_t, vp9_row_iscan_4x4[16]);
+
+extern DECLARE_ALIGNED(64, int16_t, vp9_default_iscan_8x8[64]);
+
+extern DECLARE_ALIGNED(16, int16_t, vp9_col_iscan_8x8[64]);
+extern DECLARE_ALIGNED(16, int16_t, vp9_row_iscan_8x8[64]);
+
+extern DECLARE_ALIGNED(16, int16_t, vp9_default_iscan_16x16[256]);
+
+extern DECLARE_ALIGNED(16, int16_t, vp9_col_iscan_16x16[256]);
+extern DECLARE_ALIGNED(16, int16_t, vp9_row_iscan_16x16[256]);
+
+extern DECLARE_ALIGNED(16, int16_t, vp9_default_iscan_32x32[1024]);
 
 void vp9_coef_tree_initialize(void);
 void vp9_adapt_coef_probs(struct VP9Common *);
@@ -149,7 +166,8 @@ static int get_coef_band(const uint8_t * band_translate, int coef_index) {
 }
 
 #define MAX_NEIGHBORS 2
-static INLINE int get_coef_context(const int *scan, const int *neighbors,
+static INLINE int get_coef_context(const int16_t *scan,
+                                   const int16_t *neighbors,
                                    int nb_pad, uint8_t *token_cache,
                                    int c, int l) {
   int eob = l;
@@ -169,7 +187,7 @@ static INLINE int get_coef_context(const int *scan, const int *neighbors,
   }
 }
 
-const int *vp9_get_coef_neighbors_handle(const int *scan, int *pad);
+const int16_t *vp9_get_coef_neighbors_handle(const int16_t *scan, int *pad);
 
 
 // 128 lists of probabilities are stored for the following ONE node probs:
@@ -198,7 +216,7 @@ void vp9_model_to_full_probs(const vp9_prob *model, vp9_prob *full);
 
 extern const vp9_prob vp9_modelcoefprobs[COEFPROB_MODELS][ENTROPY_NODES - 1];
 
-static INLINE const int* get_scan_4x4(TX_TYPE tx_type) {
+static INLINE const int16_t* get_scan_4x4(TX_TYPE tx_type) {
   switch (tx_type) {
     case ADST_DCT:
       return vp9_row_scan_4x4;
@@ -209,7 +227,18 @@ static INLINE const int* get_scan_4x4(TX_TYPE tx_type) {
   }
 }
 
-static INLINE const int* get_scan_8x8(TX_TYPE tx_type) {
+static INLINE const int16_t* get_iscan_4x4(TX_TYPE tx_type) {
+  switch (tx_type) {
+    case ADST_DCT:
+      return vp9_row_iscan_4x4;
+    case DCT_ADST:
+      return vp9_col_iscan_4x4;
+    default:
+      return vp9_default_iscan_4x4;
+  }
+}
+
+static INLINE const int16_t* get_scan_8x8(TX_TYPE tx_type) {
   switch (tx_type) {
     case ADST_DCT:
       return vp9_row_scan_8x8;
@@ -220,7 +249,18 @@ static INLINE const int* get_scan_8x8(TX_TYPE tx_type) {
   }
 }
 
-static INLINE const int* get_scan_16x16(TX_TYPE tx_type) {
+static INLINE const int16_t* get_iscan_8x8(TX_TYPE tx_type) {
+  switch (tx_type) {
+    case ADST_DCT:
+      return vp9_row_iscan_8x8;
+    case DCT_ADST:
+      return vp9_col_iscan_8x8;
+    default:
+      return vp9_default_iscan_8x8;
+  }
+}
+
+static INLINE const int16_t* get_scan_16x16(TX_TYPE tx_type) {
   switch (tx_type) {
     case ADST_DCT:
       return vp9_row_scan_16x16;
@@ -228,6 +268,17 @@ static INLINE const int* get_scan_16x16(TX_TYPE tx_type) {
       return vp9_col_scan_16x16;
     default:
       return vp9_default_scan_16x16;
+  }
+}
+
+static INLINE const int16_t* get_iscan_16x16(TX_TYPE tx_type) {
+  switch (tx_type) {
+    case ADST_DCT:
+      return vp9_row_iscan_16x16;
+    case DCT_ADST:
+      return vp9_col_iscan_16x16;
+    default:
+      return vp9_default_iscan_16x16;
   }
 }
 

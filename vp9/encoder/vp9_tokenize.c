@@ -90,8 +90,6 @@ static void fill_value_tokens() {
   vp9_dct_value_cost_ptr   = dct_value_cost + DCT_MAX_VALUE;
 }
 
-extern const int *vp9_get_coef_neighbors_handle(const int *scan, int *pad);
-
 struct tokenize_b_args {
   VP9_COMP *cpi;
   MACROBLOCKD *xd;
@@ -127,7 +125,7 @@ static void tokenize_b(int plane, int block, BLOCK_SIZE_TYPE bsize,
   ENTROPY_CONTEXT *L = xd->plane[plane].left_context + loff;
   int seg_eob, default_eob, pad;
   const int segment_id = mbmi->segment_id;
-  const int *scan, *nb;
+  const int16_t *scan, *nb;
   vp9_coeff_count *counts;
   vp9_coeff_probs_model *coef_probs;
   const int ref = mbmi->ref_frame[0] != INTRA_FRAME;

@@ -113,7 +113,7 @@ static int decode_coefs(FRAME_CONTEXT *fc, const MACROBLOCKD *xd,
   vp9_prob *prob;
   vp9_coeff_count_model *coef_counts;
   const int ref = xd->mode_info_context->mbmi.ref_frame[0] != INTRA_FRAME;
-  const int *scan, *nb;
+  const int16_t *scan, *nb;
   uint8_t token_cache[1024];
   const uint8_t * band_translate;
 #if CONFIG_BALANCED_COEFTREE
