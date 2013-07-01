@@ -491,29 +491,21 @@ static void setup_loopfilter(VP9D_COMP *pbi, struct vp9_read_bit_buffer *rb) {
     if (xd->mode_ref_lf_delta_update) {
       int i;
 
-      for (i = 0; i < MAX_REF_LF_DELTAS; i++) {
-        if (vp9_rb_read_bit(rb)) {
-          const int value = vp9_rb_read_literal(rb, 6);
-          xd->ref_lf_deltas[i] = vp9_rb_read_bit(rb) ? -value : value;
-        }
-      }
+      for (i = 0; i < MAX_REF_LF_DELTAS; i++)
+        if (vp9_rb_read_bit(rb))
+          xd->ref_lf_deltas[i] = vp9_rb_read_signed_literal(rb, 6);
 
-      for (i = 0; i < MAX_MODE_LF_DELTAS; i++) {
-        if (vp9_rb_read_bit(rb)) {
-          const int value = vp9_rb_read_literal(rb, 6);
-          xd->mode_lf_deltas[i] = vp9_rb_read_bit(rb) ? -value : value;
-        }
-      }
+      for (i = 0; i < MAX_MODE_LF_DELTAS; i++)
+        if (vp9_rb_read_bit(rb))
+          xd->mode_lf_deltas[i] = vp9_rb_read_signed_literal(rb, 6);
     }
   }
 }
 
 static int read_delta_q(struct vp9_read_bit_buffer *rb, int *delta_q) {
   const int old = *delta_q;
-  if (vp9_rb_read_bit(rb)) {
-    const int value = vp9_rb_read_literal(rb, 4);
-    *delta_q = vp9_rb_read_bit(rb) ? -value : value;
-  }
+  if (vp9_rb_read_bit(rb))
+    *delta_q = vp9_rb_read_signed_literal(rb, 4);
   return old != *delta_q;
 }
 
