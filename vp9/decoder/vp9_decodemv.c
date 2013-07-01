@@ -114,56 +114,62 @@ static int read_intra_segment_id(VP9D_COMP *pbi, int mi_row, int mi_col,
   }
 }
 
-static void kfread_modes(VP9D_COMP *pbi, MODE_INFO *m,
-                         int mi_row, int mi_col,
-                         vp9_reader *r) {
+static uint8_t read_skip_coeff(VP9D_COMP *pbi, int segment_id, vp9_reader *r) {
   VP9_COMMON *const cm = &pbi->common;
   MACROBLOCKD *const xd = &pbi->mb;
+  int skip_coeff = vp9_segfeature_active(xd, segment_id, SEG_LVL_SKIP);
+  if (!skip_coeff) {
+    const uint8_t ctx = vp9_get_pred_context(cm, xd, PRED_MBSKIP);
+    skip_coeff = vp9_read(r, vp9_get_pred_prob(cm, xd, PRED_MBSKIP));
+    cm->fc.mbskip_count[ctx][skip_coeff]++;
+  }
+  return skip_coeff;
+}
+
+static void read_intra_mode_info(VP9D_COMP *pbi, MODE_INFO *m,
+                                 int mi_row, int mi_col, vp9_reader *r) {
+  VP9_COMMON *const cm = &pbi->common;
+  MACROBLOCKD *const xd = &pbi->mb;
+  MB_MODE_INFO *const mbmi = &m->mbmi;
+  const BLOCK_SIZE_TYPE bsize = mbmi->sb_type;
   const int mis = cm->mode_info_stride;
 
-  m->mbmi.segment_id = read_intra_segment_id(pbi, mi_row, mi_col, r);
-  m->mbmi.mb_skip_coeff = vp9_segfeature_active(xd, m->mbmi.segment_id,
-                                                SEG_LVL_SKIP);
-  if (!m->mbmi.mb_skip_coeff) {
-    m->mbmi.mb_skip_coeff = vp9_read(r, vp9_get_pred_prob(cm, xd, PRED_MBSKIP));
-    cm->fc.mbskip_count[vp9_get_pred_context(cm, xd, PRED_MBSKIP)]
-                       [m->mbmi.mb_skip_coeff]++;
-  }
+  mbmi->segment_id = read_intra_segment_id(pbi, mi_row, mi_col, r);
+  mbmi->mb_skip_coeff = read_skip_coeff(pbi, mbmi->segment_id, r);
+  mbmi->txfm_size = get_txfm_size(pbi, cm->txfm_mode, bsize, 1, r);
+  mbmi->ref_frame[0] = INTRA_FRAME;
 
-  m->mbmi.txfm_size = get_txfm_size(pbi, cm->txfm_mode, m->mbmi.sb_type,
-                                    1, r);
-
-  // luma mode
-  m->mbmi.ref_frame[0] = INTRA_FRAME;
-  if (m->mbmi.sb_type >= BLOCK_SIZE_SB8X8) {
+  if (bsize >= BLOCK_SIZE_SB8X8) {
     const MB_PREDICTION_MODE A = above_block_mode(m, 0, mis);
     const MB_PREDICTION_MODE L = xd->left_available ?
                                   left_block_mode(m, 0) : DC_PRED;
-    m->mbmi.mode = read_intra_mode(r, cm->kf_y_mode_prob[A][L]);
+    mbmi->mode = read_intra_mode(r, cm->kf_y_mode_prob[A][L]);
   } else {
+    // Only 4x4, 4x8, 8x4 blocks
+    const int bw = 1 << b_width_log2(bsize);
+    const int bh = 1 << b_height_log2(bsize);
     int idx, idy;
-    int bw = 1 << b_width_log2(m->mbmi.sb_type);
-    int bh = 1 << b_height_log2(m->mbmi.sb_type);
 
     for (idy = 0; idy < 2; idy += bh) {
       for (idx = 0; idx < 2; idx += bw) {
-        int ib = idy * 2 + idx;
-        int k;
+        const int ib = idy * 2 + idx;
         const MB_PREDICTION_MODE A = above_block_mode(m, ib, mis);
         const MB_PREDICTION_MODE L = (xd->left_available || idx) ?
                                       left_block_mode(m, ib) : DC_PRED;
-        m->bmi[ib].as_mode.first =
-            read_intra_mode(r, cm->kf_y_mode_prob[A][L]);
-        for (k = 1; k < bh; ++k)
-          m->bmi[ib + k * 2].as_mode.first = m->bmi[ib].as_mode.first;
-        for (k = 1; k < bw; ++k)
-          m->bmi[ib + k].as_mode.first = m->bmi[ib].as_mode.first;
+        const MB_PREDICTION_MODE b_mode = read_intra_mode(r,
+                                              cm->kf_y_mode_prob[A][L]);
+        m->bmi[ib].as_mode.first = b_mode;
+        if (bh == 2)
+          m->bmi[ib + 2].as_mode.first = b_mode;
+        if (bw == 2)
+          m->bmi[ib + 1].as_mode.first = b_mode;
       }
     }
-    m->mbmi.mode = m->bmi[3].as_mode.first;
+
+    mbmi->mode = m->bmi[3].as_mode.first;
   }
 
-  m->mbmi.uv_mode = read_intra_mode(r, cm->kf_uv_mode_prob[m->mbmi.mode]);
+  mbmi->uv_mode = read_intra_mode(r, cm->kf_uv_mode_prob[mbmi->mode]);
 }
 
 static int read_mv_component(vp9_reader *r,
@@ -198,6 +204,25 @@ static int read_mv_component(vp9_reader *r,
   // result
   mag = vp9_get_mv_mag(mv_class, (d << 3) | (fr << 1) | hp) + 1;
   return sign ? -mag : mag;
+}
+
+static INLINE void read_mv(vp9_reader *r, MV *mv, const MV *ref,
+                           const nmv_context *ctx,
+                           nmv_context_counts *counts, int usehp) {
+  const MV_JOINT_TYPE j = treed_read(r, vp9_mv_joint_tree, ctx->joints);
+  MV diff = {0, 0};
+
+  usehp = usehp && vp9_use_mv_hp(ref);
+  if (mv_joint_vertical(j))
+    diff.row = read_mv_component(r, &ctx->comps[0], usehp);
+
+  if (mv_joint_horizontal(j))
+    diff.col = read_mv_component(r, &ctx->comps[1], usehp);
+
+  vp9_inc_mv(&diff, ref, counts, usehp);
+
+  mv->row = ref->row + diff.row;
+  mv->col = ref->col + diff.col;
 }
 
 static void update_mv(vp9_reader *r, vp9_prob *const p,
@@ -332,64 +357,8 @@ static void read_inter_mode_probs(FRAME_CONTEXT *fc, vp9_reader *r) {
 static INLINE COMPPREDMODE_TYPE read_comp_pred_mode(vp9_reader *r) {
   COMPPREDMODE_TYPE mode = vp9_read_bit(r);
   if (mode)
-     mode += vp9_read_bit(r);
+    mode += vp9_read_bit(r);
   return mode;
-}
-
-static void mb_mode_mv_init(VP9D_COMP *pbi, vp9_reader *r) {
-  VP9_COMMON *const cm = &pbi->common;
-
-  if (cm->frame_type != KEY_FRAME && !cm->intra_only) {
-    nmv_context *const nmvc = &pbi->common.fc.nmvc;
-    MACROBLOCKD *const xd = &pbi->mb;
-    int i, j;
-
-    read_inter_mode_probs(&cm->fc, r);
-
-    if (cm->mcomp_filter_type == SWITCHABLE)
-      read_switchable_interp_probs(&cm->fc, r);
-
-    for (i = 0; i < INTRA_INTER_CONTEXTS; i++)
-      if (vp9_read(r, VP9_MODE_UPDATE_PROB))
-        vp9_diff_update_prob(r, &cm->fc.intra_inter_prob[i]);
-
-    if (cm->allow_comp_inter_inter) {
-      cm->comp_pred_mode = read_comp_pred_mode(r);
-      if (cm->comp_pred_mode == HYBRID_PREDICTION)
-        for (i = 0; i < COMP_INTER_CONTEXTS; i++)
-          if (vp9_read(r, VP9_MODE_UPDATE_PROB))
-            vp9_diff_update_prob(r, &cm->fc.comp_inter_prob[i]);
-    } else {
-      cm->comp_pred_mode = SINGLE_PREDICTION_ONLY;
-    }
-
-    if (cm->comp_pred_mode != COMP_PREDICTION_ONLY)
-      for (i = 0; i < REF_CONTEXTS; i++) {
-        if (vp9_read(r, VP9_MODE_UPDATE_PROB))
-          vp9_diff_update_prob(r, &cm->fc.single_ref_prob[i][0]);
-
-        if (vp9_read(r, VP9_MODE_UPDATE_PROB))
-          vp9_diff_update_prob(r, &cm->fc.single_ref_prob[i][1]);
-      }
-
-    if (cm->comp_pred_mode != SINGLE_PREDICTION_ONLY)
-      for (i = 0; i < REF_CONTEXTS; i++)
-        if (vp9_read(r, VP9_MODE_UPDATE_PROB))
-          vp9_diff_update_prob(r, &cm->fc.comp_ref_prob[i]);
-
-    // VP9_INTRA_MODES
-    for (j = 0; j < BLOCK_SIZE_GROUPS; j++)
-      for (i = 0; i < VP9_INTRA_MODES - 1; ++i)
-        if (vp9_read(r, VP9_MODE_UPDATE_PROB))
-          vp9_diff_update_prob(r, &cm->fc.y_mode_prob[j][i]);
-
-    for (j = 0; j < NUM_PARTITION_CONTEXTS; ++j)
-      for (i = 0; i < PARTITION_TYPES - 1; ++i)
-        if (vp9_read(r, VP9_MODE_UPDATE_PROB))
-          vp9_diff_update_prob(r, &cm->fc.partition_prob[INTER_FRAME][j][i]);
-
-    read_mv_probs(r, nmvc, xd->allow_high_precision_mv);
-  }
 }
 
 static int read_inter_segment_id(VP9D_COMP *pbi, int mi_row, int mi_col,
@@ -431,26 +400,6 @@ static INLINE void assign_and_clamp_mv(int_mv *dst, const int_mv *src,
            mb_to_bottom_edge);
 }
 
-static INLINE void decode_mv(vp9_reader *r, MV *mv, const MV *ref,
-                             const nmv_context *ctx,
-                             nmv_context_counts *counts,
-                             int usehp) {
-  const MV_JOINT_TYPE j = treed_read(r, vp9_mv_joint_tree, ctx->joints);
-  MV diff = {0, 0};
-
-  usehp = usehp && vp9_use_mv_hp(ref);
-  if (mv_joint_vertical(j))
-    diff.row = read_mv_component(r, &ctx->comps[0], usehp);
-
-  if (mv_joint_horizontal(j))
-    diff.col = read_mv_component(r, &ctx->comps[1], usehp);
-
-  vp9_inc_mv(&diff, ref, counts, usehp);
-
-  mv->row = diff.row + ref->row;
-  mv->col = diff.col + ref->col;
-}
-
 static INLINE INTERPOLATIONFILTERTYPE read_switchable_filter_type(
     VP9D_COMP *pbi, vp9_reader *r) {
   VP9_COMMON *const cm = &pbi->common;
@@ -463,31 +412,32 @@ static INLINE INTERPOLATIONFILTERTYPE read_switchable_filter_type(
 }
 
 static void read_intra_block_modes(VP9D_COMP *pbi, MODE_INFO *mi,
-                                   MB_MODE_INFO *mbmi, vp9_reader *r) {
+                                   vp9_reader *r) {
   VP9_COMMON *const cm = &pbi->common;
-  MACROBLOCKD *const xd = &pbi->mb;
+  MB_MODE_INFO *const mbmi = &mi->mbmi;
   const BLOCK_SIZE_TYPE bsize = mi->mbmi.sb_type;
-  const int bw = 1 << b_width_log2(bsize);
-  const int bh = 1 << b_height_log2(bsize);
+  const int bwl = b_width_log2(bsize), bhl = b_height_log2(bsize);
 
   if (bsize >= BLOCK_SIZE_SB8X8) {
-    const BLOCK_SIZE_TYPE bsize = xd->mode_info_context->mbmi.sb_type;
-    const int bwl = b_width_log2(bsize), bhl = b_height_log2(bsize);
-    const int bsl = MIN(bwl, bhl);
-    mbmi->mode = read_intra_mode(r, cm->fc.y_mode_prob[MIN(3, bsl)]);
-    cm->fc.y_mode_counts[MIN(3, bsl)][mbmi->mode]++;
+    const int size_group = MIN(3, MIN(bwl, bhl));
+    mbmi->mode = read_intra_mode(r, cm->fc.y_mode_prob[size_group]);
+    cm->fc.y_mode_counts[size_group][mbmi->mode]++;
   } else {
+     // Only 4x4, 4x8, 8x4 blocks
+     const int bw = 1 << bwl, bh = 1 << bhl;
      int idx, idy;
+
      for (idy = 0; idy < 2; idy += bh) {
        for (idx = 0; idx < 2; idx += bw) {
-         int ib = idy * 2 + idx, k;
-         int m = read_intra_mode(r, cm->fc.y_mode_prob[0]);
-         mi->bmi[ib].as_mode.first = m;
-         cm->fc.y_mode_counts[0][m]++;
-         for (k = 1; k < bh; ++k)
-           mi->bmi[ib + k * 2].as_mode.first = m;
-         for (k = 1; k < bw; ++k)
-           mi->bmi[ib + k].as_mode.first = m;
+         const int ib = idy * 2 + idx;
+         const int b_mode = read_intra_mode(r, cm->fc.y_mode_prob[0]);
+         mi->bmi[ib].as_mode.first = b_mode;
+         cm->fc.y_mode_counts[0][b_mode]++;
+
+         if (bh == 2)
+           mi->bmi[ib + 2].as_mode.first = b_mode;
+         if (bw == 2)
+           mi->bmi[ib + 1].as_mode.first = b_mode;
       }
     }
     mbmi->mode = mi->bmi[3].as_mode.first;
@@ -515,12 +465,12 @@ static MV_REFERENCE_FRAME read_reference_frame(VP9D_COMP *pbi, int segment_id,
   return ref;
 }
 
-static void read_mb_modes_mv(VP9D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
-                             int mi_row, int mi_col,
-                             vp9_reader *r) {
+static void read_inter_mode_info(VP9D_COMP *pbi, MODE_INFO *mi,
+                                 int mi_row, int mi_col, vp9_reader *r) {
   VP9_COMMON *const cm = &pbi->common;
   MACROBLOCKD *const xd = &pbi->mb;
   nmv_context *const nmvc = &cm->fc.nmvc;
+  MB_MODE_INFO *const mbmi = &mi->mbmi;
 
   int_mv *const mv0 = &mbmi->mv[0];
   int_mv *const mv1 = &mbmi->mv[1];
@@ -529,7 +479,7 @@ static void read_mb_modes_mv(VP9D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
   const int bh = 1 << b_height_log2(bsize);
 
   int mb_to_left_edge, mb_to_right_edge, mb_to_top_edge, mb_to_bottom_edge;
-  int j, idx, idy;
+  int idx, idy;
 
   mbmi->ref_frame[1] = NONE;
 
@@ -548,17 +498,8 @@ static void read_mb_modes_mv(VP9D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
   mb_to_left_edge = xd->mb_to_left_edge - LEFT_TOP_MARGIN;
   mb_to_right_edge = xd->mb_to_right_edge + RIGHT_BOTTOM_MARGIN;
 
-  // Read the macroblock segment id.
   mbmi->segment_id = read_inter_segment_id(pbi, mi_row, mi_col, r);
-
-  mbmi->mb_skip_coeff = vp9_segfeature_active(xd, mbmi->segment_id,
-                                              SEG_LVL_SKIP);
-  if (!mbmi->mb_skip_coeff) {
-    mbmi->mb_skip_coeff = vp9_read(r, vp9_get_pred_prob(cm, xd, PRED_MBSKIP));
-    cm->fc.mbskip_count[vp9_get_pred_context(cm, xd, PRED_MBSKIP)]
-                       [mbmi->mb_skip_coeff]++;
-  }
-
+  mbmi->mb_skip_coeff = read_skip_coeff(pbi, mbmi->segment_id, r);
   mbmi->ref_frame[0] = read_reference_frame(pbi, mbmi->segment_id, r);
   mbmi->txfm_size = get_txfm_size(pbi, cm->txfm_mode, bsize,
      (mbmi->mb_skip_coeff == 0 || mbmi->ref_frame[0] == INTRA_FRAME), r);
@@ -633,30 +574,27 @@ static void read_mb_modes_mv(VP9D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
       for (idy = 0; idy < 2; idy += bh) {
         for (idx = 0; idx < 2; idx += bw) {
           int_mv blockmv, secondmv;
-          int blockmode;
-          int i;
-          j = idy * 2 + idx;
+          const int j = idy * 2 + idx;
+          const int blockmode = read_sb_mv_ref(r, mv_ref_p);
 
-          blockmode = read_sb_mv_ref(r, mv_ref_p);
           vp9_accum_mv_refs(cm, blockmode,
                             mbmi->mb_mode_context[mbmi->ref_frame[0]]);
           if (blockmode == NEARESTMV || blockmode == NEARMV) {
-            MV_REFERENCE_FRAME rf2 = mbmi->ref_frame[1];
+            const MV_REFERENCE_FRAME rf2 = mbmi->ref_frame[1];
             vp9_append_sub8x8_mvs_for_idx(cm, xd, &nearest, &nearby, j, 0);
-            if (rf2 > 0) {
+            if (rf2 > 0)
               vp9_append_sub8x8_mvs_for_idx(cm, xd,  &nearest_second,
                                             &nearby_second, j, 1);
-            }
           }
 
           switch (blockmode) {
             case NEWMV:
-              decode_mv(r, &blockmv.as_mv, &best_mv.as_mv, nmvc,
-                         &cm->fc.NMVcount, xd->allow_high_precision_mv);
+              read_mv(r, &blockmv.as_mv, &best_mv.as_mv, nmvc,
+                      &cm->fc.NMVcount, xd->allow_high_precision_mv);
 
               if (mbmi->ref_frame[1] > 0)
-                decode_mv(r, &secondmv.as_mv, &best_mv_second.as_mv, nmvc,
-                          &cm->fc.NMVcount, xd->allow_high_precision_mv);
+                read_mv(r, &secondmv.as_mv, &best_mv_second.as_mv, nmvc,
+                        &cm->fc.NMVcount, xd->allow_high_precision_mv);
 
 #ifdef VPX_MODE_COUNT
               vp9_mv_cont_count[mv_contz][3]++;
@@ -693,10 +631,10 @@ static void read_mb_modes_mv(VP9D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
           if (mbmi->ref_frame[1] > 0)
             mi->bmi[j].as_mv[1].as_int = secondmv.as_int;
 
-          for (i = 1; i < bh; ++i)
-            vpx_memcpy(&mi->bmi[j + i * 2], &mi->bmi[j], sizeof(mi->bmi[j]));
-          for (i = 1; i < bw; ++i)
-            vpx_memcpy(&mi->bmi[j + i], &mi->bmi[j], sizeof(mi->bmi[j]));
+          if (bh == 2)
+            vpx_memcpy(&mi->bmi[j + 2], &mi->bmi[j], sizeof(mi->bmi[j]));
+          if (bw == 2)
+            vpx_memcpy(&mi->bmi[j + 1], &mi->bmi[j], sizeof(mi->bmi[j]));
           mi->mbmi.mode = blockmode;
         }
       }
@@ -738,11 +676,11 @@ static void read_mb_modes_mv(VP9D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
           break;
 
         case NEWMV:
-          decode_mv(r, &mv0->as_mv, &best_mv.as_mv, nmvc, &cm->fc.NMVcount,
-                    xd->allow_high_precision_mv);
+          read_mv(r, &mv0->as_mv, &best_mv.as_mv, nmvc, &cm->fc.NMVcount,
+                  xd->allow_high_precision_mv);
           if (mbmi->ref_frame[1] > 0)
-            decode_mv(r, &mv1->as_mv, &best_mv_second.as_mv, nmvc,
-                      &cm->fc.NMVcount, xd->allow_high_precision_mv);
+            read_mv(r, &mv1->as_mv, &best_mv_second.as_mv, nmvc,
+                    &cm->fc.NMVcount, xd->allow_high_precision_mv);
           break;
         default:
           assert(0);
@@ -751,12 +689,12 @@ static void read_mb_modes_mv(VP9D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
     }
   } else {
     mv0->as_int = 0;  // required for left and above block mv
-    read_intra_block_modes(pbi, mi, mbmi, r);
+    read_intra_block_modes(pbi, mi, r);
   }
 }
 
-void vp9_decode_mode_mvs_init(VP9D_COMP* const pbi, vp9_reader *r) {
-  VP9_COMMON *cm = &pbi->common;
+void vp9_prepare_read_mode_info(VP9D_COMP* pbi, vp9_reader *r) {
+  VP9_COMMON *const cm = &pbi->common;
   int k;
 
   // TODO(jkoleszar): does this clear more than MBSKIP_CONTEXTS? Maybe remove.
@@ -765,27 +703,73 @@ void vp9_decode_mode_mvs_init(VP9D_COMP* const pbi, vp9_reader *r) {
     if (vp9_read(r, VP9_MODE_UPDATE_PROB))
       vp9_diff_update_prob(r, &cm->fc.mbskip_probs[k]);
 
-  mb_mode_mv_init(pbi, r);
+  if (cm->frame_type != KEY_FRAME && !cm->intra_only) {
+    nmv_context *const nmvc = &pbi->common.fc.nmvc;
+    MACROBLOCKD *const xd = &pbi->mb;
+    int i, j;
+
+    read_inter_mode_probs(&cm->fc, r);
+
+    if (cm->mcomp_filter_type == SWITCHABLE)
+      read_switchable_interp_probs(&cm->fc, r);
+
+    for (i = 0; i < INTRA_INTER_CONTEXTS; i++)
+      if (vp9_read(r, VP9_MODE_UPDATE_PROB))
+        vp9_diff_update_prob(r, &cm->fc.intra_inter_prob[i]);
+
+    if (cm->allow_comp_inter_inter) {
+      cm->comp_pred_mode = read_comp_pred_mode(r);
+      if (cm->comp_pred_mode == HYBRID_PREDICTION)
+        for (i = 0; i < COMP_INTER_CONTEXTS; i++)
+          if (vp9_read(r, VP9_MODE_UPDATE_PROB))
+            vp9_diff_update_prob(r, &cm->fc.comp_inter_prob[i]);
+    } else {
+      cm->comp_pred_mode = SINGLE_PREDICTION_ONLY;
+    }
+
+    if (cm->comp_pred_mode != COMP_PREDICTION_ONLY)
+      for (i = 0; i < REF_CONTEXTS; i++) {
+        if (vp9_read(r, VP9_MODE_UPDATE_PROB))
+          vp9_diff_update_prob(r, &cm->fc.single_ref_prob[i][0]);
+
+        if (vp9_read(r, VP9_MODE_UPDATE_PROB))
+          vp9_diff_update_prob(r, &cm->fc.single_ref_prob[i][1]);
+      }
+
+    if (cm->comp_pred_mode != SINGLE_PREDICTION_ONLY)
+      for (i = 0; i < REF_CONTEXTS; i++)
+        if (vp9_read(r, VP9_MODE_UPDATE_PROB))
+          vp9_diff_update_prob(r, &cm->fc.comp_ref_prob[i]);
+
+    // VP9_INTRA_MODES
+    for (j = 0; j < BLOCK_SIZE_GROUPS; j++)
+      for (i = 0; i < VP9_INTRA_MODES - 1; ++i)
+        if (vp9_read(r, VP9_MODE_UPDATE_PROB))
+          vp9_diff_update_prob(r, &cm->fc.y_mode_prob[j][i]);
+
+    for (j = 0; j < NUM_PARTITION_CONTEXTS; ++j)
+      for (i = 0; i < PARTITION_TYPES - 1; ++i)
+        if (vp9_read(r, VP9_MODE_UPDATE_PROB))
+          vp9_diff_update_prob(r, &cm->fc.partition_prob[INTER_FRAME][j][i]);
+
+    read_mv_probs(r, nmvc, xd->allow_high_precision_mv);
+  }
 }
 
-void vp9_decode_mb_mode_mv(VP9D_COMP* const pbi,
-                           MACROBLOCKD* const xd,
-                           int mi_row,
-                           int mi_col,
-                           vp9_reader *r) {
+void vp9_read_mode_info(VP9D_COMP* pbi, int mi_row, int mi_col, vp9_reader *r) {
   VP9_COMMON *const cm = &pbi->common;
+  MACROBLOCKD *const xd = &pbi->mb;
   MODE_INFO *mi = xd->mode_info_context;
-  MB_MODE_INFO *const mbmi = &mi->mbmi;
+  const BLOCK_SIZE_TYPE bsize = mi->mbmi.sb_type;
 
-  if (cm->frame_type == KEY_FRAME || cm->intra_only) {
-    kfread_modes(pbi, mi, mi_row, mi_col, r);
-  } else {
-    read_mb_modes_mv(pbi, mi, &mi->mbmi, mi_row, mi_col, r);
-  }
+  if (cm->frame_type == KEY_FRAME || cm->intra_only)
+    read_intra_mode_info(pbi, mi, mi_row, mi_col, r);
+  else
+    read_inter_mode_info(pbi, mi, mi_row, mi_col, r);
 
   if (1) {
-    const int bw = 1 << mi_width_log2(mbmi->sb_type);
-    const int bh = 1 << mi_height_log2(mbmi->sb_type);
+    const int bw = 1 << mi_width_log2(bsize);
+    const int bh = 1 << mi_height_log2(bsize);
     const int y_mis = MIN(bh, cm->mi_rows - mi_row);
     const int x_mis = MIN(bw, cm->mi_cols - mi_col);
     const int mis = cm->mode_info_stride;
