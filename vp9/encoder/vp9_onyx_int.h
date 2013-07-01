@@ -235,6 +235,8 @@ typedef struct {
   int use_one_partition_size_always;
   int less_rectangular_check;
   int use_square_partition_only;
+  int unused_mode_skip_lvl;
+  int reference_masking;
   BLOCK_SIZE_TYPE always_this_block_size;
   int use_partitions_greater_than;
   BLOCK_SIZE_TYPE greater_than_block_size;
@@ -343,6 +345,9 @@ typedef struct VP9_COMP {
   unsigned int mode_check_freq[MAX_MODES];
   unsigned int mode_test_hit_counts[MAX_MODES];
   unsigned int mode_chosen_counts[MAX_MODES];
+  int64_t unused_mode_skip_mask;
+  int ref_frame_mask;
+  int set_ref_frame_mask;
 
   int rd_thresh_mult[MAX_MODES];
   int rd_baseline_thresh[BLOCK_SIZE_TYPES][MAX_MODES];

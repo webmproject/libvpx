@@ -3002,6 +3002,19 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
     for (i = 0; i < NB_TXFM_MODES; ++i)
       txfm_cache[i] = INT64_MAX;
 
+    this_mode = vp9_mode_order[mode_index].mode;
+    ref_frame = vp9_mode_order[mode_index].ref_frame;
+
+    // Slip modes that have been masked off but always consider first mode.
+    if ( mode_index && (bsize > cpi->sf.unused_mode_skip_lvl) &&
+         (cpi->unused_mode_skip_mask & (1 << mode_index)) )
+      continue;
+
+    // Skip if the current refernce frame has been masked off
+    if (cpi->sf.reference_masking && !cpi->set_ref_frame_mask &&
+        (cpi->ref_frame_mask & (1 << ref_frame)))
+      continue;
+
     // Test best rd so far against threshold for trying this mode.
     if ((best_rd < ((cpi->rd_threshes[bsize][mode_index] *
                      cpi->rd_thresh_freq_fact[bsize][mode_index]) >> 4)) ||
@@ -3015,8 +3028,6 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
       continue;
 
     x->skip = 0;
-    this_mode = vp9_mode_order[mode_index].mode;
-    ref_frame = vp9_mode_order[mode_index].ref_frame;
 
     if (cpi->sf.use_avoid_tested_higherror && bsize >= BLOCK_SIZE_SB8X8) {
       if (!(ref_frame_mask & (1 << ref_frame))) {
@@ -3523,6 +3534,19 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
     if (x->skip && !mode_excluded)
       break;
   }
+
+  // If indicated then mark the index of the chosen mode to be inspected at
+  // other block sizes.
+  if (bsize <= cpi->sf.unused_mode_skip_lvl) {
+    cpi->unused_mode_skip_mask = cpi->unused_mode_skip_mask &
+                                 (~((int64_t)1 << best_mode_index));
+  }
+
+  // If we are using reference masking and the set mask flag is set then
+  // create the reference frame mask.
+  if (cpi->sf.reference_masking && cpi->set_ref_frame_mask)
+    cpi->ref_frame_mask = ~(1 << vp9_mode_order[best_mode_index].ref_frame);
+
   // Flag all modes that have a distortion thats > 2x the best we found at
   // this level.
   for (mode_index = 0; mode_index < MB_MODE_COUNT; ++mode_index) {

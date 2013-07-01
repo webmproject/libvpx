@@ -1573,6 +1573,58 @@ static void rd_pick_partition(VP9_COMP *cpi, TOKENEXTRA **tp, int mi_row,
   }
 }
 
+// Examines 64x64 block and chooses a best reference frame
+static void rd_pick_reference_frame(VP9_COMP *cpi, TOKENEXTRA **tp, int mi_row,
+                                    int mi_col, int *rate, int64_t *dist) {
+  VP9_COMMON * const cm = &cpi->common;
+  MACROBLOCK * const x = &cpi->mb;
+  MACROBLOCKD * const xd = &x->e_mbd;
+  int bsl = b_width_log2(BLOCK_SIZE_SB64X64), bs = 1 << bsl;
+  int ms = bs / 2;
+  ENTROPY_CONTEXT l[16 * MAX_MB_PLANE], a[16 * MAX_MB_PLANE];
+  PARTITION_CONTEXT sl[8], sa[8];
+  int pl;
+  int r;
+  int64_t d;
+
+  save_context(cpi, mi_row, mi_col, a, l, sa, sl, BLOCK_SIZE_SB64X64);
+
+  // Default is non mask (all reference frames allowed.
+  cpi->ref_frame_mask = 0;
+
+  // Do RD search for 64x64.
+  if ((mi_row + (ms >> 1) < cm->mi_rows) &&
+      (mi_col + (ms >> 1) < cm->mi_cols)) {
+    cpi->set_ref_frame_mask = 1;
+    pick_sb_modes(cpi, mi_row, mi_col, tp, &r, &d, BLOCK_SIZE_SB64X64,
+                  get_block_context(x, BLOCK_SIZE_SB64X64));
+    set_partition_seg_context(cm, xd, mi_row, mi_col);
+    pl = partition_plane_context(xd, BLOCK_SIZE_SB64X64);
+    r += x->partition_cost[pl][PARTITION_NONE];
+
+    *(get_sb_partitioning(x, BLOCK_SIZE_SB64X64)) = BLOCK_SIZE_SB64X64;
+    cpi->set_ref_frame_mask = 0;
+  }
+
+  *rate = r;
+  *dist = d;
+  // RDCOST(x->rdmult, x->rddiv, r, d)
+
+  restore_context(cpi, mi_row, mi_col, a, l, sa, sl, BLOCK_SIZE_SB64X64);
+
+  /*if (srate < INT_MAX && sdist < INT_MAX)
+    encode_sb(cpi, tp, mi_row, mi_col, 1, BLOCK_SIZE_SB64X64);
+
+  if (bsize == BLOCK_SIZE_SB64X64) {
+    assert(tp_orig < *tp);
+    assert(srate < INT_MAX);
+    assert(sdist < INT_MAX);
+  } else {
+    assert(tp_orig == *tp);
+  }
+  */
+}
+
 static void encode_sb_row(VP9_COMP *cpi, int mi_row, TOKENEXTRA **tp,
                           int *totalrate) {
   VP9_COMMON * const cm = &cpi->common;
@@ -1587,6 +1639,19 @@ static void encode_sb_row(VP9_COMP *cpi, int mi_row, TOKENEXTRA **tp,
       mi_col += 64 / MI_SIZE) {
     int dummy_rate;
     int64_t dummy_dist;
+
+    // Initialize a mask of modes that we will not consider;
+    // cpi->unused_mode_skip_mask = 0x0000000AAE17F800 (test no golden)
+    if (cpi->common.frame_type == KEY_FRAME)
+      cpi->unused_mode_skip_mask = 0;
+    else
+      cpi->unused_mode_skip_mask = 0xFFFFFFFFFFFFFE00;
+
+    if (cpi->sf.reference_masking) {
+      rd_pick_reference_frame(cpi, tp, mi_row, mi_col,
+                              &dummy_rate, &dummy_dist);
+    }
+
     if (cpi->sf.partition_by_variance || cpi->sf.use_lastframe_partitioning ||
         cpi->sf.use_one_partition_size_always ) {
       const int idx_str = cm->mode_info_stride * mi_row + mi_col;
