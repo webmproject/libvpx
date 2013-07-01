@@ -112,11 +112,10 @@ static const int plane_rd_mult[4] = {
 static int trellis_get_coeff_context(const int16_t *scan,
                                      const int16_t *nb,
                                      int idx, int token,
-                                     uint8_t *token_cache,
-                                     int pad, int l) {
+                                     uint8_t *token_cache) {
   int bak = token_cache[scan[idx]], pt;
   token_cache[scan[idx]] = vp9_pt_energy_class[token];
-  pt = get_coef_context(scan, nb, pad, token_cache, idx + 1, l);
+  pt = get_coef_context(nb, token_cache, idx + 1);
   token_cache[scan[idx]] = bak;
   return pt;
 }
@@ -141,7 +140,7 @@ static void optimize_b(VP9_COMMON *const cm, MACROBLOCK *mb,
   int best, band, pt;
   PLANE_TYPE type = xd->plane[plane].plane_type;
   int err_mult = plane_rd_mult[type];
-  int default_eob, pad;
+  int default_eob;
   const int16_t *scan, *nb;
   const int mul = 1 + (tx_size == TX_32X32);
   uint8_t token_cache[1024];
@@ -201,7 +200,7 @@ static void optimize_b(VP9_COMMON *const cm, MACROBLOCK *mb,
   for (i = 0; i < eob; i++)
     token_cache[scan[i]] = vp9_pt_energy_class[vp9_dct_value_tokens_ptr[
         qcoeff_ptr[scan[i]]].token];
-  nb = vp9_get_coef_neighbors_handle(scan, &pad);
+  nb = vp9_get_coef_neighbors_handle(scan);
 
   for (i = eob; i-- > i0;) {
     int base_bits, d2, dx;
@@ -220,8 +219,7 @@ static void optimize_b(VP9_COMMON *const cm, MACROBLOCK *mb,
       /* Consider both possible successor states. */
       if (next < default_eob) {
         band = get_coef_band(band_translate, i + 1);
-        pt = trellis_get_coeff_context(scan, nb, i, t0, token_cache,
-                                       pad, default_eob);
+        pt = trellis_get_coeff_context(scan, nb, i, t0, token_cache);
         rate0 +=
           mb->token_costs[tx_size][type][ref][0][band][pt]
                          [tokens[next][0].token];
@@ -273,14 +271,12 @@ static void optimize_b(VP9_COMMON *const cm, MACROBLOCK *mb,
       if (next < default_eob) {
         band = get_coef_band(band_translate, i + 1);
         if (t0 != DCT_EOB_TOKEN) {
-          pt = trellis_get_coeff_context(scan, nb, i, t0, token_cache,
-                                         pad, default_eob);
+          pt = trellis_get_coeff_context(scan, nb, i, t0, token_cache);
           rate0 += mb->token_costs[tx_size][type][ref][!x][band][pt]
                                   [tokens[next][0].token];
         }
         if (t1 != DCT_EOB_TOKEN) {
-          pt = trellis_get_coeff_context(scan, nb, i, t1, token_cache,
-                                         pad, default_eob);
+          pt = trellis_get_coeff_context(scan, nb, i, t1, token_cache);
           rate1 += mb->token_costs[tx_size][type][ref][!x][band][pt]
                                   [tokens[next][1].token];
         }

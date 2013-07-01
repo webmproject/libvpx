@@ -304,7 +304,7 @@ static INLINE int cost_coeffs(VP9_COMMON *const cm, MACROBLOCK *mb,
   MB_MODE_INFO *mbmi = &xd->mode_info_context->mbmi;
   int pt;
   int c = 0;
-  int cost = 0, pad;
+  int cost = 0;
   const int16_t *scan, *nb;
   const int eob = xd->plane[plane].eobs[block];
   const int16_t *qcoeff_ptr = BLOCK_OFFSET(xd->plane[plane].qcoeff, block, 16);
@@ -314,7 +314,7 @@ static INLINE int cost_coeffs(VP9_COMMON *const cm, MACROBLOCK *mb,
   ENTROPY_CONTEXT above_ec, left_ec;
   TX_TYPE tx_type = DCT_DCT;
   const int segment_id = xd->mode_info_context->mbmi.segment_id;
-  int seg_eob, default_eob;
+  int seg_eob;
   uint8_t token_cache[1024];
   const uint8_t * band_translate;
 
@@ -372,8 +372,7 @@ static INLINE int cost_coeffs(VP9_COMMON *const cm, MACROBLOCK *mb,
   assert(eob <= seg_eob);
 
   pt = combine_entropy_contexts(above_ec, left_ec);
-  nb = vp9_get_coef_neighbors_handle(scan, &pad);
-  default_eob = seg_eob;
+  nb = vp9_get_coef_neighbors_handle(scan);
 
   if (vp9_segfeature_active(xd, segment_id, SEG_LVL_SKIP))
     seg_eob = 0;
@@ -402,7 +401,7 @@ static INLINE int cost_coeffs(VP9_COMMON *const cm, MACROBLOCK *mb,
 
       v = qcoeff_ptr[rc];
       t = vp9_dct_value_tokens_ptr[v].token;
-      pt = get_coef_context(scan, nb, pad, token_cache, c, default_eob);
+      pt = get_coef_context(nb, token_cache, c);
       cost += token_costs[!prev_t][band][pt][t] + vp9_dct_value_cost_ptr[v];
       token_cache[rc] = vp9_pt_energy_class[t];
       prev_t = t;
@@ -410,7 +409,7 @@ static INLINE int cost_coeffs(VP9_COMMON *const cm, MACROBLOCK *mb,
 
     // eob token
     if (c < seg_eob) {
-      pt = get_coef_context(scan, nb, pad, token_cache, c, default_eob);
+      pt = get_coef_context(nb, token_cache, c);
       cost += token_costs[0][get_coef_band(band_translate, c)][pt]
                          [DCT_EOB_TOKEN];
     }
