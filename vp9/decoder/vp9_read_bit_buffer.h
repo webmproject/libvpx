@@ -51,4 +51,10 @@ static int vp9_rb_read_literal(struct vp9_read_bit_buffer *rb, int bits) {
   return value;
 }
 
+static int vp9_rb_read_signed_literal(struct vp9_read_bit_buffer *rb,
+                                      int bits) {
+  const int value = vp9_rb_read_literal(rb, bits);
+  return vp9_rb_read_bit(rb) ? -value : value;
+}
+
 #endif  // VP9_READ_BIT_BUFFER_
