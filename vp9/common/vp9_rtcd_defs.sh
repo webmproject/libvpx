@@ -109,7 +109,7 @@ prototype void vp9_mb_lpf_vertical_edge_w "uint8_t *s, int pitch, const uint8_t 
 specialize vp9_mb_lpf_vertical_edge_w sse2
 
 prototype void vp9_mbloop_filter_vertical_edge "uint8_t *s, int pitch, const uint8_t *blimit, const uint8_t *limit, const uint8_t *thresh, int count"
-specialize vp9_mbloop_filter_vertical_edge sse2
+specialize vp9_mbloop_filter_vertical_edge sse2 neon
 
 prototype void vp9_loop_filter_vertical_edge "uint8_t *s, int pitch, const uint8_t *blimit, const uint8_t *limit, const uint8_t *thresh, int count"
 specialize vp9_loop_filter_vertical_edge mmx neon
@@ -118,7 +118,7 @@ prototype void vp9_mb_lpf_horizontal_edge_w "uint8_t *s, int pitch, const uint8_
 specialize vp9_mb_lpf_horizontal_edge_w sse2
 
 prototype void vp9_mbloop_filter_horizontal_edge "uint8_t *s, int pitch, const uint8_t *blimit, const uint8_t *limit, const uint8_t *thresh, int count"
-specialize vp9_mbloop_filter_horizontal_edge sse2
+specialize vp9_mbloop_filter_horizontal_edge sse2 neon
 
 prototype void vp9_loop_filter_horizontal_edge "uint8_t *s, int pitch, const uint8_t *blimit, const uint8_t *limit, const uint8_t *thresh, int count"
 specialize vp9_loop_filter_horizontal_edge mmx neon
