@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAbn//3IQ\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 532,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-07-02T16:37:49Z",
+      "side": 1,
+      "message": "that\u0027s a little weird, you can just make it a direct value (instead of pointer) and copy it after the function call, right?",
+      "revId": "1f5858ef01c971717e2706853efc040e40b618b1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAbn//3II\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 542,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-07-02T16:37:49Z",
+      "side": 1,
+      "message": "struct macroblock_plane *const p \u003d ..",
+      "revId": "1f5858ef01c971717e2706853efc040e40b618b1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAbn//3IM\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 550,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-07-02T16:37:49Z",
+      "side": 1,
+      "message": "this will actually slightly change results. For testing, you could consider doing the shift at the very end, so you can confirm the results are identical.\n\nFor final patch, this is OK of course.",
+      "revId": "1f5858ef01c971717e2706853efc040e40b618b1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAbn//2wQ\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 575,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-07-02T16:37:49Z",
+      "side": 1,
+      "message": "maybe you want to split rdcost_block_args in rate_block_args and dist_block_args?",
+      "revId": "1f5858ef01c971717e2706853efc040e40b618b1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
