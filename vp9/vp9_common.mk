@@ -67,7 +67,6 @@ VP9_COMMON_SRCS-yes += common/vp9_reconinter.c
 VP9_COMMON_SRCS-yes += common/vp9_reconintra.c
 VP9_COMMON_SRCS-$(CONFIG_POSTPROC_VISUALIZER) += common/vp9_textblit.c
 VP9_COMMON_SRCS-yes += common/vp9_treecoder.c
-VP9_COMMON_SRCS-$(CONFIG_IMPLICIT_SEGMENTATION) += common/vp9_implicit_segmentation.c
 
 VP9_COMMON_SRCS-$(ARCH_X86)$(ARCH_X86_64) += common/x86/vp9_loopfilter_x86.h
 VP9_COMMON_SRCS-$(ARCH_X86)$(ARCH_X86_64) += common/x86/vp9_postproc_x86.h
