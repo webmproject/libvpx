@@ -461,25 +461,25 @@ void vp9_default_coef_probs(VP9_COMMON *pc) {
 // for each position in raster scan order.
 // -1 indicates the neighbor does not exist.
 DECLARE_ALIGNED(16, int16_t,
-                vp9_default_scan_4x4_neighbors[16 * MAX_NEIGHBORS]);
+                vp9_default_scan_4x4_neighbors[17 * MAX_NEIGHBORS]);
 DECLARE_ALIGNED(16, int16_t,
-                vp9_col_scan_4x4_neighbors[16 * MAX_NEIGHBORS]);
+                vp9_col_scan_4x4_neighbors[17 * MAX_NEIGHBORS]);
 DECLARE_ALIGNED(16, int16_t,
-                vp9_row_scan_4x4_neighbors[16 * MAX_NEIGHBORS]);
+                vp9_row_scan_4x4_neighbors[17 * MAX_NEIGHBORS]);
 DECLARE_ALIGNED(16, int16_t,
-                vp9_col_scan_8x8_neighbors[64 * MAX_NEIGHBORS]);
+                vp9_col_scan_8x8_neighbors[65 * MAX_NEIGHBORS]);
 DECLARE_ALIGNED(16, int16_t,
-                vp9_row_scan_8x8_neighbors[64 * MAX_NEIGHBORS]);
+                vp9_row_scan_8x8_neighbors[65 * MAX_NEIGHBORS]);
 DECLARE_ALIGNED(16, int16_t,
-                vp9_default_scan_8x8_neighbors[64 * MAX_NEIGHBORS]);
+                vp9_default_scan_8x8_neighbors[65 * MAX_NEIGHBORS]);
 DECLARE_ALIGNED(16, int16_t,
-                vp9_col_scan_16x16_neighbors[256 * MAX_NEIGHBORS]);
+                vp9_col_scan_16x16_neighbors[257 * MAX_NEIGHBORS]);
 DECLARE_ALIGNED(16, int16_t,
-                vp9_row_scan_16x16_neighbors[256 * MAX_NEIGHBORS]);
+                vp9_row_scan_16x16_neighbors[257 * MAX_NEIGHBORS]);
 DECLARE_ALIGNED(16, int16_t,
-                vp9_default_scan_16x16_neighbors[256 * MAX_NEIGHBORS]);
+                vp9_default_scan_16x16_neighbors[257 * MAX_NEIGHBORS]);
 DECLARE_ALIGNED(16, int16_t,
-                vp9_default_scan_32x32_neighbors[1024 * MAX_NEIGHBORS]);
+                vp9_default_scan_32x32_neighbors[1025 * MAX_NEIGHBORS]);
 
 DECLARE_ALIGNED(16, int16_t, vp9_default_iscan_4x4[16]);
 DECLARE_ALIGNED(16, int16_t, vp9_col_iscan_4x4[16]);
@@ -504,15 +504,17 @@ static int find_in_scan(const int16_t *scan, int l, int idx) {
 }
 static void init_scan_neighbors(const int16_t *scan,
                                 int16_t *iscan,
-                                int l, int16_t *neighbors,
-                                int max_neighbors) {
+                                int l, int16_t *neighbors) {
   int l2 = l * l;
   int n, i, j;
 
-  for (n = 0; n < l2; n++) {
+  // dc doesn't use this type of prediction
+  neighbors[MAX_NEIGHBORS * 0 + 0] = 0;
+  neighbors[MAX_NEIGHBORS * 0 + 1] = 0;
+  iscan[0] = find_in_scan(scan, l, 0);
+  for (n = 1; n < l2; n++) {
     int rc = scan[n];
     iscan[n] = find_in_scan(scan, l, n);
-    assert(max_neighbors == MAX_NEIGHBORS);
     i = rc / l;
     j = rc % l;
     if (i > 0 && j > 0) {
@@ -524,93 +526,84 @@ static void init_scan_neighbors(const int16_t *scan,
       // Therefore, if we use ADST/DCT, prefer the DCT neighbor coeff
       // as a context. If ADST or DCT is used in both directions, we
       // use the combination of the two as a context.
-      int a = find_in_scan(scan, l, (i - 1) * l + j);
-      int b = find_in_scan(scan, l,  i      * l + j - 1);
+      int a = (i - 1) * l + j;
+      int b =  i      * l + j - 1;
       if (scan == vp9_col_scan_4x4 || scan == vp9_col_scan_8x8 ||
           scan == vp9_col_scan_16x16) {
-        neighbors[max_neighbors * n + 0] = a;
-        neighbors[max_neighbors * n + 1] = -1;
+        // in the col/row scan cases (as well as left/top edge cases), we set
+        // both contexts to the same value, so we can branchlessly do a+b+1>>1
+        // which automatically becomes a if a == b
+        neighbors[MAX_NEIGHBORS * n + 0] =
+        neighbors[MAX_NEIGHBORS * n + 1] = a;
       } else if (scan == vp9_row_scan_4x4 || scan == vp9_row_scan_8x8 ||
                  scan == vp9_row_scan_16x16) {
-        neighbors[max_neighbors * n + 0] = b;
-        neighbors[max_neighbors * n + 1] = -1;
+        neighbors[MAX_NEIGHBORS * n + 0] =
+        neighbors[MAX_NEIGHBORS * n + 1] = b;
       } else {
-        neighbors[max_neighbors * n + 0] = a;
-        neighbors[max_neighbors * n + 1] = b;
+        neighbors[MAX_NEIGHBORS * n + 0] = a;
+        neighbors[MAX_NEIGHBORS * n + 1] = b;
       }
     } else if (i > 0) {
-      neighbors[max_neighbors * n + 0] = find_in_scan(scan, l, (i - 1) * l + j);
-      neighbors[max_neighbors * n + 1] = -1;
-    } else if (j > 0) {
-      neighbors[max_neighbors * n + 0] =
-          find_in_scan(scan, l,  i      * l + j - 1);
-      neighbors[max_neighbors * n + 1] = -1;
+      neighbors[MAX_NEIGHBORS * n + 0] =
+      neighbors[MAX_NEIGHBORS * n + 1] = (i - 1) * l + j;
     } else {
-      assert(n == 0);
-      // dc predictor doesn't use previous tokens
-      neighbors[max_neighbors * n + 0] = -1;
+      assert(j > 0);
+      neighbors[MAX_NEIGHBORS * n + 0] =
+      neighbors[MAX_NEIGHBORS * n + 1] =  i      * l + j - 1;
     }
-    assert(neighbors[max_neighbors * n + 0] < n);
+    assert(iscan[neighbors[MAX_NEIGHBORS * n + 0]] < n);
   }
+  // one padding item so we don't have to add branches in code to handle
+  // calls to get_coef_context() for the token after the final dc token
+  neighbors[MAX_NEIGHBORS * l2 + 0] = 0;
+  neighbors[MAX_NEIGHBORS * l2 + 1] = 0;
 }
 
 void vp9_init_neighbors() {
   init_scan_neighbors(vp9_default_scan_4x4, vp9_default_iscan_4x4, 4,
-                      vp9_default_scan_4x4_neighbors, MAX_NEIGHBORS);
+                      vp9_default_scan_4x4_neighbors);
   init_scan_neighbors(vp9_row_scan_4x4, vp9_row_iscan_4x4, 4,
-                      vp9_row_scan_4x4_neighbors, MAX_NEIGHBORS);
+                      vp9_row_scan_4x4_neighbors);
   init_scan_neighbors(vp9_col_scan_4x4, vp9_col_iscan_4x4, 4,
-                      vp9_col_scan_4x4_neighbors, MAX_NEIGHBORS);
+                      vp9_col_scan_4x4_neighbors);
   init_scan_neighbors(vp9_default_scan_8x8, vp9_default_iscan_8x8, 8,
-                      vp9_default_scan_8x8_neighbors, MAX_NEIGHBORS);
+                      vp9_default_scan_8x8_neighbors);
   init_scan_neighbors(vp9_row_scan_8x8, vp9_row_iscan_8x8, 8,
-                      vp9_row_scan_8x8_neighbors, MAX_NEIGHBORS);
+                      vp9_row_scan_8x8_neighbors);
   init_scan_neighbors(vp9_col_scan_8x8, vp9_col_iscan_8x8, 8,
-                      vp9_col_scan_8x8_neighbors, MAX_NEIGHBORS);
+                      vp9_col_scan_8x8_neighbors);
   init_scan_neighbors(vp9_default_scan_16x16, vp9_default_iscan_16x16, 16,
-                      vp9_default_scan_16x16_neighbors, MAX_NEIGHBORS);
+                      vp9_default_scan_16x16_neighbors);
   init_scan_neighbors(vp9_row_scan_16x16, vp9_row_iscan_16x16, 16,
-                      vp9_row_scan_16x16_neighbors, MAX_NEIGHBORS);
+                      vp9_row_scan_16x16_neighbors);
   init_scan_neighbors(vp9_col_scan_16x16, vp9_col_iscan_16x16, 16,
-                      vp9_col_scan_16x16_neighbors, MAX_NEIGHBORS);
+                      vp9_col_scan_16x16_neighbors);
   init_scan_neighbors(vp9_default_scan_32x32, vp9_default_iscan_32x32, 32,
-                      vp9_default_scan_32x32_neighbors, MAX_NEIGHBORS);
+                      vp9_default_scan_32x32_neighbors);
 }
 
-const int16_t *vp9_get_coef_neighbors_handle(const int16_t *scan, int *pad) {
+const int16_t *vp9_get_coef_neighbors_handle(const int16_t *scan) {
   if (scan == vp9_default_scan_4x4) {
-    *pad = MAX_NEIGHBORS;
     return vp9_default_scan_4x4_neighbors;
   } else if (scan == vp9_row_scan_4x4) {
-    *pad = MAX_NEIGHBORS;
     return vp9_row_scan_4x4_neighbors;
   } else if (scan == vp9_col_scan_4x4) {
-    *pad = MAX_NEIGHBORS;
     return vp9_col_scan_4x4_neighbors;
   } else if (scan == vp9_default_scan_8x8) {
-    *pad = MAX_NEIGHBORS;
     return vp9_default_scan_8x8_neighbors;
   } else if (scan == vp9_row_scan_8x8) {
-    *pad = 2;
     return vp9_row_scan_8x8_neighbors;
   } else if (scan == vp9_col_scan_8x8) {
-    *pad = 2;
     return vp9_col_scan_8x8_neighbors;
   } else if (scan == vp9_default_scan_16x16) {
-    *pad = MAX_NEIGHBORS;
     return vp9_default_scan_16x16_neighbors;
   } else if (scan == vp9_row_scan_16x16) {
-    *pad = 2;
     return vp9_row_scan_16x16_neighbors;
   } else if (scan == vp9_col_scan_16x16) {
-    *pad = 2;
     return vp9_col_scan_16x16_neighbors;
-  } else if (scan == vp9_default_scan_32x32) {
-    *pad = MAX_NEIGHBORS;
-    return vp9_default_scan_32x32_neighbors;
   } else {
-    assert(0);
-    return NULL;
+    assert(scan == vp9_default_scan_32x32);
+    return vp9_default_scan_32x32_neighbors;
   }
 }
 

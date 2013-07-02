@@ -166,28 +166,14 @@ static int get_coef_band(const uint8_t * band_translate, int coef_index) {
 }
 
 #define MAX_NEIGHBORS 2
-static INLINE int get_coef_context(const int16_t *scan,
-                                   const int16_t *neighbors,
-                                   int nb_pad, uint8_t *token_cache,
-                                   int c, int l) {
-  int eob = l;
-  assert(nb_pad == MAX_NEIGHBORS);
-  if (c == eob) {
-    return 0;
-  } else {
-    int ctx;
-    assert(neighbors[MAX_NEIGHBORS * c + 0] >= 0);
-    if (neighbors[MAX_NEIGHBORS * c + 1] >= 0) {
-      ctx = (1 + token_cache[scan[neighbors[MAX_NEIGHBORS * c + 0]]] +
-             token_cache[scan[neighbors[MAX_NEIGHBORS * c + 1]]]) >> 1;
-    } else {
-      ctx = token_cache[scan[neighbors[MAX_NEIGHBORS * c + 0]]];
-    }
-    return ctx;
-  }
+static INLINE int get_coef_context(const int16_t *neighbors,
+                                   uint8_t *token_cache,
+                                   int c) {
+  return (1 + token_cache[neighbors[MAX_NEIGHBORS * c + 0]] +
+          token_cache[neighbors[MAX_NEIGHBORS * c + 1]]) >> 1;
 }
 
-const int16_t *vp9_get_coef_neighbors_handle(const int16_t *scan, int *pad);
+const int16_t *vp9_get_coef_neighbors_handle(const int16_t *scan);
 
 
 // 128 lists of probabilities are stored for the following ONE node probs:
