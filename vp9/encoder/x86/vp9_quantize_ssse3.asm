@@ -15,10 +15,10 @@ pw_1: times 8 dw 1
 
 SECTION .text
 
-INIT_XMM ssse3
-cglobal quantize_b, 0, 6, 15, coeff, ncoeff, skip, zbin, round, quant, \
-                              shift, qcoeff, dqcoeff, dequant, zbin_oq, \
-                              eob, scan, iscan
+%macro QUANTIZE_FN 1
+cglobal quantize_%1, 0, 6, 15, coeff, ncoeff, skip, zbin, round, quant, \
+                               shift, qcoeff, dqcoeff, dequant, zbin_oq, \
+                               eob, scan, iscan
   cmp                    dword skipm, 0
   jne .blank
 
@@ -57,6 +57,10 @@ cglobal quantize_b, 0, 6, 15, coeff, ncoeff, skip, zbin, round, quant, \
   mova                           m10, [  coeffq+ncoeffq*2+16] ; m10 = c[i]
   pabsw                           m6, m9                   ; m6 = abs(m9)
   pabsw                          m11, m10                  ; m11 = abs(m10)
+%ifidn %1, b_32x32
+  paddw                           m6, m6
+  paddw                          m11, m11
+%endif
   pcmpgtw                         m7, m6, m0               ; m7 = c[i] >= zbin
   punpckhqdq                      m0, m0
   pcmpgtw                        m12, m11, m0              ; m12 = c[i] >= zbin
@@ -77,9 +81,19 @@ cglobal quantize_b, 0, 6, 15, coeff, ncoeff, skip, zbin, round, quant, \
   pand                           m13, m12
   mova        [qcoeffq+ncoeffq*2+ 0], m8
   mova        [qcoeffq+ncoeffq*2+16], m13
+%ifidn %1, b_32x32
+  pabsw                           m8, m8
+  pabsw                          m13, m13
+%endif
   pmullw                          m8, m3                   ; dqc[i] = qc[i] * q
   punpckhqdq                      m3, m3
   pmullw                         m13, m3                   ; dqc[i] = qc[i] * q
+%ifidn %1, b_32x32
+  psrlw                           m8, 1
+  psrlw                          m13, 1
+  psignw                          m8, m9
+  psignw                         m13, m10
+%endif
   mova       [dqcoeffq+ncoeffq*2+ 0], m8
   mova       [dqcoeffq+ncoeffq*2+16], m13
   pcmpeqw                         m8, m5                   ; m8 = c[i] == 0
@@ -99,6 +113,10 @@ cglobal quantize_b, 0, 6, 15, coeff, ncoeff, skip, zbin, round, quant, \
   mova                           m10, [  coeffq+ncoeffq*2+16] ; m10 = c[i]
   pabsw                           m6, m9                   ; m6 = abs(m9)
   pabsw                          m11, m10                  ; m11 = abs(m10)
+%ifidn %1, b_32x32
+  paddw                           m6, m6
+  paddw                          m11, m11
+%endif
   pcmpgtw                         m7, m6, m0               ; m7 = c[i] >= zbin
   pcmpgtw                        m12, m11, m0              ; m12 = c[i] >= zbin
   paddw                           m6, m1                   ; m6 += round
@@ -115,8 +133,18 @@ cglobal quantize_b, 0, 6, 15, coeff, ncoeff, skip, zbin, round, quant, \
   pand                           m13, m12
   mova        [qcoeffq+ncoeffq*2+ 0], m14
   mova        [qcoeffq+ncoeffq*2+16], m13
+%ifidn %1, b_32x32
+  pabsw                          m14, m14
+  pabsw                          m13, m13
+%endif
   pmullw                         m14, m3                   ; dqc[i] = qc[i] * q
   pmullw                         m13, m3                   ; dqc[i] = qc[i] * q
+%ifidn %1, b_32x32
+  psrlw                          m14, 1
+  psrlw                          m13, 1
+  psignw                         m14, m9
+  psignw                         m13, m10
+%endif
   mova       [dqcoeffq+ncoeffq*2+ 0], m14
   mova       [dqcoeffq+ncoeffq*2+16], m13
   pcmpeqw                        m14, m5                   ; m14 = c[i] == 0
@@ -163,3 +191,8 @@ cglobal quantize_b, 0, 6, 15, coeff, ncoeff, skip, zbin, round, quant, \
   jl .blank_loop
   mov                    word [eobq], 0
   RET
+%endmacro
+
+INIT_XMM ssse3
+QUANTIZE_FN b
+QUANTIZE_FN b_32x32
