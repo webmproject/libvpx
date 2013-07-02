@@ -521,7 +521,7 @@ void vp9_first_pass(VP9_COMP *cpi) {
 
   xd->mode_info_context = cm->mi;
 
-  vp9_setup_block_dptrs(&x->e_mbd, cm->subsampling_x, cm->subsampling_y);
+  setup_block_dptrs(&x->e_mbd, cm->subsampling_x, cm->subsampling_y);
 
   vp9_frame_init_quantizer(cpi);
 
