@@ -134,14 +134,14 @@ class VP8CodecFactory : public CodecFactory {
 
 const libvpx_test::VP8CodecFactory kVP8;
 
-#define VP8_INSTANTIATE_TEST_CASE(test, params)\
+#define VP8_INSTANTIATE_TEST_CASE(test, ...)\
   INSTANTIATE_TEST_CASE_P(VP8, test, \
       ::testing::Combine( \
           ::testing::Values(static_cast<const libvpx_test::CodecFactory*>( \
               &libvpx_test::kVP8)), \
-          params))
+          __VA_ARGS__))
 #else
-#define VP8_INSTANTIATE_TEST_CASE(test, params)
+#define VP8_INSTANTIATE_TEST_CASE(test, ...)
 #endif  // CONFIG_VP8
 
 
@@ -216,14 +216,14 @@ class VP9CodecFactory : public CodecFactory {
 
 const libvpx_test::VP9CodecFactory kVP9;
 
-#define VP9_INSTANTIATE_TEST_CASE(test, params)\
+#define VP9_INSTANTIATE_TEST_CASE(test, ...)\
   INSTANTIATE_TEST_CASE_P(VP9, test, \
       ::testing::Combine( \
           ::testing::Values(static_cast<const libvpx_test::CodecFactory*>( \
                &libvpx_test::kVP9)), \
-          params))
+          __VA_ARGS__))
 #else
-#define VP9_INSTANTIATE_TEST_CASE(test, params)
+#define VP9_INSTANTIATE_TEST_CASE(test, ...)
 #endif  // CONFIG_VP9
 
 
