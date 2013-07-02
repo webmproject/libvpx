@@ -242,6 +242,10 @@ typedef struct {
   int adjust_partitioning_from_last_frame;
   int last_partitioning_redo_frequency;
   int disable_splitmv;
+  // Search the D27, D63, D117 and D153 modes
+  // only if the best intra mode so far is one
+  // of the two directional modes nearest to each.
+  int conditional_oblique_intramodes;
 } SPEED_FEATURES;
 
 enum BlockSize {
