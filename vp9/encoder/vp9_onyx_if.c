@@ -738,7 +738,9 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
                                           cpi->common.show_frame == 0);
       }
       if (speed == 2) {
-        sf->use_largest_txform        = 1;
+        sf->use_largest_txform        = !(cpi->common.frame_type == KEY_FRAME ||
+                                                  cpi->common.intra_only ||
+                                                  cpi->common.show_frame == 0);
         sf->adjust_thresholds_by_speed = 1;
         sf->less_rectangular_check  = 1;
         sf->comp_inter_joint_search_thresh = BLOCK_SIZE_TYPES;
