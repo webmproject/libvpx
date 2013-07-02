@@ -86,13 +86,13 @@ static MB_PREDICTION_MODE left_block_mode(const MODE_INFO *cur_mb, int b) {
     if (cur_mb->mbmi.ref_frame[0] != INTRA_FRAME) {
       return DC_PRED;
     } else if (cur_mb->mbmi.sb_type < BLOCK_SIZE_SB8X8) {
-      return ((cur_mb->bmi + 1 + b)->as_mode.first);
+      return ((cur_mb->bmi + 1 + b)->as_mode);
     } else {
       return cur_mb->mbmi.mode;
     }
   }
   assert(b == 1 || b == 3);
-  return (cur_mb->bmi + b - 1)->as_mode.first;
+  return (cur_mb->bmi + b - 1)->as_mode;
 }
 
 static MB_PREDICTION_MODE above_block_mode(const MODE_INFO *cur_mb,
@@ -104,13 +104,13 @@ static MB_PREDICTION_MODE above_block_mode(const MODE_INFO *cur_mb,
     if (cur_mb->mbmi.ref_frame[0] != INTRA_FRAME) {
       return DC_PRED;
     } else if (cur_mb->mbmi.sb_type < BLOCK_SIZE_SB8X8) {
-      return ((cur_mb->bmi + 2 + b)->as_mode.first);
+      return ((cur_mb->bmi + 2 + b)->as_mode);
     } else {
       return cur_mb->mbmi.mode;
     }
   }
 
-  return (cur_mb->bmi + b - 2)->as_mode.first;
+  return (cur_mb->bmi + b - 2)->as_mode;
 }
 
 #endif  // VP9_COMMON_VP9_FINDNEARMV_H_

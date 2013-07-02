@@ -149,7 +149,7 @@ static void decode_block_intra(int plane, int block, BLOCK_SIZE_TYPE bsize,
 
   if (plane == 0 && mi->mbmi.sb_type < BLOCK_SIZE_SB8X8) {
     assert(bsize == BLOCK_SIZE_SB8X8);
-    b_mode = mi->bmi[raster_block].as_mode.first;
+    b_mode = mi->bmi[raster_block].as_mode;
   } else {
     b_mode = mode;
   }
