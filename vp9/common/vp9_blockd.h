@@ -509,8 +509,21 @@ static INLINE TX_TYPE get_tx_type_16x16(const MACROBLOCKD *xd) {
   return  mode2txfm_map[xd->mode_info_context->mbmi.mode];
 }
 
-void vp9_setup_block_dptrs(MACROBLOCKD *xd,
-                           int subsampling_x, int subsampling_y);
+static void setup_block_dptrs(MACROBLOCKD *xd, int ss_x, int ss_y) {
+  int i;
+
+  for (i = 0; i < MAX_MB_PLANE; i++) {
+    xd->plane[i].plane_type = i ? PLANE_TYPE_UV : PLANE_TYPE_Y_WITH_DC;
+    xd->plane[i].subsampling_x = i ? ss_x : 0;
+    xd->plane[i].subsampling_y = i ? ss_y : 0;
+  }
+#if CONFIG_ALPHA
+  // TODO(jkoleszar): Using the Y w/h for now
+  mb->plane[3].subsampling_x = 0;
+  mb->plane[3].subsampling_y = 0;
+#endif
+}
+
 
 static TX_SIZE get_uv_tx_size(const MB_MODE_INFO *mbmi) {
   const TX_SIZE size = mbmi->txfm_size;

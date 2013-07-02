@@ -1649,7 +1649,7 @@ static void init_encode_frame_mb_context(VP9_COMP *cpi) {
                    0, 0, NULL, NULL );
   setup_dst_planes(xd, &cm->yv12_fb[cm->new_fb_idx], 0, 0);
 
-  vp9_setup_block_dptrs(&x->e_mbd, cm->subsampling_x, cm->subsampling_y);
+  setup_block_dptrs(&x->e_mbd, cm->subsampling_x, cm->subsampling_y);
 
   xd->mode_info_context->mbmi.mode = DC_PRED;
   xd->mode_info_context->mbmi.uv_mode = DC_PRED;

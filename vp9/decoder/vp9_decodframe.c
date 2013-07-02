@@ -1009,7 +1009,7 @@ int vp9_decode_frame(VP9D_COMP *pbi, const uint8_t **p_data_end) {
     CHECK_MEM_ERROR(pc, pc->last_frame_seg_map,
                     vpx_calloc((pc->mi_rows * pc->mi_cols), 1));
 
-  vp9_setup_block_dptrs(xd, pc->subsampling_x, pc->subsampling_y);
+  setup_block_dptrs(xd, pc->subsampling_x, pc->subsampling_y);
 
   // clear out the coeff buffer
   for (i = 0; i < MAX_MB_PLANE; ++i)
