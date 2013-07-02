@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAbn//3IY\u003d",
+        "filename": "vp9/encoder/x86/vp9_quantize_ssse3.asm",
+        "patchSetId": 3
+      },
+      "lineNbr": 122,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2013-07-02T04:37:34Z",
+      "side": 1,
+      "message": "pmovmskb is very slow. You should try to \u0027or\u0027 with mmx registers first and do only one pmovmskb:\n\npor m12, m7\npmovmskb r6, m12\ntest r6, r6\njz .skip_iter\n\nfor instance.",
+      "revId": "90baa44690b198a785a8e08a90d27a73e5ad1894",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
