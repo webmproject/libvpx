@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAbn//24E\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 781,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2013-07-02T14:58:34Z",
+      "side": 1,
+      "message": "do you need both?  isn\u0027t allow_32x32 only set if max_txfm_size \u003e32",
+      "revId": "5d3dfe8612320d9f690530a86da6dff1c29f4ee7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
