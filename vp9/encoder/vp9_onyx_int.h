@@ -233,6 +233,8 @@ typedef struct {
   BLOCK_SIZE_TYPE greater_than_block_size;
   int use_partitions_less_than;
   BLOCK_SIZE_TYPE less_than_block_size;
+  int adjust_partitioning_from_last_frame;
+  int last_partitioning_redo_frequency;
 } SPEED_FEATURES;
 
 enum BlockSize {

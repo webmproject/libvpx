@@ -545,52 +545,49 @@ static void set_rd_speed_thresholds(VP9_COMP *cpi, int mode, int speed) {
   for (i = 0; i < MAX_MODES; ++i)
     sf->thresh_mult[i] = mode == 0 ? -500 : 0;
 
-  sf->thresh_mult[THR_ZEROMV   ] = 0;
-  sf->thresh_mult[THR_ZEROG    ] = 0;
-  sf->thresh_mult[THR_ZEROA    ] = 0;
+  sf->thresh_mult[THR_ZEROMV] = 0;
+  sf->thresh_mult[THR_ZEROG] = 0;
+  sf->thresh_mult[THR_ZEROA] = 0;
 
   sf->thresh_mult[THR_NEARESTMV] = 0;
-  sf->thresh_mult[THR_NEARESTG ] = 0;
-  sf->thresh_mult[THR_NEARESTA ] = 0;
+  sf->thresh_mult[THR_NEARESTG] = 0;
+  sf->thresh_mult[THR_NEARESTA] = 0;
 
-  sf->thresh_mult[THR_NEARMV   ] += speed_multiplier * 1000;
-  sf->thresh_mult[THR_NEARG    ] += speed_multiplier * 1000;
-  sf->thresh_mult[THR_NEARA    ] += speed_multiplier * 1000;
+  sf->thresh_mult[THR_NEARMV] += speed_multiplier * 1000;
+  sf->thresh_mult[THR_NEARG] += speed_multiplier * 1000;
+  sf->thresh_mult[THR_NEARA] += speed_multiplier * 1000;
 
-  sf->thresh_mult[THR_DC       ] += speed_multiplier * 1000;
-  sf->thresh_mult[THR_TM       ] += speed_multiplier * 1000;
-  sf->thresh_mult[THR_V_PRED   ] += speed_multiplier * 1500;
-  sf->thresh_mult[THR_H_PRED   ] += speed_multiplier * 1500;
-  sf->thresh_mult[THR_D45_PRED ] += speed_multiplier * 2000;
+  sf->thresh_mult[THR_DC] += speed_multiplier * 1000;
+  sf->thresh_mult[THR_TM] += speed_multiplier * 1000;
+  sf->thresh_mult[THR_V_PRED] += speed_multiplier * 1500;
+  sf->thresh_mult[THR_H_PRED] += speed_multiplier * 1500;
+  sf->thresh_mult[THR_D45_PRED] += speed_multiplier * 2000;
   sf->thresh_mult[THR_D135_PRED] += speed_multiplier * 2000;
   sf->thresh_mult[THR_D117_PRED] += speed_multiplier * 2000;
   sf->thresh_mult[THR_D153_PRED] += speed_multiplier * 2000;
-  sf->thresh_mult[THR_D27_PRED ] += speed_multiplier * 2000;
-  sf->thresh_mult[THR_D63_PRED ] += speed_multiplier * 2000;
+  sf->thresh_mult[THR_D27_PRED] += speed_multiplier * 2000;
+  sf->thresh_mult[THR_D63_PRED] += speed_multiplier * 2000;
 
-  sf->thresh_mult[THR_NEWMV    ] += new_motion_multiplier * 1000;
-  sf->thresh_mult[THR_NEWG     ] += new_motion_multiplier * 1000;
-  sf->thresh_mult[THR_NEWA     ] += new_motion_multiplier * 1000;
+  sf->thresh_mult[THR_NEWMV] += new_motion_multiplier * 1000;
+  sf->thresh_mult[THR_NEWG] += new_motion_multiplier * 1000;
+  sf->thresh_mult[THR_NEWA] += new_motion_multiplier * 1000;
 
-  sf->thresh_mult[THR_COMP_ZEROLA   ] += speed_multiplier * 1500;
-  sf->thresh_mult[THR_COMP_ZEROGA   ] += speed_multiplier * 1500;
+  sf->thresh_mult[THR_COMP_ZEROLA] += speed_multiplier * 1500;
+  sf->thresh_mult[THR_COMP_ZEROGA] += speed_multiplier * 1500;
 
   sf->thresh_mult[THR_COMP_NEARESTLA] += speed_multiplier * 1500;
   sf->thresh_mult[THR_COMP_NEARESTGA] += speed_multiplier * 1500;
 
-  sf->thresh_mult[THR_COMP_NEARLA   ] += speed_multiplier * 1500;
-  sf->thresh_mult[THR_COMP_NEARGA   ] += speed_multiplier * 1500;
+  sf->thresh_mult[THR_COMP_NEARLA] += speed_multiplier * 1500;
+  sf->thresh_mult[THR_COMP_NEARGA] += speed_multiplier * 1500;
 
-  sf->thresh_mult[THR_COMP_NEWLA    ] += new_motion_multiplier * 2000;
-  sf->thresh_mult[THR_COMP_NEWGA    ] += new_motion_multiplier * 2000;
+  sf->thresh_mult[THR_COMP_NEWLA] += new_motion_multiplier * 2000;
+  sf->thresh_mult[THR_COMP_NEWGA] += new_motion_multiplier * 2000;
 
-  sf->thresh_mult[THR_B_PRED   ] += speed_multiplier * 2500;
+  sf->thresh_mult[THR_B_PRED] += speed_multiplier * 2500;
 
-  sf->thresh_mult[THR_SPLITMV  ] += new_motion_multiplier * 2500;
-  sf->thresh_mult[THR_SPLITG   ] += new_motion_multiplier * 2500;
-  sf->thresh_mult[THR_SPLITA   ] += new_motion_multiplier * 2500;
-  sf->thresh_mult[THR_COMP_SPLITLA  ] += new_motion_multiplier * 4500;
-  sf->thresh_mult[THR_COMP_SPLITGA  ] += new_motion_multiplier * 4500;
+  sf->thresh_mult[THR_SPLITMV] += new_motion_multiplier * 2500;
+  sf->thresh_mult[THR_SPLITG] += new_motion_multiplier * 2500;
 
   if (cpi->sf.skip_lots_of_modes) {
     for (i = 0; i < MAX_MODES; ++i)
@@ -660,6 +657,7 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
   int mode = cpi->compressor_speed;
   int speed = cpi->speed;
   int i;
+
   // Only modes 0 and 1 supported for now in experimental code basae
   if (mode > 1)
     mode = 1;
@@ -698,6 +696,7 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
   sf->use_8tap_always = 0;
   sf->use_avoid_tested_higherror = 0;
   sf->skip_lots_of_modes = 0;
+  sf->adjust_thresholds_by_speed = 0;
   sf->partition_by_variance = 0;
   sf->use_one_partition_size_always = 0;
   sf->less_rectangular_check = 0;
@@ -705,6 +704,8 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
   sf->less_than_block_size = BLOCK_SIZE_MB16X16;
   sf->use_partitions_greater_than = 0;
   sf->greater_than_block_size = BLOCK_SIZE_SB8X8;
+  sf->adjust_partitioning_from_last_frame = 0;
+  sf->last_partitioning_redo_frequency = 4;
 
 #if CONFIG_MULTIPLE_ARF
   // Switch segmentation off.
@@ -737,46 +738,49 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
                                           cpi->common.show_frame == 0);
       }
       if (speed == 2) {
-        sf->use_largest_txform        = !(cpi->common.frame_type == KEY_FRAME ||
-                                          cpi->common.intra_only ||
-                                          cpi->common.show_frame == 0);
+        sf->use_largest_txform        = 1;
         sf->adjust_thresholds_by_speed = 1;
         sf->less_rectangular_check  = 1;
         sf->comp_inter_joint_search_thresh = BLOCK_SIZE_TYPES;
         sf->reduce_first_step_size = 1;
         sf->optimize_coefficients = 0;
         sf->use_lastframe_partitioning = 1;
+        sf->adjust_partitioning_from_last_frame = 1;
+        sf->last_partitioning_redo_frequency = 3;
       }
       if (speed == 3) {
         sf->comp_inter_joint_search_thresh = BLOCK_SIZE_TYPES;
         sf->partition_by_variance = 1;
-        sf->reduce_first_step_size = 1;
       }
       if (speed == 4) {
-        sf->reduce_first_step_size = 1;
         sf->comp_inter_joint_search_thresh = BLOCK_SIZE_TYPES;
         sf->use_one_partition_size_always = 1;
         sf->always_this_block_size = BLOCK_SIZE_MB16X16;
       }
-/*      if (speed == 2) {
-        sf->reduce_first_step_size = 0;
+      /*
+      if (speed == 2) {
+        sf->first_step = 0;
         sf->comp_inter_joint_search_thresh = BLOCK_SIZE_SB8X8;
         sf->use_partitions_less_than = 1;
         sf->less_than_block_size = BLOCK_SIZE_MB16X16;
       }
       if (speed == 3) {
-        sf->reduce_first_step_size = 0;
+        sf->first_step = 0;
         sf->comp_inter_joint_search_thresh = BLOCK_SIZE_SB8X8;
         sf->use_partitions_greater_than = 1;
         sf->greater_than_block_size = BLOCK_SIZE_SB8X8;
-      }*/
+      }
+      */
 
      break;
 
   }; /* switch */
 
   // Set rd thresholds based on mode and speed setting
-  set_rd_speed_thresholds(cpi, mode, speed);
+  if (cpi->sf.adjust_thresholds_by_speed)
+    set_rd_speed_thresholds(cpi, mode, speed);
+  else
+    set_rd_speed_thresholds(cpi, mode, 0);
 
   // Slow quant, dct and trellis not worthwhile for first pass
   // so make sure they are always turned off.
@@ -3430,7 +3434,7 @@ static void Pass2Encode(VP9_COMP *cpi, unsigned long *size,
     vp9_second_pass(cpi);
 
   encode_frame_to_data_rate(cpi, size, dest, frame_flags);
-  //vp9_print_modes_and_motion_vectors(&cpi->common, "encode.stt");
+  // vp9_print_modes_and_motion_vectors(&cpi->common, "encode.stt");
 #ifdef DISABLE_RC_LONG_TERM_MEM
   cpi->twopass.bits_left -=  cpi->this_frame_target;
 #else
