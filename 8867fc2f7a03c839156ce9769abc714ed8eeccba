@@ -1,0 +1,89 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAbn//3F8\u003d",
+        "filename": "vp8/encoder/firstpass.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 2311,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-07-02T06:08:17Z",
+      "side": 1,
+      "message": "might be ok, but some of these calculations were rolling over, unintentionally, with larger frame sizes iirc.",
+      "revId": "8867fc2f7a03c839156ce9769abc714ed8eeccba",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAbn//3F0\u003d",
+        "filename": "vp9/encoder/vp9_bitstream.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1594,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-07-02T06:08:17Z",
+      "side": 1,
+      "message": "this function is really varied in its size use: we go from size_t -\u003e int here then later int -\u003e unsigned long on the return; it\u0027d be better to rationalize the types",
+      "revId": "8867fc2f7a03c839156ce9769abc714ed8eeccba",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAbn//3Fw\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 941,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-07-02T06:08:17Z",
+      "side": 1,
+      "message": "this should be wrapped in ()s as the calculation will still be promoted to int64",
+      "revId": "8867fc2f7a03c839156ce9769abc714ed8eeccba",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAbn//3Fs\u003d",
+        "filename": "vp9/encoder/vp9_onyx_if.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1145,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-07-02T06:08:17Z",
+      "side": 1,
+      "message": "these should be indented 4 spaces",
+      "revId": "8867fc2f7a03c839156ce9769abc714ed8eeccba",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAbn//3Fo\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1933,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-07-02T06:08:17Z",
+      "side": 1,
+      "message": "no space after \u0027(int)\u0027",
+      "revId": "8867fc2f7a03c839156ce9769abc714ed8eeccba",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
