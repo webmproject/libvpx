@@ -536,9 +536,7 @@ static void set_default_lf_deltas(VP9_COMP *cpi) {
 
 static void set_rd_speed_thresholds(VP9_COMP *cpi, int mode, int speed) {
   SPEED_FEATURES *sf = &cpi->sf;
-  int speed_multiplier = (cpi->sf.adjust_thresholds_by_speed) ? speed + 1 : 1;
-  int new_motion_multiplier = speed_multiplier *
-                              (sf->new_motion_thresh_factor + 1);
+  int speed_multiplier = speed + 1;
   int i;
 
   // Set baseline threshold values
@@ -557,20 +555,26 @@ static void set_rd_speed_thresholds(VP9_COMP *cpi, int mode, int speed) {
   sf->thresh_mult[THR_NEARG] += speed_multiplier * 1000;
   sf->thresh_mult[THR_NEARA] += speed_multiplier * 1000;
 
-  sf->thresh_mult[THR_DC] += speed_multiplier * 1000;
+  sf->thresh_mult[THR_DC       ] = 0;
   sf->thresh_mult[THR_TM] += speed_multiplier * 1000;
-  sf->thresh_mult[THR_V_PRED] += speed_multiplier * 1500;
-  sf->thresh_mult[THR_H_PRED] += speed_multiplier * 1500;
-  sf->thresh_mult[THR_D45_PRED] += speed_multiplier * 2000;
-  sf->thresh_mult[THR_D135_PRED] += speed_multiplier * 2000;
-  sf->thresh_mult[THR_D117_PRED] += speed_multiplier * 2000;
-  sf->thresh_mult[THR_D153_PRED] += speed_multiplier * 2000;
-  sf->thresh_mult[THR_D27_PRED] += speed_multiplier * 2000;
-  sf->thresh_mult[THR_D63_PRED] += speed_multiplier * 2000;
+  sf->thresh_mult[THR_V_PRED   ] += speed_multiplier * 1000;
+  sf->thresh_mult[THR_H_PRED   ] += speed_multiplier * 1000;
+  sf->thresh_mult[THR_D45_PRED ] += speed_multiplier * 1500;
+  sf->thresh_mult[THR_D135_PRED] += speed_multiplier * 1500;
+  sf->thresh_mult[THR_D117_PRED] += speed_multiplier * 1500;
+  sf->thresh_mult[THR_D153_PRED] += speed_multiplier * 1500;
+  sf->thresh_mult[THR_D27_PRED ] += speed_multiplier * 1500;
+  sf->thresh_mult[THR_D63_PRED ] += speed_multiplier * 1500;
 
-  sf->thresh_mult[THR_NEWMV] += new_motion_multiplier * 1000;
-  sf->thresh_mult[THR_NEWG] += new_motion_multiplier * 1000;
-  sf->thresh_mult[THR_NEWA] += new_motion_multiplier * 1000;
+  sf->thresh_mult[THR_B_PRED   ] += speed_multiplier * 2500;
+
+  sf->thresh_mult[THR_NEWMV    ] += speed_multiplier * 1000;
+  sf->thresh_mult[THR_NEWG     ] += speed_multiplier * 1000;
+  sf->thresh_mult[THR_NEWA     ] += speed_multiplier * 1000;
+
+  sf->thresh_mult[THR_SPLITMV  ] += speed_multiplier * 2500;
+  sf->thresh_mult[THR_SPLITG   ] += speed_multiplier * 2500;
+  sf->thresh_mult[THR_SPLITA   ] += speed_multiplier * 2500;
 
   sf->thresh_mult[THR_COMP_ZEROLA] += speed_multiplier * 1500;
   sf->thresh_mult[THR_COMP_ZEROGA] += speed_multiplier * 1500;
@@ -581,13 +585,11 @@ static void set_rd_speed_thresholds(VP9_COMP *cpi, int mode, int speed) {
   sf->thresh_mult[THR_COMP_NEARLA] += speed_multiplier * 1500;
   sf->thresh_mult[THR_COMP_NEARGA] += speed_multiplier * 1500;
 
-  sf->thresh_mult[THR_COMP_NEWLA] += new_motion_multiplier * 2000;
-  sf->thresh_mult[THR_COMP_NEWGA] += new_motion_multiplier * 2000;
+  sf->thresh_mult[THR_COMP_NEWLA    ] += speed_multiplier * 2000;
+  sf->thresh_mult[THR_COMP_NEWGA    ] += speed_multiplier * 2000;
 
-  sf->thresh_mult[THR_B_PRED] += speed_multiplier * 2500;
-
-  sf->thresh_mult[THR_SPLITMV] += new_motion_multiplier * 2500;
-  sf->thresh_mult[THR_SPLITG] += new_motion_multiplier * 2500;
+  sf->thresh_mult[THR_COMP_SPLITLA  ] += speed_multiplier * 4500;
+  sf->thresh_mult[THR_COMP_SPLITGA  ] += speed_multiplier * 4500;
 
   if (cpi->sf.skip_lots_of_modes) {
     for (i = 0; i < MAX_MODES; ++i)
@@ -688,9 +690,7 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
   sf->auto_mv_step_size = 0;
   sf->max_step_search_steps = MAX_MVSEARCH_STEPS;
   sf->comp_inter_joint_search_thresh = BLOCK_SIZE_AB4X4;
-  sf->adpative_rd_thresh = 0;
-  sf->adjust_thresholds_by_speed = 0;
-  sf->new_motion_thresh_factor = 0;
+  sf->adaptive_rd_thresh = 0;
   sf->use_lastframe_partitioning = 0;
   sf->use_largest_txform = 0;
   sf->use_8tap_always = 0;
@@ -726,12 +726,13 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
 #else
       sf->static_segmentation = 0;
 #endif
-      sf->use_avoid_tested_higherror = 1;
+      sf->comp_inter_joint_search_thresh = BLOCK_SIZE_MB16X16;
       sf->auto_mv_step_size = 1;
-      sf->adpative_rd_thresh = 1;
+      sf->use_avoid_tested_higherror = 1;
+      sf->adaptive_rd_thresh = 1;
+
       if (speed == 1) {
         sf->comp_inter_joint_search_thresh = BLOCK_SIZE_TYPES;
-        sf->new_motion_thresh_factor = 1;
         sf->less_rectangular_check  = 1;
         sf->use_largest_txform        = !(cpi->common.frame_type == KEY_FRAME ||
                                           cpi->common.intra_only ||

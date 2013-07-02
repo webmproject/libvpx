@@ -54,20 +54,20 @@ DECLARE_ALIGNED(16, extern const uint8_t,
 
 const MODE_DEFINITION vp9_mode_order[MAX_MODES] = {
   {ZEROMV,    LAST_FRAME,   NONE},
+  {DC_PRED,   INTRA_FRAME,  NONE},
+
   {NEARESTMV, LAST_FRAME,   NONE},
   {NEARMV,    LAST_FRAME,   NONE},
-
-  {ZEROMV,    ALTREF_FRAME, NONE},
-  {NEARESTMV, ALTREF_FRAME, NONE},
 
   {ZEROMV,    GOLDEN_FRAME, NONE},
   {NEARESTMV, GOLDEN_FRAME, NONE},
 
+  {ZEROMV,    ALTREF_FRAME, NONE},
+  {NEARESTMV, ALTREF_FRAME, NONE},
+
   {NEARMV,    GOLDEN_FRAME, NONE},
   {NEARMV,    ALTREF_FRAME, NONE},
 
-  {DC_PRED,   INTRA_FRAME,  NONE},
-  {TM_PRED,   INTRA_FRAME,  NONE},
   {V_PRED,    INTRA_FRAME,  NONE},
   {H_PRED,    INTRA_FRAME,  NONE},
   {D45_PRED,  INTRA_FRAME,  NONE},
@@ -77,9 +77,17 @@ const MODE_DEFINITION vp9_mode_order[MAX_MODES] = {
   {D27_PRED,  INTRA_FRAME,  NONE},
   {D63_PRED,  INTRA_FRAME,  NONE},
 
+  {TM_PRED,   INTRA_FRAME,  NONE},
+
   {NEWMV,     LAST_FRAME,   NONE},
   {NEWMV,     GOLDEN_FRAME, NONE},
   {NEWMV,     ALTREF_FRAME, NONE},
+
+  {SPLITMV,   LAST_FRAME,   NONE},
+  {SPLITMV,   GOLDEN_FRAME, NONE},
+  {SPLITMV,   ALTREF_FRAME, NONE},
+
+  {I4X4_PRED, INTRA_FRAME,  NONE},
 
   /* compound prediction modes */
   {ZEROMV,    LAST_FRAME,   ALTREF_FRAME},
@@ -93,12 +101,8 @@ const MODE_DEFINITION vp9_mode_order[MAX_MODES] = {
   {NEWMV,     LAST_FRAME,   ALTREF_FRAME},
   {NEWMV,     GOLDEN_FRAME, ALTREF_FRAME},
 
-  {SPLITMV,   LAST_FRAME,   NONE},
-  {SPLITMV,   GOLDEN_FRAME, NONE},
-  {SPLITMV,   ALTREF_FRAME, NONE},
   {SPLITMV,   LAST_FRAME,   ALTREF_FRAME},
   {SPLITMV,   GOLDEN_FRAME, ALTREF_FRAME},
-  {I4X4_PRED, INTRA_FRAME,  NONE},
 };
 
 // The baseline rd thresholds for breaking out of the rd loop for
@@ -223,7 +227,7 @@ void vp9_initialize_rd_consts(VP9_COMP *cpi, int qindex) {
         }
         cpi->rd_baseline_thresh[bsize][i] = cpi->rd_threshes[bsize][i];
 
-        if (cpi->sf.adpative_rd_thresh)
+        if (cpi->sf.adaptive_rd_thresh)
           cpi->rd_thresh_freq_fact[bsize][i] = MAX_RD_THRESH_FREQ_FACT;
         else
           cpi->rd_thresh_freq_fact[bsize][i] = BASE_RD_THRESH_FREQ_FACT;
@@ -247,7 +251,7 @@ void vp9_initialize_rd_consts(VP9_COMP *cpi, int qindex) {
         }
         cpi->rd_baseline_thresh[bsize][i] = cpi->rd_threshes[bsize][i];
 
-        if (cpi->sf.adpative_rd_thresh)
+        if (cpi->sf.adaptive_rd_thresh)
           cpi->rd_thresh_freq_fact[bsize][i] = MAX_RD_THRESH_FREQ_FACT;
         else
           cpi->rd_thresh_freq_fact[bsize][i] = BASE_RD_THRESH_FREQ_FACT;
@@ -3284,16 +3288,16 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
   // choice for the current partition. It may well be better to keep a scaled
   // best rd so far value and update rd_thresh_freq_fact based on the mode/size
   // combination that wins out.
-  if (cpi->sf.adpative_rd_thresh) {
+  if (cpi->sf.adaptive_rd_thresh) {
     for (mode_index = 0; mode_index < MAX_MODES; ++mode_index) {
       if (mode_index == best_mode_index) {
         cpi->rd_thresh_freq_fact[bsize][mode_index] = BASE_RD_THRESH_FREQ_FACT;
       } else {
         cpi->rd_thresh_freq_fact[bsize][mode_index] += MAX_RD_THRESH_FREQ_INC;
         if (cpi->rd_thresh_freq_fact[bsize][mode_index] >
-            (cpi->sf.adpative_rd_thresh * MAX_RD_THRESH_FREQ_FACT)) {
+            (cpi->sf.adaptive_rd_thresh * MAX_RD_THRESH_FREQ_FACT)) {
           cpi->rd_thresh_freq_fact[bsize][mode_index] =
-            cpi->sf.adpative_rd_thresh * MAX_RD_THRESH_FREQ_FACT;
+            cpi->sf.adaptive_rd_thresh * MAX_RD_THRESH_FREQ_FACT;
         }
       }
     }
