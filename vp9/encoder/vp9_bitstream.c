@@ -213,6 +213,18 @@ static void write_selected_txfm_size(const VP9_COMP *cpi, TX_SIZE tx_size,
   }
 }
 
+static int write_skip_coeff(const VP9_COMP *cpi, int segment_id, MODE_INFO *m,
+                            vp9_writer *w) {
+  const MACROBLOCKD *const xd = &cpi->mb.e_mbd;
+  if (vp9_segfeature_active(xd, segment_id, SEG_LVL_SKIP)) {
+    return 1;
+  } else {
+    const int skip_coeff = m->mbmi.mb_skip_coeff;
+    vp9_write(w, skip_coeff, vp9_get_pred_prob(&cpi->common, xd, PRED_MBSKIP));
+    return skip_coeff;
+  }
+}
+
 void vp9_update_skip_probs(VP9_COMP *cpi, vp9_writer *bc) {
   VP9_COMMON *const pc = &cpi->common;
   int k;
@@ -429,13 +441,7 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, MODE_INFO *m,
     }
   }
 
-  if (vp9_segfeature_active(xd, segment_id, SEG_LVL_SKIP)) {
-    skip_coeff = 1;
-  } else {
-    skip_coeff = m->mbmi.mb_skip_coeff;
-    vp9_write(bc, skip_coeff,
-              vp9_get_pred_prob(pc, xd, PRED_MBSKIP));
-  }
+  skip_coeff = write_skip_coeff(cpi, segment_id, m, bc);
 
   if (!vp9_segfeature_active(xd, segment_id, SEG_LVL_REF_FRAME))
     vp9_write(bc, rf != INTRA_FRAME,
@@ -547,17 +553,11 @@ static void write_mb_modes_kf(const VP9_COMP *cpi,
   const int ym = m->mbmi.mode;
   const int mis = c->mode_info_stride;
   const int segment_id = m->mbmi.segment_id;
-  int skip_coeff;
 
   if (xd->update_mb_segmentation_map)
     write_segment_id(bc, xd, m->mbmi.segment_id);
 
-  if (vp9_segfeature_active(xd, segment_id, SEG_LVL_SKIP)) {
-    skip_coeff = 1;
-  } else {
-    skip_coeff = m->mbmi.mb_skip_coeff;
-    vp9_write(bc, skip_coeff, vp9_get_pred_prob(c, xd, PRED_MBSKIP));
-  }
+  write_skip_coeff(cpi, segment_id, m, bc);
 
   if (m->mbmi.sb_type >= BLOCK_SIZE_SB8X8 && c->txfm_mode == TX_MODE_SELECT)
     write_selected_txfm_size(cpi, m->mbmi.txfm_size, m->mbmi.sb_type, bc);
