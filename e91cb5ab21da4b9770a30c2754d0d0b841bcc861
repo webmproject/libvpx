@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAbn//1Ek\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 11
+      },
+      "lineNbr": 730,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2013-07-03T17:06:18Z",
+      "side": 1,
+      "message": "better to remove this parameter",
+      "revId": "e91cb5ab21da4b9770a30c2754d0d0b841bcc861",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAbn//1FQ\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 11
+      },
+      "lineNbr": 799,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2013-07-03T17:06:18Z",
+      "side": 1,
+      "message": "can we remove this parameter and get it from d-\u003emode_info_context-\u003ebmi[block].as_mode.filterbit inside the function?",
+      "revId": "e91cb5ab21da4b9770a30c2754d0d0b841bcc861",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAbn//1Eg\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 11
+      },
+      "lineNbr": 858,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2013-07-03T17:06:18Z",
+      "side": 1,
+      "message": "ditto",
+      "revId": "e91cb5ab21da4b9770a30c2754d0d0b841bcc861",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
