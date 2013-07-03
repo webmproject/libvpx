@@ -16,6 +16,24 @@
       "revId": "90baa44690b198a785a8e08a90d27a73e5ad1894",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAbn//1tI\u003d",
+        "filename": "vp9/encoder/x86/vp9_quantize_ssse3.asm",
+        "patchSetId": 3
+      },
+      "lineNbr": 122,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-07-03T00:34:45Z",
+      "side": 1,
+      "message": "I tried this (and it\u0027s a good idea!), and it\u0027s actually slower (by about 25 cycles). I\u0027m not quite sure why, but I suppose that pmovmskb actually pipelines, so even though the access to each GPR would block, that doesn\u0027t halt the second transfer from XMM to GPR to start anyway, and then the block time is essentially identical regardless of how many you do? Not sure.",
+      "parentUuid": "AAAAbn//3IY\u003d",
+      "revId": "90baa44690b198a785a8e08a90d27a73e5ad1894",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
