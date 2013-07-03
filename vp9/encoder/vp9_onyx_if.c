@@ -543,20 +543,20 @@ static void set_rd_speed_thresholds(VP9_COMP *cpi, int mode, int speed) {
   for (i = 0; i < MAX_MODES; ++i)
     sf->thresh_mult[i] = mode == 0 ? -500 : 0;
 
-  sf->thresh_mult[THR_ZEROMV   ] = 0;
-  sf->thresh_mult[THR_ZEROG    ] = 0;
-  sf->thresh_mult[THR_ZEROA    ] = 0;
+  sf->thresh_mult[THR_ZEROMV] = 0;
+  sf->thresh_mult[THR_ZEROG] = 0;
+  sf->thresh_mult[THR_ZEROA] = 0;
 
   sf->thresh_mult[THR_NEARESTMV] = 0;
-  sf->thresh_mult[THR_NEARESTG ] = 0;
-  sf->thresh_mult[THR_NEARESTA ] = 0;
+  sf->thresh_mult[THR_NEARESTG] = 0;
+  sf->thresh_mult[THR_NEARESTA] = 0;
 
-  sf->thresh_mult[THR_NEARMV   ] += speed_multiplier * 1000;
-  sf->thresh_mult[THR_NEARG    ] += speed_multiplier * 1000;
-  sf->thresh_mult[THR_NEARA    ] += speed_multiplier * 1000;
+  sf->thresh_mult[THR_NEARMV] += speed_multiplier * 1000;
+  sf->thresh_mult[THR_NEARG] += speed_multiplier * 1000;
+  sf->thresh_mult[THR_NEARA] += speed_multiplier * 1000;
 
   sf->thresh_mult[THR_DC       ] = 0;
-  sf->thresh_mult[THR_TM       ] += speed_multiplier * 1000;
+  sf->thresh_mult[THR_TM] += speed_multiplier * 1000;
   sf->thresh_mult[THR_V_PRED   ] += speed_multiplier * 1000;
   sf->thresh_mult[THR_H_PRED   ] += speed_multiplier * 1000;
   sf->thresh_mult[THR_D45_PRED ] += speed_multiplier * 1500;
@@ -576,14 +576,14 @@ static void set_rd_speed_thresholds(VP9_COMP *cpi, int mode, int speed) {
   sf->thresh_mult[THR_SPLITG   ] += speed_multiplier * 2500;
   sf->thresh_mult[THR_SPLITA   ] += speed_multiplier * 2500;
 
-  sf->thresh_mult[THR_COMP_ZEROLA   ] += speed_multiplier * 1500;
-  sf->thresh_mult[THR_COMP_ZEROGA   ] += speed_multiplier * 1500;
+  sf->thresh_mult[THR_COMP_ZEROLA] += speed_multiplier * 1500;
+  sf->thresh_mult[THR_COMP_ZEROGA] += speed_multiplier * 1500;
 
   sf->thresh_mult[THR_COMP_NEARESTLA] += speed_multiplier * 1500;
   sf->thresh_mult[THR_COMP_NEARESTGA] += speed_multiplier * 1500;
 
-  sf->thresh_mult[THR_COMP_NEARLA   ] += speed_multiplier * 1500;
-  sf->thresh_mult[THR_COMP_NEARGA   ] += speed_multiplier * 1500;
+  sf->thresh_mult[THR_COMP_NEARLA] += speed_multiplier * 1500;
+  sf->thresh_mult[THR_COMP_NEARGA] += speed_multiplier * 1500;
 
   sf->thresh_mult[THR_COMP_NEWLA    ] += speed_multiplier * 2000;
   sf->thresh_mult[THR_COMP_NEWGA    ] += speed_multiplier * 2000;
@@ -652,6 +652,15 @@ static void set_rd_speed_thresholds(VP9_COMP *cpi, int mode, int speed) {
     sf->thresh_mult[THR_COMP_NEWGA    ] = INT_MAX;
     sf->thresh_mult[THR_COMP_SPLITGA  ] = INT_MAX;
   }
+
+  if (sf->disable_splitmv == 1) {
+    sf->thresh_mult[THR_SPLITMV  ] = INT_MAX;
+    sf->thresh_mult[THR_SPLITG   ] = INT_MAX;
+    sf->thresh_mult[THR_SPLITA   ] = INT_MAX;
+
+    sf->thresh_mult[THR_COMP_SPLITLA  ] = INT_MAX;
+    sf->thresh_mult[THR_COMP_SPLITGA  ] = INT_MAX;
+  }
 }
 
 void vp9_set_speed_features(VP9_COMP *cpi) {
@@ -659,6 +668,7 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
   int mode = cpi->compressor_speed;
   int speed = cpi->speed;
   int i;
+
   // Only modes 0 and 1 supported for now in experimental code basae
   if (mode > 1)
     mode = 1;
@@ -689,20 +699,30 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
   sf->auto_mv_step_size = 0;
   sf->max_step_search_steps = MAX_MVSEARCH_STEPS;
   sf->comp_inter_joint_search_thresh = BLOCK_SIZE_AB4X4;
-  sf->adpative_rd_thresh = 0;
+  sf->adaptive_rd_thresh = 0;
   sf->use_lastframe_partitioning = 0;
-  sf->use_largest_txform = 0;
+  sf->tx_size_search_method = USE_FULL_RD;
   sf->use_8tap_always = 0;
   sf->use_avoid_tested_higherror = 0;
+  sf->reference_masking = 0;
   sf->skip_lots_of_modes = 0;
   sf->adjust_thresholds_by_speed = 0;
   sf->partition_by_variance = 0;
   sf->use_one_partition_size_always = 0;
   sf->less_rectangular_check = 0;
+  sf->use_square_partition_only = 0;
   sf->use_partitions_less_than = 0;
   sf->less_than_block_size = BLOCK_SIZE_MB16X16;
   sf->use_partitions_greater_than = 0;
   sf->greater_than_block_size = BLOCK_SIZE_SB8X8;
+  sf->adjust_partitioning_from_last_frame = 0;
+  sf->last_partitioning_redo_frequency = 4;
+  sf->disable_splitmv = 0;
+  sf->conditional_oblique_intramodes = 0;
+
+  // Skip any mode not chosen at size < X for all sizes > X
+  // Hence BLOCK_SIZE_SB64X64 (skip is off)
+  sf->unused_mode_skip_lvl = BLOCK_SIZE_SB64X64;
 
 #if CONFIG_MULTIPLE_ARF
   // Switch segmentation off.
@@ -723,59 +743,83 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
 #else
       sf->static_segmentation = 0;
 #endif
-      sf->comp_inter_joint_search_thresh = BLOCK_SIZE_MB16X16;
       sf->auto_mv_step_size = 1;
       sf->use_avoid_tested_higherror = 1;
-      sf->adpative_rd_thresh = 1;
-
+      sf->adaptive_rd_thresh = 1;
       if (speed == 1) {
         sf->comp_inter_joint_search_thresh = BLOCK_SIZE_TYPES;
         sf->less_rectangular_check  = 1;
-        sf->use_largest_txform        = !(cpi->common.frame_type == KEY_FRAME ||
-                                          cpi->common.intra_only ||
-                                          cpi->common.show_frame == 0);
+        sf->tx_size_search_method = ((cpi->common.frame_type == KEY_FRAME ||
+                                      cpi->common.intra_only ||
+                                      cpi->common.show_frame == 0) ?
+                                     USE_FULL_RD :
+                                     USE_LARGESTALL);
+        sf->conditional_oblique_intramodes = 1;
+        sf->disable_splitmv =
+            (MIN(cpi->common.width, cpi->common.height) >= 720)? 1 : 0;
+        sf->use_square_partition_only = !(cpi->common.frame_type == KEY_FRAME ||
+                                   cpi->common.intra_only ||
+                                   cpi->common.show_frame == 0);
+        sf->unused_mode_skip_lvl = BLOCK_SIZE_SB32X32;
       }
       if (speed == 2) {
-        sf->use_largest_txform        = !(cpi->common.frame_type == KEY_FRAME ||
-                                          cpi->common.intra_only ||
-                                          cpi->common.show_frame == 0);
         sf->adjust_thresholds_by_speed = 1;
         sf->less_rectangular_check  = 1;
+        sf->use_square_partition_only = 1;
         sf->comp_inter_joint_search_thresh = BLOCK_SIZE_TYPES;
+        sf->use_lastframe_partitioning = 1;
+        sf->adjust_partitioning_from_last_frame = 1;
+        sf->last_partitioning_redo_frequency = 3;
+        sf->tx_size_search_method = USE_LARGESTALL;
+        sf->conditional_oblique_intramodes = 1;
+        sf->unused_mode_skip_lvl = BLOCK_SIZE_SB32X32;
         sf->reduce_first_step_size = 1;
         sf->optimize_coefficients = 0;
-        sf->use_lastframe_partitioning = 1;
+        // sf->reference_masking = 1;
       }
       if (speed == 3) {
         sf->comp_inter_joint_search_thresh = BLOCK_SIZE_TYPES;
         sf->partition_by_variance = 1;
+        sf->tx_size_search_method = ((cpi->common.frame_type == KEY_FRAME ||
+                                      cpi->common.intra_only ||
+                                      cpi->common.show_frame == 0) ?
+                                     USE_FULL_RD :
+                                     USE_LARGESTALL);
         sf->reduce_first_step_size = 1;
+        sf->conditional_oblique_intramodes = 1;
       }
       if (speed == 4) {
-        sf->reduce_first_step_size = 1;
         sf->comp_inter_joint_search_thresh = BLOCK_SIZE_TYPES;
         sf->use_one_partition_size_always = 1;
         sf->always_this_block_size = BLOCK_SIZE_MB16X16;
+        sf->tx_size_search_method = ((cpi->common.frame_type == KEY_FRAME ||
+                                      cpi->common.intra_only ||
+                                      cpi->common.show_frame == 0) ?
+                                     USE_FULL_RD :
+                                     USE_LARGESTALL);
+        sf->conditional_oblique_intramodes = 1;
       }
-/*      if (speed == 2) {
-        sf->reduce_first_step_size = 0;
+      /*
+      if (speed == 2) {
+        sf->first_step = 0;
         sf->comp_inter_joint_search_thresh = BLOCK_SIZE_SB8X8;
         sf->use_partitions_less_than = 1;
         sf->less_than_block_size = BLOCK_SIZE_MB16X16;
       }
       if (speed == 3) {
-        sf->reduce_first_step_size = 0;
+        sf->first_step = 0;
         sf->comp_inter_joint_search_thresh = BLOCK_SIZE_SB8X8;
         sf->use_partitions_greater_than = 1;
         sf->greater_than_block_size = BLOCK_SIZE_SB8X8;
-      }*/
+      }
+      */
 
-     break;
+      break;
 
   }; /* switch */
 
   // Set rd thresholds based on mode and speed setting
-  if(cpi->sf.adjust_thresholds_by_speed)
+  if (cpi->sf.adjust_thresholds_by_speed)
     set_rd_speed_thresholds(cpi, mode, speed);
   else
     set_rd_speed_thresholds(cpi, mode, 0);
@@ -876,7 +920,7 @@ void vp9_alloc_compressor_data(VP9_COMP *cpi) {
   {
     unsigned int tokens = get_token_alloc(cm->mb_rows, cm->mb_cols);
 
-    CHECK_MEM_ERROR(cpi->tok, vpx_calloc(tokens, sizeof(*cpi->tok)));
+    CHECK_MEM_ERROR(cm, cpi->tok, vpx_calloc(tokens, sizeof(*cpi->tok)));
   }
 
   // Data used for real time vc mode to see if gf needs refreshing
@@ -885,12 +929,12 @@ void vp9_alloc_compressor_data(VP9_COMP *cpi) {
   cpi->gf_update_recommended = 0;
 
   vpx_free(cpi->mb_activity_map);
-  CHECK_MEM_ERROR(cpi->mb_activity_map,
+  CHECK_MEM_ERROR(cm, cpi->mb_activity_map,
                   vpx_calloc(sizeof(unsigned int),
                              cm->mb_rows * cm->mb_cols));
 
   vpx_free(cpi->mb_norm_activity_map);
-  CHECK_MEM_ERROR(cpi->mb_norm_activity_map,
+  CHECK_MEM_ERROR(cm, cpi->mb_norm_activity_map,
                   vpx_calloc(sizeof(unsigned int),
                              cm->mb_rows * cm->mb_cols));
 }
@@ -1298,15 +1342,16 @@ VP9_PTR vp9_create_compressor(VP9_CONFIG *oxcf) {
     return 0;
   }
 
-  cpi->common.error.setjmp = 1;
+  cm->error.setjmp = 1;
 
-  CHECK_MEM_ERROR(cpi->mb.ss, vpx_calloc(sizeof(search_site), (MAX_MVSEARCH_STEPS * 8) + 1));
+  CHECK_MEM_ERROR(cm, cpi->mb.ss, vpx_calloc(sizeof(search_site),
+                                             (MAX_MVSEARCH_STEPS * 8) + 1));
 
-  vp9_create_common(&cpi->common);
+  vp9_create_common(cm);
 
   init_config((VP9_PTR)cpi, oxcf);
 
-  cpi->common.current_video_frame   = 0;
+  cm->current_video_frame   = 0;
   cpi->kf_overspend_bits            = 0;
   cpi->kf_bitrate_adjustment        = 0;
   cpi->frames_till_gf_update_due    = 0;
@@ -1314,7 +1359,7 @@ VP9_PTR vp9_create_compressor(VP9_CONFIG *oxcf) {
   cpi->non_gf_bitrate_adjustment    = 0;
 
   // Set reference frame sign bias for ALTREF frame to 1 (for now)
-  cpi->common.ref_frame_sign_bias[ALTREF_FRAME] = 1;
+  cm->ref_frame_sign_bias[ALTREF_FRAME] = 1;
 
   cpi->baseline_gf_interval = DEFAULT_GF_INTERVAL;
 
@@ -1323,28 +1368,27 @@ VP9_PTR vp9_create_compressor(VP9_CONFIG *oxcf) {
   cpi->gold_is_alt  = 0;
 
   // Create the encoder segmentation map and set all entries to 0
-  CHECK_MEM_ERROR(cpi->segmentation_map,
-                  vpx_calloc(cpi->common.mi_rows * cpi->common.mi_cols, 1));
+  CHECK_MEM_ERROR(cm, cpi->segmentation_map,
+                  vpx_calloc(cm->mi_rows * cm->mi_cols, 1));
 
   // And a copy in common for temporal coding
-  CHECK_MEM_ERROR(cm->last_frame_seg_map,
-                  vpx_calloc(cpi->common.mi_rows * cpi->common.mi_cols, 1));
+  CHECK_MEM_ERROR(cm, cm->last_frame_seg_map,
+                  vpx_calloc(cm->mi_rows * cm->mi_cols, 1));
 
   // And a place holder structure is the coding context
   // for use if we want to save and restore it
-  CHECK_MEM_ERROR(cpi->coding_context.last_frame_seg_map_copy,
-                  vpx_calloc(cpi->common.mi_rows * cpi->common.mi_cols, 1));
+  CHECK_MEM_ERROR(cm, cpi->coding_context.last_frame_seg_map_copy,
+                  vpx_calloc(cm->mi_rows * cm->mi_cols, 1));
 
-  CHECK_MEM_ERROR(cpi->active_map, vpx_calloc(cpi->common.mb_rows * cpi->common.mb_cols, 1));
-  vpx_memset(cpi->active_map, 1, (cpi->common.mb_rows * cpi->common.mb_cols));
+  CHECK_MEM_ERROR(cm, cpi->active_map, vpx_calloc(cm->MBs, 1));
+  vpx_memset(cpi->active_map, 1, cm->MBs);
   cpi->active_map_enabled = 0;
 
   for (i = 0; i < (sizeof(cpi->mbgraph_stats) /
                    sizeof(cpi->mbgraph_stats[0])); i++) {
-    CHECK_MEM_ERROR(cpi->mbgraph_stats[i].mb_stats,
-                    vpx_calloc(cpi->common.mb_rows * cpi->common.mb_cols *
-                               sizeof(*cpi->mbgraph_stats[i].mb_stats),
-                               1));
+    CHECK_MEM_ERROR(cm, cpi->mbgraph_stats[i].mb_stats,
+                    vpx_calloc(cm->MBs *
+                               sizeof(*cpi->mbgraph_stats[i].mb_stats), 1));
   }
 
 #ifdef ENTROPY_STATS
@@ -2426,8 +2470,7 @@ static void full_to_model_counts(
         for (l = 0; l < PREV_COEF_CONTEXTS; ++l) {
           if (l >= 3 && k == 0)
             continue;
-          full_to_model_count(model_count[i][j][k][l],
-                              full_count[i][j][k][l]);
+          full_to_model_count(model_count[i][j][k][l], full_count[i][j][k][l]);
         }
 }
 
@@ -3430,7 +3473,7 @@ static void Pass2Encode(VP9_COMP *cpi, unsigned long *size,
     vp9_second_pass(cpi);
 
   encode_frame_to_data_rate(cpi, size, dest, frame_flags);
-  //vp9_print_modes_and_motion_vectors(&cpi->common, "encode.stt");
+  // vp9_print_modes_and_motion_vectors(&cpi->common, "encode.stt");
 #ifdef DISABLE_RC_LONG_TERM_MEM
   cpi->twopass.bits_left -=  cpi->this_frame_target;
 #else

@@ -936,9 +936,9 @@ int vp9_post_proc_frame(VP9_COMMON *oci, YV12_BUFFER_CONFIG *dest,
             for (bx = 0; bx < 16; bx += 4) {
               if ((ppflags->display_b_modes_flag & (1 << mi->mbmi.mode))
                   || (ppflags->display_mb_modes_flag & I4X4_PRED)) {
-                Y = B_PREDICTION_MODE_colors[bmi->as_mode.first][0];
-                U = B_PREDICTION_MODE_colors[bmi->as_mode.first][1];
-                V = B_PREDICTION_MODE_colors[bmi->as_mode.first][2];
+                Y = B_PREDICTION_MODE_colors[bmi->as_mode][0];
+                U = B_PREDICTION_MODE_colors[bmi->as_mode][1];
+                V = B_PREDICTION_MODE_colors[bmi->as_mode][2];
 
                 vp9_blend_b(yl + bx, ul + (bx >> 1), vl + (bx >> 1), Y, U, V,
                     0xc000, y_stride);

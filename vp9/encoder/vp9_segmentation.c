@@ -136,16 +136,16 @@ static void count_segs(VP9_COMP *cpi, MODE_INFO *mi,
 
   // Temporal prediction not allowed on key frames
   if (cm->frame_type != KEY_FRAME) {
+    const BLOCK_SIZE_TYPE bsize = mi->mbmi.sb_type;
     // Test to see if the segment id matches the predicted value.
     const int pred_segment_id = vp9_get_segment_id(cm, cm->last_frame_seg_map,
-                                                   mi->mbmi.sb_type,
-                                                   mi_row, mi_col);
+                                                   bsize, mi_row, mi_col);
     const int pred_flag = pred_segment_id == segment_id;
     const int pred_context = vp9_get_pred_context(cm, xd, PRED_SEG_ID);
 
     // Store the prediction status for this mb and update counts
     // as appropriate
-    vp9_set_pred_flag(xd, PRED_SEG_ID, pred_flag);
+    vp9_set_pred_flag(xd, bsize, PRED_SEG_ID, pred_flag);
     temporal_predictor_count[pred_context][pred_flag]++;
 
     if (!pred_flag)

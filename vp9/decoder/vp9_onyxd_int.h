@@ -41,22 +41,4 @@ typedef struct VP9Decompressor {
   int initial_height;
 } VP9D_COMP;
 
-
-#if CONFIG_DEBUG
-#define CHECK_MEM_ERROR(lval,expr) do {\
-    lval = (expr); \
-    if(!lval) \
-      vpx_internal_error(&pbi->common.error, VPX_CODEC_MEM_ERROR,\
-                         "Failed to allocate "#lval" at %s:%d", \
-                         __FILE__,__LINE__);\
-  } while(0)
-#else
-#define CHECK_MEM_ERROR(lval,expr) do {\
-    lval = (expr); \
-    if(!lval) \
-      vpx_internal_error(&pbi->common.error, VPX_CODEC_MEM_ERROR,\
-                         "Failed to allocate "#lval);\
-  } while(0)
-#endif
-
 #endif  // VP9_DECODER_VP9_TREEREADER_H_

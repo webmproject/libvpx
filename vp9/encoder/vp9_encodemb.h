@@ -27,6 +27,12 @@ struct optimize_ctx {
   ENTROPY_CONTEXT tl[MAX_MB_PLANE][16];
 };
 
+struct encode_b_args {
+  VP9_COMMON *cm;
+  MACROBLOCK *x;
+  struct optimize_ctx *ctx;
+};
+
 void vp9_optimize_init(MACROBLOCKD *xd, BLOCK_SIZE_TYPE bsize,
                        struct optimize_ctx *ctx);
 void vp9_optimize_b(int plane, int block, BLOCK_SIZE_TYPE bsize,
@@ -39,6 +45,8 @@ void vp9_encode_sb(VP9_COMMON *cm, MACROBLOCK *x, BLOCK_SIZE_TYPE bsize);
 void vp9_encode_sby(VP9_COMMON *cm, MACROBLOCK *x, BLOCK_SIZE_TYPE bsize);
 void vp9_encode_sbuv(VP9_COMMON *cm, MACROBLOCK *x, BLOCK_SIZE_TYPE bsize);
 
+void xform_quant(int plane, int block, BLOCK_SIZE_TYPE bsize,
+                 int ss_txfrm_size, void *arg);
 void vp9_xform_quant_sby(VP9_COMMON *cm, MACROBLOCK *x, BLOCK_SIZE_TYPE bsize);
 void vp9_xform_quant_sbuv(VP9_COMMON *cm, MACROBLOCK *x, BLOCK_SIZE_TYPE bsize);
 

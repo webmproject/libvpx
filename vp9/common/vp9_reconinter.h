@@ -109,14 +109,10 @@ static void setup_pre_planes(MACROBLOCKD *xd,
   }
 }
 
-static void set_scale_factors(MACROBLOCKD *xd,
-    int ref0, int ref1,
-    struct scale_factors scale_factor[MAX_REF_FRAMES]) {
-
-  xd->scale_factor[0] = scale_factor[ref0 >= 0 ? ref0 : 0];
-  xd->scale_factor[1] = scale_factor[ref1 >= 0 ? ref1 : 0];
-  xd->scale_factor_uv[0] = xd->scale_factor[0];
-  xd->scale_factor_uv[1] = xd->scale_factor[1];
+static void set_scale_factors(MACROBLOCKD *xd, int ref0, int ref1,
+                              struct scale_factors sf[MAX_REF_FRAMES]) {
+  xd->scale_factor[0] = xd->scale_factor_uv[0] = sf[ref0 >= 0 ? ref0 : 0];
+  xd->scale_factor[1] = xd->scale_factor_uv[1] = sf[ref1 >= 0 ? ref1 : 0];
 }
 
 void vp9_setup_scale_factors(VP9_COMMON *cm, int i);

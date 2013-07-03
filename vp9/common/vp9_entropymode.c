@@ -10,7 +10,6 @@
 
 
 #include "vp9/common/vp9_onyxc_int.h"
-#include "vp9/common/vp9_modecont.h"
 #include "vp9/common/vp9_seg_common.h"
 #include "vp9/common/vp9_alloccommon.h"
 #include "vpx_mem/vpx_mem.h"
@@ -98,6 +97,17 @@ const vp9_prob vp9_partition_probs[NUM_FRAME_TYPES][NUM_PARTITION_CONTEXTS]
   }
 };
 
+static const vp9_prob default_inter_mode_probs[INTER_MODE_CONTEXTS]
+                                              [VP9_INTER_MODES - 1] = {
+  {2,       173,   34},  // 0 = both zero mv
+  {7,       145,   85},  // 1 = one zero mv + one a predicted mv
+  {7,       166,   63},  // 2 = two predicted mvs
+  {7,       94,    66},  // 3 = one predicted/zero and one new mv
+  {8,       64,    46},  // 4 = two new mvs
+  {17,      81,    31},  // 5 = one intra neighbour + x
+  {25,      29,    30},  // 6 = two intra neighbours
+};
+
 /* Array indices are identical to previously-existing INTRAMODECONTEXTNODES. */
 const vp9_tree_index vp9_intra_mode_tree[VP9_INTRA_MODES * 2 - 2] = {
   -DC_PRED, 2,                      /* 0 = DC_NODE */
@@ -181,52 +191,35 @@ void tx_counts_to_branch_counts_32x32(unsigned int *tx_count_32x32p,
 void tx_counts_to_branch_counts_16x16(unsigned int *tx_count_16x16p,
                                       unsigned int (*ct_16x16p)[2]) {
   ct_16x16p[0][0] = tx_count_16x16p[TX_4X4];
-  ct_16x16p[0][1] = tx_count_16x16p[TX_8X8] +
-                    tx_count_16x16p[TX_16X16];
+  ct_16x16p[0][1] = tx_count_16x16p[TX_8X8] + tx_count_16x16p[TX_16X16];
   ct_16x16p[1][0] = tx_count_16x16p[TX_8X8];
   ct_16x16p[1][1] = tx_count_16x16p[TX_16X16];
 }
 
 void tx_counts_to_branch_counts_8x8(unsigned int *tx_count_8x8p,
                                     unsigned int (*ct_8x8p)[2]) {
-  ct_8x8p[0][0] =   tx_count_8x8p[TX_4X4];
-  ct_8x8p[0][1] =   tx_count_8x8p[TX_8X8];
+  ct_8x8p[0][0] = tx_count_8x8p[TX_4X4];
+  ct_8x8p[0][1] = tx_count_8x8p[TX_8X8];
 }
 
 const vp9_prob vp9_default_mbskip_probs[MBSKIP_CONTEXTS] = {
   192, 128, 64
 };
 
-void vp9_init_mbmode_probs(VP9_COMMON *x) {
-  vpx_memcpy(x->fc.uv_mode_prob, default_if_uv_probs,
-             sizeof(default_if_uv_probs));
-  vpx_memcpy(x->kf_uv_mode_prob, default_kf_uv_probs,
-             sizeof(default_kf_uv_probs));
-  vpx_memcpy(x->fc.y_mode_prob, default_if_y_probs,
-             sizeof(default_if_y_probs));
-
-  vpx_memcpy(x->fc.switchable_interp_prob, vp9_switchable_interp_prob,
-             sizeof(vp9_switchable_interp_prob));
-
-  vpx_memcpy(x->fc.partition_prob, vp9_partition_probs,
-             sizeof(vp9_partition_probs));
-
-  vpx_memcpy(x->fc.intra_inter_prob, default_intra_inter_p,
-             sizeof(default_intra_inter_p));
-  vpx_memcpy(x->fc.comp_inter_prob, default_comp_inter_p,
-             sizeof(default_comp_inter_p));
-  vpx_memcpy(x->fc.comp_ref_prob, default_comp_ref_p,
-             sizeof(default_comp_ref_p));
-  vpx_memcpy(x->fc.single_ref_prob, default_single_ref_p,
-             sizeof(default_single_ref_p));
-  vpx_memcpy(x->fc.tx_probs_32x32p, vp9_default_tx_probs_32x32p,
-             sizeof(vp9_default_tx_probs_32x32p));
-  vpx_memcpy(x->fc.tx_probs_16x16p, vp9_default_tx_probs_16x16p,
-             sizeof(vp9_default_tx_probs_16x16p));
-  vpx_memcpy(x->fc.tx_probs_8x8p, vp9_default_tx_probs_8x8p,
-             sizeof(vp9_default_tx_probs_8x8p));
-  vpx_memcpy(x->fc.mbskip_probs, vp9_default_mbskip_probs,
-             sizeof(vp9_default_mbskip_probs));
+void vp9_init_mbmode_probs(VP9_COMMON *cm) {
+  vp9_copy(cm->fc.uv_mode_prob, default_if_uv_probs);
+  vp9_copy(cm->kf_uv_mode_prob, default_kf_uv_probs);
+  vp9_copy(cm->fc.y_mode_prob, default_if_y_probs);
+  vp9_copy(cm->fc.switchable_interp_prob, vp9_switchable_interp_prob);
+  vp9_copy(cm->fc.partition_prob, vp9_partition_probs);
+  vp9_copy(cm->fc.intra_inter_prob, default_intra_inter_p);
+  vp9_copy(cm->fc.comp_inter_prob, default_comp_inter_p);
+  vp9_copy(cm->fc.comp_ref_prob, default_comp_ref_p);
+  vp9_copy(cm->fc.single_ref_prob, default_single_ref_p);
+  vp9_copy(cm->fc.tx_probs_32x32p, vp9_default_tx_probs_32x32p);
+  vp9_copy(cm->fc.tx_probs_16x16p, vp9_default_tx_probs_16x16p);
+  vp9_copy(cm->fc.tx_probs_8x8p, vp9_default_tx_probs_8x8p);
+  vp9_copy(cm->fc.mbskip_probs, vp9_default_mbskip_probs);
 }
 
 const vp9_tree_index vp9_switchable_interp_tree[VP9_SWITCHABLE_FILTERS*2-2] = {
@@ -253,16 +246,14 @@ void vp9_entropy_mode_init() {
   vp9_tokens_from_tree(vp9_switchable_interp_encodings,
                        vp9_switchable_interp_tree);
   vp9_tokens_from_tree(vp9_partition_encodings, vp9_partition_tree);
-
   vp9_tokens_from_tree_offset(vp9_sb_mv_ref_encoding_array,
                               vp9_sb_mv_ref_tree, NEARESTMV);
 }
 
 void vp9_init_mode_contexts(VP9_COMMON *pc) {
   vpx_memset(pc->fc.inter_mode_counts, 0, sizeof(pc->fc.inter_mode_counts));
-  vpx_memcpy(pc->fc.inter_mode_probs,
-             vp9_default_inter_mode_probs,
-             sizeof(vp9_default_inter_mode_probs));
+  vpx_memcpy(pc->fc.inter_mode_probs, default_inter_mode_probs,
+             sizeof(default_inter_mode_probs));
 }
 
 void vp9_accum_mv_refs(VP9_COMMON *pc,

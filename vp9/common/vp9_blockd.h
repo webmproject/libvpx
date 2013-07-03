@@ -122,21 +122,12 @@ typedef enum {
 
 #define WHT_UPSCALE_FACTOR 2
 
-#define TX_SIZE_PROBS  6  // (TX_SIZE_MAX_SB * (TX_SIZE_MAX_SB - 1) / 2)
-
-#define get_tx_probs(c, b) ((b) < BLOCK_SIZE_MB16X16 ? \
-                            (c)->fc.tx_probs_8x8p :    \
-                            (b) < BLOCK_SIZE_SB32X32 ? \
-                            (c)->fc.tx_probs_16x16p : (c)->fc.tx_probs_32x32p)
-
 /* For keyframes, intra block modes are predicted by the (already decoded)
    modes for the Y blocks to the left and above us; for interframes, there
    is a single probability table. */
 
 union b_mode_info {
-  struct {
-    MB_PREDICTION_MODE first;
-  } as_mode;
+  MB_PREDICTION_MODE as_mode;
   int_mv as_mv[2];  // first, second inter predictor motion vectors
 };
 
@@ -401,11 +392,13 @@ static int *get_sb_index(MACROBLOCKD *xd, BLOCK_SIZE_TYPE subsize) {
 static INLINE void update_partition_context(MACROBLOCKD *xd,
                                             BLOCK_SIZE_TYPE sb_type,
                                             BLOCK_SIZE_TYPE sb_size) {
-  int bsl = b_width_log2(sb_size), bs = (1 << bsl) / 2;
-  int bwl = b_width_log2(sb_type);
-  int bhl = b_height_log2(sb_type);
-  int boffset = b_width_log2(BLOCK_SIZE_SB64X64) - bsl;
-  char pcvalue[2] = {~(0xe << boffset), ~(0xf <<boffset)};
+  const int bsl = b_width_log2(sb_size), bs = (1 << bsl) / 2;
+  const int bwl = b_width_log2(sb_type);
+  const int bhl = b_height_log2(sb_type);
+  const int boffset = b_width_log2(BLOCK_SIZE_SB64X64) - bsl;
+  const char pcval0 = ~(0xe << boffset);
+  const char pcval1 = ~(0xf << boffset);
+  const char pcvalue[2] = {pcval0, pcval1};
 
   assert(MAX(bwl, bhl) <= bsl);
 
@@ -496,7 +489,7 @@ static INLINE TX_TYPE get_tx_type_4x4(const MACROBLOCKD *xd, int ib) {
     return DCT_DCT;
 
   return mode2txfm_map[mbmi->sb_type < BLOCK_SIZE_SB8X8 ?
-                       mi->bmi[ib].as_mode.first : mbmi->mode];
+                       mi->bmi[ib].as_mode : mbmi->mode];
 }
 
 static INLINE TX_TYPE get_tx_type_8x8(const MACROBLOCKD *xd) {
@@ -507,8 +500,21 @@ static INLINE TX_TYPE get_tx_type_16x16(const MACROBLOCKD *xd) {
   return  mode2txfm_map[xd->mode_info_context->mbmi.mode];
 }
 
-void vp9_setup_block_dptrs(MACROBLOCKD *xd,
-                           int subsampling_x, int subsampling_y);
+static void setup_block_dptrs(MACROBLOCKD *xd, int ss_x, int ss_y) {
+  int i;
+
+  for (i = 0; i < MAX_MB_PLANE; i++) {
+    xd->plane[i].plane_type = i ? PLANE_TYPE_UV : PLANE_TYPE_Y_WITH_DC;
+    xd->plane[i].subsampling_x = i ? ss_x : 0;
+    xd->plane[i].subsampling_y = i ? ss_y : 0;
+  }
+#if CONFIG_ALPHA
+  // TODO(jkoleszar): Using the Y w/h for now
+  xd->plane[3].subsampling_x = 0;
+  xd->plane[3].subsampling_y = 0;
+#endif
+}
+
 
 static TX_SIZE get_uv_tx_size(const MB_MODE_INFO *mbmi) {
   const TX_SIZE size = mbmi->txfm_size;

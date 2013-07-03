@@ -90,8 +90,6 @@ static void fill_value_tokens() {
   vp9_dct_value_cost_ptr   = dct_value_cost + DCT_MAX_VALUE;
 }
 
-extern const int *vp9_get_coef_neighbors_handle(const int *scan, int *pad);
-
 struct tokenize_b_args {
   VP9_COMP *cpi;
   MACROBLOCKD *xd;
@@ -125,9 +123,9 @@ static void tokenize_b(int plane, int block, BLOCK_SIZE_TYPE bsize,
   const int loff = (off >> mod) << tx_size;
   ENTROPY_CONTEXT *A = xd->plane[plane].above_context + aoff;
   ENTROPY_CONTEXT *L = xd->plane[plane].left_context + loff;
-  int seg_eob, default_eob, pad;
+  int seg_eob;
   const int segment_id = mbmi->segment_id;
-  const int *scan, *nb;
+  const int16_t *scan, *nb;
   vp9_coeff_count *counts;
   vp9_coeff_probs_model *coef_probs;
   const int ref = mbmi->ref_frame[0] != INTRA_FRAME;
@@ -180,8 +178,7 @@ static void tokenize_b(int plane, int block, BLOCK_SIZE_TYPE bsize,
   }
 
   pt = combine_entropy_contexts(above_ec, left_ec);
-  nb = vp9_get_coef_neighbors_handle(scan, &pad);
-  default_eob = seg_eob;
+  nb = vp9_get_coef_neighbors_handle(scan);
 
   if (vp9_segfeature_active(xd, segment_id, SEG_LVL_SKIP))
     seg_eob = 0;
@@ -193,7 +190,7 @@ static void tokenize_b(int plane, int block, BLOCK_SIZE_TYPE bsize,
     int v = 0;
     rc = scan[c];
     if (c)
-      pt = vp9_get_coef_context(scan, nb, pad, token_cache, c, default_eob);
+      pt = get_coef_context(nb, token_cache, c);
     if (c < eob) {
       v = qcoeff_ptr[rc];
       assert(-DCT_MAX_VALUE <= v  &&  v < DCT_MAX_VALUE);

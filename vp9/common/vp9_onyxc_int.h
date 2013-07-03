@@ -43,40 +43,38 @@
 #define MAX_LAG_BUFFERS 25
 
 typedef struct frame_contexts {
+  // y_mode, uv_mode, partition
   vp9_prob y_mode_prob[BLOCK_SIZE_GROUPS][VP9_INTRA_MODES - 1];
   vp9_prob uv_mode_prob[VP9_INTRA_MODES][VP9_INTRA_MODES - 1];
   vp9_prob partition_prob[NUM_FRAME_TYPES][NUM_PARTITION_CONTEXTS]
                          [PARTITION_TYPES - 1];
-
-  nmv_context nmvc;
-  nmv_context pre_nmvc;
-  /* interframe intra mode probs */
   vp9_prob pre_y_mode_prob[BLOCK_SIZE_GROUPS][VP9_INTRA_MODES - 1];
   vp9_prob pre_uv_mode_prob[VP9_INTRA_MODES][VP9_INTRA_MODES - 1];
   vp9_prob pre_partition_prob[NUM_PARTITION_CONTEXTS][PARTITION_TYPES - 1];
-  /* interframe intra mode probs */
   unsigned int y_mode_counts[BLOCK_SIZE_GROUPS][VP9_INTRA_MODES];
   unsigned int uv_mode_counts[VP9_INTRA_MODES][VP9_INTRA_MODES];
   unsigned int partition_counts[NUM_PARTITION_CONTEXTS][PARTITION_TYPES];
 
+  // coeff
   vp9_coeff_probs_model coef_probs[TX_SIZE_MAX_SB][BLOCK_TYPES];
   vp9_coeff_probs_model pre_coef_probs[TX_SIZE_MAX_SB][BLOCK_TYPES];
   vp9_coeff_count_model coef_counts[TX_SIZE_MAX_SB][BLOCK_TYPES];
   unsigned int eob_branch_counts[TX_SIZE_MAX_SB][BLOCK_TYPES][REF_TYPES]
                                 [COEF_BANDS][PREV_COEF_CONTEXTS];
 
-  nmv_context_counts NMVcount;
+  // switchable_interp
   vp9_prob switchable_interp_prob[VP9_SWITCHABLE_FILTERS + 1]
                                  [VP9_SWITCHABLE_FILTERS - 1];
   vp9_prob pre_switchable_interp_prob[VP9_SWITCHABLE_FILTERS + 1]
-      [VP9_SWITCHABLE_FILTERS - 1];
+                                     [VP9_SWITCHABLE_FILTERS - 1];
   unsigned int switchable_interp_count[VP9_SWITCHABLE_FILTERS + 1]
                                       [VP9_SWITCHABLE_FILTERS];
-
+  // inter_mode
   vp9_prob inter_mode_probs[INTER_MODE_CONTEXTS][VP9_INTER_MODES - 1];
   vp9_prob pre_inter_mode_probs[INTER_MODE_CONTEXTS][VP9_INTER_MODES - 1];
   unsigned int inter_mode_counts[INTER_MODE_CONTEXTS][VP9_INTER_MODES - 1][2];
 
+  // intra_inter, comp_inter, single_ref, comp_ref
   vp9_prob intra_inter_prob[INTRA_INTER_CONTEXTS];
   vp9_prob comp_inter_prob[COMP_INTER_CONTEXTS];
   vp9_prob single_ref_prob[REF_CONTEXTS][2];
@@ -90,6 +88,7 @@ typedef struct frame_contexts {
   unsigned int single_ref_count[REF_CONTEXTS][2][2];
   unsigned int comp_ref_count[REF_CONTEXTS][2];
 
+  // tx_probs
   vp9_prob tx_probs_32x32p[TX_SIZE_CONTEXTS][TX_SIZE_MAX_SB - 1];
   vp9_prob tx_probs_16x16p[TX_SIZE_CONTEXTS][TX_SIZE_MAX_SB - 2];
   vp9_prob tx_probs_8x8p[TX_SIZE_CONTEXTS][TX_SIZE_MAX_SB - 3];
@@ -100,9 +99,15 @@ typedef struct frame_contexts {
   unsigned int tx_count_16x16p[TX_SIZE_CONTEXTS][TX_SIZE_MAX_SB - 1];
   unsigned int tx_count_8x8p[TX_SIZE_CONTEXTS][TX_SIZE_MAX_SB - 2];
 
+  // mbskip
   vp9_prob mbskip_probs[MBSKIP_CONTEXTS];
   vp9_prob pre_mbskip_probs[MBSKIP_CONTEXTS];
   unsigned int mbskip_count[MBSKIP_CONTEXTS][2];
+
+  // mv
+  nmv_context nmvc;
+  nmv_context pre_nmvc;
+  nmv_context_counts NMVcount;
 } FRAME_CONTEXT;
 
 typedef enum {
@@ -124,10 +129,10 @@ typedef enum {
 typedef struct VP9Common {
   struct vpx_internal_error_info  error;
 
-  DECLARE_ALIGNED(16, int16_t, y_dequant[QINDEX_RANGE][2]);
-  DECLARE_ALIGNED(16, int16_t, uv_dequant[QINDEX_RANGE][2]);
+  DECLARE_ALIGNED(16, int16_t, y_dequant[QINDEX_RANGE][8]);
+  DECLARE_ALIGNED(16, int16_t, uv_dequant[QINDEX_RANGE][8]);
 #if CONFIG_ALPHA
-  DECLARE_ALIGNED(16, int16_t, a_dequant[QINDEX_RANGE][2]);
+  DECLARE_ALIGNED(16, int16_t, a_dequant[QINDEX_RANGE][8]);
 #endif
 
   int width;

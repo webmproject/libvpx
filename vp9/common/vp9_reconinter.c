@@ -172,9 +172,7 @@ void vp9_setup_interp_filters(MACROBLOCKD *xd,
   if (xd->mode_info_context) {
     MB_MODE_INFO *mbmi = &xd->mode_info_context->mbmi;
 
-    set_scale_factors(xd,
-                      mbmi->ref_frame[0] - 1,
-                      mbmi->ref_frame[1] - 1,
+    set_scale_factors(xd, mbmi->ref_frame[0] - 1, mbmi->ref_frame[1] - 1,
                       cm->active_ref_scale);
   }
 
@@ -483,13 +481,6 @@ void vp9_build_inter_predictors_sb(MACROBLOCKD *xd,
 
   vp9_build_inter_predictors_sby(xd, mi_row, mi_col, bsize);
   vp9_build_inter_predictors_sbuv(xd, mi_row, mi_col, bsize);
-}
-
-/*encoder only*/
-void vp9_build_inter4x4_predictors_mbuv(MACROBLOCKD *xd,
-                                        int mb_row, int mb_col) {
-  vp9_build_inter_predictors_sbuv(xd, mb_row, mb_col,
-                                  BLOCK_SIZE_MB16X16);
 }
 
 // TODO(dkovalev: find better place for this function)

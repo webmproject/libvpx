@@ -324,8 +324,9 @@ static void separate_arf_mbs(VP9_COMP *cpi) {
 
   int *arf_not_zz;
 
-  CHECK_MEM_ERROR(arf_not_zz,
-                  vpx_calloc(cm->mb_rows * cm->mb_cols * sizeof(*arf_not_zz), 1));
+  CHECK_MEM_ERROR(cm, arf_not_zz,
+                  vpx_calloc(cm->mb_rows * cm->mb_cols * sizeof(*arf_not_zz),
+                             1));
 
   // We are not interested in results beyond the alt ref itself.
   if (n_frames > cpi->frames_till_gf_update_due)

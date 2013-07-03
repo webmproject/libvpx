@@ -200,6 +200,13 @@ typedef enum {
   HEX = 2
 } SEARCH_METHODS;
 
+typedef enum {
+  USE_FULL_RD = 0,
+  USE_LARGESTINTRA,
+  USE_LARGESTINTRA_MODELINTER,
+  USE_LARGESTALL
+} TX_SIZE_SEARCH_METHOD;
+
 typedef struct {
   int RD;
   SEARCH_METHODS search_method;
@@ -216,10 +223,10 @@ typedef struct {
   int search_best_filter;
   int static_segmentation;
   int comp_inter_joint_search_thresh;
-  int adpative_rd_thresh;
+  int adaptive_rd_thresh;
   int skip_encode_sb;
   int use_lastframe_partitioning;
-  int use_largest_txform;
+  TX_SIZE_SEARCH_METHOD tx_size_search_method;
   int use_8tap_always;
   int use_avoid_tested_higherror;
   int skip_lots_of_modes;
@@ -227,11 +234,21 @@ typedef struct {
   int partition_by_variance;
   int use_one_partition_size_always;
   int less_rectangular_check;
+  int use_square_partition_only;
+  int unused_mode_skip_lvl;
+  int reference_masking;
   BLOCK_SIZE_TYPE always_this_block_size;
   int use_partitions_greater_than;
   BLOCK_SIZE_TYPE greater_than_block_size;
   int use_partitions_less_than;
   BLOCK_SIZE_TYPE less_than_block_size;
+  int adjust_partitioning_from_last_frame;
+  int last_partitioning_redo_frequency;
+  int disable_splitmv;
+  // Search the D27, D63, D117 and D153 modes
+  // only if the best intra mode so far is one
+  // of the two directional modes nearest to each.
+  int conditional_oblique_intramodes;
 } SPEED_FEATURES;
 
 enum BlockSize {
@@ -253,26 +270,22 @@ enum BlockSize {
 
 typedef struct VP9_COMP {
 
-  DECLARE_ALIGNED(16, short, y_quant[QINDEX_RANGE][16]);
-  DECLARE_ALIGNED(16, unsigned char, y_quant_shift[QINDEX_RANGE][16]);
-  DECLARE_ALIGNED(16, short, y_zbin[QINDEX_RANGE][16]);
-  DECLARE_ALIGNED(16, short, y_round[QINDEX_RANGE][16]);
+  DECLARE_ALIGNED(16, int16_t, y_quant[QINDEX_RANGE][8]);
+  DECLARE_ALIGNED(16, int16_t, y_quant_shift[QINDEX_RANGE][8]);
+  DECLARE_ALIGNED(16, int16_t, y_zbin[QINDEX_RANGE][8]);
+  DECLARE_ALIGNED(16, int16_t, y_round[QINDEX_RANGE][8]);
 
-  DECLARE_ALIGNED(16, short, uv_quant[QINDEX_RANGE][16]);
-  DECLARE_ALIGNED(16, unsigned char, uv_quant_shift[QINDEX_RANGE][16]);
-  DECLARE_ALIGNED(16, short, uv_zbin[QINDEX_RANGE][16]);
-  DECLARE_ALIGNED(16, short, uv_round[QINDEX_RANGE][16]);
+  DECLARE_ALIGNED(16, int16_t, uv_quant[QINDEX_RANGE][8]);
+  DECLARE_ALIGNED(16, int16_t, uv_quant_shift[QINDEX_RANGE][8]);
+  DECLARE_ALIGNED(16, int16_t, uv_zbin[QINDEX_RANGE][8]);
+  DECLARE_ALIGNED(16, int16_t, uv_round[QINDEX_RANGE][8]);
 
 #if CONFIG_ALPHA
-  DECLARE_ALIGNED(16, short, a_quant[QINDEX_RANGE][16]);
-  DECLARE_ALIGNED(16, unsigned char, a_quant_shift[QINDEX_RANGE][16]);
-  DECLARE_ALIGNED(16, short, a_zbin[QINDEX_RANGE][16]);
-  DECLARE_ALIGNED(16, short, a_round[QINDEX_RANGE][16]);
-
-  DECLARE_ALIGNED(16, short, zrun_zbin_boost_a[QINDEX_RANGE][16]);
+  DECLARE_ALIGNED(16, int16_t, a_quant[QINDEX_RANGE][8]);
+  DECLARE_ALIGNED(16, int16_t, a_quant_shift[QINDEX_RANGE][8]);
+  DECLARE_ALIGNED(16, int16_t, a_zbin[QINDEX_RANGE][8]);
+  DECLARE_ALIGNED(16, int16_t, a_round[QINDEX_RANGE][8]);
 #endif
-  DECLARE_ALIGNED(16, short, zrun_zbin_boost_y[QINDEX_RANGE][16]);
-  DECLARE_ALIGNED(16, short, zrun_zbin_boost_uv[QINDEX_RANGE][16]);
 
   MACROBLOCK mb;
   VP9_COMMON common;
@@ -332,6 +345,9 @@ typedef struct VP9_COMP {
   unsigned int mode_check_freq[MAX_MODES];
   unsigned int mode_test_hit_counts[MAX_MODES];
   unsigned int mode_chosen_counts[MAX_MODES];
+  int64_t unused_mode_skip_mask;
+  int ref_frame_mask;
+  int set_ref_frame_mask;
 
   int rd_thresh_mult[MAX_MODES];
   int rd_baseline_thresh[BLOCK_SIZE_TYPES][MAX_MODES];
@@ -590,6 +606,8 @@ typedef struct VP9_COMP {
                                       [VP9_SWITCHABLE_FILTERS];
   unsigned int best_switchable_interp_count[VP9_SWITCHABLE_FILTERS];
 
+  unsigned int txfm_stepdown_count[TX_SIZE_MAX_SB];
+
   int initial_width;
   int initial_height;
 
@@ -634,22 +652,5 @@ extern int vp9_calc_ss_err(YV12_BUFFER_CONFIG *source,
                            YV12_BUFFER_CONFIG *dest);
 
 extern void vp9_alloc_compressor_data(VP9_COMP *cpi);
-
-#if CONFIG_DEBUG
-#define CHECK_MEM_ERROR(lval,expr) do {\
-    lval = (expr); \
-    if(!lval) \
-      vpx_internal_error(&cpi->common.error, VPX_CODEC_MEM_ERROR,\
-                         "Failed to allocate "#lval" at %s:%d", \
-                         __FILE__,__LINE__);\
-  } while(0)
-#else
-#define CHECK_MEM_ERROR(lval,expr) do {\
-    lval = (expr); \
-    if(!lval) \
-      vpx_internal_error(&cpi->common.error, VPX_CODEC_MEM_ERROR,\
-                         "Failed to allocate "#lval);\
-  } while(0)
-#endif
 
 #endif  // VP9_ENCODER_VP9_ONYX_INT_H_

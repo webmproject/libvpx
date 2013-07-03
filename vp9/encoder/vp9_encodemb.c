@@ -109,14 +109,13 @@ static const int plane_rd_mult[4] = {
 
 // This function is a place holder for now but may ultimately need
 // to scan previous tokens to work out the correct context.
-static int trellis_get_coeff_context(const int *scan,
-                                     const int *nb,
+static int trellis_get_coeff_context(const int16_t *scan,
+                                     const int16_t *nb,
                                      int idx, int token,
-                                     uint8_t *token_cache,
-                                     int pad, int l) {
+                                     uint8_t *token_cache) {
   int bak = token_cache[scan[idx]], pt;
   token_cache[scan[idx]] = vp9_pt_energy_class[token];
-  pt = vp9_get_coef_context(scan, nb, pad, token_cache, idx + 1, l);
+  pt = get_coef_context(nb, token_cache, idx + 1);
   token_cache[scan[idx]] = bak;
   return pt;
 }
@@ -141,8 +140,8 @@ static void optimize_b(VP9_COMMON *const cm, MACROBLOCK *mb,
   int best, band, pt;
   PLANE_TYPE type = xd->plane[plane].plane_type;
   int err_mult = plane_rd_mult[type];
-  int default_eob, pad;
-  int const *scan, *nb;
+  int default_eob;
+  const int16_t *scan, *nb;
   const int mul = 1 + (tx_size == TX_32X32);
   uint8_t token_cache[1024];
   const int ib = txfrm_block_to_raster_block(xd, bsize, plane,
@@ -201,7 +200,7 @@ static void optimize_b(VP9_COMMON *const cm, MACROBLOCK *mb,
   for (i = 0; i < eob; i++)
     token_cache[scan[i]] = vp9_pt_energy_class[vp9_dct_value_tokens_ptr[
         qcoeff_ptr[scan[i]]].token];
-  nb = vp9_get_coef_neighbors_handle(scan, &pad);
+  nb = vp9_get_coef_neighbors_handle(scan);
 
   for (i = eob; i-- > i0;) {
     int base_bits, d2, dx;
@@ -220,14 +219,13 @@ static void optimize_b(VP9_COMMON *const cm, MACROBLOCK *mb,
       /* Consider both possible successor states. */
       if (next < default_eob) {
         band = get_coef_band(band_translate, i + 1);
-        pt = trellis_get_coeff_context(scan, nb, i, t0, token_cache,
-                                       pad, default_eob);
+        pt = trellis_get_coeff_context(scan, nb, i, t0, token_cache);
         rate0 +=
-          mb->token_costs_noskip[tx_size][type][ref][band][pt]
-                                [tokens[next][0].token];
+          mb->token_costs[tx_size][type][ref][0][band][pt]
+                         [tokens[next][0].token];
         rate1 +=
-          mb->token_costs_noskip[tx_size][type][ref][band][pt]
-                                [tokens[next][1].token];
+          mb->token_costs[tx_size][type][ref][0][band][pt]
+                         [tokens[next][1].token];
       }
       UPDATE_RD_COST();
       /* And pick the best. */
@@ -273,24 +271,14 @@ static void optimize_b(VP9_COMMON *const cm, MACROBLOCK *mb,
       if (next < default_eob) {
         band = get_coef_band(band_translate, i + 1);
         if (t0 != DCT_EOB_TOKEN) {
-          pt = trellis_get_coeff_context(scan, nb, i, t0, token_cache,
-                                         pad, default_eob);
-          if (!x)
-            rate0 += mb->token_costs[tx_size][type][ref][band][pt][
-                tokens[next][0].token];
-          else
-            rate0 += mb->token_costs_noskip[tx_size][type][ref][band][pt][
-                tokens[next][0].token];
+          pt = trellis_get_coeff_context(scan, nb, i, t0, token_cache);
+          rate0 += mb->token_costs[tx_size][type][ref][!x][band][pt]
+                                  [tokens[next][0].token];
         }
         if (t1 != DCT_EOB_TOKEN) {
-          pt = trellis_get_coeff_context(scan, nb, i, t1, token_cache,
-                                         pad, default_eob);
-          if (!x)
-            rate1 += mb->token_costs[tx_size][type][ref][band][pt][
-                tokens[next][1].token];
-          else
-            rate1 += mb->token_costs_noskip[tx_size][type][ref][band][pt][
-                tokens[next][1].token];
+          pt = trellis_get_coeff_context(scan, nb, i, t1, token_cache);
+          rate1 += mb->token_costs[tx_size][type][ref][!x][band][pt]
+                                  [tokens[next][1].token];
         }
       }
 
@@ -322,12 +310,12 @@ static void optimize_b(VP9_COMMON *const cm, MACROBLOCK *mb,
       /* Update the cost of each path if we're past the EOB token. */
       if (t0 != DCT_EOB_TOKEN) {
         tokens[next][0].rate +=
-            mb->token_costs[tx_size][type][ref][band][0][t0];
+            mb->token_costs[tx_size][type][ref][1][band][0][t0];
         tokens[next][0].token = ZERO_TOKEN;
       }
       if (t1 != DCT_EOB_TOKEN) {
         tokens[next][1].rate +=
-            mb->token_costs[tx_size][type][ref][band][0][t1];
+            mb->token_costs[tx_size][type][ref][1][band][0][t1];
         tokens[next][1].token = ZERO_TOKEN;
       }
       /* Don't update next, because we didn't add a new node. */
@@ -343,8 +331,8 @@ static void optimize_b(VP9_COMMON *const cm, MACROBLOCK *mb,
   error1 = tokens[next][1].error;
   t0 = tokens[next][0].token;
   t1 = tokens[next][1].token;
-  rate0 += mb->token_costs_noskip[tx_size][type][ref][band][pt][t0];
-  rate1 += mb->token_costs_noskip[tx_size][type][ref][band][pt][t1];
+  rate0 += mb->token_costs[tx_size][type][ref][0][band][pt][t0];
+  rate1 += mb->token_costs[tx_size][type][ref][0][band][pt][t1];
   UPDATE_RD_COST();
   best = rd_cost1 < rd_cost0;
   final_eob = i0 - 1;
@@ -439,14 +427,8 @@ void vp9_optimize_sbuv(VP9_COMMON *const cm, MACROBLOCK *x,
   foreach_transformed_block_uv(&x->e_mbd, bsize, optimize_block, &arg);
 }
 
-struct encode_b_args {
-  VP9_COMMON *cm;
-  MACROBLOCK *x;
-  struct optimize_ctx *ctx;
-};
-
-static void xform_quant(int plane, int block, BLOCK_SIZE_TYPE bsize,
-                         int ss_txfrm_size, void *arg) {
+void xform_quant(int plane, int block, BLOCK_SIZE_TYPE bsize,
+                 int ss_txfrm_size, void *arg) {
   struct encode_b_args* const args = arg;
   MACROBLOCK* const x = args->x;
   MACROBLOCKD* const xd = &x->e_mbd;
@@ -596,7 +578,7 @@ void vp9_encode_sb(VP9_COMMON *cm, MACROBLOCK *x, BLOCK_SIZE_TYPE bsize) {
   foreach_transformed_block(xd, bsize, encode_block, &arg);
 }
 
-static void encode_block_intra(int plane, int block, BLOCK_SIZE_TYPE bsize,
+void encode_block_intra(int plane, int block, BLOCK_SIZE_TYPE bsize,
                                int ss_txfrm_size, void *arg) {
   struct encode_b_args* const args = arg;
   MACROBLOCK *const x = args->x;
@@ -634,7 +616,7 @@ static void encode_block_intra(int plane, int block, BLOCK_SIZE_TYPE bsize,
   if (plane == 0 &&
       mbmi->sb_type < BLOCK_SIZE_SB8X8 &&
       mbmi->ref_frame[0] == INTRA_FRAME)
-    b_mode = xd->mode_info_context->bmi[ib].as_mode.first;
+    b_mode = xd->mode_info_context->bmi[ib].as_mode;
   else
     b_mode = mode;
 

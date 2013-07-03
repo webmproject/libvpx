@@ -39,6 +39,7 @@ VP9_DX_SRCS-yes += decoder/vp9_dsubexp.h
 VP9_DX_SRCS-yes := $(filter-out $(VP9_DX_SRCS_REMOVE-yes),$(VP9_DX_SRCS-yes))
 
 VP9_DX_SRCS-$(HAVE_SSE2) += decoder/x86/vp9_dequantize_sse2.c
+VP9_DX_SRCS-$(HAVE_NEON) += decoder/arm/neon/vp9_add_constant_residual_neon$(ASM)
 
 $(eval $(call asm_offsets_template,\
          vp9_asm_dec_offsets.asm, $(VP9_PREFIX)decoder/vp9_asm_dec_offsets.c))

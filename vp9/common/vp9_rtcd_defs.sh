@@ -59,13 +59,13 @@ specialize void vp9_build_intra_predictors
 
 if [ "$CONFIG_VP9_DECODER" = "yes" ]; then
 prototype void vp9_add_constant_residual_8x8 "const int16_t diff, uint8_t *dest, int stride"
-specialize vp9_add_constant_residual_8x8 sse2
+specialize vp9_add_constant_residual_8x8 sse2 neon
 
 prototype void vp9_add_constant_residual_16x16 "const int16_t diff, uint8_t *dest, int stride"
-specialize vp9_add_constant_residual_16x16 sse2
+specialize vp9_add_constant_residual_16x16 sse2 neon
 
 prototype void vp9_add_constant_residual_32x32 "const int16_t diff, uint8_t *dest, int stride"
-specialize vp9_add_constant_residual_32x32 sse2
+specialize vp9_add_constant_residual_32x32 sse2 neon
 fi
 
 #
@@ -558,11 +558,19 @@ prototype unsigned int vp9_get_mb_ss "const int16_t *"
 specialize vp9_get_mb_ss mmx sse2
 # ENCODEMB INVOKE
 
-prototype int64_t vp9_block_error "int16_t *coeff, int16_t *dqcoeff, intptr_t block_size"
+prototype int64_t vp9_block_error "int16_t *coeff, int16_t *dqcoeff, intptr_t block_size, int64_t *ssz"
 specialize vp9_block_error sse2
 
 prototype void vp9_subtract_block "int rows, int cols, int16_t *diff_ptr, ptrdiff_t diff_stride, const uint8_t *src_ptr, ptrdiff_t src_stride, const uint8_t *pred_ptr, ptrdiff_t pred_stride"
 specialize vp9_subtract_block sse2
+
+[ $arch = "x86_64" ] && ssse3_x86_64=ssse3
+
+prototype void vp9_quantize_b "int16_t *coeff_ptr, intptr_t n_coeffs, int skip_block, int16_t *zbin_ptr, int16_t *round_ptr, int16_t *quant_ptr, int16_t *quant_shift_ptr, int16_t *qcoeff_ptr, int16_t *dqcoeff_ptr, int16_t *dequant_ptr, int zbin_oq_value, uint16_t *eob_ptr, const int16_t *scan, const int16_t *iscan"
+specialize vp9_quantize_b $ssse3_x86_64
+
+prototype void vp9_quantize_b_32x32 "int16_t *coeff_ptr, intptr_t n_coeffs, int skip_block, int16_t *zbin_ptr, int16_t *round_ptr, int16_t *quant_ptr, int16_t *quant_shift_ptr, int16_t *qcoeff_ptr, int16_t *dqcoeff_ptr, int16_t *dequant_ptr, int zbin_oq_value, uint16_t *eob_ptr, const int16_t *scan, const int16_t *iscan"
+specialize vp9_quantize_b_32x32 $ssse3_x86_64
 
 #
 # Structured Similarity (SSIM)
@@ -579,7 +587,7 @@ fi
 
 # fdct functions
 prototype void vp9_short_fht4x4 "int16_t *InputData, int16_t *OutputData, int pitch, int tx_type"
-specialize vp9_short_fht4x4
+specialize vp9_short_fht4x4 sse2
 
 prototype void vp9_short_fht8x8 "int16_t *InputData, int16_t *OutputData, int pitch, int tx_type"
 specialize vp9_short_fht8x8 sse2
@@ -600,7 +608,7 @@ prototype void vp9_short_fdct32x32 "int16_t *InputData, int16_t *OutputData, int
 specialize vp9_short_fdct32x32
 
 prototype void vp9_short_fdct32x32_rd "int16_t *InputData, int16_t *OutputData, int pitch"
-specialize vp9_short_fdct32x32_rd
+specialize vp9_short_fdct32x32_rd sse2
 
 prototype void vp9_short_fdct16x16 "int16_t *InputData, int16_t *OutputData, int pitch"
 specialize vp9_short_fdct16x16 sse2

@@ -32,6 +32,7 @@
 #include "vp9/encoder/vp9_encodemv.h"
 #include "vp9/encoder/vp9_bitstream.h"
 #include "vp9/encoder/vp9_segmentation.h"
+#include "vp9/encoder/vp9_subexp.h"
 #include "vp9/encoder/vp9_write_bit_buffer.h"
 
 
@@ -48,8 +49,6 @@ vp9_coeff_stats tree_update_hist[TX_SIZE_MAX_SB][BLOCK_TYPES];
 extern unsigned int active_section;
 #endif
 
-#define vp9_cost_upd  ((int)(vp9_cost_one(upd) - vp9_cost_zero(upd)) >> 8)
-#define vp9_cost_upd256  ((int)(vp9_cost_one(upd) - vp9_cost_zero(upd)))
 
 #ifdef MODE_STATS
 int64_t tx_count_32x32p_stats[TX_SIZE_CONTEXTS][TX_SIZE_MAX_SB];
@@ -155,8 +154,6 @@ void write_switchable_interp_stats() {
 }
 #endif
 
-static int update_bits[255];
-
 static INLINE void write_be32(uint8_t *p, int value) {
   p[0] = value >> 24;
   p[1] = value >> 16;
@@ -164,236 +161,9 @@ static INLINE void write_be32(uint8_t *p, int value) {
   p[3] = value;
 }
 
-
-
-int recenter_nonneg(int v, int m) {
-  if (v > (m << 1))
-    return v;
-  else if (v >= m)
-    return ((v - m) << 1);
-  else
-    return ((m - v) << 1) - 1;
-}
-
 void vp9_encode_unsigned_max(struct vp9_write_bit_buffer *wb,
                              int data, int max) {
   vp9_wb_write_literal(wb, data, get_unsigned_bits(max));
-}
-
-void encode_uniform(vp9_writer *w, int v, int n) {
-  int l = get_unsigned_bits(n);
-  int m;
-  if (l == 0)
-    return;
-  m = (1 << l) - n;
-  if (v < m) {
-    vp9_write_literal(w, v, l - 1);
-  } else {
-    vp9_write_literal(w, m + ((v - m) >> 1), l - 1);
-    vp9_write_literal(w, (v - m) & 1, 1);
-  }
-}
-
-int count_uniform(int v, int n) {
-  int l = get_unsigned_bits(n);
-  int m;
-  if (l == 0) return 0;
-  m = (1 << l) - n;
-  if (v < m)
-    return l - 1;
-  else
-    return l;
-}
-
-void encode_term_subexp(vp9_writer *w, int word, int k, int num_syms) {
-  int i = 0;
-  int mk = 0;
-  while (1) {
-    int b = (i ? k + i - 1 : k);
-    int a = (1 << b);
-    if (num_syms <= mk + 3 * a) {
-      encode_uniform(w, word - mk, num_syms - mk);
-      break;
-    } else {
-      int t = (word >= mk + a);
-      vp9_write_literal(w, t, 1);
-      if (t) {
-        i = i + 1;
-        mk += a;
-      } else {
-        vp9_write_literal(w, word - mk, b);
-        break;
-      }
-    }
-  }
-}
-
-int count_term_subexp(int word, int k, int num_syms) {
-  int count = 0;
-  int i = 0;
-  int mk = 0;
-  while (1) {
-    int b = (i ? k + i - 1 : k);
-    int a = (1 << b);
-    if (num_syms <= mk + 3 * a) {
-      count += count_uniform(word - mk, num_syms - mk);
-      break;
-    } else {
-      int t = (word >= mk + a);
-      count++;
-      if (t) {
-        i = i + 1;
-        mk += a;
-      } else {
-        count += b;
-        break;
-      }
-    }
-  }
-  return count;
-}
-
-static void compute_update_table() {
-  int i;
-  for (i = 0; i < 254; i++)
-    update_bits[i] = count_term_subexp(i, SUBEXP_PARAM, 255);
-}
-
-static int split_index(int i, int n, int modulus) {
-  int max1 = (n - 1 - modulus / 2) / modulus + 1;
-  if (i % modulus == modulus / 2) i = i / modulus;
-  else i = max1 + i - (i + modulus - modulus / 2) / modulus;
-  return i;
-}
-
-static int remap_prob(int v, int m) {
-  const int n = 255;
-  const int modulus = MODULUS_PARAM;
-  int i;
-  v--;
-  m--;
-  if ((m << 1) <= n)
-    i = recenter_nonneg(v, m) - 1;
-  else
-    i = recenter_nonneg(n - 1 - v, n - 1 - m) - 1;
-
-  i = split_index(i, n - 1, modulus);
-  return i;
-}
-
-static void write_prob_diff_update(vp9_writer *w,
-                                   vp9_prob newp, vp9_prob oldp) {
-  int delp = remap_prob(newp, oldp);
-  encode_term_subexp(w, delp, SUBEXP_PARAM, 255);
-}
-
-static int prob_diff_update_cost(vp9_prob newp, vp9_prob oldp) {
-  int delp = remap_prob(newp, oldp);
-  return update_bits[delp] * 256;
-}
-
-static int prob_update_savings(const unsigned int *ct,
-                               const vp9_prob oldp, const vp9_prob newp,
-                               const vp9_prob upd) {
-  const int old_b = cost_branch256(ct, oldp);
-  const int new_b = cost_branch256(ct, newp);
-  const int update_b = 2048 + vp9_cost_upd256;
-  return old_b - new_b - update_b;
-}
-
-static int prob_diff_update_savings_search(const unsigned int *ct,
-                                           const vp9_prob oldp, vp9_prob *bestp,
-                                           const vp9_prob upd) {
-  const int old_b = cost_branch256(ct, oldp);
-  int new_b, update_b, savings, bestsavings, step;
-  vp9_prob newp, bestnewp;
-
-  bestsavings = 0;
-  bestnewp = oldp;
-
-  step = (*bestp > oldp ? -1 : 1);
-  for (newp = *bestp; newp != oldp; newp += step) {
-    new_b = cost_branch256(ct, newp);
-    update_b = prob_diff_update_cost(newp, oldp) + vp9_cost_upd256;
-    savings = old_b - new_b - update_b;
-    if (savings > bestsavings) {
-      bestsavings = savings;
-      bestnewp = newp;
-    }
-  }
-  *bestp = bestnewp;
-  return bestsavings;
-}
-
-static int prob_diff_update_savings_search_model(const unsigned int *ct,
-                                                 const vp9_prob *oldp,
-                                                 vp9_prob *bestp,
-                                                 const vp9_prob upd,
-                                                 int b, int r) {
-  int i, old_b, new_b, update_b, savings, bestsavings, step;
-  int newp;
-  vp9_prob bestnewp, newplist[ENTROPY_NODES], oldplist[ENTROPY_NODES];
-  vp9_model_to_full_probs(oldp, oldplist);
-  vpx_memcpy(newplist, oldp, sizeof(vp9_prob) * UNCONSTRAINED_NODES);
-  for (i = UNCONSTRAINED_NODES, old_b = 0; i < ENTROPY_NODES; ++i)
-    old_b += cost_branch256(ct + 2 * i, oldplist[i]);
-  old_b += cost_branch256(ct + 2 * PIVOT_NODE, oldplist[PIVOT_NODE]);
-
-  bestsavings = 0;
-  bestnewp = oldp[PIVOT_NODE];
-
-  step = (*bestp > oldp[PIVOT_NODE] ? -1 : 1);
-  newp = *bestp;
-  for (; newp != oldp[PIVOT_NODE]; newp += step) {
-    if (newp < 1 || newp > 255) continue;
-    newplist[PIVOT_NODE] = newp;
-    vp9_model_to_full_probs(newplist, newplist);
-    for (i = UNCONSTRAINED_NODES, new_b = 0; i < ENTROPY_NODES; ++i)
-      new_b += cost_branch256(ct + 2 * i, newplist[i]);
-    new_b += cost_branch256(ct + 2 * PIVOT_NODE, newplist[PIVOT_NODE]);
-    update_b = prob_diff_update_cost(newp, oldp[PIVOT_NODE]) +
-        vp9_cost_upd256;
-    savings = old_b - new_b - update_b;
-    if (savings > bestsavings) {
-      bestsavings = savings;
-      bestnewp = newp;
-    }
-  }
-  *bestp = bestnewp;
-  return bestsavings;
-}
-
-static void vp9_cond_prob_update(vp9_writer *bc, vp9_prob *oldp, vp9_prob upd,
-                                 unsigned int *ct) {
-  vp9_prob newp;
-  int savings;
-  newp = get_binary_prob(ct[0], ct[1]);
-  assert(newp >= 1);
-  savings = prob_update_savings(ct, *oldp, newp, upd);
-  if (savings > 0) {
-    vp9_write(bc, 1, upd);
-    vp9_write_prob(bc, newp);
-    *oldp = newp;
-  } else {
-    vp9_write(bc, 0, upd);
-  }
-}
-
-static void vp9_cond_prob_diff_update(vp9_writer *bc, vp9_prob *oldp,
-                                      vp9_prob upd,
-                                      unsigned int *ct) {
-  vp9_prob newp;
-  int savings;
-  newp = get_binary_prob(ct[0], ct[1]);
-  assert(newp >= 1);
-  savings = prob_diff_update_savings_search(ct, *oldp, &newp, upd);
-  if (savings > 0) {
-    vp9_write(bc, 1, upd);
-    write_prob_diff_update(bc, newp, *oldp);
-    *oldp = newp;
-  } else {
-    vp9_write(bc, 0, upd);
-  }
 }
 
 static void update_mode(
@@ -553,12 +323,10 @@ static void pack_mb_tokens(vp9_writer* const bc,
   *tp = p;
 }
 
-static void write_sb_mv_ref(vp9_writer *bc, MB_PREDICTION_MODE m,
+static void write_sb_mv_ref(vp9_writer *w, MB_PREDICTION_MODE m,
                             const vp9_prob *p) {
-#if CONFIG_DEBUG
   assert(NEARESTMV <= m && m <= NEWMV);
-#endif
-  write_token(bc, vp9_sb_mv_ref_tree, p,
+  write_token(w, vp9_sb_mv_ref_tree, p,
               vp9_sb_mv_ref_encoding_array - NEARESTMV + m);
 }
 
@@ -689,7 +457,7 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, MODE_INFO *m,
       int bh = 1 << b_height_log2(mi->sb_type);
       for (idy = 0; idy < 2; idy += bh)
         for (idx = 0; idx < 2; idx += bw) {
-          MB_PREDICTION_MODE bm = m->bmi[idy * 2 + idx].as_mode.first;
+          const MB_PREDICTION_MODE bm = m->bmi[idy * 2 + idx].as_mode;
           write_intra_mode(bc, bm, pc->fc.y_mode_prob[0]);
         }
     }
@@ -815,7 +583,7 @@ static void write_mb_modes_kf(const VP9_COMP *cpi,
         const MB_PREDICTION_MODE A = above_block_mode(m, i, mis);
         const MB_PREDICTION_MODE L = (xd->left_available || idx) ?
                                      left_block_mode(m, i) : DC_PRED;
-        const int bm = m->bmi[i].as_mode.first;
+        const int bm = m->bmi[i].as_mode;
 #ifdef ENTROPY_STATS
         ++intra_mode_stats[A][L][bm];
 #endif
@@ -1084,11 +852,11 @@ static void update_coef_probs_common(vp9_writer* const bc, VP9_COMP *cpi,
             if (l >= 3 && k == 0)
               continue;
             if (t == PIVOT_NODE)
-              s = prob_diff_update_savings_search_model(
+              s = vp9_prob_diff_update_savings_search_model(
                   frame_branch_ct[i][j][k][l][0],
                   old_frame_coef_probs[i][j][k][l], &newp, upd, i, j);
             else
-              s = prob_diff_update_savings_search(
+              s = vp9_prob_diff_update_savings_search(
                   frame_branch_ct[i][j][k][l][t], oldp, &newp, upd);
             if (s > 0 && newp != oldp)
               u = 1;
@@ -1125,11 +893,11 @@ static void update_coef_probs_common(vp9_writer* const bc, VP9_COMP *cpi,
             if (l >= 3 && k == 0)
               continue;
             if (t == PIVOT_NODE)
-              s = prob_diff_update_savings_search_model(
+              s = vp9_prob_diff_update_savings_search_model(
                   frame_branch_ct[i][j][k][l][0],
                   old_frame_coef_probs[i][j][k][l], &newp, upd, i, j);
             else
-              s = prob_diff_update_savings_search(
+              s = vp9_prob_diff_update_savings_search(
                   frame_branch_ct[i][j][k][l][t],
                   *oldp, &newp, upd);
             if (s > 0 && newp != *oldp)
@@ -1141,7 +909,7 @@ static void update_coef_probs_common(vp9_writer* const bc, VP9_COMP *cpi,
 #endif
             if (u) {
               /* send/use new probability */
-              write_prob_diff_update(bc, newp, *oldp);
+              vp9_write_prob_diff_update(bc, newp, *oldp);
               *oldp = newp;
             }
           }
@@ -1594,7 +1362,7 @@ void vp9_pack_bitstream(VP9_COMP *cpi, uint8_t *dest, unsigned long *size) {
   bytes_packed = vp9_rb_bytes_written(&wb);
   cx_data += bytes_packed;
 
-  compute_update_table();
+  vp9_compute_update_table();
 
   vp9_start_encode(&header_bc, cx_data);
 

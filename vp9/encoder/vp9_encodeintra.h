@@ -14,6 +14,8 @@
 #include "vp9/encoder/vp9_onyx_int.h"
 
 int vp9_encode_intra(VP9_COMP *cpi, MACROBLOCK *x, int use_16x16_pred);
+void encode_block_intra(int plane, int block, BLOCK_SIZE_TYPE bsize,
+                               int ss_txfrm_size, void *arg);
 void vp9_encode_intra_block_y(VP9_COMMON *const cm, MACROBLOCK *mb,
                               BLOCK_SIZE_TYPE bs);
 void vp9_encode_intra_block_uv(VP9_COMMON *const cm, MACROBLOCK *mb,
