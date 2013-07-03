@@ -1892,7 +1892,7 @@ static void rd_check_segment_txsize(VP9_COMP *cpi, MACROBLOCK *x,
 
           // adjust src pointers
           mi_buf_shift(x, i);
-          if (cpi->sf.comp_inter_joint_search_thresh < bsize) {
+          if (cpi->sf.comp_inter_joint_search_thresh <= bsize) {
             int rate_mv;
             joint_motion_search(cpi, x, bsize, frame_mv[this_mode],
                                 mi_row, mi_col, seg_mvs[i],
@@ -2551,7 +2551,7 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
         frame_mv[refs[0]].as_int = single_newmv[refs[0]].as_int;
         frame_mv[refs[1]].as_int = single_newmv[refs[1]].as_int;
 
-        if (cpi->sf.comp_inter_joint_search_thresh < bsize) {
+        if (cpi->sf.comp_inter_joint_search_thresh <= bsize) {
           joint_motion_search(cpi, x, bsize, frame_mv,
                               mi_row, mi_col, single_newmv, &rate_mv);
         } else {
