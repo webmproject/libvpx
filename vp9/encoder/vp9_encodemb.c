@@ -188,7 +188,6 @@ static void optimize_b(VP9_COMMON *const cm, MACROBLOCK *mb,
   if (mb->e_mbd.mode_info_context->mbmi.ref_frame[0] == INTRA_FRAME)
     rdmult = (rdmult * 9) >> 4;
   rddiv = mb->rddiv;
-  memset(best_index, 0, sizeof(best_index));
   /* Initialize the sentinel node of the trellis. */
   tokens[eob][0].rate = 0;
   tokens[eob][0].error = 0;
@@ -318,6 +317,7 @@ static void optimize_b(VP9_COMMON *const cm, MACROBLOCK *mb,
             mb->token_costs[tx_size][type][ref][1][band][0][t1];
         tokens[next][1].token = ZERO_TOKEN;
       }
+      best_index[i][0] = best_index[i][1] = 0;
       /* Don't update next, because we didn't add a new node. */
     }
   }
