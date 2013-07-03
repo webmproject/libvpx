@@ -978,7 +978,8 @@ void vp9_short_fht16x16_c(int16_t *input, int16_t *output,
       temp_in[j] = input[j * pitch + i] << 2;
     ht.cols(temp_in, temp_out);
     for (j = 0; j < 16; ++j)
-      outptr[j * 16 + i] = (temp_out[j] + 1 + (temp_out[j] > 0)) >> 2;
+      outptr[j * 16 + i] = (temp_out[j] + 1 + (temp_out[j] < 0)) >> 2;
+//      outptr[j * 16 + i] = (temp_out[j] + 1 + (temp_out[j] > 0)) >> 2;
   }
 
   // Rows
