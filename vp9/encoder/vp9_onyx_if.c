@@ -779,9 +779,6 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
         sf->adjust_partitioning_from_last_frame = 1;
         sf->last_partitioning_redo_frequency = 3;
         sf->unused_mode_skip_lvl = BLOCK_SIZE_SB32X32;
-        sf->reduce_first_step_size = 1;
-        sf->optimize_coefficients = 0;
-        // sf->reference_masking = 1;
         sf->tx_size_search_method = ((cpi->common.frame_type == KEY_FRAME ||
                                       cpi->common.intra_only ||
                                       cpi->common.show_frame == 0) ?
@@ -802,7 +799,6 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
                                       cpi->common.show_frame == 0) ?
                                      USE_FULL_RD :
                                      USE_LARGESTALL);
-        sf->reduce_first_step_size = 1;
         sf->mode_search_skip_flags = FLAG_SKIP_INTRA_DIRMISMATCH |
                                      FLAG_SKIP_INTRA_BESTINTER |
                                      FLAG_SKIP_COMP_BESTINTRA |
@@ -823,6 +819,9 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
                                      FLAG_SKIP_COMP_BESTINTRA |
                                      FLAG_SKIP_COMP_REFMISMATCH;
         sf->use_rd_breakout = 1;
+        sf->optimize_coefficients = 0;
+        // sf->reduce_first_step_size = 1;
+        // sf->reference_masking = 1;
       }
       /*
       if (speed == 2) {
