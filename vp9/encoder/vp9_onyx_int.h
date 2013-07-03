@@ -207,6 +207,30 @@ typedef enum {
   USE_LARGESTALL
 } TX_SIZE_SEARCH_METHOD;
 
+typedef enum {
+  // Values should be powers of 2 so that they can be selected as bits of
+  // an integer flags field
+
+  // terminate search early based on distortion so far compared to
+  // qp step, distortion in the neighborhood of the frame, etc.
+  FLAG_EARLY_TERMINATE = 1,
+
+  // skips comp inter modes if the best so far is an intra mode
+  FLAG_SKIP_COMP_BESTINTRA = 2,
+
+  // skips comp inter modes if the best single intermode so far does
+  // not have the same reference as one of the two references being
+  // tested
+  FLAG_SKIP_COMP_REFMISMATCH = 4,
+
+  // skips oblique intra modes if the best so far is an inter mode
+  FLAG_SKIP_INTRA_BESTINTER = 8,
+
+  // skips oblique intra modes  at angles 27, 63, 117, 153 if the best
+  // intra so far is not one of the neighboring directions
+  FLAG_SKIP_INTRA_DIRMISMATCH = 16,
+} MODE_SEARCH_SKIP_LOGIC;
+
 typedef struct {
   int RD;
   SEARCH_METHODS search_method;
@@ -245,10 +269,11 @@ typedef struct {
   int adjust_partitioning_from_last_frame;
   int last_partitioning_redo_frequency;
   int disable_splitmv;
-  // Search the D27, D63, D117 and D153 modes
-  // only if the best intra mode so far is one
-  // of the two directional modes nearest to each.
-  int conditional_oblique_intramodes;
+
+  // Implements various heuristics to skip searching modes
+  // The heuristics selected are based on  flags
+  // defined in the MODE_SEARCH_SKIP_HEURISTICS enum
+  unsigned int mode_search_skip_flags;
 } SPEED_FEATURES;
 
 enum BlockSize {

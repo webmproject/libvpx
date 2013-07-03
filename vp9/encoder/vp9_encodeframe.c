@@ -2018,14 +2018,14 @@ static void select_txfm_mode(VP9_COMP *cpi) {
   } else if (cpi->common.current_video_frame == 0) {
     cpi->common.txfm_mode = TX_MODE_SELECT;
   } else {
-    if (cpi->sf.tx_size_search_method == USE_FULL_RD) {
+    if (cpi->sf.tx_size_search_method == USE_LARGESTALL) {
+      cpi->common.txfm_mode = ALLOW_32X32;
+    } else if (cpi->sf.tx_size_search_method == USE_FULL_RD) {
       int frame_type = get_frame_type(cpi);
       cpi->common.txfm_mode =
           cpi->rd_tx_select_threshes[frame_type][ALLOW_32X32]
           > cpi->rd_tx_select_threshes[frame_type][TX_MODE_SELECT] ?
           ALLOW_32X32 : TX_MODE_SELECT;
-    } else if (cpi->sf.tx_size_search_method == USE_LARGESTALL) {
-      cpi->common.txfm_mode = ALLOW_32X32;
     } else {
       unsigned int total = 0;
       int i;

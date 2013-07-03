@@ -1146,8 +1146,8 @@ static void super_block_yrd(VP9_COMP *cpi,
     *psse = sse[mbmi->txfm_size];
 }
 
-static int conditional_skip(MB_PREDICTION_MODE mode,
-                            MB_PREDICTION_MODE best_intra_mode) {
+static int conditional_skipintra(MB_PREDICTION_MODE mode,
+                                 MB_PREDICTION_MODE best_intra_mode) {
   if (mode == D117_PRED &&
       best_intra_mode != V_PRED &&
       best_intra_mode != D135_PRED)
@@ -1206,8 +1206,8 @@ static int64_t rd_pick_intra4x4block(VP9_COMP *cpi, MACROBLOCK *x, int ib,
     int ratey = 0;
     // Only do the oblique modes if the best so far is
     // one of the neighboring directional modes
-    if (cpi->sf.conditional_oblique_intramodes) {
-      if (conditional_skip(mode, *best_mode))
+    if (cpi->sf.mode_search_skip_flags & FLAG_SKIP_INTRA_DIRMISMATCH) {
+      if (conditional_skipintra(mode, *best_mode))
           continue;
     }
 
@@ -2916,7 +2916,10 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
   vp9_prob comp_mode_p;
   int64_t best_overall_rd = INT64_MAX;
   int64_t best_intra_rd = INT64_MAX;
+  int64_t best_inter_rd = INT64_MAX;
   MB_PREDICTION_MODE best_intra_mode = DC_PRED;
+  // MB_PREDICTION_MODE best_inter_mode = ZEROMV;
+  MV_REFERENCE_FRAME best_inter_ref_frame = LAST_FRAME;
   INTERPOLATIONFILTERTYPE best_filter = SWITCHABLE;
   INTERPOLATIONFILTERTYPE tmp_best_filter = SWITCHABLE;
   int rate_uv_intra[TX_SIZE_MAX_SB], rate_uv_tokenonly[TX_SIZE_MAX_SB];
@@ -3031,6 +3034,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
     int i;
     int this_skip2 = 0;
     int64_t total_sse = INT_MAX;
+    int early_term = 0;
 
     for (i = 0; i < NB_TXFM_MODES; ++i)
       txfm_cache[i] = INT64_MAX;
@@ -3088,6 +3092,16 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
       continue;
     }
 
+    comp_pred = mbmi->ref_frame[1] > INTRA_FRAME;
+    if (comp_pred) {
+      if (cpi->sf.mode_search_skip_flags & FLAG_SKIP_COMP_BESTINTRA)
+        if (vp9_mode_order[best_mode_index].ref_frame == INTRA_FRAME)
+          continue;
+      if (cpi->sf.mode_search_skip_flags & FLAG_SKIP_COMP_REFMISMATCH)
+        if (vp9_mode_order[mode_index].ref_frame != best_inter_ref_frame &&
+            vp9_mode_order[mode_index].second_ref_frame != best_inter_ref_frame)
+          continue;
+    }
     // TODO(jingning, jkoleszar): scaling reference frame not supported for
     // SPLITMV.
     if (mbmi->ref_frame[0] > 0 &&
@@ -3108,7 +3122,6 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
 
     set_scale_factors(xd, mbmi->ref_frame[0], mbmi->ref_frame[1],
                       scale_factor);
-    comp_pred = mbmi->ref_frame[1] > INTRA_FRAME;
     mbmi->mode = this_mode;
     mbmi->uv_mode = DC_PRED;
 
@@ -3186,6 +3199,12 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
     if (this_mode == I4X4_PRED) {
       int rate;
 
+      /*
+      if ((cpi->sf.mode_search_skip_flags & FLAG_SKIP_INTRA_BESTINTER) &&
+          (vp9_mode_order[best_mode_index].ref_frame > INTRA_FRAME))
+        continue;
+        */
+
       mbmi->txfm_size = TX_4X4;
       rd_pick_intra4x4mby_modes(cpi, x, &rate, &rate_y,
                                 &distortion_y, INT64_MAX);
@@ -3205,8 +3224,13 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
       TX_SIZE uv_tx;
       // Only search the oblique modes if the best so far is
       // one of the neighboring directional modes
-      if (cpi->sf.conditional_oblique_intramodes) {
-        if (conditional_skip(mbmi->mode, best_intra_mode))
+      if ((cpi->sf.mode_search_skip_flags & FLAG_SKIP_INTRA_BESTINTER) &&
+          (this_mode >= D45_PRED && this_mode <= TM_PRED)) {
+        if (vp9_mode_order[best_mode_index].ref_frame > INTRA_FRAME)
+          continue;
+      }
+      if (cpi->sf.mode_search_skip_flags & FLAG_SKIP_INTRA_DIRMISMATCH) {
+        if (conditional_skipintra(mbmi->mode, best_intra_mode))
             continue;
       }
       super_block_yrd(cpi, x, &rate_y, &distortion_y, &skippable, NULL,
@@ -3249,6 +3273,16 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
       PARTITION_INFO tmp_best_partition;
       int pred_exists = 0;
       int uv_skippable;
+      if (is_comp_pred) {
+        if (cpi->sf.mode_search_skip_flags & FLAG_SKIP_COMP_BESTINTRA)
+          if (vp9_mode_order[best_mode_index].ref_frame == INTRA_FRAME)
+            continue;
+        if (cpi->sf.mode_search_skip_flags & FLAG_SKIP_COMP_REFMISMATCH)
+          if (vp9_mode_order[mode_index].ref_frame != best_inter_ref_frame &&
+              vp9_mode_order[mode_index].second_ref_frame !=
+              best_inter_ref_frame)
+            continue;
+      }
 
       this_rd_thresh = (mbmi->ref_frame[0] == LAST_FRAME) ?
           cpi->rd_threshes[bsize][THR_NEWMV] :
@@ -3441,12 +3475,21 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
       this_rd = RDCOST(x->rdmult, x->rddiv, rate2, distortion2);
     }
 
-    // Keep record of best intra distortion
+    // Keep record of best intra rd
     if (xd->mode_info_context->mbmi.ref_frame[0] == INTRA_FRAME &&
         xd->mode_info_context->mbmi.mode <= TM_PRED &&
         this_rd < best_intra_rd) {
       best_intra_rd = this_rd;
       best_intra_mode = xd->mode_info_context->mbmi.mode;
+    }
+    // Keep record of best inter rd with single reference
+    if (xd->mode_info_context->mbmi.ref_frame[0] > INTRA_FRAME &&
+        xd->mode_info_context->mbmi.ref_frame[1] == NONE &&
+        !mode_excluded &&
+        this_rd < best_inter_rd) {
+      best_inter_rd = this_rd;
+      best_inter_ref_frame = ref_frame;
+      // best_inter_mode = xd->mode_info_context->mbmi.mode;
     }
 
     if (!disable_skip && mbmi->ref_frame[0] == INTRA_FRAME)
@@ -3475,6 +3518,8 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
     if (this_rd < best_rd || x->skip) {
       if (!mode_excluded) {
         // Note index of best mode so far
+        const int qstep = xd->plane[0].dequant[1];
+
         best_mode_index = mode_index;
 
         if (ref_frame == INTRA_FRAME) {
@@ -3492,6 +3537,12 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
         if (this_mode == I4X4_PRED || this_mode == SPLITMV)
           for (i = 0; i < 4; i++)
             best_bmodes[i] = xd->mode_info_context->bmi[i];
+
+        // TODO(debargha): enhance this test with a better distortion prediction
+        // based on qp, activity mask and history
+        if (cpi->sf.mode_search_skip_flags & FLAG_EARLY_TERMINATE)
+          if (ref_frame > INTRA_FRAME && distortion2 * 4 < qstep * qstep)
+            early_term = 1;
       }
 #if 0
       // Testing this mode gave rise to an improvement in best error score.
@@ -3566,6 +3617,9 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
           best_txfm_rd[i] = adj_rd;
       }
     }
+
+    if (early_term)
+      break;
 
     if (x->skip && !mode_excluded)
       break;
