@@ -127,9 +127,7 @@ typedef enum {
    is a single probability table. */
 
 union b_mode_info {
-  struct {
-    MB_PREDICTION_MODE first;
-  } as_mode;
+  MB_PREDICTION_MODE as_mode;
   int_mv as_mv[2];  // first, second inter predictor motion vectors
 };
 
@@ -491,7 +489,7 @@ static INLINE TX_TYPE get_tx_type_4x4(const MACROBLOCKD *xd, int ib) {
     return DCT_DCT;
 
   return mode2txfm_map[mbmi->sb_type < BLOCK_SIZE_SB8X8 ?
-                       mi->bmi[ib].as_mode.first : mbmi->mode];
+                       mi->bmi[ib].as_mode : mbmi->mode];
 }
 
 static INLINE TX_TYPE get_tx_type_8x8(const MACROBLOCKD *xd) {

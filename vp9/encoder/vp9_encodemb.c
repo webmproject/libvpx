@@ -616,7 +616,7 @@ void encode_block_intra(int plane, int block, BLOCK_SIZE_TYPE bsize,
   if (plane == 0 &&
       mbmi->sb_type < BLOCK_SIZE_SB8X8 &&
       mbmi->ref_frame[0] == INTRA_FRAME)
-    b_mode = xd->mode_info_context->bmi[ib].as_mode.first;
+    b_mode = xd->mode_info_context->bmi[ib].as_mode;
   else
     b_mode = mode;
 

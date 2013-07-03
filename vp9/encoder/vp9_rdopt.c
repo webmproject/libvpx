@@ -1198,7 +1198,7 @@ static int64_t rd_pick_intra4x4block(VP9_COMP *cpi, MACROBLOCK *x, int ib,
         int64_t ssz;
 
         block = ib + idy * 2 + idx;
-        xd->mode_info_context->bmi[block].as_mode.first = mode;
+        xd->mode_info_context->bmi[block].as_mode = mode;
         src = raster_block_offset_uint8(xd, BLOCK_SIZE_SB8X8, 0, block,
                                         p->src.buf, src_stride);
         src_diff = raster_block_offset_int16(xd, BLOCK_SIZE_SB8X8, 0, block,
@@ -1265,7 +1265,7 @@ static int64_t rd_pick_intra4x4block(VP9_COMP *cpi, MACROBLOCK *x, int ib,
   for (idy = 0; idy < bh; ++idy) {
     for (idx = 0; idx < bw; ++idx) {
       block = ib + idy * 2 + idx;
-      xd->mode_info_context->bmi[block].as_mode.first = *best_mode;
+      xd->mode_info_context->bmi[block].as_mode = *best_mode;
       dst = raster_block_offset_uint8(xd, BLOCK_SIZE_SB8X8, 0, block,
                                       pd->dst.buf,
                                       pd->dst.stride);
@@ -1331,11 +1331,11 @@ static int64_t rd_pick_intra4x4mby_modes(VP9_COMP *cpi, MACROBLOCK *mb,
       distortion += d;
       tot_rate_y += ry;
 
-      mic->bmi[i].as_mode.first = best_mode;
+      mic->bmi[i].as_mode = best_mode;
       for (j = 1; j < bh; ++j)
-        mic->bmi[i + j * 2].as_mode.first = best_mode;
+        mic->bmi[i + j * 2].as_mode = best_mode;
       for (j = 1; j < bw; ++j)
-        mic->bmi[i + j].as_mode.first = best_mode;
+        mic->bmi[i + j].as_mode = best_mode;
 
       if (total_rd >= best_rd)
         break;
@@ -1348,7 +1348,7 @@ static int64_t rd_pick_intra4x4mby_modes(VP9_COMP *cpi, MACROBLOCK *mb,
   *Rate = cost;
   *rate_y = tot_rate_y;
   *Distortion = distortion;
-  xd->mode_info_context->mbmi.mode = mic->bmi[3].as_mode.first;
+  xd->mode_info_context->mbmi.mode = mic->bmi[3].as_mode;
 
   return RDCOST(mb->rdmult, mb->rddiv, cost, distortion);
 }

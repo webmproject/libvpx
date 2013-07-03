@@ -457,7 +457,7 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, MODE_INFO *m,
       int bh = 1 << b_height_log2(mi->sb_type);
       for (idy = 0; idy < 2; idy += bh)
         for (idx = 0; idx < 2; idx += bw) {
-          MB_PREDICTION_MODE bm = m->bmi[idy * 2 + idx].as_mode.first;
+          const MB_PREDICTION_MODE bm = m->bmi[idy * 2 + idx].as_mode;
           write_intra_mode(bc, bm, pc->fc.y_mode_prob[0]);
         }
     }
@@ -583,7 +583,7 @@ static void write_mb_modes_kf(const VP9_COMP *cpi,
         const MB_PREDICTION_MODE A = above_block_mode(m, i, mis);
         const MB_PREDICTION_MODE L = (xd->left_available || idx) ?
                                      left_block_mode(m, i) : DC_PRED;
-        const int bm = m->bmi[i].as_mode.first;
+        const int bm = m->bmi[i].as_mode;
 #ifdef ENTROPY_STATS
         ++intra_mode_stats[A][L][bm];
 #endif

@@ -2142,7 +2142,7 @@ static void sum_intra_stats(VP9_COMP *cpi, MACROBLOCK *x) {
     int bh = 1 << b_height_log2(xd->mode_info_context->mbmi.sb_type);
     for (idy = 0; idy < 2; idy += bh) {
       for (idx = 0; idx < 2; idx += bw) {
-        int m = xd->mode_info_context->bmi[idy * 2 + idx].as_mode.first;
+        int m = xd->mode_info_context->bmi[idy * 2 + idx].as_mode;
         ++cpi->y_mode_count[0][m];
       }
     }

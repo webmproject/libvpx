@@ -162,15 +162,15 @@ static void read_intra_mode_info(VP9D_COMP *pbi, MODE_INFO *m,
                                       left_block_mode(m, ib) : DC_PRED;
         const MB_PREDICTION_MODE b_mode = read_intra_mode(r,
                                               cm->kf_y_mode_prob[A][L]);
-        m->bmi[ib].as_mode.first = b_mode;
+        m->bmi[ib].as_mode = b_mode;
         if (bh == 2)
-          m->bmi[ib + 2].as_mode.first = b_mode;
+          m->bmi[ib + 2].as_mode = b_mode;
         if (bw == 2)
-          m->bmi[ib + 1].as_mode.first = b_mode;
+          m->bmi[ib + 1].as_mode = b_mode;
       }
     }
 
-    mbmi->mode = m->bmi[3].as_mode.first;
+    mbmi->mode = m->bmi[3].as_mode;
   }
 
   mbmi->uv_mode = read_intra_mode(r, cm->kf_uv_mode_prob[mbmi->mode]);
@@ -432,16 +432,16 @@ static void read_intra_block_modes(VP9D_COMP *pbi, MODE_INFO *mi,
        for (idx = 0; idx < 2; idx += bw) {
          const int ib = idy * 2 + idx;
          const int b_mode = read_intra_mode(r, cm->fc.y_mode_prob[0]);
-         mi->bmi[ib].as_mode.first = b_mode;
+         mi->bmi[ib].as_mode = b_mode;
          cm->fc.y_mode_counts[0][b_mode]++;
 
          if (bh == 2)
-           mi->bmi[ib + 2].as_mode.first = b_mode;
+           mi->bmi[ib + 2].as_mode = b_mode;
          if (bw == 2)
-           mi->bmi[ib + 1].as_mode.first = b_mode;
+           mi->bmi[ib + 1].as_mode = b_mode;
       }
     }
-    mbmi->mode = mi->bmi[3].as_mode.first;
+    mbmi->mode = mi->bmi[3].as_mode;
   }
 
   mbmi->uv_mode = read_intra_mode(r, cm->fc.uv_mode_prob[mbmi->mode]);
