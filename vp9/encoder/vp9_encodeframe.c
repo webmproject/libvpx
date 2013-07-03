@@ -1466,6 +1466,138 @@ static void rd_pick_partition(VP9_COMP *cpi, TOKENEXTRA **tp, int mi_row,
       restore_context(cpi, mi_row, mi_col, a, l, sa, sl, bsize);
     }
   }
+
+  x->fast_ms = 0;
+  x->pred_mv.as_int = 0;
+  x->subblock_ref = 0;
+
+  // Use 4 subblocks' motion estimation results to speed up current
+  // partition's checking.
+  if (cpi->sf.using_small_partition_info) {
+    // Only use 8x8 result for non HD videos.
+    // int use_8x8 = (MIN(cpi->common.width, cpi->common.height) < 720) ? 1 : 0;
+    int use_8x8 = 1;
+
+    if (cm->frame_type && !cpi->is_src_frame_alt_ref &&
+        ((use_8x8 && bsize == BLOCK_SIZE_MB16X16) ||
+        bsize == BLOCK_SIZE_SB32X32 || bsize == BLOCK_SIZE_SB64X64)) {
+      int ref0 = 0, ref1 = 0, ref2 = 0, ref3 = 0;
+
+      if (bsize == BLOCK_SIZE_MB16X16) {
+        ref0 = x->sb8x8_context[xd->sb_index][xd->mb_index][0].mic.mbmi.
+            ref_frame[0];
+        ref1 = x->sb8x8_context[xd->sb_index][xd->mb_index][1].mic.mbmi.
+            ref_frame[0];
+        ref2 = x->sb8x8_context[xd->sb_index][xd->mb_index][2].mic.mbmi.
+            ref_frame[0];
+        ref3 = x->sb8x8_context[xd->sb_index][xd->mb_index][3].mic.mbmi.
+            ref_frame[0];
+      } else if (bsize == BLOCK_SIZE_SB32X32) {
+        ref0 = x->mb_context[xd->sb_index][0].mic.mbmi.ref_frame[0];
+        ref1 = x->mb_context[xd->sb_index][1].mic.mbmi.ref_frame[0];
+        ref2 = x->mb_context[xd->sb_index][2].mic.mbmi.ref_frame[0];
+        ref3 = x->mb_context[xd->sb_index][3].mic.mbmi.ref_frame[0];
+      } else if (bsize == BLOCK_SIZE_SB64X64) {
+        ref0 = x->sb32_context[0].mic.mbmi.ref_frame[0];
+        ref1 = x->sb32_context[1].mic.mbmi.ref_frame[0];
+        ref2 = x->sb32_context[2].mic.mbmi.ref_frame[0];
+        ref3 = x->sb32_context[3].mic.mbmi.ref_frame[0];
+      }
+
+      // Currently, only consider 4 inter ref frames.
+      if (ref0 && ref1 && ref2 && ref3) {
+        int16_t mvr0 = 0, mvc0 = 0, mvr1 = 0, mvc1 = 0, mvr2 = 0, mvc2 = 0,
+            mvr3 = 0, mvc3 = 0;
+        int d01, d23, d02, d13;  // motion vector distance between 2 blocks
+
+        // Get each subblock's motion vectors.
+        if (bsize == BLOCK_SIZE_MB16X16) {
+          mvr0 = x->sb8x8_context[xd->sb_index][xd->mb_index][0].mic.mbmi.mv[0].
+              as_mv.row;
+          mvc0 = x->sb8x8_context[xd->sb_index][xd->mb_index][0].mic.mbmi.mv[0].
+              as_mv.col;
+          mvr1 = x->sb8x8_context[xd->sb_index][xd->mb_index][1].mic.mbmi.mv[0].
+              as_mv.row;
+          mvc1 = x->sb8x8_context[xd->sb_index][xd->mb_index][1].mic.mbmi.mv[0].
+              as_mv.col;
+          mvr2 = x->sb8x8_context[xd->sb_index][xd->mb_index][2].mic.mbmi.mv[0].
+              as_mv.row;
+          mvc2 = x->sb8x8_context[xd->sb_index][xd->mb_index][2].mic.mbmi.mv[0].
+              as_mv.col;
+          mvr3 = x->sb8x8_context[xd->sb_index][xd->mb_index][3].mic.mbmi.mv[0].
+              as_mv.row;
+          mvc3 = x->sb8x8_context[xd->sb_index][xd->mb_index][3].mic.mbmi.mv[0].
+              as_mv.col;
+        } else if (bsize == BLOCK_SIZE_SB32X32) {
+          mvr0 = x->mb_context[xd->sb_index][0].mic.mbmi.mv[0].as_mv.row;
+          mvc0 = x->mb_context[xd->sb_index][0].mic.mbmi.mv[0].as_mv.col;
+          mvr1 = x->mb_context[xd->sb_index][1].mic.mbmi.mv[0].as_mv.row;
+          mvc1 = x->mb_context[xd->sb_index][1].mic.mbmi.mv[0].as_mv.col;
+          mvr2 = x->mb_context[xd->sb_index][2].mic.mbmi.mv[0].as_mv.row;
+          mvc2 = x->mb_context[xd->sb_index][2].mic.mbmi.mv[0].as_mv.col;
+          mvr3 = x->mb_context[xd->sb_index][3].mic.mbmi.mv[0].as_mv.row;
+          mvc3 = x->mb_context[xd->sb_index][3].mic.mbmi.mv[0].as_mv.col;
+        } else if (bsize == BLOCK_SIZE_SB64X64) {
+          mvr0 = x->sb32_context[0].mic.mbmi.mv[0].as_mv.row;
+          mvc0 = x->sb32_context[0].mic.mbmi.mv[0].as_mv.col;
+          mvr1 = x->sb32_context[1].mic.mbmi.mv[0].as_mv.row;
+          mvc1 = x->sb32_context[1].mic.mbmi.mv[0].as_mv.col;
+          mvr2 = x->sb32_context[2].mic.mbmi.mv[0].as_mv.row;
+          mvc2 = x->sb32_context[2].mic.mbmi.mv[0].as_mv.col;
+          mvr3 = x->sb32_context[3].mic.mbmi.mv[0].as_mv.row;
+          mvc3 = x->sb32_context[3].mic.mbmi.mv[0].as_mv.col;
+        }
+
+        // Adjust sign if ref is alt_ref
+        if (cm->ref_frame_sign_bias[ref0]) {
+          mvr0 *= -1;
+          mvc0 *= -1;
+        }
+
+        if (cm->ref_frame_sign_bias[ref1]) {
+          mvr1 *= -1;
+          mvc1 *= -1;
+        }
+
+        if (cm->ref_frame_sign_bias[ref2]) {
+          mvr2 *= -1;
+          mvc2 *= -1;
+        }
+
+        if (cm->ref_frame_sign_bias[ref3]) {
+          mvr3 *= -1;
+          mvc3 *= -1;
+        }
+
+        // Calculate mv distances.
+        d01 = MAX(abs(mvr0 - mvr1), abs(mvc0 - mvc1));
+        d23 = MAX(abs(mvr2 - mvr3), abs(mvc2 - mvc3));
+        d02 = MAX(abs(mvr0 - mvr2), abs(mvc0 - mvc2));
+        d13 = MAX(abs(mvr1 - mvr3), abs(mvc1 - mvc3));
+
+        if (d01 < 24 && d23 < 24 && d02 < 24 && d13 < 24) {
+          // Set fast motion search level.
+          x->fast_ms = 1;
+
+          // Calculate prediction MV
+          x->pred_mv.as_mv.row = (mvr0 + mvr1 + mvr2 + mvr3) >> 2;
+          x->pred_mv.as_mv.col = (mvc0 + mvc1 + mvc2 + mvc3) >> 2;
+
+          if (ref0 == ref1 && ref1 == ref2 && ref2 == ref3 &&
+              d01 < 2 && d23 < 2 && d02 < 2 && d13 < 2) {
+            // Set fast motion search level.
+            x->fast_ms = 2;
+
+            if (!d01 && !d23 && !d02 && !d13) {
+              x->fast_ms = 3;
+              x->subblock_ref = ref0;
+            }
+          }
+        }
+      }
+    }
+  }
+
   if (!cpi->sf.use_partitions_less_than
       || (cpi->sf.use_partitions_less_than
           && bsize <= cpi->sf.less_than_block_size)) {

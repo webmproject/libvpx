@@ -723,7 +723,7 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
   sf->use_rd_breakout = 0;
   sf->skip_encode_sb = 0;
   sf->use_uv_intra_rd_estimate = 0;
-
+  sf->using_small_partition_info = 0;
   // Skip any mode not chosen at size < X for all sizes > X
   // Hence BLOCK_SIZE_SB64X64 (skip is off)
   sf->unused_mode_skip_lvl = BLOCK_SIZE_SB64X64;
@@ -795,6 +795,7 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
         sf->use_rd_breakout = 1;
         sf->skip_encode_sb = 1;
         sf->use_uv_intra_rd_estimate = 1;
+        sf->using_small_partition_info = 1;
       }
       if (speed == 3) {
         sf->comp_inter_joint_search_thresh = BLOCK_SIZE_TYPES;
