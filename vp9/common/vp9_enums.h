@@ -17,6 +17,7 @@
 
 #define MI_SIZE (1 << LOG2_MI_SIZE)
 #define MI_MASK ((64 >> LOG2_MI_SIZE) - 1)
+#define MI_BLOCK_SIZE (64 / MI_SIZE)
 
 typedef enum BLOCK_SIZE_TYPE {
   BLOCK_SIZE_AB4X4,
