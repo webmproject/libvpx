@@ -200,6 +200,19 @@ static void update_mbintra_mode_probs(VP9_COMP* const cpi,
                 (unsigned int *)cpi->y_mode_count[j]);
 }
 
+static void write_selected_txfm_size(const VP9_COMP *cpi, TX_SIZE tx_size,
+                                     BLOCK_SIZE_TYPE bsize, vp9_writer *w) {
+  const VP9_COMMON *const c = &cpi->common;
+  const MACROBLOCKD *const xd = &cpi->mb.e_mbd;
+  const vp9_prob *tx_probs = vp9_get_pred_probs(c, xd, PRED_TX_SIZE);
+  vp9_write(w, tx_size != TX_4X4, tx_probs[0]);
+  if (bsize >= BLOCK_SIZE_MB16X16 && tx_size != TX_4X4) {
+    vp9_write(w, tx_size != TX_8X8, tx_probs[1]);
+    if (bsize >= BLOCK_SIZE_SB32X32 && tx_size != TX_8X8)
+      vp9_write(w, tx_size != TX_16X16, tx_probs[2]);
+  }
+}
+
 void vp9_update_skip_probs(VP9_COMP *cpi, vp9_writer *bc) {
   VP9_COMMON *const pc = &cpi->common;
   int k;
@@ -431,14 +444,7 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, MODE_INFO *m,
   if (mi->sb_type >= BLOCK_SIZE_SB8X8 && pc->txfm_mode == TX_MODE_SELECT &&
       !(rf != INTRA_FRAME &&
         (skip_coeff || vp9_segfeature_active(xd, segment_id, SEG_LVL_SKIP)))) {
-    TX_SIZE sz = mi->txfm_size;
-    const vp9_prob *tx_probs = vp9_get_pred_probs(pc, xd, PRED_TX_SIZE);
-    vp9_write(bc, sz != TX_4X4, tx_probs[0]);
-    if (mi->sb_type >= BLOCK_SIZE_MB16X16 && sz != TX_4X4) {
-      vp9_write(bc, sz != TX_8X8, tx_probs[1]);
-      if (mi->sb_type >= BLOCK_SIZE_SB32X32 && sz != TX_8X8)
-        vp9_write(bc, sz != TX_16X16, tx_probs[2]);
-    }
+    write_selected_txfm_size(cpi, mi->txfm_size, mi->sb_type, bc);
   }
 
   if (rf == INTRA_FRAME) {
@@ -461,13 +467,10 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, MODE_INFO *m,
           write_intra_mode(bc, bm, pc->fc.y_mode_prob[0]);
         }
     }
-    write_intra_mode(bc, mi->uv_mode,
-                     pc->fc.uv_mode_prob[mode]);
+    write_intra_mode(bc, mi->uv_mode, pc->fc.uv_mode_prob[mode]);
   } else {
     vp9_prob *mv_ref_p;
-
     encode_ref_frame(cpi, bc);
-
     mv_ref_p = cpi->common.fc.inter_mode_probs[mi->mb_mode_context[rf]];
 
 #ifdef ENTROPY_STATS
@@ -484,8 +487,7 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, MODE_INFO *m,
 
     if (cpi->common.mcomp_filter_type == SWITCHABLE) {
       write_token(bc, vp9_switchable_interp_tree,
-                  vp9_get_pred_probs(&cpi->common, xd,
-                                     PRED_SWITCHABLE_INTERP),
+                  vp9_get_pred_probs(&cpi->common, xd, PRED_SWITCHABLE_INTERP),
                   vp9_switchable_interp_encodings +
                   vp9_switchable_interp_map[mi->interp_filter]);
     } else {
@@ -557,16 +559,8 @@ static void write_mb_modes_kf(const VP9_COMP *cpi,
     vp9_write(bc, skip_coeff, vp9_get_pred_prob(c, xd, PRED_MBSKIP));
   }
 
-  if (m->mbmi.sb_type >= BLOCK_SIZE_SB8X8 && c->txfm_mode == TX_MODE_SELECT) {
-    TX_SIZE sz = m->mbmi.txfm_size;
-    const vp9_prob *tx_probs = vp9_get_pred_probs(c, xd, PRED_TX_SIZE);
-    vp9_write(bc, sz != TX_4X4, tx_probs[0]);
-    if (m->mbmi.sb_type >= BLOCK_SIZE_MB16X16 && sz != TX_4X4) {
-      vp9_write(bc, sz != TX_8X8, tx_probs[1]);
-      if (m->mbmi.sb_type >= BLOCK_SIZE_SB32X32 && sz != TX_8X8)
-        vp9_write(bc, sz != TX_16X16, tx_probs[2]);
-    }
-  }
+  if (m->mbmi.sb_type >= BLOCK_SIZE_SB8X8 && c->txfm_mode == TX_MODE_SELECT)
+    write_selected_txfm_size(cpi, m->mbmi.txfm_size, m->mbmi.sb_type, bc);
 
   if (m->mbmi.sb_type >= BLOCK_SIZE_SB8X8) {
     const MB_PREDICTION_MODE A = above_block_mode(m, 0, mis);
