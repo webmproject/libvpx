@@ -16,6 +16,24 @@
       "revId": "9c3939db4ba4c5c0639ac6652c6a196abef8ba83",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAbn//0/E\u003d",
+        "filename": "vp9/common/vp9_enums.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2013-07-03T17:54:15Z",
+      "side": 1,
+      "message": "I think this is ok although MAX means exactly size of 64x64 block, not something else like 32x32. Done.",
+      "parentUuid": "AAAAbn//1z4\u003d",
+      "revId": "9c3939db4ba4c5c0639ac6652c6a196abef8ba83",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
