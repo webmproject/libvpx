@@ -738,7 +738,6 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
 #else
       sf->static_segmentation = 0;
 #endif
-      sf->comp_inter_joint_search_thresh = BLOCK_SIZE_MB16X16;
       sf->auto_mv_step_size = 1;
       sf->use_avoid_tested_higherror = 1;
       sf->adaptive_rd_thresh = 1;
