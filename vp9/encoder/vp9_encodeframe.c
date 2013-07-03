@@ -1488,7 +1488,8 @@ static void rd_pick_partition(VP9_COMP *cpi, TOKENEXTRA **tp, int mi_row,
           *(get_sb_partitioning(x, bsize)) = bsize;
       }
     }
-    if (!cpi->sf.less_rectangular_check || !larger_is_better) {
+    if (!cpi->sf.use_square_partition_only &&
+        (!cpi->sf.less_rectangular_check ||!larger_is_better)) {
       // PARTITION_HORZ
       if (bsize >= BLOCK_SIZE_SB8X8 && mi_col + (ms >> 1) < cm->mi_cols) {
         int r2, r = 0;
