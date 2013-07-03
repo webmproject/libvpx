@@ -82,17 +82,6 @@ const nmv_context vp9_default_nmv_context = {
   },
 };
 
-MV_JOINT_TYPE vp9_get_mv_joint(const MV *mv) {
-  if (mv->row == 0 && mv->col == 0)
-    return MV_JOINT_ZERO;
-  else if (mv->row == 0 && mv->col != 0)
-    return MV_JOINT_HNZVZ;
-  else if (mv->row != 0 && mv->col == 0)
-    return MV_JOINT_HZVNZ;
-  else
-    return MV_JOINT_HNZVNZ;
-}
-
 #define mv_class_base(c) ((c) ? (CLASS0_SIZE << (c + 2)) : 0)
 
 MV_CLASS_TYPE vp9_get_mv_class(int z, int *offset) {

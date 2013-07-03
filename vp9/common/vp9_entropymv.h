@@ -99,7 +99,14 @@ typedef struct {
   nmv_component comps[2];
 } nmv_context;
 
-MV_JOINT_TYPE vp9_get_mv_joint(const MV *mv);
+static INLINE MV_JOINT_TYPE vp9_get_mv_joint(const MV *mv) {
+  if (mv->row == 0) {
+    return mv->col == 0 ? MV_JOINT_ZERO : MV_JOINT_HNZVZ;
+  } else {
+    return mv->col == 0 ? MV_JOINT_HZVNZ : MV_JOINT_HNZVNZ;
+  }
+}
+
 MV_CLASS_TYPE vp9_get_mv_class(int z, int *offset);
 int vp9_get_mv_mag(MV_CLASS_TYPE c, int offset);
 
