@@ -268,23 +268,23 @@ static void filter_block_plane(VP9_COMMON *cm, MACROBLOCKD *xd,
   const int col_step = 1 << xd->plane[plane].subsampling_x;
   struct buf_2d * const dst = &xd->plane[plane].dst;
   uint8_t* const dst0 = dst->buf;
-  unsigned int mask_16x16[64 / MI_SIZE] = {0};
-  unsigned int mask_8x8[64 / MI_SIZE] = {0};
-  unsigned int mask_4x4[64 / MI_SIZE] = {0};
-  unsigned int mask_4x4_int[64 / MI_SIZE] = {0};
-  struct loop_filter_info lfi[64 / MI_SIZE][64 / MI_SIZE];
+  unsigned int mask_16x16[MI_BLOCK_SIZE] = {0};
+  unsigned int mask_8x8[MI_BLOCK_SIZE] = {0};
+  unsigned int mask_4x4[MI_BLOCK_SIZE] = {0};
+  unsigned int mask_4x4_int[MI_BLOCK_SIZE] = {0};
+  struct loop_filter_info lfi[MI_BLOCK_SIZE][MI_BLOCK_SIZE];
   int r, c;
   MODE_INFO *mi = xd->mode_info_context;
   int row_step_stride = cm->mode_info_stride * row_step;
 
-  for (r = 0; r < 64 / MI_SIZE && mi_row + r < cm->mi_rows; r += row_step) {
+  for (r = 0; r < MI_BLOCK_SIZE && mi_row + r < cm->mi_rows; r += row_step) {
     unsigned int mask_16x16_c = 0;
     unsigned int mask_8x8_c = 0;
     unsigned int mask_4x4_c = 0;
     unsigned int border_mask;
 
     // Determine the vertical edges that need filtering
-    for (c = 0; c < 64 / MI_SIZE && mi_col + c < cm->mi_cols; c += col_step) {
+    for (c = 0; c < MI_BLOCK_SIZE && mi_col + c < cm->mi_cols; c += col_step) {
       const int skip_this = mi[c].mbmi.mb_skip_coeff
                             && mi[c].mbmi.ref_frame[0] != INTRA_FRAME;
       // left edge of current unit is block/partition edge -> no skip
@@ -366,7 +366,7 @@ static void filter_block_plane(VP9_COMMON *cm, MACROBLOCKD *xd,
 
   // Now do horizontal pass
   dst->buf = dst0;
-  for (r = 0; r < 64 / MI_SIZE && mi_row + r < cm->mi_rows; r += row_step) {
+  for (r = 0; r < MI_BLOCK_SIZE && mi_row + r < cm->mi_rows; r += row_step) {
     const int skip_border_4x4_r = ss_y && mi_row + r == cm->mi_rows - 1;
     const unsigned int mask_4x4_int_r = skip_border_4x4_r ? 0 : mask_4x4_int[r];
 
@@ -379,19 +379,17 @@ static void filter_block_plane(VP9_COMMON *cm, MACROBLOCKD *xd,
   }
 }
 
-void vp9_loop_filter_frame(VP9_COMMON *cm,
-                           MACROBLOCKD *xd,
-                           int frame_filter_level,
-                           int y_only) {
+void vp9_loop_filter_frame(VP9_COMMON *cm, MACROBLOCKD *xd,
+                           int frame_filter_level, int y_only) {
   int mi_row, mi_col;
 
   // Initialize the loop filter for this frame.
   vp9_loop_filter_frame_init(cm, xd, frame_filter_level);
 
-  for (mi_row = 0; mi_row < cm->mi_rows; mi_row += 64 / MI_SIZE) {
+  for (mi_row = 0; mi_row < cm->mi_rows; mi_row += MI_BLOCK_SIZE) {
     MODE_INFO* const mi = cm->mi + mi_row * cm->mode_info_stride;
 
-    for (mi_col = 0; mi_col < cm->mi_cols; mi_col += 64 / MI_SIZE) {
+    for (mi_col = 0; mi_col < cm->mi_cols; mi_col += MI_BLOCK_SIZE) {
       int plane;
 
       setup_dst_planes(xd, cm->frame_to_show, mi_row, mi_col);
