@@ -32,8 +32,8 @@ int vp9_segfeature_active(const struct segmentation *seg, int segment_id,
 }
 
 void vp9_clearall_segfeatures(struct segmentation *seg) {
-  vpx_memset(seg->feature_data, 0, sizeof(seg->feature_data));
-  vpx_memset(seg->feature_mask, 0, sizeof(seg->feature_mask));
+  vp9_zero(seg->feature_data);
+  vp9_zero(seg->feature_mask);
 }
 
 void vp9_enable_segfeature(struct segmentation *seg, int segment_id,

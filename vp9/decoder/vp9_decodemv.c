@@ -585,9 +585,9 @@ static void read_inter_mode_info(VP9D_COMP *pbi, MODE_INFO *mi,
             mi->bmi[j].as_mv[1].as_int = secondmv.as_int;
 
           if (bh == 2)
-            vpx_memcpy(&mi->bmi[j + 2], &mi->bmi[j], sizeof(mi->bmi[j]));
+            mi->bmi[j + 2] = mi->bmi[j];
           if (bw == 2)
-            vpx_memcpy(&mi->bmi[j + 1], &mi->bmi[j], sizeof(mi->bmi[j]));
+            mi->bmi[j + 1] = mi->bmi[j];
           mi->mbmi.mode = blockmode;
         }
       }

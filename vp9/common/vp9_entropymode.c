@@ -8,11 +8,11 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
+#include "vpx_mem/vpx_mem.h"
 
+#include "vp9/common/vp9_alloccommon.h"
 #include "vp9/common/vp9_onyxc_int.h"
 #include "vp9/common/vp9_seg_common.h"
-#include "vp9/common/vp9_alloccommon.h"
-#include "vpx_mem/vpx_mem.h"
 
 static const vp9_prob default_kf_uv_probs[VP9_INTRA_MODES]
                                          [VP9_INTRA_MODES - 1] = {
@@ -246,9 +246,8 @@ void vp9_entropy_mode_init() {
 }
 
 void vp9_init_mode_contexts(VP9_COMMON *pc) {
-  vpx_memset(pc->fc.inter_mode_counts, 0, sizeof(pc->fc.inter_mode_counts));
-  vpx_memcpy(pc->fc.inter_mode_probs, default_inter_mode_probs,
-             sizeof(default_inter_mode_probs));
+  vp9_zero(pc->fc.inter_mode_counts);
+  vp9_copy(pc->fc.inter_mode_probs, default_inter_mode_probs);
 }
 
 void vp9_accum_mv_refs(VP9_COMMON *pc,
@@ -447,8 +446,8 @@ static void set_default_lf_deltas(MACROBLOCKD *xd) {
   xd->ref_lf_deltas[GOLDEN_FRAME] = -1;
   xd->ref_lf_deltas[ALTREF_FRAME] = -1;
 
-  xd->mode_lf_deltas[0] = 0;              // Zero
-  xd->mode_lf_deltas[1] = 0;               // New mv
+  xd->mode_lf_deltas[0] = 0;
+  xd->mode_lf_deltas[1] = 0;
 }
 
 void vp9_setup_past_independence(VP9_COMMON *cm, MACROBLOCKD *xd) {
@@ -461,14 +460,15 @@ void vp9_setup_past_independence(VP9_COMMON *cm, MACROBLOCKD *xd) {
     vpx_memset(cm->last_frame_seg_map, 0, (cm->mi_rows * cm->mi_cols));
 
   // Reset the mode ref deltas for loop filter
-  vpx_memset(xd->last_ref_lf_deltas, 0, sizeof(xd->last_ref_lf_deltas));
-  vpx_memset(xd->last_mode_lf_deltas, 0, sizeof(xd->last_mode_lf_deltas));
+  vp9_zero(xd->last_ref_lf_deltas);
+  vp9_zero(xd->last_mode_lf_deltas);
   set_default_lf_deltas(xd);
 
   vp9_default_coef_probs(cm);
   vp9_init_mbmode_probs(cm);
-  vpx_memcpy(cm->kf_y_mode_prob, vp9_kf_default_bmode_probs,
-             sizeof(vp9_kf_default_bmode_probs));
+
+  vp9_copy(cm->kf_y_mode_prob, vp9_kf_default_bmode_probs);
+
   vp9_init_mv_probs(cm);
 
   // To force update of the sharpness
@@ -476,15 +476,14 @@ void vp9_setup_past_independence(VP9_COMMON *cm, MACROBLOCKD *xd) {
 
   vp9_init_mode_contexts(cm);
 
-  if ((cm->frame_type == KEY_FRAME) ||
-      cm->error_resilient_mode || (cm->reset_frame_context == 3)) {
+  if (cm->frame_type == KEY_FRAME ||
+      cm->error_resilient_mode || cm->reset_frame_context == 3) {
     // Reset all frame contexts.
     for (i = 0; i < NUM_FRAME_CONTEXTS; ++i)
-      vpx_memcpy(&cm->frame_contexts[i], &cm->fc, sizeof(cm->fc));
+      cm->frame_contexts[i] = cm->fc;
   } else if (cm->reset_frame_context == 2) {
     // Reset only the frame context specified in the frame header.
-    vpx_memcpy(&cm->frame_contexts[cm->frame_context_idx], &cm->fc,
-               sizeof(cm->fc));
+    cm->frame_contexts[cm->frame_context_idx] = cm->fc;
   }
 
   vpx_memset(cm->prev_mip, 0,
@@ -498,7 +497,7 @@ void vp9_setup_past_independence(VP9_COMMON *cm, MACROBLOCKD *xd) {
   vp9_update_mode_info_border(cm, cm->prev_mip);
   vp9_update_mode_info_in_image(cm, cm->prev_mi);
 
-  vpx_memset(cm->ref_frame_sign_bias, 0, sizeof(cm->ref_frame_sign_bias));
+  vp9_zero(cm->ref_frame_sign_bias);
 
   cm->frame_context_idx = 0;
 }

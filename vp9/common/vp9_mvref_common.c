@@ -147,7 +147,7 @@ void vp9_find_mv_refs_idx(VP9_COMMON *cm, MACROBLOCKD *xd, MODE_INFO *here,
   int_mv c2_refmv;
   MV_REFERENCE_FRAME c_ref_frame;
   MV_REFERENCE_FRAME c2_ref_frame;
-  int candidate_scores[MAX_MV_REF_CANDIDATES];
+  int candidate_scores[MAX_MV_REF_CANDIDATES] = { 0 };
   int refmv_count = 0;
   int split_count = 0;
   int (*mv_ref_search)[2];
@@ -160,7 +160,6 @@ void vp9_find_mv_refs_idx(VP9_COMMON *cm, MACROBLOCKD *xd, MODE_INFO *here,
 
   // Blank the reference vector lists and other local structures.
   vpx_memset(mv_ref_list, 0, sizeof(int_mv) * MAX_MV_REF_CANDIDATES);
-  vpx_memset(candidate_scores, 0, sizeof(candidate_scores));
 
   mv_ref_search = mv_ref_blocks[mbmi->sb_type];
   if (mbmi->sb_type < BLOCK_SIZE_SB8X8) {

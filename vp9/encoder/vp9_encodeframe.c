@@ -1827,10 +1827,10 @@ static void encode_frame_internal(VP9_COMP *cpi) {
   // re-initencode frame context.
   init_encode_frame_mb_context(cpi);
 
-  vpx_memset(cpi->rd_comp_pred_diff, 0, sizeof(cpi->rd_comp_pred_diff));
+  vp9_zero(cpi->rd_comp_pred_diff);
   vp9_zero(cpi->rd_filter_diff);
-  vpx_memset(cpi->rd_tx_select_diff, 0, sizeof(cpi->rd_tx_select_diff));
-  vpx_memset(cpi->rd_tx_select_threshes, 0, sizeof(cpi->rd_tx_select_threshes));
+  vp9_zero(cpi->rd_tx_select_diff);
+  vp9_zero(cpi->rd_tx_select_threshes);
 
   set_prev_mi(cm);
 

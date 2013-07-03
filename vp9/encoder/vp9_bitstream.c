@@ -714,7 +714,7 @@ static void write_modes(VP9_COMP *cpi, vp9_writer* const bc,
   for (mi_row = c->cur_tile_mi_row_start; mi_row < c->cur_tile_mi_row_end;
        mi_row += 8, m_ptr += 8 * mis) {
     m = m_ptr;
-    vpx_memset(c->left_seg_context, 0, sizeof(c->left_seg_context));
+    vp9_zero(c->left_seg_context);
     for (mi_col = c->cur_tile_mi_col_start; mi_col < c->cur_tile_mi_col_end;
          mi_col += MI_BLOCK_SIZE, m += MI_BLOCK_SIZE)
       write_modes_sb(cpi, m, bc, tok, tok_end, mi_row, mi_col,
