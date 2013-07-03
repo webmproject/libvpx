@@ -34,9 +34,9 @@ const TX_TYPE mode2txfm_map[MB_MODE_COUNT] = {
 };
 
 
-static void d27_predictor(uint8_t *ypred_ptr, int y_stride,
-                          int bw, int bh,
-                          uint8_t *yabove_row, uint8_t *yleft_col) {
+static INLINE void d27_predictor(uint8_t *ypred_ptr, int y_stride,
+                                 int bw, int bh,
+                                 uint8_t *yabove_row, uint8_t *yleft_col) {
   int r, c;
   // first column
   for (r = 0; r < bh - 1; ++r) {
@@ -69,7 +69,7 @@ static void d27_predictor(uint8_t *ypred_ptr, int y_stride,
   }
 }
 
-static void d63_predictor(uint8_t *ypred_ptr, int y_stride,
+static INLINE void d63_predictor(uint8_t *ypred_ptr, int y_stride,
                           int bw, int bh,
                           uint8_t *yabove_row, uint8_t *yleft_col) {
   int r, c;
@@ -88,9 +88,9 @@ static void d63_predictor(uint8_t *ypred_ptr, int y_stride,
   }
 }
 
-static void d45_predictor(uint8_t *ypred_ptr, int y_stride,
-                          int bw, int bh,
-                          uint8_t *yabove_row, uint8_t *yleft_col) {
+static INLINE void d45_predictor(uint8_t *ypred_ptr, int y_stride,
+                                 int bw, int bh,
+                                 uint8_t *yabove_row, uint8_t *yleft_col) {
   int r, c;
   for (r = 0; r < bh; ++r) {
     for (c = 0; c < bw; ++c) {
@@ -105,7 +105,7 @@ static void d45_predictor(uint8_t *ypred_ptr, int y_stride,
   }
 }
 
-static void d117_predictor(uint8_t *ypred_ptr, int y_stride,
+static INLINE void d117_predictor(uint8_t *ypred_ptr, int y_stride,
                            int bw, int bh,
                            uint8_t *yabove_row, uint8_t *yleft_col) {
   int r, c;
@@ -141,9 +141,9 @@ static void d117_predictor(uint8_t *ypred_ptr, int y_stride,
 }
 
 
-static void d135_predictor(uint8_t *ypred_ptr, int y_stride,
-                           int bw, int bh,
-                           uint8_t *yabove_row, uint8_t *yleft_col) {
+static INLINE void d135_predictor(uint8_t *ypred_ptr, int y_stride,
+                                  int bw, int bh,
+                                  uint8_t *yabove_row, uint8_t *yleft_col) {
   int r, c;
   ypred_ptr[0] = ROUND_POWER_OF_TWO(yleft_col[0] +
                                     yabove_row[-1] * 2 +
@@ -169,11 +169,11 @@ static void d135_predictor(uint8_t *ypred_ptr, int y_stride,
   }
 }
 
-static void d153_predictor(uint8_t *ypred_ptr,
-                           int y_stride,
-                           int bw, int bh,
-                           uint8_t *yabove_row,
-                           uint8_t *yleft_col) {
+static INLINE void d153_predictor(uint8_t *ypred_ptr,
+                                  int y_stride,
+                                  int bw, int bh,
+                                  uint8_t *yabove_row,
+                                  uint8_t *yleft_col) {
   int r, c;
   ypred_ptr[0] = ROUND_POWER_OF_TWO(yabove_row[-1] + yleft_col[0], 1);
   for (r = 1; r < bh; r++)
