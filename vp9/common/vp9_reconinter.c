@@ -483,13 +483,6 @@ void vp9_build_inter_predictors_sb(MACROBLOCKD *xd,
   vp9_build_inter_predictors_sbuv(xd, mi_row, mi_col, bsize);
 }
 
-/*encoder only*/
-void vp9_build_inter4x4_predictors_mbuv(MACROBLOCKD *xd,
-                                        int mb_row, int mb_col) {
-  vp9_build_inter_predictors_sbuv(xd, mb_row, mb_col,
-                                  BLOCK_SIZE_MB16X16);
-}
-
 // TODO(dkovalev: find better place for this function)
 void vp9_setup_scale_factors(VP9_COMMON *cm, int i) {
   const int ref = cm->active_ref_idx[i];
