@@ -206,8 +206,8 @@ static void set_offsets(VP9D_COMP *pbi, BLOCK_SIZE_TYPE bsize,
     pd->left_context = cm->left_context[i] +
                            (((mi_row * 2) & 15) >> pd->subsampling_y);
   }
-  xd->above_seg_context = cm->above_seg_context + mi_col;
-  xd->left_seg_context  = cm->left_seg_context + (mi_row & MI_MASK);
+
+  set_partition_seg_context(cm, xd, mi_row, mi_col);
 
   // Distance of Mb to the various image edges. These are specified to 8th pel
   // as they are always compared to values that are in 1/8th pel units
@@ -304,10 +304,8 @@ static void decode_modes_sb(VP9D_COMP *pbi, int mi_row, int mi_col,
 
   if (bsize >= BLOCK_SIZE_SB8X8) {
     int pl;
-    int idx = check_bsize_coverage(pc, xd, mi_row, mi_col, bsize);
-    // read the partition information
-    xd->left_seg_context = pc->left_seg_context + (mi_row & MI_MASK);
-    xd->above_seg_context = pc->above_seg_context + mi_col;
+    const int idx = check_bsize_coverage(pc, xd, mi_row, mi_col, bsize);
+    set_partition_seg_context(pc, xd, mi_row, mi_col);
     pl = partition_plane_context(xd, bsize);
 
     if (idx == 0)

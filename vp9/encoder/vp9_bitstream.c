@@ -656,9 +656,8 @@ static void write_modes_sb(VP9_COMP *cpi, MODE_INFO *m, vp9_writer *bc,
 
   if (bsize >= BLOCK_SIZE_SB8X8) {
     int pl;
-    int idx = check_bsize_coverage(cm, xd, mi_row, mi_col, bsize);
-    xd->left_seg_context = cm->left_seg_context + (mi_row & MI_MASK);
-    xd->above_seg_context = cm->above_seg_context + mi_col;
+    const int idx = check_bsize_coverage(cm, xd, mi_row, mi_col, bsize);
+    set_partition_seg_context(cm, xd, mi_row, mi_col);
     pl = partition_plane_context(xd, bsize);
     // encode the partition information
     if (idx == 0)
