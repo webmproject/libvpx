@@ -276,6 +276,16 @@ void vp9_initialize_rd_consts(VP9_COMP *cpi, int qindex) {
         cpi->mb.nmvcost_hp : cpi->mb.nmvcost,
         &cpi->common.fc.nmvc,
         cpi->mb.e_mbd.allow_high_precision_mv, 1, 1);
+
+    for (i = 0; i < INTER_MODE_CONTEXTS; i++) {
+      MB_PREDICTION_MODE m;
+
+      for (m = NEARESTMV; m < MB_MODE_COUNT; m++)
+        cpi->mb.inter_mode_cost[i][m - NEARESTMV] =
+            cost_token(vp9_sb_mv_ref_tree,
+                       cpi->common.fc.inter_mode_probs[i],
+                       vp9_sb_mv_ref_encoding_array - NEARESTMV + m);
+    }
   }
 }
 
@@ -1518,19 +1528,17 @@ static int64_t rd_pick_intra_sbuv_mode(VP9_COMP *cpi, MACROBLOCK *x,
   return best_rd;
 }
 
-int vp9_cost_mv_ref(VP9_COMP *cpi,
-                    MB_PREDICTION_MODE m,
-                    const int mode_context) {
-  MACROBLOCKD *xd = &cpi->mb.e_mbd;
+static int cost_mv_ref(VP9_COMP *cpi,
+                       MB_PREDICTION_MODE m,
+                       const int mode_context) {
+  MACROBLOCK *const x = &cpi->mb;
+  MACROBLOCKD *const xd = &x->e_mbd;
   int segment_id = xd->mode_info_context->mbmi.segment_id;
 
   // Dont account for mode here if segment skip is enabled.
   if (!vp9_segfeature_active(xd, segment_id, SEG_LVL_SKIP)) {
-    VP9_COMMON *pc = &cpi->common;
     assert(NEARESTMV <= m  &&  m <= NEWMV);
-    return cost_token(vp9_sb_mv_ref_tree,
-                      pc->fc.inter_mode_probs[mode_context],
-                      vp9_sb_mv_ref_encoding_array - NEARESTMV + m);
+    return x->inter_mode_cost[mode_context][m - NEARESTMV];
   } else
     return 0;
 }
@@ -1607,8 +1615,8 @@ static int labels2mode(MACROBLOCK *x, int i,
       break;
   }
 
-  cost = vp9_cost_mv_ref(cpi, this_mode,
-                         mbmi->mb_mode_context[mbmi->ref_frame[0]]);
+  cost = cost_mv_ref(cpi, this_mode,
+                     mbmi->mb_mode_context[mbmi->ref_frame[0]]);
 
   mic->bmi[i].as_mv[0].as_int = this_mv->as_int;
   if (mbmi->ref_frame[1] > 0)
@@ -2647,8 +2655,8 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
    * are only three options: Last/Golden, ARF/Last or Golden/ARF, or in other
    * words if you present them in that order, the second one is always known
    * if the first is known */
-  *rate2 += vp9_cost_mv_ref(cpi, this_mode,
-                            mbmi->mb_mode_context[mbmi->ref_frame[0]]);
+  *rate2 += cost_mv_ref(cpi, this_mode,
+                        mbmi->mb_mode_context[mbmi->ref_frame[0]]);
 
   pred_exists = 0;
   interpolating_intpel_seen = 0;
