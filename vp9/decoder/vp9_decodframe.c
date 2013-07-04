@@ -216,30 +216,18 @@ static void set_offsets(VP9D_COMP *pbi, BLOCK_SIZE_TYPE bsize,
   setup_dst_planes(xd, &cm->yv12_fb[cm->new_fb_idx], mi_row, mi_col);
 }
 
-static void set_refs(VP9D_COMP *pbi, int mi_row, int mi_col) {
+static void set_ref(VP9D_COMP *pbi, int i, int mi_row, int mi_col) {
   VP9_COMMON *const cm = &pbi->common;
   MACROBLOCKD *const xd = &pbi->mb;
   MB_MODE_INFO *const mbmi = &xd->mode_info_context->mbmi;
+  const int ref = mbmi->ref_frame[i] - 1;
 
-  // Select the appropriate reference frame for this MB
-  const int fb_idx = cm->active_ref_idx[mbmi->ref_frame[0] - 1];
-  const YV12_BUFFER_CONFIG *cfg = &cm->yv12_fb[fb_idx];
-  xd->scale_factor[0] = cm->active_ref_scale[mbmi->ref_frame[0] - 1];
-  xd->scale_factor_uv[0] = cm->active_ref_scale[mbmi->ref_frame[0] - 1];
-  setup_pre_planes(xd, cfg, NULL, mi_row, mi_col, xd->scale_factor,
-                   xd->scale_factor_uv);
+  const YV12_BUFFER_CONFIG *cfg = &cm->yv12_fb[cm->active_ref_idx[ref]];
+  xd->scale_factor[i] = cm->active_ref_scale[ref];
+  xd->scale_factor_uv[i] = cm->active_ref_scale[ref];
+  setup_pre_planes(xd, i, cfg, mi_row, mi_col,
+                   &xd->scale_factor[i], &xd->scale_factor_uv[i]);
   xd->corrupted |= cfg->corrupted;
-
-  if (mbmi->ref_frame[1] > INTRA_FRAME) {
-    // Select the appropriate reference frame for this MB
-    const int second_fb_idx = cm->active_ref_idx[mbmi->ref_frame[1] - 1];
-    const YV12_BUFFER_CONFIG *second_cfg = &cm->yv12_fb[second_fb_idx];
-    xd->scale_factor[1] = cm->active_ref_scale[mbmi->ref_frame[1] - 1];
-    xd->scale_factor_uv[1] = cm->active_ref_scale[mbmi->ref_frame[1] - 1];
-    setup_pre_planes(xd, NULL, second_cfg, mi_row, mi_col, xd->scale_factor,
-                     xd->scale_factor_uv);
-    xd->corrupted |= second_cfg->corrupted;
-  }
 }
 
 static void decode_modes_b(VP9D_COMP *pbi, int mi_row, int mi_col,
@@ -269,7 +257,11 @@ static void decode_modes_b(VP9D_COMP *pbi, int mi_row, int mi_col,
   } else {
     // Inter reconstruction
     int eobtotal;
-    set_refs(pbi, mi_row, mi_col);
+
+    set_ref(pbi, 0, mi_row, mi_col);
+    if (mbmi->ref_frame[1] > INTRA_FRAME)
+      set_ref(pbi, 1, mi_row, mi_col);
+
     vp9_setup_interp_filters(xd, mbmi->interp_filter, cm);
     vp9_build_inter_predictors_sb(xd, mi_row, mi_col, bsize);
     eobtotal = decode_tokens(pbi, bsize, r);
@@ -1000,8 +992,8 @@ int vp9_decode_frame(VP9D_COMP *pbi, const uint8_t **p_data_end) {
   read_coef_probs(pbi, &header_bc);
 
   // Initialize xd pointers. Any reference should do for xd->pre, so use 0.
-  setup_pre_planes(xd, &pc->yv12_fb[pc->active_ref_idx[0]], NULL,
-                   0, 0, NULL, NULL);
+  setup_pre_planes(xd, 0, &pc->yv12_fb[pc->active_ref_idx[0]], 0, 0,
+                   NULL, NULL);
   setup_dst_planes(xd, new_fb, 0, 0);
 
   // Create the segmentation map structure and set to 0
