@@ -746,6 +746,7 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
       sf->auto_mv_step_size = 1;
       sf->use_avoid_tested_higherror = 1;
       sf->adaptive_rd_thresh = 1;
+
       if (speed == 1) {
         sf->comp_inter_joint_search_thresh = BLOCK_SIZE_TYPES;
         sf->less_rectangular_check  = 1;
