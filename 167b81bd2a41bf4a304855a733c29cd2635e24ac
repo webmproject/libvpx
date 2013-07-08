@@ -16,6 +16,24 @@
       "revId": "167b81bd2a41bf4a304855a733c29cd2635e24ac",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcH//+oQ\u003d",
+        "filename": "vp9/encoder/vp9_onyx_int.h",
+        "patchSetId": 9
+      },
+      "lineNbr": 367,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-07-08T23:20:04Z",
+      "side": 1,
+      "message": "Yeah, I was intending to do that separately.",
+      "parentUuid": "AAAAcH//+qU\u003d",
+      "revId": "167b81bd2a41bf4a304855a733c29cd2635e24ac",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
