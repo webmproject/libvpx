@@ -2395,45 +2395,6 @@ static void loopfilter_frame(VP9_COMP *cpi, VP9_COMMON *cm) {
 
 }
 
-void vp9_select_interp_filter_type(VP9_COMP *cpi) {
-  int i;
-  int high_filter_index = 0;
-  unsigned int thresh;
-  unsigned int high_count = 0;
-  unsigned int count_sum = 0;
-  unsigned int *hist = cpi->best_switchable_interp_count;
-
-  if (DEFAULT_INTERP_FILTER != SWITCHABLE) {
-    cpi->common.mcomp_filter_type = DEFAULT_INTERP_FILTER;
-    return;
-  }
-
-  // TODO(agrange): Look at using RD criteria to select the interpolation
-  // filter to use for the next frame rather than this simpler counting scheme.
-
-  // Select the interpolation filter mode for the next frame
-  // based on the selection frequency seen in the current frame.
-  for (i = 0; i < VP9_SWITCHABLE_FILTERS; ++i) {
-    unsigned int count = hist[i];
-    count_sum += count;
-    if (count > high_count) {
-      high_count = count;
-      high_filter_index = i;
-    }
-  }
-
-  thresh = (unsigned int)(0.80 * count_sum);
-
-  if (high_count > thresh) {
-    // One filter accounts for 80+% of cases so force the next
-    // frame to use this filter exclusively using frame-level flag.
-    cpi->common.mcomp_filter_type = vp9_switchable_interp[high_filter_index];
-  } else {
-    // Use a MB-level switchable filter selection strategy.
-    cpi->common.mcomp_filter_type = SWITCHABLE;
-  }
-}
-
 static void scale_references(VP9_COMP *cpi) {
   VP9_COMMON *cm = &cpi->common;
   int i;

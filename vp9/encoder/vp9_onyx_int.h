@@ -380,16 +380,20 @@ typedef struct VP9_COMP {
   int rd_thresh_freq_fact[BLOCK_SIZE_TYPES][MAX_MODES];
 
   int64_t rd_comp_pred_diff[NB_PREDICTION_TYPES];
+  // FIXME(rbultje) int64_t?
   int rd_prediction_type_threshes[4][NB_PREDICTION_TYPES];
   unsigned int intra_inter_count[INTRA_INTER_CONTEXTS][2];
   unsigned int comp_inter_count[COMP_INTER_CONTEXTS][2];
   unsigned int single_ref_count[REF_CONTEXTS][2][2];
   unsigned int comp_ref_count[REF_CONTEXTS][2];
 
-  // FIXME contextualize
-
   int64_t rd_tx_select_diff[NB_TXFM_MODES];
+  // FIXME(rbultje) can this overflow?
   int rd_tx_select_threshes[4][NB_TXFM_MODES];
+
+  int64_t rd_filter_diff[VP9_SWITCHABLE_FILTERS + 1];
+  int64_t rd_filter_threshes[4][VP9_SWITCHABLE_FILTERS + 1];
+  int64_t rd_filter_cache[VP9_SWITCHABLE_FILTERS + 1];
 
   int RDMULT;
   int RDDIV;
@@ -629,7 +633,6 @@ typedef struct VP9_COMP {
 
   unsigned int switchable_interp_count[VP9_SWITCHABLE_FILTERS + 1]
                                       [VP9_SWITCHABLE_FILTERS];
-  unsigned int best_switchable_interp_count[VP9_SWITCHABLE_FILTERS];
 
   unsigned int txfm_stepdown_count[TX_SIZE_MAX_SB];
 

@@ -51,6 +51,7 @@ typedef struct {
   int comp_pred_diff;
   int single_pred_diff;
   int64_t txfm_rd_diff[NB_TXFM_MODES];
+  int64_t best_filter_diff[VP9_SWITCHABLE_FILTERS + 1];
 
   // Bit flag for each mode whether it has high error in comparison to others.
   unsigned int modes_with_high_error;
