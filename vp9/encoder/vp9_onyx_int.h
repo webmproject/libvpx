@@ -247,6 +247,7 @@ typedef struct {
   int comp_inter_joint_search_thresh;
   int adaptive_rd_thresh;
   int skip_encode_sb;
+  int skip_encode_frame;
   int use_lastframe_partitioning;
   TX_SIZE_SEARCH_METHOD tx_size_search_method;
   int use_8tap_always;
@@ -277,7 +278,6 @@ typedef struct {
 } SPEED_FEATURES;
 
 typedef struct VP9_COMP {
-
   DECLARE_ALIGNED(16, int16_t, y_quant[QINDEX_RANGE][8]);
   DECLARE_ALIGNED(16, int16_t, y_quant_shift[QINDEX_RANGE][8]);
   DECLARE_ALIGNED(16, int16_t, y_zbin[QINDEX_RANGE][8]);

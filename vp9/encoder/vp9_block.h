@@ -141,6 +141,7 @@ struct macroblock {
 
   // indicate if it is in the rd search loop or encoding process
   int rd_search;
+  int skip_encode;
 
   // TODO(jingning): Need to refactor the structure arrays that buffers the
   // coding mode decisions of each partition type.

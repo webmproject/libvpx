@@ -685,6 +685,15 @@ static void dist_block(int plane, int block, BLOCK_SIZE_TYPE bsize,
   args->dist += vp9_block_error(coeff, dqcoeff, 16 << ss_txfrm_size,
                                 &this_sse) >> shift;
   args->sse += this_sse >> shift;
+
+  if (x->skip_encode &&
+      xd->mode_info_context->mbmi.ref_frame[0] == INTRA_FRAME) {
+    // TODO(jingning): tune the model to better capture the distortion.
+    int64_t p = (pd->dequant[1] * pd->dequant[1] *
+                    (1 << ss_txfrm_size)) >> shift;
+    args->dist += p;
+    args->sse  += p;
+  }
 }
 
 static void rate_block(int plane, int block, BLOCK_SIZE_TYPE bsize,
@@ -1169,6 +1178,7 @@ static int64_t rd_pick_intra4x4block(VP9_COMP *cpi, MACROBLOCK *x, int ib,
   struct macroblock_plane *p = &x->plane[0];
   struct macroblockd_plane *pd = &xd->plane[0];
   const int src_stride = p->src.stride;
+  const int dst_stride = pd->dst.stride;
   uint8_t *src, *dst;
   int16_t *src_diff, *coeff;
 
@@ -1215,15 +1225,15 @@ static int64_t rd_pick_intra4x4block(VP9_COMP *cpi, MACROBLOCK *x, int ib,
                                              p->src_diff);
         coeff = BLOCK_OFFSET(x->plane[0].coeff, block, 16);
         dst = raster_block_offset_uint8(xd, BLOCK_SIZE_SB8X8, 0, block,
-                                        pd->dst.buf,
-                                        pd->dst.stride);
+                                        pd->dst.buf, dst_stride);
         vp9_predict_intra_block(xd, block, b_width_log2(BLOCK_SIZE_SB8X8),
                                 TX_4X4, mode,
-                                dst, pd->dst.stride,
-                                dst, pd->dst.stride);
+                                x->skip_encode ? src : dst,
+                                x->skip_encode ? src_stride : dst_stride,
+                                dst, dst_stride);
         vp9_subtract_block(4, 4, src_diff, 8,
                            src, src_stride,
-                           dst, pd->dst.stride);
+                           dst, dst_stride);
 
         tx_type = get_tx_type_4x4(xd, block);
         if (tx_type != DCT_DCT) {
@@ -1272,24 +1282,30 @@ static int64_t rd_pick_intra4x4block(VP9_COMP *cpi, MACROBLOCK *x, int ib,
     }
   }
 
+  if (x->skip_encode)
+    return best_rd;
+
   for (idy = 0; idy < bh; ++idy) {
     for (idx = 0; idx < bw; ++idx) {
       block = ib + idy * 2 + idx;
       xd->mode_info_context->bmi[block].as_mode = *best_mode;
+      src = raster_block_offset_uint8(xd, BLOCK_SIZE_SB8X8, 0, block,
+                                      p->src.buf, src_stride);
       dst = raster_block_offset_uint8(xd, BLOCK_SIZE_SB8X8, 0, block,
-                                      pd->dst.buf,
-                                      pd->dst.stride);
+                                      pd->dst.buf, dst_stride);
 
       vp9_predict_intra_block(xd, block, b_width_log2(BLOCK_SIZE_SB8X8), TX_4X4,
-                              *best_mode, dst, pd->dst.stride,
-                              dst, pd->dst.stride);
+                              *best_mode,
+                              x->skip_encode ? src : dst,
+                              x->skip_encode ? src_stride : dst_stride,
+                              dst, dst_stride);
       // inverse transform
       if (best_tx_type != DCT_DCT)
         vp9_short_iht4x4_add(best_dqcoeff[idy * 2 + idx], dst,
-                            pd->dst.stride, best_tx_type);
+                             dst_stride, best_tx_type);
       else
         xd->inv_txm4x4_add(best_dqcoeff[idy * 2 + idx], dst,
-                           pd->dst.stride);
+                           dst_stride);
     }
   }
 
@@ -2897,6 +2913,7 @@ void vp9_rd_pick_intra_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
   int64_t dist4x4_y;
   int64_t err4x4 = INT64_MAX;
 
+  x->skip_encode = 0;
   vpx_memset(&txfm_cache,0,sizeof(txfm_cache));
   ctx->skip = 0;
   xd->mode_info_context->mbmi.mode = DC_PRED;
@@ -3006,9 +3023,11 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
   int bhs = (1 << bhsl) / 4;  // mode_info step for subsize
   int best_skip2 = 0;
 
+  x->skip_encode = (cpi->sf.skip_encode_frame &&
+                    xd->q_index < QIDX_SKIP_THRESH);
+
   for (i = 0; i < 4; i++) {
     int j;
-
     for (j = 0; j < MAX_REF_FRAMES; j++)
       seg_mvs[i][j].as_int = INVALID_MV;
   }

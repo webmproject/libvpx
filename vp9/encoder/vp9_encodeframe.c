@@ -1866,6 +1866,20 @@ static void encode_frame_internal(VP9_COMP *cpi) {
     cpi->time_encode_mb_row += vpx_usec_timer_elapsed(&emr_timer);
   }
 
+  if (cpi->sf.skip_encode_sb) {
+    int j;
+    unsigned int intra_count = 0, inter_count = 0;
+    for (j = 0; j < INTRA_INTER_CONTEXTS; ++j) {
+      intra_count += cpi->intra_inter_count[j][0];
+      inter_count += cpi->intra_inter_count[j][1];
+    }
+    cpi->sf.skip_encode_frame = ((intra_count << 2) < inter_count);
+    cpi->sf.skip_encode_frame &= (cm->frame_type != KEY_FRAME);
+    cpi->sf.skip_encode_frame &= cm->show_frame;
+  } else {
+    cpi->sf.skip_encode_frame = 0;
+  }
+
   // 256 rate units to the bit,
   // projected_frame_size in units of BYTES
   cpi->projected_frame_size = totalrate >> 8;
@@ -2276,6 +2290,10 @@ static void encode_superblock(VP9_COMP *cpi, TOKENEXTRA **t, int output_enabled,
   const int bwl = mi_width_log2(bsize);
   const int bw = 1 << bwl, bh = 1 << mi_height_log2(bsize);
   x->rd_search = 0;
+  x->skip_encode = (!output_enabled && cpi->sf.skip_encode_frame &&
+                    xd->q_index < QIDX_SKIP_THRESH);
+  if (x->skip_encode)
+    return;
 
   if (cm->frame_type == KEY_FRAME) {
     if (cpi->oxcf.tuning == VP8_TUNE_SSIM) {

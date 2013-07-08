@@ -610,13 +610,17 @@ void encode_block_intra(int plane, int block, BLOCK_SIZE_TYPE bsize,
 
   plane_b_size = b_width_log2(bsize) - pd->subsampling_x;
   vp9_predict_intra_block(xd, tx_ib, plane_b_size, tx_size, b_mode,
-                          dst, pd->dst.stride,
+                          x->skip_encode ? src : dst,
+                          x->skip_encode ? p->src.stride : pd->dst.stride,
                           dst, pd->dst.stride);
   vp9_subtract_block(txfm_b_size, txfm_b_size, src_diff, bw,
                      src, p->src.stride, dst, pd->dst.stride);
 
   xform_quant(plane, block, bsize, ss_txfrm_size, arg);
 
+
+  if (x->skip_encode)
+    return;
 
   // if (x->optimize)
   // vp9_optimize_b(plane, block, bsize, ss_txfrm_size,

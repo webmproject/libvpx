@@ -15,6 +15,8 @@
 #define RDCOST(RM,DM,R,D) ( ((128+((int64_t)R)*(RM)) >> 8) + ((int64_t)DM)*(D) )
 #define RDCOST_8x8(RM,DM,R,D) ( ((128+((int64_t)R)*(RM)) >> 8) + ((int64_t)DM)*(D) )
 
+#define QIDX_SKIP_THRESH     115
+
 void vp9_initialize_rd_consts(VP9_COMP *cpi, int qindex);
 
 void vp9_initialize_me_consts(VP9_COMP *cpi, int qindex);
