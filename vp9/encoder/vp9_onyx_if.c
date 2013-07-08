@@ -720,6 +720,7 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
   sf->disable_splitmv = 0;
   sf->mode_search_skip_flags = 0;
   sf->last_chroma_intra_mode = TM_PRED;
+  sf->use_rd_breakout = 0;
 
   // Skip any mode not chosen at size < X for all sizes > X
   // Hence BLOCK_SIZE_SB64X64 (skip is off)
@@ -767,6 +768,7 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
                                      FLAG_SKIP_INTRA_BESTINTER |
                                      FLAG_SKIP_COMP_BESTINTRA;
         sf->last_chroma_intra_mode = H_PRED;
+        sf->use_rd_breakout = 1;
       }
       if (speed == 2) {
         sf->adjust_thresholds_by_speed = 1;
@@ -790,6 +792,7 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
                                      FLAG_SKIP_COMP_BESTINTRA |
                                      FLAG_SKIP_COMP_REFMISMATCH;
         sf->last_chroma_intra_mode = DC_PRED;
+        sf->use_rd_breakout = 1;
       }
       if (speed == 3) {
         sf->comp_inter_joint_search_thresh = BLOCK_SIZE_TYPES;
@@ -804,6 +807,7 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
                                      FLAG_SKIP_INTRA_BESTINTER |
                                      FLAG_SKIP_COMP_BESTINTRA |
                                      FLAG_SKIP_COMP_REFMISMATCH;
+        sf->use_rd_breakout = 1;
       }
       if (speed == 4) {
         sf->comp_inter_joint_search_thresh = BLOCK_SIZE_TYPES;
@@ -818,6 +822,7 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
                                      FLAG_SKIP_INTRA_BESTINTER |
                                      FLAG_SKIP_COMP_BESTINTRA |
                                      FLAG_SKIP_COMP_REFMISMATCH;
+        sf->use_rd_breakout = 1;
       }
       /*
       if (speed == 2) {

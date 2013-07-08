@@ -473,6 +473,31 @@ static void model_rd_for_sb(VP9_COMP *cpi, BLOCK_SIZE_TYPE bsize,
   *out_dist_sum = dist_sum << 4;
 }
 
+static void model_rd_for_sb_y(VP9_COMP *cpi, BLOCK_SIZE_TYPE bsize,
+                              MACROBLOCK *x, MACROBLOCKD *xd,
+                              int *out_rate_sum, int64_t *out_dist_sum) {
+  // Note our transform coeffs are 8 times an orthogonal transform.
+  // Hence quantizer step is also 8 times. To get effective quantizer
+  // we need to divide by 8 before sending to modeling function.
+  struct macroblock_plane *const p = &x->plane[0];
+  struct macroblockd_plane *const pd = &xd->plane[0];
+
+  // TODO(dkovalev) the same code in get_plane_block_size
+  const int bw = plane_block_width(bsize, pd);
+  const int bh = plane_block_height(bsize, pd);
+  const enum BlockSize bs = get_block_size(bw, bh);
+  unsigned int sse;
+  int rate;
+  int64_t dist;
+  (void) cpi->fn_ptr[bs].vf(p->src.buf, p->src.stride,
+                            pd->dst.buf, pd->dst.stride, &sse);
+  // sse works better than var, since there is no dc prediction used
+  model_rd_from_var_lapndz(sse, bw * bh, pd->dequant[1] >> 3, &rate, &dist);
+
+  *out_rate_sum = rate;
+  *out_dist_sum = dist << 4;
+}
+
 static void model_rd_for_sb_y_tx(VP9_COMP *cpi, BLOCK_SIZE_TYPE bsize,
                                  TX_SIZE tx_size,
                                  MACROBLOCK *x, MACROBLOCKD *xd,
@@ -1644,14 +1669,16 @@ static int labels2mode(MACROBLOCK *x, int i,
   return cost;
 }
 
-static int64_t encode_inter_mb_segment(VP9_COMMON *const cm,
+static int64_t encode_inter_mb_segment(VP9_COMP *cpi,
                                        MACROBLOCK *x,
+                                       int64_t best_yrd,
                                        int i,
                                        int *labelyrate,
                                        int64_t *distortion,
                                        ENTROPY_CONTEXT *ta,
                                        ENTROPY_CONTEXT *tl) {
   int k;
+  VP9_COMMON *const cm = &cpi->common;
   MACROBLOCKD *xd = &x->e_mbd;
   BLOCK_SIZE_TYPE bsize = xd->mode_info_context->mbmi.sb_type;
   const int bw = plane_block_width(bsize, &xd->plane[0]);
@@ -1673,9 +1700,6 @@ static int64_t encode_inter_mb_segment(VP9_COMMON *const cm,
   int64_t thisdistortion = 0;
   int thisrate = 0;
 
-  *labelyrate = 0;
-  *distortion = 0;
-
   vp9_build_inter_predictor(pre,
                             xd->plane[0].pre[0].stride,
                             dst,
@@ -1685,9 +1709,6 @@ static int64_t encode_inter_mb_segment(VP9_COMMON *const cm,
                             bw, bh, 0 /* no avg */, &xd->subpix,
                             MV_PRECISION_Q3);
 
-  // TODO(debargha): Make this work properly with the
-  // implicit-compoundinter-weight experiment when implicit
-  // weighting for splitmv modes is turned on.
   if (xd->mode_info_context->mbmi.ref_frame[1] > 0) {
     uint8_t* const second_pre =
     raster_block_offset_uint8(xd, BLOCK_SIZE_SB8X8, 0, i,
@@ -1700,10 +1721,28 @@ static int64_t encode_inter_mb_segment(VP9_COMMON *const cm,
                               &xd->subpix, MV_PRECISION_Q3);
   }
 
+  // Turning this section off for now since it hurts quality and does not
+  // improve speed much
+  /*
+  if (cpi->sf.use_rd_breakout &&
+      best_yrd < INT64_MAX) {
+    int64_t thisrd;
+    model_rd_for_sb_y(cpi, bsize, x, xd, &thisrate, &thisdistortion);
+    thisrd = RDCOST(x->rdmult, x->rddiv, thisrate, thisdistortion);
+    if (thisrd / 2 > best_yrd) {
+      *distortion = thisdistortion;
+      *labelyrate = thisrate;
+      return thisrd;
+    }
+  }
+  */
+
   vp9_subtract_block(bh, bw, src_diff, 8,
                      src, src_stride,
                      dst, xd->plane[0].dst.stride);
 
+  *labelyrate = 0;
+  *distortion = 0;
   k = i;
   for (idy = 0; idy < bh / 4; ++idy) {
     for (idx = 0; idx < bw / 4; ++idx) {
@@ -1789,7 +1828,7 @@ static void rd_check_segment_txsize(VP9_COMP *cpi, MACROBLOCK *x,
   MB_PREDICTION_MODE this_mode;
   MB_MODE_INFO * mbmi = &x->e_mbd.mode_info_context->mbmi;
   const int label_count = 4;
-  int64_t this_segment_rd = 0, other_segment_rd;
+  int64_t this_segment_rd = 0;
   int label_mv_thresh;
   int segmentyrate = 0;
   int best_eobs[4] = { 0 };
@@ -1812,15 +1851,13 @@ static void rd_check_segment_txsize(VP9_COMP *cpi, MACROBLOCK *x,
   label_mv_thresh = 1 * bsi->mvthresh / label_count;
 
   // Segmentation method overheads
-  other_segment_rd = this_segment_rd;
-
   for (idy = 0; idy < 2; idy += bh) {
     for (idx = 0; idx < 2; idx += bw) {
       // TODO(jingning,rbultje): rewrite the rate-distortion optimization
       // loop for 4x4/4x8/8x4 block coding. to be replaced with new rd loop
       int_mv mode_mv[MB_MODE_COUNT], second_mode_mv[MB_MODE_COUNT];
       int_mv frame_mv[MB_MODE_COUNT][MAX_REF_FRAMES];
-      int64_t best_label_rd = INT64_MAX, best_other_rd = INT64_MAX;
+      int64_t best_label_rd = INT64_MAX;
       MB_PREDICTION_MODE mode_selected = ZEROMV;
       int bestlabelyrate = 0;
       i = idy * 2 + idx;
@@ -1961,8 +1998,9 @@ static void rd_check_segment_txsize(VP9_COMP *cpi, MACROBLOCK *x,
             mv_check_bounds(x, &second_mode_mv[this_mode]))
           continue;
 
-        this_rd = encode_inter_mb_segment(&cpi->common,
-                                          x, i, &labelyrate,
+        this_rd = encode_inter_mb_segment(cpi, x,
+                                          bsi->segment_rd - this_segment_rd,
+                                          i, &labelyrate,
                                           &distortion, t_above_s, t_left_s);
         this_rd += RDCOST(x->rdmult, x->rddiv, rate, 0);
         rate += labelyrate;
@@ -1991,7 +2029,11 @@ static void rd_check_segment_txsize(VP9_COMP *cpi, MACROBLOCK *x,
       bd += sbd;
       segmentyrate += bestlabelyrate;
       this_segment_rd += best_label_rd;
-      other_segment_rd += best_other_rd;
+
+      if (this_segment_rd > bsi->segment_rd) {
+        bsi->segment_rd = INT64_MAX;
+        return;
+      }
 
       for (j = 1; j < bh; ++j)
         vpx_memcpy(&x->partition_info->bmi[i + j * 2],
@@ -2004,33 +2046,31 @@ static void rd_check_segment_txsize(VP9_COMP *cpi, MACROBLOCK *x,
     }
   } /* for each label */
 
-  if (this_segment_rd < bsi->segment_rd) {
-    bsi->r = br;
-    bsi->d = bd;
-    bsi->segment_yrate = segmentyrate;
-    bsi->segment_rd = this_segment_rd;
+  bsi->r = br;
+  bsi->d = bd;
+  bsi->segment_yrate = segmentyrate;
+  bsi->segment_rd = this_segment_rd;
 
-    // store everything needed to come back to this!!
-    for (i = 0; i < 4; i++) {
-      bsi->mvs[i].as_mv = x->partition_info->bmi[i].mv.as_mv;
-      if (mbmi->ref_frame[1] > 0)
-        bsi->second_mvs[i].as_mv = x->partition_info->bmi[i].second_mv.as_mv;
-      bsi->modes[i] = x->partition_info->bmi[i].mode;
-      bsi->eobs[i] = best_eobs[i];
-    }
+  // store everything needed to come back to this!!
+  for (i = 0; i < 4; i++) {
+    bsi->mvs[i].as_mv = x->partition_info->bmi[i].mv.as_mv;
+    if (mbmi->ref_frame[1] > 0)
+      bsi->second_mvs[i].as_mv = x->partition_info->bmi[i].second_mv.as_mv;
+    bsi->modes[i] = x->partition_info->bmi[i].mode;
+    bsi->eobs[i] = best_eobs[i];
   }
 }
 
-static int rd_pick_best_mbsegmentation(VP9_COMP *cpi, MACROBLOCK *x,
-                                       int_mv *best_ref_mv,
-                                       int_mv *second_best_ref_mv,
-                                       int64_t best_rd,
-                                       int *returntotrate,
-                                       int *returnyrate,
-                                       int64_t *returndistortion,
-                                       int *skippable, int mvthresh,
-                                       int_mv seg_mvs[4][MAX_REF_FRAMES],
-                                       int mi_row, int mi_col) {
+static int64_t rd_pick_best_mbsegmentation(VP9_COMP *cpi, MACROBLOCK *x,
+                                           int_mv *best_ref_mv,
+                                           int_mv *second_best_ref_mv,
+                                           int64_t best_rd,
+                                           int *returntotrate,
+                                           int *returnyrate,
+                                           int64_t *returndistortion,
+                                           int *skippable, int mvthresh,
+                                           int_mv seg_mvs[4][MAX_REF_FRAMES],
+                                           int mi_row, int mi_col) {
   int i;
   BEST_SEG_INFO bsi;
   MB_MODE_INFO * mbmi = &x->e_mbd.mode_info_context->mbmi;
@@ -2079,7 +2119,7 @@ static int rd_pick_best_mbsegmentation(VP9_COMP *cpi, MACROBLOCK *x,
   *skippable = vp9_sby_is_skippable(&x->e_mbd, BLOCK_SIZE_SB8X8);
   mbmi->mode = bsi.modes[3];
 
-  return (int)(bsi.segment_rd);
+  return bsi.segment_rd;
 }
 
 static void mv_pred(VP9_COMP *cpi, MACROBLOCK *x,
@@ -2586,6 +2626,7 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
   int best_needs_copy = 0;
   uint8_t *orig_dst[MAX_MB_PLANE];
   int orig_dst_stride[MAX_MB_PLANE];
+  int rs = 0;
 
   switch (this_mode) {
     int rate_mv;
@@ -2659,6 +2700,14 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
   *rate2 += cost_mv_ref(cpi, this_mode,
                         mbmi->mb_mode_context[mbmi->ref_frame[0]]);
 
+  if (!(*mode_excluded)) {
+    if (is_comp_pred) {
+      *mode_excluded = (cpi->common.comp_pred_mode == SINGLE_PREDICTION_ONLY);
+    } else {
+      *mode_excluded = (cpi->common.comp_pred_mode == COMP_PREDICTION_ONLY);
+    }
+  }
+
   pred_exists = 0;
   interpolating_intpel_seen = 0;
   // Are all MVs integer pel for Y and UV
@@ -2669,6 +2718,7 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
         (mbmi->mv[1].as_mv.col & 15) == 0;
   // Search for best switchable filter by checking the variance of
   // pred error irrespective of whether the filter will be used
+  *best_filter = EIGHTTAP;
   if (cpi->sf.use_8tap_always) {
     *best_filter = EIGHTTAP;
     vp9_zero(cpi->rd_filter_cache);
@@ -2679,7 +2729,7 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
 
     cpi->rd_filter_cache[VP9_SWITCHABLE_FILTERS] = INT64_MAX;
     for (i = 0; i < VP9_SWITCHABLE_FILTERS; ++i) {
-      int rs, j;
+      int j;
       int64_t rs_rd;
       const INTERPOLATIONFILTERTYPE filter = vp9_switchable_interp[i];
       const int is_intpel_interp = intpel_mv &&
@@ -2731,6 +2781,15 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
           tmp_dist_sum = dist_sum;
         }
       }
+      if (i == 0 && cpi->sf.use_rd_breakout && ref_best_rd < INT64_MAX) {
+        if (rd / 2 > ref_best_rd) {
+          for (i = 0; i < MAX_MB_PLANE; i++) {
+            xd->plane[i].dst.buf = orig_dst[i];
+            xd->plane[i].dst.stride = orig_dst_stride[i];
+          }
+          return INT64_MAX;
+        }
+      }
       newbest = i == 0 || rd < best_rd;
 
       if (newbest) {
@@ -2754,11 +2813,11 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
       xd->plane[i].dst.stride = orig_dst_stride[i];
     }
   }
-
   // Set the appripriate filter
   mbmi->interp_filter = cm->mcomp_filter_type != SWITCHABLE ?
       cm->mcomp_filter_type : *best_filter;
   vp9_setup_interp_filters(xd, mbmi->interp_filter, cm);
+  rs = (cm->mcomp_filter_type == SWITCHABLE ? get_switchable_rate(cm, x) : 0);
 
   if (pred_exists) {
     if (best_needs_copy) {
@@ -2772,6 +2831,23 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
     // Handles the special case when a filter that is not in the
     // switchable list (ex. bilinear, 6-tap) is indicated at the frame level
     vp9_build_inter_predictors_sb(xd, mi_row, mi_col, bsize);
+  }
+
+
+  if (cpi->sf.use_rd_breakout && ref_best_rd < INT64_MAX) {
+    int tmp_rate;
+    int64_t tmp_dist;
+    model_rd_for_sb(cpi, bsize, x, xd, &tmp_rate, &tmp_dist);
+    rd = RDCOST(x->rdmult, x->rddiv, rs + tmp_rate, tmp_dist);
+    // if current pred_error modeled rd is substantially more than the best
+    // so far, do not bother doing full rd
+    if (rd / 2 > ref_best_rd) {
+      for (i = 0; i < MAX_MB_PLANE; i++) {
+        xd->plane[i].dst.buf = orig_dst[i];
+        xd->plane[i].dst.stride = orig_dst_stride[i];
+      }
+      return INT64_MAX;
+    }
   }
 
   if (cpi->common.mcomp_filter_type == SWITCHABLE)
@@ -2818,7 +2894,7 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
           *distortion = sse + sse2;
           *rate2 = 500;
 
-          // for best_yrd calculation
+          // for best yrd calculation
           *rate_uv = 0;
           *distortion_uv = sse2;
 
@@ -2857,14 +2933,6 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
     *rate2 += *rate_uv;
     *distortion += *distortion_uv;
     *skippable = skippable_y && skippable_uv;
-  }
-
-  if (!(*mode_excluded)) {
-    if (is_comp_pred) {
-      *mode_excluded = (cpi->common.comp_pred_mode == SINGLE_PREDICTION_ONLY);
-    } else {
-      *mode_excluded = (cpi->common.comp_pred_mode == COMP_PREDICTION_ONLY);
-    }
   }
 
   for (i = 0; i < MAX_MB_PLANE; i++) {
@@ -2963,6 +3031,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
                      cpi->gld_fb_idx,
                      cpi->alt_fb_idx};
   int64_t best_rd = INT64_MAX;
+  int64_t best_yrd = INT64_MAX;
   int64_t best_txfm_rd[NB_TXFM_MODES];
   int64_t best_txfm_diff[NB_TXFM_MODES];
   int64_t best_pred_diff[NB_PREDICTION_TYPES];
@@ -3358,16 +3427,20 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
         int newbest, rs;
         int64_t rs_rd;
         mbmi->interp_filter =
-        vp9_switchable_interp[switchable_filter_index];
+            vp9_switchable_interp[switchable_filter_index];
         vp9_setup_interp_filters(xd, mbmi->interp_filter, &cpi->common);
 
         tmp_rd = rd_pick_best_mbsegmentation(cpi, x,
                      &mbmi->ref_mvs[mbmi->ref_frame[0]][0],
-                     second_ref, INT64_MAX,
+                     second_ref,
+                     best_yrd,
                      &rate, &rate_y, &distortion,
                      &skippable,
                      (int)this_rd_thresh, seg_mvs,
                      mi_row, mi_col);
+        if (tmp_rd == INT64_MAX) {
+          continue;
+        }
         cpi->rd_filter_cache[switchable_filter_index] = tmp_rd;
         rs = get_switchable_rate(cm, x);
         rs_rd = RDCOST(x->rdmult, x->rddiv, rs, 0);
@@ -3375,6 +3448,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
             MIN(cpi->rd_filter_cache[VP9_SWITCHABLE_FILTERS], tmp_rd + rs_rd);
         if (cm->mcomp_filter_type == SWITCHABLE)
           tmp_rd += rs_rd;
+
         newbest = (tmp_rd < tmp_best_rd);
         if (newbest) {
           tmp_best_filter = mbmi->interp_filter;
@@ -3393,8 +3467,21 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
               for (i = 0; i < 4; i++)
                 tmp_best_bmodes[i] = xd->mode_info_context->bmi[i];
               pred_exists = 1;
+              if (switchable_filter_index == 0 &&
+                  cpi->sf.use_rd_breakout &&
+                  best_rd < INT64_MAX) {
+                if (tmp_best_rdu / 2 > best_rd) {
+                  // skip searching the other filters if the first is
+                  // already substantially larger than the best so far
+                  tmp_best_filter = mbmi->interp_filter;
+                  tmp_best_rdu = INT64_MAX;
+                  break;
+                }
+              }
             }
       }  // switchable_filter_index loop
+      if (tmp_best_rdu == INT64_MAX)
+        continue;
 
       mbmi->interp_filter = (cm->mcomp_filter_type == SWITCHABLE ?
                              tmp_best_filter : cm->mcomp_filter_type);
@@ -3404,11 +3491,14 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
         // switchable list (bilinear, 6-tap) is indicated at the frame level
         tmp_rd = rd_pick_best_mbsegmentation(cpi, x,
                      &mbmi->ref_mvs[mbmi->ref_frame[0]][0],
-                     second_ref, INT64_MAX,
+                     second_ref,
+                     best_yrd,
                      &rate, &rate_y, &distortion,
                      &skippable,
                      (int)this_rd_thresh, seg_mvs,
                      mi_row, mi_col);
+        if (tmp_rd == INT64_MAX)
+          continue;
       } else {
         if (cpi->common.mcomp_filter_type == SWITCHABLE) {
           int rs = get_switchable_rate(cm, x);
@@ -3431,29 +3521,32 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
       if (cpi->common.mcomp_filter_type == SWITCHABLE)
         rate2 += get_switchable_rate(cm, x);
 
-      // If even the 'Y' rd value of split is higher than best so far
-      // then dont bother looking at UV
-      vp9_build_inter_predictors_sbuv(&x->e_mbd, mi_row, mi_col,
-                                      BLOCK_SIZE_SB8X8);
-      vp9_subtract_sbuv(x, BLOCK_SIZE_SB8X8);
-      super_block_uvrd_for_txfm(cm, x, &rate_uv, &distortion_uv,
-                                &uv_skippable, NULL, BLOCK_SIZE_SB8X8, TX_4X4);
-      rate2 += rate_uv;
-      distortion2 += distortion_uv;
-      skippable = skippable && uv_skippable;
-
-      txfm_cache[ONLY_4X4] = RDCOST(x->rdmult, x->rddiv, rate2, distortion2);
-      for (i = 0; i < NB_TXFM_MODES; ++i)
-        txfm_cache[i] = txfm_cache[ONLY_4X4];
-
       if (!mode_excluded) {
         if (is_comp_pred)
           mode_excluded = cpi->common.comp_pred_mode == SINGLE_PREDICTION_ONLY;
         else
           mode_excluded = cpi->common.comp_pred_mode == COMP_PREDICTION_ONLY;
       }
-
       compmode_cost = vp9_cost_bit(comp_mode_p, is_comp_pred);
+
+      if (RDCOST(x->rdmult, x->rddiv, rate2, distortion2) <
+          best_rd) {
+        // If even the 'Y' rd value of split is higher than best so far
+        // then dont bother looking at UV
+        vp9_build_inter_predictors_sbuv(&x->e_mbd, mi_row, mi_col,
+                                        BLOCK_SIZE_SB8X8);
+        vp9_subtract_sbuv(x, BLOCK_SIZE_SB8X8);
+        super_block_uvrd_for_txfm(cm, x, &rate_uv, &distortion_uv,
+                                  &uv_skippable, NULL,
+                                  BLOCK_SIZE_SB8X8, TX_4X4);
+        rate2 += rate_uv;
+        distortion2 += distortion_uv;
+        skippable = skippable && uv_skippable;
+
+        txfm_cache[ONLY_4X4] = RDCOST(x->rdmult, x->rddiv, rate2, distortion2);
+        for (i = 0; i < NB_TXFM_MODES; ++i)
+          txfm_cache[i] = txfm_cache[ONLY_4X4];
+      }
     } else {
       compmode_cost = vp9_cost_bit(comp_mode_p,
                                    mbmi->ref_frame[1] > INTRA_FRAME);
@@ -3495,7 +3588,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
       if (skippable && bsize >= BLOCK_SIZE_SB8X8) {
         // Back out the coefficient coding costs
         rate2 -= (rate_y + rate_uv);
-        // for best_yrd calculation
+        // for best yrd calculation
         rate_uv = 0;
 
         if (mb_skip_allowed) {
@@ -3593,6 +3686,8 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
         *returnrate = rate2;
         *returndistortion = distortion2;
         best_rd = this_rd;
+        best_yrd = best_rd -
+                   RDCOST(x->rdmult, x->rddiv, rate_uv, distortion_uv);
         best_mbmode = *mbmi;
         best_skip2 = this_skip2;
         best_partition = *x->partition_info;
