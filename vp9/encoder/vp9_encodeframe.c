@@ -1155,7 +1155,7 @@ static void choose_partitioning(VP9_COMP *cpi, MODE_INFO *m, int mi_row,
 }
 static void rd_use_partition(VP9_COMP *cpi, MODE_INFO *m, TOKENEXTRA **tp,
                              int mi_row, int mi_col, BLOCK_SIZE_TYPE bsize,
-                             int *rate, int64_t *dist) {
+                             int *rate, int64_t *dist, int do_recon) {
   VP9_COMMON * const cm = &cpi->common;
   MACROBLOCK * const x = &cpi->mb;
   MACROBLOCKD *xd = &cpi->mb.e_mbd;
@@ -1308,7 +1308,7 @@ static void rd_use_partition(VP9_COMP *cpi, MODE_INFO *m, TOKENEXTRA **tp,
         *(get_sb_index(xd, subsize)) = i;
 
         rd_use_partition(cpi, m + jj * bss * mis + ii * bss, tp, mi_row + y_idx,
-                         mi_col + x_idx, subsize, &rt, &dt);
+                         mi_col + x_idx, subsize, &rt, &dt, i != 3);
         last_part_rate += rt;
         last_part_dist += dt;
       }
@@ -1352,7 +1352,7 @@ static void rd_use_partition(VP9_COMP *cpi, MODE_INFO *m, TOKENEXTRA **tp,
 
       restore_context(cpi, mi_row, mi_col, a, l, sa, sl, bsize);
 
-      if (rt < INT_MAX && dt < INT_MAX)
+      if (rt < INT_MAX && dt < INT_MAX && i != 3)
         encode_sb(cpi, tp,  mi_row + y_idx, mi_col + x_idx, 0,
                   split_subsize);
 
@@ -1394,7 +1394,8 @@ static void rd_use_partition(VP9_COMP *cpi, MODE_INFO *m, TOKENEXTRA **tp,
   // No other opportunities for success.
   assert(chosen_rate < INT_MAX && chosen_dist < INT_MAX);
 
-  encode_sb(cpi, tp, mi_row, mi_col, bsize == BLOCK_SIZE_SB64X64, bsize);
+  if (do_recon)
+    encode_sb(cpi, tp, mi_row, mi_col, bsize == BLOCK_SIZE_SB64X64, bsize);
   *rate = chosen_rate;
   *dist = chosen_dist;
 }
@@ -1405,7 +1406,7 @@ static void rd_use_partition(VP9_COMP *cpi, MODE_INFO *m, TOKENEXTRA **tp,
 // results, for encoding speed-up.
 static void rd_pick_partition(VP9_COMP *cpi, TOKENEXTRA **tp, int mi_row,
                               int mi_col, BLOCK_SIZE_TYPE bsize, int *rate,
-                              int64_t *dist) {
+                              int64_t *dist, int do_recon) {
   VP9_COMMON * const cm = &cpi->common;
   MACROBLOCK * const x = &cpi->mb;
   MACROBLOCKD * const xd = &x->e_mbd;
@@ -1450,7 +1451,7 @@ static void rd_pick_partition(VP9_COMP *cpi, TOKENEXTRA **tp, int mi_row,
 
         *(get_sb_index(xd, subsize)) = i;
         rd_pick_partition(cpi, tp, mi_row + y_idx, mi_col + x_idx, subsize, &r,
-                          &d);
+                          &d, i != 3);
 
         r4 += r;
         d4 += d;
@@ -1565,7 +1566,7 @@ static void rd_pick_partition(VP9_COMP *cpi, TOKENEXTRA **tp, int mi_row,
 
   restore_context(cpi, mi_row, mi_col, a, l, sa, sl, bsize);
 
-  if (srate < INT_MAX && sdist < INT_MAX)
+  if (srate < INT_MAX && sdist < INT_MAX && do_recon)
     encode_sb(cpi, tp, mi_row, mi_col, bsize == BLOCK_SIZE_SB64X64, bsize);
 
   if (bsize == BLOCK_SIZE_SB64X64) {
@@ -1666,11 +1667,11 @@ static void encode_sb_row(VP9_COMP *cpi, int mi_row, TOKENEXTRA **tp,
         set_offsets(cpi, mi_row, mi_col, BLOCK_SIZE_SB64X64);
         set_partitioning(cpi, m, cpi->sf.always_this_block_size);
         rd_use_partition(cpi, m, tp, mi_row, mi_col, BLOCK_SIZE_SB64X64,
-                         &dummy_rate, &dummy_dist);
+                         &dummy_rate, &dummy_dist, 1);
       } else if (cpi->sf.partition_by_variance) {
         choose_partitioning(cpi, cm->mi, mi_row, mi_col);
         rd_use_partition(cpi, m, tp, mi_row, mi_col, BLOCK_SIZE_SB64X64,
-                         &dummy_rate, &dummy_dist);
+                         &dummy_rate, &dummy_dist, 1);
       } else {
         if ((cpi->common.current_video_frame
             % cpi->sf.last_partitioning_redo_frequency) == 0
@@ -1679,16 +1680,16 @@ static void encode_sb_row(VP9_COMP *cpi, int mi_row, TOKENEXTRA **tp,
             || cpi->common.frame_type == KEY_FRAME
             || cpi->is_src_frame_alt_ref) {
           rd_pick_partition(cpi, tp, mi_row, mi_col, BLOCK_SIZE_SB64X64,
-                            &dummy_rate, &dummy_dist);
+                            &dummy_rate, &dummy_dist, 1);
         } else {
           copy_partitioning(cpi, m, p);
           rd_use_partition(cpi, m, tp, mi_row, mi_col, BLOCK_SIZE_SB64X64,
-                           &dummy_rate, &dummy_dist);
+                           &dummy_rate, &dummy_dist, 1);
         }
       }
     } else {
       rd_pick_partition(cpi, tp, mi_row, mi_col, BLOCK_SIZE_SB64X64,
-                        &dummy_rate, &dummy_dist);
+                        &dummy_rate, &dummy_dist, 1);
     }
   }
 }
