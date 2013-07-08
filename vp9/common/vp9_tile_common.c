@@ -15,10 +15,14 @@
 #define MIN_TILE_WIDTH_SBS (MIN_TILE_WIDTH >> 6)
 #define MAX_TILE_WIDTH_SBS (MAX_TILE_WIDTH >> 6)
 
+static int to_sbs(n_mis) {
+  return mi_cols_aligned_to_sb(n_mis) >> LOG2_MI_BLOCK_SIZE;
+}
+
 static void vp9_get_tile_offsets(VP9_COMMON *cm, int *min_tile_off,
                                  int *max_tile_off, int tile_idx,
                                  int log2_n_tiles, int n_mis) {
-  const int n_sbs = (n_mis + 7) >> 3;
+  const int n_sbs = to_sbs(n_mis);
   const int sb_off1 =  (tile_idx      * n_sbs) >> log2_n_tiles;
   const int sb_off2 = ((tile_idx + 1) * n_sbs) >> log2_n_tiles;
 
@@ -43,7 +47,7 @@ void vp9_get_tile_row_offsets(VP9_COMMON *cm, int tile_row_idx) {
 
 void vp9_get_tile_n_bits(VP9_COMMON *cm, int *min_log2_n_tiles_ptr,
                          int *delta_log2_n_tiles) {
-  const int sb_cols = (cm->mb_cols + 3) >> 2;
+  const int sb_cols = to_sbs(cm->mi_cols);
   int min_log2_n_tiles, max_log2_n_tiles;
 
   for (max_log2_n_tiles = 0;

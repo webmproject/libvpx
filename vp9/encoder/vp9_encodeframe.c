@@ -1690,9 +1690,10 @@ static void encode_sb_row(VP9_COMP *cpi, int mi_row, TOKENEXTRA **tp,
 }
 
 static void init_encode_frame_mb_context(VP9_COMP *cpi) {
-  MACROBLOCK * const x = &cpi->mb;
-  VP9_COMMON * const cm = &cpi->common;
-  MACROBLOCKD * const xd = &x->e_mbd;
+  MACROBLOCK *const x = &cpi->mb;
+  VP9_COMMON *const cm = &cpi->common;
+  MACROBLOCKD *const xd = &x->e_mbd;
+  const int aligned_mi_cols = mi_cols_aligned_to_sb(cm->mi_cols);
 
   x->act_zbin_adj = 0;
   cpi->seg0_idx = 0;
@@ -1735,11 +1736,10 @@ static void init_encode_frame_mb_context(VP9_COMP *cpi) {
 
   // Note: this memset assumes above_context[0], [1] and [2]
   // are allocated as part of the same buffer.
-  vpx_memset(
-      cm->above_context[0], 0,
-      sizeof(ENTROPY_CONTEXT) * 2 * MAX_MB_PLANE * mi_cols_aligned_to_sb(cm));
+  vpx_memset(cm->above_context[0], 0,
+             sizeof(ENTROPY_CONTEXT) * 2 * MAX_MB_PLANE * aligned_mi_cols);
   vpx_memset(cm->above_seg_context, 0,
-             sizeof(PARTITION_CONTEXT) * mi_cols_aligned_to_sb(cm));
+             sizeof(PARTITION_CONTEXT) * aligned_mi_cols);
 }
 
 static void switch_lossless_mode(VP9_COMP *cpi, int lossless) {

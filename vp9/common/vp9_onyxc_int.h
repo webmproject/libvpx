@@ -301,8 +301,8 @@ static void ref_cnt_fb(int *buf, int *idx, int new_idx) {
   buf[new_idx]++;
 }
 
-static int mi_cols_aligned_to_sb(VP9_COMMON *cm) {
-  return 2 * ((cm->mb_cols + 3) & ~3);
+static int mi_cols_aligned_to_sb(int n_mis) {
+  return ALIGN_POWER_OF_TWO(n_mis, LOG2_MI_BLOCK_SIZE);
 }
 
 static INLINE void set_partition_seg_context(VP9_COMMON *cm,

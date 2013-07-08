@@ -22,12 +22,11 @@
 #define MIN(x, y) (((x) < (y)) ? (x) : (y))
 #define MAX(x, y) (((x) > (y)) ? (x) : (y))
 
-#define ROUND_POWER_OF_TWO(value, n) (((value) + (1 << ((n) - 1))) >> (n))
+#define ROUND_POWER_OF_TWO(value, n) \
+    (((value) + (1 << ((n) - 1))) >> (n))
 
-/* If we don't want to use ROUND_POWER_OF_TWO macro
-static INLINE int16_t round_power_of_two(int16_t value, int n) {
-  return (value + (1 << (n - 1))) >> n;
-}*/
+#define ALIGN_POWER_OF_TWO(value, n) \
+    (((value) + ((1 << (n)) - 1)) & ~((1 << (n)) - 1))
 
 // Only need this for fixed-size arrays, for structs just assign.
 #define vp9_copy(dest, src) {            \
@@ -54,10 +53,6 @@ static INLINE int clamp(int value, int low, int high) {
 
 static INLINE double fclamp(double value, double low, double high) {
   return value < low ? low : (value > high ? high : value);
-}
-
-static INLINE int multiple8(int value) {
-  return (value + 7) & ~7;
 }
 
 static int get_unsigned_bits(unsigned int num_values) {
