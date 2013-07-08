@@ -949,6 +949,26 @@ static void copy_partitioning(VP9_COMP *cpi, MODE_INFO **mi_8x8,
   }
 }
 
+static int sb_has_motion(VP9_COMP *cpi, MODE_INFO **prev_mi_8x8) {
+  VP9_COMMON *const cm = &cpi->common;
+  const int mis = cm->mode_info_stride;
+  int block_row, block_col;
+
+  if (cm->prev_mi) {
+    for (block_row = 0; block_row < 8; ++block_row) {
+      for (block_col = 0; block_col < 8; ++block_col) {
+        MODE_INFO * prev_mi = prev_mi_8x8[block_row * mis + block_col];
+        if (prev_mi) {
+          if (abs(prev_mi->mbmi.mv[0].as_mv.row) >= 8 ||
+              abs(prev_mi->mbmi.mv[0].as_mv.col) >= 8)
+            return 1;
+        }
+      }
+    }
+  }
+  return 0;
+}
+
 static void rd_use_partition(VP9_COMP *cpi, MODE_INFO **mi_8x8,
                              TOKENEXTRA **tp, int mi_row, int mi_col,
                              BLOCK_SIZE bsize, int *rate, int64_t *dist,
@@ -1760,7 +1780,8 @@ static void encode_sb_row(VP9_COMP *cpi, int mi_row, TOKENEXTRA **tp,
             || cm->prev_mi == 0
             || cpi->common.show_frame == 0
             || cpi->common.frame_type == KEY_FRAME
-            || cpi->is_src_frame_alt_ref) {
+            || cpi->is_src_frame_alt_ref
+            || sb_has_motion(cpi, prev_mi_8x8)) {
           // If required set upper and lower partition size limits
           if (cpi->sf.auto_min_max_partition_size) {
             set_offsets(cpi, mi_row, mi_col, BLOCK_64X64);
