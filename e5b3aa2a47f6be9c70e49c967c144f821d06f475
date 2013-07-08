@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAcH///YY\u003d",
+        "filename": "vp9/common/arm/neon/vp9_loopfilter_neon.asm",
+        "patchSetId": 2
+      },
+      "lineNbr": 293,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2013-07-08T18:35:40Z",
+      "side": 1,
+      "message": "Should be able to turn this into 1 instruction:\n vld1.8 {d0[]} [r4]\n\nd0[] indicates to duplicate the value into all lanes.",
+      "revId": "e5b3aa2a47f6be9c70e49c967c144f821d06f475",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcH///VM\u003d",
+        "filename": "vp9/common/arm/neon/vp9_loopfilter_neon.asm",
+        "patchSetId": 2
+      },
+      "lineNbr": 480,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2013-07-08T18:35:40Z",
+      "side": 1,
+      "message": "May be able to use:\n vcgt.u8 d24, d0, #0\n\nbut only #0 can be used as a constant:\nhttp://infocenter.arm.com/help/topic/com.arm.doc.dui0204h/CIHGAGID.html\n\nShould be equivalent. Given integers:\ngreater than or equal to 1 is the same as strictly greater than 0",
+      "revId": "e5b3aa2a47f6be9c70e49c967c144f821d06f475",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
