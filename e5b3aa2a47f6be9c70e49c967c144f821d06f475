@@ -104,6 +104,24 @@
       "revId": "e5b3aa2a47f6be9c70e49c967c144f821d06f475",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcH//9ko\u003d",
+        "filename": "vp9/common/arm/neon/vp9_loopfilter_neon.asm",
+        "patchSetId": 2
+      },
+      "lineNbr": 482,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2013-07-09T18:06:03Z",
+      "side": 1,
+      "message": "for vcgt d20, d20, #0? It shouldn\u0027t be set if values are 0, comparison is strictly greater than, which 0 is not.",
+      "parentUuid": "AAAAcH//9ns\u003d",
+      "revId": "e5b3aa2a47f6be9c70e49c967c144f821d06f475",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
