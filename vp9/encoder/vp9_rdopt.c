@@ -3506,7 +3506,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
           }
         }
       } else if (mb_skip_allowed && ref_frame != INTRA_FRAME &&
-                 this_mode != SPLITMV) {
+                 this_mode != SPLITMV && !xd->lossless) {
         if (RDCOST(x->rdmult, x->rddiv, rate_y + rate_uv, distortion2) <
             RDCOST(x->rdmult, x->rddiv, 0, total_sse)) {
           // Add in the cost of the no skip flag.
