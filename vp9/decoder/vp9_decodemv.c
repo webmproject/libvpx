@@ -482,10 +482,6 @@ static void read_inter_mode_info(VP9D_COMP *pbi, MODE_INFO *mi,
 
   int idx, idy;
 
-  // Make sure the MACROBLOCKD mode info pointer is pointed at the
-  // correct entry for the current macroblock.
-  xd->mode_info_context = mi;
-
   // Distance of Mb to the various image edges.
   // These specified to 8th pel as they are always compared to MV values
   // that are in 1/8th pel units
