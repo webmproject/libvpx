@@ -2340,8 +2340,7 @@ static void single_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
     for (i = 0; i < MAX_MB_PLANE; i++)
       backup_yv12[i] = xd->plane[i].pre[0];
 
-    setup_pre_planes(xd, scaled_ref_frame, NULL, mi_row, mi_col,
-                     NULL, NULL);
+    setup_pre_planes(xd, 0, scaled_ref_frame, mi_row, mi_col, NULL, NULL);
   }
 
   vp9_clamp_mv_min_max(x, &ref_mv);
@@ -2430,8 +2429,7 @@ static void joint_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
     // motion search code to be used without additional modifications.
     for (i = 0; i < MAX_MB_PLANE; i++)
       backup_yv12[i] = xd->plane[i].pre[0];
-    setup_pre_planes(xd, scaled_ref_frame[0], NULL, mi_row, mi_col,
-                     NULL, NULL);
+    setup_pre_planes(xd, 0, scaled_ref_frame[0], mi_row, mi_col, NULL, NULL);
   }
 
   if (scaled_ref_frame[1]) {
@@ -2439,8 +2437,7 @@ static void joint_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
     for (i = 0; i < MAX_MB_PLANE; i++)
       backup_second_yv12[i] = xd->plane[i].pre[1];
 
-    setup_pre_planes(xd, scaled_ref_frame[1], NULL, mi_row, mi_col,
-                     NULL, NULL);
+    setup_pre_planes(xd, 0, scaled_ref_frame[1], mi_row, mi_col, NULL, NULL);
   }
 
   xd->scale_factor[0].set_scaled_offsets(&xd->scale_factor[0],

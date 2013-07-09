@@ -1080,8 +1080,10 @@ static void choose_partitioning(VP9_COMP *cpi, MODE_INFO *m, int mi_row,
     YV12_BUFFER_CONFIG *ref_fb = &cm->yv12_fb[0];
     YV12_BUFFER_CONFIG *second_ref_fb = NULL;
 
-    setup_pre_planes(xd, ref_fb, second_ref_fb, mi_row, mi_col,
-                     xd->scale_factor, xd->scale_factor_uv);
+    setup_pre_planes(xd, 0, ref_fb, mi_row, mi_col,
+                     &xd->scale_factor[0], &xd->scale_factor_uv[0]);
+    setup_pre_planes(xd, 1, second_ref_fb, mi_row, mi_col,
+                     &xd->scale_factor[1], &xd->scale_factor_uv[1]);
     xd->mode_info_context->mbmi.ref_frame[0] = LAST_FRAME;
     xd->mode_info_context->mbmi.sb_type = BLOCK_SIZE_SB64X64;
     vp9_find_best_ref_mvs(xd, m->mbmi.ref_mvs[m->mbmi.ref_frame[0]],
@@ -1716,8 +1718,8 @@ static void init_encode_frame_mb_context(VP9_COMP *cpi) {
   vp9_setup_src_planes(x, cpi->Source, 0, 0);
 
   // TODO(jkoleszar): are these initializations required?
-  setup_pre_planes(xd, &cm->yv12_fb[cm->ref_frame_map[cpi->lst_fb_idx]], NULL,
-                   0, 0, NULL, NULL );
+  setup_pre_planes(xd, 0, &cm->yv12_fb[cm->ref_frame_map[cpi->lst_fb_idx]],
+                   0, 0, NULL, NULL);
   setup_dst_planes(xd, &cm->yv12_fb[cm->new_fb_idx], 0, 0);
 
   setup_block_dptrs(&x->e_mbd, cm->subsampling_x, cm->subsampling_y);
@@ -2335,8 +2337,11 @@ static void encode_superblock(VP9_COMP *cpi, TOKENEXTRA **t, int output_enabled,
 
     assert(cm->frame_type != KEY_FRAME);
 
-    setup_pre_planes(xd, ref_fb, second_ref_fb, mi_row, mi_col,
-                     xd->scale_factor, xd->scale_factor_uv);
+    setup_pre_planes(xd, 0, ref_fb, mi_row, mi_col,
+                     &xd->scale_factor[0], &xd->scale_factor_uv[0]);
+    setup_pre_planes(xd, 1, second_ref_fb, mi_row, mi_col,
+                     &xd->scale_factor[1], &xd->scale_factor_uv[1]);
+
 
     vp9_build_inter_predictors_sb(
         xd, mi_row, mi_col,
