@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAcH//9xw\u003d",
+        "filename": "vp9/common/arm/neon/vp9_loopfilter_neon.asm",
+        "patchSetId": 2
+      },
+      "lineNbr": 293,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2013-07-09T16:52:27Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAcH///YY\u003d",
+      "revId": "e5b3aa2a47f6be9c70e49c967c144f821d06f475",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAcH///VM\u003d",
         "filename": "vp9/common/arm/neon/vp9_loopfilter_neon.asm",
         "patchSetId": 2
@@ -30,6 +48,24 @@
       "writtenOn": "2013-07-08T18:35:40Z",
       "side": 1,
       "message": "May be able to use:\n vcgt.u8 d24, d0, #0\n\nbut only #0 can be used as a constant:\nhttp://infocenter.arm.com/help/topic/com.arm.doc.dui0204h/CIHGAGID.html\n\nShould be equivalent. Given integers:\ngreater than or equal to 1 is the same as strictly greater than 0",
+      "revId": "e5b3aa2a47f6be9c70e49c967c144f821d06f475",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcH//9t4\u003d",
+        "filename": "vp9/common/arm/neon/vp9_loopfilter_neon.asm",
+        "patchSetId": 2
+      },
+      "lineNbr": 480,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2013-07-09T16:52:27Z",
+      "side": 1,
+      "message": "I don\u0027t think this will help on this instruction, because I\u0027m checking against blimit.\n\nIt should help on \"flat\" instruction below, by removing \"vmov.u8 d23, #1\" and freeing up d23. But android compiler complains about vcgt.u8 d20, d20, #0 as an invalid instruction. \n\nPs. I changed the comment.",
+      "parentUuid": "AAAAcH///VM\u003d",
       "revId": "e5b3aa2a47f6be9c70e49c967c144f821d06f475",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
