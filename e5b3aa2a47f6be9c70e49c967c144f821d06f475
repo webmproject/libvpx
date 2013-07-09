@@ -86,6 +86,24 @@
       "revId": "e5b3aa2a47f6be9c70e49c967c144f821d06f475",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcH//9ns\u003d",
+        "filename": "vp9/common/arm/neon/vp9_loopfilter_neon.asm",
+        "patchSetId": 2
+      },
+      "lineNbr": 482,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2013-07-09T17:57:45Z",
+      "side": 1,
+      "message": "Yeah it compiled with S8, but the results were off, because d20 will be set if values are 0 or 1.",
+      "parentUuid": "AAAAcH//9rA\u003d",
+      "revId": "e5b3aa2a47f6be9c70e49c967c144f821d06f475",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
