@@ -367,13 +367,14 @@ static int read_inter_segment_id(VP9D_COMP *pbi, int mi_row, int mi_col,
   VP9_COMMON *const cm = &pbi->common;
   MACROBLOCKD *const xd = &pbi->mb;
   const BLOCK_SIZE_TYPE bsize = xd->mode_info_context->mbmi.sb_type;
-  const int pred_segment_id = vp9_get_segment_id(cm, cm->last_frame_seg_map,
-                                                 bsize, mi_row, mi_col);
+  int pred_segment_id;
   int segment_id;
 
   if (!xd->segmentation_enabled)
     return 0;  // Default for disabled segmentation
 
+  pred_segment_id = vp9_get_segment_id(cm, cm->last_frame_seg_map,
+                                                   bsize, mi_row, mi_col);
   if (!xd->update_mb_segmentation_map)
     return pred_segment_id;
 
