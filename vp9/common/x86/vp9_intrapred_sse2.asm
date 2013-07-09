@@ -125,3 +125,66 @@ cglobal dc_predictor_32x32, 4, 4, 5, dst, stride, above, left
   dec              lines4d
   jnz .loop
   REP_RET
+
+INIT_MMX sse
+cglobal v_predictor_4x4, 3, 3, 1, dst, stride, above
+  movd                  m0, [aboveq]
+  movd      [dstq        ], m0
+  movd      [dstq+strideq], m0
+  lea                 dstq, [dstq+strideq*2]
+  movd      [dstq        ], m0
+  movd      [dstq+strideq], m0
+  RET
+
+INIT_MMX sse
+cglobal v_predictor_8x8, 3, 3, 1, dst, stride, above
+  movq                  m0, [aboveq]
+  DEFINE_ARGS dst, stride, stride3
+  lea             stride3q, [strideq*3]
+  movq    [dstq          ], m0
+  movq    [dstq+strideq  ], m0
+  movq    [dstq+strideq*2], m0
+  movq    [dstq+stride3q ], m0
+  lea                 dstq, [dstq+strideq*4]
+  movq    [dstq          ], m0
+  movq    [dstq+strideq  ], m0
+  movq    [dstq+strideq*2], m0
+  movq    [dstq+stride3q ], m0
+  RET
+
+INIT_XMM sse2
+cglobal v_predictor_16x16, 3, 4, 1, dst, stride, above
+  mova                  m0, [aboveq]
+  DEFINE_ARGS dst, stride, stride3, nlines4
+  lea             stride3q, [strideq*3]
+  mov              nlines4d, 4
+.loop:
+  mova    [dstq          ], m0
+  mova    [dstq+strideq  ], m0
+  mova    [dstq+strideq*2], m0
+  mova    [dstq+stride3q ], m0
+  lea                 dstq, [dstq+strideq*4]
+  dec             nlines4d
+  jnz .loop
+  REP_RET
+
+INIT_XMM sse2
+cglobal v_predictor_32x32, 3, 4, 2, dst, stride, above
+  mova                  m0, [aboveq]
+  mova                  m1, [aboveq+16]
+  DEFINE_ARGS dst, stride, stride3, nlines4
+  lea             stride3q, [strideq*3]
+  mov              nlines4d, 8
+.loop:
+  mova [dstq             ], m0
+  mova [dstq          +16], m1
+  mova [dstq+strideq     ], m0
+  mova [dstq+strideq  +16], m1
+  mova [dstq+strideq*2   ], m0
+  mova [dstq+strideq*2+16], m1
+  mova [dstq+stride3q    ], m0
+  mova [dstq+stride3q +16], m1
+  lea                 dstq, [dstq+strideq*4]
+  dec             nlines4d
+  jnz .loop
+  REP_RET
