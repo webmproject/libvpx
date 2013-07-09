@@ -95,9 +95,8 @@ static void setup_mi(VP9_COMMON *cm) {
 int vp9_alloc_frame_buffers(VP9_COMMON *oci, int width, int height) {
   int i, mi_cols;
 
-  // Our internal buffers are always multiples of 16
-  const int aligned_width = multiple8(width);
-  const int aligned_height = multiple8(height);
+  const int aligned_width = ALIGN_POWER_OF_TWO(width, LOG2_MI_SIZE);
+  const int aligned_height = ALIGN_POWER_OF_TWO(height, LOG2_MI_SIZE);
   const int ss_x = oci->subsampling_x;
   const int ss_y = oci->subsampling_y;
   int mi_size;
@@ -147,7 +146,7 @@ int vp9_alloc_frame_buffers(VP9_COMMON *oci, int width, int height) {
 
   // FIXME(jkoleszar): allocate subsampled arrays for U/V once subsampling
   // information is exposed at this level
-  mi_cols = mi_cols_aligned_to_sb(oci);
+  mi_cols = mi_cols_aligned_to_sb(oci->mi_cols);
 
   // 2 contexts per 'mi unit', so that we have one context per 4x4 txfm
   // block where mi unit size is 8x8.
@@ -198,8 +197,8 @@ void vp9_initialize_common() {
 }
 
 void vp9_update_frame_size(VP9_COMMON *cm) {
-  const int aligned_width = multiple8(cm->width);
-  const int aligned_height = multiple8(cm->height);
+  const int aligned_width = ALIGN_POWER_OF_TWO(cm->width, LOG2_MI_SIZE);
+  const int aligned_height = ALIGN_POWER_OF_TWO(cm->height, LOG2_MI_SIZE);
 
   set_mb_mi(cm, aligned_width, aligned_height);
   setup_mi(cm);

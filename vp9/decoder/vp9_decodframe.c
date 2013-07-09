@@ -684,16 +684,17 @@ static void decode_tiles(VP9D_COMP *pbi,
   VP9_COMMON *const pc = &pbi->common;
 
   const uint8_t *data_ptr = data + first_partition_size;
-  const uint8_t* const data_end = pbi->source + pbi->source_sz;
+  const uint8_t *const data_end = pbi->source + pbi->source_sz;
+  const int aligned_mi_cols = mi_cols_aligned_to_sb(pc->mi_cols);
   int tile_row, tile_col;
 
   // Note: this memset assumes above_context[0], [1] and [2]
   // are allocated as part of the same buffer.
-  vpx_memset(pc->above_context[0], 0, sizeof(ENTROPY_CONTEXT) * 2 *
-                                      MAX_MB_PLANE * mi_cols_aligned_to_sb(pc));
+  vpx_memset(pc->above_context[0], 0,
+             sizeof(ENTROPY_CONTEXT) * 2 * MAX_MB_PLANE * aligned_mi_cols);
 
-  vpx_memset(pc->above_seg_context, 0, sizeof(PARTITION_CONTEXT) *
-                                       mi_cols_aligned_to_sb(pc));
+  vpx_memset(pc->above_seg_context, 0,
+             sizeof(PARTITION_CONTEXT) * aligned_mi_cols);
 
   if (pbi->oxcf.inv_tile_order) {
     const int n_cols = pc->tile_columns;

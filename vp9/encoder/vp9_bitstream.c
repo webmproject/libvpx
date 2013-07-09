@@ -1475,8 +1475,8 @@ void vp9_pack_bitstream(VP9_COMP *cpi, uint8_t *dest, unsigned long *size) {
     unsigned char *data_ptr = cx_data + header_bc.pos;
     TOKENEXTRA *tok[4][1 << 6], *tok_end;
 
-    vpx_memset(cpi->common.above_seg_context, 0, sizeof(PARTITION_CONTEXT) *
-               mi_cols_aligned_to_sb(&cpi->common));
+    vpx_memset(pc->above_seg_context, 0, sizeof(PARTITION_CONTEXT) *
+               mi_cols_aligned_to_sb(pc->mi_cols));
     tok[0][0] = cpi->tok;
     for (tile_row = 0; tile_row < pc->tile_rows; tile_row++) {
       if (tile_row) {
