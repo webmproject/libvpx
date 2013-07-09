@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAcH//884\u003d",
+        "filename": "vp9/common/arm/neon/vp9_dc_only_idct_add_neon.asm",
+        "patchSetId": 2
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2013-07-09T22:24:54Z",
+      "side": 1,
+      "message": "vp9_dc_only_idct_add_neon",
+      "revId": "1de5b2fdd8d67e5c164b87e35a20ad83a8f3eb42",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcH//898\u003d",
+        "filename": "vp9/common/arm/neon/vp9_dc_only_idct_add_neon.asm",
+        "patchSetId": 2
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2013-07-09T22:24:54Z",
+      "side": 1,
+      "message": "You need to save r9. Or maybe you could move the vld1.32 instructions first and then you could use r1 or r3 to hold x2d41.",
+      "revId": "1de5b2fdd8d67e5c164b87e35a20ad83a8f3eb42",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcH//9AQ\u003d",
+        "filename": "vp9/common/arm/neon/vp9_dc_only_idct_add_neon.asm",
+        "patchSetId": 2
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2013-07-09T22:24:54Z",
+      "side": 1,
+      "message": "Add some comments. I.e dct_const_round_shift, ROUND_POWER_OF_TWO, ...",
+      "revId": "1de5b2fdd8d67e5c164b87e35a20ad83a8f3eb42",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcH//9Ag\u003d",
+        "filename": "vp9/common/arm/neon/vp9_dc_only_idct_add_neon.asm",
+        "patchSetId": 2
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2013-07-09T22:24:54Z",
+      "side": 1,
+      "message": "What is this instruction doing?",
+      "revId": "1de5b2fdd8d67e5c164b87e35a20ad83a8f3eb42",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
