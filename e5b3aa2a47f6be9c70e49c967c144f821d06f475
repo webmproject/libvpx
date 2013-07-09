@@ -69,6 +69,23 @@
       "revId": "e5b3aa2a47f6be9c70e49c967c144f821d06f475",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcH//9rA\u003d",
+        "filename": "vp9/common/arm/neon/vp9_loopfilter_neon.asm",
+        "patchSetId": 2
+      },
+      "lineNbr": 482,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2013-07-09T17:12:12Z",
+      "side": 1,
+      "message": "Ah, I was looking at the d23 above and got confused.\n\nWhat exactly was the error? Is this using the correct type? vcgt #0 doesn\u0027t make sense for unsigned values since they are always greater than 0. I get this:\nError: bad type in Neon instruction -- `vcgt.u8 d20,d20,#0\u0027\n\ndatatype\nmust be one of:\nS8, S16, S32, or F32 for GE, GT, LE, or LT (#0 form).",
+      "revId": "e5b3aa2a47f6be9c70e49c967c144f821d06f475",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
