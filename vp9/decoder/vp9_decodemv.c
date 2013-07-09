@@ -749,21 +749,18 @@ void vp9_read_mode_info(VP9D_COMP* pbi, int mi_row, int mi_col, vp9_reader *r) {
   MACROBLOCKD *const xd = &pbi->mb;
   MODE_INFO *mi = xd->mode_info_context;
   const BLOCK_SIZE_TYPE bsize = mi->mbmi.sb_type;
+  const int bw = 1 << mi_width_log2(bsize);
+  const int bh = 1 << mi_height_log2(bsize);
+  const int y_mis = MIN(bh, cm->mi_rows - mi_row);
+  const int x_mis = MIN(bw, cm->mi_cols - mi_col);
+  int x, y;
 
   if (cm->frame_type == KEY_FRAME || cm->intra_only)
     read_intra_mode_info(pbi, mi, mi_row, mi_col, r);
   else
     read_inter_mode_info(pbi, mi, mi_row, mi_col, r);
 
-  if (1) {
-    const int bw = 1 << mi_width_log2(bsize);
-    const int bh = 1 << mi_height_log2(bsize);
-    const int y_mis = MIN(bh, cm->mi_rows - mi_row);
-    const int x_mis = MIN(bw, cm->mi_cols - mi_col);
-    int x, y;
-
-    for (y = 0; y < y_mis; y++)
-      for (x = !y; x < x_mis; x++)
-        mi[y * cm->mode_info_stride + x] = *mi;
-  }
+  for (y = 0; y < y_mis; y++)
+    for (x = !y; x < x_mis; x++)
+      mi[y * cm->mode_info_stride + x] = *mi;
 }
