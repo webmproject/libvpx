@@ -180,7 +180,8 @@ static void filter_selectively_vert(uint8_t *s, int pitch,
                                     const struct loop_filter_info *lfi) {
   unsigned int mask;
 
-  for (mask = mask_16x16 | mask_8x8 | mask_4x4; mask; mask >>= 1) {
+  for (mask = mask_16x16 | mask_8x8 | mask_4x4 | mask_4x4_int;
+       mask; mask >>= 1) {
     if (mask & 1) {
       if (mask_16x16 & 1) {
         vp9_mb_lpf_vertical_edge_w(s, pitch, lfi->mblim, lfi->lim,
@@ -198,8 +199,6 @@ static void filter_selectively_vert(uint8_t *s, int pitch,
                                       lfi->hev_thr, 1);
         assert(!(mask_16x16 & 1));
         assert(!(mask_8x8 & 1));
-      } else {
-        assert(0);
       }
     }
     if (mask_4x4_int & 1)
@@ -223,7 +222,8 @@ static void filter_selectively_horiz(uint8_t *s, int pitch,
                                      const struct loop_filter_info *lfi) {
   unsigned int mask;
 
-  for (mask = mask_16x16 | mask_8x8 | mask_4x4; mask; mask >>= 1) {
+  for (mask = mask_16x16 | mask_8x8 | mask_4x4 | mask_4x4_int;
+       mask; mask >>= 1) {
     if (mask & 1) {
       if (!only_4x4_1) {
         if (mask_16x16 & 1) {
@@ -242,8 +242,6 @@ static void filter_selectively_horiz(uint8_t *s, int pitch,
                                           lfi->hev_thr, 1);
           assert(!(mask_16x16 & 1));
           assert(!(mask_8x8 & 1));
-        } else {
-          assert(0);
         }
       }
 
