@@ -16,6 +16,24 @@
       "revId": "942298898cbc966e0e5cd4914b5dd8c563f3f137",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcH//87M\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 694,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2013-07-09T22:49:17Z",
+      "side": 1,
+      "message": "Done\n\nput a TODO here, we need to tune this model for better coding performance.",
+      "parentUuid": "AAAAcH//8/k\u003d",
+      "revId": "942298898cbc966e0e5cd4914b5dd8c563f3f137",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
