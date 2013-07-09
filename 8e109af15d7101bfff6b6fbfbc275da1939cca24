@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAcH//9i0\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 2613,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2013-07-09T18:13:46Z",
+      "side": 1,
+      "message": "we specifically don\u0027t want this.   They changed the code to make it possible for nearest to be 0 and then biased all entropy heavily towards reusing nearest.",
+      "revId": "8e109af15d7101bfff6b6fbfbc275da1939cca24",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
