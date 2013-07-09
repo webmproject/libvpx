@@ -35,8 +35,6 @@ specialize vp9_idct_add_8x8
 prototype void vp9_idct_add "int16_t *input, uint8_t *dest, int stride, int eob"
 specialize vp9_idct_add
 
-
-
 prototype void vp9_idct_add_32x32 "int16_t *q, uint8_t *dst, int stride, int eob"
 specialize vp9_idct_add_32x32
 
@@ -54,8 +52,44 @@ vp9_copy_mem8x8_dspr2=vp9_copy_mem8x8_dspr2
 prototype void vp9_copy_mem8x4 "const uint8_t *src, int src_pitch, uint8_t *dst, int dst_pitch"
 specialize vp9_copy_mem8x4 mmx
 
-prototype void vp9_build_intra_predictors "uint8_t *src, int src_stride, uint8_t *pred, int y_stride, int mode, int bw, int bh, int up_available, int left_available, int right_available"
-specialize void vp9_build_intra_predictors
+prototype void vp9_d27_predictor "uint8_t *ypred_ptr, int y_stride, int bs, uint8_t *yabove_row, uint8_t *yleft_col"
+specialize vp9_d27_predictor
+
+prototype void vp9_d45_predictor "uint8_t *ypred_ptr, int y_stride, int bs, uint8_t *yabove_row, uint8_t *yleft_col"
+specialize vp9_d45_predictor
+
+prototype void vp9_d63_predictor "uint8_t *ypred_ptr, int y_stride, int bs, uint8_t *yabove_row, uint8_t *yleft_col"
+specialize vp9_d63_predictor
+
+prototype void vp9_h_predictor "uint8_t *ypred_ptr, int y_stride, int bs, uint8_t *yabove_row, uint8_t *yleft_col"
+specialize vp9_h_predictor
+
+prototype void vp9_d117_predictor "uint8_t *ypred_ptr, int y_stride, int bs, uint8_t *yabove_row, uint8_t *yleft_col"
+specialize vp9_d117_predictor
+
+prototype void vp9_d135_predictor "uint8_t *ypred_ptr, int y_stride, int bs, uint8_t *yabove_row, uint8_t *yleft_col"
+specialize vp9_d135_predictor
+
+prototype void vp9_d153_predictor "uint8_t *ypred_ptr, int y_stride, int bs, uint8_t *yabove_row, uint8_t *yleft_col"
+specialize vp9_d153_predictor
+
+prototype void vp9_v_predictor "uint8_t *ypred_ptr, int y_stride, int bs, uint8_t *yabove_row, uint8_t *yleft_col"
+specialize vp9_v_predictor
+
+prototype void vp9_tm_predictor "uint8_t *ypred_ptr, int y_stride, int bs, uint8_t *yabove_row, uint8_t *yleft_col"
+specialize vp9_tm_predictor
+
+prototype void vp9_dc_predictor "uint8_t *ypred_ptr, int y_stride, int bs, uint8_t *yabove_row, uint8_t *yleft_col"
+specialize vp9_dc_predictor
+
+prototype void vp9_dc_top_predictor "uint8_t *ypred_ptr, int y_stride, int bs, uint8_t *yabove_row, uint8_t *yleft_col"
+specialize vp9_dc_top_predictor
+
+prototype void vp9_dc_left_predictor "uint8_t *ypred_ptr, int y_stride, int bs, uint8_t *yabove_row, uint8_t *yleft_col"
+specialize vp9_dc_left_predictor
+
+prototype void vp9_dc_128_predictor "uint8_t *ypred_ptr, int y_stride, int bs, uint8_t *yabove_row, uint8_t *yleft_col"
+specialize vp9_dc_128_predictor
 
 if [ "$CONFIG_VP9_DECODER" = "yes" ]; then
 prototype void vp9_add_constant_residual_8x8 "const int16_t diff, uint8_t *dest, int stride"
