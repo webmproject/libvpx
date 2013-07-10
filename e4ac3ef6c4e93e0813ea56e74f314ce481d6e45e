@@ -37,6 +37,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAcH//7NA\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1423,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-07-10T20:08:41Z",
+      "side": 1,
+      "message": "it probably falls under horizontal whitespace, because the guide is targeted for c++ with c++ style casts rather than c style.",
+      "parentUuid": "AAAAcH//7RM\u003d",
+      "revId": "e4ac3ef6c4e93e0813ea56e74f314ce481d6e45e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAcH//7SE\u003d",
         "filename": "vp9/encoder/vp9_rdopt.c",
         "patchSetId": 2
