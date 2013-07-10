@@ -149,20 +149,11 @@ static INLINE int b_height_log2(BLOCK_SIZE_TYPE sb_type) {
 }
 
 static INLINE int mi_width_log2(BLOCK_SIZE_TYPE sb_type) {
-  int a = b_width_log2(sb_type) - 1;
-  // align 4x4 block to mode_info
-  if (a < 0)
-    a = 0;
-  assert(a >= 0);
-  return a;
+  return mi_width_log2_lookup[sb_type];
 }
 
 static INLINE int mi_height_log2(BLOCK_SIZE_TYPE sb_type) {
-  int a = b_height_log2(sb_type) - 1;
-  if (a < 0)
-    a = 0;
-  assert(a >= 0);
-  return a;
+  return mi_height_log2_lookup[sb_type];
 }
 
 typedef struct {

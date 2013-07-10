@@ -15,3 +15,8 @@ const int b_width_log2_lookup[BLOCK_SIZE_TYPES] =
   {0, 0, 1, 1, 1, 2, 2, 2, 3, 3, 3, 4, 4};
 const int b_height_log2_lookup[BLOCK_SIZE_TYPES] =
   {0, 1, 0, 1, 2, 1, 2, 3, 2, 3, 4, 3, 4};
+// Log 2 conversion lookup tables for modeinfo width and height
+const int mi_width_log2_lookup[BLOCK_SIZE_TYPES] =
+  {0, 0, 0, 0, 0, 1, 1, 1, 2, 2, 2, 3, 3};
+const int mi_height_log2_lookup[BLOCK_SIZE_TYPES] =
+  {0, 0, 0, 0, 1, 0, 1, 2, 1, 2, 3, 2, 3};
