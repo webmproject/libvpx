@@ -1,0 +1,140 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAcH//7nQ\u003d",
+        "filename": "vp9/common/arm/neon/vp9_dc_only_idct_add_neon.asm",
+        "patchSetId": 3
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2013-07-10T17:26:36Z",
+      "side": 1,
+      "message": "whitpspace",
+      "revId": "0c472f7e04bec6ad0005376bd0c635367954e1ef",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcH//7nM\u003d",
+        "filename": "vp9/common/arm/neon/vp9_dc_only_idct_add_neon.asm",
+        "patchSetId": 3
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2013-07-10T17:26:36Z",
+      "side": 1,
+      "message": "data types",
+      "revId": "0c472f7e04bec6ad0005376bd0c635367954e1ef",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcH//7mw\u003d",
+        "filename": "vp9/common/arm/neon/vp9_dc_only_idct_add_neon.asm",
+        "patchSetId": 3
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2013-07-10T17:26:36Z",
+      "side": 1,
+      "message": "r12 isn\u0027t used until much later.",
+      "revId": "0c472f7e04bec6ad0005376bd0c635367954e1ef",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcH//7ms\u003d",
+        "filename": "vp9/common/arm/neon/vp9_dc_only_idct_add_neon.asm",
+        "patchSetId": 3
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2013-07-10T17:26:36Z",
+      "side": 1,
+      "message": "prefer using r12 here because there is a stall between the store of r9 and the mov.",
+      "revId": "0c472f7e04bec6ad0005376bd0c635367954e1ef",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcH//7nA\u003d",
+        "filename": "vp9/common/arm/neon/vp9_dc_only_idct_add_neon.asm",
+        "patchSetId": 3
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2013-07-10T17:26:36Z",
+      "side": 1,
+      "message": "None of these comments make sense",
+      "revId": "0c472f7e04bec6ad0005376bd0c635367954e1ef",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcH//7nY\u003d",
+        "filename": "vp9/common/arm/neon/vp9_dc_only_idct_add_neon.asm",
+        "patchSetId": 3
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2013-07-10T17:26:36Z",
+      "side": 1,
+      "message": "Move this to the top of the function. Frees r1 and r3, avoid pushing r9",
+      "revId": "0c472f7e04bec6ad0005376bd0c635367954e1ef",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcH//7m0\u003d",
+        "filename": "vp9/common/arm/neon/vp9_dc_only_idct_add_neon.asm",
+        "patchSetId": 3
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2013-07-10T17:26:36Z",
+      "side": 1,
+      "message": "This isn\u0027t doing the clip_pixel part",
+      "revId": "0c472f7e04bec6ad0005376bd0c635367954e1ef",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcH//7mg\u003d",
+        "filename": "vp9/common/arm/neon/vp9_dc_only_idct_add_neon.asm",
+        "patchSetId": 3
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2013-07-10T17:26:36Z",
+      "side": 1,
+      "message": "This is clip_pixel",
+      "revId": "0c472f7e04bec6ad0005376bd0c635367954e1ef",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
