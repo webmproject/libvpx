@@ -9,8 +9,11 @@
  */
 
 #include <assert.h>
+
 #include "vp9/common/vp9_blockd.h"
+#include "vp9/common/vp9_loopfilter.h"
 #include "vp9/common/vp9_seg_common.h"
+#include "vp9/common/vp9_quant_common.h"
 
 static const int seg_feature_data_signed[SEG_LVL_MAX] = { 1, 1, 0, 0 };
 
@@ -22,25 +25,25 @@ static const int seg_feature_data_max[SEG_LVL_MAX] = {
 // the coding mechanism is still subject to change so these provide a
 // convenient single point of change.
 
-int vp9_segfeature_active(const MACROBLOCKD *xd, int segment_id,
+int vp9_segfeature_active(const struct segmentation *seg, int segment_id,
                           SEG_LVL_FEATURES feature_id) {
-  return xd->segmentation_enabled &&
-         (xd->segment_feature_mask[segment_id] & (1 << feature_id));
+  return seg->enabled &&
+         (seg->feature_mask[segment_id] & (1 << feature_id));
 }
 
-void vp9_clearall_segfeatures(MACROBLOCKD *xd) {
-  vpx_memset(xd->segment_feature_data, 0, sizeof(xd->segment_feature_data));
-  vpx_memset(xd->segment_feature_mask, 0, sizeof(xd->segment_feature_mask));
+void vp9_clearall_segfeatures(struct segmentation *seg) {
+  vpx_memset(seg->feature_data, 0, sizeof(seg->feature_data));
+  vpx_memset(seg->feature_mask, 0, sizeof(seg->feature_mask));
 }
 
-void vp9_enable_segfeature(MACROBLOCKD *xd, int segment_id,
+void vp9_enable_segfeature(struct segmentation *seg, int segment_id,
                            SEG_LVL_FEATURES feature_id) {
-  xd->segment_feature_mask[segment_id] |= 1 << feature_id;
+  seg->feature_mask[segment_id] |= 1 << feature_id;
 }
 
-void vp9_disable_segfeature(MACROBLOCKD *xd, int segment_id,
+void vp9_disable_segfeature(struct segmentation *seg, int segment_id,
                             SEG_LVL_FEATURES feature_id) {
-  xd->segment_feature_mask[segment_id] &= ~(1 << feature_id);
+  seg->feature_mask[segment_id] &= ~(1 << feature_id);
 }
 
 int vp9_seg_feature_data_max(SEG_LVL_FEATURES feature_id) {
@@ -51,12 +54,12 @@ int vp9_is_segfeature_signed(SEG_LVL_FEATURES feature_id) {
   return seg_feature_data_signed[feature_id];
 }
 
-void vp9_clear_segdata(MACROBLOCKD *xd, int segment_id,
+void vp9_clear_segdata(struct segmentation *seg, int segment_id,
                        SEG_LVL_FEATURES feature_id) {
-  xd->segment_feature_data[segment_id][feature_id] = 0;
+  seg->feature_data[segment_id][feature_id] = 0;
 }
 
-void vp9_set_segdata(MACROBLOCKD *xd, int segment_id,
+void vp9_set_segdata(struct segmentation *seg, int segment_id,
                      SEG_LVL_FEATURES feature_id, int seg_data) {
   assert(seg_data <= seg_feature_data_max[feature_id]);
   if (seg_data < 0) {
@@ -64,12 +67,12 @@ void vp9_set_segdata(MACROBLOCKD *xd, int segment_id,
     assert(-seg_data <= seg_feature_data_max[feature_id]);
   }
 
-  xd->segment_feature_data[segment_id][feature_id] = seg_data;
+  seg->feature_data[segment_id][feature_id] = seg_data;
 }
 
-int vp9_get_segdata(const MACROBLOCKD *xd, int segment_id,
+int vp9_get_segdata(const struct segmentation *seg, int segment_id,
                     SEG_LVL_FEATURES feature_id) {
-  return xd->segment_feature_data[segment_id][feature_id];
+  return seg->feature_data[segment_id][feature_id];
 }
 
 

@@ -92,9 +92,9 @@ void vp9_loop_filter_frame_init(VP9_COMMON *cm, MACROBLOCKD *xd,
     int lvl_seg = default_filt_lvl, ref, mode, intra_lvl;
 
     // Set the baseline filter values for each segment
-    if (vp9_segfeature_active(xd, seg, SEG_LVL_ALT_LF)) {
-      const int data = vp9_get_segdata(xd, seg, SEG_LVL_ALT_LF);
-      lvl_seg = xd->mb_segment_abs_delta == SEGMENT_ABSDATA
+    if (vp9_segfeature_active(&xd->seg, seg, SEG_LVL_ALT_LF)) {
+      const int data = vp9_get_segdata(&xd->seg, seg, SEG_LVL_ALT_LF);
+      lvl_seg = xd->seg.abs_delta == SEGMENT_ABSDATA
                   ? data
                   : clamp(default_filt_lvl + data, 0, MAX_LOOP_FILTER);
     }

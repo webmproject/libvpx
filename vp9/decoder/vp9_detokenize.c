@@ -278,8 +278,8 @@ SKIP_START:
   return c;
 }
 
-static int get_eob(MACROBLOCKD* const xd, int segment_id, int eob_max) {
-  return vp9_segfeature_active(xd, segment_id, SEG_LVL_SKIP) ? 0 : eob_max;
+static int get_eob(struct segmentation *seg, int segment_id, int eob_max) {
+  return vp9_segfeature_active(seg, segment_id, SEG_LVL_SKIP) ? 0 : eob_max;
 }
 
 struct decode_block_args {
@@ -300,7 +300,7 @@ static void decode_block(int plane, int block,
   struct macroblockd_plane* pd = &xd->plane[plane];
   const int segment_id = xd->mode_info_context->mbmi.segment_id;
   const TX_SIZE ss_tx_size = ss_txfrm_size / 2;
-  const int seg_eob = get_eob(xd, segment_id, 16 << ss_txfrm_size);
+  const int seg_eob = get_eob(&xd->seg, segment_id, 16 << ss_txfrm_size);
   const int off = block >> ss_txfrm_size;
   const int mod = bw - ss_tx_size - pd->subsampling_x;
   const int aoff = (off & ((1 << mod) - 1)) << ss_tx_size;

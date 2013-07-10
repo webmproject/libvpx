@@ -247,10 +247,6 @@ typedef struct VP9Common {
                          [VP9_INTRA_MODES - 1];
   vp9_prob kf_uv_mode_prob[VP9_INTRA_MODES] [VP9_INTRA_MODES - 1];
 
-  // Context probabilities when using predictive coding of segment id
-  vp9_prob segment_pred_probs[PREDICTION_PROBS];
-  unsigned char temporal_update;
-
   // Context probabilities for reference frame prediction
   int allow_comp_inter_inter;
   MV_REFERENCE_FRAME comp_fixed_ref;

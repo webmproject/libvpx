@@ -57,9 +57,9 @@ int16_t vp9_ac_quant(int qindex, int delta) {
 
 
 int vp9_get_qindex(MACROBLOCKD *xd, int segment_id, int base_qindex) {
-  if (vp9_segfeature_active(xd, segment_id, SEG_LVL_ALT_Q)) {
-    const int data = vp9_get_segdata(xd, segment_id, SEG_LVL_ALT_Q);
-    return xd->mb_segment_abs_delta == SEGMENT_ABSDATA ?
+  if (vp9_segfeature_active(&xd->seg, segment_id, SEG_LVL_ALT_Q)) {
+    const int data = vp9_get_segdata(&xd->seg, segment_id, SEG_LVL_ALT_Q);
+    return xd->seg.abs_delta == SEGMENT_ABSDATA ?
                data :  // Abs value
                clamp(base_qindex + data, 0, MAXQ);  // Delta value
   } else {

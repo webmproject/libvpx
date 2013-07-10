@@ -174,7 +174,7 @@ static int decode_tokens(VP9D_COMP *pbi, BLOCK_SIZE_TYPE bsize, vp9_reader *r) {
     vp9_reset_sb_tokens_context(xd, bsize);
     return -1;
   } else {
-    if (xd->segmentation_enabled)
+    if (xd->seg.enabled)
       mb_init_dequantizer(&pbi->common, xd);
 
     // TODO(dkovalev) if (!vp9_reader_has_error(r))
@@ -395,55 +395,53 @@ static void read_coef_probs(FRAME_CONTEXT *fc, TXFM_MODE txfm_mode,
     read_coef_probs_common(fc, TX_32X32, r);
 }
 
-static void setup_segmentation(VP9D_COMP *pbi, struct vp9_read_bit_buffer *rb) {
+static void setup_segmentation(struct segmentation *seg,
+                               struct vp9_read_bit_buffer *rb) {
   int i, j;
 
-  VP9_COMMON *const cm = &pbi->common;
-  MACROBLOCKD *const xd = &pbi->mb;
+  seg->update_map = 0;
+  seg->update_data = 0;
 
-  xd->update_mb_segmentation_map = 0;
-  xd->update_mb_segmentation_data = 0;
-
-  xd->segmentation_enabled = vp9_rb_read_bit(rb);
-  if (!xd->segmentation_enabled)
+  seg->enabled = vp9_rb_read_bit(rb);
+  if (!seg->enabled)
     return;
 
   // Segmentation map update
-  xd->update_mb_segmentation_map = vp9_rb_read_bit(rb);
-  if (xd->update_mb_segmentation_map) {
+  seg->update_map = vp9_rb_read_bit(rb);
+  if (seg->update_map) {
     for (i = 0; i < MB_SEG_TREE_PROBS; i++)
-      xd->mb_segment_tree_probs[i] = vp9_rb_read_bit(rb) ?
-                                         vp9_rb_read_literal(rb, 8) : MAX_PROB;
+      seg->tree_probs[i] = vp9_rb_read_bit(rb) ? vp9_rb_read_literal(rb, 8)
+                                               : MAX_PROB;
 
-    cm->temporal_update = vp9_rb_read_bit(rb);
-    if (cm->temporal_update) {
+    seg->temporal_update = vp9_rb_read_bit(rb);
+    if (seg->temporal_update) {
       for (i = 0; i < PREDICTION_PROBS; i++)
-        cm->segment_pred_probs[i] = vp9_rb_read_bit(rb) ?
-                                        vp9_rb_read_literal(rb, 8) : MAX_PROB;
+        seg->pred_probs[i] = vp9_rb_read_bit(rb) ? vp9_rb_read_literal(rb, 8)
+                                                 : MAX_PROB;
     } else {
       for (i = 0; i < PREDICTION_PROBS; i++)
-        cm->segment_pred_probs[i] = MAX_PROB;
+        seg->pred_probs[i] = MAX_PROB;
     }
   }
 
   // Segmentation data update
-  xd->update_mb_segmentation_data = vp9_rb_read_bit(rb);
-  if (xd->update_mb_segmentation_data) {
-    xd->mb_segment_abs_delta = vp9_rb_read_bit(rb);
+  seg->update_data = vp9_rb_read_bit(rb);
+  if (seg->update_data) {
+    seg->abs_delta = vp9_rb_read_bit(rb);
 
-    vp9_clearall_segfeatures(xd);
+    vp9_clearall_segfeatures(seg);
 
     for (i = 0; i < MAX_MB_SEGMENTS; i++) {
       for (j = 0; j < SEG_LVL_MAX; j++) {
         int data = 0;
         const int feature_enabled = vp9_rb_read_bit(rb);
         if (feature_enabled) {
-          vp9_enable_segfeature(xd, i, j);
+          vp9_enable_segfeature(seg, i, j);
           data = decode_unsigned_max(rb, vp9_seg_feature_data_max(j));
           if (vp9_is_segfeature_signed(j))
             data = vp9_rb_read_bit(rb) ? -data : data;
         }
-        vp9_set_segdata(xd, i, j, data);
+        vp9_set_segdata(seg, i, j, data);
       }
     }
   }
@@ -902,7 +900,7 @@ static size_t read_uncompressed_header(VP9D_COMP *pbi,
 
   setup_loopfilter(pbi, rb);
   setup_quantization(pbi, rb);
-  setup_segmentation(pbi, rb);
+  setup_segmentation(&pbi->mb.seg, rb);
 
   setup_tile_info(cm, rb);
 

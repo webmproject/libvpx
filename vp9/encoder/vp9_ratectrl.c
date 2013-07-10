@@ -127,7 +127,7 @@ void vp9_save_coding_context(VP9_COMP *cpi) {
   vp9_copy(cc->uv_mode_prob, cm->fc.uv_mode_prob);
   vp9_copy(cc->partition_prob, cm->fc.partition_prob);
 
-  vp9_copy(cc->segment_pred_probs, cm->segment_pred_probs);
+  vp9_copy(cc->segment_pred_probs, xd->seg.pred_probs);
 
   vp9_copy(cc->intra_inter_prob, cm->fc.intra_inter_prob);
   vp9_copy(cc->comp_inter_prob, cm->fc.comp_inter_prob);
@@ -167,7 +167,7 @@ void vp9_restore_coding_context(VP9_COMP *cpi) {
   vp9_copy(cm->fc.uv_mode_prob, cc->uv_mode_prob);
   vp9_copy(cm->fc.partition_prob, cc->partition_prob);
 
-  vp9_copy(cm->segment_pred_probs, cc->segment_pred_probs);
+  vp9_copy(xd->seg.pred_probs, cc->segment_pred_probs);
 
   vp9_copy(cm->fc.intra_inter_prob, cc->intra_inter_prob);
   vp9_copy(cm->fc.comp_inter_prob, cc->comp_inter_prob);

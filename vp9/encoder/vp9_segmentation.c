@@ -18,14 +18,14 @@
 void vp9_enable_segmentation(VP9_PTR ptr) {
   VP9_COMP *cpi = (VP9_COMP *)ptr;
 
-  cpi->mb.e_mbd.segmentation_enabled = 1;
-  cpi->mb.e_mbd.update_mb_segmentation_map = 1;
-  cpi->mb.e_mbd.update_mb_segmentation_data = 1;
+  cpi->mb.e_mbd.seg.enabled = 1;
+  cpi->mb.e_mbd.seg.update_map = 1;
+  cpi->mb.e_mbd.seg.update_data = 1;
 }
 
 void vp9_disable_segmentation(VP9_PTR ptr) {
   VP9_COMP *cpi = (VP9_COMP *)ptr;
-  cpi->mb.e_mbd.segmentation_enabled = 0;
+  cpi->mb.e_mbd.seg.enabled = 0;
 }
 
 void vp9_set_segmentation_map(VP9_PTR ptr,
@@ -37,8 +37,8 @@ void vp9_set_segmentation_map(VP9_PTR ptr,
              (cpi->common.mi_rows * cpi->common.mi_cols));
 
   // Signal that the map should be updated.
-  cpi->mb.e_mbd.update_mb_segmentation_map = 1;
-  cpi->mb.e_mbd.update_mb_segmentation_data = 1;
+  cpi->mb.e_mbd.seg.update_map = 1;
+  cpi->mb.e_mbd.seg.update_data = 1;
 }
 
 void vp9_set_segment_data(VP9_PTR ptr,
@@ -46,10 +46,10 @@ void vp9_set_segment_data(VP9_PTR ptr,
                           unsigned char abs_delta) {
   VP9_COMP *cpi = (VP9_COMP *)(ptr);
 
-  cpi->mb.e_mbd.mb_segment_abs_delta = abs_delta;
+  cpi->mb.e_mbd.seg.abs_delta = abs_delta;
 
-  vpx_memcpy(cpi->mb.e_mbd.segment_feature_data, feature_data,
-             sizeof(cpi->mb.e_mbd.segment_feature_data));
+  vpx_memcpy(cpi->mb.e_mbd.seg.feature_data, feature_data,
+             sizeof(cpi->mb.e_mbd.seg.feature_data));
 
   // TBD ?? Set the feature mask
   // vpx_memcpy(cpi->mb.e_mbd.segment_feature_mask, 0,
@@ -232,8 +232,8 @@ void vp9_choose_segmap_coding_method(VP9_COMP *cpi) {
 
   // Set default state for the segment tree probabilities and the
   // temporal coding probabilities
-  vpx_memset(xd->mb_segment_tree_probs, 255, sizeof(xd->mb_segment_tree_probs));
-  vpx_memset(cm->segment_pred_probs, 255, sizeof(cm->segment_pred_probs));
+  vpx_memset(xd->seg.tree_probs, 255, sizeof(xd->seg.tree_probs));
+  vpx_memset(xd->seg.pred_probs, 255, sizeof(xd->seg.pred_probs));
 
   vpx_memset(no_pred_segcounts, 0, sizeof(no_pred_segcounts));
   vpx_memset(t_unpred_seg_counts, 0, sizeof(t_unpred_seg_counts));
@@ -283,11 +283,11 @@ void vp9_choose_segmap_coding_method(VP9_COMP *cpi) {
 
   // Now choose which coding method to use.
   if (t_pred_cost < no_pred_cost) {
-    cm->temporal_update = 1;
-    vpx_memcpy(xd->mb_segment_tree_probs, t_pred_tree, sizeof(t_pred_tree));
-    vpx_memcpy(cm->segment_pred_probs, t_nopred_prob, sizeof(t_nopred_prob));
+    xd->seg.temporal_update = 1;
+    vpx_memcpy(xd->seg.tree_probs, t_pred_tree, sizeof(t_pred_tree));
+    vpx_memcpy(xd->seg.pred_probs, t_nopred_prob, sizeof(t_nopred_prob));
   } else {
-    cm->temporal_update = 0;
-    vpx_memcpy(xd->mb_segment_tree_probs, no_pred_tree, sizeof(no_pred_tree));
+    xd->seg.temporal_update = 0;
+    vpx_memcpy(xd->seg.tree_probs, no_pred_tree, sizeof(no_pred_tree));
   }
 }

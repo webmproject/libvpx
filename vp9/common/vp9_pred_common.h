@@ -32,7 +32,7 @@ static INLINE unsigned char vp9_get_pred_context_seg_id(const VP9_COMMON *cm,
 static INLINE vp9_prob vp9_get_pred_prob_seg_id(const VP9_COMMON *cm,
                                                 const MACROBLOCKD *xd) {
   const int pred_context = vp9_get_pred_context_seg_id(cm, xd);
-  return cm->segment_pred_probs[pred_context];
+  return xd->seg.pred_probs[pred_context];
 }
 static INLINE unsigned char vp9_get_pred_flag_seg_id(
     const MACROBLOCKD * const xd) {

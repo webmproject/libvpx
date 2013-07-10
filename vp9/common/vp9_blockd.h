@@ -13,18 +13,19 @@
 #define VP9_COMMON_VP9_BLOCKD_H_
 
 #include "./vpx_config.h"
-#include "vpx_scale/yv12config.h"
-#include "vp9/common/vp9_convolve.h"
-#include "vp9/common/vp9_mv.h"
-#include "vp9/common/vp9_treecoder.h"
+
 #include "vpx_ports/mem.h"
+#include "vpx_scale/yv12config.h"
+
 #include "vp9/common/vp9_common.h"
-#include "vp9/common/vp9_enums.h"
 #include "vp9/common/vp9_common_data.h"
+#include "vp9/common/vp9_convolve.h"
+#include "vp9/common/vp9_enums.h"
+#include "vp9/common/vp9_mv.h"
+#include "vp9/common/vp9_seg_common.h"
+#include "vp9/common/vp9_treecoder.h"
 
 #define BLOCK_SIZE_GROUPS   4
-#define MAX_MB_SEGMENTS     8
-#define MB_SEG_TREE_PROBS   (MAX_MB_SEGMENTS-1)
 
 #define PREDICTION_PROBS 3
 
@@ -34,8 +35,6 @@
 #define MAX_MODE_LF_DELTAS      2
 
 /* Segment Feature Masks */
-#define SEGMENT_DELTADATA   0
-#define SEGMENT_ABSDATA     1
 #define MAX_MV_REF_CANDIDATES 2
 
 #define INTRA_INTER_CONTEXTS 4
@@ -91,15 +90,6 @@ typedef enum {
 static INLINE int is_inter_mode(MB_PREDICTION_MODE mode) {
   return mode >= NEARESTMV && mode <= NEWMV;
 }
-
-// Segment level features.
-typedef enum {
-  SEG_LVL_ALT_Q = 0,               // Use alternate Quantizer ....
-  SEG_LVL_ALT_LF = 1,              // Use alternate loop filter value...
-  SEG_LVL_REF_FRAME = 2,           // Optional Segment reference frame
-  SEG_LVL_SKIP = 3,                // Optional Segment (0,0) + skip mode
-  SEG_LVL_MAX = 4                  // Number of MB level features supported
-} SEG_LVL_FEATURES;
 
 // Segment level features.
 typedef enum {
@@ -253,31 +243,11 @@ typedef struct macroblockd {
   int left_available;
   int right_available;
 
+  struct segmentation seg;
+
   // partition contexts
   PARTITION_CONTEXT *above_seg_context;
   PARTITION_CONTEXT *left_seg_context;
-
-  /* 0 (disable) 1 (enable) segmentation */
-  unsigned char segmentation_enabled;
-
-  /* 0 (do not update) 1 (update) the macroblock segmentation map. */
-  unsigned char update_mb_segmentation_map;
-
-  /* 0 (do not update) 1 (update) the macroblock segmentation feature data. */
-  unsigned char update_mb_segmentation_data;
-
-  /* 0 (do not update) 1 (update) the macroblock segmentation feature data. */
-  unsigned char mb_segment_abs_delta;
-
-  /* Per frame flags that define which MB level features (such as quantizer or loop filter level) */
-  /* are enabled and when enabled the proabilities used to decode the per MB flags in MB_MODE_INFO */
-
-  // Probability Tree used to code Segment number
-  vp9_prob mb_segment_tree_probs[MB_SEG_TREE_PROBS];
-
-  // Segment features
-  int16_t segment_feature_data[MAX_MB_SEGMENTS][SEG_LVL_MAX];
-  unsigned int segment_feature_mask[MAX_MB_SEGMENTS];
 
   /* mode_based Loop filter adjustment */
   unsigned char mode_ref_lf_delta_enabled;

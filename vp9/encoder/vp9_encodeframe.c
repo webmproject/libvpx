@@ -360,7 +360,7 @@ static void update_state(VP9_COMP *cpi, PICK_MODE_CONTEXT *ctx,
   if (!output_enabled)
     return;
 
-  if (!vp9_segfeature_active(xd, mbmi->segment_id, SEG_LVL_SKIP)) {
+  if (!vp9_segfeature_active(&xd->seg, mbmi->segment_id, SEG_LVL_SKIP)) {
     for (i = 0; i < NB_TXFM_MODES; i++) {
       cpi->rd_tx_select_diff[i] += ctx->txfm_rd_diff[i];
     }
@@ -512,16 +512,16 @@ static void set_offsets(VP9_COMP *cpi, int mi_row, int mi_col,
   x->rdmult = cpi->RDMULT;
 
   /* segment ID */
-  if (xd->segmentation_enabled) {
-    uint8_t *map = xd->update_mb_segmentation_map ? cpi->segmentation_map
-                                                  : cm->last_frame_seg_map;
+  if (xd->seg.enabled) {
+    uint8_t *map = xd->seg.update_map ? cpi->segmentation_map
+                                      : cm->last_frame_seg_map;
     mbmi->segment_id = vp9_get_segment_id(cm, map, bsize, mi_row, mi_col);
 
     vp9_mb_init_quantizer(cpi, x);
 
-    if (xd->segmentation_enabled && cpi->seg0_cnt > 0
-        && !vp9_segfeature_active(xd, 0, SEG_LVL_REF_FRAME)
-        && vp9_segfeature_active(xd, 1, SEG_LVL_REF_FRAME)) {
+    if (xd->seg.enabled && cpi->seg0_cnt > 0
+        && !vp9_segfeature_active(&xd->seg, 0, SEG_LVL_REF_FRAME)
+        && vp9_segfeature_active(&xd->seg, 1, SEG_LVL_REF_FRAME)) {
       cpi->seg0_progress = (cpi->seg0_idx << 16) / cpi->seg0_cnt;
     } else {
       const int y = mb_row & ~3;
@@ -575,10 +575,8 @@ static void update_stats(VP9_COMP *cpi, int mi_row, int mi_col) {
   MB_MODE_INFO * const mbmi = &mi->mbmi;
 
   if (cm->frame_type != KEY_FRAME) {
-    int segment_id, seg_ref_active;
-
-    segment_id = mbmi->segment_id;
-    seg_ref_active = vp9_segfeature_active(xd, segment_id, SEG_LVL_REF_FRAME);
+    const int seg_ref_active = vp9_segfeature_active(&xd->seg, mbmi->segment_id,
+                                                     SEG_LVL_REF_FRAME);
 
     if (!seg_ref_active)
       cpi->intra_inter_count[vp9_get_pred_context_intra_inter(cm, xd)][mbmi
@@ -1885,7 +1883,7 @@ static int check_dual_ref_flags(VP9_COMP *cpi) {
   MACROBLOCKD *xd = &cpi->mb.e_mbd;
   int ref_flags = cpi->ref_frame_flags;
 
-  if (vp9_segfeature_active(xd, 1, SEG_LVL_REF_FRAME)) {
+  if (vp9_segfeature_active(&xd->seg, 1, SEG_LVL_REF_FRAME)) {
     return 0;
   } else {
     return (!!(ref_flags & VP9_GOLD_FLAG) + !!(ref_flags & VP9_LAST_FLAG)
@@ -1932,9 +1930,8 @@ static void reset_skip_txfm_size_b(VP9_COMP *cpi, MODE_INFO *mi, int mis,
     const int xmbs = MIN(bw, cm->mi_cols - mi_col);
 
     xd->mode_info_context = mi;
-    assert(
-        vp9_segfeature_active(xd, mbmi->segment_id, SEG_LVL_SKIP) ||
-        get_skip_flag(mi, mis, ymbs, xmbs));
+    assert(vp9_segfeature_active(&xd->seg, mbmi->segment_id, SEG_LVL_SKIP) ||
+           get_skip_flag(mi, mis, ymbs, xmbs));
     set_txfm_flag(mi, mis, ymbs, xmbs, txfm_max);
   }
 }
@@ -2370,10 +2367,11 @@ static void encode_superblock(VP9_COMP *cpi, TOKENEXTRA **t, int output_enabled,
   vp9_set_pred_flag_mbskip(xd, bsize, mi->mbmi.mb_skip_coeff);
 
   if (output_enabled) {
-    if (cm->txfm_mode == TX_MODE_SELECT && mbmi->sb_type >= BLOCK_SIZE_SB8X8
-        && !(mbmi->ref_frame[0] != INTRA_FRAME
-            && (mbmi->mb_skip_coeff
-                || vp9_segfeature_active(xd, segment_id, SEG_LVL_SKIP)))) {
+    if (cm->txfm_mode == TX_MODE_SELECT &&
+        mbmi->sb_type >= BLOCK_SIZE_SB8X8  &&
+        !(mbmi->ref_frame[0] != INTRA_FRAME &&
+            (mbmi->mb_skip_coeff ||
+             vp9_segfeature_active(&xd->seg, segment_id, SEG_LVL_SKIP)))) {
       const int context = vp9_get_pred_context_tx_size(cm, xd);
       if (bsize >= BLOCK_SIZE_SB32X32) {
         cm->fc.tx_count_32x32p[context][mbmi->txfm_size]++;

@@ -13,7 +13,9 @@
 
 #include "vpx_ports/mem.h"
 #include "vpx_config.h"
+
 #include "vp9/common/vp9_blockd.h"
+#include "vp9/common/vp9_seg_common.h"
 
 #define MAX_LOOP_FILTER 63
 #define MAX_SHARPNESS 7

@@ -216,7 +216,7 @@ static void write_selected_txfm_size(const VP9_COMP *cpi, TX_SIZE tx_size,
 static int write_skip_coeff(const VP9_COMP *cpi, int segment_id, MODE_INFO *m,
                             vp9_writer *w) {
   const MACROBLOCKD *const xd = &cpi->mb.e_mbd;
-  if (vp9_segfeature_active(xd, segment_id, SEG_LVL_SKIP)) {
+  if (vp9_segfeature_active(&xd->seg, segment_id, SEG_LVL_SKIP)) {
     return 1;
   } else {
     const int skip_coeff = m->mbmi.mb_skip_coeff;
@@ -356,10 +356,10 @@ static void write_sb_mv_ref(vp9_writer *w, MB_PREDICTION_MODE m,
 }
 
 
-static void write_segment_id(vp9_writer *w, const MACROBLOCKD *xd,
+static void write_segment_id(vp9_writer *w, const struct segmentation *seg,
                              int segment_id) {
-  if (xd->segmentation_enabled && xd->update_mb_segmentation_map)
-    treed_write(w, vp9_segment_tree, xd->mb_segment_tree_probs, segment_id, 3);
+  if (seg->enabled && seg->update_map)
+    treed_write(w, vp9_segment_tree, seg->tree_probs, segment_id, 3);
 }
 
 // This function encodes the reference frame
@@ -369,7 +369,7 @@ static void encode_ref_frame(VP9_COMP *cpi, vp9_writer *bc) {
   MACROBLOCKD *const xd = &x->e_mbd;
   MB_MODE_INFO *mi = &xd->mode_info_context->mbmi;
   const int segment_id = mi->segment_id;
-  int seg_ref_active = vp9_segfeature_active(xd, segment_id,
+  int seg_ref_active = vp9_segfeature_active(&xd->seg, segment_id,
                                              SEG_LVL_REF_FRAME);
   // If segment level coding of this signal is disabled...
   // or the segment allows multiple reference frame options
@@ -396,7 +396,7 @@ static void encode_ref_frame(VP9_COMP *cpi, vp9_writer *bc) {
     }
   } else {
     assert(mi->ref_frame[1] <= INTRA_FRAME);
-    assert(vp9_get_segdata(xd, segment_id, SEG_LVL_REF_FRAME) ==
+    assert(vp9_get_segdata(&xd->seg, segment_id, SEG_LVL_REF_FRAME) ==
            mi->ref_frame[0]);
   }
 
@@ -410,6 +410,7 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, MODE_INFO *m,
   const nmv_context *nmvc = &pc->fc.nmvc;
   MACROBLOCK *const x = &cpi->mb;
   MACROBLOCKD *const xd = &x->e_mbd;
+  struct segmentation *seg = &xd->seg;
   MB_MODE_INFO *const mi = &m->mbmi;
   const MV_REFERENCE_FRAME rf = mi->ref_frame[0];
   const MB_PREDICTION_MODE mode = mi->mode;
@@ -423,33 +424,27 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, MODE_INFO *m,
   active_section = 9;
 #endif
 
-  if (cpi->mb.e_mbd.update_mb_segmentation_map) {
-    // Is temporal coding of the segment map enabled
-    if (pc->temporal_update) {
+  if (seg->update_map) {
+    if (seg->temporal_update) {
       unsigned char prediction_flag = vp9_get_pred_flag_seg_id(xd);
       vp9_prob pred_prob = vp9_get_pred_prob_seg_id(pc, xd);
-
-      // Code the segment id prediction flag for this mb
       vp9_write(bc, prediction_flag, pred_prob);
-
-      // If the mb segment id wasn't predicted code explicitly
       if (!prediction_flag)
-        write_segment_id(bc, xd, mi->segment_id);
+        write_segment_id(bc, seg, mi->segment_id);
     } else {
-      // Normal unpredicted coding
-        write_segment_id(bc, xd, mi->segment_id);
+      write_segment_id(bc, seg, mi->segment_id);
     }
   }
 
   skip_coeff = write_skip_coeff(cpi, segment_id, m, bc);
 
-  if (!vp9_segfeature_active(xd, segment_id, SEG_LVL_REF_FRAME))
+  if (!vp9_segfeature_active(seg, segment_id, SEG_LVL_REF_FRAME))
     vp9_write(bc, rf != INTRA_FRAME,
               vp9_get_pred_prob_intra_inter(pc, xd));
 
   if (mi->sb_type >= BLOCK_SIZE_SB8X8 && pc->txfm_mode == TX_MODE_SELECT &&
       !(rf != INTRA_FRAME &&
-        (skip_coeff || vp9_segfeature_active(xd, segment_id, SEG_LVL_SKIP)))) {
+        (skip_coeff || vp9_segfeature_active(seg, segment_id, SEG_LVL_SKIP)))) {
     write_selected_txfm_size(cpi, mi->txfm_size, mi->sb_type, bc);
   }
 
@@ -484,7 +479,7 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, MODE_INFO *m,
 #endif
 
     // If segment skip is not enabled code the mode.
-    if (!vp9_segfeature_active(xd, segment_id, SEG_LVL_SKIP)) {
+    if (!vp9_segfeature_active(seg, segment_id, SEG_LVL_SKIP)) {
       if (mi->sb_type >= BLOCK_SIZE_SB8X8) {
         write_sb_mv_ref(bc, mode, mv_ref_p);
         vp9_accum_mv_refs(&cpi->common, mode, mi->mb_mode_context[rf]);
@@ -554,8 +549,8 @@ static void write_mb_modes_kf(const VP9_COMP *cpi,
   const int mis = c->mode_info_stride;
   const int segment_id = m->mbmi.segment_id;
 
-  if (xd->update_mb_segmentation_map)
-    write_segment_id(bc, xd, m->mbmi.segment_id);
+  if (xd->seg.update_map)
+    write_segment_id(bc, &xd->seg, m->mbmi.segment_id);
 
   write_skip_coeff(cpi, segment_id, m, bc);
 
@@ -1002,23 +997,23 @@ static void encode_quantization(VP9_COMMON *cm,
 
 
 static void encode_segmentation(VP9_COMP *cpi,
-                               struct vp9_write_bit_buffer *wb) {
+                                struct vp9_write_bit_buffer *wb) {
   int i, j;
-  VP9_COMMON *const cm = &cpi->common;
-  MACROBLOCKD *const xd = &cpi->mb.e_mbd;
 
-  vp9_wb_write_bit(wb, xd->segmentation_enabled);
-  if (!xd->segmentation_enabled)
+  struct segmentation *seg = &cpi->mb.e_mbd.seg;
+
+  vp9_wb_write_bit(wb, seg->enabled);
+  if (!seg->enabled)
     return;
 
   // Segmentation map
-  vp9_wb_write_bit(wb, xd->update_mb_segmentation_map);
-  if (xd->update_mb_segmentation_map) {
+  vp9_wb_write_bit(wb, seg->update_map);
+  if (seg->update_map) {
     // Select the coding strategy (temporal or spatial)
     vp9_choose_segmap_coding_method(cpi);
     // Write out probabilities used to decode unpredicted  macro-block segments
     for (i = 0; i < MB_SEG_TREE_PROBS; i++) {
-      const int prob = xd->mb_segment_tree_probs[i];
+      const int prob = seg->tree_probs[i];
       const int update = prob != MAX_PROB;
       vp9_wb_write_bit(wb, update);
       if (update)
@@ -1026,10 +1021,10 @@ static void encode_segmentation(VP9_COMP *cpi,
     }
 
     // Write out the chosen coding method.
-    vp9_wb_write_bit(wb, cm->temporal_update);
-    if (cm->temporal_update) {
+    vp9_wb_write_bit(wb, seg->temporal_update);
+    if (seg->temporal_update) {
       for (i = 0; i < PREDICTION_PROBS; i++) {
-        const int prob = cm->segment_pred_probs[i];
+        const int prob = seg->pred_probs[i];
         const int update = prob != MAX_PROB;
         vp9_wb_write_bit(wb, update);
         if (update)
@@ -1039,16 +1034,16 @@ static void encode_segmentation(VP9_COMP *cpi,
   }
 
   // Segmentation data
-  vp9_wb_write_bit(wb, xd->update_mb_segmentation_data);
-  if (xd->update_mb_segmentation_data) {
-    vp9_wb_write_bit(wb, xd->mb_segment_abs_delta);
+  vp9_wb_write_bit(wb, seg->update_data);
+  if (seg->update_data) {
+    vp9_wb_write_bit(wb, seg->abs_delta);
 
     for (i = 0; i < MAX_MB_SEGMENTS; i++) {
       for (j = 0; j < SEG_LVL_MAX; j++) {
-        const int active = vp9_segfeature_active(xd, i, j);
+        const int active = vp9_segfeature_active(seg, i, j);
         vp9_wb_write_bit(wb, active);
         if (active) {
-          const int data = vp9_get_segdata(xd, i, j);
+          const int data = vp9_get_segdata(seg, i, j);
           const int data_max = vp9_seg_feature_data_max(j);
 
           if (vp9_is_segfeature_signed(j)) {

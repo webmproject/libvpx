@@ -44,8 +44,8 @@ static MB_PREDICTION_MODE read_inter_mode(vp9_reader *r, const vp9_prob *p) {
   return (MB_PREDICTION_MODE)treed_read(r, vp9_sb_mv_ref_tree, p);
 }
 
-static int read_segment_id(vp9_reader *r, MACROBLOCKD *xd) {
-  return treed_read(r, vp9_segment_tree, xd->mb_segment_tree_probs);
+static int read_segment_id(vp9_reader *r, const struct segmentation *seg) {
+  return treed_read(r, vp9_segment_tree, seg->tree_probs);
 }
 
 static TX_SIZE read_selected_txfm_size(VP9_COMMON *cm, MACROBLOCKD *xd,
@@ -105,13 +105,13 @@ static void set_segment_id(VP9_COMMON *cm, BLOCK_SIZE_TYPE bsize,
 
 static int read_intra_segment_id(VP9D_COMP *pbi, int mi_row, int mi_col,
                                  vp9_reader *r) {
-  VP9_COMMON *const cm = &pbi->common;
   MACROBLOCKD *const xd = &pbi->mb;
+  struct segmentation *const seg = &xd->seg;
   const BLOCK_SIZE_TYPE bsize = xd->mode_info_context->mbmi.sb_type;
 
-  if (xd->segmentation_enabled && xd->update_mb_segmentation_map) {
-    const int segment_id = read_segment_id(r, xd);
-    set_segment_id(cm, bsize, mi_row, mi_col, segment_id);
+  if (seg->enabled && seg->update_map) {
+    const int segment_id = read_segment_id(r, seg);
+    set_segment_id(&pbi->common, bsize, mi_row, mi_col, segment_id);
     return segment_id;
   } else {
     return 0;
@@ -121,7 +121,7 @@ static int read_intra_segment_id(VP9D_COMP *pbi, int mi_row, int mi_col,
 static uint8_t read_skip_coeff(VP9D_COMP *pbi, int segment_id, vp9_reader *r) {
   VP9_COMMON *const cm = &pbi->common;
   MACROBLOCKD *const xd = &pbi->mb;
-  int skip_coeff = vp9_segfeature_active(xd, segment_id, SEG_LVL_SKIP);
+  int skip_coeff = vp9_segfeature_active(&xd->seg, segment_id, SEG_LVL_SKIP);
   if (!skip_coeff) {
     const uint8_t ctx = vp9_get_pred_context_mbskip(cm, xd);
     skip_coeff = vp9_read(r, vp9_get_pred_prob_mbskip(cm, xd));
@@ -290,8 +290,8 @@ static void read_ref_frame(VP9D_COMP *pbi, vp9_reader *r,
   MACROBLOCKD *const xd = &pbi->mb;
   FRAME_CONTEXT *const fc = &cm->fc;
 
-  if (vp9_segfeature_active(xd, segment_id, SEG_LVL_REF_FRAME)) {
-    ref_frame[0] = vp9_get_segdata(xd, segment_id, SEG_LVL_REF_FRAME);
+  if (vp9_segfeature_active(&xd->seg, segment_id, SEG_LVL_REF_FRAME)) {
+    ref_frame[0] = vp9_get_segdata(&xd->seg, segment_id, SEG_LVL_REF_FRAME);
     ref_frame[1] = NONE;
   } else {
     const int comp_ctx = vp9_get_pred_context_comp_inter_inter(cm, xd);
@@ -366,26 +366,28 @@ static int read_inter_segment_id(VP9D_COMP *pbi, int mi_row, int mi_col,
                                  vp9_reader *r) {
   VP9_COMMON *const cm = &pbi->common;
   MACROBLOCKD *const xd = &pbi->mb;
+  struct segmentation *const seg = &xd->seg;
   const BLOCK_SIZE_TYPE bsize = xd->mode_info_context->mbmi.sb_type;
   int pred_segment_id;
   int segment_id;
 
-  if (!xd->segmentation_enabled)
+  if (!seg->enabled)
     return 0;  // Default for disabled segmentation
 
   pred_segment_id = vp9_get_segment_id(cm, cm->last_frame_seg_map,
-                                                   bsize, mi_row, mi_col);
-  if (!xd->update_mb_segmentation_map)
+                                       bsize, mi_row, mi_col);
+  if (!seg->update_map)
     return pred_segment_id;
 
-  if (cm->temporal_update) {
+
+  if (seg->temporal_update) {
     const vp9_prob pred_prob = vp9_get_pred_prob_seg_id(cm, xd);
     const int pred_flag = vp9_read(r, pred_prob);
     vp9_set_pred_flag_seg_id(xd, bsize, pred_flag);
     segment_id = pred_flag ? pred_segment_id
-                           : read_segment_id(r, xd);
+                           : read_segment_id(r, seg);
   } else {
-    segment_id = read_segment_id(r, xd);
+    segment_id = read_segment_id(r, seg);
   }
   set_segment_id(cm, bsize, mi_row, mi_col, segment_id);
   return segment_id;
@@ -455,14 +457,14 @@ static MV_REFERENCE_FRAME read_reference_frame(VP9D_COMP *pbi, int segment_id,
   MACROBLOCKD *const xd = &pbi->mb;
 
   MV_REFERENCE_FRAME ref;
-  if (!vp9_segfeature_active(xd, segment_id, SEG_LVL_REF_FRAME)) {
+  if (!vp9_segfeature_active(&xd->seg, segment_id, SEG_LVL_REF_FRAME)) {
     const int ctx = vp9_get_pred_context_intra_inter(cm, xd);
     ref = (MV_REFERENCE_FRAME)
               vp9_read(r, vp9_get_pred_prob_intra_inter(cm, xd));
     cm->fc.intra_inter_count[ctx][ref != INTRA_FRAME]++;
   } else {
-    ref = (MV_REFERENCE_FRAME)
-              vp9_get_segdata(xd, segment_id, SEG_LVL_REF_FRAME) != INTRA_FRAME;
+    ref = (MV_REFERENCE_FRAME) vp9_get_segdata(&xd->seg, segment_id,
+                                   SEG_LVL_REF_FRAME) != INTRA_FRAME;
   }
   return ref;
 }
@@ -515,7 +517,7 @@ static void read_inter_mode_info(VP9D_COMP *pbi, MODE_INFO *mi,
 
     mv_ref_p = cm->fc.inter_mode_probs[mbmi->mb_mode_context[ref0]];
 
-    if (vp9_segfeature_active(xd, mbmi->segment_id, SEG_LVL_SKIP)) {
+    if (vp9_segfeature_active(&xd->seg, mbmi->segment_id, SEG_LVL_SKIP)) {
       mbmi->mode = ZEROMV;
     } else if (bsize >= BLOCK_SIZE_SB8X8) {
       mbmi->mode = read_inter_mode(r, mv_ref_p);
