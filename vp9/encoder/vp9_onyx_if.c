@@ -719,6 +719,7 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
   sf->last_partitioning_redo_frequency = 4;
   sf->disable_splitmv = 0;
   sf->mode_search_skip_flags = 0;
+  sf->last_chroma_intra_mode = TM_PRED;
 
   // Skip any mode not chosen at size < X for all sizes > X
   // Hence BLOCK_SIZE_SB64X64 (skip is off)
@@ -746,6 +747,7 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
       sf->auto_mv_step_size = 1;
       sf->use_avoid_tested_higherror = 1;
       sf->adaptive_rd_thresh = 1;
+      sf->last_chroma_intra_mode = TM_PRED;
 
       if (speed == 1) {
         sf->comp_inter_joint_search_thresh = BLOCK_SIZE_TYPES;
@@ -764,6 +766,7 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
         sf->mode_search_skip_flags = FLAG_SKIP_INTRA_DIRMISMATCH |
                                      FLAG_SKIP_INTRA_BESTINTER |
                                      FLAG_SKIP_COMP_BESTINTRA;
+        sf->last_chroma_intra_mode = H_PRED;
       }
       if (speed == 2) {
         sf->adjust_thresholds_by_speed = 1;
@@ -786,6 +789,7 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
                                      FLAG_SKIP_INTRA_BESTINTER |
                                      FLAG_SKIP_COMP_BESTINTRA |
                                      FLAG_SKIP_COMP_REFMISMATCH;
+        sf->last_chroma_intra_mode = DC_PRED;
       }
       if (speed == 3) {
         sf->comp_inter_joint_search_thresh = BLOCK_SIZE_TYPES;

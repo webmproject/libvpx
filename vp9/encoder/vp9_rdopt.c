@@ -1500,12 +1500,16 @@ static int64_t rd_pick_intra_sbuv_mode(VP9_COMP *cpi, MACROBLOCK *x,
                                        int64_t *distortion, int *skippable,
                                        BLOCK_SIZE_TYPE bsize) {
   MB_PREDICTION_MODE mode;
+  MB_PREDICTION_MODE last_mode;
   MB_PREDICTION_MODE UNINITIALIZED_IS_SAFE(mode_selected);
   int64_t best_rd = INT64_MAX, this_rd;
   int this_rate_tokenonly, this_rate, s;
   int64_t this_distortion;
 
-  for (mode = DC_PRED; mode <= TM_PRED; mode++) {
+  last_mode = bsize <= BLOCK_SIZE_SB8X8 ?
+              TM_PRED : cpi->sf.last_chroma_intra_mode;
+
+  for (mode = DC_PRED; mode <= last_mode; mode++) {
     x->e_mbd.mode_info_context->mbmi.uv_mode = mode;
     super_block_uvrd(&cpi->common, x, &this_rate_tokenonly,
                      &this_distortion, &s, NULL, bsize);
