@@ -478,8 +478,8 @@ static void model_rd_for_sb_y_tx(VP9_COMP *cpi, BLOCK_SIZE_TYPE bsize,
                                  MACROBLOCK *x, MACROBLOCKD *xd,
                                  int *out_rate_sum, int64_t *out_dist_sum,
                                  int *out_skip) {
-  int t, j, k;
-  enum BlockSize bs;
+  int t = 4, j, k;
+  enum BlockSize bs = BLOCK_4X4;
   struct macroblock_plane *const p = &x->plane[0];
   struct macroblockd_plane *const pd = &xd->plane[0];
   const int bw = plane_block_width(bsize, pd);
@@ -551,26 +551,25 @@ static INLINE int cost_coeffs(VP9_COMMON *const cm, MACROBLOCK *mb,
   int pt;
   int c = 0;
   int cost = 0;
-  const int16_t *scan, *nb;
+  const int16_t *scan = NULL, *nb;
   const int eob = xd->plane[plane].eobs[block];
   const int16_t *qcoeff_ptr = BLOCK_OFFSET(xd->plane[plane].qcoeff, block, 16);
   const int ref = mbmi->ref_frame[0] != INTRA_FRAME;
   unsigned int (*token_costs)[COEF_BANDS][PREV_COEF_CONTEXTS]
                     [MAX_ENTROPY_TOKENS] = mb->token_costs[tx_size][type][ref];
-  ENTROPY_CONTEXT above_ec, left_ec;
+  ENTROPY_CONTEXT above_ec = 0, left_ec = 0;
   TX_TYPE tx_type = DCT_DCT;
   const int segment_id = xd->mode_info_context->mbmi.segment_id;
-  int seg_eob;
+  int seg_eob = 0;
   uint8_t token_cache[1024];
-  const uint8_t * band_translate;
+  const uint8_t *band_translate = NULL;
 
   // Check for consistency of tx_size with mode info
   assert((!type && !plane) || (type && plane));
   if (type == PLANE_TYPE_Y_WITH_DC) {
     assert(xd->mode_info_context->mbmi.txfm_size == tx_size);
   } else {
-    TX_SIZE tx_size_uv = get_uv_tx_size(mbmi);
-    assert(tx_size == tx_size_uv);
+    assert(tx_size == get_uv_tx_size(mbmi));
   }
 
   switch (tx_size) {

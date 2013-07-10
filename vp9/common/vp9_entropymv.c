@@ -85,7 +85,7 @@ const nmv_context vp9_default_nmv_context = {
 #define mv_class_base(c) ((c) ? (CLASS0_SIZE << (c + 2)) : 0)
 
 MV_CLASS_TYPE vp9_get_mv_class(int z, int *offset) {
-  MV_CLASS_TYPE c;
+  MV_CLASS_TYPE c = MV_CLASS_0;
   if      (z < CLASS0_SIZE * 8)    c = MV_CLASS_0;
   else if (z < CLASS0_SIZE * 16)   c = MV_CLASS_1;
   else if (z < CLASS0_SIZE * 32)   c = MV_CLASS_2;

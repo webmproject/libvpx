@@ -629,7 +629,7 @@ static void write_modes_sb(VP9_COMP *cpi, MODE_INFO *m, vp9_writer *bc,
   int bsl = b_width_log2(bsize);
   int bs = (1 << bsl) / 4;  // mode_info step for subsize
   int n;
-  PARTITION_TYPE partition;
+  PARTITION_TYPE partition = PARTITION_NONE;
   BLOCK_SIZE_TYPE subsize;
 
   if (mi_row >= cm->mi_rows || mi_col >= cm->mi_cols)
