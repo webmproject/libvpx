@@ -324,9 +324,8 @@ static void update_state(VP9_COMP *cpi, PICK_MODE_CONTEXT *ctx,
   int mb_mode_index = ctx->best_mode_index;
   const int mis = cpi->common.mode_info_stride;
   const int bh = 1 << mi_height_log2(bsize), bw = 1 << mi_width_log2(bsize);
-  const MB_PREDICTION_MODE mb_mode = mi->mbmi.mode;
 
-  assert(mb_mode < MB_MODE_COUNT);
+  assert(mi->mbmi.mode < MB_MODE_COUNT);
   assert(mb_mode_index < MAX_MODES);
   assert(mi->mbmi.ref_frame[0] < MAX_REF_FRAMES);
   assert(mi->mbmi.ref_frame[1] < MAX_REF_FRAMES);
@@ -1170,7 +1169,7 @@ static void rd_use_partition(VP9_COMP *cpi, MODE_INFO *m, TOKENEXTRA **tp,
   int mh = bh / 2;
   int bss = (1 << bsl) / 4;
   int i, pl;
-  PARTITION_TYPE partition;
+  PARTITION_TYPE partition = PARTITION_NONE;
   BLOCK_SIZE_TYPE subsize;
   ENTROPY_CONTEXT l[16 * MAX_MB_PLANE], a[16 * MAX_MB_PLANE];
   PARTITION_CONTEXT sl[8], sa[8];
@@ -1420,6 +1419,8 @@ static void rd_pick_partition(VP9_COMP *cpi, TOKENEXTRA **tp, int mi_row,
   BLOCK_SIZE_TYPE subsize;
   int srate = INT_MAX;
   int64_t sdist = INT_MAX;
+
+  (void) *tp_orig;
 
   if (bsize < BLOCK_SIZE_SB8X8)
     if (xd->ab_index != 0) {
@@ -1928,13 +1929,13 @@ static void reset_skip_txfm_size_b(VP9_COMP *cpi, MODE_INFO *mi, int mis,
   if (mbmi->txfm_size > txfm_max) {
     MACROBLOCK * const x = &cpi->mb;
     MACROBLOCKD * const xd = &x->e_mbd;
-    const int segment_id = mbmi->segment_id;
     const int ymbs = MIN(bh, cm->mi_rows - mi_row);
     const int xmbs = MIN(bw, cm->mi_cols - mi_col);
 
     xd->mode_info_context = mi;
     assert(
-        vp9_segfeature_active(xd, segment_id, SEG_LVL_SKIP) || get_skip_flag(mi, mis, ymbs, xmbs));
+        vp9_segfeature_active(xd, mbmi->segment_id, SEG_LVL_SKIP) ||
+        get_skip_flag(mi, mis, ymbs, xmbs));
     set_txfm_flag(mi, mis, ymbs, xmbs, txfm_max);
   }
 }

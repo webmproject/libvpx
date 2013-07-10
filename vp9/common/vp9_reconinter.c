@@ -365,17 +365,16 @@ static void build_inter_predictors(int plane, int block,
   MACROBLOCKD * const xd = arg->xd;
   const int bwl = b_width_log2(bsize) - xd->plane[plane].subsampling_x;
   const int bhl = b_height_log2(bsize) - xd->plane[plane].subsampling_y;
-  const int bh = 4 << bhl, bw = 4 << bwl;
   const int x = 4 * (block & ((1 << bwl) - 1)), y = 4 * (block >> bwl);
   const int use_second_ref = xd->mode_info_context->mbmi.ref_frame[1] > 0;
   int which_mv;
 
-  assert(x < bw);
-  assert(y < bh);
+  assert(x < (4 << bwl));
+  assert(y < (4 << bhl));
   assert(xd->mode_info_context->mbmi.sb_type < BLOCK_SIZE_SB8X8 ||
-         4 << pred_w == bw);
+         4 << pred_w == (4 << bwl));
   assert(xd->mode_info_context->mbmi.sb_type < BLOCK_SIZE_SB8X8 ||
-         4 << pred_h == bh);
+         4 << pred_h == (4 << bhl));
 
   for (which_mv = 0; which_mv < 1 + use_second_ref; ++which_mv) {
     // source
