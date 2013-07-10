@@ -1385,26 +1385,111 @@ static void write_uncompressed_header(VP9_COMP *cpi,
   write_tile_info(cm, wb);
 }
 
-void vp9_pack_bitstream(VP9_COMP *cpi, uint8_t *dest, unsigned long *size) {
-  int i, bytes_packed;
-  VP9_COMMON *const pc = &cpi->common;
-  vp9_writer header_bc;
+static size_t write_compressed_header(VP9_COMP *cpi, uint8_t *data) {
+  VP9_COMMON *const cm = &cpi->common;
   MACROBLOCKD *const xd = &cpi->mb.e_mbd;
+  FRAME_CONTEXT *const fc = &cm->fc;
+  vp9_writer header_bc;
 
-  uint8_t *cx_data = dest;
-  struct vp9_write_bit_buffer wb = {dest, 0};
-  struct vp9_write_bit_buffer first_partition_size_wb;
+  vp9_start_encode(&header_bc, data);
+
+  if (xd->lossless)
+    cm->txfm_mode = ONLY_4X4;
+  else
+    encode_txfm_probs(cpi, &header_bc);
+
+  update_coef_probs(cpi, &header_bc);
+
+#ifdef ENTROPY_STATS
+  active_section = 2;
+#endif
+
+  vp9_update_skip_probs(cpi, &header_bc);
+
+  if (cm->frame_type != KEY_FRAME) {
+    int i;
+#ifdef ENTROPY_STATS
+    active_section = 1;
+#endif
+
+    update_inter_mode_probs(cm, &header_bc);
+    vp9_zero(fc->inter_mode_counts);
+
+    if (cm->mcomp_filter_type == SWITCHABLE)
+      update_switchable_interp_probs(cpi, &header_bc);
+
+    for (i = 0; i < INTRA_INTER_CONTEXTS; i++)
+      vp9_cond_prob_diff_update(&header_bc, &fc->intra_inter_prob[i],
+                                VP9_MODE_UPDATE_PROB,
+                                cpi->intra_inter_count[i]);
+
+    if (cm->allow_comp_inter_inter) {
+      const int comp_pred_mode = cpi->common.comp_pred_mode;
+      const int use_compound_pred = comp_pred_mode != SINGLE_PREDICTION_ONLY;
+      const int use_hybrid_pred = comp_pred_mode == HYBRID_PREDICTION;
+
+      vp9_write_bit(&header_bc, use_compound_pred);
+      if (use_compound_pred) {
+        vp9_write_bit(&header_bc, use_hybrid_pred);
+        if (use_hybrid_pred)
+          for (i = 0; i < COMP_INTER_CONTEXTS; i++)
+            vp9_cond_prob_diff_update(&header_bc, &fc->comp_inter_prob[i],
+                                      VP9_MODE_UPDATE_PROB,
+                                      cpi->comp_inter_count[i]);
+      }
+    }
+
+    if (cm->comp_pred_mode != COMP_PREDICTION_ONLY) {
+      for (i = 0; i < REF_CONTEXTS; i++) {
+        vp9_cond_prob_diff_update(&header_bc, &fc->single_ref_prob[i][0],
+                                  VP9_MODE_UPDATE_PROB,
+                                  cpi->single_ref_count[i][0]);
+        vp9_cond_prob_diff_update(&header_bc, &fc->single_ref_prob[i][1],
+                                  VP9_MODE_UPDATE_PROB,
+                                  cpi->single_ref_count[i][1]);
+      }
+    }
+
+    if (cm->comp_pred_mode != SINGLE_PREDICTION_ONLY)
+      for (i = 0; i < REF_CONTEXTS; i++)
+        vp9_cond_prob_diff_update(&header_bc, &fc->comp_ref_prob[i],
+                                  VP9_MODE_UPDATE_PROB,
+                                  cpi->comp_ref_count[i]);
+
+    update_mbintra_mode_probs(cpi, &header_bc);
+
+    for (i = 0; i < NUM_PARTITION_CONTEXTS; ++i) {
+      vp9_prob pnew[PARTITION_TYPES - 1];
+      unsigned int bct[PARTITION_TYPES - 1][2];
+      update_mode(&header_bc, PARTITION_TYPES, vp9_partition_encodings,
+                  vp9_partition_tree, pnew,
+                  fc->partition_prob[cm->frame_type][i], bct,
+                  (unsigned int *)cpi->partition_count[i]);
+    }
+
+    vp9_write_nmv_probs(cpi, xd->allow_high_precision_mv, &header_bc);
+  }
+
+  vp9_stop_encode(&header_bc);
+  assert(header_bc.pos <= 0xffff);
+
+  return header_bc.pos;
+}
+
+void vp9_pack_bitstream(VP9_COMP *cpi, uint8_t *dest, unsigned long *size) {
+  FRAME_CONTEXT *const fc = &cpi->common.fc;
+  uint8_t *data = dest;
+  size_t first_part_size;
+  struct vp9_write_bit_buffer wb = {data, 0};
+  struct vp9_write_bit_buffer saved_wb;
 
   write_uncompressed_header(cpi, &wb);
-  first_partition_size_wb = wb;
+  saved_wb = wb;
   vp9_wb_write_literal(&wb, 0, 16);  // don't know in advance first part. size
 
-  bytes_packed = vp9_rb_bytes_written(&wb);
-  cx_data += bytes_packed;
+  data += vp9_rb_bytes_written(&wb);
 
   vp9_compute_update_table();
-
-  vp9_start_encode(&header_bc, cx_data);
 
 #ifdef ENTROPY_STATS
   if (pc->frame_type == INTER_FRAME)
@@ -1415,110 +1500,29 @@ void vp9_pack_bitstream(VP9_COMP *cpi, uint8_t *dest, unsigned long *size) {
 
   vp9_clear_system_state();  // __asm emms;
 
-  vp9_copy(pc->fc.pre_coef_probs, pc->fc.coef_probs);
-  vp9_copy(pc->fc.pre_y_mode_prob, pc->fc.y_mode_prob);
-  vp9_copy(pc->fc.pre_uv_mode_prob, pc->fc.uv_mode_prob);
-  vp9_copy(pc->fc.pre_partition_prob, pc->fc.partition_prob[INTER_FRAME]);
-  pc->fc.pre_nmvc = pc->fc.nmvc;
-  vp9_copy(pc->fc.pre_switchable_interp_prob, pc->fc.switchable_interp_prob);
-  vp9_copy(pc->fc.pre_inter_mode_probs, pc->fc.inter_mode_probs);
-  vp9_copy(pc->fc.pre_intra_inter_prob, pc->fc.intra_inter_prob);
-  vp9_copy(pc->fc.pre_comp_inter_prob, pc->fc.comp_inter_prob);
-  vp9_copy(pc->fc.pre_comp_ref_prob, pc->fc.comp_ref_prob);
-  vp9_copy(pc->fc.pre_single_ref_prob, pc->fc.single_ref_prob);
-  vp9_copy(pc->fc.pre_tx_probs_8x8p, pc->fc.tx_probs_8x8p);
-  vp9_copy(pc->fc.pre_tx_probs_16x16p, pc->fc.tx_probs_16x16p);
-  vp9_copy(pc->fc.pre_tx_probs_32x32p, pc->fc.tx_probs_32x32p);
-  vp9_copy(pc->fc.pre_mbskip_probs, pc->fc.mbskip_probs);
+  vp9_copy(fc->pre_coef_probs, fc->coef_probs);
+  vp9_copy(fc->pre_y_mode_prob, fc->y_mode_prob);
+  vp9_copy(fc->pre_uv_mode_prob, fc->uv_mode_prob);
+  vp9_copy(fc->pre_partition_prob, fc->partition_prob[INTER_FRAME]);
+  fc->pre_nmvc = fc->nmvc;
+  vp9_copy(fc->pre_switchable_interp_prob, fc->switchable_interp_prob);
+  vp9_copy(fc->pre_inter_mode_probs, fc->inter_mode_probs);
+  vp9_copy(fc->pre_intra_inter_prob, fc->intra_inter_prob);
+  vp9_copy(fc->pre_comp_inter_prob, fc->comp_inter_prob);
+  vp9_copy(fc->pre_comp_ref_prob, fc->comp_ref_prob);
+  vp9_copy(fc->pre_single_ref_prob, fc->single_ref_prob);
+  vp9_copy(fc->pre_tx_probs_8x8p, fc->tx_probs_8x8p);
+  vp9_copy(fc->pre_tx_probs_16x16p, fc->tx_probs_16x16p);
+  vp9_copy(fc->pre_tx_probs_32x32p, fc->tx_probs_32x32p);
+  vp9_copy(fc->pre_mbskip_probs, fc->mbskip_probs);
 
-  if (xd->lossless) {
-    pc->txfm_mode = ONLY_4X4;
-  } else {
-    encode_txfm_probs(cpi, &header_bc);
-  }
+  first_part_size = write_compressed_header(cpi, data);
+  data += first_part_size;
+  vp9_wb_write_literal(&saved_wb, first_part_size, 16);
 
-  update_coef_probs(cpi, &header_bc);
+  data += encode_tiles(cpi, data);
 
-#ifdef ENTROPY_STATS
-  active_section = 2;
-#endif
-
-  vp9_update_skip_probs(cpi, &header_bc);
-
-  if (pc->frame_type != KEY_FRAME) {
-#ifdef ENTROPY_STATS
-    active_section = 1;
-#endif
-
-    update_inter_mode_probs(pc, &header_bc);
-    vp9_zero(cpi->common.fc.inter_mode_counts);
-
-    if (pc->mcomp_filter_type == SWITCHABLE)
-      update_switchable_interp_probs(cpi, &header_bc);
-
-    for (i = 0; i < INTRA_INTER_CONTEXTS; i++)
-      vp9_cond_prob_diff_update(&header_bc, &pc->fc.intra_inter_prob[i],
-                                VP9_MODE_UPDATE_PROB,
-                                cpi->intra_inter_count[i]);
-
-    if (pc->allow_comp_inter_inter) {
-      const int comp_pred_mode = cpi->common.comp_pred_mode;
-      const int use_compound_pred = (comp_pred_mode != SINGLE_PREDICTION_ONLY);
-      const int use_hybrid_pred = (comp_pred_mode == HYBRID_PREDICTION);
-
-      vp9_write_bit(&header_bc, use_compound_pred);
-      if (use_compound_pred) {
-        vp9_write_bit(&header_bc, use_hybrid_pred);
-        if (use_hybrid_pred) {
-          for (i = 0; i < COMP_INTER_CONTEXTS; i++)
-            vp9_cond_prob_diff_update(&header_bc, &pc->fc.comp_inter_prob[i],
-                                      VP9_MODE_UPDATE_PROB,
-                                      cpi->comp_inter_count[i]);
-        }
-      }
-    }
-
-    if (pc->comp_pred_mode != COMP_PREDICTION_ONLY) {
-      for (i = 0; i < REF_CONTEXTS; i++) {
-        vp9_cond_prob_diff_update(&header_bc, &pc->fc.single_ref_prob[i][0],
-                                  VP9_MODE_UPDATE_PROB,
-                                  cpi->single_ref_count[i][0]);
-        vp9_cond_prob_diff_update(&header_bc, &pc->fc.single_ref_prob[i][1],
-                                  VP9_MODE_UPDATE_PROB,
-                                  cpi->single_ref_count[i][1]);
-      }
-    }
-
-    if (pc->comp_pred_mode != SINGLE_PREDICTION_ONLY) {
-      for (i = 0; i < REF_CONTEXTS; i++)
-        vp9_cond_prob_diff_update(&header_bc, &pc->fc.comp_ref_prob[i],
-                                  VP9_MODE_UPDATE_PROB,
-                                  cpi->comp_ref_count[i]);
-    }
-
-    update_mbintra_mode_probs(cpi, &header_bc);
-
-    for (i = 0; i < NUM_PARTITION_CONTEXTS; ++i) {
-      vp9_prob Pnew[PARTITION_TYPES - 1];
-      unsigned int bct[PARTITION_TYPES - 1][2];
-      update_mode(&header_bc, PARTITION_TYPES, vp9_partition_encodings,
-                  vp9_partition_tree, Pnew,
-                  pc->fc.partition_prob[pc->frame_type][i], bct,
-                  (unsigned int *)cpi->partition_count[i]);
-    }
-
-    vp9_write_nmv_probs(cpi, xd->allow_high_precision_mv, &header_bc);
-  }
-
-
-  vp9_stop_encode(&header_bc);
-
-
-  // first partition size
-  assert(header_bc.pos <= 0xffff);
-  vp9_wb_write_literal(&first_partition_size_wb, header_bc.pos, 16);
-  *size = bytes_packed + header_bc.pos;
-  *size += encode_tiles(cpi, cx_data + header_bc.pos);
+  *size = data - dest;
 }
 
 #ifdef ENTROPY_STATS
