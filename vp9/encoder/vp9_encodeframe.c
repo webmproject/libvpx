@@ -389,7 +389,7 @@ static void update_state(VP9_COMP *cpi, PICK_MODE_CONTEXT *ctx,
       THR_TM /*TM_PRED*/,
       THR_B_PRED /*I4X4_PRED*/,
     };
-    cpi->mode_chosen_counts[kf_mode_index[mb_mode]]++;
+    cpi->mode_chosen_counts[kf_mode_index[mi->mbmi.mode]]++;
 #endif
   } else {
     // Note how often each mode chosen as best
