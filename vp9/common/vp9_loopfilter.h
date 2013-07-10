@@ -16,34 +16,35 @@
 #include "vp9/common/vp9_blockd.h"
 
 #define MAX_LOOP_FILTER 63
+#define MAX_SHARPNESS 7
+
 #define SIMD_WIDTH 16
 
-/* Need to align this structure so when it is declared and
- * passed it can be loaded into vector registers.
- */
+// Need to align this structure so when it is declared and
+// passed it can be loaded into vector registers.
 typedef struct {
-  DECLARE_ALIGNED(SIMD_WIDTH, unsigned char,
+  DECLARE_ALIGNED(SIMD_WIDTH, uint8_t,
                   mblim[MAX_LOOP_FILTER + 1][SIMD_WIDTH]);
-  DECLARE_ALIGNED(SIMD_WIDTH, unsigned char,
+  DECLARE_ALIGNED(SIMD_WIDTH, uint8_t,
                   blim[MAX_LOOP_FILTER + 1][SIMD_WIDTH]);
-  DECLARE_ALIGNED(SIMD_WIDTH, unsigned char,
+  DECLARE_ALIGNED(SIMD_WIDTH, uint8_t,
                   lim[MAX_LOOP_FILTER + 1][SIMD_WIDTH]);
-  DECLARE_ALIGNED(SIMD_WIDTH, unsigned char,
+  DECLARE_ALIGNED(SIMD_WIDTH, uint8_t,
                   hev_thr[4][SIMD_WIDTH]);
-  unsigned char lvl[MAX_MB_SEGMENTS][4][4];
-  unsigned char mode_lf_lut[MB_MODE_COUNT];
+  uint8_t lvl[MAX_MB_SEGMENTS][MAX_REF_FRAMES][MAX_MODE_LF_DELTAS];
+  uint8_t mode_lf_lut[MB_MODE_COUNT];
 } loop_filter_info_n;
 
 struct loop_filter_info {
-  const unsigned char *mblim;
-  const unsigned char *blim;
-  const unsigned char *lim;
-  const unsigned char *hev_thr;
+  const uint8_t *mblim;
+  const uint8_t *blim;
+  const uint8_t *lim;
+  const uint8_t *hev_thr;
 };
 
 #define prototype_loopfilter(sym) \
-  void sym(uint8_t *src, int pitch, const unsigned char *blimit, \
-           const unsigned char *limit, const unsigned char *thresh, int count)
+  void sym(uint8_t *src, int pitch, const uint8_t *blimit, \
+           const uint8_t *limit, const uint8_t *thresh, int count)
 
 #define prototype_loopfilter_block(sym) \
   void sym(uint8_t *y, uint8_t *u, uint8_t *v, \
@@ -53,11 +54,10 @@ struct loop_filter_info {
 #include "x86/vp9_loopfilter_x86.h"
 #endif
 
-typedef void loop_filter_uvfunction(uint8_t *u,   /* source pointer */
-                                    int p,              /* pitch */
-                                    const unsigned char *blimit,
-                                    const unsigned char *limit,
-                                    const unsigned char *thresh,
+typedef void loop_filter_uvfunction(uint8_t *src, int pitch,
+                                    const uint8_t *blimit,
+                                    const uint8_t *limit,
+                                    const uint8_t *thresh,
                                     uint8_t *v);
 
 /* assorted loopfilter functions which get used elsewhere */
