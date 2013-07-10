@@ -682,6 +682,14 @@ process_toolchain() {
             # iOS/ARM builds do not work with gtest. This does not match
             # x86 targets.
         ;;
+        *-win*)
+            # Some mingw toolchains don't have pthread available by default.
+            # Treat these more like visual studio where threading in gtest
+            # would be disabled for the same reason.
+            check_cxx "$@" <<EOF && soft_enable unit_tests
+int z;
+EOF
+        ;;
         *)
             enabled pthread_h && check_cxx "$@" <<EOF && soft_enable unit_tests
 int z;
