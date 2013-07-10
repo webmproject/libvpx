@@ -468,8 +468,8 @@ static void setup_block_dptrs(MACROBLOCKD *xd, int ss_x, int ss_y) {
   }
 #if CONFIG_ALPHA
   // TODO(jkoleszar): Using the Y w/h for now
-  mb->plane[3].subsampling_x = 0;
-  mb->plane[3].subsampling_y = 0;
+  xd->plane[3].subsampling_x = 0;
+  xd->plane[3].subsampling_y = 0;
 #endif
 }
 
