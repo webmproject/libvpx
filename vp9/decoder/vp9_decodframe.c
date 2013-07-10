@@ -55,32 +55,30 @@ static int decode_unsigned_max(struct vp9_read_bit_buffer *rb, int max) {
   return data > max ? max : data;
 }
 
-static void setup_txfm_mode(VP9_COMMON *pc, int lossless, vp9_reader *r) {
-  if (lossless) {
-    pc->txfm_mode = ONLY_4X4;
-  } else {
-    pc->txfm_mode = vp9_read_literal(r, 2);
-    if (pc->txfm_mode == ALLOW_32X32)
-      pc->txfm_mode += vp9_read_bit(r);
+static TXFM_MODE read_tx_mode(vp9_reader *r) {
+  TXFM_MODE txfm_mode = vp9_read_literal(r, 2);
+  if (txfm_mode == ALLOW_32X32)
+    txfm_mode += vp9_read_bit(r);
+  return txfm_mode;
+}
 
-    if (pc->txfm_mode == TX_MODE_SELECT) {
-      int i, j;
-      for (i = 0; i < TX_SIZE_CONTEXTS; ++i)
-        for (j = 0; j < TX_SIZE_MAX_SB - 3; ++j)
-          if (vp9_read(r, VP9_MODE_UPDATE_PROB))
-            vp9_diff_update_prob(r, &pc->fc.tx_probs_8x8p[i][j]);
+static void read_tx_probs(FRAME_CONTEXT *fc, vp9_reader *r) {
+  int i, j;
 
-      for (i = 0; i < TX_SIZE_CONTEXTS; ++i)
-        for (j = 0; j < TX_SIZE_MAX_SB - 2; ++j)
-          if (vp9_read(r, VP9_MODE_UPDATE_PROB))
-            vp9_diff_update_prob(r, &pc->fc.tx_probs_16x16p[i][j]);
+  for (i = 0; i < TX_SIZE_CONTEXTS; ++i)
+    for (j = 0; j < TX_SIZE_MAX_SB - 3; ++j)
+      if (vp9_read(r, VP9_MODE_UPDATE_PROB))
+        vp9_diff_update_prob(r, &fc->tx_probs_8x8p[i][j]);
 
-      for (i = 0; i < TX_SIZE_CONTEXTS; ++i)
-        for (j = 0; j < TX_SIZE_MAX_SB - 1; ++j)
-          if (vp9_read(r, VP9_MODE_UPDATE_PROB))
-            vp9_diff_update_prob(r, &pc->fc.tx_probs_32x32p[i][j]);
-    }
-  }
+  for (i = 0; i < TX_SIZE_CONTEXTS; ++i)
+    for (j = 0; j < TX_SIZE_MAX_SB - 2; ++j)
+      if (vp9_read(r, VP9_MODE_UPDATE_PROB))
+        vp9_diff_update_prob(r, &fc->tx_probs_16x16p[i][j]);
+
+  for (i = 0; i < TX_SIZE_CONTEXTS; ++i)
+    for (j = 0; j < TX_SIZE_MAX_SB - 1; ++j)
+      if (vp9_read(r, VP9_MODE_UPDATE_PROB))
+        vp9_diff_update_prob(r, &fc->tx_probs_32x32p[i][j]);
 }
 
 static void mb_init_dequantizer(VP9_COMMON *pc, MACROBLOCKD *xd) {
@@ -370,33 +368,21 @@ static void setup_token_decoder(VP9D_COMP *pbi,
 static void read_coef_probs_common(FRAME_CONTEXT *fc, TX_SIZE tx_size,
                                    vp9_reader *r) {
   vp9_coeff_probs_model *coef_probs = fc->coef_probs[tx_size];
+  int i, j, k, l, m;
 
-  if (vp9_read_bit(r)) {
-    int i, j, k, l, m;
-    for (i = 0; i < BLOCK_TYPES; i++) {
-      for (j = 0; j < REF_TYPES; j++) {
-        for (k = 0; k < COEF_BANDS; k++) {
-          for (l = 0; l < PREV_COEF_CONTEXTS; l++) {
-            if (l >= 3 && k == 0)
-              continue;
-
-            for (m = 0; m < UNCONSTRAINED_NODES; m++) {
-              vp9_prob *const p = coef_probs[i][j][k][l] + m;
-
-              if (vp9_read(r, VP9_COEF_UPDATE_PROB))
-                vp9_diff_update_prob(r, p);
-            }
-          }
-        }
-      }
-    }
-  }
+  if (vp9_read_bit(r))
+    for (i = 0; i < BLOCK_TYPES; i++)
+      for (j = 0; j < REF_TYPES; j++)
+        for (k = 0; k < COEF_BANDS; k++)
+          for (l = 0; l < PREV_COEF_CONTEXTS; l++)
+            if (k > 0 || l < 3)
+              for (m = 0; m < UNCONSTRAINED_NODES; m++)
+                if (vp9_read(r, VP9_COEF_UPDATE_PROB))
+                  vp9_diff_update_prob(r, &coef_probs[i][j][k][l][m]);
 }
 
-static void read_coef_probs(VP9D_COMP *pbi, vp9_reader *r) {
-  const TXFM_MODE txfm_mode = pbi->common.txfm_mode;
-  FRAME_CONTEXT *const fc = &pbi->common.fc;
-
+static void read_coef_probs(FRAME_CONTEXT *fc, TXFM_MODE txfm_mode,
+                            vp9_reader *r) {
   read_coef_probs_common(fc, TX_4X4, r);
 
   if (txfm_mode > ONLY_4X4)
@@ -923,6 +909,26 @@ static size_t read_uncompressed_header(VP9D_COMP *pbi,
   return vp9_rb_read_literal(rb, 16);
 }
 
+static int read_compressed_header(VP9D_COMP *pbi, const uint8_t *data,
+                                  size_t partition_size) {
+  VP9_COMMON *const cm = &pbi->common;
+  MACROBLOCKD *const xd = &pbi->mb;
+  vp9_reader r;
+
+  if (vp9_reader_init(&r, data, partition_size))
+    vpx_internal_error(&cm->error, VPX_CODEC_MEM_ERROR,
+                       "Failed to allocate bool decoder 0");
+
+  cm->txfm_mode = xd->lossless ? ONLY_4X4 : read_tx_mode(&r);
+  if (cm->txfm_mode == TX_MODE_SELECT)
+    read_tx_probs(&cm->fc, &r);
+  read_coef_probs(&cm->fc, cm->txfm_mode, &r);
+
+  vp9_prepare_read_mode_info(pbi, &r);
+
+  return vp9_reader_has_error(&r);
+}
+
 void vp9_init_dequantizer(VP9_COMMON *pc) {
   int q;
 
@@ -939,7 +945,7 @@ void vp9_init_dequantizer(VP9_COMMON *pc) {
 
 int vp9_decode_frame(VP9D_COMP *pbi, const uint8_t **p_data_end) {
   int i;
-  vp9_reader header_bc, residual_bc;
+  vp9_reader residual_bc;
   VP9_COMMON *const pc = &pbi->common;
   MACROBLOCKD *const xd = &pbi->mb;
 
@@ -973,10 +979,6 @@ int vp9_decode_frame(VP9D_COMP *pbi, const uint8_t **p_data_end) {
   xd->frame_type = pc->frame_type;
   xd->mode_info_stride = pc->mode_info_stride;
 
-  if (vp9_reader_init(&header_bc, data, first_partition_size))
-    vpx_internal_error(&pc->error, VPX_CODEC_MEM_ERROR,
-                       "Failed to allocate bool decoder 0");
-
   mb_init_dequantizer(pc, &pbi->mb);  // MB level dequantizer setup
 
   if (!keyframe)
@@ -986,14 +988,12 @@ int vp9_decode_frame(VP9D_COMP *pbi, const uint8_t **p_data_end) {
 
   update_frame_context(&pc->fc);
 
-  setup_txfm_mode(pc, xd->lossless, &header_bc);
-
-  read_coef_probs(pbi, &header_bc);
-
   // Initialize xd pointers. Any reference should do for xd->pre, so use 0.
   setup_pre_planes(xd, 0, &pc->yv12_fb[pc->active_ref_idx[0]], 0, 0,
                    NULL, NULL);
   setup_dst_planes(xd, new_fb, 0, 0);
+
+  new_fb->corrupted |= read_compressed_header(pbi, data, first_partition_size);
 
   // Create the segmentation map structure and set to 0
   if (!pc->last_frame_seg_map)
@@ -1008,14 +1008,12 @@ int vp9_decode_frame(VP9D_COMP *pbi, const uint8_t **p_data_end) {
 
   set_prev_mi(pc);
 
-  vp9_prepare_read_mode_info(pbi, &header_bc);
-
   decode_tiles(pbi, data, first_partition_size, &residual_bc);
 
   pc->last_width = pc->width;
   pc->last_height = pc->height;
 
-  new_fb->corrupted = vp9_reader_has_error(&header_bc) | xd->corrupted;
+  new_fb->corrupted |= xd->corrupted;
 
   if (!pbi->decoded_key_frame) {
     if (keyframe && !new_fb->corrupted)
