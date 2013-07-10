@@ -204,7 +204,7 @@ static void write_selected_txfm_size(const VP9_COMP *cpi, TX_SIZE tx_size,
                                      BLOCK_SIZE_TYPE bsize, vp9_writer *w) {
   const VP9_COMMON *const c = &cpi->common;
   const MACROBLOCKD *const xd = &cpi->mb.e_mbd;
-  const vp9_prob *tx_probs = vp9_get_pred_probs(c, xd, PRED_TX_SIZE);
+  const vp9_prob *tx_probs = vp9_get_pred_probs_tx_size(c, xd);
   vp9_write(w, tx_size != TX_4X4, tx_probs[0]);
   if (bsize >= BLOCK_SIZE_MB16X16 && tx_size != TX_4X4) {
     vp9_write(w, tx_size != TX_8X8, tx_probs[1]);
@@ -220,7 +220,7 @@ static int write_skip_coeff(const VP9_COMP *cpi, int segment_id, MODE_INFO *m,
     return 1;
   } else {
     const int skip_coeff = m->mbmi.mb_skip_coeff;
-    vp9_write(w, skip_coeff, vp9_get_pred_prob(&cpi->common, xd, PRED_MBSKIP));
+    vp9_write(w, skip_coeff, vp9_get_pred_prob_mbskip(&cpi->common, xd));
     return skip_coeff;
   }
 }
@@ -378,7 +378,7 @@ static void encode_ref_frame(VP9_COMP *cpi, vp9_writer *bc) {
     // (if not specified at the frame/segment level)
     if (pc->comp_pred_mode == HYBRID_PREDICTION) {
       vp9_write(bc, mi->ref_frame[1] > INTRA_FRAME,
-                vp9_get_pred_prob(pc, xd, PRED_COMP_INTER_INTER));
+                vp9_get_pred_prob_comp_inter_inter(pc, xd));
     } else {
       assert((mi->ref_frame[1] <= INTRA_FRAME) ==
                  (pc->comp_pred_mode == SINGLE_PREDICTION_ONLY));
@@ -386,13 +386,13 @@ static void encode_ref_frame(VP9_COMP *cpi, vp9_writer *bc) {
 
     if (mi->ref_frame[1] > INTRA_FRAME) {
       vp9_write(bc, mi->ref_frame[0] == GOLDEN_FRAME,
-                vp9_get_pred_prob(pc, xd, PRED_COMP_REF_P));
+                vp9_get_pred_prob_comp_ref_p(pc, xd));
     } else {
       vp9_write(bc, mi->ref_frame[0] != LAST_FRAME,
-                vp9_get_pred_prob(pc, xd, PRED_SINGLE_REF_P1));
+                vp9_get_pred_prob_single_ref_p1(pc, xd));
       if (mi->ref_frame[0] != LAST_FRAME)
         vp9_write(bc, mi->ref_frame[0] != GOLDEN_FRAME,
-                  vp9_get_pred_prob(pc, xd, PRED_SINGLE_REF_P2));
+                  vp9_get_pred_prob_single_ref_p2(pc, xd));
     }
   } else {
     assert(mi->ref_frame[1] <= INTRA_FRAME);
@@ -426,8 +426,8 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, MODE_INFO *m,
   if (cpi->mb.e_mbd.update_mb_segmentation_map) {
     // Is temporal coding of the segment map enabled
     if (pc->temporal_update) {
-      unsigned char prediction_flag = vp9_get_pred_flag(xd, PRED_SEG_ID);
-      vp9_prob pred_prob = vp9_get_pred_prob(pc, xd, PRED_SEG_ID);
+      unsigned char prediction_flag = vp9_get_pred_flag_seg_id(xd);
+      vp9_prob pred_prob = vp9_get_pred_prob_seg_id(pc, xd);
 
       // Code the segment id prediction flag for this mb
       vp9_write(bc, prediction_flag, pred_prob);
@@ -445,7 +445,7 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, MODE_INFO *m,
 
   if (!vp9_segfeature_active(xd, segment_id, SEG_LVL_REF_FRAME))
     vp9_write(bc, rf != INTRA_FRAME,
-              vp9_get_pred_prob(pc, xd, PRED_INTRA_INTER));
+              vp9_get_pred_prob_intra_inter(pc, xd));
 
   if (mi->sb_type >= BLOCK_SIZE_SB8X8 && pc->txfm_mode == TX_MODE_SELECT &&
       !(rf != INTRA_FRAME &&
@@ -493,7 +493,7 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, MODE_INFO *m,
 
     if (cpi->common.mcomp_filter_type == SWITCHABLE) {
       write_token(bc, vp9_switchable_interp_tree,
-                  vp9_get_pred_probs(&cpi->common, xd, PRED_SWITCHABLE_INTERP),
+                  vp9_get_pred_probs_switchable_interp(&cpi->common, xd),
                   vp9_switchable_interp_encodings +
                   vp9_switchable_interp_map[mi->interp_filter]);
     } else {

@@ -271,7 +271,7 @@ static void decode_modes_b(VP9D_COMP *pbi, int mi_row, int mi_col,
     } else {
       assert(mbmi->sb_type == bsize);
       if (eobtotal == 0)
-        vp9_set_pred_flag(xd, bsize, PRED_MBSKIP, 1);  // skip loopfilter
+        vp9_set_pred_flag_mbskip(xd, bsize, 1);  // skip loopfilter
       else if (eobtotal > 0)
         foreach_transformed_block(xd, bsize, decode_block, xd);
     }

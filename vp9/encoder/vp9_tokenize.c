@@ -273,7 +273,7 @@ void vp9_tokenize_sb(VP9_COMP *cpi,
   VP9_COMMON * const cm = &cpi->common;
   MB_MODE_INFO * const mbmi = &xd->mode_info_context->mbmi;
   TOKENEXTRA *t_backup = *t;
-  const int mb_skip_context = vp9_get_pred_context(cm, xd, PRED_MBSKIP);
+  const int mb_skip_context = vp9_get_pred_context_mbskip(cm, xd);
   const int segment_id = mbmi->segment_id;
   const int skip_inc = !vp9_segfeature_active(xd, segment_id, SEG_LVL_SKIP);
   const TX_SIZE txfm_size = mbmi->txfm_size;

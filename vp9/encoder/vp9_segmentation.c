@@ -141,11 +141,11 @@ static void count_segs(VP9_COMP *cpi, MODE_INFO *mi,
     const int pred_segment_id = vp9_get_segment_id(cm, cm->last_frame_seg_map,
                                                    bsize, mi_row, mi_col);
     const int pred_flag = pred_segment_id == segment_id;
-    const int pred_context = vp9_get_pred_context(cm, xd, PRED_SEG_ID);
+    const int pred_context = vp9_get_pred_context_seg_id(cm, xd);
 
     // Store the prediction status for this mb and update counts
     // as appropriate
-    vp9_set_pred_flag(xd, bsize, PRED_SEG_ID, pred_flag);
+    vp9_set_pred_flag_seg_id(xd, bsize, pred_flag);
     temporal_predictor_count[pred_context][pred_flag]++;
 
     if (!pred_flag)

@@ -50,8 +50,8 @@ static int read_segment_id(vp9_reader *r, MACROBLOCKD *xd) {
 
 static TX_SIZE read_selected_txfm_size(VP9_COMMON *cm, MACROBLOCKD *xd,
                                        BLOCK_SIZE_TYPE bsize, vp9_reader *r) {
-  const int context = vp9_get_pred_context(cm, xd, PRED_TX_SIZE);
-  const vp9_prob *tx_probs = vp9_get_pred_probs(cm, xd, PRED_TX_SIZE);
+  const int context = vp9_get_pred_context_tx_size(cm, xd);
+  const vp9_prob *tx_probs = vp9_get_pred_probs_tx_size(cm, xd);
   TX_SIZE txfm_size = vp9_read(r, tx_probs[0]);
   if (txfm_size != TX_4X4 && bsize >= BLOCK_SIZE_MB16X16) {
     txfm_size += vp9_read(r, tx_probs[1]);
@@ -123,8 +123,8 @@ static uint8_t read_skip_coeff(VP9D_COMP *pbi, int segment_id, vp9_reader *r) {
   MACROBLOCKD *const xd = &pbi->mb;
   int skip_coeff = vp9_segfeature_active(xd, segment_id, SEG_LVL_SKIP);
   if (!skip_coeff) {
-    const uint8_t ctx = vp9_get_pred_context(cm, xd, PRED_MBSKIP);
-    skip_coeff = vp9_read(r, vp9_get_pred_prob(cm, xd, PRED_MBSKIP));
+    const uint8_t ctx = vp9_get_pred_context_mbskip(cm, xd);
+    skip_coeff = vp9_read(r, vp9_get_pred_prob_mbskip(cm, xd));
     cm->fc.mbskip_count[ctx][skip_coeff]++;
   }
   return skip_coeff;
@@ -294,7 +294,7 @@ static void read_ref_frame(VP9D_COMP *pbi, vp9_reader *r,
     ref_frame[0] = vp9_get_segdata(xd, segment_id, SEG_LVL_REF_FRAME);
     ref_frame[1] = NONE;
   } else {
-    const int comp_ctx = vp9_get_pred_context(cm, xd, PRED_COMP_INTER_INTER);
+    const int comp_ctx = vp9_get_pred_context_comp_inter_inter(cm, xd);
     int is_comp;
 
     if (cm->comp_pred_mode == HYBRID_PREDICTION) {
@@ -307,16 +307,16 @@ static void read_ref_frame(VP9D_COMP *pbi, vp9_reader *r,
     // FIXME(rbultje) I'm pretty sure this breaks segmentation ref frame coding
     if (is_comp) {
       const int fix_ref_idx = cm->ref_frame_sign_bias[cm->comp_fixed_ref];
-      const int ref_ctx = vp9_get_pred_context(cm, xd, PRED_COMP_REF_P);
+      const int ref_ctx = vp9_get_pred_context_comp_ref_p(cm, xd);
       const int b = vp9_read(r, fc->comp_ref_prob[ref_ctx]);
       fc->comp_ref_count[ref_ctx][b]++;
       ref_frame[fix_ref_idx] = cm->comp_fixed_ref;
       ref_frame[!fix_ref_idx] = cm->comp_var_ref[b];
     } else {
-      const int ref1_ctx = vp9_get_pred_context(cm, xd, PRED_SINGLE_REF_P1);
+      const int ref1_ctx = vp9_get_pred_context_single_ref_p1(cm, xd);
       ref_frame[1] = NONE;
       if (vp9_read(r, fc->single_ref_prob[ref1_ctx][0])) {
-        const int ref2_ctx = vp9_get_pred_context(cm, xd, PRED_SINGLE_REF_P2);
+        const int ref2_ctx = vp9_get_pred_context_single_ref_p2(cm, xd);
         const int b = vp9_read(r, fc->single_ref_prob[ref2_ctx][1]);
         ref_frame[0] = b ? ALTREF_FRAME : GOLDEN_FRAME;
         fc->single_ref_count[ref1_ctx][0][1]++;
@@ -379,9 +379,9 @@ static int read_inter_segment_id(VP9D_COMP *pbi, int mi_row, int mi_col,
     return pred_segment_id;
 
   if (cm->temporal_update) {
-    const vp9_prob pred_prob = vp9_get_pred_prob(cm, xd, PRED_SEG_ID);
+    const vp9_prob pred_prob = vp9_get_pred_prob_seg_id(cm, xd);
     const int pred_flag = vp9_read(r, pred_prob);
-    vp9_set_pred_flag(xd, bsize, PRED_SEG_ID, pred_flag);
+    vp9_set_pred_flag_seg_id(xd, bsize, pred_flag);
     segment_id = pred_flag ? pred_segment_id
                            : read_segment_id(r, xd);
   } else {
@@ -406,9 +406,9 @@ static INLINE INTERPOLATIONFILTERTYPE read_switchable_filter_type(
     VP9D_COMP *pbi, vp9_reader *r) {
   VP9_COMMON *const cm = &pbi->common;
   MACROBLOCKD *const xd = &pbi->mb;
-  const vp9_prob *probs = vp9_get_pred_probs(cm, xd, PRED_SWITCHABLE_INTERP);
+  const vp9_prob *probs = vp9_get_pred_probs_switchable_interp(cm, xd);
   const int index = treed_read(r, vp9_switchable_interp_tree, probs);
-  const int ctx = vp9_get_pred_context(cm, xd, PRED_SWITCHABLE_INTERP);
+  const int ctx = vp9_get_pred_context_switchable_interp(cm, xd);
   ++cm->fc.switchable_interp_count[ctx][index];
   return vp9_switchable_interp[index];
 }
@@ -456,9 +456,9 @@ static MV_REFERENCE_FRAME read_reference_frame(VP9D_COMP *pbi, int segment_id,
 
   MV_REFERENCE_FRAME ref;
   if (!vp9_segfeature_active(xd, segment_id, SEG_LVL_REF_FRAME)) {
-    const int ctx = vp9_get_pred_context(cm, xd, PRED_INTRA_INTER);
+    const int ctx = vp9_get_pred_context_intra_inter(cm, xd);
     ref = (MV_REFERENCE_FRAME)
-              vp9_read(r, vp9_get_pred_prob(cm, xd, PRED_INTRA_INTER));
+              vp9_read(r, vp9_get_pred_prob_intra_inter(cm, xd));
     cm->fc.intra_inter_count[ctx][ref != INTRA_FRAME]++;
   } else {
     ref = (MV_REFERENCE_FRAME)
