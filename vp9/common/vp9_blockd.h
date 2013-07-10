@@ -20,6 +20,7 @@
 #include "vpx_ports/mem.h"
 #include "vp9/common/vp9_common.h"
 #include "vp9/common/vp9_enums.h"
+#include "vp9/common/vp9_common_data.h"
 
 #define BLOCK_SIZE_GROUPS   4
 #define MAX_MB_SEGMENTS     8
@@ -141,43 +142,10 @@ typedef enum {
 } MV_REFERENCE_FRAME;
 
 static INLINE int b_width_log2(BLOCK_SIZE_TYPE sb_type) {
-  switch (sb_type) {
-    case BLOCK_SIZE_SB4X8:
-    case BLOCK_SIZE_AB4X4: return 0;
-    case BLOCK_SIZE_SB8X4:
-    case BLOCK_SIZE_SB8X8:
-    case BLOCK_SIZE_SB8X16: return 1;
-    case BLOCK_SIZE_SB16X8:
-    case BLOCK_SIZE_MB16X16:
-    case BLOCK_SIZE_SB16X32: return 2;
-    case BLOCK_SIZE_SB32X16:
-    case BLOCK_SIZE_SB32X32:
-    case BLOCK_SIZE_SB32X64: return 3;
-    case BLOCK_SIZE_SB64X32:
-    case BLOCK_SIZE_SB64X64: return 4;
-    default: assert(0);
-      return -1;
-  }
+  return b_width_log2_lookup[sb_type];
 }
-
 static INLINE int b_height_log2(BLOCK_SIZE_TYPE sb_type) {
-  switch (sb_type) {
-    case BLOCK_SIZE_SB8X4:
-    case BLOCK_SIZE_AB4X4: return 0;
-    case BLOCK_SIZE_SB4X8:
-    case BLOCK_SIZE_SB8X8:
-    case BLOCK_SIZE_SB16X8: return 1;
-    case BLOCK_SIZE_SB8X16:
-    case BLOCK_SIZE_MB16X16:
-    case BLOCK_SIZE_SB32X16: return 2;
-    case BLOCK_SIZE_SB16X32:
-    case BLOCK_SIZE_SB32X32:
-    case BLOCK_SIZE_SB64X32: return 3;
-    case BLOCK_SIZE_SB32X64:
-    case BLOCK_SIZE_SB64X64: return 4;
-    default: assert(0);
-      return -1;
-  }
+  return b_height_log2_lookup[sb_type];
 }
 
 static INLINE int mi_width_log2(BLOCK_SIZE_TYPE sb_type) {
