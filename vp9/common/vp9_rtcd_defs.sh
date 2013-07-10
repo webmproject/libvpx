@@ -43,17 +43,6 @@ specialize vp9_idct_add_32x32
 #
 # RECON
 #
-prototype void vp9_copy_mem16x16 "const uint8_t *src, int src_pitch, uint8_t *dst, int dst_pitch"
-specialize vp9_copy_mem16x16 mmx sse2 dspr2
-vp9_copy_mem16x16_dspr2=vp9_copy_mem16x16_dspr2
-
-prototype void vp9_copy_mem8x8 "const uint8_t *src, int src_pitch, uint8_t *dst, int dst_pitch"
-specialize vp9_copy_mem8x8 mmx dspr2
-vp9_copy_mem8x8_dspr2=vp9_copy_mem8x8_dspr2
-
-prototype void vp9_copy_mem8x4 "const uint8_t *src, int src_pitch, uint8_t *dst, int dst_pitch"
-specialize vp9_copy_mem8x4 mmx
-
 prototype void vp9_d27_predictor_4x4 "uint8_t *ypred_ptr, ptrdiff_t y_stride, uint8_t *yabove_row, uint8_t *yleft_col"
 specialize vp9_d27_predictor_4x4
 
@@ -275,22 +264,28 @@ specialize vp9_blend_b
 #
 # Sub Pixel Filters
 #
-prototype void vp9_convolve8 "const uint8_t *src, int src_stride, uint8_t *dst, int dst_stride, const int16_t *filter_x, int x_step_q4, const int16_t *filter_y, int y_step_q4, int w, int h"
+prototype void vp9_convolve_copy "const uint8_t *src, ptrdiff_t src_stride, uint8_t *dst, ptrdiff_t dst_stride, const int16_t *filter_x, int x_step_q4, const int16_t *filter_y, int y_step_q4, int w, int h"
+specialize vp9_convolve_copy sse2
+
+prototype void vp9_convolve_avg "const uint8_t *src, ptrdiff_t src_stride, uint8_t *dst, ptrdiff_t dst_stride, const int16_t *filter_x, int x_step_q4, const int16_t *filter_y, int y_step_q4, int w, int h"
+specialize vp9_convolve_avg sse2
+
+prototype void vp9_convolve8 "const uint8_t *src, ptrdiff_t src_stride, uint8_t *dst, ptrdiff_t dst_stride, const int16_t *filter_x, int x_step_q4, const int16_t *filter_y, int y_step_q4, int w, int h"
 specialize vp9_convolve8 ssse3
 
-prototype void vp9_convolve8_horiz "const uint8_t *src, int src_stride, uint8_t *dst, int dst_stride, const int16_t *filter_x, int x_step_q4, const int16_t *filter_y, int y_step_q4, int w, int h"
+prototype void vp9_convolve8_horiz "const uint8_t *src, ptrdiff_t src_stride, uint8_t *dst, ptrdiff_t dst_stride, const int16_t *filter_x, int x_step_q4, const int16_t *filter_y, int y_step_q4, int w, int h"
 specialize vp9_convolve8_horiz ssse3
 
-prototype void vp9_convolve8_vert "const uint8_t *src, int src_stride, uint8_t *dst, int dst_stride, const int16_t *filter_x, int x_step_q4, const int16_t *filter_y, int y_step_q4, int w, int h"
+prototype void vp9_convolve8_vert "const uint8_t *src, ptrdiff_t src_stride, uint8_t *dst, ptrdiff_t dst_stride, const int16_t *filter_x, int x_step_q4, const int16_t *filter_y, int y_step_q4, int w, int h"
 specialize vp9_convolve8_vert ssse3
 
-prototype void vp9_convolve8_avg "const uint8_t *src, int src_stride, uint8_t *dst, int dst_stride, const int16_t *filter_x, int x_step_q4, const int16_t *filter_y, int y_step_q4, int w, int h"
+prototype void vp9_convolve8_avg "const uint8_t *src, ptrdiff_t src_stride, uint8_t *dst, ptrdiff_t dst_stride, const int16_t *filter_x, int x_step_q4, const int16_t *filter_y, int y_step_q4, int w, int h"
 specialize vp9_convolve8_avg ssse3
 
-prototype void vp9_convolve8_avg_horiz "const uint8_t *src, int src_stride, uint8_t *dst, int dst_stride, const int16_t *filter_x, int x_step_q4, const int16_t *filter_y, int y_step_q4, int w, int h"
+prototype void vp9_convolve8_avg_horiz "const uint8_t *src, ptrdiff_t src_stride, uint8_t *dst, ptrdiff_t dst_stride, const int16_t *filter_x, int x_step_q4, const int16_t *filter_y, int y_step_q4, int w, int h"
 specialize vp9_convolve8_avg_horiz ssse3
 
-prototype void vp9_convolve8_avg_vert "const uint8_t *src, int src_stride, uint8_t *dst, int dst_stride, const int16_t *filter_x, int x_step_q4, const int16_t *filter_y, int y_step_q4, int w, int h"
+prototype void vp9_convolve8_avg_vert "const uint8_t *src, ptrdiff_t src_stride, uint8_t *dst, ptrdiff_t dst_stride, const int16_t *filter_x, int x_step_q4, const int16_t *filter_y, int y_step_q4, int w, int h"
 specialize vp9_convolve8_avg_vert ssse3
 
 #

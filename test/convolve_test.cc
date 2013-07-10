@@ -22,8 +22,8 @@ extern "C" {
 }
 
 namespace {
-typedef void (*convolve_fn_t)(const uint8_t *src, int src_stride,
-                              uint8_t *dst, int dst_stride,
+typedef void (*convolve_fn_t)(const uint8_t *src, ptrdiff_t src_stride,
+                              uint8_t *dst, ptrdiff_t dst_stride,
                               const int16_t *filter_x, int filter_x_stride,
                               const int16_t *filter_y, int filter_y_stride,
                               int w, int h);

@@ -38,8 +38,8 @@
  */
  #define ALIGN_FILTERS_256 1
 
-static void convolve_horiz_c(const uint8_t *src, int src_stride,
-                             uint8_t *dst, int dst_stride,
+static void convolve_horiz_c(const uint8_t *src, ptrdiff_t src_stride,
+                             uint8_t *dst, ptrdiff_t dst_stride,
                              const int16_t *filter_x0, int x_step_q4,
                              const int16_t *filter_y, int y_step_q4,
                              int w, int h, int taps) {
@@ -80,8 +80,8 @@ static void convolve_horiz_c(const uint8_t *src, int src_stride,
   }
 }
 
-static void convolve_avg_horiz_c(const uint8_t *src, int src_stride,
-                                 uint8_t *dst, int dst_stride,
+static void convolve_avg_horiz_c(const uint8_t *src, ptrdiff_t src_stride,
+                                 uint8_t *dst, ptrdiff_t dst_stride,
                                  const int16_t *filter_x0, int x_step_q4,
                                  const int16_t *filter_y, int y_step_q4,
                                  int w, int h, int taps) {
@@ -122,8 +122,8 @@ static void convolve_avg_horiz_c(const uint8_t *src, int src_stride,
   }
 }
 
-static void convolve_vert_c(const uint8_t *src, int src_stride,
-                            uint8_t *dst, int dst_stride,
+static void convolve_vert_c(const uint8_t *src, ptrdiff_t src_stride,
+                            uint8_t *dst, ptrdiff_t dst_stride,
                             const int16_t *filter_x, int x_step_q4,
                             const int16_t *filter_y0, int y_step_q4,
                             int w, int h, int taps) {
@@ -164,8 +164,8 @@ static void convolve_vert_c(const uint8_t *src, int src_stride,
   }
 }
 
-static void convolve_avg_vert_c(const uint8_t *src, int src_stride,
-                                uint8_t *dst, int dst_stride,
+static void convolve_avg_vert_c(const uint8_t *src, ptrdiff_t src_stride,
+                                uint8_t *dst, ptrdiff_t dst_stride,
                                 const int16_t *filter_x, int x_step_q4,
                                 const int16_t *filter_y0, int y_step_q4,
                                 int w, int h, int taps) {
@@ -207,8 +207,8 @@ static void convolve_avg_vert_c(const uint8_t *src, int src_stride,
   }
 }
 
-static void convolve_c(const uint8_t *src, int src_stride,
-                       uint8_t *dst, int dst_stride,
+static void convolve_c(const uint8_t *src, ptrdiff_t src_stride,
+                       uint8_t *dst, ptrdiff_t dst_stride,
                        const int16_t *filter_x, int x_step_q4,
                        const int16_t *filter_y, int y_step_q4,
                        int w, int h, int taps) {
@@ -237,8 +237,8 @@ static void convolve_c(const uint8_t *src, int src_stride,
                   w, h, taps);
 }
 
-static void convolve_avg_c(const uint8_t *src, int src_stride,
-                           uint8_t *dst, int dst_stride,
+static void convolve_avg_c(const uint8_t *src, ptrdiff_t src_stride,
+                           uint8_t *dst, ptrdiff_t dst_stride,
                            const int16_t *filter_x, int x_step_q4,
                            const int16_t *filter_y, int y_step_q4,
                            int w, int h, int taps) {
@@ -267,8 +267,8 @@ static void convolve_avg_c(const uint8_t *src, int src_stride,
                       w, h, taps);
 }
 
-void vp9_convolve8_horiz_c(const uint8_t *src, int src_stride,
-                           uint8_t *dst, int dst_stride,
+void vp9_convolve8_horiz_c(const uint8_t *src, ptrdiff_t src_stride,
+                           uint8_t *dst, ptrdiff_t dst_stride,
                            const int16_t *filter_x, int x_step_q4,
                            const int16_t *filter_y, int y_step_q4,
                            int w, int h) {
@@ -277,8 +277,8 @@ void vp9_convolve8_horiz_c(const uint8_t *src, int src_stride,
                    w, h, 8);
 }
 
-void vp9_convolve8_avg_horiz_c(const uint8_t *src, int src_stride,
-                               uint8_t *dst, int dst_stride,
+void vp9_convolve8_avg_horiz_c(const uint8_t *src, ptrdiff_t src_stride,
+                               uint8_t *dst, ptrdiff_t dst_stride,
                                const int16_t *filter_x, int x_step_q4,
                                const int16_t *filter_y, int y_step_q4,
                                int w, int h) {
@@ -287,8 +287,8 @@ void vp9_convolve8_avg_horiz_c(const uint8_t *src, int src_stride,
                        w, h, 8);
 }
 
-void vp9_convolve8_vert_c(const uint8_t *src, int src_stride,
-                          uint8_t *dst, int dst_stride,
+void vp9_convolve8_vert_c(const uint8_t *src, ptrdiff_t src_stride,
+                          uint8_t *dst, ptrdiff_t dst_stride,
                           const int16_t *filter_x, int x_step_q4,
                           const int16_t *filter_y, int y_step_q4,
                           int w, int h) {
@@ -297,8 +297,8 @@ void vp9_convolve8_vert_c(const uint8_t *src, int src_stride,
                   w, h, 8);
 }
 
-void vp9_convolve8_avg_vert_c(const uint8_t *src, int src_stride,
-                              uint8_t *dst, int dst_stride,
+void vp9_convolve8_avg_vert_c(const uint8_t *src, ptrdiff_t src_stride,
+                              uint8_t *dst, ptrdiff_t dst_stride,
                               const int16_t *filter_x, int x_step_q4,
                               const int16_t *filter_y, int y_step_q4,
                               int w, int h) {
@@ -307,8 +307,8 @@ void vp9_convolve8_avg_vert_c(const uint8_t *src, int src_stride,
                       w, h, 8);
 }
 
-void vp9_convolve8_c(const uint8_t *src, int src_stride,
-                     uint8_t *dst, int dst_stride,
+void vp9_convolve8_c(const uint8_t *src, ptrdiff_t src_stride,
+                     uint8_t *dst, ptrdiff_t dst_stride,
                      const int16_t *filter_x, int x_step_q4,
                      const int16_t *filter_y, int y_step_q4,
                      int w, int h) {
@@ -317,8 +317,8 @@ void vp9_convolve8_c(const uint8_t *src, int src_stride,
              w, h, 8);
 }
 
-void vp9_convolve8_avg_c(const uint8_t *src, int src_stride,
-                         uint8_t *dst, int dst_stride,
+void vp9_convolve8_avg_c(const uint8_t *src, ptrdiff_t src_stride,
+                         uint8_t *dst, ptrdiff_t dst_stride,
                          const int16_t *filter_x, int x_step_q4,
                          const int16_t *filter_y, int y_step_q4,
                          int w, int h) {
@@ -339,33 +339,25 @@ void vp9_convolve8_avg_c(const uint8_t *src, int src_stride,
                    w, h);
 }
 
-void vp9_convolve_copy(const uint8_t *src, int src_stride,
-                       uint8_t *dst, int dst_stride,
-                       const int16_t *filter_x, int filter_x_stride,
-                       const int16_t *filter_y, int filter_y_stride,
-                       int w, int h) {
-  if (w == 16 && h == 16) {
-    vp9_copy_mem16x16(src, src_stride, dst, dst_stride);
-  } else if (w == 8 && h == 8) {
-    vp9_copy_mem8x8(src, src_stride, dst, dst_stride);
-  } else if (w == 8 && h == 4) {
-    vp9_copy_mem8x4(src, src_stride, dst, dst_stride);
-  } else {
-    int r;
+void vp9_convolve_copy_c(const uint8_t *src, ptrdiff_t src_stride,
+                         uint8_t *dst, ptrdiff_t dst_stride,
+                         const int16_t *filter_x, int filter_x_stride,
+                         const int16_t *filter_y, int filter_y_stride,
+                         int w, int h) {
+  int r;
 
-    for (r = h; r > 0; --r) {
-      memcpy(dst, src, w);
-      src += src_stride;
-      dst += dst_stride;
-    }
+  for (r = h; r > 0; --r) {
+    memcpy(dst, src, w);
+    src += src_stride;
+    dst += dst_stride;
   }
 }
 
-void vp9_convolve_avg(const uint8_t *src, int src_stride,
-                      uint8_t *dst, int dst_stride,
-                      const int16_t *filter_x, int filter_x_stride,
-                      const int16_t *filter_y, int filter_y_stride,
-                      int w, int h) {
+void vp9_convolve_avg_c(const uint8_t *src, ptrdiff_t src_stride,
+                        uint8_t *dst, ptrdiff_t dst_stride,
+                        const int16_t *filter_x, int filter_x_stride,
+                        const int16_t *filter_y, int filter_y_stride,
+                        int w, int h) {
   int x, y;
 
   for (y = 0; y < h; ++y) {
