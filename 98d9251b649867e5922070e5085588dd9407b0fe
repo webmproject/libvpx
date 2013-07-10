@@ -2,6 +2,23 @@
   "comments": [
     {
       "key": {
+        "uuid": "AAAAcH//7B4\u003d",
+        "filename": "vp9/common/vp9_blockd.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 397,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2013-07-10T21:20:12Z",
+      "side": 1,
+      "message": "this now is duplicate, should be removed?",
+      "revId": "98d9251b649867e5922070e5085588dd9407b0fe",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAcH//7Ns\u003d",
         "filename": "vp9/common/vp9_entropymv.c",
         "patchSetId": 3
