@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAcH//8aM\u003d",
+        "filename": "vp9/common/arm/neon/vp9_convolve8_horiz_neon.asm",
+        "patchSetId": 2
+      },
+      "lineNbr": 62,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2013-07-10T01:33:11Z",
+      "side": 1,
+      "message": "This is really unfortunate. However, vld4.u8 doesn\u0027t respect different addressing so we have to use [r0]! instead of [r0], [r0, #4], [r0, #8]",
+      "revId": "6c64c6922f80219628268221caf9d4276ab5f298",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcH//8ak\u003d",
+        "filename": "vp9/common/arm/neon/vp9_convolve8_vert_neon.asm",
+        "patchSetId": 2
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2013-07-10T01:33:11Z",
+      "side": 1,
+      "message": "Erg. filter[3] restriction is for ssse3. horiz has the correct warning.",
+      "revId": "6c64c6922f80219628268221caf9d4276ab5f298",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcH//8ac\u003d",
+        "filename": "vp9/common/arm/neon/vp9_convolve8_vert_neon.asm",
+        "patchSetId": 2
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2013-07-10T01:33:11Z",
+      "side": 1,
+      "message": "Shouldn\u0027t use subs. Left over from a different loop check.",
+      "revId": "6c64c6922f80219628268221caf9d4276ab5f298",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcH//8ag\u003d",
+        "filename": "vp9/common/arm/neon/vp9_convolve8_vert_neon.asm",
+        "patchSetId": 2
+      },
+      "lineNbr": 70,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2013-07-10T01:33:11Z",
+      "side": 1,
+      "message": "Can add 5 to r5 and avoid the extra add.",
+      "revId": "6c64c6922f80219628268221caf9d4276ab5f298",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
