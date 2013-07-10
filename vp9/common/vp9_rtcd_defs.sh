@@ -22,6 +22,8 @@ EOF
 }
 forward_decls vp9_common_forward_decls
 
+[ $arch = "x86_64" ] && mmx_x86_64=mmx && sse2_x86_64=sse2
+
 #
 # Dequant
 #
@@ -77,7 +79,7 @@ prototype void vp9_v_predictor_4x4 "uint8_t *ypred_ptr, ptrdiff_t y_stride, uint
 specialize vp9_v_predictor_4x4 sse
 
 prototype void vp9_tm_predictor_4x4 "uint8_t *ypred_ptr, ptrdiff_t y_stride, uint8_t *yabove_row, uint8_t *yleft_col"
-specialize vp9_tm_predictor_4x4
+specialize vp9_tm_predictor_4x4 sse
 
 prototype void vp9_dc_predictor_4x4 "uint8_t *ypred_ptr, ptrdiff_t y_stride, uint8_t *yabove_row, uint8_t *yleft_col"
 specialize vp9_dc_predictor_4x4 sse
@@ -116,7 +118,7 @@ prototype void vp9_v_predictor_8x8 "uint8_t *ypred_ptr, ptrdiff_t y_stride, uint
 specialize vp9_v_predictor_8x8 sse
 
 prototype void vp9_tm_predictor_8x8 "uint8_t *ypred_ptr, ptrdiff_t y_stride, uint8_t *yabove_row, uint8_t *yleft_col"
-specialize vp9_tm_predictor_8x8
+specialize vp9_tm_predictor_8x8 sse2
 
 prototype void vp9_dc_predictor_8x8 "uint8_t *ypred_ptr, ptrdiff_t y_stride, uint8_t *yabove_row, uint8_t *yleft_col"
 specialize vp9_dc_predictor_8x8 sse
@@ -155,7 +157,7 @@ prototype void vp9_v_predictor_16x16 "uint8_t *ypred_ptr, ptrdiff_t y_stride, ui
 specialize vp9_v_predictor_16x16 sse2
 
 prototype void vp9_tm_predictor_16x16 "uint8_t *ypred_ptr, ptrdiff_t y_stride, uint8_t *yabove_row, uint8_t *yleft_col"
-specialize vp9_tm_predictor_16x16
+specialize vp9_tm_predictor_16x16 sse2
 
 prototype void vp9_dc_predictor_16x16 "uint8_t *ypred_ptr, ptrdiff_t y_stride, uint8_t *yabove_row, uint8_t *yleft_col"
 specialize vp9_dc_predictor_16x16 sse2
@@ -194,7 +196,7 @@ prototype void vp9_v_predictor_32x32 "uint8_t *ypred_ptr, ptrdiff_t y_stride, ui
 specialize vp9_v_predictor_32x32 sse2
 
 prototype void vp9_tm_predictor_32x32 "uint8_t *ypred_ptr, ptrdiff_t y_stride, uint8_t *yabove_row, uint8_t *yleft_col"
-specialize vp9_tm_predictor_32x32
+specialize vp9_tm_predictor_32x32 sse2_x86_64
 
 prototype void vp9_dc_predictor_32x32 "uint8_t *ypred_ptr, ptrdiff_t y_stride, uint8_t *yabove_row, uint8_t *yleft_col"
 specialize vp9_dc_predictor_32x32 sse2
@@ -362,8 +364,6 @@ if [ "$CONFIG_VP9_ENCODER" = "yes" ]; then
 
 
 # variance
-[ $arch = "x86_64" ] && mmx_x86_64=mmx && sse2_x86_64=sse2
-
 prototype unsigned int vp9_variance32x16 "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse"
 specialize vp9_variance32x16 sse2
 
