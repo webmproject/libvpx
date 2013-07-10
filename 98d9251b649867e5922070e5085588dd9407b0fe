@@ -16,6 +16,24 @@
       "revId": "98d9251b649867e5922070e5085588dd9407b0fe",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcH//7EM\u003d",
+        "filename": "vp9/common/vp9_entropymv.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 89,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2013-07-10T21:03:46Z",
+      "side": 1,
+      "message": "agreed - but with this cl I was trying simply to avoid the warnings.   There\u0027s lots of style cleanups like this we could do...",
+      "parentUuid": "AAAAcH//7Ns\u003d",
+      "revId": "98d9251b649867e5922070e5085588dd9407b0fe",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
