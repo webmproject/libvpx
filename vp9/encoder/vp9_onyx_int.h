@@ -278,23 +278,6 @@ typedef struct {
   int use_rd_breakout;
 } SPEED_FEATURES;
 
-enum BlockSize {
-  BLOCK_4X4,
-  BLOCK_4X8,
-  BLOCK_8X4,
-  BLOCK_8X8,
-  BLOCK_8X16,
-  BLOCK_16X8,
-  BLOCK_16X16,
-  BLOCK_32X32,
-  BLOCK_32X16,
-  BLOCK_16X32,
-  BLOCK_64X32,
-  BLOCK_32X64,
-  BLOCK_64X64,
-  BLOCK_MAX_SB_SEGMENTS,
-};
-
 typedef struct VP9_COMP {
 
   DECLARE_ALIGNED(16, int16_t, y_quant[QINDEX_RANGE][8]);
@@ -540,7 +523,7 @@ typedef struct VP9_COMP {
   vp9_full_search_fn_t full_search_sad;
   vp9_refining_search_fn_t refining_search_sad;
   vp9_diamond_search_fn_t diamond_search_sad;
-  vp9_variance_fn_ptr_t fn_ptr[BLOCK_MAX_SB_SEGMENTS];
+  vp9_variance_fn_ptr_t fn_ptr[BLOCK_SIZE_TYPES];
   uint64_t time_receive_data;
   uint64_t time_compress_data;
   uint64_t time_pick_lpf;

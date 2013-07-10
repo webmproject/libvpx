@@ -370,19 +370,6 @@ static void zz_motion_search(VP9_COMP *cpi, MACROBLOCK *x, YV12_BUFFER_CONFIG *r
   }
 }
 
-static enum BlockSize get_bs(BLOCK_SIZE_TYPE b) {
-  switch (b) {
-    case BLOCK_SIZE_SB8X8:
-      return BLOCK_8X8;
-    case BLOCK_SIZE_SB16X8:
-      return BLOCK_16X8;
-    case BLOCK_SIZE_SB8X16:
-      return BLOCK_8X16;
-    default:
-      return BLOCK_16X16;
-  }
-}
-
 static void first_pass_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
                                      int_mv *ref_mv, MV *best_mv,
                                      YV12_BUFFER_CONFIG *recon_buffer,
@@ -398,7 +385,7 @@ static void first_pass_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
   int further_steps = (MAX_MVSEARCH_STEPS - 1) - step_param;
   int n;
   vp9_variance_fn_ptr_t v_fn_ptr =
-      cpi->fn_ptr[get_bs(xd->mode_info_context->mbmi.sb_type)];
+      cpi->fn_ptr[xd->mode_info_context->mbmi.sb_type];
   int new_mv_mode_penalty = 256;
 
   int sr = 0;

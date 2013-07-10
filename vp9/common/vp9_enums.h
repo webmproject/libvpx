@@ -22,20 +22,20 @@
 #define MI_MASK (MI_BLOCK_SIZE - 1)
 
 typedef enum BLOCK_SIZE_TYPE {
-  BLOCK_SIZE_AB4X4,
-  BLOCK_SIZE_SB4X8,
-  BLOCK_SIZE_SB8X4,
-  BLOCK_SIZE_SB8X8,
-  BLOCK_SIZE_SB8X16,
-  BLOCK_SIZE_SB16X8,
-  BLOCK_SIZE_MB16X16,
-  BLOCK_SIZE_SB16X32,
-  BLOCK_SIZE_SB32X16,
-  BLOCK_SIZE_SB32X32,
-  BLOCK_SIZE_SB32X64,
-  BLOCK_SIZE_SB64X32,
-  BLOCK_SIZE_SB64X64,
-  BLOCK_SIZE_TYPES
+  BLOCK_SIZE_AB4X4, BLOCK_4X4 = BLOCK_SIZE_AB4X4,
+  BLOCK_SIZE_SB4X8, BLOCK_4X8 = BLOCK_SIZE_SB4X8,
+  BLOCK_SIZE_SB8X4, BLOCK_8X4 = BLOCK_SIZE_SB8X4,
+  BLOCK_SIZE_SB8X8, BLOCK_8X8 = BLOCK_SIZE_SB8X8,
+  BLOCK_SIZE_SB8X16, BLOCK_8X16 = BLOCK_SIZE_SB8X16,
+  BLOCK_SIZE_SB16X8, BLOCK_16X8 = BLOCK_SIZE_SB16X8,
+  BLOCK_SIZE_MB16X16, BLOCK_16X16 = BLOCK_SIZE_MB16X16,
+  BLOCK_SIZE_SB16X32, BLOCK_16X32 = BLOCK_SIZE_SB16X32,
+  BLOCK_SIZE_SB32X16, BLOCK_32X16 = BLOCK_SIZE_SB32X16,
+  BLOCK_SIZE_SB32X32, BLOCK_32X32 = BLOCK_SIZE_SB32X32,
+  BLOCK_SIZE_SB32X64, BLOCK_32X64 = BLOCK_SIZE_SB32X64,
+  BLOCK_SIZE_SB64X32, BLOCK_64X32 = BLOCK_SIZE_SB64X32,
+  BLOCK_SIZE_SB64X64, BLOCK_64X64 = BLOCK_SIZE_SB64X64,
+  BLOCK_SIZE_TYPES, BLOCK_MAX_SB_SEGMENTS = BLOCK_SIZE_TYPES,
 } BLOCK_SIZE_TYPE;
 
 typedef enum PARTITION_TYPE {
@@ -48,5 +48,20 @@ typedef enum PARTITION_TYPE {
 
 #define PARTITION_PLOFFSET   4  // number of probability models per block size
 #define NUM_PARTITION_CONTEXTS (4 * PARTITION_PLOFFSET)
+
+typedef enum {
+  TX_4X4 = 0,                      // 4x4 dct transform
+  TX_8X8 = 1,                      // 8x8 dct transform
+  TX_16X16 = 2,                    // 16x16 dct transform
+  TX_32X32 = 3,                    // 32x32 dct transform
+  TX_SIZE_MAX_SB,                  // Number of transforms available to SBs
+} TX_SIZE;
+
+typedef enum {
+  DCT_DCT   = 0,                      // DCT  in both horizontal and vertical
+  ADST_DCT  = 1,                      // ADST in vertical, DCT in horizontal
+  DCT_ADST  = 2,                      // DCT  in vertical, ADST in horizontal
+  ADST_ADST = 3                       // ADST in both directions
+} TX_TYPE;
 
 #endif  // VP9_COMMON_VP9_ENUMS_H_

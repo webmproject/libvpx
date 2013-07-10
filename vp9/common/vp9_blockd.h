@@ -91,22 +91,6 @@ static INLINE int is_inter_mode(MB_PREDICTION_MODE mode) {
   return mode >= NEARESTMV && mode <= NEWMV;
 }
 
-// Segment level features.
-typedef enum {
-  TX_4X4 = 0,                      // 4x4 dct transform
-  TX_8X8 = 1,                      // 8x8 dct transform
-  TX_16X16 = 2,                    // 16x16 dct transform
-  TX_32X32 = 3,                    // 32x32 dct transform
-  TX_SIZE_MAX_SB,                  // Number of transforms available to SBs
-} TX_SIZE;
-
-typedef enum {
-  DCT_DCT   = 0,                      // DCT  in both horizontal and vertical
-  ADST_DCT  = 1,                      // ADST in vertical, DCT in horizontal
-  DCT_ADST  = 2,                      // DCT  in vertical, ADST in horizontal
-  ADST_ADST = 3                       // ADST in both directions
-} TX_TYPE;
-
 #define VP9_INTRA_MODES (TM_PRED + 1)
 
 #define VP9_INTER_MODES (1 + NEWMV - NEARESTMV)
@@ -293,7 +277,7 @@ typedef struct macroblockd {
 
 } MACROBLOCKD;
 
-static int *get_sb_index(MACROBLOCKD *xd, BLOCK_SIZE_TYPE subsize) {
+static INLINE int *get_sb_index(MACROBLOCKD *xd, BLOCK_SIZE_TYPE subsize) {
   switch (subsize) {
     case BLOCK_SIZE_SB64X64:
     case BLOCK_SIZE_SB64X32:
@@ -361,49 +345,8 @@ static INLINE int partition_plane_context(MACROBLOCKD *xd,
 
 static BLOCK_SIZE_TYPE get_subsize(BLOCK_SIZE_TYPE bsize,
                                    PARTITION_TYPE partition) {
-  BLOCK_SIZE_TYPE subsize = bsize;
-  switch (partition) {
-    case PARTITION_NONE:
-      break;
-    case PARTITION_HORZ:
-      if (bsize == BLOCK_SIZE_SB64X64)
-        subsize = BLOCK_SIZE_SB64X32;
-      else if (bsize == BLOCK_SIZE_SB32X32)
-        subsize = BLOCK_SIZE_SB32X16;
-      else if (bsize == BLOCK_SIZE_MB16X16)
-        subsize = BLOCK_SIZE_SB16X8;
-      else if (bsize == BLOCK_SIZE_SB8X8)
-        subsize = BLOCK_SIZE_SB8X4;
-      else
-        assert(0);
-      break;
-    case PARTITION_VERT:
-      if (bsize == BLOCK_SIZE_SB64X64)
-        subsize = BLOCK_SIZE_SB32X64;
-      else if (bsize == BLOCK_SIZE_SB32X32)
-        subsize = BLOCK_SIZE_SB16X32;
-      else if (bsize == BLOCK_SIZE_MB16X16)
-        subsize = BLOCK_SIZE_SB8X16;
-      else if (bsize == BLOCK_SIZE_SB8X8)
-        subsize = BLOCK_SIZE_SB4X8;
-      else
-        assert(0);
-      break;
-    case PARTITION_SPLIT:
-      if (bsize == BLOCK_SIZE_SB64X64)
-        subsize = BLOCK_SIZE_SB32X32;
-      else if (bsize == BLOCK_SIZE_SB32X32)
-        subsize = BLOCK_SIZE_MB16X16;
-      else if (bsize == BLOCK_SIZE_MB16X16)
-        subsize = BLOCK_SIZE_SB8X8;
-      else if (bsize == BLOCK_SIZE_SB8X8)
-        subsize = BLOCK_SIZE_AB4X4;
-      else
-        assert(0);
-      break;
-    default:
-      assert(0);
-  }
+  BLOCK_SIZE_TYPE subsize = subsize_lookup[partition][bsize];
+  assert(subsize != BLOCK_SIZE_TYPES);
   return subsize;
 }
 
@@ -444,31 +387,10 @@ static void setup_block_dptrs(MACROBLOCKD *xd, int ss_x, int ss_y) {
 }
 
 
-static TX_SIZE get_uv_tx_size(const MB_MODE_INFO *mbmi) {
+static INLINE TX_SIZE get_uv_tx_size(const MB_MODE_INFO *mbmi) {
   const TX_SIZE size = mbmi->txfm_size;
-
-  switch (mbmi->sb_type) {
-    case BLOCK_SIZE_SB64X64:
-      return size;
-    case BLOCK_SIZE_SB64X32:
-    case BLOCK_SIZE_SB32X64:
-    case BLOCK_SIZE_SB32X32:
-      if (size == TX_32X32)
-        return TX_16X16;
-      else
-        return size;
-    case BLOCK_SIZE_SB32X16:
-    case BLOCK_SIZE_SB16X32:
-    case BLOCK_SIZE_MB16X16:
-      if (size == TX_16X16)
-        return TX_8X8;
-      else
-        return size;
-    default:
-      return TX_4X4;
-  }
-
-  return size;
+  const TX_SIZE max_size = max_uv_txsize_lookup[mbmi->sb_type];
+  return (size > max_size ? max_size : size);
 }
 
 struct plane_block_idx {
@@ -505,6 +427,16 @@ static INLINE int plane_block_width(BLOCK_SIZE_TYPE bsize,
 static INLINE int plane_block_height(BLOCK_SIZE_TYPE bsize,
                                      const struct macroblockd_plane* plane) {
   return 4 << (b_height_log2(bsize) - plane->subsampling_y);
+}
+
+static INLINE int plane_block_width_log2by4(
+    BLOCK_SIZE_TYPE bsize, const struct macroblockd_plane* plane) {
+  return (b_width_log2(bsize) - plane->subsampling_x);
+}
+
+static INLINE int plane_block_height_log2by4(
+    BLOCK_SIZE_TYPE bsize, const struct macroblockd_plane* plane) {
+  return (b_height_log2(bsize) - plane->subsampling_y);
 }
 
 typedef void (*foreach_transformed_block_visitor)(int plane, int block,
