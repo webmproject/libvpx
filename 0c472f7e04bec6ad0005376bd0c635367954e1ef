@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAcH//7Uk\u003d",
+        "filename": "vp9/common/arm/neon/vp9_dc_only_idct_add_neon.asm",
+        "patchSetId": 3
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2013-07-10T19:13:01Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAcH//7nQ\u003d",
+      "revId": "0c472f7e04bec6ad0005376bd0c635367954e1ef",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAcH//7nM\u003d",
         "filename": "vp9/common/arm/neon/vp9_dc_only_idct_add_neon.asm",
         "patchSetId": 3
@@ -30,6 +48,24 @@
       "writtenOn": "2013-07-10T17:26:36Z",
       "side": 1,
       "message": "data types",
+      "revId": "0c472f7e04bec6ad0005376bd0c635367954e1ef",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcH//7Ug\u003d",
+        "filename": "vp9/common/arm/neon/vp9_dc_only_idct_add_neon.asm",
+        "patchSetId": 3
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2013-07-10T19:13:01Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAcH//7nM\u003d",
       "revId": "0c472f7e04bec6ad0005376bd0c635367954e1ef",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAcH//7T8\u003d",
+        "filename": "vp9/common/arm/neon/vp9_dc_only_idct_add_neon.asm",
+        "patchSetId": 3
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2013-07-10T19:13:01Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAcH//7mw\u003d",
+      "revId": "0c472f7e04bec6ad0005376bd0c635367954e1ef",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAcH//7ms\u003d",
         "filename": "vp9/common/arm/neon/vp9_dc_only_idct_add_neon.asm",
         "patchSetId": 3
@@ -64,6 +118,24 @@
       "writtenOn": "2013-07-10T17:26:36Z",
       "side": 1,
       "message": "prefer using r12 here because there is a stall between the store of r9 and the mov.",
+      "revId": "0c472f7e04bec6ad0005376bd0c635367954e1ef",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcH//7Tw\u003d",
+        "filename": "vp9/common/arm/neon/vp9_dc_only_idct_add_neon.asm",
+        "patchSetId": 3
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2013-07-10T19:13:01Z",
+      "side": 1,
+      "message": "Use r12 instead of r9 now.",
+      "parentUuid": "AAAAcH//7ms\u003d",
       "revId": "0c472f7e04bec6ad0005376bd0c635367954e1ef",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAcH//7Tg\u003d",
+        "filename": "vp9/common/arm/neon/vp9_dc_only_idct_add_neon.asm",
+        "patchSetId": 3
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2013-07-10T19:13:01Z",
+      "side": 1,
+      "message": "Was trying to match the assembly with the code.",
+      "parentUuid": "AAAAcH//7nA\u003d",
+      "revId": "0c472f7e04bec6ad0005376bd0c635367954e1ef",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAcH//7nY\u003d",
         "filename": "vp9/common/arm/neon/vp9_dc_only_idct_add_neon.asm",
         "patchSetId": 3
@@ -98,6 +188,24 @@
       "writtenOn": "2013-07-10T17:26:36Z",
       "side": 1,
       "message": "Move this to the top of the function. Frees r1 and r3, avoid pushing r9",
+      "revId": "0c472f7e04bec6ad0005376bd0c635367954e1ef",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcH//7Tc\u003d",
+        "filename": "vp9/common/arm/neon/vp9_dc_only_idct_add_neon.asm",
+        "patchSetId": 3
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2013-07-10T19:13:01Z",
+      "side": 1,
+      "message": "No need now as use r12 instead of r9.",
+      "parentUuid": "AAAAcH//7nY\u003d",
       "revId": "0c472f7e04bec6ad0005376bd0c635367954e1ef",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -121,6 +229,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAcH//7TQ\u003d",
+        "filename": "vp9/common/arm/neon/vp9_dc_only_idct_add_neon.asm",
+        "patchSetId": 3
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2013-07-10T19:13:01Z",
+      "side": 1,
+      "message": "Done. This is the part of a1 + pred_ptr[c].",
+      "parentUuid": "AAAAcH//7m0\u003d",
+      "revId": "0c472f7e04bec6ad0005376bd0c635367954e1ef",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAcH//7mg\u003d",
         "filename": "vp9/common/arm/neon/vp9_dc_only_idct_add_neon.asm",
         "patchSetId": 3
@@ -132,6 +258,24 @@
       "writtenOn": "2013-07-10T17:26:36Z",
       "side": 1,
       "message": "This is clip_pixel",
+      "revId": "0c472f7e04bec6ad0005376bd0c635367954e1ef",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcH//7TA\u003d",
+        "filename": "vp9/common/arm/neon/vp9_dc_only_idct_add_neon.asm",
+        "patchSetId": 3
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2013-07-10T19:13:01Z",
+      "side": 1,
+      "message": "Done. Add the correct comment.",
+      "parentUuid": "AAAAcH//7mg\u003d",
       "revId": "0c472f7e04bec6ad0005376bd0c635367954e1ef",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
