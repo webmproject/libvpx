@@ -1196,6 +1196,55 @@ static int get_refresh_mask(VP9_COMP *cpi) {
     }
 }
 
+static size_t encode_tiles(VP9_COMP *cpi, uint8_t *data_ptr) {
+  VP9_COMMON *const cm = &cpi->common;
+  vp9_writer residual_bc;
+
+  int tile_row, tile_col;
+  TOKENEXTRA *tok[4][1 << 6], *tok_end;
+  size_t total_size = 0;
+
+  vpx_memset(cm->above_seg_context, 0, sizeof(PARTITION_CONTEXT) *
+             mi_cols_aligned_to_sb(cm->mi_cols));
+
+  tok[0][0] = cpi->tok;
+  for (tile_row = 0; tile_row < cm->tile_rows; tile_row++) {
+    if (tile_row)
+      tok[tile_row][0] = tok[tile_row - 1][cm->tile_columns - 1] +
+                         cpi->tok_count[tile_row - 1][cm->tile_columns - 1];
+
+    for (tile_col = 1; tile_col < cm->tile_columns; tile_col++)
+      tok[tile_row][tile_col] = tok[tile_row][tile_col - 1] +
+                                cpi->tok_count[tile_row][tile_col - 1];
+  }
+
+  for (tile_row = 0; tile_row < cm->tile_rows; tile_row++) {
+    vp9_get_tile_row_offsets(cm, tile_row);
+    for (tile_col = 0; tile_col < cm->tile_columns; tile_col++) {
+      vp9_get_tile_col_offsets(cm, tile_col);
+      tok_end = tok[tile_row][tile_col] + cpi->tok_count[tile_row][tile_col];
+
+      if (tile_col < cm->tile_columns - 1 || tile_row < cm->tile_rows - 1)
+        vp9_start_encode(&residual_bc, data_ptr + total_size + 4);
+      else
+        vp9_start_encode(&residual_bc, data_ptr + total_size);
+
+      write_modes(cpi, &residual_bc, &tok[tile_row][tile_col], tok_end);
+      assert(tok[tile_row][tile_col] == tok_end);
+      vp9_stop_encode(&residual_bc);
+      if (tile_col < cm->tile_columns - 1 || tile_row < cm->tile_rows - 1) {
+        // size of this tile
+        write_be32(data_ptr + total_size, residual_bc.pos);
+        total_size += 4;
+      }
+
+      total_size += residual_bc.pos;
+    }
+  }
+
+  return total_size;
+}
+
 static void write_display_size(VP9_COMP *cpi, struct vp9_write_bit_buffer *wb) {
   VP9_COMMON *const cm = &cpi->common;
 
@@ -1339,7 +1388,7 @@ static void write_uncompressed_header(VP9_COMP *cpi,
 void vp9_pack_bitstream(VP9_COMP *cpi, uint8_t *dest, unsigned long *size) {
   int i, bytes_packed;
   VP9_COMMON *const pc = &cpi->common;
-  vp9_writer header_bc, residual_bc;
+  vp9_writer header_bc;
   MACROBLOCKD *const xd = &cpi->mb.e_mbd;
 
   uint8_t *cx_data = dest;
@@ -1469,51 +1518,7 @@ void vp9_pack_bitstream(VP9_COMP *cpi, uint8_t *dest, unsigned long *size) {
   assert(header_bc.pos <= 0xffff);
   vp9_wb_write_literal(&first_partition_size_wb, header_bc.pos, 16);
   *size = bytes_packed + header_bc.pos;
-
-  {
-    int tile_row, tile_col, total_size = 0;
-    unsigned char *data_ptr = cx_data + header_bc.pos;
-    TOKENEXTRA *tok[4][1 << 6], *tok_end;
-
-    vpx_memset(pc->above_seg_context, 0, sizeof(PARTITION_CONTEXT) *
-               mi_cols_aligned_to_sb(pc->mi_cols));
-    tok[0][0] = cpi->tok;
-    for (tile_row = 0; tile_row < pc->tile_rows; tile_row++) {
-      if (tile_row) {
-        tok[tile_row][0] = tok[tile_row - 1][pc->tile_columns - 1] +
-                           cpi->tok_count[tile_row - 1][pc->tile_columns - 1];
-      }
-      for (tile_col = 1; tile_col < pc->tile_columns; tile_col++) {
-        tok[tile_row][tile_col] = tok[tile_row][tile_col - 1] +
-                                  cpi->tok_count[tile_row][tile_col - 1];
-      }
-    }
-
-    for (tile_row = 0; tile_row < pc->tile_rows; tile_row++) {
-      vp9_get_tile_row_offsets(pc, tile_row);
-      for (tile_col = 0; tile_col < pc->tile_columns; tile_col++) {
-        vp9_get_tile_col_offsets(pc, tile_col);
-        tok_end = tok[tile_row][tile_col] + cpi->tok_count[tile_row][tile_col];
-
-        if (tile_col < pc->tile_columns - 1 || tile_row < pc->tile_rows - 1)
-          vp9_start_encode(&residual_bc, data_ptr + total_size + 4);
-        else
-          vp9_start_encode(&residual_bc, data_ptr + total_size);
-        write_modes(cpi, &residual_bc, &tok[tile_row][tile_col], tok_end);
-        assert(tok[tile_row][tile_col] == tok_end);
-        vp9_stop_encode(&residual_bc);
-        if (tile_col < pc->tile_columns - 1 || tile_row < pc->tile_rows - 1) {
-          // size of this tile
-          write_be32(data_ptr + total_size, residual_bc.pos);
-          total_size += 4;
-        }
-
-        total_size += residual_bc.pos;
-      }
-    }
-
-    *size += total_size;
-  }
+  *size += encode_tiles(cpi, cx_data + header_bc.pos);
 }
 
 #ifdef ENTROPY_STATS
