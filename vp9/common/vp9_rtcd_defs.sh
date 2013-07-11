@@ -325,7 +325,7 @@ prototype void vp9_short_idct10_32x32_add "int16_t *input, uint8_t *dest, int de
 specialize vp9_short_idct10_32x32_add
 
 prototype void vp9_short_iht4x4_add "int16_t *input, uint8_t *dest, int dest_stride, int tx_type"
-specialize vp9_short_iht4x4_add
+specialize vp9_short_iht4x4_add sse2
 
 prototype void vp9_short_iht8x8_add "int16_t *input, uint8_t *dest, int dest_stride, int tx_type"
 specialize vp9_short_iht8x8_add
