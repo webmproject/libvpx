@@ -68,17 +68,17 @@ static void read_tx_probs(FRAME_CONTEXT *fc, vp9_reader *r) {
   for (i = 0; i < TX_SIZE_CONTEXTS; ++i)
     for (j = 0; j < TX_SIZE_MAX_SB - 3; ++j)
       if (vp9_read(r, VP9_MODE_UPDATE_PROB))
-        vp9_diff_update_prob(r, &fc->tx_probs_8x8p[i][j]);
+        vp9_diff_update_prob(r, &fc->tx_probs.p8x8[i][j]);
 
   for (i = 0; i < TX_SIZE_CONTEXTS; ++i)
     for (j = 0; j < TX_SIZE_MAX_SB - 2; ++j)
       if (vp9_read(r, VP9_MODE_UPDATE_PROB))
-        vp9_diff_update_prob(r, &fc->tx_probs_16x16p[i][j]);
+        vp9_diff_update_prob(r, &fc->tx_probs.p16x16[i][j]);
 
   for (i = 0; i < TX_SIZE_CONTEXTS; ++i)
     for (j = 0; j < TX_SIZE_MAX_SB - 1; ++j)
       if (vp9_read(r, VP9_MODE_UPDATE_PROB))
-        vp9_diff_update_prob(r, &fc->tx_probs_32x32p[i][j]);
+        vp9_diff_update_prob(r, &fc->tx_probs.p32x32[i][j]);
 }
 
 static void mb_init_dequantizer(VP9_COMMON *pc, MACROBLOCKD *xd) {
@@ -604,9 +604,7 @@ static void update_frame_context(FRAME_CONTEXT *fc) {
   fc->pre_nmvc = fc->nmvc;
   vp9_copy(fc->pre_switchable_interp_prob, fc->switchable_interp_prob);
   vp9_copy(fc->pre_inter_mode_probs, fc->inter_mode_probs);
-  vp9_copy(fc->pre_tx_probs_8x8p, fc->tx_probs_8x8p);
-  vp9_copy(fc->pre_tx_probs_16x16p, fc->tx_probs_16x16p);
-  vp9_copy(fc->pre_tx_probs_32x32p, fc->tx_probs_32x32p);
+  fc->pre_tx_probs = fc->tx_probs;
   vp9_copy(fc->pre_mbskip_probs, fc->mbskip_probs);
 
   vp9_zero(fc->coef_counts);
@@ -621,9 +619,7 @@ static void update_frame_context(FRAME_CONTEXT *fc) {
   vp9_zero(fc->comp_inter_count);
   vp9_zero(fc->single_ref_count);
   vp9_zero(fc->comp_ref_count);
-  vp9_zero(fc->tx_count_8x8p);
-  vp9_zero(fc->tx_count_16x16p);
-  vp9_zero(fc->tx_count_32x32p);
+  vp9_zero(fc->tx_counts);
   vp9_zero(fc->mbskip_count);
 }
 

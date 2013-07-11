@@ -50,8 +50,9 @@ static const vp9_prob default_if_uv_probs[VP9_INTRA_MODES]
   { 101,  21, 107, 181, 192, 103,  19,  67, 125 } /* y = tm */
 };
 
-const vp9_prob vp9_partition_probs[NUM_FRAME_TYPES][NUM_PARTITION_CONTEXTS]
-                                  [PARTITION_TYPES - 1] = {
+static const vp9_prob default_partition_probs[NUM_FRAME_TYPES]
+                                             [NUM_PARTITION_CONTEXTS]
+                                             [PARTITION_TYPES - 1] = {
   { /* frame_type = keyframe */
     /* 8x8 -> 4x4 */
     { 158,  97,  94 } /* a/l both not split */,
@@ -159,20 +160,15 @@ static const vp9_prob default_single_ref_p[REF_CONTEXTS][2] = {
   { 238, 247 }
 };
 
-const vp9_prob vp9_default_tx_probs_32x32p[TX_SIZE_CONTEXTS]
-                                          [TX_SIZE_MAX_SB - 1] = {
-  { 3, 136, 37, },
-  { 5, 52, 13, },
-};
-const vp9_prob vp9_default_tx_probs_16x16p[TX_SIZE_CONTEXTS]
-                                          [TX_SIZE_MAX_SB - 2] = {
-  { 20, 152, },
-  { 15, 101, },
-};
-const vp9_prob vp9_default_tx_probs_8x8p[TX_SIZE_CONTEXTS]
-                                        [TX_SIZE_MAX_SB - 3] = {
-  { 100, },
-  { 66, },
+static const struct tx_probs default_tx_probs = {
+  { { 3, 136, 37 },
+    { 5, 52,  13 } },
+
+  { { 20, 152 },
+    { 15, 101 } },
+
+  { { 100 },
+    { 66  } }
 };
 
 void tx_counts_to_branch_counts_32x32(unsigned int *tx_count_32x32p,
@@ -202,24 +198,30 @@ void tx_counts_to_branch_counts_8x8(unsigned int *tx_count_8x8p,
   ct_8x8p[0][1] = tx_count_8x8p[TX_8X8];
 }
 
-const vp9_prob vp9_default_mbskip_probs[MBSKIP_CONTEXTS] = {
+static const vp9_prob default_mbskip_probs[MBSKIP_CONTEXTS] = {
   192, 128, 64
+};
+
+static const vp9_prob default_switchable_interp_prob[VP9_SWITCHABLE_FILTERS+1]
+                                                  [VP9_SWITCHABLE_FILTERS-1] = {
+  { 235, 162, },
+  { 36, 255, },
+  { 34, 3, },
+  { 149, 144, },
 };
 
 void vp9_init_mbmode_probs(VP9_COMMON *cm) {
   vp9_copy(cm->fc.uv_mode_prob, default_if_uv_probs);
   vp9_copy(cm->kf_uv_mode_prob, default_kf_uv_probs);
   vp9_copy(cm->fc.y_mode_prob, default_if_y_probs);
-  vp9_copy(cm->fc.switchable_interp_prob, vp9_switchable_interp_prob);
-  vp9_copy(cm->fc.partition_prob, vp9_partition_probs);
+  vp9_copy(cm->fc.switchable_interp_prob, default_switchable_interp_prob);
+  vp9_copy(cm->fc.partition_prob, default_partition_probs);
   vp9_copy(cm->fc.intra_inter_prob, default_intra_inter_p);
   vp9_copy(cm->fc.comp_inter_prob, default_comp_inter_p);
   vp9_copy(cm->fc.comp_ref_prob, default_comp_ref_p);
   vp9_copy(cm->fc.single_ref_prob, default_single_ref_p);
-  vp9_copy(cm->fc.tx_probs_32x32p, vp9_default_tx_probs_32x32p);
-  vp9_copy(cm->fc.tx_probs_16x16p, vp9_default_tx_probs_16x16p);
-  vp9_copy(cm->fc.tx_probs_8x8p, vp9_default_tx_probs_8x8p);
-  vp9_copy(cm->fc.mbskip_probs, vp9_default_mbskip_probs);
+  cm->fc.tx_probs = default_tx_probs;
+  vp9_copy(cm->fc.mbskip_probs, default_mbskip_probs);
 }
 
 const vp9_tree_index vp9_switchable_interp_tree[VP9_SWITCHABLE_FILTERS*2-2] = {
@@ -229,14 +231,7 @@ const vp9_tree_index vp9_switchable_interp_tree[VP9_SWITCHABLE_FILTERS*2-2] = {
 struct vp9_token vp9_switchable_interp_encodings[VP9_SWITCHABLE_FILTERS];
 const INTERPOLATIONFILTERTYPE vp9_switchable_interp[VP9_SWITCHABLE_FILTERS] = {
   EIGHTTAP, EIGHTTAP_SMOOTH, EIGHTTAP_SHARP};
-const int vp9_switchable_interp_map[SWITCHABLE+1] = {1, 0, 2, -1, -1};
-const vp9_prob vp9_switchable_interp_prob [VP9_SWITCHABLE_FILTERS+1]
-                                          [VP9_SWITCHABLE_FILTERS-1] = {
-  { 235, 162, },
-  { 36, 255, },
-  { 34, 3, },
-  { 149, 144, },
-};
+const int vp9_switchable_interp_map[SWITCHABLE + 1] = {1, 0, 2, -1, -1};
 
 // Indicates if the filter is interpolating or non-interpolating
 const int vp9_is_interpolating_filter[SWITCHABLE + 1] = {1, 1, 1, 1, -1};
@@ -419,21 +414,21 @@ void vp9_adapt_mode_probs(VP9_COMMON *cm) {
     unsigned int branch_ct_32x32p[TX_SIZE_MAX_SB - 1][2];
 
     for (i = 0; i < TX_SIZE_CONTEXTS; ++i) {
-      tx_counts_to_branch_counts_8x8(fc->tx_count_8x8p[i], branch_ct_8x8p);
+      tx_counts_to_branch_counts_8x8(fc->tx_counts.p8x8[i], branch_ct_8x8p);
       for (j = 0; j < TX_SIZE_MAX_SB - 3; ++j)
-        fc->tx_probs_8x8p[i][j] = update_tx_ct(fc->pre_tx_probs_8x8p[i][j],
+        fc->tx_probs.p8x8[i][j] = update_tx_ct(fc->pre_tx_probs.p8x8[i][j],
                                                branch_ct_8x8p[j]);
 
-      tx_counts_to_branch_counts_16x16(fc->tx_count_16x16p[i],
+      tx_counts_to_branch_counts_16x16(fc->tx_counts.p16x16[i],
                                        branch_ct_16x16p);
       for (j = 0; j < TX_SIZE_MAX_SB - 2; ++j)
-        fc->tx_probs_16x16p[i][j] = update_tx_ct(fc->pre_tx_probs_16x16p[i][j],
+        fc->tx_probs.p16x16[i][j] = update_tx_ct(fc->tx_probs.p16x16[i][j],
                                                  branch_ct_16x16p[j]);
 
-      tx_counts_to_branch_counts_32x32(fc->tx_count_32x32p[i],
+      tx_counts_to_branch_counts_32x32(fc->tx_counts.p32x32[i],
                                        branch_ct_32x32p);
       for (j = 0; j < TX_SIZE_MAX_SB - 1; ++j)
-        fc->tx_probs_32x32p[i][j] = update_tx_ct(fc->pre_tx_probs_32x32p[i][j],
+        fc->tx_probs.p32x32[i][j] = update_tx_ct(fc->pre_tx_probs.p32x32[i][j],
                                                  branch_ct_32x32p[j]);
     }
   }

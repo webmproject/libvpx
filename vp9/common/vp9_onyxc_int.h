@@ -89,15 +89,9 @@ typedef struct frame_contexts {
   unsigned int comp_ref_count[REF_CONTEXTS][2];
 
   // tx_probs
-  vp9_prob tx_probs_32x32p[TX_SIZE_CONTEXTS][TX_SIZE_MAX_SB - 1];
-  vp9_prob tx_probs_16x16p[TX_SIZE_CONTEXTS][TX_SIZE_MAX_SB - 2];
-  vp9_prob tx_probs_8x8p[TX_SIZE_CONTEXTS][TX_SIZE_MAX_SB - 3];
-  vp9_prob pre_tx_probs_32x32p[TX_SIZE_CONTEXTS][TX_SIZE_MAX_SB - 1];
-  vp9_prob pre_tx_probs_16x16p[TX_SIZE_CONTEXTS][TX_SIZE_MAX_SB - 2];
-  vp9_prob pre_tx_probs_8x8p[TX_SIZE_CONTEXTS][TX_SIZE_MAX_SB - 3];
-  unsigned int tx_count_32x32p[TX_SIZE_CONTEXTS][TX_SIZE_MAX_SB];
-  unsigned int tx_count_16x16p[TX_SIZE_CONTEXTS][TX_SIZE_MAX_SB - 1];
-  unsigned int tx_count_8x8p[TX_SIZE_CONTEXTS][TX_SIZE_MAX_SB - 2];
+  struct tx_probs tx_probs;
+  struct tx_probs pre_tx_probs;
+  struct tx_counts tx_counts;
 
   // mbskip
   vp9_prob mbskip_probs[MBSKIP_CONTEXTS];

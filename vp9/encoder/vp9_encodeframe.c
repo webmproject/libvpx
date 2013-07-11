@@ -1733,9 +1733,7 @@ static void init_encode_frame_mb_context(VP9_COMP *cpi) {
   vp9_zero(cpi->comp_inter_count);
   vp9_zero(cpi->single_ref_count);
   vp9_zero(cpi->comp_ref_count);
-  vp9_zero(cm->fc.tx_count_32x32p);
-  vp9_zero(cm->fc.tx_count_16x16p);
-  vp9_zero(cm->fc.tx_count_8x8p);
+  vp9_zero(cm->fc.tx_counts);
   vp9_zero(cm->fc.mbskip_count);
 
   // Note: this memset assumes above_context[0], [1] and [2]
@@ -2177,28 +2175,28 @@ void vp9_encode_frame(VP9_COMP *cpi) {
       int count32x32 = 0;
 
       for (i = 0; i < TX_SIZE_CONTEXTS; i++)
-        count4x4 += cm->fc.tx_count_32x32p[i][TX_4X4];
+        count4x4 += cm->fc.tx_counts.p32x32[i][TX_4X4];
       for (i = 0; i < TX_SIZE_CONTEXTS; i++)
-        count4x4 += cm->fc.tx_count_16x16p[i][TX_4X4];
+        count4x4 += cm->fc.tx_counts.p16x16[i][TX_4X4];
       for (i = 0; i < TX_SIZE_CONTEXTS; i++)
-        count4x4 += cm->fc.tx_count_8x8p[i][TX_4X4];
+        count4x4 += cm->fc.tx_counts.p8x8[i][TX_4X4];
 
       for (i = 0; i < TX_SIZE_CONTEXTS; i++)
-        count8x8_lp += cm->fc.tx_count_32x32p[i][TX_8X8];
+        count8x8_lp += cm->fc.tx_counts.p32x32[i][TX_8X8];
       for (i = 0; i < TX_SIZE_CONTEXTS; i++)
-        count8x8_lp += cm->fc.tx_count_16x16p[i][TX_8X8];
+        count8x8_lp += cm->fc.tx_counts.p16x16[i][TX_8X8];
 
       for (i = 0; i < TX_SIZE_CONTEXTS; i++)
-        count8x8_8x8p += cm->fc.tx_count_8x8p[i][TX_8X8];
+        count8x8_8x8p += cm->fc.tx_counts.p8x8[i][TX_8X8];
 
       for (i = 0; i < TX_SIZE_CONTEXTS; i++)
-        count16x16_16x16p += cm->fc.tx_count_16x16p[i][TX_16X16];
+        count16x16_16x16p += cm->fc.tx_counts.p16x16[i][TX_16X16];
 
       for (i = 0; i < TX_SIZE_CONTEXTS; i++)
-        count16x16_lp += cm->fc.tx_count_32x32p[i][TX_16X16];
+        count16x16_lp += cm->fc.tx_counts.p32x32[i][TX_16X16];
 
       for (i = 0; i < TX_SIZE_CONTEXTS; i++)
-        count32x32 += cm->fc.tx_count_32x32p[i][TX_32X32];
+        count32x32 += cm->fc.tx_counts.p32x32[i][TX_32X32];
 
       if (count4x4 == 0 && count16x16_lp == 0 && count16x16_16x16p == 0
           && count32x32 == 0) {
@@ -2374,11 +2372,11 @@ static void encode_superblock(VP9_COMP *cpi, TOKENEXTRA **t, int output_enabled,
              vp9_segfeature_active(&xd->seg, segment_id, SEG_LVL_SKIP)))) {
       const int context = vp9_get_pred_context_tx_size(cm, xd);
       if (bsize >= BLOCK_SIZE_SB32X32) {
-        cm->fc.tx_count_32x32p[context][mbmi->txfm_size]++;
+        cm->fc.tx_counts.p32x32[context][mbmi->txfm_size]++;
       } else if (bsize >= BLOCK_SIZE_MB16X16) {
-        cm->fc.tx_count_16x16p[context][mbmi->txfm_size]++;
+        cm->fc.tx_counts.p16x16[context][mbmi->txfm_size]++;
       } else {
-        cm->fc.tx_count_8x8p[context][mbmi->txfm_size]++;
+        cm->fc.tx_counts.p8x8[context][mbmi->txfm_size]++;
       }
     } else {
       int x, y;

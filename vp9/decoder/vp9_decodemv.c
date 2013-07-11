@@ -60,11 +60,11 @@ static TX_SIZE read_selected_txfm_size(VP9_COMMON *cm, MACROBLOCKD *xd,
   }
 
   if (bsize >= BLOCK_SIZE_SB32X32)
-    cm->fc.tx_count_32x32p[context][txfm_size]++;
+    cm->fc.tx_counts.p32x32[context][txfm_size]++;
   else if (bsize >= BLOCK_SIZE_MB16X16)
-    cm->fc.tx_count_16x16p[context][txfm_size]++;
+    cm->fc.tx_counts.p16x16[context][txfm_size]++;
   else
-    cm->fc.tx_count_8x8p[context][txfm_size]++;
+    cm->fc.tx_counts.p8x8[context][txfm_size]++;
 
   return txfm_size;
 }

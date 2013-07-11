@@ -118,11 +118,11 @@ static INLINE const vp9_prob *vp9_get_pred_probs_tx_size(const VP9_COMMON *cm,
   const MODE_INFO *const mi = xd->mode_info_context;
   const int pred_context = vp9_get_pred_context_tx_size(cm, xd);
   if (mi->mbmi.sb_type < BLOCK_SIZE_MB16X16)
-    return cm->fc.tx_probs_8x8p[pred_context];
+    return cm->fc.tx_probs.p8x8[pred_context];
   else if (mi->mbmi.sb_type < BLOCK_SIZE_SB32X32)
-    return cm->fc.tx_probs_16x16p[pred_context];
+    return cm->fc.tx_probs.p16x16[pred_context];
   else
-    return cm->fc.tx_probs_32x32p[pred_context];
+    return cm->fc.tx_probs.p32x32[pred_context];
 }
 
 #endif  // VP9_COMMON_VP9_PRED_COMMON_H_
