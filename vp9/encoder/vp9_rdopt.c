@@ -2941,53 +2941,84 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
   if (cpi->common.mcomp_filter_type == SWITCHABLE)
     *rate2 += get_switchable_rate(cm, x);
 
-  if (cpi->active_map_enabled && x->active_ptr[0] == 0)
-    x->skip = 1;
-  else if (x->encode_breakout) {
-    const BLOCK_SIZE_TYPE y_size = get_plane_block_size(bsize, &xd->plane[0]);
-    const BLOCK_SIZE_TYPE uv_size = get_plane_block_size(bsize, &xd->plane[1]);
+  if (!is_comp_pred) {
+    if (cpi->active_map_enabled && x->active_ptr[0] == 0)
+      x->skip = 1;
+    else if (x->encode_breakout) {
+      const BLOCK_SIZE_TYPE y_size = get_plane_block_size(bsize, &xd->plane[0]);
+      const BLOCK_SIZE_TYPE uv_size = get_plane_block_size(bsize,
+                                                           &xd->plane[1]);
+      unsigned int var, sse;
+      // Skipping threshold for ac.
+      unsigned int thresh_ac;
+      // The encode_breakout input
+      unsigned int encode_breakout = x->encode_breakout << 4;
 
-    unsigned int var, sse;
-    int threshold = (xd->plane[0].dequant[1] * xd->plane[0].dequant[1] >> 4);
+      // Adjust threshold according to dequant value. Making threshold more
+      // strict when dequant is high to avoid big PSNR loss.
+      if (xd->plane[0].dequant[1] < 32)
+        // Initial threshold value
+        thresh_ac = xd->plane[0].dequant[1] * xd->plane[0].dequant[1];
+      else
+        thresh_ac = (xd->plane[0].dequant[1] << 6) - 1024;
 
+      if (thresh_ac > 36000)
+        thresh_ac = 36000;
 
-    if (threshold < x->encode_breakout)
-      threshold = x->encode_breakout;
+      // Use encode_breakout input if it is bigger than internal threshold.
+      if (thresh_ac < encode_breakout)
+        thresh_ac = encode_breakout;
 
-    var = cpi->fn_ptr[y_size].vf(x->plane[0].src.buf, x->plane[0].src.stride,
-                                 xd->plane[0].dst.buf, xd->plane[0].dst.stride,
-                                 &sse);
+      var = cpi->fn_ptr[y_size].vf(x->plane[0].src.buf, x->plane[0].src.stride,
+                                   xd->plane[0].dst.buf,
+                                   xd->plane[0].dst.stride, &sse);
 
-    if ((int)sse < threshold) {
-      unsigned int q2dc = xd->plane[0].dequant[0];
-      // If there is no codeable 2nd order dc
-      // or a very small uniform pixel change change
-      if ((sse - var < q2dc * q2dc >> 4) ||
-          (sse / 2 > var && sse - var < 64)) {
-        // Check u and v to make sure skip is ok
-        int sse2;
-        unsigned int sse2u, sse2v;
-        var = cpi->fn_ptr[uv_size].vf(x->plane[1].src.buf,
-                                      x->plane[1].src.stride,
-                                      xd->plane[1].dst.buf,
-                                      xd->plane[1].dst.stride, &sse2u);
-        var = cpi->fn_ptr[uv_size].vf(x->plane[2].src.buf,
-                                      x->plane[2].src.stride,
-                                      xd->plane[2].dst.buf,
-                                      xd->plane[2].dst.stride, &sse2v);
-        sse2 = sse2u + sse2v;
+      // Adjust threshold according to partition size.
+      thresh_ac >>= 8 - (b_width_log2_lookup[bsize] +
+          b_height_log2_lookup[bsize]);
 
-        if (sse2 * 2 < threshold) {
-          x->skip = 1;
-          *distortion = sse + sse2;
-          *rate2 = 500;
+      // Y skipping condition checking
+      if (sse < thresh_ac || sse == 0) {
+        // Skipping threshold for dc
+        unsigned int thresh_dc;
 
-          // for best yrd calculation
-          *rate_uv = 0;
-          *distortion_uv = sse2;
+        thresh_dc = (xd->plane[0].dequant[0] * xd->plane[0].dequant[0] >> 6);
 
-          *disable_skip = 1;
-          this_rd = RDCOST(x->rdmult, x->rddiv, *rate2, *distortion);
+        // dc skipping checking
+        if ((sse - var) < thresh_dc || sse == var) {
+          unsigned int sse_u, sse_v;
+          unsigned int var_u, var_v;
+
+          var_u = cpi->fn_ptr[uv_size].vf(x->plane[1].src.buf,
+                                          x->plane[1].src.stride,
+                                          xd->plane[1].dst.buf,
+                                          xd->plane[1].dst.stride, &sse_u);
+
+          // U skipping condition checking
+          if ((sse_u * 4 < thresh_ac || sse_u == 0) &&
+              (sse_u - var_u < thresh_dc || sse_u == var_u)) {
+            var_v = cpi->fn_ptr[uv_size].vf(x->plane[2].src.buf,
+                                            x->plane[2].src.stride,
+                                            xd->plane[2].dst.buf,
+                                            xd->plane[2].dst.stride, &sse_v);
+
+            // V skipping condition checking
+            if ((sse_v * 4 < thresh_ac || sse_v == 0) &&
+                (sse_v - var_v < thresh_dc || sse_v == var_v)) {
+              x->skip = 1;
+
+              *rate2 = 500;
+              *rate_uv = 0;
+
+              // Scaling factor for SSE from spatial domain to frequency domain
+              // is 16. Adjust distortion accordingly.
+              *distortion_uv = (sse_u + sse_v) << 4;
+              *distortion = (sse << 4) + *distortion_uv;
+
+              *disable_skip = 1;
+              this_rd = RDCOST(x->rdmult, x->rddiv, *rate2, *distortion);
+            }
+          }
         }
       }
     }
@@ -3236,6 +3267,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
     for (i = 0; i < NB_TXFM_MODES; ++i)
       txfm_cache[i] = INT64_MAX;
 
+    x->skip = 0;
     this_mode = vp9_mode_order[mode_index].mode;
     ref_frame = vp9_mode_order[mode_index].ref_frame;
 
@@ -3260,8 +3292,6 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
     if ((vp9_mode_order[mode_index].second_ref_frame > INTRA_FRAME) &&
          vp9_segfeature_active(&xd->seg, segment_id, SEG_LVL_REF_FRAME))
       continue;
-
-    x->skip = 0;
 
     // Skip some checking based on small partitions' result.
     if (x->fast_ms > 1 && !ref_frame)
@@ -3885,9 +3915,10 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
     if (early_term)
       break;
 
-    if (x->skip && !mode_excluded)
+    if (x->skip && !comp_pred)
       break;
   }
+
   if (best_rd >= best_rd_so_far)
     return INT64_MAX;
 

@@ -535,8 +535,11 @@ static void set_offsets(VP9_COMP *cpi, int mi_row, int mi_col,
       cpi->seg0_progress = ((y * mb_cols + x * 4 + p32 + p16 + tile_progress)
           << 16) / cm->MBs;
     }
+
+    x->encode_breakout = cpi->segment_encode_breakout[mbmi->segment_id];
   } else {
     mbmi->segment_id = 0;
+    x->encode_breakout = cpi->oxcf.encode_breakout;
   }
 }
 
