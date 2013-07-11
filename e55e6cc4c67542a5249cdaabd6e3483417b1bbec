@@ -16,6 +16,24 @@
       "revId": "e55e6cc4c67542a5249cdaabd6e3483417b1bbec",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcH//5CI\u003d",
+        "filename": "vp9/common/vp9_common_data.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 91,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2013-07-11T22:47:10Z",
+      "side": 1,
+      "message": "I see what you mean. However note that sb_index, mb_index, b_index needs to co-exist and things may get tricky to manage.\n\nThe code in this patch is difficult only because I wanted to keep the flexibility of the mode info structure changing in the future. If we freeze the structure, the offsets could be hard-coded.",
+      "parentUuid": "AAAAcH//5IU\u003d",
+      "revId": "e55e6cc4c67542a5249cdaabd6e3483417b1bbec",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
