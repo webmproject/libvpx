@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAcH//5IU\u003d",
+        "filename": "vp9/common/vp9_common_data.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 91,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2013-07-11T21:51:05Z",
+      "side": 1,
+      "message": "maybe too big a change but I guess I was hoping that we didn\u0027t even need this in affect we\u0027d get rid of ab_index, b_index, mb_index,  sb_index   with an array directly...   \n\nsb_index[BLOCK_SIZE_TYPES]  \n\nand that we\u0027d remove any code referring to ab_index or anything else like that \n\nThis code seems like extra hard to follow mange...",
+      "revId": "e55e6cc4c67542a5249cdaabd6e3483417b1bbec",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
