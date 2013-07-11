@@ -94,9 +94,10 @@ typedef vpx_codec_err_t (*vpx_codec_destroy_fn_t)(vpx_codec_alg_priv_t *ctx);
 
 /*!\brief parse stream info function pointer prototype
  *
- * Performs high level parsing of the bitstream. This function is called by
- * the generic vpx_codec_parse_stream() wrapper function, so plugins implementing
- * this interface may trust the input parameters to be properly initialized.
+ * Performs high level parsing of the bitstream. This function is called by the
+ * generic vpx_codec_peek_stream_info() wrapper function, so plugins
+ * implementing this interface may trust the input parameters to be properly
+ * initialized.
  *
  * \param[in]      data    Pointer to a block of data to parse
  * \param[in]      data_sz Size of the data buffer
@@ -301,7 +302,7 @@ struct vpx_codec_iface {
   vpx_codec_set_mmap_fn_t   set_mmap;    /**< \copydoc ::vpx_codec_set_mmap_fn_t */
   struct vpx_codec_dec_iface {
     vpx_codec_peek_si_fn_t    peek_si;     /**< \copydoc ::vpx_codec_peek_si_fn_t */
-    vpx_codec_get_si_fn_t     get_si;      /**< \copydoc ::vpx_codec_peek_si_fn_t */
+    vpx_codec_get_si_fn_t     get_si;      /**< \copydoc ::vpx_codec_get_si_fn_t */
     vpx_codec_decode_fn_t     decode;      /**< \copydoc ::vpx_codec_decode_fn_t */
     vpx_codec_get_frame_fn_t  get_frame;   /**< \copydoc ::vpx_codec_get_frame_fn_t */
   } dec;
