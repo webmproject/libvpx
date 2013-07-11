@@ -1288,9 +1288,9 @@ static int64_t rd_pick_intra4x4block(VP9_COMP *cpi, MACROBLOCK *x, int ib,
                                                           block, 16),
                                       16, &ssz) >> 2;
 
-        if (best_tx_type != DCT_DCT)
+        if (tx_type != DCT_DCT)
           vp9_short_iht4x4_add(BLOCK_OFFSET(pd->dqcoeff, block, 16),
-                               dst, pd->dst.stride, best_tx_type);
+                               dst, pd->dst.stride, tx_type);
         else
           xd->inv_txm4x4_add(BLOCK_OFFSET(pd->dqcoeff, block, 16),
                              dst, pd->dst.stride);
