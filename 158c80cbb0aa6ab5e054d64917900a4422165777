@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAcH//5mg\u003d",
+        "filename": "vp9/common/arm/neon/vp9_convolve8_neon.asm",
+        "patchSetId": 6
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2013-07-11T18:12:19Z",
+      "side": 1,
+      "message": "Done",
+      "revId": "158c80cbb0aa6ab5e054d64917900a4422165777",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcH//5mc\u003d",
+        "filename": "vp9/common/arm/neon/vp9_convolve8_neon.asm",
+        "patchSetId": 6
+      },
+      "lineNbr": 150,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2013-07-11T18:12:19Z",
+      "side": 1,
+      "message": "Introduced a bug by moving the r0 update to a stall slot. Fixed by changing it back in the slow path.\n\nDuring investigation, found a better way to branch to the C function.",
+      "revId": "158c80cbb0aa6ab5e054d64917900a4422165777",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcH//5mY\u003d",
+        "filename": "vp9/common/arm/neon/vp9_convolve8_neon.asm",
+        "patchSetId": 6
+      },
+      "lineNbr": 246,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2013-07-11T18:12:19Z",
+      "side": 1,
+      "message": "See above.",
+      "revId": "158c80cbb0aa6ab5e054d64917900a4422165777",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
