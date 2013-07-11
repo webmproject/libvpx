@@ -769,20 +769,6 @@ static int rdcost_uv(VP9_COMMON *const cm, MACROBLOCK *x,
   return cost;
 }
 
-static int block_error(int16_t *coeff, int16_t *dqcoeff,
-                       int block_size, int shift) {
-  int i;
-  int64_t error = 0;
-
-  for (i = 0; i < block_size; i++) {
-    int this_diff = coeff[i] - dqcoeff[i];
-    error += (unsigned)this_diff * this_diff;
-  }
-  error >>= shift;
-
-  return error > INT_MAX ? INT_MAX : (int)error;
-}
-
 static int block_error_sby(MACROBLOCK *x, BLOCK_SIZE_TYPE bsize,
                            int shift, int64_t *sse) {
   struct macroblockd_plane *p = &x->e_mbd.plane[0];
