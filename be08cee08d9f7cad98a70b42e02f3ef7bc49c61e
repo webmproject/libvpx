@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAcH//5nY\u003d",
+        "filename": "test/dct16x16_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 295,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-07-11T18:07:24Z",
+      "side": 1,
+      "message": "just call this SetUp() and drop the ctor; it will be more consistent with most of the tests that way:\n\nhttps://code.google.com/p/googletest/wiki/Primer#Test_Fixtures:_Using_the_Same_Data_Configuration_for_Multiple_Te",
+      "revId": "be08cee08d9f7cad98a70b42e02f3ef7bc49c61e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
