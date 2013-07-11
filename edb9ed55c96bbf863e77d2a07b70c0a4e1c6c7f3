@@ -2,6 +2,23 @@
   "comments": [
     {
       "key": {
+        "uuid": "AAAAcH//58Q\u003d",
+        "filename": "vp9/common/vp9_blockd.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 326,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2013-07-11T13:39:49Z",
+      "side": 1,
+      "message": "this isn\u0027t any faster... \n\nHow about we make index an array with indice BLOCK_SIZE_TYPE  and avoid this entire lookup?",
+      "revId": "edb9ed55c96bbf863e77d2a07b70c0a4e1c6c7f3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAcH//6bo\u003d",
         "filename": "vp9/encoder/vp9_rdopt.c",
         "patchSetId": 1
@@ -13,6 +30,24 @@
       "writtenOn": "2013-07-11T00:34:42Z",
       "side": 1,
       "message": "It seems we can just remove BlockSize enum and use BLOCK_SIZE_TYPE enum instead. The only problem is that\nboth enums have the same elements in different order.",
+      "revId": "edb9ed55c96bbf863e77d2a07b70c0a4e1c6c7f3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcH//58U\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 292,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2013-07-11T13:39:49Z",
+      "side": 1,
+      "message": "lookup based on log_2 width and height?\n\nBLOCK_SIZE_TYPE block_size_type_from_w_h[5][5]",
+      "parentUuid": "AAAAcH//6bo\u003d",
       "revId": "edb9ed55c96bbf863e77d2a07b70c0a4e1c6c7f3",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
