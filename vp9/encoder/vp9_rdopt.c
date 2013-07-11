@@ -1556,19 +1556,19 @@ static int64_t rd_pick_intra_sbuv_mode(VP9_COMP *cpi, MACROBLOCK *x,
   return best_rd;
 }
 
-static int cost_mv_ref(VP9_COMP *cpi,
-                       MB_PREDICTION_MODE m,
-                       const int mode_context) {
+static int cost_mv_ref(VP9_COMP *cpi, MB_PREDICTION_MODE mode,
+                       int mode_context) {
   MACROBLOCK *const x = &cpi->mb;
   MACROBLOCKD *const xd = &x->e_mbd;
-  int segment_id = xd->mode_info_context->mbmi.segment_id;
+  const int segment_id = xd->mode_info_context->mbmi.segment_id;
 
-  // Dont account for mode here if segment skip is enabled.
+  // Don't account for mode here if segment skip is enabled.
   if (!vp9_segfeature_active(&xd->seg, segment_id, SEG_LVL_SKIP)) {
-    assert(NEARESTMV <= m  &&  m <= NEWMV);
-    return x->inter_mode_cost[mode_context][m - NEARESTMV];
-  } else
+    assert(is_inter_mode(mode));
+    return x->inter_mode_cost[mode_context][mode - NEARESTMV];
+  } else {
     return 0;
+  }
 }
 
 void vp9_set_mbmode_and_mvs(MACROBLOCK *x, MB_PREDICTION_MODE mb, int_mv *mv) {
