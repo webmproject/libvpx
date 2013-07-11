@@ -16,6 +16,24 @@
       "revId": "4f4f6eaf428a50c5d16b25ae606131d74e8bf02a",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcH//48M\u003d",
+        "filename": "vp9/encoder/vp9_onyx_if.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1074,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-07-11T23:57:03Z",
+      "side": 1,
+      "message": "isn\u0027t that clamp done at a different level (i.e. at the option handling level)?",
+      "parentUuid": "AAAAcH//5Co\u003d",
+      "revId": "4f4f6eaf428a50c5d16b25ae606131d74e8bf02a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
