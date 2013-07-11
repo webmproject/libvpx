@@ -152,63 +152,6 @@ void vp9_quantize_b_32x32_c(int16_t *coeff_ptr, intptr_t n_coeffs,
   *eob_ptr = eob + 1;
 }
 
-void vp9_quantize(MACROBLOCK *mb, int plane, int block, int n_coeffs,
-                  TX_TYPE tx_type) {
-  MACROBLOCKD *const xd = &mb->e_mbd;
-  const int16_t *scan, *iscan;
-
-  // These contexts may be available in the caller
-  switch (n_coeffs) {
-    case 4 * 4:
-      scan = get_scan_4x4(tx_type);
-      iscan = get_iscan_4x4(tx_type);
-      break;
-    case 8 * 8:
-      scan = get_scan_8x8(tx_type);
-      iscan = get_iscan_8x8(tx_type);
-      break;
-    case 16 * 16:
-      scan = get_scan_16x16(tx_type);
-      iscan = get_iscan_16x16(tx_type);
-      break;
-    default:
-      scan = vp9_default_scan_32x32;
-      iscan = vp9_default_iscan_32x32;
-      break;
-  }
-
-  // Call different quantization for different transform size.
-  if (n_coeffs >= 1024) {
-    // Save index of picked coefficient in pre-scan pass.
-    vp9_quantize_b_32x32(BLOCK_OFFSET(mb->plane[plane].coeff, block, 16),
-                         n_coeffs, mb->skip_block,
-                         mb->plane[plane].zbin,
-                         mb->plane[plane].round,
-                         mb->plane[plane].quant,
-                         mb->plane[plane].quant_shift,
-                         BLOCK_OFFSET(xd->plane[plane].qcoeff, block, 16),
-                         BLOCK_OFFSET(xd->plane[plane].dqcoeff, block, 16),
-                         xd->plane[plane].dequant,
-                         mb->plane[plane].zbin_extra,
-                         &xd->plane[plane].eobs[block],
-                         scan, iscan);
-  }
-  else {
-    vp9_quantize_b(BLOCK_OFFSET(mb->plane[plane].coeff, block, 16),
-                   n_coeffs, mb->skip_block,
-                   mb->plane[plane].zbin,
-                   mb->plane[plane].round,
-                   mb->plane[plane].quant,
-                   mb->plane[plane].quant_shift,
-                   BLOCK_OFFSET(xd->plane[plane].qcoeff, block, 16),
-                   BLOCK_OFFSET(xd->plane[plane].dqcoeff, block, 16),
-                   xd->plane[plane].dequant,
-                   mb->plane[plane].zbin_extra,
-                   &xd->plane[plane].eobs[block],
-                   scan, iscan);
-  }
-}
-
 void vp9_regular_quantize_b_4x4(MACROBLOCK *mb, int b_idx, TX_TYPE tx_type,
                                 int y_blocks) {
   MACROBLOCKD *const xd = &mb->e_mbd;
