@@ -269,15 +269,16 @@ typedef struct macroblockd {
 
   int corrupted;
 
-  int sb_index;   // index of 32x32 block inside the 64x64 block
-  int mb_index;   // index of 16x16 block inside the 32x32 block
-  int b_index;    // index of 8x8 block inside the 16x16 block
-  int ab_index;   // index of 4x4 block inside the 8x8 block
+  unsigned char sb_index;   // index of 32x32 block inside the 64x64 block
+  unsigned char mb_index;   // index of 16x16 block inside the 32x32 block
+  unsigned char b_index;    // index of 8x8 block inside the 16x16 block
+  unsigned char ab_index;   // index of 4x4 block inside the 8x8 block
+
   int q_index;
 
 } MACROBLOCKD;
 
-static INLINE int *get_sb_index(MACROBLOCKD *xd, BLOCK_SIZE_TYPE subsize) {
+static INLINE unsigned char *get_sb_index(MACROBLOCKD *xd, BLOCK_SIZE_TYPE subsize) {
   switch (subsize) {
     case BLOCK_SIZE_SB64X64:
     case BLOCK_SIZE_SB64X32:
