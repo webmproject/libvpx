@@ -275,8 +275,8 @@ void idct16x16_add(int16_t* /*in*/, int16_t *out, uint8_t *dst,
 }
 void fht16x16(int16_t *in, int16_t *out, uint8_t* /*dst*/,
               int stride, int tx_type) {
-  // FIXME(jingning): patch dependency on SSE2 16x16 hybrid transform coding
-#if HAVE_SSE2 && 0
+  // FIXME(jingning): need to test both SSE2 and c
+#if HAVE_SSE2
   vp9_short_fht16x16_sse2(in, out, stride >> 1, tx_type);
 #else
   vp9_short_fht16x16_c(in, out, stride >> 1, tx_type);
@@ -289,10 +289,9 @@ void iht16x16_add(int16_t* /*in*/, int16_t *out, uint8_t *dst,
 
 class FwdTrans16x16Test : public ::testing::TestWithParam<int> {
  public:
-  FwdTrans16x16Test() { SetUpTestTxfm(); }
-  ~FwdTrans16x16Test() {}
+  virtual ~FwdTrans16x16Test() {}
 
-  void SetUpTestTxfm() {
+  virtual void SetUp() {
     tx_type_ = GetParam();
     if (tx_type_ == 0) {
       fwd_txfm = fdct16x16;
@@ -332,10 +331,9 @@ TEST_P(FwdTrans16x16Test, AccuracyCheck) {
     for (int j = 0; j < 256; ++j) {
       src[j] = rnd.Rand8();
       dst[j] = rnd.Rand8();
-    }
-    // Initialize a test block with input range [-255, 255].
-    for (int j = 0; j < 256; ++j)
+      // Initialize a test block with input range [-255, 255].
       test_input_block[j] = src[j] - dst[j];
+    }
 
     const int pitch = 32;
     RunFwdTxfm(test_input_block, test_temp_block, dst, pitch, tx_type_);
@@ -382,10 +380,11 @@ TEST_P(FwdTrans16x16Test, CoeffSizeCheck) {
 
     // The minimum quant value is 4.
     for (int j = 0; j < 256; ++j) {
-      EXPECT_GE(4*DCT_MAX_VALUE, abs(output_block[j]))
+      EXPECT_GE(4 * DCT_MAX_VALUE, abs(output_block[j]))
           << "Error: 16x16 FDCT has coefficient larger than 4*DCT_MAX_VALUE";
-      EXPECT_GE(4*DCT_MAX_VALUE, abs(output_extreme_block[j]))
-          << "Error: 16x16 FDCT extreme has coefficient larger than 4*DCT_MAX_VALUE";
+      EXPECT_GE(4 * DCT_MAX_VALUE, abs(output_extreme_block[j]))
+          << "Error: 16x16 FDCT extreme has coefficient larger "
+          << "than 4*DCT_MAX_VALUE";
     }
   }
 }
