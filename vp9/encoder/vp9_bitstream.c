@@ -348,11 +348,11 @@ static void pack_mb_tokens(vp9_writer* const bc,
   *tp = p;
 }
 
-static void write_sb_mv_ref(vp9_writer *w, MB_PREDICTION_MODE m,
+static void write_sb_mv_ref(vp9_writer *w, MB_PREDICTION_MODE mode,
                             const vp9_prob *p) {
-  assert(NEARESTMV <= m && m <= NEWMV);
+  assert(is_inter_mode(mode));
   write_token(w, vp9_sb_mv_ref_tree, p,
-              vp9_sb_mv_ref_encoding_array - NEARESTMV + m);
+              &vp9_sb_mv_ref_encoding_array[mode - NEARESTMV]);
 }
 
 
