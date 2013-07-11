@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAcH//51w\u003d",
+        "filename": "vp9/common/vp9_blockd.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 326,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2013-07-11T16:48:38Z",
+      "side": 1,
+      "message": "Reverting this for now, since switch may be faster than ifs.",
+      "parentUuid": "AAAAcH//58Q\u003d",
+      "revId": "edb9ed55c96bbf863e77d2a07b70c0a4e1c6c7f3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAcH//6bo\u003d",
         "filename": "vp9/encoder/vp9_rdopt.c",
         "patchSetId": 1
@@ -47,6 +65,42 @@
       "writtenOn": "2013-07-11T13:39:49Z",
       "side": 1,
       "message": "lookup based on log_2 width and height?\n\nBLOCK_SIZE_TYPE block_size_type_from_w_h[5][5]",
+      "parentUuid": "AAAAcH//6bo\u003d",
+      "revId": "edb9ed55c96bbf863e77d2a07b70c0a4e1c6c7f3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcH//54I\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 292,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2013-07-11T16:48:38Z",
+      "side": 1,
+      "message": "computing log2 is non-trivial. So we will need an array of size [9][9], two lookups. I did the latter.",
+      "parentUuid": "AAAAcH//58U\u003d",
+      "revId": "edb9ed55c96bbf863e77d2a07b70c0a4e1c6c7f3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcH//54E\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 292,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2013-07-11T16:48:38Z",
+      "side": 1,
+      "message": "Yes it will be good to merge the two also. But in a later patch. In this patch I am just just changing the enums to make them the same.",
       "parentUuid": "AAAAcH//6bo\u003d",
       "revId": "edb9ed55c96bbf863e77d2a07b70c0a4e1c6c7f3",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
