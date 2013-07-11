@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAcH//53o\u003d",
+        "filename": "test/dct16x16_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 279,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2013-07-11T16:36:54Z",
+      "side": 1,
+      "message": "yes, the same issue exists in 4x4 and 8x8 cases too. all testing sse2 when applicable and skipping c. the c codes are tested only when HAVE_SSE2 is 0.\n\nthis needs to be fixed.",
+      "parentUuid": "AAAAcH//7X8\u003d",
+      "revId": "cf768b2d80891fe478abb41dd8687fcb86bfda81",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAcH//7YA\u003d",
         "filename": "test/dct16x16_test.cc",
         "patchSetId": 1
@@ -30,6 +48,24 @@
       "writtenOn": "2013-07-10T18:27:56Z",
       "side": 1,
       "message": "as a simplification here and in the other [f]dct test you can simply rename this to \u0027virtual void SetUp\u0027 and drop the default constructor",
+      "revId": "cf768b2d80891fe478abb41dd8687fcb86bfda81",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcH//52U\u003d",
+        "filename": "test/dct16x16_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 295,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2013-07-11T16:36:54Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAcH//7YA\u003d",
       "revId": "cf768b2d80891fe478abb41dd8687fcb86bfda81",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAcH//53c\u003d",
+        "filename": "test/dct16x16_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 337,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2013-07-11T16:36:54Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAcH//7Xw\u003d",
+      "revId": "cf768b2d80891fe478abb41dd8687fcb86bfda81",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAcH//7XY\u003d",
         "filename": "test/dct16x16_test.cc",
         "patchSetId": 1
@@ -64,6 +118,24 @@
       "writtenOn": "2013-07-10T18:27:56Z",
       "side": 1,
       "message": "memset should be ok",
+      "revId": "cf768b2d80891fe478abb41dd8687fcb86bfda81",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcH//524\u003d",
+        "filename": "test/dct16x16_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 377,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2013-07-11T16:36:54Z",
+      "side": 1,
+      "message": "input_extreme_block is int16_t array, but vpx_memset assigns value per byte?",
+      "parentUuid": "AAAAcH//7XY\u003d",
       "revId": "cf768b2d80891fe478abb41dd8687fcb86bfda81",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAcH//52w\u003d",
+        "filename": "test/dct16x16_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 385,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2013-07-11T16:36:54Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAcH//7XI\u003d",
+      "revId": "cf768b2d80891fe478abb41dd8687fcb86bfda81",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAcH//7XE\u003d",
         "filename": "test/dct16x16_test.cc",
         "patchSetId": 1
@@ -104,6 +194,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAcH//52s\u003d",
+        "filename": "test/dct16x16_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 387,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2013-07-11T16:36:54Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAcH//7XE\u003d",
+      "revId": "cf768b2d80891fe478abb41dd8687fcb86bfda81",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAcH//7X4\u003d",
         "filename": "test/dct16x16_test.cc",
         "patchSetId": 1
@@ -115,6 +223,24 @@
       "writtenOn": "2013-07-10T18:27:56Z",
       "side": 1,
       "message": "long line",
+      "revId": "cf768b2d80891fe478abb41dd8687fcb86bfda81",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcH//52o\u003d",
+        "filename": "test/dct16x16_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 388,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2013-07-11T16:36:54Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAcH//7X4\u003d",
       "revId": "cf768b2d80891fe478abb41dd8687fcb86bfda81",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
