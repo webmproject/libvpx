@@ -488,8 +488,6 @@ static void encode_block(int plane, int block, BLOCK_SIZE_TYPE bsize,
   uint8_t *const dst = raster_block_offset_uint8(xd, bsize, plane,
                                                  raster_block,
                                                  pd->dst.buf, pd->dst.stride);
-  TX_TYPE tx_type = DCT_DCT;
-
   xform_quant(plane, block, bsize, ss_txfrm_size, arg);
 
   if (x->optimize)
@@ -500,29 +498,17 @@ static void encode_block(int plane, int block, BLOCK_SIZE_TYPE bsize,
       vp9_short_idct32x32_add(dqcoeff, dst, pd->dst.stride);
       break;
     case TX_16X16:
-      tx_type = plane == 0 ? get_tx_type_16x16(xd) : DCT_DCT;
-      if (tx_type == DCT_DCT)
-        vp9_short_idct16x16_add(dqcoeff, dst, pd->dst.stride);
-      else
-        vp9_short_iht16x16_add(dqcoeff, dst, pd->dst.stride, tx_type);
+      vp9_short_idct16x16_add(dqcoeff, dst, pd->dst.stride);
       break;
     case TX_8X8:
-      tx_type = plane == 0 ? get_tx_type_8x8(xd) : DCT_DCT;
-      if (tx_type == DCT_DCT)
-        vp9_short_idct8x8_add(dqcoeff, dst, pd->dst.stride);
-      else
-        vp9_short_iht8x8_add(dqcoeff, dst, pd->dst.stride, tx_type);
+      vp9_short_idct8x8_add(dqcoeff, dst, pd->dst.stride);
       break;
     case TX_4X4:
-      tx_type = plane == 0 ? get_tx_type_4x4(xd, raster_block) : DCT_DCT;
-      if (tx_type == DCT_DCT)
-        // this is like vp9_short_idct4x4 but has a special case around eob<=1
-        // which is significant (not just an optimization) for the lossless
-        // case.
-        inverse_transform_b_4x4_add(xd, pd->eobs[block], dqcoeff,
-                                    dst, pd->dst.stride);
-      else
-        vp9_short_iht4x4_add(dqcoeff, dst, pd->dst.stride, tx_type);
+      // this is like vp9_short_idct4x4 but has a special case around eob<=1
+      // which is significant (not just an optimization) for the lossless
+      // case.
+      inverse_transform_b_4x4_add(xd, pd->eobs[block], dqcoeff,
+                                  dst, pd->dst.stride);
       break;
   }
 }
