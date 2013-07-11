@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAcH//6bo\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 292,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2013-07-11T00:34:42Z",
+      "side": 1,
+      "message": "It seems we can just remove BlockSize enum and use BLOCK_SIZE_TYPE enum instead. The only problem is that\nboth enums have the same elements in different order.",
+      "revId": "edb9ed55c96bbf863e77d2a07b70c0a4e1c6c7f3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
