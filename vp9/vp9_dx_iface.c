@@ -212,26 +212,27 @@ static vpx_codec_err_t vp8_peek_si(const uint8_t         *data,
                                    vpx_codec_stream_info_t *si) {
   vpx_codec_err_t res = VPX_CODEC_OK;
 
-  if (data + data_sz <= data)
-    res = VPX_CODEC_INVALID_PARAM;
-  else {
-    si->is_kf = 0;
+  if (data_sz <= 8) return VPX_CODEC_UNSUP_BITSTREAM;
 
-    if (data_sz >= 8 && (data[0] & 0xD8) == 0x80) { /* I-Frame */
+  if (data + data_sz <= data) {
+    res = VPX_CODEC_INVALID_PARAM;
+  } else {
+    const int frame_marker = (data[0] >> 6) & 0x3;
+    const int version = (data[0] >> 4) & 0x3;
+    if (frame_marker != 0x2) return VPX_CODEC_UNSUP_BITSTREAM;
+    if (version != 0) return VPX_CODEC_UNSUP_BITSTREAM;
+
+    si->is_kf = !((data[0] >> 2) & 0x1);
+    if (si->is_kf) {
       const uint8_t *c = data + 1;
-      si->is_kf = 1;
 
       if (c[0] != SYNC_CODE_0 || c[1] != SYNC_CODE_1 || c[2] != SYNC_CODE_2)
-        res = VPX_CODEC_UNSUP_BITSTREAM;
+        return VPX_CODEC_UNSUP_BITSTREAM;
 
-      si->w = (c[3] << 8) | c[4];
-      si->h = (c[5] << 8) | c[6];
-
-      // printf("w=%d, h=%d\n", si->w, si->h);
-      if (!(si->h | si->w))
-        res = VPX_CODEC_UNSUP_BITSTREAM;
-    } else
-      res = VPX_CODEC_UNSUP_BITSTREAM;
+      c += 3;
+      si->w = (((c[0] & 0xf) << 12) | (c[1] << 4) | ((c[2] >> 4) & 0xf)) + 1;
+      si->h = (((c[2] & 0xf) << 12) | (c[3] << 4) | ((c[4] >> 4) & 0xf)) + 1;
+    }
   }
 
   return res;
