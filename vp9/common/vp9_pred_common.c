@@ -17,7 +17,7 @@
 #include "vp9/common/vp9_treecoder.h"
 
 void vp9_set_pred_flag_seg_id(MACROBLOCKD *xd, BLOCK_SIZE_TYPE bsize,
-                       unsigned char pred_flag) {
+                              unsigned char pred_flag) {
   const int mis = xd->mode_info_stride;
   const int bh = 1 << mi_height_log2(bsize);
   const int bw = 1 << mi_width_log2(bsize);
@@ -34,45 +34,40 @@ void vp9_set_pred_flag_seg_id(MACROBLOCKD *xd, BLOCK_SIZE_TYPE bsize,
 // Returns a context number for the given MB prediction signal
 unsigned char vp9_get_pred_context_switchable_interp(const VP9_COMMON *cm,
                                                      const MACROBLOCKD *xd) {
-  int pred_context;
-  const MODE_INFO * const mi = xd->mode_info_context;
-  const MODE_INFO * const above_mi = mi - cm->mode_info_stride;
-  const MODE_INFO * const left_mi = mi - 1;
-  const int left_in_image = xd->left_available && left_mi->mbmi.mb_in_image;
-  const int above_in_image = xd->up_available && above_mi->mbmi.mb_in_image;
+  const MODE_INFO *const mi = xd->mode_info_context;
+  const MB_MODE_INFO *const above_mbmi = &mi[-cm->mode_info_stride].mbmi;
+  const MB_MODE_INFO *const left_mbmi = &mi[-1].mbmi;
+  const int left_in_image = xd->left_available && left_mbmi->mb_in_image;
+  const int above_in_image = xd->up_available && above_mbmi->mb_in_image;
   // Note:
   // The mode info data structure has a one element border above and to the
   // left of the entries correpsonding to real macroblocks.
   // The prediction flags in these dummy entries are initialised to 0.
   // left
-  const int left_mv_pred = is_inter_mode(left_mi->mbmi.mode);
-  const int left_interp =
-      left_in_image && left_mv_pred ?
-          vp9_switchable_interp_map[left_mi->mbmi.interp_filter] :
+  const int left_mv_pred = is_inter_mode(left_mbmi->mode);
+  const int left_interp = left_in_image && left_mv_pred ?
+          vp9_switchable_interp_map[left_mbmi->interp_filter] :
           VP9_SWITCHABLE_FILTERS;
 
   // above
-  const int above_mv_pred = is_inter_mode(above_mi->mbmi.mode);
-  const int above_interp =
-      above_in_image && above_mv_pred ?
-          vp9_switchable_interp_map[above_mi->mbmi.interp_filter] :
+  const int above_mv_pred = is_inter_mode(above_mbmi->mode);
+  const int above_interp = above_in_image && above_mv_pred ?
+          vp9_switchable_interp_map[above_mbmi->interp_filter] :
           VP9_SWITCHABLE_FILTERS;
 
   assert(left_interp != -1);
   assert(above_interp != -1);
 
   if (left_interp == above_interp)
-    pred_context = left_interp;
-  else if (left_interp == VP9_SWITCHABLE_FILTERS
-      && above_interp != VP9_SWITCHABLE_FILTERS)
-    pred_context = above_interp;
-  else if (left_interp != VP9_SWITCHABLE_FILTERS
-      && above_interp == VP9_SWITCHABLE_FILTERS)
-    pred_context = left_interp;
+    return left_interp;
+  else if (left_interp == VP9_SWITCHABLE_FILTERS &&
+           above_interp != VP9_SWITCHABLE_FILTERS)
+    return above_interp;
+  else if (left_interp != VP9_SWITCHABLE_FILTERS &&
+           above_interp == VP9_SWITCHABLE_FILTERS)
+    return left_interp;
   else
-    pred_context = VP9_SWITCHABLE_FILTERS;
-
-  return pred_context;
+    return VP9_SWITCHABLE_FILTERS;
 }
 // Returns a context number for the given MB prediction signal
 unsigned char vp9_get_pred_context_intra_inter(const VP9_COMMON *cm,
@@ -188,36 +183,30 @@ unsigned char vp9_get_pred_context_comp_ref_p(const VP9_COMMON *cm,
     } else {  // inter/inter
       int l_sg = left_mi->mbmi.ref_frame[1] <= INTRA_FRAME;
       int a_sg = above_mi->mbmi.ref_frame[1] <= INTRA_FRAME;
-      MV_REFERENCE_FRAME vrfa =
-          a_sg ?
-              above_mi->mbmi.ref_frame[0] :
-              above_mi->mbmi.ref_frame[var_ref_idx];
-      MV_REFERENCE_FRAME vrfl =
-          l_sg ?
-              left_mi->mbmi.ref_frame[0] : left_mi->mbmi.ref_frame[var_ref_idx];
+      MV_REFERENCE_FRAME vrfa = a_sg ? above_mi->mbmi.ref_frame[0]
+                                     : above_mi->mbmi.ref_frame[var_ref_idx];
+      MV_REFERENCE_FRAME vrfl = l_sg ? left_mi->mbmi.ref_frame[0]
+                                     : left_mi->mbmi.ref_frame[var_ref_idx];
 
       if (vrfa == vrfl && cm->comp_var_ref[1] == vrfa) {
         pred_context = 0;
       } else if (l_sg && a_sg) {  // single/single
         if ((vrfa == cm->comp_fixed_ref && vrfl == cm->comp_var_ref[0])
-            || (vrfl == cm->comp_fixed_ref && vrfa == cm->comp_var_ref[0])) {
+            || (vrfl == cm->comp_fixed_ref && vrfa == cm->comp_var_ref[0]))
           pred_context = 4;
-        } else if (vrfa == vrfl) {
+        else if (vrfa == vrfl)
           pred_context = 3;
-        } else {
+        else
           pred_context = 1;
-        }
       } else if (l_sg || a_sg) {  // single/comp
         MV_REFERENCE_FRAME vrfc = l_sg ? vrfa : vrfl;
         MV_REFERENCE_FRAME rfs = a_sg ? vrfa : vrfl;
-
-        if (vrfc == cm->comp_var_ref[1] && rfs != cm->comp_var_ref[1]) {
+        if (vrfc == cm->comp_var_ref[1] && rfs != cm->comp_var_ref[1])
           pred_context = 1;
-        } else if (rfs == cm->comp_var_ref[1] && vrfc != cm->comp_var_ref[1]) {
+        else if (rfs == cm->comp_var_ref[1] && vrfc != cm->comp_var_ref[1])
           pred_context = 2;
-        } else {
+        else
           pred_context = 4;
-        }
       } else if (vrfa == vrfl) {  // comp/comp
         pred_context = 4;
       } else {
@@ -419,10 +408,9 @@ unsigned char vp9_get_pred_context_single_ref_p2(const VP9_COMMON *cm,
 // Returns a context number for the given MB prediction signal
 unsigned char vp9_get_pred_context_tx_size(const VP9_COMMON *cm,
                                            const MACROBLOCKD *xd) {
-  int pred_context;
-  const MODE_INFO * const mi = xd->mode_info_context;
-  const MODE_INFO * const above_mi = mi - cm->mode_info_stride;
-  const MODE_INFO * const left_mi = mi - 1;
+  const MODE_INFO *const mi = xd->mode_info_context;
+  const MODE_INFO *const above_mi = mi - cm->mode_info_stride;
+  const MODE_INFO *const left_mi = mi - 1;
   const int left_in_image = xd->left_available && left_mi->mbmi.mb_in_image;
   const int above_in_image = xd->up_available && above_mi->mbmi.mb_in_image;
   // Note:
@@ -439,30 +427,30 @@ unsigned char vp9_get_pred_context_tx_size(const VP9_COMMON *cm,
     max_tx_size = TX_16X16;
   else
     max_tx_size = TX_32X32;
-  above_context = left_context = max_tx_size;
-  if (above_in_image) {
-    above_context = (
-        above_mi->mbmi.mb_skip_coeff ? max_tx_size : above_mi->mbmi.txfm_size);
-  }
-  if (left_in_image) {
-    left_context = (
-        left_mi->mbmi.mb_skip_coeff ? max_tx_size : left_mi->mbmi.txfm_size);
-  }
-  if (!left_in_image) {
-    left_context = above_context;
-  }
-  if (!above_in_image) {
-    above_context = left_context;
-  }
-  pred_context = (above_context + left_context > max_tx_size);
 
-  return pred_context;
+  above_context = left_context = max_tx_size;
+
+  if (above_in_image)
+    above_context = above_mi->mbmi.mb_skip_coeff ? max_tx_size
+                                                 : above_mi->mbmi.txfm_size;
+
+  if (left_in_image)
+    left_context = left_mi->mbmi.mb_skip_coeff ? max_tx_size
+                                               : left_mi->mbmi.txfm_size;
+
+  if (!left_in_image)
+    left_context = above_context;
+
+  if (!above_in_image)
+    above_context = left_context;
+
+  return above_context + left_context > max_tx_size;
 }
 
 // This function sets the status of the given prediction signal.
 // I.e. is the predicted value for the given signal correct.
 void vp9_set_pred_flag_mbskip(MACROBLOCKD *xd, BLOCK_SIZE_TYPE bsize,
-                       unsigned char pred_flag) {
+                              unsigned char pred_flag) {
   const int mis = xd->mode_info_stride;
   const int bh = 1 << mi_height_log2(bsize);
   const int bw = 1 << mi_width_log2(bsize);
