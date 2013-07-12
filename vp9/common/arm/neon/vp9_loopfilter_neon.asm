@@ -163,7 +163,7 @@ end_vp9_lf_v_edge
 ; necessary load, transpose (if necessary) and store. The function does not use
 ; registers d8-d15.
 ;
-; r0-r3 PRESERVE
+; r0-r3, r12 PRESERVE
 ; d0    blimit
 ; d1    limit
 ; d2    thresh
@@ -275,14 +275,14 @@ end_vp9_lf_v_edge
 ; sp    const uint8_t *thresh,
 ; sp+4  int count
 |vp9_mbloop_filter_horizontal_edge_neon| PROC
-    push        {lr}
+    push        {r4-r5, lr}
 
-    ldr         r12, [sp,#8]               ; load count
+    ldr         r12, [sp,#16]              ; load count
     cmp         r12, #0
     beq         end_vp9_mblf_h_edge
 
     vld1.8      {d0[]}, [r2]               ; duplicate *blimit
-    ldr         r2, [sp, #4]               ; load thresh
+    ldr         r2, [sp, #12]              ; load thresh
     vld1.8      {d1[]}, [r3]               ; duplicate *limit
     vld1.8      {d2[]}, [r2]               ; duplicate *thresh
 
@@ -317,7 +317,7 @@ count_mblf_h_loop
     bne         count_mblf_h_loop
 
 end_vp9_mblf_h_edge
-    pop         {pc}
+    pop         {r4-r5, pc}
 
     ENDP        ; |vp9_mbloop_filter_horizontal_edge_neon|
 
@@ -335,14 +335,14 @@ end_vp9_mblf_h_edge
 ; sp    const uint8_t *thresh,
 ; sp+4  int count
 |vp9_mbloop_filter_vertical_edge_neon| PROC
-    push        {lr}
+    push        {r4-r5, lr}
 
-    ldr         r12, [sp,#8]               ; load count
+    ldr         r12, [sp,#16]              ; load count
     cmp         r12, #0
     beq         end_vp9_mblf_v_edge
 
     vld1.8      {d0[]}, [r2]               ; duplicate *blimit
-    ldr         r2, [sp, #4]               ; load thresh
+    ldr         r2, [sp, #12]              ; load thresh
     vld1.8      {d1[]}, [r3]               ; duplicate *limit
     vld1.8      {d2[]}, [r2]               ; duplicate *thresh
 
@@ -404,7 +404,7 @@ count_mblf_v_loop
     bne         count_mblf_v_loop
 
 end_vp9_mblf_v_edge
-    pop         {pc}
+    pop         {r4-r5, pc}
     ENDP        ; |vp9_mbloop_filter_vertical_edge_neon|
 
 ; void vp9_mbloop_filter_neon();
@@ -412,7 +412,7 @@ end_vp9_mblf_v_edge
 ; necessary load, transpose (if necessary) and store. The function does not use
 ; registers d8-d15.
 ;
-; r0-r3 PRESERVE
+; r0-r3, r12 PRESERVE
 ; d0    blimit
 ; d1    limit
 ; d2    thresh
@@ -471,6 +471,19 @@ end_vp9_mblf_v_edge
 
     vand        d19, d19, d24              ; mask
 
+    vand        d20, d20, d19              ; flat & mask
+
+    ; This instruction will truncate the "flat & mask" masks down to 4 bits
+    ; each to fit into one 32 bit arm register. The values are stored in
+    ; q10.64[0].
+    vshrn.u16   d30, q10, #4
+    vmov.u32    r4, d30[0]                 ; flat & mask 4bits
+
+    adds        r5, r4, #1                 ; Check for all 1's
+    beq         power_branch_only
+
+    cmp         r4, #0                     ; Check for 0, set flag for later
+
     ; hevmask
     vcgt.u8     d21, d21, d2               ; (abs(p1 - p0) > thresh)*-1
     vcgt.u8     d22, d22, d2               ; (abs(q1 - q0) > thresh)*-1
@@ -511,8 +524,6 @@ end_vp9_mblf_v_edge
     vshr.s8     d30, d30, #3               ; filter2 >>= 3
     vshr.s8     d29, d29, #3               ; filter1 >>= 3
 
-    vand        d20, d20, d19              ; flat & mask
-
     vqadd.s8    d24, d24, d30              ; op0 = clamp(ps0 + filter2)
     vqsub.s8    d23, d23, d29              ; oq0 = clamp(qs0 - filter1)
 
@@ -522,6 +533,8 @@ end_vp9_mblf_v_edge
 
     vqadd.s8    d25, d25, d29              ; op1 = clamp(ps1 + filter)
     vqsub.s8    d26, d26, d29              ; oq1 = clamp(qs1 - filter)
+
+    beq         filter_branch_only
 
     veor        d24, d24, d22              ; *f_op0 = u^0x80
     veor        d23, d23, d22              ; *f_oq0 = u^0x80
@@ -588,6 +601,64 @@ end_vp9_mblf_v_edge
     vbif        d7, d17, d20               ; oq2 |= oq2 & ~(flat & mask)
 
     bx          lr
+
+power_branch_only
+    vmov.u8     d27, #3
+    vmov.u8     d21, #2
+    vaddl.u8    q14, d6, d7                ; op2 = p0 + q0
+    vmlal.u8    q14, d3, d27               ; op2 += p3 * 3
+    vmlal.u8    q14, d4, d21               ; op2 += p2 * 2
+    vaddw.u8    q14, d5                    ; op2 += p1
+    vqrshrn.u16 d2, q14, #3                ; op2
+
+    vsubw.u8    q14, d3                    ; op1 = op2 - p3
+    vsubw.u8    q14, d4                    ; op1 -= p2
+    vaddw.u8    q14, d5                    ; op1 += p1
+    vaddw.u8    q14, d16                   ; op1 += q1
+    vqrshrn.u16 d31, q14, #3               ; op1
+
+    vsubw.u8    q14, d3                    ; op0 = op1 - p3
+    vsubw.u8    q14, d5                    ; op0 -= p1
+    vaddw.u8    q14, d6                    ; op0 += p0
+    vaddw.u8    q14, d17                   ; op0 += q2
+    vqrshrn.u16 d21, q14, #3               ; op0
+
+    vsubw.u8    q14, d3                    ; oq0 = op0 - p3
+    vsubw.u8    q14, d6                    ; oq0 -= p0
+    vaddw.u8    q14, d7                    ; oq0 += q0
+    vaddw.u8    q14, d18                   ; oq0 += q3
+    vqrshrn.u16 d22, q14, #3               ; oq0
+
+    vsubw.u8    q14, d4                    ; oq1 = oq0 - p2
+    vsubw.u8    q14, d7                    ; oq1 -= q0
+    vaddw.u8    q14, d16                   ; oq1 += q1
+    vaddw.u8    q14, d18                   ; oq1 += q3
+    vqrshrn.u16 d6, q14, #3                ; oq1
+
+    vsubw.u8    q14, d5                    ; oq2 = oq0 - p1
+    vsubw.u8    q14, d16                   ; oq2 -= q1
+    vaddw.u8    q14, d17                   ; oq2 += q2
+    vaddw.u8    q14, d18                   ; oq2 += q3
+    vqrshrn.u16 d7, q14, #3                ; oq2
+
+    vswp        d3, d31
+    vswp        d4, d21
+    vswp        d5, d22
+
+    bx          lr
+
+filter_branch_only
+    ; TODO(fgalligan): See if we can rearange registers so we do not need to
+    ; do the 2 vswp.
+    vswp        d2, d4                      ; op2
+    vswp        d7, d17                     ; oq2
+    veor        d4, d24, d22                ; *op0 = u^0x80
+    veor        d5, d23, d22                ; *oq0 = u^0x80
+    veor        d3, d25, d22                ; *op1 = u^0x80
+    veor        d6, d26, d22                ; *oq1 = u^0x80
+
+    bx          lr
+
     ENDP        ; |vp9_mbloop_filter_neon|
 
     END
