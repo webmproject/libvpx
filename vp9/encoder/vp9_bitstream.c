@@ -1352,7 +1352,7 @@ static void write_uncompressed_header(VP9_COMP *cpi,
       int i;
       vp9_wb_write_literal(wb, get_refresh_mask(cpi), NUM_REF_FRAMES);
       for (i = 0; i < ALLOWED_REFS_PER_FRAME; ++i) {
-        vp9_wb_write_literal(wb, refs[i], NUM_REF_FRAMES_LG2);
+        vp9_wb_write_literal(wb, refs[i], NUM_REF_FRAMES_LOG2);
         vp9_wb_write_bit(wb, cm->ref_frame_sign_bias[LAST_FRAME + i]);
       }
 
@@ -1370,7 +1370,7 @@ static void write_uncompressed_header(VP9_COMP *cpi,
     vp9_wb_write_bit(wb, cm->frame_parallel_decoding_mode);
   }
 
-  vp9_wb_write_literal(wb, cm->frame_context_idx, NUM_FRAME_CONTEXTS_LG2);
+  vp9_wb_write_literal(wb, cm->frame_context_idx, NUM_FRAME_CONTEXTS_LOG2);
 
   encode_loopfilter(cm, xd, wb);
   encode_quantization(cm, wb);

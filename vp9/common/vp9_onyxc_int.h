@@ -28,7 +28,7 @@
 
 // Define the number of candidate reference buffers.
 #define NUM_REF_FRAMES 8
-#define NUM_REF_FRAMES_LG2 3
+#define NUM_REF_FRAMES_LOG2 3
 
 #define ALLOWED_REFS_PER_FRAME 3
 
@@ -37,8 +37,8 @@
 // normal reference pool.
 #define NUM_YV12_BUFFERS (NUM_REF_FRAMES + 4)
 
-#define NUM_FRAME_CONTEXTS_LG2 2
-#define NUM_FRAME_CONTEXTS (1 << NUM_FRAME_CONTEXTS_LG2)
+#define NUM_FRAME_CONTEXTS_LOG2 2
+#define NUM_FRAME_CONTEXTS (1 << NUM_FRAME_CONTEXTS_LOG2)
 
 #define MAX_LAG_BUFFERS 25
 

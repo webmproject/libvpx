@@ -868,7 +868,7 @@ static size_t read_uncompressed_header(VP9D_COMP *pbi,
        pbi->refresh_frame_flags = vp9_rb_read_literal(rb, NUM_REF_FRAMES);
 
       for (i = 0; i < ALLOWED_REFS_PER_FRAME; ++i) {
-        const int ref = vp9_rb_read_literal(rb, NUM_REF_FRAMES_LG2);
+        const int ref = vp9_rb_read_literal(rb, NUM_REF_FRAMES_LOG2);
         cm->active_ref_idx[i] = cm->ref_frame_map[ref];
         cm->ref_frame_sign_bias[LAST_FRAME + i] = vp9_rb_read_bit(rb);
       }
@@ -893,7 +893,7 @@ static size_t read_uncompressed_header(VP9D_COMP *pbi,
     cm->frame_parallel_decoding_mode = 1;
   }
 
-  cm->frame_context_idx = vp9_rb_read_literal(rb, NUM_FRAME_CONTEXTS_LG2);
+  cm->frame_context_idx = vp9_rb_read_literal(rb, NUM_FRAME_CONTEXTS_LOG2);
 
   if (cm->frame_type == KEY_FRAME || cm->error_resilient_mode || cm->intra_only)
     vp9_setup_past_independence(cm, xd);
