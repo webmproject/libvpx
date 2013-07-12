@@ -41,15 +41,6 @@ typedef enum
 
 static unsigned long vp8_priv_sz(const vpx_codec_dec_cfg_t *si, vpx_codec_flags_t);
 
-typedef struct
-{
-    unsigned int   id;
-    unsigned long  sz;
-    unsigned int   align;
-    unsigned int   flags;
-    unsigned long(*calc_sz)(const vpx_codec_dec_cfg_t *, vpx_codec_flags_t);
-} mem_req_t;
-
 static const mem_req_t vp8_mem_req_segs[] =
 {
     {VP8_SEG_ALG_PRIV,    0, 8, VPX_CODEC_MEM_ZERO, vp8_priv_sz},
@@ -91,65 +82,6 @@ static unsigned long vp8_priv_sz(const vpx_codec_dec_cfg_t *si, vpx_codec_flags_
      */
     (void)si;
     return sizeof(vpx_codec_alg_priv_t);
-}
-
-
-static void vp8_mmap_dtor(vpx_codec_mmap_t *mmap)
-{
-    free(mmap->priv);
-}
-
-static vpx_codec_err_t vp8_mmap_alloc(vpx_codec_mmap_t *mmap)
-{
-    vpx_codec_err_t  res;
-    unsigned int   align;
-
-    align = mmap->align ? mmap->align - 1 : 0;
-
-    if (mmap->flags & VPX_CODEC_MEM_ZERO)
-        mmap->priv = calloc(1, mmap->sz + align);
-    else
-        mmap->priv = malloc(mmap->sz + align);
-
-    res = (mmap->priv) ? VPX_CODEC_OK : VPX_CODEC_MEM_ERROR;
-    mmap->base = (void *)((((uintptr_t)mmap->priv) + align) & ~(uintptr_t)align);
-    mmap->dtor = vp8_mmap_dtor;
-    return res;
-}
-
-static vpx_codec_err_t vp8_validate_mmaps(const vp8_stream_info_t *si,
-        const vpx_codec_mmap_t        *mmaps,
-        vpx_codec_flags_t              init_flags)
-{
-    int i;
-    vpx_codec_err_t res = VPX_CODEC_OK;
-
-    for (i = 0; i < NELEMENTS(vp8_mem_req_segs) - 1; i++)
-    {
-        /* Ensure the segment has been allocated */
-        if (!mmaps[i].base)
-        {
-            res = VPX_CODEC_MEM_ERROR;
-            break;
-        }
-
-        /* Verify variable size segment is big enough for the current si. */
-        if (vp8_mem_req_segs[i].calc_sz)
-        {
-            vpx_codec_dec_cfg_t cfg;
-
-            cfg.w = si->w;
-            cfg.h = si->h;
-
-            if (mmaps[i].sz < vp8_mem_req_segs[i].calc_sz(&cfg, init_flags))
-            {
-                res = VPX_CODEC_MEM_ERROR;
-                break;
-            }
-        }
-    }
-
-    return res;
 }
 
 static void vp8_init_ctx(vpx_codec_ctx_t *ctx, const vpx_codec_mmap_t *mmap)
@@ -214,7 +146,7 @@ static vpx_codec_err_t vp8_init(vpx_codec_ctx_t *ctx,
         mmap.align = vp8_mem_req_segs[0].align;
         mmap.flags = vp8_mem_req_segs[0].flags;
 
-        res = vp8_mmap_alloc(&mmap);
+        res = vpx_mmap_alloc(&mmap);
         if (res != VPX_CODEC_OK) return res;
 
         vp8_init_ctx(ctx, &mmap);
@@ -488,7 +420,7 @@ static vpx_codec_err_t vp8_decode(vpx_codec_alg_priv_t  *ctx,
                 ctx->mmaps[i].sz = vp8_mem_req_segs[i].calc_sz(&cfg,
                                    ctx->base.init_flags);
 
-            res = vp8_mmap_alloc(&ctx->mmaps[i]);
+            res = vpx_mmap_alloc(&ctx->mmaps[i]);
         }
 
         if (!res)
@@ -500,7 +432,9 @@ static vpx_codec_err_t vp8_decode(vpx_codec_alg_priv_t  *ctx,
     /* Initialize the decoder instance on the first frame*/
     if (!res && !ctx->decoder_init)
     {
-        res = vp8_validate_mmaps(&ctx->si, ctx->mmaps, ctx->base.init_flags);
+        res = vpx_validate_mmaps(&ctx->si, ctx->mmaps,
+                                 vp8_mem_req_segs, NELEMENTS(vp8_mem_req_segs),
+                                 ctx->base.init_flags);
 
         if (!res)
         {

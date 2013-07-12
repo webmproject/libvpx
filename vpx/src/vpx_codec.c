@@ -14,6 +14,7 @@
  *
  */
 #include <stdarg.h>
+#include <stdlib.h>
 #include "vpx/vpx_integer.h"
 #include "vpx/internal/vpx_codec_internal.h"
 #include "vpx_version.h"
@@ -132,4 +133,52 @@ vpx_codec_err_t vpx_codec_control_(vpx_codec_ctx_t  *ctx,
   }
 
   return SAVE_STATUS(ctx, res);
+}
+
+//------------------------------------------------------------------------------
+// mmap interface
+
+vpx_codec_err_t vpx_mmap_alloc(vpx_codec_mmap_t *mmap) {
+  unsigned int align = mmap->align ? mmap->align - 1 : 0;
+
+  if (mmap->flags & VPX_CODEC_MEM_ZERO)
+    mmap->priv = calloc(1, mmap->sz + align);
+  else
+    mmap->priv = malloc(mmap->sz + align);
+
+  if (mmap->priv == NULL) return VPX_CODEC_MEM_ERROR;
+  mmap->base = (void *)((((uintptr_t)mmap->priv) + align) & ~(uintptr_t)align);
+  mmap->dtor = vpx_mmap_dtor;
+  return VPX_CODEC_OK;
+}
+
+void vpx_mmap_dtor(vpx_codec_mmap_t *mmap) {
+  free(mmap->priv);
+}
+
+vpx_codec_err_t vpx_validate_mmaps(const vpx_codec_stream_info_t *si,
+                                   const vpx_codec_mmap_t *mmaps,
+                                   const mem_req_t *mem_reqs, int nreqs,
+                                   vpx_codec_flags_t init_flags) {
+  int i;
+
+  for (i = 0; i < nreqs - 1; ++i) {
+    /* Ensure the segment has been allocated */
+    if (mmaps[i].base == NULL) {
+      return VPX_CODEC_MEM_ERROR;
+    }
+
+    /* Verify variable size segment is big enough for the current si. */
+    if (mem_reqs[i].calc_sz != NULL) {
+      vpx_codec_dec_cfg_t cfg;
+
+      cfg.w = si->w;
+      cfg.h = si->h;
+
+      if (mmaps[i].sz < mem_reqs[i].calc_sz(&cfg, init_flags)) {
+        return VPX_CODEC_MEM_ERROR;
+      }
+    }
+  }
+  return VPX_CODEC_OK;
 }
