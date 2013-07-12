@@ -148,8 +148,6 @@ typedef struct VP9Common {
   int subsampling_x;
   int subsampling_y;
 
-  YUV_TYPE clr_type;
-
   YV12_BUFFER_CONFIG *frame_to_show;
 
   YV12_BUFFER_CONFIG yv12_fb[NUM_YV12_BUFFERS];

@@ -180,7 +180,6 @@ void vp9_create_common(VP9_COMMON *oci) {
 
   oci->txfm_mode = ONLY_4X4;
   oci->comp_pred_mode = HYBRID_PREDICTION;
-  oci->clr_type = REG_YUV;
 
   // Initialize reference frame sign bias structure to defaults
   vpx_memset(oci->ref_frame_sign_bias, 0, sizeof(oci->ref_frame_sign_bias));

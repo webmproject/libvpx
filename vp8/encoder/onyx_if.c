@@ -4821,8 +4821,10 @@ int vp8_receive_raw_frame(VP8_COMP *cpi, unsigned int frame_flags, YV12_BUFFER_C
 {
 #if HAVE_NEON
     int64_t store_reg[8];
-#endif
+#if CONFIG_RUNTIME_CPU_DETECT
     VP8_COMMON            *cm = &cpi->common;
+#endif
+#endif
     struct vpx_usec_timer  timer;
     int                    res = 0;
 
@@ -4848,7 +4850,6 @@ int vp8_receive_raw_frame(VP8_COMP *cpi, unsigned int frame_flags, YV12_BUFFER_C
     if(vp8_lookahead_push(cpi->lookahead, sd, time_stamp, end_time,
                           frame_flags, cpi->active_map_enabled ? cpi->active_map : NULL))
         res = -1;
-    cm->clr_type = sd->clrtype;
     vpx_usec_timer_mark(&timer);
     cpi->time_receive_data += vpx_usec_timer_elapsed(&timer);
 

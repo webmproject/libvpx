@@ -3501,7 +3501,6 @@ int vp9_receive_raw_frame(VP9_PTR ptr, unsigned int frame_flags,
   if (vp9_lookahead_push(cpi->lookahead, sd, time_stamp, end_time, frame_flags,
                          cpi->active_map_enabled ? cpi->active_map : NULL))
     res = -1;
-  cm->clr_type = sd->clrtype;
   vpx_usec_timer_mark(&timer);
   cpi->time_receive_data += vpx_usec_timer_elapsed(&timer);
 
