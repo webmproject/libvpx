@@ -71,30 +71,30 @@ unsigned char vp9_get_pred_context_switchable_interp(const VP9_COMMON *cm,
 }
 // Returns a context number for the given MB prediction signal
 unsigned char vp9_get_pred_context_intra_inter(const VP9_COMMON *cm,
-                                                    const MACROBLOCKD *xd) {
+                                               const MACROBLOCKD *xd) {
   int pred_context;
   const MODE_INFO *const mi = xd->mode_info_context;
-  const MODE_INFO *const above_mi = mi - cm->mode_info_stride;
-  const MODE_INFO *const left_mi = mi - 1;
-  const int left_in_image = xd->left_available && left_mi->mbmi.mb_in_image;
-  const int above_in_image = xd->up_available && above_mi->mbmi.mb_in_image;
+  const MB_MODE_INFO *const above_mbmi = &mi[-cm->mode_info_stride].mbmi;
+  const MB_MODE_INFO *const left_mbmi = &mi[-1].mbmi;
+  const int left_in_image = xd->left_available && left_mbmi->mb_in_image;
+  const int above_in_image = xd->up_available && above_mbmi->mb_in_image;
   // Note:
   // The mode info data structure has a one element border above and to the
   // left of the entries correpsonding to real macroblocks.
   // The prediction flags in these dummy entries are initialised to 0.
   if (above_in_image && left_in_image) {  // both edges available
-    if (left_mi->mbmi.ref_frame[0] == INTRA_FRAME &&
-        above_mi->mbmi.ref_frame[0] == INTRA_FRAME) {  // intra/intra (3)
+    if (left_mbmi->ref_frame[0] == INTRA_FRAME &&
+        above_mbmi->ref_frame[0] == INTRA_FRAME) {  // intra/intra (3)
       pred_context = 3;
     } else {  // intra/inter (1) or inter/inter (0)
-      pred_context = left_mi->mbmi.ref_frame[0] == INTRA_FRAME ||
-                     above_mi->mbmi.ref_frame[0] == INTRA_FRAME;
+      pred_context = left_mbmi->ref_frame[0] == INTRA_FRAME ||
+                     above_mbmi->ref_frame[0] == INTRA_FRAME;
     }
   } else if (above_in_image || left_in_image) {  // one edge available
-    const MODE_INFO *edge = above_in_image ? above_mi : left_mi;
+    const MB_MODE_INFO *edge_mbmi = above_in_image ? above_mbmi : left_mbmi;
 
     // inter: 0, intra: 2
-    pred_context = 2 * (edge->mbmi.ref_frame[0] == INTRA_FRAME);
+    pred_context = 2 * (edge_mbmi->ref_frame[0] == INTRA_FRAME);
   } else {
     pred_context = 0;
   }
@@ -106,42 +106,39 @@ unsigned char vp9_get_pred_context_comp_inter_inter(const VP9_COMMON *cm,
                                                     const MACROBLOCKD *xd) {
   int pred_context;
   const MODE_INFO *const mi = xd->mode_info_context;
-  const MODE_INFO *const above_mi = mi - cm->mode_info_stride;
-  const MODE_INFO *const left_mi = mi - 1;
-  const int left_in_image = xd->left_available && left_mi->mbmi.mb_in_image;
-  const int above_in_image = xd->up_available && above_mi->mbmi.mb_in_image;
+  const MB_MODE_INFO *const above_mbmi = &mi[-cm->mode_info_stride].mbmi;
+  const MB_MODE_INFO *const left_mbmi = &mi[-1].mbmi;
+  const int left_in_image = xd->left_available && left_mbmi->mb_in_image;
+  const int above_in_image = xd->up_available && above_mbmi->mb_in_image;
   // Note:
   // The mode info data structure has a one element border above and to the
   // left of the entries correpsonding to real macroblocks.
   // The prediction flags in these dummy entries are initialised to 0.
   if (above_in_image && left_in_image) {  // both edges available
-    if (above_mi->mbmi.ref_frame[1] <= INTRA_FRAME &&
-        left_mi->mbmi.ref_frame[1] <= INTRA_FRAME) {
+    if (above_mbmi->ref_frame[1] <= INTRA_FRAME &&
+        left_mbmi->ref_frame[1] <= INTRA_FRAME)
       // neither edge uses comp pred (0/1)
-      pred_context = ((above_mi->mbmi.ref_frame[0] == cm->comp_fixed_ref) ^
-                      (left_mi->mbmi.ref_frame[0] == cm->comp_fixed_ref));
-    } else if (above_mi->mbmi.ref_frame[1] <= INTRA_FRAME) {
+      pred_context = (above_mbmi->ref_frame[0] == cm->comp_fixed_ref) ^
+                     (left_mbmi->ref_frame[0] == cm->comp_fixed_ref);
+    else if (above_mbmi->ref_frame[1] <= INTRA_FRAME)
       // one of two edges uses comp pred (2/3)
-      pred_context = 2 +
-          (above_mi->mbmi.ref_frame[0] == cm->comp_fixed_ref ||
-           above_mi->mbmi.ref_frame[0] == INTRA_FRAME);
-    } else if (left_mi->mbmi.ref_frame[1] <= INTRA_FRAME) {
+      pred_context = 2 + (above_mbmi->ref_frame[0] == cm->comp_fixed_ref ||
+                          above_mbmi->ref_frame[0] == INTRA_FRAME);
+    else if (left_mbmi->ref_frame[1] <= INTRA_FRAME)
       // one of two edges uses comp pred (2/3)
-      pred_context = 2 +
-          (left_mi->mbmi.ref_frame[0] == cm->comp_fixed_ref ||
-           left_mi->mbmi.ref_frame[0] == INTRA_FRAME);
-    } else {  // both edges use comp pred (4)
+      pred_context = 2 + (left_mbmi->ref_frame[0] == cm->comp_fixed_ref ||
+                          left_mbmi->ref_frame[0] == INTRA_FRAME);
+    else  // both edges use comp pred (4)
       pred_context = 4;
-    }
   } else if (above_in_image || left_in_image) {  // one edge available
-    const MODE_INFO *edge = above_in_image ? above_mi : left_mi;
+    const MB_MODE_INFO *edge_mbmi = above_in_image ? above_mbmi : left_mbmi;
 
-    if (edge->mbmi.ref_frame[1] <= INTRA_FRAME) {
+    if (edge_mbmi->ref_frame[1] <= INTRA_FRAME)
       // edge does not use comp pred (0/1)
-      pred_context = edge->mbmi.ref_frame[0] == cm->comp_fixed_ref;
-    } else {  // edge uses comp pred (3)
+      pred_context = edge_mbmi->ref_frame[0] == cm->comp_fixed_ref;
+    else
+      // edge uses comp pred (3)
       pred_context = 3;
-    }
   } else {  // no edges available (1)
     pred_context = 1;
   }
@@ -154,10 +151,10 @@ unsigned char vp9_get_pred_context_comp_ref_p(const VP9_COMMON *cm,
                                               const MACROBLOCKD *xd) {
   int pred_context;
   const MODE_INFO *const mi = xd->mode_info_context;
-  const MODE_INFO *const above_mi = mi - cm->mode_info_stride;
-  const MODE_INFO *const left_mi = mi - 1;
-  const int left_in_image = xd->left_available && left_mi->mbmi.mb_in_image;
-  const int above_in_image = xd->up_available && above_mi->mbmi.mb_in_image;
+  const MB_MODE_INFO *const above_mbmi = &mi[-cm->mode_info_stride].mbmi;
+  const MB_MODE_INFO *const left_mbmi = &mi[-1].mbmi;
+  const int left_in_image = xd->left_available && left_mbmi->mb_in_image;
+  const int above_in_image = xd->up_available && above_mbmi->mb_in_image;
   // Note:
   // The mode info data structure has a one element border above and to the
   // left of the entries correpsonding to real macroblocks.
@@ -166,33 +163,32 @@ unsigned char vp9_get_pred_context_comp_ref_p(const VP9_COMMON *cm,
   const int var_ref_idx = !fix_ref_idx;
 
   if (above_in_image && left_in_image) {  // both edges available
-    if (above_mi->mbmi.ref_frame[0] == INTRA_FRAME
-        && left_mi->mbmi.ref_frame[0] == INTRA_FRAME) {  // intra/intra (2)
+    if (above_mbmi->ref_frame[0] == INTRA_FRAME &&
+        left_mbmi->ref_frame[0] == INTRA_FRAME) {  // intra/intra (2)
       pred_context = 2;
-    } else if (above_mi->mbmi.ref_frame[0] == INTRA_FRAME
-        || left_mi->mbmi.ref_frame[0] == INTRA_FRAME) {  // intra/inter
-      const MODE_INFO *edge =
-          above_mi->mbmi.ref_frame[0] == INTRA_FRAME ? left_mi : above_mi;
+    } else if (above_mbmi->ref_frame[0] == INTRA_FRAME ||
+               left_mbmi->ref_frame[0] == INTRA_FRAME) {  // intra/inter
+      const MB_MODE_INFO *edge_mbmi = above_mbmi->ref_frame[0] == INTRA_FRAME ?
+                                          left_mbmi : above_mbmi;
 
-      if (edge->mbmi.ref_frame[1] <= INTRA_FRAME) {  // single pred (1/3)
-        pred_context = 1 + 2 * edge->mbmi.ref_frame[0] != cm->comp_var_ref[1];
-      } else {  // comp pred (1/3)
-        pred_context = 1 + 2 * edge->mbmi.ref_frame[var_ref_idx]
+      if (edge_mbmi->ref_frame[1] <= INTRA_FRAME)  // single pred (1/3)
+        pred_context = 1 + 2 * edge_mbmi->ref_frame[0] != cm->comp_var_ref[1];
+      else  // comp pred (1/3)
+        pred_context = 1 + 2 * edge_mbmi->ref_frame[var_ref_idx]
             != cm->comp_var_ref[1];
-      }
     } else {  // inter/inter
-      int l_sg = left_mi->mbmi.ref_frame[1] <= INTRA_FRAME;
-      int a_sg = above_mi->mbmi.ref_frame[1] <= INTRA_FRAME;
-      MV_REFERENCE_FRAME vrfa = a_sg ? above_mi->mbmi.ref_frame[0]
-                                     : above_mi->mbmi.ref_frame[var_ref_idx];
-      MV_REFERENCE_FRAME vrfl = l_sg ? left_mi->mbmi.ref_frame[0]
-                                     : left_mi->mbmi.ref_frame[var_ref_idx];
+      int l_sg = left_mbmi->ref_frame[1] <= INTRA_FRAME;
+      int a_sg = above_mbmi->ref_frame[1] <= INTRA_FRAME;
+      MV_REFERENCE_FRAME vrfa = a_sg ? above_mbmi->ref_frame[0]
+                                     : above_mbmi->ref_frame[var_ref_idx];
+      MV_REFERENCE_FRAME vrfl = l_sg ? left_mbmi->ref_frame[0]
+                                     : left_mbmi->ref_frame[var_ref_idx];
 
       if (vrfa == vrfl && cm->comp_var_ref[1] == vrfa) {
         pred_context = 0;
       } else if (l_sg && a_sg) {  // single/single
-        if ((vrfa == cm->comp_fixed_ref && vrfl == cm->comp_var_ref[0])
-            || (vrfl == cm->comp_fixed_ref && vrfa == cm->comp_var_ref[0]))
+        if ((vrfa == cm->comp_fixed_ref && vrfl == cm->comp_var_ref[0]) ||
+            (vrfl == cm->comp_fixed_ref && vrfa == cm->comp_var_ref[0]))
           pred_context = 4;
         else if (vrfa == vrfl)
           pred_context = 3;
@@ -214,16 +210,15 @@ unsigned char vp9_get_pred_context_comp_ref_p(const VP9_COMMON *cm,
       }
     }
   } else if (above_in_image || left_in_image) {  // one edge available
-    const MODE_INFO *edge = above_in_image ? above_mi : left_mi;
+    const MB_MODE_INFO *edge_mbmi = above_in_image ? above_mbmi : left_mbmi;
 
-    if (edge->mbmi.ref_frame[0] == INTRA_FRAME) {
+    if (edge_mbmi->ref_frame[0] == INTRA_FRAME)
       pred_context = 2;
-    } else if (edge->mbmi.ref_frame[1] > INTRA_FRAME) {
-      pred_context = 4 * edge->mbmi.ref_frame[var_ref_idx]
+    else if (edge_mbmi->ref_frame[1] > INTRA_FRAME)
+      pred_context = 4 * edge_mbmi->ref_frame[var_ref_idx]
           != cm->comp_var_ref[1];
-    } else {
-      pred_context = 3 * edge->mbmi.ref_frame[0] != cm->comp_var_ref[1];
-    }
+    else
+      pred_context = 3 * edge_mbmi->ref_frame[0] != cm->comp_var_ref[1];
   } else {  // no edges available (2)
     pred_context = 2;
   }
@@ -235,70 +230,61 @@ unsigned char vp9_get_pred_context_single_ref_p1(const VP9_COMMON *cm,
                                                  const MACROBLOCKD *xd) {
   int pred_context;
   const MODE_INFO *const mi = xd->mode_info_context;
-  const MODE_INFO *const above_mi = mi - cm->mode_info_stride;
-  const MODE_INFO *const left_mi = mi - 1;
-  const int left_in_image = xd->left_available && left_mi->mbmi.mb_in_image;
-  const int above_in_image = xd->up_available && above_mi->mbmi.mb_in_image;
+  const MB_MODE_INFO *const above_mbmi = &mi[-cm->mode_info_stride].mbmi;
+  const MB_MODE_INFO *const left_mbmi = &mi[-1].mbmi;
+  const int left_in_image = xd->left_available && left_mbmi->mb_in_image;
+  const int above_in_image = xd->up_available && above_mbmi->mb_in_image;
   // Note:
   // The mode info data structure has a one element border above and to the
   // left of the entries correpsonding to real macroblocks.
   // The prediction flags in these dummy entries are initialised to 0.
   if (above_in_image && left_in_image) {  // both edges available
-    if (above_mi->mbmi.ref_frame[0] == INTRA_FRAME
-        && left_mi->mbmi.ref_frame[0] == INTRA_FRAME) {
+    if (above_mbmi->ref_frame[0] == INTRA_FRAME &&
+        left_mbmi->ref_frame[0] == INTRA_FRAME) {
       pred_context = 2;
-    } else if (above_mi->mbmi.ref_frame[0] == INTRA_FRAME
-        || left_mi->mbmi.ref_frame[0] == INTRA_FRAME) {
-      const MODE_INFO *edge =
-          above_mi->mbmi.ref_frame[0] == INTRA_FRAME ? left_mi : above_mi;
+    } else if (above_mbmi->ref_frame[0] == INTRA_FRAME ||
+               left_mbmi->ref_frame[0] == INTRA_FRAME) {
+      const MB_MODE_INFO *edge_mbmi = above_mbmi->ref_frame[0] == INTRA_FRAME ?
+                                          left_mbmi : above_mbmi;
 
-      if (edge->mbmi.ref_frame[1] <= INTRA_FRAME) {
-        pred_context = 4 * (edge->mbmi.ref_frame[0] == LAST_FRAME);
-      } else {
-        pred_context = 1
-            + (edge->mbmi.ref_frame[0] == LAST_FRAME
-                || edge->mbmi.ref_frame[1] == LAST_FRAME);
-      }
-    } else if (above_mi->mbmi.ref_frame[1] <= INTRA_FRAME
-        && left_mi->mbmi.ref_frame[1] <= INTRA_FRAME) {
-      pred_context = 2 * (above_mi->mbmi.ref_frame[0] == LAST_FRAME)
-          + 2 * (left_mi->mbmi.ref_frame[0] == LAST_FRAME);
-    } else if (above_mi->mbmi.ref_frame[1] > INTRA_FRAME
-        && left_mi->mbmi.ref_frame[1] > INTRA_FRAME) {
-      pred_context = 1
-          + (above_mi->mbmi.ref_frame[0] == LAST_FRAME
-              || above_mi->mbmi.ref_frame[1] == LAST_FRAME
-              || left_mi->mbmi.ref_frame[0] == LAST_FRAME
-              || left_mi->mbmi.ref_frame[1] == LAST_FRAME);
+      if (edge_mbmi->ref_frame[1] <= INTRA_FRAME)
+        pred_context = 4 * (edge_mbmi->ref_frame[0] == LAST_FRAME);
+      else
+        pred_context = 1 + (edge_mbmi->ref_frame[0] == LAST_FRAME ||
+                            edge_mbmi->ref_frame[1] == LAST_FRAME);
+    } else if (above_mbmi->ref_frame[1] <= INTRA_FRAME &&
+               left_mbmi->ref_frame[1] <= INTRA_FRAME) {
+      pred_context = 2 * (above_mbmi->ref_frame[0] == LAST_FRAME) +
+                     2 * (left_mbmi->ref_frame[0] == LAST_FRAME);
+    } else if (above_mbmi->ref_frame[1] > INTRA_FRAME &&
+               left_mbmi->ref_frame[1] > INTRA_FRAME) {
+      pred_context = 1 + (above_mbmi->ref_frame[0] == LAST_FRAME ||
+                          above_mbmi->ref_frame[1] == LAST_FRAME ||
+                          left_mbmi->ref_frame[0] == LAST_FRAME ||
+                          left_mbmi->ref_frame[1] == LAST_FRAME);
     } else {
-      MV_REFERENCE_FRAME rfs =
-          above_mi->mbmi.ref_frame[1] <= INTRA_FRAME ?
-              above_mi->mbmi.ref_frame[0] : left_mi->mbmi.ref_frame[0];
-      MV_REFERENCE_FRAME crf1 =
-          above_mi->mbmi.ref_frame[1] > INTRA_FRAME ?
-              above_mi->mbmi.ref_frame[0] : left_mi->mbmi.ref_frame[0];
-      MV_REFERENCE_FRAME crf2 =
-          above_mi->mbmi.ref_frame[1] > INTRA_FRAME ?
-              above_mi->mbmi.ref_frame[1] : left_mi->mbmi.ref_frame[1];
+      MV_REFERENCE_FRAME rfs = above_mbmi->ref_frame[1] <= INTRA_FRAME ?
+              above_mbmi->ref_frame[0] : left_mbmi->ref_frame[0];
+      MV_REFERENCE_FRAME crf1 = above_mbmi->ref_frame[1] > INTRA_FRAME ?
+              above_mbmi->ref_frame[0] : left_mbmi->ref_frame[0];
+      MV_REFERENCE_FRAME crf2 = above_mbmi->ref_frame[1] > INTRA_FRAME ?
+              above_mbmi->ref_frame[1] : left_mbmi->ref_frame[1];
 
-      if (rfs == LAST_FRAME) {
+      if (rfs == LAST_FRAME)
         pred_context = 3 + (crf1 == LAST_FRAME || crf2 == LAST_FRAME);
-      } else {
+      else
         pred_context = crf1 == LAST_FRAME || crf2 == LAST_FRAME;
-      }
     }
   } else if (above_in_image || left_in_image) {  // one edge available
-    const MODE_INFO *edge = above_in_image ? above_mi : left_mi;
+    const MB_MODE_INFO *edge_mbmi = above_in_image ? above_mbmi : left_mbmi;
 
-    if (edge->mbmi.ref_frame[0] == INTRA_FRAME) {
+    if (edge_mbmi->ref_frame[0] == INTRA_FRAME)
       pred_context = 2;
-    } else if (edge->mbmi.ref_frame[1] <= INTRA_FRAME) {
-      pred_context = 4 * (edge->mbmi.ref_frame[0] == LAST_FRAME);
-    } else {
-      pred_context = 1
-          + (edge->mbmi.ref_frame[0] == LAST_FRAME
-              || edge->mbmi.ref_frame[1] == LAST_FRAME);
-    }
+    else if (edge_mbmi->ref_frame[1] <= INTRA_FRAME)
+      pred_context = 4 * (edge_mbmi->ref_frame[0] == LAST_FRAME);
+    else
+      pred_context = 1 + (edge_mbmi->ref_frame[0] == LAST_FRAME ||
+                          edge_mbmi->ref_frame[1] == LAST_FRAME);
   } else {  // no edges available (2)
     pred_context = 2;
   }
@@ -310,95 +296,85 @@ unsigned char vp9_get_pred_context_single_ref_p2(const VP9_COMMON *cm,
                                                  const MACROBLOCKD *xd) {
   int pred_context;
   const MODE_INFO *const mi = xd->mode_info_context;
-  const MODE_INFO *const above_mi = mi - cm->mode_info_stride;
-  const MODE_INFO *const left_mi = mi - 1;
-  const int left_in_image = xd->left_available && left_mi->mbmi.mb_in_image;
-  const int above_in_image = xd->up_available && above_mi->mbmi.mb_in_image;
+  const MB_MODE_INFO *const above_mbmi = &mi[-cm->mode_info_stride].mbmi;
+  const MB_MODE_INFO *const left_mbmi = &mi[-1].mbmi;
+  const int left_in_image = xd->left_available && left_mbmi->mb_in_image;
+  const int above_in_image = xd->up_available && above_mbmi->mb_in_image;
+
   // Note:
   // The mode info data structure has a one element border above and to the
   // left of the entries correpsonding to real macroblocks.
   // The prediction flags in these dummy entries are initialised to 0.
   if (above_in_image && left_in_image) {  // both edges available
-    if (above_mi->mbmi.ref_frame[0] == INTRA_FRAME
-        && left_mi->mbmi.ref_frame[0] == INTRA_FRAME) {
+    if (above_mbmi->ref_frame[0] == INTRA_FRAME &&
+        left_mbmi->ref_frame[0] == INTRA_FRAME) {
       pred_context = 2;
-    } else if (above_mi->mbmi.ref_frame[0] == INTRA_FRAME
-        || left_mi->mbmi.ref_frame[0] == INTRA_FRAME) {
-      const MODE_INFO *edge =
-          above_mi->mbmi.ref_frame[0] == INTRA_FRAME ? left_mi : above_mi;
+    } else if (above_mbmi->ref_frame[0] == INTRA_FRAME ||
+               left_mbmi->ref_frame[0] == INTRA_FRAME) {
+      const MB_MODE_INFO *edge_mbmi = above_mbmi->ref_frame[0] == INTRA_FRAME ?
+                                          left_mbmi : above_mbmi;
 
-      if (edge->mbmi.ref_frame[1] <= INTRA_FRAME) {
-        if (edge->mbmi.ref_frame[0] == LAST_FRAME) {
+      if (edge_mbmi->ref_frame[1] <= INTRA_FRAME) {
+        if (edge_mbmi->ref_frame[0] == LAST_FRAME)
           pred_context = 3;
-        } else {
-          pred_context = 4 * (edge->mbmi.ref_frame[0] == GOLDEN_FRAME);
-        }
+        else
+          pred_context = 4 * (edge_mbmi->ref_frame[0] == GOLDEN_FRAME);
       } else {
-        pred_context = 1
-            + 2
-                * (edge->mbmi.ref_frame[0] == GOLDEN_FRAME
-                    || edge->mbmi.ref_frame[1] == GOLDEN_FRAME);
+        pred_context = 1 + 2 * (edge_mbmi->ref_frame[0] == GOLDEN_FRAME ||
+                                edge_mbmi->ref_frame[1] == GOLDEN_FRAME);
       }
-    } else if (above_mi->mbmi.ref_frame[1] <= INTRA_FRAME
-        && left_mi->mbmi.ref_frame[1] <= INTRA_FRAME) {
-      if (above_mi->mbmi.ref_frame[0] == LAST_FRAME
-          && left_mi->mbmi.ref_frame[0] == LAST_FRAME) {
+    } else if (above_mbmi->ref_frame[1] <= INTRA_FRAME &&
+               left_mbmi->ref_frame[1] <= INTRA_FRAME) {
+      if (above_mbmi->ref_frame[0] == LAST_FRAME &&
+          left_mbmi->ref_frame[0] == LAST_FRAME) {
         pred_context = 3;
-      } else if (above_mi->mbmi.ref_frame[0] == LAST_FRAME
-          || left_mi->mbmi.ref_frame[0] == LAST_FRAME) {
-        const MODE_INFO *edge =
-            above_mi->mbmi.ref_frame[0] == LAST_FRAME ? left_mi : above_mi;
+      } else if (above_mbmi->ref_frame[0] == LAST_FRAME ||
+                 left_mbmi->ref_frame[0] == LAST_FRAME) {
+        const MB_MODE_INFO *edge_mbmi = above_mbmi->ref_frame[0] == LAST_FRAME ?
+                                           left_mbmi : above_mbmi;
 
-        pred_context = 4 * (edge->mbmi.ref_frame[0] == GOLDEN_FRAME);
+        pred_context = 4 * (edge_mbmi->ref_frame[0] == GOLDEN_FRAME);
       } else {
-        pred_context = 2 * (above_mi->mbmi.ref_frame[0] == GOLDEN_FRAME)
-            + 2 * (left_mi->mbmi.ref_frame[0] == GOLDEN_FRAME);
+        pred_context = 2 * (above_mbmi->ref_frame[0] == GOLDEN_FRAME) +
+                       2 * (left_mbmi->ref_frame[0] == GOLDEN_FRAME);
       }
-    } else if (above_mi->mbmi.ref_frame[1] > INTRA_FRAME
-        && left_mi->mbmi.ref_frame[1] > INTRA_FRAME) {
-      if (above_mi->mbmi.ref_frame[0] == left_mi->mbmi.ref_frame[0]
-          && above_mi->mbmi.ref_frame[1] == left_mi->mbmi.ref_frame[1]) {
-        pred_context = 3
-            * (above_mi->mbmi.ref_frame[0] == GOLDEN_FRAME
-                || above_mi->mbmi.ref_frame[1] == GOLDEN_FRAME
-                || left_mi->mbmi.ref_frame[0] == GOLDEN_FRAME
-                || left_mi->mbmi.ref_frame[1] == GOLDEN_FRAME);
-      } else {
+    } else if (above_mbmi->ref_frame[1] > INTRA_FRAME &&
+               left_mbmi->ref_frame[1] > INTRA_FRAME) {
+      if (above_mbmi->ref_frame[0] == left_mbmi->ref_frame[0] &&
+          above_mbmi->ref_frame[1] == left_mbmi->ref_frame[1])
+        pred_context = 3 * (above_mbmi->ref_frame[0] == GOLDEN_FRAME ||
+                            above_mbmi->ref_frame[1] == GOLDEN_FRAME ||
+                            left_mbmi->ref_frame[0] == GOLDEN_FRAME ||
+                            left_mbmi->ref_frame[1] == GOLDEN_FRAME);
+      else
         pred_context = 2;
-      }
     } else {
-      MV_REFERENCE_FRAME rfs =
-          above_mi->mbmi.ref_frame[1] <= INTRA_FRAME ?
-              above_mi->mbmi.ref_frame[0] : left_mi->mbmi.ref_frame[0];
-      MV_REFERENCE_FRAME crf1 =
-          above_mi->mbmi.ref_frame[1] > INTRA_FRAME ?
-              above_mi->mbmi.ref_frame[0] : left_mi->mbmi.ref_frame[0];
-      MV_REFERENCE_FRAME crf2 =
-          above_mi->mbmi.ref_frame[1] > INTRA_FRAME ?
-              above_mi->mbmi.ref_frame[1] : left_mi->mbmi.ref_frame[1];
+      MV_REFERENCE_FRAME rfs = above_mbmi->ref_frame[1] <= INTRA_FRAME ?
+              above_mbmi->ref_frame[0] : left_mbmi->ref_frame[0];
+      MV_REFERENCE_FRAME crf1 = above_mbmi->ref_frame[1] > INTRA_FRAME ?
+              above_mbmi->ref_frame[0] : left_mbmi->ref_frame[0];
+      MV_REFERENCE_FRAME crf2 = above_mbmi->ref_frame[1] > INTRA_FRAME ?
+              above_mbmi->ref_frame[1] : left_mbmi->ref_frame[1];
 
-      if (rfs == GOLDEN_FRAME) {
+      if (rfs == GOLDEN_FRAME)
         pred_context = 3 + (crf1 == GOLDEN_FRAME || crf2 == GOLDEN_FRAME);
-      } else if (rfs == ALTREF_FRAME) {
+      else if (rfs == ALTREF_FRAME)
         pred_context = crf1 == GOLDEN_FRAME || crf2 == GOLDEN_FRAME;
-      } else {
+      else
         pred_context = 1 + 2 * (crf1 == GOLDEN_FRAME || crf2 == GOLDEN_FRAME);
-      }
     }
   } else if (above_in_image || left_in_image) {  // one edge available
-    const MODE_INFO *edge = above_in_image ? above_mi : left_mi;
+    const MB_MODE_INFO *edge_mbmi = above_in_image ? above_mbmi : left_mbmi;
 
-    if (edge->mbmi.ref_frame[0] == INTRA_FRAME
-        || (edge->mbmi.ref_frame[0] == LAST_FRAME
-            && edge->mbmi.ref_frame[1] <= INTRA_FRAME)) {
+    if (edge_mbmi->ref_frame[0] == INTRA_FRAME ||
+        (edge_mbmi->ref_frame[0] == LAST_FRAME &&
+         edge_mbmi->ref_frame[1] <= INTRA_FRAME))
       pred_context = 2;
-    } else if (edge->mbmi.ref_frame[1] <= INTRA_FRAME) {
-      pred_context = 4 * (edge->mbmi.ref_frame[0] == GOLDEN_FRAME);
-    } else {
-      pred_context = 3
-          * (edge->mbmi.ref_frame[0] == GOLDEN_FRAME
-              || edge->mbmi.ref_frame[1] == GOLDEN_FRAME);
-    }
+    else if (edge_mbmi->ref_frame[1] <= INTRA_FRAME)
+      pred_context = 4 * (edge_mbmi->ref_frame[0] == GOLDEN_FRAME);
+    else
+      pred_context = 3 * (edge_mbmi->ref_frame[0] == GOLDEN_FRAME ||
+                          edge_mbmi->ref_frame[1] == GOLDEN_FRAME);
   } else {  // no edges available (2)
     pred_context = 2;
   }
