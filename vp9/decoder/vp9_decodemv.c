@@ -473,12 +473,6 @@ static void read_inter_mode_info(VP9D_COMP *pbi, MODE_INFO *mi,
 
   int idx, idy;
 
-  // Distance of Mb to the various image edges.
-  // These specified to 8th pel as they are always compared to MV values
-  // that are in 1/8th pel units
-  set_mi_row_col(cm, xd, mi_row, 1 << mi_height_log2(bsize),
-                         mi_col, 1 << mi_width_log2(bsize));
-
   mbmi->segment_id = read_inter_segment_id(pbi, mi_row, mi_col, r);
   mbmi->mb_skip_coeff = read_skip_coeff(pbi, mbmi->segment_id, r);
   mbmi->ref_frame[0] = read_reference_frame(pbi, mbmi->segment_id, r);
