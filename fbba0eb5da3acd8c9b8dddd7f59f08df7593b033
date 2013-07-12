@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAcH//4wc\u003d",
+        "filename": "vp9/common/arm/neon/vp9_loopfilter_neon.asm",
+        "patchSetId": 2
+      },
+      "lineNbr": 429,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2013-07-12T02:30:09Z",
+      "side": 1,
+      "message": "#8 should be sufficient. Measured in bytes, not bits.",
+      "revId": "fbba0eb5da3acd8c9b8dddd7f59f08df7593b033",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
