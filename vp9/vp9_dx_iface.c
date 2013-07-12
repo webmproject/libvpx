@@ -92,15 +92,6 @@ static void vp8_init_ctx(vpx_codec_ctx_t *ctx, const vpx_codec_mmap_t *mmap) {
   }
 }
 
-static void *mmap_lkup(vpx_codec_alg_priv_t *ctx, unsigned int id) {
-  int i;
-
-  for (i = 0; i < NELEMENTS(ctx->mmaps); i++)
-    if (ctx->mmaps[i].id == id)
-      return ctx->mmaps[i].base;
-
-  return NULL;
-}
 static void vp8_finalize_mmaps(vpx_codec_alg_priv_t *ctx) {
   /* nothing to clean up */
 }
