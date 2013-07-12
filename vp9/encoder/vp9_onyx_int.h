@@ -505,6 +505,7 @@ typedef struct VP9_COMP {
   int error_bins[1024];
 
   unsigned int max_mv_magnitude;
+  int mv_step_param;
 
   // Data used for real time conferencing mode to help determine if it would be good to update the gf
   int inter_zz_count;
