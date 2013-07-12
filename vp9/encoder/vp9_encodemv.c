@@ -257,55 +257,6 @@ static void counts_to_nmv_context(
   }
 }
 
-
-void print_nmvcounts(nmv_context_counts tnmvcounts) {
-  int i, j, k;
-  printf("\nCounts =\n  { ");
-  for (j = 0; j < MV_JOINTS; ++j)
-    printf("%d, ", tnmvcounts.joints[j]);
-  printf("},\n");
-  for (i = 0; i < 2; ++i) {
-    printf("  {\n");
-    printf("    %d/%d,\n", tnmvcounts.comps[i].sign[0],
-                           tnmvcounts.comps[i].sign[1]);
-    printf("    { ");
-    for (j = 0; j < MV_CLASSES; ++j)
-      printf("%d, ", tnmvcounts.comps[i].classes[j]);
-    printf("},\n");
-    printf("    { ");
-    for (j = 0; j < CLASS0_SIZE; ++j)
-      printf("%d, ", tnmvcounts.comps[i].class0[j]);
-    printf("},\n");
-    printf("    { ");
-    for (j = 0; j < MV_OFFSET_BITS; ++j)
-      printf("%d/%d, ", tnmvcounts.comps[i].bits[j][0],
-                        tnmvcounts.comps[i].bits[j][1]);
-    printf("},\n");
-
-    printf("    {");
-    for (j = 0; j < CLASS0_SIZE; ++j) {
-      printf("{");
-      for (k = 0; k < 4; ++k)
-        printf("%d, ", tnmvcounts.comps[i].class0_fp[j][k]);
-      printf("}, ");
-    }
-    printf("},\n");
-
-    printf("    { ");
-    for (j = 0; j < 4; ++j)
-      printf("%d, ", tnmvcounts.comps[i].fp[j]);
-    printf("},\n");
-
-    printf("    %d/%d,\n",
-           tnmvcounts.comps[i].class0_hp[0],
-           tnmvcounts.comps[i].class0_hp[1]);
-    printf("    %d/%d,\n",
-           tnmvcounts.comps[i].hp[0],
-           tnmvcounts.comps[i].hp[1]);
-    printf("  },\n");
-  }
-}
-
 #ifdef NMV_STATS
 void init_nmvstats() {
   vp9_zero(tnmvcounts);
