@@ -299,7 +299,7 @@ static BLOCK_SIZE_TYPE get_plane_block_size(BLOCK_SIZE_TYPE bsize,
                         plane_block_height_log2by4(bsize, pd));
 }
 
-static inline void linear_interpolate2(double x, int ntab, int inv_step,
+static INLINE void linear_interpolate2(double x, int ntab, int inv_step,
                                        const double *tab1, const double *tab2,
                                        double *v1, double *v2) {
   double y = x * inv_step;
