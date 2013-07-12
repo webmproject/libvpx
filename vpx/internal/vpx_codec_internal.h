@@ -474,4 +474,30 @@ static void vpx_internal_error(struct vpx_internal_error_info *info,
   if (info->setjmp)
     longjmp(info->jmp, info->error_code);
 }
+
+//------------------------------------------------------------------------------
+// mmap interface
+
+typedef struct {
+  unsigned int   id;
+  unsigned long  sz;
+  unsigned int   align;
+  unsigned int   flags;
+  unsigned long (*calc_sz)(const vpx_codec_dec_cfg_t *, vpx_codec_flags_t);
+} mem_req_t;
+
+// Allocates mmap.priv and sets mmap.base based on mmap.sz/align/flags
+// requirements.
+// Returns #VPX_CODEC_OK on success, #VPX_CODEC_MEM_ERROR otherwise.
+vpx_codec_err_t vpx_mmap_alloc(vpx_codec_mmap_t *mmap);
+
+// Frees mmap.base allocated by a call to vpx_mmap_alloc().
+void vpx_mmap_dtor(vpx_codec_mmap_t *mmap);
+
+// Checks each mmap has the size requirement specificied by mem_reqs.
+// Returns #VPX_CODEC_OK on success, #VPX_CODEC_MEM_ERROR otherwise.
+vpx_codec_err_t vpx_validate_mmaps(const vpx_codec_stream_info_t *si,
+                                   const vpx_codec_mmap_t *mmaps,
+                                   const mem_req_t *mem_reqs, int nreqs,
+                                   vpx_codec_flags_t init_flags);
 #endif
