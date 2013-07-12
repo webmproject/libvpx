@@ -1075,28 +1075,26 @@ static void encode_txfm_probs(VP9_COMP *cpi, vp9_writer *w) {
 
 
     for (i = 0; i < TX_SIZE_CONTEXTS; i++) {
-      tx_counts_to_branch_counts_8x8(cm->fc.tx_count_8x8p[i],
+      tx_counts_to_branch_counts_8x8(cm->fc.tx_counts.p8x8[i],
                                      ct_8x8p);
-      for (j = 0; j < TX_SIZE_MAX_SB - 3; j++) {
-        vp9_cond_prob_diff_update(w, &cm->fc.tx_probs_8x8p[i][j],
+      for (j = 0; j < TX_SIZE_MAX_SB - 3; j++)
+        vp9_cond_prob_diff_update(w, &cm->fc.tx_probs.p8x8[i][j],
                                   VP9_MODE_UPDATE_PROB, ct_8x8p[j]);
-      }
     }
+
     for (i = 0; i < TX_SIZE_CONTEXTS; i++) {
-      tx_counts_to_branch_counts_16x16(cm->fc.tx_count_16x16p[i],
+      tx_counts_to_branch_counts_16x16(cm->fc.tx_counts.p16x16[i],
                                        ct_16x16p);
-      for (j = 0; j < TX_SIZE_MAX_SB - 2; j++) {
-        vp9_cond_prob_diff_update(w, &cm->fc.tx_probs_16x16p[i][j],
+      for (j = 0; j < TX_SIZE_MAX_SB - 2; j++)
+        vp9_cond_prob_diff_update(w, &cm->fc.tx_probs.p16x16[i][j],
                                   VP9_MODE_UPDATE_PROB, ct_16x16p[j]);
-      }
     }
+
     for (i = 0; i < TX_SIZE_CONTEXTS; i++) {
-      tx_counts_to_branch_counts_32x32(cm->fc.tx_count_32x32p[i],
-                                       ct_32x32p);
-      for (j = 0; j < TX_SIZE_MAX_SB - 1; j++) {
-        vp9_cond_prob_diff_update(w, &cm->fc.tx_probs_32x32p[i][j],
+      tx_counts_to_branch_counts_32x32(cm->fc.tx_counts.p32x32[i], ct_32x32p);
+      for (j = 0; j < TX_SIZE_MAX_SB - 1; j++)
+        vp9_cond_prob_diff_update(w, &cm->fc.tx_probs.p32x32[i][j],
                                   VP9_MODE_UPDATE_PROB, ct_32x32p[j]);
-      }
     }
 #ifdef MODE_STATS
     if (!cpi->dummy_packing)
@@ -1505,9 +1503,7 @@ void vp9_pack_bitstream(VP9_COMP *cpi, uint8_t *dest, unsigned long *size) {
   vp9_copy(fc->pre_comp_inter_prob, fc->comp_inter_prob);
   vp9_copy(fc->pre_comp_ref_prob, fc->comp_ref_prob);
   vp9_copy(fc->pre_single_ref_prob, fc->single_ref_prob);
-  vp9_copy(fc->pre_tx_probs_8x8p, fc->tx_probs_8x8p);
-  vp9_copy(fc->pre_tx_probs_16x16p, fc->tx_probs_16x16p);
-  vp9_copy(fc->pre_tx_probs_32x32p, fc->tx_probs_32x32p);
+  fc->pre_tx_probs = fc->tx_probs;
   vp9_copy(fc->pre_mbskip_probs, fc->mbskip_probs);
 
   first_part_size = write_compressed_header(cpi, data);
