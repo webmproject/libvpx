@@ -266,21 +266,19 @@ int vp9_sbuv_is_skippable(MACROBLOCKD *xd, BLOCK_SIZE_TYPE bsize) {
   return result;
 }
 
-void vp9_tokenize_sb(VP9_COMP *cpi,
-                     MACROBLOCKD *xd,
-                     TOKENEXTRA **t,
-                     int dry_run, BLOCK_SIZE_TYPE bsize) {
-  VP9_COMMON * const cm = &cpi->common;
-  MB_MODE_INFO * const mbmi = &xd->mode_info_context->mbmi;
+void vp9_tokenize_sb(VP9_COMP *cpi, TOKENEXTRA **t, int dry_run,
+                     BLOCK_SIZE_TYPE bsize) {
+  VP9_COMMON *const cm = &cpi->common;
+  MACROBLOCKD *const xd = &cpi->mb.e_mbd;
+  MB_MODE_INFO *const mbmi = &xd->mode_info_context->mbmi;
   TOKENEXTRA *t_backup = *t;
-  const int mb_skip_context = vp9_get_pred_context_mbskip(cm, xd);
+  const int mb_skip_context = vp9_get_pred_context_mbskip(xd);
   const int skip_inc = !vp9_segfeature_active(&xd->seg, mbmi->segment_id,
                                               SEG_LVL_SKIP);
   const TX_SIZE txfm_size = mbmi->txfm_size;
   struct tokenize_b_args arg = { cpi, xd, t, txfm_size, dry_run };
 
   mbmi->mb_skip_coeff = vp9_sb_is_skippable(xd, bsize);
-
   if (mbmi->mb_skip_coeff) {
     if (!dry_run)
       cm->fc.mbskip_count[mb_skip_context][1] += skip_inc;

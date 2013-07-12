@@ -2345,11 +2345,11 @@ static void encode_superblock(VP9_COMP *cpi, TOKENEXTRA **t, int output_enabled,
   }
 
   if (xd->mode_info_context->mbmi.ref_frame[0] == INTRA_FRAME) {
-    vp9_tokenize_sb(cpi, xd, t, !output_enabled,
+    vp9_tokenize_sb(cpi, t, !output_enabled,
                     (bsize < BLOCK_SIZE_SB8X8) ? BLOCK_SIZE_SB8X8 : bsize);
   } else if (!x->skip) {
     vp9_encode_sb(cm, x, (bsize < BLOCK_SIZE_SB8X8) ? BLOCK_SIZE_SB8X8 : bsize);
-    vp9_tokenize_sb(cpi, xd, t, !output_enabled,
+    vp9_tokenize_sb(cpi, t, !output_enabled,
                     (bsize < BLOCK_SIZE_SB8X8) ? BLOCK_SIZE_SB8X8 : bsize);
   } else {
     int mb_skip_context = xd->left_available ? (mi - 1)->mbmi.mb_skip_coeff : 0;

@@ -225,14 +225,13 @@ static int write_skip_coeff(const VP9_COMP *cpi, int segment_id, MODE_INFO *m,
   }
 }
 
-void vp9_update_skip_probs(VP9_COMP *cpi, vp9_writer *bc) {
-  VP9_COMMON *const pc = &cpi->common;
+void vp9_update_skip_probs(VP9_COMP *cpi, vp9_writer *w) {
+  FRAME_CONTEXT *const fc = &cpi->common.fc;
   int k;
 
-  for (k = 0; k < MBSKIP_CONTEXTS; ++k) {
-    vp9_cond_prob_diff_update(bc, &pc->fc.mbskip_probs[k],
-                              VP9_MODE_UPDATE_PROB, pc->fc.mbskip_count[k]);
-  }
+  for (k = 0; k < MBSKIP_CONTEXTS; ++k)
+    vp9_cond_prob_diff_update(w, &fc->mbskip_probs[k],
+                              VP9_MODE_UPDATE_PROB, fc->mbskip_count[k]);
 }
 
 static void write_intra_mode(vp9_writer *bc, int m, const vp9_prob *p) {
@@ -426,13 +425,13 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, MODE_INFO *m,
 
   if (seg->update_map) {
     if (seg->temporal_update) {
-      unsigned char prediction_flag = vp9_get_pred_flag_seg_id(xd);
-      vp9_prob pred_prob = vp9_get_pred_prob_seg_id(pc, xd);
-      vp9_write(bc, prediction_flag, pred_prob);
-      if (!prediction_flag)
-        write_segment_id(bc, seg, mi->segment_id);
+      const int pred_flag = xd->mode_info_context->mbmi.seg_id_predicted;
+      vp9_prob pred_prob = vp9_get_pred_prob_seg_id(xd);
+      vp9_write(bc, pred_flag, pred_prob);
+      if (!pred_flag)
+        write_segment_id(bc, seg, segment_id);
     } else {
-      write_segment_id(bc, seg, mi->segment_id);
+      write_segment_id(bc, seg, segment_id);
     }
   }
 

@@ -123,7 +123,7 @@ static uint8_t read_skip_coeff(VP9D_COMP *pbi, int segment_id, vp9_reader *r) {
   MACROBLOCKD *const xd = &pbi->mb;
   int skip_coeff = vp9_segfeature_active(&xd->seg, segment_id, SEG_LVL_SKIP);
   if (!skip_coeff) {
-    const uint8_t ctx = vp9_get_pred_context_mbskip(cm, xd);
+    const int ctx = vp9_get_pred_context_mbskip(xd);
     skip_coeff = vp9_read(r, vp9_get_pred_prob_mbskip(cm, xd));
     cm->fc.mbskip_count[ctx][skip_coeff]++;
   }
@@ -329,16 +329,6 @@ static void read_ref_frame(VP9D_COMP *pbi, vp9_reader *r,
   }
 }
 
-#ifdef VPX_MODE_COUNT
-unsigned int vp9_mv_cont_count[5][4] = {
-  { 0, 0, 0, 0 },
-  { 0, 0, 0, 0 },
-  { 0, 0, 0, 0 },
-  { 0, 0, 0, 0 },
-  { 0, 0, 0, 0 }
-};
-#endif
-
 static void read_switchable_interp_probs(FRAME_CONTEXT *fc, vp9_reader *r) {
   int i, j;
   for (j = 0; j < VP9_SWITCHABLE_FILTERS + 1; ++j)
@@ -379,9 +369,8 @@ static int read_inter_segment_id(VP9D_COMP *pbi, int mi_row, int mi_col,
   if (!seg->update_map)
     return pred_segment_id;
 
-
   if (seg->temporal_update) {
-    const vp9_prob pred_prob = vp9_get_pred_prob_seg_id(cm, xd);
+    const vp9_prob pred_prob = vp9_get_pred_prob_seg_id(xd);
     const int pred_flag = vp9_read(r, pred_prob);
     vp9_set_pred_flag_seg_id(xd, bsize, pred_flag);
     segment_id = pred_flag ? pred_segment_id
@@ -577,34 +566,21 @@ static void read_inter_mode_info(VP9D_COMP *pbi, MODE_INFO *mi,
               if (ref1 > 0)
                 read_mv(r, &secondmv.as_mv, &best_mv_second.as_mv, nmvc,
                         &cm->fc.NMVcount, xd->allow_high_precision_mv);
-
-#ifdef VPX_MODE_COUNT
-              vp9_mv_cont_count[mv_contz][3]++;
-#endif
               break;
             case NEARESTMV:
               blockmv.as_int = nearest.as_int;
               if (ref1 > 0)
                 secondmv.as_int = nearest_second.as_int;
-#ifdef VPX_MODE_COUNT
-              vp9_mv_cont_count[mv_contz][0]++;
-#endif
               break;
             case NEARMV:
               blockmv.as_int = nearby.as_int;
               if (ref1 > 0)
                 secondmv.as_int = nearby_second.as_int;
-#ifdef VPX_MODE_COUNT
-              vp9_mv_cont_count[mv_contz][1]++;
-#endif
               break;
             case ZEROMV:
               blockmv.as_int = 0;
               if (ref1 > 0)
                 secondmv.as_int = 0;
-#ifdef VPX_MODE_COUNT
-              vp9_mv_cont_count[mv_contz][2]++;
-#endif
               break;
             default:
               assert(!"Invalid inter mode value");
