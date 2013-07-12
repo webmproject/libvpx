@@ -108,14 +108,46 @@ static int read_intra_segment_id(VP9D_COMP *pbi, int mi_row, int mi_col,
   MACROBLOCKD *const xd = &pbi->mb;
   struct segmentation *const seg = &xd->seg;
   const BLOCK_SIZE_TYPE bsize = xd->mode_info_context->mbmi.sb_type;
+  int segment_id;
 
-  if (seg->enabled && seg->update_map) {
-    const int segment_id = read_segment_id(r, seg);
-    set_segment_id(&pbi->common, bsize, mi_row, mi_col, segment_id);
-    return segment_id;
-  } else {
+  if (!seg->enabled)
+    return 0;  // Default for disabled segmentation
+
+  if (!seg->update_map)
     return 0;
+
+  segment_id = read_segment_id(r, seg);
+  set_segment_id(&pbi->common, bsize, mi_row, mi_col, segment_id);
+  return segment_id;
+}
+
+static int read_inter_segment_id(VP9D_COMP *pbi, int mi_row, int mi_col,
+                                 vp9_reader *r) {
+  VP9_COMMON *const cm = &pbi->common;
+  MACROBLOCKD *const xd = &pbi->mb;
+  struct segmentation *const seg = &xd->seg;
+  const BLOCK_SIZE_TYPE bsize = xd->mode_info_context->mbmi.sb_type;
+  int pred_segment_id, segment_id;
+
+  if (!seg->enabled)
+    return 0;  // Default for disabled segmentation
+
+  pred_segment_id = vp9_get_segment_id(cm, cm->last_frame_seg_map,
+                                       bsize, mi_row, mi_col);
+  if (!seg->update_map)
+    return pred_segment_id;
+
+  if (seg->temporal_update) {
+    const vp9_prob pred_prob = vp9_get_pred_prob_seg_id(xd);
+    const int pred_flag = vp9_read(r, pred_prob);
+    vp9_set_pred_flag_seg_id(xd, bsize, pred_flag);
+    segment_id = pred_flag ? pred_segment_id
+                           : read_segment_id(r, seg);
+  } else {
+    segment_id = read_segment_id(r, seg);
   }
+  set_segment_id(cm, bsize, mi_row, mi_col, segment_id);
+  return segment_id;
 }
 
 static uint8_t read_skip_coeff(VP9D_COMP *pbi, int segment_id, vp9_reader *r) {
@@ -351,37 +383,6 @@ static INLINE COMPPREDMODE_TYPE read_comp_pred_mode(vp9_reader *r) {
     mode += vp9_read_bit(r);
   return mode;
 }
-
-static int read_inter_segment_id(VP9D_COMP *pbi, int mi_row, int mi_col,
-                                 vp9_reader *r) {
-  VP9_COMMON *const cm = &pbi->common;
-  MACROBLOCKD *const xd = &pbi->mb;
-  struct segmentation *const seg = &xd->seg;
-  const BLOCK_SIZE_TYPE bsize = xd->mode_info_context->mbmi.sb_type;
-  int pred_segment_id;
-  int segment_id;
-
-  if (!seg->enabled)
-    return 0;  // Default for disabled segmentation
-
-  pred_segment_id = vp9_get_segment_id(cm, cm->last_frame_seg_map,
-                                       bsize, mi_row, mi_col);
-  if (!seg->update_map)
-    return pred_segment_id;
-
-  if (seg->temporal_update) {
-    const vp9_prob pred_prob = vp9_get_pred_prob_seg_id(xd);
-    const int pred_flag = vp9_read(r, pred_prob);
-    vp9_set_pred_flag_seg_id(xd, bsize, pred_flag);
-    segment_id = pred_flag ? pred_segment_id
-                           : read_segment_id(r, seg);
-  } else {
-    segment_id = read_segment_id(r, seg);
-  }
-  set_segment_id(cm, bsize, mi_row, mi_col, segment_id);
-  return segment_id;
-}
-
 
 static INLINE void assign_and_clamp_mv(int_mv *dst, const int_mv *src,
                                        int mb_to_left_edge,
