@@ -16,6 +16,24 @@
       "revId": "607dfc11f42a0e37b6d85e00660768ea55e5d0f1",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcH//4Rk\u003d",
+        "filename": "vp9/common/arm/neon/vp9_loopfilter_neon.asm",
+        "patchSetId": 3
+      },
+      "lineNbr": 429,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2013-07-12T17:30:46Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAcH//4Xo\u003d",
+      "revId": "607dfc11f42a0e37b6d85e00660768ea55e5d0f1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
