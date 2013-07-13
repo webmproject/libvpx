@@ -233,10 +233,10 @@ static vpx_codec_err_t set_vp9e_config(VP9_CONFIG *oxcf,
   oxcf->width   = cfg.g_w;
   oxcf->height  = cfg.g_h;
   /* guess a frame rate if out of whack, use 30 */
-  oxcf->frame_rate             = (double)(cfg.g_timebase.den) / (double)(cfg.g_timebase.num);
+  oxcf->framerate             = (double)(cfg.g_timebase.den) / (double)(cfg.g_timebase.num);
 
-  if (oxcf->frame_rate > 180) {
-    oxcf->frame_rate = 30;
+  if (oxcf->framerate > 180) {
+    oxcf->framerate = 30;
   }
 
   switch (cfg.g_pass) {

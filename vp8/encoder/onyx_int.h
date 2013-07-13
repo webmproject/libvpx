@@ -232,7 +232,7 @@ enum
 typedef struct
 {
     /* Layer configuration */
-    double frame_rate;
+    double framerate;
     int target_bandwidth;
 
     /* Layer specific coding parameters */
@@ -401,7 +401,7 @@ typedef struct VP8_COMP
     /* Minimum allocation that should be used for any frame */
     int min_frame_bandwidth;
     int inter_frame_target;
-    double output_frame_rate;
+    double output_framerate;
     int64_t last_time_stamp_seen;
     int64_t last_end_time_stamp_seen;
     int64_t first_time_stamp_ever;
@@ -415,8 +415,8 @@ typedef struct VP8_COMP
 
     int buffered_mode;
 
-    double frame_rate;
-    double ref_frame_rate;
+    double framerate;
+    double ref_framerate;
     int64_t buffer_level;
     int64_t bits_off_target;
 

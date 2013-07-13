@@ -1093,13 +1093,13 @@ static int estimate_cq(VP9_COMP *cpi,
 }
 
 
-extern void vp9_new_frame_rate(VP9_COMP *cpi, double framerate);
+extern void vp9_new_framerate(VP9_COMP *cpi, double framerate);
 
 void vp9_init_second_pass(VP9_COMP *cpi) {
   FIRSTPASS_STATS this_frame;
   FIRSTPASS_STATS *start_pos;
 
-  double lower_bounds_min_rate = FRAME_OVERHEAD_BITS * cpi->oxcf.frame_rate;
+  double lower_bounds_min_rate = FRAME_OVERHEAD_BITS * cpi->oxcf.framerate;
   double two_pass_min_rate = (double)(cpi->oxcf.target_bandwidth
                                       * cpi->oxcf.two_pass_vbrmin_section / 100);
 
@@ -1120,10 +1120,10 @@ void vp9_init_second_pass(VP9_COMP *cpi) {
   // encoded in the second pass is a guess.  However the sum duration is not.
   // Its calculated based on the actual durations of all frames from the first
   // pass.
-  vp9_new_frame_rate(cpi, 10000000.0 * cpi->twopass.total_stats.count /
+  vp9_new_framerate(cpi, 10000000.0 * cpi->twopass.total_stats.count /
                        cpi->twopass.total_stats.duration);
 
-  cpi->output_frame_rate = cpi->oxcf.frame_rate;
+  cpi->output_framerate = cpi->oxcf.framerate;
   cpi->twopass.bits_left = (int64_t)(cpi->twopass.total_stats.duration *
                                      cpi->oxcf.target_bandwidth / 10000000.0);
   cpi->twopass.bits_left -= (int64_t)(cpi->twopass.total_stats.duration *
@@ -2203,7 +2203,7 @@ void vp9_second_pass(VP9_COMP *cpi) {
 
   // Set nominal per second bandwidth for this frame
   cpi->target_bandwidth = (int)(cpi->per_frame_bandwidth
-                                * cpi->output_frame_rate);
+                                * cpi->output_framerate);
   if (cpi->target_bandwidth < 0)
     cpi->target_bandwidth = 0;
 
@@ -2623,7 +2623,7 @@ static void find_next_key_frame(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
     cpi->per_frame_bandwidth = cpi->twopass.kf_bits;
     // Convert to a per second bitrate
     cpi->target_bandwidth = (int)(cpi->twopass.kf_bits *
-                                  cpi->output_frame_rate);
+                                  cpi->output_framerate);
   }
 
   // Note the total error score of the kf group minus the key frame itself

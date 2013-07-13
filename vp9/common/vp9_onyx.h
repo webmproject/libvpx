@@ -98,7 +98,7 @@ extern "C"
                   //   3 - lowest quality/fastest decode
     int width;  // width of data passed to the compressor
     int height;  // height of data passed to the compressor
-    double frame_rate;       // set to passed in framerate
+    double framerate;       // set to passed in framerate
     int64_t target_bandwidth;    // bandwidth to be used in kilobits per second
 
     int noise_sensitivity;   // parameter used for applying pre processing blur: recommendation 0

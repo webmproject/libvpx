@@ -388,7 +388,7 @@ static void calc_iframe_target_size(VP8_COMP *cpi)
         int initial_boost = 32; /* |3.0 * per_frame_bandwidth| */
         /* Boost depends somewhat on frame rate: only used for 1 layer case. */
         if (cpi->oxcf.number_of_layers == 1) {
-          kf_boost = MAX(initial_boost, (int)(2 * cpi->output_frame_rate - 16));
+          kf_boost = MAX(initial_boost, (int)(2 * cpi->output_framerate - 16));
         }
         else {
           /* Initial factor: set target size to: |3.0 * per_frame_bandwidth|. */
@@ -399,9 +399,9 @@ static void calc_iframe_target_size(VP8_COMP *cpi)
         kf_boost = kf_boost * kf_boost_qadjustment[Q] / 100;
 
         /* frame separation adjustment ( down) */
-        if (cpi->frames_since_key  < cpi->output_frame_rate / 2)
+        if (cpi->frames_since_key  < cpi->output_framerate / 2)
             kf_boost = (int)(kf_boost
-                       * cpi->frames_since_key / (cpi->output_frame_rate / 2));
+                       * cpi->frames_since_key / (cpi->output_framerate / 2));
 
         /* Minimal target size is |2* per_frame_bandwidth|. */
         if (kf_boost < 16)
@@ -1360,7 +1360,7 @@ static int estimate_keyframe_frequency(VP8_COMP *cpi)
          * whichever is smaller.
          */
         int key_freq = cpi->oxcf.key_freq>0 ? cpi->oxcf.key_freq : 1;
-        av_key_frame_frequency = 1 + (int)cpi->output_frame_rate * 2;
+        av_key_frame_frequency = 1 + (int)cpi->output_framerate * 2;
 
         if (cpi->oxcf.auto_key && av_key_frame_frequency > key_freq)
             av_key_frame_frequency = key_freq;
