@@ -1705,9 +1705,6 @@ static void init_encode_frame_mb_context(VP9_COMP *cpi) {
   xd->mode_info_stride = cm->mode_info_stride;
   xd->frame_type = cm->frame_type;
 
-  xd->frames_since_golden = cm->frames_since_golden;
-  xd->frames_till_alt_ref_frame = cm->frames_till_alt_ref_frame;
-
   // reset intra mode contexts
   if (cm->frame_type == KEY_FRAME)
     vp9_init_mbmode_probs(cm);
