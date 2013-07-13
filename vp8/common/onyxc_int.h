@@ -157,7 +157,6 @@ typedef struct VP8Common
 
     unsigned int current_video_frame;
 
-    int near_boffset[3];
     int version;
 
     TOKEN_PARTITION multi_token_partition;
