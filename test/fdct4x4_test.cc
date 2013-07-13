@@ -44,10 +44,8 @@ void iht4x4_add(int16_t* /*in*/, int16_t *out, uint8_t *dst,
 
 class FwdTrans4x4Test : public ::testing::TestWithParam<int> {
  public:
-  FwdTrans4x4Test() { SetUpTestTxfm(); }
-  ~FwdTrans4x4Test() {}
-
-  void SetUpTestTxfm() {
+  virtual ~FwdTrans4x4Test() {}
+  virtual void SetUp() {
     tx_type_ = GetParam();
     if (tx_type_ == 0) {
       fwd_txfm_ = fdct4x4;
