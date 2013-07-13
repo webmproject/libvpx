@@ -172,10 +172,10 @@ unsigned char vp9_get_pred_context_comp_ref_p(const VP9_COMMON *cm,
                                           left_mbmi : above_mbmi;
 
       if (edge_mbmi->ref_frame[1] <= INTRA_FRAME)  // single pred (1/3)
-        pred_context = 1 + 2 * edge_mbmi->ref_frame[0] != cm->comp_var_ref[1];
+        pred_context = 1 + 2 * (edge_mbmi->ref_frame[0] != cm->comp_var_ref[1]);
       else  // comp pred (1/3)
-        pred_context = 1 + 2 * edge_mbmi->ref_frame[var_ref_idx]
-            != cm->comp_var_ref[1];
+        pred_context = 1 + 2 * (edge_mbmi->ref_frame[var_ref_idx]
+                                    != cm->comp_var_ref[1]);
     } else {  // inter/inter
       int l_sg = left_mbmi->ref_frame[1] <= INTRA_FRAME;
       int a_sg = above_mbmi->ref_frame[1] <= INTRA_FRAME;
@@ -215,10 +215,10 @@ unsigned char vp9_get_pred_context_comp_ref_p(const VP9_COMMON *cm,
     if (edge_mbmi->ref_frame[0] == INTRA_FRAME)
       pred_context = 2;
     else if (edge_mbmi->ref_frame[1] > INTRA_FRAME)
-      pred_context = 4 * edge_mbmi->ref_frame[var_ref_idx]
-          != cm->comp_var_ref[1];
+      pred_context = 4 * (edge_mbmi->ref_frame[var_ref_idx]
+                              != cm->comp_var_ref[1]);
     else
-      pred_context = 3 * edge_mbmi->ref_frame[0] != cm->comp_var_ref[1];
+      pred_context = 3 * (edge_mbmi->ref_frame[0] != cm->comp_var_ref[1]);
   } else {  // no edges available (2)
     pred_context = 2;
   }
