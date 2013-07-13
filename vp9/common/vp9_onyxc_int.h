@@ -255,9 +255,6 @@ typedef struct VP9Common {
   int near_boffset[3];
   int version;
 
-  double bitrate;
-  double framerate;
-
 #if CONFIG_POSTPROC
   struct postproc_state  postproc_state;
 #endif
