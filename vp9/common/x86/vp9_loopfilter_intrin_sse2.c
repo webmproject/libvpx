@@ -1346,7 +1346,7 @@ void vp9_mbloop_filter_vertical_edge_sse2(unsigned char *s,
 
   /* Loop filtering */
   vp9_mbloop_filter_horizontal_edge_sse2(t_dst + 8 * 16, 16, blimit, limit,
-                                           thresh, 1);
+                                         thresh, 1);
   src[0] = t_dst + 3 * 16;
   src[1] = t_dst + 3 * 16 + 8;
 
@@ -1358,10 +1358,10 @@ void vp9_mbloop_filter_vertical_edge_sse2(unsigned char *s,
 }
 
 void vp9_mb_lpf_vertical_edge_w_sse2(unsigned char *s,
-                                          int p,
-                                          const unsigned char *blimit,
-                                          const unsigned char *limit,
-                                          const unsigned char *thresh) {
+                                     int p,
+                                     const unsigned char *blimit,
+                                     const unsigned char *limit,
+                                     const unsigned char *thresh) {
   DECLARE_ALIGNED_ARRAY(16, unsigned char, t_dst, 256);
   unsigned char *src[4];
   unsigned char *dst[4];
