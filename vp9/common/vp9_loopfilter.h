@@ -44,18 +44,6 @@ struct loop_filter_info {
   const uint8_t *hev_thr;
 };
 
-#define prototype_loopfilter(sym) \
-  void sym(uint8_t *src, int pitch, const uint8_t *blimit, \
-           const uint8_t *limit, const uint8_t *thresh, int count)
-
-#define prototype_loopfilter_block(sym) \
-  void sym(uint8_t *y, uint8_t *u, uint8_t *v, \
-           int ystride, int uv_stride, struct loop_filter_info *lfi)
-
-#if ARCH_X86 || ARCH_X86_64
-#include "x86/vp9_loopfilter_x86.h"
-#endif
-
 /* assorted loopfilter functions which get used elsewhere */
 struct VP9Common;
 struct macroblockd;
