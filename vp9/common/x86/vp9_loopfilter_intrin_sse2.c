@@ -15,9 +15,6 @@
 prototype_loopfilter(vp9_loop_filter_vertical_edge_sse2);
 prototype_loopfilter(vp9_loop_filter_horizontal_edge_sse2);
 
-extern loop_filter_uvfunction vp9_loop_filter_horizontal_edge_uv_sse2;
-extern loop_filter_uvfunction vp9_loop_filter_vertical_edge_uv_sse2;
-
 void vp9_mb_lpf_horizontal_edge_w_sse2_8(unsigned char *s,
                                          int p,
                                          const unsigned char *_blimit,

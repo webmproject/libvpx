@@ -56,12 +56,6 @@ struct loop_filter_info {
 #include "x86/vp9_loopfilter_x86.h"
 #endif
 
-typedef void loop_filter_uvfunction(uint8_t *src, int pitch,
-                                    const uint8_t *blimit,
-                                    const uint8_t *limit,
-                                    const uint8_t *thresh,
-                                    uint8_t *v);
-
 /* assorted loopfilter functions which get used elsewhere */
 struct VP9Common;
 struct macroblockd;
