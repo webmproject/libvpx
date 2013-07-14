@@ -1203,79 +1203,6 @@ void vp9_mbloop_filter_horizontal_edge_sse2(unsigned char *s,
   }
 }
 
-void vp9_mbloop_filter_horizontal_edge_uv_sse2(unsigned char *u,
-                                               int p,
-                                               const unsigned char *_blimit,
-                                               const unsigned char *_limit,
-                                               const unsigned char *_thresh,
-                                               unsigned char *v) {
-  DECLARE_ALIGNED_ARRAY(16, unsigned char, src, 160);
-
-  /* Read source */
-  const __m128i p4 = _mm_unpacklo_epi64(_mm_loadl_epi64((__m128i *)(u - 5 * p)),
-      _mm_loadl_epi64((__m128i *)(v - 5 * p)));
-  const __m128i p3 = _mm_unpacklo_epi64(_mm_loadl_epi64((__m128i *)(u - 4 * p)),
-      _mm_loadl_epi64((__m128i *)(v - 4 * p)));
-  const __m128i p2 = _mm_unpacklo_epi64(_mm_loadl_epi64((__m128i *)(u - 3 * p)),
-      _mm_loadl_epi64((__m128i *)(v - 3 * p)));
-  const __m128i p1 = _mm_unpacklo_epi64(_mm_loadl_epi64((__m128i *)(u - 2 * p)),
-      _mm_loadl_epi64((__m128i *)(v - 2 * p)));
-  const __m128i p0 = _mm_unpacklo_epi64(_mm_loadl_epi64((__m128i *)(u - 1 * p)),
-      _mm_loadl_epi64((__m128i *)(v - 1 * p)));
-  const __m128i q0 = _mm_unpacklo_epi64(_mm_loadl_epi64((__m128i *)(u)),
-      _mm_loadl_epi64((__m128i *)(v)));
-  const __m128i q1 = _mm_unpacklo_epi64(_mm_loadl_epi64((__m128i *)(u + 1 * p)),
-      _mm_loadl_epi64((__m128i *)(v + 1 * p)));
-  const __m128i q2 = _mm_unpacklo_epi64(_mm_loadl_epi64((__m128i *)(u + 2 * p)),
-      _mm_loadl_epi64((__m128i *)(v + 2 * p)));
-  const __m128i q3 = _mm_unpacklo_epi64(_mm_loadl_epi64((__m128i *)(u + 3 * p)),
-      _mm_loadl_epi64((__m128i *)(v + 3 * p)));
-  const __m128i q4 = _mm_unpacklo_epi64(_mm_loadl_epi64((__m128i *)(u + 4 * p)),
-      _mm_loadl_epi64((__m128i *)(v + 4 * p)));
-
-  _mm_store_si128((__m128i *)(src), p4);
-  _mm_store_si128((__m128i *)(src + 16), p3);
-  _mm_store_si128((__m128i *)(src + 32), p2);
-  _mm_store_si128((__m128i *)(src + 48), p1);
-  _mm_store_si128((__m128i *)(src + 64), p0);
-  _mm_store_si128((__m128i *)(src + 80), q0);
-  _mm_store_si128((__m128i *)(src + 96), q1);
-  _mm_store_si128((__m128i *)(src + 112), q2);
-  _mm_store_si128((__m128i *)(src + 128), q3);
-  _mm_store_si128((__m128i *)(src + 144), q4);
-
-  /* Loop filtering */
-  vp9_mbloop_filter_horizontal_edge_sse2(src + 80, 16, _blimit, _limit,
-                                         _thresh, 1);
-
-  /* Store result */
-  _mm_storel_epi64((__m128i *)(u - 3 * p),
-                   _mm_loadl_epi64((__m128i *)(src + 32)));
-  _mm_storel_epi64((__m128i *)(u - 2 * p),
-                   _mm_loadl_epi64((__m128i *)(src + 48)));
-  _mm_storel_epi64((__m128i *)(u - p),
-                   _mm_loadl_epi64((__m128i *)(src + 64)));
-  _mm_storel_epi64((__m128i *)u,
-                   _mm_loadl_epi64((__m128i *)(src + 80)));
-  _mm_storel_epi64((__m128i *)(u + p),
-                   _mm_loadl_epi64((__m128i *)(src + 96)));
-  _mm_storel_epi64((__m128i *)(u + 2 * p),
-                   _mm_loadl_epi64((__m128i *)(src + 112)));
-
-  _mm_storel_epi64((__m128i *)(v - 3 * p),
-                   _mm_loadl_epi64((__m128i *)(src + 40)));
-  _mm_storel_epi64((__m128i *)(v - 2 * p),
-                   _mm_loadl_epi64((__m128i *)(src + 56)));
-  _mm_storel_epi64((__m128i *)(v - p),
-                   _mm_loadl_epi64((__m128i *)(src + 72)));
-  _mm_storel_epi64((__m128i *)v,
-                   _mm_loadl_epi64((__m128i *)(src + 88)));
-  _mm_storel_epi64((__m128i *)(v + p),
-                   _mm_loadl_epi64((__m128i *)(src + 104)));
-  _mm_storel_epi64((__m128i *)(v + 2 * p),
-                   _mm_loadl_epi64((__m128i *)(src + 120)));
-}
-
 static INLINE void transpose8x16(unsigned char *in0, unsigned char *in1,
                                  int in_p, unsigned char *out, int out_p) {
   __m128i x0, x1, x2, x3, x4, x5, x6, x7;
@@ -1461,34 +1388,5 @@ void vp9_mb_lpf_vertical_edge_w_sse2(unsigned char *s,
   dst[0] = s - 8;
   dst[1] = s - 8 + 8;
 
-  transpose(src, 16, dst, p, 2);
-}
-
-
-void vp9_mbloop_filter_vertical_edge_uv_sse2(unsigned char *u,
-                                             int p,
-                                             const unsigned char *blimit,
-                                             const unsigned char *limit,
-                                             const unsigned char *thresh,
-                                             unsigned char *v) {
-  DECLARE_ALIGNED_ARRAY(16, unsigned char, t_dst, 256);
-  unsigned char *src[2];
-  unsigned char *dst[2];
-
-  /* Transpose 16x16 */
-  transpose8x16(u - 8, v - 8, p, t_dst, 16);
-  transpose8x16(u, v, p, t_dst + 16 * 8, 16);
-
-  /* Loop filtering */
-  vp9_mbloop_filter_horizontal_edge_sse2(t_dst + 8 * 16, 16, blimit, limit,
-                                           thresh, 1);
-
-  src[0] = t_dst + 3 * 16;
-  src[1] = t_dst + 3 * 16 + 8;
-
-  dst[0] = u - 5;
-  dst[1] = v - 5;
-
-  /* Transpose 16x8 */
   transpose(src, 16, dst, p, 2);
 }
