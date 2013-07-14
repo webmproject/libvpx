@@ -33,8 +33,7 @@ static void lf_init_lut(loop_filter_info_n *lfi) {
   lfi->mode_lf_lut[NEWMV] = 1;
 }
 
-void vp9_loop_filter_update_sharpness(loop_filter_info_n *lfi,
-                                      int sharpness_lvl) {
+static void update_sharpness(loop_filter_info_n *const lfi, int sharpness_lvl) {
   int lvl;
 
   // For each possible value for the loop filter fill out limits
@@ -62,7 +61,7 @@ void vp9_loop_filter_init(VP9_COMMON *cm) {
   int i;
 
   // init limits for given sharpness
-  vp9_loop_filter_update_sharpness(lfi, cm->sharpness_level);
+  update_sharpness(lfi, cm->sharpness_level);
   cm->last_sharpness_level = cm->sharpness_level;
 
   // init LUT for lvl  and hev thr picking
@@ -73,8 +72,8 @@ void vp9_loop_filter_init(VP9_COMMON *cm) {
     vpx_memset(lfi->hev_thr[i], i, SIMD_WIDTH);
 }
 
-void vp9_loop_filter_frame_init(VP9_COMMON *cm, MACROBLOCKD *xd,
-                                int default_filt_lvl) {
+static void loop_filter_frame_init(VP9_COMMON *const cm, MACROBLOCKD *const xd,
+                                   int default_filt_lvl) {
   int seg;
   // n_shift is the a multiplier for lf_deltas
   // the multiplier is 1 for when filter_lvl is between 0 and 31;
@@ -84,7 +83,7 @@ void vp9_loop_filter_frame_init(VP9_COMMON *cm, MACROBLOCKD *xd,
 
   // update limits if sharpness has changed
   if (cm->last_sharpness_level != cm->sharpness_level) {
-    vp9_loop_filter_update_sharpness(lfi, cm->sharpness_level);
+    update_sharpness(lfi, cm->sharpness_level);
     cm->last_sharpness_level = cm->sharpness_level;
   }
 
@@ -355,7 +354,7 @@ void vp9_loop_filter_frame(VP9_COMMON *cm, MACROBLOCKD *xd,
   int mi_row, mi_col;
 
   // Initialize the loop filter for this frame.
-  vp9_loop_filter_frame_init(cm, xd, frame_filter_level);
+  loop_filter_frame_init(cm, xd, frame_filter_level);
 
   for (mi_row = 0; mi_row < cm->mi_rows; mi_row += MI_BLOCK_SIZE) {
     MODE_INFO* const mi = cm->mi + mi_row * cm->mode_info_stride;
