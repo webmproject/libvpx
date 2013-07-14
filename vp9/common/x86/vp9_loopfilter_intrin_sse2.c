@@ -15,11 +15,11 @@
 prototype_loopfilter(vp9_loop_filter_vertical_edge_sse2);
 prototype_loopfilter(vp9_loop_filter_horizontal_edge_sse2);
 
-void vp9_mb_lpf_horizontal_edge_w_sse2_8(unsigned char *s,
-                                         int p,
-                                         const unsigned char *_blimit,
-                                         const unsigned char *_limit,
-                                         const unsigned char *_thresh) {
+static void mb_lpf_horizontal_edge_w_sse2_8(unsigned char *s,
+                                            int p,
+                                            const unsigned char *_blimit,
+                                            const unsigned char *_limit,
+                                            const unsigned char *_thresh) {
   DECLARE_ALIGNED(16, unsigned char, flat2_op[7][8]);
   DECLARE_ALIGNED(16, unsigned char, flat2_oq[7][8]);
 
@@ -480,11 +480,11 @@ void vp9_mb_lpf_horizontal_edge_w_sse2_8(unsigned char *s,
   }
 }
 
-void vp9_mb_lpf_horizontal_edge_w_sse2_16(unsigned char *s,
-                                          int p,
-                                          const unsigned char *_blimit,
-                                          const unsigned char *_limit,
-                                          const unsigned char *_thresh) {
+static void mb_lpf_horizontal_edge_w_sse2_16(unsigned char *s,
+                                             int p,
+                                             const unsigned char *_blimit,
+                                             const unsigned char *_limit,
+                                             const unsigned char *_thresh) {
   DECLARE_ALIGNED(16, unsigned char, flat2_op[7][16]);
   DECLARE_ALIGNED(16, unsigned char, flat2_oq[7][16]);
 
@@ -959,9 +959,9 @@ void vp9_mb_lpf_horizontal_edge_w_sse2(unsigned char *s,
                                        const unsigned char *_thresh,
                                        int count) {
   if (count == 1)
-    vp9_mb_lpf_horizontal_edge_w_sse2_8(s, p, _blimit, _limit, _thresh);
+    mb_lpf_horizontal_edge_w_sse2_8(s, p, _blimit, _limit, _thresh);
   else
-    vp9_mb_lpf_horizontal_edge_w_sse2_16(s, p, _blimit, _limit, _thresh);
+    mb_lpf_horizontal_edge_w_sse2_16(s, p, _blimit, _limit, _thresh);
 }
 
 void vp9_mbloop_filter_horizontal_edge_sse2(unsigned char *s,
