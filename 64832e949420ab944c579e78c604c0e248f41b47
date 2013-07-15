@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAcX//+k4\u003d",
+        "filename": "vp9/common/arm/neon/vp9_loopfilter_neon.asm",
+        "patchSetId": 6
+      },
+      "lineNbr": 476,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2013-07-15T20:09:04Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAcX//+oA\u003d",
+      "revId": "64832e949420ab944c579e78c604c0e248f41b47",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAcX//+oI\u003d",
         "filename": "vp9/common/arm/neon/vp9_loopfilter_neon.asm",
         "patchSetId": 6
@@ -30,6 +48,24 @@
       "writtenOn": "2013-07-15T19:32:29Z",
       "side": 1,
       "message": "stroed-\u003estored",
+      "revId": "64832e949420ab944c579e78c604c0e248f41b47",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcX//+k0\u003d",
+        "filename": "vp9/common/arm/neon/vp9_loopfilter_neon.asm",
+        "patchSetId": 6
+      },
+      "lineNbr": 477,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2013-07-15T20:09:04Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAcX//+oI\u003d",
       "revId": "64832e949420ab944c579e78c604c0e248f41b47",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAcX//+kw\u003d",
+        "filename": "vp9/common/arm/neon/vp9_loopfilter_neon.asm",
+        "patchSetId": 6
+      },
+      "lineNbr": 478,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2013-07-15T20:09:04Z",
+      "side": 1,
+      "message": "Removed.",
+      "parentUuid": "AAAAcX//+nw\u003d",
+      "revId": "64832e949420ab944c579e78c604c0e248f41b47",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAcX//+no\u003d",
         "filename": "vp9/common/arm/neon/vp9_loopfilter_neon.asm",
         "patchSetId": 6
@@ -64,6 +118,24 @@
       "writtenOn": "2013-07-15T19:32:29Z",
       "side": 1,
       "message": "should vshrn use s16? This will shift in 0s and mess up the branch because it checks for all 1s",
+      "revId": "64832e949420ab944c579e78c604c0e248f41b47",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcX//+go\u003d",
+        "filename": "vp9/common/arm/neon/vp9_loopfilter_neon.asm",
+        "patchSetId": 6
+      },
+      "lineNbr": 479,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2013-07-15T20:09:04Z",
+      "side": 1,
+      "message": "It shouldn\u0027t matter because we are truncating the top 8 bits of the u16, which includes the 4 bits inserted by the shift. So either shift should work.",
+      "parentUuid": "AAAAcX//+no\u003d",
       "revId": "64832e949420ab944c579e78c604c0e248f41b47",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
