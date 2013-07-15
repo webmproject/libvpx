@@ -493,6 +493,9 @@ static void encode_block(int plane, int block, BLOCK_SIZE_TYPE bsize,
   if (x->optimize)
     vp9_optimize_b(plane, block, bsize, ss_txfrm_size, args->cm, x, args->ctx);
 
+  if (x->skip_encode)
+    return;
+
   switch (ss_txfrm_size / 2) {
     case TX_32X32:
       vp9_short_idct32x32_add(dqcoeff, dst, pd->dst.stride);
