@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAcX//+oA\u003d",
+        "filename": "vp9/common/arm/neon/vp9_loopfilter_neon.asm",
+        "patchSetId": 6
+      },
+      "lineNbr": 476,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2013-07-15T19:32:29Z",
+      "side": 1,
+      "message": "instrcution-\u003einstruction",
+      "revId": "64832e949420ab944c579e78c604c0e248f41b47",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcX//+oI\u003d",
+        "filename": "vp9/common/arm/neon/vp9_loopfilter_neon.asm",
+        "patchSetId": 6
+      },
+      "lineNbr": 477,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2013-07-15T19:32:29Z",
+      "side": 1,
+      "message": "stroed-\u003estored",
+      "revId": "64832e949420ab944c579e78c604c0e248f41b47",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcX//+nw\u003d",
+        "filename": "vp9/common/arm/neon/vp9_loopfilter_neon.asm",
+        "patchSetId": 6
+      },
+      "lineNbr": 478,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2013-07-15T19:32:29Z",
+      "side": 1,
+      "message": "The last sentence is confusing. The incoming values are stored in d20 and packed into d30.32[0]. That d21 is used is incidental.",
+      "revId": "64832e949420ab944c579e78c604c0e248f41b47",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcX//+no\u003d",
+        "filename": "vp9/common/arm/neon/vp9_loopfilter_neon.asm",
+        "patchSetId": 6
+      },
+      "lineNbr": 479,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2013-07-15T19:32:29Z",
+      "side": 1,
+      "message": "should vshrn use s16? This will shift in 0s and mess up the branch because it checks for all 1s",
+      "revId": "64832e949420ab944c579e78c604c0e248f41b47",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
