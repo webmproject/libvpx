@@ -15,6 +15,8 @@
 #include "vpx_mem/vpx_mem.h"
 #include "vpx/vpx_integer.h"
 
+#define MODEL_NODES (ENTROPY_NODES - UNCONSTRAINED_NODES)
+
 DECLARE_ALIGNED(16, const uint8_t, vp9_norm[256]) = {
   0, 7, 6, 6, 5, 5, 5, 5, 4, 4, 4, 4, 4, 4, 4, 4,
   3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
@@ -252,7 +254,7 @@ const vp9_tree_index vp9_coefmodel_tree[6] = {
 // the probabilities for the rest of the nodes.
 
 // beta = 8
-const vp9_prob vp9_modelcoefprobs_pareto8[COEFPROB_MODELS][MODEL_NODES] = {
+static const vp9_prob modelcoefprobs_pareto8[COEFPROB_MODELS][MODEL_NODES] = {
   {  3,  86, 128,   6,  86,  23,  88,  29},
   {  9,  86, 129,  17,  88,  61,  94,  76},
   { 15,  87, 129,  28,  89,  93, 100, 110},
@@ -386,8 +388,7 @@ const vp9_prob vp9_modelcoefprobs_pareto8[COEFPROB_MODELS][MODEL_NODES] = {
 static void extend_model_to_full_distribution(vp9_prob p,
                                               vp9_prob *tree_probs) {
   const int l = ((p - 1) / 2);
-  const vp9_prob (*model)[MODEL_NODES];
-  model = vp9_modelcoefprobs_pareto8;
+  const vp9_prob (*model)[MODEL_NODES] = modelcoefprobs_pareto8;
   if (p & 1) {
     vpx_memcpy(tree_probs + UNCONSTRAINED_NODES,
                model[l], MODEL_NODES * sizeof(vp9_prob));

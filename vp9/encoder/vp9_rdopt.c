@@ -3593,7 +3593,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
 
     // Keep record of best intra rd
     if (xd->mode_info_context->mbmi.ref_frame[0] == INTRA_FRAME &&
-        xd->mode_info_context->mbmi.mode <= TM_PRED &&
+        is_intra_mode(xd->mode_info_context->mbmi.mode) &&
         this_rd < best_intra_rd) {
       best_intra_rd = this_rd;
       best_intra_mode = xd->mode_info_context->mbmi.mode;

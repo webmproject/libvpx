@@ -24,13 +24,10 @@
 #include "vp9/common/vp9_postproc.h"
 #endif
 
-/* Create/destroy static data structures. */
-
-// Define the number of candidate reference buffers.
-#define NUM_REF_FRAMES 8
-#define NUM_REF_FRAMES_LOG2 3
-
 #define ALLOWED_REFS_PER_FRAME 3
+
+#define NUM_REF_FRAMES_LOG2 3
+#define NUM_REF_FRAMES (1 << NUM_REF_FRAMES_LOG2)
 
 // 1 scratch frame for the new frame, 3 for scaled references on the encoder
 // TODO(jkoleszar): These 3 extra references could probably come from the
@@ -39,8 +36,6 @@
 
 #define NUM_FRAME_CONTEXTS_LOG2 2
 #define NUM_FRAME_CONTEXTS (1 << NUM_FRAME_CONTEXTS_LOG2)
-
-#define MAX_LAG_BUFFERS 25
 
 typedef struct frame_contexts {
   // y_mode, uv_mode, partition

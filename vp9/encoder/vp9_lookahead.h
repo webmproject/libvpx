@@ -14,6 +14,8 @@
 #include "vpx_scale/yv12config.h"
 #include "vpx/vpx_integer.h"
 
+#define MAX_LAG_BUFFERS 25
+
 struct lookahead_entry {
   YV12_BUFFER_CONFIG  img;
   int64_t             ts_start;

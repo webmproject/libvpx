@@ -87,6 +87,10 @@ typedef enum {
   MB_MODE_COUNT
 } MB_PREDICTION_MODE;
 
+static INLINE int is_intra_mode(MB_PREDICTION_MODE mode) {
+  return mode <= TM_PRED;
+}
+
 static INLINE int is_inter_mode(MB_PREDICTION_MODE mode) {
   return mode >= NEARESTMV && mode <= NEWMV;
 }
@@ -94,8 +98,6 @@ static INLINE int is_inter_mode(MB_PREDICTION_MODE mode) {
 #define VP9_INTRA_MODES (TM_PRED + 1)
 
 #define VP9_INTER_MODES (1 + NEWMV - NEARESTMV)
-
-#define WHT_UPSCALE_FACTOR 2
 
 /* For keyframes, intra block modes are predicted by the (already decoded)
    modes for the Y blocks to the left and above us; for interframes, there
