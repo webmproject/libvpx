@@ -238,6 +238,8 @@ typedef struct {
 } MODE_INFO;
 
 #define VP9_REF_SCALE_SHIFT 14
+#define VP9_REF_NO_SCALE 16384
+
 struct scale_factors {
   int x_scale_fp;   // horizontal fixed point scale factor
   int y_scale_fp;   // vertical fixed point scale factor

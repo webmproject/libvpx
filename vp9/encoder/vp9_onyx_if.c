@@ -2299,7 +2299,7 @@ static void loopfilter_frame(VP9_COMP *cpi, VP9_COMMON *cm) {
     vp9_loop_filter_frame(cm, &cpi->mb.e_mbd, cm->filter_level, 0);
   }
 
-  vp9_extend_frame_borders(cm->frame_to_show,
+  vp9_extend_frame_inner_borders(cm->frame_to_show,
                            cm->subsampling_x, cm->subsampling_y);
 
 }
