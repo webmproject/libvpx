@@ -16,6 +16,7 @@
 #include "vp9/common/vp9_filter.h"
 #include "vp9/common/vp9_reconinter.h"
 #include "vp9/common/vp9_reconintra.h"
+#include "./vpx_scale_rtcd.h"
 
 static int scale_value_x_with_scaling(int val,
                                       const struct scale_factors *scale) {
@@ -406,6 +407,10 @@ void vp9_setup_scale_factors(VP9_COMMON *cm, int i) {
     vp9_setup_scale_factors_for_frame(sf,
                                       fb->y_crop_width, fb->y_crop_height,
                                       cm->width, cm->height);
+
+    if (sf->x_scale_fp != VP9_REF_NO_SCALE ||
+        sf->y_scale_fp != VP9_REF_NO_SCALE)
+      vp9_extend_frame_borders(fb, cm->subsampling_x, cm->subsampling_y);
   }
 }
 
