@@ -34,19 +34,12 @@
 #include "vp9/decoder/vp9_onyxd_int.h"
 #include "vp9/decoder/vp9_read_bit_buffer.h"
 
-
-// #define DEC_DEBUG
-#ifdef DEC_DEBUG
-int dec_debug = 0;
-#endif
-
 static int read_be32(const uint8_t *p) {
   return (p[0] << 24) | (p[1] << 16) | (p[2] << 8) | p[3];
 }
 
 // len == 0 is not allowed
-static int read_is_valid(const uint8_t *start, size_t len,
-                         const uint8_t *end) {
+static int read_is_valid(const uint8_t *start, size_t len, const uint8_t *end) {
   return start + len > start && start + len <= end;
 }
 
@@ -62,33 +55,33 @@ static TXFM_MODE read_tx_mode(vp9_reader *r) {
   return txfm_mode;
 }
 
-static void read_tx_probs(FRAME_CONTEXT *fc, vp9_reader *r) {
+static void read_tx_probs(struct tx_probs *tx_probs, vp9_reader *r) {
   int i, j;
 
   for (i = 0; i < TX_SIZE_CONTEXTS; ++i)
     for (j = 0; j < TX_SIZE_MAX_SB - 3; ++j)
       if (vp9_read(r, VP9_MODE_UPDATE_PROB))
-        vp9_diff_update_prob(r, &fc->tx_probs.p8x8[i][j]);
+        vp9_diff_update_prob(r, &tx_probs->p8x8[i][j]);
 
   for (i = 0; i < TX_SIZE_CONTEXTS; ++i)
     for (j = 0; j < TX_SIZE_MAX_SB - 2; ++j)
       if (vp9_read(r, VP9_MODE_UPDATE_PROB))
-        vp9_diff_update_prob(r, &fc->tx_probs.p16x16[i][j]);
+        vp9_diff_update_prob(r, &tx_probs->p16x16[i][j]);
 
   for (i = 0; i < TX_SIZE_CONTEXTS; ++i)
     for (j = 0; j < TX_SIZE_MAX_SB - 1; ++j)
       if (vp9_read(r, VP9_MODE_UPDATE_PROB))
-        vp9_diff_update_prob(r, &fc->tx_probs.p32x32[i][j]);
+        vp9_diff_update_prob(r, &tx_probs->p32x32[i][j]);
 }
 
-static void mb_init_dequantizer(VP9_COMMON *pc, MACROBLOCKD *xd) {
+static void init_dequantizer(VP9_COMMON *cm, MACROBLOCKD *xd) {
   int i;
   const int segment_id = xd->mode_info_context->mbmi.segment_id;
-  xd->q_index = vp9_get_qindex(xd, segment_id, pc->base_qindex);
+  xd->q_index = vp9_get_qindex(xd, segment_id, cm->base_qindex);
 
-  xd->plane[0].dequant = pc->y_dequant[xd->q_index];
+  xd->plane[0].dequant = cm->y_dequant[xd->q_index];
   for (i = 1; i < MAX_MB_PLANE; i++)
-    xd->plane[i].dequant = pc->uv_dequant[xd->q_index];
+    xd->plane[i].dequant = cm->uv_dequant[xd->q_index];
 }
 
 static void decode_block(int plane, int block, BLOCK_SIZE_TYPE bsize,
@@ -175,7 +168,7 @@ static int decode_tokens(VP9D_COMP *pbi, BLOCK_SIZE_TYPE bsize, vp9_reader *r) {
     return -1;
   } else {
     if (xd->seg.enabled)
-      mb_init_dequantizer(&pbi->common, xd);
+      init_dequantizer(&pbi->common, xd);
 
     // TODO(dkovalev) if (!vp9_reader_has_error(r))
     return vp9_decode_tokens(pbi, r, bsize);
@@ -288,11 +281,10 @@ static void decode_modes_sb(VP9D_COMP *pbi, int mi_row, int mi_col,
   if (mi_row >= pc->mi_rows || mi_col >= pc->mi_cols)
     return;
 
-  if (bsize < BLOCK_SIZE_SB8X8)
+  if (bsize < BLOCK_SIZE_SB8X8) {
     if (xd->ab_index != 0)
       return;
-
-  if (bsize >= BLOCK_SIZE_SB8X8) {
+  } else {
     int pl;
     const int idx = check_bsize_coverage(pc, xd, mi_row, mi_col, bsize);
     set_partition_seg_context(pc, xd, mi_row, mi_col);
@@ -337,8 +329,9 @@ static void decode_modes_sb(VP9D_COMP *pbi, int mi_row, int mi_col,
       }
       break;
     default:
-      assert(0);
+      assert(!"Invalid partition type");
   }
+
   // update partition context
   if (bsize >= BLOCK_SIZE_SB8X8 &&
       (bsize == BLOCK_SIZE_SB8X8 || partition != PARTITION_SPLIT)) {
@@ -365,9 +358,8 @@ static void setup_token_decoder(VP9D_COMP *pbi,
                        "Failed to allocate bool decoder %d", 1);
 }
 
-static void read_coef_probs_common(FRAME_CONTEXT *fc, TX_SIZE tx_size,
+static void read_coef_probs_common(vp9_coeff_probs_model *coef_probs,
                                    vp9_reader *r) {
-  vp9_coeff_probs_model *coef_probs = fc->coef_probs[tx_size];
   int i, j, k, l, m;
 
   if (vp9_read_bit(r))
@@ -383,16 +375,16 @@ static void read_coef_probs_common(FRAME_CONTEXT *fc, TX_SIZE tx_size,
 
 static void read_coef_probs(FRAME_CONTEXT *fc, TXFM_MODE txfm_mode,
                             vp9_reader *r) {
-  read_coef_probs_common(fc, TX_4X4, r);
+  read_coef_probs_common(fc->coef_probs[TX_4X4], r);
 
   if (txfm_mode > ONLY_4X4)
-    read_coef_probs_common(fc, TX_8X8, r);
+    read_coef_probs_common(fc->coef_probs[TX_8X8], r);
 
   if (txfm_mode > ALLOW_8X8)
-    read_coef_probs_common(fc, TX_16X16, r);
+    read_coef_probs_common(fc->coef_probs[TX_16X16], r);
 
   if (txfm_mode > ALLOW_16X16)
-    read_coef_probs_common(fc, TX_32X32, r);
+    read_coef_probs_common(fc->coef_probs[TX_32X32], r);
 }
 
 static void setup_segmentation(struct segmentation *seg,
@@ -760,10 +752,9 @@ static void setup_inter_inter(VP9_COMMON *cm) {
   int i;
 
   cm->allow_comp_inter_inter = 0;
-  for (i = 0; i < ALLOWED_REFS_PER_FRAME; ++i) {
-    cm->allow_comp_inter_inter |= i > 0 &&
+  for (i = 1; i < ALLOWED_REFS_PER_FRAME; ++i)
+    cm->allow_comp_inter_inter |=
         cm->ref_frame_sign_bias[i + 1] != cm->ref_frame_sign_bias[1];
-  }
 
   if (cm->allow_comp_inter_inter) {
     // which one is always-on in comp inter-inter?
@@ -915,7 +906,7 @@ static int read_compressed_header(VP9D_COMP *pbi, const uint8_t *data,
 
   cm->txfm_mode = xd->lossless ? ONLY_4X4 : read_tx_mode(&r);
   if (cm->txfm_mode == TX_MODE_SELECT)
-    read_tx_probs(&cm->fc, &r);
+    read_tx_probs(&cm->fc.tx_probs, &r);
   read_coef_probs(&cm->fc, cm->txfm_mode, &r);
 
   vp9_prepare_read_mode_info(pbi, &r);
@@ -923,17 +914,15 @@ static int read_compressed_header(VP9D_COMP *pbi, const uint8_t *data,
   return vp9_reader_has_error(&r);
 }
 
-void vp9_init_dequantizer(VP9_COMMON *pc) {
+void vp9_init_dequantizer(VP9_COMMON *cm) {
   int q;
 
   for (q = 0; q < QINDEX_RANGE; q++) {
-    // DC value
-    pc->y_dequant[q][0] = vp9_dc_quant(q, pc->y_dc_delta_q);
-    pc->uv_dequant[q][0] = vp9_dc_quant(q, pc->uv_dc_delta_q);
+    cm->y_dequant[q][0] = vp9_dc_quant(q, cm->y_dc_delta_q);
+    cm->y_dequant[q][1] = vp9_ac_quant(q, 0);
 
-    // AC values
-    pc->y_dequant[q][1] = vp9_ac_quant(q, 0);
-    pc->uv_dequant[q][1] = vp9_ac_quant(q, pc->uv_ac_delta_q);
+    cm->uv_dequant[q][0] = vp9_dc_quant(q, cm->uv_dc_delta_q);
+    cm->uv_dequant[q][1] = vp9_ac_quant(q, cm->uv_ac_delta_q);
   }
 }
 
@@ -973,7 +962,7 @@ int vp9_decode_frame(VP9D_COMP *pbi, const uint8_t **p_data_end) {
   xd->frame_type = pc->frame_type;
   xd->mode_info_stride = pc->mode_info_stride;
 
-  mb_init_dequantizer(pc, &pbi->mb);  // MB level dequantizer setup
+  init_dequantizer(pc, &pbi->mb);
 
   if (!keyframe)
     vp9_setup_interp_filters(xd, pc->mcomp_filter_type, pc);
@@ -1017,11 +1006,10 @@ int vp9_decode_frame(VP9D_COMP *pbi, const uint8_t **p_data_end) {
                          "A stream must start with a complete key frame");
   }
 
-  // Adaptation
   if (!pc->error_resilient_mode && !pc->frame_parallel_decoding_mode) {
     vp9_adapt_coef_probs(pc);
 
-    if ((!keyframe) && (!pc->intra_only)) {
+    if (!keyframe && !pc->intra_only) {
       vp9_adapt_mode_probs(pc);
       vp9_adapt_mode_context(pc);
       vp9_adapt_mv_probs(pc, xd->allow_high_precision_mv);
