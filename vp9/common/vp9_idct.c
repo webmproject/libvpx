@@ -534,6 +534,7 @@ static void idct16_1d(int16_t *input, int16_t *output) {
   step1[14] = -step2[14] + step2[15];
   step1[15] = step2[14] + step2[15];
 
+  // stage 4
   temp1 = (step1[0] + step1[1]) * cospi_16_64;
   temp2 = (step1[0] - step1[1]) * cospi_16_64;
   step2[0] = dct_const_round_shift(temp1);
