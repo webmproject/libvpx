@@ -16,6 +16,24 @@
       "revId": "6abd06466a89068c8d7c50988713ff9e305fe8d7",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcX//8EA\u003d",
+        "filename": "vp9/common/vp9_tile_common.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2013-07-16T21:50:37Z",
+      "side": 1,
+      "message": "That\u0027s a tricky question. I think eventually we should have just blocks without any \"mb\" or \"sb\" prefixes because it\u0027s very confusing: BLOCK_4X4, BLOCK_8X16, etc. Right now renaming\nconstants to {MIN, MAX}_TILE_WIDTH_B64.",
+      "parentUuid": "AAAAcX//8RA\u003d",
+      "revId": "6abd06466a89068c8d7c50988713ff9e305fe8d7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
