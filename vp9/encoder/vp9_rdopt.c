@@ -1524,6 +1524,24 @@ static int64_t rd_pick_intra_sbuv_mode(VP9_COMP *cpi, MACROBLOCK *x,
   return best_rd;
 }
 
+static int64_t rd_sbuv_dcpred(VP9_COMP *cpi, MACROBLOCK *x,
+                              int *rate, int *rate_tokenonly,
+                              int64_t *distortion, int *skippable,
+                              BLOCK_SIZE_TYPE bsize) {
+  int64_t this_rd;
+
+  x->e_mbd.mode_info_context->mbmi.uv_mode = DC_PRED;
+  super_block_uvrd(&cpi->common, x, rate_tokenonly,
+                   distortion, skippable, NULL, bsize);
+  *rate = *rate_tokenonly +
+          x->intra_uv_mode_cost[x->e_mbd.frame_type][DC_PRED];
+  this_rd = RDCOST(x->rdmult, x->rddiv, *rate, *distortion);
+
+  x->e_mbd.mode_info_context->mbmi.uv_mode = DC_PRED;
+
+  return this_rd;
+}
+
 static int cost_mv_ref(VP9_COMP *cpi, MB_PREDICTION_MODE mode,
                        int mode_context) {
   MACROBLOCK *const x = &cpi->mb;
@@ -3090,7 +3108,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
     frame_mv[ZEROMV][ref_frame].as_int = 0;
   }
 
-  // If intra is not masked off then get best uv intra mode rd.
+  // If intra is not masked off then get uv intra mode rd.
   if (!cpi->sf.use_avoid_tested_higherror
       || (cpi->sf.use_avoid_tested_higherror
           && (ref_frame_mask & (1 << INTRA_FRAME)))) {
@@ -3104,12 +3122,26 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
 
     mbmi->mode = DC_PRED;
     mbmi->ref_frame[0] = INTRA_FRAME;
+
+    // Test all possible UV transform sizes that may be used in the main loop
     for (i = min_uvtxfm_size; i <= max_uvtxfm_size; ++i) {
       mbmi->txfm_size = i;
-      rd_pick_intra_sbuv_mode(cpi, x, &rate_uv_intra[i],
-                              &rate_uv_tokenonly[i], &dist_uv[i], &skip_uv[i],
-                              (bsize < BLOCK_SIZE_SB8X8) ? BLOCK_SIZE_SB8X8 :
-                                                           bsize);
+
+      // Use an estimated rd for uv_intra based on DC_PRED if the
+      // appropriate speed flag is set.
+      if (cpi->sf.use_uv_intra_rd_estimate) {
+        rd_sbuv_dcpred(cpi, x, &rate_uv_intra[i],
+                       &rate_uv_tokenonly[i], &dist_uv[i], &skip_uv[i],
+                       (bsize < BLOCK_SIZE_SB8X8) ? BLOCK_SIZE_SB8X8 :
+                                                    bsize);
+      // Else do a proper rd search for each possible transform size that may
+      // be considered in the main rd loop.
+      } else {
+        rd_pick_intra_sbuv_mode(cpi, x, &rate_uv_intra[i],
+                                &rate_uv_tokenonly[i], &dist_uv[i], &skip_uv[i],
+                                (bsize < BLOCK_SIZE_SB8X8) ? BLOCK_SIZE_SB8X8
+                                                           : bsize);
+      }
       mode_uv[i] = mbmi->uv_mode;
     }
   }
@@ -3759,6 +3791,20 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
 
     if (x->skip && !mode_excluded)
       break;
+  }
+
+  // If we used an estimate for the uv intra rd in the loop above...
+  if (cpi->sf.use_uv_intra_rd_estimate) {
+    // Do Intra UV best rd mode selection if best mode choice above was intra.
+    if (vp9_mode_order[best_mode_index].ref_frame == INTRA_FRAME) {
+      TX_SIZE uv_tx_size = get_uv_tx_size(mbmi);
+      rd_pick_intra_sbuv_mode(cpi, x, &rate_uv_intra[uv_tx_size],
+                              &rate_uv_tokenonly[uv_tx_size],
+                              &dist_uv[uv_tx_size],
+                              &skip_uv[uv_tx_size],
+                              (bsize < BLOCK_SIZE_SB8X8) ? BLOCK_SIZE_SB8X8
+                                                         : bsize);
+    }
   }
 
   // If indicated then mark the index of the chosen mode to be inspected at
