@@ -392,9 +392,7 @@ static void setup_block_dptrs(MACROBLOCKD *xd, int ss_x, int ss_y) {
 
 
 static INLINE TX_SIZE get_uv_tx_size(const MB_MODE_INFO *mbmi) {
-  const TX_SIZE size = mbmi->txfm_size;
-  const TX_SIZE max_size = max_uv_txsize_lookup[mbmi->sb_type];
-  return (size > max_size ? max_size : size);
+  return MIN(mbmi->txfm_size, max_uv_txsize_lookup[mbmi->sb_type]);
 }
 
 struct plane_block_idx {
