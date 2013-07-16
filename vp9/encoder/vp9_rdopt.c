@@ -1842,7 +1842,8 @@ static void rd_check_segment_txsize(VP9_COMP *cpi, MACROBLOCK *x,
         vpx_memcpy(t_left_s, t_left, sizeof(t_left_s));
 
         // motion search for newmv (single predictor case only)
-        if (mbmi->ref_frame[1] <= 0 && this_mode == NEWMV) {
+        if (mbmi->ref_frame[1] <= 0 && this_mode == NEWMV &&
+            seg_mvs[i][mbmi->ref_frame[0]].as_int == INVALID_MV) {
           int step_param = 0;
           int further_steps;
           int thissme, bestsme = INT_MAX;
@@ -1914,7 +1915,10 @@ static void rd_check_segment_txsize(VP9_COMP *cpi, MACROBLOCK *x,
 
           // restore src pointers
           mi_buf_restore(x, orig_src, orig_pre);
-        } else if (mbmi->ref_frame[1] > 0 && this_mode == NEWMV) {
+        }
+
+        if (mbmi->ref_frame[1] > 0 && this_mode == NEWMV &&
+            mbmi->interp_filter == vp9_switchable_interp[0]) {
           if (seg_mvs[i][mbmi->ref_frame[1]].as_int == INVALID_MV ||
               seg_mvs[i][mbmi->ref_frame[0]].as_int == INVALID_MV)
             continue;
@@ -3415,28 +3419,28 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
         if ((newbest && cm->mcomp_filter_type == SWITCHABLE) ||
             (mbmi->interp_filter == cm->mcomp_filter_type &&
              cm->mcomp_filter_type != SWITCHABLE)) {
-              tmp_best_rdu = tmp_rd;
-              tmp_best_rate = rate;
-              tmp_best_ratey = rate_y;
-              tmp_best_distortion = distortion;
-              tmp_best_skippable = skippable;
-              tmp_best_mbmode = *mbmi;
-              tmp_best_partition = *x->partition_info;
-              for (i = 0; i < 4; i++)
-                tmp_best_bmodes[i] = xd->mode_info_context->bmi[i];
-              pred_exists = 1;
-              if (switchable_filter_index == 0 &&
-                  cpi->sf.use_rd_breakout &&
-                  best_rd < INT64_MAX) {
-                if (tmp_best_rdu / 2 > best_rd) {
-                  // skip searching the other filters if the first is
-                  // already substantially larger than the best so far
-                  tmp_best_filter = mbmi->interp_filter;
-                  tmp_best_rdu = INT64_MAX;
-                  break;
-                }
-              }
+          tmp_best_rdu = tmp_rd;
+          tmp_best_rate = rate;
+          tmp_best_ratey = rate_y;
+          tmp_best_distortion = distortion;
+          tmp_best_skippable = skippable;
+          tmp_best_mbmode = *mbmi;
+          tmp_best_partition = *x->partition_info;
+          for (i = 0; i < 4; i++)
+            tmp_best_bmodes[i] = xd->mode_info_context->bmi[i];
+          pred_exists = 1;
+          if (switchable_filter_index == 0 &&
+              cpi->sf.use_rd_breakout &&
+              best_rd < INT64_MAX) {
+            if (tmp_best_rdu / 2 > best_rd) {
+              // skip searching the other filters if the first is
+              // already substantially larger than the best so far
+              tmp_best_filter = mbmi->interp_filter;
+              tmp_best_rdu = INT64_MAX;
+              break;
             }
+          }
+        }
       }  // switchable_filter_index loop
       if (tmp_best_rdu == INT64_MAX)
         continue;
