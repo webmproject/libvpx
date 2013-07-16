@@ -451,7 +451,7 @@ static int estimate_keyframe_frequency(VP9_COMP *cpi) {
      * whichever is smaller.
      */
     int key_freq = cpi->oxcf.key_freq > 0 ? cpi->oxcf.key_freq : 1;
-    av_key_frame_frequency = (int)cpi->output_frame_rate * 2;
+    av_key_frame_frequency = (int)cpi->output_framerate * 2;
 
     if (cpi->oxcf.auto_key && av_key_frame_frequency > key_freq)
       av_key_frame_frequency = cpi->oxcf.key_freq;

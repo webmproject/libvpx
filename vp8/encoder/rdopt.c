@@ -341,7 +341,7 @@ void vp8_initialize_rd_consts(VP8_COMP *cpi, MACROBLOCK *x, int Qvalue)
 
 void vp8_auto_select_speed(VP8_COMP *cpi)
 {
-    int milliseconds_for_compress = (int)(1000000 / cpi->frame_rate);
+    int milliseconds_for_compress = (int)(1000000 / cpi->framerate);
 
     milliseconds_for_compress = milliseconds_for_compress * (16 - cpi->oxcf.cpu_used) / 16;
 

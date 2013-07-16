@@ -1026,14 +1026,14 @@ int vp9_reverse_trans(int x) {
 
   return 63;
 };
-void vp9_new_frame_rate(VP9_COMP *cpi, double framerate) {
+void vp9_new_framerate(VP9_COMP *cpi, double framerate) {
   if (framerate < 0.1)
     framerate = 30;
 
-  cpi->oxcf.frame_rate             = framerate;
-  cpi->output_frame_rate            = cpi->oxcf.frame_rate;
-  cpi->per_frame_bandwidth          = (int)(cpi->oxcf.target_bandwidth / cpi->output_frame_rate);
-  cpi->av_per_frame_bandwidth        = (int)(cpi->oxcf.target_bandwidth / cpi->output_frame_rate);
+  cpi->oxcf.framerate             = framerate;
+  cpi->output_framerate            = cpi->oxcf.framerate;
+  cpi->per_frame_bandwidth          = (int)(cpi->oxcf.target_bandwidth / cpi->output_framerate);
+  cpi->av_per_frame_bandwidth        = (int)(cpi->oxcf.target_bandwidth / cpi->output_framerate);
   cpi->min_frame_bandwidth          = (int)(cpi->av_per_frame_bandwidth * cpi->oxcf.two_pass_vbrmin_section / 100);
 
 
@@ -1230,7 +1230,7 @@ void vp9_change_config(VP9_PTR ptr, VP9_CONFIG *oxcf) {
                                             cpi->oxcf.target_bandwidth, 1000);
 
   // Set up frame rate and related parameters rate control values.
-  vp9_new_frame_rate(cpi, cpi->oxcf.frame_rate);
+  vp9_new_framerate(cpi, cpi->oxcf.framerate);
 
   // Set absolute upper and lower quality limits
   cpi->worst_quality = cpi->oxcf.worst_allowed_q;
@@ -1522,7 +1522,7 @@ VP9_PTR vp9_create_compressor(VP9_CONFIG *oxcf) {
   cal_nmvsadcosts_hp(cpi->mb.nmvsadcost_hp);
 
   for (i = 0; i < KEY_FRAME_CONTEXT; i++)
-    cpi->prior_key_frame_distance[i] = (int)cpi->output_frame_rate;
+    cpi->prior_key_frame_distance[i] = (int)cpi->output_framerate;
 
 #ifdef OUTPUT_YUV_SRC
   yuv_file = fopen("bd.yuv", "ab");
@@ -2530,7 +2530,7 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
     cpi->per_frame_bandwidth = cpi->twopass.gf_bits;
     // per second target bitrate
     cpi->target_bandwidth = (int)(cpi->twopass.gf_bits *
-                                  cpi->output_frame_rate);
+                                  cpi->output_framerate);
   }
 
   // Clear zbin over-quant value and mode boost values.
@@ -3472,14 +3472,14 @@ static void Pass2Encode(VP9_COMP *cpi, unsigned long *size,
 #endif
 
   if (!cpi->refresh_alt_ref_frame) {
-    double lower_bounds_min_rate = FRAME_OVERHEAD_BITS * cpi->oxcf.frame_rate;
+    double lower_bounds_min_rate = FRAME_OVERHEAD_BITS * cpi->oxcf.framerate;
     double two_pass_min_rate = (double)(cpi->oxcf.target_bandwidth
                                         * cpi->oxcf.two_pass_vbrmin_section / 100);
 
     if (two_pass_min_rate < lower_bounds_min_rate)
       two_pass_min_rate = lower_bounds_min_rate;
 
-    cpi->twopass.bits_left += (int64_t)(two_pass_min_rate / cpi->oxcf.frame_rate);
+    cpi->twopass.bits_left += (int64_t)(two_pass_min_rate / cpi->oxcf.framerate);
   }
 }
 
@@ -3701,18 +3701,18 @@ int vp9_get_compressed_data(VP9_PTR ptr, unsigned int *frame_flags,
 
     if (this_duration) {
       if (step) {
-        vp9_new_frame_rate(cpi, 10000000.0 / this_duration);
+        vp9_new_framerate(cpi, 10000000.0 / this_duration);
       } else {
         // Average this frame's rate into the last second's average
         // frame rate. If we haven't seen 1 second yet, then average
         // over the whole interval seen.
         const double interval = MIN((double)(cpi->source->ts_end
                                      - cpi->first_time_stamp_ever), 10000000.0);
-        double avg_duration = 10000000.0 / cpi->oxcf.frame_rate;
+        double avg_duration = 10000000.0 / cpi->oxcf.framerate;
         avg_duration *= (interval - avg_duration + this_duration);
         avg_duration /= interval;
 
-        vp9_new_frame_rate(cpi, 10000000.0 / avg_duration);
+        vp9_new_framerate(cpi, 10000000.0 / avg_duration);
       }
     }
 

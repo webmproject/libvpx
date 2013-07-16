@@ -923,7 +923,7 @@ int vp8_post_proc_frame(VP8_COMMON *oci, YV12_BUFFER_CONFIG *dest, vp8_ppflags_t
     if (flags & VP8D_DEBUG_TXT_RATE_INFO)
     {
         char message[512];
-        sprintf(message, "Bitrate: %10.2f frame_rate: %10.2f ", oci->bitrate, oci->framerate);
+        sprintf(message, "Bitrate: %10.2f framerate: %10.2f ", oci->bitrate, oci->framerate);
         vp8_blit_text(message, oci->post_proc_buffer.y_buffer, oci->post_proc_buffer.y_stride);
     }
 
