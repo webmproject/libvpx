@@ -28,8 +28,6 @@ typedef struct {
   DECLARE_ALIGNED(SIMD_WIDTH, uint8_t,
                   mblim[MAX_LOOP_FILTER + 1][SIMD_WIDTH]);
   DECLARE_ALIGNED(SIMD_WIDTH, uint8_t,
-                  blim[MAX_LOOP_FILTER + 1][SIMD_WIDTH]);
-  DECLARE_ALIGNED(SIMD_WIDTH, uint8_t,
                   lim[MAX_LOOP_FILTER + 1][SIMD_WIDTH]);
   DECLARE_ALIGNED(SIMD_WIDTH, uint8_t,
                   hev_thr[4][SIMD_WIDTH]);
@@ -39,10 +37,10 @@ typedef struct {
 
 struct loop_filter_info {
   const uint8_t *mblim;
-  const uint8_t *blim;
   const uint8_t *lim;
   const uint8_t *hev_thr;
 };
+
 
 /* assorted loopfilter functions which get used elsewhere */
 struct VP9Common;

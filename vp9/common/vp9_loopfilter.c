@@ -50,7 +50,6 @@ static void update_sharpness(loop_filter_info_n *const lfi, int sharpness_lvl) {
       block_inside_limit = 1;
 
     vpx_memset(lfi->lim[lvl], block_inside_limit, SIMD_WIDTH);
-    vpx_memset(lfi->blim[lvl], (2 * lvl + block_inside_limit), SIMD_WIDTH);
     vpx_memset(lfi->mblim[lvl], (2 * (lvl + 2) + block_inside_limit),
                SIMD_WIDTH);
   }
@@ -127,7 +126,6 @@ static int build_lfi(const loop_filter_info_n *const lfi_n,
 
   if (filter_level > 0) {
     lfi->mblim = lfi_n->mblim[filter_level];
-    lfi->blim = lfi_n->blim[filter_level];
     lfi->lim = lfi_n->lim[filter_level];
     lfi->hev_thr = lfi_n->hev_thr[filter_level >> 4];
     return 1;
@@ -189,7 +187,7 @@ static void filter_selectively_horiz(uint8_t *s, int pitch,
 
   for (mask = mask_16x16 | mask_8x8 | mask_4x4 | mask_4x4_int;
        mask; mask >>= count) {
-    count =1;
+    count = 1;
     if (mask & 1) {
       if (!only_4x4_1) {
         if (mask_16x16 & 1) {
@@ -244,6 +242,7 @@ static void filter_block_plane(VP9_COMMON *const cm, MACROBLOCKD *const xd,
   unsigned int mask_4x4_int[MI_BLOCK_SIZE] = {0};
   struct loop_filter_info lfi[MI_BLOCK_SIZE][MI_BLOCK_SIZE];
   int r, c;
+
   const MODE_INFO *mi = xd->mode_info_context;
   const int row_step_stride = cm->mode_info_stride * row_step;
 
