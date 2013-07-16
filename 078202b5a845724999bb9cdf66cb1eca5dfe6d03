@@ -52,6 +52,23 @@
       "revId": "078202b5a845724999bb9cdf66cb1eca5dfe6d03",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcX//8c0\u003d",
+        "filename": "vp9/common/arm/neon/vp9_convolve_neon.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2013-07-16T19:30:33Z",
+      "side": 1,
+      "message": "Will be called with h\u003d11,15,23,39 which are not supported. Standby.",
+      "revId": "078202b5a845724999bb9cdf66cb1eca5dfe6d03",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
