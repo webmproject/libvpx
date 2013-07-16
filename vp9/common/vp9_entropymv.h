@@ -25,9 +25,6 @@ void vp9_adapt_mv_probs(struct VP9Common *cm, int usehp);
 int vp9_use_mv_hp(const MV *ref);
 
 #define VP9_NMV_UPDATE_PROB  252
-
-//#define MV_GROUP_UPDATE
-
 #define LOW_PRECISION_MV_UPDATE  /* Use 7 bit forward update */
 
 /* Symbols for coding which components are zero jointly */
