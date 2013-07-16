@@ -565,96 +565,156 @@ void vp9_encode_sb(VP9_COMMON *cm, MACROBLOCK *x, BLOCK_SIZE_TYPE bsize) {
 }
 
 void encode_block_intra(int plane, int block, BLOCK_SIZE_TYPE bsize,
-                               int ss_txfrm_size, void *arg) {
+                        int ss_txfrm_size, void *arg) {
   struct encode_b_args* const args = arg;
   MACROBLOCK *const x = args->x;
   MACROBLOCKD *const xd = &x->e_mbd;
-  MB_MODE_INFO *const mbmi = &xd->mode_info_context->mbmi;
+  MB_MODE_INFO *mbmi = &xd->mode_info_context->mbmi;
   const TX_SIZE tx_size = (TX_SIZE)(ss_txfrm_size / 2);
   struct macroblock_plane *const p = &x->plane[plane];
   struct macroblockd_plane *const pd = &xd->plane[plane];
-  int16_t *const dqcoeff = BLOCK_OFFSET(pd->dqcoeff, block, 16);
-  const int bw = plane_block_width(bsize, pd);
-  const int raster_block = txfrm_block_to_raster_block(xd, bsize, plane,
-                                                       block, ss_txfrm_size);
-
-  uint8_t *const src = raster_block_offset_uint8(xd, bsize, plane, raster_block,
-                                                 p->src.buf, p->src.stride);
-  uint8_t *const dst = raster_block_offset_uint8(xd, bsize, plane, raster_block,
-                                                 pd->dst.buf, pd->dst.stride);
-  int16_t *const src_diff = raster_block_offset_int16(xd, bsize, plane,
-                                                      raster_block,
-                                                      p->src_diff);
-
-  const int txfm_b_size = 4 << tx_size;
-  int ib = raster_block;
-  int tx_ib = ib >> tx_size;
-  int plane_b_size;
-
+  int16_t *coeff = BLOCK_OFFSET(p->coeff, block, 16);
+  int16_t *qcoeff = BLOCK_OFFSET(pd->qcoeff, block, 16);
+  int16_t *dqcoeff = BLOCK_OFFSET(pd->dqcoeff, block, 16);
+  const int16_t *scan, *iscan;
   TX_TYPE tx_type;
-  int mode, b_mode;
+  MB_PREDICTION_MODE mode;
+  const int bwl = b_width_log2(bsize) - pd->subsampling_x, bw = 1 << bwl;
+  const int twl = bwl - tx_size, twmask = (1 << twl) - 1;
+  int xoff, yoff;
+  uint8_t *src, *dst;
+  int16_t *src_diff;
+  uint16_t *eob = &pd->eobs[block];
 
   if (xd->mb_to_right_edge < 0 || xd->mb_to_bottom_edge < 0) {
     extend_for_intra(xd, plane, block, bsize, ss_txfrm_size);
   }
 
-  mode = plane == 0? mbmi->mode: mbmi->uv_mode;
-  if (plane == 0 &&
-      mbmi->sb_type < BLOCK_SIZE_SB8X8 &&
-      mbmi->ref_frame[0] == INTRA_FRAME)
-    b_mode = xd->mode_info_context->bmi[ib].as_mode;
-  else
-    b_mode = mode;
-
-  assert(b_mode >= DC_PRED && b_mode <= TM_PRED);
-
-  plane_b_size = b_width_log2(bsize) - pd->subsampling_x;
-  vp9_predict_intra_block(xd, tx_ib, plane_b_size, tx_size, b_mode,
-                          x->skip_encode ? src : dst,
-                          x->skip_encode ? p->src.stride : pd->dst.stride,
-                          dst, pd->dst.stride);
-  vp9_subtract_block(txfm_b_size, txfm_b_size, src_diff, bw,
-                     src, p->src.stride, dst, pd->dst.stride);
-
-  xform_quant(plane, block, bsize, ss_txfrm_size, arg);
-
-
-  if (x->skip_encode)
-    return;
-
   // if (x->optimize)
   // vp9_optimize_b(plane, block, bsize, ss_txfrm_size,
   //                args->cm, x, args->ctx);
 
-  switch (ss_txfrm_size / 2) {
+  switch (tx_size) {
     case TX_32X32:
+      scan = vp9_default_scan_32x32;
+      iscan = vp9_default_iscan_32x32;
+      mode = plane == 0 ? mbmi->mode : mbmi->uv_mode;
+      block >>= 6;
+      xoff = 32 * (block & twmask);
+      yoff = 32 * (block >> twl);
+      dst = pd->dst.buf + yoff * pd->dst.stride + xoff;
+      src = p->src.buf + yoff * p->src.stride + xoff;
+      src_diff = p->src_diff + 4 * bw * yoff + xoff;
+      vp9_predict_intra_block(xd, block, bwl, TX_32X32, mode,
+                              dst, pd->dst.stride, dst, pd->dst.stride);
+      vp9_subtract_block(32, 32, src_diff, bw * 4,
+                         src, p->src.stride, dst, pd->dst.stride);
+      if (x->rd_search)
+        vp9_short_fdct32x32_rd(src_diff, coeff, bw * 8);
+      else
+        vp9_short_fdct32x32(src_diff, coeff, bw * 8);
+      vp9_quantize_b_32x32(coeff, 1024, x->skip_block, p->zbin, p->round,
+                           p->quant, p->quant_shift, qcoeff, dqcoeff,
+                           pd->dequant, p->zbin_extra, eob, scan, iscan);
+      if (!x->skip_encode)
         vp9_short_idct32x32_add(dqcoeff, dst, pd->dst.stride);
       break;
     case TX_16X16:
       tx_type = plane == 0 ? get_tx_type_16x16(xd) : DCT_DCT;
-      if (tx_type == DCT_DCT)
-        vp9_short_idct16x16_add(dqcoeff, dst, pd->dst.stride);
+      scan = get_scan_16x16(tx_type);
+      iscan = get_iscan_16x16(tx_type);
+      mode = plane == 0 ? mbmi->mode : mbmi->uv_mode;
+      block >>= 4;
+      xoff = 16 * (block & twmask);
+      yoff = 16 * (block >> twl);
+      dst = pd->dst.buf + yoff * pd->dst.stride + xoff;
+      src = p->src.buf + yoff * p->src.stride + xoff;
+      src_diff = p->src_diff + 4 * bw * yoff + xoff;
+      vp9_predict_intra_block(xd, block, bwl, TX_16X16, mode,
+                              dst, pd->dst.stride, dst, pd->dst.stride);
+      vp9_subtract_block(16, 16, src_diff, bw * 4,
+                         src, p->src.stride, dst, pd->dst.stride);
+      if (tx_type != DCT_DCT)
+        vp9_short_fht16x16(src_diff, coeff, bw * 4, tx_type);
       else
-        vp9_short_iht16x16_add(dqcoeff, dst, pd->dst.stride, tx_type);
+        x->fwd_txm16x16(src_diff, coeff, bw * 8);
+      vp9_quantize_b(coeff, 256, x->skip_block, p->zbin, p->round, p->quant,
+                     p->quant_shift, qcoeff, dqcoeff,
+                     pd->dequant, p->zbin_extra, eob, scan, iscan);
+      if (!x->skip_encode) {
+        if (tx_type == DCT_DCT)
+          vp9_short_idct16x16_add(dqcoeff, dst, pd->dst.stride);
+        else
+          vp9_short_iht16x16_add(dqcoeff, dst, pd->dst.stride, tx_type);
+      }
       break;
     case TX_8X8:
       tx_type = plane == 0 ? get_tx_type_8x8(xd) : DCT_DCT;
-      if (tx_type == DCT_DCT)
-        vp9_short_idct8x8_add(dqcoeff, dst, pd->dst.stride);
+      scan = get_scan_8x8(tx_type);
+      iscan = get_iscan_8x8(tx_type);
+      mode = plane == 0 ? mbmi->mode : mbmi->uv_mode;
+      block >>= 2;
+      xoff = 8 * (block & twmask);
+      yoff = 8 * (block >> twl);
+      dst = pd->dst.buf + yoff * pd->dst.stride + xoff;
+      src = p->src.buf + yoff * p->src.stride + xoff;
+      src_diff = p->src_diff + 4 * bw * yoff + xoff;
+      vp9_predict_intra_block(xd, block, bwl, TX_8X8, mode,
+                              dst, pd->dst.stride, dst, pd->dst.stride);
+      vp9_subtract_block(8, 8, src_diff, bw * 4,
+                         src, p->src.stride, dst, pd->dst.stride);
+      if (tx_type != DCT_DCT)
+        vp9_short_fht8x8(src_diff, coeff, bw * 4, tx_type);
       else
-        vp9_short_iht8x8_add(dqcoeff, dst, pd->dst.stride, tx_type);
+        x->fwd_txm8x8(src_diff, coeff, bw * 8);
+      vp9_quantize_b(coeff, 64, x->skip_block, p->zbin, p->round, p->quant,
+                     p->quant_shift, qcoeff, dqcoeff,
+                     pd->dequant, p->zbin_extra, eob, scan, iscan);
+      if (!x->skip_encode) {
+        if (tx_type == DCT_DCT)
+          vp9_short_idct8x8_add(dqcoeff, dst, pd->dst.stride);
+        else
+          vp9_short_iht8x8_add(dqcoeff, dst, pd->dst.stride, tx_type);
+      }
       break;
     case TX_4X4:
-      tx_type = plane == 0 ? get_tx_type_4x4(xd, raster_block) : DCT_DCT;
-      if (tx_type == DCT_DCT)
-        // this is like vp9_short_idct4x4 but has a special case around eob<=1
-        // which is significant (not just an optimization) for the lossless
-        // case.
-        inverse_transform_b_4x4_add(xd, pd->eobs[block], dqcoeff,
-                                    dst, pd->dst.stride);
+      tx_type = plane == 0 ? get_tx_type_4x4(xd, block) : DCT_DCT;
+      scan = get_scan_4x4(tx_type);
+      iscan = get_iscan_4x4(tx_type);
+      if (mbmi->sb_type < BLOCK_SIZE_SB8X8 && plane == 0) {
+        mode = xd->mode_info_context->bmi[block].as_mode;
+      } else {
+        mode = plane == 0 ? mbmi->mode : mbmi->uv_mode;
+      }
+      xoff = 4 * (block & twmask);
+      yoff = 4 * (block >> twl);
+      dst = pd->dst.buf + yoff * pd->dst.stride + xoff;
+      src = p->src.buf + yoff * p->src.stride + xoff;
+      src_diff = p->src_diff + 4 * bw * yoff + xoff;
+      vp9_predict_intra_block(xd, block, bwl, TX_4X4, mode,
+                              dst, pd->dst.stride, dst, pd->dst.stride);
+      vp9_subtract_block(4, 4, src_diff, bw * 4,
+                         src, p->src.stride, dst, pd->dst.stride);
+      if (tx_type != DCT_DCT)
+        vp9_short_fht4x4(src_diff, coeff, bw * 4, tx_type);
       else
-        vp9_short_iht4x4_add(dqcoeff, dst, pd->dst.stride, tx_type);
+        x->fwd_txm4x4(src_diff, coeff, bw * 8);
+      vp9_quantize_b(coeff, 16, x->skip_block, p->zbin, p->round, p->quant,
+                     p->quant_shift, qcoeff, dqcoeff,
+                     pd->dequant, p->zbin_extra, eob, scan, iscan);
+      if (!x->skip_encode) {
+        if (tx_type == DCT_DCT)
+          // this is like vp9_short_idct4x4 but has a special case around eob<=1
+          // which is significant (not just an optimization) for the lossless
+          // case.
+          inverse_transform_b_4x4_add(xd, *eob, dqcoeff,
+                                      dst, pd->dst.stride);
+        else
+          vp9_short_iht4x4_add(dqcoeff, dst, pd->dst.stride, tx_type);
+      }
       break;
+    default:
+      assert(0);
   }
 }
 
