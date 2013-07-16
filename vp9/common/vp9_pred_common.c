@@ -16,21 +16,6 @@
 #include "vp9/common/vp9_seg_common.h"
 #include "vp9/common/vp9_treecoder.h"
 
-void vp9_set_pred_flag_seg_id(MACROBLOCKD *xd, BLOCK_SIZE_TYPE bsize,
-                              unsigned char pred_flag) {
-  const int mis = xd->mode_info_stride;
-  const int bh = 1 << mi_height_log2(bsize);
-  const int bw = 1 << mi_width_log2(bsize);
-#define sub(a, b) (b) < 0 ? (a) + (b) : (a)
-  const int x_mis = sub(bw, xd->mb_to_right_edge >> (3 + LOG2_MI_SIZE));
-  const int y_mis = sub(bh, xd->mb_to_bottom_edge >> (3 + LOG2_MI_SIZE));
-#undef sub
-  int x, y;
-
-  for (y = 0; y < y_mis; y++)
-    for (x = 0; x < x_mis; x++)
-      xd->mode_info_context[y * mis + x].mbmi.seg_id_predicted = pred_flag;
-}
 // Returns a context number for the given MB prediction signal
 unsigned char vp9_get_pred_context_switchable_interp(const VP9_COMMON *cm,
                                                      const MACROBLOCKD *xd) {
@@ -423,22 +408,32 @@ unsigned char vp9_get_pred_context_tx_size(const VP9_COMMON *cm,
   return above_context + left_context > max_tx_size;
 }
 
-// This function sets the status of the given prediction signal.
-// I.e. is the predicted value for the given signal correct.
-void vp9_set_pred_flag_mbskip(MACROBLOCKD *xd, BLOCK_SIZE_TYPE bsize,
-                              unsigned char pred_flag) {
-  const int mis = xd->mode_info_stride;
-  const int bh = 1 << mi_height_log2(bsize);
+void vp9_set_pred_flag_seg_id(VP9_COMMON *cm, BLOCK_SIZE_TYPE bsize,
+                              int mi_row, int mi_col, uint8_t pred_flag) {
+  MODE_INFO *mi = &cm->mi[mi_row * cm->mode_info_stride + mi_col];
   const int bw = 1 << mi_width_log2(bsize);
-#define sub(a, b) (b) < 0 ? (a) + (b) : (a)
-  const int x_mis = sub(bw, xd->mb_to_right_edge >> (3 + LOG2_MI_SIZE));
-  const int y_mis = sub(bh, xd->mb_to_bottom_edge >> (3 + LOG2_MI_SIZE));
-#undef sub
+  const int bh = 1 << mi_height_log2(bsize);
+  const int xmis = MIN(cm->mi_cols - mi_col, bw);
+  const int ymis = MIN(cm->mi_rows - mi_row, bh);
   int x, y;
 
-  for (y = 0; y < y_mis; y++)
-    for (x = 0; x < x_mis; x++)
-      xd->mode_info_context[y * mis + x].mbmi.mb_skip_coeff = pred_flag;
+  for (y = 0; y < ymis; y++)
+    for (x = 0; x < xmis; x++)
+      mi[y * cm->mode_info_stride + x].mbmi.seg_id_predicted = pred_flag;
+}
+
+void vp9_set_pred_flag_mbskip(VP9_COMMON *cm, BLOCK_SIZE_TYPE bsize,
+                              int mi_row, int mi_col, uint8_t pred_flag) {
+  MODE_INFO *mi = &cm->mi[mi_row * cm->mode_info_stride + mi_col];
+  const int bw = 1 << mi_width_log2(bsize);
+  const int bh = 1 << mi_height_log2(bsize);
+  const int xmis = MIN(cm->mi_cols - mi_col, bw);
+  const int ymis = MIN(cm->mi_rows - mi_row, bh);
+  int x, y;
+
+  for (y = 0; y < ymis; y++)
+    for (x = 0; x < xmis; x++)
+      mi[y * cm->mode_info_stride + x].mbmi.mb_skip_coeff = pred_flag;
 }
 
 int vp9_get_segment_id(VP9_COMMON *cm, const uint8_t *segment_ids,

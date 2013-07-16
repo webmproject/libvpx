@@ -145,7 +145,7 @@ static void count_segs(VP9_COMP *cpi, MODE_INFO *mi,
 
     // Store the prediction status for this mb and update counts
     // as appropriate
-    vp9_set_pred_flag_seg_id(xd, bsize, pred_flag);
+    vp9_set_pred_flag_seg_id(cm, bsize, mi_row, mi_col, pred_flag);
     temporal_predictor_count[pred_context][pred_flag]++;
 
     if (!pred_flag)
