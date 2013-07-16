@@ -1095,7 +1095,7 @@ int vp8_decode_frame(VP8D_COMP *pbi)
         vpx_internal_error(&pc->error, VPX_CODEC_MEM_ERROR,
                            "Failed to allocate bool decoder 0");
     if (pc->frame_type == KEY_FRAME) {
-        pc->clr_type    = (YUV_TYPE)vp8_read_bit(bc);
+        (void)vp8_read_bit(bc);  // colorspace
         pc->clamp_type  = (CLAMP_TYPE)vp8_read_bit(bc);
     }
 

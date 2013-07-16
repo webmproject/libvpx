@@ -72,7 +72,6 @@ typedef struct VP8Common
     int horiz_scale;
     int vert_scale;
 
-    YUV_TYPE clr_type;
     CLAMP_TYPE  clamp_type;
 
     YV12_BUFFER_CONFIG *frame_to_show;

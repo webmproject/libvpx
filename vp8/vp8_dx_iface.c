@@ -288,8 +288,7 @@ static void yuvconfig2image(vpx_image_t               *img,
       * the Y, U, and V planes, nor other alignment adjustments that
       * might be representable by a YV12_BUFFER_CONFIG, so we just
       * initialize all the fields.*/
-    img->fmt = yv12->clrtype == REG_YUV ?
-        VPX_IMG_FMT_I420 : VPX_IMG_FMT_VPXI420;
+    img->fmt = VPX_IMG_FMT_I420;
     img->w = yv12->y_stride;
     img->h = (yv12->y_height + 2 * VP8BORDERINPIXELS + 15) & ~15;
     img->d_w = yv12->y_width;
@@ -721,8 +720,6 @@ static vpx_codec_err_t image2yuvconfig(const vpx_image_t   *img,
     yv12->uv_stride = img->stride[VPX_PLANE_U];
 
     yv12->border  = (img->stride[VPX_PLANE_Y] - img->d_w) / 2;
-    yv12->clrtype = (img->fmt == VPX_IMG_FMT_VPXI420 || img->fmt == VPX_IMG_FMT_VPXYV12);
-
     return res;
 }
 
