@@ -50,8 +50,8 @@ static int read_segment_id(vp9_reader *r, const struct segmentation *seg) {
 
 static TX_SIZE read_selected_txfm_size(VP9_COMMON *cm, MACROBLOCKD *xd,
                                        BLOCK_SIZE_TYPE bsize, vp9_reader *r) {
-  const int context = vp9_get_pred_context_tx_size(cm, xd);
-  const vp9_prob *tx_probs = vp9_get_pred_probs_tx_size(cm, xd);
+  const int context = vp9_get_pred_context_tx_size(xd);
+  const vp9_prob *tx_probs = vp9_get_pred_probs_tx_size(xd, &cm->fc.tx_probs);
   TX_SIZE txfm_size = vp9_read(r, tx_probs[0]);
   if (txfm_size != TX_4X4 && bsize >= BLOCK_SIZE_MB16X16) {
     txfm_size += vp9_read(r, tx_probs[1]);

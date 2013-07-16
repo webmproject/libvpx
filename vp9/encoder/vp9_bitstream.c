@@ -202,9 +202,9 @@ static void update_mbintra_mode_probs(VP9_COMP* const cpi,
 
 static void write_selected_txfm_size(const VP9_COMP *cpi, TX_SIZE tx_size,
                                      BLOCK_SIZE_TYPE bsize, vp9_writer *w) {
-  const VP9_COMMON *const c = &cpi->common;
+  const VP9_COMMON *const cm = &cpi->common;
   const MACROBLOCKD *const xd = &cpi->mb.e_mbd;
-  const vp9_prob *tx_probs = vp9_get_pred_probs_tx_size(c, xd);
+  const vp9_prob *tx_probs = vp9_get_pred_probs_tx_size(xd, &cm->fc.tx_probs);
   vp9_write(w, tx_size != TX_4X4, tx_probs[0]);
   if (bsize >= BLOCK_SIZE_MB16X16 && tx_size != TX_4X4) {
     vp9_write(w, tx_size != TX_8X8, tx_probs[1]);

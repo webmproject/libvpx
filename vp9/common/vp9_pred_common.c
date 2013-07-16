@@ -367,10 +367,9 @@ unsigned char vp9_get_pred_context_single_ref_p2(const VP9_COMMON *cm,
   return pred_context;
 }
 // Returns a context number for the given MB prediction signal
-unsigned char vp9_get_pred_context_tx_size(const VP9_COMMON *cm,
-                                           const MACROBLOCKD *xd) {
+unsigned char vp9_get_pred_context_tx_size(const MACROBLOCKD *xd) {
   const MODE_INFO *const mi = xd->mode_info_context;
-  const MODE_INFO *const above_mi = mi - cm->mode_info_stride;
+  const MODE_INFO *const above_mi = mi - xd->mode_info_stride;
   const MODE_INFO *const left_mi = mi - 1;
   const int left_in_image = xd->left_available && left_mi->mbmi.mb_in_image;
   const int above_in_image = xd->up_available && above_mi->mbmi.mb_in_image;

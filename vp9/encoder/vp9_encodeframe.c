@@ -2386,7 +2386,7 @@ static void encode_superblock(VP9_COMP *cpi, TOKENEXTRA **t, int output_enabled,
         !(mbmi->ref_frame[0] != INTRA_FRAME &&
             (mbmi->mb_skip_coeff ||
              vp9_segfeature_active(&xd->seg, segment_id, SEG_LVL_SKIP)))) {
-      const int context = vp9_get_pred_context_tx_size(cm, xd);
+      const int context = vp9_get_pred_context_tx_size(xd);
       if (bsize >= BLOCK_SIZE_SB32X32) {
         cm->fc.tx_counts.p32x32[context][mbmi->txfm_size]++;
       } else if (bsize >= BLOCK_SIZE_MB16X16) {
