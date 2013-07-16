@@ -33,12 +33,7 @@ struct tx_counts {
   unsigned int p8x8[TX_SIZE_CONTEXTS][TX_SIZE_MAX_SB - 2];
 };
 
-extern int vp9_mv_cont(const int_mv *l, const int_mv *a);
-
-
-extern const vp9_prob vp9_kf_default_bmode_probs[VP9_INTRA_MODES]
-                                                [VP9_INTRA_MODES]
-                                                [VP9_INTRA_MODES - 1];
+int vp9_mv_cont(const int_mv *l, const int_mv *a);
 
 extern const vp9_tree_index vp9_intra_mode_tree[];
 extern const vp9_tree_index  vp9_sb_mv_ref_tree[];
