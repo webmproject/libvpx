@@ -1068,19 +1068,13 @@ static int64_t rescale(int val, int64_t num, int denom) {
 
 static void set_tile_limits(VP9_COMP *cpi) {
   VP9_COMMON *const cm = &cpi->common;
-  int min_log2_tiles, max_log2_tiles;
 
-  cm->log2_tile_columns = cpi->oxcf.tile_columns;
+  int min_log2_tile_cols, max_log2_tile_cols;
+  vp9_get_tile_n_bits(cm->mi_cols, &min_log2_tile_cols, &max_log2_tile_cols);
+
+  cm->log2_tile_cols = clamp(cpi->oxcf.tile_columns,
+                             min_log2_tile_cols, max_log2_tile_cols);
   cm->log2_tile_rows = cpi->oxcf.tile_rows;
-
-  vp9_get_tile_n_bits(cm, &min_log2_tiles, &max_log2_tiles);
-  max_log2_tiles += min_log2_tiles;
-
-  cm->log2_tile_columns = clamp(cm->log2_tile_columns,
-                                min_log2_tiles, max_log2_tiles);
-
-  cm->tile_columns = 1 << cm->log2_tile_columns;
-  cm->tile_rows = 1 << cm->log2_tile_rows;
 }
 
 static void init_config(VP9_PTR ptr, VP9_CONFIG *oxcf) {

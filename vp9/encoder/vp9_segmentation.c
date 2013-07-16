@@ -216,8 +216,7 @@ void vp9_choose_segmap_coding_method(VP9_COMP *cpi) {
   int no_pred_cost;
   int t_pred_cost = INT_MAX;
 
-  int i;
-  int tile_col, mi_row, mi_col;
+  int i, tile_col, mi_row, mi_col;
 
   int temporal_predictor_count[PREDICTION_PROBS][2];
   int no_pred_segcounts[MAX_MB_SEGMENTS];
@@ -241,18 +240,16 @@ void vp9_choose_segmap_coding_method(VP9_COMP *cpi) {
 
   // First of all generate stats regarding how well the last segment map
   // predicts this one
-  for (tile_col = 0; tile_col < cm->tile_columns; tile_col++) {
+  for (tile_col = 0; tile_col < 1 << cm->log2_tile_cols; tile_col++) {
     vp9_get_tile_col_offsets(cm, tile_col);
     mi_ptr = cm->mi + cm->cur_tile_mi_col_start;
     for (mi_row = 0; mi_row < cm->mi_rows;
          mi_row += 8, mi_ptr += 8 * mis) {
       mi = mi_ptr;
-      for (mi_col = cm->cur_tile_mi_col_start;
-           mi_col < cm->cur_tile_mi_col_end;
-           mi_col += 8, mi += 8) {
+      for (mi_col = cm->cur_tile_mi_col_start; mi_col < cm->cur_tile_mi_col_end;
+           mi_col += 8, mi += 8)
         count_segs_sb(cpi, mi, no_pred_segcounts, temporal_predictor_count,
                       t_unpred_seg_counts, mi_row, mi_col, BLOCK_SIZE_SB64X64);
-      }
     }
   }
 

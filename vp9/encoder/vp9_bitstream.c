@@ -1136,18 +1136,18 @@ static void fix_mcomp_filter_type(VP9_COMP *cpi) {
 }
 
 static void write_tile_info(VP9_COMMON *cm, struct vp9_write_bit_buffer *wb) {
-  int min_log2_tiles, delta_log2_tiles, n_tile_bits, n;
-  vp9_get_tile_n_bits(cm, &min_log2_tiles, &delta_log2_tiles);
-  n_tile_bits = cm->log2_tile_columns - min_log2_tiles;
-  for (n = 0; n < delta_log2_tiles; n++) {
-    if (n_tile_bits--) {
-      vp9_wb_write_bit(wb, 1);
-    } else {
-      vp9_wb_write_bit(wb, 0);
-      break;
-    }
-  }
+  int min_log2_tile_cols, max_log2_tile_cols, ones;
+  vp9_get_tile_n_bits(cm->mi_cols, &min_log2_tile_cols, &max_log2_tile_cols);
 
+  // columns
+  ones = cm->log2_tile_cols - min_log2_tile_cols;
+  while (ones--)
+    vp9_wb_write_bit(wb, 1);
+
+  if (cm->log2_tile_cols < max_log2_tile_cols)
+    vp9_wb_write_bit(wb, 0);
+
+  // rows
   vp9_wb_write_bit(wb, cm->log2_tile_rows != 0);
   if (cm->log2_tile_rows != 0)
     vp9_wb_write_bit(wb, cm->log2_tile_rows != 1);
@@ -1195,28 +1195,30 @@ static size_t encode_tiles(VP9_COMP *cpi, uint8_t *data_ptr) {
   int tile_row, tile_col;
   TOKENEXTRA *tok[4][1 << 6], *tok_end;
   size_t total_size = 0;
+  const int tile_cols = 1 << cm->log2_tile_cols;
+  const int tile_rows = 1 << cm->log2_tile_rows;
 
   vpx_memset(cm->above_seg_context, 0, sizeof(PARTITION_CONTEXT) *
              mi_cols_aligned_to_sb(cm->mi_cols));
 
   tok[0][0] = cpi->tok;
-  for (tile_row = 0; tile_row < cm->tile_rows; tile_row++) {
+  for (tile_row = 0; tile_row < tile_rows; tile_row++) {
     if (tile_row)
-      tok[tile_row][0] = tok[tile_row - 1][cm->tile_columns - 1] +
-                         cpi->tok_count[tile_row - 1][cm->tile_columns - 1];
+      tok[tile_row][0] = tok[tile_row - 1][tile_cols - 1] +
+                         cpi->tok_count[tile_row - 1][tile_cols - 1];
 
-    for (tile_col = 1; tile_col < cm->tile_columns; tile_col++)
+    for (tile_col = 1; tile_col < tile_cols; tile_col++)
       tok[tile_row][tile_col] = tok[tile_row][tile_col - 1] +
                                 cpi->tok_count[tile_row][tile_col - 1];
   }
 
-  for (tile_row = 0; tile_row < cm->tile_rows; tile_row++) {
+  for (tile_row = 0; tile_row < tile_rows; tile_row++) {
     vp9_get_tile_row_offsets(cm, tile_row);
-    for (tile_col = 0; tile_col < cm->tile_columns; tile_col++) {
+    for (tile_col = 0; tile_col < tile_cols; tile_col++) {
       vp9_get_tile_col_offsets(cm, tile_col);
       tok_end = tok[tile_row][tile_col] + cpi->tok_count[tile_row][tile_col];
 
-      if (tile_col < cm->tile_columns - 1 || tile_row < cm->tile_rows - 1)
+      if (tile_col < tile_cols - 1 || tile_row < tile_rows - 1)
         vp9_start_encode(&residual_bc, data_ptr + total_size + 4);
       else
         vp9_start_encode(&residual_bc, data_ptr + total_size);
@@ -1224,7 +1226,7 @@ static size_t encode_tiles(VP9_COMP *cpi, uint8_t *data_ptr) {
       write_modes(cpi, &residual_bc, &tok[tile_row][tile_col], tok_end);
       assert(tok[tile_row][tile_col] == tok_end);
       vp9_stop_encode(&residual_bc);
-      if (tile_col < cm->tile_columns - 1 || tile_row < cm->tile_rows - 1) {
+      if (tile_col < tile_cols - 1 || tile_row < tile_rows - 1) {
         // size of this tile
         write_be32(data_ptr + total_size, residual_bc.pos);
         total_size += 4;

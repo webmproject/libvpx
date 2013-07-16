@@ -1839,22 +1839,23 @@ static void encode_frame_internal(VP9_COMP *cpi) {
       // Take tiles into account and give start/end MB
       int tile_col, tile_row;
       TOKENEXTRA *tp = cpi->tok;
+      const int tile_cols = 1 << cm->log2_tile_cols;
+      const int tile_rows = 1 << cm->log2_tile_rows;
 
-      for (tile_row = 0; tile_row < cm->tile_rows; tile_row++) {
+      for (tile_row = 0; tile_row < tile_rows; tile_row++) {
         vp9_get_tile_row_offsets(cm, tile_row);
 
-        for (tile_col = 0; tile_col < cm->tile_columns; tile_col++) {
+        for (tile_col = 0; tile_col < tile_cols; tile_col++) {
           TOKENEXTRA *tp_old = tp;
 
           // For each row of SBs in the frame
           vp9_get_tile_col_offsets(cm, tile_col);
           for (mi_row = cm->cur_tile_mi_row_start;
-              mi_row < cm->cur_tile_mi_row_end; mi_row += 8)
+               mi_row < cm->cur_tile_mi_row_end; mi_row += 8)
             encode_sb_row(cpi, mi_row, &tp, &totalrate);
 
           cpi->tok_count[tile_row][tile_col] = (unsigned int)(tp - tp_old);
-          assert(tp - cpi->tok <=
-                 get_token_alloc(cm->mb_rows, cm->mb_cols));
+          assert(tp - cpi->tok <= get_token_alloc(cm->mb_rows, cm->mb_cols));
         }
       }
     }

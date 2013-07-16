@@ -632,23 +632,19 @@ static void decode_tile(VP9D_COMP *pbi, vp9_reader *r) {
 }
 
 static void setup_tile_info(VP9_COMMON *cm, struct vp9_read_bit_buffer *rb) {
-  int delta_log2_tiles;
+  int min_log2_tile_cols, max_log2_tile_cols, max_ones;
+  vp9_get_tile_n_bits(cm->mi_cols, &min_log2_tile_cols, &max_log2_tile_cols);
 
-  vp9_get_tile_n_bits(cm, &cm->log2_tile_columns, &delta_log2_tiles);
-  while (delta_log2_tiles--) {
-    if (vp9_rb_read_bit(rb)) {
-      cm->log2_tile_columns++;
-    } else {
-      break;
-    }
-  }
+  // columns
+  max_ones = max_log2_tile_cols - min_log2_tile_cols;
+  cm->log2_tile_cols = min_log2_tile_cols;
+  while (max_ones-- && vp9_rb_read_bit(rb))
+    cm->log2_tile_cols++;
 
+  // rows
   cm->log2_tile_rows = vp9_rb_read_bit(rb);
   if (cm->log2_tile_rows)
     cm->log2_tile_rows += vp9_rb_read_bit(rb);
-
-  cm->tile_columns = 1 << cm->log2_tile_columns;
-  cm->tile_rows    = 1 << cm->log2_tile_rows;
 }
 
 static void decode_tiles(VP9D_COMP *pbi,
@@ -659,6 +655,8 @@ static void decode_tiles(VP9D_COMP *pbi,
   const uint8_t *data_ptr = data + first_partition_size;
   const uint8_t *const data_end = pbi->source + pbi->source_sz;
   const int aligned_mi_cols = mi_cols_aligned_to_sb(pc->mi_cols);
+  const int tile_cols = 1 << pc->log2_tile_cols;
+  const int tile_rows = 1 << pc->log2_tile_rows;
   int tile_row, tile_col;
 
   // Note: this memset assumes above_context[0], [1] and [2]
@@ -670,20 +668,19 @@ static void decode_tiles(VP9D_COMP *pbi,
              sizeof(PARTITION_CONTEXT) * aligned_mi_cols);
 
   if (pbi->oxcf.inv_tile_order) {
-    const int n_cols = pc->tile_columns;
     const uint8_t *data_ptr2[4][1 << 6];
     vp9_reader bc_bak = {0};
 
     // pre-initialize the offsets, we're going to read in inverse order
     data_ptr2[0][0] = data_ptr;
-    for (tile_row = 0; tile_row < pc->tile_rows; tile_row++) {
+    for (tile_row = 0; tile_row < tile_rows; tile_row++) {
       if (tile_row) {
-        const int size = read_be32(data_ptr2[tile_row - 1][n_cols - 1]);
-        data_ptr2[tile_row - 1][n_cols - 1] += 4;
-        data_ptr2[tile_row][0] = data_ptr2[tile_row - 1][n_cols - 1] + size;
+        const int size = read_be32(data_ptr2[tile_row - 1][tile_cols - 1]);
+        data_ptr2[tile_row - 1][tile_cols - 1] += 4;
+        data_ptr2[tile_row][0] = data_ptr2[tile_row - 1][tile_cols - 1] + size;
       }
 
-      for (tile_col = 1; tile_col < n_cols; tile_col++) {
+      for (tile_col = 1; tile_col < tile_cols; tile_col++) {
         const int size = read_be32(data_ptr2[tile_row][tile_col - 1]);
         data_ptr2[tile_row][tile_col - 1] += 4;
         data_ptr2[tile_row][tile_col] =
@@ -691,15 +688,15 @@ static void decode_tiles(VP9D_COMP *pbi,
       }
     }
 
-    for (tile_row = 0; tile_row < pc->tile_rows; tile_row++) {
+    for (tile_row = 0; tile_row < tile_rows; tile_row++) {
       vp9_get_tile_row_offsets(pc, tile_row);
-      for (tile_col = n_cols - 1; tile_col >= 0; tile_col--) {
+      for (tile_col = tile_cols - 1; tile_col >= 0; tile_col--) {
         vp9_get_tile_col_offsets(pc, tile_col);
         setup_token_decoder(pbi, data_ptr2[tile_row][tile_col],
                             data_end - data_ptr2[tile_row][tile_col],
                             residual_bc);
         decode_tile(pbi, residual_bc);
-        if (tile_row == pc->tile_rows - 1 && tile_col == n_cols - 1)
+        if (tile_row == tile_rows - 1 && tile_col == tile_cols - 1)
           bc_bak = *residual_bc;
       }
     }
@@ -707,15 +704,14 @@ static void decode_tiles(VP9D_COMP *pbi,
   } else {
     int has_more;
 
-    for (tile_row = 0; tile_row < pc->tile_rows; tile_row++) {
+    for (tile_row = 0; tile_row < tile_rows; tile_row++) {
       vp9_get_tile_row_offsets(pc, tile_row);
-      for (tile_col = 0; tile_col < pc->tile_columns; tile_col++) {
+      for (tile_col = 0; tile_col < tile_cols; tile_col++) {
         size_t size;
 
         vp9_get_tile_col_offsets(pc, tile_col);
 
-        has_more = tile_col < pc->tile_columns - 1 ||
-                   tile_row < pc->tile_rows - 1;
+        has_more = tile_col < tile_cols - 1 || tile_row < tile_rows - 1;
         if (has_more) {
           if (!read_is_valid(data_ptr, 4, data_end))
             vpx_internal_error(&pc->error, VPX_CODEC_CORRUPT_FRAME,
