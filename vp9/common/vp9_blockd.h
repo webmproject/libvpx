@@ -258,9 +258,6 @@ typedef struct macroblockd {
   int mb_to_top_edge;
   int mb_to_bottom_edge;
 
-  unsigned int frames_since_golden;
-  unsigned int frames_till_alt_ref_frame;
-
   int lossless;
   /* Inverse transform function pointers. */
   void (*inv_txm4x4_1_add)(int16_t *input, uint8_t *dest, int stride);
