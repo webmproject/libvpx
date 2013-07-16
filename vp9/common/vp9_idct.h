@@ -22,6 +22,8 @@
 #define DCT_CONST_BITS 14
 #define DCT_CONST_ROUNDING  (1 << (DCT_CONST_BITS - 1))
 
+#define WHT_UPSCALE_FACTOR 2
+
 #define pair_set_epi16(a, b) \
   _mm_set1_epi32(((uint16_t)(a)) + (((uint16_t)(b)) << 16))
 

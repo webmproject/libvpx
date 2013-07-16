@@ -52,8 +52,6 @@ typedef struct {
 
 extern vp9_extra_bit vp9_extra_bits[12];    /* indexed by token value */
 
-#define PROB_UPDATE_BASELINE_COST   7
-
 #define MAX_PROB                255
 #define DCT_MAX_VALUE           16384
 
@@ -183,7 +181,6 @@ const int16_t *vp9_get_coef_neighbors_handle(const int16_t *scan);
 #define COEFPROB_MODELS             128
 
 #define UNCONSTRAINED_NODES         3
-#define MODEL_NODES                 (ENTROPY_NODES - UNCONSTRAINED_NODES)
 
 #define PIVOT_NODE                  2   // which node is pivot
 
@@ -199,8 +196,6 @@ typedef unsigned int vp9_coeff_stats_model[REF_TYPES][COEF_BANDS]
                                           [UNCONSTRAINED_NODES][2];
 
 void vp9_model_to_full_probs(const vp9_prob *model, vp9_prob *full);
-
-extern const vp9_prob vp9_modelcoefprobs[COEFPROB_MODELS][ENTROPY_NODES - 1];
 
 static INLINE const int16_t* get_scan_4x4(TX_TYPE tx_type) {
   switch (tx_type) {
