@@ -16,6 +16,24 @@
       "revId": "ea933276069320ecc885d17ea6cf09b61c3212f9",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcX//8ko\u003d",
+        "filename": "vp9/encoder/vp9_mcomp.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1507,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2013-07-16T18:53:51Z",
+      "side": 1,
+      "message": "Removed. It was left behind as I was playing with the C-version  for trying slight modifications of this search.",
+      "parentUuid": "AAAAcX//8mg\u003d",
+      "revId": "ea933276069320ecc885d17ea6cf09b61c3212f9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
