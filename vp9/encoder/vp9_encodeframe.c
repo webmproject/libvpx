@@ -2377,7 +2377,7 @@ static void encode_superblock(VP9_COMP *cpi, TOKENEXTRA **t, int output_enabled,
 
   // copy skip flag on all mb_mode_info contexts in this SB
   // if this was a skip at this txfm size
-  vp9_set_pred_flag_mbskip(xd, bsize, mi->mbmi.mb_skip_coeff);
+  vp9_set_pred_flag_mbskip(cm, bsize, mi_row, mi_col, mi->mbmi.mb_skip_coeff);
 
   if (output_enabled) {
     if (cm->txfm_mode == TX_MODE_SELECT &&
