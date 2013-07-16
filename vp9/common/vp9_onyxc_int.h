@@ -245,7 +245,6 @@ typedef struct VP9Common {
   unsigned int  frame_context_idx; /* Context to use/update */
 
   unsigned int current_video_frame;
-  int near_boffset[3];
   int version;
 
 #if CONFIG_POSTPROC
