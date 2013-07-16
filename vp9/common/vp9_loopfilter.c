@@ -33,8 +33,7 @@ static void lf_init_lut(loop_filter_info_n *lfi) {
   lfi->mode_lf_lut[NEWMV] = 1;
 }
 
-void vp9_loop_filter_update_sharpness(loop_filter_info_n *lfi,
-                                      int sharpness_lvl) {
+static void update_sharpness(loop_filter_info_n *const lfi, int sharpness_lvl) {
   int lvl;
 
   // For each possible value for the loop filter fill out limits
@@ -62,7 +61,7 @@ void vp9_loop_filter_init(VP9_COMMON *cm) {
   int i;
 
   // init limits for given sharpness
-  vp9_loop_filter_update_sharpness(lfi, cm->sharpness_level);
+  update_sharpness(lfi, cm->sharpness_level);
   cm->last_sharpness_level = cm->sharpness_level;
 
   // init LUT for lvl  and hev thr picking
@@ -73,8 +72,8 @@ void vp9_loop_filter_init(VP9_COMMON *cm) {
     vpx_memset(lfi->hev_thr[i], i, SIMD_WIDTH);
 }
 
-void vp9_loop_filter_frame_init(VP9_COMMON *cm, MACROBLOCKD *xd,
-                                int default_filt_lvl) {
+static void loop_filter_frame_init(VP9_COMMON *const cm, MACROBLOCKD *const xd,
+                                   int default_filt_lvl) {
   int seg;
   // n_shift is the a multiplier for lf_deltas
   // the multiplier is 1 for when filter_lvl is between 0 and 31;
@@ -84,7 +83,7 @@ void vp9_loop_filter_frame_init(VP9_COMMON *cm, MACROBLOCKD *xd,
 
   // update limits if sharpness has changed
   if (cm->last_sharpness_level != cm->sharpness_level) {
-    vp9_loop_filter_update_sharpness(lfi, cm->sharpness_level);
+    update_sharpness(lfi, cm->sharpness_level);
     cm->last_sharpness_level = cm->sharpness_level;
   }
 
@@ -118,9 +117,9 @@ void vp9_loop_filter_frame_init(VP9_COMMON *cm, MACROBLOCKD *xd,
   }
 }
 
-static int build_lfi(const VP9_COMMON *cm, const MB_MODE_INFO *mbmi,
-                      struct loop_filter_info *lfi) {
-  const loop_filter_info_n *const lfi_n = &cm->lf_info;
+static int build_lfi(const loop_filter_info_n *const lfi_n,
+                     const MB_MODE_INFO *const mbmi,
+                     struct loop_filter_info *const lfi) {
   const int seg = mbmi->segment_id;
   const int ref = mbmi->ref_frame[0];
   const int mode = lfi_n->mode_lf_lut[mbmi->mode];
@@ -231,13 +230,13 @@ static void filter_selectively_horiz(uint8_t *s, int pitch,
   }
 }
 
-static void filter_block_plane(VP9_COMMON *cm, MACROBLOCKD *xd,
+static void filter_block_plane(VP9_COMMON *const cm, MACROBLOCKD *const xd,
                                int plane, int mi_row, int mi_col) {
   const int ss_x = xd->plane[plane].subsampling_x;
   const int ss_y = xd->plane[plane].subsampling_y;
-  const int row_step = 1 << xd->plane[plane].subsampling_y;
-  const int col_step = 1 << xd->plane[plane].subsampling_x;
-  struct buf_2d * const dst = &xd->plane[plane].dst;
+  const int row_step = 1 << ss_x;
+  const int col_step = 1 << ss_y;
+  struct buf_2d *const dst = &xd->plane[plane].dst;
   uint8_t* const dst0 = dst->buf;
   unsigned int mask_16x16[MI_BLOCK_SIZE] = {0};
   unsigned int mask_8x8[MI_BLOCK_SIZE] = {0};
@@ -245,8 +244,8 @@ static void filter_block_plane(VP9_COMMON *cm, MACROBLOCKD *xd,
   unsigned int mask_4x4_int[MI_BLOCK_SIZE] = {0};
   struct loop_filter_info lfi[MI_BLOCK_SIZE][MI_BLOCK_SIZE];
   int r, c;
-  MODE_INFO *mi = xd->mode_info_context;
-  int row_step_stride = cm->mode_info_stride * row_step;
+  const MODE_INFO *mi = xd->mode_info_context;
+  const int row_step_stride = cm->mode_info_stride * row_step;
 
   for (r = 0; r < MI_BLOCK_SIZE && mi_row + r < cm->mi_rows; r += row_step) {
     unsigned int mask_16x16_c = 0;
@@ -272,8 +271,7 @@ static void filter_block_plane(VP9_COMMON *cm, MACROBLOCKD *xd,
       const int skip_border_4x4_r = ss_y && mi_row + r == cm->mi_rows - 1;
 
       // Filter level can vary per MI
-      if (!build_lfi(cm, &mi[c].mbmi,
-                     lfi[r] + (c >> xd->plane[plane].subsampling_x)))
+      if (!build_lfi(&cm->lf_info, &mi[c].mbmi, lfi[r] + (c >> ss_x)))
         continue;
 
       // Build masks based on the transform size of each block
@@ -355,7 +353,7 @@ void vp9_loop_filter_frame(VP9_COMMON *cm, MACROBLOCKD *xd,
   int mi_row, mi_col;
 
   // Initialize the loop filter for this frame.
-  vp9_loop_filter_frame_init(cm, xd, frame_filter_level);
+  loop_filter_frame_init(cm, xd, frame_filter_level);
 
   for (mi_row = 0; mi_row < cm->mi_rows; mi_row += MI_BLOCK_SIZE) {
     MODE_INFO* const mi = cm->mi + mi_row * cm->mode_info_stride;
