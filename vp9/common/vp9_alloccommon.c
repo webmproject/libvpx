@@ -158,10 +158,6 @@ int vp9_alloc_frame_buffers(VP9_COMMON *oci, int width, int height) {
   if (!oci->above_context[0])
     goto fail;
 
-  for (i = 1; i < MAX_MB_PLANE; i++)
-    oci->above_context[i] =
-        oci->above_context[0] + i * sizeof(ENTROPY_CONTEXT) * 2 * mi_cols;
-
   oci->above_seg_context = vpx_calloc(sizeof(PARTITION_CONTEXT) * mi_cols, 1);
   if (!oci->above_seg_context)
     goto fail;
@@ -197,9 +193,15 @@ void vp9_initialize_common() {
 }
 
 void vp9_update_frame_size(VP9_COMMON *cm) {
+  int i, mi_cols;
   const int aligned_width = multiple8(cm->width);
   const int aligned_height = multiple8(cm->height);
 
   set_mb_mi(cm, aligned_width, aligned_height);
   setup_mi(cm);
+
+  mi_cols = mi_cols_aligned_to_sb(cm);
+  for (i = 1; i < MAX_MB_PLANE; i++)
+    cm->above_context[i] =
+        cm->above_context[0] + i * sizeof(ENTROPY_CONTEXT) * 2 * mi_cols;
 }
