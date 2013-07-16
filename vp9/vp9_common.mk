@@ -58,7 +58,6 @@ VP9_COMMON_SRCS-yes += common/vp9_tile_common.c
 VP9_COMMON_SRCS-yes += common/vp9_treecoder.h
 VP9_COMMON_SRCS-yes += common/vp9_loopfilter.c
 VP9_COMMON_SRCS-yes += common/vp9_loopfilter_filters.c
-VP9_COMMON_SRCS-yes += common/vp9_modecontext.c
 VP9_COMMON_SRCS-yes += common/vp9_mvref_common.c
 VP9_COMMON_SRCS-yes += common/vp9_mvref_common.h
 VP9_COMMON_SRCS-yes += common/vp9_quant_common.c
