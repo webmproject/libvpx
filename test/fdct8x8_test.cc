@@ -51,10 +51,8 @@ void iht8x8_add(int16_t* /*in*/, int16_t *out, uint8_t *dst,
 
 class FwdTrans8x8Test : public ::testing::TestWithParam<int> {
  public:
-  FwdTrans8x8Test() { SetUpTestTxfm(); }
-  ~FwdTrans8x8Test() {}
-
-  void SetUpTestTxfm() {
+  virtual ~FwdTrans8x8Test() {}
+  virtual void SetUp() {
     tx_type_ = GetParam();
     if (tx_type_ == 0) {
       fwd_txfm = fdct8x8;
