@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAcX//9os\u003d",
+        "filename": "vp9/common/vp9_entropy.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 257,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2013-07-16T01:35:51Z",
+      "side": 1,
+      "message": "model_coef_probs_\n\nmaybe we should follow naming conventions?",
+      "revId": "338edc85e87ee03adcda3ceb92aec9d260ca2339",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
