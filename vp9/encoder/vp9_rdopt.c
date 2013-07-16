@@ -3089,18 +3089,25 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
     frame_mv[NEWMV][ref_frame].as_int = INVALID_MV;
     frame_mv[ZEROMV][ref_frame].as_int = 0;
   }
+
+  // If intra is not masked off then get best uv intra mode rd.
   if (!cpi->sf.use_avoid_tested_higherror
       || (cpi->sf.use_avoid_tested_higherror
           && (ref_frame_mask & (1 << INTRA_FRAME)))) {
+    // Note that the enumerator TXFM_MODE "matches" TX_SIZE.
+    // Eg. ONLY_4X4 = TX_4X4, ALLOW_8X8 = TX_8X8 etc such that the MIN
+    // operation below correctly constrains max_uvtxfm_size.
+    TX_SIZE max_uvtxfm_size =
+      MIN(max_uv_txsize_lookup[bsize], (TX_SIZE)cm->txfm_mode);
+    TX_SIZE min_uvtxfm_size = (cpi->sf.tx_size_search_method == USE_LARGESTALL)
+                              ? max_uvtxfm_size : TX_4X4;
+
     mbmi->mode = DC_PRED;
     mbmi->ref_frame[0] = INTRA_FRAME;
-    for (i = 0; i <= (bsize < BLOCK_SIZE_MB16X16 ? TX_4X4 :
-                      (bsize < BLOCK_SIZE_SB32X32 ? TX_8X8 :
-                       (bsize < BLOCK_SIZE_SB64X64 ? TX_16X16 : TX_32X32)));
-         i++) {
+    for (i = min_uvtxfm_size; i <= max_uvtxfm_size; ++i) {
       mbmi->txfm_size = i;
-      rd_pick_intra_sbuv_mode(cpi, x, &rate_uv_intra[i], &rate_uv_tokenonly[i],
-                              &dist_uv[i], &skip_uv[i],
+      rd_pick_intra_sbuv_mode(cpi, x, &rate_uv_intra[i],
+                              &rate_uv_tokenonly[i], &dist_uv[i], &skip_uv[i],
                               (bsize < BLOCK_SIZE_SB8X8) ? BLOCK_SIZE_SB8X8 :
                                                            bsize);
       mode_uv[i] = mbmi->uv_mode;
