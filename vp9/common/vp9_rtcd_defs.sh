@@ -283,10 +283,10 @@ prototype void vp9_convolve8_avg "const uint8_t *src, ptrdiff_t src_stride, uint
 specialize vp9_convolve8_avg ssse3
 
 prototype void vp9_convolve8_avg_horiz "const uint8_t *src, ptrdiff_t src_stride, uint8_t *dst, ptrdiff_t dst_stride, const int16_t *filter_x, int x_step_q4, const int16_t *filter_y, int y_step_q4, int w, int h"
-specialize vp9_convolve8_avg_horiz ssse3
+specialize vp9_convolve8_avg_horiz ssse3 neon
 
 prototype void vp9_convolve8_avg_vert "const uint8_t *src, ptrdiff_t src_stride, uint8_t *dst, ptrdiff_t dst_stride, const int16_t *filter_x, int x_step_q4, const int16_t *filter_y, int y_step_q4, int w, int h"
-specialize vp9_convolve8_avg_vert ssse3
+specialize vp9_convolve8_avg_vert ssse3 neon
 
 #
 # dct

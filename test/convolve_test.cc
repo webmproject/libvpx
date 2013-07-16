@@ -549,8 +549,8 @@ INSTANTIATE_TEST_CASE_P(SSSE3, ConvolveTest, ::testing::Values(
 
 #if HAVE_NEON
 const ConvolveFunctions convolve8_neon(
-    vp9_convolve8_horiz_neon, vp9_convolve8_avg_horiz_c,
-    vp9_convolve8_vert_neon, vp9_convolve8_avg_vert_c,
+    vp9_convolve8_horiz_neon, vp9_convolve8_avg_horiz_neon,
+    vp9_convolve8_vert_neon, vp9_convolve8_avg_vert_neon,
     vp9_convolve8_c, vp9_convolve8_avg_c);
 
 INSTANTIATE_TEST_CASE_P(NEON, ConvolveTest, ::testing::Values(

@@ -89,6 +89,7 @@ endif
 VP9_COMMON_SRCS-$(HAVE_SSE2) += common/x86/vp9_idct_intrin_sse2.c
 
 VP9_COMMON_SRCS-$(HAVE_NEON) += common/arm/neon/vp9_convolve8_neon$(ASM)
+VP9_COMMON_SRCS-$(HAVE_NEON) += common/arm/neon/vp9_convolve8_avg_neon$(ASM)
 VP9_COMMON_SRCS-$(HAVE_NEON) += common/arm/neon/vp9_loopfilter_neon$(ASM)
 VP9_COMMON_SRCS-$(HAVE_NEON) += common/arm/neon/vp9_dc_only_idct_add_neon$(ASM)
 
