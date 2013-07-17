@@ -16,6 +16,24 @@
       "revId": "fef78d77525ccbd92fea709fb27617e7b9310931",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcX//7Aw\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 2956,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-07-17T17:08:18Z",
+      "side": 1,
+      "message": "Yeah I just put it in for consistency, I\u0027ll actually use it later. If you want I can remove it from this patch, but then the signatures of pick_intra/inter_mode_sb will become different, which is kind of weird.",
+      "parentUuid": "AAAAcX//7DA\u003d",
+      "revId": "fef78d77525ccbd92fea709fb27617e7b9310931",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
