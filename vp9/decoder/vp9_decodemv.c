@@ -169,7 +169,7 @@ static void read_intra_mode_info(VP9D_COMP *pbi, MODE_INFO *m,
     const MB_PREDICTION_MODE A = above_block_mode(m, 0, mis);
     const MB_PREDICTION_MODE L = xd->left_available ?
                                   left_block_mode(m, 0) : DC_PRED;
-    mbmi->mode = read_intra_mode(r, cm->kf_y_mode_prob[A][L]);
+    mbmi->mode = read_intra_mode(r, vp9_kf_y_mode_prob[A][L]);
   } else {
     // Only 4x4, 4x8, 8x4 blocks
     const int bw = 1 << b_width_log2(bsize);
@@ -183,7 +183,7 @@ static void read_intra_mode_info(VP9D_COMP *pbi, MODE_INFO *m,
         const MB_PREDICTION_MODE L = (xd->left_available || idx) ?
                                       left_block_mode(m, ib) : DC_PRED;
         const MB_PREDICTION_MODE b_mode = read_intra_mode(r,
-                                              cm->kf_y_mode_prob[A][L]);
+                                              vp9_kf_y_mode_prob[A][L]);
         m->bmi[ib].as_mode = b_mode;
         if (bh == 2)
           m->bmi[ib + 2].as_mode = b_mode;
@@ -195,7 +195,7 @@ static void read_intra_mode_info(VP9D_COMP *pbi, MODE_INFO *m,
     mbmi->mode = m->bmi[3].as_mode;
   }
 
-  mbmi->uv_mode = read_intra_mode(r, cm->kf_uv_mode_prob[mbmi->mode]);
+  mbmi->uv_mode = read_intra_mode(r, vp9_kf_uv_mode_prob[mbmi->mode]);
 }
 
 static int read_mv_component(vp9_reader *r,

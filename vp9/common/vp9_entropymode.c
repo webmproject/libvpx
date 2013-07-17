@@ -14,8 +14,8 @@
 #include "vp9/common/vp9_onyxc_int.h"
 #include "vp9/common/vp9_seg_common.h"
 
-static const vp9_prob default_kf_uv_probs[VP9_INTRA_MODES]
-                                         [VP9_INTRA_MODES - 1] = {
+const vp9_prob vp9_kf_uv_mode_prob[VP9_INTRA_MODES]
+                                  [VP9_INTRA_MODES - 1] = {
   { 144,  11,  54, 157, 195, 130,  46,  58, 108 } /* y = dc */,
   { 118,  15, 123, 148, 131, 101,  44,  93, 131 } /* y = v */,
   { 113,  12,  23, 188, 226, 142,  26,  32, 125 } /* y = h */,
@@ -98,9 +98,9 @@ static const vp9_prob default_partition_probs[NUM_FRAME_TYPES]
   }
 };
 
-static const vp9_prob default_kf_bmode_probs[VP9_INTRA_MODES]
-                                            [VP9_INTRA_MODES]
-                                            [VP9_INTRA_MODES - 1] = {
+const vp9_prob vp9_kf_y_mode_prob[VP9_INTRA_MODES]
+                                 [VP9_INTRA_MODES]
+                                 [VP9_INTRA_MODES - 1] = {
   { /* above = dc */
     { 137,  30,  42, 148, 151, 207,  70,  52,  91 } /* left = dc */,
     {  92,  45, 102, 136, 116, 180,  74,  90, 100 } /* left = v */,
@@ -328,7 +328,6 @@ static const vp9_prob default_switchable_interp_prob[VP9_SWITCHABLE_FILTERS+1]
 
 void vp9_init_mbmode_probs(VP9_COMMON *cm) {
   vp9_copy(cm->fc.uv_mode_prob, default_if_uv_probs);
-  vp9_copy(cm->kf_uv_mode_prob, default_kf_uv_probs);
   vp9_copy(cm->fc.y_mode_prob, default_if_y_probs);
   vp9_copy(cm->fc.switchable_interp_prob, default_switchable_interp_prob);
   vp9_copy(cm->fc.partition_prob, default_partition_probs);
@@ -582,8 +581,6 @@ void vp9_setup_past_independence(VP9_COMMON *cm, MACROBLOCKD *xd) {
 
   vp9_default_coef_probs(cm);
   vp9_init_mbmode_probs(cm);
-
-  vp9_copy(cm->kf_y_mode_prob, default_kf_bmode_probs);
 
   vp9_init_mv_probs(cm);
 

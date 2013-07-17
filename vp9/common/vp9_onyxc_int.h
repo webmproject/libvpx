@@ -227,13 +227,6 @@ typedef struct VP9Common {
   PARTITION_CONTEXT *above_seg_context;
   PARTITION_CONTEXT left_seg_context[8];
 
-  /* keyframe block modes are predicted by their above, left neighbors */
-
-  vp9_prob kf_y_mode_prob[VP9_INTRA_MODES]
-                         [VP9_INTRA_MODES]
-                         [VP9_INTRA_MODES - 1];
-  vp9_prob kf_uv_mode_prob[VP9_INTRA_MODES] [VP9_INTRA_MODES - 1];
-
   // Context probabilities for reference frame prediction
   int allow_comp_inter_inter;
   MV_REFERENCE_FRAME comp_fixed_ref;
