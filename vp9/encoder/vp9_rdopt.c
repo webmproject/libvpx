@@ -1861,6 +1861,30 @@ static void rd_check_segment_txsize(VP9_COMP *cpi, MACROBLOCK *x,
         const struct buf_2d orig_src = x->plane[0].src;
         struct buf_2d orig_pre[2];
 
+        // if we're near/nearest and mv == 0,0, compare to zeromv
+        if ((this_mode == NEARMV || this_mode == NEARESTMV ||
+             this_mode == ZEROMV) &&
+            frame_mv[this_mode][mbmi->ref_frame[0]].as_int == 0 &&
+            (mbmi->ref_frame[1] <= 0 ||
+             frame_mv[this_mode][mbmi->ref_frame[1]].as_int == 0)) {
+          int rfc = mbmi->mb_mode_context[mbmi->ref_frame[0]];
+          int c1 = cost_mv_ref(cpi, NEARMV, rfc);
+          int c2 = cost_mv_ref(cpi, NEARESTMV, rfc);
+          int c3 = cost_mv_ref(cpi, ZEROMV, rfc);
+
+          if (this_mode == NEARMV) {
+            if (c1 >= c2 || c1 > c3)
+              continue;
+          } else if (this_mode == NEARESTMV) {
+            if (c2 > c1 || c2 > c3)
+              continue;
+          } else {
+            assert(this_mode == ZEROMV);
+            if (c3 >= c2 || c3 >= c1)
+              continue;
+          }
+        }
+
         vpx_memcpy(orig_pre, x->e_mbd.plane[0].pre, sizeof(orig_pre));
 
         vpx_memcpy(t_above_s, t_above, sizeof(t_above_s));
