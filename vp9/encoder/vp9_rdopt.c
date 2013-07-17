@@ -1716,12 +1716,10 @@ static int64_t encode_inter_mb_segment(VP9_COMP *cpi,
                      src, src_stride,
                      dst, xd->plane[0].dst.stride);
 
-  *labelyrate = 0;
-  *distortion = 0;
   k = i;
   for (idy = 0; idy < bh / 4; ++idy) {
     for (idx = 0; idx < bw / 4; ++idx) {
-      int64_t ssz;
+      int64_t ssz, rd, rd1, rd2;
 
       k += (idy * 2 + idx);
       src_diff = raster_block_offset_int16(xd, BLOCK_SIZE_SB8X8, 0, k,
@@ -1736,13 +1734,17 @@ static int64_t encode_inter_mb_segment(VP9_COMP *cpi,
       thisrate += cost_coeffs(cm, x, 0, k, PLANE_TYPE_Y_WITH_DC,
                               ta + (k & 1),
                               tl + (k >> 1), TX_4X4, 16);
+      rd1 = RDCOST(x->rdmult, x->rddiv, thisrate, thisdistortion >> 2);
+      rd2 = RDCOST(x->rdmult, x->rddiv, 0, thissse >> 2);
+      rd = MIN(rd1, rd2);
+      if (rd >= best_yrd)
+        return INT64_MAX;
     }
   }
-  *distortion += thisdistortion;
-  *labelyrate += thisrate;
+  *distortion = thisdistortion >> 2;
+  *labelyrate = thisrate;
   *sse = thissse >> 2;
 
-  *distortion >>= 2;
   return RDCOST(x->rdmult, x->rddiv, *labelyrate, *distortion);
 }
 
@@ -2008,8 +2010,10 @@ static void rd_check_segment_txsize(VP9_COMP *cpi, MACROBLOCK *x,
                                           bsi->segment_rd - this_segment_rd,
                                           i, &labelyrate, &distortion, &sse,
                                           t_above_s, t_left_s);
-        this_rd += RDCOST(x->rdmult, x->rddiv, rate, 0);
-        rate += labelyrate;
+        if (this_rd < INT64_MAX) {
+          this_rd += RDCOST(x->rdmult, x->rddiv, rate, 0);
+          rate += labelyrate;
+        }
 
         if (this_rd < best_label_rd) {
           sbr = rate;
@@ -2023,6 +2027,11 @@ static void rd_check_segment_txsize(VP9_COMP *cpi, MACROBLOCK *x,
           vpx_memcpy(t_left_b, t_left_s, sizeof(t_left_s));
         }
       } /*for each 4x4 mode*/
+
+      if (best_label_rd == INT64_MAX) {
+        bsi->segment_rd = INT64_MAX;
+        return;
+      }
 
       vpx_memcpy(t_above, t_above_b, sizeof(t_above));
       vpx_memcpy(t_left, t_left_b, sizeof(t_left));
