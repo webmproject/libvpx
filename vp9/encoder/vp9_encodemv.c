@@ -510,44 +510,41 @@ void vp9_build_nmv_cost_table(int *mvjoint,
 
 void vp9_update_nmv_count(VP9_COMP *cpi, MACROBLOCK *x,
                          int_mv *best_ref_mv, int_mv *second_best_ref_mv) {
-  MB_MODE_INFO * mbmi = &x->e_mbd.mode_info_context->mbmi;
-  MV mv;
-  int bwl = b_width_log2(mbmi->sb_type), bw = 1 << bwl;
-  int bhl = b_height_log2(mbmi->sb_type), bh = 1 << bhl;
+  MB_MODE_INFO *mbmi = &x->e_mbd.mode_info_context->mbmi;
+  MV diff;
+  const int bw = 1 << b_width_log2(mbmi->sb_type);
+  const int bh = 1 << b_height_log2(mbmi->sb_type);
   int idx, idy;
 
   if (mbmi->sb_type < BLOCK_SIZE_SB8X8) {
-    int i;
     PARTITION_INFO *pi = x->partition_info;
     for (idy = 0; idy < 2; idy += bh) {
       for (idx = 0; idx < 2; idx += bw) {
-        i = idy * 2 + idx;
+        const int i = idy * 2 + idx;
         if (pi->bmi[i].mode == NEWMV) {
-          mv.row = (pi->bmi[i].mv.as_mv.row - best_ref_mv->as_mv.row);
-          mv.col = (pi->bmi[i].mv.as_mv.col - best_ref_mv->as_mv.col);
-          vp9_inc_mv(&mv, &best_ref_mv->as_mv, &cpi->NMVcount,
-                     x->e_mbd.allow_high_precision_mv);
+          diff.row = pi->bmi[i].mv.as_mv.row - best_ref_mv->as_mv.row;
+          diff.col = pi->bmi[i].mv.as_mv.col - best_ref_mv->as_mv.col;
+          vp9_inc_mv(&diff, &cpi->NMVcount);
+
           if (x->e_mbd.mode_info_context->mbmi.ref_frame[1] > INTRA_FRAME) {
-            mv.row = pi->bmi[i].second_mv.as_mv.row -
+            diff.row = pi->bmi[i].second_mv.as_mv.row -
                          second_best_ref_mv->as_mv.row;
-            mv.col = pi->bmi[i].second_mv.as_mv.col -
+            diff.col = pi->bmi[i].second_mv.as_mv.col -
                          second_best_ref_mv->as_mv.col;
-            vp9_inc_mv(&mv, &second_best_ref_mv->as_mv, &cpi->NMVcount,
-                       x->e_mbd.allow_high_precision_mv);
+            vp9_inc_mv(&diff, &cpi->NMVcount);
           }
         }
       }
     }
   } else if (mbmi->mode == NEWMV) {
-    mv.row = mbmi->mv[0].as_mv.row - best_ref_mv->as_mv.row;
-    mv.col = mbmi->mv[0].as_mv.col - best_ref_mv->as_mv.col;
-    vp9_inc_mv(&mv, &best_ref_mv->as_mv, &cpi->NMVcount,
-                      x->e_mbd.allow_high_precision_mv);
+    diff.row = mbmi->mv[0].as_mv.row - best_ref_mv->as_mv.row;
+    diff.col = mbmi->mv[0].as_mv.col - best_ref_mv->as_mv.col;
+    vp9_inc_mv(&diff, &cpi->NMVcount);
+
     if (mbmi->ref_frame[1] > INTRA_FRAME) {
-      mv.row = mbmi->mv[1].as_mv.row - second_best_ref_mv->as_mv.row;
-      mv.col = mbmi->mv[1].as_mv.col - second_best_ref_mv->as_mv.col;
-      vp9_inc_mv(&mv, &second_best_ref_mv->as_mv, &cpi->NMVcount,
-                 x->e_mbd.allow_high_precision_mv);
+      diff.row = mbmi->mv[1].as_mv.row - second_best_ref_mv->as_mv.row;
+      diff.col = mbmi->mv[1].as_mv.col - second_best_ref_mv->as_mv.col;
+      vp9_inc_mv(&diff, &cpi->NMVcount);
     }
   }
 }

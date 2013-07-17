@@ -110,19 +110,18 @@ static INLINE vp9_prob vp9_get_pred_prob_single_ref_p2(const VP9_COMMON *cm,
   return cm->fc.single_ref_prob[pred_context][1];
 }
 
-unsigned char vp9_get_pred_context_tx_size(const VP9_COMMON *cm,
-                                           const MACROBLOCKD *xd);
+unsigned char vp9_get_pred_context_tx_size(const MACROBLOCKD *xd);
 
-static INLINE const vp9_prob *vp9_get_pred_probs_tx_size(const VP9_COMMON *cm,
-                                                         const MACROBLOCKD * xd) {
+static const vp9_prob *vp9_get_pred_probs_tx_size(const MACROBLOCKD *xd,
+                           const struct tx_probs *tx_probs) {
   const MODE_INFO *const mi = xd->mode_info_context;
-  const int pred_context = vp9_get_pred_context_tx_size(cm, xd);
+  const int pred_context = vp9_get_pred_context_tx_size(xd);
   if (mi->mbmi.sb_type < BLOCK_SIZE_MB16X16)
-    return cm->fc.tx_probs.p8x8[pred_context];
+    return tx_probs->p8x8[pred_context];
   else if (mi->mbmi.sb_type < BLOCK_SIZE_SB32X32)
-    return cm->fc.tx_probs.p16x16[pred_context];
+    return tx_probs->p16x16[pred_context];
   else
-    return cm->fc.tx_probs.p32x32[pred_context];
+    return tx_probs->p32x32[pred_context];
 }
 
 #endif  // VP9_COMMON_VP9_PRED_COMMON_H_

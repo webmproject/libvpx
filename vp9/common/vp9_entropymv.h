@@ -125,8 +125,7 @@ typedef struct {
   nmv_component_counts comps[2];
 } nmv_context_counts;
 
-void vp9_inc_mv(const MV *mv, const MV *ref, nmv_context_counts *mvctx,
-                int usehp);
+void vp9_inc_mv(const MV *mv, nmv_context_counts *mvctx);
 
 void vp9_counts_process(nmv_context_counts *NMVcount, int usehp);
 
