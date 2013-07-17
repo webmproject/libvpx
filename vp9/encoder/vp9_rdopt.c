@@ -3330,13 +3330,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
       if (rate_y == INT_MAX)
         continue;
 
-      uv_tx = mbmi->txfm_size;
-      if (bsize < BLOCK_SIZE_MB16X16 && uv_tx == TX_8X8)
-        uv_tx = TX_4X4;
-      if (bsize < BLOCK_SIZE_SB32X32 && uv_tx == TX_16X16)
-        uv_tx = TX_8X8;
-      else if (bsize < BLOCK_SIZE_SB64X64 && uv_tx == TX_32X32)
-        uv_tx = TX_16X16;
+      uv_tx = MIN(mbmi->txfm_size, max_uv_txsize_lookup[bsize]);
 
       rate_uv = rate_uv_intra[uv_tx];
       distortion_uv = dist_uv[uv_tx];
