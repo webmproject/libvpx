@@ -776,10 +776,14 @@ static void block_yrd_txfm(int plane, int block, BLOCK_SIZE_TYPE bsize,
   MACROBLOCK *const x = args->x;
   MACROBLOCKD *const xd = &x->e_mbd;
   struct encode_b_args encode_args = {args->cm, x, NULL};
+  int64_t rd1, rd2, rd;
 
   if (args->skip)
     return;
-  if (RDCOST(x->rdmult, x->rddiv, args->rate, args->dist) > args->best_rd) {
+  rd1 = RDCOST(x->rdmult, x->rddiv, args->rate, args->dist);
+  rd2 = RDCOST(x->rdmult, x->rddiv, 0, args->sse);
+  rd = MIN(rd1, rd2);
+  if (rd > args->best_rd) {
     args->skip = 1;
     args->rate = INT_MAX;
     args->dist = INT64_MAX;
@@ -2949,7 +2953,7 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
 void vp9_rd_pick_intra_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
                                int *returnrate, int64_t *returndist,
                                BLOCK_SIZE_TYPE bsize,
-                               PICK_MODE_CONTEXT *ctx) {
+                               PICK_MODE_CONTEXT *ctx, int64_t best_rd) {
   VP9_COMMON *cm = &cpi->common;
   MACROBLOCKD *xd = &x->e_mbd;
   int rate_y = 0, rate_uv = 0;
@@ -3016,7 +3020,8 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
                                   int *returnrate,
                                   int64_t *returndistortion,
                                   BLOCK_SIZE_TYPE bsize,
-                                  PICK_MODE_CONTEXT *ctx) {
+                                  PICK_MODE_CONTEXT *ctx,
+                                  int64_t best_rd_so_far) {
   VP9_COMMON *cm = &cpi->common;
   MACROBLOCKD *xd = &x->e_mbd;
   MB_MODE_INFO *mbmi = &xd->mode_info_context->mbmi;
@@ -3034,8 +3039,8 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
                      cpi->lst_fb_idx,
                      cpi->gld_fb_idx,
                      cpi->alt_fb_idx};
-  int64_t best_rd = INT64_MAX;
-  int64_t best_yrd = INT64_MAX;
+  int64_t best_rd = best_rd_so_far;
+  int64_t best_yrd = best_rd_so_far;  // FIXME(rbultje) more precise
   int64_t best_txfm_rd[NB_TXFM_MODES];
   int64_t best_txfm_diff[NB_TXFM_MODES];
   int64_t best_pred_diff[NB_PREDICTION_TYPES];
@@ -3097,6 +3102,8 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
     best_txfm_rd[i] = INT64_MAX;
   for (i = 0; i <= VP9_SWITCHABLE_FILTERS; i++)
     best_filter_rd[i] = INT64_MAX;
+
+  *returnrate = INT_MAX;
 
   // Create a mask set to 1 for each frame used by a smaller resolution.
   if (cpi->sf.use_avoid_tested_higherror) {
@@ -3833,6 +3840,8 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
     if (x->skip && !mode_excluded)
       break;
   }
+  if (best_rd >= best_rd_so_far)
+    return INT64_MAX;
 
   // If we used an estimate for the uv intra rd in the loop above...
   if (cpi->sf.use_uv_intra_rd_estimate) {
