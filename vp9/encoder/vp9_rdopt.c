@@ -2610,7 +2610,7 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
                                  int *rate_uv, int64_t *distortion_uv,
                                  int *mode_excluded, int *disable_skip,
                                  INTERPOLATIONFILTERTYPE *best_filter,
-                                 int_mv *frame_mv,
+                                 int_mv (*mode_mv)[MAX_REF_FRAMES],
                                  int mi_row, int mi_col,
                                  int_mv single_newmv[MAX_REF_FRAMES],
                                  int64_t *psse, int64_t ref_best_rd) {
@@ -2620,6 +2620,7 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
   const int is_comp_pred = (mbmi->ref_frame[1] > 0);
   const int num_refs = is_comp_pred ? 2 : 1;
   const int this_mode = mbmi->mode;
+  int_mv *frame_mv = mode_mv[this_mode];
   int i;
   int refs[2] = { mbmi->ref_frame[0],
     (mbmi->ref_frame[1] < 0 ? 0 : mbmi->ref_frame[1]) };
@@ -2677,6 +2678,30 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
     default:
       break;
   }
+
+  // if we're near/nearest and mv == 0,0, compare to zeromv
+  if ((this_mode == NEARMV || this_mode == NEARESTMV || this_mode == ZEROMV) &&
+      frame_mv[refs[0]].as_int == 0 &&
+      !vp9_segfeature_active(&xd->seg, mbmi->segment_id, SEG_LVL_SKIP) &&
+      (num_refs == 1 || frame_mv[refs[1]].as_int == 0)) {
+    int rfc = mbmi->mb_mode_context[mbmi->ref_frame[0]];
+    int c1 = cost_mv_ref(cpi, NEARMV, rfc);
+    int c2 = cost_mv_ref(cpi, NEARESTMV, rfc);
+    int c3 = cost_mv_ref(cpi, ZEROMV, rfc);
+
+    if (this_mode == NEARMV) {
+      if (c1 >= c2 || c1 > c3)
+        return INT64_MAX;
+    } else if (this_mode == NEARESTMV) {
+      if (c2 > c1 || c2 > c3)
+        return INT64_MAX;
+    } else {
+      assert(this_mode == ZEROMV);
+      if (c3 >= c2 || c3 >= c1)
+        return INT64_MAX;
+    }
+  }
+
   for (i = 0; i < num_refs; ++i) {
     cur_mv[i] = frame_mv[refs[i]];
     // Clip "next_nearest" so that it does not extend to far out of image
@@ -3595,7 +3620,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
                                   &rate_y, &distortion_y,
                                   &rate_uv, &distortion_uv,
                                   &mode_excluded, &disable_skip,
-                                  &tmp_best_filter, frame_mv[this_mode],
+                                  &tmp_best_filter, frame_mv,
                                   mi_row, mi_col,
                                   single_newmv, &total_sse, best_rd);
       if (this_rd == INT64_MAX)
