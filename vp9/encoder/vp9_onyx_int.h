@@ -275,6 +275,7 @@ typedef struct {
   unsigned int mode_search_skip_flags;
   MB_PREDICTION_MODE last_chroma_intra_mode;
   int use_rd_breakout;
+  int use_uv_intra_rd_estimate;
 } SPEED_FEATURES;
 
 typedef struct VP9_COMP {
