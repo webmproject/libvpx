@@ -103,9 +103,9 @@ static void extend_frame(YV12_BUFFER_CONFIG *ybf,
   const int c_h = (ybf->y_crop_height + subsampling_y) >> subsampling_y;
   const int c_et = ext_size >> subsampling_y;
   const int c_el = ext_size >> subsampling_x;
-  const int c_eb = (ybf->border + ybf->y_height - ybf->y_crop_height +
+  const int c_eb = (ext_size + ybf->y_height - ybf->y_crop_height +
                     subsampling_y) >> subsampling_y;
-  const int c_er = (ybf->border + ybf->y_width - ybf->y_crop_width +
+  const int c_er = (ext_size + ybf->y_width - ybf->y_crop_width +
                     subsampling_x) >> subsampling_x;
 
   assert(ybf->y_height - ybf->y_crop_height < 16);
