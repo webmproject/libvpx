@@ -352,8 +352,8 @@ static void update_state(VP9_COMP *cpi, PICK_MODE_CONTEXT *ctx,
 
   if (mbmi->ref_frame[0] != INTRA_FRAME && mbmi->sb_type < BLOCK_SIZE_SB8X8) {
     *x->partition_info = ctx->partition_info;
-    mbmi->mv[0].as_int = x->partition_info->bmi[3].mv.as_int;
-    mbmi->mv[1].as_int = x->partition_info->bmi[3].second_mv.as_int;
+    mbmi->mv[0].as_int = mi->bmi[3].as_mv[0].as_int;
+    mbmi->mv[1].as_int = mi->bmi[3].as_mv[1].as_int;
   }
 
   x->skip = ctx->skip;

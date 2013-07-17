@@ -505,7 +505,7 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, MODE_INFO *m,
         for (idx = 0; idx < 2; idx += bw) {
           j = idy * 2 + idx;
           blockmode = cpi->mb.partition_info->bmi[j].mode;
-          blockmv = cpi->mb.partition_info->bmi[j].mv;
+          blockmv = m->bmi[j].as_mv[0];
           write_sb_mv_ref(bc, blockmode, mv_ref_p);
           vp9_accum_mv_refs(&cpi->common, blockmode, mi->mb_mode_context[rf]);
           if (blockmode == NEWMV) {
@@ -517,7 +517,7 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, MODE_INFO *m,
 
             if (mi->ref_frame[1] > INTRA_FRAME)
               vp9_encode_mv(cpi, bc,
-                            &cpi->mb.partition_info->bmi[j].second_mv.as_mv,
+                            &m->bmi[j].as_mv[1].as_mv,
                             &mi->best_second_mv.as_mv,
                             nmvc, xd->allow_high_precision_mv);
           }
