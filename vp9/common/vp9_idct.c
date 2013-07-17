@@ -124,9 +124,7 @@ void vp9_short_idct4x4_add_c(int16_t *input, uint8_t *dest, int dest_stride) {
 
   // Rows
   for (i = 0; i < 4; ++i) {
-    for (j = 0; j < 4; ++j)
-      temp_in[j] = input[j];
-    vp9_idct4_1d(temp_in, outptr);
+    vp9_idct4_1d(input, outptr);
     input += 4;
     outptr += 4;
   }
