@@ -296,8 +296,7 @@ static void build_inter_predictors(int plane, int block,
     const int pre_stride = arg->pre_stride[which_mv][plane];
     const uint8_t *const pre = base_pre +
         scaled_buffer_offset(x, y, pre_stride, &xd->scale_factor[which_mv]);
-    struct scale_factors * const scale =
-      plane == 0 ? &xd->scale_factor[which_mv] : &xd->scale_factor_uv[which_mv];
+    struct scale_factors * const scale = &xd->scale_factor[which_mv];
 
     // dest
     uint8_t *const dst = arg->dst[plane] + arg->dst_stride[plane] * y + x;
