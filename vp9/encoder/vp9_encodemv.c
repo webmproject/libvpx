@@ -417,10 +417,6 @@ void vp9_write_nmv_probs(VP9_COMP* const cpi, int usehp, vp9_writer* const bc) {
   unsigned int branch_ct_hp[2][2];
   nmv_context *mvc = &cpi->common.fc.nmvc;
 
-#ifdef MV_GROUP_UPDATE
-  int savings = 0;
-#endif
-
 #ifdef NMV_STATS
   if (!cpi->dummy_packing)
     add_nmvcount(&tnmvcounts, &cpi->NMVcount);
@@ -430,73 +426,6 @@ void vp9_write_nmv_probs(VP9_COMP* const cpi, int usehp, vp9_writer* const bc) {
                         branch_ct_class0, branch_ct_bits,
                         branch_ct_class0_fp, branch_ct_fp,
                         branch_ct_class0_hp, branch_ct_hp);
-  /* write updates if they help */
-#ifdef MV_GROUP_UPDATE
-  for (j = 0; j < MV_JOINTS - 1; ++j) {
-    savings += update_nmv_savings(branch_ct_joint[j],
-                                  cpi->common.fc.nmvc.joints[j],
-                                  prob.joints[j],
-                                  VP9_NMV_UPDATE_PROB);
-  }
-  for (i = 0; i < 2; ++i) {
-    savings += update_nmv_savings(branch_ct_sign[i],
-                                  cpi->common.fc.nmvc.comps[i].sign,
-                                  prob.comps[i].sign,
-                                  VP9_NMV_UPDATE_PROB);
-    for (j = 0; j < MV_CLASSES - 1; ++j) {
-      savings += update_nmv_savings(branch_ct_classes[i][j],
-                                    cpi->common.fc.nmvc.comps[i].classes[j],
-                                    prob.comps[i].classes[j],
-                                    VP9_NMV_UPDATE_PROB);
-    }
-    for (j = 0; j < CLASS0_SIZE - 1; ++j) {
-      savings += update_nmv_savings(branch_ct_class0[i][j],
-                                    cpi->common.fc.nmvc.comps[i].class0[j],
-                                    prob.comps[i].class0[j],
-                                    VP9_NMV_UPDATE_PROB);
-    }
-    for (j = 0; j < MV_OFFSET_BITS; ++j) {
-      savings += update_nmv_savings(branch_ct_bits[i][j],
-                                    cpi->common.fc.nmvc.comps[i].bits[j],
-                                    prob.comps[i].bits[j],
-                                    VP9_NMV_UPDATE_PROB);
-    }
-  }
-  for (i = 0; i < 2; ++i) {
-    for (j = 0; j < CLASS0_SIZE; ++j) {
-      int k;
-      for (k = 0; k < 3; ++k) {
-        savings += update_nmv_savings(branch_ct_class0_fp[i][j][k],
-                                      cpi->common.fc.nmvc.comps[i].class0_fp[j][k],
-                                      prob.comps[i].class0_fp[j][k],
-                                      VP9_NMV_UPDATE_PROB);
-      }
-    }
-    for (j = 0; j < 3; ++j) {
-      savings += update_nmv_savings(branch_ct_fp[i][j],
-                                    cpi->common.fc.nmvc.comps[i].fp[j],
-                                    prob.comps[i].fp[j],
-                                    VP9_NMV_UPDATE_PROB);
-    }
-  }
-  if (usehp) {
-    for (i = 0; i < 2; ++i) {
-      savings += update_nmv_savings(branch_ct_class0_hp[i],
-                                    cpi->common.fc.nmvc.comps[i].class0_hp,
-                                    prob.comps[i].class0_hp,
-                                    VP9_NMV_UPDATE_PROB);
-      savings += update_nmv_savings(branch_ct_hp[i],
-                                    cpi->common.fc.nmvc.comps[i].hp,
-                                    prob.comps[i].hp,
-                                    VP9_NMV_UPDATE_PROB);
-    }
-  }
-  if (savings <= 0) {
-    vp9_write_bit(bc, 0);
-    return;
-  }
-  vp9_write_bit(bc, 1);
-#endif
 
   for (j = 0; j < MV_JOINTS - 1; ++j)
     update_mv(bc, branch_ct_joint[j], &mvc->joints[j], prob.joints[j],

@@ -274,11 +274,6 @@ static void update_mv(vp9_reader *r, vp9_prob *p, vp9_prob upd_p) {
 static void read_mv_probs(vp9_reader *r, nmv_context *mvc, int usehp) {
   int i, j, k;
 
-#ifdef MV_GROUP_UPDATE
-  if (!vp9_read_bit(r))
-    return;
-#endif
-
   for (j = 0; j < MV_JOINTS - 1; ++j)
     update_mv(r, &mvc->joints[j], VP9_NMV_UPDATE_PROB);
 
