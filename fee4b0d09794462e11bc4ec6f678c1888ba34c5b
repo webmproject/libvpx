@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAcX//7Ew\u003d",
+        "filename": "vp9/encoder/vp9_encodemv.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 610,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2013-07-17T16:40:33Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAcX//7Og\u003d",
+      "revId": "fee4b0d09794462e11bc4ec6f678c1888ba34c5b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAcX//7OQ\u003d",
         "filename": "vp9/encoder/vp9_onyx_if.c",
         "patchSetId": 3
@@ -30,6 +48,24 @@
       "writtenOn": "2013-07-17T12:46:52Z",
       "side": 1,
       "message": "I think this is wrong.\n\nIt is fine if there is an alt ref immediately after the key frame to set the cpi-\u003emax_mv_magnitude etc to a sensible value,  but if alt ref is turned off then we have a problem. \n\nIn particular after the first key frame we will set max_mv_magnitude to 64 which will prevent a motion search in the frames that follow.\n\nAlso I think we could have a problem where the motion varies from frame to frame or is slow then speeds up as the previous frame will limit the motion search and this then propagates over multiple frames. This was I was playing safe and only setting the range on alt refs else leaving it to a value based on frame size.",
+      "revId": "fee4b0d09794462e11bc4ec6f678c1888ba34c5b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcX//7FA\u003d",
+        "filename": "vp9/encoder/vp9_onyx_if.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 2567,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2013-07-17T16:40:33Z",
+      "side": 1,
+      "message": "Your intuition is right, however there isn\u0027t much of a difference in practice, because the max_mv_magnitude is not really a hard limit on the mv. We can still get mvs larger than that.\n\nMy next patch will have changed some of the logic here. So take a look at that.",
+      "parentUuid": "AAAAcX//7OQ\u003d",
       "revId": "fee4b0d09794462e11bc4ec6f678c1888ba34c5b",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
