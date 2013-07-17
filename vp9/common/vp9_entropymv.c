@@ -187,11 +187,9 @@ static void counts_to_context(nmv_component_counts *mvcomp, int usehp) {
   }
 }
 
-void vp9_inc_mv(const MV *mv, const MV *ref, nmv_context_counts *mvctx,
-                       int usehp) {
+void vp9_inc_mv(const MV *mv,  nmv_context_counts *mvctx) {
   const MV_JOINT_TYPE j = vp9_get_mv_joint(mv);
   mvctx->joints[j]++;
-  usehp = usehp && vp9_use_mv_hp(ref);
   if (mv_joint_vertical(j))
     inc_mv_component_count(mv->row, &mvctx->comps[0], 1);
 
