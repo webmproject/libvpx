@@ -26,16 +26,6 @@
 #include "vp9/decoder/vp9_dsubexp.h"
 #include "vp9/decoder/vp9_treereader.h"
 
-// #define DEBUG_DEC_MV
-#ifdef DEBUG_DEC_MV
-int dec_mvcount = 0;
-#endif
-
-// #define DEC_DEBUG
-#ifdef DEC_DEBUG
-extern int dec_debug;
-#endif
-
 static MB_PREDICTION_MODE read_intra_mode(vp9_reader *r, const vp9_prob *p) {
   return (MB_PREDICTION_MODE)treed_read(r, vp9_intra_mode_tree, p);
 }
@@ -486,11 +476,6 @@ static void read_inter_mode_info(VP9D_COMP *pbi, MODE_INFO *mi,
     ref0 = mbmi->ref_frame[0];
     ref1 = mbmi->ref_frame[1];
 
-#ifdef DEC_DEBUG
-    if (dec_debug)
-      printf("%d %d\n", xd->mode_info_context->mbmi.mv[0].as_mv.row,
-             xd->mode_info_context->mbmi.mv[0].as_mv.col);
-#endif
     vp9_find_mv_refs(cm, xd, mi, xd->prev_mode_info_context,
                      ref0, mbmi->ref_mvs[ref0], cm->ref_frame_sign_bias);
 
@@ -509,13 +494,6 @@ static void read_inter_mode_info(VP9D_COMP *pbi, MODE_INFO *mi,
       vp9_find_best_ref_mvs(xd, mbmi->ref_mvs[ref0], &nearest, &nearby);
       best_mv.as_int = mbmi->ref_mvs[ref0][0].as_int;
     }
-
-#ifdef DEC_DEBUG
-    if (dec_debug)
-      printf("[D %d %d] %d %d %d %d\n", ref_frame,
-             mbmi->mb_mode_context[ref_frame],
-             mv_ref_p[0], mv_ref_p[1], mv_ref_p[2], mv_ref_p[3]);
-#endif
 
     mbmi->interp_filter = cm->mcomp_filter_type == SWITCHABLE
                               ? read_switchable_filter_type(pbi, r)
@@ -645,6 +623,31 @@ static void read_inter_mode_info(VP9D_COMP *pbi, MODE_INFO *mi,
   }
 }
 
+static void read_comp_pred(VP9_COMMON *cm, vp9_reader *r) {
+  int i;
+
+  cm->comp_pred_mode = cm->allow_comp_inter_inter ? read_comp_pred_mode(r)
+                                                  : SINGLE_PREDICTION_ONLY;
+
+  if (cm->comp_pred_mode == HYBRID_PREDICTION)
+    for (i = 0; i < COMP_INTER_CONTEXTS; i++)
+      if (vp9_read(r, VP9_MODE_UPDATE_PROB))
+        vp9_diff_update_prob(r, &cm->fc.comp_inter_prob[i]);
+
+  if (cm->comp_pred_mode != COMP_PREDICTION_ONLY)
+    for (i = 0; i < REF_CONTEXTS; i++) {
+      if (vp9_read(r, VP9_MODE_UPDATE_PROB))
+        vp9_diff_update_prob(r, &cm->fc.single_ref_prob[i][0]);
+      if (vp9_read(r, VP9_MODE_UPDATE_PROB))
+        vp9_diff_update_prob(r, &cm->fc.single_ref_prob[i][1]);
+    }
+
+  if (cm->comp_pred_mode != SINGLE_PREDICTION_ONLY)
+    for (i = 0; i < REF_CONTEXTS; i++)
+      if (vp9_read(r, VP9_MODE_UPDATE_PROB))
+        vp9_diff_update_prob(r, &cm->fc.comp_ref_prob[i]);
+}
+
 void vp9_prepare_read_mode_info(VP9D_COMP* pbi, vp9_reader *r) {
   VP9_COMMON *const cm = &pbi->common;
   int k;
@@ -669,31 +672,8 @@ void vp9_prepare_read_mode_info(VP9D_COMP* pbi, vp9_reader *r) {
       if (vp9_read(r, VP9_MODE_UPDATE_PROB))
         vp9_diff_update_prob(r, &cm->fc.intra_inter_prob[i]);
 
-    if (cm->allow_comp_inter_inter) {
-      cm->comp_pred_mode = read_comp_pred_mode(r);
-      if (cm->comp_pred_mode == HYBRID_PREDICTION)
-        for (i = 0; i < COMP_INTER_CONTEXTS; i++)
-          if (vp9_read(r, VP9_MODE_UPDATE_PROB))
-            vp9_diff_update_prob(r, &cm->fc.comp_inter_prob[i]);
-    } else {
-      cm->comp_pred_mode = SINGLE_PREDICTION_ONLY;
-    }
+    read_comp_pred(cm, r);
 
-    if (cm->comp_pred_mode != COMP_PREDICTION_ONLY)
-      for (i = 0; i < REF_CONTEXTS; i++) {
-        if (vp9_read(r, VP9_MODE_UPDATE_PROB))
-          vp9_diff_update_prob(r, &cm->fc.single_ref_prob[i][0]);
-
-        if (vp9_read(r, VP9_MODE_UPDATE_PROB))
-          vp9_diff_update_prob(r, &cm->fc.single_ref_prob[i][1]);
-      }
-
-    if (cm->comp_pred_mode != SINGLE_PREDICTION_ONLY)
-      for (i = 0; i < REF_CONTEXTS; i++)
-        if (vp9_read(r, VP9_MODE_UPDATE_PROB))
-          vp9_diff_update_prob(r, &cm->fc.comp_ref_prob[i]);
-
-    // VP9_INTRA_MODES
     for (j = 0; j < BLOCK_SIZE_GROUPS; j++)
       for (i = 0; i < VP9_INTRA_MODES - 1; ++i)
         if (vp9_read(r, VP9_MODE_UPDATE_PROB))
