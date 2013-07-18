@@ -99,6 +99,10 @@ static INLINE int is_inter_mode(MB_PREDICTION_MODE mode) {
 
 #define VP9_INTER_MODES (1 + NEWMV - NEARESTMV)
 
+static INLINE int inter_mode_offset(MB_PREDICTION_MODE mode) {
+  return (mode - NEARESTMV);
+}
+
 /* For keyframes, intra block modes are predicted by the (already decoded)
    modes for the Y blocks to the left and above us; for interframes, there
    is a single probability table. */
