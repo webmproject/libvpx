@@ -137,8 +137,8 @@ void vp9_save_coding_context(VP9_COMP *cpi) {
   vpx_memcpy(cpi->coding_context.last_frame_seg_map_copy,
              cm->last_frame_seg_map, (cm->mi_rows * cm->mi_cols));
 
-  vp9_copy(cc->last_ref_lf_deltas, xd->last_ref_lf_deltas);
-  vp9_copy(cc->last_mode_lf_deltas, xd->last_mode_lf_deltas);
+  vp9_copy(cc->last_ref_lf_deltas, xd->lf.last_ref_deltas);
+  vp9_copy(cc->last_mode_lf_deltas, xd->lf.last_mode_deltas);
 
   vp9_copy(cc->coef_probs, cm->fc.coef_probs);
   vp9_copy(cc->switchable_interp_prob, cm->fc.switchable_interp_prob);
@@ -176,8 +176,8 @@ void vp9_restore_coding_context(VP9_COMP *cpi) {
              cpi->coding_context.last_frame_seg_map_copy,
              (cm->mi_rows * cm->mi_cols));
 
-  vp9_copy(xd->last_ref_lf_deltas, cc->last_ref_lf_deltas);
-  vp9_copy(xd->last_mode_lf_deltas, cc->last_mode_lf_deltas);
+  vp9_copy(xd->lf.last_ref_deltas, cc->last_ref_lf_deltas);
+  vp9_copy(xd->lf.last_mode_deltas, cc->last_mode_lf_deltas);
 
   vp9_copy(cm->fc.coef_probs, cc->coef_probs);
   vp9_copy(cm->fc.switchable_interp_prob, cc->switchable_interp_prob);

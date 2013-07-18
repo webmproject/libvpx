@@ -26,8 +26,8 @@ struct postproc_state {
 #include "vp9/common/vp9_onyxc_int.h"
 #include "vp9/common/vp9_ppflags.h"
 
-int vp9_post_proc_frame(struct VP9Common *oci, YV12_BUFFER_CONFIG *dest,
-                        vp9_ppflags_t *flags);
+int vp9_post_proc_frame(struct VP9Common *oci, struct loopfilter *lf,
+                        YV12_BUFFER_CONFIG *dest, vp9_ppflags_t *flags);
 
 void vp9_denoise(const YV12_BUFFER_CONFIG *src, YV12_BUFFER_CONFIG *dst, int q);
 

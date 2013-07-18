@@ -46,7 +46,7 @@ struct loop_filter_info {
 struct VP9Common;
 struct macroblockd;
 
-void vp9_loop_filter_init(struct VP9Common *cm);
+void vp9_loop_filter_init(struct VP9Common *cm, struct loopfilter *lf);
 
 void vp9_loop_filter_frame(struct VP9Common *cm,
                            struct macroblockd *mbd,
