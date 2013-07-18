@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAcX//4vc\u003d",
+        "filename": "vp9/common/arm/neon/vp9_short_idct8x8_add_neon.asm",
+        "patchSetId": 3
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2013-07-18T23:46:16Z",
+      "side": 1,
+      "message": "Done. Add more comments about this.",
+      "parentUuid": "AAAAcX//424\u003d",
+      "revId": "19e65f5e116f7b80be0dfc9cb795d6e5924f9f26",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAcX//5NE\u003d",
         "filename": "vp9/common/arm/neon/vp9_short_idct8x8_add_neon.asm",
         "patchSetId": 3
@@ -30,6 +48,24 @@
       "writtenOn": "2013-07-18T22:01:45Z",
       "side": 1,
       "message": "Do you have any unused registers? These could be stored once instead of each time the macro is invoked. If you\u0027re short on registers, they could be stored in the same register and subscripted:\n vmov.16 d0[0], r3\n vmov.16 d0[1], r4\n...\n vmull.s16 qN, dM, d0[0]",
+      "revId": "19e65f5e116f7b80be0dfc9cb795d6e5924f9f26",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcX//4vY\u003d",
+        "filename": "vp9/common/arm/neon/vp9_short_idct8x8_add_neon.asm",
+        "patchSetId": 3
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2013-07-18T23:46:16Z",
+      "side": 1,
+      "message": "It is difficult to do in this way as the output need 8 128bits registers and the calculation needs another 8 128bits registers as buffer. So no more registers left for my use.",
+      "parentUuid": "AAAAcX//5NE\u003d",
       "revId": "19e65f5e116f7b80be0dfc9cb795d6e5924f9f26",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAcX//4vU\u003d",
+        "filename": "vp9/common/arm/neon/vp9_short_idct8x8_add_neon.asm",
+        "patchSetId": 3
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2013-07-18T23:46:16Z",
+      "side": 1,
+      "message": "As above.",
+      "parentUuid": "AAAAcX//5KQ\u003d",
+      "revId": "19e65f5e116f7b80be0dfc9cb795d6e5924f9f26",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAcX//43Q\u003d",
         "filename": "vp9/common/arm/neon/vp9_short_idct8x8_add_neon.asm",
         "patchSetId": 3
@@ -70,6 +124,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAcX//4uw\u003d",
+        "filename": "vp9/common/arm/neon/vp9_short_idct8x8_add_neon.asm",
+        "patchSetId": 3
+      },
+      "lineNbr": 260,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2013-07-18T23:46:16Z",
+      "side": 1,
+      "message": "Constant pool will introduce the latency between the transfer of memory to registers. So maybe just keep in current way as the constant numbers are not crazy yet.",
+      "parentUuid": "AAAAcX//43Q\u003d",
+      "revId": "19e65f5e116f7b80be0dfc9cb795d6e5924f9f26",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAcX//5Lo\u003d",
         "filename": "vp9/common/arm/neon/vp9_short_idct8x8_add_neon.asm",
         "patchSetId": 3
@@ -81,6 +153,24 @@
       "writtenOn": "2013-07-18T22:01:45Z",
       "side": 1,
       "message": "0x0c00",
+      "revId": "19e65f5e116f7b80be0dfc9cb795d6e5924f9f26",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcX//4vM\u003d",
+        "filename": "vp9/common/arm/neon/vp9_short_idct8x8_add_neon.asm",
+        "patchSetId": 3
+      },
+      "lineNbr": 261,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2013-07-18T23:46:16Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAcX//5Lo\u003d",
       "revId": "19e65f5e116f7b80be0dfc9cb795d6e5924f9f26",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
