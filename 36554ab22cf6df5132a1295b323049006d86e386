@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAcX//55Y\u003d",
+        "filename": "vp9/common/arm/neon/vp9_short_idct8x8_add_neon.asm",
+        "patchSetId": 2
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2013-07-18T17:56:33Z",
+      "side": 1,
+      "message": "Done. Add comments about what the macro is doing.",
+      "parentUuid": "AAAAcX//6MA\u003d",
+      "revId": "36554ab22cf6df5132a1295b323049006d86e386",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAcX//6T8\u003d",
         "filename": "vp9/common/arm/neon/vp9_short_idct8x8_add_neon.asm",
         "patchSetId": 2
@@ -30,6 +48,24 @@
       "writtenOn": "2013-07-17T22:59:13Z",
       "side": 1,
       "message": "Use some reg other than q0 here. Maybe \"vsub.s32 q2, q2, q4\". Then you don\u0027t have to dup r3 and r4 again below.",
+      "revId": "36554ab22cf6df5132a1295b323049006d86e386",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcX//57o\u003d",
+        "filename": "vp9/common/arm/neon/vp9_short_idct8x8_add_neon.asm",
+        "patchSetId": 2
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2013-07-18T17:56:33Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAcX//6T8\u003d",
       "revId": "36554ab22cf6df5132a1295b323049006d86e386",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAcX//57k\u003d",
+        "filename": "vp9/common/arm/neon/vp9_short_idct8x8_add_neon.asm",
+        "patchSetId": 2
+      },
+      "lineNbr": 78,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2013-07-18T17:56:33Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAcX//6SQ\u003d",
+      "revId": "36554ab22cf6df5132a1295b323049006d86e386",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAcX//6RQ\u003d",
         "filename": "vp9/common/arm/neon/vp9_short_idct8x8_add_neon.asm",
         "patchSetId": 2
@@ -64,6 +118,24 @@
       "writtenOn": "2013-07-17T22:59:13Z",
       "side": 1,
       "message": "Can this overflow?",
+      "revId": "36554ab22cf6df5132a1295b323049006d86e386",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcX//550\u003d",
+        "filename": "vp9/common/arm/neon/vp9_short_idct8x8_add_neon.asm",
+        "patchSetId": 2
+      },
+      "lineNbr": 101,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2013-07-18T17:56:33Z",
+      "side": 1,
+      "message": "Done.  Overflow is possible. Originally I implement it as input[0] * cospi_16_64 + input[2]*cospi_16_64. That will avoid the overflow. But to save one instruction, I changed it to be this way. Revert it back to original implementation now.",
+      "parentUuid": "AAAAcX//6RQ\u003d",
       "revId": "36554ab22cf6df5132a1295b323049006d86e386",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAcX//55w\u003d",
+        "filename": "vp9/common/arm/neon/vp9_short_idct8x8_add_neon.asm",
+        "patchSetId": 2
+      },
+      "lineNbr": 112,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2013-07-18T17:56:33Z",
+      "side": 1,
+      "message": "Done. Separate the calculation.",
+      "parentUuid": "AAAAcX//6RM\u003d",
+      "revId": "36554ab22cf6df5132a1295b323049006d86e386",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAcX//6Qo\u003d",
         "filename": "vp9/common/arm/neon/vp9_short_idct8x8_add_neon.asm",
         "patchSetId": 2
@@ -98,6 +188,24 @@
       "writtenOn": "2013-07-17T22:59:13Z",
       "side": 1,
       "message": "See if you can remove these 2 vdups.",
+      "revId": "36554ab22cf6df5132a1295b323049006d86e386",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcX//55s\u003d",
+        "filename": "vp9/common/arm/neon/vp9_short_idct8x8_add_neon.asm",
+        "patchSetId": 2
+      },
+      "lineNbr": 142,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2013-07-18T17:56:33Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAcX//6Qo\u003d",
       "revId": "36554ab22cf6df5132a1295b323049006d86e386",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -121,6 +229,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAcX//55o\u003d",
+        "filename": "vp9/common/arm/neon/vp9_short_idct8x8_add_neon.asm",
+        "patchSetId": 2
+      },
+      "lineNbr": 174,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2013-07-18T17:56:33Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAcX//6Ps\u003d",
+      "revId": "36554ab22cf6df5132a1295b323049006d86e386",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAcX//6Pg\u003d",
         "filename": "vp9/common/arm/neon/vp9_short_idct8x8_add_neon.asm",
         "patchSetId": 2
@@ -132,6 +258,24 @@
       "writtenOn": "2013-07-17T22:59:13Z",
       "side": 1,
       "message": "Can this overflow?",
+      "revId": "36554ab22cf6df5132a1295b323049006d86e386",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcX//55k\u003d",
+        "filename": "vp9/common/arm/neon/vp9_short_idct8x8_add_neon.asm",
+        "patchSetId": 2
+      },
+      "lineNbr": 180,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2013-07-18T17:56:33Z",
+      "side": 1,
+      "message": "Done. Separate the calculation.",
+      "parentUuid": "AAAAcX//6Pg\u003d",
       "revId": "36554ab22cf6df5132a1295b323049006d86e386",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -155,6 +299,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAcX//55g\u003d",
+        "filename": "vp9/common/arm/neon/vp9_short_idct8x8_add_neon.asm",
+        "patchSetId": 2
+      },
+      "lineNbr": 192,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2013-07-18T17:56:33Z",
+      "side": 1,
+      "message": "Done. Separate the calculation.",
+      "parentUuid": "AAAAcX//6PY\u003d",
+      "revId": "36554ab22cf6df5132a1295b323049006d86e386",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAcX//6PM\u003d",
         "filename": "vp9/common/arm/neon/vp9_short_idct8x8_add_neon.asm",
         "patchSetId": 2
@@ -166,6 +328,24 @@
       "writtenOn": "2013-07-17T22:59:13Z",
       "side": 1,
       "message": "This code \"step1[7] \u003d step2[7];\" looks like it is not needed and can be removed from the c code also.",
+      "revId": "36554ab22cf6df5132a1295b323049006d86e386",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcX//55c\u003d",
+        "filename": "vp9/common/arm/neon/vp9_short_idct8x8_add_neon.asm",
+        "patchSetId": 2
+      },
+      "lineNbr": 202,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2013-07-18T17:56:33Z",
+      "side": 1,
+      "message": "Done. Directly save the step2[7] into step1[7] in the above instruction.",
+      "parentUuid": "AAAAcX//6PM\u003d",
       "revId": "36554ab22cf6df5132a1295b323049006d86e386",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -189,6 +369,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAcX//6I8\u003d",
+        "filename": "vp9/common/arm/neon/vp9_short_idct8x8_add_neon.asm",
+        "patchSetId": 2
+      },
+      "lineNbr": 240,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2013-07-18T17:56:33Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAcX//6VY\u003d",
+      "revId": "36554ab22cf6df5132a1295b323049006d86e386",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAcX//6Nc\u003d",
         "filename": "vp9/common/arm/neon/vp9_short_idct8x8_add_neon.asm",
         "patchSetId": 2
@@ -206,6 +404,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAcX//6J8\u003d",
+        "filename": "vp9/common/arm/neon/vp9_short_idct8x8_add_neon.asm",
+        "patchSetId": 2
+      },
+      "lineNbr": 291,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2013-07-18T17:56:33Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAcX//6Nc\u003d",
+      "revId": "36554ab22cf6df5132a1295b323049006d86e386",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAcX//6Ms\u003d",
         "filename": "vp9/common/arm/neon/vp9_short_idct8x8_add_neon.asm",
         "patchSetId": 2
@@ -217,6 +433,24 @@
       "writtenOn": "2013-07-17T22:59:13Z",
       "side": 1,
       "message": "Could you change lines 305-312 to a vshrn and then change lines 328-335 to vqadd and then remove lines 338-345?\n\nI guess you would just have to worry that the vshrn would truncate values.",
+      "revId": "36554ab22cf6df5132a1295b323049006d86e386",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcX//5fE\u003d",
+        "filename": "vp9/common/arm/neon/vp9_short_idct8x8_add_neon.asm",
+        "patchSetId": 2
+      },
+      "lineNbr": 328,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2013-07-18T17:56:33Z",
+      "side": 1,
+      "message": "Per our dicussion, result is not right if do in that way. So keep current code.",
+      "parentUuid": "AAAAcX//6Ms\u003d",
       "revId": "36554ab22cf6df5132a1295b323049006d86e386",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
