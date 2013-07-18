@@ -16,7 +16,7 @@
 /.install-*
 /.libs
 /Makefile
-/config.err
+/config.log
 /config.mk
 /decode_to_md5
 /decode_to_md5.c

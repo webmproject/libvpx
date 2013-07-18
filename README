@@ -97,7 +97,7 @@ COMPILING THE APPLICATIONS/LIBRARIES:
 
   5. Configuration errors
   If the configuration step fails, the first step is to look in the error log.
-  This defaults to config.err. This should give a good indication of what went
+  This defaults to config.log. This should give a good indication of what went
   wrong. If not, contact us for support.
 
 SUPPORT
