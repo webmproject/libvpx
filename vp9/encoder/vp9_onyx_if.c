@@ -131,6 +131,32 @@ static int gf_low_motion_minq[QINDEX_RANGE];
 static int gf_high_motion_minq[QINDEX_RANGE];
 static int inter_minq[QINDEX_RANGE];
 
+static INLINE void Scale2Ratio(int mode, int *hr, int *hs) {
+  switch (mode) {
+    case NORMAL:
+      *hr = 1;
+      *hs = 1;
+      break;
+    case FOURFIVE:
+      *hr = 4;
+      *hs = 5;
+      break;
+    case THREEFIVE:
+      *hr = 3;
+      *hs = 5;
+    break;
+    case ONETWO:
+      *hr = 1;
+      *hs = 2;
+    break;
+    default:
+      *hr = 1;
+      *hs = 1;
+       assert(0);
+      break;
+  }
+}
+
 // Functions to compute the active minq lookup table entries based on a
 // formulaic approach to facilitate easier adjustment of the Q tables.
 // The formulae were derived from computing a 3rd order polynomial best

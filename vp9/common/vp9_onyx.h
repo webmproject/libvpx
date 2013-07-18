@@ -64,34 +64,6 @@ extern "C"
     FRAMEFLAGS_ALTREF = 4,
   } FRAMETYPE_FLAGS;
 
-
-#include <assert.h>
-  static INLINE void Scale2Ratio(int mode, int *hr, int *hs) {
-    switch (mode) {
-      case    NORMAL:
-        *hr = 1;
-        *hs = 1;
-        break;
-      case    FOURFIVE:
-        *hr = 4;
-        *hs = 5;
-        break;
-      case    THREEFIVE:
-        *hr = 3;
-        *hs = 5;
-        break;
-      case    ONETWO:
-        *hr = 1;
-        *hs = 2;
-        break;
-      default:
-        *hr = 1;
-        *hs = 1;
-        assert(0);
-        break;
-    }
-  }
-
   typedef struct {
     int version;  // 4 versions of bitstream defined:
                   //   0 - best quality/slowest decode,
