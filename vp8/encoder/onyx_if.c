@@ -2750,7 +2750,7 @@ static void update_alt_ref_frame_stats(VP8_COMP *cpi)
     cpi->gf_active_count = cm->mb_rows * cm->mb_cols;
 
     /* this frame refreshes means next frames don't unless specified by user */
-    cpi->common.frames_since_golden = 0;
+    cpi->frames_since_golden = 0;
 
     /* Clear the alternate reference update pending flag. */
     cpi->source_alt_ref_pending = 0;
@@ -2802,7 +2802,7 @@ static void update_golden_frame_stats(VP8_COMP *cpi)
          * user
          */
         cm->refresh_golden_frame = 0;
-        cpi->common.frames_since_golden = 0;
+        cpi->frames_since_golden = 0;
 
         cpi->recent_ref_frame_usage[INTRA_FRAME] = 1;
         cpi->recent_ref_frame_usage[LAST_FRAME] = 1;
@@ -2834,12 +2834,12 @@ static void update_golden_frame_stats(VP8_COMP *cpi)
         if (cpi->frames_till_gf_update_due > 0)
             cpi->frames_till_gf_update_due--;
 
-        if (cpi->common.frames_till_alt_ref_frame)
-            cpi->common.frames_till_alt_ref_frame --;
+        if (cpi->frames_till_alt_ref_frame)
+            cpi->frames_till_alt_ref_frame --;
 
-        cpi->common.frames_since_golden ++;
+        cpi->frames_since_golden ++;
 
-        if (cpi->common.frames_since_golden > 1)
+        if (cpi->frames_since_golden > 1)
         {
             cpi->recent_ref_frame_usage[INTRA_FRAME] +=
                 cpi->mb.count_mb_ref_frame_usage[INTRA_FRAME];
@@ -2890,11 +2890,11 @@ static void update_rd_ref_frame_probs(VP8_COMP *cpi)
             cpi->prob_last_coded = 200;
             cpi->prob_gf_coded = 1;
         }
-        else if (cpi->common.frames_since_golden == 0)
+        else if (cpi->frames_since_golden == 0)
         {
             cpi->prob_last_coded = 214;
         }
-        else if (cpi->common.frames_since_golden == 1)
+        else if (cpi->frames_since_golden == 1)
         {
             cpi->prob_last_coded = 192;
             cpi->prob_gf_coded = 220;
@@ -4934,7 +4934,7 @@ int vp8_get_compressed_data(VP8_COMP *cpi, unsigned int *frame_flags, unsigned l
                                               cpi->frames_till_gf_update_due);
                 force_src_buffer = &cpi->alt_ref_buffer;
             }
-            cm->frames_till_alt_ref_frame = cpi->frames_till_gf_update_due;
+            cpi->frames_till_alt_ref_frame = cpi->frames_till_gf_update_due;
             cm->refresh_alt_ref_frame = 1;
             cm->refresh_golden_frame = 0;
             cm->refresh_last_frame = 0;

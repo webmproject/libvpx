@@ -234,7 +234,7 @@ void vp8_save_coding_context(VP8_COMP *cpi)
     cc->frames_since_key          = cpi->frames_since_key;
     cc->filter_level             = cpi->common.filter_level;
     cc->frames_till_gf_update_due   = cpi->frames_till_gf_update_due;
-    cc->frames_since_golden       = cpi->common.frames_since_golden;
+    cc->frames_since_golden       = cpi->frames_since_golden;
 
     vp8_copy(cc->mvc,      cpi->common.fc.mvc);
     vp8_copy(cc->mvcosts,  cpi->rd_costs.mvcosts);
@@ -271,7 +271,7 @@ void vp8_restore_coding_context(VP8_COMP *cpi)
     cpi->frames_since_key         =   cc->frames_since_key;
     cpi->common.filter_level     =   cc->filter_level;
     cpi->frames_till_gf_update_due  =   cc->frames_till_gf_update_due;
-    cpi->common.frames_since_golden       =   cc->frames_since_golden;
+    cpi->frames_since_golden       =   cc->frames_since_golden;
 
     vp8_copy(cpi->common.fc.mvc, cc->mvc);
 
@@ -715,7 +715,7 @@ static void calc_pframe_target_size(VP8_COMP *cpi)
                 if (Adjustment > (cpi->this_frame_target - min_frame_target))
                     Adjustment = (cpi->this_frame_target - min_frame_target);
 
-                if (cpi->common.frames_since_golden == (cpi->current_gf_interval >> 1))
+                if (cpi->frames_since_golden == (cpi->current_gf_interval >> 1))
                     cpi->this_frame_target += ((cpi->current_gf_interval - 1) * Adjustment);
                 else
                     cpi->this_frame_target -= Adjustment;

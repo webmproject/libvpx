@@ -2398,7 +2398,7 @@ static void assign_std_frame_bits(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
     target_frame_size += cpi->min_frame_bandwidth;
 
     /* Every other frame gets a few extra bits */
-    if ( (cpi->common.frames_since_golden & 0x01) &&
+    if ( (cpi->frames_since_golden & 0x01) &&
          (cpi->frames_till_gf_update_due > 0) )
     {
         target_frame_size += cpi->twopass.alt_extra_bits;
