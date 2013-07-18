@@ -1875,15 +1875,28 @@ static void rd_check_segment_txsize(VP9_COMP *cpi, MACROBLOCK *x,
           int c3 = cost_mv_ref(cpi, ZEROMV, rfc);
 
           if (this_mode == NEARMV) {
-            if (c1 >= c2 || c1 > c3)
+            if (c1 > c3)
               continue;
           } else if (this_mode == NEARESTMV) {
-            if (c2 > c1 || c2 > c3)
+            if (c2 > c3)
               continue;
           } else {
             assert(this_mode == ZEROMV);
-            if (c3 >= c2 || c3 >= c1)
-              continue;
+            if (mbmi->ref_frame[1] <= 0) {
+              if ((c3 >= c2 &&
+                   frame_mv[NEARESTMV][mbmi->ref_frame[0]].as_int == 0) ||
+                  (c3 >= c1 &&
+                   frame_mv[NEARMV][mbmi->ref_frame[0]].as_int == 0))
+                continue;
+            } else {
+              if ((c3 >= c2 &&
+                   frame_mv[NEARESTMV][mbmi->ref_frame[0]].as_int == 0 &&
+                   frame_mv[NEARESTMV][mbmi->ref_frame[1]].as_int == 0) ||
+                  (c3 >= c1 &&
+                   frame_mv[NEARMV][mbmi->ref_frame[0]].as_int == 0 &&
+                   frame_mv[NEARMV][mbmi->ref_frame[1]].as_int == 0))
+                continue;
+            }
           }
         }
 
@@ -2723,15 +2736,28 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
     int c3 = cost_mv_ref(cpi, ZEROMV, rfc);
 
     if (this_mode == NEARMV) {
-      if (c1 >= c2 || c1 > c3)
+      if (c1 > c3)
         return INT64_MAX;
     } else if (this_mode == NEARESTMV) {
-      if (c2 > c1 || c2 > c3)
+      if (c2 > c3)
         return INT64_MAX;
     } else {
       assert(this_mode == ZEROMV);
-      if (c3 >= c2 || c3 >= c1)
-        return INT64_MAX;
+      if (num_refs == 1) {
+        if ((c3 >= c2 &&
+             mode_mv[NEARESTMV][mbmi->ref_frame[0]].as_int == 0) ||
+            (c3 >= c1 &&
+             mode_mv[NEARMV][mbmi->ref_frame[0]].as_int == 0))
+          return INT64_MAX;
+      } else {
+        if ((c3 >= c2 &&
+             mode_mv[NEARESTMV][mbmi->ref_frame[0]].as_int == 0 &&
+             mode_mv[NEARESTMV][mbmi->ref_frame[1]].as_int == 0) ||
+            (c3 >= c1 &&
+             mode_mv[NEARMV][mbmi->ref_frame[0]].as_int == 0 &&
+             mode_mv[NEARMV][mbmi->ref_frame[1]].as_int == 0))
+          return INT64_MAX;
+      }
     }
   }
 
