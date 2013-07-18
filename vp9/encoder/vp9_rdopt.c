@@ -1368,12 +1368,9 @@ static int64_t rd_pick_intra4x4mby_modes(VP9_COMP *cpi, MACROBLOCK *mb,
         mic->bmi[i + j].as_mode = best_mode;
 
       if (total_rd >= best_rd)
-        break;
+        return INT64_MAX;
     }
   }
-
-  if (total_rd >= best_rd)
-    return INT64_MAX;
 
   *Rate = cost;
   *rate_y = tot_rate_y;
