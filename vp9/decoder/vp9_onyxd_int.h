@@ -10,13 +10,14 @@
 
 #ifndef VP9_DECODER_VP9_ONYXD_INT_H_
 #define VP9_DECODER_VP9_ONYXD_INT_H_
+
 #include "./vpx_config.h"
+
+#include "vp9/common/vp9_onyxc_int.h"
+
+#include "vp9/decoder/vp9_idct_blk.h"
 #include "vp9/decoder/vp9_onyxd.h"
 #include "vp9/decoder/vp9_treereader.h"
-#include "vp9/common/vp9_onyxc_int.h"
-#include "vp9/decoder/vp9_idct_blk.h"
-
-// #define DEC_DEBUG
 
 typedef struct VP9Decompressor {
   DECLARE_ALIGNED(16, MACROBLOCKD, mb);
@@ -28,12 +29,10 @@ typedef struct VP9Decompressor {
   const uint8_t *source;
   uint32_t source_sz;
 
-  vp9_reader *mbc;
   int64_t last_time_stamp;
   int ready_for_new_data;
 
   int refresh_frame_flags;
-  vp9_prob prob_skip_false;
 
   int decoded_key_frame;
 

@@ -154,7 +154,6 @@ void vp9_remove_decompressor(VP9D_PTR ptr) {
     vpx_free(pbi->common.last_frame_seg_map);
 
   vp9_remove_common(&pbi->common);
-  vpx_free(pbi->mbc);
   vpx_free(pbi);
 }
 
