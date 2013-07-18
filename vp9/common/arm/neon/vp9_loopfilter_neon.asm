@@ -38,6 +38,7 @@
     push        {lr}
 
     ldr         r12, [sp,#8]               ; load count
+    add         r1, r1, r1                 ; double pitch
     cmp         r12, #0
     beq         end_vp9_lf_h_edge
 
@@ -47,9 +48,8 @@
     vld1.8      {d2[]}, [r2]               ; duplicate *thresh
 
 count_lf_h_loop
-    sub         r2, r0, r1, lsl #2         ; move src pointer down by 4 lines
-    add         r3, r2, r1
-    add         r1, r1, r1
+    sub         r2, r0, r1, lsl #1         ; move src pointer down by 4 lines
+    add         r3, r2, r1, lsr #1         ; set to 3 lines down
 
     vld1.u8     {d3}, [r2@64], r1          ; p3
     vld1.u8     {d4}, [r3@64], r1          ; p2
@@ -278,6 +278,7 @@ end_vp9_lf_v_edge
     push        {r4-r5, lr}
 
     ldr         r12, [sp,#16]              ; load count
+    add         r1, r1, r1                 ; double pitch
     cmp         r12, #0
     beq         end_vp9_mblf_h_edge
 
@@ -287,9 +288,8 @@ end_vp9_lf_v_edge
     vld1.8      {d2[]}, [r2]               ; duplicate *thresh
 
 count_mblf_h_loop
-    sub         r3, r0, r1, lsl #2         ; move src pointer down by 4 lines
-    add         r2, r3, r1
-    add         r1, r1, r1
+    sub         r3, r0, r1, lsl #1         ; move src pointer down by 4 lines
+    add         r2, r3, r1, lsr #1         ; set to 3 lines down
 
     vld1.u8     {d3}, [r3@64], r1          ; p3
     vld1.u8     {d4}, [r2@64], r1          ; p2
