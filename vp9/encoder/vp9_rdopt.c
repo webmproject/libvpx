@@ -1996,12 +1996,8 @@ static void rd_check_segment_txsize(VP9_COMP *cpi, MACROBLOCK *x,
                            x->mvcost, cpi);
 
         // Trap vectors that reach beyond the UMV borders
-        if (((mode_mv[this_mode].as_mv.row >> 3) < x->mv_row_min) ||
-            ((mode_mv[this_mode].as_mv.row >> 3) > x->mv_row_max) ||
-            ((mode_mv[this_mode].as_mv.col >> 3) < x->mv_col_min) ||
-            ((mode_mv[this_mode].as_mv.col >> 3) > x->mv_col_max)) {
+        if (mv_check_bounds(x, &mode_mv[this_mode]))
           continue;
-        }
         if (mbmi->ref_frame[1] > 0 &&
             mv_check_bounds(x, &second_mode_mv[this_mode]))
           continue;
