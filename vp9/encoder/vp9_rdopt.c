@@ -3434,9 +3434,15 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
                                       SEG_LVL_REF_FRAME)) {
       // Only consider ZEROMV/ALTREF_FRAME for alt ref frame,
       // unless ARNR filtering is enabled in which case we want
-      // an unfiltered alternative
+      // an unfiltered alternative. We allow near/nearest as well
+      // because they may result in zero-zero MVs but be cheaper.
       if (cpi->is_src_frame_alt_ref && (cpi->oxcf.arnr_max_frames == 0)) {
-        if (this_mode != ZEROMV || ref_frame != ALTREF_FRAME) {
+        if ((this_mode != ZEROMV &&
+             !(this_mode == NEARMV &&
+               frame_mv[NEARMV][ALTREF_FRAME].as_int == 0) &&
+             !(this_mode == NEARESTMV &&
+               frame_mv[NEARESTMV][ALTREF_FRAME].as_int == 0)) ||
+            ref_frame != ALTREF_FRAME) {
           continue;
         }
       }
@@ -4017,35 +4023,6 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
   }
 #endif
 
-  // This code forces Altref,0,0 and skip for the frame that overlays a
-  // an alrtef unless Altref is filtered. However, this is unsafe if
-  // segment level coding of ref frame is enabled for this segment.
-  if (!vp9_segfeature_active(&xd->seg, segment_id, SEG_LVL_REF_FRAME) &&
-      cpi->is_src_frame_alt_ref &&
-      (cpi->oxcf.arnr_max_frames == 0) &&
-      (best_mbmode.mode != ZEROMV || best_mbmode.ref_frame[0] != ALTREF_FRAME)
-      && bsize >= BLOCK_SIZE_SB8X8) {
-    mbmi->mode = ZEROMV;
-    mbmi->ref_frame[0] = ALTREF_FRAME;
-    mbmi->ref_frame[1] = NONE;
-    mbmi->mv[0].as_int = 0;
-    mbmi->uv_mode = DC_PRED;
-    mbmi->mb_skip_coeff = 1;
-    if (cm->txfm_mode == TX_MODE_SELECT) {
-      if (bsize >= BLOCK_SIZE_SB32X32)
-        mbmi->txfm_size = TX_32X32;
-      else if (bsize >= BLOCK_SIZE_MB16X16)
-        mbmi->txfm_size = TX_16X16;
-      else
-        mbmi->txfm_size = TX_8X8;
-    }
-
-    vpx_memset(best_txfm_diff, 0, sizeof(best_txfm_diff));
-    vpx_memset(best_pred_diff, 0, sizeof(best_pred_diff));
-    vpx_memset(best_filter_diff, 0, sizeof(best_filter_diff));
-    goto end;
-  }
-
   // macroblock modes
   *mbmi = best_mbmode;
   x->skip |= best_skip2;
@@ -4103,7 +4080,6 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
     vpx_memset(best_txfm_diff, 0, sizeof(best_txfm_diff));
   }
 
- end:
   set_scale_factors(xd, mbmi->ref_frame[0], mbmi->ref_frame[1],
                     scale_factor);
   store_coding_context(x, ctx, best_mode_index,
