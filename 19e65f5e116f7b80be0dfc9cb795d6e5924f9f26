@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAcX//5NE\u003d",
+        "filename": "vp9/common/arm/neon/vp9_short_idct8x8_add_neon.asm",
+        "patchSetId": 3
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2013-07-18T22:01:45Z",
+      "side": 1,
+      "message": "Do you have any unused registers? These could be stored once instead of each time the macro is invoked. If you\u0027re short on registers, they could be stored in the same register and subscripted:\n vmov.16 d0[0], r3\n vmov.16 d0[1], r4\n...\n vmull.s16 qN, dM, d0[0]",
+      "revId": "19e65f5e116f7b80be0dfc9cb795d6e5924f9f26",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcX//5KQ\u003d",
+        "filename": "vp9/common/arm/neon/vp9_short_idct8x8_add_neon.asm",
+        "patchSetId": 3
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2013-07-18T22:01:45Z",
+      "side": 1,
+      "message": "likewise. d0[2], d0[2]",
+      "revId": "19e65f5e116f7b80be0dfc9cb795d6e5924f9f26",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcX//43Q\u003d",
+        "filename": "vp9/common/arm/neon/vp9_short_idct8x8_add_neon.asm",
+        "patchSetId": 3
+      },
+      "lineNbr": 260,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2013-07-18T22:01:45Z",
+      "side": 1,
+      "message": "Since you have so many constants, consider a constant pool:\nvp8/common/arm/neon/dequant_idct_neon.asm\nvp8/common/arm/neon/idct_dequant_full_2x_neon.asm",
+      "revId": "19e65f5e116f7b80be0dfc9cb795d6e5924f9f26",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcX//5Lo\u003d",
+        "filename": "vp9/common/arm/neon/vp9_short_idct8x8_add_neon.asm",
+        "patchSetId": 3
+      },
+      "lineNbr": 261,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2013-07-18T22:01:45Z",
+      "side": 1,
+      "message": "0x0c00",
+      "revId": "19e65f5e116f7b80be0dfc9cb795d6e5924f9f26",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
