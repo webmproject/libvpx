@@ -2360,8 +2360,8 @@ static void setup_buffer_inter(VP9_COMP *cpi, MACROBLOCK *x,
   // Further refinement that is encode side only to test the top few candidates
   // in full and choose the best as the centre point for subsequent searches.
   // The current implementation doesn't support scaling.
-  if (scale[frame_type].x_scale_fp == (1 << VP9_REF_SCALE_SHIFT) &&
-      scale[frame_type].y_scale_fp == (1 << VP9_REF_SCALE_SHIFT))
+  if (scale[frame_type].x_scale_fp == VP9_REF_NO_SCALE &&
+      scale[frame_type].y_scale_fp == VP9_REF_NO_SCALE)
     mv_pred(cpi, x, yv12_mb[frame_type][0].buf, yv12->y_stride,
             frame_type, block_size);
 }
@@ -3354,18 +3354,14 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
     // TODO(jingning, jkoleszar): scaling reference frame not supported for
     // SPLITMV.
     if (mbmi->ref_frame[0] > 0 &&
-          (scale_factor[mbmi->ref_frame[0]].x_scale_fp !=
-           (1 << VP9_REF_SCALE_SHIFT) ||
-           scale_factor[mbmi->ref_frame[0]].y_scale_fp !=
-           (1 << VP9_REF_SCALE_SHIFT)) &&
+        (scale_factor[mbmi->ref_frame[0]].x_scale_fp != VP9_REF_NO_SCALE ||
+         scale_factor[mbmi->ref_frame[0]].y_scale_fp != VP9_REF_NO_SCALE) &&
         this_mode == SPLITMV)
       continue;
 
     if (mbmi->ref_frame[1] > 0 &&
-          (scale_factor[mbmi->ref_frame[1]].x_scale_fp !=
-           (1 << VP9_REF_SCALE_SHIFT) ||
-           scale_factor[mbmi->ref_frame[1]].y_scale_fp !=
-           (1 << VP9_REF_SCALE_SHIFT)) &&
+        (scale_factor[mbmi->ref_frame[1]].x_scale_fp != VP9_REF_NO_SCALE ||
+         scale_factor[mbmi->ref_frame[1]].y_scale_fp != VP9_REF_NO_SCALE) &&
         this_mode == SPLITMV)
       continue;
 
