@@ -23,10 +23,13 @@ extern "C" {
 
 namespace {
 class TileIndependenceTest : public ::libvpx_test::EncoderTest,
-    public ::libvpx_test::CodecTestWithParam<int> {
+                             public ::libvpx_test::CodecTestWithParam<int> {
  protected:
-  TileIndependenceTest() : EncoderTest(GET_PARAM(0)), n_tiles_(GET_PARAM(1)),
-      md5_fw_order_(), md5_inv_order_() {
+  TileIndependenceTest()
+      : EncoderTest(GET_PARAM(0)),
+        md5_fw_order_(),
+        md5_inv_order_(),
+        n_tiles_(GET_PARAM(1)) {
     init_flags_ = VPX_CODEC_USE_PSNR;
     vpx_codec_dec_cfg_t cfg;
     cfg.w = 704;
@@ -56,9 +59,8 @@ class TileIndependenceTest : public ::libvpx_test::EncoderTest,
 
   void UpdateMD5(::libvpx_test::Decoder *dec, const vpx_codec_cx_pkt_t *pkt,
                  ::libvpx_test::MD5 *md5) {
-    const vpx_codec_err_t res =
-        dec->DecodeFrame(reinterpret_cast<uint8_t*>(pkt->data.frame.buf),
-                         pkt->data.frame.sz);
+    const vpx_codec_err_t res = dec->DecodeFrame(
+        reinterpret_cast<uint8_t*>(pkt->data.frame.buf), pkt->data.frame.sz);
     if (res != VPX_CODEC_OK) {
       abort_ = true;
       ASSERT_EQ(VPX_CODEC_OK, res);
@@ -72,11 +74,11 @@ class TileIndependenceTest : public ::libvpx_test::EncoderTest,
     UpdateMD5(inv_dec_, pkt, &md5_inv_order_);
   }
 
- private:
-  int n_tiles_;
- protected:
   ::libvpx_test::MD5 md5_fw_order_, md5_inv_order_;
   ::libvpx_test::Decoder *fw_dec_, *inv_dec_;
+
+ private:
+  int n_tiles_;
 };
 
 // run an encode with 2 or 4 tiles, and do the decode both in normal and
@@ -93,7 +95,7 @@ TEST_P(TileIndependenceTest, MD5Match) {
                                      timebase.den, timebase.num, 0, 30);
   ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
 
-  const char *md5_fw_str  = md5_fw_order_.Get();
+  const char *md5_fw_str = md5_fw_order_.Get();
   const char *md5_inv_str = md5_inv_order_.Get();
 
   // could use ASSERT_EQ(!memcmp(.., .., 16) here, but this gives nicer
@@ -102,7 +104,6 @@ TEST_P(TileIndependenceTest, MD5Match) {
   ASSERT_STREQ(md5_fw_str, md5_inv_str);
 }
 
-VP9_INSTANTIATE_TEST_CASE(TileIndependenceTest,
-                          ::testing::Range(0, 2, 1));
+VP9_INSTANTIATE_TEST_CASE(TileIndependenceTest, ::testing::Range(0, 2, 1));
 
 }  // namespace
