@@ -1543,6 +1543,29 @@ static int64_t rd_sbuv_dcpred(VP9_COMP *cpi, MACROBLOCK *x,
   return this_rd;
 }
 
+static void choose_intra_uv_mode(VP9_COMP *cpi, BLOCK_SIZE_TYPE bsize,
+                                 int *rate_uv, int *rate_uv_tokenonly,
+                                 int64_t *dist_uv, int *skip_uv,
+                                 MB_PREDICTION_MODE *mode_uv) {
+  MACROBLOCK *const x = &cpi->mb;
+
+  // Use an estimated rd for uv_intra based on DC_PRED if the
+  // appropriate speed flag is set.
+  if (cpi->sf.use_uv_intra_rd_estimate) {
+    rd_sbuv_dcpred(cpi, x, rate_uv, rate_uv_tokenonly, dist_uv, skip_uv,
+                   (bsize < BLOCK_SIZE_SB8X8) ? BLOCK_SIZE_SB8X8 :
+                   bsize);
+  // Else do a proper rd search for each possible transform size that may
+  // be considered in the main rd loop.
+  } else {
+    rd_pick_intra_sbuv_mode(cpi, x,
+                            rate_uv, rate_uv_tokenonly, dist_uv, skip_uv,
+                            (bsize < BLOCK_SIZE_SB8X8) ? BLOCK_SIZE_SB8X8
+                            : bsize);
+  }
+  *mode_uv = x->e_mbd.mode_info_context->mbmi.uv_mode;
+}
+
 static int cost_mv_ref(VP9_COMP *cpi, MB_PREDICTION_MODE mode,
                        int mode_context) {
   MACROBLOCK *const x = &cpi->mb;
@@ -3165,6 +3188,8 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
     best_txfm_rd[i] = INT64_MAX;
   for (i = 0; i <= VP9_SWITCHABLE_FILTERS; i++)
     best_filter_rd[i] = INT64_MAX;
+  for (i = 0; i < TX_SIZE_MAX_SB; i++)
+    rate_uv_intra[i] = INT_MAX;
 
   *returnrate = INT_MAX;
 
@@ -3208,44 +3233,6 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
     }
     frame_mv[NEWMV][ref_frame].as_int = INVALID_MV;
     frame_mv[ZEROMV][ref_frame].as_int = 0;
-  }
-
-  // If intra is not masked off then get uv intra mode rd.
-  if (x->fast_ms < 2 && (!cpi->sf.use_avoid_tested_higherror
-      || (cpi->sf.use_avoid_tested_higherror
-          && (ref_frame_mask & (1 << INTRA_FRAME))))) {
-    // Note that the enumerator TXFM_MODE "matches" TX_SIZE.
-    // Eg. ONLY_4X4 = TX_4X4, ALLOW_8X8 = TX_8X8 etc such that the MIN
-    // operation below correctly constrains max_uvtxfm_size.
-    TX_SIZE max_uvtxfm_size =
-      MIN(max_uv_txsize_lookup[bsize], (TX_SIZE)cm->txfm_mode);
-    TX_SIZE min_uvtxfm_size = (cpi->sf.tx_size_search_method == USE_LARGESTALL)
-                              ? max_uvtxfm_size : TX_4X4;
-
-    mbmi->mode = DC_PRED;
-    mbmi->ref_frame[0] = INTRA_FRAME;
-
-    // Test all possible UV transform sizes that may be used in the main loop
-    for (i = min_uvtxfm_size; i <= max_uvtxfm_size; ++i) {
-      mbmi->txfm_size = i;
-
-      // Use an estimated rd for uv_intra based on DC_PRED if the
-      // appropriate speed flag is set.
-      if (cpi->sf.use_uv_intra_rd_estimate) {
-        rd_sbuv_dcpred(cpi, x, &rate_uv_intra[i],
-                       &rate_uv_tokenonly[i], &dist_uv[i], &skip_uv[i],
-                       (bsize < BLOCK_SIZE_SB8X8) ? BLOCK_SIZE_SB8X8 :
-                                                    bsize);
-      // Else do a proper rd search for each possible transform size that may
-      // be considered in the main rd loop.
-      } else {
-        rd_pick_intra_sbuv_mode(cpi, x, &rate_uv_intra[i],
-                                &rate_uv_tokenonly[i], &dist_uv[i], &skip_uv[i],
-                                (bsize < BLOCK_SIZE_SB8X8) ? BLOCK_SIZE_SB8X8
-                                                           : bsize);
-      }
-      mode_uv[i] = mbmi->uv_mode;
-    }
   }
 
   for (mode_index = 0; mode_index < MAX_MODES; ++mode_index) {
@@ -3452,8 +3439,14 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
       rate2 += intra_cost_penalty;
       distortion2 += distortion_y;
 
+      if (rate_uv_intra[TX_4X4] == INT_MAX) {
+        choose_intra_uv_mode(cpi, bsize, &rate_uv_intra[TX_4X4],
+                             &rate_uv_tokenonly[TX_4X4],
+                             &dist_uv[TX_4X4], &skip_uv[TX_4X4],
+                             &mode_uv[TX_4X4]);
+      }
       rate2 += rate_uv_intra[TX_4X4];
-      rate_uv = rate_uv_intra[TX_4X4];
+      rate_uv = rate_uv_tokenonly[TX_4X4];
       distortion2 += dist_uv[TX_4X4];
       distortion_uv = dist_uv[TX_4X4];
       mbmi->uv_mode = mode_uv[TX_4X4];
@@ -3480,13 +3473,19 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
         continue;
 
       uv_tx = MIN(mbmi->txfm_size, max_uv_txsize_lookup[bsize]);
+      if (rate_uv_intra[uv_tx] == INT_MAX) {
+        choose_intra_uv_mode(cpi, bsize, &rate_uv_intra[uv_tx],
+                             &rate_uv_tokenonly[uv_tx],
+                             &dist_uv[uv_tx], &skip_uv[uv_tx],
+                             &mode_uv[uv_tx]);
+      }
 
-      rate_uv = rate_uv_intra[uv_tx];
+      rate_uv = rate_uv_tokenonly[uv_tx];
       distortion_uv = dist_uv[uv_tx];
       skippable = skippable && skip_uv[uv_tx];
       mbmi->uv_mode = mode_uv[uv_tx];
 
-      rate2 = rate_y + x->mbmode_cost[mbmi->mode] + rate_uv;
+      rate2 = rate_y + x->mbmode_cost[mbmi->mode] + rate_uv_intra[uv_tx];
       if (mbmi->mode != DC_PRED && mbmi->mode != TM_PRED)
         rate2 += intra_cost_penalty;
       distortion2 = distortion_y + distortion_uv;
