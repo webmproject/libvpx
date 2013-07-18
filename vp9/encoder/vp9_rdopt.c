@@ -1641,9 +1641,6 @@ static int labels2mode(MACROBLOCK *x, int i,
     mic->bmi[i].as_mv[1].as_int = this_second_mv->as_int;
 
   x->partition_info->bmi[i].mode = m;
-  x->partition_info->bmi[i].mv.as_int = this_mv->as_int;
-  if (mbmi->ref_frame[1] > 0)
-    x->partition_info->bmi[i].second_mv.as_int = this_second_mv->as_int;
   for (idy = 0; idy < bh; ++idy) {
     for (idx = 0; idx < bw; ++idx) {
       vpx_memcpy(&mic->bmi[i + idy * 2 + idx],
@@ -1806,7 +1803,8 @@ static void rd_check_segment_txsize(VP9_COMP *cpi, MACROBLOCK *x,
   int i, j, br = 0, rate = 0, sbr = 0, idx, idy;
   int64_t bd = 0, sbd = 0, subblock_sse = 0, block_sse = 0;
   MB_PREDICTION_MODE this_mode;
-  MB_MODE_INFO * mbmi = &x->e_mbd.mode_info_context->mbmi;
+  MODE_INFO *mi = x->e_mbd.mode_info_context;
+  MB_MODE_INFO *const mbmi = &mi->mbmi;
   const int label_count = 4;
   int64_t this_segment_rd = 0;
   int label_mv_thresh;
@@ -2080,9 +2078,9 @@ static void rd_check_segment_txsize(VP9_COMP *cpi, MACROBLOCK *x,
 
   // store everything needed to come back to this!!
   for (i = 0; i < 4; i++) {
-    bsi->mvs[i].as_mv = x->partition_info->bmi[i].mv.as_mv;
+    bsi->mvs[i].as_mv = mi->bmi[i].as_mv[0].as_mv;
     if (mbmi->ref_frame[1] > 0)
-      bsi->second_mvs[i].as_mv = x->partition_info->bmi[i].second_mv.as_mv;
+      bsi->second_mvs[i].as_mv = mi->bmi[i].as_mv[1].as_mv;
     bsi->modes[i] = x->partition_info->bmi[i].mode;
     bsi->eobs[i] = best_eobs[i];
   }
@@ -2123,24 +2121,12 @@ static int64_t rd_pick_best_mbsegmentation(VP9_COMP *cpi, MACROBLOCK *x,
       x->e_mbd.mode_info_context->bmi[i].as_mv[1].as_int =
       bsi.second_mvs[i].as_int;
     x->e_mbd.plane[0].eobs[i] = bsi.eobs[i];
-  }
-
-  /* save partitions */
-  x->partition_info->count = 4;
-
-  for (i = 0; i < x->partition_info->count; i++) {
     x->partition_info->bmi[i].mode = bsi.modes[i];
-    x->partition_info->bmi[i].mv.as_mv = bsi.mvs[i].as_mv;
-    if (mbmi->ref_frame[1] > 0)
-      x->partition_info->bmi[i].second_mv.as_mv = bsi.second_mvs[i].as_mv;
   }
+
   /*
    * used to set mbmi->mv.as_int
    */
-  x->partition_info->bmi[3].mv.as_int = bsi.mvs[3].as_int;
-  if (mbmi->ref_frame[1] > 0)
-    x->partition_info->bmi[3].second_mv.as_int = bsi.second_mvs[3].as_int;
-
   *returntotrate = bsi.r;
   *returndistortion = bsi.d;
   *returnyrate = bsi.segment_yrate;
@@ -4041,8 +4027,8 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
 
     *x->partition_info = best_partition;
 
-    mbmi->mv[0].as_int = x->partition_info->bmi[3].mv.as_int;
-    mbmi->mv[1].as_int = x->partition_info->bmi[3].second_mv.as_int;
+    mbmi->mv[0].as_int = xd->mode_info_context->bmi[3].as_mv[0].as_int;
+    mbmi->mv[1].as_int = xd->mode_info_context->bmi[3].as_mv[1].as_int;
   }
 
   for (i = 0; i < NB_PREDICTION_TYPES; ++i) {

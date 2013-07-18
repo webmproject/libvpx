@@ -24,11 +24,8 @@ typedef struct {
 } search_site;
 
 typedef struct {
-  int count;
   struct {
     MB_PREDICTION_MODE mode;
-    int_mv mv;
-    int_mv second_mv;
   } bmi[4];
 } PARTITION_INFO;
 
