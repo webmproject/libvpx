@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAcX//59k\u003d",
+        "filename": "vp9/common/vp9_mvref_common.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 316,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2013-07-18T04:00:20Z",
+      "side": 1,
+      "message": "don\u0027t need both of these if proposed_ref_1 \u003d\u003d ref_frame then proposed_ref_0 does not...",
+      "revId": "6eb3bdbd152c53c2fe41843e17040a61c32dc0b5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcX//59c\u003d",
+        "filename": "vp9/common/vp9_mvref_common.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 318,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2013-07-18T04:00:20Z",
+      "side": 1,
+      "message": "seems wasteful to do the i\u003c2 and block_idx\u003e\u003d2 over and over again.",
+      "revId": "6eb3bdbd152c53c2fe41843e17040a61c32dc0b5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcX//59Y\u003d",
+        "filename": "vp9/common/vp9_mvref_common.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 327,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2013-07-18T04:00:20Z",
+      "side": 1,
+      "message": "this is in the else clause of above don\u0027t need the proposed_ref_1 !\u003d ref_frame",
+      "revId": "6eb3bdbd152c53c2fe41843e17040a61c32dc0b5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
