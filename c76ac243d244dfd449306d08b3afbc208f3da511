@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAcX//5xU\u003d",
+        "filename": "vp9/encoder/vp9_onyx_if.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 2564,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2013-07-19T11:50:04Z",
+      "side": 1,
+      "message": "I still think there is a pottential problem if we have a very low motion (or even static section where cpi-\u003emax_mv_magnitude \u003d 0) then a key frame scene cut to a high motion section.\n\nARF may handle this if allowable but even in two pass encodes a very high motion section may cause arf to be turned off. Why limit this \"reset\" to just the first inter frame and not more generally to the first inter frame after a kf/intra only frame?",
+      "revId": "c76ac243d244dfd449306d08b3afbc208f3da511",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
