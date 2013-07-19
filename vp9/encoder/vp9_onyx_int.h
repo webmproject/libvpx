@@ -141,12 +141,14 @@ typedef struct {
   MBGRAPH_MB_STATS *mb_stats;
 } MBGRAPH_FRAME_STATS;
 
+// This enumerator type needs to be kept aligned with the mode order in
+// const MODE_DEFINITION vp9_mode_order[MAX_MODES] used in the rd code.
 typedef enum {
-  THR_ZEROMV,
-  THR_DC,
-
   THR_NEARESTMV,
   THR_NEARMV,
+
+  THR_ZEROMV,
+  THR_DC,
 
   THR_ZEROG,
   THR_NEARESTG,
