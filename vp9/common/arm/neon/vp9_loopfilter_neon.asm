@@ -37,13 +37,14 @@
 |vp9_loop_filter_horizontal_edge_neon| PROC
     push        {lr}
 
-    ldr         r12, [sp,#8]               ; load count
+    vld1.8      {d0[]}, [r2]               ; duplicate *blimit
+    ldr         r12, [sp, #8]              ; load count
+    ldr         r2, [sp, #4]               ; load thresh
     add         r1, r1, r1                 ; double pitch
+
     cmp         r12, #0
     beq         end_vp9_lf_h_edge
 
-    vld1.8      {d0[]}, [r2]               ; duplicate *blimit
-    ldr         r2, [sp, #4]               ; load thresh
     vld1.8      {d1[]}, [r3]               ; duplicate *limit
     vld1.8      {d2[]}, [r2]               ; duplicate *thresh
 
@@ -99,18 +100,18 @@ end_vp9_lf_h_edge
 |vp9_loop_filter_vertical_edge_neon| PROC
     push        {lr}
 
-    ldr         r12, [sp,#8]               ; load count
+    vld1.8      {d0[]}, [r2]              ; duplicate *blimit
+    ldr         r12, [sp, #8]             ; load count
+    vld1.8      {d1[]}, [r3]              ; duplicate *limit
+
+    ldr         r3, [sp, #4]              ; load thresh
+    sub         r2, r0, #4                ; move s pointer down by 4 columns
     cmp         r12, #0
     beq         end_vp9_lf_v_edge
 
-    vld1.8      {d0[]}, [r2]               ; duplicate *blimit
-    ldr         r2, [sp, #4]               ; load thresh
-    vld1.8      {d1[]}, [r3]               ; duplicate *limit
-    vld1.8      {d2[]}, [r2]               ; duplicate *thresh
+    vld1.8      {d2[]}, [r3]              ; duplicate *thresh
 
 count_lf_v_loop
-    sub         r2, r0, #4                 ; move s pointer down by 4 columns
-
     vld1.u8     {d3}, [r2], r1             ; load s data
     vld1.u8     {d4}, [r2], r1
     vld1.u8     {d5}, [r2], r1
@@ -152,6 +153,7 @@ count_lf_v_loop
 
     add         r0, r0, r1, lsl #3         ; s += pitch * 8
     subs        r12, r12, #1
+    subne       r2, r0, #4                 ; move s pointer down by 4 columns
     bne         count_lf_v_loop
 
 end_vp9_lf_v_edge
@@ -163,6 +165,7 @@ end_vp9_lf_v_edge
 ; necessary load, transpose (if necessary) and store. The function does not use
 ; registers d8-d15.
 ;
+; Inputs:
 ; r0-r3, r12 PRESERVE
 ; d0    blimit
 ; d1    limit
@@ -175,39 +178,48 @@ end_vp9_lf_v_edge
 ; d16   q1
 ; d17   q2
 ; d18   q3
+;
+; Outputs:
+; d4    op1
+; d5    op0
+; d6    oq0
+; d7    oq1
 |vp9_loop_filter_neon| PROC
     ; filter_mask
-    vabd.u8     d19, d3, d4                 ; abs(p3 - p2)
-    vabd.u8     d20, d4, d5                 ; abs(p2 - p1)
-    vabd.u8     d21, d5, d6                 ; abs(p1 - p0)
-    vabd.u8     d22, d16, d7                ; abs(q1 - q0)
-    vabd.u8     d3, d17, d16                ; abs(q2 - q1)
-    vabd.u8     d4, d18, d17                ; abs(q3 - q2)
+    vabd.u8     d19, d3, d4                 ; m1 = abs(p3 - p2)
+    vabd.u8     d20, d4, d5                 ; m2 = abs(p2 - p1)
+    vabd.u8     d21, d5, d6                 ; m3 = abs(p1 - p0)
+    vabd.u8     d22, d16, d7                ; m4 = abs(q1 - q0)
+    vabd.u8     d3, d17, d16                ; m5 = abs(q2 - q1)
+    vabd.u8     d4, d18, d17                ; m6 = abs(q3 - q2)
 
     ; only compare the largest value to limit
-    vmax.u8     d19, d19, d20
-    vmax.u8     d20, d21, d22
-    vmax.u8     d3, d3, d4
-    vmax.u8     d23, d19, d20
+    vmax.u8     d19, d19, d20               ; m1 = max(m1, m2)
+    vmax.u8     d20, d21, d22               ; m2 = max(m3, m4)
 
     vabd.u8     d17, d6, d7                 ; abs(p0 - q0)
+
+    vmax.u8     d3, d3, d4                  ; m3 = max(m5, m6)
+
+    vmov.u8     d18, #0x80
+
+    vmax.u8     d23, d19, d20               ; m1 = max(m1, m2)
 
     ; hevmask
     vcgt.u8     d21, d21, d2                ; (abs(p1 - p0) > thresh)*-1
     vcgt.u8     d22, d22, d2                ; (abs(q1 - q0) > thresh)*-1
-    vmax.u8     d23, d23, d3
-
-    vmov.u8     d18, #0x80
+    vmax.u8     d23, d23, d3                ; m1 = max(m1, m3)
 
     vabd.u8     d28, d5, d16                ; a = abs(p1 - q1)
     vqadd.u8    d17, d17, d17               ; b = abs(p0 - q0) * 2
 
-    ; abs () > limit
-    vcge.u8     d23, d1, d23
+    veor        d7, d7, d18                 ; qs0
+
+    vcge.u8     d23, d1, d23                ; abs(m1) > limit
 
     ; filter() function
     ; convert to signed
-    veor        d7, d7, d18                 ; qs0
+
     vshr.u8     d28, d28, #1                ; a = a / 2
     veor        d6, d6, d18                 ; ps0
 
@@ -244,19 +256,20 @@ end_vp9_lf_v_edge
     vshr.s8     d28, d28, #3                ; filter2 >>= 3
     vshr.s8     d27, d27, #3                ; filter1 >>= 3
 
-
     vqadd.s8    d19, d6, d28                ; u = clamp(ps0 + filter2)
     vqsub.s8    d26, d7, d27                ; u = clamp(qs0 - filter1)
 
-    ; outer tap adjustments: ++filter >> 1
-    vrshr.s8    d27, d27, #1
+    ; outer tap adjustments
+    vrshr.s8    d27, d27, #1                ; filter = ++filter1 >> 1
+
+    veor        d6, d26, d18                ; *oq0 = u^0x80
+
     vbic        d27, d27, d22               ; filter &= ~hev
 
     vqadd.s8    d21, d5, d27                ; u = clamp(ps1 + filter)
     vqsub.s8    d20, d16, d27               ; u = clamp(qs1 - filter)
 
     veor        d5, d19, d18                ; *op0 = u^0x80
-    veor        d6, d26, d18                ; *oq0 = u^0x80
     veor        d4, d21, d18                ; *op1 = u^0x80
     veor        d7, d20, d18                ; *oq1 = u^0x80
 
@@ -277,13 +290,14 @@ end_vp9_lf_v_edge
 |vp9_mbloop_filter_horizontal_edge_neon| PROC
     push        {r4-r5, lr}
 
-    ldr         r12, [sp,#16]              ; load count
+    vld1.8      {d0[]}, [r2]               ; duplicate *blimit
+    ldr         r12, [sp, #16]             ; load count
+    ldr         r2, [sp, #12]              ; load thresh
     add         r1, r1, r1                 ; double pitch
+
     cmp         r12, #0
     beq         end_vp9_mblf_h_edge
 
-    vld1.8      {d0[]}, [r2]               ; duplicate *blimit
-    ldr         r2, [sp, #12]              ; load thresh
     vld1.8      {d1[]}, [r3]               ; duplicate *limit
     vld1.8      {d2[]}, [r2]               ; duplicate *thresh
 
@@ -305,12 +319,12 @@ count_mblf_h_loop
 
     bl          vp9_mbloop_filter_neon
 
-    vst1.u8     {d2}, [r2@64], r1          ; store op2
-    vst1.u8     {d3}, [r3@64], r1          ; store op1
-    vst1.u8     {d4}, [r2@64], r1          ; store op0
-    vst1.u8     {d5}, [r3@64], r1          ; store oq0
-    vst1.u8     {d6}, [r2@64], r1          ; store oq1
-    vst1.u8     {d7}, [r3@64], r1          ; store oq2
+    vst1.u8     {d0}, [r2@64], r1          ; store op2
+    vst1.u8     {d1}, [r3@64], r1          ; store op1
+    vst1.u8     {d2}, [r2@64], r1          ; store op0
+    vst1.u8     {d3}, [r3@64], r1          ; store oq0
+    vst1.u8     {d4}, [r2@64], r1          ; store oq1
+    vst1.u8     {d5}, [r3@64], r1          ; store oq2
 
     add         r0, r0, #8
     subs        r12, r12, #1
@@ -337,18 +351,18 @@ end_vp9_mblf_h_edge
 |vp9_mbloop_filter_vertical_edge_neon| PROC
     push        {r4-r5, lr}
 
-    ldr         r12, [sp,#16]              ; load count
+    vld1.8      {d0[]}, [r2]              ; duplicate *blimit
+    ldr         r12, [sp, #16]            ; load count
+    vld1.8      {d1[]}, [r3]              ; duplicate *limit
+
+    ldr         r3, [sp, #12]             ; load thresh
+    sub         r2, r0, #4                ; move s pointer down by 4 columns
     cmp         r12, #0
     beq         end_vp9_mblf_v_edge
 
-    vld1.8      {d0[]}, [r2]               ; duplicate *blimit
-    ldr         r2, [sp, #12]              ; load thresh
-    vld1.8      {d1[]}, [r3]               ; duplicate *limit
-    vld1.8      {d2[]}, [r2]               ; duplicate *thresh
+    vld1.8      {d2[]}, [r3]              ; duplicate *thresh
 
 count_mblf_v_loop
-    sub         r2, r0, #4                 ; move s pointer down by 4 columns
-
     vld1.u8     {d3}, [r2], r1             ; load s data
     vld1.u8     {d4}, [r2], r1
     vld1.u8     {d5}, [r2], r1
@@ -380,27 +394,28 @@ count_mblf_v_loop
     bl          vp9_mbloop_filter_neon
 
     ;store op2, op1, op0, oq0
-    vst4.8      {d2[0], d3[0], d4[0], d5[0]}, [r2], r1
-    vst4.8      {d2[1], d3[1], d4[1], d5[1]}, [r2], r1
-    vst4.8      {d2[2], d3[2], d4[2], d5[2]}, [r2], r1
-    vst4.8      {d2[3], d3[3], d4[3], d5[3]}, [r2], r1
-    vst4.8      {d2[4], d3[4], d4[4], d5[4]}, [r2], r1
-    vst4.8      {d2[5], d3[5], d4[5], d5[5]}, [r2], r1
-    vst4.8      {d2[6], d3[6], d4[6], d5[6]}, [r2], r1
-    vst4.8      {d2[7], d3[7], d4[7], d5[7]}, [r2]
+    vst4.8      {d0[0], d1[0], d2[0], d3[0]}, [r2], r1
+    vst4.8      {d0[1], d1[1], d2[1], d3[1]}, [r2], r1
+    vst4.8      {d0[2], d1[2], d2[2], d3[2]}, [r2], r1
+    vst4.8      {d0[3], d1[3], d2[3], d3[3]}, [r2], r1
+    vst4.8      {d0[4], d1[4], d2[4], d3[4]}, [r2], r1
+    vst4.8      {d0[5], d1[5], d2[5], d3[5]}, [r2], r1
+    vst4.8      {d0[6], d1[6], d2[6], d3[6]}, [r2], r1
+    vst4.8      {d0[7], d1[7], d2[7], d3[7]}, [r2]
 
     ;store oq1, oq2
-    vst2.8      {d6[0], d7[0]}, [r3], r1
-    vst2.8      {d6[1], d7[1]}, [r3], r1
-    vst2.8      {d6[2], d7[2]}, [r3], r1
-    vst2.8      {d6[3], d7[3]}, [r3], r1
-    vst2.8      {d6[4], d7[4]}, [r3], r1
-    vst2.8      {d6[5], d7[5]}, [r3], r1
-    vst2.8      {d6[6], d7[6]}, [r3], r1
-    vst2.8      {d6[7], d7[7]}, [r3]
+    vst2.8      {d4[0], d5[0]}, [r3], r1
+    vst2.8      {d4[1], d5[1]}, [r3], r1
+    vst2.8      {d4[2], d5[2]}, [r3], r1
+    vst2.8      {d4[3], d5[3]}, [r3], r1
+    vst2.8      {d4[4], d5[4]}, [r3], r1
+    vst2.8      {d4[5], d5[5]}, [r3], r1
+    vst2.8      {d4[6], d5[6]}, [r3], r1
+    vst2.8      {d4[7], d5[7]}, [r3]
 
     add         r0, r0, r1, lsl #3         ; s += pitch * 8
     subs        r12, r12, #1
+    subne       r2, r0, #4                 ; move s pointer down by 4 columns
     bne         count_mblf_v_loop
 
 end_vp9_mblf_v_edge
@@ -412,6 +427,7 @@ end_vp9_mblf_v_edge
 ; necessary load, transpose (if necessary) and store. The function does not use
 ; registers d8-d15.
 ;
+; Inputs:
 ; r0-r3, r12 PRESERVE
 ; d0    blimit
 ; d1    limit
@@ -424,22 +440,38 @@ end_vp9_mblf_v_edge
 ; d16   q1
 ; d17   q2
 ; d18   q3
+;
+; Outputs:
+; d0    op2
+; d1    op1
+; d2    op0
+; d3    oq0
+; d4    oq1
+; d5    oq2
 |vp9_mbloop_filter_neon| PROC
     ; filter_mask
-    vabd.u8     d19, d3, d4                ; abs(p3 - p2)
-    vabd.u8     d20, d4, d5                ; abs(p2 - p1)
-    vabd.u8     d21, d5, d6                ; abs(p1 - p0)
-    vabd.u8     d22, d16, d7               ; abs(q1 - q0)
-    vabd.u8     d23, d17, d16              ; abs(q2 - q1)
-    vabd.u8     d24, d18, d17              ; abs(q3 - q2)
+    vabd.u8     d19, d3, d4                ; m1 = abs(p3 - p2)
+    vabd.u8     d20, d4, d5                ; m2 = abs(p2 - p1)
+    vabd.u8     d21, d5, d6                ; m3 = abs(p1 - p0)
+    vabd.u8     d22, d16, d7               ; m4 = abs(q1 - q0)
+    vabd.u8     d23, d17, d16              ; m5 = abs(q2 - q1)
+    vabd.u8     d24, d18, d17              ; m6 = abs(q3 - q2)
 
     ; only compare the largest value to limit
-    vmax.u8     d19, d19, d20              ; max(abs(p3 - p2), abs(p2 - p1))
-    vmax.u8     d20, d21, d22              ; max(abs(p1 - p0), abs(q1 - q0))
-    vmax.u8     d23, d23, d24              ; max(abs(q2 - q1), abs(q3 - q2))
+    vmax.u8     d19, d19, d20              ; m1 = max(m1, m2)
+    vmax.u8     d20, d21, d22              ; m2 = max(m3, m4)
+
+    vabd.u8     d25, d6, d4                ; m7 = abs(p0 - p2)
+
+    vmax.u8     d23, d23, d24              ; m3 = max(m5, m6)
+
+    vabd.u8     d26, d7, d17               ; m8 = abs(q0 - q2)
+
     vmax.u8     d19, d19, d20
 
-    vabd.u8     d24, d6, d7                ; abs(p0 - q0)
+    vabd.u8     d24, d6, d7                ; m9 = abs(p0 - q0)
+    vabd.u8     d27, d3, d6                ; m10 = abs(p3 - p0)
+    vabd.u8     d28, d18, d7               ; m11 = abs(q3 - q0)
 
     vmax.u8     d19, d19, d23
 
@@ -449,29 +481,34 @@ end_vp9_mblf_v_edge
     ; abs () > limit
     vcge.u8     d19, d1, d19
 
-    ; flatmask4
-    vabd.u8     d25, d6, d4                ; abs(p0 - p2)
-    vabd.u8     d26, d7, d17               ; abs(q0 - q2)
-    vabd.u8     d27, d3, d6                ; abs(p3 - p0)
-    vabd.u8     d28, d18, d7               ; abs(q3 - q0)
-
     ; only compare the largest value to thresh
-    vmax.u8     d25, d25, d26              ; max(abs(p0 - p2), abs(q0 - q2))
-    vmax.u8     d26, d27, d28              ; max(abs(p3 - p0), abs(q3 - q0))
-    vmax.u8     d25, d25, d26
-    vmax.u8     d20, d20, d25
+    vmax.u8     d25, d25, d26              ; m4 = max(m7, m8)
+    vmax.u8     d26, d27, d28              ; m5 = max(m10, m11)
 
     vshr.u8     d23, d23, #1               ; a = a / 2
+
+    vmax.u8     d25, d25, d26              ; m4 = max(m4, m5)
+
     vqadd.u8    d24, d24, d23              ; a = b + a
+
+    vmax.u8     d20, d20, d25              ; m2 = max(m2, m4)
 
     vmov.u8     d23, #1
     vcge.u8     d24, d0, d24               ; a > blimit
+
+    vcgt.u8     d21, d21, d2               ; (abs(p1 - p0) > thresh)*-1
 
     vcge.u8     d20, d23, d20              ; flat
 
     vand        d19, d19, d24              ; mask
 
+    vcgt.u8     d23, d22, d2               ; (abs(q1 - q0) > thresh)*-1
+
     vand        d20, d20, d19              ; flat & mask
+
+    vmov.u8     d22, #0x80
+
+    vorr        d23, d21, d23              ; hev
 
     ; This instruction will truncate the "flat & mask" masks down to 4 bits
     ; each to fit into one 32 bit arm register. The values are stored in
@@ -480,35 +517,30 @@ end_vp9_mblf_v_edge
     vmov.u32    r4, d30[0]                 ; flat & mask 4bits
 
     adds        r5, r4, #1                 ; Check for all 1's
+
+    ; If mask and flat are 1's for all vectors, then we only need to execute
+    ; the power branch for all vectors.
     beq         power_branch_only
 
     cmp         r4, #0                     ; Check for 0, set flag for later
 
-    ; hevmask
-    vcgt.u8     d21, d21, d2               ; (abs(p1 - p0) > thresh)*-1
-    vcgt.u8     d22, d22, d2               ; (abs(q1 - q0) > thresh)*-1
-    vorr        d21, d21, d22              ; hev
-
-    vmov.u8     d22, #0x80
-
     ; mbfilter() function
-
     ; filter() function
     ; convert to signed
-    veor        d23, d7, d22               ; qs0
+    veor        d21, d7, d22               ; qs0
     veor        d24, d6, d22               ; ps0
     veor        d25, d5, d22               ; ps1
     veor        d26, d16, d22              ; qs1
 
     vmov.u8     d27, #3
 
-    vsub.s8     d28, d23, d24              ; ( qs0 - ps0)
+    vsub.s8     d28, d21, d24              ; ( qs0 - ps0)
 
     vqsub.s8    d29, d25, d26              ; filter = clamp(ps1-qs1)
 
     vmull.s8    q15, d28, d27              ; 3 * ( qs0 - ps0)
 
-    vand        d29, d29, d21              ; filter &= hev
+    vand        d29, d29, d23              ; filter &= hev
 
     vaddw.s8    q15, q15, d29              ; filter + 3 * (qs0 - ps0)
 
@@ -525,80 +557,96 @@ end_vp9_mblf_v_edge
     vshr.s8     d29, d29, #3               ; filter1 >>= 3
 
     vqadd.s8    d24, d24, d30              ; op0 = clamp(ps0 + filter2)
-    vqsub.s8    d23, d23, d29              ; oq0 = clamp(qs0 - filter1)
+    vqsub.s8    d21, d21, d29              ; oq0 = clamp(qs0 - filter1)
 
     ; outer tap adjustments: ++filter1 >> 1
     vrshr.s8    d29, d29, #1
-    vbic        d29, d29, d21              ; filter &= ~hev
+    vbic        d29, d29, d23              ; filter &= ~hev
 
     vqadd.s8    d25, d25, d29              ; op1 = clamp(ps1 + filter)
     vqsub.s8    d26, d26, d29              ; oq1 = clamp(qs1 - filter)
 
+    ; If mask and flat are 0's for all vectors, then we only need to execute
+    ; the filter branch for all vectors.
     beq         filter_branch_only
 
+    ; If mask and flat are mixed then we must perform both branches and
+    ; combine the data.
     veor        d24, d24, d22              ; *f_op0 = u^0x80
-    veor        d23, d23, d22              ; *f_oq0 = u^0x80
+    veor        d21, d21, d22              ; *f_oq0 = u^0x80
     veor        d25, d25, d22              ; *f_op1 = u^0x80
     veor        d26, d26, d22              ; *f_oq1 = u^0x80
 
-    ; mbfilter flat && mask branch
-    ; TODO(fgalligan): Can I decrease the cycles shifting to consective d's
-    ; and using vibt on the q's?
-    vmov.u8     d21, #2
-    vaddl.u8    q14, d6, d7                ; op2 = p0 + q0
-    vmlal.u8    q14, d3, d27               ; op2 += p3 * 3
-    vmlal.u8    q14, d4, d21               ; op2 += p2 * 2
-    vaddw.u8    q14, d5                    ; op2 += p1
+    ; At this point we have already executed the filter branch. The filter
+    ; branch does not set op2 or oq2, so use p2 and q2. Execute the power
+    ; branch and combine the data.
+    vmov.u8     d23, #2
+    vaddl.u8    q14, d6, d7                ; r_op2 = p0 + q0
+    vmlal.u8    q14, d3, d27               ; r_op2 += p3 * 3
+    vmlal.u8    q14, d4, d23               ; r_op2 += p2 * 2
+
+    vbif        d0, d4, d20                ; op2 |= p2 & ~(flat & mask)
+
+    vaddw.u8    q14, d5                    ; r_op2 += p1
+
+    vbif        d1, d25, d20               ; op1 |= f_op1 & ~(flat & mask)
+
     vqrshrn.u16 d30, q14, #3               ; r_op2
 
-    vsubw.u8    q14, d3                    ; op1 = op2 - p3
-    vsubw.u8    q14, d4                    ; op1 -= p2
-    vaddw.u8    q14, d5                    ; op1 += p1
-    vaddw.u8    q14, d16                   ; op1 += q1
+    vsubw.u8    q14, d3                    ; r_op1 = r_op2 - p3
+    vsubw.u8    q14, d4                    ; r_op1 -= p2
+    vaddw.u8    q14, d5                    ; r_op1 += p1
+    vaddw.u8    q14, d16                   ; r_op1 += q1
+
+    vbif        d2, d24, d20               ; op0 |= f_op0 & ~(flat & mask)
+
     vqrshrn.u16 d31, q14, #3               ; r_op1
 
-    vsubw.u8    q14, d3                    ; op0 = op1 - p3
-    vsubw.u8    q14, d5                    ; op0 -= p1
-    vaddw.u8    q14, d6                    ; op0 += p0
-    vaddw.u8    q14, d17                   ; op0 += q2
-    vqrshrn.u16 d21, q14, #3               ; r_op0
+    vsubw.u8    q14, d3                    ; r_op0 = r_op1 - p3
+    vsubw.u8    q14, d5                    ; r_op0 -= p1
+    vaddw.u8    q14, d6                    ; r_op0 += p0
+    vaddw.u8    q14, d17                   ; r_op0 += q2
 
-    vsubw.u8    q14, d3                    ; oq0 = op0 - p3
-    vsubw.u8    q14, d6                    ; oq0 -= p0
-    vaddw.u8    q14, d7                    ; oq0 += q0
+    vbit        d0, d30, d20               ; op2 |= r_op2 & (flat & mask)
+
+    vqrshrn.u16 d23, q14, #3               ; r_op0
+
+    vsubw.u8    q14, d3                    ; r_oq0 = r_op0 - p3
+    vsubw.u8    q14, d6                    ; r_oq0 -= p0
+    vaddw.u8    q14, d7                    ; r_oq0 += q0
+
+    vbit        d1, d31, d20               ; op1 |= r_op1 & (flat & mask)
+
     vaddw.u8    q14, d18                   ; oq0 += q3
+
+    vbit        d2, d23, d20               ; op0 |= r_op0 & (flat & mask)
+
     vqrshrn.u16 d22, q14, #3               ; r_oq0
 
-    vsubw.u8    q14, d4                    ; oq1 = oq0 - p2
-    vsubw.u8    q14, d7                    ; oq1 -= q0
-    vaddw.u8    q14, d16                   ; oq1 += q1
-    vaddw.u8    q14, d18                   ; oq1 += q3
-    vqrshrn.u16 d0, q14, #3                ; r_oq1
+    vsubw.u8    q14, d4                    ; r_oq1 = r_oq0 - p2
+    vsubw.u8    q14, d7                    ; r_oq1 -= q0
+    vaddw.u8    q14, d16                   ; r_oq1 += q1
 
-    vsubw.u8    q14, d5                    ; oq2 = oq0 - p1
-    vsubw.u8    q14, d16                   ; oq2 -= q1
-    vaddw.u8    q14, d17                   ; oq2 += q2
-    vaddw.u8    q14, d18                   ; oq2 += q3
-    vqrshrn.u16 d1, q14, #3                ; r_oq2
+    vbif        d3, d21, d20               ; oq0 |= f_oq0 & ~(flat & mask)
 
-    ; Filter does not set op2 or oq2, so use p2 and q2.
-    vbit        d2, d30, d20               ; op2 |= r_op2 & (flat & mask)
-    vbif        d2, d4, d20                ; op2 |= op2 & ~(flat & mask)
+    vaddw.u8    q14, d18                   ; r_oq1 += q3
 
-    vbit        d3, d31, d20               ; op1 |= r_op1 & (flat & mask)
-    vbif        d3, d25, d20               ; op1 |= f_op1 & ~(flat & mask)
+    vbif        d4, d26, d20               ; oq1 |= f_oq1 & ~(flat & mask)
 
-    vbit        d4, d21, d20               ; op0 |= r_op0 & (flat & mask)
-    vbif        d4, d24, d20               ; op0 |= f_op0 & ~(flat & mask)
+    vqrshrn.u16 d6, q14, #3                ; r_oq1
 
-    vbit        d5, d22, d20               ; oq0 |= r_oq0 & (flat & mask)
-    vbif        d5, d23, d20               ; oq0 |= f_oq0 & ~(flat & mask)
+    vsubw.u8    q14, d5                    ; r_oq2 = r_oq1 - p1
+    vsubw.u8    q14, d16                   ; r_oq2 -= q1
+    vaddw.u8    q14, d17                   ; r_oq2 += q2
+    vaddw.u8    q14, d18                   ; r_oq2 += q3
 
-    vbit        d6, d0, d20                ; oq1 |= r_oq1 & (flat & mask)
-    vbif        d6, d26, d20               ; oq1 |= f_oq1 & ~(flat & mask)
+    vbif        d5, d17, d20               ; oq2 |= q2 & ~(flat & mask)
 
-    vbit        d7, d1, d20                ; oq2 |= r_oq2 & (flat & mask)
-    vbif        d7, d17, d20               ; oq2 |= oq2 & ~(flat & mask)
+    vqrshrn.u16 d7, q14, #3                ; r_oq2
+
+    vbit        d3, d22, d20               ; oq0 |= r_oq0 & (flat & mask)
+    vbit        d4, d6, d20                ; oq1 |= r_oq1 & (flat & mask)
+    vbit        d5, d7, d20                ; oq2 |= r_oq2 & (flat & mask)
 
     bx          lr
 
@@ -609,53 +657,49 @@ power_branch_only
     vmlal.u8    q14, d3, d27               ; op2 += p3 * 3
     vmlal.u8    q14, d4, d21               ; op2 += p2 * 2
     vaddw.u8    q14, d5                    ; op2 += p1
-    vqrshrn.u16 d2, q14, #3                ; op2
+    vqrshrn.u16 d0, q14, #3                ; op2
 
     vsubw.u8    q14, d3                    ; op1 = op2 - p3
     vsubw.u8    q14, d4                    ; op1 -= p2
     vaddw.u8    q14, d5                    ; op1 += p1
     vaddw.u8    q14, d16                   ; op1 += q1
-    vqrshrn.u16 d31, q14, #3               ; op1
+    vqrshrn.u16 d1, q14, #3                ; op1
 
     vsubw.u8    q14, d3                    ; op0 = op1 - p3
     vsubw.u8    q14, d5                    ; op0 -= p1
     vaddw.u8    q14, d6                    ; op0 += p0
     vaddw.u8    q14, d17                   ; op0 += q2
-    vqrshrn.u16 d21, q14, #3               ; op0
+    vqrshrn.u16 d2, q14, #3                ; op0
 
     vsubw.u8    q14, d3                    ; oq0 = op0 - p3
     vsubw.u8    q14, d6                    ; oq0 -= p0
     vaddw.u8    q14, d7                    ; oq0 += q0
     vaddw.u8    q14, d18                   ; oq0 += q3
-    vqrshrn.u16 d22, q14, #3               ; oq0
+    vqrshrn.u16 d3, q14, #3                ; oq0
 
     vsubw.u8    q14, d4                    ; oq1 = oq0 - p2
     vsubw.u8    q14, d7                    ; oq1 -= q0
     vaddw.u8    q14, d16                   ; oq1 += q1
     vaddw.u8    q14, d18                   ; oq1 += q3
-    vqrshrn.u16 d6, q14, #3                ; oq1
+    vqrshrn.u16 d4, q14, #3                ; oq1
 
-    vsubw.u8    q14, d5                    ; oq2 = oq0 - p1
+    vsubw.u8    q14, d5                    ; oq2 = oq1 - p1
     vsubw.u8    q14, d16                   ; oq2 -= q1
     vaddw.u8    q14, d17                   ; oq2 += q2
     vaddw.u8    q14, d18                   ; oq2 += q3
-    vqrshrn.u16 d7, q14, #3                ; oq2
-
-    vswp        d3, d31
-    vswp        d4, d21
-    vswp        d5, d22
+    vqrshrn.u16 d5, q14, #3                ; oq2
 
     bx          lr
 
 filter_branch_only
     ; TODO(fgalligan): See if we can rearange registers so we do not need to
     ; do the 2 vswp.
-    vswp        d2, d4                      ; op2
-    vswp        d7, d17                     ; oq2
-    veor        d4, d24, d22                ; *op0 = u^0x80
-    veor        d5, d23, d22                ; *oq0 = u^0x80
-    veor        d3, d25, d22                ; *op1 = u^0x80
-    veor        d6, d26, d22                ; *oq1 = u^0x80
+    vswp        d0, d4                      ; op2
+    vswp        d5, d17                     ; oq2
+    veor        d2, d24, d22                ; *op0 = u^0x80
+    veor        d3, d21, d22                ; *oq0 = u^0x80
+    veor        d1, d25, d22                ; *op1 = u^0x80
+    veor        d4, d26, d22                ; *oq1 = u^0x80
 
     bx          lr
 
