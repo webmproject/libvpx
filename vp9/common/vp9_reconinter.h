@@ -83,8 +83,7 @@ static void setup_dst_planes(MACROBLOCKD *xd,
 static void setup_pre_planes(MACROBLOCKD *xd, int i,
                              const YV12_BUFFER_CONFIG *src,
                              int mi_row, int mi_col,
-                             const struct scale_factors *scale,
-                             const struct scale_factors *scale_uv) {
+                             const struct scale_factors *sf) {
   if (src) {
     int j;
     uint8_t* buffers[4] = {src->y_buffer, src->u_buffer, src->v_buffer,
@@ -94,7 +93,6 @@ static void setup_pre_planes(MACROBLOCKD *xd, int i,
 
     for (j = 0; j < MAX_MB_PLANE; ++j) {
       struct macroblockd_plane *pd = &xd->plane[j];
-      const struct scale_factors *sf = j ? scale_uv : scale;
       setup_pred_plane(&pd->pre[i], buffers[j], strides[j],
                      mi_row, mi_col, sf, pd->subsampling_x, pd->subsampling_y);
     }
@@ -103,8 +101,8 @@ static void setup_pre_planes(MACROBLOCKD *xd, int i,
 
 static void set_scale_factors(MACROBLOCKD *xd, int ref0, int ref1,
                               struct scale_factors sf[MAX_REF_FRAMES]) {
-  xd->scale_factor[0] = xd->scale_factor_uv[0] = sf[ref0 >= 0 ? ref0 : 0];
-  xd->scale_factor[1] = xd->scale_factor_uv[1] = sf[ref1 >= 0 ? ref1 : 0];
+  xd->scale_factor[0] = sf[ref0 >= 0 ? ref0 : 0];
+  xd->scale_factor[1] = sf[ref1 >= 0 ? ref1 : 0];
 }
 
 void vp9_setup_scale_factors(VP9_COMMON *cm, int i);

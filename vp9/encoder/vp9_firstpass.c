@@ -501,7 +501,7 @@ void vp9_first_pass(VP9_COMP *cpi) {
   vp9_clear_system_state();  // __asm emms;
 
   vp9_setup_src_planes(x, cpi->Source, 0, 0);
-  setup_pre_planes(xd, 0, lst_yv12, 0, 0, NULL, NULL);
+  setup_pre_planes(xd, 0, lst_yv12, 0, 0, NULL);
   setup_dst_planes(xd, new_yv12, 0, 0);
 
   x->partition_info = x->pi;

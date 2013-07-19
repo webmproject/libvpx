@@ -215,9 +215,7 @@ static void set_ref(VP9D_COMP *pbi, int i, int mi_row, int mi_col) {
 
   const YV12_BUFFER_CONFIG *cfg = &cm->yv12_fb[cm->active_ref_idx[ref]];
   xd->scale_factor[i] = cm->active_ref_scale[ref];
-  xd->scale_factor_uv[i] = cm->active_ref_scale[ref];
-  setup_pre_planes(xd, i, cfg, mi_row, mi_col,
-                   &xd->scale_factor[i], &xd->scale_factor_uv[i]);
+  setup_pre_planes(xd, i, cfg, mi_row, mi_col, &xd->scale_factor[i]);
   xd->corrupted |= cfg->corrupted;
 }
 
@@ -969,8 +967,7 @@ int vp9_decode_frame(VP9D_COMP *pbi, const uint8_t **p_data_end) {
   update_frame_context(&pc->fc);
 
   // Initialize xd pointers. Any reference should do for xd->pre, so use 0.
-  setup_pre_planes(xd, 0, &pc->yv12_fb[pc->active_ref_idx[0]], 0, 0,
-                   NULL, NULL);
+  setup_pre_planes(xd, 0, &pc->yv12_fb[pc->active_ref_idx[0]], 0, 0, NULL);
   setup_dst_planes(xd, new_fb, 0, 0);
 
   new_fb->corrupted |= read_compressed_header(pbi, data, first_partition_size);

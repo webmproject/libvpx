@@ -58,7 +58,7 @@ static void temporal_filter_predictors_mb_c(MACROBLOCKD *xd,
   vp9_build_inter_predictor(u_mb_ptr, stride,
                             &pred[256], 8,
                             &mv,
-                            &xd->scale_factor_uv[which_mv],
+                            &xd->scale_factor[which_mv],
                             8, 8,
                             which_mv,
                             &xd->subpix, MV_PRECISION_Q4);
@@ -66,7 +66,7 @@ static void temporal_filter_predictors_mb_c(MACROBLOCKD *xd,
   vp9_build_inter_predictor(v_mb_ptr, stride,
                             &pred[320], 8,
                             &mv,
-                            &xd->scale_factor_uv[which_mv],
+                            &xd->scale_factor[which_mv],
                             8, 8,
                             which_mv,
                             &xd->subpix, MV_PRECISION_Q4);
@@ -443,7 +443,6 @@ void vp9_temporal_filter_prepare(VP9_COMP *cpi, int distance) {
       cm->yv12_fb[cm->new_fb_idx].y_crop_width,
       cm->yv12_fb[cm->new_fb_idx].y_crop_height,
       cm->width, cm->height);
-  cpi->mb.e_mbd.scale_factor_uv[0] = cpi->mb.e_mbd.scale_factor[0];
 
   // Setup frame pointers, NULL indicates frame not included in filter
   vpx_memset(cpi->frames, 0, max_frames * sizeof(YV12_BUFFER_CONFIG *));

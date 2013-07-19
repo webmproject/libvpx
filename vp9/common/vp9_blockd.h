@@ -219,7 +219,6 @@ typedef struct macroblockd {
   struct macroblockd_plane plane[MAX_MB_PLANE];
 
   struct scale_factors scale_factor[2];
-  struct scale_factors scale_factor_uv[2];
 
   MODE_INFO *prev_mode_info_context;
   MODE_INFO *mode_info_context;
