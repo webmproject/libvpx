@@ -1907,7 +1907,6 @@ static void init_encode_frame_mb_context(VP9_COMP *cpi) {
   cpi->seg0_idx = 0;
 
   xd->mode_info_stride = cm->mode_info_stride;
-  xd->frame_type = cm->frame_type;
 
   // reset intra mode contexts
   if (cm->frame_type == KEY_FRAME)

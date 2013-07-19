@@ -224,8 +224,6 @@ typedef struct macroblockd {
   MODE_INFO *mode_info_context;
   int mode_info_stride;
 
-  FRAME_TYPE frame_type;
-
   int up_available;
   int left_available;
   int right_available;
