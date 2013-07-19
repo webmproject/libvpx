@@ -330,10 +330,10 @@ static void read_ref_frame(VP9D_COMP *pbi, vp9_reader *r,
       ref_frame[fix_ref_idx] = cm->comp_fixed_ref;
       ref_frame[!fix_ref_idx] = cm->comp_var_ref[b];
     } else {
-      const int ref1_ctx = vp9_get_pred_context_single_ref_p1(cm, xd);
+      const int ref1_ctx = vp9_get_pred_context_single_ref_p1(xd);
       ref_frame[1] = NONE;
       if (vp9_read(r, fc->single_ref_prob[ref1_ctx][0])) {
-        const int ref2_ctx = vp9_get_pred_context_single_ref_p2(cm, xd);
+        const int ref2_ctx = vp9_get_pred_context_single_ref_p2(xd);
         const int b = vp9_read(r, fc->single_ref_prob[ref2_ctx][1]);
         ref_frame[0] = b ? ALTREF_FRAME : GOLDEN_FRAME;
         fc->single_ref_count[ref1_ctx][0][1]++;
@@ -385,7 +385,7 @@ static INLINE INTERPOLATIONFILTERTYPE read_switchable_filter_type(
   MACROBLOCKD *const xd = &pbi->mb;
   const vp9_prob *probs = vp9_get_pred_probs_switchable_interp(cm, xd);
   const int index = treed_read(r, vp9_switchable_interp_tree, probs);
-  const int ctx = vp9_get_pred_context_switchable_interp(cm, xd);
+  const int ctx = vp9_get_pred_context_switchable_interp(xd);
   ++cm->fc.switchable_interp_count[ctx][index];
   return vp9_switchable_interp[index];
 }
@@ -433,7 +433,7 @@ static MV_REFERENCE_FRAME read_reference_frame(VP9D_COMP *pbi, int segment_id,
 
   MV_REFERENCE_FRAME ref;
   if (!vp9_segfeature_active(&xd->seg, segment_id, SEG_LVL_REF_FRAME)) {
-    const int ctx = vp9_get_pred_context_intra_inter(cm, xd);
+    const int ctx = vp9_get_pred_context_intra_inter(xd);
     ref = (MV_REFERENCE_FRAME)
               vp9_read(r, vp9_get_pred_prob_intra_inter(cm, xd));
     cm->fc.intra_inter_count[ctx][ref != INTRA_FRAME]++;

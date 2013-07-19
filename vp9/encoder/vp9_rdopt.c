@@ -2379,7 +2379,7 @@ static INLINE int get_switchable_rate(VP9_COMMON *cm, MACROBLOCK *x) {
   MACROBLOCKD *xd = &x->e_mbd;
   MB_MODE_INFO *const mbmi = &xd->mode_info_context->mbmi;
 
-  const int c = vp9_get_pred_context_switchable_interp(cm, xd);
+  const int c = vp9_get_pred_context_switchable_interp(xd);
   const int m = vp9_switchable_interp_map[mbmi->interp_filter];
   return SWITCHABLE_INTERP_RATE_FACTOR * x->switchable_interp_costs[c][m];
 }

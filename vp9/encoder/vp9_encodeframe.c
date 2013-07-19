@@ -422,7 +422,7 @@ static void update_state(VP9_COMP *cpi, PICK_MODE_CONTEXT *ctx,
     if (cpi->common.mcomp_filter_type == SWITCHABLE
         && is_inter_mode(mbmi->mode)) {
       ++cpi->common.fc.switchable_interp_count[
-          vp9_get_pred_context_switchable_interp(&cpi->common, xd)]
+          vp9_get_pred_context_switchable_interp(xd)]
             [vp9_switchable_interp_map[mbmi->interp_filter]];
     }
 
@@ -581,7 +581,7 @@ static void update_stats(VP9_COMP *cpi, int mi_row, int mi_col) {
                                                      SEG_LVL_REF_FRAME);
 
     if (!seg_ref_active)
-      cpi->intra_inter_count[vp9_get_pred_context_intra_inter(cm, xd)][mbmi
+      cpi->intra_inter_count[vp9_get_pred_context_intra_inter(xd)][mbmi
           ->ref_frame[0] > INTRA_FRAME]++;
 
     // If the segment reference feature is enabled we have only a single
@@ -596,10 +596,10 @@ static void update_stats(VP9_COMP *cpi, int mi_row, int mi_col) {
         cpi->comp_ref_count[vp9_get_pred_context_comp_ref_p(cm, xd)][mbmi
             ->ref_frame[0] == GOLDEN_FRAME]++;
       } else {
-        cpi->single_ref_count[vp9_get_pred_context_single_ref_p1(cm, xd)]
+        cpi->single_ref_count[vp9_get_pred_context_single_ref_p1(xd)]
                               [0][mbmi->ref_frame[0] != LAST_FRAME]++;
         if (mbmi->ref_frame[0] != LAST_FRAME)
-          cpi->single_ref_count[vp9_get_pred_context_single_ref_p2(cm, xd)][1]
+          cpi->single_ref_count[vp9_get_pred_context_single_ref_p2(xd)][1]
               [mbmi->ref_frame[0] != GOLDEN_FRAME]++;
       }
     }

@@ -17,10 +17,9 @@
 #include "vp9/common/vp9_treecoder.h"
 
 // Returns a context number for the given MB prediction signal
-unsigned char vp9_get_pred_context_switchable_interp(const VP9_COMMON *cm,
-                                                     const MACROBLOCKD *xd) {
+unsigned char vp9_get_pred_context_switchable_interp(const MACROBLOCKD *xd) {
   const MODE_INFO *const mi = xd->mode_info_context;
-  const MB_MODE_INFO *const above_mbmi = &mi[-cm->mode_info_stride].mbmi;
+  const MB_MODE_INFO *const above_mbmi = &mi[-xd->mode_info_stride].mbmi;
   const MB_MODE_INFO *const left_mbmi = &mi[-1].mbmi;
   const int left_in_image = xd->left_available && left_mbmi->mb_in_image;
   const int above_in_image = xd->up_available && above_mbmi->mb_in_image;
@@ -55,11 +54,10 @@ unsigned char vp9_get_pred_context_switchable_interp(const VP9_COMMON *cm,
     return VP9_SWITCHABLE_FILTERS;
 }
 // Returns a context number for the given MB prediction signal
-unsigned char vp9_get_pred_context_intra_inter(const VP9_COMMON *cm,
-                                               const MACROBLOCKD *xd) {
+unsigned char vp9_get_pred_context_intra_inter(const MACROBLOCKD *xd) {
   int pred_context;
   const MODE_INFO *const mi = xd->mode_info_context;
-  const MB_MODE_INFO *const above_mbmi = &mi[-cm->mode_info_stride].mbmi;
+  const MB_MODE_INFO *const above_mbmi = &mi[-xd->mode_info_stride].mbmi;
   const MB_MODE_INFO *const left_mbmi = &mi[-1].mbmi;
   const int left_in_image = xd->left_available && left_mbmi->mb_in_image;
   const int above_in_image = xd->up_available && above_mbmi->mb_in_image;
@@ -211,11 +209,10 @@ unsigned char vp9_get_pred_context_comp_ref_p(const VP9_COMMON *cm,
 
   return pred_context;
 }
-unsigned char vp9_get_pred_context_single_ref_p1(const VP9_COMMON *cm,
-                                                 const MACROBLOCKD *xd) {
+unsigned char vp9_get_pred_context_single_ref_p1(const MACROBLOCKD *xd) {
   int pred_context;
   const MODE_INFO *const mi = xd->mode_info_context;
-  const MB_MODE_INFO *const above_mbmi = &mi[-cm->mode_info_stride].mbmi;
+  const MB_MODE_INFO *const above_mbmi = &mi[-xd->mode_info_stride].mbmi;
   const MB_MODE_INFO *const left_mbmi = &mi[-1].mbmi;
   const int left_in_image = xd->left_available && left_mbmi->mb_in_image;
   const int above_in_image = xd->up_available && above_mbmi->mb_in_image;
@@ -277,11 +274,10 @@ unsigned char vp9_get_pred_context_single_ref_p1(const VP9_COMMON *cm,
   return pred_context;
 }
 
-unsigned char vp9_get_pred_context_single_ref_p2(const VP9_COMMON *cm,
-                                                 const MACROBLOCKD *xd) {
+unsigned char vp9_get_pred_context_single_ref_p2(const MACROBLOCKD *xd) {
   int pred_context;
   const MODE_INFO *const mi = xd->mode_info_context;
-  const MB_MODE_INFO *const above_mbmi = &mi[-cm->mode_info_stride].mbmi;
+  const MB_MODE_INFO *const above_mbmi = &mi[-xd->mode_info_stride].mbmi;
   const MB_MODE_INFO *const left_mbmi = &mi[-1].mbmi;
   const int left_in_image = xd->left_available && left_mbmi->mb_in_image;
   const int above_in_image = xd->up_available && above_mbmi->mb_in_image;
