@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAcX//3FI\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1258,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2013-07-19T22:27:52Z",
+      "side": 1,
+      "message": "can we avoid goto statement by using something like\n\nif (RDCOST() \u003e\u003d best_rd) {\n  idy \u003d 4;\n  break;\n}\n\n(?)",
+      "revId": "224ff1bec370398c17a39ff2a14e6d15a009cc79",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
