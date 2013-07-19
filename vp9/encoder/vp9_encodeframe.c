@@ -1674,6 +1674,7 @@ static void rd_pick_partition(VP9_COMP *cpi, TOKENEXTRA **tp, int mi_row,
             RDCOST(x->rdmult, x->rddiv, srate, sdist)) {
           srate = r4;
           sdist = d4;
+          larger_is_better = 0;
           *(get_sb_partitioning(x, bsize)) = subsize;
           best_rd = MIN(best_rd, RDCOST(x->rdmult, x->rddiv, r4, d4));
         }
