@@ -603,14 +603,34 @@ static void decode_tile(VP9D_COMP *pbi, vp9_reader *r) {
   VP9_COMMON *const pc = &pbi->common;
   int mi_row, mi_col;
 
+  if (pbi->do_loopfilter_inline) {
+    vp9_loop_filter_frame_init(pc, &pbi->mb, pbi->mb.lf.filter_level);
+  }
+
   for (mi_row = pc->cur_tile_mi_row_start; mi_row < pc->cur_tile_mi_row_end;
        mi_row += MI_BLOCK_SIZE) {
     // For a SB there are 2 left contexts, each pertaining to a MB row within
     vpx_memset(&pc->left_context, 0, sizeof(pc->left_context));
     vpx_memset(pc->left_seg_context, 0, sizeof(pc->left_seg_context));
     for (mi_col = pc->cur_tile_mi_col_start; mi_col < pc->cur_tile_mi_col_end;
-         mi_col += MI_BLOCK_SIZE)
+         mi_col += MI_BLOCK_SIZE) {
       decode_modes_sb(pbi, mi_row, mi_col, r, BLOCK_SIZE_SB64X64);
+    }
+
+    if (pbi->do_loopfilter_inline) {
+      YV12_BUFFER_CONFIG *const fb =
+          &pbi->common.yv12_fb[pbi->common.new_fb_idx];
+      // delay the loopfilter by 1 macroblock row.
+      const int lf_start = mi_row - MI_BLOCK_SIZE;
+      if (lf_start < 0) continue;
+      vp9_loop_filter_rows(fb, pc, &pbi->mb, lf_start, mi_row, 0);
+    }
+  }
+
+  if (pbi->do_loopfilter_inline) {
+    YV12_BUFFER_CONFIG *const fb = &pbi->common.yv12_fb[pbi->common.new_fb_idx];
+    vp9_loop_filter_rows(fb, pc, &pbi->mb,
+                         mi_row - MI_BLOCK_SIZE, pc->mi_rows, 0);
   }
 }
 
@@ -929,6 +949,8 @@ int vp9_decode_frame(VP9D_COMP *pbi, const uint8_t **p_data_end) {
   data += vp9_rb_bytes_read(&rb);
   xd->corrupted = 0;
   new_fb->corrupted = 0;
+  pbi->do_loopfilter_inline =
+      (pc->log2_tile_rows | pc->log2_tile_cols) == 0 && pbi->mb.lf.filter_level;
 
   if (!pbi->decoded_key_frame && !keyframe)
     return -1;

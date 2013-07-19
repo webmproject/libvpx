@@ -71,8 +71,8 @@ void vp9_loop_filter_init(VP9_COMMON *cm, struct loopfilter *lf) {
     vpx_memset(lfi->hev_thr[i], i, SIMD_WIDTH);
 }
 
-static void loop_filter_frame_init(VP9_COMMON *const cm, MACROBLOCKD *const xd,
-                                   int default_filt_lvl) {
+void vp9_loop_filter_frame_init(VP9_COMMON *const cm, MACROBLOCKD *const xd,
+                                int default_filt_lvl) {
   int seg;
   // n_shift is the a multiplier for lf_deltas
   // the multiplier is 1 for when filter_lvl is between 0 and 31;
@@ -349,24 +349,30 @@ static void filter_block_plane(VP9_COMMON *const cm,
   }
 }
 
-void vp9_loop_filter_frame(VP9_COMMON *cm, MACROBLOCKD *xd,
-                           int frame_filter_level, int y_only) {
+void vp9_loop_filter_rows(const YV12_BUFFER_CONFIG *frame_buffer,
+                          VP9_COMMON *cm, MACROBLOCKD *xd,
+                          int start, int stop, int y_only) {
   const int num_planes = y_only ? 1 : MAX_MB_PLANE;
   int mi_row, mi_col;
 
-  // Initialize the loop filter for this frame.
-  loop_filter_frame_init(cm, xd, frame_filter_level);
-
-  for (mi_row = 0; mi_row < cm->mi_rows; mi_row += MI_BLOCK_SIZE) {
+  for (mi_row = start; mi_row < stop; mi_row += MI_BLOCK_SIZE) {
     MODE_INFO* const mi = cm->mi + mi_row * cm->mode_info_stride;
 
     for (mi_col = 0; mi_col < cm->mi_cols; mi_col += MI_BLOCK_SIZE) {
       int plane;
 
-      setup_dst_planes(xd, cm->frame_to_show, mi_row, mi_col);
+      setup_dst_planes(xd, frame_buffer, mi_row, mi_col);
       for (plane = 0; plane < num_planes; ++plane) {
         filter_block_plane(cm, &xd->plane[plane], mi + mi_col, mi_row, mi_col);
       }
     }
   }
+}
+
+void vp9_loop_filter_frame(VP9_COMMON *cm, MACROBLOCKD *xd,
+                           int frame_filter_level, int y_only) {
+  if (!frame_filter_level) return;
+  vp9_loop_filter_frame_init(cm, xd, frame_filter_level);
+  vp9_loop_filter_rows(cm->frame_to_show, cm, xd,
+                       0, cm->mi_rows, y_only);
 }
