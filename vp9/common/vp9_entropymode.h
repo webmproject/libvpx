@@ -26,7 +26,7 @@ struct VP9Common;
 struct tx_probs {
   vp9_prob p32x32[TX_SIZE_CONTEXTS][TX_SIZE_MAX_SB - 1];
   vp9_prob p16x16[TX_SIZE_CONTEXTS][TX_SIZE_MAX_SB - 2];
-  vp9_prob p8x8[TX_SIZE_CONTEXTS][TX_SIZE_MAX_SB - 2];
+  vp9_prob p8x8[TX_SIZE_CONTEXTS][TX_SIZE_MAX_SB - 3];
 };
 
 struct tx_counts {
