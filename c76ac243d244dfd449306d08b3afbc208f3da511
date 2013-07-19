@@ -16,6 +16,24 @@
       "revId": "c76ac243d244dfd449306d08b3afbc208f3da511",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcX//3Is\u003d",
+        "filename": "vp9/encoder/vp9_onyx_if.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 2564,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2013-07-19T22:18:25Z",
+      "side": 1,
+      "message": "Okay resetting for any key/intra-only frame.\n\nI see your point but my original motivation was to preserve the max_mv_magnitude even if there is a key frame in between (which could simply be because the max key frame interval was reached).",
+      "parentUuid": "AAAAcX//5xU\u003d",
+      "revId": "c76ac243d244dfd449306d08b3afbc208f3da511",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
