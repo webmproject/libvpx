@@ -1955,7 +1955,7 @@ static void switch_lossless_mode(VP9_COMP *cpi, int lossless) {
     cpi->mb.optimize = 0;
     cpi->common.filter_level = 0;
     cpi->zbin_mode_boost_enabled = 0;
-    cpi->common.txfm_mode = ONLY_4X4;
+    cpi->common.tx_mode = ONLY_4X4;
   } else {
     // printf("Not lossless\n");
     cpi->mb.fwd_txm8x4 = vp9_short_fdct8x4;
@@ -1965,10 +1965,10 @@ static void switch_lossless_mode(VP9_COMP *cpi, int lossless) {
   }
 }
 
-static void switch_txfm_mode(VP9_COMP *cpi) {
+static void switch_tx_mode(VP9_COMP *cpi) {
   if (cpi->sf.tx_size_search_method == USE_LARGESTALL &&
-      cpi->common.txfm_mode >= ALLOW_32X32)
-    cpi->common.txfm_mode = ALLOW_32X32;
+      cpi->common.tx_mode >= ALLOW_32X32)
+    cpi->common.tx_mode = ALLOW_32X32;
 }
 
 static void encode_frame_internal(VP9_COMP *cpi) {
@@ -2015,7 +2015,7 @@ static void encode_frame_internal(VP9_COMP *cpi) {
 
   vp9_initialize_rd_consts(cpi, cm->base_qindex + cm->y_dc_delta_q);
   vp9_initialize_me_consts(cpi, cm->base_qindex);
-  switch_txfm_mode(cpi);
+  switch_tx_mode(cpi);
 
   if (cpi->oxcf.tuning == VP8_TUNE_SSIM) {
     // Initialize encode frame context.
@@ -2229,17 +2229,17 @@ static int get_frame_type(VP9_COMP *cpi) {
   return frame_type;
 }
 
-static void select_txfm_mode(VP9_COMP *cpi) {
+static void select_tx_mode(VP9_COMP *cpi) {
   if (cpi->oxcf.lossless) {
-    cpi->common.txfm_mode = ONLY_4X4;
+    cpi->common.tx_mode = ONLY_4X4;
   } else if (cpi->common.current_video_frame == 0) {
-    cpi->common.txfm_mode = TX_MODE_SELECT;
+    cpi->common.tx_mode = TX_MODE_SELECT;
   } else {
     if (cpi->sf.tx_size_search_method == USE_LARGESTALL) {
-      cpi->common.txfm_mode = ALLOW_32X32;
+      cpi->common.tx_mode = ALLOW_32X32;
     } else if (cpi->sf.tx_size_search_method == USE_FULL_RD) {
       int frame_type = get_frame_type(cpi);
-      cpi->common.txfm_mode =
+      cpi->common.tx_mode =
           cpi->rd_tx_select_threshes[frame_type][ALLOW_32X32]
           > cpi->rd_tx_select_threshes[frame_type][TX_MODE_SELECT] ?
           ALLOW_32X32 : TX_MODE_SELECT;
@@ -2250,7 +2250,7 @@ static void select_txfm_mode(VP9_COMP *cpi) {
         total += cpi->txfm_stepdown_count[i];
       if (total) {
         double fraction = (double)cpi->txfm_stepdown_count[0] / total;
-        cpi->common.txfm_mode = fraction > 0.90 ? ALLOW_32X32 : TX_MODE_SELECT;
+        cpi->common.tx_mode = fraction > 0.90 ? ALLOW_32X32 : TX_MODE_SELECT;
         // printf("fraction = %f\n", fraction);
       }  // else keep unchanged
     }
@@ -2338,7 +2338,7 @@ void vp9_encode_frame(VP9_COMP *cpi) {
       cpi->mb.e_mbd.lossless = 1;
     }
 
-    select_txfm_mode(cpi);
+    select_tx_mode(cpi);
     cpi->common.comp_pred_mode = pred_type;
     cpi->common.mcomp_filter_type = filter_type;
     encode_frame_internal(cpi);
@@ -2384,7 +2384,7 @@ void vp9_encode_frame(VP9_COMP *cpi) {
       }
     }
 
-    if (cpi->common.txfm_mode == TX_MODE_SELECT) {
+    if (cpi->common.tx_mode == TX_MODE_SELECT) {
       int count4x4 = 0;
       int count8x8_lp = 0, count8x8_8x8p = 0;
       int count16x16_16x16p = 0, count16x16_lp = 0;
@@ -2416,16 +2416,16 @@ void vp9_encode_frame(VP9_COMP *cpi) {
 
       if (count4x4 == 0 && count16x16_lp == 0 && count16x16_16x16p == 0
           && count32x32 == 0) {
-        cpi->common.txfm_mode = ALLOW_8X8;
+        cpi->common.tx_mode = ALLOW_8X8;
         reset_skip_txfm_size(cpi, TX_8X8);
       } else if (count8x8_8x8p == 0 && count16x16_16x16p == 0
                  && count8x8_lp == 0 && count16x16_lp == 0 && count32x32 == 0) {
-        cpi->common.txfm_mode = ONLY_4X4;
+        cpi->common.tx_mode = ONLY_4X4;
         reset_skip_txfm_size(cpi, TX_4X4);
       } else if (count8x8_lp == 0 && count16x16_lp == 0 && count4x4 == 0) {
-        cpi->common.txfm_mode = ALLOW_32X32;
+        cpi->common.tx_mode = ALLOW_32X32;
       } else if (count32x32 == 0 && count8x8_lp == 0 && count4x4 == 0) {
-        cpi->common.txfm_mode = ALLOW_16X16;
+        cpi->common.tx_mode = ALLOW_16X16;
         reset_skip_txfm_size(cpi, TX_16X16);
       }
     }
@@ -2585,7 +2585,7 @@ static void encode_superblock(VP9_COMP *cpi, TOKENEXTRA **t, int output_enabled,
   vp9_set_pred_flag_mbskip(cm, bsize, mi_row, mi_col, mi->mbmi.mb_skip_coeff);
 
   if (output_enabled) {
-    if (cm->txfm_mode == TX_MODE_SELECT &&
+    if (cm->tx_mode == TX_MODE_SELECT &&
         mbmi->sb_type >= BLOCK_SIZE_SB8X8  &&
         !(mbmi->ref_frame[0] != INTRA_FRAME &&
             (mbmi->mb_skip_coeff ||
@@ -2600,7 +2600,7 @@ static void encode_superblock(VP9_COMP *cpi, TOKENEXTRA **t, int output_enabled,
       }
     } else {
       int x, y;
-      TX_SIZE sz = (cm->txfm_mode == TX_MODE_SELECT) ? TX_32X32 : cm->txfm_mode;
+      TX_SIZE sz = (cm->tx_mode == TX_MODE_SELECT) ? TX_32X32 : cm->tx_mode;
       // The new intra coding scheme requires no change of transform size
       if (mi->mbmi.ref_frame[0] != INTRA_FRAME) {
         if (sz == TX_32X32 && bsize < BLOCK_SIZE_SB32X32)

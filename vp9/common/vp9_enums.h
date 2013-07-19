@@ -58,6 +58,15 @@ typedef enum {
 } TX_SIZE;
 
 typedef enum {
+  ONLY_4X4            = 0,
+  ALLOW_8X8           = 1,
+  ALLOW_16X16         = 2,
+  ALLOW_32X32         = 3,
+  TX_MODE_SELECT      = 4,
+  NB_TXFM_MODES       = 5,
+} TX_MODE;
+
+typedef enum {
   DCT_DCT   = 0,                      // DCT  in both horizontal and vertical
   ADST_DCT  = 1,                      // ADST in vertical, DCT in horizontal
   DCT_ADST  = 2,                      // DCT  in vertical, ADST in horizontal

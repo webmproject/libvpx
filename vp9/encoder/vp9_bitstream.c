@@ -441,7 +441,7 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, MODE_INFO *m,
     vp9_write(bc, rf != INTRA_FRAME,
               vp9_get_pred_prob_intra_inter(pc, xd));
 
-  if (mi->sb_type >= BLOCK_SIZE_SB8X8 && pc->txfm_mode == TX_MODE_SELECT &&
+  if (mi->sb_type >= BLOCK_SIZE_SB8X8 && pc->tx_mode == TX_MODE_SELECT &&
       !(rf != INTRA_FRAME &&
         (skip_coeff || vp9_segfeature_active(seg, segment_id, SEG_LVL_SKIP)))) {
     write_selected_txfm_size(cpi, mi->txfm_size, mi->sb_type, bc);
@@ -553,7 +553,7 @@ static void write_mb_modes_kf(const VP9_COMP *cpi,
 
   write_skip_coeff(cpi, segment_id, m, bc);
 
-  if (m->mbmi.sb_type >= BLOCK_SIZE_SB8X8 && c->txfm_mode == TX_MODE_SELECT)
+  if (m->mbmi.sb_type >= BLOCK_SIZE_SB8X8 && c->tx_mode == TX_MODE_SELECT)
     write_selected_txfm_size(cpi, m->mbmi.txfm_size, m->mbmi.sb_type, bc);
 
   if (m->mbmi.sb_type >= BLOCK_SIZE_SB8X8) {
@@ -905,7 +905,7 @@ static void update_coef_probs_common(vp9_writer* const bc, VP9_COMP *cpi,
 }
 
 static void update_coef_probs(VP9_COMP* const cpi, vp9_writer* const bc) {
-  const TXFM_MODE txfm_mode = cpi->common.txfm_mode;
+  const TX_MODE tx_mode = cpi->common.tx_mode;
 
   vp9_clear_system_state();
 
@@ -915,13 +915,13 @@ static void update_coef_probs(VP9_COMP* const cpi, vp9_writer* const bc) {
   update_coef_probs_common(bc, cpi, TX_4X4);
 
   // do not do this if not even allowed
-  if (txfm_mode > ONLY_4X4)
+  if (tx_mode > ONLY_4X4)
     update_coef_probs_common(bc, cpi, TX_8X8);
 
-  if (txfm_mode > ALLOW_8X8)
+  if (tx_mode > ALLOW_8X8)
     update_coef_probs_common(bc, cpi, TX_16X16);
 
-  if (txfm_mode > ALLOW_16X16)
+  if (tx_mode > ALLOW_16X16)
     update_coef_probs_common(bc, cpi, TX_32X32);
 }
 
@@ -1062,12 +1062,12 @@ static void encode_txfm_probs(VP9_COMP *cpi, vp9_writer *w) {
   VP9_COMMON *const cm = &cpi->common;
 
   // Mode
-  vp9_write_literal(w, MIN(cm->txfm_mode, ALLOW_32X32), 2);
-  if (cm->txfm_mode >= ALLOW_32X32)
-    vp9_write_bit(w, cm->txfm_mode == TX_MODE_SELECT);
+  vp9_write_literal(w, MIN(cm->tx_mode, ALLOW_32X32), 2);
+  if (cm->tx_mode >= ALLOW_32X32)
+    vp9_write_bit(w, cm->tx_mode == TX_MODE_SELECT);
 
   // Probabilities
-  if (cm->txfm_mode == TX_MODE_SELECT) {
+  if (cm->tx_mode == TX_MODE_SELECT) {
     int i, j;
     unsigned int ct_8x8p[TX_SIZE_MAX_SB - 3][2];
     unsigned int ct_16x16p[TX_SIZE_MAX_SB - 2][2];
@@ -1388,7 +1388,7 @@ static size_t write_compressed_header(VP9_COMP *cpi, uint8_t *data) {
   vp9_start_encode(&header_bc, data);
 
   if (xd->lossless)
-    cm->txfm_mode = ONLY_4X4;
+    cm->tx_mode = ONLY_4X4;
   else
     encode_txfm_probs(cpi, &header_bc);
 

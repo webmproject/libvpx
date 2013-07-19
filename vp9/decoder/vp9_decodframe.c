@@ -48,11 +48,11 @@ static int decode_unsigned_max(struct vp9_read_bit_buffer *rb, int max) {
   return data > max ? max : data;
 }
 
-static TXFM_MODE read_tx_mode(vp9_reader *r) {
-  TXFM_MODE txfm_mode = vp9_read_literal(r, 2);
-  if (txfm_mode == ALLOW_32X32)
-    txfm_mode += vp9_read_bit(r);
-  return txfm_mode;
+static TX_MODE read_tx_mode(vp9_reader *r) {
+  TX_MODE tx_mode = vp9_read_literal(r, 2);
+  if (tx_mode == ALLOW_32X32)
+    tx_mode += vp9_read_bit(r);
+  return tx_mode;
 }
 
 static void read_tx_probs(struct tx_probs *tx_probs, vp9_reader *r) {
@@ -372,17 +372,17 @@ static void read_coef_probs_common(vp9_coeff_probs_model *coef_probs,
                   vp9_diff_update_prob(r, &coef_probs[i][j][k][l][m]);
 }
 
-static void read_coef_probs(FRAME_CONTEXT *fc, TXFM_MODE txfm_mode,
+static void read_coef_probs(FRAME_CONTEXT *fc, TX_MODE tx_mode,
                             vp9_reader *r) {
   read_coef_probs_common(fc->coef_probs[TX_4X4], r);
 
-  if (txfm_mode > ONLY_4X4)
+  if (tx_mode > ONLY_4X4)
     read_coef_probs_common(fc->coef_probs[TX_8X8], r);
 
-  if (txfm_mode > ALLOW_8X8)
+  if (tx_mode > ALLOW_8X8)
     read_coef_probs_common(fc->coef_probs[TX_16X16], r);
 
-  if (txfm_mode > ALLOW_16X16)
+  if (tx_mode > ALLOW_16X16)
     read_coef_probs_common(fc->coef_probs[TX_32X32], r);
 }
 
@@ -899,10 +899,10 @@ static int read_compressed_header(VP9D_COMP *pbi, const uint8_t *data,
     vpx_internal_error(&cm->error, VPX_CODEC_MEM_ERROR,
                        "Failed to allocate bool decoder 0");
 
-  cm->txfm_mode = xd->lossless ? ONLY_4X4 : read_tx_mode(&r);
-  if (cm->txfm_mode == TX_MODE_SELECT)
+  cm->tx_mode = xd->lossless ? ONLY_4X4 : read_tx_mode(&r);
+  if (cm->tx_mode == TX_MODE_SELECT)
     read_tx_probs(&cm->fc.tx_probs, &r);
-  read_coef_probs(&cm->fc, cm->txfm_mode, &r);
+  read_coef_probs(&cm->fc, cm->tx_mode, &r);
 
   vp9_prepare_read_mode_info(pbi, &r);
 

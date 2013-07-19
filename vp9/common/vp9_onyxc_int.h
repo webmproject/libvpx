@@ -106,15 +106,6 @@ typedef enum {
   NB_PREDICTION_TYPES    = 3,
 } COMPPREDMODE_TYPE;
 
-typedef enum {
-  ONLY_4X4            = 0,
-  ALLOW_8X8           = 1,
-  ALLOW_16X16         = 2,
-  ALLOW_32X32         = 3,
-  TX_MODE_SELECT      = 4,
-  NB_TXFM_MODES       = 5,
-} TXFM_MODE;
-
 typedef struct VP9Common {
   struct vpx_internal_error_info  error;
 
@@ -179,7 +170,7 @@ typedef struct VP9Common {
   int mode_info_stride;
 
   /* profile settings */
-  TXFM_MODE txfm_mode;
+  TX_MODE tx_mode;
 
   int base_qindex;
   int last_kf_gf_q;  /* Q used on the last GF or KF */

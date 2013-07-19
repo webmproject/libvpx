@@ -521,7 +521,7 @@ void vp9_adapt_mode_probs(VP9_COMMON *cm) {
                         fc->switchable_interp_prob[i], 0);
   }
 
-  if (cm->txfm_mode == TX_MODE_SELECT) {
+  if (cm->tx_mode == TX_MODE_SELECT) {
     int j;
     unsigned int branch_ct_8x8p[TX_SIZE_MAX_SB - 3][2];
     unsigned int branch_ct_16x16p[TX_SIZE_MAX_SB - 2][2];
