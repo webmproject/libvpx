@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAcX//3Vg\u003d",
+        "filename": "build/make/obj_int_extract.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2013-07-19T21:09:31Z",
+      "side": 1,
+      "message": "Ignorant question: Is it fine that OUTPUT_FMT_PLAIN is unhandled here?",
+      "revId": "28147a449a428c545741f7ca7aa9ee321f5ccf5e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
