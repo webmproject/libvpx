@@ -834,15 +834,15 @@ static void choose_largest_txfm_size(VP9_COMP *cpi, MACROBLOCK *x,
   MACROBLOCKD *const xd = &x->e_mbd;
   MB_MODE_INFO *const mbmi = &xd->mode_info_context->mbmi;
   if (max_txfm_size == TX_32X32 &&
-      (cm->txfm_mode == ALLOW_32X32 ||
-       cm->txfm_mode == TX_MODE_SELECT)) {
+      (cm->tx_mode == ALLOW_32X32 ||
+       cm->tx_mode == TX_MODE_SELECT)) {
     mbmi->txfm_size = TX_32X32;
   } else if (max_txfm_size >= TX_16X16 &&
-             (cm->txfm_mode == ALLOW_16X16 ||
-              cm->txfm_mode == ALLOW_32X32 ||
-              cm->txfm_mode == TX_MODE_SELECT)) {
+             (cm->tx_mode == ALLOW_16X16 ||
+              cm->tx_mode == ALLOW_32X32 ||
+              cm->tx_mode == TX_MODE_SELECT)) {
     mbmi->txfm_size = TX_16X16;
-  } else if (cm->txfm_mode != ONLY_4X4) {
+  } else if (cm->tx_mode != ONLY_4X4) {
     mbmi->txfm_size = TX_8X8;
   } else {
     mbmi->txfm_size = TX_4X4;
@@ -901,29 +901,29 @@ static void choose_txfm_size_from_rd(VP9_COMP *cpi, MACROBLOCK *x,
   }
 
   if (max_txfm_size == TX_32X32 &&
-      (cm->txfm_mode == ALLOW_32X32 ||
-       (cm->txfm_mode == TX_MODE_SELECT &&
+      (cm->tx_mode == ALLOW_32X32 ||
+       (cm->tx_mode == TX_MODE_SELECT &&
         rd[TX_32X32][1] < rd[TX_16X16][1] && rd[TX_32X32][1] < rd[TX_8X8][1] &&
         rd[TX_32X32][1] < rd[TX_4X4][1]))) {
     mbmi->txfm_size = TX_32X32;
   } else if (max_txfm_size >= TX_16X16 &&
-             (cm->txfm_mode == ALLOW_16X16 ||
-              cm->txfm_mode == ALLOW_32X32 ||
-              (cm->txfm_mode == TX_MODE_SELECT &&
+             (cm->tx_mode == ALLOW_16X16 ||
+              cm->tx_mode == ALLOW_32X32 ||
+              (cm->tx_mode == TX_MODE_SELECT &&
                rd[TX_16X16][1] < rd[TX_8X8][1] &&
                rd[TX_16X16][1] < rd[TX_4X4][1]))) {
     mbmi->txfm_size = TX_16X16;
-  } else if (cm->txfm_mode == ALLOW_8X8 ||
-             cm->txfm_mode == ALLOW_16X16 ||
-             cm->txfm_mode == ALLOW_32X32 ||
-           (cm->txfm_mode == TX_MODE_SELECT && rd[TX_8X8][1] < rd[TX_4X4][1])) {
+  } else if (cm->tx_mode == ALLOW_8X8 ||
+             cm->tx_mode == ALLOW_16X16 ||
+             cm->tx_mode == ALLOW_32X32 ||
+           (cm->tx_mode == TX_MODE_SELECT && rd[TX_8X8][1] < rd[TX_4X4][1])) {
     mbmi->txfm_size = TX_8X8;
   } else {
     mbmi->txfm_size = TX_4X4;
   }
 
   *distortion = d[mbmi->txfm_size];
-  *rate       = r[mbmi->txfm_size][cm->txfm_mode == TX_MODE_SELECT];
+  *rate       = r[mbmi->txfm_size][cm->tx_mode == TX_MODE_SELECT];
   *skip       = s[mbmi->txfm_size];
 
   txfm_cache[ONLY_4X4] = rd[TX_4X4][0];
@@ -1009,23 +1009,23 @@ static void choose_txfm_size_from_modelrd(VP9_COMP *cpi, MACROBLOCK *x,
   }
 
   if (max_txfm_size == TX_32X32 &&
-      (cm->txfm_mode == ALLOW_32X32 ||
-       (cm->txfm_mode == TX_MODE_SELECT &&
+      (cm->tx_mode == ALLOW_32X32 ||
+       (cm->tx_mode == TX_MODE_SELECT &&
         rd[TX_32X32][1] <= rd[TX_16X16][1] &&
         rd[TX_32X32][1] <= rd[TX_8X8][1] &&
         rd[TX_32X32][1] <= rd[TX_4X4][1]))) {
     mbmi->txfm_size = TX_32X32;
   } else if (max_txfm_size >= TX_16X16 &&
-             (cm->txfm_mode == ALLOW_16X16 ||
-              cm->txfm_mode == ALLOW_32X32 ||
-              (cm->txfm_mode == TX_MODE_SELECT &&
+             (cm->tx_mode == ALLOW_16X16 ||
+              cm->tx_mode == ALLOW_32X32 ||
+              (cm->tx_mode == TX_MODE_SELECT &&
                rd[TX_16X16][1] <= rd[TX_8X8][1] &&
                rd[TX_16X16][1] <= rd[TX_4X4][1]))) {
     mbmi->txfm_size = TX_16X16;
-  } else if (cm->txfm_mode == ALLOW_8X8 ||
-             cm->txfm_mode == ALLOW_16X16 ||
-             cm->txfm_mode == ALLOW_32X32 ||
-           (cm->txfm_mode == TX_MODE_SELECT &&
+  } else if (cm->tx_mode == ALLOW_8X8 ||
+             cm->tx_mode == ALLOW_16X16 ||
+             cm->tx_mode == ALLOW_32X32 ||
+           (cm->tx_mode == TX_MODE_SELECT &&
             rd[TX_8X8][1] <= rd[TX_4X4][1])) {
     mbmi->txfm_size = TX_8X8;
   } else {
@@ -1040,7 +1040,7 @@ static void choose_txfm_size_from_modelrd(VP9_COMP *cpi, MACROBLOCK *x,
                              bs, mbmi->txfm_size);
   } else {
     *distortion = d[mbmi->txfm_size];
-    *rate       = r[mbmi->txfm_size][cm->txfm_mode == TX_MODE_SELECT];
+    *rate       = r[mbmi->txfm_size][cm->tx_mode == TX_MODE_SELECT];
     *skip       = s[mbmi->txfm_size];
   }
 
@@ -1437,7 +1437,7 @@ static int64_t rd_pick_intra_sby_mode(VP9_COMP *cpi, MACROBLOCK *x,
     if (cpi->sf.tx_size_search_method == USE_FULL_RD && this_rd < INT64_MAX) {
       for (i = 0; i < NB_TXFM_MODES; i++) {
         int64_t adj_rd = this_rd + local_txfm_cache[i] -
-            local_txfm_cache[cpi->common.txfm_mode];
+            local_txfm_cache[cpi->common.tx_mode];
         if (adj_rd < txfm_cache[i]) {
           txfm_cache[i] = adj_rd;
         }
@@ -3077,7 +3077,7 @@ void vp9_rd_pick_intra_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
     *returndist = dist_y + (dist_uv >> 2);
     if (cpi->sf.tx_size_search_method == USE_FULL_RD) {
       for (i = 0; i < NB_TXFM_MODES; i++) {
-        ctx->txfm_rd_diff[i] = txfm_cache[i] - txfm_cache[cm->txfm_mode];
+        ctx->txfm_rd_diff[i] = txfm_cache[i] - txfm_cache[cm->tx_mode];
       }
     }
   }
@@ -3872,7 +3872,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
       for (i = 0; i < NB_TXFM_MODES; i++) {
         int64_t adj_rd = INT64_MAX;
         if (this_mode != I4X4_PRED) {
-          adj_rd = this_rd + txfm_cache[i] - txfm_cache[cm->txfm_mode];
+          adj_rd = this_rd + txfm_cache[i] - txfm_cache[cm->tx_mode];
         } else {
           adj_rd = this_rd;
         }

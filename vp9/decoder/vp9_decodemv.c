@@ -59,19 +59,19 @@ static TX_SIZE read_selected_txfm_size(VP9_COMMON *cm, MACROBLOCKD *xd,
   return txfm_size;
 }
 
-static TX_SIZE read_txfm_size(VP9D_COMP *pbi, TXFM_MODE txfm_mode,
+static TX_SIZE read_txfm_size(VP9D_COMP *pbi, TX_MODE tx_mode,
                               BLOCK_SIZE_TYPE bsize, int select_cond,
                               vp9_reader *r) {
   VP9_COMMON *const cm = &pbi->common;
   MACROBLOCKD *const xd = &pbi->mb;
 
-  if (txfm_mode == TX_MODE_SELECT && bsize >= BLOCK_SIZE_SB8X8 && select_cond)
+  if (tx_mode == TX_MODE_SELECT && bsize >= BLOCK_SIZE_SB8X8 && select_cond)
     return read_selected_txfm_size(cm, xd, bsize, r);
-  else if (txfm_mode >= ALLOW_32X32 && bsize >= BLOCK_SIZE_SB32X32)
+  else if (tx_mode >= ALLOW_32X32 && bsize >= BLOCK_SIZE_SB32X32)
     return TX_32X32;
-  else if (txfm_mode >= ALLOW_16X16 && bsize >= BLOCK_SIZE_MB16X16)
+  else if (tx_mode >= ALLOW_16X16 && bsize >= BLOCK_SIZE_MB16X16)
     return TX_16X16;
-  else if (txfm_mode >= ALLOW_8X8 && bsize >= BLOCK_SIZE_SB8X8)
+  else if (tx_mode >= ALLOW_8X8 && bsize >= BLOCK_SIZE_SB8X8)
     return TX_8X8;
   else
     return TX_4X4;
@@ -162,7 +162,7 @@ static void read_intra_mode_info(VP9D_COMP *pbi, MODE_INFO *m,
 
   mbmi->segment_id = read_intra_segment_id(pbi, mi_row, mi_col, r);
   mbmi->mb_skip_coeff = read_skip_coeff(pbi, mbmi->segment_id, r);
-  mbmi->txfm_size = read_txfm_size(pbi, cm->txfm_mode, bsize, 1, r);
+  mbmi->txfm_size = read_txfm_size(pbi, cm->tx_mode, bsize, 1, r);
   mbmi->ref_frame[0] = INTRA_FRAME;
 
   if (bsize >= BLOCK_SIZE_SB8X8) {
@@ -463,7 +463,7 @@ static void read_inter_mode_info(VP9D_COMP *pbi, MODE_INFO *mi,
   mbmi->mb_skip_coeff = read_skip_coeff(pbi, mbmi->segment_id, r);
   mbmi->ref_frame[0] = read_reference_frame(pbi, mbmi->segment_id, r);
   mbmi->ref_frame[1] = NONE;
-  mbmi->txfm_size = read_txfm_size(pbi, cm->txfm_mode, bsize,
+  mbmi->txfm_size = read_txfm_size(pbi, cm->tx_mode, bsize,
      (!mbmi->mb_skip_coeff || mbmi->ref_frame[0] == INTRA_FRAME), r);
 
   if (mbmi->ref_frame[0] != INTRA_FRAME) {
