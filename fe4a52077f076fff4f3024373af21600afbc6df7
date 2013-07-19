@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAcX//3kw\u003d",
+        "filename": "configure",
+        "patchSetId": 2
+      },
+      "lineNbr": 118,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2013-07-19T19:31:09Z",
+      "side": 1,
+      "message": "Ugh, I was hoping they\u0027d ditch 32bit support.",
+      "revId": "fe4a52077f076fff4f3024373af21600afbc6df7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
