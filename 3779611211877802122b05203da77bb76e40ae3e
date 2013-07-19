@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAcX//3J8\u003d",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-07-19T22:11:08Z",
+      "side": 1,
+      "message": "Can you add a more specific \u0027broken since: git log --oneline ...\u0027 in the message body?",
+      "revId": "3779611211877802122b05203da77bb76e40ae3e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
