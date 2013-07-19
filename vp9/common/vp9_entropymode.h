@@ -40,10 +40,10 @@ extern const vp9_prob vp9_kf_y_mode_prob[VP9_INTRA_MODES][VP9_INTRA_MODES]
                                         [VP9_INTRA_MODES - 1];
 
 extern const vp9_tree_index vp9_intra_mode_tree[];
-extern const vp9_tree_index vp9_sb_mv_ref_tree[];
+extern const vp9_tree_index vp9_inter_mode_tree[];
 
 extern struct vp9_token vp9_intra_mode_encodings[VP9_INTRA_MODES];
-extern struct vp9_token vp9_sb_mv_ref_encoding_array[VP9_INTER_MODES];
+extern struct vp9_token vp9_inter_mode_encodings[VP9_INTER_MODES];
 
 // probability models for partition information
 extern const vp9_tree_index vp9_partition_tree[];
