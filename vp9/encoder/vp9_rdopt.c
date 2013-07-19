@@ -1384,21 +1384,16 @@ static int64_t rd_pick_intra_sby_mode(VP9_COMP *cpi, MACROBLOCK *x,
                                       int *rate, int *rate_tokenonly,
                                       int64_t *distortion, int *skippable,
                                       BLOCK_SIZE_TYPE bsize,
-                                      int64_t txfm_cache[NB_TXFM_MODES]) {
+                                      int64_t txfm_cache[NB_TXFM_MODES],
+                                      int64_t best_rd) {
   MB_PREDICTION_MODE mode;
   MB_PREDICTION_MODE UNINITIALIZED_IS_SAFE(mode_selected);
   MACROBLOCKD *const xd = &x->e_mbd;
   int this_rate, this_rate_tokenonly, s;
-  int64_t this_distortion;
-  int64_t best_rd = INT64_MAX, this_rd;
+  int64_t this_distortion, this_rd;
   TX_SIZE UNINITIALIZED_IS_SAFE(best_tx);
   int i;
   int *bmode_costs = x->mbmode_cost;
-
-  if (bsize < BLOCK_SIZE_SB8X8) {
-    x->e_mbd.mode_info_context->mbmi.txfm_size = TX_4X4;
-    return best_rd;
-  }
 
   if (cpi->sf.tx_size_search_method == USE_FULL_RD) {
     for (i = 0; i < NB_TXFM_MODES; i++)
@@ -3040,50 +3035,41 @@ void vp9_rd_pick_intra_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
                                int *returnrate, int64_t *returndist,
                                BLOCK_SIZE_TYPE bsize,
                                PICK_MODE_CONTEXT *ctx, int64_t best_rd) {
-  VP9_COMMON *cm = &cpi->common;
-  MACROBLOCKD *xd = &x->e_mbd;
-  int rate_y = 0, rate_uv = 0;
-  int rate_y_tokenonly = 0, rate_uv_tokenonly = 0;
-  int64_t dist_y = 0, dist_uv = 0;
-  int y_skip = 0, uv_skip = 0;
-  int64_t txfm_cache[NB_TXFM_MODES], err;
-  MB_PREDICTION_MODE mode;
-  TX_SIZE txfm_size;
-  int rate4x4_y, rate4x4_y_tokenonly;
-  int64_t dist4x4_y;
-  int64_t err4x4 = INT64_MAX;
+  VP9_COMMON *const cm = &cpi->common;
+  MACROBLOCKD *const xd = &x->e_mbd;
+  int rate_y = 0, rate_uv = 0, rate_y_tokenonly = 0, rate_uv_tokenonly = 0;
+  int y_skip = 0, uv_skip;
+  int64_t dist_y = 0, dist_uv = 0, txfm_cache[NB_TXFM_MODES];
 
   x->skip_encode = 0;
-  vpx_memset(&txfm_cache,0,sizeof(txfm_cache));
+  vpx_memset(&txfm_cache, 0, sizeof(txfm_cache));
   ctx->skip = 0;
-  xd->mode_info_context->mbmi.mode = DC_PRED;
   xd->mode_info_context->mbmi.ref_frame[0] = INTRA_FRAME;
-  err = rd_pick_intra_sby_mode(cpi, x, &rate_y, &rate_y_tokenonly,
-                               &dist_y, &y_skip, bsize, txfm_cache);
-  mode = xd->mode_info_context->mbmi.mode;
-  txfm_size = xd->mode_info_context->mbmi.txfm_size;
-  rd_pick_intra_sbuv_mode(cpi, x, &rate_uv, &rate_uv_tokenonly,
-                          &dist_uv, &uv_skip,
-                          (bsize < BLOCK_SIZE_SB8X8) ? BLOCK_SIZE_SB8X8 :
-                                                       bsize);
-  if (bsize < BLOCK_SIZE_SB8X8)
-    err4x4 = rd_pick_intra4x4mby_modes(cpi, x, &rate4x4_y,
-                                       &rate4x4_y_tokenonly,
-                                       &dist4x4_y, err);
+  if (bsize >= BLOCK_SIZE_SB8X8) {
+    if (rd_pick_intra_sby_mode(cpi, x, &rate_y, &rate_y_tokenonly,
+                               &dist_y, &y_skip, bsize, txfm_cache,
+                               best_rd) >= best_rd) {
+      *returnrate = INT_MAX;
+      return;
+    }
+    rd_pick_intra_sbuv_mode(cpi, x, &rate_uv, &rate_uv_tokenonly,
+                            &dist_uv, &uv_skip, bsize);
+  } else {
+    y_skip = 0;
+    if (rd_pick_intra4x4mby_modes(cpi, x, &rate_y, &rate_y_tokenonly,
+                                  &dist_y, best_rd) >= best_rd) {
+      *returnrate = INT_MAX;
+      return;
+    }
+    rd_pick_intra_sbuv_mode(cpi, x, &rate_uv, &rate_uv_tokenonly,
+                            &dist_uv, &uv_skip, BLOCK_SIZE_SB8X8);
+  }
 
   if (y_skip && uv_skip) {
     *returnrate = rate_y + rate_uv - rate_y_tokenonly - rate_uv_tokenonly +
                   vp9_cost_bit(vp9_get_pred_prob_mbskip(cm, xd), 1);
     *returndist = dist_y + (dist_uv >> 2);
     memset(ctx->txfm_rd_diff, 0, sizeof(ctx->txfm_rd_diff));
-    xd->mode_info_context->mbmi.mode = mode;
-    xd->mode_info_context->mbmi.txfm_size = txfm_size;
-  } else if (bsize < BLOCK_SIZE_SB8X8 && err4x4 < err) {
-    *returnrate = rate4x4_y + rate_uv +
-        vp9_cost_bit(vp9_get_pred_prob_mbskip(cm, xd), 0);
-    *returndist = dist4x4_y + (dist_uv >> 2);
-    vpx_memset(ctx->txfm_rd_diff, 0, sizeof(ctx->txfm_rd_diff));
-    xd->mode_info_context->mbmi.txfm_size = TX_4X4;
   } else {
     int i;
     *returnrate = rate_y + rate_uv +
@@ -3094,8 +3080,6 @@ void vp9_rd_pick_intra_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
         ctx->txfm_rd_diff[i] = txfm_cache[i] - txfm_cache[cm->txfm_mode];
       }
     }
-    xd->mode_info_context->mbmi.txfm_size = txfm_size;
-    xd->mode_info_context->mbmi.mode = mode;
   }
 
   ctx->mic = *xd->mode_info_context;
