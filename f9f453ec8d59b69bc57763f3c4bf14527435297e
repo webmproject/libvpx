@@ -16,6 +16,24 @@
       "revId": "f9f453ec8d59b69bc57763f3c4bf14527435297e",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcX//4YQ\u003d",
+        "filename": "vp9/common/vp9_entropymode.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2013-07-19T08:00:42Z",
+      "side": 1,
+      "message": "Thanks, will fix in the next change set.",
+      "parentUuid": "AAAAcX//4gg\u003d",
+      "revId": "f9f453ec8d59b69bc57763f3c4bf14527435297e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
