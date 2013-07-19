@@ -653,6 +653,10 @@ process_common_toolchain() {
                 tgt_isa=x86_64
                 tgt_os=darwin12
                 ;;
+            *darwin13*)
+                tgt_isa=x86_64
+                tgt_os=darwin13
+                ;;
             x86_64*mingw32*)
                 tgt_os=win64
                 ;;
@@ -750,6 +754,10 @@ process_common_toolchain() {
         *-darwin12-*)
             add_cflags  "-mmacosx-version-min=10.8"
             add_ldflags "-mmacosx-version-min=10.8"
+            ;;
+        *-darwin13-*)
+            add_cflags  "-mmacosx-version-min=10.9"
+            add_ldflags "-mmacosx-version-min=10.9"
             ;;
     esac
 
