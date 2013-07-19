@@ -560,7 +560,7 @@ static void write_mb_modes_kf(const VP9_COMP *cpi,
     const MB_PREDICTION_MODE A = above_block_mode(m, 0, mis);
     const MB_PREDICTION_MODE L = xd->left_available ?
                                  left_block_mode(m, 0) : DC_PRED;
-    write_intra_mode(bc, ym, c->kf_y_mode_prob[A][L]);
+    write_intra_mode(bc, ym, vp9_kf_y_mode_prob[A][L]);
   } else {
     int idx, idy;
     int bw = 1 << b_width_log2(m->mbmi.sb_type);
@@ -575,12 +575,12 @@ static void write_mb_modes_kf(const VP9_COMP *cpi,
 #ifdef ENTROPY_STATS
         ++intra_mode_stats[A][L][bm];
 #endif
-        write_intra_mode(bc, bm, c->kf_y_mode_prob[A][L]);
+        write_intra_mode(bc, bm, vp9_kf_y_mode_prob[A][L]);
       }
     }
   }
 
-  write_intra_mode(bc, m->mbmi.uv_mode, c->kf_uv_mode_prob[ym]);
+  write_intra_mode(bc, m->mbmi.uv_mode, vp9_kf_uv_mode_prob[ym]);
 }
 
 static void write_modes_b(VP9_COMP *cpi, MODE_INFO *m, vp9_writer *bc,
