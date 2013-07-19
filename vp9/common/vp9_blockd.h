@@ -169,7 +169,7 @@ enum mv_precision {
 };
 
 #define VP9_REF_SCALE_SHIFT 14
-#define VP9_REF_NO_SCALE 16384
+#define VP9_REF_NO_SCALE (1 << VP9_REF_SCALE_SHIFT)
 
 struct scale_factors {
   int x_scale_fp;   // horizontal fixed point scale factor
