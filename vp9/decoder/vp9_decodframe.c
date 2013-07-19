@@ -645,12 +645,11 @@ static void setup_tile_info(VP9_COMMON *cm, struct vp9_read_bit_buffer *rb) {
     cm->log2_tile_rows += vp9_rb_read_bit(rb);
 }
 
-static void decode_tiles(VP9D_COMP *pbi,
-                         const uint8_t *data, size_t first_partition_size,
-                         vp9_reader *residual_bc) {
+static const uint8_t *decode_tiles(VP9D_COMP *pbi, const uint8_t *data) {
+  vp9_reader residual_bc;
+
   VP9_COMMON *const pc = &pbi->common;
 
-  const uint8_t *data_ptr = data + first_partition_size;
   const uint8_t *const data_end = pbi->source + pbi->source_sz;
   const int aligned_mi_cols = mi_cols_aligned_to_sb(pc->mi_cols);
   const int tile_cols = 1 << pc->log2_tile_cols;
@@ -670,7 +669,7 @@ static void decode_tiles(VP9D_COMP *pbi,
     vp9_reader bc_bak = {0};
 
     // pre-initialize the offsets, we're going to read in inverse order
-    data_ptr2[0][0] = data_ptr;
+    data_ptr2[0][0] = data;
     for (tile_row = 0; tile_row < tile_rows; tile_row++) {
       if (tile_row) {
         const int size = read_be32(data_ptr2[tile_row - 1][tile_cols - 1]);
@@ -692,13 +691,13 @@ static void decode_tiles(VP9D_COMP *pbi,
         vp9_get_tile_col_offsets(pc, tile_col);
         setup_token_decoder(pbi, data_ptr2[tile_row][tile_col],
                             data_end - data_ptr2[tile_row][tile_col],
-                            residual_bc);
-        decode_tile(pbi, residual_bc);
+                            &residual_bc);
+        decode_tile(pbi, &residual_bc);
         if (tile_row == tile_rows - 1 && tile_col == tile_cols - 1)
-          bc_bak = *residual_bc;
+          bc_bak = residual_bc;
       }
     }
-    *residual_bc = bc_bak;
+    residual_bc = bc_bak;
   } else {
     int has_more;
 
@@ -711,22 +710,24 @@ static void decode_tiles(VP9D_COMP *pbi,
 
         has_more = tile_col < tile_cols - 1 || tile_row < tile_rows - 1;
         if (has_more) {
-          if (!read_is_valid(data_ptr, 4, data_end))
+          if (!read_is_valid(data, 4, data_end))
             vpx_internal_error(&pc->error, VPX_CODEC_CORRUPT_FRAME,
                          "Truncated packet or corrupt tile length");
 
-          size = read_be32(data_ptr);
-          data_ptr += 4;
+          size = read_be32(data);
+          data += 4;
         } else {
-          size = data_end - data_ptr;
+          size = data_end - data;
         }
 
-        setup_token_decoder(pbi, data_ptr, size, residual_bc);
-        decode_tile(pbi, residual_bc);
-        data_ptr += size;
+        setup_token_decoder(pbi, data, size, &residual_bc);
+        decode_tile(pbi, &residual_bc);
+        data += size;
       }
     }
   }
+
+  return vp9_reader_find_end(&residual_bc);
 }
 
 static void check_sync_code(VP9_COMMON *cm, struct vp9_read_bit_buffer *rb) {
@@ -923,7 +924,6 @@ void vp9_init_dequantizer(VP9_COMMON *cm) {
 
 int vp9_decode_frame(VP9D_COMP *pbi, const uint8_t **p_data_end) {
   int i;
-  vp9_reader residual_bc;
   VP9_COMMON *const pc = &pbi->common;
   MACROBLOCKD *const xd = &pbi->mb;
 
@@ -985,7 +985,7 @@ int vp9_decode_frame(VP9D_COMP *pbi, const uint8_t **p_data_end) {
 
   set_prev_mi(pc);
 
-  decode_tiles(pbi, data, first_partition_size, &residual_bc);
+  *p_data_end = decode_tiles(pbi, data + first_partition_size);
 
   pc->last_width = pc->width;
   pc->last_height = pc->height;
@@ -1013,6 +1013,5 @@ int vp9_decode_frame(VP9D_COMP *pbi, const uint8_t **p_data_end) {
   if (pc->refresh_frame_context)
     pc->frame_contexts[pc->frame_context_idx] = pc->fc;
 
-  *p_data_end = vp9_reader_find_end(&residual_bc);
   return 0;
 }
