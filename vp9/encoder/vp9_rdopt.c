@@ -2129,6 +2129,8 @@ static int64_t rd_pick_best_mbsegmentation(VP9_COMP *cpi, MACROBLOCK *x,
 
   rd_check_segment_txsize(cpi, x, &bsi, seg_mvs, mi_row, mi_col);
 
+  if (bsi.segment_rd > best_rd)
+    return INT64_MAX;
   /* set it to the best */
   for (i = 0; i < 4; i++) {
     x->e_mbd.mode_info_context->bmi[i].as_mv[0].as_int = bsi.mvs[i].as_int;
