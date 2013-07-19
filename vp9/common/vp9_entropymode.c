@@ -536,7 +536,7 @@ void vp9_adapt_mode_probs(VP9_COMMON *cm) {
       tx_counts_to_branch_counts_16x16(fc->tx_counts.p16x16[i],
                                        branch_ct_16x16p);
       for (j = 0; j < TX_SIZE_MAX_SB - 2; ++j)
-        fc->tx_probs.p16x16[i][j] = update_tx_ct(fc->tx_probs.p16x16[i][j],
+        fc->tx_probs.p16x16[i][j] = update_tx_ct(fc->pre_tx_probs.p16x16[i][j],
                                                  branch_ct_16x16p[j]);
 
       tx_counts_to_branch_counts_32x32(fc->tx_counts.p32x32[i],
