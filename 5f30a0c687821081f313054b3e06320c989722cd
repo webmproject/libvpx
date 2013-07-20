@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAcX//2fg\u003d",
+        "filename": "vp8/encoder/onyx_int.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 373,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2013-07-20T21:12:05Z",
+      "side": 1,
+      "message": "why so far apart?  Similar variables?",
+      "revId": "5f30a0c687821081f313054b3e06320c989722cd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcX//2fc\u003d",
+        "filename": "vp8/encoder/ratectrl.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 237,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2013-07-20T21:12:05Z",
+      "side": 1,
+      "message": "spacing...",
+      "revId": "5f30a0c687821081f313054b3e06320c989722cd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
