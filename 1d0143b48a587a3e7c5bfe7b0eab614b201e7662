@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAcX//2n8\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 1766,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-07-20T03:25:52Z",
+      "side": 1,
+      "message": "Why4 (for both)? We only have two for a 8x8 block, right?",
+      "revId": "1d0143b48a587a3e7c5bfe7b0eab614b201e7662",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcX//2n4\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 1779,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-07-20T03:25:52Z",
+      "side": 1,
+      "message": "Should the mvs be moved also (into SEG_RDSTAT), and perhaps be made an array of size [2] in and by themselves?",
+      "revId": "1d0143b48a587a3e7c5bfe7b0eab614b201e7662",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
