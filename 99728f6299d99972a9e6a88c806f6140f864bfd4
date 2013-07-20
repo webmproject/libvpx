@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAcX//2ew\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 633,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2013-07-20T21:46:28Z",
+      "side": 1,
+      "message": "nice trick / useable in tokenize and detokenize.  probably ought to move to a separate function.",
+      "revId": "99728f6299d99972a9e6a88c806f6140f864bfd4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
