@@ -43,16 +43,13 @@ typedef struct frame_contexts {
   vp9_prob uv_mode_prob[VP9_INTRA_MODES][VP9_INTRA_MODES - 1];
   vp9_prob partition_prob[NUM_FRAME_TYPES][NUM_PARTITION_CONTEXTS]
                          [PARTITION_TYPES - 1];
-  vp9_prob pre_y_mode_prob[BLOCK_SIZE_GROUPS][VP9_INTRA_MODES - 1];
-  vp9_prob pre_uv_mode_prob[VP9_INTRA_MODES][VP9_INTRA_MODES - 1];
-  vp9_prob pre_partition_prob[NUM_PARTITION_CONTEXTS][PARTITION_TYPES - 1];
+
   unsigned int y_mode_counts[BLOCK_SIZE_GROUPS][VP9_INTRA_MODES];
   unsigned int uv_mode_counts[VP9_INTRA_MODES][VP9_INTRA_MODES];
   unsigned int partition_counts[NUM_PARTITION_CONTEXTS][PARTITION_TYPES];
 
   // coeff
   vp9_coeff_probs_model coef_probs[TX_SIZE_MAX_SB][BLOCK_TYPES];
-  vp9_coeff_probs_model pre_coef_probs[TX_SIZE_MAX_SB][BLOCK_TYPES];
   vp9_coeff_count_model coef_counts[TX_SIZE_MAX_SB][BLOCK_TYPES];
   unsigned int eob_branch_counts[TX_SIZE_MAX_SB][BLOCK_TYPES][REF_TYPES]
                                 [COEF_BANDS][PREV_COEF_CONTEXTS];
@@ -60,13 +57,10 @@ typedef struct frame_contexts {
   // switchable_interp
   vp9_prob switchable_interp_prob[VP9_SWITCHABLE_FILTERS + 1]
                                  [VP9_SWITCHABLE_FILTERS - 1];
-  vp9_prob pre_switchable_interp_prob[VP9_SWITCHABLE_FILTERS + 1]
-                                     [VP9_SWITCHABLE_FILTERS - 1];
   unsigned int switchable_interp_count[VP9_SWITCHABLE_FILTERS + 1]
                                       [VP9_SWITCHABLE_FILTERS];
   // inter_mode
   vp9_prob inter_mode_probs[INTER_MODE_CONTEXTS][VP9_INTER_MODES - 1];
-  vp9_prob pre_inter_mode_probs[INTER_MODE_CONTEXTS][VP9_INTER_MODES - 1];
   unsigned int inter_mode_counts[INTER_MODE_CONTEXTS][VP9_INTER_MODES - 1][2];
 
   // intra_inter, comp_inter, single_ref, comp_ref
@@ -74,10 +68,7 @@ typedef struct frame_contexts {
   vp9_prob comp_inter_prob[COMP_INTER_CONTEXTS];
   vp9_prob single_ref_prob[REF_CONTEXTS][2];
   vp9_prob comp_ref_prob[REF_CONTEXTS];
-  vp9_prob pre_intra_inter_prob[INTRA_INTER_CONTEXTS];
-  vp9_prob pre_comp_inter_prob[COMP_INTER_CONTEXTS];
-  vp9_prob pre_single_ref_prob[REF_CONTEXTS][2];
-  vp9_prob pre_comp_ref_prob[REF_CONTEXTS];
+
   unsigned int intra_inter_count[INTRA_INTER_CONTEXTS][2];
   unsigned int comp_inter_count[COMP_INTER_CONTEXTS][2];
   unsigned int single_ref_count[REF_CONTEXTS][2][2];
@@ -85,17 +76,14 @@ typedef struct frame_contexts {
 
   // tx_probs
   struct tx_probs tx_probs;
-  struct tx_probs pre_tx_probs;
   struct tx_counts tx_counts;
 
   // mbskip
   vp9_prob mbskip_probs[MBSKIP_CONTEXTS];
-  vp9_prob pre_mbskip_probs[MBSKIP_CONTEXTS];
   unsigned int mbskip_count[MBSKIP_CONTEXTS][2];
 
   // mv
   nmv_context nmvc;
-  nmv_context pre_nmvc;
   nmv_context_counts NMVcount;
 } FRAME_CONTEXT;
 

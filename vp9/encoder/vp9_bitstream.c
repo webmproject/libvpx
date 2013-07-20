@@ -1471,7 +1471,6 @@ static size_t write_compressed_header(VP9_COMP *cpi, uint8_t *data) {
 }
 
 void vp9_pack_bitstream(VP9_COMP *cpi, uint8_t *dest, unsigned long *size) {
-  FRAME_CONTEXT *const fc = &cpi->common.fc;
   uint8_t *data = dest;
   size_t first_part_size;
   struct vp9_write_bit_buffer wb = {data, 0};
@@ -1493,20 +1492,6 @@ void vp9_pack_bitstream(VP9_COMP *cpi, uint8_t *dest, unsigned long *size) {
 #endif
 
   vp9_clear_system_state();  // __asm emms;
-
-  vp9_copy(fc->pre_coef_probs, fc->coef_probs);
-  vp9_copy(fc->pre_y_mode_prob, fc->y_mode_prob);
-  vp9_copy(fc->pre_uv_mode_prob, fc->uv_mode_prob);
-  vp9_copy(fc->pre_partition_prob, fc->partition_prob[INTER_FRAME]);
-  fc->pre_nmvc = fc->nmvc;
-  vp9_copy(fc->pre_switchable_interp_prob, fc->switchable_interp_prob);
-  vp9_copy(fc->pre_inter_mode_probs, fc->inter_mode_probs);
-  vp9_copy(fc->pre_intra_inter_prob, fc->intra_inter_prob);
-  vp9_copy(fc->pre_comp_inter_prob, fc->comp_inter_prob);
-  vp9_copy(fc->pre_comp_ref_prob, fc->comp_ref_prob);
-  vp9_copy(fc->pre_single_ref_prob, fc->single_ref_prob);
-  fc->pre_tx_probs = fc->tx_probs;
-  vp9_copy(fc->pre_mbskip_probs, fc->mbskip_probs);
 
   first_part_size = write_compressed_header(cpi, data);
   data += first_part_size;

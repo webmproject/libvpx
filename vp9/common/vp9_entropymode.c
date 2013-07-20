@@ -392,6 +392,8 @@ void vp9_accum_mv_refs(VP9_COMMON *pc,
 #define MVREF_MAX_UPDATE_FACTOR 128
 void vp9_adapt_mode_context(VP9_COMMON *pc) {
   int i, j;
+  FRAME_CONTEXT *pre_fc = &pc->frame_contexts[pc->frame_context_idx];
+
   unsigned int (*inter_mode_counts)[VP9_INTER_MODES - 1][2] =
       pc->fc.inter_mode_counts;
   vp9_prob (*mode_context)[VP9_INTER_MODES - 1] = pc->fc.inter_mode_probs;
@@ -403,7 +405,7 @@ void vp9_adapt_mode_context(VP9_COMMON *pc) {
       count = count > MVREF_COUNT_SAT ? MVREF_COUNT_SAT : count;
       factor = (MVREF_MAX_UPDATE_FACTOR * count / MVREF_COUNT_SAT);
       mode_context[j][i] = weighted_prob(
-          pc->fc.pre_inter_mode_probs[j][i],
+          pre_fc->inter_mode_probs[j][i],
           get_binary_prob(inter_mode_counts[j][i][0],
                           inter_mode_counts[j][i][1]),
           factor);
@@ -450,6 +452,8 @@ static void update_mode_probs(int n_modes,
 void vp9_adapt_mode_probs(VP9_COMMON *cm) {
   int i, j;
   FRAME_CONTEXT *fc = &cm->fc;
+  FRAME_CONTEXT *pre_fc = &cm->frame_contexts[cm->frame_context_idx];
+
 #ifdef MODE_COUNT_TESTING
   int t;
 
@@ -485,39 +489,40 @@ void vp9_adapt_mode_probs(VP9_COMMON *cm) {
 #endif
 
   for (i = 0; i < INTRA_INTER_CONTEXTS; i++)
-    fc->intra_inter_prob[i] = update_mode_ct2(fc->pre_intra_inter_prob[i],
+    fc->intra_inter_prob[i] = update_mode_ct2(pre_fc->intra_inter_prob[i],
                                               fc->intra_inter_count[i]);
   for (i = 0; i < COMP_INTER_CONTEXTS; i++)
-    fc->comp_inter_prob[i] = update_mode_ct2(fc->pre_comp_inter_prob[i],
+    fc->comp_inter_prob[i] = update_mode_ct2(pre_fc->comp_inter_prob[i],
                                              fc->comp_inter_count[i]);
   for (i = 0; i < REF_CONTEXTS; i++)
-    fc->comp_ref_prob[i] = update_mode_ct2(fc->pre_comp_ref_prob[i],
+    fc->comp_ref_prob[i] = update_mode_ct2(pre_fc->comp_ref_prob[i],
                                            fc->comp_ref_count[i]);
   for (i = 0; i < REF_CONTEXTS; i++)
     for (j = 0; j < 2; j++)
-      fc->single_ref_prob[i][j] = update_mode_ct2(fc->pre_single_ref_prob[i][j],
+      fc->single_ref_prob[i][j] = update_mode_ct2(pre_fc->single_ref_prob[i][j],
                                                   fc->single_ref_count[i][j]);
 
   for (i = 0; i < BLOCK_SIZE_GROUPS; i++)
     update_mode_probs(VP9_INTRA_MODES, vp9_intra_mode_tree,
-                      fc->y_mode_counts[i], fc->pre_y_mode_prob[i],
+                      fc->y_mode_counts[i], pre_fc->y_mode_prob[i],
                       fc->y_mode_prob[i], 0);
 
   for (i = 0; i < VP9_INTRA_MODES; ++i)
     update_mode_probs(VP9_INTRA_MODES, vp9_intra_mode_tree,
-                      fc->uv_mode_counts[i], fc->pre_uv_mode_prob[i],
+                      fc->uv_mode_counts[i], pre_fc->uv_mode_prob[i],
                       fc->uv_mode_prob[i], 0);
 
   for (i = 0; i < NUM_PARTITION_CONTEXTS; i++)
     update_mode_probs(PARTITION_TYPES, vp9_partition_tree,
-                      fc->partition_counts[i], fc->pre_partition_prob[i],
+                      fc->partition_counts[i],
+                      pre_fc->partition_prob[INTER_FRAME][i],
                       fc->partition_prob[INTER_FRAME][i], 0);
 
   if (cm->mcomp_filter_type == SWITCHABLE) {
     for (i = 0; i <= VP9_SWITCHABLE_FILTERS; i++)
       update_mode_probs(VP9_SWITCHABLE_FILTERS, vp9_switchable_interp_tree,
                         fc->switchable_interp_count[i],
-                        fc->pre_switchable_interp_prob[i],
+                        pre_fc->switchable_interp_prob[i],
                         fc->switchable_interp_prob[i], 0);
   }
 
@@ -530,25 +535,25 @@ void vp9_adapt_mode_probs(VP9_COMMON *cm) {
     for (i = 0; i < TX_SIZE_CONTEXTS; ++i) {
       tx_counts_to_branch_counts_8x8(fc->tx_counts.p8x8[i], branch_ct_8x8p);
       for (j = 0; j < TX_SIZE_MAX_SB - 3; ++j)
-        fc->tx_probs.p8x8[i][j] = update_tx_ct(fc->pre_tx_probs.p8x8[i][j],
+        fc->tx_probs.p8x8[i][j] = update_tx_ct(pre_fc->tx_probs.p8x8[i][j],
                                                branch_ct_8x8p[j]);
 
       tx_counts_to_branch_counts_16x16(fc->tx_counts.p16x16[i],
                                        branch_ct_16x16p);
       for (j = 0; j < TX_SIZE_MAX_SB - 2; ++j)
-        fc->tx_probs.p16x16[i][j] = update_tx_ct(fc->pre_tx_probs.p16x16[i][j],
+        fc->tx_probs.p16x16[i][j] = update_tx_ct(pre_fc->tx_probs.p16x16[i][j],
                                                  branch_ct_16x16p[j]);
 
       tx_counts_to_branch_counts_32x32(fc->tx_counts.p32x32[i],
                                        branch_ct_32x32p);
       for (j = 0; j < TX_SIZE_MAX_SB - 1; ++j)
-        fc->tx_probs.p32x32[i][j] = update_tx_ct(fc->pre_tx_probs.p32x32[i][j],
+        fc->tx_probs.p32x32[i][j] = update_tx_ct(pre_fc->tx_probs.p32x32[i][j],
                                                  branch_ct_32x32p[j]);
     }
   }
 
   for (i = 0; i < MBSKIP_CONTEXTS; ++i)
-    fc->mbskip_probs[i] = update_mode_ct2(fc->pre_mbskip_probs[i],
+    fc->mbskip_probs[i] = update_mode_ct2(pre_fc->mbskip_probs[i],
                                           fc->mbskip_count[i]);
 }
 
