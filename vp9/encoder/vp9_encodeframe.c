@@ -1248,9 +1248,6 @@ static void rd_use_partition(VP9_COMP *cpi, MODE_INFO *m, TOKENEXTRA **tp,
     case PARTITION_NONE:
       pick_sb_modes(cpi, mi_row, mi_col, &last_part_rate, &last_part_dist,
                     bsize, get_block_context(x, bsize), INT64_MAX);
-      set_partition_seg_context(cm, xd, mi_row, mi_col);
-      pl = partition_plane_context(xd, bsize);
-      last_part_rate += x->partition_cost[pl][PARTITION_NONE];
       break;
     case PARTITION_HORZ:
       *(get_sb_index(xd, subsize)) = 0;
@@ -1267,9 +1264,6 @@ static void rd_use_partition(VP9_COMP *cpi, MODE_INFO *m, TOKENEXTRA **tp,
         last_part_rate += rt;
         last_part_dist += dt;
       }
-      set_partition_seg_context(cm, xd, mi_row, mi_col);
-      pl = partition_plane_context(xd, bsize);
-      last_part_rate += x->partition_cost[pl][PARTITION_HORZ];
       break;
     case PARTITION_VERT:
       *(get_sb_index(xd, subsize)) = 0;
@@ -1286,9 +1280,6 @@ static void rd_use_partition(VP9_COMP *cpi, MODE_INFO *m, TOKENEXTRA **tp,
         last_part_rate += rt;
         last_part_dist += dt;
       }
-      set_partition_seg_context(cm, xd, mi_row, mi_col);
-      pl = partition_plane_context(xd, bsize);
-      last_part_rate += x->partition_cost[pl][PARTITION_VERT];
       break;
     case PARTITION_SPLIT:
       // Split partition.
@@ -1308,16 +1299,23 @@ static void rd_use_partition(VP9_COMP *cpi, MODE_INFO *m, TOKENEXTRA **tp,
 
         rd_use_partition(cpi, m + jj * bss * mis + ii * bss, tp, mi_row + y_idx,
                          mi_col + x_idx, subsize, &rt, &dt, i != 3);
+        if (rt == INT_MAX || dt == INT_MAX) {
+          last_part_rate = INT_MAX;
+          last_part_dist = INT_MAX;
+          break;
+        }
         last_part_rate += rt;
         last_part_dist += dt;
       }
-      set_partition_seg_context(cm, xd, mi_row, mi_col);
-      pl = partition_plane_context(xd, bsize);
-      last_part_rate += x->partition_cost[pl][PARTITION_SPLIT];
       break;
     default:
       assert(0);
   }
+  set_partition_seg_context(cm, xd, mi_row, mi_col);
+  pl = partition_plane_context(xd, bsize);
+  if (last_part_rate < INT_MAX)
+    last_part_rate += x->partition_cost[pl][partition];
+
   if (cpi->sf.adjust_partitioning_from_last_frame
       && partition != PARTITION_SPLIT && bsize > BLOCK_SIZE_SB8X8
       && (mi_row + ms < cm->mi_rows || mi_row + (ms >> 1) == cm->mi_rows)
@@ -1392,10 +1390,12 @@ static void rd_use_partition(VP9_COMP *cpi, MODE_INFO *m, TOKENEXTRA **tp,
 
   // We must have chosen a partitioning and encoding or we'll fail later on.
   // No other opportunities for success.
-  assert(chosen_rate < INT_MAX && chosen_dist < INT_MAX);
+  if ( bsize == BLOCK_SIZE_SB64X64)
+    assert(chosen_rate < INT_MAX && chosen_dist < INT_MAX);
 
   if (do_recon)
     encode_sb(cpi, tp, mi_row, mi_col, bsize == BLOCK_SIZE_SB64X64, bsize);
+
   *rate = chosen_rate;
   *dist = chosen_dist;
 }
