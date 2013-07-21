@@ -582,21 +582,7 @@ static void setup_frame_size_with_refs(VP9D_COMP *pbi,
   apply_frame_size(pbi, width, height);
 }
 
-static void update_frame_context(FRAME_CONTEXT *fc) {
-  vp9_copy(fc->pre_coef_probs, fc->coef_probs);
-  vp9_copy(fc->pre_y_mode_prob, fc->y_mode_prob);
-  vp9_copy(fc->pre_uv_mode_prob, fc->uv_mode_prob);
-  vp9_copy(fc->pre_partition_prob, fc->partition_prob[1]);
-  vp9_copy(fc->pre_intra_inter_prob, fc->intra_inter_prob);
-  vp9_copy(fc->pre_comp_inter_prob, fc->comp_inter_prob);
-  vp9_copy(fc->pre_single_ref_prob, fc->single_ref_prob);
-  vp9_copy(fc->pre_comp_ref_prob, fc->comp_ref_prob);
-  fc->pre_nmvc = fc->nmvc;
-  vp9_copy(fc->pre_switchable_interp_prob, fc->switchable_interp_prob);
-  vp9_copy(fc->pre_inter_mode_probs, fc->inter_mode_probs);
-  fc->pre_tx_probs = fc->tx_probs;
-  vp9_copy(fc->pre_mbskip_probs, fc->mbskip_probs);
-
+static void zero_counts(FRAME_CONTEXT *fc) {
   vp9_zero(fc->coef_counts);
   vp9_zero(fc->eob_branch_counts);
   vp9_zero(fc->y_mode_counts);
@@ -962,7 +948,7 @@ int vp9_decode_frame(VP9D_COMP *pbi, const uint8_t **p_data_end) {
 
   pc->fc = pc->frame_contexts[pc->frame_context_idx];
 
-  update_frame_context(&pc->fc);
+  zero_counts(&pc->fc);
 
   // Initialize xd pointers. Any reference should do for xd->pre, so use 0.
   setup_pre_planes(xd, 0, &pc->yv12_fb[pc->active_ref_idx[0]], 0, 0, NULL);

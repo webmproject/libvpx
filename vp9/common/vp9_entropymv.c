@@ -222,8 +222,10 @@ static unsigned int adapt_probs(unsigned int i,
 void vp9_adapt_mv_probs(VP9_COMMON *cm, int usehp) {
   int i, j;
 
+  FRAME_CONTEXT *pre_fc = &cm->frame_contexts[cm->frame_context_idx];
+
   nmv_context *ctx = &cm->fc.nmvc;
-  nmv_context *pre_ctx = &cm->fc.pre_nmvc;
+  nmv_context *pre_ctx = &pre_fc->nmvc;
   nmv_context_counts *cts = &cm->fc.NMVcount;
 
   vp9_counts_process(cts, usehp);
