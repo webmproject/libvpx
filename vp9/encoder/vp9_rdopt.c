@@ -1346,7 +1346,7 @@ static int64_t rd_pick_intra4x4mby_modes(VP9_COMP *cpi, MACROBLOCK *mb,
       int64_t UNINITIALIZED_IS_SAFE(d);
       i = idy * 2 + idx;
 
-      if (xd->frame_type == KEY_FRAME) {
+      if (cpi->common.frame_type == KEY_FRAME) {
         const MB_PREDICTION_MODE A = above_block_mode(mic, i, mis);
         const MB_PREDICTION_MODE L = (xd->left_available || idx) ?
                                      left_block_mode(mic, i) : DC_PRED;
@@ -1488,13 +1488,12 @@ static int64_t rd_pick_intra_sbuv_mode(VP9_COMP *cpi, MACROBLOCK *x,
                                        int64_t *distortion, int *skippable,
                                        BLOCK_SIZE_TYPE bsize) {
   MB_PREDICTION_MODE mode;
-  MB_PREDICTION_MODE last_mode;
   MB_PREDICTION_MODE UNINITIALIZED_IS_SAFE(mode_selected);
   int64_t best_rd = INT64_MAX, this_rd;
   int this_rate_tokenonly, this_rate, s;
   int64_t this_distortion;
 
-  last_mode = bsize <= BLOCK_SIZE_SB8X8 ?
+  MB_PREDICTION_MODE last_mode = bsize <= BLOCK_SIZE_SB8X8 ?
               TM_PRED : cpi->sf.last_chroma_intra_mode;
 
   for (mode = DC_PRED; mode <= last_mode; mode++) {
@@ -1502,7 +1501,7 @@ static int64_t rd_pick_intra_sbuv_mode(VP9_COMP *cpi, MACROBLOCK *x,
     super_block_uvrd(&cpi->common, x, &this_rate_tokenonly,
                      &this_distortion, &s, NULL, bsize);
     this_rate = this_rate_tokenonly +
-                x->intra_uv_mode_cost[x->e_mbd.frame_type][mode];
+                x->intra_uv_mode_cost[cpi->common.frame_type][mode];
     this_rd = RDCOST(x->rdmult, x->rddiv, this_rate, this_distortion);
 
     if (this_rd < best_rd) {
@@ -1530,7 +1529,7 @@ static int64_t rd_sbuv_dcpred(VP9_COMP *cpi, MACROBLOCK *x,
   super_block_uvrd(&cpi->common, x, rate_tokenonly,
                    distortion, skippable, NULL, bsize);
   *rate = *rate_tokenonly +
-          x->intra_uv_mode_cost[x->e_mbd.frame_type][DC_PRED];
+          x->intra_uv_mode_cost[cpi->common.frame_type][DC_PRED];
   this_rd = RDCOST(x->rdmult, x->rddiv, *rate, *distortion);
 
   x->e_mbd.mode_info_context->mbmi.uv_mode = DC_PRED;

@@ -954,7 +954,6 @@ int vp9_decode_frame(VP9D_COMP *pbi, const uint8_t **p_data_end) {
 
   xd->mode_info_context = pc->mi;
   xd->prev_mode_info_context = pc->prev_mi;
-  xd->frame_type = pc->frame_type;
   xd->mode_info_stride = pc->mode_info_stride;
 
   init_dequantizer(pc, &pbi->mb);
