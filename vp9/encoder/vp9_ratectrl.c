@@ -32,46 +32,8 @@
 // Bits Per MB at different Q (Multiplied by 512)
 #define BPER_MB_NORMBITS    9
 
-// % adjustment to target kf size based on seperation from previous frame
-static const int kf_boost_seperation_adjustment[16] = {
-  30,   40,   50,   55,   60,   65,   70,   75,
-  80,   85,   90,   95,  100,  100,  100,  100,
-};
-
-static const int gf_adjust_table[101] = {
-  100,
-  115, 130, 145, 160, 175, 190, 200, 210, 220, 230,
-  240, 260, 270, 280, 290, 300, 310, 320, 330, 340,
-  350, 360, 370, 380, 390, 400, 400, 400, 400, 400,
-  400, 400, 400, 400, 400, 400, 400, 400, 400, 400,
-  400, 400, 400, 400, 400, 400, 400, 400, 400, 400,
-  400, 400, 400, 400, 400, 400, 400, 400, 400, 400,
-  400, 400, 400, 400, 400, 400, 400, 400, 400, 400,
-  400, 400, 400, 400, 400, 400, 400, 400, 400, 400,
-  400, 400, 400, 400, 400, 400, 400, 400, 400, 400,
-  400, 400, 400, 400, 400, 400, 400, 400, 400, 400,
-};
-
-static const int gf_intra_usage_adjustment[20] = {
-  125, 120, 115, 110, 105, 100,  95,  85,  80,  75,
-  70,  65,  60,  55,  50,  50,  50,  50,  50,  50,
-};
-
-static const int gf_interval_table[101] = {
-  7,
-  7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
-  7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
-  7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
-  8, 8, 8, 8, 8, 8, 8, 8, 8, 8,
-  8, 8, 8, 8, 8, 8, 8, 8, 8, 8,
-  9, 9, 9, 9, 9, 9, 9, 9, 9, 9,
-  9, 9, 9, 9, 9, 9, 9, 9, 9, 9,
-  10, 10, 10, 10, 10, 10, 10, 10, 10, 10,
-  10, 10, 10, 10, 10, 10, 10, 10, 10, 10,
-  11, 11, 11, 11, 11, 11, 11, 11, 11, 11,
-};
-
-static const unsigned int prior_key_frame_weight[KEY_FRAME_CONTEXT] = { 1, 2, 3, 4, 5 };
+static const unsigned int prior_key_frame_weight[KEY_FRAME_CONTEXT] =
+    { 1, 2, 3, 4, 5 };
 
 // These functions use formulaic calculations to make playing with the
 // quantizer tables easier. If necessary they can be replaced by lookup
