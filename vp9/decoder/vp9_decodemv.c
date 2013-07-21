@@ -31,7 +31,7 @@ static MB_PREDICTION_MODE read_intra_mode(vp9_reader *r, const vp9_prob *p) {
 }
 
 static MB_PREDICTION_MODE read_inter_mode(vp9_reader *r, const vp9_prob *p) {
-  return (MB_PREDICTION_MODE)treed_read(r, vp9_sb_mv_ref_tree, p);
+  return (MB_PREDICTION_MODE)treed_read(r, vp9_inter_mode_tree, p);
 }
 
 static int read_segment_id(vp9_reader *r, const struct segmentation *seg) {

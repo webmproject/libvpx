@@ -282,9 +282,9 @@ void vp9_initialize_rd_consts(VP9_COMP *cpi, int qindex) {
 
       for (m = NEARESTMV; m < MB_MODE_COUNT; m++)
         cpi->mb.inter_mode_cost[i][m - NEARESTMV] =
-            cost_token(vp9_sb_mv_ref_tree,
+            cost_token(vp9_inter_mode_tree,
                        cpi->common.fc.inter_mode_probs[i],
-                       vp9_sb_mv_ref_encoding_array - NEARESTMV + m);
+                       vp9_inter_mode_encodings - NEARESTMV + m);
     }
   }
 }

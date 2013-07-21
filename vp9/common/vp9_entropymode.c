@@ -238,7 +238,7 @@ const vp9_tree_index vp9_intra_mode_tree[VP9_INTRA_MODES * 2 - 2] = {
   -D153_PRED, -D27_PRED             /* 8 = D153_NODE */
 };
 
-const vp9_tree_index vp9_sb_mv_ref_tree[6] = {
+const vp9_tree_index vp9_inter_mode_tree[6] = {
   -ZEROMV, 2,
   -NEARESTMV, 4,
   -NEARMV, -NEWMV
@@ -251,8 +251,7 @@ const vp9_tree_index vp9_partition_tree[6] = {
 };
 
 struct vp9_token vp9_intra_mode_encodings[VP9_INTRA_MODES];
-
-struct vp9_token vp9_sb_mv_ref_encoding_array[VP9_INTER_MODES];
+struct vp9_token vp9_inter_mode_encodings[VP9_INTER_MODES];
 
 struct vp9_token vp9_partition_encodings[PARTITION_TYPES];
 
@@ -356,8 +355,8 @@ void vp9_entropy_mode_init() {
   vp9_tokens_from_tree(vp9_switchable_interp_encodings,
                        vp9_switchable_interp_tree);
   vp9_tokens_from_tree(vp9_partition_encodings, vp9_partition_tree);
-  vp9_tokens_from_tree_offset(vp9_sb_mv_ref_encoding_array,
-                              vp9_sb_mv_ref_tree, NEARESTMV);
+  vp9_tokens_from_tree_offset(vp9_inter_mode_encodings,
+                              vp9_inter_mode_tree, NEARESTMV);
 }
 
 void vp9_init_mode_contexts(VP9_COMMON *pc) {
