@@ -630,9 +630,11 @@ static void constrain_line(int x0, int *x1, int y0, int *y1,
   }
 }
 
-int vp9_post_proc_frame(VP9_COMMON *oci, YV12_BUFFER_CONFIG *dest,
+int vp9_post_proc_frame(struct VP9Common *oci,
+                        struct loopfilter *lf,
+                        YV12_BUFFER_CONFIG *dest,
                         vp9_ppflags_t *ppflags) {
-  int q = oci->filter_level * 10 / 6;
+  int q = lf->filter_level * 10 / 6;
   int flags = ppflags->post_proc_flag;
   int deblock_level = ppflags->deblocking_level;
   int noise_level = ppflags->noise_level;

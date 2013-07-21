@@ -925,29 +925,29 @@ static void update_coef_probs(VP9_COMP* const cpi, vp9_writer* const bc) {
     update_coef_probs_common(bc, cpi, TX_32X32);
 }
 
-static void encode_loopfilter(VP9_COMMON *pc, MACROBLOCKD *xd,
+static void encode_loopfilter(struct loopfilter *lf,
                               struct vp9_write_bit_buffer *wb) {
   int i;
 
   // Encode the loop filter level and type
-  vp9_wb_write_literal(wb, pc->filter_level, 6);
-  vp9_wb_write_literal(wb, pc->sharpness_level, 3);
+  vp9_wb_write_literal(wb, lf->filter_level, 6);
+  vp9_wb_write_literal(wb, lf->sharpness_level, 3);
 
   // Write out loop filter deltas applied at the MB level based on mode or
   // ref frame (if they are enabled).
-  vp9_wb_write_bit(wb, xd->mode_ref_lf_delta_enabled);
+  vp9_wb_write_bit(wb, lf->mode_ref_delta_enabled);
 
-  if (xd->mode_ref_lf_delta_enabled) {
+  if (lf->mode_ref_delta_enabled) {
     // Do the deltas need to be updated
-    vp9_wb_write_bit(wb, xd->mode_ref_lf_delta_update);
-    if (xd->mode_ref_lf_delta_update) {
+    vp9_wb_write_bit(wb, lf->mode_ref_delta_update);
+    if (lf->mode_ref_delta_update) {
       // Send update
       for (i = 0; i < MAX_REF_LF_DELTAS; i++) {
-        const int delta = xd->ref_lf_deltas[i];
+        const int delta = lf->ref_deltas[i];
 
         // Frame level data
-        if (delta != xd->last_ref_lf_deltas[i]) {
-          xd->last_ref_lf_deltas[i] = delta;
+        if (delta != lf->last_ref_deltas[i]) {
+          lf->last_ref_deltas[i] = delta;
           vp9_wb_write_bit(wb, 1);
 
           assert(delta != 0);
@@ -960,9 +960,9 @@ static void encode_loopfilter(VP9_COMMON *pc, MACROBLOCKD *xd,
 
       // Send update
       for (i = 0; i < MAX_MODE_LF_DELTAS; i++) {
-        const int delta = xd->mode_lf_deltas[i];
-        if (delta != xd->last_mode_lf_deltas[i]) {
-          xd->last_mode_lf_deltas[i] = delta;
+        const int delta = lf->mode_deltas[i];
+        if (delta != lf->last_mode_deltas[i]) {
+          lf->last_mode_deltas[i] = delta;
           vp9_wb_write_bit(wb, 1);
 
           assert(delta != 0);
@@ -1372,7 +1372,7 @@ static void write_uncompressed_header(VP9_COMP *cpi,
 
   vp9_wb_write_literal(wb, cm->frame_context_idx, NUM_FRAME_CONTEXTS_LOG2);
 
-  encode_loopfilter(cm, xd, wb);
+  encode_loopfilter(&xd->lf, wb);
   encode_quantization(cm, wb);
   encode_segmentation(cpi, wb);
 

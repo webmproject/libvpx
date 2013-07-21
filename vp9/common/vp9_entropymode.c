@@ -552,16 +552,16 @@ void vp9_adapt_mode_probs(VP9_COMMON *cm) {
 }
 
 static void set_default_lf_deltas(MACROBLOCKD *xd) {
-  xd->mode_ref_lf_delta_enabled = 1;
-  xd->mode_ref_lf_delta_update = 1;
+  xd->lf.mode_ref_delta_enabled = 1;
+  xd->lf.mode_ref_delta_update = 1;
 
-  xd->ref_lf_deltas[INTRA_FRAME] = 1;
-  xd->ref_lf_deltas[LAST_FRAME] = 0;
-  xd->ref_lf_deltas[GOLDEN_FRAME] = -1;
-  xd->ref_lf_deltas[ALTREF_FRAME] = -1;
+  xd->lf.ref_deltas[INTRA_FRAME] = 1;
+  xd->lf.ref_deltas[LAST_FRAME] = 0;
+  xd->lf.ref_deltas[GOLDEN_FRAME] = -1;
+  xd->lf.ref_deltas[ALTREF_FRAME] = -1;
 
-  xd->mode_lf_deltas[0] = 0;
-  xd->mode_lf_deltas[1] = 0;
+  xd->lf.mode_deltas[0] = 0;
+  xd->lf.mode_deltas[1] = 0;
 }
 
 void vp9_setup_past_independence(VP9_COMMON *cm, MACROBLOCKD *xd) {
@@ -574,8 +574,8 @@ void vp9_setup_past_independence(VP9_COMMON *cm, MACROBLOCKD *xd) {
     vpx_memset(cm->last_frame_seg_map, 0, (cm->mi_rows * cm->mi_cols));
 
   // Reset the mode ref deltas for loop filter
-  vp9_zero(xd->last_ref_lf_deltas);
-  vp9_zero(xd->last_mode_lf_deltas);
+  vp9_zero(xd->lf.last_ref_deltas);
+  vp9_zero(xd->lf.last_mode_deltas);
   set_default_lf_deltas(xd);
 
   vp9_default_coef_probs(cm);
@@ -584,7 +584,7 @@ void vp9_setup_past_independence(VP9_COMMON *cm, MACROBLOCKD *xd) {
   vp9_init_mv_probs(cm);
 
   // To force update of the sharpness
-  cm->last_sharpness_level = -1;
+  xd->lf.last_sharpness_level = -1;
 
   vp9_init_mode_contexts(cm);
 

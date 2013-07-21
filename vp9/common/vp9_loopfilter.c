@@ -55,13 +55,13 @@ static void update_sharpness(loop_filter_info_n *const lfi, int sharpness_lvl) {
   }
 }
 
-void vp9_loop_filter_init(VP9_COMMON *cm) {
+void vp9_loop_filter_init(VP9_COMMON *cm, struct loopfilter *lf) {
   loop_filter_info_n *lfi = &cm->lf_info;
   int i;
 
   // init limits for given sharpness
-  update_sharpness(lfi, cm->sharpness_level);
-  cm->last_sharpness_level = cm->sharpness_level;
+  update_sharpness(lfi, lf->sharpness_level);
+  lf->last_sharpness_level = lf->sharpness_level;
 
   // init LUT for lvl  and hev thr picking
   lf_init_lut(lfi);
@@ -79,11 +79,12 @@ static void loop_filter_frame_init(VP9_COMMON *const cm, MACROBLOCKD *const xd,
   // 2 when filter_lvl is between 32 and 63
   const int n_shift = default_filt_lvl >> 5;
   loop_filter_info_n *const lfi = &cm->lf_info;
+  struct loopfilter *lf = &xd->lf;
 
   // update limits if sharpness has changed
-  if (cm->last_sharpness_level != cm->sharpness_level) {
-    update_sharpness(lfi, cm->sharpness_level);
-    cm->last_sharpness_level = cm->sharpness_level;
+  if (lf->last_sharpness_level != lf->sharpness_level) {
+    update_sharpness(lfi, lf->sharpness_level);
+    lf->last_sharpness_level = lf->sharpness_level;
   }
 
   for (seg = 0; seg < MAX_MB_SEGMENTS; seg++) {
@@ -97,20 +98,20 @@ static void loop_filter_frame_init(VP9_COMMON *const cm, MACROBLOCKD *const xd,
                   : clamp(default_filt_lvl + data, 0, MAX_LOOP_FILTER);
     }
 
-    if (!xd->mode_ref_lf_delta_enabled) {
+    if (!lf->mode_ref_delta_enabled) {
       // we could get rid of this if we assume that deltas are set to
       // zero when not in use; encoder always uses deltas
       vpx_memset(lfi->lvl[seg][0], lvl_seg, 4 * 4);
       continue;
     }
 
-    intra_lvl = lvl_seg + (xd->ref_lf_deltas[INTRA_FRAME] << n_shift);
+    intra_lvl = lvl_seg + (lf->ref_deltas[INTRA_FRAME] << n_shift);
     lfi->lvl[seg][INTRA_FRAME][0] = clamp(intra_lvl, 0, MAX_LOOP_FILTER);
 
     for (ref = LAST_FRAME; ref < MAX_REF_FRAMES; ++ref)
       for (mode = 0; mode < MAX_MODE_LF_DELTAS; ++mode) {
-        const int inter_lvl = lvl_seg + (xd->ref_lf_deltas[ref] << n_shift)
-                                      + (xd->mode_lf_deltas[mode] << n_shift);
+        const int inter_lvl = lvl_seg + (lf->ref_deltas[ref] << n_shift)
+                                      + (lf->mode_deltas[mode] << n_shift);
         lfi->lvl[seg][ref][mode] = clamp(inter_lvl, 0, MAX_LOOP_FILTER);
       }
   }

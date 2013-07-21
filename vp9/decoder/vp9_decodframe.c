@@ -438,30 +438,29 @@ static void setup_segmentation(struct segmentation *seg,
   }
 }
 
-static void setup_loopfilter(VP9D_COMP *pbi, struct vp9_read_bit_buffer *rb) {
-  VP9_COMMON *const cm = &pbi->common;
-  MACROBLOCKD *const xd = &pbi->mb;
+static void setup_loopfilter(struct loopfilter *lf,
+                             struct vp9_read_bit_buffer *rb) {
 
-  cm->filter_level = vp9_rb_read_literal(rb, 6);
-  cm->sharpness_level = vp9_rb_read_literal(rb, 3);
+  lf->filter_level = vp9_rb_read_literal(rb, 6);
+  lf->sharpness_level = vp9_rb_read_literal(rb, 3);
 
   // Read in loop filter deltas applied at the MB level based on mode or ref
   // frame.
-  xd->mode_ref_lf_delta_update = 0;
+  lf->mode_ref_delta_update = 0;
 
-  xd->mode_ref_lf_delta_enabled = vp9_rb_read_bit(rb);
-  if (xd->mode_ref_lf_delta_enabled) {
-    xd->mode_ref_lf_delta_update = vp9_rb_read_bit(rb);
-    if (xd->mode_ref_lf_delta_update) {
+  lf->mode_ref_delta_enabled = vp9_rb_read_bit(rb);
+  if (lf->mode_ref_delta_enabled) {
+    lf->mode_ref_delta_update = vp9_rb_read_bit(rb);
+    if (lf->mode_ref_delta_update) {
       int i;
 
       for (i = 0; i < MAX_REF_LF_DELTAS; i++)
         if (vp9_rb_read_bit(rb))
-          xd->ref_lf_deltas[i] = vp9_rb_read_signed_literal(rb, 6);
+          lf->ref_deltas[i] = vp9_rb_read_signed_literal(rb, 6);
 
       for (i = 0; i < MAX_MODE_LF_DELTAS; i++)
         if (vp9_rb_read_bit(rb))
-          xd->mode_lf_deltas[i] = vp9_rb_read_signed_literal(rb, 6);
+          lf->mode_deltas[i] = vp9_rb_read_signed_literal(rb, 6);
     }
   }
 }
@@ -797,7 +796,7 @@ static size_t read_uncompressed_header(VP9D_COMP *pbi,
     int frame_to_show = cm->ref_frame_map[vp9_rb_read_literal(rb, 3)];
     ref_cnt_fb(cm->fb_idx_ref_cnt, &cm->new_fb_idx, frame_to_show);
     pbi->refresh_frame_flags = 0;
-    cm->filter_level = 0;
+    xd->lf.filter_level = 0;
     return 0;
   }
 
@@ -881,9 +880,9 @@ static size_t read_uncompressed_header(VP9D_COMP *pbi,
   if (cm->frame_type == KEY_FRAME || cm->error_resilient_mode || cm->intra_only)
     vp9_setup_past_independence(cm, xd);
 
-  setup_loopfilter(pbi, rb);
+  setup_loopfilter(&xd->lf, rb);
   setup_quantization(pbi, rb);
-  setup_segmentation(&pbi->mb.seg, rb);
+  setup_segmentation(&xd->seg, rb);
 
   setup_tile_info(cm, rb);
 

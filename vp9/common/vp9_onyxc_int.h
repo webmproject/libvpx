@@ -202,10 +202,6 @@ typedef struct VP9Common {
 
   loop_filter_info_n lf_info;
 
-  int filter_level;
-  int last_sharpness_level;
-  int sharpness_level;
-
   int refresh_frame_context;    /* Two state 0 = NO, 1 = YES */
 
   int ref_frame_sign_bias[MAX_REF_FRAMES];    /* Two state 0, 1 */

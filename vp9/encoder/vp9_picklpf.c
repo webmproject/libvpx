@@ -127,6 +127,7 @@ void vp9_set_alt_lf_level(VP9_COMP *cpi, int filt_val) {
 
 void vp9_pick_filter_level(YV12_BUFFER_CONFIG *sd, VP9_COMP *cpi) {
   VP9_COMMON *cm = &cpi->common;
+  struct loopfilter *lf = &cpi->mb.e_mbd.lf;
 
   int best_err = 0;
   int filt_err = 0;
@@ -135,7 +136,8 @@ void vp9_pick_filter_level(YV12_BUFFER_CONFIG *sd, VP9_COMP *cpi) {
 
   int filter_step;
   int filt_high = 0;
-  int filt_mid = cm->filter_level;      // Start search at previous frame filter level
+  // Start search at previous frame filter level
+  int filt_mid = lf->filter_level;
   int filt_low = 0;
   int filt_best;
   int filt_direction = 0;
@@ -146,12 +148,12 @@ void vp9_pick_filter_level(YV12_BUFFER_CONFIG *sd, VP9_COMP *cpi) {
   vp8_yv12_copy_y(cm->frame_to_show, &cpi->last_frame_uf);
 
   if (cm->frame_type == KEY_FRAME)
-    cm->sharpness_level = 0;
+    lf->sharpness_level = 0;
   else
-    cm->sharpness_level = cpi->oxcf.Sharpness;
+    lf->sharpness_level = cpi->oxcf.Sharpness;
 
   // Start the search at the previous frame filter level unless it is now out of range.
-  filt_mid = cm->filter_level;
+  filt_mid = lf->filter_level;
 
   if (filt_mid < min_filter_level)
     filt_mid = min_filter_level;
@@ -232,5 +234,5 @@ void vp9_pick_filter_level(YV12_BUFFER_CONFIG *sd, VP9_COMP *cpi) {
     }
   }
 
-  cm->filter_level = filt_best;
+  lf->filter_level = filt_best;
 }

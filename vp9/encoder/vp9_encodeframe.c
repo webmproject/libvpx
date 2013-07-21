@@ -1952,7 +1952,7 @@ static void switch_lossless_mode(VP9_COMP *cpi, int lossless) {
     cpi->mb.e_mbd.inv_txm4x4_1_add = vp9_short_iwalsh4x4_1_add;
     cpi->mb.e_mbd.inv_txm4x4_add = vp9_short_iwalsh4x4_add;
     cpi->mb.optimize = 0;
-    cpi->common.filter_level = 0;
+    cpi->mb.e_mbd.lf.filter_level = 0;
     cpi->zbin_mode_boost_enabled = 0;
     cpi->common.tx_mode = ONLY_4X4;
   } else {
