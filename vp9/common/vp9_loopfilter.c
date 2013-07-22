@@ -229,13 +229,16 @@ static void filter_selectively_horiz(uint8_t *s, int pitch,
   }
 }
 
-static void filter_block_plane(VP9_COMMON *const cm, MACROBLOCKD *const xd,
-                               int plane, int mi_row, int mi_col) {
-  const int ss_x = xd->plane[plane].subsampling_x;
-  const int ss_y = xd->plane[plane].subsampling_y;
+static void filter_block_plane(VP9_COMMON *const cm,
+                               struct macroblockd_plane *const plane,
+                               const MODE_INFO *mi,
+                               int mi_row, int mi_col) {
+  const int ss_x = plane->subsampling_x;
+  const int ss_y = plane->subsampling_y;
   const int row_step = 1 << ss_x;
   const int col_step = 1 << ss_y;
-  struct buf_2d *const dst = &xd->plane[plane].dst;
+  const int row_step_stride = cm->mode_info_stride * row_step;
+  struct buf_2d *const dst = &plane->dst;
   uint8_t* const dst0 = dst->buf;
   unsigned int mask_16x16[MI_BLOCK_SIZE] = {0};
   unsigned int mask_8x8[MI_BLOCK_SIZE] = {0};
@@ -243,9 +246,6 @@ static void filter_block_plane(VP9_COMMON *const cm, MACROBLOCKD *const xd,
   unsigned int mask_4x4_int[MI_BLOCK_SIZE] = {0};
   struct loop_filter_info lfi[MI_BLOCK_SIZE][MI_BLOCK_SIZE];
   int r, c;
-
-  const MODE_INFO *mi = xd->mode_info_context;
-  const int row_step_stride = cm->mode_info_stride * row_step;
 
   for (r = 0; r < MI_BLOCK_SIZE && mi_row + r < cm->mi_rows; r += row_step) {
     unsigned int mask_16x16_c = 0;
@@ -265,8 +265,9 @@ static void filter_block_plane(VP9_COMMON *const cm, MACROBLOCKD *const xd,
       const int block_edge_above = b_height_log2(mi[c].mbmi.sb_type) ?
           !(r & ((1 << (b_height_log2(mi[c].mbmi.sb_type)-1)) - 1)) : 1;
       const int skip_this_r = skip_this && !block_edge_above;
-      const TX_SIZE tx_size = plane ? get_uv_tx_size(&mi[c].mbmi)
-                                    : mi[c].mbmi.txfm_size;
+      const TX_SIZE tx_size = (plane->plane_type == PLANE_TYPE_UV)
+                            ? get_uv_tx_size(&mi[c].mbmi)
+                            : mi[c].mbmi.txfm_size;
       const int skip_border_4x4_c = ss_x && mi_col + c == cm->mi_cols - 1;
       const int skip_border_4x4_r = ss_y && mi_row + r == cm->mi_rows - 1;
 
@@ -350,6 +351,7 @@ static void filter_block_plane(VP9_COMMON *const cm, MACROBLOCKD *const xd,
 
 void vp9_loop_filter_frame(VP9_COMMON *cm, MACROBLOCKD *xd,
                            int frame_filter_level, int y_only) {
+  const int num_planes = y_only ? 1 : MAX_MB_PLANE;
   int mi_row, mi_col;
 
   // Initialize the loop filter for this frame.
@@ -362,9 +364,8 @@ void vp9_loop_filter_frame(VP9_COMMON *cm, MACROBLOCKD *xd,
       int plane;
 
       setup_dst_planes(xd, cm->frame_to_show, mi_row, mi_col);
-      for (plane = 0; plane < (y_only ? 1 : MAX_MB_PLANE); plane++) {
-        xd->mode_info_context = mi + mi_col;
-        filter_block_plane(cm, xd, plane, mi_row, mi_col);
+      for (plane = 0; plane < num_planes; ++plane) {
+        filter_block_plane(cm, &xd->plane[plane], mi + mi_col, mi_row, mi_col);
       }
     }
   }
