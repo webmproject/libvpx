@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAcX//1iY\u003d",
+        "filename": "vp8/encoder/onyx_int.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 373,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-07-22T18:46:35Z",
+      "side": 1,
+      "message": "Seemed golden related was here; frames_since_key was also grouped with kf.\n\nanother reason was to add it near frames_till_gf_update_due...one might be derived from the other in the end.",
+      "parentUuid": "AAAAcX//2fg\u003d",
+      "revId": "5f30a0c687821081f313054b3e06320c989722cd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAcX//2fc\u003d",
         "filename": "vp8/encoder/ratectrl.c",
         "patchSetId": 1
@@ -30,6 +48,24 @@
       "writtenOn": "2013-07-20T21:12:05Z",
       "side": 1,
       "message": "spacing...",
+      "revId": "5f30a0c687821081f313054b3e06320c989722cd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcX//1iw\u003d",
+        "filename": "vp8/encoder/ratectrl.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 237,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-07-22T18:46:35Z",
+      "side": 1,
+      "message": "TODO(later): this whole file is ragged, best to keep that noise separate.",
+      "parentUuid": "AAAAcX//2fc\u003d",
       "revId": "5f30a0c687821081f313054b3e06320c989722cd",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
