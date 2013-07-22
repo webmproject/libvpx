@@ -54,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAcX//1pM\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 471,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2013-07-22T17:55:18Z",
+      "side": 1,
+      "message": "That\u0027s all true but could we just assume that bw and bh mean block width/height in pixels and use them consistently in the code? We already do in the decoder\u0027s code, you can check that usually plane_block_width() is assigned to bw.",
+      "parentUuid": "AAAAcX//1sA\u003d",
+      "revId": "a3d939479c0d12f18220af8817dd00086443156e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAcX//1t0\u003d",
         "filename": "vp9/encoder/vp9_rdopt.c",
         "patchSetId": 8
