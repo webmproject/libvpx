@@ -2610,14 +2610,8 @@ static void encode_superblock(VP9_COMP *cpi, TOKENEXTRA **t, int output_enabled,
         !(mbmi->ref_frame[0] != INTRA_FRAME &&
             (mbmi->mb_skip_coeff ||
              vp9_segfeature_active(&xd->seg, segment_id, SEG_LVL_SKIP)))) {
-      const int context = vp9_get_pred_context_tx_size(xd);
-      if (bsize >= BLOCK_SIZE_SB32X32) {
-        cm->fc.tx_counts.p32x32[context][mbmi->txfm_size]++;
-      } else if (bsize >= BLOCK_SIZE_MB16X16) {
-        cm->fc.tx_counts.p16x16[context][mbmi->txfm_size]++;
-      } else {
-        cm->fc.tx_counts.p8x8[context][mbmi->txfm_size]++;
-      }
+      const uint8_t context = vp9_get_pred_context_tx_size(xd);
+      update_tx_counts(bsize, context, mbmi->txfm_size, &cm->fc.tx_counts);
     } else {
       int x, y;
       TX_SIZE sz = (cm->tx_mode == TX_MODE_SELECT) ? TX_32X32 : cm->tx_mode;
