@@ -37,7 +37,7 @@ static double compute_psnr(const vpx_image_t *img1,
                   img2->planes[VPX_PLANE_Y][i * img2->stride[VPX_PLANE_Y] + j];
       sqrerr += d * d;
     }
-  double mse = sqrerr / (width_y * height_y);
+  double mse = static_cast<double>(sqrerr) / (width_y * height_y);
   double psnr = 100.0;
   if (mse > 0.0) {
     psnr = 10 * log10(255.0 * 255.0 / mse);
