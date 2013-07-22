@@ -1880,6 +1880,7 @@ static void rd_check_segment_txsize(VP9_COMP *cpi, MACROBLOCK *x,
           int thissme, bestsme = INT_MAX;
           int sadpb = x->sadperbit4;
           int_mv mvp_full;
+          int max_mv;
 
           /* Is the best so far sufficiently good that we cant justify doing
            * and new motion search. */
@@ -1896,19 +1897,16 @@ static void rd_check_segment_txsize(VP9_COMP *cpi, MACROBLOCK *x,
                 x->e_mbd.mode_info_context->bmi[i - 2].as_mv[0].as_int;
             }
           }
+          if (i == 0)
+            max_mv = x->max_mv_context[mbmi->ref_frame[0]];
+          else
+            max_mv = MAX(abs(bsi->mvp.as_mv.row), abs(bsi->mvp.as_mv.col)) >> 3;
           if (cpi->sf.auto_mv_step_size && cpi->common.show_frame) {
             // Take wtd average of the step_params based on the last frame's
             // max mv magnitude and the best ref mvs of the current block for
             // the given reference.
-            if (i == 0)
-              step_param = (vp9_init_search_range(
-                  cpi, x->max_mv_context[mbmi->ref_frame[0]]) +
-                  cpi->mv_step_param) >> 1;
-            else
-              step_param = (vp9_init_search_range(
-                  cpi, MAX(abs(bsi->mvp.as_mv.row),
-                           abs(bsi->mvp.as_mv.col)) >> 3) +
-                  cpi->mv_step_param) >> 1;
+            step_param = (vp9_init_search_range(cpi, max_mv) +
+                          cpi->mv_step_param) >> 1;
           } else {
             step_param = cpi->mv_step_param;
           }
@@ -1920,9 +1918,26 @@ static void rd_check_segment_txsize(VP9_COMP *cpi, MACROBLOCK *x,
 
           // adjust src pointer for this block
           mi_buf_shift(x, i);
-          bestsme = vp9_full_pixel_diamond(cpi, x, &mvp_full, step_param,
-                                           sadpb, further_steps, 0, v_fn_ptr,
-                                           bsi->ref_mv, &mode_mv[NEWMV]);
+          if (cpi->sf.search_method == HEX) {
+            bestsme = vp9_hex_search(x, &mvp_full,
+                                     step_param,
+                                     sadpb, 1, v_fn_ptr, 1,
+                                     bsi->ref_mv, &mode_mv[NEWMV]);
+          } else if (cpi->sf.search_method == SQUARE) {
+            bestsme = vp9_square_search(x, &mvp_full,
+                                        step_param,
+                                        sadpb, 1, v_fn_ptr, 1,
+                                        bsi->ref_mv, &mode_mv[NEWMV]);
+          } else if (cpi->sf.search_method == BIGDIA) {
+            bestsme = vp9_bigdia_search(x, &mvp_full,
+                                        step_param,
+                                        sadpb, 1, v_fn_ptr, 1,
+                                        bsi->ref_mv, &mode_mv[NEWMV]);
+          } else {
+            bestsme = vp9_full_pixel_diamond(cpi, x, &mvp_full, step_param,
+                                             sadpb, further_steps, 0, v_fn_ptr,
+                                             bsi->ref_mv, &mode_mv[NEWMV]);
+          }
 
           // Should we do a full search (best quality only)
           if (cpi->compressor_speed == 0) {
@@ -2497,10 +2512,30 @@ static void single_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
   // Further step/diamond searches as necessary
   further_steps = (cpi->sf.max_step_search_steps - 1) - step_param;
 
-  bestsme = vp9_full_pixel_diamond(cpi, x, &mvp_full, step_param,
-                                   sadpb, further_steps, 1,
-                                   &cpi->fn_ptr[block_size],
-                                   &ref_mv, tmp_mv);
+  if (cpi->sf.search_method == HEX) {
+    bestsme = vp9_hex_search(x, &mvp_full,
+                             step_param,
+                             sadpb, 1,
+                             &cpi->fn_ptr[block_size], 1,
+                             &ref_mv, tmp_mv);
+  } else if (cpi->sf.search_method == SQUARE) {
+    bestsme = vp9_square_search(x, &mvp_full,
+                                step_param,
+                                sadpb, 1,
+                                &cpi->fn_ptr[block_size], 1,
+                                &ref_mv, tmp_mv);
+  } else if (cpi->sf.search_method == BIGDIA) {
+    bestsme = vp9_bigdia_search(x, &mvp_full,
+                                step_param,
+                                sadpb, 1,
+                                &cpi->fn_ptr[block_size], 1,
+                                &ref_mv, tmp_mv);
+  } else {
+    bestsme = vp9_full_pixel_diamond(cpi, x, &mvp_full, step_param,
+                                     sadpb, further_steps, 1,
+                                     &cpi->fn_ptr[block_size],
+                                     &ref_mv, tmp_mv);
+  }
 
   x->mv_col_min = tmp_col_min;
   x->mv_col_max = tmp_col_max;
@@ -2508,7 +2543,7 @@ static void single_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
   x->mv_row_max = tmp_row_max;
 
   if (bestsme < INT_MAX) {
-    int dis; /* TODO: use dis in distortion calculation later. */
+    int dis;  /* TODO: use dis in distortion calculation later. */
     unsigned int sse;
     cpi->find_fractional_mv_step(x, tmp_mv, &ref_mv,
                                  x->errorperbit,

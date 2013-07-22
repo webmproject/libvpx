@@ -192,7 +192,9 @@ typedef enum {
 typedef enum {
   DIAMOND = 0,
   NSTEP = 1,
-  HEX = 2
+  HEX = 2,
+  BIGDIA = 3,
+  SQUARE = 4
 } SEARCH_METHODS;
 
 typedef enum {
