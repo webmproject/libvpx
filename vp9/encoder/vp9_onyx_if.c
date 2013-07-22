@@ -378,7 +378,7 @@ static void configure_static_seg_features(VP9_COMP *cpi) {
     // All other frames if segmentation has been enabled
 
     // First normal frame in a valid gf or alt ref group
-    if (cpi->common.frames_since_golden == 0) {
+    if (cpi->frames_since_golden == 0) {
       // Set up segment features for normal frames in an arf group
       if (cpi->source_alt_ref_active) {
         xd->seg.update_map = 0;
@@ -2175,7 +2175,7 @@ static void scale_and_extend_frame(YV12_BUFFER_CONFIG *src_fb,
 
 static void update_alt_ref_frame_stats(VP9_COMP *cpi) {
   // this frame refreshes means next frames don't unless specified by user
-  cpi->common.frames_since_golden = 0;
+  cpi->frames_since_golden = 0;
 
 #if CONFIG_MULTIPLE_ARF
   if (!cpi->multi_arf_enabled)
@@ -2191,7 +2191,7 @@ static void update_golden_frame_stats(VP9_COMP *cpi) {
   if (cpi->refresh_golden_frame) {
     // this frame refreshes means next frames don't unless specified by user
     cpi->refresh_golden_frame = 0;
-    cpi->common.frames_since_golden = 0;
+    cpi->frames_since_golden = 0;
 
     // ******** Fixed Q test code only ************
     // If we are going to use the ALT reference for the next group of frames set a flag to say so.
@@ -2213,10 +2213,10 @@ static void update_golden_frame_stats(VP9_COMP *cpi) {
     if (cpi->frames_till_gf_update_due > 0)
       cpi->frames_till_gf_update_due--;
 
-    if (cpi->common.frames_till_alt_ref_frame)
-      cpi->common.frames_till_alt_ref_frame--;
+    if (cpi->frames_till_alt_ref_frame)
+      cpi->frames_till_alt_ref_frame--;
 
-    cpi->common.frames_since_golden++;
+    cpi->frames_since_golden++;
   }
 }
 
@@ -3620,7 +3620,7 @@ int vp9_get_compressed_data(VP9_PTR ptr, unsigned int *frame_flags,
       cpi->is_src_frame_alt_ref = 0;
 
       // TODO(agrange) This needs to vary depending on where the next ARF is.
-      cm->frames_till_alt_ref_frame = frames_to_arf;
+      cpi->frames_till_alt_ref_frame = frames_to_arf;
 
 #if CONFIG_MULTIPLE_ARF
       if (!cpi->multi_arf_enabled)

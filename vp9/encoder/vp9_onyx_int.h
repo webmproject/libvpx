@@ -310,6 +310,7 @@ typedef struct VP9_COMP {
   YV12_BUFFER_CONFIG *un_scaled_source;
   YV12_BUFFER_CONFIG scaled_source;
 
+  unsigned int frames_till_alt_ref_frame;
   int source_alt_ref_pending; // frame in src_buffers has been identified to be encoded as an alt ref
   int source_alt_ref_active;  // an alt ref frame has been encoded and is usable
 
@@ -392,6 +393,7 @@ typedef struct VP9_COMP {
   double key_frame_rate_correction_factor;
   double gf_rate_correction_factor;
 
+  unsigned int frames_since_golden;
   int frames_till_gf_update_due;      // Count down till next GF
 
   int gf_overspend_bits;            // Total bits overspent becasue of GF boost (cumulative)

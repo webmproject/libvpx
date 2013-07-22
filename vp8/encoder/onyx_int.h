@@ -320,6 +320,7 @@ typedef struct VP8_COMP
     YV12_BUFFER_CONFIG scaled_source;
     YV12_BUFFER_CONFIG *last_frame_unscaled_source;
 
+    unsigned int frames_till_alt_ref_frame;
     /* frame in src_buffers has been identified to be encoded as an alt ref */
     int source_alt_ref_pending;
     /* an alt ref frame has been encoded and is usable */
@@ -369,6 +370,7 @@ typedef struct VP8_COMP
     double key_frame_rate_correction_factor;
     double gf_rate_correction_factor;
 
+    unsigned int frames_since_golden;
     /* Count down till next GF */
     int frames_till_gf_update_due;
 

@@ -171,9 +171,6 @@ typedef struct VP9Common {
   int a_ac_delta_q;
 #endif
 
-  unsigned int frames_since_golden;
-  unsigned int frames_till_alt_ref_frame;
-
   /* We allocate a MODE_INFO struct for each macroblock, together with
      an extra row on top and column on the left to simplify prediction. */
 

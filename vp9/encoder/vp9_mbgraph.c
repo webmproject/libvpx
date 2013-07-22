@@ -406,8 +406,8 @@ void vp9_update_mbgraph_stats(VP9_COMP *cpi) {
   // being a GF - so exit if we don't look ahead beyond that
   if (n_frames <= cpi->frames_till_gf_update_due)
     return;
-  if (n_frames > (int)cpi->common.frames_till_alt_ref_frame)
-    n_frames = cpi->common.frames_till_alt_ref_frame;
+  if (n_frames > (int)cpi->frames_till_alt_ref_frame)
+    n_frames = cpi->frames_till_alt_ref_frame;
   if (n_frames > MAX_LAG_BUFFERS)
     n_frames = MAX_LAG_BUFFERS;
 
