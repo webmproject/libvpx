@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAcX//0z0\u003d",
+        "filename": "third_party/libyuv/source/scale.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 2733,
+      "author": {
+        "id": 1115898
+      },
+      "writtenOn": "2013-07-22T23:48:28Z",
+      "side": 1,
+      "message": "FYI Might be cleaner to pass in \"+r\"(source_y_fraction \u003e\u003e 1)  // %3\nbut it might introduce an extra mov and register used.\nThe most recent code in libyuv is one function for 32 and 64 bit, but would be harder to port.",
+      "revId": "f9e8167ba98e6152935db090158f464a81ec4ccb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
