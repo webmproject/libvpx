@@ -387,49 +387,29 @@ void vp9_accum_mv_refs(VP9_COMMON *pc,
   }
 }
 
-#define MVREF_COUNT_SAT 20
-#define MVREF_MAX_UPDATE_FACTOR 128
-void vp9_adapt_mode_context(VP9_COMMON *pc) {
-  int i, j;
-  FRAME_CONTEXT *pre_fc = &pc->frame_contexts[pc->frame_context_idx];
+#define COUNT_SAT 20
+#define MAX_UPDATE_FACTOR 128
 
-  unsigned int (*inter_mode_counts)[VP9_INTER_MODES - 1][2] =
-      pc->fc.inter_mode_counts;
-  vp9_prob (*mode_context)[VP9_INTER_MODES - 1] = pc->fc.inter_mode_probs;
-
-  for (j = 0; j < INTER_MODE_CONTEXTS; j++) {
-    for (i = 0; i < VP9_INTER_MODES - 1; i++) {
-      int count = inter_mode_counts[j][i][0] + inter_mode_counts[j][i][1];
-      int factor;
-      count = count > MVREF_COUNT_SAT ? MVREF_COUNT_SAT : count;
-      factor = (MVREF_MAX_UPDATE_FACTOR * count / MVREF_COUNT_SAT);
-      mode_context[j][i] = weighted_prob(
-          pre_fc->inter_mode_probs[j][i],
-          get_binary_prob(inter_mode_counts[j][i][0],
-                          inter_mode_counts[j][i][1]),
-          factor);
-    }
-  }
-}
-
-#define MODE_COUNT_SAT 20
-#define MODE_MAX_UPDATE_FACTOR 128
-
-static int update_mode_ct(vp9_prob pre_prob, vp9_prob prob,
+static int update_ct(vp9_prob pre_prob, vp9_prob prob,
                           unsigned int ct[2]) {
-  const int count = MIN(ct[0] + ct[1], MODE_COUNT_SAT);
-  const int factor = MODE_MAX_UPDATE_FACTOR * count / MODE_COUNT_SAT;
+  const int count = MIN(ct[0] + ct[1], COUNT_SAT);
+  const int factor = MAX_UPDATE_FACTOR * count / COUNT_SAT;
   return weighted_prob(pre_prob, prob, factor);
 }
 
-static int update_mode_ct2(vp9_prob pre_prob, unsigned int ct[2]) {
-  return update_mode_ct(pre_prob, get_binary_prob(ct[0], ct[1]), ct);
+static int update_ct2(vp9_prob pre_prob, unsigned int ct[2]) {
+  return update_ct(pre_prob, get_binary_prob(ct[0], ct[1]), ct);
 }
 
-static vp9_prob update_tx_ct(vp9_prob prob, unsigned int ct[2]) {
-  const int count = MIN(ct[0] + ct[1], MODE_COUNT_SAT);
-  const int factor = count * MODE_MAX_UPDATE_FACTOR / MODE_COUNT_SAT;
-  return weighted_prob(prob, get_binary_prob(ct[0], ct[1]), factor);
+void vp9_adapt_mode_context(VP9_COMMON *pc) {
+  int i, j;
+  FRAME_CONTEXT *const fc = &pc->fc;
+  FRAME_CONTEXT *const pre_fc = &pc->frame_contexts[pc->frame_context_idx];
+
+  for (j = 0; j < INTER_MODE_CONTEXTS; j++)
+    for (i = 0; i < VP9_INTER_MODES - 1; i++)
+      fc->inter_mode_probs[j][i] = update_ct2(pre_fc->inter_mode_probs[j][i],
+                                              fc->inter_mode_counts[j][i]);
 }
 
 static void update_mode_probs(int n_modes,
@@ -444,7 +424,7 @@ static void update_mode_probs(int n_modes,
   assert(n_modes - 1 < MAX_PROBS);
   vp9_tree_probs_from_distribution(tree, probs, branch_ct, cnt, tok0_offset);
   for (t = 0; t < n_modes - 1; ++t)
-    dst_probs[t] = update_mode_ct(pre_probs[t], probs[t], branch_ct[t]);
+    dst_probs[t] = update_ct(pre_probs[t], probs[t], branch_ct[t]);
 }
 
 // #define MODE_COUNT_TESTING
@@ -488,18 +468,18 @@ void vp9_adapt_mode_probs(VP9_COMMON *cm) {
 #endif
 
   for (i = 0; i < INTRA_INTER_CONTEXTS; i++)
-    fc->intra_inter_prob[i] = update_mode_ct2(pre_fc->intra_inter_prob[i],
-                                              fc->intra_inter_count[i]);
+    fc->intra_inter_prob[i] = update_ct2(pre_fc->intra_inter_prob[i],
+                                         fc->intra_inter_count[i]);
   for (i = 0; i < COMP_INTER_CONTEXTS; i++)
-    fc->comp_inter_prob[i] = update_mode_ct2(pre_fc->comp_inter_prob[i],
-                                             fc->comp_inter_count[i]);
+    fc->comp_inter_prob[i] = update_ct2(pre_fc->comp_inter_prob[i],
+                                        fc->comp_inter_count[i]);
   for (i = 0; i < REF_CONTEXTS; i++)
-    fc->comp_ref_prob[i] = update_mode_ct2(pre_fc->comp_ref_prob[i],
-                                           fc->comp_ref_count[i]);
+    fc->comp_ref_prob[i] = update_ct2(pre_fc->comp_ref_prob[i],
+                                      fc->comp_ref_count[i]);
   for (i = 0; i < REF_CONTEXTS; i++)
     for (j = 0; j < 2; j++)
-      fc->single_ref_prob[i][j] = update_mode_ct2(pre_fc->single_ref_prob[i][j],
-                                                  fc->single_ref_count[i][j]);
+      fc->single_ref_prob[i][j] = update_ct2(pre_fc->single_ref_prob[i][j],
+                                             fc->single_ref_count[i][j]);
 
   for (i = 0; i < BLOCK_SIZE_GROUPS; i++)
     update_mode_probs(VP9_INTRA_MODES, vp9_intra_mode_tree,
@@ -534,26 +514,26 @@ void vp9_adapt_mode_probs(VP9_COMMON *cm) {
     for (i = 0; i < TX_SIZE_CONTEXTS; ++i) {
       tx_counts_to_branch_counts_8x8(fc->tx_counts.p8x8[i], branch_ct_8x8p);
       for (j = 0; j < TX_SIZE_MAX_SB - 3; ++j)
-        fc->tx_probs.p8x8[i][j] = update_tx_ct(pre_fc->tx_probs.p8x8[i][j],
-                                               branch_ct_8x8p[j]);
+        fc->tx_probs.p8x8[i][j] = update_ct2(pre_fc->tx_probs.p8x8[i][j],
+                                             branch_ct_8x8p[j]);
 
       tx_counts_to_branch_counts_16x16(fc->tx_counts.p16x16[i],
                                        branch_ct_16x16p);
       for (j = 0; j < TX_SIZE_MAX_SB - 2; ++j)
-        fc->tx_probs.p16x16[i][j] = update_tx_ct(pre_fc->tx_probs.p16x16[i][j],
-                                                 branch_ct_16x16p[j]);
+        fc->tx_probs.p16x16[i][j] = update_ct2(pre_fc->tx_probs.p16x16[i][j],
+                                               branch_ct_16x16p[j]);
 
       tx_counts_to_branch_counts_32x32(fc->tx_counts.p32x32[i],
                                        branch_ct_32x32p);
       for (j = 0; j < TX_SIZE_MAX_SB - 1; ++j)
-        fc->tx_probs.p32x32[i][j] = update_tx_ct(pre_fc->tx_probs.p32x32[i][j],
-                                                 branch_ct_32x32p[j]);
+        fc->tx_probs.p32x32[i][j] = update_ct2(pre_fc->tx_probs.p32x32[i][j],
+                                               branch_ct_32x32p[j]);
     }
   }
 
   for (i = 0; i < MBSKIP_CONTEXTS; ++i)
-    fc->mbskip_probs[i] = update_mode_ct2(pre_fc->mbskip_probs[i],
-                                          fc->mbskip_count[i]);
+    fc->mbskip_probs[i] = update_ct2(pre_fc->mbskip_probs[i],
+                                     fc->mbskip_count[i]);
 }
 
 static void set_default_lf_deltas(MACROBLOCKD *xd) {
