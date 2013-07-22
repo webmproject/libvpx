@@ -75,7 +75,7 @@ Options:
 
 Build options:
   --help                      print this message
-  --log=yes|no|FILE           file configure log is written to [config.err]
+  --log=yes|no|FILE           file configure log is written to [config.log]
   --target=TARGET             target platform tuple [generic-gnu]
   --cpu=CPU                   optimize for a specific cpu rather than a family
   --extra-cflags=ECFLAGS      add ECFLAGS to CFLAGS [$CFLAGS]
@@ -1304,7 +1304,7 @@ process_detect() {
 }
 
 enable logging
-logfile="config.err"
+logfile="config.log"
 self=$0
 process() {
     cmdline_args="$@"
