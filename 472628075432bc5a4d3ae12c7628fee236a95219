@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAcX//1jI\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 471,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2013-07-22T18:43:01Z",
+      "side": 1,
+      "message": "b4x4s_wide and b4x4s_high are just in pixels without any relation to block sizes... that\u0027s why I still think that \"4x4\" part is redundant and confusing here (it\u0027s ok to have it for results of another functions like plane_block_width_log2by4). I still suggest bw and bh as in all another places :)",
+      "revId": "472628075432bc5a4d3ae12c7628fee236a95219",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
