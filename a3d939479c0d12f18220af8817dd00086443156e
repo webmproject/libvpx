@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAcX//1so\u003d",
+        "filename": "vp9/encoder/vp9_bitstream.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 462,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2013-07-22T17:37:05Z",
+      "side": 1,
+      "message": "May be just \"b_width()\" function instead of \"1 \u003c\u003c b_width_log2()\" ?  And the same for \"1 \u003c\u003c b_height_log2()\". The current name \"block_type_to_ablocks_wide\" is very long and unreadable.",
+      "revId": "a3d939479c0d12f18220af8817dd00086443156e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcX//1t4\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 471,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2013-07-22T17:37:05Z",
+      "side": 1,
+      "message": "We usually (at least in the decoder\u0027s code) use short bw or bh names for block width/height in pixels (and bwl/bhl for log). \n\nI also think it\u0027s good not to use ab/sb block prefixes anymore because they are confusing. We can refer to the different block sizes as b4, b8, etc.",
+      "revId": "a3d939479c0d12f18220af8817dd00086443156e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcX//1t0\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 472,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2013-07-22T17:37:05Z",
+      "side": 1,
+      "message": "bh",
+      "revId": "a3d939479c0d12f18220af8817dd00086443156e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
