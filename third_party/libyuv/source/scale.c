@@ -1370,12 +1370,12 @@ static void ScaleFilterRows_SSSE3(uint8* dst_ptr, const uint8* src_ptr,
     mov        edx, [esp + 8 + 12]  // src_stride
     mov        ecx, [esp + 8 + 16]  // dst_width
     mov        eax, [esp + 8 + 20]  // source_y_fraction (0..255)
+    shr        eax, 1
     cmp        eax, 0
     je         xloop1
-    cmp        eax, 128
+    cmp        eax, 64
     je         xloop2
 
-    shr        eax, 1
     mov        ah,al
     neg        al
     add        al, 128
@@ -2132,11 +2132,11 @@ void ScaleFilterRows_SSSE3(uint8* dst_ptr,
     "mov    0x14(%esp),%edx                    \n"
     "mov    0x18(%esp),%ecx                    \n"
     "mov    0x1c(%esp),%eax                    \n"
+    "shr    %eax                               \n"
     "cmp    $0x0,%eax                          \n"
     "je     2f                                 \n"
-    "cmp    $0x80,%eax                         \n"
+    "cmp    $0x40,%eax                         \n"
     "je     3f                                 \n"
-    "shr    %eax                               \n"
     "mov    %al,%ah                            \n"
     "neg    %al                                \n"
     "add    $0x80,%al                          \n"
@@ -2662,6 +2662,7 @@ static void ScaleFilterRows_SSE2(uint8* dst_ptr,
 static void ScaleFilterRows_SSSE3(uint8* dst_ptr,
                                   const uint8* src_ptr, int src_stride,
                                   int dst_width, int source_y_fraction) {
+  source_y_fraction >>= 1;
   if (source_y_fraction == 0) {
     asm volatile (
    "1:"
@@ -2680,7 +2681,7 @@ static void ScaleFilterRows_SSSE3(uint8* dst_ptr,
       : "memory", "cc", "rax"
     );
     return;
-  } else if (source_y_fraction == 128) {
+  } else if (source_y_fraction == 64) {
     asm volatile (
     "1:"
       "movdqa     (%1),%%xmm0                  \n"
@@ -2703,7 +2704,6 @@ static void ScaleFilterRows_SSSE3(uint8* dst_ptr,
   } else {
     asm volatile (
       "mov        %3,%%eax                     \n"
-      "shr        %%eax                        \n"
       "mov        %%al,%%ah                    \n"
       "neg        %%al                         \n"
       "add        $0x80,%%al                   \n"
