@@ -36,6 +36,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAcX//1sA\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 471,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2013-07-22T17:42:21Z",
+      "side": 1,
+      "message": "From Google style guide : \n\n\"Function names, variable names, and filenames should be descriptive; eschew abbreviation.\nGive as descriptive a name as possible, within reason. Do not worry about saving horizontal space as it is far more important to make your code immediately understandable by a new reader. Do not use abbreviations that are ambiguous or unfamiliar to readers outside your project, and do not abbreviate by deleting letters within a word.\"\n\nbh and bw were inconsistently and incorrectly used throughout the code - there are multiple instances of this.   \n\nThe names are poor - is bw bandwidth, superblock width,  4x4 blocks wide or something else....",
+      "parentUuid": "AAAAcX//1t4\u003d",
+      "revId": "a3d939479c0d12f18220af8817dd00086443156e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAcX//1t0\u003d",
         "filename": "vp9/encoder/vp9_rdopt.c",
         "patchSetId": 8
