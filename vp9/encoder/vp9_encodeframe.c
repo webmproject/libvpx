@@ -1253,7 +1253,8 @@ static void rd_use_partition(VP9_COMP *cpi, MODE_INFO *m, TOKENEXTRA **tp,
       *(get_sb_index(xd, subsize)) = 0;
       pick_sb_modes(cpi, mi_row, mi_col, &last_part_rate, &last_part_dist,
                     subsize, get_block_context(x, subsize), INT64_MAX);
-      if (bsize >= BLOCK_SIZE_SB8X8 && mi_row + (mh >> 1) < cm->mi_rows) {
+      if (last_part_rate != INT_MAX &&
+          bsize >= BLOCK_SIZE_SB8X8 && mi_row + (mh >> 1) < cm->mi_rows) {
         int rt = 0;
         int64_t dt = 0;
         update_state(cpi, get_block_context(x, subsize), subsize, 0);
@@ -1261,6 +1262,12 @@ static void rd_use_partition(VP9_COMP *cpi, MODE_INFO *m, TOKENEXTRA **tp,
         *(get_sb_index(xd, subsize)) = 1;
         pick_sb_modes(cpi, mi_row + (ms >> 1), mi_col, &rt, &dt, subsize,
                       get_block_context(x, subsize), INT64_MAX);
+        if (rt == INT_MAX || dt == INT_MAX) {
+          last_part_rate = INT_MAX;
+          last_part_dist = INT_MAX;
+          break;
+        }
+
         last_part_rate += rt;
         last_part_dist += dt;
       }
@@ -1269,7 +1276,8 @@ static void rd_use_partition(VP9_COMP *cpi, MODE_INFO *m, TOKENEXTRA **tp,
       *(get_sb_index(xd, subsize)) = 0;
       pick_sb_modes(cpi, mi_row, mi_col, &last_part_rate, &last_part_dist,
                     subsize, get_block_context(x, subsize), INT64_MAX);
-      if (bsize >= BLOCK_SIZE_SB8X8 && mi_col + (ms >> 1) < cm->mi_cols) {
+      if (last_part_rate != INT_MAX &&
+          bsize >= BLOCK_SIZE_SB8X8 && mi_col + (ms >> 1) < cm->mi_cols) {
         int rt = 0;
         int64_t dt = 0;
         update_state(cpi, get_block_context(x, subsize), subsize, 0);
@@ -1277,6 +1285,11 @@ static void rd_use_partition(VP9_COMP *cpi, MODE_INFO *m, TOKENEXTRA **tp,
         *(get_sb_index(xd, subsize)) = 1;
         pick_sb_modes(cpi, mi_row, mi_col + (ms >> 1), &rt, &dt, subsize,
                       get_block_context(x, subsize), INT64_MAX);
+        if (rt == INT_MAX || dt == INT_MAX) {
+          last_part_rate = INT_MAX;
+          last_part_dist = INT_MAX;
+          break;
+        }
         last_part_rate += rt;
         last_part_dist += dt;
       }
@@ -1350,7 +1363,13 @@ static void rd_use_partition(VP9_COMP *cpi, MODE_INFO *m, TOKENEXTRA **tp,
 
       restore_context(cpi, mi_row, mi_col, a, l, sa, sl, bsize);
 
-      if (rt < INT_MAX && dt < INT_MAX && i != 3)
+      if (rt == INT_MAX || dt == INT_MAX) {
+        split_rate = INT_MAX;
+        split_dist = INT_MAX;
+        break;
+      }
+
+      if (i != 3)
         encode_sb(cpi, tp,  mi_row + y_idx, mi_col + x_idx, 0,
                   split_subsize);
 
@@ -1362,10 +1381,12 @@ static void rd_use_partition(VP9_COMP *cpi, MODE_INFO *m, TOKENEXTRA **tp,
     }
     set_partition_seg_context(cm, xd, mi_row, mi_col);
     pl = partition_plane_context(xd, bsize);
-    split_rate += x->partition_cost[pl][PARTITION_SPLIT];
+    if (split_rate < INT_MAX) {
+      split_rate += x->partition_cost[pl][PARTITION_SPLIT];
 
-    chosen_rate = split_rate;
-    chosen_dist = split_dist;
+      chosen_rate = split_rate;
+      chosen_dist = split_dist;
+    }
   }
 
   // If last_part is better set the partitioning to that...
