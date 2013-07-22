@@ -2189,6 +2189,8 @@ static int64_t rd_pick_best_mbsegmentation(VP9_COMP *cpi, MACROBLOCK *x,
 
   rd_check_segment_txsize(cpi, x, bsi_buf, filter_idx, seg_mvs, mi_row, mi_col);
 
+  if (bsi.segment_rd > best_rd)
+    return INT64_MAX;
   /* set it to the best */
   for (i = 0; i < 4; i++) {
     mode_idx = inter_mode_offset(bsi->modes[i]);
