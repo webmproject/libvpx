@@ -48,8 +48,20 @@ struct macroblockd;
 
 void vp9_loop_filter_init(struct VP9Common *cm, struct loopfilter *lf);
 
+// Update the loop filter for the current frame.
+// This should be called before vp9_loop_filter_rows(), vp9_loop_filter_frame()
+// calls this function directly.
+void vp9_loop_filter_frame_init(struct VP9Common *const cm,
+                                struct macroblockd *const xd,
+                                int default_filt_lvl);
+
 void vp9_loop_filter_frame(struct VP9Common *cm,
                            struct macroblockd *mbd,
                            int filter_level,
                            int y_only);
+
+// Apply the loop filter to [start, stop) macro block rows in frame_buffer.
+void vp9_loop_filter_rows(const YV12_BUFFER_CONFIG *frame_buffer,
+                          struct VP9Common *cm, struct macroblockd *xd,
+                          int start, int stop, int y_only);
 #endif  // VP9_COMMON_VP9_LOOPFILTER_H_

@@ -38,6 +38,8 @@ typedef struct VP9Decompressor {
 
   int initial_width;
   int initial_height;
+
+  int do_loopfilter_inline;  // apply loopfilter to available rows immediately
 } VP9D_COMP;
 
 #endif  // VP9_DECODER_VP9_TREEREADER_H_
