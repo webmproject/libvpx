@@ -28,13 +28,11 @@ static void vp9_get_tile_offsets(int *min_tile_off, int *max_tile_off,
 }
 
 void vp9_get_tile_col_offsets(VP9_COMMON *cm, int tile_col_idx) {
-  cm->cur_tile_col_idx = tile_col_idx;
   vp9_get_tile_offsets(&cm->cur_tile_mi_col_start, &cm->cur_tile_mi_col_end,
                        tile_col_idx, cm->log2_tile_cols, cm->mi_cols);
 }
 
 void vp9_get_tile_row_offsets(VP9_COMMON *cm, int tile_row_idx) {
-  cm->cur_tile_row_idx = tile_row_idx;
   vp9_get_tile_offsets(&cm->cur_tile_mi_row_start, &cm->cur_tile_mi_row_end,
                        tile_row_idx, cm->log2_tile_rows, cm->mi_rows);
 }
