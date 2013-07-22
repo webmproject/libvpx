@@ -16,6 +16,24 @@
       "revId": "472628075432bc5a4d3ae12c7628fee236a95219",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcX//1aw\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 471,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2013-07-22T19:46:08Z",
+      "side": 1,
+      "message": "oops here you are right.   I got confused for plane blocks  its the other ones that aren\u0027t in pixels.",
+      "parentUuid": "AAAAcX//1jI\u003d",
+      "revId": "472628075432bc5a4d3ae12c7628fee236a95219",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
