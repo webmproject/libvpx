@@ -19,11 +19,13 @@
 #include "vp9/common/vp9_findnearmv.h"
 #include "vp9/common/vp9_common.h"
 
+// #define NEW_DIAMOND_SEARCH
+
 void vp9_clamp_mv_min_max(MACROBLOCK *x, int_mv *ref_mv) {
   int col_min = (ref_mv->as_mv.col >> 3) - MAX_FULL_PEL_VAL +
-                                 ((ref_mv->as_mv.col & 7) ? 1 : 0);
+                ((ref_mv->as_mv.col & 7) ? 1 : 0);
   int row_min = (ref_mv->as_mv.row >> 3) - MAX_FULL_PEL_VAL +
-                                 ((ref_mv->as_mv.row & 7) ? 1 : 0);
+                ((ref_mv->as_mv.row & 7) ? 1 : 0);
   int col_max = (ref_mv->as_mv.col >> 3) + MAX_FULL_PEL_VAL;
   int row_max = (ref_mv->as_mv.row >> 3) + MAX_FULL_PEL_VAL;
 
@@ -1511,12 +1513,13 @@ int vp9_diamond_search_sad_c(MACROBLOCK *x,
       this_row_offset = best_mv->as_mv.row + ss[i].mv.row;
       this_col_offset = best_mv->as_mv.col + ss[i].mv.col;
 
-      if ((this_col_offset > x->mv_col_min) && (this_col_offset < x->mv_col_max) &&
-          (this_row_offset > x->mv_row_min) && (this_row_offset < x->mv_row_max))
-
-      {
+      if ((this_col_offset > x->mv_col_min) &&
+          (this_col_offset < x->mv_col_max) &&
+          (this_row_offset > x->mv_row_min) &&
+          (this_row_offset < x->mv_row_max)) {
         check_here = ss[i].offset + best_address;
-        thissad = fn_ptr->sdf(what, what_stride, check_here, in_what_stride, bestsad);
+        thissad = fn_ptr->sdf(what, what_stride, check_here, in_what_stride,
+                              bestsad);
 
         if (thissad < bestsad) {
           this_mv.as_mv.row = this_row_offset;
@@ -1539,6 +1542,34 @@ int vp9_diamond_search_sad_c(MACROBLOCK *x,
       best_mv->as_mv.col += ss[best_site].mv.col;
       best_address += ss[best_site].offset;
       last_site = best_site;
+#if defined(NEW_DIAMOND_SEARCH)
+      while (1) {
+        this_row_offset = best_mv->as_mv.row + ss[best_site].mv.row;
+        this_col_offset = best_mv->as_mv.col + ss[best_site].mv.col;
+        if ((this_col_offset > x->mv_col_min) &&
+            (this_col_offset < x->mv_col_max) &&
+            (this_row_offset > x->mv_row_min) &&
+            (this_row_offset < x->mv_row_max)) {
+          check_here = ss[best_site].offset + best_address;
+          thissad = fn_ptr->sdf(what, what_stride, check_here, in_what_stride,
+                                bestsad);
+          if (thissad < bestsad) {
+            this_mv.as_mv.row = this_row_offset;
+            this_mv.as_mv.col = this_col_offset;
+            thissad += mvsad_err_cost(&this_mv, &fcenter_mv,
+                                      mvjsadcost, mvsadcost, sad_per_bit);
+            if (thissad < bestsad) {
+              bestsad = thissad;
+              best_mv->as_mv.row += ss[best_site].mv.row;
+              best_mv->as_mv.col += ss[best_site].mv.col;
+              best_address += ss[best_site].offset;
+              continue;
+            }
+          }
+        }
+        break;
+      };
+#endif
     } else if (best_address == in_what)
       (*num00)++;
   }
@@ -1680,12 +1711,39 @@ int vp9_diamond_search_sadx4(MACROBLOCK *x,
         i++;
       }
     }
-
     if (best_site != last_site) {
       best_mv->as_mv.row += ss[best_site].mv.row;
       best_mv->as_mv.col += ss[best_site].mv.col;
       best_address += ss[best_site].offset;
       last_site = best_site;
+#if defined(NEW_DIAMOND_SEARCH)
+      while (1) {
+        this_row_offset = best_mv->as_mv.row + ss[best_site].mv.row;
+        this_col_offset = best_mv->as_mv.col + ss[best_site].mv.col;
+        if ((this_col_offset > x->mv_col_min) &&
+            (this_col_offset < x->mv_col_max) &&
+            (this_row_offset > x->mv_row_min) &&
+            (this_row_offset < x->mv_row_max)) {
+          check_here = ss[best_site].offset + best_address;
+          thissad = fn_ptr->sdf(what, what_stride, check_here, in_what_stride,
+                                bestsad);
+          if (thissad < bestsad) {
+            this_mv.as_mv.row = this_row_offset;
+            this_mv.as_mv.col = this_col_offset;
+            thissad += mvsad_err_cost(&this_mv, &fcenter_mv,
+                                      mvjsadcost, mvsadcost, sad_per_bit);
+            if (thissad < bestsad) {
+              bestsad = thissad;
+              best_mv->as_mv.row += ss[best_site].mv.row;
+              best_mv->as_mv.col += ss[best_site].mv.col;
+              best_address += ss[best_site].offset;
+              continue;
+            }
+          }
+        }
+        break;
+      };
+#endif
     } else if (best_address == in_what)
       (*num00)++;
   }
@@ -1706,6 +1764,7 @@ int vp9_diamond_search_sadx4(MACROBLOCK *x,
 /* do_refine: If last step (1-away) of n-step search doesn't pick the center
               point as the best match, we will do a final 1-away diamond
               refining search  */
+
 int vp9_full_pixel_diamond(VP9_COMP *cpi, MACROBLOCK *x,
                            int_mv *mvp_full, int step_param,
                            int sadpb, int further_steps,
