@@ -427,45 +427,10 @@ static void update_mode_probs(int n_modes,
     dst_probs[t] = update_ct(pre_probs[t], probs[t], branch_ct[t]);
 }
 
-// #define MODE_COUNT_TESTING
 void vp9_adapt_mode_probs(VP9_COMMON *cm) {
   int i, j;
   FRAME_CONTEXT *fc = &cm->fc;
   FRAME_CONTEXT *pre_fc = &cm->frame_contexts[cm->frame_context_idx];
-
-#ifdef MODE_COUNT_TESTING
-  int t;
-
-  printf("static const unsigned int\nymode_counts"
-         "[VP9_INTRA_MODES] = {\n");
-  for (t = 0; t < VP9_INTRA_MODES; ++t)
-    printf("%d, ", fc->ymode_counts[t]);
-  printf("};\n");
-  printf("static const unsigned int\nuv_mode_counts"
-         "[VP9_INTRA_MODES] [VP9_INTRA_MODES] = {\n");
-  for (i = 0; i < VP9_INTRA_MODES; ++i) {
-    printf("  {");
-    for (t = 0; t < VP9_INTRA_MODES; ++t)
-      printf("%d, ", fc->uv_mode_counts[i][t]);
-    printf("},\n");
-  }
-  printf("};\n");
-  printf("static const unsigned int\nbmode_counts"
-         "[VP9_NKF_BINTRAMODES] = {\n");
-  for (t = 0; t < VP9_NKF_BINTRAMODES; ++t)
-    printf("%d, ", fc->bmode_counts[t]);
-  printf("};\n");
-  printf("static const unsigned int\ni8x8_mode_counts"
-         "[VP9_I8X8_MODES] = {\n");
-  for (t = 0; t < VP9_I8X8_MODES; ++t)
-    printf("%d, ", fc->i8x8_mode_counts[t]);
-  printf("};\n");
-  printf("static const unsigned int\nmbsplit_counts"
-         "[VP9_NUMMBSPLITS] = {\n");
-  for (t = 0; t < VP9_NUMMBSPLITS; ++t)
-    printf("%d, ", fc->mbsplit_counts[t]);
-  printf("};\n");
-#endif
 
   for (i = 0; i < INTRA_INTER_CONTEXTS; i++)
     fc->intra_inter_prob[i] = update_ct2(pre_fc->intra_inter_prob[i],
