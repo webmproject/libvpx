@@ -38,35 +38,29 @@ static int read_segment_id(vp9_reader *r, const struct segmentation *seg) {
   return treed_read(r, vp9_segment_tree, seg->tree_probs);
 }
 
-static TX_SIZE read_selected_txfm_size(VP9_COMMON *cm, MACROBLOCKD *xd,
-                                       BLOCK_SIZE_TYPE bsize, vp9_reader *r) {
-  const int context = vp9_get_pred_context_tx_size(xd);
-  const vp9_prob *tx_probs = vp9_get_pred_probs_tx_size(xd, &cm->fc.tx_probs);
-  TX_SIZE txfm_size = vp9_read(r, tx_probs[0]);
-  if (txfm_size != TX_4X4 && bsize >= BLOCK_SIZE_MB16X16) {
-    txfm_size += vp9_read(r, tx_probs[1]);
-    if (txfm_size != TX_8X8 && bsize >= BLOCK_SIZE_SB32X32)
-      txfm_size += vp9_read(r, tx_probs[2]);
+static TX_SIZE read_selected_tx_size(VP9_COMMON *cm, MACROBLOCKD *xd,
+                                     BLOCK_SIZE_TYPE bsize, vp9_reader *r) {
+  const uint8_t context = vp9_get_pred_context_tx_size(xd);
+  const vp9_prob *tx_probs = get_tx_probs(bsize, context, &cm->fc.tx_probs);
+  TX_SIZE tx_size = vp9_read(r, tx_probs[0]);
+  if (tx_size != TX_4X4 && bsize >= BLOCK_SIZE_MB16X16) {
+    tx_size += vp9_read(r, tx_probs[1]);
+    if (tx_size != TX_8X8 && bsize >= BLOCK_SIZE_SB32X32)
+      tx_size += vp9_read(r, tx_probs[2]);
   }
 
-  if (bsize >= BLOCK_SIZE_SB32X32)
-    cm->fc.tx_counts.p32x32[context][txfm_size]++;
-  else if (bsize >= BLOCK_SIZE_MB16X16)
-    cm->fc.tx_counts.p16x16[context][txfm_size]++;
-  else
-    cm->fc.tx_counts.p8x8[context][txfm_size]++;
-
-  return txfm_size;
+  update_tx_counts(bsize, context, tx_size, &cm->fc.tx_counts);
+  return tx_size;
 }
 
-static TX_SIZE read_txfm_size(VP9D_COMP *pbi, TX_MODE tx_mode,
-                              BLOCK_SIZE_TYPE bsize, int select_cond,
-                              vp9_reader *r) {
+static TX_SIZE read_tx_size(VP9D_COMP *pbi, TX_MODE tx_mode,
+                            BLOCK_SIZE_TYPE bsize, int select_cond,
+                            vp9_reader *r) {
   VP9_COMMON *const cm = &pbi->common;
   MACROBLOCKD *const xd = &pbi->mb;
 
   if (tx_mode == TX_MODE_SELECT && bsize >= BLOCK_SIZE_SB8X8 && select_cond)
-    return read_selected_txfm_size(cm, xd, bsize, r);
+    return read_selected_tx_size(cm, xd, bsize, r);
   else if (tx_mode >= ALLOW_32X32 && bsize >= BLOCK_SIZE_SB32X32)
     return TX_32X32;
   else if (tx_mode >= ALLOW_16X16 && bsize >= BLOCK_SIZE_MB16X16)
@@ -162,7 +156,7 @@ static void read_intra_mode_info(VP9D_COMP *pbi, MODE_INFO *m,
 
   mbmi->segment_id = read_intra_segment_id(pbi, mi_row, mi_col, r);
   mbmi->mb_skip_coeff = read_skip_coeff(pbi, mbmi->segment_id, r);
-  mbmi->txfm_size = read_txfm_size(pbi, cm->tx_mode, bsize, 1, r);
+  mbmi->txfm_size = read_tx_size(pbi, cm->tx_mode, bsize, 1, r);
   mbmi->ref_frame[0] = INTRA_FRAME;
 
   if (bsize >= BLOCK_SIZE_SB8X8) {
@@ -463,7 +457,7 @@ static void read_inter_mode_info(VP9D_COMP *pbi, MODE_INFO *mi,
   mbmi->mb_skip_coeff = read_skip_coeff(pbi, mbmi->segment_id, r);
   mbmi->ref_frame[0] = read_reference_frame(pbi, mbmi->segment_id, r);
   mbmi->ref_frame[1] = NONE;
-  mbmi->txfm_size = read_txfm_size(pbi, cm->tx_mode, bsize,
+  mbmi->txfm_size = read_tx_size(pbi, cm->tx_mode, bsize,
      (!mbmi->mb_skip_coeff || mbmi->ref_frame[0] == INTRA_FRAME), r);
 
   if (mbmi->ref_frame[0] != INTRA_FRAME) {
