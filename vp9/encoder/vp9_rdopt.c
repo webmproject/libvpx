@@ -2900,8 +2900,7 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
       int j;
       int64_t rs_rd;
       const INTERPOLATIONFILTERTYPE filter = vp9_switchable_interp[i];
-      const int is_intpel_interp = intpel_mv &&
-          vp9_is_interpolating_filter[filter];
+      const int is_intpel_interp = intpel_mv;
       mbmi->interp_filter = filter;
       vp9_setup_interp_filters(xd, mbmi->interp_filter, cm);
       rs = get_switchable_rate(cm, x);
