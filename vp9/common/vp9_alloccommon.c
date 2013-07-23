@@ -53,7 +53,6 @@ void vp9_free_frame_buffers(VP9_COMMON *oci) {
   for (i = 0; i < NUM_YV12_BUFFERS; i++)
     vp9_free_frame_buffer(&oci->yv12_fb[i]);
 
-  vp9_free_frame_buffer(&oci->temp_scale_frame);
   vp9_free_frame_buffer(&oci->post_proc_buffer);
 
   vpx_free(oci->mip);
@@ -120,10 +119,6 @@ int vp9_alloc_frame_buffers(VP9_COMMON *oci, int width, int height) {
     oci->ref_frame_map[i] = i;
     oci->fb_idx_ref_cnt[i] = 1;
   }
-
-  if (vp9_alloc_frame_buffer(&oci->temp_scale_frame, width, 16, ss_x, ss_y,
-                             VP9BORDERINPIXELS) < 0)
-    goto fail;
 
   if (vp9_alloc_frame_buffer(&oci->post_proc_buffer, width, height, ss_x, ss_y,
                              VP9BORDERINPIXELS) < 0)

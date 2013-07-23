@@ -130,10 +130,7 @@ typedef struct VP9Common {
   struct scale_factors active_ref_scale[ALLOWED_REFS_PER_FRAME];
   int new_fb_idx;
 
-
   YV12_BUFFER_CONFIG post_proc_buffer;
-  YV12_BUFFER_CONFIG temp_scale_frame;
-
 
   FRAME_TYPE last_frame_type;  /* Save last frame's frame type for motion search. */
   FRAME_TYPE frame_type;
