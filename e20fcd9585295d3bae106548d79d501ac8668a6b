@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAcX//zbE\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 545,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2013-07-23T18:42:50Z",
+      "side": 1,
+      "message": "kind of weird?  !! is that actually better than *A\u003e0 ,  *L \u003e0? To me its marginally harder to read.",
+      "revId": "e20fcd9585295d3bae106548d79d501ac8668a6b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcX//zZ4\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 681,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2013-07-23T18:42:50Z",
+      "side": 1,
+      "message": "!! weird construct",
+      "revId": "e20fcd9585295d3bae106548d79d501ac8668a6b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
