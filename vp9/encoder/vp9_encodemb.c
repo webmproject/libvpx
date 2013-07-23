@@ -533,6 +533,8 @@ static void encode_block(int plane, int block, BLOCK_SIZE_TYPE bsize,
 
   if (x->skip_encode)
     return;
+  if (pd->eobs[block] == 0)
+    return;
 
   switch (ss_txfrm_size / 2) {
     case TX_32X32:
@@ -657,7 +659,7 @@ void encode_block_intra(int plane, int block, BLOCK_SIZE_TYPE bsize,
       vp9_quantize_b_32x32(coeff, 1024, x->skip_block, p->zbin, p->round,
                            p->quant, p->quant_shift, qcoeff, dqcoeff,
                            pd->dequant, p->zbin_extra, eob, scan, iscan);
-      if (!x->skip_encode)
+      if (!x->skip_encode && *eob)
         vp9_short_idct32x32_add(dqcoeff, dst, pd->dst.stride);
       break;
     case TX_16X16:
@@ -682,7 +684,7 @@ void encode_block_intra(int plane, int block, BLOCK_SIZE_TYPE bsize,
       vp9_quantize_b(coeff, 256, x->skip_block, p->zbin, p->round, p->quant,
                      p->quant_shift, qcoeff, dqcoeff,
                      pd->dequant, p->zbin_extra, eob, scan, iscan);
-      if (!x->skip_encode) {
+      if (!x->skip_encode && *eob) {
         if (tx_type == DCT_DCT)
           vp9_short_idct16x16_add(dqcoeff, dst, pd->dst.stride);
         else
@@ -711,7 +713,7 @@ void encode_block_intra(int plane, int block, BLOCK_SIZE_TYPE bsize,
       vp9_quantize_b(coeff, 64, x->skip_block, p->zbin, p->round, p->quant,
                      p->quant_shift, qcoeff, dqcoeff,
                      pd->dequant, p->zbin_extra, eob, scan, iscan);
-      if (!x->skip_encode) {
+      if (!x->skip_encode && *eob) {
         if (tx_type == DCT_DCT)
           vp9_short_idct8x8_add(dqcoeff, dst, pd->dst.stride);
         else
@@ -743,7 +745,7 @@ void encode_block_intra(int plane, int block, BLOCK_SIZE_TYPE bsize,
       vp9_quantize_b(coeff, 16, x->skip_block, p->zbin, p->round, p->quant,
                      p->quant_shift, qcoeff, dqcoeff,
                      pd->dequant, p->zbin_extra, eob, scan, iscan);
-      if (!x->skip_encode) {
+      if (!x->skip_encode && *eob) {
         if (tx_type == DCT_DCT)
           // this is like vp9_short_idct4x4 but has a special case around eob<=1
           // which is significant (not just an optimization) for the lossless
