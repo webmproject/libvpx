@@ -356,12 +356,6 @@ static void optimize_b(VP9_COMMON *const cm, MACROBLOCK *mb,
   *a = *l = (final_eob > 0);
 }
 
-struct optimize_block_args {
-  VP9_COMMON *cm;
-  MACROBLOCK *x;
-  struct optimize_ctx *ctx;
-};
-
 void vp9_optimize_b(int plane, int block, BLOCK_SIZE_TYPE bsize,
                     int ss_txfrm_size, VP9_COMMON *cm, MACROBLOCK *mb,
                     struct optimize_ctx *ctx) {
@@ -377,7 +371,7 @@ void vp9_optimize_b(int plane, int block, BLOCK_SIZE_TYPE bsize,
 
 static void optimize_block(int plane, int block, BLOCK_SIZE_TYPE bsize,
                            int ss_txfrm_size, void *arg) {
-  const struct optimize_block_args* const args = arg;
+  const struct encode_b_args* const args = arg;
   vp9_optimize_b(plane, block, bsize, ss_txfrm_size, args->cm, args->x,
                  args->ctx);
 }
@@ -414,7 +408,7 @@ void vp9_optimize_init(MACROBLOCKD *xd, BLOCK_SIZE_TYPE bsize,
 
 void vp9_optimize_sby(VP9_COMMON *cm, MACROBLOCK *x, BLOCK_SIZE_TYPE bsize) {
   struct optimize_ctx ctx;
-  struct optimize_block_args arg = {cm, x, &ctx};
+  struct encode_b_args arg = {cm, x, &ctx};
   vp9_optimize_init(&x->e_mbd, bsize, &ctx);
   foreach_transformed_block_in_plane(&x->e_mbd, bsize, 0, optimize_block, &arg);
 }
@@ -422,7 +416,7 @@ void vp9_optimize_sby(VP9_COMMON *cm, MACROBLOCK *x, BLOCK_SIZE_TYPE bsize) {
 void vp9_optimize_sbuv(VP9_COMMON *const cm, MACROBLOCK *x,
                        BLOCK_SIZE_TYPE bsize) {
   struct optimize_ctx ctx;
-  struct optimize_block_args arg = {cm, x, &ctx};
+  struct encode_b_args arg = {cm, x, &ctx};
   vp9_optimize_init(&x->e_mbd, bsize, &ctx);
   foreach_transformed_block_uv(&x->e_mbd, bsize, optimize_block, &arg);
 }
