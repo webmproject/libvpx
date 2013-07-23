@@ -87,7 +87,7 @@ void vp9_loop_filter_frame_init(VP9_COMMON *const cm, MACROBLOCKD *const xd,
     lf->last_sharpness_level = lf->sharpness_level;
   }
 
-  for (seg = 0; seg < MAX_MB_SEGMENTS; seg++) {
+  for (seg = 0; seg < MAX_SEGMENTS; seg++) {
     int lvl_seg = default_filt_lvl, ref, mode, intra_lvl;
 
     // Set the baseline filter values for each segment

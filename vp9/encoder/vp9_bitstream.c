@@ -997,7 +997,7 @@ static void encode_segmentation(VP9_COMP *cpi,
     // Select the coding strategy (temporal or spatial)
     vp9_choose_segmap_coding_method(cpi);
     // Write out probabilities used to decode unpredicted  macro-block segments
-    for (i = 0; i < MB_SEG_TREE_PROBS; i++) {
+    for (i = 0; i < SEG_TREE_PROBS; i++) {
       const int prob = seg->tree_probs[i];
       const int update = prob != MAX_PROB;
       vp9_wb_write_bit(wb, update);
@@ -1023,7 +1023,7 @@ static void encode_segmentation(VP9_COMP *cpi,
   if (seg->update_data) {
     vp9_wb_write_bit(wb, seg->abs_delta);
 
-    for (i = 0; i < MAX_MB_SEGMENTS; i++) {
+    for (i = 0; i < MAX_SEGMENTS; i++) {
       for (j = 0; j < SEG_LVL_MAX; j++) {
         const int active = vp9_segfeature_active(seg, i, j);
         vp9_wb_write_bit(wb, active);

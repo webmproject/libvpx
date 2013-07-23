@@ -514,7 +514,7 @@ typedef struct VP9_COMP {
   unsigned char *segmentation_map;
 
   // segment threashold for encode breakout
-  int  segment_encode_breakout[MAX_MB_SEGMENTS];
+  int  segment_encode_breakout[MAX_SEGMENTS];
 
   unsigned char *active_map;
   unsigned int active_map_enabled;

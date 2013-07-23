@@ -400,7 +400,7 @@ static void setup_segmentation(struct segmentation *seg,
   // Segmentation map update
   seg->update_map = vp9_rb_read_bit(rb);
   if (seg->update_map) {
-    for (i = 0; i < MB_SEG_TREE_PROBS; i++)
+    for (i = 0; i < SEG_TREE_PROBS; i++)
       seg->tree_probs[i] = vp9_rb_read_bit(rb) ? vp9_rb_read_literal(rb, 8)
                                                : MAX_PROB;
 
@@ -422,7 +422,7 @@ static void setup_segmentation(struct segmentation *seg,
 
     vp9_clearall_segfeatures(seg);
 
-    for (i = 0; i < MAX_MB_SEGMENTS; i++) {
+    for (i = 0; i < MAX_SEGMENTS; i++) {
       for (j = 0; j < SEG_LVL_MAX; j++) {
         int data = 0;
         const int feature_enabled = vp9_rb_read_bit(rb);

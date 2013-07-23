@@ -16,8 +16,8 @@
 #define SEGMENT_DELTADATA   0
 #define SEGMENT_ABSDATA     1
 
-#define MAX_MB_SEGMENTS     8
-#define MB_SEG_TREE_PROBS   (MAX_MB_SEGMENTS-1)
+#define MAX_SEGMENTS     8
+#define SEG_TREE_PROBS   (MAX_SEGMENTS-1)
 
 #define PREDICTION_PROBS 3
 
@@ -27,7 +27,7 @@ typedef enum {
   SEG_LVL_ALT_LF = 1,              // Use alternate loop filter value...
   SEG_LVL_REF_FRAME = 2,           // Optional Segment reference frame
   SEG_LVL_SKIP = 3,                // Optional Segment (0,0) + skip mode
-  SEG_LVL_MAX = 4                  // Number of MB level features supported
+  SEG_LVL_MAX = 4                  // Number of features supported
 } SEG_LVL_FEATURES;
 
 
@@ -38,11 +38,11 @@ struct segmentation {
   uint8_t abs_delta;
   uint8_t temporal_update;
 
-  vp9_prob tree_probs[MB_SEG_TREE_PROBS];
+  vp9_prob tree_probs[SEG_TREE_PROBS];
   vp9_prob pred_probs[PREDICTION_PROBS];
 
-  int16_t feature_data[MAX_MB_SEGMENTS][SEG_LVL_MAX];
-  unsigned int feature_mask[MAX_MB_SEGMENTS];
+  int16_t feature_data[MAX_SEGMENTS][SEG_LVL_MAX];
+  unsigned int feature_mask[MAX_SEGMENTS];
 };
 
 int vp9_segfeature_active(const struct segmentation *seg,

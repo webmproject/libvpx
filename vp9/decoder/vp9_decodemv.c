@@ -86,7 +86,7 @@ static void set_segment_id(VP9_COMMON *cm, BLOCK_SIZE_TYPE bsize,
   const int ymis = MIN(cm->mi_rows - mi_row, bh);
   int x, y;
 
-  assert(segment_id >= 0 && segment_id < MAX_MB_SEGMENTS);
+  assert(segment_id >= 0 && segment_id < MAX_SEGMENTS);
 
   for (y = 0; y < ymis; y++)
     for (x = 0; x < xmis; x++)
