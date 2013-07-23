@@ -219,11 +219,11 @@ void vp9_choose_segmap_coding_method(VP9_COMP *cpi) {
   int i, tile_col, mi_row, mi_col;
 
   int temporal_predictor_count[PREDICTION_PROBS][2];
-  int no_pred_segcounts[MAX_MB_SEGMENTS];
-  int t_unpred_seg_counts[MAX_MB_SEGMENTS];
+  int no_pred_segcounts[MAX_SEGMENTS];
+  int t_unpred_seg_counts[MAX_SEGMENTS];
 
-  vp9_prob no_pred_tree[MB_SEG_TREE_PROBS];
-  vp9_prob t_pred_tree[MB_SEG_TREE_PROBS];
+  vp9_prob no_pred_tree[SEG_TREE_PROBS];
+  vp9_prob t_pred_tree[SEG_TREE_PROBS];
   vp9_prob t_nopred_prob[PREDICTION_PROBS];
 
   const int mis = cm->mode_info_stride;

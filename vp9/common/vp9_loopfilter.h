@@ -31,7 +31,7 @@ typedef struct {
                   lim[MAX_LOOP_FILTER + 1][SIMD_WIDTH]);
   DECLARE_ALIGNED(SIMD_WIDTH, uint8_t,
                   hev_thr[4][SIMD_WIDTH]);
-  uint8_t lvl[MAX_MB_SEGMENTS][MAX_REF_FRAMES][MAX_MODE_LF_DELTAS];
+  uint8_t lvl[MAX_SEGMENTS][MAX_REF_FRAMES][MAX_MODE_LF_DELTAS];
   uint8_t mode_lf_lut[MB_MODE_COUNT];
 } loop_filter_info_n;
 

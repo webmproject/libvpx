@@ -445,6 +445,6 @@ int vp9_get_segment_id(VP9_COMMON *cm, const uint8_t *segment_ids,
       segment_id = MIN(segment_id,
                        segment_ids[mi_offset + y * cm->mi_cols + x]);
 
-  assert(segment_id >= 0 && segment_id < MAX_MB_SEGMENTS);
+  assert(segment_id >= 0 && segment_id < MAX_SEGMENTS);
   return segment_id;
 }
