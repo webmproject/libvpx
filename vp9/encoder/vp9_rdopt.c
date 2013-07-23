@@ -136,10 +136,12 @@ static void fill_token_costs(vp9_coeff_count (*c)[BLOCK_TYPES][2],
           }
 }
 
-static int rd_iifactor[32] =  { 4, 4, 3, 2, 1, 0, 0, 0,
-                                0, 0, 0, 0, 0, 0, 0, 0,
-                                0, 0, 0, 0, 0, 0, 0, 0,
-                                0, 0, 0, 0, 0, 0, 0, 0, };
+static const int rd_iifactor[32] = {
+  4, 4, 3, 2, 1, 0, 0, 0,
+  0, 0, 0, 0, 0, 0, 0, 0,
+  0, 0, 0, 0, 0, 0, 0, 0,
+  0, 0, 0, 0, 0, 0, 0, 0,
+};
 
 // 3* dc_qlookup[Q]*dc_qlookup[Q];
 

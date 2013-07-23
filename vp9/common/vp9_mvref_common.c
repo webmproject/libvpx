@@ -11,7 +11,7 @@
 #include "vp9/common/vp9_mvref_common.h"
 
 #define MVREF_NEIGHBOURS 8
-static int mv_ref_blocks[BLOCK_SIZE_TYPES][MVREF_NEIGHBOURS][2] = {
+static const int mv_ref_blocks[BLOCK_SIZE_TYPES][MVREF_NEIGHBOURS][2] = {
   // SB4X4
   {{0, -1}, {-1, 0}, {-1, -1}, {0, -2}, {-2, 0}, {-1, -2}, {-2, -1}, {-2, -2}},
   // SB4X8
@@ -150,7 +150,7 @@ void vp9_find_mv_refs_idx(VP9_COMMON *cm, MACROBLOCKD *xd, MODE_INFO *here,
   int candidate_scores[MAX_MV_REF_CANDIDATES] = { 0 };
   int refmv_count = 0;
   int split_count = 0;
-  int (*mv_ref_search)[2];
+  const int (*mv_ref_search)[2] = mv_ref_blocks[mbmi->sb_type];
   const int mi_col = get_mi_col(xd);
   const int mi_row = get_mi_row(xd);
   int intra_count = 0;
@@ -161,7 +161,6 @@ void vp9_find_mv_refs_idx(VP9_COMMON *cm, MACROBLOCKD *xd, MODE_INFO *here,
   // Blank the reference vector lists and other local structures.
   vpx_memset(mv_ref_list, 0, sizeof(int_mv) * MAX_MV_REF_CANDIDATES);
 
-  mv_ref_search = mv_ref_blocks[mbmi->sb_type];
   if (mbmi->sb_type < BLOCK_SIZE_SB8X8) {
     x_idx = block_idx & 1;
     y_idx = block_idx >> 1;
