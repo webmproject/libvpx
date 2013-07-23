@@ -459,10 +459,10 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, MODE_INFO *m,
       write_intra_mode(bc, mode, pc->fc.y_mode_prob[MIN(3, bsl)]);
     } else {
       int idx, idy;
-      int bw = 1 << b_width_log2(mi->sb_type);
-      int bh = 1 << b_height_log2(mi->sb_type);
-      for (idy = 0; idy < 2; idy += bh)
-        for (idx = 0; idx < 2; idx += bw) {
+      int num_4x4_blocks_wide = num_4x4_blocks_wide_lookup[mi->sb_type];
+      int num_4x4_blocks_high = num_4x4_blocks_high_lookup[mi->sb_type];
+      for (idy = 0; idy < 2; idy += num_4x4_blocks_high)
+        for (idx = 0; idx < 2; idx += num_4x4_blocks_wide) {
           const MB_PREDICTION_MODE bm = m->bmi[idy * 2 + idx].as_mode;
           write_intra_mode(bc, bm, pc->fc.y_mode_prob[0]);
         }
@@ -498,11 +498,11 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, MODE_INFO *m,
       int j;
       MB_PREDICTION_MODE blockmode;
       int_mv blockmv;
-      int bwl = b_width_log2(mi->sb_type), bw = 1 << bwl;
-      int bhl = b_height_log2(mi->sb_type), bh = 1 << bhl;
+      int num_4x4_blocks_wide = num_4x4_blocks_wide_lookup[mi->sb_type];
+      int num_4x4_blocks_high = num_4x4_blocks_high_lookup[mi->sb_type];
       int idx, idy;
-      for (idy = 0; idy < 2; idy += bh) {
-        for (idx = 0; idx < 2; idx += bw) {
+      for (idy = 0; idy < 2; idy += num_4x4_blocks_high) {
+        for (idx = 0; idx < 2; idx += num_4x4_blocks_wide) {
           j = idy * 2 + idx;
           blockmode = cpi->mb.partition_info->bmi[j].mode;
           blockmv = m->bmi[j].as_mv[0];
@@ -563,10 +563,10 @@ static void write_mb_modes_kf(const VP9_COMP *cpi,
     write_intra_mode(bc, ym, vp9_kf_y_mode_prob[A][L]);
   } else {
     int idx, idy;
-    int bw = 1 << b_width_log2(m->mbmi.sb_type);
-    int bh = 1 << b_height_log2(m->mbmi.sb_type);
-    for (idy = 0; idy < 2; idy += bh) {
-      for (idx = 0; idx < 2; idx += bw) {
+    int num_4x4_blocks_wide = num_4x4_blocks_wide_lookup[m->mbmi.sb_type];
+    int num_4x4_blocks_high = num_4x4_blocks_high_lookup[m->mbmi.sb_type];
+    for (idy = 0; idy < 2; idy += num_4x4_blocks_high) {
+      for (idx = 0; idx < 2; idx += num_4x4_blocks_wide) {
         int i = idy * 2 + idx;
         const MB_PREDICTION_MODE A = above_block_mode(m, i, mis);
         const MB_PREDICTION_MODE L = (xd->left_available || idx) ?
@@ -619,7 +619,6 @@ static void write_modes_sb(VP9_COMP *cpi, MODE_INFO *m, vp9_writer *bc,
   VP9_COMMON *const cm = &cpi->common;
   MACROBLOCKD *xd = &cpi->mb.e_mbd;
   const int mis = cm->mode_info_stride;
-  int bwl, bhl;
   int bsl = b_width_log2(bsize);
   int bs = (1 << bsl) / 4;  // mode_info step for subsize
   int n;
@@ -629,20 +628,7 @@ static void write_modes_sb(VP9_COMP *cpi, MODE_INFO *m, vp9_writer *bc,
   if (mi_row >= cm->mi_rows || mi_col >= cm->mi_cols)
     return;
 
-  bwl = b_width_log2(m->mbmi.sb_type);
-  bhl = b_height_log2(m->mbmi.sb_type);
-
-  // parse the partition type
-  if ((bwl == bsl) && (bhl == bsl))
-    partition = PARTITION_NONE;
-  else if ((bwl == bsl) && (bhl < bsl))
-    partition = PARTITION_HORZ;
-  else if ((bwl < bsl) && (bhl == bsl))
-    partition = PARTITION_VERT;
-  else if ((bwl < bsl) && (bhl < bsl))
-    partition = PARTITION_SPLIT;
-  else
-    assert(0);
+  partition = partition_lookup[bsl][m->mbmi.sb_type];
 
   if (bsize < BLOCK_SIZE_SB8X8)
     if (xd->ab_index > 0)

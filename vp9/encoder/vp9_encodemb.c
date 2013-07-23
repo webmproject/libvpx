@@ -441,7 +441,7 @@ void xform_quant(int plane, int block, BLOCK_SIZE_TYPE bsize,
   TX_TYPE tx_type;
   const int16_t *scan, *iscan;
   uint16_t *eob = &pd->eobs[block];
-  const int bwl = b_width_log2(bsize) - pd->subsampling_x, bw = 1 << bwl;
+  const int bwl = plane_block_width_log2by4(bsize, pd), bw = 1 << bwl;
   const int twl = bwl - tx_size, twmask = (1 << twl) - 1;
   int xoff, yoff;
   int16_t *src_diff;
