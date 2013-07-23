@@ -1938,8 +1938,23 @@ static void rd_check_segment_txsize(VP9_COMP *cpi, MACROBLOCK *x,
               if (i == 2)
                 bsi->mvp.as_int =
                 x->e_mbd.mode_info_context->bmi[i - 2].as_mv[0].as_int;
-              step_param = 2;
             }
+          }
+          if (cpi->sf.auto_mv_step_size && cpi->common.show_frame) {
+            // Take wtd average of the step_params based on the last frame's
+            // max mv magnitude and the best ref mvs of the current block for
+            // the given reference.
+            if (i == 0)
+              step_param = (vp9_init_search_range(
+                  cpi, x->max_mv_context[mbmi->ref_frame[0]]) +
+                  cpi->mv_step_param) >> 1;
+            else
+              step_param = (vp9_init_search_range(
+                  cpi, MAX(abs(bsi->mvp.as_mv.row),
+                           abs(bsi->mvp.as_mv.col)) >> 3) +
+                  cpi->mv_step_param) >> 1;
+          } else {
+            step_param = cpi->mv_step_param;
           }
 
           further_steps = (MAX_MVSEARCH_STEPS - 1) - step_param;
@@ -2225,6 +2240,7 @@ static void mv_pred(VP9_COMP *cpi, MACROBLOCK *x,
   int best_index = 0;
   int best_sad = INT_MAX;
   int this_sad = INT_MAX;
+  unsigned int max_mv = 0;
 
   uint8_t *src_y_ptr = x->plane[0].src.buf;
   uint8_t *ref_y_ptr;
@@ -2234,6 +2250,8 @@ static void mv_pred(VP9_COMP *cpi, MACROBLOCK *x,
   for (i = 0; i < MAX_MV_REF_CANDIDATES; i++) {
     this_mv.as_int = mbmi->ref_mvs[ref_frame][i].as_int;
 
+    max_mv = MAX(max_mv,
+                 MAX(abs(this_mv.as_mv.row), abs(this_mv.as_mv.col)) >> 3);
     // The list is at an end if we see 0 for a second time.
     if (!this_mv.as_int && zero_seen)
       break;
@@ -2257,6 +2275,7 @@ static void mv_pred(VP9_COMP *cpi, MACROBLOCK *x,
 
   // Note the index of the mv that worked best in the reference list.
   x->mv_best_ref_index[ref_frame] = best_index;
+  x->max_mv_context[ref_frame] = max_mv;
 }
 
 static void estimate_ref_frame_costs(VP9_COMP *cpi, int segment_id,
@@ -2503,12 +2522,14 @@ static void single_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
     // Work out the size of the first step in the mv step search.
     // 0 here is maximum length first step. 1 is MAX >> 1 etc.
     if (cpi->sf.auto_mv_step_size && cpi->common.show_frame) {
-      step_param = vp9_init_search_range(cpi, cpi->max_mv_magnitude);
+      // Take wtd average of the step_params based on the last frame's
+      // max mv magnitude and that based on the best ref mvs of the current
+      // block for the given reference.
+      step_param = (vp9_init_search_range(cpi, x->max_mv_context[ref]) +
+                    cpi->mv_step_param) >> 1;
     } else {
-      step_param = vp9_init_search_range(
-                     cpi, MIN(cpi->common.width, cpi->common.height));
+      step_param = cpi->mv_step_param;
     }
-
     // mvp_full.as_int = ref_mv[0].as_int;
     mvp_full.as_int =
         mbmi->ref_mvs[ref][x->mv_best_ref_index[ref]].as_int;
