@@ -323,7 +323,8 @@ static void update_state(VP9_COMP *cpi, PICK_MODE_CONTEXT *ctx,
 
   int mb_mode_index = ctx->best_mode_index;
   const int mis = cpi->common.mode_info_stride;
-  const int bh = 1 << mi_height_log2(bsize), bw = 1 << mi_width_log2(bsize);
+  const int mi_height = num_8x8_blocks_high_lookup[bsize];
+  const int mi_width = num_8x8_blocks_wide_lookup[bsize];
 
   assert(mi->mbmi.mode < MB_MODE_COUNT);
   assert(mb_mode_index < MAX_MODES);
@@ -333,10 +334,10 @@ static void update_state(VP9_COMP *cpi, PICK_MODE_CONTEXT *ctx,
 
   // Restore the coding context of the MB to that that was in place
   // when the mode was picked for it
-  for (y = 0; y < bh; y++) {
-    for (x_idx = 0; x_idx < bw; x_idx++) {
-      if ((xd->mb_to_right_edge >> (3 + LOG2_MI_SIZE)) + bw > x_idx
-          && (xd->mb_to_bottom_edge >> (3 + LOG2_MI_SIZE)) + bh > y) {
+  for (y = 0; y < mi_height; y++) {
+    for (x_idx = 0; x_idx < mi_width; x_idx++) {
+      if ((xd->mb_to_right_edge >> (3 + LOG2_MI_SIZE)) + mi_width > x_idx
+          && (xd->mb_to_bottom_edge >> (3 + LOG2_MI_SIZE)) + mi_height > y) {
         MODE_INFO *mi_addr = xd->mode_info_context + x_idx + y * mis;
         *mi_addr = *mi;
       }
@@ -412,10 +413,10 @@ static void update_state(VP9_COMP *cpi, PICK_MODE_CONTEXT *ctx,
 
     if (bsize > BLOCK_SIZE_SB8X8 && mbmi->mode == NEWMV) {
       int i, j;
-      for (j = 0; j < bh; ++j)
-        for (i = 0; i < bw; ++i)
-          if ((xd->mb_to_right_edge >> (3 + LOG2_MI_SIZE)) + bw > i
-              && (xd->mb_to_bottom_edge >> (3 + LOG2_MI_SIZE)) + bh > j)
+      for (j = 0; j < mi_height; ++j)
+        for (i = 0; i < mi_width; ++i)
+          if ((xd->mb_to_right_edge >> (3 + LOG2_MI_SIZE)) + mi_width > i
+              && (xd->mb_to_bottom_edge >> (3 + LOG2_MI_SIZE)) + mi_height > j)
             xd->mode_info_context[mis * j + i].mbmi = *mbmi;
     }
 
@@ -459,7 +460,8 @@ static void set_offsets(VP9_COMP *cpi, int mi_row, int mi_col,
   MB_MODE_INFO *mbmi;
   const int dst_fb_idx = cm->new_fb_idx;
   const int idx_str = xd->mode_info_stride * mi_row + mi_col;
-  const int bw = 1 << mi_width_log2(bsize), bh = 1 << mi_height_log2(bsize);
+  const int mi_width = num_8x8_blocks_wide_lookup[bsize];
+  const int mi_height = num_8x8_blocks_high_lookup[bsize];
   const int mb_row = mi_row >> 1;
   const int mb_col = mi_col >> 1;
   const int idx_map = mb_row * cm->mb_cols + mb_col;
@@ -496,13 +498,13 @@ static void set_offsets(VP9_COMP *cpi, int mi_row, int mi_col,
   x->mv_row_min = -((mi_row * MI_SIZE)+ VP9BORDERINPIXELS - VP9_INTERP_EXTEND);
   x->mv_col_min = -((mi_col * MI_SIZE)+ VP9BORDERINPIXELS - VP9_INTERP_EXTEND);
   x->mv_row_max = ((cm->mi_rows - mi_row) * MI_SIZE
-      + (VP9BORDERINPIXELS - MI_SIZE * bh - VP9_INTERP_EXTEND));
+      + (VP9BORDERINPIXELS - MI_SIZE * mi_height - VP9_INTERP_EXTEND));
   x->mv_col_max = ((cm->mi_cols - mi_col) * MI_SIZE
-      + (VP9BORDERINPIXELS - MI_SIZE * bw - VP9_INTERP_EXTEND));
+      + (VP9BORDERINPIXELS - MI_SIZE * mi_width - VP9_INTERP_EXTEND));
 
   // Set up distance of MB to edge of frame in 1/8th pel units
-  assert(!(mi_col & (bw - 1)) && !(mi_row & (bh - 1)));
-  set_mi_row_col(cm, xd, mi_row, bh, mi_col, bw);
+  assert(!(mi_col & (mi_width - 1)) && !(mi_row & (mi_height - 1)));
+  set_mi_row_col(cm, xd, mi_row, mi_height, mi_col, mi_width);
 
   /* set up source buffers */
   vp9_setup_src_planes(x, cpi->Source, mi_row, mi_col);
@@ -676,23 +678,27 @@ static void restore_context(VP9_COMP *cpi, int mi_row, int mi_col,
   MACROBLOCK * const x = &cpi->mb;
   MACROBLOCKD * const xd = &x->e_mbd;
   int p;
-  int bwl = b_width_log2(bsize), bw = 1 << bwl;
-  int bhl = b_height_log2(bsize), bh = 1 << bhl;
-  int mwl = mi_width_log2(bsize), mw = 1 << mwl;
-  int mhl = mi_height_log2(bsize), mh = 1 << mhl;
+  int num_4x4_blocks_wide = num_4x4_blocks_wide_lookup[bsize];
+  int num_4x4_blocks_high = num_4x4_blocks_high_lookup[bsize];
+  int mi_width = num_8x8_blocks_wide_lookup[bsize];
+  int mi_height = num_8x8_blocks_high_lookup[bsize];
   for (p = 0; p < MAX_MB_PLANE; p++) {
     vpx_memcpy(
         cm->above_context[p] + ((mi_col * 2) >> xd->plane[p].subsampling_x),
-        a + bw * p, sizeof(ENTROPY_CONTEXT) * bw >> xd->plane[p].subsampling_x);
+        a + num_4x4_blocks_wide * p,
+        (sizeof(ENTROPY_CONTEXT) * num_4x4_blocks_wide) >>
+        xd->plane[p].subsampling_x);
     vpx_memcpy(
         cm->left_context[p]
-            + ((mi_row & MI_MASK)* 2 >> xd->plane[p].subsampling_y),l + bh * p,
-            sizeof(ENTROPY_CONTEXT) * bh >> xd->plane[p].subsampling_y);
-          }
+            + ((mi_row & MI_MASK) * 2 >> xd->plane[p].subsampling_y),
+        l + num_4x4_blocks_high * p,
+        (sizeof(ENTROPY_CONTEXT) * num_4x4_blocks_high) >>
+        xd->plane[p].subsampling_y);
+  }
   vpx_memcpy(cm->above_seg_context + mi_col, sa,
-             sizeof(PARTITION_CONTEXT) * mw);
+             sizeof(PARTITION_CONTEXT) * mi_width);
   vpx_memcpy(cm->left_seg_context + (mi_row & MI_MASK), sl,
-             sizeof(PARTITION_CONTEXT) * mh);
+             sizeof(PARTITION_CONTEXT) * mi_height);
 }
 static void save_context(VP9_COMP *cpi, int mi_row, int mi_col,
                          ENTROPY_CONTEXT a[16 * MAX_MB_PLANE],
@@ -703,27 +709,30 @@ static void save_context(VP9_COMP *cpi, int mi_row, int mi_col,
   MACROBLOCK * const x = &cpi->mb;
   MACROBLOCKD * const xd = &x->e_mbd;
   int p;
-  int bwl = b_width_log2(bsize), bw = 1 << bwl;
-  int bhl = b_height_log2(bsize), bh = 1 << bhl;
-  int mwl = mi_width_log2(bsize), mw = 1 << mwl;
-  int mhl = mi_height_log2(bsize), mh = 1 << mhl;
+  int num_4x4_blocks_wide = num_4x4_blocks_wide_lookup[bsize];
+  int num_4x4_blocks_high = num_4x4_blocks_high_lookup[bsize];
+  int mi_width = num_8x8_blocks_wide_lookup[bsize];
+  int mi_height = num_8x8_blocks_high_lookup[bsize];
 
   // buffer the above/left context information of the block in search.
   for (p = 0; p < MAX_MB_PLANE; ++p) {
     vpx_memcpy(
-        a + bw * p,
+        a + num_4x4_blocks_wide * p,
         cm->above_context[p] + (mi_col * 2 >> xd->plane[p].subsampling_x),
-        sizeof(ENTROPY_CONTEXT) * bw >> xd->plane[p].subsampling_x);
+        (sizeof(ENTROPY_CONTEXT) * num_4x4_blocks_wide) >>
+        xd->plane[p].subsampling_x);
     vpx_memcpy(
-        l + bh * p,
+        l + num_4x4_blocks_high * p,
         cm->left_context[p]
-            + ((mi_row & MI_MASK)* 2 >> xd->plane[p].subsampling_y),sizeof(ENTROPY_CONTEXT) * bh >> xd->plane[p].subsampling_y);
-          }
+            + ((mi_row & MI_MASK) * 2 >> xd->plane[p].subsampling_y),
+        (sizeof(ENTROPY_CONTEXT) * num_4x4_blocks_high) >>
+        xd->plane[p].subsampling_y);
+  }
   vpx_memcpy(sa, cm->above_seg_context + mi_col,
-             sizeof(PARTITION_CONTEXT) * mw);
+             sizeof(PARTITION_CONTEXT) * mi_width);
   vpx_memcpy(sl, cm->left_seg_context + (mi_row & MI_MASK),
-  sizeof(PARTITION_CONTEXT) * mh)
-             ;}
+             sizeof(PARTITION_CONTEXT) * mi_height);
+}
 
 static void encode_b(VP9_COMP *cpi, TOKENEXTRA **tp, int mi_row, int mi_col,
                      int output_enabled, BLOCK_SIZE_TYPE bsize, int sub_index) {
@@ -759,8 +768,10 @@ static void encode_sb(VP9_COMP *cpi, TOKENEXTRA **tp, int mi_row, int mi_col,
   MACROBLOCKD * const xd = &x->e_mbd;
   BLOCK_SIZE_TYPE c1 = BLOCK_SIZE_SB8X8;
   const int bsl = b_width_log2(bsize), bs = (1 << bsl) / 4;
-  int bwl, bhl;
   int UNINITIALIZED_IS_SAFE(pl);
+  PARTITION_TYPE partition;
+  BLOCK_SIZE_TYPE subsize;
+  int i;
 
   if (mi_row >= cm->mi_rows || mi_col >= cm->mi_cols)
     return;
@@ -771,44 +782,46 @@ static void encode_sb(VP9_COMP *cpi, TOKENEXTRA **tp, int mi_row, int mi_col,
     pl = partition_plane_context(xd, bsize);
     c1 = *(get_sb_partitioning(x, bsize));
   }
+  partition = partition_lookup[bsl][c1];
 
-  bwl = b_width_log2(c1), bhl = b_height_log2(c1);
+  switch (partition) {
+    case PARTITION_NONE:
+      if (output_enabled && bsize >= BLOCK_SIZE_SB8X8)
+        cpi->partition_count[pl][PARTITION_NONE]++;
+      encode_b(cpi, tp, mi_row, mi_col, output_enabled, c1, -1);
+      break;
+    case PARTITION_VERT:
+      if (output_enabled)
+        cpi->partition_count[pl][PARTITION_VERT]++;
+      encode_b(cpi, tp, mi_row, mi_col, output_enabled, c1, 0);
+      encode_b(cpi, tp, mi_row, mi_col + bs, output_enabled, c1, 1);
+      break;
+    case PARTITION_HORZ:
+      if (output_enabled)
+        cpi->partition_count[pl][PARTITION_HORZ]++;
+      encode_b(cpi, tp, mi_row, mi_col, output_enabled, c1, 0);
+      encode_b(cpi, tp, mi_row + bs, mi_col, output_enabled, c1, 1);
+      break;
+    case PARTITION_SPLIT:
+      subsize = get_subsize(bsize, PARTITION_SPLIT);
 
-  if (bsl == bwl && bsl == bhl) {
-    if (output_enabled && bsize >= BLOCK_SIZE_SB8X8)
-      cpi->partition_count[pl][PARTITION_NONE]++;
-    encode_b(cpi, tp, mi_row, mi_col, output_enabled, c1, -1);
-  } else if (bsl == bhl && bsl > bwl) {
-    if (output_enabled)
-      cpi->partition_count[pl][PARTITION_VERT]++;
-    encode_b(cpi, tp, mi_row, mi_col, output_enabled, c1, 0);
-    encode_b(cpi, tp, mi_row, mi_col + bs, output_enabled, c1, 1);
-  } else if (bsl == bwl && bsl > bhl) {
-    if (output_enabled)
-      cpi->partition_count[pl][PARTITION_HORZ]++;
-    encode_b(cpi, tp, mi_row, mi_col, output_enabled, c1, 0);
-    encode_b(cpi, tp, mi_row + bs, mi_col, output_enabled, c1, 1);
-  } else {
-    BLOCK_SIZE_TYPE subsize;
-    int i;
+      if (output_enabled)
+        cpi->partition_count[pl][PARTITION_SPLIT]++;
 
-    assert(bwl < bsl && bhl < bsl);
-    subsize = get_subsize(bsize, PARTITION_SPLIT);
+      for (i = 0; i < 4; i++) {
+        const int x_idx = i & 1, y_idx = i >> 1;
 
-    if (output_enabled)
-      cpi->partition_count[pl][PARTITION_SPLIT]++;
-
-    for (i = 0; i < 4; i++) {
-      const int x_idx = i & 1, y_idx = i >> 1;
-
-      *(get_sb_index(xd, subsize)) = i;
-      encode_sb(cpi, tp, mi_row + y_idx * bs, mi_col + x_idx * bs,
-                output_enabled, subsize);
-    }
+        *(get_sb_index(xd, subsize)) = i;
+        encode_sb(cpi, tp, mi_row + y_idx * bs, mi_col + x_idx * bs,
+                  output_enabled, subsize);
+      }
+      break;
+    default:
+      assert(0);
+      break;
   }
 
-  if (bsize >= BLOCK_SIZE_SB8X8
-      && (bsize == BLOCK_SIZE_SB8X8 || bsl == bwl || bsl == bhl)) {
+  if (partition != PARTITION_SPLIT || bsize == BLOCK_SIZE_SB8X8) {
     set_partition_seg_context(cm, xd, mi_row, mi_col);
     update_partition_context(xd, c1, bsize);
   }
@@ -1159,13 +1172,11 @@ static void rd_use_partition(VP9_COMP *cpi, MODE_INFO *m, TOKENEXTRA **tp,
   MACROBLOCK * const x = &cpi->mb;
   MACROBLOCKD *xd = &cpi->mb.e_mbd;
   const int mis = cm->mode_info_stride;
-  int bwl = b_width_log2(m->mbmi.sb_type);
-  int bhl = b_height_log2(m->mbmi.sb_type);
   int bsl = b_width_log2(bsize);
-  int bs = (1 << bsl);
-  int bh = (1 << bhl);
-  int ms = bs / 2;
-  int mh = bh / 2;
+  int num_4x4_blocks_wide = num_4x4_blocks_wide_lookup[bsize];
+  int num_4x4_blocks_high = num_4x4_blocks_high_lookup[bsize];
+  int ms = num_4x4_blocks_wide / 2;
+  int mh = num_4x4_blocks_high / 2;
   int bss = (1 << bsl) / 4;
   int i, pl;
   PARTITION_TYPE partition = PARTITION_NONE;
@@ -1187,17 +1198,7 @@ static void rd_use_partition(VP9_COMP *cpi, MODE_INFO *m, TOKENEXTRA **tp,
   if (mi_row >= cm->mi_rows || mi_col >= cm->mi_cols)
     return;
 
-  // parse the partition type
-  if ((bwl == bsl) && (bhl == bsl))
-    partition = PARTITION_NONE;
-  else if ((bwl == bsl) && (bhl < bsl))
-    partition = PARTITION_HORZ;
-  else if ((bwl < bsl) && (bhl == bsl))
-    partition = PARTITION_VERT;
-  else if ((bwl < bsl) && (bhl < bsl))
-    partition = PARTITION_SPLIT;
-  else
-    assert(0);
+  partition = partition_lookup[bsl][bs_type];
 
   subsize = get_subsize(bsize, partition);
 
@@ -1340,8 +1341,8 @@ static void rd_use_partition(VP9_COMP *cpi, MODE_INFO *m, TOKENEXTRA **tp,
 
     // Split partition.
     for (i = 0; i < 4; i++) {
-      int x_idx = (i & 1) * (bs >> 2);
-      int y_idx = (i >> 1) * (bs >> 2);
+      int x_idx = (i & 1) * (num_4x4_blocks_wide >> 2);
+      int y_idx = (i >> 1) * (num_4x4_blocks_wide >> 2);
       int rt = 0;
       int64_t dt = 0;
       ENTROPY_CONTEXT l[16 * MAX_MB_PLANE], a[16 * MAX_MB_PLANE];
@@ -2468,10 +2469,12 @@ static void sum_intra_stats(VP9_COMP *cpi, MACROBLOCK *x) {
     ++cpi->y_mode_count[MIN(bsl, 3)][m];
   } else {
     int idx, idy;
-    int bw = 1 << b_width_log2(xd->mode_info_context->mbmi.sb_type);
-    int bh = 1 << b_height_log2(xd->mode_info_context->mbmi.sb_type);
-    for (idy = 0; idy < 2; idy += bh) {
-      for (idx = 0; idx < 2; idx += bw) {
+    int num_4x4_blocks_wide = num_4x4_blocks_wide_lookup[
+      xd->mode_info_context->mbmi.sb_type];
+    int num_4x4_blocks_high = num_4x4_blocks_high_lookup[
+      xd->mode_info_context->mbmi.sb_type];
+    for (idy = 0; idy < 2; idy += num_4x4_blocks_high) {
+      for (idx = 0; idx < 2; idx += num_4x4_blocks_wide) {
         int m = xd->mode_info_context->bmi[idy * 2 + idx].as_mode;
         ++cpi->y_mode_count[0][m];
       }
@@ -2509,8 +2512,8 @@ static void encode_superblock(VP9_COMP *cpi, TOKENEXTRA **t, int output_enabled,
   MB_MODE_INFO *mbmi = &mi->mbmi;
   unsigned int segment_id = mbmi->segment_id;
   const int mis = cm->mode_info_stride;
-  const int bwl = mi_width_log2(bsize);
-  const int bw = 1 << bwl, bh = 1 << mi_height_log2(bsize);
+  const int mi_width = num_8x8_blocks_wide_lookup[bsize];
+  const int mi_height = num_8x8_blocks_high_lookup[bsize];
   x->rd_search = 0;
   x->skip_encode = (!output_enabled && cpi->sf.skip_encode_frame &&
                     xd->q_index < QIDX_SKIP_THRESH);
@@ -2635,8 +2638,8 @@ static void encode_superblock(VP9_COMP *cpi, TOKENEXTRA **t, int output_enabled,
         sz = TX_4X4;
       }
 
-      for (y = 0; y < bh; y++) {
-        for (x = 0; x < bw; x++) {
+      for (y = 0; y < mi_height; y++) {
+        for (x = 0; x < mi_width; x++) {
           if (mi_col + x < cm->mi_cols && mi_row + y < cm->mi_rows) {
             mi[mis * y + x].mbmi.txfm_size = sz;
           }

@@ -461,10 +461,8 @@ static void model_rd_for_sb_y_tx(VP9_COMP *cpi, BLOCK_SIZE_TYPE bsize,
   BLOCK_SIZE_TYPE bs = BLOCK_SIZE_AB4X4;
   struct macroblock_plane *const p = &x->plane[0];
   struct macroblockd_plane *const pd = &xd->plane[0];
-  const int bwl = plane_block_width_log2by4(bsize, pd);
-  const int bhl = plane_block_height_log2by4(bsize, pd);
-  const int bw = 4 << bwl;
-  const int bh = 4 << bhl;
+  const int width = plane_block_width(bsize, pd);
+  const int height = plane_block_height(bsize, pd);
   int rate_sum = 0;
   int64_t dist_sum = 0;
 
@@ -483,10 +481,9 @@ static void model_rd_for_sb_y_tx(VP9_COMP *cpi, BLOCK_SIZE_TYPE bsize,
   } else {
     assert(0);
   }
-  assert(bs <= get_block_size(bwl, bhl));
   *out_skip = 1;
-  for (j = 0; j < bh; j+=t) {
-    for (k = 0; k < bw; k+=t) {
+  for (j = 0; j < height; j += t) {
+    for (k = 0; k < width; k += t) {
       int rate;
       int64_t dist;
       unsigned int sse;
@@ -709,8 +706,8 @@ static void rate_block(int plane, int block, BLOCK_SIZE_TYPE bsize,
 static int rdcost_plane(VP9_COMMON * const cm, MACROBLOCK *x, int plane,
                         BLOCK_SIZE_TYPE bsize, TX_SIZE tx_size) {
   MACROBLOCKD * const xd = &x->e_mbd;
-  const int bwl = b_width_log2(bsize) - xd->plane[plane].subsampling_x;
-  const int bhl = b_height_log2(bsize) - xd->plane[plane].subsampling_y;
+  const int bwl = plane_block_width_log2by4(bsize, &xd->plane[plane]);
+  const int bhl = plane_block_height_log2by4(bsize, &xd->plane[plane]);
   const int bw = 1 << bwl, bh = 1 << bhl;
   struct rdcost_block_args args = { cm, x, { 0 }, { 0 }, tx_size, bw, bh,
     0, 0, 0, INT64_MAX, 0 };
@@ -800,8 +797,8 @@ static void super_block_yrd_for_txfm(VP9_COMMON *const cm, MACROBLOCK *x,
                                      BLOCK_SIZE_TYPE bsize, TX_SIZE tx_size) {
   MACROBLOCKD *const xd = &x->e_mbd;
   struct macroblockd_plane *const pd = &xd->plane[0];
-  const int bwl = b_width_log2(bsize) - xd->plane[0].subsampling_x;
-  const int bhl = b_height_log2(bsize) - xd->plane[0].subsampling_y;
+  const int bwl = plane_block_width_log2by4(bsize, pd);
+  const int bhl = plane_block_height_log2by4(bsize, pd);
   const int bw = 1 << bwl, bh = 1 << bhl;
   struct rdcost_block_args args = { cm, x, { 0 }, { 0 }, tx_size, bw, bh,
                                     0, 0, 0, ref_best_rd, 0 };
@@ -1183,8 +1180,8 @@ static int64_t rd_pick_intra4x4block(VP9_COMP *cpi, MACROBLOCK *x, int ib,
   ENTROPY_CONTEXT tl[2], templ[2];
   TX_TYPE tx_type = DCT_DCT;
   TX_TYPE best_tx_type = DCT_DCT;
-  int bw = 1 << b_width_log2(bsize);
-  int bh = 1 << b_height_log2(bsize);
+  int num_4x4_blocks_wide = num_4x4_blocks_wide_lookup[bsize];
+  int num_4x4_blocks_high = num_4x4_blocks_high_lookup[bsize];
   int idx, idy, block;
   DECLARE_ALIGNED(16, int16_t, best_dqcoeff[4][16]);
 
@@ -1210,8 +1207,8 @@ static int64_t rd_pick_intra4x4block(VP9_COMP *cpi, MACROBLOCK *x, int ib,
     vpx_memcpy(tempa, ta, sizeof(ta));
     vpx_memcpy(templ, tl, sizeof(tl));
 
-    for (idy = 0; idy < bh; ++idy) {
-      for (idx = 0; idx < bw; ++idx) {
+    for (idy = 0; idy < num_4x4_blocks_high; ++idy) {
+      for (idx = 0; idx < num_4x4_blocks_wide; ++idx) {
         int64_t ssz;
 
         block = ib + idy * 2 + idx;
@@ -1268,8 +1265,8 @@ static int64_t rd_pick_intra4x4block(VP9_COMP *cpi, MACROBLOCK *x, int ib,
       best_tx_type = tx_type;
       vpx_memcpy(a, tempa, sizeof(tempa));
       vpx_memcpy(l, templ, sizeof(templ));
-      for (idy = 0; idy < bh; ++idy) {
-        for (idx = 0; idx < bw; ++idx) {
+      for (idy = 0; idy < num_4x4_blocks_high; ++idy) {
+        for (idx = 0; idx < num_4x4_blocks_wide; ++idx) {
           block = ib + idy * 2 + idx;
           vpx_memcpy(best_dqcoeff[idy * 2 + idx],
                      BLOCK_OFFSET(pd->dqcoeff, block, 16),
@@ -1282,8 +1279,8 @@ static int64_t rd_pick_intra4x4block(VP9_COMP *cpi, MACROBLOCK *x, int ib,
   if (x->skip_encode)
     return best_rd;
 
-  for (idy = 0; idy < bh; ++idy) {
-    for (idx = 0; idx < bw; ++idx) {
+  for (idy = 0; idy < num_4x4_blocks_high; ++idy) {
+    for (idx = 0; idx < num_4x4_blocks_wide; ++idx) {
       block = ib + idy * 2 + idx;
       xd->mode_info_context->bmi[block].as_mode = *best_mode;
       src = raster_block_offset_uint8(xd, BLOCK_SIZE_SB8X8, 0, block,
@@ -1315,8 +1312,8 @@ static int64_t rd_pick_intra4x4mby_modes(VP9_COMP *cpi, MACROBLOCK *mb,
   int i, j;
   MACROBLOCKD *const xd = &mb->e_mbd;
   BLOCK_SIZE_TYPE bsize = xd->mode_info_context->mbmi.sb_type;
-  int bw = 1 << b_width_log2(bsize);
-  int bh = 1 << b_height_log2(bsize);
+  int num_4x4_blocks_wide = num_4x4_blocks_wide_lookup[bsize];
+  int num_4x4_blocks_high = num_4x4_blocks_high_lookup[bsize];
   int idx, idy;
   int cost = 0;
   int64_t distortion = 0;
@@ -1331,8 +1328,8 @@ static int64_t rd_pick_intra4x4mby_modes(VP9_COMP *cpi, MACROBLOCK *mb,
 
   bmode_costs = mb->mbmode_cost;
 
-  for (idy = 0; idy < 2; idy += bh) {
-    for (idx = 0; idx < 2; idx += bw) {
+  for (idy = 0; idy < 2; idy += num_4x4_blocks_high) {
+    for (idx = 0; idx < 2; idx += num_4x4_blocks_wide) {
       const int mis = xd->mode_info_stride;
       MB_PREDICTION_MODE UNINITIALIZED_IS_SAFE(best_mode);
       int UNINITIALIZED_IS_SAFE(r), UNINITIALIZED_IS_SAFE(ry);
@@ -1355,9 +1352,9 @@ static int64_t rd_pick_intra4x4mby_modes(VP9_COMP *cpi, MACROBLOCK *mb,
       tot_rate_y += ry;
 
       mic->bmi[i].as_mode = best_mode;
-      for (j = 1; j < bh; ++j)
+      for (j = 1; j < num_4x4_blocks_high; ++j)
         mic->bmi[i + j * 2].as_mode = best_mode;
-      for (j = 1; j < bw; ++j)
+      for (j = 1; j < num_4x4_blocks_wide; ++j)
         mic->bmi[i + j].as_mode = best_mode;
 
       if (total_rd >= best_rd)
@@ -1597,8 +1594,8 @@ static int labels2mode(MACROBLOCK *x, int i,
   MB_MODE_INFO * mbmi = &mic->mbmi;
   int cost = 0, thismvcost = 0;
   int idx, idy;
-  int bw = 1 << b_width_log2(mbmi->sb_type);
-  int bh = 1 << b_height_log2(mbmi->sb_type);
+  int num_4x4_blocks_wide = num_4x4_blocks_wide_lookup[mbmi->sb_type];
+  int num_4x4_blocks_high = num_4x4_blocks_high_lookup[mbmi->sb_type];
 
   /* We have to be careful retrieving previously-encoded motion vectors.
    Ones from this macroblock have to be pulled from the BLOCKD array
@@ -1648,8 +1645,8 @@ static int labels2mode(MACROBLOCK *x, int i,
     mic->bmi[i].as_mv[1].as_int = this_second_mv->as_int;
 
   x->partition_info->bmi[i].mode = m;
-  for (idy = 0; idy < bh; ++idy)
-    for (idx = 0; idx < bw; ++idx)
+  for (idy = 0; idy < num_4x4_blocks_high; ++idy)
+    for (idx = 0; idx < num_4x4_blocks_wide; ++idx)
       vpx_memcpy(&mic->bmi[i + idy * 2 + idx],
                  &mic->bmi[i], sizeof(mic->bmi[i]));
 
@@ -1669,10 +1666,8 @@ static int64_t encode_inter_mb_segment(VP9_COMP *cpi,
   VP9_COMMON *const cm = &cpi->common;
   MACROBLOCKD *xd = &x->e_mbd;
   BLOCK_SIZE_TYPE bsize = xd->mode_info_context->mbmi.sb_type;
-  const int bwl = plane_block_width_log2by4(bsize, &xd->plane[0]);
-  const int bhl = plane_block_height_log2by4(bsize, &xd->plane[0]);
-  const int bw = 4 << bwl;
-  const int bh = 4 << bhl;
+  const int width = plane_block_width(bsize, &xd->plane[0]);
+  const int height = plane_block_height(bsize, &xd->plane[0]);
   int idx, idy;
   const int src_stride = x->plane[0].src.stride;
   uint8_t* const src = raster_block_offset_uint8(xd, BLOCK_SIZE_SB8X8, 0, i,
@@ -1696,7 +1691,7 @@ static int64_t encode_inter_mb_segment(VP9_COMP *cpi,
                             xd->plane[0].dst.stride,
                             &xd->mode_info_context->bmi[i].as_mv[0],
                             &xd->scale_factor[0],
-                            bw, bh, 0 /* no avg */, &xd->subpix,
+                            width, height, 0, &xd->subpix,
                             MV_PRECISION_Q3);
 
   if (xd->mode_info_context->mbmi.ref_frame[1] > 0) {
@@ -1707,17 +1702,18 @@ static int64_t encode_inter_mb_segment(VP9_COMP *cpi,
     vp9_build_inter_predictor(second_pre, xd->plane[0].pre[1].stride,
                               dst, xd->plane[0].dst.stride,
                               &xd->mode_info_context->bmi[i].as_mv[1],
-                              &xd->scale_factor[1], bw, bh, 1,
+                              &xd->scale_factor[1],
+                              width, height, 1,
                               &xd->subpix, MV_PRECISION_Q3);
   }
 
-  vp9_subtract_block(bh, bw, src_diff, 8,
+  vp9_subtract_block(height, width, src_diff, 8,
                      src, src_stride,
                      dst, xd->plane[0].dst.stride);
 
   k = i;
-  for (idy = 0; idy < bh / 4; ++idy) {
-    for (idx = 0; idx < bw / 4; ++idx) {
+  for (idy = 0; idy < height / 4; ++idy) {
+    for (idx = 0; idx < width / 4; ++idx) {
       int64_t ssz, rd, rd1, rd2;
 
       k += (idy * 2 + idx);
@@ -1823,8 +1819,8 @@ static void rd_check_segment_txsize(VP9_COMP *cpi, MACROBLOCK *x,
   int label_mv_thresh;
   int segmentyrate = 0;
   BLOCK_SIZE_TYPE bsize = mbmi->sb_type;
-  int bwl = b_width_log2(bsize), bw = 1 << bwl;
-  int bhl = b_height_log2(bsize), bh = 1 << bhl;
+  int num_4x4_blocks_wide = num_4x4_blocks_wide_lookup[bsize];
+  int num_4x4_blocks_high = num_4x4_blocks_high_lookup[bsize];
   vp9_variance_fn_ptr_t *v_fn_ptr;
   ENTROPY_CONTEXT t_above[2], t_left[2];
   BEST_SEG_INFO *bsi = bsi_buf + filter_idx;
@@ -1834,7 +1830,7 @@ static void rd_check_segment_txsize(VP9_COMP *cpi, MACROBLOCK *x,
   vpx_memcpy(t_above, x->e_mbd.plane[0].above_context, sizeof(t_above));
   vpx_memcpy(t_left, x->e_mbd.plane[0].left_context, sizeof(t_left));
 
-  v_fn_ptr = &cpi->fn_ptr[get_block_size(bwl, bhl)];
+  v_fn_ptr = &cpi->fn_ptr[bsize];
 
   // 64 makes this threshold really big effectively
   // making it so that we very rarely check mvs on
@@ -1843,8 +1839,8 @@ static void rd_check_segment_txsize(VP9_COMP *cpi, MACROBLOCK *x,
   label_mv_thresh = 1 * bsi->mvthresh / label_count;
 
   // Segmentation method overheads
-  for (idy = 0; idy < 2; idy += bh) {
-    for (idx = 0; idx < 2; idx += bw) {
+  for (idy = 0; idy < 2; idy += num_4x4_blocks_high) {
+    for (idx = 0; idx < 2; idx += num_4x4_blocks_wide) {
       // TODO(jingning,rbultje): rewrite the rate-distortion optimization
       // loop for 4x4/4x8/8x4 block coding. to be replaced with new rd loop
       int_mv mode_mv[MB_MODE_COUNT], second_mode_mv[MB_MODE_COUNT];
@@ -2036,19 +2032,19 @@ static void rd_check_segment_txsize(VP9_COMP *cpi, MACROBLOCK *x,
                         x->mvcost, cpi);
 
         bsi->rdstat[i][mode_idx].mvs[0].as_int = mode_mv[this_mode].as_int;
-        if (bw > 1)
+        if (num_4x4_blocks_wide > 1)
           bsi->rdstat[i + 1][mode_idx].mvs[0].as_int =
               mode_mv[this_mode].as_int;
-        if (bh > 1)
+        if (num_4x4_blocks_high > 1)
           bsi->rdstat[i + 2][mode_idx].mvs[0].as_int =
               mode_mv[this_mode].as_int;
         if (mbmi->ref_frame[1] > 0) {
           bsi->rdstat[i][mode_idx].mvs[1].as_int =
               second_mode_mv[this_mode].as_int;
-          if (bw > 1)
+          if (num_4x4_blocks_wide > 1)
             bsi->rdstat[i + 1][mode_idx].mvs[1].as_int =
                 second_mode_mv[this_mode].as_int;
-          if (bh > 1)
+          if (num_4x4_blocks_high > 1)
             bsi->rdstat[i + 2][mode_idx].mvs[1].as_int =
                 second_mode_mv[this_mode].as_int;
         }
@@ -2149,11 +2145,11 @@ static void rd_check_segment_txsize(VP9_COMP *cpi, MACROBLOCK *x,
         return;
       }
 
-      for (j = 1; j < bh; ++j)
+      for (j = 1; j < num_4x4_blocks_high; ++j)
         vpx_memcpy(&x->partition_info->bmi[i + j * 2],
                    &x->partition_info->bmi[i],
                    sizeof(x->partition_info->bmi[i]));
-      for (j = 1; j < bw; ++j)
+      for (j = 1; j < num_4x4_blocks_wide; ++j)
         vpx_memcpy(&x->partition_info->bmi[i + j],
                    &x->partition_info->bmi[i],
                    sizeof(x->partition_info->bmi[i]));
