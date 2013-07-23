@@ -246,13 +246,8 @@ static INLINE void read_mv(vp9_reader *r, MV *mv, const MV *ref,
 }
 
 static void update_mv(vp9_reader *r, vp9_prob *p, vp9_prob upd_p) {
-  if (vp9_read(r, upd_p)) {
-#ifdef LOW_PRECISION_MV_UPDATE
+  if (vp9_read(r, upd_p))
     *p = (vp9_read_literal(r, 7) << 1) | 1;
-#else
-    *p = vp9_read_literal(r, 8);
-#endif
-  }
 }
 
 static void read_mv_probs(vp9_reader *r, nmv_context *mvc, int usehp) {
