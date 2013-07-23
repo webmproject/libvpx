@@ -363,36 +363,26 @@ unsigned char vp9_get_pred_context_single_ref_p2(const MACROBLOCKD *xd) {
   return pred_context;
 }
 // Returns a context number for the given MB prediction signal
+// The mode info data structure has a one element border above and to the
+// left of the entries corresponding to real blocks.
+// The prediction flags in these dummy entries are initialized to 0.
 unsigned char vp9_get_pred_context_tx_size(const MACROBLOCKD *xd) {
   const MODE_INFO *const mi = xd->mode_info_context;
-  const MODE_INFO *const above_mi = mi - xd->mode_info_stride;
-  const MODE_INFO *const left_mi = mi - 1;
-  const int left_in_image = xd->left_available && left_mi->mbmi.mb_in_image;
-  const int above_in_image = xd->up_available && above_mi->mbmi.mb_in_image;
-  // Note:
-  // The mode info data structure has a one element border above and to the
-  // left of the entries correpsonding to real macroblocks.
-  // The prediction flags in these dummy entries are initialised to 0.
-  int above_context, left_context;
-  int max_tx_size;
-  if (mi->mbmi.sb_type < BLOCK_SIZE_SB8X8)
-    max_tx_size = TX_4X4;
-  else if (mi->mbmi.sb_type < BLOCK_SIZE_MB16X16)
-    max_tx_size = TX_8X8;
-  else if (mi->mbmi.sb_type < BLOCK_SIZE_SB32X32)
-    max_tx_size = TX_16X16;
-  else
-    max_tx_size = TX_32X32;
-
-  above_context = left_context = max_tx_size;
+  const MB_MODE_INFO *const above_mbmi = &mi[-xd->mode_info_stride].mbmi;
+  const MB_MODE_INFO *const left_mbmi = &mi[-1].mbmi;
+  const int left_in_image = xd->left_available && left_mbmi->mb_in_image;
+  const int above_in_image = xd->up_available && above_mbmi->mb_in_image;
+  const int max_tx_size = max_txsize_lookup[mi->mbmi.sb_type];
+  int above_context = max_tx_size;
+  int left_context = max_tx_size;
 
   if (above_in_image)
-    above_context = above_mi->mbmi.mb_skip_coeff ? max_tx_size
-                                                 : above_mi->mbmi.txfm_size;
+    above_context = above_mbmi->mb_skip_coeff ? max_tx_size
+                                              : above_mbmi->txfm_size;
 
   if (left_in_image)
-    left_context = left_mi->mbmi.mb_skip_coeff ? max_tx_size
-                                               : left_mi->mbmi.txfm_size;
+    left_context = left_mbmi->mb_skip_coeff ? max_tx_size
+                                            : left_mbmi->txfm_size;
 
   if (!left_in_image)
     left_context = above_context;
