@@ -415,8 +415,8 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, MODE_INFO *m,
   const MB_PREDICTION_MODE mode = mi->mode;
   const int segment_id = mi->segment_id;
   int skip_coeff;
+  const BLOCK_SIZE_TYPE bsize = mi->sb_type;
 
-  xd->prev_mode_info_context = pc->prev_mi + (m - pc->mi);
   x->partition_info = x->pi + (m - pc->mi);
 
 #ifdef ENTROPY_STATS
@@ -425,7 +425,7 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, MODE_INFO *m,
 
   if (seg->update_map) {
     if (seg->temporal_update) {
-      const int pred_flag = xd->mode_info_context->mbmi.seg_id_predicted;
+      const int pred_flag = mi->seg_id_predicted;
       vp9_prob pred_prob = vp9_get_pred_prob_seg_id(xd);
       vp9_write(bc, pred_flag, pred_prob);
       if (!pred_flag)
@@ -441,10 +441,10 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, MODE_INFO *m,
     vp9_write(bc, rf != INTRA_FRAME,
               vp9_get_pred_prob_intra_inter(pc, xd));
 
-  if (mi->sb_type >= BLOCK_SIZE_SB8X8 && pc->tx_mode == TX_MODE_SELECT &&
+  if (bsize >= BLOCK_SIZE_SB8X8 && pc->tx_mode == TX_MODE_SELECT &&
       !(rf != INTRA_FRAME &&
         (skip_coeff || vp9_segfeature_active(seg, segment_id, SEG_LVL_SKIP)))) {
-    write_selected_txfm_size(cpi, mi->txfm_size, mi->sb_type, bc);
+    write_selected_txfm_size(cpi, mi->txfm_size, bsize, bc);
   }
 
   if (rf == INTRA_FRAME) {
@@ -452,15 +452,14 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, MODE_INFO *m,
     active_section = 6;
 #endif
 
-    if (m->mbmi.sb_type >= BLOCK_SIZE_SB8X8) {
-      const BLOCK_SIZE_TYPE bsize = xd->mode_info_context->mbmi.sb_type;
+    if (bsize >= BLOCK_SIZE_SB8X8) {
       const int bwl = b_width_log2(bsize), bhl = b_height_log2(bsize);
       const int bsl = MIN(bwl, bhl);
       write_intra_mode(bc, mode, pc->fc.y_mode_prob[MIN(3, bsl)]);
     } else {
       int idx, idy;
-      int num_4x4_blocks_wide = num_4x4_blocks_wide_lookup[mi->sb_type];
-      int num_4x4_blocks_high = num_4x4_blocks_high_lookup[mi->sb_type];
+      int num_4x4_blocks_wide = num_4x4_blocks_wide_lookup[bsize];
+      int num_4x4_blocks_high = num_4x4_blocks_high_lookup[bsize];
       for (idy = 0; idy < 2; idy += num_4x4_blocks_high)
         for (idx = 0; idx < 2; idx += num_4x4_blocks_wide) {
           const MB_PREDICTION_MODE bm = m->bmi[idy * 2 + idx].as_mode;
@@ -479,7 +478,7 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, MODE_INFO *m,
 
     // If segment skip is not enabled code the mode.
     if (!vp9_segfeature_active(seg, segment_id, SEG_LVL_SKIP)) {
-      if (mi->sb_type >= BLOCK_SIZE_SB8X8) {
+      if (bsize >= BLOCK_SIZE_SB8X8) {
         write_sb_mv_ref(bc, mode, mv_ref_p);
         vp9_accum_mv_refs(&cpi->common, mode, mi->mb_mode_context[rf]);
       }
@@ -494,17 +493,17 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, MODE_INFO *m,
       assert(mi->interp_filter == cpi->common.mcomp_filter_type);
     }
 
-    if (xd->mode_info_context->mbmi.sb_type < BLOCK_SIZE_SB8X8) {
+    if (bsize < BLOCK_SIZE_SB8X8) {
       int j;
       MB_PREDICTION_MODE blockmode;
       int_mv blockmv;
-      int num_4x4_blocks_wide = num_4x4_blocks_wide_lookup[mi->sb_type];
-      int num_4x4_blocks_high = num_4x4_blocks_high_lookup[mi->sb_type];
+      int num_4x4_blocks_wide = num_4x4_blocks_wide_lookup[bsize];
+      int num_4x4_blocks_high = num_4x4_blocks_high_lookup[bsize];
       int idx, idy;
       for (idy = 0; idy < 2; idy += num_4x4_blocks_high) {
         for (idx = 0; idx < 2; idx += num_4x4_blocks_wide) {
           j = idy * 2 + idx;
-          blockmode = cpi->mb.partition_info->bmi[j].mode;
+          blockmode = x->partition_info->bmi[j].mode;
           blockmv = m->bmi[j].as_mv[0];
           write_sb_mv_ref(bc, blockmode, mv_ref_p);
           vp9_accum_mv_refs(&cpi->common, blockmode, mi->mb_mode_context[rf]);
