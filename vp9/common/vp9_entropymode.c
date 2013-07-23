@@ -347,9 +347,6 @@ const INTERPOLATIONFILTERTYPE vp9_switchable_interp[VP9_SWITCHABLE_FILTERS] = {
   EIGHTTAP, EIGHTTAP_SMOOTH, EIGHTTAP_SHARP};
 const int vp9_switchable_interp_map[SWITCHABLE + 1] = {1, 0, 2, -1, -1};
 
-// Indicates if the filter is interpolating or non-interpolating
-const int vp9_is_interpolating_filter[SWITCHABLE + 1] = {1, 1, 1, 1, -1};
-
 void vp9_entropy_mode_init() {
   vp9_tokens_from_tree(vp9_intra_mode_encodings, vp9_intra_mode_tree);
   vp9_tokens_from_tree(vp9_switchable_interp_encodings,
