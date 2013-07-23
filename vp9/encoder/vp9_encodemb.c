@@ -438,7 +438,6 @@ void xform_quant(int plane, int block, BLOCK_SIZE_TYPE bsize,
   int16_t *qcoeff = BLOCK_OFFSET(pd->qcoeff, block, 16);
   int16_t *dqcoeff = BLOCK_OFFSET(pd->dqcoeff, block, 16);
   const TX_SIZE tx_size = (TX_SIZE)(ss_txfrm_size / 2);
-  TX_TYPE tx_type;
   const int16_t *scan, *iscan;
   uint16_t *eob = &pd->eobs[block];
   const int bwl = plane_block_width_log2by4(bsize, pd), bw = 1 << bwl;
@@ -463,48 +462,36 @@ void xform_quant(int plane, int block, BLOCK_SIZE_TYPE bsize,
                            pd->dequant, p->zbin_extra, eob, scan, iscan);
       break;
     case TX_16X16:
-      tx_type = plane == 0 ? get_tx_type_16x16(xd) : DCT_DCT;
-      scan = get_scan_16x16(tx_type);
-      iscan = get_iscan_16x16(tx_type);
+      scan = vp9_default_scan_16x16;
+      iscan = vp9_default_iscan_16x16;
       block >>= 4;
       xoff = 16 * (block & twmask);
       yoff = 16 * (block >> twl);
       src_diff = p->src_diff + 4 * bw * yoff + xoff;
-      if (tx_type != DCT_DCT)
-        vp9_short_fht16x16(src_diff, coeff, bw * 4, tx_type);
-      else
-        x->fwd_txm16x16(src_diff, coeff, bw * 8);
+      x->fwd_txm16x16(src_diff, coeff, bw * 8);
       vp9_quantize_b(coeff, 256, x->skip_block, p->zbin, p->round,
                      p->quant, p->quant_shift, qcoeff, dqcoeff,
                      pd->dequant, p->zbin_extra, eob, scan, iscan);
       break;
     case TX_8X8:
-      tx_type = plane == 0 ? get_tx_type_8x8(xd) : DCT_DCT;
-      scan = get_scan_8x8(tx_type);
-      iscan = get_iscan_8x8(tx_type);
+      scan = vp9_default_scan_8x8;
+      iscan = vp9_default_iscan_8x8;
       block >>= 2;
       xoff = 8 * (block & twmask);
       yoff = 8 * (block >> twl);
       src_diff = p->src_diff + 4 * bw * yoff + xoff;
-      if (tx_type != DCT_DCT)
-        vp9_short_fht8x8(src_diff, coeff, bw * 4, tx_type);
-      else
-        x->fwd_txm8x8(src_diff, coeff, bw * 8);
+      x->fwd_txm8x8(src_diff, coeff, bw * 8);
       vp9_quantize_b(coeff, 64, x->skip_block, p->zbin, p->round,
                      p->quant, p->quant_shift, qcoeff, dqcoeff,
                      pd->dequant, p->zbin_extra, eob, scan, iscan);
       break;
     case TX_4X4:
-      tx_type = plane == 0 ? get_tx_type_4x4(xd, block) : DCT_DCT;
-      scan = get_scan_4x4(tx_type);
-      iscan = get_iscan_4x4(tx_type);
+      scan = vp9_default_scan_4x4;
+      iscan = vp9_default_iscan_4x4;
       xoff = 4 * (block & twmask);
       yoff = 4 * (block >> twl);
       src_diff = p->src_diff + 4 * bw * yoff + xoff;
-      if (tx_type != DCT_DCT)
-        vp9_short_fht4x4(src_diff, coeff, bw * 4, tx_type);
-      else
-        x->fwd_txm4x4(src_diff, coeff, bw * 8);
+      x->fwd_txm4x4(src_diff, coeff, bw * 8);
       vp9_quantize_b(coeff, 16, x->skip_block, p->zbin, p->round,
                      p->quant, p->quant_shift, qcoeff, dqcoeff,
                      pd->dequant, p->zbin_extra, eob, scan, iscan);
