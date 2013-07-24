@@ -16,6 +16,24 @@
       "revId": "1099a436d3be3fac43248dac4a5fd57727683fbd",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcX//ymc\u003d",
+        "filename": "vp9/encoder/vp9_onyx_if.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 3171,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2013-07-24T00:28:15Z",
+      "side": 1,
+      "message": "I could investigate this after, the meaning of cpi counters is also unclear for me. It looks like cpi counters are used to temporary save main counters and then restore them back (but it could be wrong).",
+      "parentUuid": "AAAAcX//ynM\u003d",
+      "revId": "1099a436d3be3fac43248dac4a5fd57727683fbd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
