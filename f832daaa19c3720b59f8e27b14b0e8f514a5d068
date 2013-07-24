@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAcX//xj8\u003d",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1002325
+      },
+      "writtenOn": "2013-07-24T20:05:02Z",
+      "side": 1,
+      "message": "It didn\u0027t work immediately when opening in VS either - previously you could just load up the sln and hit Build Solution, now that failed due to failing to build obj_int_extract. IIRC it did succeed if I manually did a build on the obj_int_extract project first and then reran Build Solution. But no really big issue.",
+      "parentUuid": "AAAAcX//xxM\u003d",
+      "revId": "f832daaa19c3720b59f8e27b14b0e8f514a5d068",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAcX//xxE\u003d",
         "filename": "build/make/gen_msvs_sln.sh",
         "patchSetId": 1
@@ -30,6 +48,24 @@
       "writtenOn": "2013-07-24T18:20:41Z",
       "side": 1,
       "message": "this will be true the first time through actually with an empty config_list",
+      "revId": "f832daaa19c3720b59f8e27b14b0e8f514a5d068",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcX//xkI\u003d",
+        "filename": "build/make/gen_msvs_sln.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 82,
+      "author": {
+        "id": 1002325
+      },
+      "writtenOn": "2013-07-24T20:05:02Z",
+      "side": 1,
+      "message": "Oops, sorry about that, will send a new patch in a moment.",
+      "parentUuid": "AAAAcX//xxE\u003d",
       "revId": "f832daaa19c3720b59f8e27b14b0e8f514a5d068",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
