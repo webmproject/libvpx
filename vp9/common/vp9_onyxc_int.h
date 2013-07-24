@@ -38,54 +38,42 @@
 #define NUM_FRAME_CONTEXTS (1 << NUM_FRAME_CONTEXTS_LOG2)
 
 typedef struct frame_contexts {
-  // y_mode, uv_mode, partition
   vp9_prob y_mode_prob[BLOCK_SIZE_GROUPS][VP9_INTRA_MODES - 1];
   vp9_prob uv_mode_prob[VP9_INTRA_MODES][VP9_INTRA_MODES - 1];
   vp9_prob partition_prob[NUM_FRAME_TYPES][NUM_PARTITION_CONTEXTS]
                          [PARTITION_TYPES - 1];
-
-  unsigned int y_mode_counts[BLOCK_SIZE_GROUPS][VP9_INTRA_MODES];
-  unsigned int uv_mode_counts[VP9_INTRA_MODES][VP9_INTRA_MODES];
-  unsigned int partition_counts[NUM_PARTITION_CONTEXTS][PARTITION_TYPES];
-
-  // coeff
   vp9_coeff_probs_model coef_probs[TX_SIZE_MAX_SB][BLOCK_TYPES];
-  vp9_coeff_count_model coef_counts[TX_SIZE_MAX_SB][BLOCK_TYPES];
-  unsigned int eob_branch_counts[TX_SIZE_MAX_SB][BLOCK_TYPES][REF_TYPES]
-                                [COEF_BANDS][PREV_COEF_CONTEXTS];
-
-  // switchable_interp
   vp9_prob switchable_interp_prob[VP9_SWITCHABLE_FILTERS + 1]
                                  [VP9_SWITCHABLE_FILTERS - 1];
-  unsigned int switchable_interp_count[VP9_SWITCHABLE_FILTERS + 1]
-                                      [VP9_SWITCHABLE_FILTERS];
-  // inter_mode
   vp9_prob inter_mode_probs[INTER_MODE_CONTEXTS][VP9_INTER_MODES - 1];
-  unsigned int inter_mode_counts[INTER_MODE_CONTEXTS][VP9_INTER_MODES - 1][2];
-
-  // intra_inter, comp_inter, single_ref, comp_ref
   vp9_prob intra_inter_prob[INTRA_INTER_CONTEXTS];
   vp9_prob comp_inter_prob[COMP_INTER_CONTEXTS];
   vp9_prob single_ref_prob[REF_CONTEXTS][2];
   vp9_prob comp_ref_prob[REF_CONTEXTS];
-
-  unsigned int intra_inter_count[INTRA_INTER_CONTEXTS][2];
-  unsigned int comp_inter_count[COMP_INTER_CONTEXTS][2];
-  unsigned int single_ref_count[REF_CONTEXTS][2][2];
-  unsigned int comp_ref_count[REF_CONTEXTS][2];
-
-  // tx_probs
   struct tx_probs tx_probs;
-  struct tx_counts tx_counts;
-
-  // mbskip
   vp9_prob mbskip_probs[MBSKIP_CONTEXTS];
-  unsigned int mbskip_count[MBSKIP_CONTEXTS][2];
-
-  // mv
   nmv_context nmvc;
-  nmv_context_counts NMVcount;
 } FRAME_CONTEXT;
+
+typedef struct {
+  unsigned int y_mode[BLOCK_SIZE_GROUPS][VP9_INTRA_MODES];
+  unsigned int uv_mode[VP9_INTRA_MODES][VP9_INTRA_MODES];
+  unsigned int partition[NUM_PARTITION_CONTEXTS][PARTITION_TYPES];
+  vp9_coeff_count_model coef[TX_SIZE_MAX_SB][BLOCK_TYPES];
+  unsigned int eob_branch[TX_SIZE_MAX_SB][BLOCK_TYPES][REF_TYPES]
+                         [COEF_BANDS][PREV_COEF_CONTEXTS];
+  unsigned int switchable_interp[VP9_SWITCHABLE_FILTERS + 1]
+                                [VP9_SWITCHABLE_FILTERS];
+  unsigned int inter_mode[INTER_MODE_CONTEXTS][VP9_INTER_MODES - 1][2];
+  unsigned int intra_inter[INTRA_INTER_CONTEXTS][2];
+  unsigned int comp_inter[COMP_INTER_CONTEXTS][2];
+  unsigned int single_ref[REF_CONTEXTS][2][2];
+  unsigned int comp_ref[REF_CONTEXTS][2];
+  struct tx_counts tx;
+  unsigned int mbskip[MBSKIP_CONTEXTS][2];
+  nmv_context_counts mv;
+} FRAME_COUNTS;
+
 
 typedef enum {
   SINGLE_PREDICTION_ONLY = 0,
@@ -205,6 +193,7 @@ typedef struct VP9Common {
   FRAME_CONTEXT fc;  /* this frame entropy */
   FRAME_CONTEXT frame_contexts[NUM_FRAME_CONTEXTS];
   unsigned int  frame_context_idx; /* Context to use/update */
+  FRAME_COUNTS counts;
 
   unsigned int current_video_frame;
   int version;

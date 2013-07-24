@@ -225,12 +225,12 @@ static int write_skip_coeff(const VP9_COMP *cpi, int segment_id, MODE_INFO *m,
 }
 
 void vp9_update_skip_probs(VP9_COMP *cpi, vp9_writer *w) {
-  FRAME_CONTEXT *const fc = &cpi->common.fc;
+  VP9_COMMON *cm = &cpi->common;
   int k;
 
   for (k = 0; k < MBSKIP_CONTEXTS; ++k)
-    vp9_cond_prob_diff_update(w, &fc->mbskip_probs[k],
-                              VP9_MODE_UPDATE_PROB, fc->mbskip_count[k]);
+    vp9_cond_prob_diff_update(w, &cm->fc.mbskip_probs[k],
+                              VP9_MODE_UPDATE_PROB, cm->counts.mbskip[k]);
 }
 
 static void write_intra_mode(vp9_writer *bc, int m, const vp9_prob *p) {
@@ -248,7 +248,7 @@ static void update_switchable_interp_probs(VP9_COMP *const cpi,
     vp9_tree_probs_from_distribution(
         vp9_switchable_interp_tree,
         new_prob[j], branch_ct[j],
-        pc->fc.switchable_interp_count[j], 0);
+        pc->counts.switchable_interp[j], 0);
   }
   for (j = 0; j <= VP9_SWITCHABLE_FILTERS; ++j) {
     for (i = 0; i < VP9_SWITCHABLE_FILTERS - 1; ++i) {
@@ -269,7 +269,7 @@ static void update_inter_mode_probs(VP9_COMMON *pc, vp9_writer* const bc) {
     for (j = 0; j < VP9_INTER_MODES - 1; j++) {
       vp9_cond_prob_diff_update(bc, &pc->fc.inter_mode_probs[i][j],
                                 VP9_MODE_UPDATE_PROB,
-                                pc->fc.inter_mode_counts[i][j]);
+                                pc->counts.inter_mode[i][j]);
     }
   }
 }
@@ -740,7 +740,7 @@ static void build_tree_distribution(VP9_COMP *cpi, TX_SIZE txfm_size) {
   vp9_coeff_probs_model *coef_probs = cpi->frame_coef_probs[txfm_size];
   vp9_coeff_count *coef_counts = cpi->coef_counts[txfm_size];
   unsigned int (*eob_branch_ct)[REF_TYPES][COEF_BANDS][PREV_COEF_CONTEXTS] =
-      cpi->common.fc.eob_branch_counts[txfm_size];
+      cpi->common.counts.eob_branch[txfm_size];
   vp9_coeff_stats *coef_branch_ct = cpi->frame_branch_ct[txfm_size];
   vp9_prob full_probs[ENTROPY_NODES];
   int i, j, k, l;
@@ -1060,7 +1060,7 @@ static void encode_txfm_probs(VP9_COMP *cpi, vp9_writer *w) {
 
 
     for (i = 0; i < TX_SIZE_CONTEXTS; i++) {
-      tx_counts_to_branch_counts_8x8(cm->fc.tx_counts.p8x8[i],
+      tx_counts_to_branch_counts_8x8(cm->counts.tx.p8x8[i],
                                      ct_8x8p);
       for (j = 0; j < TX_SIZE_MAX_SB - 3; j++)
         vp9_cond_prob_diff_update(w, &cm->fc.tx_probs.p8x8[i][j],
@@ -1068,7 +1068,7 @@ static void encode_txfm_probs(VP9_COMP *cpi, vp9_writer *w) {
     }
 
     for (i = 0; i < TX_SIZE_CONTEXTS; i++) {
-      tx_counts_to_branch_counts_16x16(cm->fc.tx_counts.p16x16[i],
+      tx_counts_to_branch_counts_16x16(cm->counts.tx.p16x16[i],
                                        ct_16x16p);
       for (j = 0; j < TX_SIZE_MAX_SB - 2; j++)
         vp9_cond_prob_diff_update(w, &cm->fc.tx_probs.p16x16[i][j],
@@ -1076,7 +1076,7 @@ static void encode_txfm_probs(VP9_COMP *cpi, vp9_writer *w) {
     }
 
     for (i = 0; i < TX_SIZE_CONTEXTS; i++) {
-      tx_counts_to_branch_counts_32x32(cm->fc.tx_counts.p32x32[i], ct_32x32p);
+      tx_counts_to_branch_counts_32x32(cm->counts.tx.p32x32[i], ct_32x32p);
       for (j = 0; j < TX_SIZE_MAX_SB - 1; j++)
         vp9_cond_prob_diff_update(w, &cm->fc.tx_probs.p32x32[i][j],
                                   VP9_MODE_UPDATE_PROB, ct_32x32p[j]);
@@ -1105,7 +1105,7 @@ static void fix_mcomp_filter_type(VP9_COMP *cpi) {
     for (i = 0; i < VP9_SWITCHABLE_FILTERS; ++i) {
       count[i] = 0;
       for (j = 0; j <= VP9_SWITCHABLE_FILTERS; ++j)
-        count[i] += cm->fc.switchable_interp_count[j][i];
+        count[i] += cm->counts.switchable_interp[j][i];
       c += (count[i] > 0);
     }
     if (c == 1) {
@@ -1392,7 +1392,7 @@ static size_t write_compressed_header(VP9_COMP *cpi, uint8_t *data) {
 #endif
 
     update_inter_mode_probs(cm, &header_bc);
-    vp9_zero(fc->inter_mode_counts);
+    vp9_zero(cm->counts.inter_mode);
 
     if (cm->mcomp_filter_type == SWITCHABLE)
       update_switchable_interp_probs(cpi, &header_bc);

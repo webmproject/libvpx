@@ -219,7 +219,7 @@ static void tokenize_b(int plane, int block, BLOCK_SIZE_TYPE bsize,
 #else
       if (!t->skip_eob_node)
 #endif
-        ++cpi->common.fc.eob_branch_counts[tx_size][type][ref][band][pt];
+        ++cpi->common.counts.eob_branch[tx_size][type][ref][band][pt];
     }
     token_cache[scan[c]] = vp9_pt_energy_class[token];
     ++t;
@@ -281,7 +281,7 @@ void vp9_tokenize_sb(VP9_COMP *cpi, TOKENEXTRA **t, int dry_run,
   mbmi->mb_skip_coeff = vp9_sb_is_skippable(xd, bsize);
   if (mbmi->mb_skip_coeff) {
     if (!dry_run)
-      cm->fc.mbskip_count[mb_skip_context][1] += skip_inc;
+      cm->counts.mbskip[mb_skip_context][1] += skip_inc;
     vp9_reset_sb_tokens_context(xd, bsize);
     if (dry_run)
       *t = t_backup;
@@ -289,7 +289,7 @@ void vp9_tokenize_sb(VP9_COMP *cpi, TOKENEXTRA **t, int dry_run,
   }
 
   if (!dry_run)
-    cm->fc.mbskip_count[mb_skip_context][0] += skip_inc;
+    cm->counts.mbskip[mb_skip_context][0] += skip_inc;
 
   foreach_transformed_block(xd, bsize, tokenize_b, &arg);
 

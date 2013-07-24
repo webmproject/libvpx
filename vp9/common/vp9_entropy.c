@@ -629,9 +629,9 @@ static void adapt_coef_probs(VP9_COMMON *cm, TX_SIZE txfm_size,
 
   vp9_coeff_probs_model *dst_coef_probs = cm->fc.coef_probs[txfm_size];
   vp9_coeff_probs_model *pre_coef_probs = pre_fc->coef_probs[txfm_size];
-  vp9_coeff_count_model *coef_counts = cm->fc.coef_counts[txfm_size];
+  vp9_coeff_count_model *coef_counts = cm->counts.coef[txfm_size];
   unsigned int (*eob_branch_count)[REF_TYPES][COEF_BANDS][PREV_COEF_CONTEXTS] =
-      cm->fc.eob_branch_counts[txfm_size];
+      cm->counts.eob_branch[txfm_size];
   int t, i, j, k, l, count;
   int factor;
   unsigned int branch_ct[UNCONSTRAINED_NODES][2];

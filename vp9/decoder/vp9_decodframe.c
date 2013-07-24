@@ -298,7 +298,7 @@ static void decode_modes_sb(VP9D_COMP *pbi, int mi_row, int mi_col,
     else
       partition = PARTITION_SPLIT;
 
-    pc->fc.partition_counts[pl][partition]++;
+    pc->counts.partition[pl][partition]++;
   }
 
   subsize = get_subsize(bsize, partition);
@@ -580,23 +580,6 @@ static void setup_frame_size_with_refs(VP9D_COMP *pbi,
 
   setup_display_size(pbi, rb);
   apply_frame_size(pbi, width, height);
-}
-
-static void zero_counts(FRAME_CONTEXT *fc) {
-  vp9_zero(fc->coef_counts);
-  vp9_zero(fc->eob_branch_counts);
-  vp9_zero(fc->y_mode_counts);
-  vp9_zero(fc->uv_mode_counts);
-  vp9_zero(fc->NMVcount);
-  vp9_zero(fc->inter_mode_counts);
-  vp9_zero(fc->partition_counts);
-  vp9_zero(fc->switchable_interp_count);
-  vp9_zero(fc->intra_inter_count);
-  vp9_zero(fc->comp_inter_count);
-  vp9_zero(fc->single_ref_count);
-  vp9_zero(fc->comp_ref_count);
-  vp9_zero(fc->tx_counts);
-  vp9_zero(fc->mbskip_count);
 }
 
 static void decode_tile(VP9D_COMP *pbi, vp9_reader *r) {
@@ -970,7 +953,7 @@ int vp9_decode_frame(VP9D_COMP *pbi, const uint8_t **p_data_end) {
 
   pc->fc = pc->frame_contexts[pc->frame_context_idx];
 
-  zero_counts(&pc->fc);
+  vp9_zero(pc->counts);
 
   // Initialize xd pointers. Any reference should do for xd->pre, so use 0.
   setup_pre_planes(xd, 0, &pc->yv12_fb[pc->active_ref_idx[0]], 0, 0, NULL);

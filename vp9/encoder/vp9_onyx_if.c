@@ -3152,7 +3152,7 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
   update_reference_frames(cpi);
 
   for (t = TX_4X4; t <= TX_32X32; t++)
-    full_to_model_counts(cpi->common.fc.coef_counts[t],
+    full_to_model_counts(cpi->common.counts.coef[t],
                          cpi->coef_counts[t]);
   if (!cpi->common.error_resilient_mode &&
       !cpi->common.frame_parallel_decoding_mode) {
@@ -3160,14 +3160,16 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
   }
 
   if (cpi->common.frame_type != KEY_FRAME) {
-    vp9_copy(cpi->common.fc.y_mode_counts, cpi->y_mode_count);
-    vp9_copy(cpi->common.fc.uv_mode_counts, cpi->y_uv_mode_count);
-    vp9_copy(cpi->common.fc.partition_counts, cpi->partition_count);
-    vp9_copy(cm->fc.intra_inter_count, cpi->intra_inter_count);
-    vp9_copy(cm->fc.comp_inter_count, cpi->comp_inter_count);
-    vp9_copy(cm->fc.single_ref_count, cpi->single_ref_count);
-    vp9_copy(cm->fc.comp_ref_count, cpi->comp_ref_count);
-    cpi->common.fc.NMVcount = cpi->NMVcount;
+    FRAME_COUNTS *counts = &cpi->common.counts;
+
+    vp9_copy(counts->y_mode, cpi->y_mode_count);
+    vp9_copy(counts->uv_mode, cpi->y_uv_mode_count);
+    vp9_copy(counts->partition, cpi->partition_count);
+    vp9_copy(counts->intra_inter, cpi->intra_inter_count);
+    vp9_copy(counts->comp_inter, cpi->comp_inter_count);
+    vp9_copy(counts->single_ref, cpi->single_ref_count);
+    vp9_copy(counts->comp_ref, cpi->comp_ref_count);
+    counts->mv = cpi->NMVcount;
     if (!cpi->common.error_resilient_mode &&
         !cpi->common.frame_parallel_decoding_mode) {
       vp9_adapt_mode_probs(&cpi->common);

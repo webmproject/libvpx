@@ -91,11 +91,13 @@ DECLARE_ALIGNED(16, extern const uint8_t,
       val += 1 << bits_count;          \
   } while (0);
 
-static int decode_coefs(FRAME_CONTEXT *fc, const MACROBLOCKD *xd,
+static int decode_coefs(VP9_COMMON *cm, const MACROBLOCKD *xd,
                         vp9_reader *r, int block_idx,
                         PLANE_TYPE type, int seg_eob, int16_t *qcoeff_ptr,
                         TX_SIZE txfm_size, const int16_t *dq,
                         ENTROPY_CONTEXT *A, ENTROPY_CONTEXT *L) {
+  FRAME_CONTEXT *const fc = &cm->fc;
+  FRAME_COUNTS *const counts = &cm->counts;
   ENTROPY_CONTEXT above_ec, left_ec;
   int pt, c = 0;
   int band;
@@ -121,7 +123,7 @@ static int decode_coefs(FRAME_CONTEXT *fc, const MACROBLOCKD *xd,
 #endif
 
   coef_probs  = fc->coef_probs[txfm_size][type][ref];
-  coef_counts = fc->coef_counts[txfm_size];
+  coef_counts = counts->coef[txfm_size];
   switch (txfm_size) {
     default:
     case TX_4X4: {
@@ -172,7 +174,7 @@ static int decode_coefs(FRAME_CONTEXT *fc, const MACROBLOCKD *xd,
     band = get_coef_band(band_translate, c);
     prob = coef_probs[band][pt];
 #if !CONFIG_BALANCED_COEFTREE
-    fc->eob_branch_counts[txfm_size][type][ref][band][pt]++;
+    counts->eob_branch[txfm_size][type][ref][band][pt]++;
     if (!vp9_read(r, prob[EOB_CONTEXT_NODE]))
       break;
 
@@ -308,7 +310,7 @@ static void decode_block(int plane, int block,
 
   ENTROPY_CONTEXT *A = pd->above_context + aoff;
   ENTROPY_CONTEXT *L = pd->left_context + loff;
-  const int eob = decode_coefs(&arg->pbi->common.fc, xd, arg->r, block,
+  const int eob = decode_coefs(&arg->pbi->common, xd, arg->r, block,
                                pd->plane_type, seg_eob,
                                BLOCK_OFFSET(pd->qcoeff, block, 16),
                                ss_tx_size, pd->dequant, A, L);
