@@ -393,18 +393,6 @@ static int update_ct2(vp9_prob pre_prob, unsigned int ct[2]) {
   return update_ct(pre_prob, get_binary_prob(ct[0], ct[1]), ct);
 }
 
-void vp9_adapt_mode_context(VP9_COMMON *pc) {
-  int i, j;
-  FRAME_CONTEXT *const fc = &pc->fc;
-  FRAME_CONTEXT *const pre_fc = &pc->frame_contexts[pc->frame_context_idx];
-  FRAME_COUNTS  *const counts = &pc->counts;
-
-  for (j = 0; j < INTER_MODE_CONTEXTS; j++)
-    for (i = 0; i < VP9_INTER_MODES - 1; i++)
-      fc->inter_mode_probs[j][i] = update_ct2(pre_fc->inter_mode_probs[j][i],
-                                              counts->inter_mode[j][i]);
-}
-
 static void update_mode_probs(int n_modes,
                               const vp9_tree_index *tree, unsigned int *cnt,
                               vp9_prob *pre_probs, vp9_prob *dst_probs,
@@ -440,6 +428,10 @@ void vp9_adapt_mode_probs(VP9_COMMON *cm) {
       fc->single_ref_prob[i][j] = update_ct2(pre_fc->single_ref_prob[i][j],
                                              counts->single_ref[i][j]);
 
+  for (j = 0; j < INTER_MODE_CONTEXTS; j++)
+      for (i = 0; i < VP9_INTER_MODES - 1; i++)
+        fc->inter_mode_probs[j][i] = update_ct2(pre_fc->inter_mode_probs[j][i],
+                                                counts->inter_mode[j][i]);
   for (i = 0; i < BLOCK_SIZE_GROUPS; i++)
     update_mode_probs(VP9_INTRA_MODES, vp9_intra_mode_tree,
                       counts->y_mode[i], pre_fc->y_mode_prob[i],
