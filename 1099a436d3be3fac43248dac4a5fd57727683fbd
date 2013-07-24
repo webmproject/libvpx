@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAcX//ynM\u003d",
+        "filename": "vp9/encoder/vp9_onyx_if.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 3171,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-07-24T00:19:52Z",
+      "side": 1,
+      "message": "so this is maybe worth a separate CL, but why do we have duplicate counters in the encoder? I.e. why do we count some things in cpi-\u003e*_count and then copy to cm-\u003ecounts.*, but others directly in cm-\u003ecounts.*? Ideally, all cpi-\u003e*_counts would die.",
+      "revId": "1099a436d3be3fac43248dac4a5fd57727683fbd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
