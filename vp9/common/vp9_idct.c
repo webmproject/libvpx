@@ -156,23 +156,6 @@ void vp9_short_idct4x4_1_add_c(int16_t *input, uint8_t *dest, int dest_stride) {
   }
 }
 
-void vp9_dc_only_idct_add_c(int input_dc, uint8_t *pred_ptr,
-                            uint8_t *dst_ptr, int pitch, int stride) {
-  int a1;
-  int r, c;
-  int16_t out = dct_const_round_shift(input_dc * cospi_16_64);
-  out = dct_const_round_shift(out * cospi_16_64);
-  a1 = ROUND_POWER_OF_TWO(out, 4);
-
-  for (r = 0; r < 4; r++) {
-    for (c = 0; c < 4; c++)
-      dst_ptr[c] = clip_pixel(a1 + pred_ptr[c]);
-
-    dst_ptr += stride;
-    pred_ptr += pitch;
-  }
-}
-
 static void idct8_1d(int16_t *input, int16_t *output) {
   int16_t step1[8], step2[8];
   int temp1, temp2;

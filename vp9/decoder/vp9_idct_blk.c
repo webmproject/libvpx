@@ -66,7 +66,7 @@ void vp9_idct_add_c(int16_t *input, uint8_t *dest, int stride, int eob) {
     vp9_short_idct4x4_add(input, dest, stride);
     vpx_memset(input, 0, 32);
   } else {
-    vp9_dc_only_idct_add(input[0], dest, dest, stride, stride);
+    vp9_short_idct4x4_1_add(input, dest, stride);
     ((int *)input)[0] = 0;
   }
 }
