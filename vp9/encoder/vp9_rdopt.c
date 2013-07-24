@@ -109,7 +109,7 @@ static int rd_thresh_block_size_factor[BLOCK_SIZE_TYPES] =
 #define MAX_RD_THRESH_FREQ_FACT 32
 #define MAX_RD_THRESH_FREQ_INC 1
 
-static void fill_token_costs(vp9_coeff_count (*c)[BLOCK_TYPES][2],
+static void fill_token_costs(vp9_coeff_cost *c,
                              vp9_coeff_probs_model (*p)[BLOCK_TYPES]) {
   int i, j, k, l;
   TX_SIZE t;
@@ -120,12 +120,12 @@ static void fill_token_costs(vp9_coeff_count (*c)[BLOCK_TYPES][2],
           for (l = 0; l < PREV_COEF_CONTEXTS; l++) {
             vp9_prob probs[ENTROPY_NODES];
             vp9_model_to_full_probs(p[t][i][j][k][l], probs);
-            vp9_cost_tokens((int *)c[t][i][j][0][k][l], probs,
+            vp9_cost_tokens((int *)c[t][i][j][k][0][l], probs,
                             vp9_coef_tree);
-            vp9_cost_tokens_skip((int *)c[t][i][j][1][k][l], probs,
+            vp9_cost_tokens_skip((int *)c[t][i][j][k][1][l], probs,
                                  vp9_coef_tree);
-            assert(c[t][i][j][0][k][l][DCT_EOB_TOKEN] ==
-                   c[t][i][j][1][k][l][DCT_EOB_TOKEN]);
+            assert(c[t][i][j][k][0][l][DCT_EOB_TOKEN] ==
+                   c[t][i][j][k][1][l][DCT_EOB_TOKEN]);
           }
 }
 
@@ -513,11 +513,16 @@ int64_t vp9_block_error_c(int16_t *coeff, int16_t *dqcoeff,
   return error;
 }
 
+/* The trailing '0' is a terminator which is used inside cost_coeffs() to
+ * decide whether to include cost of a trailing EOB node or not (i.e. we
+ * can skip this if the last coefficient in this transform block, e.g. the
+ * 16th coefficient in a 4x4 block or the 64th coefficient in a 8x8 block,
+ * were non-zero). */
 static const int16_t band_counts[TX_SIZE_MAX_SB][8] = {
-  { 1, 2, 3, 4,  3,   16 - 13 },
-  { 1, 2, 3, 4, 11,   64 - 21 },
-  { 1, 2, 3, 4, 11,  256 - 21 },
-  { 1, 2, 3, 4, 11, 1024 - 21 },
+  { 1, 2, 3, 4,  3,   16 - 13, 0 },
+  { 1, 2, 3, 4, 11,   64 - 21, 0 },
+  { 1, 2, 3, 4, 11,  256 - 21, 0 },
+  { 1, 2, 3, 4, 11, 1024 - 21, 0 },
 };
 
 static INLINE int cost_coeffs(VP9_COMMON *const cm, MACROBLOCK *mb,
@@ -528,11 +533,11 @@ static INLINE int cost_coeffs(VP9_COMMON *const cm, MACROBLOCK *mb,
   MACROBLOCKD *const xd = &mb->e_mbd;
   MB_MODE_INFO *mbmi = &xd->mode_info_context->mbmi;
   int pt, c, cost;
-  const int16_t *band_count = band_counts[tx_size];
+  const int16_t *band_count = &band_counts[tx_size][1];
   const int eob = xd->plane[plane].eobs[block];
   const int16_t *qcoeff_ptr = BLOCK_OFFSET(xd->plane[plane].qcoeff, block, 16);
   const int ref = mbmi->ref_frame[0] != INTRA_FRAME;
-  unsigned int (*token_costs)[COEF_BANDS][PREV_COEF_CONTEXTS]
+  unsigned int (*token_costs)[2][PREV_COEF_CONTEXTS]
                     [MAX_ENTROPY_TOKENS] = mb->token_costs[tx_size][type][ref];
   ENTROPY_CONTEXT above_ec = !!*A, left_ec = !!*L;
   uint8_t token_cache[1024];
@@ -552,13 +557,14 @@ static INLINE int cost_coeffs(VP9_COMMON *const cm, MACROBLOCK *mb,
     cost = token_costs[0][0][pt][DCT_EOB_TOKEN];
     c = 0;
   } else {
-    int v, prev_t, band = 1, band_left = band_count[1];
+    int v, prev_t, band_left = *band_count++;
 
     // dc token
     v = qcoeff_ptr[0];
     prev_t = vp9_dct_value_tokens_ptr[v].token;
-    cost = token_costs[0][0][pt][prev_t] + vp9_dct_value_cost_ptr[v];
+    cost = (*token_costs)[0][pt][prev_t] + vp9_dct_value_cost_ptr[v];
     token_cache[0] = vp9_pt_energy_class[prev_t];
+    ++token_costs;
 
     // ac tokens
     for (c = 1; c < eob; c++) {
@@ -568,18 +574,19 @@ static INLINE int cost_coeffs(VP9_COMMON *const cm, MACROBLOCK *mb,
       v = qcoeff_ptr[rc];
       t = vp9_dct_value_tokens_ptr[v].token;
       pt = get_coef_context(nb, token_cache, c);
-      cost += token_costs[!prev_t][band][pt][t] + vp9_dct_value_cost_ptr[v];
+      cost += (*token_costs)[!prev_t][pt][t] + vp9_dct_value_cost_ptr[v];
       token_cache[rc] = vp9_pt_energy_class[t];
       prev_t = t;
       if (!--band_left) {
-        band_left = band_count[++band];
+        band_left = *band_count++;
+        ++token_costs;
       }
     }
 
     // eob token
-    if (band < 6) {
+    if (band_left) {
       pt = get_coef_context(nb, token_cache, c);
-      cost += token_costs[0][band][pt][DCT_EOB_TOKEN];
+      cost += (*token_costs)[0][pt][DCT_EOB_TOKEN];
     }
   }
 
