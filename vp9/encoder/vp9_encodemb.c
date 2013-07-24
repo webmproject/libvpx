@@ -154,27 +154,21 @@ static void optimize_b(VP9_COMMON *const cm, MACROBLOCK *mb,
   qcoeff_ptr = BLOCK_OFFSET(xd->plane[plane].qcoeff, block, 16);
   switch (tx_size) {
     default:
-    case TX_4X4: {
-      const TX_TYPE tx_type = plane == 0 ? get_tx_type_4x4(xd, ib) : DCT_DCT;
+    case TX_4X4:
       default_eob = 16;
-      scan = get_scan_4x4(tx_type);
+      scan = get_scan_4x4(get_tx_type_4x4(type, xd, ib));
       band_translate = vp9_coefband_trans_4x4;
       break;
-    }
-    case TX_8X8: {
-      const TX_TYPE tx_type = plane == 0 ? get_tx_type_8x8(xd) : DCT_DCT;
-      scan = get_scan_8x8(tx_type);
+    case TX_8X8:
+      scan = get_scan_8x8(get_tx_type_8x8(type, xd));
       default_eob = 64;
       band_translate = vp9_coefband_trans_8x8plus;
       break;
-    }
-    case TX_16X16: {
-      const TX_TYPE tx_type = plane == 0 ? get_tx_type_16x16(xd) : DCT_DCT;
-      scan = get_scan_16x16(tx_type);
+    case TX_16X16:
+      scan = get_scan_16x16(get_tx_type_16x16(type, xd));
       default_eob = 256;
       band_translate = vp9_coefband_trans_8x8plus;
       break;
-    }
     case TX_32X32:
       scan = vp9_default_scan_32x32;
       default_eob = 1024;
@@ -644,7 +638,7 @@ void encode_block_intra(int plane, int block, BLOCK_SIZE_TYPE bsize,
         vp9_short_idct32x32_add(dqcoeff, dst, pd->dst.stride);
       break;
     case TX_16X16:
-      tx_type = plane == 0 ? get_tx_type_16x16(xd) : DCT_DCT;
+      tx_type = get_tx_type_16x16(pd->plane_type, xd);
       scan = get_scan_16x16(tx_type);
       iscan = get_iscan_16x16(tx_type);
       mode = plane == 0 ? mbmi->mode : mbmi->uv_mode;
@@ -673,7 +667,7 @@ void encode_block_intra(int plane, int block, BLOCK_SIZE_TYPE bsize,
       }
       break;
     case TX_8X8:
-      tx_type = plane == 0 ? get_tx_type_8x8(xd) : DCT_DCT;
+      tx_type = get_tx_type_8x8(pd->plane_type, xd);
       scan = get_scan_8x8(tx_type);
       iscan = get_iscan_8x8(tx_type);
       mode = plane == 0 ? mbmi->mode : mbmi->uv_mode;
@@ -702,7 +696,7 @@ void encode_block_intra(int plane, int block, BLOCK_SIZE_TYPE bsize,
       }
       break;
     case TX_4X4:
-      tx_type = plane == 0 ? get_tx_type_4x4(xd, block) : DCT_DCT;
+      tx_type = get_tx_type_4x4(pd->plane_type, xd, block);
       scan = get_scan_4x4(tx_type);
       iscan = get_iscan_4x4(tx_type);
       if (mbmi->sb_type < BLOCK_SIZE_SB8X8 && plane == 0) {

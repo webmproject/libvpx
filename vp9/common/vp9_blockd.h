@@ -359,23 +359,30 @@ static BLOCK_SIZE_TYPE get_subsize(BLOCK_SIZE_TYPE bsize,
 
 extern const TX_TYPE mode2txfm_map[MB_MODE_COUNT];
 
-static INLINE TX_TYPE get_tx_type_4x4(const MACROBLOCKD *xd, int ib) {
-  MODE_INFO *const mi = xd->mode_info_context;
-  MB_MODE_INFO *const mbmi = &mi->mbmi;
+static INLINE TX_TYPE get_tx_type_4x4(PLANE_TYPE plane_type,
+                                      const MACROBLOCKD *xd, int ib) {
+  const MODE_INFO *const mi = xd->mode_info_context;
+  const MB_MODE_INFO *const mbmi = &mi->mbmi;
 
-  if (xd->lossless || mbmi->ref_frame[0] != INTRA_FRAME)
+  if (plane_type != PLANE_TYPE_Y_WITH_DC ||
+      xd->lossless ||
+      mbmi->ref_frame[0] != INTRA_FRAME)
     return DCT_DCT;
 
   return mode2txfm_map[mbmi->sb_type < BLOCK_SIZE_SB8X8 ?
                        mi->bmi[ib].as_mode : mbmi->mode];
 }
 
-static INLINE TX_TYPE get_tx_type_8x8(const MACROBLOCKD *xd) {
-  return mode2txfm_map[xd->mode_info_context->mbmi.mode];
+static INLINE TX_TYPE get_tx_type_8x8(PLANE_TYPE plane_type,
+                                      const MACROBLOCKD *xd) {
+  return plane_type == PLANE_TYPE_Y_WITH_DC ?
+             mode2txfm_map[xd->mode_info_context->mbmi.mode] : DCT_DCT;
 }
 
-static INLINE TX_TYPE get_tx_type_16x16(const MACROBLOCKD *xd) {
-  return  mode2txfm_map[xd->mode_info_context->mbmi.mode];
+static INLINE TX_TYPE get_tx_type_16x16(PLANE_TYPE plane_type,
+                                        const MACROBLOCKD *xd) {
+  return plane_type == PLANE_TYPE_Y_WITH_DC ?
+             mode2txfm_map[xd->mode_info_context->mbmi.mode] : DCT_DCT;
 }
 
 static void setup_block_dptrs(MACROBLOCKD *xd, int ss_x, int ss_y) {
