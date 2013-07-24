@@ -2283,9 +2283,9 @@ void vp9_encode_frame(VP9_COMP *cpi) {
 
   // In the longer term the encoder should be generalized to match the
   // decoder such that we allow compound where one of the 3 buffers has a
-  // differnt sign bias and that buffer is then the fixed ref. However, this
+  // different sign bias and that buffer is then the fixed ref. However, this
   // requires further work in the rd loop. For now the only supported encoder
-  // side behaviour is where the ALT ref buffer has oppositie sign bias to
+  // side behaviour is where the ALT ref buffer has opposite sign bias to
   // the other two.
   if ((cm->ref_frame_sign_bias[ALTREF_FRAME]
        == cm->ref_frame_sign_bias[GOLDEN_FRAME])
@@ -2331,7 +2331,7 @@ void vp9_encode_frame(VP9_COMP *cpi) {
     /* filter type selection */
     // FIXME(rbultje) for some odd reason, we often select smooth_filter
     // as default filter for ARF overlay frames. This is a REALLY BAD
-    // IDEA so we explicitely disable it here.
+    // IDEA so we explicitly disable it here.
     if (frame_type != 3 &&
         cpi->rd_filter_threshes[frame_type][1] >
             cpi->rd_filter_threshes[frame_type][0] &&
