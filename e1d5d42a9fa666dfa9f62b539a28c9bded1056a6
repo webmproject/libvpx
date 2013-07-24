@@ -16,6 +16,24 @@
       "revId": "e1d5d42a9fa666dfa9f62b539a28c9bded1056a6",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcX//xkg\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 812,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2013-07-24T19:56:46Z",
+      "side": 1,
+      "message": "Replacing \"type\" variable with constant PLANE_TYPE_Y_WITH_DC, so compiler could eliminate runtime check.",
+      "parentUuid": "AAAAcX//xmQ\u003d",
+      "revId": "e1d5d42a9fa666dfa9f62b539a28c9bded1056a6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
