@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAcX//x3U\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1426,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2013-07-24T17:38:48Z",
+      "side": 1,
+      "message": "Could you use BLOCK_4X4, BLOCK_8X8, etc constants from the same enumeration? Eventually we are going to remove all references to AB/MB/SB and rename BLOCK_SIZE_TYPE enum to BLOCK_SIZE.",
+      "revId": "61e1c8087759a5815cec11cd7766c855e591c9bc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
