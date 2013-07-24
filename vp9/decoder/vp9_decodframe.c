@@ -90,32 +90,32 @@ static void decode_block(int plane, int block, BLOCK_SIZE_TYPE bsize,
   struct macroblockd_plane *pd = &xd->plane[plane];
   int16_t* const qcoeff = BLOCK_OFFSET(pd->qcoeff, block, 16);
   const int stride = pd->dst.stride;
+  const int eob = pd->eobs[block];
   const int raster_block = txfrm_block_to_raster_block(xd, bsize, plane,
                                                        block, ss_txfrm_size);
   uint8_t* const dst = raster_block_offset_uint8(xd, bsize, plane,
                                                  raster_block,
                                                  pd->dst.buf, stride);
 
-  TX_TYPE tx_type;
-
   switch (ss_txfrm_size / 2) {
-    case TX_4X4:
-      tx_type = plane == 0 ? get_tx_type_4x4(xd, raster_block) : DCT_DCT;
+    case TX_4X4: {
+      const TX_TYPE tx_type = get_tx_type_4x4(pd->plane_type, xd, raster_block);
       if (tx_type == DCT_DCT)
-        xd->itxm_add(qcoeff, dst, stride, pd->eobs[block]);
+        xd->itxm_add(qcoeff, dst, stride, eob);
       else
-        vp9_iht_add_c(tx_type, qcoeff, dst, stride, pd->eobs[block]);
+        vp9_iht_add_c(tx_type, qcoeff, dst, stride, eob);
       break;
+    }
     case TX_8X8:
-      tx_type = plane == 0 ? get_tx_type_8x8(xd) : DCT_DCT;
-      vp9_iht_add_8x8_c(tx_type, qcoeff, dst, stride, pd->eobs[block]);
+      vp9_iht_add_8x8_c(get_tx_type_8x8(pd->plane_type, xd), qcoeff, dst,
+                        stride, eob);
       break;
     case TX_16X16:
-      tx_type = plane == 0 ? get_tx_type_16x16(xd) : DCT_DCT;
-      vp9_iht_add_16x16_c(tx_type, qcoeff, dst, stride, pd->eobs[block]);
+      vp9_iht_add_16x16_c(get_tx_type_16x16(pd->plane_type, xd), qcoeff, dst,
+                          stride, eob);
       break;
     case TX_32X32:
-      vp9_idct_add_32x32(qcoeff, dst, stride, pd->eobs[block]);
+      vp9_idct_add_32x32(qcoeff, dst, stride, eob);
       break;
   }
 }

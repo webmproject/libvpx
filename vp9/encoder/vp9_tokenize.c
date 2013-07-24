@@ -104,7 +104,6 @@ static void tokenize_b(int plane, int block, BLOCK_SIZE_TYPE bsize,
   VP9_COMP *cpi = args->cpi;
   MACROBLOCKD *xd = args->xd;
   TOKENEXTRA **tp = args->tp;
-  PLANE_TYPE type = plane ? PLANE_TYPE_UV : PLANE_TYPE_Y_WITH_DC;
   TX_SIZE tx_size = ss_txfrm_size / 2;
   int dry_run = args->dry_run;
 
@@ -113,6 +112,7 @@ static void tokenize_b(int plane, int block, BLOCK_SIZE_TYPE bsize,
   int c = 0, rc = 0;
   TOKENEXTRA *t = *tp;        /* store tokens starting here */
   const int eob = xd->plane[plane].eobs[block];
+  const PLANE_TYPE type = xd->plane[plane].plane_type;
   const int16_t *qcoeff_ptr = BLOCK_OFFSET(xd->plane[plane].qcoeff, block, 16);
   const BLOCK_SIZE_TYPE sb_type = (mbmi->sb_type < BLOCK_SIZE_SB8X8) ?
                                    BLOCK_SIZE_SB8X8 : mbmi->sb_type;
@@ -138,36 +138,27 @@ static void tokenize_b(int plane, int block, BLOCK_SIZE_TYPE bsize,
   coef_probs = cpi->common.fc.coef_probs[tx_size];
   switch (tx_size) {
     default:
-    case TX_4X4: {
-      const TX_TYPE tx_type = type == PLANE_TYPE_Y_WITH_DC ?
-                                  get_tx_type_4x4(xd, block) : DCT_DCT;
+    case TX_4X4:
       above_ec = A[0] != 0;
       left_ec = L[0] != 0;
       seg_eob = 16;
-      scan = get_scan_4x4(tx_type);
+      scan = get_scan_4x4(get_tx_type_4x4(type, xd, block));
       band_translate = vp9_coefband_trans_4x4;
       break;
-    }
-    case TX_8X8: {
-      const TX_TYPE tx_type = type == PLANE_TYPE_Y_WITH_DC ?
-                                  get_tx_type_8x8(xd) : DCT_DCT;
+    case TX_8X8:
       above_ec = (A[0] + A[1]) != 0;
       left_ec = (L[0] + L[1]) != 0;
       seg_eob = 64;
-      scan = get_scan_8x8(tx_type);
+      scan = get_scan_8x8(get_tx_type_8x8(type, xd));
       band_translate = vp9_coefband_trans_8x8plus;
       break;
-    }
-    case TX_16X16: {
-      const TX_TYPE tx_type = type == PLANE_TYPE_Y_WITH_DC ?
-                                  get_tx_type_16x16(xd) : DCT_DCT;
+    case TX_16X16:
       above_ec = (A[0] + A[1] + A[2] + A[3]) != 0;
       left_ec = (L[0] + L[1] + L[2] + L[3]) != 0;
       seg_eob = 256;
-      scan = get_scan_16x16(tx_type);
+      scan = get_scan_16x16(get_tx_type_16x16(type, xd));
       band_translate = vp9_coefband_trans_8x8plus;
       break;
-    }
     case TX_32X32:
       above_ec = (A[0] + A[1] + A[2] + A[3] + A[4] + A[5] + A[6] + A[7]) != 0;
       left_ec = (L[0] + L[1] + L[2] + L[3] + L[4] + L[5] + L[6] + L[7]) != 0;

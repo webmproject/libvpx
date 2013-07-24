@@ -127,27 +127,21 @@ static int decode_coefs(VP9_COMMON *cm, const MACROBLOCKD *xd,
   switch (txfm_size) {
     default:
     case TX_4X4: {
-      const TX_TYPE tx_type = type == PLANE_TYPE_Y_WITH_DC ?
-                                  get_tx_type_4x4(xd, block_idx) : DCT_DCT;
-      scan = get_scan_4x4(tx_type);
+      scan = get_scan_4x4(get_tx_type_4x4(type, xd, block_idx));
       above_ec = A[0] != 0;
       left_ec = L[0] != 0;
       band_translate = vp9_coefband_trans_4x4;
       break;
     }
     case TX_8X8: {
-      const TX_TYPE tx_type = type == PLANE_TYPE_Y_WITH_DC ?
-                                  get_tx_type_8x8(xd) : DCT_DCT;
-      scan = get_scan_8x8(tx_type);
+      scan = get_scan_8x8(get_tx_type_8x8(type, xd));
       above_ec = (A[0] + A[1]) != 0;
       left_ec = (L[0] + L[1]) != 0;
       band_translate = vp9_coefband_trans_8x8plus;
       break;
     }
     case TX_16X16: {
-      const TX_TYPE tx_type = type == PLANE_TYPE_Y_WITH_DC ?
-                                  get_tx_type_16x16(xd) : DCT_DCT;
-      scan = get_scan_16x16(tx_type);
+      scan = get_scan_16x16(get_tx_type_16x16(type, xd));
       above_ec = (A[0] + A[1] + A[2] + A[3]) != 0;
       left_ec = (L[0] + L[1] + L[2] + L[3]) != 0;
       band_translate = vp9_coefband_trans_8x8plus;
