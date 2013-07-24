@@ -148,6 +148,23 @@ void vp9_short_idct4x4_add_sse2(int16_t *input, uint8_t *dest, int stride) {
   RECON_AND_STORE4X4(dest, input3);
 }
 
+void vp9_short_idct4x4_1_add_sse2(int16_t *input, uint8_t *dest, int stride) {
+  __m128i dc_value;
+  const __m128i zero = _mm_setzero_si128();
+  int a;
+
+  a = dct_const_round_shift(input[0] * cospi_16_64);
+  a = dct_const_round_shift(a * cospi_16_64);
+  a = ROUND_POWER_OF_TWO(a, 4);
+
+  dc_value = _mm_set1_epi16(a);
+
+  RECON_AND_STORE4X4(dest, dc_value);
+  RECON_AND_STORE4X4(dest, dc_value);
+  RECON_AND_STORE4X4(dest, dc_value);
+  RECON_AND_STORE4X4(dest, dc_value);
+}
+
 void vp9_idct4_1d_sse2(int16_t *input, int16_t *output) {
   const __m128i zero = _mm_setzero_si128();
   const __m128i c1 = _mm_setr_epi16((int16_t)cospi_16_64, (int16_t)cospi_16_64,
