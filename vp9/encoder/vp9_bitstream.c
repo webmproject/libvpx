@@ -302,22 +302,13 @@ static void pack_mb_tokens(vp9_writer* const bc,
     assert(pp != 0);
 
     /* skip one or two nodes */
-#if !CONFIG_BALANCED_COEFTREE
     if (p->skip_eob_node) {
       n -= p->skip_eob_node;
       i = 2 * p->skip_eob_node;
     }
-#endif
 
     do {
       const int bb = (v >> --n) & 1;
-#if CONFIG_BALANCED_COEFTREE
-      if (i == 2 && p->skip_eob_node) {
-        i += 2;
-        assert(bb == 1);
-        continue;
-      }
-#endif
       vp9_write(bc, bb, pp[i >> 1]);
       i = vp9_coef_tree[i + bb];
     } while (n);
@@ -757,19 +748,11 @@ static void build_tree_distribution(VP9_COMP *cpi, TX_SIZE txfm_size) {
                                            coef_counts[i][j][k][l], 0);
           vpx_memcpy(coef_probs[i][j][k][l], full_probs,
                      sizeof(vp9_prob) * UNCONSTRAINED_NODES);
-#if CONFIG_BALANCED_COEFTREE
-          coef_branch_ct[i][j][k][l][1][1] = eob_branch_ct[i][j][k][l] -
-                                             coef_branch_ct[i][j][k][l][1][0];
-          coef_probs[i][j][k][l][1] =
-              get_binary_prob(coef_branch_ct[i][j][k][l][1][0],
-                              coef_branch_ct[i][j][k][l][1][1]);
-#else
           coef_branch_ct[i][j][k][l][0][1] = eob_branch_ct[i][j][k][l] -
                                              coef_branch_ct[i][j][k][l][0][0];
           coef_probs[i][j][k][l][0] =
               get_binary_prob(coef_branch_ct[i][j][k][l][0][0],
                               coef_branch_ct[i][j][k][l][0][1]);
-#endif
 #ifdef ENTROPY_STATS
           if (!cpi->dummy_packing) {
             int t;

@@ -122,17 +122,10 @@ static void fill_token_costs(vp9_coeff_count (*c)[BLOCK_TYPES][2],
             vp9_model_to_full_probs(p[t][i][j][k][l], probs);
             vp9_cost_tokens((int *)c[t][i][j][0][k][l], probs,
                             vp9_coef_tree);
-#if CONFIG_BALANCED_COEFTREE
-            // Replace the eob node prob with a very small value so that the
-            // cost approximately equals the cost without the eob node
-            probs[1] = 1;
-            vp9_cost_tokens((int *)c[t][i][j][1][k][l], probs, vp9_coef_tree);
-#else
             vp9_cost_tokens_skip((int *)c[t][i][j][1][k][l], probs,
                                  vp9_coef_tree);
             assert(c[t][i][j][0][k][l][DCT_EOB_TOKEN] ==
                    c[t][i][j][1][k][l][DCT_EOB_TOKEN]);
-#endif
           }
 }
 
