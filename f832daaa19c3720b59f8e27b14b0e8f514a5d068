@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAcX//xxM\u003d",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-07-24T18:20:41Z",
+      "side": 1,
+      "message": "sorry for the breakage; was it only the msbuild step or was the solution unusable in vs after the failure?",
+      "revId": "f832daaa19c3720b59f8e27b14b0e8f514a5d068",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcX//xxE\u003d",
+        "filename": "build/make/gen_msvs_sln.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 82,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-07-24T18:20:41Z",
+      "side": 1,
+      "message": "this will be true the first time through actually with an empty config_list",
+      "revId": "f832daaa19c3720b59f8e27b14b0e8f514a5d068",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
