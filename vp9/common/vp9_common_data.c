@@ -31,6 +31,11 @@ const int mi_height_log2_lookup[BLOCK_SIZE_TYPES] =
 const int num_8x8_blocks_high_lookup[BLOCK_SIZE_TYPES] =
   {1, 1, 1, 1, 2, 1, 2, 4, 2, 4, 8, 4, 8};
 
+// MIN(3, MIN(b_width_log2(bsize), b_height_log2(bsize)))
+const int size_group_lookup[BLOCK_SIZE_TYPES] =
+  {0, 0, 0, 1, 1, 1, 2, 2, 2, 3, 3, 3, 3};
+
+
 const PARTITION_TYPE partition_lookup[][BLOCK_SIZE_TYPES] = {
   {  // 4X4
     // 4X4, 4X8,8X4,8X8,8X16,16X8,16X16,16X32,32X16,32X32,32X64,64X32,64X64
