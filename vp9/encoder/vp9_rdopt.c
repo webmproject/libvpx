@@ -3195,7 +3195,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
   MB_MODE_INFO *mbmi = &xd->mode_info_context->mbmi;
   const BLOCK_SIZE_TYPE block_size = get_plane_block_size(bsize, &xd->plane[0]);
   MB_PREDICTION_MODE this_mode;
-  MV_REFERENCE_FRAME ref_frame;
+  MV_REFERENCE_FRAME ref_frame, second_ref_frame;
   unsigned char segment_id = xd->mode_info_context->mbmi.segment_id;
   int comp_pred, i;
   int_mv frame_mv[MB_MODE_COUNT][MAX_REF_FRAMES];
@@ -3336,6 +3336,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
 
     this_mode = vp9_mode_order[mode_index].mode;
     ref_frame = vp9_mode_order[mode_index].ref_frame;
+    second_ref_frame = vp9_mode_order[mode_index].second_ref_frame;
 
     // Slip modes that have been masked off but always consider first mode.
     if ( mode_index && (bsize > cpi->sf.unused_mode_skip_lvl) &&
@@ -3355,7 +3356,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
 
     // Do not allow compound prediction if the segment level reference
     // frame feature is in use as in this case there can only be one reference.
-    if ((vp9_mode_order[mode_index].second_ref_frame > INTRA_FRAME) &&
+    if ((second_ref_frame > INTRA_FRAME) &&
          vp9_segfeature_active(&xd->seg, segment_id, SEG_LVL_REF_FRAME))
       continue;
 
@@ -3374,51 +3375,49 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
       if (!(mode_mask & (1 << this_mode))) {
         continue;
       }
-      if (vp9_mode_order[mode_index].second_ref_frame != NONE
-          && !(ref_frame_mask
-              & (1 << vp9_mode_order[mode_index].second_ref_frame))) {
+      if (second_ref_frame != NONE
+          && !(ref_frame_mask & (1 << second_ref_frame))) {
         continue;
       }
     }
 
     mbmi->ref_frame[0] = ref_frame;
-    mbmi->ref_frame[1] = vp9_mode_order[mode_index].second_ref_frame;
+    mbmi->ref_frame[1] = second_ref_frame;
 
     if (!(ref_frame == INTRA_FRAME
         || (cpi->ref_frame_flags & flag_list[ref_frame]))) {
       continue;
     }
-    if (!(mbmi->ref_frame[1] == NONE
-        || (cpi->ref_frame_flags & flag_list[mbmi->ref_frame[1]]))) {
+    if (!(second_ref_frame == NONE
+        || (cpi->ref_frame_flags & flag_list[second_ref_frame]))) {
       continue;
     }
 
-    comp_pred = mbmi->ref_frame[1] > INTRA_FRAME;
+    comp_pred = second_ref_frame > INTRA_FRAME;
     if (comp_pred) {
       if (cpi->sf.mode_search_skip_flags & FLAG_SKIP_COMP_BESTINTRA)
         if (vp9_mode_order[best_mode_index].ref_frame == INTRA_FRAME)
           continue;
       if (cpi->sf.mode_search_skip_flags & FLAG_SKIP_COMP_REFMISMATCH)
-        if (vp9_mode_order[mode_index].ref_frame != best_inter_ref_frame &&
-            vp9_mode_order[mode_index].second_ref_frame != best_inter_ref_frame)
+        if (ref_frame != best_inter_ref_frame &&
+            second_ref_frame != best_inter_ref_frame)
           continue;
     }
     // TODO(jingning, jkoleszar): scaling reference frame not supported for
     // SPLITMV.
-    if (mbmi->ref_frame[0] > 0 &&
-        (scale_factor[mbmi->ref_frame[0]].x_scale_fp != VP9_REF_NO_SCALE ||
-         scale_factor[mbmi->ref_frame[0]].y_scale_fp != VP9_REF_NO_SCALE) &&
+    if (ref_frame > 0 &&
+        (scale_factor[ref_frame].x_scale_fp != VP9_REF_NO_SCALE ||
+         scale_factor[ref_frame].y_scale_fp != VP9_REF_NO_SCALE) &&
         this_mode == SPLITMV)
       continue;
 
-    if (mbmi->ref_frame[1] > 0 &&
-        (scale_factor[mbmi->ref_frame[1]].x_scale_fp != VP9_REF_NO_SCALE ||
-         scale_factor[mbmi->ref_frame[1]].y_scale_fp != VP9_REF_NO_SCALE) &&
+    if (second_ref_frame > 0 &&
+        (scale_factor[second_ref_frame].x_scale_fp != VP9_REF_NO_SCALE ||
+         scale_factor[second_ref_frame].y_scale_fp != VP9_REF_NO_SCALE) &&
         this_mode == SPLITMV)
       continue;
 
-    set_scale_factors(xd, mbmi->ref_frame[0], mbmi->ref_frame[1],
-                      scale_factor);
+    set_scale_factors(xd, ref_frame, second_ref_frame, scale_factor);
     mbmi->mode = this_mode;
     mbmi->uv_mode = DC_PRED;
 
@@ -3435,21 +3434,18 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
       continue;
 
     if (comp_pred) {
-      if (!(cpi->ref_frame_flags & flag_list[mbmi->ref_frame[1]]))
+      if (!(cpi->ref_frame_flags & flag_list[second_ref_frame]))
         continue;
-      set_scale_factors(xd, mbmi->ref_frame[0], mbmi->ref_frame[1],
-                        scale_factor);
+      set_scale_factors(xd, ref_frame, second_ref_frame, scale_factor);
 
       mode_excluded = mode_excluded
                          ? mode_excluded
                          : cm->comp_pred_mode == SINGLE_PREDICTION_ONLY;
     } else {
-      // mbmi->ref_frame[1] = vp9_mode_order[mode_index].ref_frame[1];
-      if (ref_frame != INTRA_FRAME) {
-        if (mbmi->ref_frame[1] != INTRA_FRAME)
-          mode_excluded =
-              mode_excluded ?
-                  mode_excluded : cm->comp_pred_mode == COMP_PREDICTION_ONLY;
+      if (ref_frame != INTRA_FRAME && second_ref_frame != INTRA_FRAME) {
+        mode_excluded =
+            mode_excluded ?
+                mode_excluded : cm->comp_pred_mode == COMP_PREDICTION_ONLY;
       }
     }
 
@@ -3457,7 +3453,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
     for (i = 0; i < MAX_MB_PLANE; i++) {
       xd->plane[i].pre[0] = yv12_mb[ref_frame][i];
       if (comp_pred)
-        xd->plane[i].pre[1] = yv12_mb[mbmi->ref_frame[1]][i];
+        xd->plane[i].pre[1] = yv12_mb[second_ref_frame][i];
     }
 
     // If the segment reference frame feature is enabled....
@@ -3568,7 +3564,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
         rate2 += intra_cost_penalty;
       distortion2 = distortion_y + distortion_uv;
     } else if (this_mode == SPLITMV) {
-      const int is_comp_pred = mbmi->ref_frame[1] > 0;
+      const int is_comp_pred = second_ref_frame > 0;
       int rate;
       int64_t distortion;
       int64_t this_rd_thresh;
@@ -3578,7 +3574,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
       int tmp_best_skippable = 0;
       int switchable_filter_index;
       int_mv *second_ref = is_comp_pred ?
-          &mbmi->ref_mvs[mbmi->ref_frame[1]][0] : NULL;
+          &mbmi->ref_mvs[second_ref_frame][0] : NULL;
       union b_mode_info tmp_best_bmodes[16];
       MB_MODE_INFO tmp_best_mbmode;
       PARTITION_INFO tmp_best_partition;
@@ -3590,16 +3586,15 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
           if (vp9_mode_order[best_mode_index].ref_frame == INTRA_FRAME)
             continue;
         if (cpi->sf.mode_search_skip_flags & FLAG_SKIP_COMP_REFMISMATCH)
-          if (vp9_mode_order[mode_index].ref_frame != best_inter_ref_frame &&
-              vp9_mode_order[mode_index].second_ref_frame !=
-              best_inter_ref_frame)
+          if (ref_frame != best_inter_ref_frame &&
+              second_ref_frame != best_inter_ref_frame)
             continue;
       }
 
-      this_rd_thresh = (mbmi->ref_frame[0] == LAST_FRAME) ?
+      this_rd_thresh = (ref_frame == LAST_FRAME) ?
           cpi->rd_threshes[bsize][THR_NEWMV] :
           cpi->rd_threshes[bsize][THR_NEWA];
-      this_rd_thresh = (mbmi->ref_frame[0] == GOLDEN_FRAME) ?
+      this_rd_thresh = (ref_frame == GOLDEN_FRAME) ?
           cpi->rd_threshes[bsize][THR_NEWG] : this_rd_thresh;
       xd->mode_info_context->mbmi.txfm_size = TX_4X4;
 
@@ -3614,7 +3609,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
         vp9_setup_interp_filters(xd, mbmi->interp_filter, &cpi->common);
 
         tmp_rd = rd_pick_best_mbsegmentation(cpi, x,
-                     &mbmi->ref_mvs[mbmi->ref_frame[0]][0],
+                     &mbmi->ref_mvs[ref_frame][0],
                      second_ref,
                      best_yrd,
                      &rate, &rate_y, &distortion,
@@ -3676,7 +3671,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
         // Handles the special case when a filter that is not in the
         // switchable list (bilinear, 6-tap) is indicated at the frame level
         tmp_rd = rd_pick_best_mbsegmentation(cpi, x,
-                     &mbmi->ref_mvs[mbmi->ref_frame[0]][0],
+                     &mbmi->ref_mvs[ref_frame][0],
                      second_ref,
                      best_yrd,
                      &rate, &rate_y, &distortion,
@@ -3737,8 +3732,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
           txfm_cache[i] = txfm_cache[ONLY_4X4];
       }
     } else {
-      compmode_cost = vp9_cost_bit(comp_mode_p,
-                                   mbmi->ref_frame[1] > INTRA_FRAME);
+      compmode_cost = vp9_cost_bit(comp_mode_p, second_ref_frame > INTRA_FRAME);
       this_rd = handle_inter_mode(cpi, x, bsize,
                                   txfm_cache,
                                   &rate2, &distortion2, &skippable,
@@ -3758,10 +3752,10 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
 
     // Estimate the reference frame signaling cost and add it
     // to the rolling cost variable.
-    if (mbmi->ref_frame[1] > INTRA_FRAME) {
-      rate2 += ref_costs_comp[mbmi->ref_frame[0]];
+    if (second_ref_frame > INTRA_FRAME) {
+      rate2 += ref_costs_comp[ref_frame];
     } else {
-      rate2 += ref_costs_single[mbmi->ref_frame[0]];
+      rate2 += ref_costs_single[ref_frame];
     }
 
     if (!disable_skip) {
@@ -3791,8 +3785,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
             rate2 += prob_skip_cost;
           }
         }
-      } else if (mb_skip_allowed && ref_frame != INTRA_FRAME &&
-                 !xd->lossless) {
+      } else if (mb_skip_allowed && ref_frame != INTRA_FRAME && !xd->lossless) {
         if (RDCOST(x->rdmult, x->rddiv, rate_y + rate_uv, distortion2) <
             RDCOST(x->rdmult, x->rddiv, 0, total_sse)) {
           // Add in the cost of the no skip flag.
@@ -3839,7 +3832,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
       // best_inter_mode = xd->mode_info_context->mbmi.mode;
     }
 
-    if (!disable_skip && mbmi->ref_frame[0] == INTRA_FRAME) {
+    if (!disable_skip && ref_frame == INTRA_FRAME) {
       for (i = 0; i < NB_PREDICTION_TYPES; ++i)
         best_pred_rd[i] = MIN(best_pred_rd[i], this_rd);
       for (i = 0; i <= VP9_SWITCHABLE_FILTERS; i++)
@@ -3852,9 +3845,9 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
           || distortion2 < mode_distortions[this_mode]) {
         mode_distortions[this_mode] = distortion2;
       }
-      if (frame_distortions[mbmi->ref_frame[0]] == -1
-          || distortion2 < frame_distortions[mbmi->ref_frame[0]]) {
-        frame_distortions[mbmi->ref_frame[0]] = distortion2;
+      if (frame_distortions[ref_frame] == -1
+          || distortion2 < frame_distortions[ref_frame]) {
+        frame_distortions[ref_frame] = distortion2;
       }
     }
 
@@ -3916,7 +3909,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
     }
 
     /* keep record of best compound/single-only prediction */
-    if (!disable_skip && mbmi->ref_frame[0] != INTRA_FRAME) {
+    if (!disable_skip && ref_frame != INTRA_FRAME) {
       int single_rd, hybrid_rd, single_rate, hybrid_rate;
 
       if (cpi->common.comp_pred_mode == HYBRID_PREDICTION) {
@@ -3930,10 +3923,10 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
       single_rd = RDCOST(x->rdmult, x->rddiv, single_rate, distortion2);
       hybrid_rd = RDCOST(x->rdmult, x->rddiv, hybrid_rate, distortion2);
 
-      if (mbmi->ref_frame[1] <= INTRA_FRAME &&
+      if (second_ref_frame <= INTRA_FRAME &&
           single_rd < best_pred_rd[SINGLE_PREDICTION_ONLY]) {
         best_pred_rd[SINGLE_PREDICTION_ONLY] = single_rd;
-      } else if (mbmi->ref_frame[1] > INTRA_FRAME &&
+      } else if (second_ref_frame > INTRA_FRAME &&
                  single_rd < best_pred_rd[COMP_PREDICTION_ONLY]) {
         best_pred_rd[COMP_PREDICTION_ONLY] = single_rd;
       }
@@ -3942,7 +3935,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
     }
 
     /* keep record of best filter type */
-    if (!mode_excluded && !disable_skip && mbmi->ref_frame[0] != INTRA_FRAME &&
+    if (!mode_excluded && !disable_skip && ref_frame != INTRA_FRAME &&
         cm->mcomp_filter_type != BILINEAR) {
       int64_t ref = cpi->rd_filter_cache[cm->mcomp_filter_type == SWITCHABLE ?
                               VP9_SWITCHABLE_FILTERS :
