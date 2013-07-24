@@ -731,10 +731,13 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
   sf->use_one_partition_size_always = 0;
   sf->less_rectangular_check = 0;
   sf->use_square_partition_only = 0;
-  sf->use_partitions_less_than = 0;
-  sf->less_than_block_size = BLOCK_SIZE_MB16X16;
-  sf->use_partitions_greater_than = 0;
-  sf->greater_than_block_size = BLOCK_SIZE_SB8X8;
+  sf->auto_min_max_partition_size = 0;
+  sf->auto_min_max_partition_interval = 0;
+  sf->auto_min_max_partition_count = 0;
+  sf->use_max_partition_size = 0;
+  sf->max_partition_size = BLOCK_64X64;
+  sf->use_min_partition_size = 0;
+  sf->min_partition_size = BLOCK_4X4;
   sf->adjust_partitioning_from_last_frame = 0;
   sf->last_partitioning_redo_frequency = 4;
   sf->disable_splitmv = 0;
@@ -788,10 +791,15 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
         sf->mode_search_skip_flags = FLAG_SKIP_INTRA_DIRMISMATCH |
                                      FLAG_SKIP_INTRA_BESTINTER |
                                      FLAG_SKIP_COMP_BESTINTRA;
-        sf->last_chroma_intra_mode = H_PRED;
+        sf->use_uv_intra_rd_estimate = 1;
         sf->use_rd_breakout = 1;
         sf->skip_encode_sb = 1;
         sf->auto_mv_step_size = 1;
+
+        sf->auto_min_max_partition_size = 1;
+        sf->use_max_partition_size = 1;
+        sf->use_min_partition_size = 1;
+        sf->auto_min_max_partition_interval = 1;
       }
       if (speed == 2) {
         sf->adjust_thresholds_by_speed = 1;
@@ -812,9 +820,9 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
                                      FLAG_SKIP_COMP_BESTINTRA |
                                      FLAG_SKIP_COMP_REFMISMATCH;
         sf->last_chroma_intra_mode = DC_PRED;
+        sf->use_uv_intra_rd_estimate = 1;
         sf->use_rd_breakout = 1;
         sf->skip_encode_sb = 1;
-        sf->use_uv_intra_rd_estimate = 1;
         sf->using_small_partition_info = 1;
         sf->disable_splitmv =
             (MIN(cpi->common.width, cpi->common.height) >= 720)? 1 : 0;
@@ -862,14 +870,14 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
       if (speed == 2) {
         sf->first_step = 0;
         sf->comp_inter_joint_search_thresh = BLOCK_SIZE_SB8X8;
-        sf->use_partitions_less_than = 1;
-        sf->less_than_block_size = BLOCK_SIZE_MB16X16;
+        sf->use_max_partition_size = 1;
+        sf->max_partition_size = BLOCK_SIZE_MB16X16;
       }
       if (speed == 3) {
         sf->first_step = 0;
         sf->comp_inter_joint_search_thresh = BLOCK_SIZE_SB8X8;
-        sf->use_partitions_greater_than = 1;
-        sf->greater_than_block_size = BLOCK_SIZE_SB8X8;
+        sf->use_min_partition_size = 1;
+        sf->min_partition_size = BLOCK_SIZE_SB8X8;
       }
       */
 
