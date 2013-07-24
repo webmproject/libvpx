@@ -432,7 +432,7 @@ static void configure_static_seg_features(VP9_COMP *cpi) {
           vp9_enable_segfeature(&xd->seg, 0, SEG_LVL_SKIP);
           vp9_enable_segfeature(&xd->seg, 1, SEG_LVL_SKIP);
       }
-      // Enable data udpate
+      // Enable data update
       xd->seg.update_data = 1;
     } else {
       // All other frames.
