@@ -72,15 +72,21 @@ parse_project() {
     eval "${var}_name=$name"
     eval "${var}_guid=$guid"
 
-    # assume that all projects have the same list of possible configurations,
-    # so overwriting old config_lists is not a problem
     if [ "$sfx" = "vcproj" ]; then
-        config_list=`grep -A1 '<Configuration' $file |
+        cur_config_list=`grep -A1 '<Configuration' $file |
             grep Name | cut -d\" -f2`
     else
-        config_list=`grep -B1 'Label="Configuration"' $file |
+        cur_config_list=`grep -B1 'Label="Configuration"' $file |
             grep Condition | cut -d\' -f4`
     fi
+    new_config_list=$(for i in $config_list $cur_config_list; do
+        echo $i
+    done | sort | uniq)
+    if [ "$config_list" != "" ] && [ "$config_list" != "$new_config_list" ]; then
+        mixed_platforms=1
+    fi
+    config_list="$new_config_list"
+    eval "${var}_config_list=\"$cur_config_list\""
     proj_list="${proj_list} ${var}"
 }
 
@@ -130,6 +136,11 @@ process_global() {
     indent_push
     IFS_bak=${IFS}
     IFS=$'\r'$'\n'
+    if [ "$mixed_platforms" != "" ]; then
+        config_list="
+Release|Mixed Platforms
+Debug|Mixed Platforms"
+    fi
     for config in ${config_list}; do
         echo "${indent}$config = $config"
     done
@@ -144,10 +155,17 @@ process_global() {
     indent_push
     for proj in ${proj_list}; do
         eval "local proj_guid=\${${proj}_guid}"
+        eval "local proj_config_list=\${${proj}_config_list}"
         IFS=$'\r'$'\n'
-        for config in ${config_list}; do
-            echo "${indent}${proj_guid}.${config}.ActiveCfg = ${config}"
-            echo "${indent}${proj_guid}.${config}.Build.0 = ${config}"
+        for config in ${proj_config_list}; do
+            if [ "$mixed_platforms" != "" ]; then
+                local c=${config%%|*}
+                echo "${indent}${proj_guid}.${c}|Mixed Platforms.ActiveCfg = ${config}"
+                echo "${indent}${proj_guid}.${c}|Mixed Platforms.Build.0 = ${config}"
+            else
+                echo "${indent}${proj_guid}.${config}.ActiveCfg = ${config}"
+                echo "${indent}${proj_guid}.${config}.Build.0 = ${config}"
+            fi
 
         done
         IFS=${IFS_bak}
