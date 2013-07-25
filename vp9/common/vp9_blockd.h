@@ -26,9 +26,6 @@
 #include "vp9/common/vp9_treecoder.h"
 
 #define BLOCK_SIZE_GROUPS   4
-
-#define PREDICTION_PROBS 3
-
 #define MBSKIP_CONTEXTS 3
 
 /* Segment Feature Masks */
