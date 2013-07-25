@@ -1213,6 +1213,10 @@ static void rd_use_partition(VP9_COMP *cpi, MODE_INFO *m, TOKENEXTRA **tp,
   }
   save_context(cpi, mi_row, mi_col, a, l, sa, sl, bsize);
 
+  x->fast_ms = 0;
+  x->pred_mv.as_int = 0;
+  x->subblock_ref = 0;
+
   if (cpi->sf.adjust_partitioning_from_last_frame) {
     // Check if any of the sub blocks are further split.
     if (partition == PARTITION_SPLIT && subsize > BLOCK_SIZE_SB8X8) {
