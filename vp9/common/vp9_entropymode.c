@@ -356,11 +356,6 @@ void vp9_entropy_mode_init() {
                               vp9_inter_mode_tree, NEARESTMV);
 }
 
-void vp9_init_mode_contexts(VP9_COMMON *pc) {
-  vp9_zero(pc->counts.inter_mode);
-  vp9_copy(pc->fc.inter_mode_probs, default_inter_mode_probs);
-}
-
 void vp9_accum_mv_refs(VP9_COMMON *pc,
                        MB_PREDICTION_MODE m,
                        const int context) {
@@ -527,15 +522,13 @@ void vp9_setup_past_independence(VP9_COMMON *cm, MACROBLOCKD *xd) {
   vp9_zero(xd->lf.last_mode_deltas);
   set_default_lf_deltas(xd);
 
-  vp9_default_coef_probs(cm);
-  vp9_init_mbmode_probs(cm);
-
-  vp9_init_mv_probs(cm);
-
   // To force update of the sharpness
   xd->lf.last_sharpness_level = -1;
 
-  vp9_init_mode_contexts(cm);
+  vp9_default_coef_probs(cm);
+  vp9_init_mbmode_probs(cm);
+  vp9_init_mv_probs(cm);
+  vp9_copy(cm->fc.inter_mode_probs, default_inter_mode_probs);
 
   if (cm->frame_type == KEY_FRAME ||
       cm->error_resilient_mode || cm->reset_frame_context == 3) {
