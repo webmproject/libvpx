@@ -3173,7 +3173,6 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
     if (!cpi->common.error_resilient_mode &&
         !cpi->common.frame_parallel_decoding_mode) {
       vp9_adapt_mode_probs(&cpi->common);
-      vp9_adapt_mode_context(&cpi->common);
       vp9_adapt_mv_probs(&cpi->common, cpi->mb.e_mbd.allow_high_precision_mv);
     }
   }
