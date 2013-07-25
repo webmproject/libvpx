@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAcX//wk4\u003d",
+        "filename": "vp9/common/x86/vp9_intrapred_ssse3.asm",
+        "patchSetId": 2
+      },
+      "lineNbr": 278,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2013-07-25T14:17:59Z",
+      "side": 1,
+      "message": "i\u0027d swap these two psrldq above, so that m3 gets a chance to be ready for storing first:\n\n...\npsrldq              m3, 1\npsrldq              m2, 1\nmovd    [dstq        ], m3\n...",
+      "revId": "ff6bbeb98e5d44683edb8f2f16602dd44598d864",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
