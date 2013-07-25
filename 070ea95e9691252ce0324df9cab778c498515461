@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAcX//wTk\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 2932,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2013-07-25T17:41:44Z",
+      "side": 1,
+      "message": "Was wondering if we could get a similar trade-off by changing the threshold above, since conceptually what is being done here is quite similar. I picked a factor of 2 to keep the performance drop minimal.",
+      "revId": "070ea95e9691252ce0324df9cab778c498515461",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
