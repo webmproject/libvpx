@@ -55,6 +55,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAcX//vtM\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 2932,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2013-07-25T21:44:23Z",
+      "side": 1,
+      "message": "Yes, this check is only for inter modes. It requires that residuals are small enough comparing with dequant values in order to get skipped. Not sure about using it for intra modes.\nWill look at FLAG_EARLY_TERMINATE flag to see if we could combine them.",
+      "parentUuid": "AAAAcX//vww\u003d",
+      "revId": "070ea95e9691252ce0324df9cab778c498515461",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAcX//vzY\u003d",
         "filename": "vp9/encoder/vp9_rdopt.c",
         "patchSetId": 6
