@@ -34,6 +34,23 @@
       "revId": "070ea95e9691252ce0324df9cab778c498515461",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcX//vzY\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 2988,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2013-07-25T21:05:35Z",
+      "side": 1,
+      "message": "can the if-elseif-else... be replaced by\nthresh_ac \u003e\u003e\u003d 8 - (b_width_log2_lookup[bsize] + b_height_log2_lookup[bsize]);?\n\nmaybe a new single lookup table ?",
+      "revId": "070ea95e9691252ce0324df9cab778c498515461",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
