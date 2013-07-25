@@ -16,6 +16,24 @@
       "revId": "070ea95e9691252ce0324df9cab778c498515461",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcX//wRQ\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 2932,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2013-07-25T17:58:49Z",
+      "side": 1,
+      "message": "Here, if pred_error is too large, then don\u0027t use this mode, and continue to check next mode.\nStatic threshold skipping focuses on small pred_error cases. If pred_error is small enough, we pick this mode and don\u0027t check any other modes. Also, don\u0027t transmit any residual data.\nSo, these two are different. Right?",
+      "parentUuid": "AAAAcX//wTk\u003d",
+      "revId": "070ea95e9691252ce0324df9cab778c498515461",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
