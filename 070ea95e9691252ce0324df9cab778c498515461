@@ -37,6 +37,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAcX//vww\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 2932,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2013-07-25T21:34:14Z",
+      "side": 1,
+      "message": "Oh yes, you are setting x-\u003eskip \u003d 1. Didn\u0027t see that.\n\nIn that case, the FLAG_EARLY_TERMINATE is redundant now and can be removed. Also, is this check only supposed to be for  inter modes?",
+      "parentUuid": "AAAAcX//wRQ\u003d",
+      "revId": "070ea95e9691252ce0324df9cab778c498515461",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAcX//vzY\u003d",
         "filename": "vp9/encoder/vp9_rdopt.c",
         "patchSetId": 6
