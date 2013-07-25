@@ -337,9 +337,6 @@ prototype void vp9_idct4_1d "int16_t *input, int16_t *output"
 specialize vp9_idct4_1d sse2
 # dct and add
 
-prototype void vp9_dc_only_idct_add "int input_dc, uint8_t *pred_ptr, uint8_t *dst_ptr, int pitch, int stride"
-specialize vp9_dc_only_idct_add sse2 neon
-
 prototype void vp9_short_iwalsh4x4_1_add "int16_t *input, uint8_t *dest, int dest_stride"
 specialize vp9_short_iwalsh4x4_1_add
 
