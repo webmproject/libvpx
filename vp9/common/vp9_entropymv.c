@@ -175,14 +175,7 @@ void vp9_inc_mv(const MV *mv,  nmv_context_counts *mvctx) {
 }
 
 static void adapt_prob(vp9_prob *dest, vp9_prob prep, unsigned int ct[2]) {
-  const int count = MIN(ct[0] + ct[1], MV_COUNT_SAT);
-  if (count) {
-    const vp9_prob newp = get_binary_prob(ct[0], ct[1]);
-    const int factor = MV_MAX_UPDATE_FACTOR * count / MV_COUNT_SAT;
-    *dest = weighted_prob(prep, newp, factor);
-  } else {
-    *dest = prep;
-  }
+  *dest = merge_probs2(prep, ct, MV_COUNT_SAT, MV_MAX_UPDATE_FACTOR);
 }
 
 void vp9_counts_process(nmv_context_counts *nmv_count, int usehp) {
@@ -195,26 +188,20 @@ static unsigned int adapt_probs(unsigned int i,
                                 vp9_prob this_probs[],
                                 const vp9_prob last_probs[],
                                 const unsigned int num_events[]) {
-  vp9_prob this_prob;
 
-  const uint32_t left = tree[i] <= 0
+
+  const unsigned int left = tree[i] <= 0
           ? num_events[-tree[i]]
           : adapt_probs(tree[i], tree, this_probs, last_probs, num_events);
 
-  const uint32_t right = tree[i + 1] <= 0
+  const unsigned int right = tree[i + 1] <= 0
           ? num_events[-tree[i + 1]]
           : adapt_probs(tree[i + 1], tree, this_probs, last_probs, num_events);
 
-  uint32_t weight = left + right;
-  if (weight) {
-    this_prob = get_binary_prob(left, right);
-    weight = weight > MV_COUNT_SAT ? MV_COUNT_SAT : weight;
-    this_prob = weighted_prob(last_probs[i >> 1], this_prob,
-                              MV_MAX_UPDATE_FACTOR * weight / MV_COUNT_SAT);
-  } else {
-    this_prob = last_probs[i >> 1];
-  }
-  this_probs[i >> 1] = this_prob;
+  const unsigned int ct[2] = { left, right };
+
+  this_probs[i >> 1] = merge_probs2(last_probs[i >> 1], ct,
+                                    MV_COUNT_SAT, MV_MAX_UPDATE_FACTOR);
   return left + right;
 }
 
