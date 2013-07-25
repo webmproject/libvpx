@@ -858,7 +858,7 @@ static void set_block_size(VP9_COMMON * const cm, MODE_INFO *m,
   int bhl = b_height_log2(bsize);
   int bsl = (bwl > bhl ? bwl : bhl);
 
-  int bs = (1 << bsl) / 2;  //
+  int bs = (1 << bsl) / 2;  // Block size in units of 8 pels.
   MODE_INFO *m2 = m + mi_row * mis + mi_col;
   for (row = 0; row < bs; row++) {
     for (col = 0; col < bs; col++) {
@@ -1455,9 +1455,8 @@ static void rd_pick_partition(VP9_COMP *cpi, TOKENEXTRA **tp, int mi_row,
   save_context(cpi, mi_row, mi_col, a, l, sa, sl, bsize);
 
   // PARTITION_SPLIT
-  if (!cpi->sf.use_partitions_greater_than
-      || (cpi->sf.use_partitions_greater_than
-          && bsize > cpi->sf.greater_than_block_size)) {
+  if (!cpi->sf.use_partitions_greater_than ||
+      bsize > cpi->sf.greater_than_block_size) {
     if (bsize > BLOCK_SIZE_SB8X8) {
       int r4 = 0;
       int64_t d4 = 0, sum_rd = 0;
@@ -1515,26 +1514,21 @@ static void rd_pick_partition(VP9_COMP *cpi, TOKENEXTRA **tp, int mi_row,
         ((use_8x8 && bsize == BLOCK_SIZE_MB16X16) ||
         bsize == BLOCK_SIZE_SB32X32 || bsize == BLOCK_SIZE_SB64X64)) {
       int ref0 = 0, ref1 = 0, ref2 = 0, ref3 = 0;
+      PICK_MODE_CONTEXT *block_context = NULL;
 
       if (bsize == BLOCK_SIZE_MB16X16) {
-        ref0 = x->sb8x8_context[xd->sb_index][xd->mb_index][0].mic.mbmi.
-            ref_frame[0];
-        ref1 = x->sb8x8_context[xd->sb_index][xd->mb_index][1].mic.mbmi.
-            ref_frame[0];
-        ref2 = x->sb8x8_context[xd->sb_index][xd->mb_index][2].mic.mbmi.
-            ref_frame[0];
-        ref3 = x->sb8x8_context[xd->sb_index][xd->mb_index][3].mic.mbmi.
-            ref_frame[0];
+        block_context = x->sb8x8_context[xd->sb_index][xd->mb_index];
       } else if (bsize == BLOCK_SIZE_SB32X32) {
-        ref0 = x->mb_context[xd->sb_index][0].mic.mbmi.ref_frame[0];
-        ref1 = x->mb_context[xd->sb_index][1].mic.mbmi.ref_frame[0];
-        ref2 = x->mb_context[xd->sb_index][2].mic.mbmi.ref_frame[0];
-        ref3 = x->mb_context[xd->sb_index][3].mic.mbmi.ref_frame[0];
+        block_context = x->mb_context[xd->sb_index];
       } else if (bsize == BLOCK_SIZE_SB64X64) {
-        ref0 = x->sb32_context[0].mic.mbmi.ref_frame[0];
-        ref1 = x->sb32_context[1].mic.mbmi.ref_frame[0];
-        ref2 = x->sb32_context[2].mic.mbmi.ref_frame[0];
-        ref3 = x->sb32_context[3].mic.mbmi.ref_frame[0];
+        block_context = x->sb32_context;
+      }
+
+      if (block_context) {
+        ref0 = block_context[0].mic.mbmi.ref_frame[0];
+        ref1 = block_context[1].mic.mbmi.ref_frame[0];
+        ref2 = block_context[2].mic.mbmi.ref_frame[0];
+        ref3 = block_context[3].mic.mbmi.ref_frame[0];
       }
 
       // Currently, only consider 4 inter ref frames.
@@ -1544,42 +1538,14 @@ static void rd_pick_partition(VP9_COMP *cpi, TOKENEXTRA **tp, int mi_row,
         int d01, d23, d02, d13;  // motion vector distance between 2 blocks
 
         // Get each subblock's motion vectors.
-        if (bsize == BLOCK_SIZE_MB16X16) {
-          mvr0 = x->sb8x8_context[xd->sb_index][xd->mb_index][0].mic.mbmi.mv[0].
-              as_mv.row;
-          mvc0 = x->sb8x8_context[xd->sb_index][xd->mb_index][0].mic.mbmi.mv[0].
-              as_mv.col;
-          mvr1 = x->sb8x8_context[xd->sb_index][xd->mb_index][1].mic.mbmi.mv[0].
-              as_mv.row;
-          mvc1 = x->sb8x8_context[xd->sb_index][xd->mb_index][1].mic.mbmi.mv[0].
-              as_mv.col;
-          mvr2 = x->sb8x8_context[xd->sb_index][xd->mb_index][2].mic.mbmi.mv[0].
-              as_mv.row;
-          mvc2 = x->sb8x8_context[xd->sb_index][xd->mb_index][2].mic.mbmi.mv[0].
-              as_mv.col;
-          mvr3 = x->sb8x8_context[xd->sb_index][xd->mb_index][3].mic.mbmi.mv[0].
-              as_mv.row;
-          mvc3 = x->sb8x8_context[xd->sb_index][xd->mb_index][3].mic.mbmi.mv[0].
-              as_mv.col;
-        } else if (bsize == BLOCK_SIZE_SB32X32) {
-          mvr0 = x->mb_context[xd->sb_index][0].mic.mbmi.mv[0].as_mv.row;
-          mvc0 = x->mb_context[xd->sb_index][0].mic.mbmi.mv[0].as_mv.col;
-          mvr1 = x->mb_context[xd->sb_index][1].mic.mbmi.mv[0].as_mv.row;
-          mvc1 = x->mb_context[xd->sb_index][1].mic.mbmi.mv[0].as_mv.col;
-          mvr2 = x->mb_context[xd->sb_index][2].mic.mbmi.mv[0].as_mv.row;
-          mvc2 = x->mb_context[xd->sb_index][2].mic.mbmi.mv[0].as_mv.col;
-          mvr3 = x->mb_context[xd->sb_index][3].mic.mbmi.mv[0].as_mv.row;
-          mvc3 = x->mb_context[xd->sb_index][3].mic.mbmi.mv[0].as_mv.col;
-        } else if (bsize == BLOCK_SIZE_SB64X64) {
-          mvr0 = x->sb32_context[0].mic.mbmi.mv[0].as_mv.row;
-          mvc0 = x->sb32_context[0].mic.mbmi.mv[0].as_mv.col;
-          mvr1 = x->sb32_context[1].mic.mbmi.mv[0].as_mv.row;
-          mvc1 = x->sb32_context[1].mic.mbmi.mv[0].as_mv.col;
-          mvr2 = x->sb32_context[2].mic.mbmi.mv[0].as_mv.row;
-          mvc2 = x->sb32_context[2].mic.mbmi.mv[0].as_mv.col;
-          mvr3 = x->sb32_context[3].mic.mbmi.mv[0].as_mv.row;
-          mvc3 = x->sb32_context[3].mic.mbmi.mv[0].as_mv.col;
-        }
+        mvr0 = block_context[0].mic.mbmi.mv[0].as_mv.row;
+        mvc0 = block_context[0].mic.mbmi.mv[0].as_mv.col;
+        mvr1 = block_context[1].mic.mbmi.mv[0].as_mv.row;
+        mvc1 = block_context[1].mic.mbmi.mv[0].as_mv.col;
+        mvr2 = block_context[2].mic.mbmi.mv[0].as_mv.row;
+        mvc2 = block_context[2].mic.mbmi.mv[0].as_mv.col;
+        mvr3 = block_context[3].mic.mbmi.mv[0].as_mv.row;
+        mvc3 = block_context[3].mic.mbmi.mv[0].as_mv.col;
 
         // Adjust sign if ref is alt_ref
         if (cm->ref_frame_sign_bias[ref0]) {
@@ -1631,9 +1597,8 @@ static void rd_pick_partition(VP9_COMP *cpi, TOKENEXTRA **tp, int mi_row,
     }
   }
 
-  if (!cpi->sf.use_partitions_less_than
-      || (cpi->sf.use_partitions_less_than
-          && bsize <= cpi->sf.less_than_block_size)) {
+  if (!cpi->sf.use_partitions_less_than ||
+      bsize <= cpi->sf.less_than_block_size) {
     int larger_is_better = 0;
     // PARTITION_NONE
     if ((mi_row + (ms >> 1) < cm->mi_rows) &&

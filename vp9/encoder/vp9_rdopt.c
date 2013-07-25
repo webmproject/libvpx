@@ -3338,12 +3338,12 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
     ref_frame = vp9_mode_order[mode_index].ref_frame;
     second_ref_frame = vp9_mode_order[mode_index].second_ref_frame;
 
-    // Slip modes that have been masked off but always consider first mode.
+    // Skip modes that have been masked off but always consider first mode.
     if ( mode_index && (bsize > cpi->sf.unused_mode_skip_lvl) &&
          (cpi->unused_mode_skip_mask & (1 << mode_index)) )
       continue;
 
-    // Skip if the current refernce frame has been masked off
+    // Skip if the current reference frame has been masked off
     if (cpi->sf.reference_masking && !cpi->set_ref_frame_mask &&
         (cpi->ref_frame_mask & (1 << ref_frame)))
       continue;
