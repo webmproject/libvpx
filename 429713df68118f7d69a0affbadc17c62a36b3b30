@@ -1,0 +1,140 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAcX//wsk\u003d",
+        "filename": "vp9/common/vp9_mvref_common.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 107,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2013-07-25T06:23:48Z",
+      "side": 1,
+      "message": "if we made find_mv_refs_idx return mv_counts we could make this goto a return... :)   This could probably be an inline \nfunction too but would require a bit of weird construct.   \ncalling function would be something like \n\nif (!add_mv_ref_list(mv_ref_list,mvref_coun,candidate-\u003emvt)\n  goto done;",
+      "revId": "429713df68118f7d69a0affbadc17c62a36b3b30",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcX//wsg\u003d",
+        "filename": "vp9/common/vp9_mvref_common.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 110,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2013-07-25T06:23:48Z",
+      "side": 1,
+      "message": "space",
+      "revId": "429713df68118f7d69a0affbadc17c62a36b3b30",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcX//ws8\u003d",
+        "filename": "vp9/common/vp9_mvref_common.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 142,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2013-07-25T06:23:48Z",
+      "side": 1,
+      "message": "these checks can probably be put in a static inline function.. rather than duplicated 3 times.",
+      "revId": "429713df68118f7d69a0affbadc17c62a36b3b30",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcX//wsU\u003d",
+        "filename": "vp9/common/vp9_mvref_common.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 162,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2013-07-25T06:23:48Z",
+      "side": 1,
+      "message": "some duplicate code here for checking ref and adding it.   Maybe an inline function could work a macro surely could",
+      "revId": "429713df68118f7d69a0affbadc17c62a36b3b30",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcX//wsM\u003d",
+        "filename": "vp9/common/vp9_mvref_common.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 184,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2013-07-25T06:23:48Z",
+      "side": 1,
+      "message": "a lot of this code is duplicated above.  I think it can be made shorter with either a macro or inline function as above..",
+      "revId": "429713df68118f7d69a0affbadc17c62a36b3b30",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcX//wsI\u003d",
+        "filename": "vp9/common/vp9_mvref_common.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 211,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2013-07-25T06:23:48Z",
+      "side": 1,
+      "message": "ditto duplicate code",
+      "revId": "429713df68118f7d69a0affbadc17c62a36b3b30",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcX//wsE\u003d",
+        "filename": "vp9/common/vp9_mvref_common.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 227,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2013-07-25T06:23:48Z",
+      "side": 1,
+      "message": "ditto duplicate code",
+      "revId": "429713df68118f7d69a0affbadc17c62a36b3b30",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcX//wr8\u003d",
+        "filename": "vp9/common/vp9_mvref_common.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 245,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2013-07-25T06:23:48Z",
+      "side": 1,
+      "message": "the following 3 lines are repeated multiple times.   should be an inline function or macro.",
+      "revId": "429713df68118f7d69a0affbadc17c62a36b3b30",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
