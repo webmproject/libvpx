@@ -15,9 +15,7 @@
 
 #include "vp9/common/vp9_onyxc_int.h"
 
-#include "vp9/decoder/vp9_idct_blk.h"
 #include "vp9/decoder/vp9_onyxd.h"
-#include "vp9/decoder/vp9_treereader.h"
 
 typedef struct VP9Decompressor {
   DECLARE_ALIGNED(16, MACROBLOCKD, mb);

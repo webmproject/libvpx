@@ -1066,8 +1066,7 @@ static void choose_partitioning(VP9_COMP *cpi, MODE_INFO *m, int mi_row,
   int dp;
   int pixels_wide = 64, pixels_high = 64;
 
-  vpx_memset(&vt, 0, sizeof(vt));
-
+  vp9_zero(vt);
   set_offsets(cpi, mi_row, mi_col, BLOCK_SIZE_SB64X64);
 
   if (xd->mb_to_right_edge < 0)

@@ -248,8 +248,7 @@ static void update_mbgraph_frame_stats(VP9_COMP *cpi,
   int_mv arf_top_mv, gld_top_mv;
   MODE_INFO mi_local;
 
-  // Make sure the mi context starts in a consistent state.
-  memset(&mi_local, 0, sizeof(mi_local));
+  vp9_zero(mi_local);
 
   // Set up limit values for motion vectors to prevent them extending outside the UMV borders
   arf_top_mv.as_int = 0;

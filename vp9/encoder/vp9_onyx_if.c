@@ -1383,7 +1383,7 @@ VP9_PTR vp9_create_compressor(VP9_CONFIG *oxcf) {
 
   cm = &cpi->common;
 
-  vpx_memset(cpi, 0, sizeof(VP9_COMP));
+  vp9_zero(*cpi);
 
   if (setjmp(cm->error.jmp)) {
     VP9_PTR ptr = ctx.ptr;
@@ -2818,7 +2818,7 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
   }
 #endif
   loop_count = 0;
-  vpx_memset(cpi->rd_tx_select_threshes, 0, sizeof(cpi->rd_tx_select_threshes));
+  vp9_zero(cpi->rd_tx_select_threshes);
 
   if (cm->frame_type != KEY_FRAME) {
     /* TODO: Decide this more intelligently */

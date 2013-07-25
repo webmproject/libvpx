@@ -80,7 +80,6 @@ extern vp9_extra_bit vp9_extra_bits[12];    /* indexed by token value */
    coefficient band (and since zigzag positions 0, 1, and 2 are in
    distinct bands). */
 
-/*# define DC_TOKEN_CONTEXTS        3*/ /* 00, 0!0, !0!0 */
 #define PREV_COEF_CONTEXTS          6
 
 // #define ENTROPY_STATS

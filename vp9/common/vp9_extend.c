@@ -8,8 +8,10 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#include "vp9/common/vp9_extend.h"
 #include "vpx_mem/vpx_mem.h"
+
+#include "vp9/common/vp9_common.h"
+#include "vp9/common/vp9_extend.h"
 
 static void copy_and_extend_plane(const uint8_t *src, int src_pitch,
                                   uint8_t *dst, int dst_pitch,
@@ -107,14 +109,14 @@ void vp9_copy_and_extend_frame_with_rect(const YV12_BUFFER_CONFIG *src,
   const int src_y_offset = srcy * src->y_stride + srcx;
   const int dst_y_offset = srcy * dst->y_stride + srcx;
 
-  const int et_uv = (et_y + 1) >> 1;
-  const int el_uv = (el_y + 1) >> 1;
-  const int eb_uv = (eb_y + 1) >> 1;
-  const int er_uv = (er_y + 1) >> 1;
+  const int et_uv = ROUND_POWER_OF_TWO(et_y, 1);
+  const int el_uv = ROUND_POWER_OF_TWO(el_y, 1);
+  const int eb_uv = ROUND_POWER_OF_TWO(eb_y, 1);
+  const int er_uv = ROUND_POWER_OF_TWO(er_y, 1);
   const int src_uv_offset = ((srcy * src->uv_stride) >> 1) + (srcx >> 1);
   const int dst_uv_offset = ((srcy * dst->uv_stride) >> 1) + (srcx >> 1);
-  const int srch_uv = (srch + 1) >> 1;
-  const int srcw_uv = (srcw + 1) >> 1;
+  const int srch_uv = ROUND_POWER_OF_TWO(srch, 1);
+  const int srcw_uv = ROUND_POWER_OF_TWO(srcw, 1);
 
   copy_and_extend_plane(src->y_buffer + src_y_offset, src->y_stride,
                         dst->y_buffer + dst_y_offset, dst->y_stride,

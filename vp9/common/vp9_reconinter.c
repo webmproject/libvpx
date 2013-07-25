@@ -400,7 +400,7 @@ void vp9_setup_scale_factors(VP9_COMMON *cm, int i) {
   const int ref = cm->active_ref_idx[i];
   struct scale_factors *const sf = &cm->active_ref_scale[i];
   if (ref >= NUM_YV12_BUFFERS) {
-    memset(sf, 0, sizeof(*sf));
+    vp9_zero(*sf);
   } else {
     YV12_BUFFER_CONFIG *const fb = &cm->yv12_fb[ref];
     vp9_setup_scale_factors_for_frame(sf,

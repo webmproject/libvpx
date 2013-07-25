@@ -61,8 +61,6 @@ extern struct vp9_token vp9_switchable_interp_encodings[VP9_SWITCHABLE_FILTERS];
 
 void vp9_entropy_mode_init();
 
-int vp9_mv_cont(const int_mv *l, const int_mv *a);
-
 void vp9_setup_past_independence(struct VP9Common *cm, MACROBLOCKD *xd);
 
 void vp9_init_mbmode_probs(struct VP9Common *x);

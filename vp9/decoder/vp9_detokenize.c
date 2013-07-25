@@ -15,8 +15,10 @@
 #include "vp9/common/vp9_common.h"
 #include "vp9/common/vp9_seg_common.h"
 
+#include "vp9/decoder/vp9_dboolhuff.h"
 #include "vp9/decoder/vp9_detokenize.h"
 #include "vp9/decoder/vp9_onyxd_int.h"
+#include "vp9/decoder/vp9_treereader.h"
 
 #define EOB_CONTEXT_NODE            0
 #define ZERO_CONTEXT_NODE           1
@@ -93,27 +95,18 @@ static int decode_coefs(VP9_COMMON *cm, const MACROBLOCKD *xd,
   FRAME_CONTEXT *const fc = &cm->fc;
   FRAME_COUNTS *const counts = &cm->counts;
   ENTROPY_CONTEXT above_ec, left_ec;
-  int pt, c = 0;
-  int band;
-  vp9_prob (*coef_probs)[PREV_COEF_CONTEXTS][UNCONSTRAINED_NODES];
-  vp9_prob coef_probs_full[COEF_BANDS][PREV_COEF_CONTEXTS][ENTROPY_NODES];
-  uint8_t load_map[COEF_BANDS][PREV_COEF_CONTEXTS] = {
-    {0, 0, 0, 0, 0, 0},
-    {0, 0, 0, 0, 0, 0},
-    {0, 0, 0, 0, 0, 0},
-    {0, 0, 0, 0, 0, 0},
-    {0, 0, 0, 0, 0, 0},
-    {0, 0, 0, 0, 0, 0},
-  };
-
-  vp9_prob *prob;
-  vp9_coeff_count_model *coef_counts;
   const int ref = xd->mode_info_context->mbmi.ref_frame[0] != INTRA_FRAME;
+  int band, pt, c = 0;
+  vp9_prob (*coef_probs)[PREV_COEF_CONTEXTS][UNCONSTRAINED_NODES] =
+      fc->coef_probs[txfm_size][type][ref];
+  vp9_prob coef_probs_full[COEF_BANDS][PREV_COEF_CONTEXTS][ENTROPY_NODES];
+  uint8_t load_map[COEF_BANDS][PREV_COEF_CONTEXTS] = { { 0 } };
+  vp9_prob *prob;
+  vp9_coeff_count_model *coef_counts = counts->coef[txfm_size];
   const int16_t *scan, *nb;
   uint8_t token_cache[1024];
   const uint8_t * band_translate;
-  coef_probs  = fc->coef_probs[txfm_size][type][ref];
-  coef_counts = counts->coef[txfm_size];
+
   switch (txfm_size) {
     default:
     case TX_4X4: {
