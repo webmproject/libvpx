@@ -382,15 +382,12 @@ void vp9_accum_mv_refs(VP9_COMMON *pc,
 #define COUNT_SAT 20
 #define MAX_UPDATE_FACTOR 128
 
-static int update_ct(vp9_prob pre_prob, vp9_prob prob,
-                          unsigned int ct[2]) {
-  const int count = MIN(ct[0] + ct[1], COUNT_SAT);
-  const int factor = MAX_UPDATE_FACTOR * count / COUNT_SAT;
-  return weighted_prob(pre_prob, prob, factor);
+static int update_ct(vp9_prob pre_prob, vp9_prob prob, unsigned int ct[2]) {
+  return merge_probs(pre_prob, prob, ct, COUNT_SAT, MAX_UPDATE_FACTOR);
 }
 
 static int update_ct2(vp9_prob pre_prob, unsigned int ct[2]) {
-  return update_ct(pre_prob, get_binary_prob(ct[0], ct[1]), ct);
+  return merge_probs2(pre_prob, ct, COUNT_SAT, MAX_UPDATE_FACTOR);
 }
 
 static void update_mode_probs(int n_modes,

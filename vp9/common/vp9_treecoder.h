@@ -79,4 +79,22 @@ static INLINE vp9_prob weighted_prob(int prob1, int prob2, int factor) {
   return ROUND_POWER_OF_TWO(prob1 * (256 - factor) + prob2 * factor, 8);
 }
 
+static INLINE vp9_prob merge_probs(vp9_prob pre_prob, vp9_prob prob,
+                                   const unsigned int ct[2],
+                                   unsigned int count_sat,
+                                   unsigned int max_update_factor) {
+  const unsigned int count = MIN(ct[0] + ct[1], count_sat);
+  const unsigned int factor = max_update_factor * count / count_sat;
+  return weighted_prob(pre_prob, prob, factor);
+}
+
+static INLINE vp9_prob merge_probs2(vp9_prob pre_prob,
+                                   const unsigned int ct[2],
+                                   unsigned int count_sat,
+                                   unsigned int max_update_factor) {
+  return merge_probs(pre_prob, get_binary_prob(ct[0], ct[1]), ct, count_sat,
+                     max_update_factor);
+}
+
+
 #endif  // VP9_COMMON_VP9_TREECODER_H_

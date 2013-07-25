@@ -614,7 +614,8 @@ void vp9_coef_tree_initialize() {
 #define COEF_MAX_UPDATE_FACTOR_AFTER_KEY 128
 
 static void adapt_coef_probs(VP9_COMMON *cm, TX_SIZE txfm_size,
-                             int count_sat, int update_factor) {
+                             unsigned int count_sat,
+                             unsigned int update_factor) {
   FRAME_CONTEXT *pre_fc = &cm->frame_contexts[cm->frame_context_idx];
 
   vp9_coeff_probs_model *dst_coef_probs = cm->fc.coef_probs[txfm_size];
@@ -622,8 +623,7 @@ static void adapt_coef_probs(VP9_COMMON *cm, TX_SIZE txfm_size,
   vp9_coeff_count_model *coef_counts = cm->counts.coef[txfm_size];
   unsigned int (*eob_branch_count)[REF_TYPES][COEF_BANDS][PREV_COEF_CONTEXTS] =
       cm->counts.eob_branch[txfm_size];
-  int t, i, j, k, l, count;
-  int factor;
+  int t, i, j, k, l;
   unsigned int branch_ct[UNCONSTRAINED_NODES][2];
   vp9_prob coef_probs[UNCONSTRAINED_NODES];
   int entropy_nodes_adapt = UNCONSTRAINED_NODES;
@@ -634,29 +634,23 @@ static void adapt_coef_probs(VP9_COMMON *cm, TX_SIZE txfm_size,
         for (l = 0; l < PREV_COEF_CONTEXTS; ++l) {
           if (l >= 3 && k == 0)
             continue;
-          vp9_tree_probs_from_distribution(
-              vp9_coefmodel_tree,
-              coef_probs, branch_ct,
-              coef_counts[i][j][k][l], 0);
+          vp9_tree_probs_from_distribution(vp9_coefmodel_tree, coef_probs,
+                                           branch_ct, coef_counts[i][j][k][l],
+                                           0);
           branch_ct[0][1] = eob_branch_count[i][j][k][l] - branch_ct[0][0];
           coef_probs[0] = get_binary_prob(branch_ct[0][0], branch_ct[0][1]);
-          for (t = 0; t < entropy_nodes_adapt; ++t) {
-            count = branch_ct[t][0] + branch_ct[t][1];
-            count = count > count_sat ? count_sat : count;
-            factor = (update_factor * count / count_sat);
-            dst_coef_probs[i][j][k][l][t] =
-                weighted_prob(pre_coef_probs[i][j][k][l][t],
-                              coef_probs[t], factor);
-          }
+          for (t = 0; t < entropy_nodes_adapt; ++t)
+            dst_coef_probs[i][j][k][l][t] = merge_probs(
+                pre_coef_probs[i][j][k][l][t], coef_probs[t],
+                branch_ct[t], count_sat, update_factor);
         }
 }
 
 void vp9_adapt_coef_probs(VP9_COMMON *cm) {
   TX_SIZE t;
-  int count_sat;
-  int update_factor; /* denominator 256 */
+  unsigned int count_sat, update_factor;
 
-  if ((cm->frame_type == KEY_FRAME) || cm->intra_only) {
+  if (cm->frame_type == KEY_FRAME || cm->intra_only) {
     update_factor = COEF_MAX_UPDATE_FACTOR_KEY;
     count_sat = COEF_COUNT_SAT_KEY;
   } else if (cm->last_frame_type == KEY_FRAME) {
