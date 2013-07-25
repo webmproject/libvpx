@@ -69,7 +69,9 @@ void vp9_init_mbmode_probs(struct VP9Common *x);
 
 void vp9_adapt_mode_probs(struct VP9Common *);
 
-void vp9_accum_mv_refs(struct VP9Common *pc, MB_PREDICTION_MODE m, int context);
+void vp9_accum_mv_refs(struct VP9Common *pc,
+                       MB_PREDICTION_MODE m,
+                       const int context);
 
 void tx_counts_to_branch_counts_32x32(unsigned int *tx_count_32x32p,
                                       unsigned int (*ct_32x32p)[2]);
