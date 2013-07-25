@@ -385,15 +385,14 @@ static void read_intra_block_modes(VP9D_COMP *pbi, MODE_INFO *mi,
   VP9_COMMON *const cm = &pbi->common;
   MB_MODE_INFO *const mbmi = &mi->mbmi;
   const BLOCK_SIZE_TYPE bsize = mi->mbmi.sb_type;
-  const int bwl = b_width_log2(bsize), bhl = b_height_log2(bsize);
 
   if (bsize >= BLOCK_SIZE_SB8X8) {
-    const int size_group = MIN(3, MIN(bwl, bhl));
+    const int size_group = size_group_lookup[bsize];
     mbmi->mode = read_intra_mode(r, cm->fc.y_mode_prob[size_group]);
     cm->counts.y_mode[size_group][mbmi->mode]++;
   } else {
      // Only 4x4, 4x8, 8x4 blocks
-     const int bw = 1 << bwl, bh = 1 << bhl;
+     const int bw = 1 << b_width_log2(bsize), bh = 1 << b_height_log2(bsize);
      int idx, idy;
 
      for (idy = 0; idy < 2; idy += bh) {

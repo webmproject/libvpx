@@ -443,9 +443,7 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, MODE_INFO *m,
 #endif
 
     if (bsize >= BLOCK_SIZE_SB8X8) {
-      const int bwl = b_width_log2(bsize), bhl = b_height_log2(bsize);
-      const int bsl = MIN(bwl, bhl);
-      write_intra_mode(bc, mode, pc->fc.y_mode_prob[MIN(3, bsl)]);
+      write_intra_mode(bc, mode, pc->fc.y_mode_prob[size_group_lookup[bsize]]);
     } else {
       int idx, idy;
       int num_4x4_blocks_wide = num_4x4_blocks_wide_lookup[bsize];
