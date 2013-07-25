@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAcX//wE8\u003d",
+        "filename": "vp9/encoder/vp9_onyx_if.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 909,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2013-07-25T19:14:16Z",
+      "side": 1,
+      "message": "oxcf.lossless was already used above to initialize sf.optimize_cofficients flag, would this be redundant?",
+      "revId": "ab47e70e4344923ff9cf382109ceab720148dea6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
