@@ -3048,14 +3048,10 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
       // The encode_breakout input
       unsigned int encode_breakout = x->encode_breakout << 4;
 
-      // Adjust threshold according to dequant value. Making threshold more
-      // strict when dequant is high to avoid big PSNR loss.
-      if (xd->plane[0].dequant[1] < 32)
-        // Initial threshold value
-        thresh_ac = xd->plane[0].dequant[1] * xd->plane[0].dequant[1];
-      else
-        thresh_ac = (xd->plane[0].dequant[1] << 6) - 1024;
+      // Calculate threshold according to dequant value.
+      thresh_ac = (xd->plane[0].dequant[1] * xd->plane[0].dequant[1]) / 9;
 
+      // Set a maximum for threshold to avoid big PSNR loss in low bitrate case.
       if (thresh_ac > 36000)
         thresh_ac = 36000;
 
