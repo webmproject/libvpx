@@ -22,8 +22,8 @@
     MACRO
     IDCT8x8_1D
     ; stage 1
-    vdup.16         d0, r3;                   ; duplicate cospi_28_64
-    vdup.16         d1, r4;                   ; duplicate cospi_4_64
+    vdup.16         d0, r3                    ; duplicate cospi_28_64
+    vdup.16         d1, r4                    ; duplicate cospi_4_64
 
     ; input[1] * cospi_28_64
     vmull.s16       q2, d18, d0
@@ -57,8 +57,8 @@
     vqrshrn.s32     d14, q2, #14              ; >> 14
     vqrshrn.s32     d15, q3, #14              ; >> 14
 
-    vdup.16         d0, r5;                   ; duplicate cospi_12_64
-    vdup.16         d1, r6;                   ; duplicate cospi_20_64
+    vdup.16         d0, r5                    ; duplicate cospi_12_64
+    vdup.16         d1, r6                    ; duplicate cospi_20_64
 
     ; input[5] * cospi_12_64
     vmull.s16       q2, d26, d0
@@ -93,7 +93,7 @@
     vqrshrn.s32     d13, q1, #14              ; >> 14
 
     ; stage 2 & stage 3 - even half
-    vdup.16         d0, r7;                   ; duplicate cospi_16_64
+    vdup.16         d0, r7                    ; duplicate cospi_16_64
 
     ; input[0] * cospi_16_64
     vmull.s16       q2, d16, d0
@@ -128,8 +128,8 @@
     vqrshrn.s32     d23, q3, #14              ; >> 14
 
     ; input[1] * cospi_24_64 - input[3] * cospi_8_64
-    vdup.16         d0, r8;                   ; duplicate cospi_24_64
-    vdup.16         d1, r9;                   ; duplicate cospi_8_64
+    vdup.16         d0, r8                    ; duplicate cospi_24_64
+    vdup.16         d1, r9                    ; duplicate cospi_8_64
 
     ; input[1] * cospi_24_64
     vmull.s16       q2, d20, d0
@@ -176,7 +176,7 @@
     vadd.s16        q7, q7, q6                ; step2[7] = step1[6] + step1[7]
 
     ; stage 3 -odd half
-    vdup.16         d16, r7;                   ; duplicate cospi_16_64
+    vdup.16         d16, r7                   ; duplicate cospi_16_64
 
     ; step2[6] * cospi_16_64
     vmull.s16       q9, d28, d16
@@ -211,14 +211,14 @@
     vqrshrn.s32     d13, q10, #14             ; >> 14
 
     ; stage 4
-    vadd.s16        q8, q0, q7;               ; output[0] = step1[0] + step1[7];
-    vadd.s16        q9, q1, q6;               ; output[1] = step1[1] + step1[6];
-    vadd.s16        q10, q2, q5;              ; output[2] = step1[2] + step1[5];
-    vadd.s16        q11, q3, q4;              ; output[3] = step1[3] + step1[4];
-    vsub.s16        q12, q3, q4;              ; output[4] = step1[3] - step1[4];
-    vsub.s16        q13, q2, q5;              ; output[5] = step1[2] - step1[5];
-    vsub.s16        q14, q1, q6;              ; output[6] = step1[1] - step1[6];
-    vsub.s16        q15, q0, q7;              ; output[7] = step1[0] - step1[7];
+    vadd.s16        q8, q0, q7                ; output[0] = step1[0] + step1[7];
+    vadd.s16        q9, q1, q6                ; output[1] = step1[1] + step1[6];
+    vadd.s16        q10, q2, q5               ; output[2] = step1[2] + step1[5];
+    vadd.s16        q11, q3, q4               ; output[3] = step1[3] + step1[4];
+    vsub.s16        q12, q3, q4               ; output[4] = step1[3] - step1[4];
+    vsub.s16        q13, q2, q5               ; output[5] = step1[2] - step1[5];
+    vsub.s16        q14, q1, q6               ; output[6] = step1[1] - step1[6];
+    vsub.s16        q15, q0, q7               ; output[7] = step1[0] - step1[7];
     MEND
 
     ; Transpose a 8x8 16bit data matrix. Datas are loaded in q8-q15.
@@ -310,14 +310,14 @@
     mov             r0, r1
 
     ; load destination data
-    vld1.u8         {d0}, [r1], r2
-    vld1.u8         {d1}, [r1], r2
-    vld1.s16        {d2}, [r1], r2
-    vld1.s16        {d3}, [r1], r2
-    vld1.s16        {d4}, [r1], r2
-    vld1.s16        {d5}, [r1], r2
-    vld1.s16        {d6}, [r1], r2
-    vld1.s16        {d7}, [r1]
+    vld1.64         {d0}, [r1], r2
+    vld1.64         {d1}, [r1], r2
+    vld1.64         {d2}, [r1], r2
+    vld1.64         {d3}, [r1], r2
+    vld1.64         {d4}, [r1], r2
+    vld1.64         {d5}, [r1], r2
+    vld1.64         {d6}, [r1], r2
+    vld1.64         {d7}, [r1]
 
     ; ROUND_POWER_OF_TWO(temp_out[j], 5) + dest[j * dest_stride + i]
     vaddw.u8        q8, q8, d0
