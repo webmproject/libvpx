@@ -8,9 +8,9 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-
-#include <stdio.h>
 #include <assert.h>
+#include <limits.h>
+#include <stdio.h>
 
 #include "vp9/common/vp9_onyxc_int.h"
 #if CONFIG_POSTPROC
@@ -114,7 +114,7 @@ VP9D_PTR vp9_create_decompressor(VP9D_CONFIG *oxcf) {
   if (!pbi)
     return NULL;
 
-  vpx_memset(pbi, 0, sizeof(VP9D_COMP));
+  vp9_zero(*pbi);
 
   if (setjmp(pbi->common.error.jmp)) {
     pbi->common.error.setjmp = 0;

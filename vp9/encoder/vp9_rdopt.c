@@ -2204,7 +2204,7 @@ static int64_t rd_pick_best_mbsegmentation(VP9_COMP *cpi, MACROBLOCK *x,
   MB_MODE_INFO *mbmi = &mi->mbmi;
   int mode_idx;
 
-  vpx_memset(bsi, 0, sizeof(*bsi));
+  vp9_zero(*bsi);
 
   bsi->segment_rd = best_rd;
   bsi->ref_mv = best_ref_mv;

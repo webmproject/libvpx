@@ -31,8 +31,10 @@
 #include "vp9/decoder/vp9_detokenize.h"
 #include "vp9/decoder/vp9_decodemv.h"
 #include "vp9/decoder/vp9_dsubexp.h"
+#include "vp9/decoder/vp9_idct_blk.h"
 #include "vp9/decoder/vp9_onyxd_int.h"
 #include "vp9/decoder/vp9_read_bit_buffer.h"
+#include "vp9/decoder/vp9_treereader.h"
 
 static int read_be32(const uint8_t *p) {
   return (p[0] << 24) | (p[1] << 16) | (p[2] << 8) | p[3];

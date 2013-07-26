@@ -16,7 +16,7 @@
 #define MV_MAX_UPDATE_FACTOR 128
 
 /* Integer pel reference mv threshold for use of high-precision 1/8 mv */
-#define COMPANDED_MVREF_THRESH    8
+#define COMPANDED_MVREF_THRESH 8
 
 const vp9_tree_index vp9_mv_joint_tree[2 * MV_JOINTS - 2] = {
   -MV_JOINT_ZERO, 2,
@@ -169,8 +169,8 @@ void vp9_inc_mv(const MV *mv,  nmv_context_counts *counts) {
     ++counts->comps[1].mvcount[MV_MAX + mv->col];
 }
 
-static void adapt_prob(vp9_prob *dest, vp9_prob prep, unsigned int ct[2]) {
-  *dest = merge_probs2(prep, ct, MV_COUNT_SAT, MV_MAX_UPDATE_FACTOR);
+static vp9_prob adapt_prob(vp9_prob prep, const unsigned int ct[2]) {
+  return merge_probs2(prep, ct, MV_COUNT_SAT, MV_MAX_UPDATE_FACTOR);
 }
 
 void vp9_counts_process(nmv_context_counts *nmv_count, int usehp) {
@@ -192,11 +192,8 @@ static unsigned int adapt_probs(unsigned int i,
   const unsigned int right = tree[i + 1] <= 0
           ? num_events[-tree[i + 1]]
           : adapt_probs(tree[i + 1], tree, this_probs, last_probs, num_events);
-
   const unsigned int ct[2] = { left, right };
-
-  this_probs[i >> 1] = merge_probs2(last_probs[i >> 1], ct,
-                                    MV_COUNT_SAT, MV_MAX_UPDATE_FACTOR);
+  this_probs[i >> 1] = adapt_prob(last_probs[i >> 1], ct);
   return left + right;
 }
 
@@ -215,31 +212,27 @@ void vp9_adapt_mv_probs(VP9_COMMON *cm, int usehp) {
   adapt_probs(0, vp9_mv_joint_tree, ctx->joints, pre_ctx->joints, cts->joints);
 
   for (i = 0; i < 2; ++i) {
-    adapt_prob(&ctx->comps[i].sign, pre_ctx->comps[i].sign, cts->comps[i].sign);
+    ctx->comps[i].sign = adapt_prob(pre_ctx->comps[i].sign, cts->comps[i].sign);
     adapt_probs(0, vp9_mv_class_tree, ctx->comps[i].classes,
                 pre_ctx->comps[i].classes, cts->comps[i].classes);
     adapt_probs(0, vp9_mv_class0_tree, ctx->comps[i].class0,
                 pre_ctx->comps[i].class0, cts->comps[i].class0);
 
     for (j = 0; j < MV_OFFSET_BITS; ++j)
-      adapt_prob(&ctx->comps[i].bits[j], pre_ctx->comps[i].bits[j],
-                 cts->comps[i].bits[j]);
-  }
+        ctx->comps[i].bits[j] = adapt_prob(pre_ctx->comps[i].bits[j],
+                                           cts->comps[i].bits[j]);
 
-  for (i = 0; i < 2; ++i) {
     for (j = 0; j < CLASS0_SIZE; ++j)
       adapt_probs(0, vp9_mv_fp_tree, ctx->comps[i].class0_fp[j],
                   pre_ctx->comps[i].class0_fp[j], cts->comps[i].class0_fp[j]);
 
     adapt_probs(0, vp9_mv_fp_tree, ctx->comps[i].fp, pre_ctx->comps[i].fp,
                 cts->comps[i].fp);
-  }
 
-  if (usehp) {
-    for (i = 0; i < 2; ++i) {
-      adapt_prob(&ctx->comps[i].class0_hp, pre_ctx->comps[i].class0_hp,
-                 cts->comps[i].class0_hp);
-      adapt_prob(&ctx->comps[i].hp, pre_ctx->comps[i].hp, cts->comps[i].hp);
+    if (usehp) {
+      ctx->comps[i].class0_hp = adapt_prob(pre_ctx->comps[i].class0_hp,
+                                           cts->comps[i].class0_hp);
+      ctx->comps[i].hp = adapt_prob(pre_ctx->comps[i].hp, cts->comps[i].hp);
     }
   }
 }
