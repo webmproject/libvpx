@@ -16,6 +16,41 @@
       "revId": "e8eed28dc815418effce6a734f9e2706b393124e",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcX//u90\u003d",
+        "filename": "vp9/common/x86/vp9_intrapred_ssse3.asm",
+        "patchSetId": 2
+      },
+      "lineNbr": 110,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-07-26T14:27:02Z",
+      "side": 1,
+      "message": "only on atom. On regular x86 chips, it performs pretty well.",
+      "parentUuid": "AAAAcX//vao\u003d",
+      "revId": "e8eed28dc815418effce6a734f9e2706b393124e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcX//u9w\u003d",
+        "filename": "vp9/common/x86/vp9_intrapred_ssse3.asm",
+        "patchSetId": 2
+      },
+      "lineNbr": 115,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-07-26T14:27:02Z",
+      "side": 1,
+      "message": "on a more generic note, I was discussing (with skal@ and cd@) to try to do these calculations in 8bit instead of 16bit (basically 3tap\u003dpavgb(b, pavgb(a, c))-((a ^ c) \u0026 1), so a new version may follow if that\u0027s faster).",
+      "revId": "e8eed28dc815418effce6a734f9e2706b393124e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
