@@ -1,0 +1,361 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAcX//ukY\u003d",
+        "filename": "vp9/common/vp9_mvref_common.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 88,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-07-26T19:23:23Z",
+      "side": 1,
+      "message": "use 2 spaces consistently or align these all horizontally; also trailing comma in the comment is not necessary",
+      "revId": "7e1d830e65e5d2a30bd12caa30014a0e1728eb6a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcX//ukM\u003d",
+        "filename": "vp9/common/vp9_mvref_common.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 96,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-07-26T19:23:23Z",
+      "side": 1,
+      "message": "\u0026 ~1 would be better balanced here.",
+      "revId": "7e1d830e65e5d2a30bd12caa30014a0e1728eb6a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcX//uj8\u003d",
+        "filename": "vp9/common/vp9_mvref_common.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 120,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-07-26T19:23:23Z",
+      "side": 1,
+      "message": "not a macro",
+      "revId": "7e1d830e65e5d2a30bd12caa30014a0e1728eb6a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcX//uj4\u003d",
+        "filename": "vp9/common/vp9_mvref_common.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 122,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-07-26T19:23:23Z",
+      "side": 1,
+      "message": "maybe is_inside or something more descriptive; you could also pass the cm members needed to make it clearer what the function is checking",
+      "revId": "7e1d830e65e5d2a30bd12caa30014a0e1728eb6a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcX//uj0\u003d",
+        "filename": "vp9/common/vp9_mvref_common.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 123,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-07-26T19:23:23Z",
+      "side": 1,
+      "message": "prefer grouping params together logically e.g.: mi_row, mi_col",
+      "revId": "7e1d830e65e5d2a30bd12caa30014a0e1728eb6a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcX//ujs\u003d",
+        "filename": "vp9/common/vp9_mvref_common.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 124,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-07-26T19:23:23Z",
+      "side": 1,
+      "message": "maybe i -\u003e idx",
+      "revId": "7e1d830e65e5d2a30bd12caa30014a0e1728eb6a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcX//ue0\u003d",
+        "filename": "vp9/common/vp9_mvref_common.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 138,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-07-26T19:23:23Z",
+      "side": 1,
+      "message": "newline",
+      "revId": "7e1d830e65e5d2a30bd12caa30014a0e1728eb6a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcX//ujg\u003d",
+        "filename": "vp9/common/vp9_mvref_common.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 144,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-07-26T19:23:23Z",
+      "side": 1,
+      "message": "MB_MODE_INFO *const",
+      "revId": "7e1d830e65e5d2a30bd12caa30014a0e1728eb6a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcX//ujo\u003d",
+        "filename": "vp9/common/vp9_mvref_common.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 149,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-07-26T19:23:23Z",
+      "side": 1,
+      "message": "\u003d {0} is sufficient",
+      "revId": "7e1d830e65e5d2a30bd12caa30014a0e1728eb6a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcX//ui8\u003d",
+        "filename": "vp9/common/vp9_mvref_common.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 155,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-07-26T19:23:23Z",
+      "side": 1,
+      "message": "you\u0027ll need a rebase, this is done at 146 now...",
+      "revId": "7e1d830e65e5d2a30bd12caa30014a0e1728eb6a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcX//ui0\u003d",
+        "filename": "vp9/common/vp9_mvref_common.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 158,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-07-26T19:23:23Z",
+      "side": 1,
+      "message": "sizeof(*mv_ref_list) / sizeof(mv_ref_list[0]) should be preferred",
+      "revId": "7e1d830e65e5d2a30bd12caa30014a0e1728eb6a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcX//uig\u003d",
+        "filename": "vp9/common/vp9_mvref_common.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 160,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-07-26T19:23:23Z",
+      "side": 1,
+      "message": "do this at 153 + const",
+      "revId": "7e1d830e65e5d2a30bd12caa30014a0e1728eb6a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcX//uiA\u003d",
+        "filename": "vp9/common/vp9_mvref_common.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 165,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-07-26T19:23:23Z",
+      "side": 1,
+      "message": "prefer pre-increment",
+      "revId": "7e1d830e65e5d2a30bd12caa30014a0e1728eb6a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcX//uiI\u003d",
+        "filename": "vp9/common/vp9_mvref_common.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 170,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-07-26T19:23:23Z",
+      "side": 1,
+      "message": "this should be aligned with \u0027here\u0027; the ()s are not strictly necessary either",
+      "revId": "7e1d830e65e5d2a30bd12caa30014a0e1728eb6a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcX//uiE\u003d",
+        "filename": "vp9/common/vp9_mvref_common.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 173,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-07-26T19:23:23Z",
+      "side": 1,
+      "message": "prefer pre-increment",
+      "revId": "7e1d830e65e5d2a30bd12caa30014a0e1728eb6a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcX//ufI\u003d",
+        "filename": "vp9/common/vp9_mvref_common.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 186,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-07-26T19:23:23Z",
+      "side": 1,
+      "message": "that\u0027s not really what this else is checking; also this comment is misplaced it should go either inline at 188 or in the block itself.",
+      "revId": "7e1d830e65e5d2a30bd12caa30014a0e1728eb6a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcX//ue8\u003d",
+        "filename": "vp9/common/vp9_mvref_common.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 194,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-07-26T19:23:23Z",
+      "side": 1,
+      "message": "seems like this could be factorized with the if at the cost of another branch at assignment -- may no be worth it",
+      "revId": "7e1d830e65e5d2a30bd12caa30014a0e1728eb6a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcX//ueU\u003d",
+        "filename": "vp9/common/vp9_mvref_common.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 199,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-07-26T19:23:23Z",
+      "side": 1,
+      "message": "Check the rest...",
+      "revId": "7e1d830e65e5d2a30bd12caa30014a0e1728eb6a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcX//ueA\u003d",
+        "filename": "vp9/common/vp9_mvref_common.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 207,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-07-26T19:23:23Z",
+      "side": 1,
+      "message": "fix alignment",
+      "revId": "7e1d830e65e5d2a30bd12caa30014a0e1728eb6a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcX//ueE\u003d",
+        "filename": "vp9/common/vp9_mvref_common.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 212,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-07-26T19:23:23Z",
+      "side": 1,
+      "message": "as above, fix this formatting everywhere",
+      "revId": "7e1d830e65e5d2a30bd12caa30014a0e1728eb6a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcX//uds\u003d",
+        "filename": "vp9/common/vp9_mvref_common.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 277,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-07-26T19:23:23Z",
+      "side": 1,
+      "message": "rather than embedding a goto in a macro why not change the above to be in a helper and have it return to this.",
+      "revId": "7e1d830e65e5d2a30bd12caa30014a0e1728eb6a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
