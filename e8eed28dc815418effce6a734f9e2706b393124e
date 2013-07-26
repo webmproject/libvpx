@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAcX//vao\u003d",
+        "filename": "vp9/common/x86/vp9_intrapred_ssse3.asm",
+        "patchSetId": 2
+      },
+      "lineNbr": 110,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2013-07-26T00:19:57Z",
+      "side": 1,
+      "message": "doesn\u0027t pshufb have latency issues?  ie is this better than loading and shifting left?   just a question.  certainly less code.",
+      "revId": "e8eed28dc815418effce6a734f9e2706b393124e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
