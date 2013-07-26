@@ -47,6 +47,14 @@ static void inverse_transform_b_4x4_add(MACROBLOCKD *xd, int eob,
     xd->inv_txm4x4_add(dqcoeff, dest, stride);
 }
 
+static void inverse_transform_b_8x8_add(MACROBLOCKD *xd, int eob,
+                                        int16_t *dqcoeff, uint8_t *dest,
+                                        int stride) {
+  if (eob <= 1)
+    vp9_short_idct8x8_1_add(dqcoeff, dest, stride);
+  else
+    vp9_short_idct8x8_add(dqcoeff, dest, stride);
+}
 
 static void subtract_plane(MACROBLOCK *x, BLOCK_SIZE_TYPE bsize, int plane) {
   struct macroblock_plane *const p = &x->plane[plane];
@@ -533,7 +541,8 @@ static void encode_block(int plane, int block, BLOCK_SIZE_TYPE bsize,
       vp9_short_idct16x16_add(dqcoeff, dst, pd->dst.stride);
       break;
     case TX_8X8:
-      vp9_short_idct8x8_add(dqcoeff, dst, pd->dst.stride);
+      inverse_transform_b_8x8_add(xd, pd->eobs[block], dqcoeff,
+                                  dst, pd->dst.stride);
       break;
     case TX_4X4:
       // this is like vp9_short_idct4x4 but has a special case around eob<=1
@@ -711,7 +720,7 @@ void encode_block_intra(int plane, int block, BLOCK_SIZE_TYPE bsize,
                      pd->dequant, p->zbin_extra, eob, scan, iscan);
       if (!x->skip_encode && *eob) {
         if (tx_type == DCT_DCT)
-          vp9_short_idct8x8_add(dqcoeff, dst, pd->dst.stride);
+          inverse_transform_b_8x8_add(xd, *eob, dqcoeff, dst, pd->dst.stride);
         else
           vp9_short_iht8x8_add(dqcoeff, dst, pd->dst.stride, tx_type);
       }
@@ -746,8 +755,7 @@ void encode_block_intra(int plane, int block, BLOCK_SIZE_TYPE bsize,
           // this is like vp9_short_idct4x4 but has a special case around eob<=1
           // which is significant (not just an optimization) for the lossless
           // case.
-          inverse_transform_b_4x4_add(xd, *eob, dqcoeff,
-                                      dst, pd->dst.stride);
+          inverse_transform_b_4x4_add(xd, *eob, dqcoeff, dst, pd->dst.stride);
         else
           vp9_short_iht4x4_add(dqcoeff, dst, pd->dst.stride, tx_type);
       }

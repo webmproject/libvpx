@@ -93,15 +93,8 @@ void vp9_idct_add_8x8_c(int16_t *input, uint8_t *dest, int stride, int eob) {
   if (eob) {
     if (eob == 1) {
       // DC only DCT coefficient
-      int16_t in = input[0];
-      int16_t out;
-
-      // Note: the idct1 will need to be modified accordingly whenever
-      // vp9_short_idct8x8_c() is modified.
-      vp9_short_idct1_8x8_c(&in, &out);
+      vp9_short_idct8x8_1_add(input, dest, stride);
       input[0] = 0;
-
-      vp9_add_constant_residual_8x8(out, dest, stride);
     } else {
       vp9_short_idct8x8_add(input, dest, stride);
       vpx_memset(input, 0, 128);

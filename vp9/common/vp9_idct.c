@@ -225,6 +225,19 @@ void vp9_short_idct8x8_add_c(int16_t *input, uint8_t *dest, int dest_stride) {
   }
 }
 
+void vp9_short_idct8x8_1_add_c(int16_t *input, uint8_t *dest, int dest_stride) {
+  int i, j;
+  int a1;
+  int16_t out = dct_const_round_shift(input[0] * cospi_16_64);
+  out = dct_const_round_shift(out * cospi_16_64);
+  a1 = ROUND_POWER_OF_TWO(out, 5);
+  for (j = 0; j < 8; ++j) {
+    for (i = 0; i < 8; ++i)
+      dest[i] = clip_pixel(dest[i] + a1);
+    dest += dest_stride;
+  }
+}
+
 static void iadst4_1d(int16_t *input, int16_t *output) {
   int s0, s1, s2, s3, s4, s5, s6, s7;
 
@@ -431,12 +444,6 @@ void vp9_short_idct10_8x8_add_c(int16_t *input, uint8_t *dest,
       dest[j * dest_stride + i] = clip_pixel(ROUND_POWER_OF_TWO(temp_out[j], 5)
                                   + dest[j * dest_stride + i]);
   }
-}
-
-void vp9_short_idct1_8x8_c(int16_t *input, int16_t *output) {
-  int16_t out = dct_const_round_shift(input[0] * cospi_16_64);
-  out = dct_const_round_shift(out * cospi_16_64);
-  output[0] = ROUND_POWER_OF_TWO(out, 5);
 }
 
 static void idct16_1d(int16_t *input, int16_t *output) {

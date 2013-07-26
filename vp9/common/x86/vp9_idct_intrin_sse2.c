@@ -523,9 +523,9 @@ void vp9_short_iht4x4_add_sse2(int16_t *input, uint8_t *dest, int stride,
   {                                                     \
      __m128i d0 = _mm_loadl_epi64((__m128i *)(dest)); \
       d0 = _mm_unpacklo_epi8(d0, zero); \
-      in_x = _mm_add_epi16(in_x, d0); \
-      in_x = _mm_packus_epi16(in_x, in_x); \
-      _mm_storel_epi64((__m128i *)(dest), in_x); \
+      d0 = _mm_add_epi16(in_x, d0); \
+      d0 = _mm_packus_epi16(d0, d0); \
+      _mm_storel_epi64((__m128i *)(dest), d0); \
       dest += stride; \
   }
 
@@ -595,6 +595,27 @@ void vp9_short_idct8x8_add_sse2(int16_t *input, uint8_t *dest, int stride) {
   RECON_AND_STORE(dest, in5);
   RECON_AND_STORE(dest, in6);
   RECON_AND_STORE(dest, in7);
+}
+
+void vp9_short_idct8x8_1_add_sse2(int16_t *input, uint8_t *dest, int stride) {
+  __m128i dc_value;
+  const __m128i zero = _mm_setzero_si128();
+  int a;
+
+  a = dct_const_round_shift(input[0] * cospi_16_64);
+  a = dct_const_round_shift(a * cospi_16_64);
+  a = ROUND_POWER_OF_TWO(a, 5);
+
+  dc_value = _mm_set1_epi16(a);
+
+  RECON_AND_STORE(dest, dc_value);
+  RECON_AND_STORE(dest, dc_value);
+  RECON_AND_STORE(dest, dc_value);
+  RECON_AND_STORE(dest, dc_value);
+  RECON_AND_STORE(dest, dc_value);
+  RECON_AND_STORE(dest, dc_value);
+  RECON_AND_STORE(dest, dc_value);
+  RECON_AND_STORE(dest, dc_value);
 }
 
 // perform 8x8 transpose
