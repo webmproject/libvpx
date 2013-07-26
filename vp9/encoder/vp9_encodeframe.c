@@ -1429,6 +1429,56 @@ static void rd_use_partition(VP9_COMP *cpi, MODE_INFO *m, TOKENEXTRA **tp,
   *dist = chosen_dist;
 }
 
+static BLOCK_SIZE_TYPE min_partition_size[BLOCK_SIZE_TYPES] =
+  { BLOCK_4X4, BLOCK_4X4, BLOCK_4X4, BLOCK_4X4,
+    BLOCK_4X4, BLOCK_4X4, BLOCK_8X8, BLOCK_8X8,
+    BLOCK_8X8, BLOCK_16X16, BLOCK_16X16, BLOCK_16X16, BLOCK_16X16 };
+static BLOCK_SIZE_TYPE max_partition_size[BLOCK_SIZE_TYPES] =
+  { BLOCK_8X8, BLOCK_16X16, BLOCK_16X16, BLOCK_16X16,
+    BLOCK_32X32, BLOCK_32X32, BLOCK_32X32, BLOCK_64X64,
+    BLOCK_64X64, BLOCK_64X64, BLOCK_64X64, BLOCK_64X64, BLOCK_64X64 };
+
+
+// Look at neighbouring blocks and set a min and max partition size based on
+// what they chose.
+static void rd_auto_partition_range(VP9_COMP *cpi,
+                                    BLOCK_SIZE_TYPE * min_block_size,
+                                    BLOCK_SIZE_TYPE * max_block_size) {
+  MACROBLOCKD *const xd = &cpi->mb.e_mbd;
+  const MODE_INFO *const mi = xd->mode_info_context;
+  const MB_MODE_INFO *const above_mbmi = &mi[-xd->mode_info_stride].mbmi;
+  const MB_MODE_INFO *const left_mbmi = &mi[-1].mbmi;
+  const int left_in_image = xd->left_available && left_mbmi->mb_in_image;
+  const int above_in_image = xd->up_available && above_mbmi->mb_in_image;
+
+  // Frequency check
+  if (cpi->sf.auto_min_max_partition_count <= 0) {
+    cpi->sf.auto_min_max_partition_count =
+      cpi->sf.auto_min_max_partition_interval;
+    *min_block_size = BLOCK_4X4;
+    *max_block_size = BLOCK_64X64;
+    return;
+  } else {
+    --cpi->sf.auto_min_max_partition_count;
+  }
+
+  // Check for edge cases
+  if (!left_in_image && !above_in_image) {
+    *min_block_size = BLOCK_4X4;
+    *max_block_size = BLOCK_64X64;
+  } else if (!left_in_image) {
+    *min_block_size = min_partition_size[above_mbmi->sb_type];
+    *max_block_size = max_partition_size[above_mbmi->sb_type];
+  } else if (!above_in_image) {
+    *min_block_size = min_partition_size[left_mbmi->sb_type];
+    *max_block_size = max_partition_size[left_mbmi->sb_type];
+  } else {
+    *min_block_size =
+      min_partition_size[MIN(left_mbmi->sb_type, above_mbmi->sb_type)];
+    *max_block_size =
+      max_partition_size[MAX(left_mbmi->sb_type, above_mbmi->sb_type)];
+  }
+}
 
 // TODO(jingning,jimbankoski,rbultje): properly skip partition types that are
 // unlikely to be selected depending on previously rate-distortion optimization
@@ -1462,8 +1512,8 @@ static void rd_pick_partition(VP9_COMP *cpi, TOKENEXTRA **tp, int mi_row,
   save_context(cpi, mi_row, mi_col, a, l, sa, sl, bsize);
 
   // PARTITION_SPLIT
-  if (!cpi->sf.use_partitions_greater_than ||
-      bsize > cpi->sf.greater_than_block_size) {
+  if (!cpi->sf.auto_min_max_partition_size ||
+      bsize >= cpi->sf.min_partition_size) {
     if (bsize > BLOCK_SIZE_SB8X8) {
       int r4 = 0;
       int64_t d4 = 0, sum_rd = 0;
@@ -1604,8 +1654,8 @@ static void rd_pick_partition(VP9_COMP *cpi, TOKENEXTRA **tp, int mi_row,
     }
   }
 
-  if (!cpi->sf.use_partitions_less_than ||
-      bsize <= cpi->sf.less_than_block_size) {
+  if (!cpi->sf.use_max_partition_size ||
+      bsize <= cpi->sf.max_partition_size) {
     int larger_is_better = 0;
     // PARTITION_NONE
     if ((mi_row + (ms >> 1) < cm->mi_rows) &&
@@ -1876,6 +1926,12 @@ static void encode_sb_row(VP9_COMP *cpi, int mi_row, TOKENEXTRA **tp,
             || cpi->common.show_frame == 0
             || cpi->common.frame_type == KEY_FRAME
             || cpi->is_src_frame_alt_ref) {
+          // If required set upper and lower partition size limits
+          if (cpi->sf.auto_min_max_partition_size) {
+            rd_auto_partition_range(cpi,
+                                    &cpi->sf.min_partition_size,
+                                    &cpi->sf.max_partition_size);
+          }
           rd_pick_partition(cpi, tp, mi_row, mi_col, BLOCK_SIZE_SB64X64,
                             &dummy_rate, &dummy_dist, 1, INT64_MAX);
         } else {
@@ -1885,6 +1941,13 @@ static void encode_sb_row(VP9_COMP *cpi, int mi_row, TOKENEXTRA **tp,
         }
       }
     } else {
+      // If required set upper and lower partition size limits
+      if (cpi->sf.auto_min_max_partition_size) {
+        rd_auto_partition_range(cpi,
+                                &cpi->sf.min_partition_size,
+                                &cpi->sf.max_partition_size);
+      }
+
       rd_pick_partition(cpi, tp, mi_row, mi_col, BLOCK_SIZE_SB64X64,
                         &dummy_rate, &dummy_dist, 1, INT64_MAX);
     }
