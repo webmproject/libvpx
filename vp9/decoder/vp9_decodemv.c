@@ -380,8 +380,8 @@ static INLINE INTERPOLATIONFILTERTYPE read_switchable_filter_type(
   return vp9_switchable_interp[index];
 }
 
-static void read_intra_block_modes(VP9D_COMP *pbi, MODE_INFO *mi,
-                                   vp9_reader *r) {
+static void read_intra_block_part(VP9D_COMP *pbi, MODE_INFO *mi,
+                                  vp9_reader *r) {
   VP9_COMMON *const cm = &pbi->common;
   MB_MODE_INFO *const mbmi = &mi->mbmi;
   const BLOCK_SIZE_TYPE bsize = mi->mbmi.sb_type;
@@ -433,183 +433,191 @@ static MV_REFERENCE_FRAME read_reference_frame(VP9D_COMP *pbi, int segment_id,
   return ref;
 }
 
-static void read_inter_mode_info(VP9D_COMP *pbi, MODE_INFO *mi,
-                                 int mi_row, int mi_col, vp9_reader *r) {
+static void read_inter_block_part(VP9D_COMP *pbi, MODE_INFO *mi,
+                                  vp9_reader *r) {
   VP9_COMMON *const cm = &pbi->common;
   MACROBLOCKD *const xd = &pbi->mb;
   nmv_context *const nmvc = &cm->fc.nmvc;
   MB_MODE_INFO *const mbmi = &mi->mbmi;
-
   int_mv *const mv0 = &mbmi->mv[0];
   int_mv *const mv1 = &mbmi->mv[1];
-  const BLOCK_SIZE_TYPE bsize = mi->mbmi.sb_type;
+  const BLOCK_SIZE_TYPE bsize = mbmi->sb_type;
   const int bw = 1 << b_width_log2(bsize);
   const int bh = 1 << b_height_log2(bsize);
 
-  int idx, idy;
+  int_mv nearest, nearby, best_mv;
+  int_mv nearest_second, nearby_second, best_mv_second;
+  vp9_prob *mv_ref_p;
+  MV_REFERENCE_FRAME ref0, ref1;
+
+  read_ref_frame(pbi, r, mbmi->segment_id, mbmi->ref_frame);
+  ref0 = mbmi->ref_frame[0];
+  ref1 = mbmi->ref_frame[1];
+
+  vp9_find_mv_refs(cm, xd, mi, xd->prev_mode_info_context,
+                   ref0, mbmi->ref_mvs[ref0], cm->ref_frame_sign_bias);
+
+  mv_ref_p = cm->fc.inter_mode_probs[mbmi->mb_mode_context[ref0]];
+
+  if (vp9_segfeature_active(&xd->seg, mbmi->segment_id, SEG_LVL_SKIP)) {
+    mbmi->mode = ZEROMV;
+  } else if (bsize >= BLOCK_SIZE_SB8X8) {
+    mbmi->mode = read_inter_mode(r, mv_ref_p);
+    vp9_accum_mv_refs(cm, mbmi->mode, mbmi->mb_mode_context[ref0]);
+  }
+  mbmi->uv_mode = DC_PRED;
+
+  // nearest, nearby
+  if (bsize < BLOCK_SIZE_SB8X8 || mbmi->mode != ZEROMV) {
+    vp9_find_best_ref_mvs(xd, mbmi->ref_mvs[ref0], &nearest, &nearby);
+    best_mv.as_int = mbmi->ref_mvs[ref0][0].as_int;
+  }
+
+  mbmi->interp_filter = cm->mcomp_filter_type == SWITCHABLE
+                            ? read_switchable_filter_type(pbi, r)
+                            : cm->mcomp_filter_type;
+
+  if (ref1 > INTRA_FRAME) {
+    vp9_find_mv_refs(cm, xd, mi, xd->prev_mode_info_context,
+                     ref1, mbmi->ref_mvs[ref1], cm->ref_frame_sign_bias);
+
+    if (bsize < BLOCK_SIZE_SB8X8 || mbmi->mode != ZEROMV) {
+      vp9_find_best_ref_mvs(xd, mbmi->ref_mvs[ref1],
+                            &nearest_second, &nearby_second);
+      best_mv_second.as_int = mbmi->ref_mvs[ref1][0].as_int;
+    }
+  }
+
+
+  if (mbmi->sb_type < BLOCK_SIZE_SB8X8) {
+    int idx, idy;
+    for (idy = 0; idy < 2; idy += bh) {
+      for (idx = 0; idx < 2; idx += bw) {
+        int_mv blockmv, secondmv;
+        const int j = idy * 2 + idx;
+        const int blockmode = read_inter_mode(r, mv_ref_p);
+
+        vp9_accum_mv_refs(cm, blockmode, mbmi->mb_mode_context[ref0]);
+        if (blockmode == NEARESTMV || blockmode == NEARMV) {
+          vp9_append_sub8x8_mvs_for_idx(cm, xd, &nearest, &nearby, j, 0);
+          if (ref1 > 0)
+            vp9_append_sub8x8_mvs_for_idx(cm, xd,  &nearest_second,
+                                         &nearby_second, j, 1);
+        }
+
+        switch (blockmode) {
+          case NEWMV:
+            read_mv(r, &blockmv.as_mv, &best_mv.as_mv, nmvc,
+                    &cm->counts.mv, xd->allow_high_precision_mv);
+
+            if (ref1 > 0)
+              read_mv(r, &secondmv.as_mv, &best_mv_second.as_mv, nmvc,
+                      &cm->counts.mv, xd->allow_high_precision_mv);
+            break;
+          case NEARESTMV:
+            blockmv.as_int = nearest.as_int;
+            if (ref1 > 0)
+              secondmv.as_int = nearest_second.as_int;
+            break;
+          case NEARMV:
+            blockmv.as_int = nearby.as_int;
+            if (ref1 > 0)
+              secondmv.as_int = nearby_second.as_int;
+            break;
+          case ZEROMV:
+            blockmv.as_int = 0;
+            if (ref1 > 0)
+              secondmv.as_int = 0;
+            break;
+          default:
+            assert(!"Invalid inter mode value");
+        }
+        mi->bmi[j].as_mv[0].as_int = blockmv.as_int;
+        if (ref1 > 0)
+          mi->bmi[j].as_mv[1].as_int = secondmv.as_int;
+
+        if (bh == 2)
+          mi->bmi[j + 2] = mi->bmi[j];
+        if (bw == 2)
+          mi->bmi[j + 1] = mi->bmi[j];
+        mi->mbmi.mode = blockmode;
+      }
+    }
+
+    mv0->as_int = mi->bmi[3].as_mv[0].as_int;
+    mv1->as_int = mi->bmi[3].as_mv[1].as_int;
+  } else {
+    const int mb_to_top_edge = xd->mb_to_top_edge - LEFT_TOP_MARGIN;
+    const int mb_to_bottom_edge = xd->mb_to_bottom_edge + RIGHT_BOTTOM_MARGIN;
+    const int mb_to_left_edge = xd->mb_to_left_edge - LEFT_TOP_MARGIN;
+    const int mb_to_right_edge = xd->mb_to_right_edge + RIGHT_BOTTOM_MARGIN;
+
+    switch (mbmi->mode) {
+      case NEARMV:
+        // Clip "next_nearest" so that it does not extend to far out of image
+        assign_and_clamp_mv(mv0, &nearby, mb_to_left_edge,
+                                          mb_to_right_edge,
+                                          mb_to_top_edge,
+                                          mb_to_bottom_edge);
+        if (ref1 > 0)
+          assign_and_clamp_mv(mv1, &nearby_second, mb_to_left_edge,
+                                                   mb_to_right_edge,
+                                                   mb_to_top_edge,
+                                                   mb_to_bottom_edge);
+        break;
+
+      case NEARESTMV:
+        // Clip "next_nearest" so that it does not extend to far out of image
+        assign_and_clamp_mv(mv0, &nearest, mb_to_left_edge,
+                                           mb_to_right_edge,
+                                           mb_to_top_edge,
+                                           mb_to_bottom_edge);
+        if (ref1 > 0)
+          assign_and_clamp_mv(mv1, &nearest_second, mb_to_left_edge,
+                                                    mb_to_right_edge,
+                                                    mb_to_top_edge,
+                                                    mb_to_bottom_edge);
+        break;
+
+      case ZEROMV:
+        mv0->as_int = 0;
+        if (ref1 > 0)
+          mv1->as_int = 0;
+        break;
+
+      case NEWMV:
+        read_mv(r, &mv0->as_mv, &best_mv.as_mv, nmvc, &cm->counts.mv,
+                xd->allow_high_precision_mv);
+        if (ref1 > 0)
+          read_mv(r, &mv1->as_mv, &best_mv_second.as_mv, nmvc,
+                  &cm->counts.mv, xd->allow_high_precision_mv);
+        break;
+      default:
+        assert(!"Invalid inter mode value");
+    }
+  }
+}
+
+static void read_inter_mode_info(VP9D_COMP *pbi, MODE_INFO *mi,
+                                 int mi_row, int mi_col, vp9_reader *r) {
+  VP9_COMMON *const cm = &pbi->common;
+  MB_MODE_INFO *const mbmi = &mi->mbmi;
+  int intra_block;
 
   mbmi->segment_id = read_inter_segment_id(pbi, mi_row, mi_col, r);
   mbmi->mb_skip_coeff = read_skip_coeff(pbi, mbmi->segment_id, r);
   mbmi->ref_frame[0] = read_reference_frame(pbi, mbmi->segment_id, r);
   mbmi->ref_frame[1] = NONE;
-  mbmi->txfm_size = read_tx_size(pbi, cm->tx_mode, bsize,
-     (!mbmi->mb_skip_coeff || mbmi->ref_frame[0] == INTRA_FRAME), r);
+  intra_block = mbmi->ref_frame[0] == INTRA_FRAME;
+  mbmi->txfm_size = read_tx_size(pbi, cm->tx_mode, mbmi->sb_type,
+                                 !mbmi->mb_skip_coeff || intra_block, r);
+  mbmi->mv[0].as_int = 0;
+  mbmi->mv[1].as_int = 0;
 
-  if (mbmi->ref_frame[0] != INTRA_FRAME) {
-    int_mv nearest, nearby, best_mv;
-    int_mv nearest_second, nearby_second, best_mv_second;
-    vp9_prob *mv_ref_p;
-    MV_REFERENCE_FRAME ref0, ref1;
-
-    read_ref_frame(pbi, r, mbmi->segment_id, mbmi->ref_frame);
-    ref0 = mbmi->ref_frame[0];
-    ref1 = mbmi->ref_frame[1];
-
-    vp9_find_mv_refs(cm, xd, mi, xd->prev_mode_info_context,
-                     ref0, mbmi->ref_mvs[ref0], cm->ref_frame_sign_bias);
-
-    mv_ref_p = cm->fc.inter_mode_probs[mbmi->mb_mode_context[ref0]];
-
-    if (vp9_segfeature_active(&xd->seg, mbmi->segment_id, SEG_LVL_SKIP)) {
-      mbmi->mode = ZEROMV;
-    } else if (bsize >= BLOCK_SIZE_SB8X8) {
-      mbmi->mode = read_inter_mode(r, mv_ref_p);
-      vp9_accum_mv_refs(cm, mbmi->mode, mbmi->mb_mode_context[ref0]);
-    }
-    mbmi->uv_mode = DC_PRED;
-
-    // nearest, nearby
-    if (bsize < BLOCK_SIZE_SB8X8 || mbmi->mode != ZEROMV) {
-      vp9_find_best_ref_mvs(xd, mbmi->ref_mvs[ref0], &nearest, &nearby);
-      best_mv.as_int = mbmi->ref_mvs[ref0][0].as_int;
-    }
-
-    mbmi->interp_filter = cm->mcomp_filter_type == SWITCHABLE
-                              ? read_switchable_filter_type(pbi, r)
-                              : cm->mcomp_filter_type;
-
-    if (ref1 > INTRA_FRAME) {
-      vp9_find_mv_refs(cm, xd, mi, xd->prev_mode_info_context,
-                       ref1, mbmi->ref_mvs[ref1], cm->ref_frame_sign_bias);
-
-      if (bsize < BLOCK_SIZE_SB8X8 || mbmi->mode != ZEROMV) {
-        vp9_find_best_ref_mvs(xd, mbmi->ref_mvs[ref1],
-                              &nearest_second, &nearby_second);
-        best_mv_second.as_int = mbmi->ref_mvs[ref1][0].as_int;
-      }
-    }
-
-
-    if (mbmi->sb_type < BLOCK_SIZE_SB8X8) {
-      for (idy = 0; idy < 2; idy += bh) {
-        for (idx = 0; idx < 2; idx += bw) {
-          int_mv blockmv, secondmv;
-          const int j = idy * 2 + idx;
-          const int blockmode = read_inter_mode(r, mv_ref_p);
-
-          vp9_accum_mv_refs(cm, blockmode, mbmi->mb_mode_context[ref0]);
-          if (blockmode == NEARESTMV || blockmode == NEARMV) {
-            vp9_append_sub8x8_mvs_for_idx(cm, xd, &nearest, &nearby, j, 0);
-            if (ref1 > 0)
-              vp9_append_sub8x8_mvs_for_idx(cm, xd,  &nearest_second,
-                                            &nearby_second, j, 1);
-          }
-
-          switch (blockmode) {
-            case NEWMV:
-              read_mv(r, &blockmv.as_mv, &best_mv.as_mv, nmvc,
-                      &cm->counts.mv, xd->allow_high_precision_mv);
-
-              if (ref1 > 0)
-                read_mv(r, &secondmv.as_mv, &best_mv_second.as_mv, nmvc,
-                        &cm->counts.mv, xd->allow_high_precision_mv);
-              break;
-            case NEARESTMV:
-              blockmv.as_int = nearest.as_int;
-              if (ref1 > 0)
-                secondmv.as_int = nearest_second.as_int;
-              break;
-            case NEARMV:
-              blockmv.as_int = nearby.as_int;
-              if (ref1 > 0)
-                secondmv.as_int = nearby_second.as_int;
-              break;
-            case ZEROMV:
-              blockmv.as_int = 0;
-              if (ref1 > 0)
-                secondmv.as_int = 0;
-              break;
-            default:
-              assert(!"Invalid inter mode value");
-          }
-          mi->bmi[j].as_mv[0].as_int = blockmv.as_int;
-          if (ref1 > 0)
-            mi->bmi[j].as_mv[1].as_int = secondmv.as_int;
-
-          if (bh == 2)
-            mi->bmi[j + 2] = mi->bmi[j];
-          if (bw == 2)
-            mi->bmi[j + 1] = mi->bmi[j];
-          mi->mbmi.mode = blockmode;
-        }
-      }
-
-      mv0->as_int = mi->bmi[3].as_mv[0].as_int;
-      mv1->as_int = mi->bmi[3].as_mv[1].as_int;
-    } else {
-      const int mb_to_top_edge = xd->mb_to_top_edge - LEFT_TOP_MARGIN;
-      const int mb_to_bottom_edge = xd->mb_to_bottom_edge + RIGHT_BOTTOM_MARGIN;
-      const int mb_to_left_edge = xd->mb_to_left_edge - LEFT_TOP_MARGIN;
-      const int mb_to_right_edge = xd->mb_to_right_edge + RIGHT_BOTTOM_MARGIN;
-
-      switch (mbmi->mode) {
-        case NEARMV:
-          // Clip "next_nearest" so that it does not extend to far out of image
-          assign_and_clamp_mv(mv0, &nearby, mb_to_left_edge,
-                                            mb_to_right_edge,
-                                            mb_to_top_edge,
-                                            mb_to_bottom_edge);
-          if (ref1 > 0)
-            assign_and_clamp_mv(mv1, &nearby_second, mb_to_left_edge,
-                                                     mb_to_right_edge,
-                                                     mb_to_top_edge,
-                                                     mb_to_bottom_edge);
-          break;
-
-        case NEARESTMV:
-          // Clip "next_nearest" so that it does not extend to far out of image
-          assign_and_clamp_mv(mv0, &nearest, mb_to_left_edge,
-                                             mb_to_right_edge,
-                                             mb_to_top_edge,
-                                             mb_to_bottom_edge);
-          if (ref1 > 0)
-            assign_and_clamp_mv(mv1, &nearest_second, mb_to_left_edge,
-                                                      mb_to_right_edge,
-                                                      mb_to_top_edge,
-                                                      mb_to_bottom_edge);
-          break;
-
-        case ZEROMV:
-          mv0->as_int = 0;
-          if (ref1 > 0)
-            mv1->as_int = 0;
-          break;
-
-        case NEWMV:
-          read_mv(r, &mv0->as_mv, &best_mv.as_mv, nmvc, &cm->counts.mv,
-                  xd->allow_high_precision_mv);
-          if (ref1 > 0)
-            read_mv(r, &mv1->as_mv, &best_mv_second.as_mv, nmvc,
-                    &cm->counts.mv, xd->allow_high_precision_mv);
-          break;
-        default:
-          assert(!"Invalid inter mode value");
-      }
-    }
-  } else {
-    mv0->as_int = 0;  // required for left and above block mv
-    read_intra_block_modes(pbi, mi, r);
-  }
+  if (intra_block)
+    read_intra_block_part(pbi, mi, r);
+  else
+    read_inter_block_part(pbi, mi, r);
 }
 
 static void read_comp_pred(VP9_COMMON *cm, vp9_reader *r) {
