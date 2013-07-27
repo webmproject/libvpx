@@ -52,8 +52,19 @@ static void inverse_transform_b_8x8_add(MACROBLOCKD *xd, int eob,
                                         int stride) {
   if (eob <= 1)
     vp9_short_idct8x8_1_add(dqcoeff, dest, stride);
+  else if (eob <= 10)
+    vp9_short_idct10_8x8_add(dqcoeff, dest, stride);
   else
     vp9_short_idct8x8_add(dqcoeff, dest, stride);
+}
+
+static void inverse_transform_b_16x16_add(MACROBLOCKD *xd, int eob,
+                                          int16_t *dqcoeff, uint8_t *dest,
+                                          int stride) {
+  if (eob <= 10)
+    vp9_short_idct10_16x16_add(dqcoeff, dest, stride);
+  else
+    vp9_short_idct16x16_add(dqcoeff, dest, stride);
 }
 
 static void subtract_plane(MACROBLOCK *x, BLOCK_SIZE_TYPE bsize, int plane) {
@@ -538,7 +549,8 @@ static void encode_block(int plane, int block, BLOCK_SIZE_TYPE bsize,
       vp9_short_idct32x32_add(dqcoeff, dst, pd->dst.stride);
       break;
     case TX_16X16:
-      vp9_short_idct16x16_add(dqcoeff, dst, pd->dst.stride);
+      inverse_transform_b_16x16_add(xd, pd->eobs[block], dqcoeff,
+                                    dst, pd->dst.stride);
       break;
     case TX_8X8:
       inverse_transform_b_8x8_add(xd, pd->eobs[block], dqcoeff,
@@ -691,7 +703,7 @@ void encode_block_intra(int plane, int block, BLOCK_SIZE_TYPE bsize,
                      pd->dequant, p->zbin_extra, eob, scan, iscan);
       if (!x->skip_encode && *eob) {
         if (tx_type == DCT_DCT)
-          vp9_short_idct16x16_add(dqcoeff, dst, pd->dst.stride);
+          inverse_transform_b_16x16_add(xd, *eob, dqcoeff, dst, pd->dst.stride);
         else
           vp9_short_iht16x16_add(dqcoeff, dst, pd->dst.stride, tx_type);
       }
