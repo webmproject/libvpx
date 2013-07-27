@@ -1186,17 +1186,19 @@ static int64_t rd_pick_intra4x4block(VP9_COMP *cpi, MACROBLOCK *x, int ib,
   struct macroblockd_plane *pd = &xd->plane[0];
   const int src_stride = p->src.stride;
   const int dst_stride = pd->dst.stride;
-  uint8_t *src, *dst;
+  uint8_t *src_init = raster_block_offset_uint8(xd, BLOCK_SIZE_SB8X8, 0, ib,
+                                                p->src.buf, src_stride);
+  uint8_t *dst_init = raster_block_offset_uint8(xd, BLOCK_SIZE_SB8X8, 0, ib,
+                                                pd->dst.buf, dst_stride);
   int16_t *src_diff, *coeff;
 
   ENTROPY_CONTEXT ta[2], tempa[2];
   ENTROPY_CONTEXT tl[2], templ[2];
   TX_TYPE tx_type = DCT_DCT;
-  TX_TYPE best_tx_type = DCT_DCT;
   int num_4x4_blocks_wide = num_4x4_blocks_wide_lookup[bsize];
   int num_4x4_blocks_high = num_4x4_blocks_high_lookup[bsize];
   int idx, idy, block;
-  DECLARE_ALIGNED(16, int16_t, best_dqcoeff[4][16]);
+  uint8_t best_dst[8 * 8];
 
   assert(ib < 4);
 
@@ -1224,17 +1226,15 @@ static int64_t rd_pick_intra4x4block(VP9_COMP *cpi, MACROBLOCK *x, int ib,
       for (idx = 0; idx < num_4x4_blocks_wide; ++idx) {
         int64_t ssz;
         const int16_t *scan;
+        uint8_t *src = src_init + idx * 4 + idy * 4 * src_stride;
+        uint8_t *dst = dst_init + idx * 4 + idy * 4 * dst_stride;
 
         block = ib + idy * 2 + idx;
         xd->mode_info_context->bmi[block].as_mode = mode;
-        src = raster_block_offset_uint8(xd, BLOCK_SIZE_SB8X8, 0, block,
-                                        p->src.buf, src_stride);
         src_diff = raster_block_offset_int16(xd, BLOCK_SIZE_SB8X8, 0, block,
                                              p->src_diff);
         coeff = BLOCK_OFFSET(x->plane[0].coeff, block, 16);
-        dst = raster_block_offset_uint8(xd, BLOCK_SIZE_SB8X8, 0, block,
-                                        pd->dst.buf, dst_stride);
-        vp9_predict_intra_block(xd, block, b_width_log2(BLOCK_SIZE_SB8X8),
+        vp9_predict_intra_block(xd, block, 1,
                                 TX_4X4, mode,
                                 x->skip_encode ? src : dst,
                                 x->skip_encode ? src_stride : dst_stride,
@@ -1280,19 +1280,11 @@ static int64_t rd_pick_intra4x4block(VP9_COMP *cpi, MACROBLOCK *x, int ib,
       *bestdistortion = distortion;
       best_rd = this_rd;
       *best_mode = mode;
-      best_tx_type = tx_type;
       vpx_memcpy(a, tempa, sizeof(tempa));
       vpx_memcpy(l, templ, sizeof(templ));
-      // FIXME(rbultje) why are we storing best_dqcoeff instead of the
-      // dst buffer here?
-      for (idy = 0; idy < num_4x4_blocks_high; ++idy) {
-        for (idx = 0; idx < num_4x4_blocks_wide; ++idx) {
-          block = ib + idy * 2 + idx;
-          vpx_memcpy(best_dqcoeff[idy * 2 + idx],
-                     BLOCK_OFFSET(pd->dqcoeff, block, 16),
-                     sizeof(best_dqcoeff[0]));
-        }
-      }
+      for (idy = 0; idy < num_4x4_blocks_high * 4; ++idy)
+        vpx_memcpy(best_dst + idy * 8, dst_init + idy * dst_stride,
+                   num_4x4_blocks_wide * 4);
     }
   next:
     {}
@@ -1301,29 +1293,9 @@ static int64_t rd_pick_intra4x4block(VP9_COMP *cpi, MACROBLOCK *x, int ib,
   if (best_rd >= rd_thresh || x->skip_encode)
     return best_rd;
 
-  for (idy = 0; idy < num_4x4_blocks_high; ++idy) {
-    for (idx = 0; idx < num_4x4_blocks_wide; ++idx) {
-      block = ib + idy * 2 + idx;
-      xd->mode_info_context->bmi[block].as_mode = *best_mode;
-      src = raster_block_offset_uint8(xd, BLOCK_SIZE_SB8X8, 0, block,
-                                      p->src.buf, src_stride);
-      dst = raster_block_offset_uint8(xd, BLOCK_SIZE_SB8X8, 0, block,
-                                      pd->dst.buf, dst_stride);
-
-      vp9_predict_intra_block(xd, block, b_width_log2(BLOCK_SIZE_SB8X8), TX_4X4,
-                              *best_mode,
-                              x->skip_encode ? src : dst,
-                              x->skip_encode ? src_stride : dst_stride,
-                              dst, dst_stride);
-      // inverse transform
-      if (best_tx_type != DCT_DCT)
-        vp9_short_iht4x4_add(best_dqcoeff[idy * 2 + idx], dst,
-                             dst_stride, best_tx_type);
-      else
-        xd->inv_txm4x4_add(best_dqcoeff[idy * 2 + idx], dst,
-                           dst_stride);
-    }
-  }
+  for (idy = 0; idy < num_4x4_blocks_high * 4; ++idy)
+    vpx_memcpy(dst_init + idy * dst_stride, best_dst + idy * 8,
+               num_4x4_blocks_wide * 4);
 
   return best_rd;
 }
