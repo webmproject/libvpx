@@ -16,6 +16,24 @@
       "revId": "94b0c6791d87f0fababf55f739b79feeb2083b98",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcX//t7A\u003d",
+        "filename": "vp9/common/x86/vp9_intrapred_ssse3.asm",
+        "patchSetId": 3
+      },
+      "lineNbr": 152,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2013-07-27T00:20:12Z",
+      "side": 1,
+      "message": "scratch that... That doesn\u0027t apply here...",
+      "parentUuid": "AAAAcX//uVY\u003d",
+      "revId": "94b0c6791d87f0fababf55f739b79feeb2083b98",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
