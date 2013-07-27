@@ -518,7 +518,7 @@ int64_t vp9_block_error_c(int16_t *coeff, int16_t *dqcoeff,
  * can skip this if the last coefficient in this transform block, e.g. the
  * 16th coefficient in a 4x4 block or the 64th coefficient in a 8x8 block,
  * were non-zero). */
-static const int16_t band_counts[TX_SIZE_MAX_SB][8] = {
+static const int16_t band_counts[TX_SIZES][8] = {
   { 1, 2, 3, 4,  3,   16 - 13, 0 },
   { 1, 2, 3, 4, 11,   64 - 21, 0 },
   { 1, 2, 3, 4, 11,  256 - 21, 0 },
@@ -874,7 +874,7 @@ static void choose_txfm_size_from_rd(VP9_COMP *cpi, MACROBLOCK *x,
   MACROBLOCKD *const xd = &x->e_mbd;
   MB_MODE_INFO *const mbmi = &xd->mode_info_context->mbmi;
   vp9_prob skip_prob = vp9_get_pred_prob_mbskip(cm, xd);
-  int64_t rd[TX_SIZE_MAX_SB][2];
+  int64_t rd[TX_SIZES][2];
   int n, m;
   int s0, s1;
 
@@ -979,11 +979,11 @@ static void choose_txfm_size_from_modelrd(VP9_COMP *cpi, MACROBLOCK *x,
   MACROBLOCKD *const xd = &x->e_mbd;
   MB_MODE_INFO *const mbmi = &xd->mode_info_context->mbmi;
   vp9_prob skip_prob = vp9_get_pred_prob_mbskip(cm, xd);
-  int64_t rd[TX_SIZE_MAX_SB][2];
+  int64_t rd[TX_SIZES][2];
   int n, m;
   int s0, s1;
-  double scale_rd[TX_SIZE_MAX_SB] = {1.73, 1.44, 1.20, 1.00};
-  // double scale_r[TX_SIZE_MAX_SB] = {2.82, 2.00, 1.41, 1.00};
+  double scale_rd[TX_SIZES] = {1.73, 1.44, 1.20, 1.00};
+  // double scale_r[TX_SIZES] = {2.82, 2.00, 1.41, 1.00};
 
   const vp9_prob *tx_probs = get_tx_probs2(xd, &cm->fc.tx_probs);
 
@@ -1075,8 +1075,8 @@ static void super_block_yrd(VP9_COMP *cpi,
                             int64_t txfm_cache[NB_TXFM_MODES],
                             int64_t ref_best_rd) {
   VP9_COMMON *const cm = &cpi->common;
-  int r[TX_SIZE_MAX_SB][2], s[TX_SIZE_MAX_SB];
-  int64_t d[TX_SIZE_MAX_SB], sse[TX_SIZE_MAX_SB];
+  int r[TX_SIZES][2], s[TX_SIZES];
+  int64_t d[TX_SIZES], sse[TX_SIZES];
   MACROBLOCKD *xd = &x->e_mbd;
   MB_MODE_INFO *const mbmi = &xd->mode_info_context->mbmi;
 
@@ -1097,7 +1097,7 @@ static void super_block_yrd(VP9_COMP *cpi,
 
   if (cpi->sf.tx_size_search_method == USE_LARGESTINTRA_MODELINTER &&
       mbmi->ref_frame[0] > INTRA_FRAME) {
-    int model_used[TX_SIZE_MAX_SB] = {1, 1, 1, 1};
+    int model_used[TX_SIZES] = {1, 1, 1, 1};
     if (bs >= BLOCK_SIZE_SB32X32) {
       if (model_used[TX_32X32]) {
         model_rd_for_sb_y_tx(cpi, bs, TX_32X32, x, xd,
@@ -3240,10 +3240,10 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
   // MB_PREDICTION_MODE best_inter_mode = ZEROMV;
   MV_REFERENCE_FRAME best_inter_ref_frame = LAST_FRAME;
   INTERPOLATIONFILTERTYPE tmp_best_filter = SWITCHABLE;
-  int rate_uv_intra[TX_SIZE_MAX_SB], rate_uv_tokenonly[TX_SIZE_MAX_SB];
-  int64_t dist_uv[TX_SIZE_MAX_SB];
-  int skip_uv[TX_SIZE_MAX_SB];
-  MB_PREDICTION_MODE mode_uv[TX_SIZE_MAX_SB];
+  int rate_uv_intra[TX_SIZES], rate_uv_tokenonly[TX_SIZES];
+  int64_t dist_uv[TX_SIZES];
+  int skip_uv[TX_SIZES];
+  MB_PREDICTION_MODE mode_uv[TX_SIZES];
   struct scale_factors scale_factor[4];
   unsigned int ref_frame_mask = 0;
   unsigned int mode_mask = 0;
@@ -3284,7 +3284,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
     best_txfm_rd[i] = INT64_MAX;
   for (i = 0; i <= VP9_SWITCHABLE_FILTERS; i++)
     best_filter_rd[i] = INT64_MAX;
-  for (i = 0; i < TX_SIZE_MAX_SB; i++)
+  for (i = 0; i < TX_SIZES; i++)
     rate_uv_intra[i] = INT_MAX;
 
   *returnrate = INT_MAX;

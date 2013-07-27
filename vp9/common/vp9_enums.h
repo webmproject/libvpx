@@ -54,7 +54,7 @@ typedef enum {
   TX_8X8 = 1,                      // 8x8 dct transform
   TX_16X16 = 2,                    // 16x16 dct transform
   TX_32X32 = 3,                    // 32x32 dct transform
-  TX_SIZE_MAX_SB,                  // Number of transforms available to SBs
+  TX_SIZES
 } TX_SIZE;
 
 typedef enum {

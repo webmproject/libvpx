@@ -455,25 +455,25 @@ void vp9_adapt_mode_probs(VP9_COMMON *cm) {
 
   if (cm->tx_mode == TX_MODE_SELECT) {
     int j;
-    unsigned int branch_ct_8x8p[TX_SIZE_MAX_SB - 3][2];
-    unsigned int branch_ct_16x16p[TX_SIZE_MAX_SB - 2][2];
-    unsigned int branch_ct_32x32p[TX_SIZE_MAX_SB - 1][2];
+    unsigned int branch_ct_8x8p[TX_SIZES - 3][2];
+    unsigned int branch_ct_16x16p[TX_SIZES - 2][2];
+    unsigned int branch_ct_32x32p[TX_SIZES - 1][2];
 
     for (i = 0; i < TX_SIZE_CONTEXTS; ++i) {
       tx_counts_to_branch_counts_8x8(counts->tx.p8x8[i], branch_ct_8x8p);
-      for (j = 0; j < TX_SIZE_MAX_SB - 3; ++j)
+      for (j = 0; j < TX_SIZES - 3; ++j)
         fc->tx_probs.p8x8[i][j] = update_ct2(pre_fc->tx_probs.p8x8[i][j],
                                              branch_ct_8x8p[j]);
 
       tx_counts_to_branch_counts_16x16(counts->tx.p16x16[i],
                                        branch_ct_16x16p);
-      for (j = 0; j < TX_SIZE_MAX_SB - 2; ++j)
+      for (j = 0; j < TX_SIZES - 2; ++j)
         fc->tx_probs.p16x16[i][j] = update_ct2(pre_fc->tx_probs.p16x16[i][j],
                                                branch_ct_16x16p[j]);
 
       tx_counts_to_branch_counts_32x32(counts->tx.p32x32[i],
                                        branch_ct_32x32p);
-      for (j = 0; j < TX_SIZE_MAX_SB - 1; ++j)
+      for (j = 0; j < TX_SIZES - 1; ++j)
         fc->tx_probs.p32x32[i][j] = update_ct2(pre_fc->tx_probs.p32x32[i][j],
                                                branch_ct_32x32p[j]);
     }

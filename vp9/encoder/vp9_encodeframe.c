@@ -2301,7 +2301,7 @@ static void select_tx_mode(VP9_COMP *cpi) {
     } else {
       unsigned int total = 0;
       int i;
-      for (i = 0; i < TX_SIZE_MAX_SB; ++i)
+      for (i = 0; i < TX_SIZES; ++i)
         total += cpi->txfm_stepdown_count[i];
       if (total) {
         double fraction = (double)cpi->txfm_stepdown_count[0] / total;
@@ -2415,7 +2415,7 @@ void vp9_encode_frame(VP9_COMP *cpi) {
       int diff;
       if (i == TX_MODE_SELECT)
         pd -= RDCOST(cpi->mb.rdmult, cpi->mb.rddiv,
-                     2048 * (TX_SIZE_MAX_SB - 1), 0);
+                     2048 * (TX_SIZES - 1), 0);
       diff = (int) (pd / cpi->common.MBs);
       cpi->rd_tx_select_threshes[frame_type][i] += diff;
       cpi->rd_tx_select_threshes[frame_type][i] /= 2;

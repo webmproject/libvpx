@@ -77,7 +77,7 @@ typedef struct {
   // 0 = ZERO_MV, MV
   signed char last_mode_lf_deltas[MAX_MODE_LF_DELTAS];
 
-  vp9_coeff_probs_model coef_probs[TX_SIZE_MAX_SB][BLOCK_TYPES];
+  vp9_coeff_probs_model coef_probs[TX_SIZES][BLOCK_TYPES];
 
   vp9_prob y_mode_prob[4][VP9_INTRA_MODES - 1];
   vp9_prob uv_mode_prob[VP9_INTRA_MODES][VP9_INTRA_MODES - 1];
@@ -460,9 +460,9 @@ typedef struct VP9_COMP {
 
   nmv_context_counts NMVcount;
 
-  vp9_coeff_count coef_counts[TX_SIZE_MAX_SB][BLOCK_TYPES];
-  vp9_coeff_probs_model frame_coef_probs[TX_SIZE_MAX_SB][BLOCK_TYPES];
-  vp9_coeff_stats frame_branch_ct[TX_SIZE_MAX_SB][BLOCK_TYPES];
+  vp9_coeff_count coef_counts[TX_SIZES][BLOCK_TYPES];
+  vp9_coeff_probs_model frame_coef_probs[TX_SIZES][BLOCK_TYPES];
+  vp9_coeff_stats frame_branch_ct[TX_SIZES][BLOCK_TYPES];
 
   int gfu_boost;
   int last_boost;
@@ -622,7 +622,7 @@ typedef struct VP9_COMP {
   unsigned int switchable_interp_count[VP9_SWITCHABLE_FILTERS + 1]
                                       [VP9_SWITCHABLE_FILTERS];
 
-  unsigned int txfm_stepdown_count[TX_SIZE_MAX_SB];
+  unsigned int txfm_stepdown_count[TX_SIZES];
 
   int initial_width;
   int initial_height;

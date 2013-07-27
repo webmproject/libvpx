@@ -25,8 +25,8 @@
    compressions, then generating vp9_context.c = initial stats. */
 
 #ifdef ENTROPY_STATS
-vp9_coeff_accum context_counters[TX_SIZE_MAX_SB][BLOCK_TYPES];
-extern vp9_coeff_stats tree_update_hist[TX_SIZE_MAX_SB][BLOCK_TYPES];
+vp9_coeff_accum context_counters[TX_SIZES][BLOCK_TYPES];
+extern vp9_coeff_stats tree_update_hist[TX_SIZES][BLOCK_TYPES];
 #endif  /* ENTROPY_STATS */
 
 DECLARE_ALIGNED(16, extern const uint8_t,

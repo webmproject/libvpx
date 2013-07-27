@@ -44,16 +44,16 @@ unsigned __int64 Sectionbits[500];
 int intra_mode_stats[VP9_INTRA_MODES]
                     [VP9_INTRA_MODES]
                     [VP9_INTRA_MODES];
-vp9_coeff_stats tree_update_hist[TX_SIZE_MAX_SB][BLOCK_TYPES];
+vp9_coeff_stats tree_update_hist[TX_SIZES][BLOCK_TYPES];
 
 extern unsigned int active_section;
 #endif
 
 
 #ifdef MODE_STATS
-int64_t tx_count_32x32p_stats[TX_SIZE_CONTEXTS][TX_SIZE_MAX_SB];
-int64_t tx_count_16x16p_stats[TX_SIZE_CONTEXTS][TX_SIZE_MAX_SB - 1];
-int64_t tx_count_8x8p_stats[TX_SIZE_CONTEXTS][TX_SIZE_MAX_SB - 2];
+int64_t tx_count_32x32p_stats[TX_SIZE_CONTEXTS][TX_SIZES];
+int64_t tx_count_16x16p_stats[TX_SIZE_CONTEXTS][TX_SIZES - 1];
+int64_t tx_count_8x8p_stats[TX_SIZE_CONTEXTS][TX_SIZES - 2];
 int64_t switchable_interp_stats[VP9_SWITCHABLE_FILTERS+1]
                                [VP9_SWITCHABLE_FILTERS];
 
@@ -70,17 +70,17 @@ void init_switchable_interp_stats() {
 static void update_tx_count_stats(VP9_COMMON *cm) {
   int i, j;
   for (i = 0; i < TX_SIZE_CONTEXTS; i++) {
-    for (j = 0; j < TX_SIZE_MAX_SB; j++) {
+    for (j = 0; j < TX_SIZES; j++) {
       tx_count_32x32p_stats[i][j] += cm->fc.tx_count_32x32p[i][j];
     }
   }
   for (i = 0; i < TX_SIZE_CONTEXTS; i++) {
-    for (j = 0; j < TX_SIZE_MAX_SB - 1; j++) {
+    for (j = 0; j < TX_SIZES - 1; j++) {
       tx_count_16x16p_stats[i][j] += cm->fc.tx_count_16x16p[i][j];
     }
   }
   for (i = 0; i < TX_SIZE_CONTEXTS; i++) {
-    for (j = 0; j < TX_SIZE_MAX_SB - 2; j++) {
+    for (j = 0; j < TX_SIZES - 2; j++) {
       tx_count_8x8p_stats[i][j] += cm->fc.tx_count_8x8p[i][j];
     }
   }
@@ -103,30 +103,30 @@ void write_tx_count_stats() {
   fclose(fp);
 
   printf(
-      "vp9_default_tx_count_32x32p[TX_SIZE_CONTEXTS][TX_SIZE_MAX_SB] = {\n");
+      "vp9_default_tx_count_32x32p[TX_SIZE_CONTEXTS][TX_SIZES] = {\n");
   for (i = 0; i < TX_SIZE_CONTEXTS; i++) {
     printf("  { ");
-    for (j = 0; j < TX_SIZE_MAX_SB; j++) {
+    for (j = 0; j < TX_SIZES; j++) {
       printf("%"PRId64", ", tx_count_32x32p_stats[i][j]);
     }
     printf("},\n");
   }
   printf("};\n");
   printf(
-      "vp9_default_tx_count_16x16p[TX_SIZE_CONTEXTS][TX_SIZE_MAX_SB-1] = {\n");
+      "vp9_default_tx_count_16x16p[TX_SIZE_CONTEXTS][TX_SIZES-1] = {\n");
   for (i = 0; i < TX_SIZE_CONTEXTS; i++) {
     printf("  { ");
-    for (j = 0; j < TX_SIZE_MAX_SB - 1; j++) {
+    for (j = 0; j < TX_SIZES - 1; j++) {
       printf("%"PRId64", ", tx_count_16x16p_stats[i][j]);
     }
     printf("},\n");
   }
   printf("};\n");
   printf(
-      "vp9_default_tx_count_8x8p[TX_SIZE_CONTEXTS][TX_SIZE_MAX_SB-2] = {\n");
+      "vp9_default_tx_count_8x8p[TX_SIZE_CONTEXTS][TX_SIZES-2] = {\n");
   for (i = 0; i < TX_SIZE_CONTEXTS; i++) {
     printf("  { ");
-    for (j = 0; j < TX_SIZE_MAX_SB - 2; j++) {
+    for (j = 0; j < TX_SIZES - 2; j++) {
       printf("%"PRId64", ", tx_count_8x8p_stats[i][j]);
     }
     printf("},\n");
@@ -1034,15 +1034,15 @@ static void encode_txfm_probs(VP9_COMP *cpi, vp9_writer *w) {
   // Probabilities
   if (cm->tx_mode == TX_MODE_SELECT) {
     int i, j;
-    unsigned int ct_8x8p[TX_SIZE_MAX_SB - 3][2];
-    unsigned int ct_16x16p[TX_SIZE_MAX_SB - 2][2];
-    unsigned int ct_32x32p[TX_SIZE_MAX_SB - 1][2];
+    unsigned int ct_8x8p[TX_SIZES - 3][2];
+    unsigned int ct_16x16p[TX_SIZES - 2][2];
+    unsigned int ct_32x32p[TX_SIZES - 1][2];
 
 
     for (i = 0; i < TX_SIZE_CONTEXTS; i++) {
       tx_counts_to_branch_counts_8x8(cm->counts.tx.p8x8[i],
                                      ct_8x8p);
-      for (j = 0; j < TX_SIZE_MAX_SB - 3; j++)
+      for (j = 0; j < TX_SIZES - 3; j++)
         vp9_cond_prob_diff_update(w, &cm->fc.tx_probs.p8x8[i][j],
                                   VP9_MODE_UPDATE_PROB, ct_8x8p[j]);
     }
@@ -1050,14 +1050,14 @@ static void encode_txfm_probs(VP9_COMP *cpi, vp9_writer *w) {
     for (i = 0; i < TX_SIZE_CONTEXTS; i++) {
       tx_counts_to_branch_counts_16x16(cm->counts.tx.p16x16[i],
                                        ct_16x16p);
-      for (j = 0; j < TX_SIZE_MAX_SB - 2; j++)
+      for (j = 0; j < TX_SIZES - 2; j++)
         vp9_cond_prob_diff_update(w, &cm->fc.tx_probs.p16x16[i][j],
                                   VP9_MODE_UPDATE_PROB, ct_16x16p[j]);
     }
 
     for (i = 0; i < TX_SIZE_CONTEXTS; i++) {
       tx_counts_to_branch_counts_32x32(cm->counts.tx.p32x32[i], ct_32x32p);
-      for (j = 0; j < TX_SIZE_MAX_SB - 1; j++)
+      for (j = 0; j < TX_SIZES - 1; j++)
         vp9_cond_prob_diff_update(w, &cm->fc.tx_probs.p32x32[i][j],
                                   VP9_MODE_UPDATE_PROB, ct_32x32p[j]);
     }
