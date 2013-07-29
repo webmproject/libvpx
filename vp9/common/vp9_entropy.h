@@ -101,7 +101,7 @@ extern DECLARE_ALIGNED(16, const int16_t, vp9_default_scan_4x4[16]);
 extern DECLARE_ALIGNED(16, const int16_t, vp9_col_scan_4x4[16]);
 extern DECLARE_ALIGNED(16, const int16_t, vp9_row_scan_4x4[16]);
 
-extern DECLARE_ALIGNED(64, const int16_t, vp9_default_scan_8x8[64]);
+extern DECLARE_ALIGNED(16, const int16_t, vp9_default_scan_8x8[64]);
 
 extern DECLARE_ALIGNED(16, const int16_t, vp9_col_scan_8x8[64]);
 extern DECLARE_ALIGNED(16, const int16_t, vp9_row_scan_8x8[64]);
@@ -118,7 +118,7 @@ extern DECLARE_ALIGNED(16, int16_t, vp9_default_iscan_4x4[16]);
 extern DECLARE_ALIGNED(16, int16_t, vp9_col_iscan_4x4[16]);
 extern DECLARE_ALIGNED(16, int16_t, vp9_row_iscan_4x4[16]);
 
-extern DECLARE_ALIGNED(64, int16_t, vp9_default_iscan_8x8[64]);
+extern DECLARE_ALIGNED(16, int16_t, vp9_default_iscan_8x8[64]);
 
 extern DECLARE_ALIGNED(16, int16_t, vp9_col_iscan_8x8[64]);
 extern DECLARE_ALIGNED(16, int16_t, vp9_row_iscan_8x8[64]);

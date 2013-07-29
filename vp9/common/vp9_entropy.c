@@ -73,7 +73,7 @@ DECLARE_ALIGNED(16, const int16_t, vp9_row_scan_4x4[16]) = {
   13, 11, 14, 15,
 };
 
-DECLARE_ALIGNED(64, const int16_t, vp9_default_scan_8x8[64]) = {
+DECLARE_ALIGNED(16, const int16_t, vp9_default_scan_8x8[64]) = {
   0,  8,  1, 16,  9,  2, 17, 24,
   10,  3, 18, 25, 32, 11,  4, 26,
   33, 19, 40, 12, 34, 27,  5, 41,
