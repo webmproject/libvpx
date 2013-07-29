@@ -123,14 +123,8 @@ void vp9_idct_add_16x16_c(int16_t *input, uint8_t *dest, int stride, int eob) {
   if (eob) {
     if (eob == 1) {
       /* DC only DCT coefficient. */
-      int16_t in = input[0];
-      int16_t out;
-      /* Note: the idct1 will need to be modified accordingly whenever
-       * vp9_short_idct16x16() is modified. */
-      vp9_short_idct1_16x16_c(&in, &out);
+      vp9_short_idct16x16_1_add(input, dest, stride);
       input[0] = 0;
-
-      vp9_add_constant_residual_16x16(out, dest, stride);
     } else if (eob <= 10) {
       vp9_short_idct10_16x16_add(input, dest, stride);
       vpx_memset(input, 0, 512);

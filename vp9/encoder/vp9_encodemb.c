@@ -61,7 +61,9 @@ static void inverse_transform_b_8x8_add(MACROBLOCKD *xd, int eob,
 static void inverse_transform_b_16x16_add(MACROBLOCKD *xd, int eob,
                                           int16_t *dqcoeff, uint8_t *dest,
                                           int stride) {
-  if (eob <= 10)
+  if (eob <= 1)
+    vp9_short_idct16x16_1_add(dqcoeff, dest, stride);
+  else if (eob <= 10)
     vp9_short_idct10_16x16_add(dqcoeff, dest, stride);
   else
     vp9_short_idct16x16_add(dqcoeff, dest, stride);

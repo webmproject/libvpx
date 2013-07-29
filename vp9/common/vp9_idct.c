@@ -864,10 +864,18 @@ void vp9_short_idct10_16x16_add_c(int16_t *input, uint8_t *dest,
   }
 }
 
-void vp9_short_idct1_16x16_c(int16_t *input, int16_t *output) {
+void vp9_short_idct16x16_1_add_c(int16_t *input, uint8_t *dest,
+                                 int dest_stride) {
+  int i, j;
+  int a1;
   int16_t out = dct_const_round_shift(input[0] * cospi_16_64);
   out = dct_const_round_shift(out * cospi_16_64);
-  output[0] = ROUND_POWER_OF_TWO(out, 6);
+  a1 = ROUND_POWER_OF_TWO(out, 6);
+  for (j = 0; j < 16; ++j) {
+    for (i = 0; i < 16; ++i)
+      dest[i] = clip_pixel(dest[i] + a1);
+    dest += dest_stride;
+  }
 }
 
 static void idct32_1d(int16_t *input, int16_t *output) {

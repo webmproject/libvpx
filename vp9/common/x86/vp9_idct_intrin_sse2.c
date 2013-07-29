@@ -1470,6 +1470,38 @@ void vp9_short_idct16x16_add_sse2(int16_t *input, uint8_t *dest, int stride) {
   }
 }
 
+void vp9_short_idct16x16_1_add_sse2(int16_t *input, uint8_t *dest, int stride) {
+  __m128i dc_value;
+  const __m128i zero = _mm_setzero_si128();
+  int a, i;
+
+  a = dct_const_round_shift(input[0] * cospi_16_64);
+  a = dct_const_round_shift(a * cospi_16_64);
+  a = ROUND_POWER_OF_TWO(a, 6);
+
+  dc_value = _mm_set1_epi16(a);
+
+  for (i = 0; i < 2; ++i) {
+    RECON_AND_STORE(dest, dc_value);
+    RECON_AND_STORE(dest, dc_value);
+    RECON_AND_STORE(dest, dc_value);
+    RECON_AND_STORE(dest, dc_value);
+    RECON_AND_STORE(dest, dc_value);
+    RECON_AND_STORE(dest, dc_value);
+    RECON_AND_STORE(dest, dc_value);
+    RECON_AND_STORE(dest, dc_value);
+    RECON_AND_STORE(dest, dc_value);
+    RECON_AND_STORE(dest, dc_value);
+    RECON_AND_STORE(dest, dc_value);
+    RECON_AND_STORE(dest, dc_value);
+    RECON_AND_STORE(dest, dc_value);
+    RECON_AND_STORE(dest, dc_value);
+    RECON_AND_STORE(dest, dc_value);
+    RECON_AND_STORE(dest, dc_value);
+    dest += 8 - (stride * 16);
+  }
+}
+
 static INLINE void array_transpose_16x16(__m128i *res0, __m128i *res1) {
   __m128i tbuf[8];
   array_transpose_8x8(res0, res0);
