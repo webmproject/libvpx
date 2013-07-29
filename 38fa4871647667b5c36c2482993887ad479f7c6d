@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAcX//tXo\u003d",
+        "filename": "vp9/encoder/vp9_encodemb.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2013-07-29T16:24:43Z",
+      "side": 1,
+      "message": "10 assumes the typical zigzag order, is it still valid for non-default scan order?\n\ncan you double check this?",
+      "revId": "38fa4871647667b5c36c2482993887ad479f7c6d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
