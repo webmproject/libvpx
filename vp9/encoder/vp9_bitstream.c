@@ -200,8 +200,8 @@ static void update_mbintra_mode_probs(VP9_COMP* const cpi,
                 (unsigned int *)cpi->y_mode_count[j]);
 }
 
-static void write_selected_txfm_size(const VP9_COMP *cpi, TX_SIZE tx_size,
-                                     BLOCK_SIZE_TYPE bsize, vp9_writer *w) {
+static void write_selected_tx_size(const VP9_COMP *cpi, TX_SIZE tx_size,
+                                   BLOCK_SIZE_TYPE bsize, vp9_writer *w) {
   const MACROBLOCKD *const xd = &cpi->mb.e_mbd;
   const vp9_prob *tx_probs = get_tx_probs2(xd, &cpi->common.fc.tx_probs);
   vp9_write(w, tx_size != TX_4X4, tx_probs[0]);
@@ -434,7 +434,7 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, MODE_INFO *m,
   if (bsize >= BLOCK_SIZE_SB8X8 && pc->tx_mode == TX_MODE_SELECT &&
       !(rf != INTRA_FRAME &&
         (skip_coeff || vp9_segfeature_active(seg, segment_id, SEG_LVL_SKIP)))) {
-    write_selected_txfm_size(cpi, mi->txfm_size, bsize, bc);
+    write_selected_tx_size(cpi, mi->txfm_size, bsize, bc);
   }
 
   if (rf == INTRA_FRAME) {
@@ -541,7 +541,7 @@ static void write_mb_modes_kf(const VP9_COMP *cpi,
   write_skip_coeff(cpi, segment_id, m, bc);
 
   if (m->mbmi.sb_type >= BLOCK_SIZE_SB8X8 && c->tx_mode == TX_MODE_SELECT)
-    write_selected_txfm_size(cpi, m->mbmi.txfm_size, m->mbmi.sb_type, bc);
+    write_selected_tx_size(cpi, m->mbmi.txfm_size, m->mbmi.sb_type, bc);
 
   if (m->mbmi.sb_type >= BLOCK_SIZE_SB8X8) {
     const MB_PREDICTION_MODE A = above_block_mode(m, 0, mis);
@@ -724,12 +724,12 @@ static void print_prob_tree(vp9_coeff_probs *coef_probs, int block_types) {
   fclose(f);
 }
 
-static void build_tree_distribution(VP9_COMP *cpi, TX_SIZE txfm_size) {
-  vp9_coeff_probs_model *coef_probs = cpi->frame_coef_probs[txfm_size];
-  vp9_coeff_count *coef_counts = cpi->coef_counts[txfm_size];
+static void build_tree_distribution(VP9_COMP *cpi, TX_SIZE tx_size) {
+  vp9_coeff_probs_model *coef_probs = cpi->frame_coef_probs[tx_size];
+  vp9_coeff_count *coef_counts = cpi->coef_counts[tx_size];
   unsigned int (*eob_branch_ct)[REF_TYPES][COEF_BANDS][PREV_COEF_CONTEXTS] =
-      cpi->common.counts.eob_branch[txfm_size];
-  vp9_coeff_stats *coef_branch_ct = cpi->frame_branch_ct[txfm_size];
+      cpi->common.counts.eob_branch[tx_size];
+  vp9_coeff_stats *coef_branch_ct = cpi->frame_branch_ct[tx_size];
   vp9_prob full_probs[ENTROPY_NODES];
   int i, j, k, l;
 
@@ -754,9 +754,9 @@ static void build_tree_distribution(VP9_COMP *cpi, TX_SIZE txfm_size) {
           if (!cpi->dummy_packing) {
             int t;
             for (t = 0; t < MAX_ENTROPY_TOKENS; ++t)
-              context_counters[txfm_size][i][j][k][l][t] +=
+              context_counters[tx_size][i][j][k][l][t] +=
                   coef_counts[i][j][k][l][t];
-            context_counters[txfm_size][i][j][k][l][MAX_ENTROPY_TOKENS] +=
+            context_counters[tx_size][i][j][k][l][MAX_ENTROPY_TOKENS] +=
                 eob_branch_ct[i][j][k][l];
           }
 #endif

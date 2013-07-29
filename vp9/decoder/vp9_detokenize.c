@@ -75,7 +75,7 @@ DECLARE_ALIGNED(16, extern const uint8_t,
 #define WRITE_COEF_CONTINUE(val, token)                  \
   {                                                      \
     qcoeff_ptr[scan[c]] = vp9_read_and_apply_sign(r, val) * \
-                            dq[c > 0] / (1 + (txfm_size == TX_32X32)); \
+                            dq[c > 0] / (1 + (tx_size == TX_32X32)); \
     INCREMENT_COUNT(token);                              \
     c++;                                                 \
     continue;                                            \
@@ -90,7 +90,7 @@ DECLARE_ALIGNED(16, extern const uint8_t,
 static int decode_coefs(VP9_COMMON *cm, const MACROBLOCKD *xd,
                         vp9_reader *r, int block_idx,
                         PLANE_TYPE type, int seg_eob, int16_t *qcoeff_ptr,
-                        TX_SIZE txfm_size, const int16_t *dq,
+                        TX_SIZE tx_size, const int16_t *dq,
                         ENTROPY_CONTEXT *A, ENTROPY_CONTEXT *L) {
   FRAME_CONTEXT *const fc = &cm->fc;
   FRAME_COUNTS *const counts = &cm->counts;
@@ -98,16 +98,16 @@ static int decode_coefs(VP9_COMMON *cm, const MACROBLOCKD *xd,
   const int ref = xd->mode_info_context->mbmi.ref_frame[0] != INTRA_FRAME;
   int band, pt, c = 0;
   vp9_prob (*coef_probs)[PREV_COEF_CONTEXTS][UNCONSTRAINED_NODES] =
-      fc->coef_probs[txfm_size][type][ref];
+      fc->coef_probs[tx_size][type][ref];
   vp9_prob coef_probs_full[COEF_BANDS][PREV_COEF_CONTEXTS][ENTROPY_NODES];
   uint8_t load_map[COEF_BANDS][PREV_COEF_CONTEXTS] = { { 0 } };
   vp9_prob *prob;
-  vp9_coeff_count_model *coef_counts = counts->coef[txfm_size];
+  vp9_coeff_count_model *coef_counts = counts->coef[tx_size];
   const int16_t *scan, *nb;
   uint8_t token_cache[1024];
   const uint8_t * band_translate;
 
-  switch (txfm_size) {
+  switch (tx_size) {
     default:
     case TX_4X4: {
       scan = get_scan_4x4(get_tx_type_4x4(type, xd, block_idx));
@@ -150,7 +150,7 @@ static int decode_coefs(VP9_COMMON *cm, const MACROBLOCKD *xd,
       pt = get_coef_context(nb, token_cache, c);
     band = get_coef_band(band_translate, c);
     prob = coef_probs[band][pt];
-    counts->eob_branch[txfm_size][type][ref][band][pt]++;
+    counts->eob_branch[tx_size][type][ref][band][pt]++;
     if (!vp9_read(r, prob[EOB_CONTEXT_NODE]))
       break;
 

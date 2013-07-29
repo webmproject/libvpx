@@ -257,8 +257,7 @@ void vp9_tokenize_sb(VP9_COMP *cpi, TOKENEXTRA **t, int dry_run,
   const int mb_skip_context = vp9_get_pred_context_mbskip(xd);
   const int skip_inc = !vp9_segfeature_active(&xd->seg, mbmi->segment_id,
                                               SEG_LVL_SKIP);
-  const TX_SIZE txfm_size = mbmi->txfm_size;
-  struct tokenize_b_args arg = { cpi, xd, t, txfm_size, dry_run };
+  struct tokenize_b_args arg = { cpi, xd, t, mbmi->txfm_size, dry_run };
 
   mbmi->mb_skip_coeff = vp9_sb_is_skippable(xd, bsize);
   if (mbmi->mb_skip_coeff) {
