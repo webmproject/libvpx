@@ -866,7 +866,7 @@ static void choose_txfm_size_from_rd(VP9_COMP *cpi, MACROBLOCK *x,
                                      int (*r)[2], int *rate,
                                      int64_t *d, int64_t *distortion,
                                      int *s, int *skip,
-                                     int64_t txfm_cache[NB_TXFM_MODES],
+                                     int64_t txfm_cache[TX_MODES],
                                      BLOCK_SIZE_TYPE bs) {
   const TX_SIZE max_txfm_size = TX_32X32
       - (bs < BLOCK_SIZE_SB32X32) - (bs < BLOCK_SIZE_MB16X16);
@@ -1072,7 +1072,7 @@ static void choose_txfm_size_from_modelrd(VP9_COMP *cpi, MACROBLOCK *x,
 static void super_block_yrd(VP9_COMP *cpi,
                             MACROBLOCK *x, int *rate, int64_t *distortion,
                             int *skip, int64_t *psse, BLOCK_SIZE_TYPE bs,
-                            int64_t txfm_cache[NB_TXFM_MODES],
+                            int64_t txfm_cache[TX_MODES],
                             int64_t ref_best_rd) {
   VP9_COMMON *const cm = &cpi->common;
   int r[TX_SIZES][2], s[TX_SIZES];
@@ -1087,7 +1087,7 @@ static void super_block_yrd(VP9_COMP *cpi,
   if (cpi->sf.tx_size_search_method == USE_LARGESTALL ||
       (cpi->sf.tx_size_search_method != USE_FULL_RD &&
        mbmi->ref_frame[0] == INTRA_FRAME)) {
-    vpx_memset(txfm_cache, 0, NB_TXFM_MODES * sizeof(int64_t));
+    vpx_memset(txfm_cache, 0, TX_MODES * sizeof(int64_t));
     choose_largest_txfm_size(cpi, x, rate, distortion, skip, sse,
                              ref_best_rd, bs);
     if (psse)
@@ -1380,7 +1380,7 @@ static int64_t rd_pick_intra_sby_mode(VP9_COMP *cpi, MACROBLOCK *x,
                                       int *rate, int *rate_tokenonly,
                                       int64_t *distortion, int *skippable,
                                       BLOCK_SIZE_TYPE bsize,
-                                      int64_t txfm_cache[NB_TXFM_MODES],
+                                      int64_t txfm_cache[TX_MODES],
                                       int64_t best_rd) {
   MB_PREDICTION_MODE mode;
   MB_PREDICTION_MODE UNINITIALIZED_IS_SAFE(mode_selected);
@@ -1392,13 +1392,13 @@ static int64_t rd_pick_intra_sby_mode(VP9_COMP *cpi, MACROBLOCK *x,
   int *bmode_costs = x->mbmode_cost;
 
   if (cpi->sf.tx_size_search_method == USE_FULL_RD) {
-    for (i = 0; i < NB_TXFM_MODES; i++)
+    for (i = 0; i < TX_MODES; i++)
       txfm_cache[i] = INT64_MAX;
   }
 
   /* Y Search for 32x32 intra prediction mode */
   for (mode = DC_PRED; mode <= TM_PRED; mode++) {
-    int64_t local_txfm_cache[NB_TXFM_MODES];
+    int64_t local_txfm_cache[TX_MODES];
     MODE_INFO *const mic = xd->mode_info_context;
     const int mis = xd->mode_info_stride;
 
@@ -1431,7 +1431,7 @@ static int64_t rd_pick_intra_sby_mode(VP9_COMP *cpi, MACROBLOCK *x,
     }
 
     if (cpi->sf.tx_size_search_method == USE_FULL_RD && this_rd < INT64_MAX) {
-      for (i = 0; i < NB_TXFM_MODES; i++) {
+      for (i = 0; i < TX_MODES; i++) {
         int64_t adj_rd = this_rd + local_txfm_cache[i] -
             local_txfm_cache[cpi->common.tx_mode];
         if (adj_rd < txfm_cache[i]) {
@@ -2349,7 +2349,7 @@ static void store_coding_context(MACROBLOCK *x, PICK_MODE_CONTEXT *ctx,
                          int_mv *ref_mv,
                          int_mv *second_ref_mv,
                          int64_t comp_pred_diff[NB_PREDICTION_TYPES],
-                         int64_t txfm_size_diff[NB_TXFM_MODES],
+                         int64_t txfm_size_diff[TX_MODES],
                          int64_t best_filter_diff[VP9_SWITCHABLE_FILTERS + 1]) {
   MACROBLOCKD *const xd = &x->e_mbd;
 
@@ -3151,7 +3151,7 @@ void vp9_rd_pick_intra_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
   MACROBLOCKD *const xd = &x->e_mbd;
   int rate_y = 0, rate_uv = 0, rate_y_tokenonly = 0, rate_uv_tokenonly = 0;
   int y_skip = 0, uv_skip;
-  int64_t dist_y = 0, dist_uv = 0, txfm_cache[NB_TXFM_MODES];
+  int64_t dist_y = 0, dist_uv = 0, txfm_cache[TX_MODES];
 
   x->skip_encode = 0;
   vpx_memset(&txfm_cache, 0, sizeof(txfm_cache));
@@ -3188,7 +3188,7 @@ void vp9_rd_pick_intra_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
         vp9_cost_bit(vp9_get_pred_prob_mbskip(cm, xd), 0);
     *returndist = dist_y + (dist_uv >> 2);
     if (cpi->sf.tx_size_search_method == USE_FULL_RD) {
-      for (i = 0; i < NB_TXFM_MODES; i++) {
+      for (i = 0; i < TX_MODES; i++) {
         ctx->txfm_rd_diff[i] = txfm_cache[i] - txfm_cache[cm->tx_mode];
       }
     }
@@ -3223,8 +3223,8 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
                      cpi->alt_fb_idx};
   int64_t best_rd = best_rd_so_far;
   int64_t best_yrd = best_rd_so_far;  // FIXME(rbultje) more precise
-  int64_t best_txfm_rd[NB_TXFM_MODES];
-  int64_t best_txfm_diff[NB_TXFM_MODES];
+  int64_t best_txfm_rd[TX_MODES];
+  int64_t best_txfm_diff[TX_MODES];
   int64_t best_pred_diff[NB_PREDICTION_TYPES];
   int64_t best_pred_rd[NB_PREDICTION_TYPES];
   int64_t best_filter_rd[VP9_SWITCHABLE_FILTERS + 1];
@@ -3280,7 +3280,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
 
   for (i = 0; i < NB_PREDICTION_TYPES; ++i)
     best_pred_rd[i] = INT64_MAX;
-  for (i = 0; i < NB_TXFM_MODES; i++)
+  for (i = 0; i < TX_MODES; i++)
     best_txfm_rd[i] = INT64_MAX;
   for (i = 0; i <= VP9_SWITCHABLE_FILTERS; i++)
     best_filter_rd[i] = INT64_MAX;
@@ -3339,13 +3339,13 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
     int rate2 = 0, rate_y = 0, rate_uv = 0;
     int64_t distortion2 = 0, distortion_y = 0, distortion_uv = 0;
     int skippable;
-    int64_t txfm_cache[NB_TXFM_MODES];
+    int64_t txfm_cache[TX_MODES];
     int i;
     int this_skip2 = 0;
     int64_t total_sse = INT_MAX;
     int early_term = 0;
 
-    for (i = 0; i < NB_TXFM_MODES; ++i)
+    for (i = 0; i < TX_MODES; ++i)
       txfm_cache[i] = INT64_MAX;
 
     x->skip = 0;
@@ -3539,7 +3539,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
       distortion_uv = dist_uv[TX_4X4];
       mbmi->uv_mode = mode_uv[TX_4X4];
       txfm_cache[ONLY_4X4] = RDCOST(x->rdmult, x->rddiv, rate2, distortion2);
-      for (i = 0; i < NB_TXFM_MODES; ++i)
+      for (i = 0; i < TX_MODES; ++i)
         txfm_cache[i] = txfm_cache[ONLY_4X4];
     } else if (ref_frame == INTRA_FRAME) {
       TX_SIZE uv_tx;
@@ -3742,7 +3742,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
         total_sse += uv_sse;
 
         txfm_cache[ONLY_4X4] = RDCOST(x->rdmult, x->rddiv, rate2, distortion2);
-        for (i = 0; i < NB_TXFM_MODES; ++i)
+        for (i = 0; i < TX_MODES; ++i)
           txfm_cache[i] = txfm_cache[ONLY_4X4];
       }
     } else {
@@ -3978,7 +3978,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
       txfm_cache[ALLOW_32X32] = txfm_cache[ALLOW_16X16];
     }
     if (!mode_excluded && this_rd != INT64_MAX) {
-      for (i = 0; i < NB_TXFM_MODES; i++) {
+      for (i = 0; i < TX_MODES; i++) {
         int64_t adj_rd = INT64_MAX;
         if (this_mode != I4X4_PRED) {
           adj_rd = this_rd + txfm_cache[i] - txfm_cache[cm->tx_mode];
@@ -4138,7 +4138,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
   }
 
   if (!x->skip) {
-    for (i = 0; i < NB_TXFM_MODES; i++) {
+    for (i = 0; i < TX_MODES; i++) {
       if (best_txfm_rd[i] == INT64_MAX)
         best_txfm_diff[i] = 0;
       else

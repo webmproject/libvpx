@@ -63,7 +63,7 @@ typedef enum {
   ALLOW_16X16         = 2,
   ALLOW_32X32         = 3,
   TX_MODE_SELECT      = 4,
-  NB_TXFM_MODES       = 5,
+  TX_MODES            = 5,
 } TX_MODE;
 
 typedef enum {

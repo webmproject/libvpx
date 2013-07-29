@@ -362,9 +362,8 @@ static void update_state(VP9_COMP *cpi, PICK_MODE_CONTEXT *ctx,
     return;
 
   if (!vp9_segfeature_active(&xd->seg, mbmi->segment_id, SEG_LVL_SKIP)) {
-    for (i = 0; i < NB_TXFM_MODES; i++) {
+    for (i = 0; i < TX_MODES; i++)
       cpi->rd_tx_select_diff[i] += ctx->txfm_rd_diff[i];
-    }
   }
 
   if (cpi->common.frame_type == KEY_FRAME) {
@@ -2410,7 +2409,7 @@ void vp9_encode_frame(VP9_COMP *cpi) {
           (cpi->rd_filter_threshes[frame_type][i] + diff) / 2;
     }
 
-    for (i = 0; i < NB_TXFM_MODES; ++i) {
+    for (i = 0; i < TX_MODES; ++i) {
       int64_t pd = cpi->rd_tx_select_diff[i];
       int diff;
       if (i == TX_MODE_SELECT)
