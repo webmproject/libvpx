@@ -98,6 +98,28 @@ struct tokenize_b_args {
   int dry_run;
 };
 
+static void set_entropy_context_b(int plane, int block, BLOCK_SIZE_TYPE bsize,
+                                  int ss_txfrm_size, void *arg) {
+  struct tokenize_b_args* const args = arg;
+  TX_SIZE tx_size = ss_txfrm_size >> 1;
+  MACROBLOCKD *xd = args->xd;
+  const int bwl = b_width_log2(bsize);
+  const int off = block >> (2 * tx_size);
+  const int mod = bwl - tx_size - xd->plane[plane].subsampling_x;
+  const int aoff = (off & ((1 << mod) - 1)) << tx_size;
+  const int loff = (off >> mod) << tx_size;
+  ENTROPY_CONTEXT *A = xd->plane[plane].above_context + aoff;
+  ENTROPY_CONTEXT *L = xd->plane[plane].left_context + loff;
+  const int eob = xd->plane[plane].eobs[block];
+
+  if (xd->mb_to_right_edge < 0 || xd->mb_to_bottom_edge < 0) {
+    set_contexts_on_border(xd, bsize, plane, tx_size, eob, aoff, loff, A, L);
+  } else {
+    vpx_memset(A, eob > 0, sizeof(ENTROPY_CONTEXT) * (1 << tx_size));
+    vpx_memset(L, eob > 0, sizeof(ENTROPY_CONTEXT) * (1 << tx_size));
+  }
+}
+
 static void tokenize_b(int plane, int block, BLOCK_SIZE_TYPE bsize,
                        int ss_txfrm_size, void *arg) {
   struct tokenize_b_args* const args = arg;
@@ -269,13 +291,13 @@ void vp9_tokenize_sb(VP9_COMP *cpi, TOKENEXTRA **t, int dry_run,
     return;
   }
 
-  if (!dry_run)
+  if (!dry_run) {
     cm->counts.mbskip[mb_skip_context][0] += skip_inc;
-
-  foreach_transformed_block(xd, bsize, tokenize_b, &arg);
-
-  if (dry_run)
+    foreach_transformed_block(xd, bsize, tokenize_b, &arg);
+  } else {
+    foreach_transformed_block(xd, bsize, set_entropy_context_b, &arg);
     *t = t_backup;
+  }
 }
 
 #ifdef ENTROPY_STATS
