@@ -95,6 +95,9 @@ void vp9_idct_add_8x8_c(int16_t *input, uint8_t *dest, int stride, int eob) {
       // DC only DCT coefficient
       vp9_short_idct8x8_1_add(input, dest, stride);
       input[0] = 0;
+    } else if (eob <= 10) {
+      vp9_short_idct10_8x8_add(input, dest, stride);
+      vpx_memset(input, 0, 128);
     } else {
       vp9_short_idct8x8_add(input, dest, stride);
       vpx_memset(input, 0, 128);
@@ -128,6 +131,9 @@ void vp9_idct_add_16x16_c(int16_t *input, uint8_t *dest, int stride, int eob) {
       input[0] = 0;
 
       vp9_add_constant_residual_16x16(out, dest, stride);
+    } else if (eob <= 10) {
+      vp9_short_idct10_16x16_add(input, dest, stride);
+      vpx_memset(input, 0, 512);
     } else {
       vp9_short_idct16x16_add(input, dest, stride);
       vpx_memset(input, 0, 512);
