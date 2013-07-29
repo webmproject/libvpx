@@ -16,6 +16,24 @@
       "revId": "38fa4871647667b5c36c2482993887ad479f7c6d",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcX//tSA\u003d",
+        "filename": "vp9/encoder/vp9_encodemb.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2013-07-29T18:02:31Z",
+      "side": 1,
+      "message": "Done.\n\nYes, 10 is still a valid threshold in the new scanning order.",
+      "parentUuid": "AAAAcX//tXo\u003d",
+      "revId": "38fa4871647667b5c36c2482993887ad479f7c6d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
