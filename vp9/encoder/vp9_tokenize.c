@@ -136,9 +136,7 @@ static void tokenize_b(int plane, int block, BLOCK_SIZE_TYPE bsize,
   const int eob = xd->plane[plane].eobs[block];
   const PLANE_TYPE type = xd->plane[plane].plane_type;
   const int16_t *qcoeff_ptr = BLOCK_OFFSET(xd->plane[plane].qcoeff, block, 16);
-  const BLOCK_SIZE_TYPE sb_type = (mbmi->sb_type < BLOCK_SIZE_SB8X8) ?
-                                   BLOCK_SIZE_SB8X8 : mbmi->sb_type;
-  const int bwl = b_width_log2(sb_type);
+  const int bwl = b_width_log2(bsize);
   const int off = block >> (2 * tx_size);
   const int mod = bwl - tx_size - xd->plane[plane].subsampling_x;
   const int aoff = (off & ((1 << mod) - 1)) << tx_size;
@@ -168,22 +166,22 @@ static void tokenize_b(int plane, int block, BLOCK_SIZE_TYPE bsize,
       band_translate = vp9_coefband_trans_4x4;
       break;
     case TX_8X8:
-      above_ec = (A[0] + A[1]) != 0;
-      left_ec = (L[0] + L[1]) != 0;
+      above_ec = !!*(uint16_t *)A;
+      left_ec  = !!*(uint16_t *)L;
       seg_eob = 64;
       scan = get_scan_8x8(get_tx_type_8x8(type, xd));
       band_translate = vp9_coefband_trans_8x8plus;
       break;
     case TX_16X16:
-      above_ec = (A[0] + A[1] + A[2] + A[3]) != 0;
-      left_ec = (L[0] + L[1] + L[2] + L[3]) != 0;
+      above_ec = !!*(uint32_t *)A;
+      left_ec  = !!*(uint32_t *)L;
       seg_eob = 256;
       scan = get_scan_16x16(get_tx_type_16x16(type, xd));
       band_translate = vp9_coefband_trans_8x8plus;
       break;
     case TX_32X32:
-      above_ec = (A[0] + A[1] + A[2] + A[3] + A[4] + A[5] + A[6] + A[7]) != 0;
-      left_ec = (L[0] + L[1] + L[2] + L[3] + L[4] + L[5] + L[6] + L[7]) != 0;
+      above_ec = !!*(uint64_t *)A;
+      left_ec  = !!*(uint64_t *)L;
       seg_eob = 1024;
       scan = vp9_default_scan_32x32;
       band_translate = vp9_coefband_trans_8x8plus;
@@ -225,7 +223,7 @@ static void tokenize_b(int plane, int block, BLOCK_SIZE_TYPE bsize,
       if (!t->skip_eob_node)
         ++cpi->common.counts.eob_branch[tx_size][type][ref][band][pt];
     }
-    token_cache[scan[c]] = vp9_pt_energy_class[token];
+    token_cache[rc] = vp9_pt_energy_class[token];
     ++t;
   } while (c < eob && ++c < seg_eob);
 
@@ -233,9 +231,8 @@ static void tokenize_b(int plane, int block, BLOCK_SIZE_TYPE bsize,
   if (xd->mb_to_right_edge < 0 || xd->mb_to_bottom_edge < 0) {
     set_contexts_on_border(xd, bsize, plane, tx_size, c, aoff, loff, A, L);
   } else {
-    for (pt = 0; pt < (1 << tx_size); pt++) {
-      A[pt] = L[pt] = c > 0;
-    }
+    vpx_memset(A, c > 0, sizeof(ENTROPY_CONTEXT) * (1 << tx_size));
+    vpx_memset(L, c > 0, sizeof(ENTROPY_CONTEXT) * (1 << tx_size));
   }
 }
 

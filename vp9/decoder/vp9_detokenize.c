@@ -118,22 +118,22 @@ static int decode_coefs(VP9_COMMON *cm, const MACROBLOCKD *xd,
     }
     case TX_8X8: {
       scan = get_scan_8x8(get_tx_type_8x8(type, xd));
-      above_ec = (A[0] + A[1]) != 0;
-      left_ec = (L[0] + L[1]) != 0;
+      above_ec = !!*(uint16_t *)A;
+      left_ec  = !!*(uint16_t *)L;
       band_translate = vp9_coefband_trans_8x8plus;
       break;
     }
     case TX_16X16: {
       scan = get_scan_16x16(get_tx_type_16x16(type, xd));
-      above_ec = (A[0] + A[1] + A[2] + A[3]) != 0;
-      left_ec = (L[0] + L[1] + L[2] + L[3]) != 0;
+      above_ec = !!*(uint32_t *)A;
+      left_ec  = !!*(uint32_t *)L;
       band_translate = vp9_coefband_trans_8x8plus;
       break;
     }
     case TX_32X32:
       scan = vp9_default_scan_32x32;
-      above_ec = (A[0] + A[1] + A[2] + A[3] + A[4] + A[5] + A[6] + A[7]) != 0;
-      left_ec = (L[0] + L[1] + L[2] + L[3] + L[4] + L[5] + L[6] + L[7]) != 0;
+      above_ec = !!*(uint64_t *)A;
+      left_ec  = !!*(uint64_t *)L;
       band_translate = vp9_coefband_trans_8x8plus;
       break;
   }
