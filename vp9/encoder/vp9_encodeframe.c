@@ -1088,7 +1088,8 @@ static void choose_partitioning(VP9_COMP *cpi, MODE_INFO *m, int mi_row,
   dp = 64;
   if (cm->frame_type != KEY_FRAME) {
     int_mv nearest_mv, near_mv;
-    YV12_BUFFER_CONFIG *ref_fb = &cm->yv12_fb[0];
+    const int idx = cm->ref_frame_map[get_ref_frame_idx(cpi, LAST_FRAME)];
+    YV12_BUFFER_CONFIG *ref_fb = &cm->yv12_fb[idx];
     YV12_BUFFER_CONFIG *second_ref_fb = NULL;
 
     setup_pre_planes(xd, 0, ref_fb, mi_row, mi_col,
@@ -1104,7 +1105,6 @@ static void choose_partitioning(VP9_COMP *cpi, MODE_INFO *m, int mi_row,
     vp9_build_inter_predictors_sby(xd, mi_row, mi_col, BLOCK_SIZE_SB64X64);
     d = xd->plane[0].dst.buf;
     dp = xd->plane[0].dst.stride;
-
   }
 
   // Fill in the entire tree of 8x8 variances for splits.
@@ -1166,6 +1166,7 @@ static void choose_partitioning(VP9_COMP *cpi, MODE_INFO *m, int mi_row,
     }
   }
 }
+
 static void rd_use_partition(VP9_COMP *cpi, MODE_INFO *m, TOKENEXTRA **tp,
                              int mi_row, int mi_col, BLOCK_SIZE_TYPE bsize,
                              int *rate, int64_t *dist, int do_recon) {
