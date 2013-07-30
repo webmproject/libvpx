@@ -108,6 +108,12 @@ typedef struct frame_contexts {
   nmv_context nmvc;
   nmv_context pre_nmvc;
   nmv_context_counts NMVcount;
+
+#if CONFIG_INTERINTRA
+  vp9_prob interintra_prob;
+  vp9_prob pre_interintra_prob;
+  unsigned int interintra_counts[2];
+#endif
 } FRAME_CONTEXT;
 
 typedef enum {
@@ -270,6 +276,10 @@ typedef struct VP9Common {
 
 #if CONFIG_POSTPROC
   struct postproc_state  postproc_state;
+#endif
+
+#if CONFIG_INTERINTRA
+  int use_interintra;
 #endif
 
   int error_resilient_mode;

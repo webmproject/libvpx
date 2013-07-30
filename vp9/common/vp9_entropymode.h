@@ -19,6 +19,12 @@
 
 #define VP9_MODE_UPDATE_PROB  252
 
+#if CONFIG_INTERINTRA
+#define VP9_DEF_INTERINTRA_PROB 192
+#define VP9_UPD_INTERINTRA_PROB 248
+#define SEPARATE_INTERINTRA_UV  0
+#endif
+
 // #define MODE_STATS
 
 extern int vp9_mv_cont(const int_mv *l, const int_mv *a);

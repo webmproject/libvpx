@@ -591,6 +591,24 @@ static void set_rd_speed_thresholds(VP9_COMP *cpi, int mode, int speed) {
   sf->thresh_mult[THR_COMP_SPLITLA  ] += speed_multiplier * 4500;
   sf->thresh_mult[THR_COMP_SPLITGA  ] += speed_multiplier * 4500;
 
+#if CONFIG_INTERINTRA
+  sf->thresh_mult[THR_COMP_INTERINTRA_ZEROL   ] += speed_multiplier * 1500;
+  sf->thresh_mult[THR_COMP_INTERINTRA_ZEROG   ] += speed_multiplier * 1500;
+  sf->thresh_mult[THR_COMP_INTERINTRA_ZEROA   ] += speed_multiplier * 1500;
+
+  sf->thresh_mult[THR_COMP_INTERINTRA_NEARESTL] += speed_multiplier * 1500;
+  sf->thresh_mult[THR_COMP_INTERINTRA_NEARESTG] += speed_multiplier * 1500;
+  sf->thresh_mult[THR_COMP_INTERINTRA_NEARESTA] += speed_multiplier * 1500;
+
+  sf->thresh_mult[THR_COMP_INTERINTRA_NEARL   ] += speed_multiplier * 1500;
+  sf->thresh_mult[THR_COMP_INTERINTRA_NEARG   ] += speed_multiplier * 1500;
+  sf->thresh_mult[THR_COMP_INTERINTRA_NEARA   ] += speed_multiplier * 1500;
+
+  sf->thresh_mult[THR_COMP_INTERINTRA_NEWL    ] += speed_multiplier * 2000;
+  sf->thresh_mult[THR_COMP_INTERINTRA_NEWG    ] += speed_multiplier * 2000;
+  sf->thresh_mult[THR_COMP_INTERINTRA_NEWA    ] += speed_multiplier * 2000;
+#endif
+
   if (cpi->sf.skip_lots_of_modes) {
     for (i = 0; i < MAX_MODES; ++i)
       sf->thresh_mult[i] = INT_MAX;
@@ -620,6 +638,12 @@ static void set_rd_speed_thresholds(VP9_COMP *cpi, int mode, int speed) {
     sf->thresh_mult[THR_ZEROMV   ] = INT_MAX;
     sf->thresh_mult[THR_NEARMV   ] = INT_MAX;
     sf->thresh_mult[THR_SPLITMV  ] = INT_MAX;
+#if CONFIG_INTERINTRA
+    sf->thresh_mult[THR_COMP_INTERINTRA_ZEROL   ] = INT_MAX;
+    sf->thresh_mult[THR_COMP_INTERINTRA_NEARESTL] = INT_MAX;
+    sf->thresh_mult[THR_COMP_INTERINTRA_NEARL   ] = INT_MAX;
+    sf->thresh_mult[THR_COMP_INTERINTRA_NEWL    ] = INT_MAX;
+#endif
   }
   if (!(cpi->ref_frame_flags & VP9_GOLD_FLAG)) {
     sf->thresh_mult[THR_NEARESTG ] = INT_MAX;
@@ -627,6 +651,12 @@ static void set_rd_speed_thresholds(VP9_COMP *cpi, int mode, int speed) {
     sf->thresh_mult[THR_NEARG    ] = INT_MAX;
     sf->thresh_mult[THR_NEWG     ] = INT_MAX;
     sf->thresh_mult[THR_SPLITG   ] = INT_MAX;
+#if CONFIG_INTERINTRA
+    sf->thresh_mult[THR_COMP_INTERINTRA_ZEROG   ] = INT_MAX;
+    sf->thresh_mult[THR_COMP_INTERINTRA_NEARESTG] = INT_MAX;
+    sf->thresh_mult[THR_COMP_INTERINTRA_NEARG   ] = INT_MAX;
+    sf->thresh_mult[THR_COMP_INTERINTRA_NEWG    ] = INT_MAX;
+#endif
   }
   if (!(cpi->ref_frame_flags & VP9_ALT_FLAG)) {
     sf->thresh_mult[THR_NEARESTA ] = INT_MAX;
@@ -634,6 +664,12 @@ static void set_rd_speed_thresholds(VP9_COMP *cpi, int mode, int speed) {
     sf->thresh_mult[THR_NEARA    ] = INT_MAX;
     sf->thresh_mult[THR_NEWA     ] = INT_MAX;
     sf->thresh_mult[THR_SPLITA   ] = INT_MAX;
+#if CONFIG_INTERINTRA
+    sf->thresh_mult[THR_COMP_INTERINTRA_ZEROA   ] = INT_MAX;
+    sf->thresh_mult[THR_COMP_INTERINTRA_NEARESTA] = INT_MAX;
+    sf->thresh_mult[THR_COMP_INTERINTRA_NEARA   ] = INT_MAX;
+    sf->thresh_mult[THR_COMP_INTERINTRA_NEWA    ] = INT_MAX;
+#endif
   }
 
   if ((cpi->ref_frame_flags & (VP9_LAST_FLAG | VP9_ALT_FLAG)) !=
@@ -2418,6 +2454,18 @@ void vp9_select_interp_filter_type(VP9_COMP *cpi) {
   }
 }
 
+#if CONFIG_INTERINTRA
+static void select_interintra_mode(VP9_COMP *cpi) {
+  static const double threshold = 0.01;
+  VP9_COMMON *cm = &cpi->common;
+  int sum = cpi->interintra_select_count[1] + cpi->interintra_select_count[0];
+  if (sum) {
+    double fraction = (double)cpi->interintra_select_count[1] / (double)sum;
+    cm->use_interintra = (fraction > threshold);
+  }
+}
+#endif
+
 static void scale_references(VP9_COMP *cpi) {
   VP9_COMMON *cm = &cpi->common;
   int i;
@@ -2802,6 +2850,12 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
     set_mvcost(&cpi->mb);
   }
 
+#if CONFIG_INTERINTRA
+  if (cm->current_video_frame == 0) {
+    cm->use_interintra = 1;
+  }
+#endif
+
 #if CONFIG_POSTPROC
 
   if (cpi->oxcf.noise_sensitivity > 0) {
@@ -3133,6 +3187,9 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
     vp9_copy(cpi->common.fc.y_mode_counts, cpi->y_mode_count);
     vp9_copy(cpi->common.fc.uv_mode_counts, cpi->y_uv_mode_count);
     vp9_copy(cpi->common.fc.partition_counts, cpi->partition_count);
+#if CONFIG_INTERINTRA
+    vp9_copy(cpi->common.fc.interintra_counts, cpi->interintra_count);
+#endif
     vp9_copy(cm->fc.intra_inter_count, cpi->intra_inter_count);
     vp9_copy(cm->fc.comp_inter_count, cpi->comp_inter_count);
     vp9_copy(cm->fc.single_ref_count, cpi->single_ref_count);
@@ -3145,6 +3202,11 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
       vp9_adapt_mv_probs(&cpi->common, cpi->mb.e_mbd.allow_high_precision_mv);
     }
   }
+
+#if CONFIG_INTERINTRA
+  if (cm->frame_type != KEY_FRAME)
+    select_interintra_mode(cpi);
+#endif
 
 #ifdef ENTROPY_STATS
   vp9_update_mode_context_stats(cpi);

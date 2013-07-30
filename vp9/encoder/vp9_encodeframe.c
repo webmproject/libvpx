@@ -420,6 +420,25 @@ static void update_state(VP9_COMP *cpi, PICK_MODE_CONTEXT *ctx,
             xd->mode_info_context[mis * j + i].mbmi = *mbmi;
     }
 
+#if CONFIG_INTERINTRA
+    if (cpi->common.use_interintra
+        && (mbmi->sb_type >= BLOCK_SIZE_SB8X8)
+        && mbmi->mode >= NEARESTMV && mbmi->mode <= NEWMV &&
+        mbmi->ref_frame[1] <= INTRA_FRAME) {
+      if (mbmi->ref_frame[1] == INTRA_FRAME) {
+        const int bwl = b_width_log2(bsize), bhl = b_height_log2(bsize);
+        const int bsl = MIN(bwl, bhl);
+        ++cpi->y_mode_count[MIN(bsl, 3)][mbmi->interintra_mode];
+        ++cpi->interintra_count[1];
+#if SEPARATE_INTERINTRA_UV
+        ++cpi->uv_mode_count[mbmi->interintra_mode][mbmi->interintra_uv_mode];
+#endif
+        } else {
+          ++cpi->interintra_count[0];
+        }
+    }
+#endif
+
     if (cpi->common.mcomp_filter_type == SWITCHABLE
         && is_inter_mode(mbmi->mode)) {
       ++cpi->common.fc.switchable_interp_count[vp9_get_pred_context(
@@ -1733,6 +1752,11 @@ static void init_encode_frame_mb_context(VP9_COMP *cpi) {
   vp9_zero(cm->fc.tx_count_8x8p);
   vp9_zero(cm->fc.mbskip_count);
 
+#if CONFIG_INTERINTRA
+  vp9_zero(cpi->interintra_count);
+  vp9_zero(cpi->interintra_select_count);
+#endif
+
   // Note: this memset assumes above_context[0], [1] and [2]
   // are allocated as part of the same buffer.
   vpx_memset(
@@ -2305,6 +2329,12 @@ static void encode_superblock(VP9_COMP *cpi, TOKENEXTRA **t, int output_enabled,
     setup_pre_planes(xd, ref_fb, second_ref_fb, mi_row, mi_col,
                      xd->scale_factor, xd->scale_factor_uv);
 
+#if CONFIG_INTERINTRA
+    if (cm->use_interintra
+        && (xd->mode_info_context->mbmi.ref_frame[1] == INTRA_FRAME)) {
+      extend_for_interintra(xd, bsize);
+    }
+#endif
     vp9_build_inter_predictors_sb(
         xd, mi_row, mi_col,
         bsize < BLOCK_SIZE_SB8X8 ? BLOCK_SIZE_SB8X8 : bsize);

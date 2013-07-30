@@ -554,6 +554,34 @@ static void read_inter_mode_info(VP9D_COMP *pbi, MODE_INFO *mi,
       }
     }
 
+#if CONFIG_INTERINTRA
+    if (mbmi->ref_frame[1] <= INTRA_FRAME) {
+      if ((pbi->common.use_interintra)
+          && (mbmi->sb_type >= BLOCK_SIZE_SB8X8)
+          && (mbmi->mode >= NEARESTMV) && (mbmi->mode <= NEWMV)
+          && (mbmi->ref_frame[1] == NONE)
+          ) {
+        mbmi->ref_frame[1] = (vp9_read(r, pbi->common.fc.interintra_prob) ?
+                              INTRA_FRAME : NONE);
+        pbi->common.fc.interintra_counts[mbmi->ref_frame[1] == INTRA_FRAME]++;
+        if (mbmi->ref_frame[1] == INTRA_FRAME) {
+          int bsg = MIN(MIN(b_width_log2(mbmi->sb_type),
+                            b_height_log2(mbmi->sb_type)), 3);
+          mbmi->interintra_mode = read_intra_mode(r,
+                                  pbi->common.fc.y_mode_prob[bsg]);
+          pbi->common.fc.y_mode_counts[bsg][mbmi->interintra_mode]++;
+#if SEPARATE_INTERINTRA_UV
+          mbmi->interintra_uv_mode = read_intra_mode(r,
+                           pbi->common.fc.uv_mode_prob[mbmi->interintra_mode]);
+          pbi->common.fc.uv_mode_counts[mbmi->interintra_mode]
+                                       [mbmi->interintra_uv_mode]++;
+#else
+          mbmi->interintra_uv_mode = mbmi->interintra_mode;
+#endif
+        }
+      }
+    }
+#endif
 
     if (mbmi->sb_type < BLOCK_SIZE_SB8X8) {
       for (idy = 0; idy < 2; idy += bh) {
@@ -699,6 +727,13 @@ void vp9_prepare_read_mode_info(VP9D_COMP* pbi, vp9_reader *r) {
 
     if (cm->mcomp_filter_type == SWITCHABLE)
       read_switchable_interp_probs(&cm->fc, r);
+
+#if CONFIG_INTERINTRA
+    if (cm->use_interintra) {
+      if (vp9_read(r, VP9_UPD_INTERINTRA_PROB))
+        cm->fc.interintra_prob = vp9_read_prob(r);
+    }
+#endif
 
     for (i = 0; i < INTRA_INTER_CONTEXTS; i++)
       if (vp9_read(r, VP9_MODE_UPDATE_PROB))

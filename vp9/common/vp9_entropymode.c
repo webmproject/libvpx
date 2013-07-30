@@ -220,6 +220,9 @@ void vp9_init_mbmode_probs(VP9_COMMON *cm) {
   vp9_copy(cm->fc.tx_probs_16x16p, vp9_default_tx_probs_16x16p);
   vp9_copy(cm->fc.tx_probs_8x8p, vp9_default_tx_probs_8x8p);
   vp9_copy(cm->fc.mbskip_probs, vp9_default_mbskip_probs);
+#if CONFIG_INTERINTRA
+  cm->fc.interintra_prob = VP9_DEF_INTERINTRA_PROB;
+#endif
 }
 
 const vp9_tree_index vp9_switchable_interp_tree[VP9_SWITCHABLE_FILTERS*2-2] = {
@@ -368,6 +371,13 @@ void vp9_adapt_mode_probs(VP9_COMMON *cm) {
   for (t = 0; t < VP9_NUMMBSPLITS; ++t)
     printf("%d, ", fc->mbsplit_counts[t]);
   printf("};\n");
+#if CONFIG_INTERINTRA
+  printf("static const int\ninterintra_counts"
+         "[2] = {\n");
+  for (t = 0; t < 2; ++t)
+    printf("%d, ", fc->interintra_counts[t]);
+  printf("};\n");
+#endif
 #endif
 
   for (i = 0; i < INTRA_INTER_CONTEXTS; i++)
@@ -458,6 +468,12 @@ void vp9_adapt_mode_probs(VP9_COMMON *cm) {
   for (i = 0; i < MBSKIP_CONTEXTS; ++i)
     fc->mbskip_probs[i] = update_mode_ct2(fc->pre_mbskip_probs[i],
                                           fc->mbskip_count[i]);
+#if CONFIG_INTERINTRA
+  if (cm->use_interintra) {
+    fc->interintra_prob = update_mode_ct2(fc->pre_interintra_prob,
+                                          fc->interintra_counts);
+  }
+#endif
 }
 
 static void set_default_lf_deltas(MACROBLOCKD *xd) {

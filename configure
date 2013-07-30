@@ -248,6 +248,7 @@ EXPERIMENT_LIST="
     non420
     alpha
     balanced_coeftree
+    interintra
 "
 CONFIG_LIST="
     external_build
