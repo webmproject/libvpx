@@ -52,15 +52,15 @@
 ; sp[]int h
 
 |vp9_convolve8_avg_horiz_neon| PROC
+    ldr             r12, [sp, #4]           ; x_step_q4
+    cmp             r12, #16
+    bne             vp9_convolve8_avg_horiz_c
+
     push            {r4-r10, lr}
 
     sub             r0, r0, #3              ; adjust for taps
 
-    ldr             r4, [sp, #36]           ; x_step_q4
     ldr             r5, [sp, #32]           ; filter_x
-    cmp             r4, #16
-    bne             call_horiz_c_convolve   ; x_step_q4 != 16
-
     ldr             r6, [sp, #48]           ; w
     ldr             r7, [sp, #52]           ; h
 
@@ -159,26 +159,20 @@ loop_horiz
 
     pop             {r4-r10, pc}
 
-call_horiz_c_convolve
-    pop             {r4-r10, lr}
-    add             r0, r0, #3              ; un-adjust for taps
-    b               vp9_convolve8_avg_horiz_c
-
-
     ENDP
 
 |vp9_convolve8_avg_vert_neon| PROC
+    ldr             r12, [sp, #12]
+    cmp             r12, #16
+    bne             vp9_convolve8_avg_vert_c
+
     push            {r4-r10, lr}
 
     ; adjust for taps
     sub             r0, r0, r1
     sub             r0, r0, r1, lsl #1
 
-    ldr             r6, [sp, #44]           ; y_step_q4
     ldr             r7, [sp, #40]           ; filter_y
-    cmp             r6, #16
-    bne             call_vert_c_convolve    ; y_step_q4 != 16
-
     ldr             r8, [sp, #48]           ; w
     ldr             r9, [sp, #52]           ; h
 
@@ -265,13 +259,6 @@ loop_vert
     bgt             loop_vert
 
     pop             {r4-r10, pc}
-
-call_vert_c_convolve
-    pop             {r4-r10, lr}
-    ; un-adjust for taps
-    add             r0, r0, r1
-    add             r0, r0, r1, lsl #1
-    b               vp9_convolve8_avg_vert_c
 
     ENDP
     END
