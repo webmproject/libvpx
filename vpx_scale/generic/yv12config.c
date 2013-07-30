@@ -60,7 +60,7 @@ int vp8_yv12_realloc_frame_buffer(YV12_BUFFER_CONFIG *ybf,
 
     /* Only support allocating buffers that have a border that's a multiple
      * of 32. The border restriction is required to get 16-byte alignment of
-     * the start of the chroma rows without intoducing an arbitrary gap
+     * the start of the chroma rows without introducing an arbitrary gap
      * between planes, which would break the semantics of things like
      * vpx_img_set_rect(). */
     if (border & 0x1f)
@@ -158,7 +158,7 @@ int vp9_realloc_frame_buffer(YV12_BUFFER_CONFIG *ybf,
 
     /* Only support allocating buffers that have a border that's a multiple
      * of 32. The border restriction is required to get 16-byte alignment of
-     * the start of the chroma rows without intoducing an arbitrary gap
+     * the start of the chroma rows without introducing an arbitrary gap
      * between planes, which would break the semantics of things like
      * vpx_img_set_rect(). */
     if (border & 0x1f)

@@ -493,16 +493,16 @@ static INLINE void foreach_transformed_block_in_plane(
     // it to 4x4 block sizes.
     if (xd->mb_to_right_edge < 0)
       max_blocks_wide +=
-          + (xd->mb_to_right_edge >> (5 + xd->plane[plane].subsampling_x));
+          (xd->mb_to_right_edge >> (5 + xd->plane[plane].subsampling_x));
 
     if (xd->mb_to_bottom_edge < 0)
       max_blocks_high +=
-          + (xd->mb_to_bottom_edge >> (5 + xd->plane[plane].subsampling_y));
+          (xd->mb_to_bottom_edge >> (5 + xd->plane[plane].subsampling_y));
 
     i = 0;
     // Unlike the normal case - in here we have to keep track of the
     // row and column of the blocks we use so that we know if we are in
-    // the unrestricted motion border..
+    // the unrestricted motion border.
     for (r = 0; r < (1 << sh); r += (1 << tx_size)) {
       for (c = 0; c < (1 << sw); c += (1 << tx_size)) {
         if (r < max_blocks_high && c < max_blocks_wide)
