@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAcX//rrQ\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1346,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2013-07-30T17:28:23Z",
+      "side": 1,
+      "message": "maybe say:\npick modes for each sub-block (of size 4x4, 4x8, or 8x4) inside an 8x8 block.\n(?)",
+      "revId": "a02665a19961bc060013c7b1156398fbe6fe4fae",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
