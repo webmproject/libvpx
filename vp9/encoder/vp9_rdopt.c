@@ -1343,6 +1343,7 @@ static int64_t rd_pick_intra4x4mby_modes(VP9_COMP *cpi, MACROBLOCK *mb,
 
   bmode_costs = mb->mbmode_cost;
 
+  // Pick modes for each sub-block (of size 4x4, 4x8, or 8x4) in an 8x8 block.
   for (idy = 0; idy < 2; idy += num_4x4_blocks_high) {
     for (idx = 0; idx < 2; idx += num_4x4_blocks_wide) {
       const int mis = xd->mode_info_stride;
@@ -1405,7 +1406,7 @@ static int64_t rd_pick_intra_sby_mode(VP9_COMP *cpi, MACROBLOCK *x,
       txfm_cache[i] = INT64_MAX;
   }
 
-  /* Y Search for 32x32 intra prediction mode */
+  /* Y Search for intra prediction mode */
   for (mode = DC_PRED; mode <= TM_PRED; mode++) {
     int64_t local_txfm_cache[NB_TXFM_MODES];
     MODE_INFO *const mic = xd->mode_info_context;
@@ -1536,8 +1537,6 @@ static int64_t rd_sbuv_dcpred(VP9_COMP *cpi, MACROBLOCK *x,
   *rate = *rate_tokenonly +
           x->intra_uv_mode_cost[cpi->common.frame_type][DC_PRED];
   this_rd = RDCOST(x->rdmult, x->rddiv, *rate, *distortion);
-
-  x->e_mbd.mode_info_context->mbmi.uv_mode = DC_PRED;
 
   return this_rd;
 }
@@ -2775,46 +2774,38 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
   int orig_dst_stride[MAX_MB_PLANE];
   int rs = 0;
 
-  switch (this_mode) {
+  if (this_mode == NEWMV) {
     int rate_mv;
-    case NEWMV:
-      if (is_comp_pred) {
-        // Initialize mv using single prediction mode result.
-        frame_mv[refs[0]].as_int = single_newmv[refs[0]].as_int;
-        frame_mv[refs[1]].as_int = single_newmv[refs[1]].as_int;
+    if (is_comp_pred) {
+      // Initialize mv using single prediction mode result.
+      frame_mv[refs[0]].as_int = single_newmv[refs[0]].as_int;
+      frame_mv[refs[1]].as_int = single_newmv[refs[1]].as_int;
 
-        if (cpi->sf.comp_inter_joint_search_thresh <= bsize) {
-          joint_motion_search(cpi, x, bsize, frame_mv,
-                              mi_row, mi_col, single_newmv, &rate_mv);
-        } else {
-          rate_mv  = vp9_mv_bit_cost(&frame_mv[refs[0]],
-                                     &mbmi->ref_mvs[refs[0]][0],
-                                     x->nmvjointcost, x->mvcost, 96,
-                                     x->e_mbd.allow_high_precision_mv);
-          rate_mv += vp9_mv_bit_cost(&frame_mv[refs[1]],
-                                     &mbmi->ref_mvs[refs[1]][0],
-                                     x->nmvjointcost, x->mvcost, 96,
-                                     x->e_mbd.allow_high_precision_mv);
-        }
-        if (frame_mv[refs[0]].as_int == INVALID_MV ||
-            frame_mv[refs[1]].as_int == INVALID_MV)
-          return INT64_MAX;
-        *rate2 += rate_mv;
+      if (cpi->sf.comp_inter_joint_search_thresh <= bsize) {
+        joint_motion_search(cpi, x, bsize, frame_mv,
+                            mi_row, mi_col, single_newmv, &rate_mv);
       } else {
-        int_mv tmp_mv;
-        single_motion_search(cpi, x, bsize, mi_row, mi_col,
-                             &tmp_mv, &rate_mv);
-        *rate2 += rate_mv;
-        frame_mv[refs[0]].as_int =
-            xd->mode_info_context->bmi[0].as_mv[0].as_int = tmp_mv.as_int;
-        single_newmv[refs[0]].as_int = tmp_mv.as_int;
+        rate_mv  = vp9_mv_bit_cost(&frame_mv[refs[0]],
+                                   &mbmi->ref_mvs[refs[0]][0],
+                                   x->nmvjointcost, x->mvcost, 96,
+                                   x->e_mbd.allow_high_precision_mv);
+        rate_mv += vp9_mv_bit_cost(&frame_mv[refs[1]],
+                                   &mbmi->ref_mvs[refs[1]][0],
+                                   x->nmvjointcost, x->mvcost, 96,
+                                   x->e_mbd.allow_high_precision_mv);
       }
-      break;
-    case NEARMV:
-    case NEARESTMV:
-    case ZEROMV:
-    default:
-      break;
+      if (frame_mv[refs[0]].as_int == INVALID_MV ||
+          frame_mv[refs[1]].as_int == INVALID_MV)
+        return INT64_MAX;
+      *rate2 += rate_mv;
+    } else {
+      int_mv tmp_mv;
+      single_motion_search(cpi, x, bsize, mi_row, mi_col, &tmp_mv, &rate_mv);
+      *rate2 += rate_mv;
+      frame_mv[refs[0]].as_int =
+          xd->mode_info_context->bmi[0].as_mv[0].as_int = tmp_mv.as_int;
+      single_newmv[refs[0]].as_int = tmp_mv.as_int;
+    }
   }
 
   // if we're near/nearest and mv == 0,0, compare to zeromv
@@ -2995,7 +2986,7 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
       xd->plane[i].dst.stride = orig_dst_stride[i];
     }
   }
-  // Set the appripriate filter
+  // Set the appropriate filter
   mbmi->interp_filter = cm->mcomp_filter_type != SWITCHABLE ?
       cm->mcomp_filter_type : *best_filter;
   vp9_setup_interp_filters(xd, mbmi->interp_filter, cm);
@@ -3254,7 +3245,6 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
   ctx->frames_with_high_error = 0;
   ctx->modes_with_high_error = 0;
 
-  xd->mode_info_context->mbmi.segment_id = segment_id;
   estimate_ref_frame_costs(cpi, segment_id, ref_costs_single, ref_costs_comp,
                            &comp_mode_p);
   vpx_memset(&best_mbmode, 0, sizeof(best_mbmode));
@@ -3271,7 +3261,8 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
 
   *returnrate = INT_MAX;
 
-  // Create a mask set to 1 for each frame used by a smaller resolution.
+  // Create a mask set to 1 for each reference frame used by a smaller
+  // resolution.
   if (cpi->sf.use_avoid_tested_higherror) {
     switch (block_size) {
       case BLOCK_64X64:
@@ -3335,7 +3326,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
     second_ref_frame = vp9_mode_order[mode_index].second_ref_frame;
 
     // Skip modes that have been masked off but always consider first mode.
-    if ( mode_index && (bsize > cpi->sf.unused_mode_skip_lvl) &&
+    if (mode_index && (bsize > cpi->sf.unused_mode_skip_lvl) &&
          (cpi->unused_mode_skip_mask & (1 << mode_index)) )
       continue;
 

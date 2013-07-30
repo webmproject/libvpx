@@ -527,7 +527,7 @@ typedef struct VP9_COMP {
   uint64_t time_receive_data;
   uint64_t time_compress_data;
   uint64_t time_pick_lpf;
-  uint64_t time_encode_mb_row;
+  uint64_t time_encode_sb_row;
 
   struct twopass_rc {
     unsigned int section_intra_rating;

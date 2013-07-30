@@ -2055,7 +2055,7 @@ static void encode_frame_internal(VP9_COMP *cpi) {
     }
 
     vpx_usec_timer_mark(&emr_timer);
-    cpi->time_encode_mb_row += vpx_usec_timer_elapsed(&emr_timer);
+    cpi->time_encode_sb_row += vpx_usec_timer_elapsed(&emr_timer);
   }
 
   if (cpi->sf.skip_encode_sb) {
