@@ -120,8 +120,8 @@ loop_horiz
     vqrshrun.s32    d5, q15, #7
 
     ; saturate
-    vqshrn.u16      d2, q1, #0
-    vqshrn.u16      d3, q2, #0
+    vqmovn.u16      d2, q1
+    vqmovn.u16      d3, q2
 
     ; transpose
     vtrn.16         d2, d3
@@ -213,8 +213,8 @@ loop_vert
     vqrshrun.s32    d5, q15, #7
 
     ; saturate
-    vqshrn.u16      d2, q1, #0
-    vqshrn.u16      d3, q2, #0
+    vqmovn.u16      d2, q1
+    vqmovn.u16      d3, q2
 
     vst1.u32        {d2[0]}, [r2], r3
     vst1.u32        {d2[1]}, [r2], r3
