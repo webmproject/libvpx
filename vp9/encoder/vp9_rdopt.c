@@ -1307,9 +1307,12 @@ static int64_t rd_pick_intra4x4block(VP9_COMP *cpi, MACROBLOCK *x, int ib,
   return best_rd;
 }
 
-static int64_t rd_pick_intra4x4mby_modes(VP9_COMP *cpi, MACROBLOCK *mb,
-                                         int *Rate, int *rate_y,
-                                         int64_t *Distortion, int64_t best_rd) {
+static int64_t rd_pick_intra_sub_8x8_y_mode(VP9_COMP * const cpi,
+                                            MACROBLOCK * const mb,
+                                            int * const rate,
+                                            int * const rate_y,
+                                            int64_t * const distortion,
+                                            int64_t best_rd) {
   int i, j;
   MACROBLOCKD *const xd = &mb->e_mbd;
   BLOCK_SIZE_TYPE bsize = xd->mode_info_context->mbmi.sb_type;
@@ -1317,7 +1320,7 @@ static int64_t rd_pick_intra4x4mby_modes(VP9_COMP *cpi, MACROBLOCK *mb,
   int num_4x4_blocks_high = num_4x4_blocks_high_lookup[bsize];
   int idx, idy;
   int cost = 0;
-  int64_t distortion = 0;
+  int64_t total_distortion = 0;
   int tot_rate_y = 0;
   int64_t total_rd = 0;
   ENTROPY_CONTEXT t_above[4], t_left[4];
@@ -1355,7 +1358,7 @@ static int64_t rd_pick_intra4x4mby_modes(VP9_COMP *cpi, MACROBLOCK *mb,
 
       total_rd += this_rd;
       cost += r;
-      distortion += d;
+      total_distortion += d;
       tot_rate_y += ry;
 
       mic->bmi[i].as_mode = best_mode;
@@ -1369,12 +1372,12 @@ static int64_t rd_pick_intra4x4mby_modes(VP9_COMP *cpi, MACROBLOCK *mb,
     }
   }
 
-  *Rate = cost;
+  *rate = cost;
   *rate_y = tot_rate_y;
-  *Distortion = distortion;
+  *distortion = total_distortion;
   xd->mode_info_context->mbmi.mode = mic->bmi[3].as_mode;
 
-  return RDCOST(mb->rdmult, mb->rddiv, cost, distortion);
+  return RDCOST(mb->rdmult, mb->rddiv, cost, total_distortion);
 }
 
 static int64_t rd_pick_intra_sby_mode(VP9_COMP *cpi, MACROBLOCK *x,
@@ -3154,8 +3157,8 @@ void vp9_rd_pick_intra_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
                             &dist_uv, &uv_skip, bsize);
   } else {
     y_skip = 0;
-    if (rd_pick_intra4x4mby_modes(cpi, x, &rate_y, &rate_y_tokenonly,
-                                  &dist_y, best_rd) >= best_rd) {
+    if (rd_pick_intra_sub_8x8_y_mode(cpi, x, &rate_y, &rate_y_tokenonly,
+                                     &dist_y, best_rd) >= best_rd) {
       *returnrate = INT_MAX;
       return;
     }
@@ -3505,9 +3508,10 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
         continue;
         */
 
+      // I4X4_PRED is only considered for block sizes less than 8x8.
       mbmi->txfm_size = TX_4X4;
-      if (rd_pick_intra4x4mby_modes(cpi, x, &rate, &rate_y,
-                                    &distortion_y, best_rd) >= best_rd)
+      if (rd_pick_intra_sub_8x8_y_mode(cpi, x, &rate, &rate_y,
+                                       &distortion_y, best_rd) >= best_rd)
         continue;
       rate2 += rate;
       rate2 += intra_cost_penalty;
