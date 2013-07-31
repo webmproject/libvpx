@@ -145,14 +145,14 @@ typedef struct {
 // const MODE_DEFINITION vp9_mode_order[MAX_MODES] used in the rd code.
 typedef enum {
   THR_NEARESTMV,
+  THR_DC,
+
   THR_NEARESTA,
   THR_NEARESTG,
   THR_NEWMV,
   THR_COMP_NEARESTLA,
   THR_NEARMV,
   THR_COMP_NEARESTGA,
-
-  THR_DC,
 
   THR_NEWG,
   THR_NEWA,
@@ -224,6 +224,10 @@ typedef enum {
   // skips oblique intra modes  at angles 27, 63, 117, 153 if the best
   // intra so far is not one of the neighboring directions
   FLAG_SKIP_INTRA_DIRMISMATCH = 16,
+
+  // skips intra modes other than DC_PRED if the source variance
+  // is small
+  FLAG_SKIP_INTRA_LOWVAR = 32,
 } MODE_SEARCH_SKIP_LOGIC;
 
 typedef struct {

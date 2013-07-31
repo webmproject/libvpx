@@ -788,7 +788,8 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
         sf->unused_mode_skip_lvl = BLOCK_SIZE_SB32X32;
         sf->mode_search_skip_flags = FLAG_SKIP_INTRA_DIRMISMATCH |
                                      FLAG_SKIP_INTRA_BESTINTER |
-                                     FLAG_SKIP_COMP_BESTINTRA;
+                                     FLAG_SKIP_COMP_BESTINTRA |
+                                     FLAG_SKIP_INTRA_LOWVAR;
         sf->use_uv_intra_rd_estimate = 1;
         sf->use_rd_breakout = 1;
         sf->skip_encode_sb = 1;
@@ -816,7 +817,9 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
         sf->mode_search_skip_flags = FLAG_SKIP_INTRA_DIRMISMATCH |
                                      FLAG_SKIP_INTRA_BESTINTER |
                                      FLAG_SKIP_COMP_BESTINTRA |
-                                     FLAG_SKIP_COMP_REFMISMATCH;
+                                     FLAG_SKIP_COMP_REFMISMATCH |
+                                     FLAG_SKIP_INTRA_LOWVAR |
+                                     FLAG_EARLY_TERMINATE;
         sf->last_chroma_intra_mode = DC_PRED;
         sf->use_uv_intra_rd_estimate = 1;
         sf->use_rd_breakout = 1;
@@ -837,7 +840,9 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
         sf->mode_search_skip_flags = FLAG_SKIP_INTRA_DIRMISMATCH |
                                      FLAG_SKIP_INTRA_BESTINTER |
                                      FLAG_SKIP_COMP_BESTINTRA |
-                                     FLAG_SKIP_COMP_REFMISMATCH;
+                                     FLAG_SKIP_COMP_REFMISMATCH |
+                                     FLAG_SKIP_INTRA_LOWVAR |
+                                     FLAG_EARLY_TERMINATE;
         sf->use_rd_breakout = 1;
         sf->skip_encode_sb = 1;
         sf->disable_splitmv = 1;
@@ -855,7 +860,9 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
         sf->mode_search_skip_flags = FLAG_SKIP_INTRA_DIRMISMATCH |
                                      FLAG_SKIP_INTRA_BESTINTER |
                                      FLAG_SKIP_COMP_BESTINTRA |
-                                     FLAG_SKIP_COMP_REFMISMATCH;
+                                     FLAG_SKIP_COMP_REFMISMATCH |
+                                     FLAG_SKIP_INTRA_LOWVAR |
+                                     FLAG_EARLY_TERMINATE;
         sf->use_rd_breakout = 1;
         sf->optimize_coefficients = 0;
         sf->auto_mv_step_size = 1;

@@ -577,6 +577,8 @@ static void pick_sb_modes(VP9_COMP *cpi, int mi_row, int mi_col,
 
   set_offsets(cpi, mi_row, mi_col, bsize);
   xd->mode_info_context->mbmi.sb_type = bsize;
+
+  x->source_variance = get_sb_variance(cpi, x, bsize);
   if (cpi->oxcf.tuning == VP8_TUNE_SSIM)
     vp9_activity_masking(cpi, x);
 
@@ -1907,6 +1909,7 @@ static void encode_sb_row(VP9_COMP *cpi, int mi_row, TOKENEXTRA **tp,
       MODE_INFO *m = cm->mi + idx_str;
       MODE_INFO *p = cm->prev_mi + idx_str;
 
+      cpi->mb.source_variance = UINT_MAX;
       if (cpi->sf.use_one_partition_size_always) {
         set_offsets(cpi, mi_row, mi_col, BLOCK_SIZE_SB64X64);
         set_partitioning(cpi, m, cpi->sf.always_this_block_size);
