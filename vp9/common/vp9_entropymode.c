@@ -356,29 +356,6 @@ void vp9_entropy_mode_init() {
                               vp9_inter_mode_tree, NEARESTMV);
 }
 
-void vp9_accum_mv_refs(VP9_COMMON *pc,
-                       MB_PREDICTION_MODE m,
-                       const int context) {
-  unsigned int (*inter_mode_counts)[VP9_INTER_MODES - 1][2] =
-      pc->counts.inter_mode;
-
-  if (m == ZEROMV) {
-    ++inter_mode_counts[context][0][0];
-  } else {
-    ++inter_mode_counts[context][0][1];
-    if (m == NEARESTMV) {
-      ++inter_mode_counts[context][1][0];
-    } else {
-      ++inter_mode_counts[context][1][1];
-      if (m == NEARMV) {
-        ++inter_mode_counts[context][2][0];
-      } else {
-        ++inter_mode_counts[context][2][1];
-      }
-    }
-  }
-}
-
 #define COUNT_SAT 20
 #define MAX_UPDATE_FACTOR 128
 
@@ -425,10 +402,11 @@ void vp9_adapt_mode_probs(VP9_COMMON *cm) {
       fc->single_ref_prob[i][j] = update_ct2(pre_fc->single_ref_prob[i][j],
                                              counts->single_ref[i][j]);
 
-  for (j = 0; j < INTER_MODE_CONTEXTS; j++)
-      for (i = 0; i < VP9_INTER_MODES - 1; i++)
-        fc->inter_mode_probs[j][i] = update_ct2(pre_fc->inter_mode_probs[j][i],
-                                                counts->inter_mode[j][i]);
+  for (i = 0; i < INTER_MODE_CONTEXTS; i++)
+    update_mode_probs(VP9_INTER_MODES, vp9_inter_mode_tree,
+                      counts->inter_mode[i], pre_fc->inter_mode_probs[i],
+                      fc->inter_mode_probs[i], NEARESTMV);
+
   for (i = 0; i < BLOCK_SIZE_GROUPS; i++)
     update_mode_probs(VP9_INTRA_MODES, vp9_intra_mode_tree,
                       counts->y_mode[i], pre_fc->y_mode_prob[i],

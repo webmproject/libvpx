@@ -64,7 +64,7 @@ typedef struct {
                          [COEF_BANDS][PREV_COEF_CONTEXTS];
   unsigned int switchable_interp[VP9_SWITCHABLE_FILTERS + 1]
                                 [VP9_SWITCHABLE_FILTERS];
-  unsigned int inter_mode[INTER_MODE_CONTEXTS][VP9_INTER_MODES - 1][2];
+  unsigned int inter_mode[INTER_MODE_CONTEXTS][VP9_INTER_MODES];
   unsigned int intra_inter[INTRA_INTER_CONTEXTS][2];
   unsigned int comp_inter[COMP_INTER_CONTEXTS][2];
   unsigned int single_ref[REF_CONTEXTS][2][2];
