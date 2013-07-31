@@ -11,6 +11,10 @@
 #include "vp9/decoder/vp9_thread.h"
 
 #include "third_party/googletest/src/include/gtest/gtest.h"
+#include "test/codec_factory.h"
+#include "test/decode_test_driver.h"
+#include "test/md5_helper.h"
+#include "test/webm_video_source.h"
 
 namespace {
 
@@ -75,6 +79,31 @@ TEST_F(VP9WorkerThreadTest, HookFailure) {
   vp9_worker_launch(&worker_);
   EXPECT_TRUE(vp9_worker_sync(&worker_));
   EXPECT_FALSE(worker_.had_error);
+}
+
+TEST(VP9DecodeMTTest, MTDecode) {
+  libvpx_test::WebMVideoSource video("vp90-2-03-size-226x226.webm");
+  video.Init();
+
+  vpx_codec_dec_cfg_t cfg = {0};
+  cfg.threads = 2;
+  libvpx_test::VP9Decoder decoder(cfg, 0);
+
+  libvpx_test::MD5 md5;
+  for (video.Begin(); video.cxdata(); video.Next()) {
+    const vpx_codec_err_t res =
+        decoder.DecodeFrame(video.cxdata(), video.frame_size());
+    ASSERT_EQ(VPX_CODEC_OK, res) << decoder.DecodeError();
+
+    libvpx_test::DxDataIterator dec_iter = decoder.GetDxData();
+    const vpx_image_t *img = NULL;
+
+    // Get decompressed data
+    while ((img = dec_iter.Next())) {
+      md5.Add(img);
+    }
+  }
+  EXPECT_STREQ("b35a1b707b28e82be025d960aba039bc", md5.Get());
 }
 
 }  // namespace

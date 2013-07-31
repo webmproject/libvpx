@@ -64,4 +64,18 @@ void vp9_loop_filter_frame(struct VP9Common *cm,
 void vp9_loop_filter_rows(const YV12_BUFFER_CONFIG *frame_buffer,
                           struct VP9Common *cm, struct macroblockd *xd,
                           int start, int stop, int y_only);
+
+typedef struct LoopFilterWorkerData {
+  const YV12_BUFFER_CONFIG *frame_buffer;
+  struct VP9Common *cm;
+  struct macroblockd xd;  // TODO(jzern): most of this is unnecessary to the
+                          // loopfilter. the planes are necessary as their state
+                          // is changed during decode.
+  int start;
+  int stop;
+  int y_only;
+} LFWorkerData;
+
+// Operates on the rows described by LFWorkerData passed as 'arg1'.
+int vp9_loop_filter_worker(void *arg1, void *arg2);
 #endif  // VP9_COMMON_VP9_LOOPFILTER_H_

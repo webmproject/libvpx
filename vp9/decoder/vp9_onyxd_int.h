@@ -14,8 +14,8 @@
 #include "./vpx_config.h"
 
 #include "vp9/common/vp9_onyxc_int.h"
-
 #include "vp9/decoder/vp9_onyxd.h"
+#include "vp9/decoder/vp9_thread.h"
 
 typedef struct VP9Decompressor {
   DECLARE_ALIGNED(16, MACROBLOCKD, mb);
@@ -38,6 +38,7 @@ typedef struct VP9Decompressor {
   int initial_height;
 
   int do_loopfilter_inline;  // apply loopfilter to available rows immediately
+  VP9Worker lf_worker;
 } VP9D_COMP;
 
 #endif  // VP9_DECODER_VP9_TREEREADER_H_
