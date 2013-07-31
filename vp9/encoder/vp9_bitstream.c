@@ -265,12 +265,17 @@ static void update_switchable_interp_probs(VP9_COMP *const cpi,
 static void update_inter_mode_probs(VP9_COMMON *pc, vp9_writer* const bc) {
   int i, j;
 
-  for (i = 0; i < INTER_MODE_CONTEXTS; i++) {
-    for (j = 0; j < VP9_INTER_MODES - 1; j++) {
+  for (i = 0; i < INTER_MODE_CONTEXTS; ++i) {
+    unsigned int branch_ct[VP9_INTER_MODES - 1][2];
+    vp9_prob new_prob[VP9_INTER_MODES - 1];
+
+    vp9_tree_probs_from_distribution(vp9_inter_mode_tree,
+                                     new_prob, branch_ct,
+                                     pc->counts.inter_mode[i], NEARESTMV);
+
+    for (j = 0; j < VP9_INTER_MODES - 1; ++j)
       vp9_cond_prob_diff_update(bc, &pc->fc.inter_mode_probs[i][j],
-                                VP9_MODE_UPDATE_PROB,
-                                pc->counts.inter_mode[i][j]);
-    }
+                                VP9_MODE_UPDATE_PROB, branch_ct[j]);
   }
 }
 
@@ -468,7 +473,8 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, MODE_INFO *m,
     if (!vp9_segfeature_active(seg, segment_id, SEG_LVL_SKIP)) {
       if (bsize >= BLOCK_SIZE_SB8X8) {
         write_sb_mv_ref(bc, mode, mv_ref_p);
-        vp9_accum_mv_refs(&cpi->common, mode, mi->mb_mode_context[rf]);
+        ++pc->counts.inter_mode[mi->mb_mode_context[rf]]
+                               [inter_mode_offset(mode)];
       }
     }
 
@@ -494,7 +500,9 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, MODE_INFO *m,
           blockmode = x->partition_info->bmi[j].mode;
           blockmv = m->bmi[j].as_mv[0];
           write_sb_mv_ref(bc, blockmode, mv_ref_p);
-          vp9_accum_mv_refs(&cpi->common, blockmode, mi->mb_mode_context[rf]);
+          ++pc->counts.inter_mode[mi->mb_mode_context[rf]]
+                                 [inter_mode_offset(blockmode)];
+
           if (blockmode == NEWMV) {
 #ifdef ENTROPY_STATS
             active_section = 11;
