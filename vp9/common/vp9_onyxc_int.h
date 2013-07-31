@@ -278,14 +278,6 @@ static void set_mi_row_col(VP9_COMMON *cm, MACROBLOCKD *xd,
   xd->right_available = (mi_col + bw < cm->cur_tile_mi_col_end);
 }
 
-static int get_mi_row(const MACROBLOCKD *xd) {
-  return ((-xd->mb_to_top_edge) >> (3 + LOG2_MI_SIZE));
-}
-
-static int get_mi_col(const MACROBLOCKD *xd) {
-  return ((-xd->mb_to_left_edge) >> (3 + LOG2_MI_SIZE));
-}
-
 static int get_token_alloc(int mb_rows, int mb_cols) {
   return mb_rows * mb_cols * (48 * 16 + 4);
 }

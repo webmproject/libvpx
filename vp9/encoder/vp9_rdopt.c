@@ -1860,12 +1860,12 @@ static void rd_check_segment_txsize(VP9_COMP *cpi, MACROBLOCK *x,
       vp9_append_sub8x8_mvs_for_idx(&cpi->common, &x->e_mbd,
                                     &frame_mv[NEARESTMV][mbmi->ref_frame[0]],
                                     &frame_mv[NEARMV][mbmi->ref_frame[0]],
-                                    i, 0);
+                                    i, 0, mi_row, mi_col);
       if (mbmi->ref_frame[1] > 0)
         vp9_append_sub8x8_mvs_for_idx(&cpi->common, &x->e_mbd,
                                    &frame_mv[NEARESTMV][mbmi->ref_frame[1]],
                                    &frame_mv[NEARMV][mbmi->ref_frame[1]],
-                                   i, 1);
+                                   i, 1, mi_row, mi_col);
 
       // search for the best motion vector on this segment
       for (this_mode = NEARESTMV; this_mode <= NEWMV; ++this_mode) {
@@ -2433,7 +2433,7 @@ static void setup_buffer_inter(VP9_COMP *cpi, MACROBLOCK *x,
                    xd->prev_mode_info_context,
                    frame_type,
                    mbmi->ref_mvs[frame_type],
-                   cpi->common.ref_frame_sign_bias);
+                   cpi->common.ref_frame_sign_bias, mi_row, mi_col);
 
   // Candidate refinement carried out at encoder and decoder
   vp9_find_best_ref_mvs(xd,

@@ -105,7 +105,7 @@ static void get_non_matching_candidates(const MODE_INFO *candidate_mi,
 
 
 // Performs mv sign inversion if indicated by the reference frame combination.
-static void scale_mv(MACROBLOCKD *xd, MV_REFERENCE_FRAME this_ref_frame,
+static void scale_mv(MV_REFERENCE_FRAME this_ref_frame,
                      MV_REFERENCE_FRAME candidate_ref_frame,
                      int_mv *candidate_mv, int *ref_sign_bias) {
 
@@ -139,10 +139,10 @@ static void add_candidate_mv(int_mv *mv_list,  int *mv_scores,
 void vp9_find_mv_refs_idx(VP9_COMMON *cm, MACROBLOCKD *xd, MODE_INFO *here,
                           MODE_INFO *lf_here, MV_REFERENCE_FRAME ref_frame,
                           int_mv *mv_ref_list, int *ref_sign_bias,
-                          int block_idx) {
+                          int block_idx, int mi_row, int mi_col) {
   int i;
   MODE_INFO *candidate_mi;
-  MB_MODE_INFO * mbmi = &xd->mode_info_context->mbmi;
+  MB_MODE_INFO *mbmi = &here->mbmi;
   int_mv c_refmv;
   int_mv c2_refmv;
   MV_REFERENCE_FRAME c_ref_frame;
@@ -150,8 +150,7 @@ void vp9_find_mv_refs_idx(VP9_COMMON *cm, MACROBLOCKD *xd, MODE_INFO *here,
   int candidate_scores[MAX_MV_REF_CANDIDATES] = { 0 };
   int refmv_count = 0;
   const int (*mv_ref_search)[2] = mv_ref_blocks[mbmi->sb_type];
-  const int mi_col = get_mi_col(xd);
-  const int mi_row = get_mi_row(xd);
+  const int mi_stride = cm->mode_info_stride;
   int intra_count = 0;
   int zero_count = 0;
   int newmv_count = 0;
@@ -176,7 +175,7 @@ void vp9_find_mv_refs_idx(VP9_COMMON *cm, MACROBLOCKD *xd, MODE_INFO *here,
       int b;
 
       candidate_mi = here + mv_ref_search[i][0] +
-                     (mv_ref_search[i][1] * xd->mode_info_stride);
+                     mi_stride * mv_ref_search[i][1];
 
       if (block_idx >= 0) {
         if (mv_ref_search[i][0])
@@ -186,13 +185,12 @@ void vp9_find_mv_refs_idx(VP9_COMMON *cm, MACROBLOCKD *xd, MODE_INFO *here,
       } else {
         b = -1;
       }
-      if (get_matching_candidate(candidate_mi, ref_frame, &c_refmv, b)) {
-        add_candidate_mv(mv_ref_list, candidate_scores,
-                         &refmv_count, c_refmv, 16);
-      }
+      if (get_matching_candidate(candidate_mi, ref_frame, &c_refmv, b))
+        add_candidate_mv(mv_ref_list, candidate_scores, &refmv_count, c_refmv,
+                         16);
 
       // Count number of neihgbours coded intra and zeromv
-      intra_count += (candidate_mi->mbmi.mode < NEARESTMV);
+      intra_count += is_intra_mode(candidate_mi->mbmi.mode);
       zero_count += (candidate_mi->mbmi.mode == ZEROMV);
       newmv_count += (candidate_mi->mbmi.mode >= NEWMV);
     }
@@ -203,26 +201,25 @@ void vp9_find_mv_refs_idx(VP9_COMMON *cm, MACROBLOCKD *xd, MODE_INFO *here,
               (refmv_count < MAX_MV_REF_CANDIDATES); ++i) {
     const int mi_search_col = mi_col + mv_ref_search[i][0];
     const int mi_search_row = mi_row + mv_ref_search[i][1];
-    if ((mi_search_col >= cm->cur_tile_mi_col_start) &&
-        (mi_search_col < cm->cur_tile_mi_col_end) &&
-        (mi_search_row >= 0) && (mi_search_row < cm->mi_rows)) {
+    if (mi_search_col >= cm->cur_tile_mi_col_start &&
+        mi_search_col < cm->cur_tile_mi_col_end &&
+        mi_search_row >= 0 &&
+        mi_search_row < cm->mi_rows) {
       candidate_mi = here + mv_ref_search[i][0] +
-                     (mv_ref_search[i][1] * xd->mode_info_stride);
+                     mi_stride * mv_ref_search[i][1];
 
-      if (get_matching_candidate(candidate_mi, ref_frame, &c_refmv, -1)) {
-        add_candidate_mv(mv_ref_list, candidate_scores,
-                         &refmv_count, c_refmv, 16);
-      }
+      if (get_matching_candidate(candidate_mi, ref_frame, &c_refmv, -1))
+        add_candidate_mv(mv_ref_list, candidate_scores, &refmv_count, c_refmv,
+                         16);
     }
   }
 
   // Look in the last frame if it exists
   if (lf_here && (refmv_count < MAX_MV_REF_CANDIDATES)) {
     candidate_mi = lf_here;
-    if (get_matching_candidate(candidate_mi, ref_frame, &c_refmv, -1)) {
-      add_candidate_mv(mv_ref_list, candidate_scores,
-                       &refmv_count, c_refmv, 16);
-    }
+    if (get_matching_candidate(candidate_mi, ref_frame, &c_refmv, -1))
+      add_candidate_mv(mv_ref_list, candidate_scores, &refmv_count, c_refmv,
+                       16);
   }
 
   // If we have not found enough candidates consider ones where the
@@ -233,24 +230,25 @@ void vp9_find_mv_refs_idx(VP9_COMMON *cm, MACROBLOCKD *xd, MODE_INFO *here,
               (refmv_count < MAX_MV_REF_CANDIDATES); ++i) {
     const int mi_search_col = mi_col + mv_ref_search[i][0];
     const int mi_search_row = mi_row + mv_ref_search[i][1];
-    if ((mi_search_col >= cm->cur_tile_mi_col_start) &&
-        (mi_search_col < cm->cur_tile_mi_col_end) &&
-        (mi_search_row >= 0) && (mi_search_row < cm->mi_rows)) {
+    if (mi_search_col >= cm->cur_tile_mi_col_start &&
+        mi_search_col < cm->cur_tile_mi_col_end &&
+        mi_search_row >= 0 &&
+        mi_search_row < cm->mi_rows) {
       candidate_mi = here + mv_ref_search[i][0] +
-                     (mv_ref_search[i][1] * xd->mode_info_stride);
+                     mi_stride * mv_ref_search[i][1];
 
       get_non_matching_candidates(candidate_mi, ref_frame,
                                   &c_ref_frame, &c_refmv,
                                   &c2_ref_frame, &c2_refmv);
 
       if (c_ref_frame != INTRA_FRAME) {
-        scale_mv(xd, ref_frame, c_ref_frame, &c_refmv, ref_sign_bias);
+        scale_mv(ref_frame, c_ref_frame, &c_refmv, ref_sign_bias);
         add_candidate_mv(mv_ref_list, candidate_scores,
                          &refmv_count, c_refmv, 1);
       }
 
       if (c2_ref_frame != INTRA_FRAME) {
-        scale_mv(xd, ref_frame, c2_ref_frame, &c2_refmv, ref_sign_bias);
+        scale_mv(ref_frame, c2_ref_frame, &c2_refmv, ref_sign_bias);
         add_candidate_mv(mv_ref_list, candidate_scores,
                          &refmv_count, c2_refmv, 1);
       }
@@ -265,13 +263,13 @@ void vp9_find_mv_refs_idx(VP9_COMMON *cm, MACROBLOCKD *xd, MODE_INFO *here,
                                 &c2_ref_frame, &c2_refmv);
 
     if (c_ref_frame != INTRA_FRAME) {
-      scale_mv(xd, ref_frame, c_ref_frame, &c_refmv, ref_sign_bias);
+      scale_mv(ref_frame, c_ref_frame, &c_refmv, ref_sign_bias);
       add_candidate_mv(mv_ref_list, candidate_scores,
                        &refmv_count, c_refmv, 1);
     }
 
     if (c2_ref_frame != INTRA_FRAME) {
-      scale_mv(xd, ref_frame, c2_ref_frame, &c2_refmv, ref_sign_bias);
+      scale_mv(ref_frame, c2_ref_frame, &c2_refmv, ref_sign_bias);
       add_candidate_mv(mv_ref_list, candidate_scores,
                        &refmv_count, c2_refmv, 1);
     }
@@ -295,7 +293,6 @@ void vp9_find_mv_refs_idx(VP9_COMMON *cm, MACROBLOCKD *xd, MODE_INFO *here,
   }
 
   // Clamp vectors
-  for (i = 0; i < MAX_MV_REF_CANDIDATES; ++i) {
+  for (i = 0; i < MAX_MV_REF_CANDIDATES; ++i)
     clamp_mv_ref(xd, &mv_ref_list[i]);
-  }
 }

@@ -41,7 +41,8 @@ void vp9_find_best_ref_mvs(MACROBLOCKD *xd,
 void vp9_append_sub8x8_mvs_for_idx(VP9_COMMON *cm, MACROBLOCKD *xd,
                                    int_mv *dst_nearest,
                                    int_mv *dst_near,
-                                   int block_idx, int ref_idx) {
+                                   int block_idx, int ref_idx,
+                                   int mi_row, int mi_col) {
   int_mv dst_list[MAX_MV_REF_CANDIDATES];
   int_mv mv_list[MAX_MV_REF_CANDIDATES];
   MODE_INFO *mi = xd->mode_info_context;
@@ -53,7 +54,8 @@ void vp9_append_sub8x8_mvs_for_idx(VP9_COMMON *cm, MACROBLOCKD *xd,
   vp9_find_mv_refs_idx(cm, xd, xd->mode_info_context,
                        xd->prev_mode_info_context,
                        mbmi->ref_frame[ref_idx],
-                       mv_list, cm->ref_frame_sign_bias, block_idx);
+                       mv_list, cm->ref_frame_sign_bias, block_idx,
+                       mi_row, mi_col);
 
   dst_list[1].as_int = 0;
   if (block_idx == 0) {

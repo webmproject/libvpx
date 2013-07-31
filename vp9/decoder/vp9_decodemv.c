@@ -439,7 +439,7 @@ static int read_is_inter_block(VP9D_COMP *pbi, int segment_id, vp9_reader *r) {
 }
 
 static void read_inter_block_mode_info(VP9D_COMP *pbi, MODE_INFO *mi,
-                                  vp9_reader *r) {
+                                       int mi_row, int mi_col, vp9_reader *r) {
   VP9_COMMON *const cm = &pbi->common;
   MACROBLOCKD *const xd = &pbi->mb;
   nmv_context *const nmvc = &cm->fc.nmvc;
@@ -459,7 +459,8 @@ static void read_inter_block_mode_info(VP9D_COMP *pbi, MODE_INFO *mi,
   ref1 = mbmi->ref_frame[1];
 
   vp9_find_mv_refs(cm, xd, mi, xd->prev_mode_info_context,
-                   ref0, mbmi->ref_mvs[ref0], cm->ref_frame_sign_bias);
+                   ref0, mbmi->ref_mvs[ref0], cm->ref_frame_sign_bias,
+                   mi_row, mi_col);
 
   inter_mode_ctx = mbmi->mb_mode_context[ref0];
 
@@ -482,7 +483,8 @@ static void read_inter_block_mode_info(VP9D_COMP *pbi, MODE_INFO *mi,
 
   if (ref1 > INTRA_FRAME) {
     vp9_find_mv_refs(cm, xd, mi, xd->prev_mode_info_context,
-                     ref1, mbmi->ref_mvs[ref1], cm->ref_frame_sign_bias);
+                     ref1, mbmi->ref_mvs[ref1], cm->ref_frame_sign_bias,
+                     mi_row, mi_col);
 
     if (bsize < BLOCK_SIZE_SB8X8 || mbmi->mode != ZEROMV) {
       vp9_find_best_ref_mvs(xd, mbmi->ref_mvs[ref1],
@@ -502,10 +504,13 @@ static void read_inter_block_mode_info(VP9D_COMP *pbi, MODE_INFO *mi,
         const int b_mode = read_inter_mode(cm, r, inter_mode_ctx);
 
         if (b_mode == NEARESTMV || b_mode == NEARMV) {
-          vp9_append_sub8x8_mvs_for_idx(cm, xd, &nearest, &nearby, j, 0);
+          vp9_append_sub8x8_mvs_for_idx(cm, xd, &nearest, &nearby, j, 0,
+                                        mi_row, mi_col);
+
           if (ref1 > 0)
             vp9_append_sub8x8_mvs_for_idx(cm, xd,  &nearest_second,
-                                         &nearby_second, j, 1);
+                                         &nearby_second, j, 1,
+                                         mi_row, mi_col);
         }
 
         switch (b_mode) {
@@ -615,7 +620,7 @@ static void read_inter_frame_mode_info(VP9D_COMP *pbi, MODE_INFO *mi,
                                  !mbmi->mb_skip_coeff || !inter_block, r);
 
   if (inter_block)
-    read_inter_block_mode_info(pbi, mi, r);
+    read_inter_block_mode_info(pbi, mi, mi_row, mi_col, r);
   else
     read_intra_block_mode_info(pbi, mi, r);
 }

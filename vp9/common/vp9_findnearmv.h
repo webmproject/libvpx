@@ -53,7 +53,8 @@ void vp9_append_sub8x8_mvs_for_idx(VP9_COMMON *pc,
                                    MACROBLOCKD *xd,
                                    int_mv *dst_nearest,
                                    int_mv *dst_near,
-                                   int block_idx, int ref_idx);
+                                   int block_idx, int ref_idx,
+                                   int mi_row, int mi_col);
 
 static MB_PREDICTION_MODE left_block_mode(const MODE_INFO *cur_mb, int b) {
   // FIXME(rbultje, jingning): temporary hack because jenkins doesn't
