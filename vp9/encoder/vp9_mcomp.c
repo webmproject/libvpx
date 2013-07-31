@@ -1319,7 +1319,8 @@ int vp9_hex_search
   fcenter_mv.as_mv.col = center_mv->as_mv.col >> 3;
 
   // adjust ref_mv to make sure it is within MV range
-  clamp_mv(ref_mv, x->mv_col_min, x->mv_col_max, x->mv_row_min, x->mv_row_max);
+  clamp_mv(&ref_mv->as_mv,
+           x->mv_col_min, x->mv_col_max, x->mv_row_min, x->mv_row_max);
   br = ref_mv->as_mv.row;
   bc = ref_mv->as_mv.col;
 
@@ -1475,7 +1476,8 @@ int vp9_diamond_search_sad_c(MACROBLOCK *x,
   fcenter_mv.as_mv.row = center_mv->as_mv.row >> 3;
   fcenter_mv.as_mv.col = center_mv->as_mv.col >> 3;
 
-  clamp_mv(ref_mv, x->mv_col_min, x->mv_col_max, x->mv_row_min, x->mv_row_max);
+  clamp_mv(&ref_mv->as_mv,
+           x->mv_col_min, x->mv_col_max, x->mv_row_min, x->mv_row_max);
   ref_row = ref_mv->as_mv.row;
   ref_col = ref_mv->as_mv.col;
   *num00 = 0;
@@ -1615,7 +1617,8 @@ int vp9_diamond_search_sadx4(MACROBLOCK *x,
   fcenter_mv.as_mv.row = center_mv->as_mv.row >> 3;
   fcenter_mv.as_mv.col = center_mv->as_mv.col >> 3;
 
-  clamp_mv(ref_mv, x->mv_col_min, x->mv_col_max, x->mv_row_min, x->mv_row_max);
+  clamp_mv(&ref_mv->as_mv,
+           x->mv_col_min, x->mv_col_max, x->mv_row_min, x->mv_row_max);
   ref_row = ref_mv->as_mv.row;
   ref_col = ref_mv->as_mv.col;
   *num00 = 0;
