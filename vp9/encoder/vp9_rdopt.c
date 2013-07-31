@@ -1613,12 +1613,11 @@ static int labels2mode(MACROBLOCK *x, int i,
     case NEWMV:
       this_mv->as_int = seg_mvs[mbmi->ref_frame[0]].as_int;
       thismvcost  = vp9_mv_bit_cost(this_mv, best_ref_mv, mvjcost, mvcost,
-                                    102, xd->allow_high_precision_mv);
+                                    102);
       if (mbmi->ref_frame[1] > 0) {
         this_second_mv->as_int = seg_mvs[mbmi->ref_frame[1]].as_int;
         thismvcost += vp9_mv_bit_cost(this_second_mv, second_best_ref_mv,
-                                      mvjcost, mvcost, 102,
-                                      xd->allow_high_precision_mv);
+                                      mvjcost, mvcost, 102);
       }
       break;
     case NEARESTMV:
@@ -2565,7 +2564,7 @@ static void single_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
   }
   *rate_mv = vp9_mv_bit_cost(tmp_mv, &ref_mv,
                              x->nmvjointcost, x->mvcost,
-                             96, xd->allow_high_precision_mv);
+                             96);
   if (scaled_ref_frame) {
     int i;
     for (i = 0; i < MAX_MB_PLANE; i++)
@@ -2720,12 +2719,10 @@ static void joint_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
   }
   *rate_mv  = vp9_mv_bit_cost(&frame_mv[refs[0]],
                               &mbmi->ref_mvs[refs[0]][0],
-                              x->nmvjointcost, x->mvcost, 96,
-                              x->e_mbd.allow_high_precision_mv);
+                              x->nmvjointcost, x->mvcost, 96);
   *rate_mv += vp9_mv_bit_cost(&frame_mv[refs[1]],
                               &mbmi->ref_mvs[refs[1]][0],
-                              x->nmvjointcost, x->mvcost, 96,
-                              x->e_mbd.allow_high_precision_mv);
+                              x->nmvjointcost, x->mvcost, 96);
 
   vpx_free(second_pred);
 }
@@ -2778,12 +2775,10 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
       } else {
         rate_mv  = vp9_mv_bit_cost(&frame_mv[refs[0]],
                                    &mbmi->ref_mvs[refs[0]][0],
-                                   x->nmvjointcost, x->mvcost, 96,
-                                   x->e_mbd.allow_high_precision_mv);
+                                   x->nmvjointcost, x->mvcost, 96);
         rate_mv += vp9_mv_bit_cost(&frame_mv[refs[1]],
                                    &mbmi->ref_mvs[refs[1]][0],
-                                   x->nmvjointcost, x->mvcost, 96,
-                                   x->e_mbd.allow_high_precision_mv);
+                                   x->nmvjointcost, x->mvcost, 96);
       }
       if (frame_mv[refs[0]].as_int == INVALID_MV ||
           frame_mv[refs[1]].as_int == INVALID_MV)

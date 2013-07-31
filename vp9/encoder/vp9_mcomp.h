@@ -25,7 +25,7 @@
 
 void vp9_clamp_mv_min_max(MACROBLOCK *x, int_mv *ref_mv);
 int vp9_mv_bit_cost(int_mv *mv, int_mv *ref, int *mvjcost,
-                           int *mvcost[2], int weight, int ishp);
+                           int *mvcost[2], int weight);
 void vp9_init_dsmotion_compensation(MACROBLOCK *x, int stride);
 void vp9_init3smotion_compensation(MACROBLOCK *x,  int stride);
 
