@@ -232,16 +232,16 @@ static int read_mv_component(vp9_reader *r,
 
 static INLINE void read_mv(vp9_reader *r, MV *mv, const MV *ref,
                            const nmv_context *ctx,
-                           nmv_context_counts *counts, int usehp) {
+                           nmv_context_counts *counts, int allow_hp) {
   const MV_JOINT_TYPE j = treed_read(r, vp9_mv_joint_tree, ctx->joints);
+  const int use_hp = allow_hp && vp9_use_mv_hp(ref);
   MV diff = {0, 0};
 
-  usehp = usehp && vp9_use_mv_hp(ref);
   if (mv_joint_vertical(j))
-    diff.row = read_mv_component(r, &ctx->comps[0], usehp);
+    diff.row = read_mv_component(r, &ctx->comps[0], use_hp);
 
   if (mv_joint_horizontal(j))
-    diff.col = read_mv_component(r, &ctx->comps[1], usehp);
+    diff.col = read_mv_component(r, &ctx->comps[1], use_hp);
 
   vp9_inc_mv(&diff, counts);
 
@@ -254,7 +254,7 @@ static void update_mv(vp9_reader *r, vp9_prob *p, vp9_prob upd_p) {
     *p = (vp9_read_literal(r, 7) << 1) | 1;
 }
 
-static void read_mv_probs(vp9_reader *r, nmv_context *mvc, int usehp) {
+static void read_mv_probs(vp9_reader *r, nmv_context *mvc, int allow_hp) {
   int i, j, k;
 
   for (j = 0; j < MV_JOINTS - 1; ++j)
@@ -285,7 +285,7 @@ static void read_mv_probs(vp9_reader *r, nmv_context *mvc, int usehp) {
       update_mv(r, &comp->fp[j], VP9_NMV_UPDATE_PROB);
   }
 
-  if (usehp) {
+  if (allow_hp) {
     for (i = 0; i < 2; ++i) {
       update_mv(r, &mvc->comps[i].class0_hp, VP9_NMV_UPDATE_PROB);
       update_mv(r, &mvc->comps[i].hp, VP9_NMV_UPDATE_PROB);
@@ -447,6 +447,7 @@ static void read_inter_block_mode_info(VP9D_COMP *pbi, MODE_INFO *mi,
   int_mv *const mv0 = &mbmi->mv[0];
   int_mv *const mv1 = &mbmi->mv[1];
   const BLOCK_SIZE_TYPE bsize = mbmi->sb_type;
+  const int allow_hp = xd->allow_high_precision_mv;
 
   int_mv nearest, nearby, best_mv;
   int_mv nearest_second, nearby_second, best_mv_second;
@@ -510,11 +511,11 @@ static void read_inter_block_mode_info(VP9D_COMP *pbi, MODE_INFO *mi,
         switch (b_mode) {
           case NEWMV:
             read_mv(r, &blockmv.as_mv, &best_mv.as_mv, nmvc,
-                    &cm->counts.mv, xd->allow_high_precision_mv);
+                    &cm->counts.mv, allow_hp);
 
             if (ref1 > 0)
               read_mv(r, &secondmv.as_mv, &best_mv_second.as_mv, nmvc,
-                      &cm->counts.mv, xd->allow_high_precision_mv);
+                      &cm->counts.mv, allow_hp);
             break;
           case NEARESTMV:
             blockmv.as_int = nearest.as_int;
@@ -588,11 +589,10 @@ static void read_inter_block_mode_info(VP9D_COMP *pbi, MODE_INFO *mi,
         break;
 
       case NEWMV:
-        read_mv(r, &mv0->as_mv, &best_mv.as_mv, nmvc, &cm->counts.mv,
-                xd->allow_high_precision_mv);
+        read_mv(r, &mv0->as_mv, &best_mv.as_mv, nmvc, &cm->counts.mv, allow_hp);
         if (ref1 > 0)
-          read_mv(r, &mv1->as_mv, &best_mv_second.as_mv, nmvc,
-                  &cm->counts.mv, xd->allow_high_precision_mv);
+          read_mv(r, &mv1->as_mv, &best_mv_second.as_mv, nmvc, &cm->counts.mv,
+                  allow_hp);
         break;
       default:
         assert(!"Invalid inter mode value");
