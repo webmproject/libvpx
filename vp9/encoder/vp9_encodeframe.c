@@ -64,7 +64,7 @@ static const uint8_t VP9_VAR_OFFS[16] = {128, 128, 128, 128, 128, 128, 128, 128,
     128, 128, 128, 128, 128, 128, 128, 128};
 
 // Original activity measure from Tim T's code.
-static unsigned int tt_activity_measure(VP9_COMP *cpi, MACROBLOCK *x) {
+static unsigned int tt_activity_measure(MACROBLOCK *x) {
   unsigned int act;
   unsigned int sse;
   /* TODO: This could also be done over smaller areas (8x8), but that would
@@ -106,7 +106,7 @@ static unsigned int mb_activity_measure(VP9_COMP *cpi, MACROBLOCK *x,
     mb_activity = alt_activity_measure(cpi, x, use_dc_pred);
   } else {
     // Original activity measure from Tim T's code.
-    mb_activity = tt_activity_measure(cpi, x);
+    mb_activity = tt_activity_measure(x);
   }
 
   if (mb_activity < VP9_ACTIVITY_AVG_MIN)
@@ -573,12 +573,12 @@ static void pick_sb_modes(VP9_COMP *cpi, int mi_row, int mi_col,
                               bsize, ctx, best_rd);
 }
 
-static void update_stats(VP9_COMP *cpi, int mi_row, int mi_col) {
-  VP9_COMMON * const cm = &cpi->common;
-  MACROBLOCK * const x = &cpi->mb;
-  MACROBLOCKD * const xd = &x->e_mbd;
+static void update_stats(VP9_COMP *cpi) {
+  VP9_COMMON *const cm = &cpi->common;
+  MACROBLOCK *const x = &cpi->mb;
+  MACROBLOCKD *const xd = &x->e_mbd;
   MODE_INFO *mi = xd->mode_info_context;
-  MB_MODE_INFO * const mbmi = &mi->mbmi;
+  MB_MODE_INFO *const mbmi = &mi->mbmi;
 
   if (cm->frame_type != KEY_FRAME) {
     const int seg_ref_active = vp9_segfeature_active(&xd->seg, mbmi->segment_id,
@@ -756,7 +756,7 @@ static void encode_b(VP9_COMP *cpi, TOKENEXTRA **tp, int mi_row, int mi_col,
   encode_superblock(cpi, tp, output_enabled, mi_row, mi_col, bsize);
 
   if (output_enabled) {
-    update_stats(cpi, mi_row, mi_col);
+    update_stats(cpi);
 
     (*tp)->token = EOSB_TOKEN;
     (*tp)++;
@@ -1881,9 +1881,8 @@ static void encode_sb_row(VP9_COMP *cpi, int mi_row, TOKENEXTRA **tp,
     else
       cpi->unused_mode_skip_mask = 0xFFFFFFFFFFFFFE00;
 
-    if (cpi->sf.reference_masking) {
+    if (cpi->sf.reference_masking)
       rd_pick_reference_frame(cpi, mi_row, mi_col);
-    }
 
     if (cpi->sf.partition_by_variance || cpi->sf.use_lastframe_partitioning ||
         cpi->sf.use_one_partition_size_always ) {
