@@ -162,6 +162,7 @@ static void read_intra_frame_mode_info(VP9D_COMP *pbi, MODE_INFO *m,
   mbmi->mb_skip_coeff = read_skip_coeff(pbi, mbmi->segment_id, r);
   mbmi->txfm_size = read_tx_size(pbi, cm->tx_mode, bsize, 1, r);
   mbmi->ref_frame[0] = INTRA_FRAME;
+  mbmi->ref_frame[1] = NONE;
 
   if (bsize >= BLOCK_SIZE_SB8X8) {
     const MB_PREDICTION_MODE A = above_block_mode(m, 0, mis);
@@ -249,8 +250,8 @@ static INLINE void read_mv(vp9_reader *r, MV *mv, const MV *ref,
   mv->col = ref->col + diff.col;
 }
 
-static void update_mv(vp9_reader *r, vp9_prob *p, vp9_prob upd_p) {
-  if (vp9_read(r, upd_p))
+static void update_mv(vp9_reader *r, vp9_prob *p) {
+  if (vp9_read(r, VP9_NMV_UPDATE_PROB))
     *p = (vp9_read_literal(r, 7) << 1) | 1;
 }
 
@@ -258,20 +259,21 @@ static void read_mv_probs(vp9_reader *r, nmv_context *mvc, int allow_hp) {
   int i, j, k;
 
   for (j = 0; j < MV_JOINTS - 1; ++j)
-    update_mv(r, &mvc->joints[j], VP9_NMV_UPDATE_PROB);
+    update_mv(r, &mvc->joints[j]);
 
   for (i = 0; i < 2; ++i) {
     nmv_component *const comp = &mvc->comps[i];
 
-    update_mv(r, &comp->sign, VP9_NMV_UPDATE_PROB);
+    update_mv(r, &comp->sign);
+
     for (j = 0; j < MV_CLASSES - 1; ++j)
-      update_mv(r, &comp->classes[j], VP9_NMV_UPDATE_PROB);
+      update_mv(r, &comp->classes[j]);
 
     for (j = 0; j < CLASS0_SIZE - 1; ++j)
-      update_mv(r, &comp->class0[j], VP9_NMV_UPDATE_PROB);
+      update_mv(r, &comp->class0[j]);
 
     for (j = 0; j < MV_OFFSET_BITS; ++j)
-      update_mv(r, &comp->bits[j], VP9_NMV_UPDATE_PROB);
+      update_mv(r, &comp->bits[j]);
   }
 
   for (i = 0; i < 2; ++i) {
@@ -279,16 +281,16 @@ static void read_mv_probs(vp9_reader *r, nmv_context *mvc, int allow_hp) {
 
     for (j = 0; j < CLASS0_SIZE; ++j)
       for (k = 0; k < 3; ++k)
-        update_mv(r, &comp->class0_fp[j][k], VP9_NMV_UPDATE_PROB);
+        update_mv(r, &comp->class0_fp[j][k]);
 
     for (j = 0; j < 3; ++j)
-      update_mv(r, &comp->fp[j], VP9_NMV_UPDATE_PROB);
+      update_mv(r, &comp->fp[j]);
   }
 
   if (allow_hp) {
     for (i = 0; i < 2; ++i) {
-      update_mv(r, &mvc->comps[i].class0_hp, VP9_NMV_UPDATE_PROB);
-      update_mv(r, &mvc->comps[i].hp, VP9_NMV_UPDATE_PROB);
+      update_mv(r, &mvc->comps[i].class0_hp);
+      update_mv(r, &mvc->comps[i].hp);
     }
   }
 }
@@ -324,18 +326,19 @@ static void read_ref_frames(VP9D_COMP *pbi, vp9_reader *r,
       ref_frame[fix_ref_idx] = cm->comp_fixed_ref;
       ref_frame[!fix_ref_idx] = cm->comp_var_ref[b];
     } else {
-      const int ref1_ctx = vp9_get_pred_context_single_ref_p1(xd);
-      ref_frame[1] = NONE;
-      if (vp9_read(r, fc->single_ref_prob[ref1_ctx][0])) {
-        const int ref2_ctx = vp9_get_pred_context_single_ref_p2(xd);
-        const int b = vp9_read(r, fc->single_ref_prob[ref2_ctx][1]);
-        ref_frame[0] = b ? ALTREF_FRAME : GOLDEN_FRAME;
-        counts->single_ref[ref1_ctx][0][1]++;
-        counts->single_ref[ref2_ctx][1][b]++;
+      const int ctx0 = vp9_get_pred_context_single_ref_p1(xd);
+      const int bit0 = vp9_read(r, fc->single_ref_prob[ctx0][0]);
+      ++counts->single_ref[ctx0][0][bit0];
+      if (bit0) {
+        const int ctx1 = vp9_get_pred_context_single_ref_p2(xd);
+        const int bit1 = vp9_read(r, fc->single_ref_prob[ctx1][1]);
+        ref_frame[0] = bit1 ? ALTREF_FRAME : GOLDEN_FRAME;
+        ++counts->single_ref[ctx1][1][bit1];
       } else {
         ref_frame[0] = LAST_FRAME;
-        counts->single_ref[ref1_ctx][0][0]++;
       }
+
+      ref_frame[1] = NONE;
     }
   }
 }
