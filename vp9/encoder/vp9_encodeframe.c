@@ -481,6 +481,7 @@ static void set_offsets(VP9_COMP *cpi, int mi_row, int mi_col,
   const int mb_row = mi_row >> 1;
   const int mb_col = mi_col >> 1;
   const int idx_map = mb_row * cm->mb_cols + mb_col;
+  const struct segmentation *const seg = &xd->seg;
   int i;
 
   // entropy context structures
@@ -530,16 +531,16 @@ static void set_offsets(VP9_COMP *cpi, int mi_row, int mi_col,
   x->rdmult = cpi->RDMULT;
 
   /* segment ID */
-  if (xd->seg.enabled) {
-    uint8_t *map = xd->seg.update_map ? cpi->segmentation_map
-                                      : cm->last_frame_seg_map;
+  if (seg->enabled) {
+    uint8_t *map = seg->update_map ? cpi->segmentation_map
+                                   : cm->last_frame_seg_map;
     mbmi->segment_id = vp9_get_segment_id(cm, map, bsize, mi_row, mi_col);
 
     vp9_mb_init_quantizer(cpi, x);
 
-    if (xd->seg.enabled && cpi->seg0_cnt > 0
-        && !vp9_segfeature_active(&xd->seg, 0, SEG_LVL_REF_FRAME)
-        && vp9_segfeature_active(&xd->seg, 1, SEG_LVL_REF_FRAME)) {
+    if (seg->enabled && cpi->seg0_cnt > 0
+        && !vp9_segfeature_active(seg, 0, SEG_LVL_REF_FRAME)
+        && vp9_segfeature_active(seg, 1, SEG_LVL_REF_FRAME)) {
       cpi->seg0_progress = (cpi->seg0_idx << 16) / cpi->seg0_cnt;
     } else {
       const int y = mb_row & ~3;

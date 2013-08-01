@@ -243,16 +243,17 @@ void vp9_initialize_enc() {
 
 static void setup_features(VP9_COMP *cpi) {
   MACROBLOCKD *xd = &cpi->mb.e_mbd;
-  struct loopfilter *lf = &xd->lf;
+  struct loopfilter *const lf = &xd->lf;
+  struct segmentation *const seg = &xd->seg;
 
   // Set up default state for MB feature flags
-  xd->seg.enabled = 0;
+  seg->enabled = 0;
 
-  xd->seg.update_map = 0;
-  xd->seg.update_data = 0;
-  vpx_memset(xd->seg.tree_probs, 255, sizeof(xd->seg.tree_probs));
+  seg->update_map = 0;
+  seg->update_data = 0;
+  vpx_memset(seg->tree_probs, 255, sizeof(seg->tree_probs));
 
-  vp9_clearall_segfeatures(&xd->seg);
+  vp9_clearall_segfeatures(seg);
 
   lf->mode_ref_delta_enabled = 0;
   lf->mode_ref_delta_update = 0;
@@ -324,6 +325,7 @@ static int compute_qdelta(VP9_COMP *cpi, double qstart, double qtarget) {
 static void configure_static_seg_features(VP9_COMP *cpi) {
   VP9_COMMON *cm = &cpi->common;
   MACROBLOCKD *xd = &cpi->mb.e_mbd;
+  struct segmentation *seg = &xd->seg;
 
   int high_q = (int)(cpi->avg_q > 48.0);
   int qi_delta;
@@ -332,26 +334,26 @@ static void configure_static_seg_features(VP9_COMP *cpi) {
   if (cm->frame_type == KEY_FRAME) {
     // Clear down the global segmentation map
     vpx_memset(cpi->segmentation_map, 0, cm->mi_rows * cm->mi_cols);
-    xd->seg.update_map = 0;
-    xd->seg.update_data = 0;
+    seg->update_map = 0;
+    seg->update_data = 0;
     cpi->static_mb_pct = 0;
 
     // Disable segmentation
     vp9_disable_segmentation((VP9_PTR)cpi);
 
     // Clear down the segment features.
-    vp9_clearall_segfeatures(&xd->seg);
+    vp9_clearall_segfeatures(seg);
   } else if (cpi->refresh_alt_ref_frame) {
     // If this is an alt ref frame
     // Clear down the global segmentation map
     vpx_memset(cpi->segmentation_map, 0, cm->mi_rows * cm->mi_cols);
-    xd->seg.update_map = 0;
-    xd->seg.update_data = 0;
+    seg->update_map = 0;
+    seg->update_data = 0;
     cpi->static_mb_pct = 0;
 
     // Disable segmentation and individual segment features by default
     vp9_disable_segmentation((VP9_PTR)cpi);
-    vp9_clearall_segfeatures(&xd->seg);
+    vp9_clearall_segfeatures(seg);
 
     // Scan frames from current to arf frame.
     // This function re-enables segmentation if appropriate.
@@ -359,45 +361,45 @@ static void configure_static_seg_features(VP9_COMP *cpi) {
 
     // If segmentation was enabled set those features needed for the
     // arf itself.
-    if (xd->seg.enabled) {
-      xd->seg.update_map = 1;
-      xd->seg.update_data = 1;
+    if (seg->enabled) {
+      seg->update_map = 1;
+      seg->update_data = 1;
 
       qi_delta = compute_qdelta(cpi, cpi->avg_q, (cpi->avg_q * 0.875));
-      vp9_set_segdata(&xd->seg, 1, SEG_LVL_ALT_Q, (qi_delta - 2));
-      vp9_set_segdata(&xd->seg, 1, SEG_LVL_ALT_LF, -2);
+      vp9_set_segdata(seg, 1, SEG_LVL_ALT_Q, (qi_delta - 2));
+      vp9_set_segdata(seg, 1, SEG_LVL_ALT_LF, -2);
 
-      vp9_enable_segfeature(&xd->seg, 1, SEG_LVL_ALT_Q);
-      vp9_enable_segfeature(&xd->seg, 1, SEG_LVL_ALT_LF);
+      vp9_enable_segfeature(seg, 1, SEG_LVL_ALT_Q);
+      vp9_enable_segfeature(seg, 1, SEG_LVL_ALT_LF);
 
       // Where relevant assume segment data is delta data
-      xd->seg.abs_delta = SEGMENT_DELTADATA;
+      seg->abs_delta = SEGMENT_DELTADATA;
 
     }
-  } else if (xd->seg.enabled) {
+  } else if (seg->enabled) {
     // All other frames if segmentation has been enabled
 
     // First normal frame in a valid gf or alt ref group
     if (cpi->frames_since_golden == 0) {
       // Set up segment features for normal frames in an arf group
       if (cpi->source_alt_ref_active) {
-        xd->seg.update_map = 0;
-        xd->seg.update_data = 1;
-        xd->seg.abs_delta = SEGMENT_DELTADATA;
+        seg->update_map = 0;
+        seg->update_data = 1;
+        seg->abs_delta = SEGMENT_DELTADATA;
 
         qi_delta = compute_qdelta(cpi, cpi->avg_q,
                                   (cpi->avg_q * 1.125));
-        vp9_set_segdata(&xd->seg, 1, SEG_LVL_ALT_Q, (qi_delta + 2));
-        vp9_enable_segfeature(&xd->seg, 1, SEG_LVL_ALT_Q);
+        vp9_set_segdata(seg, 1, SEG_LVL_ALT_Q, (qi_delta + 2));
+        vp9_enable_segfeature(seg, 1, SEG_LVL_ALT_Q);
 
-        vp9_set_segdata(&xd->seg, 1, SEG_LVL_ALT_LF, -2);
-        vp9_enable_segfeature(&xd->seg, 1, SEG_LVL_ALT_LF);
+        vp9_set_segdata(seg, 1, SEG_LVL_ALT_LF, -2);
+        vp9_enable_segfeature(seg, 1, SEG_LVL_ALT_LF);
 
         // Segment coding disabled for compred testing
         if (high_q || (cpi->static_mb_pct == 100)) {
-          vp9_set_segdata(&xd->seg, 1, SEG_LVL_REF_FRAME, ALTREF_FRAME);
-          vp9_enable_segfeature(&xd->seg, 1, SEG_LVL_REF_FRAME);
-          vp9_enable_segfeature(&xd->seg, 1, SEG_LVL_SKIP);
+          vp9_set_segdata(seg, 1, SEG_LVL_REF_FRAME, ALTREF_FRAME);
+          vp9_enable_segfeature(seg, 1, SEG_LVL_REF_FRAME);
+          vp9_enable_segfeature(seg, 1, SEG_LVL_SKIP);
         }
       } else {
         // Disable segmentation and clear down features if alt ref
@@ -407,10 +409,10 @@ static void configure_static_seg_features(VP9_COMP *cpi) {
 
         vpx_memset(cpi->segmentation_map, 0, cm->mi_rows * cm->mi_cols);
 
-        xd->seg.update_map = 0;
-        xd->seg.update_data = 0;
+        seg->update_map = 0;
+        seg->update_data = 0;
 
-        vp9_clearall_segfeatures(&xd->seg);
+        vp9_clearall_segfeatures(seg);
       }
     } else if (cpi->is_src_frame_alt_ref) {
       // Special case where we are coding over the top of a previous
@@ -418,28 +420,28 @@ static void configure_static_seg_features(VP9_COMP *cpi) {
       // Segment coding disabled for compred testing
 
       // Enable ref frame features for segment 0 as well
-      vp9_enable_segfeature(&xd->seg, 0, SEG_LVL_REF_FRAME);
-      vp9_enable_segfeature(&xd->seg, 1, SEG_LVL_REF_FRAME);
+      vp9_enable_segfeature(seg, 0, SEG_LVL_REF_FRAME);
+      vp9_enable_segfeature(seg, 1, SEG_LVL_REF_FRAME);
 
       // All mbs should use ALTREF_FRAME
-      vp9_clear_segdata(&xd->seg, 0, SEG_LVL_REF_FRAME);
-      vp9_set_segdata(&xd->seg, 0, SEG_LVL_REF_FRAME, ALTREF_FRAME);
-      vp9_clear_segdata(&xd->seg, 1, SEG_LVL_REF_FRAME);
-      vp9_set_segdata(&xd->seg, 1, SEG_LVL_REF_FRAME, ALTREF_FRAME);
+      vp9_clear_segdata(seg, 0, SEG_LVL_REF_FRAME);
+      vp9_set_segdata(seg, 0, SEG_LVL_REF_FRAME, ALTREF_FRAME);
+      vp9_clear_segdata(seg, 1, SEG_LVL_REF_FRAME);
+      vp9_set_segdata(seg, 1, SEG_LVL_REF_FRAME, ALTREF_FRAME);
 
       // Skip all MBs if high Q (0,0 mv and skip coeffs)
       if (high_q) {
-          vp9_enable_segfeature(&xd->seg, 0, SEG_LVL_SKIP);
-          vp9_enable_segfeature(&xd->seg, 1, SEG_LVL_SKIP);
+          vp9_enable_segfeature(seg, 0, SEG_LVL_SKIP);
+          vp9_enable_segfeature(seg, 1, SEG_LVL_SKIP);
       }
       // Enable data update
-      xd->seg.update_data = 1;
+      seg->update_data = 1;
     } else {
       // All other frames.
 
       // No updates.. leave things as they are.
-      xd->seg.update_map = 0;
-      xd->seg.update_data = 0;
+      seg->update_map = 0;
+      seg->update_data = 0;
     }
   }
 }
@@ -2415,8 +2417,9 @@ static void update_reference_frames(VP9_COMP * const cpi) {
 
 static void loopfilter_frame(VP9_COMP *cpi, VP9_COMMON *cm) {
   MACROBLOCKD *xd = &cpi->mb.e_mbd;
+  struct loopfilter *lf = &xd->lf;
   if (xd->lossless) {
-      xd->lf.filter_level = 0;
+      lf->filter_level = 0;
   } else {
     struct vpx_usec_timer timer;
 
@@ -2430,9 +2433,9 @@ static void loopfilter_frame(VP9_COMP *cpi, VP9_COMMON *cm) {
     cpi->time_pick_lpf += vpx_usec_timer_elapsed(&timer);
   }
 
-  if (xd->lf.filter_level > 0) {
-    vp9_set_alt_lf_level(cpi, xd->lf.filter_level);
-    vp9_loop_filter_frame(cm, xd, xd->lf.filter_level, 0);
+  if (lf->filter_level > 0) {
+    vp9_set_alt_lf_level(cpi, lf->filter_level);
+    vp9_loop_filter_frame(cm, xd, lf->filter_level, 0);
   }
 
   vp9_extend_frame_inner_borders(cm->frame_to_show,
@@ -2522,6 +2525,7 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
 
   SPEED_FEATURES *sf = &cpi->sf;
   unsigned int max_mv_def = MIN(cpi->common.width, cpi->common.height);
+  struct segmentation *seg = &xd->seg;
 #if RESET_FOREACH_FILTER
   int q_low0;
   int q_high0;
@@ -2621,9 +2625,9 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
     setup_features(cpi);
 
     // If segmentation is enabled force a map update for key frames
-    if (xd->seg.enabled) {
-      xd->seg.update_map = 1;
-      xd->seg.update_data = 1;
+    if (seg->enabled) {
+      seg->update_map = 1;
+      seg->update_data = 1;
     }
 
     // The alternate reference frame cannot be active for a key frame
@@ -4002,7 +4006,7 @@ int vp9_set_roimap(VP9_PTR comp, unsigned char *map, unsigned int rows,
                    unsigned int threshold[MAX_SEGMENTS]) {
   VP9_COMP *cpi = (VP9_COMP *) comp;
   signed char feature_data[SEG_LVL_MAX][MAX_SEGMENTS];
-  MACROBLOCKD *xd = &cpi->mb.e_mbd;
+  struct segmentation *seg = &cpi->mb.e_mbd.seg;
   int i;
 
   if (cpi->common.mb_rows != rows || cpi->common.mb_cols != cols)
@@ -4029,14 +4033,14 @@ int vp9_set_roimap(VP9_PTR comp, unsigned char *map, unsigned int rows,
   // Enable the loop and quant changes in the feature mask
   for (i = 0; i < MAX_SEGMENTS; i++) {
     if (delta_q[i])
-      vp9_enable_segfeature(&xd->seg, i, SEG_LVL_ALT_Q);
+      vp9_enable_segfeature(seg, i, SEG_LVL_ALT_Q);
     else
-      vp9_disable_segfeature(&xd->seg, i, SEG_LVL_ALT_Q);
+      vp9_disable_segfeature(seg, i, SEG_LVL_ALT_Q);
 
     if (delta_lf[i])
-      vp9_enable_segfeature(&xd->seg, i, SEG_LVL_ALT_LF);
+      vp9_enable_segfeature(seg, i, SEG_LVL_ALT_LF);
     else
-      vp9_disable_segfeature(&xd->seg, i, SEG_LVL_ALT_LF);
+      vp9_disable_segfeature(seg, i, SEG_LVL_ALT_LF);
   }
 
   // Initialise the feature data structure
