@@ -1825,8 +1825,7 @@ static void rd_pick_partition(VP9_COMP *cpi, TOKENEXTRA **tp, int mi_row,
 }
 
 // Examines 64x64 block and chooses a best reference frame
-static void rd_pick_reference_frame(VP9_COMP *cpi, TOKENEXTRA **tp, int mi_row,
-                                    int mi_col, int *rate, int64_t *dist) {
+static void rd_pick_reference_frame(VP9_COMP *cpi, int mi_row, int mi_col) {
   VP9_COMMON * const cm = &cpi->common;
   MACROBLOCK * const x = &cpi->mb;
   MACROBLOCKD * const xd = &x->e_mbd;
@@ -1857,23 +1856,7 @@ static void rd_pick_reference_frame(VP9_COMP *cpi, TOKENEXTRA **tp, int mi_row,
     cpi->set_ref_frame_mask = 0;
   }
 
-  *rate = r;
-  *dist = d;
-  // RDCOST(x->rdmult, x->rddiv, r, d)
-
   restore_context(cpi, mi_row, mi_col, a, l, sa, sl, BLOCK_SIZE_SB64X64);
-
-  /*if (srate < INT_MAX && sdist < INT_MAX)
-    encode_sb(cpi, tp, mi_row, mi_col, 1, BLOCK_SIZE_SB64X64);
-
-  if (bsize == BLOCK_SIZE_SB64X64) {
-    assert(tp_orig < *tp);
-    assert(srate < INT_MAX);
-    assert(sdist < INT_MAX);
-  } else {
-    assert(tp_orig == *tp);
-  }
-  */
 }
 
 static void encode_sb_row(VP9_COMP *cpi, int mi_row, TOKENEXTRA **tp,
@@ -1899,8 +1882,7 @@ static void encode_sb_row(VP9_COMP *cpi, int mi_row, TOKENEXTRA **tp,
       cpi->unused_mode_skip_mask = 0xFFFFFFFFFFFFFE00;
 
     if (cpi->sf.reference_masking) {
-      rd_pick_reference_frame(cpi, tp, mi_row, mi_col,
-                              &dummy_rate, &dummy_dist);
+      rd_pick_reference_frame(cpi, mi_row, mi_col);
     }
 
     if (cpi->sf.partition_by_variance || cpi->sf.use_lastframe_partitioning ||
