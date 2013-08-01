@@ -3451,7 +3451,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
       }
     }
 
-    // Select predictors
+    // Select prediction reference frames.
     for (i = 0; i < MAX_MB_PLANE; i++) {
       xd->plane[i].pre[0] = yv12_mb[ref_frame][i];
       if (comp_pred)
@@ -4046,7 +4046,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
          (cm->mcomp_filter_type == best_mbmode.interp_filter) ||
          (best_mbmode.ref_frame[0] == INTRA_FRAME));
 
-  // Updating rd_thresh_freq_fact[] here means that the differnt
+  // Updating rd_thresh_freq_fact[] here means that the different
   // partition/block sizes are handled independently based on the best
   // choice for the current partition. It may well be better to keep a scaled
   // best rd so far value and update rd_thresh_freq_fact based on the mode/size

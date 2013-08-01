@@ -554,9 +554,12 @@ static void pick_sb_modes(VP9_COMP *cpi, int mi_row, int mi_col,
 
   x->rd_search = 1;
 
-  if (bsize < BLOCK_SIZE_SB8X8)
+  if (bsize < BLOCK_SIZE_SB8X8) {
+    // When ab_index = 0 all sub-blocks are handled, so for ab_index != 0
+    // there is nothing to be done.
     if (xd->ab_index != 0)
       return;
+  }
 
   set_offsets(cpi, mi_row, mi_col, bsize);
   xd->mode_info_context->mbmi.sb_type = bsize;
@@ -614,7 +617,7 @@ static void update_stats(VP9_COMP *cpi, int mi_row, int mi_col) {
 }
 
 // TODO(jingning): the variables used here are little complicated. need further
-// refactoring on organizing the the temporary buffers, when recursive
+// refactoring on organizing the temporary buffers, when recursive
 // partition down to 4x4 block size is enabled.
 static PICK_MODE_CONTEXT *get_block_context(MACROBLOCK *x,
                                             BLOCK_SIZE_TYPE bsize) {
@@ -748,9 +751,12 @@ static void encode_b(VP9_COMP *cpi, TOKENEXTRA **tp, int mi_row, int mi_col,
   if (sub_index != -1)
     *(get_sb_index(xd, bsize)) = sub_index;
 
-  if (bsize < BLOCK_SIZE_SB8X8)
+  if (bsize < BLOCK_SIZE_SB8X8) {
+    // When ab_index = 0 all sub-blocks are handled, so for ab_index != 0
+    // there is nothing to be done.
     if (xd->ab_index > 0)
       return;
+  }
   set_offsets(cpi, mi_row, mi_col, bsize);
   update_state(cpi, get_block_context(x, bsize), bsize, output_enabled);
   encode_superblock(cpi, tp, output_enabled, mi_row, mi_col, bsize);
@@ -1205,6 +1211,8 @@ static void rd_use_partition(VP9_COMP *cpi, MODE_INFO *m, TOKENEXTRA **tp,
   subsize = get_subsize(bsize, partition);
 
   if (bsize < BLOCK_SIZE_SB8X8) {
+    // When ab_index = 0 all sub-blocks are handled, so for ab_index != 0
+    // there is nothing to be done.
     if (xd->ab_index != 0) {
       *rate = 0;
       *dist = 0;
@@ -1438,7 +1446,7 @@ static BLOCK_SIZE_TYPE max_partition_size[BLOCK_SIZE_TYPES] =
     BLOCK_64X64, BLOCK_64X64, BLOCK_64X64, BLOCK_64X64, BLOCK_64X64 };
 
 
-// Look at neighbouring blocks and set a min and max partition size based on
+// Look at neighboring blocks and set a min and max partition size based on
 // what they chose.
 static void rd_auto_partition_range(VP9_COMP *cpi,
                                     BLOCK_SIZE_TYPE * min_block_size,
@@ -1480,7 +1488,7 @@ static void rd_auto_partition_range(VP9_COMP *cpi,
 }
 
 // TODO(jingning,jimbankoski,rbultje): properly skip partition types that are
-// unlikely to be selected depending on previously rate-distortion optimization
+// unlikely to be selected depending on previous rate-distortion optimization
 // results, for encoding speed-up.
 static void rd_pick_partition(VP9_COMP *cpi, TOKENEXTRA **tp, int mi_row,
                               int mi_col, BLOCK_SIZE_TYPE bsize, int *rate,
@@ -1500,12 +1508,15 @@ static void rd_pick_partition(VP9_COMP *cpi, TOKENEXTRA **tp, int mi_row,
 
   (void) *tp_orig;
 
-  if (bsize < BLOCK_SIZE_SB8X8)
+  if (bsize < BLOCK_SIZE_SB8X8) {
+    // When ab_index = 0 all sub-blocks are handled, so for ab_index != 0
+    // there is nothing to be done.
     if (xd->ab_index != 0) {
       *rate = 0;
       *dist = 0;
       return;
     }
+  }
   assert(mi_height_log2(bsize) == mi_width_log2(bsize));
 
   save_context(cpi, mi_row, mi_col, a, l, sa, sl, bsize);
@@ -1924,8 +1935,7 @@ static void encode_sb_row(VP9_COMP *cpi, int mi_row, TOKENEXTRA **tp,
     } else {
       // If required set upper and lower partition size limits
       if (cpi->sf.auto_min_max_partition_size) {
-        rd_auto_partition_range(cpi,
-                                &cpi->sf.min_partition_size,
+        rd_auto_partition_range(cpi, &cpi->sf.min_partition_size,
                                 &cpi->sf.max_partition_size);
       }
 
