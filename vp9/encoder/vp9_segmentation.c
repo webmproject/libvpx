@@ -57,8 +57,7 @@ void vp9_set_segment_data(VP9_PTR ptr,
 }
 
 // Based on set of segment counts calculate a probability tree
-static void calc_segtree_probs(MACROBLOCKD *xd, int *segcounts,
-                               vp9_prob *segment_tree_probs) {
+static void calc_segtree_probs(int *segcounts, vp9_prob *segment_tree_probs) {
   // Work out probabilities of each segment
   const int c01 = segcounts[0] + segcounts[1];
   const int c23 = segcounts[2] + segcounts[3];
@@ -75,7 +74,7 @@ static void calc_segtree_probs(MACROBLOCKD *xd, int *segcounts,
 }
 
 // Based on set of segment counts and probabilities calculate a cost estimate
-static int cost_segmap(MACROBLOCKD *xd, int *segcounts, vp9_prob *probs) {
+static int cost_segmap(int *segcounts, vp9_prob *probs) {
   const int c01 = segcounts[0] + segcounts[1];
   const int c23 = segcounts[2] + segcounts[3];
   const int c45 = segcounts[4] + segcounts[5];
@@ -211,7 +210,7 @@ static void count_segs_sb(VP9_COMP *cpi, MODE_INFO *mi,
 
 void vp9_choose_segmap_coding_method(VP9_COMP *cpi) {
   VP9_COMMON *const cm = &cpi->common;
-  MACROBLOCKD *const xd = &cpi->mb.e_mbd;
+  struct segmentation *seg = &cpi->mb.e_mbd.seg;
 
   int no_pred_cost;
   int t_pred_cost = INT_MAX;
@@ -231,8 +230,8 @@ void vp9_choose_segmap_coding_method(VP9_COMP *cpi) {
 
   // Set default state for the segment tree probabilities and the
   // temporal coding probabilities
-  vpx_memset(xd->seg.tree_probs, 255, sizeof(xd->seg.tree_probs));
-  vpx_memset(xd->seg.pred_probs, 255, sizeof(xd->seg.pred_probs));
+  vpx_memset(seg->tree_probs, 255, sizeof(seg->tree_probs));
+  vpx_memset(seg->pred_probs, 255, sizeof(seg->pred_probs));
 
   vpx_memset(no_pred_segcounts, 0, sizeof(no_pred_segcounts));
   vpx_memset(t_unpred_seg_counts, 0, sizeof(t_unpred_seg_counts));
@@ -255,15 +254,15 @@ void vp9_choose_segmap_coding_method(VP9_COMP *cpi) {
 
   // Work out probability tree for coding segments without prediction
   // and the cost.
-  calc_segtree_probs(xd, no_pred_segcounts, no_pred_tree);
-  no_pred_cost = cost_segmap(xd, no_pred_segcounts, no_pred_tree);
+  calc_segtree_probs(no_pred_segcounts, no_pred_tree);
+  no_pred_cost = cost_segmap(no_pred_segcounts, no_pred_tree);
 
   // Key frames cannot use temporal prediction
   if (cm->frame_type != KEY_FRAME) {
     // Work out probability tree for coding those segments not
     // predicted using the temporal method and the cost.
-    calc_segtree_probs(xd, t_unpred_seg_counts, t_pred_tree);
-    t_pred_cost = cost_segmap(xd, t_unpred_seg_counts, t_pred_tree);
+    calc_segtree_probs(t_unpred_seg_counts, t_pred_tree);
+    t_pred_cost = cost_segmap(t_unpred_seg_counts, t_pred_tree);
 
     // Add in the cost of the signalling for each prediction context
     for (i = 0; i < PREDICTION_PROBS; i++) {
@@ -280,11 +279,11 @@ void vp9_choose_segmap_coding_method(VP9_COMP *cpi) {
 
   // Now choose which coding method to use.
   if (t_pred_cost < no_pred_cost) {
-    xd->seg.temporal_update = 1;
-    vpx_memcpy(xd->seg.tree_probs, t_pred_tree, sizeof(t_pred_tree));
-    vpx_memcpy(xd->seg.pred_probs, t_nopred_prob, sizeof(t_nopred_prob));
+    seg->temporal_update = 1;
+    vpx_memcpy(seg->tree_probs, t_pred_tree, sizeof(t_pred_tree));
+    vpx_memcpy(seg->pred_probs, t_nopred_prob, sizeof(t_nopred_prob));
   } else {
-    xd->seg.temporal_update = 0;
-    vpx_memcpy(xd->seg.tree_probs, no_pred_tree, sizeof(no_pred_tree));
+    seg->temporal_update = 0;
+    vpx_memcpy(seg->tree_probs, no_pred_tree, sizeof(no_pred_tree));
   }
 }

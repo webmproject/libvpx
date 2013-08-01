@@ -287,7 +287,7 @@ static void decode_modes_sb(VP9D_COMP *pbi, int mi_row, int mi_col,
       return;
   } else {
     int pl;
-    const int idx = check_bsize_coverage(pc, xd, mi_row, mi_col, bsize);
+    const int idx = check_bsize_coverage(pc, mi_row, mi_col, bsize);
     set_partition_seg_context(pc, xd, mi_row, mi_col);
     pl = partition_plane_context(xd, bsize);
 
@@ -501,7 +501,7 @@ static INTERPOLATIONFILTERTYPE read_interp_filter_type(
                              : vp9_rb_read_literal(rb, 2);
 }
 
-static void read_frame_size(VP9_COMMON *cm, struct vp9_read_bit_buffer *rb,
+static void read_frame_size(struct vp9_read_bit_buffer *rb,
                             int *width, int *height) {
   const int w = vp9_rb_read_literal(rb, 16) + 1;
   const int h = vp9_rb_read_literal(rb, 16) + 1;
@@ -509,12 +509,11 @@ static void read_frame_size(VP9_COMMON *cm, struct vp9_read_bit_buffer *rb,
   *height = h;
 }
 
-static void setup_display_size(VP9D_COMP *pbi, struct vp9_read_bit_buffer *rb) {
-  VP9_COMMON *const cm = &pbi->common;
+static void setup_display_size(VP9_COMMON *cm, struct vp9_read_bit_buffer *rb) {
   cm->display_width = cm->width;
   cm->display_height = cm->height;
   if (vp9_rb_read_bit(rb))
-    read_frame_size(cm, rb, &cm->display_width, &cm->display_height);
+    read_frame_size(rb, &cm->display_width, &cm->display_height);
 }
 
 static void apply_frame_size(VP9D_COMP *pbi, int width, int height) {
@@ -550,10 +549,9 @@ static void apply_frame_size(VP9D_COMP *pbi, int width, int height) {
 
 static void setup_frame_size(VP9D_COMP *pbi,
                              struct vp9_read_bit_buffer *rb) {
-  VP9_COMMON *const cm = &pbi->common;
   int width, height;
-  read_frame_size(cm, rb, &width, &height);
-  setup_display_size(pbi, rb);
+  read_frame_size(rb, &width, &height);
+  setup_display_size(&pbi->common, rb);
   apply_frame_size(pbi, width, height);
 }
 
@@ -574,13 +572,13 @@ static void setup_frame_size_with_refs(VP9D_COMP *pbi,
   }
 
   if (!found)
-    read_frame_size(cm, rb, &width, &height);
+    read_frame_size(rb, &width, &height);
 
   if (!width || !height)
     vpx_internal_error(&cm->error, VPX_CODEC_CORRUPT_FRAME,
                        "Referenced frame with invalid size");
 
-  setup_display_size(pbi, rb);
+  setup_display_size(cm, rb);
   apply_frame_size(pbi, width, height);
 }
 

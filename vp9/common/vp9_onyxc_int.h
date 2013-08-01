@@ -240,8 +240,7 @@ static INLINE void set_partition_seg_context(VP9_COMMON *cm, MACROBLOCKD *xd,
   xd->left_seg_context = cm->left_seg_context + (mi_row & MI_MASK);
 }
 
-static int check_bsize_coverage(VP9_COMMON *cm, MACROBLOCKD *xd,
-                                int mi_row, int mi_col,
+static int check_bsize_coverage(VP9_COMMON *cm, int mi_row, int mi_col,
                                 BLOCK_SIZE_TYPE bsize) {
   int bsl = mi_width_log2(bsize), bs = 1 << bsl;
   int ms = bs / 2;

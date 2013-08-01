@@ -525,7 +525,7 @@ static const int16_t band_counts[TX_SIZES][8] = {
   { 1, 2, 3, 4, 11, 1024 - 21, 0 },
 };
 
-static INLINE int cost_coeffs(VP9_COMMON *const cm, MACROBLOCK *mb,
+static INLINE int cost_coeffs(MACROBLOCK *mb,
                               int plane, int block, PLANE_TYPE type,
                               ENTROPY_CONTEXT *A, ENTROPY_CONTEXT *L,
                               TX_SIZE tx_size,
@@ -646,7 +646,7 @@ static void rate_block(int plane, int block, BLOCK_SIZE_TYPE bsize,
   txfrm_block_to_raster_xy(xd, bsize, plane, block, args->tx_size * 2, &x_idx,
                            &y_idx);
 
-  args->rate += cost_coeffs(args->cm, args->x, plane, block,
+  args->rate += cost_coeffs(args->x, plane, block,
                             xd->plane[plane].plane_type, args->t_above + x_idx,
                             args->t_left + y_idx, args->tx_size,
                             args->scan, args->nb);
@@ -1188,7 +1188,6 @@ static int64_t rd_pick_intra4x4block(VP9_COMP *cpi, MACROBLOCK *x, int ib,
   int64_t best_rd = rd_thresh;
   int rate = 0;
   int64_t distortion;
-  VP9_COMMON *const cm = &cpi->common;
   struct macroblock_plane *p = &x->plane[0];
   struct macroblockd_plane *pd = &xd->plane[0];
   const int src_stride = p->src.stride;
@@ -1260,7 +1259,7 @@ static int64_t rd_pick_intra4x4block(VP9_COMP *cpi, MACROBLOCK *x, int ib,
         }
 
         scan = get_scan_4x4(get_tx_type_4x4(PLANE_TYPE_Y_WITH_DC, xd, block));
-        ratey += cost_coeffs(cm, x, 0, block, PLANE_TYPE_Y_WITH_DC,
+        ratey += cost_coeffs(x, 0, block, PLANE_TYPE_Y_WITH_DC,
                              tempa + idx, templ + idy, TX_4X4, scan,
                              vp9_get_coef_neighbors_handle(scan));
         distortion += vp9_block_error(coeff, BLOCK_OFFSET(pd->dqcoeff,
@@ -1667,7 +1666,6 @@ static int64_t encode_inter_mb_segment(VP9_COMP *cpi,
                                        ENTROPY_CONTEXT *ta,
                                        ENTROPY_CONTEXT *tl) {
   int k;
-  VP9_COMMON *const cm = &cpi->common;
   MACROBLOCKD *xd = &x->e_mbd;
   BLOCK_SIZE_TYPE bsize = xd->mode_info_context->mbmi.sb_type;
   const int width = plane_block_width(bsize, &xd->plane[0]);
@@ -1730,7 +1728,7 @@ static int64_t encode_inter_mb_segment(VP9_COMP *cpi,
                                         BLOCK_OFFSET(xd->plane[0].dqcoeff,
                                                      k, 16), 16, &ssz);
       thissse += ssz;
-      thisrate += cost_coeffs(cm, x, 0, k, PLANE_TYPE_Y_WITH_DC,
+      thisrate += cost_coeffs(x, 0, k, PLANE_TYPE_Y_WITH_DC,
                               ta + (k & 1),
                               tl + (k >> 1), TX_4X4,
                               vp9_default_scan_4x4,
@@ -2458,7 +2456,7 @@ static YV12_BUFFER_CONFIG *get_scaled_ref_frame(VP9_COMP *cpi, int ref_frame) {
   return scaled_ref_frame;
 }
 
-static INLINE int get_switchable_rate(VP9_COMMON *cm, MACROBLOCK *x) {
+static INLINE int get_switchable_rate(MACROBLOCK *x) {
   MACROBLOCKD *xd = &x->e_mbd;
   MB_MODE_INFO *const mbmi = &xd->mode_info_context->mbmi;
 
@@ -2893,7 +2891,7 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
       const int is_intpel_interp = intpel_mv;
       mbmi->interp_filter = filter;
       vp9_setup_interp_filters(xd, mbmi->interp_filter, cm);
-      rs = get_switchable_rate(cm, x);
+      rs = get_switchable_rate(x);
       rs_rd = RDCOST(x->rdmult, x->rddiv, rs, 0);
 
       if (interpolating_intpel_seen && is_intpel_interp) {
@@ -2974,7 +2972,7 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
   mbmi->interp_filter = cm->mcomp_filter_type != SWITCHABLE ?
       cm->mcomp_filter_type : *best_filter;
   vp9_setup_interp_filters(xd, mbmi->interp_filter, cm);
-  rs = (cm->mcomp_filter_type == SWITCHABLE ? get_switchable_rate(cm, x) : 0);
+  rs = cm->mcomp_filter_type == SWITCHABLE ? get_switchable_rate(x) : 0;
 
   if (pred_exists) {
     if (best_needs_copy) {
@@ -3008,7 +3006,7 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
   }
 
   if (cpi->common.mcomp_filter_type == SWITCHABLE)
-    *rate2 += get_switchable_rate(cm, x);
+    *rate2 += get_switchable_rate(x);
 
   if (!is_comp_pred) {
     if (cpi->active_map_enabled && x->active_ptr[0] == 0)
@@ -3619,7 +3617,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
         if (tmp_rd == INT64_MAX)
           continue;
         cpi->rd_filter_cache[switchable_filter_index] = tmp_rd;
-        rs = get_switchable_rate(cm, x);
+        rs = get_switchable_rate(x);
         rs_rd = RDCOST(x->rdmult, x->rddiv, rs, 0);
         cpi->rd_filter_cache[VP9_SWITCHABLE_FILTERS] =
             MIN(cpi->rd_filter_cache[VP9_SWITCHABLE_FILTERS], tmp_rd + rs_rd);
@@ -3681,7 +3679,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
           continue;
       } else {
         if (cpi->common.mcomp_filter_type == SWITCHABLE) {
-          int rs = get_switchable_rate(cm, x);
+          int rs = get_switchable_rate(x);
           tmp_best_rdu -= RDCOST(x->rdmult, x->rddiv, rs, 0);
         }
         tmp_rd = tmp_best_rdu;
@@ -3700,7 +3698,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
       distortion2 += distortion;
 
       if (cpi->common.mcomp_filter_type == SWITCHABLE)
-        rate2 += get_switchable_rate(cm, x);
+        rate2 += get_switchable_rate(x);
 
       if (!mode_excluded) {
         if (is_comp_pred)

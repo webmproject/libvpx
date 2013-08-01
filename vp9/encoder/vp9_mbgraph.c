@@ -77,9 +77,7 @@ static unsigned int do_16x16_motion_iteration(VP9_COMP *cpi,
   return best_err;
 }
 
-static int do_16x16_motion_search(VP9_COMP *cpi,
-                                  int_mv *ref_mv, int_mv *dst_mv,
-                                  int buf_mb_y_offset, int mb_y_offset,
+static int do_16x16_motion_search(VP9_COMP *cpi, int_mv *ref_mv, int_mv *dst_mv,
                                   int mb_row, int mb_col) {
   MACROBLOCK *const x = &cpi->mb;
   MACROBLOCKD *const xd = &x->e_mbd;
@@ -118,9 +116,7 @@ static int do_16x16_motion_search(VP9_COMP *cpi,
   return err;
 }
 
-static int do_16x16_zerozero_search(VP9_COMP *cpi,
-                                    int_mv *dst_mv,
-                                    int buf_mb_y_offset, int mb_y_offset) {
+static int do_16x16_zerozero_search(VP9_COMP *cpi, int_mv *dst_mv) {
   MACROBLOCK *const x = &cpi->mb;
   MACROBLOCKD *const xd = &x->e_mbd;
   unsigned int err;
@@ -210,7 +206,6 @@ static void update_mbgraph_mb_stats
     g_motion_error = do_16x16_motion_search(cpi,
                                             prev_golden_ref_mv,
                                             &stats->ref[GOLDEN_FRAME].m.mv,
-                                            mb_y_offset, gld_y_offset,
                                             mb_row, mb_col);
     stats->ref[GOLDEN_FRAME].err = g_motion_error;
   } else {
@@ -224,8 +219,7 @@ static void update_mbgraph_mb_stats
     xd->plane[0].pre[0].buf = alt_ref->y_buffer + mb_y_offset;
     xd->plane[0].pre[0].stride = alt_ref->y_stride;
     a_motion_error = do_16x16_zerozero_search(cpi,
-                                              &stats->ref[ALTREF_FRAME].m.mv,
-                                              mb_y_offset, arf_y_offset);
+                                              &stats->ref[ALTREF_FRAME].m.mv);
 
     stats->ref[ALTREF_FRAME].err = a_motion_error;
   } else {

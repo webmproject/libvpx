@@ -169,7 +169,6 @@ void vp9_encode_unsigned_max(struct vp9_write_bit_buffer *wb,
 static void update_mode(
   vp9_writer *w,
   int n,
-  const struct vp9_token tok[/* n */],
   vp9_tree tree,
   vp9_prob Pnew[/* n-1 */],
   vp9_prob Pcur[/* n-1 */],
@@ -194,8 +193,7 @@ static void update_mbintra_mode_probs(VP9_COMP* const cpi,
   unsigned int bct[VP9_INTRA_MODES - 1][2];
 
   for (j = 0; j < BLOCK_SIZE_GROUPS; j++)
-    update_mode(bc, VP9_INTRA_MODES, vp9_intra_mode_encodings,
-                vp9_intra_mode_tree, pnew,
+    update_mode(bc, VP9_INTRA_MODES, vp9_intra_mode_tree, pnew,
                 cm->fc.y_mode_prob[j], bct,
                 (unsigned int *)cpi->y_mode_count[j]);
 }
@@ -398,8 +396,7 @@ static void encode_ref_frame(VP9_COMP *cpi, vp9_writer *bc) {
   // the reference frame is fully coded by the segment
 }
 
-static void pack_inter_mode_mvs(VP9_COMP *cpi, MODE_INFO *m,
-                                vp9_writer *bc, int mi_row, int mi_col) {
+static void pack_inter_mode_mvs(VP9_COMP *cpi, MODE_INFO *m, vp9_writer *bc) {
   VP9_COMMON *const pc = &cpi->common;
   const nmv_context *nmvc = &pc->fc.nmvc;
   MACROBLOCK *const x = &cpi->mb;
@@ -533,9 +530,8 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, MODE_INFO *m,
   }
 }
 
-static void write_mb_modes_kf(const VP9_COMP *cpi,
-                              MODE_INFO *m,
-                              vp9_writer *bc, int mi_row, int mi_col) {
+static void write_mb_modes_kf(const VP9_COMP *cpi, MODE_INFO *m,
+                              vp9_writer *bc) {
   const VP9_COMMON *const c = &cpi->common;
   const MACROBLOCKD *const xd = &cpi->mb.e_mbd;
   const int ym = m->mbmi.mode;
@@ -591,12 +587,12 @@ static void write_modes_b(VP9_COMP *cpi, MODE_INFO *m, vp9_writer *bc,
                  1 << mi_height_log2(m->mbmi.sb_type),
                  mi_col, 1 << mi_width_log2(m->mbmi.sb_type));
   if ((cm->frame_type == KEY_FRAME) || cm->intra_only) {
-    write_mb_modes_kf(cpi, m, bc, mi_row, mi_col);
+    write_mb_modes_kf(cpi, m, bc);
 #ifdef ENTROPY_STATS
     active_section = 8;
 #endif
   } else {
-    pack_inter_mode_mvs(cpi, m, bc, mi_row, mi_col);
+    pack_inter_mode_mvs(cpi, m, bc);
 #ifdef ENTROPY_STATS
     active_section = 1;
 #endif
@@ -630,7 +626,7 @@ static void write_modes_sb(VP9_COMP *cpi, MODE_INFO *m, vp9_writer *bc,
 
   if (bsize >= BLOCK_SIZE_SB8X8) {
     int pl;
-    const int idx = check_bsize_coverage(cm, xd, mi_row, mi_col, bsize);
+    const int idx = check_bsize_coverage(cm, mi_row, mi_col, bsize);
     set_partition_seg_context(cm, xd, mi_row, mi_col);
     pl = partition_plane_context(xd, bsize);
     // encode the partition information
@@ -1427,7 +1423,7 @@ static size_t write_compressed_header(VP9_COMP *cpi, uint8_t *data) {
     for (i = 0; i < NUM_PARTITION_CONTEXTS; ++i) {
       vp9_prob pnew[PARTITION_TYPES - 1];
       unsigned int bct[PARTITION_TYPES - 1][2];
-      update_mode(&header_bc, PARTITION_TYPES, vp9_partition_encodings,
+      update_mode(&header_bc, PARTITION_TYPES,
                   vp9_partition_tree, pnew,
                   fc->partition_prob[cm->frame_type][i], bct,
                   (unsigned int *)cpi->partition_count[i]);

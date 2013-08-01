@@ -1282,7 +1282,6 @@ static int detect_flash(VP9_COMP *cpi, int offset) {
 
 // Update the motion related elements to the GF arf boost calculation
 static void accumulate_frame_motion_stats(
-  VP9_COMP *cpi,
   FIRSTPASS_STATS *this_frame,
   double *this_frame_mv_in_out,
   double *mv_in_out_accumulator,
@@ -1377,7 +1376,7 @@ static int calc_arf_boost(VP9_COMP *cpi, int offset,
       break;
 
     // Update the motion related elements to the boost calculation
-    accumulate_frame_motion_stats(cpi, &this_frame,
+    accumulate_frame_motion_stats(&this_frame,
                                   &this_frame_mv_in_out, &mv_in_out_accumulator,
                                   &abs_mv_in_out_accumulator, &mv_ratio_accumulator);
 
@@ -1413,7 +1412,7 @@ static int calc_arf_boost(VP9_COMP *cpi, int offset,
       break;
 
     // Update the motion related elements to the boost calculation
-    accumulate_frame_motion_stats(cpi, &this_frame,
+    accumulate_frame_motion_stats(&this_frame,
                                   &this_frame_mv_in_out, &mv_in_out_accumulator,
                                   &abs_mv_in_out_accumulator, &mv_ratio_accumulator);
 
@@ -1665,7 +1664,7 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
     flash_detected = detect_flash(cpi, 0);
 
     // Update the motion related elements to the boost calculation
-    accumulate_frame_motion_stats(cpi, &next_frame,
+    accumulate_frame_motion_stats(&next_frame,
                                   &this_frame_mv_in_out, &mv_in_out_accumulator,
                                   &abs_mv_in_out_accumulator, &mv_ratio_accumulator);
 
