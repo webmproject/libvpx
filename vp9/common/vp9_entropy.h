@@ -50,7 +50,7 @@ typedef struct {
   int base_val;
 } vp9_extra_bit;
 
-extern vp9_extra_bit vp9_extra_bits[12];    /* indexed by token value */
+extern const vp9_extra_bit vp9_extra_bits[12];    /* indexed by token value */
 
 #define MAX_PROB                255
 #define DCT_MAX_VALUE           16384

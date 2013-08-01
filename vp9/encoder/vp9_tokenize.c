@@ -40,7 +40,7 @@ const int *vp9_dct_value_cost_ptr;
 static void fill_value_tokens() {
 
   TOKENVALUE *const t = dct_value_tokens + DCT_MAX_VALUE;
-  vp9_extra_bit *const e = vp9_extra_bits;
+  const vp9_extra_bit *const e = vp9_extra_bits;
 
   int i = -DCT_MAX_VALUE;
   int sign = 1;
@@ -69,7 +69,7 @@ static void fill_value_tokens() {
     // initialize the cost for extra bits for all possible coefficient value.
     {
       int cost = 0;
-      vp9_extra_bit *p = vp9_extra_bits + t[i].token;
+      const vp9_extra_bit *p = vp9_extra_bits + t[i].token;
 
       if (p->base_val) {
         const int extra = t[i].extra;
