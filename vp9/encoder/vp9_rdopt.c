@@ -1973,7 +1973,7 @@ static void rd_check_segment_txsize(VP9_COMP *cpi, MACROBLOCK *x,
           // Should we do a full search (best quality only)
           if (cpi->compressor_speed == 0) {
             /* Check if mvp_full is within the range. */
-            clamp_mv(&mvp_full, x->mv_col_min, x->mv_col_max,
+            clamp_mv(&mvp_full.as_mv, x->mv_col_min, x->mv_col_max,
                      x->mv_row_min, x->mv_row_max);
 
             thissme = cpi->full_search_sad(x, &mvp_full,
@@ -2833,10 +2833,8 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
   for (i = 0; i < num_refs; ++i) {
     cur_mv[i] = frame_mv[refs[i]];
     // Clip "next_nearest" so that it does not extend to far out of image
-    if (this_mode == NEWMV)
-      assert(!clamp_mv2(&cur_mv[i], xd));
-    else
-      clamp_mv2(&cur_mv[i], xd);
+    if (this_mode != NEWMV)
+      clamp_mv2(&cur_mv[i].as_mv, xd);
 
     if (mv_check_bounds(x, &cur_mv[i]))
       return INT64_MAX;

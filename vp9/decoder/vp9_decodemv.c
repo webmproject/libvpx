@@ -366,16 +366,6 @@ static INLINE COMPPREDMODE_TYPE read_comp_pred_mode(vp9_reader *r) {
   return mode;
 }
 
-static INLINE void assign_and_clamp_mv(int_mv *dst, const int_mv *src,
-                                       int mb_to_left_edge,
-                                       int mb_to_right_edge,
-                                       int mb_to_top_edge,
-                                       int mb_to_bottom_edge) {
-  dst->as_int = src->as_int;
-  clamp_mv(dst, mb_to_left_edge, mb_to_right_edge, mb_to_top_edge,
-           mb_to_bottom_edge);
-}
-
 static INLINE INTERPOLATIONFILTERTYPE read_switchable_filter_type(
     VP9D_COMP *pbi, vp9_reader *r) {
   VP9_COMMON *const cm = &pbi->common;
@@ -558,36 +548,25 @@ static void read_inter_block_mode_info(VP9D_COMP *pbi, MODE_INFO *mi,
     mv0->as_int = mi->bmi[3].as_mv[0].as_int;
     mv1->as_int = mi->bmi[3].as_mv[1].as_int;
   } else {
-    const int mb_to_top_edge = xd->mb_to_top_edge - LEFT_TOP_MARGIN;
-    const int mb_to_bottom_edge = xd->mb_to_bottom_edge + RIGHT_BOTTOM_MARGIN;
-    const int mb_to_left_edge = xd->mb_to_left_edge - LEFT_TOP_MARGIN;
-    const int mb_to_right_edge = xd->mb_to_right_edge + RIGHT_BOTTOM_MARGIN;
-
     switch (mbmi->mode) {
       case NEARMV:
-        // Clip "next_nearest" so that it does not extend to far out of image
-        assign_and_clamp_mv(mv0, &nearby, mb_to_left_edge,
-                                          mb_to_right_edge,
-                                          mb_to_top_edge,
-                                          mb_to_bottom_edge);
-        if (ref1 > 0)
-          assign_and_clamp_mv(mv1, &nearby_second, mb_to_left_edge,
-                                                   mb_to_right_edge,
-                                                   mb_to_top_edge,
-                                                   mb_to_bottom_edge);
+        mv0->as_int = nearby.as_int;
+        clamp_mv2(&mv0->as_mv, xd);
+
+        if (ref1 > 0) {
+          mv1->as_int = nearby_second.as_int;
+          clamp_mv2(&mv1->as_mv, xd);
+        }
         break;
 
       case NEARESTMV:
-        // Clip "next_nearest" so that it does not extend to far out of image
-        assign_and_clamp_mv(mv0, &nearest, mb_to_left_edge,
-                                           mb_to_right_edge,
-                                           mb_to_top_edge,
-                                           mb_to_bottom_edge);
-        if (ref1 > 0)
-          assign_and_clamp_mv(mv1, &nearest_second, mb_to_left_edge,
-                                                    mb_to_right_edge,
-                                                    mb_to_top_edge,
-                                                    mb_to_bottom_edge);
+        mv0->as_int = nearest.as_int;
+        clamp_mv2(&mv0->as_mv, xd);
+
+        if (ref1 > 0) {
+          mv1->as_int = nearest_second.as_int;
+          clamp_mv2(&mv1->as_mv, xd);
+        }
         break;
 
       case ZEROMV:

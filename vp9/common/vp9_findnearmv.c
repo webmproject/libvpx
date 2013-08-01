@@ -32,7 +32,7 @@ void vp9_find_best_ref_mvs(MACROBLOCKD *xd,
   // Make sure all the candidates are properly clamped etc
   for (i = 0; i < MAX_MV_REF_CANDIDATES; ++i) {
     lower_mv_precision(&mvlist[i], xd->allow_high_precision_mv);
-    clamp_mv2(&mvlist[i], xd);
+    clamp_mv2(&mvlist[i].as_mv, xd);
   }
   *nearest = mvlist[0];
   *near = mvlist[1];
