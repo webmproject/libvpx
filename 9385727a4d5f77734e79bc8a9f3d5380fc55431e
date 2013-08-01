@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAcn//9TQ\u003d",
+        "filename": "vp9/encoder/vp9_segmentation.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 216,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2013-08-01T22:09:15Z",
+      "side": 1,
+      "message": "a minor comment:\nxd is used only to get seg. maybe remove the line above, and use:\nseg \u003d \u0026cpi-\u003emb.e_mbd.seg;",
+      "revId": "9385727a4d5f77734e79bc8a9f3d5380fc55431e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
