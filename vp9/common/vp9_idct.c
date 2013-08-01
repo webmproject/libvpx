@@ -1274,29 +1274,3 @@ void vp9_short_idct1_32x32_c(int16_t *input, int16_t *output) {
   out = dct_const_round_shift(out * cospi_16_64);
   output[0] = ROUND_POWER_OF_TWO(out, 6);
 }
-
-void vp9_short_idct10_32x32_add_c(int16_t *input, uint8_t *dest,
-                                  int dest_stride) {
-  int16_t out[32 * 32] = { 0 };
-  int16_t *outptr = out;
-  int i, j;
-  int16_t temp_in[32], temp_out[32];
-
-  // First transform rows. Since all non-zero dct coefficients are in
-  // upper-left 4x4 area, we only need to calculate first 4 rows here.
-  for (i = 0; i < 4; ++i) {
-    idct32_1d(input, outptr);
-    input += 32;
-    outptr += 32;
-  }
-
-  // Columns
-  for (i = 0; i < 32; ++i) {
-    for (j = 0; j < 32; ++j)
-      temp_in[j] = out[j * 32 + i];
-    idct32_1d(temp_in, temp_out);
-    for (j = 0; j < 32; ++j)
-      dest[j * dest_stride + i] = clip_pixel(ROUND_POWER_OF_TWO(temp_out[j], 6)
-                                  + dest[j * dest_stride + i]);
-  }
-}
