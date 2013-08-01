@@ -43,10 +43,10 @@ static const int mv_ref_blocks[BLOCK_SIZE_TYPES][MVREF_NEIGHBOURS][2] = {
 #define MV_BORDER (16 << 3) // Allow 16 pels in 1/8th pel units
 
 static void clamp_mv_ref(const MACROBLOCKD *xd, int_mv *mv) {
-  mv->as_mv.col = clamp(mv->as_mv.col, xd->mb_to_left_edge - MV_BORDER,
-                                       xd->mb_to_right_edge + MV_BORDER);
-  mv->as_mv.row = clamp(mv->as_mv.row, xd->mb_to_top_edge - MV_BORDER,
-                                       xd->mb_to_bottom_edge + MV_BORDER);
+  clamp_mv(&mv->as_mv, xd->mb_to_left_edge - MV_BORDER,
+                       xd->mb_to_right_edge + MV_BORDER,
+                       xd->mb_to_top_edge - MV_BORDER,
+                       xd->mb_to_bottom_edge + MV_BORDER);
 }
 
 // Gets a candidate reference motion vector from the given mode info

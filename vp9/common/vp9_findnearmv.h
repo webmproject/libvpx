@@ -29,12 +29,6 @@ void vp9_find_best_ref_mvs(MACROBLOCKD *xd,
                            int_mv *near);
 
 // TODO(jingning): this mv clamping function should be block size dependent.
-static void clamp_mv(MV *mv, int min_col, int max_col,
-                             int min_row, int max_row) {
-  mv->col = clamp(mv->col, min_col, max_col);
-  mv->row = clamp(mv->row, min_row, max_row);
-}
-
 static void clamp_mv2(MV *mv, const MACROBLOCKD *xd) {
   clamp_mv(mv, xd->mb_to_left_edge - LEFT_TOP_MARGIN,
                xd->mb_to_right_edge + RIGHT_BOTTOM_MARGIN,

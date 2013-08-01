@@ -239,24 +239,25 @@ MV clamp_mv_to_umv_border_sb(const MV *src_mv,
     int bwl, int bhl, int ss_x, int ss_y,
     int mb_to_left_edge, int mb_to_top_edge,
     int mb_to_right_edge, int mb_to_bottom_edge) {
-  /* If the MV points so far into the UMV border that no visible pixels
-   * are used for reconstruction, the subpel part of the MV can be
-   * discarded and the MV limited to 16 pixels with equivalent results.
-   */
+  // If the MV points so far into the UMV border that no visible pixels
+  // are used for reconstruction, the subpel part of the MV can be
+  // discarded and the MV limited to 16 pixels with equivalent results.
   const int spel_left = (VP9_INTERP_EXTEND + (4 << bwl)) << 4;
   const int spel_right = spel_left - (1 << 4);
   const int spel_top = (VP9_INTERP_EXTEND + (4 << bhl)) << 4;
   const int spel_bottom = spel_top - (1 << 4);
-  MV clamped_mv;
-
+  MV clamped_mv = {
+    src_mv->row << (1 - ss_y),
+    src_mv->col << (1 - ss_x)
+  };
   assert(ss_x <= 1);
   assert(ss_y <= 1);
-  clamped_mv.col = clamp(src_mv->col << (1 - ss_x),
-                         (mb_to_left_edge << (1 - ss_x)) - spel_left,
-                         (mb_to_right_edge << (1 - ss_x)) + spel_right);
-  clamped_mv.row = clamp(src_mv->row << (1 - ss_y),
-                         (mb_to_top_edge << (1 - ss_y)) - spel_top,
-                         (mb_to_bottom_edge << (1 - ss_y)) + spel_bottom);
+
+  clamp_mv(&clamped_mv, (mb_to_left_edge << (1 - ss_x)) - spel_left,
+                        (mb_to_right_edge << (1 - ss_x)) + spel_right,
+                        (mb_to_top_edge << (1 - ss_y)) - spel_top,
+                        (mb_to_bottom_edge << (1 - ss_y)) + spel_bottom);
+
   return clamped_mv;
 }
 
