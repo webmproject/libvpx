@@ -16,6 +16,24 @@
       "revId": "9385727a4d5f77734e79bc8a9f3d5380fc55431e",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcn//9Qo\u003d",
+        "filename": "vp9/encoder/vp9_segmentation.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 216,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2013-08-01T22:36:44Z",
+      "side": 1,
+      "message": "Sure, that\u0027s for the next changesets. The final goal is to move segmentation and loopfilter structures from MACROBLOCKD to VP9_COMMON.",
+      "parentUuid": "AAAAcn//9TQ\u003d",
+      "revId": "9385727a4d5f77734e79bc8a9f3d5380fc55431e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
