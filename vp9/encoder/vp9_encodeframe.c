@@ -1653,7 +1653,7 @@ static void rd_pick_partition(VP9_COMP *cpi, TOKENEXTRA **tp, int mi_row,
     }
   }
 
-  if (!cpi->sf.use_max_partition_size ||
+  if (!cpi->sf.auto_min_max_partition_size ||
       bsize <= cpi->sf.max_partition_size) {
     int larger_is_better = 0;
     // PARTITION_NONE
