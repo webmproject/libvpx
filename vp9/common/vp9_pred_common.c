@@ -55,34 +55,28 @@ unsigned char vp9_get_pred_context_switchable_interp(const MACROBLOCKD *xd) {
 }
 // Returns a context number for the given MB prediction signal
 unsigned char vp9_get_pred_context_intra_inter(const MACROBLOCKD *xd) {
-  int pred_context;
   const MODE_INFO *const mi = xd->mode_info_context;
   const MB_MODE_INFO *const above_mbmi = &mi[-xd->mode_info_stride].mbmi;
   const MB_MODE_INFO *const left_mbmi = &mi[-1].mbmi;
   const int left_in_image = xd->left_available && left_mbmi->mb_in_image;
   const int above_in_image = xd->up_available && above_mbmi->mb_in_image;
-  // Note:
-  // The mode info data structure has a one element border above and to the
-  // left of the entries correpsonding to real macroblocks.
-  // The prediction flags in these dummy entries are initialised to 0.
-  if (above_in_image && left_in_image) {  // both edges available
-    if (left_mbmi->ref_frame[0] == INTRA_FRAME &&
-        above_mbmi->ref_frame[0] == INTRA_FRAME) {  // intra/intra (3)
-      pred_context = 3;
-    } else {  // intra/inter (1) or inter/inter (0)
-      pred_context = left_mbmi->ref_frame[0] == INTRA_FRAME ||
-                     above_mbmi->ref_frame[0] == INTRA_FRAME;
-    }
-  } else if (above_in_image || left_in_image) {  // one edge available
-    const MB_MODE_INFO *edge_mbmi = above_in_image ? above_mbmi : left_mbmi;
+  const int left_intra = left_mbmi->ref_frame[0] == INTRA_FRAME;
+  const int above_intra = above_mbmi->ref_frame[0] == INTRA_FRAME;
 
-    // inter: 0, intra: 2
-    pred_context = 2 * (edge_mbmi->ref_frame[0] == INTRA_FRAME);
-  } else {
-    pred_context = 0;
-  }
-  assert(pred_context >= 0 && pred_context < INTRA_INTER_CONTEXTS);
-  return pred_context;
+  // The mode info data structure has a one element border above and to the
+  // left of the entries corresponding to real macroblocks.
+  // The prediction flags in these dummy entries are initialized to 0.
+  // 0 - inter/inter, inter/--, --/inter, --/--
+  // 1 - intra/inter, inter/intra
+  // 2 - intra/--, --/intra
+  // 3 - intra/intra
+  if (above_in_image && left_in_image)  // both edges available
+    return left_intra && above_intra ? 3
+                                     : left_intra || above_intra;
+  else if (above_in_image || left_in_image)  // one edge available
+    return 2 * (above_in_image ? above_intra : left_intra);
+  else
+    return 0;
 }
 // Returns a context number for the given MB prediction signal
 unsigned char vp9_get_pred_context_comp_inter_inter(const VP9_COMMON *cm,
