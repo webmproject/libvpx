@@ -63,7 +63,7 @@ static unsigned int do_16x16_motion_iteration(VP9_COMP *cpi,
   }
 
   vp9_set_mbmode_and_mvs(x, NEWMV, dst_mv);
-  vp9_build_inter_predictors_sby(xd, mb_row, mb_col, BLOCK_SIZE_MB16X16);
+  vp9_build_inter_predictors_sby(xd, mb_row, mb_col, BLOCK_16X16);
   best_err = vp9_sad16x16(x->plane[0].src.buf, x->plane[0].src.stride,
                           xd->plane[0].dst.buf, xd->plane[0].dst.stride,
                           INT_MAX);
@@ -255,7 +255,7 @@ static void update_mbgraph_frame_stats(VP9_COMP *cpi,
   xd->plane[0].pre[0].stride  = buf->y_stride;
   xd->plane[1].dst.stride = buf->uv_stride;
   xd->mode_info_context = &mi_local;
-  mi_local.mbmi.sb_type = BLOCK_SIZE_MB16X16;
+  mi_local.mbmi.sb_type = BLOCK_16X16;
   mi_local.mbmi.ref_frame[0] = LAST_FRAME;
   mi_local.mbmi.ref_frame[1] = NONE;
 

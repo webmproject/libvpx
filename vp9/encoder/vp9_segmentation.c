@@ -248,7 +248,7 @@ void vp9_choose_segmap_coding_method(VP9_COMP *cpi) {
       for (mi_col = cm->cur_tile_mi_col_start; mi_col < cm->cur_tile_mi_col_end;
            mi_col += 8, mi += 8)
         count_segs_sb(cpi, mi, no_pred_segcounts, temporal_predictor_count,
-                      t_unpred_seg_counts, mi_row, mi_col, BLOCK_SIZE_SB64X64);
+                      t_unpred_seg_counts, mi_row, mi_col, BLOCK_64X64);
     }
   }
 

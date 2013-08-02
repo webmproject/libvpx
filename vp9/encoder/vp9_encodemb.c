@@ -742,11 +742,11 @@ void encode_block_intra(int plane, int block, BLOCK_SIZE_TYPE bsize,
       tx_type = get_tx_type_4x4(pd->plane_type, xd, block);
       scan = get_scan_4x4(tx_type);
       iscan = get_iscan_4x4(tx_type);
-      if (mbmi->sb_type < BLOCK_SIZE_SB8X8 && plane == 0) {
+      if (mbmi->sb_type < BLOCK_8X8 && plane == 0)
         mode = xd->mode_info_context->bmi[block].as_mode;
-      } else {
+      else
         mode = plane == 0 ? mbmi->mode : mbmi->uv_mode;
-      }
+
       xoff = 4 * (block & twmask);
       yoff = 4 * (block >> twl);
       dst = pd->dst.buf + yoff * pd->dst.stride + xoff;

@@ -453,7 +453,7 @@ static void model_rd_for_sb_y_tx(VP9_COMP *cpi, BLOCK_SIZE_TYPE bsize,
                                  int *out_rate_sum, int64_t *out_dist_sum,
                                  int *out_skip) {
   int t = 4, j, k;
-  BLOCK_SIZE_TYPE bs = BLOCK_SIZE_AB4X4;
+  BLOCK_SIZE_TYPE bs = BLOCK_4X4;
   struct macroblock_plane *const p = &x->plane[0];
   struct macroblockd_plane *const pd = &xd->plane[0];
   const int width = plane_block_width(bsize, pd);
@@ -838,7 +838,7 @@ static void choose_largest_txfm_size(VP9_COMP *cpi, MACROBLOCK *x,
                                      int64_t ref_best_rd,
                                      BLOCK_SIZE_TYPE bs) {
   const TX_SIZE max_txfm_size = TX_32X32
-      - (bs < BLOCK_SIZE_SB32X32) - (bs < BLOCK_SIZE_MB16X16);
+      - (bs < BLOCK_32X32) - (bs < BLOCK_16X16);
   VP9_COMMON *const cm = &cpi->common;
   MACROBLOCKD *const xd = &x->e_mbd;
   MB_MODE_INFO *const mbmi = &xd->mode_info_context->mbmi;
@@ -869,7 +869,7 @@ static void choose_txfm_size_from_rd(VP9_COMP *cpi, MACROBLOCK *x,
                                      int64_t tx_cache[TX_MODES],
                                      BLOCK_SIZE_TYPE bs) {
   const TX_SIZE max_tx_size = TX_32X32
-      - (bs < BLOCK_SIZE_SB32X32) - (bs < BLOCK_SIZE_MB16X16);
+      - (bs < BLOCK_32X32) - (bs < BLOCK_16X16);
   VP9_COMMON *const cm = &cpi->common;
   MACROBLOCKD *const xd = &x->e_mbd;
   MB_MODE_INFO *const mbmi = &xd->mode_info_context->mbmi;
@@ -974,7 +974,7 @@ static void choose_txfm_size_from_modelrd(VP9_COMP *cpi, MACROBLOCK *x,
                                           BLOCK_SIZE_TYPE bs,
                                           int *model_used) {
   const TX_SIZE max_txfm_size = TX_32X32
-      - (bs < BLOCK_SIZE_SB32X32) - (bs < BLOCK_SIZE_MB16X16);
+      - (bs < BLOCK_32X32) - (bs < BLOCK_16X16);
   VP9_COMMON *const cm = &cpi->common;
   MACROBLOCKD *const xd = &x->e_mbd;
   MB_MODE_INFO *const mbmi = &xd->mode_info_context->mbmi;
@@ -1098,48 +1098,46 @@ static void super_block_yrd(VP9_COMP *cpi,
   if (cpi->sf.tx_size_search_method == USE_LARGESTINTRA_MODELINTER &&
       mbmi->ref_frame[0] > INTRA_FRAME) {
     int model_used[TX_SIZES] = {1, 1, 1, 1};
-    if (bs >= BLOCK_SIZE_SB32X32) {
-      if (model_used[TX_32X32]) {
+    if (bs >= BLOCK_32X32) {
+      if (model_used[TX_32X32])
         model_rd_for_sb_y_tx(cpi, bs, TX_32X32, x, xd,
                              &r[TX_32X32][0], &d[TX_32X32], &s[TX_32X32]);
-      } else {
+      else
         super_block_yrd_for_txfm(cm, x, &r[TX_32X32][0], &d[TX_32X32],
                                  &s[TX_32X32], &sse[TX_32X32], INT64_MAX,
                                  bs, TX_32X32);
-      }
     }
-    if (bs >= BLOCK_SIZE_MB16X16) {
-      if (model_used[TX_16X16]) {
+    if (bs >= BLOCK_16X16) {
+      if (model_used[TX_16X16])
         model_rd_for_sb_y_tx(cpi, bs, TX_16X16, x, xd,
                              &r[TX_16X16][0], &d[TX_16X16], &s[TX_16X16]);
-      } else {
+      else
         super_block_yrd_for_txfm(cm, x, &r[TX_16X16][0], &d[TX_16X16],
                                  &s[TX_16X16], &sse[TX_16X16], INT64_MAX,
                                  bs, TX_16X16);
-      }
     }
-    if (model_used[TX_8X8]) {
+    if (model_used[TX_8X8])
       model_rd_for_sb_y_tx(cpi, bs, TX_8X8, x, xd,
                            &r[TX_8X8][0], &d[TX_8X8], &s[TX_8X8]);
-    } else {
+    else
       super_block_yrd_for_txfm(cm, x, &r[TX_8X8][0], &d[TX_8X8], &s[TX_8X8],
                                &sse[TX_8X8], INT64_MAX, bs, TX_8X8);
-    }
-    if (model_used[TX_4X4]) {
+
+    if (model_used[TX_4X4])
       model_rd_for_sb_y_tx(cpi, bs, TX_4X4, x, xd,
                            &r[TX_4X4][0], &d[TX_4X4], &s[TX_4X4]);
-    } else {
+    else
       super_block_yrd_for_txfm(cm, x, &r[TX_4X4][0], &d[TX_4X4], &s[TX_4X4],
                                &sse[TX_4X4], INT64_MAX, bs, TX_4X4);
-    }
+
     choose_txfm_size_from_modelrd(cpi, x, r, rate, d, distortion, s,
                                   skip, sse, ref_best_rd, bs, model_used);
   } else {
-    if (bs >= BLOCK_SIZE_SB32X32)
+    if (bs >= BLOCK_32X32)
       super_block_yrd_for_txfm(cm, x, &r[TX_32X32][0], &d[TX_32X32],
                                &s[TX_32X32], &sse[TX_32X32], ref_best_rd,
                                bs, TX_32X32);
-    if (bs >= BLOCK_SIZE_MB16X16)
+    if (bs >= BLOCK_16X16)
       super_block_yrd_for_txfm(cm, x, &r[TX_16X16][0], &d[TX_16X16],
                                &s[TX_16X16], &sse[TX_16X16], ref_best_rd,
                                bs, TX_16X16);
@@ -3946,8 +3944,8 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
     }
 
     /* keep record of best txfm size */
-    if (bsize < BLOCK_SIZE_SB32X32) {
-      if (bsize < BLOCK_SIZE_MB16X16) {
+    if (bsize < BLOCK_32X32) {
+      if (bsize < BLOCK_16X16) {
         if (this_mode == SPLITMV || this_mode == I4X4_PRED)
           tx_cache[ALLOW_8X8] = tx_cache[ONLY_4X4];
         tx_cache[ALLOW_16X16] = tx_cache[ALLOW_8X8];

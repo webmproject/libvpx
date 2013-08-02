@@ -362,13 +362,13 @@ static void update_state(VP9_COMP *cpi, PICK_MODE_CONTEXT *ctx,
   }
   // FIXME(rbultje) I'm pretty sure this should go to the end of this block
   // (i.e. after the output_enabled)
-  if (bsize < BLOCK_SIZE_SB32X32) {
-    if (bsize < BLOCK_SIZE_MB16X16)
+  if (bsize < BLOCK_32X32) {
+    if (bsize < BLOCK_16X16)
       ctx->tx_rd_diff[ALLOW_16X16] = ctx->tx_rd_diff[ALLOW_8X8];
     ctx->tx_rd_diff[ALLOW_32X32] = ctx->tx_rd_diff[ALLOW_16X16];
   }
 
-  if (is_inter_block(mbmi) && mbmi->sb_type < BLOCK_SIZE_SB8X8) {
+  if (is_inter_block(mbmi) && mbmi->sb_type < BLOCK_8X8) {
     *x->partition_info = ctx->partition_info;
     mbmi->mv[0].as_int = mi->bmi[3].as_mv[0].as_int;
     mbmi->mv[1].as_int = mi->bmi[3].as_mv[1].as_int;
@@ -802,7 +802,7 @@ static void encode_sb(VP9_COMP *cpi, TOKENEXTRA **tp, int mi_row, int mi_col,
   if (mi_row >= cm->mi_rows || mi_col >= cm->mi_cols)
     return;
 
-  c1 = BLOCK_SIZE_AB4X4;
+  c1 = BLOCK_4X4;
   if (bsize >= BLOCK_SIZE_SB8X8) {
     set_partition_seg_context(cm, xd, mi_row, mi_col);
     pl = partition_plane_context(xd, bsize);
@@ -1155,32 +1155,32 @@ static void choose_partitioning(VP9_COMP *cpi, MODE_INFO *m, int mi_row,
   // values.
   for (i = 0; i < 4; i++) {
     for (j = 0; j < 4; j++) {
-      fill_variance_tree(&vt.split[i].split[j], BLOCK_SIZE_MB16X16);
+      fill_variance_tree(&vt.split[i].split[j], BLOCK_16X16);
     }
-    fill_variance_tree(&vt.split[i], BLOCK_SIZE_SB32X32);
+    fill_variance_tree(&vt.split[i], BLOCK_32X32);
   }
-  fill_variance_tree(&vt, BLOCK_SIZE_SB64X64);
+  fill_variance_tree(&vt, BLOCK_64X64);
   // Now go through the entire structure,  splitting every block size until
   // we get to one that's got a variance lower than our threshold,  or we
   // hit 8x8.
-  if (!set_vt_partitioning(cpi, &vt, m, BLOCK_SIZE_SB64X64, mi_row, mi_col,
+  if (!set_vt_partitioning(cpi, &vt, m, BLOCK_64X64, mi_row, mi_col,
                            4)) {
     for (i = 0; i < 4; ++i) {
       const int x32_idx = ((i & 1) << 2);
       const int y32_idx = ((i >> 1) << 2);
-      if (!set_vt_partitioning(cpi, &vt.split[i], m, BLOCK_SIZE_SB32X32,
+      if (!set_vt_partitioning(cpi, &vt.split[i], m, BLOCK_32X32,
                                (mi_row + y32_idx), (mi_col + x32_idx), 2)) {
         for (j = 0; j < 4; ++j) {
           const int x16_idx = ((j & 1) << 1);
           const int y16_idx = ((j >> 1) << 1);
           if (!set_vt_partitioning(cpi, &vt.split[i].split[j], m,
-                                   BLOCK_SIZE_MB16X16,
+                                   BLOCK_16X16,
                                    (mi_row + y32_idx + y16_idx),
                                    (mi_col + x32_idx + x16_idx), 1)) {
             for (k = 0; k < 4; ++k) {
               const int x8_idx = (k & 1);
               const int y8_idx = (k >> 1);
-              set_block_size(cm, m, BLOCK_SIZE_SB8X8, mis,
+              set_block_size(cm, m, BLOCK_8X8, mis,
                              (mi_row + y32_idx + y16_idx + y8_idx),
                              (mi_col + x32_idx + x16_idx + x8_idx));
             }
@@ -1217,7 +1217,7 @@ static void rd_use_partition(VP9_COMP *cpi, MODE_INFO *m, TOKENEXTRA **tp,
   int64_t none_dist = INT_MAX;
   int chosen_rate = INT_MAX;
   int64_t chosen_dist = INT_MAX;
-  BLOCK_SIZE_TYPE sub_subsize = BLOCK_SIZE_AB4X4;
+  BLOCK_SIZE_TYPE sub_subsize = BLOCK_4X4;
   int splits_below = 0;
   BLOCK_SIZE_TYPE bs_type = m->mbmi.sb_type;
 
@@ -2249,13 +2249,13 @@ static void reset_skip_txfm_size_sb(VP9_COMP *cpi, MODE_INFO *mi,
     int n;
 
     assert(bwl < bsl && bhl < bsl);
-    if (bsize == BLOCK_SIZE_SB64X64) {
-      subsize = BLOCK_SIZE_SB32X32;
-    } else if (bsize == BLOCK_SIZE_SB32X32) {
-      subsize = BLOCK_SIZE_MB16X16;
+    if (bsize == BLOCK_64X64) {
+      subsize = BLOCK_32X32;
+    } else if (bsize == BLOCK_32X32) {
+      subsize = BLOCK_16X16;
     } else {
-      assert(bsize == BLOCK_SIZE_MB16X16);
-      subsize = BLOCK_SIZE_SB8X8;
+      assert(bsize == BLOCK_16X16);
+      subsize = BLOCK_8X8;
     }
 
     for (n = 0; n < 4; n++) {
@@ -2656,13 +2656,13 @@ static void encode_superblock(VP9_COMP *cpi, TOKENEXTRA **t, int output_enabled,
       TX_SIZE sz = (cm->tx_mode == TX_MODE_SELECT) ? TX_32X32 : cm->tx_mode;
       // The new intra coding scheme requires no change of transform size
       if (is_inter_block(&mi->mbmi)) {
-        if (sz == TX_32X32 && bsize < BLOCK_SIZE_SB32X32)
+        if (sz == TX_32X32 && bsize < BLOCK_32X32)
           sz = TX_16X16;
-        if (sz == TX_16X16 && bsize < BLOCK_SIZE_MB16X16)
+        if (sz == TX_16X16 && bsize < BLOCK_16X16)
           sz = TX_8X8;
-        if (sz == TX_8X8 && bsize < BLOCK_SIZE_SB8X8)
+        if (sz == TX_8X8 && bsize < BLOCK_8X8)
           sz = TX_4X4;
-      } else if (bsize >= BLOCK_SIZE_SB8X8) {
+      } else if (bsize >= BLOCK_8X8) {
         sz = mbmi->txfm_size;
       } else {
         sz = TX_4X4;

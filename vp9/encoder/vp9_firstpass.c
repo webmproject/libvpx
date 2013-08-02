@@ -347,17 +347,17 @@ static void zz_motion_search(VP9_COMP *cpi, MACROBLOCK *x, YV12_BUFFER_CONFIG *r
   xd->plane[0].pre[0].buf = recon_buffer->y_buffer + recon_yoffset;
 
   switch (xd->mode_info_context->mbmi.sb_type) {
-    case BLOCK_SIZE_SB8X8:
+    case BLOCK_8X8:
       vp9_mse8x8(x->plane[0].src.buf, x->plane[0].src.stride,
                  xd->plane[0].pre[0].buf, xd->plane[0].pre[0].stride,
                  (unsigned int *)(best_motion_err));
       break;
-    case BLOCK_SIZE_SB16X8:
+    case BLOCK_16X8:
       vp9_mse16x8(x->plane[0].src.buf, x->plane[0].src.stride,
                   xd->plane[0].pre[0].buf, xd->plane[0].pre[0].stride,
                   (unsigned int *)(best_motion_err));
       break;
-    case BLOCK_SIZE_SB8X16:
+    case BLOCK_8X16:
       vp9_mse8x16(x->plane[0].src.buf, x->plane[0].src.stride,
                   xd->plane[0].pre[0].buf, xd->plane[0].pre[0].stride,
                   (unsigned int *)(best_motion_err));
@@ -403,13 +403,13 @@ static void first_pass_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
 
   // override the default variance function to use MSE
   switch (xd->mode_info_context->mbmi.sb_type) {
-    case BLOCK_SIZE_SB8X8:
+    case BLOCK_8X8:
       v_fn_ptr.vf = vp9_mse8x8;
       break;
-    case BLOCK_SIZE_SB16X8:
+    case BLOCK_16X8:
       v_fn_ptr.vf = vp9_mse16x8;
       break;
-    case BLOCK_SIZE_SB8X16:
+    case BLOCK_8X16:
       v_fn_ptr.vf = vp9_mse8x16;
       break;
     default:
@@ -549,15 +549,15 @@ void vp9_first_pass(VP9_COMP *cpi) {
 
       if (mb_col * 2 + 1 < cm->mi_cols) {
         if (mb_row * 2 + 1 < cm->mi_rows) {
-          xd->mode_info_context->mbmi.sb_type = BLOCK_SIZE_MB16X16;
+          xd->mode_info_context->mbmi.sb_type = BLOCK_16X16;
         } else {
-          xd->mode_info_context->mbmi.sb_type = BLOCK_SIZE_SB16X8;
+          xd->mode_info_context->mbmi.sb_type = BLOCK_16X8;
         }
       } else {
         if (mb_row * 2 + 1 < cm->mi_rows) {
-          xd->mode_info_context->mbmi.sb_type = BLOCK_SIZE_SB8X16;
+          xd->mode_info_context->mbmi.sb_type = BLOCK_8X16;
         } else {
-          xd->mode_info_context->mbmi.sb_type = BLOCK_SIZE_SB8X8;
+          xd->mode_info_context->mbmi.sb_type = BLOCK_8X8;
         }
       }
       xd->mode_info_context->mbmi.ref_frame[0] = INTRA_FRAME;

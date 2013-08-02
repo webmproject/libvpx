@@ -317,7 +317,7 @@ static INLINE void update_partition_context(MACROBLOCKD *xd,
   const int bsl = b_width_log2(sb_size), bs = (1 << bsl) / 2;
   const int bwl = b_width_log2(sb_type);
   const int bhl = b_height_log2(sb_type);
-  const int boffset = b_width_log2(BLOCK_SIZE_SB64X64) - bsl;
+  const int boffset = b_width_log2(BLOCK_64X64) - bsl;
   const char pcval0 = ~(0xe << boffset);
   const char pcval1 = ~(0xf << boffset);
   const char pcvalue[2] = {pcval0, pcval1};
@@ -335,7 +335,7 @@ static INLINE int partition_plane_context(MACROBLOCKD *xd,
                                           BLOCK_SIZE_TYPE sb_type) {
   int bsl = mi_width_log2(sb_type), bs = 1 << bsl;
   int above = 0, left = 0, i;
-  int boffset = mi_width_log2(BLOCK_SIZE_SB64X64) - bsl;
+  int boffset = mi_width_log2(BLOCK_64X64) - bsl;
 
   assert(mi_width_log2(sb_type) == mi_height_log2(sb_type));
   assert(bsl >= 0);
@@ -371,7 +371,7 @@ static INLINE TX_TYPE get_tx_type_4x4(PLANE_TYPE plane_type,
       is_inter_block(mbmi))
     return DCT_DCT;
 
-  return mode2txfm_map[mbmi->sb_type < BLOCK_SIZE_SB8X8 ?
+  return mode2txfm_map[mbmi->sb_type < BLOCK_8X8 ?
                        mi->bmi[ib].as_mode : mbmi->mode];
 }
 
@@ -565,8 +565,8 @@ static INLINE void foreach_predicted_block_in_plane(
   // size of the predictor to use.
   int pred_w, pred_h;
 
-  if (xd->mode_info_context->mbmi.sb_type < BLOCK_SIZE_SB8X8) {
-    assert(bsize == BLOCK_SIZE_SB8X8);
+  if (xd->mode_info_context->mbmi.sb_type < BLOCK_8X8) {
+    assert(bsize == BLOCK_8X8);
     pred_w = 0;
     pred_h = 0;
   } else {

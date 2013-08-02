@@ -110,9 +110,9 @@ unsigned char vp9_get_pred_context_tx_size(const MACROBLOCKD *xd);
 
 static const vp9_prob *get_tx_probs(BLOCK_SIZE_TYPE bsize, uint8_t context,
                                     const struct tx_probs *tx_probs) {
-  if (bsize < BLOCK_SIZE_MB16X16)
+  if (bsize < BLOCK_16X16)
     return tx_probs->p8x8[context];
-  else if (bsize < BLOCK_SIZE_SB32X32)
+  else if (bsize < BLOCK_32X32)
     return tx_probs->p16x16[context];
   else
     return tx_probs->p32x32[context];
@@ -127,9 +127,9 @@ static const vp9_prob *get_tx_probs2(const MACROBLOCKD *xd,
 
 static void update_tx_counts(BLOCK_SIZE_TYPE bsize, uint8_t context,
                              TX_SIZE tx_size, struct tx_counts *tx_counts) {
-  if (bsize >= BLOCK_SIZE_SB32X32)
+  if (bsize >= BLOCK_32X32)
     tx_counts->p32x32[context][tx_size]++;
-  else if (bsize >= BLOCK_SIZE_MB16X16)
+  else if (bsize >= BLOCK_16X16)
     tx_counts->p16x16[context][tx_size]++;
   else
     tx_counts->p8x8[context][tx_size]++;

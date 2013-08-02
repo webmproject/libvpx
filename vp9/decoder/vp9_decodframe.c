@@ -140,8 +140,8 @@ static void decode_block_intra(int plane, int block, BLOCK_SIZE_TYPE bsize,
   const int mode = plane == 0 ? mi->mbmi.mode
                               : mi->mbmi.uv_mode;
 
-  if (plane == 0 && mi->mbmi.sb_type < BLOCK_SIZE_SB8X8) {
-    assert(bsize == BLOCK_SIZE_SB8X8);
+  if (plane == 0 && mi->mbmi.sb_type < BLOCK_8X8) {
+    assert(bsize == BLOCK_8X8);
     b_mode = mi->bmi[raster_block].as_mode;
   } else {
     b_mode = mode;
@@ -225,7 +225,7 @@ static void decode_modes_b(VP9D_COMP *pbi, int mi_row, int mi_col,
                            vp9_reader *r, BLOCK_SIZE_TYPE bsize) {
   VP9_COMMON *const cm = &pbi->common;
   MACROBLOCKD *const xd = &pbi->mb;
-  const int less8x8 = bsize < BLOCK_SIZE_SB8X8;
+  const int less8x8 = bsize < BLOCK_8X8;
   MB_MODE_INFO *mbmi;
 
   if (less8x8)
@@ -236,7 +236,7 @@ static void decode_modes_b(VP9D_COMP *pbi, int mi_row, int mi_col,
   vp9_read_mode_info(pbi, mi_row, mi_col, r);
 
   if (less8x8)
-    bsize = BLOCK_SIZE_SB8X8;
+    bsize = BLOCK_8X8;
 
   // Has to be called after set_offsets
   mbmi = &xd->mode_info_context->mbmi;
@@ -282,7 +282,7 @@ static void decode_modes_sb(VP9D_COMP *pbi, int mi_row, int mi_col,
   if (mi_row >= pc->mi_rows || mi_col >= pc->mi_cols)
     return;
 
-  if (bsize < BLOCK_SIZE_SB8X8) {
+  if (bsize < BLOCK_8X8) {
     if (xd->ab_index != 0)
       return;
   } else {
@@ -334,8 +334,8 @@ static void decode_modes_sb(VP9D_COMP *pbi, int mi_row, int mi_col,
   }
 
   // update partition context
-  if (bsize >= BLOCK_SIZE_SB8X8 &&
-      (bsize == BLOCK_SIZE_SB8X8 || partition != PARTITION_SPLIT)) {
+  if (bsize >= BLOCK_8X8 &&
+      (bsize == BLOCK_8X8 || partition != PARTITION_SPLIT)) {
     set_partition_seg_context(pc, xd, mi_row, mi_col);
     update_partition_context(xd, subsize, bsize);
   }
@@ -597,7 +597,7 @@ static void decode_tile(VP9D_COMP *pbi, vp9_reader *r) {
     vpx_memset(pc->left_seg_context, 0, sizeof(pc->left_seg_context));
     for (mi_col = pc->cur_tile_mi_col_start; mi_col < pc->cur_tile_mi_col_end;
          mi_col += MI_BLOCK_SIZE) {
-      decode_modes_sb(pbi, mi_row, mi_col, r, BLOCK_SIZE_SB64X64);
+      decode_modes_sb(pbi, mi_row, mi_col, r, BLOCK_64X64);
     }
 
     if (pbi->do_loopfilter_inline) {

@@ -203,9 +203,9 @@ static void write_selected_tx_size(const VP9_COMP *cpi, TX_SIZE tx_size,
   const MACROBLOCKD *const xd = &cpi->mb.e_mbd;
   const vp9_prob *tx_probs = get_tx_probs2(xd, &cpi->common.fc.tx_probs);
   vp9_write(w, tx_size != TX_4X4, tx_probs[0]);
-  if (bsize >= BLOCK_SIZE_MB16X16 && tx_size != TX_4X4) {
+  if (bsize >= BLOCK_16X16 && tx_size != TX_4X4) {
     vp9_write(w, tx_size != TX_8X8, tx_probs[1]);
-    if (bsize >= BLOCK_SIZE_SB32X32 && tx_size != TX_8X8)
+    if (bsize >= BLOCK_32X32 && tx_size != TX_8X8)
       vp9_write(w, tx_size != TX_16X16, tx_probs[2]);
   }
 }
@@ -693,8 +693,7 @@ static void write_modes(VP9_COMP *cpi, vp9_writer* const bc,
     vp9_zero(c->left_seg_context);
     for (mi_col = c->cur_tile_mi_col_start; mi_col < c->cur_tile_mi_col_end;
          mi_col += MI_BLOCK_SIZE, m += MI_BLOCK_SIZE)
-      write_modes_sb(cpi, m, bc, tok, tok_end, mi_row, mi_col,
-                     BLOCK_SIZE_SB64X64);
+      write_modes_sb(cpi, m, bc, tok, tok_end, mi_row, mi_col, BLOCK_64X64);
   }
 }
 

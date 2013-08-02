@@ -47,9 +47,9 @@ static TX_SIZE read_selected_tx_size(VP9_COMMON *cm, MACROBLOCKD *xd,
   const uint8_t context = vp9_get_pred_context_tx_size(xd);
   const vp9_prob *tx_probs = get_tx_probs(bsize, context, &cm->fc.tx_probs);
   TX_SIZE tx_size = vp9_read(r, tx_probs[0]);
-  if (tx_size != TX_4X4 && bsize >= BLOCK_SIZE_MB16X16) {
+  if (tx_size != TX_4X4 && bsize >= BLOCK_16X16) {
     tx_size += vp9_read(r, tx_probs[1]);
-    if (tx_size != TX_8X8 && bsize >= BLOCK_SIZE_SB32X32)
+    if (tx_size != TX_8X8 && bsize >= BLOCK_32X32)
       tx_size += vp9_read(r, tx_probs[2]);
   }
 
@@ -63,13 +63,13 @@ static TX_SIZE read_tx_size(VP9D_COMP *pbi, TX_MODE tx_mode,
   VP9_COMMON *const cm = &pbi->common;
   MACROBLOCKD *const xd = &pbi->mb;
 
-  if (allow_select && tx_mode == TX_MODE_SELECT && bsize >= BLOCK_SIZE_SB8X8)
+  if (allow_select && tx_mode == TX_MODE_SELECT && bsize >= BLOCK_8X8)
     return read_selected_tx_size(cm, xd, bsize, r);
-  else if (tx_mode >= ALLOW_32X32 && bsize >= BLOCK_SIZE_SB32X32)
+  else if (tx_mode >= ALLOW_32X32 && bsize >= BLOCK_32X32)
     return TX_32X32;
-  else if (tx_mode >= ALLOW_16X16 && bsize >= BLOCK_SIZE_MB16X16)
+  else if (tx_mode >= ALLOW_16X16 && bsize >= BLOCK_16X16)
     return TX_16X16;
-  else if (tx_mode >= ALLOW_8X8 && bsize >= BLOCK_SIZE_SB8X8)
+  else if (tx_mode >= ALLOW_8X8 && bsize >= BLOCK_8X8)
     return TX_8X8;
   else
     return TX_4X4;

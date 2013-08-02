@@ -478,7 +478,7 @@ void vp9_update_nmv_count(VP9_COMP *cpi, MACROBLOCK *x,
   const int num_4x4_blocks_high = num_4x4_blocks_high_lookup[mbmi->sb_type];
   int idx, idy;
 
-  if (mbmi->sb_type < BLOCK_SIZE_SB8X8) {
+  if (mbmi->sb_type < BLOCK_8X8) {
     PARTITION_INFO *pi = x->partition_info;
     for (idy = 0; idy < 2; idy += num_4x4_blocks_high) {
       for (idx = 0; idx < 2; idx += num_4x4_blocks_wide) {
