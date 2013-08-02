@@ -34,6 +34,24 @@
       "revId": "5c15a0dbc596ee40c44df129606073307e15d028",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcn//7aQ\u003d",
+        "filename": "vp9/encoder/vp9_mcomp.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 1839,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2013-08-02T23:11:24Z",
+      "side": 1,
+      "message": "Right. I was saying that if you draw all these points down, these 2 sets are covering same 80/88 points. Searching 8 points on square or diamond at one time probably won\u0027t make too much difference. Just my thoughts since I tried something similar before.",
+      "parentUuid": "AAAAcn//7b8\u003d",
+      "revId": "5c15a0dbc596ee40c44df129606073307e15d028",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
