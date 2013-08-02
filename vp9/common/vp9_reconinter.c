@@ -220,19 +220,19 @@ static INLINE int round_mv_comp_q4(int value) {
   return (value < 0 ? value - 2 : value + 2) / 4;
 }
 
-static int mi_mv_pred_row_q4(const MODE_INFO *mi, int idx) {
-  return round_mv_comp_q4(mi->bmi[0].as_mv[idx].as_mv.row +
-                          mi->bmi[1].as_mv[idx].as_mv.row +
-                          mi->bmi[2].as_mv[idx].as_mv.row +
-                          mi->bmi[3].as_mv[idx].as_mv.row);
+static MV mi_mv_pred_q4(const MODE_INFO *mi, int idx) {
+  MV res = { round_mv_comp_q4(mi->bmi[0].as_mv[idx].as_mv.row +
+                              mi->bmi[1].as_mv[idx].as_mv.row +
+                              mi->bmi[2].as_mv[idx].as_mv.row +
+                              mi->bmi[3].as_mv[idx].as_mv.row),
+             round_mv_comp_q4(mi->bmi[0].as_mv[idx].as_mv.col +
+                              mi->bmi[1].as_mv[idx].as_mv.col +
+                              mi->bmi[2].as_mv[idx].as_mv.col +
+                              mi->bmi[3].as_mv[idx].as_mv.col) };
+  return res;
 }
 
-static int mi_mv_pred_col_q4(const MODE_INFO *mi, int idx) {
-  return round_mv_comp_q4(mi->bmi[0].as_mv[idx].as_mv.col +
-                          mi->bmi[1].as_mv[idx].as_mv.col +
-                          mi->bmi[2].as_mv[idx].as_mv.col +
-                          mi->bmi[3].as_mv[idx].as_mv.col);
-}
+
 
 // TODO(jkoleszar): yet another mv clamping function :-(
 MV clamp_mv_to_umv_border_sb(const MV *src_mv,
@@ -299,44 +299,30 @@ static void build_inter_predictors(int plane, int block,
     // dest
     uint8_t *const dst = arg->dst[plane] + arg->dst_stride[plane] * y + x;
 
-    // motion vector
-    const MV *mv;
-    MV split_chroma_mv;
-    int_mv clamped_mv;
+    // TODO(jkoleszar): All chroma MVs in SPLITMV mode are taken as the
+    // same MV (the average of the 4 luma MVs) but we could do something
+    // smarter for non-4:2:0. Just punt for now, pending the changes to get
+    // rid of SPLITMV mode entirely.
+    const MV mv = mi->mbmi.sb_type < BLOCK_SIZE_SB8X8
+               ? (plane == 0 ? mi->bmi[block].as_mv[which_mv].as_mv
+                             : mi_mv_pred_q4(mi, which_mv))
+               : mi->mbmi.mv[which_mv].as_mv;
 
-    if (mi->mbmi.sb_type < BLOCK_SIZE_SB8X8) {
-      if (plane == 0) {
-        mv = &mi->bmi[block].as_mv[which_mv].as_mv;
-      } else {
-        // TODO(jkoleszar): All chroma MVs in SPLITMV mode are taken as the
-        // same MV (the average of the 4 luma MVs) but we could do something
-        // smarter for non-4:2:0. Just punt for now, pending the changes to get
-        // rid of SPLITMV mode entirely.
-        split_chroma_mv.row = mi_mv_pred_row_q4(mi, which_mv);
-        split_chroma_mv.col = mi_mv_pred_col_q4(mi, which_mv);
-        mv = &split_chroma_mv;
-      }
-    } else {
-      mv = &mi->mbmi.mv[which_mv].as_mv;
-    }
-
-    /* TODO(jkoleszar): This clamping is done in the incorrect place for the
-     * scaling case. It needs to be done on the scaled MV, not the pre-scaling
-     * MV. Note however that it performs the subsampling aware scaling so
-     * that the result is always q4.
-     */
-    clamped_mv.as_mv = clamp_mv_to_umv_border_sb(mv, bwl, bhl,
-                                                 xd->plane[plane].subsampling_x,
-                                                 xd->plane[plane].subsampling_y,
-                                                 xd->mb_to_left_edge,
-                                                 xd->mb_to_top_edge,
-                                                 xd->mb_to_right_edge,
-                                                 xd->mb_to_bottom_edge);
+    // TODO(jkoleszar): This clamping is done in the incorrect place for the
+    // scaling case. It needs to be done on the scaled MV, not the pre-scaling
+    // MV. Note however that it performs the subsampling aware scaling so
+    // that the result is always q4.
+    const MV res_mv = clamp_mv_to_umv_border_sb(&mv, bwl, bhl,
+                                                xd->plane[plane].subsampling_x,
+                                                xd->plane[plane].subsampling_y,
+                                                xd->mb_to_left_edge,
+                                                xd->mb_to_top_edge,
+                                                xd->mb_to_right_edge,
+                                                xd->mb_to_bottom_edge);
     scale->set_scaled_offsets(scale, arg->y + y, arg->x + x);
-
     vp9_build_inter_predictor(pre, pre_stride,
                               dst, arg->dst_stride[plane],
-                              &clamped_mv.as_mv, &xd->scale_factor[which_mv],
+                              &res_mv, &xd->scale_factor[which_mv],
                               4 << pred_w, 4 << pred_h, which_mv,
                               &xd->subpix, MV_PRECISION_Q4);
   }
