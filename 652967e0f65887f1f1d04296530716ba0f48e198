@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAcn//8pI\u003d",
+        "filename": "README",
+        "patchSetId": 1
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2013-08-02T14:57:15Z",
+      "side": 1,
+      "message": "Why build-out?",
+      "revId": "652967e0f65887f1f1d04296530716ba0f48e198",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcn//8pE\u003d",
+        "filename": "README",
+        "patchSetId": 1
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2013-08-02T14:57:15Z",
+      "side": 1,
+      "message": "armv5te",
+      "revId": "652967e0f65887f1f1d04296530716ba0f48e198",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcn//8pA\u003d",
+        "filename": "README",
+        "patchSetId": 1
+      },
+      "lineNbr": 65,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2013-08-02T14:57:15Z",
+      "side": 1,
+      "message": "duplicate",
+      "revId": "652967e0f65887f1f1d04296530716ba0f48e198",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
