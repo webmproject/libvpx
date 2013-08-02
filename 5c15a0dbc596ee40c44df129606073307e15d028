@@ -16,6 +16,24 @@
       "revId": "5c15a0dbc596ee40c44df129606073307e15d028",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcn//7b8\u003d",
+        "filename": "vp9/encoder/vp9_mcomp.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 1839,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2013-08-02T23:01:21Z",
+      "side": 1,
+      "message": "They are similar but not the same. BIGDIA (big diamond) searches 8 points in a diamond shape, while SQUARE searches  8 points in a square shape. \n\nI will probably do another search type soon - combining multiple search patterns at different scales - but it is not there yet.",
+      "parentUuid": "AAAAcn//7g0\u003d",
+      "revId": "5c15a0dbc596ee40c44df129606073307e15d028",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
