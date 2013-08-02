@@ -16,6 +16,12 @@
 
 #include "vp9/common/vp9_seg_common.h"
 
+struct loop_filter_info {
+  const uint8_t *mblim;
+  const uint8_t *lim;
+  const uint8_t *hev_thr;
+};
+
 static void lf_init_lut(loop_filter_info_n *lfi) {
   lfi->mode_lf_lut[DC_PRED] = 0;
   lfi->mode_lf_lut[D45_PRED] = 0;

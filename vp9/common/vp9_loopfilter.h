@@ -35,13 +35,6 @@ typedef struct {
   uint8_t mode_lf_lut[MB_MODE_COUNT];
 } loop_filter_info_n;
 
-struct loop_filter_info {
-  const uint8_t *mblim;
-  const uint8_t *lim;
-  const uint8_t *hev_thr;
-};
-
-
 /* assorted loopfilter functions which get used elsewhere */
 struct VP9Common;
 struct macroblockd;

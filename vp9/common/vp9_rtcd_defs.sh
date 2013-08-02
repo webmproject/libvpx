@@ -7,9 +7,7 @@ cat <<EOF
 #include "vpx/vpx_integer.h"
 #include "vp9/common/vp9_enums.h"
 
-struct loop_filter_info;
 struct macroblockd;
-struct loop_filter_info;
 
 /* Encoder forward decls */
 struct macroblock;
