@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAcn//7yI\u003d",
+        "filename": "vp9/encoder/x86/vp9_dct_sse2.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 3781,
+      "author": {
+        "id": 1001649
+      },
+      "writtenOn": "2013-08-02T21:20:56Z",
+      "side": 1,
+      "message": "Did you make sure it is actually faster? As I put in the above note, last I tested the unaligned instructions (even though all access are actually aligned) were faster. My guess is that it has something to do with the fact that may the unaligned instruction cannot generate exceptions and therefore may be better scheduled by the CPU.",
+      "revId": "3ec32988ddbb5344272437040f848ff26f9aa70b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
