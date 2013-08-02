@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAcn//8is\u003d",
+        "filename": "vp9/common/vp9_rtcd_defs.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2013-08-02T16:21:02Z",
+      "side": 1,
+      "message": "There are targets which require this to mean strictly 64bit:\n\n./libvpx.a(vp9_rtcd.c.o):(.text+0xb6e): undefined reference to `vp9_quantize_b_ssse3\u0027\n./libvpx.a(vp9_rtcd.c.o):(.text+0xb78): undefined reference to `vp9_quantize_b_32x32_ssse3\u0027",
+      "parentUuid": "AAAAcn//8j4\u003d",
+      "revId": "dc8c662b8d18f3259bb6a16dd946e1bb6826f447",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAcn//8j0\u003d",
         "filename": "vp9/vp9_common.mk",
         "patchSetId": 2
