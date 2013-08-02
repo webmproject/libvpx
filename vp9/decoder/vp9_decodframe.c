@@ -241,7 +241,7 @@ static void decode_modes_b(VP9D_COMP *pbi, int mi_row, int mi_col,
   // Has to be called after set_offsets
   mbmi = &xd->mode_info_context->mbmi;
 
-  if (mbmi->ref_frame[0] == INTRA_FRAME) {
+  if (!is_inter_block(mbmi)) {
     // Intra reconstruction
     decode_tokens(pbi, bsize, r);
     foreach_transformed_block(xd, bsize, decode_block_intra, xd);

@@ -95,7 +95,7 @@ static int decode_coefs(VP9_COMMON *cm, const MACROBLOCKD *xd,
   FRAME_CONTEXT *const fc = &cm->fc;
   FRAME_COUNTS *const counts = &cm->counts;
   ENTROPY_CONTEXT above_ec, left_ec;
-  const int ref = xd->mode_info_context->mbmi.ref_frame[0] != INTRA_FRAME;
+  const int ref = is_inter_block(&xd->mode_info_context->mbmi);
   int band, pt, c = 0;
   vp9_prob (*coef_probs)[PREV_COEF_CONTEXTS][UNCONSTRAINED_NODES] =
       fc->coef_probs[tx_size][type][ref];

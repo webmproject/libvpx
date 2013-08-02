@@ -50,7 +50,7 @@ static MB_PREDICTION_MODE left_block_mode(const MODE_INFO *cur_mb, int b) {
     /* On L edge, get from MB to left of us */
     --cur_mb;
 
-    if (cur_mb->mbmi.ref_frame[0] != INTRA_FRAME) {
+    if (is_inter_block(&cur_mb->mbmi)) {
       return DC_PRED;
     } else if (cur_mb->mbmi.sb_type < BLOCK_SIZE_SB8X8) {
       return ((cur_mb->bmi + 1 + b)->as_mode);
@@ -68,7 +68,7 @@ static MB_PREDICTION_MODE above_block_mode(const MODE_INFO *cur_mb,
     /* On top edge, get from MB above us */
     cur_mb -= mi_stride;
 
-    if (cur_mb->mbmi.ref_frame[0] != INTRA_FRAME) {
+    if (is_inter_block(&cur_mb->mbmi)) {
       return DC_PRED;
     } else if (cur_mb->mbmi.sb_type < BLOCK_SIZE_SB8X8) {
       return ((cur_mb->bmi + 2 + b)->as_mode);

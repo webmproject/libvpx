@@ -60,8 +60,8 @@ unsigned char vp9_get_pred_context_intra_inter(const MACROBLOCKD *xd) {
   const MB_MODE_INFO *const left_mbmi = &mi[-1].mbmi;
   const int left_in_image = xd->left_available && left_mbmi->mb_in_image;
   const int above_in_image = xd->up_available && above_mbmi->mb_in_image;
-  const int left_intra = left_mbmi->ref_frame[0] == INTRA_FRAME;
-  const int above_intra = above_mbmi->ref_frame[0] == INTRA_FRAME;
+  const int left_intra = !is_inter_block(left_mbmi);
+  const int above_intra = !is_inter_block(above_mbmi);
 
   // The mode info data structure has a one element border above and to the
   // left of the entries corresponding to real macroblocks.

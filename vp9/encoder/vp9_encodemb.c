@@ -145,8 +145,8 @@ static void optimize_b(MACROBLOCK *mb,
                        int plane, int block, BLOCK_SIZE_TYPE bsize,
                        ENTROPY_CONTEXT *a, ENTROPY_CONTEXT *l,
                        TX_SIZE tx_size) {
-  const int ref = mb->e_mbd.mode_info_context->mbmi.ref_frame[0] != INTRA_FRAME;
   MACROBLOCKD *const xd = &mb->e_mbd;
+  const int ref = is_inter_block(&xd->mode_info_context->mbmi);
   vp9_token_state tokens[1025][2];
   unsigned best_index[1025][2];
   const int16_t *coeff_ptr = BLOCK_OFFSET(mb->plane[plane].coeff,
