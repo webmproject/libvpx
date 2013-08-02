@@ -148,7 +148,7 @@ static void tokenize_b(int plane, int block, BLOCK_SIZE_TYPE bsize,
   const int16_t *scan, *nb;
   vp9_coeff_count *counts;
   vp9_coeff_probs_model *coef_probs;
-  const int ref = mbmi->ref_frame[0] != INTRA_FRAME;
+  const int ref = is_inter_block(mbmi);
   ENTROPY_CONTEXT above_ec, left_ec;
   uint8_t token_cache[1024];
   const uint8_t *band_translate;

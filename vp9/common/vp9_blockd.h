@@ -161,6 +161,11 @@ typedef struct {
   union b_mode_info bmi[4];
 } MODE_INFO;
 
+static int is_inter_block(const MB_MODE_INFO *mbmi) {
+  return mbmi->ref_frame[0] > INTRA_FRAME;
+}
+
+
 enum mv_precision {
   MV_PRECISION_Q3,
   MV_PRECISION_Q4
@@ -363,7 +368,7 @@ static INLINE TX_TYPE get_tx_type_4x4(PLANE_TYPE plane_type,
 
   if (plane_type != PLANE_TYPE_Y_WITH_DC ||
       xd->lossless ||
-      mbmi->ref_frame[0] != INTRA_FRAME)
+      is_inter_block(mbmi))
     return DCT_DCT;
 
   return mode2txfm_map[mbmi->sb_type < BLOCK_SIZE_SB8X8 ?
