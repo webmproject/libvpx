@@ -462,22 +462,24 @@ void vp9_adapt_mode_probs(VP9_COMMON *cm) {
                                      counts->mbskip[i]);
 }
 
-static void set_default_lf_deltas(MACROBLOCKD *xd) {
-  xd->lf.mode_ref_delta_enabled = 1;
-  xd->lf.mode_ref_delta_update = 1;
+static void set_default_lf_deltas(struct loopfilter *lf) {
+  lf->mode_ref_delta_enabled = 1;
+  lf->mode_ref_delta_update = 1;
 
-  xd->lf.ref_deltas[INTRA_FRAME] = 1;
-  xd->lf.ref_deltas[LAST_FRAME] = 0;
-  xd->lf.ref_deltas[GOLDEN_FRAME] = -1;
-  xd->lf.ref_deltas[ALTREF_FRAME] = -1;
+  lf->ref_deltas[INTRA_FRAME] = 1;
+  lf->ref_deltas[LAST_FRAME] = 0;
+  lf->ref_deltas[GOLDEN_FRAME] = -1;
+  lf->ref_deltas[ALTREF_FRAME] = -1;
 
-  xd->lf.mode_deltas[0] = 0;
-  xd->lf.mode_deltas[1] = 0;
+  lf->mode_deltas[0] = 0;
+  lf->mode_deltas[1] = 0;
 }
 
 void vp9_setup_past_independence(VP9_COMMON *cm, MACROBLOCKD *xd) {
   // Reset the segment feature data to the default stats:
   // Features disabled, 0, with delta coding (Default state).
+  struct loopfilter *const lf = &xd->lf;
+
   int i;
   vp9_clearall_segfeatures(&xd->seg);
   xd->seg.abs_delta = SEGMENT_DELTADATA;
@@ -485,12 +487,12 @@ void vp9_setup_past_independence(VP9_COMMON *cm, MACROBLOCKD *xd) {
     vpx_memset(cm->last_frame_seg_map, 0, (cm->mi_rows * cm->mi_cols));
 
   // Reset the mode ref deltas for loop filter
-  vp9_zero(xd->lf.last_ref_deltas);
-  vp9_zero(xd->lf.last_mode_deltas);
-  set_default_lf_deltas(xd);
+  vp9_zero(lf->last_ref_deltas);
+  vp9_zero(lf->last_mode_deltas);
+  set_default_lf_deltas(lf);
 
   // To force update of the sharpness
-  xd->lf.last_sharpness_level = -1;
+  lf->last_sharpness_level = -1;
 
   vp9_default_coef_probs(cm);
   vp9_init_mbmode_probs(cm);

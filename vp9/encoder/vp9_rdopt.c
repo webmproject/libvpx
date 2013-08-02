@@ -3189,6 +3189,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
   VP9_COMMON *cm = &cpi->common;
   MACROBLOCKD *xd = &x->e_mbd;
   MB_MODE_INFO *mbmi = &xd->mode_info_context->mbmi;
+  const struct segmentation *seg = &xd->seg;
   const BLOCK_SIZE_TYPE block_size = get_plane_block_size(bsize, &xd->plane[0]);
   MB_PREDICTION_MODE this_mode;
   MV_REFERENCE_FRAME ref_frame, second_ref_frame;
@@ -3354,7 +3355,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
     // Do not allow compound prediction if the segment level reference
     // frame feature is in use as in this case there can only be one reference.
     if ((second_ref_frame > INTRA_FRAME) &&
-         vp9_segfeature_active(&xd->seg, segment_id, SEG_LVL_REF_FRAME))
+         vp9_segfeature_active(seg, segment_id, SEG_LVL_REF_FRAME))
       continue;
 
     // Skip some checking based on small partitions' result.
@@ -3453,19 +3454,19 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
 
     // If the segment reference frame feature is enabled....
     // then do nothing if the current ref frame is not allowed..
-    if (vp9_segfeature_active(&xd->seg, segment_id, SEG_LVL_REF_FRAME) &&
-        vp9_get_segdata(&xd->seg, segment_id, SEG_LVL_REF_FRAME) !=
+    if (vp9_segfeature_active(seg, segment_id, SEG_LVL_REF_FRAME) &&
+        vp9_get_segdata(seg, segment_id, SEG_LVL_REF_FRAME) !=
             (int)ref_frame) {
       continue;
     // If the segment skip feature is enabled....
     // then do nothing if the current mode is not allowed..
-    } else if (vp9_segfeature_active(&xd->seg, segment_id, SEG_LVL_SKIP) &&
+    } else if (vp9_segfeature_active(seg, segment_id, SEG_LVL_SKIP) &&
                (this_mode != ZEROMV && ref_frame != INTRA_FRAME)) {
       continue;
     // Disable this drop out case if the ref frame
     // segment level feature is enabled for this segment. This is to
     // prevent the possibility that we end up unable to pick any mode.
-    } else if (!vp9_segfeature_active(&xd->seg, segment_id,
+    } else if (!vp9_segfeature_active(seg, segment_id,
                                       SEG_LVL_REF_FRAME)) {
       // Only consider ZEROMV/ALTREF_FRAME for alt ref frame,
       // unless ARNR filtering is enabled in which case we want
@@ -3760,7 +3761,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
       // necessary adjustment for rate. Ignore if skip is coded at
       // segment level as the cost wont have been added in.
       // Is Mb level skip allowed (i.e. not coded at segment level).
-      const int mb_skip_allowed = !vp9_segfeature_active(&xd->seg, segment_id,
+      const int mb_skip_allowed = !vp9_segfeature_active(seg, segment_id,
                                                          SEG_LVL_SKIP);
 
       if (skippable && bsize >= BLOCK_SIZE_SB8X8) {
