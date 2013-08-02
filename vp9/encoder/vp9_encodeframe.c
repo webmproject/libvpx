@@ -1584,13 +1584,16 @@ static void rd_pick_partition(VP9_COMP *cpi, TOKENEXTRA **tp, int mi_row,
     }
   }
 
+  // Use 4 subblocks' motion estimation results to speed up current
+  // partition's checking.
   x->fast_ms = 0;
   x->pred_mv.as_int = 0;
   x->subblock_ref = 0;
 
-  // Use 4 subblocks' motion estimation results to speed up current
-  // partition's checking.
-  if (cpi->sf.using_small_partition_info) {
+  if (cpi->sf.using_small_partition_info &&
+      (!cpi->sf.auto_min_max_partition_size ||
+      (bsize <= cpi->sf.max_partition_size &&
+      bsize >= cpi->sf.min_partition_size))) {
     // Only use 8x8 result for non HD videos.
     // int use_8x8 = (MIN(cpi->common.width, cpi->common.height) < 720) ? 1 : 0;
     int use_8x8 = 1;
