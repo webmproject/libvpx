@@ -110,12 +110,14 @@ static void set_entropy_context_b(int plane, int block, BLOCK_SIZE_TYPE bsize,
   ENTROPY_CONTEXT *A = xd->plane[plane].above_context + aoff;
   ENTROPY_CONTEXT *L = xd->plane[plane].left_context + loff;
   const int eob = xd->plane[plane].eobs[block];
+  const int tx_size_in_blocks = 1 << tx_size;
 
   if (xd->mb_to_right_edge < 0 || xd->mb_to_bottom_edge < 0) {
-    set_contexts_on_border(xd, bsize, plane, tx_size, eob, aoff, loff, A, L);
+    set_contexts_on_border(xd, bsize, plane, tx_size_in_blocks, eob, aoff, loff,
+                           A, L);
   } else {
-    vpx_memset(A, eob > 0, sizeof(ENTROPY_CONTEXT) * (1 << tx_size));
-    vpx_memset(L, eob > 0, sizeof(ENTROPY_CONTEXT) * (1 << tx_size));
+    vpx_memset(A, eob > 0, sizeof(ENTROPY_CONTEXT) * tx_size_in_blocks);
+    vpx_memset(L, eob > 0, sizeof(ENTROPY_CONTEXT) * tx_size_in_blocks);
   }
 }
 
@@ -125,7 +127,8 @@ static void tokenize_b(int plane, int block, BLOCK_SIZE_TYPE bsize,
   VP9_COMP *cpi = args->cpi;
   MACROBLOCKD *xd = args->xd;
   TOKENEXTRA **tp = args->tp;
-  TX_SIZE tx_size = ss_txfrm_size >> 1;
+  const TX_SIZE tx_size = ss_txfrm_size >> 1;
+  const int tx_size_in_blocks = 1 << tx_size;
   MB_MODE_INFO *mbmi = &xd->mode_info_context->mbmi;
   int pt; /* near block/prev token context index */
   int c = 0, rc = 0;
@@ -225,10 +228,11 @@ static void tokenize_b(int plane, int block, BLOCK_SIZE_TYPE bsize,
 
   *tp = t;
   if (xd->mb_to_right_edge < 0 || xd->mb_to_bottom_edge < 0) {
-    set_contexts_on_border(xd, bsize, plane, tx_size, c, aoff, loff, A, L);
+    set_contexts_on_border(xd, bsize, plane, tx_size_in_blocks, c, aoff, loff,
+                           A, L);
   } else {
-    vpx_memset(A, c > 0, sizeof(ENTROPY_CONTEXT) * (1 << tx_size));
-    vpx_memset(L, c > 0, sizeof(ENTROPY_CONTEXT) * (1 << tx_size));
+    vpx_memset(A, c > 0, sizeof(ENTROPY_CONTEXT) * tx_size_in_blocks);
+    vpx_memset(L, c > 0, sizeof(ENTROPY_CONTEXT) * tx_size_in_blocks);
   }
 }
 
