@@ -40,10 +40,7 @@ static void temporal_filter_predictors_mb_c(MACROBLOCKD *xd,
                                             int mv_col,
                                             uint8_t *pred) {
   const int which_mv = 0;
-  int_mv mv;
-
-  mv.as_mv.row = mv_row;
-  mv.as_mv.col = mv_col;
+  MV mv = { mv_row, mv_col };
 
   vp9_build_inter_predictor(y_mb_ptr, stride,
                             &pred[0], 16,
