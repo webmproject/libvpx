@@ -639,31 +639,31 @@ static PICK_MODE_CONTEXT *get_block_context(MACROBLOCK *x,
   MACROBLOCKD * const xd = &x->e_mbd;
 
   switch (bsize) {
-    case BLOCK_SIZE_SB64X64:
+    case BLOCK_64X64:
       return &x->sb64_context;
-    case BLOCK_SIZE_SB64X32:
+    case BLOCK_64X32:
       return &x->sb64x32_context[xd->sb_index];
-    case BLOCK_SIZE_SB32X64:
+    case BLOCK_32X64:
       return &x->sb32x64_context[xd->sb_index];
-    case BLOCK_SIZE_SB32X32:
+    case BLOCK_32X32:
       return &x->sb32_context[xd->sb_index];
-    case BLOCK_SIZE_SB32X16:
+    case BLOCK_32X16:
       return &x->sb32x16_context[xd->sb_index][xd->mb_index];
-    case BLOCK_SIZE_SB16X32:
+    case BLOCK_16X32:
       return &x->sb16x32_context[xd->sb_index][xd->mb_index];
-    case BLOCK_SIZE_MB16X16:
+    case BLOCK_16X16:
       return &x->mb_context[xd->sb_index][xd->mb_index];
-    case BLOCK_SIZE_SB16X8:
+    case BLOCK_16X8:
       return &x->sb16x8_context[xd->sb_index][xd->mb_index][xd->b_index];
-    case BLOCK_SIZE_SB8X16:
+    case BLOCK_8X16:
       return &x->sb8x16_context[xd->sb_index][xd->mb_index][xd->b_index];
-    case BLOCK_SIZE_SB8X8:
+    case BLOCK_8X8:
       return &x->sb8x8_context[xd->sb_index][xd->mb_index][xd->b_index];
-    case BLOCK_SIZE_SB8X4:
+    case BLOCK_8X4:
       return &x->sb8x4_context[xd->sb_index][xd->mb_index][xd->b_index];
-    case BLOCK_SIZE_SB4X8:
+    case BLOCK_4X8:
       return &x->sb4x8_context[xd->sb_index][xd->mb_index][xd->b_index];
-    case BLOCK_SIZE_AB4X4:
+    case BLOCK_4X4:
       return &x->ab4x4_context[xd->sb_index][xd->mb_index][xd->b_index];
     default:
       assert(0);
@@ -675,13 +675,13 @@ static BLOCK_SIZE_TYPE *get_sb_partitioning(MACROBLOCK *x,
                                             BLOCK_SIZE_TYPE bsize) {
   MACROBLOCKD *xd = &x->e_mbd;
   switch (bsize) {
-    case BLOCK_SIZE_SB64X64:
+    case BLOCK_64X64:
       return &x->sb64_partitioning;
-    case BLOCK_SIZE_SB32X32:
+    case BLOCK_32X32:
       return &x->sb_partitioning[xd->sb_index];
-    case BLOCK_SIZE_MB16X16:
+    case BLOCK_16X16:
       return &x->mb_partitioning[xd->sb_index][xd->mb_index];
-    case BLOCK_SIZE_SB8X8:
+    case BLOCK_8X8:
       return &x->b_partitioning[xd->sb_index][xd->mb_index][xd->b_index];
     default:
       assert(0);
@@ -926,28 +926,28 @@ typedef enum {
 static void tree_to_node(void *data, BLOCK_SIZE_TYPE block_size, vt_node *node) {
   int i;
   switch (block_size) {
-    case BLOCK_SIZE_SB64X64: {
+    case BLOCK_64X64: {
       v64x64 *vt = (v64x64 *) data;
       node->vt = &vt->vt;
       for (i = 0; i < 4; i++)
         node->split[i] = &vt->split[i].vt.none;
       break;
     }
-    case BLOCK_SIZE_SB32X32: {
+    case BLOCK_32X32: {
       v32x32 *vt = (v32x32 *) data;
       node->vt = &vt->vt;
       for (i = 0; i < 4; i++)
         node->split[i] = &vt->split[i].vt.none;
       break;
     }
-    case BLOCK_SIZE_MB16X16: {
+    case BLOCK_16X16: {
       v16x16 *vt = (v16x16 *) data;
       node->vt = &vt->vt;
       for (i = 0; i < 4; i++)
         node->split[i] = &vt->split[i].vt.none;
       break;
     }
-    case BLOCK_SIZE_SB8X8: {
+    case BLOCK_8X8: {
       v8x8 *vt = (v8x8 *) data;
       node->vt = &vt->vt;
       for (i = 0; i < 4; i++)
@@ -1585,14 +1585,14 @@ static void rd_pick_partition(VP9_COMP *cpi, TOKENEXTRA **tp, int mi_row,
     int use_8x8 = 1;
 
     if (cm->frame_type && !cpi->is_src_frame_alt_ref &&
-        ((use_8x8 && bsize == BLOCK_SIZE_MB16X16) ||
-        bsize == BLOCK_SIZE_SB32X32 || bsize == BLOCK_SIZE_SB64X64)) {
+        ((use_8x8 && bsize == BLOCK_16X16) ||
+        bsize == BLOCK_32X32 || bsize == BLOCK_64X64)) {
       int ref0 = 0, ref1 = 0, ref2 = 0, ref3 = 0;
       PICK_MODE_CONTEXT *block_context = NULL;
 
-      if (bsize == BLOCK_SIZE_MB16X16) {
+      if (bsize == BLOCK_16X16) {
         block_context = x->sb8x8_context[xd->sb_index][xd->mb_index];
-      } else if (bsize == BLOCK_SIZE_SB32X32) {
+      } else if (bsize == BLOCK_32X32) {
         block_context = x->mb_context[xd->sb_index];
       } else if (bsize == BLOCK_SIZE_SB64X64) {
         block_context = x->sb32_context;

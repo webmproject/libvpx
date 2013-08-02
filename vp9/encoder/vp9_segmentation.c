@@ -188,13 +188,13 @@ static void count_segs_sb(VP9_COMP *cpi, MODE_INFO *mi,
     int n;
 
     assert(bwl < bsl && bhl < bsl);
-    if (bsize == BLOCK_SIZE_SB64X64) {
-      subsize = BLOCK_SIZE_SB32X32;
-    } else if (bsize == BLOCK_SIZE_SB32X32) {
-      subsize = BLOCK_SIZE_MB16X16;
+    if (bsize == BLOCK_64X64) {
+      subsize = BLOCK_32X32;
+    } else if (bsize == BLOCK_32X32) {
+      subsize = BLOCK_16X16;
     } else {
-      assert(bsize == BLOCK_SIZE_MB16X16);
-      subsize = BLOCK_SIZE_SB8X8;
+      assert(bsize == BLOCK_16X16);
+      subsize = BLOCK_8X8;
     }
 
     for (n = 0; n < 4; n++) {

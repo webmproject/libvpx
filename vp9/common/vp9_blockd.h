@@ -283,22 +283,22 @@ typedef struct macroblockd {
 
 static INLINE unsigned char *get_sb_index(MACROBLOCKD *xd, BLOCK_SIZE_TYPE subsize) {
   switch (subsize) {
-    case BLOCK_SIZE_SB64X64:
-    case BLOCK_SIZE_SB64X32:
-    case BLOCK_SIZE_SB32X64:
-    case BLOCK_SIZE_SB32X32:
+    case BLOCK_64X64:
+    case BLOCK_64X32:
+    case BLOCK_32X64:
+    case BLOCK_32X32:
       return &xd->sb_index;
-    case BLOCK_SIZE_SB32X16:
-    case BLOCK_SIZE_SB16X32:
-    case BLOCK_SIZE_MB16X16:
+    case BLOCK_32X16:
+    case BLOCK_16X32:
+    case BLOCK_16X16:
       return &xd->mb_index;
-    case BLOCK_SIZE_SB16X8:
-    case BLOCK_SIZE_SB8X16:
-    case BLOCK_SIZE_SB8X8:
+    case BLOCK_16X8:
+    case BLOCK_8X16:
+    case BLOCK_8X8:
       return &xd->b_index;
-    case BLOCK_SIZE_SB8X4:
-    case BLOCK_SIZE_SB4X8:
-    case BLOCK_SIZE_AB4X4:
+    case BLOCK_8X4:
+    case BLOCK_4X8:
+    case BLOCK_4X4:
       return &xd->ab_index;
     default:
       assert(0);
