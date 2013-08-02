@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAcn//7hQ\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 81,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2013-08-02T22:52:31Z",
+      "side": 0,
+      "message": "This function was included for use in various subsequent patches to prune mode/partition searches. So this should not be removed.",
+      "revId": "5d86f3886d7d2edda7fd80faf6e735ea3a796ae6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
