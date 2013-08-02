@@ -269,7 +269,7 @@ static void decode_block(int plane, int block,
   const int mod = bw - ss_tx_size - pd->subsampling_x;
   const int aoff = (off & ((1 << mod) - 1)) << ss_tx_size;
   const int loff = (off >> mod) << ss_tx_size;
-
+  const int tx_size_in_blocks = 1 << ss_tx_size;
   ENTROPY_CONTEXT *A = pd->above_context + aoff;
   ENTROPY_CONTEXT *L = pd->left_context + loff;
   const int eob = decode_coefs(&arg->pbi->common, xd, arg->r, block,
@@ -278,10 +278,11 @@ static void decode_block(int plane, int block,
                                ss_tx_size, pd->dequant, A, L);
 
   if (xd->mb_to_right_edge < 0 || xd->mb_to_bottom_edge < 0) {
-    set_contexts_on_border(xd, bsize, plane, ss_tx_size, eob, aoff, loff, A, L);
+    set_contexts_on_border(xd, bsize, plane, tx_size_in_blocks, eob, aoff, loff,
+                           A, L);
   } else {
     int pt;
-    for (pt = 0; pt < (1 << ss_tx_size); pt++)
+    for (pt = 0; pt < tx_size_in_blocks; pt++)
       A[pt] = L[pt] = eob > 0;
   }
   pd->eobs[block] = eob;

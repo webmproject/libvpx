@@ -686,46 +686,39 @@ static void extend_for_intra(MACROBLOCKD* const xd, int plane, int block,
   }
 }
 static void set_contexts_on_border(MACROBLOCKD *xd, BLOCK_SIZE_TYPE bsize,
-                                   int plane, int ss_tx_size, int eob, int aoff,
-                                   int loff, ENTROPY_CONTEXT *A,
-                                   ENTROPY_CONTEXT *L) {
-  const int bw = b_width_log2(bsize), bh = b_height_log2(bsize);
-  const int sw = bw - xd->plane[plane].subsampling_x;
-  const int sh = bh - xd->plane[plane].subsampling_y;
-  int mi_blocks_wide = 1 << sw;
-  int mi_blocks_high = 1 << sh;
-  int tx_size_in_blocks = (1 << ss_tx_size);
+                                   int plane, int tx_size_in_blocks,
+                                   int eob, int aoff, int loff,
+                                   ENTROPY_CONTEXT *A, ENTROPY_CONTEXT *L) {
+  struct macroblockd_plane *pd = &xd->plane[plane];
   int above_contexts = tx_size_in_blocks;
   int left_contexts = tx_size_in_blocks;
+  int mi_blocks_wide = 1 << plane_block_width_log2by4(bsize, pd);
+  int mi_blocks_high = 1 << plane_block_height_log2by4(bsize, pd);
   int pt;
 
   // xd->mb_to_right_edge is in units of pixels * 8.  This converts
   // it to 4x4 block sizes.
-  if (xd->mb_to_right_edge < 0) {
-    mi_blocks_wide += (xd->mb_to_right_edge
-        >> (5 + xd->plane[plane].subsampling_x));
-  }
+  if (xd->mb_to_right_edge < 0)
+    mi_blocks_wide += (xd->mb_to_right_edge >> (5 + pd->subsampling_x));
 
   // this code attempts to avoid copying into contexts that are outside
   // our border.  Any blocks that do are set to 0...
   if (above_contexts + aoff > mi_blocks_wide)
     above_contexts = mi_blocks_wide - aoff;
 
-  if (xd->mb_to_bottom_edge < 0) {
-    mi_blocks_high += (xd->mb_to_bottom_edge
-        >> (5 + xd->plane[plane].subsampling_y));
-  }
-  if (left_contexts + loff > mi_blocks_high) {
+  if (xd->mb_to_bottom_edge < 0)
+    mi_blocks_high += (xd->mb_to_bottom_edge >> (5 + pd->subsampling_y));
+
+  if (left_contexts + loff > mi_blocks_high)
     left_contexts = mi_blocks_high - loff;
-  }
 
   for (pt = 0; pt < above_contexts; pt++)
     A[pt] = eob > 0;
-  for (pt = above_contexts; pt < (1 << ss_tx_size); pt++)
+  for (pt = above_contexts; pt < tx_size_in_blocks; pt++)
     A[pt] = 0;
   for (pt = 0; pt < left_contexts; pt++)
     L[pt] = eob > 0;
-  for (pt = left_contexts; pt < (1 << ss_tx_size); pt++)
+  for (pt = left_contexts; pt < tx_size_in_blocks; pt++)
     L[pt] = 0;
 }
 
