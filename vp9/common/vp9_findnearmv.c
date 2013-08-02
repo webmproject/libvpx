@@ -14,8 +14,9 @@
 #include "vp9/common/vp9_mvref_common.h"
 #include "vp9/common/vp9_sadmxn.h"
 
-static void lower_mv_precision(int_mv *mv, int usehp) {
-  if (!usehp || !vp9_use_mv_hp(&mv->as_mv)) {
+static void lower_mv_precision(int_mv *mv, int allow_hp) {
+  const int use_hp = allow_hp && vp9_use_mv_hp(&mv->as_mv);
+  if (!use_hp) {
     if (mv->as_mv.row & 1)
       mv->as_mv.row += (mv->as_mv.row > 0 ? -1 : 1);
     if (mv->as_mv.col & 1)

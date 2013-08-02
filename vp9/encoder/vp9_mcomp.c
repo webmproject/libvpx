@@ -269,7 +269,6 @@ int vp9_find_best_sub_pixel_step_iteratively(MACROBLOCK *x,
   int maxc, minc, maxr, minr;
   int y_stride;
   int offset;
-  int usehp = xd->allow_high_precision_mv;
 
   uint8_t *y = xd->plane[0].pre[0].buf +
                (bestmv->as_mv.row) * xd->plane[0].pre[0].stride +
@@ -370,13 +369,7 @@ int vp9_find_best_sub_pixel_step_iteratively(MACROBLOCK *x,
     tc = bc;
   }
 
-  if (xd->allow_high_precision_mv) {
-    usehp = vp9_use_mv_hp(&ref_mv->as_mv);
-  } else {
-    usehp = 0;
-  }
-
-  if (usehp) {
+  if (xd->allow_high_precision_mv && vp9_use_mv_hp(&ref_mv->as_mv)) {
     hstep >>= 1;
     while (--eighthiters) {
       CHECK_BETTER(left, tr, tc - hstep);
@@ -450,7 +443,6 @@ int vp9_find_best_sub_pixel_comp(MACROBLOCK *x,
   int maxc, minc, maxr, minr;
   int y_stride;
   int offset;
-  int usehp = xd->allow_high_precision_mv;
 
   DECLARE_ALIGNED_ARRAY(16, uint8_t, comp_pred, 64 * 64);
   uint8_t *y = xd->plane[0].pre[0].buf +
@@ -559,13 +551,7 @@ int vp9_find_best_sub_pixel_comp(MACROBLOCK *x,
     tc = bc;
   }
 
-  if (xd->allow_high_precision_mv) {
-    usehp = vp9_use_mv_hp(&ref_mv->as_mv);
-  } else {
-    usehp = 0;
-  }
-
-  if (usehp) {
+  if (xd->allow_high_precision_mv && vp9_use_mv_hp(&ref_mv->as_mv)) {
     hstep >>= 1;
     while (--eighthiters) {
       CHECK_BETTER(left, tr, tc - hstep);
@@ -636,7 +622,6 @@ int vp9_find_best_sub_pixel_step(MACROBLOCK *x,
   int thismse;
   int y_stride;
   MACROBLOCKD *xd = &x->e_mbd;
-  int usehp = xd->allow_high_precision_mv;
 
   uint8_t *y = xd->plane[0].pre[0].buf +
                (bestmv->as_mv.row) * xd->plane[0].pre[0].stride +
@@ -929,12 +914,7 @@ int vp9_find_best_sub_pixel_step(MACROBLOCK *x,
     *sse1 = sse;
   }
 
-  if (x->e_mbd.allow_high_precision_mv) {
-    usehp = vp9_use_mv_hp(&ref_mv->as_mv);
-  } else {
-    usehp = 0;
-  }
-  if (!usehp)
+  if (!(xd->allow_high_precision_mv && vp9_use_mv_hp(&ref_mv->as_mv)))
     return bestmse;
 
   /* Now do 1/8th pixel */

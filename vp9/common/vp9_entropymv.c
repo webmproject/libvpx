@@ -198,7 +198,7 @@ static unsigned int adapt_probs(unsigned int i,
 }
 
 
-void vp9_adapt_mv_probs(VP9_COMMON *cm, int usehp) {
+void vp9_adapt_mv_probs(VP9_COMMON *cm, int allow_hp) {
   int i, j;
 
   FRAME_CONTEXT *pre_fc = &cm->frame_contexts[cm->frame_context_idx];
@@ -207,7 +207,7 @@ void vp9_adapt_mv_probs(VP9_COMMON *cm, int usehp) {
   nmv_context *pre_ctx = &pre_fc->nmvc;
   nmv_context_counts *cts = &cm->counts.mv;
 
-  vp9_counts_process(cts, usehp);
+  vp9_counts_process(cts, allow_hp);
 
   adapt_probs(0, vp9_mv_joint_tree, ctx->joints, pre_ctx->joints, cts->joints);
 
@@ -229,7 +229,7 @@ void vp9_adapt_mv_probs(VP9_COMMON *cm, int usehp) {
     adapt_probs(0, vp9_mv_fp_tree, ctx->comps[i].fp, pre_ctx->comps[i].fp,
                 cts->comps[i].fp);
 
-    if (usehp) {
+    if (allow_hp) {
       ctx->comps[i].class0_hp = adapt_prob(pre_ctx->comps[i].class0_hp,
                                            cts->comps[i].class0_hp);
       ctx->comps[i].hp = adapt_prob(pre_ctx->comps[i].hp, cts->comps[i].hp);
