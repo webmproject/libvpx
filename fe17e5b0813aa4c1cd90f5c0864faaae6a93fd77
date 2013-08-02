@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAcn//7Yk\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 3529,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2013-08-02T23:17:09Z",
+      "side": 1,
+      "message": "this comment was meant for the next if branch, probably should be moved to line 3533.",
+      "revId": "fe17e5b0813aa4c1cd90f5c0864faaae6a93fd77",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcn//7Yg\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 3531,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2013-08-02T23:17:09Z",
+      "side": 1,
+      "message": "is the value 64 a preset threshold? should we make this a #define?\n\nof maybe consider to make this a function of the current block size?",
+      "revId": "fe17e5b0813aa4c1cd90f5c0864faaae6a93fd77",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
