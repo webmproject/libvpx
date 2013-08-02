@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAcn//8j4\u003d",
+        "filename": "vp9/common/vp9_rtcd_defs.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2013-08-02T15:58:47Z",
+      "side": 1,
+      "message": "change variable name.  no longer just x86_64",
+      "revId": "dc8c662b8d18f3259bb6a16dd946e1bb6826f447",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcn//8j0\u003d",
+        "filename": "vp9/vp9_common.mk",
+        "patchSetId": 2
+      },
+      "lineNbr": 86,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2013-08-02T15:58:47Z",
+      "side": 1,
+      "message": "maybe should be up a level",
+      "revId": "dc8c662b8d18f3259bb6a16dd946e1bb6826f447",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
