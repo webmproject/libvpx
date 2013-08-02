@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAcn//8TE\u003d",
+        "filename": "README",
+        "patchSetId": 1
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-08-02T18:14:32Z",
+      "side": 1,
+      "message": "I think the confusion is that this step is creating build/ at the same level as libvpx/, and its being confused with libvpx/build. The working directory here is the *parent* of libvpx, not libvpx itself. Maybe the paragraph of text above needs more detail?",
+      "parentUuid": "AAAAcn//8pI\u003d",
+      "revId": "652967e0f65887f1f1d04296530716ba0f48e198",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAcn//8pE\u003d",
         "filename": "README",
         "patchSetId": 1
