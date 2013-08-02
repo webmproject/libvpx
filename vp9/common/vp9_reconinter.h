@@ -39,7 +39,7 @@ void vp9_setup_scale_factors_for_frame(struct scale_factors *scale,
 
 void vp9_build_inter_predictor(const uint8_t *src, int src_stride,
                                uint8_t *dst, int dst_stride,
-                               const int_mv *mv_q3,
+                               const MV *mv_q3,
                                const struct scale_factors *scale,
                                int w, int h, int do_avg,
                                const struct subpix_fn_table *subpix,

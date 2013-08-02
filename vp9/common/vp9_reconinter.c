@@ -197,14 +197,14 @@ void vp9_setup_interp_filters(MACROBLOCKD *xd,
 
 void vp9_build_inter_predictor(const uint8_t *src, int src_stride,
                                uint8_t *dst, int dst_stride,
-                               const int_mv *src_mv,
+                               const MV *src_mv,
                                const struct scale_factors *scale,
                                int w, int h, int weight,
                                const struct subpix_fn_table *subpix,
                                enum mv_precision precision) {
   const MV32 mv = precision == MV_PRECISION_Q4
-                     ? scale->scale_mv_q4(&src_mv->as_mv, scale)
-                     : scale->scale_mv_q3_to_q4(&src_mv->as_mv, scale);
+                     ? scale->scale_mv_q4(src_mv, scale)
+                     : scale->scale_mv_q3_to_q4(src_mv, scale);
   const int subpel_x = mv.col & 15;
   const int subpel_y = mv.row & 15;
 
@@ -336,7 +336,7 @@ static void build_inter_predictors(int plane, int block,
 
     vp9_build_inter_predictor(pre, pre_stride,
                               dst, arg->dst_stride[plane],
-                              &clamped_mv, &xd->scale_factor[which_mv],
+                              &clamped_mv.as_mv, &xd->scale_factor[which_mv],
                               4 << pred_w, 4 << pred_h, which_mv,
                               &xd->subpix, MV_PRECISION_Q4);
   }
