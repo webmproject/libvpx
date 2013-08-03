@@ -364,8 +364,8 @@ static void update_state(VP9_COMP *cpi, PICK_MODE_CONTEXT *ctx,
   // (i.e. after the output_enabled)
   if (bsize < BLOCK_SIZE_SB32X32) {
     if (bsize < BLOCK_SIZE_MB16X16)
-      ctx->txfm_rd_diff[ALLOW_16X16] = ctx->txfm_rd_diff[ALLOW_8X8];
-    ctx->txfm_rd_diff[ALLOW_32X32] = ctx->txfm_rd_diff[ALLOW_16X16];
+      ctx->tx_rd_diff[ALLOW_16X16] = ctx->tx_rd_diff[ALLOW_8X8];
+    ctx->tx_rd_diff[ALLOW_32X32] = ctx->tx_rd_diff[ALLOW_16X16];
   }
 
   if (is_inter_block(mbmi) && mbmi->sb_type < BLOCK_SIZE_SB8X8) {
@@ -380,7 +380,7 @@ static void update_state(VP9_COMP *cpi, PICK_MODE_CONTEXT *ctx,
 
   if (!vp9_segfeature_active(&xd->seg, mbmi->segment_id, SEG_LVL_SKIP)) {
     for (i = 0; i < TX_MODES; i++)
-      cpi->rd_tx_select_diff[i] += ctx->txfm_rd_diff[i];
+      cpi->rd_tx_select_diff[i] += ctx->tx_rd_diff[i];
   }
 
   if (cpi->common.frame_type == KEY_FRAME) {
