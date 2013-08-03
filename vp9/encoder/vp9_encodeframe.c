@@ -55,6 +55,9 @@ static void adjust_act_zbin(VP9_COMP *cpi, MACROBLOCK *x);
  */
 #define VP9_ACTIVITY_AVG_MIN (64)
 
+/* Motion vector component magnitude threshold for defining fast motion. */
+#define FAST_MOTION_MV_THRESH (24)
+
 /* This is used as a reference when computing the source variance for the
  *  purposes of activity masking.
  * Eventually this should be replaced by custom no-reference routines,
@@ -1505,6 +1508,102 @@ static void rd_auto_partition_range(VP9_COMP *cpi,
   }
 }
 
+static void compute_fast_motion_search_level(VP9_COMP *const cpi,
+                                             const BLOCK_SIZE_TYPE bsize) {
+  VP9_COMMON *const cm = &cpi->common;
+  MACROBLOCK *const x = &cpi->mb;
+  MACROBLOCKD *const xd = &x->e_mbd;
+
+  // Only use 8x8 result for non HD videos.
+  // int use_8x8 = (MIN(cpi->common.width, cpi->common.height) < 720) ? 1 : 0;
+  int use_8x8 = 1;
+
+  if (cm->frame_type && !cpi->is_src_frame_alt_ref &&
+      ((use_8x8 && bsize == BLOCK_16X16) ||
+      bsize == BLOCK_32X32 || bsize == BLOCK_64X64)) {
+    int ref0 = 0, ref1 = 0, ref2 = 0, ref3 = 0;
+    PICK_MODE_CONTEXT *block_context = NULL;
+
+    if (bsize == BLOCK_16X16) {
+      block_context = x->sb8x8_context[xd->sb_index][xd->mb_index];
+    } else if (bsize == BLOCK_32X32) {
+      block_context = x->mb_context[xd->sb_index];
+    } else if (bsize == BLOCK_64X64) {
+      block_context = x->sb32_context;
+    }
+
+    if (block_context) {
+      ref0 = block_context[0].mic.mbmi.ref_frame[0];
+      ref1 = block_context[1].mic.mbmi.ref_frame[0];
+      ref2 = block_context[2].mic.mbmi.ref_frame[0];
+      ref3 = block_context[3].mic.mbmi.ref_frame[0];
+    }
+
+    // Currently, only consider 4 inter reference frames.
+    if (ref0 && ref1 && ref2 && ref3) {
+      int d01, d23, d02, d13;
+
+      // Motion vectors for the four subblocks.
+      int16_t mvr0 = block_context[0].mic.mbmi.mv[0].as_mv.row;
+      int16_t mvc0 = block_context[0].mic.mbmi.mv[0].as_mv.col;
+      int16_t mvr1 = block_context[1].mic.mbmi.mv[0].as_mv.row;
+      int16_t mvc1 = block_context[1].mic.mbmi.mv[0].as_mv.col;
+      int16_t mvr2 = block_context[2].mic.mbmi.mv[0].as_mv.row;
+      int16_t mvc2 = block_context[2].mic.mbmi.mv[0].as_mv.col;
+      int16_t mvr3 = block_context[3].mic.mbmi.mv[0].as_mv.row;
+      int16_t mvc3 = block_context[3].mic.mbmi.mv[0].as_mv.col;
+
+      // Adjust sign if ref is alt_ref.
+      if (cm->ref_frame_sign_bias[ref0]) {
+        mvr0 *= -1;
+        mvc0 *= -1;
+      }
+
+      if (cm->ref_frame_sign_bias[ref1]) {
+        mvr1 *= -1;
+        mvc1 *= -1;
+      }
+
+      if (cm->ref_frame_sign_bias[ref2]) {
+        mvr2 *= -1;
+        mvc2 *= -1;
+      }
+
+      if (cm->ref_frame_sign_bias[ref3]) {
+        mvr3 *= -1;
+        mvc3 *= -1;
+      }
+
+      // Calculate mv distances.
+      d01 = MAX(abs(mvr0 - mvr1), abs(mvc0 - mvc1));
+      d23 = MAX(abs(mvr2 - mvr3), abs(mvc2 - mvc3));
+      d02 = MAX(abs(mvr0 - mvr2), abs(mvc0 - mvc2));
+      d13 = MAX(abs(mvr1 - mvr3), abs(mvc1 - mvc3));
+
+      if (d01 < FAST_MOTION_MV_THRESH && d23 < FAST_MOTION_MV_THRESH &&
+          d02 < FAST_MOTION_MV_THRESH && d13 < FAST_MOTION_MV_THRESH) {
+        // Set fast motion search level.
+        x->fast_ms = 1;
+
+        // Calculate prediction MV.
+        x->pred_mv.as_mv.row = (mvr0 + mvr1 + mvr2 + mvr3) >> 2;
+        x->pred_mv.as_mv.col = (mvc0 + mvc1 + mvc2 + mvc3) >> 2;
+
+        if (ref0 == ref1 && ref1 == ref2 && ref2 == ref3 &&
+            d01 < 2 && d23 < 2 && d02 < 2 && d13 < 2) {
+          // Set fast motion search level.
+          x->fast_ms = 2;
+
+          if (!d01 && !d23 && !d02 && !d13) {
+            x->fast_ms = 3;
+            x->subblock_ref = ref0;
+          }
+        }
+      }
+    }
+  }
+}
+
 // TODO(jingning,jimbankoski,rbultje): properly skip partition types that are
 // unlikely to be selected depending on previous rate-distortion optimization
 // results, for encoding speed-up.
@@ -1587,99 +1686,10 @@ static void rd_pick_partition(VP9_COMP *cpi, TOKENEXTRA **tp, int mi_row,
   x->pred_mv.as_int = 0;
   x->subblock_ref = 0;
 
-  if (cpi->sf.using_small_partition_info &&
-      (!cpi->sf.auto_min_max_partition_size ||
-      (bsize <= cpi->sf.max_partition_size &&
-      bsize >= cpi->sf.min_partition_size))) {
-    // Only use 8x8 result for non HD videos.
-    // int use_8x8 = (MIN(cpi->common.width, cpi->common.height) < 720) ? 1 : 0;
-    int use_8x8 = 1;
-
-    if (cm->frame_type && !cpi->is_src_frame_alt_ref &&
-        ((use_8x8 && bsize == BLOCK_16X16) ||
-        bsize == BLOCK_32X32 || bsize == BLOCK_64X64)) {
-      int ref0 = 0, ref1 = 0, ref2 = 0, ref3 = 0;
-      PICK_MODE_CONTEXT *block_context = NULL;
-
-      if (bsize == BLOCK_16X16) {
-        block_context = x->sb8x8_context[xd->sb_index][xd->mb_index];
-      } else if (bsize == BLOCK_32X32) {
-        block_context = x->mb_context[xd->sb_index];
-      } else if (bsize == BLOCK_64X64) {
-        block_context = x->sb32_context;
-      }
-
-      if (block_context) {
-        ref0 = block_context[0].mic.mbmi.ref_frame[0];
-        ref1 = block_context[1].mic.mbmi.ref_frame[0];
-        ref2 = block_context[2].mic.mbmi.ref_frame[0];
-        ref3 = block_context[3].mic.mbmi.ref_frame[0];
-      }
-
-      // Currently, only consider 4 inter ref frames.
-      if (ref0 && ref1 && ref2 && ref3) {
-        int16_t mvr0 = 0, mvc0 = 0, mvr1 = 0, mvc1 = 0, mvr2 = 0, mvc2 = 0,
-            mvr3 = 0, mvc3 = 0;
-        int d01, d23, d02, d13;  // motion vector distance between 2 blocks
-
-        // Get each subblock's motion vectors.
-        mvr0 = block_context[0].mic.mbmi.mv[0].as_mv.row;
-        mvc0 = block_context[0].mic.mbmi.mv[0].as_mv.col;
-        mvr1 = block_context[1].mic.mbmi.mv[0].as_mv.row;
-        mvc1 = block_context[1].mic.mbmi.mv[0].as_mv.col;
-        mvr2 = block_context[2].mic.mbmi.mv[0].as_mv.row;
-        mvc2 = block_context[2].mic.mbmi.mv[0].as_mv.col;
-        mvr3 = block_context[3].mic.mbmi.mv[0].as_mv.row;
-        mvc3 = block_context[3].mic.mbmi.mv[0].as_mv.col;
-
-        // Adjust sign if ref is alt_ref
-        if (cm->ref_frame_sign_bias[ref0]) {
-          mvr0 *= -1;
-          mvc0 *= -1;
-        }
-
-        if (cm->ref_frame_sign_bias[ref1]) {
-          mvr1 *= -1;
-          mvc1 *= -1;
-        }
-
-        if (cm->ref_frame_sign_bias[ref2]) {
-          mvr2 *= -1;
-          mvc2 *= -1;
-        }
-
-        if (cm->ref_frame_sign_bias[ref3]) {
-          mvr3 *= -1;
-          mvc3 *= -1;
-        }
-
-        // Calculate mv distances.
-        d01 = MAX(abs(mvr0 - mvr1), abs(mvc0 - mvc1));
-        d23 = MAX(abs(mvr2 - mvr3), abs(mvc2 - mvc3));
-        d02 = MAX(abs(mvr0 - mvr2), abs(mvc0 - mvc2));
-        d13 = MAX(abs(mvr1 - mvr3), abs(mvc1 - mvc3));
-
-        if (d01 < 24 && d23 < 24 && d02 < 24 && d13 < 24) {
-          // Set fast motion search level.
-          x->fast_ms = 1;
-
-          // Calculate prediction MV
-          x->pred_mv.as_mv.row = (mvr0 + mvr1 + mvr2 + mvr3) >> 2;
-          x->pred_mv.as_mv.col = (mvc0 + mvc1 + mvc2 + mvc3) >> 2;
-
-          if (ref0 == ref1 && ref1 == ref2 && ref2 == ref3 &&
-              d01 < 2 && d23 < 2 && d02 < 2 && d13 < 2) {
-            // Set fast motion search level.
-            x->fast_ms = 2;
-
-            if (!d01 && !d23 && !d02 && !d13) {
-              x->fast_ms = 3;
-              x->subblock_ref = ref0;
-            }
-          }
-        }
-      }
-    }
+  // Use 4 subblocks' motion estimation results to speed up current
+  // partition's checking.
+  if (cpi->sf.using_small_partition_info) {
+    compute_fast_motion_search_level(cpi, bsize);
   }
 
   if (!cpi->sf.auto_min_max_partition_size ||
