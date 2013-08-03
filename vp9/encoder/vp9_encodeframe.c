@@ -74,13 +74,32 @@ static const uint8_t VP9_VAR_OFFS[64] = {
   128, 128, 128, 128, 128, 128, 128, 128
 };
 
-static unsigned int get_sb_variance(VP9_COMP *cpi, MACROBLOCK *x,
-                                    BLOCK_SIZE_TYPE bs) {
+static unsigned int get_sby_perpixel_variance(VP9_COMP *cpi, MACROBLOCK *x,
+                                              BLOCK_SIZE_TYPE bs) {
   unsigned int var, sse;
   var = cpi->fn_ptr[bs].vf(x->plane[0].src.buf,
                            x->plane[0].src.stride,
                            VP9_VAR_OFFS, 0, &sse);
-  return var >> num_pels_log2_lookup[bs];
+  return (var + (1 << (num_pels_log2_lookup[bs] - 1))) >>
+      num_pels_log2_lookup[bs];
+}
+
+static unsigned int get_sbuv_perpixel_variance(VP9_COMP *cpi, MACROBLOCK *x,
+                                               BLOCK_SIZE_TYPE bs) {
+  unsigned int varu, varv, sse;
+  BLOCK_SIZE_TYPE uvbs = ss_size_lookup[bs]
+                                       [x->e_mbd.plane[1].subsampling_x]
+                                       [x->e_mbd.plane[1].subsampling_y];
+  if (uvbs == BLOCK_INVALID)
+    return 0;
+  varu = cpi->fn_ptr[uvbs].vf(x->plane[1].src.buf,
+                              x->plane[1].src.stride,
+                              VP9_VAR_OFFS, 0, &sse);
+  varv = cpi->fn_ptr[uvbs].vf(x->plane[2].src.buf,
+                              x->plane[2].src.stride,
+                              VP9_VAR_OFFS, 0, &sse);
+  return (varu + varv + (1 << num_pels_log2_lookup[uvbs])) >>
+      (1 + num_pels_log2_lookup[uvbs]);
 }
 
 // Original activity measure from Tim T's code.
@@ -574,7 +593,7 @@ static void pick_sb_modes(VP9_COMP *cpi, int mi_row, int mi_col,
   set_offsets(cpi, mi_row, mi_col, bsize);
   xd->mode_info_context->mbmi.sb_type = bsize;
 
-  x->source_variance = get_sb_variance(cpi, x, bsize);
+  x->source_variance = get_sby_perpixel_variance(cpi, x, bsize);
   if (cpi->oxcf.tuning == VP8_TUNE_SSIM)
     vp9_activity_masking(cpi, x);
 
@@ -1614,10 +1633,26 @@ static void rd_pick_partition(VP9_COMP *cpi, TOKENEXTRA **tp, int mi_row,
   int this_rate, sum_rate = 0, best_rate = INT_MAX;
   int64_t this_dist, sum_dist = 0, best_dist = INT_MAX;
   int64_t sum_rd = 0;
-
+  int do_split = 1, do_rect = 1;
   // Override min_partition_size for edge blocks
   int force_horz_split = mi_row + (ms >> 1) >= cm->mi_rows;
   int force_vert_split = mi_col + (ms >> 1) >= cm->mi_cols;
+  const int partition_none_allowed = (bsize <= cpi->sf.max_partition_size ||
+                                      !cpi->sf.auto_min_max_partition_size) &&
+                                     !force_horz_split &&
+                                     !force_vert_split;
+  const int partition_horz_allowed = (bsize <= cpi->sf.max_partition_size ||
+                                      !cpi->sf.auto_min_max_partition_size) &&
+                                     !cpi->sf.use_square_partition_only &&
+                                     bsize >= BLOCK_8X8 &&
+                                     !force_vert_split;
+  const int partition_vert_allowed = (bsize <= cpi->sf.max_partition_size ||
+                                      !cpi->sf.auto_min_max_partition_size) &&
+                                     !cpi->sf.use_square_partition_only &&
+                                     bsize >= BLOCK_8X8 &&
+                                     !force_horz_split;
+  int partition_split_done = 0;
+
 
   (void) *tp_orig;
 
@@ -1634,18 +1669,28 @@ static void rd_pick_partition(VP9_COMP *cpi, TOKENEXTRA **tp, int mi_row,
 
   save_context(cpi, mi_row, mi_col, a, l, sa, sl, bsize);
 
+  if (cpi->sf.disable_split_var_thresh && partition_none_allowed) {
+    unsigned int source_variancey;
+    vp9_setup_src_planes(x, cpi->Source, mi_row, mi_col);
+    source_variancey = get_sby_perpixel_variance(cpi, x, bsize);
+    if (source_variancey < cpi->sf.disable_split_var_thresh)
+      do_split = 0;
+    else if (source_variancey < cpi->sf.disable_split_var_thresh / 2)
+      do_rect = 0;
+  }
   // PARTITION_SPLIT
-  if (!cpi->sf.auto_min_max_partition_size ||
-      bsize > cpi->sf.min_partition_size) {
+  if (do_split &&
+      (!cpi->sf.auto_min_max_partition_size ||
+       bsize >= cpi->sf.min_partition_size)) {
     if (bsize > BLOCK_8X8) {
       subsize = get_subsize(bsize, PARTITION_SPLIT);
-
       for (i = 0; i < 4 && sum_rd < best_rd; ++i) {
         int x_idx = (i & 1) * (ms >> 1);
         int y_idx = (i >> 1) * (ms >> 1);
 
-        if ((mi_row + y_idx >= cm->mi_rows) || (mi_col + x_idx >= cm->mi_cols))
-          continue;
+          if ((mi_row + y_idx >= cm->mi_rows) ||
+              (mi_col + x_idx >= cm->mi_cols))
+            continue;
 
         *(get_sb_index(xd, subsize)) = i;
 
@@ -1672,6 +1717,7 @@ static void rd_pick_partition(VP9_COMP *cpi, TOKENEXTRA **tp, int mi_row,
           *(get_sb_partitioning(x, bsize)) = subsize;
         }
       }
+      partition_split_done = 1;
       restore_context(cpi, mi_row, mi_col, a, l, sa, sl, bsize);
     }
   }
@@ -1684,7 +1730,8 @@ static void rd_pick_partition(VP9_COMP *cpi, TOKENEXTRA **tp, int mi_row,
 
   // Use 4 subblocks' motion estimation results to speed up current
   // partition's checking.
-  if (cpi->sf.using_small_partition_info) {
+  if (partition_split_done &&
+      cpi->sf.using_small_partition_info) {
     compute_fast_motion_search_level(cpi, bsize);
   }
 
@@ -1693,7 +1740,7 @@ static void rd_pick_partition(VP9_COMP *cpi, TOKENEXTRA **tp, int mi_row,
     int larger_is_better = 0;
 
     // PARTITION_NONE
-    if (!force_horz_split && !force_vert_split) {
+    if (partition_none_allowed) {
       pick_sb_modes(cpi, mi_row, mi_col, &this_rate, &this_dist, bsize,
                     get_block_context(x, bsize), best_rd);
       if (this_rate != INT_MAX) {
@@ -1714,7 +1761,7 @@ static void rd_pick_partition(VP9_COMP *cpi, TOKENEXTRA **tp, int mi_row,
       }
     }
 
-    if (bsize == BLOCK_8X8) {
+    if (bsize == BLOCK_8X8 && do_split) {
       sum_rate = 0; sum_dist = 0; sum_rd = 0;
 
       subsize = get_subsize(bsize, PARTITION_SPLIT);
@@ -1754,10 +1801,11 @@ static void rd_pick_partition(VP9_COMP *cpi, TOKENEXTRA **tp, int mi_row,
       restore_context(cpi, mi_row, mi_col, a, l, sa, sl, bsize);
     }
 
-    if (!cpi->sf.use_square_partition_only &&
+    if (do_rect &&
+        !cpi->sf.use_square_partition_only &&
         (!cpi->sf.less_rectangular_check || !larger_is_better)) {
       // PARTITION_HORZ
-      if (bsize >= BLOCK_8X8 && mi_col + (ms >> 1) < cm->mi_cols) {
+      if (partition_horz_allowed) {
         subsize = get_subsize(bsize, PARTITION_HORZ);
         if (!cpi->sf.auto_min_max_partition_size || force_horz_split ||
             subsize >= cpi->sf.min_partition_size) {
@@ -1799,7 +1847,7 @@ static void rd_pick_partition(VP9_COMP *cpi, TOKENEXTRA **tp, int mi_row,
       }
 
       // PARTITION_VERT
-      if (bsize >= BLOCK_8X8 && mi_row + (ms >> 1) < cm->mi_rows) {
+      if (partition_vert_allowed) {
         subsize = get_subsize(bsize, PARTITION_VERT);
         if (!cpi->sf.auto_min_max_partition_size || force_vert_split ||
             subsize >= cpi->sf.min_partition_size) {

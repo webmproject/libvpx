@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2010 The WebM project authors. All Rights Reserved.
+ * Copyright (c) 2010 The WebM project authors. All Rights Reserved.
  *
  *  Use of this source code is governed by a BSD-style license
  *  that can be found in the LICENSE file in the root of the source
@@ -736,6 +736,7 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
   sf->last_partitioning_redo_frequency = 4;
   sf->disable_splitmv = 0;
   sf->mode_search_skip_flags = 0;
+  sf->disable_split_var_thresh = 0;
   sf->last_chroma_intra_mode = TM_PRED;
   sf->use_rd_breakout = 0;
   sf->skip_encode_sb = 0;
@@ -793,6 +794,7 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
 
         sf->auto_min_max_partition_size = 1;
         sf->auto_min_max_partition_interval = 1;
+        sf->disable_split_var_thresh = 32;
       }
       if (speed == 2) {
         sf->adjust_thresholds_by_speed = 1;
@@ -826,6 +828,7 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
         sf->search_method = SQUARE;
         sf->subpel_iters_per_step = 1;
         sf->use_fast_lpf_pick = 1;
+        sf->disable_split_var_thresh = 64;
       }
       if (speed == 3) {
         sf->comp_inter_joint_search_thresh = BLOCK_SIZES;
@@ -848,6 +851,7 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
         sf->auto_mv_step_size = 1;
         sf->search_method = BIGDIA;
         sf->subpel_iters_per_step = 1;
+        sf->disable_split_var_thresh = 64;
       }
       if (speed == 4) {
         sf->comp_inter_joint_search_thresh = BLOCK_SIZES;
@@ -874,6 +878,7 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
         sf->disable_splitmv = 1;
         sf->search_method = HEX;
         sf->subpel_iters_per_step = 1;
+        sf->disable_split_var_thresh = 64;
       }
       /*
       if (speed == 2) {

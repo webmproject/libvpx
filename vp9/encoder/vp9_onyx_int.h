@@ -284,6 +284,8 @@ typedef struct {
   // The heuristics selected are based on  flags
   // defined in the MODE_SEARCH_SKIP_HEURISTICS enum
   unsigned int mode_search_skip_flags;
+  // A source variance threshold below which the split mode is disabled
+  unsigned int disable_split_var_thresh;
   MB_PREDICTION_MODE last_chroma_intra_mode;
   int use_rd_breakout;
   int use_uv_intra_rd_estimate;
