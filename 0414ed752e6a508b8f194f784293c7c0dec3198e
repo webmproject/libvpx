@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAcn//65s\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 1554,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2013-08-03T05:42:57Z",
+      "side": 1,
+      "message": "Should this \"set_partition_..\" and the \"restore_context_\" called in pair? i.e. shall we move restore_context to be inside this if..\n\nI was also wondering about the few similar occurrences below",
+      "revId": "0414ed752e6a508b8f194f784293c7c0dec3198e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
