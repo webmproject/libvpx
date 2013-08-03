@@ -946,6 +946,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAcn//7Do\u003d",
+        "filename": "vp9/common/vp9_mvref_common.c",
+        "patchSetId": 23
+      },
+      "lineNbr": 290,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-08-03T00:55:58Z",
+      "side": 1,
+      "message": "I find this preferable in distinguishing between booleans and pointer types, especially in these gigantic functions.",
+      "parentUuid": "AAAAcn//7FM\u003d",
+      "revId": "78201159bb9419a67ffe596cb336c00b2d7078a0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAcn//7NY\u003d",
         "filename": "vp9/common/vp9_mvref_common.c",
         "patchSetId": 23
@@ -993,6 +1011,24 @@
       "side": 1,
       "message": "Capital case? It seems all another are lower-case ones...",
       "parentUuid": "AAAAcn//7NY\u003d",
+      "revId": "78201159bb9419a67ffe596cb336c00b2d7078a0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcn//7Dg\u003d",
+        "filename": "vp9/common/vp9_mvref_common.c",
+        "patchSetId": 23
+      },
+      "lineNbr": 294,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-08-03T00:55:58Z",
+      "side": 1,
+      "message": "This is webp style; we can shift one way or another for consistency",
+      "parentUuid": "AAAAcn//7FI\u003d",
       "revId": "78201159bb9419a67ffe596cb336c00b2d7078a0",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
