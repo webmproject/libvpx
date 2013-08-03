@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAcn//7LU\u003d",
+        "filename": "vp9/common/vp9_mvref_common.c",
+        "patchSetId": 23
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2013-08-03T00:45:19Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAcn//7Us\u003d",
+      "revId": "78201159bb9419a67ffe596cb336c00b2d7078a0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAcn//7UI\u003d",
         "filename": "vp9/common/vp9_mvref_common.c",
         "patchSetId": 23
@@ -30,6 +48,24 @@
       "writtenOn": "2013-08-03T00:04:12Z",
       "side": 1,
       "message": "newline and why not group all static tables at the top; a good order would be typedefs / static tables / static functions / public functions",
+      "revId": "78201159bb9419a67ffe596cb336c00b2d7078a0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcn//7LE\u003d",
+        "filename": "vp9/common/vp9_mvref_common.c",
+        "patchSetId": 23
+      },
+      "lineNbr": 74,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2013-08-03T00:45:19Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAcn//7UI\u003d",
       "revId": "78201159bb9419a67ffe596cb336c00b2d7078a0",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAcn//7K0\u003d",
+        "filename": "vp9/common/vp9_mvref_common.c",
+        "patchSetId": 23
+      },
+      "lineNbr": 88,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2013-08-03T00:45:19Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAcn//7T8\u003d",
+      "revId": "78201159bb9419a67ffe596cb336c00b2d7078a0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAcn//7T0\u003d",
         "filename": "vp9/common/vp9_mvref_common.c",
         "patchSetId": 23
@@ -64,6 +118,24 @@
       "writtenOn": "2013-08-03T00:04:12Z",
       "side": 1,
       "message": "static const int\n2 space indent",
+      "revId": "78201159bb9419a67ffe596cb336c00b2d7078a0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcn//7K4\u003d",
+        "filename": "vp9/common/vp9_mvref_common.c",
+        "patchSetId": 23
+      },
+      "lineNbr": 90,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2013-08-03T00:45:19Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAcn//7T0\u003d",
       "revId": "78201159bb9419a67ffe596cb336c00b2d7078a0",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAcn//7Ko\u003d",
+        "filename": "vp9/common/vp9_mvref_common.c",
+        "patchSetId": 23
+      },
+      "lineNbr": 112,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2013-08-03T00:45:19Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAcn//7Tg\u003d",
+      "revId": "78201159bb9419a67ffe596cb336c00b2d7078a0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAcn//7Tk\u003d",
         "filename": "vp9/common/vp9_mvref_common.c",
         "patchSetId": 23
@@ -98,6 +188,24 @@
       "writtenOn": "2013-08-03T00:04:12Z",
       "side": 1,
       "message": "depending on the use wrapping macros like this in do/while(0) reduces side effects",
+      "revId": "78201159bb9419a67ffe596cb336c00b2d7078a0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcn//7KY\u003d",
+        "filename": "vp9/common/vp9_mvref_common.c",
+        "patchSetId": 23
+      },
+      "lineNbr": 115,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2013-08-03T00:45:19Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAcn//7Tk\u003d",
       "revId": "78201159bb9419a67ffe596cb336c00b2d7078a0",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -121,6 +229,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAcn//7KU\u003d",
+        "filename": "vp9/common/vp9_mvref_common.c",
+        "patchSetId": 23
+      },
+      "lineNbr": 116,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2013-08-03T00:45:19Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAcn//7Pk\u003d",
+      "revId": "78201159bb9419a67ffe596cb336c00b2d7078a0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAcn//7Ts\u003d",
         "filename": "vp9/common/vp9_mvref_common.c",
         "patchSetId": 23
@@ -132,6 +258,24 @@
       "writtenOn": "2013-08-03T00:04:12Z",
       "side": 1,
       "message": "2 space indent",
+      "revId": "78201159bb9419a67ffe596cb336c00b2d7078a0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcn//7Is\u003d",
+        "filename": "vp9/common/vp9_mvref_common.c",
+        "patchSetId": 23
+      },
+      "lineNbr": 125,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2013-08-03T00:45:19Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAcn//7Ts\u003d",
       "revId": "78201159bb9419a67ffe596cb336c00b2d7078a0",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -155,6 +299,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAcn//7Ik\u003d",
+        "filename": "vp9/common/vp9_mvref_common.c",
+        "patchSetId": 23
+      },
+      "lineNbr": 139,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2013-08-03T00:45:19Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAcn//7SY\u003d",
+      "revId": "78201159bb9419a67ffe596cb336c00b2d7078a0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAcn//7SI\u003d",
         "filename": "vp9/common/vp9_mvref_common.c",
         "patchSetId": 23
@@ -166,6 +328,24 @@
       "writtenOn": "2013-08-03T00:04:12Z",
       "side": 1,
       "message": "const",
+      "revId": "78201159bb9419a67ffe596cb336c00b2d7078a0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcn//7Ic\u003d",
+        "filename": "vp9/common/vp9_mvref_common.c",
+        "patchSetId": 23
+      },
+      "lineNbr": 146,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2013-08-03T00:45:19Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAcn//7SI\u003d",
       "revId": "78201159bb9419a67ffe596cb336c00b2d7078a0",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -189,6 +369,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAcn//7H0\u003d",
+        "filename": "vp9/common/vp9_mvref_common.c",
+        "patchSetId": 23
+      },
+      "lineNbr": 158,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2013-08-03T00:45:19Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAcn//7P4\u003d",
+      "revId": "78201159bb9419a67ffe596cb336c00b2d7078a0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAcn//7Ps\u003d",
         "filename": "vp9/common/vp9_mvref_common.c",
         "patchSetId": 23
@@ -200,6 +398,24 @@
       "writtenOn": "2013-08-03T00:04:12Z",
       "side": 1,
       "message": "prefer (candidate)",
+      "revId": "78201159bb9419a67ffe596cb336c00b2d7078a0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcn//7Hw\u003d",
+        "filename": "vp9/common/vp9_mvref_common.c",
+        "patchSetId": 23
+      },
+      "lineNbr": 161,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2013-08-03T00:45:19Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAcn//7Ps\u003d",
       "revId": "78201159bb9419a67ffe596cb336c00b2d7078a0",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -223,6 +439,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAcn//7Hg\u003d",
+        "filename": "vp9/common/vp9_mvref_common.c",
+        "patchSetId": 23
+      },
+      "lineNbr": 175,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2013-08-03T00:45:19Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAcn//7OU\u003d",
+      "revId": "78201159bb9419a67ffe596cb336c00b2d7078a0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAcn//7PY\u003d",
         "filename": "vp9/common/vp9_mvref_common.c",
         "patchSetId": 23
@@ -234,6 +468,24 @@
       "writtenOn": "2013-08-03T00:04:12Z",
       "side": 1,
       "message": "do this assignment immediately",
+      "revId": "78201159bb9419a67ffe596cb336c00b2d7078a0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcn//7HY\u003d",
+        "filename": "vp9/common/vp9_mvref_common.c",
+        "patchSetId": 23
+      },
+      "lineNbr": 181,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2013-08-03T00:45:19Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAcn//7PY\u003d",
       "revId": "78201159bb9419a67ffe596cb336c00b2d7078a0",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -257,6 +509,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAcn//7HU\u003d",
+        "filename": "vp9/common/vp9_mvref_common.c",
+        "patchSetId": 23
+      },
+      "lineNbr": 182,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2013-08-03T00:45:19Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAcn//7PU\u003d",
+      "revId": "78201159bb9419a67ffe596cb336c00b2d7078a0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAcn//7PM\u003d",
         "filename": "vp9/common/vp9_mvref_common.c",
         "patchSetId": 23
@@ -268,6 +538,24 @@
       "writtenOn": "2013-08-03T00:04:12Z",
       "side": 1,
       "message": "*const -\u003e also \u0027*\u0027 seems to be tied to the variable in this project.",
+      "revId": "78201159bb9419a67ffe596cb336c00b2d7078a0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcn//7G0\u003d",
+        "filename": "vp9/common/vp9_mvref_common.c",
+        "patchSetId": 23
+      },
+      "lineNbr": 199,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2013-08-03T00:45:19Z",
+      "side": 1,
+      "message": "not actually const see mbmi-\u003emb_mode_context[ref_frame] ... line 301",
+      "parentUuid": "AAAAcn//7PM\u003d",
       "revId": "78201159bb9419a67ffe596cb336c00b2d7078a0",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -291,6 +579,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAcn//7Gs\u003d",
+        "filename": "vp9/common/vp9_mvref_common.c",
+        "patchSetId": 23
+      },
+      "lineNbr": 203,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2013-08-03T00:45:19Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAcn//7PE\u003d",
+      "revId": "78201159bb9419a67ffe596cb336c00b2d7078a0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAcn//7O4\u003d",
         "filename": "vp9/common/vp9_mvref_common.c",
         "patchSetId": 23
@@ -302,6 +608,24 @@
       "writtenOn": "2013-08-03T00:04:12Z",
       "side": 1,
       "message": "prefer sizeof(*mv_ref_list) or mv_ref_list[0]",
+      "revId": "78201159bb9419a67ffe596cb336c00b2d7078a0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcn//7Gw\u003d",
+        "filename": "vp9/common/vp9_mvref_common.c",
+        "patchSetId": 23
+      },
+      "lineNbr": 208,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2013-08-03T00:45:19Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAcn//7O4\u003d",
       "revId": "78201159bb9419a67ffe596cb336c00b2d7078a0",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -325,6 +649,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAcn//7Gk\u003d",
+        "filename": "vp9/common/vp9_mvref_common.c",
+        "patchSetId": 23
+      },
+      "lineNbr": 213,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2013-08-03T00:45:19Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAcn//7O0\u003d",
+      "revId": "78201159bb9419a67ffe596cb336c00b2d7078a0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAcn//7OA\u003d",
         "filename": "vp9/common/vp9_mvref_common.c",
         "patchSetId": 23
@@ -336,6 +678,24 @@
       "writtenOn": "2013-08-03T00:04:12Z",
       "side": 1,
       "message": "note ()s aren\u0027t strictly necessary here",
+      "revId": "78201159bb9419a67ffe596cb336c00b2d7078a0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcn//7GY\u003d",
+        "filename": "vp9/common/vp9_mvref_common.c",
+        "patchSetId": 23
+      },
+      "lineNbr": 219,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2013-08-03T00:45:19Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAcn//7OA\u003d",
       "revId": "78201159bb9419a67ffe596cb336c00b2d7078a0",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -359,6 +719,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAcn//7GM\u003d",
+        "filename": "vp9/common/vp9_mvref_common.c",
+        "patchSetId": 23
+      },
+      "lineNbr": 240,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2013-08-03T00:45:19Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAcn//7N0\u003d",
+      "revId": "78201159bb9419a67ffe596cb336c00b2d7078a0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAcn//7Nk\u003d",
         "filename": "vp9/common/vp9_mvref_common.c",
         "patchSetId": 23
@@ -370,6 +748,24 @@
       "writtenOn": "2013-08-03T00:04:12Z",
       "side": 1,
       "message": "!\u003d NULL",
+      "revId": "78201159bb9419a67ffe596cb336c00b2d7078a0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcn//7GI\u003d",
+        "filename": "vp9/common/vp9_mvref_common.c",
+        "patchSetId": 23
+      },
+      "lineNbr": 261,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2013-08-03T00:45:19Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAcn//7Nk\u003d",
       "revId": "78201159bb9419a67ffe596cb336c00b2d7078a0",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -393,6 +789,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAcn//7F8\u003d",
+        "filename": "vp9/common/vp9_mvref_common.c",
+        "patchSetId": 23
+      },
+      "lineNbr": 265,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2013-08-03T00:45:19Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAcn//7No\u003d",
+      "revId": "78201159bb9419a67ffe596cb336c00b2d7078a0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAcn//7Ns\u003d",
         "filename": "vp9/common/vp9_mvref_common.c",
         "patchSetId": 23
@@ -404,6 +818,24 @@
       "writtenOn": "2013-08-03T00:04:12Z",
       "side": 1,
       "message": "drop the ;",
+      "revId": "78201159bb9419a67ffe596cb336c00b2d7078a0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcn//7GQ\u003d",
+        "filename": "vp9/common/vp9_mvref_common.c",
+        "patchSetId": 23
+      },
+      "lineNbr": 267,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2013-08-03T00:45:19Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAcn//7Ns\u003d",
       "revId": "78201159bb9419a67ffe596cb336c00b2d7078a0",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -444,6 +876,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAcn//7F4\u003d",
+        "filename": "vp9/common/vp9_mvref_common.c",
+        "patchSetId": 23
+      },
+      "lineNbr": 290,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2013-08-03T00:45:19Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAcn//7Nc\u003d",
+      "revId": "78201159bb9419a67ffe596cb336c00b2d7078a0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAcn//7NY\u003d",
         "filename": "vp9/common/vp9_mvref_common.c",
         "patchSetId": 23
@@ -455,6 +905,24 @@
       "writtenOn": "2013-08-03T00:04:12Z",
       "side": 1,
       "message": "Done:",
+      "revId": "78201159bb9419a67ffe596cb336c00b2d7078a0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcn//7Fo\u003d",
+        "filename": "vp9/common/vp9_mvref_common.c",
+        "patchSetId": 23
+      },
+      "lineNbr": 294,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2013-08-03T00:45:19Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAcn//7NY\u003d",
       "revId": "78201159bb9419a67ffe596cb336c00b2d7078a0",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
