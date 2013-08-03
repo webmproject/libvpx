@@ -103,10 +103,6 @@ extern int intra_mode_stats[VP9_INTRA_MODES]
                            [VP9_INTRA_MODES];
 #endif
 
-#ifdef NMV_STATS
-extern void init_nmvstats();
-extern void print_nmvstats();
-#endif
 #ifdef MODE_STATS
 extern void init_tx_count_stats();
 extern void write_tx_count_stats();
@@ -1455,9 +1451,6 @@ VP9_PTR vp9_create_compressor(VP9_CONFIG *oxcf) {
     init_context_counters();
 #endif
 
-#ifdef NMV_STATS
-  init_nmvstats();
-#endif
 #ifdef MODE_STATS
   init_tx_count_stats();
   init_switchable_interp_stats();
@@ -1721,10 +1714,7 @@ void vp9_remove_compressor(VP9_PTR *ptr) {
       print_mode_context(cpi);
     }
 #endif
-#ifdef NMV_STATS
-    if (cpi->pass != 1)
-      print_nmvstats();
-#endif
+
 #ifdef MODE_STATS
     if (cpi->pass != 1) {
       write_tx_count_stats();
