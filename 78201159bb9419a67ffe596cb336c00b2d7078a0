@@ -1,0 +1,480 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAcn//7Us\u003d",
+        "filename": "vp9/common/vp9_mvref_common.c",
+        "patchSetId": 23
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-08-03T00:04:12Z",
+      "side": 1,
+      "message": "drop this line",
+      "revId": "78201159bb9419a67ffe596cb336c00b2d7078a0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcn//7UI\u003d",
+        "filename": "vp9/common/vp9_mvref_common.c",
+        "patchSetId": 23
+      },
+      "lineNbr": 74,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-08-03T00:04:12Z",
+      "side": 1,
+      "message": "newline and why not group all static tables at the top; a good order would be typedefs / static tables / static functions / public functions",
+      "revId": "78201159bb9419a67ffe596cb336c00b2d7078a0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcn//7T8\u003d",
+        "filename": "vp9/common/vp9_mvref_common.c",
+        "patchSetId": 23
+      },
+      "lineNbr": 88,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-08-03T00:04:12Z",
+      "side": 1,
+      "message": "a bit heavy on the whitespace after periods here.",
+      "revId": "78201159bb9419a67ffe596cb336c00b2d7078a0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcn//7T0\u003d",
+        "filename": "vp9/common/vp9_mvref_common.c",
+        "patchSetId": 23
+      },
+      "lineNbr": 90,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-08-03T00:04:12Z",
+      "side": 1,
+      "message": "static const int\n2 space indent",
+      "revId": "78201159bb9419a67ffe596cb336c00b2d7078a0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcn//7Tg\u003d",
+        "filename": "vp9/common/vp9_mvref_common.c",
+        "patchSetId": 23
+      },
+      "lineNbr": 112,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-08-03T00:04:12Z",
+      "side": 1,
+      "message": "...If it\u0027s the second...",
+      "revId": "78201159bb9419a67ffe596cb336c00b2d7078a0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcn//7Tk\u003d",
+        "filename": "vp9/common/vp9_mvref_common.c",
+        "patchSetId": 23
+      },
+      "lineNbr": 115,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-08-03T00:04:12Z",
+      "side": 1,
+      "message": "depending on the use wrapping macros like this in do/while(0) reduces side effects",
+      "revId": "78201159bb9419a67ffe596cb336c00b2d7078a0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcn//7Pk\u003d",
+        "filename": "vp9/common/vp9_mvref_common.c",
+        "patchSetId": 23
+      },
+      "lineNbr": 116,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-08-03T00:04:12Z",
+      "side": 1,
+      "message": "this should be (mv)",
+      "revId": "78201159bb9419a67ffe596cb336c00b2d7078a0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcn//7Ts\u003d",
+        "filename": "vp9/common/vp9_mvref_common.c",
+        "patchSetId": 23
+      },
+      "lineNbr": 125,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-08-03T00:04:12Z",
+      "side": 1,
+      "message": "2 space indent",
+      "revId": "78201159bb9419a67ffe596cb336c00b2d7078a0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcn//7SY\u003d",
+        "filename": "vp9/common/vp9_mvref_common.c",
+        "patchSetId": 23
+      },
+      "lineNbr": 139,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-08-03T00:04:12Z",
+      "side": 1,
+      "message": "this is difficult; at a minimum these should be aligned with the \u0027(\u0027. I\u0027d suggest bringing the 2nd clause down, wrapping it in ()s and maybe shifting the \u0027?\u0027 \u0027:\u0027s to the front of the respective branches.",
+      "revId": "78201159bb9419a67ffe596cb336c00b2d7078a0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcn//7SI\u003d",
+        "filename": "vp9/common/vp9_mvref_common.c",
+        "patchSetId": 23
+      },
+      "lineNbr": 146,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-08-03T00:04:12Z",
+      "side": 1,
+      "message": "const",
+      "revId": "78201159bb9419a67ffe596cb336c00b2d7078a0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcn//7P4\u003d",
+        "filename": "vp9/common/vp9_mvref_common.c",
+        "patchSetId": 23
+      },
+      "lineNbr": 158,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-08-03T00:04:12Z",
+      "side": 1,
+      "message": "..., not INTRA, and they...",
+      "revId": "78201159bb9419a67ffe596cb336c00b2d7078a0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcn//7Ps\u003d",
+        "filename": "vp9/common/vp9_mvref_common.c",
+        "patchSetId": 23
+      },
+      "lineNbr": 161,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-08-03T00:04:12Z",
+      "side": 1,
+      "message": "prefer (candidate)",
+      "revId": "78201159bb9419a67ffe596cb336c00b2d7078a0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcn//7OU\u003d",
+        "filename": "vp9/common/vp9_mvref_common.c",
+        "patchSetId": 23
+      },
+      "lineNbr": 175,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-08-03T00:04:12Z",
+      "side": 1,
+      "message": "call \u0027i\u0027 idx instead",
+      "revId": "78201159bb9419a67ffe596cb336c00b2d7078a0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcn//7PY\u003d",
+        "filename": "vp9/common/vp9_mvref_common.c",
+        "patchSetId": 23
+      },
+      "lineNbr": 181,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-08-03T00:04:12Z",
+      "side": 1,
+      "message": "do this assignment immediately",
+      "revId": "78201159bb9419a67ffe596cb336c00b2d7078a0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcn//7PU\u003d",
+        "filename": "vp9/common/vp9_mvref_common.c",
+        "patchSetId": 23
+      },
+      "lineNbr": 182,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-08-03T00:04:12Z",
+      "side": 1,
+      "message": "no whitespace before )",
+      "revId": "78201159bb9419a67ffe596cb336c00b2d7078a0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcn//7PM\u003d",
+        "filename": "vp9/common/vp9_mvref_common.c",
+        "patchSetId": 23
+      },
+      "lineNbr": 199,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-08-03T00:04:12Z",
+      "side": 1,
+      "message": "*const -\u003e also \u0027*\u0027 seems to be tied to the variable in this project.",
+      "revId": "78201159bb9419a67ffe596cb336c00b2d7078a0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcn//7PE\u003d",
+        "filename": "vp9/common/vp9_mvref_common.c",
+        "patchSetId": 23
+      },
+      "lineNbr": 203,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-08-03T00:04:12Z",
+      "side": 1,
+      "message": "const",
+      "revId": "78201159bb9419a67ffe596cb336c00b2d7078a0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcn//7O4\u003d",
+        "filename": "vp9/common/vp9_mvref_common.c",
+        "patchSetId": 23
+      },
+      "lineNbr": 208,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-08-03T00:04:12Z",
+      "side": 1,
+      "message": "prefer sizeof(*mv_ref_list) or mv_ref_list[0]",
+      "revId": "78201159bb9419a67ffe596cb336c00b2d7078a0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcn//7O0\u003d",
+        "filename": "vp9/common/vp9_mvref_common.c",
+        "patchSetId": 23
+      },
+      "lineNbr": 213,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-08-03T00:04:12Z",
+      "side": 1,
+      "message": "prefer preincrement",
+      "revId": "78201159bb9419a67ffe596cb336c00b2d7078a0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcn//7OA\u003d",
+        "filename": "vp9/common/vp9_mvref_common.c",
+        "patchSetId": 23
+      },
+      "lineNbr": 219,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-08-03T00:04:12Z",
+      "side": 1,
+      "message": "note ()s aren\u0027t strictly necessary here",
+      "revId": "78201159bb9419a67ffe596cb336c00b2d7078a0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcn//7N0\u003d",
+        "filename": "vp9/common/vp9_mvref_common.c",
+        "patchSetId": 23
+      },
+      "lineNbr": 240,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-08-03T00:04:12Z",
+      "side": 1,
+      "message": "drop the \u0027;\u0027",
+      "revId": "78201159bb9419a67ffe596cb336c00b2d7078a0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcn//7Nk\u003d",
+        "filename": "vp9/common/vp9_mvref_common.c",
+        "patchSetId": 23
+      },
+      "lineNbr": 261,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-08-03T00:04:12Z",
+      "side": 1,
+      "message": "!\u003d NULL",
+      "revId": "78201159bb9419a67ffe596cb336c00b2d7078a0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcn//7No\u003d",
+        "filename": "vp9/common/vp9_mvref_common.c",
+        "patchSetId": 23
+      },
+      "lineNbr": 265,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-08-03T00:04:12Z",
+      "side": 1,
+      "message": "2 space indent",
+      "revId": "78201159bb9419a67ffe596cb336c00b2d7078a0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcn//7Ns\u003d",
+        "filename": "vp9/common/vp9_mvref_common.c",
+        "patchSetId": 23
+      },
+      "lineNbr": 267,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-08-03T00:04:12Z",
+      "side": 1,
+      "message": "drop the ;",
+      "revId": "78201159bb9419a67ffe596cb336c00b2d7078a0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcn//7Ng\u003d",
+        "filename": "vp9/common/vp9_mvref_common.c",
+        "patchSetId": 23
+      },
+      "lineNbr": 279,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-08-03T00:04:12Z",
+      "side": 1,
+      "message": "fix alignment as 248",
+      "revId": "78201159bb9419a67ffe596cb336c00b2d7078a0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcn//7Nc\u003d",
+        "filename": "vp9/common/vp9_mvref_common.c",
+        "patchSetId": 23
+      },
+      "lineNbr": 290,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-08-03T00:04:12Z",
+      "side": 1,
+      "message": "!\u003d NULL",
+      "revId": "78201159bb9419a67ffe596cb336c00b2d7078a0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcn//7NY\u003d",
+        "filename": "vp9/common/vp9_mvref_common.c",
+        "patchSetId": 23
+      },
+      "lineNbr": 294,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-08-03T00:04:12Z",
+      "side": 1,
+      "message": "Done:",
+      "revId": "78201159bb9419a67ffe596cb336c00b2d7078a0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcn//7NU\u003d",
+        "filename": "vp9/common/vp9_mvref_common.h",
+        "patchSetId": 23
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-08-03T00:04:12Z",
+      "side": 1,
+      "message": "these are ok together as they\u0027re logically related",
+      "revId": "78201159bb9419a67ffe596cb336c00b2d7078a0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
