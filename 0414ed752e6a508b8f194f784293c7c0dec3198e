@@ -16,6 +16,24 @@
       "revId": "0414ed752e6a508b8f194f784293c7c0dec3198e",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcn//65k\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 1554,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2013-08-03T06:30:14Z",
+      "side": 1,
+      "message": "It seems restore_context_ comes in pair with save_context_. The context info is saved at the very beginning, and every time one partition type is tested (through pick_sb_modes_), we need to restore the context models before getting into next partition type.",
+      "parentUuid": "AAAAcn//65s\u003d",
+      "revId": "0414ed752e6a508b8f194f784293c7c0dec3198e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
