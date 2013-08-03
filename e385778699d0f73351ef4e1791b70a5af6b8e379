@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAcn//7NE\u003d",
+        "filename": "vp9/encoder/vp9_bitstream.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 454,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-08-03T00:08:05Z",
+      "side": 1,
+      "message": "prefer {}\u0027s around multi-line loops",
+      "revId": "e385778699d0f73351ef4e1791b70a5af6b8e379",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcn//7M8\u003d",
+        "filename": "vp9/encoder/vp9_bitstream.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 560,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-08-03T00:08:05Z",
+      "side": 1,
+      "message": "isn\u0027t there a consistent uint32_t type rather than uint?",
+      "revId": "e385778699d0f73351ef4e1791b70a5af6b8e379",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcn//7M0\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 697,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-08-03T00:08:05Z",
+      "side": 1,
+      "message": "fix these while you\u0027re here; they should be tied to the variable or in this case \u0027const\u0027",
+      "revId": "e385778699d0f73351ef4e1791b70a5af6b8e379",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcn//7Mw\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 729,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-08-03T00:08:05Z",
+      "side": 1,
+      "message": "ditto",
+      "revId": "e385778699d0f73351ef4e1791b70a5af6b8e379",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
