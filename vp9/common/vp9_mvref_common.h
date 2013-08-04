@@ -17,12 +17,13 @@
 void vp9_find_mv_refs_idx(VP9_COMMON *cm,
                           MACROBLOCKD *xd,
                           MODE_INFO *here,
-                          MODE_INFO *lf_here,
-                          MV_REFERENCE_FRAME ref_frame,
+                          const MODE_INFO *lf_here,
+                          const MV_REFERENCE_FRAME ref_frame,
                           int_mv *mv_ref_list,
-                          int *ref_sign_bias,
-                          int block_idx,
-                          int mi_row, int mi_col);
+                          const int *ref_sign_bias,
+                          const int block_idx,
+                          const int mi_row,
+                          const int mi_col);
 
 static INLINE void vp9_find_mv_refs(VP9_COMMON *cm,
                                     MACROBLOCKD *xd,
