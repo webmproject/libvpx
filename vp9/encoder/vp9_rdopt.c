@@ -1199,8 +1199,8 @@ static int64_t rd_pick_intra4x4block(VP9_COMP *cpi, MACROBLOCK *x, int ib,
   ENTROPY_CONTEXT ta[2], tempa[2];
   ENTROPY_CONTEXT tl[2], templ[2];
   TX_TYPE tx_type = DCT_DCT;
-  int num_4x4_blocks_wide = num_4x4_blocks_wide_lookup[bsize];
-  int num_4x4_blocks_high = num_4x4_blocks_high_lookup[bsize];
+  const int num_4x4_blocks_wide = num_4x4_blocks_wide_lookup[bsize];
+  const int num_4x4_blocks_high = num_4x4_blocks_high_lookup[bsize];
   int idx, idy, block;
   uint8_t best_dst[8 * 8];
 
@@ -1313,8 +1313,8 @@ static int64_t rd_pick_intra_sub_8x8_y_mode(VP9_COMP * const cpi,
   int i, j;
   MACROBLOCKD *const xd = &mb->e_mbd;
   BLOCK_SIZE_TYPE bsize = xd->mode_info_context->mbmi.sb_type;
-  int num_4x4_blocks_wide = num_4x4_blocks_wide_lookup[bsize];
-  int num_4x4_blocks_high = num_4x4_blocks_high_lookup[bsize];
+  const int num_4x4_blocks_wide = num_4x4_blocks_wide_lookup[bsize];
+  const int num_4x4_blocks_high = num_4x4_blocks_high_lookup[bsize];
   int idx, idy;
   int cost = 0;
   int64_t total_distortion = 0;
@@ -1598,8 +1598,8 @@ static int labels2mode(MACROBLOCK *x, int i,
   MB_MODE_INFO * mbmi = &mic->mbmi;
   int cost = 0, thismvcost = 0;
   int idx, idy;
-  int num_4x4_blocks_wide = num_4x4_blocks_wide_lookup[mbmi->sb_type];
-  int num_4x4_blocks_high = num_4x4_blocks_high_lookup[mbmi->sb_type];
+  const int num_4x4_blocks_wide = num_4x4_blocks_wide_lookup[mbmi->sb_type];
+  const int num_4x4_blocks_high = num_4x4_blocks_high_lookup[mbmi->sb_type];
 
   /* We have to be careful retrieving previously-encoded motion vectors.
    Ones from this macroblock have to be pulled from the BLOCKD array
@@ -1818,8 +1818,8 @@ static void rd_check_segment_txsize(VP9_COMP *cpi, MACROBLOCK *x,
   int label_mv_thresh;
   int segmentyrate = 0;
   BLOCK_SIZE_TYPE bsize = mbmi->sb_type;
-  int num_4x4_blocks_wide = num_4x4_blocks_wide_lookup[bsize];
-  int num_4x4_blocks_high = num_4x4_blocks_high_lookup[bsize];
+  const int num_4x4_blocks_wide = num_4x4_blocks_wide_lookup[bsize];
+  const int num_4x4_blocks_high = num_4x4_blocks_high_lookup[bsize];
   vp9_variance_fn_ptr_t *v_fn_ptr;
   ENTROPY_CONTEXT t_above[2], t_left[2];
   BEST_SEG_INFO *bsi = bsi_buf + filter_idx;
