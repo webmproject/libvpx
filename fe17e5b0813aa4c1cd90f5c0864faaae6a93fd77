@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAcn//5p4\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 3529,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2013-08-05T21:15:38Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAcn//7Yk\u003d",
+      "revId": "fe17e5b0813aa4c1cd90f5c0864faaae6a93fd77",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAcn//7Yg\u003d",
         "filename": "vp9/encoder/vp9_rdopt.c",
         "patchSetId": 3
@@ -30,6 +48,24 @@
       "writtenOn": "2013-08-02T23:17:09Z",
       "side": 1,
       "message": "is the value 64 a preset threshold? should we make this a #define?\n\nof maybe consider to make this a function of the current block size?",
+      "revId": "fe17e5b0813aa4c1cd90f5c0864faaae6a93fd77",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcn//5p8\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 3531,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2013-08-05T21:15:38Z",
+      "side": 1,
+      "message": "Made it an array for different sb_types. Added a TODO to optimize it later.",
+      "parentUuid": "AAAAcn//7Yg\u003d",
       "revId": "fe17e5b0813aa4c1cd90f5c0864faaae6a93fd77",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
