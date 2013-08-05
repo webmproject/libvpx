@@ -16,6 +16,24 @@
       "revId": "195860af0fb1933027008a64e343b5cfb9219262",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcn//5+E\u003d",
+        "filename": "vp9/encoder/vp9_bitstream.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 561,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2013-08-05T19:17:09Z",
+      "side": 1,
+      "message": "ok const added and reverted to int.   mostly because so many other places we use int for idxs  including just above for idx and idy...",
+      "parentUuid": "AAAAcn//5/g\u003d",
+      "revId": "195860af0fb1933027008a64e343b5cfb9219262",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
