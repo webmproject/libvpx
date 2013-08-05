@@ -89,6 +89,7 @@ LIBVPX_TEST_SRCS-yes                   += tile_independence_test.cc
 endif
 
 LIBVPX_TEST_SRCS-$(CONFIG_VP9)         += convolve_test.cc
+LIBVPX_TEST_SRCS-$(CONFIG_VP9_DECODER) += vp9_thread_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_VP9_ENCODER) += fdct4x4_test.cc
 
 LIBVPX_TEST_SRCS-$(CONFIG_VP9_ENCODER) += fdct8x8_test.cc

@@ -34,6 +34,7 @@
 #include "vp9/decoder/vp9_idct_blk.h"
 #include "vp9/decoder/vp9_onyxd_int.h"
 #include "vp9/decoder/vp9_read_bit_buffer.h"
+#include "vp9/decoder/vp9_thread.h"
 #include "vp9/decoder/vp9_treereader.h"
 
 static int read_be32(const uint8_t *p) {
@@ -583,10 +584,18 @@ static void setup_frame_size_with_refs(VP9D_COMP *pbi,
 }
 
 static void decode_tile(VP9D_COMP *pbi, vp9_reader *r) {
+  const int num_threads = pbi->oxcf.max_threads;
   VP9_COMMON *const pc = &pbi->common;
   int mi_row, mi_col;
 
   if (pbi->do_loopfilter_inline) {
+    if (num_threads > 1) {
+      LFWorkerData *const lf_data = (LFWorkerData*)pbi->lf_worker.data1;
+      lf_data->frame_buffer = &pbi->common.yv12_fb[pbi->common.new_fb_idx];
+      lf_data->cm = pc;
+      lf_data->xd = pbi->mb;
+      lf_data->y_only = 0;
+    }
     vp9_loop_filter_frame_init(pc, &pbi->mb, pbi->mb.lf.filter_level);
   }
 
@@ -601,17 +610,33 @@ static void decode_tile(VP9D_COMP *pbi, vp9_reader *r) {
     }
 
     if (pbi->do_loopfilter_inline) {
-      YV12_BUFFER_CONFIG *const fb =
-          &pbi->common.yv12_fb[pbi->common.new_fb_idx];
       // delay the loopfilter by 1 macroblock row.
       const int lf_start = mi_row - MI_BLOCK_SIZE;
       if (lf_start < 0) continue;
-      vp9_loop_filter_rows(fb, pc, &pbi->mb, lf_start, mi_row, 0);
+
+      if (num_threads > 1) {
+        LFWorkerData *const lf_data = (LFWorkerData*)pbi->lf_worker.data1;
+
+        vp9_worker_sync(&pbi->lf_worker);
+        lf_data->start = lf_start;
+        lf_data->stop = mi_row;
+        pbi->lf_worker.hook = vp9_loop_filter_worker;
+        vp9_worker_launch(&pbi->lf_worker);
+      } else {
+        YV12_BUFFER_CONFIG *const fb =
+            &pbi->common.yv12_fb[pbi->common.new_fb_idx];
+        vp9_loop_filter_rows(fb, pc, &pbi->mb, lf_start, mi_row, 0);
+      }
     }
   }
 
   if (pbi->do_loopfilter_inline) {
     YV12_BUFFER_CONFIG *const fb = &pbi->common.yv12_fb[pbi->common.new_fb_idx];
+    if (num_threads > 1) {
+      // TODO(jzern): since the loop filter is delayed one mb row, this will be
+      // forced to wait for the last row scheduled in the for loop.
+      vp9_worker_sync(&pbi->lf_worker);
+    }
     vp9_loop_filter_rows(fb, pc, &pbi->mb,
                          mi_row - MI_BLOCK_SIZE, pc->mi_rows, 0);
   }
