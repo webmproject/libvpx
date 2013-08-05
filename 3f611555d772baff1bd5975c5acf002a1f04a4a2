@@ -16,6 +16,24 @@
       "revId": "3f611555d772baff1bd5975c5acf002a1f04a4a2",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcn//5rI\u003d",
+        "filename": "vp9/common/vp9_entropymode.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 343,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2013-08-05T21:07:44Z",
+      "side": 1,
+      "message": "No, there are no any changes. I just \"inlined\" all mappings according to real values in bitstream. The only side effect is in {read, write}_interp_filter_type() functions, this is the only place where mappings are used now.",
+      "parentUuid": "AAAAcn//54I\u003d",
+      "revId": "3f611555d772baff1bd5975c5acf002a1f04a4a2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
