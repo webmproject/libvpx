@@ -21,7 +21,7 @@ EOF
 forward_decls vp9_common_forward_decls
 
 # x86inc.asm doesn't work if pic is enabled on 32 bit platforms so no assembly.
-[ $arch = "x86_64" -o ! "$CONFIG_PIC" = "yes" -o $CONFIG_FORCE_X86INC == "yes"] && mmx_x86inc=mmx && sse2_x86inc=sse2  && ssse3_x86inc=ssse3
+[ $arch = "x86_64" -o ! "$CONFIG_PIC" = "yes" -o "$CONFIG_FORCE_X86INC" == "yes" ] && mmx_x86inc=mmx && sse2_x86inc=sse2  && ssse3_x86inc=ssse3
 
 # this variable is for functions that are 64 bit only.
 [ $arch = "x86_64" ] && mmx_x86_64=mmx && sse2_x86_64=sse2  && ssse3_x86_64=ssse3
@@ -704,7 +704,7 @@ prototype int64_t vp9_block_error "int16_t *coeff, int16_t *dqcoeff, intptr_t bl
 specialize vp9_block_error sse2
 
 prototype void vp9_subtract_block "int rows, int cols, int16_t *diff_ptr, ptrdiff_t diff_stride, const uint8_t *src_ptr, ptrdiff_t src_stride, const uint8_t *pred_ptr, ptrdiff_t pred_stride"
-specialize vp9_subtract_block sse2
+specialize vp9_subtract_block $sse2_x86inc
 
 prototype void vp9_quantize_b "int16_t *coeff_ptr, intptr_t n_coeffs, int skip_block, int16_t *zbin_ptr, int16_t *round_ptr, int16_t *quant_ptr, int16_t *quant_shift_ptr, int16_t *qcoeff_ptr, int16_t *dqcoeff_ptr, int16_t *dequant_ptr, int zbin_oq_value, uint16_t *eob_ptr, const int16_t *scan, const int16_t *iscan"
 specialize vp9_quantize_b $ssse3_x86_64
