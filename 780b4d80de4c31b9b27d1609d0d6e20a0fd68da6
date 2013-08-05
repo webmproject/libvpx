@@ -33,6 +33,23 @@
       "revId": "780b4d80de4c31b9b27d1609d0d6e20a0fd68da6",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcn//5kI\u003d",
+        "filename": "vp9/vp9_common.mk",
+        "patchSetId": 2
+      },
+      "lineNbr": 94,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2013-08-05T21:55:59Z",
+      "side": 1,
+      "message": "Move this before the 8x8. Order hasn\u0027t been maintained (dc should come before loopfilter), but no reason to put new things out of order.",
+      "revId": "780b4d80de4c31b9b27d1609d0d6e20a0fd68da6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
