@@ -449,13 +449,14 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, MODE_INFO *m, vp9_writer *bc) {
       write_intra_mode(bc, mode, pc->fc.y_mode_prob[size_group_lookup[bsize]]);
     } else {
       int idx, idy;
-      int num_4x4_blocks_wide = num_4x4_blocks_wide_lookup[bsize];
-      int num_4x4_blocks_high = num_4x4_blocks_high_lookup[bsize];
-      for (idy = 0; idy < 2; idy += num_4x4_blocks_high)
+      const int num_4x4_blocks_wide = num_4x4_blocks_wide_lookup[bsize];
+      const int num_4x4_blocks_high = num_4x4_blocks_high_lookup[bsize];
+      for (idy = 0; idy < 2; idy += num_4x4_blocks_high) {
         for (idx = 0; idx < 2; idx += num_4x4_blocks_wide) {
           const MB_PREDICTION_MODE bm = m->bmi[idy * 2 + idx].as_mode;
           write_intra_mode(bc, bm, pc->fc.y_mode_prob[0]);
         }
+      }
     }
     write_intra_mode(bc, mi->uv_mode, pc->fc.uv_mode_prob[mode]);
   } else {
@@ -489,8 +490,8 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, MODE_INFO *m, vp9_writer *bc) {
       int j;
       MB_PREDICTION_MODE blockmode;
       int_mv blockmv;
-      int num_4x4_blocks_wide = num_4x4_blocks_wide_lookup[bsize];
-      int num_4x4_blocks_high = num_4x4_blocks_high_lookup[bsize];
+      const int num_4x4_blocks_wide = num_4x4_blocks_wide_lookup[bsize];
+      const int num_4x4_blocks_high = num_4x4_blocks_high_lookup[bsize];
       int idx, idy;
       for (idy = 0; idy < 2; idy += num_4x4_blocks_high) {
         for (idx = 0; idx < 2; idx += num_4x4_blocks_wide) {
@@ -553,11 +554,11 @@ static void write_mb_modes_kf(const VP9_COMP *cpi, MODE_INFO *m,
     write_intra_mode(bc, ym, vp9_kf_y_mode_prob[A][L]);
   } else {
     int idx, idy;
-    int num_4x4_blocks_wide = num_4x4_blocks_wide_lookup[m->mbmi.sb_type];
-    int num_4x4_blocks_high = num_4x4_blocks_high_lookup[m->mbmi.sb_type];
+    const int num_4x4_blocks_wide = num_4x4_blocks_wide_lookup[m->mbmi.sb_type];
+    const int num_4x4_blocks_high = num_4x4_blocks_high_lookup[m->mbmi.sb_type];
     for (idy = 0; idy < 2; idy += num_4x4_blocks_high) {
       for (idx = 0; idx < 2; idx += num_4x4_blocks_wide) {
-        int i = idy * 2 + idx;
+        const int i = idy * 2 + idx;
         const MB_PREDICTION_MODE A = above_block_mode(m, i, mis);
         const MB_PREDICTION_MODE L = (xd->left_available || idx) ?
                                      left_block_mode(m, i) : DC_PRED;
