@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAcn//5Pw\u003d",
+        "filename": "test/vp9_subtract_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 96,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2013-08-05T23:57:09Z",
+      "side": 1,
+      "message": "Apparently not sufficient:\nhttp://build.webmproject.org/jenkins/job/libvpx%20compile%20options/5768/arch\u003dx86-linux-gcc,config\u003derror-concealment,label\u003dslave/console\n[CXX] test/vp9_subtract_test.cc.o\n../libvpx/test/vp9_subtract_test.cc: In function \u0027testing::internal::ParamGenerator\u003cvoid (*)(int, int, short int*, int, const unsigned char*, int, const unsigned char*, int)\u003e vp9::gtest_SSE2VP9SubtractBlockTest_EvalGenerator_()\u0027:\n../libvpx/test/vp9_subtract_test.cc:97:32: error: \u0027vp9_subtract_block_sse2\u0027 was not declared in this scope\n../libvpx/test/vp9_subtract_test.cc:97:58: error: control reaches end of non-void function [-Werror\u003dreturn-type]\ncc1plus: all warnings being treated as errors\nmake[1]: *** [test/vp9_subtract_test.cc.o] Error 1\nmake: *** [.DEFAULT] Error 2",
+      "revId": "2ebf5b3212bd392aee19a713b818f58473e56adb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
