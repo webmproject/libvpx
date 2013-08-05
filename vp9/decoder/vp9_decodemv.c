@@ -371,10 +371,10 @@ static INLINE INTERPOLATIONFILTERTYPE read_switchable_filter_type(
   VP9_COMMON *const cm = &pbi->common;
   MACROBLOCKD *const xd = &pbi->mb;
   const vp9_prob *probs = vp9_get_pred_probs_switchable_interp(cm, xd);
-  const int index = treed_read(r, vp9_switchable_interp_tree, probs);
+  const int type = treed_read(r, vp9_switchable_interp_tree, probs);
   const int ctx = vp9_get_pred_context_switchable_interp(xd);
-  ++cm->counts.switchable_interp[ctx][index];
-  return vp9_switchable_interp[index];
+  ++cm->counts.switchable_interp[ctx][type];
+  return type;
 }
 
 static void read_intra_block_mode_info(VP9D_COMP *pbi, MODE_INFO *mi,

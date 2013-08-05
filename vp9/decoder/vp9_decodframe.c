@@ -497,8 +497,11 @@ static void setup_quantization(VP9D_COMP *pbi, struct vp9_read_bit_buffer *rb) {
 
 static INTERPOLATIONFILTERTYPE read_interp_filter_type(
     struct vp9_read_bit_buffer *rb) {
+  const INTERPOLATIONFILTERTYPE literal_to_type[] = { EIGHTTAP_SMOOTH,
+                                                      EIGHTTAP,
+                                                      EIGHTTAP_SHARP };
   return vp9_rb_read_bit(rb) ? SWITCHABLE
-                             : vp9_rb_read_literal(rb, 2);
+                             : literal_to_type[vp9_rb_read_literal(rb, 2)];
 }
 
 static void read_frame_size(struct vp9_read_bit_buffer *rb,
@@ -836,7 +839,7 @@ static size_t read_uncompressed_header(VP9D_COMP *pbi,
       pbi->refresh_frame_flags = vp9_rb_read_literal(rb, NUM_REF_FRAMES);
       setup_frame_size(pbi, rb);
     } else {
-       pbi->refresh_frame_flags = vp9_rb_read_literal(rb, NUM_REF_FRAMES);
+      pbi->refresh_frame_flags = vp9_rb_read_literal(rb, NUM_REF_FRAMES);
 
       for (i = 0; i < ALLOWED_REFS_PER_FRAME; ++i) {
         const int ref = vp9_rb_read_literal(rb, NUM_REF_FRAMES_LOG2);

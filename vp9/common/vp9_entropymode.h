@@ -49,11 +49,6 @@ extern struct vp9_token vp9_inter_mode_encodings[VP9_INTER_MODES];
 extern const vp9_tree_index vp9_partition_tree[];
 extern struct vp9_token vp9_partition_encodings[PARTITION_TYPES];
 
-extern const INTERPOLATIONFILTERTYPE vp9_switchable_interp
-                 [VP9_SWITCHABLE_FILTERS];
-
-extern const int vp9_switchable_interp_map[SWITCHABLE + 1];
-
 extern const vp9_tree_index vp9_switchable_interp_tree
                  [2 * (VP9_SWITCHABLE_FILTERS - 1)];
 

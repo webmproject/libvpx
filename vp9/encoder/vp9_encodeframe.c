@@ -439,8 +439,7 @@ static void update_state(VP9_COMP *cpi, PICK_MODE_CONTEXT *ctx,
     if (cpi->common.mcomp_filter_type == SWITCHABLE
         && is_inter_mode(mbmi->mode)) {
       ++cpi->common.counts.switchable_interp[
-          vp9_get_pred_context_switchable_interp(xd)]
-            [vp9_switchable_interp_map[mbmi->interp_filter]];
+          vp9_get_pred_context_switchable_interp(xd)][mbmi->interp_filter];
     }
 
     cpi->rd_comp_pred_diff[SINGLE_PREDICTION_ONLY] += ctx->single_pred_diff;
@@ -2385,15 +2384,15 @@ void vp9_encode_frame(VP9_COMP *cpi) {
             cpi->rd_filter_threshes[frame_type][2] &&
         cpi->rd_filter_threshes[frame_type][1] >
             cpi->rd_filter_threshes[frame_type][VP9_SWITCHABLE_FILTERS]) {
-      filter_type = vp9_switchable_interp[1];
+      filter_type = EIGHTTAP_SMOOTH;
     } else if (cpi->rd_filter_threshes[frame_type][2] >
             cpi->rd_filter_threshes[frame_type][0] &&
         cpi->rd_filter_threshes[frame_type][2] >
             cpi->rd_filter_threshes[frame_type][VP9_SWITCHABLE_FILTERS]) {
-      filter_type = vp9_switchable_interp[2];
+      filter_type = EIGHTTAP_SHARP;
     } else if (cpi->rd_filter_threshes[frame_type][0] >
                   cpi->rd_filter_threshes[frame_type][VP9_SWITCHABLE_FILTERS]) {
-      filter_type = vp9_switchable_interp[0];
+      filter_type = EIGHTTAP;
     } else {
       filter_type = SWITCHABLE;
     }
