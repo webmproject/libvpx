@@ -20,7 +20,11 @@ EOF
 }
 forward_decls vp9_common_forward_decls
 
-[ $arch = "x86_64" ] && mmx_x86_64=mmx && sse2_x86_64=sse2
+# x86inc.asm doesn't work if pic is enabled on 32 bit platforms so no assembly.
+[ $arch = "x86_64" -o ! "$CONFIG_PIC" = "yes" -o $CONFIG_FORCE_X86INC == "yes"] && mmx_x86inc=mmx && sse2_x86inc=sse2  && ssse3_x86inc=ssse3
+
+# this variable is for functions that are 64 bit only.
+[ $arch = "x86_64" ] && mmx_x86_64=mmx && sse2_x86_64=sse2  && ssse3_x86_64=ssse3
 
 #
 # Dequant
@@ -263,10 +267,10 @@ specialize vp9_blend_b
 # Sub Pixel Filters
 #
 prototype void vp9_convolve_copy "const uint8_t *src, ptrdiff_t src_stride, uint8_t *dst, ptrdiff_t dst_stride, const int16_t *filter_x, int x_step_q4, const int16_t *filter_y, int y_step_q4, int w, int h"
-specialize vp9_convolve_copy sse2
+specialize vp9_convolve_copy $sse2_x86inc
 
 prototype void vp9_convolve_avg "const uint8_t *src, ptrdiff_t src_stride, uint8_t *dst, ptrdiff_t dst_stride, const int16_t *filter_x, int x_step_q4, const int16_t *filter_y, int y_step_q4, int w, int h"
-specialize vp9_convolve_avg sse2
+specialize vp9_convolve_avg $sse2_x86inc
 
 prototype void vp9_convolve8 "const uint8_t *src, ptrdiff_t src_stride, uint8_t *dst, ptrdiff_t dst_stride, const int16_t *filter_x, int x_step_q4, const int16_t *filter_y, int y_step_q4, int w, int h"
 specialize vp9_convolve8 ssse3 neon
@@ -702,8 +706,6 @@ specialize vp9_block_error sse2
 prototype void vp9_subtract_block "int rows, int cols, int16_t *diff_ptr, ptrdiff_t diff_stride, const uint8_t *src_ptr, ptrdiff_t src_stride, const uint8_t *pred_ptr, ptrdiff_t pred_stride"
 specialize vp9_subtract_block sse2
 
-[ $arch = "x86_64" ] && ssse3_x86_64=ssse3
-
 prototype void vp9_quantize_b "int16_t *coeff_ptr, intptr_t n_coeffs, int skip_block, int16_t *zbin_ptr, int16_t *round_ptr, int16_t *quant_ptr, int16_t *quant_shift_ptr, int16_t *qcoeff_ptr, int16_t *dqcoeff_ptr, int16_t *dequant_ptr, int zbin_oq_value, uint16_t *eob_ptr, const int16_t *scan, const int16_t *iscan"
 specialize vp9_quantize_b $ssse3_x86_64
 
@@ -714,13 +716,11 @@ specialize vp9_quantize_b_32x32 $ssse3_x86_64
 # Structured Similarity (SSIM)
 #
 if [ "$CONFIG_INTERNAL_STATS" = "yes" ]; then
-    [ $arch = "x86_64" ] && sse2_on_x86_64=sse2
-
     prototype void vp9_ssim_parms_8x8 "uint8_t *s, int sp, uint8_t *r, int rp, unsigned long *sum_s, unsigned long *sum_r, unsigned long *sum_sq_s, unsigned long *sum_sq_r, unsigned long *sum_sxr"
-    specialize vp9_ssim_parms_8x8 $sse2_on_x86_64
+    specialize vp9_ssim_parms_8x8 $sse2_x86_64
 
     prototype void vp9_ssim_parms_16x16 "uint8_t *s, int sp, uint8_t *r, int rp, unsigned long *sum_s, unsigned long *sum_r, unsigned long *sum_sq_s, unsigned long *sum_sq_r, unsigned long *sum_sxr"
-    specialize vp9_ssim_parms_16x16 $sse2_on_x86_64
+    specialize vp9_ssim_parms_16x16 $sse2_x86_64
 fi
 
 # fdct functions

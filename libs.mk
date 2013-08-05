@@ -57,6 +57,19 @@ CLEAN-OBJS += $$(BUILD_PFX)$(1).h
 RTCD += $$(BUILD_PFX)$(1).h
 endef
 
+# x86inc.asm is not compatible with pic 32bit builds. Restrict
+# files which use it to 64bit builds or 32bit without pic
+USE_X86INC = no
+ifneq ($(CONFIG_PIC),yes)
+  USE_X86INC = yes
+endif
+ifeq ($(ARCH_X86_64),yes)
+  USE_X86INC = yes
+endif
+ifeq ($(CONFIG_FORCE_X86INC),yes)
+  USE_X86INC = yes
+endif
+
 CODEC_SRCS-yes += CHANGELOG
 CODEC_SRCS-yes += libs.mk
 

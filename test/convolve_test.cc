@@ -527,9 +527,9 @@ INSTANTIATE_TEST_CASE_P(C, ConvolveTest, ::testing::Values(
 
 #if HAVE_SSSE3
 const ConvolveFunctions convolve8_ssse3(
-    vp9_convolve8_horiz_ssse3, vp9_convolve8_avg_horiz_c,
-    vp9_convolve8_vert_ssse3, vp9_convolve8_avg_vert_c,
-    vp9_convolve8_ssse3, vp9_convolve8_avg_c);
+    vp9_convolve8_horiz_ssse3, vp9_convolve8_avg_horiz_ssse3,
+    vp9_convolve8_vert_ssse3, vp9_convolve8_avg_vert_ssse3,
+    vp9_convolve8_ssse3, vp9_convolve8_avg_ssse3);
 
 INSTANTIATE_TEST_CASE_P(SSSE3, ConvolveTest, ::testing::Values(
     make_tuple(4, 4, &convolve8_ssse3),
