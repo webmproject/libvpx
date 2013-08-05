@@ -164,7 +164,7 @@ static void read_intra_frame_mode_info(VP9D_COMP *pbi, MODE_INFO *m,
   mbmi->ref_frame[0] = INTRA_FRAME;
   mbmi->ref_frame[1] = NONE;
 
-  if (bsize >= BLOCK_SIZE_SB8X8) {
+  if (bsize >= BLOCK_8X8) {
     const MB_PREDICTION_MODE A = above_block_mode(m, 0, mis);
     const MB_PREDICTION_MODE L = xd->left_available ?
                                   left_block_mode(m, 0) : DC_PRED;
@@ -386,7 +386,7 @@ static void read_intra_block_mode_info(VP9D_COMP *pbi, MODE_INFO *mi,
   mbmi->ref_frame[0] = INTRA_FRAME;
   mbmi->ref_frame[1] = NONE;
 
-  if (bsize >= BLOCK_SIZE_SB8X8) {
+  if (bsize >= BLOCK_8X8) {
     const int size_group = size_group_lookup[bsize];
     mbmi->mode = read_intra_mode(r, cm->fc.y_mode_prob[size_group]);
     cm->counts.y_mode[size_group][mbmi->mode]++;
@@ -459,13 +459,13 @@ static void read_inter_block_mode_info(VP9D_COMP *pbi, MODE_INFO *mi,
 
   if (vp9_segfeature_active(&xd->seg, mbmi->segment_id, SEG_LVL_SKIP))
     mbmi->mode = ZEROMV;
-  else if (bsize >= BLOCK_SIZE_SB8X8)
+  else if (bsize >= BLOCK_8X8)
     mbmi->mode = read_inter_mode(cm, r, inter_mode_ctx);
 
   mbmi->uv_mode = DC_PRED;
 
   // nearest, nearby
-  if (bsize < BLOCK_SIZE_SB8X8 || mbmi->mode != ZEROMV) {
+  if (bsize < BLOCK_8X8 || mbmi->mode != ZEROMV) {
     vp9_find_best_ref_mvs(xd, mbmi->ref_mvs[ref0], &nearest, &nearby);
     best_mv.as_int = mbmi->ref_mvs[ref0][0].as_int;
   }
@@ -479,14 +479,14 @@ static void read_inter_block_mode_info(VP9D_COMP *pbi, MODE_INFO *mi,
                      ref1, mbmi->ref_mvs[ref1], cm->ref_frame_sign_bias,
                      mi_row, mi_col);
 
-    if (bsize < BLOCK_SIZE_SB8X8 || mbmi->mode != ZEROMV) {
+    if (bsize < BLOCK_8X8 || mbmi->mode != ZEROMV) {
       vp9_find_best_ref_mvs(xd, mbmi->ref_mvs[ref1],
                             &nearest_second, &nearby_second);
       best_mv_second.as_int = mbmi->ref_mvs[ref1][0].as_int;
     }
   }
 
-  if (bsize < BLOCK_SIZE_SB8X8) {
+  if (bsize < BLOCK_8X8) {
     const int num_4x4_w = num_4x4_blocks_wide_lookup[bsize];  // 1 or 2
     const int num_4x4_h = num_4x4_blocks_high_lookup[bsize];  // 1 or 2
     int idx, idy;

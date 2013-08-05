@@ -434,7 +434,7 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, MODE_INFO *m, vp9_writer *bc) {
     vp9_write(bc, rf != INTRA_FRAME,
               vp9_get_pred_prob_intra_inter(pc, xd));
 
-  if (bsize >= BLOCK_SIZE_SB8X8 && pc->tx_mode == TX_MODE_SELECT &&
+  if (bsize >= BLOCK_8X8 && pc->tx_mode == TX_MODE_SELECT &&
       !(rf != INTRA_FRAME &&
         (skip_coeff || vp9_segfeature_active(seg, segment_id, SEG_LVL_SKIP)))) {
     write_selected_tx_size(cpi, mi->txfm_size, bsize, bc);
@@ -445,7 +445,7 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, MODE_INFO *m, vp9_writer *bc) {
     active_section = 6;
 #endif
 
-    if (bsize >= BLOCK_SIZE_SB8X8) {
+    if (bsize >= BLOCK_8X8) {
       write_intra_mode(bc, mode, pc->fc.y_mode_prob[size_group_lookup[bsize]]);
     } else {
       int idx, idy;
@@ -470,7 +470,7 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, MODE_INFO *m, vp9_writer *bc) {
 
     // If segment skip is not enabled code the mode.
     if (!vp9_segfeature_active(seg, segment_id, SEG_LVL_SKIP)) {
-      if (bsize >= BLOCK_SIZE_SB8X8) {
+      if (bsize >= BLOCK_8X8) {
         write_sb_mv_ref(bc, mode, mv_ref_p);
         ++pc->counts.inter_mode[mi->mb_mode_context[rf]]
                                [inter_mode_offset(mode)];
@@ -486,7 +486,7 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, MODE_INFO *m, vp9_writer *bc) {
       assert(mi->interp_filter == cpi->common.mcomp_filter_type);
     }
 
-    if (bsize < BLOCK_SIZE_SB8X8) {
+    if (bsize < BLOCK_8X8) {
       int j;
       MB_PREDICTION_MODE blockmode;
       int_mv blockmv;
@@ -544,10 +544,10 @@ static void write_mb_modes_kf(const VP9_COMP *cpi, MODE_INFO *m,
 
   write_skip_coeff(cpi, segment_id, m, bc);
 
-  if (m->mbmi.sb_type >= BLOCK_SIZE_SB8X8 && c->tx_mode == TX_MODE_SELECT)
+  if (m->mbmi.sb_type >= BLOCK_8X8 && c->tx_mode == TX_MODE_SELECT)
     write_selected_tx_size(cpi, m->mbmi.txfm_size, m->mbmi.sb_type, bc);
 
-  if (m->mbmi.sb_type >= BLOCK_SIZE_SB8X8) {
+  if (m->mbmi.sb_type >= BLOCK_8X8) {
     const MB_PREDICTION_MODE A = above_block_mode(m, 0, mis);
     const MB_PREDICTION_MODE L = xd->left_available ?
                                  left_block_mode(m, 0) : DC_PRED;
@@ -580,7 +580,7 @@ static void write_modes_b(VP9_COMP *cpi, MODE_INFO *m, vp9_writer *bc,
   VP9_COMMON *const cm = &cpi->common;
   MACROBLOCKD *const xd = &cpi->mb.e_mbd;
 
-  if (m->mbmi.sb_type < BLOCK_SIZE_SB8X8)
+  if (m->mbmi.sb_type < BLOCK_8X8)
     if (xd->ab_index > 0)
       return;
   xd->mode_info_context = m;
@@ -621,11 +621,11 @@ static void write_modes_sb(VP9_COMP *cpi, MODE_INFO *m, vp9_writer *bc,
 
   partition = partition_lookup[bsl][m->mbmi.sb_type];
 
-  if (bsize < BLOCK_SIZE_SB8X8)
+  if (bsize < BLOCK_8X8)
     if (xd->ab_index > 0)
       return;
 
-  if (bsize >= BLOCK_SIZE_SB8X8) {
+  if (bsize >= BLOCK_8X8) {
     int pl;
     const int idx = check_bsize_coverage(cm, mi_row, mi_col, bsize);
     set_partition_seg_context(cm, xd, mi_row, mi_col);
@@ -672,8 +672,8 @@ static void write_modes_sb(VP9_COMP *cpi, MODE_INFO *m, vp9_writer *bc,
   }
 
   // update partition context
-  if (bsize >= BLOCK_SIZE_SB8X8 &&
-      (bsize == BLOCK_SIZE_SB8X8 || partition != PARTITION_SPLIT)) {
+  if (bsize >= BLOCK_8X8 &&
+      (bsize == BLOCK_8X8 || partition != PARTITION_SPLIT)) {
     set_partition_seg_context(cm, xd, mi_row, mi_col);
     update_partition_context(xd, subsize, bsize);
   }

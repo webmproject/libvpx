@@ -121,7 +121,7 @@ static void clamp_mv_ref(const MACROBLOCKD *xd, int_mv *mv) {
 static INLINE int_mv get_sub_block_mv(const MODE_INFO *candidate,
                                       int check_sub_blocks, int which_mv,
                                       int search_col, int block_idx) {
-  return (check_sub_blocks && candidate->mbmi.sb_type < BLOCK_SIZE_SB8X8
+  return (check_sub_blocks && candidate->mbmi.sb_type < BLOCK_8X8
           ? candidate->bmi[idx_n_column_to_subblock[block_idx][search_col == 0]]
               .as_mv[which_mv]
           : candidate->mbmi.mv[which_mv]);
