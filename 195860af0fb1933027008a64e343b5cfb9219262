@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAcn//5/g\u003d",
+        "filename": "vp9/encoder/vp9_bitstream.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 561,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2013-08-05T19:08:18Z",
+      "side": 1,
+      "message": "Why not int as before? above_block_mode has int as a parameter. It should be const in any case :)",
+      "revId": "195860af0fb1933027008a64e343b5cfb9219262",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
