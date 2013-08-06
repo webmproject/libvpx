@@ -29,18 +29,16 @@ unsigned char vp9_get_pred_context_switchable_interp(const MACROBLOCKD *xd) {
   // The prediction flags in these dummy entries are initialised to 0.
   // left
   const int left_mv_pred = is_inter_mode(left_mbmi->mode);
-  const int left_interp = left_in_image && left_mv_pred ?
-          vp9_switchable_interp_map[left_mbmi->interp_filter] :
-          VP9_SWITCHABLE_FILTERS;
+  const int left_interp = left_in_image && left_mv_pred
+                              ? left_mbmi->interp_filter
+                              : VP9_SWITCHABLE_FILTERS;
 
   // above
   const int above_mv_pred = is_inter_mode(above_mbmi->mode);
-  const int above_interp = above_in_image && above_mv_pred ?
-          vp9_switchable_interp_map[above_mbmi->interp_filter] :
-          VP9_SWITCHABLE_FILTERS;
+  const int above_interp = above_in_image && above_mv_pred
+                               ? above_mbmi->interp_filter
+                               : VP9_SWITCHABLE_FILTERS;
 
-  assert(left_interp != -1);
-  assert(above_interp != -1);
 
   if (left_interp == above_interp)
     return left_interp;

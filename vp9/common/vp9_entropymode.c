@@ -339,13 +339,10 @@ void vp9_init_mbmode_probs(VP9_COMMON *cm) {
 }
 
 const vp9_tree_index vp9_switchable_interp_tree[VP9_SWITCHABLE_FILTERS*2-2] = {
-  -0, 2,
-  -1, -2
+  -EIGHTTAP, 2,
+  -EIGHTTAP_SMOOTH, -EIGHTTAP_SHARP
 };
 struct vp9_token vp9_switchable_interp_encodings[VP9_SWITCHABLE_FILTERS];
-const INTERPOLATIONFILTERTYPE vp9_switchable_interp[VP9_SWITCHABLE_FILTERS] = {
-  EIGHTTAP, EIGHTTAP_SMOOTH, EIGHTTAP_SHARP};
-const int vp9_switchable_interp_map[SWITCHABLE + 1] = {1, 0, 2, -1, -1};
 
 void vp9_entropy_mode_init() {
   vp9_tokens_from_tree(vp9_intra_mode_encodings, vp9_intra_mode_tree);

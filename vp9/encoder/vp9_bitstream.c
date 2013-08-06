@@ -480,8 +480,7 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, MODE_INFO *m, vp9_writer *bc) {
     if (cpi->common.mcomp_filter_type == SWITCHABLE) {
       write_token(bc, vp9_switchable_interp_tree,
                   vp9_get_pred_probs_switchable_interp(&cpi->common, xd),
-                  vp9_switchable_interp_encodings +
-                  vp9_switchable_interp_map[mi->interp_filter]);
+                  &vp9_switchable_interp_encodings[mi->interp_filter]);
     } else {
       assert(mi->interp_filter == cpi->common.mcomp_filter_type);
     }
@@ -1073,9 +1072,11 @@ static void encode_txfm_probs(VP9_COMP *cpi, vp9_writer *w) {
 
 static void write_interp_filter_type(INTERPOLATIONFILTERTYPE type,
                                      struct vp9_write_bit_buffer *wb) {
+  const int type_to_literal[] = { 1, 0, 2 };
+
   vp9_wb_write_bit(wb, type == SWITCHABLE);
   if (type != SWITCHABLE)
-    vp9_wb_write_literal(wb, type, 2);
+    vp9_wb_write_literal(wb, type_to_literal[type], 2);
 }
 
 static void fix_mcomp_filter_type(VP9_COMP *cpi) {
@@ -1095,7 +1096,7 @@ static void fix_mcomp_filter_type(VP9_COMP *cpi) {
       // Only one filter is used. So set the filter at frame level
       for (i = 0; i < VP9_SWITCHABLE_FILTERS; ++i) {
         if (count[i]) {
-          cm->mcomp_filter_type = vp9_switchable_interp[i];
+          cm->mcomp_filter_type = i;
           break;
         }
       }

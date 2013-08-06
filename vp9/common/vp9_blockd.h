@@ -56,11 +56,11 @@ typedef enum {
 } FRAME_TYPE;
 
 typedef enum {
-  EIGHTTAP_SMOOTH,
-  EIGHTTAP,
-  EIGHTTAP_SHARP,
-  BILINEAR,
-  SWITCHABLE  /* should be the last one */
+  EIGHTTAP = 0,
+  EIGHTTAP_SMOOTH = 1,
+  EIGHTTAP_SHARP = 2,
+  BILINEAR = 3,
+  SWITCHABLE = 4  /* should be the last one */
 } INTERPOLATIONFILTERTYPE;
 
 typedef enum {

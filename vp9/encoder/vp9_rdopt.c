@@ -1966,7 +1966,7 @@ static void rd_check_segment_txsize(VP9_COMP *cpi, MACROBLOCK *x,
         }
 
         if (mbmi->ref_frame[1] > 0 && this_mode == NEWMV &&
-            mbmi->interp_filter == vp9_switchable_interp[0]) {
+            mbmi->interp_filter == EIGHTTAP) {
           if (seg_mvs[i][mbmi->ref_frame[1]].as_int == INVALID_MV ||
               seg_mvs[i][mbmi->ref_frame[0]].as_int == INVALID_MV)
             continue;
@@ -2419,7 +2419,7 @@ static INLINE int get_switchable_rate(MACROBLOCK *x) {
   MB_MODE_INFO *const mbmi = &xd->mode_info_context->mbmi;
 
   const int c = vp9_get_pred_context_switchable_interp(xd);
-  const int m = vp9_switchable_interp_map[mbmi->interp_filter];
+  const int m = mbmi->interp_filter;
   return SWITCHABLE_INTERP_RATE_FACTOR * x->switchable_interp_costs[c][m];
 }
 
@@ -2845,9 +2845,8 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
     for (i = 0; i < VP9_SWITCHABLE_FILTERS; ++i) {
       int j;
       int64_t rs_rd;
-      const INTERPOLATIONFILTERTYPE filter = vp9_switchable_interp[i];
       const int is_intpel_interp = intpel_mv;
-      mbmi->interp_filter = filter;
+      mbmi->interp_filter = i;
       vp9_setup_interp_filters(xd, mbmi->interp_filter, cm);
       rs = get_switchable_rate(x);
       rs_rd = RDCOST(x->rdmult, x->rddiv, rs, 0);
@@ -3566,8 +3565,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
            ++switchable_filter_index) {
         int newbest, rs;
         int64_t rs_rd;
-        mbmi->interp_filter =
-            vp9_switchable_interp[switchable_filter_index];
+        mbmi->interp_filter = switchable_filter_index;
         vp9_setup_interp_filters(xd, mbmi->interp_filter, &cpi->common);
 
         tmp_rd = rd_pick_best_mbsegmentation(cpi, x,
@@ -3908,8 +3906,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
     if (!mode_excluded && !disable_skip && ref_frame != INTRA_FRAME &&
         cm->mcomp_filter_type != BILINEAR) {
       int64_t ref = cpi->rd_filter_cache[cm->mcomp_filter_type == SWITCHABLE ?
-                              VP9_SWITCHABLE_FILTERS :
-                              vp9_switchable_interp_map[cm->mcomp_filter_type]];
+                              VP9_SWITCHABLE_FILTERS : cm->mcomp_filter_type];
       for (i = 0; i <= VP9_SWITCHABLE_FILTERS; i++) {
         int64_t adj_rd;
         // In cases of poor prediction, filter_cache[] can contain really big
