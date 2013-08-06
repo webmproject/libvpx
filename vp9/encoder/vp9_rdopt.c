@@ -54,14 +54,14 @@ DECLARE_ALIGNED(16, extern const uint8_t,
 
 const MODE_DEFINITION vp9_mode_order[MAX_MODES] = {
   {NEARESTMV, LAST_FRAME,   NONE},
+  {DC_PRED,   INTRA_FRAME,  NONE},
+
   {NEARESTMV, ALTREF_FRAME, NONE},
   {NEARESTMV, GOLDEN_FRAME, NONE},
   {NEWMV,     LAST_FRAME,   NONE},
   {NEARESTMV, LAST_FRAME,   ALTREF_FRAME},
   {NEARMV,    LAST_FRAME,   NONE},
   {NEARESTMV, GOLDEN_FRAME, ALTREF_FRAME},
-
-  {DC_PRED,   INTRA_FRAME,  NONE},
 
   {NEWMV,     GOLDEN_FRAME, NONE},
   {NEWMV,     ALTREF_FRAME, NONE},
@@ -3518,6 +3518,16 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
         tx_cache[i] = tx_cache[ONLY_4X4];
     } else if (ref_frame == INTRA_FRAME) {
       TX_SIZE uv_tx;
+      // Disable intra modes other than DC_PRED for blocks with low variance
+      // Threshold for intra skipping based on source variance
+      // TODO(debargha): Specialize the threshold for super block sizes
+      static const int skip_intra_var_thresh[BLOCK_SIZE_TYPES] = {
+        64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64,
+      };
+      if ((cpi->sf.mode_search_skip_flags & FLAG_SKIP_INTRA_LOWVAR) &&
+          this_mode != DC_PRED &&
+          x->source_variance < skip_intra_var_thresh[mbmi->sb_type])
+        continue;
       // Only search the oblique modes if the best so far is
       // one of the neighboring directional modes
       if ((cpi->sf.mode_search_skip_flags & FLAG_SKIP_INTRA_BESTINTER) &&
@@ -3844,8 +3854,6 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
     if (this_rd < best_rd || x->skip) {
       if (!mode_excluded) {
         // Note index of best mode so far
-        const int qstep = xd->plane[0].dequant[1];
-
         best_mode_index = mode_index;
 
         if (ref_frame == INTRA_FRAME) {
@@ -3868,9 +3876,19 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
 
         // TODO(debargha): enhance this test with a better distortion prediction
         // based on qp, activity mask and history
-        if (cpi->sf.mode_search_skip_flags & FLAG_EARLY_TERMINATE)
-          if (ref_frame > INTRA_FRAME && distortion2 * 4 < qstep * qstep)
+        if (cpi->sf.mode_search_skip_flags & FLAG_EARLY_TERMINATE) {
+          const int qstep = xd->plane[0].dequant[1];
+          // TODO(debargha): Enhance this by specializing for each mode_index
+          int scale = 4;
+          if (x->source_variance < UINT_MAX) {
+            const int var_adjust = (x->source_variance < 16);
+            scale -= var_adjust;
+          }
+          if (ref_frame > INTRA_FRAME &&
+              distortion2 * scale < qstep * qstep) {
             early_term = 1;
+          }
+        }
       }
 #if 0
       // Testing this mode gave rise to an improvement in best error score.
