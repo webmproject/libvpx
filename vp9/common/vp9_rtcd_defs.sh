@@ -50,13 +50,13 @@ prototype void vp9_d27_predictor_4x4 "uint8_t *ypred_ptr, ptrdiff_t y_stride, ui
 specialize vp9_d27_predictor_4x4
 
 prototype void vp9_d45_predictor_4x4 "uint8_t *ypred_ptr, ptrdiff_t y_stride, uint8_t *yabove_row, uint8_t *yleft_col"
-specialize vp9_d45_predictor_4x4 ssse3
+specialize vp9_d45_predictor_4x4 $ssse3_x86inc
 
 prototype void vp9_d63_predictor_4x4 "uint8_t *ypred_ptr, ptrdiff_t y_stride, uint8_t *yabove_row, uint8_t *yleft_col"
 specialize vp9_d63_predictor_4x4
 
 prototype void vp9_h_predictor_4x4 "uint8_t *ypred_ptr, ptrdiff_t y_stride, uint8_t *yabove_row, uint8_t *yleft_col"
-specialize vp9_h_predictor_4x4 ssse3
+specialize vp9_h_predictor_4x4 $ssse3_x86inc
 
 prototype void vp9_d117_predictor_4x4 "uint8_t *ypred_ptr, ptrdiff_t y_stride, uint8_t *yabove_row, uint8_t *yleft_col"
 specialize vp9_d117_predictor_4x4
@@ -89,13 +89,13 @@ prototype void vp9_d27_predictor_8x8 "uint8_t *ypred_ptr, ptrdiff_t y_stride, ui
 specialize vp9_d27_predictor_8x8
 
 prototype void vp9_d45_predictor_8x8 "uint8_t *ypred_ptr, ptrdiff_t y_stride, uint8_t *yabove_row, uint8_t *yleft_col"
-specialize vp9_d45_predictor_8x8 ssse3
+specialize vp9_d45_predictor_8x8 $ssse3_x86inc
 
 prototype void vp9_d63_predictor_8x8 "uint8_t *ypred_ptr, ptrdiff_t y_stride, uint8_t *yabove_row, uint8_t *yleft_col"
 specialize vp9_d63_predictor_8x8
 
 prototype void vp9_h_predictor_8x8 "uint8_t *ypred_ptr, ptrdiff_t y_stride, uint8_t *yabove_row, uint8_t *yleft_col"
-specialize vp9_h_predictor_8x8 ssse3
+specialize vp9_h_predictor_8x8 $ssse3_x86inc
 
 prototype void vp9_d117_predictor_8x8 "uint8_t *ypred_ptr, ptrdiff_t y_stride, uint8_t *yabove_row, uint8_t *yleft_col"
 specialize vp9_d117_predictor_8x8
@@ -128,13 +128,13 @@ prototype void vp9_d27_predictor_16x16 "uint8_t *ypred_ptr, ptrdiff_t y_stride, 
 specialize vp9_d27_predictor_16x16
 
 prototype void vp9_d45_predictor_16x16 "uint8_t *ypred_ptr, ptrdiff_t y_stride, uint8_t *yabove_row, uint8_t *yleft_col"
-specialize vp9_d45_predictor_16x16 ssse3
+specialize vp9_d45_predictor_16x16 $ssse3_x86inc
 
 prototype void vp9_d63_predictor_16x16 "uint8_t *ypred_ptr, ptrdiff_t y_stride, uint8_t *yabove_row, uint8_t *yleft_col"
 specialize vp9_d63_predictor_16x16
 
 prototype void vp9_h_predictor_16x16 "uint8_t *ypred_ptr, ptrdiff_t y_stride, uint8_t *yabove_row, uint8_t *yleft_col"
-specialize vp9_h_predictor_16x16 ssse3
+specialize vp9_h_predictor_16x16 $ssse3_x86inc
 
 prototype void vp9_d117_predictor_16x16 "uint8_t *ypred_ptr, ptrdiff_t y_stride, uint8_t *yabove_row, uint8_t *yleft_col"
 specialize vp9_d117_predictor_16x16
@@ -167,13 +167,13 @@ prototype void vp9_d27_predictor_32x32 "uint8_t *ypred_ptr, ptrdiff_t y_stride, 
 specialize vp9_d27_predictor_32x32
 
 prototype void vp9_d45_predictor_32x32 "uint8_t *ypred_ptr, ptrdiff_t y_stride, uint8_t *yabove_row, uint8_t *yleft_col"
-specialize vp9_d45_predictor_32x32 ssse3
+specialize vp9_d45_predictor_32x32 $ssse3_x86inc
 
 prototype void vp9_d63_predictor_32x32 "uint8_t *ypred_ptr, ptrdiff_t y_stride, uint8_t *yabove_row, uint8_t *yleft_col"
 specialize vp9_d63_predictor_32x32
 
 prototype void vp9_h_predictor_32x32 "uint8_t *ypred_ptr, ptrdiff_t y_stride, uint8_t *yabove_row, uint8_t *yleft_col"
-specialize vp9_h_predictor_32x32 ssse3
+specialize vp9_h_predictor_32x32 $ssse3 x86inc
 
 prototype void vp9_d117_predictor_32x32 "uint8_t *ypred_ptr, ptrdiff_t y_stride, uint8_t *yabove_row, uint8_t *yleft_col"
 specialize vp9_d117_predictor_32x32
