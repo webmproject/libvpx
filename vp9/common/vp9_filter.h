@@ -19,7 +19,9 @@
 #define VP9_FILTER_WEIGHT 128
 #define VP9_FILTER_SHIFT  7
 
-#define SUBPEL_SHIFTS 16
+#define SUBPEL_BITS 4
+#define SUBPEL_MASK ((1 << SUBPEL_BITS) - 1)
+#define SUBPEL_SHIFTS (1 << SUBPEL_BITS)
 
 extern const int16_t vp9_bilinear_filters[SUBPEL_SHIFTS][8];
 extern const int16_t vp9_sub_pel_filters_6[SUBPEL_SHIFTS][8];
