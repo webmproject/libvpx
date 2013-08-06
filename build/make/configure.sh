@@ -1189,6 +1189,12 @@ EOF
         fi
     fi
 
+    # default use_x86inc to yes if pic is no or 64bit or we are not on darwin
+    echo "  checking here for x86inc \"${tgt_isa}\" \"$pic\" "
+    if [ ${tgt_isa} = x86_64 -o ! "$pic" == "yes" -o ! ${tgt_os:0:6} = darwin ]; then
+      soft_enable use_x86inc
+    fi
+
     # Position Independent Code (PIC) support, for building relocatable
     # shared objects
     enabled gcc && enabled pic && check_add_cflags -fPIC

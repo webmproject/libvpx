@@ -21,7 +21,7 @@ EOF
 forward_decls vp9_common_forward_decls
 
 # x86inc.asm doesn't work if pic is enabled on 32 bit platforms so no assembly.
-[ $arch = "x86_64" -o ! "$CONFIG_PIC" = "yes" -o "$CONFIG_FORCE_X86INC" == "yes" ] && mmx_x86inc=mmx && sse2_x86inc=sse2  && ssse3_x86inc=ssse3
+[ "$CONFIG_USE_X86INC" = "yes" ] && mmx_x86inc=mmx && sse2_x86inc=sse2  && ssse3_x86inc=ssse3
 
 # this variable is for functions that are 64 bit only.
 [ $arch = "x86_64" ] && mmx_x86_64=mmx && sse2_x86_64=sse2  && ssse3_x86_64=ssse3
