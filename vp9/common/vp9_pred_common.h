@@ -57,12 +57,6 @@ void vp9_set_pred_flag_mbskip(VP9_COMMON *cm, BLOCK_SIZE_TYPE bsize,
 
 unsigned char vp9_get_pred_context_switchable_interp(const MACROBLOCKD *xd);
 
-static INLINE const vp9_prob *vp9_get_pred_probs_switchable_interp(
-    const VP9_COMMON *cm, const MACROBLOCKD *xd) {
-  const int pred_context = vp9_get_pred_context_switchable_interp(xd);
-  return &cm->fc.switchable_interp_prob[pred_context][0];
-}
-
 unsigned char vp9_get_pred_context_intra_inter(const MACROBLOCKD *xd);
 
 static INLINE vp9_prob vp9_get_pred_prob_intra_inter(const VP9_COMMON *cm,

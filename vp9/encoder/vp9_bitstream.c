@@ -477,12 +477,13 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, MODE_INFO *m, vp9_writer *bc) {
       }
     }
 
-    if (cpi->common.mcomp_filter_type == SWITCHABLE) {
+    if (pc->mcomp_filter_type == SWITCHABLE) {
+      const int ctx = vp9_get_pred_context_switchable_interp(xd);
       write_token(bc, vp9_switchable_interp_tree,
-                  vp9_get_pred_probs_switchable_interp(&cpi->common, xd),
+                  pc->fc.switchable_interp_prob[ctx],
                   &vp9_switchable_interp_encodings[mi->interp_filter]);
     } else {
-      assert(mi->interp_filter == cpi->common.mcomp_filter_type);
+      assert(mi->interp_filter == pc->mcomp_filter_type);
     }
 
     if (bsize < BLOCK_8X8) {

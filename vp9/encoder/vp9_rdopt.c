@@ -2412,13 +2412,12 @@ static YV12_BUFFER_CONFIG *get_scaled_ref_frame(VP9_COMP *cpi, int ref_frame) {
   return scaled_ref_frame;
 }
 
-static INLINE int get_switchable_rate(MACROBLOCK *x) {
-  MACROBLOCKD *xd = &x->e_mbd;
-  MB_MODE_INFO *const mbmi = &xd->mode_info_context->mbmi;
-
-  const int c = vp9_get_pred_context_switchable_interp(xd);
-  const int m = mbmi->interp_filter;
-  return SWITCHABLE_INTERP_RATE_FACTOR * x->switchable_interp_costs[c][m];
+static INLINE int get_switchable_rate(const MACROBLOCK *x) {
+  const MACROBLOCKD *const xd = &x->e_mbd;
+  const MB_MODE_INFO *const mbmi = &xd->mode_info_context->mbmi;
+  const int ctx = vp9_get_pred_context_switchable_interp(xd);
+  return SWITCHABLE_INTERP_RATE_FACTOR *
+             x->switchable_interp_costs[ctx][mbmi->interp_filter];
 }
 
 static void single_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
