@@ -232,14 +232,18 @@ typedef enum {
   FLAG_SKIP_INTRA_LOWVAR = 32,
 } MODE_SEARCH_SKIP_LOGIC;
 
+typedef enum {
+  SUBPEL_ITERATIVE = 0,
+  // Other methods to come
+} SUBPEL_SEARCH_METHODS;
+
 typedef struct {
   int RD;
   SEARCH_METHODS search_method;
   int auto_filter;
   int recode_loop;
-  int iterative_sub_pixel;
-  int half_pixel_search;
-  int quarter_pixel_search;
+  SUBPEL_SEARCH_METHODS subpel_search_method;
+  int subpel_iters_per_step;
   int thresh_mult[MAX_MODES];
   int max_step_search_steps;
   int reduce_first_step_size;

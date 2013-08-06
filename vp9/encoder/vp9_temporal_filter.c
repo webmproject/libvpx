@@ -170,6 +170,7 @@ static int temporal_filter_find_matching_mb_c(VP9_COMP *cpi,
                                            &best_ref_mv1,
                                            x->errorperbit,
                                            &cpi->fn_ptr[BLOCK_16X16],
+                                           0, cpi->sf.subpel_iters_per_step,
                                            NULL, NULL,
                                            &distortion, &sse);
   }
