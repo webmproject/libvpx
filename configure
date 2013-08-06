@@ -314,6 +314,7 @@ CMDLINE_SELECT="
     gprof
     gcov
     pic
+    use_x86inc
     optimizations
     ccache
     runtime_cpu_detect
