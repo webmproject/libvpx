@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAcn//3+M\u003d",
+        "filename": "test/variance_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 604,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2013-08-06T16:22:00Z",
+      "side": 1,
+      "message": "extra space",
+      "revId": "3c59f4d03049d46f862a619a9f496c2b1906dd20",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
