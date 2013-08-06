@@ -289,6 +289,7 @@ typedef struct {
   MB_PREDICTION_MODE last_chroma_intra_mode;
   int use_rd_breakout;
   int use_uv_intra_rd_estimate;
+  int use_fast_lpf_pick;
 } SPEED_FEATURES;
 
 typedef struct VP9_COMP {

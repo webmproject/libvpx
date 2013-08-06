@@ -125,6 +125,10 @@ static int get_max_filter_level(VP9_COMP *cpi, int base_qindex) {
 void vp9_set_alt_lf_level(VP9_COMP *cpi, int filt_val) {
 }
 
+void vp9_pick_filter_level_fast(YV12_BUFFER_CONFIG *sd, VP9_COMP *cpi) {
+  struct loopfilter *lf = &cpi->mb.e_mbd.lf;
+  lf->filter_level = 0;
+}
 void vp9_pick_filter_level(YV12_BUFFER_CONFIG *sd, VP9_COMP *cpi) {
   VP9_COMMON *cm = &cpi->common;
   struct loopfilter *lf = &cpi->mb.e_mbd.lf;
