@@ -154,10 +154,10 @@ static int temporal_filter_find_matching_mb_c(VP9_COMP *cpi,
   // TODO Check that the 16x16 vf & sdf are selected here
   // Ignore mv costing by sending NULL pointer instead of cost arrays
   ref_mv = &x->e_mbd.mode_info_context->bmi[0].as_mv[0];
-  bestsme = vp9_hex_search(x, &best_ref_mv1_full, ref_mv,
-                           step_param, sadpb, &cpi->fn_ptr[BLOCK_16X16],
-                           NULL, NULL, NULL, NULL,
-                           &best_ref_mv1);
+  bestsme = vp9_hex_search(x, &best_ref_mv1_full,
+                           step_param, sadpb, 1,
+                           &cpi->fn_ptr[BLOCK_16X16],
+                           0, &best_ref_mv1, ref_mv);
 
 #if ALT_REF_SUBPEL_ENABLED
   // Try sub-pixel MC?

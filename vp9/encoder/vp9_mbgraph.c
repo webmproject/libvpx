@@ -46,8 +46,9 @@ static unsigned int do_16x16_motion_iteration(VP9_COMP *cpi,
   ref_full.as_mv.row = ref_mv->as_mv.row >> 3;
 
   /*cpi->sf.search_method == HEX*/
-  best_err = vp9_hex_search(x, &ref_full, dst_mv, step_param, x->errorperbit,
-                            &v_fn_ptr, NULL, NULL, NULL, NULL, ref_mv);
+  best_err = vp9_hex_search(x, &ref_full, step_param, x->errorperbit,
+                            0, &v_fn_ptr,
+                            0, ref_mv, dst_mv);
 
   // Try sub-pixel MC
   // if (bestsme > error_thresh && bestsme < INT_MAX)
