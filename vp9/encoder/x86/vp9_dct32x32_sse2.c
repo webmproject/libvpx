@@ -12,8 +12,8 @@
 #include "vp9/common/vp9_idct.h"  // for cospi constants
 #include "vpx_ports/mem.h"
 
-void FDCT32x32_NAME(int16_t *input,
-                    int16_t *output_org, int pitch) {
+void FDCT32x32_2D(int16_t *input,
+                  int16_t *output_org, int pitch) {
   // Calculate pre-multiplied strides
   const int str1 = pitch >> 1;
   const int str2 = pitch;
