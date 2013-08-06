@@ -333,13 +333,14 @@ void vp9_activity_masking(VP9_COMP *cpi, MACROBLOCK *x) {
 static void update_state(VP9_COMP *cpi, PICK_MODE_CONTEXT *ctx,
                          BLOCK_SIZE_TYPE bsize, int output_enabled) {
   int i, x_idx, y;
-  MACROBLOCK * const x = &cpi->mb;
-  MACROBLOCKD * const xd = &x->e_mbd;
+  VP9_COMMON *const cm = &cpi->common;
+  MACROBLOCK *const x = &cpi->mb;
+  MACROBLOCKD *const xd = &x->e_mbd;
   MODE_INFO *mi = &ctx->mic;
-  MB_MODE_INFO * const mbmi = &xd->mode_info_context->mbmi;
+  MB_MODE_INFO *const mbmi = &xd->mode_info_context->mbmi;
 
   int mb_mode_index = ctx->best_mode_index;
-  const int mis = cpi->common.mode_info_stride;
+  const int mis = cm->mode_info_stride;
   const int mi_width = num_8x8_blocks_wide_lookup[bsize];
   const int mi_height = num_8x8_blocks_high_lookup[bsize];
 
@@ -351,15 +352,12 @@ static void update_state(VP9_COMP *cpi, PICK_MODE_CONTEXT *ctx,
 
   // Restore the coding context of the MB to that that was in place
   // when the mode was picked for it
-  for (y = 0; y < mi_height; y++) {
-    for (x_idx = 0; x_idx < mi_width; x_idx++) {
+  for (y = 0; y < mi_height; y++)
+    for (x_idx = 0; x_idx < mi_width; x_idx++)
       if ((xd->mb_to_right_edge >> (3 + LOG2_MI_SIZE)) + mi_width > x_idx
-          && (xd->mb_to_bottom_edge >> (3 + LOG2_MI_SIZE)) + mi_height > y) {
-        MODE_INFO *mi_addr = xd->mode_info_context + x_idx + y * mis;
-        *mi_addr = *mi;
-      }
-    }
-  }
+          && (xd->mb_to_bottom_edge >> (3 + LOG2_MI_SIZE)) + mi_height > y)
+        xd->mode_info_context[x_idx + y * mis] = *mi;
+
   // FIXME(rbultje) I'm pretty sure this should go to the end of this block
   // (i.e. after the output_enabled)
   if (bsize < BLOCK_32X32) {
@@ -383,7 +381,7 @@ static void update_state(VP9_COMP *cpi, PICK_MODE_CONTEXT *ctx,
       cpi->rd_tx_select_diff[i] += ctx->tx_rd_diff[i];
   }
 
-  if (cpi->common.frame_type == KEY_FRAME) {
+  if (cm->frame_type == KEY_FRAME) {
     // Restore the coding modes to that held in the coding context
     // if (mb_mode == I4X4_PRED)
     //    for (i = 0; i < 16; i++)
@@ -436,19 +434,17 @@ static void update_state(VP9_COMP *cpi, PICK_MODE_CONTEXT *ctx,
             xd->mode_info_context[mis * j + i].mbmi = *mbmi;
     }
 
-    if (cpi->common.mcomp_filter_type == SWITCHABLE
-        && is_inter_mode(mbmi->mode)) {
-      ++cpi->common.counts.switchable_interp[
-          vp9_get_pred_context_switchable_interp(xd)][mbmi->interp_filter];
+    if (cm->mcomp_filter_type == SWITCHABLE && is_inter_mode(mbmi->mode)) {
+      const int ctx = vp9_get_pred_context_switchable_interp(xd);
+      ++cm->counts.switchable_interp[ctx][mbmi->interp_filter];
     }
 
     cpi->rd_comp_pred_diff[SINGLE_PREDICTION_ONLY] += ctx->single_pred_diff;
     cpi->rd_comp_pred_diff[COMP_PREDICTION_ONLY] += ctx->comp_pred_diff;
     cpi->rd_comp_pred_diff[HYBRID_PREDICTION] += ctx->hybrid_pred_diff;
 
-    for (i = 0; i <= VP9_SWITCHABLE_FILTERS; i++) {
+    for (i = 0; i <= VP9_SWITCHABLE_FILTERS; i++)
       cpi->rd_filter_diff[i] += ctx->best_filter_diff[i];
-    }
   }
 }
 
