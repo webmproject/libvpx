@@ -285,8 +285,8 @@ static void build_inter_predictors(int plane, int block,
 
   assert(x < (4 << bwl));
   assert(y < (4 << bhl));
-  assert(mi->mbmi.sb_type < BLOCK_SIZE_SB8X8 || 4 << pred_w == (4 << bwl));
-  assert(mi->mbmi.sb_type < BLOCK_SIZE_SB8X8 || 4 << pred_h == (4 << bhl));
+  assert(mi->mbmi.sb_type < BLOCK_8X8 || 4 << pred_w == (4 << bwl));
+  assert(mi->mbmi.sb_type < BLOCK_8X8 || 4 << pred_h == (4 << bhl));
 
   for (which_mv = 0; which_mv < 1 + use_second_ref; ++which_mv) {
     // source
@@ -303,7 +303,7 @@ static void build_inter_predictors(int plane, int block,
     // same MV (the average of the 4 luma MVs) but we could do something
     // smarter for non-4:2:0. Just punt for now, pending the changes to get
     // rid of SPLITMV mode entirely.
-    const MV mv = mi->mbmi.sb_type < BLOCK_SIZE_SB8X8
+    const MV mv = mi->mbmi.sb_type < BLOCK_8X8
                ? (plane == 0 ? mi->bmi[block].as_mv[which_mv].as_mv
                              : mi_mv_pred_q4(mi, which_mv))
                : mi->mbmi.mv[which_mv].as_mv;

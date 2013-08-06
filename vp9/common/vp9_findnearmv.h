@@ -52,8 +52,8 @@ static MB_PREDICTION_MODE left_block_mode(const MODE_INFO *cur_mb, int b) {
 
     if (is_inter_block(&cur_mb->mbmi)) {
       return DC_PRED;
-    } else if (cur_mb->mbmi.sb_type < BLOCK_SIZE_SB8X8) {
-      return ((cur_mb->bmi + 1 + b)->as_mode);
+    } else if (cur_mb->mbmi.sb_type < BLOCK_8X8) {
+      return (cur_mb->bmi + 1 + b)->as_mode;
     } else {
       return cur_mb->mbmi.mode;
     }
@@ -70,8 +70,8 @@ static MB_PREDICTION_MODE above_block_mode(const MODE_INFO *cur_mb,
 
     if (is_inter_block(&cur_mb->mbmi)) {
       return DC_PRED;
-    } else if (cur_mb->mbmi.sb_type < BLOCK_SIZE_SB8X8) {
-      return ((cur_mb->bmi + 2 + b)->as_mode);
+    } else if (cur_mb->mbmi.sb_type < BLOCK_8X8) {
+      return (cur_mb->bmi + 2 + b)->as_mode;
     } else {
       return cur_mb->mbmi.mode;
     }

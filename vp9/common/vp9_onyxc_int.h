@@ -250,7 +250,7 @@ static int check_bsize_coverage(VP9_COMMON *cm, int mi_row, int mi_col,
 
   // frame width/height are multiples of 8, hence 8x8 block should always
   // pass the above check
-  assert(bsize > BLOCK_SIZE_SB8X8);
+  assert(bsize > BLOCK_8X8);
 
   // return the node index in the prob tree for binary coding
   // only allow horizontal/split partition types
