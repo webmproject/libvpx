@@ -483,6 +483,7 @@ INSTANTIATE_TEST_CASE_P(
 #endif
 
 #if HAVE_SSE2
+#if CONFIG_USE_X86INC
 const vp9_variance_fn_t variance4x4_sse2 = vp9_variance4x4_sse2;
 const vp9_variance_fn_t variance4x8_sse2 = vp9_variance4x8_sse2;
 const vp9_variance_fn_t variance8x4_sse2 = vp9_variance8x4_sse2;
@@ -596,8 +597,11 @@ INSTANTIATE_TEST_CASE_P(
                       make_tuple(6, 5, subpel_avg_variance64x32_sse2),
                       make_tuple(6, 6, subpel_avg_variance64x64_sse2)));
 #endif
+#endif
 
 #if HAVE_SSSE3
+#if CONFIG_USE_X86INC
+
 const vp9_subpixvariance_fn_t subpel_variance4x4_ssse3 =
     vp9_sub_pixel_variance4x4_ssse3;
 const vp9_subpixvariance_fn_t subpel_variance4x8_ssse3 =
@@ -681,6 +685,7 @@ INSTANTIATE_TEST_CASE_P(
                       make_tuple(5, 6, subpel_avg_variance32x64_ssse3),
                       make_tuple(6, 5, subpel_avg_variance64x32_ssse3),
                       make_tuple(6, 6, subpel_avg_variance64x64_ssse3)));
+#endif
 #endif
 #endif  // CONFIG_VP9_ENCODER
 

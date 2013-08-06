@@ -494,6 +494,7 @@ const sad_m_by_n_test_param_t sse2_tests[] = {
 INSTANTIATE_TEST_CASE_P(SSE2, SADTest, ::testing::ValuesIn(sse2_tests));
 
 #if CONFIG_VP9_ENCODER
+#if CONFIG_USE_X86INC
 const sad_n_by_n_by_4_fn_t sad_64x64x4d_sse2 = vp9_sad64x64x4d_sse2;
 const sad_n_by_n_by_4_fn_t sad_64x32x4d_sse2 = vp9_sad64x32x4d_sse2;
 const sad_n_by_n_by_4_fn_t sad_32x64x4d_sse2 = vp9_sad32x64x4d_sse2;
@@ -519,6 +520,7 @@ INSTANTIATE_TEST_CASE_P(SSE2, SADx4Test, ::testing::Values(
                         make_tuple(8, 4, sad_8x4x4d_sse2)));
 #endif
 #endif
+#endif
 
 #if HAVE_SSE3
 #if CONFIG_VP8_ENCODER
@@ -537,9 +539,11 @@ INSTANTIATE_TEST_CASE_P(SSE3, SADx4Test, ::testing::Values(
 #endif
 
 #if HAVE_SSSE3
+#if CONFIG_USE_X86INC
 const sad_m_by_n_fn_t sad_16x16_sse3 = vp8_sad16x16_sse3;
 INSTANTIATE_TEST_CASE_P(SSE3, SADTest, ::testing::Values(
                         make_tuple(16, 16, sad_16x16_sse3)));
+#endif
 #endif
 
 }  // namespace
