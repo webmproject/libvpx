@@ -21,10 +21,11 @@ EOF
 forward_decls vp9_common_forward_decls
 
 # x86inc.asm doesn't work if pic is enabled on 32 bit platforms so no assembly.
-[ "$CONFIG_USE_X86INC" = "yes" ] && mmx_x86inc=mmx && sse2_x86inc=sse2  && ssse3_x86inc=ssse3
+[ "$CONFIG_USE_X86INC" = "yes" ] && mmx_x86inc=mmx && sse_x86inc=sse &&
+  sse2_x86inc=sse2 && ssse3_x86inc=ssse3
 
 # this variable is for functions that are 64 bit only.
-[ $arch = "x86_64" ] && mmx_x86_64=mmx && sse2_x86_64=sse2  && ssse3_x86_64=ssse3
+[ $arch = "x86_64" ] && mmx_x86_64=mmx && sse2_x86_64=sse2 && ssse3_x86_64=ssse3
 
 #
 # Dequant
@@ -67,13 +68,13 @@ prototype void vp9_d153_predictor_4x4 "uint8_t *ypred_ptr, ptrdiff_t y_stride, u
 specialize vp9_d153_predictor_4x4
 
 prototype void vp9_v_predictor_4x4 "uint8_t *ypred_ptr, ptrdiff_t y_stride, uint8_t *yabove_row, uint8_t *yleft_col"
-specialize vp9_v_predictor_4x4 sse
+specialize vp9_v_predictor_4x4 $sse_x86inc
 
 prototype void vp9_tm_predictor_4x4 "uint8_t *ypred_ptr, ptrdiff_t y_stride, uint8_t *yabove_row, uint8_t *yleft_col"
-specialize vp9_tm_predictor_4x4 sse
+specialize vp9_tm_predictor_4x4 $sse_x86inc
 
 prototype void vp9_dc_predictor_4x4 "uint8_t *ypred_ptr, ptrdiff_t y_stride, uint8_t *yabove_row, uint8_t *yleft_col"
-specialize vp9_dc_predictor_4x4 sse
+specialize vp9_dc_predictor_4x4 $sse_x86inc
 
 prototype void vp9_dc_top_predictor_4x4 "uint8_t *ypred_ptr, ptrdiff_t y_stride, uint8_t *yabove_row, uint8_t *yleft_col"
 specialize vp9_dc_top_predictor_4x4
@@ -106,13 +107,13 @@ prototype void vp9_d153_predictor_8x8 "uint8_t *ypred_ptr, ptrdiff_t y_stride, u
 specialize vp9_d153_predictor_8x8
 
 prototype void vp9_v_predictor_8x8 "uint8_t *ypred_ptr, ptrdiff_t y_stride, uint8_t *yabove_row, uint8_t *yleft_col"
-specialize vp9_v_predictor_8x8 sse
+specialize vp9_v_predictor_8x8 $sse_x86inc
 
 prototype void vp9_tm_predictor_8x8 "uint8_t *ypred_ptr, ptrdiff_t y_stride, uint8_t *yabove_row, uint8_t *yleft_col"
-specialize vp9_tm_predictor_8x8 sse2
+specialize vp9_tm_predictor_8x8 $sse2_x86inc
 
 prototype void vp9_dc_predictor_8x8 "uint8_t *ypred_ptr, ptrdiff_t y_stride, uint8_t *yabove_row, uint8_t *yleft_col"
-specialize vp9_dc_predictor_8x8 sse
+specialize vp9_dc_predictor_8x8 $sse_x86inc
 
 prototype void vp9_dc_top_predictor_8x8 "uint8_t *ypred_ptr, ptrdiff_t y_stride, uint8_t *yabove_row, uint8_t *yleft_col"
 specialize vp9_dc_top_predictor_8x8
@@ -145,13 +146,13 @@ prototype void vp9_d153_predictor_16x16 "uint8_t *ypred_ptr, ptrdiff_t y_stride,
 specialize vp9_d153_predictor_16x16
 
 prototype void vp9_v_predictor_16x16 "uint8_t *ypred_ptr, ptrdiff_t y_stride, uint8_t *yabove_row, uint8_t *yleft_col"
-specialize vp9_v_predictor_16x16 sse2
+specialize vp9_v_predictor_16x16 $sse2_x86inc
 
 prototype void vp9_tm_predictor_16x16 "uint8_t *ypred_ptr, ptrdiff_t y_stride, uint8_t *yabove_row, uint8_t *yleft_col"
-specialize vp9_tm_predictor_16x16 sse2
+specialize vp9_tm_predictor_16x16 $sse2_x86inc
 
 prototype void vp9_dc_predictor_16x16 "uint8_t *ypred_ptr, ptrdiff_t y_stride, uint8_t *yabove_row, uint8_t *yleft_col"
-specialize vp9_dc_predictor_16x16 sse2
+specialize vp9_dc_predictor_16x16 $sse2_x86inc
 
 prototype void vp9_dc_top_predictor_16x16 "uint8_t *ypred_ptr, ptrdiff_t y_stride, uint8_t *yabove_row, uint8_t *yleft_col"
 specialize vp9_dc_top_predictor_16x16
@@ -184,13 +185,13 @@ prototype void vp9_d153_predictor_32x32 "uint8_t *ypred_ptr, ptrdiff_t y_stride,
 specialize vp9_d153_predictor_32x32
 
 prototype void vp9_v_predictor_32x32 "uint8_t *ypred_ptr, ptrdiff_t y_stride, uint8_t *yabove_row, uint8_t *yleft_col"
-specialize vp9_v_predictor_32x32 sse2
+specialize vp9_v_predictor_32x32 $sse2_x86inc
 
 prototype void vp9_tm_predictor_32x32 "uint8_t *ypred_ptr, ptrdiff_t y_stride, uint8_t *yabove_row, uint8_t *yleft_col"
-specialize vp9_tm_predictor_32x32 sse2_x86_64
+specialize vp9_tm_predictor_32x32 $sse2_x86_64
 
 prototype void vp9_dc_predictor_32x32 "uint8_t *ypred_ptr, ptrdiff_t y_stride, uint8_t *yabove_row, uint8_t *yleft_col"
-specialize vp9_dc_predictor_32x32 sse2
+specialize vp9_dc_predictor_32x32 $sse2_x86inc
 
 prototype void vp9_dc_top_predictor_32x32 "uint8_t *ypred_ptr, ptrdiff_t y_stride, uint8_t *yabove_row, uint8_t *yleft_col"
 specialize vp9_dc_top_predictor_32x32
