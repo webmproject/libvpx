@@ -14,13 +14,13 @@
 #include "vp9/common/vp9_mvref_common.h"
 #include "vp9/common/vp9_sadmxn.h"
 
-static void lower_mv_precision(int_mv *mv, int allow_hp) {
-  const int use_hp = allow_hp && vp9_use_mv_hp(&mv->as_mv);
+static void lower_mv_precision(MV *mv, int allow_hp) {
+  const int use_hp = allow_hp && vp9_use_mv_hp(mv);
   if (!use_hp) {
-    if (mv->as_mv.row & 1)
-      mv->as_mv.row += (mv->as_mv.row > 0 ? -1 : 1);
-    if (mv->as_mv.col & 1)
-      mv->as_mv.col += (mv->as_mv.col > 0 ? -1 : 1);
+    if (mv->row & 1)
+      mv->row += (mv->row > 0 ? -1 : 1);
+    if (mv->col & 1)
+      mv->col += (mv->col > 0 ? -1 : 1);
   }
 }
 
@@ -32,7 +32,7 @@ void vp9_find_best_ref_mvs(MACROBLOCKD *xd,
   int i;
   // Make sure all the candidates are properly clamped etc
   for (i = 0; i < MAX_MV_REF_CANDIDATES; ++i) {
-    lower_mv_precision(&mvlist[i], xd->allow_high_precision_mv);
+    lower_mv_precision(&mvlist[i].as_mv, xd->allow_high_precision_mv);
     clamp_mv2(&mvlist[i].as_mv, xd);
   }
   *nearest = mvlist[0];
