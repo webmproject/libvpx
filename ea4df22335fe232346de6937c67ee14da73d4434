@@ -55,6 +55,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAcn//1MY\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 399,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2013-08-07T22:07:30Z",
+      "side": 1,
+      "message": "\u003e\u003e 3   seems like something anyone who doesn\u0027t know this code could get wrong.   Why not have an inline function that corrects it / a macro or something so that I don\u0027t have to remember that the parameter called dequant is 1/8 what\u0027s stored in the table.",
+      "parentUuid": "AAAAcn//1Nk\u003d",
+      "revId": "ea4df22335fe232346de6937c67ee14da73d4434",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAcn//1RA\u003d",
         "filename": "vp9/encoder/vp9_rdopt.c",
         "patchSetId": 4
