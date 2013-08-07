@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAcn//21A\u003d",
+        "filename": "vp9/common/arm/neon/vp9_idct16x16_neon.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2013-08-07T00:10:54Z",
+      "side": 1,
+      "message": "Jenkins treats warnings as errors. You need prototypes for the neon functions you call.\n\n[CC] vp9/common/arm/neon/vp9_idct16x16_neon.c.o\n../libvpx/vp9/common/arm/neon/vp9_idct16x16_neon.c: In function \u0027vp9_short_idct16x16_add_neon\u0027:\n../libvpx/vp9/common/arm/neon/vp9_idct16x16_neon.c:22:3: error: implicit declaration of function \u0027vp9_short_idct16x16_add_neon_pass1\u0027 [-Werror\u003dimplicit-function-declaration]\n../libvpx/vp9/common/arm/neon/vp9_idct16x16_neon.c:27:3: error: implicit declaration of function \u0027vp9_short_idct16x16_add_neon_pass2\u0027 [-Werror\u003dimplicit-function-declaration]\ncc1: all warnings being treated as errors",
+      "revId": "9b80d4d5d217345599a4c577d3ee2b64d372f57d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
