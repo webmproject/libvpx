@@ -565,7 +565,7 @@ static void pick_sb_modes(VP9_COMP *cpi, int mi_row, int mi_col,
   MACROBLOCK *const x = &cpi->mb;
   MACROBLOCKD *const xd = &x->e_mbd;
 
-  x->rd_search = 1;
+  x->use_lp32x32fdct = 1;
 
   if (bsize < BLOCK_8X8) {
     // When ab_index = 0 all sub-blocks are handled, so for ab_index != 0
@@ -2546,7 +2546,7 @@ static void encode_superblock(VP9_COMP *cpi, TOKENEXTRA **t, int output_enabled,
   const int mis = cm->mode_info_stride;
   const int mi_width = num_8x8_blocks_wide_lookup[bsize];
   const int mi_height = num_8x8_blocks_high_lookup[bsize];
-  x->rd_search = 0;
+  x->use_lp32x32fdct = cpi->sf.use_lp32x32fdct;
   x->skip_encode = (!output_enabled && cpi->sf.skip_encode_frame &&
                     xd->q_index < QIDX_SKIP_THRESH);
   if (x->skip_encode)
