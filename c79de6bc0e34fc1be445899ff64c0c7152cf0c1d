@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAcn//2Ck\u003d",
+        "filename": "vp9/common/arm/neon/vp9_idct16x16_neon.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2013-08-07T17:54:06Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAcn//2v0\u003d",
+      "revId": "c79de6bc0e34fc1be445899ff64c0c7152cf0c1d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAcn//2vs\u003d",
         "filename": "vp9/common/arm/neon/vp9_short_idct16x16_add_neon.asm",
         "patchSetId": 5
@@ -30,6 +48,24 @@
       "writtenOn": "2013-08-07T00:50:15Z",
       "side": 1,
       "message": "If it touches q4-q7, those need to be vpush\u0027d",
+      "revId": "c79de6bc0e34fc1be445899ff64c0c7152cf0c1d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcn//2CY\u003d",
+        "filename": "vp9/common/arm/neon/vp9_short_idct16x16_add_neon.asm",
+        "patchSetId": 5
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2013-08-07T17:54:06Z",
+      "side": 1,
+      "message": "add vpush {d8-d15} and vpop {d8-d15} for both functions.",
+      "parentUuid": "AAAAcn//2vs\u003d",
       "revId": "c79de6bc0e34fc1be445899ff64c0c7152cf0c1d",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
