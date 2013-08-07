@@ -143,7 +143,7 @@ typedef struct {
   unsigned char mb_skip_coeff;                                /* does this mb has coefficients at all, 1=no coefficients, 0=need decode tokens */
   unsigned char segment_id;           // Segment id for current frame
 
-  // Flags used for prediction status of various bistream signals
+  // Flags used for prediction status of various bit-stream signals
   unsigned char seg_id_predicted;
 
   // Indicates if the mb is part of the image (1) vs border (0)
