@@ -1967,6 +1967,7 @@ static void rd_check_segment_txsize(VP9_COMP *cpi, MACROBLOCK *x,
             unsigned int sse;
             cpi->find_fractional_mv_step(x, &mode_mv[NEWMV],
                                          bsi->ref_mv, x->errorperbit, v_fn_ptr,
+                                         0, cpi->sf.subpel_iters_per_step,
                                          x->nmvjointcost, x->mvcost,
                                          &distortion, &sse);
 
@@ -2547,6 +2548,7 @@ static void single_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
     cpi->find_fractional_mv_step(x, tmp_mv, &ref_mv,
                                  x->errorperbit,
                                  &cpi->fn_ptr[block_size],
+                                 0, cpi->sf.subpel_iters_per_step,
                                  x->nmvjointcost, x->mvcost,
                                  &dis, &sse);
   }
@@ -2673,13 +2675,15 @@ static void joint_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
       int dis; /* TODO: use dis in distortion calculation later. */
       unsigned int sse;
 
-      bestsme = vp9_find_best_sub_pixel_comp(x, &tmp_mv,
-                                             &ref_mv[id],
-                                             x->errorperbit,
-                                             &cpi->fn_ptr[block_size],
-                                             x->nmvjointcost, x->mvcost,
-                                             &dis, &sse, second_pred,
-                                             pw, ph);
+      bestsme = vp9_find_best_sub_pixel_comp_iterative(
+          x, &tmp_mv,
+          &ref_mv[id],
+          x->errorperbit,
+          &cpi->fn_ptr[block_size],
+          0, cpi->sf.subpel_iters_per_step,
+          x->nmvjointcost, x->mvcost,
+          &dis, &sse, second_pred,
+          pw, ph);
     }
 
     if (id)

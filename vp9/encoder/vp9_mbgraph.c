@@ -59,7 +59,7 @@ static unsigned int do_16x16_motion_iteration(VP9_COMP *cpi,
         x,
         dst_mv, ref_mv,
         x->errorperbit, &v_fn_ptr,
-        NULL, NULL,
+        0, cpi->sf.subpel_iters_per_step, NULL, NULL,
         & distortion, &sse);
   }
 
