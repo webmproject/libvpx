@@ -51,7 +51,7 @@ void vp9_loop_filter_frame_init(struct VP9Common *const cm,
 void vp9_loop_filter_frame(struct VP9Common *cm,
                            struct macroblockd *mbd,
                            int filter_level,
-                           int y_only);
+                           int y_only, int partial);
 
 // Apply the loop filter to [start, stop) macro block rows in frame_buffer.
 void vp9_loop_filter_rows(const YV12_BUFFER_CONFIG *frame_buffer,

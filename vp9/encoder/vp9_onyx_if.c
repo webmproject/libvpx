@@ -2436,10 +2436,7 @@ static void loopfilter_frame(VP9_COMP *cpi, VP9_COMMON *cm) {
 
     vpx_usec_timer_start(&timer);
 
-    if (cpi->sf.use_fast_lpf_pick == 0)
-      vp9_pick_filter_level(cpi->Source, cpi);
-    else
-      vp9_pick_filter_level_fast(cpi->Source, cpi);
+    vp9_pick_filter_level(cpi->Source, cpi, cpi->sf.use_fast_lpf_pick);
 
     vpx_usec_timer_mark(&timer);
     cpi->time_pick_lpf += vpx_usec_timer_elapsed(&timer);
@@ -2447,7 +2444,7 @@ static void loopfilter_frame(VP9_COMP *cpi, VP9_COMMON *cm) {
 
   if (lf->filter_level > 0) {
     vp9_set_alt_lf_level(cpi, lf->filter_level);
-    vp9_loop_filter_frame(cm, xd, lf->filter_level, 0);
+    vp9_loop_filter_frame(cm, xd, lf->filter_level, 0, 0);
   }
 
   vp9_extend_frame_inner_borders(cm->frame_to_show,

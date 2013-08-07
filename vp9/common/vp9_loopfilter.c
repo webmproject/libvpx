@@ -377,11 +377,23 @@ void vp9_loop_filter_rows(const YV12_BUFFER_CONFIG *frame_buffer,
 }
 
 void vp9_loop_filter_frame(VP9_COMMON *cm, MACROBLOCKD *xd,
-                           int frame_filter_level, int y_only) {
+                           int frame_filter_level,
+                           int y_only, int partial) {
+  int start_mi_row, end_mi_row, mi_rows_to_filter;
   if (!frame_filter_level) return;
+
+  start_mi_row = 0;
+  mi_rows_to_filter = cm->mi_rows;
+  if (partial && cm->mi_rows > 8) {
+    start_mi_row = cm->mi_rows >> 1;
+    start_mi_row &= 0xfffffff8;
+    mi_rows_to_filter = MAX(cm->mi_rows / 8, 8);
+  }
+  end_mi_row = start_mi_row + mi_rows_to_filter;
   vp9_loop_filter_frame_init(cm, xd, frame_filter_level);
   vp9_loop_filter_rows(cm->frame_to_show, cm, xd,
-                       0, cm->mi_rows, y_only);
+                       start_mi_row, end_mi_row,
+                       y_only);
 }
 
 int vp9_loop_filter_worker(void *arg1, void *arg2) {
