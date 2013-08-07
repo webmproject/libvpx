@@ -13,6 +13,7 @@
 #include <string.h>
 
 #include "third_party/googletest/src/include/gtest/gtest.h"
+#include "vpx_ports/mem.h"
 
 extern "C" {
 #include "vp9/common/vp9_entropy.h"
@@ -264,6 +265,131 @@ void reference_16x16_dct_2d(int16_t input[16*16], double output[16*16]) {
   }
 }
 
+void fdct16x16(int16_t *in, int16_t *out, uint8_t* /*dst*/,
+               int stride, int /*tx_type*/) {
+  vp9_short_fdct16x16_c(in, out, stride);
+}
+void idct16x16_add(int16_t* /*in*/, int16_t *out, uint8_t *dst,
+                   int stride, int /*tx_type*/) {
+  vp9_short_idct16x16_add_c(out, dst, stride >> 1);
+}
+void fht16x16(int16_t *in, int16_t *out, uint8_t* /*dst*/,
+              int stride, int tx_type) {
+  // FIXME(jingning): need to test both SSE2 and c
+#if HAVE_SSE2
+  vp9_short_fht16x16_sse2(in, out, stride >> 1, tx_type);
+#else
+  vp9_short_fht16x16_c(in, out, stride >> 1, tx_type);
+#endif
+}
+void iht16x16_add(int16_t* /*in*/, int16_t *out, uint8_t *dst,
+                  int stride, int tx_type) {
+  vp9_short_iht16x16_add_c(out, dst, stride >> 1, tx_type);
+}
+
+class FwdTrans16x16Test : public ::testing::TestWithParam<int> {
+ public:
+  virtual ~FwdTrans16x16Test() {}
+
+  virtual void SetUp() {
+    tx_type_ = GetParam();
+    if (tx_type_ == 0) {
+      fwd_txfm = fdct16x16;
+      inv_txfm = idct16x16_add;
+    } else {
+      fwd_txfm = fht16x16;
+      inv_txfm = iht16x16_add;
+    }
+  }
+
+ protected:
+  void RunFwdTxfm(int16_t *in, int16_t *out, uint8_t *dst,
+                  int stride, int tx_type) {
+    (*fwd_txfm)(in, out, dst, stride, tx_type);
+  }
+  void RunInvTxfm(int16_t *in, int16_t *out, uint8_t *dst,
+                  int stride, int tx_type) {
+    (*inv_txfm)(in, out, dst, stride, tx_type);
+  }
+
+  int tx_type_;
+  void (*fwd_txfm)(int16_t*, int16_t*, uint8_t*, int, int);
+  void (*inv_txfm)(int16_t*, int16_t*, uint8_t*, int, int);
+};
+
+TEST_P(FwdTrans16x16Test, AccuracyCheck) {
+  ACMRandom rnd(ACMRandom::DeterministicSeed());
+  int max_error = 0;
+  double total_error = 0;
+  const int count_test_block = 10000;
+  for (int i = 0; i < count_test_block; ++i) {
+    DECLARE_ALIGNED_ARRAY(16, int16_t, test_input_block, 256);
+    DECLARE_ALIGNED_ARRAY(16, int16_t, test_temp_block, 256);
+    DECLARE_ALIGNED_ARRAY(16, uint8_t, dst, 256);
+    DECLARE_ALIGNED_ARRAY(16, uint8_t, src, 256);
+
+    for (int j = 0; j < 256; ++j) {
+      src[j] = rnd.Rand8();
+      dst[j] = rnd.Rand8();
+      // Initialize a test block with input range [-255, 255].
+      test_input_block[j] = src[j] - dst[j];
+    }
+
+    const int pitch = 32;
+    RunFwdTxfm(test_input_block, test_temp_block, dst, pitch, tx_type_);
+    RunInvTxfm(test_input_block, test_temp_block, dst, pitch, tx_type_);
+
+    for (int j = 0; j < 256; ++j) {
+      const int diff = dst[j] - src[j];
+      const int error = diff * diff;
+      if (max_error < error)
+        max_error = error;
+      total_error += error;
+    }
+  }
+
+  EXPECT_GE(1, max_error)
+      << "Error: 16x16 FHT/IHT has an individual round trip error > 1";
+
+  EXPECT_GE(count_test_block , total_error)
+      << "Error: 16x16 FHT/IHT has average round trip error > 1 per block";
+}
+
+TEST_P(FwdTrans16x16Test, CoeffSizeCheck) {
+  ACMRandom rnd(ACMRandom::DeterministicSeed());
+  const int count_test_block = 1000;
+  for (int i = 0; i < count_test_block; ++i) {
+    DECLARE_ALIGNED_ARRAY(16, int16_t, input_block, 256);
+    DECLARE_ALIGNED_ARRAY(16, int16_t, input_extreme_block, 256);
+    DECLARE_ALIGNED_ARRAY(16, int16_t, output_block, 256);
+    DECLARE_ALIGNED_ARRAY(16, int16_t, output_extreme_block, 256);
+    DECLARE_ALIGNED_ARRAY(16, uint8_t, dst, 256);
+
+    // Initialize a test block with input range [-255, 255].
+    for (int j = 0; j < 256; ++j) {
+      input_block[j] = rnd.Rand8() - rnd.Rand8();
+      input_extreme_block[j] = rnd.Rand8() % 2 ? 255 : -255;
+    }
+    if (i == 0)
+      for (int j = 0; j < 256; ++j)
+        input_extreme_block[j] = 255;
+
+    const int pitch = 32;
+    RunFwdTxfm(input_block, output_block, dst, pitch, tx_type_);
+    RunFwdTxfm(input_extreme_block, output_extreme_block, dst, pitch, tx_type_);
+
+    // The minimum quant value is 4.
+    for (int j = 0; j < 256; ++j) {
+      EXPECT_GE(4 * DCT_MAX_VALUE, abs(output_block[j]))
+          << "Error: 16x16 FDCT has coefficient larger than 4*DCT_MAX_VALUE";
+      EXPECT_GE(4 * DCT_MAX_VALUE, abs(output_extreme_block[j]))
+          << "Error: 16x16 FDCT extreme has coefficient larger "
+          << "than 4*DCT_MAX_VALUE";
+    }
+  }
+}
+
+INSTANTIATE_TEST_CASE_P(VP9, FwdTrans16x16Test, ::testing::Range(0, 4));
 
 TEST(VP9Idct16x16Test, AccuracyCheck) {
   ACMRandom rnd(ACMRandom::DeterministicSeed());
@@ -295,72 +421,4 @@ TEST(VP9Idct16x16Test, AccuracyCheck) {
   }
 }
 
-// we need enable fdct test once we re-do the 16 point fdct.
-TEST(VP9Fdct16x16Test, AccuracyCheck) {
-  ACMRandom rnd(ACMRandom::DeterministicSeed());
-  int max_error = 0;
-  double total_error = 0;
-  const int count_test_block = 1000;
-  for (int i = 0; i < count_test_block; ++i) {
-    int16_t test_input_block[256];
-    int16_t test_temp_block[256];
-    uint8_t dst[256], src[256];
-
-    for (int j = 0; j < 256; ++j) {
-      src[j] = rnd.Rand8();
-      dst[j] = rnd.Rand8();
-    }
-    // Initialize a test block with input range [-255, 255].
-    for (int j = 0; j < 256; ++j)
-      test_input_block[j] = src[j] - dst[j];
-
-    const int pitch = 32;
-    vp9_short_fdct16x16_c(test_input_block, test_temp_block, pitch);
-    vp9_short_idct16x16_add_c(test_temp_block, dst, 16);
-
-    for (int j = 0; j < 256; ++j) {
-      const int diff = dst[j] - src[j];
-      const int error = diff * diff;
-      if (max_error < error)
-        max_error = error;
-      total_error += error;
-    }
-  }
-
-  EXPECT_GE(1, max_error)
-      << "Error: 16x16 FDCT/IDCT has an individual round trip error > 1";
-
-  EXPECT_GE(count_test_block , total_error)
-      << "Error: 16x16 FDCT/IDCT has average round trip error > 1 per block";
-}
-
-TEST(VP9Fdct16x16Test, CoeffSizeCheck) {
-  ACMRandom rnd(ACMRandom::DeterministicSeed());
-  const int count_test_block = 1000;
-  for (int i = 0; i < count_test_block; ++i) {
-    int16_t input_block[256], input_extreme_block[256];
-    int16_t output_block[256], output_extreme_block[256];
-
-    // Initialize a test block with input range [-255, 255].
-    for (int j = 0; j < 256; ++j) {
-      input_block[j] = rnd.Rand8() - rnd.Rand8();
-      input_extreme_block[j] = rnd.Rand8() % 2 ? 255 : -255;
-    }
-    if (i == 0)
-      for (int j = 0; j < 256; ++j)
-        input_extreme_block[j] = 255;
-
-    const int pitch = 32;
-    vp9_short_fdct16x16_c(input_block, output_block, pitch);
-    vp9_short_fdct16x16_c(input_extreme_block, output_extreme_block, pitch);
-
-    // The minimum quant value is 4.
-    for (int j = 0; j < 256; ++j) {
-      EXPECT_GE(4*DCT_MAX_VALUE, abs(output_block[j]))
-          << "Error: 16x16 FDCT has coefficient larger than 4*DCT_MAX_VALUE";
-      EXPECT_GE(4*DCT_MAX_VALUE, abs(output_extreme_block[j]))
-          << "Error: 16x16 FDCT extreme has coefficient larger than 4*DCT_MAX_VALUE";
-    }
-  }
-}
 }  // namespace

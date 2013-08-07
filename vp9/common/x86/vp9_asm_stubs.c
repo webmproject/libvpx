@@ -121,11 +121,12 @@ void vp9_filter_block1d4_h8_avg_ssse3(const unsigned char *src_ptr,
                                      unsigned int output_height,
                                      const short *filter);
 
-void vp9_convolve8_horiz_ssse3(const uint8_t *src, int src_stride,
-                               uint8_t *dst, int dst_stride,
+void vp9_convolve8_horiz_ssse3(const uint8_t *src, ptrdiff_t src_stride,
+                               uint8_t *dst, ptrdiff_t dst_stride,
                                const int16_t *filter_x, int x_step_q4,
                                const int16_t *filter_y, int y_step_q4,
                                int w, int h) {
+  /* Ensure the filter can be compressed to int16_t. */
   if (x_step_q4 == 16 && filter_x[3] != 128) {
     while (w >= 16) {
       vp9_filter_block1d16_h8_ssse3(src, src_stride,
@@ -159,8 +160,8 @@ void vp9_convolve8_horiz_ssse3(const uint8_t *src, int src_stride,
   }
 }
 
-void vp9_convolve8_vert_ssse3(const uint8_t *src, int src_stride,
-                              uint8_t *dst, int dst_stride,
+void vp9_convolve8_vert_ssse3(const uint8_t *src, ptrdiff_t src_stride,
+                              uint8_t *dst, ptrdiff_t dst_stride,
                               const int16_t *filter_x, int x_step_q4,
                               const int16_t *filter_y, int y_step_q4,
                               int w, int h) {
@@ -197,8 +198,8 @@ void vp9_convolve8_vert_ssse3(const uint8_t *src, int src_stride,
   }
 }
 
-void vp9_convolve8_avg_horiz_ssse3(const uint8_t *src, int src_stride,
-                               uint8_t *dst, int dst_stride,
+void vp9_convolve8_avg_horiz_ssse3(const uint8_t *src, ptrdiff_t src_stride,
+                               uint8_t *dst, ptrdiff_t dst_stride,
                                const int16_t *filter_x, int x_step_q4,
                                const int16_t *filter_y, int y_step_q4,
                                int w, int h) {
@@ -235,8 +236,8 @@ void vp9_convolve8_avg_horiz_ssse3(const uint8_t *src, int src_stride,
   }
 }
 
-void vp9_convolve8_avg_vert_ssse3(const uint8_t *src, int src_stride,
-                              uint8_t *dst, int dst_stride,
+void vp9_convolve8_avg_vert_ssse3(const uint8_t *src, ptrdiff_t src_stride,
+                              uint8_t *dst, ptrdiff_t dst_stride,
                               const int16_t *filter_x, int x_step_q4,
                               const int16_t *filter_y, int y_step_q4,
                               int w, int h) {
@@ -273,8 +274,8 @@ void vp9_convolve8_avg_vert_ssse3(const uint8_t *src, int src_stride,
   }
 }
 
-void vp9_convolve8_ssse3(const uint8_t *src, int src_stride,
-                         uint8_t *dst, int dst_stride,
+void vp9_convolve8_ssse3(const uint8_t *src, ptrdiff_t src_stride,
+                         uint8_t *dst, ptrdiff_t dst_stride,
                          const int16_t *filter_x, int x_step_q4,
                          const int16_t *filter_y, int y_step_q4,
                          int w, int h) {
@@ -294,8 +295,8 @@ void vp9_convolve8_ssse3(const uint8_t *src, int src_stride,
   }
 }
 
-void vp9_convolve8_avg_ssse3(const uint8_t *src, int src_stride,
-                         uint8_t *dst, int dst_stride,
+void vp9_convolve8_avg_ssse3(const uint8_t *src, ptrdiff_t src_stride,
+                         uint8_t *dst, ptrdiff_t dst_stride,
                          const int16_t *filter_x, int x_step_q4,
                          const int16_t *filter_y, int y_step_q4,
                          int w, int h) {

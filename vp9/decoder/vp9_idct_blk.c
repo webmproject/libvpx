@@ -66,7 +66,7 @@ void vp9_idct_add_c(int16_t *input, uint8_t *dest, int stride, int eob) {
     vp9_short_idct4x4_add(input, dest, stride);
     vpx_memset(input, 0, 32);
   } else {
-    vp9_dc_only_idct_add(input[0], dest, dest, stride, stride);
+    vp9_short_idct4x4_1_add(input, dest, stride);
     ((int *)input)[0] = 0;
   }
 }
@@ -93,15 +93,11 @@ void vp9_idct_add_8x8_c(int16_t *input, uint8_t *dest, int stride, int eob) {
   if (eob) {
     if (eob == 1) {
       // DC only DCT coefficient
-      int16_t in = input[0];
-      int16_t out;
-
-      // Note: the idct1 will need to be modified accordingly whenever
-      // vp9_short_idct8x8_c() is modified.
-      vp9_short_idct1_8x8_c(&in, &out);
+      vp9_short_idct8x8_1_add(input, dest, stride);
       input[0] = 0;
-
-      vp9_add_constant_residual_8x8(out, dest, stride);
+    } else if (eob <= 10) {
+      vp9_short_idct10_8x8_add(input, dest, stride);
+      vpx_memset(input, 0, 128);
     } else {
       vp9_short_idct8x8_add(input, dest, stride);
       vpx_memset(input, 0, 128);
@@ -127,14 +123,11 @@ void vp9_idct_add_16x16_c(int16_t *input, uint8_t *dest, int stride, int eob) {
   if (eob) {
     if (eob == 1) {
       /* DC only DCT coefficient. */
-      int16_t in = input[0];
-      int16_t out;
-      /* Note: the idct1 will need to be modified accordingly whenever
-       * vp9_short_idct16x16() is modified. */
-      vp9_short_idct1_16x16_c(&in, &out);
+      vp9_short_idct16x16_1_add(input, dest, stride);
       input[0] = 0;
-
-      vp9_add_constant_residual_16x16(out, dest, stride);
+    } else if (eob <= 10) {
+      vp9_short_idct10_16x16_add(input, dest, stride);
+      vpx_memset(input, 0, 512);
     } else {
       vp9_short_idct16x16_add(input, dest, stride);
       vpx_memset(input, 0, 512);

@@ -25,7 +25,7 @@
 
 void vp9_clamp_mv_min_max(MACROBLOCK *x, int_mv *ref_mv);
 int vp9_mv_bit_cost(int_mv *mv, int_mv *ref, int *mvjcost,
-                           int *mvcost[2], int weight, int ishp);
+                           int *mvcost[2], int weight);
 void vp9_init_dsmotion_compensation(MACROBLOCK *x, int stride);
 void vp9_init3smotion_compensation(MACROBLOCK *x,  int stride);
 
@@ -40,19 +40,46 @@ int vp9_full_pixel_diamond(struct VP9_COMP *cpi, MACROBLOCK *x,
                            int_mv *ref_mv, int_mv *dst_mv);
 
 int vp9_hex_search(MACROBLOCK *x,
-                   int_mv *ref_mv, int_mv *best_mv,
-                   int search_param, int error_per_bit,
+                   int_mv *ref_mv,
+                   int search_param,
+                   int error_per_bit,
+                   int do_init_search,
                    const vp9_variance_fn_ptr_t *vf,
-                   int *mvjsadcost, int *mvsadcost[2],
-                   int *mvjcost, int *mvcost[2],
-                   int_mv *center_mv);
+                   int use_mvcost,
+                   int_mv *center_mv,
+                   int_mv *best_mv);
+int vp9_bigdia_search(MACROBLOCK *x,
+                      int_mv *ref_mv,
+                      int search_param,
+                      int error_per_bit,
+                      int do_init_search,
+                      const vp9_variance_fn_ptr_t *vf,
+                      int use_mvcost,
+                      int_mv *center_mv,
+                      int_mv *best_mv);
+int vp9_square_search(MACROBLOCK *x,
+                      int_mv *ref_mv,
+                      int search_param,
+                      int error_per_bit,
+                      int do_init_search,
+                      const vp9_variance_fn_ptr_t *vf,
+                      int use_mvcost,
+                      int_mv *center_mv,
+                      int_mv *best_mv);
 
-typedef int (fractional_mv_step_fp) (MACROBLOCK *x, int_mv
-  *bestmv, int_mv *ref_mv, int error_per_bit, const vp9_variance_fn_ptr_t *vfp,
-  int *mvjcost, int *mvcost[2], int *distortion, unsigned int *sse);
-extern fractional_mv_step_fp vp9_find_best_sub_pixel_step_iteratively;
-extern fractional_mv_step_fp vp9_find_best_sub_pixel_step;
-extern fractional_mv_step_fp vp9_find_best_half_pixel_step;
+typedef int (fractional_mv_step_fp) (
+    MACROBLOCK *x,
+    int_mv *bestmv,
+    int_mv *ref_mv,
+    int error_per_bit,
+    const vp9_variance_fn_ptr_t *vfp,
+    int forced_stop,  // 0 - full, 1 - qtr only, 2 - half only
+    int iters_per_step,
+    int *mvjcost,
+    int *mvcost[2],
+    int *distortion,
+    unsigned int *sse);
+extern fractional_mv_step_fp vp9_find_best_sub_pixel_iterative;
 
 typedef int (*vp9_full_search_fn_t)(MACROBLOCK *x,
                                     int_mv *ref_mv, int sad_per_bit,
@@ -75,14 +102,17 @@ typedef int (*vp9_diamond_search_fn_t)(MACROBLOCK *x,
                                        int *mvjcost, int *mvcost[2],
                                        int_mv *center_mv);
 
-int vp9_find_best_sub_pixel_comp(MACROBLOCK *x,
-                                 int_mv *bestmv, int_mv *ref_mv,
-                                 int error_per_bit,
-                                 const vp9_variance_fn_ptr_t *vfp,
-                                 int *mvjcost, int *mvcost[2],
-                                 int *distortion, unsigned int *sse1,
-                                 const uint8_t *second_pred,
-                                 int w, int h);
+int vp9_find_best_sub_pixel_comp_iterative(
+    MACROBLOCK *x,
+    int_mv *bestmv, int_mv *ref_mv,
+    int error_per_bit,
+    const vp9_variance_fn_ptr_t *vfp,
+    int forced_stop,  // 0 - full, 1 - qtr only, 2 - half only
+    int iters_per_step,
+    int *mvjcost, int *mvcost[2],
+    int *distortion, unsigned int *sse1,
+    const uint8_t *second_pred,
+    int w, int h);
 
 int vp9_refining_search_8p_c(MACROBLOCK *x,
                              int_mv *ref_mv, int error_per_bit,

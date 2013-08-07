@@ -26,10 +26,6 @@ int vp9_use_mv_hp(const MV *ref);
 
 #define VP9_NMV_UPDATE_PROB  252
 
-//#define MV_GROUP_UPDATE
-
-#define LOW_PRECISION_MV_UPDATE  /* Use 7 bit forward update */
-
 /* Symbols for coding which components are zero jointly */
 #define MV_JOINTS     4
 typedef enum {
@@ -99,7 +95,14 @@ typedef struct {
   nmv_component comps[2];
 } nmv_context;
 
-MV_JOINT_TYPE vp9_get_mv_joint(const MV *mv);
+static INLINE MV_JOINT_TYPE vp9_get_mv_joint(const MV *mv) {
+  if (mv->row == 0) {
+    return mv->col == 0 ? MV_JOINT_ZERO : MV_JOINT_HNZVZ;
+  } else {
+    return mv->col == 0 ? MV_JOINT_HZVNZ : MV_JOINT_HNZVNZ;
+  }
+}
+
 MV_CLASS_TYPE vp9_get_mv_class(int z, int *offset);
 int vp9_get_mv_mag(MV_CLASS_TYPE c, int offset);
 
@@ -121,9 +124,7 @@ typedef struct {
   nmv_component_counts comps[2];
 } nmv_context_counts;
 
-void vp9_inc_mv(const MV *mv, const MV *ref, nmv_context_counts *mvctx,
-                int usehp);
-extern const nmv_context vp9_default_nmv_context;
+void vp9_inc_mv(const MV *mv, nmv_context_counts *mvctx);
 
 void vp9_counts_process(nmv_context_counts *NMVcount, int usehp);
 

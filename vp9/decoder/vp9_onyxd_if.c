@@ -8,9 +8,9 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-
-#include <stdio.h>
 #include <assert.h>
+#include <limits.h>
+#include <stdio.h>
 
 #include "vp9/common/vp9_onyxc_int.h"
 #if CONFIG_POSTPROC
@@ -114,7 +114,7 @@ VP9D_PTR vp9_create_decompressor(VP9D_CONFIG *oxcf) {
   if (!pbi)
     return NULL;
 
-  vpx_memset(pbi, 0, sizeof(VP9D_COMP));
+  vp9_zero(*pbi);
 
   if (setjmp(pbi->common.error.jmp)) {
     pbi->common.error.setjmp = 0;
@@ -136,10 +136,20 @@ VP9D_PTR vp9_create_decompressor(VP9D_CONFIG *oxcf) {
   // vp9_init_dequantizer() for every frame.
   vp9_init_dequantizer(&pbi->common);
 
-  vp9_loop_filter_init(&pbi->common);
+  vp9_loop_filter_init(&pbi->common, &pbi->mb.lf);
 
   pbi->common.error.setjmp = 0;
   pbi->decoded_key_frame = 0;
+
+  if (pbi->oxcf.max_threads > 1) {
+    vp9_worker_init(&pbi->lf_worker);
+    pbi->lf_worker.data1 = vpx_malloc(sizeof(LFWorkerData));
+    pbi->lf_worker.hook = (VP9WorkerHook)vp9_loop_filter_worker;
+    if (pbi->lf_worker.data1 == NULL || !vp9_worker_reset(&pbi->lf_worker)) {
+      vp9_remove_decompressor(pbi);
+      return NULL;
+    }
+  }
 
   return pbi;
 }
@@ -154,7 +164,8 @@ void vp9_remove_decompressor(VP9D_PTR ptr) {
     vpx_free(pbi->common.last_frame_seg_map);
 
   vp9_remove_common(&pbi->common);
-  vpx_free(pbi->mbc);
+  vp9_worker_end(&pbi->lf_worker);
+  vpx_free(pbi->lf_worker.data1);
   vpx_free(pbi);
 }
 
@@ -347,9 +358,9 @@ int vp9_receive_compressed_data(VP9D_PTR ptr,
                              cm->current_video_frame + 1000);
 #endif
 
-    if (cm->filter_level) {
+    if (!pbi->do_loopfilter_inline) {
       /* Apply the loop filter if appropriate. */
-      vp9_loop_filter_frame(cm, &pbi->mb, cm->filter_level, 0);
+      vp9_loop_filter_frame(cm, &pbi->mb, pbi->mb.lf.filter_level, 0);
     }
 
 #if WRITE_RECON_BUFFER == 2
@@ -361,8 +372,9 @@ int vp9_receive_compressed_data(VP9D_PTR ptr,
                              cm->current_video_frame + 3000);
 #endif
 
-    vp9_extend_frame_borders(cm->frame_to_show,
-                             cm->subsampling_x, cm->subsampling_y);
+    vp9_extend_frame_inner_borders(cm->frame_to_show,
+                                   cm->subsampling_x,
+                                   cm->subsampling_y);
   }
 
 #if WRITE_RECON_BUFFER == 1
@@ -382,11 +394,10 @@ int vp9_receive_compressed_data(VP9D_PTR ptr,
 
     // update the upper left visible macroblock ptrs
     cm->mi = cm->mip + cm->mode_info_stride + 1;
+    cm->prev_mi = cm->prev_mip + cm->mode_info_stride + 1;
 
     cm->current_video_frame++;
   }
-  // restore prev_mi
-  cm->prev_mi = cm->prev_mip + cm->mode_info_stride + 1;
 
   pbi->ready_for_new_data = 0;
   pbi->last_time_stamp = time_stamp;
@@ -413,9 +424,8 @@ int vp9_get_raw_frame(VP9D_PTR ptr, YV12_BUFFER_CONFIG *sd,
   *time_stamp = pbi->last_time_stamp;
   *time_end_stamp = 0;
 
-  sd->clrtype = pbi->common.clr_type;
 #if CONFIG_POSTPROC
-  ret = vp9_post_proc_frame(&pbi->common, sd, flags);
+  ret = vp9_post_proc_frame(&pbi->common, &pbi->mb.lf, sd, flags);
 #else
 
   if (pbi->common.frame_to_show) {

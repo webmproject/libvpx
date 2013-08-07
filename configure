@@ -115,6 +115,7 @@ all_platforms="${all_platforms} x86-darwin9-icc"
 all_platforms="${all_platforms} x86-darwin10-gcc"
 all_platforms="${all_platforms} x86-darwin11-gcc"
 all_platforms="${all_platforms} x86-darwin12-gcc"
+all_platforms="${all_platforms} x86-darwin13-gcc"
 all_platforms="${all_platforms} x86-linux-gcc"
 all_platforms="${all_platforms} x86-linux-icc"
 all_platforms="${all_platforms} x86-os2-gcc"
@@ -129,6 +130,7 @@ all_platforms="${all_platforms} x86_64-darwin9-gcc"
 all_platforms="${all_platforms} x86_64-darwin10-gcc"
 all_platforms="${all_platforms} x86_64-darwin11-gcc"
 all_platforms="${all_platforms} x86_64-darwin12-gcc"
+all_platforms="${all_platforms} x86_64-darwin13-gcc"
 all_platforms="${all_platforms} x86_64-linux-gcc"
 all_platforms="${all_platforms} x86_64-linux-icc"
 all_platforms="${all_platforms} x86_64-solaris-gcc"
@@ -142,6 +144,7 @@ all_platforms="${all_platforms} universal-darwin9-gcc"
 all_platforms="${all_platforms} universal-darwin10-gcc"
 all_platforms="${all_platforms} universal-darwin11-gcc"
 all_platforms="${all_platforms} universal-darwin12-gcc"
+all_platforms="${all_platforms} universal-darwin13-gcc"
 all_platforms="${all_platforms} generic-gnu"
 
 # all_targets is a list of all targets that can be configured
@@ -247,7 +250,6 @@ EXPERIMENT_LIST="
     multiple_arf
     non420
     alpha
-    balanced_coeftree
     interintra
 "
 CONFIG_LIST="
@@ -256,6 +258,7 @@ CONFIG_LIST="
     install_bins
     install_libs
     install_srcs
+    use_x86inc
     debug
     gprof
     gcov
@@ -312,6 +315,7 @@ CMDLINE_SELECT="
     gprof
     gcov
     pic
+    use_x86inc
     optimizations
     ccache
     runtime_cpu_detect
@@ -682,6 +686,14 @@ process_toolchain() {
         *-darwin-*)
             # iOS/ARM builds do not work with gtest. This does not match
             # x86 targets.
+        ;;
+        *-win*)
+            # Some mingw toolchains don't have pthread available by default.
+            # Treat these more like visual studio where threading in gtest
+            # would be disabled for the same reason.
+            check_cxx "$@" <<EOF && soft_enable unit_tests
+int z;
+EOF
         ;;
         *)
             enabled pthread_h && check_cxx "$@" <<EOF && soft_enable unit_tests

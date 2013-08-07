@@ -430,7 +430,6 @@ int vp8dx_get_raw_frame(VP8D_COMP *pbi, YV12_BUFFER_CONFIG *sd, int64_t *time_st
     *time_stamp = pbi->last_time_stamp;
     *time_end_stamp = 0;
 
-    sd->clrtype = pbi->common.clr_type;
 #if CONFIG_POSTPROC
     ret = vp8_post_proc_frame(&pbi->common, sd, flags);
 #else

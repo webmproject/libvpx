@@ -33,10 +33,8 @@ struct encode_b_args {
   struct optimize_ctx *ctx;
 };
 
-void vp9_optimize_init(MACROBLOCKD *xd, BLOCK_SIZE_TYPE bsize,
-                       struct optimize_ctx *ctx);
 void vp9_optimize_b(int plane, int block, BLOCK_SIZE_TYPE bsize,
-                    int ss_txfrm_size, VP9_COMMON *cm, MACROBLOCK *x,
+                    int ss_txfrm_size, MACROBLOCK *x,
                     struct optimize_ctx *ctx);
 void vp9_optimize_sby(VP9_COMMON *cm, MACROBLOCK *x, BLOCK_SIZE_TYPE bsize);
 void vp9_optimize_sbuv(VP9_COMMON *cm, MACROBLOCK *x, BLOCK_SIZE_TYPE bsize);

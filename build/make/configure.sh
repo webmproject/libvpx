@@ -75,7 +75,7 @@ Options:
 
 Build options:
   --help                      print this message
-  --log=yes|no|FILE           file configure log is written to [config.err]
+  --log=yes|no|FILE           file configure log is written to [config.log]
   --target=TARGET             target platform tuple [generic-gnu]
   --cpu=CPU                   optimize for a specific cpu rather than a family
   --extra-cflags=ECFLAGS      add ECFLAGS to CFLAGS [$CFLAGS]
@@ -653,6 +653,10 @@ process_common_toolchain() {
                 tgt_isa=x86_64
                 tgt_os=darwin12
                 ;;
+            *darwin13*)
+                tgt_isa=x86_64
+                tgt_os=darwin13
+                ;;
             x86_64*mingw32*)
                 tgt_os=win64
                 ;;
@@ -750,6 +754,10 @@ process_common_toolchain() {
         *-darwin12-*)
             add_cflags  "-mmacosx-version-min=10.8"
             add_ldflags "-mmacosx-version-min=10.8"
+            ;;
+        *-darwin13-*)
+            add_cflags  "-mmacosx-version-min=10.9"
+            add_ldflags "-mmacosx-version-min=10.9"
             ;;
     esac
 
@@ -1181,6 +1189,12 @@ EOF
         fi
     fi
 
+    # default use_x86inc to yes if pic is no or 64bit or we are not on darwin
+    echo "  checking here for x86inc \"${tgt_isa}\" \"$pic\" "
+    if [ ${tgt_isa} = x86_64 -o ! "$pic" == "yes" -o ! ${tgt_os:0:6} = darwin ]; then
+      soft_enable use_x86inc
+    fi
+
     # Position Independent Code (PIC) support, for building relocatable
     # shared objects
     enabled gcc && enabled pic && check_add_cflags -fPIC
@@ -1296,7 +1310,7 @@ process_detect() {
 }
 
 enable logging
-logfile="config.err"
+logfile="config.log"
 self=$0
 process() {
     cmdline_args="$@"

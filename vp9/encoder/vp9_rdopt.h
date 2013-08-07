@@ -15,18 +15,20 @@
 #define RDCOST(RM,DM,R,D) ( ((128+((int64_t)R)*(RM)) >> 8) + ((int64_t)DM)*(D) )
 #define RDCOST_8x8(RM,DM,R,D) ( ((128+((int64_t)R)*(RM)) >> 8) + ((int64_t)DM)*(D) )
 
+#define QIDX_SKIP_THRESH     115
+
 void vp9_initialize_rd_consts(VP9_COMP *cpi, int qindex);
 
 void vp9_initialize_me_consts(VP9_COMP *cpi, int qindex);
 
 void vp9_rd_pick_intra_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
                                int *r, int64_t *d, BLOCK_SIZE_TYPE bsize,
-                               PICK_MODE_CONTEXT *ctx);
+                               PICK_MODE_CONTEXT *ctx, int64_t best_rd);
 
 int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
                                   int mi_row, int mi_col,
                                   int *r, int64_t *d, BLOCK_SIZE_TYPE bsize,
-                                  PICK_MODE_CONTEXT *ctx);
+                                  PICK_MODE_CONTEXT *ctx, int64_t best_rd);
 
 void vp9_init_me_luts();
 

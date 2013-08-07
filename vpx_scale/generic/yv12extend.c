@@ -96,15 +96,16 @@ vp8_yv12_extend_frame_borders_c(YV12_BUFFER_CONFIG *ybf) {
 }
 
 #if CONFIG_VP9
-void vp9_extend_frame_borders_c(YV12_BUFFER_CONFIG *ybf,
-                                int subsampling_x, int subsampling_y) {
+static void extend_frame(YV12_BUFFER_CONFIG *ybf,
+                        int subsampling_x, int subsampling_y,
+                        int ext_size) {
   const int c_w = (ybf->y_crop_width + subsampling_x) >> subsampling_x;
   const int c_h = (ybf->y_crop_height + subsampling_y) >> subsampling_y;
-  const int c_et = ybf->border >> subsampling_y;
-  const int c_el = ybf->border >> subsampling_x;
-  const int c_eb = (ybf->border + ybf->y_height - ybf->y_crop_height +
+  const int c_et = ext_size >> subsampling_y;
+  const int c_el = ext_size >> subsampling_x;
+  const int c_eb = (ext_size + ybf->y_height - ybf->y_crop_height +
                     subsampling_y) >> subsampling_y;
-  const int c_er = (ybf->border + ybf->y_width - ybf->y_crop_width +
+  const int c_er = (ext_size + ybf->y_width - ybf->y_crop_width +
                     subsampling_x) >> subsampling_x;
 
   assert(ybf->y_height - ybf->y_crop_height < 16);
@@ -114,15 +115,28 @@ void vp9_extend_frame_borders_c(YV12_BUFFER_CONFIG *ybf,
 
   extend_plane(ybf->y_buffer, ybf->y_stride,
                ybf->y_crop_width, ybf->y_crop_height,
-               ybf->border, ybf->border,
-               ybf->border + ybf->y_height - ybf->y_crop_height,
-               ybf->border + ybf->y_width - ybf->y_crop_width);
+               ext_size, ext_size,
+               ext_size + ybf->y_height - ybf->y_crop_height,
+               ext_size + ybf->y_width - ybf->y_crop_width);
 
   extend_plane(ybf->u_buffer, ybf->uv_stride,
                c_w, c_h, c_et, c_el, c_eb, c_er);
 
   extend_plane(ybf->v_buffer, ybf->uv_stride,
                c_w, c_h, c_et, c_el, c_eb, c_er);
+}
+
+
+void vp9_extend_frame_borders_c(YV12_BUFFER_CONFIG *ybf,
+                                int subsampling_x, int subsampling_y) {
+  extend_frame(ybf, subsampling_x, subsampling_y, ybf->border);
+}
+
+void vp9_extend_frame_inner_borders_c(YV12_BUFFER_CONFIG *ybf,
+                                      int subsampling_x, int subsampling_y) {
+  const int inner_bw = ybf->border > VP9INNERBORDERINPIXLES ?
+                       VP9INNERBORDERINPIXLES : ybf->border;
+  extend_frame(ybf, subsampling_x, subsampling_y, inner_bw);
 }
 #endif
 

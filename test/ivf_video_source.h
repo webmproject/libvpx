@@ -47,7 +47,8 @@ class IVFVideoSource : public CompressedVideoSource {
   virtual void Init() {
     // Allocate a buffer for read in the compressed video frame.
     compressed_frame_buf_ = new uint8_t[libvpx_test::kCodeBufferSize];
-    ASSERT_TRUE(compressed_frame_buf_) << "Allocate frame buffer failed";
+    ASSERT_TRUE(compressed_frame_buf_ != NULL)
+        << "Allocate frame buffer failed";
   }
 
   virtual void Begin() {

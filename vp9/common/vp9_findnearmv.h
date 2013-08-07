@@ -28,53 +28,20 @@ void vp9_find_best_ref_mvs(MACROBLOCKD *xd,
                            int_mv *nearest,
                            int_mv *near);
 
-static void mv_bias(int refmb_ref_frame_sign_bias, int refframe,
-                    int_mv *mvp, const int *ref_frame_sign_bias) {
-  MV xmv = mvp->as_mv;
-
-  if (refmb_ref_frame_sign_bias != ref_frame_sign_bias[refframe]) {
-    xmv.row *= -1;
-    xmv.col *= -1;
-  }
-
-  mvp->as_mv = xmv;
-}
-
 // TODO(jingning): this mv clamping function should be block size dependent.
-static void clamp_mv(int_mv *mv,
-                     int mb_to_left_edge,
-                     int mb_to_right_edge,
-                     int mb_to_top_edge,
-                     int mb_to_bottom_edge) {
-  mv->as_mv.col = clamp(mv->as_mv.col, mb_to_left_edge, mb_to_right_edge);
-  mv->as_mv.row = clamp(mv->as_mv.row, mb_to_top_edge, mb_to_bottom_edge);
-}
-
-static int clamp_mv2(int_mv *mv, const MACROBLOCKD *xd) {
-  int_mv tmp_mv;
-  tmp_mv.as_int = mv->as_int;
-  clamp_mv(mv,
-           xd->mb_to_left_edge - LEFT_TOP_MARGIN,
-           xd->mb_to_right_edge + RIGHT_BOTTOM_MARGIN,
-           xd->mb_to_top_edge - LEFT_TOP_MARGIN,
-           xd->mb_to_bottom_edge + RIGHT_BOTTOM_MARGIN);
-  return tmp_mv.as_int != mv->as_int;
-}
-
-static int check_mv_bounds(int_mv *mv,
-                           int mb_to_left_edge, int mb_to_right_edge,
-                           int mb_to_top_edge, int mb_to_bottom_edge) {
-  return mv->as_mv.col < mb_to_left_edge ||
-         mv->as_mv.col > mb_to_right_edge ||
-         mv->as_mv.row < mb_to_top_edge ||
-         mv->as_mv.row > mb_to_bottom_edge;
+static void clamp_mv2(MV *mv, const MACROBLOCKD *xd) {
+  clamp_mv(mv, xd->mb_to_left_edge - LEFT_TOP_MARGIN,
+               xd->mb_to_right_edge + RIGHT_BOTTOM_MARGIN,
+               xd->mb_to_top_edge - LEFT_TOP_MARGIN,
+               xd->mb_to_bottom_edge + RIGHT_BOTTOM_MARGIN);
 }
 
 void vp9_append_sub8x8_mvs_for_idx(VP9_COMMON *pc,
                                    MACROBLOCKD *xd,
                                    int_mv *dst_nearest,
                                    int_mv *dst_near,
-                                   int block_idx, int ref_idx);
+                                   int block_idx, int ref_idx,
+                                   int mi_row, int mi_col);
 
 static MB_PREDICTION_MODE left_block_mode(const MODE_INFO *cur_mb, int b) {
   // FIXME(rbultje, jingning): temporary hack because jenkins doesn't
@@ -83,10 +50,10 @@ static MB_PREDICTION_MODE left_block_mode(const MODE_INFO *cur_mb, int b) {
     /* On L edge, get from MB to left of us */
     --cur_mb;
 
-    if (cur_mb->mbmi.ref_frame[0] != INTRA_FRAME) {
+    if (is_inter_block(&cur_mb->mbmi)) {
       return DC_PRED;
-    } else if (cur_mb->mbmi.sb_type < BLOCK_SIZE_SB8X8) {
-      return ((cur_mb->bmi + 1 + b)->as_mode);
+    } else if (cur_mb->mbmi.sb_type < BLOCK_8X8) {
+      return (cur_mb->bmi + 1 + b)->as_mode;
     } else {
       return cur_mb->mbmi.mode;
     }
@@ -101,10 +68,10 @@ static MB_PREDICTION_MODE above_block_mode(const MODE_INFO *cur_mb,
     /* On top edge, get from MB above us */
     cur_mb -= mi_stride;
 
-    if (cur_mb->mbmi.ref_frame[0] != INTRA_FRAME) {
+    if (is_inter_block(&cur_mb->mbmi)) {
       return DC_PRED;
-    } else if (cur_mb->mbmi.sb_type < BLOCK_SIZE_SB8X8) {
-      return ((cur_mb->bmi + 2 + b)->as_mode);
+    } else if (cur_mb->mbmi.sb_type < BLOCK_8X8) {
+      return (cur_mb->bmi + 2 + b)->as_mode;
     } else {
       return cur_mb->mbmi.mode;
     }

@@ -35,9 +35,5 @@ VP8_DX_SRCS-yes += decoder/onyxd_int.h
 VP8_DX_SRCS-yes += decoder/treereader.h
 VP8_DX_SRCS-yes += decoder/onyxd_if.c
 VP8_DX_SRCS-$(CONFIG_MULTITHREAD) += decoder/threading.c
-VP8_DX_SRCS-yes += decoder/vp8_asm_dec_offsets.c
 
 VP8_DX_SRCS-yes := $(filter-out $(VP8_DX_SRCS_REMOVE-yes),$(VP8_DX_SRCS-yes))
-
-$(eval $(call asm_offsets_template,\
-         vp8_asm_dec_offsets.asm, $(VP8_PREFIX)decoder/vp8_asm_dec_offsets.c))

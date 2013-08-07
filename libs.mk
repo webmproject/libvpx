@@ -57,6 +57,13 @@ CLEAN-OBJS += $$(BUILD_PFX)$(1).h
 RTCD += $$(BUILD_PFX)$(1).h
 endef
 
+# x86inc.asm is not compatible with pic 32bit builds. Restrict
+# files which use it to 64bit builds or 32bit without pic
+USE_X86INC = no
+ifeq ($(CONFIG_USE_X86INC),yes)
+  USE_X86INC = yes
+endif
+
 CODEC_SRCS-yes += CHANGELOG
 CODEC_SRCS-yes += libs.mk
 
@@ -448,6 +455,10 @@ else
 include $(SRC_PATH_BARE)/third_party/googletest/gtest.mk
 GTEST_SRCS := $(addprefix third_party/googletest/src/,$(call enabled,GTEST_SRCS))
 GTEST_OBJS=$(call objs,$(GTEST_SRCS))
+ifeq ($(filter win%,$(TGT_OS)),$(TGT_OS))
+# Disabling pthreads globally will cause issues on darwin and possibly elsewhere
+$(GTEST_OBJS) $(GTEST_OBJS:.o=.d): CXXFLAGS += -DGTEST_HAS_PTHREAD=0
+endif
 $(GTEST_OBJS) $(GTEST_OBJS:.o=.d): CXXFLAGS += -I$(SRC_PATH_BARE)/third_party/googletest/src
 $(GTEST_OBJS) $(GTEST_OBJS:.o=.d): CXXFLAGS += -I$(SRC_PATH_BARE)/third_party/googletest/src/include
 OBJS-$(BUILD_LIBVPX) += $(GTEST_OBJS)
@@ -472,7 +483,7 @@ $(foreach bin,$(LIBVPX_TEST_BINS),\
         lib$(CODEC_LIB)$(CODEC_LIB_SUF) libgtest.a ))\
     $(if $(BUILD_LIBVPX),$(eval $(call linkerxx_template,$(bin),\
         $(LIBVPX_TEST_OBJS) \
-        -L. -lvpx -lgtest -lpthread -lm)\
+        -L. -lvpx -lgtest $(extralibs) -lm)\
         )))\
     $(if $(LIPO_LIBS),$(eval $(call lipo_bin_template,$(bin))))\
 

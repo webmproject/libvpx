@@ -72,10 +72,21 @@ parse_project() {
     eval "${var}_name=$name"
     eval "${var}_guid=$guid"
 
-    # assume that all projects have the same list of possible configurations,
-    # so overwriting old config_lists is not a problem
-    config_list=`grep -A1 '<Configuration' $file |
-        grep Name | cut -d\" -f2`
+    if [ "$sfx" = "vcproj" ]; then
+        cur_config_list=`grep -A1 '<Configuration' $file |
+            grep Name | cut -d\" -f2`
+    else
+        cur_config_list=`grep -B1 'Label="Configuration"' $file |
+            grep Condition | cut -d\' -f4`
+    fi
+    new_config_list=$(for i in $config_list $cur_config_list; do
+        echo $i
+    done | sort | uniq)
+    if [ "$config_list" != "" ] && [ "$config_list" != "$new_config_list" ]; then
+        mixed_platforms=1
+    fi
+    config_list="$new_config_list"
+    eval "${var}_config_list=\"$cur_config_list\""
     proj_list="${proj_list} ${var}"
 }
 
@@ -125,6 +136,11 @@ process_global() {
     indent_push
     IFS_bak=${IFS}
     IFS=$'\r'$'\n'
+    if [ "$mixed_platforms" != "" ]; then
+        config_list="
+Release|Mixed Platforms
+Debug|Mixed Platforms"
+    fi
     for config in ${config_list}; do
         echo "${indent}$config = $config"
     done
@@ -139,10 +155,17 @@ process_global() {
     indent_push
     for proj in ${proj_list}; do
         eval "local proj_guid=\${${proj}_guid}"
+        eval "local proj_config_list=\${${proj}_config_list}"
         IFS=$'\r'$'\n'
-        for config in ${config_list}; do
-            echo "${indent}${proj_guid}.${config}.ActiveCfg = ${config}"
-            echo "${indent}${proj_guid}.${config}.Build.0 = ${config}"
+        for config in ${proj_config_list}; do
+            if [ "$mixed_platforms" != "" ]; then
+                local c=${config%%|*}
+                echo "${indent}${proj_guid}.${c}|Mixed Platforms.ActiveCfg = ${config}"
+                echo "${indent}${proj_guid}.${c}|Mixed Platforms.Build.0 = ${config}"
+            else
+                echo "${indent}${proj_guid}.${config}.ActiveCfg = ${config}"
+                echo "${indent}${proj_guid}.${config}.Build.0 = ${config}"
+            fi
 
         done
         IFS=${IFS_bak}
@@ -168,9 +191,14 @@ process_makefile() {
     IFS=$'\r'$'\n'
     local TAB=$'\t'
     cat <<EOF
-found_devenv := \$(shell which devenv.com >/dev/null 2>&1 && echo yes)
+ifeq (\$(CONFIG_VS_VERSION),7)
+MSBUILD_TOOL := devenv.com
+else
+MSBUILD_TOOL := msbuild.exe
+endif
+found_devenv := \$(shell which \$(MSBUILD_TOOL) >/dev/null 2>&1 && echo yes)
 .nodevenv.once:
-${TAB}@echo "  * devenv.com not found in path."
+${TAB}@echo "  * \$(MSBUILD_TOOL) not found in path."
 ${TAB}@echo "  * "
 ${TAB}@echo "  * You will have to build all configurations manually using the"
 ${TAB}@echo "  * Visual Studio IDE. To allow make to build them automatically,"
@@ -195,16 +223,17 @@ ${TAB}rm -rf "$platform"/"$config"
 ifneq (\$(found_devenv),)
   ifeq (\$(CONFIG_VS_VERSION),7)
 $nows_sln_config: $outfile
-${TAB}devenv.com $outfile -build "$config"
+${TAB}\$(MSBUILD_TOOL) $outfile -build "$config"
 
   else
 $nows_sln_config: $outfile
-${TAB}devenv.com $outfile -build "$sln_config"
+${TAB}\$(MSBUILD_TOOL) $outfile -m -t:Build \\
+${TAB}${TAB}-p:Configuration="$config" -p:Platform="$platform"
 
   endif
 else
 $nows_sln_config: $outfile .nodevenv.once
-${TAB}@echo "  * Skipping build of $sln_config (devenv.com not in path)."
+${TAB}@echo "  * Skipping build of $sln_config (\$(MSBUILD_TOOL) not in path)."
 ${TAB}@echo "  * "
 endif
 

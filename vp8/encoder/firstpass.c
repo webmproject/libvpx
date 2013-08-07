@@ -1325,7 +1325,7 @@ static int estimate_kf_group_q(VP8_COMP *cpi, double section_err, int section_ta
     return Q;
 }
 
-extern void vp8_new_frame_rate(VP8_COMP *cpi, double framerate);
+extern void vp8_new_framerate(VP8_COMP *cpi, double framerate);
 
 void vp8_init_second_pass(VP8_COMP *cpi)
 {
@@ -1349,9 +1349,9 @@ void vp8_init_second_pass(VP8_COMP *cpi)
      * sum duration is not. Its calculated based on the actual durations of
      * all frames from the first pass.
      */
-    vp8_new_frame_rate(cpi, 10000000.0 * cpi->twopass.total_stats.count / cpi->twopass.total_stats.duration);
+    vp8_new_framerate(cpi, 10000000.0 * cpi->twopass.total_stats.count / cpi->twopass.total_stats.duration);
 
-    cpi->output_frame_rate = cpi->frame_rate;
+    cpi->output_framerate = cpi->framerate;
     cpi->twopass.bits_left = (int64_t)(cpi->twopass.total_stats.duration * cpi->oxcf.target_bandwidth / 10000000.0) ;
     cpi->twopass.bits_left -= (int64_t)(cpi->twopass.total_stats.duration * two_pass_min_rate / 10000000.0);
 
@@ -2398,7 +2398,7 @@ static void assign_std_frame_bits(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
     target_frame_size += cpi->min_frame_bandwidth;
 
     /* Every other frame gets a few extra bits */
-    if ( (cpi->common.frames_since_golden & 0x01) &&
+    if ( (cpi->frames_since_golden & 0x01) &&
          (cpi->frames_till_gf_update_due > 0) )
     {
         target_frame_size += cpi->twopass.alt_extra_bits;
@@ -2529,7 +2529,7 @@ void vp8_second_pass(VP8_COMP *cpi)
 
     /* Set nominal per second bandwidth for this frame */
     cpi->target_bandwidth = (int)
-    (cpi->per_frame_bandwidth * cpi->output_frame_rate);
+    (cpi->per_frame_bandwidth * cpi->output_framerate);
     if (cpi->target_bandwidth < 0)
         cpi->target_bandwidth = 0;
 
@@ -3185,7 +3185,7 @@ static void find_next_key_frame(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
 
         /* Convert to a per second bitrate */
         cpi->target_bandwidth = (int)(cpi->twopass.kf_bits *
-                                      cpi->output_frame_rate);
+                                      cpi->output_framerate);
     }
 
     /* Note the total error score of the kf group minus the key frame itself */
@@ -3224,7 +3224,7 @@ static void find_next_key_frame(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
         cpi->common.vert_scale = NORMAL;
 
         /* Calculate Average bits per frame. */
-        av_bits_per_frame = cpi->oxcf.target_bandwidth / DOUBLE_DIVIDE_CHECK((double)cpi->frame_rate);
+        av_bits_per_frame = cpi->oxcf.target_bandwidth / DOUBLE_DIVIDE_CHECK((double)cpi->framerate);
 
         /* CBR... Use the clip average as the target for deciding resample */
         if (cpi->oxcf.end_usage == USAGE_STREAM_FROM_SERVER)
@@ -3299,7 +3299,7 @@ static void find_next_key_frame(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
         }
         else
         {
-            int64_t clip_bits = (int64_t)(cpi->twopass.total_stats.count * cpi->oxcf.target_bandwidth / DOUBLE_DIVIDE_CHECK((double)cpi->frame_rate));
+            int64_t clip_bits = (int64_t)(cpi->twopass.total_stats.count * cpi->oxcf.target_bandwidth / DOUBLE_DIVIDE_CHECK((double)cpi->framerate));
             int64_t over_spend = cpi->oxcf.starting_buffer_level - cpi->buffer_level;
 
             /* If triggered last time the threshold for triggering again is

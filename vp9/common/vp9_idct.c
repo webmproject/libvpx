@@ -124,9 +124,7 @@ void vp9_short_idct4x4_add_c(int16_t *input, uint8_t *dest, int dest_stride) {
 
   // Rows
   for (i = 0; i < 4; ++i) {
-    for (j = 0; j < 4; ++j)
-      temp_in[j] = input[j];
-    vp9_idct4_1d(temp_in, outptr);
+    vp9_idct4_1d(input, outptr);
     input += 4;
     outptr += 4;
   }
@@ -155,23 +153,6 @@ void vp9_short_idct4x4_1_add_c(int16_t *input, uint8_t *dest, int dest_stride) {
     dest[2] = clip_pixel(dest[2] + a1);
     dest[3] = clip_pixel(dest[3] + a1);
     dest += dest_stride;
-  }
-}
-
-void vp9_dc_only_idct_add_c(int input_dc, uint8_t *pred_ptr,
-                            uint8_t *dst_ptr, int pitch, int stride) {
-  int a1;
-  int r, c;
-  int16_t out = dct_const_round_shift(input_dc * cospi_16_64);
-  out = dct_const_round_shift(out * cospi_16_64);
-  a1 = ROUND_POWER_OF_TWO(out, 4);
-
-  for (r = 0; r < 4; r++) {
-    for (c = 0; c < 4; c++)
-      dst_ptr[c] = clip_pixel(a1 + pred_ptr[c]);
-
-    dst_ptr += stride;
-    pred_ptr += pitch;
   }
 }
 
@@ -241,6 +222,19 @@ void vp9_short_idct8x8_add_c(int16_t *input, uint8_t *dest, int dest_stride) {
     for (j = 0; j < 8; ++j)
       dest[j * dest_stride + i] = clip_pixel(ROUND_POWER_OF_TWO(temp_out[j], 5)
                                   + dest[j * dest_stride + i]);
+  }
+}
+
+void vp9_short_idct8x8_1_add_c(int16_t *input, uint8_t *dest, int dest_stride) {
+  int i, j;
+  int a1;
+  int16_t out = dct_const_round_shift(input[0] * cospi_16_64);
+  out = dct_const_round_shift(out * cospi_16_64);
+  a1 = ROUND_POWER_OF_TWO(out, 5);
+  for (j = 0; j < 8; ++j) {
+    for (i = 0; i < 8; ++i)
+      dest[i] = clip_pixel(dest[i] + a1);
+    dest += dest_stride;
   }
 }
 
@@ -428,12 +422,11 @@ void vp9_short_iht8x8_add_c(int16_t *input, uint8_t *dest, int dest_stride,
 
 void vp9_short_idct10_8x8_add_c(int16_t *input, uint8_t *dest,
                                 int dest_stride) {
-  int16_t out[8 * 8];
+  int16_t out[8 * 8] = { 0 };
   int16_t *outptr = out;
   int i, j;
   int16_t temp_in[8], temp_out[8];
 
-  vpx_memset(out, 0, sizeof(out));
   // First transform rows
   // only first 4 row has non-zero coefs
   for (i = 0; i < 4; ++i) {
@@ -451,12 +444,6 @@ void vp9_short_idct10_8x8_add_c(int16_t *input, uint8_t *dest,
       dest[j * dest_stride + i] = clip_pixel(ROUND_POWER_OF_TWO(temp_out[j], 5)
                                   + dest[j * dest_stride + i]);
   }
-}
-
-void vp9_short_idct1_8x8_c(int16_t *input, int16_t *output) {
-  int16_t out = dct_const_round_shift(input[0] * cospi_16_64);
-  out = dct_const_round_shift(out * cospi_16_64);
-  output[0] = ROUND_POWER_OF_TWO(out, 5);
 }
 
 static void idct16_1d(int16_t *input, int16_t *output) {
@@ -535,6 +522,7 @@ static void idct16_1d(int16_t *input, int16_t *output) {
   step1[14] = -step2[14] + step2[15];
   step1[15] = step2[14] + step2[15];
 
+  // stage 4
   temp1 = (step1[0] + step1[1]) * cospi_16_64;
   temp2 = (step1[0] - step1[1]) * cospi_16_64;
   step2[0] = dct_const_round_shift(temp1);
@@ -852,15 +840,13 @@ void vp9_short_iht16x16_add_c(int16_t *input, uint8_t *dest, int dest_stride,
 
 void vp9_short_idct10_16x16_add_c(int16_t *input, uint8_t *dest,
                                   int dest_stride) {
-  int16_t out[16 * 16];
+  int16_t out[16 * 16] = { 0 };
   int16_t *outptr = out;
   int i, j;
   int16_t temp_in[16], temp_out[16];
 
-  /* First transform rows. Since all non-zero dct coefficients are in
-   * upper-left 4x4 area, we only need to calculate first 4 rows here.
-   */
-  vpx_memset(out, 0, sizeof(out));
+  // First transform rows. Since all non-zero dct coefficients are in
+  // upper-left 4x4 area, we only need to calculate first 4 rows here.
   for (i = 0; i < 4; ++i) {
     idct16_1d(input, outptr);
     input += 16;
@@ -878,10 +864,18 @@ void vp9_short_idct10_16x16_add_c(int16_t *input, uint8_t *dest,
   }
 }
 
-void vp9_short_idct1_16x16_c(int16_t *input, int16_t *output) {
+void vp9_short_idct16x16_1_add_c(int16_t *input, uint8_t *dest,
+                                 int dest_stride) {
+  int i, j;
+  int a1;
   int16_t out = dct_const_round_shift(input[0] * cospi_16_64);
   out = dct_const_round_shift(out * cospi_16_64);
-  output[0] = ROUND_POWER_OF_TWO(out, 6);
+  a1 = ROUND_POWER_OF_TWO(out, 6);
+  for (j = 0; j < 16; ++j) {
+    for (i = 0; i < 16; ++i)
+      dest[i] = clip_pixel(dest[i] + a1);
+    dest += dest_stride;
+  }
 }
 
 static void idct32_1d(int16_t *input, int16_t *output) {
@@ -1279,32 +1273,4 @@ void vp9_short_idct1_32x32_c(int16_t *input, int16_t *output) {
   int16_t out = dct_const_round_shift(input[0] * cospi_16_64);
   out = dct_const_round_shift(out * cospi_16_64);
   output[0] = ROUND_POWER_OF_TWO(out, 6);
-}
-
-void vp9_short_idct10_32x32_add_c(int16_t *input, uint8_t *dest,
-                                  int dest_stride) {
-  int16_t out[32 * 32];
-  int16_t *outptr = out;
-  int i, j;
-  int16_t temp_in[32], temp_out[32];
-
-  /* First transform rows. Since all non-zero dct coefficients are in
-   * upper-left 4x4 area, we only need to calculate first 4 rows here.
-   */
-  vpx_memset(out, 0, sizeof(out));
-  for (i = 0; i < 4; ++i) {
-    idct32_1d(input, outptr);
-    input += 32;
-    outptr += 32;
-  }
-
-  // Columns
-  for (i = 0; i < 32; ++i) {
-    for (j = 0; j < 32; ++j)
-      temp_in[j] = out[j * 32 + i];
-    idct32_1d(temp_in, temp_out);
-    for (j = 0; j < 32; ++j)
-      dest[j * dest_stride + i] = clip_pixel(ROUND_POWER_OF_TWO(temp_out[j], 6)
-                                  + dest[j * dest_stride + i]);
-  }
 }

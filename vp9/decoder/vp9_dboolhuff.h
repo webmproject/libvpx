@@ -22,11 +22,6 @@ typedef size_t VP9_BD_VALUE;
 
 #define VP9_BD_VALUE_SIZE ((int)sizeof(VP9_BD_VALUE)*CHAR_BIT)
 
-// This is meant to be a large, positive constant that can still be efficiently
-// loaded as an immediate (on platforms like ARM, for example).
-// Even relatively modest values like 100 would work fine.
-#define VP9_LOTS_OF_BITS 0x40000000
-
 typedef struct {
   const uint8_t *buffer_end;
   const uint8_t *buffer;
@@ -93,22 +88,6 @@ static int vp9_read_literal(vp9_reader *br, int bits) {
   return z;
 }
 
-static int vp9_reader_has_error(vp9_reader *r) {
-  // Check if we have reached the end of the buffer.
-  //
-  // Variable 'count' stores the number of bits in the 'value' buffer, minus
-  // 8. The top byte is part of the algorithm, and the remainder is buffered
-  // to be shifted into it. So if count == 8, the top 16 bits of 'value' are
-  // occupied, 8 for the algorithm and 8 in the buffer.
-  //
-  // When reading a byte from the user's buffer, count is filled with 8 and
-  // one byte is filled into the value buffer. When we reach the end of the
-  // data, count is additionally filled with VP9_LOTS_OF_BITS. So when
-  // count == VP9_LOTS_OF_BITS - 1, the user's data has been exhausted.
-  //
-  // 1 if we have tried to decode bits after the end of stream was encountered.
-  // 0 No error.
-  return r->count > VP9_BD_VALUE_SIZE && r->count < VP9_LOTS_OF_BITS;
-}
+int vp9_reader_has_error(vp9_reader *r);
 
 #endif  // VP9_DECODER_VP9_DBOOLHUFF_H_

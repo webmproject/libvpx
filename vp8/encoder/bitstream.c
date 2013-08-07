@@ -1322,7 +1322,7 @@ void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest, unsigned char * dest
         vp8_start_encode(bc, cx_data, cx_data_end);
 
         /* signal clr type */
-        vp8_write_bit(bc, pc->clr_type);
+        vp8_write_bit(bc, 0);
         vp8_write_bit(bc, pc->clamp_type);
 
     }

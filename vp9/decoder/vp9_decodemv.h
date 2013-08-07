@@ -12,6 +12,7 @@
 #define VP9_DECODER_VP9_DECODEMV_H_
 
 #include "vp9/decoder/vp9_onyxd_int.h"
+#include "vp9/decoder/vp9_dboolhuff.h"
 
 void vp9_prepare_read_mode_info(VP9D_COMP* pbi, vp9_reader *r);
 

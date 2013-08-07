@@ -13,61 +13,39 @@
 
 #include "vpx_ports/mem.h"
 #include "vpx_config.h"
+
 #include "vp9/common/vp9_blockd.h"
+#include "vp9/common/vp9_seg_common.h"
 
 #define MAX_LOOP_FILTER 63
+#define MAX_SHARPNESS 7
+
 #define SIMD_WIDTH 16
 
-/* Need to align this structure so when it is declared and
- * passed it can be loaded into vector registers.
- */
+// Need to align this structure so when it is declared and
+// passed it can be loaded into vector registers.
 typedef struct {
-  DECLARE_ALIGNED(SIMD_WIDTH, unsigned char,
+  DECLARE_ALIGNED(SIMD_WIDTH, uint8_t,
                   mblim[MAX_LOOP_FILTER + 1][SIMD_WIDTH]);
-  DECLARE_ALIGNED(SIMD_WIDTH, unsigned char,
-                  blim[MAX_LOOP_FILTER + 1][SIMD_WIDTH]);
-  DECLARE_ALIGNED(SIMD_WIDTH, unsigned char,
+  DECLARE_ALIGNED(SIMD_WIDTH, uint8_t,
                   lim[MAX_LOOP_FILTER + 1][SIMD_WIDTH]);
-  DECLARE_ALIGNED(SIMD_WIDTH, unsigned char,
+  DECLARE_ALIGNED(SIMD_WIDTH, uint8_t,
                   hev_thr[4][SIMD_WIDTH]);
-  unsigned char lvl[MAX_MB_SEGMENTS][4][4];
-  unsigned char mode_lf_lut[MB_MODE_COUNT];
+  uint8_t lvl[MAX_SEGMENTS][MAX_REF_FRAMES][MAX_MODE_LF_DELTAS];
+  uint8_t mode_lf_lut[MB_MODE_COUNT];
 } loop_filter_info_n;
-
-struct loop_filter_info {
-  const unsigned char *mblim;
-  const unsigned char *blim;
-  const unsigned char *lim;
-  const unsigned char *hev_thr;
-};
-
-#define prototype_loopfilter(sym) \
-  void sym(uint8_t *src, int pitch, const unsigned char *blimit, \
-           const unsigned char *limit, const unsigned char *thresh, int count)
-
-#define prototype_loopfilter_block(sym) \
-  void sym(uint8_t *y, uint8_t *u, uint8_t *v, \
-           int ystride, int uv_stride, struct loop_filter_info *lfi)
-
-#if ARCH_X86 || ARCH_X86_64
-#include "x86/vp9_loopfilter_x86.h"
-#endif
-
-typedef void loop_filter_uvfunction(uint8_t *u,   /* source pointer */
-                                    int p,              /* pitch */
-                                    const unsigned char *blimit,
-                                    const unsigned char *limit,
-                                    const unsigned char *thresh,
-                                    uint8_t *v);
 
 /* assorted loopfilter functions which get used elsewhere */
 struct VP9Common;
 struct macroblockd;
 
-void vp9_loop_filter_init(struct VP9Common *cm);
+void vp9_loop_filter_init(struct VP9Common *cm, struct loopfilter *lf);
 
-void vp9_loop_filter_frame_init(struct VP9Common *cm,
-                                struct macroblockd *mbd,
+// Update the loop filter for the current frame.
+// This should be called before vp9_loop_filter_rows(), vp9_loop_filter_frame()
+// calls this function directly.
+void vp9_loop_filter_frame_init(struct VP9Common *const cm,
+                                struct macroblockd *const xd,
                                 int default_filt_lvl);
 
 void vp9_loop_filter_frame(struct VP9Common *cm,
@@ -75,11 +53,22 @@ void vp9_loop_filter_frame(struct VP9Common *cm,
                            int filter_level,
                            int y_only);
 
-void vp9_loop_filter_partial_frame(struct VP9Common *cm,
-                                   struct macroblockd *mbd,
-                                   int default_filt_lvl);
+// Apply the loop filter to [start, stop) macro block rows in frame_buffer.
+void vp9_loop_filter_rows(const YV12_BUFFER_CONFIG *frame_buffer,
+                          struct VP9Common *cm, struct macroblockd *xd,
+                          int start, int stop, int y_only);
 
-void vp9_loop_filter_update_sharpness(loop_filter_info_n *lfi,
-                                      int sharpness_lvl);
+typedef struct LoopFilterWorkerData {
+  const YV12_BUFFER_CONFIG *frame_buffer;
+  struct VP9Common *cm;
+  struct macroblockd xd;  // TODO(jzern): most of this is unnecessary to the
+                          // loopfilter. the planes are necessary as their state
+                          // is changed during decode.
+  int start;
+  int stop;
+  int y_only;
+} LFWorkerData;
 
+// Operates on the rows described by LFWorkerData passed as 'arg1'.
+int vp9_loop_filter_worker(void *arg1, void *arg2);
 #endif  // VP9_COMMON_VP9_LOOPFILTER_H_

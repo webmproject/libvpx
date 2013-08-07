@@ -381,7 +381,7 @@ generate_vcproj() {
                             RuntimeLibrary="$debug_runtime" \
                             UsePrecompiledHeader="0" \
                             WarningLevel="3" \
-                            DebugInformationFormat="1" \
+                            DebugInformationFormat="2" \
                             $warn_64bit \
 
                         $uses_asm && tag Tool Name="YASM"  IncludePaths="$incs" Debug="true"
@@ -395,7 +395,7 @@ generate_vcproj() {
                             RuntimeLibrary="$debug_runtime" \
                             UsePrecompiledHeader="0" \
                             WarningLevel="3" \
-                            DebugInformationFormat="1" \
+                            DebugInformationFormat="2" \
                             $warn_64bit \
 
                         $uses_asm && tag Tool Name="YASM"  IncludePaths="$incs" Debug="true"

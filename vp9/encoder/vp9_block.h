@@ -24,11 +24,8 @@ typedef struct {
 } search_site;
 
 typedef struct {
-  int count;
   struct {
     MB_PREDICTION_MODE mode;
-    int_mv mv;
-    int_mv second_mv;
   } bmi[4];
 } PARTITION_INFO;
 
@@ -50,7 +47,8 @@ typedef struct {
   int hybrid_pred_diff;
   int comp_pred_diff;
   int single_pred_diff;
-  int64_t txfm_rd_diff[NB_TXFM_MODES];
+  int64_t tx_rd_diff[TX_MODES];
+  int64_t best_filter_diff[VP9_SWITCHABLE_FILTERS + 1];
 
   // Bit flag for each mode whether it has high error in comparison to others.
   unsigned int modes_with_high_error;
@@ -73,6 +71,11 @@ struct macroblock_plane {
   // Zbin Over Quant value
   int16_t zbin_extra;
 };
+
+/* The [2] dimension is for whether we skip the EOB node (i.e. if previous
+ * coefficient in this block was zero) or not. */
+typedef unsigned int vp9_coeff_cost[BLOCK_TYPES][REF_TYPES][COEF_BANDS][2]
+                                   [PREV_COEF_CONTEXTS][MAX_ENTROPY_TOKENS];
 
 typedef struct macroblock MACROBLOCK;
 struct macroblock {
@@ -98,6 +101,8 @@ struct macroblock {
   signed int act_zbin_adj;
 
   int mv_best_ref_index[MAX_REF_FRAMES];
+  unsigned int max_mv_context[MAX_REF_FRAMES];
+  unsigned int source_variance;
 
   int nmvjointcost[MV_JOINTS];
   int nmvcosts[2][MV_VALS];
@@ -114,6 +119,7 @@ struct macroblock {
   int **mvsadcost;
 
   int mbmode_cost[MB_MODE_COUNT];
+  unsigned inter_mode_cost[INTER_MODE_CONTEXTS][MB_MODE_COUNT - NEARESTMV];
   int intra_uv_mode_cost[2][MB_MODE_COUNT];
   int y_mode_costs[VP9_INTRA_MODES][VP9_INTRA_MODES][VP9_INTRA_MODES];
   int switchable_interp_costs[VP9_SWITCHABLE_FILTERS + 1]
@@ -133,12 +139,18 @@ struct macroblock {
   unsigned char *active_ptr;
 
   // note that token_costs is the cost when eob node is skipped
-  vp9_coeff_count token_costs[TX_SIZE_MAX_SB][BLOCK_TYPES][2];
+  vp9_coeff_cost token_costs[TX_SIZES];
 
   int optimize;
 
   // indicate if it is in the rd search loop or encoding process
   int rd_search;
+  int skip_encode;
+
+  // Used to store sub partition's choices.
+  int fast_ms;
+  int_mv pred_mv;
+  int subblock_ref;
 
   // TODO(jingning): Need to refactor the structure arrays that buffers the
   // coding mode decisions of each partition type.

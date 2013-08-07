@@ -233,10 +233,10 @@ static vpx_codec_err_t set_vp9e_config(VP9_CONFIG *oxcf,
   oxcf->width   = cfg.g_w;
   oxcf->height  = cfg.g_h;
   /* guess a frame rate if out of whack, use 30 */
-  oxcf->frame_rate             = (double)(cfg.g_timebase.den) / (double)(cfg.g_timebase.num);
+  oxcf->framerate             = (double)(cfg.g_timebase.den) / (double)(cfg.g_timebase.num);
 
-  if (oxcf->frame_rate > 180) {
-    oxcf->frame_rate = 30;
+  if (oxcf->framerate > 180) {
+    oxcf->framerate = 30;
   }
 
   switch (cfg.g_pass) {
@@ -1032,6 +1032,7 @@ static vpx_codec_ctrl_fn_map_t vp9e_ctf_maps[] = {
   {VP8E_SET_CQ_LEVEL,                 set_param},
   {VP8E_SET_MAX_INTRA_BITRATE_PCT,    set_param},
   {VP9E_SET_LOSSLESS,                 set_param},
+  {VP9E_SET_FRAME_PARALLEL_DECODING,  set_param},
   {VP9_GET_REFERENCE,                 get_reference},
   { -1, NULL},
 };

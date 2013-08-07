@@ -15,8 +15,6 @@
 #include "vp9/encoder/vp9_lookahead.h"
 #include "vp9/common/vp9_extend.h"
 
-#define MAX_LAG_BUFFERS 25
-
 struct lookahead_ctx {
   unsigned int max_sz;         /* Absolute size of the queue */
   unsigned int sz;             /* Number of buffers currently in the queue */

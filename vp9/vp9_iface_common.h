@@ -29,7 +29,7 @@ static void yuvconfig2image(vpx_image_t *img, const YV12_BUFFER_CONFIG  *yv12,
     img->fmt = VPX_IMG_FMT_I420;
   }
   img->w = yv12->y_stride;
-  img->h = multiple8(yv12->y_height + 2 * VP9BORDERINPIXELS);
+  img->h = ALIGN_POWER_OF_TWO(yv12->y_height + 2 * VP9BORDERINPIXELS, 3);
   img->d_w = yv12->y_crop_width;
   img->d_h = yv12->y_crop_height;
   img->x_chroma_shift = yv12->uv_width < yv12->y_width;
@@ -74,8 +74,6 @@ static vpx_codec_err_t image2yuvconfig(const vpx_image_t *img,
   yv12->alpha_stride = yv12->alpha_buffer ? img->stride[VPX_PLANE_ALPHA] : 0;
 
   yv12->border  = (img->stride[VPX_PLANE_Y] - img->w) / 2;
-  yv12->clrtype = REG_YUV;
-
 #if CONFIG_ALPHA
   // For development purposes, force alpha to hold the same data a Y for now.
   yv12->alpha_buffer = yv12->y_buffer;

@@ -244,7 +244,7 @@ unsigned int vp9_variance16x16_sse2
   return (var - (((unsigned int)avg * avg) >> 8));
 }
 
-unsigned int vp9_mse16x16_wmt(
+unsigned int vp9_mse16x16_sse2(
   const unsigned char *src_ptr,
   int  source_stride,
   const unsigned char *ref_ptr,
@@ -500,7 +500,7 @@ FNS(ssse3, ssse3);
 #undef FNS
 #undef FN
 
-unsigned int vp9_variance_halfpixvar16x16_h_wmt(
+unsigned int vp9_variance_halfpixvar16x16_h_sse2(
   const unsigned char *src_ptr,
   int  src_pixels_per_line,
   const unsigned char *dst_ptr,
@@ -519,7 +519,7 @@ unsigned int vp9_variance_halfpixvar16x16_h_wmt(
 }
 
 
-unsigned int vp9_variance_halfpixvar16x16_v_wmt(
+unsigned int vp9_variance_halfpixvar16x16_v_sse2(
   const unsigned char *src_ptr,
   int  src_pixels_per_line,
   const unsigned char *dst_ptr,
@@ -537,7 +537,7 @@ unsigned int vp9_variance_halfpixvar16x16_v_wmt(
 }
 
 
-unsigned int vp9_variance_halfpixvar16x16_hv_wmt(
+unsigned int vp9_variance_halfpixvar16x16_hv_sse2(
   const unsigned char *src_ptr,
   int  src_pixels_per_line,
   const unsigned char *dst_ptr,

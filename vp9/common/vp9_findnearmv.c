@@ -14,12 +14,13 @@
 #include "vp9/common/vp9_mvref_common.h"
 #include "vp9/common/vp9_sadmxn.h"
 
-static void lower_mv_precision(int_mv *mv, int usehp) {
-  if (!usehp || !vp9_use_mv_hp(&mv->as_mv)) {
-    if (mv->as_mv.row & 1)
-      mv->as_mv.row += (mv->as_mv.row > 0 ? -1 : 1);
-    if (mv->as_mv.col & 1)
-      mv->as_mv.col += (mv->as_mv.col > 0 ? -1 : 1);
+static void lower_mv_precision(MV *mv, int allow_hp) {
+  const int use_hp = allow_hp && vp9_use_mv_hp(mv);
+  if (!use_hp) {
+    if (mv->row & 1)
+      mv->row += (mv->row > 0 ? -1 : 1);
+    if (mv->col & 1)
+      mv->col += (mv->col > 0 ? -1 : 1);
   }
 }
 
@@ -31,8 +32,8 @@ void vp9_find_best_ref_mvs(MACROBLOCKD *xd,
   int i;
   // Make sure all the candidates are properly clamped etc
   for (i = 0; i < MAX_MV_REF_CANDIDATES; ++i) {
-    lower_mv_precision(&mvlist[i], xd->allow_high_precision_mv);
-    clamp_mv2(&mvlist[i], xd);
+    lower_mv_precision(&mvlist[i].as_mv, xd->allow_high_precision_mv);
+    clamp_mv2(&mvlist[i].as_mv, xd);
   }
   *nearest = mvlist[0];
   *near = mvlist[1];
@@ -41,7 +42,8 @@ void vp9_find_best_ref_mvs(MACROBLOCKD *xd,
 void vp9_append_sub8x8_mvs_for_idx(VP9_COMMON *cm, MACROBLOCKD *xd,
                                    int_mv *dst_nearest,
                                    int_mv *dst_near,
-                                   int block_idx, int ref_idx) {
+                                   int block_idx, int ref_idx,
+                                   int mi_row, int mi_col) {
   int_mv dst_list[MAX_MV_REF_CANDIDATES];
   int_mv mv_list[MAX_MV_REF_CANDIDATES];
   MODE_INFO *mi = xd->mode_info_context;
@@ -53,7 +55,8 @@ void vp9_append_sub8x8_mvs_for_idx(VP9_COMMON *cm, MACROBLOCKD *xd,
   vp9_find_mv_refs_idx(cm, xd, xd->mode_info_context,
                        xd->prev_mode_info_context,
                        mbmi->ref_frame[ref_idx],
-                       mv_list, cm->ref_frame_sign_bias, block_idx);
+                       mv_list, cm->ref_frame_sign_bias, block_idx,
+                       mi_row, mi_col);
 
   dst_list[1].as_int = 0;
   if (block_idx == 0) {

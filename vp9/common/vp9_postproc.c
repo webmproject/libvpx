@@ -411,7 +411,7 @@ static void fillrd(struct postproc_state *state, int q, int a) {
 
     }
 
-    for (next = next; next < 256; next++)
+    for (; next < 256; next++)
       char_dist[next] = 0;
   }
 
@@ -630,9 +630,11 @@ static void constrain_line(int x0, int *x1, int y0, int *y1,
   }
 }
 
-int vp9_post_proc_frame(VP9_COMMON *oci, YV12_BUFFER_CONFIG *dest,
+int vp9_post_proc_frame(struct VP9Common *oci,
+                        struct loopfilter *lf,
+                        YV12_BUFFER_CONFIG *dest,
                         vp9_ppflags_t *ppflags) {
-  int q = oci->filter_level * 10 / 6;
+  int q = lf->filter_level * 10 / 6;
   int flags = ppflags->post_proc_flag;
   int deblock_level = ppflags->deblocking_level;
   int noise_level = ppflags->noise_level;
@@ -758,7 +760,7 @@ int vp9_post_proc_frame(VP9_COMMON *oci, YV12_BUFFER_CONFIG *dest,
   if (flags & VP9D_DEBUG_TXT_RATE_INFO) {
     char message[512];
     snprintf(message, sizeof(message),
-             "Bitrate: %10.2f frame_rate: %10.2f ",
+             "Bitrate: %10.2f framerate: %10.2f ",
              oci->bitrate, oci->framerate);
     vp9_blit_text(message, oci->post_proc_buffer.y_buffer,
                   oci->post_proc_buffer.y_stride);

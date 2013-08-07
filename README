@@ -1,7 +1,7 @@
 vpx Multi-Format Codec SDK
-README - 21 June 2012
+README - 1 August 2013
 
-Welcome to the WebM VP8 Codec SDK!
+Welcome to the WebM VP8/VP9 Codec SDK!
 
 COMPILING THE APPLICATIONS/LIBRARIES:
   The build system used is similar to autotools. Building generally consists of
@@ -53,33 +53,63 @@ COMPILING THE APPLICATIONS/LIBRARIES:
     armv5te-android-gcc
     armv5te-linux-rvct
     armv5te-linux-gcc
+    armv5te-none-rvct
     armv6-darwin-gcc
     armv6-linux-rvct
     armv6-linux-gcc
+    armv6-none-rvct
     armv7-android-gcc
+    armv7-darwin-gcc
     armv7-linux-rvct
     armv7-linux-gcc
+    armv7-none-rvct
+    armv7-win32-vs11
     mips32-linux-gcc
     ppc32-darwin8-gcc
     ppc32-darwin9-gcc
+    ppc32-linux-gcc
     ppc64-darwin8-gcc
     ppc64-darwin9-gcc
     ppc64-linux-gcc
+    sparc-solaris-gcc
+    x86-android-gcc
     x86-darwin8-gcc
     x86-darwin8-icc
     x86-darwin9-gcc
     x86-darwin9-icc
+    x86-darwin10-gcc
+    x86-darwin11-gcc
+    x86-darwin12-gcc
+    x86-darwin13-gcc
     x86-linux-gcc
     x86-linux-icc
+    x86-os2-gcc
     x86-solaris-gcc
+    x86-win32-gcc
     x86-win32-vs7
     x86-win32-vs8
+    x86-win32-vs9
+    x86-win32-vs10
+    x86-win32-vs11
     x86_64-darwin9-gcc
+    x86_64-darwin10-gcc
+    x86_64-darwin11-gcc
+    x86_64-darwin12-gcc
+    x86_64-darwin13-gcc
     x86_64-linux-gcc
+    x86_64-linux-icc
     x86_64-solaris-gcc
+    x86_64-win64-gcc
     x86_64-win64-vs8
+    x86_64-win64-vs9
+    x86_64-win64-vs10
+    x86_64-win64-vs11
     universal-darwin8-gcc
     universal-darwin9-gcc
+    universal-darwin10-gcc
+    universal-darwin11-gcc
+    universal-darwin12-gcc
+    universal-darwin13-gcc
     generic-gnu
 
   The generic-gnu target, in conjunction with the CROSS environment variable,
@@ -97,7 +127,7 @@ COMPILING THE APPLICATIONS/LIBRARIES:
 
   5. Configuration errors
   If the configuration step fails, the first step is to look in the error log.
-  This defaults to config.err. This should give a good indication of what went
+  This defaults to config.log. This should give a good indication of what went
   wrong. If not, contact us for support.
 
 SUPPORT

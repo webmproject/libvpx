@@ -13,6 +13,8 @@
 
 #include "vpx/vpx_integer.h"
 
+#include "vp9/common/vp9_common.h"
+
 typedef struct {
   int16_t row;
   int16_t col;
@@ -28,9 +30,10 @@ typedef struct {
   int32_t col;
 } MV32;
 
-typedef union int_mv32 {
-  uint64_t as_int;
-  MV32 as_mv;
-} int_mv32; /* facilitates faster equality tests and copies */
+static void clamp_mv(MV *mv, int min_col, int max_col,
+                             int min_row, int max_row) {
+  mv->col = clamp(mv->col, min_col, max_col);
+  mv->row = clamp(mv->row, min_row, max_row);
+}
 
 #endif  // VP9_COMMON_VP9_MV_H_
