@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAcn//1Og\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 399,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2013-08-07T21:52:23Z",
+      "side": 1,
+      "message": "I think num_pels_log2_lookup should go away ?   it seems completely unnecessary.  why not just have the lookup return the pixels everywhere/ \n\nDown below we apparently have \npd-\u003edequant[1]\u003e\u003e3  ?   why is that?   If I use it again is it ok for me to sometimes pass in pd-\u003edequant[1] \u003e\u003e 2   why would I want that?   Is this yet another magic number?",
+      "parentUuid": "AAAAcn//1RE\u003d",
+      "revId": "ea4df22335fe232346de6937c67ee14da73d4434",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAcn//1RA\u003d",
         "filename": "vp9/encoder/vp9_rdopt.c",
         "patchSetId": 4
