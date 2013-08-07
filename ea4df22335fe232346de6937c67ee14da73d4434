@@ -37,6 +37,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAcn//1Nk\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 399,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2013-08-07T21:58:17Z",
+      "side": 1,
+      "message": "Yes - one of the tables is redundant and can go.\n\npd-\u003edequant[1]\u003e\u003e3: that is because all our transform coeffs are 8 times the actual orthogonal transform. So the effective quantizer (assuming an orthogonal transform) needs to be divided by 8.",
+      "parentUuid": "AAAAcn//1Og\u003d",
+      "revId": "ea4df22335fe232346de6937c67ee14da73d4434",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAcn//1RA\u003d",
         "filename": "vp9/encoder/vp9_rdopt.c",
         "patchSetId": 4
