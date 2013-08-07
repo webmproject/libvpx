@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAcn//06o\u003d",
+        "filename": "vp9/common/arm/neon/vp9_short_idct16x16_add_neon.asm",
+        "patchSetId": 7
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2013-08-07T22:44:47Z",
+      "side": 1,
+      "message": "Can also use r12 for constants (scratch register, not required to be saved)",
+      "parentUuid": "AAAAcn//1Ug\u003d",
+      "revId": "a5c16289dbd87a616609b5a3b22b8a3179618316",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAcn//118\u003d",
         "filename": "vp9/common/arm/neon/vp9_short_idct16x16_add_neon.asm",
         "patchSetId": 7
@@ -30,6 +48,24 @@
       "writtenOn": "2013-08-07T22:13:14Z",
       "side": 1,
       "message": "Is this \"vld2.s16        {q8,q9}, [r0]!\" faster than doing something like \"vld1.s16        {q8}, [r0], r3\", where r3 is set to 128?\n\nOr am I not understanding what you are doing?",
+      "revId": "a5c16289dbd87a616609b5a3b22b8a3179618316",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcn//06Y\u003d",
+        "filename": "vp9/common/arm/neon/vp9_short_idct16x16_add_neon.asm",
+        "patchSetId": 7
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2013-08-07T22:44:47Z",
+      "side": 1,
+      "message": "It\u0027s deinterleaving. q8 gets the first element, q9 gets the second. q9 gets discarded. There must be a better way though ... especially using q9 again right away is problematic.",
+      "parentUuid": "AAAAcn//118\u003d",
       "revId": "a5c16289dbd87a616609b5a3b22b8a3179618316",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
