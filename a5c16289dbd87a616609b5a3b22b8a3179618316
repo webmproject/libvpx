@@ -72,6 +72,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAcn//01E\u003d",
+        "filename": "vp9/common/arm/neon/vp9_short_idct16x16_add_neon.asm",
+        "patchSetId": 7
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2013-08-07T23:47:58Z",
+      "side": 1,
+      "message": "Right I understand what he is doing now. I agree using the scratch register is not great. You could load q0-q15 and then change the resisters in the instructions below. Might be a lot of work. Could add a TODO.",
+      "parentUuid": "AAAAcn//06Y\u003d",
+      "revId": "a5c16289dbd87a616609b5a3b22b8a3179618316",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAcn//1tI\u003d",
         "filename": "vp9/common/arm/neon/vp9_short_idct16x16_add_neon.asm",
         "patchSetId": 7
