@@ -130,8 +130,37 @@ static INLINE int mi_height_log2(BLOCK_SIZE_TYPE sb_type) {
   return mi_height_log2_lookup[sb_type];
 }
 
+#if CONFIG_INTERINTRA
+static INLINE TX_SIZE intra_size_log2_for_interintra(int bs) {
+  switch (bs) {
+    case 4:
+      return TX_4X4;
+      break;
+    case 8:
+      return TX_8X8;
+      break;
+    case 16:
+      return TX_16X16;
+      break;
+    case 32:
+      return TX_32X32;
+      break;
+    default:
+      return TX_32X32;
+      break;
+  }
+}
+
+static INLINE int is_interintra_allowed(BLOCK_SIZE_TYPE sb_type) {
+  return ((sb_type >= BLOCK_8X8) && (sb_type < BLOCK_64X64));
+}
+#endif
+
 typedef struct {
   MB_PREDICTION_MODE mode, uv_mode;
+#if CONFIG_INTERINTRA
+  MB_PREDICTION_MODE interintra_mode, interintra_uv_mode;
+#endif
   MV_REFERENCE_FRAME ref_frame[2];
   TX_SIZE txfm_size;
   int_mv mv[2]; // for each reference frame used
@@ -650,6 +679,43 @@ static void txfrm_block_to_raster_xy(MACROBLOCKD *xd,
   *x = (raster_mb & (tx_cols - 1)) << (txwl);
   *y = raster_mb >> tx_cols_log2 << (txwl);
 }
+
+#if CONFIG_INTERINTRA
+static void extend_for_interintra(MACROBLOCKD* const xd,
+                                  BLOCK_SIZE_TYPE bsize) {
+  int bh = 4 << b_height_log2(bsize), bw = 4 << b_width_log2(bsize);
+  int ystride = xd->plane[0].dst.stride, uvstride = xd->plane[1].dst.stride;
+  uint8_t *pixel_y, *pixel_u, *pixel_v;
+  int ymargin, uvmargin;
+  if (xd->mb_to_bottom_edge < 0) {
+    int r;
+    ymargin = 0 - xd->mb_to_bottom_edge / 8;
+    uvmargin = 0 - xd->mb_to_bottom_edge / 16;
+    pixel_y = xd->plane[0].dst.buf - 1 + (bh - ymargin -1) * ystride;
+    pixel_u = xd->plane[1].dst.buf - 1 + (bh / 2 - uvmargin - 1) * uvstride;
+    pixel_v = xd->plane[2].dst.buf - 1 + (bh / 2 - uvmargin - 1) * uvstride;
+    for (r = 0; r < ymargin; r++)
+      xd->plane[0].dst.buf[-1 + (bh - r -1) * ystride] = *pixel_y;
+    for (r = 0; r < uvmargin; r++) {
+      xd->plane[1].dst.buf[-1 + (bh / 2 - r -1) * uvstride] = *pixel_u;
+      xd->plane[2].dst.buf[-1 + (bh / 2 - r -1) * uvstride] = *pixel_v;
+    }
+  }
+  if (xd->mb_to_right_edge < 0) {
+    ymargin = 0 - xd->mb_to_right_edge / 8;
+    uvmargin = 0 - xd->mb_to_right_edge / 16;
+    pixel_y = xd->plane[0].dst.buf + bw - ymargin - 1 - ystride;
+    pixel_u = xd->plane[1].dst.buf + bw / 2 - uvmargin - 1 - uvstride;
+    pixel_v = xd->plane[2].dst.buf + bw / 2 - uvmargin - 1 - uvstride;
+    vpx_memset(xd->plane[0].dst.buf + bw - ymargin - ystride,
+               *pixel_y, ymargin);
+    vpx_memset(xd->plane[1].dst.buf + bw / 2 - uvmargin - uvstride,
+               *pixel_u, uvmargin);
+    vpx_memset(xd->plane[2].dst.buf + bw / 2 - uvmargin - uvstride,
+               *pixel_v, uvmargin);
+  }
+}
+#endif
 
 static void extend_for_intra(MACROBLOCKD* const xd, int plane, int block,
                              BLOCK_SIZE_TYPE bsize, int ss_txfrm_size) {

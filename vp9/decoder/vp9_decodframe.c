@@ -255,6 +255,11 @@ static void decode_modes_b(VP9D_COMP *pbi, int mi_row, int mi_col,
       set_ref(pbi, 1, mi_row, mi_col);
 
     vp9_setup_interp_filters(xd, mbmi->interp_filter, cm);
+#if CONFIG_INTERINTRA
+    if (cm->use_interintra && (mbmi->ref_frame[1] == INTRA_FRAME)) {
+      extend_for_interintra(xd, bsize);
+    }
+#endif
     vp9_build_inter_predictors_sb(xd, mi_row, mi_col, bsize);
     eobtotal = decode_tokens(pbi, bsize, r);
     if (less8x8) {
@@ -876,6 +881,10 @@ static size_t read_uncompressed_header(VP9D_COMP *pbi,
 
       xd->allow_high_precision_mv = vp9_rb_read_bit(rb);
       cm->mcomp_filter_type = read_interp_filter_type(rb);
+
+#if CONFIG_INTERINTRA
+      cm->use_interintra = vp9_rb_read_bit(rb);
+#endif
 
       for (i = 0; i < ALLOWED_REFS_PER_FRAME; ++i)
         vp9_setup_scale_factors(cm, i);

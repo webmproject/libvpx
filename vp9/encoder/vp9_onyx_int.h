@@ -47,7 +47,11 @@
 
 #define KEY_FRAME_CONTEXT 5
 
+#if CONFIG_INTERINTRA
+#define MAX_MODES 48
+#else
 #define MAX_MODES 36
+#endif
 
 #define MIN_THRESHMULT  32
 #define MAX_THRESHMULT  512
@@ -91,6 +95,10 @@ typedef struct {
 
   struct tx_probs tx_probs;
   vp9_prob mbskip_probs[MBSKIP_CONTEXTS];
+
+#if CONFIG_INTERINTRA
+  vp9_prob interintra_prob;
+#endif
 } CODING_CONTEXT;
 
 typedef struct {
@@ -187,6 +195,23 @@ typedef enum {
   THR_D63_PRED,
   THR_D117_PRED,
   THR_D45_PRED,
+
+#if CONFIG_INTERINTRA
+  THR_COMP_INTERINTRA_ZEROL,
+  THR_COMP_INTERINTRA_NEARESTL,
+  THR_COMP_INTERINTRA_NEARL,
+  THR_COMP_INTERINTRA_NEWL,
+
+  THR_COMP_INTERINTRA_ZEROG,
+  THR_COMP_INTERINTRA_NEARESTG,
+  THR_COMP_INTERINTRA_NEARG,
+  THR_COMP_INTERINTRA_NEWG,
+
+  THR_COMP_INTERINTRA_ZEROA,
+  THR_COMP_INTERINTRA_NEARESTA,
+  THR_COMP_INTERINTRA_NEARA,
+  THR_COMP_INTERINTRA_NEWA,
+#endif
 } THR_MODES;
 
 typedef enum {
@@ -467,6 +492,11 @@ typedef struct VP9_COMP {
   int y_mode_count[4][VP9_INTRA_MODES];
   int y_uv_mode_count[VP9_INTRA_MODES][VP9_INTRA_MODES];
   unsigned int partition_count[NUM_PARTITION_CONTEXTS][PARTITION_TYPES];
+
+#if CONFIG_INTERINTRA
+  unsigned int interintra_count[2];
+  unsigned int interintra_select_count[2];
+#endif
 
   nmv_context_counts NMVcount;
 

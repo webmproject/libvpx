@@ -96,6 +96,23 @@ const MODE_DEFINITION vp9_mode_order[MAX_MODES] = {
   {D63_PRED,  INTRA_FRAME,  NONE},
   {D117_PRED, INTRA_FRAME,  NONE},
   {D45_PRED,  INTRA_FRAME,  NONE},
+#if CONFIG_INTERINTRA
+
+  {ZEROMV,    LAST_FRAME,   INTRA_FRAME},
+  {NEARESTMV, LAST_FRAME,   INTRA_FRAME},
+  {NEARMV,    LAST_FRAME,   INTRA_FRAME},
+  {NEWMV,     LAST_FRAME,   INTRA_FRAME},
+
+  {ZEROMV,    GOLDEN_FRAME, INTRA_FRAME},
+  {NEARESTMV, GOLDEN_FRAME, INTRA_FRAME},
+  {NEARMV,    GOLDEN_FRAME, INTRA_FRAME},
+  {NEWMV,     GOLDEN_FRAME, INTRA_FRAME},
+
+  {ZEROMV,    ALTREF_FRAME, INTRA_FRAME},
+  {NEARESTMV, ALTREF_FRAME, INTRA_FRAME},
+  {NEARMV,    ALTREF_FRAME, INTRA_FRAME},
+  {NEWMV,     ALTREF_FRAME, INTRA_FRAME},
+#endif
 };
 
 // The baseline rd thresholds for breaking out of the rd loop for
@@ -2724,6 +2741,9 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
                                  int64_t txfm_cache[],
                                  int *rate2, int64_t *distortion,
                                  int *skippable,
+#if CONFIG_INTERINTRA
+                                 int *compmode_interintra_cost,
+#endif
                                  int *rate_y, int64_t *distortion_y,
                                  int *rate_uv, int64_t *distortion_uv,
                                  int *mode_excluded, int *disable_skip,
@@ -2736,6 +2756,9 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
   MACROBLOCKD *xd = &x->e_mbd;
   MB_MODE_INFO *mbmi = &xd->mode_info_context->mbmi;
   const int is_comp_pred = (mbmi->ref_frame[1] > 0);
+#if CONFIG_INTERINTRA
+  const int is_comp_interintra_pred = (mbmi->ref_frame[1] == INTRA_FRAME);
+#endif
   const int num_refs = is_comp_pred ? 2 : 1;
   const int this_mode = mbmi->mode;
   int_mv *frame_mv = mode_mv[this_mode];
@@ -2753,6 +2776,12 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
   uint8_t *orig_dst[MAX_MB_PLANE];
   int orig_dst_stride[MAX_MB_PLANE];
   int rs = 0;
+
+#if CONFIG_INTERINTRA
+  if (is_inter_mode(this_mode) && mbmi->ref_frame[1] == INTRA_FRAME) {
+    extend_for_interintra(xd, bsize);
+  }
+#endif
 
   if (this_mode == NEWMV) {
     int rate_mv;
@@ -2849,6 +2878,21 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
    * if the first is known */
   *rate2 += cost_mv_ref(cpi, this_mode,
                         mbmi->mb_mode_context[mbmi->ref_frame[0]]);
+
+#if CONFIG_INTERINTRA
+  if (!is_comp_pred) {
+    *compmode_interintra_cost = vp9_cost_bit(cm->fc.interintra_prob,
+                                             is_comp_interintra_pred);
+    if (is_comp_interintra_pred) {
+      *compmode_interintra_cost +=
+          x->mbmode_cost[mbmi->interintra_mode];
+#if SEPARATE_INTERINTRA_UV
+      *compmode_interintra_cost +=
+          x->intra_uv_mode_cost[xd->frame_type][mbmi->interintra_uv_mode];
+#endif
+    }
+  }
+#endif
 
   if (!(*mode_excluded)) {
     if (is_comp_pred) {
@@ -3231,6 +3275,15 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
   int bhsl = b_height_log2(bsize);
   int bhs = (1 << bhsl) / 4;  // mode_info step for subsize
   int best_skip2 = 0;
+#if CONFIG_INTERINTRA
+  int is_best_interintra = 0;
+  int best_intra16_mode = DC_PRED;
+#if SEPARATE_INTERINTRA_UV
+  int best_intra16_uv_mode = DC_PRED;
+#endif
+  int64_t best_intra16_rd = INT64_MAX;
+  int64_t best_overall_rd = INT64_MAX;
+#endif
 
   x->skip_encode = (cpi->sf.skip_encode_frame &&
                     xd->q_index < QIDX_SKIP_THRESH);
@@ -3308,6 +3361,9 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
     int64_t this_rd = INT64_MAX;
     int disable_skip = 0;
     int compmode_cost = 0;
+#if CONFIG_INTERINTRA
+    int compmode_interintra_cost = 0;
+#endif
     int rate2 = 0, rate_y = 0, rate_uv = 0;
     int64_t distortion2 = 0, distortion_y = 0, distortion_uv = 0;
     int skippable;
@@ -3374,6 +3430,9 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
       continue;
     }
     if (!(second_ref_frame == NONE
+#if CONFIG_INTERINTRA
+        || (second_ref_frame == INTRA_FRAME)
+#endif
         || (cpi->ref_frame_flags & flag_list[second_ref_frame]))) {
       continue;
     }
@@ -3405,6 +3464,10 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
     set_scale_factors(xd, ref_frame, second_ref_frame, scale_factor);
     mbmi->mode = this_mode;
     mbmi->uv_mode = DC_PRED;
+#if CONFIG_INTERINTRA
+    mbmi->interintra_mode = (MB_PREDICTION_MODE)(DC_PRED - 1);
+    mbmi->interintra_uv_mode = (MB_PREDICTION_MODE)(DC_PRED - 1);
+#endif
 
     // Evaluate all sub-pel filters irrespective of whether we can use
     // them for this frame.
@@ -3432,6 +3495,10 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
             mode_excluded ?
                 mode_excluded : cm->comp_pred_mode == COMP_PREDICTION_ONLY;
       }
+#if CONFIG_INTERINTRA
+      if (ref_frame != INTRA_FRAME && second_ref_frame == INTRA_FRAME)
+          mode_excluded = mode_excluded ? mode_excluded : !cm->use_interintra;
+#endif
     }
 
     // Select prediction reference frames.
@@ -3728,9 +3795,24 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
       }
     } else {
       compmode_cost = vp9_cost_bit(comp_mode_p, second_ref_frame > INTRA_FRAME);
+#if CONFIG_INTERINTRA
+      if (second_ref_frame == INTRA_FRAME) {
+        if (best_intra16_mode == DC_PRED -1)
+          continue;
+        mbmi->interintra_mode = best_intra16_mode;
+#if SEPARATE_INTERINTRA_UV
+        mbmi->interintra_uv_mode = best_intra16_uv_mode;
+#else
+        mbmi->interintra_uv_mode = best_intra16_mode;
+#endif
+      }
+#endif
       this_rd = handle_inter_mode(cpi, x, bsize,
                                   tx_cache,
                                   &rate2, &distortion2, &skippable,
+#if CONFIG_INTERINTRA
+                                  &compmode_interintra_cost,
+#endif
                                   &rate_y, &distortion_y,
                                   &rate_uv, &distortion_uv,
                                   &mode_excluded, &disable_skip,
@@ -3741,6 +3823,11 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
         continue;
     }
 
+#if CONFIG_INTERINTRA
+    if (cpi->common.use_interintra) {
+      rate2 += compmode_interintra_cost;
+    }
+#endif
     if (cpi->common.comp_pred_mode == HYBRID_PREDICTION) {
       rate2 += compmode_cost;
     }
@@ -3809,6 +3896,18 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
       // Calculate the final RD estimate for this mode.
       this_rd = RDCOST(x->rdmult, x->rddiv, rate2, distortion2);
     }
+#if CONFIG_INTERINTRA
+    if ((ref_frame == INTRA_FRAME) &&
+        (this_mode <= TM_PRED) &&
+        (this_rd < best_intra16_rd)) {
+      best_intra16_rd = this_rd;
+      best_intra16_mode = this_mode;
+#if SEPARATE_INTERINTRA_UV
+      best_intra16_uv_mode = (mbmi->txfm_size != TX_4X4 ?
+                              mode_uv_8x8 : mode_uv_4x4);
+#endif
+    }
+#endif
 
     // Keep record of best intra rd
     if (xd->mode_info_context->mbmi.ref_frame[0] == INTRA_FRAME &&
@@ -3833,6 +3932,13 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
       for (i = 0; i <= VP9_SWITCHABLE_FILTERS; i++)
         best_filter_rd[i] = MIN(best_filter_rd[i], this_rd);
     }
+
+#if CONFIG_INTERINTRA
+    if (this_rd < best_overall_rd) {
+      best_overall_rd = this_rd;
+      is_best_interintra = (second_ref_frame == INTRA_FRAME);
+    }
+#endif
 
     if (this_mode != I4X4_PRED && this_mode != SPLITMV) {
       // Store the respective mode distortions for later use.
@@ -4043,6 +4149,9 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
          (cm->mcomp_filter_type == best_mbmode.interp_filter) ||
          (best_mbmode.ref_frame[0] == INTRA_FRAME));
 
+#if CONFIG_INTERINTRA
+  ++cpi->interintra_select_count[is_best_interintra];
+#endif
   // Updating rd_thresh_freq_fact[] here means that the different
   // partition/block sizes are handled independently based on the best
   // choice for the current partition. It may well be better to keep a scaled

@@ -336,6 +336,9 @@ void vp9_init_mbmode_probs(VP9_COMMON *cm) {
   vp9_copy(cm->fc.single_ref_prob, default_single_ref_p);
   cm->fc.tx_probs = default_tx_probs;
   vp9_copy(cm->fc.mbskip_probs, default_mbskip_probs);
+#if CONFIG_INTERINTRA
+  cm->fc.interintra_prob = VP9_DEF_INTERINTRA_PROB;
+#endif
 }
 
 const vp9_tree_index vp9_switchable_interp_tree[VP9_SWITCHABLE_FILTERS*2-2] = {
@@ -457,6 +460,13 @@ void vp9_adapt_mode_probs(VP9_COMMON *cm) {
   for (i = 0; i < MBSKIP_CONTEXTS; ++i)
     fc->mbskip_probs[i] = update_ct2(pre_fc->mbskip_probs[i],
                                      counts->mbskip[i]);
+
+#if CONFIG_INTERINTRA
+  if (cm->use_interintra) {
+    fc->interintra_prob = update_ct2(pre_fc->interintra_prob,
+                                     counts->interintra);
+  }
+#endif
 }
 
 static void set_default_lf_deltas(struct loopfilter *lf) {

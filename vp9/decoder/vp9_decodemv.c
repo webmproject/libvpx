@@ -486,6 +486,30 @@ static void read_inter_block_mode_info(VP9D_COMP *pbi, MODE_INFO *mi,
     }
   }
 
+#if CONFIG_INTERINTRA
+    if ((cm->use_interintra)
+        && is_interintra_allowed(bsize)
+        && is_inter_mode(mbmi->mode)
+        && (mbmi->ref_frame[1] == NONE)
+        ) {
+      mbmi->ref_frame[1] = (vp9_read(r, cm->fc.interintra_prob) ?
+                            INTRA_FRAME : NONE);
+      cm->counts.interintra[mbmi->ref_frame[1] == INTRA_FRAME]++;
+      if (mbmi->ref_frame[1] == INTRA_FRAME) {
+        int bsg = MIN(MIN(b_width_log2(bsize), b_height_log2(bsize)), 3);
+        mbmi->interintra_mode = read_intra_mode(r, cm->fc.y_mode_prob[bsg]);
+        cm->counts.y_mode[bsg][mbmi->interintra_mode]++;
+#if SEPARATE_INTERINTRA_UV
+        mbmi->interintra_uv_mode = read_intra_mode(r,
+                                   cm->fc.uv_mode_prob[mbmi->interintra_mode]);
+        cm->counts.uv_mode[mbmi->interintra_mode][mbmi->interintra_uv_mode]++;
+#else
+        mbmi->interintra_uv_mode = mbmi->interintra_mode;
+#endif
+        }
+    }
+#endif
+
   if (bsize < BLOCK_8X8) {
     const int num_4x4_w = num_4x4_blocks_wide_lookup[bsize];  // 1 or 2
     const int num_4x4_h = num_4x4_blocks_high_lookup[bsize];  // 1 or 2
@@ -651,6 +675,13 @@ void vp9_prepare_read_mode_info(VP9D_COMP* pbi, vp9_reader *r) {
 
     if (cm->mcomp_filter_type == SWITCHABLE)
       read_switchable_interp_probs(&cm->fc, r);
+
+#if CONFIG_INTERINTRA
+    if (cm->use_interintra) {
+      if (vp9_read(r, VP9_UPD_INTERINTRA_PROB))
+        cm->fc.interintra_prob = vp9_read_prob(r);
+    }
+#endif
 
     for (i = 0; i < INTRA_INTER_CONTEXTS; i++)
       if (vp9_read(r, VP9_MODE_UPDATE_PROB))
