@@ -9,7 +9,7 @@
 ;
 
 
-    EXPORT  |vp8_yv12_copy_y_neon|
+    EXPORT  |vpx_yv12_copy_y_neon|
 
     ARM
     REQUIRE8
@@ -20,7 +20,7 @@
     AREA ||.text||, CODE, READONLY, ALIGN=2
 
 ;void vpxyv12_copy_y_neon(YV12_BUFFER_CONFIG *src_ybc, YV12_BUFFER_CONFIG *dst_ybc)
-|vp8_yv12_copy_y_neon| PROC
+|vpx_yv12_copy_y_neon| PROC
     push            {r4 - r11, lr}
     vpush           {d8-d15}
 

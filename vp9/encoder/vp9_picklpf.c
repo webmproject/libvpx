@@ -149,7 +149,7 @@ void vp9_pick_filter_level(YV12_BUFFER_CONFIG *sd, VP9_COMP *cpi) {
   int Bias = 0;                       // Bias against raising loop filter and in favour of lowering it
 
   //  Make a copy of the unfiltered / processed recon buffer
-  vp8_yv12_copy_y(cm->frame_to_show, &cpi->last_frame_uf);
+  vpx_yv12_copy_y(cm->frame_to_show, &cpi->last_frame_uf);
 
   if (cm->frame_type == KEY_FRAME)
     lf->sharpness_level = 0;
@@ -175,7 +175,7 @@ void vp9_pick_filter_level(YV12_BUFFER_CONFIG *sd, VP9_COMP *cpi) {
   filt_best = filt_mid;
 
   //  Re-instate the unfiltered frame
-  vp8_yv12_copy_y(&cpi->last_frame_uf, cm->frame_to_show);
+  vpx_yv12_copy_y(&cpi->last_frame_uf, cm->frame_to_show);
 
   while (filter_step > 0) {
     Bias = (best_err >> (15 - (filt_mid / 8))) * filter_step; // PGW change 12/12/06 for small images
@@ -199,7 +199,7 @@ void vp9_pick_filter_level(YV12_BUFFER_CONFIG *sd, VP9_COMP *cpi) {
       filt_err = vp9_calc_ss_err(sd, cm->frame_to_show);
 
       //  Re-instate the unfiltered frame
-      vp8_yv12_copy_y(&cpi->last_frame_uf, cm->frame_to_show);
+      vpx_yv12_copy_y(&cpi->last_frame_uf, cm->frame_to_show);
 
       // If value is close to the best so far then bias towards a lower loop filter value.
       if ((filt_err - Bias) < best_err) {
@@ -219,7 +219,7 @@ void vp9_pick_filter_level(YV12_BUFFER_CONFIG *sd, VP9_COMP *cpi) {
       filt_err = vp9_calc_ss_err(sd, cm->frame_to_show);
 
       //  Re-instate the unfiltered frame
-      vp8_yv12_copy_y(&cpi->last_frame_uf, cm->frame_to_show);
+      vpx_yv12_copy_y(&cpi->last_frame_uf, cm->frame_to_show);
 
       // Was it better than the previous best?
       if (filt_err < (best_err - Bias)) {

@@ -22,8 +22,8 @@ specialize vp8_yv12_extend_frame_borders neon
 prototype void vp8_yv12_copy_frame "struct yv12_buffer_config *src_ybc, struct yv12_buffer_config *dst_ybc"
 specialize vp8_yv12_copy_frame neon
 
-prototype void vp8_yv12_copy_y "struct yv12_buffer_config *src_ybc, struct yv12_buffer_config *dst_ybc"
-specialize vp8_yv12_copy_y neon
+prototype void vpx_yv12_copy_y "struct yv12_buffer_config *src_ybc, struct yv12_buffer_config *dst_ybc"
+specialize vpx_yv12_copy_y neon
 
 if [ "$CONFIG_VP9" = "yes" ]; then
     prototype void vp9_extend_frame_borders "struct yv12_buffer_config *ybf, int subsampling_x, int subsampling_y"

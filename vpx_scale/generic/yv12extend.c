@@ -200,7 +200,7 @@ vp8_yv12_copy_frame_c(YV12_BUFFER_CONFIG *src_ybc,
   vp8_yv12_extend_frame_borders_c(dst_ybc);
 }
 
-void vp8_yv12_copy_y_c(YV12_BUFFER_CONFIG *src_ybc,
+void vpx_yv12_copy_y_c(YV12_BUFFER_CONFIG *src_ybc,
                        YV12_BUFFER_CONFIG *dst_ybc) {
   int row;
   unsigned char *source, *dest;
