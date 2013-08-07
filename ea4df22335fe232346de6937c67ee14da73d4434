@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAcn//1RE\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 399,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2013-08-07T21:39:47Z",
+      "side": 1,
+      "message": "Can we reuse num_pels_log2_lookup for this, rather than creating another table. For instance, we could use:\n1 \u003c\u003c num_pels_log2_lookup[bs], here and below.",
+      "revId": "ea4df22335fe232346de6937c67ee14da73d4434",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcn//1RA\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 690,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2013-08-07T21:39:47Z",
+      "side": 1,
+      "message": "ditto",
+      "revId": "ea4df22335fe232346de6937c67ee14da73d4434",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
