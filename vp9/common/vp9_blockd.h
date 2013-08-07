@@ -433,6 +433,14 @@ static INLINE struct plane_block_idx plane_block_idx(int y_blocks,
   return res;
 }
 
+static BLOCK_SIZE_TYPE get_plane_block_size(BLOCK_SIZE_TYPE bsize,
+                                            struct macroblockd_plane *pd) {
+  BLOCK_SIZE_TYPE bs = ss_size_lookup[bsize]
+                                     [pd->subsampling_x][pd->subsampling_y];
+  assert(bs < BLOCK_SIZE_TYPES);
+  return bs;
+}
+
 static INLINE int plane_block_width(BLOCK_SIZE_TYPE bsize,
                                     const struct macroblockd_plane* plane) {
   return 4 << (b_width_log2(bsize) - plane->subsampling_x);
@@ -695,10 +703,11 @@ static void set_contexts_on_border(MACROBLOCKD *xd, BLOCK_SIZE_TYPE bsize,
                                    int eob, int aoff, int loff,
                                    ENTROPY_CONTEXT *A, ENTROPY_CONTEXT *L) {
   struct macroblockd_plane *pd = &xd->plane[plane];
+  const BLOCK_SIZE_TYPE bs = get_plane_block_size(bsize, pd);
+  int mi_blocks_wide = num_4x4_blocks_wide_lookup[bs];
+  int mi_blocks_high = num_4x4_blocks_high_lookup[bs];
   int above_contexts = tx_size_in_blocks;
   int left_contexts = tx_size_in_blocks;
-  int mi_blocks_wide = 1 << plane_block_width_log2by4(bsize, pd);
-  int mi_blocks_high = 1 << plane_block_height_log2by4(bsize, pd);
   int pt;
 
   // xd->mb_to_right_edge is in units of pixels * 8.  This converts
