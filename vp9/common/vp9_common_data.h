@@ -27,6 +27,6 @@ extern const PARTITION_TYPE partition_lookup[][BLOCK_SIZE_TYPES];
 extern const BLOCK_SIZE_TYPE subsize_lookup[PARTITION_TYPES][BLOCK_SIZE_TYPES];
 extern const TX_SIZE max_txsize_lookup[BLOCK_SIZE_TYPES];
 extern const TX_SIZE max_uv_txsize_lookup[BLOCK_SIZE_TYPES];
-extern const BLOCK_SIZE_TYPE bsize_from_dim_lookup[5][5];
+extern const BLOCK_SIZE_TYPE ss_size_lookup[BLOCK_SIZE_TYPES][2][2];
 
 #endif    // VP9_COMMON_VP9_COMMON_DATA_H
