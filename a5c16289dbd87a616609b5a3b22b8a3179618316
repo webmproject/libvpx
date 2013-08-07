@@ -1,0 +1,191 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAcn//1Ug\u003d",
+        "filename": "vp9/common/arm/neon/vp9_short_idct16x16_add_neon.asm",
+        "patchSetId": 7
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2013-08-07T22:13:14Z",
+      "side": 1,
+      "message": "You could remove the push and the pop if you space out loading the cospi constants to only r3. Don\u0027t know how much it will gain you though.",
+      "revId": "a5c16289dbd87a616609b5a3b22b8a3179618316",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcn//118\u003d",
+        "filename": "vp9/common/arm/neon/vp9_short_idct16x16_add_neon.asm",
+        "patchSetId": 7
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2013-08-07T22:13:14Z",
+      "side": 1,
+      "message": "Is this \"vld2.s16        {q8,q9}, [r0]!\" faster than doing something like \"vld1.s16        {q8}, [r0], r3\", where r3 is set to 128?\n\nOr am I not understanding what you are doing?",
+      "revId": "a5c16289dbd87a616609b5a3b22b8a3179618316",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcn//1tI\u003d",
+        "filename": "vp9/common/arm/neon/vp9_short_idct16x16_add_neon.asm",
+        "patchSetId": 7
+      },
+      "lineNbr": 96,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2013-08-07T22:13:14Z",
+      "side": 1,
+      "message": "nit: I misunderstood comment. How about adding \u0027\u003d\u003d\u0027\n\nAnd below",
+      "revId": "a5c16289dbd87a616609b5a3b22b8a3179618316",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcn//1og\u003d",
+        "filename": "vp9/common/arm/neon/vp9_short_idct16x16_add_neon.asm",
+        "patchSetId": 7
+      },
+      "lineNbr": 101,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2013-08-07T22:13:14Z",
+      "side": 1,
+      "message": "Can you use vmlsl.s16 q2, d30, d1 and vmlsl.s16 q3, d31, d1 and remove the 2 vsubs?\n\nAnd below for subtract instructions.",
+      "revId": "a5c16289dbd87a616609b5a3b22b8a3179618316",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcn//1ZM\u003d",
+        "filename": "vp9/common/arm/neon/vp9_short_idct16x16_add_neon.asm",
+        "patchSetId": 7
+      },
+      "lineNbr": 117,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2013-08-07T22:13:14Z",
+      "side": 1,
+      "message": "I think you can use vmlal here and remove the 2 vadds below.\n\nAnd below for add instructions.",
+      "revId": "a5c16289dbd87a616609b5a3b22b8a3179618316",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcn//1X8\u003d",
+        "filename": "vp9/common/arm/neon/vp9_short_idct16x16_add_neon.asm",
+        "patchSetId": 7
+      },
+      "lineNbr": 165,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2013-08-07T22:13:14Z",
+      "side": 1,
+      "message": "It would be good to remove these 4 instructions and try and make sure the instructions above put the values in q0-q3",
+      "revId": "a5c16289dbd87a616609b5a3b22b8a3179618316",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcn//1VE\u003d",
+        "filename": "vp9/common/arm/neon/vp9_short_idct16x16_add_neon.asm",
+        "patchSetId": 7
+      },
+      "lineNbr": 243,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2013-08-07T22:13:14Z",
+      "side": 1,
+      "message": "I think you could remove this if you switch the order of q13 and q12 above and call vadd q4, q4, q5",
+      "revId": "a5c16289dbd87a616609b5a3b22b8a3179618316",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcn//1TQ\u003d",
+        "filename": "vp9/common/arm/neon/vp9_short_idct16x16_add_neon.asm",
+        "patchSetId": 7
+      },
+      "lineNbr": 518,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2013-08-07T22:13:14Z",
+      "side": 1,
+      "message": "nit: 80 chars",
+      "revId": "a5c16289dbd87a616609b5a3b22b8a3179618316",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcn//1SU\u003d",
+        "filename": "vp9/common/arm/neon/vp9_short_idct16x16_add_neon.asm",
+        "patchSetId": 7
+      },
+      "lineNbr": 527,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2013-08-07T22:13:14Z",
+      "side": 1,
+      "message": "Can you remove these 2 functions and vadd into q0 \u0026 q7 above?",
+      "revId": "a5c16289dbd87a616609b5a3b22b8a3179618316",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcn//1MA\u003d",
+        "filename": "vp9/common/arm/neon/vp9_short_idct16x16_add_neon.asm",
+        "patchSetId": 7
+      },
+      "lineNbr": 578,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2013-08-07T22:13:14Z",
+      "side": 1,
+      "message": "You can do rsb r4, #0 and remove mov and sub.",
+      "revId": "a5c16289dbd87a616609b5a3b22b8a3179618316",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcn//1Lw\u003d",
+        "filename": "vp9/common/arm/neon/vp9_short_idct16x16_add_neon.asm",
+        "patchSetId": 7
+      },
+      "lineNbr": 712,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2013-08-07T22:13:14Z",
+      "side": 1,
+      "message": "stata?",
+      "revId": "a5c16289dbd87a616609b5a3b22b8a3179618316",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
