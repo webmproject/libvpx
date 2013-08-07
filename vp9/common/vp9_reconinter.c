@@ -33,27 +33,7 @@ static int unscaled_value(int val, const struct scale_factors *scale) {
   return val;
 }
 
-static MV32 mv_q3_to_q4_with_scaling(const MV *mv,
-                                     const struct scale_factors *scale) {
-  const MV32 res = {
-    ((mv->row << 1) * scale->y_scale_fp >> VP9_REF_SCALE_SHIFT)
-        + scale->y_offset_q4,
-    ((mv->col << 1) * scale->x_scale_fp >> VP9_REF_SCALE_SHIFT)
-        + scale->x_offset_q4
-  };
-  return res;
-}
-
-static MV32 mv_q3_to_q4_without_scaling(const MV *mv,
-                                        const struct scale_factors *scale) {
-  const MV32 res = {
-     mv->row << 1,
-     mv->col << 1
-  };
-  return res;
-}
-
-static MV32 mv_q4_with_scaling(const MV *mv,
+static MV32 mv_with_scaling(const MV *mv,
                                const struct scale_factors *scale) {
   const MV32 res = {
     (mv->row * scale->y_scale_fp >> VP9_REF_SCALE_SHIFT) + scale->y_offset_q4,
@@ -62,8 +42,8 @@ static MV32 mv_q4_with_scaling(const MV *mv,
   return res;
 }
 
-static MV32 mv_q4_without_scaling(const MV *mv,
-                                  const struct scale_factors *scale) {
+static MV32 mv_without_scaling(const MV *mv,
+                               const struct scale_factors *scale) {
   const MV32 res = {
     mv->row,
     mv->col
@@ -109,14 +89,12 @@ void vp9_setup_scale_factors_for_frame(struct scale_factors *scale,
     scale->scale_value_x = unscaled_value;
     scale->scale_value_y = unscaled_value;
     scale->set_scaled_offsets = set_offsets_without_scaling;
-    scale->scale_mv_q3_to_q4 = mv_q3_to_q4_without_scaling;
-    scale->scale_mv_q4 = mv_q4_without_scaling;
+    scale->scale_mv = mv_without_scaling;
   } else {
     scale->scale_value_x = scale_value_x_with_scaling;
     scale->scale_value_y = scale_value_y_with_scaling;
     scale->set_scaled_offsets = set_offsets_with_scaling;
-    scale->scale_mv_q3_to_q4 = mv_q3_to_q4_with_scaling;
-    scale->scale_mv_q4 = mv_q4_with_scaling;
+    scale->scale_mv = mv_with_scaling;
   }
 
   // TODO(agrange): Investigate the best choice of functions to use here
@@ -202,14 +180,15 @@ void vp9_build_inter_predictor(const uint8_t *src, int src_stride,
                                int w, int h, int weight,
                                const struct subpix_fn_table *subpix,
                                enum mv_precision precision) {
-  const MV32 mv = precision == MV_PRECISION_Q4
-                     ? scale->scale_mv_q4(src_mv, scale)
-                     : scale->scale_mv_q3_to_q4(src_mv, scale);
-  const int subpel_x = mv.col & 15;
-  const int subpel_y = mv.row & 15;
+  const int is_q4 = precision == MV_PRECISION_Q4;
+  const MV mv_q4 = { is_q4 ? src_mv->row : src_mv->row << 1,
+                     is_q4 ? src_mv->col : src_mv->col << 1 };
+  const MV32 mv = scale->scale_mv(&mv_q4, scale);
+  const int subpel_x = mv.col & SUBPEL_MASK;
+  const int subpel_y = mv.row & SUBPEL_MASK;
 
-  src += (mv.row >> 4) * src_stride + (mv.col >> 4);
-  scale->predict[!!subpel_x][!!subpel_y][weight](
+  src += (mv.row >> SUBPEL_BITS) * src_stride + (mv.col >> SUBPEL_BITS);
+  scale->predict[subpel_x != 0][subpel_y != 0][weight](
       src, src_stride, dst, dst_stride,
       subpix->filter_x[subpel_x], scale->x_step_q4,
       subpix->filter_y[subpel_y], scale->y_step_q4,
