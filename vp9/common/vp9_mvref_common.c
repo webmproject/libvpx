@@ -70,33 +70,33 @@ static const int counter_to_context[19] = {
   BOTH_INTRA  // 18
 };
 
-static const int mv_ref_blocks[BLOCK_SIZE_TYPES][MVREF_NEIGHBOURS][2] = {
+static const MV mv_ref_blocks[BLOCK_SIZE_TYPES][MVREF_NEIGHBOURS] = {
   // 4X4
-  {{0, -1}, {-1, 0}, {-1, -1}, {0, -2}, {-2, 0}, {-1, -2}, {-2, -1}, {-2, -2}},
+  {{-1, 0}, {0, -1}, {-1, -1}, {-2, 0}, {0, -2}, {-2, -1}, {-1, -2}, {-2, -2}},
   // 4X8
-  {{0, -1}, {-1, 0}, {-1, -1}, {0, -2}, {-2, 0}, {-1, -2}, {-2, -1}, {-2, -2}},
+  {{-1, 0}, {0, -1}, {-1, -1}, {-2, 0}, {0, -2}, {-2, -1}, {-1, -2}, {-2, -2}},
   // 8X4
-  {{0, -1}, {-1, 0}, {-1, -1}, {0, -2}, {-2, 0}, {-1, -2}, {-2, -1}, {-2, -2}},
+  {{-1, 0}, {0, -1}, {-1, -1}, {-2, 0}, {0, -2}, {-2, -1}, {-1, -2}, {-2, -2}},
   // 8X8
-  {{0, -1}, {-1, 0}, {-1, -1}, {0, -2}, {-2, 0}, {-1, -2}, {-2, -1}, {-2, -2}},
+  {{-1, 0}, {0, -1}, {-1, -1}, {-2, 0}, {0, -2}, {-2, -1}, {-1, -2}, {-2, -2}},
   // 8X16
-  {{-1, 0}, {0, -1}, {-1, 1}, {-1, -1}, {-2, 0}, {0, -2}, {-1, -2}, {-2, -1}},
-  // 16X8
   {{0, -1}, {-1, 0}, {1, -1}, {-1, -1}, {0, -2}, {-2, 0}, {-2, -1}, {-1, -2}},
+  // 16X8
+  {{-1, 0}, {0, -1}, {-1, 1}, {-1, -1}, {-2, 0}, {0, -2}, {-1, -2}, {-2, -1}},
   // 16X16
-  {{0, -1}, {-1, 0}, {1, -1}, {-1, 1}, {-1, -1}, {0, -3}, {-3, 0}, {-3, -3}},
+  {{-1, 0}, {0, -1}, {-1, 1}, {1, -1}, {-1, -1}, {-3, 0}, {0, -3}, {-3, -3}},
   // 16X32
-  {{-1, 0}, {0, -1}, {-1, 2}, {-1, -1}, {1, -1}, {-3, 0}, {0, -3}, {-3, -3}},
-  // 32X16
   {{0, -1}, {-1, 0}, {2, -1}, {-1, -1}, {-1, 1}, {0, -3}, {-3, 0}, {-3, -3}},
+  // 32X16
+  {{-1, 0}, {0, -1}, {-1, 2}, {-1, -1}, {1, -1}, {-3, 0}, {0, -3}, {-3, -3}},
   // 32X32
-  {{1, -1}, {-1, 1}, {2, -1}, {-1, 2}, {-1, -1}, {0, -3}, {-3, 0}, {-3, -3}},
+  {{-1, 1}, {1, -1}, {-1, 2}, {2, -1}, {-1, -1}, {-3, 0}, {0, -3}, {-3, -3}},
   // 32X64
-  {{-1, 0}, {0, -1}, {-1, 4}, {2, -1}, {-1, -1}, {-3, 0}, {0, -3}, {-1, 2}},
-  // 64X32
   {{0, -1}, {-1, 0}, {4, -1}, {-1, 2}, {-1, -1}, {0, -3}, {-3, 0}, {2, -1}},
+  // 64X32
+  {{-1, 0}, {0, -1}, {-1, 4}, {2, -1}, {-1, -1}, {-3, 0}, {0, -3}, {-1, 2}},
   // 64X64
-  {{3, -1}, {-1, 3}, {4, -1}, {-1, 4}, {-1, -1}, {0, -1}, {-1, 0}, {6, -1}}
+  {{-1, 3}, {3, -1}, {-1, 4}, {4, -1}, {-1, -1}, {-1, 0}, {0, -1}, {-1, 6}}
 };
 
 static const int idx_n_column_to_subblock[4][2] = {
@@ -171,12 +171,12 @@ static INLINE int_mv scale_mv(const MODE_INFO *candidate, const int which_mv,
 // Checks that the given mi_row, mi_col and search point
 // are inside the borders of the tile.
 static INLINE int is_inside(int mi_col, int mi_row, int cur_tile_mi_col_start,
-                            const int mv_ref[2]) {
+                            const MV *mv_ref) {
   // Check that the candidate is within the border.  We only need to check
   // the left side because all the positive right side ones are for blocks that
   // are large enough to support the + value they have within their border.
-  return !(mi_row + mv_ref[1] < 0 ||
-           mi_col + mv_ref[0] < cur_tile_mi_col_start);
+  return !(mi_row + mv_ref->row < 0 ||
+           mi_col + mv_ref->col < cur_tile_mi_col_start);
 }
 
 // This function searches the neighbourhood of a given MB/SB
@@ -190,7 +190,7 @@ void vp9_find_mv_refs_idx(VP9_COMMON *cm, MACROBLOCKD *xd, MODE_INFO *here,
   int idx;
   MB_MODE_INFO *mbmi = &xd->mode_info_context->mbmi;
   int refmv_count = 0;
-  const int (*mv_ref_search)[2] = mv_ref_blocks[mbmi->sb_type];
+  const MV *mv_ref_search = mv_ref_blocks[mbmi->sb_type];
   const MODE_INFO *candidate;
   const int check_sub_blocks = block_idx >= 0;
   int different_ref_found = 0;
@@ -203,12 +203,12 @@ void vp9_find_mv_refs_idx(VP9_COMMON *cm, MACROBLOCKD *xd, MODE_INFO *here,
   // if the size < 8x8 we get the mv from the bmi substructure,
   // and we also need to keep a mode count.
   for (idx = 0; idx < 2; ++idx) {
-    const int *mv_ref = mv_ref_search[idx];
+    const MV *mv_ref = &mv_ref_search[idx];
 
     if (!is_inside(mi_col, mi_row, cm->cur_tile_mi_col_start, mv_ref))
       continue;
 
-    candidate = here + mv_ref[0] + mv_ref[1] * xd->mode_info_stride;
+    candidate = here + mv_ref->col + mv_ref->row * xd->mode_info_stride;
 
     // Keep counts for entropy encoding.
     context_counter += mode_2_counter[candidate->mbmi.mode];
@@ -216,14 +216,14 @@ void vp9_find_mv_refs_idx(VP9_COMMON *cm, MACROBLOCKD *xd, MODE_INFO *here,
     // Check if the candidate comes from the same reference frame.
     if (candidate->mbmi.ref_frame[0] == ref_frame) {
       ADD_MV_REF_LIST(get_sub_block_mv(candidate, check_sub_blocks, 0,
-                                       mv_ref[0], block_idx));
+                                       mv_ref->col, block_idx));
       different_ref_found = candidate->mbmi.ref_frame[1] != ref_frame;
     } else {
       different_ref_found = 1;
       if (candidate->mbmi.ref_frame[1] == ref_frame) {
         // Add second motion vector if it has the same ref_frame.
         ADD_MV_REF_LIST(get_sub_block_mv(candidate, check_sub_blocks, 1,
-                                         mv_ref[0], block_idx));
+                                         mv_ref->col, block_idx));
       }
     }
   }
@@ -232,11 +232,11 @@ void vp9_find_mv_refs_idx(VP9_COMMON *cm, MACROBLOCKD *xd, MODE_INFO *here,
   // as before except we don't need to keep track of sub blocks or
   // mode counts.
   for (; idx < MVREF_NEIGHBOURS; ++idx) {
-    const int *mv_ref = mv_ref_search[idx];
+    const MV *mv_ref = &mv_ref_search[idx];
     if (!is_inside(mi_col, mi_row, cm->cur_tile_mi_col_start, mv_ref))
       continue;
 
-    candidate = here + mv_ref[0] + mv_ref[1] * xd->mode_info_stride;
+    candidate = here + mv_ref->col + mv_ref->row * xd->mode_info_stride;
 
     if (candidate->mbmi.ref_frame[0] == ref_frame) {
       ADD_MV_REF_LIST(candidate->mbmi.mv[0]);
@@ -263,11 +263,11 @@ void vp9_find_mv_refs_idx(VP9_COMMON *cm, MACROBLOCKD *xd, MODE_INFO *here,
   // different reference frames.
   if (different_ref_found) {
     for (idx = 0; idx < MVREF_NEIGHBOURS; ++idx) {
-      const int *mv_ref = mv_ref_search[idx];
+      const MV *mv_ref = &mv_ref_search[idx];
       if (!is_inside(mi_col, mi_row, cm->cur_tile_mi_col_start, mv_ref))
         continue;
 
-      candidate = here + mv_ref[0] + mv_ref[1] * xd->mode_info_stride;
+      candidate = here + mv_ref->col + mv_ref->row * xd->mode_info_stride;
 
       // If the candidate is INTRA we don't want to consider its mv.
       if (!is_inter_block(&candidate->mbmi))
