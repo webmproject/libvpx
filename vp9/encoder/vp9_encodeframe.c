@@ -435,7 +435,7 @@ static void update_state(VP9_COMP *cpi, PICK_MODE_CONTEXT *ctx,
     }
 
 #if CONFIG_INTERINTRA
-    if (cpi->common.use_interintra
+    if (cm->use_interintra
         && is_interintra_allowed(mbmi->sb_type)
         && mbmi->mode >= NEARESTMV && mbmi->mode <= NEWMV &&
         mbmi->ref_frame[1] <= INTRA_FRAME) {
@@ -450,6 +450,16 @@ static void update_state(VP9_COMP *cpi, PICK_MODE_CONTEXT *ctx,
         } else {
           ++cpi->interintra_count[0];
         }
+    }
+#endif
+
+#if CONFIG_MASKED_COMPOUND_INTER
+    if (cm->use_masked_compound &&
+        cm->comp_pred_mode != SINGLE_PREDICTION_ONLY &&
+        is_inter_mode(mbmi->mode) &&
+        get_mask_bits(mbmi->sb_type) &&
+        mbmi->ref_frame[1] > INTRA_FRAME) {
+      ++cpi->masked_compound_counts[mbmi->use_masked_compound];
     }
 #endif
 
@@ -2030,6 +2040,10 @@ static void init_encode_frame_mb_context(VP9_COMP *cpi) {
 #endif
 #if CONFIG_FILTERINTRA
   vp9_zero(cm->counts.filterintra);
+#endif
+#if CONFIG_MASKED_COMPOUND_INTER
+  vp9_zero(cpi->masked_compound_counts);
+  vp9_zero(cpi->masked_compound_select_counts);
 #endif
 
   // Note: this memset assumes above_context[0], [1] and [2]

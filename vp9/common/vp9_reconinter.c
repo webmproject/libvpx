@@ -261,6 +261,302 @@ MV clamp_mv_to_umv_border_sb(const MV *src_mv,
   return clamped_mv;
 }
 
+#if CONFIG_MASKED_COMPOUND_INTER
+#define MASK_WEIGHT_BITS 6
+
+static int get_masked_weight(int m) {
+  #define SMOOTHER_LEN  32
+  static const uint8_t smoothfn[2 * SMOOTHER_LEN + 1] = {
+      0,  0,  0,  0,  0,  0,  0,  0,
+      0,  0,  0,  0,  0,  1,  1,  1,
+      1,  1,  2,  2,  3,  4,  5,  6,
+      8,  9, 12, 14, 17, 21, 24, 28,
+      32,
+      36, 40, 43, 47, 50, 52, 55, 56,
+      58, 59, 60, 61, 62, 62, 63, 63,
+      63, 63, 63, 64, 64, 64, 64, 64,
+      64, 64, 64, 64, 64, 64, 64, 64,
+  };
+  if (m < -SMOOTHER_LEN)
+    return 0;
+  else if (m > SMOOTHER_LEN)
+    return (1 << MASK_WEIGHT_BITS);
+  else
+    return smoothfn[m + SMOOTHER_LEN];
+}
+
+static int get_hard_mask(int m) {
+  return m > 0;
+}
+
+// Equation of line: f(x, y) = a[0]*(x - a[2]*w/4) + a[1]*(y - a[3]*h/4) = 0
+// The soft mask is obtained by computing f(x, y) and then calling
+// get_masked_weight(f(x, y)).
+static const int mask_params_sml[1 << MASK_BITS_SML][4] = {
+  {-1,  2, 2, 2},
+  { 1, -2, 2, 2},
+  {-2,  1, 2, 2},
+  { 2, -1, 2, 2},
+  { 2,  1, 2, 2},
+  {-2, -1, 2, 2},
+  { 1,  2, 2, 2},
+  {-1, -2, 2, 2},
+};
+
+static const int mask_params_med_hgtw[1 << MASK_BITS_MED][4] = {
+  {-1,  2, 2, 2},
+  { 1, -2, 2, 2},
+  {-2,  1, 2, 2},
+  { 2, -1, 2, 2},
+  { 2,  1, 2, 2},
+  {-2, -1, 2, 2},
+  { 1,  2, 2, 2},
+  {-1, -2, 2, 2},
+
+  {-1,  2, 2, 1},
+  { 1, -2, 2, 1},
+  {-1,  2, 2, 3},
+  { 1, -2, 2, 3},
+  { 1,  2, 2, 1},
+  {-1, -2, 2, 1},
+  { 1,  2, 2, 3},
+  {-1, -2, 2, 3},
+};
+
+static const int mask_params_med_hltw[1 << MASK_BITS_MED][4] = {
+  {-1,  2, 2, 2},
+  { 1, -2, 2, 2},
+  {-2,  1, 2, 2},
+  { 2, -1, 2, 2},
+  { 2,  1, 2, 2},
+  {-2, -1, 2, 2},
+  { 1,  2, 2, 2},
+  {-1, -2, 2, 2},
+
+  {-2,  1, 1, 2},
+  { 2, -1, 1, 2},
+  {-2,  1, 3, 2},
+  { 2, -1, 3, 2},
+  { 2,  1, 1, 2},
+  {-2, -1, 1, 2},
+  { 2,  1, 3, 2},
+  {-2, -1, 3, 2},
+};
+
+static const int mask_params_med_heqw[1 << MASK_BITS_MED][4] = {
+  {-1,  2, 2, 2},
+  { 1, -2, 2, 2},
+  {-2,  1, 2, 2},
+  { 2, -1, 2, 2},
+  { 2,  1, 2, 2},
+  {-2, -1, 2, 2},
+  { 1,  2, 2, 2},
+  {-1, -2, 2, 2},
+
+  { 0,  2, 0, 1},
+  { 0, -2, 0, 1},
+  { 0,  2, 0, 3},
+  { 0, -2, 0, 3},
+  { 2,  0, 1, 0},
+  {-2,  0, 1, 0},
+  { 2,  0, 3, 0},
+  {-2,  0, 3, 0},
+};
+
+static const int mask_params_big_hgtw[1 << MASK_BITS_BIG][4] = {
+  {-1,  2, 2, 2},
+  { 1, -2, 2, 2},
+  {-2,  1, 2, 2},
+  { 2, -1, 2, 2},
+  { 2,  1, 2, 2},
+  {-2, -1, 2, 2},
+  { 1,  2, 2, 2},
+  {-1, -2, 2, 2},
+
+  {-1,  2, 2, 1},
+  { 1, -2, 2, 1},
+  {-1,  2, 2, 3},
+  { 1, -2, 2, 3},
+  { 1,  2, 2, 1},
+  {-1, -2, 2, 1},
+  { 1,  2, 2, 3},
+  {-1, -2, 2, 3},
+
+  {-2,  1, 1, 2},
+  { 2, -1, 1, 2},
+  {-2,  1, 3, 2},
+  { 2, -1, 3, 2},
+  { 2,  1, 1, 2},
+  {-2, -1, 1, 2},
+  { 2,  1, 3, 2},
+  {-2, -1, 3, 2},
+
+  { 0,  2, 0, 1},
+  { 0, -2, 0, 1},
+  { 0,  2, 0, 2},
+  { 0, -2, 0, 2},
+  { 0,  2, 0, 3},
+  { 0, -2, 0, 3},
+  { 2,  0, 2, 0},
+  {-2,  0, 2, 0},
+};
+
+static const int mask_params_big_hltw[1 << MASK_BITS_BIG][4] = {
+  {-1,  2, 2, 2},
+  { 1, -2, 2, 2},
+  {-2,  1, 2, 2},
+  { 2, -1, 2, 2},
+  { 2,  1, 2, 2},
+  {-2, -1, 2, 2},
+  { 1,  2, 2, 2},
+  {-1, -2, 2, 2},
+
+  {-1,  2, 2, 1},
+  { 1, -2, 2, 1},
+  {-1,  2, 2, 3},
+  { 1, -2, 2, 3},
+  { 1,  2, 2, 1},
+  {-1, -2, 2, 1},
+  { 1,  2, 2, 3},
+  {-1, -2, 2, 3},
+
+  {-2,  1, 1, 2},
+  { 2, -1, 1, 2},
+  {-2,  1, 3, 2},
+  { 2, -1, 3, 2},
+  { 2,  1, 1, 2},
+  {-2, -1, 1, 2},
+  { 2,  1, 3, 2},
+  {-2, -1, 3, 2},
+
+  { 0,  2, 0, 2},
+  { 0, -2, 0, 2},
+  { 2,  0, 1, 0},
+  {-2,  0, 1, 0},
+  { 2,  0, 2, 0},
+  {-2,  0, 2, 0},
+  { 2,  0, 3, 0},
+  {-2,  0, 3, 0},
+};
+
+static const int mask_params_big_heqw[1 << MASK_BITS_BIG][4] = {
+  {-1,  2, 2, 2},
+  { 1, -2, 2, 2},
+  {-2,  1, 2, 2},
+  { 2, -1, 2, 2},
+  { 2,  1, 2, 2},
+  {-2, -1, 2, 2},
+  { 1,  2, 2, 2},
+  {-1, -2, 2, 2},
+
+  {-1,  2, 2, 1},
+  { 1, -2, 2, 1},
+  {-1,  2, 2, 3},
+  { 1, -2, 2, 3},
+  { 1,  2, 2, 1},
+  {-1, -2, 2, 1},
+  { 1,  2, 2, 3},
+  {-1, -2, 2, 3},
+
+  {-2,  1, 1, 2},
+  { 2, -1, 1, 2},
+  {-2,  1, 3, 2},
+  { 2, -1, 3, 2},
+  { 2,  1, 1, 2},
+  {-2, -1, 1, 2},
+  { 2,  1, 3, 2},
+  {-2, -1, 3, 2},
+
+  { 0,  2, 0, 1},
+  { 0, -2, 0, 1},
+  { 0,  2, 0, 3},
+  { 0, -2, 0, 3},
+  { 2,  0, 1, 0},
+  {-2,  0, 1, 0},
+  { 2,  0, 3, 0},
+  {-2,  0, 3, 0},
+};
+
+static const int *get_mask_params(int mask_index,
+                                  BLOCK_SIZE_TYPE sb_type,
+                                  int h, int w) {
+  const int *a;
+  const int mask_bits = get_mask_bits(sb_type);
+
+  if (mask_index == MASK_NONE)
+    return NULL;
+
+  if (mask_bits == MASK_BITS_SML) {
+    a = mask_params_sml[mask_index];
+  } else if (mask_bits == MASK_BITS_MED) {
+    if (h > w)
+      a = mask_params_med_hgtw[mask_index];
+    else if (h < w)
+      a = mask_params_med_hltw[mask_index];
+    else
+      a = mask_params_med_heqw[mask_index];
+  } else if (mask_bits == MASK_BITS_BIG) {
+    if (h > w)
+      a = mask_params_big_hgtw[mask_index];
+    else if (h < w)
+      a = mask_params_big_hltw[mask_index];
+    else
+      a = mask_params_big_heqw[mask_index];
+  } else {
+    assert(0);
+  }
+  return a;
+}
+
+void vp9_generate_masked_weight(int mask_index,
+                                BLOCK_SIZE_TYPE sb_type,
+                                int h, int w,
+                                uint8_t *mask, int stride) {
+  int i, j;
+  const int *a = get_mask_params(mask_index, sb_type, h, w);
+  if (!a) return;
+  for (i = 0; i < h; ++i)
+    for (j = 0; j < w; ++j) {
+      int x = (j - (a[2] * w) / 4);
+      int y = (i - (a[3] * h) / 4);
+      int m = a[0] * x + a[1] * y;
+      mask[i * stride + j] = get_masked_weight(m);
+    }
+}
+
+void vp9_generate_hard_mask(int mask_index, BLOCK_SIZE_TYPE sb_type,
+                            int h, int w, uint8_t *mask, int stride) {
+  int i, j;
+  const int *a = get_mask_params(mask_index, sb_type, h, w);
+  if (!a) return;
+  for (i = 0; i < h; ++i)
+    for (j = 0; j < w; ++j) {
+      int x = (j - (a[2] * w) / 4);
+      int y = (i - (a[3] * h) / 4);
+      int m = a[0] * x + a[1] * y;
+      mask[i * stride + j] = get_hard_mask(m);
+    }
+}
+
+static void build_masked_compound(uint8_t *dst, int dst_stride,
+                                  uint8_t *dst2, int dst2_stride,
+                                  int mask_index, BLOCK_SIZE_TYPE sb_type,
+                                  int h, int w) {
+  int i, j;
+  uint8_t mask[4096];
+  vp9_generate_masked_weight(mask_index, sb_type, h, w, mask, 64);
+  for (i = 0; i < h; ++i)
+    for (j = 0; j < w; ++j) {
+      int m = mask[i * 64 + j];
+      dst[i * dst_stride + j] =  (dst[i * dst_stride + j] * m +
+                                  dst2[i * dst2_stride + j] *
+                                  ((1 << MASK_WEIGHT_BITS) - m) +
+                                  (1 << (MASK_WEIGHT_BITS - 1))) >>
+                                 MASK_WEIGHT_BITS;
+    }
+}
+#endif
+
 struct build_inter_predictors_args {
   MACROBLOCKD *xd;
   int x;
@@ -320,11 +616,31 @@ static void build_inter_predictors(int plane, int block,
                                                 xd->mb_to_right_edge,
                                                 xd->mb_to_bottom_edge);
     scale->set_scaled_offsets(scale, arg->y + y, arg->x + x);
+
+#if CONFIG_MASKED_COMPOUND_INTER
+    if (which_mv && xd->mode_info_context->mbmi.use_masked_compound) {
+      uint8_t tmp_dst[4096];
+      vp9_build_inter_predictor(pre, pre_stride,
+                                tmp_dst, 64,
+                                &res_mv, &xd->scale_factor[which_mv],
+                                4 << pred_w, 4 << pred_h, 0,
+                                &xd->subpix, MV_PRECISION_Q4);
+      build_masked_compound(dst, arg->dst_stride[plane],
+                            tmp_dst, 64,
+                            xd->mode_info_context->mbmi.mask_index,
+                            xd->mode_info_context->mbmi.sb_type,
+                            (4 << pred_h), (4 << pred_w));
+
+    } else {
+#endif
     vp9_build_inter_predictor(pre, pre_stride,
                               dst, arg->dst_stride[plane],
                               &res_mv, &xd->scale_factor[which_mv],
                               4 << pred_w, 4 << pred_h, which_mv,
                               &xd->subpix, MV_PRECISION_Q4);
+#if CONFIG_MASKED_COMPOUND_INTER
+    }
+#endif
   }
 }
 void vp9_build_inter_predictors_sby(MACROBLOCKD *xd,

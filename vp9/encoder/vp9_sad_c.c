@@ -613,3 +613,126 @@ void vp9_sad4x4x4d_c(const uint8_t *src_ptr,
   sad_array[3] = vp9_sad4x4(src_ptr, src_stride,
                             ref_ptr[3], ref_stride, 0x7fffffff);
 }
+
+#if CONFIG_MASKED_COMPOUND_INTER
+unsigned int vp9_masked_sad64x64_c(const uint8_t *src_ptr,
+                                   int  src_stride,
+                                   const uint8_t *ref_ptr,
+                                   int  ref_stride,
+                                   const uint8_t *msk_ptr,
+                                   int  msk_stride,
+                                   unsigned int max_sad) {
+  return masked_sad_mx_n_c(src_ptr, src_stride, ref_ptr, ref_stride,
+                           msk_ptr, msk_stride,  64, 64);
+}
+
+unsigned int vp9_masked_sad64x32_c(const uint8_t *src_ptr,
+                                   int  src_stride,
+                                   const uint8_t *ref_ptr,
+                                   int  ref_stride,
+                                   const uint8_t *msk_ptr,
+                                   int  msk_stride,
+                                   unsigned int max_sad) {
+  return masked_sad_mx_n_c(src_ptr, src_stride, ref_ptr, ref_stride,
+                           msk_ptr, msk_stride, 64, 32);
+}
+
+unsigned int vp9_masked_sad32x64_c(const uint8_t *src_ptr,
+                                   int  src_stride,
+                                   const uint8_t *ref_ptr,
+                                   int  ref_stride,
+                                   const uint8_t *msk_ptr,
+                                   int  msk_stride,
+                                   unsigned int max_sad) {
+  return masked_sad_mx_n_c(src_ptr, src_stride, ref_ptr, ref_stride,
+                           msk_ptr, msk_stride, 32, 64);
+}
+
+unsigned int vp9_masked_sad32x32_c(const uint8_t *src_ptr,
+                                   int  src_stride,
+                                   const uint8_t *ref_ptr,
+                                   int  ref_stride,
+                                   const uint8_t *msk_ptr,
+                                   int  msk_stride,
+                                   unsigned int max_sad) {
+  return masked_sad_mx_n_c(src_ptr, src_stride, ref_ptr, ref_stride,
+                           msk_ptr, msk_stride, 32, 32);
+}
+
+unsigned int vp9_masked_sad16x32_c(const uint8_t *src_ptr,
+                                   int  src_stride,
+                                   const uint8_t *ref_ptr,
+                                   int  ref_stride,
+                                   const uint8_t *msk_ptr,
+                                   int  msk_stride,
+                                   unsigned int max_sad) {
+  return masked_sad_mx_n_c(src_ptr, src_stride, ref_ptr, ref_stride,
+                           msk_ptr, msk_stride, 16, 32);
+}
+
+unsigned int vp9_masked_sad32x16_c(const uint8_t *src_ptr,
+                                   int  src_stride,
+                                   const uint8_t *ref_ptr,
+                                   int  ref_stride,
+                                   const uint8_t *msk_ptr,
+                                   int  msk_stride,
+                                   unsigned int max_sad) {
+  return masked_sad_mx_n_c(src_ptr, src_stride, ref_ptr, ref_stride,
+                           msk_ptr, msk_stride, 32, 16);
+}
+
+unsigned int vp9_masked_sad16x16_c(const uint8_t *src_ptr,
+                                   int  src_stride,
+                                   const uint8_t *ref_ptr,
+                                   int  ref_stride,
+                                   const uint8_t *msk_ptr,
+                                   int  msk_stride,
+                                   unsigned int max_sad) {
+  return masked_sad_mx_n_c(src_ptr, src_stride, ref_ptr, ref_stride,
+                           msk_ptr, msk_stride, 16, 16);
+}
+
+unsigned int vp9_masked_sad8x16_c(const uint8_t *src_ptr,
+                                  int  src_stride,
+                                  const uint8_t *ref_ptr,
+                                  int  ref_stride,
+                                  const uint8_t *msk_ptr,
+                                  int  msk_stride,
+                                  unsigned int max_sad) {
+  return masked_sad_mx_n_c(src_ptr, src_stride, ref_ptr, ref_stride,
+                           msk_ptr, msk_stride, 8, 16);
+}
+
+unsigned int vp9_masked_sad16x8_c(const uint8_t *src_ptr,
+                                  int  src_stride,
+                                  const uint8_t *ref_ptr,
+                                  int  ref_stride,
+                                  const uint8_t *msk_ptr,
+                                  int  msk_stride,
+                                  unsigned int max_sad) {
+  return masked_sad_mx_n_c(src_ptr, src_stride, ref_ptr, ref_stride,
+                           msk_ptr, msk_stride, 16, 8);
+}
+
+unsigned int vp9_masked_sad8x8_c(const uint8_t *src_ptr,
+                                 int  src_stride,
+                                 const uint8_t *ref_ptr,
+                                 int  ref_stride,
+                                 const uint8_t *msk_ptr,
+                                 int  msk_stride,
+                                 unsigned int max_sad) {
+  return masked_sad_mx_n_c(src_ptr, src_stride, ref_ptr, ref_stride,
+                           msk_ptr, msk_stride, 8, 8);
+}
+
+unsigned int vp9_masked_sad4x4_c(const uint8_t *src_ptr,
+                                 int  src_stride,
+                                 const uint8_t *ref_ptr,
+                                 int  ref_stride,
+                                 const uint8_t *msk_ptr,
+                                 int  msk_stride,
+                                 unsigned int max_sad) {
+  return masked_sad_mx_n_c(src_ptr, src_stride, ref_ptr, ref_stride,
+                           msk_ptr, msk_stride, 4, 4);
+}
+#endif

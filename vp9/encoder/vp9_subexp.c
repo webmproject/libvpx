@@ -235,7 +235,7 @@ void vp9_cond_prob_diff_update(vp9_writer *w, vp9_prob *oldp,
   }
 }
 
-#if CONFIG_INTERINTRA
+#if CONFIG_INTERINTRA || CONFIG_MASKED_COMPOUND_INTER
 static int prob_update_savings(const unsigned int *ct,
                                const vp9_prob oldp, const vp9_prob newp,
                                const vp9_prob upd) {

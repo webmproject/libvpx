@@ -120,4 +120,18 @@ int vp9_refining_search_8p_c(MACROBLOCK *x,
                              int *mvjcost, int *mvcost[2],
                              int_mv *center_mv, const uint8_t *second_pred,
                              int w, int h);
+
+#if CONFIG_MASKED_COMPOUND_INTER
+int vp9_find_best_masked_sub_pixel_step_iteratively(
+    MACROBLOCK *x, uint8_t *mask, int mask_stride, int_mv *bestmv,
+    int_mv *ref_mv, int error_per_bit, const vp9_variance_fn_ptr_t *vfp,
+    int *mvjcost, int *mvcost[2], int *distortion, unsigned int *sse,
+    int is_second);
+
+int vp9_masked_full_pixel_diamond(
+    struct VP9_COMP *cpi, MACROBLOCK *x, uint8_t *mask, int mask_stride,
+    int_mv *mvp_full, int step_param, int sadpb, int further_steps,
+    int do_refine, vp9_variance_fn_ptr_t *fn_ptr, int_mv *ref_mv,
+    int_mv *dst_mv, int is_second);
+#endif  // CONFIG_MASKED_COMPOUND_INTER
 #endif  // VP9_ENCODER_VP9_MCOMP_H_

@@ -59,6 +59,9 @@ typedef struct frame_contexts {
 #if CONFIG_FILTERINTRA
   vp9_prob filterintra_prob[TX_SIZES][VP9_INTRA_MODES];
 #endif
+#if CONFIG_MASKED_COMPOUND_INTER
+  vp9_prob masked_compound_prob;
+#endif
 } FRAME_CONTEXT;
 
 typedef struct {
@@ -83,6 +86,9 @@ typedef struct {
 #endif
 #if CONFIG_FILTERINTRA
   unsigned int filterintra[TX_SIZES][VP9_INTRA_MODES][2];
+#endif
+#if CONFIG_MASKED_COMPOUND_INTER
+  unsigned int masked_compound[2];
 #endif
 } FRAME_COUNTS;
 
@@ -216,6 +222,10 @@ typedef struct VP9Common {
 
 #if CONFIG_INTERINTRA
   int use_interintra;
+#endif
+
+#if CONFIG_MASKED_COMPOUND_INTER
+  int use_masked_compound;
 #endif
 
   int error_resilient_mode;

@@ -21,7 +21,7 @@ void vp9_write_prob_diff_update(vp9_writer *w,
 void vp9_cond_prob_diff_update(vp9_writer *w, vp9_prob *oldp,
                                vp9_prob upd, unsigned int *ct);
 
-#if CONFIG_INTERINTRA
+#if CONFIG_INTERINTRA || CONFIG_MASKED_COMPOUND_INTER
 void vp9_cond_prob_update(vp9_writer *w, vp9_prob *oldp, vp9_prob upd,
                                  unsigned int *ct);
 #endif

@@ -15,7 +15,7 @@
 #include "vp9/common/vp9_treecoder.h"
 #include "vp9/decoder/vp9_dboolhuff.h"
 
-#if CONFIG_INTERINTRA
+#if CONFIG_INTERINTRA || CONFIG_MASKED_COMPOUND_INTER
 #define vp9_read_prob(r) ((vp9_prob)vp9_read_literal(r, 8))
 #endif
 #define vp9_read_and_apply_sign(r, value) (vp9_read_bit(r) ? -(value) : (value))

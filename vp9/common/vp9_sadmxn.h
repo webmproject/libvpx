@@ -35,4 +35,30 @@ static INLINE unsigned int sad_mx_n_c(const uint8_t *src_ptr,
   return sad;
 }
 
+#if CONFIG_MASKED_COMPOUND_INTER
+static INLINE unsigned int masked_sad_mx_n_c(const uint8_t *src_ptr,
+                                           int src_stride,
+                                           const uint8_t *ref_ptr,
+                                           int ref_stride,
+                                           const uint8_t *msk_ptr,
+                                           int msk_stride,
+                                           int m,
+                                           int n) {
+  int r, c;
+  unsigned int sad = 0;
+
+  for (r = 0; r < n; r++) {
+    for (c = 0; c < m; c++) {
+      sad += (msk_ptr[c]) * abs(src_ptr[c] - ref_ptr[c]);
+    }
+
+    src_ptr += src_stride;
+    ref_ptr += ref_stride;
+    msk_ptr += msk_stride;
+  }
+  sad = (sad + 31) >> 6;
+
+  return sad;
+}
+#endif
 #endif  // VP9_COMMON_VP9_SADMXN_H_

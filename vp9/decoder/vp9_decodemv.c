@@ -511,6 +511,11 @@ static void read_inter_block_mode_info(VP9D_COMP *pbi, MODE_INFO *mi,
   uint8_t inter_mode_ctx;
   MV_REFERENCE_FRAME ref0, ref1;
 
+#if CONFIG_MASKED_COMPOUND_INTER
+  mbmi->use_masked_compound = 0;
+  mbmi->mask_index = MASK_NONE;
+#endif
+
   read_ref_frames(pbi, r, mbmi->segment_id, mbmi->ref_frame);
   ref0 = mbmi->ref_frame[0];
   ref1 = mbmi->ref_frame[1];
@@ -673,6 +678,21 @@ static void read_inter_block_mode_info(VP9D_COMP *pbi, MODE_INFO *mi,
         assert(!"Invalid inter mode value");
     }
   }
+#if CONFIG_MASKED_COMPOUND_INTER
+    mbmi->use_masked_compound = 0;
+    if (pbi->common.use_masked_compound &&
+        pbi->common.comp_pred_mode != SINGLE_PREDICTION_ONLY &&
+        is_inter_mode(mbmi->mode) &&
+        get_mask_bits(mi->mbmi.sb_type) &&
+        mbmi->ref_frame[1] > INTRA_FRAME) {
+      mbmi->use_masked_compound =
+          vp9_read(r, pbi->common.fc.masked_compound_prob);
+      pbi->common.counts.masked_compound[mbmi->use_masked_compound]++;
+      if (mbmi->use_masked_compound) {
+        mbmi->mask_index = vp9_read_literal(r, get_mask_bits(mi->mbmi.sb_type));
+      }
+    }
+#endif
 }
 
 static void read_inter_frame_mode_info(VP9D_COMP *pbi, MODE_INFO *mi,
@@ -705,6 +725,18 @@ static void read_comp_pred(VP9_COMMON *cm, vp9_reader *r) {
     for (i = 0; i < COMP_INTER_CONTEXTS; i++)
       if (vp9_read(r, VP9_MODE_UPDATE_PROB))
         vp9_diff_update_prob(r, &cm->fc.comp_inter_prob[i]);
+
+#if CONFIG_MASKED_COMPOUND_INTER
+  if (cm->comp_pred_mode != SINGLE_PREDICTION_ONLY) {
+    cm->use_masked_compound = vp9_read_bit(r);
+    if (cm->use_masked_compound) {
+      if (vp9_read(r, VP9_UPD_MASKED_COMPOUND_PROB))
+        cm->fc.masked_compound_prob = vp9_read_prob(r);
+    }
+  } else {
+    cm->use_masked_compound = 0;
+  }
+#endif
 
   if (cm->comp_pred_mode != COMP_PREDICTION_ONLY)
     for (i = 0; i < REF_CONTEXTS; i++) {

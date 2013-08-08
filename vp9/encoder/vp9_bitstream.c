@@ -564,6 +564,18 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, MODE_INFO *m, vp9_writer *bc) {
         vp9_encode_mv(cpi, bc, &mi->mv[1].as_mv, &mi->best_second_mv.as_mv,
                       nmvc, allow_hp);
     }
+#if CONFIG_MASKED_COMPOUND_INTER
+  if (cpi->common.use_masked_compound &&
+      cpi->common.comp_pred_mode != SINGLE_PREDICTION_ONLY &&
+      is_inter_mode(mode) &&
+      get_mask_bits(mi->sb_type) &&
+      mi->ref_frame[1] > INTRA_FRAME) {
+    vp9_write(bc, mi->use_masked_compound, pc->fc.masked_compound_prob);
+    if (mi->use_masked_compound) {
+      vp9_write_literal(bc, mi->mask_index, get_mask_bits(mi->sb_type));
+    }
+  }
+#endif
   }
 }
 
@@ -1468,6 +1480,25 @@ static size_t write_compressed_header(VP9_COMP *cpi, uint8_t *data) {
                                       VP9_MODE_UPDATE_PROB,
                                       cpi->comp_inter_count[i]);
       }
+#if CONFIG_MASKED_COMPOUND_INTER
+      if (use_compound_pred) {
+        if (!cpi->dummy_packing && cm->use_masked_compound)
+          cm->use_masked_compound = (cpi->masked_compound_counts[1] > 0);
+        vp9_write_bit(&header_bc, cm->use_masked_compound);
+        if (cm->use_masked_compound) {
+          vp9_cond_prob_update(&header_bc,
+                               &fc->masked_compound_prob,
+                               VP9_UPD_MASKED_COMPOUND_PROB,
+                               cpi->masked_compound_counts);
+        } else {
+          vp9_zero(cpi->masked_compound_counts);
+        }
+      } else {
+        if (!cpi->dummy_packing)
+          cm->use_masked_compound = 0;
+        vp9_zero(cpi->masked_compound_counts);
+      }
+#endif
     }
 
     if (cm->comp_pred_mode != COMP_PREDICTION_ONLY) {

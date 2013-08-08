@@ -1726,6 +1726,36 @@ VP9_PTR vp9_create_compressor(VP9_CONFIG *oxcf) {
       vp9_sub_pixel_avg_variance4x4, NULL, NULL, NULL,
       vp9_sad4x4x3, vp9_sad4x4x8, vp9_sad4x4x4d)
 
+#if CONFIG_MASKED_COMPOUND_INTER
+#define MBFP(BT, MSDF, MVF, MSVF) \
+  cpi->fn_ptr[BT].msdf            = MSDF; \
+  cpi->fn_ptr[BT].mvf             = MVF; \
+  cpi->fn_ptr[BT].msvf            = MSVF;
+
+  MBFP(BLOCK_64X64, vp9_masked_sad64x64, vp9_masked_variance64x64,
+       vp9_masked_sub_pixel_variance64x64)
+  MBFP(BLOCK_64X32, vp9_masked_sad64x32, vp9_masked_variance64x32,
+         vp9_masked_sub_pixel_variance64x32)
+  MBFP(BLOCK_32X64, vp9_masked_sad32x64, vp9_masked_variance32x64,
+         vp9_masked_sub_pixel_variance32x64)
+  MBFP(BLOCK_32X32, vp9_masked_sad32x32, vp9_masked_variance32x32,
+       vp9_masked_sub_pixel_variance32x32)
+  MBFP(BLOCK_32X16, vp9_masked_sad32x16, vp9_masked_variance32x16,
+       vp9_masked_sub_pixel_variance32x16)
+  MBFP(BLOCK_16X32, vp9_masked_sad16x32, vp9_masked_variance16x32,
+       vp9_masked_sub_pixel_variance16x32)
+  MBFP(BLOCK_16X16, vp9_masked_sad16x16, vp9_masked_variance16x16,
+         vp9_masked_sub_pixel_variance16x16)
+  MBFP(BLOCK_16X8, vp9_masked_sad16x8, vp9_masked_variance16x8,
+         vp9_masked_sub_pixel_variance16x8)
+  MBFP(BLOCK_8X16, vp9_masked_sad8x16, vp9_masked_variance8x16,
+         vp9_masked_sub_pixel_variance8x16)
+  MBFP(BLOCK_8X8, vp9_masked_sad8x8, vp9_masked_variance8x8,
+       vp9_masked_sub_pixel_variance8x8)
+  MBFP(BLOCK_4X4, vp9_masked_sad4x4, vp9_masked_variance4x4,
+         vp9_masked_sub_pixel_variance4x4)
+#endif
+
   cpi->full_search_sad = vp9_full_search_sad;
   cpi->diamond_search_sad = vp9_diamond_search_sad;
   cpi->refining_search_sad = vp9_refining_search_sad;
@@ -2501,6 +2531,19 @@ static void select_interintra_mode(VP9_COMP *cpi) {
 }
 #endif
 
+#if CONFIG_MASKED_COMPOUND_INTER
+static void select_masked_compound_mode(VP9_COMP *cpi) {
+  static const double threshold = 1/128.0;
+  VP9_COMMON *cm = &cpi->common;
+  int sum = cpi->masked_compound_select_counts[1] +
+      cpi->masked_compound_select_counts[0];
+  if (sum) {
+    double fraction = (double) cpi->masked_compound_select_counts[1] / sum;
+    cm->use_masked_compound = (fraction > threshold);
+    }
+}
+#endif
+
 static void scale_references(VP9_COMP *cpi) {
   VP9_COMMON *cm = &cpi->common;
   int i;
@@ -2911,6 +2954,12 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
   }
 #endif
 
+#if CONFIG_MASKED_COMPOUND_INTER
+  if (cm->current_video_frame == 0) {
+    cm->use_masked_compound = 0;
+  }
+#endif
+
 #if CONFIG_POSTPROC
 
   if (cpi->oxcf.noise_sensitivity > 0) {
@@ -3251,6 +3300,9 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
 #if CONFIG_INTERINTRA
     vp9_copy(counts->interintra, cpi->interintra_count);
 #endif
+#if CONFIG_MASKED_COMPOUND_INTER
+    vp9_copy(counts->masked_compound, cpi->masked_compound_counts);
+#endif
     if (!cpi->common.error_resilient_mode &&
         !cpi->common.frame_parallel_decoding_mode) {
       vp9_adapt_mode_probs(&cpi->common);
@@ -3261,6 +3313,10 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
 #if CONFIG_INTERINTRA
   if (cm->frame_type != KEY_FRAME)
     select_interintra_mode(cpi);
+#endif
+#if CONFIG_MASKED_COMPOUND_INTER
+  if (cm->frame_type != KEY_FRAME)
+    select_masked_compound_mode(cpi);
 #endif
 
 #ifdef ENTROPY_STATS

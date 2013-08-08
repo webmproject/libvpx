@@ -39,6 +39,39 @@ static void variance(const uint8_t *src_ptr,
   }
 }
 
+#if CONFIG_MASKED_COMPOUND_INTER
+static void masked_variance(const uint8_t *src_ptr,
+                            int  src_stride,
+                            const uint8_t *ref_ptr,
+                            int  ref_stride,
+                            const uint8_t *msk_ptr,
+                            int  msk_stride,
+                            int  w,
+                            int  h,
+                            unsigned int *sse,
+                            int *sum) {
+  int i, j;
+  int diff;
+
+  *sum = 0;
+  *sse = 0;
+
+  for (i = 0; i < h; i++) {
+    for (j = 0; j < w; j++) {
+      diff = (src_ptr[j] - ref_ptr[j]) * (msk_ptr[j]);
+      *sum += diff;
+      *sse += diff * diff;
+    }
+
+    src_ptr += src_stride;
+    ref_ptr += ref_stride;
+    msk_ptr += msk_stride;
+  }
+  *sum = (*sum >= 0) ? ((*sum + 31) >> 6) : -((-*sum + 31) >> 6);
+  *sse = (*sse + 2047) >> 12;
+}
+#endif
+
 /****************************************************************************
  *
  *  ROUTINE       : filter_block2d_bil_first_pass

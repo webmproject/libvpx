@@ -557,6 +557,113 @@ specialize vp9_sad4x8_avg $sse_x86inc
 prototype unsigned int vp9_sad4x4_avg "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int  ref_stride, const uint8_t *second_pred, unsigned int max_sad"
 specialize vp9_sad4x4_avg $sse_x86inc
 
+if [ "$CONFIG_MASKED_COMPOUND_INTER" = "yes" ]; then
+prototype int vp9_masked_diamond_search_sad "struct macroblock *x, uint8_t *mask, int mask_stride, union int_mv *ref_mv, union int_mv *best_mv, int search_param, int sad_per_bit, int *num00, struct vp9_variance_vtable *fn_ptr, DEC_MVCOSTS, union int_mv *center_mv, int is_second"
+specialize vp9_masked_diamond_search_sad
+
+prototype int vp9_masked_refining_search_sad "struct macroblock *x, uint8_t *mask, int mask_stride, union int_mv *ref_mv, int sad_per_bit, int distance, struct vp9_variance_vtable *fn_ptr, DEC_MVCOSTS, union int_mv *center_mv, int is_second"
+specialize vp9_refining_search_sad
+
+prototype unsigned int vp9_masked_variance32x16 "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, const uint8_t *msk_ptr, int msk_stride, unsigned int *sse"
+specialize vp9_masked_variance32x16
+
+prototype unsigned int vp9_masked_variance16x32 "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, const uint8_t *msk_ptr, int msk_stride, unsigned int *sse"
+specialize vp9_masked_variance16x32
+
+prototype unsigned int vp9_masked_variance64x32 "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, const uint8_t *msk_ptr, int msk_stride, unsigned int *sse"
+specialize vp9_masked_variance64x32
+
+prototype unsigned int vp9_masked_variance32x64 "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, const uint8_t *msk_ptr, int msk_stride, unsigned int *sse"
+specialize vp9_masked_variance32x64
+
+prototype unsigned int vp9_masked_variance32x32 "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, const uint8_t *msk_ptr, int msk_stride, unsigned int *sse"
+specialize vp9_masked_variance32x32
+
+prototype unsigned int vp9_masked_variance64x64 "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, const uint8_t *msk_ptr, int msk_stride, unsigned int *sse"
+specialize vp9_masked_variance64x64
+
+prototype unsigned int vp9_masked_variance16x16 "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, const uint8_t *msk_ptr, int msk_stride, unsigned int *sse"
+specialize vp9_masked_variance16x16
+
+prototype unsigned int vp9_masked_variance16x8 "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, const uint8_t *msk_ptr, int msk_stride, unsigned int *sse"
+specialize vp9_masked_variance16x8
+
+prototype unsigned int vp9_masked_variance8x16 "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, const uint8_t *msk_ptr, int msk_stride, unsigned int *sse"
+specialize vp9_masked_variance8x16
+
+prototype unsigned int vp9_masked_variance8x8 "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, const uint8_t *msk_ptr, int msk_stride, unsigned int *sse"
+specialize vp9_masked_variance8x8
+
+prototype unsigned int vp9_masked_variance4x4 "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, const uint8_t *msk_ptr, int msk_stride, unsigned int *sse"
+specialize vp9_masked_variance4x4
+
+prototype unsigned int vp9_masked_sub_pixel_variance64x64 "const uint8_t *src_ptr, int source_stride, int xoffset, int  yoffset, const uint8_t *ref_ptr, int ref_stride, const uint8_t *msk_ptr, int msk_stride, unsigned int *sse"
+specialize vp9_masked_sub_pixel_variance64x64
+
+prototype unsigned int vp9_masked_sub_pixel_variance32x64 "const uint8_t *src_ptr, int source_stride, int xoffset, int  yoffset, const uint8_t *ref_ptr, int ref_stride, const uint8_t *msk_ptr, int msk_stride, unsigned int *sse"
+specialize vp9_masked_sub_pixel_variance32x64
+
+prototype unsigned int vp9_masked_sub_pixel_variance64x32 "const uint8_t *src_ptr, int source_stride, int xoffset, int  yoffset, const uint8_t *ref_ptr, int ref_stride, const uint8_t *msk_ptr, int msk_stride, unsigned int *sse"
+specialize vp9_masked_sub_pixel_variance64x32
+
+prototype unsigned int vp9_masked_sub_pixel_variance32x16 "const uint8_t *src_ptr, int source_stride, int xoffset, int  yoffset, const uint8_t *ref_ptr, int ref_stride, const uint8_t *msk_ptr, int msk_stride, unsigned int *sse"
+specialize vp9_masked_sub_pixel_variance32x16
+
+prototype unsigned int vp9_masked_sub_pixel_variance16x32 "const uint8_t *src_ptr, int source_stride, int xoffset, int  yoffset, const uint8_t *ref_ptr, int ref_stride, const uint8_t *msk_ptr, int msk_stride, unsigned int *sse"
+specialize vp9_masked_sub_pixel_variance16x32
+
+prototype unsigned int vp9_masked_sub_pixel_variance32x32 "const uint8_t *src_ptr, int source_stride, int xoffset, int  yoffset, const uint8_t *ref_ptr, int ref_stride, const uint8_t *msk_ptr, int msk_stride, unsigned int *sse"
+specialize vp9_masked_sub_pixel_variance32x32
+
+prototype unsigned int vp9_masked_sub_pixel_variance16x16 "const uint8_t *src_ptr, int source_stride, int xoffset, int  yoffset, const uint8_t *ref_ptr, int ref_stride, const uint8_t *msk_ptr, int msk_stride, unsigned int *sse"
+specialize vp9_masked_sub_pixel_variance16x16
+
+prototype unsigned int vp9_masked_sub_pixel_variance8x16 "const uint8_t *src_ptr, int source_stride, int xoffset, int  yoffset, const uint8_t *ref_ptr, int ref_stride, const uint8_t *msk_ptr, int msk_stride, unsigned int *sse"
+specialize vp9_masked_sub_pixel_variance8x16
+
+prototype unsigned int vp9_masked_sub_pixel_variance16x8 "const uint8_t *src_ptr, int source_stride, int xoffset, int  yoffset, const uint8_t *ref_ptr, int ref_stride, const uint8_t *msk_ptr, int msk_stride, unsigned int *sse"
+specialize vp9_masked_sub_pixel_variance16x8
+
+prototype unsigned int vp9_masked_sub_pixel_variance8x8 "const uint8_t *src_ptr, int source_stride, int xoffset, int  yoffset, const uint8_t *ref_ptr, int ref_stride, const uint8_t *msk_ptr, int msk_stride, unsigned int *sse"
+specialize vp9_masked_sub_pixel_variance8x8
+
+prototype unsigned int vp9_masked_sub_pixel_variance4x4 "const uint8_t *src_ptr, int source_stride, int xoffset, int  yoffset, const uint8_t *ref_ptr, int ref_stride, const uint8_t *msk_ptr, int msk_stride, unsigned int *sse"
+specialize vp9_masked_sub_pixel_variance4x4
+
+prototype unsigned int vp9_masked_sad64x64 "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int  ref_stride, const uint8_t *msk_ptr, int msk_stride, unsigned int max_sad"
+specialize vp9_masked_sad64x64
+
+prototype unsigned int vp9_masked_sad32x64 "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, const uint8_t *msk_ptr, int msk_stride, unsigned int max_sad"
+specialize vp9_masked_sad32x64
+
+prototype unsigned int vp9_masked_sad64x32 "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, const uint8_t *msk_ptr, int msk_stride, unsigned int max_sad"
+specialize vp9_masked_sad64x32
+
+prototype unsigned int vp9_masked_sad32x16 "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, const uint8_t *msk_ptr, int msk_stride, unsigned int max_sad"
+specialize vp9_masked_sad32x16
+
+prototype unsigned int vp9_masked_sad16x32 "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, const uint8_t *msk_ptr, int msk_stride, unsigned int max_sad"
+specialize vp9_masked_sad16x32
+
+prototype unsigned int vp9_masked_sad32x32 "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int  ref_stride, const uint8_t *msk_ptr, int msk_stride, unsigned int max_sad"
+specialize vp9_masked_sad32x32
+
+prototype unsigned int vp9_masked_sad16x16 "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int  ref_stride, const uint8_t *msk_ptr, int msk_stride, unsigned int max_sad"
+specialize vp9_masked_sad16x16
+
+prototype unsigned int vp9_masked_sad16x8 "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int  ref_stride, const uint8_t *msk_ptr, int msk_stride, unsigned int max_sad"
+specialize vp9_masked_sad16x8
+
+prototype unsigned int vp9_masked_sad8x16 "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int  ref_stride, const uint8_t *msk_ptr, int msk_stride, unsigned int max_sad"
+specialize vp9_masked_sad8x16
+
+prototype unsigned int vp9_masked_sad8x8 "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int  ref_stride, const uint8_t *msk_ptr, int msk_stride, unsigned int max_sad"
+specialize vp9_masked_sad8x8
+
+prototype unsigned int vp9_masked_sad4x4 "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int  ref_stride, const uint8_t *msk_ptr, int msk_stride, unsigned int max_sad"
+specialize vp9_masked_sad4x4
+fi
+
 prototype unsigned int vp9_variance_halfpixvar16x16_h "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse"
 specialize vp9_variance_halfpixvar16x16_h $sse2_x86inc
 

@@ -252,6 +252,7 @@ EXPERIMENT_LIST="
     alpha
     interintra
     filterintra
+    masked_compound_inter
 "
 CONFIG_LIST="
     external_build

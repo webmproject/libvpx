@@ -107,4 +107,11 @@ static void set_scale_factors(MACROBLOCKD *xd, int ref0, int ref1,
 
 void vp9_setup_scale_factors(VP9_COMMON *cm, int i);
 
+#if CONFIG_MASKED_COMPOUND_INTER
+void vp9_generate_masked_weight(int mask_index, BLOCK_SIZE_TYPE sb_type,
+                              int h, int w, uint8_t *mask, int stride);
+void vp9_generate_hard_mask(int mask_index, BLOCK_SIZE_TYPE sb_type,
+                          int h, int w, uint8_t *mask, int stride);
+#endif
+
 #endif  // VP9_COMMON_VP9_RECONINTER_H_
