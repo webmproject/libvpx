@@ -8,26 +8,29 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#include <stdio.h>
 #include <limits.h>
 #include <math.h>
+#include <stdio.h>
+
+#include "./vpx_config.h"
+
+#include "vpx_mem/vpx_mem.h"
+
+#include "vp9/common/vp9_findnearmv.h"
+#include "vp9/common/vp9_common.h"
 
 #include "vp9/encoder/vp9_onyx_int.h"
 #include "vp9/encoder/vp9_mcomp.h"
-#include "vpx_mem/vpx_mem.h"
-#include "./vpx_config.h"
-#include "vp9/common/vp9_findnearmv.h"
-#include "vp9/common/vp9_common.h"
 
 // #define NEW_DIAMOND_SEARCH
 
 void vp9_clamp_mv_min_max(MACROBLOCK *x, int_mv *ref_mv) {
-  int col_min = (ref_mv->as_mv.col >> 3) - MAX_FULL_PEL_VAL +
+  const int col_min = (ref_mv->as_mv.col >> 3) - MAX_FULL_PEL_VAL +
                 ((ref_mv->as_mv.col & 7) ? 1 : 0);
-  int row_min = (ref_mv->as_mv.row >> 3) - MAX_FULL_PEL_VAL +
+  const int row_min = (ref_mv->as_mv.row >> 3) - MAX_FULL_PEL_VAL +
                 ((ref_mv->as_mv.row & 7) ? 1 : 0);
-  int col_max = (ref_mv->as_mv.col >> 3) + MAX_FULL_PEL_VAL;
-  int row_max = (ref_mv->as_mv.row >> 3) + MAX_FULL_PEL_VAL;
+  const int col_max = (ref_mv->as_mv.col >> 3) + MAX_FULL_PEL_VAL;
+  const int row_max = (ref_mv->as_mv.row >> 3) + MAX_FULL_PEL_VAL;
 
   /* Get intersection of UMV window and valid MV window to reduce # of checks in diamond search. */
   if (x->mv_col_min < col_min)
@@ -323,8 +326,6 @@ int vp9_find_best_sub_pixel_iterative(MACROBLOCK *x,
   int src_stride = x->plane[0].src.stride;
   MACROBLOCKD *xd = &x->e_mbd;
 
-  int rr, rc, br, bc, hstep;
-  int tr, tc;
   unsigned int besterr = INT_MAX;
   unsigned int sse;
   unsigned int whichdir;
@@ -332,30 +333,27 @@ int vp9_find_best_sub_pixel_iterative(MACROBLOCK *x,
   unsigned int quarteriters = iters_per_step;
   unsigned int eighthiters = iters_per_step;
   int thismse;
-  int maxc, minc, maxr, minr;
-  int y_stride;
-  int offset;
 
   uint8_t *y = xd->plane[0].pre[0].buf +
                (bestmv->as_mv.row) * xd->plane[0].pre[0].stride +
                bestmv->as_mv.col;
 
-  y_stride = xd->plane[0].pre[0].stride;
+  const int y_stride = xd->plane[0].pre[0].stride;
 
-  rr = ref_mv->as_mv.row;
-  rc = ref_mv->as_mv.col;
-  br = bestmv->as_mv.row << 3;
-  bc = bestmv->as_mv.col << 3;
-  hstep = 4;
-  minc = MAX(x->mv_col_min << 3, (ref_mv->as_mv.col) - ((1 << MV_MAX_BITS) - 1));
-  maxc = MIN(x->mv_col_max << 3, (ref_mv->as_mv.col) + ((1 << MV_MAX_BITS) - 1));
-  minr = MAX(x->mv_row_min << 3, (ref_mv->as_mv.row) - ((1 << MV_MAX_BITS) - 1));
-  maxr = MIN(x->mv_row_max << 3, (ref_mv->as_mv.row) + ((1 << MV_MAX_BITS) - 1));
+  int rr = ref_mv->as_mv.row;
+  int rc = ref_mv->as_mv.col;
+  int br = bestmv->as_mv.row << 3;
+  int bc = bestmv->as_mv.col << 3;
+  int hstep = 4;
+  const int minc = MAX(x->mv_col_min << 3, ref_mv->as_mv.col - MV_MAX);
+  const int maxc = MIN(x->mv_col_max << 3, ref_mv->as_mv.col + MV_MAX);
+  const int minr = MAX(x->mv_row_min << 3, ref_mv->as_mv.row - MV_MAX);
+  const int maxr = MIN(x->mv_row_max << 3, ref_mv->as_mv.row + MV_MAX);
 
-  tr = br;
-  tc = bc;
+  int tr = br;
+  int tc = bc;
 
-  offset = (bestmv->as_mv.row) * y_stride + bestmv->as_mv.col;
+  const int offset = (bestmv->as_mv.row) * y_stride + bestmv->as_mv.col;
 
   // central mv
   bestmv->as_mv.row <<= 3;
@@ -533,12 +531,10 @@ int vp9_find_best_sub_pixel_comp_iterative(MACROBLOCK *x,
                                            unsigned int *sse1,
                                            const uint8_t *second_pred,
                                            int w, int h) {
-  uint8_t *z = x->plane[0].src.buf;
-  int src_stride = x->plane[0].src.stride;
-  MACROBLOCKD *xd = &x->e_mbd;
+  uint8_t *const z = x->plane[0].src.buf;
+  const int src_stride = x->plane[0].src.stride;
+  MACROBLOCKD *const xd = &x->e_mbd;
 
-  int rr, rc, br, bc, hstep;
-  int tr, tc;
   unsigned int besterr = INT_MAX;
   unsigned int sse;
   unsigned int whichdir;
@@ -546,35 +542,28 @@ int vp9_find_best_sub_pixel_comp_iterative(MACROBLOCK *x,
   unsigned int quarteriters = iters_per_step;
   unsigned int eighthiters = iters_per_step;
   int thismse;
-  int maxc, minc, maxr, minr;
-  int y_stride;
-  int offset;
 
   DECLARE_ALIGNED_ARRAY(16, uint8_t, comp_pred, 64 * 64);
-  uint8_t *y = xd->plane[0].pre[0].buf +
+  uint8_t *const y = xd->plane[0].pre[0].buf +
                (bestmv->as_mv.row) * xd->plane[0].pre[0].stride +
                bestmv->as_mv.col;
 
-  y_stride = xd->plane[0].pre[0].stride;
+  const int y_stride = xd->plane[0].pre[0].stride;
 
-  rr = ref_mv->as_mv.row;
-  rc = ref_mv->as_mv.col;
-  br = bestmv->as_mv.row << 3;
-  bc = bestmv->as_mv.col << 3;
-  hstep = 4;
-  minc = MAX(x->mv_col_min << 3, (ref_mv->as_mv.col) -
-             ((1 << MV_MAX_BITS) - 1));
-  maxc = MIN(x->mv_col_max << 3, (ref_mv->as_mv.col) +
-             ((1 << MV_MAX_BITS) - 1));
-  minr = MAX(x->mv_row_min << 3, (ref_mv->as_mv.row) -
-             ((1 << MV_MAX_BITS) - 1));
-  maxr = MIN(x->mv_row_max << 3, (ref_mv->as_mv.row) +
-             ((1 << MV_MAX_BITS) - 1));
+  int rr = ref_mv->as_mv.row;
+  int rc = ref_mv->as_mv.col;
+  int br = bestmv->as_mv.row << 3;
+  int bc = bestmv->as_mv.col << 3;
+  int hstep = 4;
+  const int minc = MAX(x->mv_col_min << 3, ref_mv->as_mv.col - MV_MAX);
+  const int maxc = MIN(x->mv_col_max << 3, ref_mv->as_mv.col + MV_MAX);
+  const int minr = MAX(x->mv_row_min << 3, ref_mv->as_mv.row - MV_MAX);
+  const int maxr = MIN(x->mv_row_max << 3, ref_mv->as_mv.row + MV_MAX);
 
-  tr = br;
-  tc = bc;
+  int tr = br;
+  int tc = bc;
 
-  offset = (bestmv->as_mv.row) * y_stride + bestmv->as_mv.col;
+  const int offset = (bestmv->as_mv.row) * y_stride + bestmv->as_mv.col;
 
   // central mv
   bestmv->as_mv.row <<= 3;
@@ -753,9 +742,6 @@ int vp9_find_best_sub_pixel_comp_tree(MACROBLOCK *x,
 #undef DIST
 #undef IFMVCV
 #undef CHECK_BETTER
-#undef MIN
-#undef MAX
-
 #undef SP
 
 #define CHECK_BOUNDS(range) \
@@ -1588,18 +1574,12 @@ int vp9_full_search_sad_c(MACROBLOCK *x, int_mv *ref_mv,
             + mvsad_err_cost(best_mv, &fcenter_mv, mvjsadcost, mvsadcost,
                              sad_per_bit);
 
-  // Apply further limits to prevent us looking using vectors that stretch beyiond the UMV border
-  if (col_min < x->mv_col_min)
-    col_min = x->mv_col_min;
-
-  if (col_max > x->mv_col_max)
-    col_max = x->mv_col_max;
-
-  if (row_min < x->mv_row_min)
-    row_min = x->mv_row_min;
-
-  if (row_max > x->mv_row_max)
-    row_max = x->mv_row_max;
+  // Apply further limits to prevent us looking using vectors that stretch
+  // beyond the UMV border
+  col_min = MAX(col_min, x->mv_col_min);
+  col_max = MIN(col_max, x->mv_col_max);
+  row_min = MAX(row_min, x->mv_row_min);
+  row_max = MIN(row_max, x->mv_row_max);
 
   for (r = row_min; r < row_max; r++) {
     this_mv.as_mv.row = r;
@@ -1684,18 +1664,12 @@ int vp9_full_search_sadx3(MACROBLOCK *x, int_mv *ref_mv,
             + mvsad_err_cost(best_mv, &fcenter_mv, mvjsadcost, mvsadcost,
                              sad_per_bit);
 
-  // Apply further limits to prevent us looking using vectors that stretch beyiond the UMV border
-  if (col_min < x->mv_col_min)
-    col_min = x->mv_col_min;
-
-  if (col_max > x->mv_col_max)
-    col_max = x->mv_col_max;
-
-  if (row_min < x->mv_row_min)
-    row_min = x->mv_row_min;
-
-  if (row_max > x->mv_row_max)
-    row_max = x->mv_row_max;
+  // Apply further limits to prevent us looking using vectors that stretch
+  // beyond the UMV border
+  col_min = MAX(col_min, x->mv_col_min);
+  col_max = MIN(col_max, x->mv_col_max);
+  row_min = MAX(row_min, x->mv_row_min);
+  row_max = MIN(row_max, x->mv_row_max);
 
   for (r = row_min; r < row_max; r++) {
     this_mv.as_mv.row = r;
@@ -1813,18 +1787,12 @@ int vp9_full_search_sadx8(MACROBLOCK *x, int_mv *ref_mv,
             + mvsad_err_cost(best_mv, &fcenter_mv, mvjsadcost, mvsadcost,
                              sad_per_bit);
 
-  // Apply further limits to prevent us looking using vectors that stretch beyiond the UMV border
-  if (col_min < x->mv_col_min)
-    col_min = x->mv_col_min;
-
-  if (col_max > x->mv_col_max)
-    col_max = x->mv_col_max;
-
-  if (row_min < x->mv_row_min)
-    row_min = x->mv_row_min;
-
-  if (row_max > x->mv_row_max)
-    row_max = x->mv_row_max;
+  // Apply further limits to prevent us looking using vectors that stretch
+  // beyond the UMV border
+  col_min = MAX(col_min, x->mv_col_min);
+  col_max = MIN(col_max, x->mv_col_max);
+  row_min = MAX(row_min, x->mv_row_min);
+  row_max = MIN(row_max, x->mv_row_max);
 
   for (r = row_min; r < row_max; r++) {
     this_mv.as_mv.row = r;

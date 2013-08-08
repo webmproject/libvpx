@@ -377,7 +377,7 @@ static const vp9_prob modelcoefprobs_pareto8[COEFPROB_MODELS][MODEL_NODES] = {
 
 static void extend_model_to_full_distribution(vp9_prob p,
                                               vp9_prob *tree_probs) {
-  const int l = ((p - 1) / 2);
+  const int l = (p - 1) / 2;
   const vp9_prob (*model)[MODEL_NODES] = modelcoefprobs_pareto8;
   if (p & 1) {
     vpx_memcpy(tree_probs + UNCONSTRAINED_NODES,

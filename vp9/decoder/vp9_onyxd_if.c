@@ -187,21 +187,21 @@ vpx_codec_err_t vp9_copy_reference_dec(VP9D_PTR ptr,
    * later commit that adds VP9-specific controls for this functionality.
    */
   if (ref_frame_flag == VP9_LAST_FLAG) {
-    ref_fb_idx = pbi->common.ref_frame_map[0];
+    ref_fb_idx = cm->ref_frame_map[0];
   } else {
-    vpx_internal_error(&pbi->common.error, VPX_CODEC_ERROR,
+    vpx_internal_error(&cm->error, VPX_CODEC_ERROR,
                        "Invalid reference frame");
-    return pbi->common.error.error_code;
+    return cm->error.error_code;
   }
 
   if (!equal_dimensions(&cm->yv12_fb[ref_fb_idx], sd)) {
-    vpx_internal_error(&pbi->common.error, VPX_CODEC_ERROR,
+    vpx_internal_error(&cm->error, VPX_CODEC_ERROR,
                        "Incorrect buffer dimensions");
   } else {
     vp8_yv12_copy_frame(&cm->yv12_fb[ref_fb_idx], sd);
   }
 
-  return pbi->common.error.error_code;
+  return cm->error.error_code;
 }
 
 
@@ -261,22 +261,21 @@ int vp9_get_reference_dec(VP9D_PTR ptr, int index, YV12_BUFFER_CONFIG **fb) {
 /* If any buffer updating is signaled it should be done here. */
 static void swap_frame_buffers(VP9D_COMP *pbi) {
   int ref_index = 0, mask;
+  VP9_COMMON *const cm = &pbi->common;
 
   for (mask = pbi->refresh_frame_flags; mask; mask >>= 1) {
-    if (mask & 1) {
-      ref_cnt_fb(pbi->common.fb_idx_ref_cnt,
-                 &pbi->common.ref_frame_map[ref_index],
-                 pbi->common.new_fb_idx);
-    }
+    if (mask & 1)
+      ref_cnt_fb(cm->fb_idx_ref_cnt, &cm->ref_frame_map[ref_index],
+                 cm->new_fb_idx);
     ++ref_index;
   }
 
-  pbi->common.frame_to_show = &pbi->common.yv12_fb[pbi->common.new_fb_idx];
-  pbi->common.fb_idx_ref_cnt[pbi->common.new_fb_idx]--;
+  cm->frame_to_show = &cm->yv12_fb[cm->new_fb_idx];
+  cm->fb_idx_ref_cnt[cm->new_fb_idx]--;
 
-  /* Invalidate these references until the next frame starts. */
+  // Invalidate these references until the next frame starts.
   for (ref_index = 0; ref_index < 3; ref_index++)
-    pbi->common.active_ref_idx[ref_index] = INT_MAX;
+    cm->active_ref_idx[ref_index] = INT_MAX;
 }
 
 int vp9_receive_compressed_data(VP9D_PTR ptr,
@@ -293,7 +292,7 @@ int vp9_receive_compressed_data(VP9D_PTR ptr,
   if (ptr == 0)
     return -1;
 
-  pbi->common.error.error_code = VPX_CODEC_OK;
+  cm->error.error_code = VPX_CODEC_OK;
 
   pbi->source = source;
   pbi->source_sz = size;
@@ -314,8 +313,8 @@ int vp9_receive_compressed_data(VP9D_PTR ptr,
 
   cm->new_fb_idx = get_free_fb(cm);
 
-  if (setjmp(pbi->common.error.jmp)) {
-    pbi->common.error.setjmp = 0;
+  if (setjmp(cm->error.jmp)) {
+    cm->error.setjmp = 0;
 
     /* We do not know if the missing frame(s) was supposed to update
      * any of the reference buffers, but we act conservative and
@@ -334,13 +333,13 @@ int vp9_receive_compressed_data(VP9D_PTR ptr,
     return -1;
   }
 
-  pbi->common.error.setjmp = 1;
+  cm->error.setjmp = 1;
 
   retcode = vp9_decode_frame(pbi, psource);
 
   if (retcode < 0) {
-    pbi->common.error.error_code = VPX_CODEC_ERROR;
-    pbi->common.error.setjmp = 0;
+    cm->error.error_code = VPX_CODEC_ERROR;
+    cm->error.setjmp = 0;
     if (cm->fb_idx_ref_cnt[cm->new_fb_idx] > 0)
       cm->fb_idx_ref_cnt[cm->new_fb_idx]--;
     return retcode;
@@ -403,7 +402,7 @@ int vp9_receive_compressed_data(VP9D_PTR ptr,
   pbi->last_time_stamp = time_stamp;
   pbi->source_sz = 0;
 
-  pbi->common.error.setjmp = 0;
+  cm->error.setjmp = 0;
   return retcode;
 }
 

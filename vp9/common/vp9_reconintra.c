@@ -51,18 +51,17 @@ static INLINE void d27_predictor(uint8_t *pred_ptr, ptrdiff_t stride, int bs,
                                  uint8_t *above_row, uint8_t *left_col) {
   int r, c;
   // first column
-  for (r = 0; r < bs - 1; ++r) {
-      pred_ptr[r * stride] = ROUND_POWER_OF_TWO(left_col[r] +
-                                                   left_col[r + 1], 1);
-  }
+  for (r = 0; r < bs - 1; ++r)
+    pred_ptr[r * stride] = ROUND_POWER_OF_TWO(left_col[r] + left_col[r + 1], 1);
+
   pred_ptr[(bs - 1) * stride] = left_col[bs - 1];
   pred_ptr++;
   // second column
-  for (r = 0; r < bs - 2; ++r) {
-      pred_ptr[r * stride] = ROUND_POWER_OF_TWO(left_col[r] +
-                                                   left_col[r + 1] * 2 +
-                                                   left_col[r + 2], 2);
-  }
+  for (r = 0; r < bs - 2; ++r)
+    pred_ptr[r * stride] = ROUND_POWER_OF_TWO(left_col[r] +
+                                              left_col[r + 1] * 2 +
+                                              left_col[r + 2], 2);
+
   pred_ptr[(bs - 2) * stride] = ROUND_POWER_OF_TWO(left_col[bs - 2] +
                                                       left_col[bs - 1] * 3,
                                                       2);
@@ -70,15 +69,12 @@ static INLINE void d27_predictor(uint8_t *pred_ptr, ptrdiff_t stride, int bs,
   pred_ptr++;
 
   // rest of last row
-  for (c = 0; c < bs - 2; ++c) {
+  for (c = 0; c < bs - 2; ++c)
     pred_ptr[(bs - 1) * stride + c] = left_col[bs - 1];
-  }
 
-  for (r = bs - 2; r >= 0; --r) {
-    for (c = 0; c < bs - 2; ++c) {
+  for (r = bs - 2; r >= 0; --r)
+    for (c = 0; c < bs - 2; ++c)
       pred_ptr[r * stride + c] = pred_ptr[(r + 1) * stride + c - 2];
-    }
-  }
 }
 intra_pred_allsizes(d27)
 
@@ -86,16 +82,12 @@ static INLINE void d63_predictor(uint8_t *pred_ptr, ptrdiff_t stride, int bs,
                                  uint8_t *above_row, uint8_t *left_col) {
   int r, c;
   for (r = 0; r < bs; ++r) {
-    for (c = 0; c < bs; ++c) {
-      if (r & 1) {
-        pred_ptr[c] = ROUND_POWER_OF_TWO(above_row[r/2 + c] +
-                                         above_row[r/2 + c + 1] * 2 +
-                                         above_row[r/2 + c + 2], 2);
-      } else {
-        pred_ptr[c] = ROUND_POWER_OF_TWO(above_row[r/2 + c] +
-                                         above_row[r/2+ c + 1], 1);
-      }
-    }
+    for (c = 0; c < bs; ++c)
+      pred_ptr[c] = r & 1 ? ROUND_POWER_OF_TWO(above_row[r/2 + c] +
+                                               above_row[r/2 + c + 1] * 2 +
+                                               above_row[r/2 + c + 2], 2)
+                          : ROUND_POWER_OF_TWO(above_row[r/2 + c] +
+                                               above_row[r/2+ c + 1], 1);
     pred_ptr += stride;
   }
 }
@@ -141,9 +133,9 @@ static INLINE void d117_predictor(uint8_t *pred_ptr, ptrdiff_t stride, int bs,
                                    left_col[0] * 2 +
                                    left_col[1], 2);
   for (r = 3; r < bs; ++r)
-    pred_ptr[(r-2) * stride] = ROUND_POWER_OF_TWO(left_col[r - 3] +
-                                                  left_col[r - 2] * 2 +
-                                                  left_col[r - 1], 2);
+    pred_ptr[(r - 2) * stride] = ROUND_POWER_OF_TWO(left_col[r - 3] +
+                                                    left_col[r - 2] * 2 +
+                                                    left_col[r - 1], 2);
   // the rest of the block
   for (r = 2; r < bs; ++r) {
     for (c = 1; c < bs; c++)
