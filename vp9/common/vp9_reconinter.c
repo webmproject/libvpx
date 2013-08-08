@@ -211,20 +211,16 @@ static MV mi_mv_pred_q4(const MODE_INFO *mi, int idx) {
   return res;
 }
 
-
-
 // TODO(jkoleszar): yet another mv clamping function :-(
-MV clamp_mv_to_umv_border_sb(const MV *src_mv,
-    int bwl, int bhl, int ss_x, int ss_y,
-    int mb_to_left_edge, int mb_to_top_edge,
-    int mb_to_right_edge, int mb_to_bottom_edge) {
+MV clamp_mv_to_umv_border_sb(const MACROBLOCKD *xd, const MV *src_mv,
+                             int bw, int bh, int ss_x, int ss_y) {
   // If the MV points so far into the UMV border that no visible pixels
   // are used for reconstruction, the subpel part of the MV can be
   // discarded and the MV limited to 16 pixels with equivalent results.
-  const int spel_left = (VP9_INTERP_EXTEND + (4 << bwl)) << 4;
-  const int spel_right = spel_left - (1 << 4);
-  const int spel_top = (VP9_INTERP_EXTEND + (4 << bhl)) << 4;
-  const int spel_bottom = spel_top - (1 << 4);
+  const int spel_left = (VP9_INTERP_EXTEND + bw) << SUBPEL_BITS;
+  const int spel_right = spel_left - SUBPEL_SHIFTS;
+  const int spel_top = (VP9_INTERP_EXTEND + bh) << SUBPEL_BITS;
+  const int spel_bottom = spel_top - SUBPEL_SHIFTS;
   MV clamped_mv = {
     src_mv->row << (1 - ss_y),
     src_mv->col << (1 - ss_x)
@@ -232,10 +228,10 @@ MV clamp_mv_to_umv_border_sb(const MV *src_mv,
   assert(ss_x <= 1);
   assert(ss_y <= 1);
 
-  clamp_mv(&clamped_mv, (mb_to_left_edge << (1 - ss_x)) - spel_left,
-                        (mb_to_right_edge << (1 - ss_x)) + spel_right,
-                        (mb_to_top_edge << (1 - ss_y)) - spel_top,
-                        (mb_to_bottom_edge << (1 - ss_y)) + spel_bottom);
+  clamp_mv(&clamped_mv, (xd->mb_to_left_edge << (1 - ss_x)) - spel_left,
+                        (xd->mb_to_right_edge << (1 - ss_x)) + spel_right,
+                        (xd->mb_to_top_edge << (1 - ss_y)) - spel_top,
+                        (xd->mb_to_bottom_edge << (1 - ss_y)) + spel_bottom);
 
   return clamped_mv;
 }
@@ -254,28 +250,31 @@ static void build_inter_predictors(int plane, int block,
                                    int pred_w, int pred_h,
                                    void *argv) {
   const struct build_inter_predictors_args* const arg = argv;
-  MACROBLOCKD * const xd = arg->xd;
-  const int bwl = b_width_log2(bsize) - xd->plane[plane].subsampling_x;
-  const int bhl = b_height_log2(bsize) - xd->plane[plane].subsampling_y;
-  const int x = 4 * (block & ((1 << bwl) - 1)), y = 4 * (block >> bwl);
+  MACROBLOCKD *const xd = arg->xd;
+  struct macroblockd_plane *const pd = &xd->plane[plane];
+  const int bwl = b_width_log2(bsize) - pd->subsampling_x;
+  const int bw = 4 << bwl;
+  const int bh = plane_block_height(bsize, pd);
+  const int x = 4 * (block & ((1 << bwl) - 1));
+  const int y = 4 * (block >> bwl);
   const MODE_INFO *const mi = xd->mode_info_context;
   const int use_second_ref = mi->mbmi.ref_frame[1] > 0;
   int which_mv;
 
-  assert(x < (4 << bwl));
-  assert(y < (4 << bhl));
-  assert(mi->mbmi.sb_type < BLOCK_8X8 || 4 << pred_w == (4 << bwl));
-  assert(mi->mbmi.sb_type < BLOCK_8X8 || 4 << pred_h == (4 << bhl));
+  assert(x < bw);
+  assert(y < bh);
+  assert(mi->mbmi.sb_type < BLOCK_8X8 || 4 << pred_w == bw);
+  assert(mi->mbmi.sb_type < BLOCK_8X8 || 4 << pred_h == bh);
 
   for (which_mv = 0; which_mv < 1 + use_second_ref; ++which_mv) {
-    // source
-    const uint8_t * const base_pre = arg->pre[which_mv][plane];
-    const int pre_stride = arg->pre_stride[which_mv][plane];
-    const uint8_t *const pre = base_pre +
-        scaled_buffer_offset(x, y, pre_stride, &xd->scale_factor[which_mv]);
-    struct scale_factors * const scale = &xd->scale_factor[which_mv];
+    struct scale_factors *const scale = &xd->scale_factor[which_mv];
 
-    // dest
+    // src
+    const int pre_stride = arg->pre_stride[which_mv][plane];
+    const uint8_t *const pre = arg->pre[which_mv][plane] +
+        scaled_buffer_offset(x, y, pre_stride, &xd->scale_factor[which_mv]);
+
+    // dst
     uint8_t *const dst = arg->dst[plane] + arg->dst_stride[plane] * y + x;
 
     // TODO(jkoleszar): All chroma MVs in SPLITMV mode are taken as the
@@ -291,13 +290,10 @@ static void build_inter_predictors(int plane, int block,
     // scaling case. It needs to be done on the scaled MV, not the pre-scaling
     // MV. Note however that it performs the subsampling aware scaling so
     // that the result is always q4.
-    const MV res_mv = clamp_mv_to_umv_border_sb(&mv, bwl, bhl,
-                                                xd->plane[plane].subsampling_x,
-                                                xd->plane[plane].subsampling_y,
-                                                xd->mb_to_left_edge,
-                                                xd->mb_to_top_edge,
-                                                xd->mb_to_right_edge,
-                                                xd->mb_to_bottom_edge);
+    const MV res_mv = clamp_mv_to_umv_border_sb(xd, &mv, bw, bh,
+                                                pd->subsampling_x,
+                                                pd->subsampling_y);
+
     scale->set_scaled_offsets(scale, arg->y + y, arg->x + x);
     vp9_build_inter_predictor(pre, pre_stride,
                               dst, arg->dst_stride[plane],
