@@ -459,10 +459,10 @@ void xform_quant(int plane, int block, BLOCK_SIZE_TYPE bsize,
   int16_t *coeff = BLOCK_OFFSET(p->coeff, block, 16);
   int16_t *qcoeff = BLOCK_OFFSET(pd->qcoeff, block, 16);
   int16_t *dqcoeff = BLOCK_OFFSET(pd->dqcoeff, block, 16);
-  const TX_SIZE tx_size = (TX_SIZE)(ss_txfrm_size / 2);
   const int16_t *scan, *iscan;
   uint16_t *eob = &pd->eobs[block];
-  const int bwl = plane_block_width_log2by4(bsize, pd), bw = 1 << bwl;
+  const TX_SIZE tx_size = (TX_SIZE)(ss_txfrm_size / 2);
+  const int bwl = b_width_log2(bsize) - pd->subsampling_x, bw = 1 << bwl;
   const int twl = bwl - tx_size, twmask = (1 << twl) - 1;
   int xoff, yoff;
   int16_t *src_diff;

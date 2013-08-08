@@ -450,16 +450,6 @@ static INLINE int plane_block_height(BLOCK_SIZE_TYPE bsize,
   return 4 << (b_height_log2(bsize) - plane->subsampling_y);
 }
 
-static INLINE int plane_block_width_log2by4(
-    BLOCK_SIZE_TYPE bsize, const struct macroblockd_plane* plane) {
-  return (b_width_log2(bsize) - plane->subsampling_x);
-}
-
-static INLINE int plane_block_height_log2by4(
-    BLOCK_SIZE_TYPE bsize, const struct macroblockd_plane* plane) {
-  return (b_height_log2(bsize) - plane->subsampling_y);
-}
-
 typedef void (*foreach_transformed_block_visitor)(int plane, int block,
                                                   BLOCK_SIZE_TYPE bsize,
                                                   int ss_txfrm_size,
