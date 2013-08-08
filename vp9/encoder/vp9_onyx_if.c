@@ -719,6 +719,7 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
   sf->adaptive_rd_thresh = 0;
   sf->use_lastframe_partitioning = 0;
   sf->tx_size_search_method = USE_FULL_RD;
+  sf->use_lp32x32fdct = 0;
   sf->use_8tap_always = 0;
   sf->use_avoid_tested_higherror = 0;
   sf->reference_masking = 0;
@@ -790,6 +791,7 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
         sf->use_uv_intra_rd_estimate = 1;
         sf->use_rd_breakout = 1;
         sf->skip_encode_sb = 1;
+        sf->use_lp32x32fdct = 1;
         sf->auto_mv_step_size = 1;
 
         sf->auto_min_max_partition_size = 1;
@@ -821,6 +823,7 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
         sf->use_uv_intra_rd_estimate = 1;
         sf->use_rd_breakout = 1;
         sf->skip_encode_sb = 1;
+        sf->use_lp32x32fdct = 1;
         sf->using_small_partition_info = 1;
         sf->disable_splitmv =
             (MIN(cpi->common.width, cpi->common.height) >= 720)? 1 : 0;
@@ -844,6 +847,7 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
                                      FLAG_EARLY_TERMINATE;
         sf->use_rd_breakout = 1;
         sf->skip_encode_sb = 1;
+        sf->use_lp32x32fdct = 1;
         sf->disable_splitmv = 1;
         sf->auto_mv_step_size = 1;
         sf->search_method = BIGDIA;
@@ -865,6 +869,7 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
                                      FLAG_SKIP_INTRA_LOWVAR |
                                      FLAG_EARLY_TERMINATE;
         sf->use_rd_breakout = 1;
+        sf->use_lp32x32fdct = 1;
         sf->optimize_coefficients = 0;
         sf->auto_mv_step_size = 1;
         // sf->reduce_first_step_size = 1;

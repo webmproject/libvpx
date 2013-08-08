@@ -257,6 +257,7 @@ typedef struct {
   int skip_encode_frame;
   int use_lastframe_partitioning;
   TX_SIZE_SEARCH_METHOD tx_size_search_method;
+  int use_lp32x32fdct;
   int use_8tap_always;
   int use_avoid_tested_higherror;
   int skip_lots_of_modes;

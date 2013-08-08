@@ -475,7 +475,7 @@ void xform_quant(int plane, int block, BLOCK_SIZE_TYPE bsize,
       xoff = 32 * (block & twmask);
       yoff = 32 * (block >> twl);
       src_diff = p->src_diff + 4 * bw * yoff + xoff;
-      if (x->rd_search)
+      if (x->use_lp32x32fdct)
         vp9_short_fdct32x32_rd(src_diff, coeff, bw * 8);
       else
         vp9_short_fdct32x32(src_diff, coeff, bw * 8);
@@ -670,7 +670,7 @@ void encode_block_intra(int plane, int block, BLOCK_SIZE_TYPE bsize,
                               dst, pd->dst.stride, dst, pd->dst.stride);
       vp9_subtract_block(32, 32, src_diff, bw * 4,
                          src, p->src.stride, dst, pd->dst.stride);
-      if (x->rd_search)
+      if (x->use_lp32x32fdct)
         vp9_short_fdct32x32_rd(src_diff, coeff, bw * 8);
       else
         vp9_short_fdct32x32(src_diff, coeff, bw * 8);

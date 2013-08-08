@@ -144,7 +144,7 @@ struct macroblock {
   int optimize;
 
   // indicate if it is in the rd search loop or encoding process
-  int rd_search;
+  int use_lp32x32fdct;
   int skip_encode;
 
   // Used to store sub partition's choices.
