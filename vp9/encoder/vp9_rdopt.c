@@ -2675,7 +2675,7 @@ static void joint_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
       int dis; /* TODO: use dis in distortion calculation later. */
       unsigned int sse;
 
-      bestsme = vp9_find_best_sub_pixel_comp_iterative(
+      bestsme = cpi->find_fractional_mv_step_comp(
           x, &tmp_mv,
           &ref_mv[id],
           x->errorperbit,

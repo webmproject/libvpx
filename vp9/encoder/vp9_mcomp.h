@@ -80,6 +80,21 @@ typedef int (fractional_mv_step_fp) (
     int *distortion,
     unsigned int *sse);
 extern fractional_mv_step_fp vp9_find_best_sub_pixel_iterative;
+extern fractional_mv_step_fp vp9_find_best_sub_pixel_tree;
+
+typedef int (fractional_mv_step_comp_fp) (
+    MACROBLOCK *x,
+    int_mv *bestmv, int_mv *ref_mv,
+    int error_per_bit,
+    const vp9_variance_fn_ptr_t *vfp,
+    int forced_stop,  // 0 - full, 1 - qtr only, 2 - half only
+    int iters_per_step,
+    int *mvjcost, int *mvcost[2],
+    int *distortion, unsigned int *sse1,
+    const uint8_t *second_pred,
+    int w, int h);
+extern fractional_mv_step_comp_fp vp9_find_best_sub_pixel_comp_iterative;
+extern fractional_mv_step_comp_fp vp9_find_best_sub_pixel_comp_tree;
 
 typedef int (*vp9_full_search_fn_t)(MACROBLOCK *x,
                                     int_mv *ref_mv, int sad_per_bit,
@@ -101,18 +116,6 @@ typedef int (*vp9_diamond_search_fn_t)(MACROBLOCK *x,
                                        vp9_variance_fn_ptr_t *fn_ptr,
                                        int *mvjcost, int *mvcost[2],
                                        int_mv *center_mv);
-
-int vp9_find_best_sub_pixel_comp_iterative(
-    MACROBLOCK *x,
-    int_mv *bestmv, int_mv *ref_mv,
-    int error_per_bit,
-    const vp9_variance_fn_ptr_t *vfp,
-    int forced_stop,  // 0 - full, 1 - qtr only, 2 - half only
-    int iters_per_step,
-    int *mvjcost, int *mvcost[2],
-    int *distortion, unsigned int *sse1,
-    const uint8_t *second_pred,
-    int w, int h);
 
 int vp9_refining_search_8p_c(MACROBLOCK *x,
                              int_mv *ref_mv, int error_per_bit,

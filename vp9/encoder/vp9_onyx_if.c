@@ -713,8 +713,8 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
   sf->search_method = NSTEP;
   sf->auto_filter = 1;
   sf->recode_loop = 1;
-  sf->subpel_search_method = SUBPEL_ITERATIVE;
-  sf->subpel_iters_per_step = 3;
+  sf->subpel_search_method = SUBPEL_TREE;
+  sf->subpel_iters_per_step = 2;
   sf->optimize_coefficients = !cpi->oxcf.lossless;
   sf->reduce_first_step_size = 0;
   sf->auto_mv_step_size = 0;
@@ -830,7 +830,7 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
             (MIN(cpi->common.width, cpi->common.height) >= 720)? 1 : 0;
         sf->auto_mv_step_size = 1;
         sf->search_method = SQUARE;
-        sf->subpel_iters_per_step = 2;
+        sf->subpel_iters_per_step = 1;
       }
       if (speed == 3) {
         sf->comp_inter_joint_search_thresh = BLOCK_SIZE_TYPES;
@@ -922,9 +922,10 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
 
   if (cpi->sf.subpel_search_method == SUBPEL_ITERATIVE) {
     cpi->find_fractional_mv_step = vp9_find_best_sub_pixel_iterative;
-  } else {
-    // TODO(debargha): Other methods to come
-    assert(0);
+    cpi->find_fractional_mv_step_comp = vp9_find_best_sub_pixel_comp_iterative;
+  } else if (cpi->sf.subpel_search_method == SUBPEL_TREE) {
+    cpi->find_fractional_mv_step = vp9_find_best_sub_pixel_tree;
+    cpi->find_fractional_mv_step_comp = vp9_find_best_sub_pixel_comp_tree;
   }
 
   cpi->mb.optimize = cpi->sf.optimize_coefficients == 1 && cpi->pass != 1;
