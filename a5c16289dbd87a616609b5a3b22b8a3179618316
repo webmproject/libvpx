@@ -37,6 +37,41 @@
     },
     {
       "key": {
+        "uuid": "AAAAcn//zEE\u003d",
+        "filename": "vp9/common/arm/neon/vp9_short_idct16x16_add_neon.asm",
+        "patchSetId": 7
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2013-08-08T21:55:44Z",
+      "side": 1,
+      "message": "Done. Space out the loading of constants. Use only r3 and r12 for loading. So remove the push {r4-r9}",
+      "parentUuid": "AAAAcn//1Ug\u003d",
+      "revId": "a5c16289dbd87a616609b5a3b22b8a3179618316",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcn//ybs\u003d",
+        "filename": "vp9/common/arm/neon/vp9_short_idct16x16_add_neon.asm",
+        "patchSetId": 7
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2013-08-08T21:55:44Z",
+      "side": 1,
+      "message": "Two new functions |save_registers| and |restore_registers| are added. Push and pop operations are only called once.",
+      "revId": "a5c16289dbd87a616609b5a3b22b8a3179618316",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAcn//118\u003d",
         "filename": "vp9/common/arm/neon/vp9_short_idct16x16_add_neon.asm",
         "patchSetId": 7
@@ -90,6 +125,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAcn//zL0\u003d",
+        "filename": "vp9/common/arm/neon/vp9_short_idct16x16_add_neon.asm",
+        "patchSetId": 7
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2013-08-08T21:55:44Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAcn//01E\u003d",
+      "revId": "a5c16289dbd87a616609b5a3b22b8a3179618316",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAcn//1tI\u003d",
         "filename": "vp9/common/arm/neon/vp9_short_idct16x16_add_neon.asm",
         "patchSetId": 7
@@ -101,6 +154,24 @@
       "writtenOn": "2013-08-07T22:13:14Z",
       "side": 1,
       "message": "nit: I misunderstood comment. How about adding \u0027\u003d\u003d\u0027\n\nAnd below",
+      "revId": "a5c16289dbd87a616609b5a3b22b8a3179618316",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcn//zRo\u003d",
+        "filename": "vp9/common/arm/neon/vp9_short_idct16x16_add_neon.asm",
+        "patchSetId": 7
+      },
+      "lineNbr": 96,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2013-08-08T21:55:44Z",
+      "side": 1,
+      "message": "Done. Delete \"\u003d\" to avoid confusion.",
+      "parentUuid": "AAAAcn//1tI\u003d",
       "revId": "a5c16289dbd87a616609b5a3b22b8a3179618316",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -124,6 +195,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAcn//zRY\u003d",
+        "filename": "vp9/common/arm/neon/vp9_short_idct16x16_add_neon.asm",
+        "patchSetId": 7
+      },
+      "lineNbr": 101,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2013-08-08T21:55:44Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAcn//1og\u003d",
+      "revId": "a5c16289dbd87a616609b5a3b22b8a3179618316",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAcn//1ZM\u003d",
         "filename": "vp9/common/arm/neon/vp9_short_idct16x16_add_neon.asm",
         "patchSetId": 7
@@ -135,6 +224,24 @@
       "writtenOn": "2013-08-07T22:13:14Z",
       "side": 1,
       "message": "I think you can use vmlal here and remove the 2 vadds below.\n\nAnd below for add instructions.",
+      "revId": "a5c16289dbd87a616609b5a3b22b8a3179618316",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcn//zRU\u003d",
+        "filename": "vp9/common/arm/neon/vp9_short_idct16x16_add_neon.asm",
+        "patchSetId": 7
+      },
+      "lineNbr": 117,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2013-08-08T21:55:44Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAcn//1ZM\u003d",
       "revId": "a5c16289dbd87a616609b5a3b22b8a3179618316",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -158,6 +265,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAcn//ygs\u003d",
+        "filename": "vp9/common/arm/neon/vp9_short_idct16x16_add_neon.asm",
+        "patchSetId": 7
+      },
+      "lineNbr": 165,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2013-08-08T21:55:44Z",
+      "side": 1,
+      "message": "Done. Just use q8, q12..registers in the following instructions.",
+      "parentUuid": "AAAAcn//1X8\u003d",
+      "revId": "a5c16289dbd87a616609b5a3b22b8a3179618316",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAcn//1VE\u003d",
         "filename": "vp9/common/arm/neon/vp9_short_idct16x16_add_neon.asm",
         "patchSetId": 7
@@ -169,6 +294,58 @@
       "writtenOn": "2013-08-07T22:13:14Z",
       "side": 1,
       "message": "I think you could remove this if you switch the order of q13 and q12 above and call vadd q4, q4, q5",
+      "revId": "a5c16289dbd87a616609b5a3b22b8a3179618316",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcn//yf0\u003d",
+        "filename": "vp9/common/arm/neon/vp9_short_idct16x16_add_neon.asm",
+        "patchSetId": 7
+      },
+      "lineNbr": 243,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2013-08-08T21:55:44Z",
+      "side": 1,
+      "message": "Done. Directly save the step2[4] into q4 in above instruction.",
+      "parentUuid": "AAAAcn//1VE\u003d",
+      "revId": "a5c16289dbd87a616609b5a3b22b8a3179618316",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcn//ycs\u003d",
+        "filename": "vp9/common/arm/neon/vp9_short_idct16x16_add_neon.asm",
+        "patchSetId": 7
+      },
+      "lineNbr": 325,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2013-08-08T21:55:44Z",
+      "side": 1,
+      "message": "I tried to skip this push as in pass1. But seems not possible as I need to use these registers to load the data in pass1. So just keep them.",
+      "revId": "a5c16289dbd87a616609b5a3b22b8a3179618316",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcn//yb4\u003d",
+        "filename": "vp9/common/arm/neon/vp9_short_idct16x16_add_neon.asm",
+        "patchSetId": 7
+      },
+      "lineNbr": 326,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2013-08-08T21:55:44Z",
+      "side": 1,
+      "message": "Two new functions |save_registers| and |restore_registers| are added. Push and pop operations are only called once.",
       "revId": "a5c16289dbd87a616609b5a3b22b8a3179618316",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -192,6 +369,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAcn//zOw\u003d",
+        "filename": "vp9/common/arm/neon/vp9_short_idct16x16_add_neon.asm",
+        "patchSetId": 7
+      },
+      "lineNbr": 518,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2013-08-08T21:55:44Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAcn//1TQ\u003d",
+      "revId": "a5c16289dbd87a616609b5a3b22b8a3179618316",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAcn//1SU\u003d",
         "filename": "vp9/common/arm/neon/vp9_short_idct16x16_add_neon.asm",
         "patchSetId": 7
@@ -203,6 +398,24 @@
       "writtenOn": "2013-08-07T22:13:14Z",
       "side": 1,
       "message": "Can you remove these 2 functions and vadd into q0 \u0026 q7 above?",
+      "revId": "a5c16289dbd87a616609b5a3b22b8a3179618316",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcn//yfI\u003d",
+        "filename": "vp9/common/arm/neon/vp9_short_idct16x16_add_neon.asm",
+        "patchSetId": 7
+      },
+      "lineNbr": 527,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2013-08-08T21:55:44Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAcn//1SU\u003d",
       "revId": "a5c16289dbd87a616609b5a3b22b8a3179618316",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -226,6 +439,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAcn//zO0\u003d",
+        "filename": "vp9/common/arm/neon/vp9_short_idct16x16_add_neon.asm",
+        "patchSetId": 7
+      },
+      "lineNbr": 578,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2013-08-08T21:55:44Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAcn//1MA\u003d",
+      "revId": "a5c16289dbd87a616609b5a3b22b8a3179618316",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAcn//1Lw\u003d",
         "filename": "vp9/common/arm/neon/vp9_short_idct16x16_add_neon.asm",
         "patchSetId": 7
@@ -237,6 +468,24 @@
       "writtenOn": "2013-08-07T22:13:14Z",
       "side": 1,
       "message": "stata?",
+      "revId": "a5c16289dbd87a616609b5a3b22b8a3179618316",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcn//zPs\u003d",
+        "filename": "vp9/common/arm/neon/vp9_short_idct16x16_add_neon.asm",
+        "patchSetId": 7
+      },
+      "lineNbr": 712,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2013-08-08T21:55:44Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAcn//1Lw\u003d",
       "revId": "a5c16289dbd87a616609b5a3b22b8a3179618316",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
