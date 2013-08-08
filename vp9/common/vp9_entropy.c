@@ -622,7 +622,6 @@ static void adapt_coef_probs(VP9_COMMON *cm, TX_SIZE tx_size,
   int t, i, j, k, l;
   unsigned int branch_ct[UNCONSTRAINED_NODES][2];
   vp9_prob coef_probs[UNCONSTRAINED_NODES];
-  int entropy_nodes_adapt = UNCONSTRAINED_NODES;
 
   for (i = 0; i < BLOCK_TYPES; ++i)
     for (j = 0; j < REF_TYPES; ++j)
@@ -635,7 +634,7 @@ static void adapt_coef_probs(VP9_COMMON *cm, TX_SIZE tx_size,
                                            0);
           branch_ct[0][1] = eob_branch_count[i][j][k][l] - branch_ct[0][0];
           coef_probs[0] = get_binary_prob(branch_ct[0][0], branch_ct[0][1]);
-          for (t = 0; t < entropy_nodes_adapt; ++t)
+          for (t = 0; t < UNCONSTRAINED_NODES; ++t)
             dst_coef_probs[i][j][k][l][t] = merge_probs(
                 pre_coef_probs[i][j][k][l][t], coef_probs[t],
                 branch_ct[t], count_sat, update_factor);
