@@ -197,7 +197,7 @@ struct macroblockd_plane {
   ENTROPY_CONTEXT *left_context;
 };
 
-#define BLOCK_OFFSET(x, i, n) ((x) + (i) * (n))
+#define BLOCK_OFFSET(x, i) ((x) + (i) * 16)
 
 typedef struct macroblockd {
   struct macroblockd_plane plane[MAX_MB_PLANE];

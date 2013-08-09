@@ -271,7 +271,7 @@ static void decode_block(int plane, int block,
   ENTROPY_CONTEXT *L = pd->left_context + loff;
   const int eob = decode_coefs(&arg->pbi->common, xd, arg->r, block,
                                pd->plane_type, seg_eob,
-                               BLOCK_OFFSET(pd->qcoeff, block, 16),
+                               BLOCK_OFFSET(pd->qcoeff, block),
                                ss_tx_size, pd->dequant, A, L);
 
   if (xd->mb_to_right_edge < 0 || xd->mb_to_bottom_edge < 0) {

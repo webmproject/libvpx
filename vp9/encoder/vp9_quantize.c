@@ -159,14 +159,14 @@ void vp9_regular_quantize_b_4x4(MACROBLOCK *mb, int b_idx, TX_TYPE tx_type,
   const int16_t *scan = get_scan_4x4(tx_type);
   const int16_t *iscan = get_iscan_4x4(tx_type);
 
-  vp9_quantize_b(BLOCK_OFFSET(mb->plane[pb_idx.plane].coeff, pb_idx.block, 16),
+  vp9_quantize_b(BLOCK_OFFSET(mb->plane[pb_idx.plane].coeff, pb_idx.block),
            16, mb->skip_block,
            mb->plane[pb_idx.plane].zbin,
            mb->plane[pb_idx.plane].round,
            mb->plane[pb_idx.plane].quant,
            mb->plane[pb_idx.plane].quant_shift,
-           BLOCK_OFFSET(xd->plane[pb_idx.plane].qcoeff, pb_idx.block, 16),
-           BLOCK_OFFSET(xd->plane[pb_idx.plane].dqcoeff, pb_idx.block, 16),
+           BLOCK_OFFSET(xd->plane[pb_idx.plane].qcoeff, pb_idx.block),
+           BLOCK_OFFSET(xd->plane[pb_idx.plane].dqcoeff, pb_idx.block),
            xd->plane[pb_idx.plane].dequant,
            mb->plane[pb_idx.plane].zbin_extra,
            &xd->plane[pb_idx.plane].eobs[pb_idx.block],
