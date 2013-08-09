@@ -1182,9 +1182,8 @@ static int64_t rd_pick_intra_sub_8x8_y_mode(VP9_COMP * const cpi,
       }
 
       this_rd = rd_pick_intra4x4block(cpi, mb, i, &best_mode, bmode_costs,
-                                      t_above + idx, t_left + idy,
-                                      &r, &ry, &d, bsize,
-                                      best_rd - total_rd);
+                                      t_above + idx, t_left + idy, &r, &ry, &d,
+                                      bsize, best_rd - total_rd);
       if (this_rd >= best_rd - total_rd)
         return INT64_MAX;
 

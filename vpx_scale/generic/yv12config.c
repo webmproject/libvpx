@@ -192,7 +192,7 @@ int vp9_realloc_frame_buffer(YV12_BUFFER_CONFIG *ybf,
     ybf->alpha_buffer = ybf->buffer_alloc + yplane_size + 2 * uvplane_size +
                         (alpha_border_h * alpha_stride) + alpha_border_w;
 #endif
-    ybf->corrupted = 0; /* assume not currupted by errors */
+    ybf->corrupted = 0; /* assume not corrupted by errors */
     return 0;
   }
   return -2;

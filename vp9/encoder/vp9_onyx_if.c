@@ -4026,7 +4026,7 @@ int vp9_set_roimap(VP9_PTR comp, unsigned char *map, unsigned int rows,
   // Activate segmentation.
   vp9_enable_segmentation((VP9_PTR)cpi);
 
-  // Set up the quan, LF and breakout threshold segment data
+  // Set up the quant, LF and breakout threshold segment data
   for (i = 0; i < MAX_SEGMENTS; i++) {
     feature_data[SEG_LVL_ALT_Q][i] = delta_q[i];
     feature_data[SEG_LVL_ALT_LF][i] = delta_lf[i];
@@ -4046,7 +4046,7 @@ int vp9_set_roimap(VP9_PTR comp, unsigned char *map, unsigned int rows,
       vp9_disable_segfeature(seg, i, SEG_LVL_ALT_LF);
   }
 
-  // Initialise the feature data structure
+  // Initialize the feature data structure
   // SEGMENT_DELTADATA    0, SEGMENT_ABSDATA      1
   vp9_set_segment_data((VP9_PTR)cpi, &feature_data[0][0], SEGMENT_DELTADATA);
 
