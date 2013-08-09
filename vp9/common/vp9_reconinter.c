@@ -240,10 +240,8 @@ struct build_inter_predictors_args {
   MACROBLOCKD *xd;
   int x;
   int y;
-  uint8_t* dst[MAX_MB_PLANE];
-  int dst_stride[MAX_MB_PLANE];
-  uint8_t* pre[2][MAX_MB_PLANE];
-  int pre_stride[2][MAX_MB_PLANE];
+  struct buf_2d *dst[MAX_MB_PLANE];
+  struct buf_2d *pre[2][MAX_MB_PLANE];
 };
 static void build_inter_predictors(int plane, int block,
                                    BLOCK_SIZE_TYPE bsize,
@@ -268,14 +266,13 @@ static void build_inter_predictors(int plane, int block,
 
   for (which_mv = 0; which_mv < 1 + use_second_ref; ++which_mv) {
     struct scale_factors *const scale = &xd->scale_factor[which_mv];
+    struct buf_2d *const pre_buf = arg->pre[which_mv][plane];
+    struct buf_2d *const dst_buf = arg->dst[plane];
 
-    // src
-    const int pre_stride = arg->pre_stride[which_mv][plane];
-    const uint8_t *const pre = arg->pre[which_mv][plane] +
-        scaled_buffer_offset(x, y, pre_stride, &xd->scale_factor[which_mv]);
+    const uint8_t *const pre = pre_buf->buf + scaled_buffer_offset(x, y,
+                               pre_buf->stride, scale);
 
-    // dst
-    uint8_t *const dst = arg->dst[plane] + arg->dst_stride[plane] * y + x;
+    uint8_t *const dst = dst_buf->buf + dst_buf->stride * y + x;
 
     // TODO(jkoleszar): All chroma MVs in SPLITMV mode are taken as the
     // same MV (the average of the 4 luma MVs) but we could do something
@@ -295,53 +292,35 @@ static void build_inter_predictors(int plane, int block,
                                                 pd->subsampling_y);
 
     scale->set_scaled_offsets(scale, arg->y + y, arg->x + x);
-    vp9_build_inter_predictor(pre, pre_stride,
-                              dst, arg->dst_stride[plane],
-                              &res_mv, &xd->scale_factor[which_mv],
+    vp9_build_inter_predictor(pre, pre_buf->stride, dst, dst_buf->stride,
+                              &res_mv, scale,
                               4 << pred_w, 4 << pred_h, which_mv,
                               &xd->subpix, MV_PRECISION_Q4);
   }
 }
-void vp9_build_inter_predictors_sby(MACROBLOCKD *xd,
-                                    int mi_row,
-                                    int mi_col,
+void vp9_build_inter_predictors_sby(MACROBLOCKD *xd, int mi_row, int mi_col,
                                     BLOCK_SIZE_TYPE bsize) {
   struct build_inter_predictors_args args = {
     xd, mi_col * MI_SIZE, mi_row * MI_SIZE,
-    {xd->plane[0].dst.buf, NULL, NULL}, {xd->plane[0].dst.stride, 0, 0},
-    {{xd->plane[0].pre[0].buf, NULL, NULL},
-     {xd->plane[0].pre[1].buf, NULL, NULL}},
-    {{xd->plane[0].pre[0].stride, 0, 0}, {xd->plane[0].pre[1].stride, 0, 0}},
+    {&xd->plane[0].dst, NULL, NULL},
+    {{&xd->plane[0].pre[0], NULL, NULL},
+     {&xd->plane[0].pre[1], NULL, NULL}},
   };
 
   foreach_predicted_block_in_plane(xd, bsize, 0, build_inter_predictors, &args);
 }
-void vp9_build_inter_predictors_sbuv(MACROBLOCKD *xd,
-                                     int mi_row,
-                                     int mi_col,
+void vp9_build_inter_predictors_sbuv(MACROBLOCKD *xd, int mi_row, int mi_col,
                                      BLOCK_SIZE_TYPE bsize) {
   struct build_inter_predictors_args args = {
     xd, mi_col * MI_SIZE, mi_row * MI_SIZE,
 #if CONFIG_ALPHA
-    {NULL, xd->plane[1].dst.buf, xd->plane[2].dst.buf,
-     xd->plane[3].dst.buf},
-    {0, xd->plane[1].dst.stride, xd->plane[1].dst.stride,
-     xd->plane[3].dst.stride},
-    {{NULL, xd->plane[1].pre[0].buf, xd->plane[2].pre[0].buf,
-      xd->plane[3].pre[0].buf},
-     {NULL, xd->plane[1].pre[1].buf, xd->plane[2].pre[1].buf,
-      xd->plane[3].pre[1].buf}},
-    {{0, xd->plane[1].pre[0].stride, xd->plane[1].pre[0].stride,
-      xd->plane[3].pre[0].stride},
-     {0, xd->plane[1].pre[1].stride, xd->plane[1].pre[1].stride,
-      xd->plane[3].pre[1].stride}},
+    {NULL, &xd->plane[1].dst, &xd->plane[2].dst, &xd->plane[3].dst},
+    {{NULL, &xd->plane[1].pre[0], &xd->plane[2].pre[0], &xd->plane[3].pre[0]},
+     {NULL, &xd->plane[1].pre[1], &xd->plane[2].pre[1], &xd->plane[3].pre[1]}},
 #else
-    {NULL, xd->plane[1].dst.buf, xd->plane[2].dst.buf},
-    {0, xd->plane[1].dst.stride, xd->plane[1].dst.stride},
-    {{NULL, xd->plane[1].pre[0].buf, xd->plane[2].pre[0].buf},
-     {NULL, xd->plane[1].pre[1].buf, xd->plane[2].pre[1].buf}},
-    {{0, xd->plane[1].pre[0].stride, xd->plane[1].pre[0].stride},
-     {0, xd->plane[1].pre[1].stride, xd->plane[1].pre[1].stride}},
+    {NULL, &xd->plane[1].dst, &xd->plane[2].dst},
+    {{NULL, &xd->plane[1].pre[0], &xd->plane[2].pre[0]},
+     {NULL, &xd->plane[1].pre[1], &xd->plane[2].pre[1]}},
 #endif
   };
   foreach_predicted_block_uv(xd, bsize, build_inter_predictors, &args);
