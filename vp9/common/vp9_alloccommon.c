@@ -58,6 +58,7 @@ void vp9_free_frame_buffers(VP9_COMMON *oci) {
   vpx_free(oci->mip);
   vpx_free(oci->prev_mip);
   vpx_free(oci->above_seg_context);
+  vpx_free(oci->last_frame_seg_map);
 
   vpx_free(oci->above_context[0]);
   for (i = 0; i < MAX_MB_PLANE; i++)
@@ -65,6 +66,7 @@ void vp9_free_frame_buffers(VP9_COMMON *oci) {
   oci->mip = NULL;
   oci->prev_mip = NULL;
   oci->above_seg_context = NULL;
+  oci->last_frame_seg_map = NULL;
 }
 
 static void set_mb_mi(VP9_COMMON *cm, int aligned_width, int aligned_height) {
@@ -157,6 +159,11 @@ int vp9_alloc_frame_buffers(VP9_COMMON *oci, int width, int height) {
   if (!oci->above_seg_context)
     goto fail;
 
+  // Create the segmentation map structure and set to 0.
+  oci->last_frame_seg_map = vpx_calloc(oci->mi_rows * oci->mi_cols, 1);
+  if (!oci->last_frame_seg_map)
+    goto fail;
+
   return 0;
 
  fail:
@@ -198,4 +205,8 @@ void vp9_update_frame_size(VP9_COMMON *cm) {
   for (i = 1; i < MAX_MB_PLANE; i++)
     cm->above_context[i] =
         cm->above_context[0] + i * sizeof(ENTROPY_CONTEXT) * 2 * mi_cols;
+
+  // Initialize the previous frame segment map to 0.
+  if (cm->last_frame_seg_map)
+    vpx_memset(cm->last_frame_seg_map, 0, cm->mi_rows * cm->mi_cols);
 }

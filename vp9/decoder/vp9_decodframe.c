@@ -989,11 +989,6 @@ int vp9_decode_frame(VP9D_COMP *pbi, const uint8_t **p_data_end) {
 
   new_fb->corrupted |= read_compressed_header(pbi, data, first_partition_size);
 
-  // Create the segmentation map structure and set to 0
-  if (!pc->last_frame_seg_map)
-    CHECK_MEM_ERROR(pc, pc->last_frame_seg_map,
-                    vpx_calloc((pc->mi_rows * pc->mi_cols), 1));
-
   setup_block_dptrs(xd, pc->subsampling_x, pc->subsampling_y);
 
   // clear out the coeff buffer

@@ -160,9 +160,6 @@ void vp9_remove_decompressor(VP9D_PTR ptr) {
   if (!pbi)
     return;
 
-  if (pbi->common.last_frame_seg_map)
-    vpx_free(pbi->common.last_frame_seg_map);
-
   vp9_remove_common(&pbi->common);
   vp9_worker_end(&pbi->lf_worker);
   vpx_free(pbi->lf_worker.data1);
