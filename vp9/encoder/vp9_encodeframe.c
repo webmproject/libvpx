@@ -1941,6 +1941,7 @@ static void encode_sb_row(VP9_COMP *cpi, int mi_row, TOKENEXTRA **tp,
             || cpi->is_src_frame_alt_ref) {
           // If required set upper and lower partition size limits
           if (cpi->sf.auto_min_max_partition_size) {
+            set_offsets(cpi, mi_row, mi_col, BLOCK_64X64);
             rd_auto_partition_range(cpi,
                                     &cpi->sf.min_partition_size,
                                     &cpi->sf.max_partition_size);
@@ -1956,6 +1957,7 @@ static void encode_sb_row(VP9_COMP *cpi, int mi_row, TOKENEXTRA **tp,
     } else {
       // If required set upper and lower partition size limits
       if (cpi->sf.auto_min_max_partition_size) {
+        set_offsets(cpi, mi_row, mi_col, BLOCK_64X64);
         rd_auto_partition_range(cpi, &cpi->sf.min_partition_size,
                                 &cpi->sf.max_partition_size);
       }
