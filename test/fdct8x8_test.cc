@@ -148,7 +148,7 @@ TEST_P(FwdTrans8x8Test, SignBiasCheck) {
 TEST_P(FwdTrans8x8Test, RoundTripErrorCheck) {
   ACMRandom rnd(ACMRandom::DeterministicSeed());
   int max_error = 0;
-  double total_error = 0;
+  int total_error = 0;
   const int count_test_block = 100000;
   for (int i = 0; i < count_test_block; ++i) {
     DECLARE_ALIGNED_ARRAY(16, int16_t, test_input_block, 64);
@@ -199,7 +199,7 @@ TEST_P(FwdTrans8x8Test, RoundTripErrorCheck) {
 TEST_P(FwdTrans8x8Test, ExtremalCheck) {
   ACMRandom rnd(ACMRandom::DeterministicSeed());
   int max_error = 0;
-  double total_error = 0;
+  int total_error = 0;
   const int count_test_block = 100000;
   for (int i = 0; i < count_test_block; ++i) {
     DECLARE_ALIGNED_ARRAY(16, int16_t, test_input_block, 64);
