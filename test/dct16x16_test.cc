@@ -320,7 +320,7 @@ class FwdTrans16x16Test : public ::testing::TestWithParam<int> {
 TEST_P(FwdTrans16x16Test, AccuracyCheck) {
   ACMRandom rnd(ACMRandom::DeterministicSeed());
   int max_error = 0;
-  double total_error = 0;
+  int total_error = 0;
   const int count_test_block = 10000;
   for (int i = 0; i < count_test_block; ++i) {
     DECLARE_ALIGNED_ARRAY(16, int16_t, test_input_block, 256);
