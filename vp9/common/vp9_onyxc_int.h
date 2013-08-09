@@ -176,6 +176,8 @@ typedef struct VP9Common {
 
   int ref_frame_sign_bias[MAX_REF_FRAMES];    /* Two state 0, 1 */
 
+  struct loopfilter lf;
+
   /* Y,U,V */
   ENTROPY_CONTEXT *above_context[MAX_MB_PLANE];
   ENTROPY_CONTEXT left_context[MAX_MB_PLANE][16];

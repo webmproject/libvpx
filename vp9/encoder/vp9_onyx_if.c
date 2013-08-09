@@ -239,7 +239,7 @@ void vp9_initialize_enc() {
 
 static void setup_features(VP9_COMP *cpi) {
   MACROBLOCKD *xd = &cpi->mb.e_mbd;
-  struct loopfilter *const lf = &xd->lf;
+  struct loopfilter *const lf = &cpi->common.lf;
   struct segmentation *const seg = &xd->seg;
 
   // Set up default state for MB feature flags
@@ -543,7 +543,7 @@ static void update_reference_segmentation_map(VP9_COMP *cpi) {
 }
 
 static void set_default_lf_deltas(VP9_COMP *cpi) {
-  struct loopfilter *lf = &cpi->mb.e_mbd.lf;
+  struct loopfilter *lf = &cpi->common.lf;
 
   lf->mode_ref_delta_enabled = 1;
   lf->mode_ref_delta_update = 1;
@@ -1305,7 +1305,7 @@ void vp9_change_config(VP9_PTR ptr, VP9_CONFIG *oxcf) {
   // VP8 sharpness level mapping 0-7 (vs 0-10 in general VPx dialogs)
   cpi->oxcf.Sharpness = MIN(7, cpi->oxcf.Sharpness);
 
-  cpi->mb.e_mbd.lf.sharpness_level = cpi->oxcf.Sharpness;
+  cpi->common.lf.sharpness_level = cpi->oxcf.Sharpness;
 
   if (cpi->initial_width) {
     // Increasing the size of the frame beyond the first seen frame, or some
@@ -1705,7 +1705,7 @@ VP9_PTR vp9_create_compressor(VP9_CONFIG *oxcf) {
    */
   vp9_init_quantizer(cpi);
 
-  vp9_loop_filter_init(cm, &cpi->mb.e_mbd.lf);
+  vp9_loop_filter_init(cm, &cpi->common.lf);
 
   cpi->common.error.setjmp = 0;
 
@@ -2426,7 +2426,7 @@ static void update_reference_frames(VP9_COMP * const cpi) {
 
 static void loopfilter_frame(VP9_COMP *cpi, VP9_COMMON *cm) {
   MACROBLOCKD *xd = &cpi->mb.e_mbd;
-  struct loopfilter *lf = &xd->lf;
+  struct loopfilter *lf = &cm->lf;
   if (xd->lossless) {
       lf->filter_level = 0;
   } else {
@@ -2605,7 +2605,7 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
   }
 
   // Set default state for segment based loop filter update flags
-  xd->lf.mode_ref_delta_update = 0;
+  cm->lf.mode_ref_delta_update = 0;
 
   // Initialize cpi->mv_step_param to default based on max resolution
   cpi->mv_step_param = vp9_init_search_range(cpi, max_mv_def);
@@ -3477,7 +3477,7 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
   // Clear the one shot update flags for segmentation map and mode/ref loop filter deltas.
   xd->seg.update_map = 0;
   xd->seg.update_data = 0;
-  xd->lf.mode_ref_delta_update = 0;
+  cm->lf.mode_ref_delta_update = 0;
 
   // keep track of the last coded dimensions
   cm->last_width = cm->width;
@@ -3584,7 +3584,7 @@ static int frame_is_reference(const VP9_COMP *cpi) {
          cpi->refresh_golden_frame ||
          cpi->refresh_alt_ref_frame ||
          cm->refresh_frame_context ||
-         mb->lf.mode_ref_delta_update ||
+         cm->lf.mode_ref_delta_update ||
          mb->seg.update_map ||
          mb->seg.update_data;
 }
@@ -3990,7 +3990,7 @@ int vp9_get_preview_raw_frame(VP9_PTR comp, YV12_BUFFER_CONFIG *dest,
   else {
     int ret;
 #if CONFIG_POSTPROC
-    ret = vp9_post_proc_frame(&cpi->common, &cpi->mb.e_mbd.lf, dest, flags);
+    ret = vp9_post_proc_frame(&cpi->common, &cpi->common.lf, dest, flags);
 #else
 
     if (cpi->common.frame_to_show) {

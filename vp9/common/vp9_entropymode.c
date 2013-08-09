@@ -473,7 +473,7 @@ static void set_default_lf_deltas(struct loopfilter *lf) {
 void vp9_setup_past_independence(VP9_COMMON *cm, MACROBLOCKD *xd) {
   // Reset the segment feature data to the default stats:
   // Features disabled, 0, with delta coding (Default state).
-  struct loopfilter *const lf = &xd->lf;
+  struct loopfilter *const lf = &cm->lf;
 
   int i;
   vp9_clearall_segfeatures(&xd->seg);

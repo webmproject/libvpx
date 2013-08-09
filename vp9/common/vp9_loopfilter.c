@@ -85,7 +85,7 @@ void vp9_loop_filter_frame_init(VP9_COMMON *const cm, MACROBLOCKD *const xd,
   // 2 when filter_lvl is between 32 and 63
   const int n_shift = default_filt_lvl >> 5;
   loop_filter_info_n *const lfi = &cm->lf_info;
-  struct loopfilter *const lf = &xd->lf;
+  struct loopfilter *const lf = &cm->lf;
   struct segmentation *const seg = &xd->seg;
 
   // update limits if sharpness has changed

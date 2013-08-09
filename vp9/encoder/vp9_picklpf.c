@@ -127,7 +127,7 @@ void vp9_set_alt_lf_level(VP9_COMP *cpi, int filt_val) {
 
 void vp9_pick_filter_level(YV12_BUFFER_CONFIG *sd, VP9_COMP *cpi, int partial) {
   VP9_COMMON *cm = &cpi->common;
-  struct loopfilter *lf = &cpi->mb.e_mbd.lf;
+  struct loopfilter *lf = &cpi->common.lf;
 
   int best_err = 0;
   int filt_err = 0;
