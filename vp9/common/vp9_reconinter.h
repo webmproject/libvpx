@@ -33,10 +33,6 @@ void vp9_setup_interp_filters(MACROBLOCKD *xd,
                               INTERPOLATIONFILTERTYPE filter,
                               VP9_COMMON *cm);
 
-void vp9_setup_scale_factors_for_frame(struct scale_factors *scale,
-                                       int other_w, int other_h,
-                                       int this_w, int this_h);
-
 void vp9_build_inter_predictor(const uint8_t *src, int src_stride,
                                uint8_t *dst, int dst_stride,
                                const MV *mv_q3,

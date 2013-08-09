@@ -19,9 +19,9 @@
 
 #include "vp9/common/vp9_common.h"
 #include "vp9/common/vp9_common_data.h"
-#include "vp9/common/vp9_convolve.h"
 #include "vp9/common/vp9_enums.h"
 #include "vp9/common/vp9_mv.h"
+#include "vp9/common/vp9_scale.h"
 #include "vp9/common/vp9_seg_common.h"
 #include "vp9/common/vp9_treecoder.h"
 
@@ -171,24 +171,6 @@ enum mv_precision {
   MV_PRECISION_Q4
 };
 
-#define VP9_REF_SCALE_SHIFT 14
-#define VP9_REF_NO_SCALE (1 << VP9_REF_SCALE_SHIFT)
-
-struct scale_factors {
-  int x_scale_fp;   // horizontal fixed point scale factor
-  int y_scale_fp;   // vertical fixed point scale factor
-  int x_offset_q4;
-  int x_step_q4;
-  int y_offset_q4;
-  int y_step_q4;
-
-  int (*scale_value_x)(int val, const struct scale_factors *scale);
-  int (*scale_value_y)(int val, const struct scale_factors *scale);
-  void (*set_scaled_offsets)(struct scale_factors *scale, int row, int col);
-  MV32 (*scale_mv)(const MV *mv, const struct scale_factors *scale);
-
-  convolve_fn_t predict[2][2][2];  // horiz, vert, avg
-};
 
 #if CONFIG_ALPHA
 enum { MAX_MB_PLANE = 4 };

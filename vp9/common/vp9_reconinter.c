@@ -10,140 +10,16 @@
 
 #include <assert.h>
 
+#include "./vpx_scale_rtcd.h"
 #include "./vpx_config.h"
+
 #include "vpx/vpx_integer.h"
+
 #include "vp9/common/vp9_blockd.h"
 #include "vp9/common/vp9_filter.h"
 #include "vp9/common/vp9_reconinter.h"
 #include "vp9/common/vp9_reconintra.h"
-#include "./vpx_scale_rtcd.h"
 
-static int scale_value_x_with_scaling(int val,
-                                      const struct scale_factors *scale) {
-  return (val * scale->x_scale_fp >> VP9_REF_SCALE_SHIFT);
-}
-
-static int scale_value_y_with_scaling(int val,
-                                      const struct scale_factors *scale) {
-  return (val * scale->y_scale_fp >> VP9_REF_SCALE_SHIFT);
-}
-
-static int unscaled_value(int val, const struct scale_factors *scale) {
-  (void) scale;
-  return val;
-}
-
-static MV32 mv_with_scaling(const MV *mv,
-                               const struct scale_factors *scale) {
-  const MV32 res = {
-    (mv->row * scale->y_scale_fp >> VP9_REF_SCALE_SHIFT) + scale->y_offset_q4,
-    (mv->col * scale->x_scale_fp >> VP9_REF_SCALE_SHIFT) + scale->x_offset_q4
-  };
-  return res;
-}
-
-static MV32 mv_without_scaling(const MV *mv,
-                               const struct scale_factors *scale) {
-  const MV32 res = {
-    mv->row,
-    mv->col
-  };
-  return res;
-}
-
-static void set_offsets_with_scaling(struct scale_factors *scale,
-                                     int row, int col) {
-  const int x_q4 = 16 * col;
-  const int y_q4 = 16 * row;
-
-  scale->x_offset_q4 = (x_q4 * scale->x_scale_fp >> VP9_REF_SCALE_SHIFT) & 0xf;
-  scale->y_offset_q4 = (y_q4 * scale->y_scale_fp >> VP9_REF_SCALE_SHIFT) & 0xf;
-}
-
-static void set_offsets_without_scaling(struct scale_factors *scale,
-                                        int row, int col) {
-  scale->x_offset_q4 = 0;
-  scale->y_offset_q4 = 0;
-}
-
-static int get_fixed_point_scale_factor(int other_size, int this_size) {
-  // Calculate scaling factor once for each reference frame
-  // and use fixed point scaling factors in decoding and encoding routines.
-  // Hardware implementations can calculate scale factor in device driver
-  // and use multiplication and shifting on hardware instead of division.
-  return (other_size << VP9_REF_SCALE_SHIFT) / this_size;
-}
-
-void vp9_setup_scale_factors_for_frame(struct scale_factors *scale,
-                                       int other_w, int other_h,
-                                       int this_w, int this_h) {
-  scale->x_scale_fp = get_fixed_point_scale_factor(other_w, this_w);
-  scale->x_offset_q4 = 0;  // calculated per-mb
-  scale->x_step_q4 = (16 * scale->x_scale_fp >> VP9_REF_SCALE_SHIFT);
-
-  scale->y_scale_fp = get_fixed_point_scale_factor(other_h, this_h);
-  scale->y_offset_q4 = 0;  // calculated per-mb
-  scale->y_step_q4 = (16 * scale->y_scale_fp >> VP9_REF_SCALE_SHIFT);
-
-  if ((other_w == this_w) && (other_h == this_h)) {
-    scale->scale_value_x = unscaled_value;
-    scale->scale_value_y = unscaled_value;
-    scale->set_scaled_offsets = set_offsets_without_scaling;
-    scale->scale_mv = mv_without_scaling;
-  } else {
-    scale->scale_value_x = scale_value_x_with_scaling;
-    scale->scale_value_y = scale_value_y_with_scaling;
-    scale->set_scaled_offsets = set_offsets_with_scaling;
-    scale->scale_mv = mv_with_scaling;
-  }
-
-  // TODO(agrange): Investigate the best choice of functions to use here
-  // for EIGHTTAP_SMOOTH. Since it is not interpolating, need to choose what
-  // to do at full-pel offsets. The current selection, where the filter is
-  // applied in one direction only, and not at all for 0,0, seems to give the
-  // best quality, but it may be worth trying an additional mode that does
-  // do the filtering on full-pel.
-  if (scale->x_step_q4 == 16) {
-    if (scale->y_step_q4 == 16) {
-      // No scaling in either direction.
-      scale->predict[0][0][0] = vp9_convolve_copy;
-      scale->predict[0][0][1] = vp9_convolve_avg;
-      scale->predict[0][1][0] = vp9_convolve8_vert;
-      scale->predict[0][1][1] = vp9_convolve8_avg_vert;
-      scale->predict[1][0][0] = vp9_convolve8_horiz;
-      scale->predict[1][0][1] = vp9_convolve8_avg_horiz;
-    } else {
-      // No scaling in x direction. Must always scale in the y direction.
-      scale->predict[0][0][0] = vp9_convolve8_vert;
-      scale->predict[0][0][1] = vp9_convolve8_avg_vert;
-      scale->predict[0][1][0] = vp9_convolve8_vert;
-      scale->predict[0][1][1] = vp9_convolve8_avg_vert;
-      scale->predict[1][0][0] = vp9_convolve8;
-      scale->predict[1][0][1] = vp9_convolve8_avg;
-    }
-  } else {
-    if (scale->y_step_q4 == 16) {
-      // No scaling in the y direction. Must always scale in the x direction.
-      scale->predict[0][0][0] = vp9_convolve8_horiz;
-      scale->predict[0][0][1] = vp9_convolve8_avg_horiz;
-      scale->predict[0][1][0] = vp9_convolve8;
-      scale->predict[0][1][1] = vp9_convolve8_avg;
-      scale->predict[1][0][0] = vp9_convolve8_horiz;
-      scale->predict[1][0][1] = vp9_convolve8_avg_horiz;
-    } else {
-      // Must always scale in both directions.
-      scale->predict[0][0][0] = vp9_convolve8;
-      scale->predict[0][0][1] = vp9_convolve8_avg;
-      scale->predict[0][1][0] = vp9_convolve8;
-      scale->predict[0][1][1] = vp9_convolve8_avg;
-      scale->predict[1][0][0] = vp9_convolve8;
-      scale->predict[1][0][1] = vp9_convolve8_avg;
-    }
-  }
-  // 2D subpel motion always gets filtered in both directions
-  scale->predict[1][1][0] = vp9_convolve8;
-  scale->predict[1][1][1] = vp9_convolve8_avg;
-}
 
 void vp9_setup_interp_filters(MACROBLOCKD *xd,
                               INTERPOLATIONFILTERTYPE mcomp_filter_type,
