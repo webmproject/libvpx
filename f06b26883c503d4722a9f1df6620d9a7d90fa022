@@ -50,6 +50,24 @@
       "revId": "f06b26883c503d4722a9f1df6620d9a7d90fa022",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcn//wQg\u003d",
+        "filename": "vp9/common/vp9_alloccommon.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 212,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2013-08-09T23:55:39Z",
+      "side": 1,
+      "message": "thought seg_map was still assigned per 16x16, and hence using cm-\u003emb_rows, cm-\u003emb_cols.\n\nI am guessing this place is correct, but everywhere else should use mb_rows and mb_cols (?)",
+      "parentUuid": "AAAAcn//wRE\u003d",
+      "revId": "f06b26883c503d4722a9f1df6620d9a7d90fa022",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
