@@ -1342,7 +1342,7 @@ static void write_uncompressed_header(VP9_COMP *cpi,
 
   vp9_wb_write_literal(wb, cm->frame_context_idx, NUM_FRAME_CONTEXTS_LOG2);
 
-  encode_loopfilter(&xd->lf, wb);
+  encode_loopfilter(&cm->lf, wb);
   encode_quantization(cm, wb);
   encode_segmentation(cpi, wb);
 

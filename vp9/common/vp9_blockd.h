@@ -217,27 +217,6 @@ struct macroblockd_plane {
 
 #define BLOCK_OFFSET(x, i, n) ((x) + (i) * (n))
 
-#define MAX_REF_LF_DELTAS       4
-#define MAX_MODE_LF_DELTAS      2
-
-struct loopfilter {
-  int filter_level;
-
-  int sharpness_level;
-  int last_sharpness_level;
-
-  uint8_t mode_ref_delta_enabled;
-  uint8_t mode_ref_delta_update;
-
-  // 0 = Intra, Last, GF, ARF
-  signed char ref_deltas[MAX_REF_LF_DELTAS];
-  signed char last_ref_deltas[MAX_REF_LF_DELTAS];
-
-  // 0 = ZERO_MV, MV
-  signed char mode_deltas[MAX_MODE_LF_DELTAS];
-  signed char last_mode_deltas[MAX_MODE_LF_DELTAS];
-};
-
 typedef struct macroblockd {
   struct macroblockd_plane plane[MAX_MB_PLANE];
 
@@ -252,7 +231,6 @@ typedef struct macroblockd {
   int right_available;
 
   struct segmentation seg;
-  struct loopfilter lf;
 
   // partition contexts
   PARTITION_CONTEXT *above_seg_context;

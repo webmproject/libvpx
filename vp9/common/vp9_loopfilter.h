@@ -22,6 +22,27 @@
 
 #define SIMD_WIDTH 16
 
+#define MAX_REF_LF_DELTAS       4
+#define MAX_MODE_LF_DELTAS      2
+
+struct loopfilter {
+  int filter_level;
+
+  int sharpness_level;
+  int last_sharpness_level;
+
+  uint8_t mode_ref_delta_enabled;
+  uint8_t mode_ref_delta_update;
+
+  // 0 = Intra, Last, GF, ARF
+  signed char ref_deltas[MAX_REF_LF_DELTAS];
+  signed char last_ref_deltas[MAX_REF_LF_DELTAS];
+
+  // 0 = ZERO_MV, MV
+  signed char mode_deltas[MAX_MODE_LF_DELTAS];
+  signed char last_mode_deltas[MAX_MODE_LF_DELTAS];
+};
+
 // Need to align this structure so when it is declared and
 // passed it can be loaded into vector registers.
 typedef struct {

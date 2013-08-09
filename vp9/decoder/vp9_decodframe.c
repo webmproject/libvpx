@@ -599,7 +599,7 @@ static void decode_tile(VP9D_COMP *pbi, vp9_reader *r) {
       lf_data->xd = pbi->mb;
       lf_data->y_only = 0;
     }
-    vp9_loop_filter_frame_init(pc, &pbi->mb, pbi->mb.lf.filter_level);
+    vp9_loop_filter_frame_init(pc, &pbi->mb, pc->lf.filter_level);
   }
 
   for (mi_row = pc->cur_tile_mi_row_start; mi_row < pc->cur_tile_mi_row_end;
@@ -813,7 +813,7 @@ static size_t read_uncompressed_header(VP9D_COMP *pbi,
     int frame_to_show = cm->ref_frame_map[vp9_rb_read_literal(rb, 3)];
     ref_cnt_fb(cm->fb_idx_ref_cnt, &cm->new_fb_idx, frame_to_show);
     pbi->refresh_frame_flags = 0;
-    xd->lf.filter_level = 0;
+    cm->lf.filter_level = 0;
     return 0;
   }
 
@@ -897,7 +897,7 @@ static size_t read_uncompressed_header(VP9D_COMP *pbi,
   if (cm->frame_type == KEY_FRAME || cm->error_resilient_mode || cm->intra_only)
     vp9_setup_past_independence(cm, xd);
 
-  setup_loopfilter(&xd->lf, rb);
+  setup_loopfilter(&cm->lf, rb);
   setup_quantization(pbi, rb);
   setup_segmentation(&xd->seg, rb);
 
@@ -961,7 +961,7 @@ int vp9_decode_frame(VP9D_COMP *pbi, const uint8_t **p_data_end) {
   xd->corrupted = 0;
   new_fb->corrupted = 0;
   pbi->do_loopfilter_inline =
-      (pc->log2_tile_rows | pc->log2_tile_cols) == 0 && pbi->mb.lf.filter_level;
+      (pc->log2_tile_rows | pc->log2_tile_cols) == 0 && pc->lf.filter_level;
 
   if (!pbi->decoded_key_frame && !keyframe)
     return -1;
