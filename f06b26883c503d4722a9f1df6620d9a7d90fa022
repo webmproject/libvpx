@@ -68,6 +68,24 @@
       "revId": "f06b26883c503d4722a9f1df6620d9a7d90fa022",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcn//wMI\u003d",
+        "filename": "vp9/common/vp9_alloccommon.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 212,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2013-08-10T00:35:07Z",
+      "side": 1,
+      "message": "We are going to remove mb_rows, mb_cols, and MBs. Please don\u0027t use them anymore, use mi_rows and mi_cols instead.",
+      "parentUuid": "AAAAcn//wQg\u003d",
+      "revId": "f06b26883c503d4722a9f1df6620d9a7d90fa022",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
