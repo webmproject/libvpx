@@ -102,7 +102,7 @@ const MODE_DEFINITION vp9_mode_order[MAX_MODES] = {
 // certain modes are assumed to be based on 8x8 blocks.
 // This table is used to correct for blocks size.
 // The factors here are << 2 (2 = x0.5, 32 = x8 etc).
-static int rd_thresh_block_size_factor[BLOCK_SIZE_TYPES] =
+static int rd_thresh_block_size_factor[BLOCK_SIZES] =
   {2, 3, 3, 4, 6, 6, 8, 12, 12, 16, 24, 24, 32};
 
 #define BASE_RD_THRESH_FREQ_FACT 16
@@ -199,7 +199,7 @@ void vp9_initialize_rd_consts(VP9_COMP *cpi, int qindex) {
     cpi->RDDIV = 1;
     cpi->RDMULT /= 100;
 
-    for (bsize = 0; bsize < BLOCK_SIZE_TYPES; ++bsize) {
+    for (bsize = 0; bsize < BLOCK_SIZES; ++bsize) {
       for (i = 0; i < MAX_MODES; ++i) {
         // Threshold here seem unecessarily harsh but fine given actual
         // range of values used for cpi->sf.thresh_mult[]
@@ -224,7 +224,7 @@ void vp9_initialize_rd_consts(VP9_COMP *cpi, int qindex) {
   } else {
     cpi->RDDIV = 100;
 
-    for (bsize = 0; bsize < BLOCK_SIZE_TYPES; ++bsize) {
+    for (bsize = 0; bsize < BLOCK_SIZES; ++bsize) {
       for (i = 0; i < MAX_MODES; i++) {
         // Threshold here seem unecessarily harsh but fine given actual
         // range of values used for cpi->sf.thresh_mult[]
@@ -3506,7 +3506,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
       // Disable intra modes other than DC_PRED for blocks with low variance
       // Threshold for intra skipping based on source variance
       // TODO(debargha): Specialize the threshold for super block sizes
-      static const int skip_intra_var_thresh[BLOCK_SIZE_TYPES] = {
+      static const int skip_intra_var_thresh[BLOCK_SIZES] = {
         64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64,
       };
       if ((cpi->sf.mode_search_skip_flags & FLAG_SKIP_INTRA_LOWVAR) &&

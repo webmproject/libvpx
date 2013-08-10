@@ -39,7 +39,7 @@ TEST_P(VP9SubtractBlockTest, SimpleSubtract) {
   ACMRandom rnd(ACMRandom::DeterministicSeed());
 
   // FIXME(rbultje) split in its own file
-  for (BLOCK_SIZE_TYPE bsize = BLOCK_4X4; bsize < BLOCK_SIZE_TYPES;
+  for (BLOCK_SIZE_TYPE bsize = BLOCK_4X4; bsize < BLOCK_SIZES;
        bsize = static_cast<BLOCK_SIZE_TYPE>(static_cast<int>(bsize) + 1)) {
     const int block_width  = 4 << b_width_log2(bsize);
     const int block_height = 4 << b_height_log2(bsize);

@@ -772,7 +772,7 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
       sf->use_avoid_tested_higherror = 1;
       sf->adaptive_rd_thresh = 1;
       if (speed == 1) {
-        sf->comp_inter_joint_search_thresh = BLOCK_SIZE_TYPES;
+        sf->comp_inter_joint_search_thresh = BLOCK_SIZES;
         sf->less_rectangular_check  = 1;
         sf->tx_size_search_method = ((cpi->common.frame_type == KEY_FRAME ||
                                       cpi->common.intra_only ||
@@ -804,7 +804,7 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
         sf->adjust_thresholds_by_speed = 1;
         sf->less_rectangular_check  = 1;
         sf->use_square_partition_only = 1;
-        sf->comp_inter_joint_search_thresh = BLOCK_SIZE_TYPES;
+        sf->comp_inter_joint_search_thresh = BLOCK_SIZES;
         sf->use_lastframe_partitioning = 1;
         sf->adjust_partitioning_from_last_frame = 1;
         sf->last_partitioning_redo_frequency = 3;
@@ -834,7 +834,7 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
         sf->use_fast_lpf_pick = 1;
       }
       if (speed == 3) {
-        sf->comp_inter_joint_search_thresh = BLOCK_SIZE_TYPES;
+        sf->comp_inter_joint_search_thresh = BLOCK_SIZES;
         sf->partition_by_variance = 1;
         sf->tx_size_search_method = ((cpi->common.frame_type == KEY_FRAME ||
                                       cpi->common.intra_only ||
@@ -856,7 +856,7 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
         sf->subpel_iters_per_step = 1;
       }
       if (speed == 4) {
-        sf->comp_inter_joint_search_thresh = BLOCK_SIZE_TYPES;
+        sf->comp_inter_joint_search_thresh = BLOCK_SIZES;
         sf->use_one_partition_size_always = 1;
         sf->always_this_block_size = BLOCK_16X16;
         sf->tx_size_search_method = ((cpi->common.frame_type == KEY_FRAME ||

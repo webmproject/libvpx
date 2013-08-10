@@ -374,9 +374,9 @@ typedef struct VP9_COMP {
   int set_ref_frame_mask;
 
   int rd_thresh_mult[MAX_MODES];
-  int rd_baseline_thresh[BLOCK_SIZE_TYPES][MAX_MODES];
-  int rd_threshes[BLOCK_SIZE_TYPES][MAX_MODES];
-  int rd_thresh_freq_fact[BLOCK_SIZE_TYPES][MAX_MODES];
+  int rd_baseline_thresh[BLOCK_SIZES][MAX_MODES];
+  int rd_threshes[BLOCK_SIZES][MAX_MODES];
+  int rd_thresh_freq_fact[BLOCK_SIZES][MAX_MODES];
 
   int64_t rd_comp_pred_diff[NB_PREDICTION_TYPES];
   // FIXME(rbultje) int64_t?
@@ -540,7 +540,7 @@ typedef struct VP9_COMP {
   vp9_full_search_fn_t full_search_sad;
   vp9_refining_search_fn_t refining_search_sad;
   vp9_diamond_search_fn_t diamond_search_sad;
-  vp9_variance_fn_ptr_t fn_ptr[BLOCK_SIZE_TYPES];
+  vp9_variance_fn_ptr_t fn_ptr[BLOCK_SIZES];
   uint64_t time_receive_data;
   uint64_t time_compress_data;
   uint64_t time_pick_lpf;

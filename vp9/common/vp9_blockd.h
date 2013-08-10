@@ -313,8 +313,8 @@ static INLINE int partition_plane_context(MACROBLOCKD *xd,
 
 static BLOCK_SIZE_TYPE get_subsize(BLOCK_SIZE_TYPE bsize,
                                    PARTITION_TYPE partition) {
-  BLOCK_SIZE_TYPE subsize = subsize_lookup[partition][bsize];
-  assert(subsize != BLOCK_SIZE_TYPES);
+  const BLOCK_SIZE_TYPE subsize = subsize_lookup[partition][bsize];
+  assert(subsize < BLOCK_SIZES);
   return subsize;
 }
 
@@ -396,7 +396,7 @@ static BLOCK_SIZE_TYPE get_plane_block_size(BLOCK_SIZE_TYPE bsize,
                                             struct macroblockd_plane *pd) {
   BLOCK_SIZE_TYPE bs = ss_size_lookup[bsize]
                                      [pd->subsampling_x][pd->subsampling_y];
-  assert(bs < BLOCK_SIZE_TYPES);
+  assert(bs < BLOCK_SIZES);
   return bs;
 }
 

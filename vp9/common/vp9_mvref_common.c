@@ -70,7 +70,7 @@ static const int counter_to_context[19] = {
   BOTH_INTRA  // 18
 };
 
-static const MV mv_ref_blocks[BLOCK_SIZE_TYPES][MVREF_NEIGHBOURS] = {
+static const MV mv_ref_blocks[BLOCK_SIZES][MVREF_NEIGHBOURS] = {
   // 4X4
   {{-1, 0}, {0, -1}, {-1, -1}, {-2, 0}, {0, -2}, {-2, -1}, {-1, -2}, {-2, -2}},
   // 4X8
