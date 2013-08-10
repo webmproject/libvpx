@@ -91,7 +91,7 @@ static void decode_block(int plane, int block, BLOCK_SIZE_TYPE bsize,
                          int ss_txfrm_size, void *arg) {
   MACROBLOCKD* const xd = arg;
   struct macroblockd_plane *pd = &xd->plane[plane];
-  int16_t* const qcoeff = BLOCK_OFFSET(pd->qcoeff, block, 16);
+  int16_t* const qcoeff = BLOCK_OFFSET(pd->qcoeff, block);
   const int stride = pd->dst.stride;
   const int eob = pd->eobs[block];
   const int raster_block = txfrm_block_to_raster_block(xd, bsize, plane,

@@ -135,7 +135,7 @@ static void tokenize_b(int plane, int block, BLOCK_SIZE_TYPE bsize,
   TOKENEXTRA *t = *tp;        /* store tokens starting here */
   const int eob = xd->plane[plane].eobs[block];
   const PLANE_TYPE type = xd->plane[plane].plane_type;
-  const int16_t *qcoeff_ptr = BLOCK_OFFSET(xd->plane[plane].qcoeff, block, 16);
+  const int16_t *qcoeff_ptr = BLOCK_OFFSET(xd->plane[plane].qcoeff, block);
   const int bwl = b_width_log2(bsize);
   const int off = block >> (2 * tx_size);
   const int mod = bwl - tx_size - xd->plane[plane].subsampling_x;

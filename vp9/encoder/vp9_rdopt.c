@@ -495,7 +495,7 @@ static INLINE int cost_coeffs(MACROBLOCK *mb,
   int pt, c, cost;
   const int16_t *band_count = &band_counts[tx_size][1];
   const int eob = xd->plane[plane].eobs[block];
-  const int16_t *qcoeff_ptr = BLOCK_OFFSET(xd->plane[plane].qcoeff, block, 16);
+  const int16_t *qcoeff_ptr = BLOCK_OFFSET(xd->plane[plane].qcoeff, block);
   const int ref = mbmi->ref_frame[0] != INTRA_FRAME;
   unsigned int (*token_costs)[2][PREV_COEF_CONTEXTS]
                     [MAX_ENTROPY_TOKENS] = mb->token_costs[tx_size][type][ref];
@@ -581,8 +581,8 @@ static void dist_block(int plane, int block, BLOCK_SIZE_TYPE bsize,
   struct macroblockd_plane *const pd = &xd->plane[0];
   int64_t this_sse;
   int shift = args->tx_size == TX_32X32 ? 0 : 2;
-  int16_t *const coeff = BLOCK_OFFSET(p->coeff, block, 16);
-  int16_t *const dqcoeff = BLOCK_OFFSET(pd->dqcoeff, block, 16);
+  int16_t *const coeff = BLOCK_OFFSET(p->coeff, block);
+  int16_t *const dqcoeff = BLOCK_OFFSET(pd->dqcoeff, block);
   args->dist += vp9_block_error(coeff, dqcoeff, 16 << ss_txfrm_size,
                                 &this_sse) >> shift;
   args->sse += this_sse >> shift;
@@ -1188,7 +1188,7 @@ static int64_t rd_pick_intra4x4block(VP9_COMP *cpi, MACROBLOCK *x, int ib,
         xd->mode_info_context->bmi[block].as_mode = mode;
         src_diff = raster_block_offset_int16(xd, BLOCK_8X8, 0, block,
                                              p->src_diff);
-        coeff = BLOCK_OFFSET(x->plane[0].coeff, block, 16);
+        coeff = BLOCK_OFFSET(x->plane[0].coeff, block);
         vp9_predict_intra_block(xd, block, 1,
                                 TX_4X4, mode,
                                 x->skip_encode ? src : dst,
@@ -1211,17 +1211,16 @@ static int64_t rd_pick_intra4x4block(VP9_COMP *cpi, MACROBLOCK *x, int ib,
         ratey += cost_coeffs(x, 0, block, PLANE_TYPE_Y_WITH_DC,
                              tempa + idx, templ + idy, TX_4X4, scan,
                              vp9_get_coef_neighbors_handle(scan));
-        distortion += vp9_block_error(coeff, BLOCK_OFFSET(pd->dqcoeff,
-                                                          block, 16),
+        distortion += vp9_block_error(coeff, BLOCK_OFFSET(pd->dqcoeff, block),
                                       16, &ssz) >> 2;
         if (RDCOST(x->rdmult, x->rddiv, ratey, distortion) >= best_rd)
           goto next;
 
         if (tx_type != DCT_DCT)
-          vp9_short_iht4x4_add(BLOCK_OFFSET(pd->dqcoeff, block, 16),
+          vp9_short_iht4x4_add(BLOCK_OFFSET(pd->dqcoeff, block),
                                dst, pd->dst.stride, tx_type);
         else
-          xd->inv_txm4x4_add(BLOCK_OFFSET(pd->dqcoeff, block, 16),
+          xd->inv_txm4x4_add(BLOCK_OFFSET(pd->dqcoeff, block),
                              dst, pd->dst.stride);
       }
     }
@@ -1628,7 +1627,7 @@ static int64_t encode_inter_mb_segment(VP9_COMP *cpi,
                                                  src_stride);
   int16_t* src_diff = raster_block_offset_int16(xd, BLOCK_8X8, 0, i,
                                                 x->plane[0].src_diff);
-  int16_t* coeff = BLOCK_OFFSET(x->plane[0].coeff, 16, i);
+  int16_t* coeff = BLOCK_OFFSET(x->plane[0].coeff, i);
   uint8_t* const pre = raster_block_offset_uint8(xd, BLOCK_8X8, 0, i,
                                                  pd->pre[0].buf,
                                                  pd->pre[0].stride);
@@ -1666,10 +1665,10 @@ static int64_t encode_inter_mb_segment(VP9_COMP *cpi,
       k += (idy * 2 + idx);
       src_diff = raster_block_offset_int16(xd, BLOCK_8X8, 0, k,
                                            x->plane[0].src_diff);
-      coeff = BLOCK_OFFSET(x->plane[0].coeff, 16, k);
+      coeff = BLOCK_OFFSET(x->plane[0].coeff, k);
       x->fwd_txm4x4(src_diff, coeff, 16);
       x->quantize_b_4x4(x, k, DCT_DCT, 16);
-      thisdistortion += vp9_block_error(coeff, BLOCK_OFFSET(pd->dqcoeff, k, 16),
+      thisdistortion += vp9_block_error(coeff, BLOCK_OFFSET(pd->dqcoeff, k),
                                         16, &ssz);
       thissse += ssz;
       thisrate += cost_coeffs(x, 0, k, PLANE_TYPE_Y_WITH_DC,
