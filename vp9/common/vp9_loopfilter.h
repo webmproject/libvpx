@@ -60,7 +60,7 @@ typedef struct {
 struct VP9Common;
 struct macroblockd;
 
-void vp9_loop_filter_init(struct VP9Common *cm, struct loopfilter *lf);
+void vp9_loop_filter_init(struct VP9Common *cm);
 
 // Update the loop filter for the current frame.
 // This should be called before vp9_loop_filter_rows(), vp9_loop_filter_frame()

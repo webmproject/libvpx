@@ -61,8 +61,9 @@ static void update_sharpness(loop_filter_info_n *const lfi, int sharpness_lvl) {
   }
 }
 
-void vp9_loop_filter_init(VP9_COMMON *cm, struct loopfilter *lf) {
+void vp9_loop_filter_init(VP9_COMMON *cm) {
   loop_filter_info_n *lfi = &cm->lf_info;
+  struct loopfilter *lf = &cm->lf;
   int i;
 
   // init limits for given sharpness
