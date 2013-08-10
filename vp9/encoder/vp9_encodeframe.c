@@ -516,14 +516,12 @@ static void set_offsets(VP9_COMP *cpi, int mi_row, int mi_col,
   // Set up destination pointers
   setup_dst_planes(xd, &cm->yv12_fb[dst_fb_idx], mi_row, mi_col);
 
-  /* Set up limit values for MV components to prevent them from
-   * extending beyond the UMV borders assuming 16x16 block size */
-  x->mv_row_min = -((mi_row * MI_SIZE)+ VP9BORDERINPIXELS - VP9_INTERP_EXTEND);
-  x->mv_col_min = -((mi_col * MI_SIZE)+ VP9BORDERINPIXELS - VP9_INTERP_EXTEND);
-  x->mv_row_max = ((cm->mi_rows - mi_row) * MI_SIZE
-      + (VP9BORDERINPIXELS - MI_SIZE * mi_height - VP9_INTERP_EXTEND));
-  x->mv_col_max = ((cm->mi_cols - mi_col) * MI_SIZE
-      + (VP9BORDERINPIXELS - MI_SIZE * mi_width - VP9_INTERP_EXTEND));
+  // Set up limit values for MV components
+  // mv beyond the range do not produce new/different prediction block
+  x->mv_row_min = -((mi_row * MI_SIZE) + MAX_BLOCK_SIZE + VP9_INTERP_EXTEND);
+  x->mv_col_min = -((mi_col * MI_SIZE) + MAX_BLOCK_SIZE + VP9_INTERP_EXTEND);
+  x->mv_row_max = (cm->mi_rows - mi_row) * MI_SIZE + VP9_INTERP_EXTEND;
+  x->mv_col_max = (cm->mi_cols - mi_col) * MI_SIZE + VP9_INTERP_EXTEND;
 
   // Set up distance of MB to edge of frame in 1/8th pel units
   assert(!(mi_col & (mi_width - 1)) && !(mi_row & (mi_height - 1)));
