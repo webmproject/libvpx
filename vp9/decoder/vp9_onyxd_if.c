@@ -110,35 +110,36 @@ void vp9_initialize_dec() {
 
 VP9D_PTR vp9_create_decompressor(VP9D_CONFIG *oxcf) {
   VP9D_COMP *const pbi = vpx_memalign(32, sizeof(VP9D_COMP));
+  VP9_COMMON *const cm = pbi ? &pbi->common : NULL;
 
-  if (!pbi)
+  if (!cm)
     return NULL;
 
   vp9_zero(*pbi);
 
-  if (setjmp(pbi->common.error.jmp)) {
-    pbi->common.error.setjmp = 0;
+  if (setjmp(cm->error.jmp)) {
+    cm->error.setjmp = 0;
     vp9_remove_decompressor(pbi);
     return NULL;
   }
 
-  pbi->common.error.setjmp = 1;
+  cm->error.setjmp = 1;
   vp9_initialize_dec();
 
-  vp9_create_common(&pbi->common);
+  vp9_create_common(cm);
 
   pbi->oxcf = *oxcf;
-  pbi->common.current_video_frame = 0;
   pbi->ready_for_new_data = 1;
+  cm->current_video_frame = 0;
 
   // vp9_init_dequantizer() is first called here. Add check in
   // frame_init_dequantizer() to avoid unnecessary calling of
   // vp9_init_dequantizer() for every frame.
-  vp9_init_dequantizer(&pbi->common);
+  vp9_init_dequantizer(cm);
 
-  vp9_loop_filter_init(&pbi->common, &pbi->common.lf);
+  vp9_loop_filter_init(cm);
 
-  pbi->common.error.setjmp = 0;
+  cm->error.setjmp = 0;
   pbi->decoded_key_frame = 0;
 
   if (pbi->oxcf.max_threads > 1) {
@@ -424,7 +425,7 @@ int vp9_get_raw_frame(VP9D_PTR ptr, YV12_BUFFER_CONFIG *sd,
   *time_end_stamp = 0;
 
 #if CONFIG_POSTPROC
-  ret = vp9_post_proc_frame(&pbi->common, &pbi->common.lf, sd, flags);
+  ret = vp9_post_proc_frame(&pbi->common, sd, flags);
 #else
 
   if (pbi->common.frame_to_show) {

@@ -49,7 +49,7 @@
 
 extern void print_tree_update_probs();
 
-static void set_default_lf_deltas(VP9_COMP *cpi);
+static void set_default_lf_deltas(struct loopfilter *lf);
 
 #define DEFAULT_INTERP_FILTER SWITCHABLE
 
@@ -258,7 +258,7 @@ static void setup_features(VP9_COMP *cpi) {
   vp9_zero(lf->last_ref_deltas);
   vp9_zero(lf->last_mode_deltas);
 
-  set_default_lf_deltas(cpi);
+  set_default_lf_deltas(lf);
 }
 
 static void dealloc_compressor_data(VP9_COMP *cpi) {
@@ -542,9 +542,7 @@ static void update_reference_segmentation_map(VP9_COMP *cpi) {
   }
 }
 
-static void set_default_lf_deltas(VP9_COMP *cpi) {
-  struct loopfilter *lf = &cpi->common.lf;
-
+static void set_default_lf_deltas(struct loopfilter *lf) {
   lf->mode_ref_delta_enabled = 1;
   lf->mode_ref_delta_update = 1;
 
@@ -1705,7 +1703,7 @@ VP9_PTR vp9_create_compressor(VP9_CONFIG *oxcf) {
    */
   vp9_init_quantizer(cpi);
 
-  vp9_loop_filter_init(cm, &cpi->common.lf);
+  vp9_loop_filter_init(cm);
 
   cpi->common.error.setjmp = 0;
 
@@ -3990,7 +3988,7 @@ int vp9_get_preview_raw_frame(VP9_PTR comp, YV12_BUFFER_CONFIG *dest,
   else {
     int ret;
 #if CONFIG_POSTPROC
-    ret = vp9_post_proc_frame(&cpi->common, &cpi->common.lf, dest, flags);
+    ret = vp9_post_proc_frame(&cpi->common, dest, flags);
 #else
 
     if (cpi->common.frame_to_show) {

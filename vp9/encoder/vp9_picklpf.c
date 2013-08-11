@@ -21,29 +21,15 @@
 #include "./vpx_scale_rtcd.h"
 
 void vp9_yv12_copy_partial_frame_c(YV12_BUFFER_CONFIG *src_ybc,
-                                   YV12_BUFFER_CONFIG *dst_ybc, int Fraction) {
-  uint8_t *src_y, *dst_y;
-  int yheight;
-  int ystride;
-  int yoffset;
-  int linestocopy;
+                                   YV12_BUFFER_CONFIG *dst_ybc, int fraction) {
+  const int height = src_ybc->y_height;
+  const int stride = src_ybc->y_stride;
+  const int offset = stride * ((height >> 5) * 16 - 8);
+  const int lines_to_copy = MAX(height >> (fraction + 4), 1) << 4;
 
   assert(src_ybc->y_stride == dst_ybc->y_stride);
-  yheight  = src_ybc->y_height;
-  ystride  = src_ybc->y_stride;
-
-  linestocopy = (yheight >> (Fraction + 4));
-
-  if (linestocopy < 1)
-    linestocopy = 1;
-
-  linestocopy <<= 4;
-
-  yoffset  = ystride * ((yheight >> 5) * 16 - 8);
-  src_y = src_ybc->y_buffer + yoffset;
-  dst_y = dst_ybc->y_buffer + yoffset;
-
-  vpx_memcpy(dst_y, src_y, ystride * (linestocopy + 16));
+  vpx_memcpy(dst_ybc->y_buffer + offset, src_ybc->y_buffer + offset,
+             stride * (lines_to_copy + 16));
 }
 
 static int calc_partial_ssl_err(YV12_BUFFER_CONFIG *source,
@@ -126,13 +112,13 @@ void vp9_set_alt_lf_level(VP9_COMP *cpi, int filt_val) {
 }
 
 void vp9_pick_filter_level(YV12_BUFFER_CONFIG *sd, VP9_COMP *cpi, int partial) {
-  VP9_COMMON *cm = &cpi->common;
-  struct loopfilter *lf = &cpi->common.lf;
+  VP9_COMMON *const cm = &cpi->common;
+  struct loopfilter *const lf = &cm->lf;
 
   int best_err = 0;
   int filt_err = 0;
-  int min_filter_level = get_min_filter_level(cpi, cm->base_qindex);
-  int max_filter_level = get_max_filter_level(cpi, cm->base_qindex);
+  const int min_filter_level = get_min_filter_level(cpi, cm->base_qindex);
+  const int max_filter_level = get_max_filter_level(cpi, cm->base_qindex);
 
   int filter_step;
   int filt_high = 0;
@@ -147,21 +133,14 @@ void vp9_pick_filter_level(YV12_BUFFER_CONFIG *sd, VP9_COMP *cpi, int partial) {
   //  Make a copy of the unfiltered / processed recon buffer
   vpx_yv12_copy_y(cm->frame_to_show, &cpi->last_frame_uf);
 
-  if (cm->frame_type == KEY_FRAME)
-    lf->sharpness_level = 0;
-  else
-    lf->sharpness_level = cpi->oxcf.Sharpness;
+  lf->sharpness_level = cm->frame_type == KEY_FRAME ? 0
+                                                    : cpi->oxcf.Sharpness;
 
   // Start the search at the previous frame filter level unless it is now out of range.
-  filt_mid = lf->filter_level;
-
-  if (filt_mid < min_filter_level)
-    filt_mid = min_filter_level;
-  else if (filt_mid > max_filter_level)
-    filt_mid = max_filter_level;
+  filt_mid = clamp(lf->filter_level, min_filter_level, max_filter_level);
 
   // Define the initial step size
-  filter_step = (filt_mid < 16) ? 4 : filt_mid / 4;
+  filter_step = filt_mid < 16 ? 4 : filt_mid / 4;
 
   // Get baseline error score
   vp9_set_alt_lf_level(cpi, filt_mid);
