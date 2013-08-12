@@ -480,17 +480,8 @@ static void set_offsets(VP9_COMP *cpi, int mi_row, int mi_col,
   const int mb_col = mi_col >> 1;
   const int idx_map = mb_row * cm->mb_cols + mb_col;
   const struct segmentation *const seg = &xd->seg;
-  int i;
 
-  // entropy context structures
-  for (i = 0; i < MAX_MB_PLANE; i++) {
-    xd->plane[i].above_context = cm->above_context[i]
-        + (mi_col * 2 >> xd->plane[i].subsampling_x);
-    xd->plane[i].left_context = cm->left_context[i]
-        + (((mi_row * 2) & 15) >> xd->plane[i].subsampling_y);
-  }
-
-  // partition contexts
+  set_skip_context(cm, xd, mi_row, mi_col);
   set_partition_seg_context(cm, xd, mi_row, mi_col);
 
   // Activity map pointer
@@ -2630,7 +2621,7 @@ static void encode_superblock(VP9_COMP *cpi, TOKENEXTRA **t, int output_enabled,
     mbmi->mb_skip_coeff = 1;
     if (output_enabled)
       cm->counts.mbskip[mb_skip_context][1]++;
-    vp9_reset_sb_tokens_context(xd, MAX(bsize, BLOCK_8X8));
+    reset_skip_context(xd, MAX(bsize, BLOCK_8X8));
   }
 
   // copy skip flag on all mb_mode_info contexts in this SB

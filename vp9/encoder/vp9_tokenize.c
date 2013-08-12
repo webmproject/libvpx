@@ -282,7 +282,7 @@ void vp9_tokenize_sb(VP9_COMP *cpi, TOKENEXTRA **t, int dry_run,
   if (mbmi->mb_skip_coeff) {
     if (!dry_run)
       cm->counts.mbskip[mb_skip_context][1] += skip_inc;
-    vp9_reset_sb_tokens_context(xd, bsize);
+    reset_skip_context(xd, bsize);
     if (dry_run)
       *t = t_backup;
     return;
