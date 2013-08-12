@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAcn//usc\u003d",
+        "filename": "vp9/encoder/x86/vp9_dct32x32_sse2.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 1307,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2013-08-12T21:28:32Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAcn//uyU\u003d",
+      "revId": "58a628e995af96ed0463b43afd24b4da7cc5589c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAcn//uyg\u003d",
         "filename": "vp9/encoder/x86/vp9_dct32x32_sse2.c",
         "patchSetId": 6
@@ -30,6 +48,24 @@
       "writtenOn": "2013-08-12T20:41:25Z",
       "side": 1,
       "message": "Add a TODO about manually inlining these \u0027functions\u0027 to hide instructions latency.",
+      "revId": "58a628e995af96ed0463b43afd24b4da7cc5589c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcn//usY\u003d",
+        "filename": "vp9/encoder/x86/vp9_dct32x32_sse2.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 1321,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2013-08-12T21:28:32Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAcn//uyg\u003d",
       "revId": "58a628e995af96ed0463b43afd24b4da7cc5589c",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
