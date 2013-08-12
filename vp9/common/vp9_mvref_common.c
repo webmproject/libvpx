@@ -129,18 +129,15 @@ static INLINE int_mv get_sub_block_mv(const MODE_INFO *candidate,
 
 
 // Performs mv sign inversion if indicated by the reference frame combination.
-static INLINE int_mv scale_mv(const MODE_INFO *candidate, const int which_mv,
+static INLINE int_mv scale_mv(const MB_MODE_INFO *mbmi, int ref,
                               const MV_REFERENCE_FRAME this_ref_frame,
                               const int *ref_sign_bias) {
-  int_mv return_mv = candidate->mbmi.mv[which_mv];
-
-  // Sign inversion where appropriate.
-  if (ref_sign_bias[candidate->mbmi.ref_frame[which_mv]] !=
-      ref_sign_bias[this_ref_frame]) {
-    return_mv.as_mv.row *= -1;
-    return_mv.as_mv.col *= -1;
+  int_mv mv = mbmi->mv[ref];
+  if (ref_sign_bias[mbmi->ref_frame[ref]] != ref_sign_bias[this_ref_frame]) {
+    mv.as_mv.row *= -1;
+    mv.as_mv.col *= -1;
   }
-  return return_mv;
+  return mv;
 }
 
 // This macro is used to add a motion vector mv_ref list if it isn't
@@ -159,12 +156,12 @@ static INLINE int_mv scale_mv(const MODE_INFO *candidate, const int which_mv,
 // If either reference frame is different, not INTRA, and they
 // are different from each other scale and add the mv to our list.
 #define IF_DIFF_REF_FRAME_ADD_MV(CANDIDATE) \
-  if ((CANDIDATE)->mbmi.ref_frame[0] != ref_frame) { \
+  if ((CANDIDATE)->ref_frame[0] != ref_frame) { \
     ADD_MV_REF_LIST(scale_mv((CANDIDATE), 0, ref_frame, ref_sign_bias)); \
   } \
-  if ((CANDIDATE)->mbmi.ref_frame[1] != ref_frame && \
-      (CANDIDATE)->mbmi.ref_frame[1] > INTRA_FRAME && \
-      (CANDIDATE)->mbmi.mv[1].as_int != (CANDIDATE)->mbmi.mv[0].as_int) { \
+  if ((CANDIDATE)->ref_frame[1] != ref_frame && \
+      (CANDIDATE)->ref_frame[1] > INTRA_FRAME && \
+      (CANDIDATE)->mv[1].as_int != (CANDIDATE)->mv[0].as_int) { \
     ADD_MV_REF_LIST(scale_mv((CANDIDATE), 1, ref_frame, ref_sign_bias)); \
   }
 
@@ -273,13 +270,13 @@ void vp9_find_mv_refs_idx(VP9_COMMON *cm, MACROBLOCKD *xd, MODE_INFO *here,
       if (!is_inter_block(&candidate->mbmi))
         continue;
 
-      IF_DIFF_REF_FRAME_ADD_MV(candidate);
+      IF_DIFF_REF_FRAME_ADD_MV(&candidate->mbmi);
     }
   }
 
   // Since we still don't have a candidate we'll try the last frame.
   if (lf_here != NULL && is_inter_block(&lf_here->mbmi)) {
-    IF_DIFF_REF_FRAME_ADD_MV(lf_here);
+    IF_DIFF_REF_FRAME_ADD_MV(&lf_here->mbmi);
   }
 
  Done:
@@ -290,6 +287,3 @@ void vp9_find_mv_refs_idx(VP9_COMMON *cm, MACROBLOCKD *xd, MODE_INFO *here,
   for (idx = 0; idx < MAX_MV_REF_CANDIDATES; ++idx)
     clamp_mv_ref(&mv_ref_list[idx].as_mv, xd);
 }
-
-#undef ADD_MV_REF_LIST
-#undef IF_DIFF_REF_FRAME_ADD_MV
