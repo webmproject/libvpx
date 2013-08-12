@@ -3913,7 +3913,7 @@ int vp9_get_compressed_data(VP9_PTR ptr, unsigned int *frame_flags,
           double weight = 0;
 #if CONFIG_POSTPROC
           vp9_deblock(cm->frame_to_show, &cm->post_proc_buffer,
-                      cpi->mb.e_mbd.lf.filter_level * 10 / 6);
+                      cm->lf.filter_level * 10 / 6);
 #endif
           vp9_clear_system_state();
 
