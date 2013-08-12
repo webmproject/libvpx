@@ -2457,7 +2457,7 @@ static void single_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
     setup_pre_planes(xd, 0, scaled_ref_frame, mi_row, mi_col, NULL);
   }
 
-  vp9_clamp_mv_min_max(x, &ref_mv);
+  vp9_clamp_mv_min_max(x, &ref_mv.as_mv);
 
   // Adjust search parameters based on small partitions' result.
   if (x->fast_ms) {
@@ -2637,7 +2637,7 @@ static void joint_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
     // Compound motion search on first ref frame.
     if (id)
       xd->plane[0].pre[0] = ref_yv12[id];
-    vp9_clamp_mv_min_max(x, &ref_mv[id]);
+    vp9_clamp_mv_min_max(x, &ref_mv[id].as_mv);
 
     // Use mv result from single mode as mvp.
     tmp_mv.as_int = frame_mv[refs[id]].as_int;
