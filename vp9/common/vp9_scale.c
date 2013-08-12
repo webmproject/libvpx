@@ -9,13 +9,14 @@
  */
 
 #include "./vp9_rtcd.h"
+#include "vp9/common/vp9_filter.h"
 #include "vp9/common/vp9_scale.h"
 
-static int scaled_x(int val, const struct scale_factors *scale) {
+static INLINE int scaled_x(int val, const struct scale_factors *scale) {
   return val * scale->x_scale_fp >> VP9_REF_SCALE_SHIFT;
 }
 
-static int scaled_y(int val, const struct scale_factors *scale) {
+static INLINE int scaled_y(int val, const struct scale_factors *scale) {
   return val * scale->y_scale_fp >> VP9_REF_SCALE_SHIFT;
 }
 
@@ -26,8 +27,8 @@ static int unscaled_value(int val, const struct scale_factors *scale) {
 
 static MV32 scaled_mv(const MV *mv, const struct scale_factors *scale) {
   const MV32 res = {
-    (mv->row * scale->y_scale_fp >> VP9_REF_SCALE_SHIFT) + scale->y_offset_q4,
-    (mv->col * scale->x_scale_fp >> VP9_REF_SCALE_SHIFT) + scale->x_offset_q4
+    scaled_y(mv->row, scale) + scale->y_offset_q4,
+    scaled_x(mv->col, scale) + scale->x_offset_q4
   };
   return res;
 }
@@ -42,11 +43,8 @@ static MV32 unscaled_mv(const MV *mv, const struct scale_factors *scale) {
 
 static void set_offsets_with_scaling(struct scale_factors *scale,
                                      int row, int col) {
-  const int x_q4 = 16 * col;
-  const int y_q4 = 16 * row;
-
-  scale->x_offset_q4 = (x_q4 * scale->x_scale_fp >> VP9_REF_SCALE_SHIFT) & 0xF;
-  scale->y_offset_q4 = (y_q4 * scale->y_scale_fp >> VP9_REF_SCALE_SHIFT) & 0xF;
+  scale->x_offset_q4 = scaled_x(col << SUBPEL_BITS, scale) & SUBPEL_MASK;
+  scale->y_offset_q4 = scaled_y(row << SUBPEL_BITS, scale) & SUBPEL_MASK;
 }
 
 static void set_offsets_without_scaling(struct scale_factors *scale,
@@ -67,12 +65,12 @@ void vp9_setup_scale_factors_for_frame(struct scale_factors *scale,
                                        int other_w, int other_h,
                                        int this_w, int this_h) {
   scale->x_scale_fp = get_fixed_point_scale_factor(other_w, this_w);
-  scale->x_offset_q4 = 0;  // calculated per-mb
-  scale->x_step_q4 = (16 * scale->x_scale_fp >> VP9_REF_SCALE_SHIFT);
+  scale->x_offset_q4 = 0;  // calculated per block
+  scale->x_step_q4 = scaled_x(16, scale);
 
   scale->y_scale_fp = get_fixed_point_scale_factor(other_h, this_h);
-  scale->y_offset_q4 = 0;  // calculated per-mb
-  scale->y_step_q4 = (16 * scale->y_scale_fp >> VP9_REF_SCALE_SHIFT);
+  scale->y_offset_q4 = 0;  // calculated per block
+  scale->y_step_q4 = scaled_y(16, scale);
 
   if (other_w == this_w && other_h == this_h) {
     scale->scale_value_x = unscaled_value;
