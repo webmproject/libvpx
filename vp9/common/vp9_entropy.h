@@ -156,17 +156,16 @@ extern DECLARE_ALIGNED(16, int16_t,
 void vp9_coef_tree_initialize(void);
 void vp9_adapt_coef_probs(struct VP9Common *);
 
-static INLINE void vp9_reset_sb_tokens_context(MACROBLOCKD* const xd,
-                                               BLOCK_SIZE_TYPE bsize) {
-  /* Clear entropy contexts */
+static INLINE void reset_skip_context(MACROBLOCKD *xd, BLOCK_SIZE_TYPE bsize) {
   const int bw = 1 << b_width_log2(bsize);
   const int bh = 1 << b_height_log2(bsize);
   int i;
   for (i = 0; i < MAX_MB_PLANE; i++) {
-    vpx_memset(xd->plane[i].above_context, 0,
-               sizeof(ENTROPY_CONTEXT) * bw >> xd->plane[i].subsampling_x);
-    vpx_memset(xd->plane[i].left_context, 0,
-               sizeof(ENTROPY_CONTEXT) * bh >> xd->plane[i].subsampling_y);
+    struct macroblockd_plane *const pd = &xd->plane[i];
+    vpx_memset(pd->above_context, 0,
+               sizeof(ENTROPY_CONTEXT) * (bw >> pd->subsampling_x));
+    vpx_memset(pd->left_context, 0,
+               sizeof(ENTROPY_CONTEXT) * (bh >> pd->subsampling_y));
   }
 }
 

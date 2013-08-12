@@ -236,6 +236,18 @@ static int mi_cols_aligned_to_sb(int n_mis) {
   return ALIGN_POWER_OF_TWO(n_mis, LOG2_MI_BLOCK_SIZE);
 }
 
+static INLINE void set_skip_context(VP9_COMMON *cm, MACROBLOCKD *xd,
+                                    int mi_row, int mi_col) {
+  const int above_idx = mi_col * 2;
+  const int left_idx = (mi_row * 2) & 15;
+  int i;
+  for (i = 0; i < MAX_MB_PLANE; i++) {
+    struct macroblockd_plane *const pd = &xd->plane[i];
+    pd->above_context = cm->above_context[i] + (above_idx >> pd->subsampling_x);
+    pd->left_context = cm->left_context[i] + (left_idx >> pd->subsampling_y);
+  }
+}
+
 static INLINE void set_partition_seg_context(VP9_COMMON *cm, MACROBLOCKD *xd,
                                              int mi_row, int mi_col) {
   xd->above_seg_context = cm->above_seg_context + mi_col;

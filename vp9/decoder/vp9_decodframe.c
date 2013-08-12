@@ -167,7 +167,7 @@ static int decode_tokens(VP9D_COMP *pbi, BLOCK_SIZE_TYPE bsize, vp9_reader *r) {
   MACROBLOCKD *const xd = &pbi->mb;
 
   if (xd->mode_info_context->mbmi.mb_skip_coeff) {
-    vp9_reset_sb_tokens_context(xd, bsize);
+      reset_skip_context(xd, bsize);
     return -1;
   } else {
     if (xd->seg.enabled)
@@ -185,7 +185,6 @@ static void set_offsets(VP9D_COMP *pbi, BLOCK_SIZE_TYPE bsize,
   const int bh = 1 << mi_height_log2(bsize);
   const int bw = 1 << mi_width_log2(bsize);
   const int mi_idx = mi_row * cm->mode_info_stride + mi_col;
-  int i;
 
   xd->mode_info_context = cm->mi + mi_idx;
   xd->mode_info_context->mbmi.sb_type = bsize;
@@ -193,14 +192,8 @@ static void set_offsets(VP9D_COMP *pbi, BLOCK_SIZE_TYPE bsize,
   // cannot be used.
   xd->prev_mode_info_context = cm->prev_mi ? cm->prev_mi + mi_idx : NULL;
 
-  for (i = 0; i < MAX_MB_PLANE; i++) {
-    struct macroblockd_plane *pd = &xd->plane[i];
-    pd->above_context = cm->above_context[i] +
-                            (mi_col * 2 >> pd->subsampling_x);
-    pd->left_context = cm->left_context[i] +
-                           (((mi_row * 2) & 15) >> pd->subsampling_y);
-  }
 
+  set_skip_context(cm, xd, mi_row, mi_col);
   set_partition_seg_context(cm, xd, mi_row, mi_col);
 
   // Distance of Mb to the various image edges. These are specified to 8th pel
@@ -675,7 +668,7 @@ static const uint8_t *decode_tiles(VP9D_COMP *pbi, const uint8_t *data) {
   // Note: this memset assumes above_context[0], [1] and [2]
   // are allocated as part of the same buffer.
   vpx_memset(pc->above_context[0], 0,
-             sizeof(ENTROPY_CONTEXT) * 2 * MAX_MB_PLANE * aligned_mi_cols);
+             sizeof(ENTROPY_CONTEXT) * MAX_MB_PLANE * (2 * aligned_mi_cols));
 
   vpx_memset(pc->above_seg_context, 0,
              sizeof(PARTITION_CONTEXT) * aligned_mi_cols);
