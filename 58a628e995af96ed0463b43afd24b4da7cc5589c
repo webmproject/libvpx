@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAcn//uyU\u003d",
+        "filename": "vp9/encoder/x86/vp9_dct32x32_sse2.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 1307,
+      "author": {
+        "id": 1001649
+      },
+      "writtenOn": "2013-08-12T20:41:25Z",
+      "side": 1,
+      "message": "I have no problems with the extra spaces to make the parameters more lined up but do fix the lines longer than 80 char.",
+      "revId": "58a628e995af96ed0463b43afd24b4da7cc5589c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcn//uyg\u003d",
+        "filename": "vp9/encoder/x86/vp9_dct32x32_sse2.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 1321,
+      "author": {
+        "id": 1001649
+      },
+      "writtenOn": "2013-08-12T20:41:25Z",
+      "side": 1,
+      "message": "Add a TODO about manually inlining these \u0027functions\u0027 to hide instructions latency.",
+      "revId": "58a628e995af96ed0463b43afd24b4da7cc5589c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
