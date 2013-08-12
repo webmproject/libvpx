@@ -40,7 +40,7 @@ static unsigned int do_16x16_motion_iteration(VP9_COMP *cpi,
       (cpi->speed < 8 ? (cpi->speed > 5 ? 1 : 0) : 2);
   step_param = MIN(step_param, (cpi->sf.max_step_search_steps - 2));
 
-  vp9_clamp_mv_min_max(x, ref_mv);
+  vp9_clamp_mv_min_max(x, &ref_mv->as_mv);
 
   ref_full.as_mv.col = ref_mv->as_mv.col >> 3;
   ref_full.as_mv.row = ref_mv->as_mv.row >> 3;

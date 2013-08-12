@@ -24,15 +24,14 @@
 
 // #define NEW_DIAMOND_SEARCH
 
-void vp9_clamp_mv_min_max(MACROBLOCK *x, int_mv *ref_mv) {
-  const int col_min = (ref_mv->as_mv.col >> 3) - MAX_FULL_PEL_VAL +
-                ((ref_mv->as_mv.col & 7) ? 1 : 0);
-  const int row_min = (ref_mv->as_mv.row >> 3) - MAX_FULL_PEL_VAL +
-                ((ref_mv->as_mv.row & 7) ? 1 : 0);
-  const int col_max = (ref_mv->as_mv.col >> 3) + MAX_FULL_PEL_VAL;
-  const int row_max = (ref_mv->as_mv.row >> 3) + MAX_FULL_PEL_VAL;
+void vp9_clamp_mv_min_max(MACROBLOCK *x, MV *mv) {
+  const int col_min = (mv->col >> 3) - MAX_FULL_PEL_VAL + (mv->col & 7 ? 1 : 0);
+  const int row_min = (mv->row >> 3) - MAX_FULL_PEL_VAL + (mv->row & 7 ? 1 : 0);
+  const int col_max = (mv->col >> 3) + MAX_FULL_PEL_VAL;
+  const int row_max = (mv->row >> 3) + MAX_FULL_PEL_VAL;
 
-  /* Get intersection of UMV window and valid MV window to reduce # of checks in diamond search. */
+  // Get intersection of UMV window and valid MV window to reduce # of checks
+  // in diamond search.
   if (x->mv_col_min < col_min)
     x->mv_col_min = col_min;
   if (x->mv_col_max > col_max)
