@@ -53,7 +53,7 @@ void vp9_build_inter_predictor(const uint8_t *src, int src_stride,
                                uint8_t *dst, int dst_stride,
                                const MV *src_mv,
                                const struct scale_factors *scale,
-                               int w, int h, int weight,
+                               int w, int h, int ref,
                                const struct subpix_fn_table *subpix,
                                enum mv_precision precision) {
   const int is_q4 = precision == MV_PRECISION_Q4;
@@ -64,7 +64,7 @@ void vp9_build_inter_predictor(const uint8_t *src, int src_stride,
   const int subpel_y = mv.row & SUBPEL_MASK;
 
   src += (mv.row >> SUBPEL_BITS) * src_stride + (mv.col >> SUBPEL_BITS);
-  scale->predict[subpel_x != 0][subpel_y != 0][weight](
+  scale->predict[subpel_x != 0][subpel_y != 0][ref](
       src, src_stride, dst, dst_stride,
       subpix->filter_x[subpel_x], scale->x_step_q4,
       subpix->filter_y[subpel_y], scale->y_step_q4,
@@ -114,10 +114,9 @@ MV clamp_mv_to_umv_border_sb(const MACROBLOCKD *xd, const MV *src_mv,
 
 struct build_inter_predictors_args {
   MACROBLOCKD *xd;
-  int x;
-  int y;
-  struct buf_2d *dst[MAX_MB_PLANE];
-  struct buf_2d *pre[2][MAX_MB_PLANE];
+  int x, y;
+  struct buf_2d *dst;
+  struct buf_2d *pre[2];
 };
 static void build_inter_predictors(int plane, int block,
                                    BLOCK_SIZE_TYPE bsize,
@@ -133,17 +132,17 @@ static void build_inter_predictors(int plane, int block,
   const int y = 4 * (block >> bwl);
   const MODE_INFO *const mi = xd->mode_info_context;
   const int use_second_ref = mi->mbmi.ref_frame[1] > 0;
-  int which_mv;
+  int ref;
 
   assert(x < bw);
   assert(y < bh);
   assert(mi->mbmi.sb_type < BLOCK_8X8 || 4 << pred_w == bw);
   assert(mi->mbmi.sb_type < BLOCK_8X8 || 4 << pred_h == bh);
 
-  for (which_mv = 0; which_mv < 1 + use_second_ref; ++which_mv) {
-    struct scale_factors *const scale = &xd->scale_factor[which_mv];
-    struct buf_2d *const pre_buf = arg->pre[which_mv][plane];
-    struct buf_2d *const dst_buf = arg->dst[plane];
+  for (ref = 0; ref < 1 + use_second_ref; ++ref) {
+    struct scale_factors *const scale = &xd->scale_factor[ref];
+    struct buf_2d *const pre_buf = arg->pre[ref];
+    struct buf_2d *const dst_buf = arg->dst;
 
     const uint8_t *const pre = pre_buf->buf + scaled_buffer_offset(x, y,
                                pre_buf->stride, scale);
@@ -155,9 +154,9 @@ static void build_inter_predictors(int plane, int block,
     // smarter for non-4:2:0. Just punt for now, pending the changes to get
     // rid of SPLITMV mode entirely.
     const MV mv = mi->mbmi.sb_type < BLOCK_8X8
-               ? (plane == 0 ? mi->bmi[block].as_mv[which_mv].as_mv
-                             : mi_mv_pred_q4(mi, which_mv))
-               : mi->mbmi.mv[which_mv].as_mv;
+               ? (plane == 0 ? mi->bmi[block].as_mv[ref].as_mv
+                             : mi_mv_pred_q4(mi, ref))
+               : mi->mbmi.mv[ref].as_mv;
 
     // TODO(jkoleszar): This clamping is done in the incorrect place for the
     // scaling case. It needs to be done on the scaled MV, not the pre-scaling
@@ -170,43 +169,40 @@ static void build_inter_predictors(int plane, int block,
     scale->set_scaled_offsets(scale, arg->y + y, arg->x + x);
     vp9_build_inter_predictor(pre, pre_buf->stride, dst, dst_buf->stride,
                               &res_mv, scale,
-                              4 << pred_w, 4 << pred_h, which_mv,
+                              4 << pred_w, 4 << pred_h, ref,
                               &xd->subpix, MV_PRECISION_Q4);
   }
 }
+
+static void build_inter_predictors_for_planes(MACROBLOCKD *xd,
+                                              BLOCK_SIZE_TYPE bsize,
+                                              int mi_row, int mi_col,
+                                              int plane_from, int plane_to) {
+  int plane;
+  for (plane = plane_from; plane <= plane_to; ++plane) {
+    struct build_inter_predictors_args args = {
+      xd, mi_col * MI_SIZE, mi_row * MI_SIZE,
+      &xd->plane[plane].dst,
+      {&xd->plane[plane].pre[0], &xd->plane[plane].pre[1]}
+    };
+    foreach_predicted_block_in_plane(xd, bsize, plane, build_inter_predictors,
+                                     &args);
+  }
+}
+
 void vp9_build_inter_predictors_sby(MACROBLOCKD *xd, int mi_row, int mi_col,
                                     BLOCK_SIZE_TYPE bsize) {
-  struct build_inter_predictors_args args = {
-    xd, mi_col * MI_SIZE, mi_row * MI_SIZE,
-    {&xd->plane[0].dst, NULL, NULL},
-    {{&xd->plane[0].pre[0], NULL, NULL},
-     {&xd->plane[0].pre[1], NULL, NULL}},
-  };
-
-  foreach_predicted_block_in_plane(xd, bsize, 0, build_inter_predictors, &args);
+  build_inter_predictors_for_planes(xd, bsize, mi_row, mi_col, 0, 0);
 }
 void vp9_build_inter_predictors_sbuv(MACROBLOCKD *xd, int mi_row, int mi_col,
                                      BLOCK_SIZE_TYPE bsize) {
-  struct build_inter_predictors_args args = {
-    xd, mi_col * MI_SIZE, mi_row * MI_SIZE,
-#if CONFIG_ALPHA
-    {NULL, &xd->plane[1].dst, &xd->plane[2].dst, &xd->plane[3].dst},
-    {{NULL, &xd->plane[1].pre[0], &xd->plane[2].pre[0], &xd->plane[3].pre[0]},
-     {NULL, &xd->plane[1].pre[1], &xd->plane[2].pre[1], &xd->plane[3].pre[1]}},
-#else
-    {NULL, &xd->plane[1].dst, &xd->plane[2].dst},
-    {{NULL, &xd->plane[1].pre[0], &xd->plane[2].pre[0]},
-     {NULL, &xd->plane[1].pre[1], &xd->plane[2].pre[1]}},
-#endif
-  };
-  foreach_predicted_block_uv(xd, bsize, build_inter_predictors, &args);
+  build_inter_predictors_for_planes(xd, bsize, mi_row, mi_col, 1,
+                                    MAX_MB_PLANE - 1);
 }
-void vp9_build_inter_predictors_sb(MACROBLOCKD *xd,
-                                   int mi_row, int mi_col,
+void vp9_build_inter_predictors_sb(MACROBLOCKD *xd, int mi_row, int mi_col,
                                    BLOCK_SIZE_TYPE bsize) {
-
-  vp9_build_inter_predictors_sby(xd, mi_row, mi_col, bsize);
-  vp9_build_inter_predictors_sbuv(xd, mi_row, mi_col, bsize);
+  build_inter_predictors_for_planes(xd, bsize, mi_row, mi_col, 0,
+                                    MAX_MB_PLANE - 1);
 }
 
 // TODO(dkovalev: find better place for this function)

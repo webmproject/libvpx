@@ -552,15 +552,7 @@ static INLINE void foreach_predicted_block(
     foreach_predicted_block_in_plane(xd, bsize, plane, visit, arg);
   }
 }
-static INLINE void foreach_predicted_block_uv(
-    const MACROBLOCKD* const xd, BLOCK_SIZE_TYPE bsize,
-    foreach_predicted_block_visitor visit, void *arg) {
-  int plane;
 
-  for (plane = 1; plane < MAX_MB_PLANE; plane++) {
-    foreach_predicted_block_in_plane(xd, bsize, plane, visit, arg);
-  }
-}
 static int raster_block_offset(MACROBLOCKD *xd, BLOCK_SIZE_TYPE bsize,
                                int plane, int block, int stride) {
   const int bw = b_width_log2(bsize) - xd->plane[plane].subsampling_x;
