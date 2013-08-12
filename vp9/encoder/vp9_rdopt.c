@@ -922,8 +922,7 @@ static void choose_txfm_size_from_modelrd(VP9_COMP *cpi, MACROBLOCK *x,
                                           int64_t *d, int64_t *distortion,
                                           int *s, int *skip, int64_t *sse,
                                           int64_t ref_best_rd,
-                                          BLOCK_SIZE_TYPE bs,
-                                          int *model_used) {
+                                          BLOCK_SIZE_TYPE bs) {
   const TX_SIZE max_txfm_size = TX_32X32
       - (bs < BLOCK_32X32) - (bs < BLOCK_16X16);
   VP9_COMMON *const cm = &cpi->common;
@@ -992,17 +991,11 @@ static void choose_txfm_size_from_modelrd(VP9_COMP *cpi, MACROBLOCK *x,
     mbmi->txfm_size = TX_4X4;
   }
 
-  if (model_used[mbmi->txfm_size]) {
-    // Actually encode using the chosen mode if a model was used, but do not
-    // update the r, d costs
-    super_block_yrd_for_txfm(cm, x, rate, distortion, skip,
-                             &sse[mbmi->txfm_size], ref_best_rd,
-                             bs, mbmi->txfm_size);
-  } else {
-    *distortion = d[mbmi->txfm_size];
-    *rate       = r[mbmi->txfm_size][cm->tx_mode == TX_MODE_SELECT];
-    *skip       = s[mbmi->txfm_size];
-  }
+  // Actually encode using the chosen mode if a model was used, but do not
+  // update the r, d costs
+  super_block_yrd_for_txfm(cm, x, rate, distortion, skip,
+                           &sse[mbmi->txfm_size], ref_best_rd,
+                           bs, mbmi->txfm_size);
 
   if (max_txfm_size == TX_32X32 &&
       rd[TX_32X32][1] <= rd[TX_16X16][1] &&
@@ -1048,41 +1041,21 @@ static void super_block_yrd(VP9_COMP *cpi,
 
   if (cpi->sf.tx_size_search_method == USE_LARGESTINTRA_MODELINTER &&
       mbmi->ref_frame[0] > INTRA_FRAME) {
-    int model_used[TX_SIZES] = {1, 1, 1, 1};
-    if (bs >= BLOCK_32X32) {
-      if (model_used[TX_32X32])
-        model_rd_for_sb_y_tx(cpi, bs, TX_32X32, x, xd,
-                             &r[TX_32X32][0], &d[TX_32X32], &s[TX_32X32]);
-      else
-        super_block_yrd_for_txfm(cm, x, &r[TX_32X32][0], &d[TX_32X32],
-                                 &s[TX_32X32], &sse[TX_32X32], INT64_MAX,
-                                 bs, TX_32X32);
-    }
-    if (bs >= BLOCK_16X16) {
-      if (model_used[TX_16X16])
-        model_rd_for_sb_y_tx(cpi, bs, TX_16X16, x, xd,
-                             &r[TX_16X16][0], &d[TX_16X16], &s[TX_16X16]);
-      else
-        super_block_yrd_for_txfm(cm, x, &r[TX_16X16][0], &d[TX_16X16],
-                                 &s[TX_16X16], &sse[TX_16X16], INT64_MAX,
-                                 bs, TX_16X16);
-    }
-    if (model_used[TX_8X8])
-      model_rd_for_sb_y_tx(cpi, bs, TX_8X8, x, xd,
-                           &r[TX_8X8][0], &d[TX_8X8], &s[TX_8X8]);
-    else
-      super_block_yrd_for_txfm(cm, x, &r[TX_8X8][0], &d[TX_8X8], &s[TX_8X8],
-                               &sse[TX_8X8], INT64_MAX, bs, TX_8X8);
+    if (bs >= BLOCK_32X32)
+      model_rd_for_sb_y_tx(cpi, bs, TX_32X32, x, xd,
+                           &r[TX_32X32][0], &d[TX_32X32], &s[TX_32X32]);
+    if (bs >= BLOCK_16X16)
+      model_rd_for_sb_y_tx(cpi, bs, TX_16X16, x, xd,
+                           &r[TX_16X16][0], &d[TX_16X16], &s[TX_16X16]);
 
-    if (model_used[TX_4X4])
-      model_rd_for_sb_y_tx(cpi, bs, TX_4X4, x, xd,
-                           &r[TX_4X4][0], &d[TX_4X4], &s[TX_4X4]);
-    else
-      super_block_yrd_for_txfm(cm, x, &r[TX_4X4][0], &d[TX_4X4], &s[TX_4X4],
-                               &sse[TX_4X4], INT64_MAX, bs, TX_4X4);
+    model_rd_for_sb_y_tx(cpi, bs, TX_8X8, x, xd,
+                         &r[TX_8X8][0], &d[TX_8X8], &s[TX_8X8]);
+
+    model_rd_for_sb_y_tx(cpi, bs, TX_4X4, x, xd,
+                         &r[TX_4X4][0], &d[TX_4X4], &s[TX_4X4]);
 
     choose_txfm_size_from_modelrd(cpi, x, r, rate, d, distortion, s,
-                                  skip, sse, ref_best_rd, bs, model_used);
+                                  skip, sse, ref_best_rd, bs);
   } else {
     if (bs >= BLOCK_32X32)
       super_block_yrd_for_txfm(cm, x, &r[TX_32X32][0], &d[TX_32X32],
