@@ -2879,21 +2879,6 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
   *rate2 += cost_mv_ref(cpi, this_mode,
                         mbmi->mb_mode_context[mbmi->ref_frame[0]]);
 
-#if CONFIG_INTERINTRA
-  if (!is_comp_pred) {
-    *compmode_interintra_cost = vp9_cost_bit(cm->fc.interintra_prob,
-                                             is_comp_interintra_pred);
-    if (is_comp_interintra_pred) {
-      *compmode_interintra_cost +=
-          x->mbmode_cost[mbmi->interintra_mode];
-#if SEPARATE_INTERINTRA_UV
-      *compmode_interintra_cost +=
-          x->intra_uv_mode_cost[xd->frame_type][mbmi->interintra_uv_mode];
-#endif
-    }
-  }
-#endif
-
   if (!(*mode_excluded)) {
     if (is_comp_pred) {
       *mode_excluded = (cpi->common.comp_pred_mode == SINGLE_PREDICTION_ONLY);
@@ -3010,6 +2995,47 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
       cm->mcomp_filter_type : *best_filter;
   vp9_setup_interp_filters(xd, mbmi->interp_filter, cm);
   rs = cm->mcomp_filter_type == SWITCHABLE ? get_switchable_rate(x) : 0;
+
+#if CONFIG_INTERINTRA
+  if ((!is_comp_pred) && is_comp_interintra_pred) {
+    int interintra_mode, best_interintra_mode;
+    int64_t best_interintra_rd = INT64_MAX;
+    int rmode, rate_sum;
+    int64_t dist_sum;
+    for (interintra_mode = DC_PRED; interintra_mode <= TM_PRED;
+        interintra_mode++) {
+      mbmi->interintra_mode = interintra_mode;
+      #if !SEPARATE_INTERINTRA_UV
+      mbmi->interintra_uv_mode = interintra_mode;
+      #endif
+      rmode = x->mbmode_cost[mbmi->interintra_mode];
+      vp9_build_inter_predictors_sb(xd, mi_row, mi_col, bsize);
+      model_rd_for_sb(cpi, bsize, x, xd, &rate_sum, &dist_sum);
+      rd = RDCOST(x->rdmult, x->rddiv, rmode + rate_sum, dist_sum);
+      if (rd < best_interintra_rd) {
+        best_interintra_rd = rd;
+        best_interintra_mode = interintra_mode;
+      }
+    }
+    mbmi->interintra_mode = best_interintra_mode;
+#if !SEPARATE_INTERINTRA_UV
+    mbmi->interintra_uv_mode = best_interintra_mode;
+#endif
+    pred_exists = 0;
+  }
+
+  if (!is_comp_pred) {
+    *compmode_interintra_cost = vp9_cost_bit(cm->fc.interintra_prob,
+                                             is_comp_interintra_pred);
+    if (is_comp_interintra_pred) {
+      *compmode_interintra_cost += x->mbmode_cost[mbmi->interintra_mode];
+#if SEPARATE_INTERINTRA_UV
+      *compmode_interintra_cost +=
+          x->intra_uv_mode_cost[xd->frame_type][mbmi->interintra_uv_mode];
+#endif
+      }
+  }
+#endif
 
   if (pred_exists) {
     if (best_needs_copy) {
