@@ -1632,7 +1632,7 @@ static void rd_pick_partition(VP9_COMP *cpi, TOKENEXTRA **tp, int mi_row,
 
   // PARTITION_SPLIT
   if (!cpi->sf.auto_min_max_partition_size ||
-      bsize >= cpi->sf.min_partition_size) {
+      bsize > cpi->sf.min_partition_size) {
     if (bsize > BLOCK_8X8) {
       subsize = get_subsize(bsize, PARTITION_SPLIT);
 
