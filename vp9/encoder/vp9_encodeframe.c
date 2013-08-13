@@ -1615,6 +1615,10 @@ static void rd_pick_partition(VP9_COMP *cpi, TOKENEXTRA **tp, int mi_row,
   int64_t this_dist, sum_dist = 0, best_dist = INT_MAX;
   int64_t sum_rd = 0;
 
+  // Override min_partition_size for edge blocks
+  int force_horz_split = mi_row + (ms >> 1) >= cm->mi_rows;
+  int force_vert_split = mi_col + (ms >> 1) >= cm->mi_cols;
+
   (void) *tp_orig;
 
   if (bsize < BLOCK_8X8) {
@@ -1644,6 +1648,7 @@ static void rd_pick_partition(VP9_COMP *cpi, TOKENEXTRA **tp, int mi_row,
           continue;
 
         *(get_sb_index(xd, subsize)) = i;
+
         rd_pick_partition(cpi, tp, mi_row + y_idx, mi_col + x_idx, subsize,
                           &this_rate, &this_dist, i != 3, best_rd - sum_rd);
 
@@ -1688,8 +1693,7 @@ static void rd_pick_partition(VP9_COMP *cpi, TOKENEXTRA **tp, int mi_row,
     int larger_is_better = 0;
 
     // PARTITION_NONE
-    if ((mi_row + (ms >> 1) < cm->mi_rows) &&
-        (mi_col + (ms >> 1) < cm->mi_cols)) {
+    if (!force_horz_split && !force_vert_split) {
       pick_sb_modes(cpi, mi_row, mi_col, &this_rate, &this_dist, bsize,
                     get_block_context(x, bsize), best_rd);
       if (this_rate != INT_MAX) {
@@ -1755,78 +1759,84 @@ static void rd_pick_partition(VP9_COMP *cpi, TOKENEXTRA **tp, int mi_row,
       // PARTITION_HORZ
       if (bsize >= BLOCK_8X8 && mi_col + (ms >> 1) < cm->mi_cols) {
         subsize = get_subsize(bsize, PARTITION_HORZ);
-        *(get_sb_index(xd, subsize)) = 0;
-        pick_sb_modes(cpi, mi_row, mi_col, &sum_rate, &sum_dist, subsize,
-                      get_block_context(x, subsize), best_rd);
-        sum_rd = RDCOST(x->rdmult, x->rddiv, sum_rate, sum_dist);
-
-        if (sum_rd < best_rd && mi_row + (ms >> 1) < cm->mi_rows) {
-          update_state(cpi, get_block_context(x, subsize), subsize, 0);
-          encode_superblock(cpi, tp, 0, mi_row, mi_col, subsize);
-
-          *(get_sb_index(xd, subsize)) = 1;
-          pick_sb_modes(cpi, mi_row + (ms >> 1), mi_col, &this_rate,
-                        &this_dist, subsize, get_block_context(x, subsize),
-                        best_rd - sum_rd);
-          if (this_rate == INT_MAX) {
-            sum_rd = INT64_MAX;
-          } else {
-            sum_rate += this_rate;
-            sum_dist += this_dist;
-            sum_rd = RDCOST(x->rdmult, x->rddiv, sum_rate, sum_dist);
-          }
-        }
-        if (sum_rd < best_rd) {
-          set_partition_seg_context(cm, xd, mi_row, mi_col);
-          pl = partition_plane_context(xd, bsize);
-          sum_rate += x->partition_cost[pl][PARTITION_HORZ];
+        if (!cpi->sf.auto_min_max_partition_size || force_horz_split ||
+            subsize >= cpi->sf.min_partition_size) {
+          *(get_sb_index(xd, subsize)) = 0;
+          pick_sb_modes(cpi, mi_row, mi_col, &sum_rate, &sum_dist, subsize,
+                        get_block_context(x, subsize), best_rd);
           sum_rd = RDCOST(x->rdmult, x->rddiv, sum_rate, sum_dist);
-          if (sum_rd < best_rd) {
-            best_rd = sum_rd;
-            best_rate = sum_rate;
-            best_dist = sum_dist;
-            *(get_sb_partitioning(x, bsize)) = subsize;
+
+          if (sum_rd < best_rd && mi_row + (ms >> 1) < cm->mi_rows) {
+            update_state(cpi, get_block_context(x, subsize), subsize, 0);
+            encode_superblock(cpi, tp, 0, mi_row, mi_col, subsize);
+
+            *(get_sb_index(xd, subsize)) = 1;
+            pick_sb_modes(cpi, mi_row + (ms >> 1), mi_col, &this_rate,
+                          &this_dist, subsize, get_block_context(x, subsize),
+                          best_rd - sum_rd);
+            if (this_rate == INT_MAX) {
+              sum_rd = INT64_MAX;
+            } else {
+              sum_rate += this_rate;
+              sum_dist += this_dist;
+              sum_rd = RDCOST(x->rdmult, x->rddiv, sum_rate, sum_dist);
+            }
           }
+          if (sum_rd < best_rd) {
+            set_partition_seg_context(cm, xd, mi_row, mi_col);
+            pl = partition_plane_context(xd, bsize);
+            sum_rate += x->partition_cost[pl][PARTITION_HORZ];
+            sum_rd = RDCOST(x->rdmult, x->rddiv, sum_rate, sum_dist);
+            if (sum_rd < best_rd) {
+              best_rd = sum_rd;
+              best_rate = sum_rate;
+              best_dist = sum_dist;
+              *(get_sb_partitioning(x, bsize)) = subsize;
+            }
+          }
+          restore_context(cpi, mi_row, mi_col, a, l, sa, sl, bsize);
         }
-        restore_context(cpi, mi_row, mi_col, a, l, sa, sl, bsize);
       }
 
       // PARTITION_VERT
       if (bsize >= BLOCK_8X8 && mi_row + (ms >> 1) < cm->mi_rows) {
         subsize = get_subsize(bsize, PARTITION_VERT);
-        *(get_sb_index(xd, subsize)) = 0;
-        pick_sb_modes(cpi, mi_row, mi_col, &sum_rate, &sum_dist, subsize,
-                      get_block_context(x, subsize), best_rd);
-        sum_rd = RDCOST(x->rdmult, x->rddiv, sum_rate, sum_dist);
-        if (sum_rd < best_rd && mi_col + (ms >> 1) < cm->mi_cols) {
-          update_state(cpi, get_block_context(x, subsize), subsize, 0);
-          encode_superblock(cpi, tp, 0, mi_row, mi_col, subsize);
-
-          *(get_sb_index(xd, subsize)) = 1;
-          pick_sb_modes(cpi, mi_row, mi_col + (ms >> 1), &this_rate, &this_dist,
-                        subsize, get_block_context(x, subsize),
-                        best_rd - sum_rd);
-          if (this_rate == INT_MAX) {
-            sum_rd = INT64_MAX;
-          } else {
-            sum_rate += this_rate;
-            sum_dist += this_dist;
-            sum_rd = RDCOST(x->rdmult, x->rddiv, sum_rate, sum_dist);
-          }
-        }
-        if (sum_rd < best_rd) {
-          set_partition_seg_context(cm, xd, mi_row, mi_col);
-          pl = partition_plane_context(xd, bsize);
-          sum_rate += x->partition_cost[pl][PARTITION_VERT];
+        if (!cpi->sf.auto_min_max_partition_size || force_vert_split ||
+            subsize >= cpi->sf.min_partition_size) {
+          *(get_sb_index(xd, subsize)) = 0;
+          pick_sb_modes(cpi, mi_row, mi_col, &sum_rate, &sum_dist, subsize,
+                        get_block_context(x, subsize), best_rd);
           sum_rd = RDCOST(x->rdmult, x->rddiv, sum_rate, sum_dist);
-          if (sum_rd < best_rd) {
-            best_rate = sum_rate;
-            best_dist = sum_dist;
-            best_rd = sum_rd;
-            *(get_sb_partitioning(x, bsize)) = subsize;
+          if (sum_rd < best_rd && mi_col + (ms >> 1) < cm->mi_cols) {
+            update_state(cpi, get_block_context(x, subsize), subsize, 0);
+            encode_superblock(cpi, tp, 0, mi_row, mi_col, subsize);
+
+            *(get_sb_index(xd, subsize)) = 1;
+            pick_sb_modes(cpi, mi_row, mi_col + (ms >> 1), &this_rate,
+                          &this_dist, subsize, get_block_context(x, subsize),
+                          best_rd - sum_rd);
+            if (this_rate == INT_MAX) {
+              sum_rd = INT64_MAX;
+            } else {
+              sum_rate += this_rate;
+              sum_dist += this_dist;
+              sum_rd = RDCOST(x->rdmult, x->rddiv, sum_rate, sum_dist);
+            }
           }
+          if (sum_rd < best_rd) {
+            set_partition_seg_context(cm, xd, mi_row, mi_col);
+            pl = partition_plane_context(xd, bsize);
+            sum_rate += x->partition_cost[pl][PARTITION_VERT];
+            sum_rd = RDCOST(x->rdmult, x->rddiv, sum_rate, sum_dist);
+            if (sum_rd < best_rd) {
+              best_rate = sum_rate;
+              best_dist = sum_dist;
+              best_rd = sum_rd;
+              *(get_sb_partitioning(x, bsize)) = subsize;
+            }
+          }
+          restore_context(cpi, mi_row, mi_col, a, l, sa, sl, bsize);
         }
-        restore_context(cpi, mi_row, mi_col, a, l, sa, sl, bsize);
       }
     }
   }
@@ -1837,7 +1847,6 @@ static void rd_pick_partition(VP9_COMP *cpi, TOKENEXTRA **tp, int mi_row,
 
   if (best_rate < INT_MAX && best_dist < INT_MAX && do_recon)
     encode_sb(cpi, tp, mi_row, mi_col, bsize == BLOCK_64X64, bsize);
-
   if (bsize == BLOCK_64X64) {
     assert(tp_orig < *tp);
     assert(best_rate < INT_MAX);
