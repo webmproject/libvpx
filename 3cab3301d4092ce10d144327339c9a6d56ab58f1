@@ -16,6 +16,24 @@
       "revId": "3cab3301d4092ce10d144327339c9a6d56ab58f1",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcn//tsY\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 790,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2013-08-13T05:16:24Z",
+      "side": 1,
+      "message": "These functions are only called by block sizes \u003e\u003d 8x8. They should not run into sub8x8 cases. \n\nYes, when it comes to sub8x8 cases, the max_txfm_size should be set to be TX_4X4.",
+      "parentUuid": "AAAAcn//uLI\u003d",
+      "revId": "3cab3301d4092ce10d144327339c9a6d56ab58f1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
