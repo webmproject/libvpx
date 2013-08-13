@@ -251,6 +251,7 @@ EXPERIMENT_LIST="
     non420
     alpha
     interintra
+    filterintra
 "
 CONFIG_LIST="
     external_build

@@ -640,6 +640,9 @@ void encode_block_intra(int plane, int block, BLOCK_SIZE_TYPE bsize,
   const int16_t *scan, *iscan;
   TX_TYPE tx_type;
   MB_PREDICTION_MODE mode;
+#if CONFIG_FILTERINTRA
+  int fbit = 0;
+#endif
   const int bwl = b_width_log2(bsize) - pd->subsampling_x, bw = 1 << bwl;
   const int twl = bwl - tx_size, twmask = (1 << twl) - 1;
   int xoff, yoff;
@@ -660,6 +663,9 @@ void encode_block_intra(int plane, int block, BLOCK_SIZE_TYPE bsize,
       scan = vp9_default_scan_32x32;
       iscan = vp9_default_iscan_32x32;
       mode = plane == 0 ? mbmi->mode : mbmi->uv_mode;
+#if CONFIG_FILTERINTRA
+      fbit = plane == 0 ? mbmi->filterbit : mbmi->uv_filterbit;
+#endif
       block >>= 6;
       xoff = 32 * (block & twmask);
       yoff = 32 * (block >> twl);
@@ -667,6 +673,9 @@ void encode_block_intra(int plane, int block, BLOCK_SIZE_TYPE bsize,
       src = p->src.buf + yoff * p->src.stride + xoff;
       src_diff = p->src_diff + 4 * bw * yoff + xoff;
       vp9_predict_intra_block(xd, block, bwl, TX_32X32, mode,
+#if CONFIG_FILTERINTRA
+                              fbit,
+#endif
                               dst, pd->dst.stride, dst, pd->dst.stride);
       vp9_subtract_block(32, 32, src_diff, bw * 4,
                          src, p->src.stride, dst, pd->dst.stride);
@@ -685,6 +694,9 @@ void encode_block_intra(int plane, int block, BLOCK_SIZE_TYPE bsize,
       scan = get_scan_16x16(tx_type);
       iscan = get_iscan_16x16(tx_type);
       mode = plane == 0 ? mbmi->mode : mbmi->uv_mode;
+#if CONFIG_FILTERINTRA
+      fbit = plane == 0 ? mbmi->filterbit : mbmi->uv_filterbit;
+#endif
       block >>= 4;
       xoff = 16 * (block & twmask);
       yoff = 16 * (block >> twl);
@@ -692,6 +704,9 @@ void encode_block_intra(int plane, int block, BLOCK_SIZE_TYPE bsize,
       src = p->src.buf + yoff * p->src.stride + xoff;
       src_diff = p->src_diff + 4 * bw * yoff + xoff;
       vp9_predict_intra_block(xd, block, bwl, TX_16X16, mode,
+#if CONFIG_FILTERINTRA
+                              fbit,
+#endif
                               dst, pd->dst.stride, dst, pd->dst.stride);
       vp9_subtract_block(16, 16, src_diff, bw * 4,
                          src, p->src.stride, dst, pd->dst.stride);
@@ -714,6 +729,9 @@ void encode_block_intra(int plane, int block, BLOCK_SIZE_TYPE bsize,
       scan = get_scan_8x8(tx_type);
       iscan = get_iscan_8x8(tx_type);
       mode = plane == 0 ? mbmi->mode : mbmi->uv_mode;
+#if CONFIG_FILTERINTRA
+      fbit = plane == 0 ? mbmi->filterbit : mbmi->uv_filterbit;
+#endif
       block >>= 2;
       xoff = 8 * (block & twmask);
       yoff = 8 * (block >> twl);
@@ -721,6 +739,9 @@ void encode_block_intra(int plane, int block, BLOCK_SIZE_TYPE bsize,
       src = p->src.buf + yoff * p->src.stride + xoff;
       src_diff = p->src_diff + 4 * bw * yoff + xoff;
       vp9_predict_intra_block(xd, block, bwl, TX_8X8, mode,
+#if CONFIG_FILTERINTRA
+                              fbit,
+#endif
                               dst, pd->dst.stride, dst, pd->dst.stride);
       vp9_subtract_block(8, 8, src_diff, bw * 4,
                          src, p->src.stride, dst, pd->dst.stride);
@@ -747,12 +768,22 @@ void encode_block_intra(int plane, int block, BLOCK_SIZE_TYPE bsize,
       else
         mode = plane == 0 ? mbmi->mode : mbmi->uv_mode;
 
+#if CONFIG_FILTERINTRA
+      if (mbmi->sb_type < BLOCK_8X8 && plane == 0)
+        fbit = xd->mode_info_context->b_filter_info[block];
+      else
+        fbit = plane == 0 ? mbmi->filterbit : mbmi->uv_filterbit;
+#endif
+
       xoff = 4 * (block & twmask);
       yoff = 4 * (block >> twl);
       dst = pd->dst.buf + yoff * pd->dst.stride + xoff;
       src = p->src.buf + yoff * p->src.stride + xoff;
       src_diff = p->src_diff + 4 * bw * yoff + xoff;
       vp9_predict_intra_block(xd, block, bwl, TX_4X4, mode,
+#if CONFIG_FILTERINTRA
+                              fbit,
+#endif
                               dst, pd->dst.stride, dst, pd->dst.stride);
       vp9_subtract_block(4, 4, src_diff, bw * 4,
                          src, p->src.stride, dst, pd->dst.stride);

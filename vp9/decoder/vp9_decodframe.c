@@ -140,12 +140,22 @@ static void decode_block_intra(int plane, int block, BLOCK_SIZE_TYPE bsize,
   const int tx_ib = raster_block >> tx_size;
   const int mode = plane == 0 ? mi->mbmi.mode
                               : mi->mbmi.uv_mode;
+#if CONFIG_FILTERINTRA
+  int fbit = 0;
+#endif
 
   if (plane == 0 && mi->mbmi.sb_type < BLOCK_8X8) {
     assert(bsize == BLOCK_8X8);
     b_mode = mi->bmi[raster_block].as_mode;
+#if CONFIG_FILTERINTRA
+    fbit = mi->b_filter_info[raster_block];
+#endif
   } else {
     b_mode = mode;
+#if CONFIG_FILTERINTRA
+    if (tx_size <= TX_8X8)
+      fbit = plane == 0? mi->mbmi.filterbit: mi->mbmi.uv_filterbit;
+#endif
   }
 
   if (xd->mb_to_right_edge < 0 || xd->mb_to_bottom_edge < 0)
@@ -153,6 +163,9 @@ static void decode_block_intra(int plane, int block, BLOCK_SIZE_TYPE bsize,
 
   plane_b_size = b_width_log2(bsize) - pd->subsampling_x;
   vp9_predict_intra_block(xd, tx_ib, plane_b_size, tx_size, b_mode,
+#if CONFIG_FILTERINTRA
+                          fbit,
+#endif
                           dst, pd->dst.stride,
                           dst, pd->dst.stride);
 

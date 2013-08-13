@@ -146,7 +146,13 @@ static int find_best_16x16_intra(VP9_COMP *cpi,
     unsigned int err;
 
     xd->mode_info_context->mbmi.mode = mode;
+#if CONFIG_FILTERINTRA
+    xd->mode_info_context->mbmi.filterbit = 0;
+#endif
     vp9_predict_intra_block(xd, 0, 2, TX_16X16, mode,
+#if CONFIG_FILTERINTRA
+                            0,
+#endif
                             x->plane[0].src.buf, x->plane[0].src.stride,
                             xd->plane[0].dst.buf, xd->plane[0].dst.stride);
     err = vp9_sad16x16(x->plane[0].src.buf, x->plane[0].src.stride,

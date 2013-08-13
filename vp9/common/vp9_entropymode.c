@@ -214,6 +214,16 @@ const vp9_prob vp9_kf_y_mode_prob[VP9_INTRA_MODES]
   }
 };
 
+#if CONFIG_FILTERINTRA
+const vp9_prob vp9_default_filterintra_prob[TX_SIZES][VP9_INTRA_MODES] = {
+  // DC   V    H    D45  D135 D117 D153 D27  D63  TM
+    {160, 160, 160, 160, 160, 160, 160, 160, 160, 160},  // TX_4X4
+    {180, 180, 180, 180, 180, 180, 180, 180, 180, 180},  // TX_8X8
+    {200, 200, 200, 200, 200, 200, 200, 200, 200, 200},  // TX_16X16
+    {220, 220, 220, 220, 220, 220, 220, 220, 220, 220},  // TX_32X32
+};
+#endif
+
 static const vp9_prob default_inter_mode_probs[INTER_MODE_CONTEXTS]
                                               [VP9_INTER_MODES - 1] = {
   {2,       173,   34},  // 0 = both zero mv
@@ -338,6 +348,9 @@ void vp9_init_mbmode_probs(VP9_COMMON *cm) {
   vp9_copy(cm->fc.mbskip_probs, default_mbskip_probs);
 #if CONFIG_INTERINTRA
   cm->fc.interintra_prob = VP9_DEF_INTERINTRA_PROB;
+#endif
+#if CONFIG_FILTERINTRA
+  vp9_copy(cm->fc.filterintra_prob, vp9_default_filterintra_prob);
 #endif
 }
 
@@ -466,6 +479,12 @@ void vp9_adapt_mode_probs(VP9_COMMON *cm) {
     fc->interintra_prob = update_ct2(pre_fc->interintra_prob,
                                      counts->interintra);
   }
+#endif
+#if CONFIG_FILTERINTRA
+  for (i = 0; i < TX_SIZES; ++i)
+    for (j = 0; j < VP9_INTRA_MODES; ++j)
+      fc->filterintra_prob[i][j] = update_ct2(pre_fc->filterintra_prob[i][j],
+                                              counts->filterintra[i][j]);
 #endif
 }
 

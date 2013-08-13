@@ -109,6 +109,9 @@ void vp9_save_coding_context(VP9_COMP *cpi) {
 #if CONFIG_INTERINTRA
   cc->interintra_prob = cm->fc.interintra_prob;
 #endif
+#if CONFIG_FILTERINTRA
+  vp9_copy(cc->filterintra_prob, cm->fc.filterintra_prob);
+#endif
 }
 
 void vp9_restore_coding_context(VP9_COMP *cpi) {
@@ -150,6 +153,9 @@ void vp9_restore_coding_context(VP9_COMP *cpi) {
   vp9_copy(cm->fc.mbskip_probs, cc->mbskip_probs);
 #if CONFIG_INTERINTRA
   cm->fc.interintra_prob = cc->interintra_prob;
+#endif
+#if CONFIG_FILTERINTRA
+  vp9_copy(cm->fc.filterintra_prob, cc->filterintra_prob);
 #endif
 }
 

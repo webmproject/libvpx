@@ -2009,6 +2009,10 @@ static void init_encode_frame_mb_context(VP9_COMP *cpi) {
 
   xd->mode_info_context->mbmi.mode = DC_PRED;
   xd->mode_info_context->mbmi.uv_mode = DC_PRED;
+#if CONFIG_FILTERINTRA
+  xd->mode_info_context->mbmi.filterbit = 0;
+  xd->mode_info_context->mbmi.uv_filterbit = 0;
+#endif
 
   vp9_zero(cpi->y_mode_count)
   vp9_zero(cpi->y_uv_mode_count)
@@ -2023,6 +2027,9 @@ static void init_encode_frame_mb_context(VP9_COMP *cpi) {
 #if CONFIG_INTERINTRA
   vp9_zero(cpi->interintra_count);
   vp9_zero(cpi->interintra_select_count);
+#endif
+#if CONFIG_FILTERINTRA
+  vp9_zero(cm->counts.filterintra);
 #endif
 
   // Note: this memset assumes above_context[0], [1] and [2]
@@ -2515,13 +2522,30 @@ static void sum_intra_stats(VP9_COMP *cpi, MACROBLOCK *x) {
   const MACROBLOCKD *xd = &x->e_mbd;
   const MB_PREDICTION_MODE m = xd->mode_info_context->mbmi.mode;
   const MB_PREDICTION_MODE uvm = xd->mode_info_context->mbmi.uv_mode;
+#if CONFIG_FILTERINTRA
+  const int uv_fbit = xd->mode_info_context->mbmi.uv_filterbit;
+  int fbit = xd->mode_info_context->mbmi.filterbit;
+#endif
 
   ++cpi->y_uv_mode_count[m][uvm];
+#if CONFIG_FILTERINTRA
+  if (is_filter_allowed(uvm) &&
+      (get_uv_tx_size(&(xd->mode_info_context->mbmi)) <= TX_8X8))
+    ++cpi->common.counts.filterintra
+                         [get_uv_tx_size(&(xd->mode_info_context->mbmi))]
+                         [uvm][uv_fbit];
+#endif
   if (xd->mode_info_context->mbmi.sb_type >= BLOCK_8X8) {
     const BLOCK_SIZE_TYPE bsize = xd->mode_info_context->mbmi.sb_type;
     const int bwl = b_width_log2(bsize), bhl = b_height_log2(bsize);
     const int bsl = MIN(bwl, bhl);
     ++cpi->y_mode_count[MIN(bsl, 3)][m];
+#if CONFIG_FILTERINTRA
+    if (is_filter_allowed(m) &&
+        (xd->mode_info_context->mbmi.txfm_size <= TX_8X8))
+      ++cpi->common.counts.filterintra[xd->mode_info_context->mbmi.txfm_size]
+                                       [m][fbit];
+#endif
   } else {
     int idx, idy;
     int num_4x4_blocks_wide = num_4x4_blocks_wide_lookup[
@@ -2532,6 +2556,12 @@ static void sum_intra_stats(VP9_COMP *cpi, MACROBLOCK *x) {
       for (idx = 0; idx < 2; idx += num_4x4_blocks_wide) {
         int m = xd->mode_info_context->bmi[idy * 2 + idx].as_mode;
         ++cpi->y_mode_count[0][m];
+#if CONFIG_FILTERINTRA
+        if (is_filter_allowed(m)) {
+          fbit = xd->mode_info_context->b_filter_info[idy * 2 + idx];
+          ++cpi->common.counts.filterintra[0][m][fbit];
+        }
+#endif
       }
     }
   }

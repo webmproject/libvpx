@@ -401,11 +401,110 @@ static void build_intra_predictors(uint8_t *src, int src_stride,
   }
 }
 
+#if CONFIG_FILTERINTRA
+static void filter_intra_predictors(uint8_t *ypred_ptr, int y_stride, int bs,
+                                    uint8_t *yabove_row, uint8_t *yleft_col,
+                                    int mode) {
+  static const int prec_bits = 10;
+  static const int round_val = 511;
+  static const int taps[10][3] = {
+      {438 , 660, -352},  // DC
+      {1014, 565, -559},  // V
+      {312, 1017, -312},  // H
+      {0, 0, 0},          // D45
+      {478, 483, 153},    // D135
+      {699, 470, -122},   // D117
+      {356, 707, 35},     // D153
+      {0, 0, 0},          // D27
+      {0, 0, 0},          // D63
+      {877, 896, -812}    // TM
+      };
+  int k, r, c;
+  int pred[17][17];
+  int mean, ipred;
+  const int c1 = taps[mode][0];
+  const int c2 = taps[mode][1];
+  const int c3 = taps[mode][2];
+
+  k = 0;
+  mean = 0;
+  while (k < bs) {
+    mean = mean + (int)yleft_col[r];
+    mean = mean + (int)yabove_row[c];
+    k++;
+  }
+  mean = (mean + bs) / (2 * bs);
+
+  for (r = 0; r < bs; r++)
+    pred[r + 1][0] = (int)yleft_col[r] - mean;
+
+  for (c = 0; c < bs + 1; c++)
+    pred[0][c] = (int)yabove_row[c - 1] - mean;
+
+  for (r = 1; r < bs + 1; r++)
+    for (c = 1; c < bs + 1; c++) {
+      ipred = c1 * pred[r - 1][c] + c2 * pred[r][c - 1]
+              + c3 * pred[r - 1][c - 1];
+      pred[r][c] = ipred < 0 ? -((-ipred + round_val) >> prec_bits) :
+                               ((ipred + round_val) >> prec_bits);
+    }
+
+  for (r = 0; r < bs; r++) {
+    for (c = 0; c < bs; c++) {
+      ipred = pred[r + 1][c + 1] + mean;
+      ypred_ptr[c] = clip_pixel(ipred);
+    }
+    ypred_ptr += y_stride;
+  }
+}
+
+static void build_filter_intra_predictors(uint8_t *src, int src_stride,
+                                          uint8_t *pred_ptr, int stride,
+                                          MB_PREDICTION_MODE mode, TX_SIZE txsz,
+                                          int up_available, int left_available,
+                                          int right_available) {
+  int i;
+  DECLARE_ALIGNED_ARRAY(16, uint8_t, left_col, 64);
+  DECLARE_ALIGNED_ARRAY(16, uint8_t, yabove_data, 128 + 16);
+  uint8_t *above_row = yabove_data + 16;
+  const int bs = 4 << txsz;
+
+  if (left_available) {
+    for (i = 0; i < bs; i++)
+      left_col[i] = src[i * src_stride - 1];
+  } else {
+    vpx_memset(left_col, 129, bs);
+  }
+
+  if (up_available) {
+    uint8_t *above_ptr = src - src_stride;
+    if (bs == 4 && right_available && left_available) {
+      above_row = above_ptr;
+    } else {
+      vpx_memcpy(above_row, above_ptr, bs);
+      if (bs == 4 && right_available)
+        vpx_memcpy(above_row + bs, above_ptr + bs, bs);
+      else
+        vpx_memset(above_row + bs, above_row[bs - 1], bs);
+      above_row[-1] = left_available ? above_ptr[-1] : 129;
+    }
+  } else {
+    vpx_memset(above_row, 127, bs * 2);
+    above_row[-1] = 127;
+  }
+
+  filter_intra_predictors(pred_ptr, stride, bs, above_row, left_col, mode);
+}
+#endif
+
 void vp9_predict_intra_block(MACROBLOCKD *xd,
                             int block_idx,
                             int bwl_in,
                             TX_SIZE tx_size,
                             int mode,
+#if CONFIG_FILTERINTRA
+                            int filterbit,
+#endif
                             uint8_t *reference, int ref_stride,
                             uint8_t *predictor, int pre_stride) {
   const int bwl = bwl_in - tx_size;
@@ -413,14 +512,30 @@ void vp9_predict_intra_block(MACROBLOCKD *xd,
   const int have_top = (block_idx >> bwl) || xd->up_available;
   const int have_left = (block_idx & wmask) || xd->left_available;
   const int have_right = ((block_idx & wmask) != wmask);
+#if CONFIG_FILTERINTRA
+  int filterflag = is_filter_allowed(mode) && (tx_size <= TX_8X8) && filterbit;
+#endif
 
   assert(bwl >= 0);
+#if CONFIG_FILTERINTRA
+  if (!filterflag) {
+#endif
   build_intra_predictors(reference, ref_stride,
                          predictor, pre_stride,
                          mode,
                          tx_size,
                          have_top, have_left,
                          have_right);
+#if CONFIG_FILTERINTRA
+  } else {
+    build_filter_intra_predictors(reference, ref_stride,
+                                  predictor, pre_stride,
+                                  mode,
+                                  tx_size,
+                                  have_top, have_left,
+                                  have_right);
+  }
+#endif
 }
 
 #if CONFIG_INTERINTRA
@@ -549,7 +664,7 @@ static void combine_interintra(MB_PREDICTION_MODE mode,
 
 // Break down rectangular intra prediction for joint spatio-temporal prediction
 // into two square intra predictions.
-void build_intra_predictors_for_interintra(uint8_t *src, int src_stride,
+static void build_intra_predictors_for_interintra(uint8_t *src, int src_stride,
                                            uint8_t *pred_ptr, int stride,
                                            MB_PREDICTION_MODE mode,
                                            int bw, int bh,

@@ -99,6 +99,9 @@ typedef struct {
 #if CONFIG_INTERINTRA
   vp9_prob interintra_prob;
 #endif
+#if CONFIG_FILTERINTRA
+  vp9_prob filterintra_prob[TX_SIZES][VP9_INTRA_MODES];
+#endif
 } CODING_CONTEXT;
 
 typedef struct {

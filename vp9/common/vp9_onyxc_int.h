@@ -56,6 +56,9 @@ typedef struct frame_contexts {
 #if CONFIG_INTERINTRA
   vp9_prob interintra_prob;
 #endif
+#if CONFIG_FILTERINTRA
+  vp9_prob filterintra_prob[TX_SIZES][VP9_INTRA_MODES];
+#endif
 } FRAME_CONTEXT;
 
 typedef struct {
@@ -77,6 +80,9 @@ typedef struct {
   nmv_context_counts mv;
 #if CONFIG_INTERINTRA
   unsigned int interintra[2];
+#endif
+#if CONFIG_FILTERINTRA
+  unsigned int filterintra[TX_SIZES][VP9_INTRA_MODES][2];
 #endif
 } FRAME_COUNTS;
 
