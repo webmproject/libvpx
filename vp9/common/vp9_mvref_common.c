@@ -281,7 +281,7 @@ void vp9_find_mv_refs_idx(VP9_COMMON *cm, MACROBLOCKD *xd, MODE_INFO *here,
 
  Done:
 
-  mbmi->mb_mode_context[ref_frame] = counter_to_context[context_counter];
+  mbmi->mode_context[ref_frame] = counter_to_context[context_counter];
 
   // Clamp vectors
   for (idx = 0; idx < MAX_MV_REF_CANDIDATES; ++idx)

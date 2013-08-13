@@ -157,7 +157,7 @@ static void decode_block_intra(int plane, int block, BLOCK_SIZE_TYPE bsize,
                           dst, pd->dst.stride);
 
   // Early exit if there are no coefficients
-  if (mi->mbmi.mb_skip_coeff)
+  if (mi->mbmi.skip_coeff)
     return;
 
   decode_block(plane, block, bsize, ss_txfrm_size, arg);
@@ -166,7 +166,7 @@ static void decode_block_intra(int plane, int block, BLOCK_SIZE_TYPE bsize,
 static int decode_tokens(VP9D_COMP *pbi, BLOCK_SIZE_TYPE bsize, vp9_reader *r) {
   MACROBLOCKD *const xd = &pbi->mb;
 
-  if (xd->mode_info_context->mbmi.mb_skip_coeff) {
+  if (xd->mode_info_context->mbmi.skip_coeff) {
       reset_skip_context(xd, bsize);
     return -1;
   } else {

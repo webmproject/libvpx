@@ -38,7 +38,7 @@ void vp9_update_mode_info_in_image(VP9_COMMON *cm, MODE_INFO *mi) {
   for (i = 0; i < cm->mi_rows; i++) {
     MODE_INFO *ptr = mi;
     for (j = 0; j < cm->mi_cols; j++) {
-      ptr->mbmi.mb_in_image = 1;
+      ptr->mbmi.in_image = 1;
       ptr++;  // Next element in the row
     }
 
