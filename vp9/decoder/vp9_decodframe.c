@@ -583,11 +583,12 @@ static void decode_tile(VP9D_COMP *pbi, vp9_reader *r) {
   const int num_threads = pbi->oxcf.max_threads;
   VP9_COMMON *const pc = &pbi->common;
   int mi_row, mi_col;
+  YV12_BUFFER_CONFIG *const fb = &pc->yv12_fb[pc->new_fb_idx];
 
   if (pbi->do_loopfilter_inline) {
     if (num_threads > 1) {
       LFWorkerData *const lf_data = (LFWorkerData*)pbi->lf_worker.data1;
-      lf_data->frame_buffer = &pbi->common.yv12_fb[pbi->common.new_fb_idx];
+      lf_data->frame_buffer = fb;
       lf_data->cm = pc;
       lf_data->xd = pbi->mb;
       lf_data->y_only = 0;
@@ -598,8 +599,8 @@ static void decode_tile(VP9D_COMP *pbi, vp9_reader *r) {
   for (mi_row = pc->cur_tile_mi_row_start; mi_row < pc->cur_tile_mi_row_end;
        mi_row += MI_BLOCK_SIZE) {
     // For a SB there are 2 left contexts, each pertaining to a MB row within
-    vpx_memset(&pc->left_context, 0, sizeof(pc->left_context));
-    vpx_memset(pc->left_seg_context, 0, sizeof(pc->left_seg_context));
+    vp9_zero(pc->left_context);
+    vp9_zero(pc->left_seg_context);
     for (mi_col = pc->cur_tile_mi_col_start; mi_col < pc->cur_tile_mi_col_end;
          mi_col += MI_BLOCK_SIZE) {
       decode_modes_sb(pbi, mi_row, mi_col, r, BLOCK_64X64);
@@ -619,15 +620,12 @@ static void decode_tile(VP9D_COMP *pbi, vp9_reader *r) {
         pbi->lf_worker.hook = vp9_loop_filter_worker;
         vp9_worker_launch(&pbi->lf_worker);
       } else {
-        YV12_BUFFER_CONFIG *const fb =
-            &pbi->common.yv12_fb[pbi->common.new_fb_idx];
         vp9_loop_filter_rows(fb, pc, &pbi->mb, lf_start, mi_row, 0);
       }
     }
   }
 
   if (pbi->do_loopfilter_inline) {
-    YV12_BUFFER_CONFIG *const fb = &pbi->common.yv12_fb[pbi->common.new_fb_idx];
     if (num_threads > 1) {
       // TODO(jzern): since the loop filter is delayed one mb row, this will be
       // forced to wait for the last row scheduled in the for loop.
