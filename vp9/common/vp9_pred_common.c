@@ -130,6 +130,9 @@ unsigned char vp9_get_pred_context_comp_ref_p(const VP9_COMMON *cm,
   const MB_MODE_INFO *const left_mbmi = &mi[-1].mbmi;
   const int left_in_image = xd->left_available && left_mbmi->mb_in_image;
   const int above_in_image = xd->up_available && above_mbmi->mb_in_image;
+  const int left_intra = !is_inter_block(left_mbmi);
+  const int above_intra = !is_inter_block(above_mbmi);
+
   // Note:
   // The mode info data structure has a one element border above and to the
   // left of the entries correpsonding to real macroblocks.
@@ -138,13 +141,10 @@ unsigned char vp9_get_pred_context_comp_ref_p(const VP9_COMMON *cm,
   const int var_ref_idx = !fix_ref_idx;
 
   if (above_in_image && left_in_image) {  // both edges available
-    if (above_mbmi->ref_frame[0] == INTRA_FRAME &&
-        left_mbmi->ref_frame[0] == INTRA_FRAME) {  // intra/intra (2)
+    if (above_intra && left_intra) {  // intra/intra (2)
       pred_context = 2;
-    } else if (above_mbmi->ref_frame[0] == INTRA_FRAME ||
-               left_mbmi->ref_frame[0] == INTRA_FRAME) {  // intra/inter
-      const MB_MODE_INFO *edge_mbmi = above_mbmi->ref_frame[0] == INTRA_FRAME ?
-                                          left_mbmi : above_mbmi;
+    } else if (above_intra || left_intra) {  // intra/inter
+      const MB_MODE_INFO *edge_mbmi = above_intra ? left_mbmi : above_mbmi;
 
       if (edge_mbmi->ref_frame[1] <= INTRA_FRAME)  // single pred (1/3)
         pred_context = 1 + 2 * (edge_mbmi->ref_frame[0] != cm->comp_var_ref[1]);
@@ -208,18 +208,18 @@ unsigned char vp9_get_pred_context_single_ref_p1(const MACROBLOCKD *xd) {
   const MB_MODE_INFO *const left_mbmi = &mi[-1].mbmi;
   const int left_in_image = xd->left_available && left_mbmi->mb_in_image;
   const int above_in_image = xd->up_available && above_mbmi->mb_in_image;
+  const int left_intra = !is_inter_block(left_mbmi);
+  const int above_intra = !is_inter_block(above_mbmi);
+
   // Note:
   // The mode info data structure has a one element border above and to the
   // left of the entries correpsonding to real macroblocks.
   // The prediction flags in these dummy entries are initialised to 0.
   if (above_in_image && left_in_image) {  // both edges available
-    if (above_mbmi->ref_frame[0] == INTRA_FRAME &&
-        left_mbmi->ref_frame[0] == INTRA_FRAME) {
+    if (above_intra && left_intra) {
       pred_context = 2;
-    } else if (above_mbmi->ref_frame[0] == INTRA_FRAME ||
-               left_mbmi->ref_frame[0] == INTRA_FRAME) {
-      const MB_MODE_INFO *edge_mbmi = above_mbmi->ref_frame[0] == INTRA_FRAME ?
-                                          left_mbmi : above_mbmi;
+    } else if (above_intra || left_intra) {
+      const MB_MODE_INFO *edge_mbmi = above_intra ? left_mbmi : above_mbmi;
 
       if (edge_mbmi->ref_frame[1] <= INTRA_FRAME)
         pred_context = 4 * (edge_mbmi->ref_frame[0] == LAST_FRAME);
@@ -273,19 +273,18 @@ unsigned char vp9_get_pred_context_single_ref_p2(const MACROBLOCKD *xd) {
   const MB_MODE_INFO *const left_mbmi = &mi[-1].mbmi;
   const int left_in_image = xd->left_available && left_mbmi->mb_in_image;
   const int above_in_image = xd->up_available && above_mbmi->mb_in_image;
+  const int left_intra = !is_inter_block(left_mbmi);
+  const int above_intra = !is_inter_block(above_mbmi);
 
   // Note:
   // The mode info data structure has a one element border above and to the
   // left of the entries correpsonding to real macroblocks.
   // The prediction flags in these dummy entries are initialised to 0.
   if (above_in_image && left_in_image) {  // both edges available
-    if (above_mbmi->ref_frame[0] == INTRA_FRAME &&
-        left_mbmi->ref_frame[0] == INTRA_FRAME) {
+    if (above_intra && left_intra) {
       pred_context = 2;
-    } else if (above_mbmi->ref_frame[0] == INTRA_FRAME ||
-               left_mbmi->ref_frame[0] == INTRA_FRAME) {
-      const MB_MODE_INFO *edge_mbmi = above_mbmi->ref_frame[0] == INTRA_FRAME ?
-                                          left_mbmi : above_mbmi;
+    } else if (above_intra || left_intra) {
+      const MB_MODE_INFO *edge_mbmi = above_intra ? left_mbmi : above_mbmi;
 
       if (edge_mbmi->ref_frame[1] <= INTRA_FRAME) {
         if (edge_mbmi->ref_frame[0] == LAST_FRAME)
