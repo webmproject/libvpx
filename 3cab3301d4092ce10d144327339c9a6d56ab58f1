@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAcn//uLI\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 790,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2013-08-13T00:23:02Z",
+      "side": 1,
+      "message": "In general, the result of this expression is different from max_txsize_lookup for 4x4, 4x8, and 8x4 block sizes (expression really says 8x8 transform instead of correct 4x4 value)",
+      "revId": "3cab3301d4092ce10d144327339c9a6d56ab58f1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
