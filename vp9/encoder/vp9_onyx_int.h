@@ -275,8 +275,6 @@ typedef struct {
   int auto_min_max_partition_count;
   BLOCK_SIZE_TYPE min_partition_size;
   BLOCK_SIZE_TYPE max_partition_size;
-  // int use_min_partition_size;       // not used in code
-  // int use_max_partition_size;
   int adjust_partitioning_from_last_frame;
   int last_partitioning_redo_frequency;
   int disable_splitmv;

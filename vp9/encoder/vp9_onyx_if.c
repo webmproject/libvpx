@@ -730,9 +730,7 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
   sf->auto_min_max_partition_size = 0;
   sf->auto_min_max_partition_interval = 0;
   sf->auto_min_max_partition_count = 0;
-  // sf->use_max_partition_size = 0;
   sf->max_partition_size = BLOCK_64X64;
-  // sf->use_min_partition_size = 0;
   sf->min_partition_size = BLOCK_4X4;
   sf->adjust_partitioning_from_last_frame = 0;
   sf->last_partitioning_redo_frequency = 4;
@@ -794,8 +792,6 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
         sf->auto_mv_step_size = 1;
 
         sf->auto_min_max_partition_size = 1;
-        // sf->use_max_partition_size = 1;
-        // sf->use_min_partition_size = 1;
         sf->auto_min_max_partition_interval = 1;
       }
       if (speed == 2) {
@@ -883,13 +879,11 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
       if (speed == 2) {
         sf->first_step = 0;
         sf->comp_inter_joint_search_thresh = BLOCK_8X8;
-        sf->use_max_partition_size = 1;
         sf->max_partition_size = BLOCK_16X16;
       }
       if (speed == 3) {
         sf->first_step = 0;
         sf->comp_inter_joint_search_thresh = BLOCK_B8X8;
-        sf->use_min_partition_size = 1;
         sf->min_partition_size = BLOCK_8X8;
       }
       */
