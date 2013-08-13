@@ -148,10 +148,10 @@ loop_horiz
     vtrn.32         d2, d3
     vtrn.8          d2, d3
 
-    vst1.u32        {d2[0]}, [r2], r3
-    vst1.u32        {d3[0]}, [r2], r3
-    vst1.u32        {d2[1]}, [r2], r3
-    vst1.u32        {d3[1]}, [r2], r4
+    vst1.u32        {d2[0]}, [r2@32], r3
+    vst1.u32        {d3[0]}, [r2@32], r3
+    vst1.u32        {d2[1]}, [r2@32], r3
+    vst1.u32        {d3[1]}, [r2@32], r4
 
     vmov            q8,  q9
     vmov            d20, d23
@@ -254,10 +254,10 @@ loop_vert
     vqmovn.u16      d2, q1
     vqmovn.u16      d3, q2
 
-    vst1.u32        {d2[0]}, [r5], r3
-    vst1.u32        {d2[1]}, [r8], r3
-    vst1.u32        {d3[0]}, [r5], r3
-    vst1.u32        {d3[1]}, [r8], r3
+    vst1.u32        {d2[0]}, [r5@32], r3
+    vst1.u32        {d2[1]}, [r8@32], r3
+    vst1.u32        {d3[0]}, [r5@32], r3
+    vst1.u32        {d3[1]}, [r8@32], r3
 
     vmov            q8, q10
     vmov            d18, d22
