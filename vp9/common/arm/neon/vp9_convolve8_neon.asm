@@ -177,59 +177,72 @@ loop_horiz
     cmp             r12, #16
     bne             vp9_convolve8_vert_c
 
-    push            {r4-r10, lr}
+    push            {r4-r8, lr}
 
     ; adjust for taps
     sub             r0, r0, r1
     sub             r0, r0, r1, lsl #1
 
-    ldr             r7, [sp, #40]           ; filter_y
-    ldr             r8, [sp, #48]           ; w
-    ldr             r9, [sp, #52]           ; h
+    ldr             r4, [sp, #32]           ; filter_y
+    ldr             r6, [sp, #40]           ; w
+    ldr             lr, [sp, #44]           ; h
 
-    vld1.s16        {q0}, [r7]              ; filter_y
+    vld1.s16        {q0}, [r4]              ; filter_y
 
-    mov             r5, r1, lsl #1          ; src_stride * 2
-    add             r5, r5, r1, lsl #3      ; src_stride * 10
-    sub             r5, r5, #4              ; src_stride * 10 + 4
-    rsb             r5, r5, #0              ; reset for src
+    lsl             r1, r1, #1
+    lsl             r3, r3, #1
 
-    add             r6, r3, r3, lsl #1      ; dst_stride * 3
-    sub             r6, r6, #4              ; dst_stride * 3 - 4
-    rsb             r6, r6, #0              ; reset for dst
+loop_vert_h
+    mov             r4, r0
+    add             r7, r0, r1, asr #1
+    mov             r5, r2
+    add             r8, r2, r3, asr #1
+    mov             r12, lr                 ; h loop counter
 
-    rsb             r7, r8, r1, lsl #2      ; reset src for outer loop
-    rsb             r12, r8, r3, lsl #2     ; reset dst for outer loop
+    vld1.u32        {d16[0]}, [r4], r1
+    vld1.u32        {d16[1]}, [r7], r1
+    vld1.u32        {d18[0]}, [r4], r1
+    vld1.u32        {d18[1]}, [r7], r1
+    vld1.u32        {d20[0]}, [r4], r1
+    vld1.u32        {d20[1]}, [r7], r1
+    vld1.u32        {d22[0]}, [r4], r1
 
-    mov             r10, r8                 ; w loop counter
-
-loop_vert
-    ; always process a 4x4 block at a time
-    vld1.u32        {d16[0]}, [r0], r1
-    vld1.u32        {d16[1]}, [r0], r1
-    vld1.u32        {d18[0]}, [r0], r1
-    vld1.u32        {d18[1]}, [r0], r1
-    vld1.u32        {d20[0]}, [r0], r1
-    vld1.u32        {d20[1]}, [r0], r1
-    vld1.u32        {d22[0]}, [r0], r1
-    vld1.u32        {d22[1]}, [r0], r1
-    vld1.u32        {d24[0]}, [r0], r1
-    vld1.u32        {d24[1]}, [r0], r1
-    vld1.u32        {d26[0]}, [r0], r5
-
-    ; extract to s16
     vmovl.u8        q8, d16
     vmovl.u8        q9, d18
     vmovl.u8        q10, d20
     vmovl.u8        q11, d22
+
+loop_vert
+    ; always process a 4x4 block at a time
+    vld1.u32        {d24[0]}, [r7], r1
+    vld1.u32        {d26[0]}, [r4], r1
+    vld1.u32        {d26[1]}, [r7], r1
+    vld1.u32        {d24[1]}, [r4], r1
+
+    ; extract to s16
     vmovl.u8        q12, d24
     vmovl.u8        q13, d26
 
+    pld             [r5]
+    pld             [r8]
+
     ; src[] * filter_y
-    MULTIPLY_BY_Q0 q1, d16, d17, d18, d19, d20, d21, d22, d23
-    MULTIPLY_BY_Q0 q2, d17, d18, d19, d20, d21, d22, d23, d24
-    MULTIPLY_BY_Q0 q14, d18, d19, d20, d21, d22, d23, d24, d25
-    MULTIPLY_BY_Q0 q15, d19, d20, d21, d22, d23, d24, d25, d26
+    MULTIPLY_BY_Q0  q1,  d16, d17, d18, d19, d20, d21, d22, d24
+
+    pld             [r5, r3]
+    pld             [r8, r3]
+
+    MULTIPLY_BY_Q0  q2,  d17, d18, d19, d20, d21, d22, d24, d26
+
+    pld             [r7]
+    pld             [r4]
+
+    MULTIPLY_BY_Q0  q14, d18, d19, d20, d21, d22, d24, d26, d27
+
+    pld             [r7, r1]
+    pld             [r4, r1]
+
+    MULTIPLY_BY_Q0  q15, d19, d20, d21, d22, d24, d26, d27, d25
 
     ; += 64 >> 7
     vqrshrun.s32    d2, q1, #7
@@ -241,22 +254,27 @@ loop_vert
     vqmovn.u16      d2, q1
     vqmovn.u16      d3, q2
 
-    vst1.u32        {d2[0]}, [r2], r3
-    vst1.u32        {d2[1]}, [r2], r3
-    vst1.u32        {d3[0]}, [r2], r3
-    vst1.u32        {d3[1]}, [r2], r6
+    vst1.u32        {d2[0]}, [r5], r3
+    vst1.u32        {d2[1]}, [r8], r3
+    vst1.u32        {d3[0]}, [r5], r3
+    vst1.u32        {d3[1]}, [r8], r3
 
-    subs            r8, r8, #4              ; w -= 4
+    vmov            q8, q10
+    vmov            d18, d22
+    vmov            d19, d24
+    vmov            q10, q13
+    vmov            d22, d25
+
+    subs            r12, r12, #4            ; h -= 4
     bgt             loop_vert
 
     ; outer loop
-    mov             r8, r10                 ; restore w counter
-    add             r0, r0, r7              ; src += 4 * src_stride - w
-    add             r2, r2, r12             ; dst += 4 * dst_stride - w
-    subs            r9, r9, #4              ; h -= 4
-    bgt             loop_vert
+    add             r0, r0, #4
+    add             r2, r2, #4
+    subs            r6, r6, #4              ; w -= 4
+    bgt             loop_vert_h
 
-    pop             {r4-r10, pc}
+    pop             {r4-r8, pc}
 
     ENDP
     END
