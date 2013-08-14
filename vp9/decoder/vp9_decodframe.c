@@ -99,8 +99,9 @@ static void decode_block(int plane, int block, BLOCK_SIZE_TYPE bsize,
   uint8_t* const dst = raster_block_offset_uint8(xd, bsize, plane,
                                                  raster_block,
                                                  pd->dst.buf, stride);
+  const TX_SIZE tx_size = (TX_SIZE)(ss_txfrm_size >> 1);
 
-  switch (ss_txfrm_size / 2) {
+  switch (tx_size) {
     case TX_4X4: {
       const TX_TYPE tx_type = get_tx_type_4x4(pd->plane_type, xd, raster_block);
       if (tx_type == DCT_DCT)
@@ -120,6 +121,8 @@ static void decode_block(int plane, int block, BLOCK_SIZE_TYPE bsize,
     case TX_32X32:
       vp9_idct_add_32x32(qcoeff, dst, stride, eob);
       break;
+    default:
+      assert(!"Invalid transform size");
   }
 }
 
@@ -134,7 +137,7 @@ static void decode_block_intra(int plane, int block, BLOCK_SIZE_TYPE bsize,
   uint8_t* const dst = raster_block_offset_uint8(xd, bsize, plane,
                                                  raster_block,
                                                  pd->dst.buf, pd->dst.stride);
-  const TX_SIZE tx_size = (TX_SIZE)(ss_txfrm_size / 2);
+  const TX_SIZE tx_size = (TX_SIZE)(ss_txfrm_size >> 1);
   int b_mode;
   int plane_b_size;
   const int tx_ib = raster_block >> tx_size;

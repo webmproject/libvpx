@@ -374,13 +374,14 @@ void vp9_optimize_b(int plane, int block, BLOCK_SIZE_TYPE bsize,
                     int ss_txfrm_size, MACROBLOCK *mb,
                     struct optimize_ctx *ctx) {
   MACROBLOCKD *const xd = &mb->e_mbd;
+  const TX_SIZE tx_size = (TX_SIZE)(ss_txfrm_size >> 1);
   int x, y;
 
   // find current entropy context
   txfrm_block_to_raster_xy(xd, bsize, plane, block, ss_txfrm_size, &x, &y);
 
-  optimize_b(mb, plane, block, bsize,
-             &ctx->ta[plane][x], &ctx->tl[plane][y], ss_txfrm_size / 2);
+  optimize_b(mb, plane, block, bsize, &ctx->ta[plane][x], &ctx->tl[plane][y],
+             tx_size);
 }
 
 static void optimize_block(int plane, int block, BLOCK_SIZE_TYPE bsize,
@@ -460,7 +461,7 @@ void xform_quant(int plane, int block, BLOCK_SIZE_TYPE bsize,
   int16_t *dqcoeff = BLOCK_OFFSET(pd->dqcoeff, block);
   const int16_t *scan, *iscan;
   uint16_t *eob = &pd->eobs[block];
-  const TX_SIZE tx_size = (TX_SIZE)(ss_txfrm_size / 2);
+  const TX_SIZE tx_size = (TX_SIZE)(ss_txfrm_size >> 1);
   const int bwl = b_width_log2(bsize) - pd->subsampling_x, bw = 1 << bwl;
   const int twl = bwl - tx_size, twmask = (1 << twl) - 1;
   int xoff, yoff;
@@ -534,17 +535,17 @@ static void encode_block(int plane, int block, BLOCK_SIZE_TYPE bsize,
   uint8_t *const dst = raster_block_offset_uint8(xd, bsize, plane,
                                                  raster_block,
                                                  pd->dst.buf, pd->dst.stride);
+  const TX_SIZE tx_size = (TX_SIZE)(ss_txfrm_size >> 1);
+
   xform_quant(plane, block, bsize, ss_txfrm_size, arg);
 
   if (x->optimize)
     vp9_optimize_b(plane, block, bsize, ss_txfrm_size, x, args->ctx);
 
-  if (x->skip_encode)
-    return;
-  if (pd->eobs[block] == 0)
+  if (x->skip_encode || pd->eobs[block] == 0)
     return;
 
-  switch (ss_txfrm_size / 2) {
+  switch (tx_size) {
     case TX_32X32:
       vp9_short_idct32x32_add(dqcoeff, dst, pd->dst.stride);
       break;
@@ -563,6 +564,8 @@ static void encode_block(int plane, int block, BLOCK_SIZE_TYPE bsize,
       inverse_transform_b_4x4_add(xd, pd->eobs[block], dqcoeff,
                                   dst, pd->dst.stride);
       break;
+    default:
+      assert(!"Invalid transform size");
   }
 }
 
@@ -630,7 +633,7 @@ void encode_block_intra(int plane, int block, BLOCK_SIZE_TYPE bsize,
   MACROBLOCK *const x = args->x;
   MACROBLOCKD *const xd = &x->e_mbd;
   MB_MODE_INFO *mbmi = &xd->mode_info_context->mbmi;
-  const TX_SIZE tx_size = (TX_SIZE)(ss_txfrm_size / 2);
+  const TX_SIZE tx_size = (TX_SIZE)(ss_txfrm_size >> 1);
   struct macroblock_plane *const p = &x->plane[plane];
   struct macroblockd_plane *const pd = &xd->plane[plane];
   int16_t *coeff = BLOCK_OFFSET(p->coeff, block);

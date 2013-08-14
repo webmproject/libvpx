@@ -393,7 +393,7 @@ static INLINE struct plane_block_idx plane_block_idx(int y_blocks,
 }
 
 static BLOCK_SIZE_TYPE get_plane_block_size(BLOCK_SIZE_TYPE bsize,
-                                            struct macroblockd_plane *pd) {
+                           const struct macroblockd_plane *pd) {
   BLOCK_SIZE_TYPE bs = ss_size_lookup[bsize]
                                      [pd->subsampling_x][pd->subsampling_y];
   assert(bs < BLOCK_SIZES);
@@ -418,7 +418,7 @@ typedef void (*foreach_transformed_block_visitor)(int plane, int block,
 static INLINE void foreach_transformed_block_in_plane(
     const MACROBLOCKD* const xd, BLOCK_SIZE_TYPE bsize, int plane,
     foreach_transformed_block_visitor visit, void *arg) {
-  const int bw = b_width_log2(bsize), bh = b_height_log2(bsize);
+  const struct macroblockd_plane *const pd = &xd->plane[plane];
 
   // block and transform sizes, in number of 4x4 blocks log 2 ("*_b")
   // 4x4=0, 8x8=2, 16x16=4, 32x32=6, 64x64=8
@@ -426,56 +426,45 @@ static INLINE void foreach_transformed_block_in_plane(
   const MB_MODE_INFO* mbmi = &xd->mode_info_context->mbmi;
   const TX_SIZE tx_size = plane ? get_uv_tx_size(mbmi)
                                 : mbmi->txfm_size;
-  const int block_size_b = bw + bh;
+  const int bw = b_width_log2(bsize) - pd->subsampling_x;
+  const int bh = b_height_log2(bsize) - pd->subsampling_y;
   const int txfrm_size_b = tx_size * 2;
-
-  // subsampled size of the block
-  const int ss_sum = xd->plane[plane].subsampling_x
-      + xd->plane[plane].subsampling_y;
-  const int ss_block_size = block_size_b - ss_sum;
-
   const int step = 1 << txfrm_size_b;
-
   int i;
-
-  assert(txfrm_size_b <= block_size_b);
-  assert(txfrm_size_b <= ss_block_size);
 
   // If mb_to_right_edge is < 0 we are in a situation in which
   // the current block size extends into the UMV and we won't
   // visit the sub blocks that are wholly within the UMV.
   if (xd->mb_to_right_edge < 0 || xd->mb_to_bottom_edge < 0) {
     int r, c;
-    const int sw = bw - xd->plane[plane].subsampling_x;
-    const int sh = bh - xd->plane[plane].subsampling_y;
-    int max_blocks_wide = 1 << sw;
-    int max_blocks_high = 1 << sh;
+
+    int max_blocks_wide = 1 << bw;
+    int max_blocks_high = 1 << bh;
 
     // xd->mb_to_right_edge is in units of pixels * 8.  This converts
     // it to 4x4 block sizes.
     if (xd->mb_to_right_edge < 0)
-      max_blocks_wide +=
-          (xd->mb_to_right_edge >> (5 + xd->plane[plane].subsampling_x));
+      max_blocks_wide += (xd->mb_to_right_edge >> (5 + pd->subsampling_x));
 
     if (xd->mb_to_bottom_edge < 0)
-      max_blocks_high +=
-          (xd->mb_to_bottom_edge >> (5 + xd->plane[plane].subsampling_y));
+      max_blocks_high += (xd->mb_to_bottom_edge >> (5 + pd->subsampling_y));
 
     i = 0;
     // Unlike the normal case - in here we have to keep track of the
     // row and column of the blocks we use so that we know if we are in
     // the unrestricted motion border.
-    for (r = 0; r < (1 << sh); r += (1 << tx_size)) {
-      for (c = 0; c < (1 << sw); c += (1 << tx_size)) {
+    for (r = 0; r < (1 << bh); r += (1 << tx_size)) {
+      for (c = 0; c < (1 << bw); c += (1 << tx_size)) {
         if (r < max_blocks_high && c < max_blocks_wide)
           visit(plane, i, bsize, txfrm_size_b, arg);
         i += step;
       }
     }
   } else {
-    for (i = 0; i < (1 << ss_block_size); i += step) {
+    const int ss_block_size = bw + bh;
+    assert(txfrm_size_b <= ss_block_size);
+    for (i = 0; i < (1 << ss_block_size); i += step)
       visit(plane, i, bsize, txfrm_size_b, arg);
-    }
   }
 }
 
@@ -484,10 +473,8 @@ static INLINE void foreach_transformed_block(
     foreach_transformed_block_visitor visit, void *arg) {
   int plane;
 
-  for (plane = 0; plane < MAX_MB_PLANE; plane++) {
-    foreach_transformed_block_in_plane(xd, bsize, plane,
-                                       visit, arg);
-  }
+  for (plane = 0; plane < MAX_MB_PLANE; plane++)
+    foreach_transformed_block_in_plane(xd, bsize, plane, visit, arg);
 }
 
 static INLINE void foreach_transformed_block_uv(
@@ -495,10 +482,8 @@ static INLINE void foreach_transformed_block_uv(
     foreach_transformed_block_visitor visit, void *arg) {
   int plane;
 
-  for (plane = 1; plane < MAX_MB_PLANE; plane++) {
-    foreach_transformed_block_in_plane(xd, bsize, plane,
-                                       visit, arg);
-  }
+  for (plane = 1; plane < MAX_MB_PLANE; plane++)
+    foreach_transformed_block_in_plane(xd, bsize, plane, visit, arg);
 }
 
 // TODO(jkoleszar): In principle, pred_w, pred_h are unnecessary, as we could
@@ -548,9 +533,8 @@ static INLINE void foreach_predicted_block(
     foreach_predicted_block_visitor visit, void *arg) {
   int plane;
 
-  for (plane = 0; plane < MAX_MB_PLANE; plane++) {
+  for (plane = 0; plane < MAX_MB_PLANE; plane++)
     foreach_predicted_block_in_plane(xd, bsize, plane, visit, arg);
-  }
 }
 
 static int raster_block_offset(MACROBLOCKD *xd, BLOCK_SIZE_TYPE bsize,
@@ -577,7 +561,7 @@ static int txfrm_block_to_raster_block(MACROBLOCKD *xd,
                                        int plane, int block,
                                        int ss_txfrm_size) {
   const int bwl = b_width_log2(bsize) - xd->plane[plane].subsampling_x;
-  const int txwl = ss_txfrm_size / 2;
+  const int txwl = ss_txfrm_size >> 1;
   const int tx_cols_log2 = bwl - txwl;
   const int tx_cols = 1 << tx_cols_log2;
   const int raster_mb = block >> ss_txfrm_size;
@@ -592,7 +576,7 @@ static void txfrm_block_to_raster_xy(MACROBLOCKD *xd,
                                      int ss_txfrm_size,
                                      int *x, int *y) {
   const int bwl = b_width_log2(bsize) - xd->plane[plane].subsampling_x;
-  const int txwl = ss_txfrm_size / 2;
+  const int txwl = ss_txfrm_size >> 1;
   const int tx_cols_log2 = bwl - txwl;
   const int tx_cols = 1 << tx_cols_log2;
   const int raster_mb = block >> ss_txfrm_size;
@@ -656,13 +640,13 @@ static void set_contexts_on_border(MACROBLOCKD *xd, BLOCK_SIZE_TYPE bsize,
   if (xd->mb_to_right_edge < 0)
     mi_blocks_wide += (xd->mb_to_right_edge >> (5 + pd->subsampling_x));
 
+  if (xd->mb_to_bottom_edge < 0)
+    mi_blocks_high += (xd->mb_to_bottom_edge >> (5 + pd->subsampling_y));
+
   // this code attempts to avoid copying into contexts that are outside
   // our border.  Any blocks that do are set to 0...
   if (above_contexts + aoff > mi_blocks_wide)
     above_contexts = mi_blocks_wide - aoff;
-
-  if (xd->mb_to_bottom_edge < 0)
-    mi_blocks_high += (xd->mb_to_bottom_edge >> (5 + pd->subsampling_y));
 
   if (left_contexts + loff > mi_blocks_high)
     left_contexts = mi_blocks_high - loff;
