@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAcn//q2Y\u003d",
+        "filename": "vp9/common/vp9_blockd.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 396,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2013-08-14T21:19:44Z",
+      "side": 1,
+      "message": "I\u0027m still cleaning up vp9_blockd.h, so will fix next time.",
+      "parentUuid": "AAAAcn//q+A\u003d",
+      "revId": "bb072000e8da3b5a4f59cf851b8c0d43871b9b6e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAcn//q9o\u003d",
         "filename": "vp9/common/vp9_blockd.h",
         "patchSetId": 4
@@ -87,6 +105,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAcn//q2E\u003d",
+        "filename": "vp9/decoder/vp9_decodframe.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 113,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2013-08-14T21:19:44Z",
+      "side": 1,
+      "message": "Didn\u0027t know about this, will follow this guideline.",
+      "parentUuid": "AAAAcn//q9M\u003d",
+      "revId": "bb072000e8da3b5a4f59cf851b8c0d43871b9b6e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAcn//q80\u003d",
         "filename": "vp9/encoder/vp9_tokenize.c",
         "patchSetId": 4
@@ -98,6 +134,24 @@
       "writtenOn": "2013-08-14T20:41:51Z",
       "side": 1,
       "message": "these two can be *const",
+      "revId": "bb072000e8da3b5a4f59cf851b8c0d43871b9b6e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcn//q2M\u003d",
+        "filename": "vp9/encoder/vp9_tokenize.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 110,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2013-08-14T21:19:44Z",
+      "side": 1,
+      "message": "Agree, I\u0027m trying to add const as much as possible, will do it in the next patch sets.",
+      "parentUuid": "AAAAcn//q80\u003d",
       "revId": "bb072000e8da3b5a4f59cf851b8c0d43871b9b6e",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
