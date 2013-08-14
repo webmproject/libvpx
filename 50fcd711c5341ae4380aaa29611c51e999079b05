@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAcn//rGg\u003d",
+        "filename": "build/make/configure.sh",
+        "patchSetId": 6
+      },
+      "lineNbr": 1290,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-08-14T20:24:39Z",
+      "side": 1,
+      "message": "these are unnecessary",
+      "revId": "50fcd711c5341ae4380aaa29611c51e999079b05",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
