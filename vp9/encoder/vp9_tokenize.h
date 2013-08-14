@@ -32,7 +32,8 @@ typedef int64_t vp9_coeff_accum[REF_TYPES][COEF_BANDS][PREV_COEF_CONTEXTS]
                                [MAX_ENTROPY_TOKENS + 1];
 
 int vp9_sb_is_skippable(MACROBLOCKD *xd, BLOCK_SIZE_TYPE bsize);
-int vp9_sby_is_skippable(MACROBLOCKD *xd, BLOCK_SIZE_TYPE bsize);
+int vp9_is_skippable_in_plane(MACROBLOCKD *xd, BLOCK_SIZE_TYPE bsize,
+                              int plane);
 int vp9_sbuv_is_skippable(MACROBLOCKD *xd, BLOCK_SIZE_TYPE bsize);
 struct VP9_COMP;
 

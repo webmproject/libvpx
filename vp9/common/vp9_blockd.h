@@ -165,12 +165,10 @@ static int is_inter_block(const MB_MODE_INFO *mbmi) {
   return mbmi->ref_frame[0] > INTRA_FRAME;
 }
 
-
 enum mv_precision {
   MV_PRECISION_Q3,
   MV_PRECISION_Q4
 };
-
 
 #if CONFIG_ALPHA
 enum { MAX_MB_PLANE = 4 };
