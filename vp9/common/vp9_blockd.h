@@ -212,8 +212,6 @@ typedef struct macroblockd {
   int left_available;
   int right_available;
 
-  struct segmentation seg;
-
   // partition contexts
   PARTITION_CONTEXT *above_seg_context;
   PARTITION_CONTEXT *left_seg_context;

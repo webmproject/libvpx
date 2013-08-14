@@ -253,7 +253,8 @@ void vp9_mb_init_quantizer(VP9_COMP *cpi, MACROBLOCK *x) {
   MACROBLOCKD *xd = &x->e_mbd;
   int zbin_extra;
   int segment_id = xd->mode_info_context->mbmi.segment_id;
-  const int qindex = vp9_get_qindex(xd, segment_id, cpi->common.base_qindex);
+  const int qindex = vp9_get_qindex(&cpi->common.seg, segment_id,
+                                    cpi->common.base_qindex);
 
   // Y
   zbin_extra = (cpi->common.y_dequant[qindex][1] *
@@ -288,7 +289,8 @@ void vp9_mb_init_quantizer(VP9_COMP *cpi, MACROBLOCK *x) {
   x->e_mbd.plane[3].dequant = cpi->common.a_dequant[qindex];
 #endif
 
-  x->skip_block = vp9_segfeature_active(&xd->seg, segment_id, SEG_LVL_SKIP);
+  x->skip_block = vp9_segfeature_active(&cpi->common.seg, segment_id,
+                                        SEG_LVL_SKIP);
 
   /* save this macroblock QIndex for vp9_update_zbin_extra() */
   x->e_mbd.q_index = qindex;

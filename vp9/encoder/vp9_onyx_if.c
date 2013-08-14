@@ -237,10 +237,9 @@ void vp9_initialize_enc() {
   }
 }
 
-static void setup_features(VP9_COMP *cpi) {
-  MACROBLOCKD *xd = &cpi->mb.e_mbd;
-  struct loopfilter *const lf = &cpi->common.lf;
-  struct segmentation *const seg = &xd->seg;
+static void setup_features(VP9_COMMON *cm) {
+  struct loopfilter *const lf = &cm->lf;
+  struct segmentation *const seg = &cm->seg;
 
   // Set up default state for MB feature flags
   seg->enabled = 0;
@@ -320,8 +319,7 @@ static int compute_qdelta(VP9_COMP *cpi, double qstart, double qtarget) {
 
 static void configure_static_seg_features(VP9_COMP *cpi) {
   VP9_COMMON *cm = &cpi->common;
-  MACROBLOCKD *xd = &cpi->mb.e_mbd;
-  struct segmentation *seg = &xd->seg;
+  struct segmentation *seg = &cm->seg;
 
   int high_q = (int)(cpi->avg_q > 48.0);
   int qi_delta;
@@ -1232,7 +1230,7 @@ void vp9_change_config(VP9_PTR ptr, VP9_CONFIG *oxcf) {
   cm->refresh_frame_context = 1;
   cm->reset_frame_context = 0;
 
-  setup_features(cpi);
+  setup_features(cm);
   cpi->mb.e_mbd.allow_high_precision_mv = 0;   // Default mv precision adaptation
   set_mvcost(&cpi->mb);
 
@@ -2531,7 +2529,7 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
 
   SPEED_FEATURES *sf = &cpi->sf;
   unsigned int max_mv_def = MIN(cpi->common.width, cpi->common.height);
-  struct segmentation *seg = &xd->seg;
+  struct segmentation *seg = &cm->seg;
 #if RESET_FOREACH_FILTER
   int q_low0;
   int q_high0;
@@ -2628,7 +2626,7 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
     int i;
 
     // Reset the loop filter deltas and segmentation map
-    setup_features(cpi);
+    setup_features(cm);
 
     // If segmentation is enabled force a map update for key frames
     if (seg->enabled) {
@@ -3164,7 +3162,7 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
   cpi->dummy_packing = 0;
   vp9_pack_bitstream(cpi, dest, size);
 
-  if (xd->seg.update_map)
+  if (cm->seg.update_map)
     update_reference_segmentation_map(cpi);
 
   release_scaled_references(cpi);
@@ -3472,8 +3470,8 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
   }
 
   // Clear the one shot update flags for segmentation map and mode/ref loop filter deltas.
-  xd->seg.update_map = 0;
-  xd->seg.update_data = 0;
+  cm->seg.update_map = 0;
+  cm->seg.update_data = 0;
   cm->lf.mode_ref_delta_update = 0;
 
   // keep track of the last coded dimensions
@@ -3574,7 +3572,6 @@ int vp9_receive_raw_frame(VP9_PTR ptr, unsigned int frame_flags,
 
 static int frame_is_reference(const VP9_COMP *cpi) {
   const VP9_COMMON *cm = &cpi->common;
-  const MACROBLOCKD *mb = &cpi->mb.e_mbd;
 
   return cm->frame_type == KEY_FRAME ||
          cpi->refresh_last_frame ||
@@ -3582,8 +3579,8 @@ static int frame_is_reference(const VP9_COMP *cpi) {
          cpi->refresh_alt_ref_frame ||
          cm->refresh_frame_context ||
          cm->lf.mode_ref_delta_update ||
-         mb->seg.update_map ||
-         mb->seg.update_data;
+         cm->seg.update_map ||
+         cm->seg.update_data;
 }
 
 #if CONFIG_MULTIPLE_ARF
@@ -4012,7 +4009,7 @@ int vp9_set_roimap(VP9_PTR comp, unsigned char *map, unsigned int rows,
                    unsigned int threshold[MAX_SEGMENTS]) {
   VP9_COMP *cpi = (VP9_COMP *) comp;
   signed char feature_data[SEG_LVL_MAX][MAX_SEGMENTS];
-  struct segmentation *seg = &cpi->mb.e_mbd.seg;
+  struct segmentation *seg = &cpi->common.seg;
   int i;
 
   if (cpi->common.mb_rows != rows || cpi->common.mb_cols != cols)

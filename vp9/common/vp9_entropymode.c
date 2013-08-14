@@ -470,14 +470,14 @@ static void set_default_lf_deltas(struct loopfilter *lf) {
   lf->mode_deltas[1] = 0;
 }
 
-void vp9_setup_past_independence(VP9_COMMON *cm, MACROBLOCKD *xd) {
+void vp9_setup_past_independence(VP9_COMMON *cm) {
   // Reset the segment feature data to the default stats:
   // Features disabled, 0, with delta coding (Default state).
   struct loopfilter *const lf = &cm->lf;
 
   int i;
-  vp9_clearall_segfeatures(&xd->seg);
-  xd->seg.abs_delta = SEGMENT_DELTADATA;
+  vp9_clearall_segfeatures(&cm->seg);
+  cm->seg.abs_delta = SEGMENT_DELTADATA;
   if (cm->last_frame_seg_map)
     vpx_memset(cm->last_frame_seg_map, 0, (cm->mi_rows * cm->mi_cols));
 

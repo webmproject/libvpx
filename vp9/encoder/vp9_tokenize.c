@@ -191,7 +191,7 @@ static void tokenize_b(int plane, int block, BLOCK_SIZE_TYPE bsize,
   pt = combine_entropy_contexts(above_ec, left_ec);
   nb = vp9_get_coef_neighbors_handle(scan);
 
-  if (vp9_segfeature_active(&xd->seg, segment_id, SEG_LVL_SKIP))
+  if (vp9_segfeature_active(&cpi->common.seg, segment_id, SEG_LVL_SKIP))
     seg_eob = 0;
 
   c = 0;
@@ -274,7 +274,7 @@ void vp9_tokenize_sb(VP9_COMP *cpi, TOKENEXTRA **t, int dry_run,
   MB_MODE_INFO *const mbmi = &xd->mode_info_context->mbmi;
   TOKENEXTRA *t_backup = *t;
   const int mb_skip_context = vp9_get_pred_context_mbskip(xd);
-  const int skip_inc = !vp9_segfeature_active(&xd->seg, mbmi->segment_id,
+  const int skip_inc = !vp9_segfeature_active(&cm->seg, mbmi->segment_id,
                                               SEG_LVL_SKIP);
   struct tokenize_b_args arg = {cpi, xd, t, mbmi->txfm_size};
 

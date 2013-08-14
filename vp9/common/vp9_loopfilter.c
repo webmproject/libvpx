@@ -78,8 +78,7 @@ void vp9_loop_filter_init(VP9_COMMON *cm) {
     vpx_memset(lfi->hev_thr[i], i, SIMD_WIDTH);
 }
 
-void vp9_loop_filter_frame_init(VP9_COMMON *const cm, MACROBLOCKD *const xd,
-                                int default_filt_lvl) {
+void vp9_loop_filter_frame_init(VP9_COMMON *const cm, int default_filt_lvl) {
   int seg_id;
   // n_shift is the a multiplier for lf_deltas
   // the multiplier is 1 for when filter_lvl is between 0 and 31;
@@ -87,7 +86,7 @@ void vp9_loop_filter_frame_init(VP9_COMMON *const cm, MACROBLOCKD *const xd,
   const int n_shift = default_filt_lvl >> 5;
   loop_filter_info_n *const lfi = &cm->lf_info;
   struct loopfilter *const lf = &cm->lf;
-  struct segmentation *const seg = &xd->seg;
+  struct segmentation *const seg = &cm->seg;
 
   // update limits if sharpness has changed
   if (lf->last_sharpness_level != lf->sharpness_level) {
@@ -99,7 +98,7 @@ void vp9_loop_filter_frame_init(VP9_COMMON *const cm, MACROBLOCKD *const xd,
     int lvl_seg = default_filt_lvl, ref, mode, intra_lvl;
 
     // Set the baseline filter values for each segment
-    if (vp9_segfeature_active(&xd->seg, seg_id, SEG_LVL_ALT_LF)) {
+    if (vp9_segfeature_active(seg, seg_id, SEG_LVL_ALT_LF)) {
       const int data = vp9_get_segdata(seg, seg_id, SEG_LVL_ALT_LF);
       lvl_seg = seg->abs_delta == SEGMENT_ABSDATA
                   ? data
@@ -391,7 +390,7 @@ void vp9_loop_filter_frame(VP9_COMMON *cm, MACROBLOCKD *xd,
     mi_rows_to_filter = MAX(cm->mi_rows / 8, 8);
   }
   end_mi_row = start_mi_row + mi_rows_to_filter;
-  vp9_loop_filter_frame_init(cm, xd, frame_filter_level);
+  vp9_loop_filter_frame_init(cm, frame_filter_level);
   vp9_loop_filter_rows(cm->frame_to_show, cm, xd,
                        start_mi_row, end_mi_row,
                        y_only);

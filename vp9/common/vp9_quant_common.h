@@ -23,6 +23,6 @@ void vp9_init_quant_tables();
 int16_t vp9_dc_quant(int qindex, int delta);
 int16_t vp9_ac_quant(int qindex, int delta);
 
-int vp9_get_qindex(MACROBLOCKD *mb, int segment_id, int base_qindex);
+int vp9_get_qindex(struct segmentation *seg, int segment_id, int base_qindex);
 
 #endif  // VP9_COMMON_VP9_QUANT_COMMON_H_

@@ -80,7 +80,7 @@ static void read_tx_probs(struct tx_probs *tx_probs, vp9_reader *r) {
 static void init_dequantizer(VP9_COMMON *cm, MACROBLOCKD *xd) {
   int i;
   const int segment_id = xd->mode_info_context->mbmi.segment_id;
-  xd->q_index = vp9_get_qindex(xd, segment_id, cm->base_qindex);
+  xd->q_index = vp9_get_qindex(&cm->seg, segment_id, cm->base_qindex);
 
   xd->plane[0].dequant = cm->y_dequant[xd->q_index];
   for (i = 1; i < MAX_MB_PLANE; i++)
@@ -173,7 +173,7 @@ static int decode_tokens(VP9D_COMP *pbi, BLOCK_SIZE_TYPE bsize, vp9_reader *r) {
       reset_skip_context(xd, bsize);
     return -1;
   } else {
-    if (xd->seg.enabled)
+    if (pbi->common.seg.enabled)
       init_dequantizer(&pbi->common, xd);
 
     // TODO(dkovalev) if (!vp9_reader_has_error(r))
@@ -596,7 +596,7 @@ static void decode_tile(VP9D_COMP *pbi, vp9_reader *r) {
       lf_data->xd = pbi->mb;
       lf_data->y_only = 0;
     }
-    vp9_loop_filter_frame_init(pc, &pbi->mb, pc->lf.filter_level);
+    vp9_loop_filter_frame_init(pc, pc->lf.filter_level);
   }
 
   for (mi_row = pc->cur_tile_mi_row_start; mi_row < pc->cur_tile_mi_row_end;
@@ -889,11 +889,11 @@ static size_t read_uncompressed_header(VP9D_COMP *pbi,
   cm->frame_context_idx = vp9_rb_read_literal(rb, NUM_FRAME_CONTEXTS_LOG2);
 
   if (cm->frame_type == KEY_FRAME || cm->error_resilient_mode || cm->intra_only)
-    vp9_setup_past_independence(cm, xd);
+    vp9_setup_past_independence(cm);
 
   setup_loopfilter(&cm->lf, rb);
   setup_quantization(pbi, rb);
-  setup_segmentation(&xd->seg, rb);
+  setup_segmentation(&cm->seg, rb);
 
   setup_tile_info(cm, rb);
 
