@@ -262,13 +262,6 @@ int vp9_is_skippable_in_plane(MACROBLOCKD *xd, BLOCK_SIZE_TYPE bsize,
   return result;
 }
 
-int vp9_sbuv_is_skippable(MACROBLOCKD *xd, BLOCK_SIZE_TYPE bsize) {
-  int result = 1;
-  struct is_skippable_args args = {xd, &result};
-  foreach_transformed_block_uv(xd, bsize, is_skippable, &args);
-  return result;
-}
-
 void vp9_tokenize_sb(VP9_COMP *cpi, TOKENEXTRA **t, int dry_run,
                      BLOCK_SIZE_TYPE bsize) {
   VP9_COMMON *const cm = &cpi->common;

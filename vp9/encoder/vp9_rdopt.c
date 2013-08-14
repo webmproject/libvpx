@@ -611,88 +611,6 @@ static void rate_block(int plane, int block, BLOCK_SIZE_TYPE bsize,
                             args->scan, args->nb);
 }
 
-// FIXME(jingning): need to make the rd test of chroma components consistent
-// with that of luma component. this function should be deprecated afterwards.
-static int rdcost_plane(VP9_COMMON * const cm, MACROBLOCK *x, int plane,
-                        BLOCK_SIZE_TYPE bsize, TX_SIZE tx_size) {
-  MACROBLOCKD *const xd = &x->e_mbd;
-  struct macroblockd_plane *pd = &xd->plane[plane];
-  const BLOCK_SIZE_TYPE bs = get_plane_block_size(bsize, pd);
-  const int num_4x4_blocks_wide = num_4x4_blocks_wide_lookup[bs];
-  const int num_4x4_blocks_high = num_4x4_blocks_high_lookup[bs];
-  int i;
-  struct rdcost_block_args args = { cm, x, { 0 }, { 0 }, tx_size,
-                                    num_4x4_blocks_wide, num_4x4_blocks_high,
-                                    0, 0, 0, INT64_MAX, 0 };
-
-  switch (tx_size) {
-    case TX_4X4:
-      vpx_memcpy(&args.t_above, pd->above_context,
-                 sizeof(ENTROPY_CONTEXT) * num_4x4_blocks_wide);
-      vpx_memcpy(&args.t_left, pd->left_context,
-                 sizeof(ENTROPY_CONTEXT) * num_4x4_blocks_high);
-      args.scan = vp9_default_scan_4x4;
-      args.nb = vp9_default_scan_4x4_neighbors;
-      break;
-    case TX_8X8:
-      for (i = 0; i < num_4x4_blocks_wide; i += 2)
-        args.t_above[i] = !!*(uint16_t *)&pd->above_context[i];
-      for (i = 0; i < num_4x4_blocks_high; i += 2)
-        args.t_left[i] = !!*(uint16_t *)&pd->left_context[i];
-      args.scan = vp9_default_scan_8x8;
-      args.nb = vp9_default_scan_8x8_neighbors;
-      break;
-    case TX_16X16:
-      for (i = 0; i < num_4x4_blocks_wide; i += 4)
-        args.t_above[i] = !!*(uint32_t *)&pd->above_context[i];
-      for (i = 0; i < num_4x4_blocks_high; i += 4)
-        args.t_left[i] = !!*(uint32_t *)&pd->left_context[i];
-      args.scan = vp9_default_scan_16x16;
-      args.nb = vp9_default_scan_16x16_neighbors;
-      break;
-    case TX_32X32:
-      for (i = 0; i < num_4x4_blocks_wide; i += 8)
-        args.t_above[i] = !!*(uint64_t *)&pd->above_context[i];
-      for (i = 0; i < num_4x4_blocks_high; i += 8)
-        args.t_left[i] = !!*(uint64_t *)&pd->left_context[i];
-      args.scan = vp9_default_scan_32x32;
-      args.nb = vp9_default_scan_32x32_neighbors;
-      break;
-    default:
-      assert(0);
-  }
-
-  foreach_transformed_block_in_plane(xd, bsize, plane, rate_block, &args);
-  return args.rate;
-}
-
-static int rdcost_uv(VP9_COMMON *const cm, MACROBLOCK *x,
-                     BLOCK_SIZE_TYPE bsize, TX_SIZE tx_size) {
-  int cost = 0, plane;
-
-  for (plane = 1; plane < MAX_MB_PLANE; plane++) {
-    cost += rdcost_plane(cm, x, plane, bsize, tx_size);
-  }
-  return cost;
-}
-
-static int64_t block_error_sbuv(MACROBLOCK *x, BLOCK_SIZE_TYPE bsize,
-                                int shift, int64_t *sse) {
-  int64_t sum = 0, this_sse;
-  int plane;
-
-  *sse = 0;
-  for (plane = 1; plane < MAX_MB_PLANE; plane++) {
-    struct macroblockd_plane *pd = &x->e_mbd.plane[plane];
-    const BLOCK_SIZE_TYPE bs = get_plane_block_size(bsize, pd);
-    sum += vp9_block_error(x->plane[plane].coeff, pd->dqcoeff,
-                           1 << num_pels_log2_lookup[bs], &this_sse);
-    *sse += this_sse;
-  }
-  *sse >>= shift;
-  return sum >> shift;
-}
-
 static void block_yrd_txfm(int plane, int block, BLOCK_SIZE_TYPE bsize,
                            int ss_txfrm_size, void *arg) {
   struct rdcost_block_args *args = arg;
@@ -1363,24 +1281,6 @@ static int64_t rd_pick_intra_sby_mode(VP9_COMP *cpi, MACROBLOCK *x,
   x->e_mbd.mode_info_context->mbmi.txfm_size = best_tx;
 
   return best_rd;
-}
-
-static void super_block_uvrd_for_txfm(VP9_COMMON *const cm, MACROBLOCK *x,
-                                      int *rate, int64_t *distortion,
-                                      int *skippable, int64_t *sse,
-                                      BLOCK_SIZE_TYPE bsize,
-                                      TX_SIZE uv_tx_size) {
-  MACROBLOCKD *const xd = &x->e_mbd;
-  int64_t dummy;
-  if (xd->mode_info_context->mbmi.ref_frame[0] == INTRA_FRAME)
-    vp9_encode_intra_block_uv(cm, x, bsize);
-  else
-    vp9_xform_quant_sbuv(cm, x, bsize);
-
-  *distortion = block_error_sbuv(x, bsize, uv_tx_size == TX_32X32 ? 0 : 2,
-                                 sse ? sse : &dummy);
-  *rate       = rdcost_uv(cm, x, bsize, uv_tx_size);
-  *skippable  = vp9_sbuv_is_skippable(xd, bsize);
 }
 
 static void super_block_uvrd(VP9_COMMON *const cm, MACROBLOCK *x,
@@ -3682,9 +3582,9 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
         // then dont bother looking at UV
         vp9_build_inter_predictors_sbuv(&x->e_mbd, mi_row, mi_col,
                                         BLOCK_8X8);
-        vp9_subtract_sbuv(x, BLOCK_8X8);
-        super_block_uvrd_for_txfm(cm, x, &rate_uv, &distortion_uv,
-                                  &uv_skippable, &uv_sse, BLOCK_8X8, TX_4X4);
+
+        super_block_uvrd(cm, x, &rate_uv, &distortion_uv, &uv_skippable,
+                         &uv_sse, BLOCK_8X8);
         rate2 += rate_uv;
         distortion2 += distortion_uv;
         skippable = skippable && uv_skippable;
