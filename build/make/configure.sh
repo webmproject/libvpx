@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 ##
 ##  configure.sh
 ##
@@ -264,12 +264,13 @@ elif test ! -z "$TEMPDIR" ; then
 else
     TMPDIRx="/tmp"
 fi
-TMP_H="${TMPDIRx}/vpx-conf-$$-${RANDOM}.h"
-TMP_C="${TMPDIRx}/vpx-conf-$$-${RANDOM}.c"
-TMP_CC="${TMPDIRx}/vpx-conf-$$-${RANDOM}.cc"
-TMP_O="${TMPDIRx}/vpx-conf-$$-${RANDOM}.o"
-TMP_X="${TMPDIRx}/vpx-conf-$$-${RANDOM}.x"
-TMP_ASM="${TMPDIRx}/vpx-conf-$$-${RANDOM}.asm"
+RAND=$(awk 'BEGIN { srand(); printf "%d\n",(rand() * 32768)}')
+TMP_H="${TMPDIRx}/vpx-conf-$$-${RAND}.h"
+TMP_C="${TMPDIRx}/vpx-conf-$$-${RAND}.c"
+TMP_CC="${TMPDIRx}/vpx-conf-$$-${RAND}.cc"
+TMP_O="${TMPDIRx}/vpx-conf-$$-${RAND}.o"
+TMP_X="${TMPDIRx}/vpx-conf-$$-${RAND}.x"
+TMP_ASM="${TMPDIRx}/vpx-conf-$$-${RAND}.asm"
 
 clean_temp_files() {
     rm -f ${TMP_C} ${TMP_CC} ${TMP_H} ${TMP_O} ${TMP_X} ${TMP_ASM}
@@ -805,7 +806,7 @@ process_common_toolchain() {
             arch_int=${arch_int%%te}
             check_add_asflags --defsym ARCHITECTURE=${arch_int}
             tune_cflags="-mtune="
-            if [ ${tgt_isa} == "armv7" ]; then
+            if [ ${tgt_isa} = "armv7" ]; then
                 if [ -z "${float_abi}" ]; then
                     check_cpp <<EOF && float_abi=hard || float_abi=softfp
 #ifndef __ARM_PCS_VFP
@@ -855,7 +856,7 @@ EOF
             tune_cflags="--cpu="
             tune_asflags="--cpu="
             if [ -z "${tune_cpu}" ]; then
-                if [ ${tgt_isa} == "armv7" ]; then
+                if [ ${tgt_isa} = "armv7" ]; then
                     if enabled neon
                     then
                         check_add_cflags --fpu=softvfp+vfpv3
@@ -915,7 +916,7 @@ EOF
 
             enable pic
             soft_enable realtime_only
-            if [ ${tgt_isa} == "armv7" ]; then
+            if [ ${tgt_isa} = "armv7" ]; then
                 soft_enable runtime_cpu_detect
             fi
             if enabled runtime_cpu_detect; then
@@ -1191,7 +1192,7 @@ EOF
 
     # default use_x86inc to yes if pic is no or 64bit or we are not on darwin
     echo "  checking here for x86inc \"${tgt_isa}\" \"$pic\" "
-    if [ ${tgt_isa} = x86_64 -o ! "$pic" == "yes" -o ! ${tgt_os:0:6} = darwin ]; then
+    if [ ${tgt_isa} = x86_64 -o ! "$pic" = "yes" -o "${tgt_os#darwin}" = "${tgt_os}"  ]; then
       soft_enable use_x86inc
     fi
 
@@ -1287,8 +1288,8 @@ print_config_h() {
 
 print_webm_license() {
     local destination=$1
-    local prefix=$2
-    local suffix=$3
+    local prefix="$2"
+    local suffix="$3"
     shift 3
     cat <<EOF > ${destination}
 ${prefix} Copyright (c) 2011 The WebM project authors. All Rights Reserved.${suffix}
