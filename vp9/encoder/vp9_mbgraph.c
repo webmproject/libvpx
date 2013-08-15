@@ -241,9 +241,7 @@ static void update_mbgraph_frame_stats(VP9_COMP *cpi,
   int mb_col, mb_row, offset = 0;
   int mb_y_offset = 0, arf_y_offset = 0, gld_y_offset = 0;
   int_mv arf_top_mv, gld_top_mv;
-  MODE_INFO mi_local;
-
-  vp9_zero(mi_local);
+  MODE_INFO mi_local = { { 0 } };
 
   // Set up limit values for motion vectors to prevent them extending outside the UMV borders
   arf_top_mv.as_int = 0;
@@ -309,7 +307,7 @@ static void update_mbgraph_frame_stats(VP9_COMP *cpi,
 static void separate_arf_mbs(VP9_COMP *cpi) {
   VP9_COMMON *const cm = &cpi->common;
   int mb_col, mb_row, offset, i;
-  int ncnt[4];
+  int ncnt[4] = { 0 };
   int n_frames = cpi->mbgraph_n_frames;
 
   int *arf_not_zz;
@@ -345,7 +343,6 @@ static void separate_arf_mbs(VP9_COMP *cpi) {
     }
   }
 
-  vpx_memset(ncnt, 0, sizeof(ncnt));
   for (offset = 0, mb_row = 0; mb_row < cm->mb_rows;
        offset += cm->mb_cols, mb_row++) {
     for (mb_col = 0; mb_col < cm->mb_cols; mb_col++) {

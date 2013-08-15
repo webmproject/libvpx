@@ -1580,7 +1580,7 @@ void define_fixed_arf_period(VP9_COMP *cpi) {
 
 // Analyse and define a gf/arf group.
 static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
-  FIRSTPASS_STATS next_frame;
+  FIRSTPASS_STATS next_frame = { 0 };
   FIRSTPASS_STATS *start_pos;
   int i;
   double boost_score = 0.0;
@@ -1615,8 +1615,6 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   vp9_clear_system_state();  // __asm emms;
 
   start_pos = cpi->twopass.stats_in;
-
-  vpx_memset(&next_frame, 0, sizeof(next_frame)); // assure clean
 
   // Load stats for the current frame.
   mod_frame_err = calculate_modified_err(cpi, this_frame);

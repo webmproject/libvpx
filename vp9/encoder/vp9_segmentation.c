@@ -217,9 +217,9 @@ void vp9_choose_segmap_coding_method(VP9_COMP *cpi) {
 
   int i, tile_col, mi_row, mi_col;
 
-  int temporal_predictor_count[PREDICTION_PROBS][2];
-  int no_pred_segcounts[MAX_SEGMENTS];
-  int t_unpred_seg_counts[MAX_SEGMENTS];
+  int temporal_predictor_count[PREDICTION_PROBS][2] = { { 0 } };
+  int no_pred_segcounts[MAX_SEGMENTS] = { 0 };
+  int t_unpred_seg_counts[MAX_SEGMENTS] = { 0 };
 
   vp9_prob no_pred_tree[SEG_TREE_PROBS];
   vp9_prob t_pred_tree[SEG_TREE_PROBS];
@@ -232,10 +232,6 @@ void vp9_choose_segmap_coding_method(VP9_COMP *cpi) {
   // temporal coding probabilities
   vpx_memset(seg->tree_probs, 255, sizeof(seg->tree_probs));
   vpx_memset(seg->pred_probs, 255, sizeof(seg->pred_probs));
-
-  vpx_memset(no_pred_segcounts, 0, sizeof(no_pred_segcounts));
-  vpx_memset(t_unpred_seg_counts, 0, sizeof(t_unpred_seg_counts));
-  vpx_memset(temporal_predictor_count, 0, sizeof(temporal_predictor_count));
 
   // First of all generate stats regarding how well the last segment map
   // predicts this one
