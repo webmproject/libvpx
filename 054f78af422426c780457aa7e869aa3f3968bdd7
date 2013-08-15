@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAc3////s\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1409,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2013-08-15T16:23:17Z",
+      "side": 1,
+      "message": "Done\n\nrenamed it txfm_rd_in_plane",
+      "parentUuid": "AAAAcn//p4I\u003d",
+      "revId": "054f78af422426c780457aa7e869aa3f3968bdd7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAcn//p4E\u003d",
         "filename": "vp9/encoder/vp9_tokenize.c",
         "patchSetId": 2
@@ -30,6 +48,24 @@
       "writtenOn": "2013-08-15T05:50:00Z",
       "side": 1,
       "message": "If the function take plane parameter, it is no longer \"y\"..",
+      "revId": "054f78af422426c780457aa7e869aa3f3968bdd7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAc3////k\u003d",
+        "filename": "vp9/encoder/vp9_tokenize.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 257,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2013-08-15T16:23:17Z",
+      "side": 1,
+      "message": "Done\n\nrenamed is_skippable_in_plane",
+      "parentUuid": "AAAAcn//p4E\u003d",
       "revId": "054f78af422426c780457aa7e869aa3f3968bdd7",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
