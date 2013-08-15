@@ -1492,7 +1492,7 @@ static int cost_mv_ref(VP9_COMP *cpi, MB_PREDICTION_MODE mode,
   const int segment_id = xd->mode_info_context->mbmi.segment_id;
 
   // Don't account for mode here if segment skip is enabled.
-  if (!vp9_segfeature_active(&xd->seg, segment_id, SEG_LVL_SKIP)) {
+  if (!vp9_segfeature_active(&cpi->common.seg, segment_id, SEG_LVL_SKIP)) {
     assert(is_inter_mode(mode));
     return x->inter_mode_cost[mode_context][mode - NEARESTMV];
   } else {
@@ -2226,7 +2226,7 @@ static void estimate_ref_frame_costs(VP9_COMP *cpi, int segment_id,
                                      vp9_prob *comp_mode_p) {
   VP9_COMMON *const cm = &cpi->common;
   MACROBLOCKD *const xd = &cpi->mb.e_mbd;
-  int seg_ref_active = vp9_segfeature_active(&xd->seg, segment_id,
+  int seg_ref_active = vp9_segfeature_active(&cm->seg, segment_id,
                                              SEG_LVL_REF_FRAME);
   if (seg_ref_active) {
     vpx_memset(ref_costs_single, 0, MAX_REF_FRAMES * sizeof(*ref_costs_single));
@@ -2759,7 +2759,7 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
   // if we're near/nearest and mv == 0,0, compare to zeromv
   if ((this_mode == NEARMV || this_mode == NEARESTMV || this_mode == ZEROMV) &&
       frame_mv[refs[0]].as_int == 0 &&
-      !vp9_segfeature_active(&xd->seg, mbmi->segment_id, SEG_LVL_SKIP) &&
+      !vp9_segfeature_active(&cm->seg, mbmi->segment_id, SEG_LVL_SKIP) &&
       (num_refs == 1 || frame_mv[refs[1]].as_int == 0)) {
     int rfc = mbmi->mode_context[mbmi->ref_frame[0]];
     int c1 = cost_mv_ref(cpi, NEARMV, rfc);
@@ -3148,7 +3148,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
   VP9_COMMON *cm = &cpi->common;
   MACROBLOCKD *xd = &x->e_mbd;
   MB_MODE_INFO *mbmi = &xd->mode_info_context->mbmi;
-  const struct segmentation *seg = &xd->seg;
+  const struct segmentation *seg = &cm->seg;
   const BLOCK_SIZE_TYPE block_size = get_plane_block_size(bsize, &xd->plane[0]);
   MB_PREDICTION_MODE this_mode;
   MV_REFERENCE_FRAME ref_frame, second_ref_frame;

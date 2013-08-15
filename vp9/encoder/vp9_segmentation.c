@@ -17,39 +17,42 @@
 
 void vp9_enable_segmentation(VP9_PTR ptr) {
   VP9_COMP *cpi = (VP9_COMP *)ptr;
+  struct segmentation *const seg =  &cpi->common.seg;
 
-  cpi->mb.e_mbd.seg.enabled = 1;
-  cpi->mb.e_mbd.seg.update_map = 1;
-  cpi->mb.e_mbd.seg.update_data = 1;
+  seg->enabled = 1;
+  seg->update_map = 1;
+  seg->update_data = 1;
 }
 
 void vp9_disable_segmentation(VP9_PTR ptr) {
   VP9_COMP *cpi = (VP9_COMP *)ptr;
-  cpi->mb.e_mbd.seg.enabled = 0;
+  struct segmentation *const seg =  &cpi->common.seg;
+  seg->enabled = 0;
 }
 
 void vp9_set_segmentation_map(VP9_PTR ptr,
                               unsigned char *segmentation_map) {
-  VP9_COMP *cpi = (VP9_COMP *)(ptr);
+  VP9_COMP *cpi = (VP9_COMP *)ptr;
+  struct segmentation *const seg = &cpi->common.seg;
 
   // Copy in the new segmentation map
   vpx_memcpy(cpi->segmentation_map, segmentation_map,
              (cpi->common.mi_rows * cpi->common.mi_cols));
 
   // Signal that the map should be updated.
-  cpi->mb.e_mbd.seg.update_map = 1;
-  cpi->mb.e_mbd.seg.update_data = 1;
+  seg->update_map = 1;
+  seg->update_data = 1;
 }
 
 void vp9_set_segment_data(VP9_PTR ptr,
                           signed char *feature_data,
                           unsigned char abs_delta) {
-  VP9_COMP *cpi = (VP9_COMP *)(ptr);
+  VP9_COMP *cpi = (VP9_COMP *)ptr;
+  struct segmentation *const seg = &cpi->common.seg;
 
-  cpi->mb.e_mbd.seg.abs_delta = abs_delta;
+  seg->abs_delta = abs_delta;
 
-  vpx_memcpy(cpi->mb.e_mbd.seg.feature_data, feature_data,
-             sizeof(cpi->mb.e_mbd.seg.feature_data));
+  vpx_memcpy(seg->feature_data, feature_data, sizeof(seg->feature_data));
 
   // TBD ?? Set the feature mask
   // vpx_memcpy(cpi->mb.e_mbd.segment_feature_mask, 0,
@@ -210,7 +213,7 @@ static void count_segs_sb(VP9_COMP *cpi, MODE_INFO *mi,
 
 void vp9_choose_segmap_coding_method(VP9_COMP *cpi) {
   VP9_COMMON *const cm = &cpi->common;
-  struct segmentation *seg = &cpi->mb.e_mbd.seg;
+  struct segmentation *seg = &cm->seg;
 
   int no_pred_cost;
   int t_pred_cost = INT_MAX;

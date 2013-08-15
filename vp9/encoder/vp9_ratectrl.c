@@ -71,7 +71,6 @@ int vp9_bits_per_mb(FRAME_TYPE frame_type, int qindex,
 void vp9_save_coding_context(VP9_COMP *cpi) {
   CODING_CONTEXT *const cc = &cpi->coding_context;
   VP9_COMMON *cm = &cpi->common;
-  MACROBLOCKD *xd = &cpi->mb.e_mbd;
 
   // Stores a snapshot of key state variables which can subsequently be
   // restored with a call to vp9_restore_coding_context. These functions are
@@ -89,7 +88,7 @@ void vp9_save_coding_context(VP9_COMP *cpi) {
   vp9_copy(cc->uv_mode_prob, cm->fc.uv_mode_prob);
   vp9_copy(cc->partition_prob, cm->fc.partition_prob);
 
-  vp9_copy(cc->segment_pred_probs, xd->seg.pred_probs);
+  vp9_copy(cc->segment_pred_probs, cm->seg.pred_probs);
 
   vp9_copy(cc->intra_inter_prob, cm->fc.intra_inter_prob);
   vp9_copy(cc->comp_inter_prob, cm->fc.comp_inter_prob);
@@ -111,7 +110,6 @@ void vp9_save_coding_context(VP9_COMP *cpi) {
 void vp9_restore_coding_context(VP9_COMP *cpi) {
   CODING_CONTEXT *const cc = &cpi->coding_context;
   VP9_COMMON *cm = &cpi->common;
-  MACROBLOCKD *xd = &cpi->mb.e_mbd;
 
   // Restore key state variables to the snapshot state stored in the
   // previous call to vp9_save_coding_context.
@@ -127,7 +125,7 @@ void vp9_restore_coding_context(VP9_COMP *cpi) {
   vp9_copy(cm->fc.uv_mode_prob, cc->uv_mode_prob);
   vp9_copy(cm->fc.partition_prob, cc->partition_prob);
 
-  vp9_copy(xd->seg.pred_probs, cc->segment_pred_probs);
+  vp9_copy(cm->seg.pred_probs, cc->segment_pred_probs);
 
   vp9_copy(cm->fc.intra_inter_prob, cc->intra_inter_prob);
   vp9_copy(cm->fc.comp_inter_prob, cc->comp_inter_prob);
@@ -149,9 +147,8 @@ void vp9_restore_coding_context(VP9_COMP *cpi) {
 
 void vp9_setup_key_frame(VP9_COMP *cpi) {
   VP9_COMMON *cm = &cpi->common;
-  MACROBLOCKD *xd = &cpi->mb.e_mbd;
 
-  vp9_setup_past_independence(cm, xd);
+  vp9_setup_past_independence(cm);
 
   // interval before next GF
   cpi->frames_till_gf_update_due = cpi->baseline_gf_interval;
@@ -162,9 +159,8 @@ void vp9_setup_key_frame(VP9_COMP *cpi) {
 
 void vp9_setup_inter_frame(VP9_COMP *cpi) {
   VP9_COMMON *cm = &cpi->common;
-  MACROBLOCKD *xd = &cpi->mb.e_mbd;
   if (cm->error_resilient_mode || cm->intra_only)
-    vp9_setup_past_independence(cm, xd);
+    vp9_setup_past_independence(cm);
 
   assert(cm->frame_context_idx < NUM_FRAME_CONTEXTS);
   cm->fc = cm->frame_contexts[cm->frame_context_idx];

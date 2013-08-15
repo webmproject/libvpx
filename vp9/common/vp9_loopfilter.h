@@ -65,9 +65,7 @@ void vp9_loop_filter_init(struct VP9Common *cm);
 // Update the loop filter for the current frame.
 // This should be called before vp9_loop_filter_rows(), vp9_loop_filter_frame()
 // calls this function directly.
-void vp9_loop_filter_frame_init(struct VP9Common *const cm,
-                                struct macroblockd *const xd,
-                                int default_filt_lvl);
+void vp9_loop_filter_frame_init(struct VP9Common *cm, int default_filt_lvl);
 
 void vp9_loop_filter_frame(struct VP9Common *cm,
                            struct macroblockd *mbd,

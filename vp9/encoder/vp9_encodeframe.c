@@ -398,7 +398,7 @@ static void update_state(VP9_COMP *cpi, PICK_MODE_CONTEXT *ctx,
   if (!output_enabled)
     return;
 
-  if (!vp9_segfeature_active(&xd->seg, mbmi->segment_id, SEG_LVL_SKIP)) {
+  if (!vp9_segfeature_active(&cm->seg, mbmi->segment_id, SEG_LVL_SKIP)) {
     for (i = 0; i < TX_MODES; i++)
       cpi->rd_tx_select_diff[i] += ctx->tx_rd_diff[i];
   }
@@ -498,7 +498,7 @@ static void set_offsets(VP9_COMP *cpi, int mi_row, int mi_col,
   const int mb_row = mi_row >> 1;
   const int mb_col = mi_col >> 1;
   const int idx_map = mb_row * cm->mb_cols + mb_col;
-  const struct segmentation *const seg = &xd->seg;
+  const struct segmentation *const seg = &cm->seg;
 
   set_skip_context(cm, xd, mi_row, mi_col);
   set_partition_seg_context(cm, xd, mi_row, mi_col);
@@ -615,7 +615,7 @@ static void update_stats(VP9_COMP *cpi) {
   MB_MODE_INFO *const mbmi = &mi->mbmi;
 
   if (cm->frame_type != KEY_FRAME) {
-    const int seg_ref_active = vp9_segfeature_active(&xd->seg, mbmi->segment_id,
+    const int seg_ref_active = vp9_segfeature_active(&cm->seg, mbmi->segment_id,
                                                      SEG_LVL_REF_FRAME);
 
     if (!seg_ref_active)
@@ -2212,10 +2212,9 @@ static void encode_frame_internal(VP9_COMP *cpi) {
 }
 
 static int check_dual_ref_flags(VP9_COMP *cpi) {
-  MACROBLOCKD *xd = &cpi->mb.e_mbd;
-  int ref_flags = cpi->ref_frame_flags;
+  const int ref_flags = cpi->ref_frame_flags;
 
-  if (vp9_segfeature_active(&xd->seg, 1, SEG_LVL_REF_FRAME)) {
+  if (vp9_segfeature_active(&cpi->common.seg, 1, SEG_LVL_REF_FRAME)) {
     return 0;
   } else {
     return (!!(ref_flags & VP9_GOLD_FLAG) + !!(ref_flags & VP9_LAST_FLAG)
@@ -2262,7 +2261,7 @@ static void reset_skip_txfm_size_b(VP9_COMP *cpi, MODE_INFO *mi, int mis,
     const int xmbs = MIN(bw, cm->mi_cols - mi_col);
 
     xd->mode_info_context = mi;
-    assert(vp9_segfeature_active(&xd->seg, mbmi->segment_id, SEG_LVL_SKIP) ||
+    assert(vp9_segfeature_active(&cm->seg, mbmi->segment_id, SEG_LVL_SKIP) ||
            get_skip_flag(mi, mis, ymbs, xmbs));
     set_txfm_flag(mi, mis, ymbs, xmbs, txfm_max);
   }
@@ -2690,7 +2689,7 @@ static void encode_superblock(VP9_COMP *cpi, TOKENEXTRA **t, int output_enabled,
         mbmi->sb_type >= BLOCK_8X8  &&
         !(is_inter_block(mbmi) &&
             (mbmi->skip_coeff ||
-             vp9_segfeature_active(&xd->seg, segment_id, SEG_LVL_SKIP)))) {
+             vp9_segfeature_active(&cm->seg, segment_id, SEG_LVL_SKIP)))) {
       const uint8_t context = vp9_get_pred_context_tx_size(xd);
       update_tx_counts(bsize, context, mbmi->txfm_size, &cm->counts.tx);
     } else {

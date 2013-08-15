@@ -27,8 +27,9 @@ static INLINE int vp9_get_pred_context_seg_id(const MACROBLOCKD *xd) {
              (xd->left_available ? left_mbmi->seg_id_predicted : 0);
 }
 
-static INLINE vp9_prob vp9_get_pred_prob_seg_id(const MACROBLOCKD *xd) {
-  return xd->seg.pred_probs[vp9_get_pred_context_seg_id(xd)];
+static INLINE vp9_prob vp9_get_pred_prob_seg_id(struct segmentation *seg,
+                                                const MACROBLOCKD *xd) {
+  return seg->pred_probs[vp9_get_pred_context_seg_id(xd)];
 }
 
 void vp9_set_pred_flag_seg_id(VP9_COMMON *cm, BLOCK_SIZE_TYPE bsize,
