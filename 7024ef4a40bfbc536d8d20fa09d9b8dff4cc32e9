@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAcn//qII\u003d",
+        "filename": "build/make/gen_msvs_def.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-08-15T01:52:16Z",
+      "side": 1,
+      "message": "you probably meant printf",
+      "revId": "7024ef4a40bfbc536d8d20fa09d9b8dff4cc32e9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
