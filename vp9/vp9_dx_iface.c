@@ -368,6 +368,8 @@ static vpx_codec_err_t vp9_decode(vpx_codec_alg_priv_t  *ctx,
   uint32_t sizes[8];
   int frames_this_pts, frame_count = 0;
 
+  if (data == NULL || data_sz == 0) return VPX_CODEC_INVALID_PARAM;
+
   parse_superframe_index(data, data_sz, sizes, &frames_this_pts);
 
   do {
