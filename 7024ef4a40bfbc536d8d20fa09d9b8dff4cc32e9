@@ -16,6 +16,23 @@
       "revId": "7024ef4a40bfbc536d8d20fa09d9b8dff4cc32e9",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAcn//qIA\u003d",
+        "filename": "build/make/gen_msvs_sln.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 279,
+      "author": {
+        "id": 1003307
+      },
+      "writtenOn": "2013-08-15T01:55:25Z",
+      "side": 1,
+      "message": "I just realized that this breaks filenames with spaces in them, so probably not worth it.",
+      "revId": "7024ef4a40bfbc536d8d20fa09d9b8dff4cc32e9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
