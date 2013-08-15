@@ -216,7 +216,7 @@ static int write_skip_coeff(const VP9_COMP *cpi, int segment_id, MODE_INFO *m,
   if (vp9_segfeature_active(&xd->seg, segment_id, SEG_LVL_SKIP)) {
     return 1;
   } else {
-    const int skip_coeff = m->mbmi.mb_skip_coeff;
+    const int skip_coeff = m->mbmi.skip_coeff;
     vp9_write(w, skip_coeff, vp9_get_pred_prob_mbskip(&cpi->common, xd));
     return skip_coeff;
   }
@@ -462,7 +462,7 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, MODE_INFO *m, vp9_writer *bc) {
   } else {
     vp9_prob *mv_ref_p;
     encode_ref_frame(cpi, bc);
-    mv_ref_p = cpi->common.fc.inter_mode_probs[mi->mb_mode_context[rf]];
+    mv_ref_p = cpi->common.fc.inter_mode_probs[mi->mode_context[rf]];
 
 #ifdef ENTROPY_STATS
     active_section = 3;
@@ -472,7 +472,7 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, MODE_INFO *m, vp9_writer *bc) {
     if (!vp9_segfeature_active(seg, segment_id, SEG_LVL_SKIP)) {
       if (bsize >= BLOCK_8X8) {
         write_sb_mv_ref(bc, mode, mv_ref_p);
-        ++pc->counts.inter_mode[mi->mb_mode_context[rf]]
+        ++pc->counts.inter_mode[mi->mode_context[rf]]
                                [inter_mode_offset(mode)];
       }
     }
@@ -499,7 +499,7 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, MODE_INFO *m, vp9_writer *bc) {
           blockmode = x->partition_info->bmi[j].mode;
           blockmv = m->bmi[j].as_mv[0];
           write_sb_mv_ref(bc, blockmode, mv_ref_p);
-          ++pc->counts.inter_mode[mi->mb_mode_context[rf]]
+          ++pc->counts.inter_mode[mi->mode_context[rf]]
                                  [inter_mode_offset(blockmode)];
 
           if (blockmode == NEWMV) {

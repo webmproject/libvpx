@@ -130,26 +130,26 @@ static INLINE int mi_height_log2(BLOCK_SIZE_TYPE sb_type) {
   return mi_height_log2_lookup[sb_type];
 }
 
+// This structure now relates to 8x8 block regions.
 typedef struct {
   MB_PREDICTION_MODE mode, uv_mode;
   MV_REFERENCE_FRAME ref_frame[2];
   TX_SIZE txfm_size;
-  int_mv mv[2]; // for each reference frame used
+  int_mv mv[2];                // for each reference frame used
   int_mv ref_mvs[MAX_REF_FRAMES][MAX_MV_REF_CANDIDATES];
   int_mv best_mv, best_second_mv;
 
-  uint8_t mb_mode_context[MAX_REF_FRAMES];
+  uint8_t mode_context[MAX_REF_FRAMES];
 
-  unsigned char mb_skip_coeff;                                /* does this mb has coefficients at all, 1=no coefficients, 0=need decode tokens */
-  unsigned char segment_id;           // Segment id for current frame
+  unsigned char skip_coeff;    // 0=need to decode coeffs, 1=no coefficients
+  unsigned char segment_id;    // Segment id for this block.
 
   // Flags used for prediction status of various bit-stream signals
   unsigned char seg_id_predicted;
 
-  // Indicates if the mb is part of the image (1) vs border (0)
-  // This can be useful in determining whether the MB provides
-  // a valid predictor
-  unsigned char mb_in_image;
+  // Indicates if the block is part of the image (1) vs border (0)
+  // This can be useful in determining whether it provides a valid predictor
+  unsigned char in_image;
 
   INTERPOLATIONFILTERTYPE interp_filter;
 

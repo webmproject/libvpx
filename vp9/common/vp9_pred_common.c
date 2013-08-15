@@ -21,8 +21,8 @@ unsigned char vp9_get_pred_context_switchable_interp(const MACROBLOCKD *xd) {
   const MODE_INFO *const mi = xd->mode_info_context;
   const MB_MODE_INFO *const above_mbmi = &mi[-xd->mode_info_stride].mbmi;
   const MB_MODE_INFO *const left_mbmi = &mi[-1].mbmi;
-  const int left_in_image = xd->left_available && left_mbmi->mb_in_image;
-  const int above_in_image = xd->up_available && above_mbmi->mb_in_image;
+  const int left_in_image = xd->left_available && left_mbmi->in_image;
+  const int above_in_image = xd->up_available && above_mbmi->in_image;
   // Note:
   // The mode info data structure has a one element border above and to the
   // left of the entries correpsonding to real macroblocks.
@@ -56,8 +56,8 @@ unsigned char vp9_get_pred_context_intra_inter(const MACROBLOCKD *xd) {
   const MODE_INFO *const mi = xd->mode_info_context;
   const MB_MODE_INFO *const above_mbmi = &mi[-xd->mode_info_stride].mbmi;
   const MB_MODE_INFO *const left_mbmi = &mi[-1].mbmi;
-  const int left_in_image = xd->left_available && left_mbmi->mb_in_image;
-  const int above_in_image = xd->up_available && above_mbmi->mb_in_image;
+  const int left_in_image = xd->left_available && left_mbmi->in_image;
+  const int above_in_image = xd->up_available && above_mbmi->in_image;
   const int left_intra = !is_inter_block(left_mbmi);
   const int above_intra = !is_inter_block(above_mbmi);
 
@@ -83,8 +83,8 @@ unsigned char vp9_get_pred_context_comp_inter_inter(const VP9_COMMON *cm,
   const MODE_INFO *const mi = xd->mode_info_context;
   const MB_MODE_INFO *const above_mbmi = &mi[-cm->mode_info_stride].mbmi;
   const MB_MODE_INFO *const left_mbmi = &mi[-1].mbmi;
-  const int left_in_image = xd->left_available && left_mbmi->mb_in_image;
-  const int above_in_image = xd->up_available && above_mbmi->mb_in_image;
+  const int left_in_image = xd->left_available && left_mbmi->in_image;
+  const int above_in_image = xd->up_available && above_mbmi->in_image;
   // Note:
   // The mode info data structure has a one element border above and to the
   // left of the entries correpsonding to real macroblocks.
@@ -128,8 +128,8 @@ unsigned char vp9_get_pred_context_comp_ref_p(const VP9_COMMON *cm,
   const MODE_INFO *const mi = xd->mode_info_context;
   const MB_MODE_INFO *const above_mbmi = &mi[-cm->mode_info_stride].mbmi;
   const MB_MODE_INFO *const left_mbmi = &mi[-1].mbmi;
-  const int left_in_image = xd->left_available && left_mbmi->mb_in_image;
-  const int above_in_image = xd->up_available && above_mbmi->mb_in_image;
+  const int left_in_image = xd->left_available && left_mbmi->in_image;
+  const int above_in_image = xd->up_available && above_mbmi->in_image;
   const int left_intra = !is_inter_block(left_mbmi);
   const int above_intra = !is_inter_block(above_mbmi);
 
@@ -206,8 +206,8 @@ unsigned char vp9_get_pred_context_single_ref_p1(const MACROBLOCKD *xd) {
   const MODE_INFO *const mi = xd->mode_info_context;
   const MB_MODE_INFO *const above_mbmi = &mi[-xd->mode_info_stride].mbmi;
   const MB_MODE_INFO *const left_mbmi = &mi[-1].mbmi;
-  const int left_in_image = xd->left_available && left_mbmi->mb_in_image;
-  const int above_in_image = xd->up_available && above_mbmi->mb_in_image;
+  const int left_in_image = xd->left_available && left_mbmi->in_image;
+  const int above_in_image = xd->up_available && above_mbmi->in_image;
   const int left_intra = !is_inter_block(left_mbmi);
   const int above_intra = !is_inter_block(above_mbmi);
 
@@ -271,8 +271,8 @@ unsigned char vp9_get_pred_context_single_ref_p2(const MACROBLOCKD *xd) {
   const MODE_INFO *const mi = xd->mode_info_context;
   const MB_MODE_INFO *const above_mbmi = &mi[-xd->mode_info_stride].mbmi;
   const MB_MODE_INFO *const left_mbmi = &mi[-1].mbmi;
-  const int left_in_image = xd->left_available && left_mbmi->mb_in_image;
-  const int above_in_image = xd->up_available && above_mbmi->mb_in_image;
+  const int left_in_image = xd->left_available && left_mbmi->in_image;
+  const int above_in_image = xd->up_available && above_mbmi->in_image;
   const int left_intra = !is_inter_block(left_mbmi);
   const int above_intra = !is_inter_block(above_mbmi);
 
@@ -361,18 +361,18 @@ unsigned char vp9_get_pred_context_tx_size(const MACROBLOCKD *xd) {
   const MODE_INFO *const mi = xd->mode_info_context;
   const MB_MODE_INFO *const above_mbmi = &mi[-xd->mode_info_stride].mbmi;
   const MB_MODE_INFO *const left_mbmi = &mi[-1].mbmi;
-  const int left_in_image = xd->left_available && left_mbmi->mb_in_image;
-  const int above_in_image = xd->up_available && above_mbmi->mb_in_image;
+  const int left_in_image = xd->left_available && left_mbmi->in_image;
+  const int above_in_image = xd->up_available && above_mbmi->in_image;
   const int max_tx_size = max_txsize_lookup[mi->mbmi.sb_type];
   int above_context = max_tx_size;
   int left_context = max_tx_size;
 
   if (above_in_image)
-    above_context = above_mbmi->mb_skip_coeff ? max_tx_size
+    above_context = above_mbmi->skip_coeff ? max_tx_size
                                               : above_mbmi->txfm_size;
 
   if (left_in_image)
-    left_context = left_mbmi->mb_skip_coeff ? max_tx_size
+    left_context = left_mbmi->skip_coeff ? max_tx_size
                                             : left_mbmi->txfm_size;
 
   if (!left_in_image)
@@ -409,7 +409,7 @@ void vp9_set_pred_flag_mbskip(VP9_COMMON *cm, BLOCK_SIZE_TYPE bsize,
 
   for (y = 0; y < ymis; y++)
     for (x = 0; x < xmis; x++)
-      mi[y * cm->mode_info_stride + x].mbmi.mb_skip_coeff = pred_flag;
+      mi[y * cm->mode_info_stride + x].mbmi.skip_coeff = pred_flag;
 }
 
 int vp9_get_segment_id(VP9_COMMON *cm, const uint8_t *segment_ids,

@@ -1558,7 +1558,7 @@ static int labels2mode(MACROBLOCK *x, int i,
   }
 
   cost = cost_mv_ref(cpi, this_mode,
-                     mbmi->mb_mode_context[mbmi->ref_frame[0]]);
+                     mbmi->mode_context[mbmi->ref_frame[0]]);
 
   mic->bmi[i].as_mv[0].as_int = this_mv->as_int;
   if (mbmi->ref_frame[1] > 0)
@@ -1791,7 +1791,7 @@ static void rd_check_segment_txsize(VP9_COMP *cpi, MACROBLOCK *x,
             frame_mv[this_mode][mbmi->ref_frame[0]].as_int == 0 &&
             (mbmi->ref_frame[1] <= 0 ||
              frame_mv[this_mode][mbmi->ref_frame[1]].as_int == 0)) {
-          int rfc = mbmi->mb_mode_context[mbmi->ref_frame[0]];
+          int rfc = mbmi->mode_context[mbmi->ref_frame[0]];
           int c1 = cost_mv_ref(cpi, NEARMV, rfc);
           int c2 = cost_mv_ref(cpi, NEARESTMV, rfc);
           int c3 = cost_mv_ref(cpi, ZEROMV, rfc);
@@ -2747,7 +2747,7 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
       frame_mv[refs[0]].as_int == 0 &&
       !vp9_segfeature_active(&xd->seg, mbmi->segment_id, SEG_LVL_SKIP) &&
       (num_refs == 1 || frame_mv[refs[1]].as_int == 0)) {
-    int rfc = mbmi->mb_mode_context[mbmi->ref_frame[0]];
+    int rfc = mbmi->mode_context[mbmi->ref_frame[0]];
     int c1 = cost_mv_ref(cpi, NEARMV, rfc);
     int c2 = cost_mv_ref(cpi, NEARESTMV, rfc);
     int c3 = cost_mv_ref(cpi, ZEROMV, rfc);
@@ -2804,7 +2804,7 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
    * words if you present them in that order, the second one is always known
    * if the first is known */
   *rate2 += cost_mv_ref(cpi, this_mode,
-                        mbmi->mb_mode_context[mbmi->ref_frame[0]]);
+                        mbmi->mode_context[mbmi->ref_frame[0]]);
 
   if (!(*mode_excluded)) {
     if (is_comp_pred) {

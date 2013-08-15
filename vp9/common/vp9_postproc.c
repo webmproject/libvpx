@@ -737,7 +737,7 @@ int vp9_post_proc_frame(struct VP9Common *oci,
         char zz[4];
         int dc_diff = !(mi[mb_index].mbmi.mode != I4X4_PRED &&
                         mi[mb_index].mbmi.mode != SPLITMV &&
-                        mi[mb_index].mbmi.mb_skip_coeff);
+                        mi[mb_index].mbmi.skip_coeff);
 
         if (oci->frame_type == KEY_FRAME)
           sprintf(zz, "a");

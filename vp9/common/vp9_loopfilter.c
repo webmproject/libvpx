@@ -263,7 +263,7 @@ static void filter_block_plane(VP9_COMMON *const cm,
 
     // Determine the vertical edges that need filtering
     for (c = 0; c < MI_BLOCK_SIZE && mi_col + c < cm->mi_cols; c += col_step) {
-      const int skip_this = mi[c].mbmi.mb_skip_coeff
+      const int skip_this = mi[c].mbmi.skip_coeff
                             && is_inter_block(&mi[c].mbmi);
       // left edge of current unit is block/partition edge -> no skip
       const int block_edge_left = b_width_log2(mi[c].mbmi.sb_type) ?

@@ -1467,8 +1467,8 @@ static void rd_auto_partition_range(VP9_COMP *cpi,
   const MODE_INFO *const mi = xd->mode_info_context;
   const MB_MODE_INFO *const above_mbmi = &mi[-xd->mode_info_stride].mbmi;
   const MB_MODE_INFO *const left_mbmi = &mi[-1].mbmi;
-  const int left_in_image = xd->left_available && left_mbmi->mb_in_image;
-  const int above_in_image = xd->up_available && above_mbmi->mb_in_image;
+  const int left_in_image = xd->left_available && left_mbmi->in_image;
+  const int above_in_image = xd->up_available && above_mbmi->in_image;
 
   // Frequency check
   if (cpi->sf.auto_min_max_partition_count <= 0) {
@@ -2180,7 +2180,7 @@ static int get_skip_flag(MODE_INFO *mi, int mis, int ymbs, int xmbs) {
 
   for (y = 0; y < ymbs; y++) {
     for (x = 0; x < xmbs; x++) {
-      if (!mi[y * mis + x].mbmi.mb_skip_coeff)
+      if (!mi[y * mis + x].mbmi.skip_coeff)
         return 0;
     }
   }
@@ -2624,10 +2624,10 @@ static void encode_superblock(VP9_COMP *cpi, TOKENEXTRA **t, int output_enabled,
     vp9_encode_sb(cm, x, MAX(bsize, BLOCK_8X8));
     vp9_tokenize_sb(cpi, t, !output_enabled, MAX(bsize, BLOCK_8X8));
   } else {
-    int mb_skip_context = xd->left_available ? (mi - 1)->mbmi.mb_skip_coeff : 0;
-    mb_skip_context += (mi - mis)->mbmi.mb_skip_coeff;
+    int mb_skip_context = xd->left_available ? (mi - 1)->mbmi.skip_coeff : 0;
+    mb_skip_context += (mi - mis)->mbmi.skip_coeff;
 
-    mbmi->mb_skip_coeff = 1;
+    mbmi->skip_coeff = 1;
     if (output_enabled)
       cm->counts.mbskip[mb_skip_context][1]++;
     reset_skip_context(xd, MAX(bsize, BLOCK_8X8));
@@ -2635,13 +2635,13 @@ static void encode_superblock(VP9_COMP *cpi, TOKENEXTRA **t, int output_enabled,
 
   // copy skip flag on all mb_mode_info contexts in this SB
   // if this was a skip at this txfm size
-  vp9_set_pred_flag_mbskip(cm, bsize, mi_row, mi_col, mi->mbmi.mb_skip_coeff);
+  vp9_set_pred_flag_mbskip(cm, bsize, mi_row, mi_col, mi->mbmi.skip_coeff);
 
   if (output_enabled) {
     if (cm->tx_mode == TX_MODE_SELECT &&
         mbmi->sb_type >= BLOCK_8X8  &&
         !(is_inter_block(mbmi) &&
-            (mbmi->mb_skip_coeff ||
+            (mbmi->skip_coeff ||
              vp9_segfeature_active(&xd->seg, segment_id, SEG_LVL_SKIP)))) {
       const uint8_t context = vp9_get_pred_context_tx_size(xd);
       update_tx_counts(bsize, context, mbmi->txfm_size, &cm->counts.tx);

@@ -39,8 +39,8 @@ static INLINE int vp9_get_pred_context_mbskip(const MACROBLOCKD *xd) {
   const MB_MODE_INFO *const above_mbmi = &mi[-xd->mode_info_stride].mbmi;
   const MB_MODE_INFO *const left_mbmi = &mi[-1].mbmi;
 
-  return above_mbmi->mb_skip_coeff +
-             (xd->left_available ? left_mbmi->mb_skip_coeff : 0);
+  return above_mbmi->skip_coeff +
+             (xd->left_available ? left_mbmi->skip_coeff : 0);
 }
 
 static INLINE vp9_prob vp9_get_pred_prob_mbskip(const VP9_COMMON *cm,
@@ -49,7 +49,7 @@ static INLINE vp9_prob vp9_get_pred_prob_mbskip(const VP9_COMMON *cm,
 }
 
 static INLINE unsigned char vp9_get_pred_flag_mbskip(const MACROBLOCKD *xd) {
-  return xd->mode_info_context->mbmi.mb_skip_coeff;
+  return xd->mode_info_context->mbmi.skip_coeff;
 }
 
 void vp9_set_pred_flag_mbskip(VP9_COMMON *cm, BLOCK_SIZE_TYPE bsize,

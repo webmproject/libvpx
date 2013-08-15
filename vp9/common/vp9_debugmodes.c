@@ -57,7 +57,7 @@ void vp9_print_modes_and_motion_vectors(VP9_COMMON *cm, char *file) {
 
   print_mi_data(cm, mvs, "Partitions:", offsetof(MB_MODE_INFO, sb_type));
   print_mi_data(cm, mvs, "Modes:", offsetof(MB_MODE_INFO, mode));
-  print_mi_data(cm, mvs, "Skips:", offsetof(MB_MODE_INFO, mb_skip_coeff));
+  print_mi_data(cm, mvs, "Skips:", offsetof(MB_MODE_INFO, skip_coeff));
   print_mi_data(cm, mvs, "Ref frame:", offsetof(MB_MODE_INFO, ref_frame[0]));
   print_mi_data(cm, mvs, "Transform:", offsetof(MB_MODE_INFO, txfm_size));
   print_mi_data(cm, mvs, "UV Modes:", offsetof(MB_MODE_INFO, uv_mode));

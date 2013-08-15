@@ -278,8 +278,8 @@ void vp9_tokenize_sb(VP9_COMP *cpi, TOKENEXTRA **t, int dry_run,
                                               SEG_LVL_SKIP);
   struct tokenize_b_args arg = {cpi, xd, t, mbmi->txfm_size};
 
-  mbmi->mb_skip_coeff = vp9_sb_is_skippable(xd, bsize);
-  if (mbmi->mb_skip_coeff) {
+  mbmi->skip_coeff = vp9_sb_is_skippable(xd, bsize);
+  if (mbmi->skip_coeff) {
     if (!dry_run)
       cm->counts.mbskip[mb_skip_context][1] += skip_inc;
     reset_skip_context(xd, bsize);
