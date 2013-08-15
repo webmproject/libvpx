@@ -240,6 +240,7 @@ struct is_skippable_args {
   MACROBLOCKD *xd;
   int *skippable;
 };
+
 static void is_skippable(int plane, int block,
                          BLOCK_SIZE_TYPE bsize, int ss_txfrm_size, void *argv) {
   struct is_skippable_args *args = argv;
@@ -253,10 +254,11 @@ int vp9_sb_is_skippable(MACROBLOCKD *xd, BLOCK_SIZE_TYPE bsize) {
   return result;
 }
 
-int vp9_sby_is_skippable(MACROBLOCKD *xd, BLOCK_SIZE_TYPE bsize) {
+int vp9_is_skippable_in_plane(MACROBLOCKD *xd, BLOCK_SIZE_TYPE bsize,
+                              int plane) {
   int result = 1;
   struct is_skippable_args args = {xd, &result};
-  foreach_transformed_block_in_plane(xd, bsize, 0, is_skippable, &args);
+  foreach_transformed_block_in_plane(xd, bsize, plane, is_skippable, &args);
   return result;
 }
 
