@@ -185,63 +185,43 @@ static void invert_quant(int16_t *quant, int16_t *shift, int d) {
 }
 
 void vp9_init_quantizer(VP9_COMP *cpi) {
-  int i;
-  int quant_val;
-  int quant_uv_val;
-#if CONFIG_ALPHA
-  int quant_alpha_val;
-#endif
-  int q;
+  int i, q;
+  VP9_COMMON *const cm = &cpi->common;
 
   for (q = 0; q < QINDEX_RANGE; q++) {
-    int qzbin_factor = (vp9_dc_quant(q, 0) < 148) ? 84 : 80;
-    int qrounding_factor = 48;
-    if (q == 0) {
-      qzbin_factor = 64;
-      qrounding_factor = 64;
+    const int qzbin_factor = q == 0 ? 64 : (vp9_dc_quant(q, 0) < 148 ? 84 : 80);
+    const int qrounding_factor = q == 0 ? 64 : 48;
+
+    // y
+    for (i = 0; i < 2; ++i) {
+      const int quant = i == 0 ? vp9_dc_quant(q, cm->y_dc_delta_q)
+                               : vp9_ac_quant(q, 0);
+      invert_quant(&cpi->y_quant[q][i], &cpi->y_quant_shift[q][i], quant);
+      cpi->y_zbin[q][i] = ROUND_POWER_OF_TWO(qzbin_factor * quant, 7);
+      cpi->y_round[q][i] = (qrounding_factor * quant) >> 7;
+      cm->y_dequant[q][i] = quant;
     }
 
-    // dc values
-    quant_val = vp9_dc_quant(q, cpi->common.y_dc_delta_q);
-    invert_quant(cpi->y_quant[q] + 0, cpi->y_quant_shift[q] + 0, quant_val);
-    cpi->y_zbin[q][0] = ROUND_POWER_OF_TWO(qzbin_factor * quant_val, 7);
-    cpi->y_round[q][0] = (qrounding_factor * quant_val) >> 7;
-    cpi->common.y_dequant[q][0] = quant_val;
-
-    quant_val = vp9_dc_quant(q, cpi->common.uv_dc_delta_q);
-    invert_quant(cpi->uv_quant[q] + 0, cpi->uv_quant_shift[q] + 0, quant_val);
-    cpi->uv_zbin[q][0] = ROUND_POWER_OF_TWO(qzbin_factor * quant_val, 7);
-    cpi->uv_round[q][0] = (qrounding_factor * quant_val) >> 7;
-    cpi->common.uv_dequant[q][0] = quant_val;
+    // uv
+    for (i = 0; i < 2; ++i) {
+      const int quant = i == 0 ? vp9_dc_quant(q, cm->uv_dc_delta_q)
+                               : vp9_ac_quant(q, cm->uv_ac_delta_q);
+      invert_quant(&cpi->uv_quant[q][i], &cpi->uv_quant_shift[q][i], quant);
+      cpi->uv_zbin[q][i] = ROUND_POWER_OF_TWO(qzbin_factor * quant, 7);
+      cpi->uv_round[q][i] = (qrounding_factor * quant) >> 7;
+      cm->uv_dequant[q][i] = quant;
+    }
 
 #if CONFIG_ALPHA
-    quant_val = vp9_dc_quant(q, cpi->common.a_dc_delta_q);
-    invert_quant(cpi->a_quant[q] + 0, cpi->a_quant_shift[q] + 0, quant_val);
-    cpi->a_zbin[q][0] = ROUND_POWER_OF_TWO(qzbin_factor * quant_val, 7);
-    cpi->a_round[q][0] = (qrounding_factor * quant_val) >> 7;
-    cpi->common.a_dequant[q][0] = quant_val;
-#endif
-
-    quant_val = vp9_ac_quant(q, 0);
-    invert_quant(cpi->y_quant[q] + 1, cpi->y_quant_shift[q] + 1, quant_val);
-    cpi->y_zbin[q][1] = ROUND_POWER_OF_TWO(qzbin_factor * quant_val, 7);
-    cpi->y_round[q][1] = (qrounding_factor * quant_val) >> 7;
-    cpi->common.y_dequant[q][1] = quant_val;
-
-    quant_uv_val = vp9_ac_quant(q, cpi->common.uv_ac_delta_q);
-    invert_quant(cpi->uv_quant[q] + 1, cpi->uv_quant_shift[q] + 1,
-                 quant_uv_val);
-    cpi->uv_zbin[q][1] = ROUND_POWER_OF_TWO(qzbin_factor * quant_uv_val, 7);
-    cpi->uv_round[q][1] = (qrounding_factor * quant_uv_val) >> 7;
-    cpi->common.uv_dequant[q][1] = quant_uv_val;
-
-#if CONFIG_ALPHA
-    quant_alpha_val = vp9_ac_quant(q, cpi->common.a_ac_delta_q);
-    invert_quant(cpi->a_quant[q] + 1, cpi->a_quant_shift[q] + 1,
-                 quant_alpha_val);
-    cpi->a_zbin[q][1] = ROUND_POWER_OF_TWO(qzbin_factor * quant_alpha_val, 7);
-    cpi->a_round[q][1] = (qrounding_factor * quant_alpha_val) >> 7;
-    cpi->common.a_dequant[q][1] = quant_alpha_val;
+    // alpha
+    for (i = 0; i < 2; ++i) {
+      const int quant = i == 0 ? vp9_dc_quant(q, cm->a_dc_delta_q)
+                               : vp9_ac_quant(q, cm->a_ac_delta_q);
+      invert_quant(&cpi->a_quant[q][i], &cpi->a_quant_shift[q][i], quant);
+      cpi->a_zbin[q][i] = ROUND_POWER_OF_TWO(qzbin_factor * quant, 7);
+      cpi->a_round[q][i] = (qrounding_factor * quant) >> 7;
+      cm->a_dequant[q][i] = quant;
+    }
 #endif
 
     for (i = 2; i < 8; i++) {
@@ -249,20 +229,20 @@ void vp9_init_quantizer(VP9_COMP *cpi) {
       cpi->y_quant_shift[q][i] = cpi->y_quant_shift[q][1];
       cpi->y_zbin[q][i] = cpi->y_zbin[q][1];
       cpi->y_round[q][i] = cpi->y_round[q][1];
-      cpi->common.y_dequant[q][i] = cpi->common.y_dequant[q][1];
+      cm->y_dequant[q][i] = cm->y_dequant[q][1];
 
       cpi->uv_quant[q][i] = cpi->uv_quant[q][1];
       cpi->uv_quant_shift[q][i] = cpi->uv_quant_shift[q][1];
       cpi->uv_zbin[q][i] = cpi->uv_zbin[q][1];
       cpi->uv_round[q][i] = cpi->uv_round[q][1];
-      cpi->common.uv_dequant[q][i] = cpi->common.uv_dequant[q][1];
+      cm->uv_dequant[q][i] = cm->uv_dequant[q][1];
 
 #if CONFIG_ALPHA
       cpi->a_quant[q][i] = cpi->a_quant[q][1];
       cpi->a_quant_shift[q][i] = cpi->a_quant_shift[q][1];
       cpi->a_zbin[q][i] = cpi->a_zbin[q][1];
       cpi->a_round[q][i] = cpi->a_round[q][1];
-      cpi->common.a_dequant[q][i] = cpi->common.a_dequant[q][1];
+      cm->a_dequant[q][i] = cm->a_dequant[q][1];
 #endif
     }
   }
