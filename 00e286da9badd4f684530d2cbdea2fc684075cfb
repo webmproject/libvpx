@@ -16,6 +16,24 @@
       "revId": "00e286da9badd4f684530d2cbdea2fc684075cfb",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAc3///80\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 77,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2013-08-15T16:47:06Z",
+      "side": 1,
+      "message": "Done to avoid ambiguity and maintain consistency in the rest of the code.\n\nHowever note variance is by definition a mean - so per pixel is redundant.",
+      "parentUuid": "AAAAcn//qWs\u003d",
+      "revId": "00e286da9badd4f684530d2cbdea2fc684075cfb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
