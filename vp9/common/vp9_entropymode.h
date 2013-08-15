@@ -20,7 +20,6 @@
 #define VP9_SWITCHABLE_FILTERS 3   // number of switchable filters
 
 #if CONFIG_INTERINTRA
-#define VP9_DEF_INTERINTRA_PROB 192
 #define VP9_UPD_INTERINTRA_PROB 248
 #define SEPARATE_INTERINTRA_UV  0
 #endif

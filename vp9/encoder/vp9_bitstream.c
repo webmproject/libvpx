@@ -509,7 +509,8 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, MODE_INFO *m, vp9_writer *bc) {
         && is_interintra_allowed(bsize)
         && is_inter_mode(mode)
         && (mi->ref_frame[1] <= INTRA_FRAME)) {
-        vp9_write(bc, mi->ref_frame[1] == INTRA_FRAME, pc->fc.interintra_prob);
+        vp9_write(bc, mi->ref_frame[1] == INTRA_FRAME,
+                  pc->fc.interintra_prob[bsize]);
         if (mi->ref_frame[1] == INTRA_FRAME) {
           const int bwl = b_width_log2(bsize),
                     bhl = b_height_log2(bsize);
@@ -1396,8 +1397,16 @@ static void write_uncompressed_header(VP9_COMP *cpi,
       fix_mcomp_filter_type(cpi);
       write_interp_filter_type(cm->mcomp_filter_type, wb);
 #if CONFIG_INTERINTRA
-      if (!cpi->dummy_packing && cm->use_interintra)
-        cm->use_interintra = (cpi->interintra_count[1] > 0);
+      if (!cpi->dummy_packing && cm->use_interintra) {
+        int b;
+        cm->use_interintra = 0;
+        for (b = 0; b < BLOCK_SIZE_TYPES; ++b) {
+          if (is_interintra_allowed(b) && cpi->interintra_count[b][1] > 0) {
+            cm->use_interintra = 1;
+            break;
+          }
+        }
+      }
       vp9_wb_write_bit(wb, cm->use_interintra);
       if (!cm->use_interintra)
         vp9_zero(cpi->interintra_count);
@@ -1454,10 +1463,14 @@ static size_t write_compressed_header(VP9_COMP *cpi, uint8_t *data) {
 
 #if CONFIG_INTERINTRA
     if (cm->use_interintra) {
-      vp9_cond_prob_update(&header_bc,
-                           &cm->fc.interintra_prob,
-                           VP9_UPD_INTERINTRA_PROB,
-                           cpi->interintra_count);
+      int b;
+      for (b = 0; b < BLOCK_SIZE_TYPES; ++b) {
+        if (is_interintra_allowed(b))
+          vp9_cond_prob_diff_update(&header_bc,
+                                    &cm->fc.interintra_prob[b],
+                                    VP9_UPD_INTERINTRA_PROB,
+                                    cpi->interintra_count[b]);
+      }
     }
 #endif
 

@@ -443,12 +443,12 @@ static void update_state(VP9_COMP *cpi, PICK_MODE_CONTEXT *ctx,
         const int bwl = b_width_log2(bsize), bhl = b_height_log2(bsize);
         const int bsl = MIN(bwl, bhl);
         ++cpi->y_mode_count[MIN(bsl, 3)][mbmi->interintra_mode];
-        ++cpi->interintra_count[1];
+        ++cpi->interintra_count[mbmi->sb_type][1];
 #if SEPARATE_INTERINTRA_UV
         ++cpi->uv_mode_count[mbmi->interintra_mode][mbmi->interintra_uv_mode];
 #endif
         } else {
-          ++cpi->interintra_count[0];
+          ++cpi->interintra_count[mbmi->sb_type][0];
         }
     }
 #endif

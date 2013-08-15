@@ -335,6 +335,12 @@ static const vp9_prob default_switchable_interp_prob[VP9_SWITCHABLE_FILTERS+1]
   { 149, 144, },
 };
 
+#if CONFIG_INTERINTRA
+static const vp9_prob default_interintra_prob[BLOCK_SIZE_TYPES] = {
+  192, 192, 192, 192, 192, 192, 192, 192, 192, 192, 192, 192, 192
+};
+#endif
+
 void vp9_init_mbmode_probs(VP9_COMMON *cm) {
   vp9_copy(cm->fc.uv_mode_prob, default_if_uv_probs);
   vp9_copy(cm->fc.y_mode_prob, default_if_y_probs);
@@ -347,7 +353,7 @@ void vp9_init_mbmode_probs(VP9_COMMON *cm) {
   cm->fc.tx_probs = default_tx_probs;
   vp9_copy(cm->fc.mbskip_probs, default_mbskip_probs);
 #if CONFIG_INTERINTRA
-  cm->fc.interintra_prob = VP9_DEF_INTERINTRA_PROB;
+  vp9_copy(cm->fc.interintra_prob, default_interintra_prob);
 #endif
 #if CONFIG_FILTERINTRA
   vp9_copy(cm->fc.filterintra_prob, vp9_default_filterintra_prob);
@@ -479,8 +485,11 @@ void vp9_adapt_mode_probs(VP9_COMMON *cm) {
 
 #if CONFIG_INTERINTRA
   if (cm->use_interintra) {
-    fc->interintra_prob = update_ct2(pre_fc->interintra_prob,
-                                     counts->interintra);
+    for (i = 0; i < BLOCK_SIZE_TYPES; ++i) {
+      if (is_interintra_allowed(i))
+        fc->interintra_prob[i] = update_ct2(pre_fc->interintra_prob[i],
+                                            counts->interintra[i]);
+    }
   }
 #endif
 #if CONFIG_FILTERINTRA

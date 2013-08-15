@@ -54,7 +54,7 @@ typedef struct frame_contexts {
   vp9_prob mbskip_probs[MBSKIP_CONTEXTS];
   nmv_context nmvc;
 #if CONFIG_INTERINTRA
-  vp9_prob interintra_prob;
+  vp9_prob interintra_prob[BLOCK_SIZE_TYPES];
 #endif
 #if CONFIG_FILTERINTRA
   vp9_prob filterintra_prob[TX_SIZES][VP9_INTRA_MODES];
@@ -82,7 +82,7 @@ typedef struct {
   unsigned int mbskip[MBSKIP_CONTEXTS][2];
   nmv_context_counts mv;
 #if CONFIG_INTERINTRA
-  unsigned int interintra[2];
+  unsigned int interintra[BLOCK_SIZE_TYPES][2];
 #endif
 #if CONFIG_FILTERINTRA
   unsigned int filterintra[TX_SIZES][VP9_INTRA_MODES][2];

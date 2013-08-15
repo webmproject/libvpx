@@ -3268,7 +3268,7 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
   }
 
   if (!is_comp_pred) {
-    *compmode_interintra_cost = vp9_cost_bit(cm->fc.interintra_prob,
+    *compmode_interintra_cost = vp9_cost_bit(cm->fc.interintra_prob[bsize],
                                              is_comp_interintra_pred);
     if (is_comp_interintra_pred) {
       *compmode_interintra_cost += x->mbmode_cost[mbmi->interintra_mode];

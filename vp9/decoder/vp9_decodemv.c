@@ -561,9 +561,9 @@ static void read_inter_block_mode_info(VP9D_COMP *pbi, MODE_INFO *mi,
         && is_inter_mode(mbmi->mode)
         && (mbmi->ref_frame[1] == NONE)
         ) {
-      mbmi->ref_frame[1] = (vp9_read(r, cm->fc.interintra_prob) ?
+      mbmi->ref_frame[1] = (vp9_read(r, cm->fc.interintra_prob[bsize]) ?
                             INTRA_FRAME : NONE);
-      cm->counts.interintra[mbmi->ref_frame[1] == INTRA_FRAME]++;
+      cm->counts.interintra[bsize][mbmi->ref_frame[1] == INTRA_FRAME]++;
       if (mbmi->ref_frame[1] == INTRA_FRAME) {
         int bsg = MIN(MIN(b_width_log2(bsize), b_height_log2(bsize)), 3);
         mbmi->interintra_mode = read_intra_mode(r, cm->fc.y_mode_prob[bsg]);
@@ -774,8 +774,12 @@ void vp9_prepare_read_mode_info(VP9D_COMP* pbi, vp9_reader *r) {
 
 #if CONFIG_INTERINTRA
     if (cm->use_interintra) {
-      if (vp9_read(r, VP9_UPD_INTERINTRA_PROB))
-        cm->fc.interintra_prob = vp9_read_prob(r);
+      int b;
+      for (b = 0; b < BLOCK_SIZE_TYPES; ++b) {
+        if (is_interintra_allowed(b))
+          if (vp9_read(r, VP9_UPD_INTERINTRA_PROB))
+            vp9_diff_update_prob(r, &cm->fc.interintra_prob[b]);
+      }
     }
 #endif
 

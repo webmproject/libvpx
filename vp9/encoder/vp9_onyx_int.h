@@ -97,7 +97,7 @@ typedef struct {
   vp9_prob mbskip_probs[MBSKIP_CONTEXTS];
 
 #if CONFIG_INTERINTRA
-  vp9_prob interintra_prob;
+  vp9_prob interintra_prob[BLOCK_SIZE_TYPES];
 #endif
 #if CONFIG_FILTERINTRA
   vp9_prob filterintra_prob[TX_SIZES][VP9_INTRA_MODES];
@@ -500,7 +500,7 @@ typedef struct VP9_COMP {
   unsigned int partition_count[NUM_PARTITION_CONTEXTS][PARTITION_TYPES];
 
 #if CONFIG_INTERINTRA
-  unsigned int interintra_count[2];
+  unsigned int interintra_count[BLOCK_SIZE_TYPES][2];
   unsigned int interintra_select_count[2];
 #endif
 #if CONFIG_MASKED_COMPOUND_INTER
