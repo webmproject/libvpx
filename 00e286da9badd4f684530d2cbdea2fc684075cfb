@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAcn//qWs\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 77,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2013-08-15T00:16:17Z",
+      "side": 1,
+      "message": "this name suggests a returned value of variance per block, while it really provides the variance value per pixel. perhaps consider to rename it to avoid ambiguity(?)",
+      "revId": "00e286da9badd4f684530d2cbdea2fc684075cfb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
