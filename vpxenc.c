@@ -2631,8 +2631,8 @@ int main(int argc, const char **argv_) {
                                          &global.framerate));
     }
 
-    FOREACH_STREAM(open_output_file(stream, &global));
     FOREACH_STREAM(setup_pass(stream, &global, pass));
+    FOREACH_STREAM(open_output_file(stream, &global));
     FOREACH_STREAM(initialize_encoder(stream, &global));
 
     frame_avail = 1;
