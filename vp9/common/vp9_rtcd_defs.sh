@@ -271,7 +271,7 @@ prototype void vp9_convolve_copy "const uint8_t *src, ptrdiff_t src_stride, uint
 specialize vp9_convolve_copy $sse2_x86inc neon
 
 prototype void vp9_convolve_avg "const uint8_t *src, ptrdiff_t src_stride, uint8_t *dst, ptrdiff_t dst_stride, const int16_t *filter_x, int x_step_q4, const int16_t *filter_y, int y_step_q4, int w, int h"
-specialize vp9_convolve_avg $sse2_x86inc
+specialize vp9_convolve_avg $sse2_x86inc neon
 
 prototype void vp9_convolve8 "const uint8_t *src, ptrdiff_t src_stride, uint8_t *dst, ptrdiff_t dst_stride, const int16_t *filter_x, int x_step_q4, const int16_t *filter_y, int y_step_q4, int w, int h"
 specialize vp9_convolve8 ssse3 neon
