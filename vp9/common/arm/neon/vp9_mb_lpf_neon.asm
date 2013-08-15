@@ -361,8 +361,6 @@ v_end
 
     vand        d16, d20, d19              ; flat && mask
     vmov        r5, r6, d16
-    orrs        r5, r5, r6                 ; Check for 0
-    orreq       r7, r7, #1                 ; Only do filter branch
 
     ; flatmask5(1, p7, p6, p5, p4, p0, q0, q4, q5, q6, q7)
     vabd.u8     d22, d3, d7                ; abs(p4 - p0)
@@ -388,10 +386,11 @@ v_end
 
     vmov.u8     d22, #0x80
 
+    orrs        r5, r5, r6                 ; Check for 0
+    orreq       r7, r7, #1                 ; Only do filter branch
+
     vand        d17, d18, d16              ; flat2 && flat && mask
     vmov        r5, r6, d17
-    orrs        r5, r5, r6                 ; Check for 0
-    orreq       r7, r7, #2                 ; Only do mbfilter branch
 
     ; mbfilter() function
 
@@ -405,15 +404,10 @@ v_end
     vmov.u8     d27, #3
 
     vsub.s8     d28, d23, d24              ; ( qs0 - ps0)
-
     vqsub.s8    d29, d25, d26              ; filter = clamp(ps1-qs1)
-
     vmull.s8    q15, d28, d27              ; 3 * ( qs0 - ps0)
-
     vand        d29, d29, d21              ; filter &= hev
-
     vaddw.s8    q15, q15, d29              ; filter + 3 * (qs0 - ps0)
-
     vmov.u8     d29, #4
 
     ; filter = clamp(filter + 3 * ( qs0 - ps0))
@@ -452,37 +446,37 @@ v_end
     vaddl.u8    q15, d7, d8                ; op2 = p0 + q0
     vmlal.u8    q15, d4, d27               ; op2 = p0 + q0 + p3 * 3
     vmlal.u8    q15, d5, d29               ; op2 = p0 + q0 + p3 * 3 + p2 * 2
+    vaddl.u8    q10, d4, d5
     vaddw.u8    q15, d6                    ; op2=p1 + p0 + q0 + p3 * 3 + p2 *2
+    vaddl.u8    q14, d6, d9
     vqrshrn.u16 d18, q15, #3               ; r_op2
 
-    vsubw.u8    q15, d4                    ; op1 = op2 - p3
-    vsubw.u8    q15, d5                    ; op1 -= p2
-    vaddw.u8    q15, d6                    ; op1 += p1
-    vaddw.u8    q15, d9                    ; op1 += q1
+    vsub.i16    q15, q10
+    vaddl.u8    q10, d4, d6
+    vadd.i16    q15, q14
+    vaddl.u8    q14, d7, d10
     vqrshrn.u16 d19, q15, #3               ; r_op1
 
-    vsubw.u8    q15, d4                    ; op0 = op1 - p3
-    vsubw.u8    q15, d6                    ; op0 -= p1
-    vaddw.u8    q15, d7                    ; op0 += p0
-    vaddw.u8    q15, d10                   ; op0 += q2
+    vsub.i16    q15, q10
+    vadd.i16    q15, q14
+    vaddl.u8    q14, d8, d11
     vqrshrn.u16 d20, q15, #3               ; r_op0
 
     vsubw.u8    q15, d4                    ; oq0 = op0 - p3
     vsubw.u8    q15, d7                    ; oq0 -= p0
-    vaddw.u8    q15, d8                    ; oq0 += q0
-    vaddw.u8    q15, d11                   ; oq0 += q3
+    vadd.i16    q15, q14
+    vaddl.u8    q14, d9, d11
     vqrshrn.u16 d21, q15, #3               ; r_oq0
 
     vsubw.u8    q15, d5                    ; oq1 = oq0 - p2
     vsubw.u8    q15, d8                    ; oq1 -= q0
-    vaddw.u8    q15, d9                    ; oq1 += q1
-    vaddw.u8    q15, d11                   ; oq1 += q3
+    vadd.i16    q15, q14
+    vaddl.u8    q14, d10, d11
     vqrshrn.u16 d22, q15, #3               ; r_oq1
 
     vsubw.u8    q15, d6                    ; oq2 = oq0 - p1
     vsubw.u8    q15, d9                    ; oq2 -= q1
-    vaddw.u8    q15, d10                   ; oq2 += q2
-    vaddw.u8    q15, d11                   ; oq2 += q3
+    vadd.i16    q15, q14
     vqrshrn.u16 d27, q15, #3               ; r_oq2
 
     ; Filter does not set op2 or oq2, so use p2 and q2.
@@ -501,113 +495,104 @@ v_end
     ; wide_mbfilter flat2 && flat && mask branch
     vmov.u8     d16, #7
     vaddl.u8    q15, d7, d8                ; op6 = p0 + q0
+    vaddl.u8    q12, d2, d3
+    vaddl.u8    q13, d4, d5
+    vaddl.u8    q14, d1, d6
     vmlal.u8    q15, d0, d16               ; op6 += p7 * 3
-    vmlal.u8    q15, d1, d29               ; op6 += p6 * 2
-    vaddw.u8    q15, d2                    ; op6 += p5
-    vaddw.u8    q15, d3                    ; op6 += p4
-    vaddw.u8    q15, d4                    ; op6 += p3
-    vaddw.u8    q15, d5                    ; op6 += p2
-    vaddw.u8    q15, d6                    ; op6 += p1
+    vadd.i16    q12, q13
+    vadd.i16    q15, q14
+    vaddl.u8    q14, d2, d9
+    vadd.i16    q15, q12
+    vaddl.u8    q12, d0, d1
+    vaddw.u8    q15, d1
+    vaddl.u8    q13, d0, d2
+    vadd.i16    q14, q15, q14
     vqrshrn.u16 d16, q15, #4               ; w_op6
 
-    vsubw.u8    q15, d0                    ; op5 = op6 - p7
-    vsubw.u8    q15, d1                    ; op5 -= p6
-    vaddw.u8    q15, d2                    ; op5 += p5
-    vaddw.u8    q15, d9                    ; op5 += q1
+    vsub.i16    q15, q14, q12
+    vaddl.u8    q14, d3, d10
     vqrshrn.u16 d24, q15, #4               ; w_op5
 
-    vsubw.u8    q15, d0                    ; op4 = op5 - p7
-    vsubw.u8    q15, d2                    ; op4 -= p5
-    vaddw.u8    q15, d3                    ; op4 += p4
-    vaddw.u8    q15, d10                   ; op4 += q2
+    vsub.i16    q15, q13
+    vaddl.u8    q13, d0, d3
+    vadd.i16    q15, q14
+    vaddl.u8    q14, d4, d11
     vqrshrn.u16 d25, q15, #4               ; w_op4
 
-    vsubw.u8    q15, d0                    ; op3 = op4 - p7
-    vsubw.u8    q15, d3                    ; op3 -= p4
-    vaddw.u8    q15, d4                    ; op3 += p3
-    vaddw.u8    q15, d11                   ; op3 += q3
+    vadd.i16    q15, q14
+    vaddl.u8    q14, d0, d4
+    vsub.i16    q15, q13
+    vsub.i16    q14, q15, q14
     vqrshrn.u16 d26, q15, #4               ; w_op3
 
-    vsubw.u8    q15, d0                    ; op2 = op3 - p7
-    vsubw.u8    q15, d4                    ; op2 -= p3
-    vaddw.u8    q15, d5                    ; op2 += p2
+    vaddw.u8    q15, q14, d5               ; op2 += p2
+    vaddl.u8    q14, d0, d5
     vaddw.u8    q15, d12                   ; op2 += q4
+    vbif        d26, d4, d17               ; op3 |= p3 & ~(f2 & f & m)
     vqrshrn.u16 d27, q15, #4               ; w_op2
 
-    vbif        d27, d18, d17              ; op2 |= t_op2 & ~(f2 & f & m)
-
-    vsubw.u8    q15, d0                    ; op1 = op2 - p7
-    vsubw.u8    q15, d5                    ; op1 -= p2
+    vsub.i16    q15, q14
+    vaddl.u8    q14, d0, d6
     vaddw.u8    q15, d6                    ; op1 += p1
     vaddw.u8    q15, d13                   ; op1 += q5
+    vbif        d27, d18, d17              ; op2 |= t_op2 & ~(f2 & f & m)
     vqrshrn.u16 d18, q15, #4               ; w_op1
 
-    vbif        d18, d19, d17              ; op1 |= t_op1 & ~(f2 & f & m)
-
-    vsubw.u8    q15, d0                    ; op0 = op1 - p7
-    vsubw.u8    q15, d6                    ; op0 -= p1
+    vsub.i16    q15, q14
+    vaddl.u8    q14, d0, d7
     vaddw.u8    q15, d7                    ; op0 += p0
     vaddw.u8    q15, d14                   ; op0 += q6
+    vbif        d18, d19, d17              ; op1 |= t_op1 & ~(f2 & f & m)
     vqrshrn.u16 d19, q15, #4               ; w_op0
 
-    vbif        d19, d20, d17              ; op0 |= t_op0 & ~(f2 & f & m)
-
-    vsubw.u8    q15, d0                    ; oq0 = op0 - p7
-    vsubw.u8    q15, d7                    ; oq0 -= p0
+    vsub.i16    q15, q14
+    vaddl.u8    q14, d1, d8
     vaddw.u8    q15, d8                    ; oq0 += q0
     vaddw.u8    q15, d15                   ; oq0 += q7
+    vbif        d19, d20, d17              ; op0 |= t_op0 & ~(f2 & f & m)
     vqrshrn.u16 d20, q15, #4               ; w_oq0
 
-    vbif        d20, d21, d17              ; oq0 |= t_oq0 & ~(f2 & f & m)
-
-    vsubw.u8    q15, d1                    ; oq1 = oq0 - p6
-    vsubw.u8    q15, d8                    ; oq1 -= q0
+    vsub.i16    q15, q14
+    vaddl.u8    q14, d2, d9
     vaddw.u8    q15, d9                    ; oq1 += q1
+    vaddl.u8    q4, d10, d15
     vaddw.u8    q15, d15                   ; oq1 += q7
+    vbif        d20, d21, d17              ; oq0 |= t_oq0 & ~(f2 & f & m)
     vqrshrn.u16 d21, q15, #4               ; w_oq1
 
+    vsub.i16    q15, q14
+    vaddl.u8    q14, d3, d10
+    vadd.i16    q15, q4
+    vaddl.u8    q4, d11, d15
     vbif        d21, d22, d17              ; oq1 |= t_oq1 & ~(f2 & f & m)
-
-    vsubw.u8    q15, d2                    ; oq2 = oq1 - p5
-    vsubw.u8    q15, d9                    ; oq2 -= q1
-    vaddw.u8    q15, d10                   ; oq2 += q2
-    vaddw.u8    q15, d15                   ; oq2 += q7
     vqrshrn.u16 d22, q15, #4               ; w_oq2
 
+    vsub.i16    q15, q14
+    vaddl.u8    q14, d4, d11
+    vadd.i16    q15, q4
+    vaddl.u8    q4, d12, d15
     vbif        d22, d23, d17              ; oq2 |= t_oq2 & ~(f2 & f & m)
-
-    vsubw.u8    q15, d3                    ; oq3 = oq2 - p4
-    vsubw.u8    q15, d10                   ; oq3 -= q2
-    vaddw.u8    q15, d11                   ; oq3 += q3
-    vaddw.u8    q15, d15                   ; oq3 += q7
     vqrshrn.u16 d23, q15, #4               ; w_oq3
 
+    vsub.i16    q15, q14
+    vaddl.u8    q14, d5, d12
+    vadd.i16    q15, q4
+    vaddl.u8    q4, d13, d15
     vbif        d16, d1, d17               ; op6 |= p6 & ~(f2 & f & m)
-
-    vsubw.u8    q15, d4                    ; oq4 = oq3 - p3
-    vsubw.u8    q15, d11                   ; oq4 -= q3
-    vaddw.u8    q15, d12                   ; oq4 += q4
-    vaddw.u8    q15, d15                   ; oq4 += q7
     vqrshrn.u16 d1, q15, #4                ; w_oq4
 
+    vsub.i16    q15, q14
+    vaddl.u8    q14, d6, d13
+    vadd.i16    q15, q4
+    vaddl.u8    q4, d14, d15
     vbif        d24, d2, d17               ; op5 |= p5 & ~(f2 & f & m)
-
-    vsubw.u8    q15, d5                    ; oq5 = oq4 - p2
-    vsubw.u8    q15, d12                   ; oq5 -= q4
-    vaddw.u8    q15, d13                   ; oq5 += q5
-    vaddw.u8    q15, d15                   ; oq5 += q7
     vqrshrn.u16 d2, q15, #4                ; w_oq5
 
+    vsub.i16    q15, q14
     vbif        d25, d3, d17               ; op4 |= p4 & ~(f2 & f & m)
-
-    vsubw.u8    q15, d6                    ; oq6 = oq5 - p1
-    vsubw.u8    q15, d13                   ; oq6 -= q5
-    vaddw.u8    q15, d14                   ; oq6 += q6
-    vaddw.u8    q15, d15                   ; oq6 += q7
-    vqrshrn.u16 d3, q15, #4                ; w_oq6
-
-    vbif        d26, d4, d17               ; op3 |= p3 & ~(f2 & f & m)
+    vadd.i16    q15, q4
     vbif        d23, d11, d17              ; oq3 |= q3 & ~(f2 & f & m)
+    vqrshrn.u16 d3, q15, #4                ; w_oq6
     vbif        d1, d12, d17               ; oq4 |= q4 & ~(f2 & f & m)
     vbif        d2, d13, d17               ; oq5 |= q5 & ~(f2 & f & m)
     vbif        d3, d14, d17               ; oq6 |= q6 & ~(f2 & f & m)
