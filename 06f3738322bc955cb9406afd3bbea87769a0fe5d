@@ -402,6 +402,24 @@
       "revId": "06f3738322bc955cb9406afd3bbea87769a0fe5d",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAc3///sQ\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 605,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2013-08-15T18:45:16Z",
+      "side": 1,
+      "message": "Oh, I\u0027ve moved \"int x_idx, y_idx;\" line below :) Now I see what you meant. Done.",
+      "parentUuid": "AAAAc3///xA\u003d",
+      "revId": "06f3738322bc955cb9406afd3bbea87769a0fe5d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
