@@ -544,52 +544,55 @@ static int raster_block_offset(MACROBLOCKD *xd, BLOCK_SIZE_TYPE bsize,
   return y * stride + x;
 }
 static int16_t* raster_block_offset_int16(MACROBLOCKD *xd,
-                                         BLOCK_SIZE_TYPE bsize,
-                                         int plane, int block, int16_t *base) {
+                                          BLOCK_SIZE_TYPE bsize,
+                                          int plane, int block, int16_t *base) {
   const int stride = plane_block_width(bsize, &xd->plane[plane]);
   return base + raster_block_offset(xd, bsize, plane, block, stride);
 }
 static uint8_t* raster_block_offset_uint8(MACROBLOCKD *xd,
-                                         BLOCK_SIZE_TYPE bsize,
-                                         int plane, int block,
-                                         uint8_t *base, int stride) {
+                                          BLOCK_SIZE_TYPE bsize,
+                                          int plane, int block,
+                                          uint8_t *base, int stride) {
   return base + raster_block_offset(xd, bsize, plane, block, stride);
 }
 
 static int txfrm_block_to_raster_block(MACROBLOCKD *xd,
                                        BLOCK_SIZE_TYPE bsize,
                                        int plane, int block,
-                                       int ss_txfrm_size) {
+                                       TX_SIZE tx_size) {
   const int bwl = b_width_log2(bsize) - xd->plane[plane].subsampling_x;
-  const int txwl = ss_txfrm_size >> 1;
-  const int tx_cols_log2 = bwl - txwl;
+  const int ss_txfrm_size = tx_size << 1;
+  const int tx_cols_log2 = bwl - tx_size;
   const int tx_cols = 1 << tx_cols_log2;
   const int raster_mb = block >> ss_txfrm_size;
-  const int x = (raster_mb & (tx_cols - 1)) << (txwl);
-  const int y = raster_mb >> tx_cols_log2 << (txwl);
+  const int x = (raster_mb & (tx_cols - 1)) << tx_size;
+  const int y = raster_mb >> tx_cols_log2 << tx_size;
   return x + (y << bwl);
 }
 
 static void txfrm_block_to_raster_xy(MACROBLOCKD *xd,
                                      BLOCK_SIZE_TYPE bsize,
                                      int plane, int block,
-                                     int ss_txfrm_size,
+                                     TX_SIZE tx_size,
                                      int *x, int *y) {
   const int bwl = b_width_log2(bsize) - xd->plane[plane].subsampling_x;
-  const int txwl = ss_txfrm_size >> 1;
-  const int tx_cols_log2 = bwl - txwl;
+  const int ss_txfrm_size = tx_size << 1;
+  const int tx_cols_log2 = bwl - tx_size;
   const int tx_cols = 1 << tx_cols_log2;
   const int raster_mb = block >> ss_txfrm_size;
-  *x = (raster_mb & (tx_cols - 1)) << (txwl);
-  *y = raster_mb >> tx_cols_log2 << (txwl);
+  *x = (raster_mb & (tx_cols - 1)) << tx_size;
+  *y = raster_mb >> tx_cols_log2 << tx_size;
 }
 
-static void extend_for_intra(MACROBLOCKD* const xd, int plane, int block,
-                             BLOCK_SIZE_TYPE bsize, int ss_txfrm_size) {
-  const int bw = plane_block_width(bsize, &xd->plane[plane]);
-  const int bh = plane_block_height(bsize, &xd->plane[plane]);
+static void extend_for_intra(MACROBLOCKD* const xd, BLOCK_SIZE_TYPE bsize,
+                             int plane, int block, TX_SIZE tx_size) {
+  struct macroblockd_plane *const pd = &xd->plane[plane];
+  uint8_t *const buf = pd->dst.buf;
+  const int stride = pd->dst.stride;
+  const int bw = plane_block_width(bsize, pd);
+  const int bh = plane_block_height(bsize, pd);
   int x, y;
-  txfrm_block_to_raster_xy(xd, bsize, plane, block, ss_txfrm_size, &x, &y);
+  txfrm_block_to_raster_xy(xd, bsize, plane, block, tx_size, &x, &y);
   x = x * 4 - 1;
   y = y * 4 - 1;
   // Copy a pixel into the umv if we are in a situation where the block size
@@ -597,29 +600,23 @@ static void extend_for_intra(MACROBLOCKD* const xd, int plane, int block,
   // TODO(JBB): Should be able to do the full extend in place so we don't have
   // to do this multiple times.
   if (xd->mb_to_right_edge < 0) {
-    int umv_border_start = bw
-        + (xd->mb_to_right_edge >> (3 + xd->plane[plane].subsampling_x));
+    const int umv_border_start = bw + (xd->mb_to_right_edge >>
+                                       (3 + pd->subsampling_x));
 
     if (x + bw > umv_border_start)
-      vpx_memset(
-          xd->plane[plane].dst.buf + y * xd->plane[plane].dst.stride
-              + umv_border_start,
-          *(xd->plane[plane].dst.buf + y * xd->plane[plane].dst.stride
-              + umv_border_start - 1),
-          bw);
+      vpx_memset(&buf[y * stride + umv_border_start],
+                 buf[y * stride + umv_border_start - 1], bw);
   }
-  if (xd->mb_to_bottom_edge < 0) {
-    int umv_border_start = bh
-        + (xd->mb_to_bottom_edge >> (3 + xd->plane[plane].subsampling_y));
-    int i;
-    uint8_t c = *(xd->plane[plane].dst.buf
-        + (umv_border_start - 1) * xd->plane[plane].dst.stride + x);
 
-    uint8_t *d = xd->plane[plane].dst.buf
-        + umv_border_start * xd->plane[plane].dst.stride + x;
+  if (xd->mb_to_bottom_edge < 0) {
+    const int umv_border_start = bh + (xd->mb_to_bottom_edge >>
+                                       (3 + pd->subsampling_y));
+    int i;
+    const uint8_t c = buf[(umv_border_start - 1) * stride + x];
+    uint8_t *d = &buf[umv_border_start * stride + x];
 
     if (y + bh > umv_border_start)
-      for (i = 0; i < bh; i++, d += xd->plane[plane].dst.stride)
+      for (i = 0; i < bh; ++i, d += stride)
         *d = c;
   }
 }
