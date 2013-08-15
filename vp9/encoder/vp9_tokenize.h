@@ -34,7 +34,6 @@ typedef int64_t vp9_coeff_accum[REF_TYPES][COEF_BANDS][PREV_COEF_CONTEXTS]
 int vp9_sb_is_skippable(MACROBLOCKD *xd, BLOCK_SIZE_TYPE bsize);
 int vp9_is_skippable_in_plane(MACROBLOCKD *xd, BLOCK_SIZE_TYPE bsize,
                               int plane);
-int vp9_sbuv_is_skippable(MACROBLOCKD *xd, BLOCK_SIZE_TYPE bsize);
 struct VP9_COMP;
 
 void vp9_tokenize_sb(struct VP9_COMP *cpi, TOKENEXTRA **t, int dry_run,
