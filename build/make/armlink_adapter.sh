@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 ##
 ##  Copyright (c) 2010 The WebM project authors. All Rights Reserved.
 ##
@@ -13,20 +13,20 @@
 verbose=0
 set -- $*
 for i; do
-    if [ "$i" == "-o" ]; then
+    if [ "$i" = "-o" ]; then
         on_of=1
-    elif [ "$i" == "-v" ]; then
+    elif [ "$i" = "-v" ]; then
         verbose=1
-    elif [ "$i" == "-g" ]; then
+    elif [ "$i" = "-g" ]; then
         args="${args} --debug"
-    elif [ "$on_of" == "1" ]; then
+    elif [ "$on_of" = "1" ]; then
         outfile=$i
         on_of=0
     elif [ -f "$i" ]; then
         infiles="$infiles $i"
-    elif [ "${i:0:2}" == "-l" ]; then
+    elif [ "${i#-l}" != "$i" ]; then
         libs="$libs ${i#-l}"
-    elif [ "${i:0:2}" == "-L" ]; then
+    elif [ "${i#-L}" != "$i" ]; then
         libpaths="${libpaths} ${i#-L}"
     else
         args="${args} ${i}"
