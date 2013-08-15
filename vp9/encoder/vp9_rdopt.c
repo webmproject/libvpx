@@ -599,11 +599,10 @@ static void dist_block(int plane, int block, BLOCK_SIZE_TYPE bsize,
 static void rate_block(int plane, int block, BLOCK_SIZE_TYPE bsize,
                        int ss_txfrm_size, void *arg) {
   struct rdcost_block_args* args = arg;
+  MACROBLOCKD *const xd = &args->x->e_mbd;
   int x_idx, y_idx;
-  MACROBLOCKD * const xd = &args->x->e_mbd;
-
-  txfrm_block_to_raster_xy(xd, bsize, plane, block, args->tx_size * 2, &x_idx,
-                           &y_idx);
+  txfrm_block_to_raster_xy(xd, bsize, plane, block, args->tx_size,
+                           &x_idx, &y_idx);
 
   args->rate += cost_coeffs(args->x, plane, block,
                             xd->plane[plane].plane_type, args->t_above + x_idx,
