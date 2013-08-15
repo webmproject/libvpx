@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAc3///18\u003d",
+        "filename": "vp9/common/vp9_alloccommon.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 162,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2013-08-15T17:44:54Z",
+      "side": 1,
+      "message": "May be we should put this code into vp9_free_frame_buffers() which is called at the beginning of vp9_alloc_frame_buffers function?",
+      "revId": "9117cdcc6f814eec79d454cbddff14f2f6872698",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
