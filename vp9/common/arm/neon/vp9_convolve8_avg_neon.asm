@@ -159,10 +159,10 @@ loop_horiz
     ; average the new value and the dst value
     vrhadd.u8       q1, q1, q3
 
-    vst1.u32        {d2[0]}, [r2], r3
-    vst1.u32        {d3[0]}, [r2], r3
-    vst1.u32        {d2[1]}, [r2], r3
-    vst1.u32        {d3[1]}, [r2], r4
+    vst1.u32        {d2[0]}, [r2@32], r3
+    vst1.u32        {d3[0]}, [r2@32], r3
+    vst1.u32        {d2[1]}, [r2@32], r3
+    vst1.u32        {d3[1]}, [r2@32], r4
 
     vmov            q8,  q9
     vmov            d20, d23
@@ -234,10 +234,10 @@ loop_vert
     vmovl.u8        q12, d24
     vmovl.u8        q13, d26
 
-    vld1.u32        {d6[0]}, [r5], r3
-    vld1.u32        {d6[1]}, [r8], r3
-    vld1.u32        {d7[0]}, [r5], r3
-    vld1.u32        {d7[1]}, [r8], r3
+    vld1.u32        {d6[0]}, [r5@32], r3
+    vld1.u32        {d6[1]}, [r8@32], r3
+    vld1.u32        {d7[0]}, [r5@32], r3
+    vld1.u32        {d7[1]}, [r8@32], r3
 
     pld             [r7]
     pld             [r4]
@@ -276,10 +276,10 @@ loop_vert
     sub             r5, r5, r3, lsl #1      ; reset for store
     sub             r8, r8, r3, lsl #1
 
-    vst1.u32        {d2[0]}, [r5], r3
-    vst1.u32        {d2[1]}, [r8], r3
-    vst1.u32        {d3[0]}, [r5], r3
-    vst1.u32        {d3[1]}, [r8], r3
+    vst1.u32        {d2[0]}, [r5@32], r3
+    vst1.u32        {d2[1]}, [r8@32], r3
+    vst1.u32        {d3[0]}, [r5@32], r3
+    vst1.u32        {d3[1]}, [r8@32], r3
 
     vmov            q8, q10
     vmov            d18, d22
