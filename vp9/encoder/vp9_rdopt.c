@@ -556,7 +556,6 @@ static INLINE int cost_coeffs(MACROBLOCK *mb,
 }
 
 struct rdcost_block_args {
-  VP9_COMMON *cm;
   MACROBLOCK *x;
   ENTROPY_CONTEXT t_above[16];
   ENTROPY_CONTEXT t_left[16];
@@ -616,7 +615,7 @@ static void block_yrd_txfm(int plane, int block, BLOCK_SIZE_TYPE bsize,
   struct rdcost_block_args *args = arg;
   MACROBLOCK *const x = args->x;
   MACROBLOCKD *const xd = &x->e_mbd;
-  struct encode_b_args encode_args = {args->cm, x, NULL};
+  struct encode_b_args encode_args = {x, NULL};
   int64_t rd1, rd2, rd;
 
   if (args->skip)
@@ -641,7 +640,7 @@ static void block_yrd_txfm(int plane, int block, BLOCK_SIZE_TYPE bsize,
   rate_block(plane, block, bsize, tx_size, args);
 }
 
-static void txfm_rd_in_plane(VP9_COMMON *const cm, MACROBLOCK *x,
+static void txfm_rd_in_plane(MACROBLOCK *x,
                              int *rate, int64_t *distortion,
                              int *skippable, int64_t *sse,
                              int64_t ref_best_rd, int plane,
@@ -652,7 +651,7 @@ static void txfm_rd_in_plane(VP9_COMMON *const cm, MACROBLOCK *x,
   const int num_4x4_blocks_wide = num_4x4_blocks_wide_lookup[bs];
   const int num_4x4_blocks_high = num_4x4_blocks_high_lookup[bs];
   int i;
-  struct rdcost_block_args args = { cm, x, { 0 }, { 0 }, tx_size,
+  struct rdcost_block_args args = { x, { 0 }, { 0 }, tx_size,
                                     num_4x4_blocks_wide, num_4x4_blocks_high,
                                     0, 0, 0, ref_best_rd, 0 };
   if (plane == 0)
@@ -725,7 +724,7 @@ static void choose_largest_txfm_size(VP9_COMP *cpi, MACROBLOCK *x,
   } else {
     mbmi->txfm_size = TX_4X4;
   }
-  txfm_rd_in_plane(cm, x, rate, distortion, skip,
+  txfm_rd_in_plane(x, rate, distortion, skip,
                    &sse[mbmi->txfm_size], ref_best_rd, 0, bs,
                    mbmi->txfm_size);
   cpi->txfm_stepdown_count[0]++;
@@ -909,7 +908,7 @@ static void choose_txfm_size_from_modelrd(VP9_COMP *cpi, MACROBLOCK *x,
 
   // Actually encode using the chosen mode if a model was used, but do not
   // update the r, d costs
-  txfm_rd_in_plane(cm, x, rate, distortion, skip, &sse[mbmi->txfm_size],
+  txfm_rd_in_plane(x, rate, distortion, skip, &sse[mbmi->txfm_size],
                    ref_best_rd, 0, bs, mbmi->txfm_size);
 
   if (max_txfm_size == TX_32X32 &&
@@ -933,7 +932,6 @@ static void super_block_yrd(VP9_COMP *cpi,
                             int *skip, int64_t *psse, BLOCK_SIZE_TYPE bs,
                             int64_t txfm_cache[TX_MODES],
                             int64_t ref_best_rd) {
-  VP9_COMMON *const cm = &cpi->common;
   int r[TX_SIZES][2], s[TX_SIZES];
   int64_t d[TX_SIZES], sse[TX_SIZES];
   MACROBLOCKD *xd = &x->e_mbd;
@@ -973,14 +971,14 @@ static void super_block_yrd(VP9_COMP *cpi,
                                   skip, sse, ref_best_rd, bs);
   } else {
     if (bs >= BLOCK_32X32)
-      txfm_rd_in_plane(cm, x, &r[TX_32X32][0], &d[TX_32X32], &s[TX_32X32],
+      txfm_rd_in_plane(x, &r[TX_32X32][0], &d[TX_32X32], &s[TX_32X32],
                        &sse[TX_32X32], ref_best_rd, 0, bs, TX_32X32);
     if (bs >= BLOCK_16X16)
-      txfm_rd_in_plane(cm, x, &r[TX_16X16][0], &d[TX_16X16], &s[TX_16X16],
+      txfm_rd_in_plane(x, &r[TX_16X16][0], &d[TX_16X16], &s[TX_16X16],
                        &sse[TX_16X16], ref_best_rd, 0, bs, TX_16X16);
-    txfm_rd_in_plane(cm, x, &r[TX_8X8][0], &d[TX_8X8], &s[TX_8X8],
+    txfm_rd_in_plane(x, &r[TX_8X8][0], &d[TX_8X8], &s[TX_8X8],
                      &sse[TX_8X8], ref_best_rd, 0, bs, TX_8X8);
-    txfm_rd_in_plane(cm, x, &r[TX_4X4][0], &d[TX_4X4], &s[TX_4X4],
+    txfm_rd_in_plane(x, &r[TX_4X4][0], &d[TX_4X4], &s[TX_4X4],
                      &sse[TX_4X4], ref_best_rd, 0, bs, TX_4X4);
     choose_txfm_size_from_rd(cpi, x, r, rate, d, distortion, s,
                              skip, txfm_cache, bs);
@@ -1301,7 +1299,7 @@ static void super_block_uvrd(VP9_COMMON *const cm, MACROBLOCK *x,
   *skippable = 1;
 
   for (plane = 1; plane < MAX_MB_PLANE; ++plane) {
-    txfm_rd_in_plane(cm, x, &pnrate, &pndist, &pnskip, &pnsse,
+    txfm_rd_in_plane(x, &pnrate, &pndist, &pnskip, &pnsse,
                      INT64_MAX, plane, bsize, uv_txfm_size);
     *rate += pnrate;
     *distortion += pndist;

@@ -125,24 +125,22 @@ static unsigned int tt_activity_measure(MACROBLOCK *x) {
 }
 
 // Stub for alternative experimental activity measures.
-static unsigned int alt_activity_measure(VP9_COMP *cpi, MACROBLOCK *x,
-                                         int use_dc_pred) {
-  return vp9_encode_intra(cpi, x, use_dc_pred);
+static unsigned int alt_activity_measure(MACROBLOCK *x, int use_dc_pred) {
+  return vp9_encode_intra(x, use_dc_pred);
 }
 DECLARE_ALIGNED(16, static const uint8_t, vp9_64x64_zeros[64*64]) = {0};
 
 // Measure the activity of the current macroblock
 // What we measure here is TBD so abstracted to this function
 #define ALT_ACT_MEASURE 1
-static unsigned int mb_activity_measure(VP9_COMP *cpi, MACROBLOCK *x,
-                                        int mb_row, int mb_col) {
+static unsigned int mb_activity_measure(MACROBLOCK *x, int mb_row, int mb_col) {
   unsigned int mb_activity;
 
   if (ALT_ACT_MEASURE) {
     int use_dc_pred = (mb_col || mb_row) && (!mb_col || !mb_row);
 
     // Or use and alternative.
-    mb_activity = alt_activity_measure(cpi, x, use_dc_pred);
+    mb_activity = alt_activity_measure(x, use_dc_pred);
   } else {
     // Original activity measure from Tim T's code.
     mb_activity = tt_activity_measure(x);
@@ -299,7 +297,7 @@ static void build_activity_map(VP9_COMP *cpi) {
 #endif
 
       // measure activity
-      mb_activity = mb_activity_measure(cpi, x, mb_row, mb_col);
+      mb_activity = mb_activity_measure(x, mb_row, mb_col);
 
       // Keep frame sum
       activity_sum += mb_activity;
@@ -2641,8 +2639,8 @@ static void encode_superblock(VP9_COMP *cpi, TOKENEXTRA **t, int output_enabled,
   }
 
   if (mbmi->ref_frame[0] == INTRA_FRAME) {
-    vp9_encode_intra_block_y(cm, x, MAX(bsize, BLOCK_8X8));
-    vp9_encode_intra_block_uv(cm, x, MAX(bsize, BLOCK_8X8));
+    vp9_encode_intra_block_y(x, MAX(bsize, BLOCK_8X8));
+    vp9_encode_intra_block_uv(x, MAX(bsize, BLOCK_8X8));
     if (output_enabled)
       sum_intra_stats(cpi, x);
   } else {
@@ -2668,7 +2666,7 @@ static void encode_superblock(VP9_COMP *cpi, TOKENEXTRA **t, int output_enabled,
   if (mbmi->ref_frame[0] == INTRA_FRAME) {
     vp9_tokenize_sb(cpi, t, !output_enabled, MAX(bsize, BLOCK_8X8));
   } else if (!x->skip) {
-    vp9_encode_sb(cm, x, MAX(bsize, BLOCK_8X8));
+    vp9_encode_sb(x, MAX(bsize, BLOCK_8X8));
     vp9_tokenize_sb(cpi, t, !output_enabled, MAX(bsize, BLOCK_8X8));
   } else {
     int mb_skip_context = xd->left_available ? (mi - 1)->mbmi.skip_coeff : 0;

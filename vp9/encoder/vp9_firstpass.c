@@ -568,7 +568,7 @@ void vp9_first_pass(VP9_COMP *cpi) {
                      1 << mi_height_log2(xd->mode_info_context->mbmi.sb_type));
 
       // do intra 16x16 prediction
-      this_error = vp9_encode_intra(cpi, x, use_dc_pred);
+      this_error = vp9_encode_intra(x, use_dc_pred);
 
       // "intrapenalty" below deals with situations where the intra and inter error scores are very low (eg a plain black frame)
       // We do not have special cases in first pass for 0,0 and nearest etc so all inter modes carry an overhead cost estimate fot the mv.
@@ -667,7 +667,7 @@ void vp9_first_pass(VP9_COMP *cpi) {
           vp9_build_inter_predictors_sby(xd, mb_row << 1,
                                          mb_col << 1,
                                          xd->mode_info_context->mbmi.sb_type);
-          vp9_encode_sby(cm, x, xd->mode_info_context->mbmi.sb_type);
+          vp9_encode_sby(x, xd->mode_info_context->mbmi.sb_type);
           sum_mvr += mv.as_mv.row;
           sum_mvr_abs += abs(mv.as_mv.row);
           sum_mvc += mv.as_mv.col;

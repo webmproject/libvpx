@@ -428,17 +428,16 @@ void optimize_init_b(int plane, BLOCK_SIZE_TYPE bsize, void *arg) {
   }
 }
 
-void vp9_optimize_sby(VP9_COMMON *cm, MACROBLOCK *x, BLOCK_SIZE_TYPE bsize) {
+void vp9_optimize_sby(MACROBLOCK *x, BLOCK_SIZE_TYPE bsize) {
   struct optimize_ctx ctx;
-  struct encode_b_args arg = {cm, x, &ctx};
+  struct encode_b_args arg = {x, &ctx};
   optimize_init_b(0, bsize, &arg);
   foreach_transformed_block_in_plane(&x->e_mbd, bsize, 0, optimize_block, &arg);
 }
 
-void vp9_optimize_sbuv(VP9_COMMON *const cm, MACROBLOCK *x,
-                       BLOCK_SIZE_TYPE bsize) {
+void vp9_optimize_sbuv(MACROBLOCK *x, BLOCK_SIZE_TYPE bsize) {
   struct optimize_ctx ctx;
-  struct encode_b_args arg = {cm, x, &ctx};
+  struct encode_b_args arg = {x, &ctx};
   int i;
   for (i = 1; i < MAX_MB_PLANE; ++i)
     optimize_init_b(i, bsize, &arg);
@@ -563,25 +562,24 @@ static void encode_block(int plane, int block, BLOCK_SIZE_TYPE bsize,
   }
 }
 
-void vp9_xform_quant_sby(VP9_COMMON *cm, MACROBLOCK *x, BLOCK_SIZE_TYPE bsize) {
+void vp9_xform_quant_sby(MACROBLOCK *x, BLOCK_SIZE_TYPE bsize) {
   MACROBLOCKD* const xd = &x->e_mbd;
-  struct encode_b_args arg = {cm, x, NULL};
+  struct encode_b_args arg = {x, NULL};
 
   foreach_transformed_block_in_plane(xd, bsize, 0, vp9_xform_quant, &arg);
 }
 
-void vp9_xform_quant_sbuv(VP9_COMMON *cm, MACROBLOCK *x,
-                          BLOCK_SIZE_TYPE bsize) {
+void vp9_xform_quant_sbuv(MACROBLOCK *x, BLOCK_SIZE_TYPE bsize) {
   MACROBLOCKD* const xd = &x->e_mbd;
-  struct encode_b_args arg = {cm, x, NULL};
+  struct encode_b_args arg = {x, NULL};
 
   foreach_transformed_block_uv(xd, bsize, vp9_xform_quant, &arg);
 }
 
-void vp9_encode_sby(VP9_COMMON *cm, MACROBLOCK *x, BLOCK_SIZE_TYPE bsize) {
+void vp9_encode_sby(MACROBLOCK *x, BLOCK_SIZE_TYPE bsize) {
   MACROBLOCKD *const xd = &x->e_mbd;
   struct optimize_ctx ctx;
-  struct encode_b_args arg = {cm, x, &ctx};
+  struct encode_b_args arg = {x, &ctx};
 
   vp9_subtract_sby(x, bsize);
   if (x->optimize)
@@ -590,10 +588,10 @@ void vp9_encode_sby(VP9_COMMON *cm, MACROBLOCK *x, BLOCK_SIZE_TYPE bsize) {
   foreach_transformed_block_in_plane(xd, bsize, 0, encode_block, &arg);
 }
 
-void vp9_encode_sbuv(VP9_COMMON *cm, MACROBLOCK *x, BLOCK_SIZE_TYPE bsize) {
+void vp9_encode_sbuv(MACROBLOCK *x, BLOCK_SIZE_TYPE bsize) {
   MACROBLOCKD *const xd = &x->e_mbd;
   struct optimize_ctx ctx;
-  struct encode_b_args arg = {cm, x, &ctx};
+  struct encode_b_args arg = {x, &ctx};
 
   vp9_subtract_sbuv(x, bsize);
   if (x->optimize) {
@@ -605,10 +603,10 @@ void vp9_encode_sbuv(VP9_COMMON *cm, MACROBLOCK *x, BLOCK_SIZE_TYPE bsize) {
   foreach_transformed_block_uv(xd, bsize, encode_block, &arg);
 }
 
-void vp9_encode_sb(VP9_COMMON *cm, MACROBLOCK *x, BLOCK_SIZE_TYPE bsize) {
+void vp9_encode_sb(MACROBLOCK *x, BLOCK_SIZE_TYPE bsize) {
   MACROBLOCKD *const xd = &x->e_mbd;
   struct optimize_ctx ctx;
-  struct encode_b_args arg = {cm, x, &ctx};
+  struct encode_b_args arg = {x, &ctx};
 
   vp9_subtract_sb(x, bsize);
 
@@ -772,20 +770,18 @@ void vp9_encode_block_intra(int plane, int block, BLOCK_SIZE_TYPE bsize,
   }
 }
 
-void vp9_encode_intra_block_y(VP9_COMMON *cm, MACROBLOCK *x,
-                              BLOCK_SIZE_TYPE bsize) {
+void vp9_encode_intra_block_y(MACROBLOCK *x, BLOCK_SIZE_TYPE bsize) {
   MACROBLOCKD* const xd = &x->e_mbd;
   struct optimize_ctx ctx;
-  struct encode_b_args arg = {cm, x, &ctx};
+  struct encode_b_args arg = {x, &ctx};
 
   foreach_transformed_block_in_plane(xd, bsize, 0, vp9_encode_block_intra,
                                      &arg);
 }
-void vp9_encode_intra_block_uv(VP9_COMMON *cm, MACROBLOCK *x,
-                              BLOCK_SIZE_TYPE bsize) {
+void vp9_encode_intra_block_uv(MACROBLOCK *x, BLOCK_SIZE_TYPE bsize) {
   MACROBLOCKD* const xd = &x->e_mbd;
   struct optimize_ctx ctx;
-  struct encode_b_args arg = {cm, x, &ctx};
+  struct encode_b_args arg = {x, &ctx};
   foreach_transformed_block_uv(xd, bsize, vp9_encode_block_intra, &arg);
 }
 
