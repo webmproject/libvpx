@@ -33,8 +33,7 @@
     ; So, two passes of a transpose followed by a column transform.
 
     ; load the inputs into q8-q9, d16-d19
-    vld1.s16        {q8}, [r0]!
-    vld1.s16        {q9}, [r0]!
+    vld1.s16        {q8,q9}, [r0]!
 
     ; generate scalar constants
     ; cospi_8_64 = 15137 = 0x3b21
