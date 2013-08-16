@@ -1472,6 +1472,31 @@ static const BLOCK_SIZE_TYPE max_partition_size[BLOCK_SIZES] =
     BLOCK_32X32, BLOCK_32X32, BLOCK_32X32, BLOCK_64X64,
     BLOCK_64X64, BLOCK_64X64, BLOCK_64X64, BLOCK_64X64, BLOCK_64X64 };
 
+// Look at all the mode_info entries for blocks that are part of this
+// partition and find the min and max values for sb_type.
+// At the moment this is designed to work on a 64x64 SB but could be
+// adjusted to use a size parameter.
+//
+// The min and max are assumed to have been initialized prior to calling this
+// function so repeat calls can accumulate a min and max of more than one sb64.
+static void get_sb_partition_size_range(VP9_COMP *cpi, MODE_INFO * mi,
+                                        BLOCK_SIZE_TYPE * min_block_size,
+                                        BLOCK_SIZE_TYPE * max_block_size ) {
+  MACROBLOCKD *const xd = &cpi->mb.e_mbd;
+  int sb_width_in_blocks = MI_BLOCK_SIZE;
+  int sb_height_in_blocks  = MI_BLOCK_SIZE;
+  int i, j;
+  int index = 0;
+
+  // Check the sb_type for each block that belongs to this region.
+  for (i = 0; i < sb_height_in_blocks; ++i) {
+    for (j = 0; j < sb_width_in_blocks; ++j) {
+      *min_block_size = MIN(*min_block_size, mi[index+j].mbmi.sb_type);
+      *max_block_size = MAX(*max_block_size, mi[index+j].mbmi.sb_type);
+    }
+    index += xd->mode_info_stride;
+  }
+}
 
 // Look at neighboring blocks and set a min and max partition size based on
 // what they chose.
@@ -1479,7 +1504,9 @@ static void rd_auto_partition_range(VP9_COMP *cpi,
                                     BLOCK_SIZE_TYPE * min_block_size,
                                     BLOCK_SIZE_TYPE * max_block_size) {
   MACROBLOCKD *const xd = &cpi->mb.e_mbd;
-  const MODE_INFO *const mi = xd->mode_info_context;
+  MODE_INFO *mi = xd->mode_info_context;
+  MODE_INFO *above_sb64_mi;
+  MODE_INFO *left_sb64_mi;
   const MB_MODE_INFO *const above_mbmi = &mi[-xd->mode_info_stride].mbmi;
   const MB_MODE_INFO *const left_mbmi = &mi[-1].mbmi;
   const int left_in_image = xd->left_available && left_mbmi->in_image;
@@ -1496,21 +1523,33 @@ static void rd_auto_partition_range(VP9_COMP *cpi,
     --cpi->sf.auto_min_max_partition_count;
   }
 
-  // Check for edge cases
+  // Set default values if not left or above neighbour
   if (!left_in_image && !above_in_image) {
     *min_block_size = BLOCK_4X4;
     *max_block_size = BLOCK_64X64;
-  } else if (!left_in_image) {
-    *min_block_size = min_partition_size[above_mbmi->sb_type];
-    *max_block_size = max_partition_size[above_mbmi->sb_type];
-  } else if (!above_in_image) {
-    *min_block_size = min_partition_size[left_mbmi->sb_type];
-    *max_block_size = max_partition_size[left_mbmi->sb_type];
   } else {
-    *min_block_size =
-      min_partition_size[MIN(left_mbmi->sb_type, above_mbmi->sb_type)];
-    *max_block_size =
-      max_partition_size[MAX(left_mbmi->sb_type, above_mbmi->sb_type)];
+    // Default "min to max" and "max to min"
+    *min_block_size = BLOCK_64X64;
+    *max_block_size = BLOCK_4X4;
+
+    // Find the min and max partition sizes used in the left SB64
+    if (left_in_image) {
+      left_sb64_mi = &mi[-MI_BLOCK_SIZE];
+      get_sb_partition_size_range(cpi, left_sb64_mi,
+                                  min_block_size, max_block_size);
+    }
+
+    // Find the min and max partition sizes used in the above SB64 taking
+    // the values found for left as a starting point.
+    if (above_in_image) {
+      above_sb64_mi = &mi[-xd->mode_info_stride * MI_BLOCK_SIZE];
+      get_sb_partition_size_range(cpi, above_sb64_mi,
+                                  min_block_size, max_block_size);
+    }
+
+    // give a bit of leaway either side of the observed min and max
+    *min_block_size = min_partition_size[*min_block_size];
+    *max_block_size = max_partition_size[*max_block_size];
   }
 }
 
