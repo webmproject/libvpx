@@ -408,7 +408,7 @@ static INLINE int plane_block_height(BLOCK_SIZE_TYPE bsize,
 
 typedef void (*foreach_transformed_block_visitor)(int plane, int block,
                                                   BLOCK_SIZE_TYPE bsize,
-                                                  int ss_txfrm_size,
+                                                  TX_SIZE tx_size,
                                                   void *arg);
 
 static INLINE void foreach_transformed_block_in_plane(
@@ -452,7 +452,7 @@ static INLINE void foreach_transformed_block_in_plane(
     for (r = 0; r < (1 << bh); r += (1 << tx_size)) {
       for (c = 0; c < (1 << bw); c += (1 << tx_size)) {
         if (r < max_blocks_high && c < max_blocks_wide)
-          visit(plane, i, bsize, txfrm_size_b, arg);
+          visit(plane, i, bsize, tx_size, arg);
         i += step;
       }
     }
@@ -460,7 +460,7 @@ static INLINE void foreach_transformed_block_in_plane(
     const int ss_block_size = bw + bh;
     assert(txfrm_size_b <= ss_block_size);
     for (i = 0; i < (1 << ss_block_size); i += step)
-      visit(plane, i, bsize, txfrm_size_b, arg);
+      visit(plane, i, bsize, tx_size, arg);
   }
 }
 
@@ -557,10 +557,9 @@ static int txfrm_block_to_raster_block(MACROBLOCKD *xd,
                                        int plane, int block,
                                        TX_SIZE tx_size) {
   const int bwl = b_width_log2(bsize) - xd->plane[plane].subsampling_x;
-  const int ss_txfrm_size = tx_size << 1;
   const int tx_cols_log2 = bwl - tx_size;
   const int tx_cols = 1 << tx_cols_log2;
-  const int raster_mb = block >> ss_txfrm_size;
+  const int raster_mb = block >> (tx_size << 1);
   const int x = (raster_mb & (tx_cols - 1)) << tx_size;
   const int y = raster_mb >> tx_cols_log2 << tx_size;
   return x + (y << bwl);
@@ -572,10 +571,9 @@ static void txfrm_block_to_raster_xy(MACROBLOCKD *xd,
                                      TX_SIZE tx_size,
                                      int *x, int *y) {
   const int bwl = b_width_log2(bsize) - xd->plane[plane].subsampling_x;
-  const int ss_txfrm_size = tx_size << 1;
   const int tx_cols_log2 = bwl - tx_size;
   const int tx_cols = 1 << tx_cols_log2;
-  const int raster_mb = block >> ss_txfrm_size;
+  const int raster_mb = block >> (tx_size << 1);
   *x = (raster_mb & (tx_cols - 1)) << tx_size;
   *y = raster_mb >> tx_cols_log2 << tx_size;
 }

@@ -249,10 +249,8 @@ struct decode_block_args {
   int *eobtotal;
 };
 
-static void decode_block(int plane, int block,
-                         BLOCK_SIZE_TYPE bsize,
-                         int ss_txfrm_size,
-                         void *argv) {
+static void decode_block(int plane, int block, BLOCK_SIZE_TYPE bsize,
+                         TX_SIZE tx_size, void *argv) {
   const struct decode_block_args* const arg = argv;
   const int bw = b_width_log2(bsize);
 
@@ -261,7 +259,7 @@ static void decode_block(int plane, int block,
   struct segmentation *seg = &arg->pbi->common.seg;
   struct macroblockd_plane* pd = &xd->plane[plane];
   const int segment_id = xd->mode_info_context->mbmi.segment_id;
-  const TX_SIZE tx_size = ss_txfrm_size >> 1;
+  const int ss_txfrm_size = tx_size << 1;
   const int seg_eob = get_eob(seg, segment_id, 16 << ss_txfrm_size);
   const int off = block >> ss_txfrm_size;
   const int mod = bw - tx_size - pd->subsampling_x;

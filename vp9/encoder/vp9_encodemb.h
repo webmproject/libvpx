@@ -42,8 +42,8 @@ void vp9_encode_sb(VP9_COMMON *cm, MACROBLOCK *x, BLOCK_SIZE_TYPE bsize);
 void vp9_encode_sby(VP9_COMMON *cm, MACROBLOCK *x, BLOCK_SIZE_TYPE bsize);
 void vp9_encode_sbuv(VP9_COMMON *cm, MACROBLOCK *x, BLOCK_SIZE_TYPE bsize);
 
-void xform_quant(int plane, int block, BLOCK_SIZE_TYPE bsize,
-                 int ss_txfrm_size, void *arg);
+void vp9_xform_quant(int plane, int block, BLOCK_SIZE_TYPE bsize,
+                     TX_SIZE tx_size, void *arg);
 void vp9_xform_quant_sby(VP9_COMMON *cm, MACROBLOCK *x, BLOCK_SIZE_TYPE bsize);
 void vp9_xform_quant_sbuv(VP9_COMMON *cm, MACROBLOCK *x, BLOCK_SIZE_TYPE bsize);
 

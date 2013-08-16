@@ -98,9 +98,8 @@ struct tokenize_b_args {
 };
 
 static void set_entropy_context_b(int plane, int block, BLOCK_SIZE_TYPE bsize,
-                                  int ss_txfrm_size, void *arg) {
+                                  TX_SIZE tx_size, void *arg) {
   struct tokenize_b_args* const args = arg;
-  const TX_SIZE tx_size = (TX_SIZE)(ss_txfrm_size >> 1);
   MACROBLOCKD *const xd = args->xd;
   const int bwl = b_width_log2(bsize);
   const int off = block >> (2 * tx_size);
@@ -122,12 +121,11 @@ static void set_entropy_context_b(int plane, int block, BLOCK_SIZE_TYPE bsize,
 }
 
 static void tokenize_b(int plane, int block, BLOCK_SIZE_TYPE bsize,
-                       int ss_txfrm_size, void *arg) {
+                       TX_SIZE tx_size, void *arg) {
   struct tokenize_b_args* const args = arg;
   VP9_COMP *cpi = args->cpi;
   MACROBLOCKD *xd = args->xd;
   TOKENEXTRA **tp = args->tp;
-  const TX_SIZE tx_size = (TX_SIZE)(ss_txfrm_size >> 1);
   const int tx_size_in_blocks = 1 << tx_size;
   MB_MODE_INFO *mbmi = &xd->mode_info_context->mbmi;
   int pt; /* near block/prev token context index */
@@ -242,7 +240,7 @@ struct is_skippable_args {
 };
 
 static void is_skippable(int plane, int block,
-                         BLOCK_SIZE_TYPE bsize, int ss_txfrm_size, void *argv) {
+                         BLOCK_SIZE_TYPE bsize, TX_SIZE tx_size, void *argv) {
   struct is_skippable_args *args = argv;
   args->skippable[0] &= (!args->xd->plane[plane].eobs[block]);
 }

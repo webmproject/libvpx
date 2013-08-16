@@ -572,7 +572,8 @@ struct rdcost_block_args {
 };
 
 static void dist_block(int plane, int block, BLOCK_SIZE_TYPE bsize,
-                       int ss_txfrm_size, void *arg) {
+                       TX_SIZE tx_size, void *arg) {
+  const int ss_txfrm_size = tx_size << 1;
   struct rdcost_block_args* args = arg;
   MACROBLOCK* const x = args->x;
   MACROBLOCKD* const xd = &x->e_mbd;
@@ -597,7 +598,7 @@ static void dist_block(int plane, int block, BLOCK_SIZE_TYPE bsize,
 }
 
 static void rate_block(int plane, int block, BLOCK_SIZE_TYPE bsize,
-                       int ss_txfrm_size, void *arg) {
+                       TX_SIZE tx_size, void *arg) {
   struct rdcost_block_args* args = arg;
   MACROBLOCKD *const xd = &args->x->e_mbd;
   int x_idx, y_idx;
@@ -611,7 +612,7 @@ static void rate_block(int plane, int block, BLOCK_SIZE_TYPE bsize,
 }
 
 static void block_yrd_txfm(int plane, int block, BLOCK_SIZE_TYPE bsize,
-                           int ss_txfrm_size, void *arg) {
+                           TX_SIZE tx_size, void *arg) {
   struct rdcost_block_args *args = arg;
   MACROBLOCK *const x = args->x;
   MACROBLOCKD *const xd = &x->e_mbd;
@@ -632,12 +633,12 @@ static void block_yrd_txfm(int plane, int block, BLOCK_SIZE_TYPE bsize,
   }
 
   if (!is_inter_block(&xd->mode_info_context->mbmi))
-    encode_block_intra(plane, block, bsize, ss_txfrm_size, &encode_args);
+    vp9_encode_block_intra(plane, block, bsize, tx_size, &encode_args);
   else
-    xform_quant(plane, block, bsize, ss_txfrm_size, &encode_args);
+    vp9_xform_quant(plane, block, bsize, tx_size, &encode_args);
 
-  dist_block(plane, block, bsize, ss_txfrm_size, args);
-  rate_block(plane, block, bsize, ss_txfrm_size, args);
+  dist_block(plane, block, bsize, tx_size, args);
+  rate_block(plane, block, bsize, tx_size, args);
 }
 
 static void txfm_rd_in_plane(VP9_COMMON *const cm, MACROBLOCK *x,

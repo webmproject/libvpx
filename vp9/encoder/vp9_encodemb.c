@@ -382,9 +382,9 @@ void vp9_optimize_b(int plane, int block, BLOCK_SIZE_TYPE bsize,
 }
 
 static void optimize_block(int plane, int block, BLOCK_SIZE_TYPE bsize,
-                           int ss_txfrm_size, void *arg) {
+                           TX_SIZE tx_size, void *arg) {
   const struct encode_b_args* const args = arg;
-  vp9_optimize_b(plane, block, bsize, ss_txfrm_size >> 1, args->x, args->ctx);
+  vp9_optimize_b(plane, block, bsize, tx_size, args->x, args->ctx);
 }
 
 void optimize_init_b(int plane, BLOCK_SIZE_TYPE bsize, void *arg) {
@@ -446,8 +446,8 @@ void vp9_optimize_sbuv(VP9_COMMON *const cm, MACROBLOCK *x,
   foreach_transformed_block_uv(&x->e_mbd, bsize, optimize_block, &arg);
 }
 
-void xform_quant(int plane, int block, BLOCK_SIZE_TYPE bsize,
-                 int ss_txfrm_size, void *arg) {
+void vp9_xform_quant(int plane, int block, BLOCK_SIZE_TYPE bsize,
+                     TX_SIZE tx_size, void *arg) {
   struct encode_b_args* const args = arg;
   MACROBLOCK* const x = args->x;
   MACROBLOCKD* const xd = &x->e_mbd;
@@ -458,7 +458,6 @@ void xform_quant(int plane, int block, BLOCK_SIZE_TYPE bsize,
   int16_t *dqcoeff = BLOCK_OFFSET(pd->dqcoeff, block);
   const int16_t *scan, *iscan;
   uint16_t *eob = &pd->eobs[block];
-  const TX_SIZE tx_size = (TX_SIZE)(ss_txfrm_size >> 1);
   const int bwl = b_width_log2(bsize) - pd->subsampling_x, bw = 1 << bwl;
   const int twl = bwl - tx_size, twmask = (1 << twl) - 1;
   int xoff, yoff;
@@ -521,11 +520,10 @@ void xform_quant(int plane, int block, BLOCK_SIZE_TYPE bsize,
 }
 
 static void encode_block(int plane, int block, BLOCK_SIZE_TYPE bsize,
-                         int ss_txfrm_size, void *arg) {
+                         TX_SIZE tx_size, void *arg) {
   struct encode_b_args *const args = arg;
   MACROBLOCK *const x = args->x;
   MACROBLOCKD *const xd = &x->e_mbd;
-  const TX_SIZE tx_size = (TX_SIZE)(ss_txfrm_size >> 1);
   const int raster_block = txfrm_block_to_raster_block(xd, bsize, plane,
                                                        block, tx_size);
   struct macroblockd_plane *const pd = &xd->plane[plane];
@@ -533,7 +531,7 @@ static void encode_block(int plane, int block, BLOCK_SIZE_TYPE bsize,
   uint8_t *const dst = raster_block_offset_uint8(xd, bsize, plane,
                                                  raster_block,
                                                  pd->dst.buf, pd->dst.stride);
-  xform_quant(plane, block, bsize, ss_txfrm_size, arg);
+  vp9_xform_quant(plane, block, bsize, tx_size, arg);
 
   if (x->optimize)
     vp9_optimize_b(plane, block, bsize, tx_size, x, args->ctx);
@@ -569,7 +567,7 @@ void vp9_xform_quant_sby(VP9_COMMON *cm, MACROBLOCK *x, BLOCK_SIZE_TYPE bsize) {
   MACROBLOCKD* const xd = &x->e_mbd;
   struct encode_b_args arg = {cm, x, NULL};
 
-  foreach_transformed_block_in_plane(xd, bsize, 0, xform_quant, &arg);
+  foreach_transformed_block_in_plane(xd, bsize, 0, vp9_xform_quant, &arg);
 }
 
 void vp9_xform_quant_sbuv(VP9_COMMON *cm, MACROBLOCK *x,
@@ -577,7 +575,7 @@ void vp9_xform_quant_sbuv(VP9_COMMON *cm, MACROBLOCK *x,
   MACROBLOCKD* const xd = &x->e_mbd;
   struct encode_b_args arg = {cm, x, NULL};
 
-  foreach_transformed_block_uv(xd, bsize, xform_quant, &arg);
+  foreach_transformed_block_uv(xd, bsize, vp9_xform_quant, &arg);
 }
 
 void vp9_encode_sby(VP9_COMMON *cm, MACROBLOCK *x, BLOCK_SIZE_TYPE bsize) {
@@ -623,13 +621,12 @@ void vp9_encode_sb(VP9_COMMON *cm, MACROBLOCK *x, BLOCK_SIZE_TYPE bsize) {
   foreach_transformed_block(xd, bsize, encode_block, &arg);
 }
 
-void encode_block_intra(int plane, int block, BLOCK_SIZE_TYPE bsize,
-                        int ss_txfrm_size, void *arg) {
+void vp9_encode_block_intra(int plane, int block, BLOCK_SIZE_TYPE bsize,
+                            TX_SIZE tx_size, void *arg) {
   struct encode_b_args* const args = arg;
   MACROBLOCK *const x = args->x;
   MACROBLOCKD *const xd = &x->e_mbd;
   MB_MODE_INFO *mbmi = &xd->mode_info_context->mbmi;
-  const TX_SIZE tx_size = (TX_SIZE)(ss_txfrm_size >> 1);
   struct macroblock_plane *const p = &x->plane[plane];
   struct macroblockd_plane *const pd = &xd->plane[plane];
   int16_t *coeff = BLOCK_OFFSET(p->coeff, block);
@@ -781,14 +778,14 @@ void vp9_encode_intra_block_y(VP9_COMMON *cm, MACROBLOCK *x,
   struct optimize_ctx ctx;
   struct encode_b_args arg = {cm, x, &ctx};
 
-  foreach_transformed_block_in_plane(xd, bsize, 0,
-                                     encode_block_intra, &arg);
+  foreach_transformed_block_in_plane(xd, bsize, 0, vp9_encode_block_intra,
+                                     &arg);
 }
 void vp9_encode_intra_block_uv(VP9_COMMON *cm, MACROBLOCK *x,
                               BLOCK_SIZE_TYPE bsize) {
   MACROBLOCKD* const xd = &x->e_mbd;
   struct optimize_ctx ctx;
   struct encode_b_args arg = {cm, x, &ctx};
-  foreach_transformed_block_uv(xd, bsize, encode_block_intra, &arg);
+  foreach_transformed_block_uv(xd, bsize, vp9_encode_block_intra, &arg);
 }
 
