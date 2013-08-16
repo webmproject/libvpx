@@ -259,7 +259,6 @@ typedef struct {
   int use_lastframe_partitioning;
   TX_SIZE_SEARCH_METHOD tx_size_search_method;
   int use_lp32x32fdct;
-  int use_8tap_always;
   int use_avoid_tested_higherror;
   int skip_lots_of_modes;
   int adjust_thresholds_by_speed;
@@ -286,6 +285,9 @@ typedef struct {
   unsigned int mode_search_skip_flags;
   // A source variance threshold below which the split mode is disabled
   unsigned int disable_split_var_thresh;
+  // A source variance threshold below which filter search is disabled
+  // Choose a very large value (UINT_MAX) to use 8-tap always
+  unsigned int disable_filter_search_var_thresh;
   MB_PREDICTION_MODE last_chroma_intra_mode;
   int use_rd_breakout;
   int use_uv_intra_rd_estimate;

@@ -2625,7 +2625,6 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
   int64_t this_rd = 0;
   DECLARE_ALIGNED_ARRAY(16, uint8_t, tmp_buf, MAX_MB_PLANE * 64 * 64);
   int pred_exists = 0;
-  int interpolating_intpel_seen = 0;
   int intpel_mv;
   int64_t rd, best_rd = INT64_MAX;
   int best_needs_copy = 0;
@@ -2738,7 +2737,6 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
   }
 
   pred_exists = 0;
-  interpolating_intpel_seen = 0;
   // Are all MVs integer pel for Y and UV
   intpel_mv = (mbmi->mv[0].as_mv.row & 15) == 0 &&
       (mbmi->mv[0].as_mv.col & 15) == 0;
@@ -2747,97 +2745,97 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
         (mbmi->mv[1].as_mv.col & 15) == 0;
   // Search for best switchable filter by checking the variance of
   // pred error irrespective of whether the filter will be used
-  *best_filter = EIGHTTAP;
-  if (cpi->sf.use_8tap_always) {
+  if (cm->mcomp_filter_type != BILINEAR) {
     *best_filter = EIGHTTAP;
-    vp9_zero(cpi->rd_filter_cache);
-  } else {
-    int i, newbest;
-    int tmp_rate_sum = 0;
-    int64_t tmp_dist_sum = 0;
+    if (x->source_variance <
+        cpi->sf.disable_filter_search_var_thresh) {
+      *best_filter = EIGHTTAP;
+      vp9_zero(cpi->rd_filter_cache);
+    } else {
+      int i, newbest;
+      int tmp_rate_sum = 0;
+      int64_t tmp_dist_sum = 0;
 
-    cpi->rd_filter_cache[VP9_SWITCHABLE_FILTERS] = INT64_MAX;
-    for (i = 0; i < VP9_SWITCHABLE_FILTERS; ++i) {
-      int j;
-      int64_t rs_rd;
-      const int is_intpel_interp = intpel_mv;
-      mbmi->interp_filter = i;
-      vp9_setup_interp_filters(xd, mbmi->interp_filter, cm);
-      rs = get_switchable_rate(x);
-      rs_rd = RDCOST(x->rdmult, x->rddiv, rs, 0);
+      cpi->rd_filter_cache[VP9_SWITCHABLE_FILTERS] = INT64_MAX;
+      for (i = 0; i < VP9_SWITCHABLE_FILTERS; ++i) {
+        int j;
+        int64_t rs_rd;
+        mbmi->interp_filter = i;
+        vp9_setup_interp_filters(xd, mbmi->interp_filter, cm);
+        rs = get_switchable_rate(x);
+        rs_rd = RDCOST(x->rdmult, x->rddiv, rs, 0);
 
-      if (interpolating_intpel_seen && is_intpel_interp) {
-        cpi->rd_filter_cache[i] = RDCOST(x->rdmult, x->rddiv,
-                                         tmp_rate_sum, tmp_dist_sum);
-        cpi->rd_filter_cache[VP9_SWITCHABLE_FILTERS] =
-            MIN(cpi->rd_filter_cache[VP9_SWITCHABLE_FILTERS],
-                cpi->rd_filter_cache[i] + rs_rd);
-        rd = cpi->rd_filter_cache[i];
-        if (cm->mcomp_filter_type == SWITCHABLE)
-          rd += rs_rd;
-      } else {
-        int rate_sum = 0;
-        int64_t dist_sum = 0;
-        if ((cm->mcomp_filter_type == SWITCHABLE &&
-             (!i || best_needs_copy)) ||
-            (cm->mcomp_filter_type != SWITCHABLE &&
-             (cm->mcomp_filter_type == mbmi->interp_filter ||
-              (!interpolating_intpel_seen && is_intpel_interp)))) {
-          for (j = 0; j < MAX_MB_PLANE; j++) {
-            xd->plane[j].dst.buf = orig_dst[j];
-            xd->plane[j].dst.stride = orig_dst_stride[j];
-          }
+        if (i > 0 && intpel_mv) {
+          cpi->rd_filter_cache[i] = RDCOST(x->rdmult, x->rddiv,
+                                           tmp_rate_sum, tmp_dist_sum);
+          cpi->rd_filter_cache[VP9_SWITCHABLE_FILTERS] =
+              MIN(cpi->rd_filter_cache[VP9_SWITCHABLE_FILTERS],
+                  cpi->rd_filter_cache[i] + rs_rd);
+          rd = cpi->rd_filter_cache[i];
+          if (cm->mcomp_filter_type == SWITCHABLE)
+            rd += rs_rd;
         } else {
-          for (j = 0; j < MAX_MB_PLANE; j++) {
-            xd->plane[j].dst.buf = tmp_buf + j * 64 * 64;
-            xd->plane[j].dst.stride = 64;
+          int rate_sum = 0;
+          int64_t dist_sum = 0;
+          if ((cm->mcomp_filter_type == SWITCHABLE &&
+               (!i || best_needs_copy)) ||
+              (cm->mcomp_filter_type != SWITCHABLE &&
+               (cm->mcomp_filter_type == mbmi->interp_filter ||
+                (i == 0 && intpel_mv)))) {
+            for (j = 0; j < MAX_MB_PLANE; j++) {
+              xd->plane[j].dst.buf = orig_dst[j];
+              xd->plane[j].dst.stride = orig_dst_stride[j];
+            }
+          } else {
+            for (j = 0; j < MAX_MB_PLANE; j++) {
+              xd->plane[j].dst.buf = tmp_buf + j * 64 * 64;
+              xd->plane[j].dst.stride = 64;
+            }
+          }
+          vp9_build_inter_predictors_sb(xd, mi_row, mi_col, bsize);
+          model_rd_for_sb(cpi, bsize, x, xd, &rate_sum, &dist_sum);
+          cpi->rd_filter_cache[i] = RDCOST(x->rdmult, x->rddiv,
+                                           rate_sum, dist_sum);
+          cpi->rd_filter_cache[VP9_SWITCHABLE_FILTERS] =
+              MIN(cpi->rd_filter_cache[VP9_SWITCHABLE_FILTERS],
+                  cpi->rd_filter_cache[i] + rs_rd);
+          rd = cpi->rd_filter_cache[i];
+          if (cm->mcomp_filter_type == SWITCHABLE)
+            rd += rs_rd;
+          if (i == 0 && intpel_mv) {
+            tmp_rate_sum = rate_sum;
+            tmp_dist_sum = dist_sum;
           }
         }
-        vp9_build_inter_predictors_sb(xd, mi_row, mi_col, bsize);
-        model_rd_for_sb(cpi, bsize, x, xd, &rate_sum, &dist_sum);
-        cpi->rd_filter_cache[i] = RDCOST(x->rdmult, x->rddiv,
-                                         rate_sum, dist_sum);
-        cpi->rd_filter_cache[VP9_SWITCHABLE_FILTERS] =
-            MIN(cpi->rd_filter_cache[VP9_SWITCHABLE_FILTERS],
-                cpi->rd_filter_cache[i] + rs_rd);
-        rd = cpi->rd_filter_cache[i];
-        if (cm->mcomp_filter_type == SWITCHABLE)
-          rd += rs_rd;
-        if (!interpolating_intpel_seen && is_intpel_interp) {
-          tmp_rate_sum = rate_sum;
-          tmp_dist_sum = dist_sum;
-        }
-      }
-      if (i == 0 && cpi->sf.use_rd_breakout && ref_best_rd < INT64_MAX) {
-        if (rd / 2 > ref_best_rd) {
-          for (i = 0; i < MAX_MB_PLANE; i++) {
-            xd->plane[i].dst.buf = orig_dst[i];
-            xd->plane[i].dst.stride = orig_dst_stride[i];
+        if (i == 0 && cpi->sf.use_rd_breakout && ref_best_rd < INT64_MAX) {
+          if (rd / 2 > ref_best_rd) {
+            for (i = 0; i < MAX_MB_PLANE; i++) {
+              xd->plane[i].dst.buf = orig_dst[i];
+              xd->plane[i].dst.stride = orig_dst_stride[i];
+            }
+            return INT64_MAX;
           }
-          return INT64_MAX;
+        }
+        newbest = i == 0 || rd < best_rd;
+
+        if (newbest) {
+          best_rd = rd;
+          *best_filter = mbmi->interp_filter;
+          if (cm->mcomp_filter_type == SWITCHABLE && i && !intpel_mv)
+            best_needs_copy = !best_needs_copy;
+        }
+
+        if ((cm->mcomp_filter_type == SWITCHABLE && newbest) ||
+            (cm->mcomp_filter_type != SWITCHABLE &&
+             cm->mcomp_filter_type == mbmi->interp_filter)) {
+          pred_exists = 1;
         }
       }
-      newbest = i == 0 || rd < best_rd;
 
-      if (newbest) {
-        best_rd = rd;
-        *best_filter = mbmi->interp_filter;
-        if (cm->mcomp_filter_type == SWITCHABLE && i &&
-            !(interpolating_intpel_seen && is_intpel_interp))
-          best_needs_copy = !best_needs_copy;
+      for (i = 0; i < MAX_MB_PLANE; i++) {
+        xd->plane[i].dst.buf = orig_dst[i];
+        xd->plane[i].dst.stride = orig_dst_stride[i];
       }
-
-      if ((cm->mcomp_filter_type == SWITCHABLE && newbest) ||
-          (cm->mcomp_filter_type != SWITCHABLE &&
-           cm->mcomp_filter_type == mbmi->interp_filter)) {
-        pred_exists = 1;
-      }
-      interpolating_intpel_seen |= is_intpel_interp;
-    }
-
-    for (i = 0; i < MAX_MB_PLANE; i++) {
-      xd->plane[i].dst.buf = orig_dst[i];
-      xd->plane[i].dst.stride = orig_dst_stride[i];
     }
   }
   // Set the appropriate filter
@@ -3486,66 +3484,76 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
       xd->mode_info_context->mbmi.txfm_size = TX_4X4;
 
       cpi->rd_filter_cache[VP9_SWITCHABLE_FILTERS] = INT64_MAX;
-      for (switchable_filter_index = 0;
-           switchable_filter_index < VP9_SWITCHABLE_FILTERS;
-           ++switchable_filter_index) {
-        int newbest, rs;
-        int64_t rs_rd;
-        mbmi->interp_filter = switchable_filter_index;
-        vp9_setup_interp_filters(xd, mbmi->interp_filter, &cpi->common);
+      if (cm->mcomp_filter_type != BILINEAR) {
+        tmp_best_filter = EIGHTTAP;
+        if (x->source_variance <
+            cpi->sf.disable_filter_search_var_thresh) {
+          tmp_best_filter = EIGHTTAP;
+          vp9_zero(cpi->rd_filter_cache);
+        } else {
+          for (switchable_filter_index = 0;
+               switchable_filter_index < VP9_SWITCHABLE_FILTERS;
+               ++switchable_filter_index) {
+            int newbest, rs;
+            int64_t rs_rd;
+            mbmi->interp_filter = switchable_filter_index;
+            vp9_setup_interp_filters(xd, mbmi->interp_filter, &cpi->common);
 
-        tmp_rd = rd_pick_best_mbsegmentation(cpi, x,
-                     &mbmi->ref_mvs[ref_frame][0],
-                     second_ref,
-                     best_yrd,
-                     &rate, &rate_y, &distortion,
-                     &skippable, &total_sse,
-                     (int)this_rd_thresh, seg_mvs,
-                     bsi, switchable_filter_index,
-                     mi_row, mi_col);
-        if (tmp_rd == INT64_MAX)
-          continue;
+            tmp_rd = rd_pick_best_mbsegmentation(cpi, x,
+                                                 &mbmi->ref_mvs[ref_frame][0],
+                                                 second_ref,
+                                                 best_yrd,
+                                                 &rate, &rate_y, &distortion,
+                                                 &skippable, &total_sse,
+                                                 (int)this_rd_thresh, seg_mvs,
+                                                 bsi, switchable_filter_index,
+                                                 mi_row, mi_col);
 
-        cpi->rd_filter_cache[switchable_filter_index] = tmp_rd;
-        rs = get_switchable_rate(x);
-        rs_rd = RDCOST(x->rdmult, x->rddiv, rs, 0);
-        cpi->rd_filter_cache[VP9_SWITCHABLE_FILTERS] =
-            MIN(cpi->rd_filter_cache[VP9_SWITCHABLE_FILTERS], tmp_rd + rs_rd);
-        if (cm->mcomp_filter_type == SWITCHABLE)
-          tmp_rd += rs_rd;
+            if (tmp_rd == INT64_MAX)
+              continue;
+            cpi->rd_filter_cache[switchable_filter_index] = tmp_rd;
+            rs = get_switchable_rate(x);
+            rs_rd = RDCOST(x->rdmult, x->rddiv, rs, 0);
+            cpi->rd_filter_cache[VP9_SWITCHABLE_FILTERS] =
+                MIN(cpi->rd_filter_cache[VP9_SWITCHABLE_FILTERS],
+                    tmp_rd + rs_rd);
+            if (cm->mcomp_filter_type == SWITCHABLE)
+              tmp_rd += rs_rd;
 
-        newbest = (tmp_rd < tmp_best_rd);
-        if (newbest) {
-          tmp_best_filter = mbmi->interp_filter;
-          tmp_best_rd = tmp_rd;
-        }
-        if ((newbest && cm->mcomp_filter_type == SWITCHABLE) ||
-            (mbmi->interp_filter == cm->mcomp_filter_type &&
-             cm->mcomp_filter_type != SWITCHABLE)) {
-          tmp_best_rdu = tmp_rd;
-          tmp_best_rate = rate;
-          tmp_best_ratey = rate_y;
-          tmp_best_distortion = distortion;
-          tmp_best_sse = total_sse;
-          tmp_best_skippable = skippable;
-          tmp_best_mbmode = *mbmi;
-          tmp_best_partition = *x->partition_info;
-          for (i = 0; i < 4; i++)
-            tmp_best_bmodes[i] = xd->mode_info_context->bmi[i];
-          pred_exists = 1;
-          if (switchable_filter_index == 0 &&
-              cpi->sf.use_rd_breakout &&
-              best_rd < INT64_MAX) {
-            if (tmp_best_rdu / 2 > best_rd) {
-              // skip searching the other filters if the first is
-              // already substantially larger than the best so far
+            newbest = (tmp_rd < tmp_best_rd);
+            if (newbest) {
               tmp_best_filter = mbmi->interp_filter;
-              tmp_best_rdu = INT64_MAX;
-              break;
+              tmp_best_rd = tmp_rd;
             }
-          }
+            if ((newbest && cm->mcomp_filter_type == SWITCHABLE) ||
+                (mbmi->interp_filter == cm->mcomp_filter_type &&
+                 cm->mcomp_filter_type != SWITCHABLE)) {
+              tmp_best_rdu = tmp_rd;
+              tmp_best_rate = rate;
+              tmp_best_ratey = rate_y;
+              tmp_best_distortion = distortion;
+              tmp_best_sse = total_sse;
+              tmp_best_skippable = skippable;
+              tmp_best_mbmode = *mbmi;
+              tmp_best_partition = *x->partition_info;
+              for (i = 0; i < 4; i++)
+                tmp_best_bmodes[i] = xd->mode_info_context->bmi[i];
+              pred_exists = 1;
+              if (switchable_filter_index == 0 &&
+                  cpi->sf.use_rd_breakout &&
+                  best_rd < INT64_MAX) {
+                if (tmp_best_rdu / 2 > best_rd) {
+                  // skip searching the other filters if the first is
+                  // already substantially larger than the best so far
+                  tmp_best_filter = mbmi->interp_filter;
+                  tmp_best_rdu = INT64_MAX;
+                  break;
+                }
+              }
+            }
+          }  // switchable_filter_index loop
         }
-      }  // switchable_filter_index loop
+      }
 
       if (tmp_best_rdu == INT64_MAX)
         continue;
