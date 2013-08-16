@@ -49,8 +49,8 @@ const TX_TYPE mode2txfm_map[MB_MODE_COUNT] = {
   intra_pred_sized(type, 16) \
   intra_pred_sized(type, 32)
 
-static INLINE void d27_predictor(uint8_t *dst, ptrdiff_t stride, int bs,
-                                 const uint8_t *above, const uint8_t *left) {
+static INLINE void d207_predictor(uint8_t *dst, ptrdiff_t stride, int bs,
+                                  const uint8_t *above, const uint8_t *left) {
   int r, c;
 
   // first column
@@ -76,7 +76,7 @@ static INLINE void d27_predictor(uint8_t *dst, ptrdiff_t stride, int bs,
     for (c = 0; c < bs - 2; ++c)
       dst[r * stride + c] = dst[(r + 1) * stride + c - 2];
 }
-intra_pred_allsizes(d27)
+intra_pred_allsizes(d207)
 
 static INLINE void d63_predictor(uint8_t *dst, ptrdiff_t stride, int bs,
                                  const uint8_t *above, const uint8_t *left) {
@@ -297,7 +297,7 @@ static void init_intra_pred_fn_ptrs(void) {
 
   intra_pred_allsizes(pred[V_PRED], v);
   intra_pred_allsizes(pred[H_PRED], h);
-  intra_pred_allsizes(pred[D27_PRED], d27);
+  intra_pred_allsizes(pred[D27_PRED], d207);
   intra_pred_allsizes(pred[D45_PRED], d45);
   intra_pred_allsizes(pred[D63_PRED], d63);
   intra_pred_allsizes(pred[D117_PRED], d117);

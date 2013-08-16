@@ -46,8 +46,8 @@ specialize vp9_idct_add_32x32
 #
 # RECON
 #
-prototype void vp9_d27_predictor_4x4 "uint8_t *dst, ptrdiff_t y_stride, const uint8_t *above, const uint8_t *left"
-specialize vp9_d27_predictor_4x4
+prototype void vp9_d207_predictor_4x4 "uint8_t *dst, ptrdiff_t y_stride, const uint8_t *above, const uint8_t *left"
+specialize vp9_d207_predictor_4x4
 
 prototype void vp9_d45_predictor_4x4 "uint8_t *dst, ptrdiff_t y_stride, const uint8_t *above, const uint8_t *left"
 specialize vp9_d45_predictor_4x4 $ssse3_x86inc
@@ -85,8 +85,8 @@ specialize vp9_dc_left_predictor_4x4
 prototype void vp9_dc_128_predictor_4x4 "uint8_t *dst, ptrdiff_t y_stride, const uint8_t *above, const uint8_t *left"
 specialize vp9_dc_128_predictor_4x4
 
-prototype void vp9_d27_predictor_8x8 "uint8_t *dst, ptrdiff_t y_stride, const uint8_t *above, const uint8_t *left"
-specialize vp9_d27_predictor_8x8
+prototype void vp9_d207_predictor_8x8 "uint8_t *dst, ptrdiff_t y_stride, const uint8_t *above, const uint8_t *left"
+specialize vp9_d207_predictor_8x8
 
 prototype void vp9_d45_predictor_8x8 "uint8_t *dst, ptrdiff_t y_stride, const uint8_t *above, const uint8_t *left"
 specialize vp9_d45_predictor_8x8 $ssse3_x86inc
@@ -124,8 +124,8 @@ specialize vp9_dc_left_predictor_8x8
 prototype void vp9_dc_128_predictor_8x8 "uint8_t *dst, ptrdiff_t y_stride, const uint8_t *above, const uint8_t *left"
 specialize vp9_dc_128_predictor_8x8
 
-prototype void vp9_d27_predictor_16x16 "uint8_t *dst, ptrdiff_t y_stride, const uint8_t *above, const uint8_t *left"
-specialize vp9_d27_predictor_16x16
+prototype void vp9_d207_predictor_16x16 "uint8_t *dst, ptrdiff_t y_stride, const uint8_t *above, const uint8_t *left"
+specialize vp9_d207_predictor_16x16
 
 prototype void vp9_d45_predictor_16x16 "uint8_t *dst, ptrdiff_t y_stride, const uint8_t *above, const uint8_t *left"
 specialize vp9_d45_predictor_16x16 $ssse3_x86inc
@@ -163,8 +163,8 @@ specialize vp9_dc_left_predictor_16x16
 prototype void vp9_dc_128_predictor_16x16 "uint8_t *dst, ptrdiff_t y_stride, const uint8_t *above, const uint8_t *left"
 specialize vp9_dc_128_predictor_16x16
 
-prototype void vp9_d27_predictor_32x32 "uint8_t *dst, ptrdiff_t y_stride, const uint8_t *above, const uint8_t *left"
-specialize vp9_d27_predictor_32x32
+prototype void vp9_d207_predictor_32x32 "uint8_t *dst, ptrdiff_t y_stride, const uint8_t *above, const uint8_t *left"
+specialize vp9_d207_predictor_32x32
 
 prototype void vp9_d45_predictor_32x32 "uint8_t *dst, ptrdiff_t y_stride, const uint8_t *above, const uint8_t *left"
 specialize vp9_d45_predictor_32x32 $ssse3_x86inc
