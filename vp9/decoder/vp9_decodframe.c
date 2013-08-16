@@ -88,13 +88,12 @@ static void init_dequantizer(VP9_COMMON *cm, MACROBLOCKD *xd) {
 }
 
 static void decode_block(int plane, int block, BLOCK_SIZE_TYPE bsize,
-                         int ss_txfrm_size, void *arg) {
+                         TX_SIZE tx_size, void *arg) {
   MACROBLOCKD* const xd = arg;
   struct macroblockd_plane *const pd = &xd->plane[plane];
   int16_t* const qcoeff = BLOCK_OFFSET(pd->qcoeff, block);
   const int stride = pd->dst.stride;
   const int eob = pd->eobs[block];
-  const TX_SIZE tx_size = (TX_SIZE)(ss_txfrm_size >> 1);
   const int raster_block = txfrm_block_to_raster_block(xd, bsize, plane,
                                                        block, tx_size);
   uint8_t* const dst = raster_block_offset_uint8(xd, bsize, plane,
@@ -126,11 +125,10 @@ static void decode_block(int plane, int block, BLOCK_SIZE_TYPE bsize,
 }
 
 static void decode_block_intra(int plane, int block, BLOCK_SIZE_TYPE bsize,
-                               int ss_txfrm_size, void *arg) {
+                               TX_SIZE tx_size, void *arg) {
   MACROBLOCKD* const xd = arg;
   struct macroblockd_plane *const pd = &xd->plane[plane];
   MODE_INFO *const mi = xd->mode_info_context;
-  const TX_SIZE tx_size = (TX_SIZE)(ss_txfrm_size >> 1);
   const int raster_block = txfrm_block_to_raster_block(xd, bsize, plane,
                                                        block, tx_size);
   uint8_t* const dst = raster_block_offset_uint8(xd, bsize, plane,
@@ -160,7 +158,7 @@ static void decode_block_intra(int plane, int block, BLOCK_SIZE_TYPE bsize,
   if (mi->mbmi.skip_coeff)
     return;
 
-  decode_block(plane, block, bsize, ss_txfrm_size, arg);
+  decode_block(plane, block, bsize, tx_size, arg);
 }
 
 static int decode_tokens(VP9D_COMP *pbi, BLOCK_SIZE_TYPE bsize, vp9_reader *r) {
