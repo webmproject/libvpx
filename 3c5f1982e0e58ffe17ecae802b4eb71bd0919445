@@ -2,6 +2,23 @@
   "comments": [
     {
       "key": {
+        "uuid": "AAAAc3//9aI\u003d",
+        "filename": "vp9/common/arm/neon/vp9_short_idct8x8_add_neon.asm",
+        "patchSetId": 1
+      },
+      "lineNbr": 342,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2013-08-17T01:05:54Z",
+      "side": 1,
+      "message": "Can be downshifted",
+      "revId": "3c5f1982e0e58ffe17ecae802b4eb71bd0919445",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAc3//9aU\u003d",
         "filename": "vp9/common/arm/neon/vp9_short_idct8x8_add_neon.asm",
         "patchSetId": 1
@@ -13,6 +30,23 @@
       "writtenOn": "2013-08-17T01:00:48Z",
       "side": 1,
       "message": "Neither of these have the second highest bit set and can be shifted without accidentally changing the sign",
+      "revId": "3c5f1982e0e58ffe17ecae802b4eb71bd0919445",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAc3//9aA\u003d",
+        "filename": "vp9/common/arm/neon/vp9_short_idct8x8_add_neon.asm",
+        "patchSetId": 1
+      },
+      "lineNbr": 362,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2013-08-17T01:05:54Z",
+      "side": 1,
+      "message": "Can be downshifted",
       "revId": "3c5f1982e0e58ffe17ecae802b4eb71bd0919445",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -47,6 +81,24 @@
       "writtenOn": "2013-08-17T01:00:48Z",
       "side": 1,
       "message": "http://git.chromium.org/gitweb/?p\u003dwebm/libvpx.git;a\u003dblob;f\u003dvp8/common/arm/neon/idct_dequant_full_2x_neon.asm\n\nI think you can use vqdmulh for this constant and avoid having to expand and narrow",
+      "revId": "3c5f1982e0e58ffe17ecae802b4eb71bd0919445",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAc3//9Z8\u003d",
+        "filename": "vp9/common/arm/neon/vp9_short_idct8x8_add_neon.asm",
+        "patchSetId": 1
+      },
+      "lineNbr": 401,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2013-08-17T01:05:54Z",
+      "side": 1,
+      "message": "I\u0027m thinking this backwards. That compensates the shift so it\u0027s for 16 instead of 15. You want to compensate the other direction since it\u0027s a shift by 14. So if you half the source constant,\n\nWait. I\u0027m confused again. We can talk this through Monday.",
+      "parentUuid": "AAAAc3//9aY\u003d",
       "revId": "3c5f1982e0e58ffe17ecae802b4eb71bd0919445",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
