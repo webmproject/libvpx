@@ -261,7 +261,7 @@ MV clamp_mv_to_umv_border_sb(const MV *src_mv,
   return clamped_mv;
 }
 
-#if CONFIG_MASKED_COMPOUND_INTER
+#if CONFIG_MASKED_COMPOUND
 #define MASK_WEIGHT_BITS 6
 
 static int get_masked_weight(int m) {
@@ -617,7 +617,7 @@ static void build_inter_predictors(int plane, int block,
                                                 xd->mb_to_bottom_edge);
     scale->set_scaled_offsets(scale, arg->y + y, arg->x + x);
 
-#if CONFIG_MASKED_COMPOUND_INTER
+#if CONFIG_MASKED_COMPOUND
     if (which_mv && xd->mode_info_context->mbmi.use_masked_compound) {
       uint8_t tmp_dst[4096];
       vp9_build_inter_predictor(pre, pre_stride,
@@ -638,7 +638,7 @@ static void build_inter_predictors(int plane, int block,
                               &res_mv, &xd->scale_factor[which_mv],
                               4 << pred_w, 4 << pred_h, which_mv,
                               &xd->subpix, MV_PRECISION_Q4);
-#if CONFIG_MASKED_COMPOUND_INTER
+#if CONFIG_MASKED_COMPOUND
     }
 #endif
   }

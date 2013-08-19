@@ -67,7 +67,7 @@ typedef unsigned int (*vp9_subp_avg_variance_fn_t)(const uint8_t *src_ptr,
                                                    unsigned int *sse,
                                                    const uint8_t *second_pred);
 
-#if CONFIG_MASKED_COMPOUND_INTER
+#if CONFIG_MASKED_COMPOUND
 typedef unsigned int(*vp9_masked_sad_fn_t)(const uint8_t *src_ptr,
                                          int source_stride,
                                          const uint8_t *ref_ptr,
@@ -118,7 +118,7 @@ typedef struct vp9_variance_vtable {
   vp9_sad_multi_fn_t         sdx3f;
   vp9_sad_multi1_fn_t        sdx8f;
   vp9_sad_multi_d_fn_t       sdx4df;
-#if CONFIG_MASKED_COMPOUND_INTER
+#if CONFIG_MASKED_COMPOUND
   vp9_masked_sad_fn_t            msdf;
   vp9_masked_variance_fn_t       mvf;
   vp9_masked_subpixvariance_fn_t msvf;

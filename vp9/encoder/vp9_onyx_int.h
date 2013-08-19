@@ -98,12 +98,15 @@ typedef struct {
 
 #if CONFIG_INTERINTRA
   vp9_prob interintra_prob[BLOCK_SIZE_TYPES];
+#if CONFIG_MASKED_COMPOUND
+  vp9_prob masked_interintra_prob[BLOCK_SIZE_TYPES];
+#endif
 #endif
 #if CONFIG_FILTERINTRA
   vp9_prob filterintra_prob[TX_SIZES][VP9_INTRA_MODES];
 #endif
-#if CONFIG_MASKED_COMPOUND_INTER
-  vp9_prob masked_compound_prob;
+#if CONFIG_MASKED_COMPOUND
+  vp9_prob masked_compound_prob[BLOCK_SIZE_TYPES];
 #endif
 } CODING_CONTEXT;
 
@@ -502,9 +505,13 @@ typedef struct VP9_COMP {
 #if CONFIG_INTERINTRA
   unsigned int interintra_count[BLOCK_SIZE_TYPES][2];
   unsigned int interintra_select_count[2];
+#if CONFIG_MASKED_COMPOUND
+  unsigned int masked_interintra_count[BLOCK_SIZE_TYPES][2];
+  unsigned int masked_interintra_select_count[2];
 #endif
-#if CONFIG_MASKED_COMPOUND_INTER
-  unsigned int masked_compound_counts[2];
+#endif
+#if CONFIG_MASKED_COMPOUND
+  unsigned int masked_compound_counts[BLOCK_SIZE_TYPES][2];
   unsigned int masked_compound_select_counts[2];
 #endif
 

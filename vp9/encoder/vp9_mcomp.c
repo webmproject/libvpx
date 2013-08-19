@@ -614,7 +614,7 @@ int vp9_find_best_sub_pixel_comp_iterative(MACROBLOCK *x,
 #undef DIST
 #undef IFMVCV
 #undef CHECK_BETTER
-#if !CONFIG_MASKED_COMPOUND_INTER
+#if !CONFIG_MASKED_COMPOUND
 #undef MIN
 #undef MAX
 #endif
@@ -1167,7 +1167,7 @@ int vp9_diamond_search_sad_c(MACROBLOCK *x,
                                                    mvcost, x->errorperbit);
 }
 
-#if CONFIG_MASKED_COMPOUND_INTER
+#if CONFIG_MASKED_COMPOUND
 
 #define MVC(r, c)                                       \
     (mvcost ?                                           \
@@ -1662,7 +1662,7 @@ int vp9_masked_full_pixel_diamond(VP9_COMP *cpi, MACROBLOCK *x,
   }
   return bestsme;
 }
-#endif  // CONFIG_MASKED_COMPOUND_INTER
+#endif  // CONFIG_MASKED_COMPOUND
 
 int vp9_diamond_search_sadx4(MACROBLOCK *x,
                              int_mv *ref_mv, int_mv *best_mv, int search_param,
@@ -2217,7 +2217,7 @@ int vp9_full_search_sadx8(MACROBLOCK *x, int_mv *ref_mv,
       }
     }
 
-    while ((c + 2) < col_max) {
+    while ((c + 2) < col_max && fn_ptr->sdx3f != NULL) {
       int i;
 
       fn_ptr->sdx3f(what, what_stride, check_here, in_what_stride, sad_array);

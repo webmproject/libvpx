@@ -234,30 +234,3 @@ void vp9_cond_prob_diff_update(vp9_writer *w, vp9_prob *oldp,
     vp9_write(w, 0, upd);
   }
 }
-
-#if CONFIG_INTERINTRA || CONFIG_MASKED_COMPOUND_INTER
-static int prob_update_savings(const unsigned int *ct,
-                               const vp9_prob oldp, const vp9_prob newp,
-                               const vp9_prob upd) {
-  const int old_b = cost_branch256(ct, oldp);
-  const int new_b = cost_branch256(ct, newp);
-  const int update_b = 2048 + vp9_cost_upd256;
-  return old_b - new_b - update_b;
-}
-
-void vp9_cond_prob_update(vp9_writer *w, vp9_prob *oldp, vp9_prob upd,
-                                 unsigned int *ct) {
-  vp9_prob newp;
-  int savings;
-  newp = get_binary_prob(ct[0], ct[1]);
-  assert(newp >= 1);
-  savings = prob_update_savings(ct, *oldp, newp, upd);
-  if (savings > 0) {
-    vp9_write(w, 1, upd);
-    vp9_write_prob(w, newp);
-    *oldp = newp;
-  } else {
-    vp9_write(w, 0, upd);
-  }
-}
-#endif

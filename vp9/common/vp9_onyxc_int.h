@@ -55,12 +55,15 @@ typedef struct frame_contexts {
   nmv_context nmvc;
 #if CONFIG_INTERINTRA
   vp9_prob interintra_prob[BLOCK_SIZE_TYPES];
+#if CONFIG_MASKED_COMPOUND
+  vp9_prob masked_interintra_prob[BLOCK_SIZE_TYPES];
+#endif
 #endif
 #if CONFIG_FILTERINTRA
   vp9_prob filterintra_prob[TX_SIZES][VP9_INTRA_MODES];
 #endif
-#if CONFIG_MASKED_COMPOUND_INTER
-  vp9_prob masked_compound_prob;
+#if CONFIG_MASKED_COMPOUND
+  vp9_prob masked_compound_prob[BLOCK_SIZE_TYPES];
 #endif
 } FRAME_CONTEXT;
 
@@ -83,12 +86,15 @@ typedef struct {
   nmv_context_counts mv;
 #if CONFIG_INTERINTRA
   unsigned int interintra[BLOCK_SIZE_TYPES][2];
+#if CONFIG_MASKED_COMPOUND
+  unsigned int masked_interintra[BLOCK_SIZE_TYPES][2];
+#endif
 #endif
 #if CONFIG_FILTERINTRA
   unsigned int filterintra[TX_SIZES][VP9_INTRA_MODES][2];
 #endif
-#if CONFIG_MASKED_COMPOUND_INTER
-  unsigned int masked_compound[2];
+#if CONFIG_MASKED_COMPOUND
+  unsigned int masked_compound[BLOCK_SIZE_TYPES][2];
 #endif
 } FRAME_COUNTS;
 
@@ -222,9 +228,12 @@ typedef struct VP9Common {
 
 #if CONFIG_INTERINTRA
   int use_interintra;
+#if CONFIG_MASKED_COMPOUND
+  int use_masked_interintra;
+#endif
 #endif
 
-#if CONFIG_MASKED_COMPOUND_INTER
+#if CONFIG_MASKED_COMPOUND
   int use_masked_compound;
 #endif
 

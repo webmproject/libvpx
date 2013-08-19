@@ -39,5 +39,12 @@ void vp9_build_interintra_predictors(MACROBLOCKD *xd,
                                      int ystride,
                                      int uvstride,
                                      BLOCK_SIZE_TYPE bsize);
+#if CONFIG_MASKED_COMPOUND
+void vp9_generate_masked_weight_interintra(int mask_index,
+                                           BLOCK_SIZE_TYPE sb_type,
+                                           int h, int w,
+                                           uint8_t *mask, int stride);
+#endif
+
 #endif
 #endif  // VP9_COMMON_VP9_RECONINTRA_H_

@@ -614,7 +614,7 @@ void vp9_sad4x4x4d_c(const uint8_t *src_ptr,
                             ref_ptr[3], ref_stride, 0x7fffffff);
 }
 
-#if CONFIG_MASKED_COMPOUND_INTER
+#if CONFIG_MASKED_COMPOUND
 unsigned int vp9_masked_sad64x64_c(const uint8_t *src_ptr,
                                    int  src_stride,
                                    const uint8_t *ref_ptr,

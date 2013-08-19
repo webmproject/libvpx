@@ -557,7 +557,7 @@ specialize vp9_sad4x8_avg $sse_x86inc
 prototype unsigned int vp9_sad4x4_avg "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int  ref_stride, const uint8_t *second_pred, unsigned int max_sad"
 specialize vp9_sad4x4_avg $sse_x86inc
 
-if [ "$CONFIG_MASKED_COMPOUND_INTER" = "yes" ]; then
+if [ "$CONFIG_MASKED_COMPOUND" = "yes" ]; then
 prototype int vp9_masked_diamond_search_sad "struct macroblock *x, uint8_t *mask, int mask_stride, union int_mv *ref_mv, union int_mv *best_mv, int search_param, int sad_per_bit, int *num00, struct vp9_variance_vtable *fn_ptr, DEC_MVCOSTS, union int_mv *center_mv, int is_second"
 specialize vp9_masked_diamond_search_sad
 

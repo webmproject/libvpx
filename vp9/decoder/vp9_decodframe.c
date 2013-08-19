@@ -897,6 +897,13 @@ static size_t read_uncompressed_header(VP9D_COMP *pbi,
 
 #if CONFIG_INTERINTRA
       cm->use_interintra = vp9_rb_read_bit(rb);
+#if CONFIG_MASKED_COMPOUND
+      if (cm->use_interintra) {
+        cm->use_masked_interintra = vp9_rb_read_bit(rb);
+      } else {
+        cm->use_masked_interintra = 0;
+      }
+#endif
 #endif
 
       for (i = 0; i < ALLOWED_REFS_PER_FRAME; ++i)

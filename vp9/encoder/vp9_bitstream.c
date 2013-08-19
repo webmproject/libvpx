@@ -520,7 +520,18 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, MODE_INFO *m, vp9_writer *bc) {
           write_intra_mode(bc, mi->interintra_uv_mode,
                         pc->fc.uv_mode_prob[mi->interintra_mode]);
 #endif
+#if CONFIG_MASKED_COMPOUND
+        if (get_mask_bits_interintra(mi->sb_type) &&
+            pc->use_masked_interintra) {
+          vp9_write(bc, mi->use_masked_interintra,
+                    pc->fc.masked_interintra_prob[bsize]);
+          if (mi->use_masked_interintra) {
+            vp9_write_literal(bc, mi->interintra_mask_index,
+                              get_mask_bits_interintra(mi->sb_type));
+          }
         }
+#endif
+      }
     }
 #endif
     if (bsize < BLOCK_8X8) {
@@ -565,13 +576,13 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, MODE_INFO *m, vp9_writer *bc) {
         vp9_encode_mv(cpi, bc, &mi->mv[1].as_mv, &mi->best_second_mv.as_mv,
                       nmvc, allow_hp);
     }
-#if CONFIG_MASKED_COMPOUND_INTER
+#if CONFIG_MASKED_COMPOUND
   if (cpi->common.use_masked_compound &&
       cpi->common.comp_pred_mode != SINGLE_PREDICTION_ONLY &&
       is_inter_mode(mode) &&
       get_mask_bits(mi->sb_type) &&
       mi->ref_frame[1] > INTRA_FRAME) {
-    vp9_write(bc, mi->use_masked_compound, pc->fc.masked_compound_prob);
+    vp9_write(bc, mi->use_masked_compound, pc->fc.masked_compound_prob[bsize]);
     if (mi->use_masked_compound) {
       vp9_write_literal(bc, mi->mask_index, get_mask_bits(mi->sb_type));
     }
@@ -1401,7 +1412,7 @@ static void write_uncompressed_header(VP9_COMP *cpi,
         int b;
         cm->use_interintra = 0;
         for (b = 0; b < BLOCK_SIZE_TYPES; ++b) {
-          if (is_interintra_allowed(b) && cpi->interintra_count[b][1] > 0) {
+          if (is_interintra_allowed(b) && (cpi->interintra_count[b][1] > 0)) {
             cm->use_interintra = 1;
             break;
           }
@@ -1410,6 +1421,25 @@ static void write_uncompressed_header(VP9_COMP *cpi,
       vp9_wb_write_bit(wb, cm->use_interintra);
       if (!cm->use_interintra)
         vp9_zero(cpi->interintra_count);
+#if CONFIG_MASKED_COMPOUND
+      if (!cpi->dummy_packing && cm->use_interintra
+          && cm->use_masked_interintra) {
+        int k;
+        cm->use_masked_interintra = 0;
+        for (k = 0; k < BLOCK_SIZE_TYPES; ++k) {
+          if (is_interintra_allowed(k) && get_mask_bits_interintra(k) &&
+              (cpi->masked_interintra_count[k][1] > 0)) {
+            cm->use_masked_interintra = 1;
+            break;
+          }
+        }
+      }
+      if (cm->use_interintra) {
+        vp9_wb_write_bit(wb, cm->use_masked_interintra);
+        if (!cm->use_masked_interintra)
+          vp9_zero(cpi->masked_interintra_count);
+      }
+#endif
 #endif
     }
   }
@@ -1471,6 +1501,18 @@ static size_t write_compressed_header(VP9_COMP *cpi, uint8_t *data) {
                                     VP9_UPD_INTERINTRA_PROB,
                                     cpi->interintra_count[b]);
       }
+#if CONFIG_MASKED_COMPOUND
+      if (cm->use_masked_interintra) {
+        int k;
+        for (k = 0; k < BLOCK_SIZE_TYPES; ++k) {
+          if (is_interintra_allowed(k) && get_mask_bits_interintra(k))
+            vp9_cond_prob_diff_update(&header_bc,
+                                      &cm->fc.masked_interintra_prob[k],
+                                      VP9_UPD_MASKED_INTERINTRA_PROB,
+                                      cpi->masked_interintra_count[k]);
+        }
+      }
+#endif
     }
 #endif
 
@@ -1493,16 +1535,26 @@ static size_t write_compressed_header(VP9_COMP *cpi, uint8_t *data) {
                                       VP9_MODE_UPDATE_PROB,
                                       cpi->comp_inter_count[i]);
       }
-#if CONFIG_MASKED_COMPOUND_INTER
+#if CONFIG_MASKED_COMPOUND
       if (use_compound_pred) {
-        if (!cpi->dummy_packing && cm->use_masked_compound)
-          cm->use_masked_compound = (cpi->masked_compound_counts[1] > 0);
+        if (!cpi->dummy_packing && cm->use_masked_compound) {
+          cm->use_masked_compound = 0;
+          for (i = 0; i < BLOCK_SIZE_TYPES; i++) {
+            if (get_mask_bits(i) && (cpi->masked_compound_counts[i][1] > 0)) {
+              cm->use_masked_compound = 1;
+              break;
+            }
+          }
+        }
         vp9_write_bit(&header_bc, cm->use_masked_compound);
         if (cm->use_masked_compound) {
-          vp9_cond_prob_update(&header_bc,
-                               &fc->masked_compound_prob,
-                               VP9_UPD_MASKED_COMPOUND_PROB,
-                               cpi->masked_compound_counts);
+          for (i = 0; i < BLOCK_SIZE_TYPES; i++) {
+            if (get_mask_bits(i))
+              vp9_cond_prob_diff_update(&header_bc,
+                                        &fc->masked_compound_prob[i],
+                                        VP9_UPD_MASKED_COMPOUND_PROB,
+                                        cpi->masked_compound_counts[i]);
+          }
         } else {
           vp9_zero(cpi->masked_compound_counts);
         }
