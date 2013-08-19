@@ -1168,11 +1168,10 @@ static int64_t rd_pick_intra_sub_8x8_y_mode(VP9_COMP * const cpi,
   for (idy = 0; idy < 2; idy += num_4x4_blocks_high) {
     for (idx = 0; idx < 2; idx += num_4x4_blocks_wide) {
       const int mis = xd->mode_info_stride;
-      MB_PREDICTION_MODE UNINITIALIZED_IS_SAFE(best_mode);
-      int UNINITIALIZED_IS_SAFE(r), UNINITIALIZED_IS_SAFE(ry);
-      int64_t UNINITIALIZED_IS_SAFE(d), this_rd;
+      MB_PREDICTION_MODE best_mode = DC_PRED;
+      int r = INT_MAX, ry = INT_MAX;
+      int64_t d = INT64_MAX, this_rd = INT64_MAX;
       i = idy * 2 + idx;
-
       if (cpi->common.frame_type == KEY_FRAME) {
         const MB_PREDICTION_MODE A = above_block_mode(mic, i, mis);
         const MB_PREDICTION_MODE L = (xd->left_available || idx) ?
@@ -1218,11 +1217,11 @@ static int64_t rd_pick_intra_sby_mode(VP9_COMP *cpi, MACROBLOCK *x,
                                       int64_t tx_cache[TX_MODES],
                                       int64_t best_rd) {
   MB_PREDICTION_MODE mode;
-  MB_PREDICTION_MODE UNINITIALIZED_IS_SAFE(mode_selected);
+  MB_PREDICTION_MODE mode_selected = DC_PRED;
   MACROBLOCKD *const xd = &x->e_mbd;
   int this_rate, this_rate_tokenonly, s;
   int64_t this_distortion, this_rd;
-  TX_SIZE UNINITIALIZED_IS_SAFE(best_tx);
+  TX_SIZE best_tx = TX_4X4;
   int i;
   int *bmode_costs = x->mbmode_cost;
 
@@ -1314,7 +1313,7 @@ static int64_t rd_pick_intra_sbuv_mode(VP9_COMP *cpi, MACROBLOCK *x,
                                        int64_t *distortion, int *skippable,
                                        BLOCK_SIZE_TYPE bsize) {
   MB_PREDICTION_MODE mode;
-  MB_PREDICTION_MODE UNINITIALIZED_IS_SAFE(mode_selected);
+  MB_PREDICTION_MODE mode_selected = DC_PRED;
   int64_t best_rd = INT64_MAX, this_rd;
   int this_rate_tokenonly, this_rate, s;
   int64_t this_distortion, this_sse;
