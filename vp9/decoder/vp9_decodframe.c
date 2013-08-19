@@ -91,13 +91,13 @@ static void decode_block(int plane, int block, BLOCK_SIZE_TYPE bsize,
                          TX_SIZE tx_size, void *arg) {
   MACROBLOCKD* const xd = arg;
   struct macroblockd_plane *const pd = &xd->plane[plane];
+  const BLOCK_SIZE_TYPE plane_bsize = get_plane_block_size(bsize, pd);
   int16_t* const qcoeff = BLOCK_OFFSET(pd->qcoeff, block);
   const int stride = pd->dst.stride;
   const int eob = pd->eobs[block];
-  const int raster_block = txfrm_block_to_raster_block(xd, bsize, plane,
-                                                       block, tx_size);
-  uint8_t* const dst = raster_block_offset_uint8(xd, bsize, plane,
-                                                 raster_block,
+  const int raster_block = txfrm_block_to_raster_block(plane_bsize, tx_size,
+                                                       block);
+  uint8_t* const dst = raster_block_offset_uint8(plane_bsize, raster_block,
                                                  pd->dst.buf, stride);
   switch (tx_size) {
     case TX_4X4: {
@@ -128,14 +128,13 @@ static void decode_block_intra(int plane, int block, BLOCK_SIZE_TYPE bsize,
                                TX_SIZE tx_size, void *arg) {
   MACROBLOCKD* const xd = arg;
   struct macroblockd_plane *const pd = &xd->plane[plane];
+  const BLOCK_SIZE_TYPE plane_bsize = get_plane_block_size(bsize, pd);
   MODE_INFO *const mi = xd->mode_info_context;
-  const int raster_block = txfrm_block_to_raster_block(xd, bsize, plane,
-                                                       block, tx_size);
-  uint8_t* const dst = raster_block_offset_uint8(xd, bsize, plane,
-                                                 raster_block,
+  const int raster_block = txfrm_block_to_raster_block(plane_bsize, tx_size,
+                                                       block);
+  uint8_t* const dst = raster_block_offset_uint8(plane_bsize, raster_block,
                                                  pd->dst.buf, pd->dst.stride);
   int b_mode;
-  int plane_b_size;
   const int tx_ib = raster_block >> tx_size;
   const int mode = (plane == 0) ? mi->mbmi.mode : mi->mbmi.uv_mode;
 
@@ -147,10 +146,9 @@ static void decode_block_intra(int plane, int block, BLOCK_SIZE_TYPE bsize,
   }
 
   if (xd->mb_to_right_edge < 0 || xd->mb_to_bottom_edge < 0)
-    extend_for_intra(xd, bsize, plane, block, tx_size);
+    extend_for_intra(xd, plane_bsize, plane, block, tx_size);
 
-  plane_b_size = b_width_log2(bsize) - pd->subsampling_x;
-  vp9_predict_intra_block(xd, tx_ib, plane_b_size, tx_size, b_mode,
+  vp9_predict_intra_block(xd, tx_ib, b_width_log2(plane_bsize), tx_size, b_mode,
                           dst, pd->dst.stride,
                           dst, pd->dst.stride);
 

@@ -146,31 +146,33 @@ static void optimize_b(MACROBLOCK *mb,
                        ENTROPY_CONTEXT *a, ENTROPY_CONTEXT *l,
                        TX_SIZE tx_size) {
   MACROBLOCKD *const xd = &mb->e_mbd;
+  struct macroblockd_plane *pd = &xd->plane[plane];
+  const BLOCK_SIZE_TYPE plane_bsize = get_plane_block_size(bsize, pd);
   const int ref = is_inter_block(&xd->mode_info_context->mbmi);
   vp9_token_state tokens[1025][2];
   unsigned best_index[1025][2];
   const int16_t *coeff_ptr = BLOCK_OFFSET(mb->plane[plane].coeff, block);
   int16_t *qcoeff_ptr;
   int16_t *dqcoeff_ptr;
-  int eob = xd->plane[plane].eobs[block], final_eob, sz = 0;
+  int eob = pd->eobs[block], final_eob, sz = 0;
   const int i0 = 0;
   int rc, x, next, i;
   int64_t rdmult, rddiv, rd_cost0, rd_cost1;
   int rate0, rate1, error0, error1, t0, t1;
   int best, band, pt;
-  PLANE_TYPE type = xd->plane[plane].plane_type;
+  PLANE_TYPE type = pd->plane_type;
   int err_mult = plane_rd_mult[type];
   int default_eob;
   const int16_t *scan, *nb;
   const int mul = 1 + (tx_size == TX_32X32);
   uint8_t token_cache[1024];
-  const int ib = txfrm_block_to_raster_block(xd, bsize, plane, block, tx_size);
-  const int16_t *dequant_ptr = xd->plane[plane].dequant;
+  const int ib = txfrm_block_to_raster_block(plane_bsize, tx_size, block);
+  const int16_t *dequant_ptr = pd->dequant;
   const uint8_t * band_translate;
 
   assert((!type && !plane) || (type && plane));
-  dqcoeff_ptr = BLOCK_OFFSET(xd->plane[plane].dqcoeff, block);
-  qcoeff_ptr = BLOCK_OFFSET(xd->plane[plane].qcoeff, block);
+  dqcoeff_ptr = BLOCK_OFFSET(pd->dqcoeff, block);
+  qcoeff_ptr = BLOCK_OFFSET(pd->qcoeff, block);
   switch (tx_size) {
     default:
     case TX_4X4:
@@ -372,10 +374,12 @@ static void optimize_b(MACROBLOCK *mb,
 void vp9_optimize_b(int plane, int block, BLOCK_SIZE_TYPE bsize,
                     TX_SIZE tx_size, MACROBLOCK *mb, struct optimize_ctx *ctx) {
   MACROBLOCKD *const xd = &mb->e_mbd;
+  const BLOCK_SIZE_TYPE plane_bsize = get_plane_block_size(bsize,
+                                                           &xd->plane[plane]);
   int x, y;
 
   // find current entropy context
-  txfrm_block_to_raster_xy(xd, bsize, plane, block, tx_size, &x, &y);
+  txfrm_block_to_raster_xy(plane_bsize, tx_size, block, &x, &y);
 
   optimize_b(mb, plane, block, bsize, &ctx->ta[plane][x], &ctx->tl[plane][y],
              tx_size);
@@ -445,7 +449,7 @@ void vp9_optimize_sbuv(MACROBLOCK *x, BLOCK_SIZE_TYPE bsize) {
   foreach_transformed_block_uv(&x->e_mbd, bsize, optimize_block, &arg);
 }
 
-void vp9_xform_quant(int plane, int block, BLOCK_SIZE_TYPE bsize,
+void vp9_xform_quant(int plane, int block, BLOCK_SIZE_TYPE plane_bsize,
                      TX_SIZE tx_size, void *arg) {
   struct encode_b_args* const args = arg;
   MACROBLOCK* const x = args->x;
@@ -457,7 +461,7 @@ void vp9_xform_quant(int plane, int block, BLOCK_SIZE_TYPE bsize,
   int16_t *dqcoeff = BLOCK_OFFSET(pd->dqcoeff, block);
   const int16_t *scan, *iscan;
   uint16_t *eob = &pd->eobs[block];
-  const int bwl = b_width_log2(bsize) - pd->subsampling_x, bw = 1 << bwl;
+  const int bwl = b_width_log2(plane_bsize), bw = 1 << bwl;
   const int twl = bwl - tx_size, twmask = (1 << twl) - 1;
   int xoff, yoff;
   int16_t *src_diff;
@@ -523,14 +527,15 @@ static void encode_block(int plane, int block, BLOCK_SIZE_TYPE bsize,
   struct encode_b_args *const args = arg;
   MACROBLOCK *const x = args->x;
   MACROBLOCKD *const xd = &x->e_mbd;
-  const int raster_block = txfrm_block_to_raster_block(xd, bsize, plane,
-                                                       block, tx_size);
   struct macroblockd_plane *const pd = &xd->plane[plane];
+  const BLOCK_SIZE_TYPE plane_bsize = get_plane_block_size(bsize, pd);
+  const int raster_block = txfrm_block_to_raster_block(plane_bsize, tx_size,
+                                                       block);
+
   int16_t *const dqcoeff = BLOCK_OFFSET(pd->dqcoeff, block);
-  uint8_t *const dst = raster_block_offset_uint8(xd, bsize, plane,
-                                                 raster_block,
+  uint8_t *const dst = raster_block_offset_uint8(plane_bsize, raster_block,
                                                  pd->dst.buf, pd->dst.stride);
-  vp9_xform_quant(plane, block, bsize, tx_size, arg);
+  vp9_xform_quant(plane, block, plane_bsize, tx_size, arg);
 
   if (x->optimize)
     vp9_optimize_b(plane, block, bsize, tx_size, x, args->ctx);
@@ -627,13 +632,14 @@ void vp9_encode_block_intra(int plane, int block, BLOCK_SIZE_TYPE bsize,
   MB_MODE_INFO *mbmi = &xd->mode_info_context->mbmi;
   struct macroblock_plane *const p = &x->plane[plane];
   struct macroblockd_plane *const pd = &xd->plane[plane];
+  const BLOCK_SIZE_TYPE plane_bsize = get_plane_block_size(bsize, pd);
   int16_t *coeff = BLOCK_OFFSET(p->coeff, block);
   int16_t *qcoeff = BLOCK_OFFSET(pd->qcoeff, block);
   int16_t *dqcoeff = BLOCK_OFFSET(pd->dqcoeff, block);
   const int16_t *scan, *iscan;
   TX_TYPE tx_type;
   MB_PREDICTION_MODE mode;
-  const int bwl = b_width_log2(bsize) - pd->subsampling_x, bw = 1 << bwl;
+  const int bwl = b_width_log2(plane_bsize), bw = 1 << bwl;
   const int twl = bwl - tx_size, twmask = (1 << twl) - 1;
   int xoff, yoff;
   uint8_t *src, *dst;
@@ -641,7 +647,7 @@ void vp9_encode_block_intra(int plane, int block, BLOCK_SIZE_TYPE bsize,
   uint16_t *eob = &pd->eobs[block];
 
   if (xd->mb_to_right_edge < 0 || xd->mb_to_bottom_edge < 0) {
-    extend_for_intra(xd, bsize, plane, block, tx_size);
+    extend_for_intra(xd, plane_bsize, plane, block, tx_size);
   }
 
   // if (x->optimize)

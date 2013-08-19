@@ -570,8 +570,7 @@ struct rdcost_block_args {
   const int16_t *scan, *nb;
 };
 
-static void dist_block(int plane, int block, BLOCK_SIZE_TYPE bsize,
-                       TX_SIZE tx_size, void *arg) {
+static void dist_block(int plane, int block, TX_SIZE tx_size, void *arg) {
   const int ss_txfrm_size = tx_size << 1;
   struct rdcost_block_args* args = arg;
   MACROBLOCK* const x = args->x;
@@ -596,16 +595,17 @@ static void dist_block(int plane, int block, BLOCK_SIZE_TYPE bsize,
   }
 }
 
-static void rate_block(int plane, int block, BLOCK_SIZE_TYPE bsize,
+static void rate_block(int plane, int block, BLOCK_SIZE_TYPE plane_bsize,
                        TX_SIZE tx_size, void *arg) {
   struct rdcost_block_args* args = arg;
   MACROBLOCKD *const xd = &args->x->e_mbd;
+  struct macroblockd_plane *const pd = &xd->plane[plane];
+
   int x_idx, y_idx;
-  txfrm_block_to_raster_xy(xd, bsize, plane, block, args->tx_size,
-                           &x_idx, &y_idx);
+  txfrm_block_to_raster_xy(plane_bsize, args->tx_size, block, &x_idx, &y_idx);
 
   args->rate += cost_coeffs(args->x, plane, block,
-                            xd->plane[plane].plane_type, args->t_above + x_idx,
+                            pd->plane_type, args->t_above + x_idx,
                             args->t_left + y_idx, args->tx_size,
                             args->scan, args->nb);
 }
@@ -616,6 +616,8 @@ static void block_yrd_txfm(int plane, int block, BLOCK_SIZE_TYPE bsize,
   MACROBLOCK *const x = args->x;
   MACROBLOCKD *const xd = &x->e_mbd;
   struct encode_b_args encode_args = {x, NULL};
+  const BLOCK_SIZE_TYPE plane_bsize = get_plane_block_size(bsize,
+                                                           &xd->plane[plane]);
   int64_t rd1, rd2, rd;
 
   if (args->skip)
@@ -634,10 +636,10 @@ static void block_yrd_txfm(int plane, int block, BLOCK_SIZE_TYPE bsize,
   if (!is_inter_block(&xd->mode_info_context->mbmi))
     vp9_encode_block_intra(plane, block, bsize, tx_size, &encode_args);
   else
-    vp9_xform_quant(plane, block, bsize, tx_size, &encode_args);
+    vp9_xform_quant(plane, block, plane_bsize, tx_size, &encode_args);
 
-  dist_block(plane, block, bsize, tx_size, args);
-  rate_block(plane, block, bsize, tx_size, args);
+  dist_block(plane, block, tx_size, args);
+  rate_block(plane, block, plane_bsize, tx_size, args);
 }
 
 static void txfm_rd_in_plane(MACROBLOCK *x,
@@ -1025,9 +1027,9 @@ static int64_t rd_pick_intra4x4block(VP9_COMP *cpi, MACROBLOCK *x, int ib,
   struct macroblockd_plane *pd = &xd->plane[0];
   const int src_stride = p->src.stride;
   const int dst_stride = pd->dst.stride;
-  uint8_t *src_init = raster_block_offset_uint8(xd, BLOCK_8X8, 0, ib,
+  uint8_t *src_init = raster_block_offset_uint8(BLOCK_8X8, ib,
                                                 p->src.buf, src_stride);
-  uint8_t *dst_init = raster_block_offset_uint8(xd, BLOCK_8X8, 0, ib,
+  uint8_t *dst_init = raster_block_offset_uint8(BLOCK_8X8, ib,
                                                 pd->dst.buf, dst_stride);
   int16_t *src_diff, *coeff;
 
@@ -1070,8 +1072,7 @@ static int64_t rd_pick_intra4x4block(VP9_COMP *cpi, MACROBLOCK *x, int ib,
 
         block = ib + idy * 2 + idx;
         xd->mode_info_context->bmi[block].as_mode = mode;
-        src_diff = raster_block_offset_int16(xd, BLOCK_8X8, 0, block,
-                                             p->src_diff);
+        src_diff = raster_block_offset_int16(BLOCK_8X8, block, p->src_diff);
         coeff = BLOCK_OFFSET(x->plane[0].coeff, block);
         vp9_predict_intra_block(xd, block, 1,
                                 TX_4X4, mode,
@@ -1502,18 +1503,17 @@ static int64_t encode_inter_mb_segment(VP9_COMP *cpi,
   const int height = plane_block_height(bsize, pd);
   int idx, idy;
   const int src_stride = x->plane[0].src.stride;
-  uint8_t* const src = raster_block_offset_uint8(xd, BLOCK_8X8, 0, i,
+  uint8_t* const src = raster_block_offset_uint8(BLOCK_8X8, i,
                                                  x->plane[0].src.buf,
                                                  src_stride);
-  int16_t* src_diff = raster_block_offset_int16(xd, BLOCK_8X8, 0, i,
+  int16_t* src_diff = raster_block_offset_int16(BLOCK_8X8, i,
                                                 x->plane[0].src_diff);
   int16_t* coeff = BLOCK_OFFSET(x->plane[0].coeff, i);
-  uint8_t* const pre = raster_block_offset_uint8(xd, BLOCK_8X8, 0, i,
+  uint8_t* const pre = raster_block_offset_uint8(BLOCK_8X8, i,
                                                  pd->pre[0].buf,
                                                  pd->pre[0].stride);
-  uint8_t* const dst = raster_block_offset_uint8(xd, BLOCK_8X8, 0, i,
-                                                 pd->dst.buf,
-                                                 pd->dst.stride);
+  uint8_t* const dst = raster_block_offset_uint8(BLOCK_8X8, i,
+                                                 pd->dst.buf, pd->dst.stride);
   int64_t thisdistortion = 0, thissse = 0;
   int thisrate = 0;
 
@@ -1525,8 +1525,7 @@ static int64_t encode_inter_mb_segment(VP9_COMP *cpi,
 
   if (mi->mbmi.ref_frame[1] > 0) {
     uint8_t* const second_pre =
-    raster_block_offset_uint8(xd, BLOCK_8X8, 0, i,
-                              pd->pre[1].buf, pd->pre[1].stride);
+    raster_block_offset_uint8(BLOCK_8X8, 0, pd->pre[1].buf, pd->pre[1].stride);
     vp9_build_inter_predictor(second_pre, pd->pre[1].stride,
                               dst, pd->dst.stride,
                               &mi->bmi[i].as_mv[1].as_mv,
@@ -1543,7 +1542,7 @@ static int64_t encode_inter_mb_segment(VP9_COMP *cpi,
       int64_t ssz, rd, rd1, rd2;
 
       k += (idy * 2 + idx);
-      src_diff = raster_block_offset_int16(xd, BLOCK_8X8, 0, k,
+      src_diff = raster_block_offset_int16(BLOCK_8X8, k,
                                            x->plane[0].src_diff);
       coeff = BLOCK_OFFSET(x->plane[0].coeff, k);
       x->fwd_txm4x4(src_diff, coeff, 16);
@@ -1606,21 +1605,18 @@ static INLINE int mv_check_bounds(MACROBLOCK *x, int_mv *mv) {
 }
 
 static INLINE void mi_buf_shift(MACROBLOCK *x, int i) {
-  MB_MODE_INFO *mbmi = &x->e_mbd.mode_info_context->mbmi;
-  x->plane[0].src.buf =
-      raster_block_offset_uint8(&x->e_mbd, BLOCK_8X8, 0, i,
-                                x->plane[0].src.buf,
-                                x->plane[0].src.stride);
-  assert(((intptr_t)x->e_mbd.plane[0].pre[0].buf & 0x7) == 0);
-  x->e_mbd.plane[0].pre[0].buf =
-      raster_block_offset_uint8(&x->e_mbd, BLOCK_8X8, 0, i,
-                                x->e_mbd.plane[0].pre[0].buf,
-                                x->e_mbd.plane[0].pre[0].stride);
+  MB_MODE_INFO *const mbmi = &x->e_mbd.mode_info_context->mbmi;
+  struct macroblock_plane *const p = &x->plane[0];
+  struct macroblockd_plane *const pd = &x->e_mbd.plane[0];
+
+  p->src.buf = raster_block_offset_uint8(BLOCK_8X8, i, p->src.buf,
+                                         p->src.stride);
+  assert(((intptr_t)pd->pre[0].buf & 0x7) == 0);
+  pd->pre[0].buf = raster_block_offset_uint8(BLOCK_8X8, i, pd->pre[0].buf,
+                                             pd->pre[0].stride);
   if (mbmi->ref_frame[1])
-    x->e_mbd.plane[0].pre[1].buf =
-        raster_block_offset_uint8(&x->e_mbd, BLOCK_8X8, 0, i,
-                                  x->e_mbd.plane[0].pre[1].buf,
-                                  x->e_mbd.plane[0].pre[1].stride);
+    pd->pre[1].buf = raster_block_offset_uint8(BLOCK_8X8, i, pd->pre[1].buf,
+                                               pd->pre[1].stride);
 }
 
 static INLINE void mi_buf_restore(MACROBLOCK *x, struct buf_2d orig_src,
