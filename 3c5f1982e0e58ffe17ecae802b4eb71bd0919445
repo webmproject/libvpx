@@ -70,6 +70,23 @@
     },
     {
       "key": {
+        "uuid": "AAAAc3//8uo\u003d",
+        "filename": "vp9/common/arm/neon/vp9_short_idct8x8_add_neon.asm",
+        "patchSetId": 1
+      },
+      "lineNbr": 389,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2013-08-19T16:40:56Z",
+      "side": 1,
+      "message": "You should be able to move this block above vqrshrn block above to free up the cycles. Or you can do these optimizations later for vp9_short_idct8x8_add_neon too.",
+      "revId": "3c5f1982e0e58ffe17ecae802b4eb71bd0919445",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAc3//9aY\u003d",
         "filename": "vp9/common/arm/neon/vp9_short_idct8x8_add_neon.asm",
         "patchSetId": 1
@@ -99,6 +116,74 @@
       "side": 1,
       "message": "I\u0027m thinking this backwards. That compensates the shift so it\u0027s for 16 instead of 15. You want to compensate the other direction since it\u0027s a shift by 14. So if you half the source constant,\n\nWait. I\u0027m confused again. We can talk this through Monday.",
       "parentUuid": "AAAAc3//9aY\u003d",
+      "revId": "3c5f1982e0e58ffe17ecae802b4eb71bd0919445",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAc3//8uc\u003d",
+        "filename": "vp9/common/arm/neon/vp9_short_idct8x8_add_neon.asm",
+        "patchSetId": 1
+      },
+      "lineNbr": 410,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2013-08-19T16:40:56Z",
+      "side": 1,
+      "message": "Ditto. Move up one block.",
+      "revId": "3c5f1982e0e58ffe17ecae802b4eb71bd0919445",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAc3//8uQ\u003d",
+        "filename": "vp9/common/arm/neon/vp9_short_idct8x8_add_neon.asm",
+        "patchSetId": 1
+      },
+      "lineNbr": 420,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2013-08-19T16:40:56Z",
+      "side": 1,
+      "message": "I think you can remove this if you treat step[0] \u003d step[1] below.",
+      "revId": "3c5f1982e0e58ffe17ecae802b4eb71bd0919445",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAc3//8uM\u003d",
+        "filename": "vp9/common/arm/neon/vp9_short_idct8x8_add_neon.asm",
+        "patchSetId": 1
+      },
+      "lineNbr": 423,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2013-08-19T16:40:56Z",
+      "side": 1,
+      "message": "Ditto. Move up one block.",
+      "revId": "3c5f1982e0e58ffe17ecae802b4eb71bd0919445",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAc3//8uE\u003d",
+        "filename": "vp9/common/arm/neon/vp9_short_idct8x8_add_neon.asm",
+        "patchSetId": 1
+      },
+      "lineNbr": 454,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2013-08-19T16:40:56Z",
+      "side": 1,
+      "message": "Ditto. Move this up to after vqrshrn (line 440).",
       "revId": "3c5f1982e0e58ffe17ecae802b4eb71bd0919445",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
