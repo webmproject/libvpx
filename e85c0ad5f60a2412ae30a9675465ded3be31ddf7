@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAc3//8Is\u003d",
+        "filename": "vpxenc.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1691,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-08-19T21:49:15Z",
+      "side": 1,
+      "message": "this might have a larger effect to existing users; it might be safer to make this conditional on the codec for now at the end of this loop. i.e., set to -1 here and check, unless we want this to be the preferred default even when vp9 has a 1-pass",
+      "revId": "e85c0ad5f60a2412ae30a9675465ded3be31ddf7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
