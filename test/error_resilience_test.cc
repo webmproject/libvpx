@@ -62,7 +62,7 @@ class ErrorResilienceTest : public ::libvpx_test::EncoderTest,
     if (droppable_nframes_ > 0 &&
         (cfg_.g_pass == VPX_RC_LAST_PASS || cfg_.g_pass == VPX_RC_ONE_PASS)) {
       for (unsigned int i = 0; i < droppable_nframes_; ++i) {
-        if (droppable_frames_[i] == nframes_) {
+        if (droppable_frames_[i] == video->frame()) {
           std::cout << "             Encoding droppable frame: "
                     << droppable_frames_[i] << "\n";
           frame_flags_ |= (VP8_EFLAG_NO_UPD_LAST |
@@ -148,7 +148,7 @@ TEST_P(ErrorResilienceTest, OnVersusOff) {
   const vpx_rational timebase = { 33333333, 1000000000 };
   cfg_.g_timebase = timebase;
   cfg_.rc_target_bitrate = 2000;
-  cfg_.g_lag_in_frames = 25;
+  cfg_.g_lag_in_frames = 10;
 
   init_flags_ = VPX_CODEC_USE_PSNR;
 
@@ -179,6 +179,9 @@ TEST_P(ErrorResilienceTest, DropFramesWithoutRecovery) {
   const vpx_rational timebase = { 33333333, 1000000000 };
   cfg_.g_timebase = timebase;
   cfg_.rc_target_bitrate = 500;
+  // FIXME(debargha): Fix this to work for any lag.
+  // Currently this test only works for lag = 0
+  cfg_.g_lag_in_frames = 0;
 
   init_flags_ = VPX_CODEC_USE_PSNR;
 
