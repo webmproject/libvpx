@@ -3014,7 +3014,8 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
   int rs = 0;
 
 #if CONFIG_INTERINTRA
-  if (is_inter_mode(this_mode) && mbmi->ref_frame[1] == INTRA_FRAME) {
+  if (is_inter_mode(this_mode) && mbmi->ref_frame[1] == INTRA_FRAME &&
+      is_interintra_allowed(mbmi->sb_type)) {
     extend_for_interintra(xd, bsize);
   }
 #endif
@@ -3240,17 +3241,18 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
   rs = cm->mcomp_filter_type == SWITCHABLE ? get_switchable_rate(x) : 0;
 
 #if CONFIG_INTERINTRA
-  if ((!is_comp_pred) && is_comp_interintra_pred) {
-    int interintra_mode, best_interintra_mode;
+  if ((!is_comp_pred) && is_comp_interintra_pred &&
+      is_interintra_allowed(mbmi->sb_type)) {
+    MB_PREDICTION_MODE interintra_mode, best_interintra_mode = DC_PRED;
     int64_t best_interintra_rd = INT64_MAX;
     int rmode, rate_sum;
     int64_t dist_sum;
     for (interintra_mode = DC_PRED; interintra_mode <= TM_PRED;
-        interintra_mode++) {
+        ++interintra_mode) {
       mbmi->interintra_mode = interintra_mode;
-      #if !SEPARATE_INTERINTRA_UV
+#if !SEPARATE_INTERINTRA_UV
       mbmi->interintra_uv_mode = interintra_mode;
-      #endif
+#endif
       rmode = x->mbmode_cost[mbmi->interintra_mode];
       vp9_build_inter_predictors_sb(xd, mi_row, mi_col, bsize);
       model_rd_for_sb(cpi, bsize, x, xd, &rate_sum, &dist_sum);
@@ -3270,7 +3272,7 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
   if (!is_comp_pred) {
     *compmode_interintra_cost = vp9_cost_bit(cm->fc.interintra_prob[bsize],
                                              is_comp_interintra_pred);
-    if (is_comp_interintra_pred) {
+    if (is_comp_interintra_pred && is_interintra_allowed(mbmi->sb_type)) {
       *compmode_interintra_cost += x->mbmode_cost[mbmi->interintra_mode];
 #if SEPARATE_INTERINTRA_UV
       *compmode_interintra_cost +=
@@ -3906,6 +3908,11 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
     if (bsize < BLOCK_8X8 &&
         !(this_mode == I4X4_PRED || this_mode == SPLITMV))
       continue;
+#if CONFIG_INTERINTRA
+    if (!is_interintra_allowed(bsize) && is_inter_mode(this_mode)
+        && second_ref_frame == INTRA_FRAME)
+      continue;
+#endif
 
     if (comp_pred) {
       if (!(cpi->ref_frame_flags & flag_list[second_ref_frame]))

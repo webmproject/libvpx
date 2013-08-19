@@ -539,6 +539,69 @@ void vp9_predict_intra_block(MACROBLOCKD *xd,
 }
 
 #if CONFIG_INTERINTRA
+// Intra predictor for the second square block in interintra prediction.
+// Prediction of the first block (in pred_ptr) will be used to generate half of
+// the boundary values.
+static void build_intra_predictors_for_2nd_block_interintra
+                                   (uint8_t *src, int src_stride,
+                                   uint8_t *pred_ptr, int stride,
+                                   MB_PREDICTION_MODE mode, TX_SIZE txsz,
+                                   int up_available, int left_available,
+                                   int right_available, int bwltbh) {
+  int i;
+  DECLARE_ALIGNED_ARRAY(16, uint8_t, left_col, 64);
+  DECLARE_ALIGNED_ARRAY(16, uint8_t, yabove_data, 128 + 16);
+  uint8_t *above_row = yabove_data + 16;
+  const int bs = 4 << txsz;
+
+  // 127 127 127 .. 127 127 127 127 127 127
+  // 129  A   B  ..  Y   Z
+  // 129  C   D  ..  W   X
+  // 129  E   F  ..  U   V
+  // 129  G   H  ..  S   T   T   T   T   T
+  // ..
+
+  once(init_intra_pred_fn_ptrs);
+  if (left_available) {
+    for (i = 0; i < bs; i++) {
+      if (bwltbh)
+        left_col[i] = src[i * src_stride - 1];
+      else
+        left_col[i] = pred_ptr[i * stride - 1];
+    }
+  } else {
+    vpx_memset(left_col, 129, bs);
+  }
+
+  if (up_available) {
+    uint8_t *above_ptr;
+    if (bwltbh)
+      above_ptr = pred_ptr - stride;
+    else
+      above_ptr = src - src_stride;
+    if (bs == 4 && right_available && left_available) {
+      above_row = above_ptr;
+    } else {
+      vpx_memcpy(above_row, above_ptr, bs);
+      if (bs == 4 && right_available)
+        vpx_memcpy(above_row + bs, above_ptr + bs, bs);
+      else
+        vpx_memset(above_row + bs, above_row[bs - 1], bs);
+      above_row[-1] = left_available ? above_ptr[-1] : 129;
+    }
+  } else {
+    vpx_memset(above_row, 127, bs * 2);
+    above_row[-1] = 127;
+  }
+
+  if (mode == DC_PRED) {
+    dc_pred[left_available][up_available][txsz](pred_ptr, stride,
+                                                above_row, left_col);
+  } else {
+    pred[mode][txsz](pred_ptr, stride, above_row, left_col);
+  }
+}
+
 static void combine_interintra(MB_PREDICTION_MODE mode,
                                uint8_t *interpred,
                                int interstride,
@@ -680,18 +743,20 @@ static void build_intra_predictors_for_interintra(uint8_t *src, int src_stride,
     build_intra_predictors(src, src_stride, pred_ptr, stride,
                            mode, intra_size_log2_for_interintra(bw),
                            up_available, left_available, right_available);
-    build_intra_predictors(src_bottom, src_stride, pred_ptr_bottom, stride,
-                           mode, intra_size_log2_for_interintra(bw),
-                           1, left_available, right_available);
+    build_intra_predictors_for_2nd_block_interintra(src_bottom, src_stride,
+                                                    pred_ptr_bottom, stride,
+                                       mode, intra_size_log2_for_interintra(bw),
+                                       1, left_available, right_available, 1);
   } else {
     uint8_t *src_right = src + bh;
     uint8_t *pred_ptr_right = pred_ptr + bh;
     build_intra_predictors(src, src_stride, pred_ptr, stride,
                            mode, intra_size_log2_for_interintra(bh),
                            up_available, left_available, right_available);
-    build_intra_predictors(src_right, src_stride, pred_ptr_right, stride,
-                           mode, intra_size_log2_for_interintra(bh),
-                           up_available, 1, right_available);
+    build_intra_predictors_for_2nd_block_interintra(src_right, src_stride,
+                                                    pred_ptr_right, stride,
+                                       mode, intra_size_log2_for_interintra(bh),
+                                       up_available, 1, right_available, 0);
   }
 }
 
