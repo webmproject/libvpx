@@ -3016,13 +3016,13 @@ void vp9_rd_pick_intra_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
   if (y_skip && uv_skip) {
     *returnrate = rate_y + rate_uv - rate_y_tokenonly - rate_uv_tokenonly +
                   vp9_cost_bit(vp9_get_pred_prob_mbskip(cm, xd), 1);
-    *returndist = dist_y + (dist_uv >> 2);
+    *returndist = dist_y + dist_uv;
     vp9_zero(ctx->tx_rd_diff);
   } else {
     int i;
     *returnrate = rate_y + rate_uv +
         vp9_cost_bit(vp9_get_pred_prob_mbskip(cm, xd), 0);
-    *returndist = dist_y + (dist_uv >> 2);
+    *returndist = dist_y + dist_uv;
     if (cpi->sf.tx_size_search_method == USE_FULL_RD)
       for (i = 0; i < TX_MODES; i++)
         ctx->tx_rd_diff[i] = tx_cache[i] - tx_cache[cm->tx_mode];
