@@ -610,14 +610,12 @@ static void rate_block(int plane, int block, BLOCK_SIZE_TYPE plane_bsize,
                             args->scan, args->nb);
 }
 
-static void block_yrd_txfm(int plane, int block, BLOCK_SIZE_TYPE bsize,
+static void block_yrd_txfm(int plane, int block, BLOCK_SIZE_TYPE plane_bsize,
                            TX_SIZE tx_size, void *arg) {
   struct rdcost_block_args *args = arg;
   MACROBLOCK *const x = args->x;
   MACROBLOCKD *const xd = &x->e_mbd;
   struct encode_b_args encode_args = {x, NULL};
-  const BLOCK_SIZE_TYPE plane_bsize = get_plane_block_size(bsize,
-                                                           &xd->plane[plane]);
   int64_t rd1, rd2, rd;
 
   if (args->skip)
@@ -634,7 +632,7 @@ static void block_yrd_txfm(int plane, int block, BLOCK_SIZE_TYPE bsize,
   }
 
   if (!is_inter_block(&xd->mode_info_context->mbmi))
-    vp9_encode_block_intra(plane, block, bsize, tx_size, &encode_args);
+    vp9_encode_block_intra(plane, block, plane_bsize, tx_size, &encode_args);
   else
     vp9_xform_quant(plane, block, plane_bsize, tx_size, &encode_args);
 

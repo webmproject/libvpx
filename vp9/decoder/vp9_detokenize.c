@@ -249,10 +249,9 @@ struct decode_block_args {
   int *eobtotal;
 };
 
-static void decode_block(int plane, int block, BLOCK_SIZE_TYPE bsize,
+static void decode_block(int plane, int block, BLOCK_SIZE_TYPE plane_bsize,
                          TX_SIZE tx_size, void *argv) {
   const struct decode_block_args* const arg = argv;
-  const int bw = b_width_log2(bsize);
 
   // find the maximum eob for this transform size, adjusted by segment
   MACROBLOCKD *xd = &arg->pbi->mb;
@@ -262,7 +261,7 @@ static void decode_block(int plane, int block, BLOCK_SIZE_TYPE bsize,
   const int ss_txfrm_size = tx_size << 1;
   const int seg_eob = get_eob(seg, segment_id, 16 << ss_txfrm_size);
   const int off = block >> ss_txfrm_size;
-  const int mod = bw - tx_size - pd->subsampling_x;
+  const int mod = b_width_log2(plane_bsize) - tx_size;
   const int aoff = (off & ((1 << mod) - 1)) << tx_size;
   const int loff = (off >> mod) << tx_size;
   const int tx_size_in_blocks = 1 << tx_size;
@@ -274,8 +273,8 @@ static void decode_block(int plane, int block, BLOCK_SIZE_TYPE bsize,
                                tx_size, pd->dequant, A, L);
 
   if (xd->mb_to_right_edge < 0 || xd->mb_to_bottom_edge < 0) {
-    set_contexts_on_border(xd, bsize, plane, tx_size_in_blocks, eob, aoff, loff,
-                           A, L);
+    set_contexts_on_border(xd, plane_bsize, plane, tx_size_in_blocks, eob,
+                           aoff, loff, A, L);
   } else {
     int pt;
     for (pt = 0; pt < tx_size_in_blocks; pt++)

@@ -97,50 +97,51 @@ struct tokenize_b_args {
   TX_SIZE tx_size;
 };
 
-static void set_entropy_context_b(int plane, int block, BLOCK_SIZE_TYPE bsize,
+static void set_entropy_context_b(int plane, int block,
+                                  BLOCK_SIZE_TYPE plane_bsize,
                                   TX_SIZE tx_size, void *arg) {
   struct tokenize_b_args* const args = arg;
   MACROBLOCKD *const xd = args->xd;
-  const int bwl = b_width_log2(bsize);
+  struct macroblockd_plane *pd = &xd->plane[plane];
   const int off = block >> (2 * tx_size);
-  const int mod = bwl - tx_size - xd->plane[plane].subsampling_x;
+  const int mod = b_width_log2(plane_bsize) - tx_size;
   const int aoff = (off & ((1 << mod) - 1)) << tx_size;
   const int loff = (off >> mod) << tx_size;
-  ENTROPY_CONTEXT *A = xd->plane[plane].above_context + aoff;
-  ENTROPY_CONTEXT *L = xd->plane[plane].left_context + loff;
-  const int eob = xd->plane[plane].eobs[block];
+  ENTROPY_CONTEXT *A = pd->above_context + aoff;
+  ENTROPY_CONTEXT *L = pd->left_context + loff;
+  const int eob = pd->eobs[block];
   const int tx_size_in_blocks = 1 << tx_size;
 
   if (xd->mb_to_right_edge < 0 || xd->mb_to_bottom_edge < 0) {
-    set_contexts_on_border(xd, bsize, plane, tx_size_in_blocks, eob, aoff, loff,
-                           A, L);
+    set_contexts_on_border(xd, plane_bsize, plane, tx_size_in_blocks, eob, aoff,
+                           loff, A, L);
   } else {
     vpx_memset(A, eob > 0, sizeof(ENTROPY_CONTEXT) * tx_size_in_blocks);
     vpx_memset(L, eob > 0, sizeof(ENTROPY_CONTEXT) * tx_size_in_blocks);
   }
 }
 
-static void tokenize_b(int plane, int block, BLOCK_SIZE_TYPE bsize,
+static void tokenize_b(int plane, int block, BLOCK_SIZE_TYPE plane_bsize,
                        TX_SIZE tx_size, void *arg) {
   struct tokenize_b_args* const args = arg;
   VP9_COMP *cpi = args->cpi;
   MACROBLOCKD *xd = args->xd;
   TOKENEXTRA **tp = args->tp;
   const int tx_size_in_blocks = 1 << tx_size;
+  struct macroblockd_plane *pd = &xd->plane[plane];
   MB_MODE_INFO *mbmi = &xd->mode_info_context->mbmi;
   int pt; /* near block/prev token context index */
   int c = 0, rc = 0;
   TOKENEXTRA *t = *tp;        /* store tokens starting here */
-  const int eob = xd->plane[plane].eobs[block];
-  const PLANE_TYPE type = xd->plane[plane].plane_type;
-  const int16_t *qcoeff_ptr = BLOCK_OFFSET(xd->plane[plane].qcoeff, block);
-  const int bwl = b_width_log2(bsize);
+  const int eob = pd->eobs[block];
+  const PLANE_TYPE type = pd->plane_type;
+  const int16_t *qcoeff_ptr = BLOCK_OFFSET(pd->qcoeff, block);
   const int off = block >> (2 * tx_size);
-  const int mod = bwl - tx_size - xd->plane[plane].subsampling_x;
+  const int mod = b_width_log2(plane_bsize) - tx_size;
   const int aoff = (off & ((1 << mod) - 1)) << tx_size;
   const int loff = (off >> mod) << tx_size;
-  ENTROPY_CONTEXT *A = xd->plane[plane].above_context + aoff;
-  ENTROPY_CONTEXT *L = xd->plane[plane].left_context + loff;
+  ENTROPY_CONTEXT *A = pd->above_context + aoff;
+  ENTROPY_CONTEXT *L = pd->left_context + loff;
   int seg_eob;
   const int segment_id = mbmi->segment_id;
   const int16_t *scan, *nb;
@@ -226,8 +227,8 @@ static void tokenize_b(int plane, int block, BLOCK_SIZE_TYPE bsize,
 
   *tp = t;
   if (xd->mb_to_right_edge < 0 || xd->mb_to_bottom_edge < 0) {
-    set_contexts_on_border(xd, bsize, plane, tx_size_in_blocks, c, aoff, loff,
-                           A, L);
+    set_contexts_on_border(xd, plane_bsize, plane, tx_size_in_blocks, c,
+                           aoff, loff, A, L);
   } else {
     vpx_memset(A, c > 0, sizeof(ENTROPY_CONTEXT) * tx_size_in_blocks);
     vpx_memset(L, c > 0, sizeof(ENTROPY_CONTEXT) * tx_size_in_blocks);
@@ -240,7 +241,8 @@ struct is_skippable_args {
 };
 
 static void is_skippable(int plane, int block,
-                         BLOCK_SIZE_TYPE bsize, TX_SIZE tx_size, void *argv) {
+                         BLOCK_SIZE_TYPE plane_bsize, TX_SIZE tx_size,
+                         void *argv) {
   struct is_skippable_args *args = argv;
   args->skippable[0] &= (!args->xd->plane[plane].eobs[block]);
 }
