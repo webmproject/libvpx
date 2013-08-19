@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAc3//8xk\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 507,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2013-08-19T15:19:25Z",
+      "side": 1,
+      "message": "Seems ok but I guess this could have a small entropy impact even if it does not alter the predictor.",
+      "revId": "229461066daacd3aaaeb2cb92247b9366003c02f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
