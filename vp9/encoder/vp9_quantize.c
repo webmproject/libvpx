@@ -152,6 +152,32 @@ void vp9_quantize_b_32x32_c(int16_t *coeff_ptr, intptr_t n_coeffs,
   *eob_ptr = eob + 1;
 }
 
+struct plane_block_idx {
+  int plane;
+  int block;
+};
+
+// TODO(jkoleszar): returning a struct so it can be used in a const context,
+// expect to refactor this further later.
+static INLINE struct plane_block_idx plane_block_idx(int y_blocks,
+                                                     int b_idx) {
+  const int v_offset = y_blocks * 5 / 4;
+  struct plane_block_idx res;
+
+  if (b_idx < y_blocks) {
+    res.plane = 0;
+    res.block = b_idx;
+  } else if (b_idx < v_offset) {
+    res.plane = 1;
+    res.block = b_idx - y_blocks;
+  } else {
+    assert(b_idx < y_blocks * 3 / 2);
+    res.plane = 2;
+    res.block = b_idx - v_offset;
+  }
+  return res;
+}
+
 void vp9_regular_quantize_b_4x4(MACROBLOCK *mb, int b_idx, TX_TYPE tx_type,
                                 int y_blocks) {
   MACROBLOCKD *const xd = &mb->e_mbd;

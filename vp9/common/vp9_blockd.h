@@ -362,32 +362,6 @@ static INLINE TX_SIZE get_uv_tx_size(const MB_MODE_INFO *mbmi) {
   return MIN(mbmi->txfm_size, max_uv_txsize_lookup[mbmi->sb_type]);
 }
 
-struct plane_block_idx {
-  int plane;
-  int block;
-};
-
-// TODO(jkoleszar): returning a struct so it can be used in a const context,
-// expect to refactor this further later.
-static INLINE struct plane_block_idx plane_block_idx(int y_blocks,
-                                                     int b_idx) {
-  const int v_offset = y_blocks * 5 / 4;
-  struct plane_block_idx res;
-
-  if (b_idx < y_blocks) {
-    res.plane = 0;
-    res.block = b_idx;
-  } else if (b_idx < v_offset) {
-    res.plane = 1;
-    res.block = b_idx - y_blocks;
-  } else {
-    assert(b_idx < y_blocks * 3 / 2);
-    res.plane = 2;
-    res.block = b_idx - v_offset;
-  }
-  return res;
-}
-
 static BLOCK_SIZE_TYPE get_plane_block_size(BLOCK_SIZE_TYPE bsize,
                            const struct macroblockd_plane *pd) {
   BLOCK_SIZE_TYPE bs = ss_size_lookup[bsize]
