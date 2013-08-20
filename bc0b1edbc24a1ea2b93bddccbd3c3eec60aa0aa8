@@ -86,6 +86,24 @@
       "revId": "bc0b1edbc24a1ea2b93bddccbd3c3eec60aa0aa8",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAc3//6vU\u003d",
+        "filename": "vp9/common/arm/neon/vp9_short_idct8x8_add_neon.asm",
+        "patchSetId": 3
+      },
+      "lineNbr": 372,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2013-08-20T17:09:15Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAc3//65U\u003d",
+      "revId": "bc0b1edbc24a1ea2b93bddccbd3c3eec60aa0aa8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
