@@ -17,18 +17,17 @@
 #define SUBPEL_BITS 4
 #define SUBPEL_MASK ((1 << SUBPEL_BITS) - 1)
 #define SUBPEL_SHIFTS (1 << SUBPEL_BITS)
+#define SUBPEL_TAPS 8
 
-extern const int16_t vp9_bilinear_filters[SUBPEL_SHIFTS][8];
-extern const int16_t vp9_sub_pel_filters_6[SUBPEL_SHIFTS][8];
-extern const int16_t vp9_sub_pel_filters_8[SUBPEL_SHIFTS][8];
-extern const int16_t vp9_sub_pel_filters_8s[SUBPEL_SHIFTS][8];
-extern const int16_t vp9_sub_pel_filters_8lp[SUBPEL_SHIFTS][8];
+extern const int16_t vp9_bilinear_filters[SUBPEL_SHIFTS][SUBPEL_TAPS];
+extern const int16_t vp9_sub_pel_filters_6[SUBPEL_SHIFTS][SUBPEL_TAPS];
+extern const int16_t vp9_sub_pel_filters_8[SUBPEL_SHIFTS][SUBPEL_TAPS];
+extern const int16_t vp9_sub_pel_filters_8s[SUBPEL_SHIFTS][SUBPEL_TAPS];
+extern const int16_t vp9_sub_pel_filters_8lp[SUBPEL_SHIFTS][SUBPEL_TAPS];
 
 // The VP9_BILINEAR_FILTERS_2TAP macro returns a pointer to the bilinear
 // filter kernel as a 2 tap filter.
-#define BF_LENGTH (sizeof(vp9_bilinear_filters[0]) / \
-                   sizeof(vp9_bilinear_filters[0][0]))
-#define BF_OFFSET (BF_LENGTH / 2 - 1)
-#define VP9_BILINEAR_FILTERS_2TAP(x) (vp9_bilinear_filters[x] + BF_OFFSET)
+#define VP9_BILINEAR_FILTERS_2TAP(x) \
+  (vp9_bilinear_filters[(x)] + SUBPEL_TAPS/2 - 1)
 
 #endif  // VP9_COMMON_VP9_FILTER_H_

@@ -8,14 +8,12 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-
-#include <stdlib.h>
-#include "vp9/common/vp9_filter.h"
 #include "vpx_ports/mem.h"
-#include "vp9_rtcd.h"
-#include "vp9/common/vp9_common.h"
 
-DECLARE_ALIGNED(256, const int16_t, vp9_bilinear_filters[SUBPEL_SHIFTS][8]) = {
+#include "vp9/common/vp9_filter.h"
+
+DECLARE_ALIGNED(256, const int16_t,
+                vp9_bilinear_filters[SUBPEL_SHIFTS][SUBPEL_TAPS]) = {
   { 0, 0, 0, 128,   0, 0, 0, 0 },
   { 0, 0, 0, 120,   8, 0, 0, 0 },
   { 0, 0, 0, 112,  16, 0, 0, 0 },
@@ -34,8 +32,9 @@ DECLARE_ALIGNED(256, const int16_t, vp9_bilinear_filters[SUBPEL_SHIFTS][8]) = {
   { 0, 0, 0,   8, 120, 0, 0, 0 }
 };
 
-DECLARE_ALIGNED(256, const int16_t, vp9_sub_pel_filters_8[SUBPEL_SHIFTS][8]) = {
-  /* Lagrangian interpolation filter */
+// Lagrangian interpolation filter
+DECLARE_ALIGNED(256, const int16_t,
+                vp9_sub_pel_filters_8[SUBPEL_SHIFTS][SUBPEL_TAPS]) = {
   { 0,   0,   0, 128,   0,   0,   0,  0},
   { 0,   1,  -5, 126,   8,  -3,   1,  0},
   { -1,   3, -10, 122,  18,  -6,   2,  0},
@@ -54,9 +53,9 @@ DECLARE_ALIGNED(256, const int16_t, vp9_sub_pel_filters_8[SUBPEL_SHIFTS][8]) = {
   { 0,   1,  -3,   8, 126,  -5,   1,  0}
 };
 
-DECLARE_ALIGNED(256, const int16_t, vp9_sub_pel_filters_8s[SUBPEL_SHIFTS][8])
-    = {
-  /* dct based filter */
+// DCT based filter
+DECLARE_ALIGNED(256, const int16_t,
+                vp9_sub_pel_filters_8s[SUBPEL_SHIFTS][SUBPEL_TAPS]) = {
   {0,   0,   0, 128,   0,   0,   0, 0},
   {-1,   3,  -7, 127,   8,  -3,   1, 0},
   {-2,   5, -13, 125,  17,  -6,   3, -1},
@@ -75,9 +74,9 @@ DECLARE_ALIGNED(256, const int16_t, vp9_sub_pel_filters_8s[SUBPEL_SHIFTS][8])
   {0,   1,  -3,   8, 127,  -7,   3, -1}
 };
 
+// freqmultiplier = 0.5
 DECLARE_ALIGNED(256, const int16_t,
-                vp9_sub_pel_filters_8lp[SUBPEL_SHIFTS][8]) = {
-  /* freqmultiplier = 0.5 */
+                vp9_sub_pel_filters_8lp[SUBPEL_SHIFTS][SUBPEL_TAPS]) = {
   { 0,  0,  0, 128,  0,  0,  0,  0},
   {-3, -1, 32,  64, 38,  1, -3,  0},
   {-2, -2, 29,  63, 41,  2, -3,  0},
