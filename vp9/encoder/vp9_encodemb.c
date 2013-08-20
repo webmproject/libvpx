@@ -142,12 +142,11 @@ static int trellis_get_coeff_context(const int16_t *scan,
 }
 
 static void optimize_b(MACROBLOCK *mb,
-                       int plane, int block, BLOCK_SIZE_TYPE bsize,
+                       int plane, int block, BLOCK_SIZE_TYPE plane_bsize,
                        ENTROPY_CONTEXT *a, ENTROPY_CONTEXT *l,
                        TX_SIZE tx_size) {
   MACROBLOCKD *const xd = &mb->e_mbd;
   struct macroblockd_plane *pd = &xd->plane[plane];
-  const BLOCK_SIZE_TYPE plane_bsize = get_plane_block_size(bsize, pd);
   const int ref = is_inter_block(&xd->mode_info_context->mbmi);
   vp9_token_state tokens[1025][2];
   unsigned best_index[1025][2];
@@ -371,24 +370,12 @@ static void optimize_b(MACROBLOCK *mb,
   *a = *l = (final_eob > 0);
 }
 
-void vp9_optimize_b(int plane, int block, BLOCK_SIZE_TYPE bsize,
+void vp9_optimize_b(int plane, int block, BLOCK_SIZE_TYPE plane_bsize,
                     TX_SIZE tx_size, MACROBLOCK *mb, struct optimize_ctx *ctx) {
-  MACROBLOCKD *const xd = &mb->e_mbd;
-  const BLOCK_SIZE_TYPE plane_bsize = get_plane_block_size(bsize,
-                                                           &xd->plane[plane]);
   int x, y;
-
-  // find current entropy context
   txfrm_block_to_raster_xy(plane_bsize, tx_size, block, &x, &y);
-
-  optimize_b(mb, plane, block, bsize, &ctx->ta[plane][x], &ctx->tl[plane][y],
-             tx_size);
-}
-
-static void optimize_block(int plane, int block, BLOCK_SIZE_TYPE bsize,
-                           TX_SIZE tx_size, void *arg) {
-  const struct encode_b_args* const args = arg;
-  vp9_optimize_b(plane, block, bsize, tx_size, args->x, args->ctx);
+  optimize_b(mb, plane, block, plane_bsize,
+             &ctx->ta[plane][x], &ctx->tl[plane][y], tx_size);
 }
 
 void optimize_init_b(int plane, BLOCK_SIZE_TYPE bsize, void *arg) {
@@ -430,23 +417,6 @@ void optimize_init_b(int plane, BLOCK_SIZE_TYPE bsize, void *arg) {
     default:
       assert(0);
   }
-}
-
-void vp9_optimize_sby(MACROBLOCK *x, BLOCK_SIZE_TYPE bsize) {
-  struct optimize_ctx ctx;
-  struct encode_b_args arg = {x, &ctx};
-  optimize_init_b(0, bsize, &arg);
-  foreach_transformed_block_in_plane(&x->e_mbd, bsize, 0, optimize_block, &arg);
-}
-
-void vp9_optimize_sbuv(MACROBLOCK *x, BLOCK_SIZE_TYPE bsize) {
-  struct optimize_ctx ctx;
-  struct encode_b_args arg = {x, &ctx};
-  int i;
-  for (i = 1; i < MAX_MB_PLANE; ++i)
-    optimize_init_b(i, bsize, &arg);
-
-  foreach_transformed_block_uv(&x->e_mbd, bsize, optimize_block, &arg);
 }
 
 void vp9_xform_quant(int plane, int block, BLOCK_SIZE_TYPE plane_bsize,
@@ -522,13 +492,12 @@ void vp9_xform_quant(int plane, int block, BLOCK_SIZE_TYPE plane_bsize,
   }
 }
 
-static void encode_block(int plane, int block, BLOCK_SIZE_TYPE bsize,
+static void encode_block(int plane, int block, BLOCK_SIZE_TYPE plane_bsize,
                          TX_SIZE tx_size, void *arg) {
   struct encode_b_args *const args = arg;
   MACROBLOCK *const x = args->x;
   MACROBLOCKD *const xd = &x->e_mbd;
   struct macroblockd_plane *const pd = &xd->plane[plane];
-  const BLOCK_SIZE_TYPE plane_bsize = get_plane_block_size(bsize, pd);
   const int raster_block = txfrm_block_to_raster_block(plane_bsize, tx_size,
                                                        block);
 
@@ -538,7 +507,7 @@ static void encode_block(int plane, int block, BLOCK_SIZE_TYPE bsize,
   vp9_xform_quant(plane, block, plane_bsize, tx_size, arg);
 
   if (x->optimize)
-    vp9_optimize_b(plane, block, bsize, tx_size, x, args->ctx);
+    vp9_optimize_b(plane, block, plane_bsize, tx_size, x, args->ctx);
 
   if (x->skip_encode || pd->eobs[block] == 0)
     return;
@@ -567,20 +536,6 @@ static void encode_block(int plane, int block, BLOCK_SIZE_TYPE bsize,
   }
 }
 
-void vp9_xform_quant_sby(MACROBLOCK *x, BLOCK_SIZE_TYPE bsize) {
-  MACROBLOCKD* const xd = &x->e_mbd;
-  struct encode_b_args arg = {x, NULL};
-
-  foreach_transformed_block_in_plane(xd, bsize, 0, vp9_xform_quant, &arg);
-}
-
-void vp9_xform_quant_sbuv(MACROBLOCK *x, BLOCK_SIZE_TYPE bsize) {
-  MACROBLOCKD* const xd = &x->e_mbd;
-  struct encode_b_args arg = {x, NULL};
-
-  foreach_transformed_block_uv(xd, bsize, vp9_xform_quant, &arg);
-}
-
 void vp9_encode_sby(MACROBLOCK *x, BLOCK_SIZE_TYPE bsize) {
   MACROBLOCKD *const xd = &x->e_mbd;
   struct optimize_ctx ctx;
@@ -591,21 +546,6 @@ void vp9_encode_sby(MACROBLOCK *x, BLOCK_SIZE_TYPE bsize) {
     optimize_init_b(0, bsize, &arg);
 
   foreach_transformed_block_in_plane(xd, bsize, 0, encode_block, &arg);
-}
-
-void vp9_encode_sbuv(MACROBLOCK *x, BLOCK_SIZE_TYPE bsize) {
-  MACROBLOCKD *const xd = &x->e_mbd;
-  struct optimize_ctx ctx;
-  struct encode_b_args arg = {x, &ctx};
-
-  vp9_subtract_sbuv(x, bsize);
-  if (x->optimize) {
-    int i;
-    for (i = 1; i < MAX_MB_PLANE; ++i)
-      optimize_init_b(i, bsize, &arg);
-  }
-
-  foreach_transformed_block_uv(xd, bsize, encode_block, &arg);
 }
 
 void vp9_encode_sb(MACROBLOCK *x, BLOCK_SIZE_TYPE bsize) {
@@ -624,7 +564,7 @@ void vp9_encode_sb(MACROBLOCK *x, BLOCK_SIZE_TYPE bsize) {
   foreach_transformed_block(xd, bsize, encode_block, &arg);
 }
 
-void vp9_encode_block_intra(int plane, int block, BLOCK_SIZE_TYPE bsize,
+void vp9_encode_block_intra(int plane, int block, BLOCK_SIZE_TYPE plane_bsize,
                             TX_SIZE tx_size, void *arg) {
   struct encode_b_args* const args = arg;
   MACROBLOCK *const x = args->x;
@@ -632,7 +572,6 @@ void vp9_encode_block_intra(int plane, int block, BLOCK_SIZE_TYPE bsize,
   MB_MODE_INFO *mbmi = &xd->mode_info_context->mbmi;
   struct macroblock_plane *const p = &x->plane[plane];
   struct macroblockd_plane *const pd = &xd->plane[plane];
-  const BLOCK_SIZE_TYPE plane_bsize = get_plane_block_size(bsize, pd);
   int16_t *coeff = BLOCK_OFFSET(p->coeff, block);
   int16_t *qcoeff = BLOCK_OFFSET(pd->qcoeff, block);
   int16_t *dqcoeff = BLOCK_OFFSET(pd->dqcoeff, block);
@@ -646,12 +585,11 @@ void vp9_encode_block_intra(int plane, int block, BLOCK_SIZE_TYPE bsize,
   int16_t *src_diff;
   uint16_t *eob = &pd->eobs[block];
 
-  if (xd->mb_to_right_edge < 0 || xd->mb_to_bottom_edge < 0) {
+  if (xd->mb_to_right_edge < 0 || xd->mb_to_bottom_edge < 0)
     extend_for_intra(xd, plane_bsize, plane, block, tx_size);
-  }
 
   // if (x->optimize)
-  // vp9_optimize_b(plane, block, bsize, tx_size, x, args->ctx);
+  // vp9_optimize_b(plane, block, plane_bsize, tx_size, x, args->ctx);
 
   switch (tx_size) {
     case TX_32X32:

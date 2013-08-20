@@ -385,7 +385,7 @@ static INLINE int plane_block_height(BLOCK_SIZE_TYPE bsize,
 }
 
 typedef void (*foreach_transformed_block_visitor)(int plane, int block,
-                                                  BLOCK_SIZE_TYPE bsize,
+                                                  BLOCK_SIZE_TYPE plane_bsize,
                                                   TX_SIZE tx_size,
                                                   void *arg);
 
@@ -400,10 +400,10 @@ static INLINE void foreach_transformed_block_in_plane(
   const MB_MODE_INFO* mbmi = &xd->mode_info_context->mbmi;
   const TX_SIZE tx_size = plane ? get_uv_tx_size(mbmi)
                                 : mbmi->txfm_size;
-  const int bw = b_width_log2(bsize) - pd->subsampling_x;
-  const int bh = b_height_log2(bsize) - pd->subsampling_y;
-  const int txfrm_size_b = tx_size * 2;
-  const int step = 1 << txfrm_size_b;
+  const BLOCK_SIZE_TYPE plane_bsize = get_plane_block_size(bsize, pd);
+  const int bw = b_width_log2(plane_bsize);
+  const int bh = b_height_log2(plane_bsize);
+  const int step = 1 << (tx_size << 1);
   int i;
 
   // If mb_to_right_edge is < 0 we are in a situation in which
@@ -430,15 +430,13 @@ static INLINE void foreach_transformed_block_in_plane(
     for (r = 0; r < (1 << bh); r += (1 << tx_size)) {
       for (c = 0; c < (1 << bw); c += (1 << tx_size)) {
         if (r < max_blocks_high && c < max_blocks_wide)
-          visit(plane, i, bsize, tx_size, arg);
+          visit(plane, i, plane_bsize, tx_size, arg);
         i += step;
       }
     }
   } else {
-    const int ss_block_size = bw + bh;
-    assert(txfrm_size_b <= ss_block_size);
-    for (i = 0; i < (1 << ss_block_size); i += step)
-      visit(plane, i, bsize, tx_size, arg);
+    for (i = 0; i < (1 << (bw + bh)); i += step)
+      visit(plane, i, plane_bsize, tx_size, arg);
   }
 }
 
@@ -588,14 +586,13 @@ static void extend_for_intra(MACROBLOCKD* const xd, BLOCK_SIZE_TYPE plane_bsize,
         *d = c;
   }
 }
-static void set_contexts_on_border(MACROBLOCKD *xd, BLOCK_SIZE_TYPE bsize,
+static void set_contexts_on_border(MACROBLOCKD *xd, BLOCK_SIZE_TYPE plane_bsize,
                                    int plane, int tx_size_in_blocks,
                                    int eob, int aoff, int loff,
                                    ENTROPY_CONTEXT *A, ENTROPY_CONTEXT *L) {
   struct macroblockd_plane *pd = &xd->plane[plane];
-  const BLOCK_SIZE_TYPE bs = get_plane_block_size(bsize, pd);
-  int mi_blocks_wide = num_4x4_blocks_wide_lookup[bs];
-  int mi_blocks_high = num_4x4_blocks_high_lookup[bs];
+  int mi_blocks_wide = num_4x4_blocks_wide_lookup[plane_bsize];
+  int mi_blocks_high = num_4x4_blocks_high_lookup[plane_bsize];
   int above_contexts = tx_size_in_blocks;
   int left_contexts = tx_size_in_blocks;
   int pt;

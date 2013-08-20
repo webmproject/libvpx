@@ -32,19 +32,11 @@ struct encode_b_args {
   struct optimize_ctx *ctx;
 };
 
-void vp9_optimize_b(int plane, int block, BLOCK_SIZE_TYPE bsize,
-                    TX_SIZE tx_size, MACROBLOCK *x, struct optimize_ctx *ctx);
-void vp9_optimize_sby(MACROBLOCK *x, BLOCK_SIZE_TYPE bsize);
-void vp9_optimize_sbuv(MACROBLOCK *x, BLOCK_SIZE_TYPE bsize);
-
 void vp9_encode_sb(MACROBLOCK *x, BLOCK_SIZE_TYPE bsize);
 void vp9_encode_sby(MACROBLOCK *x, BLOCK_SIZE_TYPE bsize);
-void vp9_encode_sbuv(MACROBLOCK *x, BLOCK_SIZE_TYPE bsize);
 
 void vp9_xform_quant(int plane, int block, BLOCK_SIZE_TYPE plane_bsize,
                      TX_SIZE tx_size, void *arg);
-void vp9_xform_quant_sby(MACROBLOCK *x, BLOCK_SIZE_TYPE bsize);
-void vp9_xform_quant_sbuv(MACROBLOCK *x, BLOCK_SIZE_TYPE bsize);
 
 void vp9_subtract_sby(MACROBLOCK *x, BLOCK_SIZE_TYPE bsize);
 void vp9_subtract_sbuv(MACROBLOCK *x, BLOCK_SIZE_TYPE bsize);

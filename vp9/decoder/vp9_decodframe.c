@@ -87,11 +87,10 @@ static void init_dequantizer(VP9_COMMON *cm, MACROBLOCKD *xd) {
     xd->plane[i].dequant = cm->uv_dequant[xd->q_index];
 }
 
-static void decode_block(int plane, int block, BLOCK_SIZE_TYPE bsize,
+static void decode_block(int plane, int block, BLOCK_SIZE_TYPE plane_bsize,
                          TX_SIZE tx_size, void *arg) {
   MACROBLOCKD* const xd = arg;
   struct macroblockd_plane *const pd = &xd->plane[plane];
-  const BLOCK_SIZE_TYPE plane_bsize = get_plane_block_size(bsize, pd);
   int16_t* const qcoeff = BLOCK_OFFSET(pd->qcoeff, block);
   const int stride = pd->dst.stride;
   const int eob = pd->eobs[block];
@@ -124,11 +123,11 @@ static void decode_block(int plane, int block, BLOCK_SIZE_TYPE bsize,
   }
 }
 
-static void decode_block_intra(int plane, int block, BLOCK_SIZE_TYPE bsize,
+static void decode_block_intra(int plane, int block,
+                               BLOCK_SIZE_TYPE plane_bsize,
                                TX_SIZE tx_size, void *arg) {
   MACROBLOCKD* const xd = arg;
   struct macroblockd_plane *const pd = &xd->plane[plane];
-  const BLOCK_SIZE_TYPE plane_bsize = get_plane_block_size(bsize, pd);
   MODE_INFO *const mi = xd->mode_info_context;
   const int raster_block = txfrm_block_to_raster_block(plane_bsize, tx_size,
                                                        block);
@@ -139,7 +138,7 @@ static void decode_block_intra(int plane, int block, BLOCK_SIZE_TYPE bsize,
   const int mode = (plane == 0) ? mi->mbmi.mode : mi->mbmi.uv_mode;
 
   if (plane == 0 && mi->mbmi.sb_type < BLOCK_8X8) {
-    assert(bsize == BLOCK_8X8);
+    assert(plane_bsize == BLOCK_8X8);
     b_mode = mi->bmi[raster_block].as_mode;
   } else {
     b_mode = mode;
@@ -156,7 +155,7 @@ static void decode_block_intra(int plane, int block, BLOCK_SIZE_TYPE bsize,
   if (mi->mbmi.skip_coeff)
     return;
 
-  decode_block(plane, block, bsize, tx_size, arg);
+  decode_block(plane, block, plane_bsize, tx_size, arg);
 }
 
 static int decode_tokens(VP9D_COMP *pbi, BLOCK_SIZE_TYPE bsize, vp9_reader *r) {
