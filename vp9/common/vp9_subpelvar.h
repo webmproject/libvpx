@@ -11,7 +11,8 @@
 #ifndef VP9_COMMON_VP9_SUBPELVAR_H_
 #define VP9_COMMON_VP9_SUBPELVAR_H_
 
-#include "vp9/common/vp9_filter.h"
+#include "vp9/common/vp9_common.h"
+#include "vp9/common/vp9_convolve.h"
 
 static void variance(const uint8_t *src_ptr,
                      int  source_stride,
@@ -78,10 +79,10 @@ static void var_filter_block2d_bil_first_pass(const uint8_t *src_ptr,
 
   for (i = 0; i < output_height; i++) {
     for (j = 0; j < output_width; j++) {
-      // Apply bilinear filter
-      output_ptr[j] = (((int)src_ptr[0]          * vp9_filter[0]) +
-                       ((int)src_ptr[pixel_step] * vp9_filter[1]) +
-                       (VP9_FILTER_WEIGHT / 2)) >> VP9_FILTER_SHIFT;
+      output_ptr[j] = ROUND_POWER_OF_TWO((int)src_ptr[0] * vp9_filter[0] +
+                          (int)src_ptr[pixel_step] * vp9_filter[1],
+                          VP9_FILTER_BITS);
+
       src_ptr++;
     }
 
@@ -127,20 +128,16 @@ static void var_filter_block2d_bil_second_pass(const uint16_t *src_ptr,
                                                unsigned int output_width,
                                                const int16_t *vp9_filter) {
   unsigned int  i, j;
-  int  Temp;
 
   for (i = 0; i < output_height; i++) {
     for (j = 0; j < output_width; j++) {
-      // Apply filter
-      Temp = ((int)src_ptr[0]         * vp9_filter[0]) +
-             ((int)src_ptr[pixel_step] * vp9_filter[1]) +
-             (VP9_FILTER_WEIGHT / 2);
-      output_ptr[j] = (unsigned int)(Temp >> VP9_FILTER_SHIFT);
+      output_ptr[j] = ROUND_POWER_OF_TWO((int)src_ptr[0] * vp9_filter[0] +
+                          (int)src_ptr[pixel_step] * vp9_filter[1],
+                          VP9_FILTER_BITS);
       src_ptr++;
     }
 
-    // Next row...
-    src_ptr    += src_pixels_per_line - output_width;
+    src_ptr += src_pixels_per_line - output_width;
     output_ptr += output_width;
   }
 }

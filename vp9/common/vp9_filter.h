@@ -12,12 +12,7 @@
 #define VP9_COMMON_VP9_FILTER_H_
 
 #include "vpx_config.h"
-#include "vpx_scale/yv12config.h"
 #include "vpx/vpx_integer.h"
-
-#define BLOCK_HEIGHT_WIDTH 4
-#define VP9_FILTER_WEIGHT 128
-#define VP9_FILTER_SHIFT  7
 
 #define SUBPEL_BITS 4
 #define SUBPEL_MASK ((1 << SUBPEL_BITS) - 1)
