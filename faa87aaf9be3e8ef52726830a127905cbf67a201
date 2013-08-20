@@ -52,6 +52,24 @@
       "revId": "faa87aaf9be3e8ef52726830a127905cbf67a201",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAc3//6lE\u003d",
+        "filename": "vp9/common/arm/neon/vp9_short_idct8x8_add_neon.asm",
+        "patchSetId": 4
+      },
+      "lineNbr": 441,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2013-08-20T18:43:56Z",
+      "side": 1,
+      "message": "Yes. I make a mistake here. I could either use vmlsl or delete the vmull below.",
+      "parentUuid": "AAAAc3//6pw\u003d",
+      "revId": "faa87aaf9be3e8ef52726830a127905cbf67a201",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
