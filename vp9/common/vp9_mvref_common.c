@@ -167,13 +167,15 @@ static INLINE int_mv scale_mv(const MB_MODE_INFO *mbmi, int ref,
 
 // Checks that the given mi_row, mi_col and search point
 // are inside the borders of the tile.
-static INLINE int is_inside(int mi_col, int mi_row, int cur_tile_mi_col_start,
+static INLINE int is_inside(int mi_col, int mi_row,
+                            int cur_tile_mi_col_start,
+                            int cur_tile_mi_col_end,
+                            int mi_rows,
                             const MV *mv_ref) {
-  // Check that the candidate is within the border.  We only need to check
-  // the left side because all the positive right side ones are for blocks that
-  // are large enough to support the + value they have within their border.
   return !(mi_row + mv_ref->row < 0 ||
-           mi_col + mv_ref->col < cur_tile_mi_col_start);
+           mi_col + mv_ref->col < cur_tile_mi_col_start ||
+           mi_row + mv_ref->row >= mi_rows ||
+           mi_col + mv_ref->col >= cur_tile_mi_col_end);
 }
 
 // This function searches the neighbourhood of a given MB/SB
@@ -202,7 +204,8 @@ void vp9_find_mv_refs_idx(VP9_COMMON *cm, MACROBLOCKD *xd, MODE_INFO *here,
   for (idx = 0; idx < 2; ++idx) {
     const MV *mv_ref = &mv_ref_search[idx];
 
-    if (!is_inside(mi_col, mi_row, cm->cur_tile_mi_col_start, mv_ref))
+    if (!is_inside(mi_col, mi_row, cm->cur_tile_mi_col_start,
+                   cm->cur_tile_mi_col_end, cm->mi_rows, mv_ref))
       continue;
 
     candidate = here + mv_ref->col + mv_ref->row * xd->mode_info_stride;
@@ -230,7 +233,8 @@ void vp9_find_mv_refs_idx(VP9_COMMON *cm, MACROBLOCKD *xd, MODE_INFO *here,
   // mode counts.
   for (; idx < MVREF_NEIGHBOURS; ++idx) {
     const MV *mv_ref = &mv_ref_search[idx];
-    if (!is_inside(mi_col, mi_row, cm->cur_tile_mi_col_start, mv_ref))
+    if (!is_inside(mi_col, mi_row, cm->cur_tile_mi_col_start,
+                   cm->cur_tile_mi_col_end, cm->mi_rows, mv_ref))
       continue;
 
     candidate = here + mv_ref->col + mv_ref->row * xd->mode_info_stride;
@@ -261,7 +265,8 @@ void vp9_find_mv_refs_idx(VP9_COMMON *cm, MACROBLOCKD *xd, MODE_INFO *here,
   if (different_ref_found) {
     for (idx = 0; idx < MVREF_NEIGHBOURS; ++idx) {
       const MV *mv_ref = &mv_ref_search[idx];
-      if (!is_inside(mi_col, mi_row, cm->cur_tile_mi_col_start, mv_ref))
+      if (!is_inside(mi_col, mi_row, cm->cur_tile_mi_col_start,
+                     cm->cur_tile_mi_col_end, cm->mi_rows, mv_ref))
         continue;
 
       candidate = here + mv_ref->col + mv_ref->row * xd->mode_info_stride;
