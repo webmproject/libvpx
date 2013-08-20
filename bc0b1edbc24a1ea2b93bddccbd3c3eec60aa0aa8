@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAc3//7OA\u003d",
+        "filename": "vp9/common/arm/neon/vp9_short_idct8x8_add_neon.asm",
+        "patchSetId": 3
+      },
+      "lineNbr": 341,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2013-08-20T04:01:54Z",
+      "side": 1,
+      "message": "Shift the constant here to avoid modifying it later\n#0x0C7C \u003c\u003c 1 \u003d\u003d #0x18F8",
+      "revId": "bc0b1edbc24a1ea2b93bddccbd3c3eec60aa0aa8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAc3//7OM\u003d",
+        "filename": "vp9/common/arm/neon/vp9_short_idct8x8_add_neon.asm",
+        "patchSetId": 3
+      },
+      "lineNbr": 368,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2013-08-20T04:01:54Z",
+      "side": 1,
+      "message": "Remove this.",
+      "revId": "bc0b1edbc24a1ea2b93bddccbd3c3eec60aa0aa8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAc3//7OI\u003d",
+        "filename": "vp9/common/arm/neon/vp9_short_idct8x8_add_neon.asm",
+        "patchSetId": 3
+      },
+      "lineNbr": 372,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2013-08-20T04:01:54Z",
+      "side": 1,
+      "message": "left shift would be better than multiply, but neither is necessary.",
+      "revId": "bc0b1edbc24a1ea2b93bddccbd3c3eec60aa0aa8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
