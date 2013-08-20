@@ -793,7 +793,10 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
 
         sf->auto_min_max_partition_size = 1;
         sf->auto_min_max_partition_interval = 1;
-        sf->disable_split_var_thresh = 16;
+        // FIXME(jingning): temporarily turn off disable_split_var_thresh
+        // during refactoring process. will get this back after finishing
+        // the main framework of partition search type.
+        sf->disable_split_var_thresh = 0;
         sf->disable_filter_search_var_thresh = 16;
       }
       if (speed == 2) {
@@ -821,7 +824,7 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
         sf->use_rd_breakout = 1;
         sf->skip_encode_sb = 1;
         sf->use_lp32x32fdct = 1;
-        sf->using_small_partition_info = 1;
+        sf->using_small_partition_info = 0;
         sf->disable_splitmv =
             (MIN(cpi->common.width, cpi->common.height) >= 720)? 1 : 0;
         sf->auto_mv_step_size = 1;
