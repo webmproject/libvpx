@@ -390,14 +390,13 @@ typedef void (*foreach_transformed_block_visitor)(int plane, int block,
                                                   void *arg);
 
 static INLINE void foreach_transformed_block_in_plane(
-    const MACROBLOCKD* const xd, BLOCK_SIZE_TYPE bsize, int plane,
+    const MACROBLOCKD *const xd, BLOCK_SIZE_TYPE bsize, int plane,
     foreach_transformed_block_visitor visit, void *arg) {
   const struct macroblockd_plane *const pd = &xd->plane[plane];
-
+  const MB_MODE_INFO* mbmi = &xd->mode_info_context->mbmi;
   // block and transform sizes, in number of 4x4 blocks log 2 ("*_b")
   // 4x4=0, 8x8=2, 16x16=4, 32x32=6, 64x64=8
   // transform size varies per plane, look it up in a common way.
-  const MB_MODE_INFO* mbmi = &xd->mode_info_context->mbmi;
   const TX_SIZE tx_size = plane ? get_uv_tx_size(mbmi)
                                 : mbmi->txfm_size;
   const BLOCK_SIZE_TYPE plane_bsize = get_plane_block_size(bsize, pd);

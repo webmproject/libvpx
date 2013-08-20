@@ -1217,6 +1217,7 @@ static int64_t rd_pick_intra_sby_mode(VP9_COMP *cpi, MACROBLOCK *x,
   MB_PREDICTION_MODE mode;
   MB_PREDICTION_MODE mode_selected = DC_PRED;
   MACROBLOCKD *const xd = &x->e_mbd;
+  MODE_INFO *const mic = xd->mode_info_context;
   int this_rate, this_rate_tokenonly, s;
   int64_t this_distortion, this_rd;
   TX_SIZE best_tx = TX_4X4;
@@ -1230,7 +1231,6 @@ static int64_t rd_pick_intra_sby_mode(VP9_COMP *cpi, MACROBLOCK *x,
   /* Y Search for intra prediction mode */
   for (mode = DC_PRED; mode <= TM_PRED; mode++) {
     int64_t local_tx_cache[TX_MODES];
-    MODE_INFO *const mic = xd->mode_info_context;
     const int mis = xd->mode_info_stride;
 
     if (cpi->common.frame_type == KEY_FRAME) {
@@ -1240,7 +1240,7 @@ static int64_t rd_pick_intra_sby_mode(VP9_COMP *cpi, MACROBLOCK *x,
 
       bmode_costs = x->y_mode_costs[A][L];
     }
-    x->e_mbd.mode_info_context->mbmi.mode = mode;
+    mic->mbmi.mode = mode;
 
     super_block_yrd(cpi, x, &this_rate_tokenonly, &this_distortion, &s, NULL,
                     bsize, local_tx_cache, best_rd);
@@ -1254,7 +1254,7 @@ static int64_t rd_pick_intra_sby_mode(VP9_COMP *cpi, MACROBLOCK *x,
     if (this_rd < best_rd) {
       mode_selected   = mode;
       best_rd         = this_rd;
-      best_tx         = x->e_mbd.mode_info_context->mbmi.txfm_size;
+      best_tx         = mic->mbmi.txfm_size;
       *rate           = this_rate;
       *rate_tokenonly = this_rate_tokenonly;
       *distortion     = this_distortion;
@@ -1272,8 +1272,8 @@ static int64_t rd_pick_intra_sby_mode(VP9_COMP *cpi, MACROBLOCK *x,
     }
   }
 
-  x->e_mbd.mode_info_context->mbmi.mode = mode_selected;
-  x->e_mbd.mode_info_context->mbmi.txfm_size = best_tx;
+  mic->mbmi.mode = mode_selected;
+  mic->mbmi.txfm_size = best_tx;
 
   return best_rd;
 }
@@ -1437,7 +1437,7 @@ static int labels2mode(MACROBLOCK *x, int i,
                        int *mvjcost, int *mvcost[2], VP9_COMP *cpi) {
   MACROBLOCKD *const xd = &x->e_mbd;
   MODE_INFO *const mic = xd->mode_info_context;
-  MB_MODE_INFO * mbmi = &mic->mbmi;
+  MB_MODE_INFO *mbmi = &mic->mbmi;
   int cost = 0, thismvcost = 0;
   int idx, idy;
   const int num_4x4_blocks_wide = num_4x4_blocks_wide_lookup[mbmi->sb_type];

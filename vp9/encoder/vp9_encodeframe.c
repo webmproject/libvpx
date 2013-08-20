@@ -574,6 +574,7 @@ static void pick_sb_modes(VP9_COMP *cpi, int mi_row, int mi_col,
   MACROBLOCK *const x = &cpi->mb;
   MACROBLOCKD *const xd = &x->e_mbd;
 
+  // Use the lower precision, but faster, 32x32 fdct for mode selection.
   x->use_lp32x32fdct = 1;
 
   if (bsize < BLOCK_8X8) {
@@ -1757,8 +1758,6 @@ static void rd_pick_partition(VP9_COMP *cpi, TOKENEXTRA **tp, int mi_row,
     }
   }
 
-  // Use 4 subblocks' motion estimation results to speed up current
-  // partition's checking.
   x->fast_ms = 0;
   x->pred_mv.as_int = 0;
   x->subblock_ref = 0;
@@ -2178,7 +2177,7 @@ static void encode_frame_internal(VP9_COMP *cpi) {
     build_activity_map(cpi);
   }
 
-  // re-initencode frame context.
+  // Re-initialize encode frame context.
   init_encode_frame_mb_context(cpi);
 
   vp9_zero(cpi->rd_comp_pred_diff);
@@ -2414,7 +2413,7 @@ void vp9_encode_frame(VP9_COMP *cpi) {
   // decoder such that we allow compound where one of the 3 buffers has a
   // different sign bias and that buffer is then the fixed ref. However, this
   // requires further work in the rd loop. For now the only supported encoder
-  // side behaviour is where the ALT ref buffer has opposite sign bias to
+  // side behavior is where the ALT ref buffer has opposite sign bias to
   // the other two.
   if ((cm->ref_frame_sign_bias[ALTREF_FRAME]
        == cm->ref_frame_sign_bias[GOLDEN_FRAME])
@@ -2481,13 +2480,12 @@ void vp9_encode_frame(VP9_COMP *cpi) {
       filter_type = SWITCHABLE;
     }
 
-    /* transform size (4x4, 8x8, 16x16 or select-per-mb) selection */
-
     cpi->mb.e_mbd.lossless = 0;
     if (cpi->oxcf.lossless) {
       cpi->mb.e_mbd.lossless = 1;
     }
 
+    /* transform size selection (4x4, 8x8, 16x16 or select-per-mb) */
     select_tx_mode(cpi);
     cpi->common.comp_pred_mode = pred_type;
     cpi->common.mcomp_filter_type = filter_type;
