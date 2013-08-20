@@ -17,9 +17,6 @@
 #include "vpx/vpx_integer.h"
 #include "vpx_ports/mem.h"
 
-#define VP9_FILTER_WEIGHT 128
-#define VP9_FILTER_SHIFT  7
-
 /* Assume a bank of 16 filters to choose from. There are two implementations
  * for filter wrapping behavior, since we want to be able to pick which filter
  * to start with. We could either:
@@ -43,7 +40,7 @@ static void convolve_horiz_c(const uint8_t *src, ptrdiff_t src_stride,
                              const int16_t *filter_x0, int x_step_q4,
                              const int16_t *filter_y, int y_step_q4,
                              int w, int h, int taps) {
-  int x, y, k, sum;
+  int x, y, k;
   const int16_t *filter_x_base = filter_x0;
 
 #if ALIGN_FILTERS_256
@@ -64,12 +61,12 @@ static void convolve_horiz_c(const uint8_t *src, ptrdiff_t src_stride,
     for (x = 0; x < w; ++x) {
       /* Per-pixel src offset */
       int src_x = (x_q4 - x0_q4) >> 4;
+      int sum = 0;
 
-      for (sum = 0, k = 0; k < taps; ++k) {
+      for (k = 0; k < taps; ++k)
         sum += src[src_x + k] * filter_x[k];
-      }
-      sum += (VP9_FILTER_WEIGHT >> 1);
-      dst[x] = clip_pixel(sum >> VP9_FILTER_SHIFT);
+
+      dst[x] = clip_pixel(ROUND_POWER_OF_TWO(sum, VP9_FILTER_BITS));
 
       /* Adjust source and filter to use for the next pixel */
       x_q4 += x_step_q4;
@@ -85,7 +82,7 @@ static void convolve_avg_horiz_c(const uint8_t *src, ptrdiff_t src_stride,
                                  const int16_t *filter_x0, int x_step_q4,
                                  const int16_t *filter_y, int y_step_q4,
                                  int w, int h, int taps) {
-  int x, y, k, sum;
+  int x, y, k;
   const int16_t *filter_x_base = filter_x0;
 
 #if ALIGN_FILTERS_256
@@ -106,12 +103,13 @@ static void convolve_avg_horiz_c(const uint8_t *src, ptrdiff_t src_stride,
     for (x = 0; x < w; ++x) {
       /* Per-pixel src offset */
       int src_x = (x_q4 - x0_q4) >> 4;
+      int sum = 0;
 
-      for (sum = 0, k = 0; k < taps; ++k) {
+      for (k = 0; k < taps; ++k)
         sum += src[src_x + k] * filter_x[k];
-      }
-      sum += (VP9_FILTER_WEIGHT >> 1);
-      dst[x] = (dst[x] + clip_pixel(sum >> VP9_FILTER_SHIFT) + 1) >> 1;
+
+      dst[x] = ROUND_POWER_OF_TWO(dst[x] +
+                   clip_pixel(ROUND_POWER_OF_TWO(sum, VP9_FILTER_BITS)), 1);
 
       /* Adjust source and filter to use for the next pixel */
       x_q4 += x_step_q4;
@@ -127,7 +125,7 @@ static void convolve_vert_c(const uint8_t *src, ptrdiff_t src_stride,
                             const int16_t *filter_x, int x_step_q4,
                             const int16_t *filter_y0, int y_step_q4,
                             int w, int h, int taps) {
-  int x, y, k, sum;
+  int x, y, k;
 
   const int16_t *filter_y_base = filter_y0;
 
@@ -148,12 +146,13 @@ static void convolve_vert_c(const uint8_t *src, ptrdiff_t src_stride,
     for (y = 0; y < h; ++y) {
       /* Per-pixel src offset */
       int src_y = (y_q4 - y0_q4) >> 4;
+      int sum = 0;
 
-      for (sum = 0, k = 0; k < taps; ++k) {
+      for (k = 0; k < taps; ++k)
         sum += src[(src_y + k) * src_stride] * filter_y[k];
-      }
-      sum += (VP9_FILTER_WEIGHT >> 1);
-      dst[y * dst_stride] = clip_pixel(sum >> VP9_FILTER_SHIFT);
+
+      dst[y * dst_stride] =
+          clip_pixel(ROUND_POWER_OF_TWO(sum, VP9_FILTER_BITS));
 
       /* Adjust source and filter to use for the next pixel */
       y_q4 += y_step_q4;
@@ -169,7 +168,7 @@ static void convolve_avg_vert_c(const uint8_t *src, ptrdiff_t src_stride,
                                 const int16_t *filter_x, int x_step_q4,
                                 const int16_t *filter_y0, int y_step_q4,
                                 int w, int h, int taps) {
-  int x, y, k, sum;
+  int x, y, k;
 
   const int16_t *filter_y_base = filter_y0;
 
@@ -190,13 +189,13 @@ static void convolve_avg_vert_c(const uint8_t *src, ptrdiff_t src_stride,
     for (y = 0; y < h; ++y) {
       /* Per-pixel src offset */
       int src_y = (y_q4 - y0_q4) >> 4;
+      int sum = 0;
 
-      for (sum = 0, k = 0; k < taps; ++k) {
+      for (k = 0; k < taps; ++k)
         sum += src[(src_y + k) * src_stride] * filter_y[k];
-      }
-      sum += (VP9_FILTER_WEIGHT >> 1);
-      dst[y * dst_stride] =
-          (dst[y * dst_stride] + clip_pixel(sum >> VP9_FILTER_SHIFT) + 1) >> 1;
+
+      dst[y * dst_stride] = ROUND_POWER_OF_TWO(dst[y * dst_stride] +
+           clip_pixel(ROUND_POWER_OF_TWO(sum, VP9_FILTER_BITS)), 1);
 
       /* Adjust source and filter to use for the next pixel */
       y_q4 += y_step_q4;
