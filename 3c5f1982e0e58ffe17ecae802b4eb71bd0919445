@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAc3//7xM\u003d",
+        "filename": "vp9/common/arm/neon/vp9_short_idct8x8_add_neon.asm",
+        "patchSetId": 1
+      },
+      "lineNbr": 342,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2013-08-20T00:38:36Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAc3//9aI\u003d",
+      "revId": "3c5f1982e0e58ffe17ecae802b4eb71bd0919445",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAc3//9aU\u003d",
         "filename": "vp9/common/arm/neon/vp9_short_idct8x8_add_neon.asm",
         "patchSetId": 1
@@ -30,6 +48,24 @@
       "writtenOn": "2013-08-17T01:00:48Z",
       "side": 1,
       "message": "Neither of these have the second highest bit set and can be shifted without accidentally changing the sign",
+      "revId": "3c5f1982e0e58ffe17ecae802b4eb71bd0919445",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAc3//7wM\u003d",
+        "filename": "vp9/common/arm/neon/vp9_short_idct8x8_add_neon.asm",
+        "patchSetId": 1
+      },
+      "lineNbr": 350,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2013-08-20T00:38:36Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAc3//9aU\u003d",
       "revId": "3c5f1982e0e58ffe17ecae802b4eb71bd0919445",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAc3//7wI\u003d",
+        "filename": "vp9/common/arm/neon/vp9_short_idct8x8_add_neon.asm",
+        "patchSetId": 1
+      },
+      "lineNbr": 362,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2013-08-20T00:38:36Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAc3//9aA\u003d",
+      "revId": "3c5f1982e0e58ffe17ecae802b4eb71bd0919445",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAc3//9aQ\u003d",
         "filename": "vp9/common/arm/neon/vp9_short_idct8x8_add_neon.asm",
         "patchSetId": 1
@@ -70,6 +124,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAc3//7wE\u003d",
+        "filename": "vp9/common/arm/neon/vp9_short_idct8x8_add_neon.asm",
+        "patchSetId": 1
+      },
+      "lineNbr": 366,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2013-08-20T00:38:36Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAc3//9aQ\u003d",
+      "revId": "3c5f1982e0e58ffe17ecae802b4eb71bd0919445",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAc3//8uo\u003d",
         "filename": "vp9/common/arm/neon/vp9_short_idct8x8_add_neon.asm",
         "patchSetId": 1
@@ -81,6 +153,24 @@
       "writtenOn": "2013-08-19T16:40:56Z",
       "side": 1,
       "message": "You should be able to move this block above vqrshrn block above to free up the cycles. Or you can do these optimizations later for vp9_short_idct8x8_add_neon too.",
+      "revId": "3c5f1982e0e58ffe17ecae802b4eb71bd0919445",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAc3//7sI\u003d",
+        "filename": "vp9/common/arm/neon/vp9_short_idct8x8_add_neon.asm",
+        "patchSetId": 1
+      },
+      "lineNbr": 389,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2013-08-20T00:38:36Z",
+      "side": 1,
+      "message": "This optimization will be addressed in another CL since need to test more to see the timing. This CL is mainly for the vp9_short_idct10_8x8_add_neon implementation.",
+      "parentUuid": "AAAAc3//8uo\u003d",
       "revId": "3c5f1982e0e58ffe17ecae802b4eb71bd0919445",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -122,6 +212,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAc3//7vw\u003d",
+        "filename": "vp9/common/arm/neon/vp9_short_idct8x8_add_neon.asm",
+        "patchSetId": 1
+      },
+      "lineNbr": 401,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2013-08-20T00:38:36Z",
+      "side": 1,
+      "message": "Done. Use vqrdmulh instead of vqdmulh to save a bunch of instructions.",
+      "parentUuid": "AAAAc3//9aY\u003d",
+      "revId": "3c5f1982e0e58ffe17ecae802b4eb71bd0919445",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAc3//8uc\u003d",
         "filename": "vp9/common/arm/neon/vp9_short_idct8x8_add_neon.asm",
         "patchSetId": 1
@@ -133,6 +241,24 @@
       "writtenOn": "2013-08-19T16:40:56Z",
       "side": 1,
       "message": "Ditto. Move up one block.",
+      "revId": "3c5f1982e0e58ffe17ecae802b4eb71bd0919445",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAc3//7rM\u003d",
+        "filename": "vp9/common/arm/neon/vp9_short_idct8x8_add_neon.asm",
+        "patchSetId": 1
+      },
+      "lineNbr": 410,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2013-08-20T00:38:36Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAc3//8uc\u003d",
       "revId": "3c5f1982e0e58ffe17ecae802b4eb71bd0919445",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -156,6 +282,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAc3//7vc\u003d",
+        "filename": "vp9/common/arm/neon/vp9_short_idct8x8_add_neon.asm",
+        "patchSetId": 1
+      },
+      "lineNbr": 420,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2013-08-20T00:38:36Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAc3//8uQ\u003d",
+      "revId": "3c5f1982e0e58ffe17ecae802b4eb71bd0919445",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAc3//8uM\u003d",
         "filename": "vp9/common/arm/neon/vp9_short_idct8x8_add_neon.asm",
         "patchSetId": 1
@@ -173,6 +317,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAc3//7sE\u003d",
+        "filename": "vp9/common/arm/neon/vp9_short_idct8x8_add_neon.asm",
+        "patchSetId": 1
+      },
+      "lineNbr": 423,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2013-08-20T00:38:36Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAc3//8uM\u003d",
+      "revId": "3c5f1982e0e58ffe17ecae802b4eb71bd0919445",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAc3//8uE\u003d",
         "filename": "vp9/common/arm/neon/vp9_short_idct8x8_add_neon.asm",
         "patchSetId": 1
@@ -184,6 +346,24 @@
       "writtenOn": "2013-08-19T16:40:56Z",
       "side": 1,
       "message": "Ditto. Move this up to after vqrshrn (line 440).",
+      "revId": "3c5f1982e0e58ffe17ecae802b4eb71bd0919445",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAc3//7rI\u003d",
+        "filename": "vp9/common/arm/neon/vp9_short_idct8x8_add_neon.asm",
+        "patchSetId": 1
+      },
+      "lineNbr": 454,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2013-08-20T00:38:36Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAc3//8uE\u003d",
       "revId": "3c5f1982e0e58ffe17ecae802b4eb71bd0919445",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
