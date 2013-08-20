@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAc3//67s\u003d",
+        "filename": "vp9/common/vp9_mvref_common.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 177,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2013-08-20T13:55:14Z",
+      "side": 1,
+      "message": "it doesn\u0027t matter in practice (since all tiles are sb64 aligned), but for consistency, this check should use cm-\u003emi_rows, not cm-\u003ecur_tile_mi_rows_end, to make it clear that tile rows are not independent.",
+      "revId": "bd581c10735b9bcb75d0250d51ecac36faed6982",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
