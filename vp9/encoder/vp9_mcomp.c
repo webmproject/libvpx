@@ -1824,7 +1824,7 @@ int vp9_full_search_sadx8(MACROBLOCK *x, int_mv *ref_mv,
       }
     }
 
-    while ((c + 2) < col_max) {
+    while ((c + 2) < col_max && fn_ptr->sdx3f != NULL) {
       int i;
 
       fn_ptr->sdx3f(what, what_stride, check_here, in_what_stride, sad_array);
