@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAc3//79I\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 13
+      },
+      "lineNbr": 581,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2013-08-20T00:17:10Z",
+      "side": 1,
+      "message": "This rounding will only work for +ve numbers... you need to subtract 0.5 from negative values. This might bias your mapping somewhat.",
+      "revId": "9009de32d3d7aa07a268f290f0ce915bcc0253ab",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
