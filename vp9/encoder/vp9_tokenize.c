@@ -103,22 +103,9 @@ static void set_entropy_context_b(int plane, int block,
   struct tokenize_b_args* const args = arg;
   MACROBLOCKD *const xd = args->xd;
   struct macroblockd_plane *pd = &xd->plane[plane];
-  const int off = block >> (2 * tx_size);
-  const int mod = b_width_log2(plane_bsize) - tx_size;
-  const int aoff = (off & ((1 << mod) - 1)) << tx_size;
-  const int loff = (off >> mod) << tx_size;
-  ENTROPY_CONTEXT *A = pd->above_context + aoff;
-  ENTROPY_CONTEXT *L = pd->left_context + loff;
-  const int eob = pd->eobs[block];
-  const int tx_size_in_blocks = 1 << tx_size;
-
-  if (xd->mb_to_right_edge < 0 || xd->mb_to_bottom_edge < 0) {
-    set_contexts_on_border(xd, plane_bsize, plane, tx_size_in_blocks, eob, aoff,
-                           loff, A, L);
-  } else {
-    vpx_memset(A, eob > 0, sizeof(ENTROPY_CONTEXT) * tx_size_in_blocks);
-    vpx_memset(L, eob > 0, sizeof(ENTROPY_CONTEXT) * tx_size_in_blocks);
-  }
+  int aoff, loff;
+  txfrm_block_to_raster_xy(plane_bsize, tx_size, block, &aoff, &loff);
+  set_contexts(xd, pd, plane_bsize, tx_size, pd->eobs[block] > 0, aoff, loff);
 }
 
 static void tokenize_b(int plane, int block, BLOCK_SIZE_TYPE plane_bsize,
@@ -127,7 +114,6 @@ static void tokenize_b(int plane, int block, BLOCK_SIZE_TYPE plane_bsize,
   VP9_COMP *cpi = args->cpi;
   MACROBLOCKD *xd = args->xd;
   TOKENEXTRA **tp = args->tp;
-  const int tx_size_in_blocks = 1 << tx_size;
   struct macroblockd_plane *pd = &xd->plane[plane];
   MB_MODE_INFO *mbmi = &xd->mode_info_context->mbmi;
   int pt; /* near block/prev token context index */
@@ -136,27 +122,25 @@ static void tokenize_b(int plane, int block, BLOCK_SIZE_TYPE plane_bsize,
   const int eob = pd->eobs[block];
   const PLANE_TYPE type = pd->plane_type;
   const int16_t *qcoeff_ptr = BLOCK_OFFSET(pd->qcoeff, block);
-  const int off = block >> (2 * tx_size);
-  const int mod = b_width_log2(plane_bsize) - tx_size;
-  const int aoff = (off & ((1 << mod) - 1)) << tx_size;
-  const int loff = (off >> mod) << tx_size;
-  ENTROPY_CONTEXT *A = pd->above_context + aoff;
-  ENTROPY_CONTEXT *L = pd->left_context + loff;
   int seg_eob;
   const int segment_id = mbmi->segment_id;
   const int16_t *scan, *nb;
-  vp9_coeff_count *counts;
-  vp9_coeff_probs_model *coef_probs;
+  vp9_coeff_count *const counts = cpi->coef_counts[tx_size];
+  vp9_coeff_probs_model *const coef_probs = cpi->common.fc.coef_probs[tx_size];
   const int ref = is_inter_block(mbmi);
   ENTROPY_CONTEXT above_ec, left_ec;
   uint8_t token_cache[1024];
   const uint8_t *band_translate;
+  ENTROPY_CONTEXT *A, *L;
+  int aoff, loff;
+  txfrm_block_to_raster_xy(plane_bsize, tx_size, block, &aoff, &loff);
+
+  A = pd->above_context + aoff;
+  L = pd->left_context + loff;
+
   assert((!type && !plane) || (type && plane));
 
-  counts = cpi->coef_counts[tx_size];
-  coef_probs = cpi->common.fc.coef_probs[tx_size];
   switch (tx_size) {
-    default:
     case TX_4X4:
       above_ec = A[0] != 0;
       left_ec = L[0] != 0;
@@ -185,6 +169,8 @@ static void tokenize_b(int plane, int block, BLOCK_SIZE_TYPE plane_bsize,
       scan = vp9_default_scan_32x32;
       band_translate = vp9_coefband_trans_8x8plus;
       break;
+    default:
+      assert(!"Invalid transform size");
   }
 
   pt = combine_entropy_contexts(above_ec, left_ec);
@@ -226,13 +212,8 @@ static void tokenize_b(int plane, int block, BLOCK_SIZE_TYPE plane_bsize,
   } while (c < eob && ++c < seg_eob);
 
   *tp = t;
-  if (xd->mb_to_right_edge < 0 || xd->mb_to_bottom_edge < 0) {
-    set_contexts_on_border(xd, plane_bsize, plane, tx_size_in_blocks, c,
-                           aoff, loff, A, L);
-  } else {
-    vpx_memset(A, c > 0, sizeof(ENTROPY_CONTEXT) * tx_size_in_blocks);
-    vpx_memset(L, c > 0, sizeof(ENTROPY_CONTEXT) * tx_size_in_blocks);
-  }
+
+  set_contexts(xd, pd, plane_bsize, tx_size, c > 0, aoff, loff);
 }
 
 struct is_skippable_args {

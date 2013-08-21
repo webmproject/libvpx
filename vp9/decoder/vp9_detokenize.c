@@ -260,26 +260,17 @@ static void decode_block(int plane, int block, BLOCK_SIZE_TYPE plane_bsize,
   const int segment_id = xd->mode_info_context->mbmi.segment_id;
   const int ss_txfrm_size = tx_size << 1;
   const int seg_eob = get_eob(seg, segment_id, 16 << ss_txfrm_size);
-  const int off = block >> ss_txfrm_size;
-  const int mod = b_width_log2(plane_bsize) - tx_size;
-  const int aoff = (off & ((1 << mod) - 1)) << tx_size;
-  const int loff = (off >> mod) << tx_size;
-  const int tx_size_in_blocks = 1 << tx_size;
-  ENTROPY_CONTEXT *A = pd->above_context + aoff;
-  ENTROPY_CONTEXT *L = pd->left_context + loff;
-  const int eob = decode_coefs(&arg->pbi->common, xd, arg->r, block,
-                               pd->plane_type, seg_eob,
-                               BLOCK_OFFSET(pd->qcoeff, block),
-                               tx_size, pd->dequant, A, L);
+  int aoff, loff, eob;
 
-  if (xd->mb_to_right_edge < 0 || xd->mb_to_bottom_edge < 0) {
-    set_contexts_on_border(xd, plane_bsize, plane, tx_size_in_blocks, eob,
-                           aoff, loff, A, L);
-  } else {
-    int pt;
-    for (pt = 0; pt < tx_size_in_blocks; pt++)
-      A[pt] = L[pt] = eob > 0;
-  }
+  txfrm_block_to_raster_xy(plane_bsize, tx_size, block, &aoff, &loff);
+
+  eob = decode_coefs(&arg->pbi->common, xd, arg->r, block,
+                     pd->plane_type, seg_eob, BLOCK_OFFSET(pd->qcoeff, block),
+                     tx_size, pd->dequant,
+                     pd->above_context + aoff, pd->left_context + loff);
+
+  set_contexts(xd, pd, plane_bsize, tx_size, eob > 0, aoff, loff);
+
   pd->eobs[block] = eob;
   *arg->eobtotal += eob;
 }

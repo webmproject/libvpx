@@ -545,7 +545,7 @@ static void txfrm_block_to_raster_xy(BLOCK_SIZE_TYPE plane_bsize,
   const int tx_cols = 1 << tx_cols_log2;
   const int raster_mb = block >> (tx_size << 1);
   *x = (raster_mb & (tx_cols - 1)) << tx_size;
-  *y = raster_mb >> tx_cols_log2 << tx_size;
+  *y = (raster_mb >> tx_cols_log2) << tx_size;
 }
 
 static void extend_for_intra(MACROBLOCKD* const xd, BLOCK_SIZE_TYPE plane_bsize,
@@ -585,11 +585,12 @@ static void extend_for_intra(MACROBLOCKD* const xd, BLOCK_SIZE_TYPE plane_bsize,
         *d = c;
   }
 }
-static void set_contexts_on_border(MACROBLOCKD *xd, BLOCK_SIZE_TYPE plane_bsize,
-                                   int plane, int tx_size_in_blocks,
-                                   int eob, int aoff, int loff,
+static void set_contexts_on_border(MACROBLOCKD *xd,
+                                   struct macroblockd_plane *pd,
+                                   BLOCK_SIZE_TYPE plane_bsize,
+                                   int tx_size_in_blocks, int has_eob,
+                                   int aoff, int loff,
                                    ENTROPY_CONTEXT *A, ENTROPY_CONTEXT *L) {
-  struct macroblockd_plane *pd = &xd->plane[plane];
   int mi_blocks_wide = num_4x4_blocks_wide_lookup[plane_bsize];
   int mi_blocks_high = num_4x4_blocks_high_lookup[plane_bsize];
   int above_contexts = tx_size_in_blocks;
@@ -613,14 +614,29 @@ static void set_contexts_on_border(MACROBLOCKD *xd, BLOCK_SIZE_TYPE plane_bsize,
     left_contexts = mi_blocks_high - loff;
 
   for (pt = 0; pt < above_contexts; pt++)
-    A[pt] = eob > 0;
+    A[pt] = has_eob;
   for (pt = above_contexts; pt < tx_size_in_blocks; pt++)
     A[pt] = 0;
   for (pt = 0; pt < left_contexts; pt++)
-    L[pt] = eob > 0;
+    L[pt] = has_eob;
   for (pt = left_contexts; pt < tx_size_in_blocks; pt++)
     L[pt] = 0;
 }
 
+static void set_contexts(MACROBLOCKD *xd, struct macroblockd_plane *pd,
+                         BLOCK_SIZE_TYPE plane_bsize, TX_SIZE tx_size,
+                         int has_eob, int aoff, int loff) {
+  ENTROPY_CONTEXT *const A = pd->above_context + aoff;
+  ENTROPY_CONTEXT *const L = pd->left_context + loff;
+  const int tx_size_in_blocks = 1 << tx_size;
+
+  if (xd->mb_to_right_edge < 0 || xd->mb_to_bottom_edge < 0) {
+    set_contexts_on_border(xd, pd, plane_bsize, tx_size_in_blocks, has_eob,
+                           aoff, loff, A, L);
+  } else {
+    vpx_memset(A, has_eob, sizeof(ENTROPY_CONTEXT) * tx_size_in_blocks);
+    vpx_memset(L, has_eob, sizeof(ENTROPY_CONTEXT) * tx_size_in_blocks);
+  }
+}
 
 #endif  // VP9_COMMON_VP9_BLOCKD_H_
