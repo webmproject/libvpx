@@ -458,57 +458,6 @@ static INLINE void foreach_transformed_block_uv(
     foreach_transformed_block_in_plane(xd, bsize, plane, visit, arg);
 }
 
-// TODO(jkoleszar): In principle, pred_w, pred_h are unnecessary, as we could
-// calculate the subsampled BLOCK_SIZE_TYPE, but that type isn't defined for
-// sizes smaller than 16x16 yet.
-typedef void (*foreach_predicted_block_visitor)(int plane, int block,
-                                                BLOCK_SIZE_TYPE bsize,
-                                                int pred_w, int pred_h,
-                                                void *arg);
-static INLINE void foreach_predicted_block_in_plane(
-    const MACROBLOCKD* const xd, BLOCK_SIZE_TYPE bsize, int plane,
-    foreach_predicted_block_visitor visit, void *arg) {
-  int i, x, y;
-
-  // block sizes in number of 4x4 blocks log 2 ("*_b")
-  // 4x4=0, 8x8=2, 16x16=4, 32x32=6, 64x64=8
-  // subsampled size of the block
-  const int bwl = b_width_log2(bsize) - xd->plane[plane].subsampling_x;
-  const int bhl = b_height_log2(bsize) - xd->plane[plane].subsampling_y;
-
-  // size of the predictor to use.
-  int pred_w, pred_h;
-
-  if (xd->mode_info_context->mbmi.sb_type < BLOCK_8X8) {
-    assert(bsize == BLOCK_8X8);
-    pred_w = 0;
-    pred_h = 0;
-  } else {
-    pred_w = bwl;
-    pred_h = bhl;
-  }
-  assert(pred_w <= bwl);
-  assert(pred_h <= bhl);
-
-  // visit each subblock in raster order
-  i = 0;
-  for (y = 0; y < 1 << bhl; y += 1 << pred_h) {
-    for (x = 0; x < 1 << bwl; x += 1 << pred_w) {
-      visit(plane, i, bsize, pred_w, pred_h, arg);
-      i += 1 << pred_w;
-    }
-    i += (1 << (bwl + pred_h)) - (1 << bwl);
-  }
-}
-static INLINE void foreach_predicted_block(
-    const MACROBLOCKD* const xd, BLOCK_SIZE_TYPE bsize,
-    foreach_predicted_block_visitor visit, void *arg) {
-  int plane;
-
-  for (plane = 0; plane < MAX_MB_PLANE; plane++)
-    foreach_predicted_block_in_plane(xd, bsize, plane, visit, arg);
-}
-
 static int raster_block_offset(BLOCK_SIZE_TYPE plane_bsize,
                                int raster_block, int stride) {
   const int bw = b_width_log2(plane_bsize);
