@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAc3//4Nk\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1714,
+      "author": {
+        "id": 1003307
+      },
+      "writtenOn": "2013-08-21T23:50:27Z",
+      "side": 1,
+      "message": "No point in checking this if the previous check failed, so we could do:\n\nif (source_variancey \u003c cpi-\u003esf.disable_split_var_thresh) {\n  do_split \u003d 0;\n  if (source_variancey \u003c cpi-\u003esf.disable_split_var_thresh / 2)\n    do_rect \u003d 0;\n}",
+      "revId": "c67446eb46ddda248b6219d23bce598cb5932975",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
