@@ -485,42 +485,39 @@ static const int16_t band_counts[TX_SIZES][8] = {
 };
 
 static INLINE int cost_coeffs(MACROBLOCK *mb,
-                              int plane, int block, PLANE_TYPE type,
+                              int plane, int block,
                               ENTROPY_CONTEXT *A, ENTROPY_CONTEXT *L,
                               TX_SIZE tx_size,
                               const int16_t *scan, const int16_t *nb) {
   MACROBLOCKD *const xd = &mb->e_mbd;
   MB_MODE_INFO *mbmi = &xd->mode_info_context->mbmi;
-  int pt, c, cost;
+  struct macroblockd_plane *pd = &xd->plane[plane];
+  const PLANE_TYPE type = pd->plane_type;
   const int16_t *band_count = &band_counts[tx_size][1];
-  const int eob = xd->plane[plane].eobs[block];
-  const int16_t *qcoeff_ptr = BLOCK_OFFSET(xd->plane[plane].qcoeff, block);
+  const int eob = pd->eobs[block];
+  const int16_t *const qcoeff_ptr = BLOCK_OFFSET(pd->qcoeff, block);
   const int ref = mbmi->ref_frame[0] != INTRA_FRAME;
-  unsigned int (*token_costs)[2][PREV_COEF_CONTEXTS]
-                    [MAX_ENTROPY_TOKENS] = mb->token_costs[tx_size][type][ref];
-  ENTROPY_CONTEXT above_ec = !!*A, left_ec = !!*L;
+  unsigned int (*token_costs)[2][PREV_COEF_CONTEXTS][MAX_ENTROPY_TOKENS] =
+                   mb->token_costs[tx_size][type][ref];
+  const ENTROPY_CONTEXT above_ec = !!*A, left_ec = !!*L;
   uint8_t token_cache[1024];
+  int pt = combine_entropy_contexts(above_ec, left_ec);
+  int c, cost;
 
   // Check for consistency of tx_size with mode info
-  assert((!type && !plane) || (type && plane));
-  if (type == PLANE_TYPE_Y_WITH_DC) {
-    assert(xd->mode_info_context->mbmi.txfm_size == tx_size);
-  } else {
-    assert(tx_size == get_uv_tx_size(mbmi));
-  }
-
-  pt = combine_entropy_contexts(above_ec, left_ec);
+  assert(type == PLANE_TYPE_Y_WITH_DC ? mbmi->txfm_size == tx_size
+                                      : get_uv_tx_size(mbmi) == tx_size);
 
   if (eob == 0) {
     // single eob token
     cost = token_costs[0][0][pt][DCT_EOB_TOKEN];
     c = 0;
   } else {
-    int v, prev_t, band_left = *band_count++;
+    int band_left = *band_count++;
 
     // dc token
-    v = qcoeff_ptr[0];
-    prev_t = vp9_dct_value_tokens_ptr[v].token;
+    int v = qcoeff_ptr[0];
+    int prev_t = vp9_dct_value_tokens_ptr[v].token;
     cost = (*token_costs)[0][pt][prev_t] + vp9_dct_value_cost_ptr[v];
     token_cache[0] = vp9_pt_energy_class[prev_t];
     ++token_costs;
@@ -550,7 +547,7 @@ static INLINE int cost_coeffs(MACROBLOCK *mb,
   }
 
   // is eob first coefficient;
-  *A = *L = c > 0;
+  *A = *L = (c > 0);
 
   return cost;
 }
@@ -598,14 +595,12 @@ static void dist_block(int plane, int block, TX_SIZE tx_size, void *arg) {
 static void rate_block(int plane, int block, BLOCK_SIZE_TYPE plane_bsize,
                        TX_SIZE tx_size, void *arg) {
   struct rdcost_block_args* args = arg;
-  MACROBLOCKD *const xd = &args->x->e_mbd;
-  struct macroblockd_plane *const pd = &xd->plane[plane];
 
   int x_idx, y_idx;
   txfrm_block_to_raster_xy(plane_bsize, args->tx_size, block, &x_idx, &y_idx);
 
   args->rate += cost_coeffs(args->x, plane, block,
-                            pd->plane_type, args->t_above + x_idx,
+                            args->t_above + x_idx,
                             args->t_left + y_idx, args->tx_size,
                             args->scan, args->nb);
 }
@@ -1091,7 +1086,7 @@ static int64_t rd_pick_intra4x4block(VP9_COMP *cpi, MACROBLOCK *x, int ib,
         }
 
         scan = get_scan_4x4(get_tx_type_4x4(PLANE_TYPE_Y_WITH_DC, xd, block));
-        ratey += cost_coeffs(x, 0, block, PLANE_TYPE_Y_WITH_DC,
+        ratey += cost_coeffs(x, 0, block,
                              tempa + idx, templ + idy, TX_4X4, scan,
                              vp9_get_coef_neighbors_handle(scan));
         distortion += vp9_block_error(coeff, BLOCK_OFFSET(pd->dqcoeff, block),
@@ -1563,7 +1558,7 @@ static int64_t encode_inter_mb_segment(VP9_COMP *cpi,
       thisdistortion += vp9_block_error(coeff, BLOCK_OFFSET(pd->dqcoeff, k),
                                         16, &ssz);
       thissse += ssz;
-      thisrate += cost_coeffs(x, 0, k, PLANE_TYPE_Y_WITH_DC,
+      thisrate += cost_coeffs(x, 0, k,
                               ta + (k & 1),
                               tl + (k >> 1), TX_4X4,
                               vp9_default_scan_4x4,
