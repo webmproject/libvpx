@@ -10,6 +10,7 @@
 
 #include "./vp9_rtcd.h"
 #include "vp9/common/vp9_filter.h"
+#include "vp9/common/vp9_onyxc_int.h"
 #include "vp9/common/vp9_scale.h"
 
 static INLINE int scaled_x(int val, const struct scale_factors *scale) {
@@ -61,9 +62,23 @@ static int get_fixed_point_scale_factor(int other_size, int this_size) {
   return (other_size << VP9_REF_SCALE_SHIFT) / this_size;
 }
 
-void vp9_setup_scale_factors_for_frame(struct scale_factors *scale,
+static int check_scale_factors(int other_w, int other_h,
+                               int this_w, int this_h) {
+  return 2 * this_w >= other_w &&
+         2 * this_h >= other_h &&
+         this_w <= 16 * other_w &&
+         this_h <= 16 * other_h;
+}
+
+void vp9_setup_scale_factors_for_frame(struct VP9Common *cm,
+                                       struct scale_factors *scale,
                                        int other_w, int other_h,
                                        int this_w, int this_h) {
+  if (!check_scale_factors(other_w, other_h, this_w, this_h))
+    vpx_internal_error(&cm->error, VPX_CODEC_UNSUP_BITSTREAM,
+                       "Invalid scale factors");
+
+
   scale->x_scale_fp = get_fixed_point_scale_factor(other_w, this_w);
   scale->x_offset_q4 = 0;  // calculated per block
   scale->x_step_q4 = scaled_x(16, scale);

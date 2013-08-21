@@ -210,7 +210,7 @@ void vp9_setup_scale_factors(VP9_COMMON *cm, int i) {
     vp9_zero(*sf);
   } else {
     YV12_BUFFER_CONFIG *const fb = &cm->yv12_fb[ref];
-    vp9_setup_scale_factors_for_frame(sf,
+    vp9_setup_scale_factors_for_frame(cm, sf,
                                       fb->y_crop_width, fb->y_crop_height,
                                       cm->width, cm->height);
 
