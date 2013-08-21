@@ -108,7 +108,7 @@ void vp9_loop_filter_frame_init(VP9_COMMON *const cm, int default_filt_lvl) {
     if (!lf->mode_ref_delta_enabled) {
       // we could get rid of this if we assume that deltas are set to
       // zero when not in use; encoder always uses deltas
-      vpx_memset(lfi->lvl[seg_id][0], lvl_seg, sizeof(lfi->lvl[seg_id][0]));
+      vpx_memset(lfi->lvl[seg_id], lvl_seg, sizeof(lfi->lvl[seg_id]));
       continue;
     }
 
