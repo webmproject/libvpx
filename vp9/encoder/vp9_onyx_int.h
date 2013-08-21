@@ -36,6 +36,8 @@
 #define DISABLE_RC_LONG_TERM_MEM 0
 #endif
 
+// #define MODE_TEST_HIT_STATS
+
 // #define SPEEDSTATS 1
 #if CONFIG_MULTIPLE_ARF
 // Set MIN_GF_INTERVAL to 1 for the full decomposition.
@@ -663,6 +665,12 @@ typedef struct VP9_COMP {
 
 #ifdef ENTROPY_STATS
   int64_t mv_ref_stats[INTER_MODE_CONTEXTS][INTER_MODES - 1][2];
+#endif
+
+
+#ifdef MODE_TEST_HIT_STATS
+  // Debug / test stats
+  int64_t mode_test_hits[BLOCK_SIZES];
 #endif
 } VP9_COMP;
 
