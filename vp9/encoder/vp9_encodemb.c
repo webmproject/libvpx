@@ -378,13 +378,13 @@ void vp9_optimize_b(int plane, int block, BLOCK_SIZE_TYPE plane_bsize,
              &ctx->ta[plane][x], &ctx->tl[plane][y], tx_size);
 }
 
-void optimize_init_b(int plane, BLOCK_SIZE_TYPE bsize, void *arg) {
-  const struct encode_b_args* const args = arg;
+static void optimize_init_b(int plane, BLOCK_SIZE_TYPE bsize,
+                            struct encode_b_args *args) {
   const MACROBLOCKD *xd = &args->x->e_mbd;
   const struct macroblockd_plane* const pd = &xd->plane[plane];
-  const int bwl = b_width_log2(bsize) - pd->subsampling_x;
-  const int bhl = b_height_log2(bsize) - pd->subsampling_y;
-  const int bw = 1 << bwl, bh = 1 << bhl;
+  const BLOCK_SIZE_TYPE plane_bsize = get_plane_block_size(bsize, pd);
+  const int num_4x4_w = num_4x4_blocks_wide_lookup[plane_bsize];
+  const int num_4x4_h = num_4x4_blocks_high_lookup[plane_bsize];
   const MB_MODE_INFO *mbmi = &xd->mode_info_context->mbmi;
   const TX_SIZE tx_size = plane ? get_uv_tx_size(mbmi) : mbmi->txfm_size;
   int i;
@@ -392,26 +392,26 @@ void optimize_init_b(int plane, BLOCK_SIZE_TYPE bsize, void *arg) {
   switch (tx_size) {
     case TX_4X4:
       vpx_memcpy(args->ctx->ta[plane], pd->above_context,
-                 sizeof(ENTROPY_CONTEXT) * bw);
+                 sizeof(ENTROPY_CONTEXT) * num_4x4_w);
       vpx_memcpy(args->ctx->tl[plane], pd->left_context,
-                 sizeof(ENTROPY_CONTEXT) * bh);
+                 sizeof(ENTROPY_CONTEXT) * num_4x4_h);
       break;
     case TX_8X8:
-      for (i = 0; i < bw; i += 2)
+      for (i = 0; i < num_4x4_w; i += 2)
         args->ctx->ta[plane][i] = !!*(uint16_t *)&pd->above_context[i];
-      for (i = 0; i < bh; i += 2)
+      for (i = 0; i < num_4x4_h; i += 2)
         args->ctx->tl[plane][i] = !!*(uint16_t *)&pd->left_context[i];
       break;
     case TX_16X16:
-      for (i = 0; i < bw; i += 4)
+      for (i = 0; i < num_4x4_w; i += 4)
         args->ctx->ta[plane][i] = !!*(uint32_t *)&pd->above_context[i];
-      for (i = 0; i < bh; i += 4)
+      for (i = 0; i < num_4x4_h; i += 4)
         args->ctx->tl[plane][i] = !!*(uint32_t *)&pd->left_context[i];
       break;
     case TX_32X32:
-      for (i = 0; i < bw; i += 8)
+      for (i = 0; i < num_4x4_w; i += 8)
         args->ctx->ta[plane][i] = !!*(uint64_t *)&pd->above_context[i];
-      for (i = 0; i < bh; i += 8)
+      for (i = 0; i < num_4x4_h; i += 8)
         args->ctx->tl[plane][i] = !!*(uint64_t *)&pd->left_context[i];
       break;
     default:
