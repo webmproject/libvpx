@@ -12,7 +12,6 @@
 
 #include "vp9/common/vp9_findnearmv.h"
 #include "vp9/common/vp9_mvref_common.h"
-#include "vp9/common/vp9_sadmxn.h"
 
 static void lower_mv_precision(MV *mv, int allow_hp) {
   const int use_hp = allow_hp && vp9_use_mv_hp(mv);
