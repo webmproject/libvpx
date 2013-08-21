@@ -1713,15 +1713,16 @@ static void rd_pick_partition(VP9_COMP *cpi, TOKENEXTRA **tp, int mi_row,
     unsigned int source_variancey;
     vp9_setup_src_planes(x, cpi->Source, mi_row, mi_col);
     source_variancey = get_sby_perpixel_variance(cpi, x, bsize);
-    if (source_variancey < cpi->sf.disable_split_var_thresh)
+    if (source_variancey < cpi->sf.disable_split_var_thresh) {
       do_split = 0;
-    else if (source_variancey < cpi->sf.disable_split_var_thresh / 2)
-      do_rect = 0;
+      if (source_variancey < cpi->sf.disable_split_var_thresh / 2)
+        do_rect = 0;
+    }
   }
   // PARTITION_SPLIT
   if (do_split &&
       (!cpi->sf.auto_min_max_partition_size ||
-       bsize >= cpi->sf.min_partition_size)) {
+       bsize > cpi->sf.min_partition_size)) {
     if (bsize > BLOCK_8X8) {
       subsize = get_subsize(bsize, PARTITION_SPLIT);
       for (i = 0; i < 4 && sum_rd < best_rd; ++i) {
