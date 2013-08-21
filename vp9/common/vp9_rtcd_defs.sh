@@ -343,12 +343,6 @@ specialize vp9_short_iwalsh4x4_1_add
 prototype void vp9_short_iwalsh4x4_add "int16_t *input, uint8_t *dest, int dest_stride"
 specialize vp9_short_iwalsh4x4_add
 
-prototype unsigned int vp9_sad32x3 "const uint8_t *src_ptr, int  src_stride, const uint8_t *ref_ptr, int ref_stride, int max_sad"
-specialize vp9_sad32x3
-
-prototype unsigned int vp9_sad3x32 "const uint8_t *src_ptr, int  src_stride, const uint8_t *ref_ptr, int ref_stride, int max_sad"
-specialize vp9_sad3x32
-
 #
 # Encoder functions below this point.
 #
