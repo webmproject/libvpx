@@ -437,7 +437,7 @@ void vp9_temporal_filter_prepare(VP9_COMP *cpi, int distance) {
 #endif
 
   // Setup scaling factors. Scaling on each of the arnr frames is not supported
-  vp9_setup_scale_factors_for_frame(&cpi->mb.e_mbd.scale_factor[0],
+  vp9_setup_scale_factors_for_frame(cm, &cpi->mb.e_mbd.scale_factor[0],
       cm->yv12_fb[cm->new_fb_idx].y_crop_width,
       cm->yv12_fb[cm->new_fb_idx].y_crop_height,
       cm->width, cm->height);
