@@ -51,14 +51,14 @@ static const struct extraconfig_map extracfg_map[] = {
     {
       NULL,
       0,                          /* cpu_used      */
-      0,                          /* enable_auto_alt_ref */
+      1,                          /* enable_auto_alt_ref */
       0,                          /* noise_sensitivity */
       0,                          /* Sharpness */
       0,                          /* static_thresh */
       0,                          /* tile_columns */
       0,                          /* tile_rows */
-      0,                          /* arnr_max_frames */
-      3,                          /* arnr_strength */
+      7,                          /* arnr_max_frames */
+      5,                          /* arnr_strength */
       3,                          /* arnr_type*/
       0,                          /* experimental mode */
       0,                          /* tuning*/
@@ -411,21 +411,20 @@ static vpx_codec_err_t set_param(vpx_codec_alg_priv_t *ctx,
 #define MAP(id, var) case id: var = CAST(id, args); break;
 
   switch (ctrl_id) {
-      MAP(VP8E_SET_CPUUSED,               xcfg.cpu_used);
-      MAP(VP8E_SET_ENABLEAUTOALTREF,      xcfg.enable_auto_alt_ref);
-      MAP(VP8E_SET_NOISE_SENSITIVITY,     xcfg.noise_sensitivity);
-      MAP(VP8E_SET_SHARPNESS,             xcfg.Sharpness);
-      MAP(VP8E_SET_STATIC_THRESHOLD,      xcfg.static_thresh);
-      MAP(VP9E_SET_TILE_COLUMNS,          xcfg.tile_columns);
-      MAP(VP9E_SET_TILE_ROWS,             xcfg.tile_rows);
-
-      MAP(VP8E_SET_ARNR_MAXFRAMES,        xcfg.arnr_max_frames);
-      MAP(VP8E_SET_ARNR_STRENGTH,        xcfg.arnr_strength);
-      MAP(VP8E_SET_ARNR_TYPE,        xcfg.arnr_type);
-      MAP(VP8E_SET_TUNING,                xcfg.tuning);
-      MAP(VP8E_SET_CQ_LEVEL,              xcfg.cq_level);
-      MAP(VP8E_SET_MAX_INTRA_BITRATE_PCT, xcfg.rc_max_intra_bitrate_pct);
-      MAP(VP9E_SET_LOSSLESS,              xcfg.lossless);
+      MAP(VP8E_SET_CPUUSED,                 xcfg.cpu_used);
+      MAP(VP8E_SET_ENABLEAUTOALTREF,        xcfg.enable_auto_alt_ref);
+      MAP(VP8E_SET_NOISE_SENSITIVITY,       xcfg.noise_sensitivity);
+      MAP(VP8E_SET_SHARPNESS,               xcfg.Sharpness);
+      MAP(VP8E_SET_STATIC_THRESHOLD,        xcfg.static_thresh);
+      MAP(VP9E_SET_TILE_COLUMNS,            xcfg.tile_columns);
+      MAP(VP9E_SET_TILE_ROWS,               xcfg.tile_rows);
+      MAP(VP8E_SET_ARNR_MAXFRAMES,          xcfg.arnr_max_frames);
+      MAP(VP8E_SET_ARNR_STRENGTH,           xcfg.arnr_strength);
+      MAP(VP8E_SET_ARNR_TYPE,               xcfg.arnr_type);
+      MAP(VP8E_SET_TUNING,                  xcfg.tuning);
+      MAP(VP8E_SET_CQ_LEVEL,                xcfg.cq_level);
+      MAP(VP8E_SET_MAX_INTRA_BITRATE_PCT,   xcfg.rc_max_intra_bitrate_pct);
+      MAP(VP9E_SET_LOSSLESS,                xcfg.lossless);
       MAP(VP9E_SET_FRAME_PARALLEL_DECODING, xcfg.frame_parallel_decoding_mode);
   }
 
@@ -1026,8 +1025,8 @@ static vpx_codec_ctrl_fn_map_t vp9e_ctf_maps[] = {
   {VP8E_GET_LAST_QUANTIZER,           get_param},
   {VP8E_GET_LAST_QUANTIZER_64,        get_param},
   {VP8E_SET_ARNR_MAXFRAMES,           set_param},
-  {VP8E_SET_ARNR_STRENGTH,           set_param},
-  {VP8E_SET_ARNR_TYPE,           set_param},
+  {VP8E_SET_ARNR_STRENGTH,            set_param},
+  {VP8E_SET_ARNR_TYPE,                set_param},
   {VP8E_SET_TUNING,                   set_param},
   {VP8E_SET_CQ_LEVEL,                 set_param},
   {VP8E_SET_MAX_INTRA_BITRATE_PCT,    set_param},
@@ -1053,7 +1052,7 @@ static vpx_codec_enc_cfg_map_t vp9e_usage_cfg_map[] = {
 
       VPX_RC_ONE_PASS,    /* g_pass */
 
-      0,                  /* g_lag_in_frames */
+      25,                 /* g_lag_in_frames */
 
       0,                  /* rc_dropframe_thresh */
       0,                  /* rc_resize_allowed */
@@ -1065,7 +1064,7 @@ static vpx_codec_enc_cfg_map_t vp9e_usage_cfg_map[] = {
       {0},                /* rc_twopass_stats_in */
 #endif
       256,                /* rc_target_bandwidth */
-      4,                  /* rc_min_quantizer */
+      0,                  /* rc_min_quantizer */
       63,                 /* rc_max_quantizer */
       100,                /* rc_undershoot_pct */
       100,                /* rc_overshoot_pct */
@@ -1076,7 +1075,7 @@ static vpx_codec_enc_cfg_map_t vp9e_usage_cfg_map[] = {
 
       50,                 /* rc_two_pass_vbrbias  */
       0,                  /* rc_two_pass_vbrmin_section */
-      400,                /* rc_two_pass_vbrmax_section */
+      2000,               /* rc_two_pass_vbrmax_section */
 
       /* keyframing settings (kf) */
       VPX_KF_AUTO,        /* g_kfmode*/

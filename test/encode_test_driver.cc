@@ -158,7 +158,7 @@ void EncoderTest::RunLoop(VideoSource *video) {
     Decoder* const decoder = codec_->CreateDecoder(dec_cfg, 0);
     bool again;
     for (again = true, video->Begin(); again; video->Next()) {
-      again = video->img() != NULL;
+      again = (video->img() != NULL);
 
       PreEncodeFrameHook(video);
       PreEncodeFrameHook(video, encoder);
