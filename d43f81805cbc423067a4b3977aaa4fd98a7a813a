@@ -16,6 +16,24 @@
       "revId": "d43f81805cbc423067a4b3977aaa4fd98a7a813a",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAc3//2xw\u003d",
+        "filename": "vp9/common/vp9_scale.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2013-08-22T20:54:49Z",
+      "side": 1,
+      "message": "vp9_is_scaled maybe?",
+      "parentUuid": "AAAAc3//26A\u003d",
+      "revId": "d43f81805cbc423067a4b3977aaa4fd98a7a813a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
