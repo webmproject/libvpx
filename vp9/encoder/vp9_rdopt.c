@@ -2285,8 +2285,7 @@ static void setup_buffer_inter(VP9_COMP *cpi, MACROBLOCK *x,
   // Further refinement that is encode side only to test the top few candidates
   // in full and choose the best as the centre point for subsequent searches.
   // The current implementation doesn't support scaling.
-  if (scale[frame_type].x_scale_fp == VP9_REF_NO_SCALE &&
-      scale[frame_type].y_scale_fp == VP9_REF_NO_SCALE)
+  if (!vp9_is_scaled(&scale[frame_type]))
     mv_pred(cpi, x, yv12_mb[frame_type][0].buf, yv12->y_stride,
             frame_type, block_size);
 }
@@ -3272,14 +3271,12 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
     // TODO(jingning, jkoleszar): scaling reference frame not supported for
     // SPLITMV.
     if (ref_frame > 0 &&
-        (scale_factor[ref_frame].x_scale_fp != VP9_REF_NO_SCALE ||
-         scale_factor[ref_frame].y_scale_fp != VP9_REF_NO_SCALE) &&
+        vp9_is_scaled(&scale_factor[ref_frame]) &&
         this_mode == SPLITMV)
       continue;
 
     if (second_ref_frame > 0 &&
-        (scale_factor[second_ref_frame].x_scale_fp != VP9_REF_NO_SCALE ||
-         scale_factor[second_ref_frame].y_scale_fp != VP9_REF_NO_SCALE) &&
+        vp9_is_scaled(&scale_factor[second_ref_frame]) &&
         this_mode == SPLITMV)
       continue;
 
