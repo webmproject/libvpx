@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAc3//4MQ\u003d",
+        "filename": "vp9/common/arm/neon/vp9_short_idct16x16_add_neon.asm",
+        "patchSetId": 4
+      },
+      "lineNbr": 869,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2013-08-22T00:02:45Z",
+      "side": 1,
+      "message": "If you switch step5 and step 6 above you can save a cycle because vsub wants q12 one cycle before q10",
+      "revId": "9a0d7543807c60d350282390a9216e816a0bd7ab",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
