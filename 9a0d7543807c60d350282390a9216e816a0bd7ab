@@ -36,6 +36,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAc3//2v8\u003d",
+        "filename": "vp9/common/arm/neon/vp9_short_idct16x16_add_neon.asm",
+        "patchSetId": 4
+      },
+      "lineNbr": 835,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2013-08-22T22:01:56Z",
+      "side": 1,
+      "message": "Done. Just replace my comments with this better one.",
+      "parentUuid": "AAAAc3//3OE\u003d",
+      "revId": "9a0d7543807c60d350282390a9216e816a0bd7ab",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAc3//4MQ\u003d",
         "filename": "vp9/common/arm/neon/vp9_short_idct16x16_add_neon.asm",
         "patchSetId": 4
@@ -47,6 +65,24 @@
       "writtenOn": "2013-08-22T00:02:45Z",
       "side": 1,
       "message": "If you switch step5 and step 6 above you can save a cycle because vsub wants q12 one cycle before q10",
+      "revId": "9a0d7543807c60d350282390a9216e816a0bd7ab",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAc3//2wA\u003d",
+        "filename": "vp9/common/arm/neon/vp9_short_idct16x16_add_neon.asm",
+        "patchSetId": 4
+      },
+      "lineNbr": 869,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2013-08-22T22:01:56Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAc3//4MQ\u003d",
       "revId": "9a0d7543807c60d350282390a9216e816a0bd7ab",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -70,6 +106,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAc3//2wE\u003d",
+        "filename": "vp9/common/arm/neon/vp9_short_idct16x16_add_neon.asm",
+        "patchSetId": 4
+      },
+      "lineNbr": 874,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2013-08-22T22:01:56Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAc3//3SM\u003d",
+      "revId": "9a0d7543807c60d350282390a9216e816a0bd7ab",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAc3//3RY\u003d",
         "filename": "vp9/common/arm/neon/vp9_short_idct16x16_add_neon.asm",
         "patchSetId": 4
@@ -81,6 +135,24 @@
       "writtenOn": "2013-08-22T18:06:37Z",
       "side": 1,
       "message": "You should be able to save a few cycles by switching q8 and q15 from lines 849 to ~892. Also switching to do q8 first in stage 6.",
+      "revId": "9a0d7543807c60d350282390a9216e816a0bd7ab",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAc3//2vs\u003d",
+        "filename": "vp9/common/arm/neon/vp9_short_idct16x16_add_neon.asm",
+        "patchSetId": 4
+      },
+      "lineNbr": 895,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2013-08-22T22:01:56Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAc3//3RY\u003d",
       "revId": "9a0d7543807c60d350282390a9216e816a0bd7ab",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -104,6 +176,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAc3//2vo\u003d",
+        "filename": "vp9/common/arm/neon/vp9_short_idct16x16_add_neon.asm",
+        "patchSetId": 4
+      },
+      "lineNbr": 1079,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2013-08-22T22:01:56Z",
+      "side": 1,
+      "message": "Done. Tried to match with the C code, but make it confusing. Just clean up all the temp1 and temp2 in this file. Not sure if it is better as the comments look long.",
+      "parentUuid": "AAAAc3//3OA\u003d",
+      "revId": "9a0d7543807c60d350282390a9216e816a0bd7ab",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAc3//3MI\u003d",
         "filename": "vp9/common/arm/neon/vp9_short_idct16x16_add_neon.asm",
         "patchSetId": 4
@@ -115,6 +205,24 @@
       "writtenOn": "2013-08-22T18:06:37Z",
       "side": 1,
       "message": "I think if you move the vadd of q12 \u0026 q13 above the vld of q10 and q11 you can save 2 cycles.",
+      "revId": "9a0d7543807c60d350282390a9216e816a0bd7ab",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAc3//2i0\u003d",
+        "filename": "vp9/common/arm/neon/vp9_short_idct16x16_add_neon.asm",
+        "patchSetId": 4
+      },
+      "lineNbr": 1128,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2013-08-22T22:01:56Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAc3//3MI\u003d",
       "revId": "9a0d7543807c60d350282390a9216e816a0bd7ab",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -138,6 +246,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAc3//2jU\u003d",
+        "filename": "vp9/common/arm/neon/vp9_short_idct16x16_add_neon.asm",
+        "patchSetId": 4
+      },
+      "lineNbr": 1136,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2013-08-22T22:01:56Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAc3//3MY\u003d",
+      "revId": "9a0d7543807c60d350282390a9216e816a0bd7ab",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAc3//3ME\u003d",
         "filename": "vp9/common/arm/neon/vp9_short_idct16x16_add_neon.asm",
         "patchSetId": 4
@@ -149,6 +275,24 @@
       "writtenOn": "2013-08-22T18:06:37Z",
       "side": 1,
       "message": "I think if you move the vadd of q12 \u0026 q13 above the vld of q10 and q11 you can save 2 cycles.",
+      "revId": "9a0d7543807c60d350282390a9216e816a0bd7ab",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAc3//2jc\u003d",
+        "filename": "vp9/common/arm/neon/vp9_short_idct16x16_add_neon.asm",
+        "patchSetId": 4
+      },
+      "lineNbr": 1148,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2013-08-22T22:01:56Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAc3//3ME\u003d",
       "revId": "9a0d7543807c60d350282390a9216e816a0bd7ab",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -172,6 +316,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAc3//2jg\u003d",
+        "filename": "vp9/common/arm/neon/vp9_short_idct16x16_add_neon.asm",
+        "patchSetId": 4
+      },
+      "lineNbr": 1156,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2013-08-22T22:01:56Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAc3//3MU\u003d",
+      "revId": "9a0d7543807c60d350282390a9216e816a0bd7ab",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAc3//3L0\u003d",
         "filename": "vp9/common/arm/neon/vp9_short_idct16x16_add_neon.asm",
         "patchSetId": 4
@@ -183,6 +345,24 @@
       "writtenOn": "2013-08-22T18:06:37Z",
       "side": 1,
       "message": "I think if you move the vsub of q8 \u0026 q9 above the vst of d26 and d27 you can save 2 cycles.",
+      "revId": "9a0d7543807c60d350282390a9216e816a0bd7ab",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAc3//2jk\u003d",
+        "filename": "vp9/common/arm/neon/vp9_short_idct16x16_add_neon.asm",
+        "patchSetId": 4
+      },
+      "lineNbr": 1162,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2013-08-22T22:01:56Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAc3//3L0\u003d",
       "revId": "9a0d7543807c60d350282390a9216e816a0bd7ab",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
