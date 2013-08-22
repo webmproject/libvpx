@@ -33,6 +33,142 @@
       "revId": "9a0d7543807c60d350282390a9216e816a0bd7ab",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAc3//3SM\u003d",
+        "filename": "vp9/common/arm/neon/vp9_short_idct16x16_add_neon.asm",
+        "patchSetId": 4
+      },
+      "lineNbr": 874,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2013-08-22T18:06:37Z",
+      "side": 1,
+      "message": "Switch these 2 vqrshrn instructions around and you should save a cycle because q6 will be moved down one.",
+      "revId": "9a0d7543807c60d350282390a9216e816a0bd7ab",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAc3//3RY\u003d",
+        "filename": "vp9/common/arm/neon/vp9_short_idct16x16_add_neon.asm",
+        "patchSetId": 4
+      },
+      "lineNbr": 895,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2013-08-22T18:06:37Z",
+      "side": 1,
+      "message": "You should be able to save a few cycles by switching q8 and q15 from lines 849 to ~892. Also switching to do q8 first in stage 6.",
+      "revId": "9a0d7543807c60d350282390a9216e816a0bd7ab",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAc3//3OA\u003d",
+        "filename": "vp9/common/arm/neon/vp9_short_idct16x16_add_neon.asm",
+        "patchSetId": 4
+      },
+      "lineNbr": 1079,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2013-08-22T18:06:37Z",
+      "side": 1,
+      "message": "Who is temp1? (-step1[10] + step1[13]) * cospi_16_64; ?\n\nSame for other temp1 and temp2\u0027s.",
+      "revId": "9a0d7543807c60d350282390a9216e816a0bd7ab",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAc3//3MI\u003d",
+        "filename": "vp9/common/arm/neon/vp9_short_idct16x16_add_neon.asm",
+        "patchSetId": 4
+      },
+      "lineNbr": 1128,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2013-08-22T18:06:37Z",
+      "side": 1,
+      "message": "I think if you move the vadd of q12 \u0026 q13 above the vld of q10 and q11 you can save 2 cycles.",
+      "revId": "9a0d7543807c60d350282390a9216e816a0bd7ab",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAc3//3MY\u003d",
+        "filename": "vp9/common/arm/neon/vp9_short_idct16x16_add_neon.asm",
+        "patchSetId": 4
+      },
+      "lineNbr": 1136,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2013-08-22T18:06:37Z",
+      "side": 1,
+      "message": "Move q12 \u0026 q13 above q14 \u0026 q15 and you can save 2 cycles.",
+      "revId": "9a0d7543807c60d350282390a9216e816a0bd7ab",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAc3//3ME\u003d",
+        "filename": "vp9/common/arm/neon/vp9_short_idct16x16_add_neon.asm",
+        "patchSetId": 4
+      },
+      "lineNbr": 1148,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2013-08-22T18:06:37Z",
+      "side": 1,
+      "message": "I think if you move the vadd of q12 \u0026 q13 above the vld of q10 and q11 you can save 2 cycles.",
+      "revId": "9a0d7543807c60d350282390a9216e816a0bd7ab",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAc3//3MU\u003d",
+        "filename": "vp9/common/arm/neon/vp9_short_idct16x16_add_neon.asm",
+        "patchSetId": 4
+      },
+      "lineNbr": 1156,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2013-08-22T18:06:37Z",
+      "side": 1,
+      "message": "Move q12 \u0026 q13 above q2 \u0026 q3 and you can save 2 cycles.",
+      "revId": "9a0d7543807c60d350282390a9216e816a0bd7ab",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAc3//3L0\u003d",
+        "filename": "vp9/common/arm/neon/vp9_short_idct16x16_add_neon.asm",
+        "patchSetId": 4
+      },
+      "lineNbr": 1162,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2013-08-22T18:06:37Z",
+      "side": 1,
+      "message": "I think if you move the vsub of q8 \u0026 q9 above the vst of d26 and d27 you can save 2 cycles.",
+      "revId": "9a0d7543807c60d350282390a9216e816a0bd7ab",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
