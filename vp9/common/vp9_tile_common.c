@@ -14,7 +14,7 @@
 #define MAX_TILE_WIDTH_B64 64
 
 static int to_sbs(n_mis) {
-  return mi_cols_aligned_to_sb(n_mis) >> LOG2_MI_BLOCK_SIZE;
+  return mi_cols_aligned_to_sb(n_mis) >> MI_BLOCK_SIZE_LOG2;
 }
 
 static void vp9_get_tile_offsets(int *min_tile_off, int *max_tile_off,

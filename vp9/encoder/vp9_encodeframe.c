@@ -374,8 +374,8 @@ static void update_state(VP9_COMP *cpi, PICK_MODE_CONTEXT *ctx,
   // when the mode was picked for it
   for (y = 0; y < mi_height; y++)
     for (x_idx = 0; x_idx < mi_width; x_idx++)
-      if ((xd->mb_to_right_edge >> (3 + LOG2_MI_SIZE)) + mi_width > x_idx
-          && (xd->mb_to_bottom_edge >> (3 + LOG2_MI_SIZE)) + mi_height > y)
+      if ((xd->mb_to_right_edge >> (3 + MI_SIZE_LOG2)) + mi_width > x_idx
+          && (xd->mb_to_bottom_edge >> (3 + MI_SIZE_LOG2)) + mi_height > y)
         xd->mode_info_context[x_idx + y * mis] = *mi;
 
   // FIXME(rbultje) I'm pretty sure this should go to the end of this block
@@ -449,8 +449,8 @@ static void update_state(VP9_COMP *cpi, PICK_MODE_CONTEXT *ctx,
       int i, j;
       for (j = 0; j < mi_height; ++j)
         for (i = 0; i < mi_width; ++i)
-          if ((xd->mb_to_right_edge >> (3 + LOG2_MI_SIZE)) + mi_width > i
-              && (xd->mb_to_bottom_edge >> (3 + LOG2_MI_SIZE)) + mi_height > j)
+          if ((xd->mb_to_right_edge >> (3 + MI_SIZE_LOG2)) + mi_width > i
+              && (xd->mb_to_bottom_edge >> (3 + MI_SIZE_LOG2)) + mi_height > j)
             xd->mode_info_context[mis * j + i].mbmi = *mbmi;
     }
 

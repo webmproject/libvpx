@@ -13,12 +13,12 @@
 
 #include "./vpx_config.h"
 
-#define LOG2_MI_SIZE 3
-#define LOG2_MI_BLOCK_SIZE (6 - LOG2_MI_SIZE)  // 64 = 2^6
+#define MI_SIZE_LOG2 3
+#define MI_BLOCK_SIZE_LOG2 (6 - MI_SIZE_LOG2)  // 64 = 2^6
 
 #define MAX_BLOCK_SIZE (1 << 6)  // max block size in pixel
-#define MI_SIZE (1 << LOG2_MI_SIZE)  // pixels per mi-unit
-#define MI_BLOCK_SIZE (1 << LOG2_MI_BLOCK_SIZE)  // mi-units per max block
+#define MI_SIZE (1 << MI_SIZE_LOG2)  // pixels per mi-unit
+#define MI_BLOCK_SIZE (1 << MI_BLOCK_SIZE_LOG2)  // mi-units per max block
 
 #define MI_MASK (MI_BLOCK_SIZE - 1)
 
