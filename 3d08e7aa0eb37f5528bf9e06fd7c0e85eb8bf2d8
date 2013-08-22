@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAc3//2dQ\u003d",
+        "filename": "vp9/common/arm/neon/vp9_short_idct16x16_add_neon.asm",
+        "patchSetId": 5
+      },
+      "lineNbr": 1032,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2013-08-22T22:18:47Z",
+      "side": 1,
+      "message": "You could add comments like:\n; temp1 \u003d -step1[10] * cospi_8_64 + step1[13] * cospi_24_64\n\n; dct_const_round_shift(temp1)",
+      "revId": "3d08e7aa0eb37f5528bf9e06fd7c0e85eb8bf2d8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
