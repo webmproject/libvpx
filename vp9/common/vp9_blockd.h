@@ -400,8 +400,8 @@ static INLINE void foreach_transformed_block_in_plane(
   const TX_SIZE tx_size = plane ? get_uv_tx_size(mbmi)
                                 : mbmi->txfm_size;
   const BLOCK_SIZE_TYPE plane_bsize = get_plane_block_size(bsize, pd);
-  const int bw = b_width_log2(plane_bsize);
-  const int bh = b_height_log2(plane_bsize);
+  const int num_4x4_w = num_4x4_blocks_wide_lookup[plane_bsize];
+  const int num_4x4_h = num_4x4_blocks_high_lookup[plane_bsize];
   const int step = 1 << (tx_size << 1);
   int i;
 
@@ -411,8 +411,8 @@ static INLINE void foreach_transformed_block_in_plane(
   if (xd->mb_to_right_edge < 0 || xd->mb_to_bottom_edge < 0) {
     int r, c;
 
-    int max_blocks_wide = 1 << bw;
-    int max_blocks_high = 1 << bh;
+    int max_blocks_wide = num_4x4_w;
+    int max_blocks_high = num_4x4_h;
 
     // xd->mb_to_right_edge is in units of pixels * 8.  This converts
     // it to 4x4 block sizes.
@@ -426,15 +426,15 @@ static INLINE void foreach_transformed_block_in_plane(
     // Unlike the normal case - in here we have to keep track of the
     // row and column of the blocks we use so that we know if we are in
     // the unrestricted motion border.
-    for (r = 0; r < (1 << bh); r += (1 << tx_size)) {
-      for (c = 0; c < (1 << bw); c += (1 << tx_size)) {
+    for (r = 0; r < num_4x4_h; r += (1 << tx_size)) {
+      for (c = 0; c < num_4x4_w; c += (1 << tx_size)) {
         if (r < max_blocks_high && c < max_blocks_wide)
           visit(plane, i, plane_bsize, tx_size, arg);
         i += step;
       }
     }
   } else {
-    for (i = 0; i < (1 << (bw + bh)); i += step)
+    for (i = 0; i < num_4x4_w * num_4x4_h; i += step)
       visit(plane, i, plane_bsize, tx_size, arg);
   }
 }
