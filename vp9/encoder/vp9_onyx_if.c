@@ -735,7 +735,8 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
   sf->mode_search_skip_flags = 0;
   sf->disable_split_var_thresh = 0;
   sf->disable_filter_search_var_thresh = 0;
-  sf->last_chroma_intra_mode = TM_PRED;
+  sf->intra_y_mode_mask = ALL_INTRA_MODES;
+  sf->intra_uv_mode_mask = ALL_INTRA_MODES;
   sf->use_rd_breakout = 0;
   sf->skip_encode_sb = 0;
   sf->use_uv_intra_rd_estimate = 0;
@@ -798,6 +799,9 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
         // the main framework of partition search type.
         sf->disable_split_var_thresh = 0;
         sf->disable_filter_search_var_thresh = 16;
+
+        sf->intra_y_mode_mask = INTRA_DC_TM_H_V;
+        sf->intra_uv_mode_mask = INTRA_DC_TM_H_V;
       }
       if (speed == 2) {
         sf->adjust_thresholds_by_speed = 1;
@@ -819,7 +823,8 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
                                      FLAG_SKIP_COMP_REFMISMATCH |
                                      FLAG_SKIP_INTRA_LOWVAR |
                                      FLAG_EARLY_TERMINATE;
-        sf->last_chroma_intra_mode = DC_PRED;
+        sf->intra_y_mode_mask = INTRA_DC_TM;
+        sf->intra_uv_mode_mask = INTRA_DC_TM;
         sf->use_uv_intra_rd_estimate = 1;
         sf->use_rd_breakout = 1;
         sf->skip_encode_sb = 1;
@@ -859,6 +864,8 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
         sf->subpel_iters_per_step = 1;
         sf->disable_split_var_thresh = 64;
         sf->disable_filter_search_var_thresh = 64;
+        sf->intra_y_mode_mask = INTRA_DC_ONLY;
+        sf->intra_uv_mode_mask = INTRA_DC_ONLY;
       }
       if (speed == 4) {
         sf->comp_inter_joint_search_thresh = BLOCK_SIZES;
