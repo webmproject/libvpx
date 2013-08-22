@@ -2573,29 +2573,22 @@ void vp9_encode_frame(VP9_COMP *cpi) {
 
 }
 
-static void sum_intra_stats(VP9_COMP *cpi, MACROBLOCK *x) {
-  const MACROBLOCKD *xd = &x->e_mbd;
-  const MB_PREDICTION_MODE m = xd->mode_info_context->mbmi.mode;
-  const MB_PREDICTION_MODE uvm = xd->mode_info_context->mbmi.uv_mode;
+static void sum_intra_stats(VP9_COMP *cpi, const MODE_INFO *mi) {
+  const MB_PREDICTION_MODE y_mode = mi->mbmi.mode;
+  const MB_PREDICTION_MODE uv_mode = mi->mbmi.uv_mode;
+  const BLOCK_SIZE_TYPE bsize = mi->mbmi.sb_type;
 
-  ++cpi->y_uv_mode_count[m][uvm];
-  if (xd->mode_info_context->mbmi.sb_type >= BLOCK_8X8) {
-    const BLOCK_SIZE_TYPE bsize = xd->mode_info_context->mbmi.sb_type;
-    const int bwl = b_width_log2(bsize), bhl = b_height_log2(bsize);
-    const int bsl = MIN(bwl, bhl);
-    ++cpi->y_mode_count[MIN(bsl, 3)][m];
-  } else {
+  ++cpi->y_uv_mode_count[y_mode][uv_mode];
+
+  if (bsize < BLOCK_8X8) {
     int idx, idy;
-    int num_4x4_blocks_wide = num_4x4_blocks_wide_lookup[
-      xd->mode_info_context->mbmi.sb_type];
-    int num_4x4_blocks_high = num_4x4_blocks_high_lookup[
-      xd->mode_info_context->mbmi.sb_type];
-    for (idy = 0; idy < 2; idy += num_4x4_blocks_high) {
-      for (idx = 0; idx < 2; idx += num_4x4_blocks_wide) {
-        int m = xd->mode_info_context->bmi[idy * 2 + idx].as_mode;
-        ++cpi->y_mode_count[0][m];
-      }
-    }
+    const int num_4x4_blocks_wide = num_4x4_blocks_wide_lookup[bsize];
+    const int num_4x4_blocks_high = num_4x4_blocks_high_lookup[bsize];
+    for (idy = 0; idy < 2; idy += num_4x4_blocks_high)
+      for (idx = 0; idx < 2; idx += num_4x4_blocks_wide)
+        ++cpi->y_mode_count[0][mi->bmi[idy * 2 + idx].as_mode];
+  } else {
+    ++cpi->y_mode_count[size_group_lookup[bsize]][y_mode];
   }
 }
 
@@ -2677,7 +2670,7 @@ static void encode_superblock(VP9_COMP *cpi, TOKENEXTRA **t, int output_enabled,
     vp9_encode_intra_block_y(x, MAX(bsize, BLOCK_8X8));
     vp9_encode_intra_block_uv(x, MAX(bsize, BLOCK_8X8));
     if (output_enabled)
-      sum_intra_stats(cpi, x);
+      sum_intra_stats(cpi, mi);
   } else {
     int idx = cm->ref_frame_map[get_ref_frame_idx(cpi, mbmi->ref_frame[0])];
     YV12_BUFFER_CONFIG *ref_fb = &cm->yv12_fb[idx];
