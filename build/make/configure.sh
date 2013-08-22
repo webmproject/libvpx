@@ -198,11 +198,11 @@ add_extralibs() {
 #
 # Boolean Manipulation Functions
 #
-enable(){
+enable_feature(){
     set_all yes $*
 }
 
-disable(){
+disable_feature(){
     set_all no $*
 }
 
@@ -219,7 +219,7 @@ soft_enable() {
     for var in $*; do
         if ! disabled $var; then
             log_echo "  enabling $var"
-            enable $var
+            enable_feature $var
         fi
     done
 }
@@ -228,7 +228,7 @@ soft_disable() {
     for var in $*; do
         if ! enabled $var; then
             log_echo "  disabling $var"
-            disable $var
+            disable_feature $var
         fi
     done
 }
@@ -251,10 +251,10 @@ tolower(){
 # Temporary File Functions
 #
 source_path=${0%/*}
-enable source_path_used
+enable_feature source_path_used
 if test -z "$source_path" -o "$source_path" = "." ; then
     source_path="`pwd`"
-    disable source_path_used
+    disable_feature source_path_used
 fi
 
 if test ! -z "$TMPDIR" ; then
@@ -317,8 +317,8 @@ check_header(){
     header=$1
     shift
     var=`echo $header | sed 's/[^A-Za-z0-9_]/_/g'`
-    disable $var
-    check_cpp "$@" <<EOF && enable $var
+    disable_feature $var
+    check_cpp "$@" <<EOF && enable_feature $var
 #include "$header"
 int x;
 EOF
@@ -480,7 +480,7 @@ process_common_cmdline() {
     for opt in "$@"; do
         optval="${opt#*=}"
         case "$opt" in
-        --child) enable child
+        --child) enable_feature child
         ;;
         --log*)
         logging="$optval"
@@ -492,7 +492,7 @@ process_common_cmdline() {
         ;;
         --target=*) toolchain="${toolchain:-${optval}}"
         ;;
-        --force-target=*) toolchain="${toolchain:-${optval}}"; enable force_toolchain
+        --force-target=*) toolchain="${toolchain:-${optval}}"; enable_feature force_toolchain
         ;;
         --cpu)
         ;;
@@ -528,7 +528,7 @@ process_common_cmdline() {
         ;;
         --libc=*)
         [ -d "${optval}" ] || die "Not a directory: ${optval}"
-        disable builtin_libc
+        disable_feature builtin_libc
         alt_libc="${optval}"
         ;;
         --as=*)
@@ -697,13 +697,13 @@ process_common_toolchain() {
 
     # Mark the specific ISA requested as enabled
     soft_enable ${tgt_isa}
-    enable ${tgt_os}
-    enable ${tgt_cc}
+    enable_feature ${tgt_os}
+    enable_feature ${tgt_cc}
 
     # Enable the architecture family
     case ${tgt_isa} in
-        arm*) enable arm;;
-        mips*) enable mips;;
+        arm*) enable_feature arm;;
+        mips*) enable_feature mips;;
     esac
 
     # PIC is probably what we want when building shared libs
@@ -766,7 +766,7 @@ process_common_toolchain() {
     case ${toolchain} in
         sparc-solaris-*)
             add_extralibs -lposix4
-            disable fast_unaligned
+            disable_feature fast_unaligned
             ;;
         *-solaris-*)
             add_extralibs -lposix4
@@ -791,7 +791,7 @@ process_common_toolchain() {
             ;;
         armv5te)
             soft_enable edsp
-            disable fast_unaligned
+            disable_feature fast_unaligned
             ;;
         esac
 
@@ -843,8 +843,8 @@ EOF
             asm_conversion_cmd="${source_path}/build/make/ads2armasm_ms.pl"
             AS_SFX=.s
             msvs_arch_dir=arm-msvs
-            disable multithread
-            disable unit_tests
+            disable_feature multithread
+            disable_feature unit_tests
             ;;
         rvct)
             CC=armcc
@@ -881,8 +881,8 @@ EOF
 
         case ${tgt_os} in
         none*)
-            disable multithread
-            disable os_support
+            disable_feature multithread
+            disable_feature os_support
             ;;
 
         android*)
@@ -914,7 +914,7 @@ EOF
             # Cortex-A8 implementations (NDK Dev Guide)
             add_ldflags "-Wl,--fix-cortex-a8"
 
-            enable pic
+            enable_feature pic
             soft_enable realtime_only
             if [ ${tgt_isa} = "armv7" ]; then
                 soft_enable runtime_cpu_detect
@@ -970,7 +970,7 @@ EOF
          ;;
 
         linux*)
-            enable linux
+            enable_feature linux
             if enabled rvct; then
                 # Check if we have CodeSourcery GCC in PATH. Needed for
                 # libraries
@@ -1001,14 +1001,14 @@ EOF
         tune_cflags="-mtune="
         if enabled dspr2; then
             check_add_cflags -mips32r2 -mdspr2
-            disable fast_unaligned
+            disable_feature fast_unaligned
         fi
         check_add_cflags -march=${tgt_isa}
         check_add_asflags -march=${tgt_isa}
         check_add_asflags -KPIC
     ;;
     ppc*)
-        enable ppc
+        enable_feature ppc
         bits=${tgt_isa##ppc}
         link_with_cc=gcc
         setup_gnu_toolchain
@@ -1156,7 +1156,7 @@ EOF
     ;;
     universal*|*-gcc|generic-gnu)
         link_with_cc=gcc
-        enable gcc
+        enable_feature gcc
     setup_gnu_toolchain
     ;;
     esac
@@ -1205,14 +1205,14 @@ EOF
     enabled linux && check_add_cflags -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=0
 
     # Check for strip utility variant
-    ${STRIP} -V 2>/dev/null | grep GNU >/dev/null && enable gnu_strip
+    ${STRIP} -V 2>/dev/null | grep GNU >/dev/null && enable_feature gnu_strip
 
     # Try to determine target endianness
     check_cc <<EOF
     unsigned int e = 'O'<<24 | '2'<<16 | 'B'<<8 | 'E';
 EOF
     [ -f "${TMP_O}" ] && od -A n -t x1 "${TMP_O}" | tr -d '\n' |
-        grep '4f *32 *42 *45' >/dev/null 2>&1 && enable big_endian
+        grep '4f *32 *42 *45' >/dev/null 2>&1 && enable_feature big_endian
 
     # Try to find which inline keywords are supported
     check_cc <<EOF && INLINE="inline"
@@ -1237,7 +1237,7 @@ EOF
             if enabled dspr2; then
                 if enabled big_endian; then
                     echo "dspr2 optimizations are available only for little endian platforms"
-                    disable dspr2
+                    disable_feature dspr2
                 fi
             fi
         ;;
@@ -1310,7 +1310,7 @@ process_detect() {
     true;
 }
 
-enable logging
+enable_feature logging
 logfile="config.log"
 self=$0
 process() {
