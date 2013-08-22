@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAc3//3bc\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 1709,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2013-08-22T16:09:30Z",
+      "side": 1,
+      "message": "Should use_square_partition_only be a hard rule? Horz \u0026 Vert are not allowed.\n\nIf None is not allowed for edge blocks, we can only use Split.",
+      "revId": "d0f26440711790675834a19d2c2c4212abca7bd8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
