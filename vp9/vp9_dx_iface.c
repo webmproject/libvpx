@@ -15,8 +15,9 @@
 #include "vpx/vp8dx.h"
 #include "vpx/internal/vpx_codec_internal.h"
 #include "vpx_version.h"
-#include "decoder/vp9_onyxd.h"
-#include "decoder/vp9_onyxd_int.h"
+#include "vp9/decoder/vp9_onyxd.h"
+#include "vp9/decoder/vp9_onyxd_int.h"
+#include "vp9/decoder/vp9_read_bit_buffer.h"
 #include "vp9/vp9_iface_common.h"
 
 #define VP9_CAP_POSTPROC (CONFIG_POSTPROC ? VPX_CODEC_CAP_POSTPROC : 0)
@@ -142,32 +143,64 @@ static vpx_codec_err_t vp9_destroy(vpx_codec_alg_priv_t *ctx) {
 static vpx_codec_err_t vp9_peek_si(const uint8_t         *data,
                                    unsigned int           data_sz,
                                    vpx_codec_stream_info_t *si) {
-  vpx_codec_err_t res = VPX_CODEC_OK;
-
   if (data_sz <= 8) return VPX_CODEC_UNSUP_BITSTREAM;
+  if (data + data_sz <= data) return VPX_CODEC_INVALID_PARAM;
 
-  if (data + data_sz <= data) {
-    res = VPX_CODEC_INVALID_PARAM;
-  } else {
-    const int frame_marker = (data[0] >> 6) & 0x3;
-    const int version = (data[0] >> 4) & 0x3;
+  si->is_kf = 0;
+  si->w = si->h = 0;
+
+  {
+    struct vp9_read_bit_buffer rb = { data, data + data_sz, 0, NULL, NULL };
+    const int frame_marker = vp9_rb_read_literal(&rb, 2);
+    const int version = vp9_rb_read_bit(&rb) | (vp9_rb_read_bit(&rb) << 1);
     if (frame_marker != 0x2) return VPX_CODEC_UNSUP_BITSTREAM;
+#if CONFIG_NON420
+    if (version > 1) return VPX_CODEC_UNSUP_BITSTREAM;
+#else
     if (version != 0) return VPX_CODEC_UNSUP_BITSTREAM;
+#endif
 
-    si->is_kf = !((data[0] >> 2) & 0x1);
+    if (vp9_rb_read_bit(&rb)) {  // show an existing frame
+      return VPX_CODEC_OK;
+    }
+
+    si->is_kf = !vp9_rb_read_bit(&rb);
     if (si->is_kf) {
-      const uint8_t *c = data + 1;
+      const int sRGB = 7;
+      int colorspace;
 
-      if (c[0] != SYNC_CODE_0 || c[1] != SYNC_CODE_1 || c[2] != SYNC_CODE_2)
+      rb.bit_offset += 1;  // show frame
+      rb.bit_offset += 1;  // error resilient
+
+      if (vp9_rb_read_literal(&rb, 8) != SYNC_CODE_0 ||
+          vp9_rb_read_literal(&rb, 8) != SYNC_CODE_1 ||
+          vp9_rb_read_literal(&rb, 8) != SYNC_CODE_2) {
         return VPX_CODEC_UNSUP_BITSTREAM;
+      }
 
-      c += 3;
-      si->w = (((c[0] & 0xf) << 12) | (c[1] << 4) | ((c[2] >> 4) & 0xf)) + 1;
-      si->h = (((c[2] & 0xf) << 12) | (c[3] << 4) | ((c[4] >> 4) & 0xf)) + 1;
+      colorspace = vp9_rb_read_literal(&rb, 3);
+      if (colorspace != sRGB) {
+        rb.bit_offset += 1;  // [16,235] (including xvycc) vs [0,255] range
+        if (version == 1) {
+          rb.bit_offset += 2;  // subsampling x/y
+          rb.bit_offset += 1;  // has extra plane
+        }
+      } else {
+        if (version == 1) {
+          rb.bit_offset += 1;  // has extra plane
+        } else {
+          // RGB is only available in version 1
+          return VPX_CODEC_UNSUP_BITSTREAM;
+        }
+      }
+
+      // TODO(jzern): these are available on non-keyframes in intra only mode.
+      si->w = vp9_rb_read_literal(&rb, 16) + 1;
+      si->h = vp9_rb_read_literal(&rb, 16) + 1;
     }
   }
 
-  return res;
+  return VPX_CODEC_OK;
 }
 
 static vpx_codec_err_t vp9_get_si(vpx_codec_alg_priv_t    *ctx,
