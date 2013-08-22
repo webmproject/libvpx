@@ -255,25 +255,20 @@ static INLINE void set_partition_seg_context(VP9_COMMON *cm, MACROBLOCKD *xd,
   xd->left_seg_context = cm->left_seg_context + (mi_row & MI_MASK);
 }
 
-static int check_bsize_coverage(VP9_COMMON *cm, int mi_row, int mi_col,
-                                BLOCK_SIZE_TYPE bsize) {
-  int bsl = mi_width_log2(bsize), bs = 1 << bsl;
-  int ms = bs / 2;
+// return the node index in the prob tree for binary coding
+static int check_bsize_coverage(int bs, int mi_rows, int mi_cols,
+                                int mi_row, int mi_col) {
+  const int r = (mi_row + bs < mi_rows);
+  const int c = (mi_col + bs < mi_cols);
 
-  if ((mi_row + ms < cm->mi_rows) && (mi_col + ms < cm->mi_cols))
+  if (r && c)
     return 0;
 
-  // frame width/height are multiples of 8, hence 8x8 block should always
-  // pass the above check
-  assert(bsize > BLOCK_8X8);
+  if (c && !r)
+    return 1;  // only allow horizontal/split partition types
 
-  // return the node index in the prob tree for binary coding
-  // only allow horizontal/split partition types
-  if ((mi_col + ms < cm->mi_cols) && (mi_row + ms >= cm->mi_rows))
-    return 1;
-  // only allow vertical/split partition types
-  if ((mi_row + ms < cm->mi_rows) && (mi_col + ms >= cm->mi_cols))
-    return 2;
+  if (r && !c)
+    return 2;  // only allow vertical/split partition types
 
   return -1;
 }
