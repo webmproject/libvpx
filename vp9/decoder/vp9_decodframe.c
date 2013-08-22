@@ -264,7 +264,7 @@ static void decode_modes_sb(VP9D_COMP *pbi, int mi_row, int mi_col,
                             vp9_reader* r, BLOCK_SIZE_TYPE bsize) {
   VP9_COMMON *const pc = &pbi->common;
   MACROBLOCKD *const xd = &pbi->mb;
-  int bs = (1 << mi_width_log2(bsize)) / 2, n;
+  const int bs = (1 << mi_width_log2(bsize)) / 2;
   PARTITION_TYPE partition = PARTITION_NONE;
   BLOCK_SIZE_TYPE subsize;
 
@@ -276,7 +276,8 @@ static void decode_modes_sb(VP9D_COMP *pbi, int mi_row, int mi_col,
       return;
   } else {
     int pl;
-    const int idx = check_bsize_coverage(pc, mi_row, mi_col, bsize);
+    const int idx = check_bsize_coverage(bs, pc->mi_rows, pc->mi_cols,
+                                         mi_row, mi_col);
     set_partition_seg_context(pc, xd, mi_row, mi_col);
     pl = partition_plane_context(xd, bsize);
 
@@ -311,13 +312,14 @@ static void decode_modes_sb(VP9D_COMP *pbi, int mi_row, int mi_col,
       if (mi_col + bs < pc->mi_cols)
         decode_modes_b(pbi, mi_row, mi_col + bs, r, subsize);
       break;
-    case PARTITION_SPLIT:
+    case PARTITION_SPLIT: {
+      int n;
       for (n = 0; n < 4; n++) {
-        int j = n >> 1, i = n & 0x01;
+        const int j = n >> 1, i = n & 1;
         *(get_sb_index(xd, subsize)) = n;
         decode_modes_sb(pbi, mi_row + j * bs, mi_col + i * bs, r, subsize);
       }
-      break;
+    } break;
     default:
       assert(!"Invalid partition type");
   }
