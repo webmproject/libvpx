@@ -363,7 +363,7 @@ process_cmdline() {
         eval `echo "$opt" | sed 's/--/action=/;s/-/ option=/;s/-/_/g'`
         if echo "${EXPERIMENT_LIST}" | grep "^ *$option\$" >/dev/null; then
             if enabled experimental; then
-                $action $option
+                ${action}_feature $option
             else
                 log_echo "Ignoring $opt -- not in experimental mode."
             fi

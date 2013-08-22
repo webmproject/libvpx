@@ -512,7 +512,7 @@ process_common_cmdline() {
           echo "${CMDLINE_SELECT}" | grep "^ *$option\$" >/dev/null ||
             die_unknown $opt
         fi
-        $action $option
+        ${action}_feature $option
         ;;
         --require-?*)
         eval `echo "$opt" | sed 's/--/action=/;s/-/ option=/;s/-/_/g'`
@@ -524,7 +524,7 @@ process_common_cmdline() {
         ;;
         --force-enable-?*|--force-disable-?*)
         eval `echo "$opt" | sed 's/--force-/action=/;s/-/ option=/;s/-/_/g'`
-        $action $option
+        ${action}_feature $option
         ;;
         --libc=*)
         [ -d "${optval}" ] || die "Not a directory: ${optval}"
