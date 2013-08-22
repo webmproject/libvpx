@@ -90,6 +90,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAc3//3QU\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 1675,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2013-08-22T17:23:14Z",
+      "side": 1,
+      "message": "The frame size is aligned as integer multiples of 8. so when bsize \u003c BLOCK_8X8, the above two conditions are always false.",
+      "parentUuid": "AAAAc3//3TI\u003d",
+      "revId": "63db1ba2f2ea55b3409e9638c46d86ff98bfe140",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAc3//4bg\u003d",
         "filename": "vp9/encoder/vp9_encodeframe.c",
         "patchSetId": 6
