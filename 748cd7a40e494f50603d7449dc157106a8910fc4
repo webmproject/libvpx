@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAc3//3Dc\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 11
+      },
+      "lineNbr": 1722,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2013-08-22T19:02:17Z",
+      "side": 1,
+      "message": "Perhaps move this comment to vp9_onyx_if.c if you decide to disable this for now.",
+      "revId": "748cd7a40e494f50603d7449dc157106a8910fc4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAc3//3C0\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 11
+      },
+      "lineNbr": 1797,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2013-08-22T19:02:17Z",
+      "side": 1,
+      "message": "Should be: do_rect \u0026\u003d ...",
+      "revId": "748cd7a40e494f50603d7449dc157106a8910fc4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAc3//3Do\u003d",
+        "filename": "vp9/encoder/vp9_onyx_if.c",
+        "patchSetId": 11
+      },
+      "lineNbr": 796,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2013-08-22T19:02:17Z",
+      "side": 1,
+      "message": "What is the difference on derf with this change in terms of psnr drop? If it is within 0.1% I think it is better to use a value of 16 or so here to gain 2-3% in encode speed. Speed 0 will anyways not disable small partitions so that we do not drop in quality.\n\nBut I will leave it to you if you want to bring it back later or now.",
+      "revId": "748cd7a40e494f50603d7449dc157106a8910fc4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
