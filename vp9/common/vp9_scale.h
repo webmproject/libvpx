@@ -14,10 +14,9 @@
 #include "vp9/common/vp9_mv.h"
 #include "vp9/common/vp9_convolve.h"
 
-struct VP9Common;
-
 #define VP9_REF_SCALE_SHIFT 14
 #define VP9_REF_NO_SCALE (1 << VP9_REF_SCALE_SHIFT)
+#define VP9_REF_INVALID_SCALE -1
 
 struct scale_factors {
   int x_scale_fp;   // horizontal fixed point scale factor
@@ -35,10 +34,14 @@ struct scale_factors {
   convolve_fn_t predict[2][2][2];  // horiz, vert, avg
 };
 
-void vp9_setup_scale_factors_for_frame(struct VP9Common *cm,
-                                       struct scale_factors *scale,
+void vp9_setup_scale_factors_for_frame(struct scale_factors *scale,
                                        int other_w, int other_h,
                                        int this_w, int this_h);
+
+static int vp9_is_valid_scale(const struct scale_factors *sf) {
+  return sf->x_scale_fp != VP9_REF_INVALID_SCALE &&
+         sf->y_scale_fp != VP9_REF_INVALID_SCALE;
+}
 
 static int vp9_is_scaled(const struct scale_factors *sf) {
   return sf->x_scale_fp != VP9_REF_NO_SCALE ||

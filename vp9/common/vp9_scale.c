@@ -10,7 +10,6 @@
 
 #include "./vp9_rtcd.h"
 #include "vp9/common/vp9_filter.h"
-#include "vp9/common/vp9_onyxc_int.h"
 #include "vp9/common/vp9_scale.h"
 
 static INLINE int scaled_x(int val, const struct scale_factors *scale) {
@@ -70,33 +69,32 @@ static int check_scale_factors(int other_w, int other_h,
          this_h <= 16 * other_h;
 }
 
-void vp9_setup_scale_factors_for_frame(struct VP9Common *cm,
-                                       struct scale_factors *scale,
+void vp9_setup_scale_factors_for_frame(struct scale_factors *scale,
                                        int other_w, int other_h,
                                        int this_w, int this_h) {
-  if (!check_scale_factors(other_w, other_h, this_w, this_h))
-    vpx_internal_error(&cm->error, VPX_CODEC_UNSUP_BITSTREAM,
-                       "Invalid scale factors");
-
+  if (!check_scale_factors(other_w, other_h, this_w, this_h)) {
+    scale->x_scale_fp = VP9_REF_INVALID_SCALE;
+    scale->y_scale_fp = VP9_REF_INVALID_SCALE;
+    return;
+  }
 
   scale->x_scale_fp = get_fixed_point_scale_factor(other_w, this_w);
-  scale->x_offset_q4 = 0;  // calculated per block
-  scale->x_step_q4 = scaled_x(16, scale);
-
   scale->y_scale_fp = get_fixed_point_scale_factor(other_h, this_h);
-  scale->y_offset_q4 = 0;  // calculated per block
+  scale->x_step_q4 = scaled_x(16, scale);
   scale->y_step_q4 = scaled_y(16, scale);
+  scale->x_offset_q4 = 0;  // calculated per block
+  scale->y_offset_q4 = 0;  // calculated per block
 
-  if (other_w == this_w && other_h == this_h) {
-    scale->scale_value_x = unscaled_value;
-    scale->scale_value_y = unscaled_value;
-    scale->set_scaled_offsets = set_offsets_without_scaling;
-    scale->scale_mv = unscaled_mv;
-  } else {
+  if (vp9_is_scaled(scale)) {
     scale->scale_value_x = scaled_x;
     scale->scale_value_y = scaled_y;
     scale->set_scaled_offsets = set_offsets_with_scaling;
     scale->scale_mv = scaled_mv;
+  } else {
+    scale->scale_value_x = unscaled_value;
+    scale->scale_value_y = unscaled_value;
+    scale->set_scaled_offsets = set_offsets_without_scaling;
+    scale->scale_mv = unscaled_mv;
   }
 
   // TODO(agrange): Investigate the best choice of functions to use here

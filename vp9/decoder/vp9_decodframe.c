@@ -202,11 +202,15 @@ static void set_ref(VP9D_COMP *pbi, int i, int mi_row, int mi_col) {
   VP9_COMMON *const cm = &pbi->common;
   MACROBLOCKD *const xd = &pbi->mb;
   MB_MODE_INFO *const mbmi = &xd->mode_info_context->mbmi;
-  const int ref = mbmi->ref_frame[i] - 1;
-
+  const int ref = mbmi->ref_frame[i] - LAST_FRAME;
   const YV12_BUFFER_CONFIG *cfg = &cm->yv12_fb[cm->active_ref_idx[ref]];
-  xd->scale_factor[i] = cm->active_ref_scale[ref];
-  setup_pre_planes(xd, i, cfg, mi_row, mi_col, &xd->scale_factor[i]);
+  const struct scale_factors *sf = &cm->active_ref_scale[ref];
+  if (!vp9_is_valid_scale(sf))
+    vpx_internal_error(&cm->error, VPX_CODEC_UNSUP_BITSTREAM,
+                       "Invalid scale factors");
+
+  xd->scale_factor[i] = *sf;
+  setup_pre_planes(xd, i, cfg, mi_row, mi_col, sf);
   xd->corrupted |= cfg->corrupted;
 }
 
