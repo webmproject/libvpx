@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAc3//4M0\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 1673,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2013-08-22T16:00:32Z",
+      "side": 1,
+      "message": "Done.\n\nRephrased as \"Override skipping rectangular partition operations for edge blocks\" to cover other speed features that skip rectangular partition search.",
+      "parentUuid": "AAAAc3//4a4\u003d",
+      "revId": "63db1ba2f2ea55b3409e9638c46d86ff98bfe140",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAc3//4ag\u003d",
         "filename": "vp9/encoder/vp9_encodeframe.c",
         "patchSetId": 6
@@ -30,6 +48,24 @@
       "writtenOn": "2013-08-21T22:44:09Z",
       "side": 1,
       "message": "Probably need to add \"bsize \u003e\u003d BLOCK_8X8 \u0026\u0026 ...\" for both of these.",
+      "revId": "63db1ba2f2ea55b3409e9638c46d86ff98bfe140",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAc3//394\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 1675,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2013-08-22T16:00:32Z",
+      "side": 1,
+      "message": "Done.\n\nThis condition was subsumed by the partition_horz/vert_allowed. Putting them here explicitly helps readability(?)",
+      "parentUuid": "AAAAc3//4ag\u003d",
       "revId": "63db1ba2f2ea55b3409e9638c46d86ff98bfe140",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAc3//3+A\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 1681,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2013-08-22T16:00:32Z",
+      "side": 1,
+      "message": "i agree. \n\nsince the recursion only goes through square blocks, i am guessing we probably could go with square block size thresholds as for now. this will probably make the code much cleaner, given we want to make the search parameterized next.",
+      "parentUuid": "AAAAc3//4bg\u003d",
+      "revId": "63db1ba2f2ea55b3409e9638c46d86ff98bfe140",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAc3//4Zk\u003d",
         "filename": "vp9/encoder/vp9_encodeframe.c",
         "patchSetId": 6
@@ -64,6 +118,24 @@
       "writtenOn": "2013-08-21T22:44:09Z",
       "side": 1,
       "message": "The way you wrote these checks, force_horz_split and force_vert_split no longer override min_partition_size, I think it should like it did after https://gerrit.chromium.org/gerrit/#/c/65729/",
+      "revId": "63db1ba2f2ea55b3409e9638c46d86ff98bfe140",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAc3//4LA\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 1682,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2013-08-22T16:00:32Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAc3//4Zk\u003d",
       "revId": "63db1ba2f2ea55b3409e9638c46d86ff98bfe140",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAc3//4K8\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 1712,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2013-08-22T16:00:32Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAc3//4oY\u003d",
+      "revId": "63db1ba2f2ea55b3409e9638c46d86ff98bfe140",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAc3//4oE\u003d",
         "filename": "vp9/encoder/vp9_encodeframe.c",
         "patchSetId": 6
@@ -98,6 +188,24 @@
       "writtenOn": "2013-08-21T21:12:12Z",
       "side": 1,
       "message": "Add a TODO to use the MVs for the none partition as additional MVs in the list of MVs to search for the best center point for the search for horz/vert/split partitions.",
+      "revId": "63db1ba2f2ea55b3409e9638c46d86ff98bfe140",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAc3//4KY\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 1745,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2013-08-22T16:00:32Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAc3//4oE\u003d",
       "revId": "63db1ba2f2ea55b3409e9638c46d86ff98bfe140",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -121,6 +229,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAc3//3uA\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 1749,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2013-08-22T16:00:32Z",
+      "side": 1,
+      "message": "Done\n\ndo_split covers this purpose, hence used here.",
+      "parentUuid": "AAAAc3//4eM\u003d",
+      "revId": "63db1ba2f2ea55b3409e9638c46d86ff98bfe140",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAc3//4cE\u003d",
         "filename": "vp9/encoder/vp9_encodeframe.c",
         "patchSetId": 6
@@ -132,6 +258,24 @@
       "writtenOn": "2013-08-21T22:44:09Z",
       "side": 1,
       "message": "We could replace this by:\n\n// [Some comment explaining why this makes sense]\n} else if (partition_none_allowed \u0026\u0026 cpi-\u003esf.less_rectangular_check) {\n    do_rect \u003d 0;\n}\n\nThat way we have one less variable to worry about(larger_is_better) and the checks below are simpler.",
+      "revId": "63db1ba2f2ea55b3409e9638c46d86ff98bfe140",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAc3//3ts\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 1784,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2013-08-22T16:00:32Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAc3//4cE\u003d",
       "revId": "63db1ba2f2ea55b3409e9638c46d86ff98bfe140",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -155,6 +299,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAc3//39U\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 1787,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2013-08-22T16:00:32Z",
+      "side": 1,
+      "message": "this was inherited from previously existing speed features.\n\nwe are trying to make changes progressively, so that can add back or refine them.",
+      "parentUuid": "AAAAc3//4dk\u003d",
+      "revId": "63db1ba2f2ea55b3409e9638c46d86ff98bfe140",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAc3//4d8\u003d",
         "filename": "vp9/encoder/vp9_encodeframe.c",
         "patchSetId": 6
@@ -166,6 +328,24 @@
       "writtenOn": "2013-08-21T22:44:09Z",
       "side": 1,
       "message": "Duplicated comment above.",
+      "revId": "63db1ba2f2ea55b3409e9638c46d86ff98bfe140",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAc3//39Q\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 1798,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2013-08-22T16:00:32Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAc3//4d8\u003d",
       "revId": "63db1ba2f2ea55b3409e9638c46d86ff98bfe140",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
