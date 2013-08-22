@@ -3599,7 +3599,9 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
       }
       compmode_cost = vp9_cost_bit(comp_mode_p, is_comp_pred);
 
-      tmp_best_rdu = best_rd - RDCOST(x->rdmult, x->rddiv, rate2, distortion2);
+      tmp_best_rdu = best_rd -
+          MIN(RDCOST(x->rdmult, x->rddiv, rate2, distortion2),
+              RDCOST(x->rdmult, x->rddiv, 0, total_sse));
 
       if (tmp_best_rdu > 0) {
         // If even the 'Y' rd value of split is higher than best so far
