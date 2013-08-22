@@ -157,15 +157,14 @@ void vp9_coef_tree_initialize(void);
 void vp9_adapt_coef_probs(struct VP9Common *);
 
 static INLINE void reset_skip_context(MACROBLOCKD *xd, BLOCK_SIZE_TYPE bsize) {
-  const int bw = 1 << b_width_log2(bsize);
-  const int bh = 1 << b_height_log2(bsize);
   int i;
   for (i = 0; i < MAX_MB_PLANE; i++) {
     struct macroblockd_plane *const pd = &xd->plane[i];
-    vpx_memset(pd->above_context, 0,
-               sizeof(ENTROPY_CONTEXT) * (bw >> pd->subsampling_x));
-    vpx_memset(pd->left_context, 0,
-               sizeof(ENTROPY_CONTEXT) * (bh >> pd->subsampling_y));
+    const BLOCK_SIZE_TYPE plane_bsize = get_plane_block_size(bsize, pd);
+    vpx_memset(pd->above_context, 0, sizeof(ENTROPY_CONTEXT) *
+                   num_4x4_blocks_wide_lookup[plane_bsize]);
+    vpx_memset(pd->left_context, 0, sizeof(ENTROPY_CONTEXT) *
+                   num_4x4_blocks_high_lookup[plane_bsize]);
   }
 }
 
