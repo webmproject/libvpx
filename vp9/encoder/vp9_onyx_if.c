@@ -1450,10 +1450,6 @@ VP9_PTR vp9_create_compressor(VP9_CONFIG *oxcf) {
   CHECK_MEM_ERROR(cm, cpi->segmentation_map,
                   vpx_calloc(cm->mi_rows * cm->mi_cols, 1));
 
-  // And a copy in common for temporal coding
-  CHECK_MEM_ERROR(cm, cm->last_frame_seg_map,
-                  vpx_calloc(cm->mi_rows * cm->mi_cols, 1));
-
   // And a place holder structure is the coding context
   // for use if we want to save and restore it
   CHECK_MEM_ERROR(cm, cpi->coding_context.last_frame_seg_map_copy,
