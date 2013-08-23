@@ -45,10 +45,6 @@
     ; cospi_24_64 = 6270 = 0x 187e
     mov             r12, #0x1800
     add             r12, #0x7e
-    ; generate constant vectors
-    vdup.16         d20, r0;        ; replicate cospi_8_64
-    vdup.16         d21, r3;        ; replicate cospi_16_64
-    vdup.16         d22, r12;       ; replicate cospi_24_64
 
     ; transpose the input data
     ; 00 01 02 03   d16
@@ -57,6 +53,11 @@
     ; 30 31 32 33   d19
     vtrn.16         d16, d17
     vtrn.16         d18, d19
+
+    ; generate constant vectors
+    vdup.16         d20, r0         ; replicate cospi_8_64
+    vdup.16         d21, r3         ; replicate cospi_16_64
+
     ; 00 10 02 12   d16
     ; 01 11 03 13   d17
     ; 20 30 22 32   d18
@@ -67,20 +68,24 @@
     ; 02 12 22 32   d18
     ; 03 13 23 33   d19
 
+    vdup.16         d22, r12        ; replicate cospi_24_64
+
     ; do the transform on transposed rows
 
     ; stage 1
+    vadd.s16  d23, d16, d18         ; (input[0] + input[2])
+    vsub.s16  d24, d16, d18         ; (input[0] - input[2])
+
+    vmull.s16 q15, d17, d22         ; input[1] * cospi_24_64
+    vmull.s16 q1,  d17, d20         ; input[1] * cospi_8_64
+
     ; (input[0] + input[2]) * cospi_16_64;
     ; (input[0] - input[2]) * cospi_16_64;
-    vadd.s16  d23, d16, d18
-    vsub.s16  d24, d16, d18
     vmull.s16 q13, d23, d21
     vmull.s16 q14, d24, d21
 
     ; input[1] * cospi_24_64 - input[3] * cospi_8_64;
     ; input[1] * cospi_8_64  + input[3] * cospi_24_64;
-    vmull.s16 q15, d17, d22
-    vmull.s16 q1,  d17, d20
     vmlsl.s16 q15, d19, d20
     vmlal.s16 q1,  d19, d22
 
@@ -119,17 +124,19 @@
     ; do the transform on columns
 
     ; stage 1
+    vadd.s16  d23, d16, d18         ; (input[0] + input[2])
+    vsub.s16  d24, d16, d18         ; (input[0] - input[2])
+
+    vmull.s16 q15, d17, d22         ; input[1] * cospi_24_64
+    vmull.s16 q1,  d17, d20         ; input[1] * cospi_8_64
+
     ; (input[0] + input[2]) * cospi_16_64;
     ; (input[0] - input[2]) * cospi_16_64;
-    vadd.s16  d23, d16, d18
-    vsub.s16  d24, d16, d18
     vmull.s16 q13, d23, d21
     vmull.s16 q14, d24, d21
 
     ; input[1] * cospi_24_64 - input[3] * cospi_8_64;
     ; input[1] * cospi_8_64  + input[3] * cospi_24_64;
-    vmull.s16 q15, d17, d22
-    vmull.s16 q1,  d17, d20
     vmlsl.s16 q15, d19, d20
     vmlal.s16 q1,  d19, d22
 
