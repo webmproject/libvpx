@@ -1599,7 +1599,7 @@ typedef struct {
   int64_t sse;
   int segment_yrate;
   MB_PREDICTION_MODE modes[4];
-  SEG_RDSTAT rdstat[4][VP9_INTER_MODES];
+  SEG_RDSTAT rdstat[4][INTER_MODES];
   int mvthresh;
 } BEST_SEG_INFO;
 
@@ -1962,7 +1962,7 @@ static void rd_check_segment_txsize(VP9_COMP *cpi, MACROBLOCK *x,
       if (best_rd == INT64_MAX) {
         int iy, midx;
         for (iy = i + 1; iy < 4; ++iy)
-          for (midx = 0; midx < VP9_INTER_MODES; ++midx)
+          for (midx = 0; midx < INTER_MODES; ++midx)
             bsi->rdstat[iy][midx].brdcost = INT64_MAX;
         bsi->segment_rd = INT64_MAX;
         return;
@@ -1986,7 +1986,7 @@ static void rd_check_segment_txsize(VP9_COMP *cpi, MACROBLOCK *x,
       if (this_segment_rd > bsi->segment_rd) {
         int iy, midx;
         for (iy = i + 1; iy < 4; ++iy)
-          for (midx = 0; midx < VP9_INTER_MODES; ++midx)
+          for (midx = 0; midx < INTER_MODES; ++midx)
             bsi->rdstat[iy][midx].brdcost = INT64_MAX;
         bsi->segment_rd = INT64_MAX;
         return;
@@ -2189,7 +2189,7 @@ static void store_coding_context(MACROBLOCK *x, PICK_MODE_CONTEXT *ctx,
                          int_mv *second_ref_mv,
                          int64_t comp_pred_diff[NB_PREDICTION_TYPES],
                          int64_t tx_size_diff[TX_MODES],
-                         int64_t best_filter_diff[VP9_SWITCHABLE_FILTERS + 1]) {
+                         int64_t best_filter_diff[SWITCHABLE_FILTERS + 1]) {
   MACROBLOCKD *const xd = &x->e_mbd;
 
   // Take a snapshot of the coding context so it can be
@@ -2212,7 +2212,7 @@ static void store_coding_context(MACROBLOCK *x, PICK_MODE_CONTEXT *ctx,
   // doesn't actually work this way
   memcpy(ctx->tx_rd_diff, tx_size_diff, sizeof(ctx->tx_rd_diff));
   memcpy(ctx->best_filter_diff, best_filter_diff,
-         sizeof(*best_filter_diff) * (VP9_SWITCHABLE_FILTERS + 1));
+         sizeof(*best_filter_diff) * (SWITCHABLE_FILTERS + 1));
 }
 
 static void setup_pred_block(const MACROBLOCKD *xd,
@@ -2259,10 +2259,10 @@ static void setup_buffer_inter(VP9_COMP *cpi, MACROBLOCK *x,
 
   scale[frame_type].x_offset_q4 =
       ROUND_POWER_OF_TWO(mi_col * MI_SIZE * scale[frame_type].x_scale_fp,
-       VP9_REF_SCALE_SHIFT) & 0xf;
+       REF_SCALE_SHIFT) & 0xf;
   scale[frame_type].y_offset_q4 =
       ROUND_POWER_OF_TWO(mi_row * MI_SIZE * scale[frame_type].y_scale_fp,
-       VP9_REF_SCALE_SHIFT) & 0xf;
+       REF_SCALE_SHIFT) & 0xf;
 
   // TODO(jkoleszar): Is the UV buffer ever used here? If so, need to make this
   // use the UV scaling factors.
@@ -2747,8 +2747,8 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
       int tmp_rate_sum = 0;
       int64_t tmp_dist_sum = 0;
 
-      cpi->rd_filter_cache[VP9_SWITCHABLE_FILTERS] = INT64_MAX;
-      for (i = 0; i < VP9_SWITCHABLE_FILTERS; ++i) {
+      cpi->rd_filter_cache[SWITCHABLE_FILTERS] = INT64_MAX;
+      for (i = 0; i < SWITCHABLE_FILTERS; ++i) {
         int j;
         int64_t rs_rd;
         mbmi->interp_filter = i;
@@ -2759,8 +2759,8 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
         if (i > 0 && intpel_mv) {
           cpi->rd_filter_cache[i] = RDCOST(x->rdmult, x->rddiv,
                                            tmp_rate_sum, tmp_dist_sum);
-          cpi->rd_filter_cache[VP9_SWITCHABLE_FILTERS] =
-              MIN(cpi->rd_filter_cache[VP9_SWITCHABLE_FILTERS],
+          cpi->rd_filter_cache[SWITCHABLE_FILTERS] =
+              MIN(cpi->rd_filter_cache[SWITCHABLE_FILTERS],
                   cpi->rd_filter_cache[i] + rs_rd);
           rd = cpi->rd_filter_cache[i];
           if (cm->mcomp_filter_type == SWITCHABLE)
@@ -2787,8 +2787,8 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
           model_rd_for_sb(cpi, bsize, x, xd, &rate_sum, &dist_sum);
           cpi->rd_filter_cache[i] = RDCOST(x->rdmult, x->rddiv,
                                            rate_sum, dist_sum);
-          cpi->rd_filter_cache[VP9_SWITCHABLE_FILTERS] =
-              MIN(cpi->rd_filter_cache[VP9_SWITCHABLE_FILTERS],
+          cpi->rd_filter_cache[SWITCHABLE_FILTERS] =
+              MIN(cpi->rd_filter_cache[SWITCHABLE_FILTERS],
                   cpi->rd_filter_cache[i] + rs_rd);
           rd = cpi->rd_filter_cache[i];
           if (cm->mcomp_filter_type == SWITCHABLE)
@@ -3080,8 +3080,8 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
   int64_t best_tx_diff[TX_MODES];
   int64_t best_pred_diff[NB_PREDICTION_TYPES];
   int64_t best_pred_rd[NB_PREDICTION_TYPES];
-  int64_t best_filter_rd[VP9_SWITCHABLE_FILTERS + 1];
-  int64_t best_filter_diff[VP9_SWITCHABLE_FILTERS + 1];
+  int64_t best_filter_rd[SWITCHABLE_FILTERS + 1];
+  int64_t best_filter_diff[SWITCHABLE_FILTERS + 1];
   MB_MODE_INFO best_mbmode = { 0 };
   int j;
   int mode_index, best_mode_index = 0;
@@ -3132,7 +3132,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
     best_pred_rd[i] = INT64_MAX;
   for (i = 0; i < TX_MODES; i++)
     best_tx_rd[i] = INT64_MAX;
-  for (i = 0; i <= VP9_SWITCHABLE_FILTERS; i++)
+  for (i = 0; i <= SWITCHABLE_FILTERS; i++)
     best_filter_rd[i] = INT64_MAX;
   for (i = 0; i < TX_SIZES; i++)
     rate_uv_intra[i] = INT_MAX;
@@ -3452,7 +3452,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
       union b_mode_info tmp_best_bmodes[16];
       MB_MODE_INFO tmp_best_mbmode;
       PARTITION_INFO tmp_best_partition;
-      BEST_SEG_INFO bsi[VP9_SWITCHABLE_FILTERS];
+      BEST_SEG_INFO bsi[SWITCHABLE_FILTERS];
       int pred_exists = 0;
       int uv_skippable;
       if (is_comp_pred) {
@@ -3472,7 +3472,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
           cpi->rd_threshes[bsize][THR_NEWG] : this_rd_thresh;
       xd->mode_info_context->mbmi.txfm_size = TX_4X4;
 
-      cpi->rd_filter_cache[VP9_SWITCHABLE_FILTERS] = INT64_MAX;
+      cpi->rd_filter_cache[SWITCHABLE_FILTERS] = INT64_MAX;
       if (cm->mcomp_filter_type != BILINEAR) {
         tmp_best_filter = EIGHTTAP;
         if (x->source_variance <
@@ -3481,7 +3481,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
           vp9_zero(cpi->rd_filter_cache);
         } else {
           for (switchable_filter_index = 0;
-               switchable_filter_index < VP9_SWITCHABLE_FILTERS;
+               switchable_filter_index < SWITCHABLE_FILTERS;
                ++switchable_filter_index) {
             int newbest, rs;
             int64_t rs_rd;
@@ -3503,8 +3503,8 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
             cpi->rd_filter_cache[switchable_filter_index] = tmp_rd;
             rs = get_switchable_rate(x);
             rs_rd = RDCOST(x->rdmult, x->rddiv, rs, 0);
-            cpi->rd_filter_cache[VP9_SWITCHABLE_FILTERS] =
-                MIN(cpi->rd_filter_cache[VP9_SWITCHABLE_FILTERS],
+            cpi->rd_filter_cache[SWITCHABLE_FILTERS] =
+                MIN(cpi->rd_filter_cache[SWITCHABLE_FILTERS],
                     tmp_rd + rs_rd);
             if (cm->mcomp_filter_type == SWITCHABLE)
               tmp_rd += rs_rd;
@@ -3721,7 +3721,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
     if (!disable_skip && ref_frame == INTRA_FRAME) {
       for (i = 0; i < NB_PREDICTION_TYPES; ++i)
         best_pred_rd[i] = MIN(best_pred_rd[i], this_rd);
-      for (i = 0; i <= VP9_SWITCHABLE_FILTERS; i++)
+      for (i = 0; i <= SWITCHABLE_FILTERS; i++)
         best_filter_rd[i] = MIN(best_filter_rd[i], this_rd);
     }
 
@@ -3832,8 +3832,8 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
     if (!mode_excluded && !disable_skip && ref_frame != INTRA_FRAME &&
         cm->mcomp_filter_type != BILINEAR) {
       int64_t ref = cpi->rd_filter_cache[cm->mcomp_filter_type == SWITCHABLE ?
-                              VP9_SWITCHABLE_FILTERS : cm->mcomp_filter_type];
-      for (i = 0; i <= VP9_SWITCHABLE_FILTERS; i++) {
+                              SWITCHABLE_FILTERS : cm->mcomp_filter_type];
+      for (i = 0; i <= SWITCHABLE_FILTERS; i++) {
         int64_t adj_rd;
         // In cases of poor prediction, filter_cache[] can contain really big
         // values, which actually are bigger than this_rd itself. This can
@@ -4003,14 +4003,14 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
   }
 
   if (!x->skip) {
-    for (i = 0; i <= VP9_SWITCHABLE_FILTERS; i++) {
+    for (i = 0; i <= SWITCHABLE_FILTERS; i++) {
       if (best_filter_rd[i] == INT64_MAX)
         best_filter_diff[i] = 0;
       else
         best_filter_diff[i] = best_rd - best_filter_rd[i];
     }
     if (cm->mcomp_filter_type == SWITCHABLE)
-      assert(best_filter_diff[VP9_SWITCHABLE_FILTERS] == 0);
+      assert(best_filter_diff[SWITCHABLE_FILTERS] == 0);
   } else {
     vpx_memset(best_filter_diff, 0, sizeof(best_filter_diff));
   }

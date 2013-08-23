@@ -20,7 +20,7 @@
 
 typedef size_t VP9_BD_VALUE;
 
-#define VP9_BD_VALUE_SIZE ((int)sizeof(VP9_BD_VALUE)*CHAR_BIT)
+#define BD_VALUE_SIZE ((int)sizeof(VP9_BD_VALUE)*CHAR_BIT)
 
 typedef struct {
   const uint8_t *buffer_end;
@@ -52,7 +52,7 @@ static int vp9_read(vp9_reader *br, int probability) {
   value = br->value;
   count = br->count;
 
-  bigsplit = (VP9_BD_VALUE)split << (VP9_BD_VALUE_SIZE - 8);
+  bigsplit = (VP9_BD_VALUE)split << (BD_VALUE_SIZE - 8);
 
   range = split;
 

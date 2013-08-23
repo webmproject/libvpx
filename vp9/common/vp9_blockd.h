@@ -89,9 +89,9 @@ static INLINE int is_inter_mode(MB_PREDICTION_MODE mode) {
   return mode >= NEARESTMV && mode <= NEWMV;
 }
 
-#define VP9_INTRA_MODES (TM_PRED + 1)
+#define INTRA_MODES (TM_PRED + 1)
 
-#define VP9_INTER_MODES (1 + NEWMV - NEARESTMV)
+#define INTER_MODES (1 + NEWMV - NEARESTMV)
 
 static INLINE int inter_mode_offset(MB_PREDICTION_MODE mode) {
   return (mode - NEARESTMV);

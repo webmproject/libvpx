@@ -27,7 +27,7 @@ extern const int16_t vp9_sub_pel_filters_8lp[SUBPEL_SHIFTS][SUBPEL_TAPS];
 
 // The VP9_BILINEAR_FILTERS_2TAP macro returns a pointer to the bilinear
 // filter kernel as a 2 tap filter.
-#define VP9_BILINEAR_FILTERS_2TAP(x) \
+#define BILINEAR_FILTERS_2TAP(x) \
   (vp9_bilinear_filters[(x)] + SUBPEL_TAPS/2 - 1)
 
 #endif  // VP9_COMMON_VP9_FILTER_H_

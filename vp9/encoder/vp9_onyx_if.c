@@ -98,9 +98,9 @@ FILE *keyfile;
 
 
 #ifdef ENTROPY_STATS
-extern int intra_mode_stats[VP9_INTRA_MODES]
-                           [VP9_INTRA_MODES]
-                           [VP9_INTRA_MODES];
+extern int intra_mode_stats[INTRA_MODES]
+                           [INTRA_MODES]
+                           [INTRA_MODES];
 #endif
 
 #ifdef MODE_STATS
@@ -444,9 +444,9 @@ static void configure_static_seg_features(VP9_COMP *cpi) {
 void vp9_update_mode_context_stats(VP9_COMP *cpi) {
   VP9_COMMON *cm = &cpi->common;
   int i, j;
-  unsigned int (*inter_mode_counts)[VP9_INTER_MODES - 1][2] =
+  unsigned int (*inter_mode_counts)[INTER_MODES - 1][2] =
       cm->fc.inter_mode_counts;
-  int64_t (*mv_ref_stats)[VP9_INTER_MODES - 1][2] = cpi->mv_ref_stats;
+  int64_t (*mv_ref_stats)[INTER_MODES - 1][2] = cpi->mv_ref_stats;
   FILE *f;
 
   // Read the past stats counters
@@ -460,7 +460,7 @@ void vp9_update_mode_context_stats(VP9_COMP *cpi) {
 
   // Add in the values for this frame
   for (i = 0; i < INTER_MODE_CONTEXTS; i++) {
-    for (j = 0; j < VP9_INTER_MODES - 1; j++) {
+    for (j = 0; j < INTER_MODES - 1; j++) {
       mv_ref_stats[i][j][0] += (int64_t)inter_mode_counts[i][j][0];
       mv_ref_stats[i][j][1] += (int64_t)inter_mode_counts[i][j][1];
     }
@@ -479,12 +479,12 @@ void print_mode_context(VP9_COMP *cpi) {
   fprintf(f, "#include \"vp9_entropy.h\"\n");
   fprintf(
       f,
-      "const int inter_mode_probs[INTER_MODE_CONTEXTS][VP9_INTER_MODES - 1] =");
+      "const int inter_mode_probs[INTER_MODE_CONTEXTS][INTER_MODES - 1] =");
   fprintf(f, "{\n");
   for (j = 0; j < INTER_MODE_CONTEXTS; j++) {
     fprintf(f, "  {/* %d */ ", j);
     fprintf(f, "    ");
-    for (i = 0; i < VP9_INTER_MODES - 1; i++) {
+    for (i = 0; i < INTER_MODES - 1; i++) {
       int this_prob;
       int64_t count = cpi->mv_ref_stats[j][i][0] + cpi->mv_ref_stats[j][i][1];
       if (count)
@@ -1800,18 +1800,18 @@ void vp9_remove_compressor(VP9_PTR *ptr) {
 
       fprintf(fmode, "\n#include \"vp9_entropymode.h\"\n\n");
       fprintf(fmode, "const unsigned int vp9_kf_default_bmode_counts ");
-      fprintf(fmode, "[VP9_INTRA_MODES][VP9_INTRA_MODES]"
-                     "[VP9_INTRA_MODES] =\n{\n");
+      fprintf(fmode, "[INTRA_MODES][INTRA_MODES]"
+                     "[INTRA_MODES] =\n{\n");
 
-      for (i = 0; i < VP9_INTRA_MODES; i++) {
+      for (i = 0; i < INTRA_MODES; i++) {
 
         fprintf(fmode, "    { // Above Mode :  %d\n", i);
 
-        for (j = 0; j < VP9_INTRA_MODES; j++) {
+        for (j = 0; j < INTRA_MODES; j++) {
 
           fprintf(fmode, "        {");
 
-          for (k = 0; k < VP9_INTRA_MODES; k++) {
+          for (k = 0; k < INTRA_MODES; k++) {
             if (!intra_mode_stats[i][j][k])
               fprintf(fmode, " %5d, ", 1);
             else

@@ -14,8 +14,8 @@
 #include "vp9/common/vp9_onyxc_int.h"
 #include "vp9/common/vp9_seg_common.h"
 
-const vp9_prob vp9_kf_uv_mode_prob[VP9_INTRA_MODES]
-                                  [VP9_INTRA_MODES - 1] = {
+const vp9_prob vp9_kf_uv_mode_prob[INTRA_MODES]
+                                  [INTRA_MODES - 1] = {
   { 144,  11,  54, 157, 195, 130,  46,  58, 108 } /* y = dc */,
   { 118,  15, 123, 148, 131, 101,  44,  93, 131 } /* y = v */,
   { 113,  12,  23, 188, 226, 142,  26,  32, 125 } /* y = h */,
@@ -29,15 +29,15 @@ const vp9_prob vp9_kf_uv_mode_prob[VP9_INTRA_MODES]
 };
 
 static const vp9_prob default_if_y_probs[BLOCK_SIZE_GROUPS]
-                                        [VP9_INTRA_MODES - 1] = {
+                                        [INTRA_MODES - 1] = {
   {  65,  32,  18, 144, 162, 194,  41,  51,  98 } /* block_size < 8x8 */,
   { 132,  68,  18, 165, 217, 196,  45,  40,  78 } /* block_size < 16x16 */,
   { 173,  80,  19, 176, 240, 193,  64,  35,  46 } /* block_size < 32x32 */,
   { 221, 135,  38, 194, 248, 121,  96,  85,  29 } /* block_size >= 32x32 */
 };
 
-static const vp9_prob default_if_uv_probs[VP9_INTRA_MODES]
-                                         [VP9_INTRA_MODES - 1] = {
+static const vp9_prob default_if_uv_probs[INTRA_MODES]
+                                         [INTRA_MODES - 1] = {
   { 120,   7,  76, 176, 208, 126,  28,  54, 103 } /* y = dc */,
   {  48,  12, 154, 155, 139,  90,  34, 117, 119 } /* y = v */,
   {  67,   6,  25, 204, 243, 158,  13,  21,  96 } /* y = h */,
@@ -98,9 +98,9 @@ static const vp9_prob default_partition_probs[NUM_FRAME_TYPES]
   }
 };
 
-const vp9_prob vp9_kf_y_mode_prob[VP9_INTRA_MODES]
-                                 [VP9_INTRA_MODES]
-                                 [VP9_INTRA_MODES - 1] = {
+const vp9_prob vp9_kf_y_mode_prob[INTRA_MODES]
+                                 [INTRA_MODES]
+                                 [INTRA_MODES - 1] = {
   { /* above = dc */
     { 137,  30,  42, 148, 151, 207,  70,  52,  91 } /* left = dc */,
     {  92,  45, 102, 136, 116, 180,  74,  90, 100 } /* left = v */,
@@ -215,7 +215,7 @@ const vp9_prob vp9_kf_y_mode_prob[VP9_INTRA_MODES]
 };
 
 static const vp9_prob default_inter_mode_probs[INTER_MODE_CONTEXTS]
-                                              [VP9_INTER_MODES - 1] = {
+                                              [INTER_MODES - 1] = {
   {2,       173,   34},  // 0 = both zero mv
   {7,       145,   85},  // 1 = one zero mv + one a predicted mv
   {7,       166,   63},  // 2 = two predicted mvs
@@ -226,7 +226,7 @@ static const vp9_prob default_inter_mode_probs[INTER_MODE_CONTEXTS]
 };
 
 /* Array indices are identical to previously-existing INTRAMODECONTEXTNODES. */
-const vp9_tree_index vp9_intra_mode_tree[VP9_INTRA_MODES * 2 - 2] = {
+const vp9_tree_index vp9_intra_mode_tree[INTRA_MODES * 2 - 2] = {
   -DC_PRED, 2,                      /* 0 = DC_NODE */
   -TM_PRED, 4,                      /* 1 = TM_NODE */
   -V_PRED, 6,                       /* 2 = V_NODE */
@@ -250,8 +250,8 @@ const vp9_tree_index vp9_partition_tree[6] = {
   -PARTITION_VERT, -PARTITION_SPLIT
 };
 
-struct vp9_token vp9_intra_mode_encodings[VP9_INTRA_MODES];
-struct vp9_token vp9_inter_mode_encodings[VP9_INTER_MODES];
+struct vp9_token vp9_intra_mode_encodings[INTRA_MODES];
+struct vp9_token vp9_inter_mode_encodings[INTER_MODES];
 
 struct vp9_token vp9_partition_encodings[PARTITION_TYPES];
 
@@ -317,8 +317,8 @@ static const vp9_prob default_mbskip_probs[MBSKIP_CONTEXTS] = {
   192, 128, 64
 };
 
-static const vp9_prob default_switchable_interp_prob[VP9_SWITCHABLE_FILTERS+1]
-                                                  [VP9_SWITCHABLE_FILTERS-1] = {
+static const vp9_prob default_switchable_interp_prob[SWITCHABLE_FILTERS+1]
+                                                  [SWITCHABLE_FILTERS-1] = {
   { 235, 162, },
   { 36, 255, },
   { 34, 3, },
@@ -338,11 +338,11 @@ void vp9_init_mbmode_probs(VP9_COMMON *cm) {
   vp9_copy(cm->fc.mbskip_probs, default_mbskip_probs);
 }
 
-const vp9_tree_index vp9_switchable_interp_tree[VP9_SWITCHABLE_FILTERS*2-2] = {
+const vp9_tree_index vp9_switchable_interp_tree[SWITCHABLE_FILTERS*2-2] = {
   -EIGHTTAP, 2,
   -EIGHTTAP_SMOOTH, -EIGHTTAP_SHARP
 };
-struct vp9_token vp9_switchable_interp_encodings[VP9_SWITCHABLE_FILTERS];
+struct vp9_token vp9_switchable_interp_encodings[SWITCHABLE_FILTERS];
 
 void vp9_entropy_mode_init() {
   vp9_tokens_from_tree(vp9_intra_mode_encodings, vp9_intra_mode_tree);
@@ -400,17 +400,17 @@ void vp9_adapt_mode_probs(VP9_COMMON *cm) {
                                              counts->single_ref[i][j]);
 
   for (i = 0; i < INTER_MODE_CONTEXTS; i++)
-    update_mode_probs(VP9_INTER_MODES, vp9_inter_mode_tree,
+    update_mode_probs(INTER_MODES, vp9_inter_mode_tree,
                       counts->inter_mode[i], pre_fc->inter_mode_probs[i],
                       fc->inter_mode_probs[i], NEARESTMV);
 
   for (i = 0; i < BLOCK_SIZE_GROUPS; i++)
-    update_mode_probs(VP9_INTRA_MODES, vp9_intra_mode_tree,
+    update_mode_probs(INTRA_MODES, vp9_intra_mode_tree,
                       counts->y_mode[i], pre_fc->y_mode_prob[i],
                       fc->y_mode_prob[i], 0);
 
-  for (i = 0; i < VP9_INTRA_MODES; ++i)
-    update_mode_probs(VP9_INTRA_MODES, vp9_intra_mode_tree,
+  for (i = 0; i < INTRA_MODES; ++i)
+    update_mode_probs(INTRA_MODES, vp9_intra_mode_tree,
                       counts->uv_mode[i], pre_fc->uv_mode_prob[i],
                       fc->uv_mode_prob[i], 0);
 
@@ -421,8 +421,8 @@ void vp9_adapt_mode_probs(VP9_COMMON *cm) {
                       fc->partition_prob[INTER_FRAME][i], 0);
 
   if (cm->mcomp_filter_type == SWITCHABLE) {
-    for (i = 0; i <= VP9_SWITCHABLE_FILTERS; i++)
-      update_mode_probs(VP9_SWITCHABLE_FILTERS, vp9_switchable_interp_tree,
+    for (i = 0; i <= SWITCHABLE_FILTERS; i++)
+      update_mode_probs(SWITCHABLE_FILTERS, vp9_switchable_interp_tree,
                         counts->switchable_interp[i],
                         pre_fc->switchable_interp_prob[i],
                         fc->switchable_interp_prob[i], 0);

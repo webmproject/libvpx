@@ -236,22 +236,22 @@ void vp9_write_nmv_probs(VP9_COMP* const cpi, int usehp, vp9_writer* const bc) {
 
   for (j = 0; j < MV_JOINTS - 1; ++j)
     update_mv(bc, branch_ct_joint[j], &mvc->joints[j], prob.joints[j],
-              VP9_NMV_UPDATE_PROB);
+              NMV_UPDATE_PROB);
 
   for (i = 0; i < 2; ++i) {
     update_mv(bc, branch_ct_sign[i], &mvc->comps[i].sign,
-              prob.comps[i].sign, VP9_NMV_UPDATE_PROB);
+              prob.comps[i].sign, NMV_UPDATE_PROB);
     for (j = 0; j < MV_CLASSES - 1; ++j)
       update_mv(bc, branch_ct_classes[i][j], &mvc->comps[i].classes[j],
-                prob.comps[i].classes[j], VP9_NMV_UPDATE_PROB);
+                prob.comps[i].classes[j], NMV_UPDATE_PROB);
 
     for (j = 0; j < CLASS0_SIZE - 1; ++j)
       update_mv(bc, branch_ct_class0[i][j], &mvc->comps[i].class0[j],
-                prob.comps[i].class0[j], VP9_NMV_UPDATE_PROB);
+                prob.comps[i].class0[j], NMV_UPDATE_PROB);
 
     for (j = 0; j < MV_OFFSET_BITS; ++j)
       update_mv(bc, branch_ct_bits[i][j], &mvc->comps[i].bits[j],
-                prob.comps[i].bits[j], VP9_NMV_UPDATE_PROB);
+                prob.comps[i].bits[j], NMV_UPDATE_PROB);
   }
 
   for (i = 0; i < 2; ++i) {
@@ -260,20 +260,20 @@ void vp9_write_nmv_probs(VP9_COMP* const cpi, int usehp, vp9_writer* const bc) {
       for (k = 0; k < 3; ++k)
         update_mv(bc, branch_ct_class0_fp[i][j][k],
                   &mvc->comps[i].class0_fp[j][k],
-                  prob.comps[i].class0_fp[j][k], VP9_NMV_UPDATE_PROB);
+                  prob.comps[i].class0_fp[j][k], NMV_UPDATE_PROB);
     }
 
     for (j = 0; j < 3; ++j)
       update_mv(bc, branch_ct_fp[i][j], &mvc->comps[i].fp[j],
-                prob.comps[i].fp[j], VP9_NMV_UPDATE_PROB);
+                prob.comps[i].fp[j], NMV_UPDATE_PROB);
   }
 
   if (usehp) {
     for (i = 0; i < 2; ++i) {
       update_mv(bc, branch_ct_class0_hp[i], &mvc->comps[i].class0_hp,
-                prob.comps[i].class0_hp, VP9_NMV_UPDATE_PROB);
+                prob.comps[i].class0_hp, NMV_UPDATE_PROB);
       update_mv(bc, branch_ct_hp[i], &mvc->comps[i].hp,
-                prob.comps[i].hp, VP9_NMV_UPDATE_PROB);
+                prob.comps[i].hp, NMV_UPDATE_PROB);
     }
   }
 }

@@ -48,7 +48,7 @@ typedef struct {
   int comp_pred_diff;
   int single_pred_diff;
   int64_t tx_rd_diff[TX_MODES];
-  int64_t best_filter_diff[VP9_SWITCHABLE_FILTERS + 1];
+  int64_t best_filter_diff[SWITCHABLE_FILTERS + 1];
 
   // Bit flag for each mode whether it has high error in comparison to others.
   unsigned int modes_with_high_error;
@@ -121,9 +121,9 @@ struct macroblock {
   int mbmode_cost[MB_MODE_COUNT];
   unsigned inter_mode_cost[INTER_MODE_CONTEXTS][MB_MODE_COUNT - NEARESTMV];
   int intra_uv_mode_cost[2][MB_MODE_COUNT];
-  int y_mode_costs[VP9_INTRA_MODES][VP9_INTRA_MODES][VP9_INTRA_MODES];
-  int switchable_interp_costs[VP9_SWITCHABLE_FILTERS + 1]
-                             [VP9_SWITCHABLE_FILTERS];
+  int y_mode_costs[INTRA_MODES][INTRA_MODES][INTRA_MODES];
+  int switchable_interp_costs[SWITCHABLE_FILTERS + 1]
+                             [SWITCHABLE_FILTERS];
 
   // These define limits to motion vector components to prevent them
   // from extending outside the UMV borders

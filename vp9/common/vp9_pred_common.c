@@ -31,25 +31,25 @@ unsigned char vp9_get_pred_context_switchable_interp(const MACROBLOCKD *xd) {
   const int left_mv_pred = is_inter_mode(left_mbmi->mode);
   const int left_interp = left_in_image && left_mv_pred
                               ? left_mbmi->interp_filter
-                              : VP9_SWITCHABLE_FILTERS;
+                              : SWITCHABLE_FILTERS;
 
   // above
   const int above_mv_pred = is_inter_mode(above_mbmi->mode);
   const int above_interp = above_in_image && above_mv_pred
                                ? above_mbmi->interp_filter
-                               : VP9_SWITCHABLE_FILTERS;
+                               : SWITCHABLE_FILTERS;
 
 
   if (left_interp == above_interp)
     return left_interp;
-  else if (left_interp == VP9_SWITCHABLE_FILTERS &&
-           above_interp != VP9_SWITCHABLE_FILTERS)
+  else if (left_interp == SWITCHABLE_FILTERS &&
+           above_interp != SWITCHABLE_FILTERS)
     return above_interp;
-  else if (left_interp != VP9_SWITCHABLE_FILTERS &&
-           above_interp == VP9_SWITCHABLE_FILTERS)
+  else if (left_interp != SWITCHABLE_FILTERS &&
+           above_interp == SWITCHABLE_FILTERS)
     return left_interp;
   else
-    return VP9_SWITCHABLE_FILTERS;
+    return SWITCHABLE_FILTERS;
 }
 // Returns a context number for the given MB prediction signal
 unsigned char vp9_get_pred_context_intra_inter(const MACROBLOCKD *xd) {

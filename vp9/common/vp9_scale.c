@@ -13,11 +13,11 @@
 #include "vp9/common/vp9_scale.h"
 
 static INLINE int scaled_x(int val, const struct scale_factors *scale) {
-  return val * scale->x_scale_fp >> VP9_REF_SCALE_SHIFT;
+  return val * scale->x_scale_fp >> REF_SCALE_SHIFT;
 }
 
 static INLINE int scaled_y(int val, const struct scale_factors *scale) {
-  return val * scale->y_scale_fp >> VP9_REF_SCALE_SHIFT;
+  return val * scale->y_scale_fp >> REF_SCALE_SHIFT;
 }
 
 static int unscaled_value(int val, const struct scale_factors *scale) {
@@ -58,7 +58,7 @@ static int get_fixed_point_scale_factor(int other_size, int this_size) {
   // and use fixed point scaling factors in decoding and encoding routines.
   // Hardware implementations can calculate scale factor in device driver
   // and use multiplication and shifting on hardware instead of division.
-  return (other_size << VP9_REF_SCALE_SHIFT) / this_size;
+  return (other_size << REF_SCALE_SHIFT) / this_size;
 }
 
 static int check_scale_factors(int other_w, int other_h,
@@ -73,8 +73,8 @@ void vp9_setup_scale_factors_for_frame(struct scale_factors *scale,
                                        int other_w, int other_h,
                                        int this_w, int this_h) {
   if (!check_scale_factors(other_w, other_h, this_w, this_h)) {
-    scale->x_scale_fp = VP9_REF_INVALID_SCALE;
-    scale->y_scale_fp = VP9_REF_INVALID_SCALE;
+    scale->x_scale_fp = REF_INVALID_SCALE;
+    scale->y_scale_fp = REF_INVALID_SCALE;
     return;
   }
 
