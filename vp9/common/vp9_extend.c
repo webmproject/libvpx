@@ -57,15 +57,23 @@ static void copy_and_extend_plane(const uint8_t *src, int src_pitch,
 
 void vp9_copy_and_extend_frame(const YV12_BUFFER_CONFIG *src,
                                YV12_BUFFER_CONFIG *dst) {
-  const int et_y = dst->border;
-  const int el_y = dst->border;
-  const int eb_y = dst->border + dst->y_height - src->y_height;
-  const int er_y = dst->border + dst->y_width - src->y_width;
-
-  const int et_uv = dst->border >> (dst->uv_height != dst->y_height);
-  const int el_uv = dst->border >> (dst->uv_width != dst->y_width);
-  const int eb_uv = et_uv + dst->uv_height - src->uv_height;
-  const int er_uv = el_uv + dst->uv_width - src->uv_width;
+  // Extend src frame in buffer
+  // Altref filtering assumes 16 pixel extension
+  const int et_y = 16;
+  const int el_y = 16;
+  // Motion estimation may use src block variance with the block size up
+  // to 64x64, so the right and bottom need to be extended to 64 mulitple
+  // or up to 16, whichever is greater.
+  const int eb_y = MAX(ALIGN_POWER_OF_TWO(src->y_width, 6) - src->y_width,
+                       16);
+  const int er_y = MAX(ALIGN_POWER_OF_TWO(src->y_height, 6) - src->y_height,
+                       16);
+  const int uv_width_subsampling = (src->uv_width != src->y_width);
+  const int uv_height_subsampling = (src->uv_height != src->y_height);
+  const int et_uv = et_y >> uv_height_subsampling;
+  const int el_uv = el_y >> uv_width_subsampling;
+  const int eb_uv = eb_y >> uv_height_subsampling;
+  const int er_uv = er_y >> uv_width_subsampling;
 
 #if CONFIG_ALPHA
   const int et_a = dst->border >> (dst->alpha_height != dst->y_height);
