@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAc3//1Jw\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 3218,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2013-08-23T17:21:27Z",
+      "side": 1,
+      "message": "shall we make this conditioned on speed feature adaptive_rd_thresh?\n\nit seems this changes coding statistics at speed 0.",
+      "revId": "aa5b67add04539ae2e4516f651f4221d83b5ff39",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
