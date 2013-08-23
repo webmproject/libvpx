@@ -975,10 +975,6 @@ int vp9_decode_frame(VP9D_COMP *pbi, const uint8_t **p_data_end) {
 
   vp9_zero(pc->counts);
 
-  // Initialize xd pointers. Any reference should do for xd->pre, so use 0.
-  setup_pre_planes(xd, 0, &pc->yv12_fb[pc->active_ref_idx[0]], 0, 0, NULL);
-  setup_dst_planes(xd, new_fb, 0, 0);
-
   new_fb->corrupted |= read_compressed_header(pbi, data, first_partition_size);
 
   setup_block_dptrs(xd, pc->subsampling_x, pc->subsampling_y);
