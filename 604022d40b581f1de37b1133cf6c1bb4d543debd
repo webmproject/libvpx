@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAc3//1Ow\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 2617,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2013-08-23T16:12:22Z",
+      "side": 1,
+      "message": "can we make and use is_intra_block(mbmi) here instead, hence explicitly expressing that \"if this is intra coded\"?\nthis probably makes the code more readable.",
+      "revId": "604022d40b581f1de37b1133cf6c1bb4d543debd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
