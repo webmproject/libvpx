@@ -74,8 +74,8 @@ static void set_mb_mi(VP9_COMMON *cm, int aligned_width, int aligned_height) {
   cm->mb_rows = (aligned_height + 8) >> 4;
   cm->MBs = cm->mb_rows * cm->mb_cols;
 
-  cm->mi_cols = aligned_width >> LOG2_MI_SIZE;
-  cm->mi_rows = aligned_height >> LOG2_MI_SIZE;
+  cm->mi_cols = aligned_width >> MI_SIZE_LOG2;
+  cm->mi_rows = aligned_height >> MI_SIZE_LOG2;
   cm->mode_info_stride = cm->mi_cols + MI_BLOCK_SIZE;
 }
 
@@ -96,8 +96,8 @@ static void setup_mi(VP9_COMMON *cm) {
 int vp9_alloc_frame_buffers(VP9_COMMON *oci, int width, int height) {
   int i, mi_cols;
 
-  const int aligned_width = ALIGN_POWER_OF_TWO(width, LOG2_MI_SIZE);
-  const int aligned_height = ALIGN_POWER_OF_TWO(height, LOG2_MI_SIZE);
+  const int aligned_width = ALIGN_POWER_OF_TWO(width, MI_SIZE_LOG2);
+  const int aligned_height = ALIGN_POWER_OF_TWO(height, MI_SIZE_LOG2);
   const int ss_x = oci->subsampling_x;
   const int ss_y = oci->subsampling_y;
   int mi_size;
@@ -192,8 +192,8 @@ void vp9_initialize_common() {
 
 void vp9_update_frame_size(VP9_COMMON *cm) {
   int i, mi_cols;
-  const int aligned_width = ALIGN_POWER_OF_TWO(cm->width, LOG2_MI_SIZE);
-  const int aligned_height = ALIGN_POWER_OF_TWO(cm->height, LOG2_MI_SIZE);
+  const int aligned_width = ALIGN_POWER_OF_TWO(cm->width, MI_SIZE_LOG2);
+  const int aligned_height = ALIGN_POWER_OF_TWO(cm->height, MI_SIZE_LOG2);
 
   set_mb_mi(cm, aligned_width, aligned_height);
   setup_mi(cm);

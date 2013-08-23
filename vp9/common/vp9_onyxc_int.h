@@ -234,7 +234,7 @@ static void ref_cnt_fb(int *buf, int *idx, int new_idx) {
 }
 
 static int mi_cols_aligned_to_sb(int n_mis) {
-  return ALIGN_POWER_OF_TWO(n_mis, LOG2_MI_BLOCK_SIZE);
+  return ALIGN_POWER_OF_TWO(n_mis, MI_BLOCK_SIZE_LOG2);
 }
 
 static INLINE void set_skip_context(VP9_COMMON *cm, MACROBLOCKD *xd,
