@@ -16,7 +16,6 @@
 #define MI_SIZE_LOG2 3
 #define MI_BLOCK_SIZE_LOG2 (6 - MI_SIZE_LOG2)  // 64 = 2^6
 
-#define MAX_BLOCK_SIZE (1 << 6)  // max block size in pixel
 #define MI_SIZE (1 << MI_SIZE_LOG2)  // pixels per mi-unit
 #define MI_BLOCK_SIZE (1 << MI_BLOCK_SIZE_LOG2)  // mi-units per max block
 

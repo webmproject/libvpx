@@ -503,8 +503,8 @@ static void set_offsets(VP9_COMP *cpi, int mi_row, int mi_col,
 
   // Set up limit values for MV components
   // mv beyond the range do not produce new/different prediction block
-  x->mv_row_min = -((mi_row * MI_SIZE) + MAX_BLOCK_SIZE + VP9_INTERP_EXTEND);
-  x->mv_col_min = -((mi_col * MI_SIZE) + MAX_BLOCK_SIZE + VP9_INTERP_EXTEND);
+  x->mv_row_min = -(((mi_row + mi_height) * MI_SIZE) + VP9_INTERP_EXTEND);
+  x->mv_col_min = -(((mi_col + mi_width) * MI_SIZE) + VP9_INTERP_EXTEND);
   x->mv_row_max = (cm->mi_rows - mi_row) * MI_SIZE + VP9_INTERP_EXTEND;
   x->mv_col_max = (cm->mi_cols - mi_col) * MI_SIZE + VP9_INTERP_EXTEND;
 
