@@ -237,7 +237,7 @@ static void write_intra_mode(vp9_writer *bc, int m, const vp9_prob *p) {
 
 static void update_switchable_interp_probs(VP9_COMP *const cpi,
                                            vp9_writer* const bc) {
-  VP9_COMMON *const pc = &cpi->common;
+  VP9_COMMON *const cm = &cpi->common;
   unsigned int branch_ct[SWITCHABLE_FILTERS + 1]
                         [SWITCHABLE_FILTERS - 1][2];
   vp9_prob new_prob[SWITCHABLE_FILTERS + 1][SWITCHABLE_FILTERS - 1];
@@ -246,21 +246,21 @@ static void update_switchable_interp_probs(VP9_COMP *const cpi,
     vp9_tree_probs_from_distribution(
         vp9_switchable_interp_tree,
         new_prob[j], branch_ct[j],
-        pc->counts.switchable_interp[j], 0);
+        cm->counts.switchable_interp[j], 0);
   }
   for (j = 0; j <= SWITCHABLE_FILTERS; ++j) {
     for (i = 0; i < SWITCHABLE_FILTERS - 1; ++i) {
-      vp9_cond_prob_diff_update(bc, &pc->fc.switchable_interp_prob[j][i],
+      vp9_cond_prob_diff_update(bc, &cm->fc.switchable_interp_prob[j][i],
                                 MODE_UPDATE_PROB, branch_ct[j][i]);
     }
   }
 #ifdef MODE_STATS
   if (!cpi->dummy_packing)
-    update_switchable_interp_stats(pc);
+    update_switchable_interp_stats(cm);
 #endif
 }
 
-static void update_inter_mode_probs(VP9_COMMON *pc, vp9_writer* const bc) {
+static void update_inter_mode_probs(VP9_COMMON *cm, vp9_writer* const bc) {
   int i, j;
 
   for (i = 0; i < INTER_MODE_CONTEXTS; ++i) {
@@ -269,10 +269,10 @@ static void update_inter_mode_probs(VP9_COMMON *pc, vp9_writer* const bc) {
 
     vp9_tree_probs_from_distribution(vp9_inter_mode_tree,
                                      new_prob, branch_ct,
-                                     pc->counts.inter_mode[i], NEARESTMV);
+                                     cm->counts.inter_mode[i], NEARESTMV);
 
     for (j = 0; j < INTER_MODES - 1; ++j)
-      vp9_cond_prob_diff_update(bc, &pc->fc.inter_mode_probs[i][j],
+      vp9_cond_prob_diff_update(bc, &cm->fc.inter_mode_probs[i][j],
                                 MODE_UPDATE_PROB, branch_ct[j]);
   }
 }
@@ -356,39 +356,39 @@ static void write_segment_id(vp9_writer *w, const struct segmentation *seg,
 
 // This function encodes the reference frame
 static void encode_ref_frame(VP9_COMP *cpi, vp9_writer *bc) {
-  VP9_COMMON *const pc = &cpi->common;
+  VP9_COMMON *const cm = &cpi->common;
   MACROBLOCK *const x = &cpi->mb;
   MACROBLOCKD *const xd = &x->e_mbd;
   MB_MODE_INFO *mi = &xd->mode_info_context->mbmi;
   const int segment_id = mi->segment_id;
-  int seg_ref_active = vp9_segfeature_active(&pc->seg, segment_id,
+  int seg_ref_active = vp9_segfeature_active(&cm->seg, segment_id,
                                              SEG_LVL_REF_FRAME);
   // If segment level coding of this signal is disabled...
   // or the segment allows multiple reference frame options
   if (!seg_ref_active) {
     // does the feature use compound prediction or not
     // (if not specified at the frame/segment level)
-    if (pc->comp_pred_mode == HYBRID_PREDICTION) {
+    if (cm->comp_pred_mode == HYBRID_PREDICTION) {
       vp9_write(bc, mi->ref_frame[1] > INTRA_FRAME,
-                vp9_get_pred_prob_comp_inter_inter(pc, xd));
+                vp9_get_pred_prob_comp_inter_inter(cm, xd));
     } else {
       assert((mi->ref_frame[1] <= INTRA_FRAME) ==
-                 (pc->comp_pred_mode == SINGLE_PREDICTION_ONLY));
+                 (cm->comp_pred_mode == SINGLE_PREDICTION_ONLY));
     }
 
     if (mi->ref_frame[1] > INTRA_FRAME) {
       vp9_write(bc, mi->ref_frame[0] == GOLDEN_FRAME,
-                vp9_get_pred_prob_comp_ref_p(pc, xd));
+                vp9_get_pred_prob_comp_ref_p(cm, xd));
     } else {
       vp9_write(bc, mi->ref_frame[0] != LAST_FRAME,
-                vp9_get_pred_prob_single_ref_p1(pc, xd));
+                vp9_get_pred_prob_single_ref_p1(cm, xd));
       if (mi->ref_frame[0] != LAST_FRAME)
         vp9_write(bc, mi->ref_frame[0] != GOLDEN_FRAME,
-                  vp9_get_pred_prob_single_ref_p2(pc, xd));
+                  vp9_get_pred_prob_single_ref_p2(cm, xd));
     }
   } else {
     assert(mi->ref_frame[1] <= INTRA_FRAME);
-    assert(vp9_get_segdata(&pc->seg, segment_id, SEG_LVL_REF_FRAME) ==
+    assert(vp9_get_segdata(&cm->seg, segment_id, SEG_LVL_REF_FRAME) ==
            mi->ref_frame[0]);
   }
 
@@ -397,11 +397,11 @@ static void encode_ref_frame(VP9_COMP *cpi, vp9_writer *bc) {
 }
 
 static void pack_inter_mode_mvs(VP9_COMP *cpi, MODE_INFO *m, vp9_writer *bc) {
-  VP9_COMMON *const pc = &cpi->common;
-  const nmv_context *nmvc = &pc->fc.nmvc;
+  VP9_COMMON *const cm = &cpi->common;
+  const nmv_context *nmvc = &cm->fc.nmvc;
   MACROBLOCK *const x = &cpi->mb;
   MACROBLOCKD *const xd = &x->e_mbd;
-  struct segmentation *seg = &pc->seg;
+  struct segmentation *seg = &cm->seg;
   MB_MODE_INFO *const mi = &m->mbmi;
   const MV_REFERENCE_FRAME rf = mi->ref_frame[0];
   const MB_PREDICTION_MODE mode = mi->mode;
@@ -410,7 +410,7 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, MODE_INFO *m, vp9_writer *bc) {
   const BLOCK_SIZE bsize = mi->sb_type;
   const int allow_hp = xd->allow_high_precision_mv;
 
-  x->partition_info = x->pi + (m - pc->mi);
+  x->partition_info = x->pi + (m - cm->mi);
 
 #ifdef ENTROPY_STATS
   active_section = 9;
@@ -432,9 +432,9 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, MODE_INFO *m, vp9_writer *bc) {
 
   if (!vp9_segfeature_active(seg, segment_id, SEG_LVL_REF_FRAME))
     vp9_write(bc, rf != INTRA_FRAME,
-              vp9_get_pred_prob_intra_inter(pc, xd));
+              vp9_get_pred_prob_intra_inter(cm, xd));
 
-  if (bsize >= BLOCK_8X8 && pc->tx_mode == TX_MODE_SELECT &&
+  if (bsize >= BLOCK_8X8 && cm->tx_mode == TX_MODE_SELECT &&
       !(rf != INTRA_FRAME &&
         (skip_coeff || vp9_segfeature_active(seg, segment_id, SEG_LVL_SKIP)))) {
     write_selected_tx_size(cpi, mi->tx_size, bsize, bc);
@@ -446,7 +446,7 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, MODE_INFO *m, vp9_writer *bc) {
 #endif
 
     if (bsize >= BLOCK_8X8) {
-      write_intra_mode(bc, mode, pc->fc.y_mode_prob[size_group_lookup[bsize]]);
+      write_intra_mode(bc, mode, cm->fc.y_mode_prob[size_group_lookup[bsize]]);
     } else {
       int idx, idy;
       const int num_4x4_blocks_wide = num_4x4_blocks_wide_lookup[bsize];
@@ -454,11 +454,11 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, MODE_INFO *m, vp9_writer *bc) {
       for (idy = 0; idy < 2; idy += num_4x4_blocks_high) {
         for (idx = 0; idx < 2; idx += num_4x4_blocks_wide) {
           const MB_PREDICTION_MODE bm = m->bmi[idy * 2 + idx].as_mode;
-          write_intra_mode(bc, bm, pc->fc.y_mode_prob[0]);
+          write_intra_mode(bc, bm, cm->fc.y_mode_prob[0]);
         }
       }
     }
-    write_intra_mode(bc, mi->uv_mode, pc->fc.uv_mode_prob[mode]);
+    write_intra_mode(bc, mi->uv_mode, cm->fc.uv_mode_prob[mode]);
   } else {
     vp9_prob *mv_ref_p;
     encode_ref_frame(cpi, bc);
@@ -472,18 +472,18 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, MODE_INFO *m, vp9_writer *bc) {
     if (!vp9_segfeature_active(seg, segment_id, SEG_LVL_SKIP)) {
       if (bsize >= BLOCK_8X8) {
         write_sb_mv_ref(bc, mode, mv_ref_p);
-        ++pc->counts.inter_mode[mi->mode_context[rf]]
+        ++cm->counts.inter_mode[mi->mode_context[rf]]
                                [inter_mode_offset(mode)];
       }
     }
 
-    if (pc->mcomp_filter_type == SWITCHABLE) {
+    if (cm->mcomp_filter_type == SWITCHABLE) {
       const int ctx = vp9_get_pred_context_switchable_interp(xd);
       write_token(bc, vp9_switchable_interp_tree,
-                  pc->fc.switchable_interp_prob[ctx],
+                  cm->fc.switchable_interp_prob[ctx],
                   &vp9_switchable_interp_encodings[mi->interp_filter]);
     } else {
-      assert(mi->interp_filter == pc->mcomp_filter_type);
+      assert(mi->interp_filter == cm->mcomp_filter_type);
     }
 
     if (bsize < BLOCK_8X8) {
@@ -499,7 +499,7 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, MODE_INFO *m, vp9_writer *bc) {
           blockmode = x->partition_info->bmi[j].mode;
           blockmv = m->bmi[j].as_mv[0];
           write_sb_mv_ref(bc, blockmode, mv_ref_p);
-          ++pc->counts.inter_mode[mi->mode_context[rf]]
+          ++cm->counts.inter_mode[mi->mode_context[rf]]
                                  [inter_mode_offset(blockmode)];
 
           if (blockmode == NEWMV) {
@@ -1458,7 +1458,7 @@ void vp9_pack_bitstream(VP9_COMP *cpi, uint8_t *dest, unsigned long *size) {
   vp9_compute_update_table();
 
 #ifdef ENTROPY_STATS
-  if (pc->frame_type == INTER_FRAME)
+  if (cm->frame_type == INTER_FRAME)
     active_section = 0;
   else
     active_section = 7;
