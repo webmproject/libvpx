@@ -3646,6 +3646,8 @@ int vp9_get_compressed_data(VP9_PTR ptr, unsigned int *frame_flags,
         configure_arnr_filter(cpi, cm->current_video_frame + frames_to_arf,
                               cpi->gfu_boost);
         vp9_temporal_filter_prepare(cpi, frames_to_arf);
+        vp9_extend_frame_borders(&cpi->alt_ref_buffer,
+                                 cm->subsampling_x, cm->subsampling_y);
         force_src_buffer = &cpi->alt_ref_buffer;
       }
 
