@@ -134,8 +134,8 @@ void vp9_extend_frame_borders_c(YV12_BUFFER_CONFIG *ybf,
 
 void vp9_extend_frame_inner_borders_c(YV12_BUFFER_CONFIG *ybf,
                                       int subsampling_x, int subsampling_y) {
-  const int inner_bw = ybf->border > VP9INNERBORDERINPIXLES ?
-                       VP9INNERBORDERINPIXLES : ybf->border;
+  const int inner_bw = ybf->border > VP9INNERBORDERINPIXELS ?
+                       VP9INNERBORDERINPIXELS : ybf->border;
   extend_frame(ybf, subsampling_x, subsampling_y, inner_bw);
 }
 #endif
