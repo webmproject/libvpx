@@ -381,8 +381,6 @@ typedef struct VP9_COMP {
   int ref_frame_mask;
   int set_ref_frame_mask;
 
-  int rd_thresh_mult[MAX_MODES];
-  int rd_baseline_thresh[BLOCK_SIZES][MAX_MODES];
   int rd_threshes[BLOCK_SIZES][MAX_MODES];
   int rd_thresh_freq_fact[BLOCK_SIZES][MAX_MODES];
 

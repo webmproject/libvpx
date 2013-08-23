@@ -766,7 +766,7 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
       sf->static_segmentation = 0;
 #endif
       sf->use_avoid_tested_higherror = 1;
-      sf->adaptive_rd_thresh = 1;
+      sf->adaptive_rd_thresh = MIN((speed + 1), 4);
 
       if (speed == 1) {
         sf->comp_inter_joint_search_thresh = BLOCK_SIZES;
@@ -1402,7 +1402,7 @@ static void cal_nmvsadcosts_hp(int *mvsadcost[2]) {
 }
 
 VP9_PTR vp9_create_compressor(VP9_CONFIG *oxcf) {
-  int i;
+  int i, j;
   volatile union {
     VP9_COMP *cpi;
     VP9_PTR   ptr;
@@ -1604,9 +1604,10 @@ VP9_PTR vp9_create_compressor(VP9_CONFIG *oxcf) {
 
   vp9_set_speed_features(cpi);
 
-  // Set starting values of RD threshold multipliers (128 = *1)
-  for (i = 0; i < MAX_MODES; i++)
-    cpi->rd_thresh_mult[i] = 128;
+  // Default rd threshold factors for mode selection
+  for (i = 0; i < BLOCK_SIZES; ++i)
+    for (j = 0; j < MAX_MODES; ++j)
+      cpi->rd_thresh_freq_fact[i][j] = 32;
 
 #define BFP(BT, SDF, SDAF, VF, SVF, SVAF, SVFHH, SVFHV, SVFHHV, \
             SDX3F, SDX8F, SDX4DF)\
@@ -2636,8 +2637,6 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
 
   // Set various flags etc to special state if it is a key frame
   if (cm->frame_type == KEY_FRAME) {
-    int i;
-
     // Reset the loop filter deltas and segmentation map
     setup_features(cm);
 
@@ -2649,10 +2648,6 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
 
     // The alternate reference frame cannot be active for a key frame
     cpi->source_alt_ref_active = 0;
-
-    // Reset the RD threshold multipliers to default of * 1 (128)
-    for (i = 0; i < MAX_MODES; i++)
-      cpi->rd_thresh_mult[i] = 128;
 
     cm->error_resilient_mode = (cpi->oxcf.error_resilient_mode != 0);
     cm->frame_parallel_decoding_mode =

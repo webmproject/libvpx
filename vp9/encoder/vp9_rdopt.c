@@ -104,9 +104,8 @@ const MODE_DEFINITION vp9_mode_order[MAX_MODES] = {
 static int rd_thresh_block_size_factor[BLOCK_SIZES] =
   {2, 3, 3, 4, 6, 6, 8, 12, 12, 16, 24, 24, 32};
 
-#define BASE_RD_THRESH_FREQ_FACT 16
-#define MAX_RD_THRESH_FREQ_FACT 32
-#define MAX_RD_THRESH_FREQ_INC 1
+#define MAX_RD_THRESH_FACT 64
+#define RD_THRESH_INC 1
 
 static void fill_token_costs(vp9_coeff_cost *c,
                              vp9_coeff_probs_model (*p)[BLOCK_TYPES]) {
@@ -212,12 +211,6 @@ void vp9_initialize_rd_consts(VP9_COMP *cpi, int qindex) {
         } else {
           cpi->rd_threshes[bsize][i] = INT_MAX;
         }
-        cpi->rd_baseline_thresh[bsize][i] = cpi->rd_threshes[bsize][i];
-
-        if (cpi->sf.adaptive_rd_thresh)
-          cpi->rd_thresh_freq_fact[bsize][i] = MAX_RD_THRESH_FREQ_FACT;
-        else
-          cpi->rd_thresh_freq_fact[bsize][i] = BASE_RD_THRESH_FREQ_FACT;
       }
     }
   } else {
@@ -236,12 +229,6 @@ void vp9_initialize_rd_consts(VP9_COMP *cpi, int qindex) {
         } else {
           cpi->rd_threshes[bsize][i] = INT_MAX;
         }
-        cpi->rd_baseline_thresh[bsize][i] = cpi->rd_threshes[bsize][i];
-
-        if (cpi->sf.adaptive_rd_thresh)
-          cpi->rd_thresh_freq_fact[bsize][i] = MAX_RD_THRESH_FREQ_FACT;
-        else
-          cpi->rd_thresh_freq_fact[bsize][i] = BASE_RD_THRESH_FREQ_FACT;
       }
     }
   }
@@ -3228,7 +3215,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
 
     // Test best rd so far against threshold for trying this mode.
     if ((best_rd < ((cpi->rd_threshes[bsize][mode_index] *
-                     cpi->rd_thresh_freq_fact[bsize][mode_index]) >> 4)) ||
+                     cpi->rd_thresh_freq_fact[bsize][mode_index]) >> 5)) ||
         cpi->rd_threshes[bsize][mode_index] == INT_MAX)
       continue;
 
@@ -3789,29 +3776,6 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
           }
         }
       }
-#if 0
-      // Testing this mode gave rise to an improvement in best error score.
-      // Lower threshold a bit for next time
-      cpi->rd_thresh_mult[mode_index] =
-          (cpi->rd_thresh_mult[mode_index] >= (MIN_THRESHMULT + 2)) ?
-              cpi->rd_thresh_mult[mode_index] - 2 : MIN_THRESHMULT;
-      cpi->rd_threshes[mode_index] =
-          (cpi->rd_baseline_thresh[mode_index] >> 7)
-              * cpi->rd_thresh_mult[mode_index];
-#endif
-    } else {
-      // If the mode did not help improve the best error case then
-      // raise the threshold for testing that mode next time around.
-#if 0
-      cpi->rd_thresh_mult[mode_index] += 4;
-
-      if (cpi->rd_thresh_mult[mode_index] > MAX_THRESHMULT)
-        cpi->rd_thresh_mult[mode_index] = MAX_THRESHMULT;
-
-      cpi->rd_threshes[mode_index] =
-          (cpi->rd_baseline_thresh[mode_index] >> 7)
-              * cpi->rd_thresh_mult[mode_index];
-#endif
     }
 
     /* keep record of best compound/single-only prediction */
@@ -3954,32 +3918,18 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
   if (cpi->sf.adaptive_rd_thresh) {
     for (mode_index = 0; mode_index < MAX_MODES; ++mode_index) {
       if (mode_index == best_mode_index) {
-        cpi->rd_thresh_freq_fact[bsize][mode_index] = BASE_RD_THRESH_FREQ_FACT;
+        cpi->rd_thresh_freq_fact[bsize][mode_index] -=
+          (cpi->rd_thresh_freq_fact[bsize][mode_index] >> 3);
       } else {
-        cpi->rd_thresh_freq_fact[bsize][mode_index] += MAX_RD_THRESH_FREQ_INC;
+        cpi->rd_thresh_freq_fact[bsize][mode_index] += RD_THRESH_INC;
         if (cpi->rd_thresh_freq_fact[bsize][mode_index] >
-            (cpi->sf.adaptive_rd_thresh * MAX_RD_THRESH_FREQ_FACT)) {
+            (cpi->sf.adaptive_rd_thresh * MAX_RD_THRESH_FACT)) {
           cpi->rd_thresh_freq_fact[bsize][mode_index] =
-            cpi->sf.adaptive_rd_thresh * MAX_RD_THRESH_FREQ_FACT;
+            cpi->sf.adaptive_rd_thresh * MAX_RD_THRESH_FACT;
         }
       }
     }
   }
-
-  // TODO(rbultje) integrate with RD trd_thresh_freq_facthresholding
-#if 0
-  // Reduce the activation RD thresholds for the best choice mode
-  if ((cpi->rd_baseline_thresh[best_mode_index] > 0) &&
-      (cpi->rd_baseline_thresh[best_mode_index] < (INT_MAX >> 2))) {
-    int best_adjustment = (cpi->rd_thresh_mult[best_mode_index] >> 2);
-
-    cpi->rd_thresh_mult[best_mode_index] =
-      (cpi->rd_thresh_mult[best_mode_index] >= (MIN_THRESHMULT + best_adjustment)) ?
-      cpi->rd_thresh_mult[best_mode_index] - best_adjustment : MIN_THRESHMULT;
-    cpi->rd_threshes[best_mode_index] =
-      (cpi->rd_baseline_thresh[best_mode_index] >> 7) * cpi->rd_thresh_mult[best_mode_index];
-  }
-#endif
 
   // macroblock modes
   *mbmi = best_mbmode;
