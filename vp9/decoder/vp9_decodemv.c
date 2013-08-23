@@ -553,22 +553,14 @@ static void read_inter_block_mode_info(VP9D_COMP *pbi, MODE_INFO *mi,
     switch (mbmi->mode) {
       case NEARMV:
         mv0->as_int = nearby.as_int;
-        clamp_mv2(&mv0->as_mv, xd);
-
-        if (is_compound) {
+        if (is_compound)
           mv1->as_int = nearby_second.as_int;
-          clamp_mv2(&mv1->as_mv, xd);
-        }
         break;
 
       case NEARESTMV:
         mv0->as_int = nearest.as_int;
-        clamp_mv2(&mv0->as_mv, xd);
-
-        if (is_compound) {
+        if (is_compound)
           mv1->as_int = nearest_second.as_int;
-          clamp_mv2(&mv1->as_mv, xd);
-        }
         break;
 
       case ZEROMV:
