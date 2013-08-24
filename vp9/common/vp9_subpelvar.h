@@ -81,7 +81,7 @@ static void var_filter_block2d_bil_first_pass(const uint8_t *src_ptr,
     for (j = 0; j < output_width; j++) {
       output_ptr[j] = ROUND_POWER_OF_TWO((int)src_ptr[0] * vp9_filter[0] +
                           (int)src_ptr[pixel_step] * vp9_filter[1],
-                          VP9_FILTER_BITS);
+                          FILTER_BITS);
 
       src_ptr++;
     }
@@ -133,7 +133,7 @@ static void var_filter_block2d_bil_second_pass(const uint16_t *src_ptr,
     for (j = 0; j < output_width; j++) {
       output_ptr[j] = ROUND_POWER_OF_TWO((int)src_ptr[0] * vp9_filter[0] +
                           (int)src_ptr[pixel_step] * vp9_filter[1],
-                          VP9_FILTER_BITS);
+                          FILTER_BITS);
       src_ptr++;
     }
 

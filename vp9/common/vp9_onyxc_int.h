@@ -38,14 +38,14 @@
 #define NUM_FRAME_CONTEXTS (1 << NUM_FRAME_CONTEXTS_LOG2)
 
 typedef struct frame_contexts {
-  vp9_prob y_mode_prob[BLOCK_SIZE_GROUPS][VP9_INTRA_MODES - 1];
-  vp9_prob uv_mode_prob[VP9_INTRA_MODES][VP9_INTRA_MODES - 1];
+  vp9_prob y_mode_prob[BLOCK_SIZE_GROUPS][INTRA_MODES - 1];
+  vp9_prob uv_mode_prob[INTRA_MODES][INTRA_MODES - 1];
   vp9_prob partition_prob[NUM_FRAME_TYPES][NUM_PARTITION_CONTEXTS]
                          [PARTITION_TYPES - 1];
   vp9_coeff_probs_model coef_probs[TX_SIZES][BLOCK_TYPES];
-  vp9_prob switchable_interp_prob[VP9_SWITCHABLE_FILTERS + 1]
-                                 [VP9_SWITCHABLE_FILTERS - 1];
-  vp9_prob inter_mode_probs[INTER_MODE_CONTEXTS][VP9_INTER_MODES - 1];
+  vp9_prob switchable_interp_prob[SWITCHABLE_FILTERS + 1]
+                                 [SWITCHABLE_FILTERS - 1];
+  vp9_prob inter_mode_probs[INTER_MODE_CONTEXTS][INTER_MODES - 1];
   vp9_prob intra_inter_prob[INTRA_INTER_CONTEXTS];
   vp9_prob comp_inter_prob[COMP_INTER_CONTEXTS];
   vp9_prob single_ref_prob[REF_CONTEXTS][2];
@@ -56,15 +56,15 @@ typedef struct frame_contexts {
 } FRAME_CONTEXT;
 
 typedef struct {
-  unsigned int y_mode[BLOCK_SIZE_GROUPS][VP9_INTRA_MODES];
-  unsigned int uv_mode[VP9_INTRA_MODES][VP9_INTRA_MODES];
+  unsigned int y_mode[BLOCK_SIZE_GROUPS][INTRA_MODES];
+  unsigned int uv_mode[INTRA_MODES][INTRA_MODES];
   unsigned int partition[NUM_PARTITION_CONTEXTS][PARTITION_TYPES];
   vp9_coeff_count_model coef[TX_SIZES][BLOCK_TYPES];
   unsigned int eob_branch[TX_SIZES][BLOCK_TYPES][REF_TYPES]
                          [COEF_BANDS][PREV_COEF_CONTEXTS];
-  unsigned int switchable_interp[VP9_SWITCHABLE_FILTERS + 1]
-                                [VP9_SWITCHABLE_FILTERS];
-  unsigned int inter_mode[INTER_MODE_CONTEXTS][VP9_INTER_MODES];
+  unsigned int switchable_interp[SWITCHABLE_FILTERS + 1]
+                                [SWITCHABLE_FILTERS];
+  unsigned int inter_mode[INTER_MODE_CONTEXTS][INTER_MODES];
   unsigned int intra_inter[INTRA_INTER_CONTEXTS][2];
   unsigned int comp_inter[COMP_INTER_CONTEXTS][2];
   unsigned int single_ref[REF_CONTEXTS][2][2];

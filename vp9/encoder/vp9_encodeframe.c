@@ -56,7 +56,7 @@ static void adjust_act_zbin(VP9_COMP *cpi, MACROBLOCK *x);
  * This also avoids the need for divide by zero checks in
  *  vp9_activity_masking().
  */
-#define VP9_ACTIVITY_AVG_MIN (64)
+#define ACTIVITY_AVG_MIN (64)
 
 /* Motion vector component magnitude threshold for defining fast motion. */
 #define FAST_MOTION_MV_THRESH (24)
@@ -131,8 +131,8 @@ static unsigned int mb_activity_measure(MACROBLOCK *x, int mb_row, int mb_col) {
     mb_activity = tt_activity_measure(x);
   }
 
-  if (mb_activity < VP9_ACTIVITY_AVG_MIN)
-    mb_activity = VP9_ACTIVITY_AVG_MIN;
+  if (mb_activity < ACTIVITY_AVG_MIN)
+    mb_activity = ACTIVITY_AVG_MIN;
 
   return mb_activity;
 }
@@ -182,8 +182,8 @@ static void calc_av_activity(VP9_COMP *cpi, int64_t activity_sum) {
   cpi->activity_avg = (unsigned int) (activity_sum / cpi->common.MBs);
 #endif  // ACT_MEDIAN
 
-  if (cpi->activity_avg < VP9_ACTIVITY_AVG_MIN)
-    cpi->activity_avg = VP9_ACTIVITY_AVG_MIN;
+  if (cpi->activity_avg < ACTIVITY_AVG_MIN)
+    cpi->activity_avg = ACTIVITY_AVG_MIN;
 
   // Experimental code: return fixed value normalized for several clips
   if (ALT_ACT_MEASURE)
@@ -448,7 +448,7 @@ static void update_state(VP9_COMP *cpi, PICK_MODE_CONTEXT *ctx,
     cpi->rd_comp_pred_diff[COMP_PREDICTION_ONLY] += ctx->comp_pred_diff;
     cpi->rd_comp_pred_diff[HYBRID_PREDICTION] += ctx->hybrid_pred_diff;
 
-    for (i = 0; i <= VP9_SWITCHABLE_FILTERS; i++)
+    for (i = 0; i <= SWITCHABLE_FILTERS; i++)
       cpi->rd_filter_diff[i] += ctx->best_filter_diff[i];
   }
 }
@@ -2414,15 +2414,15 @@ void vp9_encode_frame(VP9_COMP *cpi) {
         cpi->rd_filter_threshes[frame_type][1] >
             cpi->rd_filter_threshes[frame_type][2] &&
         cpi->rd_filter_threshes[frame_type][1] >
-            cpi->rd_filter_threshes[frame_type][VP9_SWITCHABLE_FILTERS]) {
+            cpi->rd_filter_threshes[frame_type][SWITCHABLE_FILTERS]) {
       filter_type = EIGHTTAP_SMOOTH;
     } else if (cpi->rd_filter_threshes[frame_type][2] >
             cpi->rd_filter_threshes[frame_type][0] &&
         cpi->rd_filter_threshes[frame_type][2] >
-            cpi->rd_filter_threshes[frame_type][VP9_SWITCHABLE_FILTERS]) {
+            cpi->rd_filter_threshes[frame_type][SWITCHABLE_FILTERS]) {
       filter_type = EIGHTTAP_SHARP;
     } else if (cpi->rd_filter_threshes[frame_type][0] >
-                  cpi->rd_filter_threshes[frame_type][VP9_SWITCHABLE_FILTERS]) {
+                  cpi->rd_filter_threshes[frame_type][SWITCHABLE_FILTERS]) {
       filter_type = EIGHTTAP;
     } else {
       filter_type = SWITCHABLE;
@@ -2445,7 +2445,7 @@ void vp9_encode_frame(VP9_COMP *cpi) {
       cpi->rd_prediction_type_threshes[frame_type][i] >>= 1;
     }
 
-    for (i = 0; i <= VP9_SWITCHABLE_FILTERS; i++) {
+    for (i = 0; i <= SWITCHABLE_FILTERS; i++) {
       const int64_t diff = cpi->rd_filter_diff[i] / cpi->common.MBs;
       cpi->rd_filter_threshes[frame_type][i] =
           (cpi->rd_filter_threshes[frame_type][i] + diff) / 2;

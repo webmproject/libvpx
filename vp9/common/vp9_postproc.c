@@ -53,7 +53,7 @@ static const unsigned char MB_PREDICTION_MODE_colors[MB_MODE_COUNT][3] = {
   { RGB_TO_YUV(0xCC33FF) },   /* Magenta */
 };
 
-static const unsigned char B_PREDICTION_MODE_colors[VP9_INTRA_MODES][3] = {
+static const unsigned char B_PREDICTION_MODE_colors[INTRA_MODES][3] = {
   { RGB_TO_YUV(0x6633ff) },   /* Purple */
   { RGB_TO_YUV(0xcc33ff) },   /* Magenta */
   { RGB_TO_YUV(0xff33cc) },   /* Pink */

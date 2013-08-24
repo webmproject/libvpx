@@ -285,7 +285,7 @@ intra_pred_allsizes(dc)
 typedef void (*intra_pred_fn)(uint8_t *dst, ptrdiff_t stride,
                               const uint8_t *above, const uint8_t *left);
 
-static intra_pred_fn pred[VP9_INTRA_MODES][4];
+static intra_pred_fn pred[INTRA_MODES][4];
 static intra_pred_fn dc_pred[2][2][4];
 
 static void init_intra_pred_fn_ptrs(void) {

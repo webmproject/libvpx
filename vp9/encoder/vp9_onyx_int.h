@@ -79,15 +79,15 @@ typedef struct {
 
   vp9_coeff_probs_model coef_probs[TX_SIZES][BLOCK_TYPES];
 
-  vp9_prob y_mode_prob[4][VP9_INTRA_MODES - 1];
-  vp9_prob uv_mode_prob[VP9_INTRA_MODES][VP9_INTRA_MODES - 1];
+  vp9_prob y_mode_prob[4][INTRA_MODES - 1];
+  vp9_prob uv_mode_prob[INTRA_MODES][INTRA_MODES - 1];
   vp9_prob partition_prob[2][NUM_PARTITION_CONTEXTS][PARTITION_TYPES - 1];
 
-  vp9_prob switchable_interp_prob[VP9_SWITCHABLE_FILTERS + 1]
-                                 [VP9_SWITCHABLE_FILTERS - 1];
+  vp9_prob switchable_interp_prob[SWITCHABLE_FILTERS + 1]
+                                 [SWITCHABLE_FILTERS - 1];
 
-  int inter_mode_counts[INTER_MODE_CONTEXTS][VP9_INTER_MODES - 1][2];
-  vp9_prob inter_mode_probs[INTER_MODE_CONTEXTS][VP9_INTER_MODES - 1];
+  int inter_mode_counts[INTER_MODE_CONTEXTS][INTER_MODES - 1][2];
+  vp9_prob inter_mode_probs[INTER_MODE_CONTEXTS][INTER_MODES - 1];
 
   struct tx_probs tx_probs;
   vp9_prob mbskip_probs[MBSKIP_CONTEXTS];
@@ -392,9 +392,9 @@ typedef struct VP9_COMP {
   // FIXME(rbultje) can this overflow?
   int rd_tx_select_threshes[4][TX_MODES];
 
-  int64_t rd_filter_diff[VP9_SWITCHABLE_FILTERS + 1];
-  int64_t rd_filter_threshes[4][VP9_SWITCHABLE_FILTERS + 1];
-  int64_t rd_filter_cache[VP9_SWITCHABLE_FILTERS + 1];
+  int64_t rd_filter_diff[SWITCHABLE_FILTERS + 1];
+  int64_t rd_filter_threshes[4][SWITCHABLE_FILTERS + 1];
+  int64_t rd_filter_cache[SWITCHABLE_FILTERS + 1];
 
   int RDMULT;
   int RDDIV;
@@ -469,8 +469,8 @@ typedef struct VP9_COMP {
 
   int cq_target_quality;
 
-  int y_mode_count[4][VP9_INTRA_MODES];
-  int y_uv_mode_count[VP9_INTRA_MODES][VP9_INTRA_MODES];
+  int y_mode_count[4][INTRA_MODES];
+  int y_uv_mode_count[INTRA_MODES][INTRA_MODES];
   unsigned int partition_count[NUM_PARTITION_CONTEXTS][PARTITION_TYPES];
 
   nmv_context_counts NMVcount;
@@ -635,8 +635,8 @@ typedef struct VP9_COMP {
 
   int dummy_packing;    /* flag to indicate if packing is dummy */
 
-  unsigned int switchable_interp_count[VP9_SWITCHABLE_FILTERS + 1]
-                                      [VP9_SWITCHABLE_FILTERS];
+  unsigned int switchable_interp_count[SWITCHABLE_FILTERS + 1]
+                                      [SWITCHABLE_FILTERS];
 
   unsigned int txfm_stepdown_count[TX_SIZES];
 
@@ -657,7 +657,7 @@ typedef struct VP9_COMP {
 #endif
 
 #ifdef ENTROPY_STATS
-  int64_t mv_ref_stats[INTER_MODE_CONTEXTS][VP9_INTER_MODES - 1][2];
+  int64_t mv_ref_stats[INTER_MODE_CONTEXTS][INTER_MODES - 1][2];
 #endif
 } VP9_COMP;
 
