@@ -454,8 +454,7 @@ static void read_inter_block_mode_info(VP9D_COMP *pbi, MODE_INFO *mi,
   is_compound = ref1 > INTRA_FRAME;
 
   vp9_find_mv_refs(cm, xd, mi, xd->prev_mode_info_context,
-                   ref0, mbmi->ref_mvs[ref0], cm->ref_frame_sign_bias,
-                   mi_row, mi_col);
+                   ref0, mbmi->ref_mvs[ref0], mi_row, mi_col);
 
   inter_mode_ctx = mbmi->mode_context[ref0];
 
@@ -478,8 +477,7 @@ static void read_inter_block_mode_info(VP9D_COMP *pbi, MODE_INFO *mi,
 
   if (is_compound) {
     vp9_find_mv_refs(cm, xd, mi, xd->prev_mode_info_context,
-                     ref1, mbmi->ref_mvs[ref1], cm->ref_frame_sign_bias,
-                     mi_row, mi_col);
+                     ref1, mbmi->ref_mvs[ref1], mi_row, mi_col);
 
     if (bsize < BLOCK_8X8 || mbmi->mode != ZEROMV) {
       vp9_find_best_ref_mvs(xd, mbmi->ref_mvs[ref1],

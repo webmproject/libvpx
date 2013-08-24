@@ -2273,8 +2273,7 @@ static void setup_buffer_inter(VP9_COMP *cpi, MACROBLOCK *x,
   vp9_find_mv_refs(&cpi->common, xd, xd->mode_info_context,
                    xd->prev_mode_info_context,
                    frame_type,
-                   mbmi->ref_mvs[frame_type],
-                   cpi->common.ref_frame_sign_bias, mi_row, mi_col);
+                   mbmi->ref_mvs[frame_type], mi_row, mi_col);
 
   // Candidate refinement carried out at encoder and decoder
   vp9_find_best_ref_mvs(xd,
