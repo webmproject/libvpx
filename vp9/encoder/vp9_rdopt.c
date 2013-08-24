@@ -90,7 +90,7 @@ const MODE_DEFINITION vp9_mode_order[MAX_MODES] = {
   {H_PRED,    INTRA_FRAME,  NONE},
   {V_PRED,    INTRA_FRAME,  NONE},
   {D135_PRED, INTRA_FRAME,  NONE},
-  {D27_PRED,  INTRA_FRAME,  NONE},
+  {D207_PRED,  INTRA_FRAME,  NONE},
   {D153_PRED, INTRA_FRAME,  NONE},
   {D63_PRED,  INTRA_FRAME,  NONE},
   {D117_PRED, INTRA_FRAME,  NONE},
@@ -992,7 +992,7 @@ static int conditional_skipintra(MB_PREDICTION_MODE mode,
       best_intra_mode != V_PRED &&
       best_intra_mode != D45_PRED)
     return 1;
-  if (mode == D27_PRED &&
+  if (mode == D207_PRED &&
       best_intra_mode != H_PRED &&
       best_intra_mode != D45_PRED)
     return 1;

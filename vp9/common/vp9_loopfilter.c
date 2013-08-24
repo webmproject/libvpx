@@ -28,7 +28,7 @@ static void lf_init_lut(loop_filter_info_n *lfi) {
   lfi->mode_lf_lut[D135_PRED] = 0;
   lfi->mode_lf_lut[D117_PRED] = 0;
   lfi->mode_lf_lut[D153_PRED] = 0;
-  lfi->mode_lf_lut[D27_PRED] = 0;
+  lfi->mode_lf_lut[D207_PRED] = 0;
   lfi->mode_lf_lut[D63_PRED] = 0;
   lfi->mode_lf_lut[V_PRED] = 0;
   lfi->mode_lf_lut[H_PRED] = 0;

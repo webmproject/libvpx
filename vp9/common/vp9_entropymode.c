@@ -235,7 +235,7 @@ const vp9_tree_index vp9_intra_mode_tree[VP9_INTRA_MODES * 2 - 2] = {
   -D135_PRED, -D117_PRED,           /* 5 = D135_NODE */
   -D45_PRED, 14,                    /* 6 = D45_NODE */
   -D63_PRED, 16,                    /* 7 = D63_NODE */
-  -D153_PRED, -D27_PRED             /* 8 = D153_NODE */
+  -D153_PRED, -D207_PRED             /* 8 = D153_NODE */
 };
 
 const vp9_tree_index vp9_inter_mode_tree[6] = {

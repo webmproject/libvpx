@@ -608,7 +608,7 @@ static void set_rd_speed_thresholds(VP9_COMP *cpi, int mode, int speed) {
   sf->thresh_mult[THR_D135_PRED] += speed_multiplier * 2500;
   sf->thresh_mult[THR_D117_PRED] += speed_multiplier * 2500;
   sf->thresh_mult[THR_D153_PRED] += speed_multiplier * 2500;
-  sf->thresh_mult[THR_D27_PRED] += speed_multiplier * 2500;
+  sf->thresh_mult[THR_D207_PRED] += speed_multiplier * 2500;
   sf->thresh_mult[THR_D63_PRED] += speed_multiplier * 2500;
 
   if (cpi->sf.skip_lots_of_modes) {
