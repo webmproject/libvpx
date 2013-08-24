@@ -22,17 +22,17 @@ static void log_frame_info(VP9_COMMON *cm, const char *str, FILE *f) {
  * and uses the passed in member offset to print out the value of an integer
  * for each mbmi member value in the mi structure.
  */
-static void print_mi_data(VP9_COMMON *common, FILE *file, char *descriptor,
+static void print_mi_data(VP9_COMMON *cm, FILE *file, char *descriptor,
                           size_t member_offset) {
   int mi_row;
   int mi_col;
   int mi_index = 0;
-  MODE_INFO *mi = common->mi;
-  int rows = common->mi_rows;
-  int cols = common->mi_cols;
+  MODE_INFO *mi = cm->mi;
+  int rows = cm->mi_rows;
+  int cols = cm->mi_cols;
   char prefix = descriptor[0];
 
-  log_frame_info(common, descriptor, file);
+  log_frame_info(cm, descriptor, file);
   mi_index = 0;
   for (mi_row = 0; mi_row < rows; mi_row++) {
     fprintf(file, "%c ", prefix);

@@ -533,11 +533,11 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, MODE_INFO *m, vp9_writer *bc) {
 
 static void write_mb_modes_kf(const VP9_COMP *cpi, MODE_INFO *m,
                               vp9_writer *bc) {
-  const VP9_COMMON *const c = &cpi->common;
+  const VP9_COMMON *const cm = &cpi->common;
   const MACROBLOCKD *const xd = &cpi->mb.e_mbd;
-  const struct segmentation *const seg = &c->seg;
+  const struct segmentation *const seg = &cm->seg;
   const int ym = m->mbmi.mode;
-  const int mis = c->mode_info_stride;
+  const int mis = cm->mode_info_stride;
   const int segment_id = m->mbmi.segment_id;
 
   if (seg->update_map)
@@ -545,7 +545,7 @@ static void write_mb_modes_kf(const VP9_COMP *cpi, MODE_INFO *m,
 
   write_skip_coeff(cpi, segment_id, m, bc);
 
-  if (m->mbmi.sb_type >= BLOCK_8X8 && c->tx_mode == TX_MODE_SELECT)
+  if (m->mbmi.sb_type >= BLOCK_8X8 && cm->tx_mode == TX_MODE_SELECT)
     write_selected_tx_size(cpi, m->mbmi.tx_size, m->mbmi.sb_type, bc);
 
   if (m->mbmi.sb_type >= BLOCK_8X8) {
@@ -684,18 +684,18 @@ static void write_modes_sb(VP9_COMP *cpi, MODE_INFO *m, vp9_writer *bc,
 
 static void write_modes(VP9_COMP *cpi, vp9_writer* const bc,
                         TOKENEXTRA **tok, TOKENEXTRA *tok_end) {
-  VP9_COMMON *const c = &cpi->common;
-  const int mis = c->mode_info_stride;
-  MODE_INFO *m, *m_ptr = c->mi;
+  VP9_COMMON *const cm = &cpi->common;
+  const int mis = cm->mode_info_stride;
+  MODE_INFO *m, *m_ptr = cm->mi;
   int mi_row, mi_col;
 
-  m_ptr += c->cur_tile_mi_col_start + c->cur_tile_mi_row_start * mis;
+  m_ptr += cm->cur_tile_mi_col_start + cm->cur_tile_mi_row_start * mis;
 
-  for (mi_row = c->cur_tile_mi_row_start; mi_row < c->cur_tile_mi_row_end;
+  for (mi_row = cm->cur_tile_mi_row_start; mi_row < cm->cur_tile_mi_row_end;
        mi_row += 8, m_ptr += 8 * mis) {
     m = m_ptr;
-    vp9_zero(c->left_seg_context);
-    for (mi_col = c->cur_tile_mi_col_start; mi_col < c->cur_tile_mi_col_end;
+    vp9_zero(cm->left_seg_context);
+    for (mi_col = cm->cur_tile_mi_col_start; mi_col < cm->cur_tile_mi_col_end;
          mi_col += MI_BLOCK_SIZE, m += MI_BLOCK_SIZE)
       write_modes_sb(cpi, m, bc, tok, tok_end, mi_row, mi_col, BLOCK_64X64);
   }

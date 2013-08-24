@@ -58,9 +58,9 @@ void vp9_entropy_mode_init();
 
 void vp9_setup_past_independence(struct VP9Common *cm);
 
-void vp9_init_mbmode_probs(struct VP9Common *x);
+void vp9_init_mbmode_probs(struct VP9Common *cm);
 
-void vp9_adapt_mode_probs(struct VP9Common *);
+void vp9_adapt_mode_probs(struct VP9Common *cm);
 
 void tx_counts_to_branch_counts_32x32(unsigned int *tx_count_32x32p,
                                       unsigned int (*ct_32x32p)[2]);

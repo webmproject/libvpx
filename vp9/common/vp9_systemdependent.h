@@ -34,6 +34,6 @@ static int round(double x) {
 #endif
 
 struct VP9Common;
-void vp9_machine_specific_config(struct VP9Common *);
+void vp9_machine_specific_config(struct VP9Common *cm);
 
 #endif  // VP9_COMMON_VP9_SYSTEMDEPENDENT_H_
