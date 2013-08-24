@@ -592,6 +592,7 @@ static void decode_tile(VP9D_COMP *pbi, vp9_reader *r) {
       lf_data->frame_buffer = fb;
       lf_data->cm = pc;
       lf_data->xd = pbi->mb;
+      lf_data->stop = 0;
       lf_data->y_only = 0;
     }
     vp9_loop_filter_frame_init(pc, pc->lf.filter_level);
@@ -615,6 +616,9 @@ static void decode_tile(VP9D_COMP *pbi, vp9_reader *r) {
       if (num_threads > 1) {
         LFWorkerData *const lf_data = (LFWorkerData*)pbi->lf_worker.data1;
 
+        // decoding has completed: finish up the loop filter in this thread.
+        if (mi_row + MI_BLOCK_SIZE >= pc->cur_tile_mi_row_end) continue;
+
         vp9_worker_sync(&pbi->lf_worker);
         lf_data->start = lf_start;
         lf_data->stop = mi_row;
@@ -627,13 +631,17 @@ static void decode_tile(VP9D_COMP *pbi, vp9_reader *r) {
   }
 
   if (pbi->do_loopfilter_inline) {
+    int lf_start;
     if (num_threads > 1) {
-      // TODO(jzern): since the loop filter is delayed one mb row, this will be
-      // forced to wait for the last row scheduled in the for loop.
+      LFWorkerData *const lf_data = (LFWorkerData*)pbi->lf_worker.data1;
+
       vp9_worker_sync(&pbi->lf_worker);
+      lf_start = lf_data->stop;
+    } else {
+      lf_start = mi_row - MI_BLOCK_SIZE;
     }
     vp9_loop_filter_rows(fb, pc, &pbi->mb,
-                         mi_row - MI_BLOCK_SIZE, pc->mi_rows, 0);
+                         lf_start, pc->mi_rows, 0);
   }
 }
 
