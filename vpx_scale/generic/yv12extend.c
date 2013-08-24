@@ -10,67 +10,52 @@
 
 #include <assert.h>
 #include "./vpx_config.h"
-#include "vpx_scale/yv12config.h"
+#include "vpx/vpx_integer.h"
 #include "vpx_mem/vpx_mem.h"
-#include "vpx_scale/vpx_scale.h"
+#include "vpx_scale/yv12config.h"
 
-/****************************************************************************
-*  Exports
-****************************************************************************/
-
-/****************************************************************************
- *
- ****************************************************************************/
-static void extend_plane(uint8_t *s,       /* source */
-                         int sp,           /* source pitch */
-                         int w,            /* width */
-                         int h,            /* height */
-                         int et,           /* extend top border */
-                         int el,           /* extend left border */
-                         int eb,           /* extend bottom border */
-                         int er) {         /* extend right border */
+static void extend_plane(uint8_t *src, int src_stride,
+                         int width, int height,
+                         int extend_top, int extend_left,
+                         int extend_bottom, int extend_right) {
   int i;
-  uint8_t *src_ptr1, *src_ptr2;
-  uint8_t *dest_ptr1, *dest_ptr2;
-  int linesize;
+  const int linesize = extend_left + extend_right + width;
 
   /* copy the left and right most columns out */
-  src_ptr1 = s;
-  src_ptr2 = s + w - 1;
-  dest_ptr1 = s - el;
-  dest_ptr2 = s + w;
+  uint8_t *src_ptr1 = src;
+  uint8_t *src_ptr2 = src + width - 1;
+  uint8_t *dst_ptr1 = src - extend_left;
+  uint8_t *dst_ptr2 = src + width;
 
-  for (i = 0; i < h; i++) {
-    vpx_memset(dest_ptr1, src_ptr1[0], el);
-    vpx_memset(dest_ptr2, src_ptr2[0], er);
-    src_ptr1  += sp;
-    src_ptr2  += sp;
-    dest_ptr1 += sp;
-    dest_ptr2 += sp;
+  for (i = 0; i < height; ++i) {
+    vpx_memset(dst_ptr1, src_ptr1[0], extend_left);
+    vpx_memset(dst_ptr2, src_ptr2[0], extend_right);
+    src_ptr1 += src_stride;
+    src_ptr2 += src_stride;
+    dst_ptr1 += src_stride;
+    dst_ptr2 += src_stride;
   }
 
   /* Now copy the top and bottom lines into each line of the respective
    * borders
    */
-  src_ptr1 = s - el;
-  src_ptr2 = s + sp * (h - 1) - el;
-  dest_ptr1 = s + sp * (-et) - el;
-  dest_ptr2 = s + sp * (h) - el;
-  linesize = el + er + w;
+  src_ptr1 = src - extend_left;
+  src_ptr2 = src + src_stride * (height - 1) - extend_left;
+  dst_ptr1 = src + src_stride * -extend_top - extend_left;
+  dst_ptr2 = src + src_stride * height - extend_left;
 
-  for (i = 0; i < et; i++) {
-    vpx_memcpy(dest_ptr1, src_ptr1, linesize);
-    dest_ptr1 += sp;
+  for (i = 0; i < extend_top; ++i) {
+    vpx_memcpy(dst_ptr1, src_ptr1, linesize);
+    dst_ptr1 += src_stride;
   }
 
-  for (i = 0; i < eb; i++) {
-    vpx_memcpy(dest_ptr2, src_ptr2, linesize);
-    dest_ptr2 += sp;
+  for (i = 0; i < extend_bottom; ++i) {
+    vpx_memcpy(dst_ptr2, src_ptr2, linesize);
+    dst_ptr2 += src_stride;
   }
 }
 
-void
-vp8_yv12_extend_frame_borders_c(YV12_BUFFER_CONFIG *ybf) {
+void vp8_yv12_extend_frame_borders_c(YV12_BUFFER_CONFIG *ybf) {
   assert(ybf->y_height - ybf->y_crop_height < 16);
   assert(ybf->y_width - ybf->y_crop_width < 16);
   assert(ybf->y_height - ybf->y_crop_height >= 0);
@@ -96,9 +81,9 @@ vp8_yv12_extend_frame_borders_c(YV12_BUFFER_CONFIG *ybf) {
 }
 
 #if CONFIG_VP9
-static void extend_frame(YV12_BUFFER_CONFIG *ybf,
-                        int subsampling_x, int subsampling_y,
-                        int ext_size) {
+static void extend_frame(YV12_BUFFER_CONFIG *const ybf,
+                         int subsampling_x, int subsampling_y,
+                         int ext_size) {
   const int c_w = (ybf->y_crop_width + subsampling_x) >> subsampling_x;
   const int c_h = (ybf->y_crop_height + subsampling_y) >> subsampling_y;
   const int c_et = ext_size >> subsampling_y;
@@ -126,7 +111,6 @@ static void extend_frame(YV12_BUFFER_CONFIG *ybf,
                c_w, c_h, c_et, c_el, c_eb, c_er);
 }
 
-
 void vp9_extend_frame_borders_c(YV12_BUFFER_CONFIG *ybf,
                                 int subsampling_x, int subsampling_y) {
   extend_frame(ybf, subsampling_x, subsampling_y, ybf->border);
@@ -138,29 +122,16 @@ void vp9_extend_frame_inner_borders_c(YV12_BUFFER_CONFIG *ybf,
                        VP9INNERBORDERINPIXELS : ybf->border;
   extend_frame(ybf, subsampling_x, subsampling_y, inner_bw);
 }
-#endif
+#endif  // CONFIG_VP9
 
-/****************************************************************************
- *
- *  ROUTINE       : vp8_yv12_copy_frame
- *
- *  INPUTS        :
- *
- *  OUTPUTS       : None.
- *
- *  RETURNS       : void
- *
- *  FUNCTION      : Copies the source image into the destination image and
- *                  updates the destination's UMV borders.
- *
- *  SPECIAL NOTES : The frames are assumed to be identical in size.
- *
- ****************************************************************************/
-void
-vp8_yv12_copy_frame_c(YV12_BUFFER_CONFIG *src_ybc,
-                      YV12_BUFFER_CONFIG *dst_ybc) {
+// Copies the source image into the destination image and updates the
+// destination's UMV borders.
+// Note: The frames are assumed to be identical in size.
+void vp8_yv12_copy_frame_c(YV12_BUFFER_CONFIG *src_ybc,
+                           YV12_BUFFER_CONFIG *dst_ybc) {
   int row;
-  unsigned char *source, *dest;
+  const uint8_t *src = src_ybc->y_buffer;
+  uint8_t *dst = dst_ybc->y_buffer;
 
 #if 0
   /* These assertions are valid in the codec, but the libvpx-tester uses
@@ -170,31 +141,28 @@ vp8_yv12_copy_frame_c(YV12_BUFFER_CONFIG *src_ybc,
   assert(src_ybc->y_height == dst_ybc->y_height);
 #endif
 
-  source = src_ybc->y_buffer;
-  dest = dst_ybc->y_buffer;
-
-  for (row = 0; row < src_ybc->y_height; row++) {
-    vpx_memcpy(dest, source, src_ybc->y_width);
-    source += src_ybc->y_stride;
-    dest   += dst_ybc->y_stride;
+  for (row = 0; row < src_ybc->y_height; ++row) {
+    vpx_memcpy(dst, src, src_ybc->y_width);
+    src += src_ybc->y_stride;
+    dst += dst_ybc->y_stride;
   }
 
-  source = src_ybc->u_buffer;
-  dest = dst_ybc->u_buffer;
+  src = src_ybc->u_buffer;
+  dst = dst_ybc->u_buffer;
 
-  for (row = 0; row < src_ybc->uv_height; row++) {
-    vpx_memcpy(dest, source, src_ybc->uv_width);
-    source += src_ybc->uv_stride;
-    dest   += dst_ybc->uv_stride;
+  for (row = 0; row < src_ybc->uv_height; ++row) {
+    vpx_memcpy(dst, src, src_ybc->uv_width);
+    src += src_ybc->uv_stride;
+    dst += dst_ybc->uv_stride;
   }
 
-  source = src_ybc->v_buffer;
-  dest = dst_ybc->v_buffer;
+  src = src_ybc->v_buffer;
+  dst = dst_ybc->v_buffer;
 
-  for (row = 0; row < src_ybc->uv_height; row++) {
-    vpx_memcpy(dest, source, src_ybc->uv_width);
-    source += src_ybc->uv_stride;
-    dest   += dst_ybc->uv_stride;
+  for (row = 0; row < src_ybc->uv_height; ++row) {
+    vpx_memcpy(dst, src, src_ybc->uv_width);
+    src += src_ybc->uv_stride;
+    dst += dst_ybc->uv_stride;
   }
 
   vp8_yv12_extend_frame_borders_c(dst_ybc);
@@ -203,15 +171,12 @@ vp8_yv12_copy_frame_c(YV12_BUFFER_CONFIG *src_ybc,
 void vpx_yv12_copy_y_c(YV12_BUFFER_CONFIG *src_ybc,
                        YV12_BUFFER_CONFIG *dst_ybc) {
   int row;
-  unsigned char *source, *dest;
+  const uint8_t *src = src_ybc->y_buffer;
+  uint8_t *dst = dst_ybc->y_buffer;
 
-
-  source = src_ybc->y_buffer;
-  dest = dst_ybc->y_buffer;
-
-  for (row = 0; row < src_ybc->y_height; row++) {
-    vpx_memcpy(dest, source, src_ybc->y_width);
-    source += src_ybc->y_stride;
-    dest   += dst_ybc->y_stride;
+  for (row = 0; row < src_ybc->y_height; ++row) {
+    vpx_memcpy(dst, src, src_ybc->y_width);
+    src += src_ybc->y_stride;
+    dst += dst_ybc->y_stride;
   }
 }
