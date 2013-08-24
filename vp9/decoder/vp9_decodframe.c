@@ -549,8 +549,8 @@ static void setup_frame_size(VP9D_COMP *pbi,
                              struct vp9_read_bit_buffer *rb) {
   int width, height;
   read_frame_size(rb, &width, &height);
-  setup_display_size(&pbi->common, rb);
   apply_frame_size(pbi, width, height);
+  setup_display_size(&pbi->common, rb);
 }
 
 static void setup_frame_size_with_refs(VP9D_COMP *pbi,
@@ -576,8 +576,8 @@ static void setup_frame_size_with_refs(VP9D_COMP *pbi,
     vpx_internal_error(&cm->error, VPX_CODEC_CORRUPT_FRAME,
                        "Referenced frame with invalid size");
 
-  setup_display_size(cm, rb);
   apply_frame_size(pbi, width, height);
+  setup_display_size(cm, rb);
 }
 
 static void decode_tile(VP9D_COMP *pbi, vp9_reader *r) {
