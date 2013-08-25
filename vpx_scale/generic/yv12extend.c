@@ -14,7 +14,7 @@
 #include "vpx_mem/vpx_mem.h"
 #include "vpx_scale/yv12config.h"
 
-static void extend_plane(uint8_t *src, int src_stride,
+static void extend_plane(uint8_t *const src, int src_stride,
                          int width, int height,
                          int extend_top, int extend_left,
                          int extend_bottom, int extend_right) {
@@ -118,7 +118,7 @@ void vp9_extend_frame_borders_c(YV12_BUFFER_CONFIG *ybf,
 
 void vp9_extend_frame_inner_borders_c(YV12_BUFFER_CONFIG *ybf,
                                       int subsampling_x, int subsampling_y) {
-  const int inner_bw = ybf->border > VP9INNERBORDERINPIXELS ?
+  const int inner_bw = (ybf->border > VP9INNERBORDERINPIXELS) ?
                        VP9INNERBORDERINPIXELS : ybf->border;
   extend_frame(ybf, subsampling_x, subsampling_y, inner_bw);
 }
@@ -127,7 +127,7 @@ void vp9_extend_frame_inner_borders_c(YV12_BUFFER_CONFIG *ybf,
 // Copies the source image into the destination image and updates the
 // destination's UMV borders.
 // Note: The frames are assumed to be identical in size.
-void vp8_yv12_copy_frame_c(YV12_BUFFER_CONFIG *src_ybc,
+void vp8_yv12_copy_frame_c(const YV12_BUFFER_CONFIG *src_ybc,
                            YV12_BUFFER_CONFIG *dst_ybc) {
   int row;
   const uint8_t *src = src_ybc->y_buffer;
@@ -168,7 +168,7 @@ void vp8_yv12_copy_frame_c(YV12_BUFFER_CONFIG *src_ybc,
   vp8_yv12_extend_frame_borders_c(dst_ybc);
 }
 
-void vpx_yv12_copy_y_c(YV12_BUFFER_CONFIG *src_ybc,
+void vpx_yv12_copy_y_c(const YV12_BUFFER_CONFIG *src_ybc,
                        YV12_BUFFER_CONFIG *dst_ybc) {
   int row;
   const uint8_t *src = src_ybc->y_buffer;
