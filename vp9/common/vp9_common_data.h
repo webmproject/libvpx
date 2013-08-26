@@ -24,9 +24,9 @@ extern const int num_4x4_blocks_wide_lookup[BLOCK_SIZES];
 extern const int size_group_lookup[BLOCK_SIZES];
 extern const int num_pels_log2_lookup[BLOCK_SIZES];
 extern const PARTITION_TYPE partition_lookup[][BLOCK_SIZES];
-extern const BLOCK_SIZE_TYPE subsize_lookup[PARTITION_TYPES][BLOCK_SIZES];
+extern const BLOCK_SIZE subsize_lookup[PARTITION_TYPES][BLOCK_SIZES];
 extern const TX_SIZE max_txsize_lookup[BLOCK_SIZES];
 extern const TX_SIZE max_uv_txsize_lookup[BLOCK_SIZES];
-extern const BLOCK_SIZE_TYPE ss_size_lookup[BLOCK_SIZES][2][2];
+extern const BLOCK_SIZE ss_size_lookup[BLOCK_SIZES][2][2];
 
 #endif    // VP9_COMMON_VP9_COMMON_DATA_H

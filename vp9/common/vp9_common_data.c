@@ -74,7 +74,7 @@ const PARTITION_TYPE partition_lookup[][BLOCK_SIZES] = {
   }
 };
 
-const BLOCK_SIZE_TYPE subsize_lookup[PARTITION_TYPES][BLOCK_SIZES] = {
+const BLOCK_SIZE subsize_lookup[PARTITION_TYPES][BLOCK_SIZES] = {
   {     // PARTITION_NONE
     BLOCK_4X4,   BLOCK_4X8,   BLOCK_8X4,
     BLOCK_8X8,   BLOCK_8X16,  BLOCK_16X8,
@@ -115,7 +115,7 @@ const TX_SIZE max_uv_txsize_lookup[BLOCK_SIZES] = {
   TX_16X16, TX_16X16, TX_16X16, TX_32X32
 };
 
-const BLOCK_SIZE_TYPE ss_size_lookup[BLOCK_SIZES][2][2] = {
+const BLOCK_SIZE ss_size_lookup[BLOCK_SIZES][2][2] = {
 //  ss_x == 0    ss_x == 0        ss_x == 1      ss_x == 1
 //  ss_y == 0    ss_y == 1        ss_y == 0      ss_y == 1
   {{BLOCK_4X4,   BLOCK_INVALID}, {BLOCK_INVALID, BLOCK_INVALID}},

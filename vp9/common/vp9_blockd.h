@@ -115,18 +115,18 @@ typedef enum {
   MAX_REF_FRAMES = 4
 } MV_REFERENCE_FRAME;
 
-static INLINE int b_width_log2(BLOCK_SIZE_TYPE sb_type) {
+static INLINE int b_width_log2(BLOCK_SIZE sb_type) {
   return b_width_log2_lookup[sb_type];
 }
-static INLINE int b_height_log2(BLOCK_SIZE_TYPE sb_type) {
+static INLINE int b_height_log2(BLOCK_SIZE sb_type) {
   return b_height_log2_lookup[sb_type];
 }
 
-static INLINE int mi_width_log2(BLOCK_SIZE_TYPE sb_type) {
+static INLINE int mi_width_log2(BLOCK_SIZE sb_type) {
   return mi_width_log2_lookup[sb_type];
 }
 
-static INLINE int mi_height_log2(BLOCK_SIZE_TYPE sb_type) {
+static INLINE int mi_height_log2(BLOCK_SIZE sb_type) {
   return mi_height_log2_lookup[sb_type];
 }
 
@@ -153,7 +153,7 @@ typedef struct {
 
   INTERPOLATIONFILTERTYPE interp_filter;
 
-  BLOCK_SIZE_TYPE sb_type;
+  BLOCK_SIZE sb_type;
 } MB_MODE_INFO;
 
 typedef struct {
@@ -245,7 +245,7 @@ typedef struct macroblockd {
 
 } MACROBLOCKD;
 
-static INLINE unsigned char *get_sb_index(MACROBLOCKD *xd, BLOCK_SIZE_TYPE subsize) {
+static INLINE unsigned char *get_sb_index(MACROBLOCKD *xd, BLOCK_SIZE subsize) {
   switch (subsize) {
     case BLOCK_64X64:
     case BLOCK_64X32:
@@ -270,9 +270,8 @@ static INLINE unsigned char *get_sb_index(MACROBLOCKD *xd, BLOCK_SIZE_TYPE subsi
   }
 }
 
-static INLINE void update_partition_context(MACROBLOCKD *xd,
-                                            BLOCK_SIZE_TYPE sb_type,
-                                            BLOCK_SIZE_TYPE sb_size) {
+static INLINE void update_partition_context(MACROBLOCKD *xd, BLOCK_SIZE sb_type,
+                                            BLOCK_SIZE sb_size) {
   const int bsl = b_width_log2(sb_size), bs = (1 << bsl) / 2;
   const int bwl = b_width_log2(sb_type);
   const int bhl = b_height_log2(sb_type);
@@ -290,8 +289,7 @@ static INLINE void update_partition_context(MACROBLOCKD *xd,
   vpx_memset(xd->left_seg_context, pcvalue[bhl == bsl], bs);
 }
 
-static INLINE int partition_plane_context(MACROBLOCKD *xd,
-                                          BLOCK_SIZE_TYPE sb_type) {
+static INLINE int partition_plane_context(MACROBLOCKD *xd, BLOCK_SIZE sb_type) {
   int bsl = mi_width_log2(sb_type), bs = 1 << bsl;
   int above = 0, left = 0, i;
   int boffset = mi_width_log2(BLOCK_64X64) - bsl;
@@ -311,9 +309,8 @@ static INLINE int partition_plane_context(MACROBLOCKD *xd,
   return (left * 2 + above) + bsl * PARTITION_PLOFFSET;
 }
 
-static BLOCK_SIZE_TYPE get_subsize(BLOCK_SIZE_TYPE bsize,
-                                   PARTITION_TYPE partition) {
-  const BLOCK_SIZE_TYPE subsize = subsize_lookup[partition][bsize];
+static BLOCK_SIZE get_subsize(BLOCK_SIZE bsize, PARTITION_TYPE partition) {
+  const BLOCK_SIZE subsize = subsize_lookup[partition][bsize];
   assert(subsize < BLOCK_SIZES);
   return subsize;
 }
@@ -366,31 +363,30 @@ static INLINE TX_SIZE get_uv_tx_size(const MB_MODE_INFO *mbmi) {
   return MIN(mbmi->txfm_size, max_uv_txsize_lookup[mbmi->sb_type]);
 }
 
-static BLOCK_SIZE_TYPE get_plane_block_size(BLOCK_SIZE_TYPE bsize,
-                           const struct macroblockd_plane *pd) {
-  BLOCK_SIZE_TYPE bs = ss_size_lookup[bsize]
-                                     [pd->subsampling_x][pd->subsampling_y];
+static BLOCK_SIZE get_plane_block_size(BLOCK_SIZE bsize,
+                                       const struct macroblockd_plane *pd) {
+  BLOCK_SIZE bs = ss_size_lookup[bsize][pd->subsampling_x][pd->subsampling_y];
   assert(bs < BLOCK_SIZES);
   return bs;
 }
 
-static INLINE int plane_block_width(BLOCK_SIZE_TYPE bsize,
+static INLINE int plane_block_width(BLOCK_SIZE bsize,
                                     const struct macroblockd_plane* plane) {
   return 4 << (b_width_log2(bsize) - plane->subsampling_x);
 }
 
-static INLINE int plane_block_height(BLOCK_SIZE_TYPE bsize,
+static INLINE int plane_block_height(BLOCK_SIZE bsize,
                                      const struct macroblockd_plane* plane) {
   return 4 << (b_height_log2(bsize) - plane->subsampling_y);
 }
 
 typedef void (*foreach_transformed_block_visitor)(int plane, int block,
-                                                  BLOCK_SIZE_TYPE plane_bsize,
+                                                  BLOCK_SIZE plane_bsize,
                                                   TX_SIZE tx_size,
                                                   void *arg);
 
 static INLINE void foreach_transformed_block_in_plane(
-    const MACROBLOCKD *const xd, BLOCK_SIZE_TYPE bsize, int plane,
+    const MACROBLOCKD *const xd, BLOCK_SIZE bsize, int plane,
     foreach_transformed_block_visitor visit, void *arg) {
   const struct macroblockd_plane *const pd = &xd->plane[plane];
   const MB_MODE_INFO* mbmi = &xd->mode_info_context->mbmi;
@@ -399,7 +395,7 @@ static INLINE void foreach_transformed_block_in_plane(
   // transform size varies per plane, look it up in a common way.
   const TX_SIZE tx_size = plane ? get_uv_tx_size(mbmi)
                                 : mbmi->txfm_size;
-  const BLOCK_SIZE_TYPE plane_bsize = get_plane_block_size(bsize, pd);
+  const BLOCK_SIZE plane_bsize = get_plane_block_size(bsize, pd);
   const int num_4x4_w = num_4x4_blocks_wide_lookup[plane_bsize];
   const int num_4x4_h = num_4x4_blocks_high_lookup[plane_bsize];
   const int step = 1 << (tx_size << 1);
@@ -440,7 +436,7 @@ static INLINE void foreach_transformed_block_in_plane(
 }
 
 static INLINE void foreach_transformed_block(
-    const MACROBLOCKD* const xd, BLOCK_SIZE_TYPE bsize,
+    const MACROBLOCKD* const xd, BLOCK_SIZE bsize,
     foreach_transformed_block_visitor visit, void *arg) {
   int plane;
 
@@ -449,7 +445,7 @@ static INLINE void foreach_transformed_block(
 }
 
 static INLINE void foreach_transformed_block_uv(
-    const MACROBLOCKD* const xd, BLOCK_SIZE_TYPE bsize,
+    const MACROBLOCKD* const xd, BLOCK_SIZE bsize,
     foreach_transformed_block_visitor visit, void *arg) {
   int plane;
 
@@ -457,25 +453,25 @@ static INLINE void foreach_transformed_block_uv(
     foreach_transformed_block_in_plane(xd, bsize, plane, visit, arg);
 }
 
-static int raster_block_offset(BLOCK_SIZE_TYPE plane_bsize,
+static int raster_block_offset(BLOCK_SIZE plane_bsize,
                                int raster_block, int stride) {
   const int bw = b_width_log2(plane_bsize);
   const int y = 4 * (raster_block >> bw);
   const int x = 4 * (raster_block & ((1 << bw) - 1));
   return y * stride + x;
 }
-static int16_t* raster_block_offset_int16(BLOCK_SIZE_TYPE plane_bsize,
+static int16_t* raster_block_offset_int16(BLOCK_SIZE plane_bsize,
                                           int raster_block, int16_t *base) {
   const int stride = 4 << b_width_log2(plane_bsize);
   return base + raster_block_offset(plane_bsize, raster_block, stride);
 }
-static uint8_t* raster_block_offset_uint8(BLOCK_SIZE_TYPE plane_bsize,
+static uint8_t* raster_block_offset_uint8(BLOCK_SIZE plane_bsize,
                                           int raster_block, uint8_t *base,
                                           int stride) {
   return base + raster_block_offset(plane_bsize, raster_block, stride);
 }
 
-static int txfrm_block_to_raster_block(BLOCK_SIZE_TYPE plane_bsize,
+static int txfrm_block_to_raster_block(BLOCK_SIZE plane_bsize,
                                        TX_SIZE tx_size, int block) {
   const int bwl = b_width_log2(plane_bsize);
   const int tx_cols_log2 = bwl - tx_size;
@@ -486,7 +482,7 @@ static int txfrm_block_to_raster_block(BLOCK_SIZE_TYPE plane_bsize,
   return x + (y << bwl);
 }
 
-static void txfrm_block_to_raster_xy(BLOCK_SIZE_TYPE plane_bsize,
+static void txfrm_block_to_raster_xy(BLOCK_SIZE plane_bsize,
                                      TX_SIZE tx_size, int block,
                                      int *x, int *y) {
   const int bwl = b_width_log2(plane_bsize);
@@ -497,7 +493,7 @@ static void txfrm_block_to_raster_xy(BLOCK_SIZE_TYPE plane_bsize,
   *y = (raster_mb >> tx_cols_log2) << tx_size;
 }
 
-static void extend_for_intra(MACROBLOCKD* const xd, BLOCK_SIZE_TYPE plane_bsize,
+static void extend_for_intra(MACROBLOCKD* const xd, BLOCK_SIZE plane_bsize,
                              int plane, int block, TX_SIZE tx_size) {
   struct macroblockd_plane *const pd = &xd->plane[plane];
   uint8_t *const buf = pd->dst.buf;
@@ -536,7 +532,7 @@ static void extend_for_intra(MACROBLOCKD* const xd, BLOCK_SIZE_TYPE plane_bsize,
 }
 static void set_contexts_on_border(MACROBLOCKD *xd,
                                    struct macroblockd_plane *pd,
-                                   BLOCK_SIZE_TYPE plane_bsize,
+                                   BLOCK_SIZE plane_bsize,
                                    int tx_size_in_blocks, int has_eob,
                                    int aoff, int loff,
                                    ENTROPY_CONTEXT *A, ENTROPY_CONTEXT *L) {
@@ -573,7 +569,7 @@ static void set_contexts_on_border(MACROBLOCKD *xd,
 }
 
 static void set_contexts(MACROBLOCKD *xd, struct macroblockd_plane *pd,
-                         BLOCK_SIZE_TYPE plane_bsize, TX_SIZE tx_size,
+                         BLOCK_SIZE plane_bsize, TX_SIZE tx_size,
                          int has_eob, int aoff, int loff) {
   ENTROPY_CONTEXT *const A = pd->above_context + aoff;
   ENTROPY_CONTEXT *const L = pd->left_context + loff;

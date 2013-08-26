@@ -383,7 +383,7 @@ unsigned char vp9_get_pred_context_tx_size(const MACROBLOCKD *xd) {
   return above_context + left_context > max_tx_size;
 }
 
-void vp9_set_pred_flag_seg_id(VP9_COMMON *cm, BLOCK_SIZE_TYPE bsize,
+void vp9_set_pred_flag_seg_id(VP9_COMMON *cm, BLOCK_SIZE bsize,
                               int mi_row, int mi_col, uint8_t pred_flag) {
   MODE_INFO *mi = &cm->mi[mi_row * cm->mode_info_stride + mi_col];
   const int bw = 1 << mi_width_log2(bsize);
@@ -397,7 +397,7 @@ void vp9_set_pred_flag_seg_id(VP9_COMMON *cm, BLOCK_SIZE_TYPE bsize,
       mi[y * cm->mode_info_stride + x].mbmi.seg_id_predicted = pred_flag;
 }
 
-void vp9_set_pred_flag_mbskip(VP9_COMMON *cm, BLOCK_SIZE_TYPE bsize,
+void vp9_set_pred_flag_mbskip(VP9_COMMON *cm, BLOCK_SIZE bsize,
                               int mi_row, int mi_col, uint8_t pred_flag) {
   MODE_INFO *mi = &cm->mi[mi_row * cm->mode_info_stride + mi_col];
   const int bw = 1 << mi_width_log2(bsize);
@@ -412,7 +412,7 @@ void vp9_set_pred_flag_mbskip(VP9_COMMON *cm, BLOCK_SIZE_TYPE bsize,
 }
 
 int vp9_get_segment_id(VP9_COMMON *cm, const uint8_t *segment_ids,
-                       BLOCK_SIZE_TYPE bsize, int mi_row, int mi_col) {
+                       BLOCK_SIZE bsize, int mi_row, int mi_col) {
   const int mi_offset = mi_row * cm->mi_cols + mi_col;
   const int bw = 1 << mi_width_log2(bsize);
   const int bh = 1 << mi_height_log2(bsize);

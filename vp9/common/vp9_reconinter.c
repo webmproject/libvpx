@@ -117,8 +117,7 @@ struct build_inter_predictors_args {
   int x, y;
 };
 
-static void build_inter_predictors(int plane, int block,
-                                   BLOCK_SIZE_TYPE bsize,
+static void build_inter_predictors(int plane, int block, BLOCK_SIZE bsize,
                                    int pred_w, int pred_h,
                                    void *argv) {
   const struct build_inter_predictors_args* const arg = argv;
@@ -174,14 +173,14 @@ static void build_inter_predictors(int plane, int block,
 }
 
 // TODO(jkoleszar): In principle, pred_w, pred_h are unnecessary, as we could
-// calculate the subsampled BLOCK_SIZE_TYPE, but that type isn't defined for
+// calculate the subsampled BLOCK_SIZE, but that type isn't defined for
 // sizes smaller than 16x16 yet.
 typedef void (*foreach_predicted_block_visitor)(int plane, int block,
-                                                BLOCK_SIZE_TYPE bsize,
+                                                BLOCK_SIZE bsize,
                                                 int pred_w, int pred_h,
                                                 void *arg);
 static INLINE void foreach_predicted_block_in_plane(
-    const MACROBLOCKD* const xd, BLOCK_SIZE_TYPE bsize, int plane,
+    const MACROBLOCKD* const xd, BLOCK_SIZE bsize, int plane,
     foreach_predicted_block_visitor visit, void *arg) {
   int i, x, y;
 
@@ -216,8 +215,7 @@ static INLINE void foreach_predicted_block_in_plane(
   }
 }
 
-static void build_inter_predictors_for_planes(MACROBLOCKD *xd,
-                                              BLOCK_SIZE_TYPE bsize,
+static void build_inter_predictors_for_planes(MACROBLOCKD *xd, BLOCK_SIZE bsize,
                                               int mi_row, int mi_col,
                                               int plane_from, int plane_to) {
   int plane;
@@ -231,16 +229,16 @@ static void build_inter_predictors_for_planes(MACROBLOCKD *xd,
 }
 
 void vp9_build_inter_predictors_sby(MACROBLOCKD *xd, int mi_row, int mi_col,
-                                    BLOCK_SIZE_TYPE bsize) {
+                                    BLOCK_SIZE bsize) {
   build_inter_predictors_for_planes(xd, bsize, mi_row, mi_col, 0, 0);
 }
 void vp9_build_inter_predictors_sbuv(MACROBLOCKD *xd, int mi_row, int mi_col,
-                                     BLOCK_SIZE_TYPE bsize) {
+                                     BLOCK_SIZE bsize) {
   build_inter_predictors_for_planes(xd, bsize, mi_row, mi_col, 1,
                                     MAX_MB_PLANE - 1);
 }
 void vp9_build_inter_predictors_sb(MACROBLOCKD *xd, int mi_row, int mi_col,
-                                   BLOCK_SIZE_TYPE bsize) {
+                                   BLOCK_SIZE bsize) {
   build_inter_predictors_for_planes(xd, bsize, mi_row, mi_col, 0,
                                     MAX_MB_PLANE - 1);
 }

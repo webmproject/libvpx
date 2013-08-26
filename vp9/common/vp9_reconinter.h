@@ -15,19 +15,14 @@
 #include "vp9/common/vp9_onyxc_int.h"
 
 struct subpix_fn_table;
-void vp9_build_inter_predictors_sby(MACROBLOCKD *xd,
-                                    int mb_row,
-                                    int mb_col,
-                                    BLOCK_SIZE_TYPE bsize);
+void vp9_build_inter_predictors_sby(MACROBLOCKD *xd, int mi_row, int mi_col,
+                                    BLOCK_SIZE bsize);
 
-void vp9_build_inter_predictors_sbuv(MACROBLOCKD *xd,
-                                     int mb_row,
-                                     int mb_col,
-                                     BLOCK_SIZE_TYPE bsize);
+void vp9_build_inter_predictors_sbuv(MACROBLOCKD *xd, int mi_row, int mi_col,
+                                     BLOCK_SIZE bsize);
 
-void vp9_build_inter_predictors_sb(MACROBLOCKD *mb,
-                                   int mb_row, int mb_col,
-                                   BLOCK_SIZE_TYPE bsize);
+void vp9_build_inter_predictors_sb(MACROBLOCKD *xd, int mi_row, int mi_col,
+                                   BLOCK_SIZE bsize);
 
 void vp9_setup_interp_filters(MACROBLOCKD *xd,
                               INTERPOLATIONFILTERTYPE filter,

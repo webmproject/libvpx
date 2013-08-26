@@ -249,7 +249,7 @@ struct decode_block_args {
   int *eobtotal;
 };
 
-static void decode_block(int plane, int block, BLOCK_SIZE_TYPE plane_bsize,
+static void decode_block(int plane, int block, BLOCK_SIZE plane_bsize,
                          TX_SIZE tx_size, void *argv) {
   const struct decode_block_args* const arg = argv;
 
@@ -275,7 +275,7 @@ static void decode_block(int plane, int block, BLOCK_SIZE_TYPE plane_bsize,
   *arg->eobtotal += eob;
 }
 
-int vp9_decode_tokens(VP9D_COMP *pbi, vp9_reader *r, BLOCK_SIZE_TYPE bsize) {
+int vp9_decode_tokens(VP9D_COMP *pbi, vp9_reader *r, BLOCK_SIZE bsize) {
   int eobtotal = 0;
   struct decode_block_args args = {pbi, r, &eobtotal};
   foreach_transformed_block(&pbi->mb, bsize, decode_block, &args);
