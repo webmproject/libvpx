@@ -701,7 +701,7 @@ prototype void vp9_quantize_b "int16_t *coeff_ptr, intptr_t n_coeffs, int skip_b
 specialize vp9_quantize_b $ssse3_x86_64
 
 prototype void vp9_quantize_b_32x32 "int16_t *coeff_ptr, intptr_t n_coeffs, int skip_block, int16_t *zbin_ptr, int16_t *round_ptr, int16_t *quant_ptr, int16_t *quant_shift_ptr, int16_t *qcoeff_ptr, int16_t *dqcoeff_ptr, int16_t *dequant_ptr, int zbin_oq_value, uint16_t *eob_ptr, const int16_t *scan, const int16_t *iscan"
-specialize vp9_quantize_b_32x32
+specialize vp9_quantize_b_32x32 $ssse3_x86_64
 
 #
 # Structured Similarity (SSIM)
