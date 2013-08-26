@@ -1,0 +1,89 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAc3//zQs\u003d",
+        "filename": "vp9/common/arm/neon/vp9_short_idct4x4_1_add_neon.asm",
+        "patchSetId": 1
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2013-08-26T21:45:24Z",
+      "side": 1,
+      "message": "nit:alignment",
+      "revId": "04d89c665c1dfecee349b98ce3cb991b81f686d0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAc3//zMI\u003d",
+        "filename": "vp9/common/arm/neon/vp9_short_idct4x4_1_add_neon.asm",
+        "patchSetId": 1
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2013-08-26T21:45:24Z",
+      "side": 1,
+      "message": "nit: out \u003d dct_const_round_shift(input[0] * cospi_16_64)",
+      "revId": "04d89c665c1dfecee349b98ce3cb991b81f686d0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAc3//zMQ\u003d",
+        "filename": "vp9/common/arm/neon/vp9_short_idct4x4_1_add_neon.asm",
+        "patchSetId": 1
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2013-08-26T21:45:24Z",
+      "side": 1,
+      "message": "nit: out \u003d dct_const_round_shift(out * cospi_16_64)",
+      "revId": "04d89c665c1dfecee349b98ce3cb991b81f686d0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAc3//zMM\u003d",
+        "filename": "vp9/common/arm/neon/vp9_short_idct4x4_1_add_neon.asm",
+        "patchSetId": 1
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2013-08-26T21:45:24Z",
+      "side": 1,
+      "message": "nit: a1 \u003d ROUND_POWER_OF_TWO(out, 4)",
+      "revId": "04d89c665c1dfecee349b98ce3cb991b81f686d0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAc3//zMY\u003d",
+        "filename": "vp9/common/arm/neon/vp9_short_idct4x4_1_add_neon.asm",
+        "patchSetId": 1
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2013-08-26T21:45:24Z",
+      "side": 1,
+      "message": "You could move this up to after \"mul              r0, r0, r12\"\n\nYou could also replace r12 with r3.",
+      "revId": "04d89c665c1dfecee349b98ce3cb991b81f686d0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
