@@ -68,6 +68,24 @@
       "revId": "c6d7c2d36cb573679f82ac84911eed5d0c9b6737",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAc3//zIo\u003d",
+        "filename": "test/test_vector_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 164,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2013-08-26T22:04:31Z",
+      "side": 1,
+      "message": "Or, rather:\nvp91-2-04-yv444-1280x720.webm",
+      "parentUuid": "AAAAc3//zJE\u003d",
+      "revId": "c6d7c2d36cb573679f82ac84911eed5d0c9b6737",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
