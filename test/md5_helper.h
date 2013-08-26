@@ -25,9 +25,15 @@ class MD5 {
 
   void Add(const vpx_image_t *img) {
     for (int plane = 0; plane < 3; ++plane) {
-      uint8_t *buf = img->planes[plane];
-      const int h = plane ? (img->d_h + 1) >> 1 : img->d_h;
-      const int w = plane ? (img->d_w + 1) >> 1 : img->d_w;
+      const uint8_t *buf = img->planes[plane];
+      // Calculate the width and height to do the md5 check. For the chroma
+      // plane, we never want to round down and thus skip a pixel so if
+      // we are shifting by 1 (chroma_shift) we add 1 before doing the shift.
+      // This works only for chroma_shift of 0 and 1.
+      const int h = plane ? (img->d_h + img->y_chroma_shift) >>
+                    img->y_chroma_shift : img->d_h;
+      const int w = plane ? (img->d_w + img->x_chroma_shift) >>
+                    img->x_chroma_shift : img->d_w;
 
       for (int y = 0; y < h; ++y) {
         MD5Update(&md5_, buf, w);
