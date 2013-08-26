@@ -2,6 +2,40 @@
   "comments": [
     {
       "key": {
+        "uuid": "AAAAc3//zK4\u003d",
+        "filename": "test/test-data.sha1",
+        "patchSetId": 1
+      },
+      "lineNbr": 524,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2013-08-26T21:56:40Z",
+      "side": 1,
+      "message": "These names don\u0027t match the correct template format.",
+      "revId": "c6d7c2d36cb573679f82ac84911eed5d0c9b6737",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAc3//zKs\u003d",
+        "filename": "test/test.mk",
+        "patchSetId": 1
+      },
+      "lineNbr": 632,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2013-08-26T21:56:40Z",
+      "side": 1,
+      "message": "File names do not match the correct template (see Dmitry\u0027s document)",
+      "revId": "c6d7c2d36cb573679f82ac84911eed5d0c9b6737",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAc3//zK0\u003d",
         "filename": "test/test_vector_test.cc",
         "patchSetId": 1
