@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAc3//zNw\u003d",
+        "filename": "test/md5_helper.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2013-08-26T21:25:54Z",
+      "side": 1,
+      "message": "const uint8_t *buf \u003d img-\u003eplanes[plane];",
+      "revId": "53bed5a73c6724b4eca7880f84be0bf192c3703f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
