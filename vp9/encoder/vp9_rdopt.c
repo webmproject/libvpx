@@ -398,50 +398,47 @@ static void model_rd_for_sb_y_tx(VP9_COMP *cpi, BLOCK_SIZE_TYPE bsize,
                                  MACROBLOCK *x, MACROBLOCKD *xd,
                                  int *out_rate_sum, int64_t *out_dist_sum,
                                  int *out_skip) {
-  int t = 4, j, k;
-  BLOCK_SIZE_TYPE bs = BLOCK_4X4;
+  int j, k;
+  BLOCK_SIZE_TYPE bs;
   struct macroblock_plane *const p = &x->plane[0];
   struct macroblockd_plane *const pd = &xd->plane[0];
-  const int width = plane_block_width(bsize, pd);
-  const int height = plane_block_height(bsize, pd);
+  const int width = 4 << num_4x4_blocks_wide_lookup[bsize];
+  const int height = 4 << num_4x4_blocks_high_lookup[bsize];
   int rate_sum = 0;
   int64_t dist_sum = 0;
+  const int t = 4 << tx_size;
 
   if (tx_size == TX_4X4) {
     bs = BLOCK_4X4;
-    t = 4;
   } else if (tx_size == TX_8X8) {
     bs = BLOCK_8X8;
-    t = 8;
   } else if (tx_size == TX_16X16) {
     bs = BLOCK_16X16;
-    t = 16;
   } else if (tx_size == TX_32X32) {
     bs = BLOCK_32X32;
-    t = 32;
   } else {
     assert(0);
   }
+
   *out_skip = 1;
   for (j = 0; j < height; j += t) {
     for (k = 0; k < width; k += t) {
       int rate;
       int64_t dist;
       unsigned int sse;
-      (void) cpi->fn_ptr[bs].vf(p->src.buf + j * p->src.stride + k,
-                                p->src.stride,
-                                pd->dst.buf + j * pd->dst.stride + k,
-                                pd->dst.stride, &sse);
+      cpi->fn_ptr[bs].vf(&p->src.buf[j * p->src.stride + k], p->src.stride,
+                         &pd->dst.buf[j * pd->dst.stride + k], pd->dst.stride,
+                         &sse);
       // sse works better than var, since there is no dc prediction used
-      model_rd_from_var_lapndz(sse, t * t, pd->dequant[1] >> 3,
-                               &rate, &dist);
+      model_rd_from_var_lapndz(sse, t * t, pd->dequant[1] >> 3, &rate, &dist);
       rate_sum += rate;
       dist_sum += dist;
       *out_skip &= (rate < 1024);
     }
   }
+
   *out_rate_sum = rate_sum;
-  *out_dist_sum = (dist_sum << 4);
+  *out_dist_sum = dist_sum << 4;
 }
 
 int64_t vp9_block_error_c(int16_t *coeff, int16_t *dqcoeff,
