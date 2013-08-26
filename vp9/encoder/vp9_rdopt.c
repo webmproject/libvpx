@@ -1043,6 +1043,10 @@ static int64_t rd_pick_intra4x4block(VP9_COMP *cpi, MACROBLOCK *x, int ib,
   for (mode = DC_PRED; mode <= TM_PRED; ++mode) {
     int64_t this_rd;
     int ratey = 0;
+
+    if (!(cpi->sf.intra_y_mode_mask & (1 << mode)))
+      continue;
+
     // Only do the oblique modes if the best so far is
     // one of the neighboring directional modes
     if (cpi->sf.mode_search_skip_flags & FLAG_SKIP_INTRA_DIRMISMATCH) {
@@ -1228,6 +1232,9 @@ static int64_t rd_pick_intra_sby_mode(VP9_COMP *cpi, MACROBLOCK *x,
     int64_t local_tx_cache[TX_MODES];
     const int mis = xd->mode_info_stride;
 
+    if (!(cpi->sf.intra_y_mode_mask & (1 << mode)))
+      continue;
+
     if (cpi->common.frame_type == KEY_FRAME) {
       const MB_PREDICTION_MODE A = above_block_mode(mic, 0, mis);
       const MB_PREDICTION_MODE L = xd->left_available ?
@@ -1325,10 +1332,14 @@ static int64_t rd_pick_intra_sbuv_mode(VP9_COMP *cpi, MACROBLOCK *x,
   int this_rate_tokenonly, this_rate, s;
   int64_t this_distortion, this_sse;
 
-  MB_PREDICTION_MODE last_mode = bsize <= BLOCK_8X8 ?
-              TM_PRED : cpi->sf.last_chroma_intra_mode;
+  // int mode_mask = (bsize <= BLOCK_8X8)
+  //                ? ALL_INTRA_MODES : cpi->sf.intra_uv_mode_mask;
 
-  for (mode = DC_PRED; mode <= last_mode; mode++) {
+  for (mode = DC_PRED; mode <= TM_PRED; mode++) {
+    // if (!(mode_mask & (1 << mode)))
+    if (!(cpi->sf.intra_uv_mode_mask & (1 << mode)))
+      continue;
+
     x->e_mbd.mode_info_context->mbmi.uv_mode = mode;
     super_block_uvrd(&cpi->common, x, &this_rate_tokenonly,
                      &this_distortion, &s, &this_sse, bsize, best_rd);
