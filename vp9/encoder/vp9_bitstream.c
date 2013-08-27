@@ -199,7 +199,7 @@ static void update_mbintra_mode_probs(VP9_COMP* const cpi,
 }
 
 static void write_selected_tx_size(const VP9_COMP *cpi, TX_SIZE tx_size,
-                                   BLOCK_SIZE_TYPE bsize, vp9_writer *w) {
+                                   BLOCK_SIZE bsize, vp9_writer *w) {
   const MACROBLOCKD *const xd = &cpi->mb.e_mbd;
   const vp9_prob *tx_probs = get_tx_probs2(xd, &cpi->common.fc.tx_probs);
   vp9_write(w, tx_size != TX_4X4, tx_probs[0]);
@@ -407,7 +407,7 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, MODE_INFO *m, vp9_writer *bc) {
   const MB_PREDICTION_MODE mode = mi->mode;
   const int segment_id = mi->segment_id;
   int skip_coeff;
-  const BLOCK_SIZE_TYPE bsize = mi->sb_type;
+  const BLOCK_SIZE bsize = mi->sb_type;
   const int allow_hp = xd->allow_high_precision_mv;
 
   x->partition_info = x->pi + (m - pc->mi);
@@ -606,8 +606,7 @@ static void write_modes_b(VP9_COMP *cpi, MODE_INFO *m, vp9_writer *bc,
 
 static void write_modes_sb(VP9_COMP *cpi, MODE_INFO *m, vp9_writer *bc,
                            TOKENEXTRA **tok, TOKENEXTRA *tok_end,
-                           int mi_row, int mi_col,
-                           BLOCK_SIZE_TYPE bsize) {
+                           int mi_row, int mi_col, BLOCK_SIZE bsize) {
   VP9_COMMON *const cm = &cpi->common;
   MACROBLOCKD *xd = &cpi->mb.e_mbd;
   const int mis = cm->mode_info_stride;
@@ -615,7 +614,7 @@ static void write_modes_sb(VP9_COMP *cpi, MODE_INFO *m, vp9_writer *bc,
   int bs = (1 << bsl) / 4;  // mode_info step for subsize
   int n;
   PARTITION_TYPE partition = PARTITION_NONE;
-  BLOCK_SIZE_TYPE subsize;
+  BLOCK_SIZE subsize;
 
   if (mi_row >= cm->mi_rows || mi_col >= cm->mi_cols)
     return;

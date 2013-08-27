@@ -273,12 +273,12 @@ typedef struct {
   int use_square_partition_only;
   int unused_mode_skip_lvl;
   int reference_masking;
-  BLOCK_SIZE_TYPE always_this_block_size;
+  BLOCK_SIZE always_this_block_size;
   int auto_min_max_partition_size;
   int auto_min_max_partition_interval;
   int auto_min_max_partition_count;
-  BLOCK_SIZE_TYPE min_partition_size;
-  BLOCK_SIZE_TYPE max_partition_size;
+  BLOCK_SIZE min_partition_size;
+  BLOCK_SIZE max_partition_size;
   int adjust_partitioning_from_last_frame;
   int last_partitioning_redo_frequency;
   int disable_splitmv;

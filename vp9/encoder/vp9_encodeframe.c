@@ -47,7 +47,7 @@ int enc_debug = 0;
 #endif
 
 static void encode_superblock(VP9_COMP *cpi, TOKENEXTRA **t, int output_enabled,
-                              int mi_row, int mi_col, BLOCK_SIZE_TYPE bsize);
+                              int mi_row, int mi_col, BLOCK_SIZE bsize);
 
 static void adjust_act_zbin(VP9_COMP *cpi, MACROBLOCK *x);
 
@@ -78,7 +78,7 @@ static const uint8_t VP9_VAR_OFFS[64] = {
 };
 
 static unsigned int get_sby_perpixel_variance(VP9_COMP *cpi, MACROBLOCK *x,
-                                              BLOCK_SIZE_TYPE bs) {
+                                              BLOCK_SIZE bs) {
   unsigned int var, sse;
   var = cpi->fn_ptr[bs].vf(x->plane[0].src.buf,
                            x->plane[0].src.stride,
@@ -336,7 +336,7 @@ void vp9_activity_masking(VP9_COMP *cpi, MACROBLOCK *x) {
 }
 
 static void update_state(VP9_COMP *cpi, PICK_MODE_CONTEXT *ctx,
-                         BLOCK_SIZE_TYPE bsize, int output_enabled) {
+                         BLOCK_SIZE bsize, int output_enabled) {
   int i, x_idx, y;
   VP9_COMMON *const cm = &cpi->common;
   MACROBLOCK *const x = &cpi->mb;
@@ -469,10 +469,10 @@ void vp9_setup_src_planes(MACROBLOCK *x, const YV12_BUFFER_CONFIG *src,
 }
 
 static void set_offsets(VP9_COMP *cpi, int mi_row, int mi_col,
-                        BLOCK_SIZE_TYPE bsize) {
-  MACROBLOCK * const x = &cpi->mb;
-  VP9_COMMON * const cm = &cpi->common;
-  MACROBLOCKD * const xd = &x->e_mbd;
+                        BLOCK_SIZE bsize) {
+  MACROBLOCK *const x = &cpi->mb;
+  VP9_COMMON *const cm = &cpi->common;
+  MACROBLOCKD *const xd = &x->e_mbd;
   MB_MODE_INFO *mbmi;
   const int dst_fb_idx = cm->new_fb_idx;
   const int idx_str = xd->mode_info_stride * mi_row + mi_col;
@@ -553,7 +553,7 @@ static void set_offsets(VP9_COMP *cpi, int mi_row, int mi_col,
 
 static void pick_sb_modes(VP9_COMP *cpi, int mi_row, int mi_col,
                           int *totalrate, int64_t *totaldist,
-                          BLOCK_SIZE_TYPE bsize, PICK_MODE_CONTEXT *ctx,
+                          BLOCK_SIZE bsize, PICK_MODE_CONTEXT *ctx,
                           int64_t best_rd) {
   VP9_COMMON *const cm = &cpi->common;
   MACROBLOCK *const x = &cpi->mb;
@@ -637,9 +637,8 @@ static void update_stats(VP9_COMP *cpi) {
 // TODO(jingning): the variables used here are little complicated. need further
 // refactoring on organizing the temporary buffers, when recursive
 // partition down to 4x4 block size is enabled.
-static PICK_MODE_CONTEXT *get_block_context(MACROBLOCK *x,
-                                            BLOCK_SIZE_TYPE bsize) {
-  MACROBLOCKD * const xd = &x->e_mbd;
+static PICK_MODE_CONTEXT *get_block_context(MACROBLOCK *x, BLOCK_SIZE bsize) {
+  MACROBLOCKD *const xd = &x->e_mbd;
 
   switch (bsize) {
     case BLOCK_64X64:
@@ -674,9 +673,8 @@ static PICK_MODE_CONTEXT *get_block_context(MACROBLOCK *x,
   }
 }
 
-static BLOCK_SIZE_TYPE *get_sb_partitioning(MACROBLOCK *x,
-                                            BLOCK_SIZE_TYPE bsize) {
-  MACROBLOCKD *xd = &x->e_mbd;
+static BLOCK_SIZE *get_sb_partitioning(MACROBLOCK *x, BLOCK_SIZE bsize) {
+  MACROBLOCKD *const xd = &x->e_mbd;
   switch (bsize) {
     case BLOCK_64X64:
       return &x->sb64_partitioning;
@@ -696,7 +694,7 @@ static void restore_context(VP9_COMP *cpi, int mi_row, int mi_col,
                             ENTROPY_CONTEXT a[16 * MAX_MB_PLANE],
                             ENTROPY_CONTEXT l[16 * MAX_MB_PLANE],
                             PARTITION_CONTEXT sa[8], PARTITION_CONTEXT sl[8],
-                            BLOCK_SIZE_TYPE bsize) {
+                            BLOCK_SIZE bsize) {
   VP9_COMMON *const cm = &cpi->common;
   MACROBLOCK *const x = &cpi->mb;
   MACROBLOCKD *const xd = &x->e_mbd;
@@ -727,7 +725,7 @@ static void save_context(VP9_COMP *cpi, int mi_row, int mi_col,
                          ENTROPY_CONTEXT a[16 * MAX_MB_PLANE],
                          ENTROPY_CONTEXT l[16 * MAX_MB_PLANE],
                          PARTITION_CONTEXT sa[8], PARTITION_CONTEXT sl[8],
-                         BLOCK_SIZE_TYPE bsize) {
+                         BLOCK_SIZE bsize) {
   const VP9_COMMON *const cm = &cpi->common;
   const MACROBLOCK *const x = &cpi->mb;
   const MACROBLOCKD *const xd = &x->e_mbd;
@@ -758,7 +756,7 @@ static void save_context(VP9_COMP *cpi, int mi_row, int mi_col,
 }
 
 static void encode_b(VP9_COMP *cpi, TOKENEXTRA **tp, int mi_row, int mi_col,
-                     int output_enabled, BLOCK_SIZE_TYPE bsize, int sub_index) {
+                     int output_enabled, BLOCK_SIZE bsize, int sub_index) {
   VP9_COMMON * const cm = &cpi->common;
   MACROBLOCK * const x = &cpi->mb;
   MACROBLOCKD * const xd = &x->e_mbd;
@@ -788,15 +786,15 @@ static void encode_b(VP9_COMP *cpi, TOKENEXTRA **tp, int mi_row, int mi_col,
 }
 
 static void encode_sb(VP9_COMP *cpi, TOKENEXTRA **tp, int mi_row, int mi_col,
-                      int output_enabled, BLOCK_SIZE_TYPE bsize) {
+                      int output_enabled, BLOCK_SIZE bsize) {
   VP9_COMMON * const cm = &cpi->common;
   MACROBLOCK * const x = &cpi->mb;
   MACROBLOCKD * const xd = &x->e_mbd;
-  BLOCK_SIZE_TYPE c1 = BLOCK_8X8;
+  BLOCK_SIZE c1 = BLOCK_8X8;
   const int bsl = b_width_log2(bsize), bs = (1 << bsl) / 4;
   int UNINITIALIZED_IS_SAFE(pl);
   PARTITION_TYPE partition;
-  BLOCK_SIZE_TYPE subsize;
+  BLOCK_SIZE subsize;
   int i;
 
   if (mi_row >= cm->mi_rows || mi_col >= cm->mi_cols)
@@ -853,8 +851,7 @@ static void encode_sb(VP9_COMP *cpi, TOKENEXTRA **tp, int mi_row, int mi_col,
   }
 }
 
-static void set_partitioning(VP9_COMP *cpi, MODE_INFO *m,
-                             BLOCK_SIZE_TYPE bsize) {
+static void set_partitioning(VP9_COMP *cpi, MODE_INFO *m, BLOCK_SIZE bsize) {
   VP9_COMMON *const cm = &cpi->common;
   const int mis = cm->mode_info_stride;
   int block_row, block_col;
@@ -877,7 +874,7 @@ static void copy_partitioning(VP9_COMP *cpi, MODE_INFO *m, MODE_INFO *p) {
 }
 
 static void set_block_size(VP9_COMMON * const cm, MODE_INFO *m,
-                           BLOCK_SIZE_TYPE bsize, int mis, int mi_row,
+                           BLOCK_SIZE bsize, int mis, int mi_row,
                            int mi_col) {
   int row, col;
   int bwl = b_width_log2(bsize);
@@ -929,9 +926,9 @@ typedef enum {
   V64X64,
 } TREE_LEVEL;
 
-static void tree_to_node(void *data, BLOCK_SIZE_TYPE block_size, vt_node *node) {
+static void tree_to_node(void *data, BLOCK_SIZE bsize, vt_node *node) {
   int i;
-  switch (block_size) {
+  switch (bsize) {
     case BLOCK_64X64: {
       v64x64 *vt = (v64x64 *) data;
       node->vt = &vt->vt;
@@ -988,9 +985,9 @@ void sum_2_variances(var *r, var *a, var*b) {
                 a->sum_error + b->sum_error, a->count + b->count);
 }
 
-static void fill_variance_tree(void *data, BLOCK_SIZE_TYPE block_size) {
+static void fill_variance_tree(void *data, BLOCK_SIZE bsize) {
   vt_node node;
-  tree_to_node(data, block_size, &node);
+  tree_to_node(data, bsize, &node);
   sum_2_variances(&node.vt->horz[0], node.split[0], node.split[1]);
   sum_2_variances(&node.vt->horz[1], node.split[2], node.split[3]);
   sum_2_variances(&node.vt->vert[0], node.split[0], node.split[2]);
@@ -1000,7 +997,7 @@ static void fill_variance_tree(void *data, BLOCK_SIZE_TYPE block_size) {
 
 #if PERFORM_RANDOM_PARTITIONING
 static int set_vt_partitioning(VP9_COMP *cpi, void *data, MODE_INFO *m,
-    BLOCK_SIZE_TYPE block_size, int mi_row,
+    BLOCK_SIZE block_size, int mi_row,
     int mi_col, int mi_size) {
   VP9_COMMON * const cm = &cpi->common;
   vt_node vt;
@@ -1039,27 +1036,27 @@ static int set_vt_partitioning(VP9_COMP *cpi, void *data, MODE_INFO *m,
 #else  // !PERFORM_RANDOM_PARTITIONING
 
 static int set_vt_partitioning(VP9_COMP *cpi, void *data, MODE_INFO *m,
-                               BLOCK_SIZE_TYPE block_size, int mi_row,
+                               BLOCK_SIZE bsize, int mi_row,
                                int mi_col, int mi_size) {
   VP9_COMMON * const cm = &cpi->common;
   vt_node vt;
   const int mis = cm->mode_info_stride;
   int64_t threshold = 50 * cpi->common.base_qindex;
 
-  tree_to_node(data, block_size, &vt);
+  tree_to_node(data, bsize, &vt);
 
   // split none is available only if we have more than half a block size
   // in width and height inside the visible image
   if (mi_col + mi_size < cm->mi_cols && mi_row + mi_size < cm->mi_rows
       && vt.vt->none.variance < threshold) {
-    set_block_size(cm, m, block_size, mis, mi_row, mi_col);
+    set_block_size(cm, m, bsize, mis, mi_row, mi_col);
     return 1;
   }
 
   // vertical split is available on all but the bottom border
   if (mi_row + mi_size < cm->mi_rows && vt.vt->vert[0].variance < threshold
       && vt.vt->vert[1].variance < threshold) {
-    set_block_size(cm, m, get_subsize(block_size, PARTITION_VERT), mis, mi_row,
+    set_block_size(cm, m, get_subsize(bsize, PARTITION_VERT), mis, mi_row,
                    mi_col);
     return 1;
   }
@@ -1067,7 +1064,7 @@ static int set_vt_partitioning(VP9_COMP *cpi, void *data, MODE_INFO *m,
   // horizontal split is available on all but the right border
   if (mi_col + mi_size < cm->mi_cols && vt.vt->horz[0].variance < threshold
       && vt.vt->horz[1].variance < threshold) {
-    set_block_size(cm, m, get_subsize(block_size, PARTITION_HORZ), mis, mi_row,
+    set_block_size(cm, m, get_subsize(bsize, PARTITION_HORZ), mis, mi_row,
                    mi_col);
     return 1;
   }
@@ -1192,7 +1189,7 @@ static void choose_partitioning(VP9_COMP *cpi, MODE_INFO *m, int mi_row,
 }
 
 static void rd_use_partition(VP9_COMP *cpi, MODE_INFO *m, TOKENEXTRA **tp,
-                             int mi_row, int mi_col, BLOCK_SIZE_TYPE bsize,
+                             int mi_row, int mi_col, BLOCK_SIZE bsize,
                              int *rate, int64_t *dist, int do_recon) {
   VP9_COMMON * const cm = &cpi->common;
   MACROBLOCK * const x = &cpi->mb;
@@ -1206,7 +1203,7 @@ static void rd_use_partition(VP9_COMP *cpi, MODE_INFO *m, TOKENEXTRA **tp,
   int bss = (1 << bsl) / 4;
   int i, pl;
   PARTITION_TYPE partition = PARTITION_NONE;
-  BLOCK_SIZE_TYPE subsize;
+  BLOCK_SIZE subsize;
   ENTROPY_CONTEXT l[16 * MAX_MB_PLANE], a[16 * MAX_MB_PLANE];
   PARTITION_CONTEXT sl[8], sa[8];
   int last_part_rate = INT_MAX;
@@ -1217,9 +1214,9 @@ static void rd_use_partition(VP9_COMP *cpi, MODE_INFO *m, TOKENEXTRA **tp,
   int64_t none_dist = INT_MAX;
   int chosen_rate = INT_MAX;
   int64_t chosen_dist = INT_MAX;
-  BLOCK_SIZE_TYPE sub_subsize = BLOCK_4X4;
+  BLOCK_SIZE sub_subsize = BLOCK_4X4;
   int splits_below = 0;
-  BLOCK_SIZE_TYPE bs_type = m->mbmi.sb_type;
+  BLOCK_SIZE bs_type = m->mbmi.sb_type;
 
   if (mi_row >= cm->mi_rows || mi_col >= cm->mi_cols)
     return;
@@ -1366,7 +1363,7 @@ static void rd_use_partition(VP9_COMP *cpi, MODE_INFO *m, TOKENEXTRA **tp,
       && partition != PARTITION_SPLIT && bsize > BLOCK_8X8
       && (mi_row + ms < cm->mi_rows || mi_row + (ms >> 1) == cm->mi_rows)
       && (mi_col + ms < cm->mi_cols || mi_col + (ms >> 1) == cm->mi_cols)) {
-    BLOCK_SIZE_TYPE split_subsize = get_subsize(bsize, PARTITION_SPLIT);
+    BLOCK_SIZE split_subsize = get_subsize(bsize, PARTITION_SPLIT);
     split_rate = 0;
     split_dist = 0;
     restore_context(cpi, mi_row, mi_col, a, l, sa, sl, bsize);
@@ -1454,14 +1451,17 @@ static void rd_use_partition(VP9_COMP *cpi, MODE_INFO *m, TOKENEXTRA **tp,
   *dist = chosen_dist;
 }
 
-static const BLOCK_SIZE_TYPE min_partition_size[BLOCK_SIZES] =
-  { BLOCK_4X4, BLOCK_4X4, BLOCK_4X4, BLOCK_4X4,
-    BLOCK_4X4, BLOCK_4X4, BLOCK_8X8, BLOCK_8X8,
-    BLOCK_8X8, BLOCK_16X16, BLOCK_16X16, BLOCK_16X16, BLOCK_16X16 };
-static const BLOCK_SIZE_TYPE max_partition_size[BLOCK_SIZES] =
-  { BLOCK_8X8, BLOCK_16X16, BLOCK_16X16, BLOCK_16X16,
-    BLOCK_32X32, BLOCK_32X32, BLOCK_32X32, BLOCK_64X64,
-    BLOCK_64X64, BLOCK_64X64, BLOCK_64X64, BLOCK_64X64, BLOCK_64X64 };
+static const BLOCK_SIZE min_partition_size[BLOCK_SIZES] = {
+  BLOCK_4X4, BLOCK_4X4, BLOCK_4X4, BLOCK_4X4,
+  BLOCK_4X4, BLOCK_4X4, BLOCK_8X8, BLOCK_8X8,
+  BLOCK_8X8, BLOCK_16X16, BLOCK_16X16, BLOCK_16X16, BLOCK_16X16
+};
+
+static const BLOCK_SIZE max_partition_size[BLOCK_SIZES] = {
+  BLOCK_8X8, BLOCK_16X16, BLOCK_16X16, BLOCK_16X16,
+  BLOCK_32X32, BLOCK_32X32, BLOCK_32X32, BLOCK_64X64,
+  BLOCK_64X64, BLOCK_64X64, BLOCK_64X64, BLOCK_64X64, BLOCK_64X64
+};
 
 // Look at all the mode_info entries for blocks that are part of this
 // partition and find the min and max values for sb_type.
@@ -1471,8 +1471,8 @@ static const BLOCK_SIZE_TYPE max_partition_size[BLOCK_SIZES] =
 // The min and max are assumed to have been initialized prior to calling this
 // function so repeat calls can accumulate a min and max of more than one sb64.
 static void get_sb_partition_size_range(VP9_COMP *cpi, MODE_INFO * mi,
-                                        BLOCK_SIZE_TYPE * min_block_size,
-                                        BLOCK_SIZE_TYPE * max_block_size ) {
+                                        BLOCK_SIZE *min_block_size,
+                                        BLOCK_SIZE *max_block_size ) {
   MACROBLOCKD *const xd = &cpi->mb.e_mbd;
   int sb_width_in_blocks = MI_BLOCK_SIZE;
   int sb_height_in_blocks  = MI_BLOCK_SIZE;
@@ -1482,8 +1482,8 @@ static void get_sb_partition_size_range(VP9_COMP *cpi, MODE_INFO * mi,
   // Check the sb_type for each block that belongs to this region.
   for (i = 0; i < sb_height_in_blocks; ++i) {
     for (j = 0; j < sb_width_in_blocks; ++j) {
-      *min_block_size = MIN(*min_block_size, mi[index+j].mbmi.sb_type);
-      *max_block_size = MAX(*max_block_size, mi[index+j].mbmi.sb_type);
+      *min_block_size = MIN(*min_block_size, mi[index + j].mbmi.sb_type);
+      *max_block_size = MAX(*max_block_size, mi[index + j].mbmi.sb_type);
     }
     index += xd->mode_info_stride;
   }
@@ -1492,8 +1492,8 @@ static void get_sb_partition_size_range(VP9_COMP *cpi, MODE_INFO * mi,
 // Look at neighboring blocks and set a min and max partition size based on
 // what they chose.
 static void rd_auto_partition_range(VP9_COMP *cpi,
-                                    BLOCK_SIZE_TYPE * min_block_size,
-                                    BLOCK_SIZE_TYPE * max_block_size) {
+                                    BLOCK_SIZE *min_block_size,
+                                    BLOCK_SIZE *max_block_size) {
   MACROBLOCKD *const xd = &cpi->mb.e_mbd;
   MODE_INFO *mi = xd->mode_info_context;
   MODE_INFO *above_sb64_mi;
@@ -1544,8 +1544,7 @@ static void rd_auto_partition_range(VP9_COMP *cpi,
   }
 }
 
-static void compute_fast_motion_search_level(VP9_COMP *const cpi,
-                                             const BLOCK_SIZE_TYPE bsize) {
+static void compute_fast_motion_search_level(VP9_COMP *cpi, BLOCK_SIZE bsize) {
   VP9_COMMON *const cm = &cpi->common;
   MACROBLOCK *const x = &cpi->mb;
   MACROBLOCKD *const xd = &x->e_mbd;
@@ -1644,7 +1643,7 @@ static void compute_fast_motion_search_level(VP9_COMP *const cpi,
 // unlikely to be selected depending on previous rate-distortion optimization
 // results, for encoding speed-up.
 static void rd_pick_partition(VP9_COMP *cpi, TOKENEXTRA **tp, int mi_row,
-                              int mi_col, BLOCK_SIZE_TYPE bsize, int *rate,
+                              int mi_col, BLOCK_SIZE bsize, int *rate,
                               int64_t *dist, int do_recon, int64_t best_rd) {
   VP9_COMMON * const cm = &cpi->common;
   MACROBLOCK * const x = &cpi->mb;
@@ -1655,7 +1654,7 @@ static void rd_pick_partition(VP9_COMP *cpi, TOKENEXTRA **tp, int mi_row,
   PARTITION_CONTEXT sl[8], sa[8];
   TOKENEXTRA *tp_orig = *tp;
   int i, pl;
-  BLOCK_SIZE_TYPE subsize;
+  BLOCK_SIZE subsize;
   int this_rate, sum_rate = 0, best_rate = INT_MAX;
   int64_t this_dist, sum_dist = 0, best_dist = INT64_MAX;
   int64_t sum_rd = 0;
@@ -2229,8 +2228,7 @@ static void set_txfm_flag(MODE_INFO *mi, int mis, int ymbs, int xmbs,
 
 static void reset_skip_txfm_size_b(VP9_COMP *cpi, MODE_INFO *mi, int mis,
                                    TX_SIZE max_tx_size, int bw, int bh,
-                                   int mi_row, int mi_col,
-                                   BLOCK_SIZE_TYPE bsize) {
+                                   int mi_row, int mi_col, BLOCK_SIZE bsize) {
   VP9_COMMON *const cm = &cpi->common;
   MB_MODE_INFO *const mbmi = &mi->mbmi;
 
@@ -2252,7 +2250,7 @@ static void reset_skip_txfm_size_b(VP9_COMP *cpi, MODE_INFO *mi, int mis,
 
 static void reset_skip_txfm_size_sb(VP9_COMP *cpi, MODE_INFO *mi,
                                     TX_SIZE max_tx_size, int mi_row, int mi_col,
-                                    BLOCK_SIZE_TYPE bsize) {
+                                    BLOCK_SIZE bsize) {
   const VP9_COMMON *const cm = &cpi->common;
   const int mis = cm->mode_info_stride;
   int bw, bh;
@@ -2278,7 +2276,7 @@ static void reset_skip_txfm_size_sb(VP9_COMP *cpi, MODE_INFO *mi,
     reset_skip_txfm_size_b(cpi, mi + hbs, mis, max_tx_size, hbs, bs, mi_row,
                            mi_col + hbs, bsize);
   } else {
-    const BLOCK_SIZE_TYPE subsize = subsize_lookup[PARTITION_SPLIT][bsize];
+    const BLOCK_SIZE subsize = subsize_lookup[PARTITION_SPLIT][bsize];
     int n;
 
     assert(bw < bs && bh < bs);
@@ -2517,7 +2515,7 @@ void vp9_encode_frame(VP9_COMP *cpi) {
 static void sum_intra_stats(VP9_COMP *cpi, const MODE_INFO *mi) {
   const MB_PREDICTION_MODE y_mode = mi->mbmi.mode;
   const MB_PREDICTION_MODE uv_mode = mi->mbmi.uv_mode;
-  const BLOCK_SIZE_TYPE bsize = mi->mbmi.sb_type;
+  const BLOCK_SIZE bsize = mi->mbmi.sb_type;
 
   ++cpi->y_uv_mode_count[y_mode][uv_mode];
 
@@ -2555,7 +2553,7 @@ static void adjust_act_zbin(VP9_COMP *cpi, MACROBLOCK *x) {
 }
 
 static void encode_superblock(VP9_COMP *cpi, TOKENEXTRA **t, int output_enabled,
-                              int mi_row, int mi_col, BLOCK_SIZE_TYPE bsize) {
+                              int mi_row, int mi_col, BLOCK_SIZE bsize) {
   VP9_COMMON * const cm = &cpi->common;
   MACROBLOCK * const x = &cpi->mb;
   MACROBLOCKD * const xd = &x->e_mbd;

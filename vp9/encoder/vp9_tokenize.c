@@ -97,8 +97,7 @@ struct tokenize_b_args {
   TX_SIZE tx_size;
 };
 
-static void set_entropy_context_b(int plane, int block,
-                                  BLOCK_SIZE_TYPE plane_bsize,
+static void set_entropy_context_b(int plane, int block, BLOCK_SIZE plane_bsize,
                                   TX_SIZE tx_size, void *arg) {
   struct tokenize_b_args* const args = arg;
   MACROBLOCKD *const xd = args->xd;
@@ -108,7 +107,7 @@ static void set_entropy_context_b(int plane, int block,
   set_contexts(xd, pd, plane_bsize, tx_size, pd->eobs[block] > 0, aoff, loff);
 }
 
-static void tokenize_b(int plane, int block, BLOCK_SIZE_TYPE plane_bsize,
+static void tokenize_b(int plane, int block, BLOCK_SIZE plane_bsize,
                        TX_SIZE tx_size, void *arg) {
   struct tokenize_b_args* const args = arg;
   VP9_COMP *cpi = args->cpi;
@@ -222,20 +221,20 @@ struct is_skippable_args {
 };
 
 static void is_skippable(int plane, int block,
-                         BLOCK_SIZE_TYPE plane_bsize, TX_SIZE tx_size,
+                         BLOCK_SIZE plane_bsize, TX_SIZE tx_size,
                          void *argv) {
   struct is_skippable_args *args = argv;
   args->skippable[0] &= (!args->xd->plane[plane].eobs[block]);
 }
 
-int vp9_sb_is_skippable(MACROBLOCKD *xd, BLOCK_SIZE_TYPE bsize) {
+int vp9_sb_is_skippable(MACROBLOCKD *xd, BLOCK_SIZE bsize) {
   int result = 1;
   struct is_skippable_args args = {xd, &result};
   foreach_transformed_block(xd, bsize, is_skippable, &args);
   return result;
 }
 
-int vp9_is_skippable_in_plane(MACROBLOCKD *xd, BLOCK_SIZE_TYPE bsize,
+int vp9_is_skippable_in_plane(MACROBLOCKD *xd, BLOCK_SIZE bsize,
                               int plane) {
   int result = 1;
   struct is_skippable_args args = {xd, &result};
@@ -244,7 +243,7 @@ int vp9_is_skippable_in_plane(MACROBLOCKD *xd, BLOCK_SIZE_TYPE bsize,
 }
 
 void vp9_tokenize_sb(VP9_COMP *cpi, TOKENEXTRA **t, int dry_run,
-                     BLOCK_SIZE_TYPE bsize) {
+                     BLOCK_SIZE bsize) {
   VP9_COMMON *const cm = &cpi->common;
   MACROBLOCKD *const xd = &cpi->mb.e_mbd;
   MB_MODE_INFO *const mbmi = &xd->mode_info_context->mbmi;

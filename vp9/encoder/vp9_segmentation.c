@@ -138,7 +138,7 @@ static void count_segs(VP9_COMP *cpi, MODE_INFO *mi,
 
   // Temporal prediction not allowed on key frames
   if (cm->frame_type != KEY_FRAME) {
-    const BLOCK_SIZE_TYPE bsize = mi->mbmi.sb_type;
+    const BLOCK_SIZE bsize = mi->mbmi.sb_type;
     // Test to see if the segment id matches the predicted value.
     const int pred_segment_id = vp9_get_segment_id(cm, cm->last_frame_seg_map,
                                                    bsize, mi_row, mi_col);
@@ -161,7 +161,7 @@ static void count_segs_sb(VP9_COMP *cpi, MODE_INFO *mi,
                           int (*temporal_predictor_count)[2],
                           int *t_unpred_seg_counts,
                           int mi_row, int mi_col,
-                          BLOCK_SIZE_TYPE bsize) {
+                          BLOCK_SIZE bsize) {
   const VP9_COMMON *const cm = &cpi->common;
   const int mis = cm->mode_info_stride;
   int bw, bh;
@@ -187,7 +187,7 @@ static void count_segs_sb(VP9_COMP *cpi, MODE_INFO *mi,
     count_segs(cpi, mi + hbs, no_pred_segcounts, temporal_predictor_count,
                t_unpred_seg_counts, hbs, bs, mi_row, mi_col + hbs);
   } else {
-    const BLOCK_SIZE_TYPE subsize = subsize_lookup[PARTITION_SPLIT][bsize];
+    const BLOCK_SIZE subsize = subsize_lookup[PARTITION_SPLIT][bsize];
     int n;
 
     assert(bw < bs && bh < bs);
