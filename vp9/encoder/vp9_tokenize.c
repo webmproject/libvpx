@@ -121,16 +121,16 @@ static void tokenize_b(int plane, int block, BLOCK_SIZE plane_bsize,
   const int eob = pd->eobs[block];
   const PLANE_TYPE type = pd->plane_type;
   const int16_t *qcoeff_ptr = BLOCK_OFFSET(pd->qcoeff, block);
-  int seg_eob;
+
   const int segment_id = mbmi->segment_id;
   const int16_t *scan, *nb;
   vp9_coeff_count *const counts = cpi->coef_counts[tx_size];
   vp9_coeff_probs_model *const coef_probs = cpi->common.fc.coef_probs[tx_size];
   const int ref = is_inter_block(mbmi);
-  ENTROPY_CONTEXT above_ec, left_ec;
   uint8_t token_cache[1024];
   const uint8_t *band_translate;
   ENTROPY_CONTEXT *A, *L;
+  const int seg_eob = get_tx_eob(&cpi->common.seg, segment_id, tx_size);
   int aoff, loff;
   txfrm_block_to_raster_xy(plane_bsize, tx_size, block, &aoff, &loff);
 
@@ -139,45 +139,9 @@ static void tokenize_b(int plane, int block, BLOCK_SIZE plane_bsize,
 
   assert((!type && !plane) || (type && plane));
 
-  switch (tx_size) {
-    case TX_4X4:
-      above_ec = A[0] != 0;
-      left_ec = L[0] != 0;
-      seg_eob = 16;
-      scan = get_scan_4x4(get_tx_type_4x4(type, xd, block));
-      band_translate = vp9_coefband_trans_4x4;
-      break;
-    case TX_8X8:
-      above_ec = !!*(uint16_t *)A;
-      left_ec  = !!*(uint16_t *)L;
-      seg_eob = 64;
-      scan = get_scan_8x8(get_tx_type_8x8(type, xd));
-      band_translate = vp9_coefband_trans_8x8plus;
-      break;
-    case TX_16X16:
-      above_ec = !!*(uint32_t *)A;
-      left_ec  = !!*(uint32_t *)L;
-      seg_eob = 256;
-      scan = get_scan_16x16(get_tx_type_16x16(type, xd));
-      band_translate = vp9_coefband_trans_8x8plus;
-      break;
-    case TX_32X32:
-      above_ec = !!*(uint64_t *)A;
-      left_ec  = !!*(uint64_t *)L;
-      seg_eob = 1024;
-      scan = vp9_default_scan_32x32;
-      band_translate = vp9_coefband_trans_8x8plus;
-      break;
-    default:
-      assert(!"Invalid transform size");
-  }
-
-  pt = combine_entropy_contexts(above_ec, left_ec);
+  pt = get_entropy_context(xd, tx_size, type, block, A, L,
+                           &scan, &band_translate);
   nb = vp9_get_coef_neighbors_handle(scan);
-
-  if (vp9_segfeature_active(&cpi->common.seg, segment_id, SEG_LVL_SKIP))
-    seg_eob = 0;
-
   c = 0;
   do {
     const int band = get_coef_band(band_translate, c);

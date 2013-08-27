@@ -336,6 +336,45 @@ static INLINE const int16_t* get_iscan_16x16(TX_TYPE tx_type) {
   }
 }
 
+static int get_entropy_context(const MACROBLOCKD *xd, TX_SIZE tx_size,
+                               PLANE_TYPE type, int block_idx,
+                               ENTROPY_CONTEXT *A, ENTROPY_CONTEXT *L,
+                               const int16_t **scan,
+                               const uint8_t **band_translate) {
+  ENTROPY_CONTEXT above_ec, left_ec;
+
+  switch (tx_size) {
+    case TX_4X4:
+      *scan = get_scan_4x4(get_tx_type_4x4(type, xd, block_idx));
+      *band_translate = vp9_coefband_trans_4x4;
+      above_ec = A[0] != 0;
+      left_ec = L[0] != 0;
+      break;
+    case TX_8X8:
+      *scan = get_scan_8x8(get_tx_type_8x8(type, xd));
+      *band_translate = vp9_coefband_trans_8x8plus;
+      above_ec = !!*(uint16_t *)A;
+      left_ec  = !!*(uint16_t *)L;
+      break;
+    case TX_16X16:
+      *scan = get_scan_16x16(get_tx_type_16x16(type, xd));
+      *band_translate = vp9_coefband_trans_8x8plus;
+      above_ec = !!*(uint32_t *)A;
+      left_ec  = !!*(uint32_t *)L;
+      break;
+    case TX_32X32:
+      *scan = vp9_default_scan_32x32;
+      *band_translate = vp9_coefband_trans_8x8plus;
+      above_ec = !!*(uint64_t *)A;
+      left_ec  = !!*(uint64_t *)L;
+      break;
+    default:
+      assert(!"Invalid transform size.");
+  }
+
+  return combine_entropy_contexts(above_ec, left_ec);
+}
+
 enum { VP9_COEF_UPDATE_PROB = 252 };
 
 #endif  // VP9_COMMON_VP9_ENTROPY_H_

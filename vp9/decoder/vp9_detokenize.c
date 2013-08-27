@@ -94,9 +94,8 @@ static int decode_coefs(VP9_COMMON *cm, const MACROBLOCKD *xd,
                         ENTROPY_CONTEXT *A, ENTROPY_CONTEXT *L) {
   FRAME_CONTEXT *const fc = &cm->fc;
   FRAME_COUNTS *const counts = &cm->counts;
-  ENTROPY_CONTEXT above_ec, left_ec;
   const int ref = is_inter_block(&xd->mode_info_context->mbmi);
-  int band, pt, c = 0;
+  int band, c = 0;
   vp9_prob (*coef_probs)[PREV_COEF_CONTEXTS][UNCONSTRAINED_NODES] =
       fc->coef_probs[tx_size][type][ref];
   vp9_prob coef_probs_full[COEF_BANDS][PREV_COEF_CONTEXTS][ENTROPY_NODES];
@@ -104,38 +103,10 @@ static int decode_coefs(VP9_COMMON *cm, const MACROBLOCKD *xd,
   vp9_prob *prob;
   vp9_coeff_count_model *coef_counts = counts->coef[tx_size];
   const int16_t *scan, *nb;
-  uint8_t token_cache[1024];
   const uint8_t *band_translate;
-
-  switch (tx_size) {
-    default:
-    case TX_4X4:
-      scan = get_scan_4x4(get_tx_type_4x4(type, xd, block_idx));
-      above_ec = A[0] != 0;
-      left_ec = L[0] != 0;
-      band_translate = vp9_coefband_trans_4x4;
-      break;
-    case TX_8X8:
-      scan = get_scan_8x8(get_tx_type_8x8(type, xd));
-      above_ec = !!*(uint16_t *)A;
-      left_ec  = !!*(uint16_t *)L;
-      band_translate = vp9_coefband_trans_8x8plus;
-      break;
-    case TX_16X16:
-      scan = get_scan_16x16(get_tx_type_16x16(type, xd));
-      above_ec = !!*(uint32_t *)A;
-      left_ec  = !!*(uint32_t *)L;
-      band_translate = vp9_coefband_trans_8x8plus;
-      break;
-    case TX_32X32:
-      scan = vp9_default_scan_32x32;
-      above_ec = !!*(uint64_t *)A;
-      left_ec  = !!*(uint64_t *)L;
-      band_translate = vp9_coefband_trans_8x8plus;
-      break;
-  }
-
-  pt = combine_entropy_contexts(above_ec, left_ec);
+  uint8_t token_cache[1024];
+  int pt = get_entropy_context(xd, tx_size, type, block_idx, A, L,
+                               &scan, &band_translate);
   nb = vp9_get_coef_neighbors_handle(scan);
 
   while (1) {
@@ -239,10 +210,6 @@ SKIP_START:
   return c;
 }
 
-static int get_eob(struct segmentation *seg, int segment_id, int eob_max) {
-  return vp9_segfeature_active(seg, segment_id, SEG_LVL_SKIP) ? 0 : eob_max;
-}
-
 struct decode_block_args {
   VP9D_COMP *pbi;
   vp9_reader *r;
@@ -258,8 +225,7 @@ static void decode_block(int plane, int block, BLOCK_SIZE plane_bsize,
   struct segmentation *seg = &arg->pbi->common.seg;
   struct macroblockd_plane* pd = &xd->plane[plane];
   const int segment_id = xd->mode_info_context->mbmi.segment_id;
-  const int ss_txfrm_size = tx_size << 1;
-  const int seg_eob = get_eob(seg, segment_id, 16 << ss_txfrm_size);
+  const int seg_eob = get_tx_eob(seg, segment_id, tx_size);
   int aoff, loff, eob;
 
   txfrm_block_to_raster_xy(plane_bsize, tx_size, block, &aoff, &loff);
