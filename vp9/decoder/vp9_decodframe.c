@@ -132,23 +132,17 @@ static void decode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
                                                        block);
   uint8_t* const dst = raster_block_offset_uint8(plane_bsize, raster_block,
                                                  pd->dst.buf, pd->dst.stride);
-  int b_mode;
-  const int tx_ib = raster_block >> tx_size;
-  const int mode = (plane == 0) ? mi->mbmi.mode : mi->mbmi.uv_mode;
-
-  if (plane == 0 && mi->mbmi.sb_type < BLOCK_8X8) {
-    assert(plane_bsize == BLOCK_8X8);
-    b_mode = mi->bmi[raster_block].as_mode;
-  } else {
-    b_mode = mode;
-  }
+  const MB_PREDICTION_MODE mode = (plane == 0)
+        ? ((mi->mbmi.sb_type < BLOCK_8X8) ? mi->bmi[raster_block].as_mode
+                                          : mi->mbmi.mode)
+        : mi->mbmi.uv_mode;
 
   if (xd->mb_to_right_edge < 0 || xd->mb_to_bottom_edge < 0)
     extend_for_intra(xd, plane_bsize, plane, block, tx_size);
 
-  vp9_predict_intra_block(xd, tx_ib, b_width_log2(plane_bsize), tx_size, b_mode,
-                          dst, pd->dst.stride,
-                          dst, pd->dst.stride);
+  vp9_predict_intra_block(xd, raster_block >> tx_size,
+                          b_width_log2(plane_bsize), tx_size, mode,
+                          dst, pd->dst.stride, dst, pd->dst.stride);
 
   // Early exit if there are no coefficients
   if (mi->mbmi.skip_coeff)
