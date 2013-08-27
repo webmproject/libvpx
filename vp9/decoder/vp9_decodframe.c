@@ -976,9 +976,6 @@ int vp9_decode_frame(VP9D_COMP *pbi, const uint8_t **p_data_end) {
 
   init_dequantizer(pc, &pbi->mb);
 
-  if (!keyframe)
-    vp9_setup_interp_filters(xd, pc->mcomp_filter_type, pc);
-
   pc->fc = pc->frame_contexts[pc->frame_context_idx];
 
   vp9_zero(pc->counts);
