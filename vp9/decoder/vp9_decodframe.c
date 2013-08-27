@@ -87,7 +87,7 @@ static void init_dequantizer(VP9_COMMON *cm, MACROBLOCKD *xd) {
     xd->plane[i].dequant = cm->uv_dequant[xd->q_index];
 }
 
-static void decode_block(int plane, int block, BLOCK_SIZE_TYPE plane_bsize,
+static void decode_block(int plane, int block, BLOCK_SIZE plane_bsize,
                          TX_SIZE tx_size, void *arg) {
   MACROBLOCKD* const xd = arg;
   struct macroblockd_plane *const pd = &xd->plane[plane];
@@ -123,8 +123,7 @@ static void decode_block(int plane, int block, BLOCK_SIZE_TYPE plane_bsize,
   }
 }
 
-static void decode_block_intra(int plane, int block,
-                               BLOCK_SIZE_TYPE plane_bsize,
+static void decode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
                                TX_SIZE tx_size, void *arg) {
   MACROBLOCKD* const xd = arg;
   struct macroblockd_plane *const pd = &xd->plane[plane];
@@ -158,7 +157,7 @@ static void decode_block_intra(int plane, int block,
   decode_block(plane, block, plane_bsize, tx_size, arg);
 }
 
-static int decode_tokens(VP9D_COMP *pbi, BLOCK_SIZE_TYPE bsize, vp9_reader *r) {
+static int decode_tokens(VP9D_COMP *pbi, BLOCK_SIZE bsize, vp9_reader *r) {
   MACROBLOCKD *const xd = &pbi->mb;
 
   if (xd->mode_info_context->mbmi.skip_coeff) {
@@ -173,7 +172,7 @@ static int decode_tokens(VP9D_COMP *pbi, BLOCK_SIZE_TYPE bsize, vp9_reader *r) {
   }
 }
 
-static void set_offsets(VP9D_COMP *pbi, BLOCK_SIZE_TYPE bsize,
+static void set_offsets(VP9D_COMP *pbi, BLOCK_SIZE bsize,
                         int mi_row, int mi_col) {
   VP9_COMMON *const cm = &pbi->common;
   MACROBLOCKD *const xd = &pbi->mb;
@@ -215,7 +214,7 @@ static void set_ref(VP9D_COMP *pbi, int i, int mi_row, int mi_col) {
 }
 
 static void decode_modes_b(VP9D_COMP *pbi, int mi_row, int mi_col,
-                           vp9_reader *r, BLOCK_SIZE_TYPE bsize) {
+                           vp9_reader *r, BLOCK_SIZE bsize) {
   VP9_COMMON *const cm = &pbi->common;
   MACROBLOCKD *const xd = &pbi->mb;
   const int less8x8 = bsize < BLOCK_8X8;
@@ -265,12 +264,12 @@ static void decode_modes_b(VP9D_COMP *pbi, int mi_row, int mi_col,
 }
 
 static void decode_modes_sb(VP9D_COMP *pbi, int mi_row, int mi_col,
-                            vp9_reader* r, BLOCK_SIZE_TYPE bsize) {
+                            vp9_reader* r, BLOCK_SIZE bsize) {
   VP9_COMMON *const pc = &pbi->common;
   MACROBLOCKD *const xd = &pbi->mb;
   const int bs = (1 << mi_width_log2(bsize)) / 2;
   PARTITION_TYPE partition = PARTITION_NONE;
-  BLOCK_SIZE_TYPE subsize;
+  BLOCK_SIZE subsize;
 
   if (mi_row >= pc->mi_rows || mi_col >= pc->mi_cols)
     return;

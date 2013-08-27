@@ -15,7 +15,7 @@
 #include "vp9/common/vp9_onyxc_int.h"
 
 int vp9_get_segment_id(VP9_COMMON *cm, const uint8_t *segment_ids,
-                       BLOCK_SIZE_TYPE bsize, int mi_row, int mi_col);
+                       BLOCK_SIZE bsize, int mi_row, int mi_col);
 
 
 static INLINE int vp9_get_pred_context_seg_id(const MACROBLOCKD *xd) {
@@ -32,7 +32,7 @@ static INLINE vp9_prob vp9_get_pred_prob_seg_id(struct segmentation *seg,
   return seg->pred_probs[vp9_get_pred_context_seg_id(xd)];
 }
 
-void vp9_set_pred_flag_seg_id(VP9_COMMON *cm, BLOCK_SIZE_TYPE bsize,
+void vp9_set_pred_flag_seg_id(VP9_COMMON *cm, BLOCK_SIZE bsize,
                               int mi_row, int mi_col, uint8_t pred_flag);
 
 static INLINE int vp9_get_pred_context_mbskip(const MACROBLOCKD *xd) {
@@ -53,7 +53,7 @@ static INLINE unsigned char vp9_get_pred_flag_mbskip(const MACROBLOCKD *xd) {
   return xd->mode_info_context->mbmi.skip_coeff;
 }
 
-void vp9_set_pred_flag_mbskip(VP9_COMMON *cm, BLOCK_SIZE_TYPE bsize,
+void vp9_set_pred_flag_mbskip(VP9_COMMON *cm, BLOCK_SIZE bsize,
                               int mi_row, int mi_col, uint8_t pred_flag);
 
 unsigned char vp9_get_pred_context_switchable_interp(const MACROBLOCKD *xd);
@@ -103,7 +103,7 @@ static INLINE vp9_prob vp9_get_pred_prob_single_ref_p2(const VP9_COMMON *cm,
 
 unsigned char vp9_get_pred_context_tx_size(const MACROBLOCKD *xd);
 
-static const vp9_prob *get_tx_probs(BLOCK_SIZE_TYPE bsize, uint8_t context,
+static const vp9_prob *get_tx_probs(BLOCK_SIZE bsize, uint8_t context,
                                     const struct tx_probs *tx_probs) {
   if (bsize < BLOCK_16X16)
     return tx_probs->p8x8[context];
@@ -115,12 +115,12 @@ static const vp9_prob *get_tx_probs(BLOCK_SIZE_TYPE bsize, uint8_t context,
 
 static const vp9_prob *get_tx_probs2(const MACROBLOCKD *xd,
                                      const struct tx_probs *tx_probs) {
-  const BLOCK_SIZE_TYPE bsize = xd->mode_info_context->mbmi.sb_type;
+  const BLOCK_SIZE bsize = xd->mode_info_context->mbmi.sb_type;
   const int context = vp9_get_pred_context_tx_size(xd);
   return get_tx_probs(bsize, context, tx_probs);
 }
 
-static void update_tx_counts(BLOCK_SIZE_TYPE bsize, uint8_t context,
+static void update_tx_counts(BLOCK_SIZE bsize, uint8_t context,
                              TX_SIZE tx_size, struct tx_counts *tx_counts) {
   if (bsize >= BLOCK_32X32)
     tx_counts->p32x32[context][tx_size]++;

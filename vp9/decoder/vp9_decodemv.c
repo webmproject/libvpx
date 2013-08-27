@@ -43,7 +43,7 @@ static int read_segment_id(vp9_reader *r, const struct segmentation *seg) {
 }
 
 static TX_SIZE read_selected_tx_size(VP9_COMMON *cm, MACROBLOCKD *xd,
-                                     BLOCK_SIZE_TYPE bsize, vp9_reader *r) {
+                                     BLOCK_SIZE bsize, vp9_reader *r) {
   const uint8_t context = vp9_get_pred_context_tx_size(xd);
   const vp9_prob *tx_probs = get_tx_probs(bsize, context, &cm->fc.tx_probs);
   TX_SIZE tx_size = vp9_read(r, tx_probs[0]);
@@ -58,7 +58,7 @@ static TX_SIZE read_selected_tx_size(VP9_COMMON *cm, MACROBLOCKD *xd,
 }
 
 static TX_SIZE read_tx_size(VP9D_COMP *pbi, TX_MODE tx_mode,
-                            BLOCK_SIZE_TYPE bsize, int allow_select,
+                            BLOCK_SIZE bsize, int allow_select,
                             vp9_reader *r) {
   VP9_COMMON *const cm = &pbi->common;
   MACROBLOCKD *const xd = &pbi->mb;
@@ -75,7 +75,7 @@ static TX_SIZE read_tx_size(VP9D_COMP *pbi, TX_MODE tx_mode,
     return TX_4X4;
 }
 
-static void set_segment_id(VP9_COMMON *cm, BLOCK_SIZE_TYPE bsize,
+static void set_segment_id(VP9_COMMON *cm, BLOCK_SIZE bsize,
                            int mi_row, int mi_col, int segment_id) {
   const int mi_offset = mi_row * cm->mi_cols + mi_col;
   const int bw = 1 << mi_width_log2(bsize);
@@ -95,7 +95,7 @@ static int read_intra_segment_id(VP9D_COMP *pbi, int mi_row, int mi_col,
                                  vp9_reader *r) {
   MACROBLOCKD *const xd = &pbi->mb;
   struct segmentation *const seg = &pbi->common.seg;
-  const BLOCK_SIZE_TYPE bsize = xd->mode_info_context->mbmi.sb_type;
+  const BLOCK_SIZE bsize = xd->mode_info_context->mbmi.sb_type;
   int segment_id;
 
   if (!seg->enabled)
@@ -114,7 +114,7 @@ static int read_inter_segment_id(VP9D_COMP *pbi, int mi_row, int mi_col,
   VP9_COMMON *const cm = &pbi->common;
   MACROBLOCKD *const xd = &pbi->mb;
   struct segmentation *const seg = &cm->seg;
-  const BLOCK_SIZE_TYPE bsize = xd->mode_info_context->mbmi.sb_type;
+  const BLOCK_SIZE bsize = xd->mode_info_context->mbmi.sb_type;
   int pred_segment_id, segment_id;
 
   if (!seg->enabled)
@@ -155,7 +155,7 @@ static void read_intra_frame_mode_info(VP9D_COMP *pbi, MODE_INFO *m,
   VP9_COMMON *const cm = &pbi->common;
   MACROBLOCKD *const xd = &pbi->mb;
   MB_MODE_INFO *const mbmi = &m->mbmi;
-  const BLOCK_SIZE_TYPE bsize = mbmi->sb_type;
+  const BLOCK_SIZE bsize = mbmi->sb_type;
   const int mis = cm->mode_info_stride;
 
   mbmi->segment_id = read_intra_segment_id(pbi, mi_row, mi_col, r);
@@ -381,7 +381,7 @@ static void read_intra_block_mode_info(VP9D_COMP *pbi, MODE_INFO *mi,
                                   vp9_reader *r) {
   VP9_COMMON *const cm = &pbi->common;
   MB_MODE_INFO *const mbmi = &mi->mbmi;
-  const BLOCK_SIZE_TYPE bsize = mi->mbmi.sb_type;
+  const BLOCK_SIZE bsize = mi->mbmi.sb_type;
 
   mbmi->ref_frame[0] = INTRA_FRAME;
   mbmi->ref_frame[1] = NONE;
@@ -439,7 +439,7 @@ static void read_inter_block_mode_info(VP9D_COMP *pbi, MODE_INFO *mi,
   MB_MODE_INFO *const mbmi = &mi->mbmi;
   int_mv *const mv0 = &mbmi->mv[0];
   int_mv *const mv1 = &mbmi->mv[1];
-  const BLOCK_SIZE_TYPE bsize = mbmi->sb_type;
+  const BLOCK_SIZE bsize = mbmi->sb_type;
   const int allow_hp = xd->allow_high_precision_mv;
 
   int_mv nearest, nearby, best_mv;
@@ -668,7 +668,7 @@ void vp9_read_mode_info(VP9D_COMP* pbi, int mi_row, int mi_col, vp9_reader *r) {
   VP9_COMMON *const cm = &pbi->common;
   MACROBLOCKD *const xd = &pbi->mb;
   MODE_INFO *mi = xd->mode_info_context;
-  const BLOCK_SIZE_TYPE bsize = mi->mbmi.sb_type;
+  const BLOCK_SIZE bsize = mi->mbmi.sb_type;
   const int bw = 1 << mi_width_log2(bsize);
   const int bh = 1 << mi_height_log2(bsize);
   const int y_mis = MIN(bh, cm->mi_rows - mi_row);

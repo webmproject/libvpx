@@ -156,11 +156,11 @@ extern DECLARE_ALIGNED(16, int16_t,
 void vp9_coef_tree_initialize(void);
 void vp9_adapt_coef_probs(struct VP9Common *);
 
-static INLINE void reset_skip_context(MACROBLOCKD *xd, BLOCK_SIZE_TYPE bsize) {
+static INLINE void reset_skip_context(MACROBLOCKD *xd, BLOCK_SIZE bsize) {
   int i;
   for (i = 0; i < MAX_MB_PLANE; i++) {
     struct macroblockd_plane *const pd = &xd->plane[i];
-    const BLOCK_SIZE_TYPE plane_bsize = get_plane_block_size(bsize, pd);
+    const BLOCK_SIZE plane_bsize = get_plane_block_size(bsize, pd);
     vpx_memset(pd->above_context, 0, sizeof(ENTROPY_CONTEXT) *
                    num_4x4_blocks_wide_lookup[plane_bsize]);
     vpx_memset(pd->left_context, 0, sizeof(ENTROPY_CONTEXT) *
