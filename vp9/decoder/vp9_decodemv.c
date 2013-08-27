@@ -445,25 +445,25 @@ static void read_inter_block_mode_info(VP9D_COMP *pbi, MODE_INFO *mi,
   int_mv nearest, nearby, best_mv;
   int_mv nearest_second, nearby_second, best_mv_second;
   uint8_t inter_mode_ctx;
-  MV_REFERENCE_FRAME ref0, ref1;
+  MV_REFERENCE_FRAME ref0;
   int is_compound;
 
+  mbmi->uv_mode = DC_PRED;
   read_ref_frames(pbi, r, mbmi->segment_id, mbmi->ref_frame);
   ref0 = mbmi->ref_frame[0];
-  ref1 = mbmi->ref_frame[1];
-  is_compound = ref1 > INTRA_FRAME;
+  is_compound = has_second_ref(mbmi);
 
   vp9_find_mv_refs(cm, xd, mi, xd->prev_mode_info_context,
                    ref0, mbmi->ref_mvs[ref0], mi_row, mi_col);
 
   inter_mode_ctx = mbmi->mode_context[ref0];
 
-  if (vp9_segfeature_active(&cm->seg, mbmi->segment_id, SEG_LVL_SKIP))
+  if (vp9_segfeature_active(&cm->seg, mbmi->segment_id, SEG_LVL_SKIP)) {
     mbmi->mode = ZEROMV;
-  else if (bsize >= BLOCK_8X8)
-    mbmi->mode = read_inter_mode(cm, r, inter_mode_ctx);
-
-  mbmi->uv_mode = DC_PRED;
+  } else {
+    if (bsize >= BLOCK_8X8)
+      mbmi->mode = read_inter_mode(cm, r, inter_mode_ctx);
+  }
 
   // nearest, nearby
   if (bsize < BLOCK_8X8 || mbmi->mode != ZEROMV) {
@@ -471,11 +471,8 @@ static void read_inter_block_mode_info(VP9D_COMP *pbi, MODE_INFO *mi,
     best_mv.as_int = mbmi->ref_mvs[ref0][0].as_int;
   }
 
-  mbmi->interp_filter = cm->mcomp_filter_type == SWITCHABLE
-                            ? read_switchable_filter_type(pbi, r)
-                            : cm->mcomp_filter_type;
-
   if (is_compound) {
+    const MV_REFERENCE_FRAME ref1 = mbmi->ref_frame[1];
     vp9_find_mv_refs(cm, xd, mi, xd->prev_mode_info_context,
                      ref1, mbmi->ref_mvs[ref1], mi_row, mi_col);
 
@@ -485,6 +482,10 @@ static void read_inter_block_mode_info(VP9D_COMP *pbi, MODE_INFO *mi,
       best_mv_second.as_int = mbmi->ref_mvs[ref1][0].as_int;
     }
   }
+
+  mbmi->interp_filter = cm->mcomp_filter_type == SWITCHABLE
+                              ? read_switchable_filter_type(pbi, r)
+                              : cm->mcomp_filter_type;
 
   if (bsize < BLOCK_8X8) {
     const int num_4x4_w = num_4x4_blocks_wide_lookup[bsize];  // 1 or 2

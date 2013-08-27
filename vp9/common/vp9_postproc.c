@@ -880,7 +880,7 @@ int vp9_post_proc_frame(struct VP9Common *oci,
               }
             }
           }
-        } else if (mi->mbmi.mode >= NEARESTMV) {
+        } else if (is_inter_mode(mi->mbmi.mode)) {
           MV *mv = &mi->mbmi.mv.as_mv;
           const int lx0 = x0 + 8;
           const int ly0 = y0 + 8;
