@@ -270,7 +270,12 @@ cglobal sub_pixel_variance%1xh, 7, 7, 13, src, src_stride, x_offset, y_offset, \
 %if mmsize == 16
   movhps               m2, [srcq+src_strideq*2]
 %else ; mmsize == 8
+%if %1 == 4
+  movh                 m1, [srcq+src_strideq*2]
+  punpckldq            m2, m1
+%else
   punpckldq            m2, [srcq+src_strideq*2]
+%endif
 %endif
   movh                 m1, [dstq]
 %if mmsize == 16
@@ -542,8 +547,15 @@ cglobal sub_pixel_variance%1xh, 7, 7, 13, src, src_stride, x_offset, y_offset, \
   movhps               m2, [srcq+src_strideq]
   movhps               m3, [srcq+src_strideq+1]
 %else
+%if %1 == 4
+  movh                 m1, [srcq+src_strideq]
+  punpckldq            m2, m1
+  movh                 m1, [srcq+src_strideq+1]
+  punpckldq            m3, m1
+%else
   punpckldq            m2, [srcq+src_strideq]
   punpckldq            m3, [srcq+src_strideq+1]
+%endif
 %endif
   pavgb                m2, m3
 %if mmsize == 16
