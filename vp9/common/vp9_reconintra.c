@@ -26,7 +26,7 @@ const TX_TYPE mode2txfm_map[MB_MODE_COUNT] = {
     ADST_ADST,  // D135
     ADST_DCT,   // D117
     DCT_ADST,   // D153
-    DCT_ADST,   // D27
+    DCT_ADST,   // D207
     ADST_DCT,   // D63
     ADST_ADST,  // TM
     DCT_DCT,    // NEARESTMV
@@ -297,7 +297,7 @@ static void init_intra_pred_fn_ptrs(void) {
 
   intra_pred_allsizes(pred[V_PRED], v);
   intra_pred_allsizes(pred[H_PRED], h);
-  intra_pred_allsizes(pred[D27_PRED], d207);
+  intra_pred_allsizes(pred[D207_PRED], d207);
   intra_pred_allsizes(pred[D45_PRED], d45);
   intra_pred_allsizes(pred[D63_PRED], d63);
   intra_pred_allsizes(pred[D117_PRED], d117);

@@ -71,7 +71,7 @@ typedef enum {
   D135_PRED,       // Directional 135 deg = 180 - 45
   D117_PRED,       // Directional 117 deg = 180 - 63
   D153_PRED,       // Directional 153 deg = 180 - 27
-  D27_PRED,        // Directional 27  deg = round(arctan(1/2) * 180/pi)
+  D207_PRED,       // Directional 207 deg = 180 + 27
   D63_PRED,        // Directional 63  deg = round(arctan(2/1) * 180/pi)
   TM_PRED,         // True-motion
   NEARESTMV,
