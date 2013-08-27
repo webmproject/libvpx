@@ -39,7 +39,7 @@ static void lf_init_lut(loop_filter_info_n *lfi) {
   lfi->mode_lf_lut[NEWMV] = 1;
 }
 
-static void update_sharpness(loop_filter_info_n *const lfi, int sharpness_lvl) {
+static void update_sharpness(loop_filter_info_n *lfi, int sharpness_lvl) {
   int lvl;
 
   // For each possible value for the loop filter fill out limits
@@ -78,7 +78,7 @@ void vp9_loop_filter_init(VP9_COMMON *cm) {
     vpx_memset(lfi->hev_thr[i], i, SIMD_WIDTH);
 }
 
-void vp9_loop_filter_frame_init(VP9_COMMON *const cm, int default_filt_lvl) {
+void vp9_loop_filter_frame_init(VP9_COMMON *cm, int default_filt_lvl) {
   int seg_id;
   // n_shift is the a multiplier for lf_deltas
   // the multiplier is 1 for when filter_lvl is between 0 and 31;
@@ -124,9 +124,9 @@ void vp9_loop_filter_frame_init(VP9_COMMON *const cm, int default_filt_lvl) {
   }
 }
 
-static int build_lfi(const loop_filter_info_n *const lfi_n,
-                     const MB_MODE_INFO *const mbmi,
-                     struct loop_filter_info *const lfi) {
+static int build_lfi(const loop_filter_info_n *lfi_n,
+                     const MB_MODE_INFO *mbmi,
+                     struct loop_filter_info *lfi) {
   const int seg = mbmi->segment_id;
   const int ref = mbmi->ref_frame[0];
   const int mode = lfi_n->mode_lf_lut[mbmi->mode];
@@ -236,8 +236,8 @@ static void filter_selectively_horiz(uint8_t *s, int pitch,
   }
 }
 
-static void filter_block_plane(VP9_COMMON *const cm,
-                               struct macroblockd_plane *const plane,
+static void filter_block_plane(VP9_COMMON *cm,
+                               struct macroblockd_plane *plane,
                                const MODE_INFO *mi,
                                int mi_row, int mi_col) {
   const int ss_x = plane->subsampling_x;
