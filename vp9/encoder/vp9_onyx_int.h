@@ -298,6 +298,7 @@ typedef struct {
   int use_rd_breakout;
   int use_uv_intra_rd_estimate;
   int use_fast_lpf_pick;
+  int use_fast_coef_updates;  // 0: 2-loop, 1: 1-loop, 2: 1-loop reduced
 } SPEED_FEATURES;
 
 typedef struct VP9_COMP {
