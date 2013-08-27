@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdH///6s\u003d",
+        "filename": "vp9/common/arm/neon/vp9_short_idct8x8_1_add_neon.asm",
+        "patchSetId": 1
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2013-08-27T17:44:31Z",
+      "side": 1,
+      "message": "Can you replace the vaddw and vqmonun blocks with:\n    vqadd.u8         d2, d0, d2               ; dest[x] + a1\n    vqadd.u8         d3, d0, d3               ; dest[x] + a1\n    vqadd.u8         d4, d0, d4               ; dest[x] + a1\n    vqadd.u8         d5, d0, d5               ; dest[x] + a1",
+      "revId": "36e9b82080605f8f015ad1bf388b00cb7f83f325",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
