@@ -369,11 +369,11 @@ unsigned char vp9_get_pred_context_tx_size(const MACROBLOCKD *xd) {
 
   if (above_in_image)
     above_context = above_mbmi->skip_coeff ? max_tx_size
-                                              : above_mbmi->txfm_size;
+                                           : above_mbmi->tx_size;
 
   if (left_in_image)
     left_context = left_mbmi->skip_coeff ? max_tx_size
-                                            : left_mbmi->txfm_size;
+                                         : left_mbmi->tx_size;
 
   if (!left_in_image)
     left_context = above_context;

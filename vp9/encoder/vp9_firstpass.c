@@ -661,7 +661,7 @@ void vp9_first_pass(VP9_COMP *cpi) {
           mv.as_mv.col <<= 3;
           this_error = motion_error;
           vp9_set_mbmode_and_mvs(x, NEWMV, &mv);
-          xd->mode_info_context->mbmi.txfm_size = TX_4X4;
+          xd->mode_info_context->mbmi.tx_size = TX_4X4;
           xd->mode_info_context->mbmi.ref_frame[0] = LAST_FRAME;
           xd->mode_info_context->mbmi.ref_frame[1] = NONE;
           vp9_build_inter_predictors_sby(xd, mb_row << 1,

@@ -489,7 +489,7 @@ static INLINE int cost_coeffs(MACROBLOCK *mb,
   int c, cost;
 
   // Check for consistency of tx_size with mode info
-  assert(type == PLANE_TYPE_Y_WITH_DC ? mbmi->txfm_size == tx_size
+  assert(type == PLANE_TYPE_Y_WITH_DC ? mbmi->tx_size == tx_size
                                       : get_uv_tx_size(mbmi) == tx_size);
 
   if (eob == 0) {
@@ -634,7 +634,7 @@ static void txfm_rd_in_plane(MACROBLOCK *x,
                                     num_4x4_blocks_wide, num_4x4_blocks_high,
                                     0, 0, 0, ref_best_rd, 0 };
   if (plane == 0)
-    xd->mode_info_context->mbmi.txfm_size = tx_size;
+    xd->mode_info_context->mbmi.tx_size = tx_size;
 
   switch (tx_size) {
     case TX_4X4:
@@ -692,20 +692,20 @@ static void choose_largest_txfm_size(VP9_COMP *cpi, MACROBLOCK *x,
   if (max_txfm_size == TX_32X32 &&
       (cm->tx_mode == ALLOW_32X32 ||
        cm->tx_mode == TX_MODE_SELECT)) {
-    mbmi->txfm_size = TX_32X32;
+    mbmi->tx_size = TX_32X32;
   } else if (max_txfm_size >= TX_16X16 &&
              (cm->tx_mode == ALLOW_16X16 ||
               cm->tx_mode == ALLOW_32X32 ||
               cm->tx_mode == TX_MODE_SELECT)) {
-    mbmi->txfm_size = TX_16X16;
+    mbmi->tx_size = TX_16X16;
   } else if (cm->tx_mode != ONLY_4X4) {
-    mbmi->txfm_size = TX_8X8;
+    mbmi->tx_size = TX_8X8;
   } else {
-    mbmi->txfm_size = TX_4X4;
+    mbmi->tx_size = TX_4X4;
   }
   txfm_rd_in_plane(x, rate, distortion, skip,
-                   &sse[mbmi->txfm_size], ref_best_rd, 0, bs,
-                   mbmi->txfm_size);
+                   &sse[mbmi->tx_size], ref_best_rd, 0, bs,
+                   mbmi->tx_size);
   cpi->txfm_stepdown_count[0]++;
 }
 
@@ -760,26 +760,26 @@ static void choose_txfm_size_from_rd(VP9_COMP *cpi, MACROBLOCK *x,
        (cm->tx_mode == TX_MODE_SELECT &&
         rd[TX_32X32][1] < rd[TX_16X16][1] && rd[TX_32X32][1] < rd[TX_8X8][1] &&
         rd[TX_32X32][1] < rd[TX_4X4][1]))) {
-    mbmi->txfm_size = TX_32X32;
+    mbmi->tx_size = TX_32X32;
   } else if (max_tx_size >= TX_16X16 &&
              (cm->tx_mode == ALLOW_16X16 ||
               cm->tx_mode == ALLOW_32X32 ||
               (cm->tx_mode == TX_MODE_SELECT &&
                rd[TX_16X16][1] < rd[TX_8X8][1] &&
                rd[TX_16X16][1] < rd[TX_4X4][1]))) {
-    mbmi->txfm_size = TX_16X16;
+    mbmi->tx_size = TX_16X16;
   } else if (cm->tx_mode == ALLOW_8X8 ||
              cm->tx_mode == ALLOW_16X16 ||
              cm->tx_mode == ALLOW_32X32 ||
            (cm->tx_mode == TX_MODE_SELECT && rd[TX_8X8][1] < rd[TX_4X4][1])) {
-    mbmi->txfm_size = TX_8X8;
+    mbmi->tx_size = TX_8X8;
   } else {
-    mbmi->txfm_size = TX_4X4;
+    mbmi->tx_size = TX_4X4;
   }
 
-  *distortion = d[mbmi->txfm_size];
-  *rate       = r[mbmi->txfm_size][cm->tx_mode == TX_MODE_SELECT];
-  *skip       = s[mbmi->txfm_size];
+  *distortion = d[mbmi->tx_size];
+  *rate       = r[mbmi->tx_size][cm->tx_mode == TX_MODE_SELECT];
+  *skip       = s[mbmi->tx_size];
 
   tx_cache[ONLY_4X4] = rd[TX_4X4][0];
   tx_cache[ALLOW_8X8] = rd[TX_8X8][0];
@@ -867,28 +867,28 @@ static void choose_txfm_size_from_modelrd(VP9_COMP *cpi, MACROBLOCK *x,
         rd[TX_32X32][1] <= rd[TX_16X16][1] &&
         rd[TX_32X32][1] <= rd[TX_8X8][1] &&
         rd[TX_32X32][1] <= rd[TX_4X4][1]))) {
-    mbmi->txfm_size = TX_32X32;
+    mbmi->tx_size = TX_32X32;
   } else if (max_txfm_size >= TX_16X16 &&
              (cm->tx_mode == ALLOW_16X16 ||
               cm->tx_mode == ALLOW_32X32 ||
               (cm->tx_mode == TX_MODE_SELECT &&
                rd[TX_16X16][1] <= rd[TX_8X8][1] &&
                rd[TX_16X16][1] <= rd[TX_4X4][1]))) {
-    mbmi->txfm_size = TX_16X16;
+    mbmi->tx_size = TX_16X16;
   } else if (cm->tx_mode == ALLOW_8X8 ||
              cm->tx_mode == ALLOW_16X16 ||
              cm->tx_mode == ALLOW_32X32 ||
            (cm->tx_mode == TX_MODE_SELECT &&
             rd[TX_8X8][1] <= rd[TX_4X4][1])) {
-    mbmi->txfm_size = TX_8X8;
+    mbmi->tx_size = TX_8X8;
   } else {
-    mbmi->txfm_size = TX_4X4;
+    mbmi->tx_size = TX_4X4;
   }
 
   // Actually encode using the chosen mode if a model was used, but do not
   // update the r, d costs
-  txfm_rd_in_plane(x, rate, distortion, skip, &sse[mbmi->txfm_size],
-                   ref_best_rd, 0, bs, mbmi->txfm_size);
+  txfm_rd_in_plane(x, rate, distortion, skip, &sse[mbmi->tx_size],
+                   ref_best_rd, 0, bs, mbmi->tx_size);
 
   if (max_txfm_size == TX_32X32 &&
       rd[TX_32X32][1] <= rd[TX_16X16][1] &&
@@ -927,7 +927,7 @@ static void super_block_yrd(VP9_COMP *cpi,
     choose_largest_txfm_size(cpi, x, rate, distortion, skip, sse,
                              ref_best_rd, bs);
     if (psse)
-      *psse = sse[mbmi->txfm_size];
+      *psse = sse[mbmi->tx_size];
     return;
   }
 
@@ -963,7 +963,7 @@ static void super_block_yrd(VP9_COMP *cpi,
                              skip, txfm_cache, bs);
   }
   if (psse)
-    *psse = sse[mbmi->txfm_size];
+    *psse = sse[mbmi->tx_size];
 }
 
 static int conditional_skipintra(MB_PREDICTION_MODE mode,
@@ -1021,7 +1021,7 @@ static int64_t rd_pick_intra4x4block(VP9_COMP *cpi, MACROBLOCK *x, int ib,
 
   vpx_memcpy(ta, a, sizeof(ta));
   vpx_memcpy(tl, l, sizeof(tl));
-  xd->mode_info_context->mbmi.txfm_size = TX_4X4;
+  xd->mode_info_context->mbmi.tx_size = TX_4X4;
 
   for (mode = DC_PRED; mode <= TM_PRED; ++mode) {
     int64_t this_rd;
@@ -1239,7 +1239,7 @@ static int64_t rd_pick_intra_sby_mode(VP9_COMP *cpi, MACROBLOCK *x,
     if (this_rd < best_rd) {
       mode_selected   = mode;
       best_rd         = this_rd;
-      best_tx         = mic->mbmi.txfm_size;
+      best_tx         = mic->mbmi.tx_size;
       *rate           = this_rate;
       *rate_tokenonly = this_rate_tokenonly;
       *distortion     = this_distortion;
@@ -1258,7 +1258,7 @@ static int64_t rd_pick_intra_sby_mode(VP9_COMP *cpi, MACROBLOCK *x,
   }
 
   mic->mbmi.mode = mode_selected;
-  mic->mbmi.txfm_size = best_tx;
+  mic->mbmi.tx_size = best_tx;
 
   return best_rd;
 }
@@ -3354,7 +3354,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
         */
 
       // I4X4_PRED is only considered for block sizes less than 8x8.
-      mbmi->txfm_size = TX_4X4;
+      mbmi->tx_size = TX_4X4;
       if (rd_pick_intra_sub_8x8_y_mode(cpi, x, &rate, &rate_y,
                                        &distortion_y, best_rd) >= best_rd)
         continue;
@@ -3405,7 +3405,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
       if (rate_y == INT_MAX)
         continue;
 
-      uv_tx = MIN(mbmi->txfm_size, max_uv_txsize_lookup[bsize]);
+      uv_tx = MIN(mbmi->tx_size, max_uv_txsize_lookup[bsize]);
       if (rate_uv_intra[uv_tx] == INT_MAX) {
         choose_intra_uv_mode(cpi, bsize, &rate_uv_intra[uv_tx],
                              &rate_uv_tokenonly[uv_tx],
@@ -3455,7 +3455,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
           cpi->rd_threshes[bsize][THR_NEWA];
       this_rd_thresh = (ref_frame == GOLDEN_FRAME) ?
           cpi->rd_threshes[bsize][THR_NEWG] : this_rd_thresh;
-      xd->mode_info_context->mbmi.txfm_size = TX_4X4;
+      xd->mode_info_context->mbmi.tx_size = TX_4X4;
 
       cpi->rd_filter_cache[SWITCHABLE_FILTERS] = INT64_MAX;
       if (cm->mcomp_filter_type != BILINEAR) {

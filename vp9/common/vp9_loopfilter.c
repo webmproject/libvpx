@@ -274,7 +274,7 @@ static void filter_block_plane(VP9_COMMON *cm,
       const int skip_this_r = skip_this && !block_edge_above;
       const TX_SIZE tx_size = (plane->plane_type == PLANE_TYPE_UV)
                             ? get_uv_tx_size(&mi[c].mbmi)
-                            : mi[c].mbmi.txfm_size;
+                            : mi[c].mbmi.tx_size;
       const int skip_border_4x4_c = ss_x && mi_col + c == cm->mi_cols - 1;
       const int skip_border_4x4_r = ss_y && mi_row + r == cm->mi_rows - 1;
 

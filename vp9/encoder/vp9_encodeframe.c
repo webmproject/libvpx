@@ -2217,12 +2217,12 @@ static int get_skip_flag(MODE_INFO *mi, int mis, int ymbs, int xmbs) {
 }
 
 static void set_txfm_flag(MODE_INFO *mi, int mis, int ymbs, int xmbs,
-                          TX_SIZE txfm_size) {
+                          TX_SIZE tx_size) {
   int x, y;
 
   for (y = 0; y < ymbs; y++) {
     for (x = 0; x < xmbs; x++)
-      mi[y * mis + x].mbmi.txfm_size = txfm_size;
+      mi[y * mis + x].mbmi.tx_size = tx_size;
   }
 }
 
@@ -2235,7 +2235,7 @@ static void reset_skip_txfm_size_b(VP9_COMP *cpi, MODE_INFO *mi, int mis,
   if (mi_row >= cm->mi_rows || mi_col >= cm->mi_cols)
     return;
 
-  if (mbmi->txfm_size > max_tx_size) {
+  if (mbmi->tx_size > max_tx_size) {
     MACROBLOCK * const x = &cpi->mb;
     MACROBLOCKD * const xd = &x->e_mbd;
     const int ymbs = MIN(bh, cm->mi_rows - mi_row);
@@ -2656,7 +2656,7 @@ static void encode_superblock(VP9_COMP *cpi, TOKENEXTRA **t, int output_enabled,
             (mbmi->skip_coeff ||
              vp9_segfeature_active(&cm->seg, segment_id, SEG_LVL_SKIP)))) {
       const uint8_t context = vp9_get_pred_context_tx_size(xd);
-      update_tx_counts(bsize, context, mbmi->txfm_size, &cm->counts.tx);
+      update_tx_counts(bsize, context, mbmi->tx_size, &cm->counts.tx);
     } else {
       int x, y;
       TX_SIZE sz = (cm->tx_mode == TX_MODE_SELECT) ? TX_32X32 : cm->tx_mode;
@@ -2669,18 +2669,15 @@ static void encode_superblock(VP9_COMP *cpi, TOKENEXTRA **t, int output_enabled,
         if (sz == TX_8X8 && bsize < BLOCK_8X8)
           sz = TX_4X4;
       } else if (bsize >= BLOCK_8X8) {
-        sz = mbmi->txfm_size;
+        sz = mbmi->tx_size;
       } else {
         sz = TX_4X4;
       }
 
-      for (y = 0; y < mi_height; y++) {
-        for (x = 0; x < mi_width; x++) {
-          if (mi_col + x < cm->mi_cols && mi_row + y < cm->mi_rows) {
-            mi[mis * y + x].mbmi.txfm_size = sz;
-          }
-        }
-      }
+      for (y = 0; y < mi_height; y++)
+        for (x = 0; x < mi_width; x++)
+          if (mi_col + x < cm->mi_cols && mi_row + y < cm->mi_rows)
+            mi[mis * y + x].mbmi.tx_size = sz;
     }
   }
 }
