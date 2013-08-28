@@ -584,11 +584,13 @@ static void write_modes_b(VP9_COMP *cpi, MODE_INFO *m, vp9_writer *bc,
   if (m->mbmi.sb_type < BLOCK_8X8)
     if (xd->ab_index > 0)
       return;
+
   xd->mode_info_context = m;
-  set_mi_row_col(&cpi->common, xd, mi_row,
-                 1 << mi_height_log2(m->mbmi.sb_type),
-                 mi_col, 1 << mi_width_log2(m->mbmi.sb_type));
-  if ((cm->frame_type == KEY_FRAME) || cm->intra_only) {
+  set_mi_row_col(&cpi->common, xd,
+                 mi_row, num_8x8_blocks_high_lookup[m->mbmi.sb_type],
+                 mi_col, num_8x8_blocks_wide_lookup[m->mbmi.sb_type]);
+
+  if (cm->frame_type == KEY_FRAME || cm->intra_only) {
     write_mb_modes_kf(cpi, m, bc);
 #ifdef ENTROPY_STATS
     active_section = 8;

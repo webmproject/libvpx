@@ -765,7 +765,7 @@ static void encode_b(VP9_COMP *cpi, TOKENEXTRA **tp, int mi_row, int mi_col,
     return;
 
   if (sub_index != -1)
-    *(get_sb_index(xd, bsize)) = sub_index;
+    *get_sb_index(xd, bsize) = sub_index;
 
   if (bsize < BLOCK_8X8) {
     // When ab_index = 0 all sub-blocks are handled, so for ab_index != 0
@@ -835,7 +835,7 @@ static void encode_sb(VP9_COMP *cpi, TOKENEXTRA **tp, int mi_row, int mi_col,
       for (i = 0; i < 4; i++) {
         const int x_idx = i & 1, y_idx = i >> 1;
 
-        *(get_sb_index(xd, subsize)) = i;
+        *get_sb_index(xd, subsize) = i;
         encode_sb(cpi, tp, mi_row + y_idx * bs, mi_col + x_idx * bs,
                   output_enabled, subsize);
       }
@@ -873,23 +873,17 @@ static void copy_partitioning(VP9_COMP *cpi, MODE_INFO *m, MODE_INFO *p) {
   }
 }
 
-static void set_block_size(VP9_COMMON * const cm, MODE_INFO *m,
+static void set_block_size(VP9_COMMON * const cm, MODE_INFO *mi,
                            BLOCK_SIZE bsize, int mis, int mi_row,
                            int mi_col) {
-  int row, col;
-  int bwl = b_width_log2(bsize);
-  int bhl = b_height_log2(bsize);
-  int bsl = (bwl > bhl ? bwl : bhl);
-
-  int bs = (1 << bsl) / 2;  // Block size in units of 8 pels.
-  MODE_INFO *m2 = m + mi_row * mis + mi_col;
-  for (row = 0; row < bs; row++) {
-    for (col = 0; col < bs; col++) {
-      if (mi_row + row >= cm->mi_rows || mi_col + col >= cm->mi_cols)
-        continue;
-      m2[row * mis + col].mbmi.sb_type = bsize;
-    }
-  }
+  int r, c;
+  const int bs = MAX(num_8x8_blocks_wide_lookup[bsize],
+                     num_8x8_blocks_high_lookup[bsize]);
+  MODE_INFO *const mi2 = &mi[mi_row * mis + mi_col];
+  for (r = 0; r < bs; r++)
+    for (c = 0; c < bs; c++)
+      if (mi_row + r < cm->mi_rows && mi_col + c < cm->mi_cols)
+        mi2[r * mis + c].mbmi.sb_type = bsize;
 }
 
 typedef struct {
@@ -1280,7 +1274,7 @@ static void rd_use_partition(VP9_COMP *cpi, MODE_INFO *m, TOKENEXTRA **tp,
                     bsize, get_block_context(x, bsize), INT64_MAX);
       break;
     case PARTITION_HORZ:
-      *(get_sb_index(xd, subsize)) = 0;
+      *get_sb_index(xd, subsize) = 0;
       pick_sb_modes(cpi, mi_row, mi_col, &last_part_rate, &last_part_dist,
                     subsize, get_block_context(x, subsize), INT64_MAX);
       if (last_part_rate != INT_MAX &&
@@ -1289,7 +1283,7 @@ static void rd_use_partition(VP9_COMP *cpi, MODE_INFO *m, TOKENEXTRA **tp,
         int64_t dt = 0;
         update_state(cpi, get_block_context(x, subsize), subsize, 0);
         encode_superblock(cpi, tp, 0, mi_row, mi_col, subsize);
-        *(get_sb_index(xd, subsize)) = 1;
+        *get_sb_index(xd, subsize) = 1;
         pick_sb_modes(cpi, mi_row + (ms >> 1), mi_col, &rt, &dt, subsize,
                       get_block_context(x, subsize), INT64_MAX);
         if (rt == INT_MAX || dt == INT_MAX) {
@@ -1303,7 +1297,7 @@ static void rd_use_partition(VP9_COMP *cpi, MODE_INFO *m, TOKENEXTRA **tp,
       }
       break;
     case PARTITION_VERT:
-      *(get_sb_index(xd, subsize)) = 0;
+      *get_sb_index(xd, subsize) = 0;
       pick_sb_modes(cpi, mi_row, mi_col, &last_part_rate, &last_part_dist,
                     subsize, get_block_context(x, subsize), INT64_MAX);
       if (last_part_rate != INT_MAX &&
@@ -1312,7 +1306,7 @@ static void rd_use_partition(VP9_COMP *cpi, MODE_INFO *m, TOKENEXTRA **tp,
         int64_t dt = 0;
         update_state(cpi, get_block_context(x, subsize), subsize, 0);
         encode_superblock(cpi, tp, 0, mi_row, mi_col, subsize);
-        *(get_sb_index(xd, subsize)) = 1;
+        *get_sb_index(xd, subsize) = 1;
         pick_sb_modes(cpi, mi_row, mi_col + (ms >> 1), &rt, &dt, subsize,
                       get_block_context(x, subsize), INT64_MAX);
         if (rt == INT_MAX || dt == INT_MAX) {
@@ -1338,7 +1332,7 @@ static void rd_use_partition(VP9_COMP *cpi, MODE_INFO *m, TOKENEXTRA **tp,
         if ((mi_row + y_idx >= cm->mi_rows) || (mi_col + x_idx >= cm->mi_cols))
           continue;
 
-        *(get_sb_index(xd, subsize)) = i;
+        *get_sb_index(xd, subsize) = i;
 
         rd_use_partition(cpi, m + jj * bss * mis + ii * bss, tp, mi_row + y_idx,
                          mi_col + x_idx, subsize, &rt, &dt, i != 3);
@@ -1381,9 +1375,9 @@ static void rd_use_partition(VP9_COMP *cpi, MODE_INFO *m, TOKENEXTRA **tp,
           || (mi_col + x_idx >= cm->mi_cols))
         continue;
 
-      *(get_sb_index(xd, split_subsize)) = i;
-      *(get_sb_partitioning(x, bsize)) = split_subsize;
-      *(get_sb_partitioning(x, split_subsize)) = split_subsize;
+      *get_sb_index(xd, split_subsize) = i;
+      *get_sb_partitioning(x, bsize) = split_subsize;
+      *get_sb_partitioning(x, split_subsize) = split_subsize;
 
       save_context(cpi, mi_row, mi_col, a, l, sa, sl, bsize);
 
@@ -1648,8 +1642,7 @@ static void rd_pick_partition(VP9_COMP *cpi, TOKENEXTRA **tp, int mi_row,
   VP9_COMMON * const cm = &cpi->common;
   MACROBLOCK * const x = &cpi->mb;
   MACROBLOCKD * const xd = &x->e_mbd;
-  int bsl = b_width_log2(bsize), bs = 1 << bsl;
-  int ms = bs / 2;
+  const int ms = num_8x8_blocks_wide_lookup[bsize] / 2;
   ENTROPY_CONTEXT l[16 * MAX_MB_PLANE], a[16 * MAX_MB_PLANE];
   PARTITION_CONTEXT sl[8], sa[8];
   TOKENEXTRA *tp_orig = *tp;
@@ -1661,8 +1654,8 @@ static void rd_pick_partition(VP9_COMP *cpi, TOKENEXTRA **tp, int mi_row,
   int do_split = bsize >= BLOCK_8X8;
   int do_rect = 1;
   // Override skipping rectangular partition operations for edge blocks
-  const int force_horz_split = (mi_row + (ms >> 1) >= cm->mi_rows);
-  const int force_vert_split = (mi_col + (ms >> 1) >= cm->mi_cols);
+  const int force_horz_split = (mi_row + ms >= cm->mi_rows);
+  const int force_vert_split = (mi_col + ms >= cm->mi_cols);
 
   int partition_none_allowed = !force_horz_split && !force_vert_split;
   int partition_horz_allowed = !force_vert_split && bsize >= BLOCK_8X8;
@@ -1742,14 +1735,13 @@ static void rd_pick_partition(VP9_COMP *cpi, TOKENEXTRA **tp, int mi_row,
   if (do_split) {
     subsize = get_subsize(bsize, PARTITION_SPLIT);
     for (i = 0; i < 4 && sum_rd < best_rd; ++i) {
-      int x_idx = (i & 1) * (ms >> 1);
-      int y_idx = (i >> 1) * (ms >> 1);
+      const int x_idx = (i & 1) * ms;
+      const int y_idx = (i >> 1) * ms;
 
-      if ((mi_row + y_idx >= cm->mi_rows) ||
-          (mi_col + x_idx >= cm->mi_cols))
+      if (mi_row + y_idx >= cm->mi_rows || mi_col + x_idx >= cm->mi_cols)
         continue;
 
-      *(get_sb_index(xd, subsize)) = i;
+      *get_sb_index(xd, subsize) = i;
 
       rd_pick_partition(cpi, tp, mi_row + y_idx, mi_col + x_idx, subsize,
                         &this_rate, &this_dist, i != 3, best_rd - sum_rd);
@@ -1795,17 +1787,17 @@ static void rd_pick_partition(VP9_COMP *cpi, TOKENEXTRA **tp, int mi_row,
   // PARTITION_HORZ
   if (partition_horz_allowed && do_rect) {
     subsize = get_subsize(bsize, PARTITION_HORZ);
-    *(get_sb_index(xd, subsize)) = 0;
+    *get_sb_index(xd, subsize) = 0;
     pick_sb_modes(cpi, mi_row, mi_col, &sum_rate, &sum_dist, subsize,
                   get_block_context(x, subsize), best_rd);
     sum_rd = RDCOST(x->rdmult, x->rddiv, sum_rate, sum_dist);
 
-    if (sum_rd < best_rd && mi_row + (ms >> 1) < cm->mi_rows) {
+    if (sum_rd < best_rd && mi_row + ms < cm->mi_rows) {
       update_state(cpi, get_block_context(x, subsize), subsize, 0);
       encode_superblock(cpi, tp, 0, mi_row, mi_col, subsize);
 
-      *(get_sb_index(xd, subsize)) = 1;
-      pick_sb_modes(cpi, mi_row + (ms >> 1), mi_col, &this_rate,
+      *get_sb_index(xd, subsize) = 1;
+      pick_sb_modes(cpi, mi_row + ms, mi_col, &this_rate,
                     &this_dist, subsize, get_block_context(x, subsize),
                     best_rd - sum_rd);
       if (this_rate == INT_MAX) {
@@ -1835,16 +1827,16 @@ static void rd_pick_partition(VP9_COMP *cpi, TOKENEXTRA **tp, int mi_row,
   if (partition_vert_allowed && do_rect) {
     subsize = get_subsize(bsize, PARTITION_VERT);
 
-    *(get_sb_index(xd, subsize)) = 0;
+    *get_sb_index(xd, subsize) = 0;
     pick_sb_modes(cpi, mi_row, mi_col, &sum_rate, &sum_dist, subsize,
                   get_block_context(x, subsize), best_rd);
     sum_rd = RDCOST(x->rdmult, x->rddiv, sum_rate, sum_dist);
-    if (sum_rd < best_rd && mi_col + (ms >> 1) < cm->mi_cols) {
+    if (sum_rd < best_rd && mi_col + ms < cm->mi_cols) {
       update_state(cpi, get_block_context(x, subsize), subsize, 0);
       encode_superblock(cpi, tp, 0, mi_row, mi_col, subsize);
 
-      *(get_sb_index(xd, subsize)) = 1;
-      pick_sb_modes(cpi, mi_row, mi_col + (ms >> 1), &this_rate,
+      *get_sb_index(xd, subsize) = 1;
+      pick_sb_modes(cpi, mi_row, mi_col + ms, &this_rate,
                     &this_dist, subsize, get_block_context(x, subsize),
                     best_rd - sum_rd);
       if (this_rate == INT_MAX) {

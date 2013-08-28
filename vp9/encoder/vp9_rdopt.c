@@ -3092,14 +3092,11 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
   int_mv seg_mvs[4][MAX_REF_FRAMES];
   union b_mode_info best_bmodes[4];
   PARTITION_INFO best_partition;
-  int bwsl = b_width_log2(bsize);
-  int bws = (1 << bwsl) / 4;  // mode_info step for subsize
-  int bhsl = b_height_log2(bsize);
-  int bhs = (1 << bhsl) / 4;  // mode_info step for subsize
+  const int bws = num_8x8_blocks_wide_lookup[bsize] / 2;
+  const int bhs = num_8x8_blocks_high_lookup[bsize] / 2;
   int best_skip2 = 0;
 
-  x->skip_encode = (cpi->sf.skip_encode_frame &&
-                    xd->q_index < QIDX_SKIP_THRESH);
+  x->skip_encode = cpi->sf.skip_encode_frame && xd->q_index < QIDX_SKIP_THRESH;
 
   for (i = 0; i < 4; i++) {
     int j;
