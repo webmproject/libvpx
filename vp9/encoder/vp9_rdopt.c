@@ -1511,28 +1511,20 @@ static int64_t encode_inter_mb_segment(VP9_COMP *cpi,
   int16_t* src_diff = raster_block_offset_int16(BLOCK_8X8, i,
                                                 x->plane[0].src_diff);
   int16_t* coeff = BLOCK_OFFSET(x->plane[0].coeff, i);
-  uint8_t* const pre = raster_block_offset_uint8(BLOCK_8X8, i,
-                                                 pd->pre[0].buf,
-                                                 pd->pre[0].stride);
   uint8_t* const dst = raster_block_offset_uint8(BLOCK_8X8, i,
                                                  pd->dst.buf, pd->dst.stride);
   int64_t thisdistortion = 0, thissse = 0;
   int thisrate = 0;
+  int ref, second_ref = has_second_ref(&mi->mbmi);
 
-  vp9_build_inter_predictor(pre, pd->pre[0].stride,
-                            dst, pd->dst.stride,
-                            &mi->bmi[i].as_mv[0].as_mv,
-                            &xd->scale_factor[0],
-                            width, height, 0, &xd->subpix, MV_PRECISION_Q3);
-
-  if (mi->mbmi.ref_frame[1] > 0) {
-    uint8_t* const second_pre =
-    raster_block_offset_uint8(BLOCK_8X8, 0, pd->pre[1].buf, pd->pre[1].stride);
-    vp9_build_inter_predictor(second_pre, pd->pre[1].stride,
+  for (ref = 0; ref < 1 + second_ref; ++ref) {
+    const uint8_t *pre = raster_block_offset_uint8(BLOCK_8X8, i,
+                                     pd->pre[ref].buf, pd->pre[ref].stride);
+    vp9_build_inter_predictor(pre, pd->pre[ref].stride,
                               dst, pd->dst.stride,
-                              &mi->bmi[i].as_mv[1].as_mv,
-                              &xd->scale_factor[1],
-                              width, height, 1, &xd->subpix, MV_PRECISION_Q3);
+                              &mi->bmi[i].as_mv[ref].as_mv,
+                              &xd->scale_factor[ref],
+                              width, height, ref, &xd->subpix, MV_PRECISION_Q3);
   }
 
   vp9_subtract_block(height, width, src_diff, 8, src, src_stride,
