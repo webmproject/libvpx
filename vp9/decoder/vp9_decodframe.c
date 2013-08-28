@@ -144,11 +144,8 @@ static void decode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
                           b_width_log2(plane_bsize), tx_size, mode,
                           dst, pd->dst.stride, dst, pd->dst.stride);
 
-  // Early exit if there are no coefficients
-  if (mi->mbmi.skip_coeff)
-    return;
-
-  decode_block(plane, block, plane_bsize, tx_size, arg);
+  if (!mi->mbmi.skip_coeff)
+    decode_block(plane, block, plane_bsize, tx_size, arg);
 }
 
 static int decode_tokens(VP9D_COMP *pbi, BLOCK_SIZE bsize, vp9_reader *r) {
@@ -170,16 +167,15 @@ static void set_offsets(VP9D_COMP *pbi, BLOCK_SIZE bsize,
                         int mi_row, int mi_col) {
   VP9_COMMON *const cm = &pbi->common;
   MACROBLOCKD *const xd = &pbi->mb;
-  const int bh = 1 << mi_height_log2(bsize);
-  const int bw = 1 << mi_width_log2(bsize);
-  const int mi_idx = mi_row * cm->mode_info_stride + mi_col;
+  const int bh = num_8x8_blocks_high_lookup[bsize];
+  const int bw = num_8x8_blocks_wide_lookup[bsize];
+  const int offset = mi_row * cm->mode_info_stride + mi_col;
 
-  xd->mode_info_context = cm->mi + mi_idx;
+  xd->mode_info_context = cm->mi + offset;
   xd->mode_info_context->mbmi.sb_type = bsize;
   // Special case: if prev_mi is NULL, the previous mode info context
   // cannot be used.
-  xd->prev_mode_info_context = cm->prev_mi ? cm->prev_mi + mi_idx : NULL;
-
+  xd->prev_mode_info_context = cm->prev_mi ? cm->prev_mi + offset : NULL;
 
   set_skip_context(cm, xd, mi_row, mi_col);
   set_partition_seg_context(cm, xd, mi_row, mi_col);
@@ -236,7 +232,7 @@ static void decode_modes_b(VP9D_COMP *pbi, int mi_row, int mi_col,
     int eobtotal;
 
     set_ref(pbi, 0, mi_row, mi_col);
-    if (mbmi->ref_frame[1] > INTRA_FRAME)
+    if (has_second_ref(mbmi))
       set_ref(pbi, 1, mi_row, mi_col);
 
     vp9_setup_interp_filters(xd, mbmi->interp_filter, cm);
@@ -261,7 +257,7 @@ static void decode_modes_sb(VP9D_COMP *pbi, int mi_row, int mi_col,
                             vp9_reader* r, BLOCK_SIZE bsize) {
   VP9_COMMON *const pc = &pbi->common;
   MACROBLOCKD *const xd = &pbi->mb;
-  const int bs = (1 << mi_width_log2(bsize)) / 2;
+  const int hbs = num_8x8_blocks_wide_lookup[bsize] / 2;
   PARTITION_TYPE partition = PARTITION_NONE;
   BLOCK_SIZE subsize;
 
@@ -273,7 +269,7 @@ static void decode_modes_sb(VP9D_COMP *pbi, int mi_row, int mi_col,
       return;
   } else {
     int pl;
-    const int idx = check_bsize_coverage(bs, pc->mi_rows, pc->mi_cols,
+    const int idx = check_bsize_coverage(hbs, pc->mi_rows, pc->mi_cols,
                                          mi_row, mi_col);
     set_partition_seg_context(pc, xd, mi_row, mi_col);
     pl = partition_plane_context(xd, bsize);
@@ -291,7 +287,7 @@ static void decode_modes_sb(VP9D_COMP *pbi, int mi_row, int mi_col,
   }
 
   subsize = get_subsize(bsize, partition);
-  *(get_sb_index(xd, subsize)) = 0;
+  *get_sb_index(xd, subsize) = 0;
 
   switch (partition) {
     case PARTITION_NONE:
@@ -299,22 +295,22 @@ static void decode_modes_sb(VP9D_COMP *pbi, int mi_row, int mi_col,
       break;
     case PARTITION_HORZ:
       decode_modes_b(pbi, mi_row, mi_col, r, subsize);
-      *(get_sb_index(xd, subsize)) = 1;
-      if (mi_row + bs < pc->mi_rows)
-        decode_modes_b(pbi, mi_row + bs, mi_col, r, subsize);
+      *get_sb_index(xd, subsize) = 1;
+      if (mi_row + hbs < pc->mi_rows)
+        decode_modes_b(pbi, mi_row + hbs, mi_col, r, subsize);
       break;
     case PARTITION_VERT:
       decode_modes_b(pbi, mi_row, mi_col, r, subsize);
-      *(get_sb_index(xd, subsize)) = 1;
-      if (mi_col + bs < pc->mi_cols)
-        decode_modes_b(pbi, mi_row, mi_col + bs, r, subsize);
+      *get_sb_index(xd, subsize) = 1;
+      if (mi_col + hbs < pc->mi_cols)
+        decode_modes_b(pbi, mi_row, mi_col + hbs, r, subsize);
       break;
     case PARTITION_SPLIT: {
       int n;
       for (n = 0; n < 4; n++) {
         const int j = n >> 1, i = n & 1;
-        *(get_sb_index(xd, subsize)) = n;
-        decode_modes_sb(pbi, mi_row + j * bs, mi_col + i * bs, r, subsize);
+        *get_sb_index(xd, subsize) = n;
+        decode_modes_sb(pbi, mi_row + j * hbs, mi_col + i * hbs, r, subsize);
       }
     } break;
     default:
@@ -597,9 +593,8 @@ static void decode_tile(VP9D_COMP *pbi, vp9_reader *r) {
     vp9_zero(pc->left_context);
     vp9_zero(pc->left_seg_context);
     for (mi_col = pc->cur_tile_mi_col_start; mi_col < pc->cur_tile_mi_col_end;
-         mi_col += MI_BLOCK_SIZE) {
+         mi_col += MI_BLOCK_SIZE)
       decode_modes_sb(pbi, mi_row, mi_col, r, BLOCK_64X64);
-    }
 
     if (pbi->do_loopfilter_inline) {
       // delay the loopfilter by 1 macroblock row.
