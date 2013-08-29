@@ -1247,7 +1247,7 @@ static int64_t rd_pick_intra_sby_mode(VP9_COMP *cpi, MACROBLOCK *x,
     }
 
     if (cpi->sf.tx_size_search_method == USE_FULL_RD && this_rd < INT64_MAX) {
-      for (i = 0; i < TX_MODES; i++) {
+      for (i = 0; i < TX_MODES && local_tx_cache[i] < INT64_MAX; i++) {
         const int64_t adj_rd = this_rd + local_tx_cache[i] -
             local_tx_cache[cpi->common.tx_mode];
         if (adj_rd < tx_cache[i]) {
@@ -3816,7 +3816,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
       tx_cache[ALLOW_32X32] = tx_cache[ALLOW_16X16];
     }
     if (!mode_excluded && this_rd != INT64_MAX) {
-      for (i = 0; i < TX_MODES; i++) {
+      for (i = 0; i < TX_MODES && tx_cache[i] < INT64_MAX; i++) {
         int64_t adj_rd = INT64_MAX;
         if (this_mode != I4X4_PRED) {
           adj_rd = this_rd + tx_cache[i] - tx_cache[cm->tx_mode];
