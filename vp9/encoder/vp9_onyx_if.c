@@ -898,6 +898,8 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
         sf->subpel_iters_per_step = 1;
         sf->disable_split_var_thresh = 64;
         sf->disable_filter_search_var_thresh = 96;
+        sf->intra_y_mode_mask = INTRA_DC_ONLY;
+        sf->intra_uv_mode_mask = INTRA_DC_ONLY;
         sf->use_fast_coef_updates = 2;
       }
       /*
