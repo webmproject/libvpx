@@ -95,7 +95,7 @@ typedef vp9_prob vp9_coeff_probs[REF_TYPES][COEF_BANDS][PREV_COEF_CONTEXTS]
 #define MODULUS_PARAM               13  /* Modulus parameter */
 
 struct VP9Common;
-void vp9_default_coef_probs(struct VP9Common *);
+void vp9_default_coef_probs(struct VP9Common *cm);
 extern DECLARE_ALIGNED(16, const int16_t, vp9_default_scan_4x4[16]);
 
 extern DECLARE_ALIGNED(16, const int16_t, vp9_col_scan_4x4[16]);
@@ -154,7 +154,7 @@ extern DECLARE_ALIGNED(16, int16_t,
                        vp9_default_scan_32x32_neighbors[1025 * MAX_NEIGHBORS]);
 
 void vp9_coef_tree_initialize(void);
-void vp9_adapt_coef_probs(struct VP9Common *);
+void vp9_adapt_coef_probs(struct VP9Common *cm);
 
 static INLINE void reset_skip_context(MACROBLOCKD *xd, BLOCK_SIZE bsize) {
   int i;

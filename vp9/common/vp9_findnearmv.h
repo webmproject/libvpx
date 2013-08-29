@@ -36,7 +36,7 @@ static void clamp_mv2(MV *mv, const MACROBLOCKD *xd) {
                xd->mb_to_bottom_edge + RIGHT_BOTTOM_MARGIN);
 }
 
-void vp9_append_sub8x8_mvs_for_idx(VP9_COMMON *pc,
+void vp9_append_sub8x8_mvs_for_idx(VP9_COMMON *cm,
                                    MACROBLOCKD *xd,
                                    int_mv *dst_nearest,
                                    int_mv *dst_near,
