@@ -134,7 +134,7 @@ static INLINE int mi_height_log2(BLOCK_SIZE sb_type) {
 typedef struct {
   MB_PREDICTION_MODE mode, uv_mode;
   MV_REFERENCE_FRAME ref_frame[2];
-  TX_SIZE txfm_size;
+  TX_SIZE tx_size;
   int_mv mv[2];                // for each reference frame used
   int_mv ref_mvs[MAX_REF_FRAMES][MAX_MV_REF_CANDIDATES];
   int_mv best_mv, best_second_mv;
@@ -360,7 +360,7 @@ static void setup_block_dptrs(MACROBLOCKD *xd, int ss_x, int ss_y) {
 
 
 static INLINE TX_SIZE get_uv_tx_size(const MB_MODE_INFO *mbmi) {
-  return MIN(mbmi->txfm_size, max_uv_txsize_lookup[mbmi->sb_type]);
+  return MIN(mbmi->tx_size, max_uv_txsize_lookup[mbmi->sb_type]);
 }
 
 static BLOCK_SIZE get_plane_block_size(BLOCK_SIZE bsize,
@@ -394,7 +394,7 @@ static INLINE void foreach_transformed_block_in_plane(
   // 4x4=0, 8x8=2, 16x16=4, 32x32=6, 64x64=8
   // transform size varies per plane, look it up in a common way.
   const TX_SIZE tx_size = plane ? get_uv_tx_size(mbmi)
-                                : mbmi->txfm_size;
+                                : mbmi->tx_size;
   const BLOCK_SIZE plane_bsize = get_plane_block_size(bsize, pd);
   const int num_4x4_w = num_4x4_blocks_wide_lookup[plane_bsize];
   const int num_4x4_h = num_4x4_blocks_high_lookup[plane_bsize];

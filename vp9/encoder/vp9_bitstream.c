@@ -437,7 +437,7 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, MODE_INFO *m, vp9_writer *bc) {
   if (bsize >= BLOCK_8X8 && pc->tx_mode == TX_MODE_SELECT &&
       !(rf != INTRA_FRAME &&
         (skip_coeff || vp9_segfeature_active(seg, segment_id, SEG_LVL_SKIP)))) {
-    write_selected_tx_size(cpi, mi->txfm_size, bsize, bc);
+    write_selected_tx_size(cpi, mi->tx_size, bsize, bc);
   }
 
   if (rf == INTRA_FRAME) {
@@ -546,7 +546,7 @@ static void write_mb_modes_kf(const VP9_COMP *cpi, MODE_INFO *m,
   write_skip_coeff(cpi, segment_id, m, bc);
 
   if (m->mbmi.sb_type >= BLOCK_8X8 && c->tx_mode == TX_MODE_SELECT)
-    write_selected_tx_size(cpi, m->mbmi.txfm_size, m->mbmi.sb_type, bc);
+    write_selected_tx_size(cpi, m->mbmi.tx_size, m->mbmi.sb_type, bc);
 
   if (m->mbmi.sb_type >= BLOCK_8X8) {
     const MB_PREDICTION_MODE A = above_block_mode(m, 0, mis);

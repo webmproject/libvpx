@@ -386,7 +386,7 @@ static void optimize_init_b(int plane, BLOCK_SIZE bsize,
   const int num_4x4_w = num_4x4_blocks_wide_lookup[plane_bsize];
   const int num_4x4_h = num_4x4_blocks_high_lookup[plane_bsize];
   const MB_MODE_INFO *mbmi = &xd->mode_info_context->mbmi;
-  const TX_SIZE tx_size = plane ? get_uv_tx_size(mbmi) : mbmi->txfm_size;
+  const TX_SIZE tx_size = plane ? get_uv_tx_size(mbmi) : mbmi->tx_size;
   int i;
 
   switch (tx_size) {

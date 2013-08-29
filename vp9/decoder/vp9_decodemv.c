@@ -160,7 +160,7 @@ static void read_intra_frame_mode_info(VP9D_COMP *pbi, MODE_INFO *m,
 
   mbmi->segment_id = read_intra_segment_id(pbi, mi_row, mi_col, r);
   mbmi->skip_coeff = read_skip_coeff(pbi, mbmi->segment_id, r);
-  mbmi->txfm_size = read_tx_size(pbi, cm->tx_mode, bsize, 1, r);
+  mbmi->tx_size = read_tx_size(pbi, cm->tx_mode, bsize, 1, r);
   mbmi->ref_frame[0] = INTRA_FRAME;
   mbmi->ref_frame[1] = NONE;
 
@@ -591,8 +591,8 @@ static void read_inter_frame_mode_info(VP9D_COMP *pbi, MODE_INFO *mi,
   mbmi->segment_id = read_inter_segment_id(pbi, mi_row, mi_col, r);
   mbmi->skip_coeff = read_skip_coeff(pbi, mbmi->segment_id, r);
   inter_block = read_is_inter_block(pbi, mbmi->segment_id, r);
-  mbmi->txfm_size = read_tx_size(pbi, cm->tx_mode, mbmi->sb_type,
-                                 !mbmi->skip_coeff || !inter_block, r);
+  mbmi->tx_size = read_tx_size(pbi, cm->tx_mode, mbmi->sb_type,
+                               !mbmi->skip_coeff || !inter_block, r);
 
   if (inter_block)
     read_inter_block_mode_info(pbi, mi, mi_row, mi_col, r);
