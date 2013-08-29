@@ -1092,7 +1092,6 @@ static int estimate_cq(VP9_COMP *cpi,
   return q;
 }
 
-
 extern void vp9_new_framerate(VP9_COMP *cpi, double framerate);
 
 void vp9_init_second_pass(VP9_COMP *cpi) {
@@ -2079,63 +2078,71 @@ void vp9_second_pass(VP9_COMP *cpi) {
 
   vp9_clear_system_state();
 
-  // Special case code for first frame.
-  if (cpi->common.current_video_frame == 0) {
-    cpi->twopass.est_max_qcorrection_factor = 1.0;
+  if (cpi->oxcf.end_usage == USAGE_CONSTANT_QUALITY) {
+    cpi->active_worst_quality = cpi->oxcf.cq_level;
+  } else {
+    // Special case code for first frame.
+    if (cpi->common.current_video_frame == 0) {
+      int section_target_bandwidth =
+          (int)(cpi->twopass.bits_left / frames_left);
+      cpi->twopass.est_max_qcorrection_factor = 1.0;
 
-    // Set a cq_level in constrained quality mode.
-    if (cpi->oxcf.end_usage == USAGE_CONSTRAINED_QUALITY) {
-      int est_cq = estimate_cq(cpi, &cpi->twopass.total_left_stats,
-                               (int)(cpi->twopass.bits_left / frames_left));
+      // Set a cq_level in constrained quality mode.
+      if (cpi->oxcf.end_usage == USAGE_CONSTRAINED_QUALITY) {
+        int est_cq = estimate_cq(cpi, &cpi->twopass.total_left_stats,
+                                 section_target_bandwidth);
 
-      cpi->cq_target_quality = cpi->oxcf.cq_level;
-      if (est_cq > cpi->cq_target_quality)
-        cpi->cq_target_quality = est_cq;
+        cpi->cq_target_quality = cpi->oxcf.cq_level;
+        if (est_cq > cpi->cq_target_quality)
+          cpi->cq_target_quality = est_cq;
+      }
+
+      // guess at maxq needed in 2nd pass
+      cpi->twopass.maxq_max_limit = cpi->worst_quality;
+      cpi->twopass.maxq_min_limit = cpi->best_quality;
+
+      tmp_q = estimate_max_q(cpi, &cpi->twopass.total_left_stats,
+                             section_target_bandwidth);
+
+      cpi->active_worst_quality = tmp_q;
+      cpi->ni_av_qi = tmp_q;
+      cpi->avg_q = vp9_convert_qindex_to_q(tmp_q);
+
+#ifndef ONE_SHOT_Q_ESTIMATE
+      // Limit the maxq value returned subsequently.
+      // This increases the risk of overspend or underspend if the initial
+      // estimate for the clip is bad, but helps prevent excessive
+      // variation in Q, especially near the end of a clip
+      // where for example a small overspend may cause Q to crash
+      adjust_maxq_qrange(cpi);
+#endif
     }
 
-    // guess at maxq needed in 2nd pass
-    cpi->twopass.maxq_max_limit = cpi->worst_quality;
-    cpi->twopass.maxq_min_limit = cpi->best_quality;
-
-    tmp_q = estimate_max_q(cpi, &cpi->twopass.total_left_stats,
-                           (int)(cpi->twopass.bits_left / frames_left));
-
-    cpi->active_worst_quality = tmp_q;
-    cpi->ni_av_qi = tmp_q;
-    cpi->avg_q = vp9_convert_qindex_to_q(tmp_q);
-
 #ifndef ONE_SHOT_Q_ESTIMATE
-    // Limit the maxq value returned subsequently.
-    // This increases the risk of overspend or underspend if the initial
-    // estimate for the clip is bad, but helps prevent excessive
-    // variation in Q, especially near the end of a clip
-    // where for example a small overspend may cause Q to crash
-    adjust_maxq_qrange(cpi);
+    // The last few frames of a clip almost always have to few or too many
+    // bits and for the sake of over exact rate control we dont want to make
+    // radical adjustments to the allowed quantizer range just to use up a
+    // few surplus bits or get beneath the target rate.
+    else if ((cpi->common.current_video_frame <
+              (((unsigned int)cpi->twopass.total_stats.count * 255) >> 8)) &&
+             ((cpi->common.current_video_frame + cpi->baseline_gf_interval) <
+              (unsigned int)cpi->twopass.total_stats.count)) {
+      int section_target_bandwidth =
+          (int)(cpi->twopass.bits_left / frames_left);
+      if (frames_left < 1)
+        frames_left = 1;
+
+      tmp_q = estimate_max_q(
+          cpi,
+          &cpi->twopass.total_left_stats,
+          section_target_bandwidth);
+
+      // Make a damped adjustment to active max Q
+      cpi->active_worst_quality =
+          adjust_active_maxq(cpi->active_worst_quality, tmp_q);
+    }
 #endif
   }
-
-#ifndef ONE_SHOT_Q_ESTIMATE
-  // The last few frames of a clip almost always have to few or too many
-  // bits and for the sake of over exact rate control we dont want to make
-  // radical adjustments to the allowed quantizer range just to use up a
-  // few surplus bits or get beneath the target rate.
-  else if ((cpi->common.current_video_frame <
-            (((unsigned int)cpi->twopass.total_stats.count * 255) >> 8)) &&
-           ((cpi->common.current_video_frame + cpi->baseline_gf_interval) <
-            (unsigned int)cpi->twopass.total_stats.count)) {
-    if (frames_left < 1)
-      frames_left = 1;
-
-    tmp_q = estimate_max_q(
-              cpi,
-              &cpi->twopass.total_left_stats,
-              (int)(cpi->twopass.bits_left / frames_left));
-
-    // Make a damped adjustment to active max Q
-    cpi->active_worst_quality =
-      adjust_active_maxq(cpi->active_worst_quality, tmp_q);
-  }
-#endif
   vp9_zero(this_frame);
   if (EOF == input_stats(cpi, &this_frame))
     return;

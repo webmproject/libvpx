@@ -1046,6 +1046,7 @@ static const struct arg_enum_list end_usage_enum[] = {
   {"vbr", VPX_VBR},
   {"cbr", VPX_CBR},
   {"cq",  VPX_CQ},
+  {"q",   VPX_Q},
   {NULL, 0}
 };
 static const arg_def_t end_usage          = ARG_DEF_ENUM(NULL, "end-usage", 1,
@@ -1126,7 +1127,7 @@ static const struct arg_enum_list tuning_enum[] = {
 static const arg_def_t tune_ssim = ARG_DEF_ENUM(NULL, "tune", 1,
                                                 "Material to favor", tuning_enum);
 static const arg_def_t cq_level = ARG_DEF(NULL, "cq-level", 1,
-                                          "Constrained Quality Level");
+                                          "Constant/Constrained Quality level");
 static const arg_def_t max_intra_rate_pct = ARG_DEF(NULL, "max-intra-rate", 1,
                                                     "Max I-frame bitrate (pct)");
 static const arg_def_t lossless = ARG_DEF(NULL, "lossless", 1, "Lossless mode");

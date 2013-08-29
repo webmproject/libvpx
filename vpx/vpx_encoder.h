@@ -217,9 +217,10 @@ extern "C" {
 
   /*!\brief Rate control mode */
   enum vpx_rc_mode {
-    VPX_VBR, /**< Variable Bit Rate (VBR) mode */
+    VPX_VBR,  /**< Variable Bit Rate (VBR) mode */
     VPX_CBR,  /**< Constant Bit Rate (CBR) mode */
-    VPX_CQ   /**< Constant Quality  (CQ)  mode */
+    VPX_CQ,   /**< Constrained Quality (CQ)  mode */
+    VPX_Q,    /**< Constant Quality (Q) mode */
   };
 
 
