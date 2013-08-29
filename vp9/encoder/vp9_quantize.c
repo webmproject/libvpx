@@ -84,7 +84,6 @@ void vp9_quantize_b_c(int16_t *coeff_ptr, intptr_t n_coeffs, int skip_block,
   *eob_ptr = eob + 1;
 }
 
-// This function works well for large transform size.
 void vp9_quantize_b_32x32_c(int16_t *coeff_ptr, intptr_t n_coeffs,
                             int skip_block,
                             int16_t *zbin_ptr, int16_t *round_ptr,
@@ -105,8 +104,8 @@ void vp9_quantize_b_32x32_c(int16_t *coeff_ptr, intptr_t n_coeffs,
   eob = -1;
 
   // Base ZBIN
-  zbins[0] = zbin_ptr[0] + zbin_oq_value;
-  zbins[1] = zbin_ptr[1] + zbin_oq_value;
+  zbins[0] = ROUND_POWER_OF_TWO(zbin_ptr[0] + zbin_oq_value, 1);
+  zbins[1] = ROUND_POWER_OF_TWO(zbin_ptr[1] + zbin_oq_value, 1);
   nzbins[0] = zbins[0] * -1;
   nzbins[1] = zbins[1] * -1;
 
@@ -114,7 +113,7 @@ void vp9_quantize_b_32x32_c(int16_t *coeff_ptr, intptr_t n_coeffs,
     // Pre-scan pass
     for (i = 0; i < n_coeffs; i++) {
       rc = scan[i];
-      z = coeff_ptr[rc] * 2;
+      z = coeff_ptr[rc];
 
       // If the coefficient is out of the base ZBIN range, keep it for
       // quantization.
@@ -130,14 +129,14 @@ void vp9_quantize_b_32x32_c(int16_t *coeff_ptr, intptr_t n_coeffs,
       // Calculate ZBIN
       zbin = (zbins[rc != 0]);
 
-      z = coeff_ptr[rc] * 2;
+      z = coeff_ptr[rc];
       sz = (z >> 31);                               // sign of z
       x  = (z ^ sz) - sz;                           // x = abs(z)
 
       if (x >= zbin) {
-        x += (round_ptr[rc != 0]);
+        x += ROUND_POWER_OF_TWO(round_ptr[rc != 0], 1);
         y  = (((int)(((int)(x * quant_ptr[rc != 0]) >> 16) + x)) *
-              quant_shift_ptr[rc != 0]) >> 16;      // quantize (x)
+              quant_shift_ptr[rc != 0]) >> 15;      // quantize (x)
 
         x  = (y ^ sz) - sz;                         // get the sign back
         qcoeff_ptr[rc]  = x;                        // write to destination

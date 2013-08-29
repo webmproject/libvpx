@@ -36,6 +36,14 @@ cglobal quantize_%1, 0, %2, 15, coeff, ncoeff, skip, zbin, round, quant, \
   pshufd                          m4, m4, 0
   mova                            m2, [quantq]             ; m2 = quant
   paddw                           m0, m4                   ; m0 = zbin + zbin_oq
+%ifidn %1, b_32x32
+  pcmpeqw                         m5, m5
+  psrlw                           m5, 15
+  paddw                           m0, m5
+  paddw                           m1, m5
+  psrlw                           m0, 1                    ; m0 = (m0 + 1) / 2
+  psrlw                           m1, 1                    ; m1 = (m1 + 1) / 2
+%endif
   mova                            m3, [r2q]                ; m3 = dequant
   psubw                           m0, [pw_1]
   mov                             r2, shiftmp
@@ -43,6 +51,9 @@ cglobal quantize_%1, 0, %2, 15, coeff, ncoeff, skip, zbin, round, quant, \
   mova                            m4, [r2]                 ; m4 = shift
   mov                             r4, dqcoeffmp
   mov                             r5, iscanmp
+%ifidn %1, b_32x32
+  psllw                           m4, 1
+%endif
   pxor                            m5, m5                   ; m5 = dedicated zero
   DEFINE_ARGS coeff, ncoeff, d1, qcoeff, dqcoeff, iscan, d2, d3, d4, d5, d6, eob
   lea                         coeffq, [  coeffq+ncoeffq*2]
@@ -56,10 +67,6 @@ cglobal quantize_%1, 0, %2, 15, coeff, ncoeff, skip, zbin, round, quant, \
   mova                           m10, [  coeffq+ncoeffq*2+16] ; m10 = c[i]
   pabsw                           m6, m9                   ; m6 = abs(m9)
   pabsw                          m11, m10                  ; m11 = abs(m10)
-%ifidn %1, b_32x32
-  paddw                           m6, m6
-  paddw                          m11, m11
-%endif
   pcmpgtw                         m7, m6, m0               ; m7 = c[i] >= zbin
   punpckhqdq                      m0, m0
   pcmpgtw                        m12, m11, m0              ; m12 = c[i] >= zbin
@@ -112,10 +119,6 @@ cglobal quantize_%1, 0, %2, 15, coeff, ncoeff, skip, zbin, round, quant, \
   mova                           m10, [  coeffq+ncoeffq*2+16] ; m10 = c[i]
   pabsw                           m6, m9                   ; m6 = abs(m9)
   pabsw                          m11, m10                  ; m11 = abs(m10)
-%ifidn %1, b_32x32
-  paddw                           m6, m6
-  paddw                          m11, m11
-%endif
   pcmpgtw                         m7, m6, m0               ; m7 = c[i] >= zbin
   pcmpgtw                        m12, m11, m0              ; m12 = c[i] >= zbin
 %ifidn %1, b_32x32
@@ -164,6 +167,7 @@ cglobal quantize_%1, 0, %2, 15, coeff, ncoeff, skip, zbin, round, quant, \
   pmaxsw                          m8, m13
   add                        ncoeffq, mmsize
   jl .ac_only_loop
+
 %ifidn %1, b_32x32
   jmp .accumulate_eob
 .skip_iter:
