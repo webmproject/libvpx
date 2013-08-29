@@ -784,94 +784,170 @@ static void update_coef_probs_common(vp9_writer* const bc, VP9_COMP *cpi,
   vp9_coeff_probs_model *old_frame_coef_probs =
       cpi->common.fc.coef_probs[tx_size];
   vp9_coeff_stats *frame_branch_ct = cpi->frame_branch_ct[tx_size];
-  int i, j, k, l, t;
-  int update[2] = {0, 0};
-  int savings;
-
+  const vp9_prob upd = VP9_COEF_UPDATE_PROB;
   const int entropy_nodes_update = UNCONSTRAINED_NODES;
+  int i, j, k, l, t;
+  switch (cpi->sf.use_fast_coef_updates) {
+    case 0: {
+      /* dry run to see if there is any udpate at all needed */
+      int savings = 0;
+      int update[2] = {0, 0};
+      for (i = 0; i < BLOCK_TYPES; ++i) {
+        for (j = 0; j < REF_TYPES; ++j) {
+          for (k = 0; k < COEF_BANDS; ++k) {
+            for (l = 0; l < PREV_COEF_CONTEXTS; ++l) {
+              for (t = 0; t < entropy_nodes_update; ++t) {
+                vp9_prob newp = new_frame_coef_probs[i][j][k][l][t];
+                const vp9_prob oldp = old_frame_coef_probs[i][j][k][l][t];
+                int s;
+                int u = 0;
 
-  const int tstart = 0;
-  /* dry run to see if there is any udpate at all needed */
-  savings = 0;
-  for (i = 0; i < BLOCK_TYPES; ++i) {
-    for (j = 0; j < REF_TYPES; ++j) {
-      for (k = 0; k < COEF_BANDS; ++k) {
-        // int prev_coef_savings[ENTROPY_NODES] = {0};
-        for (l = 0; l < PREV_COEF_CONTEXTS; ++l) {
-          for (t = tstart; t < entropy_nodes_update; ++t) {
-            vp9_prob newp = new_frame_coef_probs[i][j][k][l][t];
-            const vp9_prob oldp = old_frame_coef_probs[i][j][k][l][t];
-            const vp9_prob upd = VP9_COEF_UPDATE_PROB;
-            int s;
-            int u = 0;
-
-            if (l >= 3 && k == 0)
-              continue;
-            if (t == PIVOT_NODE)
-              s = vp9_prob_diff_update_savings_search_model(
-                  frame_branch_ct[i][j][k][l][0],
-                  old_frame_coef_probs[i][j][k][l], &newp, upd, i, j);
-            else
-              s = vp9_prob_diff_update_savings_search(
-                  frame_branch_ct[i][j][k][l][t], oldp, &newp, upd);
-            if (s > 0 && newp != oldp)
-              u = 1;
-            if (u)
-              savings += s - (int)(vp9_cost_zero(upd));
-            else
-              savings -= (int)(vp9_cost_zero(upd));
-            update[u]++;
-          }
-        }
-      }
-    }
-  }
-
-  // printf("Update %d %d, savings %d\n", update[0], update[1], savings);
-  /* Is coef updated at all */
-  if (update[1] == 0 || savings < 0) {
-    vp9_write_bit(bc, 0);
-    return;
-  }
-  vp9_write_bit(bc, 1);
-  for (i = 0; i < BLOCK_TYPES; ++i) {
-    for (j = 0; j < REF_TYPES; ++j) {
-      for (k = 0; k < COEF_BANDS; ++k) {
-        // int prev_coef_savings[ENTROPY_NODES] = {0};
-        for (l = 0; l < PREV_COEF_CONTEXTS; ++l) {
-          // calc probs and branch cts for this frame only
-          for (t = tstart; t < entropy_nodes_update; ++t) {
-            vp9_prob newp = new_frame_coef_probs[i][j][k][l][t];
-            vp9_prob *oldp = old_frame_coef_probs[i][j][k][l] + t;
-            const vp9_prob upd = VP9_COEF_UPDATE_PROB;
-            int s;
-            int u = 0;
-            if (l >= 3 && k == 0)
-              continue;
-            if (t == PIVOT_NODE)
-              s = vp9_prob_diff_update_savings_search_model(
-                  frame_branch_ct[i][j][k][l][0],
-                  old_frame_coef_probs[i][j][k][l], &newp, upd, i, j);
-            else
-              s = vp9_prob_diff_update_savings_search(
-                  frame_branch_ct[i][j][k][l][t],
-                  *oldp, &newp, upd);
-            if (s > 0 && newp != *oldp)
-              u = 1;
-            vp9_write(bc, u, upd);
-#ifdef ENTROPY_STATS
-            if (!cpi->dummy_packing)
-              ++tree_update_hist[tx_size][i][j][k][l][t][u];
-#endif
-            if (u) {
-              /* send/use new probability */
-              vp9_write_prob_diff_update(bc, newp, *oldp);
-              *oldp = newp;
+                if (l >= 3 && k == 0)
+                  continue;
+                if (t == PIVOT_NODE)
+                  s = vp9_prob_diff_update_savings_search_model(
+                      frame_branch_ct[i][j][k][l][0],
+                      old_frame_coef_probs[i][j][k][l], &newp, upd, i, j);
+                else
+                  s = vp9_prob_diff_update_savings_search(
+                      frame_branch_ct[i][j][k][l][t], oldp, &newp, upd);
+                if (s > 0 && newp != oldp)
+                  u = 1;
+                if (u)
+                  savings += s - (int)(vp9_cost_zero(upd));
+                else
+                  savings -= (int)(vp9_cost_zero(upd));
+                update[u]++;
+              }
             }
           }
         }
       }
+
+      // printf("Update %d %d, savings %d\n", update[0], update[1], savings);
+      /* Is coef updated at all */
+      if (update[1] == 0 || savings < 0) {
+        vp9_write_bit(bc, 0);
+        return;
+      }
+      vp9_write_bit(bc, 1);
+      for (i = 0; i < BLOCK_TYPES; ++i) {
+        for (j = 0; j < REF_TYPES; ++j) {
+          for (k = 0; k < COEF_BANDS; ++k) {
+            for (l = 0; l < PREV_COEF_CONTEXTS; ++l) {
+              // calc probs and branch cts for this frame only
+              for (t = 0; t < entropy_nodes_update; ++t) {
+                vp9_prob newp = new_frame_coef_probs[i][j][k][l][t];
+                vp9_prob *oldp = old_frame_coef_probs[i][j][k][l] + t;
+                const vp9_prob upd = VP9_COEF_UPDATE_PROB;
+                int s;
+                int u = 0;
+                if (l >= 3 && k == 0)
+                  continue;
+                if (t == PIVOT_NODE)
+                  s = vp9_prob_diff_update_savings_search_model(
+                      frame_branch_ct[i][j][k][l][0],
+                      old_frame_coef_probs[i][j][k][l], &newp, upd, i, j);
+                else
+                  s = vp9_prob_diff_update_savings_search(
+                      frame_branch_ct[i][j][k][l][t],
+                      *oldp, &newp, upd);
+                if (s > 0 && newp != *oldp)
+                  u = 1;
+                vp9_write(bc, u, upd);
+#ifdef ENTROPY_STATS
+                if (!cpi->dummy_packing)
+                  ++tree_update_hist[tx_size][i][j][k][l][t][u];
+#endif
+                if (u) {
+                  /* send/use new probability */
+                  vp9_write_prob_diff_update(bc, newp, *oldp);
+                  *oldp = newp;
+                }
+              }
+            }
+          }
+        }
+      }
+      return;
     }
+
+    case 1:
+    case 2: {
+      const int prev_coef_contexts_to_update =
+          (cpi->sf.use_fast_coef_updates == 2 ?
+           PREV_COEF_CONTEXTS >> 1 : PREV_COEF_CONTEXTS);
+      const int coef_band_to_update =
+          (cpi->sf.use_fast_coef_updates == 2 ?
+           COEF_BANDS >> 1 : COEF_BANDS);
+      int updates = 0;
+      int noupdates_before_first = 0;
+      for (i = 0; i < BLOCK_TYPES; ++i) {
+        for (j = 0; j < REF_TYPES; ++j) {
+          for (k = 0; k < COEF_BANDS; ++k) {
+            for (l = 0; l < PREV_COEF_CONTEXTS; ++l) {
+              // calc probs and branch cts for this frame only
+              for (t = 0; t < entropy_nodes_update; ++t) {
+                vp9_prob newp = new_frame_coef_probs[i][j][k][l][t];
+                vp9_prob *oldp = old_frame_coef_probs[i][j][k][l] + t;
+                int s;
+                int u = 0;
+                if (l >= 3 && k == 0)
+                  continue;
+                if (l >= prev_coef_contexts_to_update ||
+                    k >= coef_band_to_update) {
+                  u = 0;
+                } else {
+                  if (t == PIVOT_NODE)
+                    s = vp9_prob_diff_update_savings_search_model(
+                        frame_branch_ct[i][j][k][l][0],
+                        old_frame_coef_probs[i][j][k][l], &newp, upd, i, j);
+                  else
+                    s = vp9_prob_diff_update_savings_search(
+                        frame_branch_ct[i][j][k][l][t],
+                        *oldp, &newp, upd);
+                  if (s > 0 && newp != *oldp)
+                    u = 1;
+                }
+                updates += u;
+                if (u == 0 && updates == 0) {
+                  noupdates_before_first++;
+#ifdef ENTROPY_STATS
+                  if (!cpi->dummy_packing)
+                    ++tree_update_hist[tx_size][i][j][k][l][t][u];
+#endif
+                  continue;
+                }
+                if (u == 1 && updates == 1) {
+                  int v;
+                  // first update
+                  vp9_write_bit(bc, 1);
+                  for (v = 0; v < noupdates_before_first; ++v)
+                    vp9_write(bc, 0, upd);
+                }
+                vp9_write(bc, u, upd);
+#ifdef ENTROPY_STATS
+                if (!cpi->dummy_packing)
+                  ++tree_update_hist[tx_size][i][j][k][l][t][u];
+#endif
+                if (u) {
+                  /* send/use new probability */
+                  vp9_write_prob_diff_update(bc, newp, *oldp);
+                  *oldp = newp;
+                }
+              }
+            }
+          }
+        }
+      }
+      if (updates == 0) {
+        vp9_write_bit(bc, 0);  // no updates
+      }
+      return;
+    }
+
+    default:
+      assert(0);
   }
 }
 
