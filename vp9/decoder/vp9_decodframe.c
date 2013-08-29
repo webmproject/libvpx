@@ -454,8 +454,7 @@ static void setup_loopfilter(struct loopfilter *lf,
 
 static int read_delta_q(struct vp9_read_bit_buffer *rb, int *delta_q) {
   const int old = *delta_q;
-  if (vp9_rb_read_bit(rb))
-    *delta_q = vp9_rb_read_signed_literal(rb, 4);
+  *delta_q = vp9_rb_read_bit(rb) ? vp9_rb_read_signed_literal(rb, 4) : 0;
   return old != *delta_q;
 }
 
