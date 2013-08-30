@@ -1725,6 +1725,10 @@ VP9_PTR vp9_create_compressor(VP9_CONFIG *oxcf) {
 
   vp9_zero(cpi->y_uv_mode_count)
 
+#ifdef MODE_TEST_HIT_STATS
+  vp9_zero(cpi->mode_test_hits)
+#endif
+
   return (VP9_PTR) cpi;
 }
 
@@ -1804,6 +1808,34 @@ void vp9_remove_compressor(VP9_PTR *ptr) {
       fclose(f);
     }
 
+#endif
+
+#ifdef MODE_TEST_HIT_STATS
+    if (cpi->pass != 1) {
+      double norm_per_pixel_mode_tests = 0;
+      double norm_counts[BLOCK_SIZES];
+      int i;
+      int sb64_per_frame;
+      int norm_factors[BLOCK_SIZES] =
+        {256, 128, 128, 64, 32, 32, 16, 8, 8, 4, 2, 2, 1};
+      FILE *f = fopen("mode_hit_stats.stt", "a");
+
+      // On average, how many mode tests do we do
+      for (i = 0; i < BLOCK_SIZES; ++i) {
+        norm_counts[i] = (double)cpi->mode_test_hits[i] /
+                         (double)norm_factors[i];
+        norm_per_pixel_mode_tests += norm_counts[i];
+      }
+      // Convert to a number per 64x64 and per frame
+      sb64_per_frame = ((cpi->common.height + 63) / 64) *
+                       ((cpi->common.width + 63) / 64);
+      norm_per_pixel_mode_tests =
+        norm_per_pixel_mode_tests /
+        (double)(cpi->common.current_video_frame * sb64_per_frame);
+
+      fprintf(f, "%6.4f\n", norm_per_pixel_mode_tests);
+      fclose(f);
+    }
 #endif
 
 #ifdef ENTROPY_STATS
