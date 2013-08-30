@@ -1077,6 +1077,44 @@ static void dct32_1d(int *input, int *output, int round) {
   output[30] = step[30];
   output[31] = step[31];
 
+  // dump the magnitude by 4, hence the intermediate values are within
+  // the range of 16 bits.
+  if (round) {
+    output[0] = half_round_shift(output[0]);
+    output[1] = half_round_shift(output[1]);
+    output[2] = half_round_shift(output[2]);
+    output[3] = half_round_shift(output[3]);
+    output[4] = half_round_shift(output[4]);
+    output[5] = half_round_shift(output[5]);
+    output[6] = half_round_shift(output[6]);
+    output[7] = half_round_shift(output[7]);
+    output[8] = half_round_shift(output[8]);
+    output[9] = half_round_shift(output[9]);
+    output[10] = half_round_shift(output[10]);
+    output[11] = half_round_shift(output[11]);
+    output[12] = half_round_shift(output[12]);
+    output[13] = half_round_shift(output[13]);
+    output[14] = half_round_shift(output[14]);
+    output[15] = half_round_shift(output[15]);
+
+    output[16] = half_round_shift(output[16]);
+    output[17] = half_round_shift(output[17]);
+    output[18] = half_round_shift(output[18]);
+    output[19] = half_round_shift(output[19]);
+    output[20] = half_round_shift(output[20]);
+    output[21] = half_round_shift(output[21]);
+    output[22] = half_round_shift(output[22]);
+    output[23] = half_round_shift(output[23]);
+    output[24] = half_round_shift(output[24]);
+    output[25] = half_round_shift(output[25]);
+    output[26] = half_round_shift(output[26]);
+    output[27] = half_round_shift(output[27]);
+    output[28] = half_round_shift(output[28]);
+    output[29] = half_round_shift(output[29]);
+    output[30] = half_round_shift(output[30]);
+    output[31] = half_round_shift(output[31]);
+  }
+
   // Stage 3
   step[0] = output[0] + output[(8 - 1)];
   step[1] = output[1] + output[(8 - 2)];
@@ -1111,44 +1149,6 @@ static void dct32_1d(int *input, int *output, int round) {
   step[29] = output[29] + output[26];
   step[30] = output[30] + output[25];
   step[31] = output[31] + output[24];
-
-  // dump the magnitude by half, hence the intermediate values are within 1108
-  // the range of 16 bits.
-  if (round) {
-    step[0] = half_round_shift(step[0]);
-    step[1] = half_round_shift(step[1]);
-    step[2] = half_round_shift(step[2]);
-    step[3] = half_round_shift(step[3]);
-    step[4] = half_round_shift(step[4]);
-    step[5] = half_round_shift(step[5]);
-    step[6] = half_round_shift(step[6]);
-    step[7] = half_round_shift(step[7]);
-    step[8] = half_round_shift(step[8]);
-    step[9] = half_round_shift(step[9]);
-    step[10] = half_round_shift(step[10]);
-    step[11] = half_round_shift(step[11]);
-    step[12] = half_round_shift(step[12]);
-    step[13] = half_round_shift(step[13]);
-    step[14] = half_round_shift(step[14]);
-    step[15] = half_round_shift(step[15]);
-
-    step[16] = half_round_shift(step[16]);
-    step[17] = half_round_shift(step[17]);
-    step[18] = half_round_shift(step[18]);
-    step[19] = half_round_shift(step[19]);
-    step[20] = half_round_shift(step[20]);
-    step[21] = half_round_shift(step[21]);
-    step[22] = half_round_shift(step[22]);
-    step[23] = half_round_shift(step[23]);
-    step[24] = half_round_shift(step[24]);
-    step[25] = half_round_shift(step[25]);
-    step[26] = half_round_shift(step[26]);
-    step[27] = half_round_shift(step[27]);
-    step[28] = half_round_shift(step[28]);
-    step[29] = half_round_shift(step[29]);
-    step[30] = half_round_shift(step[30]);
-    step[31] = half_round_shift(step[31]);
-  }
 
   // Stage 4
   output[0] = step[0] + step[3];
