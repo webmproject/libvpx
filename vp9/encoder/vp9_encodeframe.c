@@ -851,13 +851,75 @@ static void encode_sb(VP9_COMP *cpi, TOKENEXTRA **tp, int mi_row, int mi_col,
   }
 }
 
-static void set_partitioning(VP9_COMP *cpi, MODE_INFO *m, BLOCK_SIZE bsize) {
+// Check to see if the given partition size is allowed for a specified number
+// of 8x8 block rows and columns remaining in the image.
+// If not then return the largest allowed partition size
+static BLOCK_SIZE find_partition_size(BLOCK_SIZE bsize,
+                                      int rows_left, int cols_left,
+                                      int *bh, int *bw) {
+  if ((rows_left <= 0) || (cols_left <= 0)) {
+    return MIN(bsize, BLOCK_8X8);
+  } else {
+    for (; bsize > 0; --bsize) {
+      *bh = num_8x8_blocks_high_lookup[bsize];
+      *bw = num_8x8_blocks_wide_lookup[bsize];
+      if ((*bh <= rows_left) && (*bw <= cols_left)) {
+        break;
+      }
+    }
+  }
+  return bsize;
+}
+
+// This function attempts to set all mode info entries in a given SB64
+// to the same block partition size.
+// However, at the bottom and right borders of the image the requested size
+// may not be allowed in which case this code attempts to choose the largest
+// allowable partition.
+static void set_partitioning(VP9_COMP *cpi, MODE_INFO *m,
+                             int mi_row, int mi_col) {
   VP9_COMMON *const cm = &cpi->common;
+  BLOCK_SIZE bsize = cpi->sf.always_this_block_size;
   const int mis = cm->mode_info_stride;
+  int row8x8_remaining = cm->cur_tile_mi_row_end - mi_row;
+  int col8x8_remaining = cm->cur_tile_mi_col_end - mi_col;
   int block_row, block_col;
-  for (block_row = 0; block_row < 8; ++block_row) {
-    for (block_col = 0; block_col < 8; ++block_col) {
-      m[block_row * mis + block_col].mbmi.sb_type = bsize;
+
+  assert((row8x8_remaining > 0) && (col8x8_remaining > 0));
+
+  // Apply the requested partition size to the SB64 if it is all "in image"
+  if ((col8x8_remaining >= MI_BLOCK_SIZE) &&
+      (row8x8_remaining >= MI_BLOCK_SIZE)) {
+    for (block_row = 0; block_row < MI_BLOCK_SIZE; ++block_row) {
+      for (block_col = 0; block_col < MI_BLOCK_SIZE; ++block_col) {
+        m[block_row * mis + block_col].mbmi.sb_type = bsize;
+      }
+    }
+  } else {
+    // Else this is a partial SB64.
+    int bh = num_8x8_blocks_high_lookup[bsize];
+    int bw = num_8x8_blocks_wide_lookup[bsize];
+    int sub_block_row;
+    int sub_block_col;
+    int row_index;
+    int col_index;
+
+    for (block_row = 0; block_row < MI_BLOCK_SIZE; block_row += bh) {
+      for (block_col = 0; block_col < MI_BLOCK_SIZE; block_col += bw) {
+        // Find a partition size that fits
+        bsize = find_partition_size(cpi->sf.always_this_block_size,
+                                    (row8x8_remaining - block_row),
+                                    (col8x8_remaining - block_col), &bh, &bw);
+
+        // Set the mi entries for all 8x8 blocks within the selected size
+        for (sub_block_row = 0; sub_block_row < bh; ++sub_block_row) {
+          for (sub_block_col = 0; sub_block_col < bw; ++sub_block_col) {
+            row_index = block_row + sub_block_row;
+            col_index = block_col + sub_block_col;
+            m[row_index * mis + col_index].mbmi.sb_type = bsize;
+          }
+        }
+      }
     }
   }
 }
@@ -1946,7 +2008,7 @@ static void encode_sb_row(VP9_COMP *cpi, int mi_row, TOKENEXTRA **tp,
       cpi->mb.source_variance = UINT_MAX;
       if (cpi->sf.use_one_partition_size_always) {
         set_offsets(cpi, mi_row, mi_col, BLOCK_64X64);
-        set_partitioning(cpi, m, cpi->sf.always_this_block_size);
+        set_partitioning(cpi, m, mi_row, mi_col);
         rd_use_partition(cpi, m, tp, mi_row, mi_col, BLOCK_64X64,
                          &dummy_rate, &dummy_dist, 1);
       } else if (cpi->sf.partition_by_variance) {
