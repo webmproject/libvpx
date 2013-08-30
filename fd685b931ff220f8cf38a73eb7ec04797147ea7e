@@ -1,0 +1,174 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdH///ls\u003d",
+        "filename": "vp9/common/vp9_blockd.h",
+        "patchSetId": 18
+      },
+      "lineNbr": 171,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2013-08-30T03:39:37Z",
+      "side": 1,
+      "message": "why does this need to be a structure and exist at all.   Wherever we are using a mode_info_8x8 why not just use a mode_info ptr?",
+      "revId": "fd685b931ff220f8cf38a73eb7ec04797147ea7e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdH///lo\u003d",
+        "filename": "vp9/common/vp9_blockd.h",
+        "patchSetId": 18
+      },
+      "lineNbr": 218,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2013-08-30T03:39:37Z",
+      "side": 1,
+      "message": "MODE_INFO *mi_8x8;",
+      "revId": "fd685b931ff220f8cf38a73eb7ec04797147ea7e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdH///lk\u003d",
+        "filename": "vp9/common/vp9_debugmodes.c",
+        "patchSetId": 18
+      },
+      "lineNbr": 70,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2013-08-30T03:39:37Z",
+      "side": 1,
+      "message": "mi_8x8[mi_index].mbmi.mv[0] after you get rid of this MODE_INFO_8X8",
+      "revId": "fd685b931ff220f8cf38a73eb7ec04797147ea7e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdH///lg\u003d",
+        "filename": "vp9/common/vp9_findnearmv.h",
+        "patchSetId": 18
+      },
+      "lineNbr": 85,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2013-08-30T03:39:37Z",
+      "side": 1,
+      "message": "I don\u0027t understand why there\u0027s a 2?  is 2 for decoder?  Why not call it left_block_mode_decoder?",
+      "revId": "fd685b931ff220f8cf38a73eb7ec04797147ea7e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdH///lc\u003d",
+        "filename": "vp9/common/vp9_loopfilter.c",
+        "patchSetId": 18
+      },
+      "lineNbr": 241,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2013-08-30T03:39:37Z",
+      "side": 1,
+      "message": "MODE_INFO *",
+      "revId": "fd685b931ff220f8cf38a73eb7ec04797147ea7e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdH///lU\u003d",
+        "filename": "vp9/common/vp9_onyxc_int.h",
+        "patchSetId": 18
+      },
+      "lineNbr": 167,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2013-08-30T03:39:37Z",
+      "side": 1,
+      "message": "no need for MODE_INFO_8X8 to exist?",
+      "revId": "fd685b931ff220f8cf38a73eb7ec04797147ea7e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdH///lQ\u003d",
+        "filename": "vp9/common/vp9_pred_common.c",
+        "patchSetId": 18
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2013-08-30T03:39:37Z",
+      "side": 1,
+      "message": "why didn\u0027t we need to check in the old code?",
+      "revId": "fd685b931ff220f8cf38a73eb7ec04797147ea7e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdH///lM\u003d",
+        "filename": "vp9/common/vp9_pred_common.c",
+        "patchSetId": 18
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2013-08-30T03:39:37Z",
+      "side": 1,
+      "message": "why didn\u0027t we need to check before?",
+      "revId": "fd685b931ff220f8cf38a73eb7ec04797147ea7e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdH///lI\u003d",
+        "filename": "vp9/common/vp9_pred_common.c",
+        "patchSetId": 18
+      },
+      "lineNbr": 410,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2013-08-30T03:39:37Z",
+      "side": 1,
+      "message": "_e \u003d encoder? why not seg_id_encoder",
+      "revId": "fd685b931ff220f8cf38a73eb7ec04797147ea7e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdH///lE\u003d",
+        "filename": "vp9/decoder/vp9_decodemv.c",
+        "patchSetId": 18
+      },
+      "lineNbr": 672,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2013-08-30T03:39:37Z",
+      "side": 1,
+      "message": "MIC_STREAM?  do we need this ifdef at all? its either on or not?",
+      "revId": "fd685b931ff220f8cf38a73eb7ec04797147ea7e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
