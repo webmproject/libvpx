@@ -75,7 +75,7 @@ static const double C13 = 0.290284677254462;
 static const double C14 = 0.195090322016128;
 static const double C15 = 0.098017140329561;
 
-static void butterfly_16x16_dct_1d(double input[16], double output[16]) {
+void butterfly_16x16_dct_1d(double input[16], double output[16]) {
   double step[16];
   double intermediate[16];
   double temp1, temp2;
@@ -287,37 +287,37 @@ void iht16x16_add(int16_t* /*in*/, int16_t *out, uint8_t *dst,
   vp9_short_iht16x16_add_c(out, dst, stride >> 1, tx_type);
 }
 
-class FwdTrans16x16Test : public ::testing::TestWithParam<int> {
+class Trans16x16Test : public ::testing::TestWithParam<int> {
  public:
-  virtual ~FwdTrans16x16Test() {}
+  virtual ~Trans16x16Test() {}
 
   virtual void SetUp() {
     tx_type_ = GetParam();
     if (tx_type_ == 0) {
-      fwd_txfm = fdct16x16;
-      inv_txfm = idct16x16_add;
+      fwd_txfm_ = fdct16x16;
+      inv_txfm_ = idct16x16_add;
     } else {
-      fwd_txfm = fht16x16;
-      inv_txfm = iht16x16_add;
+      fwd_txfm_ = fht16x16;
+      inv_txfm_ = iht16x16_add;
     }
   }
 
  protected:
   void RunFwdTxfm(int16_t *in, int16_t *out, uint8_t *dst,
                   int stride, int tx_type) {
-    (*fwd_txfm)(in, out, dst, stride, tx_type);
+    (*fwd_txfm_)(in, out, dst, stride, tx_type);
   }
   void RunInvTxfm(int16_t *in, int16_t *out, uint8_t *dst,
                   int stride, int tx_type) {
-    (*inv_txfm)(in, out, dst, stride, tx_type);
+    (*inv_txfm_)(in, out, dst, stride, tx_type);
   }
 
   int tx_type_;
-  void (*fwd_txfm)(int16_t*, int16_t*, uint8_t*, int, int);
-  void (*inv_txfm)(int16_t*, int16_t*, uint8_t*, int, int);
+  void (*fwd_txfm_)(int16_t*, int16_t*, uint8_t*, int, int);
+  void (*inv_txfm_)(int16_t*, int16_t*, uint8_t*, int, int);
 };
 
-TEST_P(FwdTrans16x16Test, AccuracyCheck) {
+TEST_P(Trans16x16Test, AccuracyCheck) {
   ACMRandom rnd(ACMRandom::DeterministicSeed());
   int max_error = 0;
   int total_error = 0;
@@ -355,7 +355,7 @@ TEST_P(FwdTrans16x16Test, AccuracyCheck) {
       << "Error: 16x16 FHT/IHT has average round trip error > 1 per block";
 }
 
-TEST_P(FwdTrans16x16Test, CoeffSizeCheck) {
+TEST_P(Trans16x16Test, CoeffSizeCheck) {
   ACMRandom rnd(ACMRandom::DeterministicSeed());
   const int count_test_block = 1000;
   for (int i = 0; i < count_test_block; ++i) {
@@ -389,14 +389,19 @@ TEST_P(FwdTrans16x16Test, CoeffSizeCheck) {
   }
 }
 
-INSTANTIATE_TEST_CASE_P(VP9, FwdTrans16x16Test, ::testing::Range(0, 4));
-
-TEST(VP9Idct16x16Test, AccuracyCheck) {
+TEST_P(Trans16x16Test, InvAccuracyCheck) {
   ACMRandom rnd(ACMRandom::DeterministicSeed());
   const int count_test_block = 1000;
+  // TODO(jingning): is this unit test necessary? if so, need to add
+  // check sets for inverse hybrid transforms too.
+  if (tx_type_ != DCT_DCT)
+    return;
+
   for (int i = 0; i < count_test_block; ++i) {
-    int16_t in[256], coeff[256];
-    uint8_t dst[256], src[256];
+    DECLARE_ALIGNED_ARRAY(16, int16_t, in, 256);
+    DECLARE_ALIGNED_ARRAY(16, int16_t, coeff, 256);
+    DECLARE_ALIGNED_ARRAY(16, uint8_t, dst, 256);
+    DECLARE_ALIGNED_ARRAY(16, uint8_t, src, 256);
     double out_r[256];
 
     for (int j = 0; j < 256; ++j) {
@@ -410,7 +415,10 @@ TEST(VP9Idct16x16Test, AccuracyCheck) {
     reference_16x16_dct_2d(in, out_r);
     for (int j = 0; j < 256; j++)
       coeff[j] = round(out_r[j]);
-    vp9_short_idct16x16_add_c(coeff, dst, 16);
+
+    const int pitch = 32;
+    RunInvTxfm(coeff, coeff, dst, pitch, tx_type_);
+
     for (int j = 0; j < 256; ++j) {
       const int diff = dst[j] - src[j];
       const int error = diff * diff;
@@ -421,4 +429,5 @@ TEST(VP9Idct16x16Test, AccuracyCheck) {
   }
 }
 
+INSTANTIATE_TEST_CASE_P(VP9, Trans16x16Test, ::testing::Range(0, 4));
 }  // namespace
