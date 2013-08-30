@@ -2,6 +2,23 @@
   "comments": [
     {
       "key": {
+        "uuid": "AAAAdH///mE\u003d",
+        "filename": "test/convolve_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 229,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-08-30T02:41:40Z",
+      "side": 1,
+      "message": "in other words: memset",
+      "revId": "552bb4541c1b2622766762de799904f343092642",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdH///mY\u003d",
         "filename": "test/convolve_test.cc",
         "patchSetId": 4
@@ -47,6 +64,23 @@
       "writtenOn": "2013-08-30T00:21:52Z",
       "side": 1,
       "message": "for (int step \u003d 1; step \u003c\u003d 32; ++step) {",
+      "revId": "552bb4541c1b2622766762de799904f343092642",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdH///mA\u003d",
+        "filename": "test/convolve_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 573,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-08-30T02:41:40Z",
+      "side": 1,
+      "message": "indent 4 spaces (like e.g., line 546",
       "revId": "552bb4541c1b2622766762de799904f343092642",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
