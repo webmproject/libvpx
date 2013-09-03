@@ -16,6 +16,24 @@
       "revId": "161e90b7ea0e006d24c78bf3d8636cabd0f0212c",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdH///Z0\u003d",
+        "filename": "test/dct16x16_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 402,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2013-09-03T22:09:47Z",
+      "side": 1,
+      "message": "done",
+      "parentUuid": "AAAAdH///bI\u003d",
+      "revId": "161e90b7ea0e006d24c78bf3d8636cabd0f0212c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
