@@ -1547,7 +1547,7 @@ static void get_sb_partition_size_range(VP9_COMP *cpi, MODE_INFO * mi,
 
 // Look at neighboring blocks and set a min and max partition size based on
 // what they chose.
-static void rd_auto_partition_range(VP9_COMP *cpi,
+static void rd_auto_partition_range(VP9_COMP *cpi, int row, int col,
                                     BLOCK_SIZE *min_block_size,
                                     BLOCK_SIZE *max_block_size) {
   MACROBLOCKD *const xd = &cpi->mb.e_mbd;
@@ -1565,38 +1565,48 @@ static void rd_auto_partition_range(VP9_COMP *cpi,
       cpi->sf.auto_min_max_partition_interval;
     *min_block_size = BLOCK_4X4;
     *max_block_size = BLOCK_64X64;
-    return;
   } else {
     --cpi->sf.auto_min_max_partition_count;
-  }
 
-  // Set default values if not left or above neighbour
-  if (!left_in_image && !above_in_image) {
-    *min_block_size = BLOCK_4X4;
-    *max_block_size = BLOCK_64X64;
-  } else {
-    // Default "min to max" and "max to min"
-    *min_block_size = BLOCK_64X64;
-    *max_block_size = BLOCK_4X4;
+    // Set default values if no left or above neighbour
+    if (!left_in_image && !above_in_image) {
+      *min_block_size = BLOCK_4X4;
+      *max_block_size = BLOCK_64X64;
+    } else {
+      VP9_COMMON *const cm = &cpi->common;
+      int row8x8_remaining = cm->cur_tile_mi_row_end - row;
+      int col8x8_remaining = cm->cur_tile_mi_col_end - col;
+      int bh, bw;
 
-    // Find the min and max partition sizes used in the left SB64
-    if (left_in_image) {
-      left_sb64_mi = &mi[-MI_BLOCK_SIZE];
-      get_sb_partition_size_range(cpi, left_sb64_mi,
-                                  min_block_size, max_block_size);
+      // Default "min to max" and "max to min"
+      *min_block_size = BLOCK_64X64;
+      *max_block_size = BLOCK_4X4;
+
+      // Find the min and max partition sizes used in the left SB64
+      if (left_in_image) {
+        left_sb64_mi = &mi[-MI_BLOCK_SIZE];
+        get_sb_partition_size_range(cpi, left_sb64_mi,
+                                    min_block_size, max_block_size);
+      }
+
+      // Find the min and max partition sizes used in the above SB64 taking
+      // the values found for left as a starting point.
+      if (above_in_image) {
+        above_sb64_mi = &mi[-xd->mode_info_stride * MI_BLOCK_SIZE];
+        get_sb_partition_size_range(cpi, above_sb64_mi,
+                                    min_block_size, max_block_size);
+      }
+
+      // Give a bit of leaway either side of the observed min and max
+      *min_block_size = min_partition_size[*min_block_size];
+      *max_block_size = max_partition_size[*max_block_size];
+
+      // Check border cases where max and min from neighbours may not be legal.
+      *max_block_size = find_partition_size(*max_block_size,
+                                            row8x8_remaining, col8x8_remaining,
+                                            &bh, &bw);
+      *min_block_size = MIN(*min_block_size, *max_block_size);
     }
-
-    // Find the min and max partition sizes used in the above SB64 taking
-    // the values found for left as a starting point.
-    if (above_in_image) {
-      above_sb64_mi = &mi[-xd->mode_info_stride * MI_BLOCK_SIZE];
-      get_sb_partition_size_range(cpi, above_sb64_mi,
-                                  min_block_size, max_block_size);
-    }
-
-    // give a bit of leaway either side of the observed min and max
-    *min_block_size = min_partition_size[*min_block_size];
-    *max_block_size = max_partition_size[*max_block_size];
   }
 }
 
@@ -2025,7 +2035,7 @@ static void encode_sb_row(VP9_COMP *cpi, int mi_row, TOKENEXTRA **tp,
           // If required set upper and lower partition size limits
           if (cpi->sf.auto_min_max_partition_size) {
             set_offsets(cpi, mi_row, mi_col, BLOCK_64X64);
-            rd_auto_partition_range(cpi,
+            rd_auto_partition_range(cpi, mi_row, mi_col,
                                     &cpi->sf.min_partition_size,
                                     &cpi->sf.max_partition_size);
           }
@@ -2041,7 +2051,8 @@ static void encode_sb_row(VP9_COMP *cpi, int mi_row, TOKENEXTRA **tp,
       // If required set upper and lower partition size limits
       if (cpi->sf.auto_min_max_partition_size) {
         set_offsets(cpi, mi_row, mi_col, BLOCK_64X64);
-        rd_auto_partition_range(cpi, &cpi->sf.min_partition_size,
+        rd_auto_partition_range(cpi, mi_row, mi_col,
+                                &cpi->sf.min_partition_size,
                                 &cpi->sf.max_partition_size);
       }
 
