@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdH///b0\u003d",
+        "filename": "vp9/encoder/vp9_bitstream.c",
+        "patchSetId": 19
+      },
+      "lineNbr": 537,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2013-09-04T14:20:35Z",
+      "side": 1,
+      "message": "I don\u0027t.  Bad rebase.",
+      "parentUuid": "AAAAdH///eg\u003d",
+      "revId": "4e332ae38c34f66a97e80702b37ba24923a13171",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdH///ek\u003d",
         "filename": "vp9/encoder/vp9_encodeframe.c",
         "patchSetId": 19
@@ -47,6 +65,24 @@
       "writtenOn": "2013-09-03T14:17:05Z",
       "side": 1,
       "message": "I don\u0027t understand why you needed to change all the functions to add a new pointer to above or left?   Seems to me if the grid was the same size as the original was before the code should have worked as before no?",
+      "revId": "4e332ae38c34f66a97e80702b37ba24923a13171",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdH///as\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 19
+      },
+      "lineNbr": 1218,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2013-09-04T14:20:35Z",
+      "side": 1,
+      "message": "Inside above_block_mode/left_block_mode, we look at the above and left mode info, depending on the block index (always zero here).  These locals should be pulled out of the loop instead.",
+      "parentUuid": "AAAAdH///eQ\u003d",
       "revId": "4e332ae38c34f66a97e80702b37ba24923a13171",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
