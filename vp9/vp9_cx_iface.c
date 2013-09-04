@@ -888,7 +888,7 @@ static vpx_codec_err_t get_reference(vpx_codec_alg_priv_t *ctx,
 static vpx_codec_err_t vp9e_set_previewpp(vpx_codec_alg_priv_t *ctx,
                                           int ctr_id,
                                           va_list args) {
-#if CONFIG_POSTPROC
+#if CONFIG_VP9_POSTPROC
   vp8_postproc_cfg_t *data = va_arg(args, vp8_postproc_cfg_t *);
   (void)ctr_id;
 

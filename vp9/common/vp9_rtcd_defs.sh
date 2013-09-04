@@ -237,7 +237,7 @@ specialize vp9_loop_filter_horizontal_edge mmx neon
 #
 # post proc
 #
-if [ "$CONFIG_POSTPROC" = "yes" ]; then
+if [ "$CONFIG_VP9_POSTPROC" = "yes" ]; then
 prototype void vp9_mbpost_proc_down "uint8_t *dst, int pitch, int rows, int cols, int flimit"
 specialize vp9_mbpost_proc_down mmx sse2
 vp9_mbpost_proc_down_sse2=vp9_mbpost_proc_down_xmm

@@ -28,7 +28,7 @@
 #include "vp9/encoder/vp9_segmentation.h"
 #include "./vp9_rtcd.h"
 #include "./vpx_scale_rtcd.h"
-#if CONFIG_POSTPROC
+#if CONFIG_VP9_POSTPROC
 #include "vp9/common/vp9_postproc.h"
 #endif
 #include "vpx_mem/vpx_mem.h"
@@ -2895,7 +2895,7 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
     set_mvcost(&cpi->mb);
   }
 
-#if CONFIG_POSTPROC
+#if CONFIG_VP9_POSTPROC
 
   if (cpi->oxcf.noise_sensitivity > 0) {
     int l = 0;
@@ -3954,7 +3954,7 @@ int vp9_get_compressed_data(VP9_PTR ptr, unsigned int *frame_flags,
         {
           double frame_psnr2, frame_ssim2 = 0;
           double weight = 0;
-#if CONFIG_POSTPROC
+#if CONFIG_VP9_POSTPROC
           vp9_deblock(cm->frame_to_show, &cm->post_proc_buffer,
                       cm->lf.filter_level * 10 / 6);
 #endif
@@ -4030,7 +4030,7 @@ int vp9_get_preview_raw_frame(VP9_PTR comp, YV12_BUFFER_CONFIG *dest,
     return -1;
   else {
     int ret;
-#if CONFIG_POSTPROC
+#if CONFIG_VP9_POSTPROC
     ret = vp9_post_proc_frame(&cpi->common, dest, flags);
 #else
 
@@ -4044,7 +4044,7 @@ int vp9_get_preview_raw_frame(VP9_PTR comp, YV12_BUFFER_CONFIG *dest,
       ret = -1;
     }
 
-#endif // !CONFIG_POSTPROC
+#endif  // !CONFIG_VP9_POSTPROC
     vp9_clear_system_state();
     return ret;
   }

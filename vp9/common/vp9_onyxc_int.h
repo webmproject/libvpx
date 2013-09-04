@@ -20,7 +20,7 @@
 #include "vp9/common/vp9_entropymode.h"
 #include "vp9/common/vp9_quant_common.h"
 
-#if CONFIG_POSTPROC
+#if CONFIG_VP9_POSTPROC
 #include "vp9/common/vp9_postproc.h"
 #endif
 
@@ -201,7 +201,7 @@ typedef struct VP9Common {
   unsigned int current_video_frame;
   int version;
 
-#if CONFIG_POSTPROC
+#if CONFIG_VP9_POSTPROC
   struct postproc_state  postproc_state;
 #endif
 
