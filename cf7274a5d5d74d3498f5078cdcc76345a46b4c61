@@ -1,0 +1,174 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdH///SY\u003d",
+        "filename": "vp9/common/arm/neon/vp9_short_iht4x4_add_neon.asm",
+        "patchSetId": 1
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2013-09-04T18:11:39Z",
+      "side": 1,
+      "message": "nit:d19",
+      "revId": "cf7274a5d5d74d3498f5078cdcc76345a46b4c61",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdH///SQ\u003d",
+        "filename": "vp9/common/arm/neon/vp9_short_iht4x4_add_neon.asm",
+        "patchSetId": 1
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2013-09-04T18:11:39Z",
+      "side": 1,
+      "message": "nit: Probably should add in the comment that d0 must contain cospi_8_64, d1 ..., and d2",
+      "revId": "cf7274a5d5d74d3498f5078cdcc76345a46b4c61",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdH///SM\u003d",
+        "filename": "vp9/common/arm/neon/vp9_short_iht4x4_add_neon.asm",
+        "patchSetId": 1
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2013-09-04T18:11:39Z",
+      "side": 1,
+      "message": "nit:d19",
+      "revId": "cf7274a5d5d74d3498f5078cdcc76345a46b4c61",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdH///SI\u003d",
+        "filename": "vp9/common/arm/neon/vp9_short_iht4x4_add_neon.asm",
+        "patchSetId": 1
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2013-09-04T18:11:39Z",
+      "side": 1,
+      "message": "nit:80 chars",
+      "revId": "cf7274a5d5d74d3498f5078cdcc76345a46b4c61",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdH///Rk\u003d",
+        "filename": "vp9/common/arm/neon/vp9_short_iht4x4_add_neon.asm",
+        "patchSetId": 1
+      },
+      "lineNbr": 65,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2013-09-04T18:11:39Z",
+      "side": 1,
+      "message": "Move this up one, between addw and subw and you should save a couple of cycles.",
+      "revId": "cf7274a5d5d74d3498f5078cdcc76345a46b4c61",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdH///Rg\u003d",
+        "filename": "vp9/common/arm/neon/vp9_short_iht4x4_add_neon.asm",
+        "patchSetId": 1
+      },
+      "lineNbr": 72,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2013-09-04T18:11:39Z",
+      "side": 1,
+      "message": "Move this up one, between the vsub of q11 and you should save 2 cycles.",
+      "revId": "cf7274a5d5d74d3498f5078cdcc76345a46b4c61",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdH///RU\u003d",
+        "filename": "vp9/common/arm/neon/vp9_short_iht4x4_add_neon.asm",
+        "patchSetId": 1
+      },
+      "lineNbr": 77,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2013-09-04T18:11:39Z",
+      "side": 1,
+      "message": "Move this up one and you should save a cycle.",
+      "revId": "cf7274a5d5d74d3498f5078cdcc76345a46b4c61",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdH///Q0\u003d",
+        "filename": "vp9/common/arm/neon/vp9_short_iht4x4_add_neon.asm",
+        "patchSetId": 1
+      },
+      "lineNbr": 125,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2013-09-04T18:11:39Z",
+      "side": 1,
+      "message": "If you move these instructions up two, after vdup d3, r0 (or one after d4, r3) you should save a cycle.",
+      "revId": "cf7274a5d5d74d3498f5078cdcc76345a46b4c61",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdH///RA\u003d",
+        "filename": "vp9/common/arm/neon/vp9_short_iht4x4_add_neon.asm",
+        "patchSetId": 1
+      },
+      "lineNbr": 157,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2013-09-04T18:11:39Z",
+      "side": 1,
+      "message": "This cmp and branch are not needed as the execution will drop through.",
+      "revId": "cf7274a5d5d74d3498f5078cdcc76345a46b4c61",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdH///RQ\u003d",
+        "filename": "vp9/common/arm/neon/vp9_short_iht4x4_add_neon.asm",
+        "patchSetId": 1
+      },
+      "lineNbr": 164,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2013-09-04T18:11:39Z",
+      "side": 1,
+      "message": "nit: our functions/labels every else are lower case.",
+      "revId": "cf7274a5d5d74d3498f5078cdcc76345a46b4c61",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
