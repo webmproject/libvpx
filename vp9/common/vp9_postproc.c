@@ -1011,7 +1011,8 @@ int vp9_post_proc_frame(struct VP9Common *cm,
   /* handle problem with extending borders */
   dest->y_width = cm->width;
   dest->y_height = cm->height;
-  dest->uv_height = dest->y_height / 2;
+  dest->uv_width = dest->y_width >> cm->subsampling_x;
+  dest->uv_height = dest->y_height >> cm->subsampling_y;
 
   return 0;
 }

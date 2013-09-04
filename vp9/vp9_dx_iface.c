@@ -20,7 +20,7 @@
 #include "vp9/decoder/vp9_read_bit_buffer.h"
 #include "vp9/vp9_iface_common.h"
 
-#define VP9_CAP_POSTPROC (CONFIG_POSTPROC ? VPX_CODEC_CAP_POSTPROC : 0)
+#define VP9_CAP_POSTPROC (CONFIG_VP9_POSTPROC ? VPX_CODEC_CAP_POSTPROC : 0)
 typedef vpx_codec_stream_info_t  vp9_stream_info_t;
 
 /* Structures for handling memory allocations */
@@ -596,7 +596,7 @@ static vpx_codec_err_t get_reference(vpx_codec_alg_priv_t *ctx,
 static vpx_codec_err_t set_postproc(vpx_codec_alg_priv_t *ctx,
                                     int ctr_id,
                                     va_list args) {
-#if CONFIG_POSTPROC
+#if CONFIG_VP9_POSTPROC
   vp8_postproc_cfg_t *data = va_arg(args, vp8_postproc_cfg_t *);
 
   if (data) {
