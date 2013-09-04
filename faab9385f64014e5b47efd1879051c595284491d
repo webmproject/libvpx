@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdH///Zs\u003d",
+        "filename": "test/dct32x32_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 71,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2013-09-04T01:32:43Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdH///aQ\u003d",
+      "revId": "faab9385f64014e5b47efd1879051c595284491d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdH///aI\u003d",
         "filename": "test/dct32x32_test.cc",
         "patchSetId": 2
@@ -30,6 +48,24 @@
       "writtenOn": "2013-09-03T21:54:51Z",
       "side": 1,
       "message": "drop this line",
+      "revId": "faab9385f64014e5b47efd1879051c595284491d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdH///Zo\u003d",
+        "filename": "test/dct32x32_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 73,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2013-09-04T01:32:43Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdH///aI\u003d",
       "revId": "faab9385f64014e5b47efd1879051c595284491d",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdH///ZQ\u003d",
+        "filename": "test/dct32x32_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 80,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2013-09-04T01:32:43Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdH///aE\u003d",
+      "revId": "faab9385f64014e5b47efd1879051c595284491d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdH///aM\u003d",
         "filename": "test/dct32x32_test.cc",
         "patchSetId": 2
@@ -64,6 +118,24 @@
       "writtenOn": "2013-09-03T21:54:51Z",
       "side": 1,
       "message": "drop this line",
+      "revId": "faab9385f64014e5b47efd1879051c595284491d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdH///Zk\u003d",
+        "filename": "test/dct32x32_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 100,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2013-09-04T01:32:43Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdH///aM\u003d",
       "revId": "faab9385f64014e5b47efd1879051c595284491d",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
