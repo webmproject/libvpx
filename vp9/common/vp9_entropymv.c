@@ -149,8 +149,6 @@ int vp9_get_mv_mag(MV_CLASS_TYPE c, int offset) {
 static void inc_mv_component(int v, nmv_component_counts *comp_counts,
                              int incr, int usehp) {
   int s, z, c, o, d, e, f;
-  if (!incr)
-    return;
   assert (v != 0);            /* should not be zero */
   s = v < 0;
   comp_counts->sign[s] += incr;
@@ -177,33 +175,22 @@ static void inc_mv_component(int v, nmv_component_counts *comp_counts,
   }
 }
 
-static void counts_to_context(nmv_component_counts *mvcomp, int usehp) {
-  int v;
-  vpx_memset(mvcomp->sign, 0, sizeof(nmv_component_counts) - sizeof(mvcomp->mvcount));
-  for (v = 1; v <= MV_MAX; v++) {
-    inc_mv_component(-v, mvcomp, mvcomp->mvcount[MV_MAX - v], usehp);
-    inc_mv_component( v, mvcomp, mvcomp->mvcount[MV_MAX + v], usehp);
-  }
-}
 
 void vp9_inc_mv(const MV *mv,  nmv_context_counts *counts) {
   const MV_JOINT_TYPE j = vp9_get_mv_joint(mv);
   ++counts->joints[j];
 
-  if (mv_joint_vertical(j))
-    ++counts->comps[0].mvcount[MV_MAX + mv->row];
+  if (mv_joint_vertical(j)) {
+    inc_mv_component(mv->row, &counts->comps[0], 1, 1);
+  }
 
-  if (mv_joint_horizontal(j))
-    ++counts->comps[1].mvcount[MV_MAX + mv->col];
+  if (mv_joint_horizontal(j)) {
+    inc_mv_component(mv->col, &counts->comps[1], 1, 1);
+  }
 }
 
 static vp9_prob adapt_prob(vp9_prob prep, const unsigned int ct[2]) {
   return merge_probs2(prep, ct, MV_COUNT_SAT, MV_MAX_UPDATE_FACTOR);
-}
-
-void vp9_counts_process(nmv_context_counts *nmv_count, int usehp) {
-  counts_to_context(&nmv_count->comps[0], usehp);
-  counts_to_context(&nmv_count->comps[1], usehp);
 }
 
 static unsigned int adapt_probs(unsigned int i,
@@ -234,8 +221,6 @@ void vp9_adapt_mv_probs(VP9_COMMON *cm, int allow_hp) {
   nmv_context *ctx = &cm->fc.nmvc;
   nmv_context *pre_ctx = &pre_fc->nmvc;
   nmv_context_counts *cts = &cm->counts.mv;
-
-  vp9_counts_process(cts, allow_hp);
 
   adapt_probs(0, vp9_mv_joint_tree, ctx->joints, pre_ctx->joints, cts->joints);
 

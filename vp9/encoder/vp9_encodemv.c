@@ -155,7 +155,6 @@ static void counts_to_nmv_context(
     unsigned int (*branch_ct_class0_hp)[2],
     unsigned int (*branch_ct_hp)[2]) {
   int i, j, k;
-  vp9_counts_process(nmv_count, usehp);
   vp9_tree_probs_from_distribution(vp9_mv_joint_tree,
                                    prob->joints,
                                    branch_ct_joint,
