@@ -39,7 +39,8 @@ static void variance(const uint8_t *src_ptr,
   }
 }
 
-#if CONFIG_MASKED_COMPOUND
+#if ((CONFIG_MASKED_INTERINTRA && CONFIG_INTERINTRA) || \
+    CONFIG_MASKED_INTERINTER)
 static void masked_variance(const uint8_t *src_ptr,
                             int  src_stride,
                             const uint8_t *ref_ptr,

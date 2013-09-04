@@ -1726,7 +1726,8 @@ VP9_PTR vp9_create_compressor(VP9_CONFIG *oxcf) {
       vp9_sub_pixel_avg_variance4x4, NULL, NULL, NULL,
       vp9_sad4x4x3, vp9_sad4x4x8, vp9_sad4x4x4d)
 
-#if CONFIG_MASKED_COMPOUND
+#if ((CONFIG_MASKED_INTERINTRA && CONFIG_INTERINTRA) || \
+    CONFIG_MASKED_INTERINTER)
 #define MBFP(BT, MSDF, MVF, MSVF) \
   cpi->fn_ptr[BT].msdf            = MSDF; \
   cpi->fn_ptr[BT].mvf             = MVF; \
@@ -2530,7 +2531,7 @@ static void select_interintra_mode(VP9_COMP *cpi) {
   }
 }
 
-#if CONFIG_MASKED_COMPOUND
+#if CONFIG_MASKED_INTERINTRA
 static void select_masked_interintra_mode(VP9_COMP *cpi) {
   static const double threshold = 1/100.0;
   VP9_COMMON *cm = &cpi->common;
@@ -2544,7 +2545,7 @@ static void select_masked_interintra_mode(VP9_COMP *cpi) {
 #endif
 #endif
 
-#if CONFIG_MASKED_COMPOUND
+#if CONFIG_MASKED_INTERINTER
 static void select_masked_compound_mode(VP9_COMP *cpi) {
   static const double threshold = 1/128.0;
   VP9_COMMON *cm = &cpi->common;
@@ -2964,13 +2965,13 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
 #if CONFIG_INTERINTRA
   if (cm->current_video_frame == 0) {
     cm->use_interintra = 1;
-#if CONFIG_MASKED_COMPOUND
+#if CONFIG_MASKED_INTERINTRA
     cm->use_masked_interintra = 1;
 #endif
   }
 #endif
 
-#if CONFIG_MASKED_COMPOUND
+#if CONFIG_MASKED_INTERINTER
   if (cm->current_video_frame == 0) {
     cm->use_masked_compound = 0;
   }
@@ -3315,11 +3316,11 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
     counts->mv = cpi->NMVcount;
 #if CONFIG_INTERINTRA
     vp9_copy(counts->interintra, cpi->interintra_count);
-#if CONFIG_MASKED_COMPOUND
+#if CONFIG_MASKED_INTERINTRA
     vp9_copy(counts->masked_interintra, cpi->masked_interintra_count);
 #endif
 #endif
-#if CONFIG_MASKED_COMPOUND
+#if CONFIG_MASKED_INTERINTER
     vp9_copy(counts->masked_compound, cpi->masked_compound_counts);
 #endif
     if (!cpi->common.error_resilient_mode &&
@@ -3332,7 +3333,7 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
 #if CONFIG_INTERINTRA
   if (cm->frame_type != KEY_FRAME) {
     select_interintra_mode(cpi);
-#if CONFIG_MASKED_COMPOUND
+#if CONFIG_MASKED_INTERINTRA
     if (cpi->common.use_interintra)
       select_masked_interintra_mode(cpi);
     else
@@ -3340,7 +3341,7 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
 #endif
   }
 #endif
-#if CONFIG_MASKED_COMPOUND
+#if CONFIG_MASKED_INTERINTER
   if (cm->frame_type != KEY_FRAME)
     select_masked_compound_mode(cpi);
 #endif

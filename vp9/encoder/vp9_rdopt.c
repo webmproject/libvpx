@@ -2841,7 +2841,8 @@ static void joint_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
   vpx_free(second_pred);
 }
 
-#if CONFIG_MASKED_COMPOUND
+#if ((CONFIG_MASKED_INTERINTRA && CONFIG_INTERINTRA)|| \
+    CONFIG_MASKED_INTERINTER)
 static void do_masked_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
                                     uint8_t *mask, int mask_stride,
                                     BLOCK_SIZE_TYPE bsize,
@@ -2930,7 +2931,9 @@ static void do_masked_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
       xd->plane[i].pre[is_second] = backup_yv12[i];
   }
 }
+#endif
 
+#if CONFIG_MASKED_INTERINTER
 static void do_masked_motion_search_indexed(VP9_COMP *cpi, MACROBLOCK *x,
                                             int mask_index,
                                             BLOCK_SIZE_TYPE bsize,
@@ -2974,7 +2977,7 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
 #if CONFIG_INTERINTRA
                                  int *compmode_interintra_cost,
 #endif
-#if CONFIG_MASKED_COMPOUND
+#if CONFIG_MASKED_INTERINTER
                                  int *compmode_masked_cost,
 #endif
                                  int *rate_y, int64_t *distortion_y,
@@ -2992,7 +2995,7 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
 #if CONFIG_INTERINTRA
   const int is_comp_interintra_pred = (mbmi->ref_frame[1] == INTRA_FRAME);
 #endif
-#if CONFIG_MASKED_COMPOUND || CONFIG_INTERINTRA
+#if CONFIG_MASKED_INTERINTER || CONFIG_INTERINTRA
   int rate_mv_tmp = 0;
 #endif
   const int num_refs = is_comp_pred ? 2 : 1;
@@ -3018,7 +3021,7 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
       is_interintra_allowed(mbmi->sb_type)) {
     extend_for_interintra(xd, bsize);
   }
-#if CONFIG_MASKED_COMPOUND
+#if CONFIG_MASKED_INTERINTRA
   mbmi->use_masked_interintra = 0;
   mbmi->interintra_mask_index = 0;
   mbmi->interintra_uv_mask_index = 0;
@@ -3046,20 +3049,20 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
       if (frame_mv[refs[0]].as_int == INVALID_MV ||
           frame_mv[refs[1]].as_int == INVALID_MV)
         return INT64_MAX;
-#if !(CONFIG_MASKED_COMPOUND || CONFIG_INTERINTRA)
+#if !(CONFIG_MASKED_INTERINTER || CONFIG_INTERINTRA)
       *rate2 += rate_mv;
 #endif
     } else {
       int_mv tmp_mv;
       single_motion_search(cpi, x, bsize, mi_row, mi_col, &tmp_mv, &rate_mv);
-#if !(CONFIG_MASKED_COMPOUND || CONFIG_INTERINTRA)
+#if !(CONFIG_MASKED_INTERINTER || CONFIG_INTERINTRA)
       *rate2 += rate_mv;
 #endif
       frame_mv[refs[0]].as_int =
           xd->mode_info_context->bmi[0].as_mv[0].as_int = tmp_mv.as_int;
       single_newmv[refs[0]].as_int = tmp_mv.as_int;
     }
-#if CONFIG_MASKED_COMPOUND || CONFIG_INTERINTRA
+#if CONFIG_MASKED_INTERINTER || CONFIG_INTERINTRA
       rate_mv_tmp = rate_mv;
 #endif
   }
@@ -3256,7 +3259,7 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
     int64_t best_interintra_rd = INT64_MAX;
     int rmode, rate_sum;
     int64_t dist_sum;
-#if CONFIG_MASKED_COMPOUND
+#if CONFIG_MASKED_INTERINTRA
 #define MASKED_INTERINTRA_REFINE_SEARCH
     int maskbits, mask_types, mask_index, best_mask_index = 0;
     int64_t best_interintra_rd_nomask, best_interintra_rd_mask = INT64_MAX;
@@ -3288,7 +3291,7 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
 #if !SEPARATE_INTERINTRA_UV
     mbmi->interintra_uv_mode = best_interintra_mode;
 #endif
-#if CONFIG_MASKED_COMPOUND
+#if CONFIG_MASKED_INTERINTRA
     maskbits = get_mask_bits_interintra(bsize);
     rmode = x->mbmode_cost[mbmi->interintra_mode];
     if (maskbits) {
@@ -3319,10 +3322,14 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
 #ifdef MASKED_INTERINTRA_REFINE_SEARCH
       // Refine motion vector
       if (this_mode == NEWMV) {
+        int j;
         mbmi->interintra_mask_index = best_mask_index;
         mbmi->interintra_uv_mask_index = best_mask_index;
         vp9_generate_masked_weight_interintra(best_mask_index, bsize,
                                               bh, bw, mask, bw);
+        for (i = 0; i < bh; ++i)
+            for (j = 0; j < bw; ++j)
+              mask[i * bw + j] = 64 - mask[i * bw + j];
         do_masked_motion_search(cpi, x, mask, bw, bsize, refs[0],
                                 mi_row, mi_col, &tmp_mv, &tmp_rate_mv, 0);
         mbmi->mv[0].as_int = tmp_mv.as_int;
@@ -3366,7 +3373,7 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
 #endif
       if (best_interintra_rd_mask < best_interintra_rd_nomask) {
         mbmi->use_masked_interintra = 1;
-        if (cm->use_masked_interintra) {
+        if (cm->use_interintra && cm->use_masked_interintra) {
           mbmi->interintra_mask_index = best_mask_index;
           mbmi->interintra_uv_mask_index = best_mask_index;
 #ifdef MASKED_INTERINTRA_REFINE_SEARCH
@@ -3408,7 +3415,7 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
       *compmode_interintra_cost +=
           x->intra_uv_mode_cost[xd->frame_type][mbmi->interintra_uv_mode];
 #endif
-#if CONFIG_MASKED_COMPOUND
+#if CONFIG_MASKED_INTERINTRA
       if (get_mask_bits_interintra(bsize) && cm->use_masked_interintra) {
         *compmode_interintra_cost += vp9_cost_bit(
                                      cm->fc.masked_interintra_prob[bsize],
@@ -3422,7 +3429,7 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
   }
 #endif
 
-#if CONFIG_MASKED_COMPOUND
+#if CONFIG_MASKED_INTERINTER
   if (is_comp_pred && get_mask_bits(bsize)) {
     int mask_index, best_mask_index = -1, rs;
     int rate_sum;
@@ -3562,9 +3569,9 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
       *compmode_masked_cost = vp9_cost_bit(cm->fc.masked_compound_prob[bsize],
                                            0);
   }
-#endif  // CONFIG_MASKED_COMPOUND
+#endif  // CONFIG_MASKED_INTERINTER
 
-#if CONFIG_INTERINTRA || CONFIG_MASKED_COMPOUND
+#if CONFIG_INTERINTRA || CONFIG_MASKED_INTERINTER
   *rate2 += rate_mv_tmp;
 #endif
 
@@ -3835,7 +3842,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
   int bhsl = b_height_log2(bsize);
   int bhs = (1 << bhsl) / 4;  // mode_info step for subsize
   int best_skip2 = 0;
-#if CONFIG_INTERINTRA || CONFIG_MASKED_COMPOUND
+#if CONFIG_INTERINTRA || CONFIG_MASKED_INTERINTER
   int64_t best_overall_rd = INT64_MAX;
 #endif
 #if CONFIG_INTERINTRA
@@ -3846,7 +3853,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
 #endif
   int64_t best_intra16_rd = INT64_MAX;
 #endif
-#if CONFIG_MASKED_COMPOUND
+#if CONFIG_MASKED_INTERINTER
   int is_best_masked_compound = 0;
 #endif
 
@@ -3929,7 +3936,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
 #if CONFIG_INTERINTRA
     int compmode_interintra_cost = 0;
 #endif
-#if CONFIG_MASKED_COMPOUND
+#if CONFIG_MASKED_INTERINTER
     int compmode_masked_cost = 0;
 #endif
     int rate2 = 0, rate_y = 0, rate_uv = 0;
@@ -4036,7 +4043,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
     mbmi->interintra_mode = (MB_PREDICTION_MODE)(DC_PRED - 1);
     mbmi->interintra_uv_mode = (MB_PREDICTION_MODE)(DC_PRED - 1);
 #endif
-#if CONFIG_MASKED_COMPOUND
+#if CONFIG_MASKED_INTERINTER
     mbmi->use_masked_compound = 0;
     mbmi->mask_index = MASK_NONE;
 #endif
@@ -4437,7 +4444,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
 #if CONFIG_INTERINTRA
                                   &compmode_interintra_cost,
 #endif
-#if CONFIG_MASKED_COMPOUND
+#if CONFIG_MASKED_INTERINTER
                                   &compmode_masked_cost,
 #endif
                                   &rate_y, &distortion_y,
@@ -4455,7 +4462,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
       rate2 += compmode_interintra_cost;
     }
 #endif
-#if CONFIG_MASKED_COMPOUND
+#if CONFIG_MASKED_INTERINTER
     if ((cpi->common.comp_pred_mode == HYBRID_PREDICTION ||
         cpi->common.comp_pred_mode == COMP_PREDICTION_ONLY) &&
         cpi->common.use_masked_compound)
@@ -4566,13 +4573,13 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
         best_filter_rd[i] = MIN(best_filter_rd[i], this_rd);
     }
 
-#if CONFIG_INTERINTRA || CONFIG_MASKED_COMPOUND
+#if CONFIG_INTERINTRA || CONFIG_MASKED_INTERINTER
     if (this_rd < best_overall_rd) {
       best_overall_rd = this_rd;
 #if CONFIG_INTERINTRA
       is_best_interintra = (second_ref_frame == INTRA_FRAME);
 #endif
-#if CONFIG_MASKED_COMPOUND
+#if CONFIG_MASKED_INTERINTER
       is_best_masked_compound = (mbmi->mask_index != MASK_NONE);
 #endif
     }
@@ -4791,7 +4798,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
   ++cpi->interintra_select_count[is_best_interintra];
 #endif
 
-#if CONFIG_MASKED_COMPOUND
+#if CONFIG_MASKED_INTERINTER
 // diagnostics
   if ((cpi->common.comp_pred_mode == HYBRID_PREDICTION ||
       cpi->common.comp_pred_mode == COMP_PREDICTION_ONLY) &&

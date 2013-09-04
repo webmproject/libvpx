@@ -602,7 +602,7 @@ static void build_intra_predictors_for_2nd_block_interintra
   }
 }
 
-#if CONFIG_MASKED_COMPOUND
+#if CONFIG_MASKED_INTERINTRA
 #define MASK_WEIGHT_BITS_INTERINTRA 6
 
 static int get_masked_weight_interintra(int m) {
@@ -888,7 +888,7 @@ void vp9_generate_hard_mask_interintra(int mask_index, BLOCK_SIZE_TYPE sb_type,
 #endif
 
 static void combine_interintra(MB_PREDICTION_MODE mode,
-#if CONFIG_MASKED_COMPOUND
+#if CONFIG_MASKED_INTERINTRA
                                int use_masked_interintra,
                                int mask_index,
                                BLOCK_SIZE_TYPE bsize,
@@ -919,7 +919,7 @@ static void combine_interintra(MB_PREDICTION_MODE mode,
                     size == 8  ? 8 : 16);
   int i, j;
 
-#if CONFIG_MASKED_COMPOUND
+#if CONFIG_MASKED_INTERINTRA
   uint8_t mask[4096];
   if (use_masked_interintra && get_mask_bits_interintra(bsize))
     vp9_generate_masked_weight_interintra(mask_index, bsize, bh, bw, mask, bw);
@@ -931,7 +931,7 @@ static void combine_interintra(MB_PREDICTION_MODE mode,
         for (j = 0; j < bw; ++j) {
           int k = i * interstride + j;
           int scale = weights1d[i * size_scale];
-#if CONFIG_MASKED_COMPOUND
+#if CONFIG_MASKED_INTERINTRA
           int m = mask[i * bw + j];
           if (use_masked_interintra && get_mask_bits_interintra(bsize))
               interpred[k] = (intrapred[i * intrastride + j] * m +
@@ -954,7 +954,7 @@ static void combine_interintra(MB_PREDICTION_MODE mode,
         for (j = 0; j < bw; ++j) {
           int k = i * interstride + j;
           int scale = weights1d[j * size_scale];
-#if CONFIG_MASKED_COMPOUND
+#if CONFIG_MASKED_INTERINTRA
           int m = mask[i * bw + j];
           if (use_masked_interintra && get_mask_bits_interintra(bsize))
               interpred[k] = (intrapred[i * intrastride + j] * m +
@@ -979,7 +979,7 @@ static void combine_interintra(MB_PREDICTION_MODE mode,
           int k = i * interstride + j;
           int scale = (weights1d[i * size_scale] * 3 +
                        weights1d[j * size_scale]) >> 2;
-#if CONFIG_MASKED_COMPOUND
+#if CONFIG_MASKED_INTERINTRA
           int m = mask[i * bw + j];
           if (use_masked_interintra && get_mask_bits_interintra(bsize))
               interpred[k] = (intrapred[i * intrastride + j] * m +
@@ -1004,7 +1004,7 @@ static void combine_interintra(MB_PREDICTION_MODE mode,
           int k = i * interstride + j;
           int scale = (weights1d[j * size_scale] * 3 +
                        weights1d[i * size_scale]) >> 2;
-#if CONFIG_MASKED_COMPOUND
+#if CONFIG_MASKED_INTERINTRA
           int m = mask[i * bw + j];
           if (use_masked_interintra && get_mask_bits_interintra(bsize))
               interpred[k] = (intrapred[i * intrastride + j] * m +
@@ -1027,7 +1027,7 @@ static void combine_interintra(MB_PREDICTION_MODE mode,
         for (j = 0; j < bw; ++j) {
           int k = i * interstride + j;
           int scale = weights1d[(i < j ? i : j) * size_scale];
-#if CONFIG_MASKED_COMPOUND
+#if CONFIG_MASKED_INTERINTRA
           int m = mask[i * bw + j];
           if (use_masked_interintra && get_mask_bits_interintra(bsize))
               interpred[k] = (intrapred[i * intrastride + j] * m +
@@ -1051,7 +1051,7 @@ static void combine_interintra(MB_PREDICTION_MODE mode,
           int k = i * interstride + j;
           int scale = (weights1d[i * size_scale] +
                        weights1d[j * size_scale]) >> 1;
-#if CONFIG_MASKED_COMPOUND
+#if CONFIG_MASKED_INTERINTRA
           int m = mask[i * bw + j];
           if (use_masked_interintra && get_mask_bits_interintra(bsize))
               interpred[k] = (intrapred[i * intrastride + j] * m +
@@ -1075,7 +1075,7 @@ static void combine_interintra(MB_PREDICTION_MODE mode,
       for (i = 0; i < bh; ++i) {
         for (j = 0; j < bw; ++j) {
           int k = i * interstride + j;
-#if CONFIG_MASKED_COMPOUND
+#if CONFIG_MASKED_INTERINTRA
           int m = mask[i * bw + j];
           if (use_masked_interintra && get_mask_bits_interintra(bsize))
               interpred[k] = (intrapred[i * intrastride + j] * m +
@@ -1141,7 +1141,7 @@ void vp9_build_interintra_predictors_sby(MACROBLOCKD *xd,
       xd->mode_info_context->mbmi.interintra_mode, bw, bh,
       xd->up_available, xd->left_available, xd->right_available);
   combine_interintra(xd->mode_info_context->mbmi.interintra_mode,
-#if CONFIG_MASKED_COMPOUND
+#if CONFIG_MASKED_INTERINTRA
                      xd->mode_info_context->mbmi.use_masked_interintra,
                      xd->mode_info_context->mbmi.interintra_mask_index,
                      bsize,
@@ -1169,14 +1169,14 @@ void vp9_build_interintra_predictors_sbuv(MACROBLOCKD *xd,
       xd->mode_info_context->mbmi.interintra_uv_mode, bw, bh,
       xd->up_available, xd->left_available, xd->right_available);
   combine_interintra(xd->mode_info_context->mbmi.interintra_uv_mode,
-#if CONFIG_MASKED_COMPOUND
+#if CONFIG_MASKED_INTERINTRA
                      xd->mode_info_context->mbmi.use_masked_interintra,
                      xd->mode_info_context->mbmi.interintra_uv_mask_index,
                      bsize,
 #endif
                      upred, uvstride, uintrapredictor, bw, bw, bh);
   combine_interintra(xd->mode_info_context->mbmi.interintra_uv_mode,
-#if CONFIG_MASKED_COMPOUND
+#if CONFIG_MASKED_INTERINTRA
                      xd->mode_info_context->mbmi.use_masked_interintra,
                      xd->mode_info_context->mbmi.interintra_uv_mask_index,
                      bsize,

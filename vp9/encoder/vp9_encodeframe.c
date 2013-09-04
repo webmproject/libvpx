@@ -447,7 +447,7 @@ static void update_state(VP9_COMP *cpi, PICK_MODE_CONTEXT *ctx,
 #if SEPARATE_INTERINTRA_UV
         ++cpi->uv_mode_count[mbmi->interintra_mode][mbmi->interintra_uv_mode];
 #endif
-#if CONFIG_MASKED_COMPOUND
+#if CONFIG_MASKED_INTERINTRA
         if (cm->use_masked_interintra &&
             get_mask_bits_interintra(mbmi->sb_type))
           ++cpi->masked_interintra_count[mbmi->sb_type]
@@ -459,7 +459,7 @@ static void update_state(VP9_COMP *cpi, PICK_MODE_CONTEXT *ctx,
     }
 #endif
 
-#if CONFIG_MASKED_COMPOUND
+#if CONFIG_MASKED_INTERINTER
     if (cm->use_masked_compound &&
         cm->comp_pred_mode != SINGLE_PREDICTION_ONLY &&
         is_inter_mode(mbmi->mode) &&
@@ -2041,7 +2041,7 @@ static void init_encode_frame_mb_context(VP9_COMP *cpi) {
 #if CONFIG_INTERINTRA
   vp9_zero(cpi->interintra_count);
   vp9_zero(cpi->interintra_select_count);
-#if CONFIG_MASKED_COMPOUND
+#if CONFIG_MASKED_INTERINTRA
   vp9_zero(cpi->masked_interintra_count);
   vp9_zero(cpi->masked_interintra_select_count);
 #endif
@@ -2049,7 +2049,7 @@ static void init_encode_frame_mb_context(VP9_COMP *cpi) {
 #if CONFIG_FILTERINTRA
   vp9_zero(cm->counts.filterintra);
 #endif
-#if CONFIG_MASKED_COMPOUND
+#if CONFIG_MASKED_INTERINTER
   vp9_zero(cpi->masked_compound_counts);
   vp9_zero(cpi->masked_compound_select_counts);
 #endif

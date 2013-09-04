@@ -956,7 +956,8 @@ unsigned int vp9_sub_pixel_avg_variance4x8_c(const uint8_t *src_ptr,
   return vp9_variance4x8(temp3, 4, dst_ptr, dst_pixels_per_line, sse);
 }
 
-#if CONFIG_MASKED_COMPOUND
+#if ((CONFIG_MASKED_INTERINTRA && CONFIG_INTERINTRA) || \
+    CONFIG_MASKED_INTERINTER)
 unsigned int vp9_masked_variance64x64_c(const uint8_t *src_ptr,
                                         int  source_stride,
                                         const uint8_t *ref_ptr,

@@ -35,7 +35,8 @@ static INLINE unsigned int sad_mx_n_c(const uint8_t *src_ptr,
   return sad;
 }
 
-#if CONFIG_MASKED_COMPOUND
+#if ((CONFIG_MASKED_INTERINTRA && CONFIG_INTERINTRA) || \
+    CONFIG_MASKED_INTERINTER)
 static INLINE unsigned int masked_sad_mx_n_c(const uint8_t *src_ptr,
                                            int src_stride,
                                            const uint8_t *ref_ptr,

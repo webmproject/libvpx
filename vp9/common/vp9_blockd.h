@@ -164,7 +164,7 @@ static INLINE int is_interintra_allowed(BLOCK_SIZE_TYPE sb_type) {
   return ((sb_type >= BLOCK_8X8) && (sb_type < BLOCK_64X64));
 }
 
-#if CONFIG_MASKED_COMPOUND
+#if CONFIG_MASKED_INTERINTRA
 #define MASK_BITS_SML_INTERINTRA   3
 #define MASK_BITS_MED_INTERINTRA   4
 #define MASK_BITS_BIG_INTERINTRA   5
@@ -182,7 +182,7 @@ static INLINE int get_mask_bits_interintra(BLOCK_SIZE_TYPE sb_type) {
 #endif
 #endif
 
-#if CONFIG_MASKED_COMPOUND
+#if CONFIG_MASKED_INTERINTER
 #define MASK_BITS_SML   3
 #define MASK_BITS_MED   4
 #define MASK_BITS_BIG   5
@@ -198,13 +198,13 @@ static inline int get_mask_bits(BLOCK_SIZE_TYPE sb_type) {
   else
     return MASK_BITS_BIG;
 }
-#endif  // CONFIG_MASKED_COMPOUND
+#endif
 
 typedef struct {
   MB_PREDICTION_MODE mode, uv_mode;
 #if CONFIG_INTERINTRA
   MB_PREDICTION_MODE interintra_mode, interintra_uv_mode;
-#if CONFIG_MASKED_COMPOUND
+#if CONFIG_MASKED_INTERINTRA
   int interintra_mask_index;
   int interintra_uv_mask_index;
   int use_masked_interintra;
@@ -236,7 +236,7 @@ typedef struct {
 
   BLOCK_SIZE_TYPE sb_type;
 
-#if CONFIG_MASKED_COMPOUND
+#if CONFIG_MASKED_INTERINTER
   int use_masked_compound;
   int mask_index;
 #endif

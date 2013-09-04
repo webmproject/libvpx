@@ -614,7 +614,8 @@ int vp9_find_best_sub_pixel_comp_iterative(MACROBLOCK *x,
 #undef DIST
 #undef IFMVCV
 #undef CHECK_BETTER
-#if !CONFIG_MASKED_COMPOUND
+#if !((CONFIG_MASKED_INTERINTRA && CONFIG_INTERINTRA) || \
+    CONFIG_MASKED_INTERINTER)
 #undef MIN
 #undef MAX
 #endif
@@ -1167,7 +1168,8 @@ int vp9_diamond_search_sad_c(MACROBLOCK *x,
                                                    mvcost, x->errorperbit);
 }
 
-#if CONFIG_MASKED_COMPOUND
+#if ((CONFIG_MASKED_INTERINTRA && CONFIG_INTERINTRA) || \
+    CONFIG_MASKED_INTERINTER)
 
 #define MVC(r, c)                                       \
     (mvcost ?                                           \
@@ -1662,7 +1664,7 @@ int vp9_masked_full_pixel_diamond(VP9_COMP *cpi, MACROBLOCK *x,
   }
   return bestsme;
 }
-#endif  // CONFIG_MASKED_COMPOUND
+#endif
 
 int vp9_diamond_search_sadx4(MACROBLOCK *x,
                              int_mv *ref_mv, int_mv *best_mv, int search_param,

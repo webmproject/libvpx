@@ -520,7 +520,7 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, MODE_INFO *m, vp9_writer *bc) {
           write_intra_mode(bc, mi->interintra_uv_mode,
                         pc->fc.uv_mode_prob[mi->interintra_mode]);
 #endif
-#if CONFIG_MASKED_COMPOUND
+#if CONFIG_MASKED_INTERINTRA
         if (get_mask_bits_interintra(mi->sb_type) &&
             pc->use_masked_interintra) {
           vp9_write(bc, mi->use_masked_interintra,
@@ -576,7 +576,7 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, MODE_INFO *m, vp9_writer *bc) {
         vp9_encode_mv(cpi, bc, &mi->mv[1].as_mv, &mi->best_second_mv.as_mv,
                       nmvc, allow_hp);
     }
-#if CONFIG_MASKED_COMPOUND
+#if CONFIG_MASKED_INTERINTER
   if (cpi->common.use_masked_compound &&
       cpi->common.comp_pred_mode != SINGLE_PREDICTION_ONLY &&
       is_inter_mode(mode) &&
@@ -1421,7 +1421,7 @@ static void write_uncompressed_header(VP9_COMP *cpi,
       vp9_wb_write_bit(wb, cm->use_interintra);
       if (!cm->use_interintra)
         vp9_zero(cpi->interintra_count);
-#if CONFIG_MASKED_COMPOUND
+#if CONFIG_MASKED_INTERINTRA
       if (!cpi->dummy_packing && cm->use_interintra
           && cm->use_masked_interintra) {
         int k;
@@ -1501,7 +1501,7 @@ static size_t write_compressed_header(VP9_COMP *cpi, uint8_t *data) {
                                     VP9_UPD_INTERINTRA_PROB,
                                     cpi->interintra_count[b]);
       }
-#if CONFIG_MASKED_COMPOUND
+#if CONFIG_MASKED_INTERINTRA
       if (cm->use_masked_interintra) {
         int k;
         for (k = 0; k < BLOCK_SIZE_TYPES; ++k) {
@@ -1535,7 +1535,7 @@ static size_t write_compressed_header(VP9_COMP *cpi, uint8_t *data) {
                                       VP9_MODE_UPDATE_PROB,
                                       cpi->comp_inter_count[i]);
       }
-#if CONFIG_MASKED_COMPOUND
+#if CONFIG_MASKED_INTERINTER
       if (use_compound_pred) {
         if (!cpi->dummy_packing && cm->use_masked_compound) {
           cm->use_masked_compound = 0;
