@@ -77,14 +77,11 @@ static void read_tx_probs(struct tx_probs *tx_probs, vp9_reader *r) {
         vp9_diff_update_prob(r, &tx_probs->p32x32[i][j]);
 }
 
-static void init_dequantizer(VP9_COMMON *cm, MACROBLOCKD *xd) {
+static void setup_plane_dequants(VP9_COMMON *cm, MACROBLOCKD *xd, int q_index) {
   int i;
-  const int segment_id = xd->mode_info_context->mbmi.segment_id;
-  xd->q_index = vp9_get_qindex(&cm->seg, segment_id, cm->base_qindex);
-
-  xd->plane[0].dequant = cm->y_dequant[xd->q_index];
+  xd->plane[0].dequant = cm->y_dequant[q_index];
   for (i = 1; i < MAX_MB_PLANE; i++)
-    xd->plane[i].dequant = cm->uv_dequant[xd->q_index];
+    xd->plane[i].dequant = cm->uv_dequant[q_index];
 }
 
 static void decode_block(int plane, int block, BLOCK_SIZE plane_bsize,
@@ -149,14 +146,17 @@ static void decode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
 }
 
 static int decode_tokens(VP9D_COMP *pbi, BLOCK_SIZE bsize, vp9_reader *r) {
+  VP9_COMMON *const cm = &pbi->common;
   MACROBLOCKD *const xd = &pbi->mb;
+  MB_MODE_INFO *const mbmi = &xd->mode_info_context->mbmi;
 
-  if (xd->mode_info_context->mbmi.skip_coeff) {
-      reset_skip_context(xd, bsize);
+  if (mbmi->skip_coeff) {
+    reset_skip_context(xd, bsize);
     return -1;
   } else {
-    if (pbi->common.seg.enabled)
-      init_dequantizer(&pbi->common, xd);
+    if (cm->seg.enabled)
+      setup_plane_dequants(cm, xd, vp9_get_qindex(&cm->seg, mbmi->segment_id,
+                                                  cm->base_qindex));
 
     // TODO(dkovalev) if (!vp9_reader_has_error(r))
     return vp9_decode_tokens(pbi, r, bsize);
@@ -173,6 +173,7 @@ static void set_offsets(VP9D_COMP *pbi, BLOCK_SIZE bsize,
 
   xd->mode_info_context = cm->mi + offset;
   xd->mode_info_context->mbmi.sb_type = bsize;
+  xd->mode_info_stride = cm->mode_info_stride;
   // Special case: if prev_mi is NULL, the previous mode info context
   // cannot be used.
   xd->prev_mode_info_context = cm->prev_mi ? cm->prev_mi + offset : NULL;
@@ -958,11 +959,7 @@ int vp9_decode_frame(VP9D_COMP *pbi, const uint8_t **p_data_end) {
     vpx_internal_error(&cm->error, VPX_CODEC_CORRUPT_FRAME,
                        "Truncated packet or corrupt header length");
 
-  xd->mode_info_context = cm->mi;
-  xd->prev_mode_info_context = cm->prev_mi;
-  xd->mode_info_stride = cm->mode_info_stride;
-
-  init_dequantizer(cm, &pbi->mb);
+  setup_plane_dequants(cm, &pbi->mb, cm->base_qindex);
 
   cm->fc = cm->frame_contexts[cm->frame_context_idx];
 
