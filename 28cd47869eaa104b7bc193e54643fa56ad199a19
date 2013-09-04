@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdH///LA\u003d",
+        "filename": "test/fdct8x8_test.cc",
+        "patchSetId": 10
+      },
+      "lineNbr": 188,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-09-04T21:06:54Z",
+      "side": 1,
+      "message": "indent is 5 not 4 here",
+      "revId": "28cd47869eaa104b7bc193e54643fa56ad199a19",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
