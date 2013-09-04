@@ -2916,8 +2916,8 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
                 (sse_v - var_v < thresh_dc || sse_v == var_v)) {
               x->skip = 1;
 
-              *rate2 = 500;
-              *rate_uv = 0;
+              // The cost of skip bit needs to be added.
+              *rate2 += vp9_cost_bit(vp9_get_pred_prob_mbskip(cm, xd), 1);
 
               // Scaling factor for SSE from spatial domain to frequency domain
               // is 16. Adjust distortion accordingly.
