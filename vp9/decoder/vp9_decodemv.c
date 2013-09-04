@@ -460,6 +460,7 @@ static void read_inter_block_mode_info(VP9D_COMP *pbi, MODE_INFO *mi,
 
   if (vp9_segfeature_active(&cm->seg, mbmi->segment_id, SEG_LVL_SKIP)) {
     mbmi->mode = ZEROMV;
+    assert(bsize >= BLOCK_8X8);
   } else {
     if (bsize >= BLOCK_8X8)
       mbmi->mode = read_inter_mode(cm, r, inter_mode_ctx);
