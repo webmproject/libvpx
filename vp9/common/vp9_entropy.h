@@ -341,7 +341,7 @@ static int get_entropy_context(const MACROBLOCKD *xd, TX_SIZE tx_size,
                                ENTROPY_CONTEXT *A, ENTROPY_CONTEXT *L,
                                const int16_t **scan,
                                const uint8_t **band_translate) {
-  ENTROPY_CONTEXT above_ec, left_ec;
+  ENTROPY_CONTEXT above_ec = 0, left_ec = 0;
 
   switch (tx_size) {
     case TX_4X4:
