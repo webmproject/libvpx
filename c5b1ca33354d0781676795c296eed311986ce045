@@ -16,6 +16,24 @@
       "revId": "c5b1ca33354d0781676795c296eed311986ce045",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdH///Gk\u003d",
+        "filename": "vp9/encoder/x86/vp9_quantize_ssse3.asm",
+        "patchSetId": 1
+      },
+      "lineNbr": 76,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2013-09-05T02:03:28Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdH///Hc\u003d",
+      "revId": "c5b1ca33354d0781676795c296eed311986ce045",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
