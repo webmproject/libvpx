@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdH///Ak\u003d",
+        "filename": "test/dct32x32_test.cc",
+        "patchSetId": 7
+      },
+      "lineNbr": 182,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2013-09-05T21:47:35Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdH///Aw\u003d",
+      "revId": "2407e8def73a740d002ffb203bccda18230c1cba",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdH///As\u003d",
         "filename": "test/dct32x32_test.cc",
         "patchSetId": 7
@@ -30,6 +48,24 @@
       "writtenOn": "2013-09-05T21:37:37Z",
       "side": 1,
       "message": "start this line with a \u003c\u003c",
+      "revId": "2407e8def73a740d002ffb203bccda18230c1cba",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdH///Ag\u003d",
+        "filename": "test/dct32x32_test.cc",
+        "patchSetId": 7
+      },
+      "lineNbr": 208,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2013-09-05T21:47:35Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdH///As\u003d",
       "revId": "2407e8def73a740d002ffb203bccda18230c1cba",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
