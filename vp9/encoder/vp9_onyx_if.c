@@ -1188,6 +1188,9 @@ static void init_config(VP9_PTR ptr, VP9_CONFIG *oxcf) {
   cpi->gld_fb_idx = 1;
   cpi->alt_fb_idx = 2;
 
+  cpi->current_layer = 0;
+  cpi->use_svc = 0;
+
   set_tile_limits(cpi);
 
   cpi->fixed_divide[0] = 0;
@@ -1457,6 +1460,9 @@ VP9_PTR vp9_create_compressor(VP9_CONFIG *oxcf) {
   cpi->gold_is_last = 0;
   cpi->alt_is_last  = 0;
   cpi->gold_is_alt  = 0;
+
+  // Spatial scalability
+  cpi->number_spatial_layers = oxcf->ss_number_layers;
 
   // Create the encoder segmentation map and set all entries to 0
   CHECK_MEM_ERROR(cm, cpi->segmentation_map,
@@ -2262,6 +2268,12 @@ static void update_golden_frame_stats(VP9_COMP *cpi) {
         cpi->oxcf.play_alternate && !cpi->refresh_alt_ref_frame) {
       cpi->source_alt_ref_pending = 1;
       cpi->frames_till_gf_update_due = cpi->baseline_gf_interval;
+
+      // TODO(ivan): for SVC encoder, GF automatic update is disabled by using a
+      // large GF_interval
+      if (cpi->use_svc) {
+        cpi->frames_till_gf_update_due = INT_MAX;
+      }
     }
 
     if (!cpi->source_alt_ref_pending)
@@ -2427,7 +2439,8 @@ static void update_reference_frames(VP9_COMP * const cpi) {
   else if (!cpi->multi_arf_enabled && cpi->refresh_golden_frame &&
       !cpi->refresh_alt_ref_frame) {
 #else
-  else if (cpi->refresh_golden_frame && !cpi->refresh_alt_ref_frame) {
+  else if (cpi->refresh_golden_frame && !cpi->refresh_alt_ref_frame &&
+           !cpi->use_svc) {
 #endif
     /* Preserve the previously existing golden frame and update the frame in
      * the alt ref slot instead. This is highly specific to the current use of
@@ -2500,9 +2513,11 @@ static void loopfilter_frame(VP9_COMP *cpi, VP9_COMMON *cm) {
 static void scale_references(VP9_COMP *cpi) {
   VP9_COMMON *cm = &cpi->common;
   int i;
+  int refs[ALLOWED_REFS_PER_FRAME] = {cpi->lst_fb_idx, cpi->gld_fb_idx,
+                                      cpi->alt_fb_idx};
 
   for (i = 0; i < 3; i++) {
-    YV12_BUFFER_CONFIG *ref = &cm->yv12_fb[cm->ref_frame_map[i]];
+    YV12_BUFFER_CONFIG *ref = &cm->yv12_fb[cm->ref_frame_map[refs[i]]];
 
     if (ref->y_crop_width != cm->width ||
         ref->y_crop_height != cm->height) {
@@ -2515,8 +2530,8 @@ static void scale_references(VP9_COMP *cpi) {
       scale_and_extend_frame(ref, &cm->yv12_fb[new_fb]);
       cpi->scaled_ref_idx[i] = new_fb;
     } else {
-      cpi->scaled_ref_idx[i] = cm->ref_frame_map[i];
-      cm->fb_idx_ref_cnt[cm->ref_frame_map[i]]++;
+      cpi->scaled_ref_idx[i] = cm->ref_frame_map[refs[i]];
+      cm->fb_idx_ref_cnt[cm->ref_frame_map[refs[i]]]++;
     }
   }
 }
@@ -3586,24 +3601,28 @@ static void Pass2Encode(VP9_COMP *cpi, unsigned long *size,
   }
 }
 
-
-int vp9_receive_raw_frame(VP9_PTR ptr, unsigned int frame_flags,
-                          YV12_BUFFER_CONFIG *sd, int64_t time_stamp,
-                          int64_t end_time) {
-  VP9_COMP              *cpi = (VP9_COMP *) ptr;
+static void check_initial_width(VP9_COMP *cpi, YV12_BUFFER_CONFIG *sd) {
   VP9_COMMON            *cm = &cpi->common;
-  struct vpx_usec_timer  timer;
-  int                    res = 0;
-
   if (!cpi->initial_width) {
     // TODO(jkoleszar): Support 1/4 subsampling?
-    cm->subsampling_x = sd->uv_width < sd->y_width;
-    cm->subsampling_y = sd->uv_height < sd->y_height;
+    cm->subsampling_x = (sd != NULL) && sd->uv_width < sd->y_width;
+    cm->subsampling_y = (sd != NULL) && sd->uv_height < sd->y_height;
     alloc_raw_frame_buffers(cpi);
 
     cpi->initial_width = cm->width;
     cpi->initial_height = cm->height;
   }
+}
+
+
+int vp9_receive_raw_frame(VP9_PTR ptr, unsigned int frame_flags,
+                          YV12_BUFFER_CONFIG *sd, int64_t time_stamp,
+                          int64_t end_time) {
+  VP9_COMP              *cpi = (VP9_COMP *) ptr;
+  struct vpx_usec_timer  timer;
+  int                    res = 0;
+
+  check_initial_width(cpi, sd);
   vpx_usec_timer_start(&timer);
   if (vp9_lookahead_push(cpi->lookahead, sd, time_stamp, end_time, frame_flags,
                          cpi->active_map_enabled ? cpi->active_map : NULL))
@@ -4141,7 +4160,76 @@ int vp9_set_internal_size(VP9_PTR comp,
   return 0;
 }
 
+int vp9_set_size_literal(VP9_PTR comp, unsigned int width,
+                         unsigned int height) {
+  VP9_COMP *cpi = (VP9_COMP *)comp;
+  VP9_COMMON *cm = &cpi->common;
 
+  check_initial_width(cpi, NULL);
+
+  if (width) {
+    cm->width = width;
+    if (cm->width * 5 < cpi->initial_width) {
+      cm->width = cpi->initial_width / 5 + 1;
+      printf("Warning: Desired width too small, changed to %d \n", cm->width);
+    }
+    if (cm->width > cpi->initial_width) {
+      cm->width = cpi->initial_width;
+      printf("Warning: Desired width too large, changed to %d \n", cm->width);
+    }
+  }
+
+  if (height) {
+    cm->height = height;
+    if (cm->height * 5 < cpi->initial_height) {
+      cm->height = cpi->initial_height / 5 + 1;
+      printf("Warning: Desired height too small, changed to %d \n", cm->height);
+    }
+    if (cm->height > cpi->initial_height) {
+      cm->height = cpi->initial_height;
+      printf("Warning: Desired height too large, changed to %d \n", cm->height);
+    }
+  }
+
+  assert(cm->width <= cpi->initial_width);
+  assert(cm->height <= cpi->initial_height);
+  update_frame_size(cpi);
+  return 0;
+}
+
+int vp9_switch_layer(VP9_PTR comp, int layer) {
+  VP9_COMP *cpi = (VP9_COMP *)comp;
+
+  if (cpi->use_svc) {
+    cpi->current_layer = layer;
+
+    // Use buffer i for layer i LST
+    cpi->lst_fb_idx = layer;
+
+    // Use buffer i-1 for layer i Alt (Inter-layer prediction)
+    if (layer != 0) cpi->alt_fb_idx = layer - 1;
+
+    // Use the rest for Golden
+    if (layer < 2 * cpi->number_spatial_layers - NUM_REF_FRAMES)
+      cpi->gld_fb_idx = cpi->lst_fb_idx;
+    else
+      cpi->gld_fb_idx = 2 * cpi->number_spatial_layers - 1 - layer;
+
+    printf("Switching to layer %d:\n", layer);
+    printf("Using references: LST/GLD/ALT [%d|%d|%d]\n", cpi->lst_fb_idx,
+           cpi->gld_fb_idx, cpi->alt_fb_idx);
+  } else {
+    printf("Switching layer not supported. Enable SVC first \n");
+  }
+  return 0;
+}
+
+void vp9_set_svc(VP9_PTR comp, int use_svc) {
+  VP9_COMP *cpi = (VP9_COMP *)comp;
+  cpi->use_svc = use_svc;
+  if (cpi->use_svc) printf("Enabled SVC encoder \n");
+  return;
+}
 
 int vp9_calc_ss_err(YV12_BUFFER_CONFIG *source, YV12_BUFFER_CONFIG *dest) {
   int i, j;

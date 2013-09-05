@@ -191,17 +191,21 @@ static void convolve_c(const uint8_t *src, ptrdiff_t src_stride,
                        const int16_t *filter_y, int y_step_q4,
                        int w, int h, int taps) {
   /* Fixed size intermediate buffer places limits on parameters.
-   * Maximum intermediate_height is 135, for y_step_q4 == 32,
+   * Maximum intermediate_height is 324, for y_step_q4 == 80,
    * h == 64, taps == 8.
+   * y_step_q4 of 80 allows for 1/10 scale for 5 layer svc
    */
-  uint8_t temp[64 * 135];
+  uint8_t temp[64 * 324];
   int intermediate_height = (((h - 1) * y_step_q4 + 15) >> 4) + taps;
 
   assert(w <= 64);
   assert(h <= 64);
   assert(taps <= 8);
-  assert(y_step_q4 <= 32);
-  assert(x_step_q4 <= 32);
+  assert(y_step_q4 <= 80);
+  assert(x_step_q4 <= 80);
+
+  if (intermediate_height < h)
+    intermediate_height = h;
 
   convolve_horiz_c(src - src_stride * (taps / 2 - 1), src_stride, temp, 64,
                    filter_x, x_step_q4, filter_y, y_step_q4, w,

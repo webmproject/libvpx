@@ -160,6 +160,8 @@ static vpx_codec_err_t validate_config(vpx_codec_alg_priv_t      *ctx,
   RANGE_CHECK_HI(cfg, rc_resize_down_thresh, 100);
   RANGE_CHECK(cfg,        g_pass,         VPX_RC_ONE_PASS, VPX_RC_LAST_PASS);
 
+  RANGE_CHECK(cfg, ss_number_layers,      1,
+              VPX_SS_MAX_LAYERS); /*Spatial layers max */
   /* VP8 does not support a lower bound on the keyframe interval in
    * automatic keyframe placement mode.
    */
@@ -317,6 +319,8 @@ static vpx_codec_err_t set_vp9e_config(VP9_CONFIG *oxcf,
 
   oxcf->error_resilient_mode = cfg.g_error_resilient;
   oxcf->frame_parallel_decoding_mode = vp8_cfg.frame_parallel_decoding_mode;
+
+  oxcf->ss_number_layers = cfg.ss_number_layers;
   /*
   printf("Current VP9 Settings: \n");
   printf("target_bandwidth: %d\n", oxcf->target_bandwidth);
@@ -423,6 +427,8 @@ static vpx_codec_err_t set_param(vpx_codec_alg_priv_t *ctx,
       MAP(VP8E_SET_ARNR_TYPE,               xcfg.arnr_type);
       MAP(VP8E_SET_TUNING,                  xcfg.tuning);
       MAP(VP8E_SET_CQ_LEVEL,                xcfg.cq_level);
+      MAP(VP9E_SET_MAX_Q,                   ctx->cfg.rc_max_quantizer);
+      MAP(VP9E_SET_MIN_Q,                   ctx->cfg.rc_min_quantizer);
       MAP(VP8E_SET_MAX_INTRA_BITRATE_PCT,   xcfg.rc_max_intra_bitrate_pct);
       MAP(VP9E_SET_LOSSLESS,                xcfg.lossless);
       MAP(VP9E_SET_FRAME_PARALLEL_DECODING, xcfg.frame_parallel_decoding_mode);
@@ -1004,6 +1010,68 @@ static vpx_codec_err_t vp9e_set_scalemode(vpx_codec_alg_priv_t *ctx,
     return VPX_CODEC_INVALID_PARAM;
 }
 
+static vpx_codec_err_t vp9e_set_width(vpx_codec_alg_priv_t *ctx, int ctr_id,
+                                      va_list args) {
+  unsigned int *data = va_arg(args, unsigned int *);
+  if (data) {
+    int res;
+    res = vp9_set_size_literal(ctx->cpi, *data, 0);
+    if (!res) {
+      return VPX_CODEC_OK;
+    } else {
+      return VPX_CODEC_INVALID_PARAM;
+    }
+  } else {
+    return VPX_CODEC_INVALID_PARAM;
+  }
+}
+
+static vpx_codec_err_t vp9e_set_height(vpx_codec_alg_priv_t *ctx,
+                                       int ctr_id,
+                                       va_list args) {
+  unsigned int *data =  va_arg(args, unsigned int *);
+
+  if (data) {
+    int res;
+    res = vp9_set_size_literal(ctx->cpi, 0, *data);
+
+    if (!res) {
+      return VPX_CODEC_OK;
+    } else {
+      return VPX_CODEC_INVALID_PARAM;
+    }
+  } else {
+    return VPX_CODEC_INVALID_PARAM;
+  }
+}
+
+static vpx_codec_err_t vp9e_set_layer(vpx_codec_alg_priv_t *ctx,
+                                      int ctr_id,
+                                      va_list args) {
+  unsigned int *data =  va_arg(args, unsigned int *);
+
+  if (data) {
+    int res;
+    res = 0;
+
+    res = vp9_switch_layer(ctx->cpi, *data);
+
+    if (!res) {
+      return VPX_CODEC_OK;
+    } else {
+      return VPX_CODEC_INVALID_PARAM;
+    }
+  } else {
+    return VPX_CODEC_INVALID_PARAM;
+  }
+}
+
+static vpx_codec_err_t vp9e_set_svc(vpx_codec_alg_priv_t *ctx, int ctr_id,
+                                    va_list args) {
+  int data = va_arg(args, int);
+  vp9_set_svc(ctx->cpi, data);
+  return VPX_CODEC_OK;
+}
 
 static vpx_codec_ctrl_fn_map_t vp9e_ctf_maps[] = {
   {VP8_SET_REFERENCE,                 vp9e_set_reference},
@@ -1029,10 +1097,16 @@ static vpx_codec_ctrl_fn_map_t vp9e_ctf_maps[] = {
   {VP8E_SET_ARNR_TYPE,                set_param},
   {VP8E_SET_TUNING,                   set_param},
   {VP8E_SET_CQ_LEVEL,                 set_param},
+  {VP9E_SET_MAX_Q,                    set_param},
+  {VP9E_SET_MIN_Q,                    set_param},
   {VP8E_SET_MAX_INTRA_BITRATE_PCT,    set_param},
   {VP9E_SET_LOSSLESS,                 set_param},
   {VP9E_SET_FRAME_PARALLEL_DECODING,  set_param},
   {VP9_GET_REFERENCE,                 get_reference},
+  {VP9E_SET_WIDTH,                    vp9e_set_width},
+  {VP9E_SET_HEIGHT,                   vp9e_set_height},
+  {VP9E_SET_LAYER,                    vp9e_set_layer},
+  {VP9E_SET_SVC,                      vp9e_set_svc},
   { -1, NULL},
 };
 
@@ -1081,6 +1155,8 @@ static vpx_codec_enc_cfg_map_t vp9e_usage_cfg_map[] = {
       VPX_KF_AUTO,        /* g_kfmode*/
       0,                  /* kf_min_dist */
       9999,               /* kf_max_dist */
+
+      VPX_SS_DEFAULT_LAYERS, /* ss_number_layers */
 
 #if VPX_ENCODER_ABI_VERSION == (1 + VPX_CODEC_ABI_VERSION)
       1,                  /* g_delete_first_pass_file */
