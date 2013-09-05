@@ -16,6 +16,24 @@
       "revId": "2c9f9bc1e40c6b65387a99a3aee237081af7ac17",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdH//++Y\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 2609,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2013-09-05T23:36:25Z",
+      "side": 1,
+      "message": "Look up table circumvents checks in the compiler - and means that if we ever swap the enums we\u0027d have to be careful to update all the lookup tables.   In an inner loop it might be worth writing a function that does this but I\u0027m not sure its worth it here.\n\nNonetheless I\u0027ve made a patch that does this - so we can debate the merrits.",
+      "parentUuid": "AAAAdH//+/k\u003d",
+      "revId": "2c9f9bc1e40c6b65387a99a3aee237081af7ac17",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
