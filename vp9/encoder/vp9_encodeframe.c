@@ -1999,13 +1999,6 @@ static void encode_sb_row(VP9_COMP *cpi, int mi_row, TOKENEXTRA **tp,
     int dummy_rate;
     int64_t dummy_dist;
 
-    // Initialize a mask of modes that we will not consider;
-    // cpi->unused_mode_skip_mask = 0x0000000AAE17F800 (test no golden)
-    if (cpi->common.frame_type == KEY_FRAME)
-      cpi->unused_mode_skip_mask = 0;
-    else
-      cpi->unused_mode_skip_mask = 0xFFFFFFFFFFFFFE00;
-
     if (cpi->sf.reference_masking)
       rd_pick_reference_frame(cpi, mi_row, mi_col);
 

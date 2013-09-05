@@ -51,20 +51,25 @@ DECLARE_ALIGNED(16, extern const uint8_t,
 #define I4X4_PRED 0x8000
 #define SPLITMV 0x10000
 
+#define LAST_FRAME_MODE_MASK    0xFFDADCD60
+#define GOLDEN_FRAME_MODE_MASK  0xFFB5A3BB0
+#define ALT_REF_MODE_MASK       0xFF8C648D0
+
 const MODE_DEFINITION vp9_mode_order[MAX_MODES] = {
   {NEARESTMV, LAST_FRAME,   NONE},
-  {DC_PRED,   INTRA_FRAME,  NONE},
-
   {NEARESTMV, ALTREF_FRAME, NONE},
   {NEARESTMV, GOLDEN_FRAME, NONE},
-  {NEWMV,     LAST_FRAME,   NONE},
-  {NEARESTMV, LAST_FRAME,   ALTREF_FRAME},
-  {NEARMV,    LAST_FRAME,   NONE},
-  {NEARESTMV, GOLDEN_FRAME, ALTREF_FRAME},
 
-  {NEWMV,     GOLDEN_FRAME, NONE},
+  {DC_PRED,   INTRA_FRAME,  NONE},
+
+  {NEWMV,     LAST_FRAME,   NONE},
   {NEWMV,     ALTREF_FRAME, NONE},
+  {NEWMV,     GOLDEN_FRAME, NONE},
+
+  {NEARMV,    LAST_FRAME,   NONE},
   {NEARMV,    ALTREF_FRAME, NONE},
+  {NEARESTMV, LAST_FRAME,   ALTREF_FRAME},
+  {NEARESTMV, GOLDEN_FRAME, ALTREF_FRAME},
 
   {TM_PRED,   INTRA_FRAME,  NONE},
 
@@ -3187,10 +3192,31 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
     ref_frame = vp9_mode_order[mode_index].ref_frame;
     second_ref_frame = vp9_mode_order[mode_index].second_ref_frame;
 
-    // Skip modes that have been masked off but always consider first mode.
-    if (mode_index && (bsize > cpi->sf.unused_mode_skip_lvl) &&
-         (cpi->unused_mode_skip_mask & (1 << mode_index)) )
-      continue;
+    // Look at the reference frame of the best mode so far and set the
+    // skip mask to look at a subset of the remaining modes.
+    if (mode_index > cpi->sf.mode_skip_start) {
+      if (mode_index == (cpi->sf.mode_skip_start + 1)) {
+        switch (vp9_mode_order[best_mode_index].ref_frame) {
+          case INTRA_FRAME:
+            cpi->mode_skip_mask = 0;
+            break;
+          case LAST_FRAME:
+            cpi->mode_skip_mask = LAST_FRAME_MODE_MASK;
+            break;
+          case GOLDEN_FRAME:
+            cpi->mode_skip_mask = GOLDEN_FRAME_MODE_MASK;
+            break;
+          case ALTREF_FRAME:
+            cpi->mode_skip_mask = ALT_REF_MODE_MASK;
+            break;
+          case NONE:
+          case MAX_REF_FRAMES:
+            assert(!"Invalid Reference frame");
+        }
+      }
+      if (cpi->mode_skip_mask & (1 << mode_index))
+        continue;
+    }
 
     // Skip if the current reference frame has been masked off
     if (cpi->sf.reference_masking && !cpi->set_ref_frame_mask &&
@@ -3857,13 +3883,6 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
                               &skip_uv[uv_tx_size],
                               bsize < BLOCK_8X8 ? BLOCK_8X8 : bsize);
     }
-  }
-
-  // If indicated then mark the index of the chosen mode to be inspected at
-  // other block sizes.
-  if (bsize <= cpi->sf.unused_mode_skip_lvl) {
-    cpi->unused_mode_skip_mask = cpi->unused_mode_skip_mask &
-                                 (~((int64_t)1 << best_mode_index));
   }
 
   // If we are using reference masking and the set mask flag is set then

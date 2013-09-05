@@ -743,9 +743,8 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
   sf->use_fast_lpf_pick = 0;
   sf->use_fast_coef_updates = 0;
   sf->using_small_partition_info = 0;
-  // Skip any mode not chosen at size < X for all sizes > X
-  // Hence BLOCK_64X64 (skip is off)
-  sf->unused_mode_skip_lvl = BLOCK_64X64;
+  sf->mode_skip_start = MAX_MODES;  // Mode index at which mode skip mask set
+
 
 #if CONFIG_MULTIPLE_ARF
   // Switch segmentation off.
@@ -782,7 +781,6 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
                                    cpi->common.show_frame == 0);
         sf->disable_splitmv =
             (MIN(cpi->common.width, cpi->common.height) >= 720)? 1 : 0;
-        sf->unused_mode_skip_lvl = BLOCK_32X32;
         sf->mode_search_skip_flags = FLAG_SKIP_INTRA_DIRMISMATCH |
                                      FLAG_SKIP_INTRA_BESTINTER |
                                      FLAG_SKIP_COMP_BESTINTRA |
@@ -804,6 +802,7 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
         sf->intra_y_mode_mask = INTRA_DC_TM_H_V;
         sf->intra_uv_mode_mask = INTRA_DC_TM_H_V;
         sf->use_fast_coef_updates = 1;
+        sf->mode_skip_start = 9;
       }
       if (speed == 2) {
         sf->adjust_thresholds_by_speed = 1;
@@ -813,7 +812,6 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
         sf->use_lastframe_partitioning = 1;
         sf->adjust_partitioning_from_last_frame = 1;
         sf->last_partitioning_redo_frequency = 3;
-        sf->unused_mode_skip_lvl = BLOCK_32X32;
         sf->tx_size_search_method = ((cpi->common.frame_type == KEY_FRAME ||
                                       cpi->common.intra_only ||
                                       cpi->common.show_frame == 0) ?
@@ -843,6 +841,7 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
         sf->disable_split_var_thresh = 32;
         sf->disable_filter_search_var_thresh = 32;
         sf->use_fast_coef_updates = 2;
+        sf->mode_skip_start = 9;
       }
       if (speed == 3) {
         sf->comp_inter_joint_search_thresh = BLOCK_SIZES;
@@ -870,6 +869,7 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
         sf->intra_y_mode_mask = INTRA_DC_ONLY;
         sf->intra_uv_mode_mask = INTRA_DC_ONLY;
         sf->use_fast_coef_updates = 2;
+        sf->mode_skip_start = 9;
       }
       if (speed == 4) {
         sf->comp_inter_joint_search_thresh = BLOCK_SIZES;
@@ -901,20 +901,8 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
         sf->intra_y_mode_mask = INTRA_DC_ONLY;
         sf->intra_uv_mode_mask = INTRA_DC_ONLY;
         sf->use_fast_coef_updates = 2;
+        sf->mode_skip_start = 9;
       }
-      /*
-      if (speed == 2) {
-        sf->first_step = 0;
-        sf->comp_inter_joint_search_thresh = BLOCK_8X8;
-        sf->max_partition_size = BLOCK_16X16;
-      }
-      if (speed == 3) {
-        sf->first_step = 0;
-        sf->comp_inter_joint_search_thresh = BLOCK_B8X8;
-        sf->min_partition_size = BLOCK_8X8;
-      }
-      */
-
       break;
 
   }; /* switch */

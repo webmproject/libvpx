@@ -147,18 +147,19 @@ typedef struct {
 // const MODE_DEFINITION vp9_mode_order[MAX_MODES] used in the rd code.
 typedef enum {
   THR_NEARESTMV,
-  THR_DC,
-
   THR_NEARESTA,
   THR_NEARESTG,
-  THR_NEWMV,
-  THR_COMP_NEARESTLA,
-  THR_NEARMV,
-  THR_COMP_NEARESTGA,
 
-  THR_NEWG,
+  THR_DC,
+
+  THR_NEWMV,
   THR_NEWA,
+  THR_NEWG,
+
+  THR_NEARMV,
   THR_NEARA,
+  THR_COMP_NEARESTLA,
+  THR_COMP_NEARESTGA,
 
   THR_TM,
 
@@ -273,7 +274,7 @@ typedef struct {
   int use_one_partition_size_always;
   int less_rectangular_check;
   int use_square_partition_only;
-  int unused_mode_skip_lvl;
+  int mode_skip_start;
   int reference_masking;
   BLOCK_SIZE always_this_block_size;
   int auto_min_max_partition_size;
@@ -384,7 +385,7 @@ typedef struct VP9_COMP {
   unsigned int mode_check_freq[MAX_MODES];
   unsigned int mode_test_hit_counts[MAX_MODES];
   unsigned int mode_chosen_counts[MAX_MODES];
-  int64_t unused_mode_skip_mask;
+  int64_t mode_skip_mask;
   int ref_frame_mask;
   int set_ref_frame_mask;
 
