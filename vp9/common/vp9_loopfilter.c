@@ -777,6 +777,7 @@ static void setup_mask(VP9_COMMON *const cm, const int mi_row, const int mi_col,
     }
   }
 }
+#if CONFIG_NON420
 static void filter_block_plane_non420(VP9_COMMON *cm,
                                       struct macroblockd_plane *plane,
                                       const MODE_INFO *mi,
@@ -896,6 +897,7 @@ static void filter_block_plane_non420(VP9_COMMON *cm,
     dst->buf += 8 * dst->stride;
   }
 }
+#endif
 
 static void filter_block_plane(VP9_COMMON *const cm,
                                struct macroblockd_plane *const plane,
@@ -981,8 +983,10 @@ void vp9_loop_filter_rows(const YV12_BUFFER_CONFIG *frame_buffer,
   const int num_planes = y_only ? 1 : MAX_MB_PLANE;
   int mi_row, mi_col;
   LOOP_FILTER_MASK lfm;
+#if CONFIG_NON420
   int use_420 = y_only || (xd->plane[1].subsampling_y == 1 &&
       xd->plane[1].subsampling_x == 1);
+#endif
 
   for (mi_row = start; mi_row < stop; mi_row += MI_BLOCK_SIZE) {
     MODE_INFO* const mi = cm->mi + mi_row * cm->mode_info_stride;
@@ -993,16 +997,22 @@ void vp9_loop_filter_rows(const YV12_BUFFER_CONFIG *frame_buffer,
       setup_dst_planes(xd, frame_buffer, mi_row, mi_col);
 
       // TODO(JBB): Make setup_mask work for non 420.
+#if CONFIG_NON420
       if (use_420)
+#endif
         setup_mask(cm, mi_row, mi_col, mi + mi_col, cm->mode_info_stride, &lfm);
 
       for (plane = 0; plane < num_planes; ++plane) {
+#if CONFIG_NON420
         if (use_420)
+#endif
           filter_block_plane(cm, &xd->plane[plane], mi + mi_col, mi_row, mi_col,
                              &lfm);
+#if CONFIG_NON420
         else
           filter_block_plane_non420(cm, &xd->plane[plane], mi + mi_col,
                                     mi_row, mi_col);
+#endif
       }
     }
   }
