@@ -15,10 +15,10 @@
 #include "third_party/googletest/src/include/gtest/gtest.h"
 
 extern "C" {
-#include "vp9_rtcd.h"
+#include "./vp9_rtcd.h"
 }
 
-#include "acm_random.h"
+#include "test/acm_random.h"
 #include "vpx/vpx_integer.h"
 
 using libvpx_test::ACMRandom;
@@ -27,10 +27,10 @@ namespace {
 
 #ifdef _MSC_VER
 static int round(double x) {
-  if(x < 0)
-    return (int)ceil(x - 0.5);
+  if (x < 0)
+    return static_cast<int>(ceil(x - 0.5));
   else
-    return (int)floor(x + 0.5);
+    return static_cast<int>(floor(x + 0.5));
 }
 #endif
 

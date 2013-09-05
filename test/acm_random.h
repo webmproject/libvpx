@@ -8,8 +8,8 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#ifndef LIBVPX_TEST_ACM_RANDOM_H_
-#define LIBVPX_TEST_ACM_RANDOM_H_
+#ifndef TEST_ACM_RANDOM_H_
+#define TEST_ACM_RANDOM_H_
 
 #include "third_party/googletest/src/include/gtest/gtest.h"
 
@@ -59,4 +59,4 @@ class ACMRandom {
 
 }  // namespace libvpx_test
 
-#endif  // LIBVPX_TEST_ACM_RANDOM_H_
+#endif  // TEST_ACM_RANDOM_H_

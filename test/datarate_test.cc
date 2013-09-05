@@ -75,7 +75,7 @@ class DatarateTest : public ::libvpx_test::EncoderTest,
     bits_in_buffer_model_ -= frame_size_in_bits;
 
     // Update the running total of bits for end of test datarate checks.
-    bits_total_ += frame_size_in_bits ;
+    bits_total_ += frame_size_in_bits;
 
     // If first drop not set and we have a drop set it to this time.
     if (!first_drop_ && duration > 1)

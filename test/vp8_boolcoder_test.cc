@@ -8,10 +8,6 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-extern "C" {
-#include "vp8/encoder/boolhuff.h"
-#include "vp8/decoder/dboolhuff.h"
-}
 
 #include <math.h>
 #include <stddef.h>
@@ -23,6 +19,11 @@ extern "C" {
 #include "test/acm_random.h"
 #include "third_party/googletest/src/include/gtest/gtest.h"
 #include "vpx/vpx_integer.h"
+
+extern "C" {
+#include "vp8/encoder/boolhuff.h"
+#include "vp8/decoder/dboolhuff.h"
+}
 
 namespace {
 const int num_tests = 10;
@@ -44,7 +45,7 @@ void encrypt_buffer(uint8_t *buffer, int size) {
 
 void test_decrypt_cb(void *decrypt_state, const uint8_t *input,
                            uint8_t *output, int count) {
-  int offset = input - (uint8_t *)decrypt_state;
+  int offset = input - reinterpret_cast<uint8_t *>(decrypt_state);
   for (int i = 0; i < count; i++) {
     output[i] = input[i] ^ secret_key[(offset + i) & 15];
   }
@@ -58,10 +59,10 @@ TEST(VP8, TestBitIO) {
   ACMRandom rnd(ACMRandom::DeterministicSeed());
   for (int n = 0; n < num_tests; ++n) {
     for (int method = 0; method <= 7; ++method) {   // we generate various proba
-      const int bits_to_test = 1000;
-      uint8_t probas[bits_to_test];
+      const int kBitsToTest = 1000;
+      uint8_t probas[kBitsToTest];
 
-      for (int i = 0; i < bits_to_test; ++i) {
+      for (int i = 0; i < kBitsToTest; ++i) {
         const int parity = i & 1;
         probas[i] =
             (method == 0) ? 0 : (method == 1) ? 255 :
@@ -76,14 +77,14 @@ TEST(VP8, TestBitIO) {
       }
       for (int bit_method = 0; bit_method <= 3; ++bit_method) {
         const int random_seed = 6432;
-        const int buffer_size = 10000;
+        const int kBufferSize = 10000;
         ACMRandom bit_rnd(random_seed);
         BOOL_CODER bw;
-        uint8_t bw_buffer[buffer_size];
-        vp8_start_encode(&bw, bw_buffer, bw_buffer + buffer_size);
+        uint8_t bw_buffer[kBufferSize];
+        vp8_start_encode(&bw, bw_buffer, bw_buffer + kBufferSize);
 
         int bit = (bit_method == 0) ? 0 : (bit_method == 1) ? 1 : 0;
-        for (int i = 0; i < bits_to_test; ++i) {
+        for (int i = 0; i < kBitsToTest; ++i) {
           if (bit_method == 2) {
             bit = (i & 1);
           } else if (bit_method == 3) {
@@ -98,19 +99,20 @@ TEST(VP8, TestBitIO) {
 #if CONFIG_DECRYPT
         encrypt_buffer(bw_buffer, buffer_size);
         vp8dx_start_decode(&br, bw_buffer, buffer_size,
-                           test_decrypt_cb, (void *)bw_buffer);
+                           test_decrypt_cb,
+                           reinterpret_cast<void *>(bw_buffer));
 #else
-        vp8dx_start_decode(&br, bw_buffer, buffer_size, NULL, NULL);
+        vp8dx_start_decode(&br, bw_buffer, kBufferSize, NULL, NULL);
 #endif
         bit_rnd.Reset(random_seed);
-        for (int i = 0; i < bits_to_test; ++i) {
+        for (int i = 0; i < kBitsToTest; ++i) {
           if (bit_method == 2) {
             bit = (i & 1);
           } else if (bit_method == 3) {
             bit = bit_rnd(2);
           }
           GTEST_ASSERT_EQ(vp8dx_decode_bool(&br, probas[i]), bit)
-              << "pos: "<< i << " / " << bits_to_test
+              << "pos: "<< i << " / " << kBitsToTest
               << " bit_method: " << bit_method
               << " method: " << method;
         }

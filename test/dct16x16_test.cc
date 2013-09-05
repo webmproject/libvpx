@@ -17,11 +17,11 @@
 
 extern "C" {
 #include "vp9/common/vp9_entropy.h"
-#include "vp9_rtcd.h"
-void vp9_short_idct16x16_add_c(short *input, uint8_t *output, int pitch);
+#include "./vp9_rtcd.h"
+void vp9_short_idct16x16_add_c(int16_t *input, uint8_t *output, int pitch);
 }
 
-#include "acm_random.h"
+#include "test/acm_random.h"
 #include "vpx/vpx_integer.h"
 
 using libvpx_test::ACMRandom;
@@ -31,9 +31,9 @@ namespace {
 #ifdef _MSC_VER
 static int round(double x) {
   if (x < 0)
-    return (int)ceil(x - 0.5);
+    return static_cast<int>(ceil(x - 0.5));
   else
-    return (int)floor(x + 0.5);
+    return static_cast<int>(floor(x + 0.5));
 }
 #endif
 
@@ -45,7 +45,9 @@ void reference2_16x16_idct_2d(double *input, double *output) {
       double s = 0;
       for (int i = 0; i < 16; ++i) {
         for (int j = 0; j < 16; ++j) {
-          x=cos(PI*j*(l+0.5)/16.0)*cos(PI*i*(k+0.5)/16.0)*input[i*16+j]/256;
+          x = cos(PI * j * (l + 0.5) / 16.0) *
+              cos(PI * i * (k + 0.5) / 16.0) *
+              input[i * 16 + j] / 256;
           if (i != 0)
             x *= sqrt(2.0);
           if (j != 0)

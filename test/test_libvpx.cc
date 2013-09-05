@@ -8,7 +8,7 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 #include <string>
-#include "vpx_config.h"
+#include "./vpx_config.h"
 extern "C" {
 #if ARCH_X86 || ARCH_X86_64
 #include "vpx_ports/x86.h"
@@ -48,7 +48,9 @@ int main(int argc, char **argv) {
 #endif
 
 #if !CONFIG_SHARED
-  /* Shared library builds don't support whitebox tests that exercise internal symbols. */
+// Shared library builds don't support whitebox tests
+// that exercise internal symbols.
+
 #if CONFIG_VP8
   vp8_rtcd();
 #endif

@@ -32,9 +32,9 @@ namespace {
 #ifdef _MSC_VER
 static int round(double x) {
   if (x < 0)
-    return (int)ceil(x - 0.5);
+    return static_cast<int>(ceil(x - 0.5));
   else
-    return (int)floor(x + 0.5);
+    return static_cast<int>(floor(x + 0.5));
 }
 #endif
 

@@ -15,10 +15,10 @@
 #include "third_party/googletest/src/include/gtest/gtest.h"
 
 extern "C" {
-#include "vp9_rtcd.h"
+#include "./vp9_rtcd.h"
 }
 
-#include "acm_random.h"
+#include "test/acm_random.h"
 #include "vpx/vpx_integer.h"
 #include "vpx_ports/mem.h"
 
@@ -156,7 +156,7 @@ TEST_P(FwdTrans4x4Test, RoundTripErrorCheck) {
     RunFwdTxfm(test_input_block, test_temp_block, dst, pitch, tx_type_);
 
     for (int j = 0; j < 16; ++j) {
-        if(test_temp_block[j] > 0) {
+        if (test_temp_block[j] > 0) {
           test_temp_block[j] += 2;
           test_temp_block[j] /= 4;
           test_temp_block[j] *= 4;

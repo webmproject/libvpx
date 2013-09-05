@@ -28,7 +28,7 @@ static unsigned int MemGetLe32(const uint8_t *mem) {
 // so that we can do actual file decodes.
 class IVFVideoSource : public CompressedVideoSource {
  public:
-  IVFVideoSource(const std::string &file_name)
+  explicit IVFVideoSource(const std::string &file_name)
       : file_name_(file_name),
         input_file_(NULL),
         compressed_frame_buf_(NULL),

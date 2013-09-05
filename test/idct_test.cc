@@ -16,7 +16,7 @@ extern "C" {
 #include "test/register_state_check.h"
 #include "third_party/googletest/src/include/gtest/gtest.h"
 
-typedef void (*idct_fn_t)(short *input, unsigned char *pred_ptr,
+typedef void (*idct_fn_t)(int16_t *input, unsigned char *pred_ptr,
                           int pred_stride, unsigned char *dst_ptr,
                           int dst_stride);
 namespace {
@@ -34,7 +34,7 @@ class IDCTTest : public ::testing::TestWithParam<idct_fn_t> {
   virtual void TearDown() { libvpx_test::ClearSystemState(); }
 
   idct_fn_t UUT;
-  short input[16];
+  int16_t input[16];
   unsigned char output[256];
   unsigned char predict[256];
 };

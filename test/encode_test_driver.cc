@@ -8,7 +8,7 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#include "vpx_config.h"
+#include "./vpx_config.h"
 #include "test/codec_factory.h"
 #include "test/encode_test_driver.h"
 #include "test/decode_test_driver.h"
@@ -114,19 +114,19 @@ static bool compare_img(const vpx_image_t *img1,
   const unsigned int height_y = img1->d_h;
   unsigned int i;
   for (i = 0; i < height_y; ++i)
-    match = ( memcmp(img1->planes[VPX_PLANE_Y] + i * img1->stride[VPX_PLANE_Y],
-                     img2->planes[VPX_PLANE_Y] + i * img2->stride[VPX_PLANE_Y],
-                     width_y) == 0) && match;
+    match = (memcmp(img1->planes[VPX_PLANE_Y] + i * img1->stride[VPX_PLANE_Y],
+                    img2->planes[VPX_PLANE_Y] + i * img2->stride[VPX_PLANE_Y],
+                    width_y) == 0) && match;
   const unsigned int width_uv  = (img1->d_w + 1) >> 1;
   const unsigned int height_uv = (img1->d_h + 1) >> 1;
   for (i = 0; i <  height_uv; ++i)
-    match = ( memcmp(img1->planes[VPX_PLANE_U] + i * img1->stride[VPX_PLANE_U],
-                     img2->planes[VPX_PLANE_U] + i * img2->stride[VPX_PLANE_U],
-                     width_uv) == 0) && match;
+    match = (memcmp(img1->planes[VPX_PLANE_U] + i * img1->stride[VPX_PLANE_U],
+                    img2->planes[VPX_PLANE_U] + i * img2->stride[VPX_PLANE_U],
+                    width_uv) == 0) && match;
   for (i = 0; i < height_uv; ++i)
-    match = ( memcmp(img1->planes[VPX_PLANE_V] + i * img1->stride[VPX_PLANE_V],
-                     img2->planes[VPX_PLANE_V] + i * img2->stride[VPX_PLANE_V],
-                     width_uv) == 0) && match;
+    match = (memcmp(img1->planes[VPX_PLANE_V] + i * img1->stride[VPX_PLANE_V],
+                    img2->planes[VPX_PLANE_V] + i * img2->stride[VPX_PLANE_V],
+                    width_uv) == 0) && match;
   return match;
 }
 

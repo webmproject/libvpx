@@ -29,7 +29,7 @@ class BordersTest : public ::libvpx_test::EncoderTest,
 
   virtual void PreEncodeFrameHook(::libvpx_test::VideoSource *video,
                                   ::libvpx_test::Encoder *encoder) {
-    if ( video->frame() == 1) {
+    if (video->frame() == 1) {
       encoder->Control(VP8E_SET_CPUUSED, 0);
       encoder->Control(VP8E_SET_ENABLEAUTOALTREF, 1);
       encoder->Control(VP8E_SET_ARNR_MAXFRAMES, 7);

@@ -18,7 +18,7 @@
 
 
 extern "C" {
-#include "vp8_rtcd.h"
+#include "./vp8_rtcd.h"
 }
 
 #include "test/acm_random.h"

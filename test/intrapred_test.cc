@@ -15,8 +15,8 @@
 #include "test/register_state_check.h"
 #include "third_party/googletest/src/include/gtest/gtest.h"
 extern "C" {
-#include "vpx_config.h"
-#include "vp8_rtcd.h"
+#include "./vpx_config.h"
+#include "./vp8_rtcd.h"
 #include "vp8/common/blockd.h"
 #include "vpx_mem/vpx_mem.h"
 }
@@ -106,9 +106,9 @@ class IntraPredBase {
           for (int y = 0; y < block_size_; y++)
             sum += data_ptr_[p][y * stride_ - 1];
         expected = (sum + (1 << (shift - 1))) >> shift;
-      } else
+      } else {
         expected = 0x80;
-
+      }
       // check that all subsequent lines are equal to the first
       for (int y = 1; y < block_size_; ++y)
         ASSERT_EQ(0, memcmp(data_ptr_[p], &data_ptr_[p][y * stride_],

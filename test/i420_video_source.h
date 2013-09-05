@@ -11,6 +11,7 @@
 #define TEST_I420_VIDEO_SOURCE_H_
 #include <cstdio>
 #include <cstdlib>
+#include <string>
 
 #include "test/video_source.h"
 
@@ -34,7 +35,6 @@ class I420VideoSource : public VideoSource {
         height_(0),
         framerate_numerator_(rate_numerator),
         framerate_denominator_(rate_denominator) {
-
     // This initializes raw_sz_, width_, height_ and allocates an img.
     SetSize(width, height);
   }

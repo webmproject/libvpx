@@ -17,15 +17,19 @@
 #include <sys/types.h>
 
 #include "third_party/googletest/src/include/gtest/gtest.h"
+#include "test/acm_random.h"
 #include "vpx/vpx_integer.h"
 #include "vpx_mem/vpx_mem.h"
 extern "C" {
 #include "vp8/encoder/onyx_int.h"
 }
 
+using libvpx_test::ACMRandom;
+
 namespace {
 
 TEST(Vp8RoiMapTest, ParameterCheck) {
+  ACMRandom rnd(ACMRandom::DeterministicSeed());
   int delta_q[MAX_MB_SEGMENTS] = { -2, -25, 0, 31 };
   int delta_lf[MAX_MB_SEGMENTS] = { -2, -25, 0, 31 };
   unsigned int threshold[MAX_MB_SEGMENTS] = { 0, 100, 200, 300 };
@@ -121,10 +125,10 @@ TEST(Vp8RoiMapTest, ParameterCheck) {
     for (int i = 0; i < 1000; ++i) {
       int rand_deltas[4];
       int deltas_valid;
-      rand_deltas[0] = (rand() % 160) - 80;
-      rand_deltas[1] = (rand() % 160) - 80;
-      rand_deltas[2] = (rand() % 160) - 80;
-      rand_deltas[3] = (rand() % 160) - 80;
+      rand_deltas[0] = rnd(160) - 80;
+      rand_deltas[1] = rnd(160) - 80;
+      rand_deltas[2] = rnd(160) - 80;
+      rand_deltas[3] = rnd(160) - 80;
 
       deltas_valid = ((abs(rand_deltas[0]) <= 63) &&
                       (abs(rand_deltas[1]) <= 63) &&

@@ -13,8 +13,8 @@
 #include "test/clear_system_state.h"
 #include "test/register_state_check.h"
 extern "C" {
-#include "vpx_config.h"
-#include "vp8_rtcd.h"
+#include "./vpx_config.h"
+#include "./vp8_rtcd.h"
 #include "vp8/common/blockd.h"
 #include "vp8/encoder/block.h"
 #include "vpx_mem/vpx_mem.h"
@@ -51,7 +51,7 @@ TEST_P(SubtractBlockTest, SimpleSubtract) {
   bd.predictor = reinterpret_cast<unsigned char*>(
       vpx_memalign(16, kBlockHeight * kDiffPredStride * sizeof(*bd.predictor)));
 
-  for(int i = 0; kSrcStride[i] > 0; ++i) {
+  for (int i = 0; kSrcStride[i] > 0; ++i) {
     // start at block0
     be.src = 0;
     be.base_src = &source;

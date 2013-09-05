@@ -8,8 +8,8 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#ifndef LIBVPX_TEST_REGISTER_STATE_CHECK_H_
-#define LIBVPX_TEST_REGISTER_STATE_CHECK_H_
+#ifndef TEST_REGISTER_STATE_CHECK_H_
+#define TEST_REGISTER_STATE_CHECK_H_
 
 #ifdef _WIN64
 
@@ -92,4 +92,4 @@ class RegisterStateCheck {};
 
 #endif  // _WIN64
 
-#endif  // LIBVPX_TEST_REGISTER_STATE_CHECK_H_
+#endif  // TEST_REGISTER_STATE_CHECK_H_

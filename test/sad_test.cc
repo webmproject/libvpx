@@ -17,7 +17,6 @@ extern "C" {
 #include "./vpx_config.h"
 #if CONFIG_VP8_ENCODER
 #include "./vp8_rtcd.h"
-//#include "vp8/common/blockd.h"
 #endif
 #if CONFIG_VP9_ENCODER
 #include "./vp9_rtcd.h"

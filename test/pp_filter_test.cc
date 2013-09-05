@@ -11,8 +11,8 @@
 #include "test/register_state_check.h"
 #include "third_party/googletest/src/include/gtest/gtest.h"
 extern "C" {
-#include "vpx_config.h"
-#include "vp8_rtcd.h"
+#include "./vpx_config.h"
+#include "./vp8_rtcd.h"
 #include "vpx/vpx_integer.h"
 #include "vpx_mem/vpx_mem.h"
 }
@@ -63,7 +63,8 @@ TEST_P(Vp8PostProcessingFilterTest, FilterOutputCheck) {
   // Pointers to top-left pixel of block in the input and output images.
   uint8_t *const src_image_ptr = src_image + (input_stride << 1);
   uint8_t *const dst_image_ptr = dst_image + 8;
-  uint8_t *const flimits = reinterpret_cast<uint8_t *>(vpx_memalign(16, block_width));
+  uint8_t *const flimits =
+      reinterpret_cast<uint8_t *>(vpx_memalign(16, block_width));
   (void)vpx_memset(flimits, 255, block_width);
 
   // Initialize pixels in the input:
