@@ -13,15 +13,17 @@
 #include <string.h>
 
 #include "third_party/googletest/src/include/gtest/gtest.h"
+#include "test/acm_random.h"
+#include "test/clear_system_state.h"
+#include "test/register_state_check.h"
+#include "test/util.h"
 
 extern "C" {
+#include "./vpx_config.h"
 #include "vp9/common/vp9_entropy.h"
 #include "./vp9_rtcd.h"
-  void vp9_short_fdct32x32_c(int16_t *input, int16_t *out, int pitch);
-  void vp9_short_idct32x32_add_c(short *input, uint8_t *output, int pitch);
 }
 
-#include "test/acm_random.h"
 #include "vpx/vpx_integer.h"
 
 using libvpx_test::ACMRandom;
@@ -36,29 +38,9 @@ static int round(double x) {
 }
 #endif
 
-static const double kPi = 3.141592653589793238462643383279502884;
-static void reference2_32x32_idct_2d(double *input, double *output) {
-  double x;
-  for (int l = 0; l < 32; ++l) {
-    for (int k = 0; k < 32; ++k) {
-      double s = 0;
-      for (int i = 0; i < 32; ++i) {
-        for (int j = 0; j < 32; ++j) {
-          x = cos(kPi * j * (l + 0.5) / 32.0) *
-              cos(kPi * i * (k + 0.5) / 32.0) * input[i * 32 + j] / 1024;
-          if (i != 0)
-            x *= sqrt(2.0);
-          if (j != 0)
-            x *= sqrt(2.0);
-          s += x;
-        }
-      }
-      output[k * 32 + l] = s / 4;
-    }
-  }
-}
-
-static void reference_32x32_dct_1d(double in[32], double out[32], int stride) {
+const int kNumCoeffs = 1024;
+const double kPi = 3.141592653589793238462643383279502884;
+void reference_32x32_dct_1d(const double in[32], double out[32], int stride) {
   const double kInvSqrt2 = 0.707106781186547524400844362104;
   for (int k = 0; k < 32; k++) {
     out[k] = 0.0;
@@ -69,7 +51,8 @@ static void reference_32x32_dct_1d(double in[32], double out[32], int stride) {
   }
 }
 
-static void reference_32x32_dct_2d(int16_t input[32*32], double output[32*32]) {
+void reference_32x32_dct_2d(const int16_t input[kNumCoeffs],
+                            double output[kNumCoeffs]) {
   // First transform columns
   for (int i = 0; i < 32; ++i) {
     double temp_in[32], temp_out[32];
@@ -91,27 +74,165 @@ static void reference_32x32_dct_2d(int16_t input[32*32], double output[32*32]) {
   }
 }
 
-TEST(VP9Idct32x32Test, AccuracyCheck) {
-  ACMRandom rnd(ACMRandom::DeterministicSeed());
-  const int count_test_block = 1000;
-  for (int i = 0; i < count_test_block; ++i) {
-    int16_t in[1024], coeff[1024];
-    uint8_t dst[1024], src[1024];
-    double out_r[1024];
+typedef void (*fwd_txfm_t)(int16_t *in, int16_t *out, int stride);
+typedef void (*inv_txfm_t)(int16_t *in, uint8_t *dst, int stride);
 
-    for (int j = 0; j < 1024; ++j) {
+class Trans32x32Test : public PARAMS(fwd_txfm_t, inv_txfm_t, int) {
+ public:
+  virtual ~Trans32x32Test() {}
+  virtual void SetUp() {
+    fwd_txfm_ = GET_PARAM(0);
+    inv_txfm_ = GET_PARAM(1);
+    version_  = GET_PARAM(2);  // 0: high precision forward transform
+                               // 1: low precision version for rd loop
+  }
+
+  virtual void TearDown() { libvpx_test::ClearSystemState(); }
+
+ protected:
+  int version_;
+  fwd_txfm_t fwd_txfm_;
+  inv_txfm_t inv_txfm_;
+};
+
+TEST_P(Trans32x32Test, AccuracyCheck) {
+  ACMRandom rnd(ACMRandom::DeterministicSeed());
+  uint32_t max_error = 0;
+  int64_t total_error = 0;
+  const int count_test_block = 1000;
+  DECLARE_ALIGNED_ARRAY(16, int16_t, test_input_block, kNumCoeffs);
+  DECLARE_ALIGNED_ARRAY(16, int16_t, test_temp_block, kNumCoeffs);
+  DECLARE_ALIGNED_ARRAY(16, uint8_t, dst, kNumCoeffs);
+  DECLARE_ALIGNED_ARRAY(16, uint8_t, src, kNumCoeffs);
+
+  for (int i = 0; i < count_test_block; ++i) {
+    // Initialize a test block with input range [-255, 255].
+    for (int j = 0; j < kNumCoeffs; ++j) {
       src[j] = rnd.Rand8();
       dst[j] = rnd.Rand8();
+      test_input_block[j] = src[j] - dst[j];
     }
+
+    const int pitch = 64;
+    REGISTER_STATE_CHECK(fwd_txfm_(test_input_block, test_temp_block, pitch));
+    REGISTER_STATE_CHECK(inv_txfm_(test_temp_block, dst, 32));
+
+    for (int j = 0; j < kNumCoeffs; ++j) {
+      const uint32_t diff = dst[j] - src[j];
+      const uint32_t error = diff * diff;
+      if (max_error < error)
+        max_error = error;
+      total_error += error;
+    }
+  }
+
+  if (version_ == 1) {
+    max_error /= 2;
+    total_error /= 45;
+  }
+
+  EXPECT_GE(1u, max_error)
+      << "Error: 32x32 FDCT/IDCT has an individual round-trip error > 1";
+
+  EXPECT_GE(count_test_block, total_error)
+      << "Error: 32x32 FDCT/IDCT has average round-trip error > 1 per block";
+}
+
+TEST_P(Trans32x32Test, CoeffCheck) {
+  ACMRandom rnd(ACMRandom::DeterministicSeed());
+  const int count_test_block = 1000;
+
+  DECLARE_ALIGNED_ARRAY(16, int16_t, input_block, kNumCoeffs);
+  DECLARE_ALIGNED_ARRAY(16, int16_t, output_ref_block, kNumCoeffs);
+  DECLARE_ALIGNED_ARRAY(16, int16_t, output_block, kNumCoeffs);
+
+  for (int i = 0; i < count_test_block; ++i) {
+    for (int j = 0; j < kNumCoeffs; ++j)
+      input_block[j] = rnd.Rand8() - rnd.Rand8();
+
+    const int pitch = 64;
+    vp9_short_fdct32x32_c(input_block, output_ref_block, pitch);
+    REGISTER_STATE_CHECK(fwd_txfm_(input_block, output_block, pitch));
+
+    if (version_ == 0) {
+      for (int j = 0; j < kNumCoeffs; ++j)
+        EXPECT_EQ(output_block[j], output_ref_block[j])
+            << "Error: 32x32 FDCT versions have mismatched coefficients";
+    } else {
+      for (int j = 0; j < kNumCoeffs; ++j)
+        EXPECT_GE(6, abs(output_block[j] - output_ref_block[j]))
+            << "Error: 32x32 FDCT rd has mismatched coefficients";
+    }
+  }
+}
+
+TEST_P(Trans32x32Test, MemCheck) {
+  ACMRandom rnd(ACMRandom::DeterministicSeed());
+  const int count_test_block = 2000;
+
+  DECLARE_ALIGNED_ARRAY(16, int16_t, input_block, kNumCoeffs);
+  DECLARE_ALIGNED_ARRAY(16, int16_t, input_extreme_block, kNumCoeffs);
+  DECLARE_ALIGNED_ARRAY(16, int16_t, output_ref_block, kNumCoeffs);
+  DECLARE_ALIGNED_ARRAY(16, int16_t, output_block, kNumCoeffs);
+
+  for (int i = 0; i < count_test_block; ++i) {
     // Initialize a test block with input range [-255, 255].
-    for (int j = 0; j < 1024; ++j)
+    for (int j = 0; j < kNumCoeffs; ++j) {
+      input_block[j] = rnd.Rand8() - rnd.Rand8();
+      input_extreme_block[j] = rnd.Rand8() & 1 ? 255 : -255;
+    }
+    if (i == 0)
+      for (int j = 0; j < kNumCoeffs; ++j)
+        input_extreme_block[j] = 255;
+    if (i == 1)
+      for (int j = 0; j < kNumCoeffs; ++j)
+        input_extreme_block[j] = -255;
+
+    const int pitch = 64;
+    vp9_short_fdct32x32_c(input_extreme_block, output_ref_block, pitch);
+    REGISTER_STATE_CHECK(fwd_txfm_(input_extreme_block, output_block, pitch));
+
+    // The minimum quant value is 4.
+    for (int j = 0; j < kNumCoeffs; ++j) {
+      if (version_ == 0) {
+        EXPECT_EQ(output_block[j], output_ref_block[j])
+            << "Error: 32x32 FDCT versions have mismatched coefficients";
+      } else {
+        EXPECT_GE(6, abs(output_block[j] - output_ref_block[j]))
+            << "Error: 32x32 FDCT rd has mismatched coefficients";
+      }
+      EXPECT_GE(4 * DCT_MAX_VALUE, abs(output_ref_block[j]))
+          << "Error: 32x32 FDCT C has coefficient larger than 4*DCT_MAX_VALUE";
+      EXPECT_GE(4 * DCT_MAX_VALUE, abs(output_block[j]))
+          << "Error: 32x32 FDCT has coefficient larger than "
+          << "4*DCT_MAX_VALUE";
+    }
+  }
+}
+
+TEST_P(Trans32x32Test, InverseAccuracy) {
+  ACMRandom rnd(ACMRandom::DeterministicSeed());
+  const int count_test_block = 1000;
+  DECLARE_ALIGNED_ARRAY(16, int16_t, in, kNumCoeffs);
+  DECLARE_ALIGNED_ARRAY(16, int16_t, coeff, kNumCoeffs);
+  DECLARE_ALIGNED_ARRAY(16, uint8_t, dst, kNumCoeffs);
+  DECLARE_ALIGNED_ARRAY(16, uint8_t, src, kNumCoeffs);
+
+  for (int i = 0; i < count_test_block; ++i) {
+    double out_r[kNumCoeffs];
+
+    // Initialize a test block with input range [-255, 255]
+    for (int j = 0; j < kNumCoeffs; ++j) {
+      src[j] = rnd.Rand8();
+      dst[j] = rnd.Rand8();
       in[j] = src[j] - dst[j];
+    }
 
     reference_32x32_dct_2d(in, out_r);
-    for (int j = 0; j < 1024; j++)
+    for (int j = 0; j < kNumCoeffs; ++j)
       coeff[j] = round(out_r[j]);
-    vp9_short_idct32x32_add_c(coeff, dst, 32);
-    for (int j = 0; j < 1024; ++j) {
+    REGISTER_STATE_CHECK(inv_txfm_(coeff, dst, 32));
+    for (int j = 0; j < kNumCoeffs; ++j) {
       const int diff = dst[j] - src[j];
       const int error = diff * diff;
       EXPECT_GE(1, error)
@@ -121,72 +242,21 @@ TEST(VP9Idct32x32Test, AccuracyCheck) {
   }
 }
 
-TEST(VP9Fdct32x32Test, AccuracyCheck) {
-  ACMRandom rnd(ACMRandom::DeterministicSeed());
-  unsigned int max_error = 0;
-  int64_t total_error = 0;
-  const int count_test_block = 1000;
-  for (int i = 0; i < count_test_block; ++i) {
-    int16_t test_input_block[1024];
-    int16_t test_temp_block[1024];
-    uint8_t dst[1024], src[1024];
+using std::tr1::make_tuple;
 
-    for (int j = 0; j < 1024; ++j) {
-      src[j] = rnd.Rand8();
-      dst[j] = rnd.Rand8();
-    }
-    // Initialize a test block with input range [-255, 255].
-    for (int j = 0; j < 1024; ++j)
-      test_input_block[j] = src[j] - dst[j];
+INSTANTIATE_TEST_CASE_P(
+    C, Trans32x32Test,
+    ::testing::Values(
+        make_tuple(&vp9_short_fdct32x32_c, &vp9_short_idct32x32_add_c, 0),
+        make_tuple(&vp9_short_fdct32x32_rd_c, &vp9_short_idct32x32_add_c, 1)));
 
-    const int pitch = 64;
-    vp9_short_fdct32x32_c(test_input_block, test_temp_block, pitch);
-    vp9_short_idct32x32_add_c(test_temp_block, dst, 32);
-
-    for (int j = 0; j < 1024; ++j) {
-      const unsigned diff = dst[j] - src[j];
-      const unsigned error = diff * diff;
-      if (max_error < error)
-        max_error = error;
-      total_error += error;
-    }
-  }
-
-  EXPECT_GE(1u, max_error)
-      << "Error: 32x32 FDCT/IDCT has an individual roundtrip error > 1";
-
-  EXPECT_GE(count_test_block, total_error)
-      << "Error: 32x32 FDCT/IDCT has average roundtrip error > 1 per block";
-}
-
-TEST(VP9Fdct32x32Test, CoeffSizeCheck) {
-  ACMRandom rnd(ACMRandom::DeterministicSeed());
-  const int count_test_block = 1000;
-  for (int i = 0; i < count_test_block; ++i) {
-    int16_t input_block[1024], input_extreme_block[1024];
-    int16_t output_block[1024], output_extreme_block[1024];
-
-    // Initialize a test block with input range [-255, 255].
-    for (int j = 0; j < 1024; ++j) {
-      input_block[j] = rnd.Rand8() - rnd.Rand8();
-      input_extreme_block[j] = rnd.Rand8() % 2 ? 255 : -255;
-    }
-    if (i == 0)
-      for (int j = 0; j < 1024; ++j)
-        input_extreme_block[j] = 255;
-
-    const int pitch = 64;
-    vp9_short_fdct32x32_c(input_block, output_block, pitch);
-    vp9_short_fdct32x32_c(input_extreme_block, output_extreme_block, pitch);
-
-    // The minimum quant value is 4.
-    for (int j = 0; j < 1024; ++j) {
-      EXPECT_GE(4*DCT_MAX_VALUE, abs(output_block[j]))
-          << "Error: 32x32 FDCT has coefficient larger than 4*DCT_MAX_VALUE";
-      EXPECT_GE(4*DCT_MAX_VALUE, abs(output_extreme_block[j]))
-          << "Error: 32x32 FDCT extreme has coefficient larger than "
-             "4*DCT_MAX_VALUE";
-    }
-  }
-}
+#if HAVE_SSE2
+INSTANTIATE_TEST_CASE_P(
+    SSE2, Trans32x32Test,
+    ::testing::Values(
+        make_tuple(&vp9_short_fdct32x32_sse2,
+                   &vp9_short_idct32x32_add_sse2, 0),
+        make_tuple(&vp9_short_fdct32x32_rd_sse2,
+                   &vp9_short_idct32x32_add_sse2, 1)));
+#endif
 }  // namespace
