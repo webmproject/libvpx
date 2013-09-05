@@ -135,6 +135,7 @@ void vp9_quantize_b_32x32_c(int16_t *coeff_ptr, intptr_t n_coeffs,
 
       if (x >= zbin) {
         x += ROUND_POWER_OF_TWO(round_ptr[rc != 0], 1);
+        x  = clamp(x, INT16_MIN, INT16_MAX);
         y  = (((int)(((int)(x * quant_ptr[rc != 0]) >> 16) + x)) *
               quant_shift_ptr[rc != 0]) >> 15;      // quantize (x)
 
