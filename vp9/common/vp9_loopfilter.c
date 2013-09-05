@@ -603,11 +603,15 @@ static void setup_mask(VP9_COMMON *const cm, const int mi_row, const int mi_col,
     case BLOCK_64X32:
       build_masks(lfi_n, mip, 0, 0, lfm);
       mip2 = mip + mode_info_stride * 4;
+      if (4 >= max_rows)
+        break;
       build_masks(lfi_n, mip2 , 32, 8, lfm);
       break;
     case BLOCK_32X64:
       build_masks(lfi_n, mip, 0, 0, lfm);
       mip2 = mip + 4;
+      if (4 >= max_cols)
+        break;
       build_masks(lfi_n, mip2, 4, 2, lfm);
       break;
     default:
@@ -624,11 +628,15 @@ static void setup_mask(VP9_COMMON *const cm, const int mi_row, const int mi_col,
             break;
           case BLOCK_32X16:
             build_masks(lfi_n, mip, shift_y, shift_uv, lfm);
+            if (mi_32_row_offset + 2 >= max_rows)
+              continue;
             mip2 = mip + mode_info_stride * 2;
             build_masks(lfi_n, mip2, shift_y + 16, shift_uv + 4, lfm);
             break;
           case BLOCK_16X32:
             build_masks(lfi_n, mip, shift_y, shift_uv, lfm);
+            if (mi_32_col_offset + 2 >= max_cols)
+              continue;
             mip2 = mip + 2;
             build_masks(lfi_n, mip2, shift_y + 2, shift_uv + 1, lfm);
             break;
@@ -650,11 +658,15 @@ static void setup_mask(VP9_COMMON *const cm, const int mi_row, const int mi_col,
                   break;
                 case BLOCK_16X8:
                   build_masks(lfi_n, mip, shift_y, shift_uv, lfm);
+                  if (mi_16_row_offset + 1 >= max_rows)
+                    continue;
                   mip2 = mip + mode_info_stride;
                   build_y_mask(lfi_n, mip2, shift_y+8, lfm);
                   break;
                 case BLOCK_8X16:
                   build_masks(lfi_n, mip, shift_y, shift_uv, lfm);
+                  if (mi_16_col_offset +1 >= max_cols)
+                    continue;
                   mip2 = mip + 1;
                   build_y_mask(lfi_n, mip2, shift_y+1, lfm);
                   break;
