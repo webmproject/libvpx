@@ -16,6 +16,24 @@
       "revId": "1123c3ac4965c37cc80c080a851764b7855e43cd",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdH//+/A\u003d",
+        "filename": "vp9/encoder/vp9_firstpass.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 1018,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2013-09-05T22:54:41Z",
+      "side": 1,
+      "message": "cleaned it up.",
+      "parentUuid": "AAAAdH///D4\u003d",
+      "revId": "1123c3ac4965c37cc80c080a851764b7855e43cd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
