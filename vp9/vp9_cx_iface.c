@@ -89,6 +89,18 @@ struct vpx_codec_alg_priv {
   unsigned int                fixed_kf_cntr;
 };
 
+static const VP9_REFFRAME ref_frame_to_vp9_reframe(vpx_ref_frame_type_t frame) {
+  switch (frame) {
+    case VP8_LAST_FRAME:
+      return VP9_LAST_FLAG;
+    case VP8_GOLD_FRAME:
+      return VP9_GOLD_FLAG;
+    case VP8_ALTR_FRAME:
+      return VP9_ALT_FLAG;
+  }
+  assert(!"Invalid Reference Frame");
+  return VP9_LAST_FLAG;
+}
 
 static vpx_codec_err_t
 update_error_state(vpx_codec_alg_priv_t                 *ctx,
@@ -853,7 +865,8 @@ static vpx_codec_err_t vp9e_set_reference(vpx_codec_alg_priv_t *ctx,
     YV12_BUFFER_CONFIG sd;
 
     image2yuvconfig(&frame->img, &sd);
-    vp9_set_reference_enc(ctx->cpi, frame->frame_type, &sd);
+    vp9_set_reference_enc(ctx->cpi, ref_frame_to_vp9_reframe(frame->frame_type),
+                          &sd);
     return VPX_CODEC_OK;
   } else
     return VPX_CODEC_INVALID_PARAM;
@@ -871,7 +884,8 @@ static vpx_codec_err_t vp9e_copy_reference(vpx_codec_alg_priv_t *ctx,
     YV12_BUFFER_CONFIG sd;
 
     image2yuvconfig(&frame->img, &sd);
-    vp9_copy_reference_enc(ctx->cpi, frame->frame_type, &sd);
+    vp9_copy_reference_enc(ctx->cpi,
+                           ref_frame_to_vp9_reframe(frame->frame_type), &sd);
     return VPX_CODEC_OK;
   } else
     return VPX_CODEC_INVALID_PARAM;
