@@ -69,6 +69,7 @@ void vp9_quantize_b_c(int16_t *coeff_ptr, intptr_t n_coeffs, int skip_block,
 
       if (x >= zbin) {
         x += (round_ptr[rc != 0]);
+        x  = clamp(x, INT16_MIN, INT16_MAX);
         y  = (((int)(((int)(x * quant_ptr[rc != 0]) >> 16) + x)) *
               quant_shift_ptr[rc != 0]) >> 16;      // quantize (x)
         x  = (y ^ sz) - sz;                         // get the sign back

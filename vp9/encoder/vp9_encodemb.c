@@ -635,8 +635,8 @@ void vp9_encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
         vp9_short_fht16x16(src_diff, coeff, bw * 4, tx_type);
       else
         x->fwd_txm16x16(src_diff, coeff, bw * 8);
-      vp9_quantize_b(coeff, 256, x->skip_block, p->zbin, p->round, p->quant,
-                     p->quant_shift, qcoeff, dqcoeff,
+      vp9_quantize_b(coeff, 256, x->skip_block, p->zbin, p->round,
+                     p->quant, p->quant_shift, qcoeff, dqcoeff,
                      pd->dequant, p->zbin_extra, eob, scan, iscan);
       if (!x->skip_encode && *eob) {
         if (tx_type == DCT_DCT)
