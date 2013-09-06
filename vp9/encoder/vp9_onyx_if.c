@@ -1590,6 +1590,8 @@ VP9_PTR vp9_create_compressor(VP9_CONFIG *oxcf) {
 
   cpi->output_pkt_list = oxcf->output_pkt_list;
 
+  cpi->enable_encode_breakout = 1;
+
   if (cpi->pass == 1) {
     vp9_init_first_pass(cpi);
   } else if (cpi->pass == 2) {
@@ -3618,6 +3620,8 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
 
 static void Pass2Encode(VP9_COMP *cpi, unsigned long *size,
                         unsigned char *dest, unsigned int *frame_flags) {
+
+  cpi->enable_encode_breakout = 1;
 
   if (!cpi->refresh_alt_ref_frame)
     vp9_second_pass(cpi);
