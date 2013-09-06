@@ -1,0 +1,89 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdH//+68\u003d",
+        "filename": "vp8/vp8_cx_iface.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1275,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2013-09-06T16:50:55Z",
+      "side": 1,
+      "message": "Can we change this to 3 ? Since with 5 layers definitely the overheads are too high. I also think that for youtube it may be better to go with 2 separate spatial bit-streams with 3 and 2 layers in each, rather than one with 5 layers. But that is a separate discussion anyways.",
+      "revId": "b3c1213eaad7c2f193b6f239a8fa8f49221cdf44",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdH//+64\u003d",
+        "filename": "vp9/common/vp9_convolve.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 192,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2013-09-06T16:50:55Z",
+      "side": 1,
+      "message": "Can you add a comment on why these changes are necessary?\nAlso is this a bit-stream change?",
+      "revId": "b3c1213eaad7c2f193b6f239a8fa8f49221cdf44",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdH//+6w\u003d",
+        "filename": "vp9/encoder/vp9_onyx_if.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 2275,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2013-09-06T16:50:55Z",
+      "side": 1,
+      "message": "why not use INT_MAX?",
+      "revId": "b3c1213eaad7c2f193b6f239a8fa8f49221cdf44",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdH//+6o\u003d",
+        "filename": "vp9/vp9_cx_iface.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1158,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2013-09-06T16:50:55Z",
+      "side": 1,
+      "message": "can we change this to 3?",
+      "revId": "b3c1213eaad7c2f193b6f239a8fa8f49221cdf44",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdH//+6k\u003d",
+        "filename": "vpx/vp8cx.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 202,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2013-09-06T16:50:55Z",
+      "side": 1,
+      "message": "can we move these to vp9cx.h (see comment above)",
+      "revId": "b3c1213eaad7c2f193b6f239a8fa8f49221cdf44",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
