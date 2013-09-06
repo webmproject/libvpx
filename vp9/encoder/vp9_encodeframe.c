@@ -1790,11 +1790,24 @@ static void rd_pick_partition(VP9_COMP *cpi, TOKENEXTRA **tp, int mi_row,
       }
       sum_rd = RDCOST(x->rdmult, x->rddiv, this_rate, this_dist);
       if (sum_rd < best_rd) {
+        int64_t stop_thresh = 2048;
+
         best_rate = this_rate;
         best_dist = this_dist;
         best_rd = sum_rd;
         if (bsize >= BLOCK_8X8)
           *(get_sb_partitioning(x, bsize)) = bsize;
+
+        // Adjust threshold according to partition size.
+        stop_thresh >>= 8 - (b_width_log2_lookup[bsize] +
+            b_height_log2_lookup[bsize]);
+
+        // If obtained distortion is very small, choose current partition
+        // and stop splitting.
+        if (this_dist < stop_thresh) {
+          do_split = 0;
+          do_rect = 0;
+        }
       }
     }
     restore_context(cpi, mi_row, mi_col, a, l, sa, sl, bsize);
