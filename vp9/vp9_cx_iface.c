@@ -148,7 +148,7 @@ static vpx_codec_err_t validate_config(vpx_codec_alg_priv_t      *ctx,
 
   RANGE_CHECK_HI(cfg, g_threads,          64);
   RANGE_CHECK_HI(cfg, g_lag_in_frames,    MAX_LAG_BUFFERS);
-  RANGE_CHECK(cfg, rc_end_usage,          VPX_VBR, VPX_CQ);
+  RANGE_CHECK(cfg, rc_end_usage,          VPX_VBR, VPX_Q);
   RANGE_CHECK_HI(cfg, rc_undershoot_pct,  1000);
   RANGE_CHECK_HI(cfg, rc_overshoot_pct,   1000);
   RANGE_CHECK_HI(cfg, rc_2pass_vbr_bias_pct, 100);
@@ -262,13 +262,15 @@ static vpx_codec_err_t set_vp9e_config(VP9_CONFIG *oxcf,
   // VBR only supported for now.
   // CBR code has been deprectated for experimental phase.
   // CQ mode not yet tested
-  oxcf->end_usage          = USAGE_LOCAL_FILE_PLAYBACK;
-  /*if (cfg.rc_end_usage == VPX_CQ)
-      oxcf->end_usage      = USAGE_CONSTRAINED_QUALITY;
-  else
-      oxcf->end_usage      = USAGE_LOCAL_FILE_PLAYBACK;*/
+  oxcf->end_usage        = USAGE_LOCAL_FILE_PLAYBACK;
+  /*
+  if (cfg.rc_end_usage == VPX_CQ)
+    oxcf->end_usage      = USAGE_CONSTRAINED_QUALITY;
+    */
+  if (cfg.rc_end_usage == VPX_Q)
+    oxcf->end_usage      = USAGE_CONSTANT_QUALITY;
 
-  oxcf->target_bandwidth       = cfg.rc_target_bitrate;
+  oxcf->target_bandwidth        = cfg.rc_target_bitrate;
   oxcf->rc_max_intra_bitrate_pct = vp8_cfg.rc_max_intra_bitrate_pct;
 
   oxcf->best_allowed_q          = cfg.rc_min_quantizer;

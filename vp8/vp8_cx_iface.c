@@ -153,7 +153,7 @@ static vpx_codec_err_t validate_config(vpx_codec_alg_priv_t      *ctx,
 #else
     RANGE_CHECK_HI(cfg, g_lag_in_frames,    25);
 #endif
-    RANGE_CHECK(cfg, rc_end_usage,          VPX_VBR, VPX_CQ);
+    RANGE_CHECK(cfg, rc_end_usage,          VPX_VBR, VPX_Q);
     RANGE_CHECK_HI(cfg, rc_undershoot_pct,  1000);
     RANGE_CHECK_HI(cfg, rc_overshoot_pct,   1000);
     RANGE_CHECK_HI(cfg, rc_2pass_vbr_bias_pct, 100);
@@ -204,7 +204,7 @@ static vpx_codec_err_t validate_config(vpx_codec_alg_priv_t      *ctx,
     RANGE_CHECK_HI(vp8_cfg, arnr_strength,   6);
     RANGE_CHECK(vp8_cfg, arnr_type,       1, 3);
     RANGE_CHECK(vp8_cfg, cq_level, 0, 63);
-    if(finalize && cfg->rc_end_usage == VPX_CQ)
+    if (finalize && (cfg->rc_end_usage == VPX_CQ || cfg->rc_end_usage == VPX_Q))
         RANGE_CHECK(vp8_cfg, cq_level,
                     cfg->rc_min_quantizer, cfg->rc_max_quantizer);
 
@@ -327,17 +327,14 @@ static vpx_codec_err_t set_vp8e_config(VP8_CONFIG *oxcf,
     oxcf->resample_up_water_mark   = cfg.rc_resize_up_thresh;
     oxcf->resample_down_water_mark = cfg.rc_resize_down_thresh;
 
-    if (cfg.rc_end_usage == VPX_VBR)
-    {
-        oxcf->end_usage = USAGE_LOCAL_FILE_PLAYBACK;
-    }
-    else if (cfg.rc_end_usage == VPX_CBR)
-    {
-        oxcf->end_usage = USAGE_STREAM_FROM_SERVER;
-    }
-    else if (cfg.rc_end_usage == VPX_CQ)
-    {
-        oxcf->end_usage = USAGE_CONSTRAINED_QUALITY;
+    if (cfg.rc_end_usage == VPX_VBR) {
+      oxcf->end_usage = USAGE_LOCAL_FILE_PLAYBACK;
+    } else if (cfg.rc_end_usage == VPX_CBR) {
+      oxcf->end_usage = USAGE_STREAM_FROM_SERVER;
+    } else if (cfg.rc_end_usage == VPX_CQ) {
+      oxcf->end_usage = USAGE_CONSTRAINED_QUALITY;
+    } else if (cfg.rc_end_usage == VPX_Q) {
+      oxcf->end_usage = USAGE_CONSTANT_QUALITY;
     }
 
     oxcf->target_bandwidth         = cfg.rc_target_bitrate;
