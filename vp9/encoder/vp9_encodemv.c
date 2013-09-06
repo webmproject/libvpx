@@ -316,7 +316,7 @@ void vp9_build_nmv_cost_table(int *mvjoint,
 
 void vp9_update_nmv_count(VP9_COMP *cpi, MACROBLOCK *x,
                          int_mv *best_ref_mv, int_mv *second_best_ref_mv) {
-  MODE_INFO *mi = x->e_mbd.mode_info_context;
+  MODE_INFO *mi = x->e_mbd.mi_8x8[0];
   MB_MODE_INFO *const mbmi = &mi->mbmi;
   MV diff;
   const int num_4x4_blocks_wide = num_4x4_blocks_wide_lookup[mbmi->sb_type];
@@ -333,7 +333,7 @@ void vp9_update_nmv_count(VP9_COMP *cpi, MACROBLOCK *x,
           diff.col = mi->bmi[i].as_mv[0].as_mv.col - best_ref_mv->as_mv.col;
           vp9_inc_mv(&diff, &cpi->NMVcount);
 
-          if (x->e_mbd.mode_info_context->mbmi.ref_frame[1] > INTRA_FRAME) {
+          if (mi->mbmi.ref_frame[1] > INTRA_FRAME) {
             diff.row = mi->bmi[i].as_mv[1].as_mv.row -
                          second_best_ref_mv->as_mv.row;
             diff.col = mi->bmi[i].as_mv[1].as_mv.col -

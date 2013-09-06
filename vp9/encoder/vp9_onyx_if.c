@@ -527,15 +527,15 @@ static void print_seg_map(VP9_COMP *cpi) {
 static void update_reference_segmentation_map(VP9_COMP *cpi) {
   VP9_COMMON *const cm = &cpi->common;
   int row, col;
-  MODE_INFO *mi, *mi_ptr = cm->mi;
+  MODE_INFO **mi_8x8, **mi_8x8_ptr = cm->mi_grid_visible;
   uint8_t *cache_ptr = cm->last_frame_seg_map, *cache;
 
   for (row = 0; row < cm->mi_rows; row++) {
-    mi = mi_ptr;
+    mi_8x8 = mi_8x8_ptr;
     cache = cache_ptr;
-    for (col = 0; col < cm->mi_cols; col++, mi++, cache++)
-      cache[0] = mi->mbmi.segment_id;
-    mi_ptr += cm->mode_info_stride;
+    for (col = 0; col < cm->mi_cols; col++, mi_8x8++, cache++)
+      cache[0] = mi_8x8[0]->mbmi.segment_id;
+    mi_8x8_ptr += cm->mode_info_stride;
     cache_ptr += cm->mi_cols;
   }
 }
@@ -3528,11 +3528,15 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
   if (cm->show_frame) {
     // current mip will be the prev_mip for the next frame
     MODE_INFO *temp = cm->prev_mip;
+    MODE_INFO **temp2 = cm->prev_mi_grid_base;
     cm->prev_mip = cm->mip;
     cm->mip = temp;
+    cm->prev_mi_grid_base = cm->mi_grid_base;
+    cm->mi_grid_base = temp2;
 
     // update the upper left visible macroblock ptrs
     cm->mi = cm->mip + cm->mode_info_stride + 1;
+    cm->mi_grid_visible = cm->mi_grid_base + cm->mode_info_stride + 1;
 
     // Don't increment frame counters if this was an altref buffer
     // update not a real frame
@@ -3541,8 +3545,9 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
   }
   // restore prev_mi
   cm->prev_mi = cm->prev_mip + cm->mode_info_stride + 1;
+  cm->prev_mi_grid_visible = cm->prev_mi_grid_base + cm->mode_info_stride + 1;
 
-#if 0
+  #if 0
   {
     char filename[512];
     FILE *recon_file;
