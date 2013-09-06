@@ -650,6 +650,10 @@ process_toolchain() {
         enable_feature dc_recon
     fi
 
+    if enabled internal_stats; then
+        enable_feature vp9_postproc
+    fi
+
     # Enable the postbuild target if building for visual studio.
     case "$tgt_cc" in
         vs*) enable_feature msvs
