@@ -16,6 +16,24 @@
       "revId": "86b259d7a08c6513c6d175e8ec74dcb68dd835a8",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdH//+vY\u003d",
+        "filename": "vp9/common/vp9_extend.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 62,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2013-09-08T23:01:16Z",
+      "side": 1,
+      "message": "Done.\nI added comments to why 16 or rounding up to 64 is necessary. Also, future patches will use the same functions for reference buffer extension and source frame extension.",
+      "parentUuid": "AAAAdH//+wg\u003d",
+      "revId": "86b259d7a08c6513c6d175e8ec74dcb68dd835a8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
