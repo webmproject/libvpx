@@ -346,7 +346,7 @@ static void zz_motion_search(VP9_COMP *cpi, MACROBLOCK *x, YV12_BUFFER_CONFIG *r
   // Set up pointers for this macro block recon buffer
   xd->plane[0].pre[0].buf = recon_buffer->y_buffer + recon_yoffset;
 
-  switch (xd->mode_info_context->mbmi.sb_type) {
+  switch (xd->this_mi->mbmi.sb_type) {
     case BLOCK_8X8:
       vp9_mse8x8(x->plane[0].src.buf, x->plane[0].src.stride,
                  xd->plane[0].pre[0].buf, xd->plane[0].pre[0].stride,
@@ -385,7 +385,7 @@ static void first_pass_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
   int further_steps = (MAX_MVSEARCH_STEPS - 1) - step_param;
   int n;
   vp9_variance_fn_ptr_t v_fn_ptr =
-      cpi->fn_ptr[xd->mode_info_context->mbmi.sb_type];
+      cpi->fn_ptr[xd->this_mi->mbmi.sb_type];
   int new_mv_mode_penalty = 256;
 
   int sr = 0;
@@ -402,7 +402,7 @@ static void first_pass_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
   further_steps -= sr;
 
   // override the default variance function to use MSE
-  switch (xd->mode_info_context->mbmi.sb_type) {
+  switch (xd->this_mi->mbmi.sb_type) {
     case BLOCK_8X8:
       v_fn_ptr.vf = vp9_mse8x8;
       break;
@@ -505,8 +505,11 @@ void vp9_first_pass(VP9_COMP *cpi) {
   setup_dst_planes(xd, new_yv12, 0, 0);
 
   x->partition_info = x->pi;
-
-  xd->mode_info_context = cm->mi;
+  xd->mi_8x8 = cm->mi_grid_visible;
+  // required for vp9_frame_init_quantizer
+  xd->this_mi =
+  xd->mi_8x8[0] = cm->mi;
+  xd->mic_stream_ptr = cm->mi;
 
   setup_block_dptrs(&x->e_mbd, cm->subsampling_x, cm->subsampling_y);
 
@@ -549,23 +552,23 @@ void vp9_first_pass(VP9_COMP *cpi) {
 
       if (mb_col * 2 + 1 < cm->mi_cols) {
         if (mb_row * 2 + 1 < cm->mi_rows) {
-          xd->mode_info_context->mbmi.sb_type = BLOCK_16X16;
+          xd->this_mi->mbmi.sb_type = BLOCK_16X16;
         } else {
-          xd->mode_info_context->mbmi.sb_type = BLOCK_16X8;
+          xd->this_mi->mbmi.sb_type = BLOCK_16X8;
         }
       } else {
         if (mb_row * 2 + 1 < cm->mi_rows) {
-          xd->mode_info_context->mbmi.sb_type = BLOCK_8X16;
+          xd->this_mi->mbmi.sb_type = BLOCK_8X16;
         } else {
-          xd->mode_info_context->mbmi.sb_type = BLOCK_8X8;
+          xd->this_mi->mbmi.sb_type = BLOCK_8X8;
         }
       }
-      xd->mode_info_context->mbmi.ref_frame[0] = INTRA_FRAME;
+      xd->this_mi->mbmi.ref_frame[0] = INTRA_FRAME;
       set_mi_row_col(cm, xd,
                      mb_row << 1,
-                     1 << mi_height_log2(xd->mode_info_context->mbmi.sb_type),
+                     1 << mi_height_log2(xd->this_mi->mbmi.sb_type),
                      mb_col << 1,
-                     1 << mi_height_log2(xd->mode_info_context->mbmi.sb_type));
+                     1 << mi_height_log2(xd->this_mi->mbmi.sb_type));
 
       // do intra 16x16 prediction
       this_error = vp9_encode_intra(x, use_dc_pred);
@@ -661,13 +664,13 @@ void vp9_first_pass(VP9_COMP *cpi) {
           mv.as_mv.col <<= 3;
           this_error = motion_error;
           vp9_set_mbmode_and_mvs(x, NEWMV, &mv);
-          xd->mode_info_context->mbmi.tx_size = TX_4X4;
-          xd->mode_info_context->mbmi.ref_frame[0] = LAST_FRAME;
-          xd->mode_info_context->mbmi.ref_frame[1] = NONE;
+          xd->this_mi->mbmi.tx_size = TX_4X4;
+          xd->this_mi->mbmi.ref_frame[0] = LAST_FRAME;
+          xd->this_mi->mbmi.ref_frame[1] = NONE;
           vp9_build_inter_predictors_sby(xd, mb_row << 1,
                                          mb_col << 1,
-                                         xd->mode_info_context->mbmi.sb_type);
-          vp9_encode_sby(x, xd->mode_info_context->mbmi.sb_type);
+                                         xd->this_mi->mbmi.sb_type);
+          vp9_encode_sby(x, xd->this_mi->mbmi.sb_type);
           sum_mvr += mv.as_mv.row;
           sum_mvr_abs += abs(mv.as_mv.row);
           sum_mvc += mv.as_mv.col;

@@ -1537,7 +1537,7 @@ int vp9_full_search_sad_c(MACROBLOCK *x, int_mv *ref_mv,
   int in_what_stride = xd->plane[0].pre[0].stride;
   int mv_stride = xd->plane[0].pre[0].stride;
   uint8_t *bestaddress;
-  int_mv *best_mv = &x->e_mbd.mode_info_context->bmi[n].as_mv[0];
+  int_mv *best_mv = &x->e_mbd.mi_8x8[0]->bmi[n].as_mv[0];
   int_mv this_mv;
   int bestsad = INT_MAX;
   int r, c;
@@ -1625,7 +1625,7 @@ int vp9_full_search_sadx3(MACROBLOCK *x, int_mv *ref_mv,
   int in_what_stride = xd->plane[0].pre[0].stride;
   int mv_stride = xd->plane[0].pre[0].stride;
   uint8_t *bestaddress;
-  int_mv *best_mv = &x->e_mbd.mode_info_context->bmi[n].as_mv[0];
+  int_mv *best_mv = &x->e_mbd.mi_8x8[0]->bmi[n].as_mv[0];
   int_mv this_mv;
   unsigned int bestsad = INT_MAX;
   int r, c;
@@ -1747,7 +1747,7 @@ int vp9_full_search_sadx8(MACROBLOCK *x, int_mv *ref_mv,
   int in_what_stride = xd->plane[0].pre[0].stride;
   int mv_stride = xd->plane[0].pre[0].stride;
   uint8_t *bestaddress;
-  int_mv *best_mv = &x->e_mbd.mode_info_context->bmi[n].as_mv[0];
+  int_mv *best_mv = &x->e_mbd.mi_8x8[0]->bmi[n].as_mv[0];
   int_mv this_mv;
   unsigned int bestsad = INT_MAX;
   int r, c;
