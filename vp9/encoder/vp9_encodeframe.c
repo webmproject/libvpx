@@ -41,6 +41,15 @@
 
 #define DBG_PRNT_SEGMAP 0
 
+
+static const TX_SIZE tx_mode_to_biggest_tx_size[TX_MODES] = {
+  TX_4X4,  // ONLY_4X4
+  TX_8X8,  // ONLY_8X8
+  TX_16X16,  // ONLY_16X16
+  TX_32X32,  // ONLY_32X32
+  TX_32X32,  // TX_MODE_SELECT
+};
+
 // #define ENC_DEBUG
 #ifdef ENC_DEBUG
 int enc_debug = 0;
@@ -2625,7 +2634,6 @@ static void adjust_act_zbin(VP9_COMP *cpi, MACROBLOCK *x) {
     x->act_zbin_adj = 1 - (int) (((int64_t) a + (b >> 1)) / b);
 #endif
 }
-
 static void encode_superblock(VP9_COMP *cpi, TOKENEXTRA **t, int output_enabled,
                               int mi_row, int mi_col, BLOCK_SIZE bsize) {
   VP9_COMMON * const cm = &cpi->common;
@@ -2730,7 +2738,9 @@ static void encode_superblock(VP9_COMP *cpi, TOKENEXTRA **t, int output_enabled,
       update_tx_counts(bsize, context, mbmi->tx_size, &cm->counts.tx);
     } else {
       int x, y;
-      TX_SIZE sz = (cm->tx_mode == TX_MODE_SELECT) ? TX_32X32 : cm->tx_mode;
+      TX_SIZE sz = tx_mode_to_biggest_tx_size[cm->tx_mode];
+      assert(sizeof(tx_mode_to_biggest_tx_size) /
+             sizeof(tx_mode_to_biggest_tx_size[0]) == TX_MODES);
       // The new intra coding scheme requires no change of transform size
       if (is_inter_block(&mi->mbmi)) {
         if (sz == TX_32X32 && bsize < BLOCK_32X32)
