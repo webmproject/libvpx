@@ -792,7 +792,7 @@ static void encode_sb(VP9_COMP *cpi, TOKENEXTRA **tp, int mi_row, int mi_col,
   MACROBLOCKD * const xd = &x->e_mbd;
   BLOCK_SIZE c1 = BLOCK_8X8;
   const int bsl = b_width_log2(bsize), bs = (1 << bsl) / 4;
-  int UNINITIALIZED_IS_SAFE(pl);
+  int pl = 0;
   PARTITION_TYPE partition;
   BLOCK_SIZE subsize;
   int i;
