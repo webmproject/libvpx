@@ -46,6 +46,12 @@ extern "C" {
   /*!\deprecated Use #VPX_TS_MAX_LAYERS instead. */
 #define MAX_LAYERS      VPX_TS_MAX_LAYERS
 
+/*! Spatial Scalability: Maximum number of coding layers */
+#define VPX_SS_MAX_LAYERS       5
+
+/*! Spatial Scalability: Default number of coding layers */
+#define VPX_SS_DEFAULT_LAYERS       3
+
   /*!\brief Current ABI version number
    *
    * \internal
@@ -596,8 +602,14 @@ extern "C" {
     unsigned int           kf_max_dist;
 
     /*
-     * Temporal scalability settings (ts)
+     * Spatial scalability settings (ss)
      */
+
+    /*!\brief Number of coding layers (spatial)
+     *
+     * This value specifies the number of coding layers to be used.
+     */
+    unsigned int           ss_number_layers;
 
     /*!\brief Number of coding layers
      *

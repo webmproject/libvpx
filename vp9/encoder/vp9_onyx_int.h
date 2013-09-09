@@ -351,6 +351,10 @@ typedef struct VP9_COMP {
   int lst_fb_idx;
   int gld_fb_idx;
   int alt_fb_idx;
+
+  int current_layer;
+  int use_svc;
+
 #if CONFIG_MULTIPLE_ARF
   int alt_ref_fb_idx[NUM_REF_FRAMES - 3];
 #endif
@@ -650,6 +654,8 @@ typedef struct VP9_COMP {
   int initial_width;
   int initial_height;
 
+  int number_spatial_layers;
+
 #if CONFIG_MULTIPLE_ARF
   // ARF tracking variables.
   int multi_arf_enabled;
@@ -681,6 +687,17 @@ static int get_ref_frame_idx(VP9_COMP *cpi, MV_REFERENCE_FRAME ref_frame) {
     return cpi->gld_fb_idx;
   } else {
     return cpi->alt_fb_idx;
+  }
+}
+
+static int get_scale_ref_frame_idx(VP9_COMP *cpi,
+                                   MV_REFERENCE_FRAME ref_frame) {
+  if (ref_frame == LAST_FRAME) {
+    return 0;
+  } else if (ref_frame == GOLDEN_FRAME) {
+    return 1;
+  } else {
+    return 2;
   }
 }
 

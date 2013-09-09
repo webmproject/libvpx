@@ -1208,7 +1208,8 @@ static int get_refresh_mask(VP9_COMP *cpi) {
     if (!cpi->multi_arf_enabled && cpi->refresh_golden_frame &&
         !cpi->refresh_alt_ref_frame) {
 #else
-    if (cpi->refresh_golden_frame && !cpi->refresh_alt_ref_frame) {
+    if (cpi->refresh_golden_frame && !cpi->refresh_alt_ref_frame &&
+        !cpi->use_svc) {
 #endif
       // Preserve the previously existing golden frame and update the frame in
       // the alt ref slot instead. This is highly specific to the use of
@@ -1320,9 +1321,16 @@ static void write_frame_size_with_refs(VP9_COMP *cpi,
     YV12_BUFFER_CONFIG *cfg = &cm->yv12_fb[cm->ref_frame_map[refs[i]]];
     found = cm->width == cfg->y_crop_width &&
             cm->height == cfg->y_crop_height;
+
+    // TODO(ivan): This prevents a bug while more than 3 buffers are used. Do it
+    // in a better way.
+    if (cpi->use_svc) {
+      found = 0;
+    }
     vp9_wb_write_bit(wb, found);
-    if (found)
+    if (found) {
       break;
+    }
   }
 
   if (!found) {

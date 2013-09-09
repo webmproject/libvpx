@@ -2278,8 +2278,9 @@ static void setup_buffer_inter(VP9_COMP *cpi, MACROBLOCK *x,
 static YV12_BUFFER_CONFIG *get_scaled_ref_frame(VP9_COMP *cpi, int ref_frame) {
   YV12_BUFFER_CONFIG *scaled_ref_frame = NULL;
   int fb = get_ref_frame_idx(cpi, ref_frame);
-  if (cpi->scaled_ref_idx[fb] != cpi->common.ref_frame_map[fb])
-    scaled_ref_frame = &cpi->common.yv12_fb[cpi->scaled_ref_idx[fb]];
+  int fb_scale = get_scale_ref_frame_idx(cpi, ref_frame);
+  if (cpi->scaled_ref_idx[fb_scale] != cpi->common.ref_frame_map[fb])
+    scaled_ref_frame = &cpi->common.yv12_fb[cpi->scaled_ref_idx[fb_scale]];
   return scaled_ref_frame;
 }
 

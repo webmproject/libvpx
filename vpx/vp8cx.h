@@ -190,7 +190,15 @@ enum vp8e_enc_control_id {
   VP9E_SET_LOSSLESS,
   VP9E_SET_TILE_COLUMNS,
   VP9E_SET_TILE_ROWS,
-  VP9E_SET_FRAME_PARALLEL_DECODING
+  VP9E_SET_FRAME_PARALLEL_DECODING,
+
+  VP9E_SET_WIDTH              = 99,
+  VP9E_SET_HEIGHT,
+  VP9E_SET_LAYER,
+  VP9E_SET_SVC,
+
+  VP9E_SET_MAX_Q,
+  VP9E_SET_MIN_Q
 };
 
 /*!\brief vpx 1-D scaling mode
@@ -292,6 +300,12 @@ VPX_CTRL_USE_TYPE(VP8E_SET_ROI_MAP,            vpx_roi_map_t *)
 VPX_CTRL_USE_TYPE(VP8E_SET_ACTIVEMAP,          vpx_active_map_t *)
 VPX_CTRL_USE_TYPE(VP8E_SET_SCALEMODE,          vpx_scaling_mode_t *)
 
+VPX_CTRL_USE_TYPE(VP9E_SET_LAYER,              int *)
+VPX_CTRL_USE_TYPE(VP9E_SET_SVC,                int)
+
+VPX_CTRL_USE_TYPE(VP9E_SET_WIDTH,              unsigned int *)
+VPX_CTRL_USE_TYPE(VP9E_SET_HEIGHT,             unsigned int *)
+
 VPX_CTRL_USE_TYPE(VP8E_SET_CPUUSED,            int)
 VPX_CTRL_USE_TYPE(VP8E_SET_ENABLEAUTOALTREF,   unsigned int)
 VPX_CTRL_USE_TYPE(VP8E_SET_NOISE_SENSITIVITY,  unsigned int)
@@ -316,6 +330,9 @@ VPX_CTRL_USE_TYPE(VP8E_SET_MAX_INTRA_BITRATE_PCT, unsigned int)
 VPX_CTRL_USE_TYPE(VP9E_SET_LOSSLESS, unsigned int)
 
 VPX_CTRL_USE_TYPE(VP9E_SET_FRAME_PARALLEL_DECODING, unsigned int)
+
+VPX_CTRL_USE_TYPE(VP9E_SET_MAX_Q,      unsigned int)
+VPX_CTRL_USE_TYPE(VP9E_SET_MIN_Q,      unsigned int)
 /*! @} - end defgroup vp8_encoder */
 #include "vpx_codec_impl_bottom.h"
 #endif
