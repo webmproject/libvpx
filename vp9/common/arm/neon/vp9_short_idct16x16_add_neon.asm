@@ -90,28 +90,28 @@
     vmull.s16       q2, d18, d0
     vmull.s16       q3, d19, d0
 
+    ; step2[4] * cospi_4_64
+    vmull.s16       q5, d18, d1
+    vmull.s16       q6, d19, d1
+
     ; temp1 = step2[4] * cospi_28_64 - step2[7] * cospi_4_64
     vmlsl.s16       q2, d30, d1
     vmlsl.s16       q3, d31, d1
+
+    ; temp2 = step2[4] * cospi_4_64 + step2[7] * cospi_28_64
+    vmlal.s16       q5, d30, d0
+    vmlal.s16       q6, d31, d0
+
+    vdup.16         d2, r3                    ; duplicate cospi_12_64
+    vdup.16         d3, r12                   ; duplicate cospi_20_64
 
     ; dct_const_round_shift(temp1)
     vqrshrn.s32     d8, q2, #14               ; >> 14
     vqrshrn.s32     d9, q3, #14               ; >> 14
 
-    ; step2[4] * cospi_4_64
-    vmull.s16       q2, d18, d1
-    vmull.s16       q3, d19, d1
-
-    ; temp2 = step2[4] * cospi_4_64 + step2[7] * cospi_28_64
-    vmlal.s16       q2, d30, d0
-    vmlal.s16       q3, d31, d0
-
     ; dct_const_round_shift(temp2)
-    vqrshrn.s32     d14, q2, #14              ; >> 14
-    vqrshrn.s32     d15, q3, #14              ; >> 14
-
-    vdup.16         d0, r3                   ; duplicate cospi_12_64
-    vdup.16         d1, r12                  ; duplicate cospi_20_64
+    vqrshrn.s32     d14, q5, #14              ; >> 14
+    vqrshrn.s32     d15, q6, #14              ; >> 14
 
     ; preloading to avoid stall
     ; generate cospi_16_64 = 11585
@@ -123,28 +123,28 @@
     add             r12, #0x7e
 
     ; step2[5] * cospi_12_64
-    vmull.s16       q2, d26, d0
-    vmull.s16       q3, d27, d0
+    vmull.s16       q2, d26, d2
+    vmull.s16       q3, d27, d2
+
+    ; step2[5] * cospi_20_64
+    vmull.s16       q9, d26, d3
+    vmull.s16       q15, d27, d3
 
     ; temp1 = input[5] * cospi_12_64 - input[3] * cospi_20_64
-    vmlsl.s16       q2, d22, d1
-    vmlsl.s16       q3, d23, d1
+    vmlsl.s16       q2, d22, d3
+    vmlsl.s16       q3, d23, d3
+
+    ; temp2 = step2[5] * cospi_20_64 + step2[6] * cospi_12_64
+    vmlal.s16       q9, d22, d2
+    vmlal.s16       q15, d23, d2
 
     ; dct_const_round_shift(temp1)
     vqrshrn.s32     d10, q2, #14              ; >> 14
     vqrshrn.s32     d11, q3, #14              ; >> 14
 
-    ; step2[5] * cospi_20_64
-    vmull.s16       q2, d26, d1
-    vmull.s16       q3, d27, d1
-
-    ; temp2 = step2[5] * cospi_20_64 + step2[6] * cospi_12_64
-    vmlal.s16       q2, d22, d0
-    vmlal.s16       q3, d23, d0
-
     ; dct_const_round_shift(temp2)
-    vqrshrn.s32     d12, q2, #14              ; >> 14
-    vqrshrn.s32     d13, q3, #14              ; >> 14
+    vqrshrn.s32     d12, q9, #14              ; >> 14
+    vqrshrn.s32     d13, q15, #14             ; >> 14
 
     ; stage 4
     vdup.16         d30, r3                   ; cospi_16_64
@@ -157,53 +157,54 @@
     vmull.s16       q0, d24, d30
     vmull.s16       q1, d25, d30
 
-    ; temp1 = (step1[0] + step1[1]) * cospi_16_64
-    vadd.s32        q3, q2, q0
-    vadd.s32        q15, q11, q1
-
-    ; dct_const_round_shift(temp1)
-    vqrshrn.s32     d16, q3, #14              ; >> 14
-    vqrshrn.s32     d17, q15, #14             ; >> 14
-
-    ; temp2 = (step1[0] - step1[1]) * cospi_16_64
-    vsub.s32        q3, q2, q0
-    vsub.s32        q15, q11, q1
-
-    ; dct_const_round_shift(temp2)
-    vqrshrn.s32     d18, q3, #14              ; >> 14
-    vqrshrn.s32     d19, q15, #14             ; >> 14
-
     ; generate cospi_8_64 = 15137
     mov             r3, #0x3b00
     add             r3, #0x21
 
-    ; step1[2] * cospi_24_64 - step1[3] * cospi_8_64;
     vdup.16         d30, r12                  ; duplicate cospi_24_64
     vdup.16         d31, r3                   ; duplicate cospi_8_64
 
+    ; temp1 = (step1[0] + step1[1]) * cospi_16_64
+    vadd.s32        q3, q2, q0
+    vadd.s32        q12, q11, q1
+
+    ; temp2 = (step1[0] - step1[1]) * cospi_16_64
+    vsub.s32        q13, q2, q0
+    vsub.s32        q1, q11, q1
+
+    ; dct_const_round_shift(temp1)
+    vqrshrn.s32     d16, q3, #14              ; >> 14
+    vqrshrn.s32     d17, q12, #14             ; >> 14
+
+    ; dct_const_round_shift(temp2)
+    vqrshrn.s32     d18, q13, #14             ; >> 14
+    vqrshrn.s32     d19, q1, #14              ; >> 14
+
+    ; step1[2] * cospi_24_64 - step1[3] * cospi_8_64;
     ; step1[2] * cospi_8_64
     vmull.s16       q0, d20, d31
     vmull.s16       q1, d21, d31
+
+    ; step1[2] * cospi_24_64
+    vmull.s16       q12, d20, d30
+    vmull.s16       q13, d21, d30
 
     ; temp2 = input[1] * cospi_8_64 + input[3] * cospi_24_64
     vmlal.s16       q0, d28, d30
     vmlal.s16       q1, d29, d30
 
+    ; temp1 = input[1] * cospi_24_64 - input[3] * cospi_8_64
+    vmlsl.s16       q12, d28, d31
+    vmlsl.s16       q13, d29, d31
+
     ; dct_const_round_shift(temp2)
     vqrshrn.s32     d22, q0, #14              ; >> 14
     vqrshrn.s32     d23, q1, #14              ; >> 14
 
-    ; step1[2] * cospi_24_64
-    vmull.s16       q0, d20, d30
-    vmull.s16       q1, d21, d30
-
-    ; temp1 = input[1] * cospi_24_64 - input[3] * cospi_8_64
-    vmlsl.s16       q0, d28, d31
-    vmlsl.s16       q1, d29, d31
-
     ; dct_const_round_shift(temp1)
-    vqrshrn.s32     d20, q0, #14              ; >> 14
-    vqrshrn.s32     d21, q1, #14              ; >> 14
+    vqrshrn.s32     d20, q12, #14             ; >> 14
+    vqrshrn.s32     d21, q13, #14             ; >> 14
+
     vsub.s16        q13, q4, q5               ; step2[5] = step1[4] - step1[5];
     vadd.s16        q4, q4, q5                ; step2[4] = step1[4] + step1[5];
     vsub.s16        q14, q7, q6               ; step2[6] = -step1[6] + step1[7];
@@ -231,32 +232,29 @@
 
     ; temp1 = (step2[6] - step2[5]) * cospi_16_64
     vsub.s32        q6, q9, q11
-    vsub.s32        q7, q10, q12
-
-    ; dct_const_round_shift(temp1)
-    vqrshrn.s32     d10, q6, #14              ; >> 14
-    vqrshrn.s32     d11, q7, #14              ; >> 14
+    vsub.s32        q13, q10, q12
 
     ; temp2 = (step2[5] + step2[6]) * cospi_16_64
     vadd.s32        q9, q9, q11
     vadd.s32        q10, q10, q12
 
+    ; dct_const_round_shift(temp1)
+    vqrshrn.s32     d10, q6, #14              ; >> 14
+    vqrshrn.s32     d11, q13, #14             ; >> 14
+
     ; dct_const_round_shift(temp2)
     vqrshrn.s32     d12, q9, #14              ; >> 14
     vqrshrn.s32     d13, q10, #14             ; >> 14
 
-    ; step1[7] = step2[7];
-    vmov.s16         q7, q15
-
     ; stage 6
-    vadd.s16        q8, q0, q7                ; step2[0] = step1[0] + step1[7];
+    vadd.s16        q8, q0, q15                ; step2[0] = step1[0] + step1[7];
     vadd.s16        q9, q1, q6                ; step2[1] = step1[1] + step1[6];
     vadd.s16        q10, q2, q5               ; step2[2] = step1[2] + step1[5];
     vadd.s16        q11, q3, q4               ; step2[3] = step1[3] + step1[4];
     vsub.s16        q12, q3, q4               ; step2[4] = step1[3] - step1[4];
     vsub.s16        q13, q2, q5               ; step2[5] = step1[2] - step1[5];
     vsub.s16        q14, q1, q6               ; step2[6] = step1[1] - step1[6];
-    vsub.s16        q15, q0, q7               ; step2[7] = step1[0] - step1[7];
+    vsub.s16        q15, q0, q15              ; step2[7] = step1[0] - step1[7];
 
     ; store the data
     vst1.64         {d16}, [r1], r2
@@ -339,28 +337,28 @@
     vmull.s16       q2, d16, d12
     vmull.s16       q3, d17, d12
 
+    ; step1[8] * cospi_2_64
+    vmull.s16       q1, d16, d13
+    vmull.s16       q4, d17, d13
+
     ; temp1 = step1[8] * cospi_30_64 - step1[15] * cospi_2_64
     vmlsl.s16       q2, d30, d13
     vmlsl.s16       q3, d31, d13
+
+    ; temp2 = step1[8] * cospi_2_64 + step1[15] * cospi_30_64
+    vmlal.s16       q1, d30, d12
+    vmlal.s16       q4, d31, d12
+
+    vdup.16         d30, r3                   ; duplicate cospi_14_64
+    vdup.16         d31, r12                  ; duplicate cospi_18_64
 
     ; dct_const_round_shift(temp1)
     vqrshrn.s32     d0, q2, #14               ; >> 14
     vqrshrn.s32     d1, q3, #14               ; >> 14
 
-    ; step1[8] * cospi_2_64
-    vmull.s16       q2, d16, d13
-    vmull.s16       q3, d17, d13
-
-    ; temp2 = step1[8] * cospi_2_64 + step1[15] * cospi_30_64
-    vmlal.s16       q2, d30, d12
-    vmlal.s16       q3, d31, d12
-
     ; dct_const_round_shift(temp2)
-    vqrshrn.s32     d14, q2, #14              ; >> 14
-    vqrshrn.s32     d15, q3, #14              ; >> 14
-
-    vdup.16         d30, r3                   ; duplicate cospi_14_64
-    vdup.16         d31, r12                  ; duplicate cospi_18_64
+    vqrshrn.s32     d14, q1, #14              ; >> 14
+    vqrshrn.s32     d15, q4, #14              ; >> 14
 
     ; preloading to avoid stall
     ; generate cospi_22_64 = 7723
@@ -375,52 +373,44 @@
     vmull.s16       q2, d24, d30
     vmull.s16       q3, d25, d30
 
+    ; step1[9] * cospi_18_64
+    vmull.s16       q4, d24, d31
+    vmull.s16       q5, d25, d31
+
     ; temp1 = step1[9] * cospi_14_64 - step1[14] * cospi_18_64
     vmlsl.s16       q2, d22, d31
     vmlsl.s16       q3, d23, d31
+
+    ; temp2 = step1[9] * cospi_18_64 + step1[14] * cospi_14_64
+    vmlal.s16       q4, d22, d30
+    vmlal.s16       q5, d23, d30
+
+    vdup.16         d30, r3                   ; duplicate cospi_22_64
+    vdup.16         d31, r12                  ; duplicate cospi_10_64
 
     ; dct_const_round_shift(temp1)
     vqrshrn.s32     d2, q2, #14               ; >> 14
     vqrshrn.s32     d3, q3, #14               ; >> 14
 
-    ; step1[9] * cospi_18_64
-    vmull.s16       q2, d24, d31
-    vmull.s16       q3, d25, d31
-
-    ; temp2 = step1[9] * cospi_18_64 + step1[14] * cospi_14_64
-    vmlal.s16       q2, d22, d30
-    vmlal.s16       q3, d23, d30
-
     ; dct_const_round_shift(temp2)
-    vqrshrn.s32     d12, q2, #14              ; >> 14
-    vqrshrn.s32     d13, q3, #14              ; >> 14
-
-    vdup.16         d30, r3                   ; duplicate cospi_22_64
-    vdup.16         d31, r12                  ; duplicate cospi_10_64
+    vqrshrn.s32     d12, q4, #14              ; >> 14
+    vqrshrn.s32     d13, q5, #14              ; >> 14
 
     ; step1[10] * cospi_22_64
     vmull.s16       q11, d20, d30
     vmull.s16       q12, d21, d30
 
+    ; step1[10] * cospi_10_64
+    vmull.s16       q4, d20, d31
+    vmull.s16       q5, d21, d31
+
     ; temp1 = step1[10] * cospi_22_64 - step1[13] * cospi_10_64
     vmlsl.s16       q11, d26, d31
     vmlsl.s16       q12, d27, d31
 
-    ; dct_const_round_shift(temp1)
-    vqrshrn.s32     d4, q11, #14              ; >> 14
-    vqrshrn.s32     d5, q12, #14              ; >> 14
-
-    ; step1[10] * cospi_10_64
-    vmull.s16       q11, d20, d31
-    vmull.s16       q12, d21, d31
-
     ; temp2 = step1[10] * cospi_10_64 + step1[13] * cospi_22_64
-    vmlal.s16       q11, d26, d30
-    vmlal.s16       q12, d27, d30
-
-    ; dct_const_round_shift(temp2)
-    vqrshrn.s32     d10, q11, #14             ; >> 14
-    vqrshrn.s32     d11, q12, #14             ; >> 14
+    vmlal.s16       q4, d26, d30
+    vmlal.s16       q5, d27, d30
 
     ; preloading to avoid stall
     ; generate cospi_6_64 = 15679
@@ -434,33 +424,42 @@
     vdup.16         d30, r3                   ; duplicate cospi_6_64
     vdup.16         d31, r12                  ; duplicate cospi_26_64
 
+    ; dct_const_round_shift(temp1)
+    vqrshrn.s32     d4, q11, #14              ; >> 14
+    vqrshrn.s32     d5, q12, #14              ; >> 14
+
+    ; dct_const_round_shift(temp2)
+    vqrshrn.s32     d11, q5, #14              ; >> 14
+    vqrshrn.s32     d10, q4, #14              ; >> 14
+
     ; step1[11] * cospi_6_64
     vmull.s16       q10, d28, d30
     vmull.s16       q11, d29, d30
+
+    ; step1[11] * cospi_26_64
+    vmull.s16       q12, d28, d31
+    vmull.s16       q13, d29, d31
 
     ; temp1 = step1[11] * cospi_6_64 - step1[12] * cospi_26_64
     vmlsl.s16       q10, d18, d31
     vmlsl.s16       q11, d19, d31
 
+    ; temp2 = step1[11] * cospi_26_64 + step1[12] * cospi_6_64
+    vmlal.s16       q12, d18, d30
+    vmlal.s16       q13, d19, d30
+
+    vsub.s16        q9, q0, q1                ; step1[9]=step2[8]-step2[9]
+    vadd.s16        q0, q0, q1                ; step1[8]=step2[8]+step2[9]
+
     ; dct_const_round_shift(temp1)
     vqrshrn.s32     d6, q10, #14              ; >> 14
     vqrshrn.s32     d7, q11, #14              ; >> 14
 
-    ; step1[11] * cospi_26_64
-    vmull.s16       q10, d28, d31
-    vmull.s16       q11, d29, d31
-
-    ; temp2 = step1[11] * cospi_26_64 + step1[12] * cospi_6_64
-    vmlal.s16       q10, d18, d30
-    vmlal.s16       q11, d19, d30
-
     ; dct_const_round_shift(temp2)
-    vqrshrn.s32     d8, q10, #14              ; >> 14
-    vqrshrn.s32     d9, q11, #14              ; >> 14
+    vqrshrn.s32     d8, q12, #14              ; >> 14
+    vqrshrn.s32     d9, q13, #14              ; >> 14
 
     ; stage 3
-    vsub.s16        q9, q0, q1                ; step1[9]=step2[8]-step2[9]
-    vadd.s16        q0, q0, q1                ; step1[8]=step2[8]+step2[9]
     vsub.s16        q10, q3, q2               ; step1[10]=-step2[10]+step2[11]
     vadd.s16        q11, q2, q3               ; step1[11]=step2[10]+step2[11]
     vadd.s16        q12, q4, q5               ; step1[12]=step2[12]+step2[13]
@@ -481,55 +480,55 @@
     vdup.16         d30, r12                  ; duplicate cospi_8_64
     vdup.16         d31, r3                   ; duplicate cospi_24_64
 
-    ; step1[14] * cospi_24_64
-    vmull.s16       q4, d28, d31
-    vmull.s16       q5, d29, d31
-
-    ; temp1 = -step1[9] * cospi_8_64 + step1[14] * cospi_24_64
-    vmlsl.s16       q4, d18, d30
-    vmlsl.s16       q5, d19, d30
-
-    ; dct_const_round_shift(temp1)
-    vqrshrn.s32     d2, q4, #14               ; >> 14
-    vqrshrn.s32     d3, q5, #14               ; >> 14
-
     ; step1[9] * cospi_24_64
     vmull.s16       q2, d18, d31
     vmull.s16       q3, d19, d31
+
+    ; step1[14] * cospi_24_64
+    vmull.s16       q4, d28, d31
+    vmull.s16       q5, d29, d31
 
     ; temp2 = step1[9] * cospi_24_64 + step1[14] * cospi_8_64
     vmlal.s16       q2, d28, d30
     vmlal.s16       q3, d29, d30
 
+    ; temp1 = -step1[9] * cospi_8_64 + step1[14] * cospi_24_64
+    vmlsl.s16       q4, d18, d30
+    vmlsl.s16       q5, d19, d30
+
+    rsb             r12, #0
+    vdup.16         d30, r12                  ; duplicate -cospi_8_64
+
     ; dct_const_round_shift(temp2)
     vqrshrn.s32     d12, q2, #14              ; >> 14
     vqrshrn.s32     d13, q3, #14              ; >> 14
 
+    ; dct_const_round_shift(temp1)
+    vqrshrn.s32     d2, q4, #14               ; >> 14
+    vqrshrn.s32     d3, q5, #14               ; >> 14
+
     vmov.s16        q3, q11
     vmov.s16        q4, q12
-
-    rsb              r12, #0
-    vdup.16         d30, r12                  ; duplicate -cospi_8_64
 
     ; - step1[13] * cospi_8_64
     vmull.s16       q11, d26, d30
     vmull.s16       q12, d27, d30
 
-    ; temp2 = -step1[10] * cospi_8_64 + step1[13] * cospi_24_64
-    vmlsl.s16       q11, d20, d31
-    vmlsl.s16       q12, d21, d31
-
-    ; dct_const_round_shift(temp2)
-    vqrshrn.s32     d4, q11, #14              ; >> 14
-    vqrshrn.s32     d5, q12, #14              ; >> 14
-
     ; -step1[10] * cospi_8_64
     vmull.s16       q8, d20, d30
     vmull.s16       q9, d21, d30
 
+    ; temp2 = -step1[10] * cospi_8_64 + step1[13] * cospi_24_64
+    vmlsl.s16       q11, d20, d31
+    vmlsl.s16       q12, d21, d31
+
     ; temp1 = -step1[10] * cospi_8_64 + step1[13] * cospi_24_64
     vmlal.s16       q8, d26, d31
     vmlal.s16       q9, d27, d31
+
+    ; dct_const_round_shift(temp2)
+    vqrshrn.s32     d4, q11, #14              ; >> 14
+    vqrshrn.s32     d5, q12, #14              ; >> 14
 
     ; dct_const_round_shift(temp1)
     vqrshrn.s32     d10, q8, #14              ; >> 14
@@ -564,17 +563,17 @@
     vsub.s32        q5, q3, q0
     vsub.s32        q6, q4, q1
 
+    ; temp2 = (step1[10] + step1[13]) * cospi_16_64
+    vadd.s32        q10, q3, q0
+    vadd.s32        q4, q4, q1
+
     ; dct_const_round_shift(temp1)
     vqrshrn.s32     d4, q5, #14               ; >> 14
     vqrshrn.s32     d5, q6, #14               ; >> 14
 
-    ; temp2 = (step1[10] + step1[13]) * cospi_16_64
-    vadd.s32        q5, q3, q0
-    vadd.s32        q6, q4, q1
-
     ; dct_const_round_shift(temp2)
-    vqrshrn.s32     d10, q5, #14              ; >> 14
-    vqrshrn.s32     d11, q6, #14              ; >> 14
+    vqrshrn.s32     d10, q10, #14             ; >> 14
+    vqrshrn.s32     d11, q4, #14              ; >> 14
 
     ; step1[11] * cospi_16_64
     vmull.s16       q0, d22, d14
@@ -588,13 +587,13 @@
     vsub.s32        q10, q13, q0
     vsub.s32        q4, q6, q1
 
-    ; dct_const_round_shift(temp1)
-    vqrshrn.s32     d6, q10, #14              ; >> 14
-    vqrshrn.s32     d7, q4, #14               ; >> 14
-
     ; temp2 = (step1[11] + step1[12]) * cospi_16_64
     vadd.s32        q13, q13, q0
     vadd.s32        q6, q6, q1
+
+    ; dct_const_round_shift(temp1)
+    vqrshrn.s32     d6, q10, #14              ; >> 14
+    vqrshrn.s32     d7, q4, #14               ; >> 14
 
     ; dct_const_round_shift(temp2)
     vqrshrn.s32     d8, q13, #14              ; >> 14
@@ -844,46 +843,46 @@ end_idct16x16_pass2
     vqrdmulh.s16    q7, q9, q1
 
     ; stage 4
-    vdup.16         q1, r3                   ; cospi_16_64*2
+    vdup.16         q1, r3                    ; cospi_16_64*2
 
     ; generate cospi_16_64 = 11585
     mov             r3, #0x2d00
     add             r3, #0x41
 
-    vdup.16         d4, r3;                  ; duplicate cospi_16_64
+    vdup.16         d4, r3;                   ; duplicate cospi_16_64
 
     ; dct_const_round_shift(step1[0] * cospi_16_64)
     vqrdmulh.s16    q8, q8, q1
-
-    ; step2[5] * cospi_16_64
-    vmull.s16       q12, d9, d4
-    vmull.s16       q11, d8, d4
 
     ; step2[6] * cospi_16_64
     vmull.s16       q9, d14, d4
     vmull.s16       q10, d15, d4
 
+    ; step2[5] * cospi_16_64
+    vmull.s16       q12, d9, d4
+    vmull.s16       q11, d8, d4
+
     ; temp1 = (step2[6] - step2[5]) * cospi_16_64
     vsub.s32        q15, q10, q12
     vsub.s32        q6, q9, q11
 
-    ; dct_const_round_shift(temp1)
-    vqrshrn.s32     d11, q15, #14             ; >> 14
-    vqrshrn.s32     d10, q6, #14              ; >> 14
-
     ; temp2 = (step2[5] + step2[6]) * cospi_16_64
     vadd.s32        q9, q9, q11
     vadd.s32        q10, q10, q12
+
+    ; dct_const_round_shift(temp1)
+    vqrshrn.s32     d11, q15, #14             ; >> 14
+    vqrshrn.s32     d10, q6, #14              ; >> 14
 
     ; dct_const_round_shift(temp2)
     vqrshrn.s32     d12, q9, #14              ; >> 14
     vqrshrn.s32     d13, q10, #14             ; >> 14
 
     ; stage 6
-    vadd.s16        q2, q8, q7               ; step2[0] = step1[0] + step1[7];
-    vadd.s16        q9, q8, q6                ; step2[1] = step1[1] + step1[6];
+    vadd.s16        q2, q8, q7                ; step2[0] = step1[0] + step1[7];
     vadd.s16        q10, q8, q5               ; step2[2] = step1[2] + step1[5];
     vadd.s16        q11, q8, q4               ; step2[3] = step1[3] + step1[4];
+    vadd.s16        q9, q8, q6                ; step2[1] = step1[1] + step1[6];
     vsub.s16        q12, q8, q4               ; step2[4] = step1[3] - step1[4];
     vsub.s16        q13, q8, q5               ; step2[5] = step1[2] - step1[5];
     vsub.s16        q14, q8, q6               ; step2[6] = step1[1] - step1[6];
@@ -997,48 +996,48 @@ end_idct16x16_pass2
     vmull.s16       q12, d14, d31
     vmull.s16       q5, d15, d31
 
-    ; temp1 = -step1[9] * cospi_8_64 + step1[14] * cospi_24_64
-    vmlsl.s16       q12, d0, d30
-    vmlsl.s16       q5, d1, d30
-
-    ; dct_const_round_shift(temp1)
-    vqrshrn.s32     d2, q12, #14              ; >> 14
-    vqrshrn.s32     d3, q5, #14               ; >> 14
-
     ; step1[9] * cospi_24_64
     vmull.s16       q2, d0, d31
     vmull.s16       q11, d1, d31
+
+    ; temp1 = -step1[9] * cospi_8_64 + step1[14] * cospi_24_64
+    vmlsl.s16       q12, d0, d30
+    vmlsl.s16       q5, d1, d30
 
     ; temp2 = step1[9] * cospi_24_64 + step1[14] * cospi_8_64
     vmlal.s16       q2, d14, d30
     vmlal.s16       q11, d15, d30
 
+    rsb              r12, #0
+    vdup.16          d30, r12                 ; duplicate -cospi_8_64
+
+    ; dct_const_round_shift(temp1)
+    vqrshrn.s32     d2, q12, #14              ; >> 14
+    vqrshrn.s32     d3, q5, #14               ; >> 14
+
     ; dct_const_round_shift(temp2)
     vqrshrn.s32     d12, q2, #14              ; >> 14
     vqrshrn.s32     d13, q11, #14             ; >> 14
-
-    rsb              r12, #0
-    vdup.16         d30, r12                  ; duplicate -cospi_8_64
 
     ; - step1[13] * cospi_8_64
     vmull.s16       q10, d8, d30
     vmull.s16       q13, d9, d30
 
-    ; temp1 = -step1[10] * cospi_24_64 - step1[13] * cospi_8_64
-    vmlsl.s16       q10, d6, d31
-    vmlsl.s16       q13, d7, d31
-
-    ; dct_const_round_shift(temp1)
-    vqrshrn.s32     d4, q10, #14              ; >> 14
-    vqrshrn.s32     d5, q13, #14              ; >> 14
-
     ; -step1[10] * cospi_8_64
     vmull.s16       q8, d6, d30
     vmull.s16       q9, d7, d30
 
+    ; temp1 = -step1[10] * cospi_24_64 - step1[13] * cospi_8_64
+    vmlsl.s16       q10, d6, d31
+    vmlsl.s16       q13, d7, d31
+
     ; temp2 = -step1[10] * cospi_8_64 + step1[13] * cospi_24_64
     vmlal.s16       q8, d8, d31
     vmlal.s16       q9, d9, d31
+
+    ; dct_const_round_shift(temp1)
+    vqrshrn.s32     d4, q10, #14              ; >> 14
+    vqrshrn.s32     d5, q13, #14              ; >> 14
 
     ; dct_const_round_shift(temp2)
     vqrshrn.s32     d10, q8, #14              ; >> 14
@@ -1073,17 +1072,17 @@ end_idct16x16_pass2
     vsub.s32        q5, q3, q0
     vsub.s32        q6, q4, q1
 
+    ; temp2 = (step1[10] + step1[13]) * cospi_16_64
+    vadd.s32        q0, q3, q0
+    vadd.s32        q1, q4, q1
+
     ; dct_const_round_shift(temp1)
     vqrshrn.s32     d4, q5, #14               ; >> 14
     vqrshrn.s32     d5, q6, #14               ; >> 14
 
-    ; temp2 = (step1[10] + step1[13]) * cospi_16_64
-    vadd.s32        q5, q3, q0
-    vadd.s32        q6, q4, q1
-
     ; dct_const_round_shift(temp2)
-    vqrshrn.s32     d10, q5, #14              ; >> 14
-    vqrshrn.s32     d11, q6, #14              ; >> 14
+    vqrshrn.s32     d10, q0, #14              ; >> 14
+    vqrshrn.s32     d11, q1, #14              ; >> 14
 
     ; step1[11] * cospi_16_64
     vmull.s16       q0, d22, d14
@@ -1097,13 +1096,13 @@ end_idct16x16_pass2
     vsub.s32        q10, q13, q0
     vsub.s32        q4, q6, q1
 
-    ; dct_const_round_shift(input_dc * cospi_16_64)
-    vqrshrn.s32     d6, q10, #14              ; >> 14
-    vqrshrn.s32     d7, q4, #14               ; >> 14
-
     ; temp2 = (step1[11] + step1[12]) * cospi_16_64
     vadd.s32        q13, q13, q0
     vadd.s32        q6, q6, q1
+
+    ; dct_const_round_shift(input_dc * cospi_16_64)
+    vqrshrn.s32     d6, q10, #14              ; >> 14
+    vqrshrn.s32     d7, q4, #14               ; >> 14
 
     ; dct_const_round_shift((step1[11] + step1[12]) * cospi_16_64);
     vqrshrn.s32     d8, q13, #14              ; >> 14
