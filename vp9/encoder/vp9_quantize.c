@@ -94,7 +94,7 @@ void vp9_quantize_b_32x32_c(int16_t *coeff_ptr, intptr_t n_coeffs,
                             uint16_t *eob_ptr, const int16_t *scan,
                             const int16_t *iscan) {
   int i, rc, eob;
-  int zbins[2], nzbins[2], zbin;
+  int zbins[2], nzbins[2];
   int x, y, z, sz;
   int idx = 0;
   int idx_arr[1024];
@@ -127,27 +127,21 @@ void vp9_quantize_b_32x32_c(int16_t *coeff_ptr, intptr_t n_coeffs,
     for (i = 0; i < idx; i++) {
       rc = scan[idx_arr[i]];
 
-      // Calculate ZBIN
-      zbin = (zbins[rc != 0]);
-
       z = coeff_ptr[rc];
       sz = (z >> 31);                               // sign of z
       x  = (z ^ sz) - sz;                           // x = abs(z)
 
-      if (x >= zbin) {
-        x += ROUND_POWER_OF_TWO(round_ptr[rc != 0], 1);
-        x  = clamp(x, INT16_MIN, INT16_MAX);
-        y  = (((int)(((int)(x * quant_ptr[rc != 0]) >> 16) + x)) *
-              quant_shift_ptr[rc != 0]) >> 15;      // quantize (x)
+      x += ROUND_POWER_OF_TWO(round_ptr[rc != 0], 1);
+      x  = clamp(x, INT16_MIN, INT16_MAX);
+      y  = ((((x * quant_ptr[rc != 0]) >> 16) + x) *
+            quant_shift_ptr[rc != 0]) >> 15;      // quantize (x)
 
-        x  = (y ^ sz) - sz;                         // get the sign back
-        qcoeff_ptr[rc]  = x;                        // write to destination
-        dqcoeff_ptr[rc] = x * dequant_ptr[rc != 0] / 2;  // dequantized value
+      x  = (y ^ sz) - sz;                         // get the sign back
+      qcoeff_ptr[rc]  = x;                        // write to destination
+      dqcoeff_ptr[rc] = x * dequant_ptr[rc != 0] / 2;  // dequantized value
 
-        if (y) {
-          eob = idx_arr[i];                         // last nonzero coeffs
-        }
-      }
+      if (y)
+        eob = idx_arr[i];                         // last nonzero coeffs
     }
   }
   *eob_ptr = eob + 1;
