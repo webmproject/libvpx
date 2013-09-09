@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdH//+q4\u003d",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 4
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-09-09T22:52:19Z",
+      "side": 1,
+      "message": "you should have copy \u0026 pasted my suggestion...",
+      "revId": "f1428f1ef6c8509bb3e4f745fd1513957798a221",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdH//+q8\u003d",
+        "filename": "test/dct16x16_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 370,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-09-09T22:52:19Z",
+      "side": 1,
+      "message": "prefer preincrement",
+      "revId": "f1428f1ef6c8509bb3e4f745fd1513957798a221",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
