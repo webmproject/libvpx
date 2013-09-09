@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdH//+tc\u003d",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 3
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2013-09-09T16:07:55Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdH//+yQ\u003d",
+      "revId": "27a5931e9e46dc458a8532a95eaa031f74ebe079",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdH//+yM\u003d",
         "filename": "test/dct16x16_test.cc",
         "patchSetId": 3
@@ -30,6 +48,24 @@
       "writtenOn": "2013-09-07T02:20:04Z",
       "side": 1,
       "message": "is this extra level of call necessary anymore?",
+      "revId": "27a5931e9e46dc458a8532a95eaa031f74ebe079",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdH//+tg\u003d",
+        "filename": "test/dct16x16_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 265,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2013-09-09T16:07:55Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdH//+yM\u003d",
       "revId": "27a5931e9e46dc458a8532a95eaa031f74ebe079",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
