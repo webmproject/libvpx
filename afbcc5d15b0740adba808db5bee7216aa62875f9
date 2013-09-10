@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdH//+jk\u003d",
+        "filename": "vp9/encoder/vp9_quantize.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 137,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2013-09-10T19:05:09Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdH//+js\u003d",
+      "revId": "afbcc5d15b0740adba808db5bee7216aa62875f9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdH//+j0\u003d",
         "filename": "vp9/encoder/vp9_quantize.c",
         "patchSetId": 1
@@ -30,6 +48,24 @@
       "writtenOn": "2013-09-10T18:49:49Z",
       "side": 1,
       "message": "can y be a zero here?",
+      "revId": "afbcc5d15b0740adba808db5bee7216aa62875f9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdH//+jc\u003d",
+        "filename": "vp9/encoder/vp9_quantize.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 144,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2013-09-10T19:05:09Z",
+      "side": 1,
+      "message": "depending on the zbin values, it could be possible that y is slightly above zbin, but still quantized to zero.",
+      "parentUuid": "AAAAdH//+j0\u003d",
       "revId": "afbcc5d15b0740adba808db5bee7216aa62875f9",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
