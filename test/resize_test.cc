@@ -124,6 +124,13 @@ TEST_P(ResizeInternalTest, TestInternalResizeWorks) {
   ::libvpx_test::I420VideoSource video("hantro_collage_w352h288.yuv", 352, 288,
                                        30, 1, 0, 10);
   init_flags_ = VPX_CODEC_USE_PSNR;
+
+  // If the number of frames being encoded is smaller than g_lag_in_frames
+  // the encoded frame is unavailable using the current API. Comparing
+  // frames to detect mismatch would then not be possible. Set
+  // g_lag_in_frames = 0 to get around this.
+  cfg_.g_lag_in_frames = 0;
+
   // q picked such that initial keyframe on this clip is ~30dB PSNR
   cfg_.rc_min_quantizer = cfg_.rc_max_quantizer = 48;
   ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
