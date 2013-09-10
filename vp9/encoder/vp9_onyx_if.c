@@ -2821,28 +2821,17 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
     // TODO(debargha): Refine the logic below
     if (cpi->oxcf.end_usage == USAGE_CONSTANT_QUALITY) {
       if (!cpi->refresh_alt_ref_frame) {
-        if (cpi->gfu_boost > high) {
-          cpi->active_best_quality = cpi->cq_target_quality * 14 / 16;
-        } else if (cpi->gfu_boost < low) {
-          cpi->active_best_quality = cpi->cq_target_quality;
-        } else {
-          const int gap = high - low;
-          const int offset = high - cpi->gfu_boost;
-          const int qdiff = cpi->cq_target_quality * 2 / 16;
-          const int adjustment = ((offset * qdiff) + (gap >> 1)) / gap;
-          cpi->active_best_quality = cpi->cq_target_quality * 14 / 16
-              + adjustment;
-        }
+        cpi->active_best_quality = cpi->cq_target_quality;
       } else {
         if (cpi->frames_since_key > 1) {
           if (cpi->gfu_boost > high) {
             cpi->active_best_quality = cpi->cq_target_quality * 6 / 16;
           } else if (cpi->gfu_boost < low) {
-            cpi->active_best_quality = cpi->cq_target_quality * 10 / 16;
+            cpi->active_best_quality = cpi->cq_target_quality * 11 / 16;
           } else {
             const int gap = high - low;
             const int offset = high - cpi->gfu_boost;
-            const int qdiff = cpi->cq_target_quality * 4 / 16;
+            const int qdiff = cpi->cq_target_quality * 5 / 16;
             const int adjustment = ((offset * qdiff) + (gap >> 1)) / gap;
             cpi->active_best_quality = cpi->cq_target_quality * 6 / 16
                 + adjustment;
@@ -2877,11 +2866,6 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
           cpi->active_best_quality = cpi->cq_target_quality;
       }
     }
-    /*
-    if (cm->current_video_frame == 1)
-      printf("q/active_best/worst_quality = %d %d %d\n",
-             q, cpi->active_best_quality, cpi->active_worst_quality);
-             */
   }
 
   // Clip the active best and worst quality values to limits
@@ -3404,7 +3388,7 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
   // in this frame.
   // update_base_skip_probs(cpi);
 
-#if 0  // CONFIG_INTERNAL_STATS
+#if CONFIG_INTERNAL_STATS
   {
     FILE *f = fopen("tmp.stt", cm->current_video_frame ? "a" : "w");
     int recon_err;
