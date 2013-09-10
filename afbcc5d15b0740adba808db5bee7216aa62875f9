@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdH//+js\u003d",
+        "filename": "vp9/encoder/vp9_quantize.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 137,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2013-09-10T18:49:49Z",
+      "side": 1,
+      "message": "are (int) casting sredundant here?",
+      "revId": "afbcc5d15b0740adba808db5bee7216aa62875f9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdH//+j0\u003d",
+        "filename": "vp9/encoder/vp9_quantize.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 144,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2013-09-10T18:49:49Z",
+      "side": 1,
+      "message": "can y be a zero here?",
+      "revId": "afbcc5d15b0740adba808db5bee7216aa62875f9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
