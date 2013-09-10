@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdH//+pE\u003d",
+        "filename": "vp9/common/arm/neon/vp9_short_idct16x16_add_neon.asm",
+        "patchSetId": 1
+      },
+      "lineNbr": 113,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2013-09-10T01:01:26Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdH//+qk\u003d",
+      "revId": "a6f6c1264d6f0d80a6288a04cca6969f6e70ae7d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdH//+qc\u003d",
         "filename": "vp9/common/arm/neon/vp9_short_idct16x16_add_neon.asm",
         "patchSetId": 1
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdH//+os\u003d",
+        "filename": "vp9/common/arm/neon/vp9_short_idct16x16_add_neon.asm",
+        "patchSetId": 1
+      },
+      "lineNbr": 168,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2013-09-10T01:01:26Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdH//+qc\u003d",
+      "revId": "a6f6c1264d6f0d80a6288a04cca6969f6e70ae7d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdH//+qY\u003d",
         "filename": "vp9/common/arm/neon/vp9_short_idct16x16_add_neon.asm",
         "patchSetId": 1
@@ -47,6 +83,24 @@
       "writtenOn": "2013-09-09T23:41:04Z",
       "side": 1,
       "message": "You can move these 2 vdups up four instructions to save a couple of cycles waiting for q2.",
+      "revId": "a6f6c1264d6f0d80a6288a04cca6969f6e70ae7d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdH//+oo\u003d",
+        "filename": "vp9/common/arm/neon/vp9_short_idct16x16_add_neon.asm",
+        "patchSetId": 1
+      },
+      "lineNbr": 360,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2013-09-10T01:01:26Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdH//+qY\u003d",
       "revId": "a6f6c1264d6f0d80a6288a04cca6969f6e70ae7d",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -87,6 +141,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdH//+og\u003d",
+        "filename": "vp9/common/arm/neon/vp9_short_idct16x16_add_neon.asm",
+        "patchSetId": 1
+      },
+      "lineNbr": 432,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2013-09-10T01:01:26Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdH//+qE\u003d",
+      "revId": "a6f6c1264d6f0d80a6288a04cca6969f6e70ae7d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdH//+pw\u003d",
         "filename": "vp9/common/arm/neon/vp9_short_idct16x16_add_neon.asm",
         "patchSetId": 1
@@ -98,6 +170,24 @@
       "writtenOn": "2013-09-09T23:41:04Z",
       "side": 1,
       "message": "You should be able to save 2 cycles moving the vadd and vsub above up 4 instructions.",
+      "revId": "a6f6c1264d6f0d80a6288a04cca6969f6e70ae7d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdH//+oY\u003d",
+        "filename": "vp9/common/arm/neon/vp9_short_idct16x16_add_neon.asm",
+        "patchSetId": 1
+      },
+      "lineNbr": 461,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2013-09-10T01:01:26Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdH//+pw\u003d",
       "revId": "a6f6c1264d6f0d80a6288a04cca6969f6e70ae7d",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -121,6 +211,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdH//+oU\u003d",
+        "filename": "vp9/common/arm/neon/vp9_short_idct16x16_add_neon.asm",
+        "patchSetId": 1
+      },
+      "lineNbr": 510,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2013-09-10T01:01:26Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdH//+po\u003d",
+      "revId": "a6f6c1264d6f0d80a6288a04cca6969f6e70ae7d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdH//+pc\u003d",
         "filename": "vp9/common/arm/neon/vp9_short_idct16x16_add_neon.asm",
         "patchSetId": 1
@@ -132,6 +240,24 @@
       "writtenOn": "2013-09-09T23:41:04Z",
       "side": 1,
       "message": "Switch the 2 instructions above and you should save one cycle.",
+      "revId": "a6f6c1264d6f0d80a6288a04cca6969f6e70ae7d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdH//+oQ\u003d",
+        "filename": "vp9/common/arm/neon/vp9_short_idct16x16_add_neon.asm",
+        "patchSetId": 1
+      },
+      "lineNbr": 862,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2013-09-10T01:01:26Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdH//+pc\u003d",
       "revId": "a6f6c1264d6f0d80a6288a04cca6969f6e70ae7d",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -155,6 +281,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdH//+oM\u003d",
+        "filename": "vp9/common/arm/neon/vp9_short_idct16x16_add_neon.asm",
+        "patchSetId": 1
+      },
+      "lineNbr": 882,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2013-09-10T01:01:26Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdH//+pY\u003d",
+      "revId": "a6f6c1264d6f0d80a6288a04cca6969f6e70ae7d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdH//+pU\u003d",
         "filename": "vp9/common/arm/neon/vp9_short_idct16x16_add_neon.asm",
         "patchSetId": 1
@@ -166,6 +310,24 @@
       "writtenOn": "2013-09-09T23:41:04Z",
       "side": 1,
       "message": "You can move these 2 instructions up four instructions to save a couple of cycles waiting for q12.",
+      "revId": "a6f6c1264d6f0d80a6288a04cca6969f6e70ae7d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdH//+oI\u003d",
+        "filename": "vp9/common/arm/neon/vp9_short_idct16x16_add_neon.asm",
+        "patchSetId": 1
+      },
+      "lineNbr": 1019,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2013-09-10T01:01:26Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdH//+pU\u003d",
       "revId": "a6f6c1264d6f0d80a6288a04cca6969f6e70ae7d",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
