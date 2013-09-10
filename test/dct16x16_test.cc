@@ -262,21 +262,27 @@ typedef void (*idct_t)(int16_t *in, uint8_t *out, int stride);
 typedef void (*fht_t) (int16_t *in, int16_t *out, int stride, int tx_type);
 typedef void (*iht_t) (int16_t *in, uint8_t *dst, int stride, int tx_type);
 
+void fdct16x16_ref(int16_t *in, int16_t *out, int stride, int tx_type) {
+  vp9_short_fdct16x16_c(in, out, stride);
+}
+
+void fht16x16_ref(int16_t *in, int16_t *out, int stride, int tx_type) {
+  vp9_short_fht16x16_c(in, out, stride, tx_type);
+}
+
 class Trans16x16TestBase {
  public:
   virtual ~Trans16x16TestBase() {}
 
  protected:
-  virtual void RunFwdTxfm(int16_t *in, int16_t *out,
-                          uint8_t *dst, int stride) = 0;
+  virtual void RunFwdTxfm(int16_t *in, int16_t *out, int stride) = 0;
 
-  virtual void RunInvTxfm(int16_t *in, int16_t *out,
-                          uint8_t *dst, int stride) = 0;
+  virtual void RunInvTxfm(int16_t *out, uint8_t *dst, int stride) = 0;
 
   void RunAccuracyCheck() {
     ACMRandom rnd(ACMRandom::DeterministicSeed());
-    int max_error = 0;
-    int total_error = 0;
+    uint32_t max_error = 0;
+    int64_t total_error = 0;
     const int count_test_block = 10000;
     for (int i = 0; i < count_test_block; ++i) {
       DECLARE_ALIGNED_ARRAY(16, int16_t, test_input_block, kNumCoeffs);
@@ -284,45 +290,63 @@ class Trans16x16TestBase {
       DECLARE_ALIGNED_ARRAY(16, uint8_t, dst, kNumCoeffs);
       DECLARE_ALIGNED_ARRAY(16, uint8_t, src, kNumCoeffs);
 
+      // Initialize a test block with input range [-255, 255].
       for (int j = 0; j < kNumCoeffs; ++j) {
         src[j] = rnd.Rand8();
         dst[j] = rnd.Rand8();
-        // Initialize a test block with input range [-255, 255].
         test_input_block[j] = src[j] - dst[j];
       }
 
-      const int pitch = 32;
-      REGISTER_STATE_CHECK(RunFwdTxfm(test_input_block, test_temp_block,
-                                      dst, pitch));
-      REGISTER_STATE_CHECK(RunInvTxfm(test_input_block, test_temp_block,
-                                      dst, pitch));
+      REGISTER_STATE_CHECK(RunFwdTxfm(test_input_block,
+                                      test_temp_block, pitch_));
+      REGISTER_STATE_CHECK(RunInvTxfm(test_temp_block, dst, pitch_));
 
       for (int j = 0; j < kNumCoeffs; ++j) {
-        const int diff = dst[j] - src[j];
-        const int error = diff * diff;
+        const uint32_t diff = dst[j] - src[j];
+        const uint32_t error = diff * diff;
         if (max_error < error)
           max_error = error;
         total_error += error;
       }
     }
 
-    EXPECT_GE(1, max_error)
+    EXPECT_GE(1u, max_error)
         << "Error: 16x16 FHT/IHT has an individual round trip error > 1";
 
     EXPECT_GE(count_test_block , total_error)
         << "Error: 16x16 FHT/IHT has average round trip error > 1 per block";
   }
 
-  void RunCoeffSizeCheck() {
+  void RunCoeffCheck() {
     ACMRandom rnd(ACMRandom::DeterministicSeed());
     const int count_test_block = 1000;
-    for (int i = 0; i < count_test_block; ++i) {
-      DECLARE_ALIGNED_ARRAY(16, int16_t, input_block, kNumCoeffs);
-      DECLARE_ALIGNED_ARRAY(16, int16_t, input_extreme_block, kNumCoeffs);
-      DECLARE_ALIGNED_ARRAY(16, int16_t, output_block, kNumCoeffs);
-      DECLARE_ALIGNED_ARRAY(16, int16_t, output_extreme_block, kNumCoeffs);
-      DECLARE_ALIGNED_ARRAY(16, uint8_t, dst, kNumCoeffs);
+    DECLARE_ALIGNED_ARRAY(16, int16_t, input_block, kNumCoeffs);
+    DECLARE_ALIGNED_ARRAY(16, int16_t, output_ref_block, kNumCoeffs);
+    DECLARE_ALIGNED_ARRAY(16, int16_t, output_block, kNumCoeffs);
 
+    for (int i = 0; i < count_test_block; ++i) {
+      // Initialize a test block with input range [-255, 255].
+      for (int j = 0; j < kNumCoeffs; ++j)
+        input_block[j] = rnd.Rand8() - rnd.Rand8();
+
+      fwd_txfm_ref(input_block, output_ref_block, pitch_, tx_type_);
+      REGISTER_STATE_CHECK(RunFwdTxfm(input_block, output_block, pitch_));
+
+      // The minimum quant value is 4.
+      for (int j = 0; j < kNumCoeffs; ++j)
+        EXPECT_EQ(output_block[j], output_ref_block[j]);
+    }
+  }
+
+  void RunMemCheck() {
+    ACMRandom rnd(ACMRandom::DeterministicSeed());
+    const int count_test_block = 1000;
+    DECLARE_ALIGNED_ARRAY(16, int16_t, input_block, kNumCoeffs);
+    DECLARE_ALIGNED_ARRAY(16, int16_t, input_extreme_block, kNumCoeffs);
+    DECLARE_ALIGNED_ARRAY(16, int16_t, output_ref_block, kNumCoeffs);
+    DECLARE_ALIGNED_ARRAY(16, int16_t, output_block, kNumCoeffs);
+
+    for (int i = 0; i < count_test_block; ++i) {
       // Initialize a test block with input range [-255, 255].
       for (int j = 0; j < kNumCoeffs; ++j) {
         input_block[j] = rnd.Rand8() - rnd.Rand8();
@@ -331,19 +355,19 @@ class Trans16x16TestBase {
       if (i == 0)
         for (int j = 0; j < kNumCoeffs; ++j)
           input_extreme_block[j] = 255;
+      if (i == 1)
+        for (int j = 0; j < kNumCoeffs; ++j)
+          input_extreme_block[j] = -255;
 
-      const int pitch = 32;
-      REGISTER_STATE_CHECK(RunFwdTxfm(input_block, output_block, dst, pitch));
+      fwd_txfm_ref(input_extreme_block, output_ref_block, pitch_, tx_type_);
       REGISTER_STATE_CHECK(RunFwdTxfm(input_extreme_block,
-                                      output_extreme_block, dst, pitch));
+                                      output_block, pitch_));
 
       // The minimum quant value is 4.
       for (int j = 0; j < kNumCoeffs; ++j) {
+        EXPECT_EQ(output_block[j], output_ref_block[j]);
         EXPECT_GE(4 * DCT_MAX_VALUE, abs(output_block[j]))
             << "Error: 16x16 FDCT has coefficient larger than 4*DCT_MAX_VALUE";
-        EXPECT_GE(4 * DCT_MAX_VALUE, abs(output_extreme_block[j]))
-            << "Error: 16x16 FDCT extreme has coefficient larger "
-            << "than 4*DCT_MAX_VALUE";
       }
     }
   }
@@ -351,12 +375,12 @@ class Trans16x16TestBase {
   void RunInvAccuracyCheck() {
     ACMRandom rnd(ACMRandom::DeterministicSeed());
     const int count_test_block = 1000;
+    DECLARE_ALIGNED_ARRAY(16, int16_t, in, kNumCoeffs);
+    DECLARE_ALIGNED_ARRAY(16, int16_t, coeff, kNumCoeffs);
+    DECLARE_ALIGNED_ARRAY(16, uint8_t, dst, kNumCoeffs);
+    DECLARE_ALIGNED_ARRAY(16, uint8_t, src, kNumCoeffs);
 
     for (int i = 0; i < count_test_block; ++i) {
-      DECLARE_ALIGNED_ARRAY(16, int16_t, in, kNumCoeffs);
-      DECLARE_ALIGNED_ARRAY(16, int16_t, coeff, kNumCoeffs);
-      DECLARE_ALIGNED_ARRAY(16, uint8_t, dst, kNumCoeffs);
-      DECLARE_ALIGNED_ARRAY(16, uint8_t, src, kNumCoeffs);
       double out_r[kNumCoeffs];
 
       // Initialize a test block with input range [-255, 255].
@@ -371,17 +395,20 @@ class Trans16x16TestBase {
         coeff[j] = round(out_r[j]);
 
       const int pitch = 32;
-      REGISTER_STATE_CHECK(RunInvTxfm(coeff, coeff, dst, pitch));
+      REGISTER_STATE_CHECK(RunInvTxfm(coeff, dst, pitch));
 
       for (int j = 0; j < kNumCoeffs; ++j) {
-        const int diff = dst[j] - src[j];
-        const int error = diff * diff;
-        EXPECT_GE(1, error)
+        const uint32_t diff = dst[j] - src[j];
+        const uint32_t error = diff * diff;
+        EXPECT_GE(1u, error)
             << "Error: 16x16 IDCT has error " << error
             << " at index " << j;
       }
     }
   }
+  int pitch_;
+  int tx_type_;
+  fht_t fwd_txfm_ref;
 };
 
 class Trans16x16DCT : public Trans16x16TestBase,
@@ -393,18 +420,19 @@ class Trans16x16DCT : public Trans16x16TestBase,
     fwd_txfm_ = GET_PARAM(0);
     inv_txfm_ = GET_PARAM(1);
     tx_type_  = GET_PARAM(2);
+    pitch_    = 32;
+    fwd_txfm_ref = fdct16x16_ref;
   }
   virtual void TearDown() { libvpx_test::ClearSystemState(); }
 
  protected:
-  void RunFwdTxfm(int16_t *in, int16_t *out, uint8_t *dst, int stride) {
+  void RunFwdTxfm(int16_t *in, int16_t *out, int stride) {
     fwd_txfm_(in, out, stride);
   }
-  void RunInvTxfm(int16_t *in, int16_t *out, uint8_t *dst, int stride) {
+  void RunInvTxfm(int16_t *out, uint8_t *dst, int stride) {
     inv_txfm_(out, dst, stride >> 1);
   }
 
-  int tx_type_;
   fdct_t fwd_txfm_;
   idct_t inv_txfm_;
 };
@@ -413,8 +441,12 @@ TEST_P(Trans16x16DCT, AccuracyCheck) {
   RunAccuracyCheck();
 }
 
-TEST_P(Trans16x16DCT, CoeffSizeCheck) {
-  RunCoeffSizeCheck();
+TEST_P(Trans16x16DCT, CoeffCheck) {
+  RunCoeffCheck();
+}
+
+TEST_P(Trans16x16DCT, MemCheck) {
+  RunMemCheck();
 }
 
 TEST_P(Trans16x16DCT, InvAccuracyCheck) {
@@ -430,18 +462,19 @@ class Trans16x16HT : public Trans16x16TestBase,
     fwd_txfm_ = GET_PARAM(0);
     inv_txfm_ = GET_PARAM(1);
     tx_type_  = GET_PARAM(2);
+    pitch_    = 16;
+    fwd_txfm_ref = fht16x16_ref;
   }
   virtual void TearDown() { libvpx_test::ClearSystemState(); }
 
  protected:
-  void RunFwdTxfm(int16_t *in, int16_t *out, uint8_t *dst, int stride) {
-    fwd_txfm_(in, out, stride >> 1, tx_type_);
+  void RunFwdTxfm(int16_t *in, int16_t *out, int stride) {
+    fwd_txfm_(in, out, stride, tx_type_);
   }
-  void RunInvTxfm(int16_t *in, int16_t *out, uint8_t *dst, int stride) {
-    inv_txfm_(out, dst, stride >> 1, tx_type_);
+  void RunInvTxfm(int16_t *out, uint8_t *dst, int stride) {
+    inv_txfm_(out, dst, stride, tx_type_);
   }
 
-  int tx_type_;
   fht_t fwd_txfm_;
   iht_t inv_txfm_;
 };
@@ -450,8 +483,12 @@ TEST_P(Trans16x16HT, AccuracyCheck) {
   RunAccuracyCheck();
 }
 
-TEST_P(Trans16x16HT, CoeffSizeCheck) {
-  RunCoeffSizeCheck();
+TEST_P(Trans16x16HT, CoeffCheck) {
+  RunCoeffCheck();
+}
+
+TEST_P(Trans16x16HT, MemCheck) {
+  RunMemCheck();
 }
 
 using std::tr1::make_tuple;
