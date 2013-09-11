@@ -16,8 +16,28 @@
 #include "vp9/encoder/vp9_onyx_int.h"
 #include "vp9/common/vp9_onyxc_int.h"
 
+typedef enum {
+  RD_DC_PRED = DC_PRED,
+  RD_V_PRED =  V_PRED,
+  RD_H_PRED = H_PRED,
+  RD_D45_PRED = D45_PRED,
+  RD_D135_PRED = D135_PRED,
+  RD_D117_PRED = D117_PRED,
+  RD_D153_PRED = D153_PRED,
+  RD_D207_PRED = D207_PRED,
+  RD_D63_PRED = D63_PRED,
+  RD_TM_PRED = TM_PRED,
+  RD_NEARESTMV = NEARESTMV,
+  RD_NEARMV = NEARMV,
+  RD_ZEROMV = ZEROMV,
+  RD_NEWMV = NEWMV,
+  RD_I4X4_PRED,
+  RD_SPLITMV,
+  RD_MODE_COUNT
+} RD_PREDICTION_MODE;
+
 typedef struct {
-  MB_PREDICTION_MODE mode;
+  RD_PREDICTION_MODE mode;
   MV_REFERENCE_FRAME ref_frame;
   MV_REFERENCE_FRAME second_ref_frame;
 } MODE_DEFINITION;
