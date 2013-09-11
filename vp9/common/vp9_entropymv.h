@@ -126,6 +126,4 @@ typedef struct {
 
 void vp9_inc_mv(const MV *mv, nmv_context_counts *mvctx);
 
-void vp9_counts_process(nmv_context_counts *NMVcount, int usehp);
-
 #endif  // VP9_COMMON_VP9_ENTROPYMV_H_
