@@ -258,7 +258,6 @@ typedef struct {
   int reduce_first_step_size;
   int auto_mv_step_size;
   int optimize_coefficients;
-  int search_best_filter;
   int static_segmentation;
   int comp_inter_joint_search_thresh;
   int adaptive_rd_thresh;
