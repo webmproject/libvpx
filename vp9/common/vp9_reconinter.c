@@ -24,11 +24,13 @@
 void vp9_setup_interp_filters(MACROBLOCKD *xd,
                               INTERPOLATIONFILTERTYPE mcomp_filter_type,
                               VP9_COMMON *cm) {
-  if (xd->mode_info_context) {
-    MB_MODE_INFO *mbmi = &xd->mode_info_context->mbmi;
+  if (xd->mi_8x8 && xd->this_mi) {
+    MB_MODE_INFO * mbmi = &xd->this_mi->mbmi;
 
     set_scale_factors(xd, mbmi->ref_frame[0] - 1, mbmi->ref_frame[1] - 1,
                       cm->active_ref_scale);
+  } else {
+    set_scale_factors(xd, -1, -1, cm->active_ref_scale);
   }
 
   switch (mcomp_filter_type) {
@@ -128,7 +130,7 @@ static void build_inter_predictors(int plane, int block, BLOCK_SIZE bsize,
   const int bh = plane_block_height(bsize, pd);
   const int x = 4 * (block & ((1 << bwl) - 1));
   const int y = 4 * (block >> bwl);
-  const MODE_INFO *const mi = xd->mode_info_context;
+  const MODE_INFO *mi = xd->this_mi;
   const int use_second_ref = mi->mbmi.ref_frame[1] > 0;
   int ref;
 
@@ -193,7 +195,7 @@ static INLINE void foreach_predicted_block_in_plane(
   // size of the predictor to use.
   int pred_w, pred_h;
 
-  if (xd->mode_info_context->mbmi.sb_type < BLOCK_8X8) {
+  if (xd->this_mi->mbmi.sb_type < BLOCK_8X8) {
     assert(bsize == BLOCK_8X8);
     pred_w = 0;
     pred_h = 0;

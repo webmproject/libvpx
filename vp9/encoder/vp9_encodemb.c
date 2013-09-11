@@ -147,7 +147,7 @@ static void optimize_b(MACROBLOCK *mb,
                        TX_SIZE tx_size) {
   MACROBLOCKD *const xd = &mb->e_mbd;
   struct macroblockd_plane *pd = &xd->plane[plane];
-  const int ref = is_inter_block(&xd->mode_info_context->mbmi);
+  const int ref = is_inter_block(&xd->this_mi->mbmi);
   vp9_token_state tokens[1025][2];
   unsigned best_index[1025][2];
   const int16_t *coeff_ptr = BLOCK_OFFSET(mb->plane[plane].coeff, block);
@@ -199,7 +199,7 @@ static void optimize_b(MACROBLOCK *mb,
 
   /* Now set up a Viterbi trellis to evaluate alternative roundings. */
   rdmult = mb->rdmult * err_mult;
-  if (mb->e_mbd.mode_info_context->mbmi.ref_frame[0] == INTRA_FRAME)
+  if (mb->e_mbd.mi_8x8[0]->mbmi.ref_frame[0] == INTRA_FRAME)
     rdmult = (rdmult * 9) >> 4;
   rddiv = mb->rddiv;
   /* Initialize the sentinel node of the trellis. */
@@ -385,7 +385,7 @@ static void optimize_init_b(int plane, BLOCK_SIZE bsize,
   const BLOCK_SIZE plane_bsize = get_plane_block_size(bsize, pd);
   const int num_4x4_w = num_4x4_blocks_wide_lookup[plane_bsize];
   const int num_4x4_h = num_4x4_blocks_high_lookup[plane_bsize];
-  const MB_MODE_INFO *mbmi = &xd->mode_info_context->mbmi;
+  const MB_MODE_INFO *mbmi = &xd->this_mi->mbmi;
   const TX_SIZE tx_size = plane ? get_uv_tx_size(mbmi) : mbmi->tx_size;
   int i;
 
@@ -569,7 +569,7 @@ void vp9_encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
   struct encode_b_args* const args = arg;
   MACROBLOCK *const x = args->x;
   MACROBLOCKD *const xd = &x->e_mbd;
-  MB_MODE_INFO *mbmi = &xd->mode_info_context->mbmi;
+  MB_MODE_INFO *mbmi = &xd->this_mi->mbmi;
   struct macroblock_plane *const p = &x->plane[plane];
   struct macroblockd_plane *const pd = &xd->plane[plane];
   int16_t *coeff = BLOCK_OFFSET(p->coeff, block);
@@ -679,7 +679,7 @@ void vp9_encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
       scan = get_scan_4x4(tx_type);
       iscan = get_iscan_4x4(tx_type);
       if (mbmi->sb_type < BLOCK_8X8 && plane == 0)
-        mode = xd->mode_info_context->bmi[block].as_mode;
+        mode = xd->this_mi->bmi[block].as_mode;
       else
         mode = plane == 0 ? mbmi->mode : mbmi->uv_mode;
 

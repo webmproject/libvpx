@@ -43,41 +43,50 @@ void vp9_append_sub8x8_mvs_for_idx(VP9_COMMON *cm,
                                    int block_idx, int ref_idx,
                                    int mi_row, int mi_col);
 
-static MB_PREDICTION_MODE left_block_mode(const MODE_INFO *cur_mb, int b) {
+static MB_PREDICTION_MODE left_block_mode(const MODE_INFO *cur_mb,
+                                          const MODE_INFO *left_mb, int b) {
   // FIXME(rbultje, jingning): temporary hack because jenkins doesn't
   // understand this condition. This will go away soon.
+  const MODE_INFO *mi = cur_mb;
+
   if (b == 0 || b == 2) {
     /* On L edge, get from MB to left of us */
-    --cur_mb;
-
-    if (is_inter_block(&cur_mb->mbmi)) {
+    mi = left_mb;
+    if (!mi)
       return DC_PRED;
-    } else if (cur_mb->mbmi.sb_type < BLOCK_8X8) {
-      return (cur_mb->bmi + 1 + b)->as_mode;
+
+    if (mi->mbmi.ref_frame[0] != INTRA_FRAME) {
+      return DC_PRED;
+    } else if (mi->mbmi.sb_type < BLOCK_8X8) {
+      return ((mi->bmi + 1 + b)->as_mode);
     } else {
-      return cur_mb->mbmi.mode;
+      return mi->mbmi.mode;
     }
   }
   assert(b == 1 || b == 3);
-  return (cur_mb->bmi + b - 1)->as_mode;
+  return (mi->bmi + b - 1)->as_mode;
 }
 
 static MB_PREDICTION_MODE above_block_mode(const MODE_INFO *cur_mb,
-                                          int b, int mi_stride) {
+                                           const MODE_INFO *above_mb, int b) {
+  const MODE_INFO *mi = cur_mb;
+
   if (!(b >> 1)) {
     /* On top edge, get from MB above us */
-    cur_mb -= mi_stride;
-
-    if (is_inter_block(&cur_mb->mbmi)) {
+    mi = above_mb;
+    if (!mi)
       return DC_PRED;
-    } else if (cur_mb->mbmi.sb_type < BLOCK_8X8) {
-      return (cur_mb->bmi + 2 + b)->as_mode;
+
+    if (mi->mbmi.ref_frame[0] != INTRA_FRAME) {
+      return DC_PRED;
+    } else if (mi->mbmi.sb_type < BLOCK_8X8) {
+      return ((mi->bmi + 2 + b)->as_mode);
     } else {
-      return cur_mb->mbmi.mode;
+      return mi->mbmi.mode;
     }
   }
 
-  return (cur_mb->bmi + b - 2)->as_mode;
+  return (mi->bmi + b - 2)->as_mode;
 }
 
 #endif  // VP9_COMMON_VP9_FINDNEARMV_H_
