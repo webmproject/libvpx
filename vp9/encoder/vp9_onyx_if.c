@@ -715,6 +715,7 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
   sf->use_lastframe_partitioning = 0;
   sf->tx_size_search_method = USE_FULL_RD;
   sf->use_lp32x32fdct = 0;
+  sf->adaptive_motion_search = 0;
   sf->use_avoid_tested_higherror = 0;
   sf->reference_masking = 0;
   sf->skip_lots_of_modes = 0;
@@ -742,7 +743,6 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
   sf->use_fast_coef_updates = 0;
   sf->using_small_partition_info = 0;
   sf->mode_skip_start = MAX_MODES;  // Mode index at which mode skip mask set
-
 
 #if CONFIG_MULTIPLE_ARF
   // Switch segmentation off.
@@ -787,6 +787,7 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
         sf->use_rd_breakout = 1;
         sf->skip_encode_sb = 1;
         sf->use_lp32x32fdct = 1;
+        sf->adaptive_motion_search = 1;
         sf->auto_mv_step_size = 1;
 
         sf->auto_min_max_partition_size = 1;
@@ -826,6 +827,7 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
         sf->use_rd_breakout = 1;
         sf->skip_encode_sb = 1;
         sf->use_lp32x32fdct = 1;
+        sf->adaptive_motion_search = 1;
         sf->using_small_partition_info = 0;
         sf->disable_splitmv =
             (MIN(cpi->common.width, cpi->common.height) >= 720)? 1 : 0;
