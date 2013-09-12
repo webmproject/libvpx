@@ -557,9 +557,8 @@ static void set_default_lf_deltas(struct loopfilter *lf) {
   lf->mode_deltas[1] = 0;   // New mv
 }
 
-static void set_rd_speed_thresholds(VP9_COMP *cpi, int mode, int speed) {
+static void set_rd_speed_thresholds(VP9_COMP *cpi, int mode) {
   SPEED_FEATURES *sf = &cpi->sf;
-  int speed_multiplier = speed + 1;
   int i;
 
   // Set baseline threshold values
@@ -570,46 +569,46 @@ static void set_rd_speed_thresholds(VP9_COMP *cpi, int mode, int speed) {
   sf->thresh_mult[THR_NEARESTG] = 0;
   sf->thresh_mult[THR_NEARESTA] = 0;
 
-  sf->thresh_mult[THR_NEWMV] += speed_multiplier * 1000;
-  sf->thresh_mult[THR_COMP_NEARESTLA] += speed_multiplier * 1000;
-  sf->thresh_mult[THR_NEARMV] += speed_multiplier * 1000;
-  sf->thresh_mult[THR_COMP_NEARESTGA] += speed_multiplier * 1000;
+  sf->thresh_mult[THR_NEWMV] += 1000;
+  sf->thresh_mult[THR_COMP_NEARESTLA] += 1000;
+  sf->thresh_mult[THR_NEARMV] += 1000;
+  sf->thresh_mult[THR_COMP_NEARESTGA] += 1000;
 
-  sf->thresh_mult[THR_DC] += speed_multiplier * 1000;
+  sf->thresh_mult[THR_DC] += 1000;
 
-  sf->thresh_mult[THR_NEWG] += speed_multiplier * 1000;
-  sf->thresh_mult[THR_NEWA] += speed_multiplier * 1000;
-  sf->thresh_mult[THR_NEARA] += speed_multiplier * 1000;
+  sf->thresh_mult[THR_NEWG] += 1000;
+  sf->thresh_mult[THR_NEWA] += 1000;
+  sf->thresh_mult[THR_NEARA] += 1000;
 
-  sf->thresh_mult[THR_TM] += speed_multiplier * 1000;
+  sf->thresh_mult[THR_TM] += 1000;
 
-  sf->thresh_mult[THR_COMP_NEARLA] += speed_multiplier * 1500;
-  sf->thresh_mult[THR_COMP_NEWLA] += speed_multiplier * 2000;
-  sf->thresh_mult[THR_NEARG] += speed_multiplier * 1000;
-  sf->thresh_mult[THR_COMP_NEARGA] += speed_multiplier * 1500;
-  sf->thresh_mult[THR_COMP_NEWGA] += speed_multiplier * 2000;
+  sf->thresh_mult[THR_COMP_NEARLA] += 1500;
+  sf->thresh_mult[THR_COMP_NEWLA] += 2000;
+  sf->thresh_mult[THR_NEARG] += 1000;
+  sf->thresh_mult[THR_COMP_NEARGA] += 1500;
+  sf->thresh_mult[THR_COMP_NEWGA] += 2000;
 
-  sf->thresh_mult[THR_SPLITMV] += speed_multiplier * 2500;
-  sf->thresh_mult[THR_SPLITG] += speed_multiplier * 2500;
-  sf->thresh_mult[THR_SPLITA] += speed_multiplier * 2500;
-  sf->thresh_mult[THR_COMP_SPLITLA] += speed_multiplier * 4500;
-  sf->thresh_mult[THR_COMP_SPLITGA] += speed_multiplier * 4500;
+  sf->thresh_mult[THR_SPLITMV] += 2500;
+  sf->thresh_mult[THR_SPLITG] += 2500;
+  sf->thresh_mult[THR_SPLITA] += 2500;
+  sf->thresh_mult[THR_COMP_SPLITLA] += 4500;
+  sf->thresh_mult[THR_COMP_SPLITGA] += 4500;
 
-  sf->thresh_mult[THR_ZEROMV] += speed_multiplier * 2000;
-  sf->thresh_mult[THR_ZEROG] += speed_multiplier * 2000;
-  sf->thresh_mult[THR_ZEROA] += speed_multiplier * 2000;
-  sf->thresh_mult[THR_COMP_ZEROLA] += speed_multiplier * 2500;
-  sf->thresh_mult[THR_COMP_ZEROGA] += speed_multiplier * 2500;
+  sf->thresh_mult[THR_ZEROMV] += 2000;
+  sf->thresh_mult[THR_ZEROG] += 2000;
+  sf->thresh_mult[THR_ZEROA] += 2000;
+  sf->thresh_mult[THR_COMP_ZEROLA] += 2500;
+  sf->thresh_mult[THR_COMP_ZEROGA] += 2500;
 
-  sf->thresh_mult[THR_B_PRED] += speed_multiplier * 2500;
-  sf->thresh_mult[THR_H_PRED] += speed_multiplier * 2000;
-  sf->thresh_mult[THR_V_PRED] += speed_multiplier * 2000;
-  sf->thresh_mult[THR_D45_PRED ] += speed_multiplier * 2500;
-  sf->thresh_mult[THR_D135_PRED] += speed_multiplier * 2500;
-  sf->thresh_mult[THR_D117_PRED] += speed_multiplier * 2500;
-  sf->thresh_mult[THR_D153_PRED] += speed_multiplier * 2500;
-  sf->thresh_mult[THR_D207_PRED] += speed_multiplier * 2500;
-  sf->thresh_mult[THR_D63_PRED] += speed_multiplier * 2500;
+  sf->thresh_mult[THR_B_PRED] += 2500;
+  sf->thresh_mult[THR_H_PRED] += 2000;
+  sf->thresh_mult[THR_V_PRED] += 2000;
+  sf->thresh_mult[THR_D45_PRED ] += 2500;
+  sf->thresh_mult[THR_D135_PRED] += 2500;
+  sf->thresh_mult[THR_D117_PRED] += 2500;
+  sf->thresh_mult[THR_D153_PRED] += 2500;
+  sf->thresh_mult[THR_D207_PRED] += 2500;
+  sf->thresh_mult[THR_D63_PRED] += 2500;
 
   if (cpi->sf.skip_lots_of_modes) {
     for (i = 0; i < MAX_MODES; ++i)
@@ -719,7 +718,6 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
   sf->use_avoid_tested_higherror = 0;
   sf->reference_masking = 0;
   sf->skip_lots_of_modes = 0;
-  sf->adjust_thresholds_by_speed = 0;
   sf->partition_by_variance = 0;
   sf->use_one_partition_size_always = 0;
   sf->less_rectangular_check = 0;
@@ -805,7 +803,6 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
         sf->mode_skip_start = 9;
       }
       if (speed == 2) {
-        sf->adjust_thresholds_by_speed = 1;
         sf->less_rectangular_check  = 1;
         sf->use_square_partition_only = 1;
         sf->comp_inter_joint_search_thresh = BLOCK_SIZES;
@@ -908,10 +905,7 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
   }; /* switch */
 
   // Set rd thresholds based on mode and speed setting
-  if (cpi->sf.adjust_thresholds_by_speed)
-    set_rd_speed_thresholds(cpi, mode, speed);
-  else
-    set_rd_speed_thresholds(cpi, mode, 0);
+  set_rd_speed_thresholds(cpi, mode);
 
   // Slow quant, dct and trellis not worthwhile for first pass
   // so make sure they are always turned off.

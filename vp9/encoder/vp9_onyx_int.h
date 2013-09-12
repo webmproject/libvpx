@@ -269,7 +269,6 @@ typedef struct {
   int use_lp32x32fdct;
   int use_avoid_tested_higherror;
   int skip_lots_of_modes;
-  int adjust_thresholds_by_speed;
   int partition_by_variance;
   int use_one_partition_size_always;
   int less_rectangular_check;
