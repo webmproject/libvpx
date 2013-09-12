@@ -59,7 +59,7 @@ const MODE_DEFINITION vp9_mode_order[MAX_MODES] = {
 
   {RD_DC_PRED,   INTRA_FRAME,  NONE},
 
-  {NEWMV,     LAST_FRAME,   NONE},
+  {RD_NEWMV,     LAST_FRAME,   NONE},
   {RD_NEWMV,     GOLDEN_FRAME, NONE},
 
   {RD_NEARMV,    LAST_FRAME,   NONE},
@@ -3434,11 +3434,11 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
         if (vp9_mode_order[best_mode_index].ref_frame > INTRA_FRAME)
           continue;
       }
+      mbmi->mode = rd_mode_to_mode(this_mode);
       if (cpi->sf.mode_search_skip_flags & FLAG_SKIP_INTRA_DIRMISMATCH) {
-        if (conditional_skipintra(this_mode, best_intra_mode))
+        if (conditional_skipintra(mbmi->mode, best_intra_mode))
             continue;
       }
-      mbmi->mode = rd_mode_to_mode(this_mode);
 
       super_block_yrd(cpi, x, &rate_y, &distortion_y, &skippable, NULL,
                       bsize, tx_cache, best_rd);
