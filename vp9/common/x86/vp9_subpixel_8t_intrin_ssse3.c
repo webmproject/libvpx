@@ -1,5 +1,4 @@
 #include <tmmintrin.h>
-#include <inttypes.h>
 #include <emmintrin.h>
 #include "vpx_ports/mem.h"
 #include "vpx_ports/emmintrin_compat.h"
