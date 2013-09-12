@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdH//+bI\u003d",
+        "filename": "vp9/common/arm/neon/vp9_short_idct32x32_add_neon.asm",
+        "patchSetId": 1
+      },
+      "lineNbr": 115,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2013-09-12T17:21:50Z",
+      "side": 1,
+      "message": "You might be able to gain a cycle by moving this up one.",
+      "revId": "6a501462f80ecaef615cddc7de5ee2ddfbeebe6c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdH//+bA\u003d",
+        "filename": "vp9/common/arm/neon/vp9_short_idct32x32_add_neon.asm",
+        "patchSetId": 1
+      },
+      "lineNbr": 125,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2013-09-12T17:21:50Z",
+      "side": 1,
+      "message": "You should be able to save a cycle by swapping the vmull of q9 and q11 above because the \"vsub.s32  q9, q9, q11\" below needs the q11 result one cycle before the q9 result.",
+      "revId": "6a501462f80ecaef615cddc7de5ee2ddfbeebe6c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdH//+a8\u003d",
+        "filename": "vp9/common/arm/neon/vp9_short_idct32x32_add_neon.asm",
+        "patchSetId": 1
+      },
+      "lineNbr": 141,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2013-09-12T17:21:50Z",
+      "side": 1,
+      "message": "You should be able to save another cycle is you move the q8 above the 2 vadds. But I\u0027m not sure if you pass in d24, d25, d30, or d31 for $reg1",
+      "revId": "6a501462f80ecaef615cddc7de5ee2ddfbeebe6c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdH//+a0\u003d",
+        "filename": "vp9/common/arm/neon/vp9_short_idct32x32_add_neon.asm",
+        "patchSetId": 1
+      },
+      "lineNbr": 1001,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2013-09-12T17:21:50Z",
+      "side": 1,
+      "message": "You should be able to update r0 and r12 by r2 and remove 2 arm adds below.",
+      "revId": "6a501462f80ecaef615cddc7de5ee2ddfbeebe6c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
