@@ -215,11 +215,11 @@ vpx_codec_err_t  vpx_codec_encode(vpx_codec_ctx_t            *ctx,
   else if (!(ctx->iface->caps & VPX_CODEC_CAP_ENCODER))
     res = VPX_CODEC_INCAPABLE;
   else {
+    unsigned int num_enc = ctx->priv->enc.total_encoders;
+
     /* Execute in a normalized floating point environment, if the platform
      * requires it.
      */
-    unsigned int num_enc = ctx->priv->enc.total_encoders;
-
     FLOATING_POINT_INIT();
 
     if (num_enc == 1)
