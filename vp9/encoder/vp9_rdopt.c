@@ -48,58 +48,53 @@
 DECLARE_ALIGNED(16, extern const uint8_t,
                 vp9_pt_energy_class[MAX_ENTROPY_TOKENS]);
 
-#define I4X4_PRED 0x8000
-#define SPLITMV 0x10000
-
 #define LAST_FRAME_MODE_MASK    0xFFDADCD60
 #define GOLDEN_FRAME_MODE_MASK  0xFFB5A3BB0
 #define ALT_REF_MODE_MASK       0xFF8C648D0
 
 const MODE_DEFINITION vp9_mode_order[MAX_MODES] = {
-  {NEARESTMV, LAST_FRAME,   NONE},
-  {NEARESTMV, ALTREF_FRAME, NONE},
-  {NEARESTMV, GOLDEN_FRAME, NONE},
+  {RD_NEARESTMV, LAST_FRAME,   NONE},
+  {RD_NEARESTMV, ALTREF_FRAME, NONE},
+  {RD_NEARESTMV, GOLDEN_FRAME, NONE},
 
-  {DC_PRED,   INTRA_FRAME,  NONE},
+  {RD_DC_PRED,   INTRA_FRAME,  NONE},
 
   {NEWMV,     LAST_FRAME,   NONE},
-  {NEWMV,     ALTREF_FRAME, NONE},
-  {NEWMV,     GOLDEN_FRAME, NONE},
+  {RD_NEWMV,     GOLDEN_FRAME, NONE},
 
-  {NEARMV,    LAST_FRAME,   NONE},
-  {NEARMV,    ALTREF_FRAME, NONE},
-  {NEARESTMV, LAST_FRAME,   ALTREF_FRAME},
-  {NEARESTMV, GOLDEN_FRAME, ALTREF_FRAME},
+  {RD_NEARMV,    LAST_FRAME,   NONE},
+  {RD_NEARESTMV, LAST_FRAME,   ALTREF_FRAME},
+  {RD_NEARESTMV, GOLDEN_FRAME, ALTREF_FRAME},
 
-  {TM_PRED,   INTRA_FRAME,  NONE},
+  {RD_TM_PRED,   INTRA_FRAME,  NONE},
 
-  {NEARMV,    LAST_FRAME,   ALTREF_FRAME},
-  {NEWMV,     LAST_FRAME,   ALTREF_FRAME},
-  {NEARMV,    GOLDEN_FRAME, NONE},
-  {NEARMV,    GOLDEN_FRAME, ALTREF_FRAME},
-  {NEWMV,     GOLDEN_FRAME, ALTREF_FRAME},
+  {RD_NEARMV,    LAST_FRAME,   ALTREF_FRAME},
+  {RD_NEWMV,     LAST_FRAME,   ALTREF_FRAME},
+  {RD_NEARMV,    GOLDEN_FRAME, NONE},
+  {RD_NEARMV,    GOLDEN_FRAME, ALTREF_FRAME},
+  {RD_NEWMV,     GOLDEN_FRAME, ALTREF_FRAME},
 
-  {SPLITMV,   LAST_FRAME,   NONE},
-  {SPLITMV,   GOLDEN_FRAME, NONE},
-  {SPLITMV,   ALTREF_FRAME, NONE},
-  {SPLITMV,   LAST_FRAME,   ALTREF_FRAME},
-  {SPLITMV,   GOLDEN_FRAME, ALTREF_FRAME},
+  {RD_SPLITMV,   LAST_FRAME,   NONE},
+  {RD_SPLITMV,   GOLDEN_FRAME, NONE},
+  {RD_SPLITMV,   ALTREF_FRAME, NONE},
+  {RD_SPLITMV,   LAST_FRAME,   ALTREF_FRAME},
+  {RD_SPLITMV,   GOLDEN_FRAME, ALTREF_FRAME},
 
-  {ZEROMV,    LAST_FRAME,   NONE},
-  {ZEROMV,    GOLDEN_FRAME, NONE},
-  {ZEROMV,    ALTREF_FRAME, NONE},
-  {ZEROMV,    LAST_FRAME,   ALTREF_FRAME},
-  {ZEROMV,    GOLDEN_FRAME, ALTREF_FRAME},
+  {RD_ZEROMV,    LAST_FRAME,   NONE},
+  {RD_ZEROMV,    GOLDEN_FRAME, NONE},
+  {RD_ZEROMV,    ALTREF_FRAME, NONE},
+  {RD_ZEROMV,    LAST_FRAME,   ALTREF_FRAME},
+  {RD_ZEROMV,    GOLDEN_FRAME, ALTREF_FRAME},
 
-  {I4X4_PRED, INTRA_FRAME,  NONE},
-  {H_PRED,    INTRA_FRAME,  NONE},
-  {V_PRED,    INTRA_FRAME,  NONE},
-  {D135_PRED, INTRA_FRAME,  NONE},
-  {D207_PRED,  INTRA_FRAME,  NONE},
-  {D153_PRED, INTRA_FRAME,  NONE},
-  {D63_PRED,  INTRA_FRAME,  NONE},
-  {D117_PRED, INTRA_FRAME,  NONE},
-  {D45_PRED,  INTRA_FRAME,  NONE},
+  {RD_I4X4_PRED, INTRA_FRAME,  NONE},
+  {RD_H_PRED,    INTRA_FRAME,  NONE},
+  {RD_V_PRED,    INTRA_FRAME,  NONE},
+  {RD_D135_PRED, INTRA_FRAME,  NONE},
+  {RD_D207_PRED, INTRA_FRAME,  NONE},
+  {RD_D153_PRED, INTRA_FRAME,  NONE},
+  {RD_D63_PRED,  INTRA_FRAME,  NONE},
+  {RD_D117_PRED, INTRA_FRAME,  NONE},
+  {RD_D45_PRED,  INTRA_FRAME,  NONE},
 };
 
 // The baseline rd thresholds for breaking out of the rd loop for
@@ -161,6 +156,15 @@ void vp9_init_me_luts() {
 static int compute_rd_mult(int qindex) {
   const int q = vp9_dc_quant(qindex, 0);
   return (11 * q * q) >> 2;
+}
+
+static MB_PREDICTION_MODE rd_mode_to_mode(RD_PREDICTION_MODE rd_mode) {
+  if (rd_mode == RD_SPLITMV || rd_mode == RD_I4X4_PRED) {
+    assert(!"Invalid rd_mode");
+    return MB_MODE_COUNT;
+  }
+  assert((int)rd_mode < (int)MB_MODE_COUNT);
+  return (MB_PREDICTION_MODE)rd_mode;
 }
 
 void vp9_initialize_me_consts(VP9_COMP *cpi, int qindex) {
@@ -3057,7 +3061,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
   MB_MODE_INFO *mbmi = &xd->mode_info_context->mbmi;
   const struct segmentation *seg = &cm->seg;
   const BLOCK_SIZE block_size = get_plane_block_size(bsize, &xd->plane[0]);
-  MB_PREDICTION_MODE this_mode;
+  RD_PREDICTION_MODE this_mode;
   MV_REFERENCE_FRAME ref_frame, second_ref_frame;
   unsigned char segment_id = xd->mode_info_context->mbmi.segment_id;
   int comp_pred, i;
@@ -3285,29 +3289,29 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
     // SPLITMV.
     if (ref_frame > 0 &&
         vp9_is_scaled(&scale_factor[ref_frame]) &&
-        this_mode == SPLITMV)
+        this_mode == RD_SPLITMV)
       continue;
 
     if (second_ref_frame > 0 &&
         vp9_is_scaled(&scale_factor[second_ref_frame]) &&
-        this_mode == SPLITMV)
+        this_mode == RD_SPLITMV)
+      continue;
+
+    if (bsize >= BLOCK_8X8 &&
+        (this_mode == RD_I4X4_PRED || this_mode == RD_SPLITMV))
+      continue;
+
+    if (bsize < BLOCK_8X8 &&
+        !(this_mode == RD_I4X4_PRED || this_mode == RD_SPLITMV))
       continue;
 
     set_scale_factors(xd, ref_frame, second_ref_frame, scale_factor);
-    mbmi->mode = this_mode;
     mbmi->uv_mode = DC_PRED;
 
     // Evaluate all sub-pel filters irrespective of whether we can use
     // them for this frame.
     mbmi->interp_filter = cm->mcomp_filter_type;
     vp9_setup_interp_filters(xd, mbmi->interp_filter, &cpi->common);
-
-    if (bsize >= BLOCK_8X8 &&
-        (this_mode == I4X4_PRED || this_mode == SPLITMV))
-      continue;
-    if (bsize < BLOCK_8X8 &&
-        !(this_mode == I4X4_PRED || this_mode == SPLITMV))
-      continue;
 
     if (comp_pred) {
       if (!(cpi->ref_frame_flags & flag_list[second_ref_frame]))
@@ -3341,7 +3345,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
     // If the segment skip feature is enabled....
     // then do nothing if the current mode is not allowed..
     } else if (vp9_segfeature_active(seg, segment_id, SEG_LVL_SKIP) &&
-               (this_mode != ZEROMV && ref_frame != INTRA_FRAME)) {
+               (this_mode != RD_ZEROMV && ref_frame != INTRA_FRAME)) {
       continue;
     // Disable this drop out case if the ref frame
     // segment level feature is enabled for this segment. This is to
@@ -3353,11 +3357,11 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
       // an unfiltered alternative. We allow near/nearest as well
       // because they may result in zero-zero MVs but be cheaper.
       if (cpi->is_src_frame_alt_ref && (cpi->oxcf.arnr_max_frames == 0)) {
-        if ((this_mode != ZEROMV &&
-             !(this_mode == NEARMV &&
-               frame_mv[NEARMV][ALTREF_FRAME].as_int == 0) &&
-             !(this_mode == NEARESTMV &&
-               frame_mv[NEARESTMV][ALTREF_FRAME].as_int == 0)) ||
+        if ((this_mode != RD_ZEROMV &&
+             !(this_mode == RD_NEARMV &&
+               frame_mv[RD_NEARMV][ALTREF_FRAME].as_int == 0) &&
+             !(this_mode == RD_NEARESTMV &&
+               frame_mv[RD_NEARESTMV][ALTREF_FRAME].as_int == 0)) ||
             ref_frame != ALTREF_FRAME) {
           continue;
         }
@@ -3369,7 +3373,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
     // a representative block in the boundary ( first ) and then implement a
     // function that does sads when inside the border..
     if (((mi_row + bhs) > cm->mi_rows || (mi_col + bws) > cm->mi_cols) &&
-        this_mode == NEWMV) {
+        this_mode == RD_NEWMV) {
       continue;
     }
 
@@ -3379,7 +3383,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
     cpi->mode_test_hits[bsize]++;
 #endif
 
-    if (this_mode == I4X4_PRED) {
+    if (this_mode == RD_I4X4_PRED) {
       int rate;
 
       /*
@@ -3388,7 +3392,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
         continue;
         */
 
-      // I4X4_PRED is only considered for block sizes less than 8x8.
+      // RD_I4X4_PRED is only considered for block sizes less than 8x8.
       mbmi->tx_size = TX_4X4;
       if (rd_pick_intra_sub_8x8_y_mode(cpi, x, &rate, &rate_y,
                                        &distortion_y, best_rd) >= best_rd)
@@ -3420,20 +3424,22 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
         64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64,
       };
       if ((cpi->sf.mode_search_skip_flags & FLAG_SKIP_INTRA_LOWVAR) &&
-          this_mode != DC_PRED &&
+          this_mode != RD_DC_PRED &&
           x->source_variance < skip_intra_var_thresh[mbmi->sb_type])
         continue;
       // Only search the oblique modes if the best so far is
       // one of the neighboring directional modes
       if ((cpi->sf.mode_search_skip_flags & FLAG_SKIP_INTRA_BESTINTER) &&
-          (this_mode >= D45_PRED && this_mode <= TM_PRED)) {
+          (this_mode >= RD_D45_PRED && this_mode <= RD_TM_PRED)) {
         if (vp9_mode_order[best_mode_index].ref_frame > INTRA_FRAME)
           continue;
       }
       if (cpi->sf.mode_search_skip_flags & FLAG_SKIP_INTRA_DIRMISMATCH) {
-        if (conditional_skipintra(mbmi->mode, best_intra_mode))
+        if (conditional_skipintra(this_mode, best_intra_mode))
             continue;
       }
+      mbmi->mode = rd_mode_to_mode(this_mode);
+
       super_block_yrd(cpi, x, &rate_y, &distortion_y, &skippable, NULL,
                       bsize, tx_cache, best_rd);
 
@@ -3454,10 +3460,10 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
       mbmi->uv_mode = mode_uv[uv_tx];
 
       rate2 = rate_y + x->mbmode_cost[mbmi->mode] + rate_uv_intra[uv_tx];
-      if (mbmi->mode != DC_PRED && mbmi->mode != TM_PRED)
+      if (this_mode != RD_DC_PRED && this_mode != RD_TM_PRED)
         rate2 += intra_cost_penalty;
       distortion2 = distortion_y + distortion_uv;
-    } else if (this_mode == SPLITMV) {
+    } else if (this_mode == RD_SPLITMV) {
       const int is_comp_pred = second_ref_frame > 0;
       int rate;
       int64_t distortion;
@@ -3638,6 +3644,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
           tx_cache[i] = tx_cache[ONLY_4X4];
       }
     } else {
+      mbmi->mode = rd_mode_to_mode(this_mode);
       compmode_cost = vp9_cost_bit(comp_mode_p, second_ref_frame > INTRA_FRAME);
       this_rd = handle_inter_mode(cpi, x, bsize,
                                   tx_cache,
@@ -3745,7 +3752,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
         best_filter_rd[i] = MIN(best_filter_rd[i], this_rd);
     }
 
-    if (this_mode != I4X4_PRED && this_mode != SPLITMV) {
+    if (this_mode != RD_I4X4_PRED && this_mode != RD_SPLITMV) {
       // Store the respective mode distortions for later use.
       if (mode_distortions[this_mode] == -1
           || distortion2 < mode_distortions[this_mode]) {
@@ -3777,7 +3784,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
         best_skip2 = this_skip2;
         best_partition = *x->partition_info;
 
-        if (this_mode == I4X4_PRED || this_mode == SPLITMV)
+        if (this_mode == RD_I4X4_PRED || this_mode == RD_SPLITMV)
           for (i = 0; i < 4; i++)
             best_bmodes[i] = xd->mode_info_context->bmi[i];
 
@@ -3847,7 +3854,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
     /* keep record of best txfm size */
     if (bsize < BLOCK_32X32) {
       if (bsize < BLOCK_16X16) {
-        if (this_mode == SPLITMV || this_mode == I4X4_PRED)
+        if (this_mode == RD_SPLITMV || this_mode == RD_I4X4_PRED)
           tx_cache[ALLOW_8X8] = tx_cache[ONLY_4X4];
         tx_cache[ALLOW_16X16] = tx_cache[ALLOW_8X8];
       }
@@ -3856,7 +3863,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
     if (!mode_excluded && this_rd != INT64_MAX) {
       for (i = 0; i < TX_MODES && tx_cache[i] < INT64_MAX; i++) {
         int64_t adj_rd = INT64_MAX;
-        if (this_mode != I4X4_PRED) {
+        if (this_mode != RD_I4X4_PRED) {
           adj_rd = this_rd + tx_cache[i] - tx_cache[cm->tx_mode];
         } else {
           adj_rd = this_rd;
