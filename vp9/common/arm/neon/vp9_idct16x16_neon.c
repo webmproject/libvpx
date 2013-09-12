@@ -29,8 +29,8 @@ extern void vp9_short_idct10_16x16_add_neon_pass2(int16_t *src,
                                                int16_t skip_adding,
                                                uint8_t *dest,
                                                int dest_stride);
-extern void save_registers();
-extern void restore_registers();
+extern void save_neon_registers();
+extern void restore_neon_registers();
 
 
 void vp9_short_idct16x16_add_neon(int16_t *input,
@@ -39,7 +39,7 @@ void vp9_short_idct16x16_add_neon(int16_t *input,
   int16_t row_idct_output[16*16] = {0};
 
   // save d8-d15 register values.
-  save_registers();
+  save_neon_registers();
 
   /* Parallel idct on the upper 8 rows */
   // First pass processes even elements 0, 2, 4, 6, 8, 10, 12, 14 and save the
@@ -102,7 +102,7 @@ void vp9_short_idct16x16_add_neon(int16_t *input,
                                      dest_stride);
 
   // restore d8-d15 register values.
-  restore_registers();
+  restore_neon_registers();
 
   return;
 }
@@ -113,7 +113,7 @@ void vp9_short_idct10_16x16_add_neon(int16_t *input,
   int16_t row_idct_output[16*16] = {0};
 
   // save d8-d15 register values.
-  save_registers();
+  save_neon_registers();
 
   /* Parallel idct on the upper 8 rows */
   // First pass processes even elements 0, 2, 4, 6, 8, 10, 12, 14 and save the
@@ -163,7 +163,7 @@ void vp9_short_idct10_16x16_add_neon(int16_t *input,
                                      dest_stride);
 
   // restore d8-d15 register values.
-  restore_registers();
+  restore_neon_registers();
 
   return;
 }
