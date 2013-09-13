@@ -796,7 +796,7 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
         sf->intra_y_mode_mask = INTRA_DC_TM_H_V;
         sf->intra_uv_mode_mask = INTRA_DC_TM_H_V;
         sf->use_fast_coef_updates = 1;
-        sf->mode_skip_start = 9;
+        sf->mode_skip_start = 11;
       }
       if (speed == 2) {
         sf->less_rectangular_check  = 1;
@@ -835,7 +835,7 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
         sf->disable_split_var_thresh = 32;
         sf->disable_filter_search_var_thresh = 32;
         sf->use_fast_coef_updates = 2;
-        sf->mode_skip_start = 9;
+        sf->mode_skip_start = 6;
       }
       if (speed == 3) {
         sf->comp_inter_joint_search_thresh = BLOCK_SIZES;
@@ -863,7 +863,7 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
         sf->intra_y_mode_mask = INTRA_DC_ONLY;
         sf->intra_uv_mode_mask = INTRA_DC_ONLY;
         sf->use_fast_coef_updates = 2;
-        sf->mode_skip_start = 9;
+        sf->mode_skip_start = 6;
       }
       if (speed == 4) {
         sf->comp_inter_joint_search_thresh = BLOCK_SIZES;
@@ -895,7 +895,7 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
         sf->intra_y_mode_mask = INTRA_DC_ONLY;
         sf->intra_uv_mode_mask = INTRA_DC_ONLY;
         sf->use_fast_coef_updates = 2;
-        sf->mode_skip_start = 9;
+        sf->mode_skip_start = 6;
       }
       break;
 
