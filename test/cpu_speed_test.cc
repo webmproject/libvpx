@@ -108,5 +108,5 @@ using std::tr1::make_tuple;
 VP9_INSTANTIATE_TEST_CASE(
     CpuSpeedTest,
     ::testing::Values(::libvpx_test::kTwoPassGood),
-    ::testing::Range(0, 3));
+    ::testing::Range(0, 5));
 }  // namespace
