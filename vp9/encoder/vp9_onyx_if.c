@@ -565,16 +565,16 @@ static void set_rd_speed_thresholds(VP9_COMP *cpi, int mode) {
   sf->thresh_mult[THR_NEARESTG] = 0;
   sf->thresh_mult[THR_NEARESTA] = 0;
 
-  sf->thresh_mult[THR_NEWMV] += 1000;
-  sf->thresh_mult[THR_COMP_NEARESTLA] += 1000;
-  sf->thresh_mult[THR_NEARMV] += 1000;
-  sf->thresh_mult[THR_COMP_NEARESTGA] += 1000;
-
   sf->thresh_mult[THR_DC] += 1000;
 
-  sf->thresh_mult[THR_NEWG] += 1000;
+  sf->thresh_mult[THR_NEWMV] += 1000;
   sf->thresh_mult[THR_NEWA] += 1000;
+  sf->thresh_mult[THR_NEWG] += 1000;
+
+  sf->thresh_mult[THR_NEARMV] += 1000;
   sf->thresh_mult[THR_NEARA] += 1000;
+  sf->thresh_mult[THR_COMP_NEARESTLA] += 1000;
+  sf->thresh_mult[THR_COMP_NEARESTGA] += 1000;
 
   sf->thresh_mult[THR_TM] += 1000;
 
@@ -605,28 +605,6 @@ static void set_rd_speed_thresholds(VP9_COMP *cpi, int mode) {
   sf->thresh_mult[THR_D153_PRED] += 2500;
   sf->thresh_mult[THR_D207_PRED] += 2500;
   sf->thresh_mult[THR_D63_PRED] += 2500;
-
-  if (cpi->sf.skip_lots_of_modes) {
-    for (i = 0; i < MAX_MODES; ++i)
-      sf->thresh_mult[i] = INT_MAX;
-
-    sf->thresh_mult[THR_DC] = 2000;
-    sf->thresh_mult[THR_TM] = 2000;
-    sf->thresh_mult[THR_NEWMV] = 4000;
-    sf->thresh_mult[THR_NEWG] = 4000;
-    sf->thresh_mult[THR_NEWA] = 4000;
-    sf->thresh_mult[THR_NEARESTMV] = 0;
-    sf->thresh_mult[THR_NEARESTG] = 0;
-    sf->thresh_mult[THR_NEARESTA] = 0;
-    sf->thresh_mult[THR_NEARMV] = 2000;
-    sf->thresh_mult[THR_NEARG] = 2000;
-    sf->thresh_mult[THR_NEARA] = 2000;
-    sf->thresh_mult[THR_COMP_NEARESTLA] = 2000;
-    sf->thresh_mult[THR_SPLITMV] = 2500;
-    sf->thresh_mult[THR_SPLITG] = 2500;
-    sf->thresh_mult[THR_SPLITA] = 2500;
-    sf->recode_loop = 0;
-  }
 
   /* disable frame modes if flags not set */
   if (!(cpi->ref_frame_flags & VP9_LAST_FLAG)) {
@@ -714,7 +692,6 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
   sf->adaptive_motion_search = 0;
   sf->use_avoid_tested_higherror = 0;
   sf->reference_masking = 0;
-  sf->skip_lots_of_modes = 0;
   sf->partition_by_variance = 0;
   sf->use_one_partition_size_always = 0;
   sf->less_rectangular_check = 0;
