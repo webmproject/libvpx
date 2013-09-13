@@ -1,0 +1,208 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdH//+Rw\u003d",
+        "filename": "libs.mk",
+        "patchSetId": 4
+      },
+      "lineNbr": 398,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-09-13T20:42:16Z",
+      "side": 1,
+      "message": "this should be in a separate patchset in case it causes any unexpected problems on the slaves",
+      "revId": "444d5232c29a77eb7c905f5612736b55297a6314",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdH//+Ro\u003d",
+        "filename": "test/resize_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-09-13T20:42:16Z",
+      "side": 1,
+      "message": "indent 2",
+      "revId": "444d5232c29a77eb7c905f5612736b55297a6314",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdH//+Rk\u003d",
+        "filename": "test/resize_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-09-13T20:42:16Z",
+      "side": 1,
+      "message": "indent 2",
+      "revId": "444d5232c29a77eb7c905f5612736b55297a6314",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdH//+Rs\u003d",
+        "filename": "test/resize_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-09-13T20:42:16Z",
+      "side": 1,
+      "message": "it\u0027d be nice if this was factored out of all the examples so it could be reused...",
+      "revId": "444d5232c29a77eb7c905f5612736b55297a6314",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdH//+Rc\u003d",
+        "filename": "test/resize_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-09-13T20:42:16Z",
+      "side": 1,
+      "message": "static_cast\u003c\u003e, could be unsigned",
+      "revId": "444d5232c29a77eb7c905f5612736b55297a6314",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdH//+RY\u003d",
+        "filename": "test/resize_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 73,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-09-13T20:42:16Z",
+      "side": 1,
+      "message": "static_cast\u003c\u003e, could be unsigned",
+      "revId": "444d5232c29a77eb7c905f5612736b55297a6314",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdH//+Rg\u003d",
+        "filename": "test/resize_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 79,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-09-13T20:42:16Z",
+      "side": 1,
+      "message": "//  WRITE_COMPRESSED_STREAM",
+      "revId": "444d5232c29a77eb7c905f5612736b55297a6314",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdH//+RU\u003d",
+        "filename": "test/resize_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 158,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-09-13T20:42:16Z",
+      "side": 1,
+      "message": "const int kStepDownFrame",
+      "revId": "444d5232c29a77eb7c905f5612736b55297a6314",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdH//+RQ\u003d",
+        "filename": "test/resize_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 159,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-09-13T20:42:16Z",
+      "side": 1,
+      "message": "ditto",
+      "revId": "444d5232c29a77eb7c905f5612736b55297a6314",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdH//+RM\u003d",
+        "filename": "test/resize_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 165,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-09-13T20:42:16Z",
+      "side": 1,
+      "message": "this is formatted incorrectly:\nhttp://google-styleguide.googlecode.com/svn/trunk/cppguide.xml#Constructor_Initializer_Lists",
+      "revId": "444d5232c29a77eb7c905f5612736b55297a6314",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdH//+RE\u003d",
+        "filename": "test/resize_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 169,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-09-13T20:42:16Z",
+      "side": 1,
+      "message": "you need a virtual dtor",
+      "revId": "444d5232c29a77eb7c905f5612736b55297a6314",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdH//+RI\u003d",
+        "filename": "test/resize_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 170,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-09-13T20:42:16Z",
+      "side": 1,
+      "message": "unused params should be commented out:\n\nhttp://google-styleguide.googlecode.com/svn/trunk/cppguide.xml#Function_Declarations_and_Definitions",
+      "revId": "444d5232c29a77eb7c905f5612736b55297a6314",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
