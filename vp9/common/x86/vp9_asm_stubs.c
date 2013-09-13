@@ -13,7 +13,6 @@
 #include "./vpx_config.h"
 #include "./vp9_rtcd.h"
 #include "vpx_ports/mem.h"
-
 ///////////////////////////////////////////////////////////////////////////
 // the mmx function that does the bilinear filtering and var calculation //
 // int one pass                                                          //
@@ -37,17 +36,8 @@ DECLARE_ALIGNED(16, const short, vp9_bilinear_filters_mmx[16][8]) = {
   {   8,  8,  8,  8, 120, 120, 120, 120 }
 };
 
-
-int num_func_entry = 0;
 #if HAVE_SSSE3
 void vp9_filter_block1d16_v8_ssse3(const unsigned char *src_ptr,
-                                   const unsigned int src_pitch,
-                                   unsigned char *output_ptr,
-                                   unsigned int out_pitch,
-                                   unsigned int output_height,
-                                   const short *filter);
-
-void vp9_filter_block1d16_v8_intrin_ssse3(const unsigned char *src_ptr,
                                    const unsigned int src_pitch,
                                    unsigned char *output_ptr,
                                    unsigned int out_pitch,
@@ -61,21 +51,7 @@ void vp9_filter_block1d16_h8_ssse3(const unsigned char *src_ptr,
                                    unsigned int output_height,
                                    const short *filter);
 
-void vp9_filter_block1d16_h8_intrin_ssse3(const unsigned char *src_ptr,
-                                   const unsigned int src_pitch,
-                                   unsigned char *output_ptr,
-                                   unsigned int out_pitch,
-                                   unsigned int output_height,
-                                   const short *filter);
-
 void vp9_filter_block1d8_v8_ssse3(const unsigned char *src_ptr,
-                                   const unsigned int src_pitch,
-                                   unsigned char *output_ptr,
-                                   unsigned int out_pitch,
-                                   unsigned int output_height,
-                                   const short *filter);
-
-void vp9_filter_block1d8_v8_intrin_ssse3(const unsigned char *src_ptr,
                                    const unsigned int src_pitch,
                                    unsigned char *output_ptr,
                                    unsigned int out_pitch,
@@ -89,13 +65,6 @@ void vp9_filter_block1d8_h8_ssse3(const unsigned char *src_ptr,
                                    unsigned int output_height,
                                    const short *filter);
 
-void vp9_filter_block1d8_h8_intrin_ssse3(const unsigned char *src_ptr,
-                                   const unsigned int src_pitch,
-                                   unsigned char *output_ptr,
-                                   unsigned int out_pitch,
-                                   unsigned int output_height,
-                                   const short *filter);
-
 void vp9_filter_block1d4_v8_ssse3(const unsigned char *src_ptr,
                                    const unsigned int src_pitch,
                                    unsigned char *output_ptr,
@@ -103,22 +72,7 @@ void vp9_filter_block1d4_v8_ssse3(const unsigned char *src_ptr,
                                    unsigned int output_height,
                                    const short *filter);
 
-void vp9_filter_block1d4_v8_intrin_ssse3(const unsigned char *src_ptr,
-                                   const unsigned int src_pitch,
-                                   unsigned char *output_ptr,
-                                   unsigned int out_pitch,
-                                   unsigned int output_height,
-                                   const short *filter);
-
-
 void vp9_filter_block1d4_h8_ssse3(const unsigned char *src_ptr,
-                                   const unsigned int src_pitch,
-                                   unsigned char *output_ptr,
-                                   unsigned int out_pitch,
-                                   unsigned int output_height,
-                                   const short *filter);
-
-void vp9_filter_block1d4_h8_intrin_ssse3(const unsigned char *src_ptr,
                                    const unsigned int src_pitch,
                                    unsigned char *output_ptr,
                                    unsigned int out_pitch,
@@ -175,7 +129,7 @@ void vp9_convolve8_horiz_ssse3(const uint8_t *src, ptrdiff_t src_stride,
   /* Ensure the filter can be compressed to int16_t. */
   if (x_step_q4 == 16 && filter_x[3] != 128) {
     while (w >= 16) {
-      vp9_filter_block1d16_h8_intrin_ssse3(src, src_stride,
+      vp9_filter_block1d16_h8_ssse3(src, src_stride,
                                     dst, dst_stride,
                                     h, filter_x);
       src += 16;
@@ -183,7 +137,7 @@ void vp9_convolve8_horiz_ssse3(const uint8_t *src, ptrdiff_t src_stride,
       w -= 16;
     }
     while (w >= 8) {
-      vp9_filter_block1d8_h8_intrin_ssse3(src, src_stride,
+      vp9_filter_block1d8_h8_ssse3(src, src_stride,
                                    dst, dst_stride,
                                    h, filter_x);
       src += 8;
@@ -191,7 +145,7 @@ void vp9_convolve8_horiz_ssse3(const uint8_t *src, ptrdiff_t src_stride,
       w -= 8;
     }
     while (w >= 4) {
-      vp9_filter_block1d4_h8_intrin_ssse3(src, src_stride,
+      vp9_filter_block1d4_h8_ssse3(src, src_stride,
                                    dst, dst_stride,
                                    h, filter_x);
       src += 4;
@@ -213,25 +167,25 @@ void vp9_convolve8_vert_ssse3(const uint8_t *src, ptrdiff_t src_stride,
                               int w, int h) {
   if (y_step_q4 == 16 && filter_y[3] != 128) {
     while (w >= 16) {
-      vp9_filter_block1d16_v8_intrin_ssse3(src - src_stride * 3, src_stride,
-                                           dst, dst_stride,
-                                           h, filter_y);
+      vp9_filter_block1d16_v8_ssse3(src - src_stride * 3, src_stride,
+                                    dst, dst_stride,
+                                    h, filter_y);
       src += 16;
       dst += 16;
       w -= 16;
     }
     while (w >= 8) {
-      vp9_filter_block1d8_v8_intrin_ssse3(src - src_stride * 3, src_stride,
-                                          dst, dst_stride,
-                                          h, filter_y);
+      vp9_filter_block1d8_v8_ssse3(src - src_stride * 3, src_stride,
+                                   dst, dst_stride,
+                                   h, filter_y);
       src += 8;
       dst += 8;
       w -= 8;
     }
     while (w >= 4) {
-      vp9_filter_block1d4_v8_intrin_ssse3(src - src_stride * 3, src_stride,
-                                          dst, dst_stride,
-                                          h, filter_y);
+      vp9_filter_block1d4_v8_ssse3(src - src_stride * 3, src_stride,
+                                   dst, dst_stride,
+                                   h, filter_y);
       src += 4;
       dst += 4;
       w -= 4;
@@ -252,24 +206,24 @@ void vp9_convolve8_avg_horiz_ssse3(const uint8_t *src, ptrdiff_t src_stride,
   if (x_step_q4 == 16 && filter_x[3] != 128) {
     while (w >= 16) {
       vp9_filter_block1d16_h8_avg_ssse3(src, src_stride,
-                                        dst, dst_stride,
-                                        h, filter_x);
+                                    dst, dst_stride,
+                                    h, filter_x);
       src += 16;
       dst += 16;
       w -= 16;
     }
     while (w >= 8) {
       vp9_filter_block1d8_h8_avg_ssse3(src, src_stride,
-                                       dst, dst_stride,
-                                       h, filter_x);
+                                   dst, dst_stride,
+                                   h, filter_x);
       src += 8;
       dst += 8;
       w -= 8;
     }
     while (w >= 4) {
       vp9_filter_block1d4_h8_avg_ssse3(src, src_stride,
-                                       dst, dst_stride,
-                                       h, filter_x);
+                                   dst, dst_stride,
+                                   h, filter_x);
       src += 4;
       dst += 4;
       w -= 4;
@@ -290,24 +244,24 @@ void vp9_convolve8_avg_vert_ssse3(const uint8_t *src, ptrdiff_t src_stride,
   if (y_step_q4 == 16 && filter_y[3] != 128) {
     while (w >= 16) {
       vp9_filter_block1d16_v8_avg_ssse3(src - src_stride * 3, src_stride,
-                                        dst, dst_stride,
-                                        h, filter_y);
+                                    dst, dst_stride,
+                                    h, filter_y);
       src += 16;
       dst += 16;
       w -= 16;
     }
     while (w >= 8) {
       vp9_filter_block1d8_v8_avg_ssse3(src - src_stride * 3, src_stride,
-                                       dst, dst_stride,
-                                       h, filter_y);
+                                   dst, dst_stride,
+                                   h, filter_y);
       src += 8;
       dst += 8;
       w -= 8;
     }
     while (w >= 4) {
       vp9_filter_block1d4_v8_avg_ssse3(src - src_stride * 3, src_stride,
-                                       dst, dst_stride,
-                                       h, filter_y);
+                                   dst, dst_stride,
+                                   h, filter_y);
       src += 4;
       dst += 4;
       w -= 4;
