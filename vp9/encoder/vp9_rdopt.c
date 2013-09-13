@@ -1771,6 +1771,7 @@ static void rd_check_segment_txsize(VP9_COMP *cpi, MACROBLOCK *x,
             max_mv = x->max_mv_context[mbmi->ref_frame[0]];
           else
             max_mv = MAX(abs(bsi->mvp.as_mv.row), abs(bsi->mvp.as_mv.col)) >> 3;
+
           if (cpi->sf.auto_mv_step_size && cpi->common.show_frame) {
             // Take wtd average of the step_params based on the last frame's
             // max mv magnitude and the best ref mvs of the current block for
@@ -1781,11 +1782,16 @@ static void rd_check_segment_txsize(VP9_COMP *cpi, MACROBLOCK *x,
             step_param = cpi->mv_step_param;
           }
 
-          further_steps = (MAX_MVSEARCH_STEPS - 1) - step_param;
-
           mvp_full.as_mv.row = bsi->mvp.as_mv.row >> 3;
           mvp_full.as_mv.col = bsi->mvp.as_mv.col >> 3;
 
+          if (cpi->sf.adaptive_motion_search && cpi->common.show_frame) {
+            mvp_full.as_mv.row = x->pred_mv[mbmi->ref_frame[0]].as_mv.row >> 3;
+            mvp_full.as_mv.col = x->pred_mv[mbmi->ref_frame[0]].as_mv.col >> 3;
+            step_param = MAX(step_param, 8);
+          }
+
+          further_steps = (MAX_MVSEARCH_STEPS - 1) - step_param;
           // adjust src pointer for this block
           mi_buf_shift(x, i);
           if (cpi->sf.search_method == HEX) {
@@ -1839,9 +1845,12 @@ static void rd_check_segment_txsize(VP9_COMP *cpi, MACROBLOCK *x,
                                          x->nmvjointcost, x->mvcost,
                                          &distortion, &sse);
 
-            // safe motion search result for use in compound prediction
+            // save motion search result for use in compound prediction
             seg_mvs[i][mbmi->ref_frame[0]].as_int = mode_mv[NEWMV].as_int;
           }
+
+          if (cpi->sf.adaptive_motion_search)
+            x->pred_mv[mbmi->ref_frame[0]].as_int = mode_mv[NEWMV].as_int;
 
           // restore src pointers
           mi_buf_restore(x, orig_src, orig_pre);
@@ -2085,10 +2094,14 @@ static void mv_pred(VP9_COMP *cpi, MACROBLOCK *x,
   uint8_t *src_y_ptr = x->plane[0].src.buf;
   uint8_t *ref_y_ptr;
   int row_offset, col_offset;
+  int num_mv_refs = MAX_MV_REF_CANDIDATES +
+                    (cpi->sf.adaptive_motion_search &&
+                     cpi->common.show_frame && block_size < BLOCK_64X64);
 
   // Get the sad for each candidate reference mv
-  for (i = 0; i < MAX_MV_REF_CANDIDATES; i++) {
-    this_mv.as_int = mbmi->ref_mvs[ref_frame][i].as_int;
+  for (i = 0; i < num_mv_refs; i++) {
+    this_mv.as_int = (i < MAX_MV_REF_CANDIDATES) ?
+        mbmi->ref_mvs[ref_frame][i].as_int : x->pred_mv[ref_frame].as_int;
 
     max_mv = MAX(max_mv,
                  MAX(abs(this_mv.as_mv.row), abs(this_mv.as_mv.col)) >> 3);
@@ -2349,7 +2362,7 @@ static void single_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
       step_param = 8;
 
     // Get prediction MV.
-    mvp_full.as_int = x->pred_mv.as_int;
+    mvp_full.as_int = x->pred_mv[ref].as_int;
 
     // Adjust MV sign if needed.
     if (cm->ref_frame_sign_bias[ref]) {
@@ -2368,10 +2381,18 @@ static void single_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
     } else {
       step_param = cpi->mv_step_param;
     }
-    // mvp_full.as_int = ref_mv[0].as_int;
-    mvp_full.as_int =
-        mbmi->ref_mvs[ref][x->mv_best_ref_index[ref]].as_int;
   }
+
+  if (cpi->sf.adaptive_motion_search && bsize < BLOCK_64X64 &&
+      cpi->common.show_frame) {
+    int boffset = 2 * (b_width_log2(BLOCK_64X64) - MIN(b_height_log2(bsize),
+                                                       b_width_log2(bsize)));
+    step_param = MAX(step_param, boffset);
+  }
+
+  mvp_full.as_int = x->mv_best_ref_index[ref] < MAX_MV_REF_CANDIDATES ?
+      mbmi->ref_mvs[ref][x->mv_best_ref_index[ref]].as_int :
+      x->pred_mv[ref].as_int;
 
   mvp_full.as_mv.col >>= 3;
   mvp_full.as_mv.row >>= 3;
@@ -2422,6 +2443,10 @@ static void single_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
   *rate_mv = vp9_mv_bit_cost(tmp_mv, &ref_mv,
                              x->nmvjointcost, x->mvcost,
                              96);
+
+  if (cpi->sf.adaptive_motion_search && cpi->common.show_frame)
+    x->pred_mv[ref].as_int = tmp_mv->as_int;
+
   if (scaled_ref_frame) {
     int i;
     for (i = 0; i < MAX_MB_PLANE; i++)

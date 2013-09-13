@@ -50,6 +50,10 @@ typedef struct {
   int64_t tx_rd_diff[TX_MODES];
   int64_t best_filter_diff[SWITCHABLE_FILTERS + 1];
 
+  // motion vector cache for adaptive motion search control in partition
+  // search loop
+  int_mv pred_mv[MAX_REF_FRAMES];
+
   // Bit flag for each mode whether it has high error in comparison to others.
   unsigned int modes_with_high_error;
 
@@ -149,7 +153,7 @@ struct macroblock {
 
   // Used to store sub partition's choices.
   int fast_ms;
-  int_mv pred_mv;
+  int_mv pred_mv[MAX_REF_FRAMES];
   int subblock_ref;
 
   // TODO(jingning): Need to refactor the structure arrays that buffers the
