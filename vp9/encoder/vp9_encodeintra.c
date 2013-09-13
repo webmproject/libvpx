@@ -16,7 +16,7 @@
 #include "vp9/encoder/vp9_encodeintra.h"
 
 int vp9_encode_intra(MACROBLOCK *x, int use_16x16_pred) {
-  MB_MODE_INFO * mbmi = &x->e_mbd.mode_info_context->mbmi;
+  MB_MODE_INFO * mbmi = &x->e_mbd.mi_8x8[0]->mbmi;
   x->skip_encode = 0;
   mbmi->mode = DC_PRED;
   mbmi->ref_frame[0] = INTRA_FRAME;
