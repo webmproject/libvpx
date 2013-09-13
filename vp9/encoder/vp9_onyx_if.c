@@ -53,10 +53,6 @@ static void set_default_lf_deltas(struct loopfilter *lf);
 
 #define DEFAULT_INTERP_FILTER SWITCHABLE
 
-#define SEARCH_BEST_FILTER 0            /* to search exhaustively for
-                                           best filter */
-#define RESET_FOREACH_FILTER 0          /* whether to reset the encoder state
-                                           before trying each new filter */
 #define SHARP_FILTER_QTHRESH 0          /* Q threshold for 8-tap sharp filter */
 
 #define ALTREF_HIGH_PRECISION_MV 1      /* whether to use high precision mv
@@ -753,7 +749,6 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
 
   switch (mode) {
     case 0: // best quality mode
-      sf->search_best_filter = SEARCH_BEST_FILTER;
       break;
 
     case 1:
@@ -2582,24 +2577,6 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
   SPEED_FEATURES *sf = &cpi->sf;
   unsigned int max_mv_def = MIN(cpi->common.width, cpi->common.height);
   struct segmentation *seg = &cm->seg;
-#if RESET_FOREACH_FILTER
-  int q_low0;
-  int q_high0;
-  int Q0;
-  int active_best_quality0;
-  int active_worst_quality0;
-  double rate_correction_factor0;
-  double gf_rate_correction_factor0;
-#endif
-
-  /* list of filters to search over */
-  int mcomp_filters_to_search[] = {
-    EIGHTTAP, EIGHTTAP_SHARP, EIGHTTAP_SMOOTH, SWITCHABLE
-  };
-  int mcomp_filters = sizeof(mcomp_filters_to_search) /
-      sizeof(*mcomp_filters_to_search);
-  int mcomp_filter_index = 0;
-  int64_t mcomp_filter_cost[4];
 
   /* Scale the source buffer, if required */
   if (cm->mi_cols * 8 != cpi->un_scaled_source->y_width ||
@@ -2911,13 +2888,7 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
   vp9_zero(cpi->rd_tx_select_threshes);
 
   if (cm->frame_type != KEY_FRAME) {
-    /* TODO: Decide this more intelligently */
-    if (sf->search_best_filter) {
-      cm->mcomp_filter_type = mcomp_filters_to_search[0];
-      mcomp_filter_index = 0;
-    } else {
-      cm->mcomp_filter_type = DEFAULT_INTERP_FILTER;
-    }
+    cm->mcomp_filter_type = DEFAULT_INTERP_FILTER;
     /* TODO: Decide this more intelligently */
     xd->allow_high_precision_mv = q < HIGH_PRECISION_MV_QTHRESH;
     set_mvcost(&cpi->mb);
@@ -2956,17 +2927,6 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
   vp9_write_yuv_frame(cpi->Source);
 #endif
 
-#if RESET_FOREACH_FILTER
-  if (sf->search_best_filter) {
-    q_low0 = q_low;
-    q_high0 = q_high;
-    Q0 = Q;
-    rate_correction_factor0 = cpi->rate_correction_factor;
-    gf_rate_correction_factor0 = cpi->gf_rate_correction_factor;
-    active_best_quality0 = cpi->active_best_quality;
-    active_worst_quality0 = cpi->active_worst_quality;
-  }
-#endif
   do {
     vp9_clear_system_state();  // __asm emms;
 
@@ -3144,55 +3104,6 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
 
     if (cpi->is_src_frame_alt_ref)
       loop = 0;
-
-    if (!loop && cm->frame_type != KEY_FRAME && sf->search_best_filter) {
-      if (mcomp_filter_index < mcomp_filters) {
-        int64_t err = vp9_calc_ss_err(cpi->Source,
-                                      &cm->yv12_fb[cm->new_fb_idx]);
-        int64_t rate = cpi->projected_frame_size << 8;
-        mcomp_filter_cost[mcomp_filter_index] =
-            (RDCOST(cpi->RDMULT, cpi->RDDIV, rate, err));
-        mcomp_filter_index++;
-        if (mcomp_filter_index < mcomp_filters) {
-          cm->mcomp_filter_type = mcomp_filters_to_search[mcomp_filter_index];
-          loop_count = -1;
-          loop = 1;
-        } else {
-          int f;
-          int64_t best_cost = mcomp_filter_cost[0];
-          int mcomp_best_filter = mcomp_filters_to_search[0];
-          for (f = 1; f < mcomp_filters; f++) {
-            if (mcomp_filter_cost[f] < best_cost) {
-              mcomp_best_filter = mcomp_filters_to_search[f];
-              best_cost = mcomp_filter_cost[f];
-            }
-          }
-          if (mcomp_best_filter != mcomp_filters_to_search[mcomp_filters - 1]) {
-            loop_count = -1;
-            loop = 1;
-            cm->mcomp_filter_type = mcomp_best_filter;
-          }
-          /*
-             printf("  best filter = %d, ( ", mcomp_best_filter);
-             for (f=0;f<mcomp_filters; f++) printf("%d ",  mcomp_filter_cost[f]);
-             printf(")\n");
-             */
-        }
-#if RESET_FOREACH_FILTER
-        if (loop) {
-          overshoot_seen = 0;
-          undershoot_seen = 0;
-          q_low = q_low0;
-          q_high = q_high0;
-          q = Q0;
-          cpi->rate_correction_factor = rate_correction_factor0;
-          cpi->gf_rate_correction_factor = gf_rate_correction_factor0;
-          cpi->active_best_quality = active_best_quality0;
-          cpi->active_worst_quality = active_worst_quality0;
-        }
-#endif
-      }
-    }
 
     if (loop) {
       loop_count++;
