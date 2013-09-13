@@ -16,6 +16,24 @@
       "revId": "ab76bab87ed57db6d80e4a291d0a13e05741a354",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdH//+Xk\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 1778,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2013-09-13T02:06:32Z",
+      "side": 1,
+      "message": "for bus at cif and 2000 kbps, the speed-up for speed 1 seems to drop to 1.5%.",
+      "parentUuid": "AAAAdH//+YM\u003d",
+      "revId": "ab76bab87ed57db6d80e4a291d0a13e05741a354",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
