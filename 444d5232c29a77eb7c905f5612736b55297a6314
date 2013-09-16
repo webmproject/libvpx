@@ -387,6 +387,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdH//+Mo\u003d",
+        "filename": "test/resize_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 169,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-09-16T21:18:30Z",
+      "side": 1,
+      "message": "it belongs in both:\n\nhttp://google-styleguide.googlecode.com/svn/trunk/cppguide.xml#Inheritance\n\nhttp://google-styleguide.googlecode.com/svn/trunk/cppguide.xml#Interfaces",
+      "parentUuid": "AAAAdH//+OQ\u003d",
+      "revId": "444d5232c29a77eb7c905f5612736b55297a6314",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdH//+RI\u003d",
         "filename": "test/resize_test.cc",
         "patchSetId": 4
