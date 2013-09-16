@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdH//+MM\u003d",
+        "filename": "test/resize_test.cc",
+        "patchSetId": 6
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-09-16T21:26:19Z",
+      "side": 1,
+      "message": "this won\u0027t build, syntax is: static_cast\u003cunsigned int\u003e()",
+      "revId": "5c704e1559c58836b6a23ecdc1db9c3e67e7e44a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
