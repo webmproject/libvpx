@@ -2096,7 +2096,8 @@ static void mv_pred(VP9_COMP *cpi, MACROBLOCK *x,
   int row_offset, col_offset;
   int num_mv_refs = MAX_MV_REF_CANDIDATES +
                     (cpi->sf.adaptive_motion_search &&
-                     cpi->common.show_frame && block_size < BLOCK_64X64);
+                     cpi->common.show_frame &&
+                     block_size < cpi->sf.max_partition_size);
 
   // Get the sad for each candidate reference mv
   for (i = 0; i < num_mv_refs; i++) {
