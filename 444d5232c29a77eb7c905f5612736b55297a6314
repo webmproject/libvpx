@@ -405,6 +405,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdH//+Lo\u003d",
+        "filename": "test/resize_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 169,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2013-09-16T22:37:25Z",
+      "side": 1,
+      "message": "Added virtual destructor here and also to the class ResizingVideoSource (since it too has virtual methods).",
+      "parentUuid": "AAAAdH//+Mo\u003d",
+      "revId": "444d5232c29a77eb7c905f5612736b55297a6314",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdH//+RI\u003d",
         "filename": "test/resize_test.cc",
         "patchSetId": 4
