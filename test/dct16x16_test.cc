@@ -258,7 +258,7 @@ void reference_16x16_dct_2d(int16_t input[256], double output[256]) {
 }
 
 typedef void (*fdct_t)(int16_t *in, int16_t *out, int stride);
-typedef void (*idct_t)(int16_t *in, uint8_t *out, int stride);
+typedef void (*idct_t)(int16_t *in, uint8_t *dst, int stride);
 typedef void (*fht_t) (int16_t *in, int16_t *out, int stride, int tx_type);
 typedef void (*iht_t) (int16_t *in, uint8_t *dst, int stride, int tx_type);
 
@@ -509,7 +509,8 @@ INSTANTIATE_TEST_CASE_P(
 INSTANTIATE_TEST_CASE_P(
     SSE2, Trans16x16DCT,
     ::testing::Values(
-        make_tuple(&vp9_short_fdct16x16_sse2, &vp9_short_idct16x16_add_c, 0)));
+        make_tuple(&vp9_short_fdct16x16_sse2,
+                   &vp9_short_idct16x16_add_sse2, 0)));
 INSTANTIATE_TEST_CASE_P(
     SSE2, Trans16x16HT,
     ::testing::Values(
