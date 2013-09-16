@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdH//+O4\u003d",
+        "filename": "libs.mk",
+        "patchSetId": 4
+      },
+      "lineNbr": 398,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2013-09-16T18:35:27Z",
+      "side": 1,
+      "message": "Will submit as separate patch.",
+      "parentUuid": "AAAAdH//+Rw\u003d",
+      "revId": "444d5232c29a77eb7c905f5612736b55297a6314",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdH//+Ro\u003d",
         "filename": "test/resize_test.cc",
         "patchSetId": 4
@@ -30,6 +48,24 @@
       "writtenOn": "2013-09-13T20:42:16Z",
       "side": 1,
       "message": "indent 2",
+      "revId": "444d5232c29a77eb7c905f5612736b55297a6314",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdH//+O0\u003d",
+        "filename": "test/resize_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2013-09-16T18:35:27Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdH//+Ro\u003d",
       "revId": "444d5232c29a77eb7c905f5612736b55297a6314",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdH//+Ow\u003d",
+        "filename": "test/resize_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2013-09-16T18:35:27Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdH//+Rk\u003d",
+      "revId": "444d5232c29a77eb7c905f5612736b55297a6314",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdH//+Rs\u003d",
         "filename": "test/resize_test.cc",
         "patchSetId": 4
@@ -64,6 +118,24 @@
       "writtenOn": "2013-09-13T20:42:16Z",
       "side": 1,
       "message": "it\u0027d be nice if this was factored out of all the examples so it could be reused...",
+      "revId": "444d5232c29a77eb7c905f5612736b55297a6314",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdH//+Os\u003d",
+        "filename": "test/resize_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2013-09-16T18:35:27Z",
+      "side": 1,
+      "message": "I\u0027ll do this as a separate patch.",
+      "parentUuid": "AAAAdH//+Rs\u003d",
       "revId": "444d5232c29a77eb7c905f5612736b55297a6314",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdH//+Oo\u003d",
+        "filename": "test/resize_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2013-09-16T18:35:27Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdH//+Rc\u003d",
+      "revId": "444d5232c29a77eb7c905f5612736b55297a6314",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdH//+RY\u003d",
         "filename": "test/resize_test.cc",
         "patchSetId": 4
@@ -98,6 +188,24 @@
       "writtenOn": "2013-09-13T20:42:16Z",
       "side": 1,
       "message": "static_cast\u003c\u003e, could be unsigned",
+      "revId": "444d5232c29a77eb7c905f5612736b55297a6314",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdH//+Ok\u003d",
+        "filename": "test/resize_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 73,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2013-09-16T18:35:27Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdH//+RY\u003d",
       "revId": "444d5232c29a77eb7c905f5612736b55297a6314",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -121,6 +229,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdH//+Og\u003d",
+        "filename": "test/resize_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 79,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2013-09-16T18:35:27Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdH//+Rg\u003d",
+      "revId": "444d5232c29a77eb7c905f5612736b55297a6314",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdH//+RU\u003d",
         "filename": "test/resize_test.cc",
         "patchSetId": 4
@@ -132,6 +258,24 @@
       "writtenOn": "2013-09-13T20:42:16Z",
       "side": 1,
       "message": "const int kStepDownFrame",
+      "revId": "444d5232c29a77eb7c905f5612736b55297a6314",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdH//+Oc\u003d",
+        "filename": "test/resize_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 158,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2013-09-16T18:35:27Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdH//+RU\u003d",
       "revId": "444d5232c29a77eb7c905f5612736b55297a6314",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -155,6 +299,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdH//+OY\u003d",
+        "filename": "test/resize_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 159,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2013-09-16T18:35:27Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdH//+RQ\u003d",
+      "revId": "444d5232c29a77eb7c905f5612736b55297a6314",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdH//+RM\u003d",
         "filename": "test/resize_test.cc",
         "patchSetId": 4
@@ -166,6 +328,24 @@
       "writtenOn": "2013-09-13T20:42:16Z",
       "side": 1,
       "message": "this is formatted incorrectly:\nhttp://google-styleguide.googlecode.com/svn/trunk/cppguide.xml#Constructor_Initializer_Lists",
+      "revId": "444d5232c29a77eb7c905f5612736b55297a6314",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdH//+OU\u003d",
+        "filename": "test/resize_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 165,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2013-09-16T18:35:27Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdH//+RM\u003d",
       "revId": "444d5232c29a77eb7c905f5612736b55297a6314",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -189,6 +369,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdH//+OQ\u003d",
+        "filename": "test/resize_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 169,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2013-09-16T18:35:27Z",
+      "side": 1,
+      "message": "I added a virtual dtor to the base class, ResizeTest, is that what you had in mind? (in the case where a ResizeInternalTest object is deleted through a ResizeTest pointer).",
+      "parentUuid": "AAAAdH//+RE\u003d",
+      "revId": "444d5232c29a77eb7c905f5612736b55297a6314",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdH//+RI\u003d",
         "filename": "test/resize_test.cc",
         "patchSetId": 4
@@ -200,6 +398,24 @@
       "writtenOn": "2013-09-13T20:42:16Z",
       "side": 1,
       "message": "unused params should be commented out:\n\nhttp://google-styleguide.googlecode.com/svn/trunk/cppguide.xml#Function_Declarations_and_Definitions",
+      "revId": "444d5232c29a77eb7c905f5612736b55297a6314",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdH//+OM\u003d",
+        "filename": "test/resize_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 170,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2013-09-16T18:35:27Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdH//+RI\u003d",
       "revId": "444d5232c29a77eb7c905f5612736b55297a6314",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
