@@ -1446,6 +1446,7 @@ static int labels2mode(MACROBLOCK *x, int i,
   int idx, idy;
   const int num_4x4_blocks_wide = num_4x4_blocks_wide_lookup[mbmi->sb_type];
   const int num_4x4_blocks_high = num_4x4_blocks_high_lookup[mbmi->sb_type];
+  const int has_second_rf = has_second_ref(mbmi);
 
   /* We have to be careful retrieving previously-encoded motion vectors.
    Ones from this macroblock have to be pulled from the BLOCKD array
@@ -1459,7 +1460,7 @@ static int labels2mode(MACROBLOCK *x, int i,
       this_mv->as_int = seg_mvs[mbmi->ref_frame[0]].as_int;
       thismvcost  = vp9_mv_bit_cost(this_mv, best_ref_mv, mvjcost, mvcost,
                                     102);
-      if (mbmi->ref_frame[1] > 0) {
+      if (has_second_rf) {
         this_second_mv->as_int = seg_mvs[mbmi->ref_frame[1]].as_int;
         thismvcost += vp9_mv_bit_cost(this_second_mv, second_best_ref_mv,
                                       mvjcost, mvcost, 102);
@@ -1467,19 +1468,19 @@ static int labels2mode(MACROBLOCK *x, int i,
       break;
     case NEARESTMV:
       this_mv->as_int = frame_mv[NEARESTMV][mbmi->ref_frame[0]].as_int;
-      if (mbmi->ref_frame[1] > 0)
+      if (has_second_rf)
         this_second_mv->as_int =
             frame_mv[NEARESTMV][mbmi->ref_frame[1]].as_int;
       break;
     case NEARMV:
       this_mv->as_int = frame_mv[NEARMV][mbmi->ref_frame[0]].as_int;
-      if (mbmi->ref_frame[1] > 0)
+      if (has_second_rf)
         this_second_mv->as_int =
             frame_mv[NEARMV][mbmi->ref_frame[1]].as_int;
       break;
     case ZEROMV:
       this_mv->as_int = 0;
-      if (mbmi->ref_frame[1] > 0)
+      if (has_second_rf)
         this_second_mv->as_int = 0;
       break;
     default:
@@ -1490,7 +1491,7 @@ static int labels2mode(MACROBLOCK *x, int i,
                      mbmi->mode_context[mbmi->ref_frame[0]]);
 
   mic->bmi[i].as_mv[0].as_int = this_mv->as_int;
-  if (mbmi->ref_frame[1] > 0)
+  if (has_second_rf)
     mic->bmi[i].as_mv[1].as_int = this_second_mv->as_int;
 
   x->partition_info->bmi[i].mode = m;
@@ -1623,7 +1624,7 @@ static INLINE void mi_buf_shift(MACROBLOCK *x, int i) {
   assert(((intptr_t)pd->pre[0].buf & 0x7) == 0);
   pd->pre[0].buf = raster_block_offset_uint8(BLOCK_8X8, i, pd->pre[0].buf,
                                              pd->pre[0].stride);
-  if (mbmi->ref_frame[1])
+  if (has_second_ref(mbmi))
     pd->pre[1].buf = raster_block_offset_uint8(BLOCK_8X8, i, pd->pre[1].buf,
                                                pd->pre[1].stride);
 }
@@ -1633,7 +1634,7 @@ static INLINE void mi_buf_restore(MACROBLOCK *x, struct buf_2d orig_src,
   MB_MODE_INFO *mbmi = &x->e_mbd.mi_8x8[0]->mbmi;
   x->plane[0].src = orig_src;
   x->e_mbd.plane[0].pre[0] = orig_pre[0];
-  if (mbmi->ref_frame[1])
+  if (has_second_ref(mbmi))
     x->e_mbd.plane[0].pre[1] = orig_pre[1];
 }
 
@@ -1658,6 +1659,7 @@ static void rd_check_segment_txsize(VP9_COMP *cpi, MACROBLOCK *x,
   BEST_SEG_INFO *bsi = bsi_buf + filter_idx;
   int mode_idx;
   int subpelmv = 1, have_ref = 0;
+  const int has_second_rf = has_second_ref(mbmi);
 
   vpx_memcpy(t_above, x->e_mbd.plane[0].above_context, sizeof(t_above));
   vpx_memcpy(t_left, x->e_mbd.plane[0].left_context, sizeof(t_left));
@@ -1687,7 +1689,7 @@ static void rd_check_segment_txsize(VP9_COMP *cpi, MACROBLOCK *x,
                                     &frame_mv[NEARESTMV][mbmi->ref_frame[0]],
                                     &frame_mv[NEARMV][mbmi->ref_frame[0]],
                                     i, 0, mi_row, mi_col);
-      if (mbmi->ref_frame[1] > 0)
+      if (has_second_rf)
         vp9_append_sub8x8_mvs_for_idx(&cpi->common, &x->e_mbd,
                                    &frame_mv[NEARESTMV][mbmi->ref_frame[1]],
                                    &frame_mv[NEARMV][mbmi->ref_frame[1]],
@@ -1705,7 +1707,7 @@ static void rd_check_segment_txsize(VP9_COMP *cpi, MACROBLOCK *x,
         if ((this_mode == NEARMV || this_mode == NEARESTMV ||
              this_mode == ZEROMV) &&
             frame_mv[this_mode][mbmi->ref_frame[0]].as_int == 0 &&
-            (mbmi->ref_frame[1] <= 0 ||
+            (!has_second_rf ||
              frame_mv[this_mode][mbmi->ref_frame[1]].as_int == 0)) {
           int rfc = mbmi->mode_context[mbmi->ref_frame[0]];
           int c1 = cost_mv_ref(cpi, NEARMV, rfc);
@@ -1720,7 +1722,7 @@ static void rd_check_segment_txsize(VP9_COMP *cpi, MACROBLOCK *x,
               continue;
           } else {
             assert(this_mode == ZEROMV);
-            if (mbmi->ref_frame[1] <= 0) {
+            if (!has_second_rf) {
               if ((c3 >= c2 &&
                    frame_mv[NEARESTMV][mbmi->ref_frame[0]].as_int == 0) ||
                   (c3 >= c1 &&
@@ -1745,7 +1747,7 @@ static void rd_check_segment_txsize(VP9_COMP *cpi, MACROBLOCK *x,
                    sizeof(bsi->rdstat[i][mode_idx].tl));
 
         // motion search for newmv (single predictor case only)
-        if (mbmi->ref_frame[1] <= 0 && this_mode == NEWMV &&
+        if (!has_second_rf && this_mode == NEWMV &&
             seg_mvs[i][mbmi->ref_frame[0]].as_int == INVALID_MV) {
           int step_param = 0;
           int further_steps;
@@ -1856,7 +1858,7 @@ static void rd_check_segment_txsize(VP9_COMP *cpi, MACROBLOCK *x,
           mi_buf_restore(x, orig_src, orig_pre);
         }
 
-        if (mbmi->ref_frame[1] > 0 && this_mode == NEWMV &&
+        if (has_second_rf && this_mode == NEWMV &&
             mbmi->interp_filter == EIGHTTAP) {
           if (seg_mvs[i][mbmi->ref_frame[1]].as_int == INVALID_MV ||
               seg_mvs[i][mbmi->ref_frame[0]].as_int == INVALID_MV)
@@ -1891,7 +1893,7 @@ static void rd_check_segment_txsize(VP9_COMP *cpi, MACROBLOCK *x,
         if (num_4x4_blocks_high > 1)
           bsi->rdstat[i + 2][mode_idx].mvs[0].as_int =
               mode_mv[this_mode].as_int;
-        if (mbmi->ref_frame[1] > 0) {
+        if (has_second_rf) {
           bsi->rdstat[i][mode_idx].mvs[1].as_int =
               second_mode_mv[this_mode].as_int;
           if (num_4x4_blocks_wide > 1)
@@ -1905,7 +1907,7 @@ static void rd_check_segment_txsize(VP9_COMP *cpi, MACROBLOCK *x,
         // Trap vectors that reach beyond the UMV borders
         if (mv_check_bounds(x, &mode_mv[this_mode]))
           continue;
-        if (mbmi->ref_frame[1] > 0 &&
+        if (has_second_rf &&
             mv_check_bounds(x, &second_mode_mv[this_mode]))
           continue;
 
@@ -1915,7 +1917,7 @@ static void rd_check_segment_txsize(VP9_COMP *cpi, MACROBLOCK *x,
                      (mode_mv[this_mode].as_mv.col & 0x0f);
           have_ref = mode_mv[this_mode].as_int ==
                      ref_bsi->rdstat[i][mode_idx].mvs[0].as_int;
-          if (mbmi->ref_frame[1] > 0) {
+          if (has_second_rf) {
             subpelmv |= (second_mode_mv[this_mode].as_mv.row & 0x0f) ||
                         (second_mode_mv[this_mode].as_mv.col & 0x0f);
             have_ref  &= second_mode_mv[this_mode].as_int ==
@@ -1926,7 +1928,7 @@ static void rd_check_segment_txsize(VP9_COMP *cpi, MACROBLOCK *x,
             ref_bsi = bsi_buf + 1;
             have_ref = mode_mv[this_mode].as_int ==
                        ref_bsi->rdstat[i][mode_idx].mvs[0].as_int;
-            if (mbmi->ref_frame[1] > 0) {
+            if (has_second_rf) {
               have_ref  &= second_mode_mv[this_mode].as_int ==
                            ref_bsi->rdstat[i][mode_idx].mvs[1].as_int;
             }
@@ -2059,7 +2061,7 @@ static int64_t rd_pick_best_mbsegmentation(VP9_COMP *cpi, MACROBLOCK *x,
   for (i = 0; i < 4; i++) {
     mode_idx = inter_mode_offset(bsi->modes[i]);
     mi->bmi[i].as_mv[0].as_int = bsi->rdstat[i][mode_idx].mvs[0].as_int;
-    if (mbmi->ref_frame[1] > 0)
+    if (has_second_ref(mbmi))
       mi->bmi[i].as_mv[1].as_int = bsi->rdstat[i][mode_idx].mvs[1].as_int;
     xd->plane[0].eobs[i] = bsi->rdstat[i][mode_idx].eobs;
     x->partition_info->bmi[i].mode = bsi->modes[i];
