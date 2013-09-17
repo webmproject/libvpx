@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdH//+IE\u003d",
+        "filename": "vp9/common/vp9_mvref_common.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 212,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2013-09-17T16:29:39Z",
+      "side": 1,
+      "message": "Now mv value is always calculated but it could be not used by the following code because of \"if\" conditions.",
+      "revId": "6e2f5b14f50d12a12bfef7504f94271605d39dd8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
