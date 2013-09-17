@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdH//+Fc\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1463,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2013-09-17T22:48:45Z",
+      "side": 1,
+      "message": "I would suggest adding an explicit test here... we constantly test against 0 throughout the code rather than INTRA_FRAME:\nif (second_ref_frame !\u003d INTRA_FRAME)\n...also applies below.",
+      "revId": "109339c26128a55e76635f28b0ddef1789156068",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdH//+FY\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1662,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2013-09-17T22:48:45Z",
+      "side": 1,
+      "message": "Badly named variable... the return value isn\u0027t a ref frame but a boolean indicating whether there is a non-INTRA ref frame.",
+      "revId": "109339c26128a55e76635f28b0ddef1789156068",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
