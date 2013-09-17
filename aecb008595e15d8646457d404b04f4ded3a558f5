@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdH//+Jk\u003d",
+        "filename": "test/fdct8x8_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 134,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-09-17T01:46:24Z",
+      "side": 1,
+      "message": "you can merge this with the loop at 129",
+      "revId": "aecb008595e15d8646457d404b04f4ded3a558f5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdH//+Jg\u003d",
+        "filename": "test/fdct8x8_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 188,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-09-17T01:46:24Z",
+      "side": 1,
+      "message": "this can be merged with 182",
+      "revId": "aecb008595e15d8646457d404b04f4ded3a558f5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
