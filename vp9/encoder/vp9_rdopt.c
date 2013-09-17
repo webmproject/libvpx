@@ -369,8 +369,8 @@ static void model_rd_from_var_lapndz(int var, int n, int qstep,
     double s2 = (double) var / n;
     double x = qstep / sqrt(s2);
     model_rd_norm(x, &R, &D);
-    *rate = ((n << 8) * R + 0.5);
-    *dist = (var * D + 0.5);
+    *rate = (int)((n << 8) * R + 0.5);
+    *dist = (int)(var * D + 0.5);
   }
   vp9_clear_system_state();
 }
@@ -397,7 +397,7 @@ static void model_rd_for_sb(VP9_COMP *cpi, BLOCK_SIZE bsize,
                              pd->dequant[1] >> 3, &rate, &dist);
 
     rate_sum += rate;
-    dist_sum += dist;
+    dist_sum += (int)dist;
   }
 
   *out_rate_sum = rate_sum;
@@ -868,8 +868,8 @@ static void choose_txfm_size_from_modelrd(VP9_COMP *cpi, MACROBLOCK *x,
     }
   }
   for (n = TX_4X4; n <= max_txfm_size; n++) {
-    rd[n][0] = (scale_rd[n] * rd[n][0]);
-    rd[n][1] = (scale_rd[n] * rd[n][1]);
+    rd[n][0] = (int64_t)(scale_rd[n] * rd[n][0]);
+    rd[n][1] = (int64_t)(scale_rd[n] * rd[n][1]);
   }
 
   if (max_txfm_size == TX_32X32 &&
@@ -2904,7 +2904,7 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
       unsigned int thresh_ac;
       // The encode_breakout input
       unsigned int encode_breakout = x->encode_breakout << 4;
-      int max_thresh = 36000;
+      unsigned int max_thresh = 36000;
 
       // Use extreme low threshold for static frames to limit skipping.
       if (cpi->enable_encode_breakout == 2)
@@ -3251,7 +3251,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
             assert(!"Invalid Reference frame");
         }
       }
-      if (cpi->mode_skip_mask & (1 << mode_index))
+      if (cpi->mode_skip_mask & ((int64_t)1 << mode_index))
         continue;
     }
 
@@ -3448,7 +3448,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
       // Disable intra modes other than DC_PRED for blocks with low variance
       // Threshold for intra skipping based on source variance
       // TODO(debargha): Specialize the threshold for super block sizes
-      static const int skip_intra_var_thresh[BLOCK_SIZES] = {
+      static const unsigned int skip_intra_var_thresh[BLOCK_SIZES] = {
         64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64,
       };
       if ((cpi->sf.mode_search_skip_flags & FLAG_SKIP_INTRA_LOWVAR) &&

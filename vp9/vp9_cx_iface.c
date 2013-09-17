@@ -589,7 +589,8 @@ static void pick_quickcompress_mode(vpx_codec_alg_priv_t  *ctx,
 
 static int write_superframe_index(vpx_codec_alg_priv_t *ctx) {
   uint8_t marker = 0xc0;
-  int mag, mask, index_sz;
+  unsigned int mask;
+  int mag, index_sz;
 
   assert(ctx->pending_frame_count);
   assert(ctx->pending_frame_count <= 8);
