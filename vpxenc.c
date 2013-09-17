@@ -883,10 +883,10 @@ static unsigned int murmur(const void *key, int len, unsigned int seed) {
   while (len >= 4) {
     unsigned int k;
 
-    k  = data[0];
-    k |= data[1] << 8;
-    k |= data[2] << 16;
-    k |= data[3] << 24;
+    k  = (unsigned int)data[0];
+    k |= (unsigned int)data[1] << 8;
+    k |= (unsigned int)data[2] << 16;
+    k |= (unsigned int)data[3] << 24;
 
     k *= m;
     k ^= k >> r;
@@ -2671,8 +2671,8 @@ int main(int argc, const char **argv_) {
           fprintf(stderr, "%7"PRId64" %s %.2f %s ",
                   cx_time > 9999999 ? cx_time / 1000 : cx_time,
                   cx_time > 9999999 ? "ms" : "us",
-                  fps >= 1.0 ? fps : 1000.0 / fps,
-                  fps >= 1.0 ? "fps" : "ms/f");
+                  fps >= 1.0 ? fps : fps * 60,
+                  fps >= 1.0 ? "fps" : "fpm");
           print_time("ETA", estimated_time_left);
           fprintf(stderr, "\033[K");
         }

@@ -392,8 +392,7 @@ typedef struct VP9_COMP {
   int rd_thresh_freq_fact[BLOCK_SIZES][MAX_MODES];
 
   int64_t rd_comp_pred_diff[NB_PREDICTION_TYPES];
-  // FIXME(rbultje) int64_t?
-  int rd_prediction_type_threshes[4][NB_PREDICTION_TYPES];
+  int64_t rd_prediction_type_threshes[4][NB_PREDICTION_TYPES];
   unsigned int intra_inter_count[INTRA_INTER_CONTEXTS][2];
   unsigned int comp_inter_count[COMP_INTER_CONTEXTS][2];
   unsigned int single_ref_count[REF_CONTEXTS][2][2];

@@ -105,7 +105,7 @@ void Ebml_SerializeUnsigned(EbmlGlobal *glob, unsigned long class_id, unsigned l
 void Ebml_SerializeBinary(EbmlGlobal *glob, unsigned long class_id, unsigned long bin) {
   int size;
   for (size = 4; size > 1; size--) {
-    if (bin & 0x000000ff << ((size - 1) * 8))
+    if (bin & (unsigned int)0x000000ff << ((size - 1) * 8))
       break;
   }
   Ebml_WriteID(glob, class_id);

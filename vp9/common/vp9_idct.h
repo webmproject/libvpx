@@ -25,7 +25,7 @@
 #define WHT_UPSCALE_FACTOR 2
 
 #define pair_set_epi16(a, b) \
-  _mm_set1_epi32(((uint16_t)(a)) + (((uint16_t)(b)) << 16))
+  _mm_set_epi16(b, a, b, a, b, a, b, a)
 
 #define pair_set_epi32(a, b) \
   _mm_set_epi32(b, a, b, a)

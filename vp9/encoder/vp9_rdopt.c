@@ -269,7 +269,7 @@ void vp9_initialize_rd_consts(VP9_COMP *cpi, int qindex) {
         cpi->mb.inter_mode_cost[i][m - NEARESTMV] =
             cost_token(vp9_inter_mode_tree,
                        cpi->common.fc.inter_mode_probs[i],
-                       vp9_inter_mode_encodings - NEARESTMV + m);
+                       vp9_inter_mode_encodings + (m - NEARESTMV));
     }
   }
 }
@@ -1683,17 +1683,17 @@ static void rd_check_segment_txsize(VP9_COMP *cpi, MACROBLOCK *x,
       i = idy * 2 + idx;
 
       frame_mv[ZEROMV][mbmi->ref_frame[0]].as_int = 0;
-      frame_mv[ZEROMV][mbmi->ref_frame[1]].as_int = 0;
       vp9_append_sub8x8_mvs_for_idx(&cpi->common, &x->e_mbd,
                                     &frame_mv[NEARESTMV][mbmi->ref_frame[0]],
                                     &frame_mv[NEARMV][mbmi->ref_frame[0]],
                                     i, 0, mi_row, mi_col);
-      if (has_second_rf)
+      if (has_second_rf) {
+        frame_mv[ZEROMV][mbmi->ref_frame[1]].as_int = 0;
         vp9_append_sub8x8_mvs_for_idx(&cpi->common, &x->e_mbd,
-                                   &frame_mv[NEARESTMV][mbmi->ref_frame[1]],
-                                   &frame_mv[NEARMV][mbmi->ref_frame[1]],
-                                   i, 1, mi_row, mi_col);
-
+                                      &frame_mv[NEARESTMV][mbmi->ref_frame[1]],
+                                      &frame_mv[NEARMV][mbmi->ref_frame[1]],
+                                      i, 1, mi_row, mi_col);
+      }
       // search for the best motion vector on this segment
       for (this_mode = NEARESTMV; this_mode <= NEWMV; ++this_mode) {
         const struct buf_2d orig_src = x->plane[0].src;
@@ -3262,8 +3262,8 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
       continue;
 
     // Test best rd so far against threshold for trying this mode.
-    if ((best_rd < ((cpi->rd_threshes[bsize][mode_index] *
-                     cpi->rd_thresh_freq_fact[bsize][mode_index]) >> 5)) ||
+    if ((best_rd < ((int64_t)cpi->rd_threshes[bsize][mode_index] *
+                     cpi->rd_thresh_freq_fact[bsize][mode_index] >> 5)) ||
         cpi->rd_threshes[bsize][mode_index] == INT_MAX)
       continue;
 

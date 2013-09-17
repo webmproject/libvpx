@@ -435,7 +435,8 @@ static void update_state(VP9_COMP *cpi, PICK_MODE_CONTEXT *ctx,
       best_second_mv.as_int = ctx->second_best_ref_mv.as_int;
       if (mbmi->mode == NEWMV) {
         best_mv.as_int = mbmi->ref_mvs[rf1][0].as_int;
-        best_second_mv.as_int = mbmi->ref_mvs[rf2][0].as_int;
+        if (rf2 > 0)
+          best_second_mv.as_int = mbmi->ref_mvs[rf2][0].as_int;
       }
       mbmi->best_mv.as_int = best_mv.as_int;
       mbmi->best_second_mv.as_int = best_second_mv.as_int;
@@ -2627,7 +2628,6 @@ void vp9_encode_frame(VP9_COMP *cpi) {
   } else {
     encode_frame_internal(cpi);
   }
-
 }
 
 static void sum_intra_stats(VP9_COMP *cpi, const MODE_INFO *mi) {

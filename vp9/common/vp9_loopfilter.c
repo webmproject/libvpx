@@ -316,13 +316,13 @@ void vp9_loop_filter_frame_init(VP9_COMMON *cm, int default_filt_lvl) {
       continue;
     }
 
-    intra_lvl = lvl_seg + (lf->ref_deltas[INTRA_FRAME] << n_shift);
+    intra_lvl = lvl_seg + lf->ref_deltas[INTRA_FRAME] * (1 << n_shift);
     lfi->lvl[seg_id][INTRA_FRAME][0] = clamp(intra_lvl, 0, MAX_LOOP_FILTER);
 
     for (ref = LAST_FRAME; ref < MAX_REF_FRAMES; ++ref)
       for (mode = 0; mode < MAX_MODE_LF_DELTAS; ++mode) {
-        const int inter_lvl = lvl_seg + (lf->ref_deltas[ref] << n_shift)
-                                      + (lf->mode_deltas[mode] << n_shift);
+        const int inter_lvl = lvl_seg + lf->ref_deltas[ref] * (1 << n_shift)
+                                      + lf->mode_deltas[mode] * (1 << n_shift);
         lfi->lvl[seg_id][ref][mode] = clamp(inter_lvl, 0, MAX_LOOP_FILTER);
       }
   }

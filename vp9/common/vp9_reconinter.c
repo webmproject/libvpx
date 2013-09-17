@@ -59,8 +59,8 @@ void vp9_build_inter_predictor(const uint8_t *src, int src_stride,
                                const struct subpix_fn_table *subpix,
                                enum mv_precision precision) {
   const int is_q4 = precision == MV_PRECISION_Q4;
-  const MV mv_q4 = { is_q4 ? src_mv->row : src_mv->row << 1,
-                     is_q4 ? src_mv->col : src_mv->col << 1 };
+  const MV mv_q4 = { is_q4 ? src_mv->row : src_mv->row * 2,
+                     is_q4 ? src_mv->col : src_mv->col * 2 };
   const MV32 mv = scale->scale_mv(&mv_q4, scale);
   const int subpel_x = mv.col & SUBPEL_MASK;
   const int subpel_y = mv.row & SUBPEL_MASK;
@@ -100,16 +100,17 @@ MV clamp_mv_to_umv_border_sb(const MACROBLOCKD *xd, const MV *src_mv,
   const int spel_top = (VP9_INTERP_EXTEND + bh) << SUBPEL_BITS;
   const int spel_bottom = spel_top - SUBPEL_SHIFTS;
   MV clamped_mv = {
-    src_mv->row << (1 - ss_y),
-    src_mv->col << (1 - ss_x)
+    src_mv->row * (1 << (1 - ss_y)),
+    src_mv->col * (1 << (1 - ss_x))
   };
   assert(ss_x <= 1);
   assert(ss_y <= 1);
 
-  clamp_mv(&clamped_mv, (xd->mb_to_left_edge << (1 - ss_x)) - spel_left,
-                        (xd->mb_to_right_edge << (1 - ss_x)) + spel_right,
-                        (xd->mb_to_top_edge << (1 - ss_y)) - spel_top,
-                        (xd->mb_to_bottom_edge << (1 - ss_y)) + spel_bottom);
+  clamp_mv(&clamped_mv,
+           xd->mb_to_left_edge * (1 << (1 - ss_x)) - spel_left,
+           xd->mb_to_right_edge * (1 << (1 - ss_x)) + spel_right,
+           xd->mb_to_top_edge * (1 << (1 - ss_y)) - spel_top,
+           xd->mb_to_bottom_edge * (1 << (1 - ss_y)) + spel_bottom);
 
   return clamped_mv;
 }

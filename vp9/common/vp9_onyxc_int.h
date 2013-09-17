@@ -280,10 +280,10 @@ static int check_bsize_coverage(int bs, int mi_rows, int mi_cols,
 static void set_mi_row_col(VP9_COMMON *cm, MACROBLOCKD *xd,
                        int mi_row, int bh,
                        int mi_col, int bw) {
-  xd->mb_to_top_edge    = -((mi_row * MI_SIZE) << 3);
-  xd->mb_to_bottom_edge = ((cm->mi_rows - bh - mi_row) * MI_SIZE) << 3;
-  xd->mb_to_left_edge   = -((mi_col * MI_SIZE) << 3);
-  xd->mb_to_right_edge  = ((cm->mi_cols - bw - mi_col) * MI_SIZE) << 3;
+  xd->mb_to_top_edge    = -((mi_row * MI_SIZE) * 8);
+  xd->mb_to_bottom_edge = ((cm->mi_rows - bh - mi_row) * MI_SIZE) * 8;
+  xd->mb_to_left_edge   = -((mi_col * MI_SIZE) * 8);
+  xd->mb_to_right_edge  = ((cm->mi_cols - bw - mi_col) * MI_SIZE) * 8;
 
   // Are edges available for intra prediction?
   xd->up_available    = (mi_row != 0);

@@ -58,10 +58,10 @@ void vp9_short_fdct4x4_c(int16_t *input, int16_t *output, int pitch) {
     for (i = 0; i < 4; ++i) {
       // Load inputs.
       if (0 == pass) {
-        input[0] = in[0 * stride] << 4;
-        input[1] = in[1 * stride] << 4;
-        input[2] = in[2 * stride] << 4;
-        input[3] = in[3 * stride] << 4;
+        input[0] = in[0 * stride] * 16;
+        input[1] = in[1 * stride] * 16;
+        input[2] = in[2 * stride] * 16;
+        input[3] = in[3 * stride] * 16;
         if (i == 0 && input[0]) {
           input[0] += 1;
         }
@@ -160,7 +160,7 @@ void vp9_short_fht4x4_c(int16_t *input, int16_t *output,
   // Columns
   for (i = 0; i < 4; ++i) {
     for (j = 0; j < 4; ++j)
-      temp_in[j] = input[j * pitch + i] << 4;
+      temp_in[j] = input[j * pitch + i] * 16;
     if (i == 0 && temp_in[0])
       temp_in[0] += 1;
     ht.cols(temp_in, temp_out);
@@ -250,14 +250,14 @@ void vp9_short_fdct8x8_c(int16_t *input, int16_t *final_output, int pitch) {
     int i;
     for (i = 0; i < 8; i++) {
       // stage 1
-      s0 = (input[0 * stride] + input[7 * stride]) << 2;
-      s1 = (input[1 * stride] + input[6 * stride]) << 2;
-      s2 = (input[2 * stride] + input[5 * stride]) << 2;
-      s3 = (input[3 * stride] + input[4 * stride]) << 2;
-      s4 = (input[3 * stride] - input[4 * stride]) << 2;
-      s5 = (input[2 * stride] - input[5 * stride]) << 2;
-      s6 = (input[1 * stride] - input[6 * stride]) << 2;
-      s7 = (input[0 * stride] - input[7 * stride]) << 2;
+      s0 = (input[0 * stride] + input[7 * stride]) * 4;
+      s1 = (input[1 * stride] + input[6 * stride]) * 4;
+      s2 = (input[2 * stride] + input[5 * stride]) * 4;
+      s3 = (input[3 * stride] + input[4 * stride]) * 4;
+      s4 = (input[3 * stride] - input[4 * stride]) * 4;
+      s5 = (input[2 * stride] - input[5 * stride]) * 4;
+      s6 = (input[1 * stride] - input[6 * stride]) * 4;
+      s7 = (input[0 * stride] - input[7 * stride]) * 4;
 
       // fdct4_1d(step, step);
       x0 = s0 + s3;
@@ -331,23 +331,23 @@ void vp9_short_fdct16x16_c(int16_t *input, int16_t *output, int pitch) {
     for (i = 0; i < 16; i++) {
       if (0 == pass) {
         // Calculate input for the first 8 results.
-        input[0] = (in[0 * stride] + in[15 * stride]) << 2;
-        input[1] = (in[1 * stride] + in[14 * stride]) << 2;
-        input[2] = (in[2 * stride] + in[13 * stride]) << 2;
-        input[3] = (in[3 * stride] + in[12 * stride]) << 2;
-        input[4] = (in[4 * stride] + in[11 * stride]) << 2;
-        input[5] = (in[5 * stride] + in[10 * stride]) << 2;
-        input[6] = (in[6 * stride] + in[ 9 * stride]) << 2;
-        input[7] = (in[7 * stride] + in[ 8 * stride]) << 2;
+        input[0] = (in[0 * stride] + in[15 * stride]) * 4;
+        input[1] = (in[1 * stride] + in[14 * stride]) * 4;
+        input[2] = (in[2 * stride] + in[13 * stride]) * 4;
+        input[3] = (in[3 * stride] + in[12 * stride]) * 4;
+        input[4] = (in[4 * stride] + in[11 * stride]) * 4;
+        input[5] = (in[5 * stride] + in[10 * stride]) * 4;
+        input[6] = (in[6 * stride] + in[ 9 * stride]) * 4;
+        input[7] = (in[7 * stride] + in[ 8 * stride]) * 4;
         // Calculate input for the next 8 results.
-        step1[0] = (in[7 * stride] - in[ 8 * stride]) << 2;
-        step1[1] = (in[6 * stride] - in[ 9 * stride]) << 2;
-        step1[2] = (in[5 * stride] - in[10 * stride]) << 2;
-        step1[3] = (in[4 * stride] - in[11 * stride]) << 2;
-        step1[4] = (in[3 * stride] - in[12 * stride]) << 2;
-        step1[5] = (in[2 * stride] - in[13 * stride]) << 2;
-        step1[6] = (in[1 * stride] - in[14 * stride]) << 2;
-        step1[7] = (in[0 * stride] - in[15 * stride]) << 2;
+        step1[0] = (in[7 * stride] - in[ 8 * stride]) * 4;
+        step1[1] = (in[6 * stride] - in[ 9 * stride]) * 4;
+        step1[2] = (in[5 * stride] - in[10 * stride]) * 4;
+        step1[3] = (in[4 * stride] - in[11 * stride]) * 4;
+        step1[4] = (in[3 * stride] - in[12 * stride]) * 4;
+        step1[5] = (in[2 * stride] - in[13 * stride]) * 4;
+        step1[6] = (in[1 * stride] - in[14 * stride]) * 4;
+        step1[7] = (in[0 * stride] - in[15 * stride]) * 4;
       } else {
         // Calculate input for the first 8 results.
         input[0] = ((in[0 * 16] + 1) >> 2) + ((in[15 * 16] + 1) >> 2);
@@ -575,7 +575,7 @@ void vp9_short_fht8x8_c(int16_t *input, int16_t *output,
   // Columns
   for (i = 0; i < 8; ++i) {
     for (j = 0; j < 8; ++j)
-      temp_in[j] = input[j * pitch + i] << 2;
+      temp_in[j] = input[j * pitch + i] * 4;
     ht.cols(temp_in, temp_out);
     for (j = 0; j < 8; ++j)
       outptr[j * 8 + i] = temp_out[j];
@@ -975,7 +975,7 @@ void vp9_short_fht16x16_c(int16_t *input, int16_t *output,
   // Columns
   for (i = 0; i < 16; ++i) {
     for (j = 0; j < 16; ++j)
-      temp_in[j] = input[j * pitch + i] << 2;
+      temp_in[j] = input[j * pitch + i] * 4;
     ht.cols(temp_in, temp_out);
     for (j = 0; j < 16; ++j)
       outptr[j * 16 + i] = (temp_out[j] + 1 + (temp_out[j] < 0)) >> 2;
@@ -1335,7 +1335,7 @@ void vp9_short_fdct32x32_c(int16_t *input, int16_t *out, int pitch) {
   for (i = 0; i < 32; ++i) {
     int temp_in[32], temp_out[32];
     for (j = 0; j < 32; ++j)
-      temp_in[j] = input[j * shortpitch + i] << 2;
+      temp_in[j] = input[j * shortpitch + i] * 4;
     dct32_1d(temp_in, temp_out, 0);
     for (j = 0; j < 32; ++j)
       output[j * 32 + i] = (temp_out[j] + 1 + (temp_out[j] > 0)) >> 2;
@@ -1364,7 +1364,7 @@ void vp9_short_fdct32x32_rd_c(int16_t *input, int16_t *out, int pitch) {
   for (i = 0; i < 32; ++i) {
     int temp_in[32], temp_out[32];
     for (j = 0; j < 32; ++j)
-      temp_in[j] = input[j * shortpitch + i] << 2;
+      temp_in[j] = input[j * shortpitch + i] * 4;
     dct32_1d(temp_in, temp_out, 0);
     for (j = 0; j < 32; ++j)
       // TODO(cd): see quality impact of only doing

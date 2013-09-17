@@ -660,8 +660,8 @@ void vp9_first_pass(VP9_COMP *cpi) {
             neutral_count++;
           }
 
-          mv.as_mv.row <<= 3;
-          mv.as_mv.col <<= 3;
+          mv.as_mv.row *= 8;
+          mv.as_mv.col *= 8;
           this_error = motion_error;
           vp9_set_mbmode_and_mvs(x, NEWMV, &mv);
           xd->this_mi->mbmi.tx_size = TX_4X4;
