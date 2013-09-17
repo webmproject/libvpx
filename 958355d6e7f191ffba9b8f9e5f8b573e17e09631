@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdH//+Ko\u003d",
+        "filename": "test/resize_test.cc",
+        "patchSetId": 8
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-09-17T01:40:50Z",
+      "side": 1,
+      "message": "static_cast\u003cunsigned int\u003e(size)",
+      "revId": "958355d6e7f191ffba9b8f9e5f8b573e17e09631",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdH//+Kk\u003d",
+        "filename": "test/resize_test.cc",
+        "patchSetId": 8
+      },
+      "lineNbr": 73,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-09-17T01:40:50Z",
+      "side": 1,
+      "message": "static_cast\u003cunsigned int\u003e(pkt-\u003edata.frame.sz)",
+      "revId": "958355d6e7f191ffba9b8f9e5f8b573e17e09631",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdH//+Js\u003d",
+        "filename": "test/resize_test.cc",
+        "patchSetId": 8
+      },
+      "lineNbr": 174,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-09-17T01:40:50Z",
+      "side": 1,
+      "message": "needs a virtual dtor",
+      "revId": "958355d6e7f191ffba9b8f9e5f8b573e17e09631",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
