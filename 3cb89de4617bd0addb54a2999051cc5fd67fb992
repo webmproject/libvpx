@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdH//+BI\u003d",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-09-18T18:18:18Z",
+      "side": 1,
+      "message": "Functions",
+      "revId": "3cb89de4617bd0addb54a2999051cc5fd67fb992",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdH//+BA\u003d",
+        "filename": "third_party/x86inc/x86inc.asm",
+        "patchSetId": 1
+      },
+      "lineNbr": 114,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2013-09-18T18:18:18Z",
+      "side": 1,
+      "message": "If this code isn\u0027t needed, probably better to delete than comment out. \n\nBut it does seem to do some stuff like \u0027%define PIC\u0027 that the x86_abi_support doesn\u0027t do. Not sure about \u0027default rel\u0027 off hand.  Is that the only use of ifdef PIC in the original code?\n\nDid you check the windows 64 bit case, or the mac 64 bit case?",
+      "revId": "3cb89de4617bd0addb54a2999051cc5fd67fb992",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
