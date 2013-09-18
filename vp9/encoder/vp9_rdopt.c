@@ -2501,7 +2501,7 @@ static void joint_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
     for (i = 0; i < MAX_MB_PLANE; i++)
       backup_second_yv12[i] = xd->plane[i].pre[1];
 
-    setup_pre_planes(xd, 0, scaled_ref_frame[1], mi_row, mi_col, NULL);
+    setup_pre_planes(xd, 1, scaled_ref_frame[1], mi_row, mi_col, NULL);
   }
 
   xd->scale_factor[0].set_scaled_offsets(&xd->scale_factor[0],
