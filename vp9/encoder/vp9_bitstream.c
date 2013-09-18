@@ -283,7 +283,7 @@ static void pack_mb_tokens(vp9_writer* const bc,
                            const TOKENEXTRA *const stop) {
   TOKENEXTRA *p = *tp;
 
-  while (p < stop) {
+  while (p < stop && p->token != EOSB_TOKEN) {
     const int t = p->token;
     const struct vp9_token *const a = vp9_coef_encodings + t;
     const vp9_extra_bit *const b = vp9_extra_bits + t;
@@ -293,10 +293,6 @@ static void pack_mb_tokens(vp9_writer* const bc,
     int n = a->len;
     vp9_prob probs[ENTROPY_NODES];
 
-    if (t == EOSB_TOKEN) {
-      ++p;
-      break;
-    }
     if (t >= TWO_TOKEN) {
       vp9_model_to_full_probs(p->context_tree, probs);
       pp = probs;
@@ -338,7 +334,7 @@ static void pack_mb_tokens(vp9_writer* const bc,
     ++p;
   }
 
-  *tp = p;
+  *tp = p + (p->token == EOSB_TOKEN);
 }
 
 static void write_sb_mv_ref(vp9_writer *w, MB_PREDICTION_MODE mode,
