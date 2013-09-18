@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdH//9/I\u003d",
+        "filename": "vp9/common/x86/vp9_intrapred_ssse3.asm",
+        "patchSetId": 1
+      },
+      "lineNbr": 359,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2013-09-18T21:11:47Z",
+      "side": 1,
+      "message": "looks like this sequence pavgb+pxor+pand+[pshufb]+psubb+pavgb+pavgb could be some MACRO, since it\u0027s used a lot",
+      "revId": "743a6f810dc0ed981e3c3dfdb8b8acffab610dd4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
