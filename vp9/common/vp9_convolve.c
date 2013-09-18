@@ -35,7 +35,7 @@ static void convolve_horiz_c(const uint8_t *src, ptrdiff_t src_stride,
 
   for (y = 0; y < h; ++y) {
     /* Initial phase offset */
-    int x_q4 = (filter_x0 - filter_x_base) / taps;
+    int x_q4 = (int)(filter_x0 - filter_x_base) / taps;
 
     for (x = 0; x < w; ++x) {
       /* Per-pixel src offset */
@@ -76,7 +76,7 @@ static void convolve_avg_horiz_c(const uint8_t *src, ptrdiff_t src_stride,
 
   for (y = 0; y < h; ++y) {
     /* Initial phase offset */
-    int x_q4 = (filter_x0 - filter_x_base) / taps;
+    int x_q4 = (int)(filter_x0 - filter_x_base) / taps;
 
     for (x = 0; x < w; ++x) {
       /* Per-pixel src offset */
@@ -118,7 +118,7 @@ static void convolve_vert_c(const uint8_t *src, ptrdiff_t src_stride,
 
   for (x = 0; x < w; ++x) {
     /* Initial phase offset */
-    int y_q4 = (filter_y0 - filter_y_base) / taps;
+    int y_q4 = (int)(filter_y0 - filter_y_base) / taps;
 
     for (y = 0; y < h; ++y) {
       /* Per-pixel src offset */
@@ -160,7 +160,7 @@ static void convolve_avg_vert_c(const uint8_t *src, ptrdiff_t src_stride,
 
   for (x = 0; x < w; ++x) {
     /* Initial phase offset */
-    int y_q4 = (filter_y0 - filter_y_base) / taps;
+    int y_q4 = (int)(filter_y0 - filter_y_base) / taps;
 
     for (y = 0; y < h; ++y) {
       /* Per-pixel src offset */
