@@ -16,6 +16,24 @@
       "revId": "98cf0145b133a0a0a153b23773436422573cc809",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdH//+Bs\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1553,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2013-09-18T16:55:36Z",
+      "side": 1,
+      "message": "I think this is correct. \n\nThis loop computes the rate-distortion cost per 4x4 block inside a 4x8/8x4/4x4 partition. The index i points the location of the given 4x8/8x4/4x4 partition, and index k indicates each 4x4 block inside.",
+      "parentUuid": "AAAAdH//+Co\u003d",
+      "revId": "98cf0145b133a0a0a153b23773436422573cc809",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
