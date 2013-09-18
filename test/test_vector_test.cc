@@ -160,6 +160,7 @@ const char *kVP9TestVectors[] = {
   "vp90-2-03-size-226x202.webm", "vp90-2-03-size-226x208.webm",
   "vp90-2-03-size-226x210.webm", "vp90-2-03-size-226x224.webm",
   "vp90-2-03-size-226x226.webm", "vp90-2-03-deltaq.webm",
+  "vp90-2-05-resize.ivf",
 #if CONFIG_NON420
   "vp91-2-04-yv444.webm"
 #endif
