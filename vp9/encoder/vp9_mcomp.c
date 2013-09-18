@@ -333,11 +333,9 @@ int vp9_find_best_sub_pixel_iterative(MACROBLOCK *x,
   unsigned int eighthiters = iters_per_step;
   int thismse;
 
-  uint8_t *y = xd->plane[0].pre[0].buf +
-               (bestmv->as_mv.row) * xd->plane[0].pre[0].stride +
-               bestmv->as_mv.col;
-
   const int y_stride = xd->plane[0].pre[0].stride;
+  const int offset = (bestmv->as_mv.row) * y_stride + bestmv->as_mv.col;
+  uint8_t *y = xd->plane[0].pre[0].buf + offset;
 
   int rr = ref_mv->as_mv.row;
   int rc = ref_mv->as_mv.col;
@@ -351,8 +349,6 @@ int vp9_find_best_sub_pixel_iterative(MACROBLOCK *x,
 
   int tr = br;
   int tc = bc;
-
-  const int offset = (bestmv->as_mv.row) * y_stride + bestmv->as_mv.col;
 
   // central mv
   bestmv->as_mv.row <<= 3;
@@ -424,45 +420,32 @@ int vp9_find_best_sub_pixel_tree(MACROBLOCK *x,
                                  int *distortion,
                                  unsigned int *sse1) {
   uint8_t *z = x->plane[0].src.buf;
-  int src_stride = x->plane[0].src.stride;
+  const int src_stride = x->plane[0].src.stride;
   MACROBLOCKD *xd = &x->e_mbd;
-  int rr, rc, br, bc, hstep;
-  int tr, tc;
   unsigned int besterr = INT_MAX;
   unsigned int sse;
   unsigned int whichdir;
   int thismse;
-  int maxc, minc, maxr, minr;
-  int y_stride;
-  int offset;
   unsigned int halfiters = iters_per_step;
   unsigned int quarteriters = iters_per_step;
   unsigned int eighthiters = iters_per_step;
 
-  uint8_t *y = xd->plane[0].pre[0].buf +
-               (bestmv->as_mv.row) * xd->plane[0].pre[0].stride +
-               bestmv->as_mv.col;
+  const int y_stride = xd->plane[0].pre[0].stride;
+  const int offset = bestmv->as_mv.row * y_stride + bestmv->as_mv.col;
+  uint8_t *y = xd->plane[0].pre[0].buf + offset;
 
-  y_stride = xd->plane[0].pre[0].stride;
+  int rr = ref_mv->as_mv.row;
+  int rc = ref_mv->as_mv.col;
+  int br = bestmv->as_mv.row << 3;
+  int bc = bestmv->as_mv.col << 3;
+  int hstep = 4;
+  const int minc = MAX(x->mv_col_min << 3, ref_mv->as_mv.col - MV_MAX);
+  const int maxc = MIN(x->mv_col_max << 3, ref_mv->as_mv.col + MV_MAX);
+  const int minr = MAX(x->mv_row_min << 3, ref_mv->as_mv.row - MV_MAX);
+  const int maxr = MIN(x->mv_row_max << 3, ref_mv->as_mv.row + MV_MAX);
 
-  rr = ref_mv->as_mv.row;
-  rc = ref_mv->as_mv.col;
-  br = bestmv->as_mv.row << 3;
-  bc = bestmv->as_mv.col << 3;
-  hstep = 4;
-  minc = MAX(x->mv_col_min << 3,
-             (ref_mv->as_mv.col) - ((1 << MV_MAX_BITS) - 1));
-  maxc = MIN(x->mv_col_max << 3,
-             (ref_mv->as_mv.col) + ((1 << MV_MAX_BITS) - 1));
-  minr = MAX(x->mv_row_min << 3,
-             (ref_mv->as_mv.row) - ((1 << MV_MAX_BITS) - 1));
-  maxr = MIN(x->mv_row_max << 3,
-             (ref_mv->as_mv.row) + ((1 << MV_MAX_BITS) - 1));
-
-  tr = br;
-  tc = bc;
-
-  offset = (bestmv->as_mv.row) * y_stride + bestmv->as_mv.col;
+  int tr = br;
+  int tc = bc;
 
   // central mv
   bestmv->as_mv.row <<= 3;
@@ -543,11 +526,9 @@ int vp9_find_best_sub_pixel_comp_iterative(MACROBLOCK *x,
   int thismse;
 
   DECLARE_ALIGNED_ARRAY(16, uint8_t, comp_pred, 64 * 64);
-  uint8_t *const y = xd->plane[0].pre[0].buf +
-               (bestmv->as_mv.row) * xd->plane[0].pre[0].stride +
-               bestmv->as_mv.col;
-
   const int y_stride = xd->plane[0].pre[0].stride;
+  const int offset = bestmv->as_mv.row * y_stride + bestmv->as_mv.col;
+  uint8_t *const y = xd->plane[0].pre[0].buf + offset;
 
   int rr = ref_mv->as_mv.row;
   int rc = ref_mv->as_mv.col;
@@ -561,8 +542,6 @@ int vp9_find_best_sub_pixel_comp_iterative(MACROBLOCK *x,
 
   int tr = br;
   int tc = bc;
-
-  const int offset = (bestmv->as_mv.row) * y_stride + bestmv->as_mv.col;
 
   // central mv
   bestmv->as_mv.row <<= 3;
@@ -638,47 +617,33 @@ int vp9_find_best_sub_pixel_comp_tree(MACROBLOCK *x,
                                       const uint8_t *second_pred,
                                       int w, int h) {
   uint8_t *z = x->plane[0].src.buf;
-  int src_stride = x->plane[0].src.stride;
+  const int src_stride = x->plane[0].src.stride;
   MACROBLOCKD *xd = &x->e_mbd;
-  int rr, rc, br, bc, hstep;
-  int tr, tc;
   unsigned int besterr = INT_MAX;
   unsigned int sse;
   unsigned int whichdir;
   int thismse;
-  int maxc, minc, maxr, minr;
-  int y_stride;
-  int offset;
   unsigned int halfiters = iters_per_step;
   unsigned int quarteriters = iters_per_step;
   unsigned int eighthiters = iters_per_step;
 
   DECLARE_ALIGNED_ARRAY(16, uint8_t, comp_pred, 64 * 64);
-  uint8_t *y = xd->plane[0].pre[0].buf +
-               (bestmv->as_mv.row) * xd->plane[0].pre[0].stride +
-               bestmv->as_mv.col;
+  const int y_stride = xd->plane[0].pre[0].stride;
+  const int offset = (bestmv->as_mv.row) * y_stride + bestmv->as_mv.col;
+  uint8_t *y = xd->plane[0].pre[0].buf + offset;
 
-  y_stride = xd->plane[0].pre[0].stride;
+  int rr = ref_mv->as_mv.row;
+  int rc = ref_mv->as_mv.col;
+  int br = bestmv->as_mv.row << 3;
+  int bc = bestmv->as_mv.col << 3;
+  int hstep = 4;
+  const int minc = MAX(x->mv_col_min << 3, ref_mv->as_mv.col - MV_MAX);
+  const int maxc = MIN(x->mv_col_max << 3, ref_mv->as_mv.col + MV_MAX);
+  const int minr = MAX(x->mv_row_min << 3, ref_mv->as_mv.row - MV_MAX);
+  const int maxr = MIN(x->mv_row_max << 3, ref_mv->as_mv.row + MV_MAX);
 
-  rr = ref_mv->as_mv.row;
-  rc = ref_mv->as_mv.col;
-  br = bestmv->as_mv.row << 3;
-  bc = bestmv->as_mv.col << 3;
-  hstep = 4;
-  minc = MAX(x->mv_col_min << 3, (ref_mv->as_mv.col) -
-             ((1 << MV_MAX_BITS) - 1));
-  maxc = MIN(x->mv_col_max << 3, (ref_mv->as_mv.col) +
-             ((1 << MV_MAX_BITS) - 1));
-  minr = MAX(x->mv_row_min << 3, (ref_mv->as_mv.row) -
-             ((1 << MV_MAX_BITS) - 1));
-  maxr = MIN(x->mv_row_max << 3, (ref_mv->as_mv.row) +
-             ((1 << MV_MAX_BITS) - 1));
-
-  tr = br;
-  tc = bc;
-
-
-  offset = (bestmv->as_mv.row) * y_stride + bestmv->as_mv.col;
+  int tr = br;
+  int tc = bc;
 
   // central mv
   bestmv->as_mv.row <<= 3;
