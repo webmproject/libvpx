@@ -703,7 +703,6 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
   sf->adaptive_motion_search = 0;
   sf->use_avoid_tested_higherror = 0;
   sf->reference_masking = 0;
-  sf->partition_by_variance = 0;
   sf->use_one_partition_size_always = 0;
   sf->less_rectangular_check = 0;
   sf->use_square_partition_only = 0;
@@ -826,8 +825,12 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
         sf->mode_skip_start = 6;
       }
       if (speed == 3) {
+        sf->less_rectangular_check  = 1;
+        sf->use_square_partition_only = 1;
         sf->comp_inter_joint_search_thresh = BLOCK_SIZES;
-        sf->partition_by_variance = 1;
+        sf->use_lastframe_partitioning = 1;
+        sf->adjust_partitioning_from_last_frame = 1;
+        sf->last_partitioning_redo_frequency = 3;
         sf->tx_size_search_method = ((cpi->common.frame_type == KEY_FRAME ||
                                       cpi->common.intra_only ||
                                       cpi->common.show_frame == 0) ?
@@ -839,17 +842,23 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
                                      FLAG_SKIP_COMP_REFMISMATCH |
                                      FLAG_SKIP_INTRA_LOWVAR |
                                      FLAG_EARLY_TERMINATE;
+        sf->intra_y_mode_mask = INTRA_DC_ONLY;
+        sf->intra_uv_mode_mask = INTRA_DC_ONLY;
+        sf->use_uv_intra_rd_estimate = 1;
         sf->use_rd_breakout = 1;
         sf->skip_encode_sb = 1;
         sf->use_lp32x32fdct = 1;
+        sf->adaptive_motion_search = 1;
+        sf->using_small_partition_info = 0;
         sf->disable_splitmv = 1;
         sf->auto_mv_step_size = 1;
         sf->search_method = BIGDIA;
         sf->subpel_iters_per_step = 1;
+        sf->use_fast_lpf_pick = 1;
+        sf->auto_min_max_partition_size = 1;
+        sf->auto_min_max_partition_interval = 2;
         sf->disable_split_var_thresh = 64;
         sf->disable_filter_search_var_thresh = 64;
-        sf->intra_y_mode_mask = INTRA_DC_ONLY;
-        sf->intra_uv_mode_mask = INTRA_DC_ONLY;
         sf->use_fast_coef_updates = 2;
         sf->mode_skip_start = 6;
       }

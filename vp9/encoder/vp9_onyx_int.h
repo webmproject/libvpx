@@ -250,7 +250,6 @@ typedef struct {
   TX_SIZE_SEARCH_METHOD tx_size_search_method;
   int use_lp32x32fdct;
   int use_avoid_tested_higherror;
-  int partition_by_variance;
   int use_one_partition_size_always;
   int less_rectangular_check;
   int use_square_partition_only;
