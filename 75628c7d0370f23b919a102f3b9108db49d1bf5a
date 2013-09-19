@@ -1,0 +1,89 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdH//98M\u003d",
+        "filename": "test/resize_test.cc",
+        "patchSetId": 9
+      },
+      "lineNbr": 150,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2013-09-19T15:58:55Z",
+      "side": 1,
+      "message": "I\u0027m not sure this belongs in the unit test.",
+      "revId": "75628c7d0370f23b919a102f3b9108db49d1bf5a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdH//98I\u003d",
+        "filename": "test/resize_test.cc",
+        "patchSetId": 9
+      },
+      "lineNbr": 293,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2013-09-19T15:58:55Z",
+      "side": 1,
+      "message": "nice..",
+      "revId": "75628c7d0370f23b919a102f3b9108db49d1bf5a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdH//98Y\u003d",
+        "filename": "vp9/vp9_cx_iface.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 1017,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2013-09-19T15:58:55Z",
+      "side": 1,
+      "message": "why do we need to make a copy?  instead of *scalemode \u003d (vpx_scaling_mode_t *)",
+      "revId": "75628c7d0370f23b919a102f3b9108db49d1bf5a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdH//98U\u003d",
+        "filename": "vp9/vp9_cx_iface.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 1038,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2013-09-19T15:58:55Z",
+      "side": 1,
+      "message": "why do we need a copy instead of just using pointer?",
+      "revId": "75628c7d0370f23b919a102f3b9108db49d1bf5a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdH//98Q\u003d",
+        "filename": "vpx/vp8cx.h",
+        "patchSetId": 9
+      },
+      "lineNbr": 259,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2013-09-19T15:58:55Z",
+      "side": 1,
+      "message": "Missing doxygen comments about what this does..",
+      "revId": "75628c7d0370f23b919a102f3b9108db49d1bf5a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
