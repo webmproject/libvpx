@@ -47,7 +47,7 @@ sub FixThumbInstructions($$)
     # this is used, it's used for two subsequent load instructions,
     # where a hand-written version of it could merge two subsequent
     # add and sub instructions.
-    s/^(\s*)((ldr|str)(ne)?)(\s+)(r\d+),\s*\[(\w+), -([^\]]+)\]/$1sub$4$5$7, $7, $8\n$1$2$5$6, [$7]\n$1add$4$5$7, $7, $8/g;
+    s/^(\s*)((ldr|str|pld)(ne)?)(\s+)(r\d+,)?\s*\[(\w+), -([^\]]+)\]/$1sub$4$5$7, $7, $8\n$1$2$5$6\[$7\]\n$1add$4$5$7, $7, $8/g;
 
     # Convert register post indexing to a separate add instruction.
     # This converts "ldrneb r9, [r0], r2" into "ldrneb r9, [r0]",
