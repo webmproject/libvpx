@@ -16,6 +16,24 @@
       "revId": "0551c3bcf3007939256c5c677b278ef47e82f2d1",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdH//96s\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1138,
+      "author": {
+        "id": 1003307
+      },
+      "writtenOn": "2013-09-19T21:56:30Z",
+      "side": 1,
+      "message": "I tried that but it gave much worse results at low bitrates with stdhd (which is where most of the gains are).",
+      "parentUuid": "AAAAdH//960\u003d",
+      "revId": "0551c3bcf3007939256c5c677b278ef47e82f2d1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
