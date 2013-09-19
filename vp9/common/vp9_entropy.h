@@ -336,37 +336,26 @@ static INLINE const int16_t* get_iscan_16x16(TX_TYPE tx_type) {
   }
 }
 
-static int get_entropy_context(const MACROBLOCKD *xd, TX_SIZE tx_size,
-                               PLANE_TYPE type, int block_idx,
-                               ENTROPY_CONTEXT *A, ENTROPY_CONTEXT *L,
-                               const int16_t **scan,
-                               const uint8_t **band_translate) {
+static int get_entropy_context(TX_SIZE tx_size,
+                               ENTROPY_CONTEXT *a, ENTROPY_CONTEXT *l) {
   ENTROPY_CONTEXT above_ec = 0, left_ec = 0;
 
   switch (tx_size) {
     case TX_4X4:
-      *scan = get_scan_4x4(get_tx_type_4x4(type, xd, block_idx));
-      *band_translate = vp9_coefband_trans_4x4;
-      above_ec = A[0] != 0;
-      left_ec = L[0] != 0;
+      above_ec = a[0] != 0;
+      left_ec = l[0] != 0;
       break;
     case TX_8X8:
-      *scan = get_scan_8x8(get_tx_type_8x8(type, xd));
-      *band_translate = vp9_coefband_trans_8x8plus;
-      above_ec = !!*(uint16_t *)A;
-      left_ec  = !!*(uint16_t *)L;
+      above_ec = !!*(uint16_t *)a;
+      left_ec  = !!*(uint16_t *)l;
       break;
     case TX_16X16:
-      *scan = get_scan_16x16(get_tx_type_16x16(type, xd));
-      *band_translate = vp9_coefband_trans_8x8plus;
-      above_ec = !!*(uint32_t *)A;
-      left_ec  = !!*(uint32_t *)L;
+      above_ec = !!*(uint32_t *)a;
+      left_ec  = !!*(uint32_t *)l;
       break;
     case TX_32X32:
-      *scan = vp9_default_scan_32x32;
-      *band_translate = vp9_coefband_trans_8x8plus;
-      above_ec = !!*(uint64_t *)A;
-      left_ec  = !!*(uint64_t *)L;
+      above_ec = !!*(uint64_t *)a;
+      left_ec  = !!*(uint64_t *)l;
       break;
     default:
       assert(!"Invalid transform size.");
@@ -374,6 +363,33 @@ static int get_entropy_context(const MACROBLOCKD *xd, TX_SIZE tx_size,
 
   return combine_entropy_contexts(above_ec, left_ec);
 }
+
+static void get_scan_and_band(const MACROBLOCKD *xd, TX_SIZE tx_size,
+                              PLANE_TYPE type, int block_idx,
+                              const int16_t **scan,
+                              const uint8_t **band_translate) {
+  switch (tx_size) {
+    case TX_4X4:
+      *scan = get_scan_4x4(get_tx_type_4x4(type, xd, block_idx));
+      *band_translate = vp9_coefband_trans_4x4;
+      break;
+    case TX_8X8:
+      *scan = get_scan_8x8(get_tx_type_8x8(type, xd));
+      *band_translate = vp9_coefband_trans_8x8plus;
+      break;
+    case TX_16X16:
+      *scan = get_scan_16x16(get_tx_type_16x16(type, xd));
+      *band_translate = vp9_coefband_trans_8x8plus;
+      break;
+    case TX_32X32:
+      *scan = vp9_default_scan_32x32;
+      *band_translate = vp9_coefband_trans_8x8plus;
+      break;
+    default:
+      assert(!"Invalid transform size.");
+  }
+}
+
 
 enum { VP9_COEF_UPDATE_PROB = 252 };
 

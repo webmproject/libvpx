@@ -129,18 +129,15 @@ static void tokenize_b(int plane, int block, BLOCK_SIZE plane_bsize,
   const int ref = is_inter_block(mbmi);
   uint8_t token_cache[1024];
   const uint8_t *band_translate;
-  ENTROPY_CONTEXT *A, *L;
   const int seg_eob = get_tx_eob(&cpi->common.seg, segment_id, tx_size);
   int aoff, loff;
   txfrm_block_to_raster_xy(plane_bsize, tx_size, block, &aoff, &loff);
 
-  A = pd->above_context + aoff;
-  L = pd->left_context + loff;
-
   assert((!type && !plane) || (type && plane));
 
-  pt = get_entropy_context(xd, tx_size, type, block, A, L,
-                           &scan, &band_translate);
+  pt = get_entropy_context(tx_size, pd->above_context + aoff,
+                                    pd->left_context + loff);
+  get_scan_and_band(xd, tx_size, type, block, &scan, &band_translate);
   nb = vp9_get_coef_neighbors_handle(scan);
   c = 0;
   do {

@@ -161,7 +161,7 @@ static void optimize_b(MACROBLOCK *mb,
   int best, band, pt;
   PLANE_TYPE type = pd->plane_type;
   int err_mult = plane_rd_mult[type];
-  int default_eob;
+  const int default_eob = 16 << (tx_size << 1);
   const int16_t *scan, *nb;
   const int mul = 1 + (tx_size == TX_32X32);
   uint8_t token_cache[1024];
@@ -172,29 +172,7 @@ static void optimize_b(MACROBLOCK *mb,
   assert((!type && !plane) || (type && plane));
   dqcoeff_ptr = BLOCK_OFFSET(pd->dqcoeff, block);
   qcoeff_ptr = BLOCK_OFFSET(pd->qcoeff, block);
-  switch (tx_size) {
-    default:
-    case TX_4X4:
-      default_eob = 16;
-      scan = get_scan_4x4(get_tx_type_4x4(type, xd, ib));
-      band_translate = vp9_coefband_trans_4x4;
-      break;
-    case TX_8X8:
-      scan = get_scan_8x8(get_tx_type_8x8(type, xd));
-      default_eob = 64;
-      band_translate = vp9_coefband_trans_8x8plus;
-      break;
-    case TX_16X16:
-      scan = get_scan_16x16(get_tx_type_16x16(type, xd));
-      default_eob = 256;
-      band_translate = vp9_coefband_trans_8x8plus;
-      break;
-    case TX_32X32:
-      scan = vp9_default_scan_32x32;
-      default_eob = 1024;
-      band_translate = vp9_coefband_trans_8x8plus;
-      break;
-  }
+  get_scan_and_band(xd, tx_size, type, ib, &scan, &band_translate);
   assert(eob <= default_eob);
 
   /* Now set up a Viterbi trellis to evaluate alternative roundings. */

@@ -105,8 +105,8 @@ static int decode_coefs(VP9_COMMON *cm, const MACROBLOCKD *xd,
   const int16_t *scan, *nb;
   const uint8_t *band_translate;
   uint8_t token_cache[1024];
-  int pt = get_entropy_context(xd, tx_size, type, block_idx, A, L,
-                               &scan, &band_translate);
+  int pt = get_entropy_context(tx_size, A, L);
+  get_scan_and_band(xd, tx_size, type, block_idx, &scan, &band_translate);
   nb = vp9_get_coef_neighbors_handle(scan);
 
   while (1) {
