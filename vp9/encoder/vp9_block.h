@@ -34,6 +34,7 @@ typedef struct {
 typedef struct {
   MODE_INFO mic;
   PARTITION_INFO partition_info;
+  unsigned char zcoeff_blk[256];
   int skip;
   int_mv best_ref_mv;
   int_mv second_best_ref_mv;
@@ -136,6 +137,7 @@ struct macroblock {
   int mv_row_min;
   int mv_row_max;
 
+  unsigned char zcoeff_blk[TX_SIZES][256];
   int skip;
 
   int encode_breakout;

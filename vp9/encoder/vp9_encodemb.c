@@ -482,6 +482,14 @@ static void encode_block(int plane, int block, BLOCK_SIZE plane_bsize,
   int16_t *const dqcoeff = BLOCK_OFFSET(pd->dqcoeff, block);
   uint8_t *const dst = raster_block_offset_uint8(plane_bsize, raster_block,
                                                  pd->dst.buf, pd->dst.stride);
+
+  // TODO(jingning): per transformed block zero forcing only enabled for
+  // luma component. will integrate chroma components as well.
+  if (x->zcoeff_blk[tx_size][block] && plane == 0) {
+    pd->eobs[block] = 0;
+    return;
+  }
+
   vp9_xform_quant(plane, block, plane_bsize, tx_size, arg);
 
   if (x->optimize)
