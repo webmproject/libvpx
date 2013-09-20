@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdH//95s\u003d",
+        "filename": "vp9/common/vp9_blockd.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 160,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2013-09-20T13:21:47Z",
+      "side": 1,
+      "message": "Actually, I was thinking about adding this function but eventually decided to have just \"is_inter_block\" and its negation. Could you delay the addition of this function for now? I just want to estimate how many times it would be used to improve code readability, i.e. my suggestion is to convert all code to use existing \"is_inter_block\" and think after.",
+      "revId": "b3cb4621167abf49b92d54595c6a2b98ef1e177b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
