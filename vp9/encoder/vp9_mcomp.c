@@ -136,66 +136,26 @@ void vp9_init_dsmotion_compensation(MACROBLOCK *x, int stride) {
 }
 
 void vp9_init3smotion_compensation(MACROBLOCK *x, int stride) {
-  int len;
-  int search_site_count = 0;
+  int len, ss_count = 1;
 
-  // Generate offsets for 8 search sites per step.
-  x->ss[search_site_count].mv.col = 0;
-  x->ss[search_site_count].mv.row = 0;
-  x->ss[search_site_count].offset = 0;
-  search_site_count++;
+  x->ss[0].mv.col = x->ss[0].mv.row = 0;
+  x->ss[0].offset = 0;
 
   for (len = MAX_FIRST_STEP; len > 0; len /= 2) {
-    // Compute offsets for search sites.
-    x->ss[search_site_count].mv.col = 0;
-    x->ss[search_site_count].mv.row = -len;
-    x->ss[search_site_count].offset = -len * stride;
-    search_site_count++;
-
-    // Compute offsets for search sites.
-    x->ss[search_site_count].mv.col = 0;
-    x->ss[search_site_count].mv.row = len;
-    x->ss[search_site_count].offset = len * stride;
-    search_site_count++;
-
-    // Compute offsets for search sites.
-    x->ss[search_site_count].mv.col = -len;
-    x->ss[search_site_count].mv.row = 0;
-    x->ss[search_site_count].offset = -len;
-    search_site_count++;
-
-    // Compute offsets for search sites.
-    x->ss[search_site_count].mv.col = len;
-    x->ss[search_site_count].mv.row = 0;
-    x->ss[search_site_count].offset = len;
-    search_site_count++;
-
-    // Compute offsets for search sites.
-    x->ss[search_site_count].mv.col = -len;
-    x->ss[search_site_count].mv.row = -len;
-    x->ss[search_site_count].offset = -len * stride - len;
-    search_site_count++;
-
-    // Compute offsets for search sites.
-    x->ss[search_site_count].mv.col = len;
-    x->ss[search_site_count].mv.row = -len;
-    x->ss[search_site_count].offset = -len * stride + len;
-    search_site_count++;
-
-    // Compute offsets for search sites.
-    x->ss[search_site_count].mv.col = -len;
-    x->ss[search_site_count].mv.row = len;
-    x->ss[search_site_count].offset = len * stride - len;
-    search_site_count++;
-
-    // Compute offsets for search sites.
-    x->ss[search_site_count].mv.col = len;
-    x->ss[search_site_count].mv.row = len;
-    x->ss[search_site_count].offset = len * stride + len;
-    search_site_count++;
+    // Generate offsets for 8 search sites per step.
+    const MV ss_mvs[8] = {
+      { 0,   -len}, {0,    len}, {-len,  0  }, {len,  0  },
+      {-len, -len}, {len, -len}, {-len,  len}, {len,  len}
+    };
+    int i;
+    for (i = 0; i < 8; ++i) {
+      search_site *const ss = &x->ss[ss_count++];
+      ss->mv = ss_mvs[i];
+      ss->offset = ss->mv.row * stride + ss->mv.col;
+    }
   }
 
-  x->ss_count = search_site_count;
+  x->ss_count = ss_count;
   x->searches_per_step = 8;
 }
 
