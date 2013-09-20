@@ -137,7 +137,7 @@ typedef struct {
   TX_SIZE tx_size;
   int_mv mv[2];                // for each reference frame used
   int_mv ref_mvs[MAX_REF_FRAMES][MAX_MV_REF_CANDIDATES];
-  int_mv best_mv, best_second_mv;
+  int_mv best_mv[2];
 
   uint8_t mode_context[MAX_REF_FRAMES];
 

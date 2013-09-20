@@ -438,8 +438,8 @@ static void update_state(VP9_COMP *cpi, PICK_MODE_CONTEXT *ctx,
         if (rf2 > 0)
           best_second_mv.as_int = mbmi->ref_mvs[rf2][0].as_int;
       }
-      mbmi->best_mv.as_int = best_mv.as_int;
-      mbmi->best_second_mv.as_int = best_second_mv.as_int;
+      mbmi->best_mv[0].as_int = best_mv.as_int;
+      mbmi->best_mv[1].as_int = best_second_mv.as_int;
       vp9_update_nmv_count(cpi, x, &best_mv, &best_second_mv);
     }
 
