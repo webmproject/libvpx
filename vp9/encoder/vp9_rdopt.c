@@ -554,9 +554,13 @@ struct rdcost_block_args {
   TX_SIZE tx_size;
   int bw;
   int bh;
-  int rate;
-  int64_t dist;
-  int64_t sse;
+  int rate[256];
+  int64_t dist[256];
+  int64_t sse[256];
+  int this_rate;
+  int64_t this_dist;
+  int64_t this_sse;
+  int64_t this_rd;
   int64_t best_rd;
   int skip;
   const int16_t *scan, *nb;
@@ -573,17 +577,17 @@ static void dist_block(int plane, int block, TX_SIZE tx_size, void *arg) {
   int shift = args->tx_size == TX_32X32 ? 0 : 2;
   int16_t *const coeff = BLOCK_OFFSET(p->coeff, block);
   int16_t *const dqcoeff = BLOCK_OFFSET(pd->dqcoeff, block);
-  args->dist += vp9_block_error(coeff, dqcoeff, 16 << ss_txfrm_size,
+  args->dist[block] = vp9_block_error(coeff, dqcoeff, 16 << ss_txfrm_size,
                                 &this_sse) >> shift;
-  args->sse += this_sse >> shift;
+  args->sse[block]  = this_sse >> shift;
 
   if (x->skip_encode &&
       xd->this_mi->mbmi.ref_frame[0] == INTRA_FRAME) {
     // TODO(jingning): tune the model to better capture the distortion.
     int64_t p = (pd->dequant[1] * pd->dequant[1] *
                     (1 << ss_txfrm_size)) >> shift;
-    args->dist += p;
-    args->sse  += p;
+    args->dist[block] = p;
+    args->sse[block]  = p;
   }
 }
 
@@ -594,10 +598,10 @@ static void rate_block(int plane, int block, BLOCK_SIZE plane_bsize,
   int x_idx, y_idx;
   txfrm_block_to_raster_xy(plane_bsize, args->tx_size, block, &x_idx, &y_idx);
 
-  args->rate += cost_coeffs(args->x, plane, block,
-                            args->t_above + x_idx,
-                            args->t_left + y_idx, args->tx_size,
-                            args->scan, args->nb);
+  args->rate[block] = cost_coeffs(args->x, plane, block,
+                                  args->t_above + x_idx,
+                                  args->t_left + y_idx, args->tx_size,
+                                  args->scan, args->nb);
 }
 
 static void block_yrd_txfm(int plane, int block, BLOCK_SIZE plane_bsize,
@@ -610,16 +614,6 @@ static void block_yrd_txfm(int plane, int block, BLOCK_SIZE plane_bsize,
 
   if (args->skip)
     return;
-  rd1 = RDCOST(x->rdmult, x->rddiv, args->rate, args->dist);
-  rd2 = RDCOST(x->rdmult, x->rddiv, 0, args->sse);
-  rd = MIN(rd1, rd2);
-  if (rd > args->best_rd) {
-    args->skip = 1;
-    args->rate = INT_MAX;
-    args->dist = INT64_MAX;
-    args->sse  = INT64_MAX;
-    return;
-  }
 
   if (!is_inter_block(&xd->this_mi->mbmi))
     vp9_encode_block_intra(plane, block, plane_bsize, tx_size, &encode_args);
@@ -628,6 +622,18 @@ static void block_yrd_txfm(int plane, int block, BLOCK_SIZE plane_bsize,
 
   dist_block(plane, block, tx_size, args);
   rate_block(plane, block, plane_bsize, tx_size, args);
+  rd1 = RDCOST(x->rdmult, x->rddiv, args->rate[block], args->dist[block]);
+  rd2 = RDCOST(x->rdmult, x->rddiv, 0, args->sse[block]);
+  rd = MIN(rd1, rd2);
+  args->this_rate += args->rate[block];
+  args->this_dist += args->dist[block];
+  args->this_sse  += args->sse[block];
+  args->this_rd += rd;
+
+  if (args->this_rd > args->best_rd) {
+    args->skip = 1;
+    return;
+  }
 }
 
 static void txfm_rd_in_plane(MACROBLOCK *x,
@@ -643,7 +649,8 @@ static void txfm_rd_in_plane(MACROBLOCK *x,
   int i;
   struct rdcost_block_args args = { x, { 0 }, { 0 }, tx_size,
                                     num_4x4_blocks_wide, num_4x4_blocks_high,
-                                    0, 0, 0, ref_best_rd, 0 };
+                                    { 0 }, { 0 }, { 0 },
+                                    0, 0, 0, 0, ref_best_rd, 0 };
   if (plane == 0)
     xd->this_mi->mbmi.tx_size = tx_size;
 
@@ -685,10 +692,17 @@ static void txfm_rd_in_plane(MACROBLOCK *x,
   }
 
   foreach_transformed_block_in_plane(xd, bsize, plane, block_yrd_txfm, &args);
-  *distortion = args.dist;
-  *rate       = args.rate;
-  *sse        = args.sse;
-  *skippable  = vp9_is_skippable_in_plane(xd, bsize, plane) && (!args.skip);
+  if (args.skip) {
+    *rate       = INT_MAX;
+    *distortion = INT64_MAX;
+    *sse        = INT64_MAX;
+    *skippable  = 0;
+  } else {
+    *distortion = args.this_dist;
+    *rate       = args.this_rate;
+    *sse        = args.this_sse;
+    *skippable  = vp9_is_skippable_in_plane(xd, bsize, plane);
+  }
 }
 
 static void choose_largest_txfm_size(VP9_COMP *cpi, MACROBLOCK *x,
