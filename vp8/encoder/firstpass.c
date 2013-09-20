@@ -909,7 +909,10 @@ extern const int vp8_bits_per_mb[2][QINDEX_RANGE];
 
 static double bitcost( double prob )
 {
-    return -(log( prob ) / log( 2.0 ));
+  if (prob > 0.000122)
+    return -log(prob) / log(2.0);
+  else
+    return 13.0;
 }
 static int64_t estimate_modemvcost(VP8_COMP *cpi,
                                      FIRSTPASS_STATS * fpstats)
