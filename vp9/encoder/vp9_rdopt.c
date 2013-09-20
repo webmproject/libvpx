@@ -1458,11 +1458,12 @@ static int labels2mode(MACROBLOCK *x, int i,
   switch (m = this_mode) {
     case NEWMV:
       this_mv->as_int = seg_mvs[mbmi->ref_frame[0]].as_int;
-      thismvcost  = vp9_mv_bit_cost(this_mv, best_ref_mv, mvjcost, mvcost,
-                                    102);
+      thismvcost  = vp9_mv_bit_cost(&this_mv->as_mv, &best_ref_mv->as_mv,
+                                    mvjcost, mvcost, 102);
       if (has_second_rf) {
         this_second_mv->as_int = seg_mvs[mbmi->ref_frame[1]].as_int;
-        thismvcost += vp9_mv_bit_cost(this_second_mv, second_best_ref_mv,
+        thismvcost += vp9_mv_bit_cost(&this_second_mv->as_mv,
+                                      &second_best_ref_mv->as_mv,
                                       mvjcost, mvcost, 102);
       }
       break;
@@ -2442,9 +2443,8 @@ static void single_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
                                  x->nmvjointcost, x->mvcost,
                                  &dis, &sse);
   }
-  *rate_mv = vp9_mv_bit_cost(tmp_mv, &ref_mv,
-                             x->nmvjointcost, x->mvcost,
-                             96);
+  *rate_mv = vp9_mv_bit_cost(&tmp_mv->as_mv, &ref_mv.as_mv,
+                             x->nmvjointcost, x->mvcost, 96);
 
   if (cpi->sf.adaptive_motion_search && cpi->common.show_frame)
     x->pred_mv[ref].as_int = tmp_mv->as_int;
@@ -2603,11 +2603,11 @@ static void joint_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
     for (i = 0; i < MAX_MB_PLANE; i++)
       xd->plane[i].pre[1] = backup_second_yv12[i];
   }
-  *rate_mv  = vp9_mv_bit_cost(&frame_mv[refs[0]],
-                              &mbmi->ref_mvs[refs[0]][0],
+  *rate_mv  = vp9_mv_bit_cost(&frame_mv[refs[0]].as_mv,
+                              &mbmi->ref_mvs[refs[0]][0].as_mv,
                               x->nmvjointcost, x->mvcost, 96);
-  *rate_mv += vp9_mv_bit_cost(&frame_mv[refs[1]],
-                              &mbmi->ref_mvs[refs[1]][0],
+  *rate_mv += vp9_mv_bit_cost(&frame_mv[refs[1]].as_mv,
+                              &mbmi->ref_mvs[refs[1]][0].as_mv,
                               x->nmvjointcost, x->mvcost, 96);
 
   vpx_free(second_pred);
@@ -2659,11 +2659,11 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
         joint_motion_search(cpi, x, bsize, frame_mv,
                             mi_row, mi_col, single_newmv, &rate_mv);
       } else {
-        rate_mv  = vp9_mv_bit_cost(&frame_mv[refs[0]],
-                                   &mbmi->ref_mvs[refs[0]][0],
+        rate_mv  = vp9_mv_bit_cost(&frame_mv[refs[0]].as_mv,
+                                   &mbmi->ref_mvs[refs[0]][0].as_mv,
                                    x->nmvjointcost, x->mvcost, 96);
-        rate_mv += vp9_mv_bit_cost(&frame_mv[refs[1]],
-                                   &mbmi->ref_mvs[refs[1]][0],
+        rate_mv += vp9_mv_bit_cost(&frame_mv[refs[1]].as_mv,
+                                   &mbmi->ref_mvs[refs[1]][0].as_mv,
                                    x->nmvjointcost, x->mvcost, 96);
       }
       if (frame_mv[refs[0]].as_int == INVALID_MV ||
