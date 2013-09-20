@@ -110,8 +110,8 @@ static int read_mvcomponent(vp8_reader *r, const MV_CONTEXT *mvc)
 
 static void read_mv(vp8_reader *r, MV *mv, const MV_CONTEXT *mvc)
 {
-    mv->row = (short)(read_mvcomponent(r,   mvc) << 1);
-    mv->col = (short)(read_mvcomponent(r, ++mvc) << 1);
+    mv->row = (short)(read_mvcomponent(r,   mvc) * 2);
+    mv->col = (short)(read_mvcomponent(r, ++mvc) * 2);
 }
 
 
@@ -292,9 +292,9 @@ static void decode_split_mv(vp8_reader *const bc, MODE_INFO *mi,
                 blockmv.as_int = 0;
                 if( vp8_read(bc, prob[2]) )
                 {
-                    blockmv.as_mv.row = read_mvcomponent(bc, &mvc[0]) << 1;
+                    blockmv.as_mv.row = read_mvcomponent(bc, &mvc[0]) * 2;
                     blockmv.as_mv.row += best_mv.as_mv.row;
-                    blockmv.as_mv.col = read_mvcomponent(bc, &mvc[1]) << 1;
+                    blockmv.as_mv.col = read_mvcomponent(bc, &mvc[1]) * 2;
                     blockmv.as_mv.col += best_mv.as_mv.col;
                 }
             }

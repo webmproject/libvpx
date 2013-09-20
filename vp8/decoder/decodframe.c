@@ -576,7 +576,7 @@ static void decode_mb_rows(VP8D_COMP *pbi)
 
         xd->left_available = 0;
 
-        xd->mb_to_top_edge = -((mb_row * 16)) << 3;
+        xd->mb_to_top_edge = -((mb_row * 16) << 3);
         xd->mb_to_bottom_edge = ((pc->mb_rows - 1 - mb_row) * 16) << 3;
 
         xd->recon_above[0] = dst_buffer[0] + recon_yoffset;

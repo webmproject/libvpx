@@ -935,7 +935,7 @@ int vp8_cost_mv_ref(MB_PREDICTION_MODE m, const int near_mv_ref_ct[4])
     assert(NEARESTMV <= m  &&  m <= SPLITMV);
     vp8_mv_ref_probs(p, near_mv_ref_ct);
     return vp8_cost_token(vp8_mv_ref_tree, p,
-                          vp8_mv_ref_encoding_array - NEARESTMV + m);
+                          vp8_mv_ref_encoding_array + (m - NEARESTMV));
 }
 
 void vp8_set_mbmode_and_mvs(MACROBLOCK *x, MB_PREDICTION_MODE mb, int_mv *mv)

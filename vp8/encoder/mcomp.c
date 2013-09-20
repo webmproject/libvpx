@@ -210,7 +210,7 @@ int vp8_find_best_sub_pixel_step_iteratively(MACROBLOCK *x, BLOCK *b, BLOCKD *d,
     unsigned char *z = (*(b->base_src) + b->src);
 
     int rr = ref_mv->as_mv.row >> 1, rc = ref_mv->as_mv.col >> 1;
-    int br = bestmv->as_mv.row << 2, bc = bestmv->as_mv.col << 2;
+    int br = bestmv->as_mv.row * 4, bc = bestmv->as_mv.col * 4;
     int tr = br, tc = bc;
     unsigned int besterr;
     unsigned int left, right, up, down, diag;
@@ -220,10 +220,14 @@ int vp8_find_best_sub_pixel_step_iteratively(MACROBLOCK *x, BLOCK *b, BLOCKD *d,
     unsigned int quarteriters = 4;
     int thismse;
 
-    int minc = MAX(x->mv_col_min << 2, (ref_mv->as_mv.col >> 1) - ((1 << mvlong_width) - 1));
-    int maxc = MIN(x->mv_col_max << 2, (ref_mv->as_mv.col >> 1) + ((1 << mvlong_width) - 1));
-    int minr = MAX(x->mv_row_min << 2, (ref_mv->as_mv.row >> 1) - ((1 << mvlong_width) - 1));
-    int maxr = MIN(x->mv_row_max << 2, (ref_mv->as_mv.row >> 1) + ((1 << mvlong_width) - 1));
+    int minc = MAX(x->mv_col_min * 4,
+                   (ref_mv->as_mv.col >> 1) - ((1 << mvlong_width) - 1));
+    int maxc = MIN(x->mv_col_max * 4,
+                   (ref_mv->as_mv.col >> 1) + ((1 << mvlong_width) - 1));
+    int minr = MAX(x->mv_row_min * 4,
+                   (ref_mv->as_mv.row >> 1) - ((1 << mvlong_width) - 1));
+    int maxr = MIN(x->mv_row_max * 4,
+                   (ref_mv->as_mv.row >> 1) + ((1 << mvlong_width) - 1));
 
     int y_stride;
     int offset;
@@ -254,8 +258,8 @@ int vp8_find_best_sub_pixel_step_iteratively(MACROBLOCK *x, BLOCK *b, BLOCKD *d,
     offset = (bestmv->as_mv.row) * y_stride + bestmv->as_mv.col;
 
     /* central mv */
-    bestmv->as_mv.row <<= 3;
-    bestmv->as_mv.col <<= 3;
+    bestmv->as_mv.row *= 8;
+    bestmv->as_mv.col *= 8;
 
     /* calculate central point error */
     besterr = vfp->vf(y, y_stride, z, b->src_stride, sse1);
@@ -337,8 +341,8 @@ int vp8_find_best_sub_pixel_step_iteratively(MACROBLOCK *x, BLOCK *b, BLOCKD *d,
         tc = bc;
     }
 
-    bestmv->as_mv.row = br << 1;
-    bestmv->as_mv.col = bc << 1;
+    bestmv->as_mv.row = br * 2;
+    bestmv->as_mv.col = bc * 2;
 
     if ((abs(bestmv->as_mv.col - ref_mv->as_mv.col) > (MAX_FULL_PEL_VAL<<3)) ||
         (abs(bestmv->as_mv.row - ref_mv->as_mv.row) > (MAX_FULL_PEL_VAL<<3)))
@@ -699,8 +703,8 @@ int vp8_find_best_half_pixel_step(MACROBLOCK *x, BLOCK *b, BLOCKD *d,
 #endif
 
     /* central mv */
-    bestmv->as_mv.row <<= 3;
-    bestmv->as_mv.col <<= 3;
+    bestmv->as_mv.row *= 8;
+    bestmv->as_mv.col *= 8;
     startmv = *bestmv;
 
     /* calculate central point error */
@@ -1315,8 +1319,8 @@ int vp8_diamond_search_sadx4
             (*num00)++;
     }
 
-    this_mv.as_mv.row = best_mv->as_mv.row << 3;
-    this_mv.as_mv.col = best_mv->as_mv.col << 3;
+    this_mv.as_mv.row = best_mv->as_mv.row * 8;
+    this_mv.as_mv.col = best_mv->as_mv.col * 8;
 
     return fn_ptr->vf(what, what_stride, best_address, in_what_stride, &thissad)
            + mv_err_cost(&this_mv, center_mv, mvcost, x->errorperbit);
@@ -1709,8 +1713,8 @@ int vp8_full_search_sadx8(MACROBLOCK *x, BLOCK *b, BLOCKD *d, int_mv *ref_mv,
         }
     }
 
-    this_mv.as_mv.row = best_mv->as_mv.row << 3;
-    this_mv.as_mv.col = best_mv->as_mv.col << 3;
+    this_mv.as_mv.row = best_mv->as_mv.row * 8;
+    this_mv.as_mv.col = best_mv->as_mv.col * 8;
 
     return fn_ptr->vf(what, what_stride, bestaddress, in_what_stride, &thissad)
            + mv_err_cost(&this_mv, center_mv, mvcost, x->errorperbit);
@@ -1905,8 +1909,8 @@ int vp8_refining_search_sadx4(MACROBLOCK *x, BLOCK *b, BLOCKD *d,
         }
     }
 
-    this_mv.as_mv.row = ref_mv->as_mv.row << 3;
-    this_mv.as_mv.col = ref_mv->as_mv.col << 3;
+    this_mv.as_mv.row = ref_mv->as_mv.row * 8;
+    this_mv.as_mv.col = ref_mv->as_mv.col * 8;
 
     return fn_ptr->vf(what, what_stride, best_address, in_what_stride, &thissad)
            + mv_err_cost(&this_mv, center_mv, mvcost, x->errorperbit);
