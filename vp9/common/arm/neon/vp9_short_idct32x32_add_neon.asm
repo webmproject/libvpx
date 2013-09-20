@@ -259,7 +259,7 @@ idct32_transpose_pair_loop
     ; transpose pair loop processing
     add r3, r3, #1
     cmp r3, #1
-    BLE idct32_transpose_pair_loop
+    ble idct32_transpose_pair_loop
 
     ; restore r0/input to its original value
     sub r0, r0, #32*8*2
@@ -954,7 +954,7 @@ idct32_transpose_pair_loop
     ; bands loop processing
     add r4, r4, #1
     cmp r4, #3
-    BLE idct32_bands_loop
+    ble idct32_bands_loop
 
     pop {r4}
     bx              lr
@@ -1005,7 +1005,7 @@ idct32_combine_add_loop
     ; loop processing
     add r3, r3, #1
     cmp r3, #31
-    BLE idct32_combine_add_loop
+    ble idct32_combine_add_loop
 
     bx              lr
     ENDP  ; |idct32_transpose|
