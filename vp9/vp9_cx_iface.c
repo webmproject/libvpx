@@ -277,11 +277,9 @@ static vpx_codec_err_t set_vp9e_config(VP9_CONFIG *oxcf,
   // CBR code has been deprectated for experimental phase.
   // CQ mode not yet tested
   oxcf->end_usage        = USAGE_LOCAL_FILE_PLAYBACK;
-  /*
   if (cfg.rc_end_usage == VPX_CQ)
     oxcf->end_usage      = USAGE_CONSTRAINED_QUALITY;
-    */
-  if (cfg.rc_end_usage == VPX_Q)
+  else if (cfg.rc_end_usage == VPX_Q)
     oxcf->end_usage      = USAGE_CONSTANT_QUALITY;
 
   oxcf->target_bandwidth        = cfg.rc_target_bitrate;

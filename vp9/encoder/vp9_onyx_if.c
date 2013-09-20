@@ -122,6 +122,8 @@ static int kf_high_motion_minq[QINDEX_RANGE];
 static int gf_low_motion_minq[QINDEX_RANGE];
 static int gf_high_motion_minq[QINDEX_RANGE];
 static int inter_minq[QINDEX_RANGE];
+static int afq_low_motion_minq[QINDEX_RANGE];
+static int afq_high_motion_minq[QINDEX_RANGE];
 
 static INLINE void Scale2Ratio(int mode, int *hr, int *hs) {
   switch (mode) {
@@ -205,7 +207,16 @@ static void init_minq_luts(void) {
                                          -0.00113,
                                          0.697,
                                          0.0);
-
+    afq_low_motion_minq[i] = calculate_minq_index(maxq,
+                                                  0.0000015,
+                                                  -0.0009,
+                                                  0.33,
+                                                  0.0);
+    afq_high_motion_minq[i] = calculate_minq_index(maxq,
+                                                   0.0000021,
+                                                   -0.00125,
+                                                   0.57,
+                                                   0.0);
   }
 }
 
@@ -2765,16 +2776,16 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
       } else {
         if (cpi->frames_since_key > 1) {
           if (cpi->gfu_boost > high) {
-            cpi->active_best_quality = cpi->cq_target_quality * 6 / 16;
+            cpi->active_best_quality = afq_low_motion_minq[q];
           } else if (cpi->gfu_boost < low) {
-            cpi->active_best_quality = cpi->cq_target_quality * 11 / 16;
+            cpi->active_best_quality = afq_high_motion_minq[q];
           } else {
             const int gap = high - low;
             const int offset = high - cpi->gfu_boost;
-            const int qdiff = cpi->cq_target_quality * 5 / 16;
+            const int qdiff = afq_high_motion_minq[q] - afq_low_motion_minq[q];
             const int adjustment = ((offset * qdiff) + (gap >> 1)) / gap;
-            cpi->active_best_quality = cpi->cq_target_quality * 6 / 16
-                + adjustment;
+
+            cpi->active_best_quality = afq_low_motion_minq[q] + adjustment;
           }
         }
       }
@@ -3262,7 +3273,7 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
   // in this frame.
   // update_base_skip_probs(cpi);
 
-#if CONFIG_INTERNAL_STATS
+#if 0  // CONFIG_INTERNAL_STATS
   {
     FILE *f = fopen("tmp.stt", cm->current_video_frame ? "a" : "w");
     int recon_err;
