@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdH//94Q\u003d",
+        "filename": "vp9/encoder/vp9_onyx_if.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 3276,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2013-09-20T23:27:08Z",
+      "side": 1,
+      "message": "revert the change here, other --enable-internal-stats will not work at configure.",
+      "revId": "52275dc2c0a0cdaaba823e88548e15a6bedb97db",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
