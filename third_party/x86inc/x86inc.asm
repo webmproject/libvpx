@@ -598,6 +598,10 @@ DECLARE_ARG 7, 8, 9, 10, 11, 12, 13, 14
         global %1:function hidden
     %elifidn __OUTPUT_FORMAT__,elf64
         global %1:function hidden
+    %elifidn __OUTPUT_FORMAT__,macho32
+        global %1:private_extern
+    %elifidn __OUTPUT_FORMAT__,macho64
+        global %1:private_extern
     %else
         global %1
     %endif
