@@ -16,6 +16,24 @@
       "revId": "24df77e95102980e5f303b3a64a955a6e8089028",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdH//924\u003d",
+        "filename": "vp8/common/reconinter.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 147,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2013-09-23T15:11:10Z",
+      "side": 0,
+      "message": "This caused a memory read of int at boundaries that are not 4-byte aligned. While this was not a real issue, but caused IOC error for clang build",
+      "parentUuid": "AAAAdH//93w\u003d",
+      "revId": "24df77e95102980e5f303b3a64a955a6e8089028",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
