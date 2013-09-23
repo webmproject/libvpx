@@ -144,8 +144,8 @@ void vp9_init3smotion_compensation(MACROBLOCK *x, int stride) {
   for (len = MAX_FIRST_STEP; len > 0; len /= 2) {
     // Generate offsets for 8 search sites per step.
     const MV ss_mvs[8] = {
-      { 0,   -len}, {0,    len}, {-len,  0  }, {len,  0  },
-      {-len, -len}, {len, -len}, {-len,  len}, {len,  len}
+      {-len,  0  }, {len,  0  }, { 0,   -len}, {0,    len},
+      {-len, -len}, {-len, len}, {len,  -len}, {len,  len}
     };
     int i;
     for (i = 0; i < 8; ++i) {
