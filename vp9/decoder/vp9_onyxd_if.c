@@ -277,7 +277,7 @@ static void swap_frame_buffers(VP9D_COMP *pbi) {
 }
 
 int vp9_receive_compressed_data(VP9D_PTR ptr,
-                                uint64_t size, const uint8_t **psource,
+                                size_t size, const uint8_t **psource,
                                 int64_t time_stamp) {
   VP9D_COMP *pbi = (VP9D_COMP *) ptr;
   VP9_COMMON *cm = &pbi->common;
