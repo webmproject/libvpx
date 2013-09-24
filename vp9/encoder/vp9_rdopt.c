@@ -2242,11 +2242,9 @@ static void store_coding_context(MACROBLOCK *x, PICK_MODE_CONTEXT *ctx,
   vpx_memcpy(ctx->zcoeff_blk, x->zcoeff_blk[xd->this_mi->mbmi.tx_size],
              sizeof(ctx->zcoeff_blk));
 
-  // FIXME(rbultje) does this memcpy the whole array? I believe sizeof()
-  // doesn't actually work this way
-  memcpy(ctx->tx_rd_diff, tx_size_diff, sizeof(ctx->tx_rd_diff));
-  memcpy(ctx->best_filter_diff, best_filter_diff,
-         sizeof(*best_filter_diff) * (SWITCHABLE_FILTERS + 1));
+  vpx_memcpy(ctx->tx_rd_diff, tx_size_diff, sizeof(ctx->tx_rd_diff));
+  vpx_memcpy(ctx->best_filter_diff, best_filter_diff,
+             sizeof(*best_filter_diff) * (SWITCHABLE_FILTERS + 1));
 }
 
 static void setup_pred_block(const MACROBLOCKD *xd,
