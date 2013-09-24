@@ -484,17 +484,13 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, MODE_INFO *m, vp9_writer *bc) {
     }
 
     if (bsize < BLOCK_8X8) {
-      int j;
-      MB_PREDICTION_MODE blockmode;
-      int_mv blockmv;
       const int num_4x4_blocks_wide = num_4x4_blocks_wide_lookup[bsize];
       const int num_4x4_blocks_high = num_4x4_blocks_high_lookup[bsize];
       int idx, idy;
       for (idy = 0; idy < 2; idy += num_4x4_blocks_high) {
         for (idx = 0; idx < 2; idx += num_4x4_blocks_wide) {
-          j = idy * 2 + idx;
-          blockmode = x->partition_info->bmi[j].mode;
-          blockmv = m->bmi[j].as_mv[0];
+          const int j = idy * 2 + idx;
+          const MB_PREDICTION_MODE blockmode = x->partition_info->bmi[j].mode;
           write_sb_mv_ref(bc, blockmode, mv_ref_p);
           ++cm->counts.inter_mode[mi->mode_context[rf]]
                                  [inter_mode_offset(blockmode)];
@@ -503,14 +499,12 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, MODE_INFO *m, vp9_writer *bc) {
 #ifdef ENTROPY_STATS
             active_section = 11;
 #endif
-            vp9_encode_mv(cpi, bc, &blockmv.as_mv, &mi->best_mv.as_mv,
-                          nmvc, allow_hp);
+            vp9_encode_mv(cpi, bc, &m->bmi[j].as_mv[0].as_mv,
+                          &mi->best_mv[0].as_mv, nmvc, allow_hp);
 
-            if (mi->ref_frame[1] > INTRA_FRAME)
-              vp9_encode_mv(cpi, bc,
-                            &m->bmi[j].as_mv[1].as_mv,
-                            &mi->best_second_mv.as_mv,
-                            nmvc, allow_hp);
+            if (has_second_ref(mi))
+              vp9_encode_mv(cpi, bc, &m->bmi[j].as_mv[1].as_mv,
+                            &mi->best_mv[1].as_mv, nmvc, allow_hp);
           }
         }
       }
@@ -518,12 +512,12 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, MODE_INFO *m, vp9_writer *bc) {
 #ifdef ENTROPY_STATS
       active_section = 5;
 #endif
-      vp9_encode_mv(cpi, bc, &mi->mv[0].as_mv, &mi->best_mv.as_mv,
-                    nmvc, allow_hp);
+      vp9_encode_mv(cpi, bc, &mi->mv[0].as_mv,
+                    &mi->best_mv[0].as_mv, nmvc, allow_hp);
 
-      if (mi->ref_frame[1] > INTRA_FRAME)
-        vp9_encode_mv(cpi, bc, &mi->mv[1].as_mv, &mi->best_second_mv.as_mv,
-                      nmvc, allow_hp);
+      if (has_second_ref(mi))
+        vp9_encode_mv(cpi, bc, &mi->mv[1].as_mv,
+                      &mi->best_mv[1].as_mv, nmvc, allow_hp);
     }
   }
 }
