@@ -54,7 +54,7 @@ void vp9_append_sub8x8_mvs_for_idx(VP9_COMMON *cm, MACROBLOCKD *xd,
 
   dst_list[1].as_int = 0;
   if (block_idx == 0) {
-    memcpy(dst_list, mv_list, MAX_MV_REF_CANDIDATES * sizeof(int_mv));
+    vpx_memcpy(dst_list, mv_list, MAX_MV_REF_CANDIDATES * sizeof(int_mv));
   } else if (block_idx == 1 || block_idx == 2) {
     int dst = 0, n;
     union b_mode_info *bmi = mi->bmi;

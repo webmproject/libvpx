@@ -282,7 +282,7 @@ void vp9_convolve_copy_c(const uint8_t *src, ptrdiff_t src_stride,
   int r;
 
   for (r = h; r > 0; --r) {
-    memcpy(dst, src, w);
+    vpx_memcpy(dst, src, w);
     src += src_stride;
     dst += dst_stride;
   }
