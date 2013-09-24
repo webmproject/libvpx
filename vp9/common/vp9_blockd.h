@@ -247,7 +247,7 @@ typedef struct macroblockd {
 
 } MACROBLOCKD;
 
-static INLINE unsigned char *get_sb_index(MACROBLOCKD *xd, BLOCK_SIZE subsize) {
+static INLINE uint8_t *get_sb_index(MACROBLOCKD *xd, BLOCK_SIZE subsize) {
   switch (subsize) {
     case BLOCK_64X64:
     case BLOCK_64X32:

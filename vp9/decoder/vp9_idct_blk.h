@@ -14,17 +14,16 @@
 
 #include "vp9/common/vp9_blockd.h"
 
+void vp9_idct_add_lossless_c(int16_t *input, uint8_t *dest,
+                             int stride, int eob);
 
-void vp9_idct_add_lossless_c(int16_t *input, unsigned char *dest, int stride,
-                             int eob);
-
-void vp9_iht_add_c(TX_TYPE tx_type, int16_t *input, unsigned char *dest,
+void vp9_iht_add_c(TX_TYPE tx_type, int16_t *input, uint8_t *dest,
                    int stride, int eob);
 
-void vp9_iht_add_8x8_c(TX_TYPE tx_type, int16_t *input, unsigned char *dest,
+void vp9_iht_add_8x8_c(TX_TYPE tx_type, int16_t *input, uint8_t *dest,
                        int stride, int eob);
 
-void vp9_iht_add_16x16_c(TX_TYPE tx_type, int16_t *input, unsigned char *dest,
+void vp9_iht_add_16x16_c(TX_TYPE tx_type, int16_t *input, uint8_t *dest,
                          int stride, int eob);
 
 #endif  // VP9_DECODER_VP9_IDCT_BLK_H_
