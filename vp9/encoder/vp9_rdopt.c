@@ -624,7 +624,12 @@ static void block_yrd_txfm(int plane, int block, BLOCK_SIZE plane_bsize,
   rate_block(plane, block, plane_bsize, tx_size, args);
   rd1 = RDCOST(x->rdmult, x->rddiv, args->rate[block], args->dist[block]);
   rd2 = RDCOST(x->rdmult, x->rddiv, 0, args->sse[block]);
+
+  // TODO(jingning): temporarily enabled only for luma component
   rd = MIN(rd1, rd2);
+  if (plane == 0)
+    x->zcoeff_blk[tx_size][block] = rd1 > rd2;
+
   args->this_rate += args->rate[block];
   args->this_dist += args->dist[block];
   args->this_sse  += args->sse[block];
@@ -2234,6 +2239,9 @@ static void store_coding_context(MACROBLOCK *x, PICK_MODE_CONTEXT *ctx,
   ctx->comp_pred_diff   = (int)comp_pred_diff[COMP_PREDICTION_ONLY];
   ctx->hybrid_pred_diff = (int)comp_pred_diff[HYBRID_PREDICTION];
 
+  vpx_memcpy(ctx->zcoeff_blk, x->zcoeff_blk[xd->this_mi->mbmi.tx_size],
+             sizeof(ctx->zcoeff_blk));
+
   // FIXME(rbultje) does this memcpy the whole array? I believe sizeof()
   // doesn't actually work this way
   memcpy(ctx->tx_rd_diff, tx_size_diff, sizeof(ctx->tx_rd_diff));
@@ -3153,8 +3161,11 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
   const int bws = num_8x8_blocks_wide_lookup[bsize] / 2;
   const int bhs = num_8x8_blocks_high_lookup[bsize] / 2;
   int best_skip2 = 0;
+  unsigned char best_zcoeff_blk[256] = { 0 };
 
   x->skip_encode = cpi->sf.skip_encode_frame && xd->q_index < QIDX_SKIP_THRESH;
+  vpx_memset(x->zcoeff_blk, 0, sizeof(x->zcoeff_blk));
+  vpx_memset(ctx->zcoeff_blk, 0, sizeof(ctx->zcoeff_blk));
 
   for (i = 0; i < 4; i++) {
     int j;
@@ -3826,6 +3837,8 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
         best_mbmode = *mbmi;
         best_skip2 = this_skip2;
         best_partition = *x->partition_info;
+        vpx_memcpy(best_zcoeff_blk, x->zcoeff_blk[mbmi->tx_size],
+                   sizeof(best_zcoeff_blk));
 
         if (this_mode == RD_I4X4_PRED || this_mode == RD_SPLITMV)
           for (i = 0; i < 4; i++)
@@ -4020,6 +4033,9 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
     mbmi->mv[0].as_int = xd->this_mi->bmi[3].as_mv[0].as_int;
     mbmi->mv[1].as_int = xd->this_mi->bmi[3].as_mv[1].as_int;
   }
+
+  vpx_memcpy(x->zcoeff_blk[mbmi->tx_size], best_zcoeff_blk,
+             sizeof(best_zcoeff_blk));
 
   for (i = 0; i < NB_PREDICTION_TYPES; ++i) {
     if (best_pred_rd[i] == INT64_MAX)
