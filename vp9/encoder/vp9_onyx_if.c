@@ -215,7 +215,7 @@ static void init_minq_luts(void) {
     afq_high_motion_minq[i] = calculate_minq_index(maxq,
                                                    0.0000021,
                                                    -0.00125,
-                                                   0.57,
+                                                   0.55,
                                                    0.0);
   }
 }
