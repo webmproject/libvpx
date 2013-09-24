@@ -2348,18 +2348,19 @@ static void reset_skip_txfm_size_b(VP9_COMP *cpi, MODE_INFO **mi_8x8,
                                    int mis, TX_SIZE max_tx_size, int bw, int bh,
                                    int mi_row, int mi_col, BLOCK_SIZE bsize) {
   VP9_COMMON * const cm = &cpi->common;
-  MB_MODE_INFO * const mbmi = &mi_8x8[0]->mbmi;
 
-  if (mi_row >= cm->mi_rows || mi_col >= cm->mi_cols)
+  if (mi_row >= cm->mi_rows || mi_col >= cm->mi_cols) {
     return;
+  } else {
+    MB_MODE_INFO * const mbmi = &mi_8x8[0]->mbmi;
+    if (mbmi->tx_size > max_tx_size) {
+      const int ymbs = MIN(bh, cm->mi_rows - mi_row);
+      const int xmbs = MIN(bw, cm->mi_cols - mi_col);
 
-  if (mbmi->tx_size > max_tx_size) {
-    const int ymbs = MIN(bh, cm->mi_rows - mi_row);
-    const int xmbs = MIN(bw, cm->mi_cols - mi_col);
-
-    assert(vp9_segfeature_active(&cm->seg, mbmi->segment_id, SEG_LVL_SKIP) ||
-           get_skip_flag(mi_8x8, mis, ymbs, xmbs));
-    set_txfm_flag(mi_8x8, mis, ymbs, xmbs, max_tx_size);
+      assert(vp9_segfeature_active(&cm->seg, mbmi->segment_id, SEG_LVL_SKIP) ||
+             get_skip_flag(mi_8x8, mis, ymbs, xmbs));
+      set_txfm_flag(mi_8x8, mis, ymbs, xmbs, max_tx_size);
+    }
   }
 }
 
