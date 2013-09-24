@@ -725,14 +725,12 @@ write_webm_file_header(EbmlGlobal                *glob,
         {
           unsigned int pixelWidth = cfg->g_w;
           unsigned int pixelHeight = cfg->g_h;
-          float        frameRate   = (float)fps->num / (float)fps->den;
 
           EbmlLoc videoStart;
           Ebml_StartSubElement(glob, &videoStart, Video);
           Ebml_SerializeUnsigned(glob, PixelWidth, pixelWidth);
           Ebml_SerializeUnsigned(glob, PixelHeight, pixelHeight);
           Ebml_SerializeUnsigned(glob, StereoMode, stereo_fmt);
-          Ebml_SerializeFloat(glob, FrameRate, frameRate);
           Ebml_EndSubElement(glob, &videoStart);
         }
         Ebml_EndSubElement(glob, &start); /* Track Entry */
