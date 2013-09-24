@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdH//9yw\u003d",
+        "filename": "vp8/encoder/firstpass.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 915,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2013-09-24T00:27:43Z",
+      "side": 1,
+      "message": "-log(0.000122) / log(2.0) \u003d 13.00",
+      "revId": "db9235657741ce3fa5b9226f55d780304320ef8c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
