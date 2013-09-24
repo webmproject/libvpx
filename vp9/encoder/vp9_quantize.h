@@ -30,14 +30,14 @@ void vp9_regular_quantize_b_8x8(MACROBLOCK *mb, int b_idx, TX_TYPE tx_type,
                                 int y_blocks);
 struct VP9_COMP;
 
-extern void vp9_set_quantizer(struct VP9_COMP *cpi, int Q);
+void vp9_set_quantizer(struct VP9_COMP *cpi, int q);
 
-extern void vp9_frame_init_quantizer(struct VP9_COMP *cpi);
+void vp9_frame_init_quantizer(struct VP9_COMP *cpi);
 
-extern void vp9_update_zbin_extra(struct VP9_COMP *cpi, MACROBLOCK *x);
+void vp9_update_zbin_extra(struct VP9_COMP *cpi, MACROBLOCK *x);
 
-extern void vp9_mb_init_quantizer(struct VP9_COMP *cpi, MACROBLOCK *x);
+void vp9_mb_init_quantizer(struct VP9_COMP *cpi, MACROBLOCK *x);
 
-extern void vp9_init_quantizer(struct VP9_COMP *cpi);
+void vp9_init_quantizer(struct VP9_COMP *cpi);
 
 #endif  // VP9_ENCODER_VP9_QUANTIZE_H_
