@@ -69,8 +69,7 @@ int vp9_square_search(MACROBLOCK *x,
 
 typedef int (fractional_mv_step_fp) (
     MACROBLOCK *x,
-    int_mv *bestmv,
-    int_mv *ref_mv,
+    MV *bestmv, const MV *ref_mv,
     int error_per_bit,
     const vp9_variance_fn_ptr_t *vfp,
     int forced_stop,  // 0 - full, 1 - qtr only, 2 - half only
@@ -84,7 +83,7 @@ extern fractional_mv_step_fp vp9_find_best_sub_pixel_tree;
 
 typedef int (fractional_mv_step_comp_fp) (
     MACROBLOCK *x,
-    int_mv *bestmv, int_mv *ref_mv,
+    MV *bestmv, const MV *ref_mv,
     int error_per_bit,
     const vp9_variance_fn_ptr_t *vfp,
     int forced_stop,  // 0 - full, 1 - qtr only, 2 - half only

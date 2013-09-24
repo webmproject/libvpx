@@ -274,7 +274,7 @@ void vp9_init3smotion_compensation(MACROBLOCK *x, int stride) {
   }
 
 int vp9_find_best_sub_pixel_iterative(MACROBLOCK *x,
-                                      int_mv *bestmv, int_mv *ref_mv,
+                                      MV *bestmv, const MV *ref_mv,
                                       int error_per_bit,
                                       const vp9_variance_fn_ptr_t *vfp,
                                       int forced_stop,
@@ -295,31 +295,30 @@ int vp9_find_best_sub_pixel_iterative(MACROBLOCK *x,
   int thismse;
 
   const int y_stride = xd->plane[0].pre[0].stride;
-  const int offset = (bestmv->as_mv.row) * y_stride + bestmv->as_mv.col;
+  const int offset = bestmv->row * y_stride + bestmv->col;
   uint8_t *y = xd->plane[0].pre[0].buf + offset;
 
-  int rr = ref_mv->as_mv.row;
-  int rc = ref_mv->as_mv.col;
-  int br = bestmv->as_mv.row * 8;
-  int bc = bestmv->as_mv.col * 8;
+  int rr = ref_mv->row;
+  int rc = ref_mv->col;
+  int br = bestmv->row * 8;
+  int bc = bestmv->col * 8;
   int hstep = 4;
-  const int minc = MAX(x->mv_col_min * 8, ref_mv->as_mv.col - MV_MAX);
-  const int maxc = MIN(x->mv_col_max * 8, ref_mv->as_mv.col + MV_MAX);
-  const int minr = MAX(x->mv_row_min * 8, ref_mv->as_mv.row - MV_MAX);
-  const int maxr = MIN(x->mv_row_max * 8, ref_mv->as_mv.row + MV_MAX);
+  const int minc = MAX(x->mv_col_min * 8, ref_mv->col - MV_MAX);
+  const int maxc = MIN(x->mv_col_max * 8, ref_mv->col + MV_MAX);
+  const int minr = MAX(x->mv_row_min * 8, ref_mv->row - MV_MAX);
+  const int maxr = MIN(x->mv_row_max * 8, ref_mv->row + MV_MAX);
 
   int tr = br;
   int tc = bc;
 
   // central mv
-  bestmv->as_mv.row <<= 3;
-  bestmv->as_mv.col <<= 3;
+  bestmv->row <<= 3;
+  bestmv->col <<= 3;
 
   // calculate central point error
   besterr = vfp->vf(y, y_stride, z, src_stride, sse1);
   *distortion = besterr;
-  besterr += mv_err_cost(&bestmv->as_mv, &ref_mv->as_mv,
-                         mvjcost, mvcost, error_per_bit);
+  besterr += mv_err_cost(bestmv, ref_mv, mvjcost, mvcost, error_per_bit);
 
   // TODO: Each subsequent iteration checks at least one point in
   // common with the last iteration could be 2 ( if diag selected)
@@ -349,7 +348,7 @@ int vp9_find_best_sub_pixel_iterative(MACROBLOCK *x,
     }
   }
 
-  if (xd->allow_high_precision_mv && vp9_use_mv_hp(&ref_mv->as_mv) &&
+  if (xd->allow_high_precision_mv && vp9_use_mv_hp(ref_mv) &&
       forced_stop == 0) {
     hstep >>= 1;
     while (eighthiters--) {
@@ -362,18 +361,18 @@ int vp9_find_best_sub_pixel_iterative(MACROBLOCK *x,
     }
   }
 
-  bestmv->as_mv.row = br;
-  bestmv->as_mv.col = bc;
+  bestmv->row = br;
+  bestmv->col = bc;
 
-  if ((abs(bestmv->as_mv.col - ref_mv->as_mv.col) > (MAX_FULL_PEL_VAL << 3)) ||
-      (abs(bestmv->as_mv.row - ref_mv->as_mv.row) > (MAX_FULL_PEL_VAL << 3)))
+  if ((abs(bestmv->col - ref_mv->col) > (MAX_FULL_PEL_VAL << 3)) ||
+      (abs(bestmv->row - ref_mv->row) > (MAX_FULL_PEL_VAL << 3)))
     return INT_MAX;
 
   return besterr;
 }
 
 int vp9_find_best_sub_pixel_tree(MACROBLOCK *x,
-                                 int_mv *bestmv, int_mv *ref_mv,
+                                 MV *bestmv, const MV *ref_mv,
                                  int error_per_bit,
                                  const vp9_variance_fn_ptr_t *vfp,
                                  int forced_stop,
@@ -393,31 +392,30 @@ int vp9_find_best_sub_pixel_tree(MACROBLOCK *x,
   unsigned int eighthiters = iters_per_step;
 
   const int y_stride = xd->plane[0].pre[0].stride;
-  const int offset = bestmv->as_mv.row * y_stride + bestmv->as_mv.col;
+  const int offset = bestmv->row * y_stride + bestmv->col;
   uint8_t *y = xd->plane[0].pre[0].buf + offset;
 
-  int rr = ref_mv->as_mv.row;
-  int rc = ref_mv->as_mv.col;
-  int br = bestmv->as_mv.row * 8;
-  int bc = bestmv->as_mv.col * 8;
+  int rr = ref_mv->row;
+  int rc = ref_mv->col;
+  int br = bestmv->row * 8;
+  int bc = bestmv->col * 8;
   int hstep = 4;
-  const int minc = MAX(x->mv_col_min * 8, ref_mv->as_mv.col - MV_MAX);
-  const int maxc = MIN(x->mv_col_max * 8, ref_mv->as_mv.col + MV_MAX);
-  const int minr = MAX(x->mv_row_min * 8, ref_mv->as_mv.row - MV_MAX);
-  const int maxr = MIN(x->mv_row_max * 8, ref_mv->as_mv.row + MV_MAX);
+  const int minc = MAX(x->mv_col_min * 8, ref_mv->col - MV_MAX);
+  const int maxc = MIN(x->mv_col_max * 8, ref_mv->col + MV_MAX);
+  const int minr = MAX(x->mv_row_min * 8, ref_mv->row - MV_MAX);
+  const int maxr = MIN(x->mv_row_max * 8, ref_mv->row + MV_MAX);
 
   int tr = br;
   int tc = bc;
 
   // central mv
-  bestmv->as_mv.row *= 8;
-  bestmv->as_mv.col *= 8;
+  bestmv->row *= 8;
+  bestmv->col *= 8;
 
   // calculate central point error
   besterr = vfp->vf(y, y_stride, z, src_stride, sse1);
   *distortion = besterr;
-  besterr += mv_err_cost(&bestmv->as_mv, &ref_mv->as_mv,
-                         mvjcost, mvcost, error_per_bit);
+  besterr += mv_err_cost(bestmv, ref_mv, mvjcost, mvcost, error_per_bit);
 
   // 1/2 pel
   FIRST_LEVEL_CHECKS;
@@ -438,7 +436,7 @@ int vp9_find_best_sub_pixel_tree(MACROBLOCK *x,
     tc = bc;
   }
 
-  if (xd->allow_high_precision_mv && vp9_use_mv_hp(&ref_mv->as_mv) &&
+  if (xd->allow_high_precision_mv && vp9_use_mv_hp(ref_mv) &&
       forced_stop == 0) {
     hstep >>= 1;
     FIRST_LEVEL_CHECKS;
@@ -449,11 +447,11 @@ int vp9_find_best_sub_pixel_tree(MACROBLOCK *x,
     tc = bc;
   }
 
-  bestmv->as_mv.row = br;
-  bestmv->as_mv.col = bc;
+  bestmv->row = br;
+  bestmv->col = bc;
 
-  if ((abs(bestmv->as_mv.col - ref_mv->as_mv.col) > (MAX_FULL_PEL_VAL << 3)) ||
-      (abs(bestmv->as_mv.row - ref_mv->as_mv.row) > (MAX_FULL_PEL_VAL << 3)))
+  if ((abs(bestmv->col - ref_mv->col) > (MAX_FULL_PEL_VAL << 3)) ||
+      (abs(bestmv->row - ref_mv->row) > (MAX_FULL_PEL_VAL << 3)))
     return INT_MAX;
 
   return besterr;
@@ -466,7 +464,7 @@ int vp9_find_best_sub_pixel_tree(MACROBLOCK *x,
               z, src_stride, &sse, second_pred)
 
 int vp9_find_best_sub_pixel_comp_iterative(MACROBLOCK *x,
-                                           int_mv *bestmv, int_mv *ref_mv,
+                                           MV *bestmv, const MV *ref_mv,
                                            int error_per_bit,
                                            const vp9_variance_fn_ptr_t *vfp,
                                            int forced_stop,
@@ -490,25 +488,25 @@ int vp9_find_best_sub_pixel_comp_iterative(MACROBLOCK *x,
 
   DECLARE_ALIGNED_ARRAY(16, uint8_t, comp_pred, 64 * 64);
   const int y_stride = xd->plane[0].pre[0].stride;
-  const int offset = bestmv->as_mv.row * y_stride + bestmv->as_mv.col;
+  const int offset = bestmv->row * y_stride + bestmv->col;
   uint8_t *const y = xd->plane[0].pre[0].buf + offset;
 
-  int rr = ref_mv->as_mv.row;
-  int rc = ref_mv->as_mv.col;
-  int br = bestmv->as_mv.row * 8;
-  int bc = bestmv->as_mv.col * 8;
+  int rr = ref_mv->row;
+  int rc = ref_mv->col;
+  int br = bestmv->row * 8;
+  int bc = bestmv->col * 8;
   int hstep = 4;
-  const int minc = MAX(x->mv_col_min * 8, ref_mv->as_mv.col - MV_MAX);
-  const int maxc = MIN(x->mv_col_max * 8, ref_mv->as_mv.col + MV_MAX);
-  const int minr = MAX(x->mv_row_min * 8, ref_mv->as_mv.row - MV_MAX);
-  const int maxr = MIN(x->mv_row_max * 8, ref_mv->as_mv.row + MV_MAX);
+  const int minc = MAX(x->mv_col_min * 8, ref_mv->col - MV_MAX);
+  const int maxc = MIN(x->mv_col_max * 8, ref_mv->col + MV_MAX);
+  const int minr = MAX(x->mv_row_min * 8, ref_mv->row - MV_MAX);
+  const int maxr = MIN(x->mv_row_max * 8, ref_mv->row + MV_MAX);
 
   int tr = br;
   int tc = bc;
 
   // central mv
-  bestmv->as_mv.row *= 8;
-  bestmv->as_mv.col *= 8;
+  bestmv->row *= 8;
+  bestmv->col *= 8;
 
   // calculate central point error
   // TODO(yunqingwang): central pointer error was already calculated in full-
@@ -516,8 +514,7 @@ int vp9_find_best_sub_pixel_comp_iterative(MACROBLOCK *x,
   comp_avg_pred(comp_pred, second_pred, w, h, y, y_stride);
   besterr = vfp->vf(comp_pred, w, z, src_stride, sse1);
   *distortion = besterr;
-  besterr += mv_err_cost(&bestmv->as_mv, &ref_mv->as_mv,
-                         mvjcost, mvcost, error_per_bit);
+  besterr += mv_err_cost(bestmv, ref_mv, mvjcost, mvcost, error_per_bit);
 
   // Each subsequent iteration checks at least one point in
   // common with the last iteration could be 2 ( if diag selected)
@@ -547,7 +544,7 @@ int vp9_find_best_sub_pixel_comp_iterative(MACROBLOCK *x,
     }
   }
 
-  if (xd->allow_high_precision_mv && vp9_use_mv_hp(&ref_mv->as_mv) &&
+  if (xd->allow_high_precision_mv && vp9_use_mv_hp(ref_mv) &&
       forced_stop == 0) {
     hstep >>= 1;
     while (eighthiters--) {
@@ -559,18 +556,18 @@ int vp9_find_best_sub_pixel_comp_iterative(MACROBLOCK *x,
       tc = bc;
     }
   }
-  bestmv->as_mv.row = br;
-  bestmv->as_mv.col = bc;
+  bestmv->row = br;
+  bestmv->col = bc;
 
-  if ((abs(bestmv->as_mv.col - ref_mv->as_mv.col) > (MAX_FULL_PEL_VAL << 3)) ||
-      (abs(bestmv->as_mv.row - ref_mv->as_mv.row) > (MAX_FULL_PEL_VAL << 3)))
+  if ((abs(bestmv->col - ref_mv->col) > (MAX_FULL_PEL_VAL << 3)) ||
+      (abs(bestmv->row - ref_mv->row) > (MAX_FULL_PEL_VAL << 3)))
     return INT_MAX;
 
   return besterr;
 }
 
 int vp9_find_best_sub_pixel_comp_tree(MACROBLOCK *x,
-                                      int_mv *bestmv, int_mv *ref_mv,
+                                      MV *bestmv, const MV *ref_mv,
                                       int error_per_bit,
                                       const vp9_variance_fn_ptr_t *vfp,
                                       int forced_stop,
@@ -593,25 +590,25 @@ int vp9_find_best_sub_pixel_comp_tree(MACROBLOCK *x,
 
   DECLARE_ALIGNED_ARRAY(16, uint8_t, comp_pred, 64 * 64);
   const int y_stride = xd->plane[0].pre[0].stride;
-  const int offset = (bestmv->as_mv.row) * y_stride + bestmv->as_mv.col;
+  const int offset = bestmv->row * y_stride + bestmv->col;
   uint8_t *y = xd->plane[0].pre[0].buf + offset;
 
-  int rr = ref_mv->as_mv.row;
-  int rc = ref_mv->as_mv.col;
-  int br = bestmv->as_mv.row * 8;
-  int bc = bestmv->as_mv.col * 8;
+  int rr = ref_mv->row;
+  int rc = ref_mv->col;
+  int br = bestmv->row * 8;
+  int bc = bestmv->col * 8;
   int hstep = 4;
-  const int minc = MAX(x->mv_col_min * 8, ref_mv->as_mv.col - MV_MAX);
-  const int maxc = MIN(x->mv_col_max * 8, ref_mv->as_mv.col + MV_MAX);
-  const int minr = MAX(x->mv_row_min * 8, ref_mv->as_mv.row - MV_MAX);
-  const int maxr = MIN(x->mv_row_max * 8, ref_mv->as_mv.row + MV_MAX);
+  const int minc = MAX(x->mv_col_min * 8, ref_mv->col - MV_MAX);
+  const int maxc = MIN(x->mv_col_max * 8, ref_mv->col + MV_MAX);
+  const int minr = MAX(x->mv_row_min * 8, ref_mv->row - MV_MAX);
+  const int maxr = MIN(x->mv_row_max * 8, ref_mv->row + MV_MAX);
 
   int tr = br;
   int tc = bc;
 
   // central mv
-  bestmv->as_mv.row *= 8;
-  bestmv->as_mv.col *= 8;
+  bestmv->row *= 8;
+  bestmv->col *= 8;
 
   // calculate central point error
   // TODO(yunqingwang): central pointer error was already calculated in full-
@@ -619,8 +616,7 @@ int vp9_find_best_sub_pixel_comp_tree(MACROBLOCK *x,
   comp_avg_pred(comp_pred, second_pred, w, h, y, y_stride);
   besterr = vfp->vf(comp_pred, w, z, src_stride, sse1);
   *distortion = besterr;
-  besterr += mv_err_cost(&bestmv->as_mv, &ref_mv->as_mv,
-                         mvjcost, mvcost, error_per_bit);
+  besterr += mv_err_cost(bestmv, ref_mv, mvjcost, mvcost, error_per_bit);
 
   // Each subsequent iteration checks at least one point in
   // common with the last iteration could be 2 ( if diag selected)
@@ -646,7 +642,7 @@ int vp9_find_best_sub_pixel_comp_tree(MACROBLOCK *x,
     tc = bc;
   }
 
-  if (xd->allow_high_precision_mv && vp9_use_mv_hp(&ref_mv->as_mv) &&
+  if (xd->allow_high_precision_mv && vp9_use_mv_hp(ref_mv) &&
       forced_stop == 0) {
     hstep >>= 1;
     FIRST_LEVEL_CHECKS;
@@ -656,11 +652,11 @@ int vp9_find_best_sub_pixel_comp_tree(MACROBLOCK *x,
     tr = br;
     tc = bc;
   }
-  bestmv->as_mv.row = br;
-  bestmv->as_mv.col = bc;
+  bestmv->row = br;
+  bestmv->col = bc;
 
-  if ((abs(bestmv->as_mv.col - ref_mv->as_mv.col) > (MAX_FULL_PEL_VAL << 3)) ||
-      (abs(bestmv->as_mv.row - ref_mv->as_mv.row) > (MAX_FULL_PEL_VAL << 3)))
+  if ((abs(bestmv->col - ref_mv->col) > (MAX_FULL_PEL_VAL << 3)) ||
+      (abs(bestmv->row - ref_mv->row) > (MAX_FULL_PEL_VAL << 3)))
     return INT_MAX;
 
   return besterr;
