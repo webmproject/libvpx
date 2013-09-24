@@ -28,10 +28,10 @@ void vp9_short_iwalsh4x4_add_c(int16_t *input, uint8_t *dest, int dest_stride) {
   int16_t *op = output;
 
   for (i = 0; i < 4; i++) {
-    a1 = ip[0] >> WHT_UPSCALE_FACTOR;
-    c1 = ip[1] >> WHT_UPSCALE_FACTOR;
-    d1 = ip[2] >> WHT_UPSCALE_FACTOR;
-    b1 = ip[3] >> WHT_UPSCALE_FACTOR;
+    a1 = ip[0] >> UNIT_QUANT_SHIFT;
+    c1 = ip[1] >> UNIT_QUANT_SHIFT;
+    d1 = ip[2] >> UNIT_QUANT_SHIFT;
+    b1 = ip[3] >> UNIT_QUANT_SHIFT;
     a1 += c1;
     d1 -= b1;
     e1 = (a1 - d1) >> 1;
@@ -77,7 +77,7 @@ void vp9_short_iwalsh4x4_1_add_c(int16_t *in, uint8_t *dest, int dest_stride) {
   int16_t *ip = in;
   int16_t *op = tmp;
 
-  a1 = ip[0] >> WHT_UPSCALE_FACTOR;
+  a1 = ip[0] >> UNIT_QUANT_SHIFT;
   e1 = a1 >> 1;
   a1 -= e1;
   op[0] = a1;

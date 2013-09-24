@@ -637,10 +637,10 @@ void vp9_short_walsh4x4_c(short *input, short *output, int pitch) {
     c1 = e1 - c1;
     a1 -= c1;
     d1 += b1;
-    op[0] = a1 << WHT_UPSCALE_FACTOR;
-    op[1] = c1 << WHT_UPSCALE_FACTOR;
-    op[2] = d1 << WHT_UPSCALE_FACTOR;
-    op[3] = b1 << WHT_UPSCALE_FACTOR;
+    op[0] = a1 * UNIT_QUANT_FACTOR;
+    op[1] = c1 * UNIT_QUANT_FACTOR;
+    op[2] = d1 * UNIT_QUANT_FACTOR;
+    op[3] = b1 * UNIT_QUANT_FACTOR;
 
     ip += 4;
     op += 4;
