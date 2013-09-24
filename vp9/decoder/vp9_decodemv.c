@@ -493,11 +493,12 @@ static void read_inter_block_mode_info(VP9D_COMP *pbi, MODE_INFO *mi,
     const int num_4x4_w = num_4x4_blocks_wide_lookup[bsize];  // 1 or 2
     const int num_4x4_h = num_4x4_blocks_high_lookup[bsize];  // 1 or 2
     int idx, idy;
+    int b_mode;
     for (idy = 0; idy < 2; idy += num_4x4_h) {
       for (idx = 0; idx < 2; idx += num_4x4_w) {
         int_mv blockmv, secondmv;
         const int j = idy * 2 + idx;
-        const int b_mode = read_inter_mode(cm, r, inter_mode_ctx);
+        b_mode = read_inter_mode(cm, r, inter_mode_ctx);
 
         if (b_mode == NEARESTMV || b_mode == NEARMV) {
           vp9_append_sub8x8_mvs_for_idx(cm, xd, &nearest, &nearby, j, 0,
@@ -544,10 +545,10 @@ static void read_inter_block_mode_info(VP9D_COMP *pbi, MODE_INFO *mi,
           mi->bmi[j + 2] = mi->bmi[j];
         if (num_4x4_w == 2)
           mi->bmi[j + 1] = mi->bmi[j];
-        mi->mbmi.mode = b_mode;
       }
     }
 
+    mi->mbmi.mode = b_mode;
     mv0->as_int = mi->bmi[3].as_mv[0].as_int;
     mv1->as_int = mi->bmi[3].as_mv[1].as_int;
   } else {
