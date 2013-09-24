@@ -534,10 +534,11 @@ void vp9_first_pass(VP9_COMP *cpi) {
     recon_yoffset = (mb_row * recon_y_stride * 16);
     recon_uvoffset = (mb_row * recon_uv_stride * 8);
 
-    // Set up limit values for motion vectors to prevent them extending outside the UMV borders
-    x->mv_row_min = -((mb_row * 16) + (VP9BORDERINPIXELS - 8));
+    // Set up limit values for motion vectors to prevent them extending
+    // outside the UMV borders
+    x->mv_row_min = -((mb_row * 16) + BORDER_MV_PIXELS_B16);
     x->mv_row_max = ((cm->mb_rows - 1 - mb_row) * 16)
-                    + (VP9BORDERINPIXELS - 8);
+                    + BORDER_MV_PIXELS_B16;
 
     // for each macroblock col in image
     for (mb_col = 0; mb_col < cm->mb_cols; mb_col++) {
@@ -583,9 +584,9 @@ void vp9_first_pass(VP9_COMP *cpi) {
       intra_error += (int64_t)this_error;
 
       // Set up limit values for motion vectors to prevent them extending outside the UMV borders
-      x->mv_col_min = -((mb_col * 16) + (VP9BORDERINPIXELS - 8));
+      x->mv_col_min = -((mb_col * 16) + BORDER_MV_PIXELS_B16);
       x->mv_col_max = ((cm->mb_cols - 1 - mb_col) * 16)
-                      + (VP9BORDERINPIXELS - 8);
+                      + BORDER_MV_PIXELS_B16;
 
       // Other than for the first frame do a motion search
       if (cm->current_video_frame > 0) {
