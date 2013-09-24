@@ -16,6 +16,24 @@
       "revId": "976837c2be68fedcb2f2f521a6ccbd09eaccdd46",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdH//9zE\u003d",
+        "filename": "test/encode_test_driver.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2013-09-24T00:19:56Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdH//9zo\u003d",
+      "revId": "976837c2be68fedcb2f2f521a6ccbd09eaccdd46",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
