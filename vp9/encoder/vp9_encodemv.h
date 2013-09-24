@@ -25,7 +25,7 @@ void vp9_build_nmv_cost_table(int *mvjoint,
                               int usehp,
                               int mvc_flag_v,
                               int mvc_flag_h);
-void vp9_update_nmv_count(VP9_COMP *cpi, MACROBLOCK *x,
-                          int_mv *best_ref_mv, int_mv *second_best_ref_mv);
+
+void vp9_update_mv_count(VP9_COMP *cpi, MACROBLOCK *x, int_mv best_ref_mv[2]);
 
 #endif  // VP9_ENCODER_VP9_ENCODEMV_H_

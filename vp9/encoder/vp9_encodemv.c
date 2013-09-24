@@ -314,44 +314,34 @@ void vp9_build_nmv_cost_table(int *mvjoint,
     build_nmv_component_cost_table(mvcost[1], &mvctx->comps[1], usehp);
 }
 
-void vp9_update_nmv_count(VP9_COMP *cpi, MACROBLOCK *x,
-                         int_mv *best_ref_mv, int_mv *second_best_ref_mv) {
+static void inc_mvs(int_mv mv[2], int_mv ref[2], int is_compound,
+                    nmv_context_counts *counts) {
+  int i;
+  for (i = 0; i < 1 + is_compound; ++i) {
+    const MV diff = { mv[i].as_mv.row - ref[i].as_mv.row,
+                      mv[i].as_mv.col - ref[i].as_mv.col };
+    vp9_inc_mv(&diff, counts);
+  }
+}
+
+void vp9_update_mv_count(VP9_COMP *cpi, MACROBLOCK *x, int_mv best_ref_mv[2]) {
   MODE_INFO *mi = x->e_mbd.mi_8x8[0];
   MB_MODE_INFO *const mbmi = &mi->mbmi;
-  MV diff;
-  const int num_4x4_blocks_wide = num_4x4_blocks_wide_lookup[mbmi->sb_type];
-  const int num_4x4_blocks_high = num_4x4_blocks_high_lookup[mbmi->sb_type];
-  int idx, idy;
+  const int is_compound = has_second_ref(mbmi);
 
   if (mbmi->sb_type < BLOCK_8X8) {
-    PARTITION_INFO *pi = x->partition_info;
-    for (idy = 0; idy < 2; idy += num_4x4_blocks_high) {
-      for (idx = 0; idx < 2; idx += num_4x4_blocks_wide) {
-        const int i = idy * 2 + idx;
-        if (pi->bmi[i].mode == NEWMV) {
-          diff.row = mi->bmi[i].as_mv[0].as_mv.row - best_ref_mv->as_mv.row;
-          diff.col = mi->bmi[i].as_mv[0].as_mv.col - best_ref_mv->as_mv.col;
-          vp9_inc_mv(&diff, &cpi->NMVcount);
+    const int num_4x4_w = num_4x4_blocks_wide_lookup[mbmi->sb_type];
+    const int num_4x4_h = num_4x4_blocks_high_lookup[mbmi->sb_type];
+    int idx, idy;
 
-          if (mi->mbmi.ref_frame[1] > INTRA_FRAME) {
-            diff.row = mi->bmi[i].as_mv[1].as_mv.row -
-                         second_best_ref_mv->as_mv.row;
-            diff.col = mi->bmi[i].as_mv[1].as_mv.col -
-                         second_best_ref_mv->as_mv.col;
-            vp9_inc_mv(&diff, &cpi->NMVcount);
-          }
-        }
+    for (idy = 0; idy < 2; idy += num_4x4_h) {
+      for (idx = 0; idx < 2; idx += num_4x4_w) {
+        const int i = idy * 2 + idx;
+        if (x->partition_info->bmi[i].mode == NEWMV)
+          inc_mvs(mi->bmi[i].as_mv, best_ref_mv, is_compound, &cpi->NMVcount);
       }
     }
   } else if (mbmi->mode == NEWMV) {
-    diff.row = mbmi->mv[0].as_mv.row - best_ref_mv->as_mv.row;
-    diff.col = mbmi->mv[0].as_mv.col - best_ref_mv->as_mv.col;
-    vp9_inc_mv(&diff, &cpi->NMVcount);
-
-    if (mbmi->ref_frame[1] > INTRA_FRAME) {
-      diff.row = mbmi->mv[1].as_mv.row - second_best_ref_mv->as_mv.row;
-      diff.col = mbmi->mv[1].as_mv.col - second_best_ref_mv->as_mv.col;
-      vp9_inc_mv(&diff, &cpi->NMVcount);
-    }
+    inc_mvs(mbmi->mv, best_ref_mv, is_compound, &cpi->NMVcount);
   }
 }
