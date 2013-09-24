@@ -171,22 +171,21 @@ static INLINE void transpose_4x4(__m128i *res) {
 void fdct4_1d_sse2(__m128i *in) {
   const __m128i k__cospi_p16_p16 = _mm_set1_epi16(cospi_16_64);
   const __m128i k__cospi_p16_m16 = pair_set_epi16(cospi_16_64, -cospi_16_64);
-  const __m128i k__cospi_p24_p08 = pair_set_epi16(cospi_24_64, cospi_8_64);
-  const __m128i k__cospi_m08_p24 = pair_set_epi16(-cospi_8_64, cospi_24_64);
+  const __m128i k__cospi_p08_p24 = pair_set_epi16(cospi_8_64, cospi_24_64);
+  const __m128i k__cospi_p24_m08 = pair_set_epi16(cospi_24_64, -cospi_8_64);
   const __m128i k__DCT_CONST_ROUNDING = _mm_set1_epi32(DCT_CONST_ROUNDING);
 
   __m128i u[4], v[4];
-  u[0] = _mm_add_epi16(in[0], in[3]);
-  u[1] = _mm_add_epi16(in[1], in[2]);
-  u[2] = _mm_sub_epi16(in[1], in[2]);
-  u[3] = _mm_sub_epi16(in[0], in[3]);
+  u[0]=_mm_unpacklo_epi16(in[0], in[1]);
+  u[1]=_mm_unpacklo_epi16(in[3], in[2]);
 
-  v[0] = _mm_unpacklo_epi16(u[0], u[1]);
-  v[1] = _mm_unpacklo_epi16(u[2], u[3]);
+  v[0] = _mm_add_epi16(u[0], u[1]);
+  v[1] = _mm_sub_epi16(u[0], u[1]);
+
   u[0] = _mm_madd_epi16(v[0], k__cospi_p16_p16);  // 0
   u[1] = _mm_madd_epi16(v[0], k__cospi_p16_m16);  // 2
-  u[2] = _mm_madd_epi16(v[1], k__cospi_p24_p08);  // 1
-  u[3] = _mm_madd_epi16(v[1], k__cospi_m08_p24);  // 3
+  u[2] = _mm_madd_epi16(v[1], k__cospi_p08_p24);  // 1
+  u[3] = _mm_madd_epi16(v[1], k__cospi_p24_m08);  // 3
 
   v[0] = _mm_add_epi32(u[0], k__DCT_CONST_ROUNDING);
   v[1] = _mm_add_epi32(u[1], k__DCT_CONST_ROUNDING);
