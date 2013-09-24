@@ -3093,8 +3093,12 @@ void vp9_rd_pick_intra_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
         vp9_cost_bit(vp9_get_pred_prob_mbskip(cm, xd), 0);
     *returndist = dist_y + dist_uv;
     if (cpi->sf.tx_size_search_method == USE_FULL_RD)
-      for (i = 0; i < TX_MODES; i++)
-        ctx->tx_rd_diff[i] = tx_cache[i] - tx_cache[cm->tx_mode];
+      for (i = 0; i < TX_MODES; i++) {
+        if (tx_cache[i] < INT64_MAX && tx_cache[cm->tx_mode] < INT64_MAX)
+          ctx->tx_rd_diff[i] = tx_cache[i] - tx_cache[cm->tx_mode];
+        else
+          ctx->tx_rd_diff[i] = 0;
+      }
   }
 
   ctx->mic = *xd->this_mi;
