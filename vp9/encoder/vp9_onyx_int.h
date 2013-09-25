@@ -649,7 +649,7 @@ typedef struct VP9_COMP {
   unsigned int switchable_interp_count[SWITCHABLE_FILTERS + 1]
                                       [SWITCHABLE_FILTERS];
 
-  unsigned int txfm_stepdown_count[TX_SIZES];
+  unsigned int tx_stepdown_count[TX_SIZES];
 
   int initial_width;
   int initial_height;

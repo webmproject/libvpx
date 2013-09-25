@@ -715,15 +715,15 @@ static void choose_largest_txfm_size(VP9_COMP *cpi, MACROBLOCK *x,
                                      int *skip, int64_t *sse,
                                      int64_t ref_best_rd,
                                      BLOCK_SIZE bs) {
-  const TX_SIZE max_txfm_size = max_txsize_lookup[bs];
+  const TX_SIZE max_tx_size = max_txsize_lookup[bs];
   VP9_COMMON *const cm = &cpi->common;
   MACROBLOCKD *const xd = &x->e_mbd;
   MB_MODE_INFO *const mbmi = &xd->this_mi->mbmi;
-  if (max_txfm_size == TX_32X32 &&
+  if (max_tx_size == TX_32X32 &&
       (cm->tx_mode == ALLOW_32X32 ||
        cm->tx_mode == TX_MODE_SELECT)) {
     mbmi->tx_size = TX_32X32;
-  } else if (max_txfm_size >= TX_16X16 &&
+  } else if (max_tx_size >= TX_16X16 &&
              (cm->tx_mode == ALLOW_16X16 ||
               cm->tx_mode == ALLOW_32X32 ||
               cm->tx_mode == TX_MODE_SELECT)) {
@@ -736,7 +736,7 @@ static void choose_largest_txfm_size(VP9_COMP *cpi, MACROBLOCK *x,
   txfm_rd_in_plane(x, rate, distortion, skip,
                    &sse[mbmi->tx_size], ref_best_rd, 0, bs,
                    mbmi->tx_size);
-  cpi->txfm_stepdown_count[0]++;
+  cpi->tx_stepdown_count[0]++;
 }
 
 static void choose_txfm_size_from_rd(VP9_COMP *cpi, MACROBLOCK *x,
@@ -830,15 +830,15 @@ static void choose_txfm_size_from_rd(VP9_COMP *cpi, MACROBLOCK *x,
       rd[TX_32X32][1] < rd[TX_16X16][1] &&
       rd[TX_32X32][1] < rd[TX_8X8][1] &&
       rd[TX_32X32][1] < rd[TX_4X4][1]) {
-    cpi->txfm_stepdown_count[0]++;
+    cpi->tx_stepdown_count[0]++;
   } else if (max_tx_size >= TX_16X16 &&
              rd[TX_16X16][1] < rd[TX_8X8][1] &&
              rd[TX_16X16][1] < rd[TX_4X4][1]) {
-    cpi->txfm_stepdown_count[max_tx_size - TX_16X16]++;
+    cpi->tx_stepdown_count[max_tx_size - TX_16X16]++;
   } else if (rd[TX_8X8][1] < rd[TX_4X4][1]) {
-    cpi->txfm_stepdown_count[max_tx_size - TX_8X8]++;
+    cpi->tx_stepdown_count[max_tx_size - TX_8X8]++;
   } else {
-    cpi->txfm_stepdown_count[max_tx_size - TX_4X4]++;
+    cpi->tx_stepdown_count[max_tx_size - TX_4X4]++;
   }
 }
 
@@ -848,7 +848,7 @@ static void choose_txfm_size_from_modelrd(VP9_COMP *cpi, MACROBLOCK *x,
                                           int *s, int *skip, int64_t *sse,
                                           int64_t ref_best_rd,
                                           BLOCK_SIZE bs) {
-  const TX_SIZE max_txfm_size = max_txsize_lookup[bs];
+  const TX_SIZE max_tx_size = max_txsize_lookup[bs];
   VP9_COMMON *const cm = &cpi->common;
   MACROBLOCKD *const xd = &x->e_mbd;
   MB_MODE_INFO *const mbmi = &xd->this_mi->mbmi;
@@ -864,9 +864,9 @@ static void choose_txfm_size_from_modelrd(VP9_COMP *cpi, MACROBLOCK *x,
   // for (n = TX_4X4; n <= max_txfm_size; n++)
   //   r[n][0] = (r[n][0] * scale_r[n]);
 
-  for (n = TX_4X4; n <= max_txfm_size; n++) {
+  for (n = TX_4X4; n <= max_tx_size; n++) {
     r[n][1] = r[n][0];
-    for (m = 0; m <= n - (n == max_txfm_size); m++) {
+    for (m = 0; m <= n - (n == max_tx_size); m++) {
       if (m == n)
         r[n][1] += vp9_cost_zero(tx_probs[m]);
       else
@@ -878,7 +878,7 @@ static void choose_txfm_size_from_modelrd(VP9_COMP *cpi, MACROBLOCK *x,
   s0 = vp9_cost_bit(skip_prob, 0);
   s1 = vp9_cost_bit(skip_prob, 1);
 
-  for (n = TX_4X4; n <= max_txfm_size; n++) {
+  for (n = TX_4X4; n <= max_tx_size; n++) {
     if (s[n]) {
       rd[n][0] = rd[n][1] = RDCOST(x->rdmult, x->rddiv, s1, d[n]);
     } else {
@@ -886,19 +886,19 @@ static void choose_txfm_size_from_modelrd(VP9_COMP *cpi, MACROBLOCK *x,
       rd[n][1] = RDCOST(x->rdmult, x->rddiv, r[n][1] + s0, d[n]);
     }
   }
-  for (n = TX_4X4; n <= max_txfm_size; n++) {
+  for (n = TX_4X4; n <= max_tx_size; n++) {
     rd[n][0] = (int64_t)(scale_rd[n] * rd[n][0]);
     rd[n][1] = (int64_t)(scale_rd[n] * rd[n][1]);
   }
 
-  if (max_txfm_size == TX_32X32 &&
+  if (max_tx_size == TX_32X32 &&
       (cm->tx_mode == ALLOW_32X32 ||
        (cm->tx_mode == TX_MODE_SELECT &&
         rd[TX_32X32][1] <= rd[TX_16X16][1] &&
         rd[TX_32X32][1] <= rd[TX_8X8][1] &&
         rd[TX_32X32][1] <= rd[TX_4X4][1]))) {
     mbmi->tx_size = TX_32X32;
-  } else if (max_txfm_size >= TX_16X16 &&
+  } else if (max_tx_size >= TX_16X16 &&
              (cm->tx_mode == ALLOW_16X16 ||
               cm->tx_mode == ALLOW_32X32 ||
               (cm->tx_mode == TX_MODE_SELECT &&
@@ -920,19 +920,19 @@ static void choose_txfm_size_from_modelrd(VP9_COMP *cpi, MACROBLOCK *x,
   txfm_rd_in_plane(x, rate, distortion, skip, &sse[mbmi->tx_size],
                    ref_best_rd, 0, bs, mbmi->tx_size);
 
-  if (max_txfm_size == TX_32X32 &&
+  if (max_tx_size == TX_32X32 &&
       rd[TX_32X32][1] <= rd[TX_16X16][1] &&
       rd[TX_32X32][1] <= rd[TX_8X8][1] &&
       rd[TX_32X32][1] <= rd[TX_4X4][1]) {
-    cpi->txfm_stepdown_count[0]++;
-  } else if (max_txfm_size >= TX_16X16 &&
+    cpi->tx_stepdown_count[0]++;
+  } else if (max_tx_size >= TX_16X16 &&
              rd[TX_16X16][1] <= rd[TX_8X8][1] &&
              rd[TX_16X16][1] <= rd[TX_4X4][1]) {
-    cpi->txfm_stepdown_count[max_txfm_size - TX_16X16]++;
+    cpi->tx_stepdown_count[max_tx_size - TX_16X16]++;
   } else if (rd[TX_8X8][1] <= rd[TX_4X4][1]) {
-    cpi->txfm_stepdown_count[max_txfm_size - TX_8X8]++;
+    cpi->tx_stepdown_count[max_tx_size - TX_8X8]++;
   } else {
-    cpi->txfm_stepdown_count[max_txfm_size - TX_4X4]++;
+    cpi->tx_stepdown_count[max_tx_size - TX_4X4]++;
   }
 }
 
