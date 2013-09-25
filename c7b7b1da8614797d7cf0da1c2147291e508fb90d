@@ -16,6 +16,24 @@
       "revId": "c7b7b1da8614797d7cf0da1c2147291e508fb90d",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdH//9pI\u003d",
+        "filename": "vp9/decoder/vp9_onyxd_int.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2013-09-25T23:52:36Z",
+      "side": 1,
+      "message": "Yes. Here we clearly want to specify memory buffer size and the standard type to do this is size_t. It is used everywhere else in the code, this change is for overall consistency.",
+      "parentUuid": "AAAAdH//9p4\u003d",
+      "revId": "c7b7b1da8614797d7cf0da1c2147291e508fb90d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
