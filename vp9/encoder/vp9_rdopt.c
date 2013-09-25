@@ -641,6 +641,39 @@ static void block_yrd_txfm(int plane, int block, BLOCK_SIZE plane_bsize,
   }
 }
 
+void vp9_get_entropy_contexts(TX_SIZE tx_size,
+    ENTROPY_CONTEXT t_above[16], ENTROPY_CONTEXT t_left[16],
+    const ENTROPY_CONTEXT *above, const ENTROPY_CONTEXT *left,
+    int num_4x4_w, int num_4x4_h) {
+  int i;
+  switch (tx_size) {
+    case TX_4X4:
+      vpx_memcpy(t_above, above, sizeof(ENTROPY_CONTEXT) * num_4x4_w);
+      vpx_memcpy(t_left, left, sizeof(ENTROPY_CONTEXT) * num_4x4_h);
+      break;
+    case TX_8X8:
+      for (i = 0; i < num_4x4_w; i += 2)
+        t_above[i] = !!*(const uint16_t *)&above[i];
+      for (i = 0; i < num_4x4_h; i += 2)
+        t_left[i] = !!*(const uint16_t *)&left[i];
+      break;
+    case TX_16X16:
+      for (i = 0; i < num_4x4_w; i += 4)
+        t_above[i] = !!*(const uint32_t *)&above[i];
+      for (i = 0; i < num_4x4_h; i += 4)
+        t_left[i] = !!*(const uint32_t *)&left[i];
+      break;
+    case TX_32X32:
+      for (i = 0; i < num_4x4_w; i += 8)
+        t_above[i] = !!*(const uint64_t *)&above[i];
+      for (i = 0; i < num_4x4_h; i += 8)
+        t_left[i] = !!*(const uint64_t *)&left[i];
+      break;
+    default:
+      assert(!"Invalid transform size.");
+  }
+}
+
 static void txfm_rd_in_plane(MACROBLOCK *x,
                              int *rate, int64_t *distortion,
                              int *skippable, int64_t *sse,
@@ -649,46 +682,33 @@ static void txfm_rd_in_plane(MACROBLOCK *x,
   MACROBLOCKD *const xd = &x->e_mbd;
   struct macroblockd_plane *const pd = &xd->plane[plane];
   const BLOCK_SIZE bs = get_plane_block_size(bsize, pd);
-  const int num_4x4_blocks_wide = num_4x4_blocks_wide_lookup[bs];
-  const int num_4x4_blocks_high = num_4x4_blocks_high_lookup[bs];
-  int i;
+  const int num_4x4_w = num_4x4_blocks_wide_lookup[bs];
+  const int num_4x4_h = num_4x4_blocks_high_lookup[bs];
+
   struct rdcost_block_args args = { x, { 0 }, { 0 }, tx_size,
-                                    num_4x4_blocks_wide, num_4x4_blocks_high,
+                                    num_4x4_w, num_4x4_h,
                                     { 0 }, { 0 }, { 0 },
                                     0, 0, 0, 0, ref_best_rd, 0 };
   if (plane == 0)
     xd->this_mi->mbmi.tx_size = tx_size;
 
+  vp9_get_entropy_contexts(tx_size, args.t_above, args.t_left,
+                           pd->above_context, pd->left_context,
+                           num_4x4_w, num_4x4_h);
   switch (tx_size) {
     case TX_4X4:
-      vpx_memcpy(&args.t_above, pd->above_context,
-                 sizeof(ENTROPY_CONTEXT) * num_4x4_blocks_wide);
-      vpx_memcpy(&args.t_left, pd->left_context,
-                 sizeof(ENTROPY_CONTEXT) * num_4x4_blocks_high);
       get_scan_nb_4x4(get_tx_type_4x4(pd->plane_type, xd, 0),
                       &args.scan, &args.nb);
       break;
     case TX_8X8:
-      for (i = 0; i < num_4x4_blocks_wide; i += 2)
-        args.t_above[i] = !!*(uint16_t *)&pd->above_context[i];
-      for (i = 0; i < num_4x4_blocks_high; i += 2)
-        args.t_left[i] = !!*(uint16_t *)&pd->left_context[i];
       get_scan_nb_8x8(get_tx_type_8x8(pd->plane_type, xd),
                       &args.scan, &args.nb);
       break;
     case TX_16X16:
-      for (i = 0; i < num_4x4_blocks_wide; i += 4)
-        args.t_above[i] = !!*(uint32_t *)&pd->above_context[i];
-      for (i = 0; i < num_4x4_blocks_high; i += 4)
-        args.t_left[i] = !!*(uint32_t *)&pd->left_context[i];
       get_scan_nb_16x16(get_tx_type_16x16(pd->plane_type, xd),
                         &args.scan, &args.nb);
       break;
     case TX_32X32:
-      for (i = 0; i < num_4x4_blocks_wide; i += 8)
-        args.t_above[i] = !!*(uint64_t *)&pd->above_context[i];
-      for (i = 0; i < num_4x4_blocks_high; i += 8)
-        args.t_left[i] = !!*(uint64_t *)&pd->left_context[i];
       args.scan = vp9_default_scan_32x32;
       args.nb = vp9_default_scan_32x32_neighbors;
       break;
