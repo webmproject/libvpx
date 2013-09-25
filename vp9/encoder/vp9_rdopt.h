@@ -33,4 +33,9 @@ void vp9_init_me_luts();
 void vp9_set_mbmode_and_mvs(MACROBLOCK *x,
                             MB_PREDICTION_MODE mb, int_mv *mv);
 
+void vp9_get_entropy_contexts(TX_SIZE tx_size,
+    ENTROPY_CONTEXT t_above[16], ENTROPY_CONTEXT t_left[16],
+    const ENTROPY_CONTEXT *above, const ENTROPY_CONTEXT *left,
+    int num_4x4_w, int num_4x4_h);
+
 #endif  // VP9_ENCODER_VP9_RDOPT_H_

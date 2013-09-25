@@ -365,36 +365,10 @@ static void optimize_init_b(int plane, BLOCK_SIZE bsize,
   const int num_4x4_h = num_4x4_blocks_high_lookup[plane_bsize];
   const MB_MODE_INFO *mbmi = &xd->this_mi->mbmi;
   const TX_SIZE tx_size = plane ? get_uv_tx_size(mbmi) : mbmi->tx_size;
-  int i;
 
-  switch (tx_size) {
-    case TX_4X4:
-      vpx_memcpy(args->ctx->ta[plane], pd->above_context,
-                 sizeof(ENTROPY_CONTEXT) * num_4x4_w);
-      vpx_memcpy(args->ctx->tl[plane], pd->left_context,
-                 sizeof(ENTROPY_CONTEXT) * num_4x4_h);
-      break;
-    case TX_8X8:
-      for (i = 0; i < num_4x4_w; i += 2)
-        args->ctx->ta[plane][i] = !!*(uint16_t *)&pd->above_context[i];
-      for (i = 0; i < num_4x4_h; i += 2)
-        args->ctx->tl[plane][i] = !!*(uint16_t *)&pd->left_context[i];
-      break;
-    case TX_16X16:
-      for (i = 0; i < num_4x4_w; i += 4)
-        args->ctx->ta[plane][i] = !!*(uint32_t *)&pd->above_context[i];
-      for (i = 0; i < num_4x4_h; i += 4)
-        args->ctx->tl[plane][i] = !!*(uint32_t *)&pd->left_context[i];
-      break;
-    case TX_32X32:
-      for (i = 0; i < num_4x4_w; i += 8)
-        args->ctx->ta[plane][i] = !!*(uint64_t *)&pd->above_context[i];
-      for (i = 0; i < num_4x4_h; i += 8)
-        args->ctx->tl[plane][i] = !!*(uint64_t *)&pd->left_context[i];
-      break;
-    default:
-      assert(0);
-  }
+  vp9_get_entropy_contexts(tx_size, args->ctx->ta[plane], args->ctx->tl[plane],
+                           pd->above_context, pd->left_context,
+                           num_4x4_w, num_4x4_h);
 }
 
 void vp9_xform_quant(int plane, int block, BLOCK_SIZE plane_bsize,
