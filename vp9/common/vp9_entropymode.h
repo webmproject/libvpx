@@ -14,7 +14,6 @@
 #include "vp9/common/vp9_blockd.h"
 #include "vp9/common/vp9_treecoder.h"
 
-#define SUBMVREF_COUNT 5
 #define TX_SIZE_CONTEXTS 2
 #define MODE_UPDATE_PROB  252
 #define SWITCHABLE_FILTERS 3   // number of switchable filters
