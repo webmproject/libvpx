@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdH//9rY\u003d",
+        "filename": "vp9/common/x86/vp9_intrapred_ssse3.asm",
+        "patchSetId": 2
+      },
+      "lineNbr": 327,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2013-09-25T19:55:25Z",
+      "side": 1,
+      "message": "Add goffset to register list for d63 functions.",
+      "revId": "611ba11cf117f53dd6c15820907541e412d3ef6b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
