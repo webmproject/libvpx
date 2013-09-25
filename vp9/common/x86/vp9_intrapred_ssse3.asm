@@ -17,8 +17,8 @@ pw_2: times 8 dw 2
 pb_7m1: times 8 db 7, -1
 pb_15: times 16 db 15
 
-sh_b01234577: db 0, 1, 2, 3, 4, 5, 7, 7
-sh_b12345677: db 1, 2, 3, 4, 5, 6, 7, 7
+sh_b01234577: db 0, 1, 2, 3, 4, 5, 7, 7, 0, 0, 0, 0, 0, 0, 0, 0
+sh_b12345677: db 1, 2, 3, 4, 5, 6, 7, 7, 0, 0, 0, 0, 0, 0, 0, 0
 sh_b23456777: db 2, 3, 4, 5, 6, 7, 7, 7, 0, 0, 0, 0, 0, 0, 0, 0
 sh_b0123456777777777: db 0, 1, 2, 3, 4, 5, 6, 7, 7, 7, 7, 7, 7, 7, 7, 7
 sh_b1234567777777777: db 1, 2, 3, 4, 5, 6, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7
@@ -305,3 +305,153 @@ cglobal d45_predictor_32x32, 3, 6, 7, dst, stride, above, dst16, line, goffset
 
   RESTORE_GOT
   RET
+
+; ------------------------------------------
+; input: x, y, z, result
+;
+; trick from pascal
+; (x+2y+z+2)>>2 can be calculated as:
+; result = avg(x,z)
+; result -= xor(x,z) & 1
+; result = avg(result,y)
+; ------------------------------------------
+%macro X_PLUS_2Y_PLUS_Z_PLUS_2_RSH_2 4
+  pavgb               %4, %1, %3
+  pxor                %3, %1
+  pand                %3, [GLOBAL(pb_1)]
+  psubb               %4, %3
+  pavgb               %4, %2
+%endmacro
+
+INIT_XMM ssse3
+cglobal d63_predictor_4x4, 3, 4, 5, dst, stride, above, goffset
+  GET_GOT     goffsetq
+
+  movq                m3, [aboveq]
+  pshufb              m1, m3, [GLOBAL(sh_b23456777)]
+  pshufb              m2, m3, [GLOBAL(sh_b12345677)]
+
+  X_PLUS_2Y_PLUS_Z_PLUS_2_RSH_2 m3, m2, m1, m4
+  pavgb               m3, m2
+
+  ; store 4 lines
+  movd    [dstq        ], m3
+  movd    [dstq+strideq], m4
+  lea               dstq, [dstq+strideq*2]
+  psrldq              m3, 1
+  psrldq              m4, 1
+  movd    [dstq        ], m3
+  movd    [dstq+strideq], m4
+  RESTORE_GOT
+  RET
+
+INIT_XMM ssse3
+cglobal d63_predictor_8x8, 3, 4, 5, dst, stride, above, goffset
+  GET_GOT     goffsetq
+
+  movq                m3, [aboveq]
+  DEFINE_ARGS dst, stride, stride3
+  lea           stride3q, [strideq*3]
+  pshufb              m1, m3, [GLOBAL(sh_b2345677777777777)]
+  pshufb              m0, m3, [GLOBAL(sh_b0123456777777777)]
+  pshufb              m2, m3, [GLOBAL(sh_b1234567777777777)]
+  pshufb              m3, [GLOBAL(sh_b0123456777777777)]
+
+  X_PLUS_2Y_PLUS_Z_PLUS_2_RSH_2 m0, m2, m1, m4
+  pavgb               m3, m2
+
+  ; store 4 lines
+  movq    [dstq        ], m3
+  movq    [dstq+strideq], m4
+  psrldq              m3, 1
+  psrldq              m4, 1
+  movq  [dstq+strideq*2], m3
+  movq  [dstq+stride3q ], m4
+  lea               dstq, [dstq+strideq*4]
+  psrldq              m3, 1
+  psrldq              m4, 1
+
+  ; store 4 lines
+  movq    [dstq        ], m3
+  movq    [dstq+strideq], m4
+  psrldq              m3, 1
+  psrldq              m4, 1
+  movq  [dstq+strideq*2], m3
+  movq  [dstq+stride3q ], m4
+  RESTORE_GOT
+  RET
+
+INIT_XMM ssse3
+cglobal d63_predictor_16x16, 3, 5, 5, dst, stride, above, line, goffset
+  GET_GOT     goffsetq
+
+  mova                m0, [aboveq]
+  DEFINE_ARGS dst, stride, stride3, line
+  lea           stride3q, [strideq*3]
+  mova                m1, [GLOBAL(sh_b123456789abcdeff)]
+  pshufb              m2, m0, [GLOBAL(sh_b23456789abcdefff)]
+  pshufb              m3, m0, m1
+
+  X_PLUS_2Y_PLUS_Z_PLUS_2_RSH_2 m0, m3, m2, m4
+  pavgb               m0, m3
+
+  mov              lined, 4
+.loop:
+  mova  [dstq          ], m0
+  mova  [dstq+strideq  ], m4
+  pshufb              m0, m1
+  pshufb              m4, m1
+  mova  [dstq+strideq*2], m0
+  mova  [dstq+stride3q ], m4
+  pshufb              m0, m1
+  pshufb              m4, m1
+  lea               dstq, [dstq+strideq*4]
+  dec              lined
+  jnz .loop
+  RESTORE_GOT
+  REP_RET
+
+INIT_XMM ssse3
+cglobal d63_predictor_32x32, 3, 5, 8, dst, stride, above, line, goffset
+  GET_GOT     goffsetq
+
+  mova                   m0, [aboveq]
+  mova                   m7, [aboveq+16]
+  DEFINE_ARGS dst, stride, stride3, line
+  mova                   m1, [GLOBAL(sh_b123456789abcdeff)]
+  lea              stride3q, [strideq*3]
+  pshufb                 m2, m7, [GLOBAL(sh_b23456789abcdefff)]
+  pshufb                 m3, m7, m1
+
+  X_PLUS_2Y_PLUS_Z_PLUS_2_RSH_2 m7, m3, m2, m4
+  palignr                m6, m7, m0, 1
+  palignr                m5, m7, m0, 2
+  pavgb                  m7, m3
+
+  X_PLUS_2Y_PLUS_Z_PLUS_2_RSH_2 m0, m6, m5, m2
+  pavgb                  m0, m6
+
+  mov                 lined, 8
+.loop:
+  mova  [dstq             ], m0
+  mova  [dstq          +16], m7
+  mova  [dstq+strideq     ], m2
+  mova  [dstq+strideq  +16], m4
+  palignr                m3, m7, m0, 1
+  palignr                m5, m4, m2, 1
+  pshufb                 m7, m1
+  pshufb                 m4, m1
+
+  mova  [dstq+strideq*2   ], m3
+  mova  [dstq+strideq*2+16], m7
+  mova  [dstq+stride3q    ], m5
+  mova  [dstq+stride3q +16], m4
+  palignr                m0, m7, m3, 1
+  palignr                m2, m4, m5, 1
+  pshufb                 m7, m1
+  pshufb                 m4, m1
+  lea                  dstq, [dstq+strideq*4]
+  dec                 lined
+  jnz .loop
+  RESTORE_GOT
+  REP_RET
