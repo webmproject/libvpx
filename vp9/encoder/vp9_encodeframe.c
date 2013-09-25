@@ -2212,7 +2212,7 @@ static void encode_frame_internal(VP9_COMP *cpi) {
   cpi->inter_zz_count = 0;
 
   vp9_zero(cm->counts.switchable_interp);
-  vp9_zero(cpi->txfm_stepdown_count);
+  vp9_zero(cpi->tx_stepdown_count);
 
   xd->mi_8x8 = cm->mi_grid_visible;
   // required for vp9_frame_init_quantizer
@@ -2458,9 +2458,9 @@ static void select_tx_mode(VP9_COMP *cpi) {
       unsigned int total = 0;
       int i;
       for (i = 0; i < TX_SIZES; ++i)
-        total += cpi->txfm_stepdown_count[i];
+        total += cpi->tx_stepdown_count[i];
       if (total) {
-        double fraction = (double)cpi->txfm_stepdown_count[0] / total;
+        double fraction = (double)cpi->tx_stepdown_count[0] / total;
         cpi->common.tx_mode = fraction > 0.90 ? ALLOW_32X32 : TX_MODE_SELECT;
         // printf("fraction = %f\n", fraction);
       }  // else keep unchanged
