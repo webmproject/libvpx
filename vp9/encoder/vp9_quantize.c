@@ -337,10 +337,10 @@ void vp9_frame_init_quantizer(VP9_COMP *cpi) {
   vp9_mb_init_quantizer(cpi, &cpi->mb);
 }
 
-void vp9_set_quantizer(struct VP9_COMP *cpi, int Q) {
+void vp9_set_quantizer(struct VP9_COMP *cpi, int q) {
   VP9_COMMON *cm = &cpi->common;
 
-  cm->base_qindex = Q;
+  cm->base_qindex = q;
 
   // if any of the delta_q values are changing update flag will
   // have to be set.

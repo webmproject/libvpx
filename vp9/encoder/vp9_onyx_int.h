@@ -712,9 +712,8 @@ void vp9_activity_masking(VP9_COMP *cpi, MACROBLOCK *x);
 
 void vp9_set_speed_features(VP9_COMP *cpi);
 
-extern int vp9_calc_ss_err(YV12_BUFFER_CONFIG *source,
-                           YV12_BUFFER_CONFIG *dest);
+int vp9_calc_ss_err(YV12_BUFFER_CONFIG *source, YV12_BUFFER_CONFIG *dest);
 
-extern void vp9_alloc_compressor_data(VP9_COMP *cpi);
+void vp9_alloc_compressor_data(VP9_COMP *cpi);
 
 #endif  // VP9_ENCODER_VP9_ONYX_INT_H_
