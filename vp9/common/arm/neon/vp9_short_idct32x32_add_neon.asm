@@ -43,8 +43,7 @@ cospi_30_64 EQU  1606
 cospi_31_64 EQU   804
 
 
-    EXPORT  |idct32_transpose_and_transform|
-    EXPORT  |idct32_combine_add|
+    EXPORT  |vp9_short_idct32x32_add_neon|
     ARM
     REQUIRE8
     PRESERVE8
@@ -100,6 +99,142 @@ cospi_31_64 EQU   804
     vst1.16 {$reg2}, [r1]
     MEND
     ; --------------------------------------------------------------------------
+    ; Combine-add results with current destination content
+    ;   q6-q9 contain the results (out[j * 32 + 0-31])
+    MACRO
+    STORE_COMBINE_CENTER_RESULTS
+    ; load dest[j * dest_stride + 0-31]
+    vld1.s16        {d8}, [r10], r2
+    vld1.s16        {d11}, [r9], r11
+    vld1.s16        {d9}, [r10]
+    vld1.s16        {d10}, [r9]
+    ; ROUND_POWER_OF_TWO
+    vrshr.s16       q7, q7, #6
+    vrshr.s16       q8, q8, #6
+    vrshr.s16       q9, q9, #6
+    vrshr.s16       q6, q6, #6
+    ; add to dest[j * dest_stride + 0-31]
+    vaddw.u8        q7, q7, d9
+    vaddw.u8        q8, q8, d10
+    vaddw.u8        q9, q9, d11
+    vaddw.u8        q6, q6, d8
+    ; clip pixel
+    vqmovun.s16     d9,  q7
+    vqmovun.s16     d10, q8
+    vqmovun.s16     d11, q9
+    vqmovun.s16     d8,  q6
+    ; store back into dest[j * dest_stride + 0-31]
+    vst1.16         {d9}, [r10], r11
+    vst1.16         {d10}, [r9], r2
+    vst1.16         {d8}, [r10]
+    vst1.16         {d11}, [r9]
+    ; update pointers (by dest_stride * 2)
+    sub r9,  r9,  r2, lsl #1
+    add r10, r10, r2, lsl #1
+    MEND
+    ; --------------------------------------------------------------------------
+    ; Combine-add results with current destination content
+    ;   q6-q9 contain the results (out[j * 32 + 0-31])
+    MACRO
+    STORE_COMBINE_CENTER_RESULTS_LAST
+    ; load dest[j * dest_stride + 0-31]
+    vld1.s16        {d8}, [r10], r2
+    vld1.s16        {d11}, [r9], r11
+    vld1.s16        {d9}, [r10]
+    vld1.s16        {d10}, [r9]
+    ; ROUND_POWER_OF_TWO
+    vrshr.s16       q7, q7, #6
+    vrshr.s16       q8, q8, #6
+    vrshr.s16       q9, q9, #6
+    vrshr.s16       q6, q6, #6
+    ; add to dest[j * dest_stride + 0-31]
+    vaddw.u8        q7, q7, d9
+    vaddw.u8        q8, q8, d10
+    vaddw.u8        q9, q9, d11
+    vaddw.u8        q6, q6, d8
+    ; clip pixel
+    vqmovun.s16     d9,  q7
+    vqmovun.s16     d10, q8
+    vqmovun.s16     d11, q9
+    vqmovun.s16     d8,  q6
+    ; store back into dest[j * dest_stride + 0-31]
+    vst1.16         {d9}, [r10], r11
+    vst1.16         {d10}, [r9], r2
+    vst1.16         {d8}, [r10]!
+    vst1.16         {d11}, [r9]!
+    ; update pointers (by dest_stride * 2)
+    sub r9,  r9,  r2, lsl #1
+    add r10, r10, r2, lsl #1
+    MEND
+    ; --------------------------------------------------------------------------
+    ; Combine-add results with current destination content
+    ;   q4-q7 contain the results (out[j * 32 + 0-31])
+    MACRO
+    STORE_COMBINE_EXTREME_RESULTS
+    ; load dest[j * dest_stride + 0-31]
+    vld1.s16        {d4}, [r7], r2
+    vld1.s16        {d7}, [r6], r11
+    vld1.s16        {d5}, [r7]
+    vld1.s16        {d6}, [r6]
+    ; ROUND_POWER_OF_TWO
+    vrshr.s16       q5, q5, #6
+    vrshr.s16       q6, q6, #6
+    vrshr.s16       q7, q7, #6
+    vrshr.s16       q4, q4, #6
+    ; add to dest[j * dest_stride + 0-31]
+    vaddw.u8        q5, q5, d5
+    vaddw.u8        q6, q6, d6
+    vaddw.u8        q7, q7, d7
+    vaddw.u8        q4, q4, d4
+    ; clip pixel
+    vqmovun.s16     d5, q5
+    vqmovun.s16     d6, q6
+    vqmovun.s16     d7, q7
+    vqmovun.s16     d4, q4
+    ; store back into dest[j * dest_stride + 0-31]
+    vst1.16         {d5}, [r7], r11
+    vst1.16         {d6}, [r6], r2
+    vst1.16         {d7}, [r6]
+    vst1.16         {d4}, [r7]
+    ; update pointers (by dest_stride * 2)
+    sub r6, r6, r2, lsl #1
+    add r7, r7, r2, lsl #1
+    MEND
+    ; --------------------------------------------------------------------------
+    ; Combine-add results with current destination content
+    ;   q4-q7 contain the results (out[j * 32 + 0-31])
+    MACRO
+    STORE_COMBINE_EXTREME_RESULTS_LAST
+    ; load dest[j * dest_stride + 0-31]
+    vld1.s16        {d4}, [r7], r2
+    vld1.s16        {d7}, [r6], r11
+    vld1.s16        {d5}, [r7]
+    vld1.s16        {d6}, [r6]
+    ; ROUND_POWER_OF_TWO
+    vrshr.s16       q5, q5, #6
+    vrshr.s16       q6, q6, #6
+    vrshr.s16       q7, q7, #6
+    vrshr.s16       q4, q4, #6
+    ; add to dest[j * dest_stride + 0-31]
+    vaddw.u8        q5, q5, d5
+    vaddw.u8        q6, q6, d6
+    vaddw.u8        q7, q7, d7
+    vaddw.u8        q4, q4, d4
+    ; clip pixel
+    vqmovun.s16     d5, q5
+    vqmovun.s16     d6, q6
+    vqmovun.s16     d7, q7
+    vqmovun.s16     d4, q4
+    ; store back into dest[j * dest_stride + 0-31]
+    vst1.16         {d5}, [r7], r11
+    vst1.16         {d6}, [r6], r2
+    vst1.16         {d7}, [r6]!
+    vst1.16         {d4}, [r7]!
+    ; update pointers (by dest_stride * 2)
+    sub r6, r6, r2, lsl #1
+    add r7, r7, r2, lsl #1
+    MEND
+    ; --------------------------------------------------------------------------
     ; Touches q8-q12, q15 (q13-q14 are preserved)
     ; valid output registers are anything but q8-q11
     MACRO
@@ -110,12 +245,12 @@ cospi_31_64 EQU   804
     ;           additions/substractions before the multiplies.
     ; generate the constants
     ;   generate scalar constants
-    mov             r3,  #$first_constant  & 0xFF00
-    add             r3,  #$first_constant  & 0x00FF
+    mov             r8,  #$first_constant  & 0xFF00
     mov             r12, #$second_constant & 0xFF00
+    add             r8,  #$first_constant  & 0x00FF
     add             r12, #$second_constant & 0x00FF
     ;   generate vector constants
-    vdup.16         d30, r3
+    vdup.16         d30, r8
     vdup.16         d31, r12
     ; (used) two for inputs (regA-regD), one for constants (q15)
     ; do some multiplications (ordered for maximum latency hiding)
@@ -153,15 +288,22 @@ cospi_31_64 EQU   804
     MEND
     ; --------------------------------------------------------------------------
 
-;void idct32_transpose_and_transform(int16_t *transpose_buffer, int16_t *output, int16_t *input);
+;void vp9_short_idct32x32_add_neon(int16_t *input, uint8_t *dest, int dest_stride);
 ;
-; r0  int16_t *transpose_buffer
-; r1  int16_t *output
-; r2  int16_t *input)
-; TODO(cd): have more logical parameter ordering but this issue will disappear
-;           when functions are combined.
+;   r0  int16_t *input,
+;   r1  uint8_t *dest,
+;   r2  int dest_stride)
+; loop counters
+;   r4  bands loop counter
+;   r5  pass loop counter
+;   r8  transpose loop counter
+; combine-add pointers
+;   r6  dest + 31 * dest_stride, descending (30, 29, 28, ...)
+;   r7  dest +  0 * dest_stride, ascending  (1, 2, 3, ...)
+;   r9  dest + 15 * dest_stride, descending (14, 13, 12, ...)
+;   r10 dest + 16 * dest_stride, ascending  (17, 18, 19, ...)
 
-|idct32_transpose_and_transform| PROC
+|vp9_short_idct32x32_add_neon| PROC
     ; This function does one pass of idct32x32 transform.
     ;
     ; This is done by transposing the input and then doing a 1d transform on
@@ -171,43 +313,73 @@ cospi_31_64 EQU   804
     ; The 1d transform is done by looping over bands of eight columns (the
     ; idct32_bands loop). For each band, the transform input transposition
     ; is done on demand, one band of four 8x8 matrices at a time. The four
-    ; matrices are trsnposed by pairs (the idct32_transpose_pair loop).
-    push {r4}
-    mov r4, #0          ; initialize bands loop counter
+    ; matrices are transposed by pairs (the idct32_transpose_pair loop).
+    push  {r4-r11}
+    vpush {d8-d15}
+    ; stack operation
+    ; internal buffer used to transpose 8 lines into before transforming them
+    ;   int16_t transpose_buffer[32 * 8];
+    ;   at sp + [4096, 4607]
+    ; results of the first pass (transpose and transform rows)
+    ;   int16_t pass1[32 * 32];
+    ;   at sp + [0, 2047]
+    ; results of the second pass (transpose and transform columns)
+    ;   int16_t pass2[32 * 32];
+    ;   at sp + [2048, 4095]
+    sub sp, sp, #512+2048+2048
+
+    ; r6  = dest + 31 * dest_stride
+    ; r7  = dest +  0 * dest_stride
+    ; r9  = dest + 15 * dest_stride
+    ; r10 = dest + 16 * dest_stride
+    rsb r6,  r2, r2, lsl #5
+    rsb r9,  r2, r2, lsl #4
+    add r10, r1, r2, lsl #4
+    mov r7, r1
+    add r6, r6, r1
+    add r9, r9, r1
+    ; r11 = -dest_stride
+    neg r11, r2
+    ; r3 = input
+    mov r3, r0
+    ; parameters for first pass
+      ; r0 = transpose_buffer[32 * 8]
+    add r0, sp, #4096
+      ; r1 = pass1[32 * 32]
+    mov r1, sp
+
+    mov r5, #0          ; initialize pass loop counter
+idct32_pass_loop
+    mov r4, #4          ; initialize bands loop counter
 idct32_bands_loop
-    ; TODO(cd) get rid of these push/pop by properly adjusting register
-    ;          content at end of loop
-    push {r0}
-    push {r1}
-    push {r2}
-    mov r3, #0          ; initialize transpose loop counter
+    mov r8, #2          ; initialize transpose loop counter
 idct32_transpose_pair_loop
     ; Load two horizontally consecutive 8x8 16bit data matrices. The first one
     ; into q0-q7 and the second one into q8-q15. There is a stride of 64,
     ; adjusted to 32 because of the two post-increments.
-    vld1.s16        {q8},  [r2]!
-    vld1.s16        {q0},  [r2]!
-    add r2, #32
-    vld1.s16        {q9},  [r2]!
-    vld1.s16        {q1},  [r2]!
-    add r2, #32
-    vld1.s16        {q10}, [r2]!
-    vld1.s16        {q2},  [r2]!
-    add r2, #32
-    vld1.s16        {q11}, [r2]!
-    vld1.s16        {q3},  [r2]!
-    add r2, #32
-    vld1.s16        {q12}, [r2]!
-    vld1.s16        {q4},  [r2]!
-    add r2, #32
-    vld1.s16        {q13}, [r2]!
-    vld1.s16        {q5},  [r2]!
-    add r2, #32
-    vld1.s16        {q14}, [r2]!
-    vld1.s16        {q6},  [r2]!
-    add r2, #32
-    vld1.s16        {q15}, [r2]!
-    vld1.s16        {q7},  [r2]!
+    vld1.s16        {q8},  [r3]!
+    vld1.s16        {q0},  [r3]!
+    add r3, #32
+    vld1.s16        {q9},  [r3]!
+    vld1.s16        {q1},  [r3]!
+    add r3, #32
+    vld1.s16        {q10}, [r3]!
+    vld1.s16        {q2},  [r3]!
+    add r3, #32
+    vld1.s16        {q11}, [r3]!
+    vld1.s16        {q3},  [r3]!
+    add r3, #32
+    vld1.s16        {q12}, [r3]!
+    vld1.s16        {q4},  [r3]!
+    add r3, #32
+    vld1.s16        {q13}, [r3]!
+    vld1.s16        {q5},  [r3]!
+    add r3, #32
+    vld1.s16        {q14}, [r3]!
+    vld1.s16        {q6},  [r3]!
+    add r3, #32
+    vld1.s16        {q15}, [r3]!
+    vld1.s16        {q7},  [r3]!
 
     ; Transpose the two 8x8 16bit data matrices.
     vswp            d17, d24
@@ -255,11 +427,13 @@ idct32_transpose_pair_loop
     vst1.16        {q7},  [r0]!
 
     ; increment pointers by adjusted stride (not necessary for r0/out)
-    sub r2,  r2,  #8*32*2-32-16*2
+    ;   go back by 7*32 for the seven lines moved fully by read and add
+    ;   go back by 32 for the eigth line only read
+    ;   advance by 16*2 to go the next pair
+    sub r3,  r3,  #7*32*2 + 32 - 16*2
     ; transpose pair loop processing
-    add r3, r3, #1
-    cmp r3, #1
-    ble idct32_transpose_pair_loop
+    subs r8, r8, #1
+    bne idct32_transpose_pair_loop
 
     ; restore r0/input to its original value
     sub r0, r0, #32*8*2
@@ -815,21 +989,26 @@ idct32_transpose_pair_loop
     vadd.s16  q9, q5, q0
     vsub.s16  q6, q5, q0
     vsub.s16  q7, q4, q1
-    STORE_IN_OUTPUT 17, 17, 16, q7, q6
-    STORE_IN_OUTPUT 16, 15, 14, q9, q8
+
+    cmp r5, #0
+    bgt idct32_bands_end_2nd_pass
+
+idct32_bands_end_1st_pass
+    STORE_IN_OUTPUT 17, 16, 17, q6, q7
+    STORE_IN_OUTPUT 17, 14, 15, q8, q9
     ; --------------------------------------------------------------------------
     ; part of final stage
     ;output[ 0 * 32] = step1b[0][i] + step1b[31][i];
     ;output[ 1 * 32] = step1b[1][i] + step1b[30][i];
     ;output[30 * 32] = step1b[1][i] - step1b[30][i];
     ;output[31 * 32] = step1b[0][i] - step1b[31][i];
-    LOAD_FROM_OUTPUT 14, 30, 31, q0, q1
+    LOAD_FROM_OUTPUT 15, 30, 31, q0, q1
     vadd.s16  q4, q2, q1
     vadd.s16  q5, q3, q0
     vsub.s16  q6, q3, q0
     vsub.s16  q7, q2, q1
-    STORE_IN_OUTPUT 31, 31, 30, q7, q6
-    STORE_IN_OUTPUT 30,  0,  1, q4, q5
+    STORE_IN_OUTPUT 31, 30, 31, q6, q7
+    STORE_IN_OUTPUT 31,  0,  1, q4, q5
     ; --------------------------------------------------------------------------
     ; part of stage 7
     ;step1[2] = step1b[2][i] + step1b[13][i];
@@ -848,25 +1027,25 @@ idct32_transpose_pair_loop
     ;output[18 * 32] = step1b[13][i] - step1b[18][i];
     ;output[19 * 32] = step1b[12][i] - step1b[19][i];
     LOAD_FROM_OUTPUT 13, 18, 19, q0, q1
-    vadd.s16  q6, q4, q1
-    vadd.s16  q7, q5, q0
-    vsub.s16  q8, q5, q0
-    vsub.s16  q9, q4, q1
-    STORE_IN_OUTPUT 19, 19, 18, q9, q8
-    STORE_IN_OUTPUT 18, 13, 12, q7, q6
+    vadd.s16  q8, q4, q1
+    vadd.s16  q9, q5, q0
+    vsub.s16  q6, q5, q0
+    vsub.s16  q7, q4, q1
+    STORE_IN_OUTPUT 19, 18, 19, q6, q7
+    STORE_IN_OUTPUT 19, 12, 13, q8, q9
     ; --------------------------------------------------------------------------
     ; part of final stage
     ;output[ 2 * 32] = step1b[2][i] + step1b[29][i];
     ;output[ 3 * 32] = step1b[3][i] + step1b[28][i];
     ;output[28 * 32] = step1b[3][i] - step1b[28][i];
     ;output[29 * 32] = step1b[2][i] - step1b[29][i];
-    LOAD_FROM_OUTPUT 12, 28, 29, q0, q1
+    LOAD_FROM_OUTPUT 13, 28, 29, q0, q1
     vadd.s16  q4, q2, q1
     vadd.s16  q5, q3, q0
     vsub.s16  q6, q3, q0
     vsub.s16  q7, q2, q1
-    STORE_IN_OUTPUT 29, 29, 28, q7, q6
-    STORE_IN_OUTPUT 28,  2,  3, q4, q5
+    STORE_IN_OUTPUT 29, 28, 29, q6, q7
+    STORE_IN_OUTPUT 29,  2,  3, q4, q5
     ; --------------------------------------------------------------------------
     ; part of stage 7
     ;step1[4] = step1b[4][i] + step1b[11][i];
@@ -885,25 +1064,25 @@ idct32_transpose_pair_loop
     ;output[20 * 32] = step1b[11][i] - step1b[20][i];
     ;output[21 * 32] = step1b[10][i] - step1b[21][i];
     LOAD_FROM_OUTPUT 11, 20, 21, q0, q1
-    vadd.s16  q6, q4, q1
-    vadd.s16  q7, q5, q0
-    vsub.s16  q8, q5, q0
-    vsub.s16  q9, q4, q1
-    STORE_IN_OUTPUT 21, 21, 20, q9, q8
-    STORE_IN_OUTPUT 20, 11, 10, q7, q6
+    vadd.s16  q8, q4, q1
+    vadd.s16  q9, q5, q0
+    vsub.s16  q6, q5, q0
+    vsub.s16  q7, q4, q1
+    STORE_IN_OUTPUT 21, 20, 21, q6, q7
+    STORE_IN_OUTPUT 21, 10, 11, q8, q9
     ; --------------------------------------------------------------------------
     ; part of final stage
     ;output[ 4 * 32] = step1b[4][i] + step1b[27][i];
     ;output[ 5 * 32] = step1b[5][i] + step1b[26][i];
     ;output[26 * 32] = step1b[5][i] - step1b[26][i];
     ;output[27 * 32] = step1b[4][i] - step1b[27][i];
-    LOAD_FROM_OUTPUT 10, 26, 27, q0, q1
+    LOAD_FROM_OUTPUT 11, 26, 27, q0, q1
     vadd.s16  q4, q2, q1
     vadd.s16  q5, q3, q0
     vsub.s16  q6, q3, q0
     vsub.s16  q7, q2, q1
-    STORE_IN_OUTPUT 27, 27, 26, q7, q6
-    STORE_IN_OUTPUT 26,  4,  5, q4, q5
+    STORE_IN_OUTPUT 27, 26, 27, q6, q7
+    STORE_IN_OUTPUT 27,  4,  5, q4, q5
     ; --------------------------------------------------------------------------
     ; part of stage 7
     ;step1[6] = step1b[6][i] + step1b[9][i];
@@ -922,92 +1101,199 @@ idct32_transpose_pair_loop
     ;output[22 * 32] = step1b[9][i] - step1b[22][i];
     ;output[23 * 32] = step1b[8][i] - step1b[23][i];
     LOAD_FROM_OUTPUT 9, 22, 23, q0, q1
-    vadd.s16  q6, q4, q1
-    vadd.s16  q7, q5, q0
-    vsub.s16  q8, q5, q0
-    vsub.s16  q9, q4, q1
-    STORE_IN_OUTPUT 23, 23, 22, q9, q8
-    STORE_IN_OUTPUT 22, 9, 8, q7, q6
+    vadd.s16  q8, q4, q1
+    vadd.s16  q9, q5, q0
+    vsub.s16  q6, q5, q0
+    vsub.s16  q7, q4, q1
+    STORE_IN_OUTPUT 23, 22, 23, q6, q7
+    STORE_IN_OUTPUT 23, 8, 9, q8, q9
     ; --------------------------------------------------------------------------
     ; part of final stage
     ;output[ 6 * 32] = step1b[6][i] + step1b[25][i];
     ;output[ 7 * 32] = step1b[7][i] + step1b[24][i];
     ;output[24 * 32] = step1b[7][i] - step1b[24][i];
     ;output[25 * 32] = step1b[6][i] - step1b[25][i];
-    LOAD_FROM_OUTPUT 8, 24, 25, q0, q1
+    LOAD_FROM_OUTPUT 9, 24, 25, q0, q1
     vadd.s16  q4, q2, q1
     vadd.s16  q5, q3, q0
     vsub.s16  q6, q3, q0
     vsub.s16  q7, q2, q1
-    STORE_IN_OUTPUT 25, 25, 24, q7, q6
-    STORE_IN_OUTPUT 24,  6,  7, q4, q5
-    ; --------------------------------------------------------------------------
+    STORE_IN_OUTPUT 25, 24, 25, q6, q7
+    STORE_IN_OUTPUT 25,  6,  7, q4, q5
 
-    ; TODO(cd) get rid of these push/pop by properly adjusting register
-    ;          content at end of loop
-    pop {r2}
-    pop {r1}
-    pop {r0}
-    add r1, r1, #8*2
-    add r2, r2, #8*32*2
+    ; restore r0 by removing the last offset from the last
+    ;     operation (LOAD_FROM_TRANSPOSED 16, 8, 24) => 24*8*2
+    sub r0, r0, #24*8*2
+    ; restore r1 by removing the last offset from the last
+    ;     operation (STORE_IN_OUTPUT 24,  6,  7) => 7*32*2
+    ; advance by 8 columns => 8*2
+    sub r1, r1, #7*32*2 - 8*2
+    ;   advance by 8 lines (8*32*2)
+    ;   go back by the two pairs from the loop (32*2)
+    add r3, r3, #8*32*2 - 32*2
 
     ; bands loop processing
-    add r4, r4, #1
-    cmp r4, #3
-    ble idct32_bands_loop
+    subs r4, r4, #1
+    bne idct32_bands_loop
 
-    pop {r4}
+    ; parameters for second pass
+    ; the input of pass2 is the result of pass1. we have to remove the offset
+    ;   of 32 columns induced by the above idct32_bands_loop
+    sub r3, r1, #32*2
+      ; r1 = pass2[32 * 32]
+    add r1, sp, #2048
+
+    ; pass loop processing
+    add r5, r5, #1
+    B idct32_pass_loop
+
+idct32_bands_end_2nd_pass
+    STORE_COMBINE_CENTER_RESULTS
+    ; --------------------------------------------------------------------------
+    ; part of final stage
+    ;output[ 0 * 32] = step1b[0][i] + step1b[31][i];
+    ;output[ 1 * 32] = step1b[1][i] + step1b[30][i];
+    ;output[30 * 32] = step1b[1][i] - step1b[30][i];
+    ;output[31 * 32] = step1b[0][i] - step1b[31][i];
+    LOAD_FROM_OUTPUT 17, 30, 31, q0, q1
+    vadd.s16  q4, q2, q1
+    vadd.s16  q5, q3, q0
+    vsub.s16  q6, q3, q0
+    vsub.s16  q7, q2, q1
+    STORE_COMBINE_EXTREME_RESULTS
+    ; --------------------------------------------------------------------------
+    ; part of stage 7
+    ;step1[2] = step1b[2][i] + step1b[13][i];
+    ;step1[3] = step1b[3][i] + step1b[12][i];
+    ;step1[12] = step1b[3][i] - step1b[12][i];
+    ;step1[13] = step1b[2][i] - step1b[13][i];
+    LOAD_FROM_OUTPUT 31, 12, 13, q0, q1
+    vadd.s16  q2, q10, q1
+    vadd.s16  q3, q11, q0
+    vsub.s16  q4, q11, q0
+    vsub.s16  q5, q10, q1
+    ; --------------------------------------------------------------------------
+    ; part of final stage
+    ;output[12 * 32] = step1b[12][i] + step1b[19][i];
+    ;output[13 * 32] = step1b[13][i] + step1b[18][i];
+    ;output[18 * 32] = step1b[13][i] - step1b[18][i];
+    ;output[19 * 32] = step1b[12][i] - step1b[19][i];
+    LOAD_FROM_OUTPUT 13, 18, 19, q0, q1
+    vadd.s16  q8, q4, q1
+    vadd.s16  q9, q5, q0
+    vsub.s16  q6, q5, q0
+    vsub.s16  q7, q4, q1
+    STORE_COMBINE_CENTER_RESULTS
+    ; --------------------------------------------------------------------------
+    ; part of final stage
+    ;output[ 2 * 32] = step1b[2][i] + step1b[29][i];
+    ;output[ 3 * 32] = step1b[3][i] + step1b[28][i];
+    ;output[28 * 32] = step1b[3][i] - step1b[28][i];
+    ;output[29 * 32] = step1b[2][i] - step1b[29][i];
+    LOAD_FROM_OUTPUT 19, 28, 29, q0, q1
+    vadd.s16  q4, q2, q1
+    vadd.s16  q5, q3, q0
+    vsub.s16  q6, q3, q0
+    vsub.s16  q7, q2, q1
+    STORE_COMBINE_EXTREME_RESULTS
+    ; --------------------------------------------------------------------------
+    ; part of stage 7
+    ;step1[4] = step1b[4][i] + step1b[11][i];
+    ;step1[5] = step1b[5][i] + step1b[10][i];
+    ;step1[10] = step1b[5][i] - step1b[10][i];
+    ;step1[11] = step1b[4][i] - step1b[11][i];
+    LOAD_FROM_OUTPUT 29, 10, 11, q0, q1
+    vadd.s16  q2, q12, q1
+    vadd.s16  q3, q13, q0
+    vsub.s16  q4, q13, q0
+    vsub.s16  q5, q12, q1
+    ; --------------------------------------------------------------------------
+    ; part of final stage
+    ;output[10 * 32] = step1b[10][i] + step1b[21][i];
+    ;output[11 * 32] = step1b[11][i] + step1b[20][i];
+    ;output[20 * 32] = step1b[11][i] - step1b[20][i];
+    ;output[21 * 32] = step1b[10][i] - step1b[21][i];
+    LOAD_FROM_OUTPUT 11, 20, 21, q0, q1
+    vadd.s16  q8, q4, q1
+    vadd.s16  q9, q5, q0
+    vsub.s16  q6, q5, q0
+    vsub.s16  q7, q4, q1
+    STORE_COMBINE_CENTER_RESULTS
+    ; --------------------------------------------------------------------------
+    ; part of final stage
+    ;output[ 4 * 32] = step1b[4][i] + step1b[27][i];
+    ;output[ 5 * 32] = step1b[5][i] + step1b[26][i];
+    ;output[26 * 32] = step1b[5][i] - step1b[26][i];
+    ;output[27 * 32] = step1b[4][i] - step1b[27][i];
+    LOAD_FROM_OUTPUT 21, 26, 27, q0, q1
+    vadd.s16  q4, q2, q1
+    vadd.s16  q5, q3, q0
+    vsub.s16  q6, q3, q0
+    vsub.s16  q7, q2, q1
+    STORE_COMBINE_EXTREME_RESULTS
+    ; --------------------------------------------------------------------------
+    ; part of stage 7
+    ;step1[6] = step1b[6][i] + step1b[9][i];
+    ;step1[7] = step1b[7][i] + step1b[8][i];
+    ;step1[8] = step1b[7][i] - step1b[8][i];
+    ;step1[9] = step1b[6][i] - step1b[9][i];
+    LOAD_FROM_OUTPUT 27, 8, 9, q0, q1
+    vadd.s16  q2, q14, q1
+    vadd.s16  q3, q15, q0
+    vsub.s16  q4, q15, q0
+    vsub.s16  q5, q14, q1
+    ; --------------------------------------------------------------------------
+    ; part of final stage
+    ;output[ 8 * 32] = step1b[8][i] + step1b[23][i];
+    ;output[ 9 * 32] = step1b[9][i] + step1b[22][i];
+    ;output[22 * 32] = step1b[9][i] - step1b[22][i];
+    ;output[23 * 32] = step1b[8][i] - step1b[23][i];
+    LOAD_FROM_OUTPUT 9, 22, 23, q0, q1
+    vadd.s16  q8, q4, q1
+    vadd.s16  q9, q5, q0
+    vsub.s16  q6, q5, q0
+    vsub.s16  q7, q4, q1
+    STORE_COMBINE_CENTER_RESULTS_LAST
+    ; --------------------------------------------------------------------------
+    ; part of final stage
+    ;output[ 6 * 32] = step1b[6][i] + step1b[25][i];
+    ;output[ 7 * 32] = step1b[7][i] + step1b[24][i];
+    ;output[24 * 32] = step1b[7][i] - step1b[24][i];
+    ;output[25 * 32] = step1b[6][i] - step1b[25][i];
+    LOAD_FROM_OUTPUT 23, 24, 25, q0, q1
+    vadd.s16  q4, q2, q1
+    vadd.s16  q5, q3, q0
+    vsub.s16  q6, q3, q0
+    vsub.s16  q7, q2, q1
+    STORE_COMBINE_EXTREME_RESULTS_LAST
+    ; --------------------------------------------------------------------------
+    ; restore pointers to their initial indices for next band pass by
+    ;     removing/adding dest_stride * 8. The actual increment by eight
+    ;     is taken care of within the _LAST macros.
+    add r6,  r6,  r2, lsl #3
+    add r9,  r9,  r2, lsl #3
+    sub r7,  r7,  r2, lsl #3
+    sub r10, r10, r2, lsl #3
+
+    ; restore r0 by removing the last offset from the last
+    ;     operation (LOAD_FROM_TRANSPOSED 16, 8, 24) => 24*8*2
+    sub r0, r0, #24*8*2
+    ; restore r1 by removing the last offset from the last
+    ;     operation (LOAD_FROM_OUTPUT 23, 24, 25) => 25*32*2
+    ; advance by 8 columns => 8*2
+    sub r1, r1, #25*32*2 - 8*2
+    ;   advance by 8 lines (8*32*2)
+    ;   go back by the two pairs from the loop (32*2)
+    add r3, r3, #8*32*2 - 32*2
+
+    ; bands loop processing
+    subs r4, r4, #1
+    bne idct32_bands_loop
+
+    ; stack operation
+    add sp, sp, #512+2048+2048
+    vpop {d8-d15}
+    pop  {r4-r11}
     bx              lr
-    ENDP  ; |idct32_transpose_and_transform|
-
-;void idct32_combine_add(uint8_t *dest, int16_t *out, int dest_stride);
-;
-; r0  uint8_t *dest
-; r1  int16_t *out
-; r2  int dest_stride)
-
-|idct32_combine_add| PROC
-
-    mov r12, r0         ; dest pointer used for stores
-    sub r2, r2, #32     ; adjust the stride (remove the post-increments)
-    mov r3, #0          ; initialize loop counter
-
-idct32_combine_add_loop
-    ; load out[j * 32 + 0-31]
-    vld1.s16        {q12},  [r1]!
-    vld1.s16        {q13},  [r1]!
-    vld1.s16        {q14},  [r1]!
-    vld1.s16        {q15},  [r1]!
-    ; load dest[j * dest_stride + 0-31]
-    vld1.s16        {q6}, [r0]!
-    vld1.s16        {q7}, [r0]!
-    ; ROUND_POWER_OF_TWO
-    vrshr.s16       q12, q12, #6
-    vrshr.s16       q13, q13, #6
-    vrshr.s16       q14, q14, #6
-    vrshr.s16       q15, q15, #6
-    ; add to dest[j * dest_stride + 0-31]
-    vaddw.u8        q12, q12, d12
-    vaddw.u8        q13, q13, d13
-    vaddw.u8        q14, q14, d14
-    vaddw.u8        q15, q15, d15
-    ; clip pixel
-    vqmovun.s16     d12, q12
-    vqmovun.s16     d13, q13
-    vqmovun.s16     d14, q14
-    vqmovun.s16     d15, q15
-    ; store back into dest[j * dest_stride + 0-31]
-    vst1.16         {q6}, [r12]!
-    vst1.16         {q7}, [r12]!
-    ; increment pointers by adjusted stride (not necessary for r1/out)
-    add r0,  r0,  r2
-    add r12, r12, r2
-    ; loop processing
-    add r3, r3, #1
-    cmp r3, #31
-    ble idct32_combine_add_loop
-
-    bx              lr
-    ENDP  ; |idct32_transpose|
-
+    ENDP  ; |vp9_short_idct32x32_add_neon|
     END
