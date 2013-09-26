@@ -12,8 +12,6 @@
     EXPORT  |vp9_short_idct16x16_add_neon_pass2|
     EXPORT  |vp9_short_idct16x16_10_add_neon_pass1|
     EXPORT  |vp9_short_idct16x16_10_add_neon_pass2|
-    EXPORT  |save_neon_registers|
-    EXPORT  |restore_neon_registers|
     ARM
     REQUIRE8
     PRESERVE8
@@ -1178,14 +1176,4 @@ end_idct10_16x16_pass2
     pop             {r3-r9}
     bx              lr
     ENDP  ; |vp9_short_idct16x16_10_add_neon_pass2|
-;void |save_neon_registers|()
-|save_neon_registers| PROC
-    vpush           {d8-d15}
-    bx              lr
-    ENDP  ; |save_registers|
-;void |restore_neon_registers|()
-|restore_neon_registers| PROC
-    vpop           {d8-d15}
-    bx             lr
-    ENDP  ; |restore_registers|
     END
