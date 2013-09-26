@@ -1062,7 +1062,7 @@ EOF
                 setup_gnu_toolchain
                 add_cflags -use-msasm -use-asm
                 add_ldflags -i-static
-                enabled x86_64 && add_cflags -ipo -no-prec-div -static -xSSE2 -axSSE2
+                enabled x86_64 && add_cflags -ipo -static -O3
                 enabled x86_64 && AR=xiar
                 case ${tune_cpu} in
                     atom*)
