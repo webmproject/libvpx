@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdH//9m4\u003d",
+        "filename": "test/intrapred_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 213,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-09-26T09:00:46Z",
+      "side": 1,
+      "message": "this won\u0027t work on windows. see:\n\nhttps://gerrit.chromium.org/gerrit/#/c/31536/",
+      "revId": "b5242368f3800e3b658e6ee4567bd41110c80071",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
