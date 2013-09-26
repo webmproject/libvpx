@@ -2736,7 +2736,7 @@ static void encode_superblock(VP9_COMP *cpi, TOKENEXTRA **t, int output_enabled,
     int idx = cm->ref_frame_map[get_ref_frame_idx(cpi, mbmi->ref_frame[0])];
     YV12_BUFFER_CONFIG *ref_fb = &cm->yv12_fb[idx];
     YV12_BUFFER_CONFIG *second_ref_fb = NULL;
-    if (mbmi->ref_frame[1] > 0) {
+    if (has_second_ref(mbmi)) {
       idx = cm->ref_frame_map[get_ref_frame_idx(cpi, mbmi->ref_frame[1])];
       second_ref_fb = &cm->yv12_fb[idx];
     }
