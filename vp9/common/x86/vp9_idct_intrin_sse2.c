@@ -2456,7 +2456,7 @@ void vp9_short_iht16x16_add_sse2(int16_t *input, uint8_t *dest, int stride,
   write_buffer_8x16(dest, in1, stride);
 }
 
-void vp9_short_idct10_16x16_add_sse2(int16_t *input, uint8_t *dest,
+void vp9_short_idct16x16_10_add_sse2(int16_t *input, uint8_t *dest,
                                      int stride) {
   const __m128i rounding = _mm_set1_epi32(DCT_CONST_ROUNDING);
   const __m128i final_rounding = _mm_set1_epi16(1<<5);

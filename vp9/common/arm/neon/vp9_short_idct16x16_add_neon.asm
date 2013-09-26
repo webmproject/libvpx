@@ -10,8 +10,8 @@
 
     EXPORT  |vp9_short_idct16x16_add_neon_pass1|
     EXPORT  |vp9_short_idct16x16_add_neon_pass2|
-    EXPORT  |vp9_short_idct10_16x16_add_neon_pass1|
-    EXPORT  |vp9_short_idct10_16x16_add_neon_pass2|
+    EXPORT  |vp9_short_idct16x16_10_add_neon_pass1|
+    EXPORT  |vp9_short_idct16x16_10_add_neon_pass2|
     EXPORT  |save_neon_registers|
     EXPORT  |restore_neon_registers|
     ARM
@@ -788,7 +788,7 @@ end_idct16x16_pass2
     bx              lr
     ENDP  ; |vp9_short_idct16x16_add_neon_pass2|
 
-;void |vp9_short_idct10_16x16_add_neon_pass1|(int16_t *input,
+;void |vp9_short_idct16x16_10_add_neon_pass1|(int16_t *input,
 ;                                             int16_t *output, int output_stride)
 ;
 ; r0  int16_t input
@@ -798,7 +798,7 @@ end_idct16x16_pass2
 ; idct16 stage1 - stage6 on all the elements loaded in q8-q15. The output
 ; will be stored back into q8-q15 registers. This function will touch q0-q7
 ; registers and use them as buffer during calculation.
-|vp9_short_idct10_16x16_add_neon_pass1| PROC
+|vp9_short_idct16x16_10_add_neon_pass1| PROC
 
     ; TODO(hkuang): Find a better way to load the elements.
     ; load elements of 0, 2, 4, 6, 8, 10, 12, 14 into q8 - q15
@@ -907,9 +907,9 @@ end_idct16x16_pass2
     vst1.64         {d31}, [r1], r2
 
     bx              lr
-    ENDP  ; |vp9_short_idct10_16x16_add_neon_pass1|
+    ENDP  ; |vp9_short_idct16x16_10_add_neon_pass1|
 
-;void vp9_short_idct10_16x16_add_neon_pass2(int16_t *src,
+;void vp9_short_idct16x16_10_add_neon_pass2(int16_t *src,
 ;                                           int16_t *output,
 ;                                           int16_t *pass1Output,
 ;                                           int16_t skip_adding,
@@ -926,7 +926,7 @@ end_idct16x16_pass2
 ; idct16 stage1 - stage7 on all the elements loaded in q8-q15. The output
 ; will be stored back into q8-q15 registers. This function will touch q0-q7
 ; registers and use them as buffer during calculation.
-|vp9_short_idct10_16x16_add_neon_pass2| PROC
+|vp9_short_idct16x16_10_add_neon_pass2| PROC
     push            {r3-r9}
 
     ; TODO(hkuang): Find a better way to load the elements.
@@ -1177,7 +1177,7 @@ end_idct16x16_pass2
 end_idct10_16x16_pass2
     pop             {r3-r9}
     bx              lr
-    ENDP  ; |vp9_short_idct10_16x16_add_neon_pass2|
+    ENDP  ; |vp9_short_idct16x16_10_add_neon_pass2|
 ;void |save_neon_registers|()
 |save_neon_registers| PROC
     vpush           {d8-d15}
