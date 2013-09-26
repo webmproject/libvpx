@@ -34,13 +34,17 @@ class IntraPredBase {
   }
 
  protected:
-  void SetupMacroblock(uint8_t *data, int block_size, int stride,
+  void SetupMacroblock(MACROBLOCKD *mbptr,
+                       MODE_INFO *miptr,
+                       uint8_t *data,
+                       int block_size,
+                       int stride,
                        int num_planes) {
-    memset(&mb_, 0, sizeof(mb_));
-    memset(&mi_, 0, sizeof(mi_));
-    mb_.up_available = 1;
-    mb_.left_available = 1;
-    mb_.mode_info_context = &mi_;
+    mbptr_ = mbptr;
+    miptr_ = miptr;
+    mbptr_->up_available = 1;
+    mbptr_->left_available = 1;
+    mbptr_->mode_info_context = miptr_;
     stride_ = stride;
     block_size_ = block_size;
     num_planes_ = num_planes;
@@ -63,14 +67,14 @@ class IntraPredBase {
   virtual void Predict(MB_PREDICTION_MODE mode) = 0;
 
   void SetLeftUnavailable() {
-    mb_.left_available = 0;
+    mbptr_->left_available = 0;
     for (int p = 0; p < num_planes_; p++)
       for (int i = -1; i < block_size_; ++i)
         data_ptr_[p][stride_ * i - 1] = 129;
   }
 
   void SetTopUnavailable() {
-    mb_.up_available = 0;
+    mbptr_->up_available = 0;
     for (int p = 0; p < num_planes_; p++)
       memset(&data_ptr_[p][-1 - stride_], 127, block_size_ + 2);
   }
@@ -96,13 +100,13 @@ class IntraPredBase {
     for (int p = 0; p < num_planes_; p++) {
       // calculate expected DC
       int expected;
-      if (mb_.up_available || mb_.left_available) {
-        int sum = 0, shift = BlockSizeLog2Min1() + mb_.up_available +
-                             mb_.left_available;
-        if (mb_.up_available)
+      if (mbptr_->up_available || mbptr_->left_available) {
+        int sum = 0, shift = BlockSizeLog2Min1() + mbptr_->up_available +
+                             mbptr_->left_available;
+        if (mbptr_->up_available)
           for (int x = 0; x < block_size_; x++)
             sum += data_ptr_[p][x - stride_];
-        if (mb_.left_available)
+        if (mbptr_->left_available)
           for (int y = 0; y < block_size_; y++)
             sum += data_ptr_[p][y * stride_ - 1];
         expected = (sum + (1 << (shift - 1))) >> shift;
@@ -209,8 +213,8 @@ class IntraPredBase {
     }
   }
 
-  MACROBLOCKD mb_;
-  MODE_INFO mi_;
+  MACROBLOCKD *mbptr_;
+  MODE_INFO *miptr_;
   uint8_t *data_ptr_[2];  // in the case of Y, only [0] is used
   int stride_;
   int block_size_;
@@ -228,12 +232,18 @@ class IntraPredYTest : public ::testing::TestWithParam<intra_pred_y_fn_t>,
     protected IntraPredBase {
  public:
   static void SetUpTestCase() {
+    mb_ = reinterpret_cast<MACROBLOCKD*>(
+        vpx_memalign(32, sizeof(MACROBLOCKD)));
+    mi_ = reinterpret_cast<MODE_INFO*>(
+        vpx_memalign(32, sizeof(MODE_INFO)));
     data_array_ = reinterpret_cast<uint8_t*>(
         vpx_memalign(kDataAlignment, kDataBufferSize));
   }
 
   static void TearDownTestCase() {
     vpx_free(data_array_);
+    vpx_free(mi_);
+    vpx_free(mb_);
     data_array_ = NULL;
   }
 
@@ -250,12 +260,12 @@ class IntraPredYTest : public ::testing::TestWithParam<intra_pred_y_fn_t>,
 
   virtual void SetUp() {
     pred_fn_ = GetParam();
-    SetupMacroblock(data_array_, kBlockSize, kStride, 1);
+    SetupMacroblock(mb_, mi_, data_array_, kBlockSize, kStride, 1);
   }
 
   virtual void Predict(MB_PREDICTION_MODE mode) {
-    mb_.mode_info_context->mbmi.mode = mode;
-    REGISTER_STATE_CHECK(pred_fn_(&mb_,
+    mbptr_->mode_info_context->mbmi.mode = mode;
+    REGISTER_STATE_CHECK(pred_fn_(mbptr_,
                                   data_ptr_[0] - kStride,
                                   data_ptr_[0] - 1, kStride,
                                   data_ptr_[0], kStride));
@@ -263,8 +273,12 @@ class IntraPredYTest : public ::testing::TestWithParam<intra_pred_y_fn_t>,
 
   intra_pred_y_fn_t pred_fn_;
   static uint8_t* data_array_;
+  static MACROBLOCKD * mb_;
+  static MODE_INFO *mi_;
 };
 
+MACROBLOCKD* IntraPredYTest::mb_ = NULL;
+MODE_INFO* IntraPredYTest::mi_ = NULL;
 uint8_t* IntraPredYTest::data_array_ = NULL;
 
 TEST_P(IntraPredYTest, IntraPredTests) {
@@ -299,12 +313,18 @@ class IntraPredUVTest : public ::testing::TestWithParam<intra_pred_uv_fn_t>,
     protected IntraPredBase {
  public:
   static void SetUpTestCase() {
+    mb_ = reinterpret_cast<MACROBLOCKD*>(
+        vpx_memalign(32, sizeof(MACROBLOCKD)));
+    mi_ = reinterpret_cast<MODE_INFO*>(
+        vpx_memalign(32, sizeof(MODE_INFO)));
     data_array_ = reinterpret_cast<uint8_t*>(
         vpx_memalign(kDataAlignment, kDataBufferSize));
   }
 
   static void TearDownTestCase() {
     vpx_free(data_array_);
+    vpx_free(mi_);
+    vpx_free(mb_);
     data_array_ = NULL;
   }
 
@@ -322,12 +342,12 @@ class IntraPredUVTest : public ::testing::TestWithParam<intra_pred_uv_fn_t>,
 
   virtual void SetUp() {
     pred_fn_ = GetParam();
-    SetupMacroblock(data_array_, kBlockSize, kStride, 2);
+    SetupMacroblock(mb_, mi_, data_array_, kBlockSize, kStride, 2);
   }
 
   virtual void Predict(MB_PREDICTION_MODE mode) {
-    mb_.mode_info_context->mbmi.uv_mode = mode;
-    pred_fn_(&mb_, data_ptr_[0] - kStride, data_ptr_[1] - kStride,
+    mbptr_->mode_info_context->mbmi.uv_mode = mode;
+    pred_fn_(mbptr_, data_ptr_[0] - kStride, data_ptr_[1] - kStride,
              data_ptr_[0] - 1, data_ptr_[1] - 1, kStride,
              data_ptr_[0], data_ptr_[1], kStride);
   }
@@ -340,8 +360,12 @@ class IntraPredUVTest : public ::testing::TestWithParam<intra_pred_uv_fn_t>,
   // We use 9 lines so we have one line above us for top-prediction.
   // [0] = U, [1] = V
   static uint8_t* data_array_;
+  static MACROBLOCKD* mb_;
+  static MODE_INFO* mi_;
 };
 
+MACROBLOCKD* IntraPredUVTest::mb_ = NULL;
+MODE_INFO* IntraPredUVTest::mi_ = NULL;
 uint8_t* IntraPredUVTest::data_array_ = NULL;
 
 TEST_P(IntraPredUVTest, IntraPredTests) {
