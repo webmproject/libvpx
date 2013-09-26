@@ -22,6 +22,10 @@
 #define MAX_FULL_PEL_VAL ((1 << (MAX_MVSEARCH_STEPS)) - 1)
 // Maximum size of the first step in full pel units
 #define MAX_FIRST_STEP (1 << (MAX_MVSEARCH_STEPS-1))
+// Allowed motion vector pixel distance outside image border
+// for Block_16x16
+#define BORDER_MV_PIXELS_B16 (16 + VP9_INTERP_EXTEND)
+
 
 void vp9_clamp_mv_min_max(MACROBLOCK *x, MV *mv);
 int vp9_mv_bit_cost(const MV *mv, const MV *ref,

@@ -10,14 +10,17 @@
 
 #include <limits.h>
 
-#include <vpx_mem/vpx_mem.h>
-#include <vp9/encoder/vp9_encodeintra.h>
-#include <vp9/encoder/vp9_rdopt.h>
-#include <vp9/common/vp9_blockd.h>
-#include <vp9/common/vp9_reconinter.h>
-#include <vp9/common/vp9_reconintra.h>
-#include <vp9/common/vp9_systemdependent.h>
-#include <vp9/encoder/vp9_segmentation.h>
+#include "vpx_mem/vpx_mem.h"
+#include "vp9/encoder/vp9_encodeintra.h"
+#include "vp9/encoder/vp9_rdopt.h"
+#include "vp9/encoder/vp9_segmentation.h"
+#include "vp9/encoder/vp9_mcomp.h"
+#include "vp9/common/vp9_blockd.h"
+#include "vp9/common/vp9_reconinter.h"
+#include "vp9/common/vp9_reconintra.h"
+#include "vp9/common/vp9_systemdependent.h"
+
+
 
 static unsigned int do_16x16_motion_iteration(VP9_COMP *cpi,
                                               int_mv *ref_mv,
@@ -246,9 +249,8 @@ static void update_mbgraph_frame_stats(VP9_COMP *cpi,
   // Set up limit values for motion vectors to prevent them extending outside the UMV borders
   arf_top_mv.as_int = 0;
   gld_top_mv.as_int = 0;
-  x->mv_row_min     = -(VP9BORDERINPIXELS - 8 - VP9_INTERP_EXTEND);
-  x->mv_row_max     = (cm->mb_rows - 1) * 8 + VP9BORDERINPIXELS
-                      - 8 - VP9_INTERP_EXTEND;
+  x->mv_row_min     = -BORDER_MV_PIXELS_B16;
+  x->mv_row_max     = (cm->mb_rows - 1) * 8 + BORDER_MV_PIXELS_B16;
   xd->up_available  = 0;
   xd->plane[0].dst.stride  = buf->y_stride;
   xd->plane[0].pre[0].stride  = buf->y_stride;
@@ -267,9 +269,8 @@ static void update_mbgraph_frame_stats(VP9_COMP *cpi,
     // Set up limit values for motion vectors to prevent them extending outside the UMV borders
     arf_left_mv.as_int = arf_top_mv.as_int;
     gld_left_mv.as_int = gld_top_mv.as_int;
-    x->mv_col_min      = -(VP9BORDERINPIXELS - 8 - VP9_INTERP_EXTEND);
-    x->mv_col_max      = (cm->mb_cols - 1) * 8 + VP9BORDERINPIXELS
-                         - 8 - VP9_INTERP_EXTEND;
+    x->mv_col_min      = -BORDER_MV_PIXELS_B16;
+    x->mv_col_max      = (cm->mb_cols - 1) * 8 + BORDER_MV_PIXELS_B16;
     xd->left_available = 0;
 
     for (mb_col = 0; mb_col < cm->mb_cols; mb_col++) {
