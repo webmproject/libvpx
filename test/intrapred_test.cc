@@ -209,8 +209,8 @@ class IntraPredBase {
     }
   }
 
-  DECLARE_ALIGNED(32, MACROBLOCKD, mb_);
-  DECLARE_ALIGNED(32, MODE_INFO, mi_);
+  MACROBLOCKD mb_;
+  MODE_INFO mi_;
   uint8_t *data_ptr_[2];  // in the case of Y, only [0] is used
   int stride_;
   int block_size_;
