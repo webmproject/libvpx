@@ -1,0 +1,106 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdH//9oI\u003d",
+        "filename": "vp9/common/arm/neon/vp9_short_idct32x32_add_neon.asm",
+        "patchSetId": 1
+      },
+      "lineNbr": 107,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2013-09-26T03:44:32Z",
+      "side": 1,
+      "message": "At least for r10 you should be able to take advantage of post incrementing. I can\u0027t remember if you can specify \u0027-r2\u0027 as an offset. I suppose you could negate r2 but i\u0027m not sure it\u0027s worth the effort.\n\nhttp://infocenter.arm.com/help/index.jsp?topic\u003d/com.arm.doc.dui0489i/CIHCADCI.html",
+      "revId": "6f272e19135e93bc442747254bdf7869eb32ce49",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdH//9n8\u003d",
+        "filename": "vp9/common/arm/neon/vp9_short_idct32x32_add_neon.asm",
+        "patchSetId": 1
+      },
+      "lineNbr": 348,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2013-09-26T03:44:32Z",
+      "side": 1,
+      "message": "rsb r6, r2, r2, lsl #5\n (r2 * 32) - r2",
+      "revId": "6f272e19135e93bc442747254bdf7869eb32ce49",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdH//9n4\u003d",
+        "filename": "vp9/common/arm/neon/vp9_short_idct32x32_add_neon.asm",
+        "patchSetId": 1
+      },
+      "lineNbr": 352,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2013-09-26T03:44:32Z",
+      "side": 1,
+      "message": "rsb r9, r2, r2, lsl #4",
+      "revId": "6f272e19135e93bc442747254bdf7869eb32ce49",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdH//9n0\u003d",
+        "filename": "vp9/common/arm/neon/vp9_short_idct32x32_add_neon.asm",
+        "patchSetId": 1
+      },
+      "lineNbr": 356,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2013-09-26T03:44:32Z",
+      "side": 1,
+      "message": "r2 lsl #4",
+      "revId": "6f272e19135e93bc442747254bdf7869eb32ce49",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdH//9nw\u003d",
+        "filename": "vp9/common/arm/neon/vp9_short_idct32x32_add_neon.asm",
+        "patchSetId": 1
+      },
+      "lineNbr": 452,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2013-09-26T03:44:32Z",
+      "side": 1,
+      "message": "adds r8, r8, #1\n bne",
+      "revId": "6f272e19135e93bc442747254bdf7869eb32ce49",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdH//9ns\u003d",
+        "filename": "vp9/common/arm/neon/vp9_short_idct32x32_add_neon.asm",
+        "patchSetId": 1
+      },
+      "lineNbr": 1310,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2013-09-26T03:44:32Z",
+      "side": 1,
+      "message": "may be able to count down to 0, use subs to avoid cmp",
+      "revId": "6f272e19135e93bc442747254bdf7869eb32ce49",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
