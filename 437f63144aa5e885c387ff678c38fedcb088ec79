@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdH//9iQ\u003d",
+        "filename": "build/make/configure.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 1065,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-09-27T09:14:26Z",
+      "side": 1,
+      "message": "generally this should be enough to provide compatibility between old versions. Are these extremely outdated or did the check fail to work?\nIf it works an option is to split them to their own call.",
+      "revId": "437f63144aa5e885c387ff678c38fedcb088ec79",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
