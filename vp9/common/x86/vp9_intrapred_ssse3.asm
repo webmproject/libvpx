@@ -13,6 +13,9 @@
 SECTION_RODATA
 
 pb_1: times 16 db 1
+pw_2: times 8 dw 2
+pb_7m1: times 8 db 7, -1
+pb_15: times 16 db 15
 
 sh_b01234577: db 0, 1, 2, 3, 4, 5, 7, 7, 0, 0, 0, 0, 0, 0, 0, 0
 sh_b12345677: db 1, 2, 3, 4, 5, 6, 7, 7, 0, 0, 0, 0, 0, 0, 0, 0
@@ -20,6 +23,15 @@ sh_b23456777: db 2, 3, 4, 5, 6, 7, 7, 7, 0, 0, 0, 0, 0, 0, 0, 0
 sh_b0123456777777777: db 0, 1, 2, 3, 4, 5, 6, 7, 7, 7, 7, 7, 7, 7, 7, 7
 sh_b1234567777777777: db 1, 2, 3, 4, 5, 6, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7
 sh_b2345677777777777: db 2, 3, 4, 5, 6, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7
+sh_b2w01234577: db 0, -1, 1, -1, 2, -1, 3, -1, 4, -1, 5, -1, 7, -1, 7, -1
+sh_b2w12345677: db 1, -1, 2, -1, 3, -1, 4, -1, 5, -1, 6, -1, 7, -1, 7, -1
+sh_b2w23456777: db 2, -1, 3, -1, 4, -1, 5, -1, 6, -1, 7, -1, 7, -1, 7, -1
+sh_b2w01234567: db 0, -1, 1, -1, 2, -1, 3, -1, 4, -1, 5, -1, 6, -1, 7, -1
+sh_b2w12345678: db 1, -1, 2, -1, 3, -1, 4, -1, 5, -1, 6, -1, 7, -1, 8, -1
+sh_b2w23456789: db 2, -1, 3, -1, 4, -1, 5, -1, 6, -1, 7, -1, 8, -1, 9, -1
+sh_b2w89abcdef: db 8, -1, 9, -1, 10, -1, 11, -1, 12, -1, 13, -1, 14, -1, 15, -1
+sh_b2w9abcdeff: db 9, -1, 10, -1, 11, -1, 12, -1, 13, -1, 14, -1, 15, -1, 15, -1
+sh_b2wabcdefff: db 10, -1, 11, -1, 12, -1, 13, -1, 14, -1, 15, -1, 15, -1, 15, -1
 sh_b123456789abcdeff: db 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 15
 sh_b23456789abcdefff: db 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 15, 15
 
@@ -31,6 +43,9 @@ sh_b54321089: db 5, 4, 3, 2, 1, 0, 8, 9, 0, 0, 0, 0, 0, 0, 0, 0
 sh_b89abcdef: db 8, 9, 10, 11, 12, 13, 14, 15, 0, 0, 0, 0, 0, 0, 0, 0
 
 sh_bfedcba9876543210: db 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0
+
+sh_b1233: db 1, 2, 3, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+sh_b2333: db 2, 3, 3, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 
 SECTION .text
 
@@ -787,5 +802,255 @@ cglobal d153_predictor_32x32, 4, 5, 8, dst, stride, above, left, goffset
   mova  [dstq+stride3q    ], m2
   mova  [dstq+stride3q+16 ], m3
 
+  RESTORE_GOT
+  RET
+
+INIT_MMX ssse3
+cglobal d207_predictor_4x4, 2, 5, 4, dst, stride, unused, left, goffset
+  GET_GOT     goffsetq
+  movifnidn        leftq, leftmp
+  movd                m0, [leftq]                ; abcd [byte]
+  pshufb              m1, m0, [GLOBAL(sh_b1233)] ; bcdd [byte]
+  pshufb              m3, m0, [GLOBAL(sh_b2333)] ; cddd
+
+  X_PLUS_2Y_PLUS_Z_PLUS_2_RSH_2 m0, m1, m3, m2
+  pavgb               m1, m0             ; ab, bc, cd, d [byte]
+
+  punpcklbw           m1, m2             ; ab, a2bc, bc, b2cd, cd, c3d, d, d
+  movd    [dstq        ], m1
+  psrlq               m1, 16             ; bc, b2cd, cd, c3d, d, d
+  movd    [dstq+strideq], m1
+  lea               dstq, [dstq+strideq*2]
+  psrlq               m1, 16             ; cd, c3d, d, d
+  movd    [dstq        ], m1
+  pshufw              m1, m1, q1111      ; d, d, d, d
+  movd    [dstq+strideq], m1
+  RESTORE_GOT
+  RET
+
+INIT_XMM ssse3
+cglobal d207_predictor_8x8, 2, 5, 4, dst, stride, stride3, left, goffset
+  GET_GOT     goffsetq
+  movifnidn        leftq, leftmp
+  movq                m3, [leftq]            ; abcdefgh [byte]
+  lea           stride3q, [strideq*3]
+
+  pshufb              m1, m3, [GLOBAL(sh_b2345677777777777)]
+  pshufb              m0, m3, [GLOBAL(sh_b0123456777777777)]
+  pshufb              m2, m3, [GLOBAL(sh_b1234567777777777)]
+
+  X_PLUS_2Y_PLUS_Z_PLUS_2_RSH_2 m0, m2, m1, m3
+  pavgb               m0, m2
+  punpcklbw           m0, m3        ; interleaved output
+
+  movq  [dstq          ], m0
+  psrldq              m0, 2
+  movq  [dstq+strideq  ], m0
+  psrldq              m0, 2
+  movq  [dstq+strideq*2], m0
+  psrldq              m0, 2
+  movq  [dstq+stride3q ], m0
+  lea               dstq, [dstq+strideq*4]
+  pshufhw             m0, m0, q0000 ; de, d2ef, ef, e2fg, fg, f2gh, gh, g3h, 8xh
+  psrldq              m0, 2
+  movq  [dstq          ], m0
+  psrldq              m0, 2
+  movq  [dstq+strideq  ], m0
+  psrldq              m0, 2
+  movq  [dstq+strideq*2], m0
+  psrldq              m0, 2
+  movq  [dstq+stride3q ], m0
+  RESTORE_GOT
+  RET
+
+INIT_XMM ssse3
+cglobal d207_predictor_16x16, 2, 5, 5, dst, stride, stride3, left, goffset
+  GET_GOT     goffsetq
+  lea           stride3q, [strideq*3]
+  movifnidn        leftq, leftmp
+  mova                m0, [leftq]            ; abcdefghijklmnop [byte]
+  pshufb              m1, m0, [GLOBAL(sh_b123456789abcdeff)] ; bcdefghijklmnopp
+  pshufb              m2, m0, [GLOBAL(sh_b23456789abcdefff)]
+
+  X_PLUS_2Y_PLUS_Z_PLUS_2_RSH_2 m0, m1, m2, m3
+  pavgb               m1, m0                 ; ab, bc, cd .. no, op, pp [byte]
+
+  punpckhbw           m4, m1, m3    ; interleaved input
+  punpcklbw           m1, m3        ; interleaved output
+  mova  [dstq          ], m1
+  palignr             m3, m4, m1, 2
+  mova  [dstq+strideq  ], m3
+  palignr             m3, m4, m1, 4
+  mova  [dstq+strideq*2], m3
+  palignr             m3, m4, m1, 6
+  mova  [dstq+stride3q ], m3
+  lea               dstq, [dstq+strideq*4]
+  palignr             m3, m4, m1, 8
+  mova  [dstq          ], m3
+  palignr             m3, m4, m1, 10
+  mova  [dstq+strideq  ], m3
+  palignr             m3, m4, m1, 12
+  mova  [dstq+strideq*2], m3
+  palignr             m3, m4, m1, 14
+  mova  [dstq+stride3q ], m3
+  DEFINE_ARGS dst, stride, stride3, line
+  mov              lined, 2
+  mova                m0, [GLOBAL(sh_b23456789abcdefff)]
+.loop:
+  lea               dstq, [dstq+strideq*4]
+  mova  [dstq          ], m4
+  pshufb              m4, m0
+  mova  [dstq+strideq  ], m4
+  pshufb              m4, m0
+  mova  [dstq+strideq*2], m4
+  pshufb              m4, m0
+  mova  [dstq+stride3q ], m4
+  pshufb              m4, m0
+  dec              lined
+  jnz .loop
+  RESTORE_GOT
+  REP_RET
+
+INIT_XMM ssse3
+cglobal d207_predictor_32x32, 2, 5, 8, dst, stride, stride3, left, goffset
+  GET_GOT     goffsetq
+  lea           stride3q, [strideq*3]
+  movifnidn        leftq, leftmp
+  mova                m1, [leftq]              ;  0-15 [byte]
+  mova                m2, [leftq+16]           ; 16-31 [byte]
+  pshufb              m0, m2, [GLOBAL(sh_b23456789abcdefff)]
+  pshufb              m4, m2, [GLOBAL(sh_b123456789abcdeff)]
+
+  X_PLUS_2Y_PLUS_Z_PLUS_2_RSH_2 m2, m4, m0, m3
+  palignr             m6, m2, m1, 1
+  palignr             m5, m2, m1, 2
+  pavgb               m2, m4         ; high 16px even lines
+
+  X_PLUS_2Y_PLUS_Z_PLUS_2_RSH_2 m1, m6, m5, m0
+  pavgb                   m1, m6         ; low 16px even lines
+
+  punpckhbw               m6, m1, m0               ; interleaved output 2
+  punpcklbw               m1, m0                   ; interleaved output 1
+
+  punpckhbw               m7, m2, m3               ; interleaved output 4
+  punpcklbw               m2, m3                   ; interleaved output 3
+
+  ; output 1st 8 lines (and half of 2nd 8 lines)
+  DEFINE_ARGS dst, stride, stride3, dst8
+  lea                  dst8q, [dstq+strideq*8]
+  mova  [dstq              ], m1
+  mova  [dstq           +16], m6
+  mova  [dst8q             ], m6
+  palignr             m0, m6, m1, 2
+  palignr             m4, m2, m6, 2
+  mova  [dstq +strideq     ], m0
+  mova  [dstq +strideq  +16], m4
+  mova  [dst8q+strideq     ], m4
+  palignr             m0, m6, m1, 4
+  palignr             m4, m2, m6, 4
+  mova  [dstq +strideq*2   ], m0
+  mova  [dstq +strideq*2+16], m4
+  mova  [dst8q+strideq*2   ], m4
+  palignr             m0, m6, m1, 6
+  palignr             m4, m2, m6, 6
+  mova  [dstq +stride3q    ], m0
+  mova  [dstq +stride3q +16], m4
+  mova  [dst8q+stride3q    ], m4
+  lea               dstq, [dstq +strideq*4]
+  lea              dst8q, [dst8q+strideq*4]
+  palignr             m0, m6, m1, 8
+  palignr             m4, m2, m6, 8
+  mova  [dstq              ], m0
+  mova  [dstq           +16], m4
+  mova  [dst8q             ], m4
+  palignr             m0, m6, m1, 10
+  palignr             m4, m2, m6, 10
+  mova  [dstq +strideq     ], m0
+  mova  [dstq +strideq  +16], m4
+  mova  [dst8q+strideq     ], m4
+  palignr             m0, m6, m1, 12
+  palignr             m4, m2, m6, 12
+  mova  [dstq +strideq*2   ], m0
+  mova  [dstq +strideq*2+16], m4
+  mova  [dst8q+strideq*2   ], m4
+  palignr             m0, m6, m1, 14
+  palignr             m4, m2, m6, 14
+  mova  [dstq +stride3q    ], m0
+  mova  [dstq +stride3q +16], m4
+  mova  [dst8q+stride3q    ], m4
+  lea               dstq, [dstq+strideq*4]
+  lea              dst8q, [dst8q+strideq*4]
+
+  ; output 2nd half of 2nd 8 lines and half of 3rd 8 lines
+  mova  [dstq           +16], m2
+  mova  [dst8q             ], m2
+  palignr             m4, m7, m2, 2
+  mova  [dstq +strideq  +16], m4
+  mova  [dst8q+strideq     ], m4
+  palignr             m4, m7, m2, 4
+  mova  [dstq +strideq*2+16], m4
+  mova  [dst8q+strideq*2   ], m4
+  palignr             m4, m7, m2, 6
+  mova  [dstq +stride3q +16], m4
+  mova  [dst8q+stride3q    ], m4
+  lea               dstq, [dstq+strideq*4]
+  lea              dst8q, [dst8q+strideq*4]
+  palignr             m4, m7, m2, 8
+  mova  [dstq           +16], m4
+  mova  [dst8q             ], m4
+  palignr             m4, m7, m2, 10
+  mova  [dstq +strideq  +16], m4
+  mova  [dst8q+strideq     ], m4
+  palignr             m4, m7, m2, 12
+  mova  [dstq +strideq*2+16], m4
+  mova  [dst8q+strideq*2   ], m4
+  palignr             m4, m7, m2, 14
+  mova  [dstq +stride3q +16], m4
+  mova  [dst8q+stride3q    ], m4
+  lea               dstq, [dstq+strideq*4]
+  lea              dst8q, [dst8q+strideq*4]
+
+  ; output 2nd half of 3rd 8 lines and half of 4th 8 lines
+  mova                m0, [sh_b23456789abcdefff]
+  mova  [dstq           +16], m7
+  mova  [dst8q             ], m7
+  pshufb              m7, m0
+  mova  [dstq +strideq  +16], m7
+  mova  [dst8q+strideq     ], m7
+  pshufb              m7, m0
+  mova  [dstq +strideq*2+16], m7
+  mova  [dst8q+strideq*2   ], m7
+  pshufb              m7, m0
+  mova  [dstq +stride3q +16], m7
+  mova  [dst8q+stride3q    ], m7
+  pshufb              m7, m0
+  lea               dstq, [dstq+strideq*4]
+  lea              dst8q, [dst8q+strideq*4]
+  mova  [dstq           +16], m7
+  mova  [dst8q             ], m7
+  pshufb              m7, m0
+  mova  [dstq +strideq  +16], m7
+  mova  [dst8q+strideq     ], m7
+  pshufb              m7, m0
+  mova  [dstq +strideq*2+16], m7
+  mova  [dst8q+strideq*2   ], m7
+  pshufb              m7, m0
+  mova  [dstq +stride3q +16], m7
+  mova  [dst8q+stride3q    ], m7
+  pshufb              m7, m0
+  lea               dstq, [dstq+strideq*4]
+
+  ; output last half of 4th 8 lines
+  mova  [dstq           +16], m7
+  mova  [dstq +strideq  +16], m7
+  mova  [dstq +strideq*2+16], m7
+  mova  [dstq +stride3q +16], m7
+  lea               dstq, [dstq+strideq*4]
+  mova  [dstq           +16], m7
+  mova  [dstq +strideq  +16], m7
+  mova  [dstq +strideq*2+16], m7
+  mova  [dstq +stride3q +16], m7
+
+  ; done!
   RESTORE_GOT
   RET
