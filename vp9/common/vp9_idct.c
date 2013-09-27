@@ -838,7 +838,7 @@ void vp9_short_iht16x16_add_c(int16_t *input, uint8_t *dest, int dest_stride,
                                   + dest[j * dest_stride + i]);  }
 }
 
-void vp9_short_idct10_16x16_add_c(int16_t *input, uint8_t *dest,
+void vp9_short_idct16x16_10_add_c(int16_t *input, uint8_t *dest,
                                   int dest_stride) {
   int16_t out[16 * 16] = { 0 };
   int16_t *outptr = out;

@@ -64,7 +64,7 @@ static void inverse_transform_b_16x16_add(int eob,
   if (eob <= 1)
     vp9_short_idct16x16_1_add(dqcoeff, dest, stride);
   else if (eob <= 10)
-    vp9_short_idct10_16x16_add(dqcoeff, dest, stride);
+    vp9_short_idct16x16_10_add(dqcoeff, dest, stride);
   else
     vp9_short_idct16x16_add(dqcoeff, dest, stride);
 }
