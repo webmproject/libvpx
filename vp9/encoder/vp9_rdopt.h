@@ -29,6 +29,11 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
                                   int *r, int64_t *d, BLOCK_SIZE bsize,
                                   PICK_MODE_CONTEXT *ctx, int64_t best_rd);
 
+int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
+                                      int mi_row, int mi_col,
+                                      int *r, int64_t *d, BLOCK_SIZE bsize,
+                                      PICK_MODE_CONTEXT *ctx, int64_t best_rd);
+
 void vp9_init_me_luts();
 
 void vp9_set_mbmode_and_mvs(MACROBLOCK *x,

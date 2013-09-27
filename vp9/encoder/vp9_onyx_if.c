@@ -616,19 +616,12 @@ static void set_rd_speed_thresholds(VP9_COMP *cpi, int mode) {
   sf->thresh_mult[THR_COMP_NEARGA] += 1500;
   sf->thresh_mult[THR_COMP_NEWGA] += 2000;
 
-  sf->thresh_mult[THR_SPLITMV] += 2500;
-  sf->thresh_mult[THR_SPLITG] += 2500;
-  sf->thresh_mult[THR_SPLITA] += 2500;
-  sf->thresh_mult[THR_COMP_SPLITLA] += 4500;
-  sf->thresh_mult[THR_COMP_SPLITGA] += 4500;
-
   sf->thresh_mult[THR_ZEROMV] += 2000;
   sf->thresh_mult[THR_ZEROG] += 2000;
   sf->thresh_mult[THR_ZEROA] += 2000;
   sf->thresh_mult[THR_COMP_ZEROLA] += 2500;
   sf->thresh_mult[THR_COMP_ZEROGA] += 2500;
 
-  sf->thresh_mult[THR_B_PRED] += 2500;
   sf->thresh_mult[THR_H_PRED] += 2000;
   sf->thresh_mult[THR_V_PRED] += 2000;
   sf->thresh_mult[THR_D45_PRED ] += 2500;
@@ -644,21 +637,18 @@ static void set_rd_speed_thresholds(VP9_COMP *cpi, int mode) {
     sf->thresh_mult[THR_NEARESTMV] = INT_MAX;
     sf->thresh_mult[THR_ZEROMV   ] = INT_MAX;
     sf->thresh_mult[THR_NEARMV   ] = INT_MAX;
-    sf->thresh_mult[THR_SPLITMV  ] = INT_MAX;
   }
   if (!(cpi->ref_frame_flags & VP9_GOLD_FLAG)) {
     sf->thresh_mult[THR_NEARESTG ] = INT_MAX;
     sf->thresh_mult[THR_ZEROG    ] = INT_MAX;
     sf->thresh_mult[THR_NEARG    ] = INT_MAX;
     sf->thresh_mult[THR_NEWG     ] = INT_MAX;
-    sf->thresh_mult[THR_SPLITG   ] = INT_MAX;
   }
   if (!(cpi->ref_frame_flags & VP9_ALT_FLAG)) {
     sf->thresh_mult[THR_NEARESTA ] = INT_MAX;
     sf->thresh_mult[THR_ZEROA    ] = INT_MAX;
     sf->thresh_mult[THR_NEARA    ] = INT_MAX;
     sf->thresh_mult[THR_NEWA     ] = INT_MAX;
-    sf->thresh_mult[THR_SPLITA   ] = INT_MAX;
   }
 
   if ((cpi->ref_frame_flags & (VP9_LAST_FLAG | VP9_ALT_FLAG)) !=
@@ -667,7 +657,6 @@ static void set_rd_speed_thresholds(VP9_COMP *cpi, int mode) {
     sf->thresh_mult[THR_COMP_NEARESTLA] = INT_MAX;
     sf->thresh_mult[THR_COMP_NEARLA   ] = INT_MAX;
     sf->thresh_mult[THR_COMP_NEWLA    ] = INT_MAX;
-    sf->thresh_mult[THR_COMP_SPLITLA  ] = INT_MAX;
   }
   if ((cpi->ref_frame_flags & (VP9_GOLD_FLAG | VP9_ALT_FLAG)) !=
       (VP9_GOLD_FLAG | VP9_ALT_FLAG)) {
@@ -675,16 +664,43 @@ static void set_rd_speed_thresholds(VP9_COMP *cpi, int mode) {
     sf->thresh_mult[THR_COMP_NEARESTGA] = INT_MAX;
     sf->thresh_mult[THR_COMP_NEARGA   ] = INT_MAX;
     sf->thresh_mult[THR_COMP_NEWGA    ] = INT_MAX;
-    sf->thresh_mult[THR_COMP_SPLITGA  ] = INT_MAX;
   }
+}
+
+static void set_rd_speed_thresholds_sub8x8(VP9_COMP *cpi, int mode) {
+  SPEED_FEATURES *sf = &cpi->sf;
+  int i;
+
+  for (i = 0; i < MAX_REFS; ++i)
+    sf->thresh_mult_sub8x8[i] = mode == 0 ? -500 : 0;
+
+  sf->thresh_mult_sub8x8[THR_LAST] += 2500;
+  sf->thresh_mult_sub8x8[THR_GOLD] += 2500;
+  sf->thresh_mult_sub8x8[THR_ALTR] += 2500;
+  sf->thresh_mult_sub8x8[THR_INTRA] += 2500;
+  sf->thresh_mult_sub8x8[THR_COMP_LA] += 4500;
+  sf->thresh_mult_sub8x8[THR_COMP_GA] += 4500;
+
+  // disable mode test if frame flag is not set
+  if (!(cpi->ref_frame_flags & VP9_LAST_FLAG))
+    sf->thresh_mult_sub8x8[THR_LAST] = INT_MAX;
+  if (!(cpi->ref_frame_flags & VP9_GOLD_FLAG))
+    sf->thresh_mult_sub8x8[THR_GOLD] = INT_MAX;
+  if (!(cpi->ref_frame_flags & VP9_ALT_FLAG))
+    sf->thresh_mult_sub8x8[THR_ALTR] = INT_MAX;
+  if ((cpi->ref_frame_flags & (VP9_LAST_FLAG | VP9_ALT_FLAG)) !=
+      (VP9_LAST_FLAG | VP9_ALT_FLAG))
+    sf->thresh_mult_sub8x8[THR_COMP_LA] = INT_MAX;
+  if ((cpi->ref_frame_flags & (VP9_GOLD_FLAG | VP9_ALT_FLAG)) !=
+      (VP9_GOLD_FLAG | VP9_ALT_FLAG))
+    sf->thresh_mult_sub8x8[THR_COMP_GA] = INT_MAX;
 
   if (sf->disable_splitmv == 1) {
-    sf->thresh_mult[THR_SPLITMV  ] = INT_MAX;
-    sf->thresh_mult[THR_SPLITG   ] = INT_MAX;
-    sf->thresh_mult[THR_SPLITA   ] = INT_MAX;
-
-    sf->thresh_mult[THR_COMP_SPLITLA  ] = INT_MAX;
-    sf->thresh_mult[THR_COMP_SPLITGA  ] = INT_MAX;
+    sf->thresh_mult_sub8x8[THR_LAST] = INT_MAX;
+    sf->thresh_mult_sub8x8[THR_GOLD] = INT_MAX;
+    sf->thresh_mult_sub8x8[THR_ALTR] = INT_MAX;
+    sf->thresh_mult_sub8x8[THR_COMP_LA] = INT_MAX;
+    sf->thresh_mult_sub8x8[THR_COMP_GA] = INT_MAX;
   }
 }
 
@@ -915,6 +931,7 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
 
   // Set rd thresholds based on mode and speed setting
   set_rd_speed_thresholds(cpi, mode);
+  set_rd_speed_thresholds_sub8x8(cpi, mode);
 
   // Slow quant, dct and trellis not worthwhile for first pass
   // so make sure they are always turned off.
@@ -1611,9 +1628,12 @@ VP9_PTR vp9_create_compressor(VP9_CONFIG *oxcf) {
   vp9_set_speed_features(cpi);
 
   // Default rd threshold factors for mode selection
-  for (i = 0; i < BLOCK_SIZES; ++i)
+  for (i = 0; i < BLOCK_SIZES; ++i) {
     for (j = 0; j < MAX_MODES; ++j)
       cpi->rd_thresh_freq_fact[i][j] = 32;
+    for (j = 0; j < MAX_REFS; ++j)
+      cpi->rd_thresh_freq_sub8x8[i][j] = 32;
+  }
 
 #define BFP(BT, SDF, SDAF, VF, SVF, SVAF, SVFHH, SVFHV, SVFHHV, \
             SDX3F, SDX8F, SDX4DF)\
@@ -3369,8 +3389,10 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
               cm->frame_type, cpi->refresh_golden_frame,
               cpi->refresh_alt_ref_frame);
 
-      for (i = 0; i < MAX_MODES; i++)
+      for (i = 0; i < MAX_MODES; ++i)
         fprintf(fmodes, "%5d ", cpi->mode_chosen_counts[i]);
+      for (i = 0; i < MAX_REFS; ++i)
+        fprintf(fmodes, "%5d ", cpi->sub8x8_mode_chosen_counts[i]);
 
       fprintf(fmodes, "\n");
 
