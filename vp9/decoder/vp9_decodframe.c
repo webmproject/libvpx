@@ -935,6 +935,15 @@ void vp9_init_dequantizer(VP9_COMMON *cm) {
   }
 }
 
+static void update_segmentation_map(VP9_COMMON *cm) {
+  int i, j;
+
+  for (i = 0; i < cm->mi_rows; ++i)
+    for (j = 0; j < cm->mi_cols; ++j)
+      cm->last_frame_seg_map[i * cm->mi_cols + j] =
+          cm->mi_grid_visible[i * cm->mode_info_stride + j]->mbmi.segment_id;
+}
+
 int vp9_decode_frame(VP9D_COMP *pbi, const uint8_t **p_data_end) {
   int i;
   VP9_COMMON *const cm = &pbi->common;
@@ -1013,6 +1022,8 @@ int vp9_decode_frame(VP9D_COMP *pbi, const uint8_t **p_data_end) {
 
   if (cm->refresh_frame_context)
     cm->frame_contexts[cm->frame_context_idx] = cm->fc;
+
+  update_segmentation_map(cm);
 
   return 0;
 }
