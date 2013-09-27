@@ -1097,6 +1097,7 @@ static int64_t rd_pick_intra4x4block(VP9_COMP *cpi, MACROBLOCK *x, int ib,
       for (idx = 0; idx < num_4x4_blocks_wide; ++idx) {
         int64_t ssz;
         const int16_t *scan;
+        const int16_t *nb;
         uint8_t *src = src_init + idx * 4 + idy * 4 * src_stride;
         uint8_t *dst = dst_init + idx * 4 + idy * 4 * dst_stride;
 
@@ -1122,10 +1123,10 @@ static int64_t rd_pick_intra4x4block(VP9_COMP *cpi, MACROBLOCK *x, int ib,
           x->quantize_b_4x4(x, block, tx_type, 16);
         }
 
-        scan = get_scan_4x4(get_tx_type_4x4(PLANE_TYPE_Y_WITH_DC, xd, block));
+        get_scan_nb_4x4(get_tx_type_4x4(PLANE_TYPE_Y_WITH_DC, xd, block),
+                        &scan, &nb);
         ratey += cost_coeffs(x, 0, block,
-                             tempa + idx, templ + idy, TX_4X4, scan,
-                             vp9_get_coef_neighbors_handle(scan));
+                             tempa + idx, templ + idy, TX_4X4, scan, nb);
         distortion += vp9_block_error(coeff, BLOCK_OFFSET(pd->dqcoeff, block),
                                       16, &ssz) >> 2;
         if (RDCOST(x->rdmult, x->rddiv, ratey, distortion) >= best_rd)

@@ -569,31 +569,6 @@ void vp9_init_neighbors() {
                       vp9_default_scan_32x32_neighbors);
 }
 
-const int16_t *vp9_get_coef_neighbors_handle(const int16_t *scan) {
-  if (scan == vp9_default_scan_4x4) {
-    return vp9_default_scan_4x4_neighbors;
-  } else if (scan == vp9_row_scan_4x4) {
-    return vp9_row_scan_4x4_neighbors;
-  } else if (scan == vp9_col_scan_4x4) {
-    return vp9_col_scan_4x4_neighbors;
-  } else if (scan == vp9_default_scan_8x8) {
-    return vp9_default_scan_8x8_neighbors;
-  } else if (scan == vp9_row_scan_8x8) {
-    return vp9_row_scan_8x8_neighbors;
-  } else if (scan == vp9_col_scan_8x8) {
-    return vp9_col_scan_8x8_neighbors;
-  } else if (scan == vp9_default_scan_16x16) {
-    return vp9_default_scan_16x16_neighbors;
-  } else if (scan == vp9_row_scan_16x16) {
-    return vp9_row_scan_16x16_neighbors;
-  } else if (scan == vp9_col_scan_16x16) {
-    return vp9_col_scan_16x16_neighbors;
-  } else {
-    assert(scan == vp9_default_scan_32x32);
-    return vp9_default_scan_32x32_neighbors;
-  }
-}
-
 void vp9_coef_tree_initialize() {
   vp9_init_neighbors();
   init_bit_trees();
