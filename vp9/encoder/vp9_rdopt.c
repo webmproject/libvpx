@@ -186,6 +186,7 @@ void vp9_initialize_rd_consts(VP9_COMP *cpi, int qindex) {
   //     cpi->common.refresh_alt_ref_frame)
   qindex = clamp(qindex, 0, MAXQ);
 
+  cpi->RDDIV = 100;
   cpi->RDMULT = compute_rd_mult(qindex);
   if (cpi->pass == 2 && (cpi->common.frame_type != KEY_FRAME)) {
     if (cpi->twopass.next_iiratio > 31)
@@ -204,42 +205,18 @@ void vp9_initialize_rd_consts(VP9_COMP *cpi, int qindex) {
   if (q < 8)
     q = 8;
 
-  if (cpi->RDMULT > 1000) {
-    cpi->RDDIV = 1;
-    cpi->RDMULT /= 100;
+  for (bsize = 0; bsize < BLOCK_SIZES; ++bsize) {
+    for (i = 0; i < MAX_MODES; i++) {
+      // Threshold here seem unecessarily harsh but fine given actual
+      // range of values used for cpi->sf.thresh_mult[]
+      int thresh_max = INT_MAX / (q * rd_thresh_block_size_factor[bsize]);
 
-    for (bsize = 0; bsize < BLOCK_SIZES; ++bsize) {
-      for (i = 0; i < MAX_MODES; ++i) {
-        // Threshold here seem unecessarily harsh but fine given actual
-        // range of values used for cpi->sf.thresh_mult[]
-        int thresh_max = INT_MAX / (q * rd_thresh_block_size_factor[bsize]);
-
-        // *4 relates to the scaling of rd_thresh_block_size_factor[]
-        if ((int64_t)cpi->sf.thresh_mult[i] < thresh_max) {
-          cpi->rd_threshes[bsize][i] =
-            cpi->sf.thresh_mult[i] * q *
-            rd_thresh_block_size_factor[bsize] / (4 * 100);
-        } else {
-          cpi->rd_threshes[bsize][i] = INT_MAX;
-        }
-      }
-    }
-  } else {
-    cpi->RDDIV = 100;
-
-    for (bsize = 0; bsize < BLOCK_SIZES; ++bsize) {
-      for (i = 0; i < MAX_MODES; i++) {
-        // Threshold here seem unecessarily harsh but fine given actual
-        // range of values used for cpi->sf.thresh_mult[]
-        int thresh_max = INT_MAX / (q * rd_thresh_block_size_factor[bsize]);
-
-        if (cpi->sf.thresh_mult[i] < thresh_max) {
-          cpi->rd_threshes[bsize][i] =
+      if (cpi->sf.thresh_mult[i] < thresh_max) {
+        cpi->rd_threshes[bsize][i] =
             cpi->sf.thresh_mult[i] * q *
             rd_thresh_block_size_factor[bsize] / 4;
-        } else {
-          cpi->rd_threshes[bsize][i] = INT_MAX;
-        }
+      } else {
+        cpi->rd_threshes[bsize][i] = INT_MAX;
       }
     }
   }
