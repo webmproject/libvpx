@@ -96,7 +96,7 @@ void vp9_idct_add_8x8_c(int16_t *input, uint8_t *dest, int stride, int eob) {
       vp9_short_idct8x8_1_add(input, dest, stride);
       input[0] = 0;
     } else if (eob <= 10) {
-      vp9_short_idct10_8x8_add(input, dest, stride);
+      vp9_short_idct8x8_10_add(input, dest, stride);
       vpx_memset(input, 0, 128);
     } else {
       vp9_short_idct8x8_add(input, dest, stride);
