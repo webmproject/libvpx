@@ -257,8 +257,6 @@ typedef struct {
   int reference_masking;
   BLOCK_SIZE always_this_block_size;
   int auto_min_max_partition_size;
-  int auto_min_max_partition_interval;
-  int auto_min_max_partition_count;
   BLOCK_SIZE min_partition_size;
   BLOCK_SIZE max_partition_size;
   int adjust_partitioning_from_last_frame;

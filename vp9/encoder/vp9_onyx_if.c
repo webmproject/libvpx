@@ -707,8 +707,6 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
   sf->less_rectangular_check = 0;
   sf->use_square_partition_only = 0;
   sf->auto_min_max_partition_size = 0;
-  sf->auto_min_max_partition_interval = 0;
-  sf->auto_min_max_partition_count = 0;
   sf->max_partition_size = BLOCK_64X64;
   sf->min_partition_size = BLOCK_4X4;
   sf->adjust_partitioning_from_last_frame = 0;
@@ -773,7 +771,6 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
         sf->auto_mv_step_size = 1;
 
         sf->auto_min_max_partition_size = 1;
-        sf->auto_min_max_partition_interval = 1;
         // FIXME(jingning): temporarily turn off disable_split_var_thresh
         // during refactoring process. will get this back after finishing
         // the main framework of partition search type.
@@ -818,7 +815,6 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
         sf->subpel_iters_per_step = 1;
         sf->use_fast_lpf_pick = 1;
         sf->auto_min_max_partition_size = 1;
-        sf->auto_min_max_partition_interval = 2;
         sf->disable_split_var_thresh = 32;
         sf->disable_filter_search_var_thresh = 32;
         sf->use_fast_coef_updates = 2;
@@ -856,7 +852,6 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
         sf->subpel_iters_per_step = 1;
         sf->use_fast_lpf_pick = 1;
         sf->auto_min_max_partition_size = 1;
-        sf->auto_min_max_partition_interval = 2;
         sf->disable_split_var_thresh = 64;
         sf->disable_filter_search_var_thresh = 64;
         sf->use_fast_coef_updates = 2;

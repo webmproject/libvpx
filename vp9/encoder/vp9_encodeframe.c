@@ -507,8 +507,7 @@ static void set_offsets(VP9_COMP *cpi, int mi_row, int mi_col,
   // cannot be used.
   xd->last_mi = cm->prev_mi ? xd->prev_mi_8x8[0] : NULL;
 
-  xd->this_mi =
-  xd->mi_8x8[0] = cm->mi + idx_str;
+  xd->this_mi = xd->mi_8x8[0] = cm->mi + idx_str;
 
   mbmi = &xd->this_mi->mbmi;
 
@@ -1261,63 +1260,64 @@ static void get_sb_partition_size_range(VP9_COMP *cpi, MODE_INFO ** mi_8x8,
 static void rd_auto_partition_range(VP9_COMP *cpi, int row, int col,
                                     BLOCK_SIZE *min_block_size,
                                     BLOCK_SIZE *max_block_size) {
+  VP9_COMMON * const cm = &cpi->common;
   MACROBLOCKD *const xd = &cpi->mb.e_mbd;
   MODE_INFO ** mi_8x8 = xd->mi_8x8;
+  MODE_INFO ** prev_mi_8x8 = xd->prev_mi_8x8;
+
   const int left_in_image = xd->left_available && mi_8x8[-1];
   const int above_in_image = xd->up_available &&
                              mi_8x8[-xd->mode_info_stride];
   MODE_INFO ** above_sb64_mi_8x8;
   MODE_INFO ** left_sb64_mi_8x8;
 
-  // Frequency check
-  if (cpi->sf.auto_min_max_partition_count <= 0) {
-    cpi->sf.auto_min_max_partition_count =
-      cpi->sf.auto_min_max_partition_interval;
+  int row8x8_remaining = cm->cur_tile_mi_row_end - row;
+  int col8x8_remaining = cm->cur_tile_mi_col_end - col;
+  int bh, bw;
+
+  // Trap case where we do not have a prediction.
+  if (!left_in_image && !above_in_image &&
+      ((cm->frame_type == KEY_FRAME) || !cm->prev_mi)) {
     *min_block_size = BLOCK_4X4;
     *max_block_size = BLOCK_64X64;
   } else {
-    --cpi->sf.auto_min_max_partition_count;
+    // Default "min to max" and "max to min"
+    *min_block_size = BLOCK_64X64;
+    *max_block_size = BLOCK_4X4;
 
-    // Set default values if no left or above neighbour
-    if (!left_in_image && !above_in_image) {
-      *min_block_size = BLOCK_4X4;
-      *max_block_size = BLOCK_64X64;
-    } else {
-      VP9_COMMON *const cm = &cpi->common;
-      int row8x8_remaining = cm->cur_tile_mi_row_end - row;
-      int col8x8_remaining = cm->cur_tile_mi_col_end - col;
-      int bh, bw;
+    // NOTE: each call to get_sb_partition_size_range() uses the previous
+    // passed in values for min and max as a starting point.
+    //
+    // Find the min and max partition used in previous frame at this location
+    if (cm->prev_mi && (cm->frame_type != KEY_FRAME)) {
+      get_sb_partition_size_range(cpi, prev_mi_8x8,
+                                  min_block_size, max_block_size);
+    }
 
-      // Default "min to max" and "max to min"
-      *min_block_size = BLOCK_64X64;
-      *max_block_size = BLOCK_4X4;
+    // Find the min and max partition sizes used in the left SB64
+    if (left_in_image) {
+      left_sb64_mi_8x8 = &mi_8x8[-MI_BLOCK_SIZE];
+      get_sb_partition_size_range(cpi, left_sb64_mi_8x8,
+                                  min_block_size, max_block_size);
+    }
 
-      // Find the min and max partition sizes used in the left SB64
-      if (left_in_image) {
-        left_sb64_mi_8x8 = &mi_8x8[-MI_BLOCK_SIZE];
-        get_sb_partition_size_range(cpi, left_sb64_mi_8x8,
-                                    min_block_size, max_block_size);
-      }
-
-      // Find the min and max partition sizes used in the above SB64 taking
-      // the values found for left as a starting point.
-      if (above_in_image) {
-        above_sb64_mi_8x8 = &mi_8x8[-xd->mode_info_stride * MI_BLOCK_SIZE];
-        get_sb_partition_size_range(cpi, above_sb64_mi_8x8,
-                                    min_block_size, max_block_size);
-      }
-
-      // Give a bit of leaway either side of the observed min and max
-      *min_block_size = min_partition_size[*min_block_size];
-      *max_block_size = max_partition_size[*max_block_size];
-
-      // Check border cases where max and min from neighbours may not be legal.
-      *max_block_size = find_partition_size(*max_block_size,
-                                            row8x8_remaining, col8x8_remaining,
-                                            &bh, &bw);
-      *min_block_size = MIN(*min_block_size, *max_block_size);
+    // Find the min and max partition sizes used in the above SB64.
+    if (above_in_image) {
+      above_sb64_mi_8x8 = &mi_8x8[-xd->mode_info_stride * MI_BLOCK_SIZE];
+      get_sb_partition_size_range(cpi, above_sb64_mi_8x8,
+                                  min_block_size, max_block_size);
     }
   }
+
+  // Give a bit of leaway either side of the observed min and max
+  *min_block_size = min_partition_size[*min_block_size];
+  *max_block_size = max_partition_size[*max_block_size];
+
+  // Check border cases where max and min from neighbours may not be legal.
+  *max_block_size = find_partition_size(*max_block_size,
+                                        row8x8_remaining, col8x8_remaining,
+                                        &bh, &bw);
+  *min_block_size = MIN(*min_block_size, *max_block_size);
 }
 
 static void compute_fast_motion_search_level(VP9_COMP *cpi, BLOCK_SIZE bsize) {
@@ -1895,12 +1895,10 @@ static void encode_frame_internal(VP9_COMP *cpi) {
 
   xd->mi_8x8 = cm->mi_grid_visible;
   // required for vp9_frame_init_quantizer
-  xd->this_mi =
-  xd->mi_8x8[0] = cm->mi;
+  xd->this_mi = xd->mi_8x8[0] = cm->mi;
   xd->mic_stream_ptr = cm->mi;
 
   xd->last_mi = cm->prev_mi;
-
 
   vp9_zero(cpi->NMVcount);
   vp9_zero(cpi->coef_counts);
