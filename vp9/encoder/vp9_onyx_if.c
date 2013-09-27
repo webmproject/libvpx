@@ -195,17 +195,17 @@ static void init_minq_luts(void) {
     gf_low_motion_minq[i] = calculate_minq_index(maxq,
                                                  0.0000015,
                                                  -0.0009,
-                                                 0.33,
+                                                 0.32,
                                                  0.0);
     gf_high_motion_minq[i] = calculate_minq_index(maxq,
                                                   0.0000021,
                                                   -0.00125,
-                                                  0.45,
+                                                  0.50,
                                                   0.0);
     inter_minq[i] = calculate_minq_index(maxq,
                                          0.00000271,
                                          -0.00113,
-                                         0.697,
+                                         0.75,
                                          0.0);
     afq_low_motion_minq[i] = calculate_minq_index(maxq,
                                                   0.0000015,
@@ -218,6 +218,27 @@ static void init_minq_luts(void) {
                                                    0.55,
                                                    0.0);
   }
+}
+
+static int get_active_quality(int q,
+                              int gfu_boost,
+                              int low,
+                              int high,
+                              int *low_motion_minq,
+                              int *high_motion_minq) {
+  int active_best_quality;
+  if (gfu_boost > high) {
+    active_best_quality = low_motion_minq[q];
+  } else if (gfu_boost < low) {
+    active_best_quality = high_motion_minq[q];
+  } else {
+    const int gap = high - low;
+    const int offset = high - gfu_boost;
+    const int qdiff = high_motion_minq[q] - low_motion_minq[q];
+    const int adjustment = ((offset * qdiff) + (gap >> 1)) / gap;
+    active_best_quality = low_motion_minq[q] + adjustment;
+  }
+  return active_best_quality;
 }
 
 static void set_mvcost(MACROBLOCK *mb) {
@@ -2702,18 +2723,10 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
       double q_val;
 
       // Baseline value derived from cpi->active_worst_quality and kf boost
-      if (cpi->kf_boost > high) {
-        cpi->active_best_quality = kf_low_motion_minq[q];
-      } else if (cpi->kf_boost < low) {
-        cpi->active_best_quality = kf_high_motion_minq[q];
-      } else {
-        const int gap = high - low;
-        const int offset = high - cpi->kf_boost;
-        const int qdiff = kf_high_motion_minq[q] - kf_low_motion_minq[q];
-        const int adjustment = ((offset * qdiff) + (gap >> 1)) / gap;
-
-        cpi->active_best_quality = kf_low_motion_minq[q] + adjustment;
-      }
+      cpi->active_best_quality = get_active_quality(q, cpi->kf_boost,
+                                                    low, high,
+                                                    kf_low_motion_minq,
+                                                    kf_high_motion_minq);
 
       // Allow somewhat lower kf minq with small image formats.
       if ((cm->width * cm->height) <= (352 * 288)) {
@@ -2748,46 +2761,47 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
       q = cpi->avg_frame_qindex;
     }
     // For constrained quality dont allow Q less than the cq level
-    if (cpi->oxcf.end_usage == USAGE_CONSTRAINED_QUALITY &&
-        q < cpi->cq_target_quality) {
-      q = cpi->cq_target_quality;
-    }
-    if (cpi->gfu_boost > high) {
-      cpi->active_best_quality = gf_low_motion_minq[q];
-    } else if (cpi->gfu_boost < low) {
-      cpi->active_best_quality = gf_high_motion_minq[q];
-    } else {
-      const int gap = high - low;
-      const int offset = high - cpi->gfu_boost;
-      const int qdiff = gf_high_motion_minq[q] - gf_low_motion_minq[q];
-      const int adjustment = ((offset * qdiff) + (gap >> 1)) / gap;
-
-      cpi->active_best_quality = gf_low_motion_minq[q] + adjustment;
-    }
-
-    // Constrained quality use slightly lower active best.
-    if (cpi->oxcf.end_usage == USAGE_CONSTRAINED_QUALITY)
+    if (cpi->oxcf.end_usage == USAGE_CONSTRAINED_QUALITY) {
+      if (q < cpi->cq_target_quality)
+        q = cpi->cq_target_quality;
+      if (cpi->frames_since_key > 1) {
+        cpi->active_best_quality = get_active_quality(q, cpi->gfu_boost,
+                                                      low, high,
+                                                      afq_low_motion_minq,
+                                                      afq_high_motion_minq);
+      } else {
+        cpi->active_best_quality = get_active_quality(q, cpi->gfu_boost,
+                                                      low, high,
+                                                      gf_low_motion_minq,
+                                                      gf_high_motion_minq);
+      }
+      // Constrained quality use slightly lower active best.
       cpi->active_best_quality = cpi->active_best_quality * 15 / 16;
 
-    // TODO(debargha): Refine the logic below
-    if (cpi->oxcf.end_usage == USAGE_CONSTANT_QUALITY) {
+    } else if (cpi->oxcf.end_usage == USAGE_CONSTANT_QUALITY) {
       if (!cpi->refresh_alt_ref_frame) {
         cpi->active_best_quality = cpi->cq_target_quality;
       } else {
         if (cpi->frames_since_key > 1) {
-          if (cpi->gfu_boost > high) {
-            cpi->active_best_quality = afq_low_motion_minq[q];
-          } else if (cpi->gfu_boost < low) {
-            cpi->active_best_quality = afq_high_motion_minq[q];
-          } else {
-            const int gap = high - low;
-            const int offset = high - cpi->gfu_boost;
-            const int qdiff = afq_high_motion_minq[q] - afq_low_motion_minq[q];
-            const int adjustment = ((offset * qdiff) + (gap >> 1)) / gap;
-
-            cpi->active_best_quality = afq_low_motion_minq[q] + adjustment;
-          }
+          cpi->active_best_quality = get_active_quality(q, cpi->gfu_boost,
+                                                        low, high,
+                                                        afq_low_motion_minq,
+                                                        afq_high_motion_minq);
+        } else {
+          cpi->active_best_quality = get_active_quality(q, cpi->gfu_boost,
+                                                        low, high,
+                                                        gf_low_motion_minq,
+                                                        gf_high_motion_minq);
         }
+      }
+    } else {
+      if (!cpi->refresh_alt_ref_frame) {
+        cpi->active_best_quality = inter_minq[q];
+      } else {
+        cpi->active_best_quality = get_active_quality(q, cpi->gfu_boost,
+                                                      low, high,
+                                                      gf_low_motion_minq,
+                                                      gf_high_motion_minq);
       }
     }
   } else {
