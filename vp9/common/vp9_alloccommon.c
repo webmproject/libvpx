@@ -170,13 +170,8 @@ int vp9_alloc_frame_buffers(VP9_COMMON *cm, int width, int height) {
 void vp9_create_common(VP9_COMMON *cm) {
   vp9_machine_specific_config(cm);
 
-  vp9_init_mbmode_probs(cm);
-
   cm->tx_mode = ONLY_4X4;
   cm->comp_pred_mode = HYBRID_PREDICTION;
-
-  // Initialize reference frame sign bias structure to defaults
-  vpx_memset(cm->ref_frame_sign_bias, 0, sizeof(cm->ref_frame_sign_bias));
 }
 
 void vp9_remove_common(VP9_COMMON *cm) {
