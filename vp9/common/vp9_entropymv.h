@@ -73,6 +73,10 @@ extern struct vp9_token vp9_mv_class_encodings[MV_CLASSES];
 #define MV_MAX         ((1 << MV_MAX_BITS) - 1)
 #define MV_VALS        ((MV_MAX << 1) + 1)
 
+#define MV_IN_USE_BITS 14
+#define MV_UPP   ((1 << MV_IN_USE_BITS) - 1)
+#define MV_LOW   (-(1 << MV_IN_USE_BITS))
+
 extern const vp9_tree_index vp9_mv_class0_tree[2 * CLASS0_SIZE - 2];
 extern struct vp9_token vp9_mv_class0_encodings[CLASS0_SIZE];
 
