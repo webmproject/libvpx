@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdH//9eY\u003d",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2013-09-28T02:24:09Z",
+      "side": 1,
+      "message": "Please make the first line of the commit message \u003c 62 characters, leave a blank line, and wrap the body of the message at 80 characters.\n\nSuch as:\n Improve FDCT32x32_2D\n\n Reduce the number of instructions by about 20. Intermediate results are\n calculated differently but after final rounding give the same results.\n\n Tested with \"park_joy_420_720p50.y4m\"\n\n Change-Id: Iba90d9bc204fedd25a904dfcfb2a67913fe211dd",
+      "revId": "b2e9e019580de59c0a3e5c4d98dc134ef558f1bd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdH//9ec\u003d",
+        "filename": "vp9/encoder/x86/vp9_dct32x32_sse2.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1342,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2013-09-28T02:24:09Z",
+      "side": 1,
+      "message": "Please use spaces instead of tabs",
+      "revId": "b2e9e019580de59c0a3e5c4d98dc134ef558f1bd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
