@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdH//9bg\u003d",
+        "filename": "vp9/common/vp9_idct_blk.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2013-09-29T17:45:14Z",
+      "side": 1,
+      "message": "why do we need the input set at all ever?  Seems like extra work?",
+      "revId": "be420c307dbb582f008e444067cc54c3e7e4b8f5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdH//9bc\u003d",
+        "filename": "vp9/common/vp9_idct_blk.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 93,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2013-09-29T17:45:14Z",
+      "side": 1,
+      "message": "why is it okay to remove memset here but not above?",
+      "revId": "be420c307dbb582f008e444067cc54c3e7e4b8f5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
