@@ -436,7 +436,6 @@ static void setup_segmentation(struct segmentation *seg,
 
 static void setup_loopfilter(struct loopfilter *lf,
                              struct vp9_read_bit_buffer *rb) {
-
   lf->filter_level = vp9_rb_read_literal(rb, 6);
   lf->sharpness_level = vp9_rb_read_literal(rb, 3);
 
