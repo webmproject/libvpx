@@ -53,7 +53,7 @@ static void inverse_transform_b_8x8_add(int eob,
   if (eob <= 1)
     vp9_short_idct8x8_1_add(dqcoeff, dest, stride);
   else if (eob <= 10)
-    vp9_short_idct10_8x8_add(dqcoeff, dest, stride);
+    vp9_short_idct8x8_10_add(dqcoeff, dest, stride);
   else
     vp9_short_idct8x8_add(dqcoeff, dest, stride);
 }

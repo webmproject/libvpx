@@ -420,7 +420,7 @@ void vp9_short_iht8x8_add_c(int16_t *input, uint8_t *dest, int dest_stride,
                                   + dest[j * dest_stride + i]);  }
 }
 
-void vp9_short_idct10_8x8_add_c(int16_t *input, uint8_t *dest,
+void vp9_short_idct8x8_10_add_c(int16_t *input, uint8_t *dest,
                                 int dest_stride) {
   int16_t out[8 * 8] = { 0 };
   int16_t *outptr = out;
