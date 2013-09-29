@@ -89,7 +89,7 @@ struct vpx_codec_alg_priv {
   unsigned int                fixed_kf_cntr;
 };
 
-static const VP9_REFFRAME ref_frame_to_vp9_reframe(vpx_ref_frame_type_t frame) {
+static VP9_REFFRAME ref_frame_to_vp9_reframe(vpx_ref_frame_type_t frame) {
   switch (frame) {
     case VP8_LAST_FRAME:
       return VP9_LAST_FLAG;
