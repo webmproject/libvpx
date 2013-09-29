@@ -61,16 +61,11 @@
 #define INTRA_ZBIN_BOOST     0
 
 typedef struct {
-  nmv_context nmvc;
   int nmvjointcost[MV_JOINTS];
   int nmvcosts[2][MV_VALS];
   int nmvcosts_hp[2][MV_VALS];
 
   vp9_prob segment_pred_probs[PREDICTION_PROBS];
-  vp9_prob intra_inter_prob[INTRA_INTER_CONTEXTS];
-  vp9_prob comp_inter_prob[COMP_INTER_CONTEXTS];
-  vp9_prob single_ref_prob[REF_CONTEXTS][2];
-  vp9_prob comp_ref_prob[REF_CONTEXTS];
 
   unsigned char *last_frame_seg_map_copy;
 
@@ -79,20 +74,8 @@ typedef struct {
   // 0 = ZERO_MV, MV
   signed char last_mode_lf_deltas[MAX_MODE_LF_DELTAS];
 
-  vp9_coeff_probs_model coef_probs[TX_SIZES][BLOCK_TYPES];
-
-  vp9_prob y_mode_prob[4][INTRA_MODES - 1];
-  vp9_prob uv_mode_prob[INTRA_MODES][INTRA_MODES - 1];
-  vp9_prob partition_prob[2][NUM_PARTITION_CONTEXTS][PARTITION_TYPES - 1];
-
-  vp9_prob switchable_interp_prob[SWITCHABLE_FILTERS + 1]
-                                 [SWITCHABLE_FILTERS - 1];
-
   int inter_mode_counts[INTER_MODE_CONTEXTS][INTER_MODES - 1][2];
-  vp9_prob inter_mode_probs[INTER_MODE_CONTEXTS][INTER_MODES - 1];
-
-  struct tx_probs tx_probs;
-  vp9_prob mbskip_probs[MBSKIP_CONTEXTS];
+  FRAME_CONTEXT fc;
 } CODING_CONTEXT;
 
 typedef struct {

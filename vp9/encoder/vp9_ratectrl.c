@@ -76,24 +76,11 @@ void vp9_save_coding_context(VP9_COMP *cpi) {
   // restored with a call to vp9_restore_coding_context. These functions are
   // intended for use in a re-code loop in vp9_compress_frame where the
   // quantizer value is adjusted between loop iterations.
-
-  cc->nmvc = cm->fc.nmvc;
   vp9_copy(cc->nmvjointcost,  cpi->mb.nmvjointcost);
   vp9_copy(cc->nmvcosts,  cpi->mb.nmvcosts);
   vp9_copy(cc->nmvcosts_hp,  cpi->mb.nmvcosts_hp);
 
-  vp9_copy(cc->inter_mode_probs, cm->fc.inter_mode_probs);
-
-  vp9_copy(cc->y_mode_prob, cm->fc.y_mode_prob);
-  vp9_copy(cc->uv_mode_prob, cm->fc.uv_mode_prob);
-  vp9_copy(cc->partition_prob, cm->fc.partition_prob);
-
   vp9_copy(cc->segment_pred_probs, cm->seg.pred_probs);
-
-  vp9_copy(cc->intra_inter_prob, cm->fc.intra_inter_prob);
-  vp9_copy(cc->comp_inter_prob, cm->fc.comp_inter_prob);
-  vp9_copy(cc->single_ref_prob, cm->fc.single_ref_prob);
-  vp9_copy(cc->comp_ref_prob, cm->fc.comp_ref_prob);
 
   vpx_memcpy(cpi->coding_context.last_frame_seg_map_copy,
              cm->last_frame_seg_map, (cm->mi_rows * cm->mi_cols));
@@ -101,10 +88,7 @@ void vp9_save_coding_context(VP9_COMP *cpi) {
   vp9_copy(cc->last_ref_lf_deltas, cm->lf.last_ref_deltas);
   vp9_copy(cc->last_mode_lf_deltas, cm->lf.last_mode_deltas);
 
-  vp9_copy(cc->coef_probs, cm->fc.coef_probs);
-  vp9_copy(cc->switchable_interp_prob, cm->fc.switchable_interp_prob);
-  cc->tx_probs = cm->fc.tx_probs;
-  vp9_copy(cc->mbskip_probs, cm->fc.mbskip_probs);
+  cc->fc = cm->fc;
 }
 
 void vp9_restore_coding_context(VP9_COMP *cpi) {
@@ -113,24 +97,11 @@ void vp9_restore_coding_context(VP9_COMP *cpi) {
 
   // Restore key state variables to the snapshot state stored in the
   // previous call to vp9_save_coding_context.
-
-  cm->fc.nmvc = cc->nmvc;
   vp9_copy(cpi->mb.nmvjointcost, cc->nmvjointcost);
   vp9_copy(cpi->mb.nmvcosts, cc->nmvcosts);
   vp9_copy(cpi->mb.nmvcosts_hp, cc->nmvcosts_hp);
 
-  vp9_copy(cm->fc.inter_mode_probs, cc->inter_mode_probs);
-
-  vp9_copy(cm->fc.y_mode_prob, cc->y_mode_prob);
-  vp9_copy(cm->fc.uv_mode_prob, cc->uv_mode_prob);
-  vp9_copy(cm->fc.partition_prob, cc->partition_prob);
-
   vp9_copy(cm->seg.pred_probs, cc->segment_pred_probs);
-
-  vp9_copy(cm->fc.intra_inter_prob, cc->intra_inter_prob);
-  vp9_copy(cm->fc.comp_inter_prob, cc->comp_inter_prob);
-  vp9_copy(cm->fc.single_ref_prob, cc->single_ref_prob);
-  vp9_copy(cm->fc.comp_ref_prob, cc->comp_ref_prob);
 
   vpx_memcpy(cm->last_frame_seg_map,
              cpi->coding_context.last_frame_seg_map_copy,
@@ -139,10 +110,7 @@ void vp9_restore_coding_context(VP9_COMP *cpi) {
   vp9_copy(cm->lf.last_ref_deltas, cc->last_ref_lf_deltas);
   vp9_copy(cm->lf.last_mode_deltas, cc->last_mode_lf_deltas);
 
-  vp9_copy(cm->fc.coef_probs, cc->coef_probs);
-  vp9_copy(cm->fc.switchable_interp_prob, cc->switchable_interp_prob);
-  cm->fc.tx_probs = cc->tx_probs;
-  vp9_copy(cm->fc.mbskip_probs, cc->mbskip_probs);
+  cm->fc = cc->fc;
 }
 
 void vp9_setup_key_frame(VP9_COMP *cpi) {
