@@ -16,6 +16,9 @@ SCALE_SRCS-$(HAVE_NEON)  += arm/neon/vp8_vpxyv12_copysrcframe_func_neon$(ASM)
 SCALE_SRCS-$(HAVE_NEON)  += arm/neon/vp8_vpxyv12_extendframeborders_neon$(ASM)
 SCALE_SRCS-$(HAVE_NEON)  += arm/neon/yv12extend_arm.c
 
+#mips(dspr2)
+SCALE_SRCS-$(HAVE_DSPR2)  += mips/dspr2/yv12extend_dspr2.c
+
 SCALE_SRCS-no += $(SCALE_SRCS_REMOVE-yes)
 
 $(eval $(call asm_offsets_template,\

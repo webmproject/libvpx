@@ -290,8 +290,10 @@ static void setup_rtcd_internal(void)
 {
 $(set_function_pointers c $ALL_ARCHS)
 #if HAVE_DSPR2
+#if CONFIG_VP8
 void dsputil_static_init();
 dsputil_static_init();
+#endif
 #endif
 }
 #endif
