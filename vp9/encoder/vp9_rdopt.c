@@ -2653,7 +2653,7 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
   VP9_COMMON *cm = &cpi->common;
   MACROBLOCKD *xd = &x->e_mbd;
   MB_MODE_INFO *mbmi = &xd->this_mi->mbmi;
-  const int is_comp_pred = (mbmi->ref_frame[1] > 0);
+  const int is_comp_pred = has_second_ref(mbmi);
   const int num_refs = is_comp_pred ? 2 : 1;
   const int this_mode = mbmi->mode;
   int_mv *frame_mv = mode_mv[this_mode];
@@ -4025,13 +4025,11 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
   if (best_mbmode.ref_frame[0] != INTRA_FRAME &&
       best_mbmode.sb_type < BLOCK_8X8) {
     for (i = 0; i < 4; i++)
-      xd->this_mi->bmi[i].as_mv[0].as_int =
-          best_bmodes[i].as_mv[0].as_int;
+      xd->this_mi->bmi[i].as_mv[0].as_int = best_bmodes[i].as_mv[0].as_int;
 
-    if (mbmi->ref_frame[1] > 0)
+    if (has_second_ref(mbmi))
       for (i = 0; i < 4; i++)
-        xd->this_mi->bmi[i].as_mv[1].as_int =
-            best_bmodes[i].as_mv[1].as_int;
+        xd->this_mi->bmi[i].as_mv[1].as_int = best_bmodes[i].as_mv[1].as_int;
 
     *x->partition_info = best_partition;
 

@@ -55,13 +55,11 @@ static MB_PREDICTION_MODE left_block_mode(const MODE_INFO *cur_mb,
     if (!mi)
       return DC_PRED;
 
-    if (mi->mbmi.ref_frame[0] != INTRA_FRAME) {
+    if (is_inter_block(&mi->mbmi))
       return DC_PRED;
-    } else if (mi->mbmi.sb_type < BLOCK_8X8) {
-      return ((mi->bmi + 1 + b)->as_mode);
-    } else {
-      return mi->mbmi.mode;
-    }
+    else
+      return mi->mbmi.sb_type < BLOCK_8X8 ? (mi->bmi + 1 + b)->as_mode
+                                          : mi->mbmi.mode;
   }
   assert(b == 1 || b == 3);
   return (mi->bmi + b - 1)->as_mode;
@@ -77,13 +75,11 @@ static MB_PREDICTION_MODE above_block_mode(const MODE_INFO *cur_mb,
     if (!mi)
       return DC_PRED;
 
-    if (mi->mbmi.ref_frame[0] != INTRA_FRAME) {
+    if (is_inter_block(&mi->mbmi))
       return DC_PRED;
-    } else if (mi->mbmi.sb_type < BLOCK_8X8) {
-      return ((mi->bmi + 2 + b)->as_mode);
-    } else {
-      return mi->mbmi.mode;
-    }
+    else
+      return mi->mbmi.sb_type < BLOCK_8X8 ? (mi->bmi + 2 + b)->as_mode
+                                          : mi->mbmi.mode;
   }
 
   return (mi->bmi + b - 2)->as_mode;

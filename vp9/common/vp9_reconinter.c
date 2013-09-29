@@ -132,7 +132,7 @@ static void build_inter_predictors(int plane, int block, BLOCK_SIZE bsize,
   const int x = 4 * (block & ((1 << bwl) - 1));
   const int y = 4 * (block >> bwl);
   const MODE_INFO *mi = xd->this_mi;
-  const int use_second_ref = mi->mbmi.ref_frame[1] > 0;
+  const int is_compound = has_second_ref(&mi->mbmi);
   int ref;
 
   assert(x < bw);
@@ -140,7 +140,7 @@ static void build_inter_predictors(int plane, int block, BLOCK_SIZE bsize,
   assert(mi->mbmi.sb_type < BLOCK_8X8 || 4 << pred_w == bw);
   assert(mi->mbmi.sb_type < BLOCK_8X8 || 4 << pred_h == bh);
 
-  for (ref = 0; ref < 1 + use_second_ref; ++ref) {
+  for (ref = 0; ref < 1 + is_compound; ++ref) {
     struct scale_factors *const scale = &xd->scale_factor[ref];
     struct buf_2d *const pre_buf = &pd->pre[ref];
     struct buf_2d *const dst_buf = &pd->dst;
