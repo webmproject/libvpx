@@ -176,7 +176,6 @@ static void read_intra_frame_mode_info(VP9D_COMP *pbi, MODE_INFO *m,
 
 static int read_mv_component(vp9_reader *r,
                              const nmv_component *mvcomp, int usehp) {
-
   int mag, d, fr, hp;
   const int sign = vp9_read(r, mvcomp->sign);
   const int mv_class = treed_read(r, vp9_mv_class_tree, mvcomp->classes);
