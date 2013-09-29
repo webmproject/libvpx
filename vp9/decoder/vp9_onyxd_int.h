@@ -41,4 +41,4 @@ typedef struct VP9Decompressor {
   VP9Worker lf_worker;
 } VP9D_COMP;
 
-#endif  // VP9_DECODER_VP9_TREEREADER_H_
+#endif  // VP9_DECODER_VP9_ONYXD_INT_H_
