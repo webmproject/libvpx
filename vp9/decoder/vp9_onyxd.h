@@ -8,8 +8,8 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#ifndef VP9_COMMON_VP9_ONYXD_H_
-#define VP9_COMMON_VP9_ONYXD_H_
+#ifndef VP9_DECODER_VP9_ONYXD_H_
+#define VP9_DECODER_VP9_ONYXD_H_
 
 #ifdef __cplusplus
 extern "C" {
@@ -66,4 +66,4 @@ void vp9_remove_decompressor(VP9D_PTR comp);
 }
 #endif
 
-#endif  // VP9_COMMON_VP9_ONYXD_H_
+#endif  // VP9_DECODER_VP9_ONYXD_H_
