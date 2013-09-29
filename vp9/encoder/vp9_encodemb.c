@@ -172,7 +172,7 @@ static void optimize_b(MACROBLOCK *mb,
   assert((!type && !plane) || (type && plane));
   dqcoeff_ptr = BLOCK_OFFSET(pd->dqcoeff, block);
   qcoeff_ptr = BLOCK_OFFSET(pd->qcoeff, block);
-  get_scan_and_band(xd, tx_size, type, ib, &scan, &band_translate);
+  get_scan_and_band(xd, tx_size, type, ib, &scan, &nb, &band_translate);
   assert(eob <= default_eob);
 
   /* Now set up a Viterbi trellis to evaluate alternative roundings. */
@@ -191,7 +191,6 @@ static void optimize_b(MACROBLOCK *mb,
   for (i = 0; i < eob; i++)
     token_cache[scan[i]] = vp9_pt_energy_class[vp9_dct_value_tokens_ptr[
         qcoeff_ptr[scan[i]]].token];
-  nb = vp9_get_coef_neighbors_handle(scan);
 
   for (i = eob; i-- > i0;) {
     int base_bits, d2, dx;

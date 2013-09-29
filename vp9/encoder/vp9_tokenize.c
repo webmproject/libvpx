@@ -137,8 +137,7 @@ static void tokenize_b(int plane, int block, BLOCK_SIZE plane_bsize,
 
   pt = get_entropy_context(tx_size, pd->above_context + aoff,
                                     pd->left_context + loff);
-  get_scan_and_band(xd, tx_size, type, block, &scan, &band_translate);
-  nb = vp9_get_coef_neighbors_handle(scan);
+  get_scan_and_band(xd, tx_size, type, block, &scan, &nb, &band_translate);
   c = 0;
   do {
     const int band = get_coef_band(band_translate, c);

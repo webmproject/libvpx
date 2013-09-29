@@ -190,9 +190,6 @@ static INLINE int get_coef_context(const int16_t *neighbors,
           token_cache[neighbors[MAX_NEIGHBORS * c + 1]]) >> 1;
 }
 
-const int16_t *vp9_get_coef_neighbors_handle(const int16_t *scan);
-
-
 // 128 lists of probabilities are stored for the following ONE node probs:
 // 1, 3, 5, 7, ..., 253, 255
 // In between probabilities are interpolated linearly
@@ -367,22 +364,24 @@ static int get_entropy_context(TX_SIZE tx_size,
 static void get_scan_and_band(const MACROBLOCKD *xd, TX_SIZE tx_size,
                               PLANE_TYPE type, int block_idx,
                               const int16_t **scan,
+                              const int16_t **scan_nb,
                               const uint8_t **band_translate) {
   switch (tx_size) {
     case TX_4X4:
-      *scan = get_scan_4x4(get_tx_type_4x4(type, xd, block_idx));
+      get_scan_nb_4x4(get_tx_type_4x4(type, xd, block_idx), scan, scan_nb);
       *band_translate = vp9_coefband_trans_4x4;
       break;
     case TX_8X8:
-      *scan = get_scan_8x8(get_tx_type_8x8(type, xd));
+      get_scan_nb_8x8(get_tx_type_8x8(type, xd), scan, scan_nb);
       *band_translate = vp9_coefband_trans_8x8plus;
       break;
     case TX_16X16:
-      *scan = get_scan_16x16(get_tx_type_16x16(type, xd));
+      get_scan_nb_16x16(get_tx_type_16x16(type, xd), scan, scan_nb);
       *band_translate = vp9_coefband_trans_8x8plus;
       break;
     case TX_32X32:
       *scan = vp9_default_scan_32x32;
+      *scan_nb = vp9_default_scan_32x32_neighbors;
       *band_translate = vp9_coefband_trans_8x8plus;
       break;
     default:
