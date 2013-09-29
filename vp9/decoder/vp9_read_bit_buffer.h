@@ -8,8 +8,8 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#ifndef VP9_READ_BIT_BUFFER_
-#define VP9_READ_BIT_BUFFER_
+#ifndef VP9_DECODER_VP9_READ_BIT_BUFFER_H_
+#define VP9_DECODER_VP9_READ_BIT_BUFFER_H_
 
 #include <limits.h>
 
@@ -57,4 +57,4 @@ static int vp9_rb_read_signed_literal(struct vp9_read_bit_buffer *rb,
   return vp9_rb_read_bit(rb) ? -value : value;
 }
 
-#endif  // VP9_READ_BIT_BUFFER_
+#endif  // VP9_DECODER_VP9_READ_BIT_BUFFER_H_
