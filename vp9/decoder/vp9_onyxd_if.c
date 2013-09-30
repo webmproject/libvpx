@@ -65,13 +65,12 @@ static void recon_write_yuv_frame(const char *name,
 #endif
 #if WRITE_RECON_BUFFER == 2
 void write_dx_frame_to_file(YV12_BUFFER_CONFIG *frame, int this_frame) {
-
   // write the frame
   FILE *yframe;
   int i;
   char filename[255];
 
-  sprintf(filename, "dx\\y%04d.raw", this_frame);
+  snprintf(filename, sizeof(filename)-1, "dx\\y%04d.raw", this_frame);
   yframe = fopen(filename, "wb");
 
   for (i = 0; i < frame->y_height; i++)
@@ -79,7 +78,7 @@ void write_dx_frame_to_file(YV12_BUFFER_CONFIG *frame, int this_frame) {
            frame->y_width, 1, yframe);
 
   fclose(yframe);
-  sprintf(filename, "dx\\u%04d.raw", this_frame);
+  snprintf(filename, sizeof(filename)-1, "dx\\u%04d.raw", this_frame);
   yframe = fopen(filename, "wb");
 
   for (i = 0; i < frame->uv_height; i++)
@@ -87,7 +86,7 @@ void write_dx_frame_to_file(YV12_BUFFER_CONFIG *frame, int this_frame) {
            frame->uv_width, 1, yframe);
 
   fclose(yframe);
-  sprintf(filename, "dx\\v%04d.raw", this_frame);
+  snprintf(filename, sizeof(filename)-1, "dx\\v%04d.raw", this_frame);
   yframe = fopen(filename, "wb");
 
   for (i = 0; i < frame->uv_height; i++)
@@ -214,13 +213,13 @@ vpx_codec_err_t vp9_set_reference_dec(VP9D_PTR ptr, VP9_REFFRAME ref_frame_flag,
    * vpxenc --test-decode functionality working, and will be replaced in a
    * later commit that adds VP9-specific controls for this functionality.
    */
-  if (ref_frame_flag == VP9_LAST_FLAG)
+  if (ref_frame_flag == VP9_LAST_FLAG) {
     ref_fb_ptr = &pbi->common.active_ref_idx[0];
-  else if (ref_frame_flag == VP9_GOLD_FLAG)
+  } else if (ref_frame_flag == VP9_GOLD_FLAG) {
     ref_fb_ptr = &pbi->common.active_ref_idx[1];
-  else if (ref_frame_flag == VP9_ALT_FLAG)
+  } else if (ref_frame_flag == VP9_ALT_FLAG) {
     ref_fb_ptr = &pbi->common.active_ref_idx[2];
-  else {
+  } else {
     vpx_internal_error(&pbi->common.error, VPX_CODEC_ERROR,
                        "Invalid reference frame");
     return pbi->common.error.error_code;
