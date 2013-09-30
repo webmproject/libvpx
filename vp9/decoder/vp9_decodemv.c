@@ -418,8 +418,7 @@ static void read_inter_block_mode_info(VP9D_COMP *pbi, MODE_INFO *mi,
   const BLOCK_SIZE bsize = mbmi->sb_type;
   const int allow_hp = xd->allow_high_precision_mv;
 
-  int_mv nearest, nearby, best_mv;
-  int_mv nearest_second, nearby_second, best_mv_second;
+  int_mv nearest[2], near[2], best[2];
   uint8_t inter_mode_ctx;
   MV_REFERENCE_FRAME ref0;
   int is_compound;
@@ -444,8 +443,8 @@ static void read_inter_block_mode_info(VP9D_COMP *pbi, MODE_INFO *mi,
 
   // nearest, nearby
   if (bsize < BLOCK_8X8 || mbmi->mode != ZEROMV) {
-    vp9_find_best_ref_mvs(xd, mbmi->ref_mvs[ref0], &nearest, &nearby);
-    best_mv.as_int = mbmi->ref_mvs[ref0][0].as_int;
+    vp9_find_best_ref_mvs(xd, mbmi->ref_mvs[ref0], &nearest[0], &near[0]);
+    best[0].as_int = nearest[0].as_int;
   }
 
   if (is_compound) {
@@ -454,9 +453,8 @@ static void read_inter_block_mode_info(VP9D_COMP *pbi, MODE_INFO *mi,
                      ref1, mbmi->ref_mvs[ref1], mi_row, mi_col);
 
     if (bsize < BLOCK_8X8 || mbmi->mode != ZEROMV) {
-      vp9_find_best_ref_mvs(xd, mbmi->ref_mvs[ref1],
-                            &nearest_second, &nearby_second);
-      best_mv_second.as_int = mbmi->ref_mvs[ref1][0].as_int;
+      vp9_find_best_ref_mvs(xd, mbmi->ref_mvs[ref1], &nearest[1], &near[1]);
+      best[1].as_int = nearest[1].as_int;
     }
   }
 
@@ -471,50 +469,48 @@ static void read_inter_block_mode_info(VP9D_COMP *pbi, MODE_INFO *mi,
     int b_mode;
     for (idy = 0; idy < 2; idy += num_4x4_h) {
       for (idx = 0; idx < 2; idx += num_4x4_w) {
-        int_mv blockmv, secondmv;
+        int_mv block[2];
         const int j = idy * 2 + idx;
         b_mode = read_inter_mode(cm, r, inter_mode_ctx);
 
         if (b_mode == NEARESTMV || b_mode == NEARMV) {
-          vp9_append_sub8x8_mvs_for_idx(cm, xd, &nearest, &nearby, j, 0,
+          vp9_append_sub8x8_mvs_for_idx(cm, xd, &nearest[0], &near[0], j, 0,
                                         mi_row, mi_col);
 
           if (is_compound)
-            vp9_append_sub8x8_mvs_for_idx(cm, xd,  &nearest_second,
-                                         &nearby_second, j, 1,
-                                         mi_row, mi_col);
+            vp9_append_sub8x8_mvs_for_idx(cm, xd,  &nearest[1], &near[1], j, 1,
+                                          mi_row, mi_col);
         }
 
         switch (b_mode) {
           case NEWMV:
-            read_mv(r, &blockmv.as_mv, &best_mv.as_mv, nmvc,
-                    &cm->counts.mv, allow_hp);
-
+            read_mv(r, &block[0].as_mv, &best[0].as_mv, nmvc, &cm->counts.mv,
+                    allow_hp);
             if (is_compound)
-              read_mv(r, &secondmv.as_mv, &best_mv_second.as_mv, nmvc,
-                      &cm->counts.mv, allow_hp);
+              read_mv(r, &block[1].as_mv, &best[1].as_mv, nmvc, &cm->counts.mv,
+                      allow_hp);
             break;
           case NEARESTMV:
-            blockmv.as_int = nearest.as_int;
+            block[0].as_int = nearest[0].as_int;
             if (is_compound)
-              secondmv.as_int = nearest_second.as_int;
+              block[1].as_int = nearest[1].as_int;
             break;
           case NEARMV:
-            blockmv.as_int = nearby.as_int;
+            block[0].as_int = near[0].as_int;
             if (is_compound)
-              secondmv.as_int = nearby_second.as_int;
+              block[1].as_int = near[1].as_int;
             break;
           case ZEROMV:
-            blockmv.as_int = 0;
+            block[0].as_int = 0;
             if (is_compound)
-              secondmv.as_int = 0;
+              block[1].as_int = 0;
             break;
           default:
             assert(!"Invalid inter mode value");
         }
-        mi->bmi[j].as_mv[0].as_int = blockmv.as_int;
+        mi->bmi[j].as_mv[0].as_int = block[0].as_int;
         if (is_compound)
-          mi->bmi[j].as_mv[1].as_int = secondmv.as_int;
+          mi->bmi[j].as_mv[1].as_int = block[1].as_int;
 
         if (num_4x4_h == 2)
           mi->bmi[j + 2] = mi->bmi[j];
@@ -529,15 +525,15 @@ static void read_inter_block_mode_info(VP9D_COMP *pbi, MODE_INFO *mi,
   } else {
     switch (mbmi->mode) {
       case NEARMV:
-        mv0->as_int = nearby.as_int;
+        mv0->as_int = near[0].as_int;
         if (is_compound)
-          mv1->as_int = nearby_second.as_int;
+          mv1->as_int = near[1].as_int;
         break;
 
       case NEARESTMV:
-        mv0->as_int = nearest.as_int;
+        mv0->as_int = nearest[0].as_int;
         if (is_compound)
-          mv1->as_int = nearest_second.as_int;
+          mv1->as_int = nearest[1].as_int;
         break;
 
       case ZEROMV:
@@ -547,9 +543,9 @@ static void read_inter_block_mode_info(VP9D_COMP *pbi, MODE_INFO *mi,
         break;
 
       case NEWMV:
-        read_mv(r, &mv0->as_mv, &best_mv.as_mv, nmvc, &cm->counts.mv, allow_hp);
+        read_mv(r, &mv0->as_mv, &best[0].as_mv, nmvc, &cm->counts.mv, allow_hp);
         if (is_compound)
-          read_mv(r, &mv1->as_mv, &best_mv_second.as_mv, nmvc, &cm->counts.mv,
+          read_mv(r, &mv1->as_mv, &best[1].as_mv, nmvc, &cm->counts.mv,
                   allow_hp);
         break;
       default:
