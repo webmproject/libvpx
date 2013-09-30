@@ -12,7 +12,7 @@
 #define VP9_COMMON_VP9_LOOPFILTER_H_
 
 #include "vpx_ports/mem.h"
-#include "vpx_config.h"
+#include "./vpx_config.h"
 
 #include "vp9/common/vp9_blockd.h"
 #include "vp9/common/vp9_seg_common.h"
