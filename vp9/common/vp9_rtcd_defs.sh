@@ -202,17 +202,6 @@ specialize vp9_dc_left_predictor_32x32
 prototype void vp9_dc_128_predictor_32x32 "uint8_t *dst, ptrdiff_t y_stride, const uint8_t *above, const uint8_t *left"
 specialize vp9_dc_128_predictor_32x32
 
-if [ "$CONFIG_VP9_DECODER" = "yes" ]; then
-prototype void vp9_add_constant_residual_8x8 "const int16_t diff, uint8_t *dest, int stride"
-specialize vp9_add_constant_residual_8x8 sse2 neon
-
-prototype void vp9_add_constant_residual_16x16 "const int16_t diff, uint8_t *dest, int stride"
-specialize vp9_add_constant_residual_16x16 sse2 neon
-
-prototype void vp9_add_constant_residual_32x32 "const int16_t diff, uint8_t *dest, int stride"
-specialize vp9_add_constant_residual_32x32 sse2 neon
-fi
-
 #
 # Loopfilter
 #
@@ -321,8 +310,8 @@ specialize vp9_short_idct16x16_10_add sse2 neon
 prototype void vp9_short_idct32x32_add "int16_t *input, uint8_t *dest, int dest_stride"
 specialize vp9_short_idct32x32_add sse2 neon
 
-prototype void vp9_short_idct1_32x32 "int16_t *input, int16_t *output"
-specialize vp9_short_idct1_32x32
+prototype void vp9_short_idct32x32_1_add "int16_t *input, uint8_t *dest, int dest_stride"
+specialize vp9_short_idct32x32_1_add
 
 prototype void vp9_short_iht4x4_add "int16_t *input, uint8_t *dest, int dest_stride, int tx_type"
 specialize vp9_short_iht4x4_add sse2 neon
