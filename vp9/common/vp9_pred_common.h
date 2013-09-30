@@ -69,8 +69,9 @@ unsigned char vp9_get_pred_context_comp_inter_inter(const VP9_COMMON *cm,
                                                     const MACROBLOCKD *xd);
 
 
-static INLINE vp9_prob vp9_get_pred_prob_comp_inter_inter(const VP9_COMMON *cm,
-                                                          const MACROBLOCKD *xd) {
+static INLINE
+vp9_prob vp9_get_pred_prob_comp_inter_inter(const VP9_COMMON *cm,
+                                            const MACROBLOCKD *xd) {
   const int pred_context = vp9_get_pred_context_comp_inter_inter(cm, xd);
   return cm->fc.comp_inter_prob[pred_context];
 }
