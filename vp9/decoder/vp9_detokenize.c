@@ -121,7 +121,7 @@ static int decode_coefs(VP9_COMMON *cm, const MACROBLOCKD *xd,
     if (!vp9_read(r, prob[EOB_CONTEXT_NODE]))
       break;
 
-SKIP_START:
+  SKIP_START:
     if (c >= seg_eob)
       break;
     if (c)
