@@ -698,12 +698,8 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
   if (mode > 1)
     mode = 1;
 
-  // Initialise default mode frequency sampling variables
-  for (i = 0; i < MAX_MODES; i ++) {
-    cpi->mode_check_freq[i] = 0;
-    cpi->mode_test_hit_counts[i] = 0;
+  for (i = 0; i < MAX_MODES; ++i)
     cpi->mode_chosen_counts[i] = 0;
-  }
 
   // best quality defaults
   sf->RD = 1;

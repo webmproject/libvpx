@@ -363,8 +363,6 @@ typedef struct VP9_COMP {
   // Ambient reconstruction err target for force key frames
   int ambient_err;
 
-  unsigned int mode_check_freq[MAX_MODES];
-  unsigned int mode_test_hit_counts[MAX_MODES];
   unsigned int mode_chosen_counts[MAX_MODES];
   int64_t mode_skip_mask;
   int ref_frame_mask;
