@@ -7,6 +7,8 @@
  *  in the file PATENTS.  All contributing project authors may
  *  be found in the AUTHORS file in the root of the source tree.
 */
+#ifndef VP9_COMMON_DEFAULT_COEF_PROBS_H_
+#define VP9_COMMON_DEFAULT_COEF_PROBS_H_
 
 /*Generated file, included by vp9_entropy.c*/
 static const vp9_coeff_probs_model default_coef_probs_4x4[BLOCK_TYPES] = {
@@ -694,3 +696,4 @@ static const vp9_coeff_probs_model default_coef_probs_32x32[BLOCK_TYPES] = {
   }
 };
 
+#endif  // VP9_COMMON_DEFAULT_COEF_PROBS_H_
