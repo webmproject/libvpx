@@ -244,7 +244,6 @@ typedef struct macroblockd {
   unsigned char ab_index;   // index of 4x4 block inside the 8x8 block
 
   int q_index;
-
 } MACROBLOCKD;
 
 static INLINE uint8_t *get_sb_index(MACROBLOCKD *xd, BLOCK_SIZE subsize) {
