@@ -13,7 +13,7 @@
 #define VP9_COMMON_VP9_ENTROPYMV_H_
 
 #include "vp9/common/vp9_treecoder.h"
-#include "vpx_config.h"
+#include "./vpx_config.h"
 #include "vp9/common/vp9_blockd.h"
 
 struct VP9Common;
