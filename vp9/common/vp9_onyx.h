@@ -13,7 +13,7 @@
 
 #ifdef __cplusplus
 extern "C"
-{
+{ // NOLINT
 #endif
 
 #include "./vpx_config.h"
@@ -33,7 +33,6 @@ extern "C"
     FOURFIVE    = 1,
     THREEFIVE   = 2,
     ONETWO      = 3
-
   } VPX_SCALING;
 
   typedef enum {
@@ -71,42 +70,48 @@ extern "C"
                   //   3 - lowest quality/fastest decode
     int width;  // width of data passed to the compressor
     int height;  // height of data passed to the compressor
-    double framerate;       // set to passed in framerate
-    int64_t target_bandwidth;    // bandwidth to be used in kilobits per second
+    double framerate;  // set to passed in framerate
+    int64_t target_bandwidth;  // bandwidth to be used in kilobits per second
 
-    int noise_sensitivity;   // parameter used for applying pre processing blur: recommendation 0
-    int Sharpness;          // parameter used for sharpening output: recommendation 0:
+    int noise_sensitivity;  // pre processing blur: recommendation 0
+    int Sharpness;  // sharpening output: recommendation 0:
     int cpu_used;
     unsigned int rc_max_intra_bitrate_pct;
 
     // mode ->
-    // (0)=Realtime/Live Encoding. This mode is optimized for realtim encoding (for example, capturing
-    //    a television signal or feed from a live camera). ( speed setting controls how fast )
-    // (1)=Good Quality Fast Encoding. The encoder balances quality with the amount of time it takes to
-    //    encode the output. ( speed setting controls how fast )
-    // (2)=One Pass - Best Quality. The encoder places priority on the quality of the output over encoding
-    //    speed. The output is compressed at the highest possible quality. This option takes the longest
-    //    amount of time to encode. ( speed setting ignored )
-    // (3)=Two Pass - First Pass. The encoder generates a file of statistics for use in the second encoding
-    //    pass. ( speed setting controls how fast )
-    // (4)=Two Pass - Second Pass. The encoder uses the statistics that were generated in the first encoding
-    //    pass to create the compressed output. ( speed setting controls how fast )
-    // (5)=Two Pass - Second Pass Best.  The encoder uses the statistics that were generated in the first
-    //    encoding pass to create the compressed output using the highest possible quality, and taking a
+    // (0)=Realtime/Live Encoding. This mode is optimized for realtime
+    //     encoding (for example, capturing a television signal or feed from
+    //     a live camera). ( speed setting controls how fast )
+    // (1)=Good Quality Fast Encoding. The encoder balances quality with the
+    //     amount of time it takes to encode the output. ( speed setting
+    //     controls how fast )
+    // (2)=One Pass - Best Quality. The encoder places priority on the
+    //     quality of the output over encoding speed. The output is compressed
+    //     at the highest possible quality. This option takes the longest
+    //     amount of time to encode. ( speed setting ignored )
+    // (3)=Two Pass - First Pass. The encoder generates a file of statistics
+    //     for use in the second encoding pass. ( speed setting controls how
+    //     fast )
+    // (4)=Two Pass - Second Pass. The encoder uses the statistics that were
+    //     generated in the first encoding pass to create the compressed
+    //     output. ( speed setting controls how fast )
+    // (5)=Two Pass - Second Pass Best.  The encoder uses the statistics that
+    //     were generated in the first encoding pass to create the compressed
+    //     output using the highest possible quality, and taking a
     //    longer amount of time to encode.. ( speed setting ignored )
-    int Mode;               //
+    int Mode;
 
     // Key Framing Operations
-    int auto_key;            // automatically detect cut scenes and set the keyframes
-    int key_freq;            // maximum distance to key frame.
+    int auto_key;  // autodetect cut scenes and set the keyframes
+    int key_freq;  // maximum distance to key frame.
 
-    int allow_lag;           // allow lagged compression (if 0 lagin frames is ignored)
-    int lag_in_frames;        // how many frames lag before we start encoding
+    int allow_lag;  // allow lagged compression (if 0 lagin frames is ignored)
+    int lag_in_frames;  // how many frames lag before we start encoding
 
     // ----------------------------------------------------------------
     // DATARATE CONTROL OPTIONS
 
-    int end_usage; // vbr or cbr
+    int end_usage;  // vbr or cbr
 
     // buffer targeting aggressiveness
     int under_shoot_pct;
@@ -138,7 +143,7 @@ extern "C"
     int play_alternate;
     int alt_freq;
 
-    int encode_breakout;  // early breakout encode threshold : for video conf recommend 800
+    int encode_breakout;  // early breakout : for video conf recommend 800
 
     /* Bitfield defining the error resiliency features to enable.
      * Can provide decodable frames after losses in previous
@@ -173,8 +178,8 @@ extern "C"
 
   void vp9_change_config(VP9_PTR onyx, VP9_CONFIG *oxcf);
 
-// receive a frames worth of data caller can assume that a copy of this frame is made
-// and not just a copy of the pointer..
+  // receive a frames worth of data. caller can assume that a copy of this
+  // frame is made and not just a copy of the pointer..
   int vp9_receive_raw_frame(VP9_PTR comp, unsigned int frame_flags,
                             YV12_BUFFER_CONFIG *sd, int64_t time_stamp,
                             int64_t end_time_stamp);
