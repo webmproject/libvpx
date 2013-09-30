@@ -17,7 +17,7 @@
 #ifndef VP9_DECODER_VP9_THREAD_H_
 #define VP9_DECODER_VP9_THREAD_H_
 
-#include "vpx_config.h"
+#include "./vpx_config.h"
 
 #if defined(__cplusplus) || defined(c_plusplus)
 extern "C" {
@@ -90,4 +90,4 @@ void vp9_worker_end(VP9Worker* const worker);
 }    // extern "C"
 #endif
 
-#endif  /* VP9_DECODER_VP9_THREAD_H_ */
+#endif  // VP9_DECODER_VP9_THREAD_H_
