@@ -1568,12 +1568,12 @@ static void rd_pick_partition(VP9_COMP *cpi, TOKENEXTRA **tp, int mi_row,
         best_dist = sum_dist;
         best_rd = sum_rd;
         *(get_sb_partitioning(x, bsize)) = subsize;
-      } else {
-        // skip rectangular partition test when larger block size
-        // gives better rd cost
-        if (cpi->sf.less_rectangular_check)
-          do_rect &= !partition_none_allowed;
       }
+    } else {
+      // skip rectangular partition test when larger block size
+      // gives better rd cost
+      if (cpi->sf.less_rectangular_check)
+        do_rect &= !partition_none_allowed;
     }
     partition_split_done = 1;
     restore_context(cpi, mi_row, mi_col, a, l, sa, sl, bsize);
