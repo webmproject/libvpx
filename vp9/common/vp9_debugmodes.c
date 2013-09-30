@@ -63,9 +63,9 @@ void vp9_print_modes_and_motion_vectors(VP9_COMMON *cm, char *file) {
   print_mi_data(cm, mvs, "Transform:", offsetof(MB_MODE_INFO, tx_size));
   print_mi_data(cm, mvs, "UV Modes:", offsetof(MB_MODE_INFO, uv_mode));
 
-  log_frame_info(cm, "Vectors ",mvs);
+  log_frame_info(cm, "Vectors ", mvs);
   for (mi_row = 0; mi_row < rows; mi_row++) {
-    fprintf(mvs,"V ");
+    fprintf(mvs, "V ");
     for (mi_col = 0; mi_col < cols; mi_col++) {
       fprintf(mvs, "%4d:%4d ", mi_8x8[mi_index]->mbmi.mv[0].as_mv.row,
                                mi_8x8[mi_index]->mbmi.mv[0].as_mv.col);
