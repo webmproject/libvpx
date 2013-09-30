@@ -11,7 +11,7 @@
 #ifndef VP9_COMMON_VP9_FILTER_H_
 #define VP9_COMMON_VP9_FILTER_H_
 
-#include "vpx_config.h"
+#include "./vpx_config.h"
 #include "vpx/vpx_integer.h"
 
 #define SUBPEL_BITS 4
