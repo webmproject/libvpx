@@ -1014,7 +1014,7 @@ void vp9_short_idct8x8_10_add_sse2(int16_t *input, uint8_t *dest, int stride) {
   TRANSPOSE_8X4(in0, in1, in2, in3, in0, in1, in2, in3)
 
   // Stage1
-  {
+  { //NOLINT
     const __m128i lo_17 = _mm_unpackhi_epi16(in0, in3);
     const __m128i lo_35 = _mm_unpackhi_epi16(in1, in2);
 
@@ -1039,7 +1039,7 @@ void vp9_short_idct8x8_10_add_sse2(int16_t *input, uint8_t *dest, int stride) {
   }
 
   // Stage2
-  {
+  { //NOLINT
     const __m128i lo_04 = _mm_unpacklo_epi16(in0, in2);
     const __m128i lo_26 = _mm_unpacklo_epi16(in1, in3);
 
@@ -1069,7 +1069,7 @@ void vp9_short_idct8x8_10_add_sse2(int16_t *input, uint8_t *dest, int stride) {
   }
 
   // Stage3
-  {
+  { //NOLINT
     const __m128i lo_56 = _mm_unpacklo_epi16(stp2_5, stp2_6);
     stp1_0 = _mm_adds_epi16(stp2_0, stp2_3);
     stp1_1 = _mm_adds_epi16(stp2_1, stp2_2);
@@ -3548,4 +3548,4 @@ void vp9_short_idct32x32_add_sse2(int16_t *input, uint8_t *dest, int stride) {
       dest += 8 - (stride * 32);
     }
   }
-}
+}  //NOLINT

@@ -61,4 +61,4 @@ extern prototype_postproc_addnoise(vp9_plane_add_noise_wmt);
 #endif
 #endif
 
-#endif
+#endif  // VP9_COMMON_X86_VP9_POSTPROC_X86_H_
