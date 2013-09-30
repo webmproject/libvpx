@@ -48,4 +48,4 @@ static int vp9_is_scaled(const struct scale_factors *sf) {
          sf->y_scale_fp != REF_NO_SCALE;
 }
 
-#endif  //  VP9_COMMON_VP9_SCALE_H_
+#endif  // VP9_COMMON_VP9_SCALE_H_
