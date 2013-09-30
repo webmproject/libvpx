@@ -25,7 +25,7 @@ typedef struct VP9Decompressor {
   VP9D_CONFIG oxcf;
 
   const uint8_t *source;
-  uint32_t source_sz;
+  size_t source_sz;
 
   int64_t last_time_stamp;
   int ready_for_new_data;
