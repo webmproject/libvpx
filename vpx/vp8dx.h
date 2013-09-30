@@ -22,7 +22,10 @@
  */
 #ifndef VP8DX_H
 #define VP8DX_H
-#include "vpx_codec_impl_top.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /*!\name Algorithm interface for VP8
  *
@@ -100,6 +103,8 @@ VPX_CTRL_USE_TYPE(VP9_INVERT_TILE_DECODE_ORDER, int)
 
 /*! @} - end defgroup vp8_decoder */
 
+#ifdef __cplusplus
+}  // extern "C"
+#endif
 
-#include "vpx_codec_impl_bottom.h"
 #endif

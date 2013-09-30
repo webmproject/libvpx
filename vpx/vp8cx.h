@@ -22,7 +22,10 @@
  */
 #ifndef VP8CX_H
 #define VP8CX_H
-#include "vpx_codec_impl_top.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /*!\name Algorithm interface for VP8
  *
@@ -334,5 +337,8 @@ VPX_CTRL_USE_TYPE(VP9E_SET_FRAME_PARALLEL_DECODING, unsigned int)
 VPX_CTRL_USE_TYPE(VP9E_SET_MAX_Q,      unsigned int)
 VPX_CTRL_USE_TYPE(VP9E_SET_MIN_Q,      unsigned int)
 /*! @} - end defgroup vp8_encoder */
-#include "vpx_codec_impl_bottom.h"
+#ifdef __cplusplus
+}  // extern "C"
+#endif
+
 #endif

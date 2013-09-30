@@ -30,7 +30,10 @@
  */
 #ifndef VP8_H
 #define VP8_H
-#include "vpx_codec_impl_top.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /*!\brief Control functions
  *
@@ -125,5 +128,8 @@ VPX_CTRL_USE_TYPE(VP9_GET_REFERENCE,           vp9_ref_frame_t *)
 
 /*! @} - end defgroup vp8 */
 
-#include "vpx_codec_impl_bottom.h"
+#ifdef __cplusplus
+}  // extern "C"
+#endif
+
 #endif
