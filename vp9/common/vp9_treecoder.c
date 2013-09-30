@@ -25,8 +25,9 @@ static void tree2tok(struct vp9_token *const p, vp9_tree t,
     if (j <= 0) {
       p[-j].value = v;
       p[-j].len = l;
-    } else
+    } else {
       tree2tok(p, t, j, v, l);
+    }
   } while (++v & 1);
 }
 
@@ -65,11 +66,9 @@ static unsigned int convert_distribution(unsigned int i,
   return left + right;
 }
 
-void vp9_tree_probs_from_distribution(
-  vp9_tree tree,
-  vp9_prob probs          [ /* n-1 */ ],
-  unsigned int branch_ct       [ /* n-1 */ ] [2],
-  const unsigned int num_events[ /* n */ ],
-  unsigned int tok0_offset) {
+void vp9_tree_probs_from_distribution(vp9_tree tree, vp9_prob probs[/* n-1 */],
+                                      unsigned int branch_ct[/* n-1 */][2],
+                                      const unsigned int num_events[/* n */],
+                                      unsigned int tok0_offset) {
   convert_distribution(0, tree, probs, branch_ct, num_events, tok0_offset);
 }
