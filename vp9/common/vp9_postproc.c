@@ -8,6 +8,9 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
+#include <math.h>
+#include <stdlib.h>
+#include <stdio.h>
 
 #include "./vpx_config.h"
 #include "vpx_scale/yv12config.h"
@@ -17,11 +20,6 @@
 #include "vp9/common/vp9_systemdependent.h"
 #include "./vp9_rtcd.h"
 #include "./vpx_scale_rtcd.h"
-
-
-#include <math.h>
-#include <stdlib.h>
-#include <stdio.h>
 
 #define RGB_TO_YUV(t)                                            \
   ( (0.257*(float)(t >> 16))  + (0.504*(float)(t >> 8 & 0xff)) + \
@@ -155,7 +153,6 @@ void vp9_post_proc_down_and_across_c(const uint8_t *src_ptr,
     p_dst = dst_ptr;
 
     for (col = 0; col < cols; col++) {
-
       int kernel = 4;
       int v = p_src[col];
 
@@ -257,7 +254,7 @@ void vp9_mbpost_proc_across_ip_c(uint8_t *src, int pitch,
 void vp9_mbpost_proc_down_c(uint8_t *dst, int pitch,
                             int rows, int cols, int flimit) {
   int r, c, i;
-  const short *rv3 = &vp9_rv[63 & rand()];
+  const short *rv3 = &vp9_rv[63 & rand()]; // NOLINT
 
   for (c = 0; c < cols; c++) {
     uint8_t *s = &dst[c];
@@ -408,7 +405,6 @@ static void fillrd(struct postproc_state *state, int q, int a) {
 
         next = next + j;
       }
-
     }
 
     for (; next < 256; next++)
@@ -416,7 +412,7 @@ static void fillrd(struct postproc_state *state, int q, int a) {
   }
 
   for (i = 0; i < 3072; i++) {
-    state->noise[i] = char_dist[rand() & 0xff];
+    state->noise[i] = char_dist[rand() & 0xff];  // NOLINT
   }
 
   for (i = 0; i < 16; i++) {
@@ -680,13 +676,14 @@ int vp9_post_proc_frame(struct VP9Common *cm,
 #if 0 && CONFIG_POSTPROC_VISUALIZER
   if (flags & VP9D_DEBUG_TXT_FRAME_INFO) {
     char message[512];
-    sprintf(message, "F%1dG%1dQ%3dF%3dP%d_s%dx%d",
-            (cm->frame_type == KEY_FRAME),
-            cm->refresh_golden_frame,
-            cm->base_qindex,
-            cm->filter_level,
-            flags,
-            cm->mb_cols, cm->mb_rows);
+    snprintf(message, sizeof(message) -1,
+             "F%1dG%1dQ%3dF%3dP%d_s%dx%d",
+             (cm->frame_type == KEY_FRAME),
+             cm->refresh_golden_frame,
+             cm->base_qindex,
+             cm->filter_level,
+             flags,
+             cm->mb_cols, cm->mb_rows);
     vp9_blit_text(message, cm->post_proc_buffer.y_buffer,
                   cm->post_proc_buffer.y_stride);
   }
@@ -707,7 +704,7 @@ int vp9_post_proc_frame(struct VP9Common *cm,
       for (j = 0; j < mb_cols; j++) {
         char zz[4];
 
-        sprintf(zz, "%c", mi[mb_index].mbmi.mode + 'a');
+        snprintf(zz, sizeof(zz) - 1, "%c", mi[mb_index].mbmi.mode + 'a');
 
         vp9_blit_text(zz, y_ptr, post->y_stride);
         mb_index++;
@@ -716,7 +713,6 @@ int vp9_post_proc_frame(struct VP9Common *cm,
 
       mb_index++; /* border */
       y_ptr += post->y_stride  * 16 - post->y_width;
-
     }
   }
 
@@ -740,9 +736,9 @@ int vp9_post_proc_frame(struct VP9Common *cm,
                         mi[mb_index].mbmi.skip_coeff);
 
         if (cm->frame_type == KEY_FRAME)
-          sprintf(zz, "a");
+          snprintf(zz, sizeof(zz) - 1, "a");
         else
-          sprintf(zz, "%c", dc_diff + '0');
+          snprintf(zz, sizeof(zz) - 1, "%c", dc_diff + '0');
 
         vp9_blit_text(zz, y_ptr, post->y_stride);
         mb_index++;
@@ -751,7 +747,6 @@ int vp9_post_proc_frame(struct VP9Common *cm,
 
       mb_index++; /* border */
       y_ptr += post->y_stride  * 16 - post->y_width;
-
     }
   }
 
@@ -894,8 +889,9 @@ int vp9_post_proc_frame(struct VP9Common *cm,
 
             constrain_line(lx0, &x1, ly0 + 1, &y1, width, height);
             vp9_blit_line(lx0,  x1, ly0 + 1,  y1, y_buffer, y_stride);
-          } else
+          } else {
             vp9_blit_line(lx0,  x1, ly0,  y1, y_buffer, y_stride);
+          }
         }
 
         mi++;
