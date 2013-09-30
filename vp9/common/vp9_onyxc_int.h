@@ -11,9 +11,9 @@
 #ifndef VP9_COMMON_VP9_ONYXC_INT_H_
 #define VP9_COMMON_VP9_ONYXC_INT_H_
 
-#include "vpx_config.h"
+#include "./vpx_config.h"
 #include "vpx/internal/vpx_codec_internal.h"
-#include "vp9_rtcd.h"
+#include "./vp9_rtcd.h"
 #include "vp9/common/vp9_loopfilter.h"
 #include "vp9/common/vp9_entropymv.h"
 #include "vp9/common/vp9_entropy.h"
@@ -120,7 +120,7 @@ typedef struct VP9Common {
 
   YV12_BUFFER_CONFIG post_proc_buffer;
 
-  FRAME_TYPE last_frame_type;  /* Save last frame's frame type for motion search. */
+  FRAME_TYPE last_frame_type;  /* last frame's frame type for motion search.*/
   FRAME_TYPE frame_type;
 
   int show_frame;
