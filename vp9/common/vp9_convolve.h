@@ -7,8 +7,8 @@
  *  in the file PATENTS.  All contributing project authors may
  *  be found in the AUTHORS file in the root of the source tree.
  */
-#ifndef VP9_COMMON_CONVOLVE_H_
-#define VP9_COMMON_CONVOLVE_H_
+#ifndef VP9_COMMON_VP9_CONVOLVE_H_
+#define VP9_COMMON_VP9_CONVOLVE_H_
 
 #include "./vpx_config.h"
 #include "vpx/vpx_integer.h"
@@ -26,4 +26,4 @@ struct subpix_fn_table {
   const int16_t (*filter_y)[8];
 };
 
-#endif  // VP9_COMMON_CONVOLVE_H_
+#endif  // VP9_COMMON_VP9_CONVOLVE_H_
