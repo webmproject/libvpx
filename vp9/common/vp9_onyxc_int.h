@@ -291,10 +291,6 @@ static void set_mi_row_col(VP9_COMMON *cm, MACROBLOCKD *xd,
   xd->right_available = (mi_col + bw < cm->cur_tile_mi_col_end);
 }
 
-static int get_token_alloc(int mb_rows, int mb_cols) {
-  return mb_rows * mb_cols * (48 * 16 + 4);
-}
-
 static void set_prev_mi(VP9_COMMON *cm) {
   const int use_prev_in_find_mv_refs = cm->width == cm->last_width &&
                                        cm->height == cm->last_height &&

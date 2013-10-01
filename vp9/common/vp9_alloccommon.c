@@ -58,13 +58,13 @@ void vp9_free_frame_buffers(VP9_COMMON *cm) {
 }
 
 static void set_mb_mi(VP9_COMMON *cm, int aligned_width, int aligned_height) {
-  cm->mb_cols = (aligned_width + 8) >> 4;
-  cm->mb_rows = (aligned_height + 8) >> 4;
-  cm->MBs = cm->mb_rows * cm->mb_cols;
-
   cm->mi_cols = aligned_width >> MI_SIZE_LOG2;
   cm->mi_rows = aligned_height >> MI_SIZE_LOG2;
   cm->mode_info_stride = cm->mi_cols + MI_BLOCK_SIZE;
+
+  cm->mb_cols = (cm->mi_cols + 1) >> 1;
+  cm->mb_rows = (cm->mi_rows + 1) >> 1;
+  cm->MBs = cm->mb_rows * cm->mb_cols;
 }
 
 static void setup_mi(VP9_COMMON *cm) {
