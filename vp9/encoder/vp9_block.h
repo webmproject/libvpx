@@ -30,7 +30,6 @@ typedef struct {
 } PARTITION_INFO;
 
 // Structure to hold snapshot of coding context during the mode picking process
-// TODO Do we need all of these?
 typedef struct {
   MODE_INFO mic;
   PARTITION_INFO partition_info;
