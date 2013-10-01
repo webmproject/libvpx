@@ -320,13 +320,13 @@ typedef struct VP9_COMP {
   YV12_BUFFER_CONFIG scaled_source;
 
   unsigned int frames_till_alt_ref_frame;
-  int source_alt_ref_pending; // frame in src_buffers has been identified to be encoded as an alt ref
-  int source_alt_ref_active;  // an alt ref frame has been encoded and is usable
+  int source_alt_ref_pending;
+  int source_alt_ref_active;
 
-  int is_src_frame_alt_ref;   // source of frame to encode is an exact copy of an alt ref frame
+  int is_src_frame_alt_ref;
 
-  int gold_is_last; // golden frame same as last frame ( short circuit gold searches)
-  int alt_is_last;  // Alt reference frame same as last ( short circuit altref search)
+  int gold_is_last;  // gold same as last frame ( short circuit gold searches)
+  int alt_is_last;  // Alt same as last ( short circuit altref search)
   int gold_is_alt;  // don't do both alt and gold search ( just do gold).
 
   int scaled_ref_idx[3];
@@ -404,14 +404,14 @@ typedef struct VP9_COMP {
   double gf_rate_correction_factor;
 
   unsigned int frames_since_golden;
-  int frames_till_gf_update_due;      // Count down till next GF
+  int frames_till_gf_update_due;  // Count down till next GF
 
-  int gf_overspend_bits;            // Total bits overspent becasue of GF boost (cumulative)
+  int gf_overspend_bits;  // cumulative bits overspent because of GF boost
 
-  int non_gf_bitrate_adjustment;     // Used in the few frames following a GF to recover the extra bits spent in that GF
+  int non_gf_bitrate_adjustment;  // Following GF to recover extra bits spent
 
-  int kf_overspend_bits;            // Extra bits spent on key frames that need to be recovered on inter frames
-  int kf_bitrate_adjustment;        // Current number of bit s to try and recover on each inter frame.
+  int kf_overspend_bits;  // Bits spent on key frames to be recovered on inters
+  int kf_bitrate_adjustment;  // number of bits to recover on each inter frame.
   int max_gf_interval;
   int baseline_gf_interval;
   int active_arnr_frames;           // <= cpi->oxcf.arnr_max_frames
@@ -419,9 +419,9 @@ typedef struct VP9_COMP {
 
   int64_t key_frame_count;
   int prior_key_frame_distance[KEY_FRAME_CONTEXT];
-  int per_frame_bandwidth;          // Current section per frame bandwidth target
-  int av_per_frame_bandwidth;        // Average frame size target for clip
-  int min_frame_bandwidth;          // Minimum allocation that should be used for any frame
+  int per_frame_bandwidth;  // Current section per frame bandwidth target
+  int av_per_frame_bandwidth;  // Average frame size target for clip
+  int min_frame_bandwidth;  // Minimum allocation used for any frame
   int inter_frame_target;
   double output_framerate;
   int64_t last_time_stamp_seen;
@@ -517,7 +517,8 @@ typedef struct VP9_COMP {
   unsigned int max_mv_magnitude;
   int mv_step_param;
 
-  // Data used for real time conferencing mode to help determine if it would be good to update the gf
+  // Data used for real time conferencing mode to help determine if it
+  // would be good to update the gf
   int inter_zz_count;
   int gf_bad_count;
   int gf_update_recommended;
