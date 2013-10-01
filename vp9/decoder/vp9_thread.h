@@ -27,7 +27,7 @@ extern "C" {
 
 #if defined(_WIN32)
 
-#include <windows.h>
+#include <windows.h>  // NOLINT
 typedef HANDLE pthread_t;
 typedef CRITICAL_SECTION pthread_mutex_t;
 typedef struct {
@@ -38,7 +38,7 @@ typedef struct {
 
 #else
 
-#include <pthread.h>
+#include <pthread.h> // NOLINT
 
 #endif    /* _WIN32 */
 #endif    /* CONFIG_MULTITHREAD */
