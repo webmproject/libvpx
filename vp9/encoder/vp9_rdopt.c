@@ -3151,7 +3151,6 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
   int64_t best_intra_rd = INT64_MAX;
   int64_t best_inter_rd = INT64_MAX;
   MB_PREDICTION_MODE best_intra_mode = DC_PRED;
-  // MB_PREDICTION_MODE best_inter_mode = ZEROMV;
   MV_REFERENCE_FRAME best_inter_ref_frame = LAST_FRAME;
   INTERPOLATIONFILTERTYPE tmp_best_filter = SWITCHABLE;
   int rate_uv_intra[TX_SIZES], rate_uv_tokenonly[TX_SIZES];
@@ -3165,7 +3164,6 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
   int64_t frame_distortions[MAX_REF_FRAMES] = {-1};
   int intra_cost_penalty = 20 * vp9_dc_quant(cpi->common.base_qindex,
                                              cpi->common.y_dc_delta_q);
-  PARTITION_INFO best_partition;
   const int bws = num_8x8_blocks_wide_lookup[bsize] / 2;
   const int bhs = num_8x8_blocks_high_lookup[bsize] / 2;
   int best_skip2 = 0;
@@ -3569,7 +3567,6 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
         this_rd < best_inter_rd) {
       best_inter_rd = this_rd;
       best_inter_ref_frame = ref_frame;
-      // best_inter_mode = xd->this_mi->mbmi.mode;
     }
 
     if (!disable_skip && ref_frame == INTRA_FRAME) {
@@ -3605,7 +3602,6 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
         best_rd = this_rd;
         best_mbmode = *mbmi;
         best_skip2 = this_skip2;
-        best_partition = *x->partition_info;
         vpx_memcpy(best_zcoeff_blk, x->zcoeff_blk[mbmi->tx_size],
                    sizeof(best_zcoeff_blk));
 
@@ -3803,7 +3799,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
   set_scale_factors(xd, mbmi->ref_frame[0], mbmi->ref_frame[1],
                     scale_factor);
   store_coding_context(x, ctx, best_mode_index,
-                       &best_partition,
+                       NULL,
                        &mbmi->ref_mvs[mbmi->ref_frame[0]][0],
                        &mbmi->ref_mvs[mbmi->ref_frame[1] < 0 ? 0 :
                                       mbmi->ref_frame[1]][0],
@@ -3849,7 +3845,6 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
   unsigned int ref_costs_single[MAX_REF_FRAMES], ref_costs_comp[MAX_REF_FRAMES];
   vp9_prob comp_mode_p;
   int64_t best_inter_rd = INT64_MAX;
-  // MB_PREDICTION_MODE best_inter_mode = ZEROMV;
   MV_REFERENCE_FRAME best_inter_ref_frame = LAST_FRAME;
   INTERPOLATIONFILTERTYPE tmp_best_filter = SWITCHABLE;
   int rate_uv_intra[TX_SIZES], rate_uv_tokenonly[TX_SIZES];
@@ -4333,7 +4328,6 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
         this_rd < best_inter_rd) {
       best_inter_rd = this_rd;
       best_inter_ref_frame = ref_frame;
-      // best_inter_mode = xd->this_mi->mbmi.mode;
     }
 
     if (!disable_skip && ref_frame == INTRA_FRAME) {
@@ -4522,7 +4516,7 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
       xd->this_mi->bmi[i].as_mv[0].as_int =
           best_bmodes[i].as_mv[0].as_int;
 
-    if (mbmi->ref_frame[1] > 0)
+    if (has_second_ref(mbmi))
       for (i = 0; i < 4; i++)
         xd->this_mi->bmi[i].as_mv[1].as_int = best_bmodes[i].as_mv[1].as_int;
 
