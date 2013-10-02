@@ -461,18 +461,17 @@ static void update_state(VP9_COMP *cpi, PICK_MODE_CONTEXT *ctx,
 }
 
 void vp9_setup_src_planes(MACROBLOCK *x, const YV12_BUFFER_CONFIG *src,
-                          int mb_row, int mb_col) {
-  uint8_t *buffers[4] = {src->y_buffer, src->u_buffer, src->v_buffer, src
-      ->alpha_buffer};
-  int strides[4] = {src->y_stride, src->uv_stride, src->uv_stride, src
-      ->alpha_stride};
+                          int mi_row, int mi_col) {
+  uint8_t *const buffers[4] = {src->y_buffer, src->u_buffer, src->v_buffer,
+                               src->alpha_buffer};
+  const int strides[4] = {src->y_stride, src->uv_stride, src->uv_stride,
+                          src->alpha_stride};
   int i;
 
-  for (i = 0; i < MAX_MB_PLANE; i++) {
-    setup_pred_plane(&x->plane[i].src, buffers[i], strides[i], mb_row, mb_col,
+  for (i = 0; i < MAX_MB_PLANE; i++)
+    setup_pred_plane(&x->plane[i].src, buffers[i], strides[i], mi_row, mi_col,
                      NULL, x->e_mbd.plane[i].subsampling_x,
                      x->e_mbd.plane[i].subsampling_y);
-  }
 }
 
 static void set_offsets(VP9_COMP *cpi, int mi_row, int mi_col,
