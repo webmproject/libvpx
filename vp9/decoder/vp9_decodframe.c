@@ -19,6 +19,7 @@
 #include "vp9/common/vp9_entropy.h"
 #include "vp9/common/vp9_entropymode.h"
 #include "vp9/common/vp9_extend.h"
+#include "vp9/common/vp9_idct.h"
 #include "vp9/common/vp9_pred_common.h"
 #include "vp9/common/vp9_quant_common.h"
 #include "vp9/common/vp9_reconintra.h"
@@ -31,7 +32,6 @@
 #include "vp9/decoder/vp9_detokenize.h"
 #include "vp9/decoder/vp9_decodemv.h"
 #include "vp9/decoder/vp9_dsubexp.h"
-#include "vp9/decoder/vp9_idct_blk.h"
 #include "vp9/decoder/vp9_onyxd_int.h"
 #include "vp9/decoder/vp9_read_bit_buffer.h"
 #include "vp9/decoder/vp9_thread.h"
@@ -104,15 +104,15 @@ static void decode_block(int plane, int block, BLOCK_SIZE plane_bsize,
         if (tx_type == DCT_DCT)
           xd->itxm_add(qcoeff, dst, stride, eob);
         else
-          vp9_iht_add_c(tx_type, qcoeff, dst, stride, eob);
+          vp9_iht_add(tx_type, qcoeff, dst, stride, eob);
         break;
       case TX_8X8:
         tx_type = get_tx_type_8x8(pd->plane_type, xd);
-        vp9_iht_add_8x8_c(tx_type, qcoeff, dst, stride, eob);
+        vp9_iht_add_8x8(tx_type, qcoeff, dst, stride, eob);
         break;
       case TX_16X16:
         tx_type = get_tx_type_16x16(pd->plane_type, xd);
-        vp9_iht_add_16x16_c(tx_type, qcoeff, dst, stride, eob);
+        vp9_iht_add_16x16(tx_type, qcoeff, dst, stride, eob);
         break;
       case TX_32X32:
         tx_type = DCT_DCT;
@@ -495,7 +495,7 @@ static void setup_quantization(VP9D_COMP *pbi, struct vp9_read_bit_buffer *rb) {
                  cm->uv_dc_delta_q == 0 &&
                  cm->uv_ac_delta_q == 0;
 
-  xd->itxm_add = xd->lossless ? vp9_idct_add_lossless_c
+  xd->itxm_add = xd->lossless ? vp9_idct_add_lossless
                               : vp9_idct_add;
 }
 

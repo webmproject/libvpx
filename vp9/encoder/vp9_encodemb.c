@@ -8,16 +8,21 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
+
+#include "./vp9_rtcd.h"
 #include "./vpx_config.h"
-#include "vp9/encoder/vp9_encodemb.h"
-#include "vp9/common/vp9_reconinter.h"
-#include "vp9/encoder/vp9_quantize.h"
-#include "vp9/encoder/vp9_tokenize.h"
-#include "vp9/common/vp9_reconintra.h"
+
 #include "vpx_mem/vpx_mem.h"
-#include "vp9/encoder/vp9_rdopt.h"
+
+#include "vp9/common/vp9_idct.h"
+#include "vp9/common/vp9_reconinter.h"
+#include "vp9/common/vp9_reconintra.h"
 #include "vp9/common/vp9_systemdependent.h"
-#include "vp9_rtcd.h"
+
+#include "vp9/encoder/vp9_encodemb.h"
+#include "vp9/encoder/vp9_quantize.h"
+#include "vp9/encoder/vp9_rdopt.h"
+#include "vp9/encoder/vp9_tokenize.h"
 
 DECLARE_ALIGNED(16, extern const uint8_t,
                 vp9_pt_energy_class[MAX_ENTROPY_TOKENS]);
@@ -45,28 +50,6 @@ static void inverse_transform_b_4x4_add(MACROBLOCKD *xd, int eob,
     xd->inv_txm4x4_1_add(dqcoeff, dest, stride);
   else
     xd->inv_txm4x4_add(dqcoeff, dest, stride);
-}
-
-static void inverse_transform_b_8x8_add(int eob,
-                                        int16_t *dqcoeff, uint8_t *dest,
-                                        int stride) {
-  if (eob <= 1)
-    vp9_short_idct8x8_1_add(dqcoeff, dest, stride);
-  else if (eob <= 10)
-    vp9_short_idct8x8_10_add(dqcoeff, dest, stride);
-  else
-    vp9_short_idct8x8_add(dqcoeff, dest, stride);
-}
-
-static void inverse_transform_b_16x16_add(int eob,
-                                          int16_t *dqcoeff, uint8_t *dest,
-                                          int stride) {
-  if (eob <= 1)
-    vp9_short_idct16x16_1_add(dqcoeff, dest, stride);
-  else if (eob <= 10)
-    vp9_short_idct16x16_10_add(dqcoeff, dest, stride);
-  else
-    vp9_short_idct16x16_add(dqcoeff, dest, stride);
 }
 
 static void subtract_plane(MACROBLOCK *x, BLOCK_SIZE bsize, int plane) {
@@ -476,12 +459,10 @@ static void encode_block(int plane, int block, BLOCK_SIZE plane_bsize,
       vp9_short_idct32x32_add(dqcoeff, dst, pd->dst.stride);
       break;
     case TX_16X16:
-      inverse_transform_b_16x16_add(pd->eobs[block], dqcoeff, dst,
-                                    pd->dst.stride);
+      vp9_idct_add_16x16(dqcoeff, dst, pd->dst.stride, pd->eobs[block]);
       break;
     case TX_8X8:
-      inverse_transform_b_8x8_add(pd->eobs[block], dqcoeff, dst,
-                                  pd->dst.stride);
+      vp9_idct_add_8x8(dqcoeff, dst, pd->dst.stride, pd->eobs[block]);
       break;
     case TX_4X4:
       // this is like vp9_short_idct4x4 but has a special case around eob<=1
@@ -597,12 +578,8 @@ void vp9_encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
       vp9_quantize_b(coeff, 256, x->skip_block, p->zbin, p->round,
                      p->quant, p->quant_shift, qcoeff, dqcoeff,
                      pd->dequant, p->zbin_extra, eob, scan, iscan);
-      if (!x->skip_encode && *eob) {
-        if (tx_type == DCT_DCT)
-          inverse_transform_b_16x16_add(*eob, dqcoeff, dst, pd->dst.stride);
-        else
-          vp9_short_iht16x16_add(dqcoeff, dst, pd->dst.stride, tx_type);
-      }
+      if (!x->skip_encode && *eob)
+        vp9_iht_add_16x16(tx_type, dqcoeff, dst, pd->dst.stride, *eob);
       break;
     case TX_8X8:
       tx_type = get_tx_type_8x8(pd->plane_type, xd);
@@ -626,12 +603,8 @@ void vp9_encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
       vp9_quantize_b(coeff, 64, x->skip_block, p->zbin, p->round, p->quant,
                      p->quant_shift, qcoeff, dqcoeff,
                      pd->dequant, p->zbin_extra, eob, scan, iscan);
-      if (!x->skip_encode && *eob) {
-        if (tx_type == DCT_DCT)
-          inverse_transform_b_8x8_add(*eob, dqcoeff, dst, pd->dst.stride);
-        else
-          vp9_short_iht8x8_add(dqcoeff, dst, pd->dst.stride, tx_type);
-      }
+      if (!x->skip_encode && *eob)
+        vp9_iht_add_8x8(tx_type, dqcoeff, dst, pd->dst.stride, *eob);
       break;
     case TX_4X4:
       tx_type = get_tx_type_4x4(pd->plane_type, xd, block);

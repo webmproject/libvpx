@@ -32,8 +32,6 @@ VP9_DX_SRCS-yes += decoder/vp9_thread.c
 VP9_DX_SRCS-yes += decoder/vp9_thread.h
 VP9_DX_SRCS-yes += decoder/vp9_treereader.h
 VP9_DX_SRCS-yes += decoder/vp9_onyxd_if.c
-VP9_DX_SRCS-yes += decoder/vp9_idct_blk.c
-VP9_DX_SRCS-yes += decoder/vp9_idct_blk.h
 VP9_DX_SRCS-yes += decoder/vp9_dsubexp.c
 VP9_DX_SRCS-yes += decoder/vp9_dsubexp.h
 
