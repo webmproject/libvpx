@@ -30,10 +30,26 @@ static MB_PREDICTION_MODE read_intra_mode(vp9_reader *r, const vp9_prob *p) {
   return (MB_PREDICTION_MODE)treed_read(r, vp9_intra_mode_tree, p);
 }
 
+static MB_PREDICTION_MODE read_intra_mode_y(VP9_COMMON *cm, vp9_reader *r,
+                                            int size_group) {
+  const MB_PREDICTION_MODE y_mode = read_intra_mode(r,
+                                        cm->fc.y_mode_prob[size_group]);
+  ++cm->counts.y_mode[size_group][y_mode];
+  return y_mode;
+}
+
+static MB_PREDICTION_MODE read_intra_mode_uv(VP9_COMMON *cm, vp9_reader *r,
+                                             MB_PREDICTION_MODE y_mode) {
+  const MB_PREDICTION_MODE uv_mode = read_intra_mode(r,
+                                         cm->fc.uv_mode_prob[y_mode]);
+  ++cm->counts.uv_mode[y_mode][uv_mode];
+  return uv_mode;
+}
+
 static MB_PREDICTION_MODE read_inter_mode(VP9_COMMON *cm, vp9_reader *r,
                                           uint8_t context) {
-  MB_PREDICTION_MODE mode = treed_read(r, vp9_inter_mode_tree,
-                            cm->fc.inter_mode_probs[context]);
+  const MB_PREDICTION_MODE mode = treed_read(r, vp9_inter_mode_tree,
+                                             cm->fc.inter_mode_probs[context]);
   ++cm->counts.inter_mode[context][inter_mode_offset(mode)];
   return mode;
 }
@@ -364,9 +380,7 @@ static void read_intra_block_mode_info(VP9D_COMP *pbi, MODE_INFO *mi,
   mbmi->ref_frame[1] = NONE;
 
   if (bsize >= BLOCK_8X8) {
-    const int size_group = size_group_lookup[bsize];
-    mbmi->mode = read_intra_mode(r, cm->fc.y_mode_prob[size_group]);
-    cm->counts.y_mode[size_group][mbmi->mode]++;
+    mbmi->mode = read_intra_mode_y(cm, r, size_group_lookup[bsize]);
   } else {
      // Only 4x4, 4x8, 8x4 blocks
      const int num_4x4_w = num_4x4_blocks_wide_lookup[bsize];  // 1 or 2
@@ -376,10 +390,8 @@ static void read_intra_block_mode_info(VP9D_COMP *pbi, MODE_INFO *mi,
      for (idy = 0; idy < 2; idy += num_4x4_h) {
        for (idx = 0; idx < 2; idx += num_4x4_w) {
          const int ib = idy * 2 + idx;
-         const int b_mode = read_intra_mode(r, cm->fc.y_mode_prob[0]);
+         const int b_mode = read_intra_mode_y(cm, r, 0);
          mi->bmi[ib].as_mode = b_mode;
-         cm->counts.y_mode[0][b_mode]++;
-
          if (num_4x4_h == 2)
            mi->bmi[ib + 2].as_mode = b_mode;
          if (num_4x4_w == 2)
@@ -389,8 +401,7 @@ static void read_intra_block_mode_info(VP9D_COMP *pbi, MODE_INFO *mi,
     mbmi->mode = mi->bmi[3].as_mode;
   }
 
-  mbmi->uv_mode = read_intra_mode(r, cm->fc.uv_mode_prob[mbmi->mode]);
-  cm->counts.uv_mode[mbmi->mode][mbmi->uv_mode]++;
+  mbmi->uv_mode = read_intra_mode_uv(cm, r, mbmi->mode);
 }
 
 static int read_is_inter_block(VP9D_COMP *pbi, int segment_id, vp9_reader *r) {
