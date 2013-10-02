@@ -30,6 +30,7 @@ sh_b65432108: db 6, 5, 4, 3, 2, 1, 0, 8, 0, 0, 0, 0, 0, 0, 0, 0
 sh_b54321089: db 5, 4, 3, 2, 1, 0, 8, 9, 0, 0, 0, 0, 0, 0, 0, 0
 sh_b89abcdef: db 8, 9, 10, 11, 12, 13, 14, 15, 0, 0, 0, 0, 0, 0, 0, 0
 
+sh_bfedcba9876543210: db 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0
 
 SECTION .text
 
@@ -530,5 +531,84 @@ cglobal d153_predictor_8x8, 4, 5, 8, dst, stride, above, left, goffset
   movq  [dstq+strideq  ], m6
   psrldq              m6, 2                     ; A-B5, A-B4, A-B3, A-B2
   movq  [dstq          ], m6
+  RESTORE_GOT
+  RET
+
+INIT_XMM ssse3
+cglobal d153_predictor_16x16, 4, 5, 8, dst, stride, above, left, goffset
+  GET_GOT     goffsetq
+  mova                m0, [leftq]
+  movu                m7, [aboveq-1]
+  ; comments below are for a predictor like this
+  ; A1 B1 C1 D1 E1 F1 G1 H1 I1 J1 K1 L1 M1 N1 O1 P1
+  ; A2 B2 A1 B1 C1 D1 E1 F1 G1 H1 I1 J1 K1 L1 M1 N1
+  ; A3 B3 A2 B2 A1 B1 C1 D1 E1 F1 G1 H1 I1 J1 K1 L1
+  ; A4 B4 A3 B3 A2 B2 A1 B1 C1 D1 E1 F1 G1 H1 I1 J1
+  ; A5 B5 A4 B4 A3 B3 A2 B2 A1 B1 C1 D1 E1 F1 G1 H1
+  ; A6 B6 A5 B5 A4 B4 A3 B3 A2 B2 A1 B1 C1 D1 E1 F1
+  ; A7 B7 A6 B6 A5 B5 A4 B4 A3 B3 A2 B2 A1 B1 C1 D1
+  ; A8 B8 A7 B7 A6 B6 A5 B5 A4 B4 A3 B3 A2 B2 A1 B1
+  ; A9 B9 A8 B8 A7 B7 A6 B6 A5 B5 A4 B4 A3 B3 A2 B2
+  ; Aa Ba A9 B9 A8 B8 A7 B7 A6 B6 A5 B5 A4 B4 A3 B3
+  ; Ab Bb Aa Ba A9 B9 A8 B8 A7 B7 A6 B6 A5 B5 A4 B4
+  ; Ac Bc Ab Bb Aa Ba A9 B9 A8 B8 A7 B7 A6 B6 A5 B5
+  ; Ad Bd Ac Bc Ab Bb Aa Ba A9 B9 A8 B8 A7 B7 A6 B6
+  ; Ae Be Ad Bd Ac Bc Ab Bb Aa Ba A9 B9 A8 B8 A7 B7
+  ; Af Bf Ae Be Ad Bd Ac Bc Ab Bb Aa Ba A9 B9 A8 B8
+  ; Ag Bg Af Bf Ae Be Ad Bd Ac Bc Ab Bb Aa Ba A9 B9
+  pshufb              m6, m7, [GLOBAL(sh_bfedcba9876543210)]
+  palignr             m5, m0, m6, 15
+  palignr             m3, m0, m6, 14
+
+  X_PLUS_2Y_PLUS_Z_PLUS_2_RSH_2 m0, m5, m3, m4          ; 3-tap avg B3-Bg
+  pshufb              m1, m0, [GLOBAL(sh_b123456789abcdeff)]
+  pavgb               m5, m0                            ; A1 - Ag
+
+  punpcklbw           m0, m4, m5                        ; A-B8 ... A-B1
+  punpckhbw           m4, m5                            ; A-B9 ... A-Bg
+
+  pshufb              m3, m7, [GLOBAL(sh_b123456789abcdeff)]
+  pshufb              m5, m7, [GLOBAL(sh_b23456789abcdefff)]
+
+  X_PLUS_2Y_PLUS_Z_PLUS_2_RSH_2 m7, m3, m5, m1          ; 3-tap avg C1-P1
+
+  pshufb              m6, m0, [GLOBAL(sh_bfedcba9876543210)]
+  DEFINE_ARGS dst, stride, stride3
+  lea           stride3q, [strideq*3]
+  palignr             m2, m1, m6, 14
+  mova  [dstq          ], m2
+  palignr             m2, m1, m6, 12
+  mova  [dstq+strideq  ], m2
+  palignr             m2, m1, m6, 10
+  mova  [dstq+strideq*2], m2
+  palignr             m2, m1, m6, 8
+  mova  [dstq+stride3q ], m2
+  lea               dstq, [dstq+strideq*4]
+  palignr             m2, m1, m6, 6
+  mova  [dstq          ], m2
+  palignr             m2, m1, m6, 4
+  mova  [dstq+strideq  ], m2
+  palignr             m2, m1, m6, 2
+  mova  [dstq+strideq*2], m2
+  pshufb              m4, [GLOBAL(sh_bfedcba9876543210)]
+  mova  [dstq+stride3q ], m6
+  lea               dstq, [dstq+strideq*4]
+
+  palignr             m2, m6, m4, 14
+  mova  [dstq          ], m2
+  palignr             m2, m6, m4, 12
+  mova  [dstq+strideq  ], m2
+  palignr             m2, m6, m4, 10
+  mova  [dstq+strideq*2], m2
+  palignr             m2, m6, m4, 8
+  mova  [dstq+stride3q ], m2
+  lea               dstq, [dstq+strideq*4]
+  palignr             m2, m6, m4, 6
+  mova  [dstq          ], m2
+  palignr             m2, m6, m4, 4
+  mova  [dstq+strideq  ], m2
+  palignr             m2, m6, m4, 2
+  mova  [dstq+strideq*2], m2
+  mova  [dstq+stride3q ], m4
   RESTORE_GOT
   RET
