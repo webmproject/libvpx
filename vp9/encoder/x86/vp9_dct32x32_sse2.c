@@ -27,24 +27,6 @@ static INLINE __m128i k_packs_epi64(__m128i a, __m128i b) {
   __m128i buf1 = _mm_shuffle_epi32(b, _MM_SHUFFLE(0, 0, 2, 0));
   return _mm_unpacklo_epi64(buf0, buf1);
 }
-
-static INLINE __m128i k_cvtlo_epi16(__m128i a, __m128i mask16, __m128i kZero) {
-  // convert the lower 4 signed 16-bit integers into 4 signed 32-bit integers
-  __m128i sign_bit = _mm_and_si128(a, mask16);
-  __m128i b = _mm_unpacklo_epi16(a, kZero);
-  sign_bit = _mm_cmplt_epi16(sign_bit, kZero);
-  sign_bit = _mm_unpacklo_epi16(kZero, sign_bit);
-  return _mm_or_si128(sign_bit, b);
-}
-
-static INLINE __m128i k_cvthi_epi16(__m128i a, __m128i mask16, __m128i kZero) {
-  // convert the lower 4 signed 16-bit integers into 4 signed 32-bit integers
-  __m128i sign_bit = _mm_and_si128(a, mask16);
-  __m128i b = _mm_unpackhi_epi16(a, kZero);
-  sign_bit = _mm_cmplt_epi16(sign_bit, kZero);
-  sign_bit = _mm_unpackhi_epi16(kZero, sign_bit);
-  return _mm_or_si128(sign_bit, b);
-}
 #endif
 
 void FDCT32x32_2D(int16_t *input,
@@ -1159,28 +1141,43 @@ void FDCT32x32_2D(int16_t *input,
       } else {
         __m128i lstep1[64], lstep2[64], lstep3[64];
         __m128i u[32], v[32], sign[16];
-        const __m128i mask16 = _mm_set1_epi32(0x80008000);
         const __m128i K32One = _mm_set_epi32(1, 1, 1, 1);
         // start using 32-bit operations
         // stage 3
         {
           // expanding to 32-bit length priori to addition operations
-          lstep2[ 0] = k_cvtlo_epi16(step2[ 0], mask16, kZero);
-          lstep2[ 1] = k_cvthi_epi16(step2[ 0], mask16, kZero);
-          lstep2[ 2] = k_cvtlo_epi16(step2[ 1], mask16, kZero);
-          lstep2[ 3] = k_cvthi_epi16(step2[ 1], mask16, kZero);
-          lstep2[ 4] = k_cvtlo_epi16(step2[ 2], mask16, kZero);
-          lstep2[ 5] = k_cvthi_epi16(step2[ 2], mask16, kZero);
-          lstep2[ 6] = k_cvtlo_epi16(step2[ 3], mask16, kZero);
-          lstep2[ 7] = k_cvthi_epi16(step2[ 3], mask16, kZero);
-          lstep2[ 8] = k_cvtlo_epi16(step2[ 4], mask16, kZero);
-          lstep2[ 9] = k_cvthi_epi16(step2[ 4], mask16, kZero);
-          lstep2[10] = k_cvtlo_epi16(step2[ 5], mask16, kZero);
-          lstep2[11] = k_cvthi_epi16(step2[ 5], mask16, kZero);
-          lstep2[12] = k_cvtlo_epi16(step2[ 6], mask16, kZero);
-          lstep2[13] = k_cvthi_epi16(step2[ 6], mask16, kZero);
-          lstep2[14] = k_cvtlo_epi16(step2[ 7], mask16, kZero);
-          lstep2[15] = k_cvthi_epi16(step2[ 7], mask16, kZero);
+          lstep2[ 0] = _mm_unpacklo_epi16(step2[ 0], kZero);
+          lstep2[ 1] = _mm_unpackhi_epi16(step2[ 0], kZero);
+          lstep2[ 2] = _mm_unpacklo_epi16(step2[ 1], kZero);
+          lstep2[ 3] = _mm_unpackhi_epi16(step2[ 1], kZero);
+          lstep2[ 4] = _mm_unpacklo_epi16(step2[ 2], kZero);
+          lstep2[ 5] = _mm_unpackhi_epi16(step2[ 2], kZero);
+          lstep2[ 6] = _mm_unpacklo_epi16(step2[ 3], kZero);
+          lstep2[ 7] = _mm_unpackhi_epi16(step2[ 3], kZero);
+          lstep2[ 8] = _mm_unpacklo_epi16(step2[ 4], kZero);
+          lstep2[ 9] = _mm_unpackhi_epi16(step2[ 4], kZero);
+          lstep2[10] = _mm_unpacklo_epi16(step2[ 5], kZero);
+          lstep2[11] = _mm_unpackhi_epi16(step2[ 5], kZero);
+          lstep2[12] = _mm_unpacklo_epi16(step2[ 6], kZero);
+          lstep2[13] = _mm_unpackhi_epi16(step2[ 6], kZero);
+          lstep2[14] = _mm_unpacklo_epi16(step2[ 7], kZero);
+          lstep2[15] = _mm_unpackhi_epi16(step2[ 7], kZero);
+          lstep2[ 0] = _mm_madd_epi16(lstep2[ 0], kOne);
+          lstep2[ 1] = _mm_madd_epi16(lstep2[ 1], kOne);
+          lstep2[ 2] = _mm_madd_epi16(lstep2[ 2], kOne);
+          lstep2[ 3] = _mm_madd_epi16(lstep2[ 3], kOne);
+          lstep2[ 4] = _mm_madd_epi16(lstep2[ 4], kOne);
+          lstep2[ 5] = _mm_madd_epi16(lstep2[ 5], kOne);
+          lstep2[ 6] = _mm_madd_epi16(lstep2[ 6], kOne);
+          lstep2[ 7] = _mm_madd_epi16(lstep2[ 7], kOne);
+          lstep2[ 8] = _mm_madd_epi16(lstep2[ 8], kOne);
+          lstep2[ 9] = _mm_madd_epi16(lstep2[ 9], kOne);
+          lstep2[10] = _mm_madd_epi16(lstep2[10], kOne);
+          lstep2[11] = _mm_madd_epi16(lstep2[11], kOne);
+          lstep2[12] = _mm_madd_epi16(lstep2[12], kOne);
+          lstep2[13] = _mm_madd_epi16(lstep2[13], kOne);
+          lstep2[14] = _mm_madd_epi16(lstep2[14], kOne);
+          lstep2[15] = _mm_madd_epi16(lstep2[15], kOne);
 
           lstep3[ 0] = _mm_add_epi32(lstep2[14], lstep2[ 0]);
           lstep3[ 1] = _mm_add_epi32(lstep2[15], lstep2[ 1]);
@@ -1231,42 +1228,75 @@ void FDCT32x32_2D(int16_t *input,
           lstep3[27] = _mm_srai_epi32(s3_13_5, DCT_CONST_BITS);
         }
         {
-          lstep2[40] = k_cvtlo_epi16(step2[20], mask16, kZero);
-          lstep2[41] = k_cvthi_epi16(step2[20], mask16, kZero);
-          lstep2[42] = k_cvtlo_epi16(step2[21], mask16, kZero);
-          lstep2[43] = k_cvthi_epi16(step2[21], mask16, kZero);
-          lstep2[44] = k_cvtlo_epi16(step2[22], mask16, kZero);
-          lstep2[45] = k_cvthi_epi16(step2[22], mask16, kZero);
-          lstep2[46] = k_cvtlo_epi16(step2[23], mask16, kZero);
-          lstep2[47] = k_cvthi_epi16(step2[23], mask16, kZero);
-          lstep2[48] = k_cvtlo_epi16(step2[24], mask16, kZero);
-          lstep2[49] = k_cvthi_epi16(step2[24], mask16, kZero);
-          lstep2[50] = k_cvtlo_epi16(step2[25], mask16, kZero);
-          lstep2[51] = k_cvthi_epi16(step2[25], mask16, kZero);
-          lstep2[52] = k_cvtlo_epi16(step2[26], mask16, kZero);
-          lstep2[53] = k_cvthi_epi16(step2[26], mask16, kZero);
-          lstep2[54] = k_cvtlo_epi16(step2[27], mask16, kZero);
-          lstep2[55] = k_cvthi_epi16(step2[27], mask16, kZero);
+          lstep2[40] = _mm_unpacklo_epi16(step2[20], kZero);
+          lstep2[41] = _mm_unpackhi_epi16(step2[20], kZero);
+          lstep2[42] = _mm_unpacklo_epi16(step2[21], kZero);
+          lstep2[43] = _mm_unpackhi_epi16(step2[21], kZero);
+          lstep2[44] = _mm_unpacklo_epi16(step2[22], kZero);
+          lstep2[45] = _mm_unpackhi_epi16(step2[22], kZero);
+          lstep2[46] = _mm_unpacklo_epi16(step2[23], kZero);
+          lstep2[47] = _mm_unpackhi_epi16(step2[23], kZero);
+          lstep2[48] = _mm_unpacklo_epi16(step2[24], kZero);
+          lstep2[49] = _mm_unpackhi_epi16(step2[24], kZero);
+          lstep2[50] = _mm_unpacklo_epi16(step2[25], kZero);
+          lstep2[51] = _mm_unpackhi_epi16(step2[25], kZero);
+          lstep2[52] = _mm_unpacklo_epi16(step2[26], kZero);
+          lstep2[53] = _mm_unpackhi_epi16(step2[26], kZero);
+          lstep2[54] = _mm_unpacklo_epi16(step2[27], kZero);
+          lstep2[55] = _mm_unpackhi_epi16(step2[27], kZero);
+          lstep2[40] = _mm_madd_epi16(lstep2[40], kOne);
+          lstep2[41] = _mm_madd_epi16(lstep2[41], kOne);
+          lstep2[42] = _mm_madd_epi16(lstep2[42], kOne);
+          lstep2[43] = _mm_madd_epi16(lstep2[43], kOne);
+          lstep2[44] = _mm_madd_epi16(lstep2[44], kOne);
+          lstep2[45] = _mm_madd_epi16(lstep2[45], kOne);
+          lstep2[46] = _mm_madd_epi16(lstep2[46], kOne);
+          lstep2[47] = _mm_madd_epi16(lstep2[47], kOne);
+          lstep2[48] = _mm_madd_epi16(lstep2[48], kOne);
+          lstep2[49] = _mm_madd_epi16(lstep2[49], kOne);
+          lstep2[50] = _mm_madd_epi16(lstep2[50], kOne);
+          lstep2[51] = _mm_madd_epi16(lstep2[51], kOne);
+          lstep2[52] = _mm_madd_epi16(lstep2[52], kOne);
+          lstep2[53] = _mm_madd_epi16(lstep2[53], kOne);
+          lstep2[54] = _mm_madd_epi16(lstep2[54], kOne);
+          lstep2[55] = _mm_madd_epi16(lstep2[55], kOne);
 
-          lstep1[32] = k_cvtlo_epi16(step1[16], mask16, kZero);
-          lstep1[33] = k_cvthi_epi16(step1[16], mask16, kZero);
-          lstep1[34] = k_cvtlo_epi16(step1[17], mask16, kZero);
-          lstep1[35] = k_cvthi_epi16(step1[17], mask16, kZero);
-          lstep1[36] = k_cvtlo_epi16(step1[18], mask16, kZero);
-          lstep1[37] = k_cvthi_epi16(step1[18], mask16, kZero);
-          lstep1[38] = k_cvtlo_epi16(step1[19], mask16, kZero);
-          lstep1[39] = k_cvthi_epi16(step1[19], mask16, kZero);
-          lstep1[56] = k_cvtlo_epi16(step1[28], mask16, kZero);
-          lstep1[57] = k_cvthi_epi16(step1[28], mask16, kZero);
-          lstep1[58] = k_cvtlo_epi16(step1[29], mask16, kZero);
-          lstep1[59] = k_cvthi_epi16(step1[29], mask16, kZero);
-          lstep1[60] = k_cvtlo_epi16(step1[30], mask16, kZero);
-          lstep1[61] = k_cvthi_epi16(step1[30], mask16, kZero);
-          lstep1[62] = k_cvtlo_epi16(step1[31], mask16, kZero);
-          lstep1[63] = k_cvthi_epi16(step1[31], mask16, kZero);
+          lstep1[32] = _mm_unpacklo_epi16(step1[16], kZero);
+          lstep1[33] = _mm_unpackhi_epi16(step1[16], kZero);
+          lstep1[34] = _mm_unpacklo_epi16(step1[17], kZero);
+          lstep1[35] = _mm_unpackhi_epi16(step1[17], kZero);
+          lstep1[36] = _mm_unpacklo_epi16(step1[18], kZero);
+          lstep1[37] = _mm_unpackhi_epi16(step1[18], kZero);
+          lstep1[38] = _mm_unpacklo_epi16(step1[19], kZero);
+          lstep1[39] = _mm_unpackhi_epi16(step1[19], kZero);
+          lstep1[56] = _mm_unpacklo_epi16(step1[28], kZero);
+          lstep1[57] = _mm_unpackhi_epi16(step1[28], kZero);
+          lstep1[58] = _mm_unpacklo_epi16(step1[29], kZero);
+          lstep1[59] = _mm_unpackhi_epi16(step1[29], kZero);
+          lstep1[60] = _mm_unpacklo_epi16(step1[30], kZero);
+          lstep1[61] = _mm_unpackhi_epi16(step1[30], kZero);
+          lstep1[62] = _mm_unpacklo_epi16(step1[31], kZero);
+          lstep1[63] = _mm_unpackhi_epi16(step1[31], kZero);
+          lstep1[32] = _mm_madd_epi16(lstep1[32], kOne);
+          lstep1[33] = _mm_madd_epi16(lstep1[33], kOne);
+          lstep1[34] = _mm_madd_epi16(lstep1[34], kOne);
+          lstep1[35] = _mm_madd_epi16(lstep1[35], kOne);
+          lstep1[36] = _mm_madd_epi16(lstep1[36], kOne);
+          lstep1[37] = _mm_madd_epi16(lstep1[37], kOne);
+          lstep1[38] = _mm_madd_epi16(lstep1[38], kOne);
+          lstep1[39] = _mm_madd_epi16(lstep1[39], kOne);
+          lstep1[56] = _mm_madd_epi16(lstep1[56], kOne);
+          lstep1[57] = _mm_madd_epi16(lstep1[57], kOne);
+          lstep1[58] = _mm_madd_epi16(lstep1[58], kOne);
+          lstep1[59] = _mm_madd_epi16(lstep1[59], kOne);
+          lstep1[60] = _mm_madd_epi16(lstep1[60], kOne);
+          lstep1[61] = _mm_madd_epi16(lstep1[61], kOne);
+          lstep1[62] = _mm_madd_epi16(lstep1[62], kOne);
+          lstep1[63] = _mm_madd_epi16(lstep1[63], kOne);
 
           lstep3[32] = _mm_add_epi32(lstep2[46], lstep1[32]);
           lstep3[33] = _mm_add_epi32(lstep2[47], lstep1[33]);
+
           lstep3[34] = _mm_add_epi32(lstep2[44], lstep1[34]);
           lstep3[35] = _mm_add_epi32(lstep2[45], lstep1[35]);
           lstep3[36] = _mm_add_epi32(lstep2[42], lstep1[36]);
@@ -1302,14 +1332,22 @@ void FDCT32x32_2D(int16_t *input,
         // stage 4
         {
           // expanding to 32-bit length priori to addition operations
-          lstep2[16] = k_cvtlo_epi16(step2[ 8], mask16, kZero);
-          lstep2[17] = k_cvthi_epi16(step2[ 8], mask16, kZero);
-          lstep2[18] = k_cvtlo_epi16(step2[ 9], mask16, kZero);
-          lstep2[19] = k_cvthi_epi16(step2[ 9], mask16, kZero);
-          lstep2[28] = k_cvtlo_epi16(step2[14], mask16, kZero);
-          lstep2[29] = k_cvthi_epi16(step2[14], mask16, kZero);
-          lstep2[30] = k_cvtlo_epi16(step2[15], mask16, kZero);
-          lstep2[31] = k_cvthi_epi16(step2[15], mask16, kZero);
+          lstep2[16] = _mm_unpacklo_epi16(step2[ 8], kZero);
+          lstep2[17] = _mm_unpackhi_epi16(step2[ 8], kZero);
+          lstep2[18] = _mm_unpacklo_epi16(step2[ 9], kZero);
+          lstep2[19] = _mm_unpackhi_epi16(step2[ 9], kZero);
+          lstep2[28] = _mm_unpacklo_epi16(step2[14], kZero);
+          lstep2[29] = _mm_unpackhi_epi16(step2[14], kZero);
+          lstep2[30] = _mm_unpacklo_epi16(step2[15], kZero);
+          lstep2[31] = _mm_unpackhi_epi16(step2[15], kZero);
+          lstep2[16] = _mm_madd_epi16(lstep2[16], kOne);
+          lstep2[17] = _mm_madd_epi16(lstep2[17], kOne);
+          lstep2[18] = _mm_madd_epi16(lstep2[18], kOne);
+          lstep2[19] = _mm_madd_epi16(lstep2[19], kOne);
+          lstep2[28] = _mm_madd_epi16(lstep2[28], kOne);
+          lstep2[29] = _mm_madd_epi16(lstep2[29], kOne);
+          lstep2[30] = _mm_madd_epi16(lstep2[30], kOne);
+          lstep2[31] = _mm_madd_epi16(lstep2[31], kOne);
 
           lstep1[ 0] = _mm_add_epi32(lstep3[ 6], lstep3[ 0]);
           lstep1[ 1] = _mm_add_epi32(lstep3[ 7], lstep3[ 1]);
@@ -1337,41 +1375,41 @@ void FDCT32x32_2D(int16_t *input,
           lstep1[31] = _mm_add_epi32(lstep3[25], lstep2[31]);
         }
         {
-          // to be continued...
-          //
-          const __m128i k32_p16_p16 = pair_set_epi32(cospi_16_64, cospi_16_64);
-          const __m128i k32_p16_m16 = pair_set_epi32(cospi_16_64, -cospi_16_64);
+        // to be continued...
+        //
+        const __m128i k32_p16_p16 = pair_set_epi32(cospi_16_64, cospi_16_64);
+        const __m128i k32_p16_m16 = pair_set_epi32(cospi_16_64, -cospi_16_64);
 
-          u[0] = _mm_unpacklo_epi32(lstep3[12], lstep3[10]);
-          u[1] = _mm_unpackhi_epi32(lstep3[12], lstep3[10]);
-          u[2] = _mm_unpacklo_epi32(lstep3[13], lstep3[11]);
-          u[3] = _mm_unpackhi_epi32(lstep3[13], lstep3[11]);
+        u[0] = _mm_unpacklo_epi32(lstep3[12], lstep3[10]);
+        u[1] = _mm_unpackhi_epi32(lstep3[12], lstep3[10]);
+        u[2] = _mm_unpacklo_epi32(lstep3[13], lstep3[11]);
+        u[3] = _mm_unpackhi_epi32(lstep3[13], lstep3[11]);
 
-          // TODO(jingning): manually inline k_madd_epi32_ to further hide
-          // instruction latency.
-          v[ 0] = k_madd_epi32(u[0], k32_p16_m16);
-          v[ 1] = k_madd_epi32(u[1], k32_p16_m16);
-          v[ 2] = k_madd_epi32(u[2], k32_p16_m16);
-          v[ 3] = k_madd_epi32(u[3], k32_p16_m16);
-          v[ 4] = k_madd_epi32(u[0], k32_p16_p16);
-          v[ 5] = k_madd_epi32(u[1], k32_p16_p16);
-          v[ 6] = k_madd_epi32(u[2], k32_p16_p16);
-          v[ 7] = k_madd_epi32(u[3], k32_p16_p16);
+        // TODO(jingning): manually inline k_madd_epi32_ to further hide
+        // instruction latency.
+        v[ 0] = k_madd_epi32(u[0], k32_p16_m16);
+        v[ 1] = k_madd_epi32(u[1], k32_p16_m16);
+        v[ 2] = k_madd_epi32(u[2], k32_p16_m16);
+        v[ 3] = k_madd_epi32(u[3], k32_p16_m16);
+        v[ 4] = k_madd_epi32(u[0], k32_p16_p16);
+        v[ 5] = k_madd_epi32(u[1], k32_p16_p16);
+        v[ 6] = k_madd_epi32(u[2], k32_p16_p16);
+        v[ 7] = k_madd_epi32(u[3], k32_p16_p16);
 
-          u[0] = k_packs_epi64(v[0], v[1]);
-          u[1] = k_packs_epi64(v[2], v[3]);
-          u[2] = k_packs_epi64(v[4], v[5]);
-          u[3] = k_packs_epi64(v[6], v[7]);
+        u[0] = k_packs_epi64(v[0], v[1]);
+        u[1] = k_packs_epi64(v[2], v[3]);
+        u[2] = k_packs_epi64(v[4], v[5]);
+        u[3] = k_packs_epi64(v[6], v[7]);
 
-          v[0] = _mm_add_epi32(u[0], k__DCT_CONST_ROUNDING);
-          v[1] = _mm_add_epi32(u[1], k__DCT_CONST_ROUNDING);
-          v[2] = _mm_add_epi32(u[2], k__DCT_CONST_ROUNDING);
-          v[3] = _mm_add_epi32(u[3], k__DCT_CONST_ROUNDING);
+        v[0] = _mm_add_epi32(u[0], k__DCT_CONST_ROUNDING);
+        v[1] = _mm_add_epi32(u[1], k__DCT_CONST_ROUNDING);
+        v[2] = _mm_add_epi32(u[2], k__DCT_CONST_ROUNDING);
+        v[3] = _mm_add_epi32(u[3], k__DCT_CONST_ROUNDING);
 
-          lstep1[10] = _mm_srai_epi32(v[0], DCT_CONST_BITS);
-          lstep1[11] = _mm_srai_epi32(v[1], DCT_CONST_BITS);
-          lstep1[12] = _mm_srai_epi32(v[2], DCT_CONST_BITS);
-          lstep1[13] = _mm_srai_epi32(v[3], DCT_CONST_BITS);
+        lstep1[10] = _mm_srai_epi32(v[0], DCT_CONST_BITS);
+        lstep1[11] = _mm_srai_epi32(v[1], DCT_CONST_BITS);
+        lstep1[12] = _mm_srai_epi32(v[2], DCT_CONST_BITS);
+        lstep1[13] = _mm_srai_epi32(v[3], DCT_CONST_BITS);
         }
         {
           const __m128i k32_m08_p24 = pair_set_epi32(-cospi_8_64, cospi_24_64);
