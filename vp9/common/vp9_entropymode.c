@@ -286,7 +286,7 @@ static const struct tx_probs default_tx_probs = {
     { 66  } }
 };
 
-void tx_counts_to_branch_counts_32x32(unsigned int *tx_count_32x32p,
+void tx_counts_to_branch_counts_32x32(const unsigned int *tx_count_32x32p,
                                       unsigned int (*ct_32x32p)[2]) {
   ct_32x32p[0][0] = tx_count_32x32p[TX_4X4];
   ct_32x32p[0][1] = tx_count_32x32p[TX_8X8] +
@@ -299,7 +299,7 @@ void tx_counts_to_branch_counts_32x32(unsigned int *tx_count_32x32p,
   ct_32x32p[2][1] = tx_count_32x32p[TX_32X32];
 }
 
-void tx_counts_to_branch_counts_16x16(unsigned int *tx_count_16x16p,
+void tx_counts_to_branch_counts_16x16(const unsigned int *tx_count_16x16p,
                                       unsigned int (*ct_16x16p)[2]) {
   ct_16x16p[0][0] = tx_count_16x16p[TX_4X4];
   ct_16x16p[0][1] = tx_count_16x16p[TX_8X8] + tx_count_16x16p[TX_16X16];
@@ -307,7 +307,7 @@ void tx_counts_to_branch_counts_16x16(unsigned int *tx_count_16x16p,
   ct_16x16p[1][1] = tx_count_16x16p[TX_16X16];
 }
 
-void tx_counts_to_branch_counts_8x8(unsigned int *tx_count_8x8p,
+void tx_counts_to_branch_counts_8x8(const unsigned int *tx_count_8x8p,
                                     unsigned int (*ct_8x8p)[2]) {
   ct_8x8p[0][0] = tx_count_8x8p[TX_4X4];
   ct_8x8p[0][1] = tx_count_8x8p[TX_8X8];
@@ -356,17 +356,19 @@ void vp9_entropy_mode_init() {
 #define COUNT_SAT 20
 #define MAX_UPDATE_FACTOR 128
 
-static int update_ct(vp9_prob pre_prob, vp9_prob prob, unsigned int ct[2]) {
+static int update_ct(vp9_prob pre_prob, vp9_prob prob,
+                     const unsigned int ct[2]) {
   return merge_probs(pre_prob, prob, ct, COUNT_SAT, MAX_UPDATE_FACTOR);
 }
 
-static int update_ct2(vp9_prob pre_prob, unsigned int ct[2]) {
+static int update_ct2(vp9_prob pre_prob, const unsigned int ct[2]) {
   return merge_probs2(pre_prob, ct, COUNT_SAT, MAX_UPDATE_FACTOR);
 }
 
 static void update_mode_probs(int n_modes,
-                              const vp9_tree_index *tree, unsigned int *cnt,
-                              vp9_prob *pre_probs, vp9_prob *dst_probs,
+                              const vp9_tree_index *tree,
+                              const unsigned int *cnt,
+                              const vp9_prob *pre_probs, vp9_prob *dst_probs,
                               unsigned int tok0_offset) {
 #define MAX_PROBS 32
   vp9_prob probs[MAX_PROBS];
@@ -382,8 +384,8 @@ static void update_mode_probs(int n_modes,
 void vp9_adapt_mode_probs(VP9_COMMON *cm) {
   int i, j;
   FRAME_CONTEXT *fc = &cm->fc;
-  FRAME_CONTEXT *pre_fc = &cm->frame_contexts[cm->frame_context_idx];
-  FRAME_COUNTS *counts = &cm->counts;
+  const FRAME_CONTEXT *pre_fc = &cm->frame_contexts[cm->frame_context_idx];
+  const FRAME_COUNTS *counts = &cm->counts;
 
   for (i = 0; i < INTRA_INTER_CONTEXTS; i++)
     fc->intra_inter_prob[i] = update_ct2(pre_fc->intra_inter_prob[i],

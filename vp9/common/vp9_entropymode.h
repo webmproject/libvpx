@@ -61,11 +61,11 @@ void vp9_init_mbmode_probs(struct VP9Common *cm);
 
 void vp9_adapt_mode_probs(struct VP9Common *cm);
 
-void tx_counts_to_branch_counts_32x32(unsigned int *tx_count_32x32p,
+void tx_counts_to_branch_counts_32x32(const unsigned int *tx_count_32x32p,
                                       unsigned int (*ct_32x32p)[2]);
-void tx_counts_to_branch_counts_16x16(unsigned int *tx_count_16x16p,
+void tx_counts_to_branch_counts_16x16(const unsigned int *tx_count_16x16p,
                                       unsigned int (*ct_16x16p)[2]);
-void tx_counts_to_branch_counts_8x8(unsigned int *tx_count_8x8p,
+void tx_counts_to_branch_counts_8x8(const unsigned int *tx_count_8x8p,
                                     unsigned int (*ct_8x8p)[2]);
 
 #endif  // VP9_COMMON_VP9_ENTROPYMODE_H_
