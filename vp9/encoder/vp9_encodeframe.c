@@ -1757,7 +1757,7 @@ static void encode_sb_row(VP9_COMP *cpi, int mi_row, TOKENEXTRA **tp,
     int dummy_rate;
     int64_t dummy_dist;
 
-    vpx_memset(cpi->mb.pred_mv, 0, sizeof(cpi->mb.pred_mv));
+    vp9_zero(cpi->mb.pred_mv);
 
     if (cpi->sf.reference_masking)
       rd_pick_reference_frame(cpi, mi_row, mi_col);
