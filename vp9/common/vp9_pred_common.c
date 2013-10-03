@@ -392,11 +392,6 @@ void vp9_set_pred_flag_seg_id(MACROBLOCKD *xd, uint8_t pred_flag) {
   xd->this_mi->mbmi.seg_id_predicted = pred_flag;
 }
 
-void vp9_set_pred_flag_mbskip(MACROBLOCKD *xd, BLOCK_SIZE bsize,
-                              uint8_t pred_flag) {
-  xd->this_mi->mbmi.skip_coeff = pred_flag;
-}
-
 int vp9_get_segment_id(VP9_COMMON *cm, const uint8_t *segment_ids,
                        BLOCK_SIZE bsize, int mi_row, int mi_col) {
   const int mi_offset = mi_row * cm->mi_cols + mi_col;
