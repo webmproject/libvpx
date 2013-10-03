@@ -534,6 +534,21 @@ sym(vp9_filter_block1d16_v8_avg_ssse3):
     ret
 
 ;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+%macro HORIZx4_ROW 2
+    movdqa      %2,   %1
+    pshufb      %1,   [GLOBAL(shuf_t0t1)]
+    pshufb      %2,   [GLOBAL(shuf_t2t3)]
+    pmaddubsw   %1,   xmm6
+    pmaddubsw   %2,   xmm7
+
+    paddsw      %1,   %2
+    movdqa      %2,   %1
+    psrldq      %2,   8
+    paddsw      %1,   %2
+    paddsw      %1,   xmm5
+    psraw       %1,   7
+    packuswb    %1,   %1
+%endm
 
 %macro HORIZx4 1
     mov         rdx, arg(5)                 ;filter ptr
@@ -544,64 +559,84 @@ sym(vp9_filter_block1d16_v8_avg_ssse3):
     movdqa      xmm4, [rdx]                 ;load filters
     movq        xmm5, rcx
     packsswb    xmm4, xmm4
-    pshuflw     xmm0, xmm4, 0b              ;k0_k1
-    pshuflw     xmm1, xmm4, 01010101b       ;k2_k3
-    pshuflw     xmm2, xmm4, 10101010b       ;k4_k5
-    pshuflw     xmm3, xmm4, 11111111b       ;k6_k7
-
-    punpcklqdq  xmm0, xmm0
-    punpcklqdq  xmm1, xmm1
-    punpcklqdq  xmm2, xmm2
-    punpcklqdq  xmm3, xmm3
-
-    movdqa      k0k1, xmm0
-    movdqa      k2k3, xmm1
-    pshufd      xmm5, xmm5, 0
-    movdqa      k4k5, xmm2
-    movdqa      k6k7, xmm3
-    movdqa      krd, xmm5
+    pshuflw     xmm6, xmm4, 0b              ;k0_k1
+    pshufhw     xmm6, xmm6, 10101010b       ;k0_k1_k4_k5
+    pshuflw     xmm7, xmm4, 01010101b       ;k2_k3
+    pshufhw     xmm7, xmm7, 11111111b       ;k2_k3_k6_k7
+    pshufd      xmm5, xmm5, 0               ;rounding
 
     movsxd      rax, dword ptr arg(1)       ;src_pixels_per_line
     movsxd      rdx, dword ptr arg(3)       ;output_pitch
     movsxd      rcx, dword ptr arg(4)       ;output_height
-
+    shr         rcx, 1
 .loop:
-    movq        xmm0,   [rsi - 3]    ; -3 -2 -1  0  1  2  3  4
+    ;Do two rows once
+    movq        xmm0,   [rsi - 3]           ;load src
+    movq        xmm1,   [rsi + 5]
+    movq        xmm2,   [rsi + rax - 3]
+    movq        xmm3,   [rsi + rax + 5]
+    punpcklqdq  xmm0,   xmm1
+    punpcklqdq  xmm2,   xmm3
 
-    movq        xmm3,   [rsi + 5]    ; 5  6  7  8  9 10 11 12
-    punpcklqdq  xmm0,   xmm3
+    HORIZx4_ROW xmm0,   xmm1
+    HORIZx4_ROW xmm2,   xmm3
+%if %1
+    movd        xmm1,   [rdi]
+    pavgb       xmm0,   xmm1
+    movd        xmm3,   [rdi + rdx]
+    pavgb       xmm2,   xmm3
+%endif
+    movd        [rdi],  xmm0
+    movd        [rdi +rdx],  xmm2
 
-    movdqa      xmm1,   xmm0
-    pshufb      xmm0,   [GLOBAL(shuf_t0t1)]
-    pmaddubsw   xmm0,   k0k1
+    lea         rsi,    [rsi + rax]
+    prefetcht0  [rsi + 4 * rax - 3]
+    lea         rsi,    [rsi + rax]
+    lea         rdi,    [rdi + 2 * rdx]
+    prefetcht0  [rsi + 2 * rax - 3]
 
-    movdqa      xmm2,   xmm1
-    pshufb      xmm1,   [GLOBAL(shuf_t2t3)]
-    pmaddubsw   xmm1,   k2k3
+    dec         rcx
+    jnz         .loop
 
-    movdqa      xmm4,   xmm2
-    pshufb      xmm2,   [GLOBAL(shuf_t4t5)]
-    pmaddubsw   xmm2,   k4k5
+    ; Do last row if output_height is odd
+    movsxd      rcx,    dword ptr arg(4)       ;output_height
+    and         rcx,    1
+    je          .done
 
-    pshufb      xmm4,   [GLOBAL(shuf_t6t7)]
-    pmaddubsw   xmm4,   k6k7
+    movq        xmm0,   [rsi - 3]    ; load src
+    movq        xmm1,   [rsi + 5]
+    punpcklqdq  xmm0,   xmm1
 
-    paddsw      xmm0,   xmm1
-    paddsw      xmm0,   xmm4
-    paddsw      xmm0,   xmm2
-    paddsw      xmm0,   krd
-    psraw       xmm0,   7
-    packuswb    xmm0,   xmm0
+    HORIZx4_ROW xmm0, xmm1
 %if %1
     movd        xmm1,   [rdi]
     pavgb       xmm0,   xmm1
 %endif
-    lea         rsi,    [rsi + rax]
     movd        [rdi],  xmm0
+.done
+%endm
 
-    lea         rdi,    [rdi + rdx]
-    dec         rcx
-    jnz         .loop
+%macro HORIZx8_ROW 4
+    movdqa      %2,   %1
+    movdqa      %3,   %1
+    movdqa      %4,   %1
+
+    pshufb      %1,   [GLOBAL(shuf_t0t1)]
+    pshufb      %2,   [GLOBAL(shuf_t2t3)]
+    pshufb      %3,   [GLOBAL(shuf_t4t5)]
+    pshufb      %4,   [GLOBAL(shuf_t6t7)]
+
+    pmaddubsw   %1,   k0k1
+    pmaddubsw   %2,   k2k3
+    pmaddubsw   %3,   k4k5
+    pmaddubsw   %4,   k6k7
+
+    paddsw      %1,   %2
+    paddsw      %1,   %4
+    paddsw      %1,   %3
+    paddsw      %1,   krd
+    psraw       %1,   7
+    packuswb    %1,   %1
 %endm
 
 %macro HORIZx8 1
@@ -633,45 +668,51 @@ sym(vp9_filter_block1d16_v8_avg_ssse3):
     movsxd      rax, dword ptr arg(1)       ;src_pixels_per_line
     movsxd      rdx, dword ptr arg(3)       ;output_pitch
     movsxd      rcx, dword ptr arg(4)       ;output_height
+    shr         rcx, 1
 
 .loop:
-    movq        xmm0,   [rsi - 3]    ; -3 -2 -1  0  1  2  3  4
+    movq        xmm0,   [rsi - 3]           ;load src
+    movq        xmm3,   [rsi + 5]
+    movq        xmm4,   [rsi + rax - 3]
+    movq        xmm7,   [rsi + rax + 5]
+    punpcklqdq  xmm0,   xmm3
+    punpcklqdq  xmm4,   xmm7
 
-    movq        xmm3,   [rsi + 5]    ; 5  6  7  8  9 10 11 12
+    HORIZx8_ROW xmm0, xmm1, xmm2, xmm3
+    HORIZx8_ROW xmm4, xmm5, xmm6, xmm7
+%if %1
+    movq        xmm1,   [rdi]
+    movq        xmm2,   [rdi + rdx]
+    pavgb       xmm0,   xmm1
+    pavgb       xmm4,   xmm2
+%endif
+    movq        [rdi],  xmm0
+    movq        [rdi + rdx],  xmm4
+
+    lea         rsi,    [rsi + rax]
+    prefetcht0  [rsi + 4 * rax - 3]
+    lea         rsi,    [rsi + rax]
+    lea         rdi,    [rdi + 2 * rdx]
+    prefetcht0  [rsi + 2 * rax - 3]
+    dec         rcx
+    jnz         .loop
+
+    ;Do last row if output_height is odd
+    movsxd      rcx,    dword ptr arg(4)    ;output_height
+    and         rcx,    1
+    je          .done
+
+    movq        xmm0,   [rsi - 3]
+    movq        xmm3,   [rsi + 5]
     punpcklqdq  xmm0,   xmm3
 
-    movdqa      xmm1,   xmm0
-    pshufb      xmm0,   [GLOBAL(shuf_t0t1)]
-    pmaddubsw   xmm0,   k0k1
-
-    movdqa      xmm2,   xmm1
-    pshufb      xmm1,   [GLOBAL(shuf_t2t3)]
-    pmaddubsw   xmm1,   k2k3
-
-    movdqa      xmm4,   xmm2
-    pshufb      xmm2,   [GLOBAL(shuf_t4t5)]
-    pmaddubsw   xmm2,   k4k5
-
-    pshufb      xmm4,   [GLOBAL(shuf_t6t7)]
-    pmaddubsw   xmm4,   k6k7
-
-    paddsw      xmm0,   xmm1
-    paddsw      xmm0,   xmm4
-    paddsw      xmm0,   xmm2
-    paddsw      xmm0,   krd
-    psraw       xmm0,   7
-    packuswb    xmm0,   xmm0
+    HORIZx8_ROW xmm0, xmm1, xmm2, xmm3
 %if %1
     movq        xmm1,   [rdi]
     pavgb       xmm0,   xmm1
 %endif
-
-    lea         rsi,    [rsi + rax]
     movq        [rdi],  xmm0
-
-    lea         rdi,    [rdi + rdx]
-    dec         rcx
-    jnz         .loop
+.done
 %endm
 
 %macro HORIZx16 1
@@ -785,18 +826,7 @@ sym(vp9_filter_block1d4_h8_ssse3):
     push        rdi
     ; end prolog
 
-    ALIGN_STACK 16, rax
-    sub         rsp, 16*5
-    %define k0k1 [rsp + 16*0]
-    %define k2k3 [rsp + 16*1]
-    %define k4k5 [rsp + 16*2]
-    %define k6k7 [rsp + 16*3]
-    %define krd [rsp + 16*4]
-
     HORIZx4 0
-
-    add rsp, 16*5
-    pop rsp
 
     ; begin epilog
     pop rdi
@@ -902,18 +932,7 @@ sym(vp9_filter_block1d4_h8_avg_ssse3):
     push        rdi
     ; end prolog
 
-    ALIGN_STACK 16, rax
-    sub         rsp, 16*5
-    %define k0k1 [rsp + 16*0]
-    %define k2k3 [rsp + 16*1]
-    %define k4k5 [rsp + 16*2]
-    %define k6k7 [rsp + 16*3]
-    %define krd [rsp + 16*4]
-
     HORIZx4 1
-
-    add rsp, 16*5
-    pop rsp
 
     ; begin epilog
     pop rdi
