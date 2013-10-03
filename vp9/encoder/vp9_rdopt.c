@@ -667,6 +667,7 @@ static void txfm_rd_in_plane(MACROBLOCK *x,
   const BLOCK_SIZE bs = get_plane_block_size(bsize, pd);
   const int num_4x4_w = num_4x4_blocks_wide_lookup[bs];
   const int num_4x4_h = num_4x4_blocks_high_lookup[bs];
+  const uint8_t *band_translate;  // just for the get_scan_and_band call
 
   struct rdcost_block_args args = { x, { 0 }, { 0 }, tx_size,
                                     num_4x4_w, num_4x4_h,
@@ -678,26 +679,9 @@ static void txfm_rd_in_plane(MACROBLOCK *x,
   vp9_get_entropy_contexts(tx_size, args.t_above, args.t_left,
                            pd->above_context, pd->left_context,
                            num_4x4_w, num_4x4_h);
-  switch (tx_size) {
-    case TX_4X4:
-      get_scan_nb_4x4(get_tx_type_4x4(pd->plane_type, xd, 0),
-                      &args.scan, &args.nb);
-      break;
-    case TX_8X8:
-      get_scan_nb_8x8(get_tx_type_8x8(pd->plane_type, xd),
-                      &args.scan, &args.nb);
-      break;
-    case TX_16X16:
-      get_scan_nb_16x16(get_tx_type_16x16(pd->plane_type, xd),
-                        &args.scan, &args.nb);
-      break;
-    case TX_32X32:
-      args.scan = vp9_default_scan_32x32;
-      args.nb = vp9_default_scan_32x32_neighbors;
-      break;
-    default:
-      assert(0);
-  }
+
+  get_scan_and_band(xd, tx_size, pd->plane_type, 0, &args.scan, &args.nb,
+                    &band_translate);
 
   foreach_transformed_block_in_plane(xd, bsize, plane, block_yrd_txfm, &args);
   if (args.skip) {
