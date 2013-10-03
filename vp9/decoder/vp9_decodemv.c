@@ -364,16 +364,15 @@ static void read_switchable_interp_probs(FRAME_CONTEXT *fc, vp9_reader *r) {
   int i, j;
   for (j = 0; j < SWITCHABLE_FILTERS + 1; ++j)
     for (i = 0; i < SWITCHABLE_FILTERS - 1; ++i)
-      if (vp9_read(r, MODE_UPDATE_PROB))
-        vp9_diff_update_prob(r, &fc->switchable_interp_prob[j][i]);
+      vp9_diff_update_prob(r, MODE_UPDATE_PROB,
+                           &fc->switchable_interp_prob[j][i]);
 }
 
 static void read_inter_mode_probs(FRAME_CONTEXT *fc, vp9_reader *r) {
   int i, j;
   for (i = 0; i < INTER_MODE_CONTEXTS; ++i)
     for (j = 0; j < INTER_MODES - 1; ++j)
-      if (vp9_read(r, MODE_UPDATE_PROB))
-        vp9_diff_update_prob(r, &fc->inter_mode_probs[i][j]);
+      vp9_diff_update_prob(r, MODE_UPDATE_PROB, &fc->inter_mode_probs[i][j]);
 }
 
 static INLINE COMPPREDMODE_TYPE read_comp_pred_mode(vp9_reader *r) {
@@ -632,21 +631,17 @@ static void read_comp_pred(VP9_COMMON *cm, vp9_reader *r) {
 
   if (cm->comp_pred_mode == HYBRID_PREDICTION)
     for (i = 0; i < COMP_INTER_CONTEXTS; i++)
-      if (vp9_read(r, MODE_UPDATE_PROB))
-        vp9_diff_update_prob(r, &cm->fc.comp_inter_prob[i]);
+      vp9_diff_update_prob(r, MODE_UPDATE_PROB, &cm->fc.comp_inter_prob[i]);
 
   if (cm->comp_pred_mode != COMP_PREDICTION_ONLY)
     for (i = 0; i < REF_CONTEXTS; i++) {
-      if (vp9_read(r, MODE_UPDATE_PROB))
-        vp9_diff_update_prob(r, &cm->fc.single_ref_prob[i][0]);
-      if (vp9_read(r, MODE_UPDATE_PROB))
-        vp9_diff_update_prob(r, &cm->fc.single_ref_prob[i][1]);
+      vp9_diff_update_prob(r, MODE_UPDATE_PROB, &cm->fc.single_ref_prob[i][0]);
+      vp9_diff_update_prob(r, MODE_UPDATE_PROB, &cm->fc.single_ref_prob[i][1]);
     }
 
   if (cm->comp_pred_mode != SINGLE_PREDICTION_ONLY)
     for (i = 0; i < REF_CONTEXTS; i++)
-      if (vp9_read(r, MODE_UPDATE_PROB))
-        vp9_diff_update_prob(r, &cm->fc.comp_ref_prob[i]);
+      vp9_diff_update_prob(r, MODE_UPDATE_PROB, &cm->fc.comp_ref_prob[i]);
 }
 
 void vp9_prepare_read_mode_info(VP9D_COMP* pbi, vp9_reader *r) {
@@ -656,8 +651,7 @@ void vp9_prepare_read_mode_info(VP9D_COMP* pbi, vp9_reader *r) {
   // TODO(jkoleszar): does this clear more than MBSKIP_CONTEXTS? Maybe remove.
   // vpx_memset(cm->fc.mbskip_probs, 0, sizeof(cm->fc.mbskip_probs));
   for (k = 0; k < MBSKIP_CONTEXTS; ++k)
-    if (vp9_read(r, MODE_UPDATE_PROB))
-      vp9_diff_update_prob(r, &cm->fc.mbskip_probs[k]);
+    vp9_diff_update_prob(r, MODE_UPDATE_PROB, &cm->fc.mbskip_probs[k]);
 
   if (cm->frame_type != KEY_FRAME && !cm->intra_only) {
     nmv_context *const nmvc = &pbi->common.fc.nmvc;
@@ -670,20 +664,18 @@ void vp9_prepare_read_mode_info(VP9D_COMP* pbi, vp9_reader *r) {
       read_switchable_interp_probs(&cm->fc, r);
 
     for (i = 0; i < INTRA_INTER_CONTEXTS; i++)
-      if (vp9_read(r, MODE_UPDATE_PROB))
-        vp9_diff_update_prob(r, &cm->fc.intra_inter_prob[i]);
+      vp9_diff_update_prob(r, MODE_UPDATE_PROB, &cm->fc.intra_inter_prob[i]);
 
     read_comp_pred(cm, r);
 
     for (j = 0; j < BLOCK_SIZE_GROUPS; j++)
       for (i = 0; i < INTRA_MODES - 1; ++i)
-        if (vp9_read(r, MODE_UPDATE_PROB))
-          vp9_diff_update_prob(r, &cm->fc.y_mode_prob[j][i]);
+        vp9_diff_update_prob(r, MODE_UPDATE_PROB, &cm->fc.y_mode_prob[j][i]);
 
     for (j = 0; j < NUM_PARTITION_CONTEXTS; ++j)
       for (i = 0; i < PARTITION_TYPES - 1; ++i)
-        if (vp9_read(r, MODE_UPDATE_PROB))
-          vp9_diff_update_prob(r, &cm->fc.partition_prob[INTER_FRAME][j][i]);
+        vp9_diff_update_prob(r, MODE_UPDATE_PROB,
+                             &cm->fc.partition_prob[INTER_FRAME][j][i]);
 
     read_mv_probs(r, nmvc, xd->allow_high_precision_mv);
   }

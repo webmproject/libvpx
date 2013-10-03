@@ -63,18 +63,15 @@ static void read_tx_probs(struct tx_probs *tx_probs, vp9_reader *r) {
 
   for (i = 0; i < TX_SIZE_CONTEXTS; ++i)
     for (j = 0; j < TX_SIZES - 3; ++j)
-      if (vp9_read(r, MODE_UPDATE_PROB))
-        vp9_diff_update_prob(r, &tx_probs->p8x8[i][j]);
+      vp9_diff_update_prob(r, MODE_UPDATE_PROB, &tx_probs->p8x8[i][j]);
 
   for (i = 0; i < TX_SIZE_CONTEXTS; ++i)
     for (j = 0; j < TX_SIZES - 2; ++j)
-      if (vp9_read(r, MODE_UPDATE_PROB))
-        vp9_diff_update_prob(r, &tx_probs->p16x16[i][j]);
+      vp9_diff_update_prob(r, MODE_UPDATE_PROB, &tx_probs->p16x16[i][j]);
 
   for (i = 0; i < TX_SIZE_CONTEXTS; ++i)
     for (j = 0; j < TX_SIZES - 1; ++j)
-      if (vp9_read(r, MODE_UPDATE_PROB))
-        vp9_diff_update_prob(r, &tx_probs->p32x32[i][j]);
+      vp9_diff_update_prob(r, MODE_UPDATE_PROB, &tx_probs->p32x32[i][j]);
 }
 
 static void setup_plane_dequants(VP9_COMMON *cm, MACROBLOCKD *xd, int q_index) {
@@ -364,8 +361,8 @@ static void read_coef_probs_common(vp9_coeff_probs_model *coef_probs,
           for (l = 0; l < PREV_COEF_CONTEXTS; l++)
             if (k > 0 || l < 3)
               for (m = 0; m < UNCONSTRAINED_NODES; m++)
-                if (vp9_read(r, VP9_COEF_UPDATE_PROB))
-                  vp9_diff_update_prob(r, &coef_probs[i][j][k][l][m]);
+                vp9_diff_update_prob(r, VP9_COEF_UPDATE_PROB,
+                                     &coef_probs[i][j][k][l][m]);
 }
 
 static void read_coef_probs(FRAME_CONTEXT *fc, TX_MODE tx_mode,
