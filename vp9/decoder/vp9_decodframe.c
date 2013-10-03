@@ -492,7 +492,8 @@ static INTERPOLATIONFILTERTYPE read_interp_filter_type(
     struct vp9_read_bit_buffer *rb) {
   const INTERPOLATIONFILTERTYPE literal_to_type[] = { EIGHTTAP_SMOOTH,
                                                       EIGHTTAP,
-                                                      EIGHTTAP_SHARP };
+                                                      EIGHTTAP_SHARP,
+                                                      BILINEAR };
   return vp9_rb_read_bit(rb) ? SWITCHABLE
                              : literal_to_type[vp9_rb_read_literal(rb, 2)];
 }

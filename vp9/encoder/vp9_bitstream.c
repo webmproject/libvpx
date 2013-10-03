@@ -1162,7 +1162,7 @@ static void encode_txfm_probs(VP9_COMP *cpi, vp9_writer *w) {
 
 static void write_interp_filter_type(INTERPOLATIONFILTERTYPE type,
                                      struct vp9_write_bit_buffer *wb) {
-  const int type_to_literal[] = { 1, 0, 2 };
+  const int type_to_literal[] = { 1, 0, 2, 3 };
 
   vp9_wb_write_bit(wb, type == SWITCHABLE);
   if (type != SWITCHABLE)
