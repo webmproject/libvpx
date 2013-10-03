@@ -360,7 +360,6 @@ static void update_state(VP9_COMP *cpi, PICK_MODE_CONTEXT *ctx,
   const int mi_height = num_8x8_blocks_high_lookup[bsize];
 
   assert(mi->mbmi.mode < MB_MODE_COUNT);
-  assert(mb_mode_index < MAX_MODES);
   assert(mi->mbmi.ref_frame[0] < MAX_REF_FRAMES);
   assert(mi->mbmi.ref_frame[1] < MAX_REF_FRAMES);
   assert(mi->mbmi.sb_type == bsize);
@@ -422,7 +421,6 @@ static void update_state(VP9_COMP *cpi, PICK_MODE_CONTEXT *ctx,
       THR_D207_PRED /*D207_PRED*/,
       THR_D63_PRED /*D63_PRED*/,
       THR_TM /*TM_PRED*/,
-      THR_B_PRED /*I4X4_PRED*/,
     };
     cpi->mode_chosen_counts[kf_mode_index[mi->mbmi.mode]]++;
 #endif
@@ -597,12 +595,17 @@ static void pick_sb_modes(VP9_COMP *cpi, int mi_row, int mi_col,
 
   // Find best coding mode & reconstruct the MB so it is available
   // as a predictor for MBs that follow in the SB
-  if (cm->frame_type == KEY_FRAME)
+  if (cm->frame_type == KEY_FRAME) {
     vp9_rd_pick_intra_mode_sb(cpi, x, totalrate, totaldist, bsize, ctx,
                               best_rd);
-  else
-    vp9_rd_pick_inter_mode_sb(cpi, x, mi_row, mi_col, totalrate, totaldist,
-                              bsize, ctx, best_rd);
+  } else {
+    if (bsize >= BLOCK_8X8)
+      vp9_rd_pick_inter_mode_sb(cpi, x, mi_row, mi_col, totalrate, totaldist,
+                                bsize, ctx, best_rd);
+    else
+      vp9_rd_pick_inter_mode_sub8x8(cpi, x, mi_row, mi_col, totalrate,
+                                    totaldist, bsize, ctx, best_rd);
+  }
 }
 
 static void update_stats(VP9_COMP *cpi) {
