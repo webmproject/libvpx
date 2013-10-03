@@ -580,7 +580,7 @@ static void write_modes_b(VP9_COMP *cpi, MODE_INFO **mi_8x8, vp9_writer *bc,
   set_mi_row_col(&cpi->common, xd,
                  mi_row, num_8x8_blocks_high_lookup[m->mbmi.sb_type],
                  mi_col, num_8x8_blocks_wide_lookup[m->mbmi.sb_type]);
-  if ((cm->frame_type == KEY_FRAME) || cm->intra_only) {
+  if (frame_is_intra_only(cm)) {
     write_mb_modes_kf(cpi, mi_8x8, bc);
 #ifdef ENTROPY_STATS
     active_section = 8;
@@ -1449,7 +1449,7 @@ static size_t write_compressed_header(VP9_COMP *cpi, uint8_t *data) {
 
   vp9_update_skip_probs(cpi, &header_bc);
 
-  if (cm->frame_type != KEY_FRAME) {
+  if (!frame_is_intra_only(cm)) {
     int i;
 #ifdef ENTROPY_STATS
     active_section = 1;
