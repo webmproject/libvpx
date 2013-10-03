@@ -91,9 +91,28 @@ static TX_SIZE read_tx_size(VP9D_COMP *pbi, TX_MODE tx_mode,
     return TX_4X4;
 }
 
+static void set_segment_id(VP9_COMMON *cm, BLOCK_SIZE bsize,
+                           int mi_row, int mi_col, int segment_id) {
+  const int mi_offset = mi_row * cm->mi_cols + mi_col;
+  const int bw = 1 << mi_width_log2(bsize);
+  const int bh = 1 << mi_height_log2(bsize);
+  const int xmis = MIN(cm->mi_cols - mi_col, bw);
+  const int ymis = MIN(cm->mi_rows - mi_row, bh);
+  int x, y;
+
+  assert(segment_id >= 0 && segment_id < MAX_SEGMENTS);
+
+  for (y = 0; y < ymis; y++)
+    for (x = 0; x < xmis; x++)
+      cm->last_frame_seg_map[mi_offset + y * cm->mi_cols + x] = segment_id;
+}
+
 static int read_intra_segment_id(VP9D_COMP *pbi, int mi_row, int mi_col,
                                  vp9_reader *r) {
+  MACROBLOCKD *const xd = &pbi->mb;
   struct segmentation *const seg = &pbi->common.seg;
+  const BLOCK_SIZE bsize = xd->this_mi->mbmi.sb_type;
+  int segment_id;
 
   if (!seg->enabled)
     return 0;  // Default for disabled segmentation
@@ -101,7 +120,9 @@ static int read_intra_segment_id(VP9D_COMP *pbi, int mi_row, int mi_col,
   if (!seg->update_map)
     return 0;
 
-  return read_segment_id(r, seg);
+  segment_id = read_segment_id(r, seg);
+  set_segment_id(&pbi->common, bsize, mi_row, mi_col, segment_id);
+  return segment_id;
 }
 
 static int read_inter_segment_id(VP9D_COMP *pbi, int mi_row, int mi_col,
@@ -110,7 +131,7 @@ static int read_inter_segment_id(VP9D_COMP *pbi, int mi_row, int mi_col,
   MACROBLOCKD *const xd = &pbi->mb;
   struct segmentation *const seg = &cm->seg;
   const BLOCK_SIZE bsize = xd->this_mi->mbmi.sb_type;
-  int pred_segment_id;;
+  int pred_segment_id, segment_id;
 
   if (!seg->enabled)
     return 0;  // Default for disabled segmentation
@@ -124,10 +145,13 @@ static int read_inter_segment_id(VP9D_COMP *pbi, int mi_row, int mi_col,
     const vp9_prob pred_prob = vp9_get_pred_prob_seg_id(seg, xd);
     const int pred_flag = vp9_read(r, pred_prob);
     vp9_set_pred_flag_seg_id(xd, pred_flag);
-    return pred_flag ? pred_segment_id : read_segment_id(r, seg);
+    segment_id = pred_flag ? pred_segment_id
+                           : read_segment_id(r, seg);
   } else {
-    return read_segment_id(r, seg);
+    segment_id = read_segment_id(r, seg);
   }
+  set_segment_id(cm, bsize, mi_row, mi_col, segment_id);
+  return segment_id;
 }
 
 static uint8_t read_skip_coeff(VP9D_COMP *pbi, int segment_id, vp9_reader *r) {
