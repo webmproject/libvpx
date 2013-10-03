@@ -3782,7 +3782,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
     if (cm->mcomp_filter_type == SWITCHABLE)
       assert(best_filter_diff[SWITCHABLE_FILTERS] == 0);
   } else {
-    vpx_memset(best_filter_diff, 0, sizeof(best_filter_diff));
+    vp9_zero(best_filter_diff);
   }
 
   if (!x->skip) {
@@ -3793,7 +3793,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
         best_tx_diff[i] = best_rd - best_tx_rd[i];
     }
   } else {
-    vpx_memset(best_tx_diff, 0, sizeof(best_tx_diff));
+    vp9_zero(best_tx_diff);
   }
 
   set_scale_factors(xd, mbmi->ref_frame[0], mbmi->ref_frame[1],
@@ -3863,8 +3863,8 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
   unsigned char best_zcoeff_blk[256] = { 0 };
 
   x->skip_encode = cpi->sf.skip_encode_frame && xd->q_index < QIDX_SKIP_THRESH;
-  vpx_memset(x->zcoeff_blk, 0, sizeof(x->zcoeff_blk));
-  vpx_memset(ctx->zcoeff_blk, 0, sizeof(ctx->zcoeff_blk));
+  vp9_zero(x->zcoeff_blk);
+  vp9_zero(ctx->zcoeff_blk);
 
   for (i = 0; i < 4; i++) {
     int j;
