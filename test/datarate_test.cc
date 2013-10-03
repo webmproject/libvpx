@@ -176,6 +176,60 @@ TEST_P(DatarateTest, ChangingDropFrameThresh) {
   }
 }
 
-VP8_INSTANTIATE_TEST_CASE(DatarateTest, ALL_TEST_MODES);
+class DatarateTestVP9 : public DatarateTest {
+ protected:
+  virtual ~DatarateTestVP9() {}
 
+  virtual void PreEncodeFrameHook(::libvpx_test::VideoSource *video,
+                                    ::libvpx_test::Encoder *encoder) {
+    if (video->frame() == 1) {
+      encoder->Control(VP8E_SET_CPUUSED, 2);
+    }
+    const vpx_rational_t tb = video->timebase();
+    timebase_ = static_cast<double>(tb.num) / tb.den;
+    duration_ = 0;
+  }
+
+  virtual void FramePktHook(const vpx_codec_cx_pkt_t *pkt) {
+    const int frame_size_in_bits = pkt->data.frame.sz * 8;
+    bits_total_ += frame_size_in_bits;
+    // Update the most recent pts.
+    last_pts_ = pkt->data.frame.pts;
+    ++frame_number_;
+  }
+
+  virtual void EndPassHook(void) {
+    if (bits_total_) {
+      duration_ = (last_pts_ + 1) * timebase_;
+      // Effective file datarate:
+      effective_datarate_ = ((bits_total_) / 1000.0) / duration_;
+    }
+  }
+};
+
+// There is no buffer model/frame dropper in VP9 currently, so for now we
+// have separate test for VP9 rate targeting for 1-pass CBR. We only check
+// that effective datarate is within some range of target bitrate.
+// No frame dropper, so we can't go to low bitrates.
+TEST_P(DatarateTestVP9, BasicRateTargeting) {
+  cfg_.rc_min_quantizer = 0;
+  cfg_.rc_max_quantizer = 63;
+  cfg_.rc_end_usage = VPX_CBR;
+
+  ::libvpx_test::I420VideoSource video("hantro_collage_w352h288.yuv", 352, 288,
+                                       30, 1, 0, 140);
+  for (int i = 200; i < 800; i += 200) {
+    cfg_.rc_target_bitrate = i;
+    ResetModel();
+    ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
+    ASSERT_GE(cfg_.rc_target_bitrate, effective_datarate_ * 0.8)
+        << " The datarate for the file exceeds the target by too much!";
+    ASSERT_LE(cfg_.rc_target_bitrate, effective_datarate_ * 1.3)
+        << " The datarate for the file missed the target!";
+  }
+}
+
+VP8_INSTANTIATE_TEST_CASE(DatarateTest, ALL_TEST_MODES);
+VP9_INSTANTIATE_TEST_CASE(DatarateTestVP9,
+                          ::testing::Values(::libvpx_test::kOnePassGood));
 }  // namespace

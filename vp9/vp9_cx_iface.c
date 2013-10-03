@@ -256,7 +256,7 @@ static vpx_codec_err_t set_vp9e_config(VP9_CONFIG *oxcf,
 
   switch (cfg.g_pass) {
     case VPX_RC_ONE_PASS:
-      oxcf->Mode = MODE_BESTQUALITY;
+      oxcf->Mode = MODE_GOODQUALITY;
       break;
     case VPX_RC_FIRST_PASS:
       oxcf->Mode = MODE_FIRSTPASS;
@@ -282,6 +282,8 @@ static vpx_codec_err_t set_vp9e_config(VP9_CONFIG *oxcf,
     oxcf->end_usage      = USAGE_CONSTRAINED_QUALITY;
   else if (cfg.rc_end_usage == VPX_Q)
     oxcf->end_usage      = USAGE_CONSTANT_QUALITY;
+  else if (cfg.rc_end_usage == VPX_CBR)
+    oxcf->end_usage = USAGE_STREAM_FROM_SERVER;
 
   oxcf->target_bandwidth         = cfg.rc_target_bitrate;
   oxcf->rc_max_intra_bitrate_pct = vp8_cfg.rc_max_intra_bitrate_pct;
