@@ -57,7 +57,7 @@ void vp9_append_sub8x8_mvs_for_idx(VP9_COMMON *cm, MACROBLOCKD *xd,
     vpx_memcpy(dst_list, mv_list, MAX_MV_REF_CANDIDATES * sizeof(int_mv));
   } else if (block_idx == 1 || block_idx == 2) {
     int dst = 0, n;
-    union b_mode_info *bmi = mi->bmi;
+    b_mode_info *bmi = mi->bmi;
 
     dst_list[dst++].as_int = bmi[0].as_mv[ref_idx].as_int;
     for (n = 0; dst < MAX_MV_REF_CANDIDATES &&
@@ -66,7 +66,7 @@ void vp9_append_sub8x8_mvs_for_idx(VP9_COMMON *cm, MACROBLOCKD *xd,
         dst_list[dst++].as_int = mv_list[n].as_int;
   } else {
     int dst = 0, n;
-    union b_mode_info *bmi = mi->bmi;
+    b_mode_info *bmi = mi->bmi;
 
     assert(block_idx == 3);
     dst_list[dst++].as_int = bmi[2].as_mv[ref_idx].as_int;

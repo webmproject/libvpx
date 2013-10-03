@@ -3857,7 +3857,7 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
   int intra_cost_penalty = 20 * vp9_dc_quant(cpi->common.base_qindex,
                                              cpi->common.y_dc_delta_q);
   int_mv seg_mvs[4][MAX_REF_FRAMES];
-  union b_mode_info best_bmodes[4];
+  b_mode_info best_bmodes[4];
   PARTITION_INFO best_partition;
   int best_skip2 = 0;
   unsigned char best_zcoeff_blk[256] = { 0 };
@@ -4100,7 +4100,7 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
       int switchable_filter_index;
       int_mv *second_ref = is_comp_pred ?
           &mbmi->ref_mvs[second_ref_frame][0] : NULL;
-      union b_mode_info tmp_best_bmodes[16];
+      b_mode_info tmp_best_bmodes[16];
       MB_MODE_INFO tmp_best_mbmode;
       PARTITION_INFO tmp_best_partition;
       BEST_SEG_INFO bsi[SWITCHABLE_FILTERS];
@@ -4364,7 +4364,8 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
 
         // TODO(debargha): enhance this test with a better distortion prediction
         // based on qp, activity mask and history
-        if (cpi->sf.mode_search_skip_flags & FLAG_EARLY_TERMINATE) {
+        if ((cpi->sf.mode_search_skip_flags & FLAG_EARLY_TERMINATE) &&
+            (mode_index > MIN_EARLY_TERM_INDEX)) {
           const int qstep = xd->plane[0].dequant[1];
           // TODO(debargha): Enhance this by specializing for each mode_index
           int scale = 4;

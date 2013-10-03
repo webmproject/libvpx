@@ -101,10 +101,10 @@ static INLINE int inter_mode_offset(MB_PREDICTION_MODE mode) {
    modes for the Y blocks to the left and above us; for interframes, there
    is a single probability table. */
 
-union b_mode_info {
+typedef struct {
   MB_PREDICTION_MODE as_mode;
   int_mv as_mv[2];  // first, second inter predictor motion vectors
-};
+} b_mode_info;
 
 typedef enum {
   NONE = -1,
@@ -154,7 +154,7 @@ typedef struct {
 
 typedef struct {
   MB_MODE_INFO mbmi;
-  union b_mode_info bmi[4];
+  b_mode_info bmi[4];
 } MODE_INFO;
 
 static INLINE int is_inter_block(const MB_MODE_INFO *mbmi) {
