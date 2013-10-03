@@ -52,6 +52,8 @@ DECLARE_ALIGNED(16, extern const uint8_t,
 #define GOLDEN_FRAME_MODE_MASK  0xFFB5A3BB0
 #define ALT_REF_MODE_MASK       0xFF8C648D0
 
+#define MIN_EARLY_TERM_INDEX    3
+
 const MODE_DEFINITION vp9_mode_order[MAX_MODES] = {
   {RD_NEARESTMV, LAST_FRAME,   NONE},
   {RD_NEARESTMV, ALTREF_FRAME, NONE},
@@ -3851,7 +3853,8 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
 
         // TODO(debargha): enhance this test with a better distortion prediction
         // based on qp, activity mask and history
-        if (cpi->sf.mode_search_skip_flags & FLAG_EARLY_TERMINATE) {
+        if ((cpi->sf.mode_search_skip_flags & FLAG_EARLY_TERMINATE) &&
+            (mode_index > MIN_EARLY_TERM_INDEX)) {
           const int qstep = xd->plane[0].dequant[1];
           // TODO(debargha): Enhance this by specializing for each mode_index
           int scale = 4;

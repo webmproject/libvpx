@@ -36,7 +36,7 @@
 #define DISABLE_RC_LONG_TERM_MEM 0
 #endif
 
-// #define MODE_TEST_HIT_STATS
+#define MODE_TEST_HIT_STATS
 
 // #define SPEEDSTATS 1
 #if CONFIG_MULTIPLE_ARF
@@ -229,6 +229,12 @@ typedef enum {
 #define INTRA_DC_TM ((1 << TM_PRED) | (1 << DC_PRED))
 #define INTRA_DC_TM_H_V (INTRA_DC_TM | (1 << V_PRED) | (1 << H_PRED))
 
+typedef enum {
+  LAST_FRAME_PARTITION_OFF = 0,
+  LAST_FRAME_PARTITION_LOW_MOTION = 1,
+  LAST_FRAME_PARTITION_ALL = 2
+} LAST_FRAME_PARTITION_METHOD;
+
 typedef struct {
   int RD;
   SEARCH_METHODS search_method;
@@ -246,7 +252,7 @@ typedef struct {
   int adaptive_rd_thresh;
   int skip_encode_sb;
   int skip_encode_frame;
-  int use_lastframe_partitioning;
+  LAST_FRAME_PARTITION_METHOD use_lastframe_partitioning;
   TX_SIZE_SEARCH_METHOD tx_size_search_method;
   int use_lp32x32fdct;
   int use_avoid_tested_higherror;

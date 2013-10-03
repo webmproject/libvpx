@@ -1781,7 +1781,9 @@ static void encode_sb_row(VP9_COMP *cpi, int mi_row, TOKENEXTRA **tp,
             || cpi->common.show_frame == 0
             || cpi->common.frame_type == KEY_FRAME
             || cpi->is_src_frame_alt_ref
-            || sb_has_motion(cpi, prev_mi_8x8)) {
+            || ((cpi->sf.use_lastframe_partitioning ==
+                 LAST_FRAME_PARTITION_LOW_MOTION) &&
+                 sb_has_motion(cpi, prev_mi_8x8))) {
           // If required set upper and lower partition size limits
           if (cpi->sf.auto_min_max_partition_size) {
             set_offsets(cpi, mi_row, mi_col, BLOCK_64X64);
