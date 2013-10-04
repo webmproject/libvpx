@@ -20,34 +20,23 @@
 #include "vp9/common/vp9_reconinter.h"
 #include "vp9/common/vp9_reconintra.h"
 
-
 void vp9_setup_interp_filters(MACROBLOCKD *xd,
                               INTERPOLATIONFILTERTYPE mcomp_filter_type,
                               VP9_COMMON *cm) {
   if (xd->mi_8x8 && xd->this_mi) {
-    MB_MODE_INFO * mbmi = &xd->this_mi->mbmi;
+    MB_MODE_INFO *const mbmi = &xd->this_mi->mbmi;
 
-    set_scale_factors(xd, mbmi->ref_frame[0] - 1, mbmi->ref_frame[1] - 1,
-                      cm->active_ref_scale);
+    set_scale_factors(xd, mbmi->ref_frame[0] - LAST_FRAME,
+                          mbmi->ref_frame[1] - LAST_FRAME,
+                          cm->active_ref_scale);
   } else {
     set_scale_factors(xd, -1, -1, cm->active_ref_scale);
   }
 
-  switch (mcomp_filter_type) {
-    case EIGHTTAP:
-    case SWITCHABLE:
-      xd->subpix.filter_x = xd->subpix.filter_y = vp9_sub_pel_filters_8;
-      break;
-    case EIGHTTAP_SMOOTH:
-      xd->subpix.filter_x = xd->subpix.filter_y = vp9_sub_pel_filters_8lp;
-      break;
-    case EIGHTTAP_SHARP:
-      xd->subpix.filter_x = xd->subpix.filter_y = vp9_sub_pel_filters_8s;
-      break;
-    case BILINEAR:
-      xd->subpix.filter_x = xd->subpix.filter_y = vp9_bilinear_filters;
-      break;
-  }
+  xd->subpix.filter_x = xd->subpix.filter_y =
+      vp9_get_filter_kernel(mcomp_filter_type == SWITCHABLE ?
+                               EIGHTTAP : mcomp_filter_type);
+
   assert(((intptr_t)xd->subpix.filter_x & 0xff) == 0);
 }
 

@@ -19,11 +19,28 @@
 #define SUBPEL_SHIFTS (1 << SUBPEL_BITS)
 #define SUBPEL_TAPS 8
 
-extern const int16_t vp9_bilinear_filters[SUBPEL_SHIFTS][SUBPEL_TAPS];
-extern const int16_t vp9_sub_pel_filters_6[SUBPEL_SHIFTS][SUBPEL_TAPS];
-extern const int16_t vp9_sub_pel_filters_8[SUBPEL_SHIFTS][SUBPEL_TAPS];
-extern const int16_t vp9_sub_pel_filters_8s[SUBPEL_SHIFTS][SUBPEL_TAPS];
-extern const int16_t vp9_sub_pel_filters_8lp[SUBPEL_SHIFTS][SUBPEL_TAPS];
+typedef enum {
+  EIGHTTAP = 0,
+  EIGHTTAP_SMOOTH = 1,
+  EIGHTTAP_SHARP = 2,
+  BILINEAR = 3,
+  SWITCHABLE = 4  /* should be the last one */
+} INTERPOLATIONFILTERTYPE;
+
+typedef const int16_t subpel_kernel[SUBPEL_TAPS];
+
+struct subpix_fn_table {
+  const subpel_kernel *filter_x;
+  const subpel_kernel *filter_y;
+};
+
+const subpel_kernel *vp9_get_filter_kernel(INTERPOLATIONFILTERTYPE type);
+
+extern const subpel_kernel vp9_bilinear_filters[SUBPEL_SHIFTS];
+extern const subpel_kernel vp9_sub_pel_filters_6[SUBPEL_SHIFTS];
+extern const subpel_kernel vp9_sub_pel_filters_8[SUBPEL_SHIFTS];
+extern const subpel_kernel vp9_sub_pel_filters_8s[SUBPEL_SHIFTS];
+extern const subpel_kernel vp9_sub_pel_filters_8lp[SUBPEL_SHIFTS];
 
 // The VP9_BILINEAR_FILTERS_2TAP macro returns a pointer to the bilinear
 // filter kernel as a 2 tap filter.
