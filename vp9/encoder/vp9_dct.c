@@ -593,11 +593,11 @@ void vp9_short_fht8x8_c(int16_t *input, int16_t *output,
 
 /* 4-point reversible, orthonormal Walsh-Hadamard in 3.5 adds, 0.5 shifts per
    pixel. */
-void vp9_short_walsh4x4_c(short *input, short *output, int pitch) {
+void vp9_short_walsh4x4_c(int16_t *input, int16_t *output, int pitch) {
   int i;
   int a1, b1, c1, d1, e1;
-  short *ip = input;
-  short *op = output;
+  int16_t *ip = input;
+  int16_t *op = output;
   int pitch_short = pitch >> 1;
 
   for (i = 0; i < 4; i++) {
@@ -647,7 +647,7 @@ void vp9_short_walsh4x4_c(short *input, short *output, int pitch) {
   }
 }
 
-void vp9_short_walsh8x4_c(short *input, short *output, int pitch) {
+void vp9_short_walsh8x4_c(int16_t *input, int16_t *output, int pitch) {
   vp9_short_walsh4x4_c(input,   output,    pitch);
   vp9_short_walsh4x4_c(input + 4, output + 16, pitch);
 }
