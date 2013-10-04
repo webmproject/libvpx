@@ -4046,7 +4046,6 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
       for (i = 0; i < TX_MODES; ++i)
         tx_cache[i] = tx_cache[ONLY_4X4];
     } else {
-      const int is_comp_pred = second_ref_frame > 0;
       int rate;
       int64_t distortion;
       int64_t this_rd_thresh;
@@ -4055,23 +4054,14 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
       int64_t tmp_best_distortion = INT_MAX, tmp_best_sse, uv_sse;
       int tmp_best_skippable = 0;
       int switchable_filter_index;
-      int_mv *second_ref = is_comp_pred ?
-          &mbmi->ref_mvs[second_ref_frame][0] : NULL;
+      int_mv *second_ref = comp_pred ?
+                             &mbmi->ref_mvs[second_ref_frame][0] : NULL;
       b_mode_info tmp_best_bmodes[16];
       MB_MODE_INFO tmp_best_mbmode;
       PARTITION_INFO tmp_best_partition;
       BEST_SEG_INFO bsi[SWITCHABLE_FILTERS];
       int pred_exists = 0;
       int uv_skippable;
-      if (is_comp_pred) {
-        if (cpi->sf.mode_search_skip_flags & FLAG_SKIP_COMP_BESTINTRA)
-          if (vp9_ref_order[best_mode_index].ref_frame == INTRA_FRAME)
-            continue;
-        if (cpi->sf.mode_search_skip_flags & FLAG_SKIP_COMP_REFMISMATCH)
-          if (ref_frame != best_inter_ref_frame &&
-              second_ref_frame != best_inter_ref_frame)
-            continue;
-      }
 
       this_rd_thresh = (ref_frame == LAST_FRAME) ?
           cpi->rd_thresh_sub8x8[bsize][THR_LAST] :
@@ -4196,12 +4186,12 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
         rate2 += get_switchable_rate(x);
 
       if (!mode_excluded) {
-        if (is_comp_pred)
+        if (comp_pred)
           mode_excluded = cpi->common.comp_pred_mode == SINGLE_PREDICTION_ONLY;
         else
           mode_excluded = cpi->common.comp_pred_mode == COMP_PREDICTION_ONLY;
       }
-      compmode_cost = vp9_cost_bit(comp_mode_p, is_comp_pred);
+      compmode_cost = vp9_cost_bit(comp_mode_p, comp_pred);
 
       tmp_best_rdu = best_rd -
           MIN(RDCOST(x->rdmult, x->rddiv, rate2, distortion2),
