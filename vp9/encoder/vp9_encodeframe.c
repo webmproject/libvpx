@@ -173,8 +173,9 @@ static void calc_av_activity(VP9_COMP *cpi, int64_t activity_sum) {
           tmp = sortlist[j - 1];
           sortlist[j - 1] = sortlist[j];
           sortlist[j] = tmp;
-        } else
-        break;
+        } else {
+          break;
+        }
       }
     }
 
@@ -246,13 +247,11 @@ static void calc_activity_index(VP9_COMP *cpi, MACROBLOCK *x) {
 #if OUTPUT_NORM_ACT_STATS
     fprintf(f, "\n");
 #endif
-
   }
 
 #if OUTPUT_NORM_ACT_STATS
   fclose(f);
 #endif
-
 }
 #endif  // USE_ACT_INDEX
 
@@ -317,7 +316,6 @@ static void build_activity_map(VP9_COMP *cpi) {
   // Calculate an activity index number of each mb
   calc_activity_index(cpi, x);
 #endif
-
 }
 
 // Macroblock activity masking
@@ -684,7 +682,7 @@ static PICK_MODE_CONTEXT *get_block_context(MACROBLOCK *x, BLOCK_SIZE bsize) {
       return &x->ab4x4_context[xd->sb_index][xd->mb_index][xd->b_index];
     default:
       assert(0);
-      return NULL ;
+      return NULL;
   }
 }
 
@@ -701,7 +699,7 @@ static BLOCK_SIZE *get_sb_partitioning(MACROBLOCK *x, BLOCK_SIZE bsize) {
       return &x->b_partitioning[xd->sb_index][xd->mb_index][xd->b_index];
     default:
       assert(0);
-      return NULL ;
+      return NULL;
   }
 }
 
@@ -2012,7 +2010,6 @@ static void encode_frame_internal(VP9_COMP *cpi) {
   // Keep record of the total distortion this time around for future use
   cpi->last_frame_distortion = cpi->frame_distortion;
 #endif
-
 }
 
 static int check_dual_ref_flags(VP9_COMP *cpi) {
