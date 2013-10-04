@@ -569,7 +569,7 @@ void vp9_first_pass(VP9_COMP *cpi) {
                      mb_row << 1,
                      1 << mi_height_log2(xd->this_mi->mbmi.sb_type),
                      mb_col << 1,
-                     1 << mi_height_log2(xd->this_mi->mbmi.sb_type));
+                     1 << mi_width_log2(xd->this_mi->mbmi.sb_type));
 
       // do intra 16x16 prediction
       this_error = vp9_encode_intra(x, use_dc_pred);
