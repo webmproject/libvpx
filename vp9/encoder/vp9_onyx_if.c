@@ -62,6 +62,12 @@ static void set_default_lf_deltas(struct loopfilter *lf);
                                            now so that HIGH_PRECISION is always
                                            chosen */
 
+// Masks for partially or completely disabling split mode
+#define DISABLE_ALL_SPLIT         0x3F
+#define DISABLE_ALL_INTER_SPLIT   0x1F
+#define DISABLE_COMPOUND_SPLIT    0x18
+#define LAST_AND_INTRA_SPLIT_ONLY 0x1E
+
 #if CONFIG_INTERNAL_STATS
 #include "math.h"
 
@@ -681,6 +687,12 @@ static void set_rd_speed_thresholds_sub8x8(VP9_COMP *cpi, int mode) {
   sf->thresh_mult_sub8x8[THR_COMP_LA] += 4500;
   sf->thresh_mult_sub8x8[THR_COMP_GA] += 4500;
 
+  // Check for masked out split cases.
+  for (i = 0; i < MAX_REFS; i++) {
+    if (sf->disable_split_mask & (1 << i))
+      sf->thresh_mult_sub8x8[i] = INT_MAX;
+  }
+
   // disable mode test if frame flag is not set
   if (!(cpi->ref_frame_flags & VP9_LAST_FLAG))
     sf->thresh_mult_sub8x8[THR_LAST] = INT_MAX;
@@ -694,15 +706,6 @@ static void set_rd_speed_thresholds_sub8x8(VP9_COMP *cpi, int mode) {
   if ((cpi->ref_frame_flags & (VP9_GOLD_FLAG | VP9_ALT_FLAG)) !=
       (VP9_GOLD_FLAG | VP9_ALT_FLAG))
     sf->thresh_mult_sub8x8[THR_COMP_GA] = INT_MAX;
-
-  if (sf->disable_splitmv == 1) {
-    sf->thresh_mult_sub8x8[THR_LAST] = INT_MAX;
-    sf->thresh_mult_sub8x8[THR_GOLD] = INT_MAX;
-    sf->thresh_mult_sub8x8[THR_ALTR] = INT_MAX;
-    sf->thresh_mult_sub8x8[THR_COMP_LA] = INT_MAX;
-    sf->thresh_mult_sub8x8[THR_COMP_GA] = INT_MAX;
-    sf->thresh_mult_sub8x8[THR_INTRA] = INT_MAX;
-  }
 }
 
 void vp9_set_speed_features(VP9_COMP *cpi) {
@@ -745,7 +748,7 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
   sf->min_partition_size = BLOCK_4X4;
   sf->adjust_partitioning_from_last_frame = 0;
   sf->last_partitioning_redo_frequency = 4;
-  sf->disable_splitmv = 0;
+  sf->disable_split_mask = 0;
   sf->mode_search_skip_flags = 0;
   sf->disable_split_var_thresh = 0;
   sf->disable_filter_search_var_thresh = 0;
@@ -786,8 +789,11 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
         sf->tx_size_search_method = ((cpi->common.frame_type == KEY_FRAME ||
                                       cpi->common.intra_only)
                                      ? USE_FULL_RD : USE_LARGESTALL);
-        sf->disable_splitmv =
-          (MIN(cpi->common.width, cpi->common.height) >= 720)? 1 : 0;
+
+        if (MIN(cpi->common.width, cpi->common.height) >= 720)
+          sf->disable_split_mask = DISABLE_ALL_SPLIT;
+        else
+          sf->disable_split_mask = DISABLE_COMPOUND_SPLIT;
 
         sf->use_rd_breakout = 1;
         sf->adaptive_motion_search = 1;
@@ -800,8 +806,11 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
         sf->tx_size_search_method = ((cpi->common.frame_type == KEY_FRAME ||
                                       cpi->common.intra_only)
                                      ? USE_FULL_RD : USE_LARGESTALL);
-        sf->disable_splitmv =
-          (MIN(cpi->common.width, cpi->common.height) >= 720)? 1 : 0;
+
+        if (MIN(cpi->common.width, cpi->common.height) >= 720)
+          sf->disable_split_mask = DISABLE_ALL_SPLIT;
+        else
+          sf->disable_split_mask = LAST_AND_INTRA_SPLIT_ONLY;
 
         sf->mode_search_skip_flags = FLAG_SKIP_INTRA_DIRMISMATCH |
                                      FLAG_SKIP_INTRA_BESTINTER |
@@ -826,8 +835,11 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
       if (speed == 3) {
         sf->use_square_partition_only = 1;
         sf->tx_size_search_method = USE_LARGESTALL;
-        sf->disable_splitmv =
-          (MIN(cpi->common.width, cpi->common.height) >= 720)? 1 : 0;
+
+        if (MIN(cpi->common.width, cpi->common.height) >= 720)
+          sf->disable_split_mask = DISABLE_ALL_SPLIT;
+        else
+          sf->disable_split_mask = DISABLE_ALL_INTER_SPLIT;
 
         sf->mode_search_skip_flags = FLAG_SKIP_INTRA_DIRMISMATCH |
                                      FLAG_SKIP_INTRA_BESTINTER |
@@ -881,7 +893,7 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
         sf->use_lp32x32fdct = 1;
         sf->adaptive_motion_search = 1;
         sf->using_small_partition_info = 0;
-        sf->disable_splitmv = 1;
+        sf->disable_split_mask = DISABLE_ALL_SPLIT;
         sf->auto_mv_step_size = 1;
         sf->search_method = BIGDIA;
         sf->subpel_iters_per_step = 1;
@@ -915,7 +927,7 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
         // sf->reduce_first_step_size = 1;
         // sf->reference_masking = 1;
 
-        sf->disable_splitmv = 1;
+        sf->disable_split_mask = DISABLE_ALL_SPLIT;
         sf->search_method = HEX;
         sf->subpel_iters_per_step = 1;
         sf->disable_split_var_thresh = 64;

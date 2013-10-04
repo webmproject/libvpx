@@ -271,7 +271,7 @@ typedef struct {
   BLOCK_SIZE max_partition_size;
   int adjust_partitioning_from_last_frame;
   int last_partitioning_redo_frequency;
-  int disable_splitmv;
+  int disable_split_mask;
   int using_small_partition_info;
   // TODO(jingning): combine the related motion search speed features
   int adaptive_motion_search;
