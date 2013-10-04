@@ -103,7 +103,8 @@ static int do_16x16_motion_search(VP9_COMP *cpi, int_mv *ref_mv, int_mv *dst_mv,
     dst_mv->as_int = tmp_mv.as_int;
   }
 
-  // If the current best reference mv is not centred on 0,0 then do a 0,0 based search as well
+  // If the current best reference mv is not centered on 0,0 then do a 0,0
+  // based search as well.
   if (ref_mv->as_int) {
     unsigned int tmp_err;
     int_mv zero_ref_mv, tmp_mv;
@@ -217,7 +218,8 @@ static void update_mbgraph_mb_stats
     stats->ref[GOLDEN_FRAME].m.mv.as_int = 0;
   }
 
-  // Alt-ref frame MV search, if it exists and is different than last/golden frame
+  // Do an Alt-ref frame MV search, if it exists and is different than
+  // last/golden frame.
   if (alt_ref) {
     int a_motion_error;
     xd->plane[0].pre[0].buf = alt_ref->y_buffer + mb_y_offset;
@@ -246,7 +248,8 @@ static void update_mbgraph_frame_stats(VP9_COMP *cpi,
   int_mv arf_top_mv, gld_top_mv;
   MODE_INFO mi_local = { { 0 } };
 
-  // Set up limit values for motion vectors to prevent them extending outside the UMV borders
+  // Set up limit values for motion vectors to prevent them extending outside
+  // the UMV borders.
   arf_top_mv.as_int = 0;
   gld_top_mv.as_int = 0;
   x->mv_row_min     = -BORDER_MV_PIXELS_B16;
@@ -266,7 +269,8 @@ static void update_mbgraph_frame_stats(VP9_COMP *cpi,
     int arf_y_in_offset = arf_y_offset;
     int gld_y_in_offset = gld_y_offset;
 
-    // Set up limit values for motion vectors to prevent them extending outside the UMV borders
+    // Set up limit values for motion vectors to prevent them extending outside
+    // the UMV borders.
     arf_left_mv.as_int = arf_top_mv.as_int;
     gld_left_mv.as_int = gld_top_mv.as_int;
     x->mv_col_min      = -BORDER_MV_PIXELS_B16;
@@ -407,7 +411,8 @@ void vp9_update_mbgraph_stats(VP9_COMP *cpi) {
   for (i = 0; i < n_frames; i++) {
     MBGRAPH_FRAME_STATS *frame_stats = &cpi->mbgraph_stats[i];
     vpx_memset(frame_stats->mb_stats, 0,
-               cm->mb_rows * cm->mb_cols * sizeof(*cpi->mbgraph_stats[i].mb_stats));
+               cm->mb_rows * cm->mb_cols *
+               sizeof(*cpi->mbgraph_stats[i].mb_stats));
   }
 
   // do motion search to find contribution of each reference to data
