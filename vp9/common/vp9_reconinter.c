@@ -174,36 +174,17 @@ typedef void (*foreach_predicted_block_visitor)(int plane, int block,
 static INLINE void foreach_predicted_block_in_plane(
     const MACROBLOCKD* const xd, BLOCK_SIZE bsize, int plane,
     foreach_predicted_block_visitor visit, void *arg) {
-  int i, x, y;
-
-  // block sizes in number of 4x4 blocks log 2 ("*_b")
-  // 4x4=0, 8x8=2, 16x16=4, 32x32=6, 64x64=8
-  // subsampled size of the block
   const int bwl = b_width_log2(bsize) - xd->plane[plane].subsampling_x;
   const int bhl = b_height_log2(bsize) - xd->plane[plane].subsampling_y;
 
-  // size of the predictor to use.
-  int pred_w, pred_h;
-
   if (xd->this_mi->mbmi.sb_type < BLOCK_8X8) {
+    int i = 0, x, y;
     assert(bsize == BLOCK_8X8);
-    pred_w = 0;
-    pred_h = 0;
+    for (y = 0; y < 1 << bhl; ++y)
+      for (x = 0; x < 1 << bwl; ++x)
+        visit(plane, i++, bsize, 0, 0, arg);
   } else {
-    pred_w = bwl;
-    pred_h = bhl;
-  }
-  assert(pred_w <= bwl);
-  assert(pred_h <= bhl);
-
-  // visit each subblock in raster order
-  i = 0;
-  for (y = 0; y < 1 << bhl; y += 1 << pred_h) {
-    for (x = 0; x < 1 << bwl; x += 1 << pred_w) {
-      visit(plane, i, bsize, pred_w, pred_h, arg);
-      i += 1 << pred_w;
-    }
-    i += (1 << (bwl + pred_h)) - (1 << bwl);
+    visit(plane, 0, bsize, bwl, bhl, arg);
   }
 }
 
