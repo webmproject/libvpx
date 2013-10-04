@@ -701,6 +701,7 @@ static void set_rd_speed_thresholds_sub8x8(VP9_COMP *cpi, int mode) {
     sf->thresh_mult_sub8x8[THR_ALTR] = INT_MAX;
     sf->thresh_mult_sub8x8[THR_COMP_LA] = INT_MAX;
     sf->thresh_mult_sub8x8[THR_COMP_GA] = INT_MAX;
+    sf->thresh_mult_sub8x8[THR_INTRA] = INT_MAX;
   }
 }
 
