@@ -9,7 +9,7 @@
  */
 
 #include "./vpx_config.h"
-#include "vp9_rtcd.h"
+#include "./vp9_rtcd.h"
 #include "vp9/encoder/vp9_quantize.h"
 #include "vp9/common/vp9_reconintra.h"
 #include "vp9/encoder/vp9_encodemb.h"
