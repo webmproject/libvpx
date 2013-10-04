@@ -8,7 +8,7 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#include "vpx_config.h"
+#include "./vpx_config.h"
 
 #include "vp9/encoder/vp9_variance.h"
 #include "vp9/common/vp9_pragmas.h"
@@ -26,7 +26,7 @@ extern unsigned int vp9_get4x4var_mmx
 
 unsigned int vp9_get_mb_ss_sse2
 (
-  const short *src_ptr
+  const int16_t *src_ptr
 );
 unsigned int vp9_get16x16var_sse2
 (
@@ -250,7 +250,6 @@ unsigned int vp9_mse16x16_sse2(
   const unsigned char *ref_ptr,
   int  recon_stride,
   unsigned int *sse) {
-
   unsigned int sse0;
   int sum0;
   vp9_get16x16var_sse2(src_ptr, source_stride, ref_ptr, recon_stride, &sse0,
@@ -407,12 +406,12 @@ FN(32, 32, 16, 5, 5, opt1, (int64_t)); \
 FN(32, 16, 16, 5, 4, opt1, (int64_t)); \
 FN(16, 32, 16, 4, 5, opt1, (int64_t)); \
 FN(16, 16, 16, 4, 4, opt1, (unsigned int)); \
-FN(16,  8, 16, 4, 3, opt1,); \
-FN(8,  16,  8, 3, 4, opt1,); \
-FN(8,   8,  8, 3, 3, opt1,); \
-FN(8,   4,  8, 3, 2, opt1,); \
-FN(4,   8,  4, 2, 3, opt2,); \
-FN(4,   4,  4, 2, 2, opt2,)
+FN(16,  8, 16, 4, 3, opt1, (unsigned int)); \
+FN(8,  16,  8, 3, 4, opt1, (unsigned int)); \
+FN(8,   8,  8, 3, 3, opt1, (unsigned int)); \
+FN(8,   4,  8, 3, 2, opt1, (unsigned int)); \
+FN(4,   8,  4, 2, 3, opt2, (unsigned int)); \
+FN(4,   4,  4, 2, 2, opt2, (unsigned int))
 
 FNS(sse2, sse);
 FNS(ssse3, ssse3);
@@ -487,12 +486,12 @@ FN(32, 32, 16, 5, 5, opt1, (int64_t)); \
 FN(32, 16, 16, 5, 4, opt1, (int64_t)); \
 FN(16, 32, 16, 4, 5, opt1, (int64_t)); \
 FN(16, 16, 16, 4, 4, opt1, (unsigned int)); \
-FN(16,  8, 16, 4, 3, opt1,); \
-FN(8,  16,  8, 3, 4, opt1,); \
-FN(8,   8,  8, 3, 3, opt1,); \
-FN(8,   4,  8, 3, 2, opt1,); \
-FN(4,   8,  4, 2, 3, opt2,); \
-FN(4,   4,  4, 2, 2, opt2,)
+FN(16,  8, 16, 4, 3, opt1, (unsigned int)); \
+FN(8,  16,  8, 3, 4, opt1, (unsigned int)); \
+FN(8,   8,  8, 3, 3, opt1, (unsigned int)); \
+FN(8,   4,  8, 3, 2, opt1, (unsigned int)); \
+FN(4,   8,  4, 2, 3, opt2, (unsigned int)); \
+FN(4,   4,  4, 2, 2, opt2, (unsigned int))
 
 FNS(sse2, sse);
 FNS(ssse3, ssse3);
