@@ -20,6 +20,7 @@
 #include "vp9/common/vp9_common.h"
 #include "vp9/common/vp9_common_data.h"
 #include "vp9/common/vp9_enums.h"
+#include "vp9/common/vp9_filter.h"
 #include "vp9/common/vp9_mv.h"
 #include "vp9/common/vp9_scale.h"
 #include "vp9/common/vp9_seg_common.h"
@@ -54,14 +55,6 @@ typedef enum {
   INTER_FRAME = 1,
   NUM_FRAME_TYPES,
 } FRAME_TYPE;
-
-typedef enum {
-  EIGHTTAP = 0,
-  EIGHTTAP_SMOOTH = 1,
-  EIGHTTAP_SHARP = 2,
-  BILINEAR = 3,
-  SWITCHABLE = 4  /* should be the last one */
-} INTERPOLATIONFILTERTYPE;
 
 typedef enum {
   DC_PRED,         // Average of above and left pixels

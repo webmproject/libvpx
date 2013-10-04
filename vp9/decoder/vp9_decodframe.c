@@ -224,7 +224,6 @@ static void set_ref(VP9D_COMP *pbi, int i, int mi_row, int mi_col) {
 
 static void decode_modes_b(VP9D_COMP *pbi, int mi_row, int mi_col,
                            vp9_reader *r, BLOCK_SIZE bsize) {
-  VP9_COMMON *const cm = &pbi->common;
   MACROBLOCKD *const xd = &pbi->mb;
   const int less8x8 = bsize < BLOCK_8X8;
   MB_MODE_INFO *mbmi;
@@ -261,7 +260,8 @@ static void decode_modes_b(VP9D_COMP *pbi, int mi_row, int mi_col,
     if (has_second_ref(mbmi))
       set_ref(pbi, 1, mi_row, mi_col);
 
-    vp9_setup_interp_filters(xd, mbmi->interp_filter, cm);
+    xd->subpix.filter_x = xd->subpix.filter_y =
+        vp9_get_filter_kernel(mbmi->interp_filter);
     vp9_build_inter_predictors_sb(xd, mi_row, mi_col, bsize);
 
     if (decode_blocks)

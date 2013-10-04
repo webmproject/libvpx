@@ -21,9 +21,4 @@ typedef void (*convolve_fn_t)(const uint8_t *src, ptrdiff_t src_stride,
                               const int16_t *filter_y, int y_step_q4,
                               int w, int h);
 
-struct subpix_fn_table {
-  const int16_t (*filter_x)[8];
-  const int16_t (*filter_y)[8];
-};
-
 #endif  // VP9_COMMON_VP9_CONVOLVE_H_
