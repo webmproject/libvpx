@@ -8,9 +8,9 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
+#include <math.h>
 
 #include "vpx_scale/yv12config.h"
-#include "math.h"
 
 #define MAX_PSNR 100
 
