@@ -2647,4 +2647,4 @@ void FDCT32x32_2D(int16_t *input,
       }
     }
   }
-}
+}  // NOLINT
