@@ -38,7 +38,6 @@ static int dct_value_cost[DCT_MAX_VALUE * 2];
 const int *vp9_dct_value_cost_ptr;
 
 static void fill_value_tokens() {
-
   TOKENVALUE *const t = dct_value_tokens + DCT_MAX_VALUE;
   const vp9_extra_bit *const e = vp9_extra_bits;
 
@@ -60,9 +59,9 @@ static void fill_value_tokens() {
 
         t[i].token = --j;
         eb |= (a - e[j].base_val) << 1;
-      } else
+      } else {
         t[i].token = a;
-
+      }
       t[i].extra = eb;
     }
 
@@ -81,9 +80,7 @@ static void fill_value_tokens() {
         cost += vp9_cost_bit(vp9_prob_half, extra & 1); /* sign */
         dct_value_cost[i + DCT_MAX_VALUE] = cost;
       }
-
     }
-
   } while (++i < DCT_MAX_VALUE);
 
   vp9_dct_value_tokens_ptr = dct_value_tokens + DCT_MAX_VALUE;
