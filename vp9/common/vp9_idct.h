@@ -16,6 +16,7 @@
 #include "./vpx_config.h"
 #include "vpx/vpx_integer.h"
 #include "vp9/common/vp9_common.h"
+#include "vp9/common/vp9_enums.h"
 
 
 // Constants and Macros used by all idct/dct functions
@@ -85,5 +86,23 @@ typedef void (*transform_1d)(int16_t*, int16_t*);
 typedef struct {
   transform_1d cols, rows;  // vertical and horizontal
 } transform_2d;
+
+
+void vp9_idct_add(int16_t *input, uint8_t *dest, int stride, int eob);
+void vp9_idct_add_lossless(int16_t *input, uint8_t *dest,
+                           int stride, int eob);
+void vp9_idct_add_8x8(int16_t *input, uint8_t *dest, int stride, int eob);
+void vp9_idct_add_16x16(int16_t *input, uint8_t *dest, int stride, int eob);
+void vp9_idct_add_32x32(int16_t *input, uint8_t *dest, int stride, int eob);
+
+void vp9_iht_add(TX_TYPE tx_type, int16_t *input, uint8_t *dest,
+                 int stride, int eob);
+
+void vp9_iht_add_8x8(TX_TYPE tx_type, int16_t *input, uint8_t *dest,
+                     int stride, int eob);
+
+void vp9_iht_add_16x16(TX_TYPE tx_type, int16_t *input, uint8_t *dest,
+                       int stride, int eob);
+
 
 #endif  // VP9_COMMON_VP9_IDCT_H_

@@ -28,22 +28,6 @@ forward_decls vp9_common_forward_decls
 [ $arch = "x86_64" ] && mmx_x86_64=mmx && sse2_x86_64=sse2 && ssse3_x86_64=ssse3
 
 #
-# Dequant
-#
-
-prototype void vp9_idct_add_16x16 "int16_t *input, uint8_t *dest, int stride, int eob"
-specialize vp9_idct_add_16x16
-
-prototype void vp9_idct_add_8x8 "int16_t *input, uint8_t *dest, int stride, int eob"
-specialize vp9_idct_add_8x8
-
-prototype void vp9_idct_add "int16_t *input, uint8_t *dest, int stride, int eob"
-specialize vp9_idct_add
-
-prototype void vp9_idct_add_32x32 "int16_t *q, uint8_t *dst, int stride, int eob"
-specialize vp9_idct_add_32x32
-
-#
 # RECON
 #
 prototype void vp9_d207_predictor_4x4 "uint8_t *dst, ptrdiff_t y_stride, const uint8_t *above, const uint8_t *left"
