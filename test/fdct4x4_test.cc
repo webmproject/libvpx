@@ -31,7 +31,7 @@ void fdct4x4(int16_t *in, int16_t *out, uint8_t* /*dst*/,
 }
 void idct4x4_add(int16_t* /*in*/, int16_t *out, uint8_t *dst,
                  int stride, int /*tx_type*/) {
-  vp9_short_idct4x4_add_c(out, dst, stride >> 1);
+  vp9_idct4x4_16_add_c(out, dst, stride >> 1);
 }
 void fht4x4(int16_t *in, int16_t *out, uint8_t* /*dst*/,
             int stride, int tx_type) {

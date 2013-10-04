@@ -490,8 +490,7 @@ static void setup_quantization(VP9D_COMP *pbi, struct vp9_read_bit_buffer *rb) {
                  cm->uv_dc_delta_q == 0 &&
                  cm->uv_ac_delta_q == 0;
 
-  xd->itxm_add = xd->lossless ? vp9_idct_add_lossless
-                              : vp9_idct_add;
+  xd->itxm_add = xd->lossless ? vp9_iwht4x4_add : vp9_idct4x4_add;
 }
 
 static INTERPOLATIONFILTERTYPE read_interp_filter_type(

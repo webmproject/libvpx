@@ -267,11 +267,11 @@ specialize vp9_convolve8_avg_vert ssse3 neon dspr2
 #
 # dct
 #
-prototype void vp9_short_idct4x4_1_add "int16_t *input, uint8_t *dest, int dest_stride"
-specialize vp9_short_idct4x4_1_add sse2 neon
+prototype void vp9_idct4x4_1_add "int16_t *input, uint8_t *dest, int dest_stride"
+specialize vp9_idct4x4_1_add sse2 neon
 
-prototype void vp9_short_idct4x4_add "int16_t *input, uint8_t *dest, int dest_stride"
-specialize vp9_short_idct4x4_add sse2 neon
+prototype void vp9_idct4x4_16_add "int16_t *input, uint8_t *dest, int dest_stride"
+specialize vp9_idct4x4_16_add sse2 neon
 
 prototype void vp9_short_idct8x8_1_add "int16_t *input, uint8_t *dest, int dest_stride"
 specialize vp9_short_idct8x8_1_add sse2 neon
@@ -310,11 +310,11 @@ prototype void vp9_idct4_1d "int16_t *input, int16_t *output"
 specialize vp9_idct4_1d sse2
 # dct and add
 
-prototype void vp9_short_iwalsh4x4_1_add "int16_t *input, uint8_t *dest, int dest_stride"
-specialize vp9_short_iwalsh4x4_1_add
+prototype void vp9_iwht4x4_1_add "int16_t *input, uint8_t *dest, int dest_stride"
+specialize vp9_iwht4x4_1_add
 
-prototype void vp9_short_iwalsh4x4_add "int16_t *input, uint8_t *dest, int dest_stride"
-specialize vp9_short_iwalsh4x4_add
+prototype void vp9_iwht4x4_16_add "int16_t *input, uint8_t *dest, int dest_stride"
+specialize vp9_iwht4x4_16_add
 
 #
 # Encoder functions below this point.
