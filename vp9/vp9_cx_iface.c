@@ -8,30 +8,30 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
+#include <stdlib.h>
+#include <string.h>
 
 #include "vpx/vpx_codec.h"
 #include "vpx/internal/vpx_codec_internal.h"
-#include "vpx_version.h"
+#include "./vpx_version.h"
 #include "vp9/encoder/vp9_onyx_int.h"
 #include "vpx/vp8cx.h"
 #include "vp9/encoder/vp9_firstpass.h"
 #include "vp9/common/vp9_onyx.h"
 #include "vp9/vp9_iface_common.h"
-#include <stdlib.h>
-#include <string.h>
 
 struct vp9_extracfg {
   struct vpx_codec_pkt_list *pkt_list;
-  int                         cpu_used;                    /** available cpu percentage in 1/16*/
-  unsigned int                enable_auto_alt_ref;           /** if encoder decides to uses alternate reference frame */
+  int                         cpu_used;  /* available cpu percentage in 1/16 */
+  unsigned int                enable_auto_alt_ref;
   unsigned int                noise_sensitivity;
   unsigned int                Sharpness;
   unsigned int                static_thresh;
   unsigned int                tile_columns;
   unsigned int                tile_rows;
-  unsigned int                arnr_max_frames;    /* alt_ref Noise Reduction Max Frame Count */
-  unsigned int                arnr_strength;    /* alt_ref Noise Reduction Strength */
-  unsigned int                arnr_type;        /* alt_ref filter type */
+  unsigned int                arnr_max_frames;
+  unsigned int                arnr_strength;
+  unsigned int                arnr_type;
   unsigned int                experimental;
   vp8e_tuning                 tuning;
   unsigned int                cq_level;         /* constrained quality level */
@@ -48,7 +48,7 @@ struct extraconfig_map {
 static const struct extraconfig_map extracfg_map[] = {
   {
     0,
-    {
+    { // NOLINT
       NULL,
       0,                          /* cpu_used      */
       1,                          /* enable_auto_alt_ref */
@@ -85,7 +85,7 @@ struct vpx_codec_alg_priv {
   uint32_t                pending_frame_magnitude;
   vpx_image_t             preview_img;
   vp8_postproc_cfg_t      preview_ppcfg;
-  vpx_codec_pkt_list_decl(64) pkt_list;              // changed to accomendate the maximum number of lagged frames allowed
+  vpx_codec_pkt_list_decl(64) pkt_list;
   unsigned int                fixed_kf_cntr;
 };
 
@@ -120,26 +120,26 @@ update_error_state(vpx_codec_alg_priv_t                 *ctx,
 #define ERROR(str) do {\
     ctx->base.err_detail = str;\
     return VPX_CODEC_INVALID_PARAM;\
-  } while(0)
+  } while (0)
 
-#define RANGE_CHECK(p,memb,lo,hi) do {\
-    if(!(((p)->memb == lo || (p)->memb > (lo)) && (p)->memb <= hi)) \
+#define RANGE_CHECK(p, memb, lo, hi) do {\
+    if (!(((p)->memb == lo || (p)->memb > (lo)) && (p)->memb <= hi)) \
       ERROR(#memb " out of range ["#lo".."#hi"]");\
-  } while(0)
+  } while (0)
 
-#define RANGE_CHECK_HI(p,memb,hi) do {\
-    if(!((p)->memb <= (hi))) \
+#define RANGE_CHECK_HI(p, memb, hi) do {\
+    if (!((p)->memb <= (hi))) \
       ERROR(#memb " out of range [.."#hi"]");\
-  } while(0)
+  } while (0)
 
-#define RANGE_CHECK_LO(p,memb,lo) do {\
-    if(!((p)->memb >= (lo))) \
+#define RANGE_CHECK_LO(p, memb, lo) do {\
+    if (!((p)->memb >= (lo))) \
       ERROR(#memb " out of range ["#lo"..]");\
-  } while(0)
+  } while (0)
 
-#define RANGE_CHECK_BOOL(p,memb) do {\
-    if(!!((p)->memb) != (p)->memb) ERROR(#memb " expected boolean");\
-  } while(0)
+#define RANGE_CHECK_BOOL(p, memb) do {\
+    if (!!((p)->memb) != (p)->memb) ERROR(#memb " expected boolean");\
+  } while (0)
 
 static vpx_codec_err_t validate_config(vpx_codec_alg_priv_t      *ctx,
                                        const vpx_codec_enc_cfg_t *cfg,
@@ -247,7 +247,8 @@ static vpx_codec_err_t set_vp9e_config(VP9_CONFIG *oxcf,
   oxcf->width   = cfg.g_w;
   oxcf->height  = cfg.g_h;
   /* guess a frame rate if out of whack, use 30 */
-  oxcf->framerate             = (double)(cfg.g_timebase.den) / (double)(cfg.g_timebase.num);
+  oxcf->framerate = (double)(cfg.g_timebase.den)
+                    / (double)(cfg.g_timebase.num);
 
   if (oxcf->framerate > 180) {
     oxcf->framerate = 30;
@@ -498,7 +499,7 @@ static vpx_codec_err_t vp9e_common_init(vpx_codec_ctx_t *ctx,
      */
     for (i = 0;
          extracfg_map[i].usage && extracfg_map[i].usage != cfg->g_usage;
-         i++);
+         i++) {}
 
     priv->vp8_cfg = extracfg_map[i].cfg;
     priv->vp8_cfg.pkt_list = &priv->pkt_list.head;
@@ -553,7 +554,6 @@ static vpx_codec_err_t vp9e_exp_init(vpx_codec_ctx_t *ctx,
 
 
 static vpx_codec_err_t vp9e_destroy(vpx_codec_alg_priv_t *ctx) {
-
   free(ctx->cx_data);
   vp9_remove_compressor(&ctx->cpi);
   free(ctx);
@@ -712,8 +712,10 @@ static vpx_codec_err_t vp9e_encode(vpx_codec_alg_priv_t  *ctx,
     lib_flags = (flags & VPX_EFLAG_FORCE_KF) ? FRAMEFLAGS_KEY : 0;
 
     /* vp8 use 10,000,000 ticks/second as time stamp */
-    dst_time_stamp    = pts * 10000000 * ctx->cfg.g_timebase.num / ctx->cfg.g_timebase.den;
-    dst_end_time_stamp = (pts + duration) * 10000000 * ctx->cfg.g_timebase.num / ctx->cfg.g_timebase.den;
+    dst_time_stamp = pts * 10000000 * ctx->cfg.g_timebase.num
+                     / ctx->cfg.g_timebase.den;
+    dst_end_time_stamp = (pts + duration) * 10000000 * ctx->cfg.g_timebase.num /
+                         ctx->cfg.g_timebase.den;
 
     if (img != NULL) {
       res = image2yuvconfig(img, &sd);
@@ -839,8 +841,6 @@ static vpx_codec_err_t vp9e_encode(vpx_codec_alg_priv_t  *ctx,
           cx_data += size;
           cx_data_sz -= size;
         }
-
-        // printf("timestamp: %lld, duration: %d\n", pkt->data.frame.pts, pkt->data.frame.duration);
       }
     }
   }
@@ -867,15 +867,14 @@ static vpx_codec_err_t vp9e_set_reference(vpx_codec_alg_priv_t *ctx,
     vp9_set_reference_enc(ctx->cpi, ref_frame_to_vp9_reframe(frame->frame_type),
                           &sd);
     return VPX_CODEC_OK;
-  } else
+  } else {
     return VPX_CODEC_INVALID_PARAM;
-
+  }
 }
 
 static vpx_codec_err_t vp9e_copy_reference(vpx_codec_alg_priv_t *ctx,
                                            int ctr_id,
                                            va_list args) {
-
   vpx_ref_frame_t *data = va_arg(args, vpx_ref_frame_t *);
 
   if (data) {
@@ -886,8 +885,9 @@ static vpx_codec_err_t vp9e_copy_reference(vpx_codec_alg_priv_t *ctx,
     vp9_copy_reference_enc(ctx->cpi,
                            ref_frame_to_vp9_reframe(frame->frame_type), &sd);
     return VPX_CODEC_OK;
-  } else
+  } else {
     return VPX_CODEC_INVALID_PARAM;
+  }
 }
 
 static vpx_codec_err_t get_reference(vpx_codec_alg_priv_t *ctx,
@@ -916,8 +916,9 @@ static vpx_codec_err_t vp9e_set_previewpp(vpx_codec_alg_priv_t *ctx,
   if (data) {
     ctx->preview_ppcfg = *((vp8_postproc_cfg_t *)data);
     return VPX_CODEC_OK;
-  } else
+  } else {
     return VPX_CODEC_INVALID_PARAM;
+  }
 #else
   (void)ctx;
   (void)ctr_id;
@@ -928,7 +929,6 @@ static vpx_codec_err_t vp9e_set_previewpp(vpx_codec_alg_priv_t *ctx,
 
 
 static vpx_image_t *vp9e_get_preview(vpx_codec_alg_priv_t *ctx) {
-
   YV12_BUFFER_CONFIG sd;
   vp9_ppflags_t flags = {0};
 
@@ -941,8 +941,9 @@ static vpx_image_t *vp9e_get_preview(vpx_codec_alg_priv_t *ctx) {
   if (0 == vp9_get_preview_raw_frame(ctx->cpi, &sd, &flags)) {
     yuvconfig2image(&ctx->preview_img, &sd, NULL);
     return &ctx->preview_img;
-  } else
+  } else {
     return NULL;
+  }
 }
 
 static vpx_codec_err_t vp9e_update_entropy(vpx_codec_alg_priv_t *ctx,
@@ -951,7 +952,6 @@ static vpx_codec_err_t vp9e_update_entropy(vpx_codec_alg_priv_t *ctx,
   int update = va_arg(args, int);
   vp9_update_entropy(ctx->cpi, update);
   return VPX_CODEC_OK;
-
 }
 
 static vpx_codec_err_t vp9e_update_reference(vpx_codec_alg_priv_t *ctx,
@@ -983,8 +983,9 @@ static vpx_codec_err_t vp9e_set_roi_map(vpx_codec_alg_priv_t *ctx,
       return VPX_CODEC_OK;
     else
       return VPX_CODEC_INVALID_PARAM;
-  } else
+  } else {
     return VPX_CODEC_INVALID_PARAM;
+  }
 }
 
 
@@ -994,21 +995,20 @@ static vpx_codec_err_t vp9e_set_activemap(vpx_codec_alg_priv_t *ctx,
   vpx_active_map_t *data = va_arg(args, vpx_active_map_t *);
 
   if (data) {
-
     vpx_active_map_t *map = (vpx_active_map_t *)data;
 
     if (!vp9_set_active_map(ctx->cpi, map->active_map, map->rows, map->cols))
       return VPX_CODEC_OK;
     else
       return VPX_CODEC_INVALID_PARAM;
-  } else
+  } else {
     return VPX_CODEC_INVALID_PARAM;
+  }
 }
 
 static vpx_codec_err_t vp9e_set_scalemode(vpx_codec_alg_priv_t *ctx,
                                           int ctr_id,
                                           va_list args) {
-
   vpx_scaling_mode_t *data =  va_arg(args, vpx_scaling_mode_t *);
 
   if (data) {
@@ -1019,10 +1019,12 @@ static vpx_codec_err_t vp9e_set_scalemode(vpx_codec_alg_priv_t *ctx,
 
     if (!res) {
       return VPX_CODEC_OK;
-    } else
+    } else {
       return VPX_CODEC_INVALID_PARAM;
-  } else
+    }
+  } else {
     return VPX_CODEC_INVALID_PARAM;
+  }
 }
 
 static vpx_codec_err_t vp9e_set_width(vpx_codec_alg_priv_t *ctx, int ctr_id,
@@ -1128,7 +1130,7 @@ static vpx_codec_ctrl_fn_map_t vp9e_ctf_maps[] = {
 static vpx_codec_enc_cfg_map_t vp9e_usage_cfg_map[] = {
   {
     0,
-    {
+    {  // NOLINT
       0,                  /* g_usage */
       0,                  /* g_threads */
       0,                  /* g_profile */
@@ -1197,13 +1199,13 @@ CODEC_INTERFACE(vpx_codec_vp9_cx) = {
   vp9e_ctf_maps,      /* vpx_codec_ctrl_fn_map_t  *ctrl_maps; */
   NOT_IMPLEMENTED,    /* vpx_codec_get_mmap_fn_t   get_mmap; */
   NOT_IMPLEMENTED,    /* vpx_codec_set_mmap_fn_t   set_mmap; */
-  {
+  {  // NOLINT
     NOT_IMPLEMENTED,    /* vpx_codec_peek_si_fn_t    peek_si; */
     NOT_IMPLEMENTED,    /* vpx_codec_get_si_fn_t     get_si; */
     NOT_IMPLEMENTED,    /* vpx_codec_decode_fn_t     decode; */
     NOT_IMPLEMENTED,    /* vpx_codec_frame_get_fn_t  frame_get; */
   },
-  {
+  {  // NOLINT
     vp9e_usage_cfg_map, /* vpx_codec_enc_cfg_map_t    peek_si; */
     vp9e_encode,        /* vpx_codec_encode_fn_t      encode; */
     vp9e_get_cxdata,    /* vpx_codec_get_cx_data_fn_t   frame_get; */
@@ -1226,13 +1228,13 @@ CODEC_INTERFACE(vpx_codec_vp9x_cx) = {
   vp9e_ctf_maps,      /* vpx_codec_ctrl_fn_map_t  *ctrl_maps; */
   NOT_IMPLEMENTED,    /* vpx_codec_get_mmap_fn_t   get_mmap; */
   NOT_IMPLEMENTED,    /* vpx_codec_set_mmap_fn_t   set_mmap; */
-  {
+  {  // NOLINT
     NOT_IMPLEMENTED,    /* vpx_codec_peek_si_fn_t    peek_si; */
     NOT_IMPLEMENTED,    /* vpx_codec_get_si_fn_t     get_si; */
     NOT_IMPLEMENTED,    /* vpx_codec_decode_fn_t     decode; */
     NOT_IMPLEMENTED,    /* vpx_codec_frame_get_fn_t  frame_get; */
   },
-  {
+  {  // NOLINT
     vp9e_usage_cfg_map, /* vpx_codec_enc_cfg_map_t    peek_si; */
     vp9e_encode,        /* vpx_codec_encode_fn_t      encode; */
     vp9e_get_cxdata,    /* vpx_codec_get_cx_data_fn_t   frame_get; */
