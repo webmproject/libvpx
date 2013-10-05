@@ -42,8 +42,8 @@ void vp9_ssim_parms_8x8_c(uint8_t *s, int sp, uint8_t *r, int rp,
   }
 }
 
-const static int64_t cc1 =  26634; // (64^2*(.01*255)^2
-const static int64_t cc2 = 239708; // (64^2*(.03*255)^2
+static const int64_t cc1 =  26634;  // (64^2*(.01*255)^2
+static const int64_t cc2 = 239708;  // (64^2*(.03*255)^2
 
 static double similarity(unsigned long sum_s, unsigned long sum_r,
                          unsigned long sum_sq_s, unsigned long sum_sq_r,
