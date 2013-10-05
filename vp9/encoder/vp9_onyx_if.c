@@ -791,7 +791,8 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
                                      ? USE_FULL_RD : USE_LARGESTALL);
 
         if (MIN(cpi->common.width, cpi->common.height) >= 720)
-          sf->disable_split_mask = DISABLE_ALL_SPLIT;
+          sf->disable_split_mask = cpi->common.show_frame ?
+              DISABLE_ALL_SPLIT : DISABLE_ALL_INTER_SPLIT;
         else
           sf->disable_split_mask = DISABLE_COMPOUND_SPLIT;
 
@@ -808,9 +809,11 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
                                      ? USE_FULL_RD : USE_LARGESTALL);
 
         if (MIN(cpi->common.width, cpi->common.height) >= 720)
-          sf->disable_split_mask = DISABLE_ALL_SPLIT;
+          sf->disable_split_mask = cpi->common.show_frame ?
+              DISABLE_ALL_SPLIT : DISABLE_ALL_INTER_SPLIT;
         else
           sf->disable_split_mask = LAST_AND_INTRA_SPLIT_ONLY;
+
 
         sf->mode_search_skip_flags = FLAG_SKIP_INTRA_DIRMISMATCH |
                                      FLAG_SKIP_INTRA_BESTINTER |
