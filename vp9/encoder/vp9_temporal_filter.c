@@ -29,7 +29,7 @@
 #include "vpx_ports/vpx_timer.h"
 
 #define ALT_REF_MC_ENABLED 1    // dis/enable MC in AltRef filtering
-#define ALT_REF_SUBPEL_ENABLED 1 // dis/enable subpel in MC AltRef filtering
+#define ALT_REF_SUBPEL_ENABLED 1  // dis/enable subpel in MC AltRef filtering
 
 static void temporal_filter_predictors_mb_c(MACROBLOCKD *xd,
                                             uint8_t *y_mb_ptr,
@@ -83,7 +83,6 @@ void vp9_temporal_filter_apply_c(uint8_t *frame1,
 
   for (i = 0, k = 0; i < block_size; i++) {
     for (j = 0; j < block_size; j++, k++) {
-
       int src_byte = frame1[byte];
       int pixel_value = *frame2++;
 
@@ -151,7 +150,6 @@ static int temporal_filter_find_matching_mb_c(VP9_COMP *cpi,
   step_param = MIN(step_param, (cpi->sf.max_step_search_steps - 2));
 
   /*cpi->sf.search_method == HEX*/
-  // TODO Check that the 16x16 vf & sdf are selected here
   // Ignore mv costing by sending NULL pointer instead of cost arrays
   ref_mv = &x->e_mbd.mi_8x8[0]->bmi[0].as_mv[0];
   bestsme = vp9_hex_search(x, &best_ref_mv1_full.as_mv,
@@ -424,16 +422,12 @@ void vp9_temporal_filter_prepare(VP9_COMP *cpi, int distance) {
 
 #ifdef DEBUGFWG
   // DEBUG FWG
-  printf("max:%d FBCK:%d FFWD:%d ftb:%d ftbbck:%d ftbfwd:%d sei:%d lasei:%d start:%d"
-, max_frames
-, num_frames_backward
-, num_frames_forward
-, frames_to_blur
-, frames_to_blur_backward
-, frames_to_blur_forward
-, cpi->source_encode_index
-, cpi->last_alt_ref_sei
-, start_frame);
+  printf(
+      "max:%d FBCK:%d FFWD:%d ftb:%d ftbbck:%d ftbfwd:%d sei:%d lasei:%d "
+      "start:%d",
+      max_frames, num_frames_backward, num_frames_forward, frames_to_blur,
+      frames_to_blur_backward, frames_to_blur_forward, cpi->source_encode_index,
+      cpi->last_alt_ref_sei, start_frame);
 #endif
 
   // Setup scaling factors. Scaling on each of the arnr frames is not supported
@@ -443,7 +437,7 @@ void vp9_temporal_filter_prepare(VP9_COMP *cpi, int distance) {
       cm->width, cm->height);
 
   // Setup frame pointers, NULL indicates frame not included in filter
-  vpx_memset(cpi->frames, 0, max_frames * sizeof(YV12_BUFFER_CONFIG *));
+  vp9_zero(cpi->frames);
   for (frame = 0; frame < frames_to_blur; frame++) {
     int which_buffer = start_frame - frame;
     struct lookahead_entry *buf = vp9_lookahead_peek(cpi->lookahead,
