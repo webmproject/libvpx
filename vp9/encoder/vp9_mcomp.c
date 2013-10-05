@@ -320,8 +320,8 @@ int vp9_find_best_sub_pixel_iterative(MACROBLOCK *x,
   *distortion = besterr;
   besterr += mv_err_cost(bestmv, ref_mv, mvjcost, mvcost, error_per_bit);
 
-  // TODO: Each subsequent iteration checks at least one point in
-  // common with the last iteration could be 2 ( if diag selected)
+  // TODO(jbb): Each subsequent iteration checks at least one point in
+  // common with the last iteration could be 2 if diagonal is selected.
   while (halfiters--) {
     // 1/2 pel
     FIRST_LEVEL_CHECKS;
@@ -332,8 +332,8 @@ int vp9_find_best_sub_pixel_iterative(MACROBLOCK *x,
     tc = bc;
   }
 
-  // TODO: Each subsequent iteration checks at least one point in common with
-  // the last iteration could be 2 ( if diag selected) 1/4 pel
+  // TODO(yaowu): Each subsequent iteration checks at least one point in common
+  // with the last iteration could be 2 if diagonal is selected.
 
   // Note forced_stop: 0 - full, 1 - qtr only, 2 - half only
   if (forced_stop != 2) {
@@ -1122,8 +1122,10 @@ int vp9_diamond_search_sad_c(MACROBLOCK *x,
                 + mvsad_err_cost(&best_mv->as_mv, &fcenter_mv.as_mv,
                                  mvjsadcost, mvsadcost, sad_per_bit);
 
-  // search_param determines the length of the initial step and hence the number of iterations
-  // 0 = initial step (MAX_FIRST_STEP) pel : 1 = (MAX_FIRST_STEP/2) pel, 2 = (MAX_FIRST_STEP/4) pel... etc.
+  // search_param determines the length of the initial step and hence the number
+  // of iterations
+  // 0 = initial step (MAX_FIRST_STEP) pel : 1 = (MAX_FIRST_STEP/2) pel, 2 =
+  // (MAX_FIRST_STEP/4) pel... etc.
   ss = &x->ss[search_param * x->searches_per_step];
   tot_steps = (x->ss_count / x->searches_per_step) - search_param;
 
@@ -1192,8 +1194,9 @@ int vp9_diamond_search_sad_c(MACROBLOCK *x,
         break;
       };
 #endif
-    } else if (best_address == in_what)
+    } else if (best_address == in_what) {
       (*num00)++;
+    }
   }
 
   this_mv.as_mv.row = best_mv->as_mv.row * 8;
@@ -1263,8 +1266,11 @@ int vp9_diamond_search_sadx4(MACROBLOCK *x,
                 + mvsad_err_cost(&best_mv->as_mv, &fcenter_mv.as_mv,
                                  mvjsadcost, mvsadcost, sad_per_bit);
 
-  // search_param determines the length of the initial step and hence the number of iterations
-  // 0 = initial step (MAX_FIRST_STEP) pel : 1 = (MAX_FIRST_STEP/2) pel, 2 = (MAX_FIRST_STEP/4) pel... etc.
+  // search_param determines the length of the initial step and hence the number
+  // of iterations.
+  // 0 = initial step (MAX_FIRST_STEP) pel
+  // 1 = (MAX_FIRST_STEP/2) pel,
+  // 2 = (MAX_FIRST_STEP/4) pel...
   ss = &x->ss[search_param * x->searches_per_step];
   tot_steps = (x->ss_count / x->searches_per_step) - search_param;
 
@@ -1273,13 +1279,16 @@ int vp9_diamond_search_sadx4(MACROBLOCK *x,
   for (step = 0; step < tot_steps; step++) {
     int all_in = 1, t;
 
-    // To know if all neighbor points are within the bounds, 4 bounds checking are enough instead of
-    // checking 4 bounds for each points.
+    // All_in is true if every one of the points we are checking are within
+    // the bounds of the image.
     all_in &= ((best_mv->as_mv.row + ss[i].mv.row) > x->mv_row_min);
     all_in &= ((best_mv->as_mv.row + ss[i + 1].mv.row) < x->mv_row_max);
     all_in &= ((best_mv->as_mv.col + ss[i + 2].mv.col) > x->mv_col_min);
     all_in &= ((best_mv->as_mv.col + ss[i + 3].mv.col) < x->mv_col_max);
 
+    // If all the pixels are within the bounds we don't check whether the
+    // search point is valid in this loop,  otherwise we check each point
+    // for validity..
     if (all_in) {
       unsigned int sad_array[4];
 
@@ -1312,10 +1321,13 @@ int vp9_diamond_search_sadx4(MACROBLOCK *x,
         this_row_offset = best_mv->as_mv.row + ss[i].mv.row;
         this_col_offset = best_mv->as_mv.col + ss[i].mv.col;
 
-        if ((this_col_offset > x->mv_col_min) && (this_col_offset < x->mv_col_max) &&
-            (this_row_offset > x->mv_row_min) && (this_row_offset < x->mv_row_max)) {
+        if ((this_col_offset > x->mv_col_min) &&
+            (this_col_offset < x->mv_col_max) &&
+            (this_row_offset > x->mv_row_min) &&
+            (this_row_offset < x->mv_row_max)) {
           check_here = ss[i].offset + best_address;
-          thissad = fn_ptr->sdf(what, what_stride, check_here, in_what_stride, bestsad);
+          thissad = fn_ptr->sdf(what, what_stride, check_here, in_what_stride,
+                                bestsad);
 
           if (thissad < bestsad) {
             this_mv.as_mv.row = this_row_offset;
@@ -1365,8 +1377,9 @@ int vp9_diamond_search_sadx4(MACROBLOCK *x,
         break;
       };
 #endif
-    } else if (best_address == in_what)
+    } else if (best_address == in_what) {
       (*num00)++;
+    }
   }
 
   this_mv.as_mv.row = best_mv->as_mv.row * 8;
@@ -1401,16 +1414,17 @@ int vp9_full_pixel_diamond(VP9_COMP *cpi, MACROBLOCK *x,
   n = num00;
   num00 = 0;
 
-  /* If there won't be more n-step search, check to see if refining search is needed. */
+  /* If there won't be more n-step search, check to see if refining search is
+   * needed. */
   if (n > further_steps)
     do_refine = 0;
 
   while (n < further_steps) {
     n++;
 
-    if (num00)
+    if (num00) {
       num00--;
-    else {
+    } else {
       thissme = cpi->diamond_search_sad(x, mvp_full, &temp_mv,
                                         step_param + n, sadpb, &num00,
                                         fn_ptr, x->nmvjointcost, x->mvcost,
@@ -1504,7 +1518,8 @@ int vp9_full_search_sad_c(MACROBLOCK *x, int_mv *ref_mv,
     check_here = r * mv_stride + in_what + col_min;
 
     for (c = col_min; c < col_max; c++) {
-      thissad = fn_ptr->sdf(what, what_stride, check_here, in_what_stride, bestsad);
+      thissad = fn_ptr->sdf(what, what_stride, check_here, in_what_stride,
+                            bestsad);
 
       this_mv.as_mv.col = c;
       thissad += mvsad_err_cost(&this_mv.as_mv, &fcenter_mv.as_mv,
@@ -1621,7 +1636,8 @@ int vp9_full_search_sadx3(MACROBLOCK *x, int_mv *ref_mv,
     }
 
     while (c < col_max) {
-      thissad = fn_ptr->sdf(what, what_stride, check_here, in_what_stride, bestsad);
+      thissad = fn_ptr->sdf(what, what_stride, check_here, in_what_stride,
+                            bestsad);
 
       if (thissad < bestsad) {
         this_mv.as_mv.col = c;
@@ -1639,7 +1655,6 @@ int vp9_full_search_sadx3(MACROBLOCK *x, int_mv *ref_mv,
       check_here++;
       c++;
     }
-
   }
 
   this_mv.as_mv.row = best_mv->as_mv.row * 8;
@@ -1770,7 +1785,8 @@ int vp9_full_search_sadx8(MACROBLOCK *x, int_mv *ref_mv,
     }
 
     while (c < col_max) {
-      thissad = fn_ptr->sdf(what, what_stride, check_here, in_what_stride, bestsad);
+      thissad = fn_ptr->sdf(what, what_stride, check_here, in_what_stride,
+                            bestsad);
 
       if (thissad < bestsad) {
         this_mv.as_mv.col = c;
@@ -1840,10 +1856,14 @@ int vp9_refining_search_sad_c(MACROBLOCK *x,
       this_row_offset = ref_mv->as_mv.row + neighbors[j].row;
       this_col_offset = ref_mv->as_mv.col + neighbors[j].col;
 
-      if ((this_col_offset > x->mv_col_min) && (this_col_offset < x->mv_col_max) &&
-          (this_row_offset > x->mv_row_min) && (this_row_offset < x->mv_row_max)) {
-        check_here = (neighbors[j].row) * in_what_stride + neighbors[j].col + best_address;
-        thissad = fn_ptr->sdf(what, what_stride, check_here, in_what_stride, bestsad);
+      if ((this_col_offset > x->mv_col_min) &&
+          (this_col_offset < x->mv_col_max) &&
+          (this_row_offset > x->mv_row_min) &&
+          (this_row_offset < x->mv_row_max)) {
+        check_here = (neighbors[j].row) * in_what_stride + neighbors[j].col +
+                     best_address;
+        thissad = fn_ptr->sdf(what, what_stride, check_here, in_what_stride,
+                              bestsad);
 
         if (thissad < bestsad) {
           this_mv.as_mv.row = this_row_offset;
@@ -1859,12 +1879,13 @@ int vp9_refining_search_sad_c(MACROBLOCK *x,
       }
     }
 
-    if (best_site == -1)
+    if (best_site == -1) {
       break;
-    else {
+    } else {
       ref_mv->as_mv.row += neighbors[best_site].row;
       ref_mv->as_mv.col += neighbors[best_site].col;
-      best_address += (neighbors[best_site].row) * in_what_stride + neighbors[best_site].col;
+      best_address += (neighbors[best_site].row) * in_what_stride +
+                      neighbors[best_site].col;
     }
   }
 
@@ -1927,7 +1948,8 @@ int vp9_refining_search_sadx4(MACROBLOCK *x,
       block_offset[2] = best_address + 1;
       block_offset[3] = best_address + in_what_stride;
 
-      fn_ptr->sdx4df(what, what_stride, block_offset, in_what_stride, sad_array);
+      fn_ptr->sdx4df(what, what_stride, block_offset, in_what_stride,
+                     sad_array);
 
       for (j = 0; j < 4; j++) {
         if (sad_array[j] < bestsad) {
@@ -1947,10 +1969,14 @@ int vp9_refining_search_sadx4(MACROBLOCK *x,
         this_row_offset = ref_mv->as_mv.row + neighbors[j].row;
         this_col_offset = ref_mv->as_mv.col + neighbors[j].col;
 
-        if ((this_col_offset > x->mv_col_min) && (this_col_offset < x->mv_col_max) &&
-            (this_row_offset > x->mv_row_min) && (this_row_offset < x->mv_row_max)) {
-          check_here = (neighbors[j].row) * in_what_stride + neighbors[j].col + best_address;
-          thissad = fn_ptr->sdf(what, what_stride, check_here, in_what_stride, bestsad);
+        if ((this_col_offset > x->mv_col_min) &&
+            (this_col_offset < x->mv_col_max) &&
+            (this_row_offset > x->mv_row_min) &&
+            (this_row_offset < x->mv_row_max)) {
+          check_here = (neighbors[j].row) * in_what_stride + neighbors[j].col +
+                       best_address;
+          thissad = fn_ptr->sdf(what, what_stride, check_here, in_what_stride,
+                                bestsad);
 
           if (thissad < bestsad) {
             this_mv.as_mv.row = this_row_offset;
@@ -1967,12 +1993,13 @@ int vp9_refining_search_sadx4(MACROBLOCK *x,
       }
     }
 
-    if (best_site == -1)
+    if (best_site == -1) {
       break;
-    else {
+    } else {
       ref_mv->as_mv.row += neighbors[best_site].row;
       ref_mv->as_mv.col += neighbors[best_site].col;
-      best_address += (neighbors[best_site].row) * in_what_stride + neighbors[best_site].col;
+      best_address += (neighbors[best_site].row) * in_what_stride +
+                      neighbors[best_site].col;
     }
   }
 
