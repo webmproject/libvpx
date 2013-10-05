@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdH//8jQ\u003d",
+        "filename": "vp9/encoder/vp9_mcomp.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 324,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2013-10-05T00:16:32Z",
+      "side": 1,
+      "message": "\"iteration; could be 2 if diag selected.\"",
+      "revId": "d0aae10655dcd2780e8ccf66dc5a7cd8b33e83f2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdH//8i4\u003d",
+        "filename": "vp9/encoder/vp9_mcomp.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 335,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2013-10-05T00:16:32Z",
+      "side": 1,
+      "message": "-- yaowu rather than yw.\n-- \"iteration; could be 2 if diag selected.\"",
+      "revId": "d0aae10655dcd2780e8ccf66dc5a7cd8b33e83f2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdH//8hk\u003d",
+        "filename": "vp9/encoder/vp9_mcomp.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1272,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2013-10-05T00:16:32Z",
+      "side": 1,
+      "message": "// of iterations:\n// 0 \u003d (MAX_FIRST_STEP) pel (initial step)\n// 1 \u003d (MAX_FIRST_STEP / 2) pel\n// 2 \u003d\t (MAX_FIRST_STEP / 4) pel\n// ... etc.",
+      "revId": "d0aae10655dcd2780e8ccf66dc5a7cd8b33e83f2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdH//8hU\u003d",
+        "filename": "vp9/encoder/vp9_mcomp.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1282,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2013-10-05T00:16:32Z",
+      "side": 1,
+      "message": "What??",
+      "revId": "d0aae10655dcd2780e8ccf66dc5a7cd8b33e83f2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
