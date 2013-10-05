@@ -10,7 +10,7 @@
 #include <assert.h>
 #include <stdlib.h>
 
-#include "vpx_config.h"
+#include "./vpx_config.h"
 #include "vp9/common/vp9_common.h"
 #include "vp9/encoder/vp9_lookahead.h"
 #include "vp9/common/vp9_extend.h"
@@ -77,7 +77,7 @@ struct lookahead_ctx * vp9_lookahead_init(unsigned int width,
         goto bail;
   }
   return ctx;
-bail:
+ bail:
   vp9_lookahead_destroy(ctx);
   return NULL;
 }
