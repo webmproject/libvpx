@@ -67,12 +67,6 @@ typedef unsigned int (*vp9_subp_avg_variance_fn_t)(const uint8_t *src_ptr,
                                                    unsigned int *sse,
                                                    const uint8_t *second_pred);
 
-typedef void (*vp9_ssimpf_fn_t)(uint8_t *s, int sp, uint8_t *r,
-                                int rp, unsigned long *sum_s,
-                                unsigned long *sum_r, unsigned long *sum_sq_s,
-                                unsigned long *sum_sq_r,
-                                unsigned long *sum_sxr);
-
 typedef unsigned int (*vp9_getmbss_fn_t)(const short *);
 
 typedef unsigned int (*vp9_get16x16prederror_fn_t)(const uint8_t *src_ptr,
