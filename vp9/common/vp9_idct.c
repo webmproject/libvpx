@@ -18,7 +18,7 @@
 #include "vp9/common/vp9_common.h"
 #include "vp9/common/vp9_idct.h"
 
-void vp9_short_iwalsh4x4_add_c(int16_t *input, uint8_t *dest, int dest_stride) {
+void vp9_iwht4x4_16_add_c(int16_t *input, uint8_t *dest, int dest_stride) {
 /* 4-point reversible, orthonormal inverse Walsh-Hadamard in 3.5 adds,
    0.5 shifts per pixel. */
   int i;
@@ -70,7 +70,7 @@ void vp9_short_iwalsh4x4_add_c(int16_t *input, uint8_t *dest, int dest_stride) {
   }
 }
 
-void vp9_short_iwalsh4x4_1_add_c(int16_t *in, uint8_t *dest, int dest_stride) {
+void vp9_iwht4x4_1_add_c(int16_t *in, uint8_t *dest, int dest_stride) {
   int i;
   int a1, e1;
   int16_t tmp[4];
@@ -116,7 +116,7 @@ void vp9_idct4_1d_c(int16_t *input, int16_t *output) {
   output[3] = step[0] - step[3];
 }
 
-void vp9_short_idct4x4_add_c(int16_t *input, uint8_t *dest, int dest_stride) {
+void vp9_idct4x4_16_add_c(int16_t *input, uint8_t *dest, int dest_stride) {
   int16_t out[4 * 4];
   int16_t *outptr = out;
   int i, j;
@@ -140,7 +140,7 @@ void vp9_short_idct4x4_add_c(int16_t *input, uint8_t *dest, int dest_stride) {
   }
 }
 
-void vp9_short_idct4x4_1_add_c(int16_t *input, uint8_t *dest, int dest_stride) {
+void vp9_idct4x4_1_add_c(int16_t *input, uint8_t *dest, int dest_stride) {
   int i;
   int a1;
   int16_t out = dct_const_round_shift(input[0] * cospi_16_64);
@@ -1286,20 +1286,19 @@ void vp9_short_idct32x32_1_add_c(int16_t *input, uint8_t *dest,
 }
 
 // idct
-void vp9_idct_add(int16_t *input, uint8_t *dest, int stride, int eob) {
+void vp9_idct4x4_add(int16_t *input, uint8_t *dest, int stride, int eob) {
   if (eob > 1)
-    vp9_short_idct4x4_add(input, dest, stride);
+    vp9_idct4x4_16_add(input, dest, stride);
   else
-    vp9_short_idct4x4_1_add(input, dest, stride);
+    vp9_idct4x4_1_add(input, dest, stride);
 }
 
 
-void vp9_idct_add_lossless(int16_t *input, uint8_t *dest, int stride,
-                             int eob) {
+void vp9_iwht4x4_add(int16_t *input, uint8_t *dest, int stride, int eob) {
   if (eob > 1)
-    vp9_short_iwalsh4x4_add(input, dest, stride);
+    vp9_iwht4x4_16_add(input, dest, stride);
   else
-    vp9_short_iwalsh4x4_1_add_c(input, dest, stride);
+    vp9_iwht4x4_1_add(input, dest, stride);
 }
 
 void vp9_idct_add_8x8(int16_t *input, uint8_t *dest, int stride, int eob) {
@@ -1348,7 +1347,7 @@ void vp9_idct_add_32x32(int16_t *input, uint8_t *dest, int stride, int eob) {
 void vp9_iht_add(TX_TYPE tx_type, int16_t *input, uint8_t *dest, int stride,
                    int eob) {
   if (tx_type == DCT_DCT)
-    vp9_idct_add(input, dest, stride, eob);
+    vp9_idct4x4_add(input, dest, stride, eob);
   else
     vp9_short_iht4x4_add(input, dest, stride, tx_type);
 }

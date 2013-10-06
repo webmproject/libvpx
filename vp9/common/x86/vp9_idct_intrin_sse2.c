@@ -15,7 +15,7 @@
 #include "vp9/common/vp9_common.h"
 #include "vp9/common/vp9_idct.h"
 
-void vp9_short_idct4x4_add_sse2(int16_t *input, uint8_t *dest, int stride) {
+void vp9_idct4x4_16_add_sse2(int16_t *input, uint8_t *dest, int stride) {
   const __m128i zero = _mm_setzero_si128();
   const __m128i eight = _mm_set1_epi16(8);
   const __m128i cst = _mm_setr_epi16((int16_t)cospi_16_64, (int16_t)cospi_16_64,
@@ -148,7 +148,7 @@ void vp9_short_idct4x4_add_sse2(int16_t *input, uint8_t *dest, int stride) {
   RECON_AND_STORE4X4(dest, input3);
 }
 
-void vp9_short_idct4x4_1_add_sse2(int16_t *input, uint8_t *dest, int stride) {
+void vp9_idct4x4_1_add_sse2(int16_t *input, uint8_t *dest, int stride) {
   __m128i dc_value;
   const __m128i zero = _mm_setzero_si128();
   int a;
