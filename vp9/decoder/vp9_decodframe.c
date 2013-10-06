@@ -253,7 +253,7 @@ static void decode_modes_b(VP9D_COMP *pbi, int mi_row, int mi_col,
     if (!less8x8) {
       assert(mbmi->sb_type == bsize);
       if (eobtotal == 0)
-        mbmi->skip_coeff = 1; // skip loopfilter
+        mbmi->skip_coeff = 1;  // skip loopfilter
     }
 
     set_ref(pbi, 0, mi_row, mi_col);
