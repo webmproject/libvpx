@@ -29,7 +29,7 @@ extern "C" {
 //------------------------------------------------------------------------------
 // simplistic pthread emulation layer
 
-#include <process.h>
+#include <process.h>  // NOLINT
 
 // _beginthreadex requires __stdcall
 #define THREADFN unsigned int __stdcall
