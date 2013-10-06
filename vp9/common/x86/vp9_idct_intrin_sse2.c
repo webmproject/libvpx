@@ -529,7 +529,7 @@ void vp9_short_iht4x4_add_sse2(int16_t *input, uint8_t *dest, int stride,
       dest += stride; \
   }
 
-void vp9_short_idct8x8_add_sse2(int16_t *input, uint8_t *dest, int stride) {
+void vp9_idct8x8_64_add_sse2(int16_t *input, uint8_t *dest, int stride) {
   const __m128i zero = _mm_setzero_si128();
   const __m128i rounding = _mm_set1_epi32(DCT_CONST_ROUNDING);
   const __m128i final_rounding = _mm_set1_epi16(1<<4);
@@ -597,7 +597,7 @@ void vp9_short_idct8x8_add_sse2(int16_t *input, uint8_t *dest, int stride) {
   RECON_AND_STORE(dest, in7);
 }
 
-void vp9_short_idct8x8_1_add_sse2(int16_t *input, uint8_t *dest, int stride) {
+void vp9_idct8x8_1_add_sse2(int16_t *input, uint8_t *dest, int stride) {
   __m128i dc_value;
   const __m128i zero = _mm_setzero_si128();
   int a;
@@ -985,7 +985,7 @@ void vp9_short_iht8x8_add_sse2(int16_t *input, uint8_t *dest, int stride,
   RECON_AND_STORE(dest, in[7]);
 }
 
-void vp9_short_idct8x8_10_add_sse2(int16_t *input, uint8_t *dest, int stride) {
+void vp9_idct8x8_10_add_sse2(int16_t *input, uint8_t *dest, int stride) {
   const __m128i zero = _mm_setzero_si128();
   const __m128i rounding = _mm_set1_epi32(DCT_CONST_ROUNDING);
   const __m128i final_rounding = _mm_set1_epi16(1<<4);

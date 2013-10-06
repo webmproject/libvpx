@@ -460,7 +460,7 @@ static void encode_block(int plane, int block, BLOCK_SIZE plane_bsize,
       vp9_idct_add_16x16(dqcoeff, dst, pd->dst.stride, pd->eobs[block]);
       break;
     case TX_8X8:
-      vp9_idct_add_8x8(dqcoeff, dst, pd->dst.stride, pd->eobs[block]);
+      vp9_idct8x8_add(dqcoeff, dst, pd->dst.stride, pd->eobs[block]);
       break;
     case TX_4X4:
       // this is like vp9_short_idct4x4 but has a special case around eob<=1

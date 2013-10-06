@@ -201,7 +201,7 @@ static void idct8_1d(int16_t *input, int16_t *output) {
   output[7] = step1[0] - step1[7];
 }
 
-void vp9_short_idct8x8_add_c(int16_t *input, uint8_t *dest, int dest_stride) {
+void vp9_idct8x8_64_add_c(int16_t *input, uint8_t *dest, int dest_stride) {
   int16_t out[8 * 8];
   int16_t *outptr = out;
   int i, j;
@@ -225,7 +225,7 @@ void vp9_short_idct8x8_add_c(int16_t *input, uint8_t *dest, int dest_stride) {
   }
 }
 
-void vp9_short_idct8x8_1_add_c(int16_t *input, uint8_t *dest, int dest_stride) {
+void vp9_idct8x8_1_add_c(int16_t *input, uint8_t *dest, int dest_stride) {
   int i, j;
   int a1;
   int16_t out = dct_const_round_shift(input[0] * cospi_16_64);
@@ -420,7 +420,7 @@ void vp9_short_iht8x8_add_c(int16_t *input, uint8_t *dest, int dest_stride,
                                   + dest[j * dest_stride + i]);  }
 }
 
-void vp9_short_idct8x8_10_add_c(int16_t *input, uint8_t *dest,
+void vp9_idct8x8_10_add_c(int16_t *input, uint8_t *dest,
                                 int dest_stride) {
   int16_t out[8 * 8] = { 0 };
   int16_t *outptr = out;
@@ -1301,7 +1301,7 @@ void vp9_iwht4x4_add(int16_t *input, uint8_t *dest, int stride, int eob) {
     vp9_iwht4x4_1_add(input, dest, stride);
 }
 
-void vp9_idct_add_8x8(int16_t *input, uint8_t *dest, int stride, int eob) {
+void vp9_idct8x8_add(int16_t *input, uint8_t *dest, int stride, int eob) {
   // If dc is 1, then input[0] is the reconstructed value, do not need
   // dequantization. Also, when dc is 1, dc is counted in eobs, namely eobs >=1.
 
@@ -1312,11 +1312,11 @@ void vp9_idct_add_8x8(int16_t *input, uint8_t *dest, int stride, int eob) {
   if (eob) {
     if (eob == 1)
       // DC only DCT coefficient
-      vp9_short_idct8x8_1_add(input, dest, stride);
+      vp9_idct8x8_1_add(input, dest, stride);
     else if (eob <= 10)
-      vp9_short_idct8x8_10_add(input, dest, stride);
+      vp9_idct8x8_10_add(input, dest, stride);
     else
-      vp9_short_idct8x8_add(input, dest, stride);
+      vp9_idct8x8_64_add(input, dest, stride);
   }
 }
 
@@ -1355,7 +1355,7 @@ void vp9_iht_add(TX_TYPE tx_type, int16_t *input, uint8_t *dest, int stride,
 void vp9_iht_add_8x8(TX_TYPE tx_type, int16_t *input, uint8_t *dest,
                        int stride, int eob) {
   if (tx_type == DCT_DCT) {
-    vp9_idct_add_8x8(input, dest, stride, eob);
+    vp9_idct8x8_add(input, dest, stride, eob);
   } else {
     if (eob > 0) {
       vp9_short_iht8x8_add(input, dest, stride, tx_type);
