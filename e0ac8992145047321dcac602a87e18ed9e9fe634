@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdH//8YI\u003d",
+        "filename": "configure.txt",
+        "patchSetId": 1
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2013-10-07T14:06:22Z",
+      "side": 1,
+      "message": "oops this file doesn\u0027t get checked in",
+      "revId": "e0ac8992145047321dcac602a87e18ed9e9fe634",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdH//8YE\u003d",
+        "filename": "hooks",
+        "patchSetId": 1
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2013-10-07T14:06:22Z",
+      "side": 1,
+      "message": "this file shouldn\u0027t be checked in.",
+      "revId": "e0ac8992145047321dcac602a87e18ed9e9fe634",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
