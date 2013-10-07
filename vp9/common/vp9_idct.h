@@ -90,7 +90,7 @@ typedef struct {
 
 void vp9_idct4x4_add(int16_t *input, uint8_t *dest, int stride, int eob);
 void vp9_iwht4x4_add(int16_t *input, uint8_t *dest, int stride, int eob);
-void vp9_idct_add_8x8(int16_t *input, uint8_t *dest, int stride, int eob);
+void vp9_idct8x8_add(int16_t *input, uint8_t *dest, int stride, int eob);
 void vp9_idct_add_16x16(int16_t *input, uint8_t *dest, int stride, int eob);
 void vp9_idct_add_32x32(int16_t *input, uint8_t *dest, int stride, int eob);
 

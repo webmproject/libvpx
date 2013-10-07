@@ -126,7 +126,7 @@ TEST(VP9Idct8x8Test, AccuracyCheck) {
     reference_dct_2d(input, output_r);
     for (int j = 0; j < 64; ++j)
       coeff[j] = round(output_r[j]);
-    vp9_short_idct8x8_add_c(coeff, dst, 8);
+    vp9_idct8x8_64_add_c(coeff, dst, 8);
     for (int j = 0; j < 64; ++j) {
       const int diff = dst[j] - src[j];
       const int error = diff * diff;

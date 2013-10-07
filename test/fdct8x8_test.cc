@@ -21,7 +21,7 @@
 extern "C" {
 #include "vp9/common/vp9_entropy.h"
 #include "./vp9_rtcd.h"
-void vp9_short_idct8x8_add_c(int16_t *input, uint8_t *output, int pitch);
+void vp9_idct8x8_64_add_c(int16_t *input, uint8_t *output, int pitch);
 }
 #include "vpx/vpx_integer.h"
 
@@ -296,7 +296,7 @@ using std::tr1::make_tuple;
 INSTANTIATE_TEST_CASE_P(
     C, FwdTrans8x8DCT,
     ::testing::Values(
-        make_tuple(&vp9_short_fdct8x8_c, &vp9_short_idct8x8_add_c, 0)));
+        make_tuple(&vp9_short_fdct8x8_c, &vp9_idct8x8_64_add_c, 0)));
 INSTANTIATE_TEST_CASE_P(
     C, FwdTrans8x8HT,
     ::testing::Values(
@@ -309,7 +309,7 @@ INSTANTIATE_TEST_CASE_P(
 INSTANTIATE_TEST_CASE_P(
     SSE2, FwdTrans8x8DCT,
     ::testing::Values(
-        make_tuple(&vp9_short_fdct8x8_sse2, &vp9_short_idct8x8_add_sse2, 0)));
+        make_tuple(&vp9_short_fdct8x8_sse2, &vp9_idct8x8_64_add_sse2, 0)));
 INSTANTIATE_TEST_CASE_P(
     SSE2, FwdTrans8x8HT,
     ::testing::Values(
