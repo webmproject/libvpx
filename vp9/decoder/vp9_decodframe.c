@@ -225,6 +225,7 @@ static void set_ref(VP9D_COMP *pbi, int i, int mi_row, int mi_col) {
 static void decode_modes_b(VP9D_COMP *pbi, int tile_col,
                            int mi_row, int mi_col,
                            vp9_reader *r, BLOCK_SIZE bsize, int index) {
+  VP9_COMMON *const cm = &pbi->common;
   MACROBLOCKD *const xd = &pbi->mb;
   const int less8x8 = bsize < BLOCK_8X8;
   MB_MODE_INFO *mbmi;
@@ -235,7 +236,7 @@ static void decode_modes_b(VP9D_COMP *pbi, int tile_col,
       return;
 
   set_offsets(pbi, bsize, tile_col, mi_row, mi_col);
-  vp9_read_mode_info(pbi, mi_row, mi_col, r);
+  vp9_read_mode_info(cm, xd, mi_row, mi_col, r);
 
   if (less8x8)
     bsize = BLOCK_8X8;
