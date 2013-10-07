@@ -36,7 +36,7 @@
 #define DISABLE_RC_LONG_TERM_MEM 0
 #endif
 
-#define MODE_TEST_HIT_STATS
+// #define MODE_TEST_HIT_STATS
 
 // #define SPEEDSTATS 1
 #if CONFIG_MULTIPLE_ARF
