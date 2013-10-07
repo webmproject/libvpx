@@ -23,16 +23,9 @@ typedef struct {
   int offset;
 } search_site;
 
-typedef struct {
-  struct {
-    MB_PREDICTION_MODE mode;
-  } bmi[4];
-} PARTITION_INFO;
-
 // Structure to hold snapshot of coding context during the mode picking process
 typedef struct {
   MODE_INFO mic;
-  PARTITION_INFO partition_info;
   unsigned char zcoeff_blk[256];
   int skip;
   int_mv best_ref_mv;
@@ -87,9 +80,6 @@ struct macroblock {
 
   MACROBLOCKD e_mbd;
   int skip_block;
-  PARTITION_INFO *partition_info; /* work pointer */
-  PARTITION_INFO *pi;   /* Corresponds to upper left visible macroblock */
-  PARTITION_INFO *pip;  /* Base of allocated array */
 
   search_site *ss;
   int ss_count;

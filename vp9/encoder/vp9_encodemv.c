@@ -337,7 +337,7 @@ void vp9_update_mv_count(VP9_COMP *cpi, MACROBLOCK *x, int_mv best_ref_mv[2]) {
     for (idy = 0; idy < 2; idy += num_4x4_h) {
       for (idx = 0; idx < 2; idx += num_4x4_w) {
         const int i = idy * 2 + idx;
-        if (x->partition_info->bmi[i].mode == NEWMV)
+        if (mi->bmi[i].as_mode == NEWMV)
           inc_mvs(mi->bmi[i].as_mv, best_ref_mv, is_compound, &cpi->NMVcount);
       }
     }

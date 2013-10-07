@@ -309,9 +309,6 @@ static void dealloc_compressor_data(VP9_COMP *cpi) {
   cpi->mb_activity_map = 0;
   vpx_free(cpi->mb_norm_activity_map);
   cpi->mb_norm_activity_map = 0;
-
-  vpx_free(cpi->mb.pip);
-  cpi->mb.pip = 0;
 }
 
 // Computes a q delta (in "q index" terms) to get from a starting q value
@@ -983,30 +980,12 @@ static void alloc_raw_frame_buffers(VP9_COMP *cpi) {
                        "Failed to allocate altref buffer");
 }
 
-static int alloc_partition_data(VP9_COMP *cpi) {
-  vpx_free(cpi->mb.pip);
-
-  cpi->mb.pip = vpx_calloc(cpi->common.mode_info_stride *
-                           (cpi->common.mi_rows + MI_BLOCK_SIZE),
-                           sizeof(PARTITION_INFO));
-  if (!cpi->mb.pip)
-    return 1;
-
-  cpi->mb.pi = cpi->mb.pip + cpi->common.mode_info_stride + 1;
-
-  return 0;
-}
-
 void vp9_alloc_compressor_data(VP9_COMP *cpi) {
   VP9_COMMON *cm = &cpi->common;
 
   if (vp9_alloc_frame_buffers(cm, cm->width, cm->height))
     vpx_internal_error(&cpi->common.error, VPX_CODEC_MEM_ERROR,
                        "Failed to allocate frame buffers");
-
-  if (alloc_partition_data(cpi))
-    vpx_internal_error(&cpi->common.error, VPX_CODEC_MEM_ERROR,
-                       "Failed to allocate partition data");
 
   if (vp9_alloc_frame_buffer(&cpi->last_frame_uf,
                              cm->width, cm->height,

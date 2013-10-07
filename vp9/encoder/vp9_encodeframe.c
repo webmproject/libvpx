@@ -381,7 +381,6 @@ static void update_state(VP9_COMP *cpi, PICK_MODE_CONTEXT *ctx,
   }
 
   if (is_inter_block(mbmi) && mbmi->sb_type < BLOCK_8X8) {
-    *x->partition_info = ctx->partition_info;
     mbmi->mv[0].as_int = mi->bmi[3].as_mv[0].as_int;
     mbmi->mv[1].as_int = mi->bmi[3].as_mv[1].as_int;
   }
@@ -491,9 +490,6 @@ static void set_offsets(VP9_COMP *cpi, int mi_row, int mi_col,
   // Activity map pointer
   x->mb_activity_ptr = &cpi->mb_activity_map[idx_map];
   x->active_ptr = cpi->active_map + idx_map;
-
-  /* pointers to mode info contexts */
-  x->partition_info = x->pi + idx_str;
 
   xd->mi_8x8 = cm->mi_grid_visible + idx_str;
   xd->prev_mi_8x8 = cm->prev_mi_grid_visible + idx_str;

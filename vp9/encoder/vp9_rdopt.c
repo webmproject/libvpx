@@ -1499,7 +1499,8 @@ static int labels2mode(MACROBLOCK *x, int i,
   if (has_second_rf)
     mic->bmi[i].as_mv[1].as_int = this_second_mv->as_int;
 
-  x->partition_info->bmi[i].mode = m;
+  mic->bmi[i].as_mode = m;
+
   for (idy = 0; idy < num_4x4_blocks_high; ++idy)
     for (idx = 0; idx < num_4x4_blocks_wide; ++idx)
       vpx_memcpy(&mic->bmi[i + idy * 2 + idx],
@@ -1646,7 +1647,7 @@ static void rd_check_segment_txsize(VP9_COMP *cpi, MACROBLOCK *x,
                                     BEST_SEG_INFO *bsi_buf, int filter_idx,
                                     int_mv seg_mvs[4][MAX_REF_FRAMES],
                                     int mi_row, int mi_col) {
-  int i, j, br = 0, idx, idy;
+  int i, br = 0, idx, idy;
   int64_t bd = 0, block_sse = 0;
   MB_PREDICTION_MODE this_mode;
   MODE_INFO *mi = x->e_mbd.mi_8x8[0];
@@ -2008,15 +2009,6 @@ static void rd_check_segment_txsize(VP9_COMP *cpi, MACROBLOCK *x,
         bsi->segment_rd = INT64_MAX;
         return;
       }
-
-      for (j = 1; j < num_4x4_blocks_high; ++j)
-        vpx_memcpy(&x->partition_info->bmi[i + j * 2],
-                   &x->partition_info->bmi[i],
-                   sizeof(x->partition_info->bmi[i]));
-      for (j = 1; j < num_4x4_blocks_wide; ++j)
-        vpx_memcpy(&x->partition_info->bmi[i + j],
-                   &x->partition_info->bmi[i],
-                   sizeof(x->partition_info->bmi[i]));
     }
   } /* for each label */
 
@@ -2028,7 +2020,7 @@ static void rd_check_segment_txsize(VP9_COMP *cpi, MACROBLOCK *x,
 
   // update the coding decisions
   for (i = 0; i < 4; ++i)
-    bsi->modes[i] = x->partition_info->bmi[i].mode;
+    bsi->modes[i] = mi->bmi[i].as_mode;
 }
 
 static int64_t rd_pick_best_mbsegmentation(VP9_COMP *cpi, MACROBLOCK *x,
@@ -2073,7 +2065,7 @@ static int64_t rd_pick_best_mbsegmentation(VP9_COMP *cpi, MACROBLOCK *x,
     if (has_second_ref(mbmi))
       mi->bmi[i].as_mv[1].as_int = bsi->rdstat[i][mode_idx].mvs[1].as_int;
     xd->plane[0].eobs[i] = bsi->rdstat[i][mode_idx].eobs;
-    x->partition_info->bmi[i].mode = bsi->modes[i];
+    mi->bmi[i].as_mode = bsi->modes[i];
   }
 
   /*
@@ -2206,7 +2198,6 @@ static void estimate_ref_frame_costs(VP9_COMP *cpi, int segment_id,
 
 static void store_coding_context(MACROBLOCK *x, PICK_MODE_CONTEXT *ctx,
                          int mode_index,
-                         PARTITION_INFO *partition,
                          int_mv *ref_mv,
                          int_mv *second_ref_mv,
                          int64_t comp_pred_diff[NB_PREDICTION_TYPES],
@@ -2219,9 +2210,6 @@ static void store_coding_context(MACROBLOCK *x, PICK_MODE_CONTEXT *ctx,
   ctx->skip = x->skip;
   ctx->best_mode_index = mode_index;
   ctx->mic = *xd->this_mi;
-
-  if (partition)
-    ctx->partition_info = *partition;
 
   ctx->best_ref_mv.as_int = ref_mv->as_int;
   ctx->second_best_ref_mv.as_int = second_ref_mv->as_int;
@@ -3780,7 +3768,6 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
   set_scale_factors(xd, mbmi->ref_frame[0], mbmi->ref_frame[1],
                     scale_factor);
   store_coding_context(x, ctx, best_mode_index,
-                       NULL,
                        &mbmi->ref_mvs[mbmi->ref_frame[0]][0],
                        &mbmi->ref_mvs[mbmi->ref_frame[1] < 0 ? 0 :
                                       mbmi->ref_frame[1]][0],
@@ -3839,7 +3826,6 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
                                              cpi->common.y_dc_delta_q);
   int_mv seg_mvs[4][MAX_REF_FRAMES];
   b_mode_info best_bmodes[4];
-  PARTITION_INFO best_partition;
   int best_skip2 = 0;
   unsigned char best_zcoeff_blk[256] = { 0 };
 
@@ -4055,7 +4041,6 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
                              &mbmi->ref_mvs[second_ref_frame][0] : NULL;
       b_mode_info tmp_best_bmodes[16];
       MB_MODE_INFO tmp_best_mbmode;
-      PARTITION_INFO tmp_best_partition;
       BEST_SEG_INFO bsi[SWITCHABLE_FILTERS];
       int pred_exists = 0;
       int uv_skippable;
@@ -4119,7 +4104,6 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
               tmp_best_sse = total_sse;
               tmp_best_skippable = skippable;
               tmp_best_mbmode = *mbmi;
-              tmp_best_partition = *x->partition_info;
               for (i = 0; i < 4; i++)
                 tmp_best_bmodes[i] = xd->this_mi->bmi[i];
               pred_exists = 1;
@@ -4171,7 +4155,6 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
         distortion = tmp_best_distortion;
         skippable = tmp_best_skippable;
         *mbmi = tmp_best_mbmode;
-        *x->partition_info = tmp_best_partition;
         for (i = 0; i < 4; i++)
           xd->this_mi->bmi[i] = tmp_best_bmodes[i];
       }
@@ -4299,7 +4282,6 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
                    RDCOST(x->rdmult, x->rddiv, rate_uv, distortion_uv);
         best_mbmode = *mbmi;
         best_skip2 = this_skip2;
-        best_partition = *x->partition_info;
         vpx_memcpy(best_zcoeff_blk, x->zcoeff_blk[mbmi->tx_size],
                    sizeof(best_zcoeff_blk));
 
@@ -4457,15 +4439,8 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
     for (i = 0; i < 4; i++)
       xd->this_mi->bmi[i].as_mode = best_bmodes[i].as_mode;
   } else {
-    for (i = 0; i < 4; i++)
-      xd->this_mi->bmi[i].as_mv[0].as_int =
-          best_bmodes[i].as_mv[0].as_int;
-
-    if (has_second_ref(mbmi))
-      for (i = 0; i < 4; i++)
-        xd->this_mi->bmi[i].as_mv[1].as_int = best_bmodes[i].as_mv[1].as_int;
-
-    *x->partition_info = best_partition;
+    for (i = 0; i < 4; ++i)
+      vpx_memcpy(&xd->this_mi->bmi[i], &best_bmodes[i], sizeof(b_mode_info));
 
     mbmi->mv[0].as_int = xd->this_mi->bmi[3].as_mv[0].as_int;
     mbmi->mv[1].as_int = xd->this_mi->bmi[3].as_mv[1].as_int;
@@ -4508,7 +4483,6 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
   set_scale_factors(xd, mbmi->ref_frame[0], mbmi->ref_frame[1],
                     scale_factor);
   store_coding_context(x, ctx, best_mode_index,
-                       &best_partition,
                        &mbmi->ref_mvs[mbmi->ref_frame[0]][0],
                        &mbmi->ref_mvs[mbmi->ref_frame[1] < 0 ? 0 :
                                       mbmi->ref_frame[1]][0],
