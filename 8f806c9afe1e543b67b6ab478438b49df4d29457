@@ -1,0 +1,293 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdH//8Ws\u003d",
+        "filename": "vp9/encoder/vp9_onyx_if.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2013-10-07T17:51:59Z",
+      "side": 1,
+      "message": "period at end of line.",
+      "revId": "8f806c9afe1e543b67b6ab478438b49df4d29457",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdH//8Wo\u003d",
+        "filename": "vp9/encoder/vp9_onyx_if.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 760,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2013-10-07T17:51:59Z",
+      "side": 1,
+      "message": "period at end of line.",
+      "revId": "8f806c9afe1e543b67b6ab478438b49df4d29457",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdH//8Wk\u003d",
+        "filename": "vp9/encoder/vp9_onyx_if.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 1925,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2013-10-07T17:51:59Z",
+      "side": 1,
+      "message": "++i",
+      "revId": "8f806c9afe1e543b67b6ab478438b49df4d29457",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdH//8Wg\u003d",
+        "filename": "vp9/encoder/vp9_onyx_if.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 2280,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2013-10-07T17:51:59Z",
+      "side": 1,
+      "message": "period at end of line.",
+      "revId": "8f806c9afe1e543b67b6ab478438b49df4d29457",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdH//8WY\u003d",
+        "filename": "vp9/encoder/vp9_onyx_if.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 2416,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2013-10-07T17:51:59Z",
+      "side": 1,
+      "message": "combine these comment lines and put period at end of line:\n// Constrained quality tests; undershoot and below auto cq level.",
+      "revId": "8f806c9afe1e543b67b6ab478438b49df4d29457",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdH//8WU\u003d",
+        "filename": "vp9/encoder/vp9_onyx_if.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 2579,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2013-10-07T17:51:59Z",
+      "side": 1,
+      "message": "FILE *const f \u003d",
+      "revId": "8f806c9afe1e543b67b6ab478438b49df4d29457",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdH//8WQ\u003d",
+        "filename": "vp9/encoder/vp9_onyx_if.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 2592,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2013-10-07T17:51:59Z",
+      "side": 1,
+      "message": "Make the statement more compact by using the full 80 columns more efficiently.",
+      "revId": "8f806c9afe1e543b67b6ab478438b49df4d29457",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdH//8WM\u003d",
+        "filename": "vp9/encoder/vp9_onyx_if.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 2620,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2013-10-07T17:51:59Z",
+      "side": 1,
+      "message": "FILE *const fmodes \u003d",
+      "revId": "8f806c9afe1e543b67b6ab478438b49df4d29457",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdH//8WI\u003d",
+        "filename": "vp9/encoder/vp9_onyx_if.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 2624,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2013-10-07T17:51:59Z",
+      "side": 1,
+      "message": "Make the statement more compact by using the full 80 columns more efficiently.",
+      "revId": "8f806c9afe1e543b67b6ab478438b49df4d29457",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdH//8WE\u003d",
+        "filename": "vp9/encoder/vp9_onyx_if.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 2643,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2013-10-07T17:51:59Z",
+      "side": 1,
+      "message": "VP9_COMMON *const cm \u003d",
+      "revId": "8f806c9afe1e543b67b6ab478438b49df4d29457",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdH//8WA\u003d",
+        "filename": "vp9/encoder/vp9_onyx_if.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 2649,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2013-10-07T17:51:59Z",
+      "side": 1,
+      "message": "Fix alignment of the // (2 space indent)",
+      "revId": "8f806c9afe1e543b67b6ab478438b49df4d29457",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdH//8V4\u003d",
+        "filename": "vp9/encoder/vp9_onyx_if.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 2806,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2013-10-07T17:51:59Z",
+      "side": 1,
+      "message": "VP9_COMMON *const cm \u003d",
+      "revId": "8f806c9afe1e543b67b6ab478438b49df4d29457",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdH//8V0\u003d",
+        "filename": "vp9/encoder/vp9_onyx_if.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 2807,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2013-10-07T17:51:59Z",
+      "side": 1,
+      "message": "MACROBLOCKD *const xd \u003d",
+      "revId": "8f806c9afe1e543b67b6ab478438b49df4d29457",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdH//8Vw\u003d",
+        "filename": "vp9/encoder/vp9_onyx_if.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 2826,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2013-10-07T17:51:59Z",
+      "side": 1,
+      "message": "SPEED_FEATURES *const sf \u003d",
+      "revId": "8f806c9afe1e543b67b6ab478438b49df4d29457",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdH//8Vs\u003d",
+        "filename": "vp9/encoder/vp9_onyx_if.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 2828,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2013-10-07T17:51:59Z",
+      "side": 1,
+      "message": "struct segmentation *const seg \u003d",
+      "revId": "8f806c9afe1e543b67b6ab478438b49df4d29457",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdH//8Vo\u003d",
+        "filename": "vp9/encoder/vp9_onyx_if.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 2830,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2013-10-07T17:51:59Z",
+      "side": 1,
+      "message": "period at end of comment, and those of comments in modified lines that follow.",
+      "revId": "8f806c9afe1e543b67b6ab478438b49df4d29457",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdH//8Vk\u003d",
+        "filename": "vp9/encoder/vp9_onyx_if.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 3370,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2013-10-07T17:51:59Z",
+      "side": 1,
+      "message": "Why remove the comment?\n// Debug stats for segment feature experiments.",
+      "revId": "8f806c9afe1e543b67b6ab478438b49df4d29457",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
