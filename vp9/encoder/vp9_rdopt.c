@@ -249,10 +249,10 @@ void vp9_initialize_rd_consts(VP9_COMP *cpi, int qindex) {
       MB_PREDICTION_MODE m;
 
       for (m = NEARESTMV; m < MB_MODE_COUNT; m++)
-        cpi->mb.inter_mode_cost[i][m - NEARESTMV] =
+        cpi->mb.inter_mode_cost[i][inter_mode_offset(m)] =
             cost_token(vp9_inter_mode_tree,
                        cpi->common.fc.inter_mode_probs[i],
-                       vp9_inter_mode_encodings + (m - NEARESTMV));
+                       vp9_inter_mode_encodings + inter_mode_offset(m));
     }
   }
 }
@@ -1416,7 +1416,7 @@ static int cost_mv_ref(VP9_COMP *cpi, MB_PREDICTION_MODE mode,
   // Don't account for mode here if segment skip is enabled.
   if (!vp9_segfeature_active(&cpi->common.seg, segment_id, SEG_LVL_SKIP)) {
     assert(is_inter_mode(mode));
-    return x->inter_mode_cost[mode_context][mode - NEARESTMV];
+    return x->inter_mode_cost[mode_context][inter_mode_offset(mode)];
   } else {
     return 0;
   }
