@@ -59,7 +59,6 @@ static int kfboost_qadjust(int qindex) {
 
 int vp9_bits_per_mb(FRAME_TYPE frame_type, int qindex,
                     double correction_factor) {
-
   const double q = vp9_convert_qindex_to_q(qindex);
   int enumerator = frame_type == KEY_FRAME ? 4000000 : 2500000;
 
@@ -192,11 +191,12 @@ static void calc_pframe_target_size(VP9_COMP *cpi) {
     cpi->this_frame_target = cpi->per_frame_bandwidth;
   }
 
-  // Sanity check that the total sum of adjustments is not above the maximum allowed
-  // That is that having allowed for KF and GF penalties we have not pushed the
-  // current interframe target to low. If the adjustment we apply here is not capable of recovering
-  // all the extra bits we have spent in the KF or GF then the remainder will have to be recovered over
-  // a longer time span via other buffer / rate control mechanisms.
+  // Check that the total sum of adjustments is not above the maximum allowed.
+  // That is, having allowed for the KF and GF penalties, we have not pushed
+  // the current inter-frame target too low. If the adjustment we apply here is
+  // not capable of recovering all the extra bits we have spent in the KF or GF,
+  // then the remainder will have to be recovered over a longer time span via
+  // other buffer / rate control mechanisms.
   if (cpi->this_frame_target < min_frame_target)
     cpi->this_frame_target = min_frame_target;
 
@@ -265,12 +265,12 @@ void vp9_update_rate_correction_factors(VP9_COMP *cpi, int damp_var) {
                                                  rate_correction_factor);
 
   // Work out a size correction factor.
-  // if ( cpi->this_frame_target > 0 )
-  //  correction_factor = (100 * cpi->projected_frame_size) / cpi->this_frame_target;
   if (projected_size_based_on_q > 0)
-    correction_factor = (100 * cpi->projected_frame_size) / projected_size_based_on_q;
+    correction_factor =
+        (100 * cpi->projected_frame_size) / projected_size_based_on_q;
 
-  // More heavily damped adjustment used if we have been oscillating either side of target
+  // More heavily damped adjustment used if we have been oscillating either side
+  // of target.
   switch (damp_var) {
     case 0:
       adjustment_limit = 0.75;
@@ -287,27 +287,29 @@ void vp9_update_rate_correction_factors(VP9_COMP *cpi, int damp_var) {
   // if ( (correction_factor > 102) && (Q < cpi->active_worst_quality) )
   if (correction_factor > 102) {
     // We are not already at the worst allowable quality
-    correction_factor = (int)(100.5 + ((correction_factor - 100) * adjustment_limit));
-    rate_correction_factor = ((rate_correction_factor * correction_factor) / 100);
+    correction_factor =
+        (int)(100.5 + ((correction_factor - 100) * adjustment_limit));
+    rate_correction_factor =
+        ((rate_correction_factor * correction_factor) / 100);
 
     // Keep rate_correction_factor within limits
     if (rate_correction_factor > MAX_BPB_FACTOR)
       rate_correction_factor = MAX_BPB_FACTOR;
-  }
-  // else if ( (correction_factor < 99) && (Q > cpi->active_best_quality) )
-  else if (correction_factor < 99) {
+  } else if (correction_factor < 99) {
     // We are not already at the best allowable quality
-    correction_factor = (int)(100.5 - ((100 - correction_factor) * adjustment_limit));
-    rate_correction_factor = ((rate_correction_factor * correction_factor) / 100);
+    correction_factor =
+        (int)(100.5 - ((100 - correction_factor) * adjustment_limit));
+    rate_correction_factor =
+        ((rate_correction_factor * correction_factor) / 100);
 
     // Keep rate_correction_factor within limits
     if (rate_correction_factor < MIN_BPB_FACTOR)
       rate_correction_factor = MIN_BPB_FACTOR;
   }
 
-  if (cpi->common.frame_type == KEY_FRAME)
+  if (cpi->common.frame_type == KEY_FRAME) {
     cpi->key_frame_rate_correction_factor = rate_correction_factor;
-  else {
+  } else {
     if (cpi->refresh_alt_ref_frame || cpi->refresh_golden_frame)
       cpi->gf_rate_correction_factor = rate_correction_factor;
     else
@@ -326,20 +328,24 @@ int vp9_regulate_q(VP9_COMP *cpi, int target_bits_per_frame) {
   double correction_factor;
 
   // Select the appropriate correction factor based upon type of frame.
-  if (cpi->common.frame_type == KEY_FRAME)
+  if (cpi->common.frame_type == KEY_FRAME) {
     correction_factor = cpi->key_frame_rate_correction_factor;
-  else {
+  } else {
     if (cpi->refresh_alt_ref_frame || cpi->refresh_golden_frame)
       correction_factor = cpi->gf_rate_correction_factor;
     else
       correction_factor = cpi->rate_correction_factor;
   }
 
-  // Calculate required scaling factor based on target frame size and size of frame produced using previous Q
+  // Calculate required scaling factor based on target frame size and size of
+  // frame produced using previous Q.
   if (target_bits_per_frame >= (INT_MAX >> BPER_MB_NORMBITS))
-    target_bits_per_mb = (target_bits_per_frame / cpi->common.MBs) << BPER_MB_NORMBITS;       // Case where we would overflow int
+    target_bits_per_mb =
+        (target_bits_per_frame / cpi->common.MBs)
+        << BPER_MB_NORMBITS;  // Case where we would overflow int
   else
-    target_bits_per_mb = (target_bits_per_frame << BPER_MB_NORMBITS) / cpi->common.MBs;
+    target_bits_per_mb =
+        (target_bits_per_frame << BPER_MB_NORMBITS) / cpi->common.MBs;
 
   i = cpi->active_best_quality;
 
@@ -405,7 +411,6 @@ static int estimate_keyframe_frequency(VP9_COMP *cpi) {
     }
 
     av_key_frame_frequency /= total_weight;
-
   }
   return av_key_frame_frequency;
 }
