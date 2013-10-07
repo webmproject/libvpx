@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdH//8TE\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 172,
+      "author": {
+        "id": 1003307
+      },
+      "writtenOn": "2013-10-07T18:45:12Z",
+      "side": 1,
+      "message": "Prefixing a function that sets things by \"get\" is a bit weird.",
+      "revId": "78173ad477b014720831830d7e5e28cb47a44e6a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdH//8S4\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 208,
+      "author": {
+        "id": 1003307
+      },
+      "writtenOn": "2013-10-07T18:45:12Z",
+      "side": 1,
+      "message": "Refactoring vp9_initialize_rd_consts is a good idea, but should ideally be done in a different commit than the bits per mb adjustement.",
+      "revId": "78173ad477b014720831830d7e5e28cb47a44e6a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
