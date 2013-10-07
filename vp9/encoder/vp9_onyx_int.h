@@ -253,6 +253,7 @@ typedef struct {
   int auto_mv_step_size;
   int optimize_coefficients;
   int static_segmentation;
+  int variance_adaptive_quantization;
   int comp_inter_joint_search_thresh;
   int adaptive_rd_thresh;
   int skip_encode_sb;
@@ -379,9 +380,9 @@ typedef struct VP9_COMP {
   int ref_frame_mask;
   int set_ref_frame_mask;
 
-  int rd_threshes[BLOCK_SIZES][MAX_MODES];
+  int rd_threshes[MAX_SEGMENTS][BLOCK_SIZES][MAX_MODES];
   int rd_thresh_freq_fact[BLOCK_SIZES][MAX_MODES];
-  int rd_thresh_sub8x8[BLOCK_SIZES][MAX_REFS];
+  int rd_thresh_sub8x8[MAX_SEGMENTS][BLOCK_SIZES][MAX_REFS];
   int rd_thresh_freq_sub8x8[BLOCK_SIZES][MAX_REFS];
 
   int64_t rd_comp_pred_diff[NB_PREDICTION_TYPES];
@@ -709,6 +710,8 @@ void vp9_set_speed_features(VP9_COMP *cpi);
 int vp9_calc_ss_err(YV12_BUFFER_CONFIG *source, YV12_BUFFER_CONFIG *dest);
 
 void vp9_alloc_compressor_data(VP9_COMP *cpi);
+
+int vp9_compute_qdelta(VP9_COMP *cpi, double qstart, double qtarget);
 
 static int get_token_alloc(int mb_rows, int mb_cols) {
   return mb_rows * mb_cols * (48 * 16 + 4);

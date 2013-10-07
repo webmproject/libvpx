@@ -30,6 +30,7 @@
 #include "vp9/common/vp9_quant_common.h"
 #include "vp9/common/vp9_entropymv.h"
 #include "vp9/encoder/vp9_encodemv.h"
+#include "vp9/encoder/vp9_vaq.h"
 #include "./vpx_scale_rtcd.h"
 // TODO(jkoleszar): for setup_dst_planes
 #include "vp9/common/vp9_reconinter.h"
@@ -530,7 +531,7 @@ void vp9_first_pass(VP9_COMP *cpi) {
   // if ( 0 )
   {
     vp9_init_mv_probs(cm);
-    vp9_initialize_rd_consts(cpi, cm->base_qindex + cm->y_dc_delta_q);
+    vp9_initialize_rd_consts(cpi);
   }
 
   // for each macroblock row in image
@@ -555,6 +556,7 @@ void vp9_first_pass(VP9_COMP *cpi) {
       int this_error;
       int gf_motion_error = INT_MAX;
       int use_dc_pred = (mb_col || mb_row) && (!mb_col || !mb_row);
+      double error_weight = 1.0;
 
       xd->plane[0].dst.buf = new_yv12->y_buffer + recon_yoffset;
       xd->plane[1].dst.buf = new_yv12->u_buffer + recon_uvoffset;
@@ -581,8 +583,13 @@ void vp9_first_pass(VP9_COMP *cpi) {
                      mb_col << 1,
                      1 << mi_width_log2(xd->this_mi->mbmi.sb_type));
 
+      if (cpi->sf.variance_adaptive_quantization) {
+        int energy = vp9_block_energy(cpi, x, xd->this_mi->mbmi.sb_type);
+        error_weight = vp9_vaq_inv_q_ratio(energy);
+      }
+
       // do intra 16x16 prediction
-      this_error = vp9_encode_intra(x, use_dc_pred);
+      this_error = error_weight * vp9_encode_intra(x, use_dc_pred);
 
       // intrapenalty below deals with situations where the intra and inter
       // error scores are very low (eg a plain black frame).
@@ -617,6 +624,7 @@ void vp9_first_pass(VP9_COMP *cpi) {
         first_pass_motion_search(cpi, x, &best_ref_mv,
                                  &mv.as_mv, lst_yv12,
                                  &motion_error, recon_yoffset);
+        motion_error *= error_weight;
 
         // If the current best reference mv is not centered on 0,0 then do a 0,0
         // based search as well.
@@ -624,6 +632,7 @@ void vp9_first_pass(VP9_COMP *cpi) {
           tmp_err = INT_MAX;
           first_pass_motion_search(cpi, x, &zero_ref_mv, &tmp_mv.as_mv,
                                    lst_yv12, &tmp_err, recon_yoffset);
+          tmp_err *= error_weight;
 
           if (tmp_err < motion_error) {
             motion_error = tmp_err;
@@ -640,6 +649,7 @@ void vp9_first_pass(VP9_COMP *cpi) {
           first_pass_motion_search(cpi, x, &zero_ref_mv,
                                    &tmp_mv.as_mv, gld_yv12,
                                    &gf_motion_error, recon_yoffset);
+          gf_motion_error *= error_weight;
 
           if ((gf_motion_error < motion_error) &&
               (gf_motion_error < this_error)) {

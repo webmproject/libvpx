@@ -18,14 +18,14 @@
 #include "vp9/common/vp9_filter.h"
 #include "vp9/encoder/vp9_variance.h"
 
-static void variance(const uint8_t *src_ptr,
-                     int  source_stride,
-                     const uint8_t *ref_ptr,
-                     int  recon_stride,
-                     int  w,
-                     int  h,
-                     unsigned int *sse,
-                     int *sum) {
+void variance(const uint8_t *src_ptr,
+              int  source_stride,
+              const uint8_t *ref_ptr,
+              int  recon_stride,
+              int  w,
+              int  h,
+              unsigned int *sse,
+              int *sum) {
   int i, j;
   int diff;
 

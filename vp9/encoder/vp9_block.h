@@ -90,6 +90,7 @@ struct macroblock {
   int sadperbit4;
   int rddiv;
   int rdmult;
+  unsigned int mb_energy;
   unsigned int *mb_activity_ptr;
   int *mb_norm_activity_ptr;
   signed int act_zbin_adj;

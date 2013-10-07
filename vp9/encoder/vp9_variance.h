@@ -14,6 +14,15 @@
 #include "vpx/vpx_integer.h"
 // #include "./vpx_config.h"
 
+void variance(const uint8_t *src_ptr,
+              int  source_stride,
+              const uint8_t *ref_ptr,
+              int  recon_stride,
+              int  w,
+              int  h,
+              unsigned int *sse,
+              int *sum);
+
 typedef unsigned int(*vp9_sad_fn_t)(const uint8_t *src_ptr,
                                     int source_stride,
                                     const uint8_t *ref_ptr,
