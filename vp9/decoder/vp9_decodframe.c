@@ -169,7 +169,7 @@ static int decode_tokens(VP9D_COMP *pbi, BLOCK_SIZE bsize, vp9_reader *r) {
                                                   cm->base_qindex));
 
     // TODO(dkovalev) if (!vp9_reader_has_error(r))
-    return vp9_decode_tokens(pbi, r, bsize);
+    return vp9_decode_tokens(cm, xd, &cm->seg, r, bsize);
   }
 }
 
