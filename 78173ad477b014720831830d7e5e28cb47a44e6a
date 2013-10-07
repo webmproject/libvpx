@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdH//8Ps\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 172,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2013-10-07T22:10:52Z",
+      "side": 1,
+      "message": "reverting this refactoring change from this patch.",
+      "parentUuid": "AAAAdH//8TE\u003d",
+      "revId": "78173ad477b014720831830d7e5e28cb47a44e6a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdH//8S4\u003d",
         "filename": "vp9/encoder/vp9_rdopt.c",
         "patchSetId": 3
@@ -30,6 +48,24 @@
       "writtenOn": "2013-10-07T18:45:12Z",
       "side": 1,
       "message": "Refactoring vp9_initialize_rd_consts is a good idea, but should ideally be done in a different commit than the bits per mb adjustement.",
+      "revId": "78173ad477b014720831830d7e5e28cb47a44e6a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdH//8Pw\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 208,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2013-10-07T22:10:52Z",
+      "side": 1,
+      "message": "ditto",
+      "parentUuid": "AAAAdH//8S4\u003d",
       "revId": "78173ad477b014720831830d7e5e28cb47a44e6a",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
