@@ -29,9 +29,6 @@ vp9_coeff_accum context_counters[TX_SIZES][BLOCK_TYPES];
 extern vp9_coeff_stats tree_update_hist[TX_SIZES][BLOCK_TYPES];
 #endif  /* ENTROPY_STATS */
 
-DECLARE_ALIGNED(16, extern const uint8_t,
-                vp9_pt_energy_class[MAX_ENTROPY_TOKENS]);
-
 static TOKENVALUE dct_value_tokens[DCT_MAX_VALUE * 2];
 const TOKENVALUE *vp9_dct_value_tokens_ptr;
 static int dct_value_cost[DCT_MAX_VALUE * 2];
