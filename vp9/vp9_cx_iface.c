@@ -267,11 +267,11 @@ static vpx_codec_err_t set_vp9e_config(VP9_CONFIG *oxcf,
   }
 
   if (cfg.g_pass == VPX_RC_FIRST_PASS) {
-    oxcf->allow_lag              = 0;
-    oxcf->lag_in_frames           = 0;
+    oxcf->allow_lag     = 0;
+    oxcf->lag_in_frames = 0;
   } else {
-    oxcf->allow_lag              = (cfg.g_lag_in_frames) > 0;
-    oxcf->lag_in_frames           = cfg.g_lag_in_frames;
+    oxcf->allow_lag     = (cfg.g_lag_in_frames) > 0;
+    oxcf->lag_in_frames = cfg.g_lag_in_frames;
   }
 
   // VBR only supported for now.
@@ -283,7 +283,7 @@ static vpx_codec_err_t set_vp9e_config(VP9_CONFIG *oxcf,
   else if (cfg.rc_end_usage == VPX_Q)
     oxcf->end_usage      = USAGE_CONSTANT_QUALITY;
 
-  oxcf->target_bandwidth        = cfg.rc_target_bitrate;
+  oxcf->target_bandwidth         = cfg.rc_target_bitrate;
   oxcf->rc_max_intra_bitrate_pct = vp8_cfg.rc_max_intra_bitrate_pct;
 
   oxcf->best_allowed_q          = cfg.rc_min_quantizer;
@@ -298,7 +298,7 @@ static vpx_codec_err_t set_vp9e_config(VP9_CONFIG *oxcf,
   oxcf->starting_buffer_level   = cfg.rc_buf_initial_sz;
   oxcf->optimal_buffer_level    = cfg.rc_buf_optimal_sz;
 
-  oxcf->two_pass_vbrbias        = cfg.rc_2pass_vbr_bias_pct;
+  oxcf->two_pass_vbrbias         = cfg.rc_2pass_vbr_bias_pct;
   oxcf->two_pass_vbrmin_section  = cfg.rc_2pass_vbr_minsection_pct;
   oxcf->two_pass_vbrmax_section  = cfg.rc_2pass_vbr_maxsection_pct;
 
@@ -314,23 +314,23 @@ static vpx_codec_err_t set_vp9e_config(VP9_CONFIG *oxcf,
   oxcf->encode_breakout        =  vp8_cfg.static_thresh;
   oxcf->play_alternate         =  vp8_cfg.enable_auto_alt_ref;
   oxcf->noise_sensitivity      =  vp8_cfg.noise_sensitivity;
-  oxcf->Sharpness             =  vp8_cfg.Sharpness;
+  oxcf->Sharpness              =  vp8_cfg.Sharpness;
 
-  oxcf->two_pass_stats_in        =  cfg.rc_twopass_stats_in;
-  oxcf->output_pkt_list         =  vp8_cfg.pkt_list;
+  oxcf->two_pass_stats_in      =  cfg.rc_twopass_stats_in;
+  oxcf->output_pkt_list        =  vp8_cfg.pkt_list;
 
   oxcf->arnr_max_frames = vp8_cfg.arnr_max_frames;
-  oxcf->arnr_strength =  vp8_cfg.arnr_strength;
-  oxcf->arnr_type =      vp8_cfg.arnr_type;
+  oxcf->arnr_strength   = vp8_cfg.arnr_strength;
+  oxcf->arnr_type       = vp8_cfg.arnr_type;
 
   oxcf->tuning = vp8_cfg.tuning;
 
   oxcf->tile_columns = vp8_cfg.tile_columns;
-  oxcf->tile_rows = vp8_cfg.tile_rows;
+  oxcf->tile_rows    = vp8_cfg.tile_rows;
 
   oxcf->lossless = vp8_cfg.lossless;
 
-  oxcf->error_resilient_mode = cfg.g_error_resilient;
+  oxcf->error_resilient_mode         = cfg.g_error_resilient;
   oxcf->frame_parallel_decoding_mode = vp8_cfg.frame_parallel_decoding_mode;
 
   oxcf->ss_number_layers = cfg.ss_number_layers;

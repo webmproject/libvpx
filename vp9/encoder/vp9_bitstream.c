@@ -388,8 +388,8 @@ static void encode_ref_frame(VP9_COMP *cpi, vp9_writer *bc) {
            mi->ref_frame[0]);
   }
 
-  // if using the prediction mdoel we have nothing further to do because
-  // the reference frame is fully coded by the segment
+  // If using the prediction model we have nothing further to do because
+  // the reference frame is fully coded by the segment.
 }
 
 static void pack_inter_mode_mvs(VP9_COMP *cpi, MODE_INFO *m, vp9_writer *bc) {
