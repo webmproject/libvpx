@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdH//8X4\u003d",
+        "filename": "vp9/encoder/vp9_ratectrl.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 195,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2013-10-07T16:09:20Z",
+      "side": 1,
+      "message": "Improve the readability of this comment?\n\"Check that the total sum of adjustments is not above the maximum allowed. That is, having allowed for the KF and GF penalties, we have not pushed the current inter-frame target too low. If the adjustment we apply here is not capable of recovering all the extra bits we have spent in the KF or GF, then the remainder will have to be recovered over a longer time span via other buffer / rate control mechanisms.\"",
+      "revId": "7a80236334d42be2394205418dcd2875b01dd0b9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdH//8X8\u003d",
+        "filename": "vp9/encoder/vp9_ratectrl.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 273,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2013-10-07T16:09:20Z",
+      "side": 1,
+      "message": "Period at end of comment required.",
+      "revId": "7a80236334d42be2394205418dcd2875b01dd0b9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdH//8X0\u003d",
+        "filename": "vp9/encoder/vp9_ratectrl.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 341,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2013-10-07T16:09:20Z",
+      "side": 1,
+      "message": "period at end of line.",
+      "revId": "7a80236334d42be2394205418dcd2875b01dd0b9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
