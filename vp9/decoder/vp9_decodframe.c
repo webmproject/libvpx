@@ -155,9 +155,8 @@ static void decode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
     decode_block(plane, block, plane_bsize, tx_size, arg);
 }
 
-static int decode_tokens(VP9D_COMP *pbi, BLOCK_SIZE bsize, vp9_reader *r) {
-  VP9_COMMON *const cm = &pbi->common;
-  MACROBLOCKD *const xd = &pbi->mb;
+static int decode_tokens(VP9_COMMON *const cm, MACROBLOCKD *const xd,
+                         BLOCK_SIZE bsize, vp9_reader *r) {
   MB_MODE_INFO *const mbmi = &xd->mi_8x8[0]->mbmi;
 
   if (mbmi->skip_coeff) {
@@ -206,19 +205,18 @@ static void set_offsets(VP9D_COMP *pbi, BLOCK_SIZE bsize,
   setup_dst_planes(xd, &cm->yv12_fb[cm->new_fb_idx], mi_row, mi_col);
 }
 
-static void set_ref(VP9D_COMP *pbi, int i, int mi_row, int mi_col) {
-  VP9_COMMON *const cm = &pbi->common;
-  MACROBLOCKD *const xd = &pbi->mb;
+static void set_ref(VP9_COMMON *const cm, MACROBLOCKD *const xd,
+                    int idx, int mi_row, int mi_col) {
   MB_MODE_INFO *const mbmi = &xd->mi_8x8[0]->mbmi;
-  const int ref = mbmi->ref_frame[i] - LAST_FRAME;
+  const int ref = mbmi->ref_frame[idx] - LAST_FRAME;
   const YV12_BUFFER_CONFIG *cfg = &cm->yv12_fb[cm->active_ref_idx[ref]];
   const struct scale_factors *sf = &cm->active_ref_scale[ref];
   if (!vp9_is_valid_scale(sf))
     vpx_internal_error(&cm->error, VPX_CODEC_UNSUP_BITSTREAM,
                        "Invalid scale factors");
 
-  xd->scale_factor[i] = *sf;
-  setup_pre_planes(xd, i, cfg, mi_row, mi_col, sf);
+  xd->scale_factor[idx] = *sf;
+  setup_pre_planes(xd, idx, cfg, mi_row, mi_col, sf);
   xd->corrupted |= cfg->corrupted;
 }
 
@@ -243,7 +241,7 @@ static void decode_modes_b(VP9D_COMP *pbi, int tile_col,
 
   // Has to be called after set_offsets
   mbmi = &xd->mi_8x8[0]->mbmi;
-  eobtotal = decode_tokens(pbi, bsize, r);
+  eobtotal = decode_tokens(cm, xd, bsize, r);
 
   if (!is_inter_block(mbmi)) {
     // Intra reconstruction
@@ -258,9 +256,9 @@ static void decode_modes_b(VP9D_COMP *pbi, int tile_col,
         mbmi->skip_coeff = 1;  // skip loopfilter
     }
 
-    set_ref(pbi, 0, mi_row, mi_col);
+    set_ref(cm, xd, 0, mi_row, mi_col);
     if (has_second_ref(mbmi))
-      set_ref(pbi, 1, mi_row, mi_col);
+      set_ref(cm, xd, 1, mi_row, mi_col);
 
     xd->subpix.filter_x = xd->subpix.filter_y =
         vp9_get_filter_kernel(mbmi->interp_filter);
@@ -271,7 +269,6 @@ static void decode_modes_b(VP9D_COMP *pbi, int tile_col,
   }
   xd->corrupted |= vp9_reader_has_error(r);
 }
-
 
 static void decode_modes_sb(VP9D_COMP *pbi, int tile_col,
                             int mi_row, int mi_col,
@@ -344,21 +341,20 @@ static void decode_modes_sb(VP9D_COMP *pbi, int tile_col,
   }
 }
 
-static void setup_token_decoder(VP9D_COMP *pbi,
-                                const uint8_t *data, size_t read_size,
+static void setup_token_decoder(const uint8_t *data,
+                                const uint8_t *data_end,
+                                size_t read_size,
+                                struct vpx_internal_error_info *error_info,
                                 vp9_reader *r) {
-  VP9_COMMON *cm = &pbi->common;
-  const uint8_t *data_end = pbi->source + pbi->source_sz;
-
   // Validate the calculated partition length. If the buffer
   // described by the partition can't be fully read, then restrict
   // it to the portion that can be (for EC mode) or throw an error.
   if (!read_is_valid(data, read_size, data_end))
-    vpx_internal_error(&cm->error, VPX_CODEC_CORRUPT_FRAME,
+    vpx_internal_error(error_info, VPX_CODEC_CORRUPT_FRAME,
                        "Truncated packet or corrupt tile length");
 
   if (vp9_reader_init(r, data, read_size))
-    vpx_internal_error(&cm->error, VPX_CODEC_MEM_ERROR,
+    vpx_internal_error(error_info, VPX_CODEC_MEM_ERROR,
                        "Failed to allocate bool decoder %d", 1);
 }
 
@@ -709,9 +705,9 @@ static const uint8_t *decode_tiles(VP9D_COMP *pbi, const uint8_t *data) {
       vp9_get_tile_row_offsets(cm, tile_row);
       for (tile_col = tile_cols - 1; tile_col >= 0; tile_col--) {
         vp9_get_tile_col_offsets(cm, tile_col);
-        setup_token_decoder(pbi, data_ptr2[tile_row][tile_col],
+        setup_token_decoder(data_ptr2[tile_row][tile_col], data_end,
                             data_end - data_ptr2[tile_row][tile_col],
-                            &residual_bc);
+                            &cm->error, &residual_bc);
         decode_tile(pbi, &residual_bc, tile_col);
         if (tile_row == tile_rows - 1 && tile_col == tile_cols - 1)
           bc_bak = residual_bc;
@@ -740,7 +736,7 @@ static const uint8_t *decode_tiles(VP9D_COMP *pbi, const uint8_t *data) {
           size = data_end - data;
         }
 
-        setup_token_decoder(pbi, data, size, &residual_bc);
+        setup_token_decoder(data, data_end, size, &cm->error, &residual_bc);
         decode_tile(pbi, &residual_bc, tile_col);
         data += size;
       }
