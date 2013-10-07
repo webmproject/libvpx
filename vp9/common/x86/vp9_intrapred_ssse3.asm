@@ -612,3 +612,180 @@ cglobal d153_predictor_16x16, 4, 5, 8, dst, stride, above, left, goffset
   mova  [dstq+stride3q ], m4
   RESTORE_GOT
   RET
+
+INIT_XMM ssse3
+cglobal d153_predictor_32x32, 4, 5, 8, dst, stride, above, left, goffset
+  GET_GOT     goffsetq
+  mova                  m0, [leftq]
+  movu                  m7, [aboveq-1]
+  movu                  m1, [aboveq+15]
+
+  pshufb                m4, m1, [GLOBAL(sh_b123456789abcdeff)]
+  pshufb                m6, m1, [GLOBAL(sh_b23456789abcdefff)]
+
+  X_PLUS_2Y_PLUS_Z_PLUS_2_RSH_2 m1, m4, m6, m2          ; 3-tap avg above [high]
+
+  palignr               m3, m1, m7, 1
+  palignr               m5, m1, m7, 2
+
+  X_PLUS_2Y_PLUS_Z_PLUS_2_RSH_2 m7, m3, m5, m1          ; 3-tap avg above [low]
+
+  pshufb                m7, [GLOBAL(sh_bfedcba9876543210)]
+  palignr               m5, m0, m7, 15
+  palignr               m3, m0, m7, 14
+
+  X_PLUS_2Y_PLUS_Z_PLUS_2_RSH_2 m0, m5, m3, m4          ; 3-tap avg B3-Bg
+  pavgb                 m5, m0                            ; A1 - Ag
+  punpcklbw             m6, m4, m5                        ; A-B8 ... A-B1
+  punpckhbw             m4, m5                            ; A-B9 ... A-Bg
+  pshufb                m6, [GLOBAL(sh_bfedcba9876543210)]
+  pshufb                m4, [GLOBAL(sh_bfedcba9876543210)]
+
+  DEFINE_ARGS dst, stride, stride3, left, line
+  lea             stride3q, [strideq*3]
+
+  palignr               m5, m2, m1, 14
+  palignr               m7, m1, m6, 14
+  mova  [dstq            ], m7
+  mova  [dstq+16         ], m5
+  palignr               m5, m2, m1, 12
+  palignr               m7, m1, m6, 12
+  mova  [dstq+strideq    ], m7
+  mova  [dstq+strideq+16 ], m5
+  palignr                m5, m2, m1, 10
+  palignr                m7, m1, m6, 10
+  mova  [dstq+strideq*2   ], m7
+  mova  [dstq+strideq*2+16], m5
+  palignr                m5, m2, m1, 8
+  palignr                m7, m1, m6, 8
+  mova  [dstq+stride3q    ], m7
+  mova  [dstq+stride3q+16 ], m5
+  lea                  dstq, [dstq+strideq*4]
+  palignr                m5, m2, m1, 6
+  palignr                m7, m1, m6, 6
+  mova  [dstq             ], m7
+  mova  [dstq+16          ], m5
+  palignr                m5, m2, m1, 4
+  palignr                m7, m1, m6, 4
+  mova  [dstq+strideq     ], m7
+  mova  [dstq+strideq+16  ], m5
+  palignr                m5, m2, m1, 2
+  palignr                m7, m1, m6, 2
+  mova  [dstq+strideq*2   ], m7
+  mova  [dstq+strideq*2+16], m5
+  mova  [dstq+stride3q    ], m6
+  mova  [dstq+stride3q+16 ], m1
+  lea                  dstq, [dstq+strideq*4]
+
+  palignr                m5, m1, m6, 14
+  palignr                m3, m6, m4, 14
+  mova  [dstq             ], m3
+  mova  [dstq+16          ], m5
+  palignr                m5, m1, m6, 12
+  palignr                m3, m6, m4, 12
+  mova  [dstq+strideq     ], m3
+  mova  [dstq+strideq+16  ], m5
+  palignr                m5, m1, m6, 10
+  palignr                m3, m6, m4, 10
+  mova  [dstq+strideq*2   ], m3
+  mova  [dstq+strideq*2+16], m5
+  palignr                m5, m1, m6, 8
+  palignr                m3, m6, m4, 8
+  mova  [dstq+stride3q    ], m3
+  mova  [dstq+stride3q+16 ], m5
+  lea                  dstq, [dstq+strideq*4]
+  palignr                m5, m1, m6, 6
+  palignr                m3, m6, m4, 6
+  mova  [dstq             ], m3
+  mova  [dstq+16          ], m5
+  palignr                m5, m1, m6, 4
+  palignr                m3, m6, m4, 4
+  mova  [dstq+strideq     ], m3
+  mova  [dstq+strideq+16  ], m5
+  palignr                m5, m1, m6, 2
+  palignr                m3, m6, m4, 2
+  mova  [dstq+strideq*2   ], m3
+  mova  [dstq+strideq*2+16], m5
+  mova  [dstq+stride3q    ], m4
+  mova  [dstq+stride3q+16 ], m6
+  lea               dstq, [dstq+strideq*4]
+
+  mova                   m7, [leftq]
+  mova                   m3, [leftq+16]
+  palignr                m5, m3, m7, 15
+  palignr                m0, m3, m7, 14
+
+  X_PLUS_2Y_PLUS_Z_PLUS_2_RSH_2 m3, m5, m0, m2          ; 3-tap avg Bh -
+  pavgb                  m5, m3                            ; Ah -
+  punpcklbw              m3, m2, m5                        ; A-B8 ... A-B1
+  punpckhbw              m2, m5                            ; A-B9 ... A-Bg
+  pshufb                 m3, [GLOBAL(sh_bfedcba9876543210)]
+  pshufb                 m2, [GLOBAL(sh_bfedcba9876543210)]
+
+  palignr                m7, m6, m4, 14
+  palignr                m0, m4, m3, 14
+  mova  [dstq             ], m0
+  mova  [dstq+16          ], m7
+  palignr                m7, m6, m4, 12
+  palignr                m0, m4, m3, 12
+  mova  [dstq+strideq     ], m0
+  mova  [dstq+strideq+16  ], m7
+  palignr                m7, m6, m4, 10
+  palignr                m0, m4, m3, 10
+  mova  [dstq+strideq*2   ], m0
+  mova  [dstq+strideq*2+16], m7
+  palignr                m7, m6, m4, 8
+  palignr                m0, m4, m3, 8
+  mova  [dstq+stride3q    ], m0
+  mova  [dstq+stride3q+16 ], m7
+  lea                  dstq, [dstq+strideq*4]
+  palignr                m7, m6, m4, 6
+  palignr                m0, m4, m3, 6
+  mova  [dstq             ], m0
+  mova  [dstq+16          ], m7
+  palignr                m7, m6, m4, 4
+  palignr                m0, m4, m3, 4
+  mova  [dstq+strideq     ], m0
+  mova  [dstq+strideq+16  ], m7
+  palignr                m7, m6, m4, 2
+  palignr                m0, m4, m3, 2
+  mova  [dstq+strideq*2   ], m0
+  mova  [dstq+strideq*2+16], m7
+  mova  [dstq+stride3q    ], m3
+  mova  [dstq+stride3q+16 ], m4
+  lea                  dstq, [dstq+strideq*4]
+
+  palignr                m7, m4, m3, 14
+  palignr                m0, m3, m2, 14
+  mova  [dstq             ], m0
+  mova  [dstq+16          ], m7
+  palignr                m7, m4, m3, 12
+  palignr                m0, m3, m2, 12
+  mova  [dstq+strideq     ], m0
+  mova  [dstq+strideq+16  ], m7
+  palignr                m7, m4, m3, 10
+  palignr                m0, m3, m2, 10
+  mova  [dstq+strideq*2   ], m0
+  mova  [dstq+strideq*2+16], m7
+  palignr                m7, m4, m3, 8
+  palignr                m0, m3, m2, 8
+  mova  [dstq+stride3q    ], m0
+  mova  [dstq+stride3q+16 ], m7
+  lea                  dstq, [dstq+strideq*4]
+  palignr                m7, m4, m3, 6
+  palignr                m0, m3, m2, 6
+  mova  [dstq             ], m0
+  mova  [dstq+16          ], m7
+  palignr                m7, m4, m3, 4
+  palignr                m0, m3, m2, 4
+  mova  [dstq+strideq     ], m0
+  mova  [dstq+strideq+16  ], m7
+  palignr                m7, m4, m3, 2
+  palignr                m0, m3, m2, 2
+  mova  [dstq+strideq*2   ], m0
+  mova  [dstq+strideq*2+16], m7
+  mova  [dstq+stride3q    ], m2
+  mova  [dstq+stride3q+16 ], m3
+
+  RESTORE_GOT
+  RET
