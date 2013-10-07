@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdH//8VM\u003d",
+        "filename": "vp9/encoder/vp9_bitstream.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 392,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2013-10-07T18:12:36Z",
+      "side": 1,
+      "message": "Capitalize the initial \"I\" and add a period to the end of the comment.",
+      "revId": "f8c7926c1d9b98a8e2edab63d3364c8fa752b69b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
