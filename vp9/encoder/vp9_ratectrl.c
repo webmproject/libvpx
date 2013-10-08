@@ -60,7 +60,7 @@ static int kfboost_qadjust(int qindex) {
 int vp9_bits_per_mb(FRAME_TYPE frame_type, int qindex,
                     double correction_factor) {
   const double q = vp9_convert_qindex_to_q(qindex);
-  int enumerator = frame_type == KEY_FRAME ? 4000000 : 2500000;
+  int enumerator = frame_type == KEY_FRAME ? 3300000 : 2250000;
 
   // q based adjustment to baseline enumerator
   enumerator += (int)(enumerator * q) >> 12;
