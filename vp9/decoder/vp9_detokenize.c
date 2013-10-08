@@ -203,7 +203,6 @@ static int decode_coefs(VP9_COMMON *cm, const MACROBLOCKD *xd,
   if (c < seg_eob)
     coef_counts[type][ref][band][pt][DCT_EOB_MODEL_TOKEN]++;
 
-
   return c;
 }
 
