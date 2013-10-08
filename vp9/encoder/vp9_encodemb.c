@@ -24,9 +24,6 @@
 #include "vp9/encoder/vp9_rdopt.h"
 #include "vp9/encoder/vp9_tokenize.h"
 
-DECLARE_ALIGNED(16, extern const uint8_t,
-                vp9_pt_energy_class[MAX_ENTROPY_TOKENS]);
-
 void vp9_subtract_block_c(int rows, int cols,
                           int16_t *diff_ptr, ptrdiff_t diff_stride,
                           const uint8_t *src_ptr, ptrdiff_t src_stride,

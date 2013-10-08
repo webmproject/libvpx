@@ -61,8 +61,6 @@ static const vp9_prob cat6_prob[15] = {
   254, 254, 254, 252, 249, 243, 230, 196, 177, 153, 140, 133, 130, 129, 0
 };
 
-DECLARE_ALIGNED(16, extern const uint8_t,
-                vp9_pt_energy_class[MAX_ENTROPY_TOKENS]);
 #define INCREMENT_COUNT(token)               \
   do {                                       \
     coef_counts[type][ref][band][pt]         \

@@ -45,9 +45,6 @@
 /* Factor to weigh the rate for switchable interp filters */
 #define SWITCHABLE_INTERP_RATE_FACTOR 1
 
-DECLARE_ALIGNED(16, extern const uint8_t,
-                vp9_pt_energy_class[MAX_ENTROPY_TOKENS]);
-
 #define LAST_FRAME_MODE_MASK    0xFFEDCD60
 #define GOLDEN_FRAME_MODE_MASK  0xFFDA3BB0
 #define ALT_REF_MODE_MASK       0xFFC648D0

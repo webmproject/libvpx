@@ -36,6 +36,9 @@
 
 #define INTER_MODE_CONTEXTS     7
 
+extern DECLARE_ALIGNED(16, const uint8_t,
+                       vp9_pt_energy_class[MAX_ENTROPY_TOKENS]);
+
 extern const vp9_tree_index vp9_coef_tree[];
 
 #define DCT_EOB_MODEL_TOKEN     3      /* EOB       Extra Bits 0+0 */
