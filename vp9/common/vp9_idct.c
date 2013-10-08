@@ -1253,7 +1253,20 @@ void vp9_short_idct32x32_add_c(int16_t *input, uint8_t *dest, int dest_stride) {
 
   // Rows
   for (i = 0; i < 32; ++i) {
-    idct32_1d(input, outptr);
+    int16_t zero_coeff[16];
+    for (j = 0; j < 16; ++j)
+      zero_coeff[j] = input[2 * j] | input[2 * j + 1];
+    for (j = 0; j < 8; ++j)
+      zero_coeff[j] = zero_coeff[2 * j] | zero_coeff[2 * j + 1];
+    for (j = 0; j < 4; ++j)
+      zero_coeff[j] = zero_coeff[2 * j] | zero_coeff[2 * j + 1];
+    for (j = 0; j < 2; ++j)
+      zero_coeff[j] = zero_coeff[2 * j] | zero_coeff[2 * j + 1];
+
+    if (zero_coeff[0] | zero_coeff[1])
+      idct32_1d(input, outptr);
+    else
+      vpx_memset(outptr, 0, sizeof(int16_t) * 32);
     input += 32;
     outptr += 32;
   }
