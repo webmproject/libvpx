@@ -16,6 +16,24 @@
       "revId": "23cc1cd8e678d9d0a92454e5d3935471a3bb6efa",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdH//8Ls\u003d",
+        "filename": "vp9/common/vp9_entropy.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2013-10-08T17:49:41Z",
+      "side": 1,
+      "message": "I didn\u0027t notice actually... but good point. We have a lot of \"extern DECLARE_ALIGNED\" instead of DECLARE_ALIGNED(... extern ...) in vp9_entropy.h. Probably we could submit this patch and then create another one which makes all declarations consistent.",
+      "parentUuid": "AAAAdH//8L4\u003d",
+      "revId": "23cc1cd8e678d9d0a92454e5d3935471a3bb6efa",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
