@@ -16,6 +16,24 @@
       "revId": "b096c5a336684ff7520571809a087bf6d5f60944",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdH//8LQ\u003d",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2013-10-08T18:09:13Z",
+      "side": 1,
+      "message": "vp9_idct16x16_add delegates to vp9_idct16x16_256_add or vp9_idct16x16_10_add or vp9_idct16x16_1_add based on eob\nvalue like this:\n\nvoid vp9_idct16x16_add(int16_t *input, uint8_t *dest, int stride, int eob) {\n  /* The calculation can be simplified if there are not many non-zero dct\n   * coefficients. Use eobs to separate different cases. */\n  if (eob) {\n    if (eob \u003d\u003d 1)\n      /* DC only DCT coefficient. */\n      vp9_idct16x16_1_add(input, dest, stride);\n    else if (eob \u003c\u003d 10)\n      vp9_idct16x16_10_add(input, dest, stride);\n    else\n      vp9_idct16x16_256_add(input, dest, stride);\n  }\n}",
+      "parentUuid": "AAAAdH//8Lk\u003d",
+      "revId": "b096c5a336684ff7520571809a087bf6d5f60944",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
