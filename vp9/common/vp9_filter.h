@@ -27,7 +27,7 @@ typedef enum {
   SWITCHABLE = 4  /* should be the last one */
 } INTERPOLATIONFILTERTYPE;
 
-typedef const int16_t subpel_kernel[SUBPEL_TAPS];
+typedef int16_t subpel_kernel[SUBPEL_TAPS];
 
 struct subpix_fn_table {
   const subpel_kernel *filter_x;
