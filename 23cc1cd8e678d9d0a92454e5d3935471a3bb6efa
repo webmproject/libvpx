@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdH//8L4\u003d",
+        "filename": "vp9/common/vp9_entropy.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2013-10-08T17:35:58Z",
+      "side": 1,
+      "message": "Is it intentional to break the consistency from DECLARE_ALIGNED(16, extern const ... )?",
+      "revId": "23cc1cd8e678d9d0a92454e5d3935471a3bb6efa",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
