@@ -111,8 +111,8 @@ static int rd_thresh_block_size_factor[BLOCK_SIZES] =
 #define RD_THRESH_INC      1
 #define RD_THRESH_POW      1.25
 
-#define MV_COST_WEIGHT      96
-#define MV_COST_WEIGHT_SUB 102
+#define MV_COST_WEIGHT      108
+#define MV_COST_WEIGHT_SUB  120
 
 static void fill_token_costs(vp9_coeff_cost *c,
                              vp9_coeff_probs_model (*p)[BLOCK_TYPES]) {
