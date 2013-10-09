@@ -565,9 +565,9 @@ static void dist_block(int plane, int block, TX_SIZE tx_size, void *arg) {
       xd->this_mi->mbmi.ref_frame[0] == INTRA_FRAME) {
     // TODO(jingning): tune the model to better capture the distortion.
     int64_t p = (pd->dequant[1] * pd->dequant[1] *
-                    (1 << ss_txfrm_size)) >> shift;
-    args->dist[block] = p;
-    args->sse[block]  = p;
+                    (1 << ss_txfrm_size)) >> (shift + 2);
+    args->dist[block] += (p >> 4);
+    args->sse[block]  += p;
   }
 }
 
