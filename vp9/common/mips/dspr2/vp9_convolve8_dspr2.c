@@ -930,6 +930,21 @@ void convolve_horiz_transposed(const uint8_t *src, ptrdiff_t src_stride,
   }
 }
 
+void copy_horiz_transposed(const uint8_t *src, ptrdiff_t src_stride,
+                           uint8_t *dst, ptrdiff_t dst_stride,
+                           int w, int h) {
+  int x, y;
+
+  for (y = 0; y < h; ++y) {
+    for (x = 0; x < w; ++x) {
+      dst[x * dst_stride] = src[x];
+    }
+
+    src += src_stride;
+    dst += 1;
+  }
+}
+
 void vp9_convolve8_dspr2(const uint8_t *src, ptrdiff_t src_stride,
                          uint8_t *dst, ptrdiff_t dst_stride,
                          const int16_t *filter_x, int x_step_q4,
@@ -966,20 +981,14 @@ void vp9_convolve8_dspr2(const uint8_t *src, ptrdiff_t src_stride,
 
   /* copy the src to dst */
   if (filter_x[3] == 0x80) {
-    int32_t y;
-    int32_t c;
-    const uint8_t *src_ptr = src - src_stride * 3;
-    uint8_t *dst_ptr = temp;
-
-    for (y = intermediate_height; y--;) {
-      for (c = 0; c < w; c++) {
-        dst_ptr[c * intermediate_height] = src_ptr[c];
-      }
-
-      /* next row... */
-      src_ptr += src_stride;
-      dst_ptr += 1;
-    }
+    copy_horiz_transposed(src - src_stride * 3, src_stride,
+                          temp, intermediate_height,
+                          w, intermediate_height);
+  } else if (((const int32_t *)filter_x)[0] == 0) {
+    vp9_convolve2_dspr2(src - src_stride * 3, src_stride,
+                        temp, intermediate_height,
+                        filter_x,
+                        w, intermediate_height);
   } else {
     src -= (src_stride * 3 + 3);
 
@@ -1021,20 +1030,14 @@ void vp9_convolve8_dspr2(const uint8_t *src, ptrdiff_t src_stride,
 
   /* copy the src to dst */
   if (filter_y[3] == 0x80) {
-    int32_t y;
-    int32_t c;
-    uint8_t *src_ptr = temp + 3;
-    uint8_t *dst_ptr = dst;
-
-    for (y = w; y--;) {
-      for (c = 0; c < h; c++) {
-        dst_ptr[c * dst_stride] = src_ptr[c];
-      }
-
-      /* next row... */
-      src_ptr += intermediate_height;
-      dst_ptr += 1;
-    }
+    copy_horiz_transposed(temp + 3, intermediate_height,
+                          dst, dst_stride,
+                          h, w);
+  } else if (((const int32_t *)filter_y)[0] == 0) {
+    vp9_convolve2_dspr2(temp + 3, intermediate_height,
+                        dst, dst_stride,
+                        filter_y,
+                        h, w);
   } else {
     switch (h) {
       case 4:

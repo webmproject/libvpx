@@ -355,6 +355,12 @@ void vp9_convolve8_avg_vert_dspr2(const uint8_t *src, ptrdiff_t src_stride,
                      filter_x, x_step_q4,
                      filter_y, y_step_q4,
                      w, h);
+  } else if (((const int32_t *)filter_y)[0] == 0) {
+    vp9_convolve2_avg_vert_dspr2(src, src_stride,
+                                 dst, dst_stride,
+                                 filter_x, x_step_q4,
+                                 filter_y, y_step_q4,
+                                 w, h);
   } else {
     if (16 == y_step_q4) {
       uint32_t pos = 38;

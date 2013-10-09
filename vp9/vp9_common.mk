@@ -89,6 +89,11 @@ endif
 
 # common (c)
 VP9_COMMON_SRCS-$(HAVE_DSPR2)  += common/mips/dspr2/vp9_common_dspr2.h
+VP9_COMMON_SRCS-$(HAVE_DSPR2)  += common/mips/dspr2/vp9_convolve2_avg_dspr2.c
+VP9_COMMON_SRCS-$(HAVE_DSPR2)  += common/mips/dspr2/vp9_convolve2_avg_horiz_dspr2.c
+VP9_COMMON_SRCS-$(HAVE_DSPR2)  += common/mips/dspr2/vp9_convolve2_dspr2.c
+VP9_COMMON_SRCS-$(HAVE_DSPR2)  += common/mips/dspr2/vp9_convolve2_horiz_dspr2.c
+VP9_COMMON_SRCS-$(HAVE_DSPR2)  += common/mips/dspr2/vp9_convolve2_vert_dspr2.c
 VP9_COMMON_SRCS-$(HAVE_DSPR2)  += common/mips/dspr2/vp9_convolve8_avg_dspr2.c
 VP9_COMMON_SRCS-$(HAVE_DSPR2)  += common/mips/dspr2/vp9_convolve8_avg_horiz_dspr2.c
 VP9_COMMON_SRCS-$(HAVE_DSPR2)  += common/mips/dspr2/vp9_convolve8_dspr2.c
