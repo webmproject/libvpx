@@ -515,7 +515,6 @@ void vp9_first_pass(VP9_COMP *cpi) {
   setup_pre_planes(xd, 0, lst_yv12, 0, 0, NULL);
   setup_dst_planes(xd, new_yv12, 0, 0);
 
-  x->partition_info = x->pi;
   xd->mi_8x8 = cm->mi_grid_visible;
   // required for vp9_frame_init_quantizer
   xd->this_mi =

@@ -406,8 +406,6 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, MODE_INFO *m, vp9_writer *bc) {
   const BLOCK_SIZE bsize = mi->sb_type;
   const int allow_hp = xd->allow_high_precision_mv;
 
-  x->partition_info = x->pi + (m - cm->mi);
-
 #ifdef ENTROPY_STATS
   active_section = 9;
 #endif
@@ -489,7 +487,7 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, MODE_INFO *m, vp9_writer *bc) {
       for (idy = 0; idy < 2; idy += num_4x4_blocks_high) {
         for (idx = 0; idx < 2; idx += num_4x4_blocks_wide) {
           const int j = idy * 2 + idx;
-          const MB_PREDICTION_MODE blockmode = x->partition_info->bmi[j].mode;
+          const MB_PREDICTION_MODE blockmode = m->bmi[j].as_mode;
           write_sb_mv_ref(bc, blockmode, mv_ref_p);
           ++cm->counts.inter_mode[mi->mode_context[rf]]
                                  [inter_mode_offset(blockmode)];
