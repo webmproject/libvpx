@@ -13,6 +13,7 @@
 
 #ifdef _MSC_VER
 #include <math.h>
+#define snprintf _snprintf
 #endif
 
 #include "./vpx_config.h"
