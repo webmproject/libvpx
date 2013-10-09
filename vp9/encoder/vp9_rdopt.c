@@ -107,8 +107,12 @@ const REF_DEFINITION vp9_ref_order[MAX_REFS] = {
 static int rd_thresh_block_size_factor[BLOCK_SIZES] =
   {2, 3, 3, 4, 6, 6, 8, 12, 12, 16, 24, 24, 32};
 
-#define MAX_RD_THRESH_FACT 64
-#define RD_THRESH_INC 1
+#define RD_THRESH_MAX_FACT 64
+#define RD_THRESH_INC      1
+#define RD_THRESH_POW      1.25
+
+#define MV_COST_WEIGHT      96
+#define MV_COST_WEIGHT_SUB 102
 
 static void fill_token_costs(vp9_coeff_cost *c,
                              vp9_coeff_probs_model (*p)[BLOCK_TYPES]) {
@@ -166,33 +170,9 @@ void vp9_initialize_me_consts(VP9_COMP *cpi, int qindex) {
   cpi->mb.sadperbit4 = sad_per_bit4lut[qindex];
 }
 
-void vp9_initialize_rd_consts(VP9_COMP *cpi, int qindex) {
+static void set_block_thresholds(VP9_COMP *cpi, int qindex) {
   int q, i, bsize;
-
-  vp9_clear_system_state();  // __asm emms;
-
-  // Further tests required to see if optimum is different
-  // for key frames, golden frames and arf frames.
-  // if (cpi->common.refresh_golden_frame ||
-  //     cpi->common.refresh_alt_ref_frame)
-  qindex = clamp(qindex, 0, MAXQ);
-
-  cpi->RDDIV = 100;
-  cpi->RDMULT = compute_rd_mult(qindex);
-  if (cpi->pass == 2 && (cpi->common.frame_type != KEY_FRAME)) {
-    if (cpi->twopass.next_iiratio > 31)
-      cpi->RDMULT += (cpi->RDMULT * rd_iifactor[31]) >> 4;
-    else
-      cpi->RDMULT +=
-          (cpi->RDMULT * rd_iifactor[cpi->twopass.next_iiratio]) >> 4;
-  }
-  cpi->mb.errorperbit = cpi->RDMULT >> 6;
-  cpi->mb.errorperbit += (cpi->mb.errorperbit == 0);
-
-  vp9_set_speed_features(cpi);
-
-  q = (int)pow(vp9_dc_quant(qindex, 0) >> 2, 1.25);
-  q <<= 2;
+  q = ((int)pow(vp9_dc_quant(qindex, 0) >> 2, RD_THRESH_POW)) << 2;
   if (q < 8)
     q = 8;
 
@@ -223,6 +203,34 @@ void vp9_initialize_rd_consts(VP9_COMP *cpi, int qindex) {
       }
     }
   }
+}
+
+void vp9_initialize_rd_consts(VP9_COMP *cpi, int qindex) {
+  int i;
+
+  vp9_clear_system_state();  // __asm emms;
+
+  // Further tests required to see if optimum is different
+  // for key frames, golden frames and arf frames.
+  // if (cpi->common.refresh_golden_frame ||
+  //     cpi->common.refresh_alt_ref_frame)
+  qindex = clamp(qindex, 0, MAXQ);
+
+  cpi->RDDIV = 100;
+  cpi->RDMULT = compute_rd_mult(qindex);
+  if (cpi->pass == 2 && (cpi->common.frame_type != KEY_FRAME)) {
+    if (cpi->twopass.next_iiratio > 31)
+      cpi->RDMULT += (cpi->RDMULT * rd_iifactor[31]) >> 4;
+    else
+      cpi->RDMULT +=
+          (cpi->RDMULT * rd_iifactor[cpi->twopass.next_iiratio]) >> 4;
+  }
+  cpi->mb.errorperbit = cpi->RDMULT >> 6;
+  cpi->mb.errorperbit += (cpi->mb.errorperbit == 0);
+
+  vp9_set_speed_features(cpi);
+
+  set_block_thresholds(cpi, qindex);
 
   fill_token_costs(cpi->mb.token_costs, cpi->common.fc.coef_probs);
 
@@ -1463,12 +1471,12 @@ static int labels2mode(MACROBLOCK *x, int i,
     case NEWMV:
       this_mv->as_int = seg_mvs[mbmi->ref_frame[0]].as_int;
       thismvcost  = vp9_mv_bit_cost(&this_mv->as_mv, &best_ref_mv->as_mv,
-                                    mvjcost, mvcost, 102);
+                                    mvjcost, mvcost, MV_COST_WEIGHT_SUB);
       if (has_second_rf) {
         this_second_mv->as_int = seg_mvs[mbmi->ref_frame[1]].as_int;
         thismvcost += vp9_mv_bit_cost(&this_second_mv->as_mv,
                                       &second_best_ref_mv->as_mv,
-                                      mvjcost, mvcost, 102);
+                                      mvjcost, mvcost, MV_COST_WEIGHT_SUB);
       }
       break;
     case NEARESTMV:
@@ -2454,7 +2462,7 @@ static void single_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
                                  &dis, &sse);
   }
   *rate_mv = vp9_mv_bit_cost(&tmp_mv->as_mv, &ref_mv.as_mv,
-                             x->nmvjointcost, x->mvcost, 96);
+                             x->nmvjointcost, x->mvcost, MV_COST_WEIGHT);
 
   if (cpi->sf.adaptive_motion_search && cpi->common.show_frame)
     x->pred_mv[ref].as_int = tmp_mv->as_int;
@@ -2615,10 +2623,10 @@ static void joint_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
   }
   *rate_mv  = vp9_mv_bit_cost(&frame_mv[refs[0]].as_mv,
                               &mbmi->ref_mvs[refs[0]][0].as_mv,
-                              x->nmvjointcost, x->mvcost, 96);
+                              x->nmvjointcost, x->mvcost, MV_COST_WEIGHT);
   *rate_mv += vp9_mv_bit_cost(&frame_mv[refs[1]].as_mv,
                               &mbmi->ref_mvs[refs[1]][0].as_mv,
-                              x->nmvjointcost, x->mvcost, 96);
+                              x->nmvjointcost, x->mvcost, MV_COST_WEIGHT);
 
   vpx_free(second_pred);
 }
@@ -2671,10 +2679,10 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
       } else {
         rate_mv  = vp9_mv_bit_cost(&frame_mv[refs[0]].as_mv,
                                    &mbmi->ref_mvs[refs[0]][0].as_mv,
-                                   x->nmvjointcost, x->mvcost, 96);
+                                   x->nmvjointcost, x->mvcost, MV_COST_WEIGHT);
         rate_mv += vp9_mv_bit_cost(&frame_mv[refs[1]].as_mv,
                                    &mbmi->ref_mvs[refs[1]][0].as_mv,
-                                   x->nmvjointcost, x->mvcost, 96);
+                                   x->nmvjointcost, x->mvcost, MV_COST_WEIGHT);
       }
       if (frame_mv[refs[0]].as_int == INVALID_MV ||
           frame_mv[refs[1]].as_int == INVALID_MV)
@@ -3731,9 +3739,9 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
       } else {
         cpi->rd_thresh_freq_fact[bsize][mode_index] += RD_THRESH_INC;
         if (cpi->rd_thresh_freq_fact[bsize][mode_index] >
-            (cpi->sf.adaptive_rd_thresh * MAX_RD_THRESH_FACT)) {
+            (cpi->sf.adaptive_rd_thresh * RD_THRESH_MAX_FACT)) {
           cpi->rd_thresh_freq_fact[bsize][mode_index] =
-            cpi->sf.adaptive_rd_thresh * MAX_RD_THRESH_FACT;
+            cpi->sf.adaptive_rd_thresh * RD_THRESH_MAX_FACT;
         }
       }
     }
@@ -4442,9 +4450,9 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
       } else {
         cpi->rd_thresh_freq_sub8x8[bsize][mode_index] += RD_THRESH_INC;
         if (cpi->rd_thresh_freq_sub8x8[bsize][mode_index] >
-            (cpi->sf.adaptive_rd_thresh * MAX_RD_THRESH_FACT)) {
+            (cpi->sf.adaptive_rd_thresh * RD_THRESH_MAX_FACT)) {
           cpi->rd_thresh_freq_sub8x8[bsize][mode_index] =
-            cpi->sf.adaptive_rd_thresh * MAX_RD_THRESH_FACT;
+            cpi->sf.adaptive_rd_thresh * RD_THRESH_MAX_FACT;
         }
       }
     }
