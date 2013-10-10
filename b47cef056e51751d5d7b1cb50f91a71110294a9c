@@ -16,6 +16,24 @@
       "revId": "b47cef056e51751d5d7b1cb50f91a71110294a9c",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdH//7/Y\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 3653,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2013-10-10T19:19:51Z",
+      "side": 1,
+      "message": "Because cpi-\u003erd_filter_cache[i] is always less than ref in this else branch, tmp is always less than 256. This is done to avoid multiplication of two potential large numbers (rd scores). int should be sufficient here.",
+      "parentUuid": "AAAAdH//8AY\u003d",
+      "revId": "b47cef056e51751d5d7b1cb50f91a71110294a9c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
