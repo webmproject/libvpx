@@ -165,41 +165,6 @@ void vp9_idct4x4_1_add_sse2(int16_t *input, uint8_t *dest, int stride) {
   RECON_AND_STORE4X4(dest, dc_value);
 }
 
-void vp9_idct4_1d_sse2(int16_t *input, int16_t *output) {
-  const __m128i zero = _mm_setzero_si128();
-  const __m128i c1 = _mm_setr_epi16((int16_t)cospi_16_64, (int16_t)cospi_16_64,
-                                    (int16_t)cospi_16_64, (int16_t)-cospi_16_64,
-                                    (int16_t)cospi_24_64, (int16_t)-cospi_8_64,
-                                    (int16_t)cospi_8_64, (int16_t)cospi_24_64);
-  const __m128i c2 = _mm_setr_epi16(1, 1, 1, 1, 1, -1, 1, -1);
-
-  const __m128i rounding = _mm_set1_epi32(DCT_CONST_ROUNDING);
-  __m128i in, temp;
-
-  // Load input data.
-  in = _mm_loadl_epi64((__m128i *)input);
-
-  // Construct i3, i1, i3, i1, i2, i0, i2, i0
-  in = _mm_shufflelo_epi16(in, 0xd8);
-  in = _mm_unpacklo_epi32(in, in);
-
-  // Stage 1
-  in = _mm_madd_epi16(in, c1);
-  in = _mm_add_epi32(in, rounding);
-  in = _mm_srai_epi32(in, DCT_CONST_BITS);
-  in = _mm_packs_epi32(in, zero);
-
-  // Stage 2
-  temp = _mm_shufflelo_epi16(in, 0x9c);
-  in = _mm_shufflelo_epi16(in, 0xc9);
-  in = _mm_unpacklo_epi64(temp, in);
-  in = _mm_madd_epi16(in, c2);
-  in = _mm_packs_epi32(in, zero);
-
-  // Store results
-  _mm_storel_epi64((__m128i *)output, in);
-}
-
 static INLINE void transpose_4x4(__m128i *res) {
   const __m128i tr0_0 = _mm_unpacklo_epi16(res[0], res[1]);
   const __m128i tr0_1 = _mm_unpacklo_epi16(res[2], res[3]);
@@ -210,7 +175,7 @@ static INLINE void transpose_4x4(__m128i *res) {
   res[3] = _mm_unpackhi_epi64(res[2], res[2]);
 }
 
-void idct4_1d_sse2(__m128i *in) {
+static void idct4_1d_sse2(__m128i *in) {
   const __m128i k__cospi_p16_p16 = pair_set_epi16(cospi_16_64, cospi_16_64);
   const __m128i k__cospi_p16_m16 = pair_set_epi16(cospi_16_64, -cospi_16_64);
   const __m128i k__cospi_p24_m08 = pair_set_epi16(cospi_24_64, -cospi_8_64);
@@ -249,7 +214,7 @@ void idct4_1d_sse2(__m128i *in) {
   in[3] = _mm_sub_epi16(u[0], u[3]);
 }
 
-void iadst4_1d_sse2(__m128i *in) {
+static void iadst4_1d_sse2(__m128i *in) {
   const __m128i k__sinpi_p01_p04 = pair_set_epi16(sinpi_1_9, sinpi_4_9);
   const __m128i k__sinpi_p03_p02 = pair_set_epi16(sinpi_3_9, sinpi_2_9);
   const __m128i k__sinpi_p02_m01 = pair_set_epi16(sinpi_2_9, -sinpi_1_9);
@@ -648,7 +613,7 @@ static INLINE void array_transpose_8x8(__m128i *in, __m128i *res) {
   res[7] = _mm_unpackhi_epi64(tr1_6, tr1_7);
 }
 
-void idct8_1d_sse2(__m128i *in) {
+static void idct8_1d_sse2(__m128i *in) {
   const __m128i rounding = _mm_set1_epi32(DCT_CONST_ROUNDING);
   const __m128i stg1_0 = pair_set_epi16(cospi_28_64, -cospi_4_64);
   const __m128i stg1_1 = pair_set_epi16(cospi_4_64, cospi_28_64);
@@ -689,7 +654,7 @@ void idct8_1d_sse2(__m128i *in) {
   in[7] = in7;
 }
 
-void iadst8_1d_sse2(__m128i *in) {
+static void iadst8_1d_sse2(__m128i *in) {
   const __m128i k__cospi_p02_p30 = pair_set_epi16(cospi_2_64, cospi_30_64);
   const __m128i k__cospi_p30_m02 = pair_set_epi16(cospi_30_64, -cospi_2_64);
   const __m128i k__cospi_p10_p22 = pair_set_epi16(cospi_10_64, cospi_22_64);
@@ -1519,7 +1484,7 @@ static INLINE void array_transpose_16x16(__m128i *res0, __m128i *res1) {
   res0[15] = tbuf[7];
 }
 
-void iadst16_1d_8col(__m128i *in) {
+static void iadst16_1d_8col(__m128i *in) {
   // perform 16x16 1-D ADST for 8 columns
   __m128i s[16], x[16], u[32], v[32];
   const __m128i k__cospi_p01_p31 = pair_set_epi16(cospi_1_64, cospi_31_64);
@@ -1989,7 +1954,7 @@ void iadst16_1d_8col(__m128i *in) {
   in[15] = _mm_sub_epi16(kZero, s[1]);
 }
 
-void idct16_1d_8col(__m128i *in) {
+static void idct16_1d_8col(__m128i *in) {
   const __m128i k__cospi_p30_m02 = pair_set_epi16(cospi_30_64, -cospi_2_64);
   const __m128i k__cospi_p02_p30 = pair_set_epi16(cospi_2_64, cospi_30_64);
   const __m128i k__cospi_p14_m18 = pair_set_epi16(cospi_14_64, -cospi_18_64);
@@ -2333,13 +2298,13 @@ void idct16_1d_8col(__m128i *in) {
   in[15] = _mm_sub_epi16(s[0], s[15]);
 }
 
-void idct16_1d_sse2(__m128i *in0, __m128i *in1) {
+static void idct16_1d_sse2(__m128i *in0, __m128i *in1) {
   array_transpose_16x16(in0, in1);
   idct16_1d_8col(in0);
   idct16_1d_8col(in1);
 }
 
-void iadst16_1d_sse2(__m128i *in0, __m128i *in1) {
+static void iadst16_1d_sse2(__m128i *in0, __m128i *in1) {
   array_transpose_16x16(in0, in1);
   iadst16_1d_8col(in0);
   iadst16_1d_8col(in1);
