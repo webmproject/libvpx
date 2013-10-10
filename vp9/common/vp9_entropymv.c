@@ -214,11 +214,11 @@ static unsigned int adapt_probs(unsigned int i,
 void vp9_adapt_mv_probs(VP9_COMMON *cm, int allow_hp) {
   int i, j;
 
-  FRAME_CONTEXT *pre_fc = &cm->frame_contexts[cm->frame_context_idx];
+  const FRAME_CONTEXT *pre_fc = &cm->frame_contexts[cm->frame_context_idx];
 
   nmv_context *ctx = &cm->fc.nmvc;
-  nmv_context *pre_ctx = &pre_fc->nmvc;
-  nmv_context_counts *cts = &cm->counts.mv;
+  const nmv_context *pre_ctx = &pre_fc->nmvc;
+  const nmv_context_counts *cts = &cm->counts.mv;
 
   adapt_probs(0, vp9_mv_joint_tree, ctx->joints, pre_ctx->joints, cts->joints);
 
