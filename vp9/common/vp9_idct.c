@@ -611,7 +611,7 @@ static void idct16_1d(int16_t *input, int16_t *output) {
   output[15] = step2[0] - step2[15];
 }
 
-void vp9_short_idct16x16_add_c(int16_t *input, uint8_t *dest, int dest_stride) {
+void vp9_idct16x16_256_add_c(int16_t *input, uint8_t *dest, int dest_stride) {
   int16_t out[16 * 16];
   int16_t *outptr = out;
   int i, j;
@@ -838,7 +838,7 @@ void vp9_short_iht16x16_add_c(int16_t *input, uint8_t *dest, int dest_stride,
                                   + dest[j * dest_stride + i]);  }
 }
 
-void vp9_short_idct16x16_10_add_c(int16_t *input, uint8_t *dest,
+void vp9_idct16x16_10_add_c(int16_t *input, uint8_t *dest,
                                   int dest_stride) {
   int16_t out[16 * 16] = { 0 };
   int16_t *outptr = out;
@@ -864,7 +864,7 @@ void vp9_short_idct16x16_10_add_c(int16_t *input, uint8_t *dest,
   }
 }
 
-void vp9_short_idct16x16_1_add_c(int16_t *input, uint8_t *dest,
+void vp9_idct16x16_1_add_c(int16_t *input, uint8_t *dest,
                                  int dest_stride) {
   int i, j;
   int a1;
@@ -1333,17 +1333,17 @@ void vp9_idct8x8_add(int16_t *input, uint8_t *dest, int stride, int eob) {
   }
 }
 
-void vp9_idct_add_16x16(int16_t *input, uint8_t *dest, int stride, int eob) {
+void vp9_idct16x16_add(int16_t *input, uint8_t *dest, int stride, int eob) {
   /* The calculation can be simplified if there are not many non-zero dct
    * coefficients. Use eobs to separate different cases. */
   if (eob) {
     if (eob == 1)
       /* DC only DCT coefficient. */
-      vp9_short_idct16x16_1_add(input, dest, stride);
+      vp9_idct16x16_1_add(input, dest, stride);
     else if (eob <= 10)
-      vp9_short_idct16x16_10_add(input, dest, stride);
+      vp9_idct16x16_10_add(input, dest, stride);
     else
-      vp9_short_idct16x16_add(input, dest, stride);
+      vp9_idct16x16_256_add(input, dest, stride);
   }
 }
 
@@ -1379,7 +1379,7 @@ void vp9_iht_add_8x8(TX_TYPE tx_type, int16_t *input, uint8_t *dest,
 void vp9_iht_add_16x16(TX_TYPE tx_type, int16_t *input, uint8_t *dest,
                          int stride, int eob) {
   if (tx_type == DCT_DCT) {
-    vp9_idct_add_16x16(input, dest, stride, eob);
+    vp9_idct16x16_add(input, dest, stride, eob);
   } else {
     if (eob > 0) {
       vp9_short_iht16x16_add(input, dest, stride, tx_type);
