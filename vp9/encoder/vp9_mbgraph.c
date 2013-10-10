@@ -312,6 +312,7 @@ static void update_mbgraph_frame_stats(VP9_COMP *cpi,
 static void separate_arf_mbs(VP9_COMP *cpi) {
   VP9_COMMON *const cm = &cpi->common;
   int mb_col, mb_row, offset, i;
+  int mi_row, mi_col;
   int ncnt[4] = { 0 };
   int n_frames = cpi->mbgraph_n_frames;
 
@@ -348,22 +349,17 @@ static void separate_arf_mbs(VP9_COMP *cpi) {
     }
   }
 
-  for (offset = 0, mb_row = 0; mb_row < cm->mb_rows;
-       offset += cm->mb_cols, mb_row++) {
-    for (mb_col = 0; mb_col < cm->mb_cols; mb_col++) {
+  // arf_not_zz is indexed by MB, but this loop is indexed by MI to avoid out
+  // of bound access in segmentation_map
+  for (mi_row = 0; mi_row < cm->mi_rows; mi_row++) {
+    for (mi_col = 0; mi_col < cm->mi_cols; mi_col++) {
       // If any of the blocks in the sequence failed then the MB
       // goes in segment 0
-      if (arf_not_zz[offset + mb_col]) {
+      if (arf_not_zz[mi_row/2*cm->mb_cols + mi_col/2]) {
         ncnt[0]++;
-        cpi->segmentation_map[offset * 4 + 2 * mb_col] = 0;
-        cpi->segmentation_map[offset * 4 + 2 * mb_col + 1] = 0;
-        cpi->segmentation_map[offset * 4 + 2 * mb_col + cm->mi_cols] = 0;
-        cpi->segmentation_map[offset * 4 + 2 * mb_col + cm->mi_cols + 1] = 0;
+        cpi->segmentation_map[mi_row * cm->mi_cols + mi_col] = 0;
       } else {
-        cpi->segmentation_map[offset * 4 + 2 * mb_col] = 1;
-        cpi->segmentation_map[offset * 4 + 2 * mb_col + 1] = 1;
-        cpi->segmentation_map[offset * 4 + 2 * mb_col + cm->mi_cols] = 1;
-        cpi->segmentation_map[offset * 4 + 2 * mb_col + cm->mi_cols + 1] = 1;
+        cpi->segmentation_map[mi_row * cm->mi_cols + mi_col] = 1;
         ncnt[1]++;
       }
     }
@@ -374,7 +370,7 @@ static void separate_arf_mbs(VP9_COMP *cpi) {
   if (1) {
     // Note % of blocks that are marked as static
     if (cm->MBs)
-      cpi->static_mb_pct = (ncnt[1] * 100) / cm->MBs;
+      cpi->static_mb_pct = (ncnt[1] * 100) / (cm->mi_rows * cm->mi_cols);
 
     // This error case should not be reachable as this function should
     // never be called with the common data structure uninitialized.
