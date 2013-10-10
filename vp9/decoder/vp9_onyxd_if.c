@@ -397,6 +397,10 @@ int vp9_receive_compressed_data(VP9D_PTR ptr,
     cm->mi_grid_visible = cm->mi_grid_base + cm->mode_info_stride + 1;
     cm->prev_mi_grid_visible = cm->prev_mi_grid_base + cm->mode_info_stride + 1;
 
+    pbi->mb.mi_8x8 = cm->mi_grid_visible;
+    pbi->mb.mi_8x8[0] = cm->mi;
+    pbi->mb.this_mi = cm->mi;
+
     cm->current_video_frame++;
   }
 
