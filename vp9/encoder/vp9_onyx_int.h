@@ -314,6 +314,7 @@ typedef struct VP9_COMP {
   MACROBLOCK mb;
   VP9_COMMON common;
   VP9_CONFIG oxcf;
+  struct rdcost_block_args rdcost_stack;
 
   struct lookahead_ctx    *lookahead;
   struct lookahead_entry  *source;
