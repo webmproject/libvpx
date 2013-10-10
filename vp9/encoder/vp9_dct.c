@@ -17,7 +17,7 @@
 #include "vp9/common/vp9_blockd.h"
 #include "vp9/common/vp9_idct.h"
 
-static void fdct4_1d(int16_t *input, int16_t *output) {
+static void fdct4(int16_t *input, int16_t *output) {
   int16_t step[4];
   int temp1, temp2;
 
@@ -102,7 +102,7 @@ void vp9_short_fdct4x4_c(int16_t *input, int16_t *output, int pitch) {
   }
 }
 
-static void fadst4_1d(int16_t *input, int16_t *output) {
+static void fadst4(int16_t *input, int16_t *output) {
   int x0, x1, x2, x3;
   int s0, s1, s2, s3, s4, s5, s6, s7;
 
@@ -143,10 +143,10 @@ static void fadst4_1d(int16_t *input, int16_t *output) {
 }
 
 static const transform_2d FHT_4[] = {
-  { fdct4_1d,  fdct4_1d  },  // DCT_DCT  = 0
-  { fadst4_1d, fdct4_1d  },  // ADST_DCT = 1
-  { fdct4_1d,  fadst4_1d },  // DCT_ADST = 2
-  { fadst4_1d, fadst4_1d }   // ADST_ADST = 3
+  { fdct4,  fdct4  },  // DCT_DCT  = 0
+  { fadst4, fdct4  },  // ADST_DCT = 1
+  { fdct4,  fadst4 },  // DCT_ADST = 2
+  { fadst4, fadst4 }   // ADST_ADST = 3
 };
 
 void vp9_short_fht4x4_c(int16_t *input, int16_t *output,
@@ -183,7 +183,7 @@ void vp9_short_fdct8x4_c(int16_t *input, int16_t *output, int pitch) {
     vp9_short_fdct4x4_c(input + 4, output + 16, pitch);
 }
 
-static void fdct8_1d(int16_t *input, int16_t *output) {
+static void fdct8(int16_t *input, int16_t *output) {
   /*canbe16*/ int s0, s1, s2, s3, s4, s5, s6, s7;
   /*needs32*/ int t0, t1, t2, t3;
   /*canbe16*/ int x0, x1, x2, x3;
@@ -198,7 +198,7 @@ static void fdct8_1d(int16_t *input, int16_t *output) {
   s6 = input[1] - input[6];
   s7 = input[0] - input[7];
 
-  // fdct4_1d(step, step);
+  // fdct4(step, step);
   x0 = s0 + s3;
   x1 = s1 + s2;
   x2 = s1 - s2;
@@ -259,7 +259,7 @@ void vp9_short_fdct8x8_c(int16_t *input, int16_t *final_output, int pitch) {
       s6 = (input[1 * stride] - input[6 * stride]) * 4;
       s7 = (input[0 * stride] - input[7 * stride]) * 4;
 
-      // fdct4_1d(step, step);
+      // fdct4(step, step);
       x0 = s0 + s3;
       x1 = s1 + s2;
       x2 = s1 - s2;
@@ -301,7 +301,7 @@ void vp9_short_fdct8x8_c(int16_t *input, int16_t *final_output, int pitch) {
 
   // Rows
   for (i = 0; i < 8; ++i) {
-    fdct8_1d(&intermediate[i * 8], &final_output[i * 8]);
+    fdct8(&intermediate[i * 8], &final_output[i * 8]);
     for (j = 0; j < 8; ++j)
       final_output[j + i * 8] /= 2;
   }
@@ -368,7 +368,7 @@ void vp9_short_fdct16x16_c(int16_t *input, int16_t *output, int pitch) {
         step1[6] = ((in[1 * 16] + 1) >> 2) - ((in[14 * 16] + 1) >> 2);
         step1[7] = ((in[0 * 16] + 1) >> 2) - ((in[15 * 16] + 1) >> 2);
       }
-      // Work on the first eight values; fdct8_1d(input, even_results);
+      // Work on the first eight values; fdct8(input, even_results);
       {
         /*canbe16*/ int s0, s1, s2, s3, s4, s5, s6, s7;
         /*needs32*/ int t0, t1, t2, t3;
@@ -384,7 +384,7 @@ void vp9_short_fdct16x16_c(int16_t *input, int16_t *output, int pitch) {
         s6 = input[1] - input[6];
         s7 = input[0] - input[7];
 
-        // fdct4_1d(step, step);
+        // fdct4(step, step);
         x0 = s0 + s3;
         x1 = s1 + s2;
         x2 = s1 - s2;
@@ -486,7 +486,7 @@ void vp9_short_fdct16x16_c(int16_t *input, int16_t *output, int pitch) {
   }
 }
 
-static void fadst8_1d(int16_t *input, int16_t *output) {
+static void fadst8(int16_t *input, int16_t *output) {
   int s0, s1, s2, s3, s4, s5, s6, s7;
 
   int x0 = input[7];
@@ -558,10 +558,10 @@ static void fadst8_1d(int16_t *input, int16_t *output) {
 }
 
 static const transform_2d FHT_8[] = {
-  { fdct8_1d,  fdct8_1d  },  // DCT_DCT  = 0
-  { fadst8_1d, fdct8_1d  },  // ADST_DCT = 1
-  { fdct8_1d,  fadst8_1d },  // DCT_ADST = 2
-  { fadst8_1d, fadst8_1d }   // ADST_ADST = 3
+  { fdct8,  fdct8  },  // DCT_DCT  = 0
+  { fadst8, fdct8  },  // ADST_DCT = 1
+  { fdct8,  fadst8 },  // DCT_ADST = 2
+  { fadst8, fadst8 }   // ADST_ADST = 3
 };
 
 void vp9_short_fht8x8_c(int16_t *input, int16_t *output,
@@ -654,7 +654,7 @@ void vp9_short_walsh8x4_c(int16_t *input, int16_t *output, int pitch) {
 
 
 // Rewrote to use same algorithm as others.
-static void fdct16_1d(int16_t in[16], int16_t out[16]) {
+static void fdct16(int16_t in[16], int16_t out[16]) {
   /*canbe16*/ int step1[8];
   /*canbe16*/ int step2[8];
   /*canbe16*/ int step3[8];
@@ -680,7 +680,7 @@ static void fdct16_1d(int16_t in[16], int16_t out[16]) {
   step1[6] = in[1] - in[14];
   step1[7] = in[0] - in[15];
 
-  // fdct8_1d(step, step);
+  // fdct8(step, step);
   {
     /*canbe16*/ int s0, s1, s2, s3, s4, s5, s6, s7;
     /*needs32*/ int t0, t1, t2, t3;
@@ -696,7 +696,7 @@ static void fdct16_1d(int16_t in[16], int16_t out[16]) {
     s6 = input[1] - input[6];
     s7 = input[0] - input[7];
 
-    // fdct4_1d(step, step);
+    // fdct4(step, step);
     x0 = s0 + s3;
     x1 = s1 + s2;
     x2 = s1 - s2;
@@ -795,7 +795,7 @@ static void fdct16_1d(int16_t in[16], int16_t out[16]) {
   out[15] = dct_const_round_shift(temp2);
 }
 
-void fadst16_1d(int16_t *input, int16_t *output) {
+void fadst16(int16_t *input, int16_t *output) {
   int s0, s1, s2, s3, s4, s5, s6, s7, s8, s9, s10, s11, s12, s13, s14, s15;
 
   int x0 = input[15];
@@ -958,10 +958,10 @@ void fadst16_1d(int16_t *input, int16_t *output) {
 }
 
 static const transform_2d FHT_16[] = {
-  { fdct16_1d,  fdct16_1d  },  // DCT_DCT  = 0
-  { fadst16_1d, fdct16_1d  },  // ADST_DCT = 1
-  { fdct16_1d,  fadst16_1d },  // DCT_ADST = 2
-  { fadst16_1d, fadst16_1d }   // ADST_ADST = 3
+  { fdct16,  fdct16  },  // DCT_DCT  = 0
+  { fadst16, fdct16  },  // ADST_DCT = 1
+  { fdct16,  fadst16 },  // DCT_ADST = 2
+  { fadst16, fadst16 }   // ADST_ADST = 3
 };
 
 void vp9_short_fht16x16_c(int16_t *input, int16_t *output,
