@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdH//8B4\u003d",
+        "filename": "vp9/common/vp9_entropymv.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 170,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2013-10-10T16:12:49Z",
+      "side": 1,
+      "message": "add a comment that c is being instead of c + CLASS0_BITS - 1 because CLASS0_BITS \u003d 0;",
+      "revId": "a8cea188d28b379b568b049f468c2e8db739051c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdH//8Bw\u003d",
+        "filename": "vp9/encoder/vp9_encodemv.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2013-10-10T16:12:49Z",
+      "side": 1,
+      "message": "Add comment",
+      "revId": "a8cea188d28b379b568b049f468c2e8db739051c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
