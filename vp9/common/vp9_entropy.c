@@ -657,10 +657,10 @@ void vp9_coef_tree_initialize() {
 static void adapt_coef_probs(VP9_COMMON *cm, TX_SIZE tx_size,
                              unsigned int count_sat,
                              unsigned int update_factor) {
-  FRAME_CONTEXT *pre_fc = &cm->frame_contexts[cm->frame_context_idx];
+  const FRAME_CONTEXT *pre_fc = &cm->frame_contexts[cm->frame_context_idx];
 
   vp9_coeff_probs_model *dst_coef_probs = cm->fc.coef_probs[tx_size];
-  vp9_coeff_probs_model *pre_coef_probs = pre_fc->coef_probs[tx_size];
+  const vp9_coeff_probs_model *pre_coef_probs = pre_fc->coef_probs[tx_size];
   vp9_coeff_count_model *coef_counts = cm->counts.coef[tx_size];
   unsigned int (*eob_branch_count)[REF_TYPES][COEF_BANDS][PREV_COEF_CONTEXTS] =
       cm->counts.eob_branch[tx_size];
