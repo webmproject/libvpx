@@ -178,4 +178,23 @@ struct macroblock {
                          int y_blocks);
 };
 
+struct rdcost_block_args {
+  MACROBLOCK *x;
+  ENTROPY_CONTEXT t_above[16];
+  ENTROPY_CONTEXT t_left[16];
+  TX_SIZE tx_size;
+  int bw;
+  int bh;
+  int rate;
+  int64_t dist;
+  int64_t sse;
+  int this_rate;
+  int64_t this_dist;
+  int64_t this_sse;
+  int64_t this_rd;
+  int64_t best_rd;
+  int skip;
+  const int16_t *scan, *nb;
+};
+
 #endif  // VP9_ENCODER_VP9_BLOCK_H_
