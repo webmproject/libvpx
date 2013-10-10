@@ -353,7 +353,7 @@ static void encode_ref_frame(VP9_COMP *cpi, vp9_writer *bc) {
   VP9_COMMON *const cm = &cpi->common;
   MACROBLOCK *const x = &cpi->mb;
   MACROBLOCKD *const xd = &x->e_mbd;
-  MB_MODE_INFO *mi = &xd->this_mi->mbmi;
+  MB_MODE_INFO *mi = &xd->mi_8x8[0]->mbmi;
   const int segment_id = mi->segment_id;
   int seg_ref_active = vp9_segfeature_active(&cm->seg, segment_id,
                                              SEG_LVL_REF_FRAME);
@@ -574,7 +574,6 @@ static void write_modes_b(VP9_COMP *cpi, MODE_INFO **mi_8x8, vp9_writer *bc,
     if (xd->ab_index > 0)
       return;
 
-  xd->this_mi = mi_8x8[0];
   xd->mi_8x8 = mi_8x8;
 
   set_mi_row_col(&cpi->common, xd,

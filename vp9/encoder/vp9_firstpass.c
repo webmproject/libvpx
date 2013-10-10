@@ -358,7 +358,7 @@ static void zz_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
   // Set up pointers for this macro block recon buffer
   xd->plane[0].pre[0].buf = recon_buffer->y_buffer + recon_yoffset;
 
-  switch (xd->this_mi->mbmi.sb_type) {
+  switch (xd->mi_8x8[0]->mbmi.sb_type) {
     case BLOCK_8X8:
       vp9_mse8x8(x->plane[0].src.buf, x->plane[0].src.stride,
                  xd->plane[0].pre[0].buf, xd->plane[0].pre[0].stride,
@@ -397,7 +397,7 @@ static void first_pass_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
   int further_steps = (MAX_MVSEARCH_STEPS - 1) - step_param;
   int n;
   vp9_variance_fn_ptr_t v_fn_ptr =
-      cpi->fn_ptr[xd->this_mi->mbmi.sb_type];
+      cpi->fn_ptr[xd->mi_8x8[0]->mbmi.sb_type];
   int new_mv_mode_penalty = 256;
 
   int sr = 0;
@@ -414,7 +414,7 @@ static void first_pass_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
   further_steps -= sr;
 
   // override the default variance function to use MSE
-  switch (xd->this_mi->mbmi.sb_type) {
+  switch (xd->mi_8x8[0]->mbmi.sb_type) {
     case BLOCK_8X8:
       v_fn_ptr.vf = vp9_mse8x8;
       break;
@@ -518,7 +518,6 @@ void vp9_first_pass(VP9_COMP *cpi) {
 
   xd->mi_8x8 = cm->mi_grid_visible;
   // required for vp9_frame_init_quantizer
-  xd->this_mi =
   xd->mi_8x8[0] = cm->mi;
   xd->mic_stream_ptr = cm->mi;
 
@@ -565,26 +564,26 @@ void vp9_first_pass(VP9_COMP *cpi) {
 
       if (mb_col * 2 + 1 < cm->mi_cols) {
         if (mb_row * 2 + 1 < cm->mi_rows) {
-          xd->this_mi->mbmi.sb_type = BLOCK_16X16;
+          xd->mi_8x8[0]->mbmi.sb_type = BLOCK_16X16;
         } else {
-          xd->this_mi->mbmi.sb_type = BLOCK_16X8;
+          xd->mi_8x8[0]->mbmi.sb_type = BLOCK_16X8;
         }
       } else {
         if (mb_row * 2 + 1 < cm->mi_rows) {
-          xd->this_mi->mbmi.sb_type = BLOCK_8X16;
+          xd->mi_8x8[0]->mbmi.sb_type = BLOCK_8X16;
         } else {
-          xd->this_mi->mbmi.sb_type = BLOCK_8X8;
+          xd->mi_8x8[0]->mbmi.sb_type = BLOCK_8X8;
         }
       }
-      xd->this_mi->mbmi.ref_frame[0] = INTRA_FRAME;
+      xd->mi_8x8[0]->mbmi.ref_frame[0] = INTRA_FRAME;
       set_mi_row_col(cm, xd,
                      mb_row << 1,
-                     1 << mi_height_log2(xd->this_mi->mbmi.sb_type),
+                     1 << mi_height_log2(xd->mi_8x8[0]->mbmi.sb_type),
                      mb_col << 1,
-                     1 << mi_width_log2(xd->this_mi->mbmi.sb_type));
+                     1 << mi_width_log2(xd->mi_8x8[0]->mbmi.sb_type));
 
       if (cpi->sf.variance_adaptive_quantization) {
-        int energy = vp9_block_energy(cpi, x, xd->this_mi->mbmi.sb_type);
+        int energy = vp9_block_energy(cpi, x, xd->mi_8x8[0]->mbmi.sb_type);
         error_weight = vp9_vaq_inv_q_ratio(energy);
       }
 
@@ -690,13 +689,13 @@ void vp9_first_pass(VP9_COMP *cpi) {
           mv.as_mv.col *= 8;
           this_error = motion_error;
           vp9_set_mbmode_and_mvs(x, NEWMV, &mv);
-          xd->this_mi->mbmi.tx_size = TX_4X4;
-          xd->this_mi->mbmi.ref_frame[0] = LAST_FRAME;
-          xd->this_mi->mbmi.ref_frame[1] = NONE;
+          xd->mi_8x8[0]->mbmi.tx_size = TX_4X4;
+          xd->mi_8x8[0]->mbmi.ref_frame[0] = LAST_FRAME;
+          xd->mi_8x8[0]->mbmi.ref_frame[1] = NONE;
           vp9_build_inter_predictors_sby(xd, mb_row << 1,
                                          mb_col << 1,
-                                         xd->this_mi->mbmi.sb_type);
-          vp9_encode_sby(x, xd->this_mi->mbmi.sb_type);
+                                         xd->mi_8x8[0]->mbmi.sb_type);
+          vp9_encode_sby(x, xd->mi_8x8[0]->mbmi.sb_type);
           sum_mvr += mv.as_mv.row;
           sum_mvr_abs += abs(mv.as_mv.row);
           sum_mvc += mv.as_mv.col;

@@ -134,7 +134,7 @@ static void decode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
                                TX_SIZE tx_size, void *arg) {
   MACROBLOCKD* const xd = arg;
   struct macroblockd_plane *const pd = &xd->plane[plane];
-  MODE_INFO *const mi = xd->this_mi;
+  MODE_INFO *const mi = xd->mi_8x8[0];
   const int raster_block = txfrm_block_to_raster_block(plane_bsize, tx_size,
                                                        block);
   uint8_t* const dst = raster_block_offset_uint8(plane_bsize, raster_block,
@@ -158,7 +158,7 @@ static void decode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
 static int decode_tokens(VP9D_COMP *pbi, BLOCK_SIZE bsize, vp9_reader *r) {
   VP9_COMMON *const cm = &pbi->common;
   MACROBLOCKD *const xd = &pbi->mb;
-  MB_MODE_INFO *const mbmi = &xd->this_mi->mbmi;
+  MB_MODE_INFO *const mbmi = &xd->mi_8x8[0]->mbmi;
 
   if (mbmi->skip_coeff) {
     reset_skip_context(xd, bsize);
@@ -187,9 +187,8 @@ static void set_offsets(VP9D_COMP *pbi, BLOCK_SIZE bsize,
   xd->prev_mi_8x8 = cm->prev_mi_grid_visible + offset;
 
   // we are using the mode info context stream here
-  xd->this_mi =
   xd->mi_8x8[0] = xd->mic_stream_ptr;
-  xd->this_mi->mbmi.sb_type = bsize;
+  xd->mi_8x8[0]->mbmi.sb_type = bsize;
   xd->mic_stream_ptr++;
 
   // Special case: if prev_mi is NULL, the previous mode info context
@@ -209,7 +208,7 @@ static void set_offsets(VP9D_COMP *pbi, BLOCK_SIZE bsize,
 static void set_ref(VP9D_COMP *pbi, int i, int mi_row, int mi_col) {
   VP9_COMMON *const cm = &pbi->common;
   MACROBLOCKD *const xd = &pbi->mb;
-  MB_MODE_INFO *const mbmi = &xd->this_mi->mbmi;
+  MB_MODE_INFO *const mbmi = &xd->mi_8x8[0]->mbmi;
   const int ref = mbmi->ref_frame[i] - LAST_FRAME;
   const YV12_BUFFER_CONFIG *cfg = &cm->yv12_fb[cm->active_ref_idx[ref]];
   const struct scale_factors *sf = &cm->active_ref_scale[ref];
@@ -240,7 +239,7 @@ static void decode_modes_b(VP9D_COMP *pbi, int mi_row, int mi_col,
     bsize = BLOCK_8X8;
 
   // Has to be called after set_offsets
-  mbmi = &xd->this_mi->mbmi;
+  mbmi = &xd->mi_8x8[0]->mbmi;
   eobtotal = decode_tokens(pbi, bsize, r);
 
   if (!is_inter_block(mbmi)) {

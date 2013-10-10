@@ -352,8 +352,8 @@ static void update_state(VP9_COMP *cpi, PICK_MODE_CONTEXT *ctx,
   MACROBLOCK *const x = &cpi->mb;
   MACROBLOCKD *const xd = &x->e_mbd;
   MODE_INFO *mi = &ctx->mic;
-  MB_MODE_INFO * const mbmi = &xd->this_mi->mbmi;
-  MODE_INFO *mi_addr = xd->this_mi;
+  MB_MODE_INFO *const mbmi = &xd->mi_8x8[0]->mbmi;
+  MODE_INFO *mi_addr = xd->mi_8x8[0];
 
   int mb_mode_index = ctx->best_mode_index;
   const int mis = cm->mode_info_stride;
@@ -497,9 +497,9 @@ static void set_offsets(VP9_COMP *cpi, int mi_row, int mi_col,
   // cannot be used.
   xd->last_mi = cm->prev_mi ? xd->prev_mi_8x8[0] : NULL;
 
-  xd->this_mi = xd->mi_8x8[0] = cm->mi + idx_str;
+  xd->mi_8x8[0] = cm->mi + idx_str;
 
-  mbmi = &xd->this_mi->mbmi;
+  mbmi = &xd->mi_8x8[0]->mbmi;
 
   // Set up destination pointers
   setup_dst_planes(xd, &cm->yv12_fb[dst_fb_idx], mi_row, mi_col);
@@ -579,10 +579,10 @@ static void pick_sb_modes(VP9_COMP *cpi, int mi_row, int mi_col,
   }
 
   set_offsets(cpi, mi_row, mi_col, bsize);
-  xd->this_mi->mbmi.sb_type = bsize;
+  xd->mi_8x8[0]->mbmi.sb_type = bsize;
 
   // Set to zero to make sure we do not use the previous encoded frame stats
-  xd->this_mi->mbmi.skip_coeff = 0;
+  xd->mi_8x8[0]->mbmi.skip_coeff = 0;
 
   x->source_variance = get_sby_perpixel_variance(cpi, x, bsize);
 
@@ -594,7 +594,7 @@ static void pick_sb_modes(VP9_COMP *cpi, int mi_row, int mi_col,
       energy = vp9_block_energy(cpi, x, bsize);
     }
 
-    xd->this_mi->mbmi.segment_id = vp9_vaq_segment_id(energy);
+    xd->mi_8x8[0]->mbmi.segment_id = vp9_vaq_segment_id(energy);
     rdmult_ratio = vp9_vaq_rdmult_ratio(energy);
     vp9_mb_init_quantizer(cpi, x);
   }
@@ -627,7 +627,7 @@ static void update_stats(VP9_COMP *cpi) {
   VP9_COMMON *const cm = &cpi->common;
   MACROBLOCK *const x = &cpi->mb;
   MACROBLOCKD *const xd = &x->e_mbd;
-  MODE_INFO *mi = xd->this_mi;
+  MODE_INFO *mi = xd->mi_8x8[0];
   MB_MODE_INFO *const mbmi = &mi->mbmi;
 
   if (!frame_is_intra_only(cm)) {
@@ -1866,8 +1866,8 @@ static void init_encode_frame_mb_context(VP9_COMP *cpi) {
 
   setup_block_dptrs(&x->e_mbd, cm->subsampling_x, cm->subsampling_y);
 
-  xd->this_mi->mbmi.mode = DC_PRED;
-  xd->this_mi->mbmi.uv_mode = DC_PRED;
+  xd->mi_8x8[0]->mbmi.mode = DC_PRED;
+  xd->mi_8x8[0]->mbmi.uv_mode = DC_PRED;
 
   vp9_zero(cpi->y_mode_count);
   vp9_zero(cpi->y_uv_mode_count);
@@ -1941,7 +1941,7 @@ static void encode_frame_internal(VP9_COMP *cpi) {
 
   xd->mi_8x8 = cm->mi_grid_visible;
   // required for vp9_frame_init_quantizer
-  xd->this_mi = xd->mi_8x8[0] = cm->mi;
+  xd->mi_8x8[0] = cm->mi;
   xd->mic_stream_ptr = cm->mi;
 
   xd->last_mi = cm->prev_mi;

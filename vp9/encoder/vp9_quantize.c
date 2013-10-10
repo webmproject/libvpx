@@ -275,7 +275,7 @@ void vp9_mb_init_quantizer(VP9_COMP *cpi, MACROBLOCK *x) {
   VP9_COMMON *const cm = &cpi->common;
   MACROBLOCKD *xd = &x->e_mbd;
   int zbin_extra;
-  int segment_id = xd->this_mi->mbmi.segment_id;
+  int segment_id = xd->mi_8x8[0]->mbmi.segment_id;
   const int qindex = vp9_get_qindex(&cpi->common.seg, segment_id,
                                     cpi->common.base_qindex);
 

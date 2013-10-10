@@ -49,7 +49,7 @@ static INLINE vp9_prob vp9_get_pred_prob_mbskip(const VP9_COMMON *cm,
 }
 
 static INLINE unsigned char vp9_get_pred_flag_mbskip(const MACROBLOCKD *xd) {
-  return xd->this_mi->mbmi.skip_coeff;
+  return xd->mi_8x8[0]->mbmi.skip_coeff;
 }
 
 unsigned char vp9_get_pred_context_switchable_interp(const MACROBLOCKD *xd);

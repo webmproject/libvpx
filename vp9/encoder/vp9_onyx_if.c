@@ -3496,7 +3496,6 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
 
     cpi->mb.e_mbd.mi_8x8 = cm->mi_grid_visible;
     cpi->mb.e_mbd.mi_8x8[0] = cm->mi;
-    cpi->mb.e_mbd.this_mi = cm->mi;
 
     // Don't increment frame counters if this was an altref buffer
     // update not a real frame
