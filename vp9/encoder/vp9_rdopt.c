@@ -3642,10 +3642,17 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
         // values, which actually are bigger than this_rd itself. This can
         // cause negative best_filter_rd[] values, which is obviously silly.
         // Therefore, if filter_cache < ref, we do an adjusted calculation.
-        if (cpi->rd_filter_cache[i] >= ref)
+        if (cpi->rd_filter_cache[i] >= ref) {
           adj_rd = this_rd + cpi->rd_filter_cache[i] - ref;
-        else  // FIXME(rbultje) do this for comppred also
-          adj_rd = this_rd - (ref - cpi->rd_filter_cache[i]) * this_rd / ref;
+        } else {
+          // FIXME(rbultje) do this for comppsred also
+          //
+          // To prevent out-of-range computation in
+          //    adj_rd = cpi->rd_filter_cache[i] * this_rd / ref
+          // cpi->rd_filter_cache[i] / ref is converted to a 256 based ratio.
+          int tmp = cpi->rd_filter_cache[i] * 256 / ref;
+          adj_rd = (this_rd * tmp) >> 8;
+        }
         best_filter_rd[i] = MIN(best_filter_rd[i], adj_rd);
       }
     }
