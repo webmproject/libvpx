@@ -43,7 +43,7 @@ cospi_30_64 EQU  1606
 cospi_31_64 EQU   804
 
 
-    EXPORT  |vp9_short_idct32x32_add_neon|
+    EXPORT  |vp9_idct32x32_1024_add_neon|
     ARM
     REQUIRE8
     PRESERVE8
@@ -288,7 +288,7 @@ cospi_31_64 EQU   804
     MEND
     ; --------------------------------------------------------------------------
 
-;void vp9_short_idct32x32_add_neon(int16_t *input, uint8_t *dest, int dest_stride);
+;void vp9_idct32x32_1024_add_neon(int16_t *input, uint8_t *dest, int dest_stride);
 ;
 ;   r0  int16_t *input,
 ;   r1  uint8_t *dest,
@@ -303,7 +303,7 @@ cospi_31_64 EQU   804
 ;   r9  dest + 15 * dest_stride, descending (14, 13, 12, ...)
 ;   r10 dest + 16 * dest_stride, ascending  (17, 18, 19, ...)
 
-|vp9_short_idct32x32_add_neon| PROC
+|vp9_idct32x32_1024_add_neon| PROC
     ; This function does one pass of idct32x32 transform.
     ;
     ; This is done by transposing the input and then doing a 1d transform on
@@ -1295,5 +1295,5 @@ idct32_bands_end_2nd_pass
     vpop {d8-d15}
     pop  {r4-r11}
     bx              lr
-    ENDP  ; |vp9_short_idct32x32_add_neon|
+    ENDP  ; |vp9_idct32x32_1024_add_neon|
     END

@@ -1245,7 +1245,7 @@ static void idct32_1d(int16_t *input, int16_t *output) {
   output[31] = step1[0] - step1[31];
 }
 
-void vp9_short_idct32x32_add_c(int16_t *input, uint8_t *dest, int dest_stride) {
+void vp9_idct32x32_1024_add_c(int16_t *input, uint8_t *dest, int dest_stride) {
   int16_t out[32 * 32];
   int16_t *outptr = out;
   int i, j;
@@ -1282,7 +1282,7 @@ void vp9_short_idct32x32_add_c(int16_t *input, uint8_t *dest, int dest_stride) {
   }
 }
 
-void vp9_short_idct32x32_1_add_c(int16_t *input, uint8_t *dest,
+void vp9_idct32x32_1_add_c(int16_t *input, uint8_t *dest,
                                  int dest_stride) {
   int i, j;
   int a1;
@@ -1347,12 +1347,12 @@ void vp9_idct16x16_add(int16_t *input, uint8_t *dest, int stride, int eob) {
   }
 }
 
-void vp9_idct_add_32x32(int16_t *input, uint8_t *dest, int stride, int eob) {
+void vp9_idct32x32_add(int16_t *input, uint8_t *dest, int stride, int eob) {
   if (eob) {
     if (eob == 1)
-      vp9_short_idct32x32_1_add(input, dest, stride);
+      vp9_idct32x32_1_add(input, dest, stride);
     else
-      vp9_short_idct32x32_add(input, dest, stride);
+      vp9_idct32x32_1024_add(input, dest, stride);
   }
 }
 

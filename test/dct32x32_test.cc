@@ -247,16 +247,16 @@ using std::tr1::make_tuple;
 INSTANTIATE_TEST_CASE_P(
     C, Trans32x32Test,
     ::testing::Values(
-        make_tuple(&vp9_short_fdct32x32_c, &vp9_short_idct32x32_add_c, 0),
-        make_tuple(&vp9_short_fdct32x32_rd_c, &vp9_short_idct32x32_add_c, 1)));
+        make_tuple(&vp9_short_fdct32x32_c, &vp9_idct32x32_1024_add_c, 0),
+        make_tuple(&vp9_short_fdct32x32_rd_c, &vp9_idct32x32_1024_add_c, 1)));
 
 #if HAVE_SSE2
 INSTANTIATE_TEST_CASE_P(
     SSE2, Trans32x32Test,
     ::testing::Values(
         make_tuple(&vp9_short_fdct32x32_sse2,
-                   &vp9_short_idct32x32_add_sse2, 0),
+                   &vp9_idct32x32_1024_add_sse2, 0),
         make_tuple(&vp9_short_fdct32x32_rd_sse2,
-                   &vp9_short_idct32x32_add_sse2, 1)));
+                   &vp9_idct32x32_1024_add_sse2, 1)));
 #endif
 }  // namespace
