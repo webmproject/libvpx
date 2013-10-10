@@ -113,7 +113,7 @@ static void decode_block(int plane, int block, BLOCK_SIZE plane_bsize,
         break;
       case TX_32X32:
         tx_type = DCT_DCT;
-        vp9_idct_add_32x32(qcoeff, dst, stride, eob);
+        vp9_idct32x32_add(qcoeff, dst, stride, eob);
         break;
       default:
         assert(!"Invalid transform size");

@@ -291,11 +291,11 @@ specialize vp9_idct16x16_256_add sse2 neon
 prototype void vp9_idct16x16_10_add "int16_t *input, uint8_t *dest, int dest_stride"
 specialize vp9_idct16x16_10_add sse2 neon
 
-prototype void vp9_short_idct32x32_add "int16_t *input, uint8_t *dest, int dest_stride"
-specialize vp9_short_idct32x32_add sse2 neon
+prototype void vp9_idct32x32_1024_add "int16_t *input, uint8_t *dest, int dest_stride"
+specialize vp9_idct32x32_1024_add sse2 neon
 
-prototype void vp9_short_idct32x32_1_add "int16_t *input, uint8_t *dest, int dest_stride"
-specialize vp9_short_idct32x32_1_add sse2
+prototype void vp9_idct32x32_1_add "int16_t *input, uint8_t *dest, int dest_stride"
+specialize vp9_idct32x32_1_add sse2
 
 prototype void vp9_short_iht4x4_add "int16_t *input, uint8_t *dest, int dest_stride, int tx_type"
 specialize vp9_short_iht4x4_add sse2 neon

@@ -442,7 +442,7 @@ static void encode_block(int plane, int block, BLOCK_SIZE plane_bsize,
 
   switch (tx_size) {
     case TX_32X32:
-      vp9_short_idct32x32_add(dqcoeff, dst, pd->dst.stride);
+      vp9_idct32x32_1024_add(dqcoeff, dst, pd->dst.stride);
       break;
     case TX_16X16:
       vp9_idct16x16_add(dqcoeff, dst, pd->dst.stride, pd->eobs[block]);
@@ -539,7 +539,7 @@ void vp9_encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
                            p->quant, p->quant_shift, qcoeff, dqcoeff,
                            pd->dequant, p->zbin_extra, eob, scan, iscan);
       if (!x->skip_encode && *eob)
-        vp9_short_idct32x32_add(dqcoeff, dst, pd->dst.stride);
+        vp9_idct32x32_1024_add(dqcoeff, dst, pd->dst.stride);
       break;
     case TX_16X16:
       tx_type = get_tx_type_16x16(pd->plane_type, xd);
