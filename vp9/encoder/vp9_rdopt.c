@@ -1108,8 +1108,8 @@ static int64_t rd_pick_intra4x4block(VP9_COMP *cpi, MACROBLOCK *x, int ib,
           vp9_short_iht4x4_add(BLOCK_OFFSET(pd->dqcoeff, block),
                                dst, pd->dst.stride, tx_type);
         else
-          xd->inv_txm4x4_add(BLOCK_OFFSET(pd->dqcoeff, block),
-                             dst, pd->dst.stride);
+          xd->itxm_add(BLOCK_OFFSET(pd->dqcoeff, block), dst, pd->dst.stride,
+                       16);
       }
     }
 

@@ -17,6 +17,7 @@
 
 #include "vp9/common/vp9_alloccommon.h"
 #include "vp9/common/vp9_filter.h"
+#include "vp9/common/vp9_idct.h"
 #if CONFIG_VP9_POSTPROC
 #include "vp9/common/vp9_postproc.h"
 #endif
@@ -1227,14 +1228,8 @@ void vp9_change_config(VP9_PTR ptr, VP9_CONFIG *oxcf) {
   cpi->oxcf.cq_level = q_trans[cpi->oxcf.cq_level];
 
   cpi->oxcf.lossless = oxcf->lossless;
-  if (cpi->oxcf.lossless) {
-    cpi->mb.e_mbd.inv_txm4x4_1_add    = vp9_iwht4x4_1_add;
-    cpi->mb.e_mbd.inv_txm4x4_add      = vp9_iwht4x4_16_add;
-  } else {
-    cpi->mb.e_mbd.inv_txm4x4_1_add    = vp9_idct4x4_1_add;
-    cpi->mb.e_mbd.inv_txm4x4_add      = vp9_idct4x4_16_add;
-  }
-
+  cpi->mb.e_mbd.itxm_add = cpi->oxcf.lossless ? vp9_iwht4x4_add
+                                              : vp9_idct4x4_add;
   cpi->baseline_gf_interval = DEFAULT_GF_INTERVAL;
 
   cpi->ref_frame_flags = VP9_ALT_FLAG | VP9_GOLD_FLAG | VP9_LAST_FLAG;

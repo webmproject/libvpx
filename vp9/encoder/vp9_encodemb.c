@@ -40,15 +40,6 @@ void vp9_subtract_block_c(int rows, int cols,
   }
 }
 
-static void inverse_transform_b_4x4_add(MACROBLOCKD *xd, int eob,
-                                        int16_t *dqcoeff, uint8_t *dest,
-                                        int stride) {
-  if (eob <= 1)
-    xd->inv_txm4x4_1_add(dqcoeff, dest, stride);
-  else
-    xd->inv_txm4x4_add(dqcoeff, dest, stride);
-}
-
 static void subtract_plane(MACROBLOCK *x, BLOCK_SIZE bsize, int plane) {
   struct macroblock_plane *const p = &x->plane[plane];
   const MACROBLOCKD *const xd = &x->e_mbd;
@@ -463,8 +454,7 @@ static void encode_block(int plane, int block, BLOCK_SIZE plane_bsize,
       // this is like vp9_short_idct4x4 but has a special case around eob<=1
       // which is significant (not just an optimization) for the lossless
       // case.
-      inverse_transform_b_4x4_add(xd, pd->eobs[block], dqcoeff,
-                                  dst, pd->dst.stride);
+      xd->itxm_add(dqcoeff, dst, pd->dst.stride, pd->eobs[block]);
       break;
     default:
       assert(!"Invalid transform size");
@@ -631,7 +621,7 @@ void vp9_encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
           // this is like vp9_short_idct4x4 but has a special case around eob<=1
           // which is significant (not just an optimization) for the lossless
           // case.
-          inverse_transform_b_4x4_add(xd, *eob, dqcoeff, dst, pd->dst.stride);
+          xd->itxm_add(dqcoeff, dst, pd->dst.stride, *eob);
         else
           vp9_short_iht4x4_add(dqcoeff, dst, pd->dst.stride, tx_type);
       }
