@@ -17,7 +17,7 @@
 #include "vp9/common/vp9_blockd.h"
 #include "vp9/common/vp9_idct.h"
 
-static void fdct4(int16_t *input, int16_t *output) {
+static void fdct4(const int16_t *input, int16_t *output) {
   int16_t step[4];
   int temp1, temp2;
 
@@ -102,7 +102,7 @@ void vp9_short_fdct4x4_c(int16_t *input, int16_t *output, int pitch) {
   }
 }
 
-static void fadst4(int16_t *input, int16_t *output) {
+static void fadst4(const int16_t *input, int16_t *output) {
   int x0, x1, x2, x3;
   int s0, s1, s2, s3, s4, s5, s6, s7;
 
@@ -183,7 +183,7 @@ void vp9_short_fdct8x4_c(int16_t *input, int16_t *output, int pitch) {
     vp9_short_fdct4x4_c(input + 4, output + 16, pitch);
 }
 
-static void fdct8(int16_t *input, int16_t *output) {
+static void fdct8(const int16_t *input, int16_t *output) {
   /*canbe16*/ int s0, s1, s2, s3, s4, s5, s6, s7;
   /*needs32*/ int t0, t1, t2, t3;
   /*canbe16*/ int x0, x1, x2, x3;
@@ -486,7 +486,7 @@ void vp9_short_fdct16x16_c(int16_t *input, int16_t *output, int pitch) {
   }
 }
 
-static void fadst8(int16_t *input, int16_t *output) {
+static void fadst8(const int16_t *input, int16_t *output) {
   int s0, s1, s2, s3, s4, s5, s6, s7;
 
   int x0 = input[7];
@@ -654,7 +654,7 @@ void vp9_short_walsh8x4_c(int16_t *input, int16_t *output, int pitch) {
 
 
 // Rewrote to use same algorithm as others.
-static void fdct16(int16_t in[16], int16_t out[16]) {
+static void fdct16(const int16_t in[16], int16_t out[16]) {
   /*canbe16*/ int step1[8];
   /*canbe16*/ int step2[8];
   /*canbe16*/ int step3[8];
@@ -795,7 +795,7 @@ static void fdct16(int16_t in[16], int16_t out[16]) {
   out[15] = dct_const_round_shift(temp2);
 }
 
-void fadst16(int16_t *input, int16_t *output) {
+static void fadst16(const int16_t *input, int16_t *output) {
   int s0, s1, s2, s3, s4, s5, s6, s7, s8, s9, s10, s11, s12, s13, s14, s15;
 
   int x0 = input[15];
@@ -1003,7 +1003,7 @@ static INLINE int half_round_shift(int input) {
   return rv;
 }
 
-static void dct32_1d(int *input, int *output, int round) {
+static void dct32_1d(const int *input, int *output, int round) {
   int step[32];
   // Stage 1
   step[0] = input[0] + input[(32 - 1)];

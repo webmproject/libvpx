@@ -81,7 +81,7 @@ static INLINE int dct_const_round_shift(int input) {
   return rv;
 }
 
-typedef void (*transform_1d)(int16_t*, int16_t*);
+typedef void (*transform_1d)(const int16_t*, int16_t*);
 
 typedef struct {
   transform_1d cols, rows;  // vertical and horizontal

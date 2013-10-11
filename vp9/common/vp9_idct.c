@@ -96,7 +96,7 @@ void vp9_iwht4x4_1_add_c(int16_t *in, uint8_t *dest, int dest_stride) {
   }
 }
 
-static void idct4_1d(int16_t *input, int16_t *output) {
+static void idct4_1d(const int16_t *input, int16_t *output) {
   int16_t step[4];
   int temp1, temp2;
   // stage 1
@@ -156,7 +156,7 @@ void vp9_idct4x4_1_add_c(int16_t *input, uint8_t *dest, int dest_stride) {
   }
 }
 
-static void idct8_1d(int16_t *input, int16_t *output) {
+static void idct8_1d(const int16_t *input, int16_t *output) {
   int16_t step1[8], step2[8];
   int temp1, temp2;
   // stage 1
@@ -238,7 +238,7 @@ void vp9_idct8x8_1_add_c(int16_t *input, uint8_t *dest, int dest_stride) {
   }
 }
 
-static void iadst4_1d(int16_t *input, int16_t *output) {
+static void iadst4_1d(const int16_t *input, int16_t *output) {
   int s0, s1, s2, s3, s4, s5, s6, s7;
 
   int x0 = input[0];
@@ -311,7 +311,7 @@ void vp9_short_iht4x4_add_c(int16_t *input, uint8_t *dest, int dest_stride,
                                   + dest[j * dest_stride + i]);
   }
 }
-static void iadst8_1d(int16_t *input, int16_t *output) {
+static void iadst8_1d(const int16_t *input, int16_t *output) {
   int s0, s1, s2, s3, s4, s5, s6, s7;
 
   int x0 = input[7];
@@ -446,7 +446,7 @@ void vp9_idct8x8_10_add_c(int16_t *input, uint8_t *dest,
   }
 }
 
-static void idct16_1d(int16_t *input, int16_t *output) {
+static void idct16_1d(const int16_t *input, int16_t *output) {
   int16_t step1[16], step2[16];
   int temp1, temp2;
 
@@ -635,7 +635,7 @@ void vp9_idct16x16_256_add_c(int16_t *input, uint8_t *dest, int dest_stride) {
   }
 }
 
-void iadst16_1d(int16_t *input, int16_t *output) {
+static void iadst16_1d(const int16_t *input, int16_t *output) {
   int s0, s1, s2, s3, s4, s5, s6, s7, s8, s9, s10, s11, s12, s13, s14, s15;
 
   int x0 = input[15];
@@ -878,7 +878,7 @@ void vp9_idct16x16_1_add_c(int16_t *input, uint8_t *dest,
   }
 }
 
-static void idct32_1d(int16_t *input, int16_t *output) {
+static void idct32_1d(const int16_t *input, int16_t *output) {
   int16_t step1[32], step2[32];
   int temp1, temp2;
 
