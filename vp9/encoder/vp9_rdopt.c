@@ -110,6 +110,7 @@ static int rd_thresh_block_size_factor[BLOCK_SIZES] =
 #define RD_THRESH_MAX_FACT 64
 #define RD_THRESH_INC      1
 #define RD_THRESH_POW      1.25
+#define RD_MULT_EPB_RATIO  64
 
 #define MV_COST_WEIGHT      108
 #define MV_COST_WEIGHT_SUB  120
@@ -162,7 +163,17 @@ void vp9_init_me_luts() {
 
 static int compute_rd_mult(int qindex) {
   const int q = vp9_dc_quant(qindex, 0);
-  return (11 * q * q) >> 2;
+  // TODO(debargha): Adjust the function below
+  return (88 * q * q / 25);
+}
+
+static int compute_rd_thresh_factor(int qindex) {
+  int q;
+  // TODO(debargha): Adjust the function below
+  q = (int)(pow(vp9_dc_quant(qindex, 0) / 4.0, RD_THRESH_POW) * 5.12);
+  if (q < 8)
+    q = 8;
+  return q;
 }
 
 void vp9_initialize_me_consts(VP9_COMP *cpi, int qindex) {
@@ -172,9 +183,7 @@ void vp9_initialize_me_consts(VP9_COMP *cpi, int qindex) {
 
 static void set_block_thresholds(VP9_COMP *cpi, int qindex) {
   int q, i, bsize;
-  q = ((int)pow(vp9_dc_quant(qindex, 0) >> 2, RD_THRESH_POW)) << 2;
-  if (q < 8)
-    q = 8;
+  q = compute_rd_thresh_factor(qindex);
 
   for (bsize = 0; bsize < BLOCK_SIZES; ++bsize) {
     for (i = 0; i < MAX_MODES; ++i) {
@@ -216,7 +225,7 @@ void vp9_initialize_rd_consts(VP9_COMP *cpi, int qindex) {
   //     cpi->common.refresh_alt_ref_frame)
   qindex = clamp(qindex, 0, MAXQ);
 
-  cpi->RDDIV = 100;
+  cpi->RDDIV = RDDIV_BITS;  // in bits (to multiply D by 128)
   cpi->RDMULT = compute_rd_mult(qindex);
   if (cpi->pass == 2 && (cpi->common.frame_type != KEY_FRAME)) {
     if (cpi->twopass.next_iiratio > 31)
@@ -225,7 +234,7 @@ void vp9_initialize_rd_consts(VP9_COMP *cpi, int qindex) {
       cpi->RDMULT +=
           (cpi->RDMULT * rd_iifactor[cpi->twopass.next_iiratio]) >> 4;
   }
-  cpi->mb.errorperbit = cpi->RDMULT >> 6;
+  cpi->mb.errorperbit = cpi->RDMULT / RD_MULT_EPB_RATIO;
   cpi->mb.errorperbit += (cpi->mb.errorperbit == 0);
 
   vp9_set_speed_features(cpi);
