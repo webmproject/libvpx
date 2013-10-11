@@ -16,6 +16,24 @@
       "revId": "1f2e089bdf4f0cff5b87c84b281a908439e42ee8",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdH//73M\u003d",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2013-10-11T17:48:08Z",
+      "side": 1,
+      "message": "Done. Of course, it should be MODE_UPDATE_PROB and VP9_COEF_UPDATE_PROB :)",
+      "parentUuid": "AAAAdH//748\u003d",
+      "revId": "1f2e089bdf4f0cff5b87c84b281a908439e42ee8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
