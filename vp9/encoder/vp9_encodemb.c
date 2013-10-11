@@ -564,7 +564,7 @@ void vp9_encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
                      p->quant, p->quant_shift, qcoeff, dqcoeff,
                      pd->dequant, p->zbin_extra, eob, scan, iscan);
       if (!x->skip_encode && *eob)
-        vp9_iht_add_16x16(tx_type, dqcoeff, dst, pd->dst.stride, *eob);
+        vp9_iht16x16_add(tx_type, dqcoeff, dst, pd->dst.stride, *eob);
       break;
     case TX_8X8:
       tx_type = get_tx_type_8x8(pd->plane_type, xd);
@@ -589,7 +589,7 @@ void vp9_encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
                      p->quant_shift, qcoeff, dqcoeff,
                      pd->dequant, p->zbin_extra, eob, scan, iscan);
       if (!x->skip_encode && *eob)
-        vp9_iht_add_8x8(tx_type, dqcoeff, dst, pd->dst.stride, *eob);
+        vp9_iht8x8_add(tx_type, dqcoeff, dst, pd->dst.stride, *eob);
       break;
     case TX_4X4:
       tx_type = get_tx_type_4x4(pd->plane_type, xd, block);

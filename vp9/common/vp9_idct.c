@@ -1357,7 +1357,7 @@ void vp9_idct32x32_add(int16_t *input, uint8_t *dest, int stride, int eob) {
 }
 
 // iht
-void vp9_iht_add(TX_TYPE tx_type, int16_t *input, uint8_t *dest, int stride,
+void vp9_iht4x4_add(TX_TYPE tx_type, int16_t *input, uint8_t *dest, int stride,
                    int eob) {
   if (tx_type == DCT_DCT)
     vp9_idct4x4_add(input, dest, stride, eob);
@@ -1365,7 +1365,7 @@ void vp9_iht_add(TX_TYPE tx_type, int16_t *input, uint8_t *dest, int stride,
     vp9_iht4x4_16_add(input, dest, stride, tx_type);
 }
 
-void vp9_iht_add_8x8(TX_TYPE tx_type, int16_t *input, uint8_t *dest,
+void vp9_iht8x8_add(TX_TYPE tx_type, int16_t *input, uint8_t *dest,
                        int stride, int eob) {
   if (tx_type == DCT_DCT) {
     vp9_idct8x8_add(input, dest, stride, eob);
@@ -1376,7 +1376,7 @@ void vp9_iht_add_8x8(TX_TYPE tx_type, int16_t *input, uint8_t *dest,
   }
 }
 
-void vp9_iht_add_16x16(TX_TYPE tx_type, int16_t *input, uint8_t *dest,
+void vp9_iht16x16_add(TX_TYPE tx_type, int16_t *input, uint8_t *dest,
                          int stride, int eob) {
   if (tx_type == DCT_DCT) {
     vp9_idct16x16_add(input, dest, stride, eob);

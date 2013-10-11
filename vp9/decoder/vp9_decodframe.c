@@ -101,15 +101,15 @@ static void decode_block(int plane, int block, BLOCK_SIZE plane_bsize,
         if (tx_type == DCT_DCT)
           xd->itxm_add(qcoeff, dst, stride, eob);
         else
-          vp9_iht_add(tx_type, qcoeff, dst, stride, eob);
+          vp9_iht4x4_add(tx_type, qcoeff, dst, stride, eob);
         break;
       case TX_8X8:
         tx_type = get_tx_type_8x8(pd->plane_type, xd);
-        vp9_iht_add_8x8(tx_type, qcoeff, dst, stride, eob);
+        vp9_iht8x8_add(tx_type, qcoeff, dst, stride, eob);
         break;
       case TX_16X16:
         tx_type = get_tx_type_16x16(pd->plane_type, xd);
-        vp9_iht_add_16x16(tx_type, qcoeff, dst, stride, eob);
+        vp9_iht16x16_add(tx_type, qcoeff, dst, stride, eob);
         break;
       case TX_32X32:
         tx_type = DCT_DCT;
