@@ -17,7 +17,7 @@
 
 void vp9_init_mode_costs(VP9_COMP *c) {
   VP9_COMMON *const cm = &c->common;
-  const vp9_tree_p KT = vp9_intra_mode_tree;
+  const vp9_tree_index *KT = vp9_intra_mode_tree;
   int i, j;
 
   for (i = 0; i < INTRA_MODES; i++) {
