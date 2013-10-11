@@ -14,6 +14,6 @@
 
 #include "vp9/decoder/vp9_dboolhuff.h"
 
-void vp9_diff_update_prob(vp9_reader *r, int update_prob, vp9_prob* p);
+void vp9_diff_update_prob(vp9_reader *r, vp9_prob* p);
 
 #endif  // VP9_DECODER_VP9_DSUBEXP_H_

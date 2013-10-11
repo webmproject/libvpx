@@ -99,8 +99,8 @@ static int decode_term_subexp(vp9_reader *r, int k, int num_syms) {
   return word;
 }
 
-void vp9_diff_update_prob(vp9_reader *r, int update_prob, vp9_prob* p) {
-  if (vp9_read(r, update_prob)) {
+void vp9_diff_update_prob(vp9_reader *r, vp9_prob* p) {
+  if (vp9_read(r, DIFF_UPDATE_PROB)) {
     const int delp = decode_term_subexp(r, SUBEXP_PARAM, 255);
     *p = (vp9_prob)inv_remap_prob(delp, *p);
   }
