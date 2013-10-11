@@ -429,9 +429,9 @@ static void filter_intra_predictors(uint8_t *ypred_ptr, int y_stride, int bs,
   k = 0;
   mean = 0;
   while (k < bs) {
-    mean = mean + (int)yleft_col[r];
-    mean = mean + (int)yabove_row[c];
-    k++;
+    mean = mean + (int)yleft_col[k];
+    mean = mean + (int)yabove_row[k];
+    ++k;
   }
   mean = (mean + bs) / (2 * bs);
 
