@@ -1942,7 +1942,6 @@ static void encode_frame_internal(VP9_COMP *cpi) {
   xd->mi_8x8 = cm->mi_grid_visible;
   // required for vp9_frame_init_quantizer
   xd->mi_8x8[0] = cm->mi;
-  xd->mic_stream_ptr = cm->mi;
 
   xd->last_mi = cm->prev_mi;
 

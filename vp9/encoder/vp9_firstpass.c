@@ -519,7 +519,6 @@ void vp9_first_pass(VP9_COMP *cpi) {
   xd->mi_8x8 = cm->mi_grid_visible;
   // required for vp9_frame_init_quantizer
   xd->mi_8x8[0] = cm->mi;
-  xd->mic_stream_ptr = cm->mi;
 
   setup_block_dptrs(&x->e_mbd, cm->subsampling_x, cm->subsampling_y);
 
