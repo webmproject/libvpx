@@ -18,6 +18,8 @@
 #include "vp9/common/vp9_scan.h"
 #include "vp9/common/vp9_treecoder.h"
 
+#define DIFF_UPDATE_PROB 252
+
 /* Coefficient token alphabet */
 
 #define ZERO_TOKEN              0       /* 0         Extra Bits 0+0 */
@@ -207,8 +209,5 @@ static void get_scan_and_band(const MACROBLOCKD *xd, TX_SIZE tx_size,
       assert(!"Invalid transform size.");
   }
 }
-
-
-enum { VP9_COEF_UPDATE_PROB = 252 };
 
 #endif  // VP9_COMMON_VP9_ENTROPY_H_
