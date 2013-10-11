@@ -623,7 +623,7 @@ void vp9_encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
           // case.
           xd->itxm_add(dqcoeff, dst, pd->dst.stride, *eob);
         else
-          vp9_short_iht4x4_add(dqcoeff, dst, pd->dst.stride, tx_type);
+          vp9_iht4x4_16_add(dqcoeff, dst, pd->dst.stride, tx_type);
       }
       break;
     default:

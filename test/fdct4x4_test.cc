@@ -39,7 +39,7 @@ void fht4x4(int16_t *in, int16_t *out, uint8_t* /*dst*/,
 }
 void iht4x4_add(int16_t* /*in*/, int16_t *out, uint8_t *dst,
                 int stride, int tx_type) {
-  vp9_short_iht4x4_add_c(out, dst, stride >> 1, tx_type);
+  vp9_iht4x4_16_add_c(out, dst, stride >> 1, tx_type);
 }
 
 class FwdTrans4x4Test : public ::testing::TestWithParam<int> {

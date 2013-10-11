@@ -264,7 +264,7 @@ static void iadst4_1d_sse2(__m128i *in) {
   in[3] = _mm_unpackhi_epi64(in[1], in[1]);
 }
 
-void vp9_short_iht4x4_add_sse2(int16_t *input, uint8_t *dest, int stride,
+void vp9_iht4x4_16_add_sse2(int16_t *input, uint8_t *dest, int stride,
                                int tx_type) {
   __m128i in[4];
   const __m128i zero = _mm_setzero_si128();
@@ -883,7 +883,7 @@ static void iadst8_1d_sse2(__m128i *in) {
 }
 
 
-void vp9_short_iht8x8_add_sse2(int16_t *input, uint8_t *dest, int stride,
+void vp9_iht8x8_64_add_sse2(int16_t *input, uint8_t *dest, int stride,
                                int tx_type) {
   __m128i in[8];
   const __m128i zero = _mm_setzero_si128();
@@ -2386,7 +2386,7 @@ static INLINE void write_buffer_8x16(uint8_t *dest, __m128i *in, int stride) {
   RECON_AND_STORE(dest, in[15]);
 }
 
-void vp9_short_iht16x16_add_sse2(int16_t *input, uint8_t *dest, int stride,
+void vp9_iht16x16_256_add_sse2(int16_t *input, uint8_t *dest, int stride,
                                  int tx_type) {
   __m128i in0[16], in1[16];
 
