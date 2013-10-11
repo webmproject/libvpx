@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdH//748\u003d",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2013-10-11T15:24:46Z",
+      "side": 1,
+      "message": "Maybe one of them is DIFF_UPDATE_PROB, otherwise, the sentence reads weird.",
+      "revId": "1f2e089bdf4f0cff5b87c84b281a908439e42ee8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
