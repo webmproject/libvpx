@@ -1044,7 +1044,7 @@ static int64_t rd_pick_intra4x4block(VP9_COMP *cpi, MACROBLOCK *x, int ib,
     int64_t this_rd;
     int ratey = 0;
 
-    if (!(cpi->sf.intra_y_mode_mask & (1 << mode)))
+    if (!(cpi->sf.intra_y_mode_mask[TX_4X4] & (1 << mode)))
       continue;
 
     // Only do the oblique modes if the best so far is
@@ -1236,7 +1236,7 @@ static int64_t rd_pick_intra_sby_mode(VP9_COMP *cpi, MACROBLOCK *x,
     MODE_INFO *above_mi = xd->mi_8x8[-xd->mode_info_stride];
     MODE_INFO *left_mi = xd->mi_8x8[-1];
 
-    if (!(cpi->sf.intra_y_mode_mask & (1 << mode)))
+    if (!(cpi->sf.intra_y_mode_mask[max_txsize_lookup[bsize]] & (1 << mode)))
       continue;
 
     if (cpi->common.frame_type == KEY_FRAME) {
@@ -1339,9 +1339,10 @@ static int64_t rd_pick_intra_sbuv_mode(VP9_COMP *cpi, MACROBLOCK *x,
   // int mode_mask = (bsize <= BLOCK_8X8)
   //                ? ALL_INTRA_MODES : cpi->sf.intra_uv_mode_mask;
 
-  for (mode = DC_PRED; mode <= TM_PRED; mode++) {
+  for (mode = DC_PRED; mode <= TM_PRED; mode ++) {
     // if (!(mode_mask & (1 << mode)))
-    if (!(cpi->sf.intra_uv_mode_mask & (1 << mode)))
+    if (!(cpi->sf.intra_uv_mode_mask[max_uv_txsize_lookup[bsize]]
+          & (1 << mode)))
       continue;
 
     x->e_mbd.mi_8x8[0]->mbmi.uv_mode = mode;

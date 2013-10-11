@@ -737,8 +737,10 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
   sf->mode_search_skip_flags = 0;
   sf->disable_split_var_thresh = 0;
   sf->disable_filter_search_var_thresh = 0;
-  sf->intra_y_mode_mask = ALL_INTRA_MODES;
-  sf->intra_uv_mode_mask = ALL_INTRA_MODES;
+  for (i = 0; i < TX_SIZES; i++) {
+    sf->intra_y_mode_mask[i] = ALL_INTRA_MODES;
+    sf->intra_uv_mode_mask[i] = ALL_INTRA_MODES;
+  }
   sf->use_rd_breakout = 0;
   sf->skip_encode_sb = 0;
   sf->use_uv_intra_rd_estimate = 0;
@@ -788,6 +790,9 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
         sf->auto_mv_step_size = 1;
         sf->adaptive_rd_thresh = 2;
         sf->recode_loop = 2;
+        sf->intra_y_mode_mask[TX_32X32] = INTRA_DC_H_V;
+        sf->intra_uv_mode_mask[TX_32X32] = INTRA_DC_H_V;
+        sf->intra_uv_mode_mask[TX_16X16] = INTRA_DC_H_V;
       }
       if (speed == 2) {
         sf->use_square_partition_only = !(cpi->common.frame_type == KEY_FRAME ||
@@ -823,6 +828,10 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
 
         sf->adaptive_rd_thresh = 2;
         sf->mode_skip_start = 11;
+        sf->intra_y_mode_mask[TX_32X32] = INTRA_DC_H_V;
+        sf->intra_y_mode_mask[TX_16X16] = INTRA_DC_H_V;
+        sf->intra_uv_mode_mask[TX_32X32] = INTRA_DC_H_V;
+        sf->intra_uv_mode_mask[TX_16X16] = INTRA_DC_H_V;
       }
       if (speed == 3) {
         sf->use_square_partition_only = 1;
@@ -923,8 +932,10 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
         sf->subpel_iters_per_step = 1;
         sf->disable_split_var_thresh = 64;
         sf->disable_filter_search_var_thresh = 96;
-        sf->intra_y_mode_mask = INTRA_DC_ONLY;
-        sf->intra_uv_mode_mask = INTRA_DC_ONLY;
+        for (i = 0; i < TX_SIZES; i++) {
+          sf->intra_y_mode_mask[i] = INTRA_DC_ONLY;
+          sf->intra_uv_mode_mask[i] = INTRA_DC_ONLY;
+        }
         sf->use_fast_coef_updates = 2;
         sf->adaptive_rd_thresh = 4;
         sf->mode_skip_start = 6;

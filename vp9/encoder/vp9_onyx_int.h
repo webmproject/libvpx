@@ -230,6 +230,7 @@ typedef enum {
 #define ALL_INTRA_MODES 0x3FF
 #define INTRA_DC_ONLY 0x01
 #define INTRA_DC_TM ((1 << TM_PRED) | (1 << DC_PRED))
+#define INTRA_DC_H_V ((1 << DC_PRED) | (1 << V_PRED) | (1 << H_PRED))
 #define INTRA_DC_TM_H_V (INTRA_DC_TM | (1 << V_PRED) | (1 << H_PRED))
 
 typedef enum {
@@ -285,8 +286,8 @@ typedef struct {
   // A source variance threshold below which filter search is disabled
   // Choose a very large value (UINT_MAX) to use 8-tap always
   unsigned int disable_filter_search_var_thresh;
-  int intra_y_mode_mask;
-  int intra_uv_mode_mask;
+  int intra_y_mode_mask[TX_SIZES];
+  int intra_uv_mode_mask[TX_SIZES];
   int use_rd_breakout;
   int use_uv_intra_rd_estimate;
   int use_fast_lpf_pick;
