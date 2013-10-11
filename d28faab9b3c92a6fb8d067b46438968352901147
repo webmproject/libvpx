@@ -34,6 +34,24 @@
       "revId": "d28faab9b3c92a6fb8d067b46438968352901147",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdH//7yQ\u003d",
+        "filename": "vp9/encoder/vp9_bitstream.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 1460,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2013-10-11T23:31:49Z",
+      "side": 1,
+      "message": "We could define function in *.h file, so it will be inlined by the compiler (as we do in MANY places :-) ). And we also could use temp variables like:\n\nconst int intra_flag \u003d intra_only_blocks(cm);\n\nI\u0027m sure there will not be any performance problems.",
+      "parentUuid": "AAAAdH//7zA\u003d",
+      "revId": "d28faab9b3c92a6fb8d067b46438968352901147",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
