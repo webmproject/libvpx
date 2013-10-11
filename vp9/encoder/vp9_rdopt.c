@@ -3903,6 +3903,32 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
     ref_frame = vp9_ref_order[mode_index].ref_frame;
     second_ref_frame = vp9_ref_order[mode_index].second_ref_frame;
 
+    // Look at the reference frame of the best mode so far and set the
+    // skip mask to look at a subset of the remaining modes.
+    if (mode_index > 2 && cpi->sf.mode_skip_start < MAX_MODES) {
+      if (mode_index == 3) {
+        switch (vp9_ref_order[best_mode_index].ref_frame) {
+          case INTRA_FRAME:
+            cpi->mode_skip_mask = 0;
+            break;
+          case LAST_FRAME:
+            cpi->mode_skip_mask = 0x0010;
+            break;
+          case GOLDEN_FRAME:
+            cpi->mode_skip_mask = 0x0008;
+            break;
+          case ALTREF_FRAME:
+            cpi->mode_skip_mask = 0x0000;
+            break;
+          case NONE:
+          case MAX_REF_FRAMES:
+            assert(!"Invalid Reference frame");
+        }
+      }
+      if (cpi->mode_skip_mask & ((int64_t)1 << mode_index))
+        continue;
+    }
+
     // Skip if the current reference frame has been masked off
     if (cpi->sf.reference_masking && !cpi->set_ref_frame_mask &&
         (cpi->ref_frame_mask & (1 << ref_frame)))
