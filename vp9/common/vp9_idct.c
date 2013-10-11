@@ -96,7 +96,7 @@ void vp9_iwht4x4_1_add_c(int16_t *in, uint8_t *dest, int dest_stride) {
   }
 }
 
-void vp9_idct4_1d_c(int16_t *input, int16_t *output) {
+static void idct4_1d(int16_t *input, int16_t *output) {
   int16_t step[4];
   int temp1, temp2;
   // stage 1
@@ -124,7 +124,7 @@ void vp9_idct4x4_16_add_c(int16_t *input, uint8_t *dest, int dest_stride) {
 
   // Rows
   for (i = 0; i < 4; ++i) {
-    vp9_idct4_1d(input, outptr);
+    idct4_1d(input, outptr);
     input += 4;
     outptr += 4;
   }
@@ -133,7 +133,7 @@ void vp9_idct4x4_16_add_c(int16_t *input, uint8_t *dest, int dest_stride) {
   for (i = 0; i < 4; ++i) {
     for (j = 0; j < 4; ++j)
       temp_in[j] = out[j * 4 + i];
-    vp9_idct4_1d(temp_in, temp_out);
+    idct4_1d(temp_in, temp_out);
     for (j = 0; j < 4; ++j)
       dest[j * dest_stride + i] = clip_pixel(ROUND_POWER_OF_TWO(temp_out[j], 4)
                                   + dest[j * dest_stride + i]);
@@ -174,7 +174,7 @@ static void idct8_1d(int16_t *input, int16_t *output) {
   step1[6] = dct_const_round_shift(temp2);
 
   // stage 2 & stage 3 - even half
-  vp9_idct4_1d(step1, step1);
+  idct4_1d(step1, step1);
 
   // stage 2 - odd half
   step2[4] = step1[4] + step1[5];
@@ -283,10 +283,10 @@ static void iadst4_1d(int16_t *input, int16_t *output) {
 void vp9_short_iht4x4_add_c(int16_t *input, uint8_t *dest, int dest_stride,
                             int tx_type) {
   const transform_2d IHT_4[] = {
-    { vp9_idct4_1d,  vp9_idct4_1d  },  // DCT_DCT  = 0
-    { iadst4_1d, vp9_idct4_1d  },      // ADST_DCT = 1
-    { vp9_idct4_1d,  iadst4_1d },      // DCT_ADST = 2
-    { iadst4_1d, iadst4_1d }           // ADST_ADST = 3
+    { idct4_1d, idct4_1d  },  // DCT_DCT  = 0
+    { iadst4_1d, idct4_1d  },   // ADST_DCT = 1
+    { idct4_1d, iadst4_1d },    // DCT_ADST = 2
+    { iadst4_1d, iadst4_1d }      // ADST_ADST = 3
   };
 
   int i, j;
