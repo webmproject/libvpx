@@ -599,6 +599,28 @@ INSTANTIATE_TEST_CASE_P(C, ConvolveTest, ::testing::Values(
     make_tuple(32, 64, &convolve8_c),
     make_tuple(64, 64, &convolve8_c)));
 
+#if HAVE_SSE2
+const ConvolveFunctions convolve8_sse2(
+    vp9_convolve8_horiz_sse2, vp9_convolve8_avg_horiz_sse2,
+    vp9_convolve8_vert_sse2, vp9_convolve8_avg_vert_sse2,
+    vp9_convolve8_sse2, vp9_convolve8_avg_sse2);
+
+INSTANTIATE_TEST_CASE_P(SSE2, ConvolveTest, ::testing::Values(
+    make_tuple(4, 4, &convolve8_sse2),
+    make_tuple(8, 4, &convolve8_sse2),
+    make_tuple(4, 8, &convolve8_sse2),
+    make_tuple(8, 8, &convolve8_sse2),
+    make_tuple(16, 8, &convolve8_sse2),
+    make_tuple(8, 16, &convolve8_sse2),
+    make_tuple(16, 16, &convolve8_sse2),
+    make_tuple(32, 16, &convolve8_sse2),
+    make_tuple(16, 32, &convolve8_sse2),
+    make_tuple(32, 32, &convolve8_sse2),
+    make_tuple(64, 32, &convolve8_sse2),
+    make_tuple(32, 64, &convolve8_sse2),
+    make_tuple(64, 64, &convolve8_sse2)));
+#endif
+
 #if HAVE_SSSE3
 const ConvolveFunctions convolve8_ssse3(
     vp9_convolve8_horiz_ssse3, vp9_convolve8_avg_horiz_ssse3,
