@@ -16,6 +16,24 @@
       "revId": "7ef573914dc2a15e9ab6507111c386cde98fd65a",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdH//704\u003d",
+        "filename": "vp9/common/vp9_idct.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 286,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2013-10-11T21:13:52Z",
+      "side": 1,
+      "message": "Right... but let me fix it in one of the next patches :) I\u0027d like this patch would contain only pure renames.",
+      "parentUuid": "AAAAdH//71A\u003d",
+      "revId": "7ef573914dc2a15e9ab6507111c386cde98fd65a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
