@@ -767,6 +767,7 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
 #endif
       sf->use_avoid_tested_higherror = 1;
       sf->adaptive_rd_thresh = 1;
+      sf->recode_loop = (speed < 1);
 
       if (speed == 1) {
         sf->use_square_partition_only = !(cpi->common.frame_type == KEY_FRAME ||
