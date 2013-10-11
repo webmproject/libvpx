@@ -500,10 +500,10 @@ INSTANTIATE_TEST_CASE_P(
 INSTANTIATE_TEST_CASE_P(
     C, Trans16x16HT,
     ::testing::Values(
-        make_tuple(&vp9_short_fht16x16_c, &vp9_short_iht16x16_add_c, 0),
-        make_tuple(&vp9_short_fht16x16_c, &vp9_short_iht16x16_add_c, 1),
-        make_tuple(&vp9_short_fht16x16_c, &vp9_short_iht16x16_add_c, 2),
-        make_tuple(&vp9_short_fht16x16_c, &vp9_short_iht16x16_add_c, 3)));
+        make_tuple(&vp9_short_fht16x16_c, &vp9_iht16x16_256_add_c, 0),
+        make_tuple(&vp9_short_fht16x16_c, &vp9_iht16x16_256_add_c, 1),
+        make_tuple(&vp9_short_fht16x16_c, &vp9_iht16x16_256_add_c, 2),
+        make_tuple(&vp9_short_fht16x16_c, &vp9_iht16x16_256_add_c, 3)));
 
 #if HAVE_SSE2
 INSTANTIATE_TEST_CASE_P(
@@ -514,9 +514,9 @@ INSTANTIATE_TEST_CASE_P(
 INSTANTIATE_TEST_CASE_P(
     SSE2, Trans16x16HT,
     ::testing::Values(
-        make_tuple(&vp9_short_fht16x16_sse2, &vp9_short_iht16x16_add_sse2, 0),
-        make_tuple(&vp9_short_fht16x16_sse2, &vp9_short_iht16x16_add_sse2, 1),
-        make_tuple(&vp9_short_fht16x16_sse2, &vp9_short_iht16x16_add_sse2, 2),
-        make_tuple(&vp9_short_fht16x16_sse2, &vp9_short_iht16x16_add_sse2, 3)));
+        make_tuple(&vp9_short_fht16x16_sse2, &vp9_iht16x16_256_add_sse2, 0),
+        make_tuple(&vp9_short_fht16x16_sse2, &vp9_iht16x16_256_add_sse2, 1),
+        make_tuple(&vp9_short_fht16x16_sse2, &vp9_iht16x16_256_add_sse2, 2),
+        make_tuple(&vp9_short_fht16x16_sse2, &vp9_iht16x16_256_add_sse2, 3)));
 #endif
 }  // namespace

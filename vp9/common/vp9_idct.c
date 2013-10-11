@@ -280,7 +280,7 @@ static void iadst4_1d(const int16_t *input, int16_t *output) {
   output[3] = dct_const_round_shift(s3);
 }
 
-void vp9_short_iht4x4_add_c(int16_t *input, uint8_t *dest, int dest_stride,
+void vp9_iht4x4_16_add_c(int16_t *input, uint8_t *dest, int dest_stride,
                             int tx_type) {
   const transform_2d IHT_4[] = {
     { idct4_1d, idct4_1d  },  // DCT_DCT  = 0
@@ -395,7 +395,7 @@ static const transform_2d IHT_8[] = {
   { iadst8_1d, iadst8_1d }   // ADST_ADST = 3
 };
 
-void vp9_short_iht8x8_add_c(int16_t *input, uint8_t *dest, int dest_stride,
+void vp9_iht8x8_64_add_c(int16_t *input, uint8_t *dest, int dest_stride,
                             int tx_type) {
   int i, j;
   int16_t out[8 * 8];
@@ -813,7 +813,7 @@ static const transform_2d IHT_16[] = {
   { iadst16_1d, iadst16_1d }   // ADST_ADST = 3
 };
 
-void vp9_short_iht16x16_add_c(int16_t *input, uint8_t *dest, int dest_stride,
+void vp9_iht16x16_256_add_c(int16_t *input, uint8_t *dest, int dest_stride,
                               int tx_type) {
   int i, j;
   int16_t out[16 * 16];
@@ -1362,7 +1362,7 @@ void vp9_iht_add(TX_TYPE tx_type, int16_t *input, uint8_t *dest, int stride,
   if (tx_type == DCT_DCT)
     vp9_idct4x4_add(input, dest, stride, eob);
   else
-    vp9_short_iht4x4_add(input, dest, stride, tx_type);
+    vp9_iht4x4_16_add(input, dest, stride, tx_type);
 }
 
 void vp9_iht_add_8x8(TX_TYPE tx_type, int16_t *input, uint8_t *dest,
@@ -1371,7 +1371,7 @@ void vp9_iht_add_8x8(TX_TYPE tx_type, int16_t *input, uint8_t *dest,
     vp9_idct8x8_add(input, dest, stride, eob);
   } else {
     if (eob > 0) {
-      vp9_short_iht8x8_add(input, dest, stride, tx_type);
+      vp9_iht8x8_64_add(input, dest, stride, tx_type);
     }
   }
 }
@@ -1382,7 +1382,7 @@ void vp9_iht_add_16x16(TX_TYPE tx_type, int16_t *input, uint8_t *dest,
     vp9_idct16x16_add(input, dest, stride, eob);
   } else {
     if (eob > 0) {
-      vp9_short_iht16x16_add(input, dest, stride, tx_type);
+      vp9_iht16x16_256_add(input, dest, stride, tx_type);
     }
   }
 }

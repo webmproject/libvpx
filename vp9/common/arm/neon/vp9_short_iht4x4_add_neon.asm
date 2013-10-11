@@ -8,7 +8,7 @@
 ;  be found in the AUTHORS file in the root of the source tree.
 ;
 
-    EXPORT  |vp9_short_iht4x4_add_neon|
+    EXPORT  |vp9_iht4x4_16_add_neon|
     ARM
     REQUIRE8
     PRESERVE8
@@ -139,7 +139,7 @@
     MEND
 
     AREA     Block, CODE, READONLY ; name this block of code
-;void vp9_short_iht4x4_add_neon(int16_t *input, uint8_t *dest,
+;void vp9_iht4x4_16_add_neon(int16_t *input, uint8_t *dest,
 ;                               int dest_stride, int tx_type)
 ;
 ; r0  int16_t input
@@ -147,7 +147,7 @@
 ; r2  int dest_stride
 ; r3  int tx_type)
 ; This function will only handle tx_type of 1,2,3.
-|vp9_short_iht4x4_add_neon| PROC
+|vp9_iht4x4_16_add_neon| PROC
 
     ; load the inputs into d16-d19
     vld1.s16    {q8,q9}, [r0]!
@@ -175,7 +175,7 @@ iadst_idct
     ; then transform columns
     IADST4x4_1D
 
-    b end_vp9_short_iht4x4_add_neon
+    b end_vp9_iht4x4_16_add_neon
 
 idct_iadst
     ; generate constants
@@ -191,7 +191,7 @@ idct_iadst
     ; then transform columns
     IDCT4x4_1D
 
-    b end_vp9_short_iht4x4_add_neon
+    b end_vp9_iht4x4_16_add_neon
 
 iadst_iadst
     ; generate constants
@@ -206,7 +206,7 @@ iadst_iadst
     ; then transform columns
     IADST4x4_1D
 
-end_vp9_short_iht4x4_add_neon
+end_vp9_iht4x4_16_add_neon
     ; ROUND_POWER_OF_TWO(temp_out[j], 4)
     vrshr.s16   q8, q8, #4
     vrshr.s16   q9, q9, #4
@@ -232,6 +232,6 @@ end_vp9_short_iht4x4_add_neon
     vst1.32     {d26[1]}, [r1], r2
     vst1.32     {d26[0]}, [r1]  ; no post-increment
     bx          lr
-    ENDP  ; |vp9_short_iht4x4_add_neon|
+    ENDP  ; |vp9_iht4x4_16_add_neon|
 
     END

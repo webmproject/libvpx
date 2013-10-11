@@ -1109,7 +1109,7 @@ static int64_t rd_pick_intra4x4block(VP9_COMP *cpi, MACROBLOCK *x, int ib,
           goto next;
 
         if (tx_type != DCT_DCT)
-          vp9_short_iht4x4_add(BLOCK_OFFSET(pd->dqcoeff, block),
+          vp9_iht4x4_16_add(BLOCK_OFFSET(pd->dqcoeff, block),
                                dst, pd->dst.stride, tx_type);
         else
           xd->itxm_add(BLOCK_OFFSET(pd->dqcoeff, block), dst, pd->dst.stride,
