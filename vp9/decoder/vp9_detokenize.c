@@ -88,22 +88,20 @@ static const vp9_prob cat6_prob[15] = {
 static int decode_coefs(VP9_COMMON *cm, const MACROBLOCKD *xd,
                         vp9_reader *r, int block_idx,
                         PLANE_TYPE type, int seg_eob, int16_t *qcoeff_ptr,
-                        TX_SIZE tx_size, const int16_t *dq,
-                        ENTROPY_CONTEXT *A, ENTROPY_CONTEXT *L) {
-  FRAME_CONTEXT *const fc = &cm->fc;
+                        TX_SIZE tx_size, const int16_t *dq, int pt) {
+  const FRAME_CONTEXT *const fc = &cm->fc;
   FRAME_COUNTS *const counts = &cm->counts;
   const int ref = is_inter_block(&xd->this_mi->mbmi);
   int band, c = 0;
-  vp9_prob (*coef_probs)[PREV_COEF_CONTEXTS][UNCONSTRAINED_NODES] =
+  const vp9_prob (*coef_probs)[PREV_COEF_CONTEXTS][UNCONSTRAINED_NODES] =
       fc->coef_probs[tx_size][type][ref];
   vp9_prob coef_probs_full[COEF_BANDS][PREV_COEF_CONTEXTS][ENTROPY_NODES];
   uint8_t load_map[COEF_BANDS][PREV_COEF_CONTEXTS] = { { 0 } };
-  vp9_prob *prob;
+  const vp9_prob *prob;
   vp9_coeff_count_model *coef_counts = counts->coef[tx_size];
   const int16_t *scan, *nb;
   const uint8_t *band_translate;
   uint8_t token_cache[1024];
-  int pt = get_entropy_context(tx_size, A, L);
   get_scan_and_band(xd, tx_size, type, block_idx, &scan, &nb, &band_translate);
 
   while (1) {
@@ -222,14 +220,15 @@ static void decode_block(int plane, int block, BLOCK_SIZE plane_bsize,
   struct macroblockd_plane* pd = &xd->plane[plane];
   const int segment_id = xd->this_mi->mbmi.segment_id;
   const int seg_eob = get_tx_eob(seg, segment_id, tx_size);
-  int aoff, loff, eob;
+  int aoff, loff, eob, pt;
 
   txfrm_block_to_raster_xy(plane_bsize, tx_size, block, &aoff, &loff);
+  pt = get_entropy_context(tx_size, pd->above_context + aoff,
+                                    pd->left_context + loff);
 
   eob = decode_coefs(&arg->pbi->common, xd, arg->r, block,
                      pd->plane_type, seg_eob, BLOCK_OFFSET(pd->qcoeff, block),
-                     tx_size, pd->dequant,
-                     pd->above_context + aoff, pd->left_context + loff);
+                     tx_size, pd->dequant, pt);
 
   set_contexts(xd, pd, plane_bsize, tx_size, eob > 0, aoff, loff);
 
