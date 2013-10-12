@@ -442,8 +442,6 @@ static vpx_codec_err_t set_param(vpx_codec_alg_priv_t *ctx,
       MAP(VP8E_SET_ARNR_TYPE,               xcfg.arnr_type);
       MAP(VP8E_SET_TUNING,                  xcfg.tuning);
       MAP(VP8E_SET_CQ_LEVEL,                xcfg.cq_level);
-      MAP(VP9E_SET_MAX_Q,                   ctx->cfg.rc_max_quantizer);
-      MAP(VP9E_SET_MIN_Q,                   ctx->cfg.rc_min_quantizer);
       MAP(VP8E_SET_MAX_INTRA_BITRATE_PCT,   xcfg.rc_max_intra_bitrate_pct);
       MAP(VP9E_SET_LOSSLESS,                xcfg.lossless);
       MAP(VP9E_SET_FRAME_PARALLEL_DECODING, xcfg.frame_parallel_decoding_mode);
@@ -1029,66 +1027,40 @@ static vpx_codec_err_t vp9e_set_scalemode(vpx_codec_alg_priv_t *ctx,
   }
 }
 
-static vpx_codec_err_t vp9e_set_width(vpx_codec_alg_priv_t *ctx, int ctr_id,
-                                      va_list args) {
-  unsigned int *data = va_arg(args, unsigned int *);
-  if (data) {
-    int res;
-    res = vp9_set_size_literal(ctx->cpi, *data, 0);
-    if (!res) {
-      return VPX_CODEC_OK;
-    } else {
-      return VPX_CODEC_INVALID_PARAM;
-    }
-  } else {
-    return VPX_CODEC_INVALID_PARAM;
-  }
-}
-
-static vpx_codec_err_t vp9e_set_height(vpx_codec_alg_priv_t *ctx,
-                                       int ctr_id,
-                                       va_list args) {
-  unsigned int *data =  va_arg(args, unsigned int *);
-
-  if (data) {
-    int res;
-    res = vp9_set_size_literal(ctx->cpi, 0, *data);
-
-    if (!res) {
-      return VPX_CODEC_OK;
-    } else {
-      return VPX_CODEC_INVALID_PARAM;
-    }
-  } else {
-    return VPX_CODEC_INVALID_PARAM;
-  }
-}
-
-static vpx_codec_err_t vp9e_set_layer(vpx_codec_alg_priv_t *ctx,
-                                      int ctr_id,
-                                      va_list args) {
-  unsigned int *data =  va_arg(args, unsigned int *);
-
-  if (data) {
-    int res;
-    res = 0;
-
-    res = vp9_switch_layer(ctx->cpi, *data);
-
-    if (!res) {
-      return VPX_CODEC_OK;
-    } else {
-      return VPX_CODEC_INVALID_PARAM;
-    }
-  } else {
-    return VPX_CODEC_INVALID_PARAM;
-  }
-}
-
 static vpx_codec_err_t vp9e_set_svc(vpx_codec_alg_priv_t *ctx, int ctr_id,
                                     va_list args) {
   int data = va_arg(args, int);
   vp9_set_svc(ctx->cpi, data);
+  return VPX_CODEC_OK;
+}
+
+static vpx_codec_err_t vp9e_set_svc_parameters(vpx_codec_alg_priv_t *ctx,
+                                               int ctr_id, va_list args) {
+  vpx_svc_parameters_t *data = va_arg(args, vpx_svc_parameters_t *);
+  VP9_COMP *cpi = (VP9_COMP *)ctx->cpi;
+  vpx_svc_parameters_t params;
+
+  if (!data) {
+    return VPX_CODEC_INVALID_PARAM;
+  }
+
+  params = *(vpx_svc_parameters_t *)data;
+
+  cpi->current_layer = params.layer;
+  cpi->lst_fb_idx = params.lst_fb_idx;
+  cpi->gld_fb_idx = params.gld_fb_idx;
+  cpi->alt_fb_idx = params.alt_fb_idx;
+
+  if (vp9_set_size_literal(ctx->cpi, params.width, params.height) != 0) {
+    return VPX_CODEC_INVALID_PARAM;
+  }
+
+  ctx->cfg.rc_max_quantizer = params.max_quantizer;
+  ctx->cfg.rc_min_quantizer = params.min_quantizer;
+
+  set_vp9e_config(&ctx->oxcf, ctx->cfg, ctx->vp8_cfg);
+  vp9_change_config(ctx->cpi, &ctx->oxcf);
+
   return VPX_CODEC_OK;
 }
 
@@ -1116,16 +1088,12 @@ static vpx_codec_ctrl_fn_map_t vp9e_ctf_maps[] = {
   {VP8E_SET_ARNR_TYPE,                set_param},
   {VP8E_SET_TUNING,                   set_param},
   {VP8E_SET_CQ_LEVEL,                 set_param},
-  {VP9E_SET_MAX_Q,                    set_param},
-  {VP9E_SET_MIN_Q,                    set_param},
   {VP8E_SET_MAX_INTRA_BITRATE_PCT,    set_param},
   {VP9E_SET_LOSSLESS,                 set_param},
   {VP9E_SET_FRAME_PARALLEL_DECODING,  set_param},
   {VP9_GET_REFERENCE,                 get_reference},
-  {VP9E_SET_WIDTH,                    vp9e_set_width},
-  {VP9E_SET_HEIGHT,                   vp9e_set_height},
-  {VP9E_SET_LAYER,                    vp9e_set_layer},
   {VP9E_SET_SVC,                      vp9e_set_svc},
+  {VP9E_SET_SVC_PARAMETERS,           vp9e_set_svc_parameters},
   { -1, NULL},
 };
 
