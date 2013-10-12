@@ -15,7 +15,7 @@
 #include "vp9/common/vp9_common.h"
 #include "vp9/common/vp9_idct.h"
 
-void vp9_idct4x4_16_add_sse2(int16_t *input, uint8_t *dest, int stride) {
+void vp9_idct4x4_16_add_sse2(const int16_t *input, uint8_t *dest, int stride) {
   const __m128i zero = _mm_setzero_si128();
   const __m128i eight = _mm_set1_epi16(8);
   const __m128i cst = _mm_setr_epi16((int16_t)cospi_16_64, (int16_t)cospi_16_64,
@@ -26,10 +26,10 @@ void vp9_idct4x4_16_add_sse2(int16_t *input, uint8_t *dest, int stride) {
   __m128i input0, input1, input2, input3;
 
   // Rows
-  input0 = _mm_loadl_epi64((__m128i *)input);
-  input1 = _mm_loadl_epi64((__m128i *)(input + 4));
-  input2 = _mm_loadl_epi64((__m128i *)(input + 8));
-  input3 = _mm_loadl_epi64((__m128i *)(input + 12));
+  input0 = _mm_loadl_epi64((const __m128i *)input);
+  input1 = _mm_loadl_epi64((const __m128i *)(input + 4));
+  input2 = _mm_loadl_epi64((const __m128i *)(input + 8));
+  input3 = _mm_loadl_epi64((const __m128i *)(input + 12));
 
   // Construct i3, i1, i3, i1, i2, i0, i2, i0
   input0 = _mm_shufflelo_epi16(input0, 0xd8);
@@ -148,7 +148,7 @@ void vp9_idct4x4_16_add_sse2(int16_t *input, uint8_t *dest, int stride) {
   RECON_AND_STORE4X4(dest, input3);
 }
 
-void vp9_idct4x4_1_add_sse2(int16_t *input, uint8_t *dest, int stride) {
+void vp9_idct4x4_1_add_sse2(const int16_t *input, uint8_t *dest, int stride) {
   __m128i dc_value;
   const __m128i zero = _mm_setzero_si128();
   int a;
@@ -264,16 +264,16 @@ static void iadst4_1d_sse2(__m128i *in) {
   in[3] = _mm_unpackhi_epi64(in[1], in[1]);
 }
 
-void vp9_iht4x4_16_add_sse2(int16_t *input, uint8_t *dest, int stride,
-                               int tx_type) {
+void vp9_iht4x4_16_add_sse2(const int16_t *input, uint8_t *dest, int stride,
+                            int tx_type) {
   __m128i in[4];
   const __m128i zero = _mm_setzero_si128();
   const __m128i eight = _mm_set1_epi16(8);
 
-  in[0] = _mm_loadl_epi64((__m128i *)input);
-  in[1] = _mm_loadl_epi64((__m128i *)(input + 4));
-  in[2] = _mm_loadl_epi64((__m128i *)(input + 8));
-  in[3] = _mm_loadl_epi64((__m128i *)(input + 12));
+  in[0] = _mm_loadl_epi64((const __m128i *)input);
+  in[1] = _mm_loadl_epi64((const __m128i *)(input + 4));
+  in[2] = _mm_loadl_epi64((const __m128i *)(input + 8));
+  in[3] = _mm_loadl_epi64((const __m128i *)(input + 12));
 
   switch (tx_type) {
     case 0:  // DCT_DCT
@@ -494,7 +494,7 @@ void vp9_iht4x4_16_add_sse2(int16_t *input, uint8_t *dest, int stride,
       dest += stride; \
   }
 
-void vp9_idct8x8_64_add_sse2(int16_t *input, uint8_t *dest, int stride) {
+void vp9_idct8x8_64_add_sse2(const int16_t *input, uint8_t *dest, int stride) {
   const __m128i zero = _mm_setzero_si128();
   const __m128i rounding = _mm_set1_epi32(DCT_CONST_ROUNDING);
   const __m128i final_rounding = _mm_set1_epi16(1<<4);
@@ -514,14 +514,14 @@ void vp9_idct8x8_64_add_sse2(int16_t *input, uint8_t *dest, int stride) {
   int i;
 
   // Load input data.
-  in0 = _mm_load_si128((__m128i *)input);
-  in1 = _mm_load_si128((__m128i *)(input + 8 * 1));
-  in2 = _mm_load_si128((__m128i *)(input + 8 * 2));
-  in3 = _mm_load_si128((__m128i *)(input + 8 * 3));
-  in4 = _mm_load_si128((__m128i *)(input + 8 * 4));
-  in5 = _mm_load_si128((__m128i *)(input + 8 * 5));
-  in6 = _mm_load_si128((__m128i *)(input + 8 * 6));
-  in7 = _mm_load_si128((__m128i *)(input + 8 * 7));
+  in0 = _mm_load_si128((const __m128i *)input);
+  in1 = _mm_load_si128((const __m128i *)(input + 8 * 1));
+  in2 = _mm_load_si128((const __m128i *)(input + 8 * 2));
+  in3 = _mm_load_si128((const __m128i *)(input + 8 * 3));
+  in4 = _mm_load_si128((const __m128i *)(input + 8 * 4));
+  in5 = _mm_load_si128((const __m128i *)(input + 8 * 5));
+  in6 = _mm_load_si128((const __m128i *)(input + 8 * 6));
+  in7 = _mm_load_si128((const __m128i *)(input + 8 * 7));
 
   // 2-D
   for (i = 0; i < 2; i++) {
@@ -562,7 +562,7 @@ void vp9_idct8x8_64_add_sse2(int16_t *input, uint8_t *dest, int stride) {
   RECON_AND_STORE(dest, in7);
 }
 
-void vp9_idct8x8_1_add_sse2(int16_t *input, uint8_t *dest, int stride) {
+void vp9_idct8x8_1_add_sse2(const int16_t *input, uint8_t *dest, int stride) {
   __m128i dc_value;
   const __m128i zero = _mm_setzero_si128();
   int a;
@@ -883,21 +883,21 @@ static void iadst8_1d_sse2(__m128i *in) {
 }
 
 
-void vp9_iht8x8_64_add_sse2(int16_t *input, uint8_t *dest, int stride,
-                               int tx_type) {
+void vp9_iht8x8_64_add_sse2(const int16_t *input, uint8_t *dest, int stride,
+                            int tx_type) {
   __m128i in[8];
   const __m128i zero = _mm_setzero_si128();
   const __m128i final_rounding = _mm_set1_epi16(1<<4);
 
   // load input data
-  in[0] = _mm_load_si128((__m128i *)input);
-  in[1] = _mm_load_si128((__m128i *)(input + 8 * 1));
-  in[2] = _mm_load_si128((__m128i *)(input + 8 * 2));
-  in[3] = _mm_load_si128((__m128i *)(input + 8 * 3));
-  in[4] = _mm_load_si128((__m128i *)(input + 8 * 4));
-  in[5] = _mm_load_si128((__m128i *)(input + 8 * 5));
-  in[6] = _mm_load_si128((__m128i *)(input + 8 * 6));
-  in[7] = _mm_load_si128((__m128i *)(input + 8 * 7));
+  in[0] = _mm_load_si128((const __m128i *)input);
+  in[1] = _mm_load_si128((const __m128i *)(input + 8 * 1));
+  in[2] = _mm_load_si128((const __m128i *)(input + 8 * 2));
+  in[3] = _mm_load_si128((const __m128i *)(input + 8 * 3));
+  in[4] = _mm_load_si128((const __m128i *)(input + 8 * 4));
+  in[5] = _mm_load_si128((const __m128i *)(input + 8 * 5));
+  in[6] = _mm_load_si128((const __m128i *)(input + 8 * 6));
+  in[7] = _mm_load_si128((const __m128i *)(input + 8 * 7));
 
   switch (tx_type) {
     case 0:  // DCT_DCT
@@ -950,7 +950,7 @@ void vp9_iht8x8_64_add_sse2(int16_t *input, uint8_t *dest, int stride,
   RECON_AND_STORE(dest, in[7]);
 }
 
-void vp9_idct8x8_10_add_sse2(int16_t *input, uint8_t *dest, int stride) {
+void vp9_idct8x8_10_add_sse2(const int16_t *input, uint8_t *dest, int stride) {
   const __m128i zero = _mm_setzero_si128();
   const __m128i rounding = _mm_set1_epi32(DCT_CONST_ROUNDING);
   const __m128i final_rounding = _mm_set1_epi16(1<<4);
@@ -970,10 +970,10 @@ void vp9_idct8x8_10_add_sse2(int16_t *input, uint8_t *dest, int stride) {
   __m128i tmp0, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7;
 
   // Rows. Load 4-row input data.
-  in0 = _mm_load_si128((__m128i *)input);
-  in1 = _mm_load_si128((__m128i *)(input + 8 * 1));
-  in2 = _mm_load_si128((__m128i *)(input + 8 * 2));
-  in3 = _mm_load_si128((__m128i *)(input + 8 * 3));
+  in0 = _mm_load_si128((const __m128i *)input);
+  in1 = _mm_load_si128((const __m128i *)(input + 8 * 1));
+  in2 = _mm_load_si128((const __m128i *)(input + 8 * 2));
+  in3 = _mm_load_si128((const __m128i *)(input + 8 * 3));
 
   // 8x4 Transpose
   TRANSPOSE_8X4(in0, in1, in2, in3, in0, in1, in2, in3)
@@ -1228,7 +1228,8 @@ void vp9_idct8x8_10_add_sse2(int16_t *input, uint8_t *dest, int stride) {
                            stp2_10, stp2_13, stp2_11, stp2_12) \
   }
 
-void vp9_idct16x16_256_add_sse2(int16_t *input, uint8_t *dest, int stride) {
+void vp9_idct16x16_256_add_sse2(const int16_t *input, uint8_t *dest,
+                                int stride) {
   const __m128i rounding = _mm_set1_epi32(DCT_CONST_ROUNDING);
   const __m128i final_rounding = _mm_set1_epi16(1<<5);
   const __m128i zero = _mm_setzero_si128();
@@ -1283,22 +1284,22 @@ void vp9_idct16x16_256_add_sse2(int16_t *input, uint8_t *dest, int stride) {
       if (i == 1) input += 128;
 
       // Load input data.
-      in0 = _mm_load_si128((__m128i *)input);
-      in8 = _mm_load_si128((__m128i *)(input + 8 * 1));
-      in1 = _mm_load_si128((__m128i *)(input + 8 * 2));
-      in9 = _mm_load_si128((__m128i *)(input + 8 * 3));
-      in2 = _mm_load_si128((__m128i *)(input + 8 * 4));
-      in10 = _mm_load_si128((__m128i *)(input + 8 * 5));
-      in3 = _mm_load_si128((__m128i *)(input + 8 * 6));
-      in11 = _mm_load_si128((__m128i *)(input + 8 * 7));
-      in4 = _mm_load_si128((__m128i *)(input + 8 * 8));
-      in12 = _mm_load_si128((__m128i *)(input + 8 * 9));
-      in5 = _mm_load_si128((__m128i *)(input + 8 * 10));
-      in13 = _mm_load_si128((__m128i *)(input + 8 * 11));
-      in6 = _mm_load_si128((__m128i *)(input + 8 * 12));
-      in14 = _mm_load_si128((__m128i *)(input + 8 * 13));
-      in7 = _mm_load_si128((__m128i *)(input + 8 * 14));
-      in15 = _mm_load_si128((__m128i *)(input + 8 * 15));
+      in0 = _mm_load_si128((const __m128i *)input);
+      in8 = _mm_load_si128((const __m128i *)(input + 8 * 1));
+      in1 = _mm_load_si128((const __m128i *)(input + 8 * 2));
+      in9 = _mm_load_si128((const __m128i *)(input + 8 * 3));
+      in2 = _mm_load_si128((const __m128i *)(input + 8 * 4));
+      in10 = _mm_load_si128((const __m128i *)(input + 8 * 5));
+      in3 = _mm_load_si128((const __m128i *)(input + 8 * 6));
+      in11 = _mm_load_si128((const __m128i *)(input + 8 * 7));
+      in4 = _mm_load_si128((const __m128i *)(input + 8 * 8));
+      in12 = _mm_load_si128((const __m128i *)(input + 8 * 9));
+      in5 = _mm_load_si128((const __m128i *)(input + 8 * 10));
+      in13 = _mm_load_si128((const __m128i *)(input + 8 * 11));
+      in6 = _mm_load_si128((const __m128i *)(input + 8 * 12));
+      in14 = _mm_load_si128((const __m128i *)(input + 8 * 13));
+      in7 = _mm_load_si128((const __m128i *)(input + 8 * 14));
+      in15 = _mm_load_si128((const __m128i *)(input + 8 * 15));
 
       TRANSPOSE_8X8(in0, in1, in2, in3, in4, in5, in6, in7, in0, in1, in2, in3,
                     in4, in5, in6, in7);
@@ -1435,7 +1436,7 @@ void vp9_idct16x16_256_add_sse2(int16_t *input, uint8_t *dest, int stride) {
   }
 }
 
-void vp9_idct16x16_1_add_sse2(int16_t *input, uint8_t *dest, int stride) {
+void vp9_idct16x16_1_add_sse2(const int16_t *input, uint8_t *dest, int stride) {
   __m128i dc_value;
   const __m128i zero = _mm_setzero_si128();
   int a, i;
@@ -2310,24 +2311,24 @@ static void iadst16_1d_sse2(__m128i *in0, __m128i *in1) {
   iadst16_1d_8col(in1);
 }
 
-static INLINE void load_buffer_8x16(int16_t *input, __m128i *in) {
-  in[0]  = _mm_load_si128((__m128i *)(input + 0 * 16));
-  in[1]  = _mm_load_si128((__m128i *)(input + 1 * 16));
-  in[2]  = _mm_load_si128((__m128i *)(input + 2 * 16));
-  in[3]  = _mm_load_si128((__m128i *)(input + 3 * 16));
-  in[4]  = _mm_load_si128((__m128i *)(input + 4 * 16));
-  in[5]  = _mm_load_si128((__m128i *)(input + 5 * 16));
-  in[6]  = _mm_load_si128((__m128i *)(input + 6 * 16));
-  in[7]  = _mm_load_si128((__m128i *)(input + 7 * 16));
+static INLINE void load_buffer_8x16(const int16_t *input, __m128i *in) {
+  in[0]  = _mm_load_si128((const __m128i *)(input + 0 * 16));
+  in[1]  = _mm_load_si128((const __m128i *)(input + 1 * 16));
+  in[2]  = _mm_load_si128((const __m128i *)(input + 2 * 16));
+  in[3]  = _mm_load_si128((const __m128i *)(input + 3 * 16));
+  in[4]  = _mm_load_si128((const __m128i *)(input + 4 * 16));
+  in[5]  = _mm_load_si128((const __m128i *)(input + 5 * 16));
+  in[6]  = _mm_load_si128((const __m128i *)(input + 6 * 16));
+  in[7]  = _mm_load_si128((const __m128i *)(input + 7 * 16));
 
-  in[8]  = _mm_load_si128((__m128i *)(input + 8 * 16));
-  in[9]  = _mm_load_si128((__m128i *)(input + 9 * 16));
-  in[10]  = _mm_load_si128((__m128i *)(input + 10 * 16));
-  in[11]  = _mm_load_si128((__m128i *)(input + 11 * 16));
-  in[12]  = _mm_load_si128((__m128i *)(input + 12 * 16));
-  in[13]  = _mm_load_si128((__m128i *)(input + 13 * 16));
-  in[14]  = _mm_load_si128((__m128i *)(input + 14 * 16));
-  in[15]  = _mm_load_si128((__m128i *)(input + 15 * 16));
+  in[8]  = _mm_load_si128((const __m128i *)(input + 8 * 16));
+  in[9]  = _mm_load_si128((const __m128i *)(input + 9 * 16));
+  in[10]  = _mm_load_si128((const __m128i *)(input + 10 * 16));
+  in[11]  = _mm_load_si128((const __m128i *)(input + 11 * 16));
+  in[12]  = _mm_load_si128((const __m128i *)(input + 12 * 16));
+  in[13]  = _mm_load_si128((const __m128i *)(input + 13 * 16));
+  in[14]  = _mm_load_si128((const __m128i *)(input + 14 * 16));
+  in[15]  = _mm_load_si128((const __m128i *)(input + 15 * 16));
 }
 
 static INLINE void write_buffer_8x16(uint8_t *dest, __m128i *in, int stride) {
@@ -2386,8 +2387,8 @@ static INLINE void write_buffer_8x16(uint8_t *dest, __m128i *in, int stride) {
   RECON_AND_STORE(dest, in[15]);
 }
 
-void vp9_iht16x16_256_add_sse2(int16_t *input, uint8_t *dest, int stride,
-                                 int tx_type) {
+void vp9_iht16x16_256_add_sse2(const int16_t *input, uint8_t *dest, int stride,
+                               int tx_type) {
   __m128i in0[16], in1[16];
 
   load_buffer_8x16(input, in0);
@@ -2421,8 +2422,8 @@ void vp9_iht16x16_256_add_sse2(int16_t *input, uint8_t *dest, int stride,
   write_buffer_8x16(dest, in1, stride);
 }
 
-void vp9_idct16x16_10_add_sse2(int16_t *input, uint8_t *dest,
-                                     int stride) {
+void vp9_idct16x16_10_add_sse2(const int16_t *input, uint8_t *dest,
+                               int stride) {
   const __m128i rounding = _mm_set1_epi32(DCT_CONST_ROUNDING);
   const __m128i final_rounding = _mm_set1_epi16(1<<5);
   const __m128i zero = _mm_setzero_si128();
@@ -2468,14 +2469,14 @@ void vp9_idct16x16_10_add_sse2(int16_t *input, uint8_t *dest,
   __m128i tmp0, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7;
   int i;
   // 1-D idct. Load input data.
-  in0 = _mm_load_si128((__m128i *)input);
-  in8 = _mm_load_si128((__m128i *)(input + 8 * 1));
-  in1 = _mm_load_si128((__m128i *)(input + 8 * 2));
-  in9 = _mm_load_si128((__m128i *)(input + 8 * 3));
-  in2 = _mm_load_si128((__m128i *)(input + 8 * 4));
-  in10 = _mm_load_si128((__m128i *)(input + 8 * 5));
-  in3 = _mm_load_si128((__m128i *)(input + 8 * 6));
-  in11 = _mm_load_si128((__m128i *)(input + 8 * 7));
+  in0 = _mm_load_si128((const __m128i *)input);
+  in8 = _mm_load_si128((const __m128i *)(input + 8 * 1));
+  in1 = _mm_load_si128((const __m128i *)(input + 8 * 2));
+  in9 = _mm_load_si128((const __m128i *)(input + 8 * 3));
+  in2 = _mm_load_si128((const __m128i *)(input + 8 * 4));
+  in10 = _mm_load_si128((const __m128i *)(input + 8 * 5));
+  in3 = _mm_load_si128((const __m128i *)(input + 8 * 6));
+  in11 = _mm_load_si128((const __m128i *)(input + 8 * 7));
 
   TRANSPOSE_8X4(in0, in1, in2, in3, in0, in1, in2, in3);
   TRANSPOSE_8X4(in8, in9, in10, in11, in8, in9, in10, in11);
@@ -2780,11 +2781,12 @@ void vp9_idct16x16_10_add_sse2(int16_t *input, uint8_t *dest,
 
 #define LOAD_DQCOEFF(reg, input) \
   {  \
-    reg = _mm_load_si128((__m128i *) input); \
+    reg = _mm_load_si128((const __m128i *) input); \
     input += 8; \
   }  \
 
-void vp9_idct32x32_1024_add_sse2(int16_t *input, uint8_t *dest, int stride) {
+void vp9_idct32x32_1024_add_sse2(const int16_t *input, uint8_t *dest,
+                                 int stride) {
   const __m128i rounding = _mm_set1_epi32(DCT_CONST_ROUNDING);
   const __m128i final_rounding = _mm_set1_epi16(1<<5);
 
@@ -3515,7 +3517,7 @@ void vp9_idct32x32_1024_add_sse2(int16_t *input, uint8_t *dest, int stride) {
   }
 }  //NOLINT
 
-void vp9_idct32x32_1_add_sse2(int16_t *input, uint8_t *dest, int stride) {
+void vp9_idct32x32_1_add_sse2(const int16_t *input, uint8_t *dest, int stride) {
   __m128i dc_value;
   const __m128i zero = _mm_setzero_si128();
   int a, i;

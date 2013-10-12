@@ -75,7 +75,7 @@ void reference_32x32_dct_2d(const int16_t input[kNumCoeffs],
 }
 
 typedef void (*fwd_txfm_t)(int16_t *in, int16_t *out, int stride);
-typedef void (*inv_txfm_t)(int16_t *in, uint8_t *dst, int stride);
+typedef void (*inv_txfm_t)(const int16_t *in, uint8_t *dst, int stride);
 
 class Trans32x32Test : public PARAMS(fwd_txfm_t, inv_txfm_t, int) {
  public:
