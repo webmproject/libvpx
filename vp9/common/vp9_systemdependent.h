@@ -24,8 +24,8 @@ void vpx_reset_mmx_state(void);
 #define vp9_clear_system_state()
 #endif
 
-#ifdef _MSC_VER
-// round is not defined in MSVC
+#if defined(_MSC_VER) && _MSC_VER < 1800
+// round is not defined in MSVC before VS2013.
 static int round(double x) {
   if (x < 0)
     return (int)ceil(x - 0.5);
