@@ -11,31 +11,31 @@
 #include "./vp9_rtcd.h"
 #include "vp9/common/vp9_common.h"
 
-extern void vp9_idct16x16_256_add_neon_pass1(int16_t *input,
-                                               int16_t *output,
-                                               int output_stride);
-extern void vp9_idct16x16_256_add_neon_pass2(int16_t *src,
-                                               int16_t *output,
-                                               int16_t *pass1Output,
-                                               int16_t skip_adding,
-                                               uint8_t *dest,
-                                               int dest_stride);
-extern void vp9_idct16x16_10_add_neon_pass1(int16_t *input,
-                                               int16_t *output,
-                                               int output_stride);
-extern void vp9_idct16x16_10_add_neon_pass2(int16_t *src,
-                                               int16_t *output,
-                                               int16_t *pass1Output,
-                                               int16_t skip_adding,
-                                               uint8_t *dest,
-                                               int dest_stride);
+void vp9_idct16x16_256_add_neon_pass1(const int16_t *input,
+                                      int16_t *output,
+                                      int output_stride);
+void vp9_idct16x16_256_add_neon_pass2(const int16_t *src,
+                                      int16_t *output,
+                                      int16_t *pass1Output,
+                                      int16_t skip_adding,
+                                      uint8_t *dest,
+                                      int dest_stride);
+void vp9_idct16x16_10_add_neon_pass1(const int16_t *input,
+                                     int16_t *output,
+                                     int output_stride);
+void vp9_idct16x16_10_add_neon_pass2(const int16_t *src,
+                                     int16_t *output,
+                                     int16_t *pass1Output,
+                                     int16_t skip_adding,
+                                     uint8_t *dest,
+                                     int dest_stride);
 
 /* For ARM NEON, d8-d15 are callee-saved registers, and need to be saved. */
 extern void vp9_push_neon(int64_t *store);
 extern void vp9_pop_neon(int64_t *store);
 
-void vp9_idct16x16_256_add_neon(int16_t *input,
-                                  uint8_t *dest, int dest_stride) {
+void vp9_idct16x16_256_add_neon(const int16_t *input,
+                                uint8_t *dest, int dest_stride) {
   int64_t store_reg[8];
   int16_t pass1_output[16*16] = {0};
   int16_t row_idct_output[16*16] = {0};
@@ -109,8 +109,8 @@ void vp9_idct16x16_256_add_neon(int16_t *input,
   return;
 }
 
-void vp9_idct16x16_10_add_neon(int16_t *input,
-                                  uint8_t *dest, int dest_stride) {
+void vp9_idct16x16_10_add_neon(const int16_t *input,
+                               uint8_t *dest, int dest_stride) {
   int64_t store_reg[8];
   int16_t pass1_output[16*16] = {0};
   int16_t row_idct_output[16*16] = {0};

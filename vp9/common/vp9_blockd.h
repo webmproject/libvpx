@@ -221,7 +221,7 @@ typedef struct macroblockd {
 
   int lossless;
   /* Inverse transform function pointers. */
-  void (*itxm_add)(int16_t *input, uint8_t *dest, int stride, int eob);
+  void (*itxm_add)(const int16_t *input, uint8_t *dest, int stride, int eob);
 
   struct subpix_fn_table  subpix;
 

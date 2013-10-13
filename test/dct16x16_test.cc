@@ -21,7 +21,7 @@
 extern "C" {
 #include "vp9/common/vp9_entropy.h"
 #include "./vp9_rtcd.h"
-void vp9_idct16x16_256_add_c(int16_t *input, uint8_t *output, int pitch);
+void vp9_idct16x16_256_add_c(const int16_t *input, uint8_t *output, int pitch);
 }
 #include "vpx/vpx_integer.h"
 
@@ -258,9 +258,10 @@ void reference_16x16_dct_2d(int16_t input[256], double output[256]) {
 }
 
 typedef void (*fdct_t)(int16_t *in, int16_t *out, int stride);
-typedef void (*idct_t)(int16_t *in, uint8_t *dst, int stride);
+typedef void (*idct_t)(const int16_t *in, uint8_t *dst, int stride);
 typedef void (*fht_t) (int16_t *in, int16_t *out, int stride, int tx_type);
-typedef void (*iht_t) (int16_t *in, uint8_t *dst, int stride, int tx_type);
+typedef void (*iht_t) (const int16_t *in, uint8_t *dst, int stride,
+                       int tx_type);
 
 void fdct16x16_ref(int16_t *in, int16_t *out, int stride, int tx_type) {
   vp9_short_fdct16x16_c(in, out, stride);
