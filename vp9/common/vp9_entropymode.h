@@ -37,19 +37,17 @@ extern const vp9_prob vp9_kf_uv_mode_prob[INTRA_MODES][INTRA_MODES - 1];
 extern const vp9_prob vp9_kf_y_mode_prob[INTRA_MODES][INTRA_MODES]
                                         [INTRA_MODES - 1];
 
-extern const vp9_tree_index vp9_intra_mode_tree[];
-extern const vp9_tree_index vp9_inter_mode_tree[];
-
+extern const vp9_tree_index vp9_intra_mode_tree[TREE_SIZE(INTRA_MODES)];
 extern struct vp9_token vp9_intra_mode_encodings[INTRA_MODES];
+
+extern const vp9_tree_index vp9_inter_mode_tree[TREE_SIZE(INTER_MODES)];
 extern struct vp9_token vp9_inter_mode_encodings[INTER_MODES];
 
-// probability models for partition information
-extern const vp9_tree_index vp9_partition_tree[];
+extern const vp9_tree_index vp9_partition_tree[TREE_SIZE(PARTITION_TYPES)];
 extern struct vp9_token vp9_partition_encodings[PARTITION_TYPES];
 
 extern const vp9_tree_index vp9_switchable_interp_tree
-                 [2 * (SWITCHABLE_FILTERS - 1)];
-
+                                [TREE_SIZE(SWITCHABLE_FILTERS)];
 extern struct vp9_token vp9_switchable_interp_encodings[SWITCHABLE_FILTERS];
 
 void vp9_entropy_mode_init();

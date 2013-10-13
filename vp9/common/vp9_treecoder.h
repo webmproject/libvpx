@@ -21,6 +21,8 @@ typedef uint8_t vp9_prob;
 
 typedef int8_t vp9_tree_index;
 
+#define TREE_SIZE(leaf_count) (2 * (leaf_count) - 2)
+
 #define vp9_complement(x) (255 - x)
 
 /* We build coding trees compactly in arrays.

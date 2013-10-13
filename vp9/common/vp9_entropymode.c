@@ -226,7 +226,7 @@ static const vp9_prob default_inter_mode_probs[INTER_MODE_CONTEXTS]
 };
 
 /* Array indices are identical to previously-existing INTRAMODECONTEXTNODES. */
-const vp9_tree_index vp9_intra_mode_tree[INTRA_MODES * 2 - 2] = {
+const vp9_tree_index vp9_intra_mode_tree[TREE_SIZE(INTRA_MODES)] = {
   -DC_PRED, 2,                      /* 0 = DC_NODE */
   -TM_PRED, 4,                      /* 1 = TM_NODE */
   -V_PRED, 6,                       /* 2 = V_NODE */
@@ -237,22 +237,20 @@ const vp9_tree_index vp9_intra_mode_tree[INTRA_MODES * 2 - 2] = {
   -D63_PRED, 16,                    /* 7 = D63_NODE */
   -D153_PRED, -D207_PRED             /* 8 = D153_NODE */
 };
+struct vp9_token vp9_intra_mode_encodings[INTRA_MODES];
 
-const vp9_tree_index vp9_inter_mode_tree[6] = {
+const vp9_tree_index vp9_inter_mode_tree[TREE_SIZE(INTER_MODES)] = {
   -ZEROMV, 2,
   -NEARESTMV, 4,
   -NEARMV, -NEWMV
 };
+struct vp9_token vp9_inter_mode_encodings[INTER_MODES];
 
-const vp9_tree_index vp9_partition_tree[6] = {
+const vp9_tree_index vp9_partition_tree[TREE_SIZE(PARTITION_TYPES)] = {
   -PARTITION_NONE, 2,
   -PARTITION_HORZ, 4,
   -PARTITION_VERT, -PARTITION_SPLIT
 };
-
-struct vp9_token vp9_intra_mode_encodings[INTRA_MODES];
-struct vp9_token vp9_inter_mode_encodings[INTER_MODES];
-
 struct vp9_token vp9_partition_encodings[PARTITION_TYPES];
 
 static const vp9_prob default_intra_inter_p[INTRA_INTER_CONTEXTS] = {
@@ -338,7 +336,8 @@ void vp9_init_mbmode_probs(VP9_COMMON *cm) {
   vp9_copy(cm->fc.mbskip_probs, default_mbskip_probs);
 }
 
-const vp9_tree_index vp9_switchable_interp_tree[SWITCHABLE_FILTERS*2-2] = {
+const vp9_tree_index vp9_switchable_interp_tree
+                         [TREE_SIZE(SWITCHABLE_FILTERS)] = {
   -EIGHTTAP, 2,
   -EIGHTTAP_SMOOTH, -EIGHTTAP_SHARP
 };

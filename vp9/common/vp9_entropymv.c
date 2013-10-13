@@ -18,14 +18,14 @@
 /* Integer pel reference mv threshold for use of high-precision 1/8 mv */
 #define COMPANDED_MVREF_THRESH 8
 
-const vp9_tree_index vp9_mv_joint_tree[2 * MV_JOINTS - 2] = {
+const vp9_tree_index vp9_mv_joint_tree[TREE_SIZE(MV_JOINTS)] = {
   -MV_JOINT_ZERO, 2,
   -MV_JOINT_HNZVZ, 4,
   -MV_JOINT_HZVNZ, -MV_JOINT_HNZVNZ
 };
 struct vp9_token vp9_mv_joint_encodings[MV_JOINTS];
 
-const vp9_tree_index vp9_mv_class_tree[2 * MV_CLASSES - 2] = {
+const vp9_tree_index vp9_mv_class_tree[TREE_SIZE(MV_CLASSES)] = {
   -MV_CLASS_0, 2,
   -MV_CLASS_1, 4,
   6, 8,
@@ -39,12 +39,12 @@ const vp9_tree_index vp9_mv_class_tree[2 * MV_CLASSES - 2] = {
 };
 struct vp9_token vp9_mv_class_encodings[MV_CLASSES];
 
-const vp9_tree_index vp9_mv_class0_tree[2 * CLASS0_SIZE - 2] = {
+const vp9_tree_index vp9_mv_class0_tree[TREE_SIZE(CLASS0_SIZE)] = {
   -0, -1,
 };
 struct vp9_token vp9_mv_class0_encodings[CLASS0_SIZE];
 
-const vp9_tree_index vp9_mv_fp_tree[2 * 4 - 2] = {
+const vp9_tree_index vp9_mv_fp_tree[TREE_SIZE(4)] = {
   -0, 2,
   -1, 4,
   -2, -3
