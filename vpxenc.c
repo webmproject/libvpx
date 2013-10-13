@@ -45,8 +45,8 @@
 #include "vpx_ports/vpx_timer.h"
 #include "tools_common.h"
 #include "y4minput.h"
-#include "libmkv/EbmlWriter.h"
-#include "libmkv/EbmlIDs.h"
+#include "third_party/libmkv/EbmlWriter.h"
+#include "third_party/libmkv/EbmlIDs.h"
 #include "third_party/libyuv/include/libyuv/scale.h"
 
 /* Need special handling of these functions on Windows */
