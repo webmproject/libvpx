@@ -1060,9 +1060,11 @@ EOF
                 CC=${CC:-icc}
                 LD=${LD:-icc}
                 setup_gnu_toolchain
-                add_cflags -use-msasm -use-asm
-                add_ldflags -i-static
-                enabled x86_64 && add_cflags -ipo -static -O3
+                add_cflags -use-msasm  # remove -use-msasm too?
+                # add -no-intel-extensions to suppress warning #10237
+                # refer to http://software.intel.com/en-us/forums/topic/280199
+                add_ldflags -i-static -no-intel-extensions
+                enabled x86_64 && add_cflags -ipo -static -O3 -no-prec-div
                 enabled x86_64 && AR=xiar
                 case ${tune_cpu} in
                     atom*)
