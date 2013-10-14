@@ -16,6 +16,24 @@
       "revId": "45792f30b63a3d97f5727a6dd7da4bae772186bc",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdH//7uU\u003d",
+        "filename": "vp9/encoder/vp9_mbgraph.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 356,
+      "author": {
+        "id": 1003307
+      },
+      "writtenOn": "2013-10-14T15:59:20Z",
+      "side": 1,
+      "message": "arf_not_zz is indexed by MB (16x16). I changed the loop indices to be in units of MI to avoid out of bounds access to the segmentation_map at the right and bottom borders",
+      "parentUuid": "AAAAdH//7uo\u003d",
+      "revId": "45792f30b63a3d97f5727a6dd7da4bae772186bc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
