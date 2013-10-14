@@ -52,6 +52,24 @@
       "revId": "d28faab9b3c92a6fb8d067b46438968352901147",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdH//7rI\u003d",
+        "filename": "vp9/encoder/vp9_bitstream.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 1460,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2013-10-14T19:19:02Z",
+      "side": 1,
+      "message": "OK, I added the function.",
+      "parentUuid": "AAAAdH//7yQ\u003d",
+      "revId": "d28faab9b3c92a6fb8d067b46438968352901147",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
