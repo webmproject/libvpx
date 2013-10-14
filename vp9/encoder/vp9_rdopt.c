@@ -476,12 +476,12 @@ static const int16_t band_counts[TX_SIZES][8] = {
   { 1, 2, 3, 4, 11, 1024 - 21, 0 },
 };
 
-static INLINE int cost_coeffs(MACROBLOCK *mb,
+static INLINE int cost_coeffs(MACROBLOCK *x,
                               int plane, int block,
                               ENTROPY_CONTEXT *A, ENTROPY_CONTEXT *L,
                               TX_SIZE tx_size,
                               const int16_t *scan, const int16_t *nb) {
-  MACROBLOCKD *const xd = &mb->e_mbd;
+  MACROBLOCKD *const xd = &x->e_mbd;
   MB_MODE_INFO *mbmi = &xd->this_mi->mbmi;
   struct macroblockd_plane *pd = &xd->plane[plane];
   const PLANE_TYPE type = pd->plane_type;
@@ -490,9 +490,9 @@ static INLINE int cost_coeffs(MACROBLOCK *mb,
   const int16_t *const qcoeff_ptr = BLOCK_OFFSET(pd->qcoeff, block);
   const int ref = mbmi->ref_frame[0] != INTRA_FRAME;
   unsigned int (*token_costs)[2][PREV_COEF_CONTEXTS][MAX_ENTROPY_TOKENS] =
-                   mb->token_costs[tx_size][type][ref];
+                   x->token_costs[tx_size][type][ref];
   const ENTROPY_CONTEXT above_ec = !!*A, left_ec = !!*L;
-  uint8_t token_cache[1024];
+  uint8_t *p_tok = x->token_cache;
   int pt = combine_entropy_contexts(above_ec, left_ec);
   int c, cost;
 
@@ -511,7 +511,7 @@ static INLINE int cost_coeffs(MACROBLOCK *mb,
     int v = qcoeff_ptr[0];
     int prev_t = vp9_dct_value_tokens_ptr[v].token;
     cost = (*token_costs)[0][pt][prev_t] + vp9_dct_value_cost_ptr[v];
-    token_cache[0] = vp9_pt_energy_class[prev_t];
+    p_tok[0] = vp9_pt_energy_class[prev_t];
     ++token_costs;
 
     // ac tokens
@@ -521,9 +521,9 @@ static INLINE int cost_coeffs(MACROBLOCK *mb,
 
       v = qcoeff_ptr[rc];
       t = vp9_dct_value_tokens_ptr[v].token;
-      pt = get_coef_context(nb, token_cache, c);
+      pt = get_coef_context(nb, p_tok, c);
       cost += (*token_costs)[!prev_t][pt][t] + vp9_dct_value_cost_ptr[v];
-      token_cache[rc] = vp9_pt_energy_class[t];
+      p_tok[rc] = vp9_pt_energy_class[t];
       prev_t = t;
       if (!--band_left) {
         band_left = *band_count++;
@@ -533,7 +533,7 @@ static INLINE int cost_coeffs(MACROBLOCK *mb,
 
     // eob token
     if (band_left) {
-      pt = get_coef_context(nb, token_cache, c);
+      pt = get_coef_context(nb, p_tok, c);
       cost += (*token_costs)[0][pt][DCT_EOB_TOKEN];
     }
   }
