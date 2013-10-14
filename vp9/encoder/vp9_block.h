@@ -26,7 +26,7 @@ typedef struct {
 // Structure to hold snapshot of coding context during the mode picking process
 typedef struct {
   MODE_INFO mic;
-  unsigned char zcoeff_blk[256];
+  uint8_t zcoeff_blk[256];
   int skip;
   int_mv best_ref_mv;
   int_mv second_best_ref_mv;
@@ -126,7 +126,7 @@ struct macroblock {
   int mv_row_min;
   int mv_row_max;
 
-  unsigned char zcoeff_blk[TX_SIZES][256];
+  uint8_t zcoeff_blk[TX_SIZES][256];
   int skip;
 
   int encode_breakout;
