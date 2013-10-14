@@ -342,36 +342,33 @@ int vp9_receive_compressed_data(VP9D_PTR ptr,
     return retcode;
   }
 
-  {
-    swap_frame_buffers(pbi);
+  swap_frame_buffers(pbi);
 
 #if WRITE_RECON_BUFFER == 2
-    if (cm->show_frame)
-      write_dx_frame_to_file(cm->frame_to_show,
-                             cm->current_video_frame);
-    else
-      write_dx_frame_to_file(cm->frame_to_show,
-                             cm->current_video_frame + 1000);
+  if (cm->show_frame)
+    write_dx_frame_to_file(cm->frame_to_show,
+                           cm->current_video_frame);
+  else
+    write_dx_frame_to_file(cm->frame_to_show,
+                           cm->current_video_frame + 1000);
 #endif
 
-    if (!pbi->do_loopfilter_inline) {
-      /* Apply the loop filter if appropriate. */
-      vp9_loop_filter_frame(cm, &pbi->mb, pbi->common.lf.filter_level, 0, 0);
-    }
-
-#if WRITE_RECON_BUFFER == 2
-    if (cm->show_frame)
-      write_dx_frame_to_file(cm->frame_to_show,
-                             cm->current_video_frame + 2000);
-    else
-      write_dx_frame_to_file(cm->frame_to_show,
-                             cm->current_video_frame + 3000);
-#endif
-
-    vp9_extend_frame_inner_borders(cm->frame_to_show,
-                                   cm->subsampling_x,
-                                   cm->subsampling_y);
+  if (!pbi->do_loopfilter_inline) {
+    vp9_loop_filter_frame(cm, &pbi->mb, pbi->common.lf.filter_level, 0, 0);
   }
+
+#if WRITE_RECON_BUFFER == 2
+  if (cm->show_frame)
+    write_dx_frame_to_file(cm->frame_to_show,
+                           cm->current_video_frame + 2000);
+  else
+    write_dx_frame_to_file(cm->frame_to_show,
+                           cm->current_video_frame + 3000);
+#endif
+
+  vp9_extend_frame_inner_borders(cm->frame_to_show,
+                                 cm->subsampling_x,
+                                 cm->subsampling_y);
 
 #if WRITE_RECON_BUFFER == 1
   if (cm->show_frame)
