@@ -16,6 +16,24 @@
       "revId": "16efd82468c6aadc7ea8a0fe7e03bdbfdbe250d3",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdH//7l8\u003d",
+        "filename": "vpxdec.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1022,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2013-10-15T18:07:17Z",
+      "side": 1,
+      "message": "read_frame returns 1 when:\nnestegg_read_packet/nestegg_packet_track fails\nnestegg_packet_count fails\nfread fails (also prints it\u0027s own message)\ncontrol passes through the end of the function (feof(infile))\n\nI thought the test vectors would catch this, but they call libvpx directly and not through vpxdec, like the old test vectors.",
+      "parentUuid": "AAAAdH//7mU\u003d",
+      "revId": "16efd82468c6aadc7ea8a0fe7e03bdbfdbe250d3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
