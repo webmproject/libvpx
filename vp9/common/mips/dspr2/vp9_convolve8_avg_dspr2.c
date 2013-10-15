@@ -435,7 +435,7 @@ void vp9_convolve8_avg_dspr2(const uint8_t *src, ptrdiff_t src_stride,
                       filter_y, y_step_q4,
                       w, intermediate_height);
 
-  vp9_convolve8_avg_vert(temp + (64*3), 64,
+  vp9_convolve8_avg_vert(temp + 64 * 3, 64,
                          dst, dst_stride,
                          filter_x, x_step_q4,
                          filter_y, y_step_q4,
