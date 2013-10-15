@@ -955,9 +955,15 @@ int vp9_decode_frame(VP9D_COMP *pbi, const uint8_t **p_data_end) {
   YV12_BUFFER_CONFIG *new_fb = &cm->yv12_fb[cm->new_fb_idx];
 
   if (!first_partition_size) {
-    // showing a frame directly
-    *p_data_end = data + 1;
-    return 0;
+    if (!keyframe) {
+      // showing a frame directly
+      *p_data_end = data + 1;
+      return 0;
+    } else {
+      vpx_internal_error(&cm->error, VPX_CODEC_CORRUPT_FRAME,
+                         "Invalid key frame");
+      return -1;
+    }
   }
   data += vp9_rb_bytes_read(&rb);
   xd->corrupted = 0;
