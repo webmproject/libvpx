@@ -13,8 +13,6 @@
 #include "./vpx_config.h"
 #include "vpx/vpx_integer.h"
 
-#define FILTER_BITS 7
-
 typedef void (*convolve_fn_t)(const uint8_t *src, ptrdiff_t src_stride,
                               uint8_t *dst, ptrdiff_t dst_stride,
                               const int16_t *filter_x, int x_step_q4,

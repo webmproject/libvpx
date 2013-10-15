@@ -14,8 +14,8 @@
 #include "vpx/vpx_integer.h"
 
 #include "vp9/common/vp9_common.h"
-#include "vp9/common/vp9_convolve.h"
 #include "vp9/common/vp9_filter.h"
+
 #include "vp9/encoder/vp9_variance.h"
 
 static void variance(const uint8_t *src_ptr,

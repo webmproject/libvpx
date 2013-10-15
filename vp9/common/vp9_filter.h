@@ -14,6 +14,8 @@
 #include "./vpx_config.h"
 #include "vpx/vpx_integer.h"
 
+#define FILTER_BITS 7
+
 #define SUBPEL_BITS 4
 #define SUBPEL_MASK ((1 << SUBPEL_BITS) - 1)
 #define SUBPEL_SHIFTS (1 << SUBPEL_BITS)

@@ -16,7 +16,7 @@
 #include "vp9/common/vp9_common.h"
 #include "vpx/vpx_integer.h"
 #include "vpx_ports/mem.h"
-#include "vp9/common/vp9_convolve.h"
+#include "vp9/common/vp9_filter.h"
 #include "vp9/common/mips/dspr2/vp9_common_dspr2.h"
 
 #if HAVE_DSPR2
