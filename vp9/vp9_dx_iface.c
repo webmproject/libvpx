@@ -658,8 +658,10 @@ static vpx_codec_err_t get_frame_corrupted(vpx_codec_alg_priv_t *ctx,
 
   if (corrupted) {
     VP9D_COMP *pbi = (VP9D_COMP *)ctx->pbi;
-    *corrupted = pbi->common.frame_to_show->corrupted;
-
+    if (pbi)
+      *corrupted = pbi->common.frame_to_show->corrupted;
+    else
+      return VPX_CODEC_ERROR;
     return VPX_CODEC_OK;
   } else {
     return VPX_CODEC_INVALID_PARAM;
