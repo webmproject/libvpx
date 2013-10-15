@@ -123,7 +123,6 @@ static unsigned int tt_activity_measure(MACROBLOCK *x) {
 static unsigned int alt_activity_measure(MACROBLOCK *x, int use_dc_pred) {
   return vp9_encode_intra(x, use_dc_pred);
 }
-DECLARE_ALIGNED(16, static const uint8_t, vp9_64x64_zeros[64*64]) = {0};
 
 // Measure the activity of the current macroblock
 // What we measure here is TBD so abstracted to this function
