@@ -399,14 +399,6 @@ static void update_state(VP9_COMP *cpi, PICK_MODE_CONTEXT *ctx,
   }
 
   if (cm->frame_type == KEY_FRAME) {
-    // Restore the coding modes to that held in the coding context
-    // if (mb_mode == I4X4_PRED)
-    //    for (i = 0; i < 16; i++)
-    //    {
-    //        xd->block[i].bmi.as_mode =
-    //                          xd->mode_info_context->bmi[i].as_mode;
-    //        assert(xd->mode_info_context->bmi[i].as_mode < MB_MODE_COUNT);
-    //    }
 #if CONFIG_INTERNAL_STATS
     static const int kf_mode_index[] = {
       THR_DC /*DC_PRED*/,
