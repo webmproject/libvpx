@@ -2231,9 +2231,6 @@ static void store_coding_context(MACROBLOCK *x, PICK_MODE_CONTEXT *ctx,
   ctx->comp_pred_diff   = (int)comp_pred_diff[COMP_PREDICTION_ONLY];
   ctx->hybrid_pred_diff = (int)comp_pred_diff[HYBRID_PREDICTION];
 
-  vpx_memcpy(ctx->zcoeff_blk, x->zcoeff_blk[xd->this_mi->mbmi.tx_size],
-             sizeof(ctx->zcoeff_blk));
-
   vpx_memcpy(ctx->tx_rd_diff, tx_size_diff, sizeof(ctx->tx_rd_diff));
   vpx_memcpy(ctx->best_filter_diff, best_filter_diff,
              sizeof(*best_filter_diff) * (SWITCHABLE_FILTERS + 1));
@@ -3149,11 +3146,8 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
   const int bws = num_8x8_blocks_wide_lookup[bsize] / 2;
   const int bhs = num_8x8_blocks_high_lookup[bsize] / 2;
   int best_skip2 = 0;
-  unsigned char best_zcoeff_blk[256] = { 0 };
 
   x->skip_encode = cpi->sf.skip_encode_frame && xd->q_index < QIDX_SKIP_THRESH;
-  vp9_zero(x->zcoeff_blk);
-  vp9_zero(ctx->zcoeff_blk);
 
   // Everywhere the flag is set the error is much higher than its neighbors.
   ctx->frames_with_high_error = 0;
@@ -3584,8 +3578,8 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
         best_rd = this_rd;
         best_mbmode = *mbmi;
         best_skip2 = this_skip2;
-        vpx_memcpy(best_zcoeff_blk, x->zcoeff_blk[mbmi->tx_size],
-                   sizeof(best_zcoeff_blk));
+        vpx_memcpy(ctx->zcoeff_blk, x->zcoeff_blk[mbmi->tx_size],
+                   sizeof(ctx->zcoeff_blk));
 
         // TODO(debargha): enhance this test with a better distortion prediction
         // based on qp, activity mask and history
@@ -3751,9 +3745,6 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
   *mbmi = best_mbmode;
   x->skip |= best_skip2;
 
-  vpx_memcpy(x->zcoeff_blk[mbmi->tx_size], best_zcoeff_blk,
-             sizeof(best_zcoeff_blk));
-
   for (i = 0; i < NB_PREDICTION_TYPES; ++i) {
     if (best_pred_rd[i] == INT64_MAX)
       best_pred_diff[i] = INT_MIN;
@@ -3847,11 +3838,9 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
   int_mv seg_mvs[4][MAX_REF_FRAMES];
   b_mode_info best_bmodes[4];
   int best_skip2 = 0;
-  unsigned char best_zcoeff_blk[256] = { 0 };
 
   x->skip_encode = cpi->sf.skip_encode_frame && xd->q_index < QIDX_SKIP_THRESH;
   vp9_zero(x->zcoeff_blk);
-  vp9_zero(ctx->zcoeff_blk);
 
   for (i = 0; i < 4; i++) {
     int j;
@@ -4328,8 +4317,8 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
                    RDCOST(x->rdmult, x->rddiv, rate_uv, distortion_uv);
         best_mbmode = *mbmi;
         best_skip2 = this_skip2;
-        vpx_memcpy(best_zcoeff_blk, x->zcoeff_blk[mbmi->tx_size],
-                   sizeof(best_zcoeff_blk));
+        vpx_memcpy(ctx->zcoeff_blk, x->zcoeff_blk[mbmi->tx_size],
+                   sizeof(ctx->zcoeff_blk));
 
         for (i = 0; i < 4; i++)
           best_bmodes[i] = xd->this_mi->bmi[i];
@@ -4492,9 +4481,6 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
     mbmi->mv[1].as_int = xd->this_mi->bmi[3].as_mv[1].as_int;
   }
 
-  vpx_memcpy(x->zcoeff_blk[mbmi->tx_size], best_zcoeff_blk,
-             sizeof(best_zcoeff_blk));
-
   for (i = 0; i < NB_PREDICTION_TYPES; ++i) {
     if (best_pred_rd[i] == INT64_MAX)
       best_pred_diff[i] = INT_MIN;
@@ -4536,4 +4522,3 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
 
   return best_rd;
 }
-
