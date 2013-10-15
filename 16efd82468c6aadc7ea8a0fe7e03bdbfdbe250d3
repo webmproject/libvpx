@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdH//7mU\u003d",
+        "filename": "vpxdec.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1022,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-10-15T17:57:25Z",
+      "side": 1,
+      "message": "I\u0027m not sure this is quite right. Doesn\u0027t this control normal eof as well? You might want to change the code to -1/0/1 returns or check for the error earlier.",
+      "revId": "16efd82468c6aadc7ea8a0fe7e03bdbfdbe250d3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
