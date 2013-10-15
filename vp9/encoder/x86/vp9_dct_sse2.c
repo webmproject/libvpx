@@ -112,11 +112,6 @@ void vp9_short_fdct4x4_sse2(int16_t *input, int16_t *output, int pitch) {
   }
 }
 
-void vp9_short_fdct8x4_sse2(int16_t *input, int16_t *output, int pitch) {
-  vp9_short_fdct4x4_sse2(input, output, pitch);
-  vp9_short_fdct4x4_sse2(input + 4, output + 16, pitch);
-}
-
 static INLINE void load_buffer_4x4(int16_t *input, __m128i *in, int stride) {
   const __m128i k__nonzero_bias_a = _mm_setr_epi16(0, 1, 1, 1, 1, 1, 1, 1);
   const __m128i k__nonzero_bias_b = _mm_setr_epi16(1, 0, 0, 0, 0, 0, 0, 0);

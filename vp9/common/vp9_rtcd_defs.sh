@@ -701,9 +701,6 @@ specialize vp9_short_fdct8x8 sse2
 prototype void vp9_short_fdct4x4 "int16_t *InputData, int16_t *OutputData, int pitch"
 specialize vp9_short_fdct4x4 sse2
 
-prototype void vp9_short_fdct8x4 "int16_t *InputData, int16_t *OutputData, int pitch"
-specialize vp9_short_fdct8x4 sse2
-
 prototype void vp9_short_fdct32x32 "int16_t *InputData, int16_t *OutputData, int pitch"
 specialize vp9_short_fdct32x32 sse2
 
@@ -715,9 +712,6 @@ specialize vp9_short_fdct16x16 sse2
 
 prototype void vp9_short_walsh4x4 "int16_t *InputData, int16_t *OutputData, int pitch"
 specialize vp9_short_walsh4x4
-
-prototype void vp9_short_walsh8x4 "int16_t *InputData, int16_t *OutputData, int pitch"
-specialize vp9_short_walsh8x4
 
 #
 # Motion search

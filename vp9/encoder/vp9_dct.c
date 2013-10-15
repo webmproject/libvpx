@@ -178,11 +178,6 @@ void vp9_short_fht4x4_c(int16_t *input, int16_t *output,
   }
 }
 
-void vp9_short_fdct8x4_c(int16_t *input, int16_t *output, int pitch) {
-    vp9_short_fdct4x4_c(input, output, pitch);
-    vp9_short_fdct4x4_c(input + 4, output + 16, pitch);
-}
-
 static void fdct8(const int16_t *input, int16_t *output) {
   /*canbe16*/ int s0, s1, s2, s3, s4, s5, s6, s7;
   /*needs32*/ int t0, t1, t2, t3;
@@ -646,12 +641,6 @@ void vp9_short_walsh4x4_c(int16_t *input, int16_t *output, int pitch) {
     op += 4;
   }
 }
-
-void vp9_short_walsh8x4_c(int16_t *input, int16_t *output, int pitch) {
-  vp9_short_walsh4x4_c(input,   output,    pitch);
-  vp9_short_walsh4x4_c(input + 4, output + 16, pitch);
-}
-
 
 // Rewrote to use same algorithm as others.
 static void fdct16(const int16_t in[16], int16_t out[16]) {

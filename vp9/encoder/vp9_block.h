@@ -172,7 +172,6 @@ struct macroblock {
   BLOCK_SIZE sb64_partitioning;
 
   void (*fwd_txm4x4)(int16_t *input, int16_t *output, int pitch);
-  void (*fwd_txm8x4)(int16_t *input, int16_t *output, int pitch);
   void (*fwd_txm8x8)(int16_t *input, int16_t *output, int pitch);
   void (*fwd_txm16x16)(int16_t *input, int16_t *output, int pitch);
   void (*quantize_b_4x4)(MACROBLOCK *x, int b_idx, TX_TYPE tx_type,

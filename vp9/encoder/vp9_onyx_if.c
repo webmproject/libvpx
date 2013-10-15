@@ -955,10 +955,8 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
 
   cpi->mb.fwd_txm16x16  = vp9_short_fdct16x16;
   cpi->mb.fwd_txm8x8    = vp9_short_fdct8x8;
-  cpi->mb.fwd_txm8x4    = vp9_short_fdct8x4;
   cpi->mb.fwd_txm4x4    = vp9_short_fdct4x4;
   if (cpi->oxcf.lossless || cpi->mb.e_mbd.lossless) {
-    cpi->mb.fwd_txm8x4    = vp9_short_walsh8x4;
     cpi->mb.fwd_txm4x4    = vp9_short_walsh4x4;
   }
 

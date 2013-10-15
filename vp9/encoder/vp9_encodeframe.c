@@ -1861,7 +1861,6 @@ static void init_encode_frame_mb_context(VP9_COMP *cpi) {
 static void switch_lossless_mode(VP9_COMP *cpi, int lossless) {
   if (lossless) {
     // printf("Switching to lossless\n");
-    cpi->mb.fwd_txm8x4 = vp9_short_walsh8x4;
     cpi->mb.fwd_txm4x4 = vp9_short_walsh4x4;
     cpi->mb.e_mbd.itxm_add = vp9_iwht4x4_add;
     cpi->mb.optimize = 0;
@@ -1870,7 +1869,6 @@ static void switch_lossless_mode(VP9_COMP *cpi, int lossless) {
     cpi->common.tx_mode = ONLY_4X4;
   } else {
     // printf("Not lossless\n");
-    cpi->mb.fwd_txm8x4 = vp9_short_fdct8x4;
     cpi->mb.fwd_txm4x4 = vp9_short_fdct4x4;
     cpi->mb.e_mbd.itxm_add = vp9_idct4x4_add;
   }
