@@ -1830,9 +1830,9 @@ static void init_encode_frame_mb_context(VP9_COMP *cpi) {
   xd->this_mi->mbmi.mode = DC_PRED;
   xd->this_mi->mbmi.uv_mode = DC_PRED;
 
-  vp9_zero(cpi->y_mode_count)
-  vp9_zero(cpi->y_uv_mode_count)
-  vp9_zero(cm->counts.inter_mode)
+  vp9_zero(cpi->y_mode_count);
+  vp9_zero(cpi->y_uv_mode_count);
+  vp9_zero(cm->counts.inter_mode);
   vp9_zero(cpi->partition_count);
   vp9_zero(cpi->intra_inter_count);
   vp9_zero(cpi->comp_inter_count);

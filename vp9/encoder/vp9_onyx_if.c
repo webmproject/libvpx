@@ -1733,7 +1733,7 @@ VP9_PTR vp9_create_compressor(VP9_CONFIG *oxcf) {
 
   cpi->common.error.setjmp = 0;
 
-  vp9_zero(cpi->y_uv_mode_count)
+  vp9_zero(cpi->y_uv_mode_count);
 
 #ifdef MODE_TEST_HIT_STATS
   vp9_zero(cpi->mode_test_hits)
