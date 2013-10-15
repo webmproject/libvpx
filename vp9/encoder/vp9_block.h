@@ -55,8 +55,8 @@ typedef struct {
 } PICK_MODE_CONTEXT;
 
 struct macroblock_plane {
-  DECLARE_ALIGNED(16, int16_t, src_diff[64*64]);
-  DECLARE_ALIGNED(16, int16_t, coeff[64*64]);
+  DECLARE_ALIGNED(16, int16_t, src_diff[64 * 64]);
+  DECLARE_ALIGNED(16, int16_t, coeff[64 * 64]);
   struct buf_2d src;
 
   // Quantizer setings
