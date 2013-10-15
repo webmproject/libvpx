@@ -24,7 +24,7 @@ TOPLEVEL_CMD = ["git", "rev-parse", "--show-toplevel"]
 DIFF_CMD = ["git", "diff"]
 DIFF_INDEX_CMD = ["git", "diff-index", "-u", "HEAD", "--"]
 SHOW_CMD = ["git", "show"]
-CPPLINT_FILTERS = ["-readability/casting", "-runtime/int"]
+CPPLINT_FILTERS = ["-readability/casting"]
 
 
 class Usage(Exception):
