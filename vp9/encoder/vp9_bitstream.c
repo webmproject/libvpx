@@ -565,13 +565,13 @@ static void write_mb_modes_kf(const VP9_COMP *cpi, MODE_INFO **mi_8x8,
 
 static void write_modes_b(VP9_COMP *cpi, MODE_INFO **mi_8x8, vp9_writer *bc,
                           TOKENEXTRA **tok, TOKENEXTRA *tok_end,
-                          int mi_row, int mi_col) {
+                          int mi_row, int mi_col, int index) {
   VP9_COMMON *const cm = &cpi->common;
   MACROBLOCKD *const xd = &cpi->mb.e_mbd;
   MODE_INFO *m = mi_8x8[0];
 
   if (m->mbmi.sb_type < BLOCK_8X8)
-    if (xd->ab_index > 0)
+    if (index > 0)
       return;
 
   xd->mi_8x8 = mi_8x8;
@@ -597,7 +597,8 @@ static void write_modes_b(VP9_COMP *cpi, MODE_INFO **mi_8x8, vp9_writer *bc,
 
 static void write_modes_sb(VP9_COMP *cpi, MODE_INFO **mi_8x8, vp9_writer *bc,
                            TOKENEXTRA **tok, TOKENEXTRA *tok_end,
-                           int mi_row, int mi_col, BLOCK_SIZE bsize) {
+                           int mi_row, int mi_col, BLOCK_SIZE bsize,
+                           int index) {
   VP9_COMMON *const cm = &cpi->common;
   MACROBLOCKD *xd = &cpi->mb.e_mbd;
   const int mis = cm->mode_info_stride;
@@ -613,11 +614,10 @@ static void write_modes_sb(VP9_COMP *cpi, MODE_INFO **mi_8x8, vp9_writer *bc,
 
   partition = partition_lookup[bsl][m->mbmi.sb_type];
 
-  if (bsize < BLOCK_8X8)
-    if (xd->ab_index > 0)
+  if (bsize < BLOCK_8X8) {
+    if (index > 0)
       return;
-
-  if (bsize >= BLOCK_8X8) {
+  } else {
     int pl;
     const int idx = check_bsize_coverage(bs, cm->mi_rows, cm->mi_cols,
                                          mi_row, mi_col);
@@ -634,31 +634,28 @@ static void write_modes_sb(VP9_COMP *cpi, MODE_INFO **mi_8x8, vp9_writer *bc,
   }
 
   subsize = get_subsize(bsize, partition);
-  *(get_sb_index(xd, subsize)) = 0;
 
   switch (partition) {
     case PARTITION_NONE:
-      write_modes_b(cpi, mi_8x8, bc, tok, tok_end, mi_row, mi_col);
+      write_modes_b(cpi, mi_8x8, bc, tok, tok_end, mi_row, mi_col, 0);
       break;
     case PARTITION_HORZ:
-      write_modes_b(cpi, mi_8x8, bc, tok, tok_end, mi_row, mi_col);
-      *(get_sb_index(xd, subsize)) = 1;
+      write_modes_b(cpi, mi_8x8, bc, tok, tok_end, mi_row, mi_col, 0);
       if ((mi_row + bs) < cm->mi_rows)
         write_modes_b(cpi, mi_8x8 + bs * mis, bc, tok, tok_end, mi_row + bs,
-                      mi_col);
+                      mi_col, 1);
       break;
     case PARTITION_VERT:
-      write_modes_b(cpi, mi_8x8, bc, tok, tok_end, mi_row, mi_col);
-      *(get_sb_index(xd, subsize)) = 1;
+      write_modes_b(cpi, mi_8x8, bc, tok, tok_end, mi_row, mi_col, 0);
       if ((mi_col + bs) < cm->mi_cols)
-        write_modes_b(cpi, mi_8x8 + bs, bc, tok, tok_end, mi_row, mi_col + bs);
+        write_modes_b(cpi, mi_8x8 + bs, bc, tok, tok_end, mi_row, mi_col + bs,
+                      1);
       break;
     case PARTITION_SPLIT:
       for (n = 0; n < 4; n++) {
-        int j = n >> 1, i = n & 0x01;
-        *(get_sb_index(xd, subsize)) = n;
+        const int j = n >> 1, i = n & 1;
         write_modes_sb(cpi, mi_8x8 + j * bs * mis + i * bs, bc, tok, tok_end,
-                       mi_row + j * bs, mi_col + i * bs, subsize);
+                       mi_row + j * bs, mi_col + i * bs, subsize, n);
       }
       break;
     default:
@@ -690,7 +687,7 @@ static void write_modes(VP9_COMP *cpi, vp9_writer* const bc,
     for (mi_col = cm->cur_tile_mi_col_start; mi_col < cm->cur_tile_mi_col_end;
          mi_col += MI_BLOCK_SIZE, m_8x8 += MI_BLOCK_SIZE) {
       write_modes_sb(cpi, m_8x8, bc, tok, tok_end, mi_row, mi_col,
-                     BLOCK_64X64);
+                     BLOCK_64X64, 0);
     }
   }
 }

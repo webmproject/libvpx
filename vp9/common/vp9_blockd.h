@@ -234,31 +234,6 @@ typedef struct macroblockd {
   int q_index;
 } MACROBLOCKD;
 
-static INLINE uint8_t *get_sb_index(MACROBLOCKD *xd, BLOCK_SIZE subsize) {
-  switch (subsize) {
-    case BLOCK_64X64:
-    case BLOCK_64X32:
-    case BLOCK_32X64:
-    case BLOCK_32X32:
-      return &xd->sb_index;
-    case BLOCK_32X16:
-    case BLOCK_16X32:
-    case BLOCK_16X16:
-      return &xd->mb_index;
-    case BLOCK_16X8:
-    case BLOCK_8X16:
-    case BLOCK_8X8:
-      return &xd->b_index;
-    case BLOCK_8X4:
-    case BLOCK_4X8:
-    case BLOCK_4X4:
-      return &xd->ab_index;
-    default:
-      assert(0);
-      return NULL;
-  }
-}
-
 static INLINE void update_partition_context(MACROBLOCKD *xd, BLOCK_SIZE sb_type,
                                             BLOCK_SIZE sb_size) {
   const int bsl = b_width_log2(sb_size), bs = (1 << bsl) / 2;
