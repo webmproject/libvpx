@@ -122,7 +122,7 @@ static void tokenize_b(int plane, int block, BLOCK_SIZE plane_bsize,
   vp9_coeff_probs_model *const coef_probs = cpi->common.fc.coef_probs[tx_size];
   const int ref = is_inter_block(mbmi);
   uint8_t token_cache[1024];
-  const uint8_t *band_translate;
+  const uint8_t *const band_translate = get_band_translate(tx_size);
   const int seg_eob = get_tx_eob(&cpi->common.seg, segment_id, tx_size);
   int aoff, loff;
   txfrm_block_to_raster_xy(plane_bsize, tx_size, block, &aoff, &loff);
@@ -131,7 +131,7 @@ static void tokenize_b(int plane, int block, BLOCK_SIZE plane_bsize,
 
   pt = get_entropy_context(tx_size, pd->above_context + aoff,
                                     pd->left_context + loff);
-  get_scan_and_band(xd, tx_size, type, block, &scan, &nb, &band_translate);
+  get_scan(xd, tx_size, type, block, &scan, &nb);
   c = 0;
   do {
     const int band = get_coef_band(band_translate, c);

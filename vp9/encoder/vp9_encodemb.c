@@ -137,12 +137,12 @@ static void optimize_b(MACROBLOCK *mb,
   uint8_t token_cache[1024];
   const int ib = txfrm_block_to_raster_block(plane_bsize, tx_size, block);
   const int16_t *dequant_ptr = pd->dequant;
-  const uint8_t * band_translate;
+  const uint8_t *const band_translate = get_band_translate(tx_size);
 
   assert((!type && !plane) || (type && plane));
   dqcoeff_ptr = BLOCK_OFFSET(pd->dqcoeff, block);
   qcoeff_ptr = BLOCK_OFFSET(pd->qcoeff, block);
-  get_scan_and_band(xd, tx_size, type, ib, &scan, &nb, &band_translate);
+  get_scan(xd, tx_size, type, ib, &scan, &nb);
   assert(eob <= default_eob);
 
   /* Now set up a Viterbi trellis to evaluate alternative roundings. */
