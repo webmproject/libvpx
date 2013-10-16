@@ -253,13 +253,13 @@ void vp9_choose_segmap_coding_method(VP9_COMP *cpi) {
   no_pred_cost = cost_segmap(no_pred_segcounts, no_pred_tree);
 
   // Key frames cannot use temporal prediction
-  if (cm->frame_type != KEY_FRAME) {
+  if (!frame_is_intra_only(cm)) {
     // Work out probability tree for coding those segments not
     // predicted using the temporal method and the cost.
     calc_segtree_probs(t_unpred_seg_counts, t_pred_tree);
     t_pred_cost = cost_segmap(t_unpred_seg_counts, t_pred_tree);
 
-    // Add in the cost of the signalling for each prediction context
+    // Add in the cost of the signaling for each prediction context.
     for (i = 0; i < PREDICTION_PROBS; i++) {
       const int count0 = temporal_predictor_count[i][0];
       const int count1 = temporal_predictor_count[i][1];

@@ -631,7 +631,7 @@ void vp9_prepare_read_mode_info(VP9D_COMP* pbi, vp9_reader *r) {
   for (k = 0; k < MBSKIP_CONTEXTS; ++k)
     vp9_diff_update_prob(r, &cm->fc.mbskip_probs[k]);
 
-  if (cm->frame_type != KEY_FRAME && !cm->intra_only) {
+  if (!frame_is_intra_only(cm)) {
     nmv_context *const nmvc = &pbi->common.fc.nmvc;
     MACROBLOCKD *const xd = &pbi->mb;
     int i, j;
@@ -669,7 +669,7 @@ void vp9_read_mode_info(VP9D_COMP* pbi, int mi_row, int mi_col, vp9_reader *r) {
   const int x_mis = MIN(bw, cm->mi_cols - mi_col);
   int x, y, z;
 
-  if (cm->frame_type == KEY_FRAME || cm->intra_only)
+  if (frame_is_intra_only(cm))
     read_intra_frame_mode_info(pbi, mi, mi_row, mi_col, r);
   else
     read_inter_frame_mode_info(pbi, mi, mi_row, mi_col, r);

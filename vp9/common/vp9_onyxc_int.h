@@ -302,4 +302,9 @@ static void set_prev_mi(VP9_COMMON *cm) {
   cm->prev_mi = use_prev_in_find_mv_refs ?
                   cm->prev_mip + cm->mode_info_stride + 1 : NULL;
 }
+
+static INLINE int frame_is_intra_only(const VP9_COMMON *const cm) {
+  return cm->frame_type == KEY_FRAME || cm->intra_only;
+}
+
 #endif  // VP9_COMMON_VP9_ONYXC_INT_H_

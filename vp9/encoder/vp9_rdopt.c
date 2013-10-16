@@ -251,7 +251,7 @@ void vp9_initialize_rd_consts(VP9_COMP *cpi, int qindex) {
   /*rough estimate for costing*/
   vp9_init_mode_costs(cpi);
 
-  if (cpi->common.frame_type != KEY_FRAME) {
+  if (!frame_is_intra_only(&cpi->common)) {
     vp9_build_nmv_cost_table(
         cpi->mb.nmvjointcost,
         cpi->mb.e_mbd.allow_high_precision_mv ?

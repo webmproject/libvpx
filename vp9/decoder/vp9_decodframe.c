@@ -894,9 +894,11 @@ static size_t read_uncompressed_header(VP9D_COMP *pbi,
     cm->frame_parallel_decoding_mode = 1;
   }
 
+  // This flag will be overridden by the call to vp9_setup_past_independence
+  // below, forcing the use of context 0 for those frame types.
   cm->frame_context_idx = vp9_rb_read_literal(rb, NUM_FRAME_CONTEXTS_LOG2);
 
-  if (cm->frame_type == KEY_FRAME || cm->error_resilient_mode || cm->intra_only)
+  if (frame_is_intra_only(cm) || cm->error_resilient_mode)
     vp9_setup_past_independence(cm);
 
   setup_loopfilter(&cm->lf, rb);
@@ -1016,7 +1018,7 @@ int vp9_decode_frame(VP9D_COMP *pbi, const uint8_t **p_data_end) {
   if (!cm->error_resilient_mode && !cm->frame_parallel_decoding_mode) {
     vp9_adapt_coef_probs(cm);
 
-    if (!keyframe && !cm->intra_only) {
+    if (!frame_is_intra_only(cm)) {
       vp9_adapt_mode_probs(cm);
       vp9_adapt_mv_probs(cm, xd->allow_high_precision_mv);
     }
