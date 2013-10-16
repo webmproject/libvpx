@@ -696,35 +696,6 @@ static void write_modes(VP9_COMP *cpi, vp9_writer* const bc,
   }
 }
 
-/* This function is used for debugging probability trees. */
-static void print_prob_tree(vp9_coeff_probs *coef_probs, int block_types) {
-  /* print coef probability tree */
-  int i, j, k, l, m;
-  FILE *f = fopen("enc_tree_probs.txt", "a");
-  fprintf(f, "{\n");
-  for (i = 0; i < block_types; i++) {
-    fprintf(f, "  {\n");
-    for (j = 0; j < REF_TYPES; ++j) {
-      fprintf(f, "  {\n");
-      for (k = 0; k < COEF_BANDS; k++) {
-        fprintf(f, "    {\n");
-        for (l = 0; l < PREV_COEF_CONTEXTS; l++) {
-          fprintf(f, "      {");
-          for (m = 0; m < ENTROPY_NODES; m++) {
-            fprintf(f, "%3u, ",
-                    (unsigned int)(coef_probs[i][j][k][l][m]));
-          }
-        }
-        fprintf(f, " }\n");
-      }
-      fprintf(f, "    }\n");
-    }
-    fprintf(f, "  }\n");
-  }
-  fprintf(f, "}\n");
-  fclose(f);
-}
-
 static void build_tree_distribution(VP9_COMP *cpi, TX_SIZE tx_size) {
   vp9_coeff_probs_model *coef_probs = cpi->frame_coef_probs[tx_size];
   vp9_coeff_count *coef_counts = cpi->coef_counts[tx_size];
