@@ -1414,6 +1414,94 @@ static void cal_nmvsadcosts_hp(int *mvsadcost[2]) {
   } while (++i <= MV_MAX);
 }
 
+static void init_pick_mode_context(VP9_COMP *cpi) {
+  int i;
+  MACROBLOCK  *x  = &cpi->mb;
+  MACROBLOCKD *xd = &x->e_mbd;
+  VP9_COMMON  *cm = &cpi->common;
+
+  for (i = 0; i < BLOCK_SIZES; ++i) {
+    const int num_4x4_w = num_4x4_blocks_wide_lookup[i];
+    const int num_4x4_h = num_4x4_blocks_high_lookup[i];
+    const int num_4x4_blk = MAX(4, num_4x4_w * num_4x4_h);
+    if (i < BLOCK_16X16) {
+      for (xd->sb_index = 0; xd->sb_index < 4; ++xd->sb_index) {
+        for (xd->mb_index = 0; xd->mb_index < 4; ++xd->mb_index) {
+          for (xd->b_index = 0; xd->b_index < 16 / num_4x4_blk; ++xd->b_index) {
+            PICK_MODE_CONTEXT *ctx = get_block_context(x, i);
+            ctx->num_4x4_blk = num_4x4_blk;
+            CHECK_MEM_ERROR(cm, ctx->zcoeff_blk,
+                            vpx_calloc(num_4x4_blk, sizeof(uint8_t)));
+          }
+        }
+      }
+    } else if (i < BLOCK_32X32) {
+      for (xd->sb_index = 0; xd->sb_index < 4; ++xd->sb_index) {
+        for (xd->mb_index = 0; xd->mb_index < 64 / num_4x4_blk;
+                               ++xd->mb_index) {
+          PICK_MODE_CONTEXT *ctx = get_block_context(x, i);
+          ctx->num_4x4_blk = num_4x4_blk;
+          CHECK_MEM_ERROR(cm, ctx->zcoeff_blk,
+                          vpx_calloc(num_4x4_blk, sizeof(uint8_t)));
+        }
+      }
+    } else if (i < BLOCK_64X64) {
+      for (xd->sb_index = 0; xd->sb_index < 256 / num_4x4_blk; ++xd->sb_index) {
+        PICK_MODE_CONTEXT *ctx = get_block_context(x, i);
+        ctx->num_4x4_blk = num_4x4_blk;
+        CHECK_MEM_ERROR(cm, ctx->zcoeff_blk,
+                        vpx_calloc(num_4x4_blk, sizeof(uint8_t)));
+      }
+    } else {
+      PICK_MODE_CONTEXT *ctx = get_block_context(x, i);
+      ctx->num_4x4_blk = num_4x4_blk;
+      CHECK_MEM_ERROR(cm, ctx->zcoeff_blk,
+                      vpx_calloc(num_4x4_blk, sizeof(uint8_t)));
+    }
+  }
+}
+
+static void free_pick_mode_context(MACROBLOCK *x) {
+  int i;
+  MACROBLOCKD *xd = &x->e_mbd;
+
+  for (i = 0; i < BLOCK_SIZES; ++i) {
+    const int num_4x4_w = num_4x4_blocks_wide_lookup[i];
+    const int num_4x4_h = num_4x4_blocks_high_lookup[i];
+    const int num_4x4_blk = MAX(4, num_4x4_w * num_4x4_h);
+    if (i < BLOCK_16X16) {
+      for (xd->sb_index = 0; xd->sb_index < 4; ++xd->sb_index) {
+        for (xd->mb_index = 0; xd->mb_index < 4; ++xd->mb_index) {
+          for (xd->b_index = 0; xd->b_index < 16 / num_4x4_blk; ++xd->b_index) {
+            PICK_MODE_CONTEXT *ctx = get_block_context(x, i);
+            vpx_free(ctx->zcoeff_blk);
+            ctx->zcoeff_blk = 0;
+          }
+        }
+      }
+    } else if (i < BLOCK_32X32) {
+      for (xd->sb_index = 0; xd->sb_index < 4; ++xd->sb_index) {
+        for (xd->mb_index = 0; xd->mb_index < 64 / num_4x4_blk;
+                               ++xd->mb_index) {
+          PICK_MODE_CONTEXT *ctx = get_block_context(x, i);
+          vpx_free(ctx->zcoeff_blk);
+          ctx->zcoeff_blk = 0;
+        }
+      }
+    } else if (i < BLOCK_64X64) {
+      for (xd->sb_index = 0; xd->sb_index < 256 / num_4x4_blk; ++xd->sb_index) {
+        PICK_MODE_CONTEXT *ctx = get_block_context(x, i);
+        vpx_free(ctx->zcoeff_blk);
+        ctx->zcoeff_blk = 0;
+      }
+    } else {
+      PICK_MODE_CONTEXT *ctx = get_block_context(x, i);
+      vpx_free(ctx->zcoeff_blk);
+      ctx->zcoeff_blk = 0;
+    }
+  }
+}
+
 VP9_PTR vp9_create_compressor(VP9_CONFIG *oxcf) {
   int i, j;
   volatile union {
@@ -1449,6 +1537,8 @@ VP9_PTR vp9_create_compressor(VP9_CONFIG *oxcf) {
   vp9_create_common(cm);
 
   init_config((VP9_PTR)cpi, oxcf);
+
+  init_pick_mode_context(cpi);
 
   cm->current_video_frame   = 0;
   cpi->kf_overspend_bits            = 0;
@@ -1913,6 +2003,7 @@ void vp9_remove_compressor(VP9_PTR *ptr) {
 #endif
   }
 
+  free_pick_mode_context(&cpi->mb);
   dealloc_compressor_data(cpi);
   vpx_free(cpi->mb.ss);
   vpx_free(cpi->tok);

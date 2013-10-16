@@ -26,7 +26,8 @@ typedef struct {
 // Structure to hold snapshot of coding context during the mode picking process
 typedef struct {
   MODE_INFO mic;
-  uint8_t zcoeff_blk[256];
+  uint8_t *zcoeff_blk;
+  int num_4x4_blk;
   int skip;
   int_mv best_ref_mv;
   int_mv second_best_ref_mv;
@@ -176,6 +177,45 @@ struct macroblock {
   void (*quantize_b_4x4)(MACROBLOCK *x, int b_idx, TX_TYPE tx_type,
                          int y_blocks);
 };
+
+// TODO(jingning): the variables used here are little complicated. need further
+// refactoring on organizing the temporary buffers, when recursive
+// partition down to 4x4 block size is enabled.
+static PICK_MODE_CONTEXT *get_block_context(MACROBLOCK *x, BLOCK_SIZE bsize) {
+  MACROBLOCKD *const xd = &x->e_mbd;
+
+  switch (bsize) {
+    case BLOCK_64X64:
+      return &x->sb64_context;
+    case BLOCK_64X32:
+      return &x->sb64x32_context[xd->sb_index];
+    case BLOCK_32X64:
+      return &x->sb32x64_context[xd->sb_index];
+    case BLOCK_32X32:
+      return &x->sb32_context[xd->sb_index];
+    case BLOCK_32X16:
+      return &x->sb32x16_context[xd->sb_index][xd->mb_index];
+    case BLOCK_16X32:
+      return &x->sb16x32_context[xd->sb_index][xd->mb_index];
+    case BLOCK_16X16:
+      return &x->mb_context[xd->sb_index][xd->mb_index];
+    case BLOCK_16X8:
+      return &x->sb16x8_context[xd->sb_index][xd->mb_index][xd->b_index];
+    case BLOCK_8X16:
+      return &x->sb8x16_context[xd->sb_index][xd->mb_index][xd->b_index];
+    case BLOCK_8X8:
+      return &x->sb8x8_context[xd->sb_index][xd->mb_index][xd->b_index];
+    case BLOCK_8X4:
+      return &x->sb8x4_context[xd->sb_index][xd->mb_index][xd->b_index];
+    case BLOCK_4X8:
+      return &x->sb4x8_context[xd->sb_index][xd->mb_index][xd->b_index];
+    case BLOCK_4X4:
+      return &x->ab4x4_context[xd->sb_index][xd->mb_index][xd->b_index];
+    default:
+      assert(0);
+      return NULL;
+  }
+}
 
 struct rdcost_block_args {
   MACROBLOCK *x;
