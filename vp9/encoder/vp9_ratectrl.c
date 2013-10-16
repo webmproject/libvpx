@@ -288,7 +288,7 @@ void vp9_update_rate_correction_factors(VP9_COMP *cpi, int damp_var) {
   if (correction_factor > 102) {
     // We are not already at the worst allowable quality
     correction_factor =
-        (int)(100.5 + ((correction_factor - 100) * adjustment_limit));
+        (int)(100 + ((correction_factor - 100) * adjustment_limit));
     rate_correction_factor =
         ((rate_correction_factor * correction_factor) / 100);
 
@@ -298,7 +298,7 @@ void vp9_update_rate_correction_factors(VP9_COMP *cpi, int damp_var) {
   } else if (correction_factor < 99) {
     // We are not already at the best allowable quality
     correction_factor =
-        (int)(100.5 - ((100 - correction_factor) * adjustment_limit));
+        (int)(100 - ((100 - correction_factor) * adjustment_limit));
     rate_correction_factor =
         ((rate_correction_factor * correction_factor) / 100);
 
