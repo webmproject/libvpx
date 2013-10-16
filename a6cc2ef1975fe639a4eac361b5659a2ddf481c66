@@ -16,6 +16,24 @@
       "revId": "a6cc2ef1975fe639a4eac361b5659a2ddf481c66",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdH//7fU\u003d",
+        "filename": "vpx/vpx_codec.mk",
+        "patchSetId": 7
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 1003234
+      },
+      "writtenOn": "2013-10-16T18:37:32Z",
+      "side": 1,
+      "message": "changed to \nAPI_SRCS-$(CONFIG_VP8_ENCODER) +\u003d src/svc_encodeframe.c\nAPI_SRCS-$(CONFIG_VP8_ENCODER) +\u003d svc_context.h",
+      "parentUuid": "AAAAdH//7fw\u003d",
+      "revId": "a6cc2ef1975fe639a4eac361b5659a2ddf481c66",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
