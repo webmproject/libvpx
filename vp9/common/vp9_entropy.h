@@ -43,7 +43,7 @@
 extern DECLARE_ALIGNED(16, const uint8_t,
                        vp9_pt_energy_class[MAX_ENTROPY_TOKENS]);
 
-extern const vp9_tree_index vp9_coef_tree[];
+extern const vp9_tree_index vp9_coef_tree[TREE_SIZE(MAX_ENTROPY_TOKENS)];
 
 #define DCT_EOB_MODEL_TOKEN     3      /* EOB       Extra Bits 0+0 */
 extern const vp9_tree_index vp9_coefmodel_tree[];
@@ -57,7 +57,8 @@ typedef struct {
   int base_val;
 } vp9_extra_bit;
 
-extern const vp9_extra_bit vp9_extra_bits[12];    /* indexed by token value */
+// indexed by token value
+extern const vp9_extra_bit vp9_extra_bits[MAX_ENTROPY_TOKENS];
 
 #define MAX_PROB                255
 #define DCT_MAX_VALUE           16384

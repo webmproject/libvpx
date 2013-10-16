@@ -56,7 +56,7 @@ DECLARE_ALIGNED(16, const uint8_t, vp9_pt_energy_class[MAX_ENTROPY_TOKENS]) = {
 
 /* Array indices are identical to previously-existing CONTEXT_NODE indices */
 
-const vp9_tree_index vp9_coef_tree[ 22] = {
+const vp9_tree_index vp9_coef_tree[TREE_SIZE(MAX_ENTROPY_TOKENS)] = {
   -DCT_EOB_TOKEN, 2,                          /* 0 = EOB */
   -ZERO_TOKEN, 4,                             /* 1 = ZERO */
   -ONE_TOKEN, 6,                              /* 2 = ONE */
@@ -274,7 +274,7 @@ static void init_bit_trees() {
   init_bit_tree(cat6, 14);
 }
 
-const vp9_extra_bit vp9_extra_bits[12] = {
+const vp9_extra_bit vp9_extra_bits[MAX_ENTROPY_TOKENS] = {
   { 0, 0, 0, 0},
   { 0, 0, 0, 1},
   { 0, 0, 0, 2},
