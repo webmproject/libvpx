@@ -100,9 +100,9 @@ static int decode_coefs(VP9_COMMON *cm, const MACROBLOCKD *xd,
   const vp9_prob *prob;
   vp9_coeff_count_model *coef_counts = counts->coef[tx_size];
   const int16_t *scan, *nb;
-  const uint8_t *band_translate;
+  const uint8_t *const band_translate = get_band_translate(tx_size);
   uint8_t token_cache[1024];
-  get_scan_and_band(xd, tx_size, type, block_idx, &scan, &nb, &band_translate);
+  get_scan(xd, tx_size, type, block_idx, &scan, &nb);
 
   while (1) {
     int val;

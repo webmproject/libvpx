@@ -681,7 +681,6 @@ static void txfm_rd_in_plane(MACROBLOCK *x,
   const BLOCK_SIZE bs = get_plane_block_size(bsize, pd);
   const int num_4x4_w = num_4x4_blocks_wide_lookup[bs];
   const int num_4x4_h = num_4x4_blocks_high_lookup[bs];
-  const uint8_t *band_translate;  // just for the get_scan_and_band call
 
   init_rdcost_stack(x, tx_size, num_4x4_w, num_4x4_h,
                     ref_best_rd, rd_stack);
@@ -692,8 +691,7 @@ static void txfm_rd_in_plane(MACROBLOCK *x,
                            pd->above_context, pd->left_context,
                            num_4x4_w, num_4x4_h);
 
-  get_scan_and_band(xd, tx_size, pd->plane_type, 0, &rd_stack->scan,
-                    &rd_stack->nb, &band_translate);
+  get_scan(xd, tx_size, pd->plane_type, 0, &rd_stack->scan, &rd_stack->nb);
 
   foreach_transformed_block_in_plane(xd, bsize, plane,
                                      block_yrd_txfm, rd_stack);

@@ -181,28 +181,27 @@ static int get_entropy_context(TX_SIZE tx_size,
   return combine_entropy_contexts(above_ec, left_ec);
 }
 
-static void get_scan_and_band(const MACROBLOCKD *xd, TX_SIZE tx_size,
-                              PLANE_TYPE type, int block_idx,
-                              const int16_t **scan,
-                              const int16_t **scan_nb,
-                              const uint8_t **band_translate) {
+static const uint8_t *get_band_translate(TX_SIZE tx_size) {
+  return tx_size == TX_4X4 ? vp9_coefband_trans_4x4
+                           : vp9_coefband_trans_8x8plus;
+}
+
+static void get_scan(const MACROBLOCKD *xd, TX_SIZE tx_size,
+                     PLANE_TYPE type, int block_idx,
+                     const int16_t **scan, const int16_t **scan_nb) {
   switch (tx_size) {
     case TX_4X4:
       get_scan_nb_4x4(get_tx_type_4x4(type, xd, block_idx), scan, scan_nb);
-      *band_translate = vp9_coefband_trans_4x4;
       break;
     case TX_8X8:
       get_scan_nb_8x8(get_tx_type_8x8(type, xd), scan, scan_nb);
-      *band_translate = vp9_coefband_trans_8x8plus;
       break;
     case TX_16X16:
       get_scan_nb_16x16(get_tx_type_16x16(type, xd), scan, scan_nb);
-      *band_translate = vp9_coefband_trans_8x8plus;
       break;
     case TX_32X32:
       *scan = vp9_default_scan_32x32;
       *scan_nb = vp9_default_scan_32x32_neighbors;
-      *band_translate = vp9_coefband_trans_8x8plus;
       break;
     default:
       assert(!"Invalid transform size.");
