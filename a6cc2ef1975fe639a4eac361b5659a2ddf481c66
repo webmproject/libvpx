@@ -34,6 +34,24 @@
       "revId": "a6cc2ef1975fe639a4eac361b5659a2ddf481c66",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdH//7ZE\u003d",
+        "filename": "vpx/vpx_codec.mk",
+        "patchSetId": 7
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2013-10-17T00:10:29Z",
+      "side": 1,
+      "message": "But this is to enable a feature in vp9_spatial_scalable_encoder, no? Which encoder is affected, vp8 or vp9?",
+      "parentUuid": "AAAAdH//7fU\u003d",
+      "revId": "a6cc2ef1975fe639a4eac361b5659a2ddf481c66",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
