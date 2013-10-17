@@ -76,7 +76,7 @@ int vp9_get_segdata(const struct segmentation *seg,
                     int segment_id,
                     SEG_LVL_FEATURES feature_id);
 
-extern const vp9_tree_index vp9_segment_tree[14];
+extern const vp9_tree_index vp9_segment_tree[TREE_SIZE(MAX_SEGMENTS)];
 
 #endif  // VP9_COMMON_VP9_SEG_COMMON_H_
 
