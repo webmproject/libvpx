@@ -129,9 +129,8 @@ static void count_segs(VP9_COMP *cpi, MODE_INFO **mi_8x8,
   if (mi_row >= cm->mi_rows || mi_col >= cm->mi_cols)
     return;
 
-  segment_id = mi_8x8[0]->mbmi.segment_id;
   xd->mi_8x8 = mi_8x8;
-  xd->this_mi = mi_8x8[0];
+  segment_id = xd->mi_8x8[0]->mbmi.segment_id;
 
   set_mi_row_col(cm, xd, mi_row, bh, mi_col, bw);
 

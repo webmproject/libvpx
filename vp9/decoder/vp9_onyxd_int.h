@@ -39,6 +39,10 @@ typedef struct VP9Decompressor {
 
   int do_loopfilter_inline;  // apply loopfilter to available rows immediately
   VP9Worker lf_worker;
+
+  /* Each tile column has its own MODE_INFO stream. This array indexes them by
+     tile column index. */
+  MODE_INFO **mi_streams;
 } VP9D_COMP;
 
 #endif  // VP9_DECODER_VP9_ONYXD_INT_H_

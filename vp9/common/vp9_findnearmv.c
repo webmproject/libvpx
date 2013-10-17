@@ -43,7 +43,7 @@ void vp9_append_sub8x8_mvs_for_idx(VP9_COMMON *cm, MACROBLOCKD *xd,
                                    int mi_row, int mi_col) {
   int_mv dst_list[MAX_MV_REF_CANDIDATES];
   int_mv mv_list[MAX_MV_REF_CANDIDATES];
-  MODE_INFO *const mi = xd->this_mi;
+  MODE_INFO *const mi = xd->mi_8x8[0];
 
   assert(ref_idx == 0 || ref_idx == 1);
   assert(MAX_MV_REF_CANDIDATES == 2);  // makes code here slightly easier

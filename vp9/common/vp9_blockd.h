@@ -196,10 +196,7 @@ typedef struct macroblockd {
   struct scale_factors scale_factor[2];
 
   MODE_INFO *last_mi;
-  MODE_INFO *this_mi;
   int mode_info_stride;
-
-  MODE_INFO *mic_stream_ptr;
 
   // A NULL indicates that the 8x8 is not part of the image
   MODE_INFO **mi_8x8;
@@ -311,7 +308,7 @@ extern const TX_TYPE mode2txfm_map[MB_MODE_COUNT];
 
 static INLINE TX_TYPE get_tx_type_4x4(PLANE_TYPE plane_type,
                                       const MACROBLOCKD *xd, int ib) {
-  const MODE_INFO *const mi = xd->this_mi;
+  const MODE_INFO *const mi = xd->mi_8x8[0];
   const MB_MODE_INFO *const mbmi = &mi->mbmi;
 
   if (plane_type != PLANE_TYPE_Y_WITH_DC ||
@@ -326,13 +323,13 @@ static INLINE TX_TYPE get_tx_type_4x4(PLANE_TYPE plane_type,
 static INLINE TX_TYPE get_tx_type_8x8(PLANE_TYPE plane_type,
                                       const MACROBLOCKD *xd) {
   return plane_type == PLANE_TYPE_Y_WITH_DC ?
-             mode2txfm_map[xd->this_mi->mbmi.mode] : DCT_DCT;
+             mode2txfm_map[xd->mi_8x8[0]->mbmi.mode] : DCT_DCT;
 }
 
 static INLINE TX_TYPE get_tx_type_16x16(PLANE_TYPE plane_type,
                                         const MACROBLOCKD *xd) {
   return plane_type == PLANE_TYPE_Y_WITH_DC ?
-             mode2txfm_map[xd->this_mi->mbmi.mode] : DCT_DCT;
+             mode2txfm_map[xd->mi_8x8[0]->mbmi.mode] : DCT_DCT;
 }
 
 static void setup_block_dptrs(MACROBLOCKD *xd, int ss_x, int ss_y) {
@@ -381,7 +378,7 @@ static INLINE void foreach_transformed_block_in_plane(
     const MACROBLOCKD *const xd, BLOCK_SIZE bsize, int plane,
     foreach_transformed_block_visitor visit, void *arg) {
   const struct macroblockd_plane *const pd = &xd->plane[plane];
-  const MB_MODE_INFO* mbmi = &xd->this_mi->mbmi;
+  const MB_MODE_INFO* mbmi = &xd->mi_8x8[0]->mbmi;
   // block and transform sizes, in number of 4x4 blocks log 2 ("*_b")
   // 4x4=0, 8x8=2, 16x16=4, 32x32=6, 64x64=8
   // transform size varies per plane, look it up in a common way.

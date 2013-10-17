@@ -389,7 +389,7 @@ unsigned char vp9_get_pred_context_tx_size(const MACROBLOCKD *xd) {
 }
 
 void vp9_set_pred_flag_seg_id(MACROBLOCKD *xd, uint8_t pred_flag) {
-  xd->this_mi->mbmi.seg_id_predicted = pred_flag;
+  xd->mi_8x8[0]->mbmi.seg_id_predicted = pred_flag;
 }
 
 int vp9_get_segment_id(VP9_COMMON *cm, const uint8_t *segment_ids,
