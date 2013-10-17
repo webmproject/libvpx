@@ -113,8 +113,7 @@ TEST_P(Trans32x32Test, AccuracyCheck) {
       test_input_block[j] = src[j] - dst[j];
     }
 
-    const int pitch = 64;
-    REGISTER_STATE_CHECK(fwd_txfm_(test_input_block, test_temp_block, pitch));
+    REGISTER_STATE_CHECK(fwd_txfm_(test_input_block, test_temp_block, 32));
     REGISTER_STATE_CHECK(inv_txfm_(test_temp_block, dst, 32));
 
     for (int j = 0; j < kNumCoeffs; ++j) {
@@ -150,9 +149,9 @@ TEST_P(Trans32x32Test, CoeffCheck) {
     for (int j = 0; j < kNumCoeffs; ++j)
       input_block[j] = rnd.Rand8() - rnd.Rand8();
 
-    const int pitch = 64;
-    vp9_short_fdct32x32_c(input_block, output_ref_block, pitch);
-    REGISTER_STATE_CHECK(fwd_txfm_(input_block, output_block, pitch));
+    const int stride = 32;
+    vp9_short_fdct32x32_c(input_block, output_ref_block, stride);
+    REGISTER_STATE_CHECK(fwd_txfm_(input_block, output_block, stride));
 
     if (version_ == 0) {
       for (int j = 0; j < kNumCoeffs; ++j)
@@ -188,9 +187,9 @@ TEST_P(Trans32x32Test, MemCheck) {
       for (int j = 0; j < kNumCoeffs; ++j)
         input_extreme_block[j] = -255;
 
-    const int pitch = 64;
-    vp9_short_fdct32x32_c(input_extreme_block, output_ref_block, pitch);
-    REGISTER_STATE_CHECK(fwd_txfm_(input_extreme_block, output_block, pitch));
+    const int stride = 32;
+    vp9_short_fdct32x32_c(input_extreme_block, output_ref_block, stride);
+    REGISTER_STATE_CHECK(fwd_txfm_(input_extreme_block, output_block, stride));
 
     // The minimum quant value is 4.
     for (int j = 0; j < kNumCoeffs; ++j) {

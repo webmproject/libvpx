@@ -1315,8 +1315,7 @@ static void dct32_1d(const int *input, int *output, int round) {
   output[31] = dct_32_round(step[31] * cospi_31_64 + step[16] * -cospi_1_64);
 }
 
-void vp9_short_fdct32x32_c(int16_t *input, int16_t *out, int pitch) {
-  int shortpitch = pitch >> 1;
+void vp9_short_fdct32x32_c(int16_t *input, int16_t *out, int stride) {
   int i, j;
   int output[32 * 32];
 
@@ -1324,7 +1323,7 @@ void vp9_short_fdct32x32_c(int16_t *input, int16_t *out, int pitch) {
   for (i = 0; i < 32; ++i) {
     int temp_in[32], temp_out[32];
     for (j = 0; j < 32; ++j)
-      temp_in[j] = input[j * shortpitch + i] * 4;
+      temp_in[j] = input[j * stride + i] * 4;
     dct32_1d(temp_in, temp_out, 0);
     for (j = 0; j < 32; ++j)
       output[j * 32 + i] = (temp_out[j] + 1 + (temp_out[j] > 0)) >> 2;
@@ -1344,8 +1343,7 @@ void vp9_short_fdct32x32_c(int16_t *input, int16_t *out, int pitch) {
 // Note that although we use dct_32_round in dct32_1d computation flow,
 // this 2d fdct32x32 for rate-distortion optimization loop is operating
 // within 16 bits precision.
-void vp9_short_fdct32x32_rd_c(int16_t *input, int16_t *out, int pitch) {
-  int shortpitch = pitch >> 1;
+void vp9_short_fdct32x32_rd_c(int16_t *input, int16_t *out, int stride) {
   int i, j;
   int output[32 * 32];
 
@@ -1353,7 +1351,7 @@ void vp9_short_fdct32x32_rd_c(int16_t *input, int16_t *out, int pitch) {
   for (i = 0; i < 32; ++i) {
     int temp_in[32], temp_out[32];
     for (j = 0; j < 32; ++j)
-      temp_in[j] = input[j * shortpitch + i] * 4;
+      temp_in[j] = input[j * stride + i] * 4;
     dct32_1d(temp_in, temp_out, 0);
     for (j = 0; j < 32; ++j)
       // TODO(cd): see quality impact of only doing

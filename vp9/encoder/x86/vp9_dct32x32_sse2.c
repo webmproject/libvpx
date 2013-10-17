@@ -30,11 +30,11 @@ static INLINE __m128i k_packs_epi64(__m128i a, __m128i b) {
 #endif
 
 void FDCT32x32_2D(int16_t *input,
-                  int16_t *output_org, int pitch) {
+                  int16_t *output_org, int stride) {
   // Calculate pre-multiplied strides
-  const int str1 = pitch >> 1;
-  const int str2 = pitch;
-  const int str3 = pitch + str1;
+  const int str1 = stride;
+  const int str2 = 2 * stride;
+  const int str3 = 2 * stride + str1;
   // We need an intermediate buffer between passes.
   DECLARE_ALIGNED(16, int16_t, intermediate[32 * 32]);
   // Constants
