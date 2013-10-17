@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdH//7Tg\u003d",
+        "filename": "vp9/encoder/vp9_vaq.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1003307
+      },
+      "writtenOn": "2013-10-17T21:06:03Z",
+      "side": 1,
+      "message": "Oh right, that\u0027s a mistake.",
+      "parentUuid": "AAAAdH//7Tw\u003d",
+      "revId": "7db42723c0792948a9b5f3bc70213d78d54d4892",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdH//7Ts\u003d",
         "filename": "vp9/encoder/vp9_vaq.c",
         "patchSetId": 5
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdH//7TY\u003d",
+        "filename": "vp9/encoder/vp9_vaq.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 1003307
+      },
+      "writtenOn": "2013-10-17T21:06:03Z",
+      "side": 1,
+      "message": "Yes, I forgot to move the definition below like I did for rdmult_ratio and error_weight.",
+      "parentUuid": "AAAAdH//7Ts\u003d",
+      "revId": "7db42723c0792948a9b5f3bc70213d78d54d4892",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdH//7To\u003d",
         "filename": "vp9/encoder/vp9_vaq.c",
         "patchSetId": 5
@@ -47,6 +83,24 @@
       "writtenOn": "2013-10-17T20:59:07Z",
       "side": 1,
       "message": "Not sure this is needed in the loop here unless there is so simd in vp9_compute_rd_mult.",
+      "revId": "7db42723c0792948a9b5f3bc70213d78d54d4892",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdH//7Tc\u003d",
+        "filename": "vp9/encoder/vp9_vaq.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 106,
+      "author": {
+        "id": 1003307
+      },
+      "writtenOn": "2013-10-17T21:06:03Z",
+      "side": 1,
+      "message": "Shouldn\u0027t be needed either indeed.",
+      "parentUuid": "AAAAdH//7To\u003d",
       "revId": "7db42723c0792948a9b5f3bc70213d78d54d4892",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
