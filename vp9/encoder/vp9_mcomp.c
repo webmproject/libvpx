@@ -275,6 +275,7 @@ void vp9_init3smotion_compensation(MACROBLOCK *x, int stride) {
 
 int vp9_find_best_sub_pixel_iterative(MACROBLOCK *x,
                                       MV *bestmv, const MV *ref_mv,
+                                      int allow_hp,
                                       int error_per_bit,
                                       const vp9_variance_fn_ptr_t *vfp,
                                       int forced_stop,
@@ -348,8 +349,7 @@ int vp9_find_best_sub_pixel_iterative(MACROBLOCK *x,
     }
   }
 
-  if (xd->allow_high_precision_mv && vp9_use_mv_hp(ref_mv) &&
-      forced_stop == 0) {
+  if (allow_hp && vp9_use_mv_hp(ref_mv) && forced_stop == 0) {
     hstep >>= 1;
     while (eighthiters--) {
       FIRST_LEVEL_CHECKS;
@@ -373,6 +373,7 @@ int vp9_find_best_sub_pixel_iterative(MACROBLOCK *x,
 
 int vp9_find_best_sub_pixel_tree(MACROBLOCK *x,
                                  MV *bestmv, const MV *ref_mv,
+                                 int allow_hp,
                                  int error_per_bit,
                                  const vp9_variance_fn_ptr_t *vfp,
                                  int forced_stop,
@@ -436,8 +437,7 @@ int vp9_find_best_sub_pixel_tree(MACROBLOCK *x,
     tc = bc;
   }
 
-  if (xd->allow_high_precision_mv && vp9_use_mv_hp(ref_mv) &&
-      forced_stop == 0) {
+  if (allow_hp && vp9_use_mv_hp(ref_mv) && forced_stop == 0) {
     hstep >>= 1;
     FIRST_LEVEL_CHECKS;
     if (eighthiters > 1) {
@@ -465,6 +465,7 @@ int vp9_find_best_sub_pixel_tree(MACROBLOCK *x,
 
 int vp9_find_best_sub_pixel_comp_iterative(MACROBLOCK *x,
                                            MV *bestmv, const MV *ref_mv,
+                                           int allow_hp,
                                            int error_per_bit,
                                            const vp9_variance_fn_ptr_t *vfp,
                                            int forced_stop,
@@ -544,8 +545,7 @@ int vp9_find_best_sub_pixel_comp_iterative(MACROBLOCK *x,
     }
   }
 
-  if (xd->allow_high_precision_mv && vp9_use_mv_hp(ref_mv) &&
-      forced_stop == 0) {
+  if (allow_hp && vp9_use_mv_hp(ref_mv) && forced_stop == 0) {
     hstep >>= 1;
     while (eighthiters--) {
       FIRST_LEVEL_CHECKS;
@@ -568,6 +568,7 @@ int vp9_find_best_sub_pixel_comp_iterative(MACROBLOCK *x,
 
 int vp9_find_best_sub_pixel_comp_tree(MACROBLOCK *x,
                                       MV *bestmv, const MV *ref_mv,
+                                      int allow_hp,
                                       int error_per_bit,
                                       const vp9_variance_fn_ptr_t *vfp,
                                       int forced_stop,
@@ -642,8 +643,7 @@ int vp9_find_best_sub_pixel_comp_tree(MACROBLOCK *x,
     tc = bc;
   }
 
-  if (xd->allow_high_precision_mv && vp9_use_mv_hp(ref_mv) &&
-      forced_stop == 0) {
+  if (allow_hp && vp9_use_mv_hp(ref_mv) && forced_stop == 0) {
     hstep >>= 1;
     FIRST_LEVEL_CHECKS;
     if (eighthiters > 1) {

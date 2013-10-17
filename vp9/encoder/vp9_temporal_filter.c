@@ -166,6 +166,7 @@ static int temporal_filter_find_matching_mb_c(VP9_COMP *cpi,
     // Ignore mv costing by sending NULL pointer instead of cost array
     bestsme = cpi->find_fractional_mv_step(x, &ref_mv->as_mv,
                                            &best_ref_mv1.as_mv,
+                                           xd->allow_high_precision_mv,
                                            x->errorperbit,
                                            &cpi->fn_ptr[BLOCK_16X16],
                                            0, cpi->sf.subpel_iters_per_step,

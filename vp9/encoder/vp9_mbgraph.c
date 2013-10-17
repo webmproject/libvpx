@@ -61,6 +61,7 @@ static unsigned int do_16x16_motion_iteration(VP9_COMP *cpi,
     best_err = cpi->find_fractional_mv_step(
         x,
         &dst_mv->as_mv, &ref_mv->as_mv,
+        xd->allow_high_precision_mv,
         x->errorperbit, &v_fn_ptr,
         0, cpi->sf.subpel_iters_per_step, NULL, NULL,
         & distortion, &sse);
