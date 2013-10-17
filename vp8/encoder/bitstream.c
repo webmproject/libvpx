@@ -1062,7 +1062,7 @@ int vp8_update_coef_context(VP8_COMP *cpi)
     if (cpi->common.frame_type == KEY_FRAME)
     {
         /* Reset to default counts/probabilities at key frames */
-        vp8_copy(cpi->coef_counts, default_coef_counts);
+        vp8_copy(cpi->mb.coef_counts, default_coef_counts);
     }
 
     if (cpi->oxcf.error_resilient_mode & VPX_ERROR_RESILIENT_PARTITIONS)
