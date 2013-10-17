@@ -2784,16 +2784,17 @@ int main(int argc, const char **argv_) {
   /* TODO(jkoleszar): This doesn't belong in this executable. Do it for now,
    * to match some existing utilities.
    */
-  FOREACH_STREAM({
-    FILE *f = fopen("opsnr.stt", "a");
-    if (stream->mismatch_seen) {
-      fprintf(f, "First mismatch occurred in frame %d\n",
-              stream->mismatch_seen);
-    } else {
-      fprintf(f, "No mismatch detected in recon buffers\n");
-    }
-    fclose(f);
-  });
+  if (!(global.pass == 1 && global.passes == 2))
+    FOREACH_STREAM({
+      FILE *f = fopen("opsnr.stt", "a");
+      if (stream->mismatch_seen) {
+        fprintf(f, "First mismatch occurred in frame %d\n",
+                stream->mismatch_seen);
+      } else {
+        fprintf(f, "No mismatch detected in recon buffers\n");
+      }
+      fclose(f);
+    });
 #endif
 
   vpx_img_free(&raw);
