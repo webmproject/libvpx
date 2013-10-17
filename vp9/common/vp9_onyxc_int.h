@@ -146,8 +146,6 @@ typedef struct VP9Common {
   TX_MODE tx_mode;
 
   int base_qindex;
-  int last_kf_gf_q;  /* Q used on the last GF or KF */
-
   int y_dc_delta_q;
   int uv_dc_delta_q;
   int uv_ac_delta_q;

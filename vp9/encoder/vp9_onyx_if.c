@@ -3386,11 +3386,6 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
 #if 0
   output_frame_level_debug_stats(cpi);
 #endif
-  // If this was a kf or Gf note the Q
-  if ((cm->frame_type == KEY_FRAME)
-      || cpi->refresh_golden_frame || cpi->refresh_alt_ref_frame)
-    cm->last_kf_gf_q = cm->base_qindex;
-
   if (cpi->refresh_golden_frame == 1)
     cm->frame_flags = cm->frame_flags | FRAMEFLAGS_GOLDEN;
   else
