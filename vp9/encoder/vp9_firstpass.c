@@ -554,7 +554,10 @@ void vp9_first_pass(VP9_COMP *cpi) {
       int this_error;
       int gf_motion_error = INT_MAX;
       int use_dc_pred = (mb_col || mb_row) && (!mb_col || !mb_row);
-      double error_weight = 1.0;
+      double error_weight;
+
+      vp9_clear_system_state();  // __asm emms;
+      error_weight = 1.0;  // avoid uninitialized warnings
 
       xd->plane[0].dst.buf = new_yv12->y_buffer + recon_yoffset;
       xd->plane[1].dst.buf = new_yv12->u_buffer + recon_uvoffset;
@@ -587,7 +590,11 @@ void vp9_first_pass(VP9_COMP *cpi) {
       }
 
       // do intra 16x16 prediction
-      this_error = error_weight * vp9_encode_intra(x, use_dc_pred);
+      this_error = vp9_encode_intra(x, use_dc_pred);
+      if (cpi->sf.variance_adaptive_quantization) {
+        vp9_clear_system_state();  // __asm emms;
+        this_error *= error_weight;
+      }
 
       // intrapenalty below deals with situations where the intra and inter
       // error scores are very low (eg a plain black frame).
@@ -622,7 +629,10 @@ void vp9_first_pass(VP9_COMP *cpi) {
         first_pass_motion_search(cpi, x, &best_ref_mv,
                                  &mv.as_mv, lst_yv12,
                                  &motion_error, recon_yoffset);
-        motion_error *= error_weight;
+        if (cpi->sf.variance_adaptive_quantization) {
+          vp9_clear_system_state();  // __asm emms;
+          motion_error *= error_weight;
+        }
 
         // If the current best reference mv is not centered on 0,0 then do a 0,0
         // based search as well.
@@ -630,7 +640,10 @@ void vp9_first_pass(VP9_COMP *cpi) {
           tmp_err = INT_MAX;
           first_pass_motion_search(cpi, x, &zero_ref_mv, &tmp_mv.as_mv,
                                    lst_yv12, &tmp_err, recon_yoffset);
-          tmp_err *= error_weight;
+          if (cpi->sf.variance_adaptive_quantization) {
+            vp9_clear_system_state();  // __asm emms;
+            tmp_err *= error_weight;
+          }
 
           if (tmp_err < motion_error) {
             motion_error = tmp_err;
@@ -647,7 +660,10 @@ void vp9_first_pass(VP9_COMP *cpi) {
           first_pass_motion_search(cpi, x, &zero_ref_mv,
                                    &tmp_mv.as_mv, gld_yv12,
                                    &gf_motion_error, recon_yoffset);
-          gf_motion_error *= error_weight;
+          if (cpi->sf.variance_adaptive_quantization) {
+            vp9_clear_system_state();  // __asm emms;
+            gf_motion_error *= error_weight;
+          }
 
           if ((gf_motion_error < motion_error) &&
               (gf_motion_error < this_error)) {

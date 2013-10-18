@@ -563,7 +563,10 @@ static void pick_sb_modes(VP9_COMP *cpi, int mi_row, int mi_col,
   MACROBLOCK *const x = &cpi->mb;
   MACROBLOCKD *const xd = &x->e_mbd;
   int orig_rdmult = x->rdmult;
-  double rdmult_ratio = 1.0;
+  double rdmult_ratio;
+
+  vp9_clear_system_state();  // __asm emms;
+  rdmult_ratio = 1.0;  // avoid uninitialized warnings
 
   // Use the lower precision, but faster, 32x32 fdct for mode selection.
   x->use_lp32x32fdct = 1;
@@ -602,7 +605,10 @@ static void pick_sb_modes(VP9_COMP *cpi, int mi_row, int mi_col,
   if (cpi->oxcf.tuning == VP8_TUNE_SSIM)
     vp9_activity_masking(cpi, x);
 
-  x->rdmult = round(x->rdmult * rdmult_ratio);
+  if (cpi->sf.variance_adaptive_quantization) {
+    vp9_clear_system_state();  // __asm emms;
+    x->rdmult = round(x->rdmult * rdmult_ratio);
+  }
 
   // Find best coding mode & reconstruct the MB so it is available
   // as a predictor for MBs that follow in the SB
@@ -618,9 +624,13 @@ static void pick_sb_modes(VP9_COMP *cpi, int mi_row, int mi_col,
                                     totaldist, bsize, ctx, best_rd);
   }
 
-  x->rdmult = orig_rdmult;
-  if (*totalrate != INT_MAX)
-    *totalrate = round(*totalrate * rdmult_ratio);
+  if (cpi->sf.variance_adaptive_quantization) {
+    x->rdmult = orig_rdmult;
+    if (*totalrate != INT_MAX) {
+      vp9_clear_system_state();  // __asm emms;
+      *totalrate = round(*totalrate * rdmult_ratio);
+    }
+  }
 }
 
 static void update_stats(VP9_COMP *cpi) {

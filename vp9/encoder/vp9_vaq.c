@@ -37,24 +37,35 @@ DECLARE_ALIGNED(16, static const uint8_t, vp9_64_zeros[64]) = {0};
 
 unsigned int vp9_vaq_segment_id(int energy) {
   ENERGY_IN_BOUNDS(energy);
+
   return SEGMENT_ID(energy);
 }
 
 double vp9_vaq_rdmult_ratio(int energy) {
   ENERGY_IN_BOUNDS(energy);
+
+  vp9_clear_system_state();  // __asm emms;
+
   return RDMULT_RATIO(energy);
 }
 
 double vp9_vaq_inv_q_ratio(int energy) {
   ENERGY_IN_BOUNDS(energy);
+
+  vp9_clear_system_state();  // __asm emms;
+
   return Q_RATIO(-energy);
 }
 
 void vp9_vaq_init() {
   int i;
-  double base_ratio = 1.8;
+  double base_ratio;
 
   assert(ENERGY_SPAN <= MAX_SEGMENTS);
+
+  vp9_clear_system_state();  // __asm emms;
+
+  base_ratio = 1.8;
 
   for (i = ENERGY_MIN; i <= ENERGY_MAX; i++) {
     Q_RATIO(i) = pow(base_ratio, i/3.0);
@@ -74,6 +85,8 @@ void vp9_vaq_frame_setup(VP9_COMP *cpi) {
 
   seg->abs_delta = SEGMENT_DELTADATA;
 
+  vp9_clear_system_state();  // __asm emms;
+
   for (i = ENERGY_MIN; i <= ENERGY_MAX; i++) {
     int qindex_delta, segment_rdmult;
 
@@ -89,6 +102,7 @@ void vp9_vaq_frame_setup(VP9_COMP *cpi) {
 
     segment_rdmult = vp9_compute_rd_mult(cpi, cm->base_qindex + qindex_delta +
                                          cm->y_dc_delta_q);
+
     RDMULT_RATIO(i) = (double) segment_rdmult / base_rdmult;
   }
 }
@@ -120,9 +134,14 @@ static unsigned int block_variance(VP9_COMP *cpi, MACROBLOCK *x,
 }
 
 int vp9_block_energy(VP9_COMP *cpi, MACROBLOCK *x, BLOCK_SIZE bs) {
+  double energy;
+  unsigned int var = block_variance(cpi, x, bs);
+
+  vp9_clear_system_state();  // __asm emms;
+
   // if (var <= 1000)
   //   return 0;
-  unsigned int var = block_variance(cpi, x, bs);
-  double energy = 0.9*(logf(var + 1) - 10.0);
+
+  energy = 0.9*(logf(var + 1) - 10.0);
   return clamp(round(energy), ENERGY_MIN, ENERGY_MAX);
 }
