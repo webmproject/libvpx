@@ -175,17 +175,18 @@ static void inc_mv_component(int v, nmv_component_counts *comp_counts,
   }
 }
 
+void vp9_inc_mv(const MV *mv, nmv_context_counts *counts) {
+  if (counts != NULL) {
+    const MV_JOINT_TYPE j = vp9_get_mv_joint(mv);
+    ++counts->joints[j];
 
-void vp9_inc_mv(const MV *mv,  nmv_context_counts *counts) {
-  const MV_JOINT_TYPE j = vp9_get_mv_joint(mv);
-  ++counts->joints[j];
+    if (mv_joint_vertical(j)) {
+      inc_mv_component(mv->row, &counts->comps[0], 1, 1);
+    }
 
-  if (mv_joint_vertical(j)) {
-    inc_mv_component(mv->row, &counts->comps[0], 1, 1);
-  }
-
-  if (mv_joint_horizontal(j)) {
-    inc_mv_component(mv->col, &counts->comps[1], 1, 1);
+    if (mv_joint_horizontal(j)) {
+      inc_mv_component(mv->col, &counts->comps[1], 1, 1);
+    }
   }
 }
 

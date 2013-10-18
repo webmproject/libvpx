@@ -113,7 +113,8 @@ static int decode_coefs(VP9_COMMON *cm, const MACROBLOCKD *xd,
       pt = get_coef_context(nb, token_cache, c);
     band = get_coef_band(band_translate, c);
     prob = coef_probs[band][pt];
-    counts->eob_branch[tx_size][type][ref][band][pt]++;
+    if (!cm->frame_parallel_decoding_mode)
+      ++counts->eob_branch[tx_size][type][ref][band][pt];
     if (!vp9_read(r, prob[EOB_CONTEXT_NODE]))
       break;
 
@@ -198,8 +199,10 @@ static int decode_coefs(VP9_COMMON *cm, const MACROBLOCKD *xd,
     WRITE_COEF_CONTINUE(val, DCT_VAL_CATEGORY6);
   }
 
-  if (c < seg_eob)
-    coef_counts[type][ref][band][pt][DCT_EOB_MODEL_TOKEN]++;
+  if (c < seg_eob) {
+    if (!cm->frame_parallel_decoding_mode)
+      ++coef_counts[type][ref][band][pt][DCT_EOB_MODEL_TOKEN];
+  }
 
   return c;
 }

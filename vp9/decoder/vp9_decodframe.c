@@ -303,7 +303,8 @@ static void decode_modes_sb(VP9D_COMP *pbi, int tile_col,
     else
       partition = PARTITION_SPLIT;
 
-    cm->counts.partition[pl][partition]++;
+    if (!cm->frame_parallel_decoding_mode)
+      ++cm->counts.partition[pl][partition];
   }
 
   subsize = get_subsize(bsize, partition);
