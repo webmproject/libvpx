@@ -425,11 +425,12 @@ static void read_intra_block_mode_info(VP9D_COMP *pbi, MODE_INFO *mi,
   mbmi->uv_mode = read_intra_mode_uv(cm, r, mbmi->mode);
 }
 
-static INLINE void assign_mv(VP9_COMMON *cm, MB_PREDICTION_MODE mode,
+static INLINE int assign_mv(VP9_COMMON *cm, MB_PREDICTION_MODE mode,
                              int_mv mv[2], int_mv best_mv[2],
                              int_mv nearest_mv[2], int_mv near_mv[2],
                              int is_compound, int allow_hp, vp9_reader *r) {
   int i;
+  int ret = 1;
 
   switch (mode) {
     case NEWMV:
@@ -438,6 +439,10 @@ static INLINE void assign_mv(VP9_COMMON *cm, MB_PREDICTION_MODE mode,
        if (is_compound)
          read_mv(r, &mv[1].as_mv, &best_mv[1].as_mv,
                  &cm->fc.nmvc, &cm->counts.mv, allow_hp);
+       for (i = 0; i < 1 + is_compound; ++i) {
+         ret = ret && mv[i].as_mv.row < MV_UPP && mv[i].as_mv.row > MV_LOW;
+         ret = ret && mv[i].as_mv.col < MV_UPP && mv[i].as_mv.col > MV_LOW;
+       }
        break;
     case NEARESTMV:
       mv[0].as_int = nearest_mv[0].as_int;
@@ -455,13 +460,9 @@ static INLINE void assign_mv(VP9_COMMON *cm, MB_PREDICTION_MODE mode,
         mv[1].as_int = 0;
       break;
     default:
-      assert(!"Invalid inter mode value.");
+      return 0;
   }
-
-  for (i = 0; i < 1 + is_compound; ++i) {
-    assert(mv[i].as_mv.row < MV_UPP && mv[i].as_mv.row > MV_LOW);
-    assert(mv[i].as_mv.col < MV_UPP && mv[i].as_mv.col > MV_LOW);
-  }
+  return ret;
 }
 
 static int read_is_inter_block(VP9D_COMP *pbi, int segment_id, vp9_reader *r) {
@@ -557,8 +558,12 @@ static void read_inter_block_mode_info(VP9D_COMP *pbi, MODE_INFO *mi,
                                           mi_row, mi_col);
         }
 
-        assign_mv(cm, b_mode, block, best, nearest, nearmv,
-                  is_compound, allow_hp, r);
+        if (!assign_mv(cm, b_mode, block, best, nearest, nearmv,
+                       is_compound, allow_hp, r)) {
+          xd->corrupted |= 1;
+          break;
+        };
+
 
         mi->bmi[j].as_mv[0].as_int = block[0].as_int;
         if (is_compound)
@@ -576,8 +581,9 @@ static void read_inter_block_mode_info(VP9D_COMP *pbi, MODE_INFO *mi,
     mbmi->mv[0].as_int = mi->bmi[3].as_mv[0].as_int;
     mbmi->mv[1].as_int = mi->bmi[3].as_mv[1].as_int;
   } else {
-    assign_mv(cm, mbmi->mode, mbmi->mv, best, nearest, nearmv,
-              is_compound, allow_hp, r);
+    xd->corrupted |= !assign_mv(cm, mbmi->mode, mbmi->mv,
+                                best, nearest, nearmv,
+                                is_compound, allow_hp, r);
   }
 }
 
