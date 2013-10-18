@@ -16,6 +16,24 @@
       "revId": "b1db717899c2cb21fbb091f734d73a6f4016e5d7",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdH//7Mo\u003d",
+        "filename": "vp9/common/vp9_pred_common.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-10-18T19:34:32Z",
+      "side": 1,
+      "message": "true. the inlining an effectively local function to a header is unfortunate, but not without precedent. I\u0027ll move them over",
+      "parentUuid": "AAAAdH//7Oc\u003d",
+      "revId": "b1db717899c2cb21fbb091f734d73a6f4016e5d7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
