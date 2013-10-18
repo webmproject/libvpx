@@ -30,7 +30,6 @@
 #include "vp9/common/vp9_reconinter.h"
 #include "vp9/common/vp9_seg_common.h"
 #include "vp9/common/vp9_tile_common.h"
-
 #include "vp9/encoder/vp9_encodeframe.h"
 #include "vp9/encoder/vp9_encodeintra.h"
 #include "vp9/encoder/vp9_encodemb.h"
@@ -45,14 +44,6 @@
 
 #define DBG_PRNT_SEGMAP 0
 
-
-static const TX_SIZE tx_mode_to_biggest_tx_size[TX_MODES] = {
-  TX_4X4,  // ONLY_4X4
-  TX_8X8,  // ONLY_8X8
-  TX_16X16,  // ONLY_16X16
-  TX_32X32,  // ONLY_32X32
-  TX_32X32,  // TX_MODE_SELECT
-};
 
 // #define ENC_DEBUG
 #ifdef ENC_DEBUG

@@ -78,17 +78,13 @@ static TX_SIZE read_tx_size(VP9D_COMP *pbi, TX_MODE tx_mode,
                             vp9_reader *r) {
   VP9_COMMON *const cm = &pbi->common;
   MACROBLOCKD *const xd = &pbi->mb;
-
-  if (allow_select && tx_mode == TX_MODE_SELECT && bsize >= BLOCK_8X8)
+  if (allow_select && tx_mode == TX_MODE_SELECT && bsize >= BLOCK_8X8) {
     return read_selected_tx_size(cm, xd, bsize, r);
-  else if (tx_mode >= ALLOW_32X32 && bsize >= BLOCK_32X32)
-    return TX_32X32;
-  else if (tx_mode >= ALLOW_16X16 && bsize >= BLOCK_16X16)
-    return TX_16X16;
-  else if (tx_mode >= ALLOW_8X8 && bsize >= BLOCK_8X8)
-    return TX_8X8;
-  else
-    return TX_4X4;
+  } else {
+    const TX_SIZE max_tx_size_block = max_txsize_lookup[bsize];
+    const TX_SIZE max_tx_size_txmode = tx_mode_to_biggest_tx_size[tx_mode];
+    return MIN(max_tx_size_block, max_tx_size_txmode);
+  }
 }
 
 static void set_segment_id(VP9_COMMON *cm, BLOCK_SIZE bsize,

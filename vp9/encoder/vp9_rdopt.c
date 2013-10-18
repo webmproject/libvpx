@@ -715,22 +715,12 @@ static void choose_largest_txfm_size(VP9_COMP *cpi, MACROBLOCK *x,
                                      BLOCK_SIZE bs) {
   const TX_SIZE max_tx_size = max_txsize_lookup[bs];
   VP9_COMMON *const cm = &cpi->common;
+  const TX_SIZE largest_tx_size = tx_mode_to_biggest_tx_size[cm->tx_mode];
   MACROBLOCKD *const xd = &x->e_mbd;
   MB_MODE_INFO *const mbmi = &xd->mi_8x8[0]->mbmi;
-  if (max_tx_size == TX_32X32 &&
-      (cm->tx_mode == ALLOW_32X32 ||
-       cm->tx_mode == TX_MODE_SELECT)) {
-    mbmi->tx_size = TX_32X32;
-  } else if (max_tx_size >= TX_16X16 &&
-             (cm->tx_mode == ALLOW_16X16 ||
-              cm->tx_mode == ALLOW_32X32 ||
-              cm->tx_mode == TX_MODE_SELECT)) {
-    mbmi->tx_size = TX_16X16;
-  } else if (cm->tx_mode != ONLY_4X4) {
-    mbmi->tx_size = TX_8X8;
-  } else {
-    mbmi->tx_size = TX_4X4;
-  }
+
+  mbmi->tx_size = MIN(max_tx_size, largest_tx_size);
+
   txfm_rd_in_plane(x, &cpi->rdcost_stack, rate, distortion, skip,
                    &sse[mbmi->tx_size], ref_best_rd, 0, bs,
                    mbmi->tx_size);
