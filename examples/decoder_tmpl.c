@@ -12,14 +12,14 @@
 /*
 @*INTRODUCTION
  */
-#include "vpx_config.h"
+#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdarg.h>
 #include <string.h>
 #define VPX_CODEC_DISABLE_COMPAT 1
-#include "vpx/vpx_decoder.h"
+#include "./vpx_config.h"
 #include "vpx/vp8dx.h"
+#include "vpx/vpx_decoder.h"
 #define interface (vpx_codec_vp8_dx())
 @EXTRA_INCLUDES
 
