@@ -802,6 +802,7 @@ static size_t read_uncompressed_header(VP9D_COMP *pbi,
                                        struct vp9_read_bit_buffer *rb) {
   VP9_COMMON *const cm = &pbi->common;
   MACROBLOCKD *const xd = &pbi->mb;
+  size_t sz;
   int i;
 
   cm->last_frame_type = cm->frame_type;
@@ -909,8 +910,9 @@ static size_t read_uncompressed_header(VP9D_COMP *pbi,
   setup_segmentation(&cm->seg, rb);
 
   setup_tile_info(cm, rb);
+  sz = vp9_rb_read_literal(rb, 16);
 
-  return vp9_rb_read_literal(rb, 16);
+  return sz > 0 ? sz : -1;
 }
 
 static int read_compressed_header(VP9D_COMP *pbi, const uint8_t *data,
