@@ -379,7 +379,7 @@ void vp9_xform_quant(int plane, int block, BLOCK_SIZE plane_bsize,
       xoff = 16 * (block & twmask);
       yoff = 16 * (block >> twl);
       src_diff = p->src_diff + 4 * bw * yoff + xoff;
-      vp9_short_fdct16x16(src_diff, coeff, bw * 8);
+      vp9_short_fdct16x16(src_diff, coeff, bw * 4);
       vp9_quantize_b(coeff, 256, x->skip_block, p->zbin, p->round,
                      p->quant, p->quant_shift, qcoeff, dqcoeff,
                      pd->dequant, p->zbin_extra, eob, scan, iscan);
@@ -559,7 +559,7 @@ void vp9_encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
       if (tx_type != DCT_DCT)
         vp9_short_fht16x16(src_diff, coeff, bw * 4, tx_type);
       else
-        vp9_short_fdct16x16(src_diff, coeff, bw * 8);
+        vp9_short_fdct16x16(src_diff, coeff, bw * 4);
       vp9_quantize_b(coeff, 256, x->skip_block, p->zbin, p->round,
                      p->quant, p->quant_shift, qcoeff, dqcoeff,
                      pd->dequant, p->zbin_extra, eob, scan, iscan);

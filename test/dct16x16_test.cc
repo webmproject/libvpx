@@ -395,8 +395,7 @@ class Trans16x16TestBase {
       for (int j = 0; j < kNumCoeffs; ++j)
         coeff[j] = round(out_r[j]);
 
-      const int pitch = 32;
-      REGISTER_STATE_CHECK(RunInvTxfm(coeff, dst, pitch));
+      REGISTER_STATE_CHECK(RunInvTxfm(coeff, dst, 16));
 
       for (int j = 0; j < kNumCoeffs; ++j) {
         const uint32_t diff = dst[j] - src[j];
@@ -421,7 +420,7 @@ class Trans16x16DCT : public Trans16x16TestBase,
     fwd_txfm_ = GET_PARAM(0);
     inv_txfm_ = GET_PARAM(1);
     tx_type_  = GET_PARAM(2);
-    pitch_    = 32;
+    pitch_    = 16;
     fwd_txfm_ref = fdct16x16_ref;
   }
   virtual void TearDown() { libvpx_test::ClearSystemState(); }
@@ -431,7 +430,7 @@ class Trans16x16DCT : public Trans16x16TestBase,
     fwd_txfm_(in, out, stride);
   }
   void RunInvTxfm(int16_t *out, uint8_t *dst, int stride) {
-    inv_txfm_(out, dst, stride >> 1);
+    inv_txfm_(out, dst, stride);
   }
 
   fdct_t fwd_txfm_;
