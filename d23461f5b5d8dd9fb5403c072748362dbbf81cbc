@@ -16,6 +16,24 @@
       "revId": "d23461f5b5d8dd9fb5403c072748362dbbf81cbc",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdH//7PY\u003d",
+        "filename": "vp9/common/vp9_pred_common.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-10-18T18:05:26Z",
+      "side": 1,
+      "message": "and *mbmi; good point! done.",
+      "parentUuid": "AAAAdH//7Pk\u003d",
+      "revId": "d23461f5b5d8dd9fb5403c072748362dbbf81cbc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
