@@ -2274,10 +2274,10 @@ static void setup_buffer_inter(VP9_COMP *cpi, MACROBLOCK *x,
   scale[frame_type] = cpi->common.active_ref_scale[frame_type - 1];
 
   scale[frame_type].x_offset_q4 =
-      ROUND_POWER_OF_TWO(mi_col * MI_SIZE * scale[frame_type].x_scale_fp,
+      ROUND_POWER_OF_TWO(mi_col * MI_SIZE * scale[frame_type].sfc->x_scale_fp,
        REF_SCALE_SHIFT) & 0xf;
   scale[frame_type].y_offset_q4 =
-      ROUND_POWER_OF_TWO(mi_row * MI_SIZE * scale[frame_type].y_scale_fp,
+      ROUND_POWER_OF_TWO(mi_row * MI_SIZE * scale[frame_type].sfc->y_scale_fp,
        REF_SCALE_SHIFT) & 0xf;
 
   // TODO(jkoleszar): Is the UV buffer ever used here? If so, need to make this
@@ -2300,7 +2300,7 @@ static void setup_buffer_inter(VP9_COMP *cpi, MACROBLOCK *x,
   // Further refinement that is encode side only to test the top few candidates
   // in full and choose the best as the centre point for subsequent searches.
   // The current implementation doesn't support scaling.
-  if (!vp9_is_scaled(&scale[frame_type]) && block_size >= BLOCK_8X8)
+  if (!vp9_is_scaled(scale[frame_type].sfc) && block_size >= BLOCK_8X8)
     mv_pred(cpi, x, yv12_mb[frame_type][0].buf, yv12->y_stride,
             frame_type, block_size);
 }
@@ -2507,9 +2507,9 @@ static void joint_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
     setup_pre_planes(xd, 1, scaled_ref_frame[1], mi_row, mi_col, NULL);
   }
 
-  xd->scale_factor[0].set_scaled_offsets(&xd->scale_factor[0],
+  xd->scale_factor[0].sfc->set_scaled_offsets(&xd->scale_factor[0],
                                          mi_row, mi_col);
-  xd->scale_factor[1].set_scaled_offsets(&xd->scale_factor[1],
+  xd->scale_factor[1].sfc->set_scaled_offsets(&xd->scale_factor[1],
                                          mi_row, mi_col);
   scaled_first_yv12 = xd->plane[0].pre[0];
 
@@ -3968,11 +3968,11 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
     // TODO(jingning, jkoleszar): scaling reference frame not supported for
     // sub8x8 blocks.
     if (ref_frame > 0 &&
-        vp9_is_scaled(&scale_factor[ref_frame]))
+        vp9_is_scaled(scale_factor[ref_frame].sfc))
       continue;
 
     if (second_ref_frame > 0 &&
-        vp9_is_scaled(&scale_factor[second_ref_frame]))
+        vp9_is_scaled(scale_factor[second_ref_frame].sfc))
       continue;
 
     set_scale_factors(xd, ref_frame, second_ref_frame, scale_factor);
