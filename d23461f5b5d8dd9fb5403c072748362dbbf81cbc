@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdH//7Pk\u003d",
+        "filename": "vp9/common/vp9_pred_common.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2013-10-18T17:47:32Z",
+      "side": 1,
+      "message": "I think that new tiny inline function could improve the readability:\n\nstatic MODE_INFO *get_above_mi(MACROBLOCKD *xd) {\n  return xd-\u003eup_available ? xd-\u003emi_8x8[-xd-\u003emode_info_stride]\n                                     : NULL;\n}\n\nAnd the same idea for get_left_mi.",
+      "revId": "d23461f5b5d8dd9fb5403c072748362dbbf81cbc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
