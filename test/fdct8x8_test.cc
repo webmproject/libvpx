@@ -223,7 +223,7 @@ class FwdTrans8x8DCT : public FwdTrans8x8TestBase,
     fwd_txfm_ = GET_PARAM(0);
     inv_txfm_ = GET_PARAM(1);
     tx_type_  = GET_PARAM(2);
-    pitch_    = 16;
+    pitch_    = 8;
     fwd_txfm_ref = fdct8x8_ref;
   }
 
@@ -234,7 +234,7 @@ class FwdTrans8x8DCT : public FwdTrans8x8TestBase,
     fwd_txfm_(in, out, stride);
   }
   void RunInvTxfm(int16_t *out, uint8_t *dst, int stride) {
-    inv_txfm_(out, dst, stride >> 1);
+    inv_txfm_(out, dst, stride);
   }
 
   fdct_t fwd_txfm_;
