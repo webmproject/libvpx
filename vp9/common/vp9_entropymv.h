@@ -112,7 +112,6 @@ int vp9_get_mv_mag(MV_CLASS_TYPE c, int offset);
 
 
 typedef struct {
-  unsigned int mvcount[MV_VALS];
   unsigned int sign[2];
   unsigned int classes[MV_CLASSES];
   unsigned int class0[CLASS0_SIZE];
