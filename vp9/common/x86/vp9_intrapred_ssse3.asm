@@ -790,9 +790,8 @@ cglobal d153_predictor_32x32, 4, 5, 8, dst, stride, above, left, goffset
   RET
 
 INIT_MMX ssse3
-cglobal d207_predictor_4x4, 2, 5, 4, dst, stride, unused, left, goffset
+cglobal d207_predictor_4x4, 4, 5, 4, dst, stride, unused, left, goffset
   GET_GOT     goffsetq
-  movifnidn        leftq, leftmp
   movd                m0, [leftq]                ; abcd [byte]
   pshufb              m1, m0, [GLOBAL(sh_b1233)] ; bcdd [byte]
   pshufb              m3, m0, [GLOBAL(sh_b2333)] ; cddd
@@ -813,9 +812,8 @@ cglobal d207_predictor_4x4, 2, 5, 4, dst, stride, unused, left, goffset
   RET
 
 INIT_XMM ssse3
-cglobal d207_predictor_8x8, 2, 5, 4, dst, stride, stride3, left, goffset
+cglobal d207_predictor_8x8, 4, 5, 4, dst, stride, stride3, left, goffset
   GET_GOT     goffsetq
-  movifnidn        leftq, leftmp
   movq                m3, [leftq]            ; abcdefgh [byte]
   lea           stride3q, [strideq*3]
 
@@ -848,10 +846,9 @@ cglobal d207_predictor_8x8, 2, 5, 4, dst, stride, stride3, left, goffset
   RET
 
 INIT_XMM ssse3
-cglobal d207_predictor_16x16, 2, 5, 5, dst, stride, stride3, left, goffset
+cglobal d207_predictor_16x16, 4, 5, 5, dst, stride, stride3, left, goffset
   GET_GOT     goffsetq
   lea           stride3q, [strideq*3]
-  movifnidn        leftq, leftmp
   mova                m0, [leftq]            ; abcdefghijklmnop [byte]
   pshufb              m1, m0, [GLOBAL(sh_b123456789abcdeff)] ; bcdefghijklmnopp
   pshufb              m2, m0, [GLOBAL(sh_b23456789abcdefff)]
@@ -896,10 +893,9 @@ cglobal d207_predictor_16x16, 2, 5, 5, dst, stride, stride3, left, goffset
   REP_RET
 
 INIT_XMM ssse3
-cglobal d207_predictor_32x32, 2, 5, 8, dst, stride, stride3, left, goffset
+cglobal d207_predictor_32x32, 4, 5, 8, dst, stride, stride3, left, goffset
   GET_GOT     goffsetq
   lea           stride3q, [strideq*3]
-  movifnidn        leftq, leftmp
   mova                m1, [leftq]              ;  0-15 [byte]
   mova                m2, [leftq+16]           ; 16-31 [byte]
   pshufb              m0, m2, [GLOBAL(sh_b23456789abcdefff)]
