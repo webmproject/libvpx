@@ -826,6 +826,7 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
         sf->last_partitioning_redo_frequency = 3;
 
         sf->adaptive_rd_thresh = 2;
+        sf->recode_loop = 2;
         sf->mode_skip_start = 11;
         sf->intra_y_mode_mask[TX_32X32] = INTRA_DC_H_V;
         sf->intra_y_mode_mask[TX_16X16] = INTRA_DC_H_V;
@@ -2782,11 +2783,12 @@ static int pick_q_and_adjust_q_bounds(VP9_COMP *cpi,
 
   // Limit Q range for the adaptive loop.
   if (cm->frame_type == KEY_FRAME && !cpi->this_key_frame_forced) {
-    *top_index = cpi->active_best_quality;
+    *top_index =
+      (cpi->active_worst_quality + cpi->active_best_quality * 3) / 4;
   } else if (!cpi->is_src_frame_alt_ref &&
              (cpi->refresh_golden_frame || cpi->refresh_alt_ref_frame)) {
     *top_index =
-      (cpi->active_worst_quality + cpi->active_best_quality * 3) / 4;
+      (cpi->active_worst_quality + cpi->active_best_quality) / 2;
   } else {
     *top_index = cpi->active_worst_quality;
   }
