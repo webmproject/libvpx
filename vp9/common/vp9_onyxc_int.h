@@ -40,8 +40,7 @@
 typedef struct frame_contexts {
   vp9_prob y_mode_prob[BLOCK_SIZE_GROUPS][INTRA_MODES - 1];
   vp9_prob uv_mode_prob[INTRA_MODES][INTRA_MODES - 1];
-  vp9_prob partition_prob[NUM_FRAME_TYPES][NUM_PARTITION_CONTEXTS]
-                         [PARTITION_TYPES - 1];
+  vp9_prob partition_prob[FRAME_TYPES][PARTITION_CONTEXTS][PARTITION_TYPES - 1];
   vp9_coeff_probs_model coef_probs[TX_SIZES][BLOCK_TYPES];
   vp9_prob switchable_interp_prob[SWITCHABLE_FILTERS + 1]
                                  [SWITCHABLE_FILTERS - 1];
@@ -58,7 +57,7 @@ typedef struct frame_contexts {
 typedef struct {
   unsigned int y_mode[BLOCK_SIZE_GROUPS][INTRA_MODES];
   unsigned int uv_mode[INTRA_MODES][INTRA_MODES];
-  unsigned int partition[NUM_PARTITION_CONTEXTS][PARTITION_TYPES];
+  unsigned int partition[PARTITION_CONTEXTS][PARTITION_TYPES];
   vp9_coeff_count_model coef[TX_SIZES][BLOCK_TYPES];
   unsigned int eob_branch[TX_SIZES][BLOCK_TYPES][REF_TYPES]
                          [COEF_BANDS][PREV_COEF_CONTEXTS];

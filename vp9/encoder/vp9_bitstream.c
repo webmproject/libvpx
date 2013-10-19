@@ -1463,7 +1463,7 @@ static size_t write_compressed_header(VP9_COMP *cpi, uint8_t *data) {
 
     update_mbintra_mode_probs(cpi, &header_bc);
 
-    for (i = 0; i < NUM_PARTITION_CONTEXTS; ++i) {
+    for (i = 0; i < PARTITION_CONTEXTS; ++i) {
       vp9_prob pnew[PARTITION_TYPES - 1];
       unsigned int bct[PARTITION_TYPES - 1][2];
       update_mode(&header_bc, PARTITION_TYPES,

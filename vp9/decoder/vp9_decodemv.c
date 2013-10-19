@@ -668,7 +668,7 @@ void vp9_prepare_read_mode_info(VP9D_COMP* pbi, vp9_reader *r) {
       for (i = 0; i < INTRA_MODES - 1; ++i)
         vp9_diff_update_prob(r, &cm->fc.y_mode_prob[j][i]);
 
-    for (j = 0; j < NUM_PARTITION_CONTEXTS; ++j)
+    for (j = 0; j < PARTITION_CONTEXTS; ++j)
       for (i = 0; i < PARTITION_TYPES - 1; ++i)
         vp9_diff_update_prob(r, &cm->fc.partition_prob[INTER_FRAME][j][i]);
 

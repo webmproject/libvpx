@@ -53,7 +53,7 @@ static INLINE int combine_entropy_contexts(ENTROPY_CONTEXT a,
 typedef enum {
   KEY_FRAME = 0,
   INTER_FRAME = 1,
-  NUM_FRAME_TYPES,
+  FRAME_TYPES,
 } FRAME_TYPE;
 
 typedef enum {
