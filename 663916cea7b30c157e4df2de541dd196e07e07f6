@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdH//7A0\u003d",
+        "filename": "vpx/vp8cx.h",
+        "patchSetId": 12
+      },
+      "lineNbr": 199,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2013-10-21T21:48:39Z",
+      "side": 1,
+      "message": "Why are the WIDTH, HEIGHT, MAX_Q and MIN_Q going away? They can be used even without SVC ?",
+      "revId": "663916cea7b30c157e4df2de541dd196e07e07f6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
