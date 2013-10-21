@@ -206,10 +206,6 @@ typedef struct macroblockd {
   int left_available;
   int right_available;
 
-  // partition contexts
-  PARTITION_CONTEXT *above_seg_context;
-  PARTITION_CONTEXT *left_seg_context;
-
   /* Distance of MB away from frame edges */
   int mb_to_left_edge;
   int mb_to_right_edge;
@@ -232,44 +228,7 @@ typedef struct macroblockd {
   int q_index;
 } MACROBLOCKD;
 
-static INLINE void update_partition_context(MACROBLOCKD *xd, BLOCK_SIZE sb_type,
-                                            BLOCK_SIZE sb_size) {
-  const int bsl = b_width_log2(sb_size), bs = (1 << bsl) / 2;
-  const int bwl = b_width_log2(sb_type);
-  const int bhl = b_height_log2(sb_type);
-  const int boffset = b_width_log2(BLOCK_64X64) - bsl;
-  const char pcval0 = ~(0xe << boffset);
-  const char pcval1 = ~(0xf << boffset);
-  const char pcvalue[2] = {pcval0, pcval1};
 
-  assert(MAX(bwl, bhl) <= bsl);
-
-  // update the partition context at the end notes. set partition bits
-  // of block sizes larger than the current one to be one, and partition
-  // bits of smaller block sizes to be zero.
-  vpx_memset(xd->above_seg_context, pcvalue[bwl == bsl], bs);
-  vpx_memset(xd->left_seg_context, pcvalue[bhl == bsl], bs);
-}
-
-static INLINE int partition_plane_context(MACROBLOCKD *xd, BLOCK_SIZE sb_type) {
-  int bsl = mi_width_log2(sb_type), bs = 1 << bsl;
-  int above = 0, left = 0, i;
-  int boffset = mi_width_log2(BLOCK_64X64) - bsl;
-
-  assert(mi_width_log2(sb_type) == mi_height_log2(sb_type));
-  assert(bsl >= 0);
-  assert(boffset >= 0);
-
-  for (i = 0; i < bs; i++)
-    above |= (xd->above_seg_context[i] & (1 << boffset));
-  for (i = 0; i < bs; i++)
-    left |= (xd->left_seg_context[i] & (1 << boffset));
-
-  above = (above > 0);
-  left  = (left > 0);
-
-  return (left * 2 + above) + bsl * PARTITION_PLOFFSET;
-}
 
 static BLOCK_SIZE get_subsize(BLOCK_SIZE bsize, PARTITION_TYPE partition) {
   const BLOCK_SIZE subsize = subsize_lookup[partition][bsize];

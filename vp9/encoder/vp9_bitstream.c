@@ -600,7 +600,6 @@ static void write_modes_sb(VP9_COMP *cpi, MODE_INFO **mi_8x8, vp9_writer *bc,
                            int mi_row, int mi_col, BLOCK_SIZE bsize,
                            int index) {
   VP9_COMMON *const cm = &cpi->common;
-  MACROBLOCKD *xd = &cpi->mb.e_mbd;
   const int mis = cm->mode_info_stride;
   int bsl = b_width_log2(bsize);
   int bs = (1 << bsl) / 4;  // mode_info step for subsize
@@ -621,8 +620,7 @@ static void write_modes_sb(VP9_COMP *cpi, MODE_INFO **mi_8x8, vp9_writer *bc,
     int pl;
     const int idx = check_bsize_coverage(bs, cm->mi_rows, cm->mi_cols,
                                          mi_row, mi_col);
-    set_partition_seg_context(cm, xd, mi_row, mi_col);
-    pl = partition_plane_context(xd, bsize);
+    pl = partition_plane_context(cm, mi_row, mi_col, bsize);
     // encode the partition information
     if (idx == 0)
       write_token(bc, vp9_partition_tree,
@@ -664,10 +662,8 @@ static void write_modes_sb(VP9_COMP *cpi, MODE_INFO **mi_8x8, vp9_writer *bc,
 
   // update partition context
   if (bsize >= BLOCK_8X8 &&
-      (bsize == BLOCK_8X8 || partition != PARTITION_SPLIT)) {
-    set_partition_seg_context(cm, xd, mi_row, mi_col);
-    update_partition_context(xd, subsize, bsize);
-  }
+      (bsize == BLOCK_8X8 || partition != PARTITION_SPLIT))
+    update_partition_context(cm, mi_row, mi_col, subsize, bsize);
 }
 
 static void write_modes(VP9_COMP *cpi, vp9_writer* const bc,
