@@ -3577,7 +3577,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
         best_mbmode = *mbmi;
         best_skip2 = this_skip2;
         vpx_memcpy(ctx->zcoeff_blk, x->zcoeff_blk[mbmi->tx_size],
-                   sizeof(ctx->zcoeff_blk));
+                   sizeof(uint8_t) * ctx->num_4x4_blk);
 
         // TODO(debargha): enhance this test with a better distortion prediction
         // based on qp, activity mask and history
@@ -4317,7 +4317,7 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
         best_mbmode = *mbmi;
         best_skip2 = this_skip2;
         vpx_memcpy(ctx->zcoeff_blk, x->zcoeff_blk[mbmi->tx_size],
-                   sizeof(ctx->zcoeff_blk));
+                   sizeof(uint8_t) * ctx->num_4x4_blk);
 
         for (i = 0; i < 4; i++)
           best_bmodes[i] = xd->mi_8x8[0]->bmi[i];
