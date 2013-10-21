@@ -2,6 +2,57 @@
   "comments": [
     {
       "key": {
+        "uuid": "AAAAdH//7BI\u003d",
+        "filename": "vp9/common/vp9_reconinter.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2013-10-21T21:34:55Z",
+      "side": 1,
+      "message": "Somehow it should be just one function... that\u0027s a lot of duplication here. You could try to change function signature, e.g. calculate mv before the function call and just pass as an argument.",
+      "revId": "218bb463afcdde5a9366be3a8b4ecebead03aa87",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdH//7BU\u003d",
+        "filename": "vp9/common/vp9_reconinter.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 162,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2013-10-21T21:34:55Z",
+      "side": 1,
+      "message": "We could just call vp9_is_scaled() which will be inlined.",
+      "revId": "218bb463afcdde5a9366be3a8b4ecebead03aa87",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdH//7BQ\u003d",
+        "filename": "vp9/common/vp9_reconinter.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 183,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2013-10-21T21:34:55Z",
+      "side": 1,
+      "message": "May be just inline the variable?",
+      "revId": "218bb463afcdde5a9366be3a8b4ecebead03aa87",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdH//7B8\u003d",
         "filename": "vp9/common/vp9_scale.c",
         "patchSetId": 1
