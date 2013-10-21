@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdH//7Ew\u003d",
+        "filename": "vp9/decoder/vp9_decodframe.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1036,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2013-10-21T17:03:24Z",
+      "side": 1,
+      "message": "It looks a little bit ugly. I guess it is not performance critical, so can we do something like this:\n\nstatic int is_zero_array(void *p, size_t n) {\n   // check here, return 0 or 1\n}\n\n#define vp9_is_zero(array) \\\n  is_zero_arry(\u0026array, sizeof(array))\n\nAnd the usage:\nassert(vp9_is_zero_array(cm-\u003ecounts.y_mode));\n\nIt would also be good to move all that checks into separate function, e.g. check_zero_frame_counts(const FRAME_COUNTS *counts).",
+      "revId": "60e7cd49bb60ee0d5aa8b783813cf58e2187f58b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
