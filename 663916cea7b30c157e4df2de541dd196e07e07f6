@@ -16,6 +16,24 @@
       "revId": "663916cea7b30c157e4df2de541dd196e07e07f6",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdH//7AY\u003d",
+        "filename": "vpx/vp8cx.h",
+        "patchSetId": 12
+      },
+      "lineNbr": 199,
+      "author": {
+        "id": 1003234
+      },
+      "writtenOn": "2013-10-21T22:03:02Z",
+      "side": 1,
+      "message": "We\u0027ve since found the need for additional svc parameters. To minimize impact to standard vp9 encoding, all svc parameters (including WIDTH, HEIGHT, etc), have been incorporated into struct vpx_svc_parameters. \n\nSVC encoding is now enabled by these two codec control commands:\n\nvpx_codec_control(codec_ctx, VP9E_SET_SVC, 1);\n\nvpx_codec_control(codec_ctx, VP9E_SET_SVC_PARAMETERS, \u0026svc_params);",
+      "parentUuid": "AAAAdH//7A0\u003d",
+      "revId": "663916cea7b30c157e4df2de541dd196e07e07f6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
