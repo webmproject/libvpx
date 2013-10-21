@@ -6,3 +6,12 @@ text vpx_codec_get_cx_data
 text vpx_codec_get_global_headers
 text vpx_codec_get_preview_frame
 text vpx_codec_set_cx_data_buf
+text vpx_svc_init
+text vpx_svc_encode
+text svc_dump_statistics
+text svc_get_message
+text svc_get_buffer
+text svc_get_frame_size
+text svc_get_encode_frame_count
+text svc_is_keyframe
+text svc_set_keyframe
