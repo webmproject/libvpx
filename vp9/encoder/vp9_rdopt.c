@@ -261,10 +261,10 @@ void vp9_initialize_rd_consts(VP9_COMP *cpi) {
   if (!frame_is_intra_only(&cpi->common)) {
     vp9_build_nmv_cost_table(
         cpi->mb.nmvjointcost,
-        cpi->mb.e_mbd.allow_high_precision_mv ?
+        cpi->common.allow_high_precision_mv ?
         cpi->mb.nmvcost_hp : cpi->mb.nmvcost,
         &cpi->common.fc.nmvc,
-        cpi->mb.e_mbd.allow_high_precision_mv, 1, 1);
+        cpi->common.allow_high_precision_mv, 1, 1);
 
     for (i = 0; i < INTER_MODE_CONTEXTS; i++) {
       MB_PREDICTION_MODE m;
@@ -1860,7 +1860,7 @@ static void rd_check_segment_txsize(VP9_COMP *cpi, MACROBLOCK *x,
             cpi->find_fractional_mv_step(x,
                                          &mode_mv[NEWMV].as_mv,
                                          &bsi->ref_mv->as_mv,
-                                         x->e_mbd.allow_high_precision_mv,
+                                         cpi->common.allow_high_precision_mv,
                                          x->errorperbit, v_fn_ptr,
                                          0, cpi->sf.subpel_iters_per_step,
                                          x->nmvjointcost, x->mvcost,
@@ -2293,7 +2293,7 @@ static void setup_buffer_inter(VP9_COMP *cpi, MACROBLOCK *x,
                    mbmi->ref_mvs[frame_type], mi_row, mi_col);
 
   // Candidate refinement carried out at encoder and decoder
-  vp9_find_best_ref_mvs(xd,
+  vp9_find_best_ref_mvs(xd, cm->allow_high_precision_mv,
                         mbmi->ref_mvs[frame_type],
                         &frame_nearest_mv[frame_type],
                         &frame_near_mv[frame_type]);
@@ -2441,7 +2441,7 @@ static void single_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
     int dis;  /* TODO: use dis in distortion calculation later. */
     unsigned int sse;
     cpi->find_fractional_mv_step(x, &tmp_mv->as_mv, &ref_mv.as_mv,
-                                 xd->allow_high_precision_mv,
+                                 cm->allow_high_precision_mv,
                                  x->errorperbit,
                                  &cpi->fn_ptr[block_size],
                                  0, cpi->sf.subpel_iters_per_step,
@@ -2577,7 +2577,7 @@ static void joint_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
       bestsme = cpi->find_fractional_mv_step_comp(
           x, &tmp_mv.as_mv,
           &ref_mv[id].as_mv,
-          xd->allow_high_precision_mv,
+          cpi->common.allow_high_precision_mv,
           x->errorperbit,
           &cpi->fn_ptr[block_size],
           0, cpi->sf.subpel_iters_per_step,

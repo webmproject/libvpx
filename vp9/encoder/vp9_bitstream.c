@@ -402,7 +402,7 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, MODE_INFO *m, vp9_writer *bc) {
   const int segment_id = mi->segment_id;
   int skip_coeff;
   const BLOCK_SIZE bsize = mi->sb_type;
-  const int allow_hp = xd->allow_high_precision_mv;
+  const int allow_hp = cm->allow_high_precision_mv;
 
 #ifdef ENTROPY_STATS
   active_section = 9;
@@ -1309,7 +1309,6 @@ static void write_sync_code(struct vp9_write_bit_buffer *wb) {
 static void write_uncompressed_header(VP9_COMP *cpi,
                                       struct vp9_write_bit_buffer *wb) {
   VP9_COMMON *const cm = &cpi->common;
-  MACROBLOCKD *const xd = &cpi->mb.e_mbd;
 
   // frame marker bits
   vp9_wb_write_literal(wb, 0x2, 2);
@@ -1374,7 +1373,7 @@ static void write_uncompressed_header(VP9_COMP *cpi,
 
       write_frame_size_with_refs(cpi, wb);
 
-      vp9_wb_write_bit(wb, xd->allow_high_precision_mv);
+      vp9_wb_write_bit(wb, cm->allow_high_precision_mv);
 
       fix_mcomp_filter_type(cpi);
       write_interp_filter_type(cm->mcomp_filter_type, wb);
@@ -1472,7 +1471,7 @@ static size_t write_compressed_header(VP9_COMP *cpi, uint8_t *data) {
                   (unsigned int *)cpi->partition_count[i]);
     }
 
-    vp9_write_nmv_probs(cpi, xd->allow_high_precision_mv, &header_bc);
+    vp9_write_nmv_probs(cpi, cm->allow_high_precision_mv, &header_bc);
   }
 
   vp9_stop_encode(&header_bc);

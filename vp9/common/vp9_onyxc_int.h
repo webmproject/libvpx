@@ -129,6 +129,8 @@ typedef struct VP9Common {
   // Flag signaling that the frame is encoded using only INTRA modes.
   int intra_only;
 
+  int allow_high_precision_mv;
+
   // Flag signaling that the frame context should be reset to default values.
   // 0 or 1 implies don't reset, 2 reset just the context specified in the
   // frame header, 3 reset all contexts.
