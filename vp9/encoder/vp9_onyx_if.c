@@ -1743,7 +1743,7 @@ VP9_PTR vp9_create_compressor(VP9_CONFIG *oxcf) {
   vp9_zero(cpi->y_uv_mode_count);
 
 #ifdef MODE_TEST_HIT_STATS
-  vp9_zero(cpi->mode_test_hits)
+  vp9_zero(cpi->mode_test_hits);
 #endif
 
   return (VP9_PTR) cpi;
@@ -3295,8 +3295,9 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
   cpi->total_byte_count += (*size);
   cpi->projected_frame_size = (*size) << 3;
 
+  // Post encode loop adjustment of Q prediction.
   if (!active_worst_qchanged)
-    vp9_update_rate_correction_factors(cpi, 2);
+    vp9_update_rate_correction_factors(cpi, (cpi->sf.recode_loop) ? 2 : 0);
 
   cpi->last_q[cm->frame_type] = cm->base_qindex;
 
@@ -3371,6 +3372,7 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
 
   cpi->buffer_level = cpi->bits_off_target;
 
+#ifndef DISABLE_RC_LONG_TERM_MEM
   // Update bits left to the kf and gf groups to account for overshoot or
   // undershoot on these frames
   if (cm->frame_type == KEY_FRAME) {
@@ -3384,6 +3386,7 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
 
     cpi->twopass.gf_group_bits = MAX(cpi->twopass.gf_group_bits, 0);
   }
+#endif
 
 #if 0
   output_frame_level_debug_stats(cpi);
