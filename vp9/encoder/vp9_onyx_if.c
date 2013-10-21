@@ -237,8 +237,9 @@ static int get_active_quality(int q,
   return active_best_quality;
 }
 
-static void set_mvcost(MACROBLOCK *mb) {
-  if (mb->e_mbd.allow_high_precision_mv) {
+static void set_mvcost(VP9_COMP *cpi) {
+  MACROBLOCK *const mb = &cpi->mb;
+  if (cpi->common.allow_high_precision_mv) {
     mb->mvcost = mb->nmvcost_hp;
     mb->mvsadcost = mb->nmvsadcost_hp;
   } else {
@@ -1262,8 +1263,8 @@ void vp9_change_config(VP9_PTR ptr, VP9_CONFIG *oxcf) {
   cm->reset_frame_context = 0;
 
   setup_features(cm);
-  cpi->mb.e_mbd.allow_high_precision_mv = 0;  // Default mv precision
-  set_mvcost(&cpi->mb);
+  cpi->common.allow_high_precision_mv = 0;  // Default mv precision
+  set_mvcost(cpi);
 
   {
     int i;
@@ -2820,7 +2821,6 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
                                       unsigned char *dest,
                                       unsigned int *frame_flags) {
   VP9_COMMON *const cm = &cpi->common;
-  MACROBLOCKD *const xd = &cpi->mb.e_mbd;
   TX_SIZE t;
   int q;
   int frame_over_shoot_limit;
@@ -2989,8 +2989,8 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
   if (!frame_is_intra_only(cm)) {
     cm->mcomp_filter_type = DEFAULT_INTERP_FILTER;
     /* TODO: Decide this more intelligently */
-    xd->allow_high_precision_mv = q < HIGH_PRECISION_MV_QTHRESH;
-    set_mvcost(&cpi->mb);
+    cm->allow_high_precision_mv = q < HIGH_PRECISION_MV_QTHRESH;
+    set_mvcost(cpi);
   }
 
 #if CONFIG_VP9_POSTPROC
@@ -3279,7 +3279,7 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
     if (!cpi->common.error_resilient_mode &&
         !cpi->common.frame_parallel_decoding_mode) {
       vp9_adapt_mode_probs(&cpi->common);
-      vp9_adapt_mv_probs(&cpi->common, cpi->mb.e_mbd.allow_high_precision_mv);
+      vp9_adapt_mv_probs(&cpi->common, cpi->common.allow_high_precision_mv);
     }
   }
 
@@ -3606,8 +3606,8 @@ int vp9_get_compressed_data(VP9_PTR ptr, unsigned int *frame_flags,
 
   cpi->source = NULL;
 
-  cpi->mb.e_mbd.allow_high_precision_mv = ALTREF_HIGH_PRECISION_MV;
-  set_mvcost(&cpi->mb);
+  cpi->common.allow_high_precision_mv = ALTREF_HIGH_PRECISION_MV;
+  set_mvcost(cpi);
 
   // Should we code an alternate reference frame.
   if (cpi->oxcf.play_alternate && cpi->source_alt_ref_pending) {

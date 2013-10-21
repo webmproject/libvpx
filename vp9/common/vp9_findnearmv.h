@@ -23,10 +23,8 @@
 // check a list of motion vectors by sad score using a number rows of pixels
 // above and a number cols of pixels in the left to select the one with best
 // score to use as ref motion vector
-void vp9_find_best_ref_mvs(MACROBLOCKD *xd,
-                           int_mv *mvlist,
-                           int_mv *nearest,
-                           int_mv *near);
+void vp9_find_best_ref_mvs(MACROBLOCKD *xd, int allow_hp,
+                           int_mv *mvlist, int_mv *nearest, int_mv *near);
 
 // TODO(jingning): this mv clamping function should be block size dependent.
 static void clamp_mv2(MV *mv, const MACROBLOCKD *xd) {

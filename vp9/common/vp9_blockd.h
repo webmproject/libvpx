@@ -222,8 +222,6 @@ typedef struct macroblockd {
 
   struct subpix_fn_table  subpix;
 
-  int allow_high_precision_mv;
-
   int corrupted;
 
   unsigned char sb_index;   // index of 32x32 block inside the 64x64 block

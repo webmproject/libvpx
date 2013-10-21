@@ -796,7 +796,6 @@ static void setup_inter_inter(VP9_COMMON *cm) {
 static size_t read_uncompressed_header(VP9D_COMP *pbi,
                                        struct vp9_read_bit_buffer *rb) {
   VP9_COMMON *const cm = &pbi->common;
-  MACROBLOCKD *const xd = &pbi->mb;
   size_t sz;
   int i;
 
@@ -875,7 +874,7 @@ static size_t read_uncompressed_header(VP9D_COMP *pbi,
 
       setup_frame_size_with_refs(pbi, rb);
 
-      xd->allow_high_precision_mv = vp9_rb_read_bit(rb);
+      cm->allow_high_precision_mv = vp9_rb_read_bit(rb);
       cm->mcomp_filter_type = read_interp_filter_type(rb);
 
       for (i = 0; i < ALLOWED_REFS_PER_FRAME; ++i)
@@ -925,7 +924,7 @@ static int read_compressed_header(VP9D_COMP *pbi, const uint8_t *data,
     read_tx_probs(&cm->fc.tx_probs, &r);
   read_coef_probs(&cm->fc, cm->tx_mode, &r);
 
-  vp9_prepare_read_mode_info(pbi, &r);
+  vp9_prepare_read_mode_info(cm, &r);
 
   return vp9_reader_has_error(&r);
 }
@@ -1030,7 +1029,7 @@ int vp9_decode_frame(VP9D_COMP *pbi, const uint8_t **p_data_end) {
 
     if (!frame_is_intra_only(cm)) {
       vp9_adapt_mode_probs(cm);
-      vp9_adapt_mv_probs(cm, xd->allow_high_precision_mv);
+      vp9_adapt_mv_probs(cm, cm->allow_high_precision_mv);
     }
   }
 

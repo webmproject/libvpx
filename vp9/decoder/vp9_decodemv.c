@@ -487,7 +487,7 @@ static void read_inter_block_mode_info(VP9_COMMON *const cm,
                                        int mi_row, int mi_col, vp9_reader *r) {
   MB_MODE_INFO *const mbmi = &mi->mbmi;
   const BLOCK_SIZE bsize = mbmi->sb_type;
-  const int allow_hp = xd->allow_high_precision_mv;
+  const int allow_hp = cm->allow_high_precision_mv;
 
   int_mv nearest[2], nearmv[2], best[2];
   uint8_t inter_mode_ctx;
@@ -518,7 +518,8 @@ static void read_inter_block_mode_info(VP9_COMMON *const cm,
 
   // nearest, nearby
   if (bsize < BLOCK_8X8 || mbmi->mode != ZEROMV) {
-    vp9_find_best_ref_mvs(xd, mbmi->ref_mvs[ref0], &nearest[0], &nearmv[0]);
+    vp9_find_best_ref_mvs(xd, allow_hp,
+                          mbmi->ref_mvs[ref0], &nearest[0], &nearmv[0]);
     best[0].as_int = nearest[0].as_int;
   }
 
@@ -528,7 +529,8 @@ static void read_inter_block_mode_info(VP9_COMMON *const cm,
                      ref1, mbmi->ref_mvs[ref1], mi_row, mi_col);
 
     if (bsize < BLOCK_8X8 || mbmi->mode != ZEROMV) {
-      vp9_find_best_ref_mvs(xd, mbmi->ref_mvs[ref1], &nearest[1], &nearmv[1]);
+      vp9_find_best_ref_mvs(xd, allow_hp,
+                            mbmi->ref_mvs[ref1], &nearest[1], &nearmv[1]);
       best[1].as_int = nearest[1].as_int;
     }
   }
@@ -630,8 +632,7 @@ static void read_comp_pred(VP9_COMMON *cm, vp9_reader *r) {
       vp9_diff_update_prob(r, &cm->fc.comp_ref_prob[i]);
 }
 
-void vp9_prepare_read_mode_info(VP9D_COMP* pbi, vp9_reader *r) {
-  VP9_COMMON *const cm = &pbi->common;
+void vp9_prepare_read_mode_info(VP9_COMMON *cm, vp9_reader *r) {
   int k;
 
   // TODO(jkoleszar): does this clear more than MBSKIP_CONTEXTS? Maybe remove.
@@ -640,8 +641,7 @@ void vp9_prepare_read_mode_info(VP9D_COMP* pbi, vp9_reader *r) {
     vp9_diff_update_prob(r, &cm->fc.mbskip_probs[k]);
 
   if (!frame_is_intra_only(cm)) {
-    nmv_context *const nmvc = &pbi->common.fc.nmvc;
-    MACROBLOCKD *const xd = &pbi->mb;
+    nmv_context *const nmvc = &cm->fc.nmvc;
     int i, j;
 
     read_inter_mode_probs(&cm->fc, r);
@@ -662,7 +662,7 @@ void vp9_prepare_read_mode_info(VP9D_COMP* pbi, vp9_reader *r) {
       for (i = 0; i < PARTITION_TYPES - 1; ++i)
         vp9_diff_update_prob(r, &cm->fc.partition_prob[INTER_FRAME][j][i]);
 
-    read_mv_probs(r, nmvc, xd->allow_high_precision_mv);
+    read_mv_probs(r, nmvc, cm->allow_high_precision_mv);
   }
 }
 
