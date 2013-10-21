@@ -12,14 +12,13 @@
 #include "vp9/common/vp9_idct.h"  // for cospi constants
 #include "vpx_ports/mem.h"
 
-void vp9_short_fdct4x4_sse2(int16_t *input, int16_t *output, int pitch) {
+void vp9_short_fdct4x4_sse2(int16_t *input, int16_t *output, int stride) {
   // The 2D transform is done with two passes which are actually pretty
   // similar. In the first one, we transform the columns and transpose
   // the results. In the second one, we transform the rows. To achieve that,
   // as the first pass results are transposed, we tranpose the columns (that
   // is the transposed rows) and transpose the results (so that it goes back
   // in normal/row positions).
-  const int stride = pitch >> 1;
   int pass;
   // Constants
   //    When we use them, in one case, they are all the same. In all others

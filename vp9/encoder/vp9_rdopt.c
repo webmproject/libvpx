@@ -1089,7 +1089,7 @@ static int64_t rd_pick_intra4x4block(VP9_COMP *cpi, MACROBLOCK *x, int ib,
           vp9_short_fht4x4(src_diff, coeff, 8, tx_type);
           x->quantize_b_4x4(x, block, tx_type, 16);
         } else {
-          x->fwd_txm4x4(src_diff, coeff, 16);
+          x->fwd_txm4x4(src_diff, coeff, 8);
           x->quantize_b_4x4(x, block, tx_type, 16);
         }
 
@@ -1566,7 +1566,7 @@ static int64_t encode_inter_mb_segment(VP9_COMP *cpi,
       k += (idy * 2 + idx);
       coeff = BLOCK_OFFSET(p->coeff, k);
       x->fwd_txm4x4(raster_block_offset_int16(BLOCK_8X8, k, p->src_diff),
-                    coeff, 16);
+                    coeff, 8);
       x->quantize_b_4x4(x, k, DCT_DCT, 16);
       thisdistortion += vp9_block_error(coeff, BLOCK_OFFSET(pd->dqcoeff, k),
                                         16, &ssz);

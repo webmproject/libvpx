@@ -36,14 +36,13 @@ static void fdct4(const int16_t *input, int16_t *output) {
   output[3] = dct_const_round_shift(temp2);
 }
 
-void vp9_short_fdct4x4_c(int16_t *input, int16_t *output, int pitch) {
+void vp9_short_fdct4x4_c(int16_t *input, int16_t *output, int stride) {
   // The 2D transform is done with two passes which are actually pretty
   // similar. In the first one, we transform the columns and transpose
   // the results. In the second one, we transform the rows. To achieve that,
   // as the first pass results are transposed, we tranpose the columns (that
   // is the transposed rows) and transpose the results (so that it goes back
   // in normal/row positions).
-  const int stride = pitch >> 1;
   int pass;
   // We need an intermediate buffer between passes.
   int16_t intermediate[4 * 4];
@@ -587,18 +586,17 @@ void vp9_short_fht8x8_c(int16_t *input, int16_t *output,
 
 /* 4-point reversible, orthonormal Walsh-Hadamard in 3.5 adds, 0.5 shifts per
    pixel. */
-void vp9_short_walsh4x4_c(int16_t *input, int16_t *output, int pitch) {
+void vp9_short_walsh4x4_c(int16_t *input, int16_t *output, int stride) {
   int i;
   int a1, b1, c1, d1, e1;
   int16_t *ip = input;
   int16_t *op = output;
-  int pitch_short = pitch >> 1;
 
   for (i = 0; i < 4; i++) {
-    a1 = ip[0 * pitch_short];
-    b1 = ip[1 * pitch_short];
-    c1 = ip[2 * pitch_short];
-    d1 = ip[3 * pitch_short];
+    a1 = ip[0 * stride];
+    b1 = ip[1 * stride];
+    c1 = ip[2 * stride];
+    d1 = ip[3 * stride];
 
     a1 += b1;
     d1 = d1 - c1;

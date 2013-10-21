@@ -959,9 +959,9 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
     sf->optimize_coefficients = 0;
   }
 
-  cpi->mb.fwd_txm4x4    = vp9_short_fdct4x4;
+  cpi->mb.fwd_txm4x4 = vp9_short_fdct4x4;
   if (cpi->oxcf.lossless || cpi->mb.e_mbd.lossless) {
-    cpi->mb.fwd_txm4x4    = vp9_short_walsh4x4;
+    cpi->mb.fwd_txm4x4 = vp9_short_walsh4x4;
   }
 
   cpi->mb.quantize_b_4x4      = vp9_regular_quantize_b_4x4;
