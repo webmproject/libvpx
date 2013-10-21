@@ -248,23 +248,22 @@ void vp9_initialize_rd_consts(VP9_COMP *cpi) {
 
   set_block_thresholds(cpi);
 
-  fill_token_costs(cpi->mb.token_costs, cpi->common.fc.coef_probs);
+  fill_token_costs(cpi->mb.token_costs, cm->fc.coef_probs);
 
   for (i = 0; i < NUM_PARTITION_CONTEXTS; i++)
     vp9_cost_tokens(cpi->mb.partition_cost[i],
-                    cpi->common.fc.partition_prob[cpi->common.frame_type][i],
+                    cm->fc.partition_prob[cm->frame_type][i],
                     vp9_partition_tree);
 
   /*rough estimate for costing*/
   vp9_init_mode_costs(cpi);
 
-  if (!frame_is_intra_only(&cpi->common)) {
+  if (!frame_is_intra_only(cm)) {
     vp9_build_nmv_cost_table(
         cpi->mb.nmvjointcost,
-        cpi->common.allow_high_precision_mv ?
-        cpi->mb.nmvcost_hp : cpi->mb.nmvcost,
-        &cpi->common.fc.nmvc,
-        cpi->common.allow_high_precision_mv, 1, 1);
+        cm->allow_high_precision_mv ? cpi->mb.nmvcost_hp : cpi->mb.nmvcost,
+        &cm->fc.nmvc,
+        cm->allow_high_precision_mv, 1, 1);
 
     for (i = 0; i < INTER_MODE_CONTEXTS; i++) {
       MB_PREDICTION_MODE m;
@@ -272,8 +271,8 @@ void vp9_initialize_rd_consts(VP9_COMP *cpi) {
       for (m = NEARESTMV; m < MB_MODE_COUNT; m++)
         cpi->mb.inter_mode_cost[i][inter_mode_offset(m)] =
             cost_token(vp9_inter_mode_tree,
-                       cpi->common.fc.inter_mode_probs[i],
-                       vp9_inter_mode_encodings + inter_mode_offset(m));
+                       cm->fc.inter_mode_probs[i],
+                       &vp9_inter_mode_encodings[inter_mode_offset(m)]);
     }
   }
 }
@@ -3139,8 +3138,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
   unsigned int mode_mask = 0;
   int64_t mode_distortions[MB_MODE_COUNT] = {-1};
   int64_t frame_distortions[MAX_REF_FRAMES] = {-1};
-  int intra_cost_penalty = 20 * vp9_dc_quant(cpi->common.base_qindex,
-                                             cpi->common.y_dc_delta_q);
+  int intra_cost_penalty = 20 * vp9_dc_quant(cm->base_qindex, cm->y_dc_delta_q);
   const int bws = num_8x8_blocks_wide_lookup[bsize] / 2;
   const int bhs = num_8x8_blocks_high_lookup[bsize] / 2;
   int best_skip2 = 0;
@@ -3321,7 +3319,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
     // Evaluate all sub-pel filters irrespective of whether we can use
     // them for this frame.
     mbmi->interp_filter = cm->mcomp_filter_type;
-    vp9_setup_interp_filters(xd, mbmi->interp_filter, &cpi->common);
+    vp9_setup_interp_filters(xd, mbmi->interp_filter, cm);
 
     if (comp_pred) {
       if (!(cpi->ref_frame_flags & flag_list[second_ref_frame]))
@@ -3458,7 +3456,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
         continue;
     }
 
-    if (cpi->common.comp_pred_mode == HYBRID_PREDICTION) {
+    if (cm->comp_pred_mode == HYBRID_PREDICTION) {
       rate2 += compmode_cost;
     }
 
@@ -3602,7 +3600,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
     if (!disable_skip && ref_frame != INTRA_FRAME) {
       int single_rd, hybrid_rd, single_rate, hybrid_rate;
 
-      if (cpi->common.comp_pred_mode == HYBRID_PREDICTION) {
+      if (cm->comp_pred_mode == HYBRID_PREDICTION) {
         single_rate = rate2 - compmode_cost;
         hybrid_rate = rate2;
       } else {
