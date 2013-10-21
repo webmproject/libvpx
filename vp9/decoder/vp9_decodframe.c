@@ -196,7 +196,6 @@ static void set_offsets(VP9D_COMP *pbi, BLOCK_SIZE bsize,
   xd->last_mi = cm->prev_mi ? xd->prev_mi_8x8[0] : NULL;
 
   set_skip_context(cm, xd, mi_row, mi_col);
-  set_partition_seg_context(cm, xd, mi_row, mi_col);
 
   // Distance of Mb to the various image edges. These are specified to 8th pel
   // as they are always compared to values that are in 1/8th pel units
@@ -274,7 +273,6 @@ static void decode_modes_sb(VP9D_COMP *pbi, int tile_col,
                             int mi_row, int mi_col,
                             vp9_reader* r, BLOCK_SIZE bsize, int index) {
   VP9_COMMON *const cm = &pbi->common;
-  MACROBLOCKD *const xd = &pbi->mb;
   const int hbs = num_8x8_blocks_wide_lookup[bsize] / 2;
   PARTITION_TYPE partition = PARTITION_NONE;
   BLOCK_SIZE subsize;
@@ -289,8 +287,7 @@ static void decode_modes_sb(VP9D_COMP *pbi, int tile_col,
     int pl;
     const int idx = check_bsize_coverage(hbs, cm->mi_rows, cm->mi_cols,
                                          mi_row, mi_col);
-    set_partition_seg_context(cm, xd, mi_row, mi_col);
-    pl = partition_plane_context(xd, bsize);
+    pl = partition_plane_context(cm, mi_row, mi_col, bsize);
 
     if (idx == 0)
       partition = treed_read(r, vp9_partition_tree,
@@ -335,10 +332,8 @@ static void decode_modes_sb(VP9D_COMP *pbi, int tile_col,
 
   // update partition context
   if (bsize >= BLOCK_8X8 &&
-      (bsize == BLOCK_8X8 || partition != PARTITION_SPLIT)) {
-    set_partition_seg_context(cm, xd, mi_row, mi_col);
-    update_partition_context(xd, subsize, bsize);
-  }
+      (bsize == BLOCK_8X8 || partition != PARTITION_SPLIT))
+    update_partition_context(cm, mi_row, mi_col, subsize, bsize);
 }
 
 static void setup_token_decoder(const uint8_t *data,

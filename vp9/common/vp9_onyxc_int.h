@@ -253,12 +253,6 @@ static INLINE void set_skip_context(VP9_COMMON *cm, MACROBLOCKD *xd,
   }
 }
 
-static INLINE void set_partition_seg_context(VP9_COMMON *cm, MACROBLOCKD *xd,
-                                             int mi_row, int mi_col) {
-  xd->above_seg_context = cm->above_seg_context + mi_col;
-  xd->left_seg_context = cm->left_seg_context + (mi_row & MI_MASK);
-}
-
 // return the node index in the prob tree for binary coding
 static int check_bsize_coverage(int bs, int mi_rows, int mi_cols,
                                 int mi_row, int mi_col) {
@@ -305,6 +299,55 @@ static void set_prev_mi(VP9_COMMON *cm) {
 
 static INLINE int frame_is_intra_only(const VP9_COMMON *const cm) {
   return cm->frame_type == KEY_FRAME || cm->intra_only;
+}
+
+static INLINE void update_partition_context(VP9_COMMON *cm,
+                                            int mi_row, int mi_col,
+                                            BLOCK_SIZE sb_type,
+                                            BLOCK_SIZE sb_size) {
+  PARTITION_CONTEXT *above_ctx = cm->above_seg_context + mi_col;
+  PARTITION_CONTEXT *left_ctx = cm->left_seg_context + (mi_row & MI_MASK);
+
+  const int bsl = b_width_log2(sb_size), bs = (1 << bsl) / 2;
+  const int bwl = b_width_log2(sb_type);
+  const int bhl = b_height_log2(sb_type);
+  const int boffset = b_width_log2(BLOCK_64X64) - bsl;
+  const char pcval0 = ~(0xe << boffset);
+  const char pcval1 = ~(0xf << boffset);
+  const char pcvalue[2] = {pcval0, pcval1};
+
+  assert(MAX(bwl, bhl) <= bsl);
+
+  // update the partition context at the end notes. set partition bits
+  // of block sizes larger than the current one to be one, and partition
+  // bits of smaller block sizes to be zero.
+  vpx_memset(above_ctx, pcvalue[bwl == bsl], bs);
+  vpx_memset(left_ctx, pcvalue[bhl == bsl], bs);
+}
+
+static INLINE int partition_plane_context(const VP9_COMMON *cm,
+                                          int mi_row, int mi_col,
+                                          BLOCK_SIZE sb_type) {
+  const PARTITION_CONTEXT *above_ctx = cm->above_seg_context + mi_col;
+  const PARTITION_CONTEXT *left_ctx = cm->left_seg_context + (mi_row & MI_MASK);
+
+  int bsl = mi_width_log2(sb_type), bs = 1 << bsl;
+  int above = 0, left = 0, i;
+  int boffset = mi_width_log2(BLOCK_64X64) - bsl;
+
+  assert(mi_width_log2(sb_type) == mi_height_log2(sb_type));
+  assert(bsl >= 0);
+  assert(boffset >= 0);
+
+  for (i = 0; i < bs; i++)
+    above |= (above_ctx[i] & (1 << boffset));
+  for (i = 0; i < bs; i++)
+    left |= (left_ctx[i] & (1 << boffset));
+
+  above = (above > 0);
+  left  = (left > 0);
+
+  return (left * 2 + above) + bsl * PARTITION_PLOFFSET;
 }
 
 #endif  // VP9_COMMON_VP9_ONYXC_INT_H_
