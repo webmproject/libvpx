@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdH//6+E\u003d",
+        "filename": "vp9/common/vp9_findnearmv.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2013-10-22T00:20:07Z",
+      "side": 1,
+      "message": "It seems you could remove \"mi\" variable and use \"left_mi\" directly  inside the if statement, and \"cur_mi\" for the return value.",
+      "revId": "19929abb7bc40bbaa3a918d3968c80bd82370213",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
