@@ -31,15 +31,15 @@ void fdct4x4(int16_t *in, int16_t *out, uint8_t* /*dst*/,
 }
 void idct4x4_add(int16_t* /*in*/, int16_t *out, uint8_t *dst,
                  int stride, int /*tx_type*/) {
-  vp9_idct4x4_16_add_c(out, dst, stride >> 1);
+  vp9_idct4x4_16_add_c(out, dst, stride);
 }
 void fht4x4(int16_t *in, int16_t *out, uint8_t* /*dst*/,
             int stride, int tx_type) {
-  vp9_short_fht4x4_c(in, out, stride >> 1, tx_type);
+  vp9_short_fht4x4_c(in, out, stride, tx_type);
 }
 void iht4x4_add(int16_t* /*in*/, int16_t *out, uint8_t *dst,
                 int stride, int tx_type) {
-  vp9_iht4x4_16_add_c(out, dst, stride >> 1, tx_type);
+  vp9_iht4x4_16_add_c(out, dst, stride, tx_type);
 }
 
 class FwdTrans4x4Test : public ::testing::TestWithParam<int> {
@@ -78,7 +78,7 @@ TEST_P(FwdTrans4x4Test, SignBiasCheck) {
   ACMRandom rnd(ACMRandom::DeterministicSeed());
   DECLARE_ALIGNED_ARRAY(16, int16_t, test_input_block, 16);
   DECLARE_ALIGNED_ARRAY(16, int16_t, test_output_block, 16);
-  const int pitch = 8;
+  const int pitch = 4;
   int count_sign_block[16][2];
   const int count_test_block = 1000000;
 
@@ -152,7 +152,7 @@ TEST_P(FwdTrans4x4Test, RoundTripErrorCheck) {
     for (int j = 0; j < 16; ++j)
       test_input_block[j] = src[j] - dst[j];
 
-    const int pitch = 8;
+    const int pitch = 4;
     RunFwdTxfm(test_input_block, test_temp_block, dst, pitch, tx_type_);
 
     for (int j = 0; j < 16; ++j) {
