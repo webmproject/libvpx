@@ -176,14 +176,32 @@ TEST_P(DatarateTest, ChangingDropFrameThresh) {
   }
 }
 
-class DatarateTestVP9 : public DatarateTest {
+class DatarateTestVP9 : public ::libvpx_test::EncoderTest,
+    public ::libvpx_test::CodecTestWith2Params<libvpx_test::TestMode, int> {
+ public:
+  DatarateTestVP9() : EncoderTest(GET_PARAM(0)) {}
+
  protected:
   virtual ~DatarateTestVP9() {}
+
+  virtual void SetUp() {
+    InitializeConfig();
+    SetMode(GET_PARAM(1));
+    set_cpu_used_ = GET_PARAM(2);
+    ResetModel();
+  }
+
+  virtual void ResetModel() {
+    last_pts_ = 0;
+    frame_number_ = 0;
+    bits_total_ = 0;
+    duration_ = 0.0;
+  }
 
   virtual void PreEncodeFrameHook(::libvpx_test::VideoSource *video,
                                     ::libvpx_test::Encoder *encoder) {
     if (video->frame() == 1) {
-      encoder->Control(VP8E_SET_CPUUSED, 2);
+      encoder->Control(VP8E_SET_CPUUSED, set_cpu_used_);
     }
     const vpx_rational_t tb = video->timebase();
     timebase_ = static_cast<double>(tb.num) / tb.den;
@@ -205,6 +223,14 @@ class DatarateTestVP9 : public DatarateTest {
       effective_datarate_ = ((bits_total_) / 1000.0) / duration_;
     }
   }
+
+  vpx_codec_pts_t last_pts_;
+  double timebase_;
+  int frame_number_;
+  int64_t bits_total_;
+  double duration_;
+  double effective_datarate_;
+  int set_cpu_used_;
 };
 
 // There is no buffer model/frame dropper in VP9 currently, so for now we
@@ -218,7 +244,7 @@ TEST_P(DatarateTestVP9, BasicRateTargeting) {
 
   ::libvpx_test::I420VideoSource video("hantro_collage_w352h288.yuv", 352, 288,
                                        30, 1, 0, 140);
-  for (int i = 200; i < 800; i += 200) {
+  for (int i = 150; i < 800; i += 200) {
     cfg_.rc_target_bitrate = i;
     ResetModel();
     ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
@@ -231,5 +257,6 @@ TEST_P(DatarateTestVP9, BasicRateTargeting) {
 
 VP8_INSTANTIATE_TEST_CASE(DatarateTest, ALL_TEST_MODES);
 VP9_INSTANTIATE_TEST_CASE(DatarateTestVP9,
-                          ::testing::Values(::libvpx_test::kOnePassGood));
+                          ::testing::Values(::libvpx_test::kOnePassGood),
+                          ::testing::Range(1, 5));
 }  // namespace
