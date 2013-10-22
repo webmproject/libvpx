@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdH//61c\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 1153,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-10-22T16:33:49Z",
+      "side": 1,
+      "message": "TODO(later) for me, expose the get_left_mi function in a common place and use it everywhere.",
+      "revId": "c807949408254556dfddfb365a3ad67db650df7d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
