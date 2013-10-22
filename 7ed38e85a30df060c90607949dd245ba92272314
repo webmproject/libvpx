@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdH//67g\u003d",
+        "filename": "vp9/common/vp9_entropymode.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-10-22T07:43:45Z",
+      "side": 1,
+      "message": "In general I\u0027d prefer to see static\u0027s before public symbols, but the methods don\u0027t follow this convention either",
+      "revId": "7ed38e85a30df060c90607949dd245ba92272314",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdH//67c\u003d",
+        "filename": "vp9/common/vp9_entropymode.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 132,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-10-22T07:43:45Z",
+      "side": 1,
+      "message": "2 spaces before comment, here and everywhere in these tables",
+      "revId": "7ed38e85a30df060c90607949dd245ba92272314",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdH//67Y\u003d",
+        "filename": "vp9/common/vp9_entropymode.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 212,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-10-22T07:43:45Z",
+      "side": 1,
+      "message": "drop this line",
+      "revId": "7ed38e85a30df060c90607949dd245ba92272314",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdH//67U\u003d",
+        "filename": "vp9/common/vp9_entropymode.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 213,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-10-22T07:43:45Z",
+      "side": 1,
+      "message": "ditto",
+      "revId": "7ed38e85a30df060c90607949dd245ba92272314",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
