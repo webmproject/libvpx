@@ -583,14 +583,12 @@ static void decode_tile(VP9D_COMP *pbi, vp9_reader *r, int tile_col) {
   YV12_BUFFER_CONFIG *const fb = &cm->yv12_fb[cm->new_fb_idx];
 
   if (pbi->do_loopfilter_inline) {
-    if (num_threads > 1) {
-      LFWorkerData *const lf_data = (LFWorkerData*)pbi->lf_worker.data1;
-      lf_data->frame_buffer = fb;
-      lf_data->cm = cm;
-      lf_data->xd = pbi->mb;
-      lf_data->stop = 0;
-      lf_data->y_only = 0;
-    }
+    LFWorkerData *const lf_data = (LFWorkerData*)pbi->lf_worker.data1;
+    lf_data->frame_buffer = fb;
+    lf_data->cm = cm;
+    lf_data->xd = pbi->mb;
+    lf_data->stop = 0;
+    lf_data->y_only = 0;
     vp9_loop_filter_frame_init(cm, cm->lf.filter_level);
   }
 
@@ -604,39 +602,33 @@ static void decode_tile(VP9D_COMP *pbi, vp9_reader *r, int tile_col) {
       decode_modes_sb(pbi, tile_col, mi_row, mi_col, r, BLOCK_64X64, 0);
 
     if (pbi->do_loopfilter_inline) {
-      // delay the loopfilter by 1 macroblock row.
       const int lf_start = mi_row - MI_BLOCK_SIZE;
+      LFWorkerData *const lf_data = (LFWorkerData*)pbi->lf_worker.data1;
+
+      // delay the loopfilter by 1 macroblock row.
       if (lf_start < 0) continue;
 
+      // decoding has completed: finish up the loop filter in this thread.
+      if (mi_row + MI_BLOCK_SIZE >= cm->cur_tile_mi_row_end) continue;
+
+      vp9_worker_sync(&pbi->lf_worker);
+      lf_data->start = lf_start;
+      lf_data->stop = mi_row;
       if (num_threads > 1) {
-        LFWorkerData *const lf_data = (LFWorkerData*)pbi->lf_worker.data1;
-
-        // decoding has completed: finish up the loop filter in this thread.
-        if (mi_row + MI_BLOCK_SIZE >= cm->cur_tile_mi_row_end) continue;
-
-        vp9_worker_sync(&pbi->lf_worker);
-        lf_data->start = lf_start;
-        lf_data->stop = mi_row;
-        pbi->lf_worker.hook = vp9_loop_filter_worker;
         vp9_worker_launch(&pbi->lf_worker);
       } else {
-        vp9_loop_filter_rows(fb, cm, &pbi->mb, lf_start, mi_row, 0);
+        vp9_worker_execute(&pbi->lf_worker);
       }
     }
   }
 
   if (pbi->do_loopfilter_inline) {
-    int lf_start;
-    if (num_threads > 1) {
-      LFWorkerData *const lf_data = (LFWorkerData*)pbi->lf_worker.data1;
+    LFWorkerData *const lf_data = (LFWorkerData*)pbi->lf_worker.data1;
 
-      vp9_worker_sync(&pbi->lf_worker);
-      lf_start = lf_data->stop;
-    } else {
-      lf_start = mi_row - MI_BLOCK_SIZE;
-    }
-    vp9_loop_filter_rows(fb, cm, &pbi->mb,
-                         lf_start, cm->mi_rows, 0);
+    vp9_worker_sync(&pbi->lf_worker);
+    lf_data->start = lf_data->stop;
+    lf_data->stop = cm->mi_rows;
+    vp9_worker_execute(&pbi->lf_worker);
   }
 }
 

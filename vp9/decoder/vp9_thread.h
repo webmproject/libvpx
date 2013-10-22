@@ -80,6 +80,11 @@ int vp9_worker_sync(VP9Worker* const worker);
 // hook/data1/data2 can be changed at any time before calling this function,
 // but not be changed afterward until the next call to vp9_worker_sync().
 void vp9_worker_launch(VP9Worker* const worker);
+// This function is similar to vp9_worker_launch() except that it calls the
+// hook directly instead of using a thread. Convenient to bypass the thread
+// mechanism while still using the VP9Worker structs. vp9_worker_sync() must
+// still be called afterward (for error reporting).
+void vp9_worker_execute(VP9Worker* const worker);
 // Kill the thread and terminate the object. To use the object again, one
 // must call vp9_worker_reset() again.
 void vp9_worker_end(VP9Worker* const worker);

@@ -145,9 +145,7 @@ static THREADFN thread_loop(void *ptr) {    // thread loop
       pthread_cond_wait(&worker->condition_, &worker->mutex_);
     }
     if (worker->status_ == WORK) {
-      if (worker->hook) {
-        worker->had_error |= !worker->hook(worker->data1, worker->data2);
-      }
+      vp9_worker_execute(worker);
       worker->status_ = OK;
     } else if (worker->status_ == NOT_OK) {   // finish the worker
       done = 1;
@@ -178,7 +176,7 @@ static void change_state(VP9Worker* const worker,
   pthread_mutex_unlock(&worker->mutex_);
 }
 
-#endif
+#endif  // CONFIG_MULTITHREAD
 
 //------------------------------------------------------------------------------
 
@@ -218,12 +216,17 @@ int vp9_worker_reset(VP9Worker* const worker) {
   return ok;
 }
 
+void vp9_worker_execute(VP9Worker* const worker) {
+  if (worker->hook != NULL) {
+    worker->had_error |= !worker->hook(worker->data1, worker->data2);
+  }
+}
+
 void vp9_worker_launch(VP9Worker* const worker) {
 #if CONFIG_MULTITHREAD
   change_state(worker, WORK);
 #else
-  if (worker->hook)
-    worker->had_error |= !worker->hook(worker->data1, worker->data2);
+  vp9_worker_execute(worker);
 #endif
 }
 

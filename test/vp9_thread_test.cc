@@ -18,7 +18,7 @@
 
 namespace {
 
-class VP9WorkerThreadTest : public ::testing::Test {
+class VP9WorkerThreadTest : public ::testing::TestWithParam<bool> {
  protected:
   virtual ~VP9WorkerThreadTest() {}
   virtual void SetUp() {
@@ -38,7 +38,7 @@ int ThreadHook(void* data, void* return_value) {
   return *reinterpret_cast<int*>(return_value);
 }
 
-TEST_F(VP9WorkerThreadTest, HookSuccess) {
+TEST_P(VP9WorkerThreadTest, HookSuccess) {
   EXPECT_TRUE(vp9_worker_sync(&worker_));  // should be a no-op.
 
   for (int i = 0; i < 2; ++i) {
@@ -50,7 +50,12 @@ TEST_F(VP9WorkerThreadTest, HookSuccess) {
     worker_.data1 = &hook_data;
     worker_.data2 = &return_value;
 
-    vp9_worker_launch(&worker_);
+    const bool synchronous = GetParam();
+    if (synchronous) {
+      vp9_worker_execute(&worker_);
+    } else {
+      vp9_worker_launch(&worker_);
+    }
     EXPECT_TRUE(vp9_worker_sync(&worker_));
     EXPECT_FALSE(worker_.had_error);
     EXPECT_EQ(5, hook_data);
@@ -59,7 +64,7 @@ TEST_F(VP9WorkerThreadTest, HookSuccess) {
   }
 }
 
-TEST_F(VP9WorkerThreadTest, HookFailure) {
+TEST_P(VP9WorkerThreadTest, HookFailure) {
   EXPECT_TRUE(vp9_worker_reset(&worker_));
 
   int hook_data = 0;
@@ -68,7 +73,12 @@ TEST_F(VP9WorkerThreadTest, HookFailure) {
   worker_.data1 = &hook_data;
   worker_.data2 = &return_value;
 
-  vp9_worker_launch(&worker_);
+  const bool synchronous = GetParam();
+  if (synchronous) {
+    vp9_worker_execute(&worker_);
+  } else {
+    vp9_worker_launch(&worker_);
+  }
   EXPECT_FALSE(vp9_worker_sync(&worker_));
   EXPECT_TRUE(worker_.had_error);
 
@@ -105,5 +115,7 @@ TEST(VP9DecodeMTTest, MTDecode) {
   }
   EXPECT_STREQ("b35a1b707b28e82be025d960aba039bc", md5.Get());
 }
+
+INSTANTIATE_TEST_CASE_P(Synchronous, VP9WorkerThreadTest, ::testing::Bool());
 
 }  // namespace
