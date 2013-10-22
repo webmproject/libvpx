@@ -4226,9 +4226,37 @@ int vp9_set_size_literal(VP9_PTR comp, unsigned int width,
   return 0;
 }
 
+int vp9_switch_layer(VP9_PTR comp, int layer) {
+  VP9_COMP *cpi = (VP9_COMP *)comp;
+
+  if (cpi->use_svc) {
+    cpi->current_layer = layer;
+
+    // Use buffer i for layer i LST
+    cpi->lst_fb_idx = layer;
+
+    // Use buffer i-1 for layer i Alt (Inter-layer prediction)
+    if (layer != 0) cpi->alt_fb_idx = layer - 1;
+
+    // Use the rest for Golden
+    if (layer < 2 * cpi->number_spatial_layers - NUM_REF_FRAMES)
+      cpi->gld_fb_idx = cpi->lst_fb_idx;
+    else
+      cpi->gld_fb_idx = 2 * cpi->number_spatial_layers - 1 - layer;
+
+    printf("Switching to layer %d:\n", layer);
+    printf("Using references: LST/GLD/ALT [%d|%d|%d]\n", cpi->lst_fb_idx,
+           cpi->gld_fb_idx, cpi->alt_fb_idx);
+  } else {
+    printf("Switching layer not supported. Enable SVC first \n");
+  }
+  return 0;
+}
+
 void vp9_set_svc(VP9_PTR comp, int use_svc) {
   VP9_COMP *cpi = (VP9_COMP *)comp;
   cpi->use_svc = use_svc;
+  if (cpi->use_svc) printf("Enabled SVC encoder \n");
   return;
 }
 
