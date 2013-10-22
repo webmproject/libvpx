@@ -526,7 +526,7 @@ static void write_mb_modes_kf(const VP9_COMP *cpi, MODE_INFO **mi_8x8,
   const int ym = m->mbmi.mode;
   const int segment_id = m->mbmi.segment_id;
   MODE_INFO *above_mi = mi_8x8[-xd->mode_info_stride];
-  MODE_INFO *left_mi = mi_8x8[-1];
+  MODE_INFO *left_mi = xd->left_available ? mi_8x8[-1] : NULL;
 
   if (seg->update_map)
     write_segment_id(bc, seg, m->mbmi.segment_id);
@@ -538,8 +538,7 @@ static void write_mb_modes_kf(const VP9_COMP *cpi, MODE_INFO **mi_8x8,
 
   if (m->mbmi.sb_type >= BLOCK_8X8) {
     const MB_PREDICTION_MODE A = above_block_mode(m, above_mi, 0);
-    const MB_PREDICTION_MODE L = xd->left_available ?
-                                 left_block_mode(m, left_mi, 0) : DC_PRED;
+    const MB_PREDICTION_MODE L = left_block_mode(m, left_mi, 0);
     write_intra_mode(bc, ym, vp9_kf_y_mode_prob[A][L]);
   } else {
     int idx, idy;
@@ -549,8 +548,7 @@ static void write_mb_modes_kf(const VP9_COMP *cpi, MODE_INFO **mi_8x8,
       for (idx = 0; idx < 2; idx += num_4x4_blocks_wide) {
         int i = idy * 2 + idx;
         const MB_PREDICTION_MODE A = above_block_mode(m, above_mi, i);
-        const MB_PREDICTION_MODE L = (xd->left_available || idx) ?
-                                     left_block_mode(m, left_mi, i) : DC_PRED;
+        const MB_PREDICTION_MODE L = left_block_mode(m, left_mi, i);
         const int bm = m->bmi[i].as_mode;
 #ifdef ENTROPY_STATS
         ++intra_mode_stats[A][L][bm];

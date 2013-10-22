@@ -1150,7 +1150,7 @@ static int64_t rd_pick_intra_sub_8x8_y_mode(VP9_COMP * const cpi,
   MACROBLOCKD *const xd = &mb->e_mbd;
   MODE_INFO *const mic = xd->mi_8x8[0];
   const MODE_INFO *above_mi = xd->mi_8x8[-xd->mode_info_stride];
-  const MODE_INFO *left_mi = xd->mi_8x8[-1];
+  const MODE_INFO *left_mi = xd->left_available ? xd->mi_8x8[-1] : NULL;
   const BLOCK_SIZE bsize = xd->mi_8x8[0]->mbmi.sb_type;
   const int num_4x4_blocks_wide = num_4x4_blocks_wide_lookup[bsize];
   const int num_4x4_blocks_high = num_4x4_blocks_high_lookup[bsize];
@@ -1176,9 +1176,7 @@ static int64_t rd_pick_intra_sub_8x8_y_mode(VP9_COMP * const cpi,
       i = idy * 2 + idx;
       if (cpi->common.frame_type == KEY_FRAME) {
         const MB_PREDICTION_MODE A = above_block_mode(mic, above_mi, i);
-        const MB_PREDICTION_MODE L = (xd->left_available || idx) ?
-                                     left_block_mode(mic, left_mi, i) :
-                                     DC_PRED;
+        const MB_PREDICTION_MODE L = left_block_mode(mic, left_mi, i);
 
         bmode_costs  = mb->y_mode_costs[A][L];
       }
@@ -1237,15 +1235,14 @@ static int64_t rd_pick_intra_sby_mode(VP9_COMP *cpi, MACROBLOCK *x,
   for (mode = DC_PRED; mode <= TM_PRED; mode++) {
     int64_t local_tx_cache[TX_MODES];
     MODE_INFO *above_mi = xd->mi_8x8[-xd->mode_info_stride];
-    MODE_INFO *left_mi = xd->mi_8x8[-1];
+    MODE_INFO *left_mi = xd->left_available ? xd->mi_8x8[-1] : NULL;
 
     if (!(cpi->sf.intra_y_mode_mask[max_txsize_lookup[bsize]] & (1 << mode)))
       continue;
 
     if (cpi->common.frame_type == KEY_FRAME) {
       const MB_PREDICTION_MODE A = above_block_mode(mic, above_mi, 0);
-      const MB_PREDICTION_MODE L = xd->left_available ?
-                                   left_block_mode(mic, left_mi, 0) : DC_PRED;
+      const MB_PREDICTION_MODE L = left_block_mode(mic, left_mi, 0);
 
       bmode_costs = x->y_mode_costs[A][L];
     }

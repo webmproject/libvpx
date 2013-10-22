@@ -41,26 +41,24 @@ void vp9_append_sub8x8_mvs_for_idx(VP9_COMMON *cm,
                                    int block_idx, int ref_idx,
                                    int mi_row, int mi_col);
 
-static MB_PREDICTION_MODE left_block_mode(const MODE_INFO *cur_mb,
-                                          const MODE_INFO *left_mb, int b) {
+static MB_PREDICTION_MODE left_block_mode(const MODE_INFO *cur_mi,
+                                          const MODE_INFO *left_mi, int b) {
   // FIXME(rbultje, jingning): temporary hack because jenkins doesn't
   // understand this condition. This will go away soon.
-  const MODE_INFO *mi = cur_mb;
 
   if (b == 0 || b == 2) {
     /* On L edge, get from MB to left of us */
-    mi = left_mb;
-    if (!mi)
+    if (!left_mi)
       return DC_PRED;
 
-    if (is_inter_block(&mi->mbmi))
+    if (is_inter_block(&left_mi->mbmi))
       return DC_PRED;
     else
-      return mi->mbmi.sb_type < BLOCK_8X8 ? (mi->bmi + 1 + b)->as_mode
-                                          : mi->mbmi.mode;
+      return left_mi->mbmi.sb_type < BLOCK_8X8 ? left_mi->bmi[b + 1].as_mode
+                                               : left_mi->mbmi.mode;
   }
   assert(b == 1 || b == 3);
-  return (mi->bmi + b - 1)->as_mode;
+  return cur_mi->bmi[b - 1].as_mode;
 }
 
 static MB_PREDICTION_MODE above_block_mode(const MODE_INFO *cur_mb,
