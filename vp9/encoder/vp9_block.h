@@ -166,7 +166,7 @@ struct macroblock {
   PICK_MODE_CONTEXT sb32x64_context[2];
   PICK_MODE_CONTEXT sb64x32_context[2];
   PICK_MODE_CONTEXT sb64_context;
-  int partition_cost[NUM_PARTITION_CONTEXTS][PARTITION_TYPES];
+  int partition_cost[PARTITION_CONTEXTS][PARTITION_TYPES];
 
   BLOCK_SIZE b_partitioning[4][4][4];
   BLOCK_SIZE mb_partitioning[4][4];

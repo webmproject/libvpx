@@ -50,8 +50,7 @@ static const vp9_prob default_if_uv_probs[INTRA_MODES]
   { 101,  21, 107, 181, 192, 103,  19,  67, 125 } /* y = tm */
 };
 
-static const vp9_prob default_partition_probs[NUM_FRAME_TYPES]
-                                             [NUM_PARTITION_CONTEXTS]
+static const vp9_prob default_partition_probs[FRAME_TYPES][PARTITION_CONTEXTS]
                                              [PARTITION_TYPES - 1] = {
   { /* frame_type = keyframe */
     /* 8x8 -> 4x4 */
@@ -415,7 +414,7 @@ void vp9_adapt_mode_probs(VP9_COMMON *cm) {
                       counts->uv_mode[i], pre_fc->uv_mode_prob[i],
                       fc->uv_mode_prob[i], 0);
 
-  for (i = 0; i < NUM_PARTITION_CONTEXTS; i++)
+  for (i = 0; i < PARTITION_CONTEXTS; i++)
     update_mode_probs(PARTITION_TYPES, vp9_partition_tree,
                       counts->partition[i],
                       pre_fc->partition_prob[INTER_FRAME][i],

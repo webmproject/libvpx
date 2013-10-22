@@ -50,7 +50,7 @@ typedef enum PARTITION_TYPE {
 } PARTITION_TYPE;
 
 #define PARTITION_PLOFFSET   4  // number of probability models per block size
-#define NUM_PARTITION_CONTEXTS (4 * PARTITION_PLOFFSET)
+#define PARTITION_CONTEXTS (4 * PARTITION_PLOFFSET)
 
 typedef enum {
   TX_4X4 = 0,                      // 4x4 dct transform
