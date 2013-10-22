@@ -1,0 +1,106 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdH//6t8\u003d",
+        "filename": "vp9/common/mips/dspr2/vp9_common_dspr2.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 84,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2013-10-22T20:58:10Z",
+      "side": 1,
+      "message": "Where is this function called/used?",
+      "revId": "79c48e516af278547bb2222c4c99059907d3358b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdH//6t0\u003d",
+        "filename": "vp9/common/mips/dspr2/vp9_common_dspr2.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 86,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2013-10-22T20:58:10Z",
+      "side": 1,
+      "message": "This is a weird function. It should be declared static in vp9_idct.c\n\nPlease duplicate the code for this in vp9_itrans16_dspr2.c instead. It\u0027s not an ideal situation, but your code may be broken by a cleanup which makes it static.",
+      "revId": "79c48e516af278547bb2222c4c99059907d3358b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdH//6uE\u003d",
+        "filename": "vp9/common/mips/dspr2/vp9_itrans16_dspr2.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2013-10-22T20:58:10Z",
+      "side": 1,
+      "message": "static",
+      "revId": "79c48e516af278547bb2222c4c99059907d3358b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdH//6uA\u003d",
+        "filename": "vp9/common/mips/dspr2/vp9_itrans16_dspr2.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 406,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2013-10-22T20:58:10Z",
+      "side": 1,
+      "message": "static",
+      "revId": "79c48e516af278547bb2222c4c99059907d3358b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdH//6tw\u003d",
+        "filename": "vp9/common/mips/dspr2/vp9_itrans32_cols_dspr2.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2013-10-22T20:58:10Z",
+      "side": 1,
+      "message": "Where is this function used?",
+      "revId": "79c48e516af278547bb2222c4c99059907d3358b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdH//6ts\u003d",
+        "filename": "vp9/common/mips/dspr2/vp9_itrans8_dspr2.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 203,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2013-10-22T20:58:10Z",
+      "side": 1,
+      "message": "static",
+      "revId": "79c48e516af278547bb2222c4c99059907d3358b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
