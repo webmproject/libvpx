@@ -2,6 +2,720 @@
   "comments": [
     {
       "key": {
+        "uuid": "AAAAdH//65M\u003d",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 12
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-10-22T08:13:37Z",
+      "side": 1,
+      "message": "this style of commit message is generally not helpful when there\u0027s no shared history",
+      "revId": "663916cea7b30c157e4df2de541dd196e07e07f6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdH//65I\u003d",
+        "filename": "libs.mk",
+        "patchSetId": 12
+      },
+      "lineNbr": 125,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-10-22T08:13:37Z",
+      "side": 1,
+      "message": "shouldn\u0027t this be CONFIG_VP9_ENCODER?",
+      "revId": "663916cea7b30c157e4df2de541dd196e07e07f6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdH//65Q\u003d",
+        "filename": "test/svc_test.cc",
+        "patchSetId": 12
+      },
+      "lineNbr": 3,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-10-22T08:13:37Z",
+      "side": 1,
+      "message": "sort these from here down",
+      "revId": "663916cea7b30c157e4df2de541dd196e07e07f6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdH//65U\u003d",
+        "filename": "test/svc_test.cc",
+        "patchSetId": 12
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-10-22T08:13:37Z",
+      "side": 1,
+      "message": "sort",
+      "revId": "663916cea7b30c157e4df2de541dd196e07e07f6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdH//67M\u003d",
+        "filename": "test/svc_test.cc",
+        "patchSetId": 12
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-10-22T08:13:37Z",
+      "side": 1,
+      "message": "you should have a virtual dtor too",
+      "revId": "663916cea7b30c157e4df2de541dd196e07e07f6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdH//67I\u003d",
+        "filename": "test/svc_test.cc",
+        "patchSetId": 12
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-10-22T08:13:37Z",
+      "side": 1,
+      "message": "const",
+      "revId": "663916cea7b30c157e4df2de541dd196e07e07f6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdH//67E\u003d",
+        "filename": "test/svc_test.cc",
+        "patchSetId": 12
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-10-22T08:13:37Z",
+      "side": 1,
+      "message": "order is (expected, actual)",
+      "revId": "663916cea7b30c157e4df2de541dd196e07e07f6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdH//664\u003d",
+        "filename": "test/svc_test.cc",
+        "patchSetId": 12
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-10-22T08:13:37Z",
+      "side": 1,
+      "message": "this project has a preference for associating the * with the variable",
+      "revId": "663916cea7b30c157e4df2de541dd196e07e07f6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdH//67A\u003d",
+        "filename": "test/svc_test.cc",
+        "patchSetId": 12
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-10-22T08:13:37Z",
+      "side": 1,
+      "message": "enums should come first in the section\n\nhttp://google-styleguide.googlecode.com/svn/trunk/cppguide.xml#Declaration_Order",
+      "revId": "663916cea7b30c157e4df2de541dd196e07e07f6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdH//668\u003d",
+        "filename": "test/svc_test.cc",
+        "patchSetId": 12
+      },
+      "lineNbr": 59,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-10-22T08:13:37Z",
+      "side": 1,
+      "message": "this project has a preference for associating the * with the variable",
+      "revId": "663916cea7b30c157e4df2de541dd196e07e07f6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdH//660\u003d",
+        "filename": "test/svc_test.cc",
+        "patchSetId": 12
+      },
+      "lineNbr": 65,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-10-22T08:13:37Z",
+      "side": 1,
+      "message": "fix param order",
+      "revId": "663916cea7b30c157e4df2de541dd196e07e07f6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdH//66w\u003d",
+        "filename": "test/svc_test.cc",
+        "patchSetId": 12
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-10-22T08:13:37Z",
+      "side": 1,
+      "message": "fix param order",
+      "revId": "663916cea7b30c157e4df2de541dd196e07e07f6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdH//66s\u003d",
+        "filename": "test/svc_test.cc",
+        "patchSetId": 12
+      },
+      "lineNbr": 74,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-10-22T08:13:37Z",
+      "side": 1,
+      "message": "fix param order",
+      "revId": "663916cea7b30c157e4df2de541dd196e07e07f6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdH//66o\u003d",
+        "filename": "test/svc_test.cc",
+        "patchSetId": 12
+      },
+      "lineNbr": 79,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-10-22T08:13:37Z",
+      "side": 1,
+      "message": "fix param order",
+      "revId": "663916cea7b30c157e4df2de541dd196e07e07f6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdH//66k\u003d",
+        "filename": "test/svc_test.cc",
+        "patchSetId": 12
+      },
+      "lineNbr": 83,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-10-22T08:13:37Z",
+      "side": 1,
+      "message": "this sentence is incomplete",
+      "revId": "663916cea7b30c157e4df2de541dd196e07e07f6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdH//66g\u003d",
+        "filename": "test/svc_test.cc",
+        "patchSetId": 12
+      },
+      "lineNbr": 92,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-10-22T08:13:37Z",
+      "side": 1,
+      "message": "fix param order",
+      "revId": "663916cea7b30c157e4df2de541dd196e07e07f6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdH//66c\u003d",
+        "filename": "test/svc_test.cc",
+        "patchSetId": 12
+      },
+      "lineNbr": 101,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-10-22T08:13:37Z",
+      "side": 1,
+      "message": "fix param order",
+      "revId": "663916cea7b30c157e4df2de541dd196e07e07f6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdH//66Y\u003d",
+        "filename": "test/svc_test.cc",
+        "patchSetId": 12
+      },
+      "lineNbr": 104,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-10-22T08:13:37Z",
+      "side": 1,
+      "message": "prefer c++ style casts",
+      "revId": "663916cea7b30c157e4df2de541dd196e07e07f6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdH//66Q\u003d",
+        "filename": "test/svc_test.cc",
+        "patchSetId": 12
+      },
+      "lineNbr": 128,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-10-22T08:13:37Z",
+      "side": 1,
+      "message": "fix param order",
+      "revId": "663916cea7b30c157e4df2de541dd196e07e07f6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdH//66M\u003d",
+        "filename": "test/svc_test.cc",
+        "patchSetId": 12
+      },
+      "lineNbr": 140,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-10-22T08:13:37Z",
+      "side": 1,
+      "message": "fix param order",
+      "revId": "663916cea7b30c157e4df2de541dd196e07e07f6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdH//66I\u003d",
+        "filename": "test/svc_test.cc",
+        "patchSetId": 12
+      },
+      "lineNbr": 143,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-10-22T08:13:37Z",
+      "side": 1,
+      "message": "prefer c++ style casts",
+      "revId": "663916cea7b30c157e4df2de541dd196e07e07f6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdH//66E\u003d",
+        "filename": "test/svc_test.cc",
+        "patchSetId": 12
+      },
+      "lineNbr": 152,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-10-22T08:13:37Z",
+      "side": 1,
+      "message": "fix param order",
+      "revId": "663916cea7b30c157e4df2de541dd196e07e07f6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdH//66A\u003d",
+        "filename": "test/svc_test.cc",
+        "patchSetId": 12
+      },
+      "lineNbr": 155,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-10-22T08:13:37Z",
+      "side": 1,
+      "message": "prefer c++ style casts",
+      "revId": "663916cea7b30c157e4df2de541dd196e07e07f6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdH//658\u003d",
+        "filename": "test/svc_test.cc",
+        "patchSetId": 12
+      },
+      "lineNbr": 161,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-10-22T08:13:37Z",
+      "side": 1,
+      "message": "prefer uint32_t",
+      "revId": "663916cea7b30c157e4df2de541dd196e07e07f6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdH//654\u003d",
+        "filename": "test/svc_test.cc",
+        "patchSetId": 12
+      },
+      "lineNbr": 170,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-10-22T08:13:37Z",
+      "side": 1,
+      "message": "fix param order",
+      "revId": "663916cea7b30c157e4df2de541dd196e07e07f6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdH//650\u003d",
+        "filename": "test/svc_test.cc",
+        "patchSetId": 12
+      },
+      "lineNbr": 173,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-10-22T08:13:37Z",
+      "side": 1,
+      "message": "layer_width and height should be grouped together as they\u0027re more closely related",
+      "revId": "663916cea7b30c157e4df2de541dd196e07e07f6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdH//65w\u003d",
+        "filename": "test/svc_test.cc",
+        "patchSetId": 12
+      },
+      "lineNbr": 175,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-10-22T08:13:37Z",
+      "side": 1,
+      "message": "fix param order",
+      "revId": "663916cea7b30c157e4df2de541dd196e07e07f6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdH//65s\u003d",
+        "filename": "test/svc_test.cc",
+        "patchSetId": 12
+      },
+      "lineNbr": 177,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-10-22T08:13:37Z",
+      "side": 1,
+      "message": "ditto on the param grouping",
+      "revId": "663916cea7b30c157e4df2de541dd196e07e07f6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdH//65o\u003d",
+        "filename": "test/svc_test.cc",
+        "patchSetId": 12
+      },
+      "lineNbr": 180,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-10-22T08:13:37Z",
+      "side": 1,
+      "message": "prefer c++ style casts",
+      "revId": "663916cea7b30c157e4df2de541dd196e07e07f6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdH//65g\u003d",
+        "filename": "test/svc_test.cc",
+        "patchSetId": 12
+      },
+      "lineNbr": 181,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-10-22T08:13:37Z",
+      "side": 1,
+      "message": "prefer c++ style casts",
+      "revId": "663916cea7b30c157e4df2de541dd196e07e07f6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdH//65k\u003d",
+        "filename": "test/svc_test.cc",
+        "patchSetId": 12
+      },
+      "lineNbr": 185,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-10-22T08:13:37Z",
+      "side": 1,
+      "message": "fix param order",
+      "revId": "663916cea7b30c157e4df2de541dd196e07e07f6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdH//65c\u003d",
+        "filename": "test/svc_test.cc",
+        "patchSetId": 12
+      },
+      "lineNbr": 186,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-10-22T08:13:37Z",
+      "side": 1,
+      "message": "prefer c++ style casts",
+      "revId": "663916cea7b30c157e4df2de541dd196e07e07f6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdH//65Y\u003d",
+        "filename": "test/svc_test.cc",
+        "patchSetId": 12
+      },
+      "lineNbr": 187,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-10-22T08:13:37Z",
+      "side": 1,
+      "message": "prefer c++ style casts",
+      "revId": "663916cea7b30c157e4df2de541dd196e07e07f6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdH//65E\u003d",
+        "filename": "vp9_spatial_scalable_encoder.c",
+        "patchSetId": 12
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-10-22T08:13:37Z",
+      "side": 1,
+      "message": "these should be sorted",
+      "revId": "663916cea7b30c157e4df2de541dd196e07e07f6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdH//648\u003d",
+        "filename": "vp9_spatial_scalable_encoder.c",
+        "patchSetId": 12
+      },
+      "lineNbr": 89,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-10-22T08:13:37Z",
+      "side": 1,
+      "message": "prefer preincrement",
+      "revId": "663916cea7b30c157e4df2de541dd196e07e07f6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdH//65A\u003d",
+        "filename": "vp9_spatial_scalable_encoder.c",
+        "patchSetId": 12
+      },
+      "lineNbr": 90,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-10-22T08:13:37Z",
+      "side": 1,
+      "message": "prefer uint8_t",
+      "revId": "663916cea7b30c157e4df2de541dd196e07e07f6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdH//644\u003d",
+        "filename": "vp9_spatial_scalable_encoder.c",
+        "patchSetId": 12
+      },
+      "lineNbr": 123,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-10-22T08:13:37Z",
+      "side": 1,
+      "message": "merge this and the line below + const",
+      "revId": "663916cea7b30c157e4df2de541dd196e07e07f6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdH//640\u003d",
+        "filename": "vp9_spatial_scalable_encoder.c",
+        "patchSetId": 12
+      },
+      "lineNbr": 130,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-10-22T08:13:37Z",
+      "side": 1,
+      "message": "fix param grouping + prefer uint32_t",
+      "revId": "663916cea7b30c157e4df2de541dd196e07e07f6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdH//64w\u003d",
+        "filename": "vp9_spatial_scalable_encoder.c",
+        "patchSetId": 12
+      },
+      "lineNbr": 177,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-10-22T08:13:37Z",
+      "side": 1,
+      "message": "this isn\u0027t available with msvc",
+      "revId": "663916cea7b30c157e4df2de541dd196e07e07f6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdH//64s\u003d",
+        "filename": "vpx/src/svc_encodeframe.c",
+        "patchSetId": 12
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-10-22T08:13:37Z",
+      "side": 1,
+      "message": "sort",
+      "revId": "663916cea7b30c157e4df2de541dd196e07e07f6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdH//64o\u003d",
+        "filename": "vpx/src/svc_encodeframe.c",
+        "patchSetId": 12
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-10-22T08:13:37Z",
+      "side": 1,
+      "message": "associate * with variable",
+      "revId": "663916cea7b30c157e4df2de541dd196e07e07f6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdH//64k\u003d",
+        "filename": "vpx/src/svc_encodeframe.c",
+        "patchSetId": 12
+      },
+      "lineNbr": 208,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-10-22T08:13:37Z",
+      "side": 1,
+      "message": "this is spelled strtok_s under msvc",
+      "revId": "663916cea7b30c157e4df2de541dd196e07e07f6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdH//7A0\u003d",
         "filename": "vpx/vp8cx.h",
         "patchSetId": 12
