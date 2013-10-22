@@ -271,8 +271,7 @@ void vp9_short_fht4x4_sse2(int16_t *input, int16_t *output,
   write_buffer_4x4(output, in);
 }
 
-void vp9_short_fdct8x8_sse2(int16_t *input, int16_t *output, int pitch) {
-  const int stride = pitch >> 1;
+void vp9_short_fdct8x8_sse2(int16_t *input, int16_t *output, int stride) {
   int pass;
   // Constants
   //    When we use them, in one case, they are all the same. In all others

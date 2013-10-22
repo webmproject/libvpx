@@ -230,8 +230,7 @@ static void fdct8(const int16_t *input, int16_t *output) {
   output[7] = dct_const_round_shift(t3);
 }
 
-void vp9_short_fdct8x8_c(int16_t *input, int16_t *final_output, int pitch) {
-  const int stride = pitch >> 1;
+void vp9_short_fdct8x8_c(int16_t *input, int16_t *final_output, int stride) {
   int i, j;
   int16_t intermediate[64];
 
