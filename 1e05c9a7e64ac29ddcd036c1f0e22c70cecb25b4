@@ -16,6 +16,24 @@
       "revId": "1e05c9a7e64ac29ddcd036c1f0e22c70cecb25b4",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdH//62U\u003d",
+        "filename": "vp9/decoder/vp9_decodemv.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 195,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2013-10-22T16:08:25Z",
+      "side": 0,
+      "message": "it is removed (?) see the right side.",
+      "parentUuid": "AAAAdH//68E\u003d",
+      "revId": "1e05c9a7e64ac29ddcd036c1f0e22c70cecb25b4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
