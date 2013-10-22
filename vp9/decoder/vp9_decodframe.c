@@ -74,6 +74,93 @@ static void read_tx_probs(struct tx_probs *tx_probs, vp9_reader *r) {
       vp9_diff_update_prob(r, &tx_probs->p32x32[i][j]);
 }
 
+static void read_switchable_interp_probs(FRAME_CONTEXT *fc, vp9_reader *r) {
+  int i, j;
+  for (j = 0; j < SWITCHABLE_FILTERS + 1; ++j)
+    for (i = 0; i < SWITCHABLE_FILTERS - 1; ++i)
+      vp9_diff_update_prob(r, &fc->switchable_interp_prob[j][i]);
+}
+
+static void read_inter_mode_probs(FRAME_CONTEXT *fc, vp9_reader *r) {
+  int i, j;
+  for (i = 0; i < INTER_MODE_CONTEXTS; ++i)
+    for (j = 0; j < INTER_MODES - 1; ++j)
+      vp9_diff_update_prob(r, &fc->inter_mode_probs[i][j]);
+}
+
+static INLINE COMPPREDMODE_TYPE read_comp_pred_mode(vp9_reader *r) {
+  COMPPREDMODE_TYPE mode = vp9_read_bit(r);
+  if (mode)
+    mode += vp9_read_bit(r);
+  return mode;
+}
+
+static void read_comp_pred(VP9_COMMON *cm, vp9_reader *r) {
+  int i;
+
+  cm->comp_pred_mode = cm->allow_comp_inter_inter ? read_comp_pred_mode(r)
+                                                  : SINGLE_PREDICTION_ONLY;
+
+  if (cm->comp_pred_mode == HYBRID_PREDICTION)
+    for (i = 0; i < COMP_INTER_CONTEXTS; i++)
+      vp9_diff_update_prob(r, &cm->fc.comp_inter_prob[i]);
+
+  if (cm->comp_pred_mode != COMP_PREDICTION_ONLY)
+    for (i = 0; i < REF_CONTEXTS; i++) {
+      vp9_diff_update_prob(r, &cm->fc.single_ref_prob[i][0]);
+      vp9_diff_update_prob(r, &cm->fc.single_ref_prob[i][1]);
+    }
+
+  if (cm->comp_pred_mode != SINGLE_PREDICTION_ONLY)
+    for (i = 0; i < REF_CONTEXTS; i++)
+      vp9_diff_update_prob(r, &cm->fc.comp_ref_prob[i]);
+}
+
+static void update_mv(vp9_reader *r, vp9_prob *p) {
+  if (vp9_read(r, NMV_UPDATE_PROB))
+    *p = (vp9_read_literal(r, 7) << 1) | 1;
+}
+
+static void read_mv_probs(vp9_reader *r, nmv_context *mvc, int allow_hp) {
+  int i, j, k;
+
+  for (j = 0; j < MV_JOINTS - 1; ++j)
+    update_mv(r, &mvc->joints[j]);
+
+  for (i = 0; i < 2; ++i) {
+    nmv_component *const comp = &mvc->comps[i];
+
+    update_mv(r, &comp->sign);
+
+    for (j = 0; j < MV_CLASSES - 1; ++j)
+      update_mv(r, &comp->classes[j]);
+
+    for (j = 0; j < CLASS0_SIZE - 1; ++j)
+      update_mv(r, &comp->class0[j]);
+
+    for (j = 0; j < MV_OFFSET_BITS; ++j)
+      update_mv(r, &comp->bits[j]);
+  }
+
+  for (i = 0; i < 2; ++i) {
+    nmv_component *const comp = &mvc->comps[i];
+
+    for (j = 0; j < CLASS0_SIZE; ++j)
+      for (k = 0; k < 3; ++k)
+        update_mv(r, &comp->class0_fp[j][k]);
+
+    for (j = 0; j < 3; ++j)
+      update_mv(r, &comp->fp[j]);
+  }
+
+  if (allow_hp) {
+    for (i = 0; i < 2; ++i) {
+      update_mv(r, &mvc->comps[i].class0_hp);
+      update_mv(r, &mvc->comps[i].hp);
+    }
+  }
+}
+
 static void setup_plane_dequants(VP9_COMMON *cm, MACROBLOCKD *xd, int q_index) {
   int i;
   xd->plane[0].dequant = cm->y_dequant[q_index];
@@ -900,7 +987,9 @@ static int read_compressed_header(VP9D_COMP *pbi, const uint8_t *data,
                                   size_t partition_size) {
   VP9_COMMON *const cm = &pbi->common;
   MACROBLOCKD *const xd = &pbi->mb;
+  FRAME_CONTEXT *const fc = &cm->fc;
   vp9_reader r;
+  int k;
 
   if (vp9_reader_init(&r, data, partition_size))
     vpx_internal_error(&cm->error, VPX_CODEC_MEM_ERROR,
@@ -908,10 +997,36 @@ static int read_compressed_header(VP9D_COMP *pbi, const uint8_t *data,
 
   cm->tx_mode = xd->lossless ? ONLY_4X4 : read_tx_mode(&r);
   if (cm->tx_mode == TX_MODE_SELECT)
-    read_tx_probs(&cm->fc.tx_probs, &r);
-  read_coef_probs(&cm->fc, cm->tx_mode, &r);
+    read_tx_probs(&fc->tx_probs, &r);
+  read_coef_probs(fc, cm->tx_mode, &r);
 
-  vp9_prepare_read_mode_info(cm, &r);
+  for (k = 0; k < MBSKIP_CONTEXTS; ++k)
+    vp9_diff_update_prob(&r, &fc->mbskip_probs[k]);
+
+  if (!frame_is_intra_only(cm)) {
+    nmv_context *const nmvc = &fc->nmvc;
+    int i, j;
+
+    read_inter_mode_probs(fc, &r);
+
+    if (cm->mcomp_filter_type == SWITCHABLE)
+      read_switchable_interp_probs(fc, &r);
+
+    for (i = 0; i < INTRA_INTER_CONTEXTS; i++)
+      vp9_diff_update_prob(&r, &fc->intra_inter_prob[i]);
+
+    read_comp_pred(cm, &r);
+
+    for (j = 0; j < BLOCK_SIZE_GROUPS; j++)
+      for (i = 0; i < INTRA_MODES - 1; ++i)
+        vp9_diff_update_prob(&r, &fc->y_mode_prob[j][i]);
+
+    for (j = 0; j < PARTITION_CONTEXTS; ++j)
+      for (i = 0; i < PARTITION_TYPES - 1; ++i)
+        vp9_diff_update_prob(&r, &fc->partition_prob[INTER_FRAME][j][i]);
+
+    read_mv_probs(&r, nmvc, cm->allow_high_precision_mv);
+  }
 
   return vp9_reader_has_error(&r);
 }

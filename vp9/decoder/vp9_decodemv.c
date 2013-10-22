@@ -23,7 +23,6 @@
 #include "vp9/decoder/vp9_decodemv.h"
 #include "vp9/decoder/vp9_decodframe.h"
 #include "vp9/decoder/vp9_onyxd_int.h"
-#include "vp9/decoder/vp9_dsubexp.h"
 #include "vp9/decoder/vp9_treereader.h"
 
 static MB_PREDICTION_MODE read_intra_mode(vp9_reader *r, const vp9_prob *p) {
@@ -260,51 +259,6 @@ static INLINE void read_mv(vp9_reader *r, MV *mv, const MV *ref,
   mv->col = ref->col + diff.col;
 }
 
-static void update_mv(vp9_reader *r, vp9_prob *p) {
-  if (vp9_read(r, NMV_UPDATE_PROB))
-    *p = (vp9_read_literal(r, 7) << 1) | 1;
-}
-
-static void read_mv_probs(vp9_reader *r, nmv_context *mvc, int allow_hp) {
-  int i, j, k;
-
-  for (j = 0; j < MV_JOINTS - 1; ++j)
-    update_mv(r, &mvc->joints[j]);
-
-  for (i = 0; i < 2; ++i) {
-    nmv_component *const comp = &mvc->comps[i];
-
-    update_mv(r, &comp->sign);
-
-    for (j = 0; j < MV_CLASSES - 1; ++j)
-      update_mv(r, &comp->classes[j]);
-
-    for (j = 0; j < CLASS0_SIZE - 1; ++j)
-      update_mv(r, &comp->class0[j]);
-
-    for (j = 0; j < MV_OFFSET_BITS; ++j)
-      update_mv(r, &comp->bits[j]);
-  }
-
-  for (i = 0; i < 2; ++i) {
-    nmv_component *const comp = &mvc->comps[i];
-
-    for (j = 0; j < CLASS0_SIZE; ++j)
-      for (k = 0; k < 3; ++k)
-        update_mv(r, &comp->class0_fp[j][k]);
-
-    for (j = 0; j < 3; ++j)
-      update_mv(r, &comp->fp[j]);
-  }
-
-  if (allow_hp) {
-    for (i = 0; i < 2; ++i) {
-      update_mv(r, &mvc->comps[i].class0_hp);
-      update_mv(r, &mvc->comps[i].hp);
-    }
-  }
-}
-
 // Read the referncence frame
 static void read_ref_frames(VP9_COMMON *const cm, MACROBLOCKD *const xd,
                             vp9_reader *r,
@@ -356,26 +310,6 @@ static void read_ref_frames(VP9_COMMON *const cm, MACROBLOCKD *const xd,
   }
 }
 
-static void read_switchable_interp_probs(FRAME_CONTEXT *fc, vp9_reader *r) {
-  int i, j;
-  for (j = 0; j < SWITCHABLE_FILTERS + 1; ++j)
-    for (i = 0; i < SWITCHABLE_FILTERS - 1; ++i)
-      vp9_diff_update_prob(r, &fc->switchable_interp_prob[j][i]);
-}
-
-static void read_inter_mode_probs(FRAME_CONTEXT *fc, vp9_reader *r) {
-  int i, j;
-  for (i = 0; i < INTER_MODE_CONTEXTS; ++i)
-    for (j = 0; j < INTER_MODES - 1; ++j)
-      vp9_diff_update_prob(r, &fc->inter_mode_probs[i][j]);
-}
-
-static INLINE COMPPREDMODE_TYPE read_comp_pred_mode(vp9_reader *r) {
-  COMPPREDMODE_TYPE mode = vp9_read_bit(r);
-  if (mode)
-    mode += vp9_read_bit(r);
-  return mode;
-}
 
 static INLINE INTERPOLATIONFILTERTYPE read_switchable_filter_type(
     VP9_COMMON *const cm, MACROBLOCKD *const xd, vp9_reader *r) {
@@ -606,61 +540,6 @@ static void read_inter_frame_mode_info(VP9_COMMON *const cm,
     read_inter_block_mode_info(cm, xd, mi, mi_row, mi_col, r);
   else
     read_intra_block_mode_info(cm, mi, r);
-}
-
-static void read_comp_pred(VP9_COMMON *cm, vp9_reader *r) {
-  int i;
-
-  cm->comp_pred_mode = cm->allow_comp_inter_inter ? read_comp_pred_mode(r)
-                                                  : SINGLE_PREDICTION_ONLY;
-
-  if (cm->comp_pred_mode == HYBRID_PREDICTION)
-    for (i = 0; i < COMP_INTER_CONTEXTS; i++)
-      vp9_diff_update_prob(r, &cm->fc.comp_inter_prob[i]);
-
-  if (cm->comp_pred_mode != COMP_PREDICTION_ONLY)
-    for (i = 0; i < REF_CONTEXTS; i++) {
-      vp9_diff_update_prob(r, &cm->fc.single_ref_prob[i][0]);
-      vp9_diff_update_prob(r, &cm->fc.single_ref_prob[i][1]);
-    }
-
-  if (cm->comp_pred_mode != SINGLE_PREDICTION_ONLY)
-    for (i = 0; i < REF_CONTEXTS; i++)
-      vp9_diff_update_prob(r, &cm->fc.comp_ref_prob[i]);
-}
-
-void vp9_prepare_read_mode_info(VP9_COMMON *cm, vp9_reader *r) {
-  int k;
-
-  // TODO(jkoleszar): does this clear more than MBSKIP_CONTEXTS? Maybe remove.
-  // vpx_memset(cm->fc.mbskip_probs, 0, sizeof(cm->fc.mbskip_probs));
-  for (k = 0; k < MBSKIP_CONTEXTS; ++k)
-    vp9_diff_update_prob(r, &cm->fc.mbskip_probs[k]);
-
-  if (!frame_is_intra_only(cm)) {
-    nmv_context *const nmvc = &cm->fc.nmvc;
-    int i, j;
-
-    read_inter_mode_probs(&cm->fc, r);
-
-    if (cm->mcomp_filter_type == SWITCHABLE)
-      read_switchable_interp_probs(&cm->fc, r);
-
-    for (i = 0; i < INTRA_INTER_CONTEXTS; i++)
-      vp9_diff_update_prob(r, &cm->fc.intra_inter_prob[i]);
-
-    read_comp_pred(cm, r);
-
-    for (j = 0; j < BLOCK_SIZE_GROUPS; j++)
-      for (i = 0; i < INTRA_MODES - 1; ++i)
-        vp9_diff_update_prob(r, &cm->fc.y_mode_prob[j][i]);
-
-    for (j = 0; j < PARTITION_CONTEXTS; ++j)
-      for (i = 0; i < PARTITION_TYPES - 1; ++i)
-        vp9_diff_update_prob(r, &cm->fc.partition_prob[INTER_FRAME][j][i]);
-
-    read_mv_probs(r, nmvc, cm->allow_high_precision_mv);
-  }
 }
 
 void vp9_read_mode_info(VP9_COMMON *cm, MACROBLOCKD *xd,
