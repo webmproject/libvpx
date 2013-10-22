@@ -204,7 +204,6 @@ typedef struct macroblockd {
 
   int up_available;
   int left_available;
-  int right_available;
 
   /* Distance of MB away from frame edges */
   int mb_to_left_edge;

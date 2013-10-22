@@ -281,7 +281,6 @@ static void set_mi_row_col(VP9_COMMON *cm, MACROBLOCKD *xd,
   // Are edges available for intra prediction?
   xd->up_available    = (mi_row != 0);
   xd->left_available  = (mi_col > cm->cur_tile_mi_col_start);
-  xd->right_available = (mi_col + bw < cm->cur_tile_mi_col_end);
 }
 
 static void set_prev_mi(VP9_COMMON *cm) {
