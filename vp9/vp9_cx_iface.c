@@ -975,37 +975,16 @@ static vpx_codec_err_t vp9e_use_reference(vpx_codec_alg_priv_t *ctx,
 static vpx_codec_err_t vp9e_set_roi_map(vpx_codec_alg_priv_t *ctx,
                                         int ctr_id,
                                         va_list args) {
-  vpx_roi_map_t *data = va_arg(args, vpx_roi_map_t *);
-
-  if (data) {
-    vpx_roi_map_t *roi = (vpx_roi_map_t *)data;
-
-    if (!vp9_set_roimap(ctx->cpi, roi->roi_map, roi->rows, roi->cols,
-                        roi->delta_q, roi->delta_lf, roi->static_threshold))
-      return VPX_CODEC_OK;
-    else
-      return VPX_CODEC_INVALID_PARAM;
-  } else {
-    return VPX_CODEC_INVALID_PARAM;
-  }
+  // TODO(yaowu): Need to re-implement and test for VP9.
+  return VPX_CODEC_INVALID_PARAM;
 }
 
 
 static vpx_codec_err_t vp9e_set_activemap(vpx_codec_alg_priv_t *ctx,
                                           int ctr_id,
                                           va_list args) {
-  vpx_active_map_t *data = va_arg(args, vpx_active_map_t *);
-
-  if (data) {
-    vpx_active_map_t *map = (vpx_active_map_t *)data;
-
-    if (!vp9_set_active_map(ctx->cpi, map->active_map, map->rows, map->cols))
-      return VPX_CODEC_OK;
-    else
-      return VPX_CODEC_INVALID_PARAM;
-  } else {
-    return VPX_CODEC_INVALID_PARAM;
-  }
+  // TODO(yaowu): Need to re-implement and test for VP9.
+  return VPX_CODEC_INVALID_PARAM;
 }
 
 static vpx_codec_err_t vp9e_set_scalemode(vpx_codec_alg_priv_t *ctx,
