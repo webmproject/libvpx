@@ -176,7 +176,6 @@ vpx_codec_err_t vp9_copy_reference_dec(VP9D_PTR ptr,
                                        YV12_BUFFER_CONFIG *sd) {
   VP9D_COMP *pbi = (VP9D_COMP *) ptr;
   VP9_COMMON *cm = &pbi->common;
-  int ref_fb_idx;
 
   /* TODO(jkoleszar): The decoder doesn't have any real knowledge of what the
    * encoder is using the frame buffers for. This is just a stub to keep the
@@ -184,18 +183,15 @@ vpx_codec_err_t vp9_copy_reference_dec(VP9D_PTR ptr,
    * later commit that adds VP9-specific controls for this functionality.
    */
   if (ref_frame_flag == VP9_LAST_FLAG) {
-    ref_fb_idx = cm->ref_frame_map[0];
+    YV12_BUFFER_CONFIG *cfg = &cm->yv12_fb[cm->ref_frame_map[0]];
+    if (!equal_dimensions(cfg, sd))
+      vpx_internal_error(&cm->error, VPX_CODEC_ERROR,
+                         "Incorrect buffer dimensions");
+    else
+      vp8_yv12_copy_frame(cfg, sd);
   } else {
     vpx_internal_error(&cm->error, VPX_CODEC_ERROR,
                        "Invalid reference frame");
-    return cm->error.error_code;
-  }
-
-  if (!equal_dimensions(&cm->yv12_fb[ref_fb_idx], sd)) {
-    vpx_internal_error(&cm->error, VPX_CODEC_ERROR,
-                       "Incorrect buffer dimensions");
-  } else {
-    vp8_yv12_copy_frame(&cm->yv12_fb[ref_fb_idx], sd);
   }
 
   return cm->error.error_code;
@@ -305,7 +301,7 @@ int vp9_receive_compressed_data(VP9D_PTR ptr,
      * thing to do here.
      */
     if (cm->active_ref_idx[0] != INT_MAX)
-      cm->yv12_fb[cm->active_ref_idx[0]].corrupted = 1;
+      get_frame_ref_buffer(cm, 0)->corrupted = 1;
   }
 
   cm->new_fb_idx = get_free_fb(cm);
@@ -322,7 +318,7 @@ int vp9_receive_compressed_data(VP9D_PTR ptr,
      * thing to do here.
      */
     if (cm->active_ref_idx[0] != INT_MAX)
-      cm->yv12_fb[cm->active_ref_idx[0]].corrupted = 1;
+      get_frame_ref_buffer(cm, 0)->corrupted = 1;
 
     if (cm->fb_idx_ref_cnt[cm->new_fb_idx] > 0)
       cm->fb_idx_ref_cnt[cm->new_fb_idx]--;

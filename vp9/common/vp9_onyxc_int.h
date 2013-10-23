@@ -217,6 +217,13 @@ typedef struct VP9Common {
   int cur_tile_mi_row_start, cur_tile_mi_row_end;
 } VP9_COMMON;
 
+// ref == 0 => LAST_FRAME
+// ref == 1 => GOLDEN_FRAME
+// ref == 2 => ALTREF_FRAME
+static YV12_BUFFER_CONFIG *get_frame_ref_buffer(VP9_COMMON *cm, int ref) {
+  return &cm->yv12_fb[cm->active_ref_idx[ref]];
+}
+
 static int get_free_fb(VP9_COMMON *cm) {
   int i;
   for (i = 0; i < NUM_YV12_BUFFERS; i++)
