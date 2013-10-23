@@ -439,16 +439,19 @@ static void extend_for_intra(MACROBLOCKD* const xd, BLOCK_SIZE plane_bsize,
   }
 
   if (xd->mb_to_bottom_edge < 0) {
-    const int bh = 4 << b_height_log2(plane_bsize);
-    const int umv_border_start = bh + (xd->mb_to_bottom_edge >>
-                                       (3 + pd->subsampling_y));
-    int i;
-    const uint8_t c = buf[(umv_border_start - 1) * stride + x];
-    uint8_t *d = &buf[umv_border_start * stride + x];
+    if (xd->left_available || x >= 0) {
+      const int bh = 4 << b_height_log2(plane_bsize);
+      const int umv_border_start =
+          bh + (xd->mb_to_bottom_edge >> (3 + pd->subsampling_y));
 
-    if (y + bh > umv_border_start)
-      for (i = 0; i < bh; ++i, d += stride)
-        *d = c;
+      if (y + bh > umv_border_start) {
+        const uint8_t c = buf[(umv_border_start - 1) * stride + x];
+        uint8_t *d = &buf[umv_border_start * stride + x];
+        int i;
+        for (i = 0; i < bh; ++i, d += stride)
+          *d = c;
+      }
+    }
   }
 }
 static void set_contexts_on_border(MACROBLOCKD *xd,
