@@ -12,7 +12,7 @@
 #include "vp9/common/vp9_idct.h"  // for cospi constants
 #include "vpx_ports/mem.h"
 
-void vp9_short_fdct4x4_sse2(int16_t *input, int16_t *output, int stride) {
+void vp9_fdct4x4_sse2(int16_t *input, int16_t *output, int stride) {
   // The 2D transform is done with two passes which are actually pretty
   // similar. In the first one, we transform the columns and transpose
   // the results. In the second one, we transform the rows. To achieve that,
