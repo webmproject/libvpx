@@ -525,7 +525,7 @@ void vp9_idct8x8_64_add_sse2(const int16_t *input, uint8_t *dest, int stride) {
 
   // 2-D
   for (i = 0; i < 2; i++) {
-    // 8x8 Transpose is copied from vp9_short_fdct8x8_sse2()
+    // 8x8 Transpose is copied from vp9_fdct8x8_sse2()
     TRANSPOSE_8X8(in0, in1, in2, in3, in4, in5, in6, in7, in0, in1, in2, in3,
                   in4, in5, in6, in7);
 
@@ -638,7 +638,7 @@ static void idct8_1d_sse2(__m128i *in) {
   in6 = in[6];
   in7 = in[7];
 
-  // 8x8 Transpose is copied from vp9_short_fdct8x8_sse2()
+  // 8x8 Transpose is copied from vp9_fdct8x8_sse2()
   TRANSPOSE_8X8(in0, in1, in2, in3, in4, in5, in6, in7, in0, in1, in2, in3,
                 in4, in5, in6, in7);
 
