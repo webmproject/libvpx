@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdH//6lI\u003d",
+        "filename": "vp9/common/vp9_blockd.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 438,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2013-10-23T22:09:37Z",
+      "side": 1,
+      "message": "along the lines of multi-threaded tile decoding, this memset can potentially write into buffers of next tile, if the current block is sitting at the right-most edge of the current tile.\n\nwe need to resolve this issue in the next patch.",
+      "revId": "bfc32a28467903de9473de05dca880394c83f14a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdH//6lM\u003d",
+        "filename": "vp9/common/vp9_blockd.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 445,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2013-10-23T22:09:37Z",
+      "side": 1,
+      "message": "fix the indent",
+      "revId": "bfc32a28467903de9473de05dca880394c83f14a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
