@@ -964,8 +964,6 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
     cpi->mb.fwd_txm4x4 = vp9_short_walsh4x4;
   }
 
-  cpi->mb.quantize_b_4x4      = vp9_regular_quantize_b_4x4;
-
   if (cpi->sf.subpel_search_method == SUBPEL_ITERATIVE) {
     cpi->find_fractional_mv_step = vp9_find_best_sub_pixel_iterative;
     cpi->find_fractional_mv_step_comp = vp9_find_best_sub_pixel_comp_iterative;
