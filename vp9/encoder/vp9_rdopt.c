@@ -933,14 +933,15 @@ static void super_block_yrd(VP9_COMP *cpi,
   MACROBLOCKD *xd = &x->e_mbd;
   MB_MODE_INFO *const mbmi = &xd->mi_8x8[0]->mbmi;
   struct rdcost_block_args *rdcost_stack = &cpi->rdcost_stack;
+  const int b_inter_mode = is_inter_block(mbmi);
 
   assert(bs == mbmi->sb_type);
-  if (mbmi->ref_frame[0] > INTRA_FRAME)
+  if (b_inter_mode)
     vp9_subtract_sby(x, bs);
 
   if (cpi->sf.tx_size_search_method == USE_LARGESTALL ||
       (cpi->sf.tx_size_search_method != USE_FULL_RD &&
-       mbmi->ref_frame[0] == INTRA_FRAME)) {
+       !b_inter_mode)) {
     vpx_memset(txfm_cache, 0, TX_MODES * sizeof(int64_t));
     choose_largest_txfm_size(cpi, x, rate, distortion, skip, sse,
                              ref_best_rd, bs);
@@ -950,7 +951,7 @@ static void super_block_yrd(VP9_COMP *cpi,
   }
 
   if (cpi->sf.tx_size_search_method == USE_LARGESTINTRA_MODELINTER &&
-      mbmi->ref_frame[0] > INTRA_FRAME) {
+      b_inter_mode) {
     if (bs >= BLOCK_32X32)
       model_rd_for_sb_y_tx(cpi, bs, TX_32X32, x, xd,
                            &r[TX_32X32][0], &d[TX_32X32], &s[TX_32X32]);
