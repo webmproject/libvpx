@@ -1280,6 +1280,31 @@ void vp9_idct32x32_1024_add_c(const int16_t *input, uint8_t *dest, int stride) {
   }
 }
 
+void vp9_idct32x32_34_add_c(const int16_t *input, uint8_t *dest, int stride) {
+  int16_t out[32 * 32] = {0};
+  int16_t *outptr = out;
+  int i, j;
+  int16_t temp_in[32], temp_out[32];
+
+  // Rows
+  // only upper-left 8x8 has non-zero coeff
+  for (i = 0; i < 8; ++i) {
+    idct32_1d(input, outptr);
+    input += 32;
+    outptr += 32;
+  }
+
+  // Columns
+  for (i = 0; i < 32; ++i) {
+    for (j = 0; j < 32; ++j)
+      temp_in[j] = out[j * 32 + i];
+    idct32_1d(temp_in, temp_out);
+    for (j = 0; j < 32; ++j)
+      dest[j * stride + i] = clip_pixel(ROUND_POWER_OF_TWO(temp_out[j], 6)
+                                  + dest[j * stride + i]);
+  }
+}
+
 void vp9_idct32x32_1_add_c(const int16_t *input, uint8_t *dest, int stride) {
   int i, j;
   int a1;
@@ -1350,6 +1375,9 @@ void vp9_idct32x32_add(const int16_t *input, uint8_t *dest, int stride,
   if (eob) {
     if (eob == 1)
       vp9_idct32x32_1_add(input, dest, stride);
+    else if (eob <= 34)
+      // non-zero coeff only in upper-left 8x8
+      vp9_idct32x32_34_add(input, dest, stride);
     else
       vp9_idct32x32_1024_add(input, dest, stride);
   }

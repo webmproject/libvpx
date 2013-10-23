@@ -294,6 +294,9 @@ specialize vp9_idct16x16_10_add sse2 neon
 prototype void vp9_idct32x32_1024_add "const int16_t *input, uint8_t *dest, int dest_stride"
 specialize vp9_idct32x32_1024_add sse2 neon
 
+prototype void vp9_idct32x32_34_add "const int16_t *input, uint8_t *dest, int dest_stride"
+specialize vp9_idct32x32_34_add sse2
+
 prototype void vp9_idct32x32_1_add "const int16_t *input, uint8_t *dest, int dest_stride"
 specialize vp9_idct32x32_1_add sse2
 
