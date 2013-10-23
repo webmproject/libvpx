@@ -50,6 +50,7 @@ UTILS-$(CONFIG_VP8_ENCODER)    += vp8_scalable_patterns.c
 vp8_scalable_patterns.GUID   = 0D6A210B-F482-4D6F-8570-4A9C01ACC88C
 vp8_scalable_patterns.DESCRIPTION = Temporal Scalability Encoder
 UTILS-$(CONFIG_VP9_ENCODER)    += vp9_spatial_scalable_encoder.c
+vp9_spatial_scalable_encoder.SRCS += args.c args.h
 vp9_spatial_scalable_encoder.GUID   = 4A38598D-627D-4505-9C7B-D4020C84100D
 vp9_spatial_scalable_encoder.DESCRIPTION = Spatial Scalable Encoder
 
