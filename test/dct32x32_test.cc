@@ -150,7 +150,7 @@ TEST_P(Trans32x32Test, CoeffCheck) {
       input_block[j] = rnd.Rand8() - rnd.Rand8();
 
     const int stride = 32;
-    vp9_short_fdct32x32_c(input_block, output_ref_block, stride);
+    vp9_fdct32x32_c(input_block, output_ref_block, stride);
     REGISTER_STATE_CHECK(fwd_txfm_(input_block, output_block, stride));
 
     if (version_ == 0) {
@@ -188,7 +188,7 @@ TEST_P(Trans32x32Test, MemCheck) {
         input_extreme_block[j] = -255;
 
     const int stride = 32;
-    vp9_short_fdct32x32_c(input_extreme_block, output_ref_block, stride);
+    vp9_fdct32x32_c(input_extreme_block, output_ref_block, stride);
     REGISTER_STATE_CHECK(fwd_txfm_(input_extreme_block, output_block, stride));
 
     // The minimum quant value is 4.
@@ -246,16 +246,16 @@ using std::tr1::make_tuple;
 INSTANTIATE_TEST_CASE_P(
     C, Trans32x32Test,
     ::testing::Values(
-        make_tuple(&vp9_short_fdct32x32_c, &vp9_idct32x32_1024_add_c, 0),
-        make_tuple(&vp9_short_fdct32x32_rd_c, &vp9_idct32x32_1024_add_c, 1)));
+        make_tuple(&vp9_fdct32x32_c, &vp9_idct32x32_1024_add_c, 0),
+        make_tuple(&vp9_fdct32x32_rd_c, &vp9_idct32x32_1024_add_c, 1)));
 
 #if HAVE_SSE2
 INSTANTIATE_TEST_CASE_P(
     SSE2, Trans32x32Test,
     ::testing::Values(
-        make_tuple(&vp9_short_fdct32x32_sse2,
+        make_tuple(&vp9_fdct32x32_sse2,
                    &vp9_idct32x32_1024_add_sse2, 0),
-        make_tuple(&vp9_short_fdct32x32_rd_sse2,
+        make_tuple(&vp9_fdct32x32_rd_sse2,
                    &vp9_idct32x32_1024_add_sse2, 1)));
 #endif
 }  // namespace

@@ -1311,7 +1311,7 @@ static void dct32_1d(const int *input, int *output, int round) {
   output[31] = dct_32_round(step[31] * cospi_31_64 + step[16] * -cospi_1_64);
 }
 
-void vp9_short_fdct32x32_c(int16_t *input, int16_t *out, int stride) {
+void vp9_fdct32x32_c(int16_t *input, int16_t *out, int stride) {
   int i, j;
   int output[32 * 32];
 
@@ -1339,7 +1339,7 @@ void vp9_short_fdct32x32_c(int16_t *input, int16_t *out, int stride) {
 // Note that although we use dct_32_round in dct32_1d computation flow,
 // this 2d fdct32x32 for rate-distortion optimization loop is operating
 // within 16 bits precision.
-void vp9_short_fdct32x32_rd_c(int16_t *input, int16_t *out, int stride) {
+void vp9_fdct32x32_rd_c(int16_t *input, int16_t *out, int stride) {
   int i, j;
   int output[32 * 32];
 
