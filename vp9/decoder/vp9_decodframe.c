@@ -41,6 +41,33 @@ static int read_be32(const uint8_t *p) {
   return (p[0] << 24) | (p[1] << 16) | (p[2] << 8) | p[3];
 }
 
+static int is_compound_prediction_allowed(const VP9_COMMON *cm) {
+  int i;
+  for (i = 1; i < ALLOWED_REFS_PER_FRAME; ++i)
+    if  (cm->ref_frame_sign_bias[i + 1] != cm->ref_frame_sign_bias[1])
+      return 1;
+
+  return 0;
+}
+
+static void setup_compound_prediction(VP9_COMMON *cm) {
+  if (cm->ref_frame_sign_bias[LAST_FRAME] ==
+          cm->ref_frame_sign_bias[GOLDEN_FRAME]) {
+    cm->comp_fixed_ref = ALTREF_FRAME;
+    cm->comp_var_ref[0] = LAST_FRAME;
+    cm->comp_var_ref[1] = GOLDEN_FRAME;
+  } else if (cm->ref_frame_sign_bias[LAST_FRAME] ==
+                 cm->ref_frame_sign_bias[ALTREF_FRAME]) {
+    cm->comp_fixed_ref = GOLDEN_FRAME;
+    cm->comp_var_ref[0] = LAST_FRAME;
+    cm->comp_var_ref[1] = ALTREF_FRAME;
+  } else {
+    cm->comp_fixed_ref = LAST_FRAME;
+    cm->comp_var_ref[0] = GOLDEN_FRAME;
+    cm->comp_var_ref[1] = ALTREF_FRAME;
+  }
+}
+
 // len == 0 is not allowed
 static int read_is_valid(const uint8_t *start, size_t len, const uint8_t *end) {
   return start + len > start && start + len <= end;
@@ -98,8 +125,11 @@ static INLINE COMPPREDMODE_TYPE read_comp_pred_mode(vp9_reader *r) {
 static void read_comp_pred(VP9_COMMON *cm, vp9_reader *r) {
   int i;
 
-  cm->comp_pred_mode = cm->allow_comp_inter_inter ? read_comp_pred_mode(r)
-                                                  : SINGLE_PREDICTION_ONLY;
+  const int compound_allowed = is_compound_prediction_allowed(cm);
+  cm->comp_pred_mode = compound_allowed ? read_comp_pred_mode(r)
+                                        : SINGLE_PREDICTION_ONLY;
+  if (compound_allowed)
+    setup_compound_prediction(cm);
 
   if (cm->comp_pred_mode == HYBRID_PREDICTION)
     for (i = 0; i < COMP_INTER_CONTEXTS; i++)
@@ -834,34 +864,6 @@ static void error_handler(void *data, size_t bit_offset) {
   vpx_internal_error(&cm->error, VPX_CODEC_CORRUPT_FRAME, "Truncated packet");
 }
 
-static void setup_inter_inter(VP9_COMMON *cm) {
-  int i;
-
-  cm->allow_comp_inter_inter = 0;
-  for (i = 1; i < ALLOWED_REFS_PER_FRAME; ++i)
-    cm->allow_comp_inter_inter |=
-        cm->ref_frame_sign_bias[i + 1] != cm->ref_frame_sign_bias[1];
-
-  if (cm->allow_comp_inter_inter) {
-    // which one is always-on in comp inter-inter?
-    if (cm->ref_frame_sign_bias[LAST_FRAME] ==
-        cm->ref_frame_sign_bias[GOLDEN_FRAME]) {
-      cm->comp_fixed_ref = ALTREF_FRAME;
-      cm->comp_var_ref[0] = LAST_FRAME;
-      cm->comp_var_ref[1] = GOLDEN_FRAME;
-    } else if (cm->ref_frame_sign_bias[LAST_FRAME] ==
-               cm->ref_frame_sign_bias[ALTREF_FRAME]) {
-      cm->comp_fixed_ref = GOLDEN_FRAME;
-      cm->comp_var_ref[0] = LAST_FRAME;
-      cm->comp_var_ref[1] = ALTREF_FRAME;
-    } else {
-      cm->comp_fixed_ref = LAST_FRAME;
-      cm->comp_var_ref[0] = GOLDEN_FRAME;
-      cm->comp_var_ref[1] = ALTREF_FRAME;
-    }
-  }
-}
-
 #define RESERVED \
   if (vp9_rb_read_bit(rb)) \
       vpx_internal_error(&cm->error, VPX_CODEC_UNSUP_BITSTREAM, \
@@ -953,8 +955,6 @@ static size_t read_uncompressed_header(VP9D_COMP *pbi,
 
       for (i = 0; i < ALLOWED_REFS_PER_FRAME; ++i)
         vp9_setup_scale_factors(cm, i);
-
-      setup_inter_inter(cm);
     }
   }
 
