@@ -707,8 +707,8 @@ specialize vp9_short_fdct32x32 sse2
 prototype void vp9_short_fdct32x32_rd "int16_t *InputData, int16_t *OutputData, int stride"
 specialize vp9_short_fdct32x32_rd sse2
 
-prototype void vp9_short_fdct16x16 "int16_t *InputData, int16_t *OutputData, int stride"
-specialize vp9_short_fdct16x16 sse2
+prototype void vp9_fdct16x16 "int16_t *input, int16_t *output, int stride"
+specialize vp9_fdct16x16 sse2
 
 prototype void vp9_short_walsh4x4 "int16_t *InputData, int16_t *OutputData, int pitch"
 specialize vp9_short_walsh4x4

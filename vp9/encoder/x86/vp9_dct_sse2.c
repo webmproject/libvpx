@@ -1054,7 +1054,7 @@ void vp9_short_fht8x8_sse2(int16_t *input, int16_t *output,
   write_buffer_8x8(output, in, 8);
 }
 
-void vp9_short_fdct16x16_sse2(int16_t *input, int16_t *output, int stride) {
+void vp9_fdct16x16_sse2(int16_t *input, int16_t *output, int stride) {
   // The 2D transform is done with two passes which are actually pretty
   // similar. In the first one, we transform the columns and transpose
   // the results. In the second one, we transform the rows. To achieve that,
