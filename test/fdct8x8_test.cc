@@ -35,7 +35,7 @@ typedef void (*iht_t) (const int16_t *in, uint8_t *dst, int stride,
               int tx_type);
 
 void fdct8x8_ref(int16_t *in, int16_t *out, int stride, int tx_type) {
-  vp9_short_fdct8x8_c(in, out, stride);
+  vp9_fdct8x8_c(in, out, stride);
 }
 
 void fht8x8_ref(int16_t *in, int16_t *out, int stride, int tx_type) {
@@ -297,7 +297,7 @@ using std::tr1::make_tuple;
 INSTANTIATE_TEST_CASE_P(
     C, FwdTrans8x8DCT,
     ::testing::Values(
-        make_tuple(&vp9_short_fdct8x8_c, &vp9_idct8x8_64_add_c, 0)));
+        make_tuple(&vp9_fdct8x8_c, &vp9_idct8x8_64_add_c, 0)));
 INSTANTIATE_TEST_CASE_P(
     C, FwdTrans8x8HT,
     ::testing::Values(
@@ -310,7 +310,7 @@ INSTANTIATE_TEST_CASE_P(
 INSTANTIATE_TEST_CASE_P(
     SSE2, FwdTrans8x8DCT,
     ::testing::Values(
-        make_tuple(&vp9_short_fdct8x8_sse2, &vp9_idct8x8_64_add_sse2, 0)));
+        make_tuple(&vp9_fdct8x8_sse2, &vp9_idct8x8_64_add_sse2, 0)));
 INSTANTIATE_TEST_CASE_P(
     SSE2, FwdTrans8x8HT,
     ::testing::Values(
