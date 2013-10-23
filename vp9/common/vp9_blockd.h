@@ -201,6 +201,7 @@ typedef struct macroblockd {
   // A NULL indicates that the 8x8 is not part of the image
   MODE_INFO **mi_8x8;
   MODE_INFO **prev_mi_8x8;
+  MODE_INFO *mi_stream;
 
   int up_available;
   int left_available;

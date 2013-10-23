@@ -260,7 +260,6 @@ static int decode_tokens(VP9_COMMON *const cm, MACROBLOCKD *const xd,
 }
 
 static void set_offsets(VP9D_COMP *pbi, BLOCK_SIZE bsize,
-                        int tile_col,
                         int mi_row, int mi_col) {
   VP9_COMMON *const cm = &pbi->common;
   MACROBLOCKD *const xd = &pbi->mb;
@@ -274,9 +273,9 @@ static void set_offsets(VP9D_COMP *pbi, BLOCK_SIZE bsize,
   xd->prev_mi_8x8 = cm->prev_mi_grid_visible + offset;
 
   // we are using the mode info context stream here
-  xd->mi_8x8[0] = pbi->mi_streams[tile_col];
+  xd->mi_8x8[0] = xd->mi_stream;
   xd->mi_8x8[0]->mbmi.sb_type = bsize;
-  pbi->mi_streams[tile_col]++;
+  ++xd->mi_stream;
 
   // Special case: if prev_mi is NULL, the previous mode info context
   // cannot be used.
@@ -306,8 +305,7 @@ static void set_ref(VP9_COMMON *const cm, MACROBLOCKD *const xd,
   xd->corrupted |= cfg->corrupted;
 }
 
-static void decode_modes_b(VP9D_COMP *pbi, int tile_col,
-                           int mi_row, int mi_col,
+static void decode_modes_b(VP9D_COMP *pbi, int mi_row, int mi_col,
                            vp9_reader *r, BLOCK_SIZE bsize, int index) {
   VP9_COMMON *const cm = &pbi->common;
   MACROBLOCKD *const xd = &pbi->mb;
@@ -319,7 +317,7 @@ static void decode_modes_b(VP9D_COMP *pbi, int tile_col,
     if (index > 0)
       return;
 
-  set_offsets(pbi, bsize, tile_col, mi_row, mi_col);
+  set_offsets(pbi, bsize, mi_row, mi_col);
   vp9_read_mode_info(cm, xd, mi_row, mi_col, r);
 
   if (less8x8)
@@ -356,8 +354,7 @@ static void decode_modes_b(VP9D_COMP *pbi, int tile_col,
   xd->corrupted |= vp9_reader_has_error(r);
 }
 
-static void decode_modes_sb(VP9D_COMP *pbi, int tile_col,
-                            int mi_row, int mi_col,
+static void decode_modes_sb(VP9D_COMP *pbi, int mi_row, int mi_col,
                             vp9_reader* r, BLOCK_SIZE bsize, int index) {
   VP9_COMMON *const cm = &pbi->common;
   const int hbs = num_8x8_blocks_wide_lookup[bsize] / 2;
@@ -393,23 +390,23 @@ static void decode_modes_sb(VP9D_COMP *pbi, int tile_col,
 
   switch (partition) {
     case PARTITION_NONE:
-      decode_modes_b(pbi, tile_col, mi_row, mi_col, r, subsize, 0);
+      decode_modes_b(pbi, mi_row, mi_col, r, subsize, 0);
       break;
     case PARTITION_HORZ:
-      decode_modes_b(pbi, tile_col, mi_row, mi_col, r, subsize, 0);
+      decode_modes_b(pbi, mi_row, mi_col, r, subsize, 0);
       if (mi_row + hbs < cm->mi_rows)
-        decode_modes_b(pbi, tile_col, mi_row + hbs, mi_col, r, subsize, 1);
+        decode_modes_b(pbi, mi_row + hbs, mi_col, r, subsize, 1);
       break;
     case PARTITION_VERT:
-      decode_modes_b(pbi, tile_col, mi_row, mi_col, r, subsize, 0);
+      decode_modes_b(pbi, mi_row, mi_col, r, subsize, 0);
       if (mi_col + hbs < cm->mi_cols)
-        decode_modes_b(pbi, tile_col, mi_row, mi_col + hbs, r, subsize, 1);
+        decode_modes_b(pbi, mi_row, mi_col + hbs, r, subsize, 1);
       break;
     case PARTITION_SPLIT: {
       int n;
       for (n = 0; n < 4; n++) {
         const int j = n >> 1, i = n & 1;
-        decode_modes_sb(pbi, tile_col, mi_row + j * hbs, mi_col + i * hbs,
+        decode_modes_sb(pbi, mi_row + j * hbs, mi_col + i * hbs,
                         r, subsize, n);
       }
     } break;
@@ -668,6 +665,9 @@ static void decode_tile(VP9D_COMP *pbi, vp9_reader *r, int tile_col) {
   VP9_COMMON *const cm = &pbi->common;
   int mi_row, mi_col;
   YV12_BUFFER_CONFIG *const fb = &cm->yv12_fb[cm->new_fb_idx];
+  MACROBLOCKD *xd = &pbi->mb;
+
+  xd->mi_stream = pbi->mi_streams[tile_col];
 
   if (pbi->do_loopfilter_inline) {
     LFWorkerData *const lf_data = (LFWorkerData*)pbi->lf_worker.data1;
@@ -686,7 +686,7 @@ static void decode_tile(VP9D_COMP *pbi, vp9_reader *r, int tile_col) {
     vp9_zero(cm->left_seg_context);
     for (mi_col = cm->cur_tile_mi_col_start; mi_col < cm->cur_tile_mi_col_end;
          mi_col += MI_BLOCK_SIZE)
-      decode_modes_sb(pbi, tile_col, mi_row, mi_col, r, BLOCK_64X64, 0);
+      decode_modes_sb(pbi, mi_row, mi_col, r, BLOCK_64X64, 0);
 
     if (pbi->do_loopfilter_inline) {
       const int lf_start = mi_row - MI_BLOCK_SIZE;
