@@ -84,9 +84,11 @@ static int get_unsigned_bits(unsigned int num_values) {
   } while (0)
 #endif
 
-#define SYNC_CODE_0 0x49
-#define SYNC_CODE_1 0x83
-#define SYNC_CODE_2 0x42
+#define VP9_SYNC_CODE_0 0x49
+#define VP9_SYNC_CODE_1 0x83
+#define VP9_SYNC_CODE_2 0x42
+
+#define VP9_FRAME_MARKER 0x2
 
 
 #endif  // VP9_COMMON_VP9_COMMON_H_

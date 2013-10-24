@@ -172,9 +172,9 @@ static vpx_codec_err_t vp9_peek_si(const uint8_t         *data,
       rb.bit_offset += 1;  // show frame
       rb.bit_offset += 1;  // error resilient
 
-      if (vp9_rb_read_literal(&rb, 8) != SYNC_CODE_0 ||
-          vp9_rb_read_literal(&rb, 8) != SYNC_CODE_1 ||
-          vp9_rb_read_literal(&rb, 8) != SYNC_CODE_2) {
+      if (vp9_rb_read_literal(&rb, 8) != VP9_SYNC_CODE_0 ||
+          vp9_rb_read_literal(&rb, 8) != VP9_SYNC_CODE_1 ||
+          vp9_rb_read_literal(&rb, 8) != VP9_SYNC_CODE_2) {
         return VPX_CODEC_UNSUP_BITSTREAM;
       }
 
