@@ -44,6 +44,7 @@ typedef struct VP9Decompressor {
      tile column index. */
   MODE_INFO **mi_streams;
 
+  ENTROPY_CONTEXT *above_context[MAX_MB_PLANE];
   PARTITION_CONTEXT *above_seg_context;
 } VP9D_COMP;
 

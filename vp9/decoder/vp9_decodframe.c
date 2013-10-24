@@ -204,7 +204,8 @@ static void setup_plane_dequants(VP9_COMMON *cm, MACROBLOCKD *xd, int q_index) {
 // tile.
 static void alloc_tile_storage(VP9D_COMP *pbi, int tile_cols) {
   VP9_COMMON *const cm = &pbi->common;
-  int tile_col;
+  const int aligned_mi_cols = mi_cols_aligned_to_sb(cm->mi_cols);
+  int i, tile_col;
 
   CHECK_MEM_ERROR(cm, pbi->mi_streams,
                   vpx_realloc(pbi->mi_streams, tile_cols *
@@ -215,12 +216,24 @@ static void alloc_tile_storage(VP9D_COMP *pbi, int tile_cols) {
         &cm->mi[cm->mi_rows * cm->cur_tile_mi_col_start];
   }
 
+  // 2 contexts per 'mi unit', so that we have one context per 4x4 txfm
+  // block where mi unit size is 8x8.
+  CHECK_MEM_ERROR(cm, pbi->above_context[0],
+                  vpx_realloc(pbi->above_context[0],
+                              sizeof(*pbi->above_context[0]) * MAX_MB_PLANE *
+                              2 * aligned_mi_cols));
+  for (i = 1; i < MAX_MB_PLANE; ++i) {
+    pbi->above_context[i] = pbi->above_context[0] +
+                            i * sizeof(*pbi->above_context[0]) *
+                            2 * aligned_mi_cols;
+  }
+
   // This is sized based on the entire frame. Each tile operates within its
   // column bounds.
   CHECK_MEM_ERROR(cm, pbi->above_seg_context,
                   vpx_realloc(pbi->above_seg_context,
                               sizeof(*pbi->above_seg_context) *
-                              mi_cols_aligned_to_sb(cm->mi_cols)));
+                              aligned_mi_cols));
 }
 
 static void decode_block(int plane, int block, BLOCK_SIZE plane_bsize,
@@ -335,7 +348,7 @@ static void set_offsets(VP9D_COMP *pbi, BLOCK_SIZE bsize,
   // cannot be used.
   xd->last_mi = cm->prev_mi ? xd->prev_mi_8x8[0] : NULL;
 
-  set_skip_context(xd, cm->above_context, cm->left_context, mi_row, mi_col);
+  set_skip_context(xd, xd->above_context, xd->left_context, mi_row, mi_col);
 
   // Distance of Mb to the various image edges. These are specified to 8th pel
   // as they are always compared to values that are in 1/8th pel units
@@ -719,7 +732,12 @@ static void setup_frame_size_with_refs(VP9D_COMP *pbi,
 
 static void setup_tile_context(VP9D_COMP *const pbi, MACROBLOCKD *const xd,
                                int tile_col) {
+  int i;
   xd->mi_stream = pbi->mi_streams[tile_col];
+
+  for (i = 0; i < MAX_MB_PLANE; ++i) {
+    xd->above_context[i] = pbi->above_context[i];
+  }
   // see note in alloc_tile_storage().
   xd->above_seg_context = pbi->above_seg_context;
 }
@@ -744,7 +762,7 @@ static void decode_tile(VP9D_COMP *pbi, vp9_reader *r) {
   for (mi_row = cm->cur_tile_mi_row_start; mi_row < cm->cur_tile_mi_row_end;
        mi_row += MI_BLOCK_SIZE) {
     // For a SB there are 2 left contexts, each pertaining to a MB row within
-    vp9_zero(cm->left_context);
+    vp9_zero(xd->left_context);
     vp9_zero(xd->left_seg_context);
     for (mi_col = cm->cur_tile_mi_col_start; mi_col < cm->cur_tile_mi_col_end;
          mi_col += MI_BLOCK_SIZE)
@@ -811,8 +829,9 @@ static const uint8_t *decode_tiles(VP9D_COMP *pbi, const uint8_t *data) {
 
   // Note: this memset assumes above_context[0], [1] and [2]
   // are allocated as part of the same buffer.
-  vpx_memset(cm->above_context[0], 0,
-             sizeof(ENTROPY_CONTEXT) * MAX_MB_PLANE * (2 * aligned_mi_cols));
+  vpx_memset(pbi->above_context[0], 0,
+             sizeof(*pbi->above_context[0]) * MAX_MB_PLANE *
+             2 * aligned_mi_cols);
 
   vpx_memset(pbi->above_seg_context, 0,
              sizeof(*pbi->above_seg_context) * aligned_mi_cols);
