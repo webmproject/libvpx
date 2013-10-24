@@ -686,31 +686,31 @@ if [ "$CONFIG_INTERNAL_STATS" = "yes" ]; then
 fi
 
 # fdct functions
-prototype void vp9_short_fht4x4 "int16_t *InputData, int16_t *OutputData, int pitch, int tx_type"
+prototype void vp9_short_fht4x4 "const int16_t *input, int16_t *output, int stride, int tx_type"
 specialize vp9_short_fht4x4 sse2
 
-prototype void vp9_short_fht8x8 "int16_t *InputData, int16_t *OutputData, int pitch, int tx_type"
+prototype void vp9_short_fht8x8 "const int16_t *input, int16_t *output, int stride, int tx_type"
 specialize vp9_short_fht8x8 sse2
 
-prototype void vp9_short_fht16x16 "int16_t *InputData, int16_t *OutputData, int pitch, int tx_type"
+prototype void vp9_short_fht16x16 "const int16_t *input, int16_t *output, int stride, int tx_type"
 specialize vp9_short_fht16x16 sse2
 
-prototype void vp9_fwht4x4 "int16_t *input, int16_t *output, int stride"
+prototype void vp9_fwht4x4 "const int16_t *input, int16_t *output, int stride"
 specialize vp9_fwht4x4
 
-prototype void vp9_fdct4x4 "int16_t *input, int16_t *output, int stride"
+prototype void vp9_fdct4x4 "const int16_t *input, int16_t *output, int stride"
 specialize vp9_fdct4x4 sse2
 
-prototype void vp9_fdct8x8 "int16_t *input, int16_t *output, int stride"
+prototype void vp9_fdct8x8 "const int16_t *input, int16_t *output, int stride"
 specialize vp9_fdct8x8 sse2
 
-prototype void vp9_fdct16x16 "int16_t *input, int16_t *output, int stride"
+prototype void vp9_fdct16x16 "const int16_t *input, int16_t *output, int stride"
 specialize vp9_fdct16x16 sse2
 
-prototype void vp9_fdct32x32 "int16_t *input, int16_t *output, int stride"
+prototype void vp9_fdct32x32 "const int16_t *input, int16_t *output, int stride"
 specialize vp9_fdct32x32 sse2
 
-prototype void vp9_fdct32x32_rd "int16_t *input, int16_t *output, int stride"
+prototype void vp9_fdct32x32_rd "const int16_t *input, int16_t *output, int stride"
 specialize vp9_fdct32x32_rd sse2
 
 #

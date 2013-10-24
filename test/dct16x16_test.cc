@@ -257,17 +257,18 @@ void reference_16x16_dct_2d(int16_t input[256], double output[256]) {
   }
 }
 
-typedef void (*fdct_t)(int16_t *in, int16_t *out, int stride);
-typedef void (*idct_t)(const int16_t *in, uint8_t *dst, int stride);
-typedef void (*fht_t) (int16_t *in, int16_t *out, int stride, int tx_type);
-typedef void (*iht_t) (const int16_t *in, uint8_t *dst, int stride,
+typedef void (*fdct_t)(const int16_t *in, int16_t *out, int stride);
+typedef void (*idct_t)(const int16_t *in, uint8_t *out, int stride);
+typedef void (*fht_t) (const int16_t *in, int16_t *out, int stride,
+                       int tx_type);
+typedef void (*iht_t) (const int16_t *in, uint8_t *out, int stride,
                        int tx_type);
 
-void fdct16x16_ref(int16_t *in, int16_t *out, int stride, int tx_type) {
+void fdct16x16_ref(const int16_t *in, int16_t *out, int stride, int tx_type) {
   vp9_fdct16x16_c(in, out, stride);
 }
 
-void fht16x16_ref(int16_t *in, int16_t *out, int stride, int tx_type) {
+void fht16x16_ref(const int16_t *in, int16_t *out, int stride, int tx_type) {
   vp9_short_fht16x16_c(in, out, stride, tx_type);
 }
 
