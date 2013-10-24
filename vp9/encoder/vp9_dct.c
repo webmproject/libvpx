@@ -36,7 +36,7 @@ static void fdct4(const int16_t *input, int16_t *output) {
   output[3] = dct_const_round_shift(temp2);
 }
 
-void vp9_short_fdct4x4_c(int16_t *input, int16_t *output, int stride) {
+void vp9_fdct4x4_c(int16_t *input, int16_t *output, int stride) {
   // The 2D transform is done with two passes which are actually pretty
   // similar. In the first one, we transform the columns and transpose
   // the results. In the second one, we transform the rows. To achieve that,
@@ -585,7 +585,7 @@ void vp9_short_fht8x8_c(int16_t *input, int16_t *output,
 
 /* 4-point reversible, orthonormal Walsh-Hadamard in 3.5 adds, 0.5 shifts per
    pixel. */
-void vp9_short_walsh4x4_c(int16_t *input, int16_t *output, int stride) {
+void vp9_fwht4x4_c(int16_t *input, int16_t *output, int stride) {
   int i;
   int a1, b1, c1, d1, e1;
   int16_t *ip = input;

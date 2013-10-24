@@ -27,7 +27,7 @@ using libvpx_test::ACMRandom;
 namespace {
 void fdct4x4(int16_t *in, int16_t *out, uint8_t* /*dst*/,
              int stride, int /*tx_type*/) {
-  vp9_short_fdct4x4_c(in, out, stride);
+  vp9_fdct4x4_c(in, out, stride);
 }
 void idct4x4_add(int16_t* /*in*/, int16_t *out, uint8_t *dst,
                  int stride, int /*tx_type*/) {
