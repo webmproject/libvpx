@@ -328,7 +328,7 @@ static void set_offsets(VP9D_COMP *pbi, BLOCK_SIZE bsize,
   // cannot be used.
   xd->last_mi = cm->prev_mi ? xd->prev_mi_8x8[0] : NULL;
 
-  set_skip_context(cm, xd, mi_row, mi_col);
+  set_skip_context(xd, cm->above_context, cm->left_context, mi_row, mi_col);
 
   // Distance of Mb to the various image edges. These are specified to 8th pel
   // as they are always compared to values that are in 1/8th pel units

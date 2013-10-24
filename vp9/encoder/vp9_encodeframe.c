@@ -499,7 +499,7 @@ static void set_offsets(VP9_COMP *cpi, int mi_row, int mi_col,
   const int idx_map = mb_row * cm->mb_cols + mb_col;
   const struct segmentation *const seg = &cm->seg;
 
-  set_skip_context(cm, xd, mi_row, mi_col);
+  set_skip_context(xd, cm->above_context, cm->left_context, mi_row, mi_col);
 
   // Activity map pointer
   x->mb_activity_ptr = &cpi->mb_activity_map[idx_map];
