@@ -37,6 +37,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdH//6eY\u003d",
+        "filename": "vp9_spatial_scalable_encoder.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-10-24T17:06:04Z",
+      "side": 1,
+      "message": "Better to include it then if it\u0027s an incompatible change",
+      "parentUuid": "AAAAdH//6fI\u003d",
+      "revId": "1ae1ec994f8d34ea48e78e703857bdd5cce2e7c6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdH//6h8\u003d",
         "filename": "vp9_spatial_scalable_encoder.c",
         "patchSetId": 2
