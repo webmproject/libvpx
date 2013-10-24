@@ -307,12 +307,14 @@ static INLINE int frame_is_intra_only(const VP9_COMMON *const cm) {
   return cm->frame_type == KEY_FRAME || cm->intra_only;
 }
 
-static INLINE void update_partition_context(VP9_COMMON *cm,
-                                            int mi_row, int mi_col,
-                                            BLOCK_SIZE sb_type,
-                                            BLOCK_SIZE sb_size) {
-  PARTITION_CONTEXT *above_ctx = cm->above_seg_context + mi_col;
-  PARTITION_CONTEXT *left_ctx = cm->left_seg_context + (mi_row & MI_MASK);
+static INLINE void update_partition_context(
+    PARTITION_CONTEXT *above_seg_context,
+    PARTITION_CONTEXT left_seg_context[8],
+    int mi_row, int mi_col,
+    BLOCK_SIZE sb_type,
+    BLOCK_SIZE sb_size) {
+  PARTITION_CONTEXT *above_ctx = above_seg_context + mi_col;
+  PARTITION_CONTEXT *left_ctx = left_seg_context + (mi_row & MI_MASK);
 
   const int bsl = b_width_log2(sb_size), bs = (1 << bsl) / 2;
   const int bwl = b_width_log2(sb_type);
@@ -331,11 +333,13 @@ static INLINE void update_partition_context(VP9_COMMON *cm,
   vpx_memset(left_ctx, pcvalue[bhl == bsl], bs);
 }
 
-static INLINE int partition_plane_context(const VP9_COMMON *cm,
-                                          int mi_row, int mi_col,
-                                          BLOCK_SIZE sb_type) {
-  const PARTITION_CONTEXT *above_ctx = cm->above_seg_context + mi_col;
-  const PARTITION_CONTEXT *left_ctx = cm->left_seg_context + (mi_row & MI_MASK);
+static INLINE int partition_plane_context(
+    const PARTITION_CONTEXT *above_seg_context,
+    const PARTITION_CONTEXT left_seg_context[8],
+    int mi_row, int mi_col,
+    BLOCK_SIZE sb_type) {
+  const PARTITION_CONTEXT *above_ctx = above_seg_context + mi_col;
+  const PARTITION_CONTEXT *left_ctx = left_seg_context + (mi_row & MI_MASK);
 
   int bsl = mi_width_log2(sb_type), bs = 1 << bsl;
   int above = 0, left = 0, i;

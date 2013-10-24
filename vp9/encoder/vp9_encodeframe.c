@@ -818,7 +818,8 @@ static void encode_sb(VP9_COMP *cpi, TOKENEXTRA **tp, int mi_row, int mi_col,
 
   c1 = BLOCK_4X4;
   if (bsize >= BLOCK_8X8) {
-    pl = partition_plane_context(cm, mi_row, mi_col, bsize);
+    pl = partition_plane_context(cm->above_seg_context, cm->left_seg_context,
+                                 mi_row, mi_col, bsize);
     c1 = *(get_sb_partitioning(x, bsize));
   }
   partition = partition_lookup[bsl][c1];
@@ -861,7 +862,8 @@ static void encode_sb(VP9_COMP *cpi, TOKENEXTRA **tp, int mi_row, int mi_col,
   }
 
   if (partition != PARTITION_SPLIT || bsize == BLOCK_8X8)
-    update_partition_context(cm, mi_row, mi_col, c1, bsize);
+    update_partition_context(cm->above_seg_context, cm->left_seg_context,
+                             mi_row, mi_col, c1, bsize);
 }
 
 // Check to see if the given partition size is allowed for a specified number
@@ -1052,7 +1054,8 @@ static void rd_use_partition(VP9_COMP *cpi, MODE_INFO **mi_8x8,
       pick_sb_modes(cpi, mi_row, mi_col, &none_rate, &none_dist, bsize,
                     get_block_context(x, bsize), INT64_MAX);
 
-      pl = partition_plane_context(cm, mi_row, mi_col, bsize);
+      pl = partition_plane_context(cm->above_seg_context, cm->left_seg_context,
+                                   mi_row, mi_col, bsize);
       none_rate += x->partition_cost[pl][PARTITION_NONE];
 
       restore_context(cpi, mi_row, mi_col, a, l, sa, sl, bsize);
@@ -1143,7 +1146,8 @@ static void rd_use_partition(VP9_COMP *cpi, MODE_INFO **mi_8x8,
       assert(0);
   }
 
-  pl = partition_plane_context(cm, mi_row, mi_col, bsize);
+  pl = partition_plane_context(cm->above_seg_context, cm->left_seg_context,
+                               mi_row, mi_col, bsize);
   if (last_part_rate < INT_MAX)
     last_part_rate += x->partition_cost[pl][partition];
 
@@ -1193,10 +1197,12 @@ static void rd_use_partition(VP9_COMP *cpi, MODE_INFO **mi_8x8,
 
       split_rate += rt;
       split_dist += dt;
-      pl = partition_plane_context(cm, mi_row + y_idx, mi_col + x_idx, bsize);
+      pl = partition_plane_context(cm->above_seg_context, cm->left_seg_context,
+                                   mi_row + y_idx, mi_col + x_idx, bsize);
       split_rate += x->partition_cost[pl][PARTITION_NONE];
     }
-    pl = partition_plane_context(cm, mi_row, mi_col, bsize);
+    pl = partition_plane_context(cm->above_seg_context, cm->left_seg_context,
+                                 mi_row, mi_col, bsize);
     if (split_rate < INT_MAX) {
       split_rate += x->partition_cost[pl][PARTITION_SPLIT];
 
@@ -1525,7 +1531,9 @@ static void rd_pick_partition(VP9_COMP *cpi, TOKENEXTRA **tp, int mi_row,
                   get_block_context(x, bsize), best_rd);
     if (this_rate != INT_MAX) {
       if (bsize >= BLOCK_8X8) {
-        pl = partition_plane_context(cm, mi_row, mi_col, bsize);
+        pl = partition_plane_context(cm->above_seg_context,
+                                     cm->left_seg_context,
+                                     mi_row, mi_col, bsize);
         this_rate += x->partition_cost[pl][PARTITION_NONE];
       }
       sum_rd = RDCOST(x->rdmult, x->rddiv, this_rate, this_dist);
@@ -1585,7 +1593,8 @@ static void rd_pick_partition(VP9_COMP *cpi, TOKENEXTRA **tp, int mi_row,
       }
     }
     if (sum_rd < best_rd && i == 4) {
-      pl = partition_plane_context(cm, mi_row, mi_col, bsize);
+      pl = partition_plane_context(cm->above_seg_context, cm->left_seg_context,
+                                   mi_row, mi_col, bsize);
       sum_rate += x->partition_cost[pl][PARTITION_SPLIT];
       sum_rd = RDCOST(x->rdmult, x->rddiv, sum_rate, sum_dist);
       if (sum_rd < best_rd) {
@@ -1641,7 +1650,8 @@ static void rd_pick_partition(VP9_COMP *cpi, TOKENEXTRA **tp, int mi_row,
       }
     }
     if (sum_rd < best_rd) {
-      pl = partition_plane_context(cm, mi_row, mi_col, bsize);
+      pl = partition_plane_context(cm->above_seg_context, cm->left_seg_context,
+                                   mi_row, mi_col, bsize);
       sum_rate += x->partition_cost[pl][PARTITION_HORZ];
       sum_rd = RDCOST(x->rdmult, x->rddiv, sum_rate, sum_dist);
       if (sum_rd < best_rd) {
@@ -1683,7 +1693,8 @@ static void rd_pick_partition(VP9_COMP *cpi, TOKENEXTRA **tp, int mi_row,
       }
     }
     if (sum_rd < best_rd) {
-      pl = partition_plane_context(cm, mi_row, mi_col, bsize);
+      pl = partition_plane_context(cm->above_seg_context, cm->left_seg_context,
+                                   mi_row, mi_col, bsize);
       sum_rate += x->partition_cost[pl][PARTITION_VERT];
       sum_rd = RDCOST(x->rdmult, x->rddiv, sum_rate, sum_dist);
       if (sum_rd < best_rd) {
@@ -1734,7 +1745,8 @@ static void rd_pick_reference_frame(VP9_COMP *cpi, int mi_row, int mi_col) {
     cpi->set_ref_frame_mask = 1;
     pick_sb_modes(cpi, mi_row, mi_col, &r, &d, BLOCK_64X64,
                   get_block_context(x, BLOCK_64X64), INT64_MAX);
-    pl = partition_plane_context(cm, mi_row, mi_col, BLOCK_64X64);
+    pl = partition_plane_context(cm->above_seg_context, cm->left_seg_context,
+                                 mi_row, mi_col, BLOCK_64X64);
     r += x->partition_cost[pl][PARTITION_NONE];
 
     *(get_sb_partitioning(x, BLOCK_64X64)) = BLOCK_64X64;

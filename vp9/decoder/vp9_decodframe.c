@@ -418,7 +418,8 @@ static void decode_modes_sb(VP9D_COMP *pbi, int mi_row, int mi_col,
     int pl;
     const int idx = check_bsize_coverage(hbs, cm->mi_rows, cm->mi_cols,
                                          mi_row, mi_col);
-    pl = partition_plane_context(cm, mi_row, mi_col, bsize);
+    pl = partition_plane_context(cm->above_seg_context, cm->left_seg_context,
+                                 mi_row, mi_col, bsize);
 
     if (idx == 0)
       partition = treed_read(r, vp9_partition_tree,
@@ -464,7 +465,8 @@ static void decode_modes_sb(VP9D_COMP *pbi, int mi_row, int mi_col,
   // update partition context
   if (bsize >= BLOCK_8X8 &&
       (bsize == BLOCK_8X8 || partition != PARTITION_SPLIT))
-    update_partition_context(cm, mi_row, mi_col, subsize, bsize);
+    update_partition_context(cm->above_seg_context, cm->left_seg_context,
+                             mi_row, mi_col, subsize, bsize);
 }
 
 static void setup_token_decoder(const uint8_t *data,
