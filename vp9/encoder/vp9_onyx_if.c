@@ -312,6 +312,9 @@ static void dealloc_compressor_data(VP9_COMP *cpi) {
   cpi->mb_activity_map = 0;
   vpx_free(cpi->mb_norm_activity_map);
   cpi->mb_norm_activity_map = 0;
+
+  vpx_free(cpi->above_seg_context);
+  cpi->above_seg_context = NULL;
 }
 
 // Computes a q delta (in "q index" terms) to get from a starting q value
@@ -1040,6 +1043,11 @@ void vp9_alloc_compressor_data(VP9_COMP *cpi) {
   CHECK_MEM_ERROR(cm, cpi->mb_norm_activity_map,
                   vpx_calloc(sizeof(unsigned int),
                              cm->mb_rows * cm->mb_cols));
+
+  vpx_free(cpi->above_seg_context);
+  CHECK_MEM_ERROR(cm, cpi->above_seg_context,
+                  vpx_calloc(mi_cols_aligned_to_sb(cm->mi_cols),
+                             sizeof(*cpi->above_seg_context)));
 }
 
 
