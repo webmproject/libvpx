@@ -21,7 +21,7 @@
 #include "vp9/common/vp9_reconintra.h"
 
 void vp9_setup_interp_filters(MACROBLOCKD *xd,
-                              INTERPOLATIONFILTERTYPE mcomp_filter_type,
+                              INTERPOLATION_TYPE mcomp_filter_type,
                               VP9_COMMON *cm) {
   if (xd->mi_8x8 && xd->mi_8x8[0]) {
     MB_MODE_INFO *const mbmi = &xd->mi_8x8[0]->mbmi;

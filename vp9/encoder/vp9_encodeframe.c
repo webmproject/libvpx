@@ -2188,7 +2188,7 @@ void vp9_encode_frame(VP9_COMP *cpi) {
 
   if (cpi->sf.RD) {
     int i, pred_type;
-    INTERPOLATIONFILTERTYPE filter_type;
+    INTERPOLATION_TYPE filter_type;
     /*
      * This code does a single RD pass over the whole frame assuming
      * either compound, single or hybrid prediction as per whatever has

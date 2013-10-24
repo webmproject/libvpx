@@ -311,7 +311,7 @@ static void read_ref_frames(VP9_COMMON *const cm, MACROBLOCKD *const xd,
 }
 
 
-static INLINE INTERPOLATIONFILTERTYPE read_switchable_filter_type(
+static INLINE INTERPOLATION_TYPE read_switchable_filter_type(
     VP9_COMMON *const cm, MACROBLOCKD *const xd, vp9_reader *r) {
   const int ctx = vp9_get_pred_context_switchable_interp(xd);
   const int type = treed_read(r, vp9_switchable_interp_tree,

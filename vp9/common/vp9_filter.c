@@ -97,7 +97,7 @@ DECLARE_ALIGNED(256, const subpel_kernel,
   { 0, -3,  1,  38, 64, 32, -1, -3}
 };
 
-const subpel_kernel *vp9_get_filter_kernel(INTERPOLATIONFILTERTYPE type) {
+const subpel_kernel *vp9_get_filter_kernel(INTERPOLATION_TYPE type) {
   switch (type) {
     case EIGHTTAP:
       return vp9_sub_pel_filters_8;
@@ -108,7 +108,7 @@ const subpel_kernel *vp9_get_filter_kernel(INTERPOLATIONFILTERTYPE type) {
     case BILINEAR:
       return vp9_bilinear_filters;
     default:
-      assert(!"Invalid filter type.");
+      assert(!"Invalid interpolation type.");
       return NULL;
   }
 }

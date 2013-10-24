@@ -569,12 +569,12 @@ static void setup_quantization(VP9D_COMP *pbi, struct vp9_read_bit_buffer *rb) {
   xd->itxm_add = xd->lossless ? vp9_iwht4x4_add : vp9_idct4x4_add;
 }
 
-static INTERPOLATIONFILTERTYPE read_interp_filter_type(
-    struct vp9_read_bit_buffer *rb) {
-  const INTERPOLATIONFILTERTYPE literal_to_type[] = { EIGHTTAP_SMOOTH,
-                                                      EIGHTTAP,
-                                                      EIGHTTAP_SHARP,
-                                                      BILINEAR };
+static INTERPOLATION_TYPE read_interp_filter_type(
+                              struct vp9_read_bit_buffer *rb) {
+  const INTERPOLATION_TYPE literal_to_type[] = { EIGHTTAP_SMOOTH,
+                                                 EIGHTTAP,
+                                                 EIGHTTAP_SHARP,
+                                                 BILINEAR };
   return vp9_rb_read_bit(rb) ? SWITCHABLE
                              : literal_to_type[vp9_rb_read_literal(rb, 2)];
 }
@@ -821,9 +821,9 @@ static const uint8_t *decode_tiles(VP9D_COMP *pbi, const uint8_t *data) {
 }
 
 static void check_sync_code(VP9_COMMON *cm, struct vp9_read_bit_buffer *rb) {
-  if (vp9_rb_read_literal(rb, 8) != SYNC_CODE_0 ||
-      vp9_rb_read_literal(rb, 8) != SYNC_CODE_1 ||
-      vp9_rb_read_literal(rb, 8) != SYNC_CODE_2) {
+  if (vp9_rb_read_literal(rb, 8) != VP9_SYNC_CODE_0 ||
+      vp9_rb_read_literal(rb, 8) != VP9_SYNC_CODE_1 ||
+      vp9_rb_read_literal(rb, 8) != VP9_SYNC_CODE_2) {
     vpx_internal_error(&cm->error, VPX_CODEC_UNSUP_BITSTREAM,
                        "Invalid frame sync code");
   }
@@ -875,7 +875,7 @@ static size_t read_uncompressed_header(VP9D_COMP *pbi,
 
   cm->last_frame_type = cm->frame_type;
 
-  if (vp9_rb_read_literal(rb, 2) != 0x2)
+  if (vp9_rb_read_literal(rb, 2) != VP9_FRAME_MARKER)
       vpx_internal_error(&cm->error, VPX_CODEC_UNSUP_BITSTREAM,
                          "Invalid frame marker");
 

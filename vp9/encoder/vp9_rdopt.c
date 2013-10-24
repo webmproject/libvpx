@@ -2621,7 +2621,7 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
                                  int *rate_y, int64_t *distortion_y,
                                  int *rate_uv, int64_t *distortion_uv,
                                  int *mode_excluded, int *disable_skip,
-                                 INTERPOLATIONFILTERTYPE *best_filter,
+                                 INTERPOLATION_TYPE *best_filter,
                                  int_mv (*mode_mv)[MAX_REF_FRAMES],
                                  int mi_row, int mi_col,
                                  int_mv single_newmv[MAX_REF_FRAMES],
@@ -3123,7 +3123,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
   int64_t best_inter_rd = INT64_MAX;
   MB_PREDICTION_MODE best_intra_mode = DC_PRED;
   MV_REFERENCE_FRAME best_inter_ref_frame = LAST_FRAME;
-  INTERPOLATIONFILTERTYPE tmp_best_filter = SWITCHABLE;
+  INTERPOLATION_TYPE tmp_best_filter = SWITCHABLE;
   int rate_uv_intra[TX_SIZES], rate_uv_tokenonly[TX_SIZES];
   int64_t dist_uv[TX_SIZES];
   int skip_uv[TX_SIZES];
@@ -3816,7 +3816,7 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
   vp9_prob comp_mode_p;
   int64_t best_inter_rd = INT64_MAX;
   MV_REFERENCE_FRAME best_inter_ref_frame = LAST_FRAME;
-  INTERPOLATIONFILTERTYPE tmp_best_filter = SWITCHABLE;
+  INTERPOLATION_TYPE tmp_best_filter = SWITCHABLE;
   int rate_uv_intra[TX_SIZES], rate_uv_tokenonly[TX_SIZES];
   int64_t dist_uv[TX_SIZES];
   int skip_uv[TX_SIZES];
