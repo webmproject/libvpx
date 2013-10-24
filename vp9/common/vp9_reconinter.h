@@ -25,7 +25,7 @@ void vp9_build_inter_predictors_sb(MACROBLOCKD *xd, int mi_row, int mi_col,
                                    BLOCK_SIZE bsize);
 
 void vp9_setup_interp_filters(MACROBLOCKD *xd,
-                              INTERPOLATIONFILTERTYPE filter,
+                              INTERPOLATION_TYPE filter,
                               VP9_COMMON *cm);
 
 void vp9_build_inter_predictor(const uint8_t *src, int src_stride,

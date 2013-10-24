@@ -27,7 +27,7 @@ typedef enum {
   EIGHTTAP_SHARP = 2,
   BILINEAR = 3,
   SWITCHABLE = 4  /* should be the last one */
-} INTERPOLATIONFILTERTYPE;
+} INTERPOLATION_TYPE;
 
 typedef int16_t subpel_kernel[SUBPEL_TAPS];
 
@@ -36,7 +36,7 @@ struct subpix_fn_table {
   const subpel_kernel *filter_y;
 };
 
-const subpel_kernel *vp9_get_filter_kernel(INTERPOLATIONFILTERTYPE type);
+const subpel_kernel *vp9_get_filter_kernel(INTERPOLATION_TYPE type);
 
 extern const subpel_kernel vp9_bilinear_filters[SUBPEL_SHIFTS];
 extern const subpel_kernel vp9_sub_pel_filters_6[SUBPEL_SHIFTS];

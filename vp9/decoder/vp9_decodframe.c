@@ -569,12 +569,12 @@ static void setup_quantization(VP9D_COMP *pbi, struct vp9_read_bit_buffer *rb) {
   xd->itxm_add = xd->lossless ? vp9_iwht4x4_add : vp9_idct4x4_add;
 }
 
-static INTERPOLATIONFILTERTYPE read_interp_filter_type(
-    struct vp9_read_bit_buffer *rb) {
-  const INTERPOLATIONFILTERTYPE literal_to_type[] = { EIGHTTAP_SMOOTH,
-                                                      EIGHTTAP,
-                                                      EIGHTTAP_SHARP,
-                                                      BILINEAR };
+static INTERPOLATION_TYPE read_interp_filter_type(
+                              struct vp9_read_bit_buffer *rb) {
+  const INTERPOLATION_TYPE literal_to_type[] = { EIGHTTAP_SMOOTH,
+                                                 EIGHTTAP,
+                                                 EIGHTTAP_SHARP,
+                                                 BILINEAR };
   return vp9_rb_read_bit(rb) ? SWITCHABLE
                              : literal_to_type[vp9_rb_read_literal(rb, 2)];
 }
