@@ -183,14 +183,6 @@ typedef struct VP9Common {
   struct loopfilter lf;
   struct segmentation seg;
 
-  /* Y,U,V */
-  ENTROPY_CONTEXT *above_context[MAX_MB_PLANE];
-  ENTROPY_CONTEXT left_context[MAX_MB_PLANE][16];
-
-  // partition contexts
-  PARTITION_CONTEXT *above_seg_context;
-  PARTITION_CONTEXT left_seg_context[8];
-
   // Context probabilities for reference frame prediction
   int allow_comp_inter_inter;
   MV_REFERENCE_FRAME comp_fixed_ref;

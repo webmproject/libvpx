@@ -41,17 +41,12 @@ void vp9_free_frame_buffers(VP9_COMMON *cm) {
 
   vpx_free(cm->mip);
   vpx_free(cm->prev_mip);
-  vpx_free(cm->above_seg_context);
   vpx_free(cm->last_frame_seg_map);
   vpx_free(cm->mi_grid_base);
   vpx_free(cm->prev_mi_grid_base);
 
-  vpx_free(cm->above_context[0]);
-  for (i = 0; i < MAX_MB_PLANE; i++)
-    cm->above_context[i] = 0;
   cm->mip = NULL;
   cm->prev_mip = NULL;
-  cm->above_seg_context = NULL;
   cm->last_frame_seg_map = NULL;
   cm->mi_grid_base = NULL;
   cm->prev_mi_grid_base = NULL;
@@ -85,7 +80,7 @@ static void setup_mi(VP9_COMMON *cm) {
 }
 
 int vp9_alloc_frame_buffers(VP9_COMMON *cm, int width, int height) {
-  int i, mi_cols;
+  int i;
 
   const int aligned_width = ALIGN_POWER_OF_TWO(width, MI_SIZE_LOG2);
   const int aligned_height = ALIGN_POWER_OF_TWO(height, MI_SIZE_LOG2);
@@ -140,21 +135,6 @@ int vp9_alloc_frame_buffers(VP9_COMMON *cm, int width, int height) {
 
   setup_mi(cm);
 
-  // FIXME(jkoleszar): allocate subsampled arrays for U/V once subsampling
-  // information is exposed at this level
-  mi_cols = mi_cols_aligned_to_sb(cm->mi_cols);
-
-  // 2 contexts per 'mi unit', so that we have one context per 4x4 txfm
-  // block where mi unit size is 8x8.
-  cm->above_context[0] = vpx_calloc(sizeof(ENTROPY_CONTEXT) * MAX_MB_PLANE *
-                                         (2 * mi_cols), 1);
-  if (!cm->above_context[0])
-    goto fail;
-
-  cm->above_seg_context = vpx_calloc(sizeof(PARTITION_CONTEXT) * mi_cols, 1);
-  if (!cm->above_seg_context)
-    goto fail;
-
   // Create the segmentation map structure and set to 0.
   cm->last_frame_seg_map = vpx_calloc(cm->mi_rows * cm->mi_cols, 1);
   if (!cm->last_frame_seg_map)
@@ -186,17 +166,11 @@ void vp9_initialize_common() {
 }
 
 void vp9_update_frame_size(VP9_COMMON *cm) {
-  int i, mi_cols;
   const int aligned_width = ALIGN_POWER_OF_TWO(cm->width, MI_SIZE_LOG2);
   const int aligned_height = ALIGN_POWER_OF_TWO(cm->height, MI_SIZE_LOG2);
 
   set_mb_mi(cm, aligned_width, aligned_height);
   setup_mi(cm);
-
-  mi_cols = mi_cols_aligned_to_sb(cm->mi_cols);
-  for (i = 1; i < MAX_MB_PLANE; i++)
-    cm->above_context[i] =
-        cm->above_context[0] + i * sizeof(ENTROPY_CONTEXT) * 2 * mi_cols;
 
   // Initialize the previous frame segment map to 0.
   if (cm->last_frame_seg_map)
