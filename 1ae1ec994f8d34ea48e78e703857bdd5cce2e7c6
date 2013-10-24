@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdH//6fI\u003d",
+        "filename": "vp9_spatial_scalable_encoder.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1003234
+      },
+      "writtenOn": "2013-10-24T16:42:33Z",
+      "side": 1,
+      "message": "Removing the modifications to this file (vp9_spatial_scalable_encoder.c)  results in compile errors due to a change in the SVC interface. This can be addressed  with one of the following choices:\n\n1) Make the  commit with no changes to this file even though it causes build failures.\n2) Make minimal changes to this file in this CL to remove the build errors. The changes would be marked with a TODO, indicating the sample app is temporarily broken.\n3) Remove this file and modify the .mk file so that the sample app will temporarily disappear. \n4)  include the changes to the sample app along with the underlying library changes. \n\nWith choice 1-3, I will immediately follow up with an additional CL for this sample app.\n\nWhat do you suggest?",
+      "parentUuid": "AAAAdH//6iU\u003d",
+      "revId": "1ae1ec994f8d34ea48e78e703857bdd5cce2e7c6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdH//6h8\u003d",
         "filename": "vp9_spatial_scalable_encoder.c",
         "patchSetId": 2
@@ -30,6 +48,24 @@
       "writtenOn": "2013-10-24T12:39:59Z",
       "side": 1,
       "message": "this is a gnu lib; msvc won\u0027t have this",
+      "revId": "1ae1ec994f8d34ea48e78e703857bdd5cce2e7c6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdH//6go\u003d",
+        "filename": "vp9_spatial_scalable_encoder.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1003234
+      },
+      "writtenOn": "2013-10-24T16:42:33Z",
+      "side": 1,
+      "message": "removed",
+      "parentUuid": "AAAAdH//6h8\u003d",
       "revId": "1ae1ec994f8d34ea48e78e703857bdd5cce2e7c6",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
