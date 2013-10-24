@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdH//6a4\u003d",
+        "filename": "vpx/exports_enc",
+        "patchSetId": 7
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-10-24T19:59:18Z",
+      "side": 1,
+      "message": "why are there 2 different namespaces -\u003e vpx_svc \u0026 svc?",
+      "revId": "033ef120b0de64231bf0811dae872561158c157e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
