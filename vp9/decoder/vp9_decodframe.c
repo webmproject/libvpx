@@ -214,6 +214,13 @@ static void alloc_tile_storage(VP9D_COMP *pbi, int tile_cols) {
     pbi->mi_streams[tile_col] =
         &cm->mi[cm->mi_rows * cm->cur_tile_mi_col_start];
   }
+
+  // This is sized based on the entire frame. Each tile operates within its
+  // column bounds.
+  CHECK_MEM_ERROR(cm, pbi->above_seg_context,
+                  vpx_realloc(pbi->above_seg_context,
+                              sizeof(*pbi->above_seg_context) *
+                              mi_cols_aligned_to_sb(cm->mi_cols)));
 }
 
 static void decode_block(int plane, int block, BLOCK_SIZE plane_bsize,
@@ -404,6 +411,7 @@ static void decode_modes_b(VP9D_COMP *pbi, int mi_row, int mi_col,
 static void decode_modes_sb(VP9D_COMP *pbi, int mi_row, int mi_col,
                             vp9_reader* r, BLOCK_SIZE bsize, int index) {
   VP9_COMMON *const cm = &pbi->common;
+  MACROBLOCKD *const xd = &pbi->mb;
   const int hbs = num_8x8_blocks_wide_lookup[bsize] / 2;
   PARTITION_TYPE partition = PARTITION_NONE;
   BLOCK_SIZE subsize;
@@ -418,7 +426,7 @@ static void decode_modes_sb(VP9D_COMP *pbi, int mi_row, int mi_col,
     int pl;
     const int idx = check_bsize_coverage(hbs, cm->mi_rows, cm->mi_cols,
                                          mi_row, mi_col);
-    pl = partition_plane_context(cm->above_seg_context, cm->left_seg_context,
+    pl = partition_plane_context(xd->above_seg_context, xd->left_seg_context,
                                  mi_row, mi_col, bsize);
 
     if (idx == 0)
@@ -465,7 +473,7 @@ static void decode_modes_sb(VP9D_COMP *pbi, int mi_row, int mi_col,
   // update partition context
   if (bsize >= BLOCK_8X8 &&
       (bsize == BLOCK_8X8 || partition != PARTITION_SPLIT))
-    update_partition_context(cm->above_seg_context, cm->left_seg_context,
+    update_partition_context(xd->above_seg_context, xd->left_seg_context,
                              mi_row, mi_col, subsize, bsize);
 }
 
@@ -709,14 +717,19 @@ static void setup_frame_size_with_refs(VP9D_COMP *pbi,
   setup_display_size(cm, rb);
 }
 
-static void decode_tile(VP9D_COMP *pbi, vp9_reader *r, int tile_col) {
+static void setup_tile_context(VP9D_COMP *const pbi, MACROBLOCKD *const xd,
+                               int tile_col) {
+  xd->mi_stream = pbi->mi_streams[tile_col];
+  // see note in alloc_tile_storage().
+  xd->above_seg_context = pbi->above_seg_context;
+}
+
+static void decode_tile(VP9D_COMP *pbi, vp9_reader *r) {
   const int num_threads = pbi->oxcf.max_threads;
   VP9_COMMON *const cm = &pbi->common;
   int mi_row, mi_col;
   YV12_BUFFER_CONFIG *const fb = &cm->yv12_fb[cm->new_fb_idx];
   MACROBLOCKD *xd = &pbi->mb;
-
-  xd->mi_stream = pbi->mi_streams[tile_col];
 
   if (pbi->do_loopfilter_inline) {
     LFWorkerData *const lf_data = (LFWorkerData*)pbi->lf_worker.data1;
@@ -732,7 +745,7 @@ static void decode_tile(VP9D_COMP *pbi, vp9_reader *r, int tile_col) {
        mi_row += MI_BLOCK_SIZE) {
     // For a SB there are 2 left contexts, each pertaining to a MB row within
     vp9_zero(cm->left_context);
-    vp9_zero(cm->left_seg_context);
+    vp9_zero(xd->left_seg_context);
     for (mi_col = cm->cur_tile_mi_col_start; mi_col < cm->cur_tile_mi_col_end;
          mi_col += MI_BLOCK_SIZE)
       decode_modes_sb(pbi, mi_row, mi_col, r, BLOCK_64X64, 0);
@@ -788,6 +801,7 @@ static const uint8_t *decode_tiles(VP9D_COMP *pbi, const uint8_t *data) {
   vp9_reader residual_bc;
 
   VP9_COMMON *const cm = &pbi->common;
+  MACROBLOCKD *const xd = &pbi->mb;
 
   const uint8_t *const data_end = pbi->source + pbi->source_sz;
   const int aligned_mi_cols = mi_cols_aligned_to_sb(cm->mi_cols);
@@ -800,8 +814,8 @@ static const uint8_t *decode_tiles(VP9D_COMP *pbi, const uint8_t *data) {
   vpx_memset(cm->above_context[0], 0,
              sizeof(ENTROPY_CONTEXT) * MAX_MB_PLANE * (2 * aligned_mi_cols));
 
-  vpx_memset(cm->above_seg_context, 0,
-             sizeof(PARTITION_CONTEXT) * aligned_mi_cols);
+  vpx_memset(pbi->above_seg_context, 0,
+             sizeof(*pbi->above_seg_context) * aligned_mi_cols);
 
   if (pbi->oxcf.inv_tile_order) {
     const uint8_t *data_ptr2[4][1 << 6];
@@ -831,7 +845,8 @@ static const uint8_t *decode_tiles(VP9D_COMP *pbi, const uint8_t *data) {
         setup_token_decoder(data_ptr2[tile_row][tile_col], data_end,
                             data_end - data_ptr2[tile_row][tile_col],
                             &cm->error, &residual_bc);
-        decode_tile(pbi, &residual_bc, tile_col);
+        setup_tile_context(pbi, xd, tile_col);
+        decode_tile(pbi, &residual_bc);
         if (tile_row == tile_rows - 1 && tile_col == tile_cols - 1)
           bc_bak = residual_bc;
       }
@@ -860,7 +875,8 @@ static const uint8_t *decode_tiles(VP9D_COMP *pbi, const uint8_t *data) {
         }
 
         setup_token_decoder(data, data_end, size, &cm->error, &residual_bc);
-        decode_tile(pbi, &residual_bc, tile_col);
+        setup_tile_context(pbi, xd, tile_col);
+        decode_tile(pbi, &residual_bc);
         data += size;
       }
     }
