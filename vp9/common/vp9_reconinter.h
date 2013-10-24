@@ -38,8 +38,10 @@ void vp9_build_inter_predictor(const uint8_t *src, int src_stride,
 
 static int scaled_buffer_offset(int x_offset, int y_offset, int stride,
                                 const struct scale_factors *scale) {
-  const int x = scale ? scale->scale_value_x(x_offset, scale) : x_offset;
-  const int y = scale ? scale->scale_value_y(y_offset, scale) : y_offset;
+  const int x = scale ? scale->sfc->scale_value_x(x_offset, scale->sfc) :
+      x_offset;
+  const int y = scale ? scale->sfc->scale_value_y(y_offset, scale->sfc) :
+      y_offset;
   return y * stride + x;
 }
 

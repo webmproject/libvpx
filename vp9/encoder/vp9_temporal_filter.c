@@ -38,14 +38,15 @@ static void temporal_filter_predictors_mb_c(MACROBLOCKD *xd,
                                             int stride,
                                             int mv_row,
                                             int mv_col,
-                                            uint8_t *pred) {
+                                            uint8_t *pred,
+                                            struct scale_factors *scale) {
   const int which_mv = 0;
   MV mv = { mv_row, mv_col };
 
   vp9_build_inter_predictor(y_mb_ptr, stride,
                             &pred[0], 16,
                             &mv,
-                            &xd->scale_factor[which_mv],
+                            scale,
                             16, 16,
                             which_mv,
                             &xd->subpix, MV_PRECISION_Q3);
@@ -55,7 +56,7 @@ static void temporal_filter_predictors_mb_c(MACROBLOCKD *xd,
   vp9_build_inter_predictor(u_mb_ptr, stride,
                             &pred[256], 8,
                             &mv,
-                            &xd->scale_factor[which_mv],
+                            scale,
                             8, 8,
                             which_mv,
                             &xd->subpix, MV_PRECISION_Q4);
@@ -63,7 +64,7 @@ static void temporal_filter_predictors_mb_c(MACROBLOCKD *xd,
   vp9_build_inter_predictor(v_mb_ptr, stride,
                             &pred[320], 8,
                             &mv,
-                            &xd->scale_factor[which_mv],
+                            scale,
                             8, 8,
                             which_mv,
                             &xd->subpix, MV_PRECISION_Q4);
@@ -186,7 +187,8 @@ static int temporal_filter_find_matching_mb_c(VP9_COMP *cpi,
 static void temporal_filter_iterate_c(VP9_COMP *cpi,
                                       int frame_count,
                                       int alt_ref_index,
-                                      int strength) {
+                                      int strength,
+                                      struct scale_factors *scale) {
   int byte;
   int frame;
   int mb_col, mb_row;
@@ -280,7 +282,7 @@ static void temporal_filter_iterate_c(VP9_COMP *cpi,
            cpi->frames[frame]->y_stride,
            mbd->mi_8x8[0]->bmi[0].as_mv[0].as_mv.row,
            mbd->mi_8x8[0]->bmi[0].as_mv[0].as_mv.col,
-           predictor);
+           predictor, scale);
 
           // Apply the filter (YUV)
           vp9_temporal_filter_apply(f->y_buffer + mb_y_offset, f->y_stride,
@@ -374,6 +376,9 @@ void vp9_temporal_filter_prepare(VP9_COMP *cpi, int distance) {
   const int num_frames_forward = vp9_lookahead_depth(cpi->lookahead)
                                - (num_frames_backward + 1);
 
+  struct scale_factors scale;
+  struct scale_factors_common scale_comm;
+
   switch (blur_type) {
     case 1:
       // Backward Blur
@@ -432,7 +437,7 @@ void vp9_temporal_filter_prepare(VP9_COMP *cpi, int distance) {
 #endif
 
   // Setup scaling factors. Scaling on each of the arnr frames is not supported
-  vp9_setup_scale_factors_for_frame(&cpi->mb.e_mbd.scale_factor[0],
+  vp9_setup_scale_factors_for_frame(&scale, &scale_comm,
       cm->yv12_fb[cm->new_fb_idx].y_crop_width,
       cm->yv12_fb[cm->new_fb_idx].y_crop_height,
       cm->width, cm->height);
@@ -447,7 +452,7 @@ void vp9_temporal_filter_prepare(VP9_COMP *cpi, int distance) {
   }
 
   temporal_filter_iterate_c(cpi, frames_to_blur, frames_to_blur_backward,
-                            strength);
+                            strength, &scale);
 }
 
 void configure_arnr_filter(VP9_COMP *cpi, const unsigned int this_frame,

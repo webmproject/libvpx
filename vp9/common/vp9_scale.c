@@ -12,23 +12,23 @@
 #include "vp9/common/vp9_filter.h"
 #include "vp9/common/vp9_scale.h"
 
-static INLINE int scaled_x(int val, const struct scale_factors *scale) {
-  return val * scale->x_scale_fp >> REF_SCALE_SHIFT;
+static INLINE int scaled_x(int val, const struct scale_factors_common *sfc) {
+  return val * sfc->x_scale_fp >> REF_SCALE_SHIFT;
 }
 
-static INLINE int scaled_y(int val, const struct scale_factors *scale) {
-  return val * scale->y_scale_fp >> REF_SCALE_SHIFT;
+static INLINE int scaled_y(int val, const struct scale_factors_common *sfc) {
+  return val * sfc->y_scale_fp >> REF_SCALE_SHIFT;
 }
 
-static int unscaled_value(int val, const struct scale_factors *scale) {
-  (void) scale;
+static int unscaled_value(int val, const struct scale_factors_common *sfc) {
+  (void) sfc;
   return val;
 }
 
 static MV32 scaled_mv(const MV *mv, const struct scale_factors *scale) {
   const MV32 res = {
-    scaled_y(mv->row, scale) + scale->y_offset_q4,
-    scaled_x(mv->col, scale) + scale->x_offset_q4
+    scaled_y(mv->row, scale->sfc) + scale->y_offset_q4,
+    scaled_x(mv->col, scale->sfc) + scale->x_offset_q4
   };
   return res;
 }
@@ -43,8 +43,8 @@ static MV32 unscaled_mv(const MV *mv, const struct scale_factors *scale) {
 
 static void set_offsets_with_scaling(struct scale_factors *scale,
                                      int row, int col) {
-  scale->x_offset_q4 = scaled_x(col << SUBPEL_BITS, scale) & SUBPEL_MASK;
-  scale->y_offset_q4 = scaled_y(row << SUBPEL_BITS, scale) & SUBPEL_MASK;
+  scale->x_offset_q4 = scaled_x(col << SUBPEL_BITS, scale->sfc) & SUBPEL_MASK;
+  scale->y_offset_q4 = scaled_y(row << SUBPEL_BITS, scale->sfc) & SUBPEL_MASK;
 }
 
 static void set_offsets_without_scaling(struct scale_factors *scale,
@@ -70,31 +70,30 @@ static int check_scale_factors(int other_w, int other_h,
 }
 
 void vp9_setup_scale_factors_for_frame(struct scale_factors *scale,
+                                       struct scale_factors_common *scale_comm,
                                        int other_w, int other_h,
                                        int this_w, int this_h) {
   if (!check_scale_factors(other_w, other_h, this_w, this_h)) {
-    scale->x_scale_fp = REF_INVALID_SCALE;
-    scale->y_scale_fp = REF_INVALID_SCALE;
+    scale_comm->x_scale_fp = REF_INVALID_SCALE;
+    scale_comm->y_scale_fp = REF_INVALID_SCALE;
     return;
   }
 
-  scale->x_scale_fp = get_fixed_point_scale_factor(other_w, this_w);
-  scale->y_scale_fp = get_fixed_point_scale_factor(other_h, this_h);
-  scale->x_step_q4 = scaled_x(16, scale);
-  scale->y_step_q4 = scaled_y(16, scale);
-  scale->x_offset_q4 = 0;  // calculated per block
-  scale->y_offset_q4 = 0;  // calculated per block
+  scale_comm->x_scale_fp = get_fixed_point_scale_factor(other_w, this_w);
+  scale_comm->y_scale_fp = get_fixed_point_scale_factor(other_h, this_h);
+  scale_comm->x_step_q4 = scaled_x(16, scale_comm);
+  scale_comm->y_step_q4 = scaled_y(16, scale_comm);
 
-  if (vp9_is_scaled(scale)) {
-    scale->scale_value_x = scaled_x;
-    scale->scale_value_y = scaled_y;
-    scale->set_scaled_offsets = set_offsets_with_scaling;
-    scale->scale_mv = scaled_mv;
+  if (vp9_is_scaled(scale_comm)) {
+    scale_comm->scale_value_x = scaled_x;
+    scale_comm->scale_value_y = scaled_y;
+    scale_comm->set_scaled_offsets = set_offsets_with_scaling;
+    scale_comm->scale_mv = scaled_mv;
   } else {
-    scale->scale_value_x = unscaled_value;
-    scale->scale_value_y = unscaled_value;
-    scale->set_scaled_offsets = set_offsets_without_scaling;
-    scale->scale_mv = unscaled_mv;
+    scale_comm->scale_value_x = unscaled_value;
+    scale_comm->scale_value_y = unscaled_value;
+    scale_comm->set_scaled_offsets = set_offsets_without_scaling;
+    scale_comm->scale_mv = unscaled_mv;
   }
 
   // TODO(agrange): Investigate the best choice of functions to use here
@@ -103,44 +102,48 @@ void vp9_setup_scale_factors_for_frame(struct scale_factors *scale,
   // applied in one direction only, and not at all for 0,0, seems to give the
   // best quality, but it may be worth trying an additional mode that does
   // do the filtering on full-pel.
-  if (scale->x_step_q4 == 16) {
-    if (scale->y_step_q4 == 16) {
+  if (scale_comm->x_step_q4 == 16) {
+    if (scale_comm->y_step_q4 == 16) {
       // No scaling in either direction.
-      scale->predict[0][0][0] = vp9_convolve_copy;
-      scale->predict[0][0][1] = vp9_convolve_avg;
-      scale->predict[0][1][0] = vp9_convolve8_vert;
-      scale->predict[0][1][1] = vp9_convolve8_avg_vert;
-      scale->predict[1][0][0] = vp9_convolve8_horiz;
-      scale->predict[1][0][1] = vp9_convolve8_avg_horiz;
+      scale_comm->predict[0][0][0] = vp9_convolve_copy;
+      scale_comm->predict[0][0][1] = vp9_convolve_avg;
+      scale_comm->predict[0][1][0] = vp9_convolve8_vert;
+      scale_comm->predict[0][1][1] = vp9_convolve8_avg_vert;
+      scale_comm->predict[1][0][0] = vp9_convolve8_horiz;
+      scale_comm->predict[1][0][1] = vp9_convolve8_avg_horiz;
     } else {
       // No scaling in x direction. Must always scale in the y direction.
-      scale->predict[0][0][0] = vp9_convolve8_vert;
-      scale->predict[0][0][1] = vp9_convolve8_avg_vert;
-      scale->predict[0][1][0] = vp9_convolve8_vert;
-      scale->predict[0][1][1] = vp9_convolve8_avg_vert;
-      scale->predict[1][0][0] = vp9_convolve8;
-      scale->predict[1][0][1] = vp9_convolve8_avg;
+      scale_comm->predict[0][0][0] = vp9_convolve8_vert;
+      scale_comm->predict[0][0][1] = vp9_convolve8_avg_vert;
+      scale_comm->predict[0][1][0] = vp9_convolve8_vert;
+      scale_comm->predict[0][1][1] = vp9_convolve8_avg_vert;
+      scale_comm->predict[1][0][0] = vp9_convolve8;
+      scale_comm->predict[1][0][1] = vp9_convolve8_avg;
     }
   } else {
-    if (scale->y_step_q4 == 16) {
+    if (scale_comm->y_step_q4 == 16) {
       // No scaling in the y direction. Must always scale in the x direction.
-      scale->predict[0][0][0] = vp9_convolve8_horiz;
-      scale->predict[0][0][1] = vp9_convolve8_avg_horiz;
-      scale->predict[0][1][0] = vp9_convolve8;
-      scale->predict[0][1][1] = vp9_convolve8_avg;
-      scale->predict[1][0][0] = vp9_convolve8_horiz;
-      scale->predict[1][0][1] = vp9_convolve8_avg_horiz;
+      scale_comm->predict[0][0][0] = vp9_convolve8_horiz;
+      scale_comm->predict[0][0][1] = vp9_convolve8_avg_horiz;
+      scale_comm->predict[0][1][0] = vp9_convolve8;
+      scale_comm->predict[0][1][1] = vp9_convolve8_avg;
+      scale_comm->predict[1][0][0] = vp9_convolve8_horiz;
+      scale_comm->predict[1][0][1] = vp9_convolve8_avg_horiz;
     } else {
       // Must always scale in both directions.
-      scale->predict[0][0][0] = vp9_convolve8;
-      scale->predict[0][0][1] = vp9_convolve8_avg;
-      scale->predict[0][1][0] = vp9_convolve8;
-      scale->predict[0][1][1] = vp9_convolve8_avg;
-      scale->predict[1][0][0] = vp9_convolve8;
-      scale->predict[1][0][1] = vp9_convolve8_avg;
+      scale_comm->predict[0][0][0] = vp9_convolve8;
+      scale_comm->predict[0][0][1] = vp9_convolve8_avg;
+      scale_comm->predict[0][1][0] = vp9_convolve8;
+      scale_comm->predict[0][1][1] = vp9_convolve8_avg;
+      scale_comm->predict[1][0][0] = vp9_convolve8;
+      scale_comm->predict[1][0][1] = vp9_convolve8_avg;
     }
   }
   // 2D subpel motion always gets filtered in both directions
-  scale->predict[1][1][0] = vp9_convolve8;
-  scale->predict[1][1][1] = vp9_convolve8_avg;
+  scale_comm->predict[1][1][0] = vp9_convolve8;
+  scale_comm->predict[1][1][1] = vp9_convolve8_avg;
+
+  scale->sfc = scale_comm;
+  scale->x_offset_q4 = 0;  // calculated per block
+  scale->y_offset_q4 = 0;  // calculated per block
 }
