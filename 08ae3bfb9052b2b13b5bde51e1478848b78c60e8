@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdH//6kA\u003d",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1002740
+      },
+      "writtenOn": "2013-10-24T00:40:34Z",
+      "side": 1,
+      "message": "There are only two, let\u0027s list them explicitly in the commit message.",
+      "revId": "08ae3bfb9052b2b13b5bde51e1478848b78c60e8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdH//6j8\u003d",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 1002740
+      },
+      "writtenOn": "2013-10-24T00:40:34Z",
+      "side": 1,
+      "message": "nit: waht -\u003e what",
+      "revId": "08ae3bfb9052b2b13b5bde51e1478848b78c60e8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdH//6kE\u003d",
+        "filename": "vp9/vp9_cx_iface.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 980,
+      "author": {
+        "id": 1002740
+      },
+      "writtenOn": "2013-10-24T00:40:34Z",
+      "side": 1,
+      "message": "Commenting out code is ugly, for two reasons:\n\n1) Old code is available in git anyway.\n2) Commented-out code will rot.\n\nSome suggestions:\n\na) Just remove the comment, \"return\" will ensure that code is not executed.\n\nb) Remove that code on 1.3 branch.\n\nc) Remove that code on trunk (history will be in git anyway).",
+      "revId": "08ae3bfb9052b2b13b5bde51e1478848b78c60e8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
