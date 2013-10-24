@@ -16,6 +16,24 @@
       "revId": "033ef120b0de64231bf0811dae872561158c157e",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdH//6aY\u003d",
+        "filename": "vpx/exports_enc",
+        "patchSetId": 7
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 1003234
+      },
+      "writtenOn": "2013-10-24T20:40:30Z",
+      "side": 1,
+      "message": "There is no good reason for the inconsistency.\n\nI will add vpx_ prefix to all exported svc_ functions",
+      "parentUuid": "AAAAdH//6a4\u003d",
+      "revId": "033ef120b0de64231bf0811dae872561158c157e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
