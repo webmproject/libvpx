@@ -501,6 +501,15 @@ webm_guess_framerate(struct input_ctx *input,
   unsigned int i;
   uint64_t     tstamp = 0;
 
+  /* Check to see if we can seek before we parse any data. */
+  if (nestegg_track_seek(input->nestegg_ctx, input->video_track, 0)) {
+    fprintf(stderr,
+            "WARNING: Failed to guess framerate (no Cues), set to 30fps.\n");
+    *fps_num = 30;
+    *fps_den = 1;
+    return 0;
+  }
+
   /* Guess the framerate. Read up to 1 second, or 50 video packets,
    * whichever comes first.
    */
