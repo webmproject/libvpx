@@ -313,6 +313,9 @@ static void dealloc_compressor_data(VP9_COMP *cpi) {
   vpx_free(cpi->mb_norm_activity_map);
   cpi->mb_norm_activity_map = 0;
 
+  vpx_free(cpi->above_context[0]);
+  cpi->above_context[0] = NULL;
+
   vpx_free(cpi->above_seg_context);
   cpi->above_seg_context = NULL;
 }
@@ -1044,6 +1047,14 @@ void vp9_alloc_compressor_data(VP9_COMP *cpi) {
                   vpx_calloc(sizeof(unsigned int),
                              cm->mb_rows * cm->mb_cols));
 
+  // 2 contexts per 'mi unit', so that we have one context per 4x4 txfm
+  // block where mi unit size is 8x8.
+  vpx_free(cpi->above_context[0]);
+  CHECK_MEM_ERROR(cm, cpi->above_context[0],
+                  vpx_calloc(2 * mi_cols_aligned_to_sb(cm->mi_cols) *
+                             MAX_MB_PLANE,
+                             sizeof(*cpi->above_context[0])));
+
   vpx_free(cpi->above_seg_context);
   CHECK_MEM_ERROR(cm, cpi->above_seg_context,
                   vpx_calloc(mi_cols_aligned_to_sb(cm->mi_cols),
@@ -1078,6 +1089,15 @@ static void update_frame_size(VP9_COMP *cpi) {
       vp9_init3smotion_compensation(&cpi->mb, y_stride);
     } else if (cpi->sf.search_method == DIAMOND) {
       vp9_init_dsmotion_compensation(&cpi->mb, y_stride);
+    }
+  }
+
+  {
+    int i;
+    for (i = 1; i < MAX_MB_PLANE; ++i) {
+      cpi->above_context[i] = cpi->above_context[0] +
+                              i * sizeof(*cpi->above_context[0]) * 2 *
+                              mi_cols_aligned_to_sb(cm->mi_cols);
     }
   }
 }
