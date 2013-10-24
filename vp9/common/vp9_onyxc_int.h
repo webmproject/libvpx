@@ -224,6 +224,10 @@ static YV12_BUFFER_CONFIG *get_frame_ref_buffer(VP9_COMMON *cm, int ref) {
   return &cm->yv12_fb[cm->active_ref_idx[ref]];
 }
 
+static YV12_BUFFER_CONFIG *get_frame_new_buffer(VP9_COMMON *cm) {
+  return &cm->yv12_fb[cm->new_fb_idx];
+}
+
 static int get_free_fb(VP9_COMMON *cm) {
   int i;
   for (i = 0; i < NUM_YV12_BUFFERS; i++)

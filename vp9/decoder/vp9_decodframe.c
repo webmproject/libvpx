@@ -317,7 +317,7 @@ static void set_offsets(VP9D_COMP *pbi, BLOCK_SIZE bsize,
   // as they are always compared to values that are in 1/8th pel units
   set_mi_row_col(cm, xd, mi_row, bh, mi_col, bw);
 
-  setup_dst_planes(xd, &cm->yv12_fb[cm->new_fb_idx], mi_row, mi_col);
+  setup_dst_planes(xd, get_frame_new_buffer(cm), mi_row, mi_col);
 }
 
 static void set_ref(VP9_COMMON *const cm, MACROBLOCKD *const xd,
@@ -650,7 +650,7 @@ static void apply_frame_size(VP9D_COMP *pbi, int width, int height) {
     vp9_update_frame_size(cm);
   }
 
-  vp9_realloc_frame_buffer(&cm->yv12_fb[cm->new_fb_idx], cm->width, cm->height,
+  vp9_realloc_frame_buffer(get_frame_new_buffer(cm), cm->width, cm->height,
                            cm->subsampling_x, cm->subsampling_y,
                            VP9BORDERINPIXELS);
 }
@@ -694,14 +694,13 @@ static void decode_tile(VP9D_COMP *pbi, vp9_reader *r, int tile_col) {
   const int num_threads = pbi->oxcf.max_threads;
   VP9_COMMON *const cm = &pbi->common;
   int mi_row, mi_col;
-  YV12_BUFFER_CONFIG *const fb = &cm->yv12_fb[cm->new_fb_idx];
   MACROBLOCKD *xd = &pbi->mb;
 
   xd->mi_stream = pbi->mi_streams[tile_col];
 
   if (pbi->do_loopfilter_inline) {
     LFWorkerData *const lf_data = (LFWorkerData*)pbi->lf_worker.data1;
-    lf_data->frame_buffer = fb;
+    lf_data->frame_buffer = get_frame_new_buffer(cm);
     lf_data->cm = cm;
     lf_data->xd = pbi->mb;
     lf_data->stop = 0;
@@ -1093,7 +1092,7 @@ int vp9_decode_frame(VP9D_COMP *pbi, const uint8_t **p_data_end) {
                                     cm, error_handler };
   const size_t first_partition_size = read_uncompressed_header(pbi, &rb);
   const int keyframe = cm->frame_type == KEY_FRAME;
-  YV12_BUFFER_CONFIG *new_fb = &cm->yv12_fb[cm->new_fb_idx];
+  YV12_BUFFER_CONFIG *new_fb = get_frame_new_buffer(cm);
   const int tile_cols = 1 << cm->log2_tile_cols;
   int tile_col;
 
