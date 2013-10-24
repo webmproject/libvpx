@@ -43,42 +43,30 @@ void vp9_append_sub8x8_mvs_for_idx(VP9_COMMON *cm,
 
 static MB_PREDICTION_MODE left_block_mode(const MODE_INFO *cur_mi,
                                           const MODE_INFO *left_mi, int b) {
-  // FIXME(rbultje, jingning): temporary hack because jenkins doesn't
-  // understand this condition. This will go away soon.
-
   if (b == 0 || b == 2) {
-    /* On L edge, get from MB to left of us */
-    if (!left_mi)
+    if (!left_mi || is_inter_block(&left_mi->mbmi))
       return DC_PRED;
 
-    if (is_inter_block(&left_mi->mbmi))
-      return DC_PRED;
-    else
-      return left_mi->mbmi.sb_type < BLOCK_8X8 ? left_mi->bmi[b + 1].as_mode
-                                               : left_mi->mbmi.mode;
+    return left_mi->mbmi.sb_type < BLOCK_8X8 ? left_mi->bmi[b + 1].as_mode
+                                             : left_mi->mbmi.mode;
+  } else {
+    assert(b == 1 || b == 3);
+    return cur_mi->bmi[b - 1].as_mode;
   }
-  assert(b == 1 || b == 3);
-  return cur_mi->bmi[b - 1].as_mode;
 }
 
-static MB_PREDICTION_MODE above_block_mode(const MODE_INFO *cur_mb,
-                                           const MODE_INFO *above_mb, int b) {
-  const MODE_INFO *mi = cur_mb;
-
-  if (!(b >> 1)) {
-    /* On top edge, get from MB above us */
-    mi = above_mb;
-    if (!mi)
+static MB_PREDICTION_MODE above_block_mode(const MODE_INFO *cur_mi,
+                                           const MODE_INFO *above_mi, int b) {
+  if (b == 0 || b == 1) {
+    if (!above_mi || is_inter_block(&above_mi->mbmi))
       return DC_PRED;
 
-    if (is_inter_block(&mi->mbmi))
-      return DC_PRED;
-    else
-      return mi->mbmi.sb_type < BLOCK_8X8 ? (mi->bmi + 2 + b)->as_mode
-                                          : mi->mbmi.mode;
+    return above_mi->mbmi.sb_type < BLOCK_8X8 ? above_mi->bmi[b + 2].as_mode
+                                              : above_mi->mbmi.mode;
+  } else {
+    assert(b == 2 || b == 3);
+    return cur_mi->bmi[b - 2].as_mode;
   }
-
-  return (mi->bmi + b - 2)->as_mode;
 }
 
 #endif  // VP9_COMMON_VP9_FINDNEARMV_H_
