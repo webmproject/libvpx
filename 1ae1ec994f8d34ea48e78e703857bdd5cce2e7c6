@@ -16,6 +16,23 @@
       "revId": "1ae1ec994f8d34ea48e78e703857bdd5cce2e7c6",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdH//6h8\u003d",
+        "filename": "vp9_spatial_scalable_encoder.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-10-24T12:39:59Z",
+      "side": 1,
+      "message": "this is a gnu lib; msvc won\u0027t have this",
+      "revId": "1ae1ec994f8d34ea48e78e703857bdd5cce2e7c6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
