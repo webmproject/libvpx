@@ -199,6 +199,23 @@ static void setup_plane_dequants(VP9_COMMON *cm, MACROBLOCKD *xd, int q_index) {
     xd->plane[i].dequant = cm->uv_dequant[q_index];
 }
 
+// Allocate storage for each tile column.
+// TODO(jzern): when max_threads <= 1 the same storage could be used for each
+// tile.
+static void alloc_tile_storage(VP9D_COMP *pbi, int tile_cols) {
+  VP9_COMMON *const cm = &pbi->common;
+  int tile_col;
+
+  CHECK_MEM_ERROR(cm, pbi->mi_streams,
+                  vpx_realloc(pbi->mi_streams, tile_cols *
+                              sizeof(*pbi->mi_streams)));
+  for (tile_col = 0; tile_col < tile_cols; ++tile_col) {
+    vp9_get_tile_col_offsets(cm, tile_col);
+    pbi->mi_streams[tile_col] =
+        &cm->mi[cm->mi_rows * cm->cur_tile_mi_col_start];
+  }
+}
+
 static void decode_block(int plane, int block, BLOCK_SIZE plane_bsize,
                          TX_SIZE tx_size, void *arg) {
   MACROBLOCKD* const xd = arg;
@@ -1095,7 +1112,6 @@ int vp9_decode_frame(VP9D_COMP *pbi, const uint8_t **p_data_end) {
   const int keyframe = cm->frame_type == KEY_FRAME;
   YV12_BUFFER_CONFIG *new_fb = &cm->yv12_fb[cm->new_fb_idx];
   const int tile_cols = 1 << cm->log2_tile_cols;
-  int tile_col;
 
   if (!first_partition_size) {
     if (!keyframe) {
@@ -1126,14 +1142,7 @@ int vp9_decode_frame(VP9D_COMP *pbi, const uint8_t **p_data_end) {
   xd->mi_8x8 = cm->mi_grid_visible;
   xd->mode_info_stride = cm->mode_info_stride;
 
-  CHECK_MEM_ERROR(cm, pbi->mi_streams,
-                  vpx_realloc(pbi->mi_streams, tile_cols *
-                              sizeof(*pbi->mi_streams)));
-  for (tile_col = 0; tile_col < tile_cols; ++tile_col) {
-    vp9_get_tile_col_offsets(cm, tile_col);
-    pbi->mi_streams[tile_col] =
-        &cm->mi[cm->mi_rows * cm->cur_tile_mi_col_start];
-  }
+  alloc_tile_storage(pbi, tile_cols);
 
   cm->fc = cm->frame_contexts[cm->frame_context_idx];
 
