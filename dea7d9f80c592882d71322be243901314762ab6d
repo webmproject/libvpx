@@ -16,6 +16,24 @@
       "revId": "dea7d9f80c592882d71322be243901314762ab6d",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX///8w\u003d",
+        "filename": "vp9/encoder/vp9_onyx_if.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 317,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-10-25T15:28:32Z",
+      "side": 1,
+      "message": "this was a progressive set of changes that removed the member in VP9_COMMON as a final step.",
+      "parentUuid": "AAAAdX///9o\u003d",
+      "revId": "dea7d9f80c592882d71322be243901314762ab6d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
