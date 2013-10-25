@@ -462,6 +462,23 @@
     },
     {
       "key": {
+        "uuid": "AAAAdX///3o\u003d",
+        "filename": "vpx/svc_context.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2013-10-25T18:49:59Z",
+      "side": 1,
+      "message": "It may be more convenient overall to just use a MAX_LAYERS macro defined as 8 or something like that, and use quantizer_values[MAX_LAYERS] and scale_factors{MAX_LAYERS] instead.",
+      "revId": "3d663edc0a82ae42eeaec9f09f37741552b2e5d5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdX///+A\u003d",
         "filename": "vpx/vp8cx.h",
         "patchSetId": 8
