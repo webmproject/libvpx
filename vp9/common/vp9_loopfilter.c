@@ -16,12 +16,6 @@
 
 #include "vp9/common/vp9_seg_common.h"
 
-struct loop_filter_info {
-  const uint8_t *mblim;
-  const uint8_t *lim;
-  const uint8_t *hev_thr;
-};
-
 // This structure holds bit masks for all 8x8 blocks in a 64x64 region.
 // Each 1 bit represents a position in which we want to apply the loop filter.
 // Left_ entries refer to whether we apply a filter on the border to the
@@ -259,8 +253,8 @@ static void update_sharpness(loop_filter_info_n *lfi, int sharpness_lvl) {
     if (block_inside_limit < 1)
       block_inside_limit = 1;
 
-    vpx_memset(lfi->lim[lvl], block_inside_limit, SIMD_WIDTH);
-    vpx_memset(lfi->mblim[lvl], (2 * (lvl + 2) + block_inside_limit),
+    vpx_memset(lfi->lfthr[lvl].lim, block_inside_limit, SIMD_WIDTH);
+    vpx_memset(lfi->lfthr[lvl].mblim, (2 * (lvl + 2) + block_inside_limit),
                SIMD_WIDTH);
   }
 }
@@ -268,7 +262,7 @@ static void update_sharpness(loop_filter_info_n *lfi, int sharpness_lvl) {
 void vp9_loop_filter_init(VP9_COMMON *cm) {
   loop_filter_info_n *lfi = &cm->lf_info;
   struct loopfilter *lf = &cm->lf;
-  int i;
+  int lvl;
 
   // init limits for given sharpness
   update_sharpness(lfi, lf->sharpness_level);
@@ -278,8 +272,8 @@ void vp9_loop_filter_init(VP9_COMMON *cm) {
   lf_init_lut(lfi);
 
   // init hev threshold const vectors
-  for (i = 0; i < 4; i++)
-    vpx_memset(lfi->hev_thr[i], i, SIMD_WIDTH);
+  for (lvl = 0; lvl <= MAX_LOOP_FILTER; lvl++)
+    vpx_memset(lfi->lfthr[lvl].hev_thr, (lvl >> 4), SIMD_WIDTH);
 }
 
 void vp9_loop_filter_frame_init(VP9_COMMON *cm, int default_filt_lvl) {
@@ -330,16 +324,14 @@ void vp9_loop_filter_frame_init(VP9_COMMON *cm, int default_filt_lvl) {
 
 static int build_lfi(const loop_filter_info_n *lfi_n,
                      const MB_MODE_INFO *mbmi,
-                     struct loop_filter_info *lfi) {
+                     const loop_filter_thresh **lfi) {
   const int seg = mbmi->segment_id;
   const int ref = mbmi->ref_frame[0];
   const int mode = lfi_n->mode_lf_lut[mbmi->mode];
   const int filter_level = lfi_n->lvl[seg][ref][mode];
 
   if (filter_level > 0) {
-    lfi->mblim = lfi_n->mblim[filter_level];
-    lfi->lim = lfi_n->lim[filter_level];
-    lfi->hev_thr = lfi_n->hev_thr[filter_level >> 4];
+    *lfi = &lfi_n->lfthr[filter_level];
     return 1;
   } else {
     return 0;
@@ -351,11 +343,13 @@ static void filter_selectively_vert(uint8_t *s, int pitch,
                                     unsigned int mask_8x8,
                                     unsigned int mask_4x4,
                                     unsigned int mask_4x4_int,
-                                    const struct loop_filter_info *lfi) {
+                                    const loop_filter_thresh **p_lfi) {
   unsigned int mask;
 
   for (mask = mask_16x16 | mask_8x8 | mask_4x4 | mask_4x4_int;
        mask; mask >>= 1) {
+    const loop_filter_thresh *lfi = *p_lfi;
+
     if (mask & 1) {
       if (mask_16x16 & 1) {
         vp9_mb_lpf_vertical_edge_w(s, pitch, lfi->mblim, lfi->lim,
@@ -379,7 +373,7 @@ static void filter_selectively_vert(uint8_t *s, int pitch,
       vp9_loop_filter_vertical_edge(s + 4, pitch, lfi->mblim, lfi->lim,
                                     lfi->hev_thr, 1);
     s += 8;
-    lfi++;
+    p_lfi++;
     mask_16x16 >>= 1;
     mask_8x8 >>= 1;
     mask_4x4 >>= 1;
@@ -393,12 +387,14 @@ static void filter_selectively_horiz(uint8_t *s, int pitch,
                                      unsigned int mask_4x4,
                                      unsigned int mask_4x4_int,
                                      int only_4x4_1,
-                                     const struct loop_filter_info *lfi) {
+                                     const loop_filter_thresh **p_lfi) {
   unsigned int mask;
   int count;
 
   for (mask = mask_16x16 | mask_8x8 | mask_4x4 | mask_4x4_int;
        mask; mask >>= count) {
+    const loop_filter_thresh *lfi = *p_lfi;
+
     count = 1;
     if (mask & 1) {
       if (!only_4x4_1) {
@@ -432,7 +428,7 @@ static void filter_selectively_horiz(uint8_t *s, int pitch,
                                         lfi->lim, lfi->hev_thr, 1);
     }
     s += 8 * count;
-    lfi += count;
+    p_lfi += count;
     mask_16x16 >>= count;
     mask_8x8 >>= count;
     mask_4x4 >>= count;
@@ -805,7 +801,7 @@ static void filter_block_plane_non420(VP9_COMMON *cm,
   unsigned int mask_8x8[MI_BLOCK_SIZE] = {0};
   unsigned int mask_4x4[MI_BLOCK_SIZE] = {0};
   unsigned int mask_4x4_int[MI_BLOCK_SIZE] = {0};
-  struct loop_filter_info lfi[MI_BLOCK_SIZE][MI_BLOCK_SIZE];
+  const loop_filter_thresh *lfi[MI_BLOCK_SIZE][MI_BLOCK_SIZE];
   int r, c;
 
   for (r = 0; r < MI_BLOCK_SIZE && mi_row + r < cm->mi_rows; r += row_step) {
@@ -834,7 +830,7 @@ static void filter_block_plane_non420(VP9_COMMON *cm,
       const int skip_border_4x4_r = ss_y && mi_row + r == cm->mi_rows - 1;
 
       // Filter level can vary per MI
-      if (!build_lfi(&cm->lf_info, &mi[0].mbmi, lfi[r] + (c >> ss_x)))
+      if (!build_lfi(&cm->lf_info, &mi[0].mbmi, &lfi[r][c >> ss_x]))
         continue;
 
       // Build masks based on the transform size of each block
@@ -925,7 +921,7 @@ static void filter_block_plane(VP9_COMMON *const cm,
   struct buf_2d *const dst = &plane->dst;
   uint8_t* const dst0 = dst->buf;
   unsigned int mask_4x4_int[MI_BLOCK_SIZE] = {0};
-  struct loop_filter_info lfi[MI_BLOCK_SIZE][MI_BLOCK_SIZE];
+  const loop_filter_thresh *lfi[MI_BLOCK_SIZE][MI_BLOCK_SIZE];
   int r, c;
   int row_shift = 3 - ss_x;
   int row_mask = 0xff >> (ss_x << 2);
@@ -938,8 +934,8 @@ static void filter_block_plane(VP9_COMMON *const cm,
     // Determine the vertical edges that need filtering
     for (c = 0; c < MI_BLOCK_SIZE && mi_col + c < cm->mi_cols; c += col_step) {
       const MODE_INFO *mi = mi_8x8[c];
-      if (!build_lfi(&cm->lf_info, &mi[0].mbmi, lfi[r] + (c >> ss_x)))
-        continue;
+
+      build_lfi(&cm->lf_info, &mi[0].mbmi, &lfi[r][c >> ss_x]);
     }
     if (!plane->plane_type) {
       mask_4x4_int[r] = MASK_ROW(lfm->int_4x4_y);
