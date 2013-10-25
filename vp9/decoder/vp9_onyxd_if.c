@@ -263,7 +263,7 @@ static void swap_frame_buffers(VP9D_COMP *pbi) {
     ++ref_index;
   }
 
-  cm->frame_to_show = &cm->yv12_fb[cm->new_fb_idx];
+  cm->frame_to_show = get_frame_new_buffer(cm);
   cm->fb_idx_ref_cnt[cm->new_fb_idx]--;
 
   // Invalidate these references until the next frame starts.

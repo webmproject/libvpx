@@ -282,7 +282,7 @@ static void build_activity_map(VP9_COMP *cpi) {
   VP9_COMMON * const cm = &cpi->common;
 
 #if ALT_ACT_MEASURE
-  YV12_BUFFER_CONFIG *new_yv12 = &cm->yv12_fb[cm->new_fb_idx];
+  YV12_BUFFER_CONFIG *new_yv12 = get_frame_new_buffer(cm);
   int recon_yoffset;
   int recon_y_stride = new_yv12->y_stride;
 #endif
@@ -1836,7 +1836,7 @@ static void init_encode_frame_mb_context(VP9_COMP *cpi) {
   // TODO(jkoleszar): are these initializations required?
   setup_pre_planes(xd, 0, &cm->yv12_fb[cm->ref_frame_map[cpi->lst_fb_idx]],
                    0, 0, NULL);
-  setup_dst_planes(xd, &cm->yv12_fb[cm->new_fb_idx], 0, 0);
+  setup_dst_planes(xd, get_frame_new_buffer(cm), 0, 0);
 
   setup_block_dptrs(&x->e_mbd, cm->subsampling_x, cm->subsampling_y);
 

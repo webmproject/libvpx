@@ -194,8 +194,8 @@ static void update_mbgraph_mb_stats
   x->plane[0].src.buf = buf->y_buffer + mb_y_offset;
   x->plane[0].src.stride = buf->y_stride;
 
-  xd->plane[0].dst.buf = cm->yv12_fb[cm->new_fb_idx].y_buffer + mb_y_offset;
-  xd->plane[0].dst.stride = cm->yv12_fb[cm->new_fb_idx].y_stride;
+  xd->plane[0].dst.buf = get_frame_new_buffer(cm)->y_buffer + mb_y_offset;
+  xd->plane[0].dst.stride = get_frame_new_buffer(cm)->y_stride;
 
   // do intra 16x16 prediction
   intra_error = find_best_16x16_intra(cpi, mb_y_offset,

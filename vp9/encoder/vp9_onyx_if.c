@@ -2669,8 +2669,7 @@ static void output_frame_level_debug_stats(VP9_COMP *cpi) {
 
   vp9_clear_system_state();  // __asm emms;
 
-  recon_err = vp9_calc_ss_err(cpi->Source,
-                              &cm->yv12_fb[cm->new_fb_idx]);
+  recon_err = vp9_calc_ss_err(cpi->Source, get_frame_new_buffer(cm));
 
   if (cpi->twopass.total_left_stats.coded_error != 0.0)
     fprintf(f, "%10d %10d %10d %10d %10d %10d %10d %10d %10d"
@@ -3169,8 +3168,7 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
       // Special case handling for forced key frames
       if ((cm->frame_type == KEY_FRAME) && cpi->this_key_frame_forced) {
         int last_q = q;
-        int kf_err = vp9_calc_ss_err(cpi->Source,
-                                     &cm->yv12_fb[cm->new_fb_idx]);
+        int kf_err = vp9_calc_ss_err(cpi->Source, get_frame_new_buffer(cm));
 
         int high_err_target = cpi->ambient_err;
         int low_err_target = cpi->ambient_err >> 1;
@@ -3306,14 +3304,13 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
   // fixed interval. Note the reconstruction error if it is the frame before
   // the force key frame
   if (cpi->next_key_frame_forced && (cpi->twopass.frames_to_key == 0)) {
-    cpi->ambient_err = vp9_calc_ss_err(cpi->Source,
-                                       &cm->yv12_fb[cm->new_fb_idx]);
+    cpi->ambient_err = vp9_calc_ss_err(cpi->Source, get_frame_new_buffer(cm));
   }
 
   if (cm->frame_type == KEY_FRAME)
     cpi->refresh_last_frame = 1;
 
-  cm->frame_to_show = &cm->yv12_fb[cm->new_fb_idx];
+  cm->frame_to_show = get_frame_new_buffer(cm);
 
 #if WRITE_RECON_BUFFER
   if (cm->show_frame)
@@ -3912,7 +3909,7 @@ int vp9_get_compressed_data(VP9_PTR ptr, unsigned int *frame_flags,
   cm->frame_flags = *frame_flags;
 
   // Reset the frame pointers to the current frame size
-  vp9_realloc_frame_buffer(&cm->yv12_fb[cm->new_fb_idx],
+  vp9_realloc_frame_buffer(get_frame_new_buffer(cm),
                            cm->width, cm->height,
                            cm->subsampling_x, cm->subsampling_y,
                            VP9BORDERINPIXELS);
