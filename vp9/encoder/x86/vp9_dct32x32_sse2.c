@@ -29,7 +29,7 @@ static INLINE __m128i k_packs_epi64(__m128i a, __m128i b) {
 }
 #endif
 
-void FDCT32x32_2D(int16_t *input,
+void FDCT32x32_2D(const int16_t *input,
                   int16_t *output_org, int stride) {
   // Calculate pre-multiplied strides
   const int str1 = stride;
@@ -93,13 +93,13 @@ void FDCT32x32_2D(int16_t *input,
       // Note: even though all the loads below are aligned, using the aligned
       //       intrinsic make the code slightly slower.
       if (0 == pass) {
-        int16_t *in  = &input[column_start];
+        const int16_t *in  = &input[column_start];
         // step1[i] =  (in[ 0 * stride] + in[(32 -  1) * stride]) << 2;
         // Note: the next four blocks could be in a loop. That would help the
         //       instruction cache but is actually slower.
         {
-          int16_t *ina =  in +  0 * str1;
-          int16_t *inb =  in + 31 * str1;
+          const int16_t *ina =  in +  0 * str1;
+          const int16_t *inb =  in + 31 * str1;
           __m128i *step1a = &step1[ 0];
           __m128i *step1b = &step1[31];
           const __m128i ina0  = _mm_loadu_si128((const __m128i *)(ina));
@@ -128,8 +128,8 @@ void FDCT32x32_2D(int16_t *input,
           step1b[-0] = _mm_slli_epi16(step1b[-0], 2);
         }
         {
-          int16_t *ina =  in +  4 * str1;
-          int16_t *inb =  in + 27 * str1;
+          const int16_t *ina =  in +  4 * str1;
+          const int16_t *inb =  in + 27 * str1;
           __m128i *step1a = &step1[ 4];
           __m128i *step1b = &step1[27];
           const __m128i ina0  = _mm_loadu_si128((const __m128i *)(ina));
@@ -158,8 +158,8 @@ void FDCT32x32_2D(int16_t *input,
           step1b[-0] = _mm_slli_epi16(step1b[-0], 2);
         }
         {
-          int16_t *ina =  in +  8 * str1;
-          int16_t *inb =  in + 23 * str1;
+          const int16_t *ina =  in +  8 * str1;
+          const int16_t *inb =  in + 23 * str1;
           __m128i *step1a = &step1[ 8];
           __m128i *step1b = &step1[23];
           const __m128i ina0  = _mm_loadu_si128((const __m128i *)(ina));
@@ -188,8 +188,8 @@ void FDCT32x32_2D(int16_t *input,
           step1b[-0] = _mm_slli_epi16(step1b[-0], 2);
         }
         {
-          int16_t *ina =  in + 12 * str1;
-          int16_t *inb =  in + 19 * str1;
+          const int16_t *ina =  in + 12 * str1;
+          const int16_t *inb =  in + 19 * str1;
           __m128i *step1a = &step1[12];
           __m128i *step1b = &step1[19];
           const __m128i ina0  = _mm_loadu_si128((const __m128i *)(ina));

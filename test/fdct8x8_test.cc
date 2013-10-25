@@ -28,17 +28,18 @@ void vp9_idct8x8_64_add_c(const int16_t *input, uint8_t *output, int pitch);
 using libvpx_test::ACMRandom;
 
 namespace {
-typedef void (*fdct_t)(int16_t *in, int16_t *out, int stride);
-typedef void (*idct_t)(const int16_t *in, uint8_t *dst, int stride);
-typedef void (*fht_t) (int16_t *in, int16_t *out, int stride, int tx_type);
-typedef void (*iht_t) (const int16_t *in, uint8_t *dst, int stride,
-              int tx_type);
+typedef void (*fdct_t)(const int16_t *in, int16_t *out, int stride);
+typedef void (*idct_t)(const int16_t *in, uint8_t *out, int stride);
+typedef void (*fht_t) (const int16_t *in, int16_t *out, int stride,
+                       int tx_type);
+typedef void (*iht_t) (const int16_t *in, uint8_t *out, int stride,
+                       int tx_type);
 
-void fdct8x8_ref(int16_t *in, int16_t *out, int stride, int tx_type) {
+void fdct8x8_ref(const int16_t *in, int16_t *out, int stride, int tx_type) {
   vp9_fdct8x8_c(in, out, stride);
 }
 
-void fht8x8_ref(int16_t *in, int16_t *out, int stride, int tx_type) {
+void fht8x8_ref(const int16_t *in, int16_t *out, int stride, int tx_type) {
   vp9_short_fht8x8_c(in, out, stride, tx_type);
 }
 

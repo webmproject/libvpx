@@ -12,7 +12,7 @@
 #include "vp9/common/vp9_idct.h"  // for cospi constants
 #include "vpx_ports/mem.h"
 
-void vp9_fdct4x4_sse2(int16_t *input, int16_t *output, int stride) {
+void vp9_fdct4x4_sse2(const int16_t *input, int16_t *output, int stride) {
   // The 2D transform is done with two passes which are actually pretty
   // similar. In the first one, we transform the columns and transpose
   // the results. In the second one, we transform the rows. To achieve that,
@@ -111,7 +111,8 @@ void vp9_fdct4x4_sse2(int16_t *input, int16_t *output, int stride) {
   }
 }
 
-static INLINE void load_buffer_4x4(int16_t *input, __m128i *in, int stride) {
+static INLINE void load_buffer_4x4(const int16_t *input, __m128i *in,
+                                   int stride) {
   const __m128i k__nonzero_bias_a = _mm_setr_epi16(0, 1, 1, 1, 1, 1, 1, 1);
   const __m128i k__nonzero_bias_b = _mm_setr_epi16(1, 0, 0, 0, 0, 0, 0, 0);
   __m128i mask;
@@ -242,7 +243,7 @@ void fadst4_1d_sse2(__m128i *in) {
   transpose_4x4(in);
 }
 
-void vp9_short_fht4x4_sse2(int16_t *input, int16_t *output,
+void vp9_short_fht4x4_sse2(const int16_t *input, int16_t *output,
                            int stride, int tx_type) {
   __m128i in[4];
   load_buffer_4x4(input, in, stride);
@@ -270,7 +271,7 @@ void vp9_short_fht4x4_sse2(int16_t *input, int16_t *output,
   write_buffer_4x4(output, in);
 }
 
-void vp9_fdct8x8_sse2(int16_t *input, int16_t *output, int stride) {
+void vp9_fdct8x8_sse2(const int16_t *input, int16_t *output, int stride) {
   int pass;
   // Constants
   //    When we use them, in one case, they are all the same. In all others
@@ -527,15 +528,16 @@ void vp9_fdct8x8_sse2(int16_t *input, int16_t *output, int stride) {
 }
 
 // load 8x8 array
-static INLINE void load_buffer_8x8(int16_t *input, __m128i *in, int stride) {
-  in[0]  = _mm_load_si128((__m128i *)(input + 0 * stride));
-  in[1]  = _mm_load_si128((__m128i *)(input + 1 * stride));
-  in[2]  = _mm_load_si128((__m128i *)(input + 2 * stride));
-  in[3]  = _mm_load_si128((__m128i *)(input + 3 * stride));
-  in[4]  = _mm_load_si128((__m128i *)(input + 4 * stride));
-  in[5]  = _mm_load_si128((__m128i *)(input + 5 * stride));
-  in[6]  = _mm_load_si128((__m128i *)(input + 6 * stride));
-  in[7]  = _mm_load_si128((__m128i *)(input + 7 * stride));
+static INLINE void load_buffer_8x8(const int16_t *input, __m128i *in,
+                                   int stride) {
+  in[0]  = _mm_load_si128((const __m128i *)(input + 0 * stride));
+  in[1]  = _mm_load_si128((const __m128i *)(input + 1 * stride));
+  in[2]  = _mm_load_si128((const __m128i *)(input + 2 * stride));
+  in[3]  = _mm_load_si128((const __m128i *)(input + 3 * stride));
+  in[4]  = _mm_load_si128((const __m128i *)(input + 4 * stride));
+  in[5]  = _mm_load_si128((const __m128i *)(input + 5 * stride));
+  in[6]  = _mm_load_si128((const __m128i *)(input + 6 * stride));
+  in[7]  = _mm_load_si128((const __m128i *)(input + 7 * stride));
 
   in[0] = _mm_slli_epi16(in[0], 2);
   in[1] = _mm_slli_epi16(in[1], 2);
@@ -1025,7 +1027,7 @@ void fadst8_1d_sse2(__m128i *in) {
   array_transpose_8x8(in, in);
 }
 
-void vp9_short_fht8x8_sse2(int16_t *input, int16_t *output,
+void vp9_short_fht8x8_sse2(const int16_t *input, int16_t *output,
                            int stride, int tx_type) {
   __m128i in[8];
   load_buffer_8x8(input, in, stride);
@@ -1054,7 +1056,7 @@ void vp9_short_fht8x8_sse2(int16_t *input, int16_t *output,
   write_buffer_8x8(output, in, 8);
 }
 
-void vp9_fdct16x16_sse2(int16_t *input, int16_t *output, int stride) {
+void vp9_fdct16x16_sse2(const int16_t *input, int16_t *output, int stride) {
   // The 2D transform is done with two passes which are actually pretty
   // similar. In the first one, we transform the columns and transpose
   // the results. In the second one, we transform the rows. To achieve that,
@@ -1064,7 +1066,7 @@ void vp9_fdct16x16_sse2(int16_t *input, int16_t *output, int stride) {
   int pass;
   // We need an intermediate buffer between passes.
   DECLARE_ALIGNED_ARRAY(16, int16_t, intermediate, 256);
-  int16_t *in = input;
+  const int16_t *in = input;
   int16_t *out = intermediate;
   // Constants
   //    When we use them, in one case, they are all the same. In all others
@@ -1679,7 +1681,7 @@ void vp9_fdct16x16_sse2(int16_t *input, int16_t *output, int stride) {
   }
 }
 
-static INLINE void load_buffer_16x16(int16_t* input, __m128i *in0,
+static INLINE void load_buffer_16x16(const int16_t* input, __m128i *in0,
                                      __m128i *in1, int stride) {
   // load first 8 columns
   load_buffer_8x8(input, in0, stride);
@@ -2531,7 +2533,7 @@ void fadst16_1d_sse2(__m128i *in0, __m128i *in1) {
   array_transpose_16x16(in0, in1);
 }
 
-void vp9_short_fht16x16_sse2(int16_t *input, int16_t *output,
+void vp9_short_fht16x16_sse2(const int16_t *input, int16_t *output,
                              int stride, int tx_type) {
   __m128i in0[16], in1[16];
   load_buffer_16x16(input, in0, in1, stride);

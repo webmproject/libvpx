@@ -173,7 +173,7 @@ struct macroblock {
   BLOCK_SIZE sb_partitioning[4];
   BLOCK_SIZE sb64_partitioning;
 
-  void (*fwd_txm4x4)(int16_t *input, int16_t *output, int pitch);
+  void (*fwd_txm4x4)(const int16_t *input, int16_t *output, int stride);
 };
 
 // TODO(jingning): the variables used here are little complicated. need further
