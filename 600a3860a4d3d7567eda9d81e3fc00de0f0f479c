@@ -16,6 +16,24 @@
       "revId": "600a3860a4d3d7567eda9d81e3fc00de0f0f479c",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX////w\u003d",
+        "filename": "vp9/encoder/vp9_dct.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 325,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2013-10-25T05:00:41Z",
+      "side": 1,
+      "message": "This is the input[8] array defined above :) Just the same name, it would be great to fix that it future (but it is not related to this change).",
+      "parentUuid": "AAAAdX////4\u003d",
+      "revId": "600a3860a4d3d7567eda9d81e3fc00de0f0f479c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
