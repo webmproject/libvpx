@@ -898,12 +898,10 @@ static size_t read_uncompressed_header(VP9D_COMP *pbi,
   cm->error_resilient_mode = vp9_rb_read_bit(rb);
 
   if (cm->frame_type == KEY_FRAME) {
-    int csp;
-
     check_sync_code(cm, rb);
 
-    csp = vp9_rb_read_literal(rb, 3);  // colorspace
-    if (csp != 7) {  // != sRGB
+    cm->color_space = vp9_rb_read_literal(rb, 3);  // colorspace
+    if (cm->color_space != SRGB) {
       vp9_rb_read_bit(rb);  // [16,235] (including xvycc) vs [0,255] range
       if (cm->version == 1) {
         cm->subsampling_x = vp9_rb_read_bit(rb);

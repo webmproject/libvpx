@@ -90,6 +90,8 @@ typedef struct VP9Common {
   DECLARE_ALIGNED(16, int16_t, a_dequant[QINDEX_RANGE][8]);
 #endif
 
+  COLOR_SPACE color_space;
+
   int width;
   int height;
   int display_width;

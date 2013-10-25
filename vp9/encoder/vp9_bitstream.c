@@ -1318,18 +1318,10 @@ static void write_uncompressed_header(VP9_COMP *cpi,
   vp9_wb_write_bit(wb, cm->error_resilient_mode);
 
   if (cm->frame_type == KEY_FRAME) {
+    const COLOR_SPACE cs = UNKNOWN;
     write_sync_code(wb);
-    // colorspaces
-    // 000 - Unknown
-    // 001 - BT.601
-    // 010 - BT.709
-    // 011 - SMPTE-170
-    // 100 - SMPTE-240
-    // 101 - Reserved
-    // 110 - Reserved
-    // 111 - sRGB (RGB)
-    vp9_wb_write_literal(wb, 0, 3);
-    if (1 /* colorspace != sRGB */) {
+    vp9_wb_write_literal(wb, cs, 3);
+    if (cs != SRGB) {
       vp9_wb_write_bit(wb, 0);  // 0: [16, 235] (i.e. xvYCC), 1: [0, 255]
       if (cm->version == 1) {
         vp9_wb_write_bit(wb, cm->subsampling_x);
