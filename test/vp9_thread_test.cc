@@ -39,10 +39,10 @@ int ThreadHook(void* data, void* return_value) {
 }
 
 TEST_P(VP9WorkerThreadTest, HookSuccess) {
-  EXPECT_TRUE(vp9_worker_sync(&worker_));  // should be a no-op.
+  EXPECT_NE(vp9_worker_sync(&worker_), 0);  // should be a no-op.
 
   for (int i = 0; i < 2; ++i) {
-    EXPECT_TRUE(vp9_worker_reset(&worker_));
+    EXPECT_NE(vp9_worker_reset(&worker_), 0);
 
     int hook_data = 0;
     int return_value = 1;  // return successfully from the hook
@@ -56,16 +56,16 @@ TEST_P(VP9WorkerThreadTest, HookSuccess) {
     } else {
       vp9_worker_launch(&worker_);
     }
-    EXPECT_TRUE(vp9_worker_sync(&worker_));
+    EXPECT_NE(vp9_worker_sync(&worker_), 0);
     EXPECT_FALSE(worker_.had_error);
     EXPECT_EQ(5, hook_data);
 
-    EXPECT_TRUE(vp9_worker_sync(&worker_));  // should be a no-op.
+    EXPECT_NE(vp9_worker_sync(&worker_), 0);  // should be a no-op.
   }
 }
 
 TEST_P(VP9WorkerThreadTest, HookFailure) {
-  EXPECT_TRUE(vp9_worker_reset(&worker_));
+  EXPECT_NE(vp9_worker_reset(&worker_), 0);
 
   int hook_data = 0;
   int return_value = 0;  // return failure from the hook
@@ -80,14 +80,14 @@ TEST_P(VP9WorkerThreadTest, HookFailure) {
     vp9_worker_launch(&worker_);
   }
   EXPECT_FALSE(vp9_worker_sync(&worker_));
-  EXPECT_TRUE(worker_.had_error);
+  EXPECT_EQ(1, worker_.had_error);
 
   // Ensure _reset() clears the error and _launch() can be called again.
   return_value = 1;
-  EXPECT_TRUE(vp9_worker_reset(&worker_));
+  EXPECT_NE(vp9_worker_reset(&worker_), 0);
   EXPECT_FALSE(worker_.had_error);
   vp9_worker_launch(&worker_);
-  EXPECT_TRUE(vp9_worker_sync(&worker_));
+  EXPECT_NE(vp9_worker_sync(&worker_), 0);
   EXPECT_FALSE(worker_.had_error);
 }
 
