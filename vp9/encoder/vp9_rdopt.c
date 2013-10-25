@@ -1432,10 +1432,6 @@ static void joint_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
                                 int mi_row, int mi_col,
                                 int_mv single_newmv[MAX_REF_FRAMES],
                                 int *rate_mv);
-static void single_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
-                                 BLOCK_SIZE bsize,
-                                 int mi_row, int mi_col,
-                                 int_mv *tmp_mv, int *rate_mv);
 
 static int labels2mode(MACROBLOCK *x, int i,
                        MB_PREDICTION_MODE this_mode,
@@ -1646,6 +1642,7 @@ static INLINE void mi_buf_restore(MACROBLOCK *x, struct buf_2d orig_src,
 }
 
 static void rd_check_segment_txsize(VP9_COMP *cpi, MACROBLOCK *x,
+                                    const TileInfo *const tile,
                                     BEST_SEG_INFO *bsi_buf, int filter_idx,
                                     int_mv seg_mvs[4][MAX_REF_FRAMES],
                                     int mi_row, int mi_col) {
@@ -1691,13 +1688,13 @@ static void rd_check_segment_txsize(VP9_COMP *cpi, MACROBLOCK *x,
       i = idy * 2 + idx;
 
       frame_mv[ZEROMV][mbmi->ref_frame[0]].as_int = 0;
-      vp9_append_sub8x8_mvs_for_idx(&cpi->common, &x->e_mbd,
+      vp9_append_sub8x8_mvs_for_idx(&cpi->common, &x->e_mbd, tile,
                                     &frame_mv[NEARESTMV][mbmi->ref_frame[0]],
                                     &frame_mv[NEARMV][mbmi->ref_frame[0]],
                                     i, 0, mi_row, mi_col);
       if (has_second_rf) {
         frame_mv[ZEROMV][mbmi->ref_frame[1]].as_int = 0;
-        vp9_append_sub8x8_mvs_for_idx(&cpi->common, &x->e_mbd,
+        vp9_append_sub8x8_mvs_for_idx(&cpi->common, &x->e_mbd, tile,
                                       &frame_mv[NEARESTMV][mbmi->ref_frame[1]],
                                       &frame_mv[NEARMV][mbmi->ref_frame[1]],
                                       i, 1, mi_row, mi_col);
@@ -2027,6 +2024,7 @@ static void rd_check_segment_txsize(VP9_COMP *cpi, MACROBLOCK *x,
 }
 
 static int64_t rd_pick_best_mbsegmentation(VP9_COMP *cpi, MACROBLOCK *x,
+                                           const TileInfo *const tile,
                                            int_mv *best_ref_mv,
                                            int_mv *second_best_ref_mv,
                                            int64_t best_rd,
@@ -2057,7 +2055,8 @@ static int64_t rd_pick_best_mbsegmentation(VP9_COMP *cpi, MACROBLOCK *x,
   for (i = 0; i < 4; i++)
     bsi->modes[i] = ZEROMV;
 
-  rd_check_segment_txsize(cpi, x, bsi_buf, filter_idx, seg_mvs, mi_row, mi_col);
+  rd_check_segment_txsize(cpi, x, tile, bsi_buf, filter_idx, seg_mvs,
+                          mi_row, mi_col);
 
   if (bsi->segment_rd > best_rd)
     return INT64_MAX;
@@ -2253,6 +2252,7 @@ static void setup_pred_block(const MACROBLOCKD *xd,
 }
 
 static void setup_buffer_inter(VP9_COMP *cpi, MACROBLOCK *x,
+                               const TileInfo *const tile,
                                int idx, MV_REFERENCE_FRAME frame_type,
                                BLOCK_SIZE block_size,
                                int mi_row, int mi_col,
@@ -2281,7 +2281,7 @@ static void setup_buffer_inter(VP9_COMP *cpi, MACROBLOCK *x,
                    &scale[frame_type], &scale[frame_type]);
 
   // Gets an initial list of candidate vectors from neighbours and orders them
-  vp9_find_mv_refs(&cpi->common, xd, xd->mi_8x8[0],
+  vp9_find_mv_refs(cm, xd, tile, xd->mi_8x8[0],
                    xd->last_mi,
                    frame_type,
                    mbmi->ref_mvs[frame_type], mi_row, mi_col);
@@ -2318,6 +2318,7 @@ static INLINE int get_switchable_rate(const MACROBLOCK *x) {
 }
 
 static void single_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
+                                 const TileInfo *const tile,
                                  BLOCK_SIZE bsize,
                                  int mi_row, int mi_col,
                                  int_mv *tmp_mv, int *rate_mv) {
@@ -2614,6 +2615,7 @@ static void joint_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
 }
 
 static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
+                                 const TileInfo *const tile,
                                  BLOCK_SIZE bsize,
                                  int64_t txfm_cache[],
                                  int *rate2, int64_t *distortion,
@@ -2672,7 +2674,8 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
       *rate2 += rate_mv;
     } else {
       int_mv tmp_mv;
-      single_motion_search(cpi, x, bsize, mi_row, mi_col, &tmp_mv, &rate_mv);
+      single_motion_search(cpi, x, tile, bsize, mi_row, mi_col,
+                           &tmp_mv, &rate_mv);
       *rate2 += rate_mv;
       frame_mv[refs[0]].as_int =
           xd->mi_8x8[0]->bmi[0].as_mv[0].as_int = tmp_mv.as_int;
@@ -3083,6 +3086,7 @@ void vp9_rd_pick_intra_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
 }
 
 int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
+                                  const TileInfo *const tile,
                                   int mi_row, int mi_col,
                                   int *returnrate,
                                   int64_t *returndistortion,
@@ -3193,8 +3197,9 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
 
   for (ref_frame = LAST_FRAME; ref_frame <= ALTREF_FRAME; ref_frame++) {
     if (cpi->ref_frame_flags & flag_list[ref_frame]) {
-      setup_buffer_inter(cpi, x, idx_list[ref_frame], ref_frame, block_size,
-                         mi_row, mi_col, frame_mv[NEARESTMV], frame_mv[NEARMV],
+      setup_buffer_inter(cpi, x, tile, idx_list[ref_frame], ref_frame,
+                         block_size, mi_row, mi_col,
+                         frame_mv[NEARESTMV], frame_mv[NEARMV],
                          yv12_mb, scale_factor);
     }
     frame_mv[NEWMV][ref_frame].as_int = INVALID_MV;
@@ -3438,7 +3443,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
     } else {
       mbmi->mode = this_mode;
       compmode_cost = vp9_cost_bit(comp_mode_p, second_ref_frame > INTRA_FRAME);
-      this_rd = handle_inter_mode(cpi, x, bsize,
+      this_rd = handle_inter_mode(cpi, x, tile, bsize,
                                   tx_cache,
                                   &rate2, &distortion2, &skippable,
                                   &rate_y, &distortion_y,
@@ -3780,6 +3785,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
 
 
 int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
+                                      const TileInfo *const tile,
                                       int mi_row, int mi_col,
                                       int *returnrate,
                                       int64_t *returndistortion,
@@ -3864,8 +3870,9 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
 
   for (ref_frame = LAST_FRAME; ref_frame <= ALTREF_FRAME; ref_frame++) {
     if (cpi->ref_frame_flags & flag_list[ref_frame]) {
-      setup_buffer_inter(cpi, x, idx_list[ref_frame], ref_frame, block_size,
-                         mi_row, mi_col, frame_mv[NEARESTMV], frame_mv[NEARMV],
+      setup_buffer_inter(cpi, x, tile, idx_list[ref_frame], ref_frame,
+                         block_size, mi_row, mi_col,
+                         frame_mv[NEARESTMV], frame_mv[NEARMV],
                          yv12_mb, scale_factor);
     }
     frame_mv[NEWMV][ref_frame].as_int = INVALID_MV;
@@ -4095,7 +4102,7 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
             mbmi->interp_filter = switchable_filter_index;
             vp9_setup_interp_filters(xd, mbmi->interp_filter, &cpi->common);
 
-            tmp_rd = rd_pick_best_mbsegmentation(cpi, x,
+            tmp_rd = rd_pick_best_mbsegmentation(cpi, x, tile,
                                                  &mbmi->ref_mvs[ref_frame][0],
                                                  second_ref,
                                                  best_yrd,
@@ -4159,7 +4166,7 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
       if (!pred_exists) {
         // Handles the special case when a filter that is not in the
         // switchable list (bilinear, 6-tap) is indicated at the frame level
-        tmp_rd = rd_pick_best_mbsegmentation(cpi, x,
+        tmp_rd = rd_pick_best_mbsegmentation(cpi, x, tile,
                      &mbmi->ref_mvs[ref_frame][0],
                      second_ref,
                      best_yrd,

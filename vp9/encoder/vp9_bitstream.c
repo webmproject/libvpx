@@ -561,7 +561,8 @@ static void write_mb_modes_kf(const VP9_COMP *cpi, MODE_INFO **mi_8x8,
   write_intra_mode(bc, m->mbmi.uv_mode, vp9_kf_uv_mode_prob[ym]);
 }
 
-static void write_modes_b(VP9_COMP *cpi, MODE_INFO **mi_8x8, vp9_writer *bc,
+static void write_modes_b(VP9_COMP *cpi, const TileInfo *const tile,
+                          MODE_INFO **mi_8x8, vp9_writer *bc,
                           TOKENEXTRA **tok, TOKENEXTRA *tok_end,
                           int mi_row, int mi_col, int index) {
   VP9_COMMON *const cm = &cpi->common;
@@ -574,9 +575,10 @@ static void write_modes_b(VP9_COMP *cpi, MODE_INFO **mi_8x8, vp9_writer *bc,
 
   xd->mi_8x8 = mi_8x8;
 
-  set_mi_row_col(&cpi->common, xd,
+  set_mi_row_col(xd, tile,
                  mi_row, num_8x8_blocks_high_lookup[m->mbmi.sb_type],
-                 mi_col, num_8x8_blocks_wide_lookup[m->mbmi.sb_type]);
+                 mi_col, num_8x8_blocks_wide_lookup[m->mbmi.sb_type],
+                 cm->mi_rows, cm->mi_cols);
   if (frame_is_intra_only(cm)) {
     write_mb_modes_kf(cpi, mi_8x8, bc);
 #ifdef ENTROPY_STATS
@@ -593,7 +595,8 @@ static void write_modes_b(VP9_COMP *cpi, MODE_INFO **mi_8x8, vp9_writer *bc,
   pack_mb_tokens(bc, tok, tok_end);
 }
 
-static void write_modes_sb(VP9_COMP *cpi, MODE_INFO **mi_8x8, vp9_writer *bc,
+static void write_modes_sb(VP9_COMP *cpi, const TileInfo *const tile,
+                           MODE_INFO **mi_8x8, vp9_writer *bc,
                            TOKENEXTRA **tok, TOKENEXTRA *tok_end,
                            int mi_row, int mi_col, BLOCK_SIZE bsize,
                            int index) {
@@ -634,24 +637,25 @@ static void write_modes_sb(VP9_COMP *cpi, MODE_INFO **mi_8x8, vp9_writer *bc,
 
   switch (partition) {
     case PARTITION_NONE:
-      write_modes_b(cpi, mi_8x8, bc, tok, tok_end, mi_row, mi_col, 0);
+      write_modes_b(cpi, tile, mi_8x8, bc, tok, tok_end, mi_row, mi_col, 0);
       break;
     case PARTITION_HORZ:
-      write_modes_b(cpi, mi_8x8, bc, tok, tok_end, mi_row, mi_col, 0);
+      write_modes_b(cpi, tile, mi_8x8, bc, tok, tok_end, mi_row, mi_col, 0);
       if ((mi_row + bs) < cm->mi_rows)
-        write_modes_b(cpi, mi_8x8 + bs * mis, bc, tok, tok_end, mi_row + bs,
-                      mi_col, 1);
+        write_modes_b(cpi, tile, mi_8x8 + bs * mis, bc, tok, tok_end,
+                      mi_row + bs, mi_col, 1);
       break;
     case PARTITION_VERT:
-      write_modes_b(cpi, mi_8x8, bc, tok, tok_end, mi_row, mi_col, 0);
+      write_modes_b(cpi, tile, mi_8x8, bc, tok, tok_end, mi_row, mi_col, 0);
       if ((mi_col + bs) < cm->mi_cols)
-        write_modes_b(cpi, mi_8x8 + bs, bc, tok, tok_end, mi_row, mi_col + bs,
-                      1);
+        write_modes_b(cpi, tile, mi_8x8 + bs, bc, tok, tok_end,
+                      mi_row, mi_col + bs, 1);
       break;
     case PARTITION_SPLIT:
       for (n = 0; n < 4; n++) {
         const int j = n >> 1, i = n & 1;
-        write_modes_sb(cpi, mi_8x8 + j * bs * mis + i * bs, bc, tok, tok_end,
+        write_modes_sb(cpi, tile, mi_8x8 + j * bs * mis + i * bs, bc,
+                       tok, tok_end,
                        mi_row + j * bs, mi_col + i * bs, subsize, n);
       }
       break;
@@ -666,7 +670,8 @@ static void write_modes_sb(VP9_COMP *cpi, MODE_INFO **mi_8x8, vp9_writer *bc,
                              mi_row, mi_col, subsize, bsize);
 }
 
-static void write_modes(VP9_COMP *cpi, vp9_writer* const bc,
+static void write_modes(VP9_COMP *cpi, const TileInfo *const tile,
+                        vp9_writer* const bc,
                         TOKENEXTRA **tok, TOKENEXTRA *tok_end) {
   VP9_COMMON *const cm = &cpi->common;
   const int mis = cm->mode_info_stride;
@@ -674,15 +679,15 @@ static void write_modes(VP9_COMP *cpi, vp9_writer* const bc,
   MODE_INFO **mi_8x8 = cm->mi_grid_visible;
   MODE_INFO **m_8x8;
 
-  mi_8x8 += cm->cur_tile_mi_col_start + cm->cur_tile_mi_row_start * mis;
+  mi_8x8 += tile->mi_col_start + tile->mi_row_start * mis;
 
-  for (mi_row = cm->cur_tile_mi_row_start; mi_row < cm->cur_tile_mi_row_end;
+  for (mi_row = tile->mi_row_start; mi_row < tile->mi_row_end;
        mi_row += 8, mi_8x8 += 8 * mis) {
     m_8x8 = mi_8x8;
     vp9_zero(cpi->left_seg_context);
-    for (mi_col = cm->cur_tile_mi_col_start; mi_col < cm->cur_tile_mi_col_end;
+    for (mi_col = tile->mi_col_start; mi_col < tile->mi_col_end;
          mi_col += MI_BLOCK_SIZE, m_8x8 += MI_BLOCK_SIZE) {
-      write_modes_sb(cpi, m_8x8, bc, tok, tok_end, mi_row, mi_col,
+      write_modes_sb(cpi, tile, m_8x8, bc, tok, tok_end, mi_row, mi_col,
                      BLOCK_64X64, 0);
     }
   }
@@ -1218,9 +1223,10 @@ static size_t encode_tiles(VP9_COMP *cpi, uint8_t *data_ptr) {
   }
 
   for (tile_row = 0; tile_row < tile_rows; tile_row++) {
-    vp9_get_tile_row_offsets(cm, tile_row);
     for (tile_col = 0; tile_col < tile_cols; tile_col++) {
-      vp9_get_tile_col_offsets(cm, tile_col);
+      TileInfo tile;
+
+      vp9_tile_init(&tile, cm, 0, tile_col);
       tok_end = tok[tile_row][tile_col] + cpi->tok_count[tile_row][tile_col];
 
       if (tile_col < tile_cols - 1 || tile_row < tile_rows - 1)
@@ -1228,7 +1234,7 @@ static size_t encode_tiles(VP9_COMP *cpi, uint8_t *data_ptr) {
       else
         vp9_start_encode(&residual_bc, data_ptr + total_size);
 
-      write_modes(cpi, &residual_bc, &tok[tile_row][tile_col], tok_end);
+      write_modes(cpi, &tile, &residual_bc, &tok[tile_row][tile_col], tok_end);
       assert(tok[tile_row][tile_col] == tok_end);
       vp9_stop_encode(&residual_bc);
       if (tile_col < tile_cols - 1 || tile_row < tile_rows - 1) {

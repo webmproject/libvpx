@@ -18,6 +18,8 @@
   (((128 + ((int64_t)R) * (RM)) >> 8) + (D << DM))
 #define QIDX_SKIP_THRESH     115
 
+struct TileInfo;
+
 int vp9_compute_rd_mult(VP9_COMP *cpi, int qindex);
 
 void vp9_initialize_rd_consts(VP9_COMP *cpi);
@@ -29,14 +31,22 @@ void vp9_rd_pick_intra_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
                                PICK_MODE_CONTEXT *ctx, int64_t best_rd);
 
 int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
+                                  const struct TileInfo *const tile,
                                   int mi_row, int mi_col,
-                                  int *r, int64_t *d, BLOCK_SIZE bsize,
-                                  PICK_MODE_CONTEXT *ctx, int64_t best_rd);
+                                  int *returnrate,
+                                  int64_t *returndistortion,
+                                  BLOCK_SIZE bsize,
+                                  PICK_MODE_CONTEXT *ctx,
+                                  int64_t best_rd_so_far);
 
 int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
+                                      const struct TileInfo *const tile,
                                       int mi_row, int mi_col,
-                                      int *r, int64_t *d, BLOCK_SIZE bsize,
-                                      PICK_MODE_CONTEXT *ctx, int64_t best_rd);
+                                      int *returnrate,
+                                      int64_t *returndistortion,
+                                      BLOCK_SIZE bsize,
+                                      PICK_MODE_CONTEXT *ctx,
+                                      int64_t best_rd_so_far);
 
 void vp9_init_me_luts();
 

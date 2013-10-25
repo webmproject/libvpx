@@ -19,6 +19,7 @@
 #include "vp9/common/vp9_entropy.h"
 #include "vp9/common/vp9_entropymode.h"
 #include "vp9/common/vp9_quant_common.h"
+#include "vp9/common/vp9_tile_common.h"
 
 #if CONFIG_VP9_POSTPROC
 #include "vp9/common/vp9_postproc.h"
@@ -207,8 +208,6 @@ typedef struct VP9Common {
   int frame_parallel_decoding_mode;
 
   int log2_tile_cols, log2_tile_rows;
-  int cur_tile_mi_col_start, cur_tile_mi_col_end;
-  int cur_tile_mi_row_start, cur_tile_mi_row_end;
 } VP9_COMMON;
 
 // ref == 0 => LAST_FRAME
@@ -279,17 +278,18 @@ static int check_bsize_coverage(int bs, int mi_rows, int mi_cols,
   return -1;
 }
 
-static void set_mi_row_col(VP9_COMMON *cm, MACROBLOCKD *xd,
-                       int mi_row, int bh,
-                       int mi_col, int bw) {
+static void set_mi_row_col(MACROBLOCKD *xd, const TileInfo *const tile,
+                           int mi_row, int bh,
+                           int mi_col, int bw,
+                           int mi_rows, int mi_cols) {
   xd->mb_to_top_edge    = -((mi_row * MI_SIZE) * 8);
-  xd->mb_to_bottom_edge = ((cm->mi_rows - bh - mi_row) * MI_SIZE) * 8;
+  xd->mb_to_bottom_edge = ((mi_rows - bh - mi_row) * MI_SIZE) * 8;
   xd->mb_to_left_edge   = -((mi_col * MI_SIZE) * 8);
-  xd->mb_to_right_edge  = ((cm->mi_cols - bw - mi_col) * MI_SIZE) * 8;
+  xd->mb_to_right_edge  = ((mi_cols - bw - mi_col) * MI_SIZE) * 8;
 
   // Are edges available for intra prediction?
   xd->up_available    = (mi_row != 0);
-  xd->left_available  = (mi_col > cm->cur_tile_mi_col_start);
+  xd->left_available  = (mi_col > tile->mi_col_start);
 }
 
 static void set_prev_mi(VP9_COMMON *cm) {

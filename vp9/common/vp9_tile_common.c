@@ -10,6 +10,8 @@
 
 #include "vp9/common/vp9_tile_common.h"
 
+#include "vp9/common/vp9_onyxc_int.h"
+
 #define MIN_TILE_WIDTH_B64 4
 #define MAX_TILE_WIDTH_B64 64
 
@@ -17,8 +19,8 @@ static int to_sbs(n_mis) {
   return mi_cols_aligned_to_sb(n_mis) >> MI_BLOCK_SIZE_LOG2;
 }
 
-static void vp9_get_tile_offsets(int *min_tile_off, int *max_tile_off,
-                                 int tile_idx, int log2_n_tiles, int n_mis) {
+static void get_tile_offsets(int *min_tile_off, int *max_tile_off,
+                             int tile_idx, int log2_n_tiles, int n_mis) {
   const int n_sbs = to_sbs(n_mis);
   const int sb_off1 =  (tile_idx      * n_sbs) >> log2_n_tiles;
   const int sb_off2 = ((tile_idx + 1) * n_sbs) >> log2_n_tiles;
@@ -27,16 +29,13 @@ static void vp9_get_tile_offsets(int *min_tile_off, int *max_tile_off,
   *max_tile_off = MIN(sb_off2 << 3, n_mis);
 }
 
-void vp9_get_tile_col_offsets(VP9_COMMON *cm, int tile_col_idx) {
-  vp9_get_tile_offsets(&cm->cur_tile_mi_col_start, &cm->cur_tile_mi_col_end,
-                       tile_col_idx, cm->log2_tile_cols, cm->mi_cols);
+void vp9_tile_init(TileInfo *tile, const VP9_COMMON *cm,
+                   int row_idx, int col_idx) {
+  get_tile_offsets(&tile->mi_row_start, &tile->mi_row_end,
+                   row_idx, cm->log2_tile_rows, cm->mi_rows);
+  get_tile_offsets(&tile->mi_col_start, &tile->mi_col_end,
+                   col_idx, cm->log2_tile_cols, cm->mi_cols);
 }
-
-void vp9_get_tile_row_offsets(VP9_COMMON *cm, int tile_row_idx) {
-  vp9_get_tile_offsets(&cm->cur_tile_mi_row_start, &cm->cur_tile_mi_row_end,
-                       tile_row_idx, cm->log2_tile_rows, cm->mi_rows);
-}
-
 
 void vp9_get_tile_n_bits(int mi_cols,
                          int *min_log2_tile_cols, int *max_log2_tile_cols) {

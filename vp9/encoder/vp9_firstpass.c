@@ -481,6 +481,7 @@ void vp9_first_pass(VP9_COMP *cpi) {
   MACROBLOCK *const x = &cpi->mb;
   VP9_COMMON *const cm = &cpi->common;
   MACROBLOCKD *const xd = &x->e_mbd;
+  TileInfo tile;
 
   int recon_yoffset, recon_uvoffset;
   const int lst_yv12_idx = cm->ref_frame_map[cpi->lst_fb_idx];
@@ -532,6 +533,9 @@ void vp9_first_pass(VP9_COMP *cpi) {
     vp9_initialize_rd_consts(cpi);
   }
 
+  // tiling is ignored in the first pass
+  vp9_tile_init(&tile, cm, 0, 0);
+
   // for each macroblock row in image
   for (mb_row = 0; mb_row < cm->mb_rows; mb_row++) {
     int_mv best_ref_mv;
@@ -578,11 +582,12 @@ void vp9_first_pass(VP9_COMP *cpi) {
         }
       }
       xd->mi_8x8[0]->mbmi.ref_frame[0] = INTRA_FRAME;
-      set_mi_row_col(cm, xd,
+      set_mi_row_col(xd, &tile,
                      mb_row << 1,
                      1 << mi_height_log2(xd->mi_8x8[0]->mbmi.sb_type),
                      mb_col << 1,
-                     1 << mi_width_log2(xd->mi_8x8[0]->mbmi.sb_type));
+                     1 << mi_width_log2(xd->mi_8x8[0]->mbmi.sb_type),
+                     cm->mi_rows, cm->mi_cols);
 
       if (cpi->sf.variance_adaptive_quantization) {
         int energy = vp9_block_energy(cpi, x, xd->mi_8x8[0]->mbmi.sb_type);

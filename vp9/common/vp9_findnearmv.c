@@ -35,6 +35,7 @@ void vp9_find_best_ref_mvs(MACROBLOCKD *xd, int allow_hp,
 }
 
 void vp9_append_sub8x8_mvs_for_idx(VP9_COMMON *cm, MACROBLOCKD *xd,
+                                   const TileInfo *const tile,
                                    int_mv *dst_nearest,
                                    int_mv *dst_near,
                                    int block_idx, int ref_idx,
@@ -46,7 +47,7 @@ void vp9_append_sub8x8_mvs_for_idx(VP9_COMMON *cm, MACROBLOCKD *xd,
   assert(ref_idx == 0 || ref_idx == 1);
   assert(MAX_MV_REF_CANDIDATES == 2);  // makes code here slightly easier
 
-  vp9_find_mv_refs_idx(cm, xd, mi, xd->last_mi,
+  vp9_find_mv_refs_idx(cm, xd, tile, mi, xd->last_mi,
                        mi->mbmi.ref_frame[ref_idx],
                        mv_list, block_idx, mi_row, mi_col);
 

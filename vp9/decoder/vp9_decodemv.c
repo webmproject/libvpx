@@ -414,6 +414,7 @@ static int read_is_inter_block(VP9_COMMON *const cm, MACROBLOCKD *const xd,
 
 static void read_inter_block_mode_info(VP9_COMMON *const cm,
                                        MACROBLOCKD *const xd,
+                                       const TileInfo *const tile,
                                        MODE_INFO *const mi,
                                        int mi_row, int mi_col, vp9_reader *r) {
   MB_MODE_INFO *const mbmi = &mi->mbmi;
@@ -430,7 +431,7 @@ static void read_inter_block_mode_info(VP9_COMMON *const cm,
   ref0 = mbmi->ref_frame[0];
   is_compound = has_second_ref(mbmi);
 
-  vp9_find_mv_refs(cm, xd, mi, xd->last_mi, ref0, mbmi->ref_mvs[ref0],
+  vp9_find_mv_refs(cm, xd, tile, mi, xd->last_mi, ref0, mbmi->ref_mvs[ref0],
                    mi_row, mi_col);
 
   inter_mode_ctx = mbmi->mode_context[ref0];
@@ -456,7 +457,7 @@ static void read_inter_block_mode_info(VP9_COMMON *const cm,
 
   if (is_compound) {
     const MV_REFERENCE_FRAME ref1 = mbmi->ref_frame[1];
-    vp9_find_mv_refs(cm, xd, mi, xd->last_mi,
+    vp9_find_mv_refs(cm, xd, tile, mi, xd->last_mi,
                      ref1, mbmi->ref_mvs[ref1], mi_row, mi_col);
 
     if (bsize < BLOCK_8X8 || mbmi->mode != ZEROMV) {
@@ -482,12 +483,12 @@ static void read_inter_block_mode_info(VP9_COMMON *const cm,
         b_mode = read_inter_mode(cm, r, inter_mode_ctx);
 
         if (b_mode == NEARESTMV || b_mode == NEARMV) {
-          vp9_append_sub8x8_mvs_for_idx(cm, xd, &nearest[0],
+          vp9_append_sub8x8_mvs_for_idx(cm, xd, tile, &nearest[0],
                                         &nearmv[0], j, 0,
                                         mi_row, mi_col);
 
           if (is_compound)
-            vp9_append_sub8x8_mvs_for_idx(cm, xd,  &nearest[1],
+            vp9_append_sub8x8_mvs_for_idx(cm, xd, tile, &nearest[1],
                                           &nearmv[1], j, 1,
                                           mi_row, mi_col);
         }
@@ -523,6 +524,7 @@ static void read_inter_block_mode_info(VP9_COMMON *const cm,
 
 static void read_inter_frame_mode_info(VP9_COMMON *const cm,
                                        MACROBLOCKD *const xd,
+                                       const TileInfo *const tile,
                                        MODE_INFO *const mi,
                                        int mi_row, int mi_col, vp9_reader *r) {
   MB_MODE_INFO *const mbmi = &mi->mbmi;
@@ -537,12 +539,13 @@ static void read_inter_frame_mode_info(VP9_COMMON *const cm,
                                !mbmi->skip_coeff || !inter_block, r);
 
   if (inter_block)
-    read_inter_block_mode_info(cm, xd, mi, mi_row, mi_col, r);
+    read_inter_block_mode_info(cm, xd, tile, mi, mi_row, mi_col, r);
   else
     read_intra_block_mode_info(cm, mi, r);
 }
 
 void vp9_read_mode_info(VP9_COMMON *cm, MACROBLOCKD *xd,
+                        const TileInfo *const tile,
                         int mi_row, int mi_col, vp9_reader *r) {
   MODE_INFO *const mi = xd->mi_8x8[0];
   const BLOCK_SIZE bsize = mi->mbmi.sb_type;
@@ -555,7 +558,7 @@ void vp9_read_mode_info(VP9_COMMON *cm, MACROBLOCKD *xd,
   if (frame_is_intra_only(cm))
     read_intra_frame_mode_info(cm, xd, mi, mi_row, mi_col, r);
   else
-    read_inter_frame_mode_info(cm, xd, mi, mi_row, mi_col, r);
+    read_inter_frame_mode_info(cm, xd, tile, mi, mi_row, mi_col, r);
 
   for (y = 0, z = 0; y < y_mis; y++, z += cm->mode_info_stride) {
     for (x = !y; x < x_mis; x++) {
