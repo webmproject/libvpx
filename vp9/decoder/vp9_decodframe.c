@@ -326,10 +326,8 @@ static int decode_tokens(VP9_COMMON *const cm, MACROBLOCKD *const xd,
   }
 }
 
-static void set_offsets(VP9D_COMP *pbi, BLOCK_SIZE bsize,
-                        int mi_row, int mi_col) {
-  VP9_COMMON *const cm = &pbi->common;
-  MACROBLOCKD *const xd = &pbi->mb;
+static void set_offsets(VP9_COMMON *const cm, MACROBLOCKD *const xd,
+                        BLOCK_SIZE bsize, int mi_row, int mi_col) {
   const int bh = num_8x8_blocks_high_lookup[bsize];
   const int bw = num_8x8_blocks_wide_lookup[bsize];
   const int offset = mi_row * cm->mode_info_stride + mi_col;
@@ -372,10 +370,9 @@ static void set_ref(VP9_COMMON *const cm, MACROBLOCKD *const xd,
   xd->corrupted |= cfg->corrupted;
 }
 
-static void decode_modes_b(VP9D_COMP *pbi, int mi_row, int mi_col,
+static void decode_modes_b(VP9_COMMON *const cm, MACROBLOCKD *const xd,
+                           int mi_row, int mi_col,
                            vp9_reader *r, BLOCK_SIZE bsize, int index) {
-  VP9_COMMON *const cm = &pbi->common;
-  MACROBLOCKD *const xd = &pbi->mb;
   const int less8x8 = bsize < BLOCK_8X8;
   MB_MODE_INFO *mbmi;
   int eobtotal;
@@ -384,7 +381,7 @@ static void decode_modes_b(VP9D_COMP *pbi, int mi_row, int mi_col,
     if (index > 0)
       return;
 
-  set_offsets(pbi, bsize, mi_row, mi_col);
+  set_offsets(cm, xd, bsize, mi_row, mi_col);
   vp9_read_mode_info(cm, xd, mi_row, mi_col, r);
 
   if (less8x8)
@@ -421,10 +418,9 @@ static void decode_modes_b(VP9D_COMP *pbi, int mi_row, int mi_col,
   xd->corrupted |= vp9_reader_has_error(r);
 }
 
-static void decode_modes_sb(VP9D_COMP *pbi, int mi_row, int mi_col,
+static void decode_modes_sb(VP9_COMMON *const cm, MACROBLOCKD *const xd,
+                            int mi_row, int mi_col,
                             vp9_reader* r, BLOCK_SIZE bsize, int index) {
-  VP9_COMMON *const cm = &pbi->common;
-  MACROBLOCKD *const xd = &pbi->mb;
   const int hbs = num_8x8_blocks_wide_lookup[bsize] / 2;
   PARTITION_TYPE partition = PARTITION_NONE;
   BLOCK_SIZE subsize;
@@ -459,23 +455,23 @@ static void decode_modes_sb(VP9D_COMP *pbi, int mi_row, int mi_col,
 
   switch (partition) {
     case PARTITION_NONE:
-      decode_modes_b(pbi, mi_row, mi_col, r, subsize, 0);
+      decode_modes_b(cm, xd, mi_row, mi_col, r, subsize, 0);
       break;
     case PARTITION_HORZ:
-      decode_modes_b(pbi, mi_row, mi_col, r, subsize, 0);
+      decode_modes_b(cm, xd, mi_row, mi_col, r, subsize, 0);
       if (mi_row + hbs < cm->mi_rows)
-        decode_modes_b(pbi, mi_row + hbs, mi_col, r, subsize, 1);
+        decode_modes_b(cm, xd, mi_row + hbs, mi_col, r, subsize, 1);
       break;
     case PARTITION_VERT:
-      decode_modes_b(pbi, mi_row, mi_col, r, subsize, 0);
+      decode_modes_b(cm, xd, mi_row, mi_col, r, subsize, 0);
       if (mi_col + hbs < cm->mi_cols)
-        decode_modes_b(pbi, mi_row, mi_col + hbs, r, subsize, 1);
+        decode_modes_b(cm, xd, mi_row, mi_col + hbs, r, subsize, 1);
       break;
     case PARTITION_SPLIT: {
       int n;
       for (n = 0; n < 4; n++) {
         const int j = n >> 1, i = n & 1;
-        decode_modes_sb(pbi, mi_row + j * hbs, mi_col + i * hbs,
+        decode_modes_sb(cm, xd, mi_row + j * hbs, mi_col + i * hbs,
                         r, subsize, n);
       }
     } break;
@@ -619,9 +615,8 @@ static int read_delta_q(struct vp9_read_bit_buffer *rb, int *delta_q) {
   return old != *delta_q;
 }
 
-static void setup_quantization(VP9D_COMP *pbi, struct vp9_read_bit_buffer *rb) {
-  MACROBLOCKD *const xd = &pbi->mb;
-  VP9_COMMON *const cm = &pbi->common;
+static void setup_quantization(VP9_COMMON *const cm, MACROBLOCKD *const xd,
+                               struct vp9_read_bit_buffer *rb) {
   int update = 0;
 
   cm->base_qindex = vp9_rb_read_literal(rb, QINDEX_BITS);
@@ -765,7 +760,7 @@ static void decode_tile(VP9D_COMP *pbi, vp9_reader *r) {
     vp9_zero(xd->left_seg_context);
     for (mi_col = cm->cur_tile_mi_col_start; mi_col < cm->cur_tile_mi_col_end;
          mi_col += MI_BLOCK_SIZE)
-      decode_modes_sb(pbi, mi_row, mi_col, r, BLOCK_64X64, 0);
+      decode_modes_sb(cm, xd, mi_row, mi_col, r, BLOCK_64X64, 0);
 
     if (pbi->do_loopfilter_inline) {
       const int lf_start = mi_row - MI_BLOCK_SIZE;
@@ -1025,7 +1020,7 @@ static size_t read_uncompressed_header(VP9D_COMP *pbi,
     vp9_setup_past_independence(cm);
 
   setup_loopfilter(&cm->lf, rb);
-  setup_quantization(pbi, rb);
+  setup_quantization(cm, &pbi->mb, rb);
   setup_segmentation(&cm->seg, rb);
 
   setup_tile_info(cm, rb);
