@@ -8,14 +8,17 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-
 #include <assert.h>
 #include <math.h>
+
 #include "./vpx_config.h"
-#include "vp9/common/vp9_systemdependent.h"
+#include "./vp9_rtcd.h"
 
 #include "vp9/common/vp9_blockd.h"
 #include "vp9/common/vp9_idct.h"
+#include "vp9/common/vp9_systemdependent.h"
+
+#include "vp9/encoder/vp9_dct.h"
 
 static void fdct4(const int16_t *input, int16_t *output) {
   int16_t step[4];
@@ -149,7 +152,7 @@ static const transform_2d FHT_4[] = {
 };
 
 void vp9_short_fht4x4_c(const int16_t *input, int16_t *output,
-                        int stride, TX_TYPE tx_type) {
+                        int stride, int tx_type) {
   int16_t out[4 * 4];
   int16_t *outptr = &out[0];
   int i, j;
@@ -557,7 +560,7 @@ static const transform_2d FHT_8[] = {
 };
 
 void vp9_short_fht8x8_c(const int16_t *input, int16_t *output,
-                        int stride, TX_TYPE tx_type) {
+                        int stride, int tx_type) {
   int16_t out[64];
   int16_t *outptr = &out[0];
   int i, j;
@@ -950,7 +953,7 @@ static const transform_2d FHT_16[] = {
 };
 
 void vp9_short_fht16x16_c(const int16_t *input, int16_t *output,
-                          int stride, TX_TYPE tx_type) {
+                          int stride, int tx_type) {
   int16_t out[256];
   int16_t *outptr = &out[0];
   int i, j;
@@ -1365,4 +1368,28 @@ void vp9_fdct32x32_rd_c(const int16_t *input, int16_t *out, int stride) {
     for (j = 0; j < 32; ++j)
       out[j + i * 32] = temp_out[j];
   }
+}
+
+void vp9_fht4x4(TX_TYPE tx_type, const int16_t *input, int16_t *output,
+                int stride) {
+  if (tx_type == DCT_DCT)
+    vp9_fdct4x4(input, output, stride);
+  else
+    vp9_short_fht4x4(input, output, stride, tx_type);
+}
+
+void vp9_fht8x8(TX_TYPE tx_type, const int16_t *input, int16_t *output,
+                int stride) {
+  if (tx_type == DCT_DCT)
+    vp9_fdct8x8(input, output, stride);
+  else
+    vp9_short_fht8x8(input, output, stride, tx_type);
+}
+
+void vp9_fht16x16(TX_TYPE tx_type, const int16_t *input, int16_t *output,
+                  int stride) {
+  if (tx_type == DCT_DCT)
+    vp9_fdct16x16(input, output, stride);
+  else
+    vp9_short_fht16x16(input, output, stride, tx_type);
 }
