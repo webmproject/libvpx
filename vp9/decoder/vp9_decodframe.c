@@ -1140,14 +1140,13 @@ int vp9_decode_frame(VP9D_COMP *pbi, const uint8_t **p_data_end) {
   MACROBLOCKD *const xd = &pbi->mb;
 
   const uint8_t *data = pbi->source;
-  const uint8_t *data_end = pbi->source + pbi->source_sz;
+  const uint8_t *const data_end = pbi->source + pbi->source_sz;
 
-  struct vp9_read_bit_buffer rb = { data, data_end, 0,
-                                    cm, error_handler };
+  struct vp9_read_bit_buffer rb = { data, data_end, 0, cm, error_handler };
   const size_t first_partition_size = read_uncompressed_header(pbi, &rb);
   const int keyframe = cm->frame_type == KEY_FRAME;
-  YV12_BUFFER_CONFIG *new_fb = get_frame_new_buffer(cm);
   const int tile_cols = 1 << cm->log2_tile_cols;
+  YV12_BUFFER_CONFIG *const new_fb = get_frame_new_buffer(cm);
 
   if (!first_partition_size) {
     if (!keyframe) {
@@ -1160,19 +1159,17 @@ int vp9_decode_frame(VP9D_COMP *pbi, const uint8_t **p_data_end) {
       return -1;
     }
   }
-  data += vp9_rb_bytes_read(&rb);
-  xd->corrupted = 0;
-  new_fb->corrupted = 0;
-  pbi->do_loopfilter_inline =
-      (cm->log2_tile_rows | cm->log2_tile_cols) == 0 && cm->lf.filter_level;
 
   if (!pbi->decoded_key_frame && !keyframe)
     return -1;
 
+  data += vp9_rb_bytes_read(&rb);
   if (!read_is_valid(data, first_partition_size, data_end))
     vpx_internal_error(&cm->error, VPX_CODEC_CORRUPT_FRAME,
                        "Truncated packet or corrupt header length");
 
+  pbi->do_loopfilter_inline =
+      (cm->log2_tile_rows | cm->log2_tile_cols) == 0 && cm->lf.filter_level;
   if (pbi->do_loopfilter_inline && pbi->lf_worker.data1 == NULL) {
     CHECK_MEM_ERROR(cm, pbi->lf_worker.data1, vpx_malloc(sizeof(LFWorkerData)));
     pbi->lf_worker.hook = (VP9WorkerHook)vp9_loop_filter_worker;
@@ -1182,26 +1179,22 @@ int vp9_decode_frame(VP9D_COMP *pbi, const uint8_t **p_data_end) {
     }
   }
 
-  setup_plane_dequants(cm, &pbi->mb, cm->base_qindex);
+  alloc_tile_storage(pbi, tile_cols);
 
   xd->mi_8x8 = cm->mi_grid_visible;
   xd->mode_info_stride = cm->mode_info_stride;
+  set_prev_mi(cm);
 
-  alloc_tile_storage(pbi, tile_cols);
-
-  cm->fc = cm->frame_contexts[cm->frame_context_idx];
-
-  vp9_zero(cm->counts);
-
-  new_fb->corrupted |= read_compressed_header(pbi, data, first_partition_size);
-
+  setup_plane_dequants(cm, xd, cm->base_qindex);
   setup_block_dptrs(xd, cm->subsampling_x, cm->subsampling_y);
 
-  // clear out the coeff buffer
+  cm->fc = cm->frame_contexts[cm->frame_context_idx];
+  vp9_zero(cm->counts);
   for (i = 0; i < MAX_MB_PLANE; ++i)
     vp9_zero(xd->plane[i].qcoeff);
 
-  set_prev_mi(cm);
+  xd->corrupted = 0;
+  new_fb->corrupted = read_compressed_header(pbi, data, first_partition_size);
 
   *p_data_end = decode_tiles(pbi, data + first_partition_size);
 
