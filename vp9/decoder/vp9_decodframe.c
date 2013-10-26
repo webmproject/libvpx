@@ -37,6 +37,12 @@
 #include "vp9/decoder/vp9_thread.h"
 #include "vp9/decoder/vp9_treereader.h"
 
+typedef struct TileWorkerData {
+  VP9_COMMON *cm;
+  vp9_reader bit_reader;
+  DECLARE_ALIGNED(16, MACROBLOCKD, xd);
+} TileWorkerData;
+
 static int read_be32(const uint8_t *p) {
   return (p[0] << 24) | (p[1] << 16) | (p[2] << 8) | p[3];
 }
@@ -917,6 +923,106 @@ static const uint8_t *decode_tiles(VP9D_COMP *pbi, const uint8_t *data) {
   return vp9_reader_find_end(&residual_bc);
 }
 
+static int tile_worker_hook(void *arg1, void *arg2) {
+  TileWorkerData *const tile_data = (TileWorkerData*)arg1;
+  const TileInfo *const tile = (TileInfo*)arg2;
+  int mi_row, mi_col;
+
+  for (mi_row = tile->mi_row_start; mi_row < tile->mi_row_end;
+       mi_row += MI_BLOCK_SIZE) {
+    vp9_zero(tile_data->xd.left_context);
+    vp9_zero(tile_data->xd.left_seg_context);
+    for (mi_col = tile->mi_col_start; mi_col < tile->mi_col_end;
+         mi_col += MI_BLOCK_SIZE)
+      decode_modes_sb(tile_data->cm, &tile_data->xd, tile,
+                      mi_row, mi_col, &tile_data->bit_reader, BLOCK_64X64, 0);
+  }
+  return !tile_data->xd.corrupted;
+}
+
+static const uint8_t *decode_tiles_mt(VP9D_COMP *pbi, const uint8_t *data) {
+  VP9_COMMON *const cm = &pbi->common;
+  const uint8_t *const data_end = pbi->source + pbi->source_sz;
+  const int aligned_mi_cols = mi_cols_aligned_to_sb(cm->mi_cols);
+  const int tile_cols = 1 << cm->log2_tile_cols;
+  const int tile_rows = 1 << cm->log2_tile_rows;
+  const int num_workers = MIN(pbi->oxcf.max_threads & ~1, tile_cols);
+  int tile_col = 0;
+
+  assert(tile_rows == 1);
+  (void)tile_rows;
+
+  if (num_workers > pbi->num_tile_workers) {
+    int i;
+    CHECK_MEM_ERROR(cm, pbi->tile_workers,
+                    vpx_realloc(pbi->tile_workers,
+                                num_workers * sizeof(*pbi->tile_workers)));
+    for (i = pbi->num_tile_workers; i < num_workers; ++i) {
+      VP9Worker *const worker = &pbi->tile_workers[i];
+      ++pbi->num_tile_workers;
+
+      vp9_worker_init(worker);
+      worker->hook = (VP9WorkerHook)tile_worker_hook;
+      CHECK_MEM_ERROR(cm, worker->data1, vpx_malloc(sizeof(TileWorkerData)));
+      CHECK_MEM_ERROR(cm, worker->data2, vpx_malloc(sizeof(TileInfo)));
+      if (i < num_workers - 1 && !vp9_worker_reset(worker)) {
+        vpx_internal_error(&cm->error, VPX_CODEC_ERROR,
+                           "Tile decoder thread creation failed");
+      }
+    }
+  }
+
+  // Note: this memset assumes above_context[0], [1] and [2]
+  // are allocated as part of the same buffer.
+  vpx_memset(pbi->above_context[0], 0,
+             sizeof(*pbi->above_context[0]) * MAX_MB_PLANE *
+             2 * aligned_mi_cols);
+  vpx_memset(pbi->above_seg_context, 0,
+             sizeof(*pbi->above_seg_context) * aligned_mi_cols);
+
+  while (tile_col < tile_cols) {
+    int i;
+    for (i = 0; i < num_workers && tile_col < tile_cols; ++i) {
+      VP9Worker *const worker = &pbi->tile_workers[i];
+      TileWorkerData *const tile_data = (TileWorkerData*)worker->data1;
+      TileInfo *const tile = (TileInfo*)worker->data2;
+      const size_t size =
+          get_tile(data_end, tile_col == tile_cols - 1, &cm->error, &data);
+
+      tile_data->cm = cm;
+      tile_data->xd = pbi->mb;
+      tile_data->xd.corrupted = 0;
+      vp9_tile_init(tile, tile_data->cm, 0, tile_col);
+
+      setup_token_decoder(data, data_end, size, &cm->error,
+                          &tile_data->bit_reader);
+      setup_tile_context(pbi, &tile_data->xd, tile_col);
+
+      worker->had_error = 0;
+      if (i == num_workers - 1 || tile_col == tile_cols - 1) {
+        vp9_worker_execute(worker);
+      } else {
+        vp9_worker_launch(worker);
+      }
+
+      data += size;
+      ++tile_col;
+    }
+
+    for (; i > 0; --i) {
+      VP9Worker *const worker = &pbi->tile_workers[i - 1];
+      pbi->mb.corrupted |= !vp9_worker_sync(worker);
+    }
+  }
+
+  {
+    const int final_worker = (tile_cols + num_workers - 1) % num_workers;
+    TileWorkerData *const tile_data =
+        (TileWorkerData*)pbi->tile_workers[final_worker].data1;
+    return vp9_reader_find_end(&tile_data->bit_reader);
+  }
+}
+
 static void check_sync_code(VP9_COMMON *cm, struct vp9_read_bit_buffer *rb) {
   if (vp9_rb_read_literal(rb, 8) != VP9_SYNC_CODE_0 ||
       vp9_rb_read_literal(rb, 8) != VP9_SYNC_CODE_1 ||
@@ -1157,6 +1263,7 @@ int vp9_decode_frame(VP9D_COMP *pbi, const uint8_t **p_data_end) {
   struct vp9_read_bit_buffer rb = { data, data_end, 0, cm, error_handler };
   const size_t first_partition_size = read_uncompressed_header(pbi, &rb);
   const int keyframe = cm->frame_type == KEY_FRAME;
+  const int tile_rows = 1 << cm->log2_tile_rows;
   const int tile_cols = 1 << cm->log2_tile_cols;
   YV12_BUFFER_CONFIG *const new_fb = get_frame_new_buffer(cm);
 
@@ -1208,7 +1315,14 @@ int vp9_decode_frame(VP9D_COMP *pbi, const uint8_t **p_data_end) {
   xd->corrupted = 0;
   new_fb->corrupted = read_compressed_header(pbi, data, first_partition_size);
 
-  *p_data_end = decode_tiles(pbi, data + first_partition_size);
+  // TODO(jzern): remove frame_parallel_decoding_mode restriction for
+  // single-frame tile decoding.
+  if (pbi->oxcf.max_threads > 1 && tile_rows == 1 && tile_cols > 1 &&
+      cm->frame_parallel_decoding_mode) {
+    *p_data_end = decode_tiles_mt(pbi, data + first_partition_size);
+  } else {
+    *p_data_end = decode_tiles(pbi, data + first_partition_size);
+  }
 
   cm->last_width = cm->width;
   cm->last_height = cm->height;

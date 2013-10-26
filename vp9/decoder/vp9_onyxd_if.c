@@ -147,6 +147,7 @@ VP9D_PTR vp9_create_decompressor(VP9D_CONFIG *oxcf) {
 }
 
 void vp9_remove_decompressor(VP9D_PTR ptr) {
+  int i;
   VP9D_COMP *const pbi = (VP9D_COMP *)ptr;
 
   if (!pbi)
@@ -155,6 +156,13 @@ void vp9_remove_decompressor(VP9D_PTR ptr) {
   vp9_remove_common(&pbi->common);
   vp9_worker_end(&pbi->lf_worker);
   vpx_free(pbi->lf_worker.data1);
+  for (i = 0; i < pbi->num_tile_workers; ++i) {
+    VP9Worker *const worker = &pbi->tile_workers[i];
+    vp9_worker_end(worker);
+    vpx_free(worker->data1);
+    vpx_free(worker->data2);
+  }
+  vpx_free(pbi->tile_workers);
   vpx_free(pbi->mi_streams);
   vpx_free(pbi->above_context[0]);
   vpx_free(pbi->above_seg_context);

@@ -8,15 +8,18 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#include "vp9/decoder/vp9_thread.h"
+#include <string>
 
 #include "third_party/googletest/src/include/gtest/gtest.h"
 #include "test/codec_factory.h"
 #include "test/decode_test_driver.h"
 #include "test/md5_helper.h"
 #include "test/webm_video_source.h"
+#include "vp9/decoder/vp9_thread.h"
 
 namespace {
+
+using std::string;
 
 class VP9WorkerThreadTest : public ::testing::TestWithParam<bool> {
  protected:
@@ -91,19 +94,26 @@ TEST_P(VP9WorkerThreadTest, HookFailure) {
   EXPECT_FALSE(worker_.had_error);
 }
 
-TEST(VP9DecodeMTTest, MTDecode) {
-  libvpx_test::WebMVideoSource video("vp90-2-03-size-226x226.webm");
+// -----------------------------------------------------------------------------
+// Multi-threaded decode tests
+
+// Decodes |filename| with |num_threads|. Returns the md5 of the decoded frames.
+string DecodeFile(const string& filename, int num_threads) {
+  libvpx_test::WebMVideoSource video(filename);
   video.Init();
 
   vpx_codec_dec_cfg_t cfg = {0};
-  cfg.threads = 2;
+  cfg.threads = num_threads;
   libvpx_test::VP9Decoder decoder(cfg, 0);
 
   libvpx_test::MD5 md5;
   for (video.Begin(); video.cxdata(); video.Next()) {
     const vpx_codec_err_t res =
         decoder.DecodeFrame(video.cxdata(), video.frame_size());
-    ASSERT_EQ(VPX_CODEC_OK, res) << decoder.DecodeError();
+    if (res != VPX_CODEC_OK) {
+      EXPECT_EQ(VPX_CODEC_OK, res) << decoder.DecodeError();
+      break;
+    }
 
     libvpx_test::DxDataIterator dec_iter = decoder.GetDxData();
     const vpx_image_t *img = NULL;
@@ -113,7 +123,32 @@ TEST(VP9DecodeMTTest, MTDecode) {
       md5.Add(img);
     }
   }
-  EXPECT_STREQ("b35a1b707b28e82be025d960aba039bc", md5.Get());
+  return string(md5.Get());
+}
+
+TEST(VP9DecodeMTTest, MTDecode) {
+  // no tiles or frame parallel; this exercises loop filter threading.
+  EXPECT_STREQ("b35a1b707b28e82be025d960aba039bc",
+               DecodeFile("vp90-2-03-size-226x226.webm", 2).c_str());
+}
+
+TEST(VP9DecodeMTTest, MTDecode2) {
+  static const struct {
+    const char *name;
+    const char *expected_md5;
+  } files[] = {
+    { "vp90-2-08-tile_1x2_frame_parallel.webm",
+      "68ede6abd66bae0a2edf2eb9232241b6" },
+    { "vp90-2-08-tile_1x4_frame_parallel.webm",
+      "368ebc6ebf3a5e478d85b2c3149b2848" },
+  };
+
+  for (int i = 0; i < static_cast<int>(sizeof(files) / sizeof(files[0])); ++i) {
+    for (int t = 2; t <= 4; ++t) {
+      EXPECT_STREQ(files[i].expected_md5, DecodeFile(files[i].name, t).c_str())
+          << "threads = " << t;
+    }
+  }
 }
 
 INSTANTIATE_TEST_CASE_P(Synchronous, VP9WorkerThreadTest, ::testing::Bool());
