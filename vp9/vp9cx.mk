@@ -20,6 +20,7 @@ VP9_CX_SRCS-yes += vp9_cx_iface.c
 VP9_CX_SRCS-yes += encoder/vp9_bitstream.c
 VP9_CX_SRCS-yes += encoder/vp9_boolhuff.c
 VP9_CX_SRCS-yes += encoder/vp9_dct.c
+VP9_CX_SRCS-yes += encoder/vp9_dct.h
 VP9_CX_SRCS-yes += encoder/vp9_encodeframe.c
 VP9_CX_SRCS-yes += encoder/vp9_encodeframe.h
 VP9_CX_SRCS-yes += encoder/vp9_encodeintra.c
