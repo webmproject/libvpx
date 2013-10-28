@@ -226,6 +226,13 @@ typedef struct macroblockd {
   unsigned char ab_index;   // index of 4x4 block inside the 8x8 block
 
   int q_index;
+
+  /* Y,U,V,(A) */
+  ENTROPY_CONTEXT *above_context[MAX_MB_PLANE];
+  ENTROPY_CONTEXT left_context[MAX_MB_PLANE][16];
+
+  PARTITION_CONTEXT *above_seg_context;
+  PARTITION_CONTEXT left_seg_context[8];
 } MACROBLOCKD;
 
 

@@ -675,6 +675,13 @@ typedef struct VP9_COMP {
   // Debug / test stats
   int64_t mode_test_hits[BLOCK_SIZES];
 #endif
+
+  /* Y,U,V,(A) */
+  ENTROPY_CONTEXT *above_context[MAX_MB_PLANE];
+  ENTROPY_CONTEXT left_context[MAX_MB_PLANE][16];
+
+  PARTITION_CONTEXT *above_seg_context;
+  PARTITION_CONTEXT left_seg_context[8];
 } VP9_COMP;
 
 static int get_ref_frame_idx(VP9_COMP *cpi, MV_REFERENCE_FRAME ref_frame) {

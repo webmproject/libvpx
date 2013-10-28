@@ -618,7 +618,8 @@ static void write_modes_sb(VP9_COMP *cpi, MODE_INFO **mi_8x8, vp9_writer *bc,
     int pl;
     const int idx = check_bsize_coverage(bs, cm->mi_rows, cm->mi_cols,
                                          mi_row, mi_col);
-    pl = partition_plane_context(cm, mi_row, mi_col, bsize);
+    pl = partition_plane_context(cpi->above_seg_context, cpi->left_seg_context,
+                                 mi_row, mi_col, bsize);
     // encode the partition information
     if (idx == 0)
       write_token(bc, vp9_partition_tree,
@@ -661,7 +662,8 @@ static void write_modes_sb(VP9_COMP *cpi, MODE_INFO **mi_8x8, vp9_writer *bc,
   // update partition context
   if (bsize >= BLOCK_8X8 &&
       (bsize == BLOCK_8X8 || partition != PARTITION_SPLIT))
-    update_partition_context(cm, mi_row, mi_col, subsize, bsize);
+    update_partition_context(cpi->above_seg_context, cpi->left_seg_context,
+                             mi_row, mi_col, subsize, bsize);
 }
 
 static void write_modes(VP9_COMP *cpi, vp9_writer* const bc,
@@ -677,7 +679,7 @@ static void write_modes(VP9_COMP *cpi, vp9_writer* const bc,
   for (mi_row = cm->cur_tile_mi_row_start; mi_row < cm->cur_tile_mi_row_end;
        mi_row += 8, mi_8x8 += 8 * mis) {
     m_8x8 = mi_8x8;
-    vp9_zero(cm->left_seg_context);
+    vp9_zero(cpi->left_seg_context);
     for (mi_col = cm->cur_tile_mi_col_start; mi_col < cm->cur_tile_mi_col_end;
          mi_col += MI_BLOCK_SIZE, m_8x8 += MI_BLOCK_SIZE) {
       write_modes_sb(cpi, m_8x8, bc, tok, tok_end, mi_row, mi_col,
@@ -1201,7 +1203,7 @@ static size_t encode_tiles(VP9_COMP *cpi, uint8_t *data_ptr) {
   const int tile_cols = 1 << cm->log2_tile_cols;
   const int tile_rows = 1 << cm->log2_tile_rows;
 
-  vpx_memset(cm->above_seg_context, 0, sizeof(PARTITION_CONTEXT) *
+  vpx_memset(cpi->above_seg_context, 0, sizeof(*cpi->above_seg_context) *
              mi_cols_aligned_to_sb(cm->mi_cols));
 
   tok[0][0] = cpi->tok;

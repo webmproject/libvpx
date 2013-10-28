@@ -156,6 +156,8 @@ void vp9_remove_decompressor(VP9D_PTR ptr) {
   vp9_worker_end(&pbi->lf_worker);
   vpx_free(pbi->lf_worker.data1);
   vpx_free(pbi->mi_streams);
+  vpx_free(pbi->above_context[0]);
+  vpx_free(pbi->above_seg_context);
   vpx_free(pbi);
 }
 

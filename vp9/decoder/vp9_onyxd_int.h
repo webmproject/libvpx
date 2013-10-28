@@ -43,6 +43,9 @@ typedef struct VP9Decompressor {
   /* Each tile column has its own MODE_INFO stream. This array indexes them by
      tile column index. */
   MODE_INFO **mi_streams;
+
+  ENTROPY_CONTEXT *above_context[MAX_MB_PLANE];
+  PARTITION_CONTEXT *above_seg_context;
 } VP9D_COMP;
 
 #endif  // VP9_DECODER_VP9_ONYXD_INT_H_
