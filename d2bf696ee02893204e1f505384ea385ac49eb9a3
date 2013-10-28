@@ -16,6 +16,24 @@
       "revId": "d2bf696ee02893204e1f505384ea385ac49eb9a3",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX///vc\u003d",
+        "filename": "vp9/common/vp9_onyxc_int.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 251,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-10-28T09:48:22Z",
+      "side": 1,
+      "message": "the ENTROPY_CONTEXT params are too long to fit in the normal aligned format.\n\nhttp://google-styleguide.googlecode.com/svn/trunk/cppguide.xml#Function_Declarations_and_Definitions",
+      "parentUuid": "AAAAdX///xs\u003d",
+      "revId": "d2bf696ee02893204e1f505384ea385ac49eb9a3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
