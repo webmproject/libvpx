@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdX///ww\u003d",
+        "filename": "test/svc_test.cc",
+        "patchSetId": 8
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 1003234
+      },
+      "writtenOn": "2013-10-28T18:58:45Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdX////U\u003d",
+      "revId": "3d663edc0a82ae42eeaec9f09f37741552b2e5d5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdX////Q\u003d",
         "filename": "test/svc_test.cc",
         "patchSetId": 8
@@ -30,6 +48,24 @@
       "writtenOn": "2013-10-25T10:10:06Z",
       "side": 1,
       "message": "is there a bug to track that?",
+      "revId": "3d663edc0a82ae42eeaec9f09f37741552b2e5d5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX///wk\u003d",
+        "filename": "test/svc_test.cc",
+        "patchSetId": 8
+      },
+      "lineNbr": 124,
+      "author": {
+        "id": 1003234
+      },
+      "writtenOn": "2013-10-28T18:58:45Z",
+      "side": 1,
+      "message": "Have not yet submitted a bug. agrange is investigating. Should I submit bug to https://code.google.com/p/webm/issues/list ?",
+      "parentUuid": "AAAAdX////Q\u003d",
       "revId": "3d663edc0a82ae42eeaec9f09f37741552b2e5d5",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdX///ws\u003d",
+        "filename": "test/svc_test.cc",
+        "patchSetId": 8
+      },
+      "lineNbr": 217,
+      "author": {
+        "id": 1003234
+      },
+      "writtenOn": "2013-10-28T18:58:45Z",
+      "side": 1,
+      "message": "No, the empty comment is to force the automatic code formatter to put the next two parameters on the same line.",
+      "parentUuid": "AAAAdX////M\u003d",
+      "revId": "3d663edc0a82ae42eeaec9f09f37741552b2e5d5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdX////I\u003d",
         "filename": "test/svc_test.cc",
         "patchSetId": 8
@@ -64,6 +118,24 @@
       "writtenOn": "2013-10-25T10:10:06Z",
       "side": 1,
       "message": "this promotion should happen automatically no?",
+      "revId": "3d663edc0a82ae42eeaec9f09f37741552b2e5d5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX///wo\u003d",
+        "filename": "test/svc_test.cc",
+        "patchSetId": 8
+      },
+      "lineNbr": 223,
+      "author": {
+        "id": 1003234
+      },
+      "writtenOn": "2013-10-28T18:58:45Z",
+      "side": 1,
+      "message": "no, cast needed to get rid of this warning:\nwarning: comparison between signed and unsigned integer expressions [-Wsign-compare]\nApparently, enums don\u0027t promote from signed to unsigned",
+      "parentUuid": "AAAAdX////I\u003d",
       "revId": "3d663edc0a82ae42eeaec9f09f37741552b2e5d5",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdX///v8\u003d",
+        "filename": "vp9_spatial_scalable_encoder.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1003234
+      },
+      "writtenOn": "2013-10-28T18:58:45Z",
+      "side": 1,
+      "message": "This is the formatting as done by the eclipse formatter using the Google Profile. If I change the format manually, it reverts when I reformat the entire file using \u003cCTRL\u003e\u003cSHIFT\u003eF (which I do instinctively). I would prefer to leave the format as is.",
+      "parentUuid": "AAAAdX////E\u003d",
+      "revId": "3d663edc0a82ae42eeaec9f09f37741552b2e5d5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdX////A\u003d",
         "filename": "vp9_spatial_scalable_encoder.c",
         "patchSetId": 8
@@ -98,6 +188,24 @@
       "writtenOn": "2013-10-25T10:10:06Z",
       "side": 1,
       "message": "same as 31",
+      "revId": "3d663edc0a82ae42eeaec9f09f37741552b2e5d5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX///v4\u003d",
+        "filename": "vp9_spatial_scalable_encoder.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 62,
+      "author": {
+        "id": 1003234
+      },
+      "writtenOn": "2013-10-28T18:58:45Z",
+      "side": 1,
+      "message": "Would prefer to leave as is, same as 31",
+      "parentUuid": "AAAAdX////A\u003d",
       "revId": "3d663edc0a82ae42eeaec9f09f37741552b2e5d5",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -121,6 +229,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdX///s4\u003d",
+        "filename": "vp9_spatial_scalable_encoder.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 72,
+      "author": {
+        "id": 1003234
+      },
+      "writtenOn": "2013-10-28T18:58:45Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdX///4U\u003d",
+      "revId": "3d663edc0a82ae42eeaec9f09f37741552b2e5d5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdX///4Y\u003d",
         "filename": "vp9_spatial_scalable_encoder.c",
         "patchSetId": 8
@@ -132,6 +258,24 @@
       "writtenOn": "2013-10-25T18:45:50Z",
       "side": 1,
       "message": "make this const uint32 default_number_frames_to_code",
+      "revId": "3d663edc0a82ae42eeaec9f09f37741552b2e5d5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX///s0\u003d",
+        "filename": "vp9_spatial_scalable_encoder.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 73,
+      "author": {
+        "id": 1003234
+      },
+      "writtenOn": "2013-10-28T18:58:45Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdX///4Y\u003d",
       "revId": "3d663edc0a82ae42eeaec9f09f37741552b2e5d5",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -173,6 +317,42 @@
     },
     {
       "key": {
+        "uuid": "AAAAdX///sw\u003d",
+        "filename": "vp9_spatial_scalable_encoder.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 76,
+      "author": {
+        "id": 1003234
+      },
+      "writtenOn": "2013-10-28T18:58:45Z",
+      "side": 1,
+      "message": "globals removed, replaced with AppInput struct",
+      "parentUuid": "AAAAdX///+8\u003d",
+      "revId": "3d663edc0a82ae42eeaec9f09f37741552b2e5d5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX///ss\u003d",
+        "filename": "vp9_spatial_scalable_encoder.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 76,
+      "author": {
+        "id": 1003234
+      },
+      "writtenOn": "2013-10-28T18:58:45Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdX///4c\u003d",
+      "revId": "3d663edc0a82ae42eeaec9f09f37741552b2e5d5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdX///+4\u003d",
         "filename": "vp9_spatial_scalable_encoder.c",
         "patchSetId": 8
@@ -184,6 +364,24 @@
       "writtenOn": "2013-10-25T10:10:06Z",
       "side": 1,
       "message": "missing comment?",
+      "revId": "3d663edc0a82ae42eeaec9f09f37741552b2e5d5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX///v0\u003d",
+        "filename": "vp9_spatial_scalable_encoder.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 159,
+      "author": {
+        "id": 1003234
+      },
+      "writtenOn": "2013-10-28T18:58:45Z",
+      "side": 1,
+      "message": "The empty comment is there so that the auto-formatter puts width and height on the same line",
+      "parentUuid": "AAAAdX///+4\u003d",
       "revId": "3d663edc0a82ae42eeaec9f09f37741552b2e5d5",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -207,6 +405,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdX///so\u003d",
+        "filename": "vp9_spatial_scalable_encoder.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 204,
+      "author": {
+        "id": 1003234
+      },
+      "writtenOn": "2013-10-28T18:58:45Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdX///4Q\u003d",
+      "revId": "3d663edc0a82ae42eeaec9f09f37741552b2e5d5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdX///+0\u003d",
         "filename": "vp9_spatial_scalable_encoder.c",
         "patchSetId": 8
@@ -218,6 +434,24 @@
       "writtenOn": "2013-10-25T10:10:06Z",
       "side": 1,
       "message": "strdup needed? I don\u0027t see a free",
+      "revId": "3d663edc0a82ae42eeaec9f09f37741552b2e5d5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX///vs\u003d",
+        "filename": "vp9_spatial_scalable_encoder.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 207,
+      "author": {
+        "id": 1003234
+      },
+      "writtenOn": "2013-10-28T18:58:45Z",
+      "side": 1,
+      "message": "strdup removed",
+      "parentUuid": "AAAAdX///+0\u003d",
       "revId": "3d663edc0a82ae42eeaec9f09f37741552b2e5d5",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -241,6 +475,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdX///vw\u003d",
+        "filename": "vp9_spatial_scalable_encoder.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 209,
+      "author": {
+        "id": 1003234
+      },
+      "writtenOn": "2013-10-28T18:58:45Z",
+      "side": 1,
+      "message": "()s necessary to suppress warning:\nsuggest parentheses around assignment used as truth value [-Wparentheses]",
+      "parentUuid": "AAAAdX///+w\u003d",
+      "revId": "3d663edc0a82ae42eeaec9f09f37741552b2e5d5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdX///34\u003d",
         "filename": "vp9_spatial_scalable_encoder.c",
         "patchSetId": 8
@@ -252,6 +504,24 @@
       "writtenOn": "2013-10-25T18:45:50Z",
       "side": 1,
       "message": "remove exec_name altogether and just pass in argv_[0] as an argument here.",
+      "revId": "3d663edc0a82ae42eeaec9f09f37741552b2e5d5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX///sk\u003d",
+        "filename": "vp9_spatial_scalable_encoder.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 251,
+      "author": {
+        "id": 1003234
+      },
+      "writtenOn": "2013-10-28T18:58:45Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdX///34\u003d",
       "revId": "3d663edc0a82ae42eeaec9f09f37741552b2e5d5",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -275,6 +545,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdX///vo\u003d",
+        "filename": "vp9_spatial_scalable_encoder.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 311,
+      "author": {
+        "id": 1003234
+      },
+      "writtenOn": "2013-10-28T18:58:45Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdX///+s\u003d",
+      "revId": "3d663edc0a82ae42eeaec9f09f37741552b2e5d5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdX///30\u003d",
         "filename": "vp9_spatial_scalable_encoder.c",
         "patchSetId": 8
@@ -286,6 +574,24 @@
       "writtenOn": "2013-10-25T18:45:50Z",
       "side": 1,
       "message": "it seems there is no need to use a global input_filename variable",
+      "revId": "3d663edc0a82ae42eeaec9f09f37741552b2e5d5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX///sg\u003d",
+        "filename": "vp9_spatial_scalable_encoder.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 313,
+      "author": {
+        "id": 1003234
+      },
+      "writtenOn": "2013-10-28T18:58:45Z",
+      "side": 1,
+      "message": "input_filename has been moved into local struct AppInput.",
+      "parentUuid": "AAAAdX///30\u003d",
       "revId": "3d663edc0a82ae42eeaec9f09f37741552b2e5d5",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -309,6 +615,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdX///sc\u003d",
+        "filename": "vp9_spatial_scalable_encoder.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 316,
+      "author": {
+        "id": 1003234
+      },
+      "writtenOn": "2013-10-28T18:58:45Z",
+      "side": 1,
+      "message": "output_filename has been moved into local struct AppInput.",
+      "parentUuid": "AAAAdX///3w\u003d",
+      "revId": "3d663edc0a82ae42eeaec9f09f37741552b2e5d5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdX///+o\u003d",
         "filename": "vp9_spatial_scalable_encoder.c",
         "patchSetId": 8
@@ -320,6 +644,24 @@
       "writtenOn": "2013-10-25T10:10:06Z",
       "side": 1,
       "message": "comment shouldn\u0027t be necesary here",
+      "revId": "3d663edc0a82ae42eeaec9f09f37741552b2e5d5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX///vk\u003d",
+        "filename": "vp9_spatial_scalable_encoder.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 352,
+      "author": {
+        "id": 1003234
+      },
+      "writtenOn": "2013-10-28T18:58:45Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdX///+o\u003d",
       "revId": "3d663edc0a82ae42eeaec9f09f37741552b2e5d5",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -343,6 +685,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdX///sY\u003d",
+        "filename": "vp9_spatial_scalable_encoder.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 354,
+      "author": {
+        "id": 1003234
+      },
+      "writtenOn": "2013-10-28T18:58:45Z",
+      "side": 1,
+      "message": "timer removed, not necessary, provided no more information than shell \"time\"",
+      "parentUuid": "AAAAdX///+k\u003d",
+      "revId": "3d663edc0a82ae42eeaec9f09f37741552b2e5d5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdX///+g\u003d",
         "filename": "vpx/src/svc_encodeframe.c",
         "patchSetId": 8
@@ -354,6 +714,24 @@
       "writtenOn": "2013-10-25T10:10:06Z",
       "side": 1,
       "message": "these should come below system includes",
+      "revId": "3d663edc0a82ae42eeaec9f09f37741552b2e5d5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX///wY\u003d",
+        "filename": "vpx/src/svc_encodeframe.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 6,
+      "author": {
+        "id": 1003234
+      },
+      "writtenOn": "2013-10-28T18:58:45Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdX///+g\u003d",
       "revId": "3d663edc0a82ae42eeaec9f09f37741552b2e5d5",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -377,6 +755,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdX///wU\u003d",
+        "filename": "vpx/src/svc_encodeframe.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 1003234
+      },
+      "writtenOn": "2013-10-28T18:58:45Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdX///+c\u003d",
+      "revId": "3d663edc0a82ae42eeaec9f09f37741552b2e5d5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdX///+Y\u003d",
         "filename": "vpx/src/svc_encodeframe.c",
         "patchSetId": 8
@@ -388,6 +784,24 @@
       "writtenOn": "2013-10-25T10:10:06Z",
       "side": 1,
       "message": "not sure if color logging belongs in a library module",
+      "revId": "3d663edc0a82ae42eeaec9f09f37741552b2e5d5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX///wQ\u003d",
+        "filename": "vpx/src/svc_encodeframe.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1003234
+      },
+      "writtenOn": "2013-10-28T18:58:45Z",
+      "side": 1,
+      "message": "The color logging make viewing the diagnostic output from vp9_spatial_scalable_encoder much easier to read. Will remove the color if required.",
+      "parentUuid": "AAAAdX///+Y\u003d",
       "revId": "3d663edc0a82ae42eeaec9f09f37741552b2e5d5",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -411,6 +825,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdX///tU\u003d",
+        "filename": "vpx/src/svc_encodeframe.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 1003234
+      },
+      "writtenOn": "2013-10-28T18:58:45Z",
+      "side": 1,
+      "message": "Staying with _WIN32, as neither MSVC_VER nor _MSC_VER are defined with this configuration:\nCROSS\u003di686-w64-mingw32- ../configure --target\u003dx86-win32-gcc --disable-install-docs --enable-unit-tests\n\nI can not find the correct header that includes strtok_s.\n\nAs an alternative, I could paste a local version of strtok_r into this file. (It is a short function).",
+      "parentUuid": "AAAAdX///+U\u003d",
+      "revId": "3d663edc0a82ae42eeaec9f09f37741552b2e5d5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdX///+M\u003d",
         "filename": "vpx/src/svc_encodeframe.c",
         "patchSetId": 8
@@ -422,6 +854,24 @@
       "writtenOn": "2013-10-25T10:10:06Z",
       "side": 1,
       "message": "try to keep these to a minimum by reordering the functions",
+      "revId": "3d663edc0a82ae42eeaec9f09f37741552b2e5d5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX///wI\u003d",
+        "filename": "vpx/src/svc_encodeframe.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 67,
+      "author": {
+        "id": 1003234
+      },
+      "writtenOn": "2013-10-28T18:58:45Z",
+      "side": 1,
+      "message": "forward references eliminated",
+      "parentUuid": "AAAAdX///+M\u003d",
       "revId": "3d663edc0a82ae42eeaec9f09f37741552b2e5d5",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -445,6 +895,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdX///wE\u003d",
+        "filename": "vpx/src/svc_encodeframe.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 1003234
+      },
+      "writtenOn": "2013-10-28T18:58:45Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdX///+Q\u003d",
+      "revId": "3d663edc0a82ae42eeaec9f09f37741552b2e5d5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdX///+E\u003d",
         "filename": "vpx/src/svc_encodeframe.c",
         "patchSetId": 8
@@ -456,6 +924,24 @@
       "writtenOn": "2013-10-25T10:10:06Z",
       "side": 1,
       "message": "missing comment?",
+      "revId": "3d663edc0a82ae42eeaec9f09f37741552b2e5d5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX///wA\u003d",
+        "filename": "vpx/src/svc_encodeframe.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 195,
+      "author": {
+        "id": 1003234
+      },
+      "writtenOn": "2013-10-28T18:58:45Z",
+      "side": 1,
+      "message": "empty comment removed",
+      "parentUuid": "AAAAdX///+E\u003d",
       "revId": "3d663edc0a82ae42eeaec9f09f37741552b2e5d5",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -479,6 +965,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdX///wc\u003d",
+        "filename": "vpx/svc_context.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1003234
+      },
+      "writtenOn": "2013-10-28T18:58:45Z",
+      "side": 1,
+      "message": "That\u0027s how it struct SvcInternal in svc_encodeframe.c are defined. The purpose of the strings in struct SvcContext is to allow the convenient setting of different quantizers and scale factors from the ffmpeg and sample app command line",
+      "parentUuid": "AAAAdX///3o\u003d",
+      "revId": "3d663edc0a82ae42eeaec9f09f37741552b2e5d5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdX///+A\u003d",
         "filename": "vpx/vp8cx.h",
         "patchSetId": 8
@@ -490,6 +994,24 @@
       "writtenOn": "2013-10-25T10:10:06Z",
       "side": 1,
       "message": "drop one space before \u0027encode\u0027",
+      "revId": "3d663edc0a82ae42eeaec9f09f37741552b2e5d5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX///wg\u003d",
+        "filename": "vpx/vp8cx.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 290,
+      "author": {
+        "id": 1003234
+      },
+      "writtenOn": "2013-10-28T18:58:45Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdX///+A\u003d",
       "revId": "3d663edc0a82ae42eeaec9f09f37741552b2e5d5",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
