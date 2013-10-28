@@ -530,3 +530,11 @@ f6235f937552e11d8eb331ec55da6b3aa596b9ac  vp90-2-06-bilinear.webm.md5
 65e3a7ffef61ab340d9140f335ecc49125970c2c  vp91-2-04-yv444.webm.md5
 0c83a1e414fde3bccd6dc451bbaee68e59974c76  vp90-2-07-frame_parallel.webm
 e5c2c9fb383e5bf3b563480adaeba5b7e3475ecd  vp90-2-07-frame_parallel.webm.md5
+086c7edcffd699ae7d99d710fd7e53b18910ca5b  vp90-2-08-tile_1x2_frame_parallel.webm
+e981ecaabb29a80e0cbc1f4002384965ce8e95bb  vp90-2-08-tile_1x2_frame_parallel.webm.md5
+ed79be026a6f28646c5825da1c12d1fbc70f96a4  vp90-2-08-tile_1x2.webm
+45b404e025841c9750895fc1a9f6bd384fe6a315  vp90-2-08-tile_1x2.webm.md5
+cf8ea970c776797aae71dac8317ea926d9431cab  vp90-2-08-tile_1x4_frame_parallel.webm
+a481fbea465010b57af5a19ebf6d4a5cfe5b9278  vp90-2-08-tile_1x4_frame_parallel.webm.md5
+0203ec456277a01aec401e7fb6c72c9a7e5e3f9d  vp90-2-08-tile_1x4.webm
+c9b237dfcc01c1b414fbcaa481d014a906ef7998  vp90-2-08-tile_1x4.webm.md5
