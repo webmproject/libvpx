@@ -72,6 +72,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdX///qo\u003d",
+        "filename": "test/svc_test.cc",
+        "patchSetId": 8
+      },
+      "lineNbr": 124,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-10-28T20:14:08Z",
+      "side": 1,
+      "message": "yes and link it here if this lands before the fix",
+      "parentUuid": "AAAAdX///wk\u003d",
+      "revId": "3d663edc0a82ae42eeaec9f09f37741552b2e5d5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdX////M\u003d",
         "filename": "test/svc_test.cc",
         "patchSetId": 8
@@ -101,6 +119,24 @@
       "side": 1,
       "message": "No, the empty comment is to force the automatic code formatter to put the next two parameters on the same line.",
       "parentUuid": "AAAAdX////M\u003d",
+      "revId": "3d663edc0a82ae42eeaec9f09f37741552b2e5d5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX///qk\u003d",
+        "filename": "test/svc_test.cc",
+        "patchSetId": 8
+      },
+      "lineNbr": 217,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-10-28T20:14:08Z",
+      "side": 1,
+      "message": "the code tries to be editor agnostic, so fix the tool",
+      "parentUuid": "AAAAdX///ws\u003d",
       "revId": "3d663edc0a82ae42eeaec9f09f37741552b2e5d5",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -142,6 +178,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdX///qg\u003d",
+        "filename": "test/svc_test.cc",
+        "patchSetId": 8
+      },
+      "lineNbr": 223,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-10-28T20:14:08Z",
+      "side": 1,
+      "message": "you could make it a static const then",
+      "parentUuid": "AAAAdX///wo\u003d",
+      "revId": "3d663edc0a82ae42eeaec9f09f37741552b2e5d5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdX////E\u003d",
         "filename": "vp9_spatial_scalable_encoder.c",
         "patchSetId": 8
@@ -171,6 +225,24 @@
       "side": 1,
       "message": "This is the formatting as done by the eclipse formatter using the Google Profile. If I change the format manually, it reverts when I reformat the entire file using \u003cCTRL\u003e\u003cSHIFT\u003eF (which I do instinctively). I would prefer to leave the format as is.",
       "parentUuid": "AAAAdX////E\u003d",
+      "revId": "3d663edc0a82ae42eeaec9f09f37741552b2e5d5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX///qc\u003d",
+        "filename": "vp9_spatial_scalable_encoder.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-10-28T20:14:08Z",
+      "side": 1,
+      "message": "sorry, the goal is to keep styling consistent with new code; fix or deal with the tool, it\u0027s not my concern",
+      "parentUuid": "AAAAdX///v8\u003d",
       "revId": "3d663edc0a82ae42eeaec9f09f37741552b2e5d5",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -382,6 +454,24 @@
       "side": 1,
       "message": "The empty comment is there so that the auto-formatter puts width and height on the same line",
       "parentUuid": "AAAAdX///+4\u003d",
+      "revId": "3d663edc0a82ae42eeaec9f09f37741552b2e5d5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX///qY\u003d",
+        "filename": "vp9_spatial_scalable_encoder.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 159,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-10-28T20:14:08Z",
+      "side": 1,
+      "message": "drop this",
+      "parentUuid": "AAAAdX///v0\u003d",
       "revId": "3d663edc0a82ae42eeaec9f09f37741552b2e5d5",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -802,6 +892,24 @@
       "side": 1,
       "message": "The color logging make viewing the diagnostic output from vp9_spatial_scalable_encoder much easier to read. Will remove the color if required.",
       "parentUuid": "AAAAdX///+Y\u003d",
+      "revId": "3d663edc0a82ae42eeaec9f09f37741552b2e5d5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX///qU\u003d",
+        "filename": "vpx/src/svc_encodeframe.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-10-28T20:14:08Z",
+      "side": 1,
+      "message": "it could go into a logger if one could set a callback, but overhead like this in the lib is questionable",
+      "parentUuid": "AAAAdX///wQ\u003d",
       "revId": "3d663edc0a82ae42eeaec9f09f37741552b2e5d5",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
