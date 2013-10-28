@@ -260,24 +260,6 @@ static INLINE void set_skip_context(
   }
 }
 
-// return the node index in the prob tree for binary coding
-static int check_bsize_coverage(int bs, int mi_rows, int mi_cols,
-                                int mi_row, int mi_col) {
-  const int r = (mi_row + bs < mi_rows);
-  const int c = (mi_col + bs < mi_cols);
-
-  if (r && c)
-    return 0;
-
-  if (c && !r)
-    return 1;  // only allow horizontal/split partition types
-
-  if (r && !c)
-    return 2;  // only allow vertical/split partition types
-
-  return -1;
-}
-
 static void set_mi_row_col(MACROBLOCKD *xd, const TileInfo *const tile,
                            int mi_row, int bh,
                            int mi_col, int bw,

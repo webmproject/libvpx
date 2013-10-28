@@ -422,6 +422,23 @@ static void decode_modes_b(VP9_COMMON *const cm, MACROBLOCKD *const xd,
   xd->corrupted |= vp9_reader_has_error(r);
 }
 
+static PARTITION_TYPE read_partition(int hbs, int mi_rows, int mi_cols,
+                                     int mi_row, int mi_col,
+                                     vp9_prob probs[PARTITION_TYPES - 1],
+                                     vp9_reader *r) {
+  const int has_rows = (mi_row + hbs) < mi_rows;
+  const int has_cols = (mi_col + hbs) < mi_cols;
+
+  if (has_rows && has_cols)
+    return treed_read(r, vp9_partition_tree, probs);
+  else if (!has_rows && has_cols)
+    return vp9_read(r, probs[1]) ? PARTITION_SPLIT : PARTITION_HORZ;
+  else if (has_rows && !has_cols)
+    return vp9_read(r, probs[2]) ? PARTITION_SPLIT : PARTITION_VERT;
+  else
+    return PARTITION_SPLIT;
+}
+
 static void decode_modes_sb(VP9_COMMON *const cm, MACROBLOCKD *const xd,
                             const TileInfo *const tile,
                             int mi_row, int mi_col,
@@ -437,23 +454,14 @@ static void decode_modes_sb(VP9_COMMON *const cm, MACROBLOCKD *const xd,
     if (index > 0)
       return;
   } else {
-    int pl;
-    const int idx = check_bsize_coverage(hbs, cm->mi_rows, cm->mi_cols,
-                                         mi_row, mi_col);
-    pl = partition_plane_context(xd->above_seg_context, xd->left_seg_context,
-                                 mi_row, mi_col, bsize);
-
-    if (idx == 0)
-      partition = treed_read(r, vp9_partition_tree,
-                             cm->fc.partition_prob[cm->frame_type][pl]);
-    else if (idx > 0 &&
-        !vp9_read(r, cm->fc.partition_prob[cm->frame_type][pl][idx]))
-      partition = (idx == 1) ? PARTITION_HORZ : PARTITION_VERT;
-    else
-      partition = PARTITION_SPLIT;
+    const int ctx = partition_plane_context(xd->above_seg_context,
+                                            xd->left_seg_context,
+                                            mi_row, mi_col, bsize);
+    partition = read_partition(hbs, cm->mi_rows, cm->mi_cols, mi_row, mi_col,
+                               cm->fc.partition_prob[cm->frame_type][ctx], r);
 
     if (!cm->frame_parallel_decoding_mode)
-      ++cm->counts.partition[pl][partition];
+      ++cm->counts.partition[ctx][partition];
   }
 
   subsize = get_subsize(bsize, partition);

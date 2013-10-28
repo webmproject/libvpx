@@ -595,6 +595,28 @@ static void write_modes_b(VP9_COMP *cpi, const TileInfo *const tile,
   pack_mb_tokens(bc, tok, tok_end);
 }
 
+static void write_partition(PARTITION_TYPE partition,
+                            int hbs, int mi_rows, int mi_cols,
+                            int mi_row, int mi_col,
+                            vp9_prob probs[PARTITION_TYPES - 1],
+                            vp9_writer *w) {
+  const int has_rows = (mi_row + hbs) < mi_rows;
+  const int has_cols = (mi_col + hbs) < mi_cols;
+
+  if (has_rows && has_cols) {
+    write_token(w, vp9_partition_tree, probs,
+                &vp9_partition_encodings[partition]);
+  } else if (!has_rows && has_cols) {
+    assert(partition == PARTITION_SPLIT || partition == PARTITION_HORZ);
+    vp9_write(w, partition == PARTITION_SPLIT, probs[1]);
+  } else if (has_rows && !has_cols) {
+    assert(partition == PARTITION_SPLIT || partition == PARTITION_VERT);
+    vp9_write(w, partition == PARTITION_SPLIT, probs[2]);
+  } else {
+    assert(partition == PARTITION_SPLIT);
+  }
+}
+
 static void write_modes_sb(VP9_COMP *cpi, const TileInfo *const tile,
                            MODE_INFO **mi_8x8, vp9_writer *bc,
                            TOKENEXTRA **tok, TOKENEXTRA *tok_end,
@@ -618,19 +640,11 @@ static void write_modes_sb(VP9_COMP *cpi, const TileInfo *const tile,
     if (index > 0)
       return;
   } else {
-    int pl;
-    const int idx = check_bsize_coverage(bs, cm->mi_rows, cm->mi_cols,
-                                         mi_row, mi_col);
-    pl = partition_plane_context(cpi->above_seg_context, cpi->left_seg_context,
-                                 mi_row, mi_col, bsize);
-    // encode the partition information
-    if (idx == 0)
-      write_token(bc, vp9_partition_tree,
-                  cm->fc.partition_prob[cm->frame_type][pl],
-                  vp9_partition_encodings + partition);
-    else if (idx > 0)
-      vp9_write(bc, partition == PARTITION_SPLIT,
-                cm->fc.partition_prob[cm->frame_type][pl][idx]);
+    const int ctx = partition_plane_context(cpi->above_seg_context,
+                                            cpi->left_seg_context,
+                                            mi_row, mi_col, bsize);
+    write_partition(partition, bs, cm->mi_rows, cm->mi_cols, mi_row, mi_col,
+                    cm->fc.partition_prob[cm->frame_type][ctx], bc);
   }
 
   subsize = get_subsize(bsize, partition);
