@@ -35,14 +35,14 @@ unsigned char vp9_get_pred_context_switchable_interp(const MACROBLOCKD *xd) {
   // left of the entries correpsonding to real macroblocks.
   // The prediction flags in these dummy entries are initialised to 0.
   // left
-  const int left_mv_pred = left_in_image ? is_inter_mode(left_mi->mbmi.mode)
+  const int left_mv_pred = left_in_image ? is_inter_block(&left_mi->mbmi)
                                          : 0;
   const int left_interp = left_in_image && left_mv_pred
                               ? left_mi->mbmi.interp_filter
                               : SWITCHABLE_FILTERS;
 
   // above
-  const int above_mv_pred = above_in_image ? is_inter_mode(above_mi->mbmi.mode)
+  const int above_mv_pred = above_in_image ? is_inter_block(&above_mi->mbmi)
                                            : 0;
   const int above_interp = above_in_image && above_mv_pred
                                ? above_mi->mbmi.interp_filter
