@@ -16,6 +16,24 @@
       "revId": "6ff397d430d99ab90fa9dc215d1b38be3924b0e0",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX///vU\u003d",
+        "filename": "vp9/decoder/vp9_decodframe.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 720,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-10-28T10:15:06Z",
+      "side": 1,
+      "message": "setup_tile_info() is called during header processing; vp9_tile_init is part of the TileInfo change.\n\nthis function affects the macroblock data, but with the ordering of the params and name, it\u0027s probably not clear exactly what this changes, so yes something along the lines of what you mention will work.\nNote there are other instances like this: set_ref/set_offsets/etc",
+      "parentUuid": "AAAAdX///xM\u003d",
+      "revId": "6ff397d430d99ab90fa9dc215d1b38be3924b0e0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
