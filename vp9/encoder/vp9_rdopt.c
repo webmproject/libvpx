@@ -1035,7 +1035,7 @@ static int64_t rd_pick_intra4x4block(VP9_COMP *cpi, MACROBLOCK *x, int ib,
   TX_TYPE tx_type = DCT_DCT;
   const int num_4x4_blocks_wide = num_4x4_blocks_wide_lookup[bsize];
   const int num_4x4_blocks_high = num_4x4_blocks_high_lookup[bsize];
-  int idx, idy, block;
+  int idx, idy;
   uint8_t best_dst[8 * 8];
 
   assert(ib < 4);
@@ -1071,8 +1071,9 @@ static int64_t rd_pick_intra4x4block(VP9_COMP *cpi, MACROBLOCK *x, int ib,
         const int16_t *nb;
         uint8_t *src = src_init + idx * 4 + idy * 4 * src_stride;
         uint8_t *dst = dst_init + idx * 4 + idy * 4 * dst_stride;
+        const int block = ib + idy * 2 + idx;
 
-        block = ib + idy * 2 + idx;
+        get_scan_nb_4x4(tx_type, &scan, &nb);
         xd->mi_8x8[0]->bmi[block].as_mode = mode;
         src_diff = raster_block_offset_int16(BLOCK_8X8, block, p->src_diff);
         coeff = BLOCK_OFFSET(x->plane[0].coeff, block);
@@ -1090,9 +1091,8 @@ static int64_t rd_pick_intra4x4block(VP9_COMP *cpi, MACROBLOCK *x, int ib,
           vp9_short_fht4x4(src_diff, coeff, 8, tx_type);
         else
           x->fwd_txm4x4(src_diff, coeff, 8);
-        vp9_regular_quantize_b_4x4(x, block, tx_type, 16);
+        vp9_regular_quantize_b_4x4(x, 16, block, scan, get_iscan_4x4(tx_type));
 
-        get_scan_nb_4x4(tx_type, &scan, &nb);
         ratey += cost_coeffs(x, 0, block,
                              tempa + idx, templ + idy, TX_4X4, scan, nb);
         distortion += vp9_block_error(coeff, BLOCK_OFFSET(pd->dqcoeff, block),
@@ -1558,7 +1558,8 @@ static int64_t encode_inter_mb_segment(VP9_COMP *cpi,
       coeff = BLOCK_OFFSET(p->coeff, k);
       x->fwd_txm4x4(raster_block_offset_int16(BLOCK_8X8, k, p->src_diff),
                     coeff, 8);
-      vp9_regular_quantize_b_4x4(x, k, DCT_DCT, 16);
+      vp9_regular_quantize_b_4x4(x, 16, k, get_scan_4x4(DCT_DCT),
+                                 get_iscan_4x4(DCT_DCT));
       thisdistortion += vp9_block_error(coeff, BLOCK_OFFSET(pd->dqcoeff, k),
                                         16, &ssz);
       thissse += ssz;
