@@ -512,15 +512,15 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi)
                 else
                 {
                     mbmi->mode =  NEARMV;
-                    vp8_clamp_mv2(&near_mvs[CNT_NEAR], &pbi->mb);
                     mbmi->mv.as_int = near_mvs[CNT_NEAR].as_int;
+                    vp8_clamp_mv2(&mbmi->mv, &pbi->mb);
                 }
             }
             else
             {
                 mbmi->mode =  NEARESTMV;
-                vp8_clamp_mv2(&near_mvs[CNT_NEAREST], &pbi->mb);
                 mbmi->mv.as_int = near_mvs[CNT_NEAREST].as_int;
+                vp8_clamp_mv2(&mbmi->mv, &pbi->mb);
             }
         }
         else
