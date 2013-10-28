@@ -142,13 +142,6 @@ VP9D_PTR vp9_create_decompressor(VP9D_CONFIG *oxcf) {
   pbi->decoded_key_frame = 0;
 
   vp9_worker_init(&pbi->lf_worker);
-  pbi->lf_worker.data1 = vpx_malloc(sizeof(LFWorkerData));
-  pbi->lf_worker.hook = (VP9WorkerHook)vp9_loop_filter_worker;
-  if (pbi->lf_worker.data1 == NULL ||
-      (pbi->oxcf.max_threads > 1 && !vp9_worker_reset(&pbi->lf_worker))) {
-    vp9_remove_decompressor(pbi);
-    return NULL;
-  }
 
   return pbi;
 }
