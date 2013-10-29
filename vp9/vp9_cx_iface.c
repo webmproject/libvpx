@@ -995,8 +995,9 @@ static vpx_codec_err_t vp9e_set_scalemode(vpx_codec_alg_priv_t *ctx,
   if (data) {
     int res;
     vpx_scaling_mode_t scalemode = *(vpx_scaling_mode_t *)data;
-    res = vp9_set_internal_size(ctx->cpi, scalemode.h_scaling_mode,
-                                scalemode.v_scaling_mode);
+    res = vp9_set_internal_size(ctx->cpi,
+                                (VPX_SCALING)scalemode.h_scaling_mode,
+                                (VPX_SCALING)scalemode.v_scaling_mode);
 
     if (!res) {
       return VPX_CODEC_OK;
