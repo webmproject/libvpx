@@ -408,23 +408,36 @@ static void filter_intra_predictors(uint8_t *ypred_ptr, int y_stride, int bs,
   static const int prec_bits = 10;
   static const int round_val = 511;
   static const int taps[10][3] = {
-      {438 , 660, -352},  // DC
-      {1014, 565, -559},  // V
-      {312, 1017, -312},  // H
-      {0, 0, 0},          // D45
-      {478, 483, 153},    // D135
-      {699, 470, -122},   // D117
-      {356, 707, 35},     // D153
-      {0, 0, 0},          // D27
-      {0, 0, 0},          // D63
-      {877, 896, -812}    // TM
-      };
+      {   0,   0,    0},  // DC
+      { 972, 563, -534},  // V
+      { 441, 975, -417},  // H
+      {   0,   0,    0},  // D45
+      { 502, 546,  -48},  // D135
+      { 744, 523, -259},  // D117
+      { 379, 760,  -73},  // D153
+      {   0,   0,    0},  // D27
+      {   0,   0,    0},  // D63
+      { 783, 839, -687},  // TM
+  };
+  static const int taps8x8[10][3] = {
+      {  0,    0,    0},  // DC
+      {991,  655, -637},  // V
+      {522,  987, -493},  // H
+      {  0,    0,    0},  // d45
+      {551,  608, -193},  // d135
+      {762,  612, -392},  // d117
+      {492,  781, -260},  // d153
+      {  0,    0,    0},  // d27
+      {  0,    0,    0},  // d63
+      {823,  873, -715},  // TM
+  };
+
   int k, r, c;
   int pred[17][17];
   int mean, ipred;
-  const int c1 = taps[mode][0];
-  const int c2 = taps[mode][1];
-  const int c3 = taps[mode][2];
+  const int c1 = (bs == 4) ? taps[mode][0]: taps8x8[mode][0];
+  const int c2 = (bs == 4) ? taps[mode][1]: taps8x8[mode][1];
+  const int c3 = (bs == 4) ? taps[mode][2]: taps8x8[mode][2];
 
   k = 0;
   mean = 0;

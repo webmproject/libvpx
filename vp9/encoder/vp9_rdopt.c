@@ -1498,7 +1498,10 @@ static int64_t rd_pick_intra_sby_mode(VP9_COMP *cpi, MACROBLOCK *x,
 
   x->e_mbd.mode_info_context->mbmi.mode = mode_selected;
 #if CONFIG_FILTERINTRA
-  x->e_mbd.mode_info_context->mbmi.filterbit = fbit_selected;
+  if (best_tx <= TX_8X8)
+    x->e_mbd.mode_info_context->mbmi.filterbit = fbit_selected;
+  else
+    x->e_mbd.mode_info_context->mbmi.filterbit = 0;
 #endif
   x->e_mbd.mode_info_context->mbmi.txfm_size = best_tx;
 
@@ -1558,8 +1561,7 @@ static int64_t rd_pick_intra_sbuv_mode(VP9_COMP *cpi, MACROBLOCK *x,
 
     if (fbit && !is_filter_allowed(mode))
       continue;
-    if (fbit && is_filter_allowed(mode) &&
-        (get_uv_tx_size(&(x->e_mbd.mode_info_context->mbmi)) != TX_4X4))
+    if (fbit && (get_uv_tx_size(&(x->e_mbd.mode_info_context->mbmi)) > TX_8X8))
       continue;
 
     x->e_mbd.mode_info_context->mbmi.uv_filterbit = fbit;
