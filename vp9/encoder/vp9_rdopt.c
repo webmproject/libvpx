@@ -1032,7 +1032,7 @@ static int64_t rd_pick_intra4x4block(VP9_COMP *cpi, MACROBLOCK *x, int ib,
 
   ENTROPY_CONTEXT ta[2], tempa[2];
   ENTROPY_CONTEXT tl[2], templ[2];
-  TX_TYPE tx_type = DCT_DCT;
+
   const int num_4x4_blocks_wide = num_4x4_blocks_wide_lookup[bsize];
   const int num_4x4_blocks_high = num_4x4_blocks_high_lookup[bsize];
   int idx, idy;
@@ -1072,8 +1072,7 @@ static int64_t rd_pick_intra4x4block(VP9_COMP *cpi, MACROBLOCK *x, int ib,
         uint8_t *src = src_init + idx * 4 + idy * 4 * src_stride;
         uint8_t *dst = dst_init + idx * 4 + idy * 4 * dst_stride;
         const int block = ib + idy * 2 + idx;
-
-        get_scan_nb_4x4(tx_type, &scan, &nb);
+        TX_TYPE tx_type;
         xd->mi_8x8[0]->bmi[block].as_mode = mode;
         src_diff = raster_block_offset_int16(BLOCK_8X8, block, p->src_diff);
         coeff = BLOCK_OFFSET(x->plane[0].coeff, block);
@@ -1087,10 +1086,13 @@ static int64_t rd_pick_intra4x4block(VP9_COMP *cpi, MACROBLOCK *x, int ib,
                            dst, dst_stride);
 
         tx_type = get_tx_type_4x4(PLANE_TYPE_Y_WITH_DC, xd, block);
+        get_scan_nb_4x4(tx_type, &scan, &nb);
+
         if (tx_type != DCT_DCT)
           vp9_short_fht4x4(src_diff, coeff, 8, tx_type);
         else
           x->fwd_txm4x4(src_diff, coeff, 8);
+
         vp9_regular_quantize_b_4x4(x, 16, block, scan, get_iscan_4x4(tx_type));
 
         ratey += cost_coeffs(x, 0, block,
