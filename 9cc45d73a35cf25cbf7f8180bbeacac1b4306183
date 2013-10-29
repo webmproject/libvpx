@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdX///Y0\u003d",
+        "filename": "build/make/configure.sh",
+        "patchSetId": 5
+      },
+      "lineNbr": 1109,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2013-10-29T20:07:14Z",
+      "side": 1,
+      "message": "Please add similar checks as SSE4 above. This makes sure compilers which don\u0027t support the flag don\u0027t try to use it.\n if enabled gcc \u0026\u0026 ! disabled avx \u0026\u0026 check_cflags -maxv; then\netc",
+      "revId": "9cc45d73a35cf25cbf7f8180bbeacac1b4306183",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX///Y4\u003d",
+        "filename": "vpx_ports/x86.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 98,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2013-10-29T20:07:14Z",
+      "side": 1,
+      "message": "I don\u0027t think this is setting what you want. 5 \u003d MMX + SSE2",
+      "revId": "9cc45d73a35cf25cbf7f8180bbeacac1b4306183",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
