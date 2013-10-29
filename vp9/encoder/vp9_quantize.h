@@ -13,8 +13,9 @@
 
 #include "vp9/encoder/vp9_block.h"
 
-void vp9_regular_quantize_b_4x4(MACROBLOCK *mb, int b_idx, TX_TYPE tx_type,
-                                int y_blocks);
+void vp9_regular_quantize_b_4x4(MACROBLOCK *x, int y_blocks, int b_idx,
+                                const int16_t *scan, const int16_t *iscan);
+
 struct VP9_COMP;
 
 void vp9_set_quantizer(struct VP9_COMP *cpi, int q);
