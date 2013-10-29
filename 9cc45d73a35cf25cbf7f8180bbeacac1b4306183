@@ -33,6 +33,24 @@
       "revId": "9cc45d73a35cf25cbf7f8180bbeacac1b4306183",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX///Ys\u003d",
+        "filename": "vpx_ports/x86.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 98,
+      "author": {
+        "id": 1002622
+      },
+      "writtenOn": "2013-10-29T20:23:43Z",
+      "side": 1,
+      "message": "Ok, I\u0027m a little unclear on how the flags work then. I used the bit values used for the feature check as the flag values. What do you recommend?",
+      "parentUuid": "AAAAdX///Y4\u003d",
+      "revId": "9cc45d73a35cf25cbf7f8180bbeacac1b4306183",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
