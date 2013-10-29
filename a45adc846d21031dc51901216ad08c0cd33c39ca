@@ -16,6 +16,24 @@
       "revId": "a45adc846d21031dc51901216ad08c0cd33c39ca",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX///lQ\u003d",
+        "filename": "test/vp9_thread_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 125,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-10-29T10:38:11Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdX///mE\u003d",
+      "revId": "a45adc846d21031dc51901216ad08c0cd33c39ca",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
