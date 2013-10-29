@@ -161,13 +161,12 @@ static void build_inter_predictors(int plane, int block, BLOCK_SIZE bsize,
     // scaling case. It needs to be done on the scaled MV, not the pre-scaling
     // MV. Note however that it performs the subsampling aware scaling so
     // that the result is always q4.
-    const MV res_mv = clamp_mv_to_umv_border_sb(xd, &mv, bw, bh,
-                                                pd->subsampling_x,
-                                                pd->subsampling_y);
+    // mv_precision precision is MV_PRECISION_Q4.
+    const MV mv_q4 = clamp_mv_to_umv_border_sb(xd, &mv, bw, bh,
+                                               pd->subsampling_x,
+                                               pd->subsampling_y);
 
     uint8_t *pre;
-    // mv_precision precision is MV_PRECISION_Q4.
-    const MV mv_q4 = {res_mv.row, res_mv.col };
     MV32 scaled_mv;
     int xs, ys;
 
