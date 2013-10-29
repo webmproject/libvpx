@@ -22,12 +22,14 @@
 extern int enc_debug;
 #endif
 
-void vp9_quantize_b_c(int16_t *coeff_ptr, intptr_t n_coeffs, int skip_block,
-                      int16_t *zbin_ptr, int16_t *round_ptr, int16_t *quant_ptr,
-                      int16_t *quant_shift_ptr, int16_t *qcoeff_ptr,
-                      int16_t *dqcoeff_ptr, int16_t *dequant_ptr,
-                      int zbin_oq_value, uint16_t *eob_ptr, const int16_t *scan,
-                      const int16_t *iscan) {
+void vp9_quantize_b_c(const int16_t *coeff_ptr, intptr_t n_coeffs,
+                      int skip_block,
+                      const int16_t *zbin_ptr, const int16_t *round_ptr,
+                      const int16_t *quant_ptr, const int16_t *quant_shift_ptr,
+                      int16_t *qcoeff_ptr, int16_t *dqcoeff_ptr,
+                      const int16_t *dequant_ptr,
+                      int zbin_oq_value, uint16_t *eob_ptr,
+                      const int16_t *scan, const int16_t *iscan) {
   int i, rc, eob;
   int zbins[2], nzbins[2], zbin;
   int x, y, z, sz;
@@ -86,14 +88,15 @@ void vp9_quantize_b_c(int16_t *coeff_ptr, intptr_t n_coeffs, int skip_block,
   *eob_ptr = eob + 1;
 }
 
-void vp9_quantize_b_32x32_c(int16_t *coeff_ptr, intptr_t n_coeffs,
+void vp9_quantize_b_32x32_c(const int16_t *coeff_ptr, intptr_t n_coeffs,
                             int skip_block,
-                            int16_t *zbin_ptr, int16_t *round_ptr,
-                            int16_t *quant_ptr, int16_t *quant_shift_ptr,
+                            const int16_t *zbin_ptr, const int16_t *round_ptr,
+                            const int16_t *quant_ptr,
+                            const int16_t *quant_shift_ptr,
                             int16_t *qcoeff_ptr, int16_t *dqcoeff_ptr,
-                            int16_t *dequant_ptr, int zbin_oq_value,
-                            uint16_t *eob_ptr, const int16_t *scan,
-                            const int16_t *iscan) {
+                            const int16_t *dequant_ptr,
+                            int zbin_oq_value, uint16_t *eob_ptr,
+                            const int16_t *scan, const int16_t *iscan) {
   int i, rc, eob;
   int zbins[2], nzbins[2];
   int x, y, z, sz;
