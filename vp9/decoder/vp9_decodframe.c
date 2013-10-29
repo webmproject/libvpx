@@ -1041,7 +1041,11 @@ static size_t read_uncompressed_header(VP9D_COMP *pbi,
   setup_tile_info(cm, rb);
   sz = vp9_rb_read_literal(rb, 16);
 
-  return sz > 0 ? sz : -1;
+  if (sz == 0)
+    vpx_internal_error(&cm->error, VPX_CODEC_CORRUPT_FRAME,
+                       "Invalid header size");
+
+  return sz;
 }
 
 static int read_compressed_header(VP9D_COMP *pbi, const uint8_t *data,
@@ -1157,15 +1161,9 @@ int vp9_decode_frame(VP9D_COMP *pbi, const uint8_t **p_data_end) {
   YV12_BUFFER_CONFIG *const new_fb = get_frame_new_buffer(cm);
 
   if (!first_partition_size) {
-    if (!keyframe) {
       // showing a frame directly
       *p_data_end = data + 1;
       return 0;
-    } else {
-      vpx_internal_error(&cm->error, VPX_CODEC_CORRUPT_FRAME,
-                         "Invalid key frame");
-      return -1;
-    }
   }
 
   if (!pbi->decoded_key_frame && !keyframe)
