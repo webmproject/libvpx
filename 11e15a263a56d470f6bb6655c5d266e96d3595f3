@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdX///aU\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1076,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2013-10-29T19:10:55Z",
+      "side": 1,
+      "message": "the mode is not set here, so should move this below the line xd-\u003emi_8x8[0]-\u003ebmi[block].as_mode \u003d mode;",
+      "revId": "11e15a263a56d470f6bb6655c5d266e96d3595f3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
