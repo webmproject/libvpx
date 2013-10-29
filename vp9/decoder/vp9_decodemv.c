@@ -72,7 +72,7 @@ static TX_SIZE read_selected_tx_size(VP9_COMMON *cm, MACROBLOCKD *xd,
   }
 
   if (!cm->frame_parallel_decoding_mode)
-    update_tx_counts(bsize, context, tx_size, &cm->counts.tx);
+    ++get_tx_counts(bsize, context, &cm->counts.tx)[tx_size];
   return tx_size;
 }
 
