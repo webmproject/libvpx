@@ -46,12 +46,13 @@ struct loopfilter {
 // Need to align this structure so when it is declared and
 // passed it can be loaded into vector registers.
 typedef struct {
-  DECLARE_ALIGNED(SIMD_WIDTH, uint8_t,
-                  mblim[MAX_LOOP_FILTER + 1][SIMD_WIDTH]);
-  DECLARE_ALIGNED(SIMD_WIDTH, uint8_t,
-                  lim[MAX_LOOP_FILTER + 1][SIMD_WIDTH]);
-  DECLARE_ALIGNED(SIMD_WIDTH, uint8_t,
-                  hev_thr[4][SIMD_WIDTH]);
+  DECLARE_ALIGNED(SIMD_WIDTH, uint8_t, mblim[SIMD_WIDTH]);
+  DECLARE_ALIGNED(SIMD_WIDTH, uint8_t, lim[SIMD_WIDTH]);
+  DECLARE_ALIGNED(SIMD_WIDTH, uint8_t, hev_thr[SIMD_WIDTH]);
+} loop_filter_thresh;
+
+typedef struct {
+  loop_filter_thresh lfthr[MAX_LOOP_FILTER + 1];
   uint8_t lvl[MAX_SEGMENTS][MAX_REF_FRAMES][MAX_MODE_LF_DELTAS];
   uint8_t mode_lf_lut[MB_MODE_COUNT];
 } loop_filter_info_n;
