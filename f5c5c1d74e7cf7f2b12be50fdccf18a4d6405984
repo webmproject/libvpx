@@ -19,6 +19,40 @@
     },
     {
       "key": {
+        "uuid": "AAAAdX///fk\u003d",
+        "filename": "build/make/configure.sh",
+        "patchSetId": 3
+      },
+      "lineNbr": 1110,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2013-10-29T17:25:29Z",
+      "side": 1,
+      "message": "spaces, not tabs",
+      "revId": "f5c5c1d74e7cf7f2b12be50fdccf18a4d6405984",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX///fg\u003d",
+        "filename": "build/make/configure.sh",
+        "patchSetId": 3
+      },
+      "lineNbr": 1113,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2013-10-29T17:25:29Z",
+      "side": 1,
+      "message": "spaces",
+      "revId": "f5c5c1d74e7cf7f2b12be50fdccf18a4d6405984",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdX///iM\u003d",
         "filename": "vp9/common/vp9_rtcd_defs.sh",
         "patchSetId": 3
