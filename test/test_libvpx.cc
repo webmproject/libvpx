@@ -45,6 +45,10 @@ int main(int argc, char **argv) {
     append_gtest_filter(":-SSSE3/*");
   if (!(simd_caps & HAS_SSE4_1))
     append_gtest_filter(":-SSE4_1/*");
+  if (!(simd_caps & HAS_AVX))
+    append_gtest_filter(":-AVX/*");
+  if (!(simd_caps & HAS_AVX2))
+    append_gtest_filter(":-AVX2/*");
 #endif
 
 #if !CONFIG_SHARED

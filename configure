@@ -234,6 +234,8 @@ ARCH_EXT_LIST="
     sse3
     ssse3
     sse4_1
+    avx
+    avx2
 
     altivec
 "
@@ -422,7 +424,7 @@ process_targets() {
     fi
 
     # The write_common_config (config.mk) logic is deferred until after the
-    # recursive calls to configure complete, becuase we want our universal
+    # recursive calls to configure complete, because we want our universal
     # targets to be executed last.
     write_common_config_targets
     enabled universal && echo "FAT_ARCHS=${fat_bin_archs}" >> config.mk
