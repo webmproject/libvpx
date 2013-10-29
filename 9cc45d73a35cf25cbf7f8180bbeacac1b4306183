@@ -51,6 +51,24 @@
       "revId": "9cc45d73a35cf25cbf7f8180bbeacac1b4306183",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX///YI\u003d",
+        "filename": "vpx_ports/x86.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 98,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2013-10-29T20:44:01Z",
+      "side": 1,
+      "message": "It\u0027s kind of legacy. We don\u0027t actually use simd_caps much anymore since the rtcd.sh setup was implemented. We do still use it to set up the tests in test_libvpx.cc and a couple places for arm where we check cpu_caps \u0026 HAS_NEON.\n\nFor this, AVX should be set to 0x40 and AVX2 should be 0x80. If another extension was added we would need to move up to 0x100. Alternatively they should be using the BIT macro below, but that\u0027s outside the scope of this change. Just moving to 0x40 / 0x80 is enough.",
+      "parentUuid": "AAAAdX///Ys\u003d",
+      "revId": "9cc45d73a35cf25cbf7f8180bbeacac1b4306183",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
