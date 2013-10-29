@@ -327,11 +327,11 @@ EOF
 require c
 case $arch in
   x86)
-    ALL_ARCHS=$(filter mmx sse sse2 sse3 ssse3 sse4_1)
+    ALL_ARCHS=$(filter mmx sse sse2 sse3 ssse3 sse4_1 avx avx2)
     x86
     ;;
   x86_64)
-    ALL_ARCHS=$(filter mmx sse sse2 sse3 ssse3 sse4_1)
+    ALL_ARCHS=$(filter mmx sse sse2 sse3 ssse3 sse4_1 avx avx2)
     REQUIRES=${REQUIRES:-mmx sse sse2}
     require $(filter $REQUIRES)
     x86
