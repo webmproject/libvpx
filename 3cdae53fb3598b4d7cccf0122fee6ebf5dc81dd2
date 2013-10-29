@@ -2,6 +2,23 @@
   "comments": [
     {
       "key": {
+        "uuid": "AAAAdX///aI\u003d",
+        "filename": "build/make/rtcd.sh",
+        "patchSetId": 4
+      },
+      "lineNbr": 330,
+      "author": {
+        "id": 1002622
+      },
+      "writtenOn": "2013-10-29T19:19:49Z",
+      "side": 1,
+      "message": "Adding the avx and avx2 arch options fixed the issue with the function prototypes being generated. Thanks Johann!",
+      "revId": "3cdae53fb3598b4d7cccf0122fee6ebf5dc81dd2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdX///bc\u003d",
         "filename": "test/test_libvpx.cc",
         "patchSetId": 4
