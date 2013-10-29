@@ -100,14 +100,17 @@ typedef enum vpx_ref_frame_type {
 
 /*!\brief reference frame data struct
  *
- * define the data struct to access vp8 reference frames
+ * Define the data struct to access vp8 reference frames.
  */
-
 typedef struct vpx_ref_frame {
   vpx_ref_frame_type_t  frame_type;   /**< which reference frame */
   vpx_image_t           img;          /**< reference frame data in image format */
 } vpx_ref_frame_t;
 
+/*!\brief VP9 specific reference frame data struct
+ *
+ * Define the data struct to access vp9 reference frames.
+ */
 typedef struct vp9_ref_frame {
   int idx; /**< frame index to get (input) */
   vpx_image_t  img; /**< img structure to populate (output) */
@@ -117,7 +120,6 @@ typedef struct vp9_ref_frame {
  *
  * defines the data type for each of VP8 decoder control function requires
  */
-
 VPX_CTRL_USE_TYPE(VP8_SET_REFERENCE,           vpx_ref_frame_t *)
 VPX_CTRL_USE_TYPE(VP8_COPY_REFERENCE,          vpx_ref_frame_t *)
 VPX_CTRL_USE_TYPE(VP8_SET_POSTPROC,            vp8_postproc_cfg_t *)
@@ -126,7 +128,6 @@ VPX_CTRL_USE_TYPE(VP8_SET_DBG_COLOR_MB_MODES,  int)
 VPX_CTRL_USE_TYPE(VP8_SET_DBG_COLOR_B_MODES,   int)
 VPX_CTRL_USE_TYPE(VP8_SET_DBG_DISPLAY_MV,      int)
 VPX_CTRL_USE_TYPE(VP9_GET_REFERENCE,           vp9_ref_frame_t *)
-
 
 /*! @} - end defgroup vp8 */
 

@@ -7,7 +7,8 @@
  *  in the file PATENTS.  All contributing project authors may
  *  be found in the AUTHORS file in the root of the source tree.
  */
-
+#ifndef VPX_DECODER_H
+#define VPX_DECODER_H
 
 /*!\defgroup decoder Decoder Algorithm Interface
  * \ingroup codec
@@ -28,8 +29,6 @@
 extern "C" {
 #endif
 
-#ifndef VPX_DECODER_H
-#define VPX_DECODER_H
 #include "vpx_codec.h"
 
   /*!\brief Current ABI version number
@@ -328,9 +327,8 @@ extern "C" {
   /*!@} - end defgroup cap_put_slice*/
 
   /*!@} - end defgroup decoder*/
-
-#endif
-
 #ifdef __cplusplus
 }
 #endif
+#endif
+

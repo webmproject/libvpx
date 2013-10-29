@@ -7,7 +7,8 @@
  *  in the file PATENTS.  All contributing project authors may
  *  be found in the AUTHORS file in the root of the source tree.
  */
-
+#ifndef VPX_ENCODER_H
+#define VPX_ENCODER_H
 
 /*!\defgroup encoder Encoder Algorithm Interface
  * \ingroup codec
@@ -28,8 +29,6 @@
 extern "C" {
 #endif
 
-#ifndef VPX_ENCODER_H
-#define VPX_ENCODER_H
 #include "vpx_codec.h"
 
   /*! Temporal Scalability: Maximum length of the sequence defining frame
@@ -930,8 +929,8 @@ extern "C" {
 
 
   /*!@} - end defgroup encoder*/
-
-#endif
 #ifdef __cplusplus
 }
 #endif
+#endif
+
