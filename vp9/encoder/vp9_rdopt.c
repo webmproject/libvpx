@@ -3526,16 +3526,14 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
     }
 
     // Keep record of best intra rd
-    if (xd->mi_8x8[0]->mbmi.ref_frame[0] == INTRA_FRAME &&
-        is_intra_mode(xd->mi_8x8[0]->mbmi.mode) &&
+    if (!is_inter_block(&xd->mi_8x8[0]->mbmi) &&
         this_rd < best_intra_rd) {
       best_intra_rd = this_rd;
       best_intra_mode = xd->mi_8x8[0]->mbmi.mode;
     }
+
     // Keep record of best inter rd with single reference
-    if (xd->mi_8x8[0]->mbmi.ref_frame[0] > INTRA_FRAME &&
-        xd->mi_8x8[0]->mbmi.ref_frame[1] == NONE &&
-        !mode_excluded &&
+    if (is_inter_block(&xd->mi_8x8[0]->mbmi) && !mode_excluded &&
         this_rd < best_inter_rd) {
       best_inter_rd = this_rd;
       best_inter_ref_frame = ref_frame;
