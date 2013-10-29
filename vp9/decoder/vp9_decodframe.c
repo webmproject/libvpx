@@ -276,7 +276,7 @@ static void decode_block(int plane, int block, BLOCK_SIZE plane_bsize,
     }
 
     if (eob == 1) {
-      *((int32_t *)qcoeff) = 0;
+      vpx_memset(qcoeff, 0, 2 * sizeof(qcoeff[0]));
     } else {
       if (tx_type == DCT_DCT && tx_size <= TX_16X16 && eob <= 10)
         vpx_memset(qcoeff, 0, 4 * (4 << tx_size) * sizeof(qcoeff[0]));
