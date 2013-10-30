@@ -309,8 +309,8 @@ static const vp9_prob default_mbskip_probs[MBSKIP_CONTEXTS] = {
   192, 128, 64
 };
 
-static const vp9_prob default_switchable_interp_prob[SWITCHABLE_FILTERS+1]
-                                                  [SWITCHABLE_FILTERS-1] = {
+static const vp9_prob default_switchable_interp_prob[SWITCHABLE_FILTER_CONTEXTS]
+                                                    [SWITCHABLE_FILTERS - 1] = {
   { 235, 162, },
   { 36, 255, },
   { 34, 3, },
@@ -416,7 +416,7 @@ void vp9_adapt_mode_probs(VP9_COMMON *cm) {
                       fc->partition_prob[INTER_FRAME][i], 0);
 
   if (cm->mcomp_filter_type == SWITCHABLE) {
-    for (i = 0; i <= SWITCHABLE_FILTERS; i++)
+    for (i = 0; i < SWITCHABLE_FILTER_CONTEXTS; i++)
       update_mode_probs(SWITCHABLE_FILTERS, vp9_switchable_interp_tree,
                         counts->switchable_interp[i],
                         pre_fc->switchable_interp_prob[i],

@@ -16,6 +16,7 @@
 
 #define TX_SIZE_CONTEXTS 2
 #define SWITCHABLE_FILTERS 3   // number of switchable filters
+#define SWITCHABLE_FILTER_CONTEXTS (SWITCHABLE_FILTERS + 1)
 
 // #define MODE_STATS
 

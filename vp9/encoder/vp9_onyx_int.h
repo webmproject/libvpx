@@ -396,9 +396,9 @@ typedef struct VP9_COMP {
   // FIXME(rbultje) can this overflow?
   int rd_tx_select_threshes[4][TX_MODES];
 
-  int64_t rd_filter_diff[SWITCHABLE_FILTERS + 1];
-  int64_t rd_filter_threshes[4][SWITCHABLE_FILTERS + 1];
-  int64_t rd_filter_cache[SWITCHABLE_FILTERS + 1];
+  int64_t rd_filter_diff[SWITCHABLE_FILTER_CONTEXTS];
+  int64_t rd_filter_threshes[4][SWITCHABLE_FILTER_CONTEXTS];
+  int64_t rd_filter_cache[SWITCHABLE_FILTER_CONTEXTS];
 
   int RDMULT;
   int RDDIV;
@@ -641,7 +641,7 @@ typedef struct VP9_COMP {
 
   int dummy_packing;    /* flag to indicate if packing is dummy */
 
-  unsigned int switchable_interp_count[SWITCHABLE_FILTERS + 1]
+  unsigned int switchable_interp_count[SWITCHABLE_FILTER_CONTEXTS]
                                       [SWITCHABLE_FILTERS];
 
   unsigned int tx_stepdown_count[TX_SIZES];

@@ -465,7 +465,7 @@ static void update_state(VP9_COMP *cpi, PICK_MODE_CONTEXT *ctx,
     cpi->rd_comp_pred_diff[COMP_PREDICTION_ONLY] += ctx->comp_pred_diff;
     cpi->rd_comp_pred_diff[HYBRID_PREDICTION] += ctx->hybrid_pred_diff;
 
-    for (i = 0; i <= SWITCHABLE_FILTERS; i++)
+    for (i = 0; i < SWITCHABLE_FILTER_CONTEXTS; i++)
       cpi->rd_filter_diff[i] += ctx->best_filter_diff[i];
   }
 }
@@ -2279,7 +2279,7 @@ void vp9_encode_frame(VP9_COMP *cpi) {
       cpi->rd_prediction_type_threshes[frame_type][i] >>= 1;
     }
 
-    for (i = 0; i <= SWITCHABLE_FILTERS; i++) {
+    for (i = 0; i < SWITCHABLE_FILTER_CONTEXTS; i++) {
       const int64_t diff = cpi->rd_filter_diff[i] / cpi->common.MBs;
       cpi->rd_filter_threshes[frame_type][i] =
           (cpi->rd_filter_threshes[frame_type][i] + diff) / 2;

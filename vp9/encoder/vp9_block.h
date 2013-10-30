@@ -42,7 +42,7 @@ typedef struct {
   int comp_pred_diff;
   int single_pred_diff;
   int64_t tx_rd_diff[TX_MODES];
-  int64_t best_filter_diff[SWITCHABLE_FILTERS + 1];
+  int64_t best_filter_diff[SWITCHABLE_FILTER_CONTEXTS];
 
   // motion vector cache for adaptive motion search control in partition
   // search loop
@@ -118,8 +118,7 @@ struct macroblock {
   unsigned inter_mode_cost[INTER_MODE_CONTEXTS][INTER_MODES];
   int intra_uv_mode_cost[2][MB_MODE_COUNT];
   int y_mode_costs[INTRA_MODES][INTRA_MODES][INTRA_MODES];
-  int switchable_interp_costs[SWITCHABLE_FILTERS + 1]
-                             [SWITCHABLE_FILTERS];
+  int switchable_interp_costs[SWITCHABLE_FILTER_CONTEXTS][SWITCHABLE_FILTERS];
 
   // These define limits to motion vector components to prevent them
   // from extending outside the UMV borders

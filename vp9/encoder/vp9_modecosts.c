@@ -36,7 +36,7 @@ void vp9_init_mode_costs(VP9_COMP *c) {
                   vp9_kf_uv_mode_prob[INTRA_MODES - 1],
                   vp9_intra_mode_tree);
 
-  for (i = 0; i <= SWITCHABLE_FILTERS; ++i)
+  for (i = 0; i < SWITCHABLE_FILTER_CONTEXTS; ++i)
     vp9_cost_tokens((int *)c->mb.switchable_interp_costs[i],
                     cm->fc.switchable_interp_prob[i],
                     vp9_switchable_interp_tree);

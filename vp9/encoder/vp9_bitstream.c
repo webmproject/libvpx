@@ -53,8 +53,7 @@ extern unsigned int active_section;
 int64_t tx_count_32x32p_stats[TX_SIZE_CONTEXTS][TX_SIZES];
 int64_t tx_count_16x16p_stats[TX_SIZE_CONTEXTS][TX_SIZES - 1];
 int64_t tx_count_8x8p_stats[TX_SIZE_CONTEXTS][TX_SIZES - 2];
-int64_t switchable_interp_stats[SWITCHABLE_FILTERS+1]
-                               [SWITCHABLE_FILTERS];
+int64_t switchable_interp_stats[SWITCHABLE_FILTER_CONTEXTS][SWITCHABLE_FILTERS];
 
 void init_tx_count_stats() {
   vp9_zero(tx_count_32x32p_stats);
@@ -87,10 +86,9 @@ static void update_tx_count_stats(VP9_COMMON *cm) {
 
 static void update_switchable_interp_stats(VP9_COMMON *cm) {
   int i, j;
-  for (i = 0; i < SWITCHABLE_FILTERS+1; ++i)
-    for (j = 0; j < SWITCHABLE_FILTERS; ++j) {
+  for (i = 0; i < SWITCHABLE_FILTER_CONTEXTS; ++i)
+    for (j = 0; j < SWITCHABLE_FILTERS; ++j)
       switchable_interp_stats[i][j] += cm->fc.switchable_interp_count[i][j];
-    }
 }
 
 void write_tx_count_stats() {
@@ -140,9 +138,9 @@ void write_switchable_interp_stats() {
   fclose(fp);
 
   printf(
-      "vp9_default_switchable_filter_count[SWITCHABLE_FILTERS+1]"
+      "vp9_default_switchable_filter_count[SWITCHABLE_FILTER_CONTEXTS]"
       "[SWITCHABLE_FILTERS] = {\n");
-  for (i = 0; i < SWITCHABLE_FILTERS+1; i++) {
+  for (i = 0; i < SWITCHABLE_FILTER_CONTEXTS; i++) {
     printf("  { ");
     for (j = 0; j < SWITCHABLE_FILTERS; j++) {
       printf("%"PRId64", ", switchable_interp_stats[i][j]);
@@ -236,17 +234,16 @@ static void write_intra_mode(vp9_writer *bc, int m, const vp9_prob *p) {
 static void update_switchable_interp_probs(VP9_COMP *const cpi,
                                            vp9_writer* const bc) {
   VP9_COMMON *const cm = &cpi->common;
-  unsigned int branch_ct[SWITCHABLE_FILTERS + 1]
-                        [SWITCHABLE_FILTERS - 1][2];
-  vp9_prob new_prob[SWITCHABLE_FILTERS + 1][SWITCHABLE_FILTERS - 1];
+  unsigned int branch_ct[SWITCHABLE_FILTER_CONTEXTS][SWITCHABLE_FILTERS - 1][2];
+  vp9_prob new_prob[SWITCHABLE_FILTER_CONTEXTS][SWITCHABLE_FILTERS - 1];
   int i, j;
-  for (j = 0; j <= SWITCHABLE_FILTERS; ++j) {
+  for (j = 0; j < SWITCHABLE_FILTER_CONTEXTS; ++j) {
     vp9_tree_probs_from_distribution(
         vp9_switchable_interp_tree,
         new_prob[j], branch_ct[j],
         cm->counts.switchable_interp[j], 0);
   }
-  for (j = 0; j <= SWITCHABLE_FILTERS; ++j) {
+  for (j = 0; j < SWITCHABLE_FILTER_CONTEXTS; ++j) {
     for (i = 0; i < SWITCHABLE_FILTERS - 1; ++i) {
       vp9_cond_prob_diff_update(bc, &cm->fc.switchable_interp_prob[j][i],
                                 branch_ct[j][i]);
@@ -1142,7 +1139,7 @@ static void fix_mcomp_filter_type(VP9_COMP *cpi) {
     int i, j, c = 0;
     for (i = 0; i < SWITCHABLE_FILTERS; ++i) {
       count[i] = 0;
-      for (j = 0; j <= SWITCHABLE_FILTERS; ++j)
+      for (j = 0; j < SWITCHABLE_FILTER_CONTEXTS; ++j)
         count[i] += cm->counts.switchable_interp[j][i];
       c += (count[i] > 0);
     }
