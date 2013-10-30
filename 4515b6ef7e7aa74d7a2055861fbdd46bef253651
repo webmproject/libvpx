@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdX///I0\u003d",
+        "filename": "vp9/common/vp9_entropymode.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2013-10-30T20:33:20Z",
+      "side": 1,
+      "message": "I agree with the name \"SWITCHABLE_CONTEXTS\" is confusing, how about we change it to something more specific. \"SWITCHABLE_FILTER_CONTEXTS\", \"INTERP_CONTEXTS\" \"INTERP_FILTER_CONTEXTS\", or anything else you like that is not as general as \"SWITCHABLE_CONTEXTS\".",
+      "revId": "4515b6ef7e7aa74d7a2055861fbdd46bef253651",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
