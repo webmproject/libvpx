@@ -418,6 +418,7 @@ static void encode_block(int plane, int block, BLOCK_SIZE plane_bsize,
   struct encode_b_args *const args = arg;
   MACROBLOCK *const x = args->x;
   MACROBLOCKD *const xd = &x->e_mbd;
+  struct optimize_ctx *const ctx = args->ctx;
   struct macroblockd_plane *const pd = &xd->plane[plane];
   const int raster_block = txfrm_block_to_raster_block(plane_bsize, tx_size,
                                                        block);
@@ -429,14 +430,18 @@ static void encode_block(int plane, int block, BLOCK_SIZE plane_bsize,
   // TODO(jingning): per transformed block zero forcing only enabled for
   // luma component. will integrate chroma components as well.
   if (x->zcoeff_blk[tx_size][block] && plane == 0) {
+    int x, y;
     pd->eobs[block] = 0;
+    txfrm_block_to_raster_xy(plane_bsize, tx_size, block, &x, &y);
+    ctx->ta[plane][x] = 0;
+    ctx->tl[plane][y] = 0;
     return;
   }
 
   vp9_xform_quant(plane, block, plane_bsize, tx_size, arg);
 
   if (x->optimize)
-    vp9_optimize_b(plane, block, plane_bsize, tx_size, x, args->ctx);
+    vp9_optimize_b(plane, block, plane_bsize, tx_size, x, ctx);
 
   if (x->skip_encode || pd->eobs[block] == 0)
     return;

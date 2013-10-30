@@ -611,7 +611,7 @@ static void block_yrd_txfm(int plane, int block, BLOCK_SIZE plane_bsize,
   // TODO(jingning): temporarily enabled only for luma component
   rd = MIN(rd1, rd2);
   if (plane == 0)
-    x->zcoeff_blk[tx_size][block] = rd1 > rd2;
+    x->zcoeff_blk[tx_size][block] = rd1 > rd2 || !xd->plane[plane].eobs[block];
 
   args->this_rate += args->rate;
   args->this_dist += args->dist;
@@ -1654,6 +1654,7 @@ static void rd_check_segment_txsize(VP9_COMP *cpi, MACROBLOCK *x,
   MB_PREDICTION_MODE this_mode;
   MODE_INFO *mi = x->e_mbd.mi_8x8[0];
   MB_MODE_INFO *const mbmi = &mi->mbmi;
+  struct macroblockd_plane *const pd = &x->e_mbd.plane[0];
   const int label_count = 4;
   int64_t this_segment_rd = 0;
   int label_mv_thresh;
@@ -1668,8 +1669,8 @@ static void rd_check_segment_txsize(VP9_COMP *cpi, MACROBLOCK *x,
   int subpelmv = 1, have_ref = 0;
   const int has_second_rf = has_second_ref(mbmi);
 
-  vpx_memcpy(t_above, x->e_mbd.plane[0].above_context, sizeof(t_above));
-  vpx_memcpy(t_left, x->e_mbd.plane[0].left_context, sizeof(t_left));
+  vpx_memcpy(t_above, pd->above_context, sizeof(t_above));
+  vpx_memcpy(t_left, pd->left_context, sizeof(t_left));
 
   v_fn_ptr = &cpi->fn_ptr[bsize];
 
@@ -1747,7 +1748,7 @@ static void rd_check_segment_txsize(VP9_COMP *cpi, MACROBLOCK *x,
           }
         }
 
-        vpx_memcpy(orig_pre, x->e_mbd.plane[0].pre, sizeof(orig_pre));
+        vpx_memcpy(orig_pre, pd->pre, sizeof(orig_pre));
         vpx_memcpy(bsi->rdstat[i][mode_idx].ta, t_above,
                    sizeof(bsi->rdstat[i][mode_idx].ta));
         vpx_memcpy(bsi->rdstat[i][mode_idx].tl, t_left,
@@ -1951,6 +1952,13 @@ static void rd_check_segment_txsize(VP9_COMP *cpi, MACROBLOCK *x,
               ref_bsi->rdstat[i][mode_idx].brdcost < INT64_MAX) {
             vpx_memcpy(&bsi->rdstat[i][mode_idx], &ref_bsi->rdstat[i][mode_idx],
                        sizeof(SEG_RDSTAT));
+            if (num_4x4_blocks_wide > 1)
+              bsi->rdstat[i + 1][mode_idx].eobs =
+                  ref_bsi->rdstat[i + 1][mode_idx].eobs;
+            if (num_4x4_blocks_high > 1)
+              bsi->rdstat[i + 2][mode_idx].eobs =
+                  ref_bsi->rdstat[i + 2][mode_idx].eobs;
+
             if (bsi->rdstat[i][mode_idx].brdcost < best_rd) {
               mode_selected = this_mode;
               best_rd = bsi->rdstat[i][mode_idx].brdcost;
@@ -1971,7 +1979,11 @@ static void rd_check_segment_txsize(VP9_COMP *cpi, MACROBLOCK *x,
           bsi->rdstat[i][mode_idx].brdcost += RDCOST(x->rdmult, x->rddiv,
                                             bsi->rdstat[i][mode_idx].brate, 0);
           bsi->rdstat[i][mode_idx].brate += bsi->rdstat[i][mode_idx].byrate;
-          bsi->rdstat[i][mode_idx].eobs = x->e_mbd.plane[0].eobs[i];
+          bsi->rdstat[i][mode_idx].eobs = pd->eobs[i];
+          if (num_4x4_blocks_wide > 1)
+            bsi->rdstat[i + 1][mode_idx].eobs = pd->eobs[i + 1];
+          if (num_4x4_blocks_high > 1)
+            bsi->rdstat[i + 2][mode_idx].eobs = pd->eobs[i + 2];
         }
 
         if (bsi->rdstat[i][mode_idx].brdcost < best_rd) {
@@ -3831,7 +3843,7 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
   int best_skip2 = 0;
 
   x->skip_encode = cpi->sf.skip_encode_frame && xd->q_index < QIDX_SKIP_THRESH;
-  vp9_zero(x->zcoeff_blk);
+  vpx_memset(x->zcoeff_blk[TX_4X4], 0, 4);
 
   for (i = 0; i < 4; i++) {
     int j;
@@ -4131,8 +4143,10 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
               tmp_best_sse = total_sse;
               tmp_best_skippable = skippable;
               tmp_best_mbmode = *mbmi;
-              for (i = 0; i < 4; i++)
+              for (i = 0; i < 4; i++) {
                 tmp_best_bmodes[i] = xd->mi_8x8[0]->bmi[i];
+                x->zcoeff_blk[TX_4X4][i] = !xd->plane[0].eobs[i];
+              }
               pred_exists = 1;
               if (switchable_filter_index == 0 &&
                   cpi->sf.use_rd_breakout &&
