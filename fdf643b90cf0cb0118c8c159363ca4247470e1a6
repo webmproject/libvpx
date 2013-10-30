@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdX///Jw\u003d",
+        "filename": "vp9/common/vp9_entropymode.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 220,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2013-10-30T18:31:51Z",
+      "side": 1,
+      "message": "remove the commented line. put // TX_4X4 in the line below.",
+      "revId": "fdf643b90cf0cb0118c8c159363ca4247470e1a6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX///Js\u003d",
+        "filename": "vp9/common/vp9_entropymode.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 222,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2013-10-30T18:31:51Z",
+      "side": 1,
+      "message": "same here",
+      "revId": "fdf643b90cf0cb0118c8c159363ca4247470e1a6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
