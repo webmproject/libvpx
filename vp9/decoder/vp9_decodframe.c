@@ -963,7 +963,8 @@ static const uint8_t *decode_tiles_mt(VP9D_COMP *pbi, const uint8_t *data) {
 
       vp9_worker_init(worker);
       worker->hook = (VP9WorkerHook)tile_worker_hook;
-      CHECK_MEM_ERROR(cm, worker->data1, vpx_malloc(sizeof(TileWorkerData)));
+      CHECK_MEM_ERROR(cm, worker->data1,
+                      vpx_memalign(32, sizeof(TileWorkerData)));
       CHECK_MEM_ERROR(cm, worker->data2, vpx_malloc(sizeof(TileInfo)));
       if (i < num_workers - 1 && !vp9_worker_reset(worker)) {
         vpx_internal_error(&cm->error, VPX_CODEC_ERROR,
