@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdX///C0\u003d",
+        "filename": "vp9/decoder/vp9_decodframe.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 557,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2013-10-31T23:15:03Z",
+      "side": 1,
+      "message": "pre-increment: ++tx_size.\n\nalternative (not sure correct and/or better):\n\nwhile(tx_size-- \u003e\u003d ONLY_4X4) {\n  read_coef_probs_common(fc-\u003ecoef_probs[tx_size], r);\n}",
+      "revId": "9914473a9087c804d948fdf622c1b3714c354cdf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
