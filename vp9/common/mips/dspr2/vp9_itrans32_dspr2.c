@@ -19,7 +19,8 @@
 #include "vp9/common/mips/dspr2/vp9_common_dspr2.h"
 
 #if HAVE_DSPR2
-static void idct32_1d_rows_dspr2(const int16_t *input, int16_t *output) {
+static void idct32_1d_rows_dspr2(const int16_t *input, int16_t *output,
+                                 uint32_t no_rows) {
   int16_t step1_0, step1_1, step1_2, step1_3, step1_4, step1_5, step1_6;
   int16_t step1_7, step1_8, step1_9, step1_10, step1_11, step1_12, step1_13;
   int16_t step1_14, step1_15, step1_16, step1_17, step1_18, step1_19, step1_20;
@@ -42,7 +43,7 @@ static void idct32_1d_rows_dspr2(const int16_t *input, int16_t *output) {
   const int const_2_power_13 = 8192;
   const int32_t *input_int;
 
-  for (i = 32; i--; ) {
+  for (i = no_rows; i--; ) {
     input_int = (const int32_t *)input;
 
     if (!(input_int[0]  | input_int[1]  | input_int[2]  | input_int[3]  |
@@ -881,10 +882,72 @@ void vp9_idct32x32_1024_add_dspr2(const int16_t *input, uint8_t *dest,
   );
 
   // Rows
-  idct32_1d_rows_dspr2(input, outptr);
+  idct32_1d_rows_dspr2(input, outptr, 32);
 
   // Columns
   vp9_idct32_1d_cols_add_blk_dspr2(out, dest, dest_stride);
+}
+
+void vp9_idct32x32_34_add_dspr2(const int16_t *input, uint8_t *dest,
+                                int stride) {
+  DECLARE_ALIGNED(32, int16_t,  out[32 * 32]);
+  int16_t *outptr = out;
+  uint32_t i;
+  uint32_t pos = 45;
+
+  /* bit positon for extract from acc */
+  __asm__ __volatile__ (
+    "wrdsp      %[pos],     1           \n\t"
+    :
+    : [pos] "r" (pos)
+  );
+
+  // Rows
+  idct32_1d_rows_dspr2(input, outptr, 8);
+
+  outptr += 8;
+  __asm__ __volatile__ (
+      "sw     $zero,      0(%[outptr])     \n\t"
+      "sw     $zero,      4(%[outptr])     \n\t"
+      "sw     $zero,      8(%[outptr])     \n\t"
+      "sw     $zero,     12(%[outptr])     \n\t"
+      "sw     $zero,     16(%[outptr])     \n\t"
+      "sw     $zero,     20(%[outptr])     \n\t"
+      "sw     $zero,     24(%[outptr])     \n\t"
+      "sw     $zero,     28(%[outptr])     \n\t"
+      "sw     $zero,     32(%[outptr])     \n\t"
+      "sw     $zero,     36(%[outptr])     \n\t"
+      "sw     $zero,     40(%[outptr])     \n\t"
+      "sw     $zero,     44(%[outptr])     \n\t"
+
+      :
+      : [outptr] "r" (outptr)
+  );
+
+  for (i = 0; i < 31; ++i) {
+    outptr += 32;
+
+    __asm__ __volatile__ (
+        "sw     $zero,      0(%[outptr])     \n\t"
+        "sw     $zero,      4(%[outptr])     \n\t"
+        "sw     $zero,      8(%[outptr])     \n\t"
+        "sw     $zero,     12(%[outptr])     \n\t"
+        "sw     $zero,     16(%[outptr])     \n\t"
+        "sw     $zero,     20(%[outptr])     \n\t"
+        "sw     $zero,     24(%[outptr])     \n\t"
+        "sw     $zero,     28(%[outptr])     \n\t"
+        "sw     $zero,     32(%[outptr])     \n\t"
+        "sw     $zero,     36(%[outptr])     \n\t"
+        "sw     $zero,     40(%[outptr])     \n\t"
+        "sw     $zero,     44(%[outptr])     \n\t"
+
+        :
+        : [outptr] "r" (outptr)
+    );
+  }
+
+  // Columns
+  vp9_idct32_1d_cols_add_blk_dspr2(out, dest, stride);
 }
 
 void vp9_idct32x32_1_add_dspr2(const int16_t *input, uint8_t *dest,
