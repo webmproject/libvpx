@@ -191,8 +191,7 @@ static INLINE const int16_t* get_iscan_16x16(TX_TYPE tx_type) {
 }
 
 static INLINE int get_coef_context(const int16_t *neighbors,
-                                   uint8_t *token_cache,
-                                   int c) {
+                                   const uint8_t *token_cache, int c) {
   return (1 + token_cache[neighbors[MAX_NEIGHBORS * c + 0]] +
           token_cache[neighbors[MAX_NEIGHBORS * c + 1]]) >> 1;
 }

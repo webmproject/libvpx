@@ -421,7 +421,7 @@ static void txfrm_block_to_raster_xy(BLOCK_SIZE plane_bsize,
   *y = (raster_mb >> tx_cols_log2) << tx_size;
 }
 
-static void extend_for_intra(MACROBLOCKD* const xd, BLOCK_SIZE plane_bsize,
+static void extend_for_intra(MACROBLOCKD *xd, BLOCK_SIZE plane_bsize,
                              int plane, int block, TX_SIZE tx_size) {
   struct macroblockd_plane *const pd = &xd->plane[plane];
   uint8_t *const buf = pd->dst.buf;
@@ -461,7 +461,7 @@ static void extend_for_intra(MACROBLOCKD* const xd, BLOCK_SIZE plane_bsize,
     }
   }
 }
-static void set_contexts_on_border(MACROBLOCKD *xd,
+static void set_contexts_on_border(const MACROBLOCKD *xd,
                                    struct macroblockd_plane *pd,
                                    BLOCK_SIZE plane_bsize,
                                    int tx_size_in_blocks, int has_eob,
@@ -499,7 +499,7 @@ static void set_contexts_on_border(MACROBLOCKD *xd,
     L[pt] = 0;
 }
 
-static void set_contexts(MACROBLOCKD *xd, struct macroblockd_plane *pd,
+static void set_contexts(const MACROBLOCKD *xd, struct macroblockd_plane *pd,
                          BLOCK_SIZE plane_bsize, TX_SIZE tx_size,
                          int has_eob, int aoff, int loff) {
   ENTROPY_CONTEXT *const A = pd->above_context + aoff;

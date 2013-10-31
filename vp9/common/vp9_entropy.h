@@ -153,8 +153,8 @@ typedef unsigned int vp9_coeff_count_model[REF_TYPES][COEF_BANDS]
 
 void vp9_model_to_full_probs(const vp9_prob *model, vp9_prob *full);
 
-static int get_entropy_context(TX_SIZE tx_size,
-                               ENTROPY_CONTEXT *a, ENTROPY_CONTEXT *l) {
+static int get_entropy_context(TX_SIZE tx_size, const ENTROPY_CONTEXT *a,
+                                                const ENTROPY_CONTEXT *l) {
   ENTROPY_CONTEXT above_ec = 0, left_ec = 0;
 
   switch (tx_size) {
@@ -163,16 +163,16 @@ static int get_entropy_context(TX_SIZE tx_size,
       left_ec = l[0] != 0;
       break;
     case TX_8X8:
-      above_ec = !!*(uint16_t *)a;
-      left_ec  = !!*(uint16_t *)l;
+      above_ec = !!*(const uint16_t *)a;
+      left_ec  = !!*(const uint16_t *)l;
       break;
     case TX_16X16:
-      above_ec = !!*(uint32_t *)a;
-      left_ec  = !!*(uint32_t *)l;
+      above_ec = !!*(const uint32_t *)a;
+      left_ec  = !!*(const uint32_t *)l;
       break;
     case TX_32X32:
-      above_ec = !!*(uint64_t *)a;
-      left_ec  = !!*(uint64_t *)l;
+      above_ec = !!*(const uint64_t *)a;
+      left_ec  = !!*(const uint64_t *)l;
       break;
     default:
       assert(!"Invalid transform size.");
