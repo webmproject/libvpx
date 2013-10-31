@@ -210,45 +210,25 @@ static int decode_coefs(VP9_COMMON *cm, const MACROBLOCKD *xd,
   return c;
 }
 
-struct decode_block_args {
-  VP9_COMMON *cm;
-  MACROBLOCKD *xd;
-  struct segmentation *seg;
-  vp9_reader *r;
-  int *eobtotal;
-};
-
-static void decode_block(int plane, int block, BLOCK_SIZE plane_bsize,
-                         TX_SIZE tx_size, void *argv) {
-  const struct decode_block_args* const arg = argv;
-
-  // find the maximum eob for this transform size, adjusted by segment
-  MACROBLOCKD *xd = arg->xd;
-  const struct segmentation *seg = arg->seg;
-  struct macroblockd_plane* pd = &xd->plane[plane];
-  const int segment_id = xd->mi_8x8[0]->mbmi.segment_id;
-  const int seg_eob = get_tx_eob(seg, segment_id, tx_size);
+int vp9_decode_block_tokens(VP9_COMMON *cm, MACROBLOCKD *xd,
+                            int plane, int block, BLOCK_SIZE plane_bsize,
+                            TX_SIZE tx_size, vp9_reader *r) {
+  struct macroblockd_plane *const pd = &xd->plane[plane];
+  const int seg_eob = get_tx_eob(&cm->seg, xd->mi_8x8[0]->mbmi.segment_id,
+                                 tx_size);
   int aoff, loff, eob, pt;
-
   txfrm_block_to_raster_xy(plane_bsize, tx_size, block, &aoff, &loff);
   pt = get_entropy_context(tx_size, pd->above_context + aoff,
                                     pd->left_context + loff);
 
-  eob = decode_coefs(arg->cm, xd, arg->r, block,
+  eob = decode_coefs(cm, xd, r, block,
                      pd->plane_type, seg_eob, BLOCK_OFFSET(pd->qcoeff, block),
                      tx_size, pd->dequant, pt);
 
   set_contexts(xd, pd, plane_bsize, tx_size, eob > 0, aoff, loff);
 
   pd->eobs[block] = eob;
-  *arg->eobtotal += eob;
+  return eob;
 }
 
-int vp9_decode_tokens(VP9_COMMON *cm, MACROBLOCKD *xd,
-                      struct segmentation *seg,
-                      vp9_reader *r, BLOCK_SIZE bsize) {
-  int eobtotal = 0;
-  struct decode_block_args args = {cm, xd, seg, r, &eobtotal};
-  foreach_transformed_block(xd, bsize, decode_block, &args);
-  return eobtotal;
-}
+
