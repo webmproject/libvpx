@@ -2283,12 +2283,8 @@ static void setup_buffer_inter(VP9_COMP *cpi, MACROBLOCK *x,
   // set up scaling factors
   scale[frame_type] = cpi->common.active_ref_scale[frame_type - 1];
 
-  scale[frame_type].x_offset_q4 =
-      ROUND_POWER_OF_TWO(mi_col * MI_SIZE * scale[frame_type].sfc->x_scale_fp,
-       REF_SCALE_SHIFT) & 0xf;
-  scale[frame_type].y_offset_q4 =
-      ROUND_POWER_OF_TWO(mi_row * MI_SIZE * scale[frame_type].sfc->y_scale_fp,
-       REF_SCALE_SHIFT) & 0xf;
+  scale[frame_type].sfc->set_scaled_offsets(&scale[frame_type],
+                                            mi_row * MI_SIZE, mi_col * MI_SIZE);
 
   // TODO(jkoleszar): Is the UV buffer ever used here? If so, need to make this
   // use the UV scaling factors.
