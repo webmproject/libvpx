@@ -42,6 +42,9 @@ typedef struct TileWorkerData {
   vp9_reader bit_reader;
   DECLARE_ALIGNED(16, MACROBLOCKD, xd);
   DECLARE_ALIGNED(16, unsigned char, token_cache[1024]);
+  DECLARE_ALIGNED(16, int16_t,  qcoeff[MAX_MB_PLANE][64 * 64]);
+  DECLARE_ALIGNED(16, int16_t,  dqcoeff[MAX_MB_PLANE][64 * 64]);
+  DECLARE_ALIGNED(16, uint16_t, eobs[MAX_MB_PLANE][256]);
 } TileWorkerData;
 
 static int read_be32(const uint8_t *p) {
@@ -931,6 +934,19 @@ static const uint8_t *decode_tiles(VP9D_COMP *pbi, const uint8_t *data) {
   return end;
 }
 
+static void setup_tile_macroblockd(TileWorkerData *const tile_data) {
+  MACROBLOCKD *xd = &tile_data->xd;
+  struct macroblockd_plane *const pd = xd->plane;
+  int i;
+
+  for (i = 0; i < MAX_MB_PLANE; ++i) {
+    pd[i].qcoeff  = tile_data->qcoeff[i];
+    pd[i].dqcoeff = tile_data->dqcoeff[i];
+    pd[i].eobs    = tile_data->eobs[i];
+    vpx_memset(xd->plane[i].dqcoeff, 0, 64 * 64 * sizeof(int16_t));
+  }
+}
+
 static int tile_worker_hook(void *arg1, void *arg2) {
   TileWorkerData *tile_data = (TileWorkerData*)arg1;
   const TileInfo *const tile = (TileInfo*)arg2;
@@ -1008,6 +1024,7 @@ static const uint8_t *decode_tiles_mt(VP9D_COMP *pbi, const uint8_t *data) {
       setup_token_decoder(data, data_end, size, &cm->error,
                           &tile_data->bit_reader);
       setup_tile_context(pbi, &tile_data->xd, 0, tile_col);
+      setup_tile_macroblockd(tile_data);
 
       worker->had_error = 0;
       if (i == num_workers - 1 || tile_col == tile_cols - 1) {
@@ -1319,7 +1336,7 @@ int vp9_decode_frame(VP9D_COMP *pbi, const uint8_t **p_data_end) {
   cm->fc = cm->frame_contexts[cm->frame_context_idx];
   vp9_zero(cm->counts);
   for (i = 0; i < MAX_MB_PLANE; ++i)
-    vp9_zero(xd->plane[i].dqcoeff);
+    vpx_memset(xd->plane[i].dqcoeff, 0, 64 * 64 * sizeof(int16_t));
 
   xd->corrupted = 0;
   new_fb->corrupted = read_compressed_header(pbi, data, first_partition_size);
