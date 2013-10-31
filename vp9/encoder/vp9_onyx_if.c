@@ -2856,19 +2856,11 @@ static int pick_q_and_adjust_q_bounds(VP9_COMP *cpi,
     if (cpi->oxcf.end_usage == USAGE_CONSTANT_QUALITY) {
       cpi->active_best_quality = cpi->cq_target_quality;
     } else {
-#ifdef ONE_SHOT_Q_ESTIMATE
-#ifdef STRICT_ONE_SHOT_Q
-      cpi->active_best_quality = q;
-#else
-      cpi->active_best_quality = inter_minq[q];
-#endif
-#else
       cpi->active_best_quality = inter_minq[q];
       // 1-pass: for now, use the average Q for the active_best, if its lower
       // than active_worst.
       if (cpi->pass == 0 && (cpi->avg_frame_qindex < q))
         cpi->active_best_quality = inter_minq[cpi->avg_frame_qindex];
-#endif
 
       // For the constrained quality mode we don't want
       // q to fall below the cq level.
