@@ -244,9 +244,8 @@ static void alloc_tile_storage(VP9D_COMP *pbi, int tile_cols) {
                               aligned_mi_cols));
 }
 
-static void decode_block(int plane, int block, BLOCK_SIZE plane_bsize,
-                         TX_SIZE tx_size, void *arg) {
-  MACROBLOCKD* const xd = arg;
+static void inverse_transform_block(MACROBLOCKD* xd, int plane, int block,
+                                    BLOCK_SIZE plane_bsize, TX_SIZE tx_size) {
   struct macroblockd_plane *const pd = &xd->plane[plane];
   int16_t* const qcoeff = BLOCK_OFFSET(pd->qcoeff, block);
   const int stride = pd->dst.stride;
@@ -292,9 +291,19 @@ static void decode_block(int plane, int block, BLOCK_SIZE plane_bsize,
   }
 }
 
-static void decode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
-                               TX_SIZE tx_size, void *arg) {
-  MACROBLOCKD* const xd = arg;
+struct intra_args {
+  VP9_COMMON *cm;
+  MACROBLOCKD *xd;
+  vp9_reader *r;
+};
+
+static void predict_and_reconstruct_intra_block(int plane, int block,
+                                                BLOCK_SIZE plane_bsize,
+                                                TX_SIZE tx_size, void *arg) {
+  struct intra_args *const args = arg;
+  VP9_COMMON *const cm = args->cm;
+  MACROBLOCKD *const xd = args->xd;
+
   struct macroblockd_plane *const pd = &xd->plane[plane];
   MODE_INFO *const mi = xd->mi_8x8[0];
   const int raster_block = txfrm_block_to_raster_block(plane_bsize, tx_size,
@@ -313,25 +322,30 @@ static void decode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
                           b_width_log2(plane_bsize), tx_size, mode,
                           dst, pd->dst.stride, dst, pd->dst.stride);
 
-  if (!mi->mbmi.skip_coeff)
-    decode_block(plane, block, plane_bsize, tx_size, arg);
+  if (!mi->mbmi.skip_coeff) {
+    vp9_decode_block_tokens(cm, xd, plane, block, plane_bsize, tx_size,
+                            args->r);
+    inverse_transform_block(xd, plane, block, plane_bsize, tx_size);
+  }
 }
 
-static int decode_tokens(VP9_COMMON *const cm, MACROBLOCKD *const xd,
-                         BLOCK_SIZE bsize, vp9_reader *r) {
-  MB_MODE_INFO *const mbmi = &xd->mi_8x8[0]->mbmi;
+struct inter_args {
+  VP9_COMMON *cm;
+  MACROBLOCKD *xd;
+  vp9_reader *r;
+  int *eobtotal;
+};
 
-  if (mbmi->skip_coeff) {
-    reset_skip_context(xd, bsize);
-    return -1;
-  } else {
-    if (cm->seg.enabled)
-      setup_plane_dequants(cm, xd, vp9_get_qindex(&cm->seg, mbmi->segment_id,
-                                                  cm->base_qindex));
+static void reconstruct_inter_block(int plane, int block,
+                                    BLOCK_SIZE plane_bsize,
+                                    TX_SIZE tx_size, void *arg) {
+  struct inter_args *args = arg;
+  VP9_COMMON *const cm = args->cm;
+  MACROBLOCKD *const xd = args->xd;
 
-    // TODO(dkovalev) if (!vp9_reader_has_error(r))
-    return vp9_decode_tokens(cm, xd, &cm->seg, r, bsize);
-  }
+  *args->eobtotal += vp9_decode_block_tokens(cm, xd, plane, block,
+                                             plane_bsize, tx_size, args->r);
+  inverse_transform_block(xd, plane, block, plane_bsize, tx_size);
 }
 
 static void set_offsets(VP9_COMMON *const cm, MACROBLOCKD *const xd,
@@ -385,7 +399,6 @@ static void decode_modes_b(VP9_COMMON *const cm, MACROBLOCKD *const xd,
                            vp9_reader *r, BLOCK_SIZE bsize) {
   const int less8x8 = bsize < BLOCK_8X8;
   MB_MODE_INFO *mbmi;
-  int eobtotal;
 
   set_offsets(cm, xd, tile, bsize, mi_row, mi_col);
   vp9_read_mode_info(cm, xd, tile, mi_row, mi_col, r);
@@ -395,32 +408,41 @@ static void decode_modes_b(VP9_COMMON *const cm, MACROBLOCKD *const xd,
 
   // Has to be called after set_offsets
   mbmi = &xd->mi_8x8[0]->mbmi;
-  eobtotal = decode_tokens(cm, xd, bsize, r);
+
+  if (mbmi->skip_coeff) {
+    reset_skip_context(xd, bsize);
+  } else {
+    if (cm->seg.enabled)
+      setup_plane_dequants(cm, xd, vp9_get_qindex(&cm->seg, mbmi->segment_id,
+                                                  cm->base_qindex));
+  }
 
   if (!is_inter_block(mbmi)) {
-    // Intra reconstruction
-    foreach_transformed_block(xd, bsize, decode_block_intra, xd);
+    struct intra_args arg = { cm, xd, r };
+    foreach_transformed_block(xd, bsize, predict_and_reconstruct_intra_block,
+                              &arg);
   } else {
-    // Inter reconstruction
-    const int decode_blocks = (eobtotal > 0);
-
-    if (!less8x8) {
-      assert(mbmi->sb_type == bsize);
-      if (eobtotal == 0)
-        mbmi->skip_coeff = 1;  // skip loopfilter
-    }
-
+    // Setup
     set_ref(cm, xd, 0, mi_row, mi_col);
     if (has_second_ref(mbmi))
       set_ref(cm, xd, 1, mi_row, mi_col);
 
     xd->subpix.filter_x = xd->subpix.filter_y =
         vp9_get_filter_kernel(mbmi->interp_filter);
+
+    // Prediction
     vp9_build_inter_predictors_sb(xd, mi_row, mi_col, bsize);
 
-    if (decode_blocks)
-      foreach_transformed_block(xd, bsize, decode_block, xd);
+    // Reconstruction
+    if (!mbmi->skip_coeff) {
+      int eobtotal = 0;
+      struct inter_args arg = { cm, xd, r, &eobtotal };
+      foreach_transformed_block(xd, bsize, reconstruct_inter_block, &arg);
+      if (!less8x8 && eobtotal == 0)
+        mbmi->skip_coeff = 1;  // skip loopfilter
+    }
   }
+
   xd->corrupted |= vp9_reader_has_error(r);
 }
 
