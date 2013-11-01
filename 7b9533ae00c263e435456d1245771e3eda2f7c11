@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdX//+/k\u003d",
+        "filename": "vp9_spatial_scalable_encoder.c",
+        "patchSetId": 15
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1003234
+      },
+      "writtenOn": "2013-11-01T22:27:14Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdX///BU\u003d",
+      "revId": "7b9533ae00c263e435456d1245771e3eda2f7c11",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdX///BQ\u003d",
         "filename": "vp9_spatial_scalable_encoder.c",
         "patchSetId": 15
@@ -30,6 +48,24 @@
       "writtenOn": "2013-11-01T03:31:29Z",
       "side": 1,
       "message": "move the decl from 124 + const",
+      "revId": "7b9533ae00c263e435456d1245771e3eda2f7c11",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX//+/g\u003d",
+        "filename": "vp9_spatial_scalable_encoder.c",
+        "patchSetId": 15
+      },
+      "lineNbr": 145,
+      "author": {
+        "id": 1003234
+      },
+      "writtenOn": "2013-11-01T22:27:14Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdX///BQ\u003d",
       "revId": "7b9533ae00c263e435456d1245771e3eda2f7c11",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdX//+/E\u003d",
+        "filename": "vp9_spatial_scalable_encoder.c",
+        "patchSetId": 15
+      },
+      "lineNbr": 193,
+      "author": {
+        "id": 1003234
+      },
+      "writtenOn": "2013-11-01T22:27:14Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdX///Ag\u003d",
+      "revId": "7b9533ae00c263e435456d1245771e3eda2f7c11",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdX///BM\u003d",
         "filename": "vp9_spatial_scalable_encoder.c",
         "patchSetId": 15
@@ -64,6 +118,24 @@
       "writtenOn": "2013-11-01T03:31:29Z",
       "side": 1,
       "message": "free(); can you run valgrind against some common use cases please?",
+      "revId": "7b9533ae00c263e435456d1245771e3eda2f7c11",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX//+6M\u003d",
+        "filename": "vp9_spatial_scalable_encoder.c",
+        "patchSetId": 15
+      },
+      "lineNbr": 233,
+      "author": {
+        "id": 1003234
+      },
+      "writtenOn": "2013-11-01T22:27:14Z",
+      "side": 1,
+      "message": "$ valgrind --leak-check\u003dyes build/vp9_spatial_scalable_encoder -t 1/30 -w 352 -h 288 -f 5 -k 4 -z 1 -l 2 ~/Videos/hantro_collage_w352h288.yuv /tmp/hantro.ivf\n** VALGRIND_ROOT\u003d/home/build/nonconf/google3/third_party/valgrind/binaries/current\n...\n\u003d\u003d11504\u003d\u003d \n\u003d\u003d11504\u003d\u003d HEAP SUMMARY:\n\u003d\u003d11504\u003d\u003d     in use at exit: 0 bytes in 0 blocks\n\u003d\u003d11504\u003d\u003d   total heap usage: 813 allocs, 813 frees, 29,003,721 bytes allocated\n\u003d\u003d11504\u003d\u003d \n\u003d\u003d11504\u003d\u003d All heap blocks were freed -- no leaks are possible",
+      "parentUuid": "AAAAdX///BM\u003d",
       "revId": "7b9533ae00c263e435456d1245771e3eda2f7c11",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdX//+/A\u003d",
+        "filename": "vp9_spatial_scalable_encoder.c",
+        "patchSetId": 15
+      },
+      "lineNbr": 334,
+      "author": {
+        "id": 1003234
+      },
+      "writtenOn": "2013-11-01T22:27:14Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdX///Ac\u003d",
+      "revId": "7b9533ae00c263e435456d1245771e3eda2f7c11",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdX///AY\u003d",
         "filename": "vp9_spatial_scalable_encoder.c",
         "patchSetId": 15
@@ -98,6 +188,24 @@
       "writtenOn": "2013-11-01T03:31:29Z",
       "side": 1,
       "message": "ditto on sign",
+      "revId": "7b9533ae00c263e435456d1245771e3eda2f7c11",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX//++8\u003d",
+        "filename": "vp9_spatial_scalable_encoder.c",
+        "patchSetId": 15
+      },
+      "lineNbr": 339,
+      "author": {
+        "id": 1003234
+      },
+      "writtenOn": "2013-11-01T22:27:14Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdX///AY\u003d",
       "revId": "7b9533ae00c263e435456d1245771e3eda2f7c11",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -121,6 +229,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdX//++k\u003d",
+        "filename": "vpx/src/svc_encodeframe.c",
+        "patchSetId": 15
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1003234
+      },
+      "writtenOn": "2013-11-01T22:27:14Z",
+      "side": 1,
+      "message": "not sure what you meant by !defined..., using\n#if defined(__MINGW32__) \u0026\u0026 !(defined(strtok_r))",
+      "parentUuid": "AAAAdX///BE\u003d",
+      "revId": "7b9533ae00c263e435456d1245771e3eda2f7c11",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdX///A4\u003d",
         "filename": "vpx/src/svc_encodeframe.c",
         "patchSetId": 15
@@ -132,6 +258,24 @@
       "writtenOn": "2013-11-01T03:31:29Z",
       "side": 1,
       "message": "mask should be unsigned to match magnitude",
+      "revId": "7b9533ae00c263e435456d1245771e3eda2f7c11",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX//++o\u003d",
+        "filename": "vpx/src/svc_encodeframe.c",
+        "patchSetId": 15
+      },
+      "lineNbr": 168,
+      "author": {
+        "id": 1003234
+      },
+      "writtenOn": "2013-11-01T22:27:14Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdX///A4\u003d",
       "revId": "7b9533ae00c263e435456d1245771e3eda2f7c11",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -155,6 +299,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdX//++c\u003d",
+        "filename": "vpx/src/svc_encodeframe.c",
+        "patchSetId": 15
+      },
+      "lineNbr": 251,
+      "author": {
+        "id": 1003234
+      },
+      "writtenOn": "2013-11-01T22:27:14Z",
+      "side": 1,
+      "message": "Added this at top of file\n#ifdef COMPILER_MSVC\n#define strdup _strdup\n#endif",
+      "parentUuid": "AAAAdX///A0\u003d",
+      "revId": "7b9533ae00c263e435456d1245771e3eda2f7c11",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdX///BA\u003d",
         "filename": "vpx/src/svc_encodeframe.c",
         "patchSetId": 15
@@ -166,6 +328,24 @@
       "writtenOn": "2013-11-01T03:31:29Z",
       "side": 1,
       "message": "fix alignment + const",
+      "revId": "7b9533ae00c263e435456d1245771e3eda2f7c11",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX//++Y\u003d",
+        "filename": "vpx/src/svc_encodeframe.c",
+        "patchSetId": 15
+      },
+      "lineNbr": 284,
+      "author": {
+        "id": 1003234
+      },
+      "writtenOn": "2013-11-01T22:27:14Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdX///BA\u003d",
       "revId": "7b9533ae00c263e435456d1245771e3eda2f7c11",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -189,6 +369,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdX//+6I\u003d",
+        "filename": "vpx/src/svc_encodeframe.c",
+        "patchSetId": 15
+      },
+      "lineNbr": 666,
+      "author": {
+        "id": 1003234
+      },
+      "writtenOn": "2013-11-01T22:27:14Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdX///A8\u003d",
+      "revId": "7b9533ae00c263e435456d1245771e3eda2f7c11",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdX///Aw\u003d",
         "filename": "vpx/src/svc_encodeframe.c",
         "patchSetId": 15
@@ -200,6 +398,24 @@
       "writtenOn": "2013-11-01T03:31:29Z",
       "side": 1,
       "message": "duration is unsigned long in the vpx api unfortunately.",
+      "revId": "7b9533ae00c263e435456d1245771e3eda2f7c11",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX//++M\u003d",
+        "filename": "vpx/src/svc_encodeframe.c",
+        "patchSetId": 15
+      },
+      "lineNbr": 750,
+      "author": {
+        "id": 1003234
+      },
+      "writtenOn": "2013-11-01T22:27:14Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdX///Aw\u003d",
       "revId": "7b9533ae00c263e435456d1245771e3eda2f7c11",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -223,6 +439,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdX//++I\u003d",
+        "filename": "vpx/src/svc_encodeframe.c",
+        "patchSetId": 15
+      },
+      "lineNbr": 762,
+      "author": {
+        "id": 1003234
+      },
+      "writtenOn": "2013-11-01T22:27:14Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdX///As\u003d",
+      "revId": "7b9533ae00c263e435456d1245771e3eda2f7c11",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdX///Ao\u003d",
         "filename": "vpx/src/svc_encodeframe.c",
         "patchSetId": 15
@@ -234,6 +468,24 @@
       "writtenOn": "2013-11-01T03:31:29Z",
       "side": 1,
       "message": "ditto for type size",
+      "revId": "7b9533ae00c263e435456d1245771e3eda2f7c11",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX//++E\u003d",
+        "filename": "vpx/src/svc_encodeframe.c",
+        "patchSetId": 15
+      },
+      "lineNbr": 775,
+      "author": {
+        "id": 1003234
+      },
+      "writtenOn": "2013-11-01T22:27:14Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdX///Ao\u003d",
       "revId": "7b9533ae00c263e435456d1245771e3eda2f7c11",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -257,6 +509,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdX//++A\u003d",
+        "filename": "vpx/src/svc_encodeframe.c",
+        "patchSetId": 15
+      },
+      "lineNbr": 838,
+      "author": {
+        "id": 1003234
+      },
+      "writtenOn": "2013-11-01T22:27:14Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdX///Ak\u003d",
+      "revId": "7b9533ae00c263e435456d1245771e3eda2f7c11",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdX///AU\u003d",
         "filename": "vpx/svc_context.h",
         "patchSetId": 15
@@ -274,6 +544,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdX//+98\u003d",
+        "filename": "vpx/svc_context.h",
+        "patchSetId": 15
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1003234
+      },
+      "writtenOn": "2013-11-01T22:27:14Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdX///AU\u003d",
+      "revId": "7b9533ae00c263e435456d1245771e3eda2f7c11",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdX///AQ\u003d",
         "filename": "vpx/svc_context.h",
         "patchSetId": 15
@@ -285,6 +573,24 @@
       "writtenOn": "2013-11-01T03:31:29Z",
       "side": 1,
       "message": "// extern \"C\"",
+      "revId": "7b9533ae00c263e435456d1245771e3eda2f7c11",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX//+94\u003d",
+        "filename": "vpx/svc_context.h",
+        "patchSetId": 15
+      },
+      "lineNbr": 121,
+      "author": {
+        "id": 1003234
+      },
+      "writtenOn": "2013-11-01T22:27:14Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdX///AQ\u003d",
       "revId": "7b9533ae00c263e435456d1245771e3eda2f7c11",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
