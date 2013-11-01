@@ -163,18 +163,13 @@ void vp9_encode_unsigned_max(struct vp9_write_bit_buffer *wb,
   vp9_wb_write_literal(wb, data, get_unsigned_bits(max));
 }
 
-static void update_mode(
-  vp9_writer *w,
-  int n,
-  vp9_tree tree,
-  vp9_prob Pnew[/* n-1 */],
-  vp9_prob Pcur[/* n-1 */],
-  unsigned int bct[/* n-1 */] [2],
-  const unsigned int num_events[/* n */]
-) {
+static void update_mode(vp9_writer *w, int n, vp9_tree tree,
+                        vp9_prob Pcur[/* n-1 */],
+                        unsigned int bct[/* n-1 */][2],
+                        const unsigned int num_events[/* n */]) {
   int i = 0;
 
-  vp9_tree_probs_from_distribution(tree, Pnew, bct, num_events, 0);
+  vp9_tree_probs_from_distribution(tree, bct, num_events, 0);
   n--;
 
   for (i = 0; i < n; ++i)
@@ -185,11 +180,10 @@ static void update_mbintra_mode_probs(VP9_COMP* const cpi,
                                       vp9_writer* const bc) {
   VP9_COMMON *const cm = &cpi->common;
   int j;
-  vp9_prob pnew[INTRA_MODES - 1];
   unsigned int bct[INTRA_MODES - 1][2];
 
   for (j = 0; j < BLOCK_SIZE_GROUPS; j++)
-    update_mode(bc, INTRA_MODES, vp9_intra_mode_tree, pnew,
+    update_mode(bc, INTRA_MODES, vp9_intra_mode_tree,
                 cm->fc.y_mode_prob[j], bct,
                 (unsigned int *)cpi->y_mode_count[j]);
 }
@@ -231,43 +225,35 @@ static void write_intra_mode(vp9_writer *bc, int m, const vp9_prob *p) {
   write_token(bc, vp9_intra_mode_tree, p, vp9_intra_mode_encodings + m);
 }
 
-static void update_switchable_interp_probs(VP9_COMP *const cpi,
-                                           vp9_writer* const bc) {
+static void update_switchable_interp_probs(VP9_COMP *cpi, vp9_writer *w) {
   VP9_COMMON *const cm = &cpi->common;
-  unsigned int branch_ct[SWITCHABLE_FILTER_CONTEXTS][SWITCHABLE_FILTERS - 1][2];
-  vp9_prob new_prob[SWITCHABLE_FILTER_CONTEXTS][SWITCHABLE_FILTERS - 1];
+  unsigned int branch_ct[SWITCHABLE_FILTERS - 1][2];
   int i, j;
   for (j = 0; j < SWITCHABLE_FILTER_CONTEXTS; ++j) {
-    vp9_tree_probs_from_distribution(
-        vp9_switchable_interp_tree,
-        new_prob[j], branch_ct[j],
-        cm->counts.switchable_interp[j], 0);
+    vp9_tree_probs_from_distribution(vp9_switchable_interp_tree, branch_ct,
+                                     cm->counts.switchable_interp[j], 0);
+
+    for (i = 0; i < SWITCHABLE_FILTERS - 1; ++i)
+      vp9_cond_prob_diff_update(w, &cm->fc.switchable_interp_prob[j][i],
+                                branch_ct[i]);
   }
-  for (j = 0; j < SWITCHABLE_FILTER_CONTEXTS; ++j) {
-    for (i = 0; i < SWITCHABLE_FILTERS - 1; ++i) {
-      vp9_cond_prob_diff_update(bc, &cm->fc.switchable_interp_prob[j][i],
-                                branch_ct[j][i]);
-    }
-  }
+
 #ifdef MODE_STATS
   if (!cpi->dummy_packing)
     update_switchable_interp_stats(cm);
 #endif
 }
 
-static void update_inter_mode_probs(VP9_COMMON *cm, vp9_writer* const bc) {
+static void update_inter_mode_probs(VP9_COMMON *cm, vp9_writer *w) {
   int i, j;
 
   for (i = 0; i < INTER_MODE_CONTEXTS; ++i) {
     unsigned int branch_ct[INTER_MODES - 1][2];
-    vp9_prob new_prob[INTER_MODES - 1];
-
-    vp9_tree_probs_from_distribution(vp9_inter_mode_tree,
-                                     new_prob, branch_ct,
+    vp9_tree_probs_from_distribution(vp9_inter_mode_tree, branch_ct,
                                      cm->counts.inter_mode[i], NEARESTMV);
 
     for (j = 0; j < INTER_MODES - 1; ++j)
-      vp9_cond_prob_diff_update(bc, &cm->fc.inter_mode_probs[i][j],
+      vp9_cond_prob_diff_update(w, &cm->fc.inter_mode_probs[i][j],
                                 branch_ct[j]);
   }
 }
@@ -710,8 +696,7 @@ static void build_tree_distribution(VP9_COMP *cpi, TX_SIZE tx_size) {
   unsigned int (*eob_branch_ct)[REF_TYPES][COEF_BANDS][PREV_COEF_CONTEXTS] =
       cpi->common.counts.eob_branch[tx_size];
   vp9_coeff_stats *coef_branch_ct = cpi->frame_branch_ct[tx_size];
-  vp9_prob full_probs[ENTROPY_NODES];
-  int i, j, k, l;
+  int i, j, k, l, m;
 
   for (i = 0; i < BLOCK_TYPES; ++i) {
     for (j = 0; j < REF_TYPES; ++j) {
@@ -720,16 +705,14 @@ static void build_tree_distribution(VP9_COMP *cpi, TX_SIZE tx_size) {
           if (l >= 3 && k == 0)
             continue;
           vp9_tree_probs_from_distribution(vp9_coef_tree,
-                                           full_probs,
                                            coef_branch_ct[i][j][k][l],
                                            coef_counts[i][j][k][l], 0);
-          vpx_memcpy(coef_probs[i][j][k][l], full_probs,
-                     sizeof(vp9_prob) * UNCONSTRAINED_NODES);
           coef_branch_ct[i][j][k][l][0][1] = eob_branch_ct[i][j][k][l] -
                                              coef_branch_ct[i][j][k][l][0][0];
-          coef_probs[i][j][k][l][0] =
-              get_binary_prob(coef_branch_ct[i][j][k][l][0][0],
-                              coef_branch_ct[i][j][k][l][0][1]);
+          for (m = 0; m < UNCONSTRAINED_NODES; ++m)
+            coef_probs[i][j][k][l][m] = get_binary_prob(
+                                            coef_branch_ct[i][j][k][l][m][0],
+                                            coef_branch_ct[i][j][k][l][m][1]);
 #ifdef ENTROPY_STATS
           if (!cpi->dummy_packing) {
             int t;
@@ -1467,10 +1450,8 @@ static size_t write_compressed_header(VP9_COMP *cpi, uint8_t *data) {
     update_mbintra_mode_probs(cpi, &header_bc);
 
     for (i = 0; i < PARTITION_CONTEXTS; ++i) {
-      vp9_prob pnew[PARTITION_TYPES - 1];
       unsigned int bct[PARTITION_TYPES - 1][2];
-      update_mode(&header_bc, PARTITION_TYPES,
-                  vp9_partition_tree, pnew,
+      update_mode(&header_bc, PARTITION_TYPES, vp9_partition_tree,
                   fc->partition_prob[cm->frame_type][i], bct,
                   (unsigned int *)cpi->partition_count[i]);
     }

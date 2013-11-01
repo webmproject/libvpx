@@ -40,9 +40,7 @@ void vp9_tokens_from_tree_offset(struct vp9_token *p, vp9_tree t,
   tree2tok(p - offset, t, 0, 0, 0);
 }
 
-static unsigned int convert_distribution(unsigned int i,
-                                         vp9_tree tree,
-                                         vp9_prob probs[],
+static unsigned int convert_distribution(unsigned int i, vp9_tree tree,
                                          unsigned int branch_ct[][2],
                                          const unsigned int num_events[],
                                          unsigned int tok0_offset) {
@@ -51,24 +49,25 @@ static unsigned int convert_distribution(unsigned int i,
   if (tree[i] <= 0) {
     left = num_events[-tree[i] - tok0_offset];
   } else {
-    left = convert_distribution(tree[i], tree, probs, branch_ct,
-                                num_events, tok0_offset);
+    left = convert_distribution(tree[i], tree, branch_ct, num_events,
+                                tok0_offset);
   }
   if (tree[i + 1] <= 0)
     right = num_events[-tree[i + 1] - tok0_offset];
   else
-    right = convert_distribution(tree[i + 1], tree, probs, branch_ct,
-                                 num_events, tok0_offset);
+    right = convert_distribution(tree[i + 1], tree, branch_ct, num_events,
+                                 tok0_offset);
 
-  probs[i>>1] = get_binary_prob(left, right);
-  branch_ct[i>>1][0] = left;
-  branch_ct[i>>1][1] = right;
+  branch_ct[i >> 1][0] = left;
+  branch_ct[i >> 1][1] = right;
   return left + right;
 }
 
-void vp9_tree_probs_from_distribution(vp9_tree tree, vp9_prob probs[/* n-1 */],
+void vp9_tree_probs_from_distribution(vp9_tree tree,
                                       unsigned int branch_ct[/* n-1 */][2],
                                       const unsigned int num_events[/* n */],
                                       unsigned int tok0_offset) {
-  convert_distribution(0, tree, probs, branch_ct, num_events, tok0_offset);
+  convert_distribution(0, tree, branch_ct, num_events, tok0_offset);
 }
+
+

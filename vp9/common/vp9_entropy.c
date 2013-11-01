@@ -322,9 +322,8 @@ static void adapt_coef_probs(VP9_COMMON *cm, TX_SIZE tx_size,
   vp9_coeff_count_model *coef_counts = cm->counts.coef[tx_size];
   unsigned int (*eob_branch_count)[REF_TYPES][COEF_BANDS][PREV_COEF_CONTEXTS] =
       cm->counts.eob_branch[tx_size];
-  int t, i, j, k, l;
+  int i, j, k, l, m;
   unsigned int branch_ct[UNCONSTRAINED_NODES][2];
-  vp9_prob coef_probs[UNCONSTRAINED_NODES];
 
   for (i = 0; i < BLOCK_TYPES; ++i)
     for (j = 0; j < REF_TYPES; ++j)
@@ -332,15 +331,14 @@ static void adapt_coef_probs(VP9_COMMON *cm, TX_SIZE tx_size,
         for (l = 0; l < PREV_COEF_CONTEXTS; ++l) {
           if (l >= 3 && k == 0)
             continue;
-          vp9_tree_probs_from_distribution(vp9_coefmodel_tree, coef_probs,
-                                           branch_ct, coef_counts[i][j][k][l],
-                                           0);
+          vp9_tree_probs_from_distribution(vp9_coefmodel_tree, branch_ct,
+                                           coef_counts[i][j][k][l], 0);
           branch_ct[0][1] = eob_branch_count[i][j][k][l] - branch_ct[0][0];
-          coef_probs[0] = get_binary_prob(branch_ct[0][0], branch_ct[0][1]);
-          for (t = 0; t < UNCONSTRAINED_NODES; ++t)
-            dst_coef_probs[i][j][k][l][t] = merge_probs(
-                pre_coef_probs[i][j][k][l][t], coef_probs[t],
-                branch_ct[t], count_sat, update_factor);
+          for (m = 0; m < UNCONSTRAINED_NODES; ++m)
+            dst_coef_probs[i][j][k][l][m] = merge_probs(
+                                                pre_coef_probs[i][j][k][l][m],
+                                                branch_ct[m],
+                                                count_sat, update_factor);
         }
 }
 
