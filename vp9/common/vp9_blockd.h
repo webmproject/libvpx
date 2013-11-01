@@ -74,10 +74,6 @@ typedef enum {
   MB_MODE_COUNT
 } MB_PREDICTION_MODE;
 
-static INLINE int is_intra_mode(MB_PREDICTION_MODE mode) {
-  return mode <= TM_PRED;
-}
-
 static INLINE int is_inter_mode(MB_PREDICTION_MODE mode) {
   return mode >= NEARESTMV && mode <= NEWMV;
 }
