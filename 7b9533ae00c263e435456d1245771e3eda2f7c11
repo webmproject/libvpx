@@ -1,0 +1,293 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdX///BU\u003d",
+        "filename": "vp9_spatial_scalable_encoder.c",
+        "patchSetId": 15
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-11-01T03:31:29Z",
+      "side": 1,
+      "message": "s/1920/1/\nthis is a \u0027has_val\u0027 member, not the default value",
+      "revId": "7b9533ae00c263e435456d1245771e3eda2f7c11",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX///BQ\u003d",
+        "filename": "vp9_spatial_scalable_encoder.c",
+        "patchSetId": 15
+      },
+      "lineNbr": 145,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-11-01T03:31:29Z",
+      "side": 1,
+      "message": "move the decl from 124 + const",
+      "revId": "7b9533ae00c263e435456d1245771e3eda2f7c11",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX///Ag\u003d",
+        "filename": "vp9_spatial_scalable_encoder.c",
+        "patchSetId": 15
+      },
+      "lineNbr": 193,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-11-01T03:31:29Z",
+      "side": 1,
+      "message": "different sized types size_t vs uint32",
+      "revId": "7b9533ae00c263e435456d1245771e3eda2f7c11",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX///BM\u003d",
+        "filename": "vp9_spatial_scalable_encoder.c",
+        "patchSetId": 15
+      },
+      "lineNbr": 233,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-11-01T03:31:29Z",
+      "side": 1,
+      "message": "free(); can you run valgrind against some common use cases please?",
+      "revId": "7b9533ae00c263e435456d1245771e3eda2f7c11",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX///Ac\u003d",
+        "filename": "vp9_spatial_scalable_encoder.c",
+        "patchSetId": 15
+      },
+      "lineNbr": 334,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-11-01T03:31:29Z",
+      "side": 1,
+      "message": "frames_to_skip is unsigned vs. a signed int",
+      "revId": "7b9533ae00c263e435456d1245771e3eda2f7c11",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX///AY\u003d",
+        "filename": "vp9_spatial_scalable_encoder.c",
+        "patchSetId": 15
+      },
+      "lineNbr": 339,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-11-01T03:31:29Z",
+      "side": 1,
+      "message": "ditto on sign",
+      "revId": "7b9533ae00c263e435456d1245771e3eda2f7c11",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX///BE\u003d",
+        "filename": "vpx/src/svc_encodeframe.c",
+        "patchSetId": 15
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-11-01T03:31:29Z",
+      "side": 1,
+      "message": "this seems to be available when MINGW_HAS_SECURE_API is defined under mingw builds, so could be placed under __MINGW32__ \u0026\u0026 !defined... to avoid any conflict with msvc builds",
+      "revId": "7b9533ae00c263e435456d1245771e3eda2f7c11",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX///A4\u003d",
+        "filename": "vpx/src/svc_encodeframe.c",
+        "patchSetId": 15
+      },
+      "lineNbr": 168,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-11-01T03:31:29Z",
+      "side": 1,
+      "message": "mask should be unsigned to match magnitude",
+      "revId": "7b9533ae00c263e435456d1245771e3eda2f7c11",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX///A0\u003d",
+        "filename": "vpx/src/svc_encodeframe.c",
+        "patchSetId": 15
+      },
+      "lineNbr": 251,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-11-01T03:31:29Z",
+      "side": 1,
+      "message": "strdup is posix; you\u0027ll want to define this for msvc\n\nhttp://msdn.microsoft.com/en-us/library/ms235454.aspx",
+      "revId": "7b9533ae00c263e435456d1245771e3eda2f7c11",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX///BA\u003d",
+        "filename": "vpx/src/svc_encodeframe.c",
+        "patchSetId": 15
+      },
+      "lineNbr": 284,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-11-01T03:31:29Z",
+      "side": 1,
+      "message": "fix alignment + const",
+      "revId": "7b9533ae00c263e435456d1245771e3eda2f7c11",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX///A8\u003d",
+        "filename": "vpx/src/svc_encodeframe.c",
+        "patchSetId": 15
+      },
+      "lineNbr": 666,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-11-01T03:31:29Z",
+      "side": 1,
+      "message": "const",
+      "revId": "7b9533ae00c263e435456d1245771e3eda2f7c11",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX///Aw\u003d",
+        "filename": "vpx/src/svc_encodeframe.c",
+        "patchSetId": 15
+      },
+      "lineNbr": 750,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-11-01T03:31:29Z",
+      "side": 1,
+      "message": "duration is unsigned long in the vpx api unfortunately.",
+      "revId": "7b9533ae00c263e435456d1245771e3eda2f7c11",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX///As\u003d",
+        "filename": "vpx/src/svc_encodeframe.c",
+        "patchSetId": 15
+      },
+      "lineNbr": 762,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-11-01T03:31:29Z",
+      "side": 1,
+      "message": "this are different sized types -\u003e int vs. size_t",
+      "revId": "7b9533ae00c263e435456d1245771e3eda2f7c11",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX///Ao\u003d",
+        "filename": "vpx/src/svc_encodeframe.c",
+        "patchSetId": 15
+      },
+      "lineNbr": 775,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-11-01T03:31:29Z",
+      "side": 1,
+      "message": "ditto for type size",
+      "revId": "7b9533ae00c263e435456d1245771e3eda2f7c11",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX///Ak\u003d",
+        "filename": "vpx/src/svc_encodeframe.c",
+        "patchSetId": 15
+      },
+      "lineNbr": 838,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-11-01T03:31:29Z",
+      "side": 1,
+      "message": "size_t",
+      "revId": "7b9533ae00c263e435456d1245771e3eda2f7c11",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX///AU\u003d",
+        "filename": "vpx/svc_context.h",
+        "patchSetId": 15
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-11-01T03:31:29Z",
+      "side": 1,
+      "message": "drop the trailing comma; some more strict build systems will fail -- it\u0027s not part of the c89 grammar",
+      "revId": "7b9533ae00c263e435456d1245771e3eda2f7c11",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX///AQ\u003d",
+        "filename": "vpx/svc_context.h",
+        "patchSetId": 15
+      },
+      "lineNbr": 121,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-11-01T03:31:29Z",
+      "side": 1,
+      "message": "// extern \"C\"",
+      "revId": "7b9533ae00c263e435456d1245771e3eda2f7c11",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
