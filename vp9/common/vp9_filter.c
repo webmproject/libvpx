@@ -97,19 +97,15 @@ DECLARE_ALIGNED(256, const subpel_kernel,
   { 0, -3,  1,  38, 64, 32, -1, -3}
 };
 
+
+static const subpel_kernel* vp9_filter_kernels[4] = {
+  vp9_sub_pel_filters_8,
+  vp9_sub_pel_filters_8lp,
+  vp9_sub_pel_filters_8s,
+  vp9_bilinear_filters
+};
+
 const subpel_kernel *vp9_get_filter_kernel(INTERPOLATION_TYPE type) {
-  switch (type) {
-    case EIGHTTAP:
-      return vp9_sub_pel_filters_8;
-    case EIGHTTAP_SMOOTH:
-      return vp9_sub_pel_filters_8lp;
-    case EIGHTTAP_SHARP:
-      return vp9_sub_pel_filters_8s;
-    case BILINEAR:
-      return vp9_bilinear_filters;
-    default:
-      assert(!"Invalid interpolation type.");
-      return NULL;
-  }
+  return vp9_filter_kernels[type];
 }
 

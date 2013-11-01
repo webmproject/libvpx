@@ -39,7 +39,6 @@ struct subpix_fn_table {
 const subpel_kernel *vp9_get_filter_kernel(INTERPOLATION_TYPE type);
 
 extern const subpel_kernel vp9_bilinear_filters[SUBPEL_SHIFTS];
-extern const subpel_kernel vp9_sub_pel_filters_6[SUBPEL_SHIFTS];
 extern const subpel_kernel vp9_sub_pel_filters_8[SUBPEL_SHIFTS];
 extern const subpel_kernel vp9_sub_pel_filters_8s[SUBPEL_SHIFTS];
 extern const subpel_kernel vp9_sub_pel_filters_8lp[SUBPEL_SHIFTS];
