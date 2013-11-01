@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdX//+9s\u003d",
+        "filename": "vp9/decoder/vp9_decodframe.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2013-11-01T18:05:01Z",
+      "side": 1,
+      "message": "I know it is not ready for review yet but just in case, may be it is better to declare like this:\n\nqcoeff[MAX_MB_PLANE][64 * 64]\ndqcoeff[MAX_MB_PLANE][64 * 64]\neobs[MAX_MB_PLANE][256]\n\nto make code a little bit more general. It is also possible to use \"for\" loops with this approach.",
+      "revId": "240cf2661f4348480c37f96896326361b9adf455",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
