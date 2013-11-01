@@ -262,7 +262,7 @@ static void inverse_transform_block(MACROBLOCKD* xd, int plane, int block,
         if (tx_type == DCT_DCT)
           xd->itxm_add(qcoeff, dst, stride, eob);
         else
-          vp9_iht4x4_add(tx_type, qcoeff, dst, stride, eob);
+          vp9_iht4x4_16_add(qcoeff, dst, stride, tx_type);
         break;
       case TX_8X8:
         tx_type = get_tx_type_8x8(pd->plane_type, xd);
@@ -285,6 +285,8 @@ static void inverse_transform_block(MACROBLOCKD* xd, int plane, int block,
     } else {
       if (tx_type == DCT_DCT && tx_size <= TX_16X16 && eob <= 10)
         vpx_memset(qcoeff, 0, 4 * (4 << tx_size) * sizeof(qcoeff[0]));
+      else if (tx_size == TX_32X32 && eob <= 34)
+        vpx_memset(qcoeff, 0, 256 * sizeof(qcoeff[0]));
       else
         vpx_memset(qcoeff, 0, (16 << (tx_size << 1)) * sizeof(qcoeff[0]));
     }
