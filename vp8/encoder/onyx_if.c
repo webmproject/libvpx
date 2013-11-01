@@ -3574,7 +3574,8 @@ static void encode_frame_to_data_rate
                 for (i=cpi->current_layer+1; i<cpi->oxcf.number_of_layers; i++)
                 {
                     LAYER_CONTEXT *lc = &cpi->layer_context[i];
-                    lc->bits_off_target += cpi->av_per_frame_bandwidth;
+                    lc->bits_off_target += (int)(lc->target_bandwidth /
+                                                 lc->framerate);
                     if (lc->bits_off_target > lc->maximum_buffer_size)
                         lc->bits_off_target = lc->maximum_buffer_size;
                     lc->buffer_level = lc->bits_off_target;
