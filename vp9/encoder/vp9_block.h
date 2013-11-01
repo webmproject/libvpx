@@ -27,6 +27,17 @@ typedef struct {
 typedef struct {
   MODE_INFO mic;
   uint8_t *zcoeff_blk;
+  int16_t *coeff[MAX_MB_PLANE][2];
+  int16_t *qcoeff[MAX_MB_PLANE][2];
+  int16_t *dqcoeff[MAX_MB_PLANE][2];
+  uint16_t *eobs[MAX_MB_PLANE][2];
+
+  // dual buffer pointers
+  int16_t *coeff_pbuf[MAX_MB_PLANE][2];
+  int16_t *qcoeff_pbuf[MAX_MB_PLANE][2];
+  int16_t *dqcoeff_pbuf[MAX_MB_PLANE][2];
+  uint16_t *eobs_pbuf[MAX_MB_PLANE][2];
+
   int num_4x4_blk;
   int skip;
   int_mv best_ref_mv;
@@ -57,7 +68,7 @@ typedef struct {
 
 struct macroblock_plane {
   DECLARE_ALIGNED(16, int16_t, src_diff[64 * 64]);
-  DECLARE_ALIGNED(16, int16_t, coeff[64 * 64]);
+  int16_t *coeff;
   struct buf_2d src;
 
   // Quantizer setings

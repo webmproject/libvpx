@@ -1901,6 +1901,7 @@ static void rd_check_segment_txsize(VP9_COMP *cpi, MACROBLOCK *x,
                         bsi->ref_mv, bsi->second_ref_mv, x->nmvjointcost,
                         x->mvcost, cpi);
 
+
         bsi->rdstat[i][mode_idx].mvs[0].as_int = mode_mv[this_mode].as_int;
         if (num_4x4_blocks_wide > 1)
           bsi->rdstat[i + 1][mode_idx].mvs[0].as_int =
