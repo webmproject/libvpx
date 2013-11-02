@@ -578,25 +578,26 @@ static void write_modes_b(VP9_COMP *cpi, const TileInfo *const tile,
   pack_mb_tokens(bc, tok, tok_end);
 }
 
-static void write_partition(PARTITION_TYPE partition,
-                            int hbs, int mi_rows, int mi_cols,
-                            int mi_row, int mi_col,
-                            vp9_prob probs[PARTITION_TYPES - 1],
-                            vp9_writer *w) {
-  const int has_rows = (mi_row + hbs) < mi_rows;
-  const int has_cols = (mi_col + hbs) < mi_cols;
+static void write_partition(VP9_COMP *cpi, int hbs, int mi_row, int mi_col,
+                            PARTITION_TYPE p, BLOCK_SIZE bsize, vp9_writer *w) {
+  VP9_COMMON *const cm = &cpi->common;
+  const int ctx = partition_plane_context(cpi->above_seg_context,
+                                          cpi->left_seg_context,
+                                          mi_row, mi_col, bsize);
+  const vp9_prob *const probs = get_partition_probs(cm, ctx);
+  const int has_rows = (mi_row + hbs) < cm->mi_rows;
+  const int has_cols = (mi_col + hbs) < cm->mi_cols;
 
   if (has_rows && has_cols) {
-    write_token(w, vp9_partition_tree, probs,
-                &vp9_partition_encodings[partition]);
+    write_token(w, vp9_partition_tree, probs, &vp9_partition_encodings[p]);
   } else if (!has_rows && has_cols) {
-    assert(partition == PARTITION_SPLIT || partition == PARTITION_HORZ);
-    vp9_write(w, partition == PARTITION_SPLIT, probs[1]);
+    assert(p == PARTITION_SPLIT || p == PARTITION_HORZ);
+    vp9_write(w, p == PARTITION_SPLIT, probs[1]);
   } else if (has_rows && !has_cols) {
-    assert(partition == PARTITION_SPLIT || partition == PARTITION_VERT);
-    vp9_write(w, partition == PARTITION_SPLIT, probs[2]);
+    assert(p == PARTITION_SPLIT || p == PARTITION_VERT);
+    vp9_write(w, p == PARTITION_SPLIT, probs[2]);
   } else {
-    assert(partition == PARTITION_SPLIT);
+    assert(p == PARTITION_SPLIT);
   }
 }
 
@@ -623,11 +624,7 @@ static void write_modes_sb(VP9_COMP *cpi, const TileInfo *const tile,
     if (index > 0)
       return;
   } else {
-    const int ctx = partition_plane_context(cpi->above_seg_context,
-                                            cpi->left_seg_context,
-                                            mi_row, mi_col, bsize);
-    write_partition(partition, bs, cm->mi_rows, cm->mi_cols, mi_row, mi_col,
-                    cm->fc.partition_prob[cm->frame_type][ctx], bc);
+    write_partition(cpi, bs, mi_row, mi_col, partition, bsize, bc);
   }
 
   subsize = get_subsize(bsize, partition);
@@ -1452,7 +1449,7 @@ static size_t write_compressed_header(VP9_COMP *cpi, uint8_t *data) {
     for (i = 0; i < PARTITION_CONTEXTS; ++i) {
       unsigned int bct[PARTITION_TYPES - 1][2];
       update_mode(&header_bc, PARTITION_TYPES, vp9_partition_tree,
-                  fc->partition_prob[cm->frame_type][i], bct,
+                  fc->partition_prob[i], bct,
                   (unsigned int *)cpi->partition_count[i]);
     }
 

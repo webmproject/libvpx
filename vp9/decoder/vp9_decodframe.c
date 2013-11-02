@@ -448,21 +448,30 @@ static void decode_modes_b(VP9_COMMON *const cm, MACROBLOCKD *const xd,
   xd->corrupted |= vp9_reader_has_error(r);
 }
 
-static PARTITION_TYPE read_partition(int hbs, int mi_rows, int mi_cols,
-                                     int mi_row, int mi_col,
-                                     vp9_prob probs[PARTITION_TYPES - 1],
+static PARTITION_TYPE read_partition(VP9_COMMON *cm, MACROBLOCKD *xd, int hbs,
+                                     int mi_row, int mi_col, BLOCK_SIZE bsize,
                                      vp9_reader *r) {
-  const int has_rows = (mi_row + hbs) < mi_rows;
-  const int has_cols = (mi_col + hbs) < mi_cols;
+  const int ctx = partition_plane_context(xd->above_seg_context,
+                                          xd->left_seg_context,
+                                          mi_row, mi_col, bsize);
+  const vp9_prob *const probs = get_partition_probs(cm, ctx);
+  const int has_rows = (mi_row + hbs) < cm->mi_rows;
+  const int has_cols = (mi_col + hbs) < cm->mi_cols;
+  PARTITION_TYPE p;
 
   if (has_rows && has_cols)
-    return treed_read(r, vp9_partition_tree, probs);
+    p = treed_read(r, vp9_partition_tree, probs);
   else if (!has_rows && has_cols)
-    return vp9_read(r, probs[1]) ? PARTITION_SPLIT : PARTITION_HORZ;
+    p = vp9_read(r, probs[1]) ? PARTITION_SPLIT : PARTITION_HORZ;
   else if (has_rows && !has_cols)
-    return vp9_read(r, probs[2]) ? PARTITION_SPLIT : PARTITION_VERT;
+    p = vp9_read(r, probs[2]) ? PARTITION_SPLIT : PARTITION_VERT;
   else
-    return PARTITION_SPLIT;
+    p = PARTITION_SPLIT;
+
+  if (!cm->frame_parallel_decoding_mode)
+    ++cm->counts.partition[ctx][p];
+
+  return p;
 }
 
 static void decode_modes_sb(VP9_COMMON *const cm, MACROBLOCKD *const xd,
@@ -472,19 +481,11 @@ static void decode_modes_sb(VP9_COMMON *const cm, MACROBLOCKD *const xd,
   const int hbs = num_8x8_blocks_wide_lookup[bsize] / 2;
   PARTITION_TYPE partition;
   BLOCK_SIZE subsize;
-  int ctx;
 
   if (mi_row >= cm->mi_rows || mi_col >= cm->mi_cols)
     return;
 
-  ctx = partition_plane_context(xd->above_seg_context, xd->left_seg_context,
-                                mi_row, mi_col, bsize);
-  partition = read_partition(hbs, cm->mi_rows, cm->mi_cols, mi_row, mi_col,
-                             cm->fc.partition_prob[cm->frame_type][ctx], r);
-
-  if (!cm->frame_parallel_decoding_mode)
-    ++cm->counts.partition[ctx][partition];
-
+  partition = read_partition(cm, xd, hbs, mi_row, mi_col, bsize, r);
   subsize = get_subsize(bsize, partition);
   if (subsize < BLOCK_8X8) {
     decode_modes_b(cm, xd, tile, mi_row, mi_col, r, subsize);
@@ -1209,7 +1210,7 @@ static int read_compressed_header(VP9D_COMP *pbi, const uint8_t *data,
 
     for (j = 0; j < PARTITION_CONTEXTS; ++j)
       for (i = 0; i < PARTITION_TYPES - 1; ++i)
-        vp9_diff_update_prob(&r, &fc->partition_prob[INTER_FRAME][j][i]);
+        vp9_diff_update_prob(&r, &fc->partition_prob[j][i]);
 
     read_mv_probs(&r, nmvc, cm->allow_high_precision_mv);
   }

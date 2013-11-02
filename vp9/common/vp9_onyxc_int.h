@@ -41,7 +41,7 @@
 typedef struct frame_contexts {
   vp9_prob y_mode_prob[BLOCK_SIZE_GROUPS][INTRA_MODES - 1];
   vp9_prob uv_mode_prob[INTRA_MODES][INTRA_MODES - 1];
-  vp9_prob partition_prob[FRAME_TYPES][PARTITION_CONTEXTS][PARTITION_TYPES - 1];
+  vp9_prob partition_prob[PARTITION_CONTEXTS][PARTITION_TYPES - 1];
   vp9_coeff_probs_model coef_probs[TX_SIZES][BLOCK_TYPES];
   vp9_prob switchable_interp_prob[SWITCHABLE_FILTER_CONTEXTS]
                                  [SWITCHABLE_FILTERS - 1];
@@ -243,6 +243,11 @@ static void ref_cnt_fb(int *buf, int *idx, int new_idx) {
 
 static int mi_cols_aligned_to_sb(int n_mis) {
   return ALIGN_POWER_OF_TWO(n_mis, MI_BLOCK_SIZE_LOG2);
+}
+
+static INLINE const vp9_prob* get_partition_probs(VP9_COMMON *cm, int ctx) {
+  return cm->frame_type == KEY_FRAME ? vp9_kf_partition_probs[ctx]
+                                     : cm->fc.partition_prob[ctx];
 }
 
 static INLINE void set_skip_context(

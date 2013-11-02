@@ -161,51 +161,52 @@ static const vp9_prob default_if_uv_probs[INTRA_MODES][INTRA_MODES - 1] = {
   { 101,  21, 107, 181, 192, 103,  19,  67, 125 }   // y = tm
 };
 
-static const vp9_prob default_partition_probs[FRAME_TYPES][PARTITION_CONTEXTS]
+const vp9_prob vp9_kf_partition_probs[PARTITION_CONTEXTS]
+                                     [PARTITION_TYPES - 1] = {
+  // 8x8 -> 4x4
+  { 158,  97,  94 },  // a/l both not split
+  {  93,  24,  99 },  // a split, l not split
+  {  85, 119,  44 },  // l split, a not split
+  {  62,  59,  67 },  // a/l both split
+  // 16x16 -> 8x8
+  { 149,  53,  53 },  // a/l both not split
+  {  94,  20,  48 },  // a split, l not split
+  {  83,  53,  24 },  // l split, a not split
+  {  52,  18,  18 },  // a/l both split
+  // 32x32 -> 16x16
+  { 150,  40,  39 },  // a/l both not split
+  {  78,  12,  26 },  // a split, l not split
+  {  67,  33,  11 },  // l split, a not split
+  {  24,   7,   5 },  // a/l both split
+  // 64x64 -> 32x32
+  { 174,  35,  49 },  // a/l both not split
+  {  68,  11,  27 },  // a split, l not split
+  {  57,  15,   9 },  // l split, a not split
+  {  12,   3,   3 },  // a/l both split
+};
+
+static const vp9_prob default_partition_probs[PARTITION_CONTEXTS]
                                              [PARTITION_TYPES - 1] = {
-  {  // frame_type = keyframe
-    // 8x8 -> 4x4
-    { 158,  97,  94 },  // a/l both not split
-    {  93,  24,  99 },  // a split, l not split
-    {  85, 119,  44 },  // l split, a not split
-    {  62,  59,  67 },  // a/l both split
-    // 16x16 -> 8x8
-    { 149,  53,  53 },  // a/l both not split
-    {  94,  20,  48 },  // a split, l not split
-    {  83,  53,  24 },  // l split, a not split
-    {  52,  18,  18 },  // a/l both split
-    // 32x32 -> 16x16
-    { 150,  40,  39 },  // a/l both not split
-    {  78,  12,  26 },  // a split, l not split
-    {  67,  33,  11 },  // l split, a not split
-    {  24,   7,   5 },  // a/l both split
-    // 64x64 -> 32x32
-    { 174,  35,  49 },  // a/l both not split
-    {  68,  11,  27 },  // a split, l not split
-    {  57,  15,   9 },  // l split, a not split
-    {  12,   3,   3 },  // a/l both split
-  }, {  // frame_type = interframe
-    // 8x8 -> 4x4
-    { 199, 122, 141 },  // a/l both not split
-    { 147,  63, 159 },  // a split, l not split
-    { 148, 133, 118 },  // l split, a not split
-    { 121, 104, 114 },  // a/l both split
-    // 16x16 -> 8x8
-    { 174,  73,  87 },  // a/l both not split
-    {  92,  41,  83 },  // a split, l not split
-    {  82,  99,  50 },  // l split, a not split
-    {  53,  39,  39 },  // a/l both split
-    // 32x32 -> 16x16
-    { 177,  58,  59 },  // a/l both not split
-    {  68,  26,  63 },  // a split, l not split
-    {  52,  79,  25 },  // l split, a not split
-    {  17,  14,  12 },  // a/l both split
-    // 64x64 -> 32x32
-    { 222,  34,  30 },  // a/l both not split
-    {  72,  16,  44 },  // a split, l not split
-    {  58,  32,  12 },  // l split, a not split
-    {  10,   7,   6 },  // a/l both split
-  }
+  // 8x8 -> 4x4
+  { 199, 122, 141 },  // a/l both not split
+  { 147,  63, 159 },  // a split, l not split
+  { 148, 133, 118 },  // l split, a not split
+  { 121, 104, 114 },  // a/l both split
+  // 16x16 -> 8x8
+  { 174,  73,  87 },  // a/l both not split
+  {  92,  41,  83 },  // a split, l not split
+  {  82,  99,  50 },  // l split, a not split
+  {  53,  39,  39 },  // a/l both split
+  // 32x32 -> 16x16
+  { 177,  58,  59 },  // a/l both not split
+  {  68,  26,  63 },  // a split, l not split
+  {  52,  79,  25 },  // l split, a not split
+  {  17,  14,  12 },  // a/l both split
+  // 64x64 -> 32x32
+  { 222,  34,  30 },  // a/l both not split
+  {  72,  16,  44 },  // a split, l not split
+  {  58,  32,  12 },  // l split, a not split
+  {  10,   7,   6 },  // a/l both split
 };
 
 static const vp9_prob default_inter_mode_probs[INTER_MODE_CONTEXTS]
@@ -404,10 +405,8 @@ void vp9_adapt_mode_probs(VP9_COMMON *cm) {
                       fc->uv_mode_prob[i], 0);
 
   for (i = 0; i < PARTITION_CONTEXTS; i++)
-    update_mode_probs(PARTITION_TYPES, vp9_partition_tree,
-                      counts->partition[i],
-                      pre_fc->partition_prob[INTER_FRAME][i],
-                      fc->partition_prob[INTER_FRAME][i], 0);
+    update_mode_probs(PARTITION_TYPES, vp9_partition_tree, counts->partition[i],
+                      pre_fc->partition_prob[i], fc->partition_prob[i], 0);
 
   if (cm->mcomp_filter_type == SWITCHABLE) {
     for (i = 0; i < SWITCHABLE_FILTER_CONTEXTS; i++)
