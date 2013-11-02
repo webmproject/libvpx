@@ -991,7 +991,7 @@ cglobal d207_predictor_32x32, 4, 5, 8, dst, stride, stride3, left, goffset
   lea              dst8q, [dst8q+strideq*4]
 
   ; output 2nd half of 3rd 8 lines and half of 4th 8 lines
-  mova                m0, [sh_b23456789abcdefff]
+  mova                m0, [GLOBAL(sh_b23456789abcdefff)]
   mova  [dstq           +16], m7
   mova  [dst8q             ], m7
   pshufb              m7, m0
