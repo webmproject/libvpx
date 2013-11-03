@@ -3544,8 +3544,9 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
     }
 
     // Keep record of best inter rd with single reference
-    if (is_inter_block(&xd->mi_8x8[0]->mbmi) && !mode_excluded &&
-        this_rd < best_inter_rd) {
+    if (is_inter_block(&xd->mi_8x8[0]->mbmi) &&
+        !has_second_ref(&xd->mi_8x8[0]->mbmi) &&
+        !mode_excluded && this_rd < best_inter_rd) {
       best_inter_rd = this_rd;
       best_inter_ref_frame = ref_frame;
     }
