@@ -16,6 +16,24 @@
       "revId": "725bb0c87813787bc5651eb70285d463288bf6a6",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX//+zQ\u003d",
+        "filename": "vp9/common/vp9_entropymode.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 164,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2013-11-04T19:59:26Z",
+      "side": 1,
+      "message": "No, we use that array directly outside of vp9_entropymode.c in get_partition_probs() function defined in vp9_onyxc_int.h.",
+      "parentUuid": "AAAAdX//+zo\u003d",
+      "revId": "725bb0c87813787bc5651eb70285d463288bf6a6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
