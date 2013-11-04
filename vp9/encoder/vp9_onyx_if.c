@@ -1032,11 +1032,6 @@ void vp9_alloc_compressor_data(VP9_COMP *cpi) {
     CHECK_MEM_ERROR(cm, cpi->tok, vpx_calloc(tokens, sizeof(*cpi->tok)));
   }
 
-  // Data used for real time vc mode to see if gf needs refreshing
-  cpi->inter_zz_count = 0;
-  cpi->gf_bad_count = 0;
-  cpi->gf_update_recommended = 0;
-
   vpx_free(cpi->mb_activity_map);
   CHECK_MEM_ERROR(cm, cpi->mb_activity_map,
                   vpx_calloc(sizeof(unsigned int),

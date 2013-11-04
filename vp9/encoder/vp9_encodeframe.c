@@ -683,10 +683,6 @@ static void update_stats(VP9_COMP *cpi) {
                                [mbmi->ref_frame[0] != GOLDEN_FRAME]++;
       }
     }
-
-    // Count of last ref frame 0,0 usage
-    if (mbmi->mode == ZEROMV && mbmi->ref_frame[0] == LAST_FRAME)
-      cpi->inter_zz_count++;
   }
 }
 
@@ -1930,9 +1926,6 @@ static void encode_frame_internal(VP9_COMP *cpi) {
 #endif
 
   totalrate = 0;
-
-  // Reset frame count of inter 0,0 motion vector usage.
-  cpi->inter_zz_count = 0;
 
   vp9_zero(cm->counts.switchable_interp);
   vp9_zero(cpi->tx_stepdown_count);
