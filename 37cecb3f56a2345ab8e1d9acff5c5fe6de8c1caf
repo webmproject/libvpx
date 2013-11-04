@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdX//+xY\u003d",
+        "filename": "test/video_source.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2013-11-04T22:16:37Z",
+      "side": 1,
+      "message": "const char *data_path (const and no space after star). I think kDataPath should be a global constant to use \"k\" prefix.",
+      "revId": "37cecb3f56a2345ab8e1d9acff5c5fe6de8c1caf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX//+xU\u003d",
+        "filename": "test/video_source.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2013-11-04T22:16:37Z",
+      "side": 1,
+      "message": "if (!data_path)",
+      "revId": "37cecb3f56a2345ab8e1d9acff5c5fe6de8c1caf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
