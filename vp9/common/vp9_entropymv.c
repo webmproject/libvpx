@@ -191,7 +191,7 @@ void vp9_inc_mv(const MV *mv, nmv_context_counts *counts) {
 }
 
 static vp9_prob adapt_prob(vp9_prob prep, const unsigned int ct[2]) {
-  return merge_probs2(prep, ct, MV_COUNT_SAT, MV_MAX_UPDATE_FACTOR);
+  return merge_probs(prep, ct, MV_COUNT_SAT, MV_MAX_UPDATE_FACTOR);
 }
 
 static unsigned int adapt_probs(unsigned int i,

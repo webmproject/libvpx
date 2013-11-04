@@ -349,13 +349,8 @@ void vp9_entropy_mode_init() {
 #define COUNT_SAT 20
 #define MAX_UPDATE_FACTOR 128
 
-static int update_ct(vp9_prob pre_prob, vp9_prob prob,
-                     const unsigned int ct[2]) {
-  return merge_probs(pre_prob, prob, ct, COUNT_SAT, MAX_UPDATE_FACTOR);
-}
-
-static int update_ct2(vp9_prob pre_prob, const unsigned int ct[2]) {
-  return merge_probs2(pre_prob, ct, COUNT_SAT, MAX_UPDATE_FACTOR);
+static int update_ct(vp9_prob pre_prob, const unsigned int ct[2]) {
+  return merge_probs(pre_prob, ct, COUNT_SAT, MAX_UPDATE_FACTOR);
 }
 
 static void update_mode_probs(int n_modes,
@@ -364,14 +359,13 @@ static void update_mode_probs(int n_modes,
                               const vp9_prob *pre_probs, vp9_prob *dst_probs,
                               unsigned int tok0_offset) {
 #define MAX_PROBS 32
-  vp9_prob probs[MAX_PROBS];
   unsigned int branch_ct[MAX_PROBS][2];
   int t;
 
   assert(n_modes - 1 < MAX_PROBS);
-  vp9_tree_probs_from_distribution(tree, probs, branch_ct, cnt, tok0_offset);
+  vp9_tree_probs_from_distribution(tree, branch_ct, cnt, tok0_offset);
   for (t = 0; t < n_modes - 1; ++t)
-    dst_probs[t] = update_ct(pre_probs[t], probs[t], branch_ct[t]);
+    dst_probs[t] = update_ct(pre_probs[t], branch_ct[t]);
 }
 
 void vp9_adapt_mode_probs(VP9_COMMON *cm) {
@@ -381,18 +375,18 @@ void vp9_adapt_mode_probs(VP9_COMMON *cm) {
   const FRAME_COUNTS *counts = &cm->counts;
 
   for (i = 0; i < INTRA_INTER_CONTEXTS; i++)
-    fc->intra_inter_prob[i] = update_ct2(pre_fc->intra_inter_prob[i],
-                                         counts->intra_inter[i]);
+    fc->intra_inter_prob[i] = update_ct(pre_fc->intra_inter_prob[i],
+                                        counts->intra_inter[i]);
   for (i = 0; i < COMP_INTER_CONTEXTS; i++)
-    fc->comp_inter_prob[i] = update_ct2(pre_fc->comp_inter_prob[i],
-                                        counts->comp_inter[i]);
+    fc->comp_inter_prob[i] = update_ct(pre_fc->comp_inter_prob[i],
+                                       counts->comp_inter[i]);
   for (i = 0; i < REF_CONTEXTS; i++)
-    fc->comp_ref_prob[i] = update_ct2(pre_fc->comp_ref_prob[i],
-                                      counts->comp_ref[i]);
+    fc->comp_ref_prob[i] = update_ct(pre_fc->comp_ref_prob[i],
+                                     counts->comp_ref[i]);
   for (i = 0; i < REF_CONTEXTS; i++)
     for (j = 0; j < 2; j++)
-      fc->single_ref_prob[i][j] = update_ct2(pre_fc->single_ref_prob[i][j],
-                                             counts->single_ref[i][j]);
+      fc->single_ref_prob[i][j] = update_ct(pre_fc->single_ref_prob[i][j],
+                                            counts->single_ref[i][j]);
 
   for (i = 0; i < INTER_MODE_CONTEXTS; i++)
     update_mode_probs(INTER_MODES, vp9_inter_mode_tree,
@@ -432,24 +426,23 @@ void vp9_adapt_mode_probs(VP9_COMMON *cm) {
     for (i = 0; i < TX_SIZE_CONTEXTS; ++i) {
       tx_counts_to_branch_counts_8x8(counts->tx.p8x8[i], branch_ct_8x8p);
       for (j = 0; j < TX_SIZES - 3; ++j)
-        fc->tx_probs.p8x8[i][j] = update_ct2(pre_fc->tx_probs.p8x8[i][j],
-                                             branch_ct_8x8p[j]);
+        fc->tx_probs.p8x8[i][j] = update_ct(pre_fc->tx_probs.p8x8[i][j],
+                                            branch_ct_8x8p[j]);
 
       tx_counts_to_branch_counts_16x16(counts->tx.p16x16[i], branch_ct_16x16p);
       for (j = 0; j < TX_SIZES - 2; ++j)
-        fc->tx_probs.p16x16[i][j] = update_ct2(pre_fc->tx_probs.p16x16[i][j],
-                                               branch_ct_16x16p[j]);
+        fc->tx_probs.p16x16[i][j] = update_ct(pre_fc->tx_probs.p16x16[i][j],
+                                              branch_ct_16x16p[j]);
 
       tx_counts_to_branch_counts_32x32(counts->tx.p32x32[i], branch_ct_32x32p);
       for (j = 0; j < TX_SIZES - 1; ++j)
-        fc->tx_probs.p32x32[i][j] = update_ct2(pre_fc->tx_probs.p32x32[i][j],
-                                               branch_ct_32x32p[j]);
+        fc->tx_probs.p32x32[i][j] = update_ct(pre_fc->tx_probs.p32x32[i][j],
+                                              branch_ct_32x32p[j]);
     }
   }
 
   for (i = 0; i < MBSKIP_CONTEXTS; ++i)
-    fc->mbskip_probs[i] = update_ct2(pre_fc->mbskip_probs[i],
-                                     counts->mbskip[i]);
+    fc->mbskip_probs[i] = update_ct(pre_fc->mbskip_probs[i], counts->mbskip[i]);
 }
 
 static void set_default_lf_deltas(struct loopfilter *lf) {
