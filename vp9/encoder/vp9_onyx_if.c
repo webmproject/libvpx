@@ -1180,7 +1180,6 @@ static void init_config(VP9_PTR ptr, VP9_CONFIG *oxcf) {
   int i;
 
   cpi->oxcf = *oxcf;
-  cpi->goldfreq = 7;
 
   cm->version = oxcf->version;
 
