@@ -37,6 +37,7 @@ vpxdec.DESCRIPTION           = Full featured decoder
 UTILS-$(CONFIG_ENCODERS)    += vpxenc.c
 vpxenc.SRCS                 += args.c args.h y4minput.c y4minput.h
 vpxenc.SRCS                 += tools_common.c tools_common.h
+vpxenc.SRCS                 += webmenc.c webmenc.h
 vpxenc.SRCS                 += vpx_ports/mem_ops.h
 vpxenc.SRCS                 += vpx_ports/mem_ops_aligned.h
 vpxenc.SRCS                 += vpx_ports/vpx_timer.h
