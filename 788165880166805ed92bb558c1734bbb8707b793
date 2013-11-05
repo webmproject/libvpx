@@ -33,6 +33,23 @@
       "revId": "788165880166805ed92bb558c1734bbb8707b793",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX//+ko\u003d",
+        "filename": "vp9/common/vp9_reconinter.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 159,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2013-11-05T22:10:36Z",
+      "side": 1,
+      "message": "ref_frame was defined as const in line 150.. the compiler should fail here.\n\nremove const from line 150.",
+      "revId": "788165880166805ed92bb558c1734bbb8707b793",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
