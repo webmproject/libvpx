@@ -956,6 +956,21 @@ static void calc_pframe_target_size(VP8_COMP *cpi)
             if (cpi->bits_off_target > cpi->oxcf.maximum_buffer_size)
               cpi->bits_off_target = (int)cpi->oxcf.maximum_buffer_size;
             cpi->buffer_level = cpi->bits_off_target;
+
+            if (cpi->oxcf.number_of_layers > 1) {
+              unsigned int i;
+
+              // Propagate bits saved by dropping the frame to higher layers.
+              for (i = cpi->current_layer + 1; i < cpi->oxcf.number_of_layers;
+                  i++) {
+                LAYER_CONTEXT *lc = &cpi->layer_context[i];
+                lc->bits_off_target += (int)(lc->target_bandwidth /
+                                             lc->framerate);
+                if (lc->bits_off_target > lc->maximum_buffer_size)
+                  lc->bits_off_target = lc->maximum_buffer_size;
+                lc->buffer_level = lc->bits_off_target;
+              }
+            }
         }
     }
 
