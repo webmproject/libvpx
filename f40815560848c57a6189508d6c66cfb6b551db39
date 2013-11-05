@@ -89,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdX//+hI\u003d",
+        "filename": "test/video_source.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2013-11-05T23:28:45Z",
+      "side": 1,
+      "message": "Just for curiosity, why  \"\u003d\u003d NULL\" is better? Is it just a style or something beyond that?",
+      "parentUuid": "AAAAdX//+ks\u003d",
+      "revId": "f40815560848c57a6189508d6c66cfb6b551db39",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdX//+kw\u003d",
         "filename": "test/video_source.h",
         "patchSetId": 4
