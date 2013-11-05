@@ -1092,7 +1092,7 @@ static int64_t rd_pick_intra4x4block(VP9_COMP *cpi, MACROBLOCK *x, int ib,
         else
           x->fwd_txm4x4(src_diff, coeff, 8);
 
-        vp9_regular_quantize_b_4x4(x, 16, block, scan, get_iscan_4x4(tx_type));
+        vp9_regular_quantize_b_4x4(x, 4, block, scan, get_iscan_4x4(tx_type));
 
         ratey += cost_coeffs(x, 0, block,
                              tempa + idx, templ + idy, TX_4X4, scan, nb);
@@ -1559,7 +1559,7 @@ static int64_t encode_inter_mb_segment(VP9_COMP *cpi,
       coeff = BLOCK_OFFSET(p->coeff, k);
       x->fwd_txm4x4(raster_block_offset_int16(BLOCK_8X8, k, p->src_diff),
                     coeff, 8);
-      vp9_regular_quantize_b_4x4(x, 16, k, get_scan_4x4(DCT_DCT),
+      vp9_regular_quantize_b_4x4(x, 4, k, get_scan_4x4(DCT_DCT),
                                  get_iscan_4x4(DCT_DCT));
       thisdistortion += vp9_block_error(coeff, BLOCK_OFFSET(pd->dqcoeff, k),
                                         16, &ssz);
