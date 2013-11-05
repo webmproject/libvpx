@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdX//+sI\u003d",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 3
+      },
+      "lineNbr": 8,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-11-05T02:21:23Z",
+      "side": 1,
+      "message": "drop this, it\u0027s recoverable from the commit",
+      "revId": "d30acc000bd000cd7503e129f2bf4674b1a10c3d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX//+sE\u003d",
+        "filename": "test/video_source.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-11-05T02:21:23Z",
+      "side": 1,
+      "message": "there\u0027s no reason to make this platform specific, simply check for the presence of the environment, followed by the preproc (LIBVPX_TEST_DATA_PATH)",
+      "revId": "d30acc000bd000cd7503e129f2bf4674b1a10c3d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
