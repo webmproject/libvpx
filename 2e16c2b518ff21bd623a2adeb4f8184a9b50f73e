@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdX//+vA\u003d",
+        "filename": "vp9/decoder/vp9_decodframe.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 365,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2013-11-05T00:22:54Z",
+      "side": 1,
+      "message": "Better formatting:\n\nxd-\u003elast_mi \u003d cm-\u003eprev_mi ? cm-\u003eprev_mi_grid_visible[offset] \n                          : NULL;",
+      "revId": "2e16c2b518ff21bd623a2adeb4f8184a9b50f73e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
