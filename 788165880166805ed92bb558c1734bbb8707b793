@@ -50,6 +50,24 @@
       "revId": "788165880166805ed92bb558c1734bbb8707b793",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX//+kg\u003d",
+        "filename": "vp9/common/vp9_reconinter.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 159,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2013-11-05T22:17:01Z",
+      "side": 1,
+      "message": "It would fail only if \"const uint8_t *const ref_frame\" :-)",
+      "parentUuid": "AAAAdX//+ko\u003d",
+      "revId": "788165880166805ed92bb558c1734bbb8707b793",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
