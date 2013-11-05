@@ -33,6 +33,74 @@
       "revId": "3ee6d0da770f218d81564babd0a57481bce29181",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX//+sw\u003d",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 7
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-11-05T02:20:02Z",
+      "side": 1,
+      "message": "drop this, it can be retrieved from the commit",
+      "revId": "3ee6d0da770f218d81564babd0a57481bce29181",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX//+so\u003d",
+        "filename": "test/decode_test_driver.cc",
+        "patchSetId": 7
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-11-05T02:20:02Z",
+      "side": 1,
+      "message": "this should be first",
+      "revId": "3ee6d0da770f218d81564babd0a57481bce29181",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX//+sY\u003d",
+        "filename": "test/encode_test_driver.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-11-05T02:20:02Z",
+      "side": 1,
+      "message": "this seems to go in the \u0027other\u0027 library bucket, not c-system so put it after c++ includes here and elsewhere",
+      "revId": "3ee6d0da770f218d81564babd0a57481bce29181",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX//+sU\u003d",
+        "filename": "test/fdct4x4_test.cc",
+        "patchSetId": 7
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-11-05T02:20:02Z",
+      "side": 1,
+      "message": "keep these separate to enforce the grouping",
+      "revId": "3ee6d0da770f218d81564babd0a57481bce29181",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
