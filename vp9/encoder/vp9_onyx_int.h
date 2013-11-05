@@ -506,14 +506,9 @@ typedef struct VP9_COMP {
   int decimation_count;
 
   // for real time encoding
-  int avg_encode_time;              // microsecond
-  int avg_pick_mode_time;            // microsecond
   int speed;
-  unsigned int cpu_freq;           // Mhz
   int compressor_speed;
 
-  int interquantizer;
-  int goldfreq;
   int auto_worst_q;
   int cpu_used;
   int pass;
