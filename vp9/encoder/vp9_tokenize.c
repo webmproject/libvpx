@@ -89,6 +89,7 @@ struct tokenize_b_args {
   MACROBLOCKD *xd;
   TOKENEXTRA **tp;
   TX_SIZE tx_size;
+  uint8_t *token_cache;
 };
 
 static void set_entropy_context_b(int plane, int block, BLOCK_SIZE plane_bsize,
@@ -107,6 +108,7 @@ static void tokenize_b(int plane, int block, BLOCK_SIZE plane_bsize,
   VP9_COMP *cpi = args->cpi;
   MACROBLOCKD *xd = args->xd;
   TOKENEXTRA **tp = args->tp;
+  uint8_t *token_cache = args->token_cache;
   struct macroblockd_plane *pd = &xd->plane[plane];
   MB_MODE_INFO *mbmi = &xd->mi_8x8[0]->mbmi;
   int pt; /* near block/prev token context index */
@@ -121,7 +123,6 @@ static void tokenize_b(int plane, int block, BLOCK_SIZE plane_bsize,
   vp9_coeff_count *const counts = cpi->coef_counts[tx_size];
   vp9_coeff_probs_model *const coef_probs = cpi->common.fc.coef_probs[tx_size];
   const int ref = is_inter_block(mbmi);
-  uint8_t token_cache[1024];
   const uint8_t *const band_translate = get_band_translate(tx_size);
   const int seg_eob = get_tx_eob(&cpi->common.seg, segment_id, tx_size);
   int aoff, loff;
@@ -205,7 +206,7 @@ void vp9_tokenize_sb(VP9_COMP *cpi, TOKENEXTRA **t, int dry_run,
   const int mb_skip_context = vp9_get_pred_context_mbskip(xd);
   const int skip_inc = !vp9_segfeature_active(&cm->seg, mbmi->segment_id,
                                               SEG_LVL_SKIP);
-  struct tokenize_b_args arg = {cpi, xd, t, mbmi->tx_size};
+  struct tokenize_b_args arg = {cpi, xd, t, mbmi->tx_size, cpi->mb.token_cache};
 
   mbmi->skip_coeff = vp9_sb_is_skippable(xd, bsize);
   if (mbmi->skip_coeff) {
