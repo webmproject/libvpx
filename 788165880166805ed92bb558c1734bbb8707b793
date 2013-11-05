@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdX//+mA\u003d",
+        "filename": "vp9/common/vp9_reconinter.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 146,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2013-11-05T20:05:47Z",
+      "side": 1,
+      "message": "Space around \"/\", \"*\", \"+\", \"-\" in all places.",
+      "revId": "788165880166805ed92bb558c1734bbb8707b793",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX//+l8\u003d",
+        "filename": "vp9/common/vp9_reconinter.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 151,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2013-11-05T20:05:47Z",
+      "side": 1,
+      "message": "Is it possible to combine declaration and initialization, i.e. \"int x0 \u003d expr\". It would be nice to mark it with const.",
+      "revId": "788165880166805ed92bb558c1734bbb8707b793",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
