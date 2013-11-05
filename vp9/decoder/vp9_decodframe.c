@@ -41,6 +41,7 @@ typedef struct TileWorkerData {
   VP9_COMMON *cm;
   vp9_reader bit_reader;
   DECLARE_ALIGNED(16, MACROBLOCKD, xd);
+  DECLARE_ALIGNED(16, unsigned char, token_cache[1024]);
 } TileWorkerData;
 
 static int read_be32(const uint8_t *p) {
@@ -297,6 +298,7 @@ struct intra_args {
   VP9_COMMON *cm;
   MACROBLOCKD *xd;
   vp9_reader *r;
+  unsigned char* token_cache;
 };
 
 static void predict_and_reconstruct_intra_block(int plane, int block,
@@ -326,7 +328,7 @@ static void predict_and_reconstruct_intra_block(int plane, int block,
 
   if (!mi->mbmi.skip_coeff) {
     vp9_decode_block_tokens(cm, xd, plane, block, plane_bsize, tx_size,
-                            args->r);
+                            args->r, args->token_cache);
     inverse_transform_block(xd, plane, block, plane_bsize, tx_size);
   }
 }
@@ -336,6 +338,7 @@ struct inter_args {
   MACROBLOCKD *xd;
   vp9_reader *r;
   int *eobtotal;
+  unsigned char* token_cache;
 };
 
 static void reconstruct_inter_block(int plane, int block,
@@ -346,7 +349,8 @@ static void reconstruct_inter_block(int plane, int block,
   MACROBLOCKD *const xd = args->xd;
 
   *args->eobtotal += vp9_decode_block_tokens(cm, xd, plane, block,
-                                             plane_bsize, tx_size, args->r);
+                                             plane_bsize, tx_size,
+                                             args->r, args->token_cache);
   inverse_transform_block(xd, plane, block, plane_bsize, tx_size);
 }
 
@@ -398,7 +402,8 @@ static void set_ref(VP9_COMMON *const cm, MACROBLOCKD *const xd,
 static void decode_modes_b(VP9_COMMON *const cm, MACROBLOCKD *const xd,
                            const TileInfo *const tile,
                            int mi_row, int mi_col,
-                           vp9_reader *r, BLOCK_SIZE bsize) {
+                           vp9_reader *r, BLOCK_SIZE bsize,
+                           unsigned char *token_cache) {
   const int less8x8 = bsize < BLOCK_8X8;
   MB_MODE_INFO *mbmi;
 
@@ -420,7 +425,7 @@ static void decode_modes_b(VP9_COMMON *const cm, MACROBLOCKD *const xd,
   }
 
   if (!is_inter_block(mbmi)) {
-    struct intra_args arg = { cm, xd, r };
+    struct intra_args arg = { cm, xd, r, token_cache };
     foreach_transformed_block(xd, bsize, predict_and_reconstruct_intra_block,
                               &arg);
   } else {
@@ -438,7 +443,7 @@ static void decode_modes_b(VP9_COMMON *const cm, MACROBLOCKD *const xd,
     // Reconstruction
     if (!mbmi->skip_coeff) {
       int eobtotal = 0;
-      struct inter_args arg = { cm, xd, r, &eobtotal };
+      struct inter_args arg = { cm, xd, r, &eobtotal, token_cache };
       foreach_transformed_block(xd, bsize, reconstruct_inter_block, &arg);
       if (!less8x8 && eobtotal == 0)
         mbmi->skip_coeff = 1;  // skip loopfilter
@@ -477,7 +482,8 @@ static PARTITION_TYPE read_partition(VP9_COMMON *cm, MACROBLOCKD *xd, int hbs,
 static void decode_modes_sb(VP9_COMMON *const cm, MACROBLOCKD *const xd,
                             const TileInfo *const tile,
                             int mi_row, int mi_col,
-                            vp9_reader* r, BLOCK_SIZE bsize) {
+                            vp9_reader* r, BLOCK_SIZE bsize,
+                            unsigned char *token_cache) {
   const int hbs = num_8x8_blocks_wide_lookup[bsize] / 2;
   PARTITION_TYPE partition;
   BLOCK_SIZE subsize;
@@ -488,27 +494,33 @@ static void decode_modes_sb(VP9_COMMON *const cm, MACROBLOCKD *const xd,
   partition = read_partition(cm, xd, hbs, mi_row, mi_col, bsize, r);
   subsize = get_subsize(bsize, partition);
   if (subsize < BLOCK_8X8) {
-    decode_modes_b(cm, xd, tile, mi_row, mi_col, r, subsize);
+    decode_modes_b(cm, xd, tile, mi_row, mi_col, r, subsize, token_cache);
   } else {
     switch (partition) {
       case PARTITION_NONE:
-        decode_modes_b(cm, xd, tile, mi_row, mi_col, r, subsize);
+        decode_modes_b(cm, xd, tile, mi_row, mi_col, r, subsize, token_cache);
         break;
       case PARTITION_HORZ:
-        decode_modes_b(cm, xd, tile, mi_row, mi_col, r, subsize);
+        decode_modes_b(cm, xd, tile, mi_row, mi_col, r, subsize, token_cache);
         if (mi_row + hbs < cm->mi_rows)
-          decode_modes_b(cm, xd, tile, mi_row + hbs, mi_col, r, subsize);
+          decode_modes_b(cm, xd, tile, mi_row + hbs, mi_col, r, subsize,
+                         token_cache);
         break;
       case PARTITION_VERT:
-        decode_modes_b(cm, xd, tile, mi_row, mi_col, r, subsize);
+        decode_modes_b(cm, xd, tile, mi_row, mi_col, r, subsize, token_cache);
         if (mi_col + hbs < cm->mi_cols)
-          decode_modes_b(cm, xd, tile, mi_row, mi_col + hbs, r, subsize);
+          decode_modes_b(cm, xd, tile, mi_row, mi_col + hbs, r, subsize,
+                         token_cache);
         break;
       case PARTITION_SPLIT:
-        decode_modes_sb(cm, xd, tile, mi_row, mi_col, r, subsize);
-        decode_modes_sb(cm, xd, tile, mi_row, mi_col + hbs, r, subsize);
-        decode_modes_sb(cm, xd, tile, mi_row + hbs, mi_col, r, subsize);
-        decode_modes_sb(cm, xd, tile, mi_row + hbs, mi_col + hbs, r, subsize);
+        decode_modes_sb(cm, xd, tile, mi_row, mi_col, r, subsize,
+                        token_cache);
+        decode_modes_sb(cm, xd, tile, mi_row, mi_col + hbs, r, subsize,
+                        token_cache);
+        decode_modes_sb(cm, xd, tile, mi_row + hbs, mi_col, r, subsize,
+                        token_cache);
+        decode_modes_sb(cm, xd, tile, mi_row + hbs, mi_col + hbs, r, subsize,
+                        token_cache);
         break;
       default:
         assert(!"Invalid partition type");
@@ -791,7 +803,8 @@ static void decode_tile(VP9D_COMP *pbi, const TileInfo *const tile,
     vp9_zero(xd->left_seg_context);
     for (mi_col = tile->mi_col_start; mi_col < tile->mi_col_end;
          mi_col += MI_BLOCK_SIZE)
-      decode_modes_sb(cm, xd, tile, mi_row, mi_col, r, BLOCK_64X64);
+      decode_modes_sb(cm, xd, tile, mi_row, mi_col, r, BLOCK_64X64,
+                      pbi->token_cache);
 
     if (pbi->do_loopfilter_inline) {
       const int lf_start = mi_row - MI_BLOCK_SIZE;
@@ -935,7 +948,7 @@ static const uint8_t *decode_tiles(VP9D_COMP *pbi, const uint8_t *data) {
 }
 
 static int tile_worker_hook(void *arg1, void *arg2) {
-  TileWorkerData *const tile_data = (TileWorkerData*)arg1;
+  TileWorkerData *tile_data = (TileWorkerData*)arg1;
   const TileInfo *const tile = (TileInfo*)arg2;
   int mi_row, mi_col;
 
@@ -944,9 +957,11 @@ static int tile_worker_hook(void *arg1, void *arg2) {
     vp9_zero(tile_data->xd.left_context);
     vp9_zero(tile_data->xd.left_seg_context);
     for (mi_col = tile->mi_col_start; mi_col < tile->mi_col_end;
-         mi_col += MI_BLOCK_SIZE)
+         mi_col += MI_BLOCK_SIZE) {
       decode_modes_sb(tile_data->cm, &tile_data->xd, tile,
-                      mi_row, mi_col, &tile_data->bit_reader, BLOCK_64X64);
+                      mi_row, mi_col, &tile_data->bit_reader, BLOCK_64X64,
+                      tile_data->token_cache);
+    }
   }
   return !tile_data->xd.corrupted;
 }
