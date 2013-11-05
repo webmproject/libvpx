@@ -16,6 +16,24 @@
       "revId": "109beccb9bdfff913272e4546836d58bdb17d6f6",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX//+rc\u003d",
+        "filename": "vp9/encoder/vp9_block.h",
+        "patchSetId": 20
+      },
+      "lineNbr": 72,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2013-11-05T06:25:18Z",
+      "side": 1,
+      "message": "This issue was resolved by\nhttps://gerrit.chromium.org/gerrit/#/c/67748/1",
+      "parentUuid": "AAAAdX//+0s\u003d",
+      "revId": "109beccb9bdfff913272e4546836d58bdb17d6f6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
