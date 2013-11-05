@@ -28,9 +28,6 @@ typedef struct {
   uint8_t         skip_eob_node;
 } TOKENEXTRA;
 
-typedef int64_t vp9_coeff_accum[REF_TYPES][COEF_BANDS][PREV_COEF_CONTEXTS]
-                               [MAX_ENTROPY_TOKENS + 1];
-
 int vp9_sb_is_skippable(MACROBLOCKD *xd, BLOCK_SIZE bsize);
 int vp9_is_skippable_in_plane(MACROBLOCKD *xd, BLOCK_SIZE bsize,
                               int plane);
@@ -38,13 +35,6 @@ struct VP9_COMP;
 
 void vp9_tokenize_sb(struct VP9_COMP *cpi, TOKENEXTRA **t, int dry_run,
                      BLOCK_SIZE bsize);
-
-#ifdef ENTROPY_STATS
-void init_context_counters();
-void print_context_counters();
-
-extern vp9_coeff_accum context_counters[TX_SIZES][BLOCK_TYPES];
-#endif
 
 extern const int *vp9_dct_value_cost_ptr;
 /* TODO: The Token field should be broken out into a separate char array to
