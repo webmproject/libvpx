@@ -37,6 +37,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdX//+hw\u003d",
+        "filename": "test/video_source.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-11-05T23:14:38Z",
+      "side": 1,
+      "message": "my mistake, I was thinking these were in an anonymous namespace, but we\u0027re not in a .cc...",
+      "parentUuid": "AAAAdX//+iI\u003d",
+      "revId": "f40815560848c57a6189508d6c66cfb6b551db39",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdX//+jM\u003d",
         "filename": "test/video_source.h",
         "patchSetId": 4
