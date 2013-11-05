@@ -2169,17 +2169,14 @@ void vp9_second_pass(VP9_COMP *cpi) {
       cpi->ni_av_qi = tmp_q;
       cpi->avg_q = vp9_convert_qindex_to_q(tmp_q);
 
-#ifndef ONE_SHOT_Q_ESTIMATE
       // Limit the maxq value returned subsequently.
       // This increases the risk of overspend or underspend if the initial
       // estimate for the clip is bad, but helps prevent excessive
       // variation in Q, especially near the end of a clip
       // where for example a small overspend may cause Q to crash
       adjust_maxq_qrange(cpi);
-#endif
     }
 
-#ifndef ONE_SHOT_Q_ESTIMATE
     // The last few frames of a clip almost always have to few or too many
     // bits and for the sake of over exact rate control we dont want to make
     // radical adjustments to the allowed quantizer range just to use up a
@@ -2202,7 +2199,6 @@ void vp9_second_pass(VP9_COMP *cpi) {
       cpi->active_worst_quality =
           adjust_active_maxq(cpi->active_worst_quality, tmp_q);
     }
-#endif
   }
   vp9_zero(this_frame);
   if (EOF == input_stats(cpi, &this_frame))
