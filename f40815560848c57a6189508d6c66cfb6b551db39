@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdX//+iI\u003d",
+        "filename": "test/video_source.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1122142
+      },
+      "writtenOn": "2013-11-05T23:09:40Z",
+      "side": 1,
+      "message": "Without static, the symbols end up multiply defined.  I can mark them as inline, or I can mark them as static.  If I mark them as inline then the symbols will be defined in each translation unit.  Thoughts?",
+      "parentUuid": "AAAAdX//+k0\u003d",
+      "revId": "f40815560848c57a6189508d6c66cfb6b551db39",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdX//+jM\u003d",
         "filename": "test/video_source.h",
         "patchSetId": 4
