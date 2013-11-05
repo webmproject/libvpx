@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdX//+ow\u003d",
+        "filename": "test/svc_test.cc",
+        "patchSetId": 17
+      },
+      "lineNbr": 229,
+      "author": {
+        "id": 1003234
+      },
+      "writtenOn": "2013-11-05T19:50:02Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdX//+to\u003d",
+      "revId": "dabf8ebf505abe29c87ff8540520d32af5d71bbd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdX//+tg\u003d",
         "filename": "vpx/src/svc_encodeframe.c",
         "patchSetId": 17
@@ -30,6 +48,24 @@
       "writtenOn": "2013-11-05T02:09:17Z",
       "side": 1,
       "message": "drop the strtok_r and check MINGW_HAS_SECURE_API",
+      "revId": "dabf8ebf505abe29c87ff8540520d32af5d71bbd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX//+nw\u003d",
+        "filename": "vpx/src/svc_encodeframe.c",
+        "patchSetId": 17
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1003234
+      },
+      "writtenOn": "2013-11-05T19:50:02Z",
+      "side": 1,
+      "message": "not done. I tried\n#if defined(__MINGW32__) \u0026\u0026 defined(MINGW_HAS_SECURE_API)\nbut MINGW_HAS_SECURE_API is not definded with this configuration\nCROSS\u003di686-w64-mingw32- ../configure --target\u003dx86-win32-gcc --disable-install-docs --enable-unit-tests",
+      "parentUuid": "AAAAdX//+tg\u003d",
       "revId": "dabf8ebf505abe29c87ff8540520d32af5d71bbd",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdX//+ns\u003d",
+        "filename": "vpx/src/svc_encodeframe.c",
+        "patchSetId": 17
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1003234
+      },
+      "writtenOn": "2013-11-05T19:50:02Z",
+      "side": 1,
+      "message": "I was not not sure where to find sec_api/string_s.h. I found it here:\nhttp://sourceforge.net/apps/trac/mingw-w64/browser/experimental/headers_additions_test/crt/sec_api/string_s.h?rev\u003d5374\nIf these issues with strtok_s are serious, I can add a local version of strtok_s to either this file or in its own file.",
+      "parentUuid": "AAAAdX//+tc\u003d",
+      "revId": "dabf8ebf505abe29c87ff8540520d32af5d71bbd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdX//+tk\u003d",
         "filename": "vpx/src/svc_encodeframe.c",
         "patchSetId": 17
@@ -64,6 +118,24 @@
       "writtenOn": "2013-11-05T02:09:17Z",
       "side": 1,
       "message": "we don\u0027t define this, check _MSC_VER instead",
+      "revId": "dabf8ebf505abe29c87ff8540520d32af5d71bbd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX//+no\u003d",
+        "filename": "vpx/src/svc_encodeframe.c",
+        "patchSetId": 17
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1003234
+      },
+      "writtenOn": "2013-11-05T19:50:02Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdX//+tk\u003d",
       "revId": "dabf8ebf505abe29c87ff8540520d32af5d71bbd",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdX//+nU\u003d",
+        "filename": "vpx/src/svc_encodeframe.c",
+        "patchSetId": 17
+      },
+      "lineNbr": 399,
+      "author": {
+        "id": 1003234
+      },
+      "writtenOn": "2013-11-05T19:50:02Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdX//+tY\u003d",
+      "revId": "dabf8ebf505abe29c87ff8540520d32af5d71bbd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdX//+tQ\u003d",
         "filename": "vpx/src/svc_encodeframe.c",
         "patchSetId": 17
@@ -98,6 +188,24 @@
       "writtenOn": "2013-11-05T02:09:17Z",
       "side": 1,
       "message": "this could be const local to the case statement where it\u0027s used",
+      "revId": "dabf8ebf505abe29c87ff8540520d32af5d71bbd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX//+ms\u003d",
+        "filename": "vpx/src/svc_encodeframe.c",
+        "patchSetId": 17
+      },
+      "lineNbr": 732,
+      "author": {
+        "id": 1003234
+      },
+      "writtenOn": "2013-11-05T19:50:02Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdX//+tQ\u003d",
       "revId": "dabf8ebf505abe29c87ff8540520d32af5d71bbd",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -121,6 +229,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdX//+nM\u003d",
+        "filename": "vpx/src/svc_encodeframe.c",
+        "patchSetId": 17
+      },
+      "lineNbr": 767,
+      "author": {
+        "id": 1003234
+      },
+      "writtenOn": "2013-11-05T19:50:02Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdX//+tU\u003d",
+      "revId": "dabf8ebf505abe29c87ff8540520d32af5d71bbd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdX//+tM\u003d",
         "filename": "vpx/src/svc_encodeframe.c",
         "patchSetId": 17
@@ -132,6 +258,24 @@
       "writtenOn": "2013-11-05T02:09:17Z",
       "side": 1,
       "message": "just consistently use the local; you can assert(frame_pkt_size \u003d\u003d cx_pkt-\u003edata.frame.sz) if you want",
+      "revId": "dabf8ebf505abe29c87ff8540520d32af5d71bbd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX//+m0\u003d",
+        "filename": "vpx/src/svc_encodeframe.c",
+        "patchSetId": 17
+      },
+      "lineNbr": 784,
+      "author": {
+        "id": 1003234
+      },
+      "writtenOn": "2013-11-05T19:50:02Z",
+      "side": 1,
+      "message": "Done\n\nWas using cx_pkt-\u003edata.frame.sz to avoid (size_t) case",
+      "parentUuid": "AAAAdX//+tM\u003d",
       "revId": "dabf8ebf505abe29c87ff8540520d32af5d71bbd",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -155,6 +299,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdX//+mw\u003d",
+        "filename": "vpx/src/svc_encodeframe.c",
+        "patchSetId": 17
+      },
+      "lineNbr": 919,
+      "author": {
+        "id": 1003234
+      },
+      "writtenOn": "2013-11-05T19:50:02Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdX//+tI\u003d",
+      "revId": "dabf8ebf505abe29c87ff8540520d32af5d71bbd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdX//+tE\u003d",
         "filename": "vpx/svc_context.h",
         "patchSetId": 17
@@ -172,6 +334,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdX//+oU\u003d",
+        "filename": "vpx/svc_context.h",
+        "patchSetId": 17
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1003234
+      },
+      "writtenOn": "2013-11-05T19:50:02Z",
+      "side": 1,
+      "message": "Done, but note that options, quantizers, and scale_factors are now assigned through putters and have hence been moved to SvcInternal in svc_encodeframe.c",
+      "parentUuid": "AAAAdX//+tE\u003d",
+      "revId": "dabf8ebf505abe29c87ff8540520d32af5d71bbd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdX//+tA\u003d",
         "filename": "vpx/svc_context.h",
         "patchSetId": 17
@@ -183,6 +363,24 @@
       "writtenOn": "2013-11-05T02:09:17Z",
       "side": 1,
       "message": "2 spaces before comment",
+      "revId": "dabf8ebf505abe29c87ff8540520d32af5d71bbd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX//+oQ\u003d",
+        "filename": "vpx/svc_context.h",
+        "patchSetId": 17
+      },
+      "lineNbr": 147,
+      "author": {
+        "id": 1003234
+      },
+      "writtenOn": "2013-11-05T19:50:02Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdX//+tA\u003d",
       "revId": "dabf8ebf505abe29c87ff8540520d32af5d71bbd",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
