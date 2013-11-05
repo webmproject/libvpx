@@ -1,0 +1,191 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdX//+to\u003d",
+        "filename": "test/svc_test.cc",
+        "patchSetId": 17
+      },
+      "lineNbr": 229,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-11-05T02:09:17Z",
+      "side": 1,
+      "message": "group width and height together, they\u0027re more closely related",
+      "revId": "dabf8ebf505abe29c87ff8540520d32af5d71bbd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX//+tg\u003d",
+        "filename": "vpx/src/svc_encodeframe.c",
+        "patchSetId": 17
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-11-05T02:09:17Z",
+      "side": 1,
+      "message": "drop the strtok_r and check MINGW_HAS_SECURE_API",
+      "revId": "dabf8ebf505abe29c87ff8540520d32af5d71bbd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX//+tc\u003d",
+        "filename": "vpx/src/svc_encodeframe.c",
+        "patchSetId": 17
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-11-05T02:09:17Z",
+      "side": 1,
+      "message": "can you take the proto from \u003csec_api/string_s.h\u003e? you\u0027re missing the calling convention here. also note that this function will require XP SP[23] to run",
+      "revId": "dabf8ebf505abe29c87ff8540520d32af5d71bbd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX//+tk\u003d",
+        "filename": "vpx/src/svc_encodeframe.c",
+        "patchSetId": 17
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-11-05T02:09:17Z",
+      "side": 1,
+      "message": "we don\u0027t define this, check _MSC_VER instead",
+      "revId": "dabf8ebf505abe29c87ff8540520d32af5d71bbd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX//+tY\u003d",
+        "filename": "vpx/src/svc_encodeframe.c",
+        "patchSetId": 17
+      },
+      "lineNbr": 399,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-11-05T02:09:17Z",
+      "side": 1,
+      "message": "you should probably set [-1] \u003d \u0027\\0\u0027;",
+      "revId": "dabf8ebf505abe29c87ff8540520d32af5d71bbd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX//+tQ\u003d",
+        "filename": "vpx/src/svc_encodeframe.c",
+        "patchSetId": 17
+      },
+      "lineNbr": 732,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-11-05T02:09:17Z",
+      "side": 1,
+      "message": "this could be const local to the case statement where it\u0027s used",
+      "revId": "dabf8ebf505abe29c87ff8540520d32af5d71bbd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX//+tU\u003d",
+        "filename": "vpx/src/svc_encodeframe.c",
+        "patchSetId": 17
+      },
+      "lineNbr": 767,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-11-05T02:09:17Z",
+      "side": 1,
+      "message": "unsigned long \u003d\u003d 32 bits on x86 so this uint64_t will cause a warning, you\u0027ll need to cast to uint32",
+      "revId": "dabf8ebf505abe29c87ff8540520d32af5d71bbd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX//+tM\u003d",
+        "filename": "vpx/src/svc_encodeframe.c",
+        "patchSetId": 17
+      },
+      "lineNbr": 784,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-11-05T02:09:17Z",
+      "side": 1,
+      "message": "just consistently use the local; you can assert(frame_pkt_size \u003d\u003d cx_pkt-\u003edata.frame.sz) if you want",
+      "revId": "dabf8ebf505abe29c87ff8540520d32af5d71bbd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX//+tI\u003d",
+        "filename": "vpx/src/svc_encodeframe.c",
+        "patchSetId": 17
+      },
+      "lineNbr": 919,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-11-05T02:09:17Z",
+      "side": 1,
+      "message": "drop this line",
+      "revId": "dabf8ebf505abe29c87ff8540520d32af5d71bbd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX//+tE\u003d",
+        "filename": "vpx/svc_context.h",
+        "patchSetId": 17
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-11-05T02:09:17Z",
+      "side": 1,
+      "message": "s/vxp/vpx/",
+      "revId": "dabf8ebf505abe29c87ff8540520d32af5d71bbd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX//+tA\u003d",
+        "filename": "vpx/svc_context.h",
+        "patchSetId": 17
+      },
+      "lineNbr": 147,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-11-05T02:09:17Z",
+      "side": 1,
+      "message": "2 spaces before comment",
+      "revId": "dabf8ebf505abe29c87ff8540520d32af5d71bbd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
