@@ -332,7 +332,7 @@ static void adapt_coef_probs(VP9_COMMON *cm, TX_SIZE tx_size,
           if (l >= 3 && k == 0)
             continue;
           vp9_tree_probs_from_distribution(vp9_coefmodel_tree, branch_ct,
-                                           coef_counts[i][j][k][l], 0);
+                                           coef_counts[i][j][k][l]);
           branch_ct[0][1] = eob_branch_count[i][j][k][l] - branch_ct[0][0];
           for (m = 0; m < UNCONSTRAINED_NODES; ++m)
             dst_coef_probs[i][j][k][l][m] = merge_probs(

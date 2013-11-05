@@ -235,9 +235,9 @@ const vp9_tree_index vp9_intra_mode_tree[TREE_SIZE(INTRA_MODES)] = {
 struct vp9_token vp9_intra_mode_encodings[INTRA_MODES];
 
 const vp9_tree_index vp9_inter_mode_tree[TREE_SIZE(INTER_MODES)] = {
-  -ZEROMV, 2,
-  -NEARESTMV, 4,
-  -NEARMV, -NEWMV
+  -INTER_OFFSET(ZEROMV), 2,
+  -INTER_OFFSET(NEARESTMV), 4,
+  -INTER_OFFSET(NEARMV), -INTER_OFFSET(NEWMV)
 };
 struct vp9_token vp9_inter_mode_encodings[INTER_MODES];
 
@@ -343,8 +343,7 @@ void vp9_entropy_mode_init() {
   vp9_tokens_from_tree(vp9_switchable_interp_encodings,
                        vp9_switchable_interp_tree);
   vp9_tokens_from_tree(vp9_partition_encodings, vp9_partition_tree);
-  vp9_tokens_from_tree_offset(vp9_inter_mode_encodings,
-                              vp9_inter_mode_tree, NEARESTMV);
+  vp9_tokens_from_tree(vp9_inter_mode_encodings, vp9_inter_mode_tree);
 }
 
 #define COUNT_SAT 20
@@ -356,9 +355,9 @@ static int adapt_prob(vp9_prob pre_prob, const unsigned int ct[2]) {
 
 static void adapt_probs(const vp9_tree_index *tree,
                         const vp9_prob *pre_probs, const unsigned int *counts,
-                        unsigned int offset, vp9_prob *probs) {
-  tree_merge_probs(tree, pre_probs, counts, offset,
-                   COUNT_SAT, MAX_UPDATE_FACTOR, probs);
+                        vp9_prob *probs) {
+  tree_merge_probs(tree, pre_probs, counts, COUNT_SAT, MAX_UPDATE_FACTOR,
+                   probs);
 }
 
 void vp9_adapt_mode_probs(VP9_COMMON *cm) {
@@ -383,25 +382,24 @@ void vp9_adapt_mode_probs(VP9_COMMON *cm) {
 
   for (i = 0; i < INTER_MODE_CONTEXTS; i++)
     adapt_probs(vp9_inter_mode_tree, pre_fc->inter_mode_probs[i],
-                counts->inter_mode[i], NEARESTMV, fc->inter_mode_probs[i]);
+                counts->inter_mode[i], fc->inter_mode_probs[i]);
 
   for (i = 0; i < BLOCK_SIZE_GROUPS; i++)
     adapt_probs(vp9_intra_mode_tree, pre_fc->y_mode_prob[i],
-                counts->y_mode[i], 0, fc->y_mode_prob[i]);
+                counts->y_mode[i], fc->y_mode_prob[i]);
 
   for (i = 0; i < INTRA_MODES; ++i)
     adapt_probs(vp9_intra_mode_tree, pre_fc->uv_mode_prob[i],
-                counts->uv_mode[i], 0, fc->uv_mode_prob[i]);
+                counts->uv_mode[i], fc->uv_mode_prob[i]);
 
   for (i = 0; i < PARTITION_CONTEXTS; i++)
     adapt_probs(vp9_partition_tree, pre_fc->partition_prob[i],
-                counts->partition[i], 0, fc->partition_prob[i]);
+                counts->partition[i], fc->partition_prob[i]);
 
   if (cm->mcomp_filter_type == SWITCHABLE) {
     for (i = 0; i < SWITCHABLE_FILTER_CONTEXTS; i++)
       adapt_probs(vp9_switchable_interp_tree, pre_fc->switchable_interp_prob[i],
-                  counts->switchable_interp[i], 0,
-                  fc->switchable_interp_prob[i]);
+                  counts->switchable_interp[i], fc->switchable_interp_prob[i]);
   }
 
   if (cm->tx_mode == TX_MODE_SELECT) {
