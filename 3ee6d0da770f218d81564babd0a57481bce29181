@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdX//+s0\u003d",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 7
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2013-11-05T02:17:00Z",
+      "side": 1,
+      "message": "Format the message as:\n Short message (prefer \u003c 72 chars)\n \u003cblank line\u003e\n Longer description",
+      "revId": "3ee6d0da770f218d81564babd0a57481bce29181",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX//+s8\u003d",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 7
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2013-11-05T02:17:00Z",
+      "side": 1,
+      "message": "Don\u0027t list all the modified files in the commit message",
+      "revId": "3ee6d0da770f218d81564babd0a57481bce29181",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
