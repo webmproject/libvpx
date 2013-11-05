@@ -107,6 +107,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdX//+g8\u003d",
+        "filename": "test/video_source.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-11-05T23:32:32Z",
+      "side": 1,
+      "message": "it\u0027s style, there\u0027s a big mix in this code base, but I think it better distinguishes bools/ints as bools from pointer checks",
+      "parentUuid": "AAAAdX//+hI\u003d",
+      "revId": "f40815560848c57a6189508d6c66cfb6b551db39",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdX//+kw\u003d",
         "filename": "test/video_source.h",
         "patchSetId": 4
