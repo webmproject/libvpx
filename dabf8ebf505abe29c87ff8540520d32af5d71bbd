@@ -72,6 +72,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdX//+lE\u003d",
+        "filename": "vpx/src/svc_encodeframe.c",
+        "patchSetId": 17
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1003234
+      },
+      "writtenOn": "2013-11-05T22:06:49Z",
+      "side": 1,
+      "message": "done\nMINGW_HAS_SECURE_API test reversed\n#if defined(__MINGW32__) \u0026\u0026 !(defined(MINGW_HAS_SECURE_API))\n\nnow compiles with ming configuration",
+      "parentUuid": "AAAAdX//+nw\u003d",
+      "revId": "dabf8ebf505abe29c87ff8540520d32af5d71bbd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdX//+tc\u003d",
         "filename": "vpx/src/svc_encodeframe.c",
         "patchSetId": 17
@@ -101,6 +119,24 @@
       "side": 1,
       "message": "I was not not sure where to find sec_api/string_s.h. I found it here:\nhttp://sourceforge.net/apps/trac/mingw-w64/browser/experimental/headers_additions_test/crt/sec_api/string_s.h?rev\u003d5374\nIf these issues with strtok_s are serious, I can add a local version of strtok_s to either this file or in its own file.",
       "parentUuid": "AAAAdX//+tc\u003d",
+      "revId": "dabf8ebf505abe29c87ff8540520d32af5d71bbd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX//+lI\u003d",
+        "filename": "vpx/src/svc_encodeframe.c",
+        "patchSetId": 17
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1003234
+      },
+      "writtenOn": "2013-11-05T22:06:49Z",
+      "side": 1,
+      "message": "proto found here, and noted in the code\n// proto from /usr/x86_64-w64-mingw32/include/sec_api/string_s.h",
+      "parentUuid": "AAAAdX//+ns\u003d",
       "revId": "dabf8ebf505abe29c87ff8540520d32af5d71bbd",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
