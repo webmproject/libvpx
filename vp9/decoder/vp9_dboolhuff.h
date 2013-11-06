@@ -44,7 +44,7 @@ static int vp9_read(vp9_reader *br, int probability) {
   VP9_BD_VALUE bigsplit;
   int count;
   unsigned int range;
-  unsigned int split = 1 + (((br->range - 1) * probability) >> 8);
+  unsigned int split = ((br->range * probability) + (256 - probability)) >> 8;
 
   if (br->count < 0)
     vp9_reader_fill(br);
