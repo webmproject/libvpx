@@ -16,6 +16,24 @@
       "revId": "3224fc9d4eca701d7e1f9c534da1d71735e5d232",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX//+Ys\u003d",
+        "filename": "vp9/decoder/vp9_decodframe.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2013-11-06T18:28:51Z",
+      "side": 1,
+      "message": "I think MACROBLOCD is only meant to contain syntax elements. That is why I kept it outside.",
+      "parentUuid": "AAAAdX//+eU\u003d",
+      "revId": "3224fc9d4eca701d7e1f9c534da1d71735e5d232",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
