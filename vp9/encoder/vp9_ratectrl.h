@@ -27,6 +27,8 @@ void vp9_compute_frame_size_bounds(VP9_COMP *cpi,
                                    int *frame_under_shoot_limit,
                                    int *frame_over_shoot_limit);
 
+void vp9_init_minq_luts(void);
+
 // return of 0 means drop frame
 int vp9_pick_frame_size(VP9_COMP *cpi);
 
@@ -35,5 +37,7 @@ int vp9_gfboost_qadjust(int qindex);
 int vp9_bits_per_mb(FRAME_TYPE frame_type, int qindex,
                     double correction_factor);
 void vp9_setup_inter_frame(VP9_COMP *cpi);
+int vp9_pick_q_and_adjust_q_bounds(VP9_COMP *cpi,
+                                   int * bottom_index, int * top_index);
 
 #endif  // VP9_ENCODER_VP9_RATECTRL_H_

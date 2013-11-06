@@ -966,19 +966,19 @@ static double calc_correction_factor(double err_per_mb,
 // (now uses the actual quantizer) but has not been tuned.
 static void adjust_maxq_qrange(VP9_COMP *cpi) {
   int i;
-  // Set the max corresponding to cpi->avg_q * 2.0
-  double q = cpi->avg_q * 2.0;
-  cpi->twopass.maxq_max_limit = cpi->worst_quality;
-  for (i = cpi->best_quality; i <= cpi->worst_quality; i++) {
+  // Set the max corresponding to cpi->rc.avg_q * 2.0
+  double q = cpi->rc.avg_q * 2.0;
+  cpi->twopass.maxq_max_limit = cpi->rc.worst_quality;
+  for (i = cpi->rc.best_quality; i <= cpi->rc.worst_quality; i++) {
     cpi->twopass.maxq_max_limit = i;
     if (vp9_convert_qindex_to_q(i) >= q)
       break;
   }
 
-  // Set the min corresponding to cpi->avg_q * 0.5
-  q = cpi->avg_q * 0.5;
-  cpi->twopass.maxq_min_limit = cpi->best_quality;
-  for (i = cpi->worst_quality; i >= cpi->best_quality; i--) {
+  // Set the min corresponding to cpi->rc.avg_q * 0.5
+  q = cpi->rc.avg_q * 0.5;
+  cpi->twopass.maxq_min_limit = cpi->rc.best_quality;
+  for (i = cpi->rc.worst_quality; i >= cpi->rc.best_quality; i--) {
     cpi->twopass.maxq_min_limit = i;
     if (vp9_convert_qindex_to_q(i) <= q)
       break;
@@ -1017,10 +1017,10 @@ static int estimate_max_q(VP9_COMP *cpi,
 
   // Calculate a corrective factor based on a rolling ratio of bits spent
   // vs target bits
-  if (cpi->rolling_target_bits > 0 &&
-      cpi->active_worst_quality < cpi->worst_quality) {
-    double rolling_ratio = (double)cpi->rolling_actual_bits /
-                               (double)cpi->rolling_target_bits;
+  if (cpi->rc.rolling_target_bits > 0 &&
+      cpi->rc.active_worst_quality < cpi->rc.worst_quality) {
+    double rolling_ratio = (double)cpi->rc.rolling_actual_bits /
+                               (double)cpi->rc.rolling_target_bits;
 
     if (rolling_ratio < 0.95)
       cpi->twopass.est_max_qcorrection_factor -= 0.005;
@@ -1066,8 +1066,8 @@ static int estimate_max_q(VP9_COMP *cpi,
   // average q observed in clip for non kf/gf/arf frames
   // Give average a chance to settle though.
   // PGW TODO.. This code is broken for the extended Q range
-  if (cpi->ni_frames > ((int)cpi->twopass.total_stats.count >> 8) &&
-      cpi->ni_frames > 25)
+  if (cpi->rc.ni_frames > ((int)cpi->twopass.total_stats.count >> 8) &&
+      cpi->rc.ni_frames > 25)
     adjust_maxq_qrange(cpi);
 
   return q;
@@ -1146,10 +1146,10 @@ static int estimate_cq(VP9_COMP *cpi,
 
   // Clip value to range "best allowed to (worst allowed - 1)"
   q = select_cq_level(q);
-  if (q >= cpi->worst_quality)
-    q = cpi->worst_quality - 1;
-  if (q < cpi->best_quality)
-    q = cpi->best_quality;
+  if (q >= cpi->rc.worst_quality)
+    q = cpi->rc.worst_quality - 1;
+  if (q < cpi->rc.best_quality)
+    q = cpi->rc.best_quality;
 
   return q;
 }
@@ -1599,13 +1599,13 @@ void define_fixed_arf_period(VP9_COMP *cpi) {
   if (cpi->twopass.frames_to_key <= (FIXED_ARF_GROUP_SIZE + 8)) {
     // Setup a GF group close to the keyframe.
     cpi->source_alt_ref_pending = 0;
-    cpi->baseline_gf_interval = cpi->twopass.frames_to_key;
-    schedule_frames(cpi, 0, (cpi->baseline_gf_interval - 1), 2, 0, 0);
+    cpi->rc.baseline_gf_interval = cpi->twopass.frames_to_key;
+    schedule_frames(cpi, 0, (cpi->rc.baseline_gf_interval - 1), 2, 0, 0);
   } else {
     // Setup a fixed period ARF group.
     cpi->source_alt_ref_pending = 1;
-    cpi->baseline_gf_interval = FIXED_ARF_GROUP_SIZE;
-    schedule_frames(cpi, 0, -(cpi->baseline_gf_interval - 1), 2, 1, 0);
+    cpi->rc.baseline_gf_interval = FIXED_ARF_GROUP_SIZE;
+    schedule_frames(cpi, 0, -(cpi->rc.baseline_gf_interval - 1), 2, 1, 0);
   }
 
   // Replace level indicator of -1 with correct level.
@@ -1702,10 +1702,10 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   // At high Q when there are few bits to spare we are better with a longer
   // interval to spread the cost of the GF.
   active_max_gf_interval =
-    12 + ((int)vp9_convert_qindex_to_q(cpi->active_worst_quality) >> 5);
+    12 + ((int)vp9_convert_qindex_to_q(cpi->rc.active_worst_quality) >> 5);
 
-  if (active_max_gf_interval > cpi->max_gf_interval)
-    active_max_gf_interval = cpi->max_gf_interval;
+  if (active_max_gf_interval > cpi->rc.max_gf_interval)
+    active_max_gf_interval = cpi->rc.max_gf_interval;
 
   i = 0;
   while (((i < cpi->twopass.static_scene_max_gf_interval) ||
@@ -1799,7 +1799,7 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   }
 
   // Set the interval until the next gf or arf.
-  cpi->baseline_gf_interval = i;
+  cpi->rc.baseline_gf_interval = i;
 
 #if CONFIG_MULTIPLE_ARF
   if (cpi->multi_arf_enabled) {
@@ -1825,24 +1825,25 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
        (mv_in_out_accumulator > -2.0)) &&
       (boost_score > 100)) {
     // Alternative boost calculation for alt ref
-    cpi->gfu_boost = calc_arf_boost(cpi, 0, (i - 1), (i - 1), &f_boost,
+    cpi->rc.gfu_boost = calc_arf_boost(cpi, 0, (i - 1), (i - 1), &f_boost,
                                     &b_boost);
     cpi->source_alt_ref_pending = 1;
 
 #if CONFIG_MULTIPLE_ARF
     // Set the ARF schedule.
     if (cpi->multi_arf_enabled) {
-      schedule_frames(cpi, 0, -(cpi->baseline_gf_interval - 1), 2, 1, 0);
+      schedule_frames(cpi, 0, -(cpi->rc.baseline_gf_interval - 1), 2, 1, 0);
     }
 #endif
   } else {
-    cpi->gfu_boost = (int)boost_score;
+    cpi->rc.gfu_boost = (int)boost_score;
     cpi->source_alt_ref_pending = 0;
 #if CONFIG_MULTIPLE_ARF
     // Set the GF schedule.
     if (cpi->multi_arf_enabled) {
-      schedule_frames(cpi, 0, cpi->baseline_gf_interval - 1, 2, 0, 0);
-      assert(cpi->new_frame_coding_order_period == cpi->baseline_gf_interval);
+      schedule_frames(cpi, 0, cpi->rc.baseline_gf_interval - 1, 2, 0, 0);
+      assert(cpi->new_frame_coding_order_period ==
+             cpi->rc.baseline_gf_interval);
     }
 #endif
   }
@@ -1915,8 +1916,9 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   // Clip cpi->twopass.gf_group_bits based on user supplied data rate
   // variability limit (cpi->oxcf.two_pass_vbrmax_section)
   if (cpi->twopass.gf_group_bits >
-      (int64_t)max_bits * cpi->baseline_gf_interval)
-    cpi->twopass.gf_group_bits = (int64_t)max_bits * cpi->baseline_gf_interval;
+      (int64_t)max_bits * cpi->rc.baseline_gf_interval)
+    cpi->twopass.gf_group_bits =
+        (int64_t)max_bits * cpi->rc.baseline_gf_interval;
 
   // Reset the file position
   reset_fpf_position(cpi, start_pos);
@@ -1929,19 +1931,18 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
       i <= (cpi->source_alt_ref_pending && cpi->common.frame_type != KEY_FRAME);
       ++i) {
     int allocation_chunks;
-    int q = cpi->oxcf.fixed_q < 0 ? cpi->last_q[INTER_FRAME]
-                                  : cpi->oxcf.fixed_q;
+    int q = cpi->rc.last_q[INTER_FRAME];
     int gf_bits;
 
-    int boost = (cpi->gfu_boost * vp9_gfboost_qadjust(q)) / 100;
+    int boost = (cpi->rc.gfu_boost * vp9_gfboost_qadjust(q)) / 100;
 
     // Set max and minimum boost and hence minimum allocation
-    boost = clamp(boost, 125, (cpi->baseline_gf_interval + 1) * 200);
+    boost = clamp(boost, 125, (cpi->rc.baseline_gf_interval + 1) * 200);
 
     if (cpi->source_alt_ref_pending && i == 0)
-      allocation_chunks = ((cpi->baseline_gf_interval + 1) * 100) + boost;
+      allocation_chunks = ((cpi->rc.baseline_gf_interval + 1) * 100) + boost;
     else
-      allocation_chunks = (cpi->baseline_gf_interval * 100) + (boost - 100);
+      allocation_chunks = (cpi->rc.baseline_gf_interval * 100) + (boost - 100);
 
     // Prevent overflow
     if (boost > 1023) {
@@ -1958,10 +1959,10 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
     // If the frame that is to be boosted is simpler than the average for
     // the gf/arf group then use an alternative calculation
     // based on the error score of the frame itself
-    if (mod_frame_err < gf_group_err / (double)cpi->baseline_gf_interval) {
+    if (mod_frame_err < gf_group_err / (double)cpi->rc.baseline_gf_interval) {
       double alt_gf_grp_bits =
         (double)cpi->twopass.kf_group_bits  *
-        (mod_frame_err * (double)cpi->baseline_gf_interval) /
+        (mod_frame_err * (double)cpi->rc.baseline_gf_interval) /
         DOUBLE_DIVIDE_CHECK(cpi->twopass.kf_group_error_left);
 
       int alt_gf_bits = (int)((double)boost * (alt_gf_grp_bits /
@@ -1986,7 +1987,7 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
       gf_bits = 0;
 
     // Add in minimum for a frame
-    gf_bits += cpi->min_frame_bandwidth;
+    gf_bits += cpi->rc.min_frame_bandwidth;
 
     if (i == 0) {
       cpi->twopass.gf_bits = gf_bits;
@@ -1994,7 +1995,7 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
     if (i == 1 || (!cpi->source_alt_ref_pending
         && (cpi->common.frame_type != KEY_FRAME))) {
       // Per frame bit target for this frame
-      cpi->per_frame_bandwidth = gf_bits;
+      cpi->rc.per_frame_bandwidth = gf_bits;
     }
   }
 
@@ -2017,7 +2018,7 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
       cpi->twopass.gf_group_error_left = (int64_t)gf_group_err;
 
     cpi->twopass.gf_group_bits -= cpi->twopass.gf_bits
-        - cpi->min_frame_bandwidth;
+        - cpi->rc.min_frame_bandwidth;
 
     if (cpi->twopass.gf_group_bits < 0)
       cpi->twopass.gf_group_bits = 0;
@@ -2025,8 +2026,9 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
     // This condition could fail if there are two kfs very close together
     // despite (MIN_GF_INTERVAL) and would cause a divide by 0 in the
     // calculation of alt_extra_bits.
-    if (cpi->baseline_gf_interval >= 3) {
-      const int boost = cpi->source_alt_ref_pending ? b_boost : cpi->gfu_boost;
+    if (cpi->rc.baseline_gf_interval >= 3) {
+      const int boost = cpi->source_alt_ref_pending ?
+          b_boost : cpi->rc.gfu_boost;
 
       if (boost >= 150) {
         int alt_extra_bits;
@@ -2045,7 +2047,7 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
     zero_stats(&sectionstats);
     reset_fpf_position(cpi, start_pos);
 
-    for (i = 0; i < cpi->baseline_gf_interval; i++) {
+    for (i = 0; i < cpi->rc.baseline_gf_interval; i++) {
       input_stats(cpi, &next_frame);
       accumulate_stats(&sectionstats, &next_frame);
     }
@@ -2102,10 +2104,10 @@ static void assign_std_frame_bits(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
     cpi->twopass.gf_group_bits = 0;
 
   // Add in the minimum number of bits that is set aside for every frame.
-  target_frame_size += cpi->min_frame_bandwidth;
+  target_frame_size += cpi->rc.min_frame_bandwidth;
 
   // Per frame bit target for this frame.
-  cpi->per_frame_bandwidth = target_frame_size;
+  cpi->rc.per_frame_bandwidth = target_frame_size;
 }
 
 // Make a damped adjustment to the active max q.
@@ -2145,7 +2147,7 @@ void vp9_second_pass(VP9_COMP *cpi) {
   vp9_clear_system_state();
 
   if (cpi->oxcf.end_usage == USAGE_CONSTANT_QUALITY) {
-    cpi->active_worst_quality = cpi->oxcf.cq_level;
+    cpi->rc.active_worst_quality = cpi->oxcf.cq_level;
   } else {
     // Special case code for first frame.
     if (cpi->common.current_video_frame == 0) {
@@ -2169,15 +2171,15 @@ void vp9_second_pass(VP9_COMP *cpi) {
       */
 
       // guess at maxq needed in 2nd pass
-      cpi->twopass.maxq_max_limit = cpi->worst_quality;
-      cpi->twopass.maxq_min_limit = cpi->best_quality;
+      cpi->twopass.maxq_max_limit = cpi->rc.worst_quality;
+      cpi->twopass.maxq_min_limit = cpi->rc.best_quality;
 
       tmp_q = estimate_max_q(cpi, &cpi->twopass.total_left_stats,
                              section_target_bandwidth);
 
-      cpi->active_worst_quality = tmp_q;
-      cpi->ni_av_qi = tmp_q;
-      cpi->avg_q = vp9_convert_qindex_to_q(tmp_q);
+      cpi->rc.active_worst_quality = tmp_q;
+      cpi->rc.ni_av_qi = tmp_q;
+      cpi->rc.avg_q = vp9_convert_qindex_to_q(tmp_q);
 
       // Limit the maxq value returned subsequently.
       // This increases the risk of overspend or underspend if the initial
@@ -2193,7 +2195,7 @@ void vp9_second_pass(VP9_COMP *cpi) {
     // few surplus bits or get beneath the target rate.
     else if ((cpi->common.current_video_frame <
               (((unsigned int)cpi->twopass.total_stats.count * 255) >> 8)) &&
-             ((cpi->common.current_video_frame + cpi->baseline_gf_interval) <
+             ((cpi->common.current_video_frame + cpi->rc.baseline_gf_interval) <
               (unsigned int)cpi->twopass.total_stats.count)) {
       int section_target_bandwidth =
           (int)(cpi->twopass.bits_left / frames_left);
@@ -2206,8 +2208,8 @@ void vp9_second_pass(VP9_COMP *cpi) {
           section_target_bandwidth);
 
       // Make a damped adjustment to active max Q
-      cpi->active_worst_quality =
-          adjust_active_maxq(cpi->active_worst_quality, tmp_q);
+      cpi->rc.active_worst_quality =
+          adjust_active_maxq(cpi->rc.active_worst_quality, tmp_q);
     }
   }
   vp9_zero(this_frame);
@@ -2225,7 +2227,7 @@ void vp9_second_pass(VP9_COMP *cpi) {
   }
 
   // Is this a GF / ARF (Note that a KF is always also a GF)
-  if (cpi->frames_till_gf_update_due == 0) {
+  if (cpi->rc.frames_till_gf_update_due == 0) {
     // Define next gf group and assign bits to it
     this_frame_copy = this_frame;
 
@@ -2259,10 +2261,10 @@ void vp9_second_pass(VP9_COMP *cpi) {
     if (cpi->source_alt_ref_pending && (cpi->common.frame_type != KEY_FRAME)) {
       // Assign a standard frames worth of bits from those allocated
       // to the GF group
-      int bak = cpi->per_frame_bandwidth;
+      int bak = cpi->rc.per_frame_bandwidth;
       this_frame_copy = this_frame;
       assign_std_frame_bits(cpi, &this_frame_copy);
-      cpi->per_frame_bandwidth = bak;
+      cpi->rc.per_frame_bandwidth = bak;
     }
   } else {
     // Otherwise this is an ordinary frame
@@ -2283,7 +2285,7 @@ void vp9_second_pass(VP9_COMP *cpi) {
   }
 
   // Set nominal per second bandwidth for this frame
-  cpi->target_bandwidth = (int)(cpi->per_frame_bandwidth
+  cpi->target_bandwidth = (int)(cpi->rc.per_frame_bandwidth
                                 * cpi->output_framerate);
   if (cpi->target_bandwidth < 0)
     cpi->target_bandwidth = 0;
@@ -2416,7 +2418,7 @@ static void find_next_key_frame(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   cpi->source_alt_ref_active = 0;
 
   // Kf is always a gf so clear frames till next gf counter
-  cpi->frames_till_gf_update_due = 0;
+  cpi->rc.frames_till_gf_update_due = 0;
 
   cpi->twopass.frames_to_key = 1;
 
@@ -2579,7 +2581,7 @@ static void find_next_key_frame(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
     }
 
     // For the first few frames collect data to decide kf boost.
-    if (i <= (cpi->max_gf_interval * 2)) {
+    if (i <= (cpi->rc.max_gf_interval * 2)) {
       if (next_frame.intra_error > cpi->twopass.kf_intra_err_min)
         r = (IIKFACTOR2 * next_frame.intra_error /
              DOUBLE_DIVIDE_CHECK(next_frame.coded_error));
@@ -2637,7 +2639,7 @@ static void find_next_key_frame(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
 
     // Make a note of baseline boost and the zero motion
     // accumulator value for use elsewhere.
-    cpi->kf_boost = kf_boost;
+    cpi->rc.kf_boost = kf_boost;
     cpi->kf_zeromotion_pct = (int)(zero_motion_accumulator * 100.0);
 
     // We do three calculations for kf size.
@@ -2707,10 +2709,10 @@ static void find_next_key_frame(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
 
     cpi->twopass.kf_group_bits -= cpi->twopass.kf_bits;
     // Add in the minimum frame allowance
-    cpi->twopass.kf_bits += cpi->min_frame_bandwidth;
+    cpi->twopass.kf_bits += cpi->rc.min_frame_bandwidth;
 
     // Peer frame bit target for this frame
-    cpi->per_frame_bandwidth = cpi->twopass.kf_bits;
+    cpi->rc.per_frame_bandwidth = cpi->twopass.kf_bits;
     // Convert to a per second bitrate
     cpi->target_bandwidth = (int)(cpi->twopass.kf_bits *
                                   cpi->output_framerate);

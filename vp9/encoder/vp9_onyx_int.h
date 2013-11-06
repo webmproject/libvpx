@@ -289,6 +289,59 @@ typedef struct {
   int use_fast_coef_updates;  // 0: 2-loop, 1: 1-loop, 2: 1-loop reduced
 } SPEED_FEATURES;
 
+typedef struct {
+  // Rate targetting variables
+  int this_frame_target;
+  int projected_frame_size;
+  int last_q[2];                   // Separate values for Intra/Inter
+  int last_boosted_qindex;         // Last boosted GF/KF/ARF q
+
+  int gfu_boost;
+  int last_boost;
+  int kf_boost;
+
+  double rate_correction_factor;
+  double key_frame_rate_correction_factor;
+  double gf_rate_correction_factor;
+
+  unsigned int frames_since_golden;
+  int frames_till_gf_update_due;  // Count down till next GF
+
+  int max_gf_interval;
+  int baseline_gf_interval;
+
+  int64_t key_frame_count;
+  int prior_key_frame_distance[KEY_FRAME_CONTEXT];
+  int per_frame_bandwidth;  // Current section per frame bandwidth target
+  int av_per_frame_bandwidth;  // Average frame size target for clip
+  int min_frame_bandwidth;  // Minimum allocation used for any frame
+
+  int ni_av_qi;
+  int ni_tot_qi;
+  int ni_frames;
+  int avg_frame_qindex;
+  double tot_q;
+  double avg_q;
+
+  int buffer_level;
+  int bits_off_target;
+
+  int rolling_target_bits;
+  int rolling_actual_bits;
+
+  int long_rolling_target_bits;
+  int long_rolling_actual_bits;
+
+  int64_t total_actual_bits;
+  int total_target_vs_actual;        // debug stats
+
+  int worst_quality;
+  int active_worst_quality;
+  int best_quality;
+  int active_best_quality;
+  int active_worst_qchanged;
+} RATE_CONTROL;
+
 typedef struct VP9_COMP {
   DECLARE_ALIGNED(16, int16_t, y_quant[QINDEX_RANGE][8]);
   DECLARE_ALIGNED(16, int16_t, y_quant_shift[QINDEX_RANGE][8]);
@@ -398,71 +451,17 @@ typedef struct VP9_COMP {
 
   CODING_CONTEXT coding_context;
 
-  // Rate targetting variables
-  int this_frame_target;
-  int projected_frame_size;
-  int last_q[2];                   // Separate values for Intra/Inter
-  int last_boosted_qindex;         // Last boosted GF/KF/ARF q
-
-  double rate_correction_factor;
-  double key_frame_rate_correction_factor;
-  double gf_rate_correction_factor;
-
-  unsigned int frames_since_golden;
-  int frames_till_gf_update_due;  // Count down till next GF
-
-  int gf_overspend_bits;  // cumulative bits overspent because of GF boost
-
-  int non_gf_bitrate_adjustment;  // Following GF to recover extra bits spent
-
-  int kf_overspend_bits;  // Bits spent on key frames to be recovered on inters
-  int kf_bitrate_adjustment;  // number of bits to recover on each inter frame.
-  int max_gf_interval;
-  int baseline_gf_interval;
+  int zbin_mode_boost;
+  int zbin_mode_boost_enabled;
   int active_arnr_frames;           // <= cpi->oxcf.arnr_max_frames
   int active_arnr_strength;         // <= cpi->oxcf.arnr_max_strength
 
-  int64_t key_frame_count;
-  int prior_key_frame_distance[KEY_FRAME_CONTEXT];
-  int per_frame_bandwidth;  // Current section per frame bandwidth target
-  int av_per_frame_bandwidth;  // Average frame size target for clip
-  int min_frame_bandwidth;  // Minimum allocation used for any frame
-  int inter_frame_target;
   double output_framerate;
   int64_t last_time_stamp_seen;
   int64_t last_end_time_stamp_seen;
   int64_t first_time_stamp_ever;
 
-  int ni_av_qi;
-  int ni_tot_qi;
-  int ni_frames;
-  int avg_frame_qindex;
-  double tot_q;
-  double avg_q;
-
-  int zbin_mode_boost;
-  int zbin_mode_boost_enabled;
-
-  int64_t total_byte_count;
-
-  int buffered_mode;
-
-  int buffer_level;
-  int bits_off_target;
-
-  int rolling_target_bits;
-  int rolling_actual_bits;
-
-  int long_rolling_target_bits;
-  int long_rolling_actual_bits;
-
-  int64_t total_actual_bits;
-  int total_target_vs_actual;        // debug stats
-
-  int worst_quality;
-  int active_worst_quality;
-  int best_quality;
-  int active_best_quality;
+  RATE_CONTROL rc;
 
   int cq_target_quality;
 
@@ -476,9 +475,6 @@ typedef struct VP9_COMP {
   vp9_coeff_probs_model frame_coef_probs[TX_SIZES][BLOCK_TYPES];
   vp9_coeff_stats frame_branch_ct[TX_SIZES][BLOCK_TYPES];
 
-  int gfu_boost;
-  int last_boost;
-  int kf_boost;
   int kf_zeromotion_pct;
   int gf_zeromotion_pct;
 
@@ -502,7 +498,6 @@ typedef struct VP9_COMP {
   int speed;
   int compressor_speed;
 
-  int auto_worst_q;
   int cpu_used;
   int pass;
 
