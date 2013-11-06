@@ -584,9 +584,9 @@ void vp9_first_pass(VP9_COMP *cpi) {
       xd->mi_8x8[0]->mbmi.ref_frame[0] = INTRA_FRAME;
       set_mi_row_col(xd, &tile,
                      mb_row << 1,
-                     1 << mi_height_log2(xd->mi_8x8[0]->mbmi.sb_type),
+                     num_8x8_blocks_high_lookup[xd->mi_8x8[0]->mbmi.sb_type],
                      mb_col << 1,
-                     1 << mi_width_log2(xd->mi_8x8[0]->mbmi.sb_type),
+                     num_8x8_blocks_wide_lookup[xd->mi_8x8[0]->mbmi.sb_type],
                      cm->mi_rows, cm->mi_cols);
 
       if (cpi->sf.variance_adaptive_quantization) {
