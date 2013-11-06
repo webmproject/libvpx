@@ -246,6 +246,9 @@ void vp9_initialize_rd_consts(VP9_COMP *cpi) {
 
   vp9_set_speed_features(cpi);
 
+  cpi->mb.select_txfm_size = cpi->sf.tx_size_search_method == USE_LARGESTALL ?
+                             0 : 1;
+
   set_block_thresholds(cpi);
 
   fill_token_costs(cpi->mb.token_costs, cm->fc.coef_probs);
@@ -3030,6 +3033,29 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
   return this_rd;  // if 0, this will be re-calculated by caller
 }
 
+static void swap_block_ptr(MACROBLOCK *x, PICK_MODE_CONTEXT *ctx) {
+  int i;
+  struct macroblock_plane *const p = x->plane;
+  struct macroblockd_plane *const pd = x->e_mbd.plane;
+
+  for (i = 0; i < MAX_MB_PLANE; ++i) {
+    p[i].coeff    = ctx->coeff_pbuf[i][1];
+    pd[i].qcoeff  = ctx->qcoeff_pbuf[i][1];
+    pd[i].dqcoeff = ctx->dqcoeff_pbuf[i][1];
+    pd[i].eobs    = ctx->eobs_pbuf[i][1];
+
+    ctx->coeff_pbuf[i][1]   = ctx->coeff_pbuf[i][0];
+    ctx->qcoeff_pbuf[i][1]  = ctx->qcoeff_pbuf[i][0];
+    ctx->dqcoeff_pbuf[i][1] = ctx->dqcoeff_pbuf[i][0];
+    ctx->eobs_pbuf[i][1]    = ctx->eobs_pbuf[i][0];
+
+    ctx->coeff_pbuf[i][0]   = p[i].coeff;
+    ctx->qcoeff_pbuf[i][0]  = pd[i].qcoeff;
+    ctx->dqcoeff_pbuf[i][0] = pd[i].dqcoeff;
+    ctx->eobs_pbuf[i][0]    = pd[i].eobs;
+  }
+}
+
 void vp9_rd_pick_intra_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
                                int *returnrate, int64_t *returndist,
                                BLOCK_SIZE bsize,
@@ -3572,6 +3598,8 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
         best_rd = this_rd;
         best_mbmode = *mbmi;
         best_skip2 = this_skip2;
+        if (!x->select_txfm_size)
+          swap_block_ptr(x, ctx);
         vpx_memcpy(ctx->zcoeff_blk, x->zcoeff_blk[mbmi->tx_size],
                    sizeof(uint8_t) * ctx->num_4x4_blk);
 
@@ -4316,6 +4344,8 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
                    RDCOST(x->rdmult, x->rddiv, rate_uv, distortion_uv);
         best_mbmode = *mbmi;
         best_skip2 = this_skip2;
+        if (!x->select_txfm_size)
+          swap_block_ptr(x, ctx);
         vpx_memcpy(ctx->zcoeff_blk, x->zcoeff_blk[mbmi->tx_size],
                    sizeof(uint8_t) * ctx->num_4x4_blk);
 
