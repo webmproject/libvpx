@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdX//+fQ\u003d",
+        "filename": "test/video_source.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-11-06T00:49:45Z",
+      "side": 1,
+      "message": "to be safe you may want to stringify this with a macro, rather than relying on embedded quotes being preserved:\n\nSTRINGIFY(s) TO_STRING(s)\nTO_STRING(s) #s",
+      "revId": "f5c6ae00233bc692b9bda531f89e463f39f1755f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
