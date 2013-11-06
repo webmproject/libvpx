@@ -138,7 +138,9 @@ static void optimize_b(MACROBLOCK *mb,
   uint8_t token_cache[1024];
   const int ib = txfrm_block_to_raster_block(plane_bsize, tx_size, block);
   const int16_t *dequant_ptr = pd->dequant;
-  const uint8_t *const band_translate = get_band_translate(tx_size);
+  const uint8_t *const band_translate = (tx_size == TX_4X4 ?
+                                         vp9_coefband_trans_4x4 :
+                                         mb->coefband_trans_8x8plus);
 
   assert((!type && !plane) || (type && plane));
   dqcoeff_ptr = BLOCK_OFFSET(pd->dqcoeff, block);
@@ -179,7 +181,7 @@ static void optimize_b(MACROBLOCK *mb,
       t0 = (vp9_dct_value_tokens_ptr + x)->token;
       /* Consider both possible successor states. */
       if (next < default_eob) {
-        band = get_coef_band(band_translate, i + 1);
+        band = band_translate[i + 1];
         pt = trellis_get_coeff_context(scan, nb, i, t0, token_cache);
         rate0 +=
           mb->token_costs[tx_size][type][ref][band][0][pt]
@@ -230,7 +232,7 @@ static void optimize_b(MACROBLOCK *mb,
         t0 = t1 = (vp9_dct_value_tokens_ptr + x)->token;
       }
       if (next < default_eob) {
-        band = get_coef_band(band_translate, i + 1);
+        band = band_translate[i + 1];
         if (t0 != DCT_EOB_TOKEN) {
           pt = trellis_get_coeff_context(scan, nb, i, t0, token_cache);
           rate0 += mb->token_costs[tx_size][type][ref][band][!x][pt]
@@ -264,7 +266,7 @@ static void optimize_b(MACROBLOCK *mb,
       /* There's no choice to make for a zero coefficient, so we don't
        *  add a new trellis node, but we do need to update the costs.
        */
-      band = get_coef_band(band_translate, i + 1);
+      band = band_translate[i + 1];
       t0 = tokens[next][0].token;
       t1 = tokens[next][1].token;
       /* Update the cost of each path if we're past the EOB token. */
@@ -284,7 +286,7 @@ static void optimize_b(MACROBLOCK *mb,
   }
 
   /* Now pick the best path through the whole trellis. */
-  band = get_coef_band(band_translate, i + 1);
+  band = band_translate[i + 1];
   pt = combine_entropy_contexts(*a, *l);
   rate0 = tokens[next][0].rate;
   rate1 = tokens[next][1].rate;

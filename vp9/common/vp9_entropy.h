@@ -127,12 +127,6 @@ static INLINE void reset_skip_context(MACROBLOCKD *xd, BLOCK_SIZE bsize) {
 extern const uint8_t vp9_coefband_trans_8x8plus[MAXBAND_INDEX + 1];
 extern const uint8_t vp9_coefband_trans_4x4[MAXBAND_INDEX + 1];
 
-
-static int get_coef_band(const uint8_t * band_translate, int coef_index) {
-  return (coef_index > MAXBAND_INDEX)
-    ? (COEF_BANDS-1) : band_translate[coef_index];
-}
-
 // 128 lists of probabilities are stored for the following ONE node probs:
 // 1, 3, 5, 7, ..., 253, 255
 // In between probabilities are interpolated linearly
@@ -179,11 +173,6 @@ static int get_entropy_context(TX_SIZE tx_size, const ENTROPY_CONTEXT *a,
   }
 
   return combine_entropy_contexts(above_ec, left_ec);
-}
-
-static const uint8_t *get_band_translate(TX_SIZE tx_size) {
-  return tx_size == TX_4X4 ? vp9_coefband_trans_4x4
-                           : vp9_coefband_trans_8x8plus;
 }
 
 static void get_scan(const MACROBLOCKD *xd, TX_SIZE tx_size,
