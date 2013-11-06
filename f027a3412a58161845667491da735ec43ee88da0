@@ -1,0 +1,140 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdX//+ds\u003d",
+        "filename": "test/svc_test.cc",
+        "patchSetId": 20
+      },
+      "lineNbr": 82,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-11-06T04:23:28Z",
+      "side": 1,
+      "message": "NULL param checks here and throughout?",
+      "revId": "f027a3412a58161845667491da735ec43ee88da0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX//+dw\u003d",
+        "filename": "test/svc_test.cc",
+        "patchSetId": 20
+      },
+      "lineNbr": 117,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-11-06T04:23:28Z",
+      "side": 1,
+      "message": "NULL check?",
+      "revId": "f027a3412a58161845667491da735ec43ee88da0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX//+do\u003d",
+        "filename": "vp9/vp9_cx_iface.c",
+        "patchSetId": 20
+      },
+      "lineNbr": 1043,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-11-06T04:23:28Z",
+      "side": 1,
+      "message": "prefer \u003d\u003d NULL",
+      "revId": "f027a3412a58161845667491da735ec43ee88da0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX//+dk\u003d",
+        "filename": "vp9_spatial_scalable_encoder.c",
+        "patchSetId": 20
+      },
+      "lineNbr": 193,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-11-06T04:23:28Z",
+      "side": 1,
+      "message": "drop the ()s around sz",
+      "revId": "f027a3412a58161845667491da735ec43ee88da0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX//+dg\u003d",
+        "filename": "vpx/src/svc_encodeframe.c",
+        "patchSetId": 20
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-11-06T04:23:28Z",
+      "side": 1,
+      "message": "drop the ()s around defined",
+      "revId": "f027a3412a58161845667491da735ec43ee88da0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX//+dc\u003d",
+        "filename": "vpx/src/svc_encodeframe.c",
+        "patchSetId": 20
+      },
+      "lineNbr": 97,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-11-06T04:23:28Z",
+      "side": 1,
+      "message": "prefer sizeof(*var)",
+      "revId": "f027a3412a58161845667491da735ec43ee88da0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX//+dU\u003d",
+        "filename": "vpx/src/svc_encodeframe.c",
+        "patchSetId": 20
+      },
+      "lineNbr": 221,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-11-06T04:23:28Z",
+      "side": 1,
+      "message": "drop this line and the next",
+      "revId": "f027a3412a58161845667491da735ec43ee88da0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX//+dQ\u003d",
+        "filename": "vpx/src/svc_encodeframe.c",
+        "patchSetId": 20
+      },
+      "lineNbr": 227,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-11-06T04:23:28Z",
+      "side": 1,
+      "message": "for local pointer assignments, try to use *const, e.g., SvcInternal *const si \u003d ...",
+      "revId": "f027a3412a58161845667491da735ec43ee88da0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
