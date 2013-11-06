@@ -91,8 +91,8 @@ static TX_SIZE read_tx_size(VP9_COMMON *const cm, MACROBLOCKD *const xd,
 static void set_segment_id(VP9_COMMON *cm, BLOCK_SIZE bsize,
                            int mi_row, int mi_col, int segment_id) {
   const int mi_offset = mi_row * cm->mi_cols + mi_col;
-  const int bw = 1 << mi_width_log2(bsize);
-  const int bh = 1 << mi_height_log2(bsize);
+  const int bw = num_8x8_blocks_wide_lookup[bsize];
+  const int bh = num_8x8_blocks_high_lookup[bsize];
   const int xmis = MIN(cm->mi_cols - mi_col, bw);
   const int ymis = MIN(cm->mi_rows - mi_row, bh);
   int x, y;
@@ -550,8 +550,8 @@ void vp9_read_mode_info(VP9_COMMON *cm, MACROBLOCKD *xd,
                         int mi_row, int mi_col, vp9_reader *r) {
   MODE_INFO *const mi = xd->mi_8x8[0];
   const BLOCK_SIZE bsize = mi->mbmi.sb_type;
-  const int bw = 1 << mi_width_log2(bsize);
-  const int bh = 1 << mi_height_log2(bsize);
+  const int bw = num_8x8_blocks_wide_lookup[bsize];
+  const int bh = num_8x8_blocks_high_lookup[bsize];
   const int y_mis = MIN(bh, cm->mi_rows - mi_row);
   const int x_mis = MIN(bw, cm->mi_cols - mi_col);
   int x, y, z;

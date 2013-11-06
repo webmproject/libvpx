@@ -1490,7 +1490,8 @@ static void rd_pick_partition(VP9_COMP *cpi, const TileInfo *const tile,
       return;
     }
   }
-  assert(mi_height_log2(bsize) == mi_width_log2(bsize));
+  assert(num_8x8_blocks_wide_lookup[bsize] ==
+             num_8x8_blocks_high_lookup[bsize]);
 
   if (bsize == BLOCK_16X16) {
     set_offsets(cpi, tile, mi_row, mi_col, bsize);

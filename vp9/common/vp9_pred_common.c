@@ -403,8 +403,8 @@ void vp9_set_pred_flag_seg_id(MACROBLOCKD *xd, uint8_t pred_flag) {
 int vp9_get_segment_id(VP9_COMMON *cm, const uint8_t *segment_ids,
                        BLOCK_SIZE bsize, int mi_row, int mi_col) {
   const int mi_offset = mi_row * cm->mi_cols + mi_col;
-  const int bw = 1 << mi_width_log2(bsize);
-  const int bh = 1 << mi_height_log2(bsize);
+  const int bw = num_8x8_blocks_wide_lookup[bsize];
+  const int bh = num_8x8_blocks_high_lookup[bsize];
   const int xmis = MIN(cm->mi_cols - mi_col, bw);
   const int ymis = MIN(cm->mi_rows - mi_row, bh);
   int x, y, segment_id = INT_MAX;
