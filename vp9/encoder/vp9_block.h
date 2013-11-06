@@ -136,7 +136,7 @@ struct macroblock {
 
   // note that token_costs is the cost when eob node is skipped
   vp9_coeff_cost token_costs[TX_SIZES];
-  uint8_t token_cache[1024];
+  DECLARE_ALIGNED(16, uint8_t, token_cache[1024]);
 
   int optimize;
 
