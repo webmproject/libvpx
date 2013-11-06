@@ -61,7 +61,7 @@ struct EbmlGlobal {
 
 /* Stereo 3D packed frame format */
 typedef enum stereo_format {
-  STEREO_FORMAT_MONO       = 0,
+  STEREO_FORMAT_MONO = 0,
   STEREO_FORMAT_LEFT_RIGHT = 1,
   STEREO_FORMAT_BOTTOM_TOP = 2,
   STEREO_FORMAT_TOP_BOTTOM = 3,

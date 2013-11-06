@@ -20,8 +20,8 @@
 #define fseeko _fseeki64
 #define ftello _ftelli64
 #elif defined(_WIN32)
-/* MinGW defines off_t as long
-   and uses f{seek,tell}o64/off64_t for large files */
+/* MinGW defines off_t as long, and uses f{seek,tell}o64/off64_t for large
+ * files */
 #define fseeko fseeko64
 #define ftello ftello64
 #define off_t off64_t
@@ -36,11 +36,10 @@ void Ebml_Write(struct EbmlGlobal *glob,
 }
 
 #define WRITE_BUFFER(s) \
-  for (i = len - 1; i >= 0; i--)\
-  { \
-    x = (char)(*(const s *)buffer_in >> (i * CHAR_BIT)); \
-    Ebml_Write(glob, &x, 1); \
-  }
+for (i = len - 1; i >= 0; i--) { \
+  x = (char)(*(const s *)buffer_in >> (i * CHAR_BIT)); \
+  Ebml_Write(glob, &x, 1); \
+}
 
 void Ebml_Serialize(struct EbmlGlobal *glob,
                     const void *buffer_in,
@@ -80,7 +79,7 @@ void Ebml_Serialize(struct EbmlGlobal *glob,
 static void Ebml_SerializeUnsigned32(struct EbmlGlobal *glob,
                                      unsigned int class_id,
                                      uint64_t ui) {
-  unsigned char sizeSerialized = 4 | 0x80;
+  const unsigned char sizeSerialized = 4 | 0x80;
   Ebml_WriteID(glob, class_id);
   Ebml_Serialize(glob, &sizeSerialized, sizeof(sizeSerialized), 1);
   Ebml_Serialize(glob, &ui, sizeof(ui), 4);
@@ -89,31 +88,28 @@ static void Ebml_SerializeUnsigned32(struct EbmlGlobal *glob,
 static void Ebml_StartSubElement(struct EbmlGlobal *glob,
                                  EbmlLoc *ebmlLoc,
                                  unsigned int class_id) {
-  /* todo this is always taking 8 bytes, this may need later optimization */
-  /* this is a key that says length unknown */
-  uint64_t unknownLen = LITERALU64(0x01FFFFFF, 0xFFFFFFFF);
-
+  const uint64_t kEbmlUnknownLength = LITERALU64(0x01FFFFFF, 0xFFFFFFFF);
   Ebml_WriteID(glob, class_id);
   *ebmlLoc = ftello(glob->stream);
-  Ebml_Serialize(glob, &unknownLen, sizeof(unknownLen), 8);
+  Ebml_Serialize(glob, &kEbmlUnknownLength, sizeof(kEbmlUnknownLength), 8);
 }
 
 static void Ebml_EndSubElement(struct EbmlGlobal *glob, EbmlLoc *ebmlLoc) {
   off_t pos;
   uint64_t size;
 
-  /* Save the current stream pointer */
+  /* Save the current stream pointer. */
   pos = ftello(glob->stream);
 
-  /* Calculate the size of this element */
+  /* Calculate the size of this element. */
   size = pos - *ebmlLoc - 8;
   size |= LITERALU64(0x01000000, 0x00000000);
 
-  /* Seek back to the beginning of the element and write the new size */
+  /* Seek back to the beginning of the element and write the new size. */
   fseeko(glob->stream, *ebmlLoc, SEEK_SET);
   Ebml_Serialize(glob, &size, sizeof(size), 8);
 
-  /* Reset the stream pointer */
+  /* Reset the stream pointer. */
   fseeko(glob->stream, pos, SEEK_SET);
 }
 
@@ -130,8 +126,12 @@ void write_webm_seek_element(struct EbmlGlobal *ebml,
 
 void write_webm_seek_info(struct EbmlGlobal *ebml) {
   off_t pos;
+  EbmlLoc start;
+  EbmlLoc startInfo;
+  uint64_t frame_time;
+  char version_string[64];
 
-  /* Save the current stream pointer */
+  /* Save the current stream pointer. */
   pos = ftello(ebml->stream);
 
   if (ebml->seek_info_pos)
@@ -139,42 +139,32 @@ void write_webm_seek_info(struct EbmlGlobal *ebml) {
   else
     ebml->seek_info_pos = pos;
 
-  {
-    EbmlLoc start;
+  Ebml_StartSubElement(ebml, &start, SeekHead);
+  write_webm_seek_element(ebml, Tracks, ebml->track_pos);
+  write_webm_seek_element(ebml, Cues, ebml->cue_pos);
+  write_webm_seek_element(ebml, Info, ebml->segment_info_pos);
+  Ebml_EndSubElement(ebml, &start);
 
-    Ebml_StartSubElement(ebml, &start, SeekHead);
-    write_webm_seek_element(ebml, Tracks, ebml->track_pos);
-    write_webm_seek_element(ebml, Cues,   ebml->cue_pos);
-    write_webm_seek_element(ebml, Info,   ebml->segment_info_pos);
-    Ebml_EndSubElement(ebml, &start);
+  /* Create and write the Segment Info. */
+  if (ebml->debug) {
+    strcpy(version_string, "vpxenc");
+  } else {
+    strcpy(version_string, "vpxenc ");
+    strncat(version_string,
+            vpx_codec_version_str(),
+            sizeof(version_string) - 1 - strlen(version_string));
   }
-  {
-    /* segment info */
-    EbmlLoc startInfo;
-    uint64_t frame_time;
-    char version_string[64];
 
-    /* Assemble version string */
-    if (ebml->debug) {
-      strcpy(version_string, "vpxenc");
-    } else {
-      strcpy(version_string, "vpxenc ");
-      strncat(version_string,
-              vpx_codec_version_str(),
-              sizeof(version_string) - 1 - strlen(version_string));
-    }
-
-    frame_time = (uint64_t)1000 * ebml->framerate.den
-                 / ebml->framerate.num;
-    ebml->segment_info_pos = ftello(ebml->stream);
-    Ebml_StartSubElement(ebml, &startInfo, Info);
-    Ebml_SerializeUnsigned(ebml, TimecodeScale, 1000000);
-    Ebml_SerializeFloat(ebml, Segment_Duration,
-                        (double)(ebml->last_pts_ms + frame_time));
-    Ebml_SerializeString(ebml, 0x4D80, version_string);
-    Ebml_SerializeString(ebml, 0x5741, version_string);
-    Ebml_EndSubElement(ebml, &startInfo);
-  }
+  frame_time = (uint64_t)1000 * ebml->framerate.den
+               / ebml->framerate.num;
+  ebml->segment_info_pos = ftello(ebml->stream);
+  Ebml_StartSubElement(ebml, &startInfo, Info);
+  Ebml_SerializeUnsigned(ebml, TimecodeScale, 1000000);
+  Ebml_SerializeFloat(ebml, Segment_Duration,
+                      (double)(ebml->last_pts_ms + frame_time));
+  Ebml_SerializeString(ebml, 0x4D80, version_string);
+  Ebml_SerializeString(ebml, 0x5741, version_string);
+  Ebml_EndSubElement(ebml, &startInfo);
 }
 
 void write_webm_file_header(struct EbmlGlobal *glob,
@@ -182,57 +172,56 @@ void write_webm_file_header(struct EbmlGlobal *glob,
                             const struct vpx_rational *fps,
                             stereo_format_t stereo_fmt,
                             unsigned int fourcc) {
-  {
-    EbmlLoc start;
-    Ebml_StartSubElement(glob, &start, EBML);
-    Ebml_SerializeUnsigned(glob, EBMLVersion, 1);
-    Ebml_SerializeUnsigned(glob, EBMLReadVersion, 1);
-    Ebml_SerializeUnsigned(glob, EBMLMaxIDLength, 4);
-    Ebml_SerializeUnsigned(glob, EBMLMaxSizeLength, 8);
-    Ebml_SerializeString(glob, DocType, "webm");
-    Ebml_SerializeUnsigned(glob, DocTypeVersion, 2);
-    Ebml_SerializeUnsigned(glob, DocTypeReadVersion, 2);
-    Ebml_EndSubElement(glob, &start);
-  }
-  {
-    Ebml_StartSubElement(glob, &glob->startSegment, Segment);
-    glob->position_reference = ftello(glob->stream);
-    glob->framerate = *fps;
-    write_webm_seek_info(glob);
+  EbmlLoc start;
+  EbmlLoc trackStart;
+  EbmlLoc videoStart;
+  unsigned int trackNumber = 1;
+  uint64_t trackID = 0;
+  unsigned int pixelWidth = cfg->g_w;
+  unsigned int pixelHeight = cfg->g_h;
 
-    {
-      EbmlLoc trackStart;
-      glob->track_pos = ftello(glob->stream);
-      Ebml_StartSubElement(glob, &trackStart, Tracks);
-      {
-        unsigned int trackNumber = 1;
-        uint64_t     trackID = 0;
+  /* Write the EBML header. */
+  Ebml_StartSubElement(glob, &start, EBML);
+  Ebml_SerializeUnsigned(glob, EBMLVersion, 1);
+  Ebml_SerializeUnsigned(glob, EBMLReadVersion, 1);
+  Ebml_SerializeUnsigned(glob, EBMLMaxIDLength, 4);
+  Ebml_SerializeUnsigned(glob, EBMLMaxSizeLength, 8);
+  Ebml_SerializeString(glob, DocType, "webm");
+  Ebml_SerializeUnsigned(glob, DocTypeVersion, 2);
+  Ebml_SerializeUnsigned(glob, DocTypeReadVersion, 2);
+  Ebml_EndSubElement(glob, &start);
 
-        EbmlLoc start;
-        Ebml_StartSubElement(glob, &start, TrackEntry);
-        Ebml_SerializeUnsigned(glob, TrackNumber, trackNumber);
-        glob->track_id_pos = ftello(glob->stream);
-        Ebml_SerializeUnsigned32(glob, TrackUID, trackID);
-        Ebml_SerializeUnsigned(glob, TrackType, 1);
-        Ebml_SerializeString(glob, CodecID,
-                             fourcc == VP8_FOURCC ? "V_VP8" : "V_VP9");
-        {
-          unsigned int pixelWidth = cfg->g_w;
-          unsigned int pixelHeight = cfg->g_h;
+  /* Open and begin writing the segment element. */
+  Ebml_StartSubElement(glob, &glob->startSegment, Segment);
+  glob->position_reference = ftello(glob->stream);
+  glob->framerate = *fps;
+  write_webm_seek_info(glob);
 
-          EbmlLoc videoStart;
-          Ebml_StartSubElement(glob, &videoStart, Video);
-          Ebml_SerializeUnsigned(glob, PixelWidth, pixelWidth);
-          Ebml_SerializeUnsigned(glob, PixelHeight, pixelHeight);
-          Ebml_SerializeUnsigned(glob, StereoMode, stereo_fmt);
-          Ebml_EndSubElement(glob, &videoStart);
-        }
-        Ebml_EndSubElement(glob, &start); /* Track Entry */
-      }
-      Ebml_EndSubElement(glob, &trackStart);
-    }
-    /* segment element is open */
-  }
+  /* Open and write the Tracks element. */
+  glob->track_pos = ftello(glob->stream);
+  Ebml_StartSubElement(glob, &trackStart, Tracks);
+
+  /* Open and write the Track entry. */
+  Ebml_StartSubElement(glob, &start, TrackEntry);
+  Ebml_SerializeUnsigned(glob, TrackNumber, trackNumber);
+  glob->track_id_pos = ftello(glob->stream);
+  Ebml_SerializeUnsigned32(glob, TrackUID, trackID);
+  Ebml_SerializeUnsigned(glob, TrackType, 1);
+  Ebml_SerializeString(glob, CodecID,
+                       fourcc == VP8_FOURCC ? "V_VP8" : "V_VP9");
+  Ebml_StartSubElement(glob, &videoStart, Video);
+  Ebml_SerializeUnsigned(glob, PixelWidth, pixelWidth);
+  Ebml_SerializeUnsigned(glob, PixelHeight, pixelHeight);
+  Ebml_SerializeUnsigned(glob, StereoMode, stereo_fmt);
+  Ebml_EndSubElement(glob, &videoStart);
+
+  /* Close Track entry. */
+  Ebml_EndSubElement(glob, &start);
+
+  /* Close Tracks element. */
+  Ebml_EndSubElement(glob, &trackStart);
+
+  /* Segment element remains open. */
 }
 
 void write_webm_block(struct EbmlGlobal *glob,
@@ -245,14 +234,16 @@ void write_webm_block(struct EbmlGlobal *glob,
   int64_t pts_ms;
   int start_cluster = 0, is_keyframe;
 
-  /* Calculate the PTS of this frame in milliseconds */
+  /* Calculate the PTS of this frame in milliseconds. */
   pts_ms = pkt->data.frame.pts * 1000
            * (uint64_t)cfg->g_timebase.num / (uint64_t)cfg->g_timebase.den;
+
   if (pts_ms <= glob->last_pts_ms)
     pts_ms = glob->last_pts_ms + 1;
+
   glob->last_pts_ms = pts_ms;
 
-  /* Calculate the relative time of this block */
+  /* Calculate the relative time of this block. */
   if (pts_ms - glob->cluster_timecode > SHRT_MAX)
     start_cluster = 1;
   else
@@ -263,12 +254,12 @@ void write_webm_block(struct EbmlGlobal *glob,
     if (glob->cluster_open)
       Ebml_EndSubElement(glob, &glob->startCluster);
 
-    /* Open the new cluster */
+    /* Open the new cluster. */
     block_timecode = 0;
     glob->cluster_open = 1;
     glob->cluster_timecode = (uint32_t)pts_ms;
     glob->cluster_pos = ftello(glob->stream);
-    Ebml_StartSubElement(glob, &glob->startCluster, Cluster); /* cluster */
+    Ebml_StartSubElement(glob, &glob->startCluster, Cluster);
     Ebml_SerializeUnsigned(glob, Timecode, glob->cluster_timecode);
 
     /* Save a cue point if this is a keyframe. */
@@ -289,7 +280,7 @@ void write_webm_block(struct EbmlGlobal *glob,
     }
   }
 
-  /* Write the Simple Block */
+  /* Write the Simple Block. */
   Ebml_WriteID(glob, SimpleBlock);
 
   block_length = (unsigned int)pkt->data.frame.sz + 4;
@@ -312,44 +303,41 @@ void write_webm_block(struct EbmlGlobal *glob,
   Ebml_Write(glob, pkt->data.frame.buf, (unsigned int)pkt->data.frame.sz);
 }
 
-
 void write_webm_file_footer(struct EbmlGlobal *glob, int hash) {
+  EbmlLoc start_cues;
+  EbmlLoc start_cue_point;
+  EbmlLoc start_cue_tracks;
+  unsigned int i;
+
   if (glob->cluster_open)
     Ebml_EndSubElement(glob, &glob->startCluster);
 
-  {
-    EbmlLoc start;
-    unsigned int i;
+  glob->cue_pos = ftello(glob->stream);
+  Ebml_StartSubElement(glob, &start_cues, Cues);
 
-    glob->cue_pos = ftello(glob->stream);
-    Ebml_StartSubElement(glob, &start, Cues);
-    for (i = 0; i < glob->cues; i++) {
-      struct cue_entry *cue = &glob->cue_list[i];
-      EbmlLoc start;
+  for (i = 0; i < glob->cues; i++) {
+    struct cue_entry *cue = &glob->cue_list[i];
+    Ebml_StartSubElement(glob, &start_cue_point, CuePoint);
+    Ebml_SerializeUnsigned(glob, CueTime, cue->time);
 
-      Ebml_StartSubElement(glob, &start, CuePoint);
-      {
-        EbmlLoc start;
+    Ebml_StartSubElement(glob, &start_cue_tracks, CueTrackPositions);
+    Ebml_SerializeUnsigned(glob, CueTrack, 1);
+    Ebml_SerializeUnsigned64(glob, CueClusterPosition,
+                             cue->loc - glob->position_reference);
+    Ebml_EndSubElement(glob, &start_cue_tracks);
 
-        Ebml_SerializeUnsigned(glob, CueTime, cue->time);
-
-        Ebml_StartSubElement(glob, &start, CueTrackPositions);
-        Ebml_SerializeUnsigned(glob, CueTrack, 1);
-        Ebml_SerializeUnsigned64(glob, CueClusterPosition,
-                                 cue->loc - glob->position_reference);
-        Ebml_EndSubElement(glob, &start);
-      }
-      Ebml_EndSubElement(glob, &start);
-    }
-    Ebml_EndSubElement(glob, &start);
+    Ebml_EndSubElement(glob, &start_cue_point);
   }
 
+  Ebml_EndSubElement(glob, &start_cues);
+
+  /* Close the Segment. */
   Ebml_EndSubElement(glob, &glob->startSegment);
 
-  /* Patch up the seek info block */
+  /* Patch up the seek info block. */
   write_webm_seek_info(glob);
 
-  /* Patch up the track id */
+  /* Patch up the track id. */
   fseeko(glob->stream, glob->track_id_pos, SEEK_SET);
   Ebml_SerializeUnsigned32(glob, TrackUID, glob->debug ? 0xDEADBEEF : hash);
 
