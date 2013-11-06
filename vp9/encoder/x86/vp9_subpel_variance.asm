@@ -118,6 +118,14 @@ SECTION .text
   RET
 %endmacro
 
+%macro INC_SRC_BY_SRC_STRIDE  0
+%if ARCH_X86=1 && CONFIG_PIC=1
+  add                srcq, src_stridemp
+%else
+  add                srcq, src_strideq
+%endif
+%endmacro
+
 %macro SUBPEL_VARIANCE 1-2 0 ; W
 %if cpuflag(ssse3)
 %define bilin_filter_m bilin_filter_m_ssse3
@@ -129,41 +137,85 @@ SECTION .text
 ; FIXME(rbultje) only bilinear filters use >8 registers, and ssse3 only uses
 ; 11, not 13, if the registers are ordered correctly. May make a minor speed
 ; difference on Win64
-%ifdef PIC
-%if %2 == 1 ; avg
-cglobal sub_pixel_avg_variance%1xh, 9, 10, 13, src, src_stride, \
-                                              x_offset, y_offset, \
-                                              dst, dst_stride, \
-                                              sec, sec_stride, height, sse
-%define sec_str sec_strideq
+
+%ifdef PIC    ; 64bit PIC
+  %if %2 == 1 ; avg
+    cglobal sub_pixel_avg_variance%1xh, 9, 10, 13, src, src_stride, \
+                                      x_offset, y_offset, \
+                                      dst, dst_stride, \
+                                      sec, sec_stride, height, sse
+    %define sec_str sec_strideq
+  %else
+    cglobal sub_pixel_variance%1xh, 7, 8, 13, src, src_stride, x_offset, \
+                                  y_offset, dst, dst_stride, height, sse
+  %endif
+  %define h heightd
+  %define bilin_filter sseq
 %else
-cglobal sub_pixel_variance%1xh, 7, 8, 13, src, src_stride, x_offset, y_offset, \
-                                          dst, dst_stride, height, sse
+  %if ARCH_X86=1 && CONFIG_PIC=1
+    %if %2 == 1 ; avg
+      cglobal sub_pixel_avg_variance%1xh, 7, 7, 13, src, src_stride, \
+                                  x_offset, y_offset, \
+                                  dst, dst_stride, \
+                                  sec, sec_stride, \
+                                  height, sse, g_bilin_filter, g_pw_8
+      %define h dword heightm
+      %define sec_str sec_stridemp
+
+      ;Store bilin_filter and pw_8 location in stack
+      GET_GOT eax
+      add esp, 4                ; restore esp
+
+      lea ecx, [GLOBAL(bilin_filter_m)]
+      mov g_bilin_filterm, ecx
+
+      lea ecx, [GLOBAL(pw_8)]
+      mov g_pw_8m, ecx
+
+      LOAD_IF_USED 0, 1         ; load eax, ecx back
+    %else
+      cglobal sub_pixel_variance%1xh, 7, 7, 13, src, src_stride, x_offset, \
+                                y_offset, dst, dst_stride, height, sse, \
+                                g_bilin_filter, g_pw_8
+      %define h heightd
+
+      ;Store bilin_filter and pw_8 location in stack
+      GET_GOT eax
+      add esp, 4                ; restore esp
+
+      lea ecx, [GLOBAL(bilin_filter_m)]
+      mov g_bilin_filterm, ecx
+
+      lea ecx, [GLOBAL(pw_8)]
+      mov g_pw_8m, ecx
+
+      LOAD_IF_USED 0, 1         ; load eax, ecx back
+    %endif
+  %else
+    %if %2 == 1 ; avg
+      cglobal sub_pixel_avg_variance%1xh, 7 + 2 * ARCH_X86_64, \
+                        7 + 2 * ARCH_X86_64, 13, src, src_stride, \
+                                             x_offset, y_offset, \
+                                             dst, dst_stride, \
+                                             sec, sec_stride, \
+                                             height, sse
+      %if ARCH_X86_64
+      %define h heightd
+      %define sec_str sec_strideq
+      %else
+      %define h dword heightm
+      %define sec_str sec_stridemp
+      %endif
+    %else
+      cglobal sub_pixel_variance%1xh, 7, 7, 13, src, src_stride, x_offset, \
+                              y_offset, dst, dst_stride, height, sse
+      %define h heightd
+    %endif
+
+    %define bilin_filter bilin_filter_m
+  %endif
 %endif
-%define h heightd
-%define bilin_filter sseq
-%else
-%if %2 == 1 ; avg
-cglobal sub_pixel_avg_variance%1xh, 7 + 2 * ARCH_X86_64, \
-                                    7 + 2 * ARCH_X86_64, 13, src, src_stride, \
-                                                         x_offset, y_offset, \
-                                                         dst, dst_stride, \
-                                                         sec, sec_stride, \
-                                                         height, sse
-%if ARCH_X86_64
-%define h heightd
-%define sec_str sec_strideq
-%else
-%define h dword heightm
-%define sec_str sec_stridemp
-%endif
-%else
-cglobal sub_pixel_variance%1xh, 7, 7, 13, src, src_stride, x_offset, y_offset, \
-                                          dst, dst_stride, height, sse
-%define h heightd
-%endif
-%define bilin_filter bilin_filter_m
-%endif
+
   ASSERT               %1 <= 16         ; m6 overflows if w > 16
   pxor                 m6, m6           ; sum
   pxor                 m7, m7           ; sse
@@ -329,11 +381,22 @@ cglobal sub_pixel_variance%1xh, 7, 7, 13, src, src_stride, x_offset, y_offset, \
 %define filter_y_b m9
 %define filter_rnd m10
 %else ; x86-32 or mmx
+%if ARCH_X86=1 && CONFIG_PIC=1
+; x_offset == 0, reuse x_offset reg
+%define tempq x_offsetq
+  add y_offsetq, g_bilin_filterm
+%define filter_y_a [y_offsetq]
+%define filter_y_b [y_offsetq+16]
+  mov tempq, g_pw_8m
+%define filter_rnd [tempq]
+%else
   add           y_offsetq, bilin_filter
 %define filter_y_a [y_offsetq]
 %define filter_y_b [y_offsetq+16]
 %define filter_rnd [pw_8]
 %endif
+%endif
+
 .x_zero_y_other_loop:
 %if %1 == 16
   movu                 m0, [srcq]
@@ -615,12 +678,23 @@ cglobal sub_pixel_variance%1xh, 7, 7, 13, src, src_stride, x_offset, y_offset, \
 %define filter_y_a m8
 %define filter_y_b m9
 %define filter_rnd m10
+%else  ;x86_32
+%if ARCH_X86=1 && CONFIG_PIC=1
+; x_offset == 0.5. We can reuse x_offset reg
+%define tempq x_offsetq
+  add y_offsetq, g_bilin_filterm
+%define filter_y_a [y_offsetq]
+%define filter_y_b [y_offsetq+16]
+  mov tempq, g_pw_8m
+%define filter_rnd [tempq]
 %else
   add           y_offsetq, bilin_filter
 %define filter_y_a [y_offsetq]
 %define filter_y_b [y_offsetq+16]
 %define filter_rnd [pw_8]
 %endif
+%endif
+
 %if %1 == 16
   movu                 m0, [srcq]
   movu                 m3, [srcq+1]
@@ -752,12 +826,23 @@ cglobal sub_pixel_variance%1xh, 7, 7, 13, src, src_stride, x_offset, y_offset, \
 %define filter_x_a m8
 %define filter_x_b m9
 %define filter_rnd m10
+%else    ; x86-32
+%if ARCH_X86=1 && CONFIG_PIC=1
+;y_offset == 0. We can reuse y_offset reg.
+%define tempq y_offsetq
+  add x_offsetq, g_bilin_filterm
+%define filter_x_a [x_offsetq]
+%define filter_x_b [x_offsetq+16]
+  mov tempq, g_pw_8m
+%define filter_rnd [tempq]
 %else
   add           x_offsetq, bilin_filter
 %define filter_x_a [x_offsetq]
 %define filter_x_b [x_offsetq+16]
 %define filter_rnd [pw_8]
 %endif
+%endif
+
 .x_other_y_zero_loop:
 %if %1 == 16
   movu                 m0, [srcq]
@@ -873,12 +958,23 @@ cglobal sub_pixel_variance%1xh, 7, 7, 13, src, src_stride, x_offset, y_offset, \
 %define filter_x_a m8
 %define filter_x_b m9
 %define filter_rnd m10
+%else    ; x86-32
+%if ARCH_X86=1 && CONFIG_PIC=1
+; y_offset == 0.5. We can reuse y_offset reg.
+%define tempq y_offsetq
+  add x_offsetq, g_bilin_filterm
+%define filter_x_a [x_offsetq]
+%define filter_x_b [x_offsetq+16]
+  mov tempq, g_pw_8m
+%define filter_rnd [tempq]
 %else
   add           x_offsetq, bilin_filter
 %define filter_x_a [x_offsetq]
 %define filter_x_b [x_offsetq+16]
 %define filter_rnd [pw_8]
 %endif
+%endif
+
 %if %1 == 16
   movu                 m0, [srcq]
   movu                 m1, [srcq+1]
@@ -1057,6 +1153,21 @@ cglobal sub_pixel_variance%1xh, 7, 7, 13, src, src_stride, x_offset, y_offset, \
 %define filter_y_a m10
 %define filter_y_b m11
 %define filter_rnd m12
+%else   ; x86-32
+%if ARCH_X86=1 && CONFIG_PIC=1
+; In this case, there is NO unused register. Used src_stride register. Later,
+; src_stride has to be loaded from stack when it is needed.
+%define tempq src_strideq
+  mov tempq, g_bilin_filterm
+  add           x_offsetq, tempq
+  add           y_offsetq, tempq
+%define filter_x_a [x_offsetq]
+%define filter_x_b [x_offsetq+16]
+%define filter_y_a [y_offsetq]
+%define filter_y_b [y_offsetq+16]
+
+  mov tempq, g_pw_8m
+%define filter_rnd [tempq]
 %else
   add           x_offsetq, bilin_filter
   add           y_offsetq, bilin_filter
@@ -1066,6 +1177,8 @@ cglobal sub_pixel_variance%1xh, 7, 7, 13, src, src_stride, x_offset, y_offset, \
 %define filter_y_b [y_offsetq+16]
 %define filter_rnd [pw_8]
 %endif
+%endif
+
   ; x_offset == bilin interpolation && y_offset == bilin interpolation
 %if %1 == 16
   movu                 m0, [srcq]
@@ -1093,7 +1206,9 @@ cglobal sub_pixel_variance%1xh, 7, 7, 13, src, src_stride, x_offset, y_offset, \
 %endif
   psraw                m0, 4
   psraw                m2, 4
-  add                srcq, src_strideq
+
+  INC_SRC_BY_SRC_STRIDE
+
   packuswb             m0, m2
 .x_other_y_other_loop:
 %if cpuflag(ssse3)
@@ -1163,7 +1278,7 @@ cglobal sub_pixel_variance%1xh, 7, 7, 13, src, src_stride, x_offset, y_offset, \
   SUM_SSE              m0, m1, m2, m3, m6, m7
   mova                 m0, m4
 
-  add                srcq, src_strideq
+  INC_SRC_BY_SRC_STRIDE
   add                dstq, dst_strideq
 %else ; %1 < 16
   movh                 m0, [srcq]
@@ -1184,12 +1299,17 @@ cglobal sub_pixel_variance%1xh, 7, 7, 13, src, src_stride, x_offset, y_offset, \
 %if cpuflag(ssse3)
   packuswb             m0, m0
 %endif
-  add                srcq, src_strideq
+
+  INC_SRC_BY_SRC_STRIDE
+
 .x_other_y_other_loop:
   movh                 m2, [srcq]
   movh                 m1, [srcq+1]
-  movh                 m4, [srcq+src_strideq]
-  movh                 m3, [srcq+src_strideq+1]
+
+  INC_SRC_BY_SRC_STRIDE
+  movh                 m4, [srcq]
+  movh                 m3, [srcq+1]
+
 %if cpuflag(ssse3)
   punpcklbw            m2, m1
   punpcklbw            m4, m3
@@ -1253,7 +1373,7 @@ cglobal sub_pixel_variance%1xh, 7, 7, 13, src, src_stride, x_offset, y_offset, \
   SUM_SSE              m0, m1, m2, m3, m6, m7
   mova                 m0, m4
 
-  lea                srcq, [srcq+src_strideq*2]
+  INC_SRC_BY_SRC_STRIDE
   lea                dstq, [dstq+dst_strideq*2]
 %endif
 %if %2 == 1 ; avg
