@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdX//+Ws\u003d",
+        "filename": "vp9_spatial_scalable_encoder.c",
+        "patchSetId": 21
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1003234
+      },
+      "writtenOn": "2013-11-06T22:50:07Z",
+      "side": 1,
+      "message": "yes, name changed to target-bitrate to be consistent",
+      "parentUuid": "AAAAdX//+Xg\u003d",
+      "revId": "6a1c5c25188341746589aecdaea8962e0e82b2b8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdX//+XI\u003d",
         "filename": "vpx/src/svc_encodeframe.c",
         "patchSetId": 21
@@ -30,6 +48,24 @@
       "writtenOn": "2013-11-06T19:46:56Z",
       "side": 1,
       "message": "you need to correct strtok_r for this build too, just no strtok_s proto",
+      "revId": "6a1c5c25188341746589aecdaea8962e0e82b2b8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX//+Wg\u003d",
+        "filename": "vpx/src/svc_encodeframe.c",
+        "patchSetId": 21
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1003234
+      },
+      "writtenOn": "2013-11-06T22:50:07Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdX//+XI\u003d",
       "revId": "6a1c5c25188341746589aecdaea8962e0e82b2b8",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdX//+Wc\u003d",
+        "filename": "vpx/src/svc_encodeframe.c",
+        "patchSetId": 21
+      },
+      "lineNbr": 97,
+      "author": {
+        "id": 1003234
+      },
+      "writtenOn": "2013-11-06T22:50:07Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdX//+Xw\u003d",
+      "revId": "6a1c5c25188341746589aecdaea8962e0e82b2b8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdX//+W8\u003d",
         "filename": "vpx/src/svc_encodeframe.c",
         "patchSetId": 21
@@ -64,6 +118,24 @@
       "writtenOn": "2013-11-06T19:46:56Z",
       "side": 1,
       "message": "there\u0027s a sign difference here",
+      "revId": "6a1c5c25188341746589aecdaea8962e0e82b2b8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX//+Tk\u003d",
+        "filename": "vpx/src/svc_encodeframe.c",
+        "patchSetId": 21
+      },
+      "lineNbr": 192,
+      "author": {
+        "id": 1003234
+      },
+      "writtenOn": "2013-11-06T22:50:07Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdX//+W8\u003d",
       "revId": "6a1c5c25188341746589aecdaea8962e0e82b2b8",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdX//+Tg\u003d",
+        "filename": "vpx/src/svc_encodeframe.c",
+        "patchSetId": 21
+      },
+      "lineNbr": 218,
+      "author": {
+        "id": 1003234
+      },
+      "writtenOn": "2013-11-06T22:50:07Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdX//+X0\u003d",
+      "revId": "6a1c5c25188341746589aecdaea8962e0e82b2b8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdX//+W4\u003d",
         "filename": "vpx/src/svc_encodeframe.c",
         "patchSetId": 21
@@ -104,6 +194,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdX//+Tc\u003d",
+        "filename": "vpx/src/svc_encodeframe.c",
+        "patchSetId": 21
+      },
+      "lineNbr": 822,
+      "author": {
+        "id": 1003234
+      },
+      "writtenOn": "2013-11-06T22:50:07Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdX//+W4\u003d",
+      "revId": "6a1c5c25188341746589aecdaea8962e0e82b2b8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdX//+X4\u003d",
         "filename": "vpx/src/svc_encodeframe.c",
         "patchSetId": 21
@@ -115,6 +223,24 @@
       "writtenOn": "2013-11-06T19:46:56Z",
       "side": 1,
       "message": "get_svc_internal?",
+      "revId": "6a1c5c25188341746589aecdaea8962e0e82b2b8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX//+TY\u003d",
+        "filename": "vpx/src/svc_encodeframe.c",
+        "patchSetId": 21
+      },
+      "lineNbr": 970,
+      "author": {
+        "id": 1003234
+      },
+      "writtenOn": "2013-11-06T22:50:07Z",
+      "side": 1,
+      "message": "get_svc_internal not used intentionally, comment added:\n// do not use get_svc_internal as it will unnecessarily allocate an \n// SvcInternal if it was not already allocated",
+      "parentUuid": "AAAAdX//+X4\u003d",
       "revId": "6a1c5c25188341746589aecdaea8962e0e82b2b8",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
