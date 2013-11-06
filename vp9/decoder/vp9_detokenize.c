@@ -82,10 +82,9 @@ static const vp9_prob cat6_prob[15] = {
     continue;                                            \
   }
 
-#define ADJUST_COEF(prob, bits_count)  \
-  do {                                 \
-    if (vp9_read(r, prob))             \
-      val += 1 << bits_count;          \
+#define ADJUST_COEF(prob, bits_count)                   \
+  do {                                                  \
+    val += (vp9_read(r, prob) << bits_count);           \
   } while (0);
 
 static int decode_coefs(VP9_COMMON *cm, const MACROBLOCKD *xd,
