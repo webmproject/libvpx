@@ -158,7 +158,7 @@ prototype void vp9_d63_predictor_32x32 "uint8_t *dst, ptrdiff_t y_stride, const 
 specialize vp9_d63_predictor_32x32 $ssse3_x86inc
 
 prototype void vp9_h_predictor_32x32 "uint8_t *dst, ptrdiff_t y_stride, const uint8_t *above, const uint8_t *left"
-specialize vp9_h_predictor_32x32 $ssse3 x86inc
+specialize vp9_h_predictor_32x32 $ssse3_x86inc
 
 prototype void vp9_d117_predictor_32x32 "uint8_t *dst, ptrdiff_t y_stride, const uint8_t *above, const uint8_t *left"
 specialize vp9_d117_predictor_32x32
