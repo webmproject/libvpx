@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdX//+eE\u003d",
+        "filename": "vp9/encoder/vp9_segmentation.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 119,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2013-11-06T02:04:52Z",
+      "side": 1,
+      "message": "It seems it is wrong here... just look how count_segs() called from count_segs_sb(). In that case bw or bh sometimes equals to num_8x8_blocks_wide_lookup[bsize] / 2.",
+      "revId": "6c3c5c6f2c13e4645537d5feef7b111b28f14f3a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
