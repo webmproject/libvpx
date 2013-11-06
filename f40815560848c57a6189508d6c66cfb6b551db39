@@ -125,6 +125,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdX//+gQ\u003d",
+        "filename": "test/video_source.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1122142
+      },
+      "writtenOn": "2013-11-06T00:11:12Z",
+      "side": 1,
+      "message": "I have heard that ! is best reserved for boolean operations.  In this case, we are testing if a pointer is equal to a particular value, so it makes the test explicit to use \u003d\u003d NULL.  In addition, the google c++ style guide favors \u003d\u003d NULL, so we shall go with that.",
+      "parentUuid": "AAAAdX//+g8\u003d",
+      "revId": "f40815560848c57a6189508d6c66cfb6b551db39",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdX//+kw\u003d",
         "filename": "test/video_source.h",
         "patchSetId": 4
