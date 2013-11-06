@@ -740,7 +740,7 @@ static void choose_txfm_size_from_rd(VP9_COMP *cpi, MACROBLOCK *x,
   int n, m;
   int s0, s1;
 
-  const vp9_prob *tx_probs = get_tx_probs2(xd, &cm->fc.tx_probs, xd->mi_8x8[0]);
+  const vp9_prob *tx_probs = get_tx_probs2(max_tx_size, xd, &cm->fc.tx_probs);
 
   for (n = TX_4X4; n <= max_tx_size; n++) {
     r[n][1] = r[n][0];
@@ -845,7 +845,7 @@ static void choose_txfm_size_from_modelrd(VP9_COMP *cpi, MACROBLOCK *x,
   double scale_rd[TX_SIZES] = {1.73, 1.44, 1.20, 1.00};
   // double scale_r[TX_SIZES] = {2.82, 2.00, 1.41, 1.00};
 
-  const vp9_prob *tx_probs = get_tx_probs2(xd, &cm->fc.tx_probs, xd->mi_8x8[0]);
+  const vp9_prob *tx_probs = get_tx_probs2(max_tx_size, xd, &cm->fc.tx_probs);
 
   // for (n = TX_4X4; n <= max_txfm_size; n++)
   //   r[n][0] = (r[n][0] * scale_r[n]);

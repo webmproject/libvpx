@@ -61,31 +61,28 @@ static int read_segment_id(vp9_reader *r, const struct segmentation *seg) {
 }
 
 static TX_SIZE read_selected_tx_size(VP9_COMMON *cm, MACROBLOCKD *xd,
-                                     BLOCK_SIZE bsize, vp9_reader *r) {
-  const uint8_t context = vp9_get_pred_context_tx_size(xd);
-  const vp9_prob *tx_probs = get_tx_probs(bsize, context, &cm->fc.tx_probs);
+                                     TX_SIZE max_tx_size, vp9_reader *r) {
+  const int ctx = vp9_get_pred_context_tx_size(xd);
+  const vp9_prob *tx_probs = get_tx_probs(max_tx_size, ctx, &cm->fc.tx_probs);
   TX_SIZE tx_size = vp9_read(r, tx_probs[0]);
-  if (tx_size != TX_4X4 && bsize >= BLOCK_16X16) {
+  if (tx_size != TX_4X4 && max_tx_size >= TX_16X16) {
     tx_size += vp9_read(r, tx_probs[1]);
-    if (tx_size != TX_8X8 && bsize >= BLOCK_32X32)
+    if (tx_size != TX_8X8 && max_tx_size >= TX_32X32)
       tx_size += vp9_read(r, tx_probs[2]);
   }
 
   if (!cm->frame_parallel_decoding_mode)
-    ++get_tx_counts(bsize, context, &cm->counts.tx)[tx_size];
+    ++get_tx_counts(max_tx_size, ctx, &cm->counts.tx)[tx_size];
   return tx_size;
 }
 
-static TX_SIZE read_tx_size(VP9_COMMON *const cm, MACROBLOCKD *const xd,
-                            TX_MODE tx_mode, BLOCK_SIZE bsize, int allow_select,
-                            vp9_reader *r) {
-  if (allow_select && tx_mode == TX_MODE_SELECT && bsize >= BLOCK_8X8) {
-    return read_selected_tx_size(cm, xd, bsize, r);
-  } else {
-    const TX_SIZE max_tx_size_block = max_txsize_lookup[bsize];
-    const TX_SIZE max_tx_size_txmode = tx_mode_to_biggest_tx_size[tx_mode];
-    return MIN(max_tx_size_block, max_tx_size_txmode);
-  }
+static TX_SIZE read_tx_size(VP9_COMMON *cm, MACROBLOCKD *xd, TX_MODE tx_mode,
+                            BLOCK_SIZE bsize, int allow_select, vp9_reader *r) {
+  const TX_SIZE max_tx_size = max_txsize_lookup[bsize];
+  if (allow_select && tx_mode == TX_MODE_SELECT && bsize >= BLOCK_8X8)
+    return read_selected_tx_size(cm, xd, max_tx_size, r);
+  else
+    return MIN(max_tx_size, tx_mode_to_biggest_tx_size[tx_mode]);
 }
 
 static void set_segment_id(VP9_COMMON *cm, BLOCK_SIZE bsize,
