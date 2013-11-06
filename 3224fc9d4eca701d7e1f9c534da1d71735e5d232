@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdX//+eU\u003d",
+        "filename": "vp9/decoder/vp9_decodframe.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2013-11-06T01:54:09Z",
+      "side": 1,
+      "message": "Is it possible to move band_translate[2] (and probably token_cache) into MACROBLOCKD struct? In this case we don\u0027t need to modify function signatures -- xd is already there.",
+      "revId": "3224fc9d4eca701d7e1f9c534da1d71735e5d232",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
