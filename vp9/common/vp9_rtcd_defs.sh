@@ -299,7 +299,7 @@ prototype void vp9_idct32x32_34_add "const int16_t *input, uint8_t *dest, int de
 specialize vp9_idct32x32_34_add sse2
 
 prototype void vp9_idct32x32_1_add "const int16_t *input, uint8_t *dest, int dest_stride"
-specialize vp9_idct32x32_1_add sse2 dspr2
+specialize vp9_idct32x32_1_add sse2 neon dspr2
 
 prototype void vp9_iht4x4_16_add "const int16_t *input, uint8_t *dest, int dest_stride, int tx_type"
 specialize vp9_iht4x4_16_add sse2 neon dspr2
