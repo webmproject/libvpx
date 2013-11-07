@@ -74,7 +74,7 @@ static const vp9_prob cat6_prob[15] = {
 
 #define WRITE_COEF_CONTINUE(val, token)                  \
   {                                                      \
-    qcoeff_ptr[scan[c]] = vp9_read_and_apply_sign(r, val) * \
+    dqcoeff_ptr[scan[c]] = vp9_read_and_apply_sign(r, val) * \
                             dq[c > 0] / (1 + (tx_size == TX_32X32)); \
     INCREMENT_COUNT(token);                              \
     token_cache[scan[c]] = vp9_pt_energy_class[token];   \
@@ -89,7 +89,7 @@ static const vp9_prob cat6_prob[15] = {
 
 static int decode_coefs(VP9_COMMON *cm, const MACROBLOCKD *xd,
                         vp9_reader *r, int block_idx,
-                        PLANE_TYPE type, int seg_eob, int16_t *qcoeff_ptr,
+                        PLANE_TYPE type, int seg_eob, int16_t *dqcoeff_ptr,
                         TX_SIZE tx_size, const int16_t *dq, int pt,
                         uint8_t *token_cache) {
   const FRAME_CONTEXT *const fc = &cm->fc;
@@ -223,7 +223,7 @@ int vp9_decode_block_tokens(VP9_COMMON *cm, MACROBLOCKD *xd,
                                     pd->left_context + loff);
 
   eob = decode_coefs(cm, xd, r, block,
-                     pd->plane_type, seg_eob, BLOCK_OFFSET(pd->qcoeff, block),
+                     pd->plane_type, seg_eob, BLOCK_OFFSET(pd->dqcoeff, block),
                      tx_size, pd->dequant, pt, token_cache);
 
   set_contexts(xd, pd, plane_bsize, tx_size, eob > 0, aoff, loff);

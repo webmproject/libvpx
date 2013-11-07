@@ -248,7 +248,7 @@ static void alloc_tile_storage(VP9D_COMP *pbi, int tile_cols) {
 static void inverse_transform_block(MACROBLOCKD* xd, int plane, int block,
                                     BLOCK_SIZE plane_bsize, TX_SIZE tx_size) {
   struct macroblockd_plane *const pd = &xd->plane[plane];
-  int16_t* const qcoeff = BLOCK_OFFSET(pd->qcoeff, block);
+  int16_t* const dqcoeff = BLOCK_OFFSET(pd->dqcoeff, block);
   const int stride = pd->dst.stride;
   const int eob = pd->eobs[block];
   if (eob > 0) {
@@ -261,35 +261,35 @@ static void inverse_transform_block(MACROBLOCKD* xd, int plane, int block,
       case TX_4X4:
         tx_type = get_tx_type_4x4(pd->plane_type, xd, raster_block);
         if (tx_type == DCT_DCT)
-          xd->itxm_add(qcoeff, dst, stride, eob);
+          xd->itxm_add(dqcoeff, dst, stride, eob);
         else
-          vp9_iht4x4_16_add(qcoeff, dst, stride, tx_type);
+          vp9_iht4x4_16_add(dqcoeff, dst, stride, tx_type);
         break;
       case TX_8X8:
         tx_type = get_tx_type_8x8(pd->plane_type, xd);
-        vp9_iht8x8_add(tx_type, qcoeff, dst, stride, eob);
+        vp9_iht8x8_add(tx_type, dqcoeff, dst, stride, eob);
         break;
       case TX_16X16:
         tx_type = get_tx_type_16x16(pd->plane_type, xd);
-        vp9_iht16x16_add(tx_type, qcoeff, dst, stride, eob);
+        vp9_iht16x16_add(tx_type, dqcoeff, dst, stride, eob);
         break;
       case TX_32X32:
         tx_type = DCT_DCT;
-        vp9_idct32x32_add(qcoeff, dst, stride, eob);
+        vp9_idct32x32_add(dqcoeff, dst, stride, eob);
         break;
       default:
         assert(!"Invalid transform size");
     }
 
     if (eob == 1) {
-      vpx_memset(qcoeff, 0, 2 * sizeof(qcoeff[0]));
+      vpx_memset(dqcoeff, 0, 2 * sizeof(dqcoeff[0]));
     } else {
       if (tx_type == DCT_DCT && tx_size <= TX_16X16 && eob <= 10)
-        vpx_memset(qcoeff, 0, 4 * (4 << tx_size) * sizeof(qcoeff[0]));
+        vpx_memset(dqcoeff, 0, 4 * (4 << tx_size) * sizeof(dqcoeff[0]));
       else if (tx_size == TX_32X32 && eob <= 34)
-        vpx_memset(qcoeff, 0, 256 * sizeof(qcoeff[0]));
+        vpx_memset(dqcoeff, 0, 256 * sizeof(dqcoeff[0]));
       else
-        vpx_memset(qcoeff, 0, (16 << (tx_size << 1)) * sizeof(qcoeff[0]));
+        vpx_memset(dqcoeff, 0, (16 << (tx_size << 1)) * sizeof(dqcoeff[0]));
     }
   }
 }
@@ -1335,7 +1335,7 @@ int vp9_decode_frame(VP9D_COMP *pbi, const uint8_t **p_data_end) {
   cm->fc = cm->frame_contexts[cm->frame_context_idx];
   vp9_zero(cm->counts);
   for (i = 0; i < MAX_MB_PLANE; ++i)
-    vp9_zero(xd->plane[i].qcoeff);
+    vp9_zero(xd->plane[i].dqcoeff);
 
   xd->corrupted = 0;
   new_fb->corrupted = read_compressed_header(pbi, data, first_partition_size);
