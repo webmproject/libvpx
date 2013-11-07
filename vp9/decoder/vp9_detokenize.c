@@ -61,16 +61,18 @@ static const vp9_prob cat6_prob[15] = {
   254, 254, 254, 252, 249, 243, 230, 196, 177, 153, 140, 133, 130, 129, 0
 };
 
+static const int token_to_counttoken[MAX_ENTROPY_TOKENS] = {
+  ZERO_TOKEN, ONE_TOKEN, TWO_TOKEN, TWO_TOKEN,
+  TWO_TOKEN, TWO_TOKEN, TWO_TOKEN, TWO_TOKEN,
+  TWO_TOKEN, TWO_TOKEN, TWO_TOKEN, DCT_EOB_MODEL_TOKEN
+};
+
 #define INCREMENT_COUNT(token)                           \
   do {                                                   \
-    if (!cm->frame_parallel_decoding_mode) {             \
-      ++coef_counts[type][ref][band][pt]                 \
-                   [token >= TWO_TOKEN ?                 \
-                    (token == DCT_EOB_TOKEN ?            \
-                     DCT_EOB_MODEL_TOKEN : TWO_TOKEN) :  \
-                    token];                              \
-    }                                                    \
-  } while (0)
+     if (!cm->frame_parallel_decoding_mode) {            \
+       ++coef_counts[band][pt][token_to_counttoken[token]]; \
+     }                                                   \
+  } while (0);
 
 #define WRITE_COEF_CONTINUE(val, token)                  \
   {                                                      \
@@ -101,7 +103,10 @@ static int decode_coefs(VP9_COMMON *cm, const MACROBLOCKD *xd,
   vp9_prob coef_probs_full[COEF_BANDS][PREV_COEF_CONTEXTS][ENTROPY_NODES];
   uint8_t load_map[COEF_BANDS][PREV_COEF_CONTEXTS] = { { 0 } };
   const vp9_prob *prob;
-  vp9_coeff_count_model *coef_counts = counts->coef[tx_size];
+  unsigned int (*coef_counts)[PREV_COEF_CONTEXTS][UNCONSTRAINED_NODES + 1] =
+      counts->coef[tx_size][type][ref];
+  unsigned int (*eob_branch_count)[PREV_COEF_CONTEXTS] =
+      counts->eob_branch[tx_size][type][ref];
   const int16_t *scan, *nb;
   const uint8_t *const band_translate = get_band_translate(tx_size);
   get_scan(xd, tx_size, type, block_idx, &scan, &nb);
@@ -116,7 +121,7 @@ static int decode_coefs(VP9_COMMON *cm, const MACROBLOCKD *xd,
     band = get_coef_band(band_translate, c);
     prob = coef_probs[band][pt];
     if (!cm->frame_parallel_decoding_mode)
-      ++counts->eob_branch[tx_size][type][ref][band][pt];
+      ++eob_branch_count[band][pt];
     if (!vp9_read(r, prob[EOB_CONTEXT_NODE]))
       break;
 
@@ -204,7 +209,7 @@ static int decode_coefs(VP9_COMMON *cm, const MACROBLOCKD *xd,
 
   if (c < seg_eob) {
     if (!cm->frame_parallel_decoding_mode)
-      ++coef_counts[type][ref][band][pt][DCT_EOB_MODEL_TOKEN];
+      ++coef_counts[band][pt][DCT_EOB_MODEL_TOKEN];
   }
 
   return c;
