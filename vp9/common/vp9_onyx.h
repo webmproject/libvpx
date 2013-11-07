@@ -221,8 +221,6 @@ extern "C"
   int vp9_set_size_literal(VP9_PTR comp, unsigned int width,
                            unsigned int height);
 
-  int vp9_switch_layer(VP9_PTR comp, int layer);
-
   void vp9_set_svc(VP9_PTR comp, int use_svc);
 
   int vp9_get_quantizer(VP9_PTR c);
