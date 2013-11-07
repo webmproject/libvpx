@@ -535,6 +535,7 @@ void vp9_first_pass(VP9_COMP *cpi) {
     pd[i].dqcoeff = ctx->dqcoeff_pbuf[i][1];
     pd[i].eobs = ctx->eobs_pbuf[i][1];
   }
+  x->skip_recode = 0;
 
 
   // Initialise the MV cost table to the defaults

@@ -377,6 +377,7 @@ static void update_state(VP9_COMP *cpi, PICK_MODE_CONTEXT *ctx,
   const int mis = cm->mode_info_stride;
   const int mi_width = num_8x8_blocks_wide_lookup[bsize];
   const int mi_height = num_8x8_blocks_high_lookup[bsize];
+  int max_plane;
 
   assert(mi->mbmi.mode < MB_MODE_COUNT);
   assert(mi->mbmi.ref_frame[0] < MAX_REF_FRAMES);
@@ -385,11 +386,19 @@ static void update_state(VP9_COMP *cpi, PICK_MODE_CONTEXT *ctx,
 
   *mi_addr = *mi;
 
-  for (i = 0; i < MAX_MB_PLANE; ++i) {
+  max_plane = is_inter_block(mbmi) ? MAX_MB_PLANE : 1;
+  for (i = 0; i < max_plane; ++i) {
     p[i].coeff = ctx->coeff_pbuf[i][1];
     pd[i].qcoeff = ctx->qcoeff_pbuf[i][1];
     pd[i].dqcoeff = ctx->dqcoeff_pbuf[i][1];
     pd[i].eobs = ctx->eobs_pbuf[i][1];
+  }
+
+  for (i = max_plane; i < MAX_MB_PLANE; ++i) {
+    p[i].coeff = ctx->coeff_pbuf[i][2];
+    pd[i].qcoeff = ctx->qcoeff_pbuf[i][2];
+    pd[i].dqcoeff = ctx->dqcoeff_pbuf[i][2];
+    pd[i].eobs = ctx->eobs_pbuf[i][2];
   }
 
   // Restore the coding context of the MB to that that was in place
@@ -619,6 +628,7 @@ static void pick_sb_modes(VP9_COMP *cpi, const TileInfo *const tile,
     pd[i].eobs = ctx->eobs_pbuf[i][0];
   }
   ctx->is_coded = 0;
+  x->skip_recode = 0;
 
   // Set to zero to make sure we do not use the previous encoded frame stats
   xd->mi_8x8[0]->mbmi.skip_coeff = 0;
@@ -2406,6 +2416,7 @@ static void encode_superblock(VP9_COMP *cpi, TOKENEXTRA **t, int output_enabled,
   const int mis = cm->mode_info_stride;
   const int mi_width = num_8x8_blocks_wide_lookup[bsize];
   const int mi_height = num_8x8_blocks_high_lookup[bsize];
+  x->skip_recode = !x->select_txfm_size && mbmi->sb_type >= BLOCK_8X8;
   x->skip_optimize = ctx->is_coded;
   ctx->is_coded = 1;
   x->use_lp32x32fdct = cpi->sf.use_lp32x32fdct;

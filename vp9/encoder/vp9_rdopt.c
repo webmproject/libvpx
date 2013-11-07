@@ -246,7 +246,8 @@ void vp9_initialize_rd_consts(VP9_COMP *cpi) {
 
   vp9_set_speed_features(cpi);
 
-  cpi->mb.select_txfm_size = cpi->sf.tx_size_search_method == USE_LARGESTALL ?
+  cpi->mb.select_txfm_size = (cpi->sf.tx_size_search_method == USE_LARGESTALL &&
+                              cm->frame_type != KEY_FRAME) ?
                              0 : 1;
 
   set_block_thresholds(cpi);
@@ -1329,6 +1330,7 @@ static void super_block_uvrd(VP9_COMP *const cpi, MACROBLOCK *x,
 }
 
 static int64_t rd_pick_intra_sbuv_mode(VP9_COMP *cpi, MACROBLOCK *x,
+                                       PICK_MODE_CONTEXT *ctx,
                                        int *rate, int *rate_tokenonly,
                                        int64_t *distortion, int *skippable,
                                        BLOCK_SIZE bsize) {
@@ -1364,6 +1366,27 @@ static int64_t rd_pick_intra_sbuv_mode(VP9_COMP *cpi, MACROBLOCK *x,
       *rate_tokenonly = this_rate_tokenonly;
       *distortion     = this_distortion;
       *skippable      = s;
+      if (!x->select_txfm_size) {
+        int i;
+        struct macroblock_plane *const p = x->plane;
+        struct macroblockd_plane *const pd = x->e_mbd.plane;
+        for (i = 1; i < MAX_MB_PLANE; ++i) {
+          p[i].coeff    = ctx->coeff_pbuf[i][2];
+          pd[i].qcoeff  = ctx->qcoeff_pbuf[i][2];
+          pd[i].dqcoeff = ctx->dqcoeff_pbuf[i][2];
+          pd[i].eobs    = ctx->eobs_pbuf[i][2];
+
+          ctx->coeff_pbuf[i][2]   = ctx->coeff_pbuf[i][0];
+          ctx->qcoeff_pbuf[i][2]  = ctx->qcoeff_pbuf[i][0];
+          ctx->dqcoeff_pbuf[i][2] = ctx->dqcoeff_pbuf[i][0];
+          ctx->eobs_pbuf[i][2]    = ctx->eobs_pbuf[i][0];
+
+          ctx->coeff_pbuf[i][0]   = p[i].coeff;
+          ctx->qcoeff_pbuf[i][0]  = pd[i].qcoeff;
+          ctx->dqcoeff_pbuf[i][0] = pd[i].dqcoeff;
+          ctx->eobs_pbuf[i][0]    = pd[i].eobs;
+        }
+      }
     }
   }
 
@@ -1389,8 +1412,9 @@ static int64_t rd_sbuv_dcpred(VP9_COMP *cpi, MACROBLOCK *x,
   return this_rd;
 }
 
-static void choose_intra_uv_mode(VP9_COMP *cpi, BLOCK_SIZE bsize,
-                                 int *rate_uv, int *rate_uv_tokenonly,
+static void choose_intra_uv_mode(VP9_COMP *cpi, PICK_MODE_CONTEXT *ctx,
+                                 BLOCK_SIZE bsize, int *rate_uv,
+                                 int *rate_uv_tokenonly,
                                  int64_t *dist_uv, int *skip_uv,
                                  MB_PREDICTION_MODE *mode_uv) {
   MACROBLOCK *const x = &cpi->mb;
@@ -1403,7 +1427,7 @@ static void choose_intra_uv_mode(VP9_COMP *cpi, BLOCK_SIZE bsize,
   // Else do a proper rd search for each possible transform size that may
   // be considered in the main rd loop.
   } else {
-    rd_pick_intra_sbuv_mode(cpi, x,
+    rd_pick_intra_sbuv_mode(cpi, x, ctx,
                             rate_uv, rate_uv_tokenonly, dist_uv, skip_uv,
                             bsize < BLOCK_8X8 ? BLOCK_8X8 : bsize);
   }
@@ -3033,12 +3057,13 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
   return this_rd;  // if 0, this will be re-calculated by caller
 }
 
-static void swap_block_ptr(MACROBLOCK *x, PICK_MODE_CONTEXT *ctx) {
-  int i;
+static void swap_block_ptr(MACROBLOCK *x, PICK_MODE_CONTEXT *ctx,
+                           int max_plane) {
   struct macroblock_plane *const p = x->plane;
   struct macroblockd_plane *const pd = x->e_mbd.plane;
+  int i;
 
-  for (i = 0; i < MAX_MB_PLANE; ++i) {
+  for (i = 0; i < max_plane; ++i) {
     p[i].coeff    = ctx->coeff_pbuf[i][1];
     pd[i].qcoeff  = ctx->qcoeff_pbuf[i][1];
     pd[i].dqcoeff = ctx->dqcoeff_pbuf[i][1];
@@ -3075,7 +3100,7 @@ void vp9_rd_pick_intra_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
       *returnrate = INT_MAX;
       return;
     }
-    rd_pick_intra_sbuv_mode(cpi, x, &rate_uv, &rate_uv_tokenonly,
+    rd_pick_intra_sbuv_mode(cpi, x, ctx, &rate_uv, &rate_uv_tokenonly,
                             &dist_uv, &uv_skip, bsize);
   } else {
     y_skip = 0;
@@ -3084,7 +3109,7 @@ void vp9_rd_pick_intra_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
       *returnrate = INT_MAX;
       return;
     }
-    rd_pick_intra_sbuv_mode(cpi, x, &rate_uv, &rate_uv_tokenonly,
+    rd_pick_intra_sbuv_mode(cpi, x, ctx, &rate_uv, &rate_uv_tokenonly,
                             &dist_uv, &uv_skip, BLOCK_8X8);
   }
 
@@ -3450,7 +3475,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
 
       uv_tx = MIN(mbmi->tx_size, max_uv_txsize_lookup[bsize]);
       if (rate_uv_intra[uv_tx] == INT_MAX) {
-        choose_intra_uv_mode(cpi, bsize, &rate_uv_intra[uv_tx],
+        choose_intra_uv_mode(cpi, ctx, bsize, &rate_uv_intra[uv_tx],
                              &rate_uv_tokenonly[uv_tx],
                              &dist_uv[uv_tx], &skip_uv[uv_tx],
                              &mode_uv[uv_tx]);
@@ -3584,6 +3609,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
 
     // Did this mode help.. i.e. is it the new best mode
     if (this_rd < best_rd || x->skip) {
+      int max_plane = MAX_MB_PLANE;
       if (!mode_excluded) {
         // Note index of best mode so far
         best_mode_index = mode_index;
@@ -3591,6 +3617,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
         if (ref_frame == INTRA_FRAME) {
           /* required for left and above block mv */
           mbmi->mv[0].as_int = 0;
+          max_plane = 1;
         }
 
         *returnrate = rate2;
@@ -3599,7 +3626,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
         best_mbmode = *mbmi;
         best_skip2 = this_skip2;
         if (!x->select_txfm_size)
-          swap_block_ptr(x, ctx);
+          swap_block_ptr(x, ctx, max_plane);
         vpx_memcpy(ctx->zcoeff_blk, x->zcoeff_blk[mbmi->tx_size],
                    sizeof(uint8_t) * ctx->num_4x4_blk);
 
@@ -3706,7 +3733,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
     // Do Intra UV best rd mode selection if best mode choice above was intra.
     if (vp9_mode_order[best_mode_index].ref_frame == INTRA_FRAME) {
       TX_SIZE uv_tx_size = get_uv_tx_size(mbmi);
-      rd_pick_intra_sbuv_mode(cpi, x, &rate_uv_intra[uv_tx_size],
+      rd_pick_intra_sbuv_mode(cpi, x, ctx, &rate_uv_intra[uv_tx_size],
                               &rate_uv_tokenonly[uv_tx_size],
                               &dist_uv[uv_tx_size],
                               &skip_uv[uv_tx_size],
@@ -4075,7 +4102,7 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
       distortion2 += distortion_y;
 
       if (rate_uv_intra[TX_4X4] == INT_MAX) {
-        choose_intra_uv_mode(cpi, bsize, &rate_uv_intra[TX_4X4],
+        choose_intra_uv_mode(cpi, ctx, bsize, &rate_uv_intra[TX_4X4],
                              &rate_uv_tokenonly[TX_4X4],
                              &dist_uv[TX_4X4], &skip_uv[TX_4X4],
                              &mode_uv[TX_4X4]);
@@ -4329,12 +4356,14 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
     // Did this mode help.. i.e. is it the new best mode
     if (this_rd < best_rd || x->skip) {
       if (!mode_excluded) {
+        int max_plane = MAX_MB_PLANE;
         // Note index of best mode so far
         best_mode_index = mode_index;
 
         if (ref_frame == INTRA_FRAME) {
           /* required for left and above block mv */
           mbmi->mv[0].as_int = 0;
+          max_plane = 1;
         }
 
         *returnrate = rate2;
@@ -4345,7 +4374,7 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
         best_mbmode = *mbmi;
         best_skip2 = this_skip2;
         if (!x->select_txfm_size)
-          swap_block_ptr(x, ctx);
+          swap_block_ptr(x, ctx, max_plane);
         vpx_memcpy(ctx->zcoeff_blk, x->zcoeff_blk[mbmi->tx_size],
                    sizeof(uint8_t) * ctx->num_4x4_blk);
 
@@ -4452,7 +4481,7 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
     // Do Intra UV best rd mode selection if best mode choice above was intra.
     if (vp9_ref_order[best_mode_index].ref_frame == INTRA_FRAME) {
       TX_SIZE uv_tx_size = get_uv_tx_size(mbmi);
-      rd_pick_intra_sbuv_mode(cpi, x, &rate_uv_intra[uv_tx_size],
+      rd_pick_intra_sbuv_mode(cpi, x, ctx, &rate_uv_intra[uv_tx_size],
                               &rate_uv_tokenonly[uv_tx_size],
                               &dist_uv[uv_tx_size],
                               &skip_uv[uv_tx_size],
