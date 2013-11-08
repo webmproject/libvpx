@@ -209,20 +209,22 @@ static void setup_plane_dequants(VP9_COMMON *cm, MACROBLOCKD *xd, int q_index) {
 // Allocate storage for each tile column.
 // TODO(jzern): when max_threads <= 1 the same storage could be used for each
 // tile.
-static void alloc_tile_storage(VP9D_COMP *pbi, int tile_cols) {
+static void alloc_tile_storage(VP9D_COMP *pbi, int tile_rows, int tile_cols) {
   VP9_COMMON *const cm = &pbi->common;
   const int aligned_mi_cols = mi_cols_aligned_to_sb(cm->mi_cols);
-  int i, tile_col;
+  int i, tile_row, tile_col;
 
   CHECK_MEM_ERROR(cm, pbi->mi_streams,
-                  vpx_realloc(pbi->mi_streams, tile_cols *
+                  vpx_realloc(pbi->mi_streams, tile_rows * tile_cols *
                               sizeof(*pbi->mi_streams)));
-  for (tile_col = 0; tile_col < tile_cols; ++tile_col) {
-    TileInfo tile;
-
-    vp9_tile_init(&tile, cm, 0, tile_col);
-    pbi->mi_streams[tile_col] =
-        &cm->mi[cm->mi_rows * tile.mi_col_start];
+  for (tile_row = 0; tile_row < tile_rows; ++tile_row) {
+    for (tile_col = 0; tile_col < tile_cols; ++tile_col) {
+      TileInfo tile;
+      vp9_tile_init(&tile, cm, tile_row, tile_col);
+      pbi->mi_streams[tile_row * tile_cols + tile_col] =
+          &cm->mi[tile.mi_row_start * cm->mode_info_stride
+                  + tile.mi_col_start];
+    }
   }
 
   // 2 contexts per 'mi unit', so that we have one context per 4x4 txfm
@@ -360,16 +362,15 @@ static void set_offsets(VP9_COMMON *const cm, MACROBLOCKD *const xd,
   const int bh = num_8x8_blocks_high_lookup[bsize];
   const int bw = num_8x8_blocks_wide_lookup[bsize];
   const int offset = mi_row * cm->mode_info_stride + mi_col;
-
-  xd->mode_info_stride = cm->mode_info_stride;
+  const int tile_offset = tile->mi_row_start * cm->mode_info_stride +
+                          tile->mi_col_start;
 
   xd->mi_8x8 = cm->mi_grid_visible + offset;
   xd->prev_mi_8x8 = cm->prev_mi_grid_visible + offset;
 
   // we are using the mode info context stream here
-  xd->mi_8x8[0] = xd->mi_stream;
+  xd->mi_8x8[0] = xd->mi_stream + offset - tile_offset;
   xd->mi_8x8[0]->mbmi.sb_type = bsize;
-  ++xd->mi_stream;
 
   // Special case: if prev_mi is NULL, the previous mode info context
   // cannot be used.
@@ -768,9 +769,10 @@ static void setup_frame_size_with_refs(VP9D_COMP *pbi,
 }
 
 static void setup_tile_context(VP9D_COMP *const pbi, MACROBLOCKD *const xd,
-                               int tile_col) {
+                               int tile_row, int tile_col) {
   int i;
-  xd->mi_stream = pbi->mi_streams[tile_col];
+  const int tile_cols = 1 << pbi->common.log2_tile_cols;
+  xd->mi_stream = pbi->mi_streams[tile_row * tile_cols + tile_col];
 
   for (i = 0; i < MAX_MB_PLANE; ++i) {
     xd->above_context[i] = pbi->above_context[i];
@@ -927,7 +929,7 @@ static const uint8_t *decode_tiles(VP9D_COMP *pbi, const uint8_t *data) {
 
       vp9_tile_init(&tile, cm, tile_row, col);
       setup_token_decoder(buf->data, data_end, buf->size, &cm->error, &r);
-      setup_tile_context(pbi, xd, col);
+      setup_tile_context(pbi, xd, tile_row, col);
       decode_tile(pbi, &tile, &r);
 
       if (last_tile)
@@ -1014,7 +1016,7 @@ static const uint8_t *decode_tiles_mt(VP9D_COMP *pbi, const uint8_t *data) {
 
       setup_token_decoder(data, data_end, size, &cm->error,
                           &tile_data->bit_reader);
-      setup_tile_context(pbi, &tile_data->xd, tile_col);
+      setup_tile_context(pbi, &tile_data->xd, 0, tile_col);
 
       worker->had_error = 0;
       if (i == num_workers - 1 || tile_col == tile_cols - 1) {
@@ -1314,7 +1316,7 @@ int vp9_decode_frame(VP9D_COMP *pbi, const uint8_t **p_data_end) {
     }
   }
 
-  alloc_tile_storage(pbi, tile_cols);
+  alloc_tile_storage(pbi, tile_rows, tile_cols);
 
   xd->mi_8x8 = cm->mi_grid_visible;
   xd->mode_info_stride = cm->mode_info_stride;
