@@ -874,77 +874,68 @@ static size_t get_tile(const uint8_t *const data_end,
   return size;
 }
 
-static const uint8_t *decode_tiles(VP9D_COMP *pbi, const uint8_t *data) {
-  vp9_reader residual_bc;
+typedef struct TileBuffer {
+  const uint8_t *data;
+  size_t size;
+} TileBuffer;
 
+static const uint8_t *decode_tiles(VP9D_COMP *pbi, const uint8_t *data) {
   VP9_COMMON *const cm = &pbi->common;
   MACROBLOCKD *const xd = &pbi->mb;
-
-  const uint8_t *const data_end = pbi->source + pbi->source_sz;
-  const int aligned_mi_cols = mi_cols_aligned_to_sb(cm->mi_cols);
+  const int aligned_cols = mi_cols_aligned_to_sb(cm->mi_cols);
   const int tile_cols = 1 << cm->log2_tile_cols;
   const int tile_rows = 1 << cm->log2_tile_rows;
+  TileBuffer tile_buffers[4][1 << 6];
   int tile_row, tile_col;
+  const uint8_t *const data_end = pbi->source + pbi->source_sz;
+  const uint8_t *end = NULL;
+  vp9_reader r;
+
+  assert(tile_rows < 4);
+  assert(tile_cols < (1 << 6));
 
   // Note: this memset assumes above_context[0], [1] and [2]
   // are allocated as part of the same buffer.
   vpx_memset(pbi->above_context[0], 0,
-             sizeof(*pbi->above_context[0]) * MAX_MB_PLANE *
-             2 * aligned_mi_cols);
+             sizeof(*pbi->above_context[0]) * MAX_MB_PLANE * 2 * aligned_cols);
 
   vpx_memset(pbi->above_seg_context, 0,
-             sizeof(*pbi->above_seg_context) * aligned_mi_cols);
+             sizeof(*pbi->above_seg_context) * aligned_cols);
 
-  if (pbi->oxcf.inv_tile_order) {
-    const uint8_t *data_ptr2[4][1 << 6];
-    vp9_reader bc_bak = {0};
-
-    // pre-initialize the offsets, we're going to decode in inverse order
-    data_ptr2[0][0] = data;
-    for (tile_row = 0; tile_row < tile_rows; tile_row++) {
-      for (tile_col = 0; tile_col < tile_cols; tile_col++) {
-        const int last_tile =
-            tile_row == tile_rows - 1 && tile_col == tile_cols - 1;
-        const size_t size = get_tile(data_end, last_tile, &cm->error, &data);
-        data_ptr2[tile_row][tile_col] = data;
-        data += size;
-      }
-    }
-
-    for (tile_row = 0; tile_row < tile_rows; tile_row++) {
-      for (tile_col = tile_cols - 1; tile_col >= 0; tile_col--) {
-        TileInfo tile;
-
-        vp9_tile_init(&tile, cm, tile_row, tile_col);
-        setup_token_decoder(data_ptr2[tile_row][tile_col], data_end,
-                            data_end - data_ptr2[tile_row][tile_col],
-                            &cm->error, &residual_bc);
-        setup_tile_context(pbi, xd, tile_col);
-        decode_tile(pbi, &tile, &residual_bc);
-        if (tile_row == tile_rows - 1 && tile_col == tile_cols - 1)
-          bc_bak = residual_bc;
-      }
-    }
-    residual_bc = bc_bak;
-  } else {
-    for (tile_row = 0; tile_row < tile_rows; tile_row++) {
-      for (tile_col = 0; tile_col < tile_cols; tile_col++) {
-        const int last_tile =
-            tile_row == tile_rows - 1 && tile_col == tile_cols - 1;
-        const size_t size = get_tile(data_end, last_tile, &cm->error, &data);
-        TileInfo tile;
-
-        vp9_tile_init(&tile, cm, tile_row, tile_col);
-
-        setup_token_decoder(data, data_end, size, &cm->error, &residual_bc);
-        setup_tile_context(pbi, xd, tile_col);
-        decode_tile(pbi, &tile, &residual_bc);
-        data += size;
-      }
+  // Load tile data into tile_buffers
+  for (tile_row = 0; tile_row < tile_rows; ++tile_row) {
+    for (tile_col = 0; tile_col < tile_cols; ++tile_col) {
+      const int last_tile = tile_row == tile_rows - 1 &&
+                            tile_col == tile_cols - 1;
+      const size_t size = get_tile(data_end, last_tile, &cm->error, &data);
+      TileBuffer *const buf = &tile_buffers[tile_row][tile_col];
+      buf->data = data;
+      buf->size = size;
+      data += size;
     }
   }
 
-  return vp9_reader_find_end(&residual_bc);
+  // Decode tiles using data from tile_buffers
+  for (tile_row = 0; tile_row < tile_rows; ++tile_row) {
+    for (tile_col = 0; tile_col < tile_cols; ++tile_col) {
+      const int col = pbi->oxcf.inv_tile_order ? tile_cols - tile_col - 1
+                                               : tile_col;
+      const int last_tile = tile_row == tile_rows - 1 &&
+                                 col == tile_cols - 1;
+      const TileBuffer *const buf = &tile_buffers[tile_row][col];
+      TileInfo tile;
+
+      vp9_tile_init(&tile, cm, tile_row, col);
+      setup_token_decoder(buf->data, data_end, buf->size, &cm->error, &r);
+      setup_tile_context(pbi, xd, col);
+      decode_tile(pbi, &tile, &r);
+
+      if (last_tile)
+        end = vp9_reader_find_end(&r);
+    }
+  }
+
+  return end;
 }
 
 static int tile_worker_hook(void *arg1, void *arg2) {
