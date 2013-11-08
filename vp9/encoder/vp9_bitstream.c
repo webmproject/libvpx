@@ -1217,7 +1217,7 @@ static size_t encode_tiles(VP9_COMP *cpi, uint8_t *data_ptr) {
     for (tile_col = 0; tile_col < tile_cols; tile_col++) {
       TileInfo tile;
 
-      vp9_tile_init(&tile, cm, 0, tile_col);
+      vp9_tile_init(&tile, cm, tile_row, tile_col);
       tok_end = tok[tile_row][tile_col] + cpi->tok_count[tile_row][tile_col];
 
       if (tile_col < tile_cols - 1 || tile_row < tile_rows - 1)
