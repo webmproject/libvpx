@@ -1765,7 +1765,7 @@ static void rd_pick_reference_frame(VP9_COMP *cpi, const TileInfo *const tile,
 }
 
 static void encode_sb_row(VP9_COMP *cpi, const TileInfo *const tile,
-                          int mi_row, TOKENEXTRA **tp, int *totalrate) {
+                          int mi_row, TOKENEXTRA **tp) {
   VP9_COMMON * const cm = &cpi->common;
   int mi_col;
 
@@ -1910,7 +1910,6 @@ static void encode_frame_internal(VP9_COMP *cpi) {
   MACROBLOCK * const x = &cpi->mb;
   VP9_COMMON * const cm = &cpi->common;
   MACROBLOCKD * const xd = &x->e_mbd;
-  int totalrate;
 
 //  fprintf(stderr, "encode_frame_internal frame %d (%d) type %d\n",
 //           cpi->common.current_video_frame, cpi->common.show_frame,
@@ -1925,8 +1924,6 @@ static void encode_frame_internal(VP9_COMP *cpi) {
     fclose(statsfile);
   }
 #endif
-
-  totalrate = 0;
 
   vp9_zero(cm->counts.switchable_interp);
   vp9_zero(cpi->tx_stepdown_count);
@@ -1989,7 +1986,7 @@ static void encode_frame_internal(VP9_COMP *cpi) {
           vp9_tile_init(&tile, cm, tile_row, tile_col);
           for (mi_row = tile.mi_row_start;
                mi_row < tile.mi_row_end; mi_row += 8)
-            encode_sb_row(cpi, &tile, mi_row, &tp, &totalrate);
+            encode_sb_row(cpi, &tile, mi_row, &tp);
 
           cpi->tok_count[tile_row][tile_col] = (unsigned int)(tp - tp_old);
           assert(tp - cpi->tok <= get_token_alloc(cm->mb_rows, cm->mb_cols));
@@ -2014,10 +2011,6 @@ static void encode_frame_internal(VP9_COMP *cpi) {
   } else {
     cpi->sf.skip_encode_frame = 0;
   }
-
-  // 256 rate units to the bit,
-  // projected_frame_size in units of BYTES
-  cpi->projected_frame_size = totalrate >> 8;
 
 #if 0
   // Keep record of the total distortion this time around for future use
