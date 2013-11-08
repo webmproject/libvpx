@@ -16,6 +16,24 @@
       "revId": "e731b2ba2cdb6f3f38b701a19dc5c035a2232371",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX//+Jo\u003d",
+        "filename": "vpxenc.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1414,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2013-11-08T22:58:03Z",
+      "side": 0,
+      "message": "Yeah; I\u0027ll take care of those when I have the ivfenc/dec patchset ready. It\u0027s pretty close. I just need to do some more testing to make sure I didn\u0027t break anything.",
+      "parentUuid": "AAAAdX//+KA\u003d",
+      "revId": "e731b2ba2cdb6f3f38b701a19dc5c035a2232371",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
