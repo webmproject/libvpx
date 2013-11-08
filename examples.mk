@@ -41,6 +41,7 @@ vpxenc.SRCS                 += webmenc.c webmenc.h
 vpxenc.SRCS                 += vpx_ports/mem_ops.h
 vpxenc.SRCS                 += vpx_ports/mem_ops_aligned.h
 vpxenc.SRCS                 += vpx_ports/vpx_timer.h
+vpxenc.SRCS                 += vpxstats.c vpxstats.h
 vpxenc.SRCS                 += third_party/libmkv/EbmlIDs.h
 vpxenc.SRCS                 += third_party/libmkv/EbmlWriter.c
 vpxenc.SRCS                 += third_party/libmkv/EbmlWriter.h
