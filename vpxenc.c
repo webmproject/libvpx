@@ -1409,17 +1409,7 @@ void open_input_file(struct input_state *input) {
     } else
       fatal("Unsupported Y4M stream.");
   } else if (input->detect.buf_read == 4 && file_is_ivf(input, &fourcc)) {
-    input->file_type = FILE_TYPE_IVF;
-    switch (fourcc) {
-      case 0x32315659:
-        input->use_i420 = 0;
-        break;
-      case 0x30323449:
-        input->use_i420 = 1;
-        break;
-      default:
-        fatal("Unsupported fourcc (%08x) in IVF", fourcc);
-    }
+    fatal("IVF is not supported as input.");
   } else {
     input->file_type = FILE_TYPE_RAW;
   }
@@ -1433,7 +1423,7 @@ static void close_input_file(struct input_state *input) {
 }
 
 static struct stream_state *new_stream(struct global_config *global,
-                                       struct stream_state  *prev) {
+                                       struct stream_state *prev) {
   struct stream_state *stream;
 
   stream = calloc(1, sizeof(*stream));
