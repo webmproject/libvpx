@@ -891,8 +891,8 @@ static const uint8_t *decode_tiles(VP9D_COMP *pbi, const uint8_t *data) {
   const uint8_t *end = NULL;
   vp9_reader r;
 
-  assert(tile_rows < 4);
-  assert(tile_cols < (1 << 6));
+  assert(tile_rows <= 4);
+  assert(tile_cols <= (1 << 6));
 
   // Note: this memset assumes above_context[0], [1] and [2]
   // are allocated as part of the same buffer.
