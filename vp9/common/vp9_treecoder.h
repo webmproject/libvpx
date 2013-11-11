@@ -42,7 +42,6 @@ struct vp9_token {
 /* Construct encoding array from tree. */
 
 void vp9_tokens_from_tree(struct vp9_token*, vp9_tree);
-void vp9_tokens_from_tree_offset(struct vp9_token*, vp9_tree, int offset);
 
 /* Convert array of token occurrence counts into a table of probabilities
    for the associated binary encoding tree.  Also writes count of branches
@@ -51,8 +50,7 @@ void vp9_tokens_from_tree_offset(struct vp9_token*, vp9_tree, int offset);
 
 void vp9_tree_probs_from_distribution(vp9_tree tree,
                                       unsigned int branch_ct[ /* n - 1 */ ][2],
-                                      const unsigned int num_events[ /* n */ ],
-                                      unsigned int tok0_offset);
+                                      const unsigned int num_events[ /* n */ ]);
 
 
 static INLINE vp9_prob clip_prob(int p) {
@@ -116,10 +114,10 @@ static unsigned int tree_merge_probs_impl(unsigned int i,
 
 static void tree_merge_probs(const vp9_tree_index *tree,
                              const vp9_prob *pre_probs,
-                             const unsigned int *counts, int offset,
+                             const unsigned int *counts,
                              unsigned int count_sat,
                              unsigned int max_update_factor, vp9_prob *probs) {
-  tree_merge_probs_impl(0, tree, pre_probs, &counts[-offset],
+  tree_merge_probs_impl(0, tree, pre_probs, counts,
                         count_sat, max_update_factor, probs);
 }
 

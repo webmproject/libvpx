@@ -169,10 +169,8 @@ static void update_mode(vp9_writer *w, int n, vp9_tree tree,
                         const unsigned int num_events[/* n */]) {
   int i = 0;
 
-  vp9_tree_probs_from_distribution(tree, bct, num_events, 0);
-  n--;
-
-  for (i = 0; i < n; ++i)
+  vp9_tree_probs_from_distribution(tree, bct, num_events);
+  for (i = 0; i < n - 1; ++i)
     vp9_cond_prob_diff_update(w, &Pcur[i], bct[i]);
 }
 
@@ -231,7 +229,7 @@ static void update_switchable_interp_probs(VP9_COMP *cpi, vp9_writer *w) {
   int i, j;
   for (j = 0; j < SWITCHABLE_FILTER_CONTEXTS; ++j) {
     vp9_tree_probs_from_distribution(vp9_switchable_interp_tree, branch_ct,
-                                     cm->counts.switchable_interp[j], 0);
+                                     cm->counts.switchable_interp[j]);
 
     for (i = 0; i < SWITCHABLE_FILTERS - 1; ++i)
       vp9_cond_prob_diff_update(w, &cm->fc.switchable_interp_prob[j][i],
@@ -250,7 +248,7 @@ static void update_inter_mode_probs(VP9_COMMON *cm, vp9_writer *w) {
   for (i = 0; i < INTER_MODE_CONTEXTS; ++i) {
     unsigned int branch_ct[INTER_MODES - 1][2];
     vp9_tree_probs_from_distribution(vp9_inter_mode_tree, branch_ct,
-                                     cm->counts.inter_mode[i], NEARESTMV);
+                                     cm->counts.inter_mode[i]);
 
     for (j = 0; j < INTER_MODES - 1; ++j)
       vp9_cond_prob_diff_update(w, &cm->fc.inter_mode_probs[i][j],
@@ -321,7 +319,7 @@ static void write_sb_mv_ref(vp9_writer *w, MB_PREDICTION_MODE mode,
                             const vp9_prob *p) {
   assert(is_inter_mode(mode));
   write_token(w, vp9_inter_mode_tree, p,
-              &vp9_inter_mode_encodings[inter_mode_offset(mode)]);
+              &vp9_inter_mode_encodings[INTER_OFFSET(mode)]);
 }
 
 
@@ -448,7 +446,7 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, MODE_INFO *m, vp9_writer *bc) {
       if (bsize >= BLOCK_8X8) {
         write_sb_mv_ref(bc, mode, mv_ref_p);
         ++cm->counts.inter_mode[mi->mode_context[rf]]
-                               [inter_mode_offset(mode)];
+                               [INTER_OFFSET(mode)];
       }
     }
 
@@ -471,7 +469,7 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, MODE_INFO *m, vp9_writer *bc) {
           const MB_PREDICTION_MODE blockmode = m->bmi[j].as_mode;
           write_sb_mv_ref(bc, blockmode, mv_ref_p);
           ++cm->counts.inter_mode[mi->mode_context[rf]]
-                                 [inter_mode_offset(blockmode)];
+                                 [INTER_OFFSET(blockmode)];
 
           if (blockmode == NEWMV) {
 #ifdef ENTROPY_STATS
@@ -703,7 +701,7 @@ static void build_tree_distribution(VP9_COMP *cpi, TX_SIZE tx_size) {
             continue;
           vp9_tree_probs_from_distribution(vp9_coef_tree,
                                            coef_branch_ct[i][j][k][l],
-                                           coef_counts[i][j][k][l], 0);
+                                           coef_counts[i][j][k][l]);
           coef_branch_ct[i][j][k][l][0][1] = eob_branch_ct[i][j][k][l] -
                                              coef_branch_ct[i][j][k][l][0][0];
           for (m = 0; m < UNCONSTRAINED_NODES; ++m)

@@ -268,10 +268,10 @@ void vp9_initialize_rd_consts(VP9_COMP *cpi) {
       MB_PREDICTION_MODE m;
 
       for (m = NEARESTMV; m < MB_MODE_COUNT; m++)
-        cpi->mb.inter_mode_cost[i][inter_mode_offset(m)] =
+        cpi->mb.inter_mode_cost[i][INTER_OFFSET(m)] =
             cost_token(vp9_inter_mode_tree,
                        cm->fc.inter_mode_probs[i],
-                       &vp9_inter_mode_encodings[inter_mode_offset(m)]);
+                       &vp9_inter_mode_encodings[INTER_OFFSET(m)]);
     }
   }
 }
@@ -1416,7 +1416,7 @@ static int cost_mv_ref(VP9_COMP *cpi, MB_PREDICTION_MODE mode,
   // Don't account for mode here if segment skip is enabled.
   if (!vp9_segfeature_active(&cpi->common.seg, segment_id, SEG_LVL_SKIP)) {
     assert(is_inter_mode(mode));
-    return x->inter_mode_cost[mode_context][inter_mode_offset(mode)];
+    return x->inter_mode_cost[mode_context][INTER_OFFSET(mode)];
   } else {
     return 0;
   }
@@ -1707,7 +1707,7 @@ static void rd_check_segment_txsize(VP9_COMP *cpi, MACROBLOCK *x,
         const struct buf_2d orig_src = x->plane[0].src;
         struct buf_2d orig_pre[2];
 
-        mode_idx = inter_mode_offset(this_mode);
+        mode_idx = INTER_OFFSET(this_mode);
         bsi->rdstat[i][mode_idx].brdcost = INT64_MAX;
 
         // if we're near/nearest and mv == 0,0, compare to zeromv
@@ -2002,7 +2002,7 @@ static void rd_check_segment_txsize(VP9_COMP *cpi, MACROBLOCK *x,
         return;
       }
 
-      mode_idx = inter_mode_offset(mode_selected);
+      mode_idx = INTER_OFFSET(mode_selected);
       vpx_memcpy(t_above, bsi->rdstat[i][mode_idx].ta, sizeof(t_above));
       vpx_memcpy(t_left, bsi->rdstat[i][mode_idx].tl, sizeof(t_left));
 
@@ -2078,7 +2078,7 @@ static int64_t rd_pick_best_mbsegmentation(VP9_COMP *cpi, MACROBLOCK *x,
     return INT64_MAX;
   /* set it to the best */
   for (i = 0; i < 4; i++) {
-    mode_idx = inter_mode_offset(bsi->modes[i]);
+    mode_idx = INTER_OFFSET(bsi->modes[i]);
     mi->bmi[i].as_mv[0].as_int = bsi->rdstat[i][mode_idx].mvs[0].as_int;
     if (has_second_ref(mbmi))
       mi->bmi[i].as_mv[1].as_int = bsi->rdstat[i][mode_idx].mvs[1].as_int;

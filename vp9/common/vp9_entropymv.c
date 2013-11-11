@@ -196,8 +196,8 @@ static vp9_prob adapt_prob(vp9_prob prep, const unsigned int ct[2]) {
 
 static void adapt_probs(const vp9_tree_index *tree, const vp9_prob *pre_probs,
                         const unsigned int *counts, vp9_prob *probs) {
-  tree_merge_probs(tree, pre_probs, counts, 0,
-                   MV_COUNT_SAT, MV_MAX_UPDATE_FACTOR, probs);
+  tree_merge_probs(tree, pre_probs, counts, MV_COUNT_SAT, MV_MAX_UPDATE_FACTOR,
+                   probs);
 }
 
 void vp9_adapt_mv_probs(VP9_COMMON *cm, int allow_hp) {
@@ -207,8 +207,7 @@ void vp9_adapt_mv_probs(VP9_COMMON *cm, int allow_hp) {
   const nmv_context *pre_fc = &cm->frame_contexts[cm->frame_context_idx].nmvc;
   const nmv_context_counts *counts = &cm->counts.mv;
 
-  adapt_probs(vp9_mv_joint_tree, pre_fc->joints, counts->joints,
-                     fc->joints);
+  adapt_probs(vp9_mv_joint_tree, pre_fc->joints, counts->joints, fc->joints);
 
   for (i = 0; i < 2; ++i) {
     nmv_component *comp = &fc->comps[i];

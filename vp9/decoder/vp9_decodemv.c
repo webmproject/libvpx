@@ -48,12 +48,13 @@ static MB_PREDICTION_MODE read_intra_mode_uv(VP9_COMMON *cm, vp9_reader *r,
 }
 
 static MB_PREDICTION_MODE read_inter_mode(VP9_COMMON *cm, vp9_reader *r,
-                                          uint8_t context) {
-  const MB_PREDICTION_MODE mode = treed_read(r, vp9_inter_mode_tree,
-                                             cm->fc.inter_mode_probs[context]);
+                                          int ctx) {
+  const int mode = treed_read(r, vp9_inter_mode_tree,
+                              cm->fc.inter_mode_probs[ctx]);
   if (!cm->frame_parallel_decoding_mode)
-    ++cm->counts.inter_mode[context][inter_mode_offset(mode)];
-  return mode;
+    ++cm->counts.inter_mode[ctx][mode];
+
+  return NEARESTMV + mode;
 }
 
 static int read_segment_id(vp9_reader *r, const struct segmentation *seg) {
