@@ -153,47 +153,38 @@ static void read_comp_pred(VP9_COMMON *cm, vp9_reader *r) {
       vp9_diff_update_prob(r, &cm->fc.comp_ref_prob[i]);
 }
 
-static void update_mv(vp9_reader *r, vp9_prob *p) {
-  if (vp9_read(r, NMV_UPDATE_PROB))
-    *p = (vp9_read_literal(r, 7) << 1) | 1;
+static void update_mv_probs(vp9_prob *p, int n, vp9_reader *r) {
+  int i;
+  for (i = 0; i < n; ++i)
+    if (vp9_read(r, NMV_UPDATE_PROB))
+       p[i] = (vp9_read_literal(r, 7) << 1) | 1;
 }
 
-static void read_mv_probs(vp9_reader *r, nmv_context *mvc, int allow_hp) {
-  int i, j, k;
+static void read_mv_probs(nmv_context *ctx, int allow_hp, vp9_reader *r) {
+  int i, j;
 
-  for (j = 0; j < MV_JOINTS - 1; ++j)
-    update_mv(r, &mvc->joints[j]);
+  update_mv_probs(ctx->joints, MV_JOINTS - 1, r);
 
   for (i = 0; i < 2; ++i) {
-    nmv_component *const comp = &mvc->comps[i];
-
-    update_mv(r, &comp->sign);
-
-    for (j = 0; j < MV_CLASSES - 1; ++j)
-      update_mv(r, &comp->classes[j]);
-
-    for (j = 0; j < CLASS0_SIZE - 1; ++j)
-      update_mv(r, &comp->class0[j]);
-
-    for (j = 0; j < MV_OFFSET_BITS; ++j)
-      update_mv(r, &comp->bits[j]);
+    nmv_component *const comp_ctx = &ctx->comps[i];
+    update_mv_probs(&comp_ctx->sign, 1, r);
+    update_mv_probs(comp_ctx->classes, MV_CLASSES - 1, r);
+    update_mv_probs(comp_ctx->class0, CLASS0_SIZE - 1, r);
+    update_mv_probs(comp_ctx->bits, MV_OFFSET_BITS, r);
   }
 
   for (i = 0; i < 2; ++i) {
-    nmv_component *const comp = &mvc->comps[i];
-
+    nmv_component *const comp_ctx = &ctx->comps[i];
     for (j = 0; j < CLASS0_SIZE; ++j)
-      for (k = 0; k < 3; ++k)
-        update_mv(r, &comp->class0_fp[j][k]);
-
-    for (j = 0; j < 3; ++j)
-      update_mv(r, &comp->fp[j]);
+      update_mv_probs(comp_ctx->class0_fp[j], 3, r);
+    update_mv_probs(comp_ctx->fp, 3, r);
   }
 
   if (allow_hp) {
     for (i = 0; i < 2; ++i) {
-      update_mv(r, &mvc->comps[i].class0_hp);
-      update_mv(r, &mvc->comps[i].hp);
+      nmv_component *const comp_ctx = &ctx->comps[i];
+      update_mv_probs(&comp_ctx->class0_hp, 1, r);
+      update_mv_probs(&comp_ctx->hp, 1, r);
     }
   }
 }
@@ -1220,7 +1211,7 @@ static int read_compressed_header(VP9D_COMP *pbi, const uint8_t *data,
       for (i = 0; i < PARTITION_TYPES - 1; ++i)
         vp9_diff_update_prob(&r, &fc->partition_prob[j][i]);
 
-    read_mv_probs(&r, nmvc, cm->allow_high_precision_mv);
+    read_mv_probs(nmvc, cm->allow_high_precision_mv, &r);
   }
 
   return vp9_reader_has_error(&r);
