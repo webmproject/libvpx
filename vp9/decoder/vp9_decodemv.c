@@ -260,6 +260,16 @@ static INLINE void read_mv(vp9_reader *r, MV *mv, const MV *ref,
   mv->col = ref->col + diff.col;
 }
 
+static COMPPREDMODE_TYPE read_reference_mode(VP9_COMMON *cm,
+                                             const MACROBLOCKD *xd,
+                                             vp9_reader *r) {
+  const int ctx = vp9_get_pred_context_comp_inter_inter(cm, xd);
+  const int mode = vp9_read(r, cm->fc.comp_inter_prob[ctx]);
+  if (!cm->frame_parallel_decoding_mode)
+    ++cm->counts.comp_inter[ctx][mode];
+  return mode;  // SINGLE_PREDICTION_ONLY or COMP_PREDICTION_ONLY
+}
+
 // Read the referncence frame
 static void read_ref_frames(VP9_COMMON *const cm, MACROBLOCKD *const xd,
                             vp9_reader *r,
@@ -271,27 +281,20 @@ static void read_ref_frames(VP9_COMMON *const cm, MACROBLOCKD *const xd,
     ref_frame[0] = vp9_get_segdata(&cm->seg, segment_id, SEG_LVL_REF_FRAME);
     ref_frame[1] = NONE;
   } else {
-    const int comp_ctx = vp9_get_pred_context_comp_inter_inter(cm, xd);
-    int is_comp;
-
-    if (cm->comp_pred_mode == HYBRID_PREDICTION) {
-      is_comp = vp9_read(r, fc->comp_inter_prob[comp_ctx]);
-      if (!cm->frame_parallel_decoding_mode)
-        ++counts->comp_inter[comp_ctx][is_comp];
-    } else {
-      is_comp = cm->comp_pred_mode == COMP_PREDICTION_ONLY;
-    }
+    const COMPPREDMODE_TYPE mode = (cm->comp_pred_mode == HYBRID_PREDICTION)
+                                      ? read_reference_mode(cm, xd, r)
+                                      : cm->comp_pred_mode;
 
     // FIXME(rbultje) I'm pretty sure this breaks segmentation ref frame coding
-    if (is_comp) {
-      const int fix_ref_idx = cm->ref_frame_sign_bias[cm->comp_fixed_ref];
-      const int ref_ctx = vp9_get_pred_context_comp_ref_p(cm, xd);
-      const int b = vp9_read(r, fc->comp_ref_prob[ref_ctx]);
+    if (mode == COMP_PREDICTION_ONLY) {
+      const int idx = cm->ref_frame_sign_bias[cm->comp_fixed_ref];
+      const int ctx = vp9_get_pred_context_comp_ref_p(cm, xd);
+      const int bit = vp9_read(r, fc->comp_ref_prob[ctx]);
       if (!cm->frame_parallel_decoding_mode)
-        ++counts->comp_ref[ref_ctx][b];
-      ref_frame[fix_ref_idx] = cm->comp_fixed_ref;
-      ref_frame[!fix_ref_idx] = cm->comp_var_ref[b];
-    } else {
+        ++counts->comp_ref[ctx][bit];
+      ref_frame[idx] = cm->comp_fixed_ref;
+      ref_frame[!idx] = cm->comp_var_ref[bit];
+    } else if (mode == SINGLE_PREDICTION_ONLY) {
       const int ctx0 = vp9_get_pred_context_single_ref_p1(xd);
       const int bit0 = vp9_read(r, fc->single_ref_prob[ctx0][0]);
       if (!cm->frame_parallel_decoding_mode)
@@ -299,14 +302,16 @@ static void read_ref_frames(VP9_COMMON *const cm, MACROBLOCKD *const xd,
       if (bit0) {
         const int ctx1 = vp9_get_pred_context_single_ref_p2(xd);
         const int bit1 = vp9_read(r, fc->single_ref_prob[ctx1][1]);
-        ref_frame[0] = bit1 ? ALTREF_FRAME : GOLDEN_FRAME;
         if (!cm->frame_parallel_decoding_mode)
           ++counts->single_ref[ctx1][1][bit1];
+        ref_frame[0] = bit1 ? ALTREF_FRAME : GOLDEN_FRAME;
       } else {
         ref_frame[0] = LAST_FRAME;
       }
 
       ref_frame[1] = NONE;
+    } else {
+      assert(!"Invalid prediction mode.");
     }
   }
 }
