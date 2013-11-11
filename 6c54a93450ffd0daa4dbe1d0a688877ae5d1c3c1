@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdX//9/c\u003d",
+        "filename": "test/svc_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2013-11-11T23:08:09Z",
+      "side": 1,
+      "message": "prefer that you maintain another private var to indicate if vpx_svc_init() was ever successful, so that you know whether to call vpx_codec_destroy().",
+      "revId": "6c54a93450ffd0daa4dbe1d0a688877ae5d1c3c1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
