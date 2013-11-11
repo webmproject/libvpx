@@ -33,21 +33,6 @@
 #include "nestegg/include/nestegg/nestegg.h"
 #include "third_party/libyuv/include/libyuv/scale.h"
 
-#if CONFIG_OS_SUPPORT
-#if defined(_MSC_VER)
-#include <io.h>
-#define snprintf _snprintf
-#define isatty   _isatty
-#define fileno   _fileno
-#else
-#include <unistd.h>
-#endif
-#endif
-
-#ifndef PATH_MAX
-#define PATH_MAX 256
-#endif
-
 static const char *exec_name;
 
 static const struct {

@@ -15,20 +15,6 @@
 #include "third_party/libmkv/EbmlWriter.h"
 #include "third_party/libmkv/EbmlIDs.h"
 
-#if defined(_MSC_VER)
-/* MSVS uses _f{seek,tell}i64 */
-#define fseeko _fseeki64
-#define ftello _ftelli64
-#elif defined(_WIN32)
-/* MinGW defines off_t as long, and uses f{seek,tell}o64/off64_t for large
- * files */
-#define fseeko fseeko64
-#define ftello ftello64
-#define off_t off64_t
-#endif
-
-#define LITERALU64(hi, lo) ((((uint64_t)hi) << 32) | lo)
-
 void Ebml_Write(struct EbmlGlobal *glob,
                 const void *buffer_in,
                 unsigned long len) {
