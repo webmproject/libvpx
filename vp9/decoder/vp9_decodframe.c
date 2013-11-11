@@ -315,7 +315,7 @@ static void predict_and_reconstruct_intra_block(int plane, int block,
   if (xd->mb_to_right_edge < 0 || xd->mb_to_bottom_edge < 0)
     extend_for_intra(xd, plane_bsize, plane, block, tx_size);
 
-  vp9_predict_intra_block(xd, raster_block >> tx_size,
+  vp9_predict_intra_block(xd, block >> (tx_size << 1),
                           b_width_log2(plane_bsize), tx_size, mode,
                           dst, pd->dst.stride, dst, pd->dst.stride);
 
