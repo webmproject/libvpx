@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdX//+CY\u003d",
+        "filename": "test/android/Android.mk",
+        "patchSetId": 2
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2013-11-11T20:44:29Z",
+      "side": 1,
+      "message": "do go on :)",
+      "revId": "230aa8d417915dda6353a178b8a1f8922e85ee4e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX//+CU\u003d",
+        "filename": "test/android/README",
+        "patchSetId": 2
+      },
+      "lineNbr": 5,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2013-11-11T20:44:29Z",
+      "side": 1,
+      "message": "Can you write this as a list with bullet points and commands to run, with comments interspersed?",
+      "revId": "230aa8d417915dda6353a178b8a1f8922e85ee4e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
