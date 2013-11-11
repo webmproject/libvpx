@@ -16,6 +16,24 @@
       "revId": "6c54a93450ffd0daa4dbe1d0a688877ae5d1c3c1",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX//9+4\u003d",
+        "filename": "test/svc_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1003234
+      },
+      "writtenOn": "2013-11-11T23:20:24Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdX//9/c\u003d",
+      "revId": "6c54a93450ffd0daa4dbe1d0a688877ae5d1c3c1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
