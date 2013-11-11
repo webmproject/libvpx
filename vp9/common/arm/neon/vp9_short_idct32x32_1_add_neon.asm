@@ -117,7 +117,7 @@ diff_negative_32_32_loop
     moveq            r12, r3
     cmp              r0, #0
     bne              diff_negative_32_32_loop
-    pop              {r3,pc}
+    pop              {pc}
 
 diff_positive_32_32
     usat             r0, #8, r0
