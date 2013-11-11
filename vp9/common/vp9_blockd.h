@@ -215,11 +215,6 @@ typedef struct macroblockd {
 
   int corrupted;
 
-  unsigned char sb_index;   // index of 32x32 block inside the 64x64 block
-  unsigned char mb_index;   // index of 16x16 block inside the 32x32 block
-  unsigned char b_index;    // index of 8x8 block inside the 16x16 block
-  unsigned char ab_index;   // index of 4x4 block inside the 8x8 block
-
   int q_index;
 
   /* Y,U,V,(A) */

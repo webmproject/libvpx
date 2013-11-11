@@ -1438,18 +1438,18 @@ static void cal_nmvsadcosts_hp(int *mvsadcost[2]) {
 
 static void init_pick_mode_context(VP9_COMP *cpi) {
   int i;
-  MACROBLOCK  *x  = &cpi->mb;
-  MACROBLOCKD *xd = &x->e_mbd;
-  VP9_COMMON  *cm = &cpi->common;
+  VP9_COMMON *const cm = &cpi->common;
+  MACROBLOCK *const x  = &cpi->mb;
+
 
   for (i = 0; i < BLOCK_SIZES; ++i) {
     const int num_4x4_w = num_4x4_blocks_wide_lookup[i];
     const int num_4x4_h = num_4x4_blocks_high_lookup[i];
     const int num_4x4_blk = MAX(4, num_4x4_w * num_4x4_h);
     if (i < BLOCK_16X16) {
-      for (xd->sb_index = 0; xd->sb_index < 4; ++xd->sb_index) {
-        for (xd->mb_index = 0; xd->mb_index < 4; ++xd->mb_index) {
-          for (xd->b_index = 0; xd->b_index < 16 / num_4x4_blk; ++xd->b_index) {
+      for (x->sb_index = 0; x->sb_index < 4; ++x->sb_index) {
+        for (x->mb_index = 0; x->mb_index < 4; ++x->mb_index) {
+          for (x->b_index = 0; x->b_index < 16 / num_4x4_blk; ++x->b_index) {
             PICK_MODE_CONTEXT *ctx = get_block_context(x, i);
             ctx->num_4x4_blk = num_4x4_blk;
             CHECK_MEM_ERROR(cm, ctx->zcoeff_blk,
@@ -1458,9 +1458,8 @@ static void init_pick_mode_context(VP9_COMP *cpi) {
         }
       }
     } else if (i < BLOCK_32X32) {
-      for (xd->sb_index = 0; xd->sb_index < 4; ++xd->sb_index) {
-        for (xd->mb_index = 0; xd->mb_index < 64 / num_4x4_blk;
-                               ++xd->mb_index) {
+      for (x->sb_index = 0; x->sb_index < 4; ++x->sb_index) {
+        for (x->mb_index = 0; x->mb_index < 64 / num_4x4_blk; ++x->mb_index) {
           PICK_MODE_CONTEXT *ctx = get_block_context(x, i);
           ctx->num_4x4_blk = num_4x4_blk;
           CHECK_MEM_ERROR(cm, ctx->zcoeff_blk,
@@ -1468,7 +1467,7 @@ static void init_pick_mode_context(VP9_COMP *cpi) {
         }
       }
     } else if (i < BLOCK_64X64) {
-      for (xd->sb_index = 0; xd->sb_index < 256 / num_4x4_blk; ++xd->sb_index) {
+      for (x->sb_index = 0; x->sb_index < 256 / num_4x4_blk; ++x->sb_index) {
         PICK_MODE_CONTEXT *ctx = get_block_context(x, i);
         ctx->num_4x4_blk = num_4x4_blk;
         CHECK_MEM_ERROR(cm, ctx->zcoeff_blk,
@@ -1485,16 +1484,15 @@ static void init_pick_mode_context(VP9_COMP *cpi) {
 
 static void free_pick_mode_context(MACROBLOCK *x) {
   int i;
-  MACROBLOCKD *xd = &x->e_mbd;
 
   for (i = 0; i < BLOCK_SIZES; ++i) {
     const int num_4x4_w = num_4x4_blocks_wide_lookup[i];
     const int num_4x4_h = num_4x4_blocks_high_lookup[i];
     const int num_4x4_blk = MAX(4, num_4x4_w * num_4x4_h);
     if (i < BLOCK_16X16) {
-      for (xd->sb_index = 0; xd->sb_index < 4; ++xd->sb_index) {
-        for (xd->mb_index = 0; xd->mb_index < 4; ++xd->mb_index) {
-          for (xd->b_index = 0; xd->b_index < 16 / num_4x4_blk; ++xd->b_index) {
+      for (x->sb_index = 0; x->sb_index < 4; ++x->sb_index) {
+        for (x->mb_index = 0; x->mb_index < 4; ++x->mb_index) {
+          for (x->b_index = 0; x->b_index < 16 / num_4x4_blk; ++x->b_index) {
             PICK_MODE_CONTEXT *ctx = get_block_context(x, i);
             vpx_free(ctx->zcoeff_blk);
             ctx->zcoeff_blk = 0;
@@ -1502,16 +1500,15 @@ static void free_pick_mode_context(MACROBLOCK *x) {
         }
       }
     } else if (i < BLOCK_32X32) {
-      for (xd->sb_index = 0; xd->sb_index < 4; ++xd->sb_index) {
-        for (xd->mb_index = 0; xd->mb_index < 64 / num_4x4_blk;
-                               ++xd->mb_index) {
+      for (x->sb_index = 0; x->sb_index < 4; ++x->sb_index) {
+        for (x->mb_index = 0; x->mb_index < 64 / num_4x4_blk; ++x->mb_index) {
           PICK_MODE_CONTEXT *ctx = get_block_context(x, i);
           vpx_free(ctx->zcoeff_blk);
           ctx->zcoeff_blk = 0;
         }
       }
     } else if (i < BLOCK_64X64) {
-      for (xd->sb_index = 0; xd->sb_index < 256 / num_4x4_blk; ++xd->sb_index) {
+      for (x->sb_index = 0; x->sb_index < 256 / num_4x4_blk; ++x->sb_index) {
         PICK_MODE_CONTEXT *ctx = get_block_context(x, i);
         vpx_free(ctx->zcoeff_blk);
         ctx->zcoeff_blk = 0;
