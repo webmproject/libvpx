@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdX//+HY\u003d",
+        "filename": "vpxstats.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2013-11-11T14:26:14Z",
+      "side": 1,
+      "message": "Maybe this is a philosophical question, but: Isn\u0027t lint wrong here? Dropping ./ in all includes that reference files in the same directory does not seem like the proper fix here.\n\nTBH I have no idea why the version of lint we\u0027re using reports these. Am I the one that\u0027s wrong? Is referencing an include in the same directory in C traditionally done using a ./ in the include?",
+      "parentUuid": "AAAAdX//+I0\u003d",
+      "revId": "9c294844877644d0785b0f2db70d0d14fef2c9b5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdX//+Iw\u003d",
         "filename": "vpxstats.c",
         "patchSetId": 7
@@ -30,6 +48,24 @@
       "writtenOn": "2013-11-09T02:18:14Z",
       "side": 1,
       "message": "./ will quiet the lint here",
+      "revId": "9c294844877644d0785b0f2db70d0d14fef2c9b5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX//+HU\u003d",
+        "filename": "vpxstats.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2013-11-11T14:26:14Z",
+      "side": 1,
+      "message": "as above",
+      "parentUuid": "AAAAdX//+Iw\u003d",
       "revId": "9c294844877644d0785b0f2db70d0d14fef2c9b5",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdX//+HQ\u003d",
+        "filename": "vpxstats.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2013-11-11T14:26:14Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdX//+Is\u003d",
+      "revId": "9c294844877644d0785b0f2db70d0d14fef2c9b5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdX//+Io\u003d",
         "filename": "vpxstats.c",
         "patchSetId": 7
@@ -64,6 +118,24 @@
       "writtenOn": "2013-11-09T02:18:14Z",
       "side": 1,
       "message": "// USE_POSIX_MMAP",
+      "revId": "9c294844877644d0785b0f2db70d0d14fef2c9b5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX//+HM\u003d",
+        "filename": "vpxstats.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2013-11-11T14:26:14Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdX//+Io\u003d",
       "revId": "9c294844877644d0785b0f2db70d0d14fef2c9b5",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
