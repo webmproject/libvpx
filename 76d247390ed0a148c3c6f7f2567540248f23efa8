@@ -1,0 +1,157 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdX//+BM\u003d",
+        "filename": "test/android/Android.mk",
+        "patchSetId": 4
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2013-11-11T22:38:22Z",
+      "side": 1,
+      "message": "This seems weird. Maybe change LOCAL_PATH_BACK to CUR_WD or something.",
+      "revId": "76d247390ed0a148c3c6f7f2567540248f23efa8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX//+BI\u003d",
+        "filename": "test/android/Android.mk",
+        "patchSetId": 4
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2013-11-11T22:38:22Z",
+      "side": 1,
+      "message": "nit: You should probably alphabetize this.",
+      "revId": "76d247390ed0a148c3c6f7f2567540248f23efa8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX//+BE\u003d",
+        "filename": "test/android/README",
+        "patchSetId": 4
+      },
+      "lineNbr": 3,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2013-11-11T22:38:22Z",
+      "side": 1,
+      "message": "--disable-neon twice",
+      "revId": "76d247390ed0a148c3c6f7f2567540248f23efa8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX//+A8\u003d",
+        "filename": "test/android/README",
+        "patchSetId": 4
+      },
+      "lineNbr": 5,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2013-11-11T22:38:22Z",
+      "side": 1,
+      "message": "Which test?",
+      "revId": "76d247390ed0a148c3c6f7f2567540248f23efa8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX//+Aw\u003d",
+        "filename": "test/android/get_files.py",
+        "patchSetId": 4
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2013-11-11T22:38:22Z",
+      "side": 1,
+      "message": "Should we specify 2 space indent for python?",
+      "revId": "76d247390ed0a148c3c6f7f2567540248f23efa8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX//+As\u003d",
+        "filename": "test/android/get_files.py",
+        "patchSetId": 4
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2013-11-11T22:38:22Z",
+      "side": 1,
+      "message": "nit: spaces around +",
+      "revId": "76d247390ed0a148c3c6f7f2567540248f23efa8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX//+Ao\u003d",
+        "filename": "test/android/get_files.py",
+        "patchSetId": 4
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2013-11-11T22:38:22Z",
+      "side": 1,
+      "message": "nit: space after ,",
+      "revId": "76d247390ed0a148c3c6f7f2567540248f23efa8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX//+Ak\u003d",
+        "filename": "test/android/get_files.py",
+        "patchSetId": 4
+      },
+      "lineNbr": 79,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2013-11-11T22:38:22Z",
+      "side": 1,
+      "message": "Move this check above arg parsing. Maybe output example command line.",
+      "revId": "76d247390ed0a148c3c6f7f2567540248f23efa8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX//+Ag\u003d",
+        "filename": "test/android/get_files.py",
+        "patchSetId": 4
+      },
+      "lineNbr": 91,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2013-11-11T22:38:22Z",
+      "side": 1,
+      "message": "nit: spaces around \u003d",
+      "revId": "76d247390ed0a148c3c6f7f2567540248f23efa8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
