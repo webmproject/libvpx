@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdX//9/A\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 2594,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2013-11-11T23:20:49Z",
+      "side": 1,
+      "message": "move this comment to line 2600.\n\nthe for loop over ref also calculates motion vector rate cost. only  line 2600-2602 serves to restore the prediction buffer pointers.",
+      "revId": "dc2c1c41a6ea96d358faeb2c9962dbfb42287080",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
