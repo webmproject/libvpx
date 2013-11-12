@@ -16,6 +16,24 @@
       "revId": "dc2c1c41a6ea96d358faeb2c9962dbfb42287080",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX//99c\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 2594,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2013-11-12T00:04:29Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdX//9/A\u003d",
+      "revId": "dc2c1c41a6ea96d358faeb2c9962dbfb42287080",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
