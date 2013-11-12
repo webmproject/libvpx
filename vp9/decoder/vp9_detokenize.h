@@ -18,6 +18,7 @@
 int vp9_decode_block_tokens(VP9_COMMON *cm, MACROBLOCKD *xd,
                             int plane, int block, BLOCK_SIZE plane_bsize,
                             TX_SIZE tx_size, vp9_reader *r,
-                            uint8_t *token_cache);
+                            uint8_t *token_cache,
+                            const uint8_t *band_translate[2]);
 
 #endif  // VP9_DECODER_VP9_DETOKENIZE_H_

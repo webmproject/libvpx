@@ -184,6 +184,9 @@ struct macroblock {
   BLOCK_SIZE sb64_partitioning;
 
   void (*fwd_txm4x4)(const int16_t *input, int16_t *output, int stride);
+
+  // band cache
+  DECLARE_ALIGNED(16, uint8_t, coefband_trans_8x8plus[1024]);
 };
 
 // TODO(jingning): the variables used here are little complicated. need further
