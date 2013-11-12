@@ -482,6 +482,10 @@ void vp9_first_pass(VP9_COMP *cpi) {
   VP9_COMMON *const cm = &cpi->common;
   MACROBLOCKD *const xd = &x->e_mbd;
   TileInfo tile;
+  struct macroblock_plane *const p = x->plane;
+  struct macroblockd_plane *const pd = xd->plane;
+  PICK_MODE_CONTEXT *ctx = &x->sb64_context;
+  int i;
 
   int recon_yoffset, recon_uvoffset;
   const int lst_yv12_idx = cm->ref_frame_map[cpi->lst_fb_idx];
@@ -524,6 +528,14 @@ void vp9_first_pass(VP9_COMP *cpi) {
   setup_block_dptrs(&x->e_mbd, cm->subsampling_x, cm->subsampling_y);
 
   vp9_frame_init_quantizer(cpi);
+
+  for (i = 0; i < MAX_MB_PLANE; ++i) {
+    p[i].coeff = ctx->coeff_pbuf[i][1];
+    pd[i].qcoeff = ctx->qcoeff_pbuf[i][1];
+    pd[i].dqcoeff = ctx->dqcoeff_pbuf[i][1];
+    pd[i].eobs = ctx->eobs_pbuf[i][1];
+  }
+
 
   // Initialise the MV cost table to the defaults
   // if( cm->current_video_frame == 0)

@@ -367,6 +367,8 @@ static void update_state(VP9_COMP *cpi, PICK_MODE_CONTEXT *ctx,
   VP9_COMMON *const cm = &cpi->common;
   MACROBLOCK *const x = &cpi->mb;
   MACROBLOCKD *const xd = &x->e_mbd;
+  struct macroblock_plane *const p = x->plane;
+  struct macroblockd_plane *const pd = xd->plane;
   MODE_INFO *mi = &ctx->mic;
   MB_MODE_INFO *const mbmi = &xd->mi_8x8[0]->mbmi;
   MODE_INFO *mi_addr = xd->mi_8x8[0];
@@ -382,6 +384,13 @@ static void update_state(VP9_COMP *cpi, PICK_MODE_CONTEXT *ctx,
   assert(mi->mbmi.sb_type == bsize);
 
   *mi_addr = *mi;
+
+  for (i = 0; i < MAX_MB_PLANE; ++i) {
+    p[i].coeff = ctx->coeff_pbuf[i][1];
+    pd[i].qcoeff = ctx->qcoeff_pbuf[i][1];
+    pd[i].dqcoeff = ctx->dqcoeff_pbuf[i][1];
+    pd[i].eobs = ctx->eobs_pbuf[i][1];
+  }
 
   // Restore the coding context of the MB to that that was in place
   // when the mode was picked for it
@@ -578,6 +587,9 @@ static void pick_sb_modes(VP9_COMP *cpi, const TileInfo *const tile,
   VP9_COMMON *const cm = &cpi->common;
   MACROBLOCK *const x = &cpi->mb;
   MACROBLOCKD *const xd = &x->e_mbd;
+  struct macroblock_plane *const p = x->plane;
+  struct macroblockd_plane *const pd = xd->plane;
+  int i;
   int orig_rdmult = x->rdmult;
   double rdmult_ratio;
 
@@ -599,6 +611,13 @@ static void pick_sb_modes(VP9_COMP *cpi, const TileInfo *const tile,
 
   set_offsets(cpi, tile, mi_row, mi_col, bsize);
   xd->mi_8x8[0]->mbmi.sb_type = bsize;
+
+  for (i = 0; i < MAX_MB_PLANE; ++i) {
+    p[i].coeff = ctx->coeff_pbuf[i][1];
+    pd[i].qcoeff = ctx->qcoeff_pbuf[i][1];
+    pd[i].dqcoeff = ctx->dqcoeff_pbuf[i][1];
+    pd[i].eobs = ctx->eobs_pbuf[i][1];
+  }
 
   // Set to zero to make sure we do not use the previous encoded frame stats
   xd->mi_8x8[0]->mbmi.skip_coeff = 0;

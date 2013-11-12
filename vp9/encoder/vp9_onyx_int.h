@@ -312,11 +312,6 @@ typedef struct VP9_COMP {
   VP9_COMMON common;
   VP9_CONFIG oxcf;
   struct rdcost_block_args rdcost_stack;
-
-  DECLARE_ALIGNED(16, int16_t,  qcoeff[MAX_MB_PLANE][64 * 64]);
-  DECLARE_ALIGNED(16, int16_t,  dqcoeff[MAX_MB_PLANE][64 * 64]);
-  DECLARE_ALIGNED(16, uint16_t, eobs[MAX_MB_PLANE][256]);
-
   struct lookahead_ctx    *lookahead;
   struct lookahead_entry  *source;
 #if CONFIG_MULTIPLE_ARF
