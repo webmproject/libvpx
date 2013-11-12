@@ -2477,53 +2477,40 @@ static void joint_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
   int pw = 4 << b_width_log2(bsize), ph = 4 << b_height_log2(bsize);
   MACROBLOCKD *xd = &x->e_mbd;
   MB_MODE_INFO *mbmi = &xd->mi_8x8[0]->mbmi;
-  int refs[2] = { mbmi->ref_frame[0],
-    (mbmi->ref_frame[1] < 0 ? 0 : mbmi->ref_frame[1]) };
+  const int refs[2] = { mbmi->ref_frame[0],
+                        mbmi->ref_frame[1] < 0 ? 0 : mbmi->ref_frame[1] };
   int_mv ref_mv[2];
   const BLOCK_SIZE block_size = get_plane_block_size(bsize, &xd->plane[0]);
-  int ite;
+  int ite, ref;
   // Prediction buffer from second frame.
   uint8_t *second_pred = vpx_memalign(16, pw * ph * sizeof(uint8_t));
 
   // Do joint motion search in compound mode to get more accurate mv.
-  struct buf_2d backup_yv12[MAX_MB_PLANE] = {{0}};
-  struct buf_2d backup_second_yv12[MAX_MB_PLANE] = {{0}};
-  struct buf_2d scaled_first_yv12;
+  struct buf_2d backup_yv12[2][MAX_MB_PLANE];
+  struct buf_2d scaled_first_yv12 = xd->plane[0].pre[0];
   int last_besterr[2] = {INT_MAX, INT_MAX};
-  YV12_BUFFER_CONFIG *scaled_ref_frame[2] = {NULL, NULL};
-  scaled_ref_frame[0] = get_scaled_ref_frame(cpi, mbmi->ref_frame[0]);
-  scaled_ref_frame[1] = get_scaled_ref_frame(cpi, mbmi->ref_frame[1]);
+  YV12_BUFFER_CONFIG *const scaled_ref_frame[2] = {
+    get_scaled_ref_frame(cpi, mbmi->ref_frame[0]),
+    get_scaled_ref_frame(cpi, mbmi->ref_frame[1])
+  };
 
-  ref_mv[0] = mbmi->ref_mvs[refs[0]][0];
-  ref_mv[1] = mbmi->ref_mvs[refs[1]][0];
+  for (ref = 0; ref < 2; ++ref) {
+    ref_mv[ref] = mbmi->ref_mvs[refs[ref]][0];
 
-  if (scaled_ref_frame[0]) {
-    int i;
-    // Swap out the reference frame for a version that's been scaled to
-    // match the resolution of the current frame, allowing the existing
-    // motion search code to be used without additional modifications.
-    for (i = 0; i < MAX_MB_PLANE; i++)
-      backup_yv12[i] = xd->plane[i].pre[0];
-    setup_pre_planes(xd, 0, scaled_ref_frame[0], mi_row, mi_col, NULL);
+    if (scaled_ref_frame[ref]) {
+      int i;
+      // Swap out the reference frame for a version that's been scaled to
+      // match the resolution of the current frame, allowing the existing
+      // motion search code to be used without additional modifications.
+      for (i = 0; i < MAX_MB_PLANE; i++)
+        backup_yv12[ref][i] = xd->plane[i].pre[ref];
+      setup_pre_planes(xd, ref, scaled_ref_frame[ref], mi_row, mi_col, NULL);
+    }
+
+    xd->scale_factor[ref].sfc->set_scaled_offsets(&xd->scale_factor[ref],
+                                                  mi_row, mi_col);
+    frame_mv[refs[ref]].as_int = single_newmv[refs[ref]].as_int;
   }
-
-  if (scaled_ref_frame[1]) {
-    int i;
-    for (i = 0; i < MAX_MB_PLANE; i++)
-      backup_second_yv12[i] = xd->plane[i].pre[1];
-
-    setup_pre_planes(xd, 1, scaled_ref_frame[1], mi_row, mi_col, NULL);
-  }
-
-  xd->scale_factor[0].sfc->set_scaled_offsets(&xd->scale_factor[0],
-                                         mi_row, mi_col);
-  xd->scale_factor[1].sfc->set_scaled_offsets(&xd->scale_factor[1],
-                                         mi_row, mi_col);
-  scaled_first_yv12 = xd->plane[0].pre[0];
-
-  // Initialize mv using single prediction mode result.
-  frame_mv[refs[0]].as_int = single_newmv[refs[0]].as_int;
-  frame_mv[refs[1]].as_int = single_newmv[refs[1]].as_int;
 
   // Allow joint search multiple times iteratively for each ref frame
   // and break out the search loop if it couldn't find better mv.
@@ -2604,24 +2591,20 @@ static void joint_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
     }
   }
 
-  // restore the predictor
-  if (scaled_ref_frame[0]) {
-    int i;
-    for (i = 0; i < MAX_MB_PLANE; i++)
-      xd->plane[i].pre[0] = backup_yv12[i];
-  }
+  *rate_mv = 0;
 
-  if (scaled_ref_frame[1]) {
-    int i;
-    for (i = 0; i < MAX_MB_PLANE; i++)
-      xd->plane[i].pre[1] = backup_second_yv12[i];
+  for (ref = 0; ref < 2; ++ref) {
+    if (scaled_ref_frame[ref]) {
+      // restore the predictor
+      int i;
+      for (i = 0; i < MAX_MB_PLANE; i++)
+        xd->plane[i].pre[ref] = backup_yv12[ref][i];
+    }
+
+    *rate_mv += vp9_mv_bit_cost(&frame_mv[refs[ref]].as_mv,
+                                &mbmi->ref_mvs[refs[ref]][0].as_mv,
+                                x->nmvjointcost, x->mvcost, MV_COST_WEIGHT);
   }
-  *rate_mv  = vp9_mv_bit_cost(&frame_mv[refs[0]].as_mv,
-                              &mbmi->ref_mvs[refs[0]][0].as_mv,
-                              x->nmvjointcost, x->mvcost, MV_COST_WEIGHT);
-  *rate_mv += vp9_mv_bit_cost(&frame_mv[refs[1]].as_mv,
-                              &mbmi->ref_mvs[refs[1]][0].as_mv,
-                              x->nmvjointcost, x->mvcost, MV_COST_WEIGHT);
 
   vpx_free(second_pred);
 }
