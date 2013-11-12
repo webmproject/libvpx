@@ -188,7 +188,7 @@ while (<STDIN>)
         $trimmed =~ s/,//g;
 
         # string to array
-        @incoming_array = split(/ /, $trimmed);
+        @incoming_array = split(/\s+/, $trimmed);
 
         print ".macro @incoming_array[0]\n";
 
