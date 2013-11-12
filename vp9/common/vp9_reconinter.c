@@ -117,16 +117,13 @@ MV clamp_mv_to_umv_border_sb(const MACROBLOCKD *xd, const MV *src_mv,
   return clamped_mv;
 }
 
-struct build_inter_predictors_args {
-  MACROBLOCKD *xd;
-  int x, y;
-};
 
-static void build_inter_predictors(int plane, int block, BLOCK_SIZE bsize,
-                                   int pred_w, int pred_h,
-                                   void *argv) {
-  const struct build_inter_predictors_args* const arg = argv;
-  MACROBLOCKD *const xd = arg->xd;
+// TODO(jkoleszar): In principle, pred_w, pred_h are unnecessary, as we could
+// calculate the subsampled BLOCK_SIZE, but that type isn't defined for
+// sizes smaller than 16x16 yet.
+static void build_inter_predictors(MACROBLOCKD *xd, int plane, int block,
+                                   BLOCK_SIZE bsize, int pred_w, int pred_h,
+                                   int mi_x, int mi_y) {
   struct macroblockd_plane *const pd = &xd->plane[plane];
   const int bwl = b_width_log2(bsize) - pd->subsampling_x;
   const int bw = 4 << bwl;
@@ -172,7 +169,7 @@ static void build_inter_predictors(int plane, int block, BLOCK_SIZE bsize,
 
     if (vp9_is_scaled(scale->sfc)) {
       pre = pre_buf->buf + scaled_buffer_offset(x, y, pre_buf->stride, scale);
-      scale->sfc->set_scaled_offsets(scale, arg->y + y, arg->x + x);
+      scale->sfc->set_scaled_offsets(scale, mi_y + y, mi_x + x);
       scaled_mv = scale->sfc->scale_mv(&mv_q4, scale);
       xs = scale->sfc->x_step_q4;
       ys = scale->sfc->y_step_q4;
@@ -190,40 +187,25 @@ static void build_inter_predictors(int plane, int block, BLOCK_SIZE bsize,
   }
 }
 
-// TODO(jkoleszar): In principle, pred_w, pred_h are unnecessary, as we could
-// calculate the subsampled BLOCK_SIZE, but that type isn't defined for
-// sizes smaller than 16x16 yet.
-typedef void (*foreach_predicted_block_visitor)(int plane, int block,
-                                                BLOCK_SIZE bsize,
-                                                int pred_w, int pred_h,
-                                                void *arg);
-static INLINE void foreach_predicted_block_in_plane(
-    const MACROBLOCKD* const xd, BLOCK_SIZE bsize, int plane,
-    foreach_predicted_block_visitor visit, void *arg) {
-  const int bwl = b_width_log2(bsize) - xd->plane[plane].subsampling_x;
-  const int bhl = b_height_log2(bsize) - xd->plane[plane].subsampling_y;
-
-  if (xd->mi_8x8[0]->mbmi.sb_type < BLOCK_8X8) {
-    int i = 0, x, y;
-    assert(bsize == BLOCK_8X8);
-    for (y = 0; y < 1 << bhl; ++y)
-      for (x = 0; x < 1 << bwl; ++x)
-        visit(plane, i++, bsize, 0, 0, arg);
-  } else {
-    visit(plane, 0, bsize, bwl, bhl, arg);
-  }
-}
-
 static void build_inter_predictors_for_planes(MACROBLOCKD *xd, BLOCK_SIZE bsize,
                                               int mi_row, int mi_col,
                                               int plane_from, int plane_to) {
   int plane;
   for (plane = plane_from; plane <= plane_to; ++plane) {
-    struct build_inter_predictors_args args = {
-      xd, mi_col * MI_SIZE, mi_row * MI_SIZE,
-    };
-    foreach_predicted_block_in_plane(xd, bsize, plane, build_inter_predictors,
-                                     &args);
+    const int mi_x = mi_col * MI_SIZE;
+    const int mi_y = mi_row * MI_SIZE;
+    const int bwl = b_width_log2(bsize) - xd->plane[plane].subsampling_x;
+    const int bhl = b_height_log2(bsize) - xd->plane[plane].subsampling_y;
+
+    if (xd->mi_8x8[0]->mbmi.sb_type < BLOCK_8X8) {
+      int i = 0, x, y;
+      assert(bsize == BLOCK_8X8);
+      for (y = 0; y < 1 << bhl; ++y)
+        for (x = 0; x < 1 << bwl; ++x)
+          build_inter_predictors(xd, plane, i++, bsize, 0, 0, mi_x, mi_y);
+    } else {
+      build_inter_predictors(xd, plane, 0, bsize, bwl, bhl, mi_x, mi_y);
+    }
   }
 }
 
