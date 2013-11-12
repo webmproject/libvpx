@@ -19,6 +19,40 @@
     },
     {
       "key": {
+        "uuid": "AAAAdX//94Y\u003d",
+        "filename": "vp9/common/vp9_loopfilter.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 465,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2013-11-12T14:51:33Z",
+      "side": 1,
+      "message": "If the lfl array was just one dimension couldn\u0027t you just use shift as is?",
+      "revId": "49cf335e7f076e90ff45a51b374d7d11576efbd5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX//94U\u003d",
+        "filename": "vp9/common/vp9_loopfilter.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 538,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2013-11-12T14:51:33Z",
+      "side": 1,
+      "message": "if array was one dimensional couldn\u0027t you use shift as is?",
+      "revId": "49cf335e7f076e90ff45a51b374d7d11576efbd5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdX//94k\u003d",
         "filename": "vp9/common/vp9_loopfilter.c",
         "patchSetId": 5
@@ -30,6 +64,23 @@
       "writtenOn": "2013-11-12T14:22:12Z",
       "side": 1,
       "message": "if we initialize this to 0 won\u0027t it let us skip some setting below?",
+      "revId": "49cf335e7f076e90ff45a51b374d7d11576efbd5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX//94Q\u003d",
+        "filename": "vp9/common/vp9_loopfilter.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 818,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2013-11-12T14:51:33Z",
+      "side": 1,
+      "message": "also if this was one dimensional couldn\u0027t we use shift without going through the shift hassle?",
       "revId": "49cf335e7f076e90ff45a51b374d7d11576efbd5",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
