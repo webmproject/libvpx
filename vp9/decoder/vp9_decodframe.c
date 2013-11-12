@@ -1326,7 +1326,6 @@ int vp9_decode_frame(VP9D_COMP *pbi, const uint8_t **p_data_end) {
 
   alloc_tile_storage(pbi, tile_rows, tile_cols);
 
-  xd->mi_8x8 = cm->mi_grid_visible;
   xd->mode_info_stride = cm->mode_info_stride;
   set_prev_mi(cm);
 
