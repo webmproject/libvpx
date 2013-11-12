@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdX//94o\u003d",
+        "filename": "vp9/common/vp9_loopfilter.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 465,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2013-11-12T14:22:12Z",
+      "side": 1,
+      "message": "can\u0027t we do this after the ! filter level code so that we avoid doing it at all if filter_level isn\u0027t set  /  I\u0027m assuming we have filter_level set to 0 at the first spot in the frame? \n\nalso isn\u0027t it better to do \u0026 7 than %8?    I don\u0027t know",
+      "revId": "49cf335e7f076e90ff45a51b374d7d11576efbd5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX//94k\u003d",
+        "filename": "vp9/common/vp9_loopfilter.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 818,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2013-11-12T14:22:12Z",
+      "side": 1,
+      "message": "if we initialize this to 0 won\u0027t it let us skip some setting below?",
+      "revId": "49cf335e7f076e90ff45a51b374d7d11576efbd5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX//94g\u003d",
+        "filename": "vp9/common/vp9_loopfilter.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 937,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2013-11-12T14:22:12Z",
+      "side": 1,
+      "message": "if you don\u0027t need mi_8x8 and mi_col don\u0027t pass them?",
+      "revId": "49cf335e7f076e90ff45a51b374d7d11576efbd5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
