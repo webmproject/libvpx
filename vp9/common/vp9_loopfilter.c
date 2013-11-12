@@ -32,8 +32,8 @@ typedef struct {
   uint16_t left_uv[TX_SIZES];
   uint16_t above_uv[TX_SIZES];
   uint16_t int_4x4_uv;
-  uint8_t lfl_y[MI_BLOCK_SIZE][MI_BLOCK_SIZE];
-  uint8_t lfl_uv[MI_BLOCK_SIZE][MI_BLOCK_SIZE >> 1];
+  uint8_t lfl_y[64];
+  uint8_t lfl_uv[16];
 } LOOP_FILTER_MASK;
 
 // 64 bit masks for left transform size.  Each 1 represents a position where
@@ -525,14 +525,16 @@ static void build_masks(const loop_filter_info_n *const lfi_n,
   int w = num_8x8_blocks_wide_lookup[block_size];
   int h = num_8x8_blocks_high_lookup[block_size];
 
-  for (i = shift_y / 8; i < (shift_y / 8 + h); i++) {
-    uint8_t *lflr = lfm->lfl_y[i] + (shift_y % 8);
-    vpx_memset(lflr, filter_level, w);
-  }
-
   // If filter level is 0 we don't loop filter.
-  if (!filter_level)
+  if (!filter_level) {
     return;
+  } else {
+    int index = shift_y;
+    for (i = 0; i < h; i++) {
+      vpx_memset(&lfm->lfl_y[index], filter_level, w);
+      index += 8;
+    }
+  }
 
   // These set 1 in the current block size for the block size edges.
   // For instance if the block size is 32x16,   we'll set :
@@ -602,13 +604,15 @@ static void build_y_mask(const loop_filter_info_n *const lfi_n,
   int w = num_8x8_blocks_wide_lookup[block_size];
   int h = num_8x8_blocks_high_lookup[block_size];
 
-  for (i = shift_y / 8; i < (shift_y / 8 + h); i++) {
-    uint8_t *lflr = lfm->lfl_y[i] + (shift_y % 8);
-    vpx_memset(lflr, filter_level, w);
-  }
-
-  if (!filter_level)
+  if (!filter_level) {
     return;
+  } else {
+    int index = shift_y;
+    for (i = 0; i < h; i++) {
+      vpx_memset(&lfm->lfl_y[index], filter_level, w);
+      index += 8;
+    }
+  }
 
   *above_y |= above_prediction_mask[block_size] << shift_y;
   *left_y |= left_prediction_mask[block_size] << shift_y;
@@ -878,7 +882,7 @@ static void filter_block_plane_non420(VP9_COMMON *cm,
   unsigned int mask_8x8[MI_BLOCK_SIZE] = {0};
   unsigned int mask_4x4[MI_BLOCK_SIZE] = {0};
   unsigned int mask_4x4_int[MI_BLOCK_SIZE] = {0};
-  uint8_t lfl[MI_BLOCK_SIZE][MI_BLOCK_SIZE];
+  uint8_t lfl[MI_BLOCK_SIZE * MI_BLOCK_SIZE];
   int r, c;
 
   for (r = 0; r < MI_BLOCK_SIZE && mi_row + r < cm->mi_rows; r += row_step) {
@@ -907,7 +911,8 @@ static void filter_block_plane_non420(VP9_COMMON *cm,
       const int skip_border_4x4_r = ss_y && mi_row + r == cm->mi_rows - 1;
 
       // Filter level can vary per MI
-      if (!(lfl[r][c >> ss_x] = build_lfi(&cm->lf_info, &mi[0].mbmi)))
+      if (!(lfl[(r << 3) + (c >> ss_x)] =
+          build_lfi(&cm->lf_info, &mi[0].mbmi)))
         continue;
 
       // Build masks based on the transform size of each block
@@ -965,7 +970,7 @@ static void filter_block_plane_non420(VP9_COMMON *cm,
                             mask_8x8_c & border_mask,
                             mask_4x4_c & border_mask,
                             mask_4x4_int[r],
-                            &cm->lf_info, lfl[r]);
+                            &cm->lf_info, &lfl[r << 3]);
     dst->buf += 8 * dst->stride;
     mi_8x8 += row_step_stride;
   }
@@ -995,7 +1000,7 @@ static void filter_block_plane_non420(VP9_COMMON *cm,
                              mask_8x8_r,
                              mask_4x4_r,
                              mask_4x4_int_r,
-                             &cm->lf_info, lfl[r]);
+                             &cm->lf_info, &lfl[r << 3]);
     dst->buf += 8 * dst->stride;
   }
 }
@@ -1003,16 +1008,12 @@ static void filter_block_plane_non420(VP9_COMMON *cm,
 
 static void filter_block_plane(VP9_COMMON *const cm,
                                struct macroblockd_plane *const plane,
-                               MODE_INFO **mi_8x8,
-                               int mi_row, int mi_col,
+                               int mi_row,
                                LOOP_FILTER_MASK *lfm) {
   struct buf_2d *const dst = &plane->dst;
   uint8_t* const dst0 = dst->buf;
   unsigned int mask_4x4_int_row[MI_BLOCK_SIZE] = {0};
   int r, c;
-
-  (void)mi_8x8;
-  (void)mi_col;
 
   if (!plane->plane_type) {
     uint64_t mask_16x16 = lfm->left_y[TX_16X16];
@@ -1030,7 +1031,7 @@ static void filter_block_plane(VP9_COMMON *const cm,
                               mask_8x8 & 0xff,
                               mask_4x4 & 0xff,
                               mask_4x4_int_row[r],
-                              &cm->lf_info, lfm->lfl_y[r]);
+                              &cm->lf_info, &lfm->lfl_y[r << 3]);
 
       dst->buf += 8 * dst->stride;
       mask_16x16 >>= 8;
@@ -1065,7 +1066,7 @@ static void filter_block_plane(VP9_COMMON *const cm,
                                mask_8x8_r,
                                mask_4x4_r,
                                mask_4x4_int_row[r],
-                               &cm->lf_info, lfm->lfl_y[r]);
+                               &cm->lf_info, &lfm->lfl_y[r << 3]);
 
       dst->buf += 8 * dst->stride;
       mask_16x16 >>= 8;
@@ -1082,7 +1083,7 @@ static void filter_block_plane(VP9_COMMON *const cm,
     for (r = 0; r < MI_BLOCK_SIZE && mi_row + r < cm->mi_rows; r += 2) {
       if (plane->plane_type == 1) {
         for (c = 0; c < (MI_BLOCK_SIZE >> 1); c++)
-          lfm->lfl_uv[r][c] = lfm->lfl_y[r][c << 1];
+          lfm->lfl_uv[(r << 1) + c] = lfm->lfl_y[(r << 3) + (c << 1)];
       }
 
       mask_4x4_int_row[r] = mask_4x4_int & 0xf;
@@ -1092,7 +1093,7 @@ static void filter_block_plane(VP9_COMMON *const cm,
                               mask_8x8 & 0xf,
                               mask_4x4 & 0xf,
                               mask_4x4_int_row[r],
-                              &cm->lf_info, lfm->lfl_uv[r]);
+                              &cm->lf_info, &lfm->lfl_uv[r << 1]);
 
       dst->buf += 8 * dst->stride;
       mask_16x16 >>= 4;
@@ -1130,7 +1131,7 @@ static void filter_block_plane(VP9_COMMON *const cm,
                                mask_8x8_r,
                                mask_4x4_r,
                                mask_4x4_int_r,
-                               &cm->lf_info, lfm->lfl_uv[r]);
+                               &cm->lf_info, &lfm->lfl_uv[r << 1]);
 
       dst->buf += 8 * dst->stride;
       mask_16x16 >>= 4;
@@ -1170,8 +1171,7 @@ void vp9_loop_filter_rows(const YV12_BUFFER_CONFIG *frame_buffer,
 #if CONFIG_NON420
         if (use_420)
 #endif
-          filter_block_plane(cm, &xd->plane[plane], mi_8x8 + mi_col, mi_row,
-                             mi_col, &lfm);
+          filter_block_plane(cm, &xd->plane[plane], mi_row, &lfm);
 #if CONFIG_NON420
         else
           filter_block_plane_non420(cm, &xd->plane[plane], mi_8x8 + mi_col,
