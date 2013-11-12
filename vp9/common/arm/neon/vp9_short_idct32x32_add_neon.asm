@@ -1145,7 +1145,7 @@ idct32_bands_end_1st_pass
 
     ; pass loop processing
     add r5, r5, #1
-    B idct32_pass_loop
+    b idct32_pass_loop
 
 idct32_bands_end_2nd_pass
     STORE_COMBINE_CENTER_RESULTS
