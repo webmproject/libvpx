@@ -3180,8 +3180,8 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
       case BLOCK_32X32:
         for (i = 0; i < 4; i++) {
           ref_frame_mask |=
-              x->mb_context[xd->sb_index][i].frames_with_high_error;
-          mode_mask |= x->mb_context[xd->sb_index][i].modes_with_high_error;
+              x->mb_context[x->sb_index][i].frames_with_high_error;
+          mode_mask |= x->mb_context[x->sb_index][i].modes_with_high_error;
         }
         break;
       default:

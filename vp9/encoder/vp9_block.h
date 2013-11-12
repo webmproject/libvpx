@@ -131,6 +131,11 @@ struct macroblock {
   int y_mode_costs[INTRA_MODES][INTRA_MODES][INTRA_MODES];
   int switchable_interp_costs[SWITCHABLE_FILTER_CONTEXTS][SWITCHABLE_FILTERS];
 
+  unsigned char sb_index;   // index of 32x32 block inside the 64x64 block
+  unsigned char mb_index;   // index of 16x16 block inside the 32x32 block
+  unsigned char b_index;    // index of 8x8 block inside the 16x16 block
+  unsigned char ab_index;   // index of 4x4 block inside the 8x8 block
+
   // These define limits to motion vector components to prevent them
   // from extending outside the UMV borders
   int mv_col_min;
@@ -193,35 +198,33 @@ struct macroblock {
 // refactoring on organizing the temporary buffers, when recursive
 // partition down to 4x4 block size is enabled.
 static PICK_MODE_CONTEXT *get_block_context(MACROBLOCK *x, BLOCK_SIZE bsize) {
-  MACROBLOCKD *const xd = &x->e_mbd;
-
   switch (bsize) {
     case BLOCK_64X64:
       return &x->sb64_context;
     case BLOCK_64X32:
-      return &x->sb64x32_context[xd->sb_index];
+      return &x->sb64x32_context[x->sb_index];
     case BLOCK_32X64:
-      return &x->sb32x64_context[xd->sb_index];
+      return &x->sb32x64_context[x->sb_index];
     case BLOCK_32X32:
-      return &x->sb32_context[xd->sb_index];
+      return &x->sb32_context[x->sb_index];
     case BLOCK_32X16:
-      return &x->sb32x16_context[xd->sb_index][xd->mb_index];
+      return &x->sb32x16_context[x->sb_index][x->mb_index];
     case BLOCK_16X32:
-      return &x->sb16x32_context[xd->sb_index][xd->mb_index];
+      return &x->sb16x32_context[x->sb_index][x->mb_index];
     case BLOCK_16X16:
-      return &x->mb_context[xd->sb_index][xd->mb_index];
+      return &x->mb_context[x->sb_index][x->mb_index];
     case BLOCK_16X8:
-      return &x->sb16x8_context[xd->sb_index][xd->mb_index][xd->b_index];
+      return &x->sb16x8_context[x->sb_index][x->mb_index][x->b_index];
     case BLOCK_8X16:
-      return &x->sb8x16_context[xd->sb_index][xd->mb_index][xd->b_index];
+      return &x->sb8x16_context[x->sb_index][x->mb_index][x->b_index];
     case BLOCK_8X8:
-      return &x->sb8x8_context[xd->sb_index][xd->mb_index][xd->b_index];
+      return &x->sb8x8_context[x->sb_index][x->mb_index][x->b_index];
     case BLOCK_8X4:
-      return &x->sb8x4_context[xd->sb_index][xd->mb_index][xd->b_index];
+      return &x->sb8x4_context[x->sb_index][x->mb_index][x->b_index];
     case BLOCK_4X8:
-      return &x->sb4x8_context[xd->sb_index][xd->mb_index][xd->b_index];
+      return &x->sb4x8_context[x->sb_index][x->mb_index][x->b_index];
     case BLOCK_4X4:
-      return &x->ab4x4_context[xd->sb_index][xd->mb_index][xd->b_index];
+      return &x->ab4x4_context[x->sb_index][x->mb_index][x->b_index];
     default:
       assert(0);
       return NULL;
