@@ -51,7 +51,7 @@ extern const vp9_tree_index vp9_coefmodel_tree[];
 extern struct vp9_token vp9_coef_encodings[MAX_ENTROPY_TOKENS];
 
 typedef struct {
-  vp9_tree_index *tree;
+  const vp9_tree_index *tree;
   const vp9_prob *prob;
   int len;
   int base_val;

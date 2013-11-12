@@ -256,15 +256,15 @@ static void update_inter_mode_probs(VP9_COMMON *cm, vp9_writer *w) {
   }
 }
 
-static void pack_mb_tokens(vp9_writer* const bc,
+static void pack_mb_tokens(vp9_writer* const w,
                            TOKENEXTRA **tp,
                            const TOKENEXTRA *const stop) {
   TOKENEXTRA *p = *tp;
 
   while (p < stop && p->token != EOSB_TOKEN) {
     const int t = p->token;
-    const struct vp9_token *const a = vp9_coef_encodings + t;
-    const vp9_extra_bit *const b = vp9_extra_bits + t;
+    const struct vp9_token *const a = &vp9_coef_encodings[t];
+    const vp9_extra_bit *const b = &vp9_extra_bits[t];
     int i = 0;
     const vp9_prob *pp;
     int v = a->value;
@@ -287,7 +287,7 @@ static void pack_mb_tokens(vp9_writer* const bc,
 
     do {
       const int bb = (v >> --n) & 1;
-      vp9_write(bc, bb, pp[i >> 1]);
+      vp9_write(w, bb, pp[i >> 1]);
       i = vp9_coef_tree[i + bb];
     } while (n);
 
@@ -302,12 +302,12 @@ static void pack_mb_tokens(vp9_writer* const bc,
 
         do {
           const int bb = (v >> --n) & 1;
-          vp9_write(bc, bb, pb[i >> 1]);
+          vp9_write(w, bb, pb[i >> 1]);
           i = b->tree[i + bb];
         } while (n);
       }
 
-      vp9_write_bit(bc, e & 1);
+      vp9_write_bit(w, e & 1);
     }
     ++p;
   }
