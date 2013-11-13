@@ -1,0 +1,123 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdX//9wk\u003d",
+        "filename": "test/android/Android.mk",
+        "patchSetId": 9
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-11-13T02:16:54Z",
+      "side": 1,
+      "message": "configure handles this for the general make solution",
+      "revId": "c88f1ec8ca1e51bf2f38462b255e72c3a4b748c0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX//9wg\u003d",
+        "filename": "test/android/Android.mk",
+        "patchSetId": 9
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-11-13T02:16:54Z",
+      "side": 1,
+      "message": "worth setting LOCAL_ARM_MODE for the rest of these targets?",
+      "revId": "c88f1ec8ca1e51bf2f38462b255e72c3a4b748c0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX//9wc\u003d",
+        "filename": "test/android/README",
+        "patchSetId": 9
+      },
+      "lineNbr": 3,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-11-13T02:16:54Z",
+      "side": 1,
+      "message": "break this line adding escapes \u0027\\\u0027 so it can be copied",
+      "revId": "c88f1ec8ca1e51bf2f38462b255e72c3a4b748c0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX//9wY\u003d",
+        "filename": "test/android/README",
+        "patchSetId": 9
+      },
+      "lineNbr": 6,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-11-13T02:16:54Z",
+      "side": 1,
+      "message": "ditto.\nseems like -fritti could go in the makefile if it\u0027s a requirement",
+      "revId": "c88f1ec8ca1e51bf2f38462b255e72c3a4b748c0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX//9wU\u003d",
+        "filename": "test/android/README",
+        "patchSetId": 9
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-11-13T02:16:54Z",
+      "side": 1,
+      "message": "break",
+      "revId": "c88f1ec8ca1e51bf2f38462b255e72c3a4b748c0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX//9wQ\u003d",
+        "filename": "test/android/README",
+        "patchSetId": 9
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-11-13T02:16:54Z",
+      "side": 1,
+      "message": "\u0027Currently, I put these files...\u0027 isn\u0027t necessary just give an example target (copy to the device, for example ...)",
+      "revId": "c88f1ec8ca1e51bf2f38462b255e72c3a4b748c0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX//9wo\u003d",
+        "filename": "test/android/get_files.py",
+        "patchSetId": 9
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-11-13T02:16:54Z",
+      "side": 1,
+      "message": "is the testdata make target not sufficient?",
+      "revId": "c88f1ec8ca1e51bf2f38462b255e72c3a4b748c0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
