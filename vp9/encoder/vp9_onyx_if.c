@@ -834,6 +834,7 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
 
         sf->adaptive_rd_thresh = 2;
         sf->recode_loop = 2;
+        sf->use_lp32x32fdct = 1;
         sf->mode_skip_start = 11;
         sf->intra_y_mode_mask[TX_32X32] = INTRA_DC_H_V;
         sf->intra_y_mode_mask[TX_16X16] = INTRA_DC_H_V;

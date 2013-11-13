@@ -432,18 +432,26 @@ static void encode_block(int plane, int block, BLOCK_SIZE plane_bsize,
   // TODO(jingning): per transformed block zero forcing only enabled for
   // luma component. will integrate chroma components as well.
   if (x->zcoeff_blk[tx_size][block] && plane == 0) {
-    int i, j;
+    int i, k;
     pd->eobs[block] = 0;
-    txfrm_block_to_raster_xy(plane_bsize, tx_size, block, &i, &j);
+    txfrm_block_to_raster_xy(plane_bsize, tx_size, block, &i, &k);
     ctx->ta[plane][i] = 0;
-    ctx->tl[plane][j] = 0;
+    ctx->tl[plane][k] = 0;
     return;
   }
 
-  vp9_xform_quant(plane, block, plane_bsize, tx_size, arg);
+  if (x->select_txfm_size || xd->mi_8x8[0]->mbmi.sb_type < BLOCK_8X8)
+    vp9_xform_quant(plane, block, plane_bsize, tx_size, arg);
 
-  if (x->optimize)
+  if (x->optimize && (x->select_txfm_size ||
+      xd->mi_8x8[0]->mbmi.sb_type < BLOCK_8X8|| !x->skip_optimize)) {
     vp9_optimize_b(plane, block, plane_bsize, tx_size, x, ctx);
+  } else {
+    int i, k;
+    txfrm_block_to_raster_xy(plane_bsize, tx_size, block, &i, &k);
+    ctx->ta[plane][i] = pd->eobs[block] > 0;
+    ctx->tl[plane][k] = pd->eobs[block] > 0;
+  }
 
   if (x->skip_encode || pd->eobs[block] == 0)
     return;
@@ -507,7 +515,8 @@ void vp9_encode_sb(MACROBLOCK *x, BLOCK_SIZE bsize) {
   struct optimize_ctx ctx;
   struct encode_b_args arg = {x, &ctx};
 
-  vp9_subtract_sb(x, bsize);
+  if (x->select_txfm_size || xd->mi_8x8[0]->mbmi.sb_type < BLOCK_8X8)
+    vp9_subtract_sb(x, bsize);
 
   if (x->optimize) {
     int i;
