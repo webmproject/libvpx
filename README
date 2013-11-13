@@ -64,6 +64,7 @@ COMPILING THE APPLICATIONS/LIBRARIES:
     armv7-linux-gcc
     armv7-none-rvct
     armv7-win32-vs11
+    armv7-win32-vs12
     mips32-linux-gcc
     ppc32-darwin8-gcc
     ppc32-darwin9-gcc
@@ -91,6 +92,7 @@ COMPILING THE APPLICATIONS/LIBRARIES:
     x86-win32-vs9
     x86-win32-vs10
     x86-win32-vs11
+    x86-win32-vs12
     x86_64-darwin9-gcc
     x86_64-darwin10-gcc
     x86_64-darwin11-gcc
@@ -104,6 +106,7 @@ COMPILING THE APPLICATIONS/LIBRARIES:
     x86_64-win64-vs9
     x86_64-win64-vs10
     x86_64-win64-vs11
+    x86_64-win64-vs12
     universal-darwin8-gcc
     universal-darwin9-gcc
     universal-darwin10-gcc
