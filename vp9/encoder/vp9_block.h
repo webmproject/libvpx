@@ -27,16 +27,16 @@ typedef struct {
 typedef struct {
   MODE_INFO mic;
   uint8_t *zcoeff_blk;
-  int16_t *coeff[MAX_MB_PLANE][2];
-  int16_t *qcoeff[MAX_MB_PLANE][2];
-  int16_t *dqcoeff[MAX_MB_PLANE][2];
-  uint16_t *eobs[MAX_MB_PLANE][2];
+  int16_t *coeff[MAX_MB_PLANE][3];
+  int16_t *qcoeff[MAX_MB_PLANE][3];
+  int16_t *dqcoeff[MAX_MB_PLANE][3];
+  uint16_t *eobs[MAX_MB_PLANE][3];
 
   // dual buffer pointers, 0: in use, 1: best in store
-  int16_t *coeff_pbuf[MAX_MB_PLANE][2];
-  int16_t *qcoeff_pbuf[MAX_MB_PLANE][2];
-  int16_t *dqcoeff_pbuf[MAX_MB_PLANE][2];
-  uint16_t *eobs_pbuf[MAX_MB_PLANE][2];
+  int16_t *coeff_pbuf[MAX_MB_PLANE][3];
+  int16_t *qcoeff_pbuf[MAX_MB_PLANE][3];
+  int16_t *dqcoeff_pbuf[MAX_MB_PLANE][3];
+  uint16_t *eobs_pbuf[MAX_MB_PLANE][3];
 
   int is_coded;
   int num_4x4_blk;
@@ -94,6 +94,7 @@ struct macroblock {
   MACROBLOCKD e_mbd;
   int skip_block;
   int select_txfm_size;
+  int skip_recode;
   int skip_optimize;
   int q_index;
 

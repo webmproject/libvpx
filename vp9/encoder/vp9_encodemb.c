@@ -431,19 +431,18 @@ static void encode_block(int plane, int block, BLOCK_SIZE plane_bsize,
   // TODO(jingning): per transformed block zero forcing only enabled for
   // luma component. will integrate chroma components as well.
   if (x->zcoeff_blk[tx_size][block] && plane == 0) {
-    int i, k;
+    int i, j;
     pd->eobs[block] = 0;
-    txfrm_block_to_raster_xy(plane_bsize, tx_size, block, &i, &k);
+    txfrm_block_to_raster_xy(plane_bsize, tx_size, block, &i, &j);
     ctx->ta[plane][i] = 0;
-    ctx->tl[plane][k] = 0;
+    ctx->tl[plane][j] = 0;
     return;
   }
 
-  if (x->select_txfm_size || xd->mi_8x8[0]->mbmi.sb_type < BLOCK_8X8)
+  if (!x->skip_recode)
     vp9_xform_quant(plane, block, plane_bsize, tx_size, arg);
 
-  if (x->optimize && (x->select_txfm_size ||
-      xd->mi_8x8[0]->mbmi.sb_type < BLOCK_8X8|| !x->skip_optimize)) {
+  if (x->optimize && (!x->skip_recode || !x->skip_optimize)) {
     vp9_optimize_b(plane, block, plane_bsize, tx_size, x, ctx);
   } else {
     int i, k;
@@ -514,10 +513,10 @@ void vp9_encode_sb(MACROBLOCK *x, BLOCK_SIZE bsize) {
   struct optimize_ctx ctx;
   struct encode_b_args arg = {x, &ctx};
 
-  if (x->select_txfm_size || xd->mi_8x8[0]->mbmi.sb_type < BLOCK_8X8)
+  if (!x->skip_recode)
     vp9_subtract_sb(x, bsize);
 
-  if (x->optimize) {
+  if (x->optimize && (!x->skip_recode || !x->skip_optimize)) {
     int i;
     for (i = 0; i < MAX_MB_PLANE; ++i)
       optimize_init_b(i, bsize, &arg);
@@ -562,19 +561,22 @@ void vp9_encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
       xoff = 32 * (block & twmask);
       yoff = 32 * (block >> twl);
       dst = pd->dst.buf + yoff * pd->dst.stride + xoff;
-      src = p->src.buf + yoff * p->src.stride + xoff;
-      src_diff = p->src_diff + 4 * bw * yoff + xoff;
       vp9_predict_intra_block(xd, block, bwl, TX_32X32, mode,
                               dst, pd->dst.stride, dst, pd->dst.stride);
-      vp9_subtract_block(32, 32, src_diff, bw * 4,
-                         src, p->src.stride, dst, pd->dst.stride);
-      if (x->use_lp32x32fdct)
-        vp9_fdct32x32_rd(src_diff, coeff, bw * 4);
-      else
-        vp9_fdct32x32(src_diff, coeff, bw * 4);
-      vp9_quantize_b_32x32(coeff, 1024, x->skip_block, p->zbin, p->round,
-                           p->quant, p->quant_shift, qcoeff, dqcoeff,
-                           pd->dequant, p->zbin_extra, eob, scan, iscan);
+
+      if (!x->skip_recode) {
+        src = p->src.buf + yoff * p->src.stride + xoff;
+        src_diff = p->src_diff + 4 * bw * yoff + xoff;
+        vp9_subtract_block(32, 32, src_diff, bw * 4,
+                           src, p->src.stride, dst, pd->dst.stride);
+        if (x->use_lp32x32fdct)
+          vp9_fdct32x32_rd(src_diff, coeff, bw * 4);
+        else
+          vp9_fdct32x32(src_diff, coeff, bw * 4);
+        vp9_quantize_b_32x32(coeff, 1024, x->skip_block, p->zbin, p->round,
+                             p->quant, p->quant_shift, qcoeff, dqcoeff,
+                             pd->dequant, p->zbin_extra, eob, scan, iscan);
+      }
       if (!x->skip_encode && *eob)
         vp9_idct32x32_add(dqcoeff, dst, pd->dst.stride, *eob);
       break;
@@ -587,16 +589,18 @@ void vp9_encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
       xoff = 16 * (block & twmask);
       yoff = 16 * (block >> twl);
       dst = pd->dst.buf + yoff * pd->dst.stride + xoff;
-      src = p->src.buf + yoff * p->src.stride + xoff;
-      src_diff = p->src_diff + 4 * bw * yoff + xoff;
       vp9_predict_intra_block(xd, block, bwl, TX_16X16, mode,
                               dst, pd->dst.stride, dst, pd->dst.stride);
-      vp9_subtract_block(16, 16, src_diff, bw * 4,
-                         src, p->src.stride, dst, pd->dst.stride);
-      vp9_fht16x16(tx_type, src_diff, coeff, bw * 4);
-      vp9_quantize_b(coeff, 256, x->skip_block, p->zbin, p->round,
-                     p->quant, p->quant_shift, qcoeff, dqcoeff,
-                     pd->dequant, p->zbin_extra, eob, scan, iscan);
+      if (!x->skip_recode) {
+        src = p->src.buf + yoff * p->src.stride + xoff;
+        src_diff = p->src_diff + 4 * bw * yoff + xoff;
+        vp9_subtract_block(16, 16, src_diff, bw * 4,
+                           src, p->src.stride, dst, pd->dst.stride);
+        vp9_fht16x16(tx_type, src_diff, coeff, bw * 4);
+        vp9_quantize_b(coeff, 256, x->skip_block, p->zbin, p->round,
+                       p->quant, p->quant_shift, qcoeff, dqcoeff,
+                       pd->dequant, p->zbin_extra, eob, scan, iscan);
+      }
       if (!x->skip_encode && *eob)
         vp9_iht16x16_add(tx_type, dqcoeff, dst, pd->dst.stride, *eob);
       break;
@@ -609,16 +613,18 @@ void vp9_encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
       xoff = 8 * (block & twmask);
       yoff = 8 * (block >> twl);
       dst = pd->dst.buf + yoff * pd->dst.stride + xoff;
-      src = p->src.buf + yoff * p->src.stride + xoff;
-      src_diff = p->src_diff + 4 * bw * yoff + xoff;
       vp9_predict_intra_block(xd, block, bwl, TX_8X8, mode,
                               dst, pd->dst.stride, dst, pd->dst.stride);
-      vp9_subtract_block(8, 8, src_diff, bw * 4,
-                         src, p->src.stride, dst, pd->dst.stride);
-      vp9_fht8x8(tx_type, src_diff, coeff, bw * 4);
-      vp9_quantize_b(coeff, 64, x->skip_block, p->zbin, p->round, p->quant,
-                     p->quant_shift, qcoeff, dqcoeff,
-                     pd->dequant, p->zbin_extra, eob, scan, iscan);
+      if (!x->skip_recode) {
+        src = p->src.buf + yoff * p->src.stride + xoff;
+        src_diff = p->src_diff + 4 * bw * yoff + xoff;
+        vp9_subtract_block(8, 8, src_diff, bw * 4,
+                           src, p->src.stride, dst, pd->dst.stride);
+        vp9_fht8x8(tx_type, src_diff, coeff, bw * 4);
+        vp9_quantize_b(coeff, 64, x->skip_block, p->zbin, p->round, p->quant,
+                       p->quant_shift, qcoeff, dqcoeff,
+                       pd->dequant, p->zbin_extra, eob, scan, iscan);
+      }
       if (!x->skip_encode && *eob)
         vp9_iht8x8_add(tx_type, dqcoeff, dst, pd->dst.stride, *eob);
       break;
@@ -634,19 +640,23 @@ void vp9_encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
       xoff = 4 * (block & twmask);
       yoff = 4 * (block >> twl);
       dst = pd->dst.buf + yoff * pd->dst.stride + xoff;
-      src = p->src.buf + yoff * p->src.stride + xoff;
-      src_diff = p->src_diff + 4 * bw * yoff + xoff;
       vp9_predict_intra_block(xd, block, bwl, TX_4X4, mode,
                               dst, pd->dst.stride, dst, pd->dst.stride);
-      vp9_subtract_block(4, 4, src_diff, bw * 4,
-                         src, p->src.stride, dst, pd->dst.stride);
-      if (tx_type != DCT_DCT)
-        vp9_short_fht4x4(src_diff, coeff, bw * 4, tx_type);
-      else
-        x->fwd_txm4x4(src_diff, coeff, bw * 4);
-      vp9_quantize_b(coeff, 16, x->skip_block, p->zbin, p->round, p->quant,
-                     p->quant_shift, qcoeff, dqcoeff,
-                     pd->dequant, p->zbin_extra, eob, scan, iscan);
+
+      if (!x->skip_recode) {
+        src = p->src.buf + yoff * p->src.stride + xoff;
+        src_diff = p->src_diff + 4 * bw * yoff + xoff;
+        vp9_subtract_block(4, 4, src_diff, bw * 4,
+                           src, p->src.stride, dst, pd->dst.stride);
+        if (tx_type != DCT_DCT)
+          vp9_short_fht4x4(src_diff, coeff, bw * 4, tx_type);
+        else
+          x->fwd_txm4x4(src_diff, coeff, bw * 4);
+        vp9_quantize_b(coeff, 16, x->skip_block, p->zbin, p->round, p->quant,
+                       p->quant_shift, qcoeff, dqcoeff,
+                       pd->dequant, p->zbin_extra, eob, scan, iscan);
+      }
+
       if (!x->skip_encode && *eob) {
         if (tx_type == DCT_DCT)
           // this is like vp9_short_idct4x4 but has a special case around eob<=1
