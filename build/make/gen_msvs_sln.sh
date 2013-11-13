@@ -255,7 +255,7 @@ for opt in "$@"; do
     ;;
     --ver=*) vs_ver="$optval"
              case $optval in
-             [789]|10|11)
+             [789]|10|11|12)
              ;;
              *) die Unrecognized Visual Studio Version in $opt
              ;;
@@ -297,12 +297,15 @@ case "${vs_ver:-8}" in
     11) sln_vers="12.00"
        sln_vers_str="Visual Studio 2012"
     ;;
+    12) sln_vers="12.00"
+       sln_vers_str="Visual Studio 2013"
+    ;;
 esac
 case "${vs_ver:-8}" in
     [789])
     sfx=vcproj
     ;;
-    10|11)
+    10|11|12)
     sfx=vcxproj
     ;;
 esac
