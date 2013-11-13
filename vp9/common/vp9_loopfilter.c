@@ -411,19 +411,16 @@ static void filter_selectively_horiz(uint8_t *s, int pitch,
           // Next block's thresholds
           const loop_filter_thresh *lfin = lfi_n->lfthr + *(lfl + 1);
 
-          // TODO(yunqingwang): Combine next 2 calls as 1 wide filtering.
-          vp9_mbloop_filter_horizontal_edge(s, pitch, lfi->mblim, lfi->lim,
-                                            lfi->hev_thr, 1);
-          vp9_mbloop_filter_horizontal_edge(s + 8, pitch, lfin->mblim,
-                                            lfin->lim, lfin->hev_thr, 1);
+          vp9_mbloop_filter_horizontal_edge_16(s, pitch, lfi->mblim,
+                                               lfi->lim, lfi->hev_thr,
+                                               lfin->mblim, lfin->lim,
+                                               lfin->hev_thr);
 
           if ((mask_4x4_int & 3) == 3) {
-            // TODO(yunqingwang): Combine next 2 calls as 1 wide filtering.
-            vp9_loop_filter_horizontal_edge(s + 4 * pitch, pitch, lfi->mblim,
-                                            lfi->lim, lfi->hev_thr, 1);
-            vp9_loop_filter_horizontal_edge(s + 8 + 4 * pitch, pitch,
-                                            lfin->mblim, lfin->lim,
-                                            lfin->hev_thr, 1);
+            vp9_loop_filter_horizontal_edge_16(s + 4 * pitch, pitch, lfi->mblim,
+                                               lfi->lim, lfi->hev_thr,
+                                               lfin->mblim, lfin->lim,
+                                               lfin->hev_thr);
           } else {
             if (mask_4x4_int & 1)
               vp9_loop_filter_horizontal_edge(s + 4 * pitch, pitch, lfi->mblim,
@@ -449,19 +446,15 @@ static void filter_selectively_horiz(uint8_t *s, int pitch,
           // Next block's thresholds
           const loop_filter_thresh *lfin = lfi_n->lfthr + *(lfl + 1);
 
-          // TODO(yunqingwang): Combine next 2 calls as 1 wide filtering.
-          vp9_loop_filter_horizontal_edge(s, pitch, lfi->mblim, lfi->lim,
-                                            lfi->hev_thr, 1);
-          vp9_loop_filter_horizontal_edge(s + 8, pitch, lfin->mblim, lfin->lim,
-                                            lfin->hev_thr, 1);
-
+          vp9_loop_filter_horizontal_edge_16(s, pitch, lfi->mblim,
+                                             lfi->lim, lfi->hev_thr,
+                                             lfin->mblim, lfin->lim,
+                                             lfin->hev_thr);
           if ((mask_4x4_int & 3) == 3) {
-            // TODO(yunqingwang): Combine next 2 calls as 1 wide filtering.
-            vp9_loop_filter_horizontal_edge(s + 4 * pitch, pitch, lfi->mblim,
-                                            lfi->lim, lfi->hev_thr, 1);
-            vp9_loop_filter_horizontal_edge(s + 8 + 4 * pitch, pitch,
-                                            lfin->mblim, lfin->lim,
-                                            lfin->hev_thr, 1);
+            vp9_loop_filter_horizontal_edge_16(s + 4 * pitch, pitch, lfi->mblim,
+                                               lfi->lim, lfi->hev_thr,
+                                               lfin->mblim, lfin->lim,
+                                               lfin->hev_thr);
           } else {
             if (mask_4x4_int & 1)
               vp9_loop_filter_horizontal_edge(s + 4 * pitch, pitch, lfi->mblim,
