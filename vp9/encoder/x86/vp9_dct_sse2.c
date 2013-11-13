@@ -206,12 +206,12 @@ void fadst4_1d_sse2(__m128i *in) {
   const __m128i k__DCT_CONST_ROUNDING = _mm_set1_epi32(DCT_CONST_ROUNDING);
   __m128i u[8], v[8];
   __m128i in7 = _mm_add_epi16(in[0], in[1]);
-  in7 = _mm_sub_epi16(in7, in[3]);
 
   u[0] = _mm_unpacklo_epi16(in[0], in[1]);
   u[1] = _mm_unpacklo_epi16(in[2], in[3]);
   u[2] = _mm_unpacklo_epi16(in7, kZero);
   u[3] = _mm_unpacklo_epi16(in[2], kZero);
+  u[4] = _mm_unpacklo_epi16(in[3], kZero);
 
   v[0] = _mm_madd_epi16(u[0], k__sinpi_p01_p02);  // s0 + s2
   v[1] = _mm_madd_epi16(u[1], k__sinpi_p03_p04);  // s4 + s5
@@ -219,9 +219,10 @@ void fadst4_1d_sse2(__m128i *in) {
   v[3] = _mm_madd_epi16(u[0], k__sinpi_p04_m01);  // s1 - s3
   v[4] = _mm_madd_epi16(u[1], k__sinpi_m03_p02);  // -s4 + s6
   v[5] = _mm_madd_epi16(u[3], k__sinpi_p03_p03);  // s4
+  v[6] = _mm_madd_epi16(u[4], k__sinpi_p03_p03);
 
   u[0] = _mm_add_epi32(v[0], v[1]);
-  u[1] = v[2];
+  u[1] = _mm_sub_epi32(v[2], v[6]);
   u[2] = _mm_add_epi32(v[3], v[4]);
   u[3] = _mm_sub_epi32(u[2], u[0]);
   u[4] = _mm_slli_epi32(v[5], 2);
