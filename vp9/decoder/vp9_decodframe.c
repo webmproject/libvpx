@@ -243,31 +243,30 @@ static void alloc_tile_storage(VP9D_COMP *pbi, int tile_rows, int tile_cols) {
 }
 
 static void inverse_transform_block(MACROBLOCKD* xd, int plane, int block,
-                                    BLOCK_SIZE plane_bsize, TX_SIZE tx_size) {
+                                    TX_SIZE tx_size, int x, int y) {
   struct macroblockd_plane *const pd = &xd->plane[plane];
-  int16_t* const dqcoeff = BLOCK_OFFSET(pd->dqcoeff, block);
-  const int stride = pd->dst.stride;
   const int eob = pd->eobs[block];
   if (eob > 0) {
     TX_TYPE tx_type;
-    const int raster_block = txfrm_block_to_raster_block(plane_bsize, tx_size,
-                                                         block);
-    uint8_t* const dst = raster_block_offset_uint8(plane_bsize, raster_block,
-                                                   pd->dst.buf, stride);
+    const int plane_type = pd->plane_type;
+    const int stride = pd->dst.stride;
+    int16_t *const dqcoeff = BLOCK_OFFSET(pd->dqcoeff, block);
+    uint8_t *const dst = &pd->dst.buf[4 * y * stride + 4 * x];
+
     switch (tx_size) {
       case TX_4X4:
-        tx_type = get_tx_type_4x4(pd->plane_type, xd, raster_block);
+        tx_type = get_tx_type_4x4(plane_type, xd, block);
         if (tx_type == DCT_DCT)
           xd->itxm_add(dqcoeff, dst, stride, eob);
         else
           vp9_iht4x4_16_add(dqcoeff, dst, stride, tx_type);
         break;
       case TX_8X8:
-        tx_type = get_tx_type_8x8(pd->plane_type, xd);
+        tx_type = get_tx_type_8x8(plane_type, xd);
         vp9_iht8x8_add(tx_type, dqcoeff, dst, stride, eob);
         break;
       case TX_16X16:
-        tx_type = get_tx_type_16x16(pd->plane_type, xd);
+        tx_type = get_tx_type_16x16(plane_type, xd);
         vp9_iht16x16_add(tx_type, dqcoeff, dst, stride, eob);
         break;
       case TX_32X32:
@@ -308,17 +307,16 @@ static void predict_and_reconstruct_intra_block(int plane, int block,
   const uint8_t *band_translate[2] = {
     args->band_translate[0], args->band_translate[1]
   };
-
   struct macroblockd_plane *const pd = &xd->plane[plane];
   MODE_INFO *const mi = xd->mi_8x8[0];
-  const int raster_block = txfrm_block_to_raster_block(plane_bsize, tx_size,
-                                                       block);
-  uint8_t* const dst = raster_block_offset_uint8(plane_bsize, raster_block,
-                                                 pd->dst.buf, pd->dst.stride);
   const MB_PREDICTION_MODE mode = (plane == 0)
-        ? ((mi->mbmi.sb_type < BLOCK_8X8) ? mi->bmi[raster_block].as_mode
-                                          : mi->mbmi.mode)
-        : mi->mbmi.uv_mode;
+          ? ((mi->mbmi.sb_type < BLOCK_8X8) ? mi->bmi[block].as_mode
+                                            : mi->mbmi.mode)
+          : mi->mbmi.uv_mode;
+  int x, y;
+  uint8_t *dst;
+  txfrm_block_to_raster_xy(plane_bsize, tx_size, block, &x, &y);
+  dst = &pd->dst.buf[4 * y * pd->dst.stride + 4 * x];
 
   if (xd->mb_to_right_edge < 0 || xd->mb_to_bottom_edge < 0)
     extend_for_intra(xd, plane_bsize, plane, block, tx_size);
@@ -328,9 +326,9 @@ static void predict_and_reconstruct_intra_block(int plane, int block,
                           dst, pd->dst.stride, dst, pd->dst.stride);
 
   if (!mi->mbmi.skip_coeff) {
-    vp9_decode_block_tokens(cm, xd, plane, block, plane_bsize, tx_size,
+    vp9_decode_block_tokens(cm, xd, plane, block, plane_bsize, x, y, tx_size,
                             args->r, args->token_cache, band_translate);
-    inverse_transform_block(xd, plane, block, plane_bsize, tx_size);
+    inverse_transform_block(xd, plane, block, tx_size, x, y);
   }
 }
 
@@ -352,12 +350,14 @@ static void reconstruct_inter_block(int plane, int block,
   const uint8_t *band_translate[2] = {
     args->band_translate[0], args->band_translate[1]
   };
+  int x, y;
+  txfrm_block_to_raster_xy(plane_bsize, tx_size, block, &x, &y);
 
   *args->eobtotal += vp9_decode_block_tokens(cm, xd, plane, block,
-                                             plane_bsize, tx_size,
+                                             plane_bsize, x, y, tx_size,
                                              args->r, args->token_cache,
                                              band_translate);
-  inverse_transform_block(xd, plane, block, plane_bsize, tx_size);
+  inverse_transform_block(xd, plane, block, tx_size, x, y);
 }
 
 static void set_offsets(VP9_COMMON *const cm, MACROBLOCKD *const xd,

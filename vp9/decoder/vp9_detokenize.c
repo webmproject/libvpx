@@ -218,24 +218,19 @@ static int decode_coefs(VP9_COMMON *cm, const MACROBLOCKD *xd,
 
 int vp9_decode_block_tokens(VP9_COMMON *cm, MACROBLOCKD *xd,
                             int plane, int block, BLOCK_SIZE plane_bsize,
-                            TX_SIZE tx_size, vp9_reader *r,
+                            int x, int y, TX_SIZE tx_size, vp9_reader *r,
                             uint8_t *token_cache,
                             const uint8_t *band_translate[2]) {
   struct macroblockd_plane *const pd = &xd->plane[plane];
   const int seg_eob = get_tx_eob(&cm->seg, xd->mi_8x8[0]->mbmi.segment_id,
                                  tx_size);
-  int aoff, loff, eob, pt;
-  txfrm_block_to_raster_xy(plane_bsize, tx_size, block, &aoff, &loff);
-  pt = get_entropy_context(tx_size, pd->above_context + aoff,
-                                    pd->left_context + loff);
-
-  eob = decode_coefs(cm, xd, r, block,
-                     pd->plane_type, seg_eob, BLOCK_OFFSET(pd->dqcoeff, block),
-                     tx_size, pd->dequant, pt, token_cache,
-                     band_translate[tx_size != TX_4X4]);
-
-  set_contexts(xd, pd, plane_bsize, tx_size, eob > 0, aoff, loff);
-
+  const int pt = get_entropy_context(tx_size, pd->above_context + x,
+                                              pd->left_context + y);
+  const int eob = decode_coefs(cm, xd, r, block, pd->plane_type, seg_eob,
+                               BLOCK_OFFSET(pd->dqcoeff, block), tx_size,
+                               pd->dequant, pt, token_cache,
+                               band_translate[tx_size != TX_4X4]);
+  set_contexts(xd, pd, plane_bsize, tx_size, eob > 0, x, y);
   pd->eobs[block] = eob;
   return eob;
 }
