@@ -109,32 +109,40 @@ static INLINE vp9_prob vp9_get_pred_prob_single_ref_p2(const VP9_COMMON *cm,
 
 unsigned char vp9_get_pred_context_tx_size(const MACROBLOCKD *xd);
 
-static const vp9_prob *get_tx_probs(BLOCK_SIZE bsize, uint8_t context,
+static const vp9_prob *get_tx_probs(TX_SIZE max_tx_size, int ctx,
                                     const struct tx_probs *tx_probs) {
-  if (bsize < BLOCK_16X16)
-    return tx_probs->p8x8[context];
-  else if (bsize < BLOCK_32X32)
-    return tx_probs->p16x16[context];
-  else
-    return tx_probs->p32x32[context];
+  switch (max_tx_size) {
+    case TX_8X8:
+      return tx_probs->p8x8[ctx];
+    case TX_16X16:
+      return tx_probs->p16x16[ctx];
+    case TX_32X32:
+      return tx_probs->p32x32[ctx];
+    default:
+      assert(!"Invalid max_tx_size.");
+      return NULL;
+  }
 }
 
-static const vp9_prob *get_tx_probs2(const MACROBLOCKD *xd,
-                                     const struct tx_probs *tx_probs,
-                                     const MODE_INFO *m) {
-  const BLOCK_SIZE bsize = m->mbmi.sb_type;
-  const int context = vp9_get_pred_context_tx_size(xd);
-  return get_tx_probs(bsize, context, tx_probs);
+static const vp9_prob *get_tx_probs2(TX_SIZE max_tx_size, const MACROBLOCKD *xd,
+                                     const struct tx_probs *tx_probs) {
+  const int ctx = vp9_get_pred_context_tx_size(xd);
+  return get_tx_probs(max_tx_size, ctx, tx_probs);
 }
 
-static unsigned int *get_tx_counts(BLOCK_SIZE bsize, uint8_t context,
+static unsigned int *get_tx_counts(TX_SIZE max_tx_size, int ctx,
                                    struct tx_counts *tx_counts) {
-  if (bsize < BLOCK_16X16)
-    return tx_counts->p8x8[context];
-  else if (bsize < BLOCK_32X32)
-    return tx_counts->p16x16[context];
-  else
-    return tx_counts->p32x32[context];
+  switch (max_tx_size) {
+    case TX_8X8:
+      return tx_counts->p8x8[ctx];
+    case TX_16X16:
+      return tx_counts->p16x16[ctx];
+    case TX_32X32:
+      return tx_counts->p32x32[ctx];
+    default:
+      assert(!"Invalid max_tx_size.");
+      return NULL;
+  }
 }
 
 #endif  // VP9_COMMON_VP9_PRED_COMMON_H_
