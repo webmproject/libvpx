@@ -3167,7 +3167,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
   const int bhs = num_8x8_blocks_high_lookup[bsize] / 2;
   int best_skip2 = 0;
 
-  x->skip_encode = cpi->sf.skip_encode_frame && xd->q_index < QIDX_SKIP_THRESH;
+  x->skip_encode = cpi->sf.skip_encode_frame && x->q_index < QIDX_SKIP_THRESH;
 
   // Everywhere the flag is set the error is much higher than its neighbors.
   ctx->frames_with_high_error = 0;
@@ -3862,7 +3862,7 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
   b_mode_info best_bmodes[4];
   int best_skip2 = 0;
 
-  x->skip_encode = cpi->sf.skip_encode_frame && xd->q_index < QIDX_SKIP_THRESH;
+  x->skip_encode = cpi->sf.skip_encode_frame && x->q_index < QIDX_SKIP_THRESH;
   vpx_memset(x->zcoeff_blk[TX_4X4], 0, 4);
 
   for (i = 0; i < 4; i++) {

@@ -301,17 +301,17 @@ void vp9_mb_init_quantizer(VP9_COMP *cpi, MACROBLOCK *x) {
                                         SEG_LVL_SKIP);
 
   /* save this macroblock QIndex for vp9_update_zbin_extra() */
-  x->e_mbd.q_index = qindex;
+  x->q_index = qindex;
 
   /* R/D setup */
   cpi->mb.errorperbit = rdmult >> 6;
   cpi->mb.errorperbit += (cpi->mb.errorperbit == 0);
 
-  vp9_initialize_me_consts(cpi, xd->q_index);
+  vp9_initialize_me_consts(cpi, x->q_index);
 }
 
 void vp9_update_zbin_extra(VP9_COMP *cpi, MACROBLOCK *x) {
-  const int qindex = x->e_mbd.q_index;
+  const int qindex = x->q_index;
   const int y_zbin_extra = (cpi->common.y_dequant[qindex][1] *
                 (cpi->zbin_mode_boost + x->act_zbin_adj)) >> 7;
   const int uv_zbin_extra = (cpi->common.uv_dequant[qindex][1] *

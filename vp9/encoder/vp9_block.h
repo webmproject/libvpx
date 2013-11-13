@@ -95,6 +95,7 @@ struct macroblock {
   int skip_block;
   int select_txfm_size;
   int skip_optimize;
+  int q_index;
 
   search_site *ss;
   int ss_count;

@@ -2410,7 +2410,7 @@ static void encode_superblock(VP9_COMP *cpi, TOKENEXTRA **t, int output_enabled,
   ctx->is_coded = 1;
   x->use_lp32x32fdct = cpi->sf.use_lp32x32fdct;
   x->skip_encode = (!output_enabled && cpi->sf.skip_encode_frame &&
-                    xd->q_index < QIDX_SKIP_THRESH);
+                    x->q_index < QIDX_SKIP_THRESH);
   if (x->skip_encode)
     return;
 
