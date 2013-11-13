@@ -191,22 +191,22 @@ specialize vp9_dc_128_predictor_32x32
 # Loopfilter
 #
 prototype void vp9_mb_lpf_vertical_edge_w "uint8_t *s, int pitch, const uint8_t *blimit, const uint8_t *limit, const uint8_t *thresh"
-specialize vp9_mb_lpf_vertical_edge_w sse2 neon
+specialize vp9_mb_lpf_vertical_edge_w sse2 neon dspr2
 
 prototype void vp9_mbloop_filter_vertical_edge "uint8_t *s, int pitch, const uint8_t *blimit, const uint8_t *limit, const uint8_t *thresh, int count"
-specialize vp9_mbloop_filter_vertical_edge sse2 neon
+specialize vp9_mbloop_filter_vertical_edge sse2 neon dspr2
 
 prototype void vp9_loop_filter_vertical_edge "uint8_t *s, int pitch, const uint8_t *blimit, const uint8_t *limit, const uint8_t *thresh, int count"
-specialize vp9_loop_filter_vertical_edge mmx neon
+specialize vp9_loop_filter_vertical_edge mmx neon dspr2
 
 prototype void vp9_mb_lpf_horizontal_edge_w "uint8_t *s, int pitch, const uint8_t *blimit, const uint8_t *limit, const uint8_t *thresh, int count"
-specialize vp9_mb_lpf_horizontal_edge_w sse2 avx2 neon
+specialize vp9_mb_lpf_horizontal_edge_w sse2 avx2 neon dspr2
 
 prototype void vp9_mbloop_filter_horizontal_edge "uint8_t *s, int pitch, const uint8_t *blimit, const uint8_t *limit, const uint8_t *thresh, int count"
-specialize vp9_mbloop_filter_horizontal_edge sse2 neon
+specialize vp9_mbloop_filter_horizontal_edge sse2 neon dspr2
 
 prototype void vp9_loop_filter_horizontal_edge "uint8_t *s, int pitch, const uint8_t *blimit, const uint8_t *limit, const uint8_t *thresh, int count"
-specialize vp9_loop_filter_horizontal_edge mmx neon
+specialize vp9_loop_filter_horizontal_edge mmx neon dspr2
 
 #
 # post proc
