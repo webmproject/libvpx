@@ -16,6 +16,24 @@
       "revId": "94b667a6173af25cb4c9a26e5604e7c2a27e34e8",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX//9sI\u003d",
+        "filename": "build/make/gen_msvs_sln.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 300,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2013-11-13T20:39:28Z",
+      "side": 1,
+      "message": "I had 13 here, but did not work. so I did a sample new solution in vs2013, the produced solution file has the version of 12.00",
+      "parentUuid": "AAAAdX//9sQ\u003d",
+      "revId": "94b667a6173af25cb4c9a26e5604e7c2a27e34e8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
