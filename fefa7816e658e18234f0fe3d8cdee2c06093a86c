@@ -36,6 +36,57 @@
     },
     {
       "key": {
+        "uuid": "AAAAdX//9n0\u003d",
+        "filename": "test/android/README",
+        "patchSetId": 1
+      },
+      "lineNbr": 4,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-11-14T00:51:34Z",
+      "side": 1,
+      "message": "indent these 2 spaces to emphasize the continuation",
+      "revId": "fefa7816e658e18234f0fe3d8cdee2c06093a86c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX//9ns\u003d",
+        "filename": "test/android/README",
+        "patchSetId": 1
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-11-14T00:51:34Z",
+      "side": 1,
+      "message": "ditto",
+      "revId": "fefa7816e658e18234f0fe3d8cdee2c06093a86c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX//9no\u003d",
+        "filename": "test/android/README",
+        "patchSetId": 1
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-11-14T00:51:34Z",
+      "side": 1,
+      "message": "ditto",
+      "revId": "fefa7816e658e18234f0fe3d8cdee2c06093a86c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdX//9n4\u003d",
         "filename": "test/android/README",
         "patchSetId": 1
@@ -47,6 +98,23 @@
       "writtenOn": "2013-11-14T00:50:04Z",
       "side": 1,
       "message": "I think the execute permission is the one you care about more. You could push to /sdcard/ easily, but you can\u0027t run from there.\n\nIn either case, the message is still a bit wordy. Maybe:\ntransfer the files to the device. Make sure you have execute permissions for the target folder.\n\nand then the example implies that /data/local/tmp has those permissions for you.",
+      "revId": "fefa7816e658e18234f0fe3d8cdee2c06093a86c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX//9nY\u003d",
+        "filename": "test/android/README",
+        "patchSetId": 1
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-11-14T00:51:34Z",
+      "side": 1,
+      "message": "long line. try to keep these \u003c\u003d 80 characters",
       "revId": "fefa7816e658e18234f0fe3d8cdee2c06093a86c",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
