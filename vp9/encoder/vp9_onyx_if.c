@@ -1224,13 +1224,6 @@ static void init_config(VP9_PTR ptr, VP9_CONFIG *oxcf) {
   cpi->fixed_divide[0] = 0;
   for (i = 1; i < 512; i++)
     cpi->fixed_divide[i] = 0x80000 / i;
-
-  vpx_memset(cpi->mb.coefband_trans_8x8plus,
-             (COEF_BANDS-1),
-             sizeof(cpi->mb.coefband_trans_8x8plus));
-  vpx_memcpy(cpi->mb.coefband_trans_8x8plus,
-             vp9_coefband_trans_8x8plus,
-             sizeof(vp9_coefband_trans_8x8plus));
 }
 
 

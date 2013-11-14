@@ -93,8 +93,7 @@ static int decode_coefs(VP9_COMMON *cm, const MACROBLOCKD *xd,
                         vp9_reader *r, int block_idx,
                         PLANE_TYPE type, int seg_eob, int16_t *dqcoeff_ptr,
                         TX_SIZE tx_size, const int16_t *dq, int pt,
-                        uint8_t *token_cache,
-                        const uint8_t *band_translate) {
+                        uint8_t *token_cache) {
   const FRAME_CONTEXT *const fc = &cm->fc;
   FRAME_COUNTS *const counts = &cm->counts;
   const int ref = is_inter_block(&xd->mi_8x8[0]->mbmi);
@@ -110,6 +109,7 @@ static int decode_coefs(VP9_COMMON *cm, const MACROBLOCKD *xd,
       counts->eob_branch[tx_size][type][ref];
   const int16_t *scan, *nb;
   const uint8_t *cat6;
+  const uint8_t *band_translate = get_band_translate(tx_size);
   get_scan(xd, tx_size, type, block_idx, &scan, &nb);
 
   while (c < seg_eob) {
@@ -219,8 +219,7 @@ static int decode_coefs(VP9_COMMON *cm, const MACROBLOCKD *xd,
 int vp9_decode_block_tokens(VP9_COMMON *cm, MACROBLOCKD *xd,
                             int plane, int block, BLOCK_SIZE plane_bsize,
                             int x, int y, TX_SIZE tx_size, vp9_reader *r,
-                            uint8_t *token_cache,
-                            const uint8_t *band_translate[2]) {
+                            uint8_t *token_cache) {
   struct macroblockd_plane *const pd = &xd->plane[plane];
   const int seg_eob = get_tx_eob(&cm->seg, xd->mi_8x8[0]->mbmi.segment_id,
                                  tx_size);
@@ -228,8 +227,7 @@ int vp9_decode_block_tokens(VP9_COMMON *cm, MACROBLOCKD *xd,
                                               pd->left_context + y);
   const int eob = decode_coefs(cm, xd, r, block, pd->plane_type, seg_eob,
                                BLOCK_OFFSET(pd->dqcoeff, block), tx_size,
-                               pd->dequant, pt, token_cache,
-                               band_translate[tx_size != TX_4X4]);
+                               pd->dequant, pt, token_cache);
   set_contexts(xd, pd, plane_bsize, tx_size, eob > 0, x, y);
   pd->eobs[block] = eob;
   return eob;

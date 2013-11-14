@@ -120,12 +120,16 @@ static INLINE void reset_skip_context(MACROBLOCKD *xd, BLOCK_SIZE bsize) {
 
 // This is the index in the scan order beyond which all coefficients for
 // 8x8 transform and above are in the top band.
-// For 4x4 blocks the index is less but to keep things common the lookup
-// table for 4x4 is padded out to this index.
+// This macro is currently unused but may be used by certain implementations
 #define MAXBAND_INDEX 21
 
-extern const uint8_t vp9_coefband_trans_8x8plus[MAXBAND_INDEX + 1];
-extern const uint8_t vp9_coefband_trans_4x4[MAXBAND_INDEX + 1];
+extern const uint8_t vp9_coefband_trans_8x8plus[1024];
+extern const uint8_t vp9_coefband_trans_4x4[16];
+
+static const uint8_t *get_band_translate(TX_SIZE tx_size) {
+  return tx_size == TX_4X4 ? vp9_coefband_trans_4x4
+                           : vp9_coefband_trans_8x8plus;
+}
 
 // 128 lists of probabilities are stored for the following ONE node probs:
 // 1, 3, 5, 7, ..., 253, 255

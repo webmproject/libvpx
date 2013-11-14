@@ -137,9 +137,7 @@ static void optimize_b(MACROBLOCK *mb,
   const int mul = 1 + (tx_size == TX_32X32);
   uint8_t token_cache[1024];
   const int16_t *dequant_ptr = pd->dequant;
-  const uint8_t *const band_translate = (tx_size == TX_4X4 ?
-                                         vp9_coefband_trans_4x4 :
-                                         mb->coefband_trans_8x8plus);
+  const uint8_t *const band_translate = get_band_translate(tx_size);
 
   assert((!type && !plane) || (type && plane));
   dqcoeff_ptr = BLOCK_OFFSET(pd->dqcoeff, block);
