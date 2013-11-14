@@ -1304,13 +1304,6 @@ int vp9_decode_frame(VP9D_COMP *pbi, const uint8_t **p_data_end) {
   const int tile_cols = 1 << cm->log2_tile_cols;
   YV12_BUFFER_CONFIG *const new_fb = get_frame_new_buffer(cm);
 
-  vpx_memset(pbi->coefband_trans_8x8plus,
-             (COEF_BANDS - 1),
-             sizeof(pbi->coefband_trans_8x8plus));
-  vpx_memcpy(pbi->coefband_trans_8x8plus,
-             vp9_coefband_trans_8x8plus,
-             sizeof(vp9_coefband_trans_8x8plus));
-
   if (!first_partition_size) {
       // showing a frame directly
       *p_data_end = data + 1;

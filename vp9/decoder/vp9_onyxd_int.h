@@ -55,7 +55,6 @@ typedef struct VP9Decompressor {
   PARTITION_CONTEXT *above_seg_context;
 
   DECLARE_ALIGNED(16, uint8_t, token_cache[1024]);
-  DECLARE_ALIGNED(16, uint8_t, coefband_trans_8x8plus[1024]);
 } VP9D_COMP;
 
 #endif  // VP9_DECODER_VP9_ONYXD_INT_H_
