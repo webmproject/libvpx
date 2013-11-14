@@ -13,178 +13,288 @@
 #include <string.h>
 
 #include "third_party/googletest/src/include/gtest/gtest.h"
+#include "test/acm_random.h"
+#include "test/clear_system_state.h"
+#include "test/register_state_check.h"
+#include "test/util.h"
 
 extern "C" {
+#include "vp9/common/vp9_entropy.h"
 #include "./vp9_rtcd.h"
+void vp9_idct4x4_16_add_c(const int16_t *input, uint8_t *output, int pitch);
 }
-
-#include "test/acm_random.h"
 #include "vpx/vpx_integer.h"
-#include "vpx_ports/mem.h"
 
 using libvpx_test::ACMRandom;
 
 namespace {
-void fdct4x4(int16_t *in, int16_t *out, uint8_t* /*dst*/,
-             int stride, int /*tx_type*/) {
+const int kNumCoeffs = 16;
+typedef void (*fdct_t)(const int16_t *in, int16_t *out, int stride);
+typedef void (*idct_t)(const int16_t *in, uint8_t *out, int stride);
+typedef void (*fht_t) (const int16_t *in, int16_t *out, int stride,
+                       int tx_type);
+typedef void (*iht_t) (const int16_t *in, uint8_t *out, int stride,
+                       int tx_type);
+
+void fdct4x4_ref(const int16_t *in, int16_t *out, int stride, int tx_type) {
   vp9_fdct4x4_c(in, out, stride);
 }
-void idct4x4_add(int16_t* /*in*/, int16_t *out, uint8_t *dst,
-                 int stride, int /*tx_type*/) {
-  vp9_idct4x4_16_add_c(out, dst, stride);
-}
-void fht4x4(int16_t *in, int16_t *out, uint8_t* /*dst*/,
-            int stride, int tx_type) {
+
+void fht4x4_ref(const int16_t *in, int16_t *out, int stride, int tx_type) {
   vp9_short_fht4x4_c(in, out, stride, tx_type);
 }
-void iht4x4_add(int16_t* /*in*/, int16_t *out, uint8_t *dst,
-                int stride, int tx_type) {
-  vp9_iht4x4_16_add_c(out, dst, stride, tx_type);
-}
 
-class FwdTrans4x4Test : public ::testing::TestWithParam<int> {
+class Trans4x4TestBase {
  public:
-  virtual ~FwdTrans4x4Test() {}
-  virtual void SetUp() {
-    tx_type_ = GetParam();
-    if (tx_type_ == 0) {
-      fwd_txfm_ = fdct4x4;
-      inv_txfm_ = idct4x4_add;
-    } else {
-      fwd_txfm_ = fht4x4;
-      inv_txfm_ = iht4x4_add;
-    }
-  }
+  virtual ~Trans4x4TestBase() {}
 
  protected:
-  void RunFwdTxfm(int16_t *in, int16_t *out, uint8_t *dst,
-                  int stride, int tx_type) {
-    (*fwd_txfm_)(in, out, dst, stride, tx_type);
+  virtual void RunFwdTxfm(const int16_t *in, int16_t *out, int stride) = 0;
+
+  virtual void RunInvTxfm(const int16_t *out, uint8_t *dst, int stride) = 0;
+
+  void RunAccuracyCheck() {
+    ACMRandom rnd(ACMRandom::DeterministicSeed());
+    uint32_t max_error = 0;
+    int64_t total_error = 0;
+    const int count_test_block = 10000;
+    for (int i = 0; i < count_test_block; ++i) {
+      DECLARE_ALIGNED_ARRAY(16, int16_t, test_input_block, kNumCoeffs);
+      DECLARE_ALIGNED_ARRAY(16, int16_t, test_temp_block, kNumCoeffs);
+      DECLARE_ALIGNED_ARRAY(16, uint8_t, dst, kNumCoeffs);
+      DECLARE_ALIGNED_ARRAY(16, uint8_t, src, kNumCoeffs);
+
+      // Initialize a test block with input range [-255, 255].
+      for (int j = 0; j < kNumCoeffs; ++j) {
+        src[j] = rnd.Rand8();
+        dst[j] = rnd.Rand8();
+        test_input_block[j] = src[j] - dst[j];
+      }
+
+      REGISTER_STATE_CHECK(RunFwdTxfm(test_input_block,
+                                      test_temp_block, pitch_));
+      REGISTER_STATE_CHECK(RunInvTxfm(test_temp_block, dst, pitch_));
+
+      for (int j = 0; j < kNumCoeffs; ++j) {
+        const uint32_t diff = dst[j] - src[j];
+        const uint32_t error = diff * diff;
+        if (max_error < error)
+          max_error = error;
+        total_error += error;
+      }
+    }
+
+    EXPECT_GE(1u, max_error)
+        << "Error: 4x4 FHT/IHT has an individual round trip error > 1";
+
+    EXPECT_GE(count_test_block , total_error)
+        << "Error: 4x4 FHT/IHT has average round trip error > 1 per block";
   }
 
-  void RunInvTxfm(int16_t *in, int16_t *out, uint8_t *dst,
-                  int stride, int tx_type) {
-    (*inv_txfm_)(in, out, dst, stride, tx_type);
+  void RunCoeffCheck() {
+    ACMRandom rnd(ACMRandom::DeterministicSeed());
+    const int count_test_block = 5000;
+    DECLARE_ALIGNED_ARRAY(16, int16_t, input_block, kNumCoeffs);
+    DECLARE_ALIGNED_ARRAY(16, int16_t, output_ref_block, kNumCoeffs);
+    DECLARE_ALIGNED_ARRAY(16, int16_t, output_block, kNumCoeffs);
+
+    for (int i = 0; i < count_test_block; ++i) {
+      // Initialize a test block with input range [-255, 255].
+      for (int j = 0; j < kNumCoeffs; ++j)
+        input_block[j] = rnd.Rand8() - rnd.Rand8();
+
+      fwd_txfm_ref(input_block, output_ref_block, pitch_, tx_type_);
+      REGISTER_STATE_CHECK(RunFwdTxfm(input_block, output_block, pitch_));
+
+      // The minimum quant value is 4.
+      for (int j = 0; j < kNumCoeffs; ++j)
+        EXPECT_EQ(output_block[j], output_ref_block[j]);
+    }
   }
 
+  void RunMemCheck() {
+    ACMRandom rnd(ACMRandom::DeterministicSeed());
+    const int count_test_block = 5000;
+    DECLARE_ALIGNED_ARRAY(16, int16_t, input_block, kNumCoeffs);
+    DECLARE_ALIGNED_ARRAY(16, int16_t, input_extreme_block, kNumCoeffs);
+    DECLARE_ALIGNED_ARRAY(16, int16_t, output_ref_block, kNumCoeffs);
+    DECLARE_ALIGNED_ARRAY(16, int16_t, output_block, kNumCoeffs);
+
+    for (int i = 0; i < count_test_block; ++i) {
+      // Initialize a test block with input range [-255, 255].
+      for (int j = 0; j < kNumCoeffs; ++j) {
+        input_block[j] = rnd.Rand8() - rnd.Rand8();
+        input_extreme_block[j] = rnd.Rand8() % 2 ? 255 : -255;
+      }
+      if (i == 0)
+        for (int j = 0; j < kNumCoeffs; ++j)
+          input_extreme_block[j] = 255;
+      if (i == 1)
+        for (int j = 0; j < kNumCoeffs; ++j)
+          input_extreme_block[j] = -255;
+
+      fwd_txfm_ref(input_extreme_block, output_ref_block, pitch_, tx_type_);
+      REGISTER_STATE_CHECK(RunFwdTxfm(input_extreme_block,
+                                      output_block, pitch_));
+
+      // The minimum quant value is 4.
+      for (int j = 0; j < kNumCoeffs; ++j) {
+        EXPECT_EQ(output_block[j], output_ref_block[j]);
+        EXPECT_GE(4 * DCT_MAX_VALUE, abs(output_block[j]))
+            << "Error: 16x16 FDCT has coefficient larger than 4*DCT_MAX_VALUE";
+      }
+    }
+  }
+
+  void RunInvAccuracyCheck() {
+    ACMRandom rnd(ACMRandom::DeterministicSeed());
+    const int count_test_block = 1000;
+    DECLARE_ALIGNED_ARRAY(16, int16_t, in, kNumCoeffs);
+    DECLARE_ALIGNED_ARRAY(16, int16_t, coeff, kNumCoeffs);
+    DECLARE_ALIGNED_ARRAY(16, uint8_t, dst, kNumCoeffs);
+    DECLARE_ALIGNED_ARRAY(16, uint8_t, src, kNumCoeffs);
+
+    for (int i = 0; i < count_test_block; ++i) {
+      // Initialize a test block with input range [-255, 255].
+      for (int j = 0; j < kNumCoeffs; ++j) {
+        src[j] = rnd.Rand8();
+        dst[j] = rnd.Rand8();
+        in[j] = src[j] - dst[j];
+      }
+
+      fwd_txfm_ref(in, coeff, pitch_, tx_type_);
+
+      REGISTER_STATE_CHECK(RunInvTxfm(coeff, dst, pitch_));
+
+      for (int j = 0; j < kNumCoeffs; ++j) {
+        const uint32_t diff = dst[j] - src[j];
+        const uint32_t error = diff * diff;
+        EXPECT_GE(1u, error)
+            << "Error: 16x16 IDCT has error " << error
+            << " at index " << j;
+      }
+    }
+  }
+
+  int pitch_;
   int tx_type_;
-  void (*fwd_txfm_)(int16_t *in, int16_t *out, uint8_t *dst,
-                   int stride, int tx_type);
-  void (*inv_txfm_)(int16_t *in, int16_t *out, uint8_t *dst,
-                   int stride, int tx_type);
+  fht_t fwd_txfm_ref;
 };
 
-TEST_P(FwdTrans4x4Test, SignBiasCheck) {
-  ACMRandom rnd(ACMRandom::DeterministicSeed());
-  DECLARE_ALIGNED_ARRAY(16, int16_t, test_input_block, 16);
-  DECLARE_ALIGNED_ARRAY(16, int16_t, test_output_block, 16);
-  const int pitch = 4;
-  int count_sign_block[16][2];
-  const int count_test_block = 1000000;
+class Trans4x4DCT
+    : public Trans4x4TestBase,
+      public PARAMS(fdct_t, idct_t, int) {
+ public:
+  virtual ~Trans4x4DCT() {}
 
-  memset(count_sign_block, 0, sizeof(count_sign_block));
-  for (int i = 0; i < count_test_block; ++i) {
-    // Initialize a test block with input range [-255, 255].
-    for (int j = 0; j < 16; ++j)
-      test_input_block[j] = rnd.Rand8() - rnd.Rand8();
+  virtual void SetUp() {
+    fwd_txfm_ = GET_PARAM(0);
+    inv_txfm_ = GET_PARAM(1);
+    tx_type_  = GET_PARAM(2);
+    pitch_    = 4;
+    fwd_txfm_ref = fdct4x4_ref;
+  }
+  virtual void TearDown() { libvpx_test::ClearSystemState(); }
 
-    RunFwdTxfm(test_input_block, test_output_block, NULL, pitch, tx_type_);
-
-    for (int j = 0; j < 16; ++j) {
-      if (test_output_block[j] < 0)
-        ++count_sign_block[j][0];
-      else if (test_output_block[j] > 0)
-        ++count_sign_block[j][1];
-    }
+ protected:
+  void RunFwdTxfm(const int16_t *in, int16_t *out, int stride) {
+    fwd_txfm_(in, out, stride);
+  }
+  void RunInvTxfm(const int16_t *out, uint8_t *dst, int stride) {
+    inv_txfm_(out, dst, stride);
   }
 
-  for (int j = 0; j < 16; ++j) {
-    const bool bias_acceptable = (abs(count_sign_block[j][0] -
-                                      count_sign_block[j][1]) < 10000);
-    EXPECT_TRUE(bias_acceptable)
-        << "Error: 4x4 FDCT/FHT has a sign bias > 1%"
-        << " for input range [-255, 255] at index " << j
-        << " tx_type " << tx_type_;
-  }
+  fdct_t fwd_txfm_;
+  idct_t inv_txfm_;
+};
 
-  memset(count_sign_block, 0, sizeof(count_sign_block));
-  for (int i = 0; i < count_test_block; ++i) {
-    // Initialize a test block with input range [-15, 15].
-    for (int j = 0; j < 16; ++j)
-      test_input_block[j] = (rnd.Rand8() >> 4) - (rnd.Rand8() >> 4);
-
-    RunFwdTxfm(test_input_block, test_output_block, NULL, pitch, tx_type_);
-
-    for (int j = 0; j < 16; ++j) {
-      if (test_output_block[j] < 0)
-        ++count_sign_block[j][0];
-      else if (test_output_block[j] > 0)
-        ++count_sign_block[j][1];
-    }
-  }
-
-  for (int j = 0; j < 16; ++j) {
-    const bool bias_acceptable = (abs(count_sign_block[j][0] -
-                                      count_sign_block[j][1]) < 100000);
-    EXPECT_TRUE(bias_acceptable)
-        << "Error: 4x4 FDCT/FHT has a sign bias > 10%"
-        << " for input range [-15, 15] at index " << j;
-  }
+TEST_P(Trans4x4DCT, AccuracyCheck) {
+  RunAccuracyCheck();
 }
 
-TEST_P(FwdTrans4x4Test, RoundTripErrorCheck) {
-  ACMRandom rnd(ACMRandom::DeterministicSeed());
-
-  int max_error = 0;
-  int total_error = 0;
-  const int count_test_block = 1000000;
-  for (int i = 0; i < count_test_block; ++i) {
-    DECLARE_ALIGNED_ARRAY(16, int16_t, test_input_block, 16);
-    DECLARE_ALIGNED_ARRAY(16, int16_t, test_temp_block, 16);
-    DECLARE_ALIGNED_ARRAY(16, uint8_t, dst, 16);
-    DECLARE_ALIGNED_ARRAY(16, uint8_t, src, 16);
-
-    for (int j = 0; j < 16; ++j) {
-      src[j] = rnd.Rand8();
-      dst[j] = rnd.Rand8();
-    }
-    // Initialize a test block with input range [-255, 255].
-    for (int j = 0; j < 16; ++j)
-      test_input_block[j] = src[j] - dst[j];
-
-    const int pitch = 4;
-    RunFwdTxfm(test_input_block, test_temp_block, dst, pitch, tx_type_);
-
-    for (int j = 0; j < 16; ++j) {
-        if (test_temp_block[j] > 0) {
-          test_temp_block[j] += 2;
-          test_temp_block[j] /= 4;
-          test_temp_block[j] *= 4;
-        } else {
-          test_temp_block[j] -= 2;
-          test_temp_block[j] /= 4;
-          test_temp_block[j] *= 4;
-        }
-    }
-
-    // inverse transform and reconstruct the pixel block
-    RunInvTxfm(test_input_block, test_temp_block, dst, pitch, tx_type_);
-
-    for (int j = 0; j < 16; ++j) {
-      const int diff = dst[j] - src[j];
-      const int error = diff * diff;
-      if (max_error < error)
-        max_error = error;
-      total_error += error;
-    }
-  }
-  EXPECT_GE(1, max_error)
-      << "Error: FDCT/IDCT or FHT/IHT has an individual roundtrip error > 1";
-
-  EXPECT_GE(count_test_block, total_error)
-      << "Error: FDCT/IDCT or FHT/IHT has average "
-      << "roundtrip error > 1 per block";
+TEST_P(Trans4x4DCT, CoeffCheck) {
+  RunCoeffCheck();
 }
 
-INSTANTIATE_TEST_CASE_P(VP9, FwdTrans4x4Test, ::testing::Range(0, 4));
+TEST_P(Trans4x4DCT, MemCheck) {
+  RunMemCheck();
+}
+
+TEST_P(Trans4x4DCT, InvAccuracyCheck) {
+  RunInvAccuracyCheck();
+}
+
+class Trans4x4HT
+    : public Trans4x4TestBase,
+      public PARAMS(fht_t, iht_t, int) {
+ public:
+  virtual ~Trans4x4HT() {}
+
+  virtual void SetUp() {
+    fwd_txfm_ = GET_PARAM(0);
+    inv_txfm_ = GET_PARAM(1);
+    tx_type_  = GET_PARAM(2);
+    pitch_    = 4;
+    fwd_txfm_ref = fht4x4_ref;
+  }
+  virtual void TearDown() { libvpx_test::ClearSystemState(); }
+
+ protected:
+  void RunFwdTxfm(const int16_t *in, int16_t *out, int stride) {
+    fwd_txfm_(in, out, stride, tx_type_);
+  }
+
+  void RunInvTxfm(const int16_t *out, uint8_t *dst, int stride) {
+    inv_txfm_(out, dst, stride, tx_type_);
+  }
+
+  fht_t fwd_txfm_;
+  iht_t inv_txfm_;
+};
+
+TEST_P(Trans4x4HT, AccuracyCheck) {
+  RunAccuracyCheck();
+}
+
+TEST_P(Trans4x4HT, CoeffCheck) {
+  RunCoeffCheck();
+}
+
+TEST_P(Trans4x4HT, MemCheck) {
+  RunMemCheck();
+}
+
+TEST_P(Trans4x4HT, InvAccuracyCheck) {
+  RunInvAccuracyCheck();
+}
+
+using std::tr1::make_tuple;
+
+INSTANTIATE_TEST_CASE_P(
+    C, Trans4x4DCT,
+    ::testing::Values(
+        make_tuple(&vp9_fdct4x4_c, &vp9_idct4x4_16_add_c, 0)));
+INSTANTIATE_TEST_CASE_P(
+    C, Trans4x4HT,
+    ::testing::Values(
+        make_tuple(&vp9_short_fht4x4_c, &vp9_iht4x4_16_add_c, 0),
+        make_tuple(&vp9_short_fht4x4_c, &vp9_iht4x4_16_add_c, 1),
+        make_tuple(&vp9_short_fht4x4_c, &vp9_iht4x4_16_add_c, 2),
+        make_tuple(&vp9_short_fht4x4_c, &vp9_iht4x4_16_add_c, 3)));
+
+#if HAVE_SSE2
+INSTANTIATE_TEST_CASE_P(
+    SSE2, Trans4x4DCT,
+    ::testing::Values(
+        make_tuple(&vp9_fdct4x4_sse2,
+                   &vp9_idct4x4_16_add_sse2, 0)));
+INSTANTIATE_TEST_CASE_P(
+    SSE2, Trans4x4HT,
+    ::testing::Values(
+        make_tuple(&vp9_short_fht4x4_sse2, &vp9_iht4x4_16_add_sse2, 0),
+        make_tuple(&vp9_short_fht4x4_sse2, &vp9_iht4x4_16_add_sse2, 1),
+        make_tuple(&vp9_short_fht4x4_sse2, &vp9_iht4x4_16_add_sse2, 2),
+        make_tuple(&vp9_short_fht4x4_sse2, &vp9_iht4x4_16_add_sse2, 3)));
+#endif
+
 }  // namespace
