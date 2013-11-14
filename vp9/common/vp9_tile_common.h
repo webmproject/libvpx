@@ -18,10 +18,10 @@ typedef struct TileInfo {
   int mi_col_start, mi_col_end;
 } TileInfo;
 
-// initializes 'tile->mi_(row|col)_(start|end)' for (row_idx, col_idx) based on
+// initializes 'tile->mi_(row|col)_(start|end)' for (row, col) based on
 // 'cm->log2_tile_(rows|cols)' & 'cm->mi_(rows|cols)'
 void vp9_tile_init(TileInfo *tile, const struct VP9Common *cm,
-                   int row_idx, int col_idx);
+                   int row, int col);
 
 void vp9_get_tile_n_bits(int mi_cols,
                          int *min_log2_tile_cols, int *max_log2_tile_cols);
