@@ -1,0 +1,293 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdX//9kc\u003d",
+        "filename": "examples.mk",
+        "patchSetId": 6
+      },
+      "lineNbr": 67,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-11-14T03:46:50Z",
+      "side": 1,
+      "message": "this all seems legacy, before the ivf{dec,enc}-\u003evpx{dec,enc} rename; is any of it needed?",
+      "revId": "dfacac7c71bd9c03878ef7d9bf5be9f84a82f64d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX//9kI\u003d",
+        "filename": "ivfdec.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-11-14T03:46:50Z",
+      "side": 1,
+      "message": "stdio.h, not sure you need stdlib.h",
+      "revId": "dfacac7c71bd9c03878ef7d9bf5be9f84a82f64d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX//9kY\u003d",
+        "filename": "ivfdec.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-11-14T03:46:50Z",
+      "side": 1,
+      "message": "for a bool-like test int will suffice",
+      "revId": "dfacac7c71bd9c03878ef7d9bf5be9f84a82f64d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX//9kU\u003d",
+        "filename": "ivfdec.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-11-14T03:46:50Z",
+      "side": 1,
+      "message": "if you move \u0026\u0026 to the above line you\u0027ll have better symmetry",
+      "revId": "dfacac7c71bd9c03878ef7d9bf5be9f84a82f64d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX//9kE\u003d",
+        "filename": "ivfdec.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-11-14T03:46:50Z",
+      "side": 1,
+      "message": "some ifdef __cplusplus extern \"C\" would simplify the tests if this is ever reused",
+      "revId": "dfacac7c71bd9c03878ef7d9bf5be9f84a82f64d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX//9kA\u003d",
+        "filename": "ivfenc.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-11-14T03:46:50Z",
+      "side": 1,
+      "message": "let\u0027s kill this horizontal whitespace when we can, it\u0027s fallen out of sync too many times leaving some ugly code",
+      "revId": "dfacac7c71bd9c03878ef7d9bf5be9f84a82f64d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX//9j8\u003d",
+        "filename": "ivfenc.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-11-14T03:46:50Z",
+      "side": 1,
+      "message": "can you just predeclare the structs here?",
+      "revId": "dfacac7c71bd9c03878ef7d9bf5be9f84a82f64d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX//9j4\u003d",
+        "filename": "ivfenc.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-11-14T03:46:50Z",
+      "side": 1,
+      "message": "this is inconsistent with IVFDEC_H_ (using //)",
+      "revId": "dfacac7c71bd9c03878ef7d9bf5be9f84a82f64d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX//9j0\u003d",
+        "filename": "tools_common.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-11-14T03:46:50Z",
+      "side": 1,
+      "message": "+stdio",
+      "revId": "dfacac7c71bd9c03878ef7d9bf5be9f84a82f64d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX//9jw\u003d",
+        "filename": "tools_common.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 96,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-11-14T03:46:50Z",
+      "side": 1,
+      "message": "excess ()s",
+      "revId": "dfacac7c71bd9c03878ef7d9bf5be9f84a82f64d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX//9js\u003d",
+        "filename": "tools_common.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 101,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-11-14T03:46:50Z",
+      "side": 1,
+      "message": "prefer preincrement",
+      "revId": "dfacac7c71bd9c03878ef7d9bf5be9f84a82f64d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX//9jo\u003d",
+        "filename": "tools_common.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 102,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-11-14T03:46:50Z",
+      "side": 1,
+      "message": "uint8_t",
+      "revId": "dfacac7c71bd9c03878ef7d9bf5be9f84a82f64d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX//9jk\u003d",
+        "filename": "tools_common.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 103,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-11-14T03:46:50Z",
+      "side": 1,
+      "message": "const x2",
+      "revId": "dfacac7c71bd9c03878ef7d9bf5be9f84a82f64d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX//9jg\u003d",
+        "filename": "tools_common.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 124,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-11-14T03:46:50Z",
+      "side": 1,
+      "message": "prefer preincrement",
+      "revId": "dfacac7c71bd9c03878ef7d9bf5be9f84a82f64d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX//9jc\u003d",
+        "filename": "tools_common.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-11-14T03:46:50Z",
+      "side": 1,
+      "message": "probably excessive on the comment for a short if/endif pair",
+      "revId": "dfacac7c71bd9c03878ef7d9bf5be9f84a82f64d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX//9jY\u003d",
+        "filename": "tools_common.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-11-14T03:46:50Z",
+      "side": 1,
+      "message": "v ?",
+      "revId": "dfacac7c71bd9c03878ef7d9bf5be9f84a82f64d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX//9jU\u003d",
+        "filename": "vpxenc.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 1353,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-11-14T03:46:50Z",
+      "side": 1,
+      "message": "kill the horizontal whitespace on this line while you\u0027re here",
+      "revId": "dfacac7c71bd9c03878ef7d9bf5be9f84a82f64d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
