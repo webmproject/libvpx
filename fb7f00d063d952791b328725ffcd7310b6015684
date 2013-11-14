@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdX//9iM\u003d",
+        "filename": "vp9/common/vp9_onyxc_int.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 334,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2013-11-14T15:16:56Z",
+      "side": 1,
+      "message": "I still hate variables like bs and bsl :)\n\nThe code is pretty cycle wasteful:\n\nConvert to something like \n\nfor(i\u003d0;i\u003cbs;i++) {\n  above |\u003d above_ctx[i];\n  left |\u003d left_ctx[i];\n} \n\nabove \u003d above \u0026 ( 1\u003c\u003c boffset) ;\nleft \u003d left \u0026 ( 1\u003c\u003c boffset)\n\netc...\n\nalso not sure why we do the whole BLOCK_64X64 subtraction /   why do we care which order the bits are?   can get rid of that by changing in both places ( update and partition)",
+      "revId": "fb7f00d063d952791b328725ffcd7310b6015684",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
