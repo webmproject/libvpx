@@ -3436,7 +3436,9 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
 
   // Post encode loop adjustment of Q prediction.
   if (!active_worst_qchanged)
-    vp9_update_rate_correction_factors(cpi, (cpi->sf.recode_loop) ? 2 : 0);
+    vp9_update_rate_correction_factors(cpi, (cpi->sf.recode_loop ||
+        cpi->oxcf.end_usage == USAGE_STREAM_FROM_SERVER) ? 2 : 0);
+
 
   cpi->last_q[cm->frame_type] = cm->base_qindex;
 
