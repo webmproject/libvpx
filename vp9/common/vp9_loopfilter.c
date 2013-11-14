@@ -283,10 +283,10 @@ void vp9_loop_filter_frame_init(VP9_COMMON *cm, int default_filt_lvl) {
   // n_shift is the a multiplier for lf_deltas
   // the multiplier is 1 for when filter_lvl is between 0 and 31;
   // 2 when filter_lvl is between 32 and 63
-  const int n_shift = default_filt_lvl >> 5;
+  const int scale = 1 << (default_filt_lvl >> 5);
   loop_filter_info_n *const lfi = &cm->lf_info;
   struct loopfilter *const lf = &cm->lf;
-  struct segmentation *const seg = &cm->seg;
+  const struct segmentation *const seg = &cm->seg;
 
   // update limits if sharpness has changed
   if (lf->last_sharpness_level != lf->sharpness_level) {
@@ -295,9 +295,7 @@ void vp9_loop_filter_frame_init(VP9_COMMON *cm, int default_filt_lvl) {
   }
 
   for (seg_id = 0; seg_id < MAX_SEGMENTS; seg_id++) {
-    int lvl_seg = default_filt_lvl, ref, mode, intra_lvl;
-
-    // Set the baseline filter values for each segment
+    int lvl_seg = default_filt_lvl;
     if (vp9_segfeature_active(seg, seg_id, SEG_LVL_ALT_LF)) {
       const int data = vp9_get_segdata(seg, seg_id, SEG_LVL_ALT_LF);
       lvl_seg = seg->abs_delta == SEGMENT_ABSDATA
@@ -309,29 +307,20 @@ void vp9_loop_filter_frame_init(VP9_COMMON *cm, int default_filt_lvl) {
       // we could get rid of this if we assume that deltas are set to
       // zero when not in use; encoder always uses deltas
       vpx_memset(lfi->lvl[seg_id], lvl_seg, sizeof(lfi->lvl[seg_id]));
-      continue;
-    }
+    } else {
+      int ref, mode;
+      const int intra_lvl = lvl_seg + lf->ref_deltas[INTRA_FRAME] * scale;
+      lfi->lvl[seg_id][INTRA_FRAME][0] = clamp(intra_lvl, 0, MAX_LOOP_FILTER);
 
-    intra_lvl = lvl_seg + lf->ref_deltas[INTRA_FRAME] * (1 << n_shift);
-    lfi->lvl[seg_id][INTRA_FRAME][0] = clamp(intra_lvl, 0, MAX_LOOP_FILTER);
-
-    for (ref = LAST_FRAME; ref < MAX_REF_FRAMES; ++ref)
-      for (mode = 0; mode < MAX_MODE_LF_DELTAS; ++mode) {
-        const int inter_lvl = lvl_seg + lf->ref_deltas[ref] * (1 << n_shift)
-                                      + lf->mode_deltas[mode] * (1 << n_shift);
-        lfi->lvl[seg_id][ref][mode] = clamp(inter_lvl, 0, MAX_LOOP_FILTER);
+      for (ref = LAST_FRAME; ref < MAX_REF_FRAMES; ++ref) {
+        for (mode = 0; mode < MAX_MODE_LF_DELTAS; ++mode) {
+          const int inter_lvl = lvl_seg + lf->ref_deltas[ref] * scale
+                                        + lf->mode_deltas[mode] * scale;
+          lfi->lvl[seg_id][ref][mode] = clamp(inter_lvl, 0, MAX_LOOP_FILTER);
+        }
       }
+    }
   }
-}
-
-static uint8_t build_lfi(const loop_filter_info_n *lfi_n,
-                     const MB_MODE_INFO *mbmi) {
-  const int seg = mbmi->segment_id;
-  const int ref = mbmi->ref_frame[0];
-  const int mode = lfi_n->mode_lf_lut[mbmi->mode];
-  const int filter_level = lfi_n->lvl[seg][ref][mode];
-
-  return filter_level;
 }
 
 static void filter_selectively_vert(uint8_t *s, int pitch,
@@ -867,6 +856,16 @@ static void setup_mask(VP9_COMMON *const cm, const int mi_row, const int mi_col,
 }
 
 #if CONFIG_NON420
+static uint8_t build_lfi(const loop_filter_info_n *lfi_n,
+                     const MB_MODE_INFO *mbmi) {
+  const int seg = mbmi->segment_id;
+  const int ref = mbmi->ref_frame[0];
+  const int mode = lfi_n->mode_lf_lut[mbmi->mode];
+  const int filter_level = lfi_n->lvl[seg][ref][mode];
+
+  return filter_level;
+}
+
 static void filter_block_plane_non420(VP9_COMMON *cm,
                                       struct macroblockd_plane *plane,
                                       MODE_INFO **mi_8x8,
