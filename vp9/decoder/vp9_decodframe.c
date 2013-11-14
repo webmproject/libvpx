@@ -704,20 +704,19 @@ static void apply_frame_size(VP9D_COMP *pbi, int width, int height) {
   VP9_COMMON *cm = &pbi->common;
 
   if (cm->width != width || cm->height != height) {
-    if (!pbi->initial_width || !pbi->initial_height) {
-      if (vp9_alloc_frame_buffers(cm, width, height))
+    // Change in frame size.
+    if (cm->width == 0 || cm->height == 0) {
+      // Assign new frame buffer on first call.
+      cm->new_fb_idx = NUM_YV12_BUFFERS - 1;
+      cm->fb_idx_ref_cnt[cm->new_fb_idx] = 1;
+    }
+
+    // TODO(agrange) Don't test width/height, check overall size.
+    if (width > cm->width || height > cm->height) {
+      // Rescale frame buffers only if they're not big enough already.
+      if (vp9_resize_frame_buffers(cm, width, height))
         vpx_internal_error(&cm->error, VPX_CODEC_MEM_ERROR,
                            "Failed to allocate frame buffers");
-      pbi->initial_width = width;
-      pbi->initial_height = height;
-    } else {
-      if (width > pbi->initial_width)
-        vpx_internal_error(&cm->error, VPX_CODEC_CORRUPT_FRAME,
-                           "Frame width too large");
-
-      if (height > pbi->initial_height)
-        vpx_internal_error(&cm->error, VPX_CODEC_CORRUPT_FRAME,
-                           "Frame height too large");
     }
 
     cm->width = width;

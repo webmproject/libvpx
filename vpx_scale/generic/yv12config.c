@@ -148,7 +148,10 @@ int vp9_realloc_frame_buffer(YV12_BUFFER_CONFIG *ybf,
 #else
     const int frame_size = yplane_size + 2 * uvplane_size;
 #endif
-    if (!ybf->buffer_alloc) {
+    if (frame_size > ybf->buffer_alloc_sz) {
+      // Allocation to hold larger frame, or first allocation.
+      if (ybf->buffer_alloc)
+        vpx_free(ybf->buffer_alloc);
       ybf->buffer_alloc = vpx_memalign(32, frame_size);
       ybf->buffer_alloc_sz = frame_size;
     }
