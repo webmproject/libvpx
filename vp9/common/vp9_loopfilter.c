@@ -351,19 +351,12 @@ static void filter_selectively_vert(uint8_t *s, int pitch,
       if (mask_16x16 & 1) {
         vp9_mb_lpf_vertical_edge_w(s, pitch, lfi->mblim, lfi->lim,
                                    lfi->hev_thr);
-        assert(!(mask_8x8 & 1));
-        assert(!(mask_4x4 & 1));
-        assert(!(mask_4x4_int & 1));
       } else if (mask_8x8 & 1) {
         vp9_mbloop_filter_vertical_edge(s, pitch, lfi->mblim, lfi->lim,
                                         lfi->hev_thr, 1);
-        assert(!(mask_16x16 & 1));
-        assert(!(mask_4x4 & 1));
       } else if (mask_4x4 & 1) {
         vp9_loop_filter_vertical_edge(s, pitch, lfi->mblim, lfi->lim,
                                       lfi->hev_thr, 1);
-        assert(!(mask_16x16 & 1));
-        assert(!(mask_8x8 & 1));
       }
     }
     if (mask_4x4_int & 1)
@@ -403,9 +396,6 @@ static void filter_selectively_horiz(uint8_t *s, int pitch,
           vp9_mb_lpf_horizontal_edge_w(s, pitch, lfi->mblim, lfi->lim,
                                        lfi->hev_thr, 1);
         }
-        assert(!(mask_8x8 & 1));
-        assert(!(mask_4x4 & 1));
-        assert(!(mask_4x4_int & 1));
       } else if (mask_8x8 & 1) {
         if ((mask_8x8 & 3) == 3) {
           // Next block's thresholds
@@ -442,8 +432,6 @@ static void filter_selectively_horiz(uint8_t *s, int pitch,
             vp9_loop_filter_horizontal_edge(s + 4 * pitch, pitch, lfi->mblim,
                                             lfi->lim, lfi->hev_thr, 1);
         }
-        assert(!(mask_16x16 & 1));
-        assert(!(mask_4x4 & 1));
       } else if (mask_4x4 & 1) {
         if ((mask_4x4 & 3) == 3) {
           // Next block's thresholds
@@ -480,8 +468,6 @@ static void filter_selectively_horiz(uint8_t *s, int pitch,
           vp9_loop_filter_horizontal_edge(s + 4 * pitch, pitch, lfi->mblim,
                                           lfi->lim, lfi->hev_thr, 1);
         }
-        assert(!(mask_16x16 & 1));
-        assert(!(mask_8x8 & 1));
       } else if (mask_4x4_int & 1) {
         vp9_loop_filter_horizontal_edge(s + 4 * pitch, pitch, lfi->mblim,
                                         lfi->lim, lfi->hev_thr, 1);
@@ -860,6 +846,24 @@ static void setup_mask(VP9_COMMON *const cm, const int mi_row, const int mi_col,
       lfm->left_uv[i] &= 0xeeee;
     }
   }
+
+  // Assert if we try to apply 2 different loop filters at the same position.
+  assert(!(lfm->left_y[TX_16X16] & lfm->left_y[TX_8X8]));
+  assert(!(lfm->left_y[TX_16X16] & lfm->left_y[TX_4X4]));
+  assert(!(lfm->left_y[TX_8X8] & lfm->left_y[TX_4X4]));
+  assert(!(lfm->int_4x4_y & lfm->left_y[TX_16X16]));
+  assert(!(lfm->left_uv[TX_16X16]&lfm->left_uv[TX_8X8]));
+  assert(!(lfm->left_uv[TX_16X16] & lfm->left_uv[TX_4X4]));
+  assert(!(lfm->left_uv[TX_8X8] & lfm->left_uv[TX_4X4]));
+  assert(!(lfm->int_4x4_uv & lfm->left_uv[TX_16X16]));
+  assert(!(lfm->above_y[TX_16X16] & lfm->above_y[TX_8X8]));
+  assert(!(lfm->above_y[TX_16X16] & lfm->above_y[TX_4X4]));
+  assert(!(lfm->above_y[TX_8X8] & lfm->above_y[TX_4X4]));
+  assert(!(lfm->int_4x4_y & lfm->above_y[TX_16X16]));
+  assert(!(lfm->above_uv[TX_16X16] & lfm->above_uv[TX_8X8]));
+  assert(!(lfm->above_uv[TX_16X16] & lfm->above_uv[TX_4X4]));
+  assert(!(lfm->above_uv[TX_8X8] & lfm->above_uv[TX_4X4]));
+  assert(!(lfm->int_4x4_uv & lfm->above_uv[TX_16X16]));
 }
 
 #if CONFIG_NON420
