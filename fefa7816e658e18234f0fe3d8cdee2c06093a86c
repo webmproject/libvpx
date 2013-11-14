@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdX//9oY\u003d",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2013-11-14T00:50:04Z",
+      "side": 1,
+      "message": "What is the goal of the tweaks? Judging by the TODO removal, it now builds from other directories? not building libnestegg?",
+      "revId": "fefa7816e658e18234f0fe3d8cdee2c06093a86c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX//9oc\u003d",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 8,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2013-11-14T00:50:04Z",
+      "side": 1,
+      "message": "Don\u0027t list the files in the commit message unless you\u0027re saying something specific about them",
+      "revId": "fefa7816e658e18234f0fe3d8cdee2c06093a86c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX//9n4\u003d",
+        "filename": "test/android/README",
+        "patchSetId": 1
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2013-11-14T00:50:04Z",
+      "side": 1,
+      "message": "I think the execute permission is the one you care about more. You could push to /sdcard/ easily, but you can\u0027t run from there.\n\nIn either case, the message is still a bit wordy. Maybe:\ntransfer the files to the device. Make sure you have execute permissions for the target folder.\n\nand then the example implies that /data/local/tmp has those permissions for you.",
+      "revId": "fefa7816e658e18234f0fe3d8cdee2c06093a86c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}

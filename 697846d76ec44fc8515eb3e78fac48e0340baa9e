@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdX//9oA\u003d",
+        "filename": "test/android/README",
+        "patchSetId": 1
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2013-11-14T00:50:04Z",
+      "side": 0,
+      "message": "I don\u0027t think we plan on changing this. Put it in the example and skip the NOTE.",
+      "revId": "697846d76ec44fc8515eb3e78fac48e0340baa9e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
