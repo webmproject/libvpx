@@ -474,12 +474,11 @@ static void encode_block_pass1(int plane, int block, BLOCK_SIZE plane_bsize,
   MACROBLOCK *const x = args->x;
   MACROBLOCKD *const xd = &x->e_mbd;
   struct macroblockd_plane *const pd = &xd->plane[plane];
-  const int raster_block = txfrm_block_to_raster_block(plane_bsize, tx_size,
-                                                       block);
-
   int16_t *const dqcoeff = BLOCK_OFFSET(pd->dqcoeff, block);
-  uint8_t *const dst = raster_block_offset_uint8(plane_bsize, raster_block,
-                                                 pd->dst.buf, pd->dst.stride);
+  int i, j;
+  uint8_t *dst;
+  txfrm_block_to_raster_xy(plane_bsize, tx_size, block, &i, &j);
+  dst = &pd->dst.buf[4 * j * pd->dst.stride + 4 * i];
 
   vp9_xform_quant(plane, block, plane_bsize, tx_size, arg);
 
