@@ -67,27 +67,27 @@ static const int token_to_counttoken[MAX_ENTROPY_TOKENS] = {
   TWO_TOKEN, TWO_TOKEN, TWO_TOKEN, DCT_EOB_MODEL_TOKEN
 };
 
-#define INCREMENT_COUNT(token)                           \
-  do {                                                   \
-     if (!cm->frame_parallel_decoding_mode) {            \
+#define INCREMENT_COUNT(token)                              \
+  do {                                                      \
+     if (!cm->frame_parallel_decoding_mode)                 \
        ++coef_counts[band][pt][token_to_counttoken[token]]; \
-     }                                                   \
-  } while (0);
+  } while (0)
+
 
 #define WRITE_COEF_CONTINUE(val, token)                  \
   {                                                      \
-    dqcoeff_ptr[scan[c]] = vp9_read_and_apply_sign(r, val) * \
+    dqcoeff_ptr[scan[c]] = (vp9_read_bit(r) ? -val : val) * \
                             dq[c > 0] / (1 + (tx_size == TX_32X32)); \
     INCREMENT_COUNT(token);                              \
     token_cache[scan[c]] = vp9_pt_energy_class[token];   \
-    c++;                                                 \
+    ++c;                                                 \
     continue;                                            \
   }
 
 #define ADJUST_COEF(prob, bits_count)                   \
   do {                                                  \
     val += (vp9_read(r, prob) << bits_count);           \
-  } while (0);
+  } while (0)
 
 static int decode_coefs(VP9_COMMON *cm, const MACROBLOCKD *xd,
                         vp9_reader *r, int block_idx,
@@ -201,10 +201,10 @@ static int decode_coefs(VP9_COMMON *cm, const MACROBLOCKD *xd,
     }
     val = 0;
     cat6 = cat6_prob;
-    while (*cat6) {
+    while (*cat6)
       val = (val << 1) | vp9_read(r, *cat6++);
-    }
     val += CAT6_MIN_VAL;
+
     WRITE_COEF_CONTINUE(val, DCT_VAL_CATEGORY6);
   }
 

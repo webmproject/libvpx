@@ -15,8 +15,6 @@
 #include "vp9/common/vp9_treecoder.h"
 #include "vp9/decoder/vp9_dboolhuff.h"
 
-#define vp9_read_and_apply_sign(r, value) (vp9_read_bit(r) ? -(value) : (value))
-
 // Intent of tree data structure is to make decoding trivial.
 static int treed_read(vp9_reader *const r, /* !!! must return a 0 or 1 !!! */
                       vp9_tree t,
