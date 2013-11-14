@@ -13,6 +13,12 @@
 #include <stdio.h>
 
 #include "./vpx_config.h"
+#include "vpx/vpx_image.h"
+#include "vpx/vpx_integer.h"
+
+#if CONFIG_ENCODERS
+#include "./y4minput.h"
+#endif
 
 #if defined(_MSC_VER)
 /* MSVS doesn't define off_t, and uses _f{seek,tell}i64. */
@@ -52,10 +58,54 @@ typedef long off_t;  /* NOLINT */
 #define PATH_MAX 512
 #endif
 
+#define IVF_FRAME_HDR_SZ (4 + 8)  /* 4 byte size + 8 byte timestamp */
+#define IVF_FILE_HDR_SZ 32
+
+#define RAW_FRAME_HDR_SZ sizeof(uint32_t)
+
 #define VP8_FOURCC (0x30385056)
 #define VP9_FOURCC (0x30395056)
 #define VP8_FOURCC_MASK (0x00385056)
 #define VP9_FOURCC_MASK (0x00395056)
+
+enum VideoFileType {
+  FILE_TYPE_RAW,
+  FILE_TYPE_IVF,
+  FILE_TYPE_Y4M,
+  FILE_TYPE_WEBM
+};
+
+struct FileTypeDetectionBuffer {
+  char buf[4];
+  size_t buf_read;
+  size_t position;
+};
+
+struct VpxRational {
+  int numerator;
+  int denominator;
+};
+
+struct VpxInputContext {
+  const char *filename;
+  FILE *file;
+  off_t length;
+  struct FileTypeDetectionBuffer detect;
+  enum VideoFileType file_type;
+  unsigned int width;
+  unsigned int height;
+  int use_i420;
+  int only_i420;
+  unsigned int fourcc;
+  struct VpxRational framerate;
+#if CONFIG_ENCODERS
+  y4m_input y4m;
+#endif
+};
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /* Sets a stdio stream into binary mode */
 FILE *set_binary_mode(FILE *stream);
@@ -66,5 +116,14 @@ void warn(const char *fmt, ...);
 
 /* The tool including this file must define usage_exit() */
 void usage_exit();
+
+uint16_t mem_get_le16(const void *data);
+uint32_t mem_get_le32(const void *data);
+
+int read_yuv_frame(struct VpxInputContext *input_ctx, vpx_image_t *yuv_frame);
+
+#ifdef __cplusplus
+}  /* extern "C" */
+#endif
 
 #endif  // TOOLS_COMMON_H_

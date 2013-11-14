@@ -23,6 +23,7 @@ vpxdec.SRCS                 += md5_utils.c md5_utils.h
 vpxdec.SRCS                 += vpx_ports/vpx_timer.h
 vpxdec.SRCS                 += vpx/vpx_integer.h
 vpxdec.SRCS                 += args.c args.h
+vpxdec.SRCS                 += ivfdec.c ivfdec.h
 vpxdec.SRCS                 += tools_common.c tools_common.h
 vpxdec.SRCS                 += nestegg/halloc/halloc.h
 vpxdec.SRCS                 += nestegg/halloc/src/align.h
@@ -36,6 +37,8 @@ vpxdec.GUID                  = BA5FE66F-38DD-E034-F542-B1578C5FB950
 vpxdec.DESCRIPTION           = Full featured decoder
 UTILS-$(CONFIG_ENCODERS)    += vpxenc.c
 vpxenc.SRCS                 += args.c args.h y4minput.c y4minput.h
+vpxenc.SRCS                 += ivfdec.c ivfdec.h
+vpxenc.SRCS                 += ivfenc.c ivfenc.h
 vpxenc.SRCS                 += tools_common.c tools_common.h
 vpxenc.SRCS                 += webmenc.c webmenc.h
 vpxenc.SRCS                 += vpx_ports/mem_ops.h
@@ -53,17 +56,10 @@ vp8_scalable_patterns.GUID   = 0D6A210B-F482-4D6F-8570-4A9C01ACC88C
 vp8_scalable_patterns.DESCRIPTION = Temporal Scalability Encoder
 UTILS-$(CONFIG_VP9_ENCODER)    += vp9_spatial_scalable_encoder.c
 vp9_spatial_scalable_encoder.SRCS += args.c args.h
+vp9_spatial_scalable_encoder.SRCS += ivfenc.c ivfenc.h
+vp9_spatial_scalable_encoder.SRCS += tools_common.c tools_common.h
 vp9_spatial_scalable_encoder.GUID   = 4A38598D-627D-4505-9C7B-D4020C84100D
 vp9_spatial_scalable_encoder.DESCRIPTION = Spatial Scalable Encoder
-
-# Clean up old ivfenc, ivfdec binaries.
-ifeq ($(CONFIG_MSVS),yes)
-CLEAN-OBJS += $(foreach p,$(VS_PLATFORMS),$(p)/Release/ivfenc.exe)
-CLEAN-OBJS += $(foreach p,$(VS_PLATFORMS),$(p)/Release/ivfdec.exe)
-else
-CLEAN-OBJS += ivfenc{.c.o,.c.d,.dox,.exe,}
-CLEAN-OBJS += ivfdec{.c.o,.c.d,.dox,.exe,}
-endif
 
 # XMA example disabled for now, not used in VP8
 #UTILS-$(CONFIG_DECODERS)    += example_xma.c

@@ -10,32 +10,23 @@
 
 #include "./vpx_config.h"
 
-#if defined(_WIN32) || defined(__OS2__) || !CONFIG_OS_SUPPORT
-#define USE_POSIX_MMAP 0
-#else
-#define USE_POSIX_MMAP 1
-#endif
-
+#include <assert.h>
+#include <limits.h>
 #include <math.h>
+#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdarg.h>
 #include <string.h>
-#include <limits.h>
-#include <assert.h>
+
 #include "vpx/vpx_encoder.h"
 #if CONFIG_DECODERS
 #include "vpx/vpx_decoder.h"
 #endif
-#if USE_POSIX_MMAP
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <sys/mman.h>
-#include <fcntl.h>
-#include <unistd.h>
-#endif
 
 #include "third_party/libyuv/include/libyuv/scale.h"
+#include "./args.h"
+#include "./ivfdec.h"
+#include "./ivfenc.h"
 
 #if CONFIG_VP8_ENCODER || CONFIG_VP9_ENCODER
 #include "vpx/vp8cx.h"
@@ -118,198 +109,27 @@ static void warn_or_exit_on_error(vpx_codec_ctx_t *ctx, int fatal,
   va_end(ap);
 }
 
-enum video_file_type {
-  FILE_TYPE_RAW,
-  FILE_TYPE_IVF,
-  FILE_TYPE_Y4M
-};
-
-struct detect_buffer {
-  char buf[4];
-  size_t buf_read;
-  size_t position;
-};
-
-
-struct input_state {
-  char                 *fn;
-  FILE                 *file;
-  off_t                 length;
-  y4m_input             y4m;
-  struct detect_buffer  detect;
-  enum video_file_type  file_type;
-  unsigned int          w;
-  unsigned int          h;
-  struct vpx_rational   framerate;
-  int                   use_i420;
-  int                   only_i420;
-};
-
-#define IVF_FRAME_HDR_SZ (4+8) /* 4 byte size + 8 byte timestamp */
-static int read_frame(struct input_state *input, vpx_image_t *img) {
-  FILE *f = input->file;
-  enum video_file_type file_type = input->file_type;
-  y4m_input *y4m = &input->y4m;
-  struct detect_buffer *detect = &input->detect;
-  int plane = 0;
+int read_frame(struct VpxInputContext *input_ctx, vpx_image_t *img) {
+  FILE *f = input_ctx->file;
+  y4m_input *y4m = &input_ctx->y4m;
   int shortread = 0;
 
-  if (file_type == FILE_TYPE_Y4M) {
+  if (input_ctx->file_type == FILE_TYPE_Y4M) {
     if (y4m_input_fetch_frame(y4m, f, img) < 1)
       return 0;
   } else {
-    if (file_type == FILE_TYPE_IVF) {
-      char junk[IVF_FRAME_HDR_SZ];
-
-      /* Skip the frame header. We know how big the frame should be. See
-       * write_ivf_frame_header() for documentation on the frame header
-       * layout.
-       */
-      (void) fread(junk, 1, IVF_FRAME_HDR_SZ, f);
-    }
-
-    for (plane = 0; plane < 3; plane++) {
-      unsigned char *ptr;
-      int w = (plane ? (1 + img->d_w) / 2 : img->d_w);
-      int h = (plane ? (1 + img->d_h) / 2 : img->d_h);
-      int r;
-
-      /* Determine the correct plane based on the image format. The for-loop
-       * always counts in Y,U,V order, but this may not match the order of
-       * the data on disk.
-       */
-      switch (plane) {
-        case 1:
-          ptr = img->planes[img->fmt == VPX_IMG_FMT_YV12 ? VPX_PLANE_V : VPX_PLANE_U];
-          break;
-        case 2:
-          ptr = img->planes[img->fmt == VPX_IMG_FMT_YV12 ? VPX_PLANE_U : VPX_PLANE_V];
-          break;
-        default:
-          ptr = img->planes[plane];
-      }
-
-      for (r = 0; r < h; r++) {
-        size_t needed = w;
-        size_t buf_position = 0;
-        const size_t left = detect->buf_read - detect->position;
-        if (left > 0) {
-          const size_t more = (left < needed) ? left : needed;
-          memcpy(ptr, detect->buf + detect->position, more);
-          buf_position = more;
-          needed -= more;
-          detect->position += more;
-        }
-        if (needed > 0) {
-          shortread |= (fread(ptr + buf_position, 1, needed, f) < needed);
-        }
-
-        ptr += img->stride[plane];
-      }
-    }
+    shortread = read_yuv_frame(input_ctx, img);
   }
 
   return !shortread;
 }
 
-
-unsigned int file_is_y4m(FILE      *infile,
-                         y4m_input *y4m,
-                         char       detect[4]) {
+int file_is_y4m(FILE *infile, y4m_input *y4m, const char detect[4]) {
   if (memcmp(detect, "YUV4", 4) == 0) {
     return 1;
   }
   return 0;
 }
-
-#define IVF_FILE_HDR_SZ (32)
-unsigned int file_is_ivf(struct input_state *input,
-                         unsigned int *fourcc) {
-  char raw_hdr[IVF_FILE_HDR_SZ];
-  int is_ivf = 0;
-  FILE *infile = input->file;
-  unsigned int *width = &input->w;
-  unsigned int *height = &input->h;
-  struct detect_buffer *detect = &input->detect;
-
-  if (memcmp(detect->buf, "DKIF", 4) != 0)
-    return 0;
-
-  /* See write_ivf_file_header() for more documentation on the file header
-   * layout.
-   */
-  if (fread(raw_hdr + 4, 1, IVF_FILE_HDR_SZ - 4, infile)
-      == IVF_FILE_HDR_SZ - 4) {
-    {
-      is_ivf = 1;
-
-      if (mem_get_le16(raw_hdr + 4) != 0)
-        warn("Unrecognized IVF version! This file may not decode "
-             "properly.");
-
-      *fourcc = mem_get_le32(raw_hdr + 8);
-    }
-  }
-
-  if (is_ivf) {
-    *width = mem_get_le16(raw_hdr + 12);
-    *height = mem_get_le16(raw_hdr + 14);
-    detect->position = 4;
-  }
-
-  return is_ivf;
-}
-
-
-static void write_ivf_file_header(FILE *outfile,
-                                  const vpx_codec_enc_cfg_t *cfg,
-                                  unsigned int fourcc,
-                                  int frame_cnt) {
-  char header[32];
-
-  if (cfg->g_pass != VPX_RC_ONE_PASS && cfg->g_pass != VPX_RC_LAST_PASS)
-    return;
-
-  header[0] = 'D';
-  header[1] = 'K';
-  header[2] = 'I';
-  header[3] = 'F';
-  mem_put_le16(header + 4,  0);                 /* version */
-  mem_put_le16(header + 6,  32);                /* headersize */
-  mem_put_le32(header + 8,  fourcc);            /* headersize */
-  mem_put_le16(header + 12, cfg->g_w);          /* width */
-  mem_put_le16(header + 14, cfg->g_h);          /* height */
-  mem_put_le32(header + 16, cfg->g_timebase.den); /* rate */
-  mem_put_le32(header + 20, cfg->g_timebase.num); /* scale */
-  mem_put_le32(header + 24, frame_cnt);         /* length */
-  mem_put_le32(header + 28, 0);                 /* unused */
-
-  (void) fwrite(header, 1, 32, outfile);
-}
-
-
-static void write_ivf_frame_header(FILE *outfile,
-                                   const vpx_codec_cx_pkt_t *pkt) {
-  char             header[12];
-  vpx_codec_pts_t  pts;
-
-  if (pkt->kind != VPX_CODEC_CX_FRAME_PKT)
-    return;
-
-  pts = pkt->data.frame.pts;
-  mem_put_le32(header, (int)pkt->data.frame.sz);
-  mem_put_le32(header + 4, pts & 0xFFFFFFFF);
-  mem_put_le32(header + 8, pts >> 32);
-
-  (void) fwrite(header, 1, 12, outfile);
-}
-
-static void write_ivf_frame_size(FILE *outfile, size_t size) {
-  char             header[4];
-  mem_put_le32(header, (int)size);
-  (void) fwrite(header, 1, 4, outfile);
-}
-
 
 
 /* Murmur hash derived from public domain reference implementation at
@@ -360,7 +180,6 @@ static unsigned int murmur(const void *key, int len, unsigned int seed) {
 }
 
 
-#include "args.h"
 static const arg_def_t debugmode = ARG_DEF("D", "debug", 0,
                                            "Debug mode (makes output deterministic)");
 static const arg_def_t outputfile = ARG_DEF("o", "output", 1,
@@ -814,9 +633,9 @@ struct rate_hist {
 };
 
 
-static void init_rate_histogram(struct rate_hist          *hist,
+static void init_rate_histogram(struct rate_hist *hist,
                                 const vpx_codec_enc_cfg_t *cfg,
-                                const vpx_rational_t      *fps) {
+                                const vpx_rational_t *fps) {
   int i;
 
   /* Determine the number of samples in the buffer. Use the file's framerate
@@ -1212,12 +1031,10 @@ static void parse_global_config(struct global_config *global, char **argv) {
 }
 
 
-void open_input_file(struct input_state *input) {
-  unsigned int fourcc;
-
+void open_input_file(struct VpxInputContext *input) {
   /* Parse certain options from the input file, if possible */
-  input->file = strcmp(input->fn, "-") ? fopen(input->fn, "rb")
-                : set_binary_mode(stdin);
+  input->file = strcmp(input->filename, "-")
+      ? fopen(input->filename, "rb") : set_binary_mode(stdin);
 
   if (!input->file)
     fatal("Failed to open input file");
@@ -1241,14 +1058,14 @@ void open_input_file(struct input_state *input) {
     if (y4m_input_open(&input->y4m, input->file, input->detect.buf, 4,
                        input->only_i420) >= 0) {
       input->file_type = FILE_TYPE_Y4M;
-      input->w = input->y4m.pic_w;
-      input->h = input->y4m.pic_h;
-      input->framerate.num = input->y4m.fps_n;
-      input->framerate.den = input->y4m.fps_d;
+      input->width = input->y4m.pic_w;
+      input->height = input->y4m.pic_h;
+      input->framerate.numerator = input->y4m.fps_n;
+      input->framerate.denominator = input->y4m.fps_d;
       input->use_i420 = 0;
     } else
       fatal("Unsupported Y4M stream.");
-  } else if (input->detect.buf_read == 4 && file_is_ivf(input, &fourcc)) {
+  } else if (input->detect.buf_read == 4 && file_is_ivf(input)) {
     fatal("IVF is not supported as input.");
   } else {
     input->file_type = FILE_TYPE_RAW;
@@ -1256,7 +1073,7 @@ void open_input_file(struct input_state *input) {
 }
 
 
-static void close_input_file(struct input_state *input) {
+static void close_input_file(struct VpxInputContext *input) {
   fclose(input->file);
   if (input->file_type == FILE_TYPE_Y4M)
     y4m_input_close(&input->y4m);
@@ -1531,7 +1348,7 @@ static void set_default_kf_interval(struct stream_state  *stream,
 
 static void show_stream_config(struct stream_state  *stream,
                                struct global_config *global,
-                               struct input_state   *input) {
+                               struct VpxInputContext *input) {
 
 #define SHOW(field) \
   fprintf(stderr, "    %-28s = %d\n", #field, stream->config.cfg.field)
@@ -1539,7 +1356,7 @@ static void show_stream_config(struct stream_state  *stream,
   if (stream->index == 0) {
     fprintf(stderr, "Codec: %s\n",
             vpx_codec_iface_name(global->codec->iface()));
-    fprintf(stderr, "Source file: %s Format: %s\n", input->fn,
+    fprintf(stderr, "Source file: %s Format: %s\n", input->filename,
             input->use_i420 ? "I420" : "YV12");
   }
   if (stream->next || stream->index)
@@ -1598,7 +1415,7 @@ static void open_output_file(struct stream_state *stream,
                            stream->config.stereo_fmt,
                            global->codec->fourcc);
   } else
-    write_ivf_file_header(stream->file, &stream->config.cfg,
+    ivf_write_file_header(stream->file, &stream->config.cfg,
                           global->codec->fourcc, 0);
 }
 
@@ -1611,7 +1428,7 @@ static void close_output_file(struct stream_state *stream,
     stream->ebml.cue_list = NULL;
   } else {
     if (!fseek(stream->file, 0, SEEK_SET))
-      write_ivf_file_header(stream->file, &stream->config.cfg,
+      ivf_write_file_header(stream->file, &stream->config.cfg,
                             fourcc,
                             stream->frames_out);
   }
@@ -1771,14 +1588,14 @@ static void get_cx_data(struct stream_state  *stream,
             ivf_header_pos = ftello(stream->file);
             fsize = pkt->data.frame.sz;
 
-            write_ivf_frame_header(stream->file, pkt);
+            ivf_write_frame_header(stream->file, pkt);
           } else {
             fsize += pkt->data.frame.sz;
 
             if (!(pkt->data.frame.flags & VPX_FRAME_IS_FRAGMENT)) {
               off_t currpos = ftello(stream->file);
               fseeko(stream->file, ivf_header_pos, SEEK_SET);
-              write_ivf_frame_size(stream->file, fsize);
+              ivf_write_frame_size(stream->file, fsize);
               fseeko(stream->file, currpos, SEEK_SET);
             }
           }
@@ -1936,8 +1753,8 @@ int main(int argc, const char **argv_) {
   vpx_image_t            raw;
   int                    frame_avail, got_data;
 
-  struct input_state       input = {0};
-  struct global_config     global;
+  struct VpxInputContext  input = {0};
+  struct global_config    global;
   struct stream_state     *streams = NULL;
   char                   **argv, **argi;
   uint64_t                 cx_time = 0;
@@ -1950,8 +1767,8 @@ int main(int argc, const char **argv_) {
     usage_exit();
 
   /* Setup default input stream settings */
-  input.framerate.num = 30;
-  input.framerate.den = 1;
+  input.framerate.numerator = 30;
+  input.framerate.denominator = 1;
   input.use_i420 = 1;
   input.only_i420 = 1;
 
@@ -1983,9 +1800,9 @@ int main(int argc, const char **argv_) {
       die("Error: Unrecognized option %s\n", *argi);
 
   /* Handle non-option arguments */
-  input.fn = argv[0];
+  input.filename = argv[0];
 
-  if (!input.fn)
+  if (!input.filename)
     usage_exit();
 
 #if CONFIG_NON420
@@ -2005,20 +1822,20 @@ int main(int argc, const char **argv_) {
     /* If the input file doesn't specify its w/h (raw files), try to get
      * the data from the first stream's configuration.
      */
-    if (!input.w || !input.h)
+    if (!input.width || !input.height)
       FOREACH_STREAM( {
       if (stream->config.cfg.g_w && stream->config.cfg.g_h) {
-        input.w = stream->config.cfg.g_w;
-        input.h = stream->config.cfg.g_h;
+        input.width = stream->config.cfg.g_w;
+        input.height = stream->config.cfg.g_h;
         break;
       }
     });
 
     /* Update stream configurations from the input file's parameters */
-    if (!input.w || !input.h)
+    if (!input.width || !input.height)
       fatal("Specify stream dimensions with --width (-w) "
             " and --height (-h)");
-    FOREACH_STREAM(set_stream_dimensions(stream, input.w, input.h));
+    FOREACH_STREAM(set_stream_dimensions(stream, input.width, input.height));
     FOREACH_STREAM(validate_stream_config(stream));
 
     /* Ensure that --passes and --pass are consistent. If --pass is set and
@@ -2034,8 +1851,10 @@ int main(int argc, const char **argv_) {
     /* Use the frame rate from the file only if none was specified
      * on the command-line.
      */
-    if (!global.have_framerate)
-      global.framerate = input.framerate;
+    if (!global.have_framerate) {
+      global.framerate.num = input.framerate.numerator;
+      global.framerate.den = input.framerate.denominator;
+    }
 
     FOREACH_STREAM(set_default_kf_interval(stream, &global));
 
@@ -2053,7 +1872,7 @@ int main(int argc, const char **argv_) {
         vpx_img_alloc(&raw,
                       input.use_i420 ? VPX_IMG_FMT_I420
                       : VPX_IMG_FMT_YV12,
-                      input.w, input.h, 32);
+                      input.width, input.height, 32);
 
       FOREACH_STREAM(init_rate_histogram(&stream->rate_hist,
                                          &stream->config.cfg,
