@@ -248,7 +248,6 @@ typedef struct {
   int auto_mv_step_size;
   int optimize_coefficients;
   int static_segmentation;
-  int variance_adaptive_quantization;
   int comp_inter_joint_search_thresh;
   int adaptive_rd_thresh;
   int skip_encode_sb;

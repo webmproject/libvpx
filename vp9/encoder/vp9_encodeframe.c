@@ -400,7 +400,7 @@ static void update_state(VP9_COMP *cpi, PICK_MODE_CONTEXT *ctx,
           && (xd->mb_to_bottom_edge >> (3 + MI_SIZE_LOG2)) + mi_height > y)
         xd->mi_8x8[x_idx + y * mis] = mi_addr;
 
-  if (cpi->sf.variance_adaptive_quantization) {
+  if (cpi->oxcf.aq_mode == VARIANCE_AQ) {
     vp9_mb_init_quantizer(cpi, x);
   }
 
@@ -549,7 +549,7 @@ static void set_offsets(VP9_COMP *cpi, const TileInfo *const tile,
 
   /* segment ID */
   if (seg->enabled) {
-    if (!cpi->sf.variance_adaptive_quantization) {
+    if (!cpi->oxcf.aq_mode == VARIANCE_AQ) {
       uint8_t *map = seg->update_map ? cpi->segmentation_map
           : cm->last_frame_seg_map;
       mbmi->segment_id = vp9_get_segment_id(cm, map, bsize, mi_row, mi_col);
@@ -625,7 +625,7 @@ static void pick_sb_modes(VP9_COMP *cpi, const TileInfo *const tile,
 
   x->source_variance = get_sby_perpixel_variance(cpi, x, bsize);
 
-  if (cpi->sf.variance_adaptive_quantization) {
+  if (cpi->oxcf.aq_mode == VARIANCE_AQ) {
     int energy;
     if (bsize <= BLOCK_16X16) {
       energy = x->mb_energy;
@@ -641,7 +641,7 @@ static void pick_sb_modes(VP9_COMP *cpi, const TileInfo *const tile,
   if (cpi->oxcf.tuning == VP8_TUNE_SSIM)
     vp9_activity_masking(cpi, x);
 
-  if (cpi->sf.variance_adaptive_quantization) {
+  if (cpi->oxcf.aq_mode == VARIANCE_AQ) {
     vp9_clear_system_state();  // __asm emms;
     x->rdmult = round(x->rdmult * rdmult_ratio);
   }
@@ -660,7 +660,7 @@ static void pick_sb_modes(VP9_COMP *cpi, const TileInfo *const tile,
                                     totaldist, bsize, ctx, best_rd);
   }
 
-  if (cpi->sf.variance_adaptive_quantization) {
+  if (cpi->oxcf.aq_mode == VARIANCE_AQ) {
     x->rdmult = orig_rdmult;
     if (*totalrate != INT_MAX) {
       vp9_clear_system_state();  // __asm emms;

@@ -601,14 +601,14 @@ void vp9_first_pass(VP9_COMP *cpi) {
                      num_8x8_blocks_wide_lookup[xd->mi_8x8[0]->mbmi.sb_type],
                      cm->mi_rows, cm->mi_cols);
 
-      if (cpi->sf.variance_adaptive_quantization) {
+      if (cpi->oxcf.aq_mode == VARIANCE_AQ) {
         int energy = vp9_block_energy(cpi, x, xd->mi_8x8[0]->mbmi.sb_type);
         error_weight = vp9_vaq_inv_q_ratio(energy);
       }
 
       // do intra 16x16 prediction
       this_error = vp9_encode_intra(x, use_dc_pred);
-      if (cpi->sf.variance_adaptive_quantization) {
+      if (cpi->oxcf.aq_mode == VARIANCE_AQ) {
         vp9_clear_system_state();  // __asm emms;
         this_error *= error_weight;
       }
@@ -646,7 +646,7 @@ void vp9_first_pass(VP9_COMP *cpi) {
         first_pass_motion_search(cpi, x, &best_ref_mv,
                                  &mv.as_mv, lst_yv12,
                                  &motion_error, recon_yoffset);
-        if (cpi->sf.variance_adaptive_quantization) {
+        if (cpi->oxcf.aq_mode == VARIANCE_AQ) {
           vp9_clear_system_state();  // __asm emms;
           motion_error *= error_weight;
         }
@@ -657,7 +657,7 @@ void vp9_first_pass(VP9_COMP *cpi) {
           tmp_err = INT_MAX;
           first_pass_motion_search(cpi, x, &zero_ref_mv, &tmp_mv.as_mv,
                                    lst_yv12, &tmp_err, recon_yoffset);
-          if (cpi->sf.variance_adaptive_quantization) {
+          if (cpi->oxcf.aq_mode == VARIANCE_AQ) {
             vp9_clear_system_state();  // __asm emms;
             tmp_err *= error_weight;
           }
@@ -677,7 +677,7 @@ void vp9_first_pass(VP9_COMP *cpi) {
           first_pass_motion_search(cpi, x, &zero_ref_mv,
                                    &tmp_mv.as_mv, gld_yv12,
                                    &gf_motion_error, recon_yoffset);
-          if (cpi->sf.variance_adaptive_quantization) {
+          if (cpi->oxcf.aq_mode == VARIANCE_AQ) {
             vp9_clear_system_state();  // __asm emms;
             gf_motion_error *= error_weight;
           }

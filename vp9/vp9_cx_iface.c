@@ -38,6 +38,7 @@ struct vp9_extracfg {
   unsigned int                rc_max_intra_bitrate_pct;
   unsigned int                lossless;
   unsigned int                frame_parallel_decoding_mode;
+  unsigned int                aq_mode;
 };
 
 struct extraconfig_map {
@@ -66,6 +67,7 @@ static const struct extraconfig_map extracfg_map[] = {
       0,                          /* rc_max_intra_bitrate_pct */
       0,                          /* lossless */
       0,                          /* frame_parallel_decoding_mode */
+      0,                          /* aq_mode */
     }
   }
 };
@@ -157,6 +159,7 @@ static vpx_codec_err_t validate_config(vpx_codec_alg_priv_t      *ctx,
     RANGE_CHECK_HI(cfg, rc_max_quantizer, 0);
     RANGE_CHECK_HI(cfg, rc_min_quantizer, 0);
   }
+  RANGE_CHECK(vp8_cfg, aq_mode,           0, AQ_MODES_COUNT - 1);
 
   RANGE_CHECK_HI(cfg, g_threads,          64);
   RANGE_CHECK_HI(cfg, g_lag_in_frames,    MAX_LAG_BUFFERS);
@@ -335,6 +338,8 @@ static vpx_codec_err_t set_vp9e_config(VP9_CONFIG *oxcf,
   oxcf->error_resilient_mode         = cfg.g_error_resilient;
   oxcf->frame_parallel_decoding_mode = vp8_cfg.frame_parallel_decoding_mode;
 
+  oxcf->aq_mode = vp8_cfg.aq_mode;
+
   oxcf->ss_number_layers = cfg.ss_number_layers;
   /*
   printf("Current VP9 Settings: \n");
@@ -445,6 +450,7 @@ static vpx_codec_err_t set_param(vpx_codec_alg_priv_t *ctx,
       MAP(VP8E_SET_MAX_INTRA_BITRATE_PCT,   xcfg.rc_max_intra_bitrate_pct);
       MAP(VP9E_SET_LOSSLESS,                xcfg.lossless);
       MAP(VP9E_SET_FRAME_PARALLEL_DECODING, xcfg.frame_parallel_decoding_mode);
+      MAP(VP9E_SET_AQ_MODE,                 xcfg.aq_mode);
   }
 
   res = validate_config(ctx, &ctx->cfg, &xcfg);
@@ -1071,6 +1077,7 @@ static vpx_codec_ctrl_fn_map_t vp9e_ctf_maps[] = {
   {VP8E_SET_MAX_INTRA_BITRATE_PCT,    set_param},
   {VP9E_SET_LOSSLESS,                 set_param},
   {VP9E_SET_FRAME_PARALLEL_DECODING,  set_param},
+  {VP9E_SET_AQ_MODE,                  set_param},
   {VP9_GET_REFERENCE,                 get_reference},
   {VP9E_SET_SVC,                      vp9e_set_svc},
   {VP9E_SET_SVC_PARAMETERS,           vp9e_set_svc_parameters},

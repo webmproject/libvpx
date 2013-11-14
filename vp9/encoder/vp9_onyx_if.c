@@ -764,8 +764,6 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
   sf->static_segmentation = 0;
 #endif
 
-  sf->variance_adaptive_quantization = 0;
-
   switch (mode) {
     case 0:  // This is the best quality mode.
       break;
@@ -3195,7 +3193,7 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
       }
     }
 
-    if (cpi->sf.variance_adaptive_quantization) {
+    if (cpi->oxcf.aq_mode == VARIANCE_AQ) {
         vp9_vaq_frame_setup(cpi);
     }
 
@@ -3980,7 +3978,7 @@ int vp9_get_compressed_data(VP9_PTR ptr, unsigned int *frame_flags,
 
   vp9_setup_interp_filters(&cpi->mb.e_mbd, DEFAULT_INTERP_FILTER, cm);
 
-  if (cpi->sf.variance_adaptive_quantization) {
+  if (cpi->oxcf.aq_mode == VARIANCE_AQ) {
       vp9_vaq_init();
   }
 
