@@ -21,7 +21,7 @@
 #include "vp9/common/vp9_seg_common.h"
 
 #include "vp9/decoder/vp9_decodemv.h"
-#include "vp9/decoder/vp9_decodframe.h"
+#include "vp9/decoder/vp9_decodeframe.h"
 #include "vp9/decoder/vp9_onyxd_int.h"
 #include "vp9/decoder/vp9_treereader.h"
 
