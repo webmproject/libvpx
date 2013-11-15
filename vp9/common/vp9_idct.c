@@ -835,7 +835,8 @@ void vp9_iht16x16_256_add_c(const int16_t *input, uint8_t *dest, int stride,
     ht.cols(temp_in, temp_out);
     for (j = 0; j < 16; ++j)
       dest[j * stride + i] = clip_pixel(ROUND_POWER_OF_TWO(temp_out[j], 6)
-                                  + dest[j * stride + i]);  }
+                                        + dest[j * stride + i]);
+  }
 }
 
 void vp9_idct16x16_10_add_c(const int16_t *input, uint8_t *dest, int stride) {
@@ -1276,7 +1277,7 @@ void vp9_idct32x32_1024_add_c(const int16_t *input, uint8_t *dest, int stride) {
     idct32_1d(temp_in, temp_out);
     for (j = 0; j < 32; ++j)
       dest[j * stride + i] = clip_pixel(ROUND_POWER_OF_TWO(temp_out[j], 6)
-                                  + dest[j * stride + i]);
+                                        + dest[j * stride + i]);
   }
 }
 
