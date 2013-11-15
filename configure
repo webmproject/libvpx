@@ -24,6 +24,7 @@ Advanced options:
   ${toggle_examples}              examples
   ${toggle_docs}                  documentation
   ${toggle_unit_tests}            unit tests
+  ${toggle_decode_perf_tests}     build decoder perf tests with unit tests
   --libc=PATH                     path to alternate libc
   --as={yasm|nasm|auto}           use specified assembler [auto, yasm preferred]
   --sdk-path=PATH                 path to root of sdk (android builds only)
@@ -302,6 +303,7 @@ CONFIG_LIST="
     postproc_visualizer
     os_support
     unit_tests
+    decode_perf_tests
     multi_res_encoding
     temporal_denoising
     experimental
@@ -355,6 +357,7 @@ CMDLINE_SELECT="
     small
     postproc_visualizer
     unit_tests
+    decode_perf_tests
     multi_res_encoding
     temporal_denoising
     experimental

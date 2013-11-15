@@ -44,6 +44,10 @@ LIBVPX_TEST_SRCS-$(CONFIG_DECODERS)    += $(NESTEGG_SRCS)
 LIBVPX_TEST_SRCS-$(CONFIG_DECODERS)    += webm_video_source.h
 
 LIBVPX_TEST_SRCS-$(CONFIG_DECODERS)    += test_vector_test.cc
+# Currently we only support decoder perf tests for vp9
+ifeq ($(CONFIG_DECODE_PERF_TESTS)$(CONFIG_VP9_DECODER), yesyes)
+LIBVPX_TEST_SRCS-yes                   += decode_perf_test.cc
+endif
 
 ##
 ## WHITE BOX TESTS
@@ -652,3 +656,43 @@ LIBVPX_TEST_DATA-$(CONFIG_VP9_DECODER) += vp90-2-08-tile-4x1.webm
 LIBVPX_TEST_DATA-$(CONFIG_VP9_DECODER) += vp90-2-08-tile-4x1.webm.md5
 LIBVPX_TEST_DATA-$(CONFIG_VP9_DECODER) += vp91-2-04-yv444.webm
 LIBVPX_TEST_DATA-$(CONFIG_VP9_DECODER) += vp91-2-04-yv444.webm.md5
+
+ifeq ($(CONFIG_DECODE_PERF_TESTS),yes)
+# BBB VP9 streams
+LIBVPX_TEST_DATA-$(CONFIG_VP9_DECODER) += \
+  vp90-2-bbb_426x240_tile_1x1_180kbps.webm
+LIBVPX_TEST_DATA-$(CONFIG_VP9_DECODER) += \
+  vp90-2-bbb_640x360_tile_1x2_337kbps.webm
+LIBVPX_TEST_DATA-$(CONFIG_VP9_DECODER) += \
+  vp90-2-bbb_854x480_tile_1x2_651kbps.webm
+LIBVPX_TEST_DATA-$(CONFIG_VP9_DECODER) += \
+  vp90-2-bbb_1280x720_tile_1x4_1310kbps.webm
+LIBVPX_TEST_DATA-$(CONFIG_VP9_DECODER) += \
+  vp90-2-bbb_1920x1080_tile_1x1_2581kbps.webm
+LIBVPX_TEST_DATA-$(CONFIG_VP9_DECODER) += \
+  vp90-2-bbb_1920x1080_tile_1x4_2586kbps.webm
+LIBVPX_TEST_DATA-$(CONFIG_VP9_DECODER) += \
+  vp90-2-bbb_1920x1080_tile_1x4_fpm_2304kbps.webm
+#Sintel VP9 streams
+LIBVPX_TEST_DATA-$(CONFIG_VP9_DECODER) += \
+  vp90-2-sintel_426x182_tile_1x1_171kbps.webm
+LIBVPX_TEST_DATA-$(CONFIG_VP9_DECODER) += \
+  vp90-2-sintel_640x272_tile_1x2_318kbps.webm
+LIBVPX_TEST_DATA-$(CONFIG_VP9_DECODER) += \
+  vp90-2-sintel_854x364_tile_1x2_621kbps.webm
+LIBVPX_TEST_DATA-$(CONFIG_VP9_DECODER) += \
+  vp90-2-sintel_1280x546_tile_1x4_1257kbps.webm
+LIBVPX_TEST_DATA-$(CONFIG_VP9_DECODER) += \
+  vp90-2-sintel_1920x818_tile_1x4_fpm_2279kbps.webm
+# TOS VP9 streams
+LIBVPX_TEST_DATA-$(CONFIG_VP9_DECODER) += \
+  vp90-2-tos_426x178_tile_1x1_181kbps.webm
+LIBVPX_TEST_DATA-$(CONFIG_VP9_DECODER) += \
+  vp90-2-tos_640x266_tile_1x2_336kbps.webm
+LIBVPX_TEST_DATA-$(CONFIG_VP9_DECODER) += \
+  vp90-2-tos_854x356_tile_1x2_656kbps.webm
+LIBVPX_TEST_DATA-$(CONFIG_VP9_DECODER) += \
+  vp90-2-tos_1280x534_tile_1x4_1306kbps.webm
+LIBVPX_TEST_DATA-$(CONFIG_VP9_DECODER) += \
+  vp90-2-tos_1920x800_tile_1x4_fpm_2335kbps.webm
+endif  # CONFIG_DECODE_PERF_TESTS
