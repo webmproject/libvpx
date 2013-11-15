@@ -323,40 +323,111 @@ void vp9_loop_filter_frame_init(VP9_COMMON *cm, int default_filt_lvl) {
   }
 }
 
-static void filter_selectively_vert(uint8_t *s, int pitch,
-                                    unsigned int mask_16x16,
-                                    unsigned int mask_8x8,
-                                    unsigned int mask_4x4,
-                                    unsigned int mask_4x4_int,
-                                    const loop_filter_info_n *lfi_n,
-                                    const uint8_t *lfl) {
+static void filter_selectively_vert_row2(PLANE_TYPE plane_type,
+                                         uint8_t *s, int pitch,
+                                         unsigned int mask_16x16_l,
+                                         unsigned int mask_8x8_l,
+                                         unsigned int mask_4x4_l,
+                                         unsigned int mask_4x4_int_l,
+                                         const loop_filter_info_n *lfi_n,
+                                         const uint8_t *lfl) {
+  const int mask_shift = plane_type ? 4 : 8;
+  const int mask_cutoff = plane_type ? 0xf : 0xff;
+  const int lfl_forward = plane_type ? 4 : 8;
+
+  unsigned int mask_16x16_0 = mask_16x16_l & mask_cutoff;
+  unsigned int mask_8x8_0 = mask_8x8_l & mask_cutoff;
+  unsigned int mask_4x4_0 = mask_4x4_l & mask_cutoff;
+  unsigned int mask_4x4_int_0 = mask_4x4_int_l & mask_cutoff;
+  unsigned int mask_16x16_1 = (mask_16x16_l >> mask_shift) & mask_cutoff;
+  unsigned int mask_8x8_1 = (mask_8x8_l >> mask_shift) & mask_cutoff;
+  unsigned int mask_4x4_1 = (mask_4x4_l >> mask_shift) & mask_cutoff;
+  unsigned int mask_4x4_int_1 = (mask_4x4_int_l >> mask_shift) & mask_cutoff;
   unsigned int mask;
 
-  for (mask = mask_16x16 | mask_8x8 | mask_4x4 | mask_4x4_int;
-       mask; mask >>= 1) {
-    const loop_filter_thresh *lfi = lfi_n->lfthr + *lfl;
+  for (mask = mask_16x16_0 | mask_8x8_0 | mask_4x4_0 | mask_4x4_int_0 |
+      mask_16x16_1 | mask_8x8_1 | mask_4x4_1 | mask_4x4_int_1;
+      mask; mask >>= 1) {
+    const loop_filter_thresh *lfi0 = lfi_n->lfthr + *lfl;
+    const loop_filter_thresh *lfi1 = lfi_n->lfthr + *(lfl + lfl_forward);
 
+    // TODO(yunqingwang): count in loopfilter functions should be removed.
     if (mask & 1) {
-      if (mask_16x16 & 1) {
-        vp9_mb_lpf_vertical_edge_w(s, pitch, lfi->mblim, lfi->lim,
-                                   lfi->hev_thr);
-      } else if (mask_8x8 & 1) {
-        vp9_mbloop_filter_vertical_edge(s, pitch, lfi->mblim, lfi->lim,
-                                        lfi->hev_thr, 1);
-      } else if (mask_4x4 & 1) {
-        vp9_loop_filter_vertical_edge(s, pitch, lfi->mblim, lfi->lim,
-                                      lfi->hev_thr, 1);
+      if ((mask_16x16_0 | mask_16x16_1) & 1) {
+        if ((mask_16x16_0 & mask_16x16_1) & 1) {
+          // TODO(yunqingwang): Combine 2 calls as 1 wide filtering.
+          vp9_mb_lpf_vertical_edge_w(s, pitch, lfi0->mblim, lfi0->lim,
+                                     lfi0->hev_thr);
+          vp9_mb_lpf_vertical_edge_w(s + 8 *pitch, pitch, lfi1->mblim,
+                                     lfi1->lim, lfi1->hev_thr);
+        } else if (mask_16x16_0 & 1) {
+          vp9_mb_lpf_vertical_edge_w(s, pitch, lfi0->mblim, lfi0->lim,
+                                     lfi0->hev_thr);
+        } else {
+          vp9_mb_lpf_vertical_edge_w(s + 8 *pitch, pitch, lfi1->mblim,
+                                     lfi1->lim, lfi1->hev_thr);
+        }
+      }
+
+      if ((mask_8x8_0 | mask_8x8_1) & 1) {
+        if ((mask_8x8_0 & mask_8x8_1) & 1) {
+          // TODO(yunqingwang): Combine 2 calls as 1 wide filtering.
+          vp9_mbloop_filter_vertical_edge(s, pitch, lfi0->mblim, lfi0->lim,
+                                          lfi0->hev_thr, 1);
+          vp9_mbloop_filter_vertical_edge(s + 8 *pitch, pitch, lfi1->mblim,
+                                          lfi1->lim, lfi1->hev_thr, 1);
+        } else if (mask_8x8_0 & 1) {
+          vp9_mbloop_filter_vertical_edge(s, pitch, lfi0->mblim, lfi0->lim,
+                                          lfi0->hev_thr, 1);
+        } else {
+          vp9_mbloop_filter_vertical_edge(s + 8 *pitch, pitch, lfi1->mblim,
+                                          lfi1->lim, lfi1->hev_thr, 1);
+        }
+      }
+
+      if ((mask_4x4_0 | mask_4x4_1) & 1) {
+        if ((mask_4x4_0 & mask_4x4_1) & 1) {
+          // TODO(yunqingwang): Combine 2 calls as 1 wide filtering.
+          vp9_loop_filter_vertical_edge(s, pitch, lfi0->mblim, lfi0->lim,
+                                        lfi0->hev_thr, 1);
+          vp9_loop_filter_vertical_edge(s + 8 *pitch, pitch, lfi1->mblim,
+                                        lfi1->lim, lfi1->hev_thr, 1);
+        } else if (mask_4x4_0 & 1) {
+          vp9_loop_filter_vertical_edge(s, pitch, lfi0->mblim, lfi0->lim,
+                                        lfi0->hev_thr, 1);
+        } else {
+          vp9_loop_filter_vertical_edge(s + 8 *pitch, pitch, lfi1->mblim,
+                                        lfi1->lim, lfi1->hev_thr, 1);
+        }
+      }
+
+      if ((mask_4x4_int_0 | mask_4x4_int_1) & 1) {
+        if ((mask_4x4_int_0 & mask_4x4_int_1) & 1) {
+          // TODO(yunqingwang): Combine 2 calls as 1 wide filtering.
+          vp9_loop_filter_vertical_edge(s + 4, pitch, lfi0->mblim, lfi0->lim,
+                                        lfi0->hev_thr, 1);
+          vp9_loop_filter_vertical_edge(s + 8 *pitch + 4, pitch, lfi1->mblim,
+                                        lfi1->lim, lfi1->hev_thr, 1);
+        } else if (mask_4x4_int_0 & 1) {
+          vp9_loop_filter_vertical_edge(s + 4, pitch, lfi0->mblim, lfi0->lim,
+                                        lfi0->hev_thr, 1);
+        } else {
+          vp9_loop_filter_vertical_edge(s + 8 *pitch + 4, pitch, lfi1->mblim,
+                                        lfi1->lim, lfi1->hev_thr, 1);
+        }
       }
     }
-    if (mask_4x4_int & 1)
-      vp9_loop_filter_vertical_edge(s + 4, pitch, lfi->mblim, lfi->lim,
-                                    lfi->hev_thr, 1);
+
     s += 8;
     lfl += 1;
-    mask_16x16 >>= 1;
-    mask_8x8 >>= 1;
-    mask_4x4 >>= 1;
-    mask_4x4_int >>= 1;
+    mask_16x16_0 >>= 1;
+    mask_8x8_0 >>= 1;
+    mask_4x4_0 >>= 1;
+    mask_4x4_int_0 >>= 1;
+    mask_16x16_1 >>= 1;
+    mask_8x8_1 >>= 1;
+    mask_4x4_1 >>= 1;
+    mask_4x4_int_1 >>= 1;
   }
 }
 
@@ -863,6 +934,43 @@ static uint8_t build_lfi(const loop_filter_info_n *lfi_n,
   return filter_level;
 }
 
+static void filter_selectively_vert(uint8_t *s, int pitch,
+                                    unsigned int mask_16x16,
+                                    unsigned int mask_8x8,
+                                    unsigned int mask_4x4,
+                                    unsigned int mask_4x4_int,
+                                    const loop_filter_info_n *lfi_n,
+                                    const uint8_t *lfl) {
+  unsigned int mask;
+
+  for (mask = mask_16x16 | mask_8x8 | mask_4x4 | mask_4x4_int;
+       mask; mask >>= 1) {
+    const loop_filter_thresh *lfi = lfi_n->lfthr + *lfl;
+
+    if (mask & 1) {
+      if (mask_16x16 & 1) {
+        vp9_mb_lpf_vertical_edge_w(s, pitch, lfi->mblim, lfi->lim,
+                                   lfi->hev_thr);
+      } else if (mask_8x8 & 1) {
+        vp9_mbloop_filter_vertical_edge(s, pitch, lfi->mblim, lfi->lim,
+                                        lfi->hev_thr, 1);
+      } else if (mask_4x4 & 1) {
+        vp9_loop_filter_vertical_edge(s, pitch, lfi->mblim, lfi->lim,
+                                      lfi->hev_thr, 1);
+      }
+    }
+    if (mask_4x4_int & 1)
+      vp9_loop_filter_vertical_edge(s + 4, pitch, lfi->mblim, lfi->lim,
+                                    lfi->hev_thr, 1);
+    s += 8;
+    lfl += 1;
+    mask_16x16 >>= 1;
+    mask_8x8 >>= 1;
+    mask_4x4 >>= 1;
+    mask_4x4_int >>= 1;
+  }
+}
+
 static void filter_block_plane_non420(VP9_COMMON *cm,
                                       struct macroblockd_plane *plane,
                                       MODE_INFO **mi_8x8,
@@ -1008,7 +1116,6 @@ static void filter_block_plane(VP9_COMMON *const cm,
                                LOOP_FILTER_MASK *lfm) {
   struct buf_2d *const dst = &plane->dst;
   uint8_t* const dst0 = dst->buf;
-  unsigned int mask_4x4_int_row[MI_BLOCK_SIZE] = {0};
   int r, c;
 
   if (!plane->plane_type) {
@@ -1017,23 +1124,27 @@ static void filter_block_plane(VP9_COMMON *const cm,
     uint64_t mask_4x4 = lfm->left_y[TX_4X4];
     uint64_t mask_4x4_int = lfm->int_4x4_y;
 
-    // Vertical pass
-    for (r = 0; r < MI_BLOCK_SIZE && mi_row + r < cm->mi_rows; r++) {
-      mask_4x4_int_row[r] = mask_4x4_int & 0xff;
+    // Vertical pass: do 2 rows at one time
+    for (r = 0; r < MI_BLOCK_SIZE && mi_row + r < cm->mi_rows; r += 2) {
+      unsigned int mask_16x16_l = mask_16x16 & 0xffff;
+      unsigned int mask_8x8_l = mask_8x8 & 0xffff;
+      unsigned int mask_4x4_l = mask_4x4 & 0xffff;
+      unsigned int mask_4x4_int_l = mask_4x4_int & 0xffff;
 
       // Disable filtering on the leftmost column
-      filter_selectively_vert(dst->buf, dst->stride,
-                              mask_16x16 & 0xff,
-                              mask_8x8 & 0xff,
-                              mask_4x4 & 0xff,
-                              mask_4x4_int_row[r],
-                              &cm->lf_info, &lfm->lfl_y[r << 3]);
+      filter_selectively_vert_row2(plane->plane_type,
+                                   dst->buf, dst->stride,
+                                   mask_16x16_l,
+                                   mask_8x8_l,
+                                   mask_4x4_l,
+                                   mask_4x4_int_l,
+                                   &cm->lf_info, &lfm->lfl_y[r << 3]);
 
-      dst->buf += 8 * dst->stride;
-      mask_16x16 >>= 8;
-      mask_8x8 >>= 8;
-      mask_4x4 >>= 8;
-      mask_4x4_int >>= 8;
+      dst->buf += 16 * dst->stride;
+      mask_16x16 >>= 16;
+      mask_8x8 >>= 16;
+      mask_4x4 >>= 16;
+      mask_4x4_int >>= 16;
     }
 
     // Horizontal pass
@@ -1041,6 +1152,7 @@ static void filter_block_plane(VP9_COMMON *const cm,
     mask_16x16 = lfm->above_y[TX_16X16];
     mask_8x8 = lfm->above_y[TX_8X8];
     mask_4x4 = lfm->above_y[TX_4X4];
+    mask_4x4_int = lfm->int_4x4_y;
 
     for (r = 0; r < MI_BLOCK_SIZE && mi_row + r < cm->mi_rows; r++) {
       unsigned int mask_16x16_r;
@@ -1061,13 +1173,14 @@ static void filter_block_plane(VP9_COMMON *const cm,
                                mask_16x16_r,
                                mask_8x8_r,
                                mask_4x4_r,
-                               mask_4x4_int_row[r],
+                               mask_4x4_int & 0xff,
                                &cm->lf_info, &lfm->lfl_y[r << 3]);
 
       dst->buf += 8 * dst->stride;
       mask_16x16 >>= 8;
       mask_8x8 >>= 8;
       mask_4x4 >>= 8;
+      mask_4x4_int >>= 8;
     }
   } else {
     uint16_t mask_16x16 = lfm->left_uv[TX_16X16];
@@ -1075,27 +1188,37 @@ static void filter_block_plane(VP9_COMMON *const cm,
     uint16_t mask_4x4 = lfm->left_uv[TX_4X4];
     uint16_t mask_4x4_int = lfm->int_4x4_uv;
 
-    // Vertical pass
-    for (r = 0; r < MI_BLOCK_SIZE && mi_row + r < cm->mi_rows; r += 2) {
+    // Vertical pass: do 2 rows at one time
+    for (r = 0; r < MI_BLOCK_SIZE && mi_row + r < cm->mi_rows; r += 4) {
       if (plane->plane_type == 1) {
-        for (c = 0; c < (MI_BLOCK_SIZE >> 1); c++)
+        for (c = 0; c < (MI_BLOCK_SIZE >> 1); c++) {
           lfm->lfl_uv[(r << 1) + c] = lfm->lfl_y[(r << 3) + (c << 1)];
+          lfm->lfl_uv[((r + 2) << 1) + c] = lfm->lfl_y[((r + 2) << 3) +
+                                                       (c << 1)];
+        }
       }
 
-      mask_4x4_int_row[r] = mask_4x4_int & 0xf;
-      // Disable filtering on the leftmost column
-      filter_selectively_vert(dst->buf, dst->stride,
-                              mask_16x16 & 0xf,
-                              mask_8x8 & 0xf,
-                              mask_4x4 & 0xf,
-                              mask_4x4_int_row[r],
-                              &cm->lf_info, &lfm->lfl_uv[r << 1]);
+      {
+        unsigned int mask_16x16_l = mask_16x16 & 0xff;
+        unsigned int mask_8x8_l = mask_8x8 & 0xff;
+        unsigned int mask_4x4_l = mask_4x4 & 0xff;
+        unsigned int mask_4x4_int_l = mask_4x4_int & 0xff;
 
-      dst->buf += 8 * dst->stride;
-      mask_16x16 >>= 4;
-      mask_8x8 >>= 4;
-      mask_4x4 >>= 4;
-      mask_4x4_int >>= 4;
+        // Disable filtering on the leftmost column
+        filter_selectively_vert_row2(plane->plane_type,
+                                     dst->buf, dst->stride,
+                                     mask_16x16_l,
+                                     mask_8x8_l,
+                                     mask_4x4_l,
+                                     mask_4x4_int_l,
+                                     &cm->lf_info, &lfm->lfl_uv[r << 1]);
+
+        dst->buf += 16 * dst->stride;
+        mask_16x16 >>= 8;
+        mask_8x8 >>= 8;
+        mask_4x4 >>= 8;
+        mask_4x4_int >>= 8;
+      }
     }
 
     // Horizontal pass
@@ -1103,11 +1226,12 @@ static void filter_block_plane(VP9_COMMON *const cm,
     mask_16x16 = lfm->above_uv[TX_16X16];
     mask_8x8 = lfm->above_uv[TX_8X8];
     mask_4x4 = lfm->above_uv[TX_4X4];
+    mask_4x4_int = lfm->int_4x4_uv;
 
     for (r = 0; r < MI_BLOCK_SIZE && mi_row + r < cm->mi_rows; r += 2) {
       const int skip_border_4x4_r = mi_row + r == cm->mi_rows - 1;
       const unsigned int mask_4x4_int_r = skip_border_4x4_r ?
-          0 : (mask_4x4_int_row[r]);
+          0 : (mask_4x4_int & 0xf);
       unsigned int mask_16x16_r;
       unsigned int mask_8x8_r;
       unsigned int mask_4x4_r;
@@ -1133,6 +1257,7 @@ static void filter_block_plane(VP9_COMMON *const cm,
       mask_16x16 >>= 4;
       mask_8x8 >>= 4;
       mask_4x4 >>= 4;
+      mask_4x4_int >>= 4;
     }
   }
 }
