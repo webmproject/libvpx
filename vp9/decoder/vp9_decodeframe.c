@@ -28,7 +28,7 @@
 #include "vp9/common/vp9_tile_common.h"
 
 #include "vp9/decoder/vp9_dboolhuff.h"
-#include "vp9/decoder/vp9_decodframe.h"
+#include "vp9/decoder/vp9_decodeframe.h"
 #include "vp9/decoder/vp9_detokenize.h"
 #include "vp9/decoder/vp9_decodemv.h"
 #include "vp9/decoder/vp9_dsubexp.h"

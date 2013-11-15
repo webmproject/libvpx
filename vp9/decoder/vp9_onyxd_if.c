@@ -25,7 +25,7 @@
 #include "vpx_scale/vpx_scale.h"
 #include "vp9/common/vp9_systemdependent.h"
 #include "vpx_ports/vpx_timer.h"
-#include "vp9/decoder/vp9_decodframe.h"
+#include "vp9/decoder/vp9_decodeframe.h"
 #include "vp9/decoder/vp9_detokenize.h"
 #include "./vpx_scale_rtcd.h"
 
