@@ -18,7 +18,6 @@
 #include "vp9/encoder/vp9_treewriter.h"
 #include "vp9/encoder/vp9_onyx_int.h"
 #include "vp9/encoder/vp9_modecosts.h"
-#include "vp9/encoder/vp9_encodeintra.h"
 #include "vp9/common/vp9_entropymode.h"
 #include "vp9/common/vp9_reconinter.h"
 #include "vp9/common/vp9_reconintra.h"

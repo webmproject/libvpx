@@ -31,7 +31,6 @@
 #include "vp9/common/vp9_seg_common.h"
 #include "vp9/common/vp9_tile_common.h"
 #include "vp9/encoder/vp9_encodeframe.h"
-#include "vp9/encoder/vp9_encodeintra.h"
 #include "vp9/encoder/vp9_encodemb.h"
 #include "vp9/encoder/vp9_encodemv.h"
 #include "vp9/encoder/vp9_onyx_int.h"
