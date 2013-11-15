@@ -17,6 +17,13 @@
 #
 # Usage: cat inputfile | perl ads2gas_apple.pl > outputfile
 #
+
+my $chromium = 0;
+
+foreach my $arg (@ARGV) {
+    $chromium = 1 if ($arg eq "-chromium");
+}
+
 print "@ This file was created from a .asm file\n";
 print "@  using the ads2gas_apple.pl script.\n\n";
 print "\t.set WIDE_REFERENCE, 0\n";
@@ -47,7 +54,7 @@ while (<STDIN>)
     s/@/,:/g;
 
     # Comment character
-    s/;/@/g;
+    s/;/ @/g;
 
     # Hexadecimal constants prefaced by 0x
     s/#&/#0x/g;
@@ -210,5 +217,19 @@ while (<STDIN>)
 #   s/\$/\\/g;                  # End macro definition
     s/MEND/.endm/;              # No need to tell it where to stop assembling
     next if /^\s*END\s*$/;
+
+    # Clang used by Chromium differs slightly from clang in XCode in what it
+    # will accept in the assembly.
+    if ($chromium) {
+        s/qsubaddx/qsax/i;
+        s/qaddsubx/qasx/i;
+        s/ldrneb/ldrbne/i;
+        s/ldrneh/ldrhne/i;
+        s/(vqshrun\.s16 .*, \#)0$/${1}8/i;
+
+        # http://llvm.org/bugs/show_bug.cgi?id=16022
+        s/\.include/#include/;
+    }
+
     print;
 }
