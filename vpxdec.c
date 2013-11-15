@@ -8,10 +8,6 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-
-/* This is a simple program that reads ivf files and decodes them
- * using the new interface. Decoded frames are output as YV12 raw.
- */
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -19,17 +15,22 @@
 #include <string.h>
 #include <limits.h>
 
+#include "./ivfdec.h"
+
 #define VPX_CODEC_DISABLE_COMPAT 1
-#include "vpx_config.h"
+#include "./vpx_config.h"
 #include "vpx/vpx_decoder.h"
 #include "vpx_ports/vpx_timer.h"
+
 #if CONFIG_VP8_DECODER || CONFIG_VP9_DECODER
 #include "vpx/vp8dx.h"
 #endif
+
 #if CONFIG_MD5
 #include "md5_utils.h"
 #endif
-#include "tools_common.h"
+
+#include "./tools_common.h"
 #include "nestegg/include/nestegg/nestegg.h"
 #include "third_party/libyuv/include/libyuv/scale.h"
 
@@ -161,53 +162,24 @@ void usage_exit() {
   exit(EXIT_FAILURE);
 }
 
-static unsigned int mem_get_le16(const void *vmem) {
-  unsigned int  val;
-  const unsigned char *mem = (const unsigned char *)vmem;
-
-  val = mem[1] << 8;
-  val |= mem[0];
-  return val;
-}
-
-static unsigned int mem_get_le32(const void *vmem) {
-  unsigned int  val;
-  const unsigned char *mem = (const unsigned char *)vmem;
-
-  val = mem[3] << 24;
-  val |= mem[2] << 16;
-  val |= mem[1] << 8;
-  val |= mem[0];
-  return val;
-}
-
-enum file_kind {
-  RAW_FILE,
-  IVF_FILE,
-  WEBM_FILE
-};
-
-struct input_ctx {
-  enum file_kind  kind;
-  FILE           *infile;
-  nestegg        *nestegg_ctx;
+struct VpxDecInputContext {
+  nestegg *nestegg_ctx;
   nestegg_packet *pkt;
-  unsigned int    chunk;
-  unsigned int    chunks;
-  unsigned int    video_track;
+  unsigned int chunk;
+  unsigned int chunks;
+  unsigned int video_track;
+  struct VpxInputContext *vpx_input_ctx;
 };
 
-#define IVF_FRAME_HDR_SZ (sizeof(uint32_t) + sizeof(uint64_t))
-#define RAW_FRAME_HDR_SZ (sizeof(uint32_t))
-static int read_frame(struct input_ctx      *input,
-                      uint8_t               **buf,
-                      size_t                *buf_sz,
-                      size_t                *buf_alloc_sz) {
-  char            raw_hdr[IVF_FRAME_HDR_SZ];
-  size_t          new_buf_sz;
-  FILE           *infile = input->infile;
-  enum file_kind  kind = input->kind;
-  if (kind == WEBM_FILE) {
+static int read_frame(struct VpxDecInputContext *input,
+                      uint8_t **buf,
+                      size_t *bytes_in_buffer,
+                      size_t *buffer_size) {
+  char raw_hdr[RAW_FRAME_HDR_SZ];
+  size_t bytes_to_read = 0;
+  FILE *infile = input->vpx_input_ctx->file;
+  enum VideoFileType kind = input->vpx_input_ctx->file_type;
+  if (kind == FILE_TYPE_WEBM) {
     if (input->chunk >= input->chunks) {
       unsigned int track;
 
@@ -227,54 +199,49 @@ static int read_frame(struct input_ctx      *input,
       input->chunk = 0;
     }
 
-    if (nestegg_packet_data(input->pkt, input->chunk, buf, buf_sz))
+    if (nestegg_packet_data(input->pkt, input->chunk, buf, bytes_in_buffer))
       return 1;
     input->chunk++;
 
     return 0;
-  }
-  /* For both the raw and ivf formats, the frame size is the first 4 bytes
-   * of the frame header. We just need to special case on the header
-   * size.
-   */
-  else if (fread(raw_hdr, kind == IVF_FILE
-                 ? IVF_FRAME_HDR_SZ : RAW_FRAME_HDR_SZ, 1, infile) != 1) {
-    if (!feof(infile))
-      fprintf(stderr, "Failed to read frame size\n");
+  } else if (kind == FILE_TYPE_RAW) {
+    if (fread(raw_hdr, RAW_FRAME_HDR_SZ, 1, infile) != 1) {
+      if (!feof(infile))
+        warn("Failed to read RAW frame size\n");
+    } else {
+      const int kCorruptFrameThreshold = 256 * 1024 * 1024;
+      const int kFrameTooSmallThreshold = 256 * 1024;
+      bytes_to_read = mem_get_le32(raw_hdr);
 
-    new_buf_sz = 0;
-  } else {
-    new_buf_sz = mem_get_le32(raw_hdr);
+      if (bytes_to_read > kCorruptFrameThreshold) {
+        warn("Read invalid frame size (%u)\n", (unsigned int)bytes_to_read);
+        bytes_to_read = 0;
+      }
 
-    if (new_buf_sz > 256 * 1024 * 1024) {
-      fprintf(stderr, "Error: Read invalid frame size (%u)\n",
-              (unsigned int)new_buf_sz);
-      new_buf_sz = 0;
-    }
+      if (kind == FILE_TYPE_RAW && bytes_to_read < kFrameTooSmallThreshold) {
+        warn("Warning: Read invalid frame size (%u) - not a raw file?\n",
+             (unsigned int)bytes_to_read);
+      }
 
-    if (kind == RAW_FILE && new_buf_sz > 256 * 1024)
-      fprintf(stderr, "Warning: Read invalid frame size (%u)"
-              " - not a raw file?\n", (unsigned int)new_buf_sz);
+      if (bytes_to_read > *buffer_size) {
+        uint8_t *new_buf = realloc(*buf, 2 * bytes_to_read);
 
-    if (new_buf_sz > *buf_alloc_sz) {
-      uint8_t *new_buf = realloc(*buf, 2 * new_buf_sz);
-
-      if (new_buf) {
-        *buf = new_buf;
-        *buf_alloc_sz = 2 * new_buf_sz;
-      } else {
-        fprintf(stderr, "Failed to allocate compressed data buffer\n");
-        new_buf_sz = 0;
+        if (new_buf) {
+          *buf = new_buf;
+          *buffer_size = 2 * bytes_to_read;
+        } else {
+          warn("Failed to allocate compressed data buffer\n");
+          bytes_to_read = 0;
+        }
       }
     }
-  }
 
-  *buf_sz = new_buf_sz;
-
-  if (!feof(infile)) {
-    if (fread(*buf, 1, *buf_sz, infile) != *buf_sz) {
-      fprintf(stderr, "Failed to read full frame\n");
-      return 1;
+    if (!feof(infile)) {
+      if (fread(*buf, 1, bytes_to_read, infile) != bytes_to_read) {
+        warn("Failed to read full frame\n");
+        return 1;
+      }
+      *bytes_in_buffer = bytes_to_read;
     }
 
     return 0;
@@ -297,8 +264,7 @@ void *out_open(const char *out_fn, int do_md5) {
                           : set_binary_mode(stdout);
 
     if (!outfile) {
-      fprintf(stderr, "Failed to output file");
-      exit(EXIT_FAILURE);
+      fatal("Failed to output file");
     }
   }
 
@@ -334,88 +300,33 @@ void out_close(void *out, const char *out_fn, int do_md5) {
   }
 }
 
-unsigned int file_is_ivf(FILE *infile,
-                         unsigned int *fourcc,
-                         unsigned int *width,
-                         unsigned int *height,
-                         unsigned int *fps_den,
-                         unsigned int *fps_num) {
-  char raw_hdr[32];
-  int is_ivf = 0;
-
-  if (fread(raw_hdr, 1, 32, infile) == 32) {
-    if (raw_hdr[0] == 'D' && raw_hdr[1] == 'K'
-        && raw_hdr[2] == 'I' && raw_hdr[3] == 'F') {
-      is_ivf = 1;
-
-      if (mem_get_le16(raw_hdr + 4) != 0)
-        fprintf(stderr, "Error: Unrecognized IVF version! This file may not"
-                " decode properly.");
-
-      *fourcc = mem_get_le32(raw_hdr + 8);
-      *width = mem_get_le16(raw_hdr + 12);
-      *height = mem_get_le16(raw_hdr + 14);
-      *fps_num = mem_get_le32(raw_hdr + 16);
-      *fps_den = mem_get_le32(raw_hdr + 20);
-
-      /* Some versions of vpxenc used 1/(2*fps) for the timebase, so
-       * we can guess the framerate using only the timebase in this
-       * case. Other files would require reading ahead to guess the
-       * timebase, like we do for webm.
-       */
-      if (*fps_num < 1000) {
-        /* Correct for the factor of 2 applied to the timebase in the
-         * encoder.
-         */
-        if (*fps_num & 1)*fps_den <<= 1;
-        else *fps_num >>= 1;
-      } else {
-        /* Don't know FPS for sure, and don't have readahead code
-         * (yet?), so just default to 30fps.
-         */
-        *fps_num = 30;
-        *fps_den = 1;
-      }
-    }
-  }
-
-  if (!is_ivf)
-    rewind(infile);
-
-  return is_ivf;
-}
-
-
-unsigned int file_is_raw(FILE *infile,
-                         unsigned int *fourcc,
-                         unsigned int *width,
-                         unsigned int *height,
-                         unsigned int *fps_den,
-                         unsigned int *fps_num) {
-  unsigned char buf[32];
+int file_is_raw(struct VpxInputContext *input) {
+  uint8_t buf[32];
   int is_raw = 0;
   vpx_codec_stream_info_t si;
 
   si.sz = sizeof(si);
 
-  if (fread(buf, 1, 32, infile) == 32) {
+  if (fread(buf, 1, 32, input->file) == 32) {
     int i;
 
-    if (mem_get_le32(buf) < 256 * 1024 * 1024)
-      for (i = 0; i < sizeof(ifaces) / sizeof(ifaces[0]); i++)
+    if (mem_get_le32(buf) < 256 * 1024 * 1024) {
+      for (i = 0; i < sizeof(ifaces) / sizeof(ifaces[0]); i++) {
         if (!vpx_codec_peek_stream_info(ifaces[i].iface(),
                                         buf + 4, 32 - 4, &si)) {
           is_raw = 1;
-          *fourcc = ifaces[i].fourcc;
-          *width = si.w;
-          *height = si.h;
-          *fps_num = 30;
-          *fps_den = 1;
+          input->fourcc = ifaces[i].fourcc;
+          input->width = si.w;
+          input->height = si.h;
+          input->framerate.numerator = 30;
+          input->framerate.denominator = 1;
           break;
         }
+      }
+    }
   }
 
-  rewind(infile);
+  rewind(input->file);
   return is_raw;
 }
 
@@ -470,18 +381,15 @@ nestegg_log_cb(nestegg *context, unsigned int severity, char const *format,
 
 
 static int
-webm_guess_framerate(struct input_ctx *input,
-                     unsigned int     *fps_den,
-                     unsigned int     *fps_num) {
+webm_guess_framerate(struct VpxDecInputContext *input) {
   unsigned int i;
   uint64_t     tstamp = 0;
 
   /* Check to see if we can seek before we parse any data. */
   if (nestegg_track_seek(input->nestegg_ctx, input->video_track, 0)) {
-    fprintf(stderr,
-            "WARNING: Failed to guess framerate (no Cues), set to 30fps.\n");
-    *fps_num = 30;
-    *fps_den = 1;
+    warn("WARNING: Failed to guess framerate (no Cues), set to 30fps.\n");
+    input->vpx_input_ctx->framerate.numerator = 30;
+    input->vpx_input_ctx->framerate.denominator  = 1;
     return 0;
   }
 
@@ -507,32 +415,27 @@ webm_guess_framerate(struct input_ctx *input,
   if (nestegg_track_seek(input->nestegg_ctx, input->video_track, 0))
     goto fail;
 
-  *fps_num = (i - 1) * 1000000;
-  *fps_den = (unsigned int)(tstamp / 1000);
+  input->vpx_input_ctx->framerate.numerator = (i - 1) * 1000000;
+  input->vpx_input_ctx->framerate.denominator = (int)(tstamp / 1000);
   return 0;
 fail:
   nestegg_destroy(input->nestegg_ctx);
   input->nestegg_ctx = NULL;
-  rewind(input->infile);
+  rewind(input->vpx_input_ctx->file);
   return 1;
 }
 
 
 static int
-file_is_webm(struct input_ctx *input,
-             unsigned int     *fourcc,
-             unsigned int     *width,
-             unsigned int     *height,
-             unsigned int     *fps_den,
-             unsigned int     *fps_num) {
+file_is_webm(struct VpxDecInputContext *input) {
   unsigned int i, n;
-  int          track_type = -1;
-  int          codec_id;
+  int track_type = -1;
+  int codec_id;
 
   nestegg_io io = {nestegg_read_cb, nestegg_seek_cb, nestegg_tell_cb, 0};
   nestegg_video_params params;
 
-  io.userdata = input->infile;
+  io.userdata = input->vpx_input_ctx->file;
   if (nestegg_init(&input->nestegg_ctx, io, NULL))
     goto fail;
 
@@ -550,9 +453,9 @@ file_is_webm(struct input_ctx *input,
 
   codec_id = nestegg_track_codec_id(input->nestegg_ctx, i);
   if (codec_id == NESTEGG_CODEC_VP8) {
-    *fourcc = VP8_FOURCC_MASK;
+    input->vpx_input_ctx->fourcc = VP8_FOURCC_MASK;
   } else if (codec_id == NESTEGG_CODEC_VP9) {
-    *fourcc = VP9_FOURCC_MASK;
+    input->vpx_input_ctx->fourcc = VP9_FOURCC_MASK;
   } else {
     fprintf(stderr, "Not VPx video, quitting.\n");
     exit(1);
@@ -563,14 +466,14 @@ file_is_webm(struct input_ctx *input,
   if (nestegg_track_video_params(input->nestegg_ctx, i, &params))
     goto fail;
 
-  *fps_den = 0;
-  *fps_num = 0;
-  *width = params.width;
-  *height = params.height;
+  input->vpx_input_ctx->framerate.denominator = 0;
+  input->vpx_input_ctx->framerate.numerator = 0;
+  input->vpx_input_ctx->width = params.width;
+  input->vpx_input_ctx->height = params.height;
   return 1;
 fail:
   input->nestegg_ctx = NULL;
-  rewind(input->infile);
+  rewind(input->vpx_input_ctx->file);
   return 0;
 }
 
@@ -663,18 +566,18 @@ void generate_filename(const char *pattern, char *out, size_t q_len,
 
 
 int main_loop(int argc, const char **argv_) {
-  vpx_codec_ctx_t          decoder;
+  vpx_codec_ctx_t       decoder;
   char                  *fn = NULL;
   int                    i;
   uint8_t               *buf = NULL;
-  size_t                 buf_sz = 0, buf_alloc_sz = 0;
+  size_t                 bytes_in_buffer = 0, buffer_size = 0;
   FILE                  *infile;
-  int                    frame_in = 0, frame_out = 0, flipuv = 0, noblit = 0, do_md5 = 0, progress = 0;
+  int                    frame_in = 0, frame_out = 0, flipuv = 0, noblit = 0;
+  int                    do_md5 = 0, progress = 0;
   int                    stop_after = 0, postproc = 0, summary = 0, quiet = 1;
   int                    arg_skip = 0;
   int                    ec_enabled = 0;
   vpx_codec_iface_t       *iface = NULL;
-  unsigned int           fourcc;
   unsigned long          dx_time = 0;
   struct arg               arg;
   char                   **argv, **argi, **argj;
@@ -682,10 +585,6 @@ int main_loop(int argc, const char **argv_) {
   char                    outfile[PATH_MAX];
   int                     single_file;
   int                     use_y4m = 1;
-  unsigned int            width;
-  unsigned int            height;
-  unsigned int            fps_den;
-  unsigned int            fps_num;
   void                   *out = NULL;
   vpx_codec_dec_cfg_t     cfg = {0};
 #if CONFIG_VP8_DECODER
@@ -695,13 +594,16 @@ int main_loop(int argc, const char **argv_) {
   int                     vp8_dbg_color_b_modes = 0;
   int                     vp8_dbg_display_mv = 0;
 #endif
-  struct input_ctx        input = {0};
   int                     frames_corrupted = 0;
   int                     dec_flags = 0;
   int                     do_scale = 0;
   int                     stream_w = 0, stream_h = 0;
   vpx_image_t             *scaled_img = NULL;
   int                     frame_avail, got_data;
+
+  struct VpxDecInputContext input = {0};
+  struct VpxInputContext vpx_input_ctx = {0};
+  input.vpx_input_ctx = &vpx_input_ctx;
 
   /* Parse command line */
   exec_name = argv_[0];
@@ -840,14 +742,13 @@ int main_loop(int argc, const char **argv_) {
     return EXIT_FAILURE;
   }
 #endif
-  input.infile = infile;
-  if (file_is_ivf(infile, &fourcc, &width, &height, &fps_den,
-                  &fps_num))
-    input.kind = IVF_FILE;
-  else if (file_is_webm(&input, &fourcc, &width, &height, &fps_den, &fps_num))
-    input.kind = WEBM_FILE;
-  else if (file_is_raw(infile, &fourcc, &width, &height, &fps_den, &fps_num))
-    input.kind = RAW_FILE;
+  input.vpx_input_ctx->file = infile;
+  if (file_is_ivf(input.vpx_input_ctx))
+    input.vpx_input_ctx->file_type = FILE_TYPE_IVF;
+  else if (file_is_webm(&input))
+    input.vpx_input_ctx->file_type = FILE_TYPE_WEBM;
+  else if (file_is_raw(input.vpx_input_ctx))
+    input.vpx_input_ctx->file_type = FILE_TYPE_RAW;
   else {
     fprintf(stderr, "Unrecognized input file type.\n");
     return EXIT_FAILURE;
@@ -874,7 +775,7 @@ int main_loop(int argc, const char **argv_) {
 
   if (single_file && !noblit) {
     generate_filename(outfile_pattern, outfile, sizeof(outfile) - 1,
-                      width, height, 0);
+                      vpx_input_ctx.width, vpx_input_ctx.height, 0);
     out = out_open(outfile, do_md5);
   }
 
@@ -887,8 +788,8 @@ int main_loop(int argc, const char **argv_) {
       return EXIT_FAILURE;
     }
 
-    if (input.kind == WEBM_FILE)
-      if (webm_guess_framerate(&input, &fps_den, &fps_num)) {
+    if (vpx_input_ctx.file_type == FILE_TYPE_WEBM)
+      if (webm_guess_framerate(&input)) {
         fprintf(stderr, "Failed to guess framerate -- error parsing "
                 "webm file?\n");
         return EXIT_FAILURE;
@@ -899,21 +800,23 @@ int main_loop(int argc, const char **argv_) {
        store one, and neither does VP8.
       That will have to wait until these tools support WebM natively.*/
     snprintf(buffer, sizeof(buffer), "YUV4MPEG2 W%u H%u F%u:%u I%c ",
-             width, height, fps_num, fps_den, 'p');
+             vpx_input_ctx.width, vpx_input_ctx.height,
+             vpx_input_ctx.framerate.numerator,
+             vpx_input_ctx.framerate.denominator,
+             'p');
     out_put(out, (unsigned char *)buffer,
             (unsigned int)strlen(buffer), do_md5);
   }
 
   /* Try to determine the codec from the fourcc. */
   for (i = 0; i < sizeof(ifaces) / sizeof(ifaces[0]); i++)
-    if ((fourcc & ifaces[i].fourcc_mask) == ifaces[i].fourcc) {
-      vpx_codec_iface_t  *ivf_iface = ifaces[i].iface();
+    if ((vpx_input_ctx.fourcc & ifaces[i].fourcc_mask) == ifaces[i].fourcc) {
+      vpx_codec_iface_t *vpx_iface = ifaces[i].iface();
 
-      if (iface && iface != ivf_iface)
-        fprintf(stderr, "Notice -- IVF header indicates codec: %s\n",
-                ifaces[i].name);
+      if (iface && iface != vpx_iface)
+        warn("Header indicates codec: %s\n", ifaces[i].name);
       else
-        iface = ivf_iface;
+        iface = vpx_iface;
 
       break;
     }
@@ -963,10 +866,10 @@ int main_loop(int argc, const char **argv_) {
 #endif
 
 
-  if(arg_skip)
+  if (arg_skip)
     fprintf(stderr, "Skiping first %d frames.\n", arg_skip);
   while (arg_skip) {
-    if (read_frame(&input, &buf, &buf_sz, &buf_alloc_sz))
+    if (read_frame(&input, &buf, &bytes_in_buffer, &buffer_size))
       break;
     arg_skip--;
   }
@@ -983,13 +886,13 @@ int main_loop(int argc, const char **argv_) {
 
     frame_avail = 0;
     if (!stop_after || frame_in < stop_after) {
-      if(!read_frame(&input, &buf, &buf_sz, &buf_alloc_sz)) {
+      if (!read_frame(&input, &buf, &bytes_in_buffer, &buffer_size)) {
         frame_avail = 1;
         frame_in++;
 
         vpx_usec_timer_start(&timer);
 
-        if (vpx_codec_decode(&decoder, buf, (unsigned int)buf_sz, NULL, 0)) {
+        if (vpx_codec_decode(&decoder, buf, bytes_in_buffer, NULL, 0)) {
           const char *detail = vpx_codec_error_detail(&decoder);
           fprintf(stderr, "Failed to decode frame: %s\n",
                   vpx_codec_error(&decoder));
@@ -1133,7 +1036,7 @@ fail:
 
   if (input.nestegg_ctx)
     nestegg_destroy(input.nestegg_ctx);
-  if (input.kind != WEBM_FILE)
+  if (input.vpx_input_ctx->file_type != FILE_TYPE_WEBM)
     free(buf);
   fclose(infile);
   free(argv);
