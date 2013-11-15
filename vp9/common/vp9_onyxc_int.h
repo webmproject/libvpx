@@ -337,13 +337,12 @@ static INLINE int partition_plane_context(
   assert(bsl >= 0);
   assert(boffset >= 0);
 
-  for (i = 0; i < bs; i++)
-    above |= (above_ctx[i] & (1 << boffset));
-  for (i = 0; i < bs; i++)
-    left |= (left_ctx[i] & (1 << boffset));
-
-  above = (above > 0);
-  left  = (left > 0);
+  for (i = 0; i < bs; i++) {
+    above |= above_ctx[i];
+    left |= left_ctx[i];
+  }
+  above = (above & (1 << boffset)) > 0;
+  left  = (left & (1 << boffset)) > 0;
 
   return (left * 2 + above) + bsl * PARTITION_PLOFFSET;
 }
