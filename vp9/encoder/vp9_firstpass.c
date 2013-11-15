@@ -14,7 +14,6 @@
 #include "vp9/encoder/vp9_block.h"
 #include "vp9/encoder/vp9_onyx_int.h"
 #include "vp9/encoder/vp9_variance.h"
-#include "vp9/encoder/vp9_encodeintra.h"
 #include "vp9/encoder/vp9_mcomp.h"
 #include "vp9/encoder/vp9_firstpass.h"
 #include "vpx_scale/vpx_scale.h"
