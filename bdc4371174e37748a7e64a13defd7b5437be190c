@@ -16,6 +16,24 @@
       "revId": "bdc4371174e37748a7e64a13defd7b5437be190c",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX//9PA\u003d",
+        "filename": "vp9/encoder/vp9_dct.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2013-11-15T23:51:53Z",
+      "side": 1,
+      "message": "put an assert for the forward transforms.\n\nthe forward transform shouldn\u0027t overflow, since we need the precise original transform coefficients to calculate the quantization distortion for rate-distortion optimization purpose.",
+      "parentUuid": "AAAAdX//9PI\u003d",
+      "revId": "bdc4371174e37748a7e64a13defd7b5437be190c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
