@@ -34,6 +34,24 @@
       "revId": "bdc4371174e37748a7e64a13defd7b5437be190c",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX//9Os\u003d",
+        "filename": "vp9/encoder/vp9_dct.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2013-11-16T00:21:15Z",
+      "side": 1,
+      "message": "Duh, I was comparing against the previous code for no good reason.",
+      "parentUuid": "AAAAdX//9PA\u003d",
+      "revId": "bdc4371174e37748a7e64a13defd7b5437be190c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
