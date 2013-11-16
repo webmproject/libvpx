@@ -245,6 +245,9 @@ static int read_frame(struct VpxDecInputContext *input,
     }
 
     return 0;
+  } else if (kind == FILE_TYPE_IVF) {
+    return ivf_read_frame(input->vpx_input_ctx,
+                          buf, bytes_in_buffer, buffer_size);
   }
 
   return 1;
