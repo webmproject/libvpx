@@ -143,4 +143,24 @@ const BLOCK_SIZE ss_size_lookup[BLOCK_SIZES][2][2] = {
   {{BLOCK_64X64, BLOCK_64X32},   {BLOCK_32X64,   BLOCK_32X32}},
 };
 
-
+// Generates 4 bit field in which each bit set to 1 represents
+// a blocksize partition  1111 means we split 8x8, 16x16, 32x32
+// and 64x64.  0001 means we just split the 64x64...
+const struct {
+  PARTITION_CONTEXT above;
+  PARTITION_CONTEXT left;
+} partition_context_lookup[BLOCK_SIZES]= {
+  {15, 15},  // 4X4
+  {15,  7},  // 4X8
+  {7,  15},  // 8X4
+  {7,   7},  // 8X8
+  {7,   3},  // 8X16
+  {3,   7},  // 16X8
+  {3,   3},  // 16X16
+  {3,   1},  // 16X32
+  {1,   3},  // 32X16
+  {1,   1},  // 32X32
+  {1,   0},  // 32X64
+  {0,   1},  // 64X32
+  {0,   0},  // 64X64
+};
