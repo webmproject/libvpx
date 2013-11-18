@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdX//9Kc\u003d",
+        "filename": "vp9/common/x86/vp9_idct_intrin_sse2.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 219,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2013-11-18T19:19:57Z",
+      "side": 1,
+      "message": "You probably can remove these 2 lines also.\n\nin[0] \u003d _mm_unpacklo_epi64(in[1], in[3]);\nin[2] \u003d _mm_unpackhi_epi64(in[1], in[3]);\n\nAre in[1] and in[3] enough?",
+      "revId": "1023342eac8987052721dadba108b3fd3edf4ffc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX//9Kw\u003d",
+        "filename": "vp9/common/x86/vp9_idct_intrin_sse2.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 281,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2013-11-18T19:19:57Z",
+      "side": 1,
+      "message": "Maybe you can load\ni0 \u003d _mm_loadu_si128((const __m128i *)(input));\ni1 \u003d _mm_loadu_si128((const __m128i *)(input + 8));\n\nand in transpose4x4, do something like\ntmp0 \u003d _mm_unpacklo_epi16(i0, i1);\ntmp1 \u003d _mm_unpackhi_epi16(i0, i1);\n\n_mm_unpacklo_epi16(tmp0, tmp1);\n_mm_unpackhi_epi16(tmp0, tmp1);\n\nto save more cycles. You may try it to see.",
+      "revId": "1023342eac8987052721dadba108b3fd3edf4ffc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
