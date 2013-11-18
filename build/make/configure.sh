@@ -1078,7 +1078,7 @@ EOF
                 msvs_arch_dir=x86-msvs
                 vc_version=${tgt_cc##vs}
                 case $vc_version in
-                    7|8|9)
+                    7|8|9|10)
                          echo "${tgt_cc} does not support avx/avx2, disabling....."
                          RTCD_OPTIONS="${RTCD_OPTIONS}--disable-avx --disable-avx2 "
                          soft_disable avx
