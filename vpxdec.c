@@ -897,11 +897,11 @@ int main_loop(int argc, const char **argv_) {
 
         if (vpx_codec_decode(&decoder, buf, bytes_in_buffer, NULL, 0)) {
           const char *detail = vpx_codec_error_detail(&decoder);
-          fprintf(stderr, "Failed to decode frame: %s\n",
-                  vpx_codec_error(&decoder));
+          warn("Failed to decode frame %d: %s",
+               frame_in, vpx_codec_error(&decoder));
 
           if (detail)
-            fprintf(stderr, "  Additional information: %s\n", detail);
+            warn("Additional information: %s", detail);
           goto fail;
         }
 
@@ -922,8 +922,7 @@ int main_loop(int argc, const char **argv_) {
     dx_time += (unsigned int)vpx_usec_timer_elapsed(&timer);
 
     if (vpx_codec_control(&decoder, VP8D_GET_FRAME_CORRUPTED, &corrupted)) {
-      fprintf(stderr, "Failed VP8_GET_FRAME_CORRUPTED: %s\n",
-              vpx_codec_error(&decoder));
+      warn("Failed VP8_GET_FRAME_CORRUPTED: %s", vpx_codec_error(&decoder));
       goto fail;
     }
     frames_corrupted += corrupted;
