@@ -1,0 +1,174 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdX//9IM\u003d",
+        "filename": "test/decode_perf_test.cc",
+        "patchSetId": 8
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-11-18T23:49:04Z",
+      "side": 1,
+      "message": "use the same header style as the rest of the tests",
+      "revId": "574e4b14cd22297e4fad86e06c85f548ce5f4388",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX//9Hw\u003d",
+        "filename": "test/decode_perf_test.cc",
+        "patchSetId": 8
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-11-18T23:49:04Z",
+      "side": 1,
+      "message": "these aren\u0027t all that helpful; I wouldn\u0027t expect these to change",
+      "revId": "574e4b14cd22297e4fad86e06c85f548ce5f4388",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX//9IA\u003d",
+        "filename": "test/decode_perf_test.cc",
+        "patchSetId": 8
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-11-18T23:49:04Z",
+      "side": 1,
+      "message": "this could be a const kUsecs...",
+      "revId": "574e4b14cd22297e4fad86e06c85f548ce5f4388",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX//9IE\u003d",
+        "filename": "test/decode_perf_test.cc",
+        "patchSetId": 8
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-11-18T23:49:04Z",
+      "side": 1,
+      "message": "associate the \u0027*\u0027 with const, which is most common in this project",
+      "revId": "574e4b14cd22297e4fad86e06c85f548ce5f4388",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX//9II\u003d",
+        "filename": "test/decode_perf_test.cc",
+        "patchSetId": 8
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-11-18T23:49:04Z",
+      "side": 1,
+      "message": "preemption",
+      "revId": "574e4b14cd22297e4fad86e06c85f548ce5f4388",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX//9Hs\u003d",
+        "filename": "test/decode_perf_test.cc",
+        "patchSetId": 8
+      },
+      "lineNbr": 63,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-11-18T23:49:04Z",
+      "side": 1,
+      "message": "I think there\u0027s a PARAMS() helper for this, though its aid in readability might be arguable.",
+      "revId": "574e4b14cd22297e4fad86e06c85f548ce5f4388",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX//9H8\u003d",
+        "filename": "test/decode_perf_test.cc",
+        "patchSetId": 8
+      },
+      "lineNbr": 67,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-11-18T23:49:04Z",
+      "side": 1,
+      "message": "ditto on \u0027*\u0027 placement",
+      "revId": "574e4b14cd22297e4fad86e06c85f548ce5f4388",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX//9Ho\u003d",
+        "filename": "test/decode_perf_test.cc",
+        "patchSetId": 8
+      },
+      "lineNbr": 88,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-11-18T23:49:04Z",
+      "side": 1,
+      "message": "\u0027 !J!\u0027 ? please make sure this builds locally since you\u0027re hiding it under a config flag that jenkins isn\u0027t aware of",
+      "revId": "574e4b14cd22297e4fad86e06c85f548ce5f4388",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX//9IU\u003d",
+        "filename": "test/test.mk",
+        "patchSetId": 8
+      },
+      "lineNbr": 663,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-11-18T23:49:04Z",
+      "side": 1,
+      "message": "it\u0027s more common to keep the assignment operator on the same line",
+      "revId": "574e4b14cd22297e4fad86e06c85f548ce5f4388",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX//9IQ\u003d",
+        "filename": "test/test.mk",
+        "patchSetId": 8
+      },
+      "lineNbr": 698,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-11-18T23:49:04Z",
+      "side": 1,
+      "message": "2 spaces then: # CONFIG_DECODE_PERF_TESTS",
+      "revId": "574e4b14cd22297e4fad86e06c85f548ce5f4388",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
