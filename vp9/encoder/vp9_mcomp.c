@@ -51,9 +51,6 @@ int vp9_init_search_range(VP9_COMP *cpi, int size) {
   while ((size << sr) < MAX_FULL_PEL_VAL)
     sr++;
 
-  if (sr)
-    sr--;
-
   sr += cpi->sf.reduce_first_step_size;
   sr = MIN(sr, (cpi->sf.max_step_search_steps - 2));
   return sr;

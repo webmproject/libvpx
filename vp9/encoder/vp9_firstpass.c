@@ -406,8 +406,6 @@ static void first_pass_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
   // for first pass test
   while ((quart_frm << sr) < MAX_FULL_PEL_VAL)
     sr++;
-  if (sr)
-    sr--;
 
   step_param    += sr;
   further_steps -= sr;

@@ -18,8 +18,9 @@
 // The maximum number of steps in a step search given the largest
 // allowed initial step
 #define MAX_MVSEARCH_STEPS 11
-// Max full pel mv specified in 1 pel units
-#define MAX_FULL_PEL_VAL ((1 << (MAX_MVSEARCH_STEPS)) - 1)
+// Max full pel mv specified in the unit of full pixel
+// Enable the use of motion vector in range [-1023, 1023].
+#define MAX_FULL_PEL_VAL ((1 << (MAX_MVSEARCH_STEPS - 1)) - 1)
 // Maximum size of the first step in full pel units
 #define MAX_FIRST_STEP (1 << (MAX_MVSEARCH_STEPS-1))
 // Allowed motion vector pixel distance outside image border
