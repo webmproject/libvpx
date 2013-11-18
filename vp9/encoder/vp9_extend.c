@@ -11,7 +11,7 @@
 #include "vpx_mem/vpx_mem.h"
 
 #include "vp9/common/vp9_common.h"
-#include "vp9/common/vp9_extend.h"
+#include "vp9/encoder/vp9_extend.h"
 
 static void copy_and_extend_plane(const uint8_t *src, int src_pitch,
                                   uint8_t *dst, int dst_pitch,
