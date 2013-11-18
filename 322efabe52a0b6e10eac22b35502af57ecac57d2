@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdX//9LI\u003d",
+        "filename": "vp9/encoder/vp9_mcomp.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2013-11-18T17:36:37Z",
+      "side": 1,
+      "message": "What MAX_FULL_PEL_VAL is used for elsewhere? If not used in other place, maybe we should just correct the value of the macro instead to be clear.",
+      "revId": "322efabe52a0b6e10eac22b35502af57ecac57d2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
