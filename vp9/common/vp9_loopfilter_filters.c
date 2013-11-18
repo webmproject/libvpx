@@ -121,6 +121,34 @@ void vp9_loop_filter_horizontal_edge_c(uint8_t *s, int p /* pitch */,
   }
 }
 
+void vp9_loop_filter_horizontal_edge_16_c(uint8_t *s, int p /* pitch */,
+                                          const uint8_t *blimit0,
+                                          const uint8_t *limit0,
+                                          const uint8_t *thresh0,
+                                          const uint8_t *blimit1,
+                                          const uint8_t *limit1,
+                                          const uint8_t *thresh1) {
+  int i, j;
+  const uint8_t *blimit = blimit0;
+  const uint8_t *limit = limit0;
+  const uint8_t *thresh = thresh0;
+
+  for (i = 0; i < 2; ++i) {
+    for (j = 0; j < 8; ++j) {
+      const uint8_t p3 = s[-4 * p], p2 = s[-3 * p], p1 = s[-2 * p], p0 = s[-p];
+      const uint8_t q0 = s[0 * p], q1 = s[1 * p], q2 = s[2 * p], q3 = s[3 * p];
+      const int8_t mask = filter_mask(*limit, *blimit,
+                                      p3, p2, p1, p0, q0, q1, q2, q3);
+      const int8_t hev = hev_mask(*thresh, p1, p0, q0, q1);
+      filter4(mask, hev, s - 2 * p, s - 1 * p, s, s + 1 * p);
+      ++s;
+    }
+    blimit = blimit1;
+    limit = limit1;
+    thresh = thresh1;
+  }
+}
+
 void vp9_loop_filter_vertical_edge_c(uint8_t *s, int pitch,
                                      const uint8_t *blimit,
                                      const uint8_t *limit,
@@ -182,6 +210,37 @@ void vp9_mbloop_filter_horizontal_edge_c(uint8_t *s, int p,
     filter8(mask, hev, flat, s - 4 * p, s - 3 * p, s - 2 * p, s - 1 * p,
                              s,         s + 1 * p, s + 2 * p, s + 3 * p);
     ++s;
+  }
+}
+
+void vp9_mbloop_filter_horizontal_edge_16_c(uint8_t *s, int p /* pitch */,
+                                            const uint8_t *blimit0,
+                                            const uint8_t *limit0,
+                                            const uint8_t *thresh0,
+                                            const uint8_t *blimit1,
+                                            const uint8_t *limit1,
+                                            const uint8_t *thresh1) {
+  int i, j;
+  const uint8_t *blimit = blimit0;
+  const uint8_t *limit = limit0;
+  const uint8_t *thresh = thresh0;
+
+  for (i = 0; i < 2; ++i) {
+    for (j = 0; j < 8; ++j) {
+      const uint8_t p3 = s[-4 * p], p2 = s[-3 * p], p1 = s[-2 * p], p0 = s[-p];
+      const uint8_t q0 = s[0 * p], q1 = s[1 * p], q2 = s[2 * p], q3 = s[3 * p];
+
+      const int8_t mask = filter_mask(*limit, *blimit,
+                                      p3, p2, p1, p0, q0, q1, q2, q3);
+      const int8_t hev = hev_mask(*thresh, p1, p0, q0, q1);
+      const int8_t flat = flat_mask4(1, p3, p2, p1, p0, q0, q1, q2, q3);
+      filter8(mask, hev, flat, s - 4 * p, s - 3 * p, s - 2 * p, s - 1 * p,
+                               s,         s + 1 * p, s + 2 * p, s + 3 * p);
+      ++s;
+    }
+    blimit = blimit1;
+    limit = limit1;
+    thresh = thresh1;
   }
 }
 
