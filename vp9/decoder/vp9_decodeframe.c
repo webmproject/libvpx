@@ -18,7 +18,6 @@
 #include "vp9/common/vp9_common.h"
 #include "vp9/common/vp9_entropy.h"
 #include "vp9/common/vp9_entropymode.h"
-#include "vp9/common/vp9_extend.h"
 #include "vp9/common/vp9_idct.h"
 #include "vp9/common/vp9_pred_common.h"
 #include "vp9/common/vp9_quant_common.h"

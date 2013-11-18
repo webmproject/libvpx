@@ -11,22 +11,22 @@
 #include <math.h>
 #include <limits.h>
 
-#include "vp9/common/vp9_onyxc_int.h"
-#include "vp9/common/vp9_reconinter.h"
-#include "vp9/encoder/vp9_onyx_int.h"
-#include "vp9/common/vp9_systemdependent.h"
-#include "vp9/encoder/vp9_quantize.h"
 #include "vp9/common/vp9_alloccommon.h"
-#include "vp9/encoder/vp9_mcomp.h"
-#include "vp9/encoder/vp9_firstpass.h"
-#include "vp9/encoder/vp9_psnr.h"
-#include "vpx_scale/vpx_scale.h"
-#include "vp9/common/vp9_extend.h"
-#include "vp9/encoder/vp9_ratectrl.h"
+#include "vp9/common/vp9_onyxc_int.h"
 #include "vp9/common/vp9_quant_common.h"
+#include "vp9/common/vp9_reconinter.h"
+#include "vp9/common/vp9_systemdependent.h"
+#include "vp9/encoder/vp9_extend.h"
+#include "vp9/encoder/vp9_firstpass.h"
+#include "vp9/encoder/vp9_mcomp.h"
+#include "vp9/encoder/vp9_onyx_int.h"
+#include "vp9/encoder/vp9_psnr.h"
+#include "vp9/encoder/vp9_quantize.h"
+#include "vp9/encoder/vp9_ratectrl.h"
 #include "vp9/encoder/vp9_segmentation.h"
 #include "vpx_mem/vpx_mem.h"
 #include "vpx_ports/vpx_timer.h"
+#include "vpx_scale/vpx_scale.h"
 
 #define ALT_REF_MC_ENABLED 1    // dis/enable MC in AltRef filtering
 #define ALT_REF_SUBPEL_ENABLED 1  // dis/enable subpel in MC AltRef filtering
