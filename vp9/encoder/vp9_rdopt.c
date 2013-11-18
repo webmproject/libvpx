@@ -612,8 +612,9 @@ static void block_yrd_txfm(int plane, int block, BLOCK_SIZE plane_bsize,
 
   // TODO(jingning): temporarily enabled only for luma component
   rd = MIN(rd1, rd2);
-  if (!xd->lossless && plane == 0)
-    x->zcoeff_blk[tx_size][block] = rd1 > rd2 || !xd->plane[plane].eobs[block];
+  if (plane == 0)
+    x->zcoeff_blk[tx_size][block] = !xd->plane[plane].eobs[block] ||
+                                    (rd1 > rd2 && !xd->lossless);
 
   args->this_rate += args->rate;
   args->this_dist += args->dist;
