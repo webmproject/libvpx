@@ -10,11 +10,11 @@
 
 
 #include <stdlib.h>
-#include "vp9/common/vp9_sadmxn.h"
-#include "vp9/encoder/vp9_variance.h"
-#include "./vpx_config.h"
-#include "vpx/vpx_integer.h"
 #include "./vp9_rtcd.h"
+#include "./vpx_config.h"
+#include "vp9/encoder/vp9_sadmxn.h"
+#include "vp9/encoder/vp9_variance.h"
+#include "vpx/vpx_integer.h"
 
 #define sad_mxn_func(m, n) \
 unsigned int vp9_sad##m##x##n##_c(const uint8_t *src_ptr, \
