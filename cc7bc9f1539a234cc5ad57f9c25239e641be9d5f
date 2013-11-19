@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdX//8/o\u003d",
+        "filename": "vp9/common/vp9_entropy.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 301,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2013-11-19T19:22:06Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdX//9Ao\u003d",
+      "revId": "cc7bc9f1539a234cc5ad57f9c25239e641be9d5f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdX//9Ac\u003d",
         "filename": "vp9/common/vp9_entropy.h",
         "patchSetId": 2
@@ -30,6 +48,24 @@
       "writtenOn": "2013-11-19T19:18:23Z",
       "side": 1,
       "message": "rename",
+      "revId": "cc7bc9f1539a234cc5ad57f9c25239e641be9d5f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX//8/k\u003d",
+        "filename": "vp9/common/vp9_entropy.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 146,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2013-11-19T19:22:06Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdX//9Ac\u003d",
       "revId": "cc7bc9f1539a234cc5ad57f9c25239e641be9d5f",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
