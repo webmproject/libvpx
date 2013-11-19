@@ -123,8 +123,6 @@ const TX_SIZE tx_mode_to_biggest_tx_size[TX_MODES] = {
   TX_32X32,  // TX_MODE_SELECT
 };
 
-
-
 const BLOCK_SIZE ss_size_lookup[BLOCK_SIZES][2][2] = {
 //  ss_x == 0    ss_x == 0        ss_x == 1      ss_x == 1
 //  ss_y == 0    ss_y == 1        ss_y == 0      ss_y == 1
@@ -144,23 +142,23 @@ const BLOCK_SIZE ss_size_lookup[BLOCK_SIZES][2][2] = {
 };
 
 // Generates 4 bit field in which each bit set to 1 represents
-// a blocksize partition  1111 means we split 8x8, 16x16, 32x32
-// and 64x64.  0001 means we just split the 64x64...
+// a blocksize partition  1111 means we split 64x64, 32x32, 16x16
+// and 8x8.  1000 means we just split the 64x64 to 32x32
 const struct {
   PARTITION_CONTEXT above;
   PARTITION_CONTEXT left;
 } partition_context_lookup[BLOCK_SIZES]= {
-  {15, 15},  // 4X4
-  {15,  7},  // 4X8
-  {7,  15},  // 8X4
-  {7,   7},  // 8X8
-  {7,   3},  // 8X16
-  {3,   7},  // 16X8
-  {3,   3},  // 16X16
-  {3,   1},  // 16X32
-  {1,   3},  // 32X16
-  {1,   1},  // 32X32
-  {1,   0},  // 32X64
-  {0,   1},  // 64X32
-  {0,   0},  // 64X64
+  {15, 15},  // 4X4   - {0b1111, 0b1111}
+  {15, 14},  // 4X8   - {0b1111, 0b1110}
+  {14, 15},  // 8X4   - {0b1110, 0b1111}
+  {14, 14},  // 8X8   - {0b1110, 0b1110}
+  {14, 12},  // 8X16  - {0b1110, 0b1100}
+  {12, 14},  // 16X8  - {0b1100, 0b1110}
+  {12, 12},  // 16X16 - {0b1100, 0b1100}
+  {12, 8 },  // 16X32 - {0b1100, 0b1000}
+  {8,  12},  // 32X16 - {0b1000, 0b1100}
+  {8,  8 },  // 32X32 - {0b1000, 0b1000}
+  {8,  0 },  // 32X64 - {0b1000, 0b0000}
+  {0,  8 },  // 64X32 - {0b0000, 0b1000}
+  {0,  0 },  // 64X64 - {0b0000, 0b0000}
 };
