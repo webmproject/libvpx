@@ -387,17 +387,6 @@ static uint8_t* raster_block_offset_uint8(BLOCK_SIZE plane_bsize,
   return base + raster_block_offset(plane_bsize, raster_block, stride);
 }
 
-static int txfrm_block_to_raster_block(BLOCK_SIZE plane_bsize,
-                                       TX_SIZE tx_size, int block) {
-  const int bwl = b_width_log2(plane_bsize);
-  const int tx_cols_log2 = bwl - tx_size;
-  const int tx_cols = 1 << tx_cols_log2;
-  const int raster_mb = block >> (tx_size << 1);
-  const int x = (raster_mb & (tx_cols - 1)) << tx_size;
-  const int y = (raster_mb >> tx_cols_log2) << tx_size;
-  return x + (y << bwl);
-}
-
 static void txfrm_block_to_raster_xy(BLOCK_SIZE plane_bsize,
                                      TX_SIZE tx_size, int block,
                                      int *x, int *y) {
