@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdX//9Ao\u003d",
+        "filename": "vp9/common/vp9_entropy.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 301,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2013-11-19T19:18:23Z",
+      "side": 1,
+      "message": "rename to \tmodelcoefprobs_pareto8_full ?",
+      "revId": "cc7bc9f1539a234cc5ad57f9c25239e641be9d5f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX//9Ac\u003d",
+        "filename": "vp9/common/vp9_entropy.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 146,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2013-11-19T19:18:23Z",
+      "side": 1,
+      "message": "rename",
+      "revId": "cc7bc9f1539a234cc5ad57f9c25239e641be9d5f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
