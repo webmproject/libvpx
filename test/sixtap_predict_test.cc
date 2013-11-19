@@ -32,7 +32,10 @@ typedef void (*sixtap_predict_fn_t)(uint8_t *src_ptr,
                                     uint8_t *dst_ptr,
                                     int  dst_pitch);
 
-class SixtapPredictTest : public PARAMS(int, int, sixtap_predict_fn_t) {
+typedef std::tr1::tuple<int, int, sixtap_predict_fn_t> sixtap_predict_param_t;
+
+class SixtapPredictTest
+    : public ::testing::TestWithParam<sixtap_predict_param_t> {
  public:
   static void SetUpTestCase() {
     src_ = reinterpret_cast<uint8_t*>(vpx_memalign(kDataAlignment, kSrcSize));

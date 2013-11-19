@@ -17,7 +17,6 @@
 #include "vpx/vpx_image.h"
 
 // Macros
-#define PARAMS(...) ::testing::TestWithParam< std::tr1::tuple< __VA_ARGS__ > >
 #define GET_PARAM(k) std::tr1::get< k >(GetParam())
 
 static double compute_psnr(const vpx_image_t *img1,

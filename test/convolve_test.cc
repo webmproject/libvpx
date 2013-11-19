@@ -44,6 +44,8 @@ struct ConvolveFunctions {
   convolve_fn_t hv8_avg_;
 };
 
+typedef std::tr1::tuple<int, int, const ConvolveFunctions*> convolve_param_t;
+
 // Reference 8-tap subpixel filter, slightly modified to fit into this test.
 #define VP9_FILTER_WEIGHT 128
 #define VP9_FILTER_SHIFT 7
@@ -169,7 +171,7 @@ void filter_average_block2d_8_c(const uint8_t *src_ptr,
                     output_width, output_height);
 }
 
-class ConvolveTest : public PARAMS(int, int, const ConvolveFunctions*) {
+class ConvolveTest : public ::testing::TestWithParam<convolve_param_t> {
  public:
   static void SetUpTestCase() {
     // Force input_ to be unaligned, output to be 16 byte aligned.
