@@ -11,17 +11,6 @@
 
 %include "vpx_ports/x86_abi_support.asm"
 
-;/************************************************************************************
-; Notes: filter_block1d_h6 applies a 6 tap filter horizontally to the input pixels. The
-; input pixel array has output_height rows. This routine assumes that output_height is an
-; even number. This function handles 8 pixels in horizontal direction, calculating ONE
-; rows each iteration to take advantage of the 128 bits operations.
-;
-; This is an implementation of some of the SSE optimizations first seen in ffvp8
-;
-;*************************************************************************************/
-
-
 %macro VERTx4 1
     mov         rdx, arg(5)                 ;filter ptr
     mov         rsi, arg(0)                 ;src_ptr
@@ -81,11 +70,14 @@
     pmaddubsw   xmm4, k4k5
     pmaddubsw   xmm6, k6k7
 
+    movdqa      xmm1, xmm2
     paddsw      xmm0, xmm6
-    paddsw      xmm0, xmm2
+    pmaxsw      xmm2, xmm4
+    pminsw      xmm4, xmm1
     paddsw      xmm0, xmm4
-    paddsw      xmm0, krd
+    paddsw      xmm0, xmm2
 
+    paddsw      xmm0, krd
     psraw       xmm0, 7
     packuswb    xmm0, xmm0
 
@@ -538,14 +530,22 @@ sym(vp9_filter_block1d16_v8_avg_ssse3):
     movdqa      %2,   %1
     pshufb      %1,   [GLOBAL(shuf_t0t1)]
     pshufb      %2,   [GLOBAL(shuf_t2t3)]
-    pmaddubsw   %1,   xmm6
-    pmaddubsw   %2,   xmm7
+    pmaddubsw   %1,   k0k1k4k5
+    pmaddubsw   %2,   k2k3k6k7
 
-    paddsw      %1,   %2
-    movdqa      %2,   %1
+    movdqa      xmm4, %1
+    movdqa      xmm5, %2
+    psrldq      %1,   8
     psrldq      %2,   8
-    paddsw      %1,   %2
-    paddsw      %1,   xmm5
+    movdqa      xmm6, xmm5
+
+    paddsw      xmm4, %2
+    pmaxsw      xmm5, %1
+    pminsw      %1, xmm6
+    paddsw      %1, xmm4
+    paddsw      %1, xmm5
+
+    paddsw      %1,   krd
     psraw       %1,   7
     packuswb    %1,   %1
 %endm
@@ -564,6 +564,10 @@ sym(vp9_filter_block1d16_v8_avg_ssse3):
     pshuflw     xmm7, xmm4, 01010101b       ;k2_k3
     pshufhw     xmm7, xmm7, 11111111b       ;k2_k3_k6_k7
     pshufd      xmm5, xmm5, 0               ;rounding
+
+    movdqa      k0k1k4k5, xmm6
+    movdqa      k2k3k6k7, xmm7
+    movdqa      krd, xmm5
 
     movsxd      rax, dword ptr arg(1)       ;src_pixels_per_line
     movsxd      rdx, dword ptr arg(3)       ;output_pitch
@@ -826,8 +830,15 @@ sym(vp9_filter_block1d4_h8_ssse3):
     push        rdi
     ; end prolog
 
+    ALIGN_STACK 16, rax
+    sub         rsp, 16 * 3
+    %define k0k1k4k5 [rsp + 16 * 0]
+    %define k2k3k6k7 [rsp + 16 * 1]
+    %define krd      [rsp + 16 * 2]
+
     HORIZx4 0
 
+    add rsp, 16 * 3
     ; begin epilog
     pop rdi
     pop rsi
@@ -932,8 +943,15 @@ sym(vp9_filter_block1d4_h8_avg_ssse3):
     push        rdi
     ; end prolog
 
+    ALIGN_STACK 16, rax
+    sub         rsp, 16 * 3
+    %define k0k1k4k5 [rsp + 16 * 0]
+    %define k2k3k6k7 [rsp + 16 * 1]
+    %define krd      [rsp + 16 * 2]
+
     HORIZx4 1
 
+    add rsp, 16 * 3
     ; begin epilog
     pop rdi
     pop rsi
