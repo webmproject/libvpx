@@ -241,16 +241,13 @@ static void alloc_tile_storage(VP9D_COMP *pbi, int tile_rows, int tile_cols) {
 }
 
 static void inverse_transform_block(MACROBLOCKD* xd, int plane, int block,
-                                    TX_SIZE tx_size, int x, int y) {
+                                    TX_SIZE tx_size, uint8_t *dst, int stride) {
   struct macroblockd_plane *const pd = &xd->plane[plane];
   const int eob = pd->eobs[block];
   if (eob > 0) {
     TX_TYPE tx_type;
     const int plane_type = pd->plane_type;
-    const int stride = pd->dst.stride;
     int16_t *const dqcoeff = BLOCK_OFFSET(pd->dqcoeff, block);
-    uint8_t *const dst = &pd->dst.buf[4 * y * stride + 4 * x];
-
     switch (tx_size) {
       case TX_4X4:
         tx_type = get_tx_type_4x4(plane_type, xd, block);
@@ -322,7 +319,7 @@ static void predict_and_reconstruct_intra_block(int plane, int block,
   if (!mi->mbmi.skip_coeff) {
     vp9_decode_block_tokens(cm, xd, plane, block, plane_bsize, x, y, tx_size,
                             args->r, args->token_cache);
-    inverse_transform_block(xd, plane, block, tx_size, x, y);
+    inverse_transform_block(xd, plane, block, tx_size, dst, pd->dst.stride);
   }
 }
 
@@ -340,13 +337,15 @@ static void reconstruct_inter_block(int plane, int block,
   struct inter_args *args = arg;
   VP9_COMMON *const cm = args->cm;
   MACROBLOCKD *const xd = args->xd;
+  struct macroblockd_plane *const pd = &xd->plane[plane];
   int x, y;
   txfrm_block_to_raster_xy(plane_bsize, tx_size, block, &x, &y);
-
   *args->eobtotal += vp9_decode_block_tokens(cm, xd, plane, block,
                                              plane_bsize, x, y, tx_size,
                                              args->r, args->token_cache);
-  inverse_transform_block(xd, plane, block, tx_size, x, y);
+  inverse_transform_block(xd, plane, block, tx_size,
+                          &pd->dst.buf[4 * y * pd->dst.stride + 4 * x],
+                          pd->dst.stride);
 }
 
 static void set_offsets(VP9_COMMON *const cm, MACROBLOCKD *const xd,
