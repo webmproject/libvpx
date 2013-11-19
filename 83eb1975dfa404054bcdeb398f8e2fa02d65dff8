@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdX//8+w\u003d",
+        "filename": "vp9/decoder/vp9_detokenize.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 113,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2013-11-19T20:11:35Z",
+      "side": 0,
+      "message": "In general it would be nice to update get_scan() function to use a lookup table. Now we have several different ways of getting scan arrays.",
+      "revId": "83eb1975dfa404054bcdeb398f8e2fa02d65dff8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
