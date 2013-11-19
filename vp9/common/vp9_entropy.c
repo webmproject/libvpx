@@ -106,8 +106,7 @@ DECLARE_ALIGNED(16, const uint8_t,
   5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5,
 };
 
-DECLARE_ALIGNED(16, const uint8_t,
-                vp9_coefband_trans_4x4[16]) = {
+DECLARE_ALIGNED(16, const uint8_t, vp9_coefband_trans_4x4[16]) = {
   0, 1, 1, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 5, 5, 5,
 };
 
@@ -115,10 +114,7 @@ DECLARE_ALIGNED(16, const uint8_t, vp9_pt_energy_class[MAX_ENTROPY_TOKENS]) = {
   0, 1, 2, 3, 3, 4, 4, 5, 5, 5, 5, 5
 };
 
-
-
-/* Array indices are identical to previously-existing CONTEXT_NODE indices */
-
+// Array indices are identical to previously-existing CONTEXT_NODE indices
 const vp9_tree_index vp9_coef_tree[TREE_SIZE(MAX_ENTROPY_TOKENS)] = {
   -DCT_EOB_TOKEN, 2,                          /* 0 = EOB */
   -ZERO_TOKEN, 4,                             /* 1 = ZERO */
@@ -162,7 +158,7 @@ const vp9_tree_index vp9_coefmodel_tree[6] = {
 // the probabilities for the rest of the nodes.
 
 // beta = 8
-static const vp9_prob modelcoefprobs_pareto8[COEFPROB_MODELS][MODEL_NODES] = {
+static const vp9_prob pareto8_probs[COEFPROB_MODELS][MODEL_NODES] = {
   {  3,  86, 128,   6,  86,  23,  88,  29},
   {  9,  86, 129,  17,  88,  61,  94,  76},
   { 15,  87, 129,  28,  89,  93, 100, 110},
@@ -293,26 +289,23 @@ static const vp9_prob modelcoefprobs_pareto8[COEFPROB_MODELS][MODEL_NODES] = {
   {255, 246, 247, 255, 239, 255, 253, 255}
 };
 
-static void extend_model_to_full_distribution(vp9_prob p,
-                                              vp9_prob *tree_probs) {
+static void extend_to_full_distribution(vp9_prob *probs, vp9_prob p) {
   const int l = (p - 1) / 2;
-  const vp9_prob (*model)[MODEL_NODES] = modelcoefprobs_pareto8;
   if (p & 1) {
-    vpx_memcpy(tree_probs + UNCONSTRAINED_NODES,
-               model[l], MODEL_NODES * sizeof(vp9_prob));
+    // Just copy
+    vpx_memcpy(probs, pareto8_probs[l], MODEL_NODES * sizeof(vp9_prob));
   } else {
-    // interpolate
+    // Interpolate
     int i;
-    for (i = UNCONSTRAINED_NODES; i < ENTROPY_NODES; ++i)
-      tree_probs[i] = (model[l][i - UNCONSTRAINED_NODES] +
-                       model[l + 1][i - UNCONSTRAINED_NODES]) >> 1;
+    for (i = 0; i < MODEL_NODES; ++i)
+      probs[i] = (pareto8_probs[l][i] + pareto8_probs[l + 1][i]) >> 1;
   }
 }
 
 void vp9_model_to_full_probs(const vp9_prob *model, vp9_prob *full) {
   if (full != model)
     vpx_memcpy(full, model, sizeof(vp9_prob) * UNCONSTRAINED_NODES);
-  extend_model_to_full_distribution(model[PIVOT_NODE], full);
+  extend_to_full_distribution(&full[UNCONSTRAINED_NODES], model[PIVOT_NODE]);
 }
 
 static vp9_tree_index cat1[2], cat2[4], cat3[6], cat4[8], cat5[10], cat6[28];
@@ -338,18 +331,18 @@ static void init_bit_trees() {
 }
 
 const vp9_extra_bit vp9_extra_bits[MAX_ENTROPY_TOKENS] = {
-  { 0, 0, 0, 0},
-  { 0, 0, 0, 1},
-  { 0, 0, 0, 2},
-  { 0, 0, 0, 3},
-  { 0, 0, 0, 4},
-  { cat1, Pcat1, 1, 5},
-  { cat2, Pcat2, 2, 7},
-  { cat3, Pcat3, 3, 11},
-  { cat4, Pcat4, 4, 19},
-  { cat5, Pcat5, 5, 35},
-  { cat6, Pcat6, 14, 67},
-  { 0, 0, 0, 0}
+  {0, 0, 0, 0},           // ZERO_TOKEN
+  {0, 0, 0, 1},           // ONE_TOKEN
+  {0, 0, 0, 2},           // TWO_TOKEN
+  {0, 0, 0, 3},           // THREE_TOKEN
+  {0, 0, 0, 4},           // FOUR_TOKEN
+  {cat1, Pcat1, 1, 5},    // DCT_VAL_CATEGORY1
+  {cat2, Pcat2, 2, 7},    // DCT_VAL_CATEGORY2
+  {cat3, Pcat3, 3, 11},   // DCT_VAL_CATEGORY3
+  {cat4, Pcat4, 4, 19},   // DCT_VAL_CATEGORY4
+  {cat5, Pcat5, 5, 35},   // DCT_VAL_CATEGORY5
+  {cat6, Pcat6, 14, 67},  // DCT_VAL_CATEGORY6
+  {0, 0, 0, 0}            // DCT_EOB_TOKEN
 };
 
 #include "vp9/common/vp9_default_coef_probs.h"
@@ -365,8 +358,6 @@ void vp9_coef_tree_initialize() {
   init_bit_trees();
   vp9_tokens_from_tree(vp9_coef_encodings, vp9_coef_tree);
 }
-
-// #define COEF_COUNT_TESTING
 
 #define COEF_COUNT_SAT 24
 #define COEF_MAX_UPDATE_FACTOR 112
