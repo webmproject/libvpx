@@ -303,43 +303,40 @@ static INLINE int frame_is_intra_only(const VP9_COMMON *const cm) {
 static INLINE void update_partition_context(
     PARTITION_CONTEXT *above_seg_context,
     PARTITION_CONTEXT left_seg_context[8],
-    int mi_row, int mi_col,
-    BLOCK_SIZE sb_type,
-    BLOCK_SIZE sb_size) {
-  PARTITION_CONTEXT *above_ctx = above_seg_context + mi_col;
-  PARTITION_CONTEXT *left_ctx = left_seg_context + (mi_row & MI_MASK);
+    int mi_row, int mi_col, BLOCK_SIZE subsize, BLOCK_SIZE bsize) {
+  PARTITION_CONTEXT *const above_ctx = above_seg_context + mi_col;
+  PARTITION_CONTEXT *const left_ctx = left_seg_context + (mi_row & MI_MASK);
 
-  const int bsl = b_width_log2(sb_size), bs = (1 << bsl) / 2;
+  // num_4x4_blocks_wide_lookup[bsize] / 2
+  const int bs = num_8x8_blocks_wide_lookup[bsize];
 
   // update the partition context at the end notes. set partition bits
   // of block sizes larger than the current one to be one, and partition
   // bits of smaller block sizes to be zero.
-  vpx_memset(above_ctx, partition_context_lookup[sb_type].above, bs);
-  vpx_memset(left_ctx, partition_context_lookup[sb_type].left, bs);
+  vpx_memset(above_ctx, partition_context_lookup[subsize].above, bs);
+  vpx_memset(left_ctx, partition_context_lookup[subsize].left, bs);
 }
 
 static INLINE int partition_plane_context(
     const PARTITION_CONTEXT *above_seg_context,
     const PARTITION_CONTEXT left_seg_context[8],
-    int mi_row, int mi_col,
-    BLOCK_SIZE sb_type) {
+    int mi_row, int mi_col, BLOCK_SIZE bsize) {
   const PARTITION_CONTEXT *above_ctx = above_seg_context + mi_col;
   const PARTITION_CONTEXT *left_ctx = left_seg_context + (mi_row & MI_MASK);
 
-  int bsl = mi_width_log2(sb_type), bs = 1 << bsl;
+  const int bsl = mi_width_log2(bsize);
+  const int bs = 1 << bsl;
   int above = 0, left = 0, i;
-  int boffset = mi_width_log2(BLOCK_64X64) - bsl;
 
-  assert(mi_width_log2(sb_type) == mi_height_log2(sb_type));
+  assert(mi_width_log2(bsize) == mi_height_log2(bsize));
   assert(bsl >= 0);
-  assert(boffset >= 0);
 
   for (i = 0; i < bs; i++) {
     above |= above_ctx[i];
     left |= left_ctx[i];
   }
-  above = (above & (1 << boffset)) > 0;
-  left  = (left & (1 << boffset)) > 0;
+  above = (above & bs) > 0;
+  left  = (left & bs) > 0;
 
   return (left * 2 + above) + bsl * PARTITION_PLOFFSET;
 }
