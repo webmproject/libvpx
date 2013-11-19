@@ -111,22 +111,11 @@ static int decode_coefs(VP9_COMMON *cm, const MACROBLOCKD *xd,
   const uint8_t *cat6;
   const uint8_t *band_translate = get_band_translate(tx_size);
   const int dq_shift = (tx_size == TX_32X32);
-  const MODE_INFO *const mi = xd->mi_8x8[0];
-  const MB_MODE_INFO *const mbmi = &mi->mbmi;
-  scan_order const *so;
   int v;
   int16_t dqv = dq[0];
 
-  if (mbmi->ref_frame[0] > 0 || type != PLANE_TYPE_Y_WITH_DC || xd->lossless) {
-    so = &inter_scan_orders[tx_size];
-  } else {
-    MB_PREDICTION_MODE mode = mbmi->mode;
-    if (mbmi->sb_type < BLOCK_8X8)
-      mode = mi->bmi[block_idx].as_mode;
-    so = &intra_scan_orders[tx_size][mode];
-  }
-  scan = so->scan;
-  nb = so->neighbors;
+  get_scan(xd, tx_size, type, block_idx, &scan, &nb);
+
   while (c < seg_eob) {
     int val;
     if (c)

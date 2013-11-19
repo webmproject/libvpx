@@ -186,23 +186,19 @@ static int get_entropy_context(TX_SIZE tx_size, const ENTROPY_CONTEXT *a,
 static void get_scan(const MACROBLOCKD *xd, TX_SIZE tx_size,
                      PLANE_TYPE type, int block_idx,
                      const int16_t **scan, const int16_t **scan_nb) {
-  switch (tx_size) {
-    case TX_4X4:
-      get_scan_nb_4x4(get_tx_type_4x4(type, xd, block_idx), scan, scan_nb);
-      break;
-    case TX_8X8:
-      get_scan_nb_8x8(get_tx_type_8x8(type, xd), scan, scan_nb);
-      break;
-    case TX_16X16:
-      get_scan_nb_16x16(get_tx_type_16x16(type, xd), scan, scan_nb);
-      break;
-    case TX_32X32:
-      *scan = vp9_default_scan_32x32;
-      *scan_nb = vp9_default_scan_32x32_neighbors;
-      break;
-    default:
-      assert(!"Invalid transform size.");
+  const MODE_INFO *const mi = xd->mi_8x8[0];
+  const MB_MODE_INFO *const mbmi = &mi->mbmi;
+  const scan_order *so;
+
+  if (is_inter_block(mbmi) || type != PLANE_TYPE_Y_WITH_DC || xd->lossless) {
+    so = &inter_scan_orders[tx_size];
+  } else {
+    const MB_PREDICTION_MODE mode =
+        mbmi->sb_type < BLOCK_8X8 ? mi->bmi[block_idx].as_mode : mbmi->mode;
+    so = &intra_scan_orders[tx_size][mode];
   }
+  *scan = so->scan;
+  *scan_nb = so->neighbors;
 }
 
 #endif  // VP9_COMMON_VP9_ENTROPY_H_
