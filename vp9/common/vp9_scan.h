@@ -15,6 +15,7 @@
 #include "vpx_ports/mem.h"
 
 #include "vp9/common/vp9_enums.h"
+#include "vp9/common/vp9_blockd.h"
 
 #define MAX_NEIGHBORS 2
 
@@ -67,8 +68,15 @@ extern DECLARE_ALIGNED(16, int16_t,
 extern DECLARE_ALIGNED(16, int16_t,
                        vp9_default_scan_32x32_neighbors[1025 * MAX_NEIGHBORS]);
 
-
 void vp9_init_neighbors();
+
+typedef struct {
+  const int16_t *scan;
+  const int16_t *neighbors;
+} scan_order;
+
+extern const scan_order intra_scan_orders[TX_SIZES][INTRA_MODES];
+extern const scan_order inter_scan_orders[TX_SIZES];
 
 static INLINE const int16_t* get_scan_4x4(TX_TYPE tx_type) {
   switch (tx_type) {
