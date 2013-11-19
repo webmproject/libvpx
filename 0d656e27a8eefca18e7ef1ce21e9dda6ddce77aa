@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdX//89Q\u003d",
+        "filename": "vp9/common/arm/neon/vp9_loopfilter_16_neon.asm",
+        "patchSetId": 2
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2013-11-19T22:24:03Z",
+      "side": 1,
+      "message": "change the comment to just\n ; *blimit0\nthroughout. It\u0027s not actually duplicating (multicasting? can\u0027t think of a good word",
+      "revId": "0d656e27a8eefca18e7ef1ce21e9dda6ddce77aa",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX//89M\u003d",
+        "filename": "vp9/common/arm/neon/vp9_loopfilter_16_neon.asm",
+        "patchSetId": 2
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2013-11-19T22:24:03Z",
+      "side": 1,
+      "message": "moving up or down? or just:\n ; s[-4 * p]\nor\n ; p3",
+      "revId": "0d656e27a8eefca18e7ef1ce21e9dda6ddce77aa",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX//89E\u003d",
+        "filename": "vp9/common/arm/neon/vp9_loopfilter_16_neon.asm",
+        "patchSetId": 2
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2013-11-19T22:24:03Z",
+      "side": 1,
+      "message": "same:\n ; s[-3 * p]",
+      "revId": "0d656e27a8eefca18e7ef1ce21e9dda6ddce77aa",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX//888\u003d",
+        "filename": "vp9/common/arm/neon/vp9_loopfilter_16_neon.asm",
+        "patchSetId": 2
+      },
+      "lineNbr": 139,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2013-11-19T22:24:03Z",
+      "side": 1,
+      "message": "the conversions are scattered through the code (which is fine, but makes the comment look weird)",
+      "revId": "0d656e27a8eefca18e7ef1ce21e9dda6ddce77aa",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
