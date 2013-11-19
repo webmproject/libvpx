@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdX//87c\u003d",
+        "filename": "vp9/common/vp9_entropy.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 191,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2013-11-19T23:14:03Z",
+      "side": 1,
+      "message": "Just for consistency: const scan_order *so;",
+      "revId": "d6e85258d4dd0556f51ec52e4675b429e0e0275f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX//87g\u003d",
+        "filename": "vp9/common/vp9_entropy.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 193,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2013-11-19T23:14:03Z",
+      "side": 1,
+      "message": "Please use is_inter_block() function instead of \"mbmi-\u003eref_frame[0] \u003e 0\" expression.",
+      "revId": "d6e85258d4dd0556f51ec52e4675b429e0e0275f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX//87k\u003d",
+        "filename": "vp9/common/vp9_entropy.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 196,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2013-11-19T23:14:03Z",
+      "side": 1,
+      "message": "I think just to be more readable it should be:\n\nconst MB_PREDICTION_MODE mode \u003d  mbmi-\u003esb_type \u003c BLOCK_8X8 ? mi-\u003ebmi[block_idx].as_mode : mbmi-\u003emode;",
+      "revId": "d6e85258d4dd0556f51ec52e4675b429e0e0275f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
