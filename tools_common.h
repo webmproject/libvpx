@@ -92,11 +92,11 @@ struct VpxInputContext {
   off_t length;
   struct FileTypeDetectionBuffer detect;
   enum VideoFileType file_type;
-  unsigned int width;
-  unsigned int height;
+  uint32_t width;
+  uint32_t height;
   int use_i420;
   int only_i420;
-  unsigned int fourcc;
+  uint32_t fourcc;
   struct VpxRational framerate;
 #if CONFIG_ENCODERS
   y4m_input y4m;

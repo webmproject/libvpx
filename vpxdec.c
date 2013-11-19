@@ -15,6 +15,9 @@
 #include <string.h>
 #include <limits.h>
 
+#include "third_party/libyuv/include/libyuv/scale.h"
+
+#include "./args.h"
 #include "./ivfdec.h"
 
 #define VPX_CODEC_DISABLE_COMPAT 1
@@ -27,20 +30,19 @@
 #endif
 
 #if CONFIG_MD5
-#include "md5_utils.h"
+#include "./md5_utils.h"
 #endif
 
 #include "./tools_common.h"
-#include "nestegg/include/nestegg/nestegg.h"
-#include "third_party/libyuv/include/libyuv/scale.h"
+#include "./webmdec.h"
 
 static const char *exec_name;
 
 static const struct {
   char const *name;
   const vpx_codec_iface_t *(*iface)(void);
-  unsigned int             fourcc;
-  unsigned int             fourcc_mask;
+  uint32_t fourcc;
+  uint32_t fourcc_mask;
 } ifaces[] = {
 #if CONFIG_VP8_DECODER
   {"vp8",  vpx_codec_vp8_dx,   VP8_FOURCC_MASK, 0x00FFFFFF},
@@ -50,7 +52,11 @@ static const struct {
 #endif
 };
 
-#include "args.h"
+struct VpxDecInputContext {
+  struct VpxInputContext *vpx_input_ctx;
+  struct WebmInputContext *webm_ctx;
+};
+
 static const arg_def_t looparg = ARG_DEF(NULL, "loops", 1,
                                           "Number of times to decode the file");
 static const arg_def_t codecarg = ARG_DEF(NULL, "codec", 1,
@@ -162,15 +168,6 @@ void usage_exit() {
   exit(EXIT_FAILURE);
 }
 
-struct VpxDecInputContext {
-  nestegg *nestegg_ctx;
-  nestegg_packet *pkt;
-  unsigned int chunk;
-  unsigned int chunks;
-  unsigned int video_track;
-  struct VpxInputContext *vpx_input_ctx;
-};
-
 static int read_frame(struct VpxDecInputContext *input,
                       uint8_t **buf,
                       size_t *bytes_in_buffer,
@@ -180,30 +177,8 @@ static int read_frame(struct VpxDecInputContext *input,
   FILE *infile = input->vpx_input_ctx->file;
   enum VideoFileType kind = input->vpx_input_ctx->file_type;
   if (kind == FILE_TYPE_WEBM) {
-    if (input->chunk >= input->chunks) {
-      unsigned int track;
-
-      do {
-        /* End of this packet, get another. */
-        if (input->pkt)
-          nestegg_free_packet(input->pkt);
-
-        if (nestegg_read_packet(input->nestegg_ctx, &input->pkt) <= 0
-            || nestegg_packet_track(input->pkt, &track))
-          return 1;
-
-      } while (track != input->video_track);
-
-      if (nestegg_packet_count(input->pkt, &input->chunks))
-        return 1;
-      input->chunk = 0;
-    }
-
-    if (nestegg_packet_data(input->pkt, input->chunk, buf, bytes_in_buffer))
-      return 1;
-    input->chunk++;
-
-    return 0;
+    return webm_read_frame(input->webm_ctx,
+                           buf, bytes_in_buffer, buffer_size);
   } else if (kind == FILE_TYPE_RAW) {
     if (fread(raw_hdr, RAW_FRAME_HDR_SZ, 1, infile) != 1) {
       if (!feof(infile))
@@ -333,160 +308,11 @@ int file_is_raw(struct VpxInputContext *input) {
   return is_raw;
 }
 
-
-static int
-nestegg_read_cb(void *buffer, size_t length, void *userdata) {
-  FILE *f = userdata;
-
-  if (fread(buffer, 1, length, f) < length) {
-    if (ferror(f))
-      return -1;
-    if (feof(f))
-      return 0;
-  }
-  return 1;
-}
-
-
-static int
-nestegg_seek_cb(int64_t offset, int whence, void *userdata) {
-  switch (whence) {
-    case NESTEGG_SEEK_SET:
-      whence = SEEK_SET;
-      break;
-    case NESTEGG_SEEK_CUR:
-      whence = SEEK_CUR;
-      break;
-    case NESTEGG_SEEK_END:
-      whence = SEEK_END;
-      break;
-  };
-  return fseek(userdata, (long)offset, whence) ? -1 : 0;
-}
-
-
-static int64_t
-nestegg_tell_cb(void *userdata) {
-  return ftell(userdata);
-}
-
-
-static void
-nestegg_log_cb(nestegg *context, unsigned int severity, char const *format,
-               ...) {
-  va_list ap;
-
-  va_start(ap, format);
-  vfprintf(stderr, format, ap);
-  fprintf(stderr, "\n");
-  va_end(ap);
-}
-
-
-static int
-webm_guess_framerate(struct VpxDecInputContext *input) {
-  unsigned int i;
-  uint64_t     tstamp = 0;
-
-  /* Check to see if we can seek before we parse any data. */
-  if (nestegg_track_seek(input->nestegg_ctx, input->video_track, 0)) {
-    warn("WARNING: Failed to guess framerate (no Cues), set to 30fps.\n");
-    input->vpx_input_ctx->framerate.numerator = 30;
-    input->vpx_input_ctx->framerate.denominator  = 1;
-    return 0;
-  }
-
-  /* Guess the framerate. Read up to 1 second, or 50 video packets,
-   * whichever comes first.
-   */
-  for (i = 0; tstamp < 1000000000 && i < 50;) {
-    nestegg_packet *pkt;
-    unsigned int track;
-
-    if (nestegg_read_packet(input->nestegg_ctx, &pkt) <= 0)
-      break;
-
-    nestegg_packet_track(pkt, &track);
-    if (track == input->video_track) {
-      nestegg_packet_tstamp(pkt, &tstamp);
-      i++;
-    }
-
-    nestegg_free_packet(pkt);
-  }
-
-  if (nestegg_track_seek(input->nestegg_ctx, input->video_track, 0))
-    goto fail;
-
-  input->vpx_input_ctx->framerate.numerator = (i - 1) * 1000000;
-  input->vpx_input_ctx->framerate.denominator = (int)(tstamp / 1000);
-  return 0;
-fail:
-  nestegg_destroy(input->nestegg_ctx);
-  input->nestegg_ctx = NULL;
-  rewind(input->vpx_input_ctx->file);
-  return 1;
-}
-
-
-static int
-file_is_webm(struct VpxDecInputContext *input) {
-  unsigned int i, n;
-  int track_type = -1;
-  int codec_id;
-
-  nestegg_io io = {nestegg_read_cb, nestegg_seek_cb, nestegg_tell_cb, 0};
-  nestegg_video_params params;
-
-  io.userdata = input->vpx_input_ctx->file;
-  if (nestegg_init(&input->nestegg_ctx, io, NULL))
-    goto fail;
-
-  if (nestegg_track_count(input->nestegg_ctx, &n))
-    goto fail;
-
-  for (i = 0; i < n; i++) {
-    track_type = nestegg_track_type(input->nestegg_ctx, i);
-
-    if (track_type == NESTEGG_TRACK_VIDEO)
-      break;
-    else if (track_type < 0)
-      goto fail;
-  }
-
-  codec_id = nestegg_track_codec_id(input->nestegg_ctx, i);
-  if (codec_id == NESTEGG_CODEC_VP8) {
-    input->vpx_input_ctx->fourcc = VP8_FOURCC_MASK;
-  } else if (codec_id == NESTEGG_CODEC_VP9) {
-    input->vpx_input_ctx->fourcc = VP9_FOURCC_MASK;
-  } else {
-    fprintf(stderr, "Not VPx video, quitting.\n");
-    exit(1);
-  }
-
-  input->video_track = i;
-
-  if (nestegg_track_video_params(input->nestegg_ctx, i, &params))
-    goto fail;
-
-  input->vpx_input_ctx->framerate.denominator = 0;
-  input->vpx_input_ctx->framerate.numerator = 0;
-  input->vpx_input_ctx->width = params.width;
-  input->vpx_input_ctx->height = params.height;
-  return 1;
-fail:
-  input->nestegg_ctx = NULL;
-  rewind(input->vpx_input_ctx->file);
-  return 0;
-}
-
-
 void show_progress(int frame_in, int frame_out, unsigned long dx_time) {
   fprintf(stderr, "%d decoded frames/%d showed frames in %lu us (%.2f fps)\r",
           frame_in, frame_out, dx_time,
           (float)frame_out * 1000000.0 / (float)dx_time);
 }
-
 
 void generate_filename(const char *pattern, char *out, size_t q_len,
                        unsigned int d_w, unsigned int d_h,
@@ -606,7 +432,9 @@ int main_loop(int argc, const char **argv_) {
 
   struct VpxDecInputContext input = {0};
   struct VpxInputContext vpx_input_ctx = {0};
+  struct WebmInputContext webm_ctx = {0};
   input.vpx_input_ctx = &vpx_input_ctx;
+  input.webm_ctx = &webm_ctx;
 
   /* Parse command line */
   exec_name = argv_[0];
@@ -748,7 +576,7 @@ int main_loop(int argc, const char **argv_) {
   input.vpx_input_ctx->file = infile;
   if (file_is_ivf(input.vpx_input_ctx))
     input.vpx_input_ctx->file_type = FILE_TYPE_IVF;
-  else if (file_is_webm(&input))
+  else if (file_is_webm(input.webm_ctx, input.vpx_input_ctx))
     input.vpx_input_ctx->file_type = FILE_TYPE_WEBM;
   else if (file_is_raw(input.vpx_input_ctx))
     input.vpx_input_ctx->file_type = FILE_TYPE_RAW;
@@ -792,7 +620,7 @@ int main_loop(int argc, const char **argv_) {
     }
 
     if (vpx_input_ctx.file_type == FILE_TYPE_WEBM)
-      if (webm_guess_framerate(&input)) {
+      if (webm_guess_framerate(input.webm_ctx, input.vpx_input_ctx)) {
         fprintf(stderr, "Failed to guess framerate -- error parsing "
                 "webm file?\n");
         return EXIT_FAILURE;
@@ -1036,10 +864,11 @@ fail:
   if (single_file && !noblit)
     out_close(out, outfile, do_md5);
 
-  if (input.nestegg_ctx)
-    nestegg_destroy(input.nestegg_ctx);
-  if (input.vpx_input_ctx->file_type != FILE_TYPE_WEBM)
+  if (input.vpx_input_ctx->file_type == FILE_TYPE_WEBM)
+    webm_free(input.webm_ctx);
+  else
     free(buf);
+
   fclose(infile);
   free(argv);
 

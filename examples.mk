@@ -25,6 +25,7 @@ vpxdec.SRCS                 += vpx/vpx_integer.h
 vpxdec.SRCS                 += args.c args.h
 vpxdec.SRCS                 += ivfdec.c ivfdec.h
 vpxdec.SRCS                 += tools_common.c tools_common.h
+vpxdec.SRCS                 += webmdec.c webmdec.h
 vpxdec.SRCS                 += nestegg/halloc/halloc.h
 vpxdec.SRCS                 += nestegg/halloc/src/align.h
 vpxdec.SRCS                 += nestegg/halloc/src/halloc.c
