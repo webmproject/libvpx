@@ -426,7 +426,6 @@ int main_loop(int argc, const char **argv_) {
   int                     frames_corrupted = 0;
   int                     dec_flags = 0;
   int                     do_scale = 0;
-  int                     stream_w = 0, stream_h = 0;
   vpx_image_t             *scaled_img = NULL;
   int                     frame_avail, got_data;
 
@@ -771,9 +770,18 @@ int main_loop(int argc, const char **argv_) {
       }
 
       if (do_scale) {
+        int stream_w = 0, stream_h = 0;
         if (img && frame_out == 1) {
-          stream_w = img->d_w;
-          stream_h = img->d_h;
+          int display_size[2];
+          if (vpx_codec_control(&decoder, VP9D_GET_DISPLAY_SIZE,
+                                display_size)) {
+            // Fallback to use raw image size if display size not available.
+            stream_w = img->d_w;
+            stream_h = img->d_h;
+          } else {
+            stream_w = display_size[0];
+            stream_h = display_size[1];
+          }
           scaled_img = vpx_img_alloc(NULL, VPX_IMG_FMT_I420,
                                      stream_w, stream_h, 16);
         }
@@ -794,7 +802,6 @@ int main_loop(int argc, const char **argv_) {
           img = scaled_img;
         }
       }
-
       if (img) {
         unsigned int y;
         char out_fn[PATH_MAX];
