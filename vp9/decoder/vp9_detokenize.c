@@ -23,14 +23,14 @@
 #define EOB_CONTEXT_NODE            0
 #define ZERO_CONTEXT_NODE           1
 #define ONE_CONTEXT_NODE            2
-#define LOW_VAL_CONTEXT_NODE        3
-#define TWO_CONTEXT_NODE            4
-#define THREE_CONTEXT_NODE          5
-#define HIGH_LOW_CONTEXT_NODE       6
-#define CAT_ONE_CONTEXT_NODE        7
-#define CAT_THREEFOUR_CONTEXT_NODE  8
-#define CAT_THREE_CONTEXT_NODE      9
-#define CAT_FIVE_CONTEXT_NODE       10
+#define LOW_VAL_CONTEXT_NODE        0
+#define TWO_CONTEXT_NODE            1
+#define THREE_CONTEXT_NODE          2
+#define HIGH_LOW_CONTEXT_NODE       3
+#define CAT_ONE_CONTEXT_NODE        4
+#define CAT_THREEFOUR_CONTEXT_NODE  5
+#define CAT_THREE_CONTEXT_NODE      6
+#define CAT_FIVE_CONTEXT_NODE       7
 
 #define CAT1_MIN_VAL    5
 #define CAT2_MIN_VAL    7
@@ -76,13 +76,15 @@ static const int token_to_counttoken[MAX_ENTROPY_TOKENS] = {
 
 #define WRITE_COEF_CONTINUE(val, token)                  \
   {                                                      \
-    dqcoeff_ptr[scan[c]] = (vp9_read_bit(r) ? -val : val) * \
-                            dq[c > 0] / (1 + (tx_size == TX_32X32)); \
+    v = (val * dqv) >> dq_shift; \
+    dqcoeff_ptr[scan[c]] = (vp9_read_bit(r) ? -v : v); \
     INCREMENT_COUNT(token);                              \
     token_cache[scan[c]] = vp9_pt_energy_class[token];   \
     ++c;                                                 \
+    dqv = dq[1];                                          \
     continue;                                            \
   }
+
 
 #define ADJUST_COEF(prob, bits_count)                   \
   do {                                                  \
@@ -100,8 +102,6 @@ static int decode_coefs(VP9_COMMON *cm, const MACROBLOCKD *xd,
   int band, c = 0;
   const vp9_prob (*coef_probs)[PREV_COEF_CONTEXTS][UNCONSTRAINED_NODES] =
       fc->coef_probs[tx_size][type][ref];
-  vp9_prob coef_probs_full[COEF_BANDS][PREV_COEF_CONTEXTS][ENTROPY_NODES];
-  uint8_t load_map[COEF_BANDS][PREV_COEF_CONTEXTS] = { { 0 } };
   const vp9_prob *prob;
   unsigned int (*coef_counts)[PREV_COEF_CONTEXTS][UNCONSTRAINED_NODES + 1] =
       counts->coef[tx_size][type][ref];
@@ -110,9 +110,12 @@ static int decode_coefs(VP9_COMMON *cm, const MACROBLOCKD *xd,
   const int16_t *scan, *nb;
   const uint8_t *cat6;
   const uint8_t *band_translate = get_band_translate(tx_size);
+  const int dq_shift = (tx_size == TX_32X32);
   const MODE_INFO *const mi = xd->mi_8x8[0];
   const MB_MODE_INFO *const mbmi = &mi->mbmi;
   scan_order const *so;
+  int v;
+  int16_t dqv = dq[0];
 
   if (mbmi->ref_frame[0] > 0 || type != PLANE_TYPE_Y_WITH_DC || xd->lossless) {
     so = &inter_scan_orders[tx_size];
@@ -148,6 +151,7 @@ static int decode_coefs(VP9_COMMON *cm, const MACROBLOCKD *xd,
     if (!vp9_read(r, prob[ZERO_CONTEXT_NODE])) {
       INCREMENT_COUNT(ZERO_TOKEN);
       token_cache[scan[c]] = vp9_pt_energy_class[ZERO_TOKEN];
+      dqv = dq[1];                                          \
       ++c;
       goto SKIP_START;
     }
@@ -156,13 +160,9 @@ static int decode_coefs(VP9_COMMON *cm, const MACROBLOCKD *xd,
     if (!vp9_read(r, prob[ONE_CONTEXT_NODE])) {
       WRITE_COEF_CONTINUE(1, ONE_TOKEN);
     }
-    // Load full probabilities if not already loaded
-    if (!load_map[band][pt]) {
-      vp9_model_to_full_probs(coef_probs[band][pt],
-                              coef_probs_full[band][pt]);
-      load_map[band][pt] = 1;
-    }
-    prob = coef_probs_full[band][pt];
+
+    prob = vp9_pareto8_full[coef_probs[band][pt][PIVOT_NODE]-1];
+
     // LOW_VAL_CONTEXT_NODE_0_
     if (!vp9_read(r, prob[LOW_VAL_CONTEXT_NODE])) {
       if (!vp9_read(r, prob[TWO_CONTEXT_NODE])) {

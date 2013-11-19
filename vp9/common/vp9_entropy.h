@@ -17,6 +17,7 @@
 #include "vp9/common/vp9_common.h"
 #include "vp9/common/vp9_scan.h"
 #include "vp9/common/vp9_treecoder.h"
+#include "vp9/common/vp9_entropymode.h"
 
 #define DIFF_UPDATE_PROB 252
 
@@ -140,6 +141,9 @@ static const uint8_t *get_band_translate(TX_SIZE tx_size) {
 #define UNCONSTRAINED_NODES         3
 
 #define PIVOT_NODE                  2   // which node is pivot
+
+#define MODEL_NODES (ENTROPY_NODES - UNCONSTRAINED_NODES)
+extern const vp9_prob vp9_pareto8_full[255][MODEL_NODES];
 
 typedef vp9_prob vp9_coeff_probs_model[REF_TYPES][COEF_BANDS]
                                       [PREV_COEF_CONTEXTS]
