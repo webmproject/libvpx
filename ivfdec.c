@@ -61,11 +61,12 @@ int file_is_ivf(struct VpxInputContext *input_ctx) {
     }
   }
 
-  if (!is_ivf)
+  if (!is_ivf) {
     rewind(input_ctx->file);
-  else
+    input_ctx->detect.buf_read = 0;
+  } else {
     input_ctx->detect.position = 4;
-
+  }
   return is_ivf;
 }
 
