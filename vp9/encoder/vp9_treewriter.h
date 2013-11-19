@@ -19,30 +19,19 @@
 
 #include "vp9/encoder/vp9_boolhuff.h"       /* for now */
 
-
 #define vp9_write_prob(w, v) vp9_write_literal((w), (v), 8)
 
-/* Approximate length of an encoded bool in 256ths of a bit at given prob */
+#define vp9_cost_zero(prob) (vp9_prob_cost[prob])
 
-#define vp9_cost_zero(x) (vp9_prob_cost[x])
-#define vp9_cost_one(x) vp9_cost_zero(vp9_complement(x))
+#define vp9_cost_one(prob) vp9_cost_zero(vp9_complement(prob))
 
-#define vp9_cost_bit(x, b) vp9_cost_zero((b) ? vp9_complement(x) : (x))
+#define vp9_cost_bit(prob, bit) vp9_cost_zero((bit) ? vp9_complement(prob) \
+                                                    : (prob))
 
-/* VP8BC version is scaled by 2^20 rather than 2^8; see bool_coder.h */
-
-
-/* Both of these return bits, not scaled bits. */
 static INLINE unsigned int cost_branch256(const unsigned int ct[2],
                                           vp9_prob p) {
   return ct[0] * vp9_cost_zero(p) + ct[1] * vp9_cost_one(p);
 }
-
-static INLINE unsigned int cost_branch(const unsigned int ct[2],
-                                       vp9_prob p) {
-  return cost_branch256(ct, p) >> 8;
-}
-
 
 static INLINE void treed_write(vp9_writer *w,
                                vp9_tree tree, const vp9_prob *probs,

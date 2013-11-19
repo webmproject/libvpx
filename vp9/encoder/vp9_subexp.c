@@ -14,7 +14,6 @@
 #include "vp9/encoder/vp9_boolhuff.h"
 #include "vp9/encoder/vp9_treewriter.h"
 
-#define vp9_cost_upd  ((int)(vp9_cost_one(upd) - vp9_cost_zero(upd)) >> 8)
 #define vp9_cost_upd256  ((int)(vp9_cost_one(upd) - vp9_cost_zero(upd)))
 
 static int update_bits[255];
