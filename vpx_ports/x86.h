@@ -35,51 +35,53 @@ typedef enum {
 
 #if defined(__GNUC__) && __GNUC__ || defined(__ANDROID__)
 #if ARCH_X86_64
-#define cpuid(func,ax,bx,cx,dx)\
+#define cpuid(func, func2, ax, bx, cx, dx)\
   __asm__ __volatile__ (\
                         "cpuid           \n\t" \
                         : "=a" (ax), "=b" (bx), "=c" (cx), "=d" (dx) \
-                        : "a"  (func));
+                        : "a" (func), "c" (func2));
 #else
-#define cpuid(func,ax,bx,cx,dx)\
+#define cpuid(func, func2, ax, bx, cx, dx)\
   __asm__ __volatile__ (\
                         "mov %%ebx, %%edi   \n\t" \
                         "cpuid              \n\t" \
                         "xchg %%edi, %%ebx  \n\t" \
                         : "=a" (ax), "=D" (bx), "=c" (cx), "=d" (dx) \
-                        : "a" (func));
+                        : "a" (func), "c" (func2));
 #endif
 #elif defined(__SUNPRO_C) || defined(__SUNPRO_CC) /* end __GNUC__ or __ANDROID__*/
 #if ARCH_X86_64
-#define cpuid(func,ax,bx,cx,dx)\
+#define cpuid(func, func2, ax, bx, cx, dx)\
   asm volatile (\
                 "xchg %rsi, %rbx \n\t" \
                 "cpuid           \n\t" \
                 "movl %ebx, %edi \n\t" \
                 "xchg %rsi, %rbx \n\t" \
                 : "=a" (ax), "=D" (bx), "=c" (cx), "=d" (dx) \
-                : "a"  (func));
+                : "a" (func), "c" (func2));
 #else
-#define cpuid(func,ax,bx,cx,dx)\
+#define cpuid(func, func2, ax, bx, cx, dx)\
   asm volatile (\
                 "pushl %ebx       \n\t" \
                 "cpuid            \n\t" \
                 "movl %ebx, %edi  \n\t" \
                 "popl %ebx        \n\t" \
                 : "=a" (ax), "=D" (bx), "=c" (cx), "=d" (dx) \
-                : "a" (func));
+                : "a" (func), "c" (func2));
 #endif
 #else /* end __SUNPRO__ */
 #if ARCH_X86_64
 void __cpuid(int CPUInfo[4], int info_type);
 #pragma intrinsic(__cpuid)
-#define cpuid(func,a,b,c,d) do{\
+#define cpuid(func, func2, a, b, c, d) do {\
     int regs[4];\
-    __cpuid(regs,func); a=regs[0];  b=regs[1];  c=regs[2];  d=regs[3];\
+    __cpuid(regs, func, func2);
+    a = regs[0];  b = regs[1];  c = regs[2];  d = regs[3];\
   } while(0)
 #else
-#define cpuid(func,a,b,c,d)\
+#define cpuid(func, func2, a, b, c, d)\
   __asm mov eax, func\
+  __asm mov ecx, func2\
   __asm cpuid\
   __asm mov a, eax\
   __asm mov b, ebx\
@@ -120,13 +122,13 @@ x86_simd_caps(void) {
     mask = strtol(env, NULL, 0);
 
   /* Ensure that the CPUID instruction supports extended features */
-  cpuid(0, reg_eax, reg_ebx, reg_ecx, reg_edx);
+  cpuid(0, 0, reg_eax, reg_ebx, reg_ecx, reg_edx);
 
   if (reg_eax < 1)
     return 0;
 
   /* Get the standard feature flags */
-  cpuid(1, reg_eax, reg_ebx, reg_ecx, reg_edx);
+  cpuid(1, 0, reg_eax, reg_ebx, reg_ecx, reg_edx);
 
   if (reg_edx & BIT(23)) flags |= HAS_MMX;
 
@@ -141,6 +143,11 @@ x86_simd_caps(void) {
   if (reg_ecx & BIT(19)) flags |= HAS_SSE4_1;
 
   if (reg_ecx & BIT(28)) flags |= HAS_AVX;
+
+  /* Get the leaf 7 feature flags. Needed to check for AVX2 support */
+  reg_eax = 7;
+  reg_ecx = 0;
+  cpuid(7, 0, reg_eax, reg_ebx, reg_ecx, reg_edx);
 
   if (reg_ebx & BIT(5)) flags |= HAS_AVX2;
 
