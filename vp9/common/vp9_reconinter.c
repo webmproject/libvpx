@@ -20,25 +20,6 @@
 #include "vp9/common/vp9_reconinter.h"
 #include "vp9/common/vp9_reconintra.h"
 
-void vp9_setup_interp_filters(MACROBLOCKD *xd,
-                              INTERPOLATION_TYPE mcomp_filter_type,
-                              VP9_COMMON *cm) {
-  if (xd->mi_8x8 && xd->mi_8x8[0]) {
-    MB_MODE_INFO *const mbmi = &xd->mi_8x8[0]->mbmi;
-
-    set_scale_factors(xd, mbmi->ref_frame[0] - LAST_FRAME,
-                          mbmi->ref_frame[1] - LAST_FRAME,
-                          cm->active_ref_scale);
-  } else {
-    set_scale_factors(xd, -1, -1, cm->active_ref_scale);
-  }
-
-  xd->subpix.filter_x = xd->subpix.filter_y =
-      vp9_get_filter_kernel(mcomp_filter_type == SWITCHABLE ?
-                               EIGHTTAP : mcomp_filter_type);
-
-  assert(((intptr_t)xd->subpix.filter_x & 0xff) == 0);
-}
 
 static void inter_predictor(const uint8_t *src, int src_stride,
                             uint8_t *dst, int dst_stride,
