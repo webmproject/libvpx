@@ -53,14 +53,11 @@ static const arg_def_t scale_factors_arg =
     ARG_DEF("r", "scale-factors", 1, "scale factors (lowest to highest layer)");
 static const arg_def_t quantizers_arg =
     ARG_DEF("q", "quantizers", 1, "quantizers (lowest to highest layer)");
-static const arg_def_t dummy_frame_arg =
-    ARG_DEF("z", "dummy-frame", 1, "make first frame blank and full size");
 
 static const arg_def_t *svc_args[] = {
   &encoding_mode_arg, &frames_arg,        &width_arg,       &height_arg,
   &timebase_arg,      &bitrate_arg,       &skip_frames_arg, &layers_arg,
-  &kf_dist_arg,       &scale_factors_arg, &quantizers_arg,  &dummy_frame_arg,
-  NULL
+  &kf_dist_arg,       &scale_factors_arg, &quantizers_arg,  NULL
 };
 
 static const SVC_ENCODING_MODE default_encoding_mode =
@@ -74,7 +71,6 @@ static const uint32_t default_timebase_den = 60;
 static const uint32_t default_bitrate = 1000;
 static const uint32_t default_spatial_layers = 5;
 static const uint32_t default_kf_dist = 100;
-static const int default_use_dummy_frame = 1;
 
 typedef struct {
   char *output_filename;
@@ -116,8 +112,6 @@ static void parse_command_line(int argc, const char **argv_,
   svc_ctx->log_level = SVC_LOG_DEBUG;
   svc_ctx->spatial_layers = default_spatial_layers;
   svc_ctx->encoding_mode = default_encoding_mode;
-  // when using a dummy frame, that frame is only encoded to be full size
-  svc_ctx->first_frame_full_size = default_use_dummy_frame;
 
   // start with default encoder configuration
   res = vpx_codec_enc_config_default(vpx_codec_vp9_cx(), enc_cfg, 0);
@@ -150,8 +144,6 @@ static void parse_command_line(int argc, const char **argv_,
       enc_cfg->g_w = arg_parse_uint(&arg);
     } else if (arg_match(&arg, &height_arg, argi)) {
       enc_cfg->g_h = arg_parse_uint(&arg);
-    } else if (arg_match(&arg, &height_arg, argi)) {
-      enc_cfg->g_h = arg_parse_uint(&arg);
     } else if (arg_match(&arg, &timebase_arg, argi)) {
       enc_cfg->g_timebase = arg_parse_rational(&arg);
     } else if (arg_match(&arg, &bitrate_arg, argi)) {
@@ -167,8 +159,6 @@ static void parse_command_line(int argc, const char **argv_,
       vpx_svc_set_scale_factors(svc_ctx, arg.val);
     } else if (arg_match(&arg, &quantizers_arg, argi)) {
       vpx_svc_set_quantizers(svc_ctx, arg.val);
-    } else if (arg_match(&arg, &dummy_frame_arg, argi)) {
-      svc_ctx->first_frame_full_size = arg_parse_int(&arg);
     } else {
       ++argj;
     }
@@ -195,13 +185,12 @@ static void parse_command_line(int argc, const char **argv_,
       "mode: %d, layers: %d\n"
       "width %d, height: %d,\n"
       "num: %d, den: %d, bitrate: %d,\n"
-      "gop size: %d, use_dummy_frame: %d\n",
+      "gop size: %d\n",
       vpx_codec_iface_name(vpx_codec_vp9_cx()), app_input->frames_to_code,
       app_input->frames_to_skip, svc_ctx->encoding_mode,
       svc_ctx->spatial_layers, enc_cfg->g_w, enc_cfg->g_h,
       enc_cfg->g_timebase.num, enc_cfg->g_timebase.den,
-      enc_cfg->rc_target_bitrate, enc_cfg->kf_max_dist,
-      svc_ctx->first_frame_full_size);
+      enc_cfg->rc_target_bitrate, enc_cfg->kf_max_dist);
 }
 
 int main(int argc, const char **argv) {
@@ -246,12 +235,9 @@ int main(int argc, const char **argv) {
   }
 
   // Encode frames
-  while (frame_cnt <= app_input.frames_to_code) {
-    if (frame_cnt == 0 && svc_ctx.first_frame_full_size) {
-      create_dummy_frame(&raw);
-    } else {
-      if (!read_yuv_frame(&app_input.input_ctx, &raw)) break;
-    }
+  while (frame_cnt < app_input.frames_to_code) {
+    if (read_yuv_frame(&app_input.input_ctx, &raw)) break;
+
     res = vpx_svc_encode(&svc_ctx, &codec, &raw, pts, frame_duration,
                          VPX_DL_REALTIME);
     printf("%s", vpx_svc_get_message(&svc_ctx));
@@ -269,7 +255,7 @@ int main(int argc, const char **argv) {
     pts += frame_duration;
   }
 
-  printf("Processed %d frames\n", frame_cnt - svc_ctx.first_frame_full_size);
+  printf("Processed %d frames\n", frame_cnt);
 
   fclose(app_input.input_ctx.file);
   if (vpx_codec_destroy(&codec)) die_codec(&codec, "Failed to destroy codec");

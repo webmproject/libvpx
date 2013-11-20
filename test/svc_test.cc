@@ -41,7 +41,6 @@ class SvcTest : public ::testing::Test {
   virtual ~SvcTest() {}
 
   virtual void SetUp() {
-    svc_.first_frame_full_size = 1;
     svc_.encoding_mode = INTER_LAYER_PREDICTION_IP;
     svc_.log_level = SVC_LOG_DEBUG;
     svc_.log_print = 0;
@@ -185,7 +184,6 @@ TEST_F(SvcTest, SetQuantizers) {
   res = vpx_svc_set_quantizers(&svc_, NULL);
   EXPECT_EQ(VPX_CODEC_INVALID_PARAM, res);
 
-  svc_.first_frame_full_size = 0;
   svc_.spatial_layers = 2;
   res = vpx_svc_set_quantizers(&svc_, "40");
   EXPECT_EQ(VPX_CODEC_OK, res);
@@ -206,7 +204,6 @@ TEST_F(SvcTest, SetScaleFactors) {
   res = vpx_svc_set_scale_factors(&svc_, NULL);
   EXPECT_EQ(VPX_CODEC_INVALID_PARAM, res);
 
-  svc_.first_frame_full_size = 0;
   svc_.spatial_layers = 2;
   res = vpx_svc_set_scale_factors(&svc_, "4/16");
   EXPECT_EQ(VPX_CODEC_OK, res);
@@ -220,11 +217,8 @@ TEST_F(SvcTest, SetScaleFactors) {
   codec_initialized_ = true;
 }
 
-// test that decoder can handle an SVC frame as the first frame in a sequence
-// this test is disabled since it always fails because of a decoder issue
-// https://code.google.com/p/webm/issues/detail?id=654
-TEST_F(SvcTest, DISABLED_FirstFrameHasLayers) {
-  svc_.first_frame_full_size = 0;
+// Test that decoder can handle an SVC frame as the first frame in a sequence.
+TEST_F(SvcTest, FirstFrameHasLayers) {
   svc_.spatial_layers = 2;
   vpx_svc_set_scale_factors(&svc_, "4/16,16/16");
   vpx_svc_set_quantizers(&svc_, "40,30");
@@ -252,7 +246,6 @@ TEST_F(SvcTest, DISABLED_FirstFrameHasLayers) {
 }
 
 TEST_F(SvcTest, EncodeThreeFrames) {
-  svc_.first_frame_full_size = 1;
   svc_.spatial_layers = 2;
   vpx_svc_set_scale_factors(&svc_, "4/16,16/16");
   vpx_svc_set_quantizers(&svc_, "40,30");
@@ -265,9 +258,9 @@ TEST_F(SvcTest, EncodeThreeFrames) {
   libvpx_test::I420VideoSource video(test_file_name_, kWidth, kHeight,
                                      codec_enc_.g_timebase.den,
                                      codec_enc_.g_timebase.num, 0, 30);
-  // FRAME 1
+  // FRAME 0
   video.Begin();
-  // this frame is full size, with only one layer
+  // This frame is a keyframe.
   res = vpx_svc_encode(&svc_, &codec_, video.img(), video.pts(),
                        video.duration(), VPX_DL_REALTIME);
   ASSERT_EQ(VPX_CODEC_OK, res);
@@ -278,13 +271,13 @@ TEST_F(SvcTest, EncodeThreeFrames) {
       vpx_svc_get_frame_size(&svc_));
   ASSERT_EQ(VPX_CODEC_OK, res_dec) << decoder_->DecodeError();
 
-  // FRAME 2
+  // FRAME 1
   video.Next();
-  // this is an I-frame
+  // This is a P-frame.
   res = vpx_svc_encode(&svc_, &codec_, video.img(), video.pts(),
                        video.duration(), VPX_DL_REALTIME);
   ASSERT_EQ(VPX_CODEC_OK, res);
-  EXPECT_EQ(1, vpx_svc_is_keyframe(&svc_));
+  EXPECT_EQ(0, vpx_svc_is_keyframe(&svc_));
 
   res_dec = decoder_->DecodeFrame(
       static_cast<const uint8_t *>(vpx_svc_get_buffer(&svc_)),
@@ -293,7 +286,7 @@ TEST_F(SvcTest, EncodeThreeFrames) {
 
   // FRAME 2
   video.Next();
-  // this is a P-frame
+  // This is a P-frame.
   res = vpx_svc_encode(&svc_, &codec_, video.img(), video.pts(),
                        video.duration(), VPX_DL_REALTIME);
   ASSERT_EQ(VPX_CODEC_OK, res);
@@ -306,7 +299,6 @@ TEST_F(SvcTest, EncodeThreeFrames) {
 }
 
 TEST_F(SvcTest, GetLayerResolution) {
-  svc_.first_frame_full_size = 0;
   svc_.spatial_layers = 2;
   vpx_svc_set_scale_factors(&svc_, "4/16,8/16");
   vpx_svc_set_quantizers(&svc_, "40,30");

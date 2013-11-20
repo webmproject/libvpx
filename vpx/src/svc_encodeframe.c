@@ -584,21 +584,13 @@ static int map_vp8_flags(int svc_flags) {
   return flags;
 }
 
-/**
- * Helper to check if the current frame is the first, full resolution dummy.
- */
-static int vpx_svc_dummy_frame(SvcContext *svc_ctx) {
-  SvcInternal *const si = get_svc_internal(svc_ctx);
-  return svc_ctx->first_frame_full_size == 1 && si->encode_frame_count == 0;
-}
-
 static void calculate_enc_frame_flags(SvcContext *svc_ctx) {
   vpx_enc_frame_flags_t flags = VPX_EFLAG_FORCE_KF;
   SvcInternal *const si = get_svc_internal(svc_ctx);
   const int is_keyframe = (si->frame_within_gop == 0);
 
   // keyframe layer zero is identical for all modes
-  if ((is_keyframe && si->layer == 0) || vpx_svc_dummy_frame(svc_ctx)) {
+  if (is_keyframe && si->layer == 0) {
     si->enc_frame_flags = VPX_EFLAG_FORCE_KF;
     return;
   }
@@ -783,10 +775,9 @@ vpx_codec_err_t vpx_svc_encode(SvcContext *svc_ctx, vpx_codec_ctx_t *codec_ctx,
   memset(&superframe, 0, sizeof(superframe));
   svc_log_reset(svc_ctx);
 
-  si->layers = vpx_svc_dummy_frame(svc_ctx) ? 1 : svc_ctx->spatial_layers;
+  si->layers = svc_ctx->spatial_layers;
   if (si->frame_within_gop >= si->kf_dist ||
-      si->encode_frame_count == 0 ||
-      (si->encode_frame_count == 1 && svc_ctx->first_frame_full_size == 1)) {
+      si->encode_frame_count == 0) {
     si->frame_within_gop = 0;
   }
   si->is_keyframe = (si->frame_within_gop == 0);
@@ -805,12 +796,8 @@ vpx_codec_err_t vpx_svc_encode(SvcContext *svc_ctx, vpx_codec_ctx_t *codec_ctx,
     }
     calculate_enc_frame_flags(svc_ctx);
 
-    if (vpx_svc_dummy_frame(svc_ctx)) {
-      // do not set svc parameters, use normal encode
-      svc_log(svc_ctx, SVC_LOG_DEBUG, "encoding full size first frame\n");
-    } else {
-      set_svc_parameters(svc_ctx, codec_ctx);
-    }
+    set_svc_parameters(svc_ctx, codec_ctx);
+
     res = vpx_codec_encode(codec_ctx, rawimg, pts, (uint32_t)duration,
                            si->enc_frame_flags, deadline);
     if (res != VPX_CODEC_OK) {
@@ -822,12 +809,10 @@ vpx_codec_err_t vpx_svc_encode(SvcContext *svc_ctx, vpx_codec_ctx_t *codec_ctx,
       switch (cx_pkt->kind) {
         case VPX_CODEC_CX_FRAME_PKT: {
           const uint32_t frame_pkt_size = (uint32_t)(cx_pkt->data.frame.sz);
-          if (!vpx_svc_dummy_frame(svc_ctx)) {
-            si->bytes_in_layer[si->layer] += frame_pkt_size;
-            svc_log(svc_ctx, SVC_LOG_DEBUG,
-                    "SVC frame: %d, layer: %d, size: %u\n",
-                    si->encode_frame_count, si->layer, frame_pkt_size);
-          }
+          si->bytes_in_layer[si->layer] += frame_pkt_size;
+          svc_log(svc_ctx, SVC_LOG_DEBUG,
+                  "SVC frame: %d, layer: %d, size: %u\n",
+                  si->encode_frame_count, si->layer, frame_pkt_size);
           layer_data =
               ld_create(cx_pkt->data.frame.buf, (size_t)frame_pkt_size);
           if (layer_data == NULL) {
@@ -842,15 +827,13 @@ vpx_codec_err_t vpx_svc_encode(SvcContext *svc_ctx, vpx_codec_ctx_t *codec_ctx,
           break;
         }
         case VPX_CODEC_PSNR_PKT: {
-          if (!vpx_svc_dummy_frame(svc_ctx)) {
-            svc_log(svc_ctx, SVC_LOG_DEBUG,
-                    "SVC frame: %d, layer: %d, PSNR(Total/Y/U/V): "
-                    "%2.3f  %2.3f  %2.3f  %2.3f \n",
-                    si->encode_frame_count, si->layer,
-                    cx_pkt->data.psnr.psnr[0], cx_pkt->data.psnr.psnr[1],
-                    cx_pkt->data.psnr.psnr[2], cx_pkt->data.psnr.psnr[3]);
-            si->psnr_in_layer[si->layer] += cx_pkt->data.psnr.psnr[0];
-          }
+          svc_log(svc_ctx, SVC_LOG_DEBUG,
+                  "SVC frame: %d, layer: %d, PSNR(Total/Y/U/V): "
+                  "%2.3f  %2.3f  %2.3f  %2.3f \n",
+                  si->encode_frame_count, si->layer,
+                  cx_pkt->data.psnr.psnr[0], cx_pkt->data.psnr.psnr[1],
+                  cx_pkt->data.psnr.psnr[2], cx_pkt->data.psnr.psnr[3]);
+          si->psnr_in_layer[si->layer] += cx_pkt->data.psnr.psnr[0];
           break;
         }
         default: {
@@ -860,11 +843,10 @@ vpx_codec_err_t vpx_svc_encode(SvcContext *svc_ctx, vpx_codec_ctx_t *codec_ctx,
     }
   }
   // add superframe index to layer data list
-  if (!vpx_svc_dummy_frame(svc_ctx)) {
-    sf_create_index(&superframe);
-    layer_data = ld_create(superframe.buffer, superframe.index_size);
-    ld_list_add(&cx_layer_list, layer_data);
-  }
+  sf_create_index(&superframe);
+  layer_data = ld_create(superframe.buffer, superframe.index_size);
+  ld_list_add(&cx_layer_list, layer_data);
+
   // get accumulated size of layer data
   si->frame_size = ld_list_get_buffer_size(cx_layer_list);
   if (si->frame_size == 0) return VPX_CODEC_ERROR;
@@ -940,7 +922,6 @@ const char *vpx_svc_dump_statistics(SvcContext *svc_ctx) {
   svc_log_reset(svc_ctx);
 
   encode_frame_count = si->encode_frame_count;
-  if (svc_ctx->first_frame_full_size) encode_frame_count--;
   if (si->encode_frame_count <= 0) return vpx_svc_get_message(svc_ctx);
 
   svc_log(svc_ctx, SVC_LOG_INFO, "\n");

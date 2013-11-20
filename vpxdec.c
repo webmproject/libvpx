@@ -697,7 +697,7 @@ int main_loop(int argc, const char **argv_) {
 
 
   if (arg_skip)
-    fprintf(stderr, "Skiping first %d frames.\n", arg_skip);
+    fprintf(stderr, "Skipping first %d frames.\n", arg_skip);
   while (arg_skip) {
     if (read_frame(&input, &buf, &bytes_in_buffer, &buffer_size))
       break;

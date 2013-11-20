@@ -39,7 +39,6 @@ typedef enum SVC_LOG_LEVEL {
 typedef struct {
   // public interface to svc_command options
   int spatial_layers;               // number of layers
-  int first_frame_full_size;        // set to one to force first frame full size
   SVC_ENCODING_MODE encoding_mode;  // svc encoding strategy
   SVC_LOG_LEVEL log_level;  // amount of information to display
   int log_print;  // when set, printf log messages instead of returning the
