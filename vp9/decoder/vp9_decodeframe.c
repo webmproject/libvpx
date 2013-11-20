@@ -159,7 +159,7 @@ static void update_mv_probs(vp9_prob *p, int n, vp9_reader *r) {
   int i;
   for (i = 0; i < n; ++i)
     if (vp9_read(r, NMV_UPDATE_PROB))
-       p[i] = (vp9_read_literal(r, 7) << 1) | 1;
+      p[i] = (vp9_read_literal(r, 7) << 1) | 1;
 }
 
 static void read_mv_probs(nmv_context *ctx, int allow_hp, vp9_reader *r) {
@@ -178,7 +178,7 @@ static void read_mv_probs(nmv_context *ctx, int allow_hp, vp9_reader *r) {
   for (i = 0; i < 2; ++i) {
     nmv_component *const comp_ctx = &ctx->comps[i];
     for (j = 0; j < CLASS0_SIZE; ++j)
-      update_mv_probs(comp_ctx->class0_fp[j], 3, r);
+      update_mv_probs(comp_ctx->class0_fp[j], MV_FP_SIZE - 1, r);
     update_mv_probs(comp_ctx->fp, 3, r);
   }
 

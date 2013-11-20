@@ -68,7 +68,7 @@ static void build_nmv_component_cost_table(int *mvcost,
   int i, v;
   int sign_cost[2], class_cost[MV_CLASSES], class0_cost[CLASS0_SIZE];
   int bits_cost[MV_OFFSET_BITS][2];
-  int class0_fp_cost[CLASS0_SIZE][4], fp_cost[4];
+  int class0_fp_cost[CLASS0_SIZE][MV_FP_SIZE], fp_cost[MV_FP_SIZE];
   int class0_hp_cost[2], hp_cost[2];
 
   sign_cost[0] = vp9_cost_zero(mvcomp->sign);
@@ -145,8 +145,8 @@ static void counts_to_nmv_context(
     unsigned int (*branch_ct_classes)[MV_CLASSES - 1][2],
     unsigned int (*branch_ct_class0)[CLASS0_SIZE - 1][2],
     unsigned int (*branch_ct_bits)[MV_OFFSET_BITS][2],
-    unsigned int (*branch_ct_class0_fp)[CLASS0_SIZE][4 - 1][2],
-    unsigned int (*branch_ct_fp)[4 - 1][2],
+    unsigned int (*branch_ct_class0_fp)[CLASS0_SIZE][MV_FP_SIZE - 1][2],
+    unsigned int (*branch_ct_fp)[MV_FP_SIZE - 1][2],
     unsigned int (*branch_ct_class0_hp)[2],
     unsigned int (*branch_ct_hp)[2]) {
   int i, j, k;
@@ -205,8 +205,8 @@ void vp9_write_nmv_probs(VP9_COMP* const cpi, int usehp, vp9_writer* const bc) {
   unsigned int branch_ct_classes[2][MV_CLASSES - 1][2];
   unsigned int branch_ct_class0[2][CLASS0_SIZE - 1][2];
   unsigned int branch_ct_bits[2][MV_OFFSET_BITS][2];
-  unsigned int branch_ct_class0_fp[2][CLASS0_SIZE][4 - 1][2];
-  unsigned int branch_ct_fp[2][4 - 1][2];
+  unsigned int branch_ct_class0_fp[2][CLASS0_SIZE][MV_FP_SIZE - 1][2];
+  unsigned int branch_ct_fp[2][MV_FP_SIZE - 1][2];
   unsigned int branch_ct_class0_hp[2][2];
   unsigned int branch_ct_hp[2][2];
   nmv_context *mvc = &cpi->common.fc.nmvc;
@@ -238,12 +238,12 @@ void vp9_write_nmv_probs(VP9_COMP* const cpi, int usehp, vp9_writer* const bc) {
   for (i = 0; i < 2; ++i) {
     for (j = 0; j < CLASS0_SIZE; ++j) {
       int k;
-      for (k = 0; k < 3; ++k)
+      for (k = 0; k < MV_FP_SIZE - 1; ++k)
         update_mv(bc, branch_ct_class0_fp[i][j][k],
                   &mvc->comps[i].class0_fp[j][k], NMV_UPDATE_PROB);
     }
 
-    for (j = 0; j < 3; ++j)
+    for (j = 0; j < MV_FP_SIZE - 1; ++j)
       update_mv(bc, branch_ct_fp[i][j], &mvc->comps[i].fp[j], NMV_UPDATE_PROB);
   }
 

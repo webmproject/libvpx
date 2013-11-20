@@ -62,6 +62,7 @@ typedef enum {
 #define CLASS0_BITS    1  /* bits at integer precision for class 0 */
 #define CLASS0_SIZE    (1 << CLASS0_BITS)
 #define MV_OFFSET_BITS (MV_CLASSES + CLASS0_BITS - 2)
+#define MV_FP_SIZE 4
 
 #define MV_MAX_BITS    (MV_CLASSES + CLASS0_BITS + 2)
 #define MV_MAX         ((1 << MV_MAX_BITS) - 1)
@@ -80,7 +81,7 @@ extern struct vp9_token vp9_mv_class_encodings[MV_CLASSES];
 extern const vp9_tree_index vp9_mv_class0_tree[TREE_SIZE(CLASS0_SIZE)];
 extern struct vp9_token vp9_mv_class0_encodings[CLASS0_SIZE];
 
-extern const vp9_tree_index vp9_mv_fp_tree[TREE_SIZE(4)];
+extern const vp9_tree_index vp9_mv_fp_tree[TREE_SIZE(MV_FP_SIZE)];
 extern struct vp9_token vp9_mv_fp_encodings[4];
 
 typedef struct {
@@ -88,8 +89,8 @@ typedef struct {
   vp9_prob classes[MV_CLASSES - 1];
   vp9_prob class0[CLASS0_SIZE - 1];
   vp9_prob bits[MV_OFFSET_BITS];
-  vp9_prob class0_fp[CLASS0_SIZE][4 - 1];
-  vp9_prob fp[4 - 1];
+  vp9_prob class0_fp[CLASS0_SIZE][MV_FP_SIZE - 1];
+  vp9_prob fp[MV_FP_SIZE - 1];
   vp9_prob class0_hp;
   vp9_prob hp;
 } nmv_component;
@@ -116,8 +117,8 @@ typedef struct {
   unsigned int classes[MV_CLASSES];
   unsigned int class0[CLASS0_SIZE];
   unsigned int bits[MV_OFFSET_BITS][2];
-  unsigned int class0_fp[CLASS0_SIZE][4];
-  unsigned int fp[4];
+  unsigned int class0_fp[CLASS0_SIZE][MV_FP_SIZE];
+  unsigned int fp[MV_FP_SIZE];
   unsigned int class0_hp[2];
   unsigned int hp[2];
 } nmv_component_counts;
