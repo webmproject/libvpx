@@ -153,11 +153,8 @@ static void counts_to_nmv_context(
   vp9_tree_probs_from_distribution(vp9_mv_joint_tree, branch_ct_joint,
                                    nmv_count->joints);
   for (i = 0; i < 2; ++i) {
-    const uint32_t s0 = nmv_count->comps[i].sign[0];
-    const uint32_t s1 = nmv_count->comps[i].sign[1];
-
-    branch_ct_sign[i][0] = s0;
-    branch_ct_sign[i][1] = s1;
+    branch_ct_sign[i][0] = nmv_count->comps[i].sign[0];
+    branch_ct_sign[i][1] = nmv_count->comps[i].sign[1];
     vp9_tree_probs_from_distribution(vp9_mv_class_tree,
                                     branch_ct_classes[i],
                                     nmv_count->comps[i].classes);
@@ -165,11 +162,8 @@ static void counts_to_nmv_context(
                                      branch_ct_class0[i],
                                      nmv_count->comps[i].class0);
     for (j = 0; j < MV_OFFSET_BITS; ++j) {
-      const uint32_t b0 = nmv_count->comps[i].bits[j][0];
-      const uint32_t b1 = nmv_count->comps[i].bits[j][1];
-
-      branch_ct_bits[i][j][0] = b0;
-      branch_ct_bits[i][j][1] = b1;
+      branch_ct_bits[i][j][0] = nmv_count->comps[i].bits[j][0];
+      branch_ct_bits[i][j][1] = nmv_count->comps[i].bits[j][1];
     }
   }
   for (i = 0; i < 2; ++i) {
@@ -184,16 +178,11 @@ static void counts_to_nmv_context(
   }
   if (usehp) {
     for (i = 0; i < 2; ++i) {
-      const uint32_t c0_hp0 = nmv_count->comps[i].class0_hp[0];
-      const uint32_t c0_hp1 = nmv_count->comps[i].class0_hp[1];
-      const uint32_t hp0 = nmv_count->comps[i].hp[0];
-      const uint32_t hp1 = nmv_count->comps[i].hp[1];
+      branch_ct_class0_hp[i][0] = nmv_count->comps[i].class0_hp[0];
+      branch_ct_class0_hp[i][1] = nmv_count->comps[i].class0_hp[1];
 
-      branch_ct_class0_hp[i][0] = c0_hp0;
-      branch_ct_class0_hp[i][1] = c0_hp1;
-
-      branch_ct_hp[i][0] = hp0;
-      branch_ct_hp[i][1] = hp1;
+      branch_ct_hp[i][0] = nmv_count->comps[i].hp[0];
+      branch_ct_hp[i][1] = nmv_count->comps[i].hp[1];
     }
   }
 }
