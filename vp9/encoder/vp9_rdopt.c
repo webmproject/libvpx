@@ -567,8 +567,7 @@ static void dist_block(int plane, int block, TX_SIZE tx_size, void *arg) {
                                &this_sse) >> shift;
   args->sse  = this_sse >> shift;
 
-  if (x->skip_encode &&
-      xd->mi_8x8[0]->mbmi.ref_frame[0] == INTRA_FRAME) {
+  if (x->skip_encode && !is_inter_block(&xd->mi_8x8[0]->mbmi)) {
     // TODO(jingning): tune the model to better capture the distortion.
     int64_t p = (pd->dequant[1] * pd->dequant[1] *
                     (1 << ss_txfrm_size)) >> (shift + 2);
@@ -3754,7 +3753,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
 
   assert((cm->mcomp_filter_type == SWITCHABLE) ||
          (cm->mcomp_filter_type == best_mbmode.interp_filter) ||
-         (best_mbmode.ref_frame[0] == INTRA_FRAME));
+         !is_inter_block(&best_mbmode));
 
   // Updating rd_thresh_freq_fact[] here means that the different
   // partition/block sizes are handled independently based on the best
@@ -4325,8 +4324,8 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
     }
 
     // Keep record of best inter rd with single reference
-    if (xd->mi_8x8[0]->mbmi.ref_frame[0] > INTRA_FRAME &&
-        xd->mi_8x8[0]->mbmi.ref_frame[1] == NONE &&
+    if (is_inter_block(&xd->mi_8x8[0]->mbmi) &&
+        !has_second_ref(&xd->mi_8x8[0]->mbmi) &&
         !mode_excluded &&
         this_rd < best_inter_rd) {
       best_inter_rd = this_rd;
@@ -4489,7 +4488,7 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
 
   assert((cm->mcomp_filter_type == SWITCHABLE) ||
          (cm->mcomp_filter_type == best_mbmode.interp_filter) ||
-         (best_mbmode.ref_frame[0] == INTRA_FRAME));
+         !is_inter_block(&best_mbmode));
 
   // Updating rd_thresh_freq_fact[] here means that the different
   // partition/block sizes are handled independently based on the best
@@ -4515,7 +4514,7 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
   // macroblock modes
   *mbmi = best_mbmode;
   x->skip |= best_skip2;
-  if (best_mbmode.ref_frame[0] == INTRA_FRAME) {
+  if (!is_inter_block(&best_mbmode)) {
     for (i = 0; i < 4; i++)
       xd->mi_8x8[0]->bmi[i].as_mode = best_bmodes[i].as_mode;
   } else {

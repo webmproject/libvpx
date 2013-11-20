@@ -167,7 +167,7 @@ static void optimize_b(MACROBLOCK *mb,
 
   /* Now set up a Viterbi trellis to evaluate alternative roundings. */
   rdmult = mb->rdmult * err_mult;
-  if (mb->e_mbd.mi_8x8[0]->mbmi.ref_frame[0] == INTRA_FRAME)
+  if (!is_inter_block(&mb->e_mbd.mi_8x8[0]->mbmi))
     rdmult = (rdmult * 9) >> 4;
   rddiv = mb->rddiv;
   /* Initialize the sentinel node of the trellis. */
