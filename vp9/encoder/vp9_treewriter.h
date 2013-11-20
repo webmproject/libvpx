@@ -35,9 +35,8 @@ static INLINE unsigned int cost_branch256(const unsigned int ct[2],
 
 static INLINE void treed_write(vp9_writer *w,
                                vp9_tree tree, const vp9_prob *probs,
-                               int bits, int len) {
-  vp9_tree_index i = 0;
-
+                               int bits, int len,
+                               vp9_tree_index i) {
   do {
     const int bit = (bits >> --len) & 1;
     vp9_write(w, bit, probs[i >> 1]);
@@ -48,7 +47,7 @@ static INLINE void treed_write(vp9_writer *w,
 static INLINE void write_token(vp9_writer *w, vp9_tree tree,
                                const vp9_prob *probs,
                                const struct vp9_token *token) {
-  treed_write(w, tree, probs, token->value, token->len);
+  treed_write(w, tree, probs, token->value, token->len, 0);
 }
 
 static INLINE int treed_cost(vp9_tree tree, const vp9_prob *probs,

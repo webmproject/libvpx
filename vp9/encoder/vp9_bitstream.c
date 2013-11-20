@@ -268,18 +268,8 @@ static void pack_mb_tokens(vp9_writer* const w,
     const struct vp9_token *const a = &vp9_coef_encodings[t];
     const vp9_extra_bit *const b = &vp9_extra_bits[t];
     int i = 0;
-    const vp9_prob *pp;
     int v = a->value;
     int n = a->len;
-    vp9_prob probs[ENTROPY_NODES];
-
-    if (t >= TWO_TOKEN) {
-      vp9_model_to_full_probs(p->context_tree, probs);
-      pp = probs;
-    } else {
-      pp = p->context_tree;
-    }
-    assert(pp != 0);
 
     /* skip one or two nodes */
     if (p->skip_eob_node) {
@@ -287,11 +277,24 @@ static void pack_mb_tokens(vp9_writer* const w,
       i = 2 * p->skip_eob_node;
     }
 
-    do {
-      const int bb = (v >> --n) & 1;
-      vp9_write(w, bb, pp[i >> 1]);
-      i = vp9_coef_tree[i + bb];
-    } while (n);
+    // TODO(jbb): expanding this can lead to big gains.  It allows
+    // much better branch prediction and would enable us to avoid numerous
+    // lookups and compares.
+
+    // If we have a token that's in the constrained set, the coefficient tree
+    // is split into two treed writes.  The first treed write takes care of the
+    // unconstrained nodes.  The second treed write takes care of the
+    // constrained nodes.
+    if (t >= TWO_TOKEN && t < DCT_EOB_TOKEN) {
+      int len = UNCONSTRAINED_NODES - p->skip_eob_node;
+      int bits = v >> (n - len);
+      treed_write(w, vp9_coef_tree, p->context_tree, bits, len, i);
+      treed_write(w, vp9_coef_con_tree,
+                  vp9_pareto8_full[p->context_tree[PIVOT_NODE] - 1], v, n - len,
+                  0);
+    } else {
+      treed_write(w, vp9_coef_tree, p->context_tree, v, n, i);
+    }
 
     if (b->base_val) {
       const int e = p->extra, l = b->len;
@@ -328,7 +331,7 @@ static void write_sb_mv_ref(vp9_writer *w, MB_PREDICTION_MODE mode,
 static void write_segment_id(vp9_writer *w, const struct segmentation *seg,
                              int segment_id) {
   if (seg->enabled && seg->update_map)
-    treed_write(w, vp9_segment_tree, seg->tree_probs, segment_id, 3);
+    treed_write(w, vp9_segment_tree, seg->tree_probs, segment_id, 3, 0);
 }
 
 // This function encodes the reference frame
