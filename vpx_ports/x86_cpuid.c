@@ -38,7 +38,7 @@ vpx_cpu_t vpx_x86_vendor(void) {
   int i;
 
   /* Get the Vendor String from the CPU */
-  cpuid(0, reg_eax, vs[0], vs[2], vs[1]);
+  cpuid(0, 0, reg_eax, vs[0], vs[2], vs[1]);
 
   for (i = 0; i < VPX_CPU_LAST; i++) {
     if (strncmp((const char *)vs, cpuid_vendor_list[i].vendor_string, 12) == 0)
