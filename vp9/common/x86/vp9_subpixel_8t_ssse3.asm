@@ -839,6 +839,7 @@ sym(vp9_filter_block1d4_h8_ssse3):
     HORIZx4 0
 
     add rsp, 16 * 3
+    pop rsp
     ; begin epilog
     pop rdi
     pop rsi
@@ -952,6 +953,7 @@ sym(vp9_filter_block1d4_h8_avg_ssse3):
     HORIZx4 1
 
     add rsp, 16 * 3
+    pop rsp
     ; begin epilog
     pop rdi
     pop rsi
