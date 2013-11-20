@@ -37,9 +37,6 @@
 
 #include "vpx_ports/vpx_timer.h"
 
-
-extern void print_tree_update_probs();
-
 static void set_default_lf_deltas(struct loopfilter *lf);
 
 #define DEFAULT_INTERP_FILTER SWITCHABLE
@@ -466,69 +463,6 @@ static void configure_static_seg_features(VP9_COMP *cpi) {
     }
   }
 }
-
-#ifdef ENTROPY_STATS
-void vp9_update_mode_context_stats(VP9_COMP *cpi) {
-  VP9_COMMON *cm = &cpi->common;
-  int i, j;
-  unsigned int (*inter_mode_counts)[INTER_MODES - 1][2] =
-      cm->fc.inter_mode_counts;
-  int64_t (*mv_ref_stats)[INTER_MODES - 1][2] = cpi->mv_ref_stats;
-  FILE *f;
-
-  // Read the past stats counters
-  f = fopen("mode_context.bin",  "rb");
-  if (!f) {
-    vpx_memset(cpi->mv_ref_stats, 0, sizeof(cpi->mv_ref_stats));
-  } else {
-    fread(cpi->mv_ref_stats, sizeof(cpi->mv_ref_stats), 1, f);
-    fclose(f);
-  }
-
-  // Add in the values for this frame
-  for (i = 0; i < INTER_MODE_CONTEXTS; i++) {
-    for (j = 0; j < INTER_MODES - 1; j++) {
-      mv_ref_stats[i][j][0] += (int64_t)inter_mode_counts[i][j][0];
-      mv_ref_stats[i][j][1] += (int64_t)inter_mode_counts[i][j][1];
-    }
-  }
-
-  // Write back the accumulated stats
-  f = fopen("mode_context.bin",  "wb");
-  fwrite(cpi->mv_ref_stats, sizeof(cpi->mv_ref_stats), 1, f);
-  fclose(f);
-}
-
-void print_mode_context(VP9_COMP *cpi) {
-  FILE *f = fopen("vp9_modecont.c", "a");
-  int i, j;
-
-  fprintf(f, "#include \"vp9_entropy.h\"\n");
-  fprintf(
-      f,
-      "const int inter_mode_probs[INTER_MODE_CONTEXTS][INTER_MODES - 1] =");
-  fprintf(f, "{\n");
-  for (j = 0; j < INTER_MODE_CONTEXTS; j++) {
-    fprintf(f, "  {/* %d */ ", j);
-    fprintf(f, "    ");
-    for (i = 0; i < INTER_MODES - 1; i++) {
-      int this_prob;
-      int64_t count = cpi->mv_ref_stats[j][i][0] + cpi->mv_ref_stats[j][i][1];
-      if (count)
-        this_prob = ((cpi->mv_ref_stats[j][i][0] * 256) + (count >> 1)) / count;
-      else
-        this_prob = 128;
-
-      // context probs
-      fprintf(f, "%5d, ", this_prob);
-    }
-    fprintf(f, "  },\n");
-  }
-
-  fprintf(f, "};\n");
-  fclose(f);
-}
-#endif  // ENTROPY_STATS
 
 // DEBUG: Print out the segment id of each MB in the current frame.
 static void print_seg_map(VP9_COMP *cpi) {
@@ -1901,14 +1835,6 @@ void vp9_remove_compressor(VP9_PTR *ptr) {
     if (cpi->pass == 2) {
       vp9_end_second_pass(cpi);
     }
-
-#ifdef ENTROPY_STATS
-    if (cpi->pass != 1) {
-      print_context_counters();
-      print_tree_update_probs();
-      print_mode_context(cpi);
-    }
-#endif
 
 #ifdef MODE_STATS
     if (cpi->pass != 1) {
