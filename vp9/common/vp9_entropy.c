@@ -128,6 +128,20 @@ const vp9_tree_index vp9_coef_tree[TREE_SIZE(MAX_ENTROPY_TOKENS)] = {
   -DCT_VAL_CATEGORY5, -DCT_VAL_CATEGORY6    /* 10 = CAT_FIVE */
 };
 
+// Unconstrained Node Tree
+const vp9_tree_index vp9_coef_con_tree[TREE_SIZE(MAX_ENTROPY_TOKENS)] = {
+  2, 6,                                     /* 0 = LOW_VAL */
+  -TWO_TOKEN, 4,                            /* 1 = TWO */
+  -THREE_TOKEN, -FOUR_TOKEN,                /* 2 = THREE */
+  8, 10,                                    /* 3 = HIGH_LOW */
+  -DCT_VAL_CATEGORY1, -DCT_VAL_CATEGORY2,   /* 4 = CAT_ONE */
+  12, 14,                                   /* 5 = CAT_THREEFOUR */
+  -DCT_VAL_CATEGORY3, -DCT_VAL_CATEGORY4,   /* 6 = CAT_THREE */
+  -DCT_VAL_CATEGORY5, -DCT_VAL_CATEGORY6    /* 7 = CAT_FIVE */
+};
+
+
+
 struct vp9_token vp9_coef_encodings[MAX_ENTROPY_TOKENS];
 
 /* Trees for extra bits.  Probabilities are constant and
