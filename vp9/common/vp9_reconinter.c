@@ -106,9 +106,10 @@ static void build_inter_predictors(MACROBLOCKD *xd, int plane, int block,
                                    BLOCK_SIZE bsize, int pred_w, int pred_h,
                                    int mi_x, int mi_y) {
   struct macroblockd_plane *const pd = &xd->plane[plane];
-  const int bwl = b_width_log2(bsize) - pd->subsampling_x;
+  const BLOCK_SIZE plane_bsize = get_plane_block_size(bsize, pd);
+  const int bwl = b_width_log2(plane_bsize);
   const int bw = 4 << bwl;
-  const int bh = plane_block_height(bsize, pd);
+  const int bh = 4 * num_4x4_blocks_high_lookup[plane_bsize];
   const int x = 4 * (block & ((1 << bwl) - 1));
   const int y = 4 * (block >> bwl);
   const MODE_INFO *mi = xd->mi_8x8[0];

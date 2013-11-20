@@ -1549,9 +1549,9 @@ static int64_t encode_inter_mb_segment(VP9_COMP *cpi,
   struct macroblockd_plane *const pd = &xd->plane[0];
   struct macroblock_plane *const p = &x->plane[0];
   MODE_INFO *const mi = xd->mi_8x8[0];
-  const BLOCK_SIZE bsize = mi->mbmi.sb_type;
-  const int width = plane_block_width(bsize, pd);
-  const int height = plane_block_height(bsize, pd);
+  const BLOCK_SIZE plane_bsize = get_plane_block_size(mi->mbmi.sb_type, pd);
+  const int width = 4 * num_4x4_blocks_wide_lookup[plane_bsize];
+  const int height = 4 * num_4x4_blocks_high_lookup[plane_bsize];
   int idx, idy;
 
   const uint8_t *const src = &p->src.buf[raster_block_offset(BLOCK_8X8, i,
