@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdX//808\u003d",
+        "filename": "vp9/common/vp9_entropy.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 141,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2013-11-20T17:50:04Z",
+      "side": 1,
+      "message": "Minor nit about naming. Actually this is the constrained tree, since the values are constrained by the value of the pivot node.\nSo suggest naming to vp9_coef_con_tree.",
+      "revId": "0a39b1cb804b1acbaeef65d2bcb714c17f574c74",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
