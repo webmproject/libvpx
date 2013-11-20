@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdX//8uM\u003d",
+        "filename": "test/svc_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 263,
+      "author": {
+        "id": 1003234
+      },
+      "writtenOn": "2013-11-20T22:23:28Z",
+      "side": 1,
+      "message": "This comment is now incorrect, should be\n// This is an I-frame",
+      "revId": "fed736895e1ad2ad50ae9677f3d63e69d26d265e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX//8uI\u003d",
+        "filename": "vp9_spatial_scalable_encoder.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 1003234
+      },
+      "writtenOn": "2013-11-20T22:23:28Z",
+      "side": 1,
+      "message": "dummy_frame_arg should be deleted",
+      "revId": "fed736895e1ad2ad50ae9677f3d63e69d26d265e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
