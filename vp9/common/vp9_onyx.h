@@ -64,6 +64,12 @@ extern "C"
     FRAMEFLAGS_ALTREF = 4,
   } FRAMETYPE_FLAGS;
 
+  typedef enum {
+    NO_AQ = 0,
+    VARIANCE_AQ = 1,
+    AQ_MODES_COUNT  // This should always be the last member of the enum
+  } AQ_MODES;
+
   typedef struct {
     int version;  // 4 versions of bitstream defined:
                   //   0 - best quality/slowest decode,
@@ -128,6 +134,7 @@ extern "C"
     int best_allowed_q;
     int cq_level;
     int lossless;
+    int aq_mode;  // Adaptive Quantization mode
 
     // two pass datarate control
     int two_pass_vbrbias;        // two pass datarate control tweaks

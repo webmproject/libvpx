@@ -380,6 +380,9 @@ static const arg_def_t lossless = ARG_DEF(NULL, "lossless", 1, "Lossless mode");
 #if CONFIG_VP9_ENCODER
 static const arg_def_t frame_parallel_decoding  = ARG_DEF(
     NULL, "frame-parallel", 1, "Enable frame parallel decodability features");
+static const arg_def_t aq_mode  = ARG_DEF(
+    NULL, "aq-mode", 1,
+    "Adaptive quantization mode (0: disabled (by default), 1: variance based)");
 #endif
 
 #if CONFIG_VP8_ENCODER
@@ -404,7 +407,7 @@ static const arg_def_t *vp9_args[] = {
   &cpu_used, &auto_altref, &noise_sens, &sharpness, &static_thresh,
   &tile_cols, &tile_rows, &arnr_maxframes, &arnr_strength, &arnr_type,
   &tune_ssim, &cq_level, &max_intra_rate_pct, &lossless,
-  &frame_parallel_decoding,
+  &frame_parallel_decoding, &aq_mode,
   NULL
 };
 static const int vp9_arg_ctrl_map[] = {
@@ -413,7 +416,7 @@ static const int vp9_arg_ctrl_map[] = {
   VP9E_SET_TILE_COLUMNS, VP9E_SET_TILE_ROWS,
   VP8E_SET_ARNR_MAXFRAMES, VP8E_SET_ARNR_STRENGTH, VP8E_SET_ARNR_TYPE,
   VP8E_SET_TUNING, VP8E_SET_CQ_LEVEL, VP8E_SET_MAX_INTRA_BITRATE_PCT,
-  VP9E_SET_LOSSLESS, VP9E_SET_FRAME_PARALLEL_DECODING,
+  VP9E_SET_LOSSLESS, VP9E_SET_FRAME_PARALLEL_DECODING, VP9E_SET_AQ_MODE,
   0
 };
 #endif

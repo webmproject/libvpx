@@ -193,6 +193,7 @@ enum vp8e_enc_control_id {
   VP9E_SET_TILE_COLUMNS,
   VP9E_SET_TILE_ROWS,
   VP9E_SET_FRAME_PARALLEL_DECODING,
+  VP9E_SET_AQ_MODE,
 
   VP9E_SET_SVC,
   VP9E_SET_SVC_PARAMETERS
@@ -342,6 +343,8 @@ VPX_CTRL_USE_TYPE(VP8E_SET_MAX_INTRA_BITRATE_PCT, unsigned int)
 VPX_CTRL_USE_TYPE(VP9E_SET_LOSSLESS, unsigned int)
 
 VPX_CTRL_USE_TYPE(VP9E_SET_FRAME_PARALLEL_DECODING, unsigned int)
+
+VPX_CTRL_USE_TYPE(VP9E_SET_AQ_MODE, unsigned int)
 
 /*! @} - end defgroup vp8_encoder */
 #ifdef __cplusplus
