@@ -1345,43 +1345,37 @@ void vp9_idct8x8_add(const int16_t *input, uint8_t *dest, int stride, int eob) {
   // coefficients. Use eobs to decide what to do.
   // TODO(yunqingwang): "eobs = 1" case is also handled in vp9_short_idct8x8_c.
   // Combine that with code here.
-  if (eob) {
-    if (eob == 1)
-      // DC only DCT coefficient
-      vp9_idct8x8_1_add(input, dest, stride);
-    else if (eob <= 10)
-      vp9_idct8x8_10_add(input, dest, stride);
-    else
-      vp9_idct8x8_64_add(input, dest, stride);
-  }
+  if (eob == 1)
+    // DC only DCT coefficient
+    vp9_idct8x8_1_add(input, dest, stride);
+  else if (eob <= 10)
+    vp9_idct8x8_10_add(input, dest, stride);
+  else
+    vp9_idct8x8_64_add(input, dest, stride);
 }
 
 void vp9_idct16x16_add(const int16_t *input, uint8_t *dest, int stride,
                        int eob) {
   /* The calculation can be simplified if there are not many non-zero dct
    * coefficients. Use eobs to separate different cases. */
-  if (eob) {
-    if (eob == 1)
-      /* DC only DCT coefficient. */
-      vp9_idct16x16_1_add(input, dest, stride);
-    else if (eob <= 10)
-      vp9_idct16x16_10_add(input, dest, stride);
-    else
-      vp9_idct16x16_256_add(input, dest, stride);
-  }
+  if (eob == 1)
+    /* DC only DCT coefficient. */
+    vp9_idct16x16_1_add(input, dest, stride);
+  else if (eob <= 10)
+    vp9_idct16x16_10_add(input, dest, stride);
+  else
+    vp9_idct16x16_256_add(input, dest, stride);
 }
 
 void vp9_idct32x32_add(const int16_t *input, uint8_t *dest, int stride,
                        int eob) {
-  if (eob) {
-    if (eob == 1)
-      vp9_idct32x32_1_add(input, dest, stride);
-    else if (eob <= 34)
-      // non-zero coeff only in upper-left 8x8
-      vp9_idct32x32_34_add(input, dest, stride);
-    else
-      vp9_idct32x32_1024_add(input, dest, stride);
-  }
+  if (eob == 1)
+    vp9_idct32x32_1_add(input, dest, stride);
+  else if (eob <= 34)
+    // non-zero coeff only in upper-left 8x8
+    vp9_idct32x32_34_add(input, dest, stride);
+  else
+    vp9_idct32x32_1024_add(input, dest, stride);
 }
 
 // iht
@@ -1398,9 +1392,7 @@ void vp9_iht8x8_add(TX_TYPE tx_type, const int16_t *input, uint8_t *dest,
   if (tx_type == DCT_DCT) {
     vp9_idct8x8_add(input, dest, stride, eob);
   } else {
-    if (eob > 0) {
-      vp9_iht8x8_64_add(input, dest, stride, tx_type);
-    }
+    vp9_iht8x8_64_add(input, dest, stride, tx_type);
   }
 }
 
@@ -1409,8 +1401,6 @@ void vp9_iht16x16_add(TX_TYPE tx_type, const int16_t *input, uint8_t *dest,
   if (tx_type == DCT_DCT) {
     vp9_idct16x16_add(input, dest, stride, eob);
   } else {
-    if (eob > 0) {
-      vp9_iht16x16_256_add(input, dest, stride, tx_type);
-    }
+    vp9_iht16x16_256_add(input, dest, stride, tx_type);
   }
 }
