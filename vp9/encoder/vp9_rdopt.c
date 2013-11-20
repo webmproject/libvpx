@@ -2636,6 +2636,16 @@ static void joint_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
   vpx_free(second_pred);
 }
 
+static INLINE void restore_dst_buf(MACROBLOCKD *xd,
+                                   uint8_t *orig_dst[MAX_MB_PLANE],
+                                   int orig_dst_stride[MAX_MB_PLANE]) {
+  int i;
+  for (i = 0; i < MAX_MB_PLANE; i++) {
+    xd->plane[i].dst.buf = orig_dst[i];
+    xd->plane[i].dst.stride = orig_dst_stride[i];
+  }
+}
+
 static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
                                  const TileInfo *const tile,
                                  BLOCK_SIZE bsize,
@@ -2787,6 +2797,7 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
   if (is_comp_pred)
     intpel_mv &= (mbmi->mv[1].as_mv.row & 15) == 0 &&
         (mbmi->mv[1].as_mv.col & 15) == 0;
+
   // Search for best switchable filter by checking the variance of
   // pred error irrespective of whether the filter will be used
   if (cm->mcomp_filter_type != BILINEAR) {
@@ -2826,10 +2837,7 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
               (cm->mcomp_filter_type != SWITCHABLE &&
                (cm->mcomp_filter_type == mbmi->interp_filter ||
                 (i == 0 && intpel_mv)))) {
-            for (j = 0; j < MAX_MB_PLANE; j++) {
-              xd->plane[j].dst.buf = orig_dst[j];
-              xd->plane[j].dst.stride = orig_dst_stride[j];
-            }
+            restore_dst_buf(xd, orig_dst, orig_dst_stride);
           } else {
             for (j = 0; j < MAX_MB_PLANE; j++) {
               xd->plane[j].dst.buf = tmp_buf + j * 64 * 64;
@@ -2853,10 +2861,7 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
         }
         if (i == 0 && cpi->sf.use_rd_breakout && ref_best_rd < INT64_MAX) {
           if (rd / 2 > ref_best_rd) {
-            for (i = 0; i < MAX_MB_PLANE; i++) {
-              xd->plane[i].dst.buf = orig_dst[i];
-              xd->plane[i].dst.stride = orig_dst_stride[i];
-            }
+            restore_dst_buf(xd, orig_dst, orig_dst_stride);
             return INT64_MAX;
           }
         }
@@ -2875,11 +2880,7 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
           pred_exists = 1;
         }
       }
-
-      for (i = 0; i < MAX_MB_PLANE; i++) {
-        xd->plane[i].dst.buf = orig_dst[i];
-        xd->plane[i].dst.stride = orig_dst_stride[i];
-      }
+      restore_dst_buf(xd, orig_dst, orig_dst_stride);
     }
   }
   // Set the appropriate filter
@@ -2911,10 +2912,7 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
     // if current pred_error modeled rd is substantially more than the best
     // so far, do not bother doing full rd
     if (rd / 2 > ref_best_rd) {
-      for (i = 0; i < MAX_MB_PLANE; i++) {
-        xd->plane[i].dst.buf = orig_dst[i];
-        xd->plane[i].dst.stride = orig_dst_stride[i];
-      }
+      restore_dst_buf(xd, orig_dst, orig_dst_stride);
       return INT64_MAX;
     }
   }
@@ -3017,10 +3015,7 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
     if (*rate_y == INT_MAX) {
       *rate2 = INT_MAX;
       *distortion = INT64_MAX;
-      for (i = 0; i < MAX_MB_PLANE; i++) {
-        xd->plane[i].dst.buf = orig_dst[i];
-        xd->plane[i].dst.stride = orig_dst_stride[i];
-      }
+      restore_dst_buf(xd, orig_dst, orig_dst_stride);
       return INT64_MAX;
     }
 
@@ -3035,10 +3030,7 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
     if (*rate_uv == INT_MAX) {
       *rate2 = INT_MAX;
       *distortion = INT64_MAX;
-      for (i = 0; i < MAX_MB_PLANE; i++) {
-        xd->plane[i].dst.buf = orig_dst[i];
-        xd->plane[i].dst.stride = orig_dst_stride[i];
-      }
+      restore_dst_buf(xd, orig_dst, orig_dst_stride);
       return INT64_MAX;
     }
 
@@ -3048,11 +3040,7 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
     *skippable = skippable_y && skippable_uv;
   }
 
-  for (i = 0; i < MAX_MB_PLANE; i++) {
-    xd->plane[i].dst.buf = orig_dst[i];
-    xd->plane[i].dst.stride = orig_dst_stride[i];
-  }
-
+  restore_dst_buf(xd, orig_dst, orig_dst_stride);
   return this_rd;  // if 0, this will be re-calculated by caller
 }
 
