@@ -139,8 +139,7 @@ static int decode_coefs(VP9_COMMON *cm, const MACROBLOCKD *xd,
   DECODE_ZERO:
     if (!vp9_read(r, prob[ZERO_CONTEXT_NODE])) {
       INCREMENT_COUNT(ZERO_TOKEN);
-      token_cache[scan[c]] = vp9_pt_energy_class[ZERO_TOKEN];
-      dqv = dq[1];                                          \
+      dqv = dq[1];
       ++c;
       goto SKIP_START;
     }
