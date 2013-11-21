@@ -158,10 +158,13 @@
     pmaddubsw   xmm6, k6k7
 
     paddsw      xmm0, xmm6
-    paddsw      xmm0, xmm2
+    movdqa      xmm1, xmm2
+    pmaxsw      xmm2, xmm4
+    pminsw      xmm4, xmm1
     paddsw      xmm0, xmm4
-    paddsw      xmm0, krd
+    paddsw      xmm0, xmm2
 
+    paddsw      xmm0, krd
     psraw       xmm0, 7
     packuswb    xmm0, xmm0
 
@@ -243,10 +246,13 @@
     pmaddubsw   xmm6, k6k7
 
     paddsw      xmm0, xmm6
-    paddsw      xmm0, xmm2
+    movdqa      xmm1, xmm2
+    pmaxsw      xmm2, xmm4
+    pminsw      xmm4, xmm1
     paddsw      xmm0, xmm4
-    paddsw      xmm0, krd
+    paddsw      xmm0, xmm2
 
+    paddsw      xmm0, krd
     psraw       xmm0, 7
     packuswb    xmm0, xmm0
 %if %1
@@ -635,9 +641,13 @@ sym(vp9_filter_block1d16_v8_avg_ssse3):
     pmaddubsw   %3,   k4k5
     pmaddubsw   %4,   k6k7
 
-    paddsw      %1,   %2
     paddsw      %1,   %4
+    movdqa      %4,   %2
+    pmaxsw      %2,   %3
+    pminsw      %3,   %4
     paddsw      %1,   %3
+    paddsw      %1,   %2
+
     paddsw      %1,   krd
     psraw       %1,   7
     packuswb    %1,   %1
@@ -783,12 +793,19 @@ sym(vp9_filter_block1d16_v8_avg_ssse3):
     pmaddubsw   xmm6,   k4k5
     pmaddubsw   xmm7,   k6k7
 
-    paddsw      xmm0,   xmm1
     paddsw      xmm0,   xmm3
+    movdqa      xmm3,   xmm1
+    pmaxsw      xmm1,   xmm2
+    pminsw      xmm2,   xmm3
     paddsw      xmm0,   xmm2
-    paddsw      xmm4,   xmm5
+    paddsw      xmm0,   xmm1
+
     paddsw      xmm4,   xmm7
+    movdqa      xmm7,   xmm5
+    pmaxsw      xmm5,   xmm6
+    pminsw      xmm6,   xmm7
     paddsw      xmm4,   xmm6
+    paddsw      xmm4,   xmm5
 
     paddsw      xmm0,   krd
     paddsw      xmm4,   krd
