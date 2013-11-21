@@ -1,0 +1,89 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdX//8ow\u003d",
+        "filename": "vp9/encoder/vp9_onyx_int.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 444,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2013-11-21T15:22:59Z",
+      "side": 1,
+      "message": "What use does this var have other than rate control?",
+      "revId": "331fff5636be9612ef02b17a62e54a5f10cb14d4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX//8o0\u003d",
+        "filename": "vp9/encoder/vp9_onyx_int.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 449,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2013-11-21T15:22:59Z",
+      "side": 1,
+      "message": "this is a rate control thing - I think",
+      "revId": "331fff5636be9612ef02b17a62e54a5f10cb14d4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX//8os\u003d",
+        "filename": "vp9/encoder/vp9_onyx_int.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 473,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2013-11-21T15:22:59Z",
+      "side": 1,
+      "message": "I think all these boosts are rate control as is target bandwidth.",
+      "revId": "331fff5636be9612ef02b17a62e54a5f10cb14d4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX//8oo\u003d",
+        "filename": "vp9/encoder/vp9_onyx_int.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 499,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2013-11-21T15:22:59Z",
+      "side": 1,
+      "message": "rate control var?  I think.",
+      "revId": "331fff5636be9612ef02b17a62e54a5f10cb14d4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX//8ok\u003d",
+        "filename": "vp9/encoder/vp9_onyx_int.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 533,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2013-11-21T15:22:59Z",
+      "side": 1,
+      "message": "shouldn\u0027t this move too?",
+      "revId": "331fff5636be9612ef02b17a62e54a5f10cb14d4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
