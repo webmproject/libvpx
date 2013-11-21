@@ -238,11 +238,16 @@ static const arg_def_t q_hist_n         = ARG_DEF(NULL, "q-hist", 1,
                                                   "Show quantizer histogram (n-buckets)");
 static const arg_def_t rate_hist_n         = ARG_DEF(NULL, "rate-hist", 1,
                                                      "Show rate histogram (n-buckets)");
+static const arg_def_t disable_warnings =
+    ARG_DEF(NULL, "disable-warnings", 0,
+            "Disable warnings about potentially incorrect encode settings.");
+
 static const arg_def_t *main_args[] = {
   &debugmode,
   &outputfile, &codecarg, &passes, &pass_arg, &fpf_name, &limit, &skip,
   &deadline, &best_dl, &good_dl, &rt_dl,
-  &quietarg, &verbosearg, &psnrarg, &use_ivf, &out_part, &q_hist_n, &rate_hist_n,
+  &quietarg, &verbosearg, &psnrarg, &use_ivf, &out_part, &q_hist_n,
+  &rate_hist_n, &disable_warnings,
   NULL
 };
 
@@ -876,6 +881,7 @@ struct global_config {
   int                       debug;
   int                       show_q_hist_buckets;
   int                       show_rate_hist_buckets;
+  int                       disable_warnings;
 };
 
 
@@ -1277,14 +1283,13 @@ static int parse_stream_params(struct global_config *global,
 }
 
 
-#define FOREACH_STREAM(func)\
-  do\
-  {\
-    struct stream_state  *stream;\
-    \
-    for(stream = streams; stream; stream = stream->next)\
-      func;\
-  }while(0)
+#define FOREACH_STREAM(func) \
+  do { \
+    struct stream_state *stream; \
+    for(stream = streams; stream; stream = stream->next) { \
+      func; \
+    } \
+  } while (0)
 
 
 static void validate_stream_config(struct stream_state *stream) {
@@ -1751,18 +1756,44 @@ static void print_time(const char *label, int64_t etl) {
   }
 }
 
-int main(int argc, const char **argv_) {
-  int                    pass;
-  vpx_image_t            raw;
-  int                    frame_avail, got_data;
+int continue_prompt() {
+  int c;
+  fprintf(stderr, "Continue? (y to continue) ");
+  c = getchar();
+  return c == 'y';
+}
 
-  struct VpxInputContext  input = {0};
-  struct global_config    global;
-  struct stream_state     *streams = NULL;
-  char                   **argv, **argi;
-  uint64_t                 cx_time = 0;
-  int                      stream_cnt = 0;
-  int                      res = 0;
+void check_quantizer(struct global_config* config, int min_q, int max_q) {
+  int check_failed = 0;
+
+  if (config->disable_warnings)
+    return;
+
+  if (min_q == max_q || abs(max_q - min_q) < 8) {
+    check_failed = 1;
+  }
+
+  if (check_failed) {
+    warn("Bad quantizer values. Quantizer values must not be equal, and "
+         "should differ by at least 8.");
+
+    if (!continue_prompt())
+      exit(EXIT_FAILURE);
+  }
+}
+
+int main(int argc, const char **argv_) {
+  int pass;
+  vpx_image_t raw;
+  int frame_avail, got_data;
+
+  struct VpxInputContext input = {0};
+  struct global_config global;
+  struct stream_state *streams = NULL;
+  char **argv, **argi;
+  uint64_t cx_time = 0;
+  int stream_cnt = 0;
+  int res = 0;
 
   exec_name = argv_[0];
 
@@ -1781,6 +1812,7 @@ int main(int argc, const char **argv_) {
    */
   argv = argv_dup(argc - 1, argv_ + 1);
   parse_global_config(&global, argv);
+
 
   {
     /* Now parse each stream's parameters. Using a local scope here
@@ -1802,6 +1834,10 @@ int main(int argc, const char **argv_) {
     if (argi[0][0] == '-' && argi[0][1])
       die("Error: Unrecognized option %s\n", *argi);
 
+  FOREACH_STREAM(
+      check_quantizer(&global,
+                      stream->config.cfg.rc_min_quantizer,
+                      stream->config.cfg.rc_max_quantizer););
   /* Handle non-option arguments */
   input.filename = argv[0];
 
