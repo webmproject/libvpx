@@ -728,6 +728,32 @@ static void choose_largest_txfm_size(VP9_COMP *cpi, MACROBLOCK *x,
   cpi->tx_stepdown_count[0]++;
 }
 
+static TX_SIZE select_tx_size(TX_MODE tx_mode, TX_SIZE max_tx_size,
+                              int64_t rd[][2]) {
+  if (max_tx_size == TX_32X32 &&
+      (tx_mode == ALLOW_32X32 ||
+       (tx_mode == TX_MODE_SELECT &&
+       rd[TX_32X32][1] < rd[TX_16X16][1] &&
+       rd[TX_32X32][1] < rd[TX_8X8][1] &&
+       rd[TX_32X32][1] < rd[TX_4X4][1]))) {
+    return TX_32X32;
+  } else if (max_tx_size >= TX_16X16 &&
+             (tx_mode == ALLOW_16X16 ||
+              tx_mode == ALLOW_32X32 ||
+              (tx_mode == TX_MODE_SELECT &&
+               rd[TX_16X16][1] < rd[TX_8X8][1] &&
+               rd[TX_16X16][1] < rd[TX_4X4][1]))) {
+    return TX_16X16;
+  } else if (tx_mode == ALLOW_8X8 ||
+             tx_mode == ALLOW_16X16 ||
+             tx_mode == ALLOW_32X32 ||
+             (tx_mode == TX_MODE_SELECT && rd[TX_8X8][1] < rd[TX_4X4][1])) {
+    return TX_8X8;
+  } else {
+    return TX_4X4;
+  }
+}
+
 static void choose_txfm_size_from_rd(VP9_COMP *cpi, MACROBLOCK *x,
                                      int (*r)[2], int *rate,
                                      int64_t *d, int64_t *distortion,
@@ -774,27 +800,7 @@ static void choose_txfm_size_from_rd(VP9_COMP *cpi, MACROBLOCK *x,
     }
   }
 
-  if (max_tx_size == TX_32X32 &&
-      (cm->tx_mode == ALLOW_32X32 ||
-       (cm->tx_mode == TX_MODE_SELECT &&
-        rd[TX_32X32][1] < rd[TX_16X16][1] && rd[TX_32X32][1] < rd[TX_8X8][1] &&
-        rd[TX_32X32][1] < rd[TX_4X4][1]))) {
-    mbmi->tx_size = TX_32X32;
-  } else if (max_tx_size >= TX_16X16 &&
-             (cm->tx_mode == ALLOW_16X16 ||
-              cm->tx_mode == ALLOW_32X32 ||
-              (cm->tx_mode == TX_MODE_SELECT &&
-               rd[TX_16X16][1] < rd[TX_8X8][1] &&
-               rd[TX_16X16][1] < rd[TX_4X4][1]))) {
-    mbmi->tx_size = TX_16X16;
-  } else if (cm->tx_mode == ALLOW_8X8 ||
-             cm->tx_mode == ALLOW_16X16 ||
-             cm->tx_mode == ALLOW_32X32 ||
-           (cm->tx_mode == TX_MODE_SELECT && rd[TX_8X8][1] < rd[TX_4X4][1])) {
-    mbmi->tx_size = TX_8X8;
-  } else {
-    mbmi->tx_size = TX_4X4;
-  }
+  mbmi->tx_size = select_tx_size(cm->tx_mode, max_tx_size, rd);
 
   *distortion = d[mbmi->tx_size];
   *rate       = r[mbmi->tx_size][cm->tx_mode == TX_MODE_SELECT];
@@ -880,29 +886,7 @@ static void choose_txfm_size_from_modelrd(VP9_COMP *cpi, MACROBLOCK *x,
     rd[n][1] = (int64_t)(scale_rd[n] * rd[n][1]);
   }
 
-  if (max_tx_size == TX_32X32 &&
-      (cm->tx_mode == ALLOW_32X32 ||
-       (cm->tx_mode == TX_MODE_SELECT &&
-        rd[TX_32X32][1] <= rd[TX_16X16][1] &&
-        rd[TX_32X32][1] <= rd[TX_8X8][1] &&
-        rd[TX_32X32][1] <= rd[TX_4X4][1]))) {
-    mbmi->tx_size = TX_32X32;
-  } else if (max_tx_size >= TX_16X16 &&
-             (cm->tx_mode == ALLOW_16X16 ||
-              cm->tx_mode == ALLOW_32X32 ||
-              (cm->tx_mode == TX_MODE_SELECT &&
-               rd[TX_16X16][1] <= rd[TX_8X8][1] &&
-               rd[TX_16X16][1] <= rd[TX_4X4][1]))) {
-    mbmi->tx_size = TX_16X16;
-  } else if (cm->tx_mode == ALLOW_8X8 ||
-             cm->tx_mode == ALLOW_16X16 ||
-             cm->tx_mode == ALLOW_32X32 ||
-           (cm->tx_mode == TX_MODE_SELECT &&
-            rd[TX_8X8][1] <= rd[TX_4X4][1])) {
-    mbmi->tx_size = TX_8X8;
-  } else {
-    mbmi->tx_size = TX_4X4;
-  }
+  mbmi->tx_size = select_tx_size(cm->tx_mode, max_tx_size, rd);
 
   // Actually encode using the chosen mode if a model was used, but do not
   // update the r, d costs
