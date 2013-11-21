@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdX//8ko\u003d",
+        "filename": "vp9/encoder/vp9_bitstream.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 889,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2013-11-21T20:41:58Z",
+      "side": 1,
+      "message": "For tx_size \u003e max_tx_size, do we really need to do this since we do not update_coef_probs below? probably worth a look.",
+      "revId": "864e7c51b6ac48142250fd02bd6e225aabfa0a3c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
