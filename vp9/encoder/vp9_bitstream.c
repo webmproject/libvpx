@@ -706,12 +706,6 @@ static void build_tree_distribution(VP9_COMP *cpi, TX_SIZE tx_size) {
   }
 }
 
-static void build_coeff_contexts(VP9_COMP *cpi) {
-  TX_SIZE t;
-  for (t = TX_4X4; t <= TX_32X32; t++)
-    build_tree_distribution(cpi, t);
-}
-
 static void update_coef_probs_common(vp9_writer* const bc, VP9_COMP *cpi,
                                      TX_SIZE tx_size) {
   vp9_coeff_probs_model *new_frame_coef_probs = cpi->frame_coef_probs[tx_size];
@@ -885,25 +879,17 @@ static void update_coef_probs_common(vp9_writer* const bc, VP9_COMP *cpi,
   }
 }
 
-static void update_coef_probs(VP9_COMP* const cpi, vp9_writer* const bc) {
+static void update_coef_probs(VP9_COMP* cpi, vp9_writer* w) {
   const TX_MODE tx_mode = cpi->common.tx_mode;
-
+  const TX_SIZE max_tx_size = tx_mode_to_biggest_tx_size[tx_mode];
+  TX_SIZE tx_size;
   vp9_clear_system_state();
 
-  // Build the cofficient contexts based on counts collected in encode loop
-  build_coeff_contexts(cpi);
+  for (tx_size = TX_4X4; tx_size <= TX_32X32; ++tx_size)
+    build_tree_distribution(cpi, tx_size);
 
-  update_coef_probs_common(bc, cpi, TX_4X4);
-
-  // do not do this if not even allowed
-  if (tx_mode > ONLY_4X4)
-    update_coef_probs_common(bc, cpi, TX_8X8);
-
-  if (tx_mode > ALLOW_8X8)
-    update_coef_probs_common(bc, cpi, TX_16X16);
-
-  if (tx_mode > ALLOW_16X16)
-    update_coef_probs_common(bc, cpi, TX_32X32);
+  for (tx_size = TX_4X4; tx_size <= max_tx_size; ++tx_size)
+    update_coef_probs_common(w, cpi, tx_size);
 }
 
 static void encode_loopfilter(struct loopfilter *lf,
