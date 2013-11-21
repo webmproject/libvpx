@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdX//8iQ\u003d",
+        "filename": "warnings.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-11-21T23:08:11Z",
+      "side": 1,
+      "message": "it would be nice to have a -y option. that still allowed the warning to be displayed",
+      "revId": "3e5602ff06cd9bf1819f3177941aa2be9fa92631",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX//8h8\u003d",
+        "filename": "warnings.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-11-21T23:08:11Z",
+      "side": 1,
+      "message": "should not be equal...",
+      "revId": "3e5602ff06cd9bf1819f3177941aa2be9fa92631",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX//8iE\u003d",
+        "filename": "warnings.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-11-21T23:08:11Z",
+      "side": 1,
+      "message": "\u0027*\u0027 placement",
+      "revId": "3e5602ff06cd9bf1819f3177941aa2be9fa92631",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
