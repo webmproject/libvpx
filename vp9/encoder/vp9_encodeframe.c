@@ -1868,10 +1868,6 @@ static void init_encode_frame_mb_context(VP9_COMP *cpi) {
 
   xd->mode_info_stride = cm->mode_info_stride;
 
-  // reset intra mode contexts
-  if (frame_is_intra_only(cm))
-    vp9_init_mbmode_probs(cm);
-
   // Copy data over into macro block data structures.
   vp9_setup_src_planes(x, cpi->Source, 0, 0);
 
