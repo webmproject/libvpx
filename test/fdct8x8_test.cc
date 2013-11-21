@@ -35,6 +35,9 @@ typedef void (*fht_t) (const int16_t *in, int16_t *out, int stride,
 typedef void (*iht_t) (const int16_t *in, uint8_t *out, int stride,
                        int tx_type);
 
+typedef std::tr1::tuple<fdct_t, idct_t, int> dct_8x8_param_t;
+typedef std::tr1::tuple<fht_t, iht_t, int> ht_8x8_param_t;
+
 void fdct8x8_ref(const int16_t *in, int16_t *out, int stride, int tx_type) {
   vp9_fdct8x8_c(in, out, stride);
 }
@@ -215,8 +218,9 @@ class FwdTrans8x8TestBase {
   fht_t fwd_txfm_ref;
 };
 
-class FwdTrans8x8DCT : public FwdTrans8x8TestBase,
-                       public PARAMS(fdct_t, idct_t, int) {
+class FwdTrans8x8DCT
+    : public FwdTrans8x8TestBase,
+      public ::testing::TestWithParam<dct_8x8_param_t> {
  public:
   virtual ~FwdTrans8x8DCT() {}
 
@@ -254,8 +258,9 @@ TEST_P(FwdTrans8x8DCT, ExtremalCheck) {
   RunExtremalCheck();
 }
 
-class FwdTrans8x8HT : public FwdTrans8x8TestBase,
-                      public PARAMS(fht_t, iht_t, int) {
+class FwdTrans8x8HT
+    : public FwdTrans8x8TestBase,
+      public ::testing::TestWithParam<ht_8x8_param_t> {
  public:
   virtual ~FwdTrans8x8HT() {}
 

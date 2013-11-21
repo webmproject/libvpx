@@ -36,6 +36,9 @@ typedef void (*fht_t) (const int16_t *in, int16_t *out, int stride,
 typedef void (*iht_t) (const int16_t *in, uint8_t *out, int stride,
                        int tx_type);
 
+typedef std::tr1::tuple<fdct_t, idct_t, int> dct_4x4_param_t;
+typedef std::tr1::tuple<fht_t, iht_t, int> ht_4x4_param_t;
+
 void fdct4x4_ref(const int16_t *in, int16_t *out, int stride, int tx_type) {
   vp9_fdct4x4_c(in, out, stride);
 }
@@ -183,7 +186,7 @@ class Trans4x4TestBase {
 
 class Trans4x4DCT
     : public Trans4x4TestBase,
-      public PARAMS(fdct_t, idct_t, int) {
+      public ::testing::TestWithParam<dct_4x4_param_t> {
  public:
   virtual ~Trans4x4DCT() {}
 
@@ -226,7 +229,7 @@ TEST_P(Trans4x4DCT, InvAccuracyCheck) {
 
 class Trans4x4HT
     : public Trans4x4TestBase,
-      public PARAMS(fht_t, iht_t, int) {
+      public ::testing::TestWithParam<ht_4x4_param_t> {
  public:
   virtual ~Trans4x4HT() {}
 
