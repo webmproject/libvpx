@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdX//8mU\u003d",
+        "filename": "vp9/encoder/vp9_onyx_int.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 444,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2013-11-21T19:47:24Z",
+      "side": 1,
+      "message": "I wanted to keep this one outside RATE_CONTROL. For now, I wanted to keep everything directly related to deciding an appropriate q for a frame in the RATE_CONTROL structure.",
+      "parentUuid": "AAAAdX//8ow\u003d",
+      "revId": "331fff5636be9612ef02b17a62e54a5f10cb14d4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdX//8o0\u003d",
         "filename": "vp9/encoder/vp9_onyx_int.h",
         "patchSetId": 2
@@ -30,6 +48,24 @@
       "writtenOn": "2013-11-21T15:22:59Z",
       "side": 1,
       "message": "this is a rate control thing - I think",
+      "revId": "331fff5636be9612ef02b17a62e54a5f10cb14d4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX//8mQ\u003d",
+        "filename": "vp9/encoder/vp9_onyx_int.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 449,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2013-11-21T19:47:24Z",
+      "side": 1,
+      "message": "This is more of an encoder option. In RATE_CONTROL I wanted to keep everything related to deciding a q for a frame - either based on target bit-rate or a quality level.",
+      "parentUuid": "AAAAdX//8o0\u003d",
       "revId": "331fff5636be9612ef02b17a62e54a5f10cb14d4",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdX//8mg\u003d",
+        "filename": "vp9/encoder/vp9_onyx_int.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 473,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2013-11-21T19:47:24Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdX//8os\u003d",
+      "revId": "331fff5636be9612ef02b17a62e54a5f10cb14d4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdX//8oo\u003d",
         "filename": "vp9/encoder/vp9_onyx_int.h",
         "patchSetId": 2
@@ -70,6 +124,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdX//8mc\u003d",
+        "filename": "vp9/encoder/vp9_onyx_int.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 499,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2013-11-21T19:47:24Z",
+      "side": 1,
+      "message": "Unused. Removing.",
+      "parentUuid": "AAAAdX//8oo\u003d",
+      "revId": "331fff5636be9612ef02b17a62e54a5f10cb14d4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdX//8ok\u003d",
         "filename": "vp9/encoder/vp9_onyx_int.h",
         "patchSetId": 2
@@ -81,6 +153,24 @@
       "writtenOn": "2013-11-21T15:22:59Z",
       "side": 1,
       "message": "shouldn\u0027t this move too?",
+      "revId": "331fff5636be9612ef02b17a62e54a5f10cb14d4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX//8mY\u003d",
+        "filename": "vp9/encoder/vp9_onyx_int.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 533,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2013-11-21T19:47:24Z",
+      "side": 1,
+      "message": "Yes - this may need to move, but let\u0027s do this in the next phase?\nI wanted to decide the parameters in RATE_CONTROL based on the twopass_rc parameters in 2-pass case or on a different set of criteria in the one-pass case.",
+      "parentUuid": "AAAAdX//8ok\u003d",
       "revId": "331fff5636be9612ef02b17a62e54a5f10cb14d4",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
