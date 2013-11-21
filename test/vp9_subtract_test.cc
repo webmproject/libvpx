@@ -41,8 +41,8 @@ TEST_P(VP9SubtractBlockTest, SimpleSubtract) {
   // FIXME(rbultje) split in its own file
   for (BLOCK_SIZE bsize = BLOCK_4X4; bsize < BLOCK_SIZES;
        bsize = static_cast<BLOCK_SIZE>(static_cast<int>(bsize) + 1)) {
-    const int block_width  = 4 << b_width_log2(bsize);
-    const int block_height = 4 << b_height_log2(bsize);
+    const int block_width = 4 * num_4x4_blocks_wide_lookup[bsize];
+    const int block_height = 4 * num_4x4_blocks_high_lookup[bsize];
     int16_t *diff = reinterpret_cast<int16_t *>(
         vpx_memalign(16, sizeof(*diff) * block_width * block_height * 2));
     uint8_t *pred = reinterpret_cast<uint8_t *>(
