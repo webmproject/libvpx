@@ -1,0 +1,89 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdX//8dQ\u003d",
+        "filename": "warnings.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-11-22T02:19:36Z",
+      "side": 1,
+      "message": "\u003d\u003d NULL",
+      "revId": "8da0b01383d9dc699e813c0cac416cff7498b9c4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX//8dI\u003d",
+        "filename": "warnings.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-11-22T02:19:36Z",
+      "side": 1,
+      "message": "!\u003d NULL",
+      "revId": "8da0b01383d9dc699e813c0cac416cff7498b9c4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX//8c4\u003d",
+        "filename": "warnings.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-11-22T02:19:36Z",
+      "side": 1,
+      "message": "node \u003d \u0026(*node)-\u003enext_;",
+      "revId": "8da0b01383d9dc699e813c0cac416cff7498b9c4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX//8dE\u003d",
+        "filename": "warnings.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-11-22T02:19:36Z",
+      "side": 1,
+      "message": "!\u003d NULL",
+      "revId": "8da0b01383d9dc699e813c0cac416cff7498b9c4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX//8c0\u003d",
+        "filename": "warnings.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 87,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-11-22T02:19:36Z",
+      "side": 1,
+      "message": "!\u003d NULL",
+      "revId": "8da0b01383d9dc699e813c0cac416cff7498b9c4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
