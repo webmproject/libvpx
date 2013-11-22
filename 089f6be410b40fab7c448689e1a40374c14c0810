@@ -16,6 +16,24 @@
       "revId": "089f6be410b40fab7c448689e1a40374c14c0810",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX//8UE\u003d",
+        "filename": "vp9/common/vp9_scan.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 236,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2013-11-22T19:10:00Z",
+      "side": 1,
+      "message": "Ok, restoring old names. I tried to make them shorter... but I\u0027ve just found that we can remove \"vp9_\" prefix (and make all of them static), so they are short enough now.",
+      "parentUuid": "AAAAdX//8ZE\u003d",
+      "revId": "089f6be410b40fab7c448689e1a40374c14c0810",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
