@@ -98,7 +98,6 @@ MV clamp_mv_to_umv_border_sb(const MACROBLOCKD *xd, const MV *src_mv,
   return clamped_mv;
 }
 
-
 // TODO(jkoleszar): In principle, pred_w, pred_h are unnecessary, as we could
 // calculate the subsampled BLOCK_SIZE, but that type isn't defined for
 // sizes smaller than 16x16 yet.
@@ -204,6 +203,96 @@ void vp9_build_inter_predictors_sb(MACROBLOCKD *xd, int mi_row, int mi_col,
                                    BLOCK_SIZE bsize) {
   build_inter_predictors_for_planes(xd, bsize, mi_row, mi_col, 0,
                                     MAX_MB_PLANE - 1);
+}
+
+// TODO(jingning): This function serves as a placeholder for decoder prediction
+// using on demand border extension. It should be moved to /decoder/ directory.
+static void dec_build_inter_predictors(MACROBLOCKD *xd, int plane, int block,
+                                       BLOCK_SIZE bsize, int pred_w, int pred_h,
+                                       int mi_x, int mi_y) {
+  struct macroblockd_plane *const pd = &xd->plane[plane];
+  const BLOCK_SIZE plane_bsize = get_plane_block_size(bsize, pd);
+  const int bwl = b_width_log2(plane_bsize);
+  const int bw = 4 << bwl;
+  const int bh = 4 * num_4x4_blocks_high_lookup[plane_bsize];
+  const int x = 4 * (block & ((1 << bwl) - 1));
+  const int y = 4 * (block >> bwl);
+  const MODE_INFO *mi = xd->mi_8x8[0];
+  const int is_compound = has_second_ref(&mi->mbmi);
+  int ref;
+
+  assert(x < bw);
+  assert(y < bh);
+  assert(mi->mbmi.sb_type < BLOCK_8X8 || 4 << pred_w == bw);
+  assert(mi->mbmi.sb_type < BLOCK_8X8 || 4 << pred_h == bh);
+
+  for (ref = 0; ref < 1 + is_compound; ++ref) {
+    struct scale_factors *const scale = &xd->scale_factor[ref];
+    struct buf_2d *const pre_buf = &pd->pre[ref];
+    struct buf_2d *const dst_buf = &pd->dst;
+    uint8_t *const dst = dst_buf->buf + dst_buf->stride * y + x;
+
+    // TODO(jkoleszar): All chroma MVs in SPLITMV mode are taken as the
+    // same MV (the average of the 4 luma MVs) but we could do something
+    // smarter for non-4:2:0. Just punt for now, pending the changes to get
+    // rid of SPLITMV mode entirely.
+    const MV mv = mi->mbmi.sb_type < BLOCK_8X8
+               ? (plane == 0 ? mi->bmi[block].as_mv[ref].as_mv
+                             : mi_mv_pred_q4(mi, ref))
+               : mi->mbmi.mv[ref].as_mv;
+
+    // TODO(jkoleszar): This clamping is done in the incorrect place for the
+    // scaling case. It needs to be done on the scaled MV, not the pre-scaling
+    // MV. Note however that it performs the subsampling aware scaling so
+    // that the result is always q4.
+    // mv_precision precision is MV_PRECISION_Q4.
+    const MV mv_q4 = clamp_mv_to_umv_border_sb(xd, &mv, bw, bh,
+                                               pd->subsampling_x,
+                                               pd->subsampling_y);
+
+    uint8_t *pre;
+    MV32 scaled_mv;
+    int xs, ys;
+
+    if (vp9_is_scaled(scale->sfc)) {
+      pre = pre_buf->buf + scaled_buffer_offset(x, y, pre_buf->stride, scale);
+      scale->sfc->set_scaled_offsets(scale, mi_y + y, mi_x + x);
+      scaled_mv = scale->sfc->scale_mv(&mv_q4, scale);
+      xs = scale->sfc->x_step_q4;
+      ys = scale->sfc->y_step_q4;
+    } else {
+      pre = pre_buf->buf + (y * pre_buf->stride + x);
+      scaled_mv.row = mv_q4.row;
+      scaled_mv.col = mv_q4.col;
+      xs = ys = 16;
+    }
+
+    inter_predictor(pre, pre_buf->stride, dst, dst_buf->stride,
+                    &scaled_mv, scale,
+                    4 << pred_w, 4 << pred_h, ref,
+                    &xd->subpix, xs, ys);
+  }
+}
+
+void vp9_dec_build_inter_predictors_sb(MACROBLOCKD *xd, int mi_row, int mi_col,
+                                       BLOCK_SIZE bsize) {
+  int plane;
+  for (plane = 0; plane < MAX_MB_PLANE; ++plane) {
+    const int mi_x = mi_col * MI_SIZE;
+    const int mi_y = mi_row * MI_SIZE;
+    const int bwl = b_width_log2(bsize) - xd->plane[plane].subsampling_x;
+    const int bhl = b_height_log2(bsize) - xd->plane[plane].subsampling_y;
+
+    if (xd->mi_8x8[0]->mbmi.sb_type < BLOCK_8X8) {
+      int i = 0, x, y;
+      assert(bsize == BLOCK_8X8);
+      for (y = 0; y < 1 << bhl; ++y)
+        for (x = 0; x < 1 << bwl; ++x)
+          dec_build_inter_predictors(xd, plane, i++, bsize, 0, 0, mi_x, mi_y);
+    } else {
+      dec_build_inter_predictors(xd, plane, 0, bsize, bwl, bhl, mi_x, mi_y);
+    }
+  }
 }
 
 // TODO(dkovalev: find better place for this function)

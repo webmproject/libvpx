@@ -444,7 +444,7 @@ static void decode_modes_b(VP9_COMMON *const cm, MACROBLOCKD *const xd,
         vp9_get_filter_kernel(mbmi->interp_filter);
 
     // Prediction
-    vp9_build_inter_predictors_sb(xd, mi_row, mi_col, bsize);
+    vp9_dec_build_inter_predictors_sb(xd, mi_row, mi_col, bsize);
 
     // Reconstruction
     if (!mbmi->skip_coeff) {
