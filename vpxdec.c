@@ -1124,7 +1124,8 @@ int main_loop(int argc, const char **argv_) {
 fail:
 
   if (vpx_codec_destroy(&decoder)) {
-    fprintf(stderr, "Failed to destroy decoder: %s\n", vpx_codec_error(&decoder));
+    fprintf(stderr, "Failed to destroy decoder: %s\n",
+            vpx_codec_error(&decoder));
     return EXIT_FAILURE;
   }
 
@@ -1135,6 +1136,9 @@ fail:
     nestegg_destroy(input.nestegg_ctx);
   if (input.kind != WEBM_FILE)
     free(buf);
+
+  if (scaled_img) vpx_img_free(scaled_img);
+
   fclose(infile);
   free(argv);
 
