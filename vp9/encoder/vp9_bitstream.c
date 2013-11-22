@@ -1391,8 +1391,7 @@ static size_t write_compressed_header(VP9_COMP *cpi, uint8_t *data) {
 
     for (i = 0; i < PARTITION_CONTEXTS; ++i)
       prob_diff_update(vp9_partition_tree, fc->partition_prob[i],
-                       (unsigned int *)cpi->partition_count[i], PARTITION_TYPES,
-                       &header_bc);
+                       cm->counts.partition[i], PARTITION_TYPES, &header_bc);
 
     vp9_write_nmv_probs(cpi, cm->allow_high_precision_mv, &header_bc);
   }
