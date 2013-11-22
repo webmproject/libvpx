@@ -8,6 +8,7 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
+#include "./vpxenc.h"
 #include "./vpx_config.h"
 
 #include <assert.h>
@@ -214,11 +215,7 @@ static const arg_def_t verbosearg       = ARG_DEF("v", "verbose", 0,
                                                   "Show encoder parameters");
 static const arg_def_t psnrarg          = ARG_DEF(NULL, "psnr", 0,
                                                   "Show PSNR in status line");
-enum TestDecodeFatality {
-  TEST_DECODE_OFF,
-  TEST_DECODE_FATAL,
-  TEST_DECODE_WARN,
-};
+
 static const struct arg_enum_list test_decode_enum[] = {
   {"off",   TEST_DECODE_OFF},
   {"fatal", TEST_DECODE_FATAL},
@@ -861,30 +858,6 @@ static int compare_img(vpx_image_t *img1, vpx_image_t *img2)
                              NELEMENTS(vp9_arg_ctrl_map))
 #endif
 
-/* Configuration elements common to all streams */
-struct global_config {
-  const struct codec_item  *codec;
-  int                       passes;
-  int                       pass;
-  int                       usage;
-  int                       deadline;
-  int                       use_i420;
-  int                       quiet;
-  int                       verbose;
-  int                       limit;
-  int                       skip_frames;
-  int                       show_psnr;
-  enum TestDecodeFatality   test_decode;
-  int                       have_framerate;
-  struct vpx_rational       framerate;
-  int                       out_part;
-  int                       debug;
-  int                       show_q_hist_buckets;
-  int                       show_rate_hist_buckets;
-  int                       disable_warnings;
-};
-
-
 /* Per-stream configuration */
 struct stream_config {
   struct vpx_codec_enc_cfg  cfg;
@@ -937,7 +910,7 @@ void validate_positive_rational(const char          *msg,
 }
 
 
-static void parse_global_config(struct global_config *global, char **argv) {
+static void parse_global_config(struct VpxEncoderConfig *global, char **argv) {
   char       **argi, **argj;
   struct arg   arg;
 
@@ -1088,7 +1061,7 @@ static void close_input_file(struct VpxInputContext *input) {
     y4m_input_close(&input->y4m);
 }
 
-static struct stream_state *new_stream(struct global_config *global,
+static struct stream_state *new_stream(struct VpxEncoderConfig *global,
                                        struct stream_state *prev) {
   struct stream_state *stream;
 
@@ -1137,7 +1110,7 @@ static struct stream_state *new_stream(struct global_config *global,
 }
 
 
-static int parse_stream_params(struct global_config *global,
+static int parse_stream_params(struct VpxEncoderConfig *global,
                                struct stream_state  *stream,
                                char **argv) {
   char                   **argi, **argj;
@@ -1341,8 +1314,8 @@ static void set_stream_dimensions(struct stream_state *stream,
 }
 
 
-static void set_default_kf_interval(struct stream_state  *stream,
-                                    struct global_config *global) {
+static void set_default_kf_interval(struct stream_state *stream,
+                                    struct VpxEncoderConfig *global) {
   /* Use a max keyframe interval of 5 seconds, if none was
    * specified on the command line.
    */
@@ -1354,8 +1327,8 @@ static void set_default_kf_interval(struct stream_state  *stream,
 }
 
 
-static void show_stream_config(struct stream_state  *stream,
-                               struct global_config *global,
+static void show_stream_config(struct stream_state *stream,
+                               struct VpxEncoderConfig *global,
                                struct VpxInputContext *input) {
 
 #define SHOW(field) \
@@ -1405,7 +1378,7 @@ static void show_stream_config(struct stream_state  *stream,
 
 
 static void open_output_file(struct stream_state *stream,
-                             struct global_config *global) {
+                             struct VpxEncoderConfig *global) {
   const char *fn = stream->config.out_fn;
 
   stream->file = strcmp(fn, "-") ? fopen(fn, "wb") : set_binary_mode(stdout);
@@ -1445,9 +1418,9 @@ static void close_output_file(struct stream_state *stream,
 }
 
 
-static void setup_pass(struct stream_state  *stream,
-                       struct global_config *global,
-                       int                   pass) {
+static void setup_pass(struct stream_state *stream,
+                       struct VpxEncoderConfig *global,
+                       int pass) {
   if (stream->config.stats_fn) {
     if (!stats_open_file(&stream->stats, stream->config.stats_fn,
                          pass))
@@ -1469,8 +1442,8 @@ static void setup_pass(struct stream_state  *stream,
 }
 
 
-static void initialize_encoder(struct stream_state  *stream,
-                               struct global_config *global) {
+static void initialize_encoder(struct stream_state *stream,
+                               struct VpxEncoderConfig *global) {
   int i;
   int flags = 0;
 
@@ -1504,10 +1477,10 @@ static void initialize_encoder(struct stream_state  *stream,
 }
 
 
-static void encode_frame(struct stream_state  *stream,
-                         struct global_config *global,
-                         struct vpx_image     *img,
-                         unsigned int          frames_in) {
+static void encode_frame(struct stream_state *stream,
+                         struct VpxEncoderConfig *global,
+                         struct vpx_image *img,
+                         unsigned int frames_in) {
   vpx_codec_pts_t frame_start, next_frame_start;
   struct vpx_codec_enc_cfg *cfg = &stream->config.cfg;
   struct vpx_usec_timer timer;
@@ -1562,9 +1535,9 @@ static void update_quantizer_histogram(struct stream_state *stream) {
 }
 
 
-static void get_cx_data(struct stream_state  *stream,
-                        struct global_config *global,
-                        int                  *got_data) {
+static void get_cx_data(struct stream_state *stream,
+                        struct VpxEncoderConfig *global,
+                        int *got_data) {
   const vpx_codec_cx_pkt_t *pkt;
   const struct vpx_codec_enc_cfg *cfg = &stream->config.cfg;
   vpx_codec_iter_t iter = NULL;
@@ -1763,7 +1736,7 @@ int continue_prompt() {
   return c == 'y';
 }
 
-void check_quantizer(struct global_config* config, int min_q, int max_q) {
+void check_quantizer(struct VpxEncoderConfig* config, int min_q, int max_q) {
   int check_failed = 0;
 
   if (config->disable_warnings)
@@ -1788,7 +1761,7 @@ int main(int argc, const char **argv_) {
   int frame_avail, got_data;
 
   struct VpxInputContext input = {0};
-  struct global_config global;
+  struct VpxEncoderConfig global;
   struct stream_state *streams = NULL;
   char **argv, **argi;
   uint64_t cx_time = 0;
