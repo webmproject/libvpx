@@ -360,6 +360,52 @@ void vp9_activity_masking(VP9_COMP *cpi, MACROBLOCK *x) {
   adjust_act_zbin(cpi, x);
 }
 
+// Select a segment for the current SB64
+static void select_in_frame_q_segment(VP9_COMP *cpi,
+                                      int mi_row, int mi_col,
+                                      int output_enabled, int projected_rate) {
+  VP9_COMMON * const cm = &cpi->common;
+  int target_rate = cpi->rc.sb64_target_rate << 8;   // convert to bits << 8
+
+  const int mi_offset = mi_row * cm->mi_cols + mi_col;
+  const int bw = 1 << mi_width_log2(BLOCK_64X64);
+  const int bh = 1 << mi_height_log2(BLOCK_64X64);
+  const int xmis = MIN(cm->mi_cols - mi_col, bw);
+  const int ymis = MIN(cm->mi_rows - mi_row, bh);
+  int complexity_metric = 64;
+  int x, y;
+
+  unsigned char segment;
+
+  if (!output_enabled) {
+    segment = 0;
+  } else {
+    // Rate depends on fraction of a SB64 in frame (xmis * ymis / bw * bh).
+    // It is converted to bits * 256 units
+    target_rate = (cpi->rc.sb64_target_rate * xmis * ymis * 256) / (bw * bh);
+
+    if (projected_rate < (target_rate / 4)) {
+      segment = 2;
+    } else if (projected_rate < (target_rate / 2)) {
+      segment = 1;
+    } else {
+      segment = 0;
+    }
+
+    complexity_metric =
+      clamp((int)((projected_rate * 64) / target_rate), 16, 255);
+  }
+
+  // Fill in the entires in the segment map corresponding to this SB64
+  for (y = 0; y < ymis; y++) {
+    for (x = 0; x < xmis; x++) {
+      cpi->segmentation_map[mi_offset + y * cm->mi_cols + x] = segment;
+      cpi->complexity_map[mi_offset + y * cm->mi_cols + x] =
+        (unsigned char)complexity_metric;
+    }
+  }
+}
+
 static void update_state(VP9_COMP *cpi, PICK_MODE_CONTEXT *ctx,
                          BLOCK_SIZE bsize, int output_enabled) {
   int i, x_idx, y;
@@ -383,6 +429,11 @@ static void update_state(VP9_COMP *cpi, PICK_MODE_CONTEXT *ctx,
   assert(mi->mbmi.ref_frame[1] < MAX_REF_FRAMES);
   assert(mi->mbmi.sb_type == bsize);
 
+  // For in frame adaptive Q copy over the chosen segment id into the
+  // mode innfo context for the chosen mode / partition.
+  if ((cpi->oxcf.aq_mode == COMPLEXITY_AQ) && output_enabled)
+    mi->mbmi.segment_id = xd->mi_8x8[0]->mbmi.segment_id;
+
   *mi_addr = *mi;
 
   max_plane = is_inter_block(mbmi) ? MAX_MB_PLANE : 1;
@@ -405,10 +456,12 @@ static void update_state(VP9_COMP *cpi, PICK_MODE_CONTEXT *ctx,
   for (y = 0; y < mi_height; y++)
     for (x_idx = 0; x_idx < mi_width; x_idx++)
       if ((xd->mb_to_right_edge >> (3 + MI_SIZE_LOG2)) + mi_width > x_idx
-          && (xd->mb_to_bottom_edge >> (3 + MI_SIZE_LOG2)) + mi_height > y)
+        && (xd->mb_to_bottom_edge >> (3 + MI_SIZE_LOG2)) + mi_height > y) {
         xd->mi_8x8[x_idx + y * mis] = mi_addr;
+      }
 
-  if (cpi->oxcf.aq_mode == VARIANCE_AQ) {
+    if ((cpi->oxcf.aq_mode == VARIANCE_AQ) ||
+        (cpi->oxcf.aq_mode == COMPLEXITY_AQ)) {
     vp9_mb_init_quantizer(cpi, x);
   }
 
@@ -557,7 +610,7 @@ static void set_offsets(VP9_COMP *cpi, const TileInfo *const tile,
 
   /* segment ID */
   if (seg->enabled) {
-    if (!cpi->oxcf.aq_mode == VARIANCE_AQ) {
+    if (cpi->oxcf.aq_mode != VARIANCE_AQ) {
       uint8_t *map = seg->update_map ? cpi->segmentation_map
           : cm->last_frame_seg_map;
       mbmi->segment_id = vp9_get_segment_id(cm, map, bsize, mi_row, mi_col);
@@ -653,6 +706,14 @@ static void pick_sb_modes(VP9_COMP *cpi, const TileInfo *const tile,
   if (cpi->oxcf.aq_mode == VARIANCE_AQ) {
     vp9_clear_system_state();  // __asm emms;
     x->rdmult = round(x->rdmult * rdmult_ratio);
+  } else if (cpi->oxcf.aq_mode == COMPLEXITY_AQ) {
+    const int mi_offset = mi_row * cm->mi_cols + mi_col;
+    unsigned char complexity = cpi->complexity_map[mi_offset];
+    const int is_edge = (mi_row == 0) || (mi_row == (cm->mi_rows - 1)) ||
+                        (mi_col == 0) || (mi_col == (cm->mi_cols - 1));
+
+    if (!is_edge && (complexity > 128))
+      x->rdmult = x->rdmult  + ((x->rdmult * (complexity - 128)) / 256);
   }
 
   // Find best coding mode & reconstruct the MB so it is available
@@ -1261,8 +1322,19 @@ static void rd_use_partition(VP9_COMP *cpi,
   if ( bsize == BLOCK_64X64)
     assert(chosen_rate < INT_MAX && chosen_dist < INT_MAX);
 
-  if (do_recon)
-    encode_sb(cpi, tile, tp, mi_row, mi_col, bsize == BLOCK_64X64, bsize);
+  if (do_recon) {
+    int output_enabled = (bsize == BLOCK_64X64);
+
+    // Check the projected output rate for this SB against it's target
+    // and and if necessary apply a Q delta using segmentation to get
+    // closer to the target.
+    if ((cpi->oxcf.aq_mode == COMPLEXITY_AQ) && cm->seg.update_map) {
+      select_in_frame_q_segment(cpi, mi_row, mi_col,
+                                output_enabled, chosen_rate);
+    }
+
+    encode_sb(cpi, tile, tp, mi_row, mi_col, output_enabled, bsize);
+  }
 
   *rate = chosen_rate;
   *dist = chosen_dist;
@@ -1740,8 +1812,17 @@ static void rd_pick_partition(VP9_COMP *cpi, const TileInfo *const tile,
   *rate = best_rate;
   *dist = best_dist;
 
-  if (best_rate < INT_MAX && best_dist < INT64_MAX && do_recon)
-    encode_sb(cpi, tile, tp, mi_row, mi_col, bsize == BLOCK_64X64, bsize);
+  if (best_rate < INT_MAX && best_dist < INT64_MAX && do_recon) {
+    int output_enabled = (bsize == BLOCK_64X64);
+
+    // Check the projected output rate for this SB against it's target
+    // and and if necessary apply a Q delta using segmentation to get
+    // closer to the target.
+    if ((cpi->oxcf.aq_mode == COMPLEXITY_AQ) && cm->seg.update_map) {
+      select_in_frame_q_segment(cpi, mi_row, mi_col, output_enabled, best_rate);
+    }
+    encode_sb(cpi, tile, tp, mi_row, mi_col, output_enabled, bsize);
+  }
   if (bsize == BLOCK_64X64) {
     assert(tp_orig < *tp);
     assert(best_rate < INT_MAX);
@@ -2415,7 +2496,8 @@ static void encode_superblock(VP9_COMP *cpi, TOKENEXTRA **t, int output_enabled,
   const int mis = cm->mode_info_stride;
   const int mi_width = num_8x8_blocks_wide_lookup[bsize];
   const int mi_height = num_8x8_blocks_high_lookup[bsize];
-  x->skip_recode = !x->select_txfm_size && mbmi->sb_type >= BLOCK_8X8;
+  x->skip_recode = !x->select_txfm_size && mbmi->sb_type >= BLOCK_8X8 &&
+                   (cpi->oxcf.aq_mode != COMPLEXITY_AQ);
   x->skip_optimize = ctx->is_coded;
   ctx->is_coded = 1;
   x->use_lp32x32fdct = cpi->sf.use_lp32x32fdct;

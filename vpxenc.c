@@ -384,7 +384,7 @@ static const arg_def_t frame_parallel_decoding  = ARG_DEF(
     NULL, "frame-parallel", 1, "Enable frame parallel decodability features");
 static const arg_def_t aq_mode  = ARG_DEF(
     NULL, "aq-mode", 1,
-    "Adaptive quantization mode (0: disabled (by default), 1: variance based)");
+    "Adaptive q mode (0: off (by default), 1: variance 2: complexity)");
 #endif
 
 #if CONFIG_VP8_ENCODER

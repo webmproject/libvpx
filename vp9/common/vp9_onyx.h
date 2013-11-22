@@ -67,6 +67,7 @@ extern "C"
   typedef enum {
     NO_AQ = 0,
     VARIANCE_AQ = 1,
+    COMPLEXITY_AQ = 2,
     AQ_MODES_COUNT  // This should always be the last member of the enum
   } AQ_MODES;
 

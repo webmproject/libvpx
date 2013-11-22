@@ -109,6 +109,9 @@ extern unsigned __int64 Sectionbits[500];
 
 extern void vp9_init_quantizer(VP9_COMP *cpi);
 
+static const double in_frame_q_adj_ratio[MAX_SEGMENTS] =
+  {1.0, 1.5, 2.0, 1.0, 1.0, 1.0, 1.0, 1.0};
+
 static INLINE void Scale2Ratio(int mode, int *hr, int *hs) {
   switch (mode) {
     case NORMAL:
@@ -192,6 +195,8 @@ static void dealloc_compressor_data(VP9_COMP *cpi) {
   vpx_free(cpi->coding_context.last_frame_seg_map_copy);
   cpi->coding_context.last_frame_seg_map_copy = 0;
 
+  vpx_free(cpi->complexity_map);
+  cpi->complexity_map = 0;
   vpx_free(cpi->active_map);
   cpi->active_map = 0;
 
@@ -241,6 +246,79 @@ int vp9_compute_qdelta(VP9_COMP *cpi, double qstart, double qtarget) {
   }
 
   return target_index - start_index;
+}
+
+// Computes a q delta (in "q index" terms) to get from a starting q value
+// to a value that should equate to thegiven rate ratio.
+
+int vp9_compute_qdelta_by_rate(VP9_COMP *cpi,
+                               double base_q_index, double rate_target_ratio) {
+  int i;
+  int base_bits_per_mb;
+  int target_bits_per_mb;
+  int target_index = cpi->rc.worst_quality;
+
+  // Make SURE use of floating point in this function is safe.
+  vp9_clear_system_state();
+
+  // Look up the current projected bits per block for the base index
+  base_bits_per_mb = vp9_bits_per_mb(cpi->common.frame_type,
+                                     base_q_index, 1.0);
+
+  // Find the target bits per mb based on the base value and given ratio.
+  target_bits_per_mb = rate_target_ratio * base_bits_per_mb;
+
+  // Convert the q target to an index
+  for (i = cpi->rc.best_quality; i < cpi->rc.worst_quality; i++) {
+    target_index = i;
+    if (vp9_bits_per_mb(cpi->common.frame_type,
+                        i, 1.0) <= target_bits_per_mb )
+      break;
+  }
+
+  return target_index - base_q_index;
+}
+
+// This function sets up a set of segments with delta Q values around
+// the baseline frame quantizer.
+static void setup_in_frame_q_adj(VP9_COMP *cpi) {
+  VP9_COMMON *cm = &cpi->common;
+  struct segmentation *seg = &cm->seg;
+  // double q_ratio;
+  int segment;
+  int qindex_delta;
+
+  // Make SURE use of floating point in this function is safe.
+  vp9_clear_system_state();
+
+  if (cm->frame_type == KEY_FRAME ||
+      cpi->refresh_alt_ref_frame ||
+      (cpi->refresh_golden_frame && !cpi->is_src_frame_alt_ref)) {
+    // Clear down the segment map
+    vpx_memset(cpi->segmentation_map, 0, cm->mi_rows * cm->mi_cols);
+
+    // Clear down the complexity map used for rd
+    vpx_memset(cpi->complexity_map, 0, cm->mi_rows * cm->mi_cols);
+
+    // Enable segmentation
+    vp9_enable_segmentation((VP9_PTR)cpi);
+    vp9_clearall_segfeatures(seg);
+
+    // Select delta coding method
+    seg->abs_delta = SEGMENT_DELTADATA;
+
+    // Segment 0 "Q" feature is disabled so it defaults to the baseline Q
+    vp9_disable_segfeature(seg, 0, SEG_LVL_ALT_Q);
+
+    // Use some of the segments for in frame Q adjustment
+    for (segment = 1; segment < 3; segment++) {
+      qindex_delta =
+        vp9_compute_qdelta_by_rate(cpi, cm->base_qindex,
+                                   in_frame_q_adj_ratio[segment]);
+      vp9_enable_segfeature(seg, segment, SEG_LVL_ALT_Q);
+      vp9_set_segdata(seg, segment, SEG_LVL_ALT_Q, qindex_delta);
+    }
+  }
 }
 
 static void configure_static_seg_features(VP9_COMP *cpi) {
@@ -1446,6 +1524,11 @@ VP9_PTR vp9_create_compressor(VP9_CONFIG *oxcf) {
   CHECK_MEM_ERROR(cm, cpi->segmentation_map,
                   vpx_calloc(cm->mi_rows * cm->mi_cols, 1));
 
+  // Create a complexity map used for rd adjustment
+  CHECK_MEM_ERROR(cm, cpi->complexity_map,
+                  vpx_calloc(cm->mi_rows * cm->mi_cols, 1));
+
+
   // And a place holder structure is the coding context
   // for use if we want to save and restore it
   CHECK_MEM_ERROR(cm, cpi->coding_context.last_frame_seg_map_copy,
@@ -2630,8 +2713,12 @@ static void encode_with_recode_loop(VP9_COMP *cpi,
       }
     }
 
+    // Variance adaptive and in frame q adjustment experiments are mutually
+    // exclusive.
     if (cpi->oxcf.aq_mode == VARIANCE_AQ) {
-        vp9_vaq_frame_setup(cpi);
+      vp9_vaq_frame_setup(cpi);
+    } else if (cpi->oxcf.aq_mode == COMPLEXITY_AQ) {
+      setup_in_frame_q_adj(cpi);
     }
 
     // transform / motion compensation build reconstruction frame
