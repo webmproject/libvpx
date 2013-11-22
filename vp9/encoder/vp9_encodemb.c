@@ -63,13 +63,12 @@ void vp9_subtract_block_c(int rows, int cols,
 
 static void subtract_plane(MACROBLOCK *x, BLOCK_SIZE bsize, int plane) {
   struct macroblock_plane *const p = &x->plane[plane];
-  const MACROBLOCKD *const xd = &x->e_mbd;
-  const struct macroblockd_plane *const pd = &xd->plane[plane];
-  const int bw = plane_block_width(bsize, pd);
-  const int bh = plane_block_height(bsize, pd);
+  const struct macroblockd_plane *const pd = &x->e_mbd.plane[plane];
+  const BLOCK_SIZE plane_bsize = get_plane_block_size(bsize, pd);
+  const int bw = 4 * num_4x4_blocks_wide_lookup[plane_bsize];
+  const int bh = 4 * num_4x4_blocks_high_lookup[plane_bsize];
 
-  vp9_subtract_block(bh, bw, p->src_diff, bw,
-                     p->src.buf, p->src.stride,
+  vp9_subtract_block(bh, bw, p->src_diff, bw, p->src.buf, p->src.stride,
                      pd->dst.buf, pd->dst.stride);
 }
 
