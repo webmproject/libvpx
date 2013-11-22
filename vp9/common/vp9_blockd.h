@@ -384,21 +384,18 @@ static void txfrm_block_to_raster_xy(BLOCK_SIZE plane_bsize,
 }
 
 static void extend_for_intra(MACROBLOCKD *xd, BLOCK_SIZE plane_bsize,
-                             int plane, int block, TX_SIZE tx_size) {
+                             int plane, int aoff, int loff) {
   struct macroblockd_plane *const pd = &xd->plane[plane];
   uint8_t *const buf = pd->dst.buf;
   const int stride = pd->dst.stride;
-
-  int x, y;
-  txfrm_block_to_raster_xy(plane_bsize, tx_size, block, &x, &y);
-  x = x * 4 - 1;
-  y = y * 4 - 1;
+  const int x = aoff * 4 - 1;
+  const int y = loff * 4 - 1;
   // Copy a pixel into the umv if we are in a situation where the block size
   // extends into the UMV.
   // TODO(JBB): Should be able to do the full extend in place so we don't have
   // to do this multiple times.
   if (xd->mb_to_right_edge < 0) {
-    const int bw = 4 << b_width_log2(plane_bsize);
+    const int bw = 4 * num_4x4_blocks_wide_lookup[plane_bsize];
     const int umv_border_start = bw + (xd->mb_to_right_edge >>
                                        (3 + pd->subsampling_x));
 
@@ -409,7 +406,7 @@ static void extend_for_intra(MACROBLOCKD *xd, BLOCK_SIZE plane_bsize,
 
   if (xd->mb_to_bottom_edge < 0) {
     if (xd->left_available || x >= 0) {
-      const int bh = 4 << b_height_log2(plane_bsize);
+      const int bh = 4 * num_4x4_blocks_high_lookup[plane_bsize];
       const int umv_border_start =
           bh + (xd->mb_to_bottom_edge >> (3 + pd->subsampling_y));
 

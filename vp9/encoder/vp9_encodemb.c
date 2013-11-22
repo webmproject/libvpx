@@ -562,7 +562,7 @@ void vp9_encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
   src_diff = &p->src_diff[4 * (j * diff_stride + i)];
 
   if (xd->mb_to_right_edge < 0 || xd->mb_to_bottom_edge < 0)
-    extend_for_intra(xd, plane_bsize, plane, block, tx_size);
+    extend_for_intra(xd, plane_bsize, plane, i, j);
 
   // if (x->optimize)
   // vp9_optimize_b(plane, block, plane_bsize, tx_size, x, args->ctx);
