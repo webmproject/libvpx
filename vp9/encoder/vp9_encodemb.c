@@ -372,22 +372,19 @@ void vp9_xform_quant(int plane, int block, BLOCK_SIZE plane_bsize,
   int16_t *dqcoeff = BLOCK_OFFSET(pd->dqcoeff, block);
   const scan_order *so;
   uint16_t *eob = &pd->eobs[block];
-  const int bwl = b_width_log2(plane_bsize), bw = 1 << bwl;
-  const int twl = bwl - tx_size, twmask = (1 << twl) - 1;
-  int xoff, yoff;
+  const int diff_stride = 4 * num_4x4_blocks_wide_lookup[plane_bsize];
+  int i, j;
   int16_t *src_diff;
+  txfrm_block_to_raster_xy(plane_bsize, tx_size, block, &i, &j);
+  src_diff = &p->src_diff[4 * (j * diff_stride + i)];
 
   switch (tx_size) {
     case TX_32X32:
       so = &vp9_default_scan_orders[TX_32X32];
-      block >>= 6;
-      xoff = 32 * (block & twmask);
-      yoff = 32 * (block >> twl);
-      src_diff = p->src_diff + 4 * bw * yoff + xoff;
       if (x->use_lp32x32fdct)
-        vp9_fdct32x32_rd(src_diff, coeff, bw * 4);
+        vp9_fdct32x32_rd(src_diff, coeff, diff_stride);
       else
-        vp9_fdct32x32(src_diff, coeff, bw * 4);
+        vp9_fdct32x32(src_diff, coeff, diff_stride);
       vp9_quantize_b_32x32(coeff, 1024, x->skip_block, p->zbin, p->round,
                            p->quant, p->quant_shift, qcoeff, dqcoeff,
                            pd->dequant, p->zbin_extra, eob, so->scan,
@@ -395,32 +392,21 @@ void vp9_xform_quant(int plane, int block, BLOCK_SIZE plane_bsize,
       break;
     case TX_16X16:
       so = &vp9_default_scan_orders[TX_16X16];
-      block >>= 4;
-      xoff = 16 * (block & twmask);
-      yoff = 16 * (block >> twl);
-      src_diff = p->src_diff + 4 * bw * yoff + xoff;
-      vp9_fdct16x16(src_diff, coeff, bw * 4);
+      vp9_fdct16x16(src_diff, coeff, diff_stride);
       vp9_quantize_b(coeff, 256, x->skip_block, p->zbin, p->round,
                      p->quant, p->quant_shift, qcoeff, dqcoeff,
                      pd->dequant, p->zbin_extra, eob, so->scan, so->iscan);
       break;
     case TX_8X8:
       so = &vp9_default_scan_orders[TX_8X8];
-      block >>= 2;
-      xoff = 8 * (block & twmask);
-      yoff = 8 * (block >> twl);
-      src_diff = p->src_diff + 4 * bw * yoff + xoff;
-      vp9_fdct8x8(src_diff, coeff, bw * 4);
+      vp9_fdct8x8(src_diff, coeff, diff_stride);
       vp9_quantize_b(coeff, 64, x->skip_block, p->zbin, p->round,
                      p->quant, p->quant_shift, qcoeff, dqcoeff,
                      pd->dequant, p->zbin_extra, eob, so->scan, so->iscan);
       break;
     case TX_4X4:
       so = &vp9_default_scan_orders[TX_4X4];
-      xoff = 4 * (block & twmask);
-      yoff = 4 * (block >> twl);
-      src_diff = p->src_diff + 4 * bw * yoff + xoff;
-      x->fwd_txm4x4(src_diff, coeff, bw * 4);
+      x->fwd_txm4x4(src_diff, coeff, diff_stride);
       vp9_quantize_b(coeff, 16, x->skip_block, p->zbin, p->round,
                      p->quant, p->quant_shift, qcoeff, dqcoeff,
                      pd->dequant, p->zbin_extra, eob, so->scan, so->iscan);
