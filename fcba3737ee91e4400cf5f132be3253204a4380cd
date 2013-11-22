@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdX//8fo\u003d",
+        "filename": "vp9/decoder/vp9_detokenize.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 128,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2013-11-22T00:40:46Z",
+      "side": 1,
+      "message": "Can this goto be removed ? since next line is DECODE_ZERO",
+      "revId": "fcba3737ee91e4400cf5f132be3253204a4380cd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
