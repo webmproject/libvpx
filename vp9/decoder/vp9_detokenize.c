@@ -81,6 +81,7 @@ static const int token_to_counttoken[MAX_ENTROPY_TOKENS] = {
     INCREMENT_COUNT(token);                              \
     token_cache[scan[c]] = vp9_pt_energy_class[token];   \
     ++c;                                                 \
+    pt = get_coef_context(nb, token_cache, c);           \
     dqv = dq[1];                                          \
     continue;                                            \
   }
@@ -118,31 +119,24 @@ static int decode_coefs(VP9_COMMON *cm, const MACROBLOCKD *xd,
 
   while (c < seg_eob) {
     int val;
-    if (c)
-      pt = get_coef_context(nb, token_cache, c);
     band = *band_translate++;
     prob = coef_probs[band][pt];
     if (!cm->frame_parallel_decoding_mode)
       ++eob_branch_count[band][pt];
     if (!vp9_read(r, prob[EOB_CONTEXT_NODE]))
       break;
-    goto DECODE_ZERO;
-
-  SKIP_START:
-    if (c >= seg_eob)
-      break;
-    if (c)
-      pt = get_coef_context(nb, token_cache, c);
-    band = *band_translate++;
-    prob = coef_probs[band][pt];
 
   DECODE_ZERO:
     if (!vp9_read(r, prob[ZERO_CONTEXT_NODE])) {
       INCREMENT_COUNT(ZERO_TOKEN);
-      token_cache[scan[c]] = vp9_pt_energy_class[ZERO_TOKEN];
-      dqv = dq[1];                                          \
+      dqv = dq[1];
       ++c;
-      goto SKIP_START;
+      if (c >= seg_eob)
+        break;
+      pt = get_coef_context(nb, token_cache, c);
+      band = *band_translate++;
+      prob = coef_probs[band][pt];
+      goto DECODE_ZERO;
     }
 
     // ONE_CONTEXT_NODE_0_

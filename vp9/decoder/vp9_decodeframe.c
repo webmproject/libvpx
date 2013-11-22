@@ -241,7 +241,8 @@ static void alloc_tile_storage(VP9D_COMP *pbi, int tile_rows, int tile_cols) {
 }
 
 static void inverse_transform_block(MACROBLOCKD* xd, int plane, int block,
-                                    TX_SIZE tx_size, uint8_t *dst, int stride) {
+                                    TX_SIZE tx_size, uint8_t *dst, int stride,
+                                    uint8_t *token_cache) {
   struct macroblockd_plane *const pd = &xd->plane[plane];
   const int eob = pd->eobs[block];
   if (eob > 0) {
@@ -274,13 +275,20 @@ static void inverse_transform_block(MACROBLOCKD* xd, int plane, int block,
 
     if (eob == 1) {
       vpx_memset(dqcoeff, 0, 2 * sizeof(dqcoeff[0]));
+      vpx_memset(token_cache, 0, 2 * sizeof(token_cache[0]));
     } else {
-      if (tx_type == DCT_DCT && tx_size <= TX_16X16 && eob <= 10)
+      if (tx_type == DCT_DCT && tx_size <= TX_16X16 && eob <= 10) {
         vpx_memset(dqcoeff, 0, 4 * (4 << tx_size) * sizeof(dqcoeff[0]));
-      else if (tx_size == TX_32X32 && eob <= 34)
+        vpx_memset(token_cache, 0,
+                   4 * (4 << tx_size) * sizeof(token_cache[0]));
+      } else if (tx_size == TX_32X32 && eob <= 34) {
         vpx_memset(dqcoeff, 0, 256 * sizeof(dqcoeff[0]));
-      else
+        vpx_memset(token_cache, 0, 256 * sizeof(token_cache[0]));
+      } else {
         vpx_memset(dqcoeff, 0, (16 << (tx_size << 1)) * sizeof(dqcoeff[0]));
+        vpx_memset(token_cache, 0,
+                   (16 << (tx_size << 1)) * sizeof(token_cache[0]));
+      }
     }
   }
 }
@@ -319,7 +327,8 @@ static void predict_and_reconstruct_intra_block(int plane, int block,
   if (!mi->mbmi.skip_coeff) {
     vp9_decode_block_tokens(cm, xd, plane, block, plane_bsize, x, y, tx_size,
                             args->r, args->token_cache);
-    inverse_transform_block(xd, plane, block, tx_size, dst, pd->dst.stride);
+    inverse_transform_block(xd, plane, block, tx_size, dst, pd->dst.stride,
+                            args->token_cache);
   }
 }
 
@@ -345,7 +354,7 @@ static void reconstruct_inter_block(int plane, int block,
                                              args->r, args->token_cache);
   inverse_transform_block(xd, plane, block, tx_size,
                           &pd->dst.buf[4 * y * pd->dst.stride + 4 * x],
-                          pd->dst.stride);
+                          pd->dst.stride, args->token_cache);
 }
 
 static void set_offsets(VP9_COMMON *const cm, MACROBLOCKD *const xd,
@@ -946,6 +955,7 @@ static void setup_tile_macroblockd(TileWorkerData *const tile_data) {
     pd[i].dqcoeff = tile_data->dqcoeff[i];
     pd[i].eobs    = tile_data->eobs[i];
     vpx_memset(xd->plane[i].dqcoeff, 0, 64 * 64 * sizeof(int16_t));
+    vpx_memset(tile_data->token_cache, 0, sizeof(tile_data->token_cache));
   }
 }
 
