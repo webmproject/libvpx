@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdX//8UY\u003d",
+        "filename": "vp9/encoder/vp9_bitstream.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 171,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2013-11-22T18:55:11Z",
+      "side": 1,
+      "message": "add a comment that you expect 32 to be the maximum number of end-symbols.",
+      "revId": "c511f560bfdf884b57a28e578084e6fadcc4b373",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
