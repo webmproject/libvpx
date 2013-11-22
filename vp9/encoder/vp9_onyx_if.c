@@ -3968,8 +3968,12 @@ int vp9_get_compressed_data(VP9_PTR ptr, unsigned int *frame_flags,
                            VP9BORDERINPIXELS);
 
   // Calculate scaling factors for each of the 3 available references
-  for (i = 0; i < ALLOWED_REFS_PER_FRAME; ++i)
+  for (i = 0; i < ALLOWED_REFS_PER_FRAME; ++i) {
     vp9_setup_scale_factors(cm, i);
+    if (vp9_is_scaled(&cm->active_ref_scale_comm[i]))
+      vp9_extend_frame_borders(&cm->yv12_fb[cm->active_ref_idx[i]],
+                               cm->subsampling_x, cm->subsampling_y);
+  }
 
   vp9_setup_interp_filters(&cpi->mb.e_mbd, DEFAULT_INTERP_FILTER, cm);
 

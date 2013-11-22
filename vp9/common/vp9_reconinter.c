@@ -218,9 +218,6 @@ void vp9_setup_scale_factors(VP9_COMMON *cm, int i) {
     vp9_setup_scale_factors_for_frame(sf, sfc,
                                       fb->y_crop_width, fb->y_crop_height,
                                       cm->width, cm->height);
-
-    if (vp9_is_scaled(sfc))
-      vp9_extend_frame_borders(fb, cm->subsampling_x, cm->subsampling_y);
   }
 }
 
