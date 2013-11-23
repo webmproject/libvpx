@@ -396,10 +396,6 @@ unsigned char vp9_get_pred_context_tx_size(const MACROBLOCKD *xd) {
   return above_context + left_context > max_tx_size;
 }
 
-void vp9_set_pred_flag_seg_id(MACROBLOCKD *xd, uint8_t pred_flag) {
-  xd->mi_8x8[0]->mbmi.seg_id_predicted = pred_flag;
-}
-
 int vp9_get_segment_id(VP9_COMMON *cm, const uint8_t *segment_ids,
                        BLOCK_SIZE bsize, int mi_row, int mi_col) {
   const int mi_offset = mi_row * cm->mi_cols + mi_col;

@@ -40,8 +40,6 @@ static INLINE vp9_prob vp9_get_pred_prob_seg_id(struct segmentation *seg,
   return seg->pred_probs[vp9_get_pred_context_seg_id(xd)];
 }
 
-void vp9_set_pred_flag_seg_id(MACROBLOCKD *xd, uint8_t pred_flag);
-
 static INLINE int vp9_get_pred_context_mbskip(const MACROBLOCKD *xd) {
   const MODE_INFO *const above_mi = get_above_mi(xd);
   const MODE_INFO *const left_mi = get_left_mi(xd);
