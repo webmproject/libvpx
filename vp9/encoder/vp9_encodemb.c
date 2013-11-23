@@ -152,16 +152,18 @@ static void optimize_b(MACROBLOCK *mb,
   PLANE_TYPE type = pd->plane_type;
   int err_mult = plane_rd_mult[type];
   const int default_eob = 16 << (tx_size << 1);
-  const int16_t *scan, *nb;
+
   const int mul = 1 + (tx_size == TX_32X32);
   uint8_t token_cache[1024];
   const int16_t *dequant_ptr = pd->dequant;
   const uint8_t *const band_translate = get_band_translate(tx_size);
+  const scan_order *so = get_scan(xd, tx_size, type, block);
+  const int16_t *scan = so->scan;
+  const int16_t *nb = so->neighbors;
 
   assert((!type && !plane) || (type && plane));
   dqcoeff_ptr = BLOCK_OFFSET(pd->dqcoeff, block);
   qcoeff_ptr = BLOCK_OFFSET(pd->qcoeff, block);
-  get_scan(xd, tx_size, type, block, &scan, &nb);
   assert(eob <= default_eob);
 
   /* Now set up a Viterbi trellis to evaluate alternative roundings. */
@@ -368,7 +370,7 @@ void vp9_xform_quant(int plane, int block, BLOCK_SIZE plane_bsize,
   int16_t *coeff = BLOCK_OFFSET(p->coeff, block);
   int16_t *qcoeff = BLOCK_OFFSET(pd->qcoeff, block);
   int16_t *dqcoeff = BLOCK_OFFSET(pd->dqcoeff, block);
-  const int16_t *scan, *iscan;
+  const scan_order *so;
   uint16_t *eob = &pd->eobs[block];
   const int bwl = b_width_log2(plane_bsize), bw = 1 << bwl;
   const int twl = bwl - tx_size, twmask = (1 << twl) - 1;
@@ -377,8 +379,7 @@ void vp9_xform_quant(int plane, int block, BLOCK_SIZE plane_bsize,
 
   switch (tx_size) {
     case TX_32X32:
-      scan = vp9_default_scan_32x32;
-      iscan = vp9_default_iscan_32x32;
+      so = &vp9_default_scan_orders[TX_32X32];
       block >>= 6;
       xoff = 32 * (block & twmask);
       yoff = 32 * (block >> twl);
@@ -389,11 +390,11 @@ void vp9_xform_quant(int plane, int block, BLOCK_SIZE plane_bsize,
         vp9_fdct32x32(src_diff, coeff, bw * 4);
       vp9_quantize_b_32x32(coeff, 1024, x->skip_block, p->zbin, p->round,
                            p->quant, p->quant_shift, qcoeff, dqcoeff,
-                           pd->dequant, p->zbin_extra, eob, scan, iscan);
+                           pd->dequant, p->zbin_extra, eob, so->scan,
+                           so->iscan);
       break;
     case TX_16X16:
-      scan = vp9_default_scan_16x16;
-      iscan = vp9_default_iscan_16x16;
+      so = &vp9_default_scan_orders[TX_16X16];
       block >>= 4;
       xoff = 16 * (block & twmask);
       yoff = 16 * (block >> twl);
@@ -401,11 +402,10 @@ void vp9_xform_quant(int plane, int block, BLOCK_SIZE plane_bsize,
       vp9_fdct16x16(src_diff, coeff, bw * 4);
       vp9_quantize_b(coeff, 256, x->skip_block, p->zbin, p->round,
                      p->quant, p->quant_shift, qcoeff, dqcoeff,
-                     pd->dequant, p->zbin_extra, eob, scan, iscan);
+                     pd->dequant, p->zbin_extra, eob, so->scan, so->iscan);
       break;
     case TX_8X8:
-      scan = vp9_default_scan_8x8;
-      iscan = vp9_default_iscan_8x8;
+      so = &vp9_default_scan_orders[TX_8X8];
       block >>= 2;
       xoff = 8 * (block & twmask);
       yoff = 8 * (block >> twl);
@@ -413,18 +413,17 @@ void vp9_xform_quant(int plane, int block, BLOCK_SIZE plane_bsize,
       vp9_fdct8x8(src_diff, coeff, bw * 4);
       vp9_quantize_b(coeff, 64, x->skip_block, p->zbin, p->round,
                      p->quant, p->quant_shift, qcoeff, dqcoeff,
-                     pd->dequant, p->zbin_extra, eob, scan, iscan);
+                     pd->dequant, p->zbin_extra, eob, so->scan, so->iscan);
       break;
     case TX_4X4:
-      scan = vp9_default_scan_4x4;
-      iscan = vp9_default_iscan_4x4;
+      so = &vp9_default_scan_orders[TX_4X4];
       xoff = 4 * (block & twmask);
       yoff = 4 * (block >> twl);
       src_diff = p->src_diff + 4 * bw * yoff + xoff;
       x->fwd_txm4x4(src_diff, coeff, bw * 4);
       vp9_quantize_b(coeff, 16, x->skip_block, p->zbin, p->round,
                      p->quant, p->quant_shift, qcoeff, dqcoeff,
-                     pd->dequant, p->zbin_extra, eob, scan, iscan);
+                     pd->dequant, p->zbin_extra, eob, so->scan, so->iscan);
       break;
     default:
       assert(0);
@@ -547,7 +546,7 @@ void vp9_encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
   int16_t *coeff = BLOCK_OFFSET(p->coeff, block);
   int16_t *qcoeff = BLOCK_OFFSET(pd->qcoeff, block);
   int16_t *dqcoeff = BLOCK_OFFSET(pd->dqcoeff, block);
-  const int16_t *scan, *iscan;
+  const scan_order *so;
   TX_TYPE tx_type;
   MB_PREDICTION_MODE mode;
   const int bwl = b_width_log2(plane_bsize);
@@ -569,8 +568,7 @@ void vp9_encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
 
   switch (tx_size) {
     case TX_32X32:
-      scan = vp9_default_scan_32x32;
-      iscan = vp9_default_iscan_32x32;
+      so = &vp9_default_scan_orders[TX_32X32];
       mode = plane == 0 ? mbmi->mode : mbmi->uv_mode;
       block >>= 6;
       vp9_predict_intra_block(xd, block, bwl, TX_32X32, mode,
@@ -585,15 +583,15 @@ void vp9_encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
           vp9_fdct32x32(src_diff, coeff, diff_stride);
         vp9_quantize_b_32x32(coeff, 1024, x->skip_block, p->zbin, p->round,
                              p->quant, p->quant_shift, qcoeff, dqcoeff,
-                             pd->dequant, p->zbin_extra, eob, scan, iscan);
+                             pd->dequant, p->zbin_extra, eob, so->scan,
+                             so->iscan);
       }
       if (!x->skip_encode && *eob)
         vp9_idct32x32_add(dqcoeff, dst, pd->dst.stride, *eob);
       break;
     case TX_16X16:
       tx_type = get_tx_type_16x16(pd->plane_type, xd);
-      scan = get_scan_16x16(tx_type);
-      iscan = get_iscan_16x16(tx_type);
+      so = &vp9_scan_orders[TX_16X16][tx_type];
       mode = plane == 0 ? mbmi->mode : mbmi->uv_mode;
       block >>= 4;
       vp9_predict_intra_block(xd, block, bwl, TX_16X16, mode,
@@ -604,15 +602,14 @@ void vp9_encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
         vp9_fht16x16(tx_type, src_diff, coeff, diff_stride);
         vp9_quantize_b(coeff, 256, x->skip_block, p->zbin, p->round,
                        p->quant, p->quant_shift, qcoeff, dqcoeff,
-                       pd->dequant, p->zbin_extra, eob, scan, iscan);
+                       pd->dequant, p->zbin_extra, eob, so->scan, so->iscan);
       }
       if (!x->skip_encode && *eob)
         vp9_iht16x16_add(tx_type, dqcoeff, dst, pd->dst.stride, *eob);
       break;
     case TX_8X8:
       tx_type = get_tx_type_8x8(pd->plane_type, xd);
-      scan = get_scan_8x8(tx_type);
-      iscan = get_iscan_8x8(tx_type);
+      so = &vp9_scan_orders[TX_8X8][tx_type];
       mode = plane == 0 ? mbmi->mode : mbmi->uv_mode;
       block >>= 2;
       vp9_predict_intra_block(xd, block, bwl, TX_8X8, mode,
@@ -623,15 +620,14 @@ void vp9_encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
         vp9_fht8x8(tx_type, src_diff, coeff, diff_stride);
         vp9_quantize_b(coeff, 64, x->skip_block, p->zbin, p->round, p->quant,
                        p->quant_shift, qcoeff, dqcoeff,
-                       pd->dequant, p->zbin_extra, eob, scan, iscan);
+                       pd->dequant, p->zbin_extra, eob, so->scan, so->iscan);
       }
       if (!x->skip_encode && *eob)
         vp9_iht8x8_add(tx_type, dqcoeff, dst, pd->dst.stride, *eob);
       break;
     case TX_4X4:
       tx_type = get_tx_type_4x4(pd->plane_type, xd, block);
-      scan = get_scan_4x4(tx_type);
-      iscan = get_iscan_4x4(tx_type);
+      so = &vp9_scan_orders[TX_4X4][tx_type];
       if (mbmi->sb_type < BLOCK_8X8 && plane == 0)
         mode = xd->mi_8x8[0]->bmi[block].as_mode;
       else
@@ -649,7 +645,7 @@ void vp9_encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
           x->fwd_txm4x4(src_diff, coeff, diff_stride);
         vp9_quantize_b(coeff, 16, x->skip_block, p->zbin, p->round, p->quant,
                        p->quant_shift, qcoeff, dqcoeff,
-                       pd->dequant, p->zbin_extra, eob, scan, iscan);
+                       pd->dequant, p->zbin_extra, eob, so->scan, so->iscan);
       }
 
       if (!x->skip_encode && *eob) {

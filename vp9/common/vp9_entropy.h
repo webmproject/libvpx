@@ -185,22 +185,18 @@ static int get_entropy_context(TX_SIZE tx_size, const ENTROPY_CONTEXT *a,
   return combine_entropy_contexts(above_ec, left_ec);
 }
 
-static void get_scan(const MACROBLOCKD *xd, TX_SIZE tx_size,
-                     PLANE_TYPE type, int block_idx,
-                     const int16_t **scan, const int16_t **scan_nb) {
+static const scan_order *get_scan(const MACROBLOCKD *xd, TX_SIZE tx_size,
+                                  PLANE_TYPE type, int block_idx) {
   const MODE_INFO *const mi = xd->mi_8x8[0];
   const MB_MODE_INFO *const mbmi = &mi->mbmi;
-  const scan_order *so;
 
   if (is_inter_block(mbmi) || type != PLANE_TYPE_Y_WITH_DC || xd->lossless) {
-    so = &inter_scan_orders[tx_size];
+    return &vp9_default_scan_orders[tx_size];
   } else {
     const MB_PREDICTION_MODE mode =
         mbmi->sb_type < BLOCK_8X8 ? mi->bmi[block_idx].as_mode : mbmi->mode;
-    so = &intra_scan_orders[tx_size][mode];
+    return &vp9_scan_orders[tx_size][mode2txfm_map[mode]];
   }
-  *scan = so->scan;
-  *scan_nb = so->neighbors;
 }
 
 #endif  // VP9_COMMON_VP9_ENTROPY_H_

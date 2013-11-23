@@ -108,14 +108,16 @@ static int decode_coefs(VP9_COMMON *cm, const MACROBLOCKD *xd,
       counts->coef[tx_size][type][ref];
   unsigned int (*eob_branch_count)[PREV_COEF_CONTEXTS] =
       counts->eob_branch[tx_size][type][ref];
-  const int16_t *scan, *nb;
   const uint8_t *cat6;
   const uint8_t *band_translate = get_band_translate(tx_size);
   const int dq_shift = (tx_size == TX_32X32);
+  const scan_order *so = get_scan(xd, tx_size, type, block_idx);
+  const int16_t *scan = so->scan;
+  const int16_t *nb = so->neighbors;
   int v;
   int16_t dqv = dq[0];
 
-  get_scan(xd, tx_size, type, block_idx, &scan, &nb);
+
 
   while (c < seg_eob) {
     int val;
