@@ -81,11 +81,11 @@ typedef struct {
 
 
 typedef enum {
-  SINGLE_PREDICTION_ONLY = 0,
-  COMP_PREDICTION_ONLY   = 1,
-  HYBRID_PREDICTION      = 2,
-  NB_PREDICTION_TYPES    = 3,
-} COMPPREDMODE_TYPE;
+  SINGLE_REFERENCE      = 0,
+  COMPOUND_REFERENCE    = 1,
+  REFERENCE_MODE_SELECT = 2,
+  REFERENCE_MODES       = 3,
+} REFERENCE_MODE;
 
 typedef struct VP9Common {
   struct vpx_internal_error_info  error;
@@ -195,7 +195,7 @@ typedef struct VP9Common {
   int allow_comp_inter_inter;
   MV_REFERENCE_FRAME comp_fixed_ref;
   MV_REFERENCE_FRAME comp_var_ref[2];
-  COMPPREDMODE_TYPE comp_pred_mode;
+  REFERENCE_MODE comp_pred_mode;
 
   FRAME_CONTEXT fc;  /* this frame entropy */
   FRAME_CONTEXT frame_contexts[NUM_FRAME_CONTEXTS];

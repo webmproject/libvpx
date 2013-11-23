@@ -319,12 +319,12 @@ static void encode_ref_frame(VP9_COMP *cpi, vp9_writer *bc) {
   if (!seg_ref_active) {
     // does the feature use compound prediction or not
     // (if not specified at the frame/segment level)
-    if (cm->comp_pred_mode == HYBRID_PREDICTION) {
+    if (cm->comp_pred_mode == REFERENCE_MODE_SELECT) {
       vp9_write(bc, mi->ref_frame[1] > INTRA_FRAME,
                 vp9_get_pred_prob_comp_inter_inter(cm, xd));
     } else {
       assert((mi->ref_frame[1] <= INTRA_FRAME) ==
-                 (cm->comp_pred_mode == SINGLE_PREDICTION_ONLY));
+                 (cm->comp_pred_mode == SINGLE_REFERENCE));
     }
 
     if (mi->ref_frame[1] > INTRA_FRAME) {
@@ -1357,8 +1357,8 @@ static size_t write_compressed_header(VP9_COMP *cpi, uint8_t *data) {
 
     if (cm->allow_comp_inter_inter) {
       const int comp_pred_mode = cpi->common.comp_pred_mode;
-      const int use_compound_pred = comp_pred_mode != SINGLE_PREDICTION_ONLY;
-      const int use_hybrid_pred = comp_pred_mode == HYBRID_PREDICTION;
+      const int use_compound_pred = comp_pred_mode != SINGLE_REFERENCE;
+      const int use_hybrid_pred = comp_pred_mode == REFERENCE_MODE_SELECT;
 
       vp9_write_bit(&header_bc, use_compound_pred);
       if (use_compound_pred) {
@@ -1370,7 +1370,7 @@ static size_t write_compressed_header(VP9_COMP *cpi, uint8_t *data) {
       }
     }
 
-    if (cm->comp_pred_mode != COMP_PREDICTION_ONLY) {
+    if (cm->comp_pred_mode != COMPOUND_REFERENCE) {
       for (i = 0; i < REF_CONTEXTS; i++) {
         vp9_cond_prob_diff_update(&header_bc, &fc->single_ref_prob[i][0],
                                   cpi->single_ref_count[i][0]);
@@ -1379,7 +1379,7 @@ static size_t write_compressed_header(VP9_COMP *cpi, uint8_t *data) {
       }
     }
 
-    if (cm->comp_pred_mode != SINGLE_PREDICTION_ONLY)
+    if (cm->comp_pred_mode != SINGLE_REFERENCE)
       for (i = 0; i < REF_CONTEXTS; i++)
         vp9_cond_prob_diff_update(&header_bc, &fc->comp_ref_prob[i],
                                   cpi->comp_ref_count[i]);

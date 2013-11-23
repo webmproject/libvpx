@@ -202,7 +202,7 @@ void vp9_create_common(VP9_COMMON *cm) {
   vp9_machine_specific_config(cm);
 
   cm->tx_mode = ONLY_4X4;
-  cm->comp_pred_mode = HYBRID_PREDICTION;
+  cm->comp_pred_mode = REFERENCE_MODE_SELECT;
 }
 
 void vp9_remove_common(VP9_COMMON *cm) {

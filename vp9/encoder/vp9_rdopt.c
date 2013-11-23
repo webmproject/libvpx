@@ -2195,7 +2195,7 @@ static void estimate_ref_frame_costs(VP9_COMP *cpi, int segment_id,
     vp9_prob intra_inter_p = vp9_get_pred_prob_intra_inter(cm, xd);
     vp9_prob comp_inter_p = 128;
 
-    if (cm->comp_pred_mode == HYBRID_PREDICTION) {
+    if (cm->comp_pred_mode == REFERENCE_MODE_SELECT) {
       comp_inter_p = vp9_get_pred_prob_comp_inter_inter(cm, xd);
       *comp_mode_p = comp_inter_p;
     } else {
@@ -2204,12 +2204,12 @@ static void estimate_ref_frame_costs(VP9_COMP *cpi, int segment_id,
 
     ref_costs_single[INTRA_FRAME] = vp9_cost_bit(intra_inter_p, 0);
 
-    if (cm->comp_pred_mode != COMP_PREDICTION_ONLY) {
+    if (cm->comp_pred_mode != COMPOUND_REFERENCE) {
       vp9_prob ref_single_p1 = vp9_get_pred_prob_single_ref_p1(cm, xd);
       vp9_prob ref_single_p2 = vp9_get_pred_prob_single_ref_p2(cm, xd);
       unsigned int base_cost = vp9_cost_bit(intra_inter_p, 1);
 
-      if (cm->comp_pred_mode == HYBRID_PREDICTION)
+      if (cm->comp_pred_mode == REFERENCE_MODE_SELECT)
         base_cost += vp9_cost_bit(comp_inter_p, 0);
 
       ref_costs_single[LAST_FRAME] = ref_costs_single[GOLDEN_FRAME] =
@@ -2224,11 +2224,11 @@ static void estimate_ref_frame_costs(VP9_COMP *cpi, int segment_id,
       ref_costs_single[GOLDEN_FRAME] = 512;
       ref_costs_single[ALTREF_FRAME] = 512;
     }
-    if (cm->comp_pred_mode != SINGLE_PREDICTION_ONLY) {
+    if (cm->comp_pred_mode != SINGLE_REFERENCE) {
       vp9_prob ref_comp_p = vp9_get_pred_prob_comp_ref_p(cm, xd);
       unsigned int base_cost = vp9_cost_bit(intra_inter_p, 1);
 
-      if (cm->comp_pred_mode == HYBRID_PREDICTION)
+      if (cm->comp_pred_mode == REFERENCE_MODE_SELECT)
         base_cost += vp9_cost_bit(comp_inter_p, 1);
 
       ref_costs_comp[LAST_FRAME]   = base_cost + vp9_cost_bit(ref_comp_p, 0);
@@ -2244,7 +2244,7 @@ static void store_coding_context(MACROBLOCK *x, PICK_MODE_CONTEXT *ctx,
                          int mode_index,
                          int_mv *ref_mv,
                          int_mv *second_ref_mv,
-                         int64_t comp_pred_diff[NB_PREDICTION_TYPES],
+                         int64_t comp_pred_diff[REFERENCE_MODES],
                          int64_t tx_size_diff[TX_MODES],
                          int64_t best_filter_diff[SWITCHABLE_FILTER_CONTEXTS]) {
   MACROBLOCKD *const xd = &x->e_mbd;
@@ -2258,9 +2258,9 @@ static void store_coding_context(MACROBLOCK *x, PICK_MODE_CONTEXT *ctx,
   ctx->best_ref_mv.as_int = ref_mv->as_int;
   ctx->second_best_ref_mv.as_int = second_ref_mv->as_int;
 
-  ctx->single_pred_diff = (int)comp_pred_diff[SINGLE_PREDICTION_ONLY];
-  ctx->comp_pred_diff   = (int)comp_pred_diff[COMP_PREDICTION_ONLY];
-  ctx->hybrid_pred_diff = (int)comp_pred_diff[HYBRID_PREDICTION];
+  ctx->single_pred_diff = (int)comp_pred_diff[SINGLE_REFERENCE];
+  ctx->comp_pred_diff   = (int)comp_pred_diff[COMPOUND_REFERENCE];
+  ctx->hybrid_pred_diff = (int)comp_pred_diff[REFERENCE_MODE_SELECT];
 
   vpx_memcpy(ctx->tx_rd_diff, tx_size_diff, sizeof(ctx->tx_rd_diff));
   vpx_memcpy(ctx->best_filter_diff, best_filter_diff,
@@ -2783,9 +2783,9 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
 
   if (!(*mode_excluded)) {
     if (is_comp_pred) {
-      *mode_excluded = (cpi->common.comp_pred_mode == SINGLE_PREDICTION_ONLY);
+      *mode_excluded = (cpi->common.comp_pred_mode == SINGLE_REFERENCE);
     } else {
-      *mode_excluded = (cpi->common.comp_pred_mode == COMP_PREDICTION_ONLY);
+      *mode_excluded = (cpi->common.comp_pred_mode == COMPOUND_REFERENCE);
     }
   }
 
@@ -3150,8 +3150,8 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
   int64_t best_rd = best_rd_so_far;
   int64_t best_tx_rd[TX_MODES];
   int64_t best_tx_diff[TX_MODES];
-  int64_t best_pred_diff[NB_PREDICTION_TYPES];
-  int64_t best_pred_rd[NB_PREDICTION_TYPES];
+  int64_t best_pred_diff[REFERENCE_MODES];
+  int64_t best_pred_rd[REFERENCE_MODES];
   int64_t best_filter_rd[SWITCHABLE_FILTER_CONTEXTS];
   int64_t best_filter_diff[SWITCHABLE_FILTER_CONTEXTS];
   MB_MODE_INFO best_mbmode = { 0 };
@@ -3187,7 +3187,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
   estimate_ref_frame_costs(cpi, segment_id, ref_costs_single, ref_costs_comp,
                            &comp_mode_p);
 
-  for (i = 0; i < NB_PREDICTION_TYPES; ++i)
+  for (i = 0; i < REFERENCE_MODES; ++i)
     best_pred_rd[i] = INT64_MAX;
   for (i = 0; i < TX_MODES; i++)
     best_tx_rd[i] = INT64_MAX;
@@ -3364,12 +3364,12 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
 
       mode_excluded = mode_excluded
                          ? mode_excluded
-                         : cm->comp_pred_mode == SINGLE_PREDICTION_ONLY;
+                         : cm->comp_pred_mode == SINGLE_REFERENCE;
     } else {
       if (ref_frame != INTRA_FRAME && second_ref_frame != INTRA_FRAME) {
         mode_excluded =
             mode_excluded ?
-                mode_excluded : cm->comp_pred_mode == COMP_PREDICTION_ONLY;
+                mode_excluded : cm->comp_pred_mode == COMPOUND_REFERENCE;
       }
     }
 
@@ -3492,7 +3492,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
         continue;
     }
 
-    if (cm->comp_pred_mode == HYBRID_PREDICTION) {
+    if (cm->comp_pred_mode == REFERENCE_MODE_SELECT) {
       rate2 += compmode_cost;
     }
 
@@ -3577,7 +3577,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
     }
 
     if (!disable_skip && ref_frame == INTRA_FRAME) {
-      for (i = 0; i < NB_PREDICTION_TYPES; ++i)
+      for (i = 0; i < REFERENCE_MODES; ++i)
         best_pred_rd[i] = MIN(best_pred_rd[i], this_rd);
       for (i = 0; i < SWITCHABLE_FILTER_CONTEXTS; i++)
         best_filter_rd[i] = MIN(best_filter_rd[i], this_rd);
@@ -3639,7 +3639,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
     if (!disable_skip && ref_frame != INTRA_FRAME) {
       int single_rd, hybrid_rd, single_rate, hybrid_rate;
 
-      if (cm->comp_pred_mode == HYBRID_PREDICTION) {
+      if (cm->comp_pred_mode == REFERENCE_MODE_SELECT) {
         single_rate = rate2 - compmode_cost;
         hybrid_rate = rate2;
       } else {
@@ -3651,14 +3651,14 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
       hybrid_rd = RDCOST(x->rdmult, x->rddiv, hybrid_rate, distortion2);
 
       if (second_ref_frame <= INTRA_FRAME &&
-          single_rd < best_pred_rd[SINGLE_PREDICTION_ONLY]) {
-        best_pred_rd[SINGLE_PREDICTION_ONLY] = single_rd;
+          single_rd < best_pred_rd[SINGLE_REFERENCE]) {
+        best_pred_rd[SINGLE_REFERENCE] = single_rd;
       } else if (second_ref_frame > INTRA_FRAME &&
-                 single_rd < best_pred_rd[COMP_PREDICTION_ONLY]) {
-        best_pred_rd[COMP_PREDICTION_ONLY] = single_rd;
+                 single_rd < best_pred_rd[COMPOUND_REFERENCE]) {
+        best_pred_rd[COMPOUND_REFERENCE] = single_rd;
       }
-      if (hybrid_rd < best_pred_rd[HYBRID_PREDICTION])
-        best_pred_rd[HYBRID_PREDICTION] = hybrid_rd;
+      if (hybrid_rd < best_pred_rd[REFERENCE_MODE_SELECT])
+        best_pred_rd[REFERENCE_MODE_SELECT] = hybrid_rd;
     }
 
     /* keep record of best filter type */
@@ -3780,7 +3780,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
   *mbmi = best_mbmode;
   x->skip |= best_skip2;
 
-  for (i = 0; i < NB_PREDICTION_TYPES; ++i) {
+  for (i = 0; i < REFERENCE_MODES; ++i) {
     if (best_pred_rd[i] == INT64_MAX)
       best_pred_diff[i] = INT_MIN;
     else
@@ -3851,8 +3851,8 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
   int64_t best_yrd = best_rd_so_far;  // FIXME(rbultje) more precise
   int64_t best_tx_rd[TX_MODES];
   int64_t best_tx_diff[TX_MODES];
-  int64_t best_pred_diff[NB_PREDICTION_TYPES];
-  int64_t best_pred_rd[NB_PREDICTION_TYPES];
+  int64_t best_pred_diff[REFERENCE_MODES];
+  int64_t best_pred_rd[REFERENCE_MODES];
   int64_t best_filter_rd[SWITCHABLE_FILTER_CONTEXTS];
   int64_t best_filter_diff[SWITCHABLE_FILTER_CONTEXTS];
   MB_MODE_INFO best_mbmode = { 0 };
@@ -3887,7 +3887,7 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
   estimate_ref_frame_costs(cpi, segment_id, ref_costs_single, ref_costs_comp,
                            &comp_mode_p);
 
-  for (i = 0; i < NB_PREDICTION_TYPES; ++i)
+  for (i = 0; i < REFERENCE_MODES; ++i)
     best_pred_rd[i] = INT64_MAX;
   for (i = 0; i < TX_MODES; i++)
     best_tx_rd[i] = INT64_MAX;
@@ -4031,12 +4031,12 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
 
       mode_excluded = mode_excluded
                          ? mode_excluded
-                         : cm->comp_pred_mode == SINGLE_PREDICTION_ONLY;
+                         : cm->comp_pred_mode == SINGLE_REFERENCE;
     } else {
       if (ref_frame != INTRA_FRAME && second_ref_frame != INTRA_FRAME) {
         mode_excluded =
             mode_excluded ?
-                mode_excluded : cm->comp_pred_mode == COMP_PREDICTION_ONLY;
+                mode_excluded : cm->comp_pred_mode == COMPOUND_REFERENCE;
       }
     }
 
@@ -4242,9 +4242,9 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
 
       if (!mode_excluded) {
         if (comp_pred)
-          mode_excluded = cpi->common.comp_pred_mode == SINGLE_PREDICTION_ONLY;
+          mode_excluded = cpi->common.comp_pred_mode == SINGLE_REFERENCE;
         else
-          mode_excluded = cpi->common.comp_pred_mode == COMP_PREDICTION_ONLY;
+          mode_excluded = cpi->common.comp_pred_mode == COMPOUND_REFERENCE;
       }
       compmode_cost = vp9_cost_bit(comp_mode_p, comp_pred);
 
@@ -4272,7 +4272,7 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
       }
     }
 
-    if (cpi->common.comp_pred_mode == HYBRID_PREDICTION) {
+    if (cpi->common.comp_pred_mode == REFERENCE_MODE_SELECT) {
       rate2 += compmode_cost;
     }
 
@@ -4333,7 +4333,7 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
     }
 
     if (!disable_skip && ref_frame == INTRA_FRAME) {
-      for (i = 0; i < NB_PREDICTION_TYPES; ++i)
+      for (i = 0; i < REFERENCE_MODES; ++i)
         best_pred_rd[i] = MIN(best_pred_rd[i], this_rd);
       for (i = 0; i < SWITCHABLE_FILTER_CONTEXTS; i++)
         best_filter_rd[i] = MIN(best_filter_rd[i], this_rd);
@@ -4390,7 +4390,7 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
     if (!disable_skip && ref_frame != INTRA_FRAME) {
       int single_rd, hybrid_rd, single_rate, hybrid_rate;
 
-      if (cpi->common.comp_pred_mode == HYBRID_PREDICTION) {
+      if (cpi->common.comp_pred_mode == REFERENCE_MODE_SELECT) {
         single_rate = rate2 - compmode_cost;
         hybrid_rate = rate2;
       } else {
@@ -4402,14 +4402,14 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
       hybrid_rd = RDCOST(x->rdmult, x->rddiv, hybrid_rate, distortion2);
 
       if (second_ref_frame <= INTRA_FRAME &&
-          single_rd < best_pred_rd[SINGLE_PREDICTION_ONLY]) {
-        best_pred_rd[SINGLE_PREDICTION_ONLY] = single_rd;
+          single_rd < best_pred_rd[SINGLE_REFERENCE]) {
+        best_pred_rd[SINGLE_REFERENCE] = single_rd;
       } else if (second_ref_frame > INTRA_FRAME &&
-                 single_rd < best_pred_rd[COMP_PREDICTION_ONLY]) {
-        best_pred_rd[COMP_PREDICTION_ONLY] = single_rd;
+                 single_rd < best_pred_rd[COMPOUND_REFERENCE]) {
+        best_pred_rd[COMPOUND_REFERENCE] = single_rd;
       }
-      if (hybrid_rd < best_pred_rd[HYBRID_PREDICTION])
-        best_pred_rd[HYBRID_PREDICTION] = hybrid_rd;
+      if (hybrid_rd < best_pred_rd[REFERENCE_MODE_SELECT])
+        best_pred_rd[REFERENCE_MODE_SELECT] = hybrid_rd;
     }
 
     /* keep record of best filter type */
@@ -4525,7 +4525,7 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
     mbmi->mv[1].as_int = xd->mi_8x8[0]->bmi[3].as_mv[1].as_int;
   }
 
-  for (i = 0; i < NB_PREDICTION_TYPES; ++i) {
+  for (i = 0; i < REFERENCE_MODES; ++i) {
     if (best_pred_rd[i] == INT64_MAX)
       best_pred_diff[i] = INT_MIN;
     else

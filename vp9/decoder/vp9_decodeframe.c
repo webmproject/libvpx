@@ -124,8 +124,8 @@ static void read_inter_mode_probs(FRAME_CONTEXT *fc, vp9_reader *r) {
       vp9_diff_update_prob(r, &fc->inter_mode_probs[i][j]);
 }
 
-static INLINE COMPPREDMODE_TYPE read_comp_pred_mode(vp9_reader *r) {
-  COMPPREDMODE_TYPE mode = vp9_read_bit(r);
+static INLINE REFERENCE_MODE read_comp_pred_mode(vp9_reader *r) {
+  REFERENCE_MODE mode = vp9_read_bit(r);
   if (mode)
     mode += vp9_read_bit(r);
   return mode;
@@ -136,21 +136,21 @@ static void read_comp_pred(VP9_COMMON *cm, vp9_reader *r) {
 
   const int compound_allowed = is_compound_prediction_allowed(cm);
   cm->comp_pred_mode = compound_allowed ? read_comp_pred_mode(r)
-                                        : SINGLE_PREDICTION_ONLY;
+                                        : SINGLE_REFERENCE;
   if (compound_allowed)
     setup_compound_prediction(cm);
 
-  if (cm->comp_pred_mode == HYBRID_PREDICTION)
+  if (cm->comp_pred_mode == REFERENCE_MODE_SELECT)
     for (i = 0; i < COMP_INTER_CONTEXTS; i++)
       vp9_diff_update_prob(r, &cm->fc.comp_inter_prob[i]);
 
-  if (cm->comp_pred_mode != COMP_PREDICTION_ONLY)
+  if (cm->comp_pred_mode != COMPOUND_REFERENCE)
     for (i = 0; i < REF_CONTEXTS; i++) {
       vp9_diff_update_prob(r, &cm->fc.single_ref_prob[i][0]);
       vp9_diff_update_prob(r, &cm->fc.single_ref_prob[i][1]);
     }
 
-  if (cm->comp_pred_mode != SINGLE_PREDICTION_ONLY)
+  if (cm->comp_pred_mode != SINGLE_REFERENCE)
     for (i = 0; i < REF_CONTEXTS; i++)
       vp9_diff_update_prob(r, &cm->fc.comp_ref_prob[i]);
 }
