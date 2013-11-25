@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdX//8HU\u003d",
+        "filename": "warnings.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2013-11-25T20:06:36Z",
+      "side": 1,
+      "message": "Is \"Your quantizer values suck\" too strong?",
+      "parentUuid": "AAAAdX//8Qg\u003d",
+      "revId": "d395b7cf2973e58d4a4e55b984dd064347b6e5d2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdX//8QI\u003d",
         "filename": "warnings.c",
         "patchSetId": 9
@@ -30,6 +48,24 @@
       "writtenOn": "2013-11-23T02:32:56Z",
       "side": 1,
       "message": "static? also the function naming though typical in other projects and in the (c++) tests is off with the rest of the c-code right now. you might want to prefer the lower with \u0027_\u0027s for consistency",
+      "revId": "d395b7cf2973e58d4a4e55b984dd064347b6e5d2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX//8G8\u003d",
+        "filename": "warnings.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2013-11-25T20:06:36Z",
+      "side": 1,
+      "message": "static: Done, here and throughout.\n\nnaming: Was being cute and camel casing the functions used only in this module. Realized I forgot to apply that rule to the check_something_something functions. Consistent is better than cute, anyway: Done.",
+      "parentUuid": "AAAAdX//8QI\u003d",
       "revId": "d395b7cf2973e58d4a4e55b984dd064347b6e5d2",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdX//8Gw\u003d",
+        "filename": "warnings.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2013-11-25T20:06:36Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdX//8QU\u003d",
+      "revId": "d395b7cf2973e58d4a4e55b984dd064347b6e5d2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdX//8QQ\u003d",
         "filename": "warnings.c",
         "patchSetId": 9
@@ -64,6 +118,24 @@
       "writtenOn": "2013-11-23T02:32:56Z",
       "side": 1,
       "message": "no preference, but could be 1 line",
+      "revId": "d395b7cf2973e58d4a4e55b984dd064347b6e5d2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX//8Gs\u003d",
+        "filename": "warnings.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2013-11-25T20:06:36Z",
+      "side": 1,
+      "message": "Left it alone. I think it\u0027s more readable this way, but it\u0027s not that big a difference either way.",
+      "parentUuid": "AAAAdX//8QQ\u003d",
       "revId": "d395b7cf2973e58d4a4e55b984dd064347b6e5d2",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdX//8Go\u003d",
+        "filename": "warnings.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2013-11-25T20:06:36Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdX//8QE\u003d",
+      "revId": "d395b7cf2973e58d4a4e55b984dd064347b6e5d2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdX//8QA\u003d",
         "filename": "warnings.c",
         "patchSetId": 9
@@ -98,6 +188,24 @@
       "writtenOn": "2013-11-23T02:32:56Z",
       "side": 1,
       "message": "static?",
+      "revId": "d395b7cf2973e58d4a4e55b984dd064347b6e5d2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX//8Gk\u003d",
+        "filename": "warnings.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2013-11-25T20:06:36Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdX//8QA\u003d",
       "revId": "d395b7cf2973e58d4a4e55b984dd064347b6e5d2",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -121,6 +229,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdX//8Gg\u003d",
+        "filename": "warnings.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 73,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2013-11-25T20:06:36Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdX//8P8\u003d",
+      "revId": "d395b7cf2973e58d4a4e55b984dd064347b6e5d2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdX//8P4\u003d",
         "filename": "warnings.c",
         "patchSetId": 9
@@ -138,6 +264,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdX//8Gc\u003d",
+        "filename": "warnings.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 80,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2013-11-25T20:06:36Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdX//8P4\u003d",
+      "revId": "d395b7cf2973e58d4a4e55b984dd064347b6e5d2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdX//8QM\u003d",
         "filename": "warnings.c",
         "patchSetId": 9
@@ -149,6 +293,24 @@
       "writtenOn": "2013-11-23T02:32:56Z",
       "side": 1,
       "message": "could be a for() to group 100/101+103",
+      "revId": "d395b7cf2973e58d4a4e55b984dd064347b6e5d2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX//8F4\u003d",
+        "filename": "warnings.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 101,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2013-11-25T20:06:36Z",
+      "side": 1,
+      "message": "Done.",
+      "parentUuid": "AAAAdX//8QM\u003d",
       "revId": "d395b7cf2973e58d4a4e55b984dd064347b6e5d2",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
