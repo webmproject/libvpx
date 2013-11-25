@@ -754,32 +754,6 @@ static void choose_largest_txfm_size(VP9_COMP *cpi, MACROBLOCK *x,
   cpi->tx_stepdown_count[0]++;
 }
 
-static TX_SIZE select_tx_size(TX_MODE tx_mode, TX_SIZE max_tx_size,
-                              int64_t rd[][2]) {
-  if (max_tx_size == TX_32X32 &&
-      (tx_mode == ALLOW_32X32 ||
-       (tx_mode == TX_MODE_SELECT &&
-       rd[TX_32X32][1] < rd[TX_16X16][1] &&
-       rd[TX_32X32][1] < rd[TX_8X8][1] &&
-       rd[TX_32X32][1] < rd[TX_4X4][1]))) {
-    return TX_32X32;
-  } else if (max_tx_size >= TX_16X16 &&
-             (tx_mode == ALLOW_16X16 ||
-              tx_mode == ALLOW_32X32 ||
-              (tx_mode == TX_MODE_SELECT &&
-               rd[TX_16X16][1] < rd[TX_8X8][1] &&
-               rd[TX_16X16][1] < rd[TX_4X4][1]))) {
-    return TX_16X16;
-  } else if (tx_mode == ALLOW_8X8 ||
-             tx_mode == ALLOW_16X16 ||
-             tx_mode == ALLOW_32X32 ||
-             (tx_mode == TX_MODE_SELECT && rd[TX_8X8][1] < rd[TX_4X4][1])) {
-    return TX_8X8;
-  } else {
-    return TX_4X4;
-  }
-}
-
 static void choose_txfm_size_from_rd(VP9_COMP *cpi, MACROBLOCK *x,
                                      int (*r)[2], int *rate,
                                      int64_t *d, int64_t *distortion,
@@ -794,39 +768,42 @@ static void choose_txfm_size_from_rd(VP9_COMP *cpi, MACROBLOCK *x,
   int64_t rd[TX_SIZES][2];
   int n, m;
   int s0, s1;
+  const TX_SIZE max_mode_tx_size = tx_mode_to_biggest_tx_size[cm->tx_mode];
+  int64_t best_rd = INT64_MAX;
+  TX_SIZE best_tx = TX_4X4;
 
   const vp9_prob *tx_probs = get_tx_probs2(max_tx_size, xd, &cm->fc.tx_probs);
-
-  for (n = TX_4X4; n <= max_tx_size; n++) {
-    r[n][1] = r[n][0];
-    if (r[n][0] == INT_MAX)
-      continue;
-    for (m = 0; m <= n - (n == max_tx_size); m++) {
-      if (m == n)
-        r[n][1] += vp9_cost_zero(tx_probs[m]);
-      else
-        r[n][1] += vp9_cost_one(tx_probs[m]);
-    }
-  }
-
   assert(skip_prob > 0);
   s0 = vp9_cost_bit(skip_prob, 0);
   s1 = vp9_cost_bit(skip_prob, 1);
 
   for (n = TX_4X4; n <= max_tx_size; n++) {
+    r[n][1] = r[n][0];
+    if (r[n][0] < INT_MAX) {
+      for (m = 0; m <= n - (n == max_tx_size); m++) {
+        if (m == n)
+          r[n][1] += vp9_cost_zero(tx_probs[m]);
+        else
+          r[n][1] += vp9_cost_one(tx_probs[m]);
+      }
+    }
     if (d[n] == INT64_MAX) {
       rd[n][0] = rd[n][1] = INT64_MAX;
-      continue;
-    }
-    if (s[n]) {
+    } else if (s[n]) {
       rd[n][0] = rd[n][1] = RDCOST(x->rdmult, x->rddiv, s1, d[n]);
     } else {
       rd[n][0] = RDCOST(x->rdmult, x->rddiv, r[n][0] + s0, d[n]);
       rd[n][1] = RDCOST(x->rdmult, x->rddiv, r[n][1] + s0, d[n]);
     }
-  }
 
-  mbmi->tx_size = select_tx_size(cm->tx_mode, max_tx_size, rd);
+    if (rd[n][1] < best_rd) {
+      best_tx = n;
+      best_rd = rd[n][1];
+    }
+  }
+  mbmi->tx_size = cm->tx_mode == TX_MODE_SELECT ?
+                      best_tx : MIN(max_tx_size, max_mode_tx_size);
+
 
   *distortion = d[mbmi->tx_size];
   *rate       = r[mbmi->tx_size][cm->tx_mode == TX_MODE_SELECT];
@@ -836,29 +813,18 @@ static void choose_txfm_size_from_rd(VP9_COMP *cpi, MACROBLOCK *x,
   tx_cache[ALLOW_8X8] = rd[TX_8X8][0];
   tx_cache[ALLOW_16X16] = rd[MIN(max_tx_size, TX_16X16)][0];
   tx_cache[ALLOW_32X32] = rd[MIN(max_tx_size, TX_32X32)][0];
-  if (max_tx_size == TX_32X32 &&
-      rd[TX_32X32][1] < rd[TX_16X16][1] && rd[TX_32X32][1] < rd[TX_8X8][1] &&
-      rd[TX_32X32][1] < rd[TX_4X4][1])
-    tx_cache[TX_MODE_SELECT] = rd[TX_32X32][1];
-  else if (max_tx_size >= TX_16X16 &&
-           rd[TX_16X16][1] < rd[TX_8X8][1] && rd[TX_16X16][1] < rd[TX_4X4][1])
-    tx_cache[TX_MODE_SELECT] = rd[TX_16X16][1];
-  else
-    tx_cache[TX_MODE_SELECT] = rd[TX_4X4][1] < rd[TX_8X8][1] ?
-                                 rd[TX_4X4][1] : rd[TX_8X8][1];
 
-  if (max_tx_size == TX_32X32 &&
-      rd[TX_32X32][1] < rd[TX_16X16][1] &&
-      rd[TX_32X32][1] < rd[TX_8X8][1] &&
-      rd[TX_32X32][1] < rd[TX_4X4][1]) {
+  if (max_tx_size == TX_32X32 && best_tx == TX_32X32) {
+    tx_cache[TX_MODE_SELECT] = rd[TX_32X32][1];
     cpi->tx_stepdown_count[0]++;
-  } else if (max_tx_size >= TX_16X16 &&
-             rd[TX_16X16][1] < rd[TX_8X8][1] &&
-             rd[TX_16X16][1] < rd[TX_4X4][1]) {
+  } else if (max_tx_size >= TX_16X16 && best_tx == TX_16X16) {
+    tx_cache[TX_MODE_SELECT] = rd[TX_16X16][1];
     cpi->tx_stepdown_count[max_tx_size - TX_16X16]++;
   } else if (rd[TX_8X8][1] < rd[TX_4X4][1]) {
+    tx_cache[TX_MODE_SELECT] = rd[TX_8X8][1];
     cpi->tx_stepdown_count[max_tx_size - TX_8X8]++;
   } else {
+    tx_cache[TX_MODE_SELECT] = rd[TX_4X4][1];
     cpi->tx_stepdown_count[max_tx_size - TX_4X4]++;
   }
 }
@@ -878,14 +844,17 @@ static void choose_txfm_size_from_modelrd(VP9_COMP *cpi, MACROBLOCK *x,
   int n, m;
   int s0, s1;
   double scale_rd[TX_SIZES] = {1.73, 1.44, 1.20, 1.00};
-  // double scale_r[TX_SIZES] = {2.82, 2.00, 1.41, 1.00};
+  const TX_SIZE max_mode_tx_size = tx_mode_to_biggest_tx_size[cm->tx_mode];
+  int64_t best_rd = INT64_MAX;
+  TX_SIZE best_tx = TX_4X4;
 
   const vp9_prob *tx_probs = get_tx_probs2(max_tx_size, xd, &cm->fc.tx_probs);
-
-  // for (n = TX_4X4; n <= max_txfm_size; n++)
-  //   r[n][0] = (r[n][0] * scale_r[n]);
+  assert(skip_prob > 0);
+  s0 = vp9_cost_bit(skip_prob, 0);
+  s1 = vp9_cost_bit(skip_prob, 1);
 
   for (n = TX_4X4; n <= max_tx_size; n++) {
+    double scale = scale_rd[n];
     r[n][1] = r[n][0];
     for (m = 0; m <= n - (n == max_tx_size); m++) {
       if (m == n)
@@ -893,40 +862,29 @@ static void choose_txfm_size_from_modelrd(VP9_COMP *cpi, MACROBLOCK *x,
       else
         r[n][1] += vp9_cost_one(tx_probs[m]);
     }
-  }
-
-  assert(skip_prob > 0);
-  s0 = vp9_cost_bit(skip_prob, 0);
-  s1 = vp9_cost_bit(skip_prob, 1);
-
-  for (n = TX_4X4; n <= max_tx_size; n++) {
     if (s[n]) {
-      rd[n][0] = rd[n][1] = RDCOST(x->rdmult, x->rddiv, s1, d[n]);
+      rd[n][0] = rd[n][1] = RDCOST(x->rdmult, x->rddiv, s1, d[n]) * scale;
     } else {
-      rd[n][0] = RDCOST(x->rdmult, x->rddiv, r[n][0] + s0, d[n]);
-      rd[n][1] = RDCOST(x->rdmult, x->rddiv, r[n][1] + s0, d[n]);
+      rd[n][0] = RDCOST(x->rdmult, x->rddiv, r[n][0] + s0, d[n]) * scale;
+      rd[n][1] = RDCOST(x->rdmult, x->rddiv, r[n][1] + s0, d[n]) * scale;
+    }
+    if (rd[n][1] < best_rd) {
+      best_rd = rd[n][1];
+      best_tx = n;
     }
   }
-  for (n = TX_4X4; n <= max_tx_size; n++) {
-    rd[n][0] = (int64_t)(scale_rd[n] * rd[n][0]);
-    rd[n][1] = (int64_t)(scale_rd[n] * rd[n][1]);
-  }
 
-  mbmi->tx_size = select_tx_size(cm->tx_mode, max_tx_size, rd);
+  mbmi->tx_size = cm->tx_mode == TX_MODE_SELECT ?
+                      best_tx : MIN(max_tx_size, max_mode_tx_size);
 
   // Actually encode using the chosen mode if a model was used, but do not
   // update the r, d costs
   txfm_rd_in_plane(x, &cpi->rdcost_stack, rate, distortion, skip,
                    &sse[mbmi->tx_size], ref_best_rd, 0, bs, mbmi->tx_size);
 
-  if (max_tx_size == TX_32X32 &&
-      rd[TX_32X32][1] <= rd[TX_16X16][1] &&
-      rd[TX_32X32][1] <= rd[TX_8X8][1] &&
-      rd[TX_32X32][1] <= rd[TX_4X4][1]) {
+  if (max_tx_size == TX_32X32 && best_tx == TX_32X32) {
     cpi->tx_stepdown_count[0]++;
-  } else if (max_tx_size >= TX_16X16 &&
-             rd[TX_16X16][1] <= rd[TX_8X8][1] &&
-             rd[TX_16X16][1] <= rd[TX_4X4][1]) {
+  } else if (max_tx_size >= TX_16X16 &&  best_tx == TX_16X16) {
     cpi->tx_stepdown_count[max_tx_size - TX_16X16]++;
   } else if (rd[TX_8X8][1] <= rd[TX_4X4][1]) {
     cpi->tx_stepdown_count[max_tx_size - TX_8X8]++;
@@ -2142,7 +2100,7 @@ static void mv_pred(VP9_COMP *cpi, MACROBLOCK *x,
   int best_index = 0;
   int best_sad = INT_MAX;
   int this_sad = INT_MAX;
-  unsigned int max_mv = 0;
+  int max_mv = 0;
 
   uint8_t *src_y_ptr = x->plane[0].src.buf;
   uint8_t *ref_y_ptr;
@@ -3643,7 +3601,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
 
     /* keep record of best compound/single-only prediction */
     if (!disable_skip && ref_frame != INTRA_FRAME) {
-      int single_rd, hybrid_rd, single_rate, hybrid_rate;
+      int64_t single_rd, hybrid_rd, single_rate, hybrid_rate;
 
       if (cm->comp_pred_mode == REFERENCE_MODE_SELECT) {
         single_rate = rate2 - compmode_cost;
@@ -4394,7 +4352,7 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
 
     /* keep record of best compound/single-only prediction */
     if (!disable_skip && ref_frame != INTRA_FRAME) {
-      int single_rd, hybrid_rd, single_rate, hybrid_rate;
+      int64_t single_rd, hybrid_rd, single_rate, hybrid_rate;
 
       if (cpi->common.comp_pred_mode == REFERENCE_MODE_SELECT) {
         single_rate = rate2 - compmode_cost;
