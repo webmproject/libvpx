@@ -17,7 +17,6 @@
 #include "vp9/encoder/vp9_tokenize.h"
 #include "vp9/encoder/vp9_treewriter.h"
 #include "vp9/encoder/vp9_onyx_int.h"
-#include "vp9/encoder/vp9_modecosts.h"
 #include "vp9/common/vp9_entropymode.h"
 #include "vp9/common/vp9_reconinter.h"
 #include "vp9/common/vp9_reconintra.h"
@@ -113,6 +112,30 @@ static int rd_thresh_block_size_factor[BLOCK_SIZES] =
 
 #define MV_COST_WEIGHT      108
 #define MV_COST_WEIGHT_SUB  120
+
+static void fill_mode_costs(VP9_COMP *c) {
+  VP9_COMMON *const cm = &c->common;
+  int i, j;
+
+  for (i = 0; i < INTRA_MODES; i++)
+    for (j = 0; j < INTRA_MODES; j++)
+      vp9_cost_tokens((int *)c->mb.y_mode_costs[i][j], vp9_kf_y_mode_prob[i][j],
+                      vp9_intra_mode_tree);
+
+  // TODO(rbultje) separate tables for superblock costing?
+  vp9_cost_tokens(c->mb.mbmode_cost, cm->fc.y_mode_prob[1],
+                  vp9_intra_mode_tree);
+  vp9_cost_tokens(c->mb.intra_uv_mode_cost[1],
+                  cm->fc.uv_mode_prob[INTRA_MODES - 1], vp9_intra_mode_tree);
+  vp9_cost_tokens(c->mb.intra_uv_mode_cost[0],
+                  vp9_kf_uv_mode_prob[INTRA_MODES - 1],
+                  vp9_intra_mode_tree);
+
+  for (i = 0; i < SWITCHABLE_FILTER_CONTEXTS; ++i)
+    vp9_cost_tokens((int *)c->mb.switchable_interp_costs[i],
+                    cm->fc.switchable_interp_prob[i],
+                    vp9_switchable_interp_tree);
+}
 
 static void fill_token_costs(vp9_coeff_cost *c,
                              vp9_coeff_probs_model (*p)[BLOCK_TYPES]) {
@@ -258,7 +281,7 @@ void vp9_initialize_rd_consts(VP9_COMP *cpi) {
                     vp9_partition_tree);
 
   /*rough estimate for costing*/
-  vp9_init_mode_costs(cpi);
+  fill_mode_costs(cpi);
 
   if (!frame_is_intra_only(cm)) {
     vp9_build_nmv_cost_table(
