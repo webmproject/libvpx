@@ -169,6 +169,8 @@ static void prob_diff_update(const vp9_tree_index *tree,
                              int n, vp9_writer *w) {
   int i;
   unsigned int branch_ct[32][2];
+
+  // Assuming max number of probabilities <= 32
   assert(n <= 32);
 
   vp9_tree_probs_from_distribution(tree, branch_ct, counts);
