@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdX//8Kw\u003d",
+        "filename": "vp9/common/vp9_reconinter.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 206,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2013-11-25T16:43:37Z",
+      "side": 1,
+      "message": "Can be done in a separate commit, we should move these to decode from common if they will be used for decoder only.",
+      "revId": "9abfa1d8a58f7ebc4a9218436c33fabed601db38",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
