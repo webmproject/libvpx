@@ -588,8 +588,8 @@ static void rate_block(int plane, int block, BLOCK_SIZE plane_bsize,
                            args->scan, args->nb);
 }
 
-static void block_yrd_txfm(int plane, int block, BLOCK_SIZE plane_bsize,
-                           TX_SIZE tx_size, void *arg) {
+static void block_rd_txfm(int plane, int block, BLOCK_SIZE plane_bsize,
+                          TX_SIZE tx_size, void *arg) {
   struct rdcost_block_args *args = arg;
   MACROBLOCK *const x = args->x;
   MACROBLOCKD *const xd = &x->e_mbd;
@@ -698,7 +698,7 @@ static void txfm_rd_in_plane(MACROBLOCK *x,
   rd_stack->nb = so->neighbors;
 
   foreach_transformed_block_in_plane(xd, bsize, plane,
-                                     block_yrd_txfm, rd_stack);
+                                     block_rd_txfm, rd_stack);
   if (rd_stack->skip) {
     *rate       = INT_MAX;
     *distortion = INT64_MAX;
