@@ -40,6 +40,7 @@
 #include "vpx_ports/mem_ops.h"
 #include "vpx_ports/vpx_timer.h"
 #include "./vpxstats.h"
+#include "./warnings.h"
 #include "./webmenc.h"
 #include "./y4minput.h"
 
@@ -238,13 +239,16 @@ static const arg_def_t rate_hist_n         = ARG_DEF(NULL, "rate-hist", 1,
 static const arg_def_t disable_warnings =
     ARG_DEF(NULL, "disable-warnings", 0,
             "Disable warnings about potentially incorrect encode settings.");
+static const arg_def_t disable_warning_prompt =
+    ARG_DEF("y", "disable-warning-prompt", 0,
+            "Display warnings, but do not prompt user to continue.");
 
 static const arg_def_t *main_args[] = {
   &debugmode,
   &outputfile, &codecarg, &passes, &pass_arg, &fpf_name, &limit, &skip,
   &deadline, &best_dl, &good_dl, &rt_dl,
   &quietarg, &verbosearg, &psnrarg, &use_ivf, &out_part, &q_hist_n,
-  &rate_hist_n, &disable_warnings,
+  &rate_hist_n, &disable_warnings, &disable_warning_prompt,
   NULL
 };
 
@@ -987,6 +991,10 @@ static void parse_global_config(struct VpxEncoderConfig *global, char **argv) {
       global->show_q_hist_buckets = arg_parse_uint(&arg);
     else if (arg_match(&arg, &rate_hist_n, argi))
       global->show_rate_hist_buckets = arg_parse_uint(&arg);
+    else if (arg_match(&arg, &disable_warnings, argi))
+      global->disable_warnings = 1;
+    else if (arg_match(&arg, &disable_warning_prompt, argi))
+      global->disable_warning_prompt = 1;
     else
       argj++;
   }
@@ -1259,7 +1267,7 @@ static int parse_stream_params(struct VpxEncoderConfig *global,
 #define FOREACH_STREAM(func) \
   do { \
     struct stream_state *stream; \
-    for(stream = streams; stream; stream = stream->next) { \
+    for (stream = streams; stream; stream = stream->next) { \
       func; \
     } \
   } while (0)
@@ -1729,31 +1737,6 @@ static void print_time(const char *label, int64_t etl) {
   }
 }
 
-int continue_prompt() {
-  int c;
-  fprintf(stderr, "Continue? (y to continue) ");
-  c = getchar();
-  return c == 'y';
-}
-
-void check_quantizer(struct VpxEncoderConfig* config, int min_q, int max_q) {
-  int check_failed = 0;
-
-  if (config->disable_warnings)
-    return;
-
-  if (min_q == max_q || abs(max_q - min_q) < 8) {
-    check_failed = 1;
-  }
-
-  if (check_failed) {
-    warn("Bad quantizer values. Quantizer values must not be equal, and "
-         "should differ by at least 8.");
-
-    if (!continue_prompt())
-      exit(EXIT_FAILURE);
-  }
-}
 
 int main(int argc, const char **argv_) {
   int pass;
@@ -1807,10 +1790,9 @@ int main(int argc, const char **argv_) {
     if (argi[0][0] == '-' && argi[0][1])
       die("Error: Unrecognized option %s\n", *argi);
 
-  FOREACH_STREAM(
-      check_quantizer(&global,
-                      stream->config.cfg.rc_min_quantizer,
-                      stream->config.cfg.rc_max_quantizer););
+  FOREACH_STREAM(check_encoder_config(global.disable_warning_prompt,
+                                      &global, &stream->config.cfg););
+
   /* Handle non-option arguments */
   input.filename = argv[0];
 

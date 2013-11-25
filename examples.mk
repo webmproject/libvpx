@@ -41,6 +41,7 @@ vpxenc.SRCS                 += args.c args.h y4minput.c y4minput.h vpxenc.h
 vpxenc.SRCS                 += ivfdec.c ivfdec.h
 vpxenc.SRCS                 += ivfenc.c ivfenc.h
 vpxenc.SRCS                 += tools_common.c tools_common.h
+vpxenc.SRCS                 += warnings.c warnings.h
 vpxenc.SRCS                 += webmenc.c webmenc.h
 vpxenc.SRCS                 += vpx_ports/mem_ops.h
 vpxenc.SRCS                 += vpx_ports/mem_ops_aligned.h
