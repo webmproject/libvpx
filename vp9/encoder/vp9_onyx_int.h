@@ -467,7 +467,6 @@ typedef struct VP9_COMP {
 
   int y_mode_count[4][INTRA_MODES];
   int y_uv_mode_count[INTRA_MODES][INTRA_MODES];
-  unsigned int partition_count[PARTITION_CONTEXTS][PARTITION_TYPES];
 
   nmv_context_counts NMVcount;
 

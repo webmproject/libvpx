@@ -3053,7 +3053,6 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
 
     vp9_copy(counts->y_mode, cpi->y_mode_count);
     vp9_copy(counts->uv_mode, cpi->y_uv_mode_count);
-    vp9_copy(counts->partition, cpi->partition_count);
     vp9_copy(counts->intra_inter, cpi->intra_inter_count);
     vp9_copy(counts->comp_inter, cpi->comp_inter_count);
     vp9_copy(counts->single_ref, cpi->single_ref_count);

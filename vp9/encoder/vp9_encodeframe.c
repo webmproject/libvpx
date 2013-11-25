@@ -850,18 +850,18 @@ static void encode_sb(VP9_COMP *cpi, const TileInfo *const tile,
   switch (partition) {
     case PARTITION_NONE:
       if (output_enabled && bsize >= BLOCK_8X8)
-        cpi->partition_count[pl][PARTITION_NONE]++;
+        cm->counts.partition[pl][PARTITION_NONE]++;
       encode_b(cpi, tile, tp, mi_row, mi_col, output_enabled, c1, -1);
       break;
     case PARTITION_VERT:
       if (output_enabled)
-        cpi->partition_count[pl][PARTITION_VERT]++;
+        cm->counts.partition[pl][PARTITION_VERT]++;
       encode_b(cpi, tile, tp, mi_row, mi_col, output_enabled, c1, 0);
       encode_b(cpi, tile, tp, mi_row, mi_col + bs, output_enabled, c1, 1);
       break;
     case PARTITION_HORZ:
       if (output_enabled)
-        cpi->partition_count[pl][PARTITION_HORZ]++;
+        cm->counts.partition[pl][PARTITION_HORZ]++;
       encode_b(cpi, tile, tp, mi_row, mi_col, output_enabled, c1, 0);
       encode_b(cpi, tile, tp, mi_row + bs, mi_col, output_enabled, c1, 1);
       break;
@@ -869,7 +869,7 @@ static void encode_sb(VP9_COMP *cpi, const TileInfo *const tile,
       subsize = get_subsize(bsize, PARTITION_SPLIT);
 
       if (output_enabled)
-        cpi->partition_count[pl][PARTITION_SPLIT]++;
+        cm->counts.partition[pl][PARTITION_SPLIT]++;
 
       for (i = 0; i < 4; i++) {
         const int x_idx = i & 1, y_idx = i >> 1;
@@ -1888,7 +1888,7 @@ static void init_encode_frame_mb_context(VP9_COMP *cpi) {
   vp9_zero(cpi->y_mode_count);
   vp9_zero(cpi->y_uv_mode_count);
   vp9_zero(cm->counts.inter_mode);
-  vp9_zero(cpi->partition_count);
+  vp9_zero(cm->counts.partition);
   vp9_zero(cpi->intra_inter_count);
   vp9_zero(cpi->comp_inter_count);
   vp9_zero(cpi->single_ref_count);
