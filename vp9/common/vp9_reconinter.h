@@ -24,6 +24,9 @@ void vp9_build_inter_predictors_sbuv(MACROBLOCKD *xd, int mi_row, int mi_col,
 void vp9_build_inter_predictors_sb(MACROBLOCKD *xd, int mi_row, int mi_col,
                                    BLOCK_SIZE bsize);
 
+void vp9_dec_build_inter_predictors_sb(MACROBLOCKD *xd, int mi_row, int mi_col,
+                                       BLOCK_SIZE bsize);
+
 void vp9_build_inter_predictor(const uint8_t *src, int src_stride,
                                uint8_t *dst, int dst_stride,
                                const MV *mv_q3,
