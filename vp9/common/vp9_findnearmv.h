@@ -41,32 +41,4 @@ void vp9_append_sub8x8_mvs_for_idx(VP9_COMMON *cm, MACROBLOCKD *xd,
                                    int block_idx, int ref_idx,
                                    int mi_row, int mi_col);
 
-static MB_PREDICTION_MODE left_block_mode(const MODE_INFO *cur_mi,
-                                          const MODE_INFO *left_mi, int b) {
-  if (b == 0 || b == 2) {
-    if (!left_mi || is_inter_block(&left_mi->mbmi))
-      return DC_PRED;
-
-    return left_mi->mbmi.sb_type < BLOCK_8X8 ? left_mi->bmi[b + 1].as_mode
-                                             : left_mi->mbmi.mode;
-  } else {
-    assert(b == 1 || b == 3);
-    return cur_mi->bmi[b - 1].as_mode;
-  }
-}
-
-static MB_PREDICTION_MODE above_block_mode(const MODE_INFO *cur_mi,
-                                           const MODE_INFO *above_mi, int b) {
-  if (b == 0 || b == 1) {
-    if (!above_mi || is_inter_block(&above_mi->mbmi))
-      return DC_PRED;
-
-    return above_mi->mbmi.sb_type < BLOCK_8X8 ? above_mi->bmi[b + 2].as_mode
-                                              : above_mi->mbmi.mode;
-  } else {
-    assert(b == 2 || b == 3);
-    return cur_mi->bmi[b - 2].as_mode;
-  }
-}
-
 #endif  // VP9_COMMON_VP9_FINDNEARMV_H_
