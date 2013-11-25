@@ -149,7 +149,7 @@ static void count_segs(VP9_COMP *cpi, const TileInfo *const tile,
 
     // Store the prediction status for this mb and update counts
     // as appropriate
-    vp9_set_pred_flag_seg_id(xd, pred_flag);
+    xd->mi_8x8[0]->mbmi.seg_id_predicted = pred_flag;
     temporal_predictor_count[pred_context][pred_flag]++;
 
     if (!pred_flag)
