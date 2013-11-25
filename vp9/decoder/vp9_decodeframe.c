@@ -11,6 +11,8 @@
 #include <assert.h>
 
 #include "./vp9_rtcd.h"
+#include "./vpx_scale_rtcd.h"
+
 #include "vpx_mem/vpx_mem.h"
 #include "vpx_scale/vpx_scale.h"
 
@@ -1164,8 +1166,12 @@ static size_t read_uncompressed_header(VP9D_COMP *pbi,
       cm->allow_high_precision_mv = vp9_rb_read_bit(rb);
       cm->mcomp_filter_type = read_interp_filter_type(rb);
 
-      for (i = 0; i < ALLOWED_REFS_PER_FRAME; ++i)
+      for (i = 0; i < ALLOWED_REFS_PER_FRAME; ++i) {
         vp9_setup_scale_factors(cm, i);
+        if (vp9_is_scaled(&cm->active_ref_scale_comm[i]))
+          vp9_extend_frame_borders(&cm->yv12_fb[cm->active_ref_idx[i]],
+                                   cm->subsampling_x, cm->subsampling_y);
+      }
     }
   }
 
