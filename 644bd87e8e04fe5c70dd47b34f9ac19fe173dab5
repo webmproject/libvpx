@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdX//8Fs\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 20
+      },
+      "lineNbr": 717,
+      "author": {
+        "id": 1003514
+      },
+      "writtenOn": "2013-11-25T20:15:51Z",
+      "side": 1,
+      "message": "You\u0027re changing rdmult here but you\u0027re not resetting it afterwards (like what is done for VARIANCE_AQ) , is this really what you want?",
+      "revId": "644bd87e8e04fe5c70dd47b34f9ac19fe173dab5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
