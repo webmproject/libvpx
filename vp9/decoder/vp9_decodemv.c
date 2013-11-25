@@ -258,14 +258,14 @@ static INLINE void read_mv(vp9_reader *r, MV *mv, const MV *ref,
   mv->col = ref->col + diff.col;
 }
 
-static COMPPREDMODE_TYPE read_reference_mode(VP9_COMMON *cm,
+static REFERENCE_MODE read_reference_mode(VP9_COMMON *cm,
                                              const MACROBLOCKD *xd,
                                              vp9_reader *r) {
   const int ctx = vp9_get_pred_context_comp_inter_inter(cm, xd);
   const int mode = vp9_read(r, cm->fc.comp_inter_prob[ctx]);
   if (!cm->frame_parallel_decoding_mode)
     ++cm->counts.comp_inter[ctx][mode];
-  return mode;  // SINGLE_PREDICTION_ONLY or COMP_PREDICTION_ONLY
+  return mode;  // SINGLE_REFERENCE or COMPOUND_REFERENCE
 }
 
 // Read the referncence frame
@@ -279,12 +279,12 @@ static void read_ref_frames(VP9_COMMON *const cm, MACROBLOCKD *const xd,
     ref_frame[0] = vp9_get_segdata(&cm->seg, segment_id, SEG_LVL_REF_FRAME);
     ref_frame[1] = NONE;
   } else {
-    const COMPPREDMODE_TYPE mode = (cm->comp_pred_mode == HYBRID_PREDICTION)
+    const REFERENCE_MODE mode = (cm->comp_pred_mode == REFERENCE_MODE_SELECT)
                                       ? read_reference_mode(cm, xd, r)
                                       : cm->comp_pred_mode;
 
     // FIXME(rbultje) I'm pretty sure this breaks segmentation ref frame coding
-    if (mode == COMP_PREDICTION_ONLY) {
+    if (mode == COMPOUND_REFERENCE) {
       const int idx = cm->ref_frame_sign_bias[cm->comp_fixed_ref];
       const int ctx = vp9_get_pred_context_comp_ref_p(cm, xd);
       const int bit = vp9_read(r, fc->comp_ref_prob[ctx]);
@@ -292,7 +292,7 @@ static void read_ref_frames(VP9_COMMON *const cm, MACROBLOCKD *const xd,
         ++counts->comp_ref[ctx][bit];
       ref_frame[idx] = cm->comp_fixed_ref;
       ref_frame[!idx] = cm->comp_var_ref[bit];
-    } else if (mode == SINGLE_PREDICTION_ONLY) {
+    } else if (mode == SINGLE_REFERENCE) {
       const int ctx0 = vp9_get_pred_context_single_ref_p1(xd);
       const int bit0 = vp9_read(r, fc->single_ref_prob[ctx0][0]);
       if (!cm->frame_parallel_decoding_mode)

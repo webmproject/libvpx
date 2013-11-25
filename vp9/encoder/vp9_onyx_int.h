@@ -432,8 +432,8 @@ typedef struct VP9_COMP {
   int rd_thresh_sub8x8[MAX_SEGMENTS][BLOCK_SIZES][MAX_REFS];
   int rd_thresh_freq_sub8x8[BLOCK_SIZES][MAX_REFS];
 
-  int64_t rd_comp_pred_diff[NB_PREDICTION_TYPES];
-  int64_t rd_prediction_type_threshes[4][NB_PREDICTION_TYPES];
+  int64_t rd_comp_pred_diff[REFERENCE_MODES];
+  int64_t rd_prediction_type_threshes[4][REFERENCE_MODES];
   unsigned int intra_inter_count[INTRA_INTER_CONTEXTS][2];
   unsigned int comp_inter_count[COMP_INTER_CONTEXTS][2];
   unsigned int single_ref_count[REF_CONTEXTS][2][2];

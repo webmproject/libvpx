@@ -531,9 +531,9 @@ static void update_state(VP9_COMP *cpi, PICK_MODE_CONTEXT *ctx,
       ++cm->counts.switchable_interp[ctx][mbmi->interp_filter];
     }
 
-    cpi->rd_comp_pred_diff[SINGLE_PREDICTION_ONLY] += ctx->single_pred_diff;
-    cpi->rd_comp_pred_diff[COMP_PREDICTION_ONLY] += ctx->comp_pred_diff;
-    cpi->rd_comp_pred_diff[HYBRID_PREDICTION] += ctx->hybrid_pred_diff;
+    cpi->rd_comp_pred_diff[SINGLE_REFERENCE] += ctx->single_pred_diff;
+    cpi->rd_comp_pred_diff[COMPOUND_REFERENCE] += ctx->comp_pred_diff;
+    cpi->rd_comp_pred_diff[REFERENCE_MODE_SELECT] += ctx->hybrid_pred_diff;
 
     for (i = 0; i < SWITCHABLE_FILTER_CONTEXTS; i++)
       cpi->rd_filter_diff[i] += ctx->best_filter_diff[i];
@@ -758,7 +758,7 @@ static void update_stats(VP9_COMP *cpi) {
     // reference frame allowed for the segment so exclude it from
     // the reference frame counts used to work out probabilities.
     if (is_inter_block(mbmi) && !seg_ref_active) {
-      if (cm->comp_pred_mode == HYBRID_PREDICTION)
+      if (cm->comp_pred_mode == REFERENCE_MODE_SELECT)
         cpi->comp_inter_count[vp9_get_pred_context_comp_inter_inter(cm, xd)]
                              [has_second_ref(mbmi)]++;
 
@@ -2315,18 +2315,18 @@ void vp9_encode_frame(VP9_COMP *cpi) {
 
     /* prediction (compound, single or hybrid) mode selection */
     if (frame_type == 3 || !cm->allow_comp_inter_inter)
-      pred_type = SINGLE_PREDICTION_ONLY;
+      pred_type = SINGLE_REFERENCE;
     else if (cpi->rd_prediction_type_threshes[frame_type][1]
              > cpi->rd_prediction_type_threshes[frame_type][0]
              && cpi->rd_prediction_type_threshes[frame_type][1]
              > cpi->rd_prediction_type_threshes[frame_type][2]
              && check_dual_ref_flags(cpi) && cpi->static_mb_pct == 100)
-      pred_type = COMP_PREDICTION_ONLY;
+      pred_type = COMPOUND_REFERENCE;
     else if (cpi->rd_prediction_type_threshes[frame_type][0]
              > cpi->rd_prediction_type_threshes[frame_type][2])
-      pred_type = SINGLE_PREDICTION_ONLY;
+      pred_type = SINGLE_REFERENCE;
     else
-      pred_type = HYBRID_PREDICTION;
+      pred_type = REFERENCE_MODE_SELECT;
 
     /* filter type selection */
     // FIXME(rbultje) for some odd reason, we often select smooth_filter
@@ -2363,7 +2363,7 @@ void vp9_encode_frame(VP9_COMP *cpi) {
     cpi->common.mcomp_filter_type = filter_type;
     encode_frame_internal(cpi);
 
-    for (i = 0; i < NB_PREDICTION_TYPES; ++i) {
+    for (i = 0; i < REFERENCE_MODES; ++i) {
       const int diff = (int) (cpi->rd_comp_pred_diff[i] / cpi->common.MBs);
       cpi->rd_prediction_type_threshes[frame_type][i] += diff;
       cpi->rd_prediction_type_threshes[frame_type][i] >>= 1;
@@ -2386,7 +2386,7 @@ void vp9_encode_frame(VP9_COMP *cpi) {
       cpi->rd_tx_select_threshes[frame_type][i] /= 2;
     }
 
-    if (cpi->common.comp_pred_mode == HYBRID_PREDICTION) {
+    if (cpi->common.comp_pred_mode == REFERENCE_MODE_SELECT) {
       int single_count_zero = 0;
       int comp_count_zero = 0;
 
@@ -2396,10 +2396,10 @@ void vp9_encode_frame(VP9_COMP *cpi) {
       }
 
       if (comp_count_zero == 0) {
-        cpi->common.comp_pred_mode = SINGLE_PREDICTION_ONLY;
+        cpi->common.comp_pred_mode = SINGLE_REFERENCE;
         vp9_zero(cpi->comp_inter_count);
       } else if (single_count_zero == 0) {
-        cpi->common.comp_pred_mode = COMP_PREDICTION_ONLY;
+        cpi->common.comp_pred_mode = COMPOUND_REFERENCE;
         vp9_zero(cpi->comp_inter_count);
       }
     }
