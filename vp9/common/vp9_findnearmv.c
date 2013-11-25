@@ -63,10 +63,12 @@ void vp9_append_sub8x8_mvs_for_idx(VP9_COMMON *cm, MACROBLOCKD *xd,
         break;
       }
   } else {
-    int_mv candidates[2 + MAX_MV_REF_CANDIDATES] = { bmi[1].as_mv[ref_idx],
-                                                     bmi[0].as_mv[ref_idx],
-                                                     mv_list[0],
-                                                     mv_list[1] };
+    int_mv candidates[2 + MAX_MV_REF_CANDIDATES];
+    candidates[0] = bmi[1].as_mv[ref_idx];
+    candidates[1] = bmi[0].as_mv[ref_idx];
+    candidates[2] = mv_list[0];
+    candidates[3] = mv_list[1];
+
     assert(block_idx == 3);
     dst_nearest->as_int = bmi[2].as_mv[ref_idx].as_int;
     for (n = 0; n < 2 + MAX_MV_REF_CANDIDATES; ++n) {
