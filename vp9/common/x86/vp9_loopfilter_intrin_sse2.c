@@ -8,7 +8,7 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#include <emmintrin.h>  /* SSE2 */
+#include <emmintrin.h>  // SSE2
 #include "vp9/common/vp9_loopfilter.h"
 #include "vpx_ports/emmintrin_compat.h"
 
@@ -99,7 +99,7 @@ static void mb_lpf_horizontal_edge_w_sse2_8(unsigned char *s,
     filt = _mm_adds_epi8(filt, work_a);
     filt = _mm_adds_epi8(filt, work_a);
     filt = _mm_adds_epi8(filt, work_a);
-    /* (vp9_filter + 3 * (qs0 - ps0)) & mask */
+    // (vp9_filter + 3 * (qs0 - ps0)) & mask
     filt = _mm_and_si128(filt, mask);
 
     filter1 = _mm_adds_epi8(filt, t4);
@@ -110,11 +110,11 @@ static void mb_lpf_horizontal_edge_w_sse2_8(unsigned char *s,
     filter2 = _mm_unpacklo_epi8(zero, filter2);
     filter2 = _mm_srai_epi16(filter2, 0xB);
 
-    /* Filter1 >> 3 */
+    // Filter1 >> 3
     filt = _mm_packs_epi16(filter2, _mm_subs_epi16(zero, filter1));
     qs0ps0 = _mm_xor_si128(_mm_adds_epi8(qs0ps0, filt), t80);
 
-    /* filt >> 1 */
+    // filt >> 1
     filt = _mm_adds_epi16(filter1, t1);
     filt = _mm_srai_epi16(filt, 1);
     filt = _mm_andnot_si128(_mm_srai_epi16(_mm_unpacklo_epi8(zero, hev), 0x8),
@@ -473,13 +473,13 @@ static void mb_lpf_horizontal_edge_w_sse2_16(unsigned char *s,
     filt = _mm_adds_epi8(filt, work_a);
     filt = _mm_adds_epi8(filt, work_a);
     filt = _mm_adds_epi8(filt, work_a);
-    /* (vp9_filter + 3 * (qs0 - ps0)) & mask */
+    // (vp9_filter + 3 * (qs0 - ps0)) & mask
     filt = _mm_and_si128(filt, mask);
 
     filter1 = _mm_adds_epi8(filt, t4);
     filter2 = _mm_adds_epi8(filt, t3);
 
-    /* Filter1 >> 3 */
+    // Filter1 >> 3
     work_a = _mm_cmpgt_epi8(zero, filter1);
     filter1 = _mm_srli_epi16(filter1, 3);
     work_a = _mm_and_si128(work_a, te0);
@@ -487,7 +487,7 @@ static void mb_lpf_horizontal_edge_w_sse2_16(unsigned char *s,
     filter1 = _mm_or_si128(filter1, work_a);
     qs0 = _mm_xor_si128(_mm_subs_epi8(qs0, filter1), t80);
 
-    /* Filter2 >> 3 */
+    // Filter2 >> 3
     work_a = _mm_cmpgt_epi8(zero, filter2);
     filter2 = _mm_srli_epi16(filter2, 3);
     work_a = _mm_and_si128(work_a, te0);
@@ -495,7 +495,7 @@ static void mb_lpf_horizontal_edge_w_sse2_16(unsigned char *s,
     filter2 = _mm_or_si128(filter2, work_a);
     ps0 = _mm_xor_si128(_mm_adds_epi8(ps0, filter2), t80);
 
-    /* filt >> 1 */
+    // filt >> 1
     filt = _mm_adds_epi8(filter1, t1);
     work_a = _mm_cmpgt_epi8(zero, filt);
     filt = _mm_srli_epi16(filt, 1);
@@ -1014,23 +1014,23 @@ void vp9_mbloop_filter_horizontal_edge_sse2(unsigned char *s,
     filt = _mm_adds_epi8(filt, work_a);
     filt = _mm_adds_epi8(filt, work_a);
     filt = _mm_adds_epi8(filt, work_a);
-    /* (vp9_filter + 3 * (qs0 - ps0)) & mask */
+    // (vp9_filter + 3 * (qs0 - ps0)) & mask
     filt = _mm_and_si128(filt, mask);
 
     filter1 = _mm_adds_epi8(filt, t4);
     filter2 = _mm_adds_epi8(filt, t3);
 
-    /* Filter1 >> 3 */
+    // Filter1 >> 3
     filter1 = _mm_unpacklo_epi8(zero, filter1);
     filter1 = _mm_srai_epi16(filter1, 11);
     filter1 = _mm_packs_epi16(filter1, filter1);
 
-    /* Filter2 >> 3 */
+    // Filter2 >> 3
     filter2 = _mm_unpacklo_epi8(zero, filter2);
     filter2 = _mm_srai_epi16(filter2, 11);
     filter2 = _mm_packs_epi16(filter2, zero);
 
-    /* filt >> 1 */
+    // filt >> 1
     filt = _mm_adds_epi8(filter1, t1);
     filt = _mm_unpacklo_epi8(zero, filt);
     filt = _mm_srai_epi16(filt, 9);
@@ -1083,7 +1083,7 @@ void vp9_mbloop_filter_horizontal_edge_sse2(unsigned char *s,
   }
 }
 
-void vp9_mbloop_filter_horizontal_edge_16_sse2(uint8_t *s, int p /* pitch */,
+void vp9_mbloop_filter_horizontal_edge_16_sse2(uint8_t *s, int p,
                                                const uint8_t *_blimit0,
                                                const uint8_t *_limit0,
                                                const uint8_t *_thresh0,
@@ -1255,27 +1255,27 @@ void vp9_mbloop_filter_horizontal_edge_16_sse2(uint8_t *s, int p /* pitch */,
     filt = _mm_adds_epi8(filt, work_a);
     filt = _mm_adds_epi8(filt, work_a);
     filt = _mm_adds_epi8(filt, work_a);
-    /* (vp9_filter + 3 * (qs0 - ps0)) & mask */
+    // (vp9_filter + 3 * (qs0 - ps0)) & mask
     filt = _mm_and_si128(filt, mask);
 
     filter1 = _mm_adds_epi8(filt, t4);
     filter2 = _mm_adds_epi8(filt, t3);
 
-    /* Filter1 >> 3 */
+    // Filter1 >> 3
     work_a = _mm_cmpgt_epi8(zero, filter1);
     filter1 = _mm_srli_epi16(filter1, 3);
     work_a = _mm_and_si128(work_a, te0);
     filter1 = _mm_and_si128(filter1, t1f);
     filter1 = _mm_or_si128(filter1, work_a);
 
-    /* Filter2 >> 3 */
+    // Filter2 >> 3
     work_a = _mm_cmpgt_epi8(zero, filter2);
     filter2 = _mm_srli_epi16(filter2, 3);
     work_a = _mm_and_si128(work_a, te0);
     filter2 = _mm_and_si128(filter2, t1f);
     filter2 = _mm_or_si128(filter2, work_a);
 
-    /* filt >> 1 */
+    // filt >> 1
     filt = _mm_adds_epi8(filter1, t1);
     work_a = _mm_cmpgt_epi8(zero, filt);
     filt = _mm_srli_epi16(filt, 1);
@@ -1427,27 +1427,27 @@ void vp9_loop_filter_horizontal_edge_16_sse2(unsigned char *s,
     filt = _mm_adds_epi8(filt, work_a);
     filt = _mm_adds_epi8(filt, work_a);
     filt = _mm_adds_epi8(filt, work_a);
-    /* (vp9_filter + 3 * (qs0 - ps0)) & mask */
+    // (vp9_filter + 3 * (qs0 - ps0)) & mask
     filt = _mm_and_si128(filt, mask);
 
     filter1 = _mm_adds_epi8(filt, t4);
     filter2 = _mm_adds_epi8(filt, t3);
 
-    /* Filter1 >> 3 */
+    // Filter1 >> 3
     work_a = _mm_cmpgt_epi8(zero, filter1);
     filter1 = _mm_srli_epi16(filter1, 3);
     work_a = _mm_and_si128(work_a, te0);
     filter1 = _mm_and_si128(filter1, t1f);
     filter1 = _mm_or_si128(filter1, work_a);
 
-    /* Filter2 >> 3 */
+    // Filter2 >> 3
     work_a = _mm_cmpgt_epi8(zero, filter2);
     filter2 = _mm_srli_epi16(filter2, 3);
     work_a = _mm_and_si128(work_a, te0);
     filter2 = _mm_and_si128(filter2, t1f);
     filter2 = _mm_or_si128(filter2, work_a);
 
-    /* filt >> 1 */
+    // filt >> 1
     filt = _mm_adds_epi8(filter1, t1);
     work_a = _mm_cmpgt_epi8(zero, filt);
     filt = _mm_srli_epi16(filt, 1);
@@ -1474,7 +1474,7 @@ static INLINE void transpose8x16(unsigned char *in0, unsigned char *in1,
   __m128i x0, x1, x2, x3, x4, x5, x6, x7;
   __m128i x8, x9, x10, x11, x12, x13, x14, x15;
 
-  /* Read in 16 lines */
+  // Read in 16 lines
   x0 = _mm_loadl_epi64((__m128i *)in0);
   x8 = _mm_loadl_epi64((__m128i *)in1);
   x1 = _mm_loadl_epi64((__m128i *)(in0 + in_p));
@@ -1512,7 +1512,7 @@ static INLINE void transpose8x16(unsigned char *in0, unsigned char *in1,
   x14 = _mm_unpacklo_epi32(x12, x13);
   x15 = _mm_unpackhi_epi32(x12, x13);
 
-  /* Store first 4-line result */
+  // Store first 4-line result
   _mm_storeu_si128((__m128i *)out, _mm_unpacklo_epi64(x6, x14));
   _mm_storeu_si128((__m128i *)(out + out_p), _mm_unpackhi_epi64(x6, x14));
   _mm_storeu_si128((__m128i *)(out + 2 * out_p), _mm_unpacklo_epi64(x7, x15));
@@ -1528,7 +1528,7 @@ static INLINE void transpose8x16(unsigned char *in0, unsigned char *in1,
   x14 = _mm_unpacklo_epi32(x12, x13);
   x15 = _mm_unpackhi_epi32(x12, x13);
 
-  /* Store second 4-line result */
+  // Store second 4-line result
   _mm_storeu_si128((__m128i *)(out + 4 * out_p), _mm_unpacklo_epi64(x6, x14));
   _mm_storeu_si128((__m128i *)(out + 5 * out_p), _mm_unpackhi_epi64(x6, x14));
   _mm_storeu_si128((__m128i *)(out + 6 * out_p), _mm_unpacklo_epi64(x7, x15));
@@ -1598,61 +1598,129 @@ static INLINE void transpose(unsigned char *src[], int in_p,
   } while (++idx8x8 < num_8x8_to_transpose);
 }
 
-void vp9_mbloop_filter_vertical_edge_sse2(unsigned char *s,
-                                          int p,
+void vp9_loop_filter_vertical_edge_16_sse2(uint8_t *s, int p,
+                                           const uint8_t *blimit0,
+                                           const uint8_t *limit0,
+                                           const uint8_t *thresh0,
+                                           const uint8_t *blimit1,
+                                           const uint8_t *limit1,
+                                           const uint8_t *thresh1) {
+  DECLARE_ALIGNED_ARRAY(16, unsigned char, t_dst, 16 * 8);
+  unsigned char *src[2];
+  unsigned char *dst[2];
+
+  // Transpose 8x16
+  transpose8x16(s - 4, s - 4 + p * 8, p, t_dst, 16);
+
+  // Loop filtering
+  vp9_loop_filter_horizontal_edge_16_sse2(t_dst + 4 * 16, 16, blimit0, limit0,
+                                          thresh0, blimit1, limit1, thresh1);
+  src[0] = t_dst;
+  src[1] = t_dst + 8;
+  dst[0] = s - 4;
+  dst[1] = s - 4 + p * 8;
+
+  // Transpose back
+  transpose(src, 16, dst, p, 2);
+}
+
+void vp9_mbloop_filter_vertical_edge_sse2(unsigned char *s, int p,
                                           const unsigned char *blimit,
                                           const unsigned char *limit,
                                           const unsigned char *thresh,
                                           int count) {
-  DECLARE_ALIGNED_ARRAY(16, unsigned char, t_dst, 256);
+  DECLARE_ALIGNED_ARRAY(8, unsigned char, t_dst, 8 * 8);
+  unsigned char *src[1];
+  unsigned char *dst[1];
+  (void)count;
+
+  // Transpose 8x8
+  src[0] = s - 4;
+  dst[0] = t_dst;
+
+  transpose(src, p, dst, 8, 1);
+
+  // Loop filtering
+  vp9_mbloop_filter_horizontal_edge_sse2(t_dst + 4 * 8, 8, blimit, limit,
+                                         thresh, 1);
+
+  src[0] = t_dst;
+  dst[0] = s - 4;
+
+  // Transpose back
+  transpose(src, 8, dst, p, 1);
+}
+
+void vp9_mbloop_filter_vertical_edge_16_sse2(uint8_t *s, int p,
+                                             const uint8_t *blimit0,
+                                             const uint8_t *limit0,
+                                             const uint8_t *thresh0,
+                                             const uint8_t *blimit1,
+                                             const uint8_t *limit1,
+                                             const uint8_t *thresh1) {
+  DECLARE_ALIGNED_ARRAY(16, unsigned char, t_dst, 16 * 8);
   unsigned char *src[2];
   unsigned char *dst[2];
 
-  (void)count;
-  /* Transpose 16x16 */
-  transpose8x16(s - 8, s - 8 + p * 8, p, t_dst, 16);
-  transpose8x16(s, s + p * 8, p, t_dst + 16 * 8, 16);
+  // Transpose 8x16
+  transpose8x16(s - 4, s - 4 + p * 8, p, t_dst, 16);
 
-  /* Loop filtering */
-  vp9_mbloop_filter_horizontal_edge_sse2(t_dst + 8 * 16, 16, blimit, limit,
-                                         thresh, 1);
-  src[0] = t_dst + 3 * 16;
-  src[1] = t_dst + 3 * 16 + 8;
+  // Loop filtering
+  vp9_mbloop_filter_horizontal_edge_16_sse2(t_dst + 4 * 16, 16, blimit0, limit0,
+                                            thresh0, blimit1, limit1, thresh1);
+  src[0] = t_dst;
+  src[1] = t_dst + 8;
 
-  dst[0] = s - 5;
-  dst[1] = s - 5 + p * 8;
+  dst[0] = s - 4;
+  dst[1] = s - 4 + p * 8;
 
-  /* Transpose 16x8 */
+  // Transpose back
   transpose(src, 16, dst, p, 2);
 }
 
-void vp9_mb_lpf_vertical_edge_w_sse2(unsigned char *s,
-                                     int p,
+void vp9_mb_lpf_vertical_edge_w_sse2(unsigned char *s, int p,
                                      const unsigned char *blimit,
                                      const unsigned char *limit,
                                      const unsigned char *thresh) {
-  DECLARE_ALIGNED_ARRAY(16, unsigned char, t_dst, 256);
-  unsigned char *src[4];
-  unsigned char *dst[4];
-
-  dst[0] = t_dst;
-  dst[1] = t_dst + 8 * 16;
+  DECLARE_ALIGNED_ARRAY(8, unsigned char, t_dst, 8 * 16);
+  unsigned char *src[2];
+  unsigned char *dst[2];
 
   src[0] = s - 8;
-  src[1] = s - 8 + 8;
+  src[1] = s;
+  dst[0] = t_dst;
+  dst[1] = t_dst + 8 * 8;
 
-  /* Transpose 16x16 */
-  transpose(src, p, dst, 16, 2);
+  // Transpose 16x8
+  transpose(src, p, dst, 8, 2);
 
-  /* Loop filtering */
-  vp9_mb_lpf_horizontal_edge_w_sse2(t_dst + 8 * 16, 16, blimit, limit,
-                                    thresh, 1);
+  // Loop filtering
+  mb_lpf_horizontal_edge_w_sse2_8(t_dst + 8 * 8, 8, blimit, limit, thresh);
 
   src[0] = t_dst;
-  src[1] = t_dst + 8 * 16;
-
+  src[1] = t_dst + 8 * 8;
   dst[0] = s - 8;
-  dst[1] = s - 8 + 8;
+  dst[1] = s;
 
-  transpose(src, 16, dst, p, 2);
+  // Transpose back
+  transpose(src, 8, dst, p, 2);
+}
+
+void vp9_mb_lpf_vertical_edge_w_16_sse2(unsigned char *s, int p,
+                                        const uint8_t *blimit,
+                                        const uint8_t *limit,
+                                        const uint8_t *thresh) {
+  DECLARE_ALIGNED_ARRAY(16, unsigned char, t_dst, 256);
+
+  // Transpose 16x16
+  transpose8x16(s - 8, s - 8 + 8 * p, p, t_dst, 16);
+  transpose8x16(s, s + 8 * p, p, t_dst + 8 * 16, 16);
+
+  // Loop filtering
+  mb_lpf_horizontal_edge_w_sse2_16(t_dst + 8 * 16, 16, blimit, limit,
+                                   thresh);
+
+  // Transpose back
+  transpose8x16(t_dst, t_dst + 8 * 16, 16, s - 8, p);
+  transpose8x16(t_dst + 8, t_dst + 8 + 8 * 16, 16, s - 8 + 8 * p, p);
 }

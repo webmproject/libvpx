@@ -306,4 +306,59 @@ void vp9_loop_filter_vertical_edge_dspr2(unsigned char *s,
     }
   }
 }
+
+void vp9_loop_filter_horizontal_edge_16_dspr2(uint8_t *s, int p /* pitch */,
+                                              const uint8_t *blimit0,
+                                              const uint8_t *limit0,
+                                              const uint8_t *thresh0,
+                                              const uint8_t *blimit1,
+                                              const uint8_t *limit1,
+                                              const uint8_t *thresh1) {
+  vp9_loop_filter_horizontal_edge_dspr2(s, p, blimit0, limit0, thresh0, 1);
+  vp9_loop_filter_horizontal_edge_dspr2(s + 8, p, blimit1, limit1, thresh1, 1);
+}
+
+void vp9_mbloop_filter_horizontal_edge_16_dspr2(uint8_t *s, int p /* pitch */,
+                                                const uint8_t *blimit0,
+                                                const uint8_t *limit0,
+                                                const uint8_t *thresh0,
+                                                const uint8_t *blimit1,
+                                                const uint8_t *limit1,
+                                                const uint8_t *thresh1) {
+  vp9_mbloop_filter_horizontal_edge_dspr2(s, p, blimit0, limit0, thresh0, 1);
+  vp9_mbloop_filter_horizontal_edge_dspr2(s + 8, p, blimit1, limit1, thresh1,
+                                          1);
+}
+
+void vp9_loop_filter_vertical_edge_16_dspr2(uint8_t *s, int p,
+                                            const uint8_t *blimit0,
+                                            const uint8_t *limit0,
+                                            const uint8_t *thresh0,
+                                            const uint8_t *blimit1,
+                                            const uint8_t *limit1,
+                                            const uint8_t *thresh1) {
+  vp9_loop_filter_vertical_edge_dspr2(s, p, blimit0, limit0, thresh0, 1);
+  vp9_loop_filter_vertical_edge_dspr2(s + 8 * p, p, blimit1, limit1, thresh1,
+                                      1);
+}
+
+void vp9_mbloop_filter_vertical_edge_16_dspr2(uint8_t *s, int p,
+                                              const uint8_t *blimit0,
+                                              const uint8_t *limit0,
+                                              const uint8_t *thresh0,
+                                              const uint8_t *blimit1,
+                                              const uint8_t *limit1,
+                                              const uint8_t *thresh1) {
+  vp9_mbloop_filter_vertical_edge_dspr2(s, p, blimit0, limit0, thresh0, 1);
+  vp9_mbloop_filter_vertical_edge_dspr2(s + 8 * p, p, blimit1, limit1, thresh1,
+                                       1);
+}
+
+void vp9_mb_lpf_vertical_edge_w_16_dspr2(uint8_t *s, int p,
+                                         const uint8_t *blimit,
+                                         const uint8_t *limit,
+                                         const uint8_t *thresh) {
+  vp9_mb_lpf_vertical_edge_w_dspr2(s, p, blimit, limit, thresh);
+  vp9_mb_lpf_vertical_edge_w_dspr2(s + 8 * p, p, blimit, limit, thresh);
+}
 #endif  // #if HAVE_DSPR2
