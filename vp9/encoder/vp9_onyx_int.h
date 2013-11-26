@@ -340,7 +340,6 @@ typedef struct {
   int active_worst_quality;
   int best_quality;
   int active_best_quality;
-  int active_worst_qchanged;
 } RATE_CONTROL;
 
 typedef struct VP9_COMP {
