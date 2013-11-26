@@ -336,9 +336,11 @@ static int frame_max_bits(VP9_COMP *cpi) {
   const double max_bits = (1.0 * cpi->twopass.bits_left /
       (cpi->twopass.total_stats.count - cpi->common.current_video_frame)) *
       (cpi->oxcf.two_pass_vbrmax_section / 100.0);
-
-  // Trap case where we are out of bits.
-  return MAX((int)max_bits, 0);
+  if (max_bits < 0)
+      return 0;
+  if (max_bits >= INT_MAX)
+    return INT_MAX;
+  return (int)max_bits;
 }
 
 void vp9_init_first_pass(VP9_COMP *cpi) {

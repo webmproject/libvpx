@@ -244,7 +244,7 @@ static void calc_iframe_target_size(VP9_COMP *cpi) {
   cpi->rc.this_frame_target = target;
 
   // Target rate per SB64 (including partial SB64s.
-  cpi->rc.sb64_target_rate = (cpi->rc.this_frame_target * 64 * 64) /
+  cpi->rc.sb64_target_rate = ((int64_t)cpi->rc.this_frame_target * 64 * 64) /
                              (cpi->common.width * cpi->common.height);
 }
 
@@ -274,7 +274,7 @@ static void calc_pframe_target_size(VP9_COMP *cpi) {
   }
 
   // Target rate per SB64 (including partial SB64s.
-  cpi->rc.sb64_target_rate = (cpi->rc.this_frame_target * 64 * 64) /
+  cpi->rc.sb64_target_rate = ((int64_t)cpi->rc.this_frame_target * 64 * 64) /
                              (cpi->common.width * cpi->common.height);
 
 
