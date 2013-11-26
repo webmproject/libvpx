@@ -329,6 +329,7 @@ void vp9_init_mbmode_probs(VP9_COMMON *cm) {
   vp9_copy(cm->fc.single_ref_prob, default_single_ref_p);
   cm->fc.tx_probs = default_tx_probs;
   vp9_copy(cm->fc.mbskip_probs, default_mbskip_probs);
+  vp9_copy(cm->fc.inter_mode_probs, default_inter_mode_probs);
 }
 
 const vp9_tree_index vp9_switchable_interp_tree
@@ -466,7 +467,6 @@ void vp9_setup_past_independence(VP9_COMMON *cm) {
   vp9_default_coef_probs(cm);
   vp9_init_mbmode_probs(cm);
   vp9_init_mv_probs(cm);
-  vp9_copy(cm->fc.inter_mode_probs, default_inter_mode_probs);
 
   if (cm->frame_type == KEY_FRAME ||
       cm->error_resilient_mode || cm->reset_frame_context == 3) {
