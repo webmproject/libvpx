@@ -2607,7 +2607,6 @@ static void encode_with_recode_loop(VP9_COMP *cpi,
   int loop = 0;
   int overshoot_seen = 0;
   int undershoot_seen = 0;
-  int active_worst_qchanged = 0;
   int q_low = bottom_index, q_high = top_index;
   do {
     vp9_clear_system_state();  // __asm emms;
@@ -2655,7 +2654,6 @@ static void encode_with_recode_loop(VP9_COMP *cpi,
 
     if (frame_over_shoot_limit == 0)
       frame_over_shoot_limit = 1;
-    active_worst_qchanged = 0;
 
     if (cpi->oxcf.end_usage == USAGE_CONSTANT_QUALITY) {
       loop = 0;
@@ -2716,16 +2714,12 @@ static void encode_with_recode_loop(VP9_COMP *cpi,
 
           if (undershoot_seen || loop_count > 1) {
             // Update rate_correction_factor unless
-            // cpi->rc.active_worst_quality has changed.
-            if (!active_worst_qchanged)
-              vp9_update_rate_correction_factors(cpi, 1);
+            vp9_update_rate_correction_factors(cpi, 1);
 
             q = (q_high + q_low + 1) / 2;
           } else {
             // Update rate_correction_factor unless
-            // cpi->rc.active_worst_quality has changed.
-            if (!active_worst_qchanged)
-              vp9_update_rate_correction_factors(cpi, 0);
+            vp9_update_rate_correction_factors(cpi, 0);
 
             q = vp9_regulate_q(cpi, cpi->rc.this_frame_target);
 
@@ -2744,15 +2738,13 @@ static void encode_with_recode_loop(VP9_COMP *cpi,
           if (overshoot_seen || loop_count > 1) {
             // Update rate_correction_factor unless
             // cpi->rc.active_worst_quality has changed.
-            if (!active_worst_qchanged)
-              vp9_update_rate_correction_factors(cpi, 1);
+            vp9_update_rate_correction_factors(cpi, 1);
 
             q = (q_high + q_low) / 2;
           } else {
             // Update rate_correction_factor unless
             // cpi->rc.active_worst_quality has changed.
-            if (!active_worst_qchanged)
-              vp9_update_rate_correction_factors(cpi, 0);
+            vp9_update_rate_correction_factors(cpi, 0);
 
             q = vp9_regulate_q(cpi, cpi->rc.this_frame_target);
 
@@ -2794,7 +2786,6 @@ static void encode_with_recode_loop(VP9_COMP *cpi,
 #endif
     }
   } while (loop);
-  cpi->rc.active_worst_qchanged = active_worst_qchanged;
 }
 
 static void encode_frame_to_data_rate(VP9_COMP *cpi,
@@ -3078,9 +3069,9 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
   cpi->rc.projected_frame_size = (*size) << 3;
 
   // Post encode loop adjustment of Q prediction.
-  if (!cpi->rc.active_worst_qchanged)
-    vp9_update_rate_correction_factors(cpi, (cpi->sf.recode_loop ||
-        cpi->oxcf.end_usage == USAGE_STREAM_FROM_SERVER) ? 2 : 0);
+  vp9_update_rate_correction_factors(
+      cpi, (cpi->sf.recode_loop ||
+            cpi->oxcf.end_usage == USAGE_STREAM_FROM_SERVER) ? 2 : 0);
 
 
   cpi->rc.last_q[cm->frame_type] = cm->base_qindex;

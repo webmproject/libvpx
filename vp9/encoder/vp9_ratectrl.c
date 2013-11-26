@@ -381,7 +381,7 @@ void vp9_update_rate_correction_factors(VP9_COMP *cpi, int damp_var) {
 }
 
 
-int vp9_regulate_q(VP9_COMP *cpi, int target_bits_per_frame) {
+int vp9_regulate_q(const VP9_COMP *cpi, int target_bits_per_frame) {
   int q = cpi->rc.active_worst_quality;
 
   int i;
