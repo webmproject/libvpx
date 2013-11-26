@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdX//77Y\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 928,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2013-11-26T23:54:11Z",
+      "side": 1,
+      "message": "I don\u0027t think this idiom is portable.\n\nFrom N1256:\n\nEach enumerated type shall be compatible with char, a signed integer type, or an unsigned integer type. The choice of type is implementation-deﬁned,110) but shall be capable of representing the values of all the members of the enumeration. The enumerated type is incomplete until after the } that terminates the list of enumerator declarations.\n\nSo a compiler could expand this to:\nunsigned tx_size;\nfor (tx_size \u003d max_tx_size; tx_size \u003e\u003d 0; --tx_size) ...\n\nThis expansion of course will infinite loop.",
+      "revId": "848e3237907a7bc3c7786d9de0b6f9f1b68f28f1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
