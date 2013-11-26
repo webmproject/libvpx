@@ -112,27 +112,27 @@
     vabd.u8     q4, q10, q9                 ; m6 = abs(q3 - q2)
 
     ; only compare the largest value to limit
-    vmax.u8     q11, q11, q12               ; m1 = max(m1, m2)
-    vmax.u8     q12, q13, q14               ; m2 = max(m3, m4)
+    vmax.u8     q11, q11, q12               ; m7 = max(m1, m2)
+    vmax.u8     q12, q13, q14               ; m8 = max(m3, m4)
 
     vabd.u8     q9, q6, q7                  ; abs(p0 - q0)
 
-    vmax.u8     q3, q3, q4                  ; m3 = max(m5, m6)
+    vmax.u8     q3, q3, q4                  ; m9 = max(m5, m6)
 
     vmov.u8     q10, #0x80
 
-    vmax.u8     q15, q11, q12               ; m1 = max(m1, m2)
+    vmax.u8     q15, q11, q12               ; m10 = max(m7, m8)
 
     vcgt.u8     q13, q13, q2                ; (abs(p1 - p0) > thresh)*-1
     vcgt.u8     q14, q14, q2                ; (abs(q1 - q0) > thresh)*-1
-    vmax.u8     q15, q15, q3                ; m1 = max(m1, m3)
+    vmax.u8     q15, q15, q3                ; m11 = max(m10, m9)
 
     vabd.u8     q2, q5, q8                  ; a = abs(p1 - q1)
     vqadd.u8    q9, q9, q9                  ; b = abs(p0 - q0) * 2
 
     veor        q7, q7, q10                 ; qs0
 
-    vcge.u8     q15, q1, q15                ; abs(m1) > limit
+    vcge.u8     q15, q1, q15                ; abs(m11) > limit
 
     vshr.u8     q2, q2, #1                  ; a = a / 2
     veor        q6, q6, q10                 ; ps0
@@ -142,7 +142,7 @@
 
     veor        q8, q8, q10                 ; qs1
 
-    vmov.u8     q4, #3
+    vmov.u16    q4, #3
 
     vsubl.s8    q2, d14, d12                ; ( qs0 - ps0)
     vsubl.s8    q11, d15, d13
@@ -150,13 +150,15 @@
     vcge.u8     q9, q0, q9                  ; a > blimit
 
     vqsub.s8    q1, q5, q8                  ; filter = clamp(ps1-qs1)
-    vorr        q14, q13, q14               ; hevmask
+    vorr        q14, q13, q14               ; hev
 
     vmul.i16    q2, q2, q4                  ; 3 * ( qs0 - ps0)
     vmul.i16    q11, q11, q4
 
     vand        q1, q1, q14                 ; filter &= hev
-    vand        q15, q15, q9                ; filter_mask
+    vand        q15, q15, q9                ; mask
+
+    vmov.u8     q4, #3
 
     vaddw.s8    q2, q2, d2                  ; filter + 3 * (qs0 - ps0)
     vaddw.s8    q11, q11, d3
@@ -180,15 +182,14 @@
     ; outer tap adjustments
     vrshr.s8    q1, q1, #1                  ; filter = ++filter1 >> 1
 
-    veor        q6, q11, q10                ; *op0 = u^0x80
+    veor        q7, q0,  q10                ; *oq0 = u^0x80
 
     vbic        q1, q1, q14                 ; filter &= ~hev
 
     vqadd.s8    q13, q5, q1                 ; u = clamp(ps1 + filter)
     vqsub.s8    q12, q8, q1                 ; u = clamp(qs1 - filter)
 
-
-    veor        q7, q0,  q10                ; *oq0 = u^0x80
+    veor        q6, q11, q10                ; *op0 = u^0x80
     veor        q5, q13, q10                ; *op1 = u^0x80
     veor        q8, q12, q10                ; *oq1 = u^0x80
 
