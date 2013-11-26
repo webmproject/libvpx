@@ -52,20 +52,22 @@ typedef enum PARTITION_TYPE {
 #define PARTITION_PLOFFSET   4  // number of probability models per block size
 #define PARTITION_CONTEXTS (4 * PARTITION_PLOFFSET)
 
+// block transform size
 typedef enum {
-  TX_4X4 = 0,                      // 4x4 dct transform
-  TX_8X8 = 1,                      // 8x8 dct transform
-  TX_16X16 = 2,                    // 16x16 dct transform
-  TX_32X32 = 3,                    // 32x32 dct transform
+  TX_4X4 = 0,                      // 4x4 transform
+  TX_8X8 = 1,                      // 8x8 transform
+  TX_16X16 = 2,                    // 16x16 transform
+  TX_32X32 = 3,                    // 32x32 transform
   TX_SIZES
 } TX_SIZE;
 
+// frame transform mode
 typedef enum {
-  ONLY_4X4            = 0,
-  ALLOW_8X8           = 1,
-  ALLOW_16X16         = 2,
-  ALLOW_32X32         = 3,
-  TX_MODE_SELECT      = 4,
+  ONLY_4X4            = 0,        // only 4x4 transform used
+  ALLOW_8X8           = 1,        // allow block transform size up to 8x8
+  ALLOW_16X16         = 2,        // allow block transform size up to 16x16
+  ALLOW_32X32         = 3,        // allow block transform size up to 32x32
+  TX_MODE_SELECT      = 4,        // transform specified for each block
   TX_MODES            = 5,
 } TX_MODE;
 
