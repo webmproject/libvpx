@@ -159,7 +159,7 @@ void vp9_initialize_enc() {
     vp9_tokenize_initialize();
     vp9_init_quant_tables();
     vp9_init_me_luts();
-    vp9_init_minq_luts();
+    vp9_rc_init_minq_luts();
     // init_base_skip_probs();
     vp9_entropy_mv_init();
     init_done = 1;
@@ -265,8 +265,8 @@ int vp9_compute_qdelta_by_rate(VP9_COMP *cpi,
   vp9_clear_system_state();
 
   // Look up the current projected bits per block for the base index
-  base_bits_per_mb = vp9_bits_per_mb(cpi->common.frame_type,
-                                     base_q_index, 1.0);
+  base_bits_per_mb = vp9_rc_bits_per_mb(cpi->common.frame_type,
+                                        base_q_index, 1.0);
 
   // Find the target bits per mb based on the base value and given ratio.
   target_bits_per_mb = rate_target_ratio * base_bits_per_mb;
@@ -274,8 +274,8 @@ int vp9_compute_qdelta_by_rate(VP9_COMP *cpi,
   // Convert the q target to an index
   for (i = cpi->rc.best_quality; i < cpi->rc.worst_quality; i++) {
     target_index = i;
-    if (vp9_bits_per_mb(cpi->common.frame_type,
-                        i, 1.0) <= target_bits_per_mb )
+    if (vp9_rc_bits_per_mb(cpi->common.frame_type,
+                           i, 1.0) <= target_bits_per_mb )
       break;
   }
 
@@ -2683,7 +2683,7 @@ static void output_frame_level_debug_stats(VP9_COMP *cpi) {
 static void encode_with_recode_loop(VP9_COMP *cpi,
                                     unsigned long *size,
                                     uint8_t *dest,
-                                    int q,
+                                    int *q,
                                     int bottom_index,
                                     int top_index,
                                     int frame_over_shoot_limit,
@@ -2697,7 +2697,7 @@ static void encode_with_recode_loop(VP9_COMP *cpi,
   do {
     vp9_clear_system_state();  // __asm emms;
 
-    vp9_set_quantizer(cpi, q);
+    vp9_set_quantizer(cpi, *q);
 
     if (loop_count == 0) {
       // Set up entropy context depending on frame type. The decoder mandates
@@ -2750,7 +2750,7 @@ static void encode_with_recode_loop(VP9_COMP *cpi,
     } else {
       // Special case handling for forced key frames
       if ((cm->frame_type == KEY_FRAME) && cpi->this_key_frame_forced) {
-        int last_q = q;
+        int last_q = *q;
         int kf_err = vp9_calc_ss_err(cpi->Source, get_frame_new_buffer(cm));
 
         int high_err_target = cpi->ambient_err;
@@ -2766,32 +2766,32 @@ static void encode_with_recode_loop(VP9_COMP *cpi,
             (kf_err > low_err_target &&
              cpi->rc.projected_frame_size <= frame_under_shoot_limit)) {
           // Lower q_high
-          q_high = q > q_low ? q - 1 : q_low;
+          q_high = *q > q_low ? *q - 1 : q_low;
 
           // Adjust Q
-          q = (q * high_err_target) / kf_err;
-          q = MIN(q, (q_high + q_low) >> 1);
+          *q = ((*q) * high_err_target) / kf_err;
+          *q = MIN((*q), (q_high + q_low) >> 1);
         } else if (kf_err < low_err_target &&
                    cpi->rc.projected_frame_size >= frame_under_shoot_limit) {
           // The key frame is much better than the previous frame
           // Raise q_low
-          q_low = q < q_high ? q + 1 : q_high;
+          q_low = *q < q_high ? *q + 1 : q_high;
 
           // Adjust Q
-          q = (q * low_err_target) / kf_err;
-          q = MIN(q, (q_high + q_low + 1) >> 1);
+          *q = ((*q) * low_err_target) / kf_err;
+          *q = MIN((*q), (q_high + q_low + 1) >> 1);
         }
 
         // Clamp Q to upper and lower limits:
-        q = clamp(q, q_low, q_high);
+        *q = clamp(*q, q_low, q_high);
 
-        loop = q != last_q;
+        loop = *q != last_q;
       } else if (recode_loop_test(
           cpi, frame_over_shoot_limit, frame_under_shoot_limit,
-          q, top_index, bottom_index)) {
+          *q, top_index, bottom_index)) {
         // Is the projected frame size out of range and are we allowed
         // to attempt to recode.
-        int last_q = q;
+        int last_q = *q;
         int retries = 0;
 
         // Frame size out of permitted range:
@@ -2800,22 +2800,22 @@ static void encode_with_recode_loop(VP9_COMP *cpi,
         // Frame is too large
         if (cpi->rc.projected_frame_size > cpi->rc.this_frame_target) {
           // Raise Qlow as to at least the current value
-          q_low = q < q_high ? q + 1 : q_high;
+          q_low = *q < q_high ? *q + 1 : q_high;
 
           if (undershoot_seen || loop_count > 1) {
             // Update rate_correction_factor unless
-            vp9_update_rate_correction_factors(cpi, 1);
+            vp9_rc_update_rate_correction_factors(cpi, 1);
 
-            q = (q_high + q_low + 1) / 2;
+            *q = (q_high + q_low + 1) / 2;
           } else {
             // Update rate_correction_factor unless
-            vp9_update_rate_correction_factors(cpi, 0);
+            vp9_rc_update_rate_correction_factors(cpi, 0);
 
-            q = vp9_regulate_q(cpi, cpi->rc.this_frame_target);
+            *q = vp9_rc_regulate_q(cpi, cpi->rc.this_frame_target);
 
-            while (q < q_low && retries < 10) {
-              vp9_update_rate_correction_factors(cpi, 0);
-              q = vp9_regulate_q(cpi, cpi->rc.this_frame_target);
+            while (*q < q_low && retries < 10) {
+              vp9_rc_update_rate_correction_factors(cpi, 0);
+              *q = vp9_rc_regulate_q(cpi, cpi->rc.this_frame_target);
               retries++;
             }
           }
@@ -2823,32 +2823,33 @@ static void encode_with_recode_loop(VP9_COMP *cpi,
           overshoot_seen = 1;
         } else {
           // Frame is too small
-          q_high = q > q_low ? q - 1 : q_low;
+          q_high = *q > q_low ? *q - 1 : q_low;
 
           if (overshoot_seen || loop_count > 1) {
             // Update rate_correction_factor unless
             // cpi->rc.active_worst_quality has changed.
-            vp9_update_rate_correction_factors(cpi, 1);
+            vp9_rc_update_rate_correction_factors(cpi, 1);
 
-            q = (q_high + q_low) / 2;
+            *q = (q_high + q_low) / 2;
           } else {
             // Update rate_correction_factor unless
             // cpi->rc.active_worst_quality has changed.
-            vp9_update_rate_correction_factors(cpi, 0);
+            vp9_rc_update_rate_correction_factors(cpi, 0);
 
-            q = vp9_regulate_q(cpi, cpi->rc.this_frame_target);
+            *q = vp9_rc_regulate_q(cpi, cpi->rc.this_frame_target);
 
             // Special case reset for qlow for constrained quality.
             // This should only trigger where there is very substantial
             // undershoot on a frame and the auto cq level is above
             // the user passsed in value.
-            if (cpi->oxcf.end_usage == USAGE_CONSTRAINED_QUALITY && q < q_low) {
-              q_low = q;
+            if (cpi->oxcf.end_usage == USAGE_CONSTRAINED_QUALITY &&
+                *q < q_low) {
+              q_low = *q;
             }
 
-            while (q > q_high && retries < 10) {
-              vp9_update_rate_correction_factors(cpi, 0);
-              q = vp9_regulate_q(cpi, cpi->rc.this_frame_target);
+            while (*q > q_high && retries < 10) {
+              vp9_rc_update_rate_correction_factors(cpi, 0);
+              *q = vp9_rc_regulate_q(cpi, cpi->rc.this_frame_target);
               retries++;
             }
           }
@@ -2857,9 +2858,9 @@ static void encode_with_recode_loop(VP9_COMP *cpi,
         }
 
         // Clamp Q to upper and lower limits:
-        q = clamp(q, q_low, q_high);
+        *q = clamp(*q, q_low, q_high);
 
-        loop = q != last_q;
+        loop = *q != last_q;
       } else {
         loop = 0;
       }
@@ -3000,15 +3001,16 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
     configure_static_seg_features(cpi);
   }
 
-  // Decide how big to make the frame.
-  vp9_pick_frame_size(cpi);
-
   vp9_clear_system_state();
 
-  q = vp9_pick_q_and_adjust_q_bounds(cpi, &bottom_index, &top_index);
+  // Decide how big to make the frame.
+  vp9_rc_pick_frame_size_and_bounds(cpi,
+                                    &frame_under_shoot_limit,
+                                    &frame_over_shoot_limit);
 
-  vp9_compute_frame_size_bounds(cpi, &frame_under_shoot_limit,
-                                &frame_over_shoot_limit);
+  q = vp9_rc_pick_q_and_adjust_q_bounds(cpi,
+                                        &bottom_index,
+                                        &top_index);
 
 #if CONFIG_MULTIPLE_ARF
   // Force the quantizer determined by the coding order pattern.
@@ -3072,7 +3074,7 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
   encode_with_recode_loop(cpi,
                           size,
                           dest,
-                          q,
+                          &q,
                           bottom_index,
                           top_index,
                           frame_over_shoot_limit,
@@ -3154,106 +3156,7 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
    * needed in motion search besides loopfilter */
   cm->last_frame_type = cm->frame_type;
 
-  // Update rate control heuristics
-  cpi->rc.projected_frame_size = (*size) << 3;
-
-  // Post encode loop adjustment of Q prediction.
-  vp9_update_rate_correction_factors(
-      cpi, (cpi->sf.recode_loop ||
-            cpi->oxcf.end_usage == USAGE_STREAM_FROM_SERVER) ? 2 : 0);
-
-
-  cpi->rc.last_q[cm->frame_type] = cm->base_qindex;
-
-  // Keep record of last boosted (KF/KF/ARF) Q value.
-  // If the current frame is coded at a lower Q then we also update it.
-  // If all mbs in this group are skipped only update if the Q value is
-  // better than that already stored.
-  // This is used to help set quality in forced key frames to reduce popping
-  if ((cm->base_qindex < cpi->rc.last_boosted_qindex) ||
-      ((cpi->static_mb_pct < 100) &&
-       ((cm->frame_type == KEY_FRAME) ||
-        cpi->refresh_alt_ref_frame ||
-        (cpi->refresh_golden_frame && !cpi->is_src_frame_alt_ref)))) {
-    cpi->rc.last_boosted_qindex = cm->base_qindex;
-  }
-
-  if (cm->frame_type == KEY_FRAME) {
-    vp9_adjust_key_frame_context(cpi);
-  }
-
-  // Keep a record of ambient average Q.
-  if (cm->frame_type != KEY_FRAME)
-    cpi->rc.avg_frame_qindex = (2 + 3 * cpi->rc.avg_frame_qindex +
-                            cm->base_qindex) >> 2;
-
-  // Keep a record from which we can calculate the average Q excluding GF
-  // updates and key frames.
-  if (cm->frame_type != KEY_FRAME &&
-      !cpi->refresh_golden_frame &&
-      !cpi->refresh_alt_ref_frame) {
-    cpi->rc.ni_frames++;
-    cpi->rc.tot_q += vp9_convert_qindex_to_q(q);
-    cpi->rc.avg_q = cpi->rc.tot_q / (double)cpi->rc.ni_frames;
-
-    // Calculate the average Q for normal inter frames (not key or GFU frames).
-    cpi->rc.ni_tot_qi += q;
-    cpi->rc.ni_av_qi = cpi->rc.ni_tot_qi / cpi->rc.ni_frames;
-  }
-
-  // Update the buffer level variable.
-  // Non-viewable frames are a special case and are treated as pure overhead.
-  if (!cm->show_frame)
-    cpi->rc.bits_off_target -= cpi->rc.projected_frame_size;
-  else
-    cpi->rc.bits_off_target += cpi->rc.av_per_frame_bandwidth -
-                               cpi->rc.projected_frame_size;
-
-  // Clip the buffer level at the maximum buffer size
-  if (cpi->rc.bits_off_target > cpi->oxcf.maximum_buffer_size)
-    cpi->rc.bits_off_target = cpi->oxcf.maximum_buffer_size;
-
-  // Rolling monitors of whether we are over or underspending used to help
-  // regulate min and Max Q in two pass.
-  if (cm->frame_type != KEY_FRAME) {
-    cpi->rc.rolling_target_bits =
-        ((cpi->rc.rolling_target_bits * 3) +
-         cpi->rc.this_frame_target + 2) / 4;
-    cpi->rc.rolling_actual_bits =
-        ((cpi->rc.rolling_actual_bits * 3) +
-         cpi->rc.projected_frame_size + 2) / 4;
-    cpi->rc.long_rolling_target_bits =
-        ((cpi->rc.long_rolling_target_bits * 31) +
-         cpi->rc.this_frame_target + 16) / 32;
-    cpi->rc.long_rolling_actual_bits =
-        ((cpi->rc.long_rolling_actual_bits * 31) +
-         cpi->rc.projected_frame_size + 16) / 32;
-  }
-
-  // Actual bits spent
-  cpi->rc.total_actual_bits += cpi->rc.projected_frame_size;
-
-  // Debug stats
-  cpi->rc.total_target_vs_actual += (cpi->rc.this_frame_target -
-                                     cpi->rc.projected_frame_size);
-
-  cpi->rc.buffer_level = cpi->rc.bits_off_target;
-
-#ifndef DISABLE_RC_LONG_TERM_MEM
-  // Update bits left to the kf and gf groups to account for overshoot or
-  // undershoot on these frames
-  if (cm->frame_type == KEY_FRAME) {
-    cpi->twopass.kf_group_bits += cpi->rc.this_frame_target -
-                                  cpi->rc.projected_frame_size;
-
-    cpi->twopass.kf_group_bits = MAX(cpi->twopass.kf_group_bits, 0);
-  } else if (cpi->refresh_golden_frame || cpi->refresh_alt_ref_frame) {
-    cpi->twopass.gf_group_bits += cpi->rc.this_frame_target -
-                                  cpi->rc.projected_frame_size;
-
-    cpi->twopass.gf_group_bits = MAX(cpi->twopass.gf_group_bits, 0);
-  }
-#endif
+  vp9_rc_postencode_update(cpi, *size, q);
 
 #if 0
   output_frame_level_debug_stats(cpi);
@@ -3383,6 +3286,10 @@ static void Pass2Encode(VP9_COMP *cpi, unsigned long *size,
 
   encode_frame_to_data_rate(cpi, size, dest, frame_flags);
   // vp9_print_modes_and_motion_vectors(&cpi->common, "encode.stt");
+
+  vp9_twopass_postencode_update(cpi, *size);
+
+  /*
 #ifdef DISABLE_RC_LONG_TERM_MEM
   cpi->twopass.bits_left -=  cpi->rc.this_frame_target;
 #else
@@ -3401,6 +3308,7 @@ static void Pass2Encode(VP9_COMP *cpi, unsigned long *size,
     cpi->twopass.bits_left += (int64_t)(two_pass_min_rate
                               / cpi->oxcf.framerate);
   }
+  */
 }
 
 static void check_initial_width(VP9_COMP *cpi, YV12_BUFFER_CONFIG *sd) {

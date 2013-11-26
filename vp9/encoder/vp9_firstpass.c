@@ -76,6 +76,19 @@ static int select_cq_level(int qindex) {
   return ret_val;
 }
 
+static int gfboost_qadjust(int qindex) {
+  const double q = vp9_convert_qindex_to_q(qindex);
+  return (int)((0.00000828 * q * q * q) +
+               (-0.0055 * q * q) +
+               (1.32 * q) + 79.3);
+}
+
+static int kfboost_qadjust(int qindex) {
+  const double q = vp9_convert_qindex_to_q(qindex);
+  return (int)((0.00000973 * q * q * q) +
+               (-0.00613 * q * q) +
+               (1.316 * q) + 121.2);
+}
 
 // Resets the first pass file to the given position using a relative seek from
 // the current position.
@@ -928,11 +941,11 @@ static int64_t estimate_modemvcost(VP9_COMP *cpi,
   intra_cost = bitcost(av_intra);
 
   // Estimate of extra bits per mv overhead for mbs
-  // << 9 is the normalization to the (bits * 512) used in vp9_bits_per_mb
+  // << 9 is the normalization to the (bits * 512) used in vp9_rc_bits_per_mb
   mv_cost = ((int)(fpstats->new_mv_count / fpstats->count) * 8) << 9;
 
   // Crude estimate of overhead cost from modes
-  // << 9 is the normalization to (bits * 512) used in vp9_bits_per_mb
+  // << 9 is the normalization to (bits * 512) used in vp9_rc_bits_per_mb
   mode_cost =
     (int)((((av_pct_inter - av_pct_motion) * zz_cost) +
            (av_pct_motion * motion_cost) +
@@ -1052,8 +1065,8 @@ static int estimate_max_q(VP9_COMP *cpi,
                                 sr_correction * speed_correction *
                                 cpi->twopass.est_max_qcorrection_factor;
 
-    bits_per_mb_at_this_q = vp9_bits_per_mb(INTER_FRAME, q,
-                                            err_correction_factor);
+    bits_per_mb_at_this_q = vp9_rc_bits_per_mb(INTER_FRAME, q,
+                                               err_correction_factor);
 
     if (bits_per_mb_at_this_q <= target_norm_bits_per_mb)
       break;
@@ -1140,7 +1153,7 @@ static int estimate_cq(VP9_COMP *cpi,
       sr_correction * speed_correction * clip_iifactor;
 
     bits_per_mb_at_this_q =
-      vp9_bits_per_mb(INTER_FRAME, q, err_correction_factor);
+      vp9_rc_bits_per_mb(INTER_FRAME, q, err_correction_factor);
 
     if (bits_per_mb_at_this_q <= target_norm_bits_per_mb)
       break;
@@ -1936,7 +1949,7 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
     int q = cpi->rc.last_q[INTER_FRAME];
     int gf_bits;
 
-    int boost = (cpi->rc.gfu_boost * vp9_gfboost_qadjust(q)) / 100;
+    int boost = (cpi->rc.gfu_boost * gfboost_qadjust(q)) / 100;
 
     // Set max and minimum boost and hence minimum allocation
     boost = clamp(boost, 125, (cpi->rc.baseline_gf_interval + 1) * 200);
@@ -2727,4 +2740,22 @@ static void find_next_key_frame(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   // The count of bits left is adjusted elsewhere based on real coded frame
   // sizes.
   cpi->twopass.modified_error_left -= kf_group_err;
+}
+
+void vp9_twopass_postencode_update(VP9_COMP *cpi, uint64_t bytes_used) {
+#ifdef DISABLE_RC_LONG_TERM_MEM
+  cpi->twopass.bits_left -=  cpi->rc.this_frame_target;
+#else
+  cpi->twopass.bits_left -= 8 * bytes_used;
+#endif
+  if (!cpi->refresh_alt_ref_frame) {
+    double lower_bounds_min_rate = FRAME_OVERHEAD_BITS * cpi->oxcf.framerate;
+    double two_pass_min_rate = (double)(cpi->oxcf.target_bandwidth *
+                                        cpi->oxcf.two_pass_vbrmin_section
+                                        / 100);
+    if (two_pass_min_rate < lower_bounds_min_rate)
+      two_pass_min_rate = lower_bounds_min_rate;
+    cpi->twopass.bits_left += (int64_t)(two_pass_min_rate /
+                                        cpi->oxcf.framerate);
+  }
 }

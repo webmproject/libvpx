@@ -20,24 +20,41 @@ void vp9_save_coding_context(VP9_COMP *cpi);
 void vp9_restore_coding_context(VP9_COMP *cpi);
 
 void vp9_setup_key_frame(VP9_COMP *cpi);
-void vp9_update_rate_correction_factors(VP9_COMP *cpi, int damp_var);
-int vp9_regulate_q(const VP9_COMP *cpi, int target_bits_per_frame);
-void vp9_adjust_key_frame_context(VP9_COMP *cpi);
-void vp9_compute_frame_size_bounds(VP9_COMP *cpi,
-                                   int *frame_under_shoot_limit,
-                                   int *frame_over_shoot_limit);
-
-void vp9_init_minq_luts(void);
-
-// return of 0 means drop frame
-int vp9_pick_frame_size(VP9_COMP *cpi);
+void vp9_setup_inter_frame(VP9_COMP *cpi);
 
 double vp9_convert_qindex_to_q(int qindex);
-int vp9_gfboost_qadjust(int qindex);
-int vp9_bits_per_mb(FRAME_TYPE frame_type, int qindex,
-                    double correction_factor);
-void vp9_setup_inter_frame(VP9_COMP *cpi);
-int vp9_pick_q_and_adjust_q_bounds(VP9_COMP *cpi,
-                                   int * bottom_index, int * top_index);
+
+// Updates rate correction factors
+void vp9_rc_update_rate_correction_factors(VP9_COMP *cpi, int damp_var);
+
+// initialize luts for minq
+void vp9_rc_init_minq_luts(void);
+
+// return of 0 means drop frame
+// Changes rc.this_frame_target and rc.sb64_rate_target
+int vp9_rc_pick_frame_size_and_bounds(VP9_COMP *cpi,
+                                      int *frame_under_shoot_limit,
+                                      int *frame_over_shoot_limit);
+// Picks q and q bounds given the target for bits
+int vp9_rc_pick_q_and_adjust_q_bounds(VP9_COMP *cpi,
+                                      int * bottom_index,
+                                      int * top_index);
+
+// Estimates q to achieve a target bits per frame
+int vp9_rc_regulate_q(const VP9_COMP *cpi, int target_bits_per_frame);
+
+// Post encode update of the rate control parameters based
+// on bytes used and q used for the frame
+void vp9_rc_postencode_update(VP9_COMP *cpi,
+                              uint64_t bytes_used,
+                              int q_used);
+
+// estimates bits per mb for a given qindex and correction factor
+int vp9_rc_bits_per_mb(FRAME_TYPE frame_type, int qindex,
+                       double correction_factor);
+
+// Post encode update of the rate control parameters for 2-pass
+void vp9_twopass_postencode_update(VP9_COMP *cpi,
+                                   uint64_t bytes_used);
 
 #endif  // VP9_ENCODER_VP9_RATECTRL_H_

@@ -30,7 +30,6 @@
 #include "vp9/encoder/vp9_lookahead.h"
 
 #define DISABLE_RC_LONG_TERM_MEM 0
-
 // #define MODE_TEST_HIT_STATS
 
 // #define SPEEDSTATS 1
