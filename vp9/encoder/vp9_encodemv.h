@@ -14,6 +14,8 @@
 
 #include "vp9/encoder/vp9_onyx_int.h"
 
+void vp9_entropy_mv_init();
+
 void vp9_write_nmv_probs(VP9_COMP* const, int usehp, vp9_writer* const);
 
 void vp9_encode_mv(VP9_COMP *cpi, vp9_writer* w, const MV* mv, const MV* ref,

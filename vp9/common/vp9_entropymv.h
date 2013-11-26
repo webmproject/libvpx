@@ -18,7 +18,6 @@
 
 struct VP9Common;
 
-void vp9_entropy_mv_init();
 void vp9_init_mv_probs(struct VP9Common *cm);
 
 void vp9_adapt_mv_probs(struct VP9Common *cm, int usehp);
@@ -72,17 +71,10 @@ typedef enum {
 #define MV_UPP   ((1 << MV_IN_USE_BITS) - 1)
 #define MV_LOW   (-(1 << MV_IN_USE_BITS))
 
-extern const vp9_tree_index vp9_mv_joint_tree[TREE_SIZE(MV_JOINTS)];
-extern struct vp9_token vp9_mv_joint_encodings[MV_JOINTS];
-
-extern const vp9_tree_index vp9_mv_class_tree[TREE_SIZE(MV_CLASSES)];
-extern struct vp9_token vp9_mv_class_encodings[MV_CLASSES];
-
-extern const vp9_tree_index vp9_mv_class0_tree[TREE_SIZE(CLASS0_SIZE)];
-extern struct vp9_token vp9_mv_class0_encodings[CLASS0_SIZE];
-
-extern const vp9_tree_index vp9_mv_fp_tree[TREE_SIZE(MV_FP_SIZE)];
-extern struct vp9_token vp9_mv_fp_encodings[4];
+extern const vp9_tree_index vp9_mv_joint_tree[];
+extern const vp9_tree_index vp9_mv_class_tree[];
+extern const vp9_tree_index vp9_mv_class0_tree[];
+extern const vp9_tree_index vp9_mv_fp_tree[];
 
 typedef struct {
   vp9_prob sign;

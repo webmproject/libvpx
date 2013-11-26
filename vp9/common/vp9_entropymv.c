@@ -23,7 +23,6 @@ const vp9_tree_index vp9_mv_joint_tree[TREE_SIZE(MV_JOINTS)] = {
   -MV_JOINT_HNZVZ, 4,
   -MV_JOINT_HZVNZ, -MV_JOINT_HNZVNZ
 };
-struct vp9_token vp9_mv_joint_encodings[MV_JOINTS];
 
 const vp9_tree_index vp9_mv_class_tree[TREE_SIZE(MV_CLASSES)] = {
   -MV_CLASS_0, 2,
@@ -37,19 +36,16 @@ const vp9_tree_index vp9_mv_class_tree[TREE_SIZE(MV_CLASSES)] = {
   -MV_CLASS_7, -MV_CLASS_8,
   -MV_CLASS_9, -MV_CLASS_10,
 };
-struct vp9_token vp9_mv_class_encodings[MV_CLASSES];
 
 const vp9_tree_index vp9_mv_class0_tree[TREE_SIZE(CLASS0_SIZE)] = {
   -0, -1,
 };
-struct vp9_token vp9_mv_class0_encodings[CLASS0_SIZE];
 
-const vp9_tree_index vp9_mv_fp_tree[TREE_SIZE(4)] = {
+const vp9_tree_index vp9_mv_fp_tree[TREE_SIZE(MV_FP_SIZE)] = {
   -0, 2,
   -1, 4,
   -2, -3
 };
-struct vp9_token vp9_mv_fp_encodings[4];
 
 static const nmv_context default_nmv_context = {
   {32, 64, 96},
@@ -233,13 +229,6 @@ void vp9_adapt_mv_probs(VP9_COMMON *cm, int allow_hp) {
       comp->hp = adapt_prob(pre_comp->hp, c->hp);
     }
   }
-}
-
-void vp9_entropy_mv_init() {
-  vp9_tokens_from_tree(vp9_mv_joint_encodings, vp9_mv_joint_tree);
-  vp9_tokens_from_tree(vp9_mv_class_encodings, vp9_mv_class_tree);
-  vp9_tokens_from_tree(vp9_mv_class0_encodings, vp9_mv_class0_tree);
-  vp9_tokens_from_tree(vp9_mv_fp_encodings, vp9_mv_fp_tree);
 }
 
 void vp9_init_mv_probs(VP9_COMMON *cm) {
