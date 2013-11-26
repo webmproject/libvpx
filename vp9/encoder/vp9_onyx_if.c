@@ -24,6 +24,8 @@
 #include "vp9/common/vp9_reconinter.h"
 #include "vp9/common/vp9_systemdependent.h"
 #include "vp9/common/vp9_tile_common.h"
+
+#include "vp9/encoder/vp9_encodemv.h"
 #include "vp9/encoder/vp9_firstpass.h"
 #include "vp9/encoder/vp9_mbgraph.h"
 #include "vp9/encoder/vp9_onyx_int.h"
@@ -159,6 +161,7 @@ void vp9_initialize_enc() {
     vp9_init_me_luts();
     vp9_init_minq_luts();
     // init_base_skip_probs();
+    vp9_entropy_mv_init();
     init_done = 1;
   }
 }

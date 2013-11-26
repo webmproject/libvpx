@@ -15,10 +15,21 @@
 #include "vp9/common/vp9_systemdependent.h"
 #include "vp9/encoder/vp9_encodemv.h"
 
-
 #ifdef ENTROPY_STATS
 extern unsigned int active_section;
 #endif
+
+static struct vp9_token mv_joint_encodings[MV_JOINTS];
+static struct vp9_token mv_class_encodings[MV_CLASSES];
+static struct vp9_token mv_fp_encodings[MV_FP_SIZE];
+static struct vp9_token mv_class0_encodings[CLASS0_SIZE];
+
+void vp9_entropy_mv_init() {
+  vp9_tokens_from_tree(mv_joint_encodings, vp9_mv_joint_tree);
+  vp9_tokens_from_tree(mv_class_encodings, vp9_mv_class_tree);
+  vp9_tokens_from_tree(mv_class0_encodings, vp9_mv_class0_tree);
+  vp9_tokens_from_tree(mv_fp_encodings, vp9_mv_fp_tree);
+}
 
 static void encode_mv_component(vp9_writer* w, int comp,
                                 const nmv_component* mvcomp, int usehp) {
@@ -37,12 +48,12 @@ static void encode_mv_component(vp9_writer* w, int comp,
 
   // Class
   write_token(w, vp9_mv_class_tree, mvcomp->classes,
-              &vp9_mv_class_encodings[mv_class]);
+              &mv_class_encodings[mv_class]);
 
   // Integer bits
   if (mv_class == MV_CLASS_0) {
     write_token(w, vp9_mv_class0_tree, mvcomp->class0,
-                &vp9_mv_class0_encodings[d]);
+                &mv_class0_encodings[d]);
   } else {
     int i;
     const int n = mv_class + CLASS0_BITS - 1;  // number of bits
@@ -53,7 +64,7 @@ static void encode_mv_component(vp9_writer* w, int comp,
   // Fractional bits
   write_token(w, vp9_mv_fp_tree,
               mv_class == MV_CLASS_0 ?  mvcomp->class0_fp[d] : mvcomp->fp,
-              &vp9_mv_fp_encodings[fr]);
+              &mv_fp_encodings[fr]);
 
   // High precision bit
   if (usehp)
@@ -198,7 +209,7 @@ void vp9_encode_mv(VP9_COMP* cpi, vp9_writer* w,
   const MV_JOINT_TYPE j = vp9_get_mv_joint(&diff);
   usehp = usehp && vp9_use_mv_hp(ref);
 
-  write_token(w, vp9_mv_joint_tree, mvctx->joints, &vp9_mv_joint_encodings[j]);
+  write_token(w, vp9_mv_joint_tree, mvctx->joints, &mv_joint_encodings[j]);
   if (mv_joint_vertical(j))
     encode_mv_component(w, diff.row, &mvctx->comps[0], usehp);
 
@@ -258,3 +269,4 @@ void vp9_update_mv_count(VP9_COMP *cpi, MACROBLOCK *x, int_mv best_ref_mv[2]) {
     inc_mvs(mbmi->mv, best_ref_mv, is_compound, &cpi->NMVcount);
   }
 }
+
