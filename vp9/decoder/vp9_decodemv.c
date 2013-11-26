@@ -20,13 +20,13 @@
 #include "vp9/common/vp9_reconinter.h"
 #include "vp9/common/vp9_seg_common.h"
 
+#include "vp9/decoder/vp9_dboolhuff.h"
 #include "vp9/decoder/vp9_decodemv.h"
 #include "vp9/decoder/vp9_decodeframe.h"
 #include "vp9/decoder/vp9_onyxd_int.h"
-#include "vp9/decoder/vp9_treereader.h"
 
 static MB_PREDICTION_MODE read_intra_mode(vp9_reader *r, const vp9_prob *p) {
-  return (MB_PREDICTION_MODE)treed_read(r, vp9_intra_mode_tree, p);
+  return (MB_PREDICTION_MODE)vp9_read_tree(r, vp9_intra_mode_tree, p);
 }
 
 static MB_PREDICTION_MODE read_intra_mode_y(VP9_COMMON *cm, vp9_reader *r,
@@ -49,8 +49,8 @@ static MB_PREDICTION_MODE read_intra_mode_uv(VP9_COMMON *cm, vp9_reader *r,
 
 static MB_PREDICTION_MODE read_inter_mode(VP9_COMMON *cm, vp9_reader *r,
                                           int ctx) {
-  const int mode = treed_read(r, vp9_inter_mode_tree,
-                              cm->fc.inter_mode_probs[ctx]);
+  const int mode = vp9_read_tree(r, vp9_inter_mode_tree,
+                                 cm->fc.inter_mode_probs[ctx]);
   if (!cm->frame_parallel_decoding_mode)
     ++cm->counts.inter_mode[ctx][mode];
 
@@ -58,7 +58,7 @@ static MB_PREDICTION_MODE read_inter_mode(VP9_COMMON *cm, vp9_reader *r,
 }
 
 static int read_segment_id(vp9_reader *r, const struct segmentation *seg) {
-  return treed_read(r, vp9_segment_tree, seg->tree_probs);
+  return vp9_read_tree(r, vp9_segment_tree, seg->tree_probs);
 }
 
 static TX_SIZE read_selected_tx_size(VP9_COMMON *cm, MACROBLOCKD *xd,
@@ -210,12 +210,12 @@ static int read_mv_component(vp9_reader *r,
                              const nmv_component *mvcomp, int usehp) {
   int mag, d, fr, hp;
   const int sign = vp9_read(r, mvcomp->sign);
-  const int mv_class = treed_read(r, vp9_mv_class_tree, mvcomp->classes);
+  const int mv_class = vp9_read_tree(r, vp9_mv_class_tree, mvcomp->classes);
   const int class0 = mv_class == MV_CLASS_0;
 
   // Integer part
   if (class0) {
-    d = treed_read(r, vp9_mv_class0_tree, mvcomp->class0);
+    d = vp9_read_tree(r, vp9_mv_class0_tree, mvcomp->class0);
   } else {
     int i;
     const int n = mv_class + CLASS0_BITS - 1;  // number of bits
@@ -226,8 +226,8 @@ static int read_mv_component(vp9_reader *r,
   }
 
   // Fractional part
-  fr = treed_read(r, vp9_mv_fp_tree,
-                  class0 ? mvcomp->class0_fp[d] : mvcomp->fp);
+  fr = vp9_read_tree(r, vp9_mv_fp_tree, class0 ? mvcomp->class0_fp[d]
+                                               : mvcomp->fp);
 
 
   // High precision part (if hp is not used, the default value of the hp is 1)
@@ -242,7 +242,7 @@ static int read_mv_component(vp9_reader *r,
 static INLINE void read_mv(vp9_reader *r, MV *mv, const MV *ref,
                            const nmv_context *ctx,
                            nmv_context_counts *counts, int allow_hp) {
-  const MV_JOINT_TYPE j = treed_read(r, vp9_mv_joint_tree, ctx->joints);
+  const MV_JOINT_TYPE j = vp9_read_tree(r, vp9_mv_joint_tree, ctx->joints);
   const int use_hp = allow_hp && vp9_use_mv_hp(ref);
   MV diff = {0, 0};
 
@@ -318,8 +318,8 @@ static void read_ref_frames(VP9_COMMON *const cm, MACROBLOCKD *const xd,
 static INLINE INTERPOLATION_TYPE read_switchable_filter_type(
     VP9_COMMON *const cm, MACROBLOCKD *const xd, vp9_reader *r) {
   const int ctx = vp9_get_pred_context_switchable_interp(xd);
-  const int type = treed_read(r, vp9_switchable_interp_tree,
-                              cm->fc.switchable_interp_prob[ctx]);
+  const int type = vp9_read_tree(r, vp9_switchable_interp_tree,
+                                 cm->fc.switchable_interp_prob[ctx]);
   if (!cm->frame_parallel_decoding_mode)
     ++cm->counts.switchable_interp[ctx][type];
   return type;
