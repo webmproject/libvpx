@@ -18,7 +18,6 @@
 #include "vp9/decoder/vp9_dboolhuff.h"
 #include "vp9/decoder/vp9_detokenize.h"
 #include "vp9/decoder/vp9_onyxd_int.h"
-#include "vp9/decoder/vp9_treereader.h"
 
 #define EOB_CONTEXT_NODE            0
 #define ZERO_CONTEXT_NODE           1

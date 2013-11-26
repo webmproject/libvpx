@@ -36,7 +36,6 @@
 #include "vp9/decoder/vp9_onyxd_int.h"
 #include "vp9/decoder/vp9_read_bit_buffer.h"
 #include "vp9/decoder/vp9_thread.h"
-#include "vp9/decoder/vp9_treereader.h"
 
 typedef struct TileWorkerData {
   VP9_COMMON *cm;
@@ -473,7 +472,7 @@ static PARTITION_TYPE read_partition(VP9_COMMON *cm, MACROBLOCKD *xd, int hbs,
   PARTITION_TYPE p;
 
   if (has_rows && has_cols)
-    p = treed_read(r, vp9_partition_tree, probs);
+    p = vp9_read_tree(r, vp9_partition_tree, probs);
   else if (!has_rows && has_cols)
     p = vp9_read(r, probs[1]) ? PARTITION_SPLIT : PARTITION_HORZ;
   else if (has_rows && !has_cols)

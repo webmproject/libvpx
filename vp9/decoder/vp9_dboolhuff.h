@@ -18,46 +18,50 @@
 #include "vpx_ports/mem.h"
 #include "vpx/vpx_integer.h"
 
-typedef size_t VP9_BD_VALUE;
+#include "vp9/common/vp9_treecoder.h"
 
-#define BD_VALUE_SIZE ((int)sizeof(VP9_BD_VALUE)*CHAR_BIT)
+typedef size_t BD_VALUE;
+
+#define BD_VALUE_SIZE ((int)sizeof(BD_VALUE) * CHAR_BIT)
+
+DECLARE_ALIGNED(16, extern const uint8_t, vp9_norm[256]);
 
 typedef struct {
   const uint8_t *buffer_end;
   const uint8_t *buffer;
-  VP9_BD_VALUE value;
+  BD_VALUE value;
   int count;
   unsigned int range;
 } vp9_reader;
-
-DECLARE_ALIGNED(16, extern const uint8_t, vp9_norm[256]);
 
 int vp9_reader_init(vp9_reader *r, const uint8_t *buffer, size_t size);
 
 void vp9_reader_fill(vp9_reader *r);
 
+int vp9_reader_has_error(vp9_reader *r);
+
 const uint8_t *vp9_reader_find_end(vp9_reader *r);
 
-static int vp9_read(vp9_reader *br, int probability) {
+static int vp9_read(vp9_reader *r, int prob) {
   unsigned int bit = 0;
-  VP9_BD_VALUE value;
-  VP9_BD_VALUE bigsplit;
+  BD_VALUE value;
+  BD_VALUE bigsplit;
   int count;
   unsigned int range;
-  unsigned int split = ((br->range * probability) + (256 - probability)) >> 8;
+  unsigned int split = (r->range * prob + (256 - prob)) >> CHAR_BIT;
 
-  if (br->count < 0)
-    vp9_reader_fill(br);
+  if (r->count < 0)
+    vp9_reader_fill(r);
 
-  value = br->value;
-  count = br->count;
+  value = r->value;
+  count = r->count;
 
-  bigsplit = (VP9_BD_VALUE)split << (BD_VALUE_SIZE - 8);
+  bigsplit = (BD_VALUE)split << (BD_VALUE_SIZE - CHAR_BIT);
 
   range = split;
 
   if (value >= bigsplit) {
-    range = br->range - split;
+    range = r->range - split;
     value = value - bigsplit;
     bit = 1;
   }
@@ -68,9 +72,9 @@ static int vp9_read(vp9_reader *br, int probability) {
     value <<= shift;
     count -= shift;
   }
-  br->value = value;
-  br->count = count;
-  br->range = range;
+  r->value = value;
+  r->count = count;
+  r->range = range;
 
   return bit;
 }
@@ -79,15 +83,23 @@ static int vp9_read_bit(vp9_reader *r) {
   return vp9_read(r, 128);  // vp9_prob_half
 }
 
-static int vp9_read_literal(vp9_reader *br, int bits) {
-  int z = 0, bit;
+static int vp9_read_literal(vp9_reader *r, int bits) {
+  int literal = 0, bit;
 
   for (bit = bits - 1; bit >= 0; bit--)
-    z |= vp9_read_bit(br) << bit;
+    literal |= vp9_read_bit(r) << bit;
 
-  return z;
+  return literal;
 }
 
-int vp9_reader_has_error(vp9_reader *r);
+static int vp9_read_tree(vp9_reader *r, const vp9_tree_index *tree,
+                         const vp9_prob *probs) {
+  vp9_tree_index i = 0;
+
+  while ((i = tree[i + vp9_read(r, probs[i >> 1])]) > 0)
+    continue;
+
+  return -i;
+}
 
 #endif  // VP9_DECODER_VP9_DBOOLHUFF_H_
