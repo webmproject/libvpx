@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdX//77w\u003d",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-11-26T23:20:47Z",
+      "side": 1,
+      "message": "a note about which tests or the commit that caused the failure can be helpful",
+      "revId": "03094a5533fee1435f9c9cfd1e6e812f17fdbf1f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX//774\u003d",
+        "filename": "vp9/encoder/vp9_firstpass.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 340,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-11-26T23:20:47Z",
+      "side": 1,
+      "message": "weird indent",
+      "revId": "03094a5533fee1435f9c9cfd1e6e812f17fdbf1f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
