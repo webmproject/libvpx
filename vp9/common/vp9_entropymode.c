@@ -232,21 +232,18 @@ const vp9_tree_index vp9_intra_mode_tree[TREE_SIZE(INTRA_MODES)] = {
   -D63_PRED, 16,                    /* 7 = D63_NODE */
   -D153_PRED, -D207_PRED             /* 8 = D153_NODE */
 };
-struct vp9_token vp9_intra_mode_encodings[INTRA_MODES];
 
 const vp9_tree_index vp9_inter_mode_tree[TREE_SIZE(INTER_MODES)] = {
   -INTER_OFFSET(ZEROMV), 2,
   -INTER_OFFSET(NEARESTMV), 4,
   -INTER_OFFSET(NEARMV), -INTER_OFFSET(NEWMV)
 };
-struct vp9_token vp9_inter_mode_encodings[INTER_MODES];
 
 const vp9_tree_index vp9_partition_tree[TREE_SIZE(PARTITION_TYPES)] = {
   -PARTITION_NONE, 2,
   -PARTITION_HORZ, 4,
   -PARTITION_VERT, -PARTITION_SPLIT
 };
-struct vp9_token vp9_partition_encodings[PARTITION_TYPES];
 
 static const vp9_prob default_intra_inter_p[INTRA_INTER_CONTEXTS] = {
   9, 102, 187, 225
@@ -337,15 +334,6 @@ const vp9_tree_index vp9_switchable_interp_tree
   -EIGHTTAP, 2,
   -EIGHTTAP_SMOOTH, -EIGHTTAP_SHARP
 };
-struct vp9_token vp9_switchable_interp_encodings[SWITCHABLE_FILTERS];
-
-void vp9_entropy_mode_init() {
-  vp9_tokens_from_tree(vp9_intra_mode_encodings, vp9_intra_mode_tree);
-  vp9_tokens_from_tree(vp9_switchable_interp_encodings,
-                       vp9_switchable_interp_tree);
-  vp9_tokens_from_tree(vp9_partition_encodings, vp9_partition_tree);
-  vp9_tokens_from_tree(vp9_inter_mode_encodings, vp9_inter_mode_tree);
-}
 
 #define COUNT_SAT 20
 #define MAX_UPDATE_FACTOR 128

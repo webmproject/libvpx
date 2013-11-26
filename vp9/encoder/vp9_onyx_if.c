@@ -39,6 +39,8 @@
 
 #include "vpx_ports/vpx_timer.h"
 
+void vp9_entropy_mode_init();
+
 static void set_default_lf_deltas(struct loopfilter *lf);
 
 #define DEFAULT_INTERP_FILTER SWITCHABLE
@@ -162,6 +164,7 @@ void vp9_initialize_enc() {
     vp9_init_minq_luts();
     // init_base_skip_probs();
     vp9_entropy_mv_init();
+    vp9_entropy_mode_init();
     init_done = 1;
   }
 }

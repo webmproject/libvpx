@@ -212,7 +212,6 @@ void vp9_remove_common(VP9_COMMON *cm) {
 void vp9_initialize_common() {
   vp9_init_neighbors();
   vp9_coef_tree_initialize();
-  vp9_entropy_mode_init();
 }
 
 void vp9_update_frame_size(VP9_COMMON *cm) {
