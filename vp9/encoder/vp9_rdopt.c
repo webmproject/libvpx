@@ -113,6 +113,19 @@ static int rd_thresh_block_size_factor[BLOCK_SIZES] =
 #define MV_COST_WEIGHT      108
 #define MV_COST_WEIGHT_SUB  120
 
+static int raster_block_offset(BLOCK_SIZE plane_bsize,
+                               int raster_block, int stride) {
+  const int bw = b_width_log2(plane_bsize);
+  const int y = 4 * (raster_block >> bw);
+  const int x = 4 * (raster_block & ((1 << bw) - 1));
+  return y * stride + x;
+}
+static int16_t* raster_block_offset_int16(BLOCK_SIZE plane_bsize,
+                                          int raster_block, int16_t *base) {
+  const int stride = 4 << b_width_log2(plane_bsize);
+  return base + raster_block_offset(plane_bsize, raster_block, stride);
+}
+
 static void fill_mode_costs(VP9_COMP *c) {
   VP9_COMMON *const cm = &c->common;
   int i, j;
