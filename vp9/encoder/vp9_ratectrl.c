@@ -26,7 +26,7 @@
 #include "vp9/common/vp9_quant_common.h"
 #include "vp9/common/vp9_seg_common.h"
 
-#define LIMIT_QRANGE_FOR_ALTREF_AND_KEY 0
+#define LIMIT_QRANGE_FOR_ALTREF_AND_KEY 1
 
 #define MIN_BPB_FACTOR 0.005
 #define MAX_BPB_FACTOR 50
