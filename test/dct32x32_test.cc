@@ -260,4 +260,14 @@ INSTANTIATE_TEST_CASE_P(
         make_tuple(&vp9_fdct32x32_rd_sse2,
                    &vp9_idct32x32_1024_add_sse2, 1)));
 #endif
+
+#if HAVE_AVX2
+INSTANTIATE_TEST_CASE_P(
+    AVX2, Trans32x32Test,
+    ::testing::Values(
+        make_tuple(&vp9_fdct32x32_avx2,
+                   &vp9_idct32x32_1024_add_sse2, 0),
+        make_tuple(&vp9_fdct32x32_rd_avx2,
+                   &vp9_idct32x32_1024_add_sse2, 1)));
+#endif
 }  // namespace
