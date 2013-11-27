@@ -64,11 +64,6 @@ static INLINE int treed_cost(vp9_tree tree, const vp9_prob *probs,
   return cost;
 }
 
-static INLINE int cost_token(vp9_tree tree, const vp9_prob *probs,
-                             const struct vp9_token *token) {
-  return treed_cost(tree, probs, token->value, token->len);
-}
-
 void vp9_cost_tokens(int *costs, const vp9_prob *probs, vp9_tree tree);
 void vp9_cost_tokens_skip(int *costs, const vp9_prob *probs, vp9_tree tree);
 

@@ -151,6 +151,30 @@ void write_switchable_interp_stats() {
 }
 #endif
 
+static struct vp9_token intra_mode_encodings[INTRA_MODES];
+static struct vp9_token switchable_interp_encodings[SWITCHABLE_FILTERS];
+static struct vp9_token partition_encodings[PARTITION_TYPES];
+static struct vp9_token inter_mode_encodings[INTER_MODES];
+
+void vp9_entropy_mode_init() {
+  vp9_tokens_from_tree(intra_mode_encodings, vp9_intra_mode_tree);
+  vp9_tokens_from_tree(switchable_interp_encodings, vp9_switchable_interp_tree);
+  vp9_tokens_from_tree(partition_encodings, vp9_partition_tree);
+  vp9_tokens_from_tree(inter_mode_encodings, vp9_inter_mode_tree);
+}
+
+static void write_intra_mode(vp9_writer *w, MB_PREDICTION_MODE mode,
+                             const vp9_prob *probs) {
+  write_token(w, vp9_intra_mode_tree, probs, &intra_mode_encodings[mode]);
+}
+
+static void write_inter_mode(vp9_writer *w, MB_PREDICTION_MODE mode,
+                             const vp9_prob *probs) {
+  assert(is_inter_mode(mode));
+  write_token(w, vp9_inter_mode_tree, probs,
+              &inter_mode_encodings[INTER_OFFSET(mode)]);
+}
+
 static INLINE void write_be32(uint8_t *p, int value) {
   p[0] = value >> 24;
   p[1] = value >> 16;
@@ -211,10 +235,6 @@ void vp9_update_skip_probs(VP9_COMP *cpi, vp9_writer *w) {
 
   for (k = 0; k < MBSKIP_CONTEXTS; ++k)
     vp9_cond_prob_diff_update(w, &cm->fc.mbskip_probs[k], cm->counts.mbskip[k]);
-}
-
-static void write_intra_mode(vp9_writer *bc, int m, const vp9_prob *p) {
-  write_token(bc, vp9_intra_mode_tree, p, vp9_intra_mode_encodings + m);
 }
 
 static void update_switchable_interp_probs(VP9_COMP *cpi, vp9_writer *w) {
@@ -292,14 +312,6 @@ static void pack_mb_tokens(vp9_writer* const w,
 
   *tp = p + (p->token == EOSB_TOKEN);
 }
-
-static void write_sb_mv_ref(vp9_writer *w, MB_PREDICTION_MODE mode,
-                            const vp9_prob *p) {
-  assert(is_inter_mode(mode));
-  write_token(w, vp9_inter_mode_tree, p,
-              &vp9_inter_mode_encodings[INTER_OFFSET(mode)]);
-}
-
 
 static void write_segment_id(vp9_writer *w, const struct segmentation *seg,
                              int segment_id) {
@@ -422,7 +434,7 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, MODE_INFO *m, vp9_writer *bc) {
     // If segment skip is not enabled code the mode.
     if (!vp9_segfeature_active(seg, segment_id, SEG_LVL_SKIP)) {
       if (bsize >= BLOCK_8X8) {
-        write_sb_mv_ref(bc, mode, mv_ref_p);
+        write_inter_mode(bc, mode, mv_ref_p);
         ++cm->counts.inter_mode[mi->mode_context[rf]]
                                [INTER_OFFSET(mode)];
       }
@@ -432,7 +444,7 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, MODE_INFO *m, vp9_writer *bc) {
       const int ctx = vp9_get_pred_context_switchable_interp(xd);
       write_token(bc, vp9_switchable_interp_tree,
                   cm->fc.switchable_interp_prob[ctx],
-                  &vp9_switchable_interp_encodings[mi->interp_filter]);
+                  &switchable_interp_encodings[mi->interp_filter]);
     } else {
       assert(mi->interp_filter == cm->mcomp_filter_type);
     }
@@ -445,7 +457,7 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, MODE_INFO *m, vp9_writer *bc) {
         for (idx = 0; idx < 2; idx += num_4x4_blocks_wide) {
           const int j = idy * 2 + idx;
           const MB_PREDICTION_MODE blockmode = m->bmi[j].as_mode;
-          write_sb_mv_ref(bc, blockmode, mv_ref_p);
+          write_inter_mode(bc, blockmode, mv_ref_p);
           ++cm->counts.inter_mode[mi->mode_context[rf]]
                                  [INTER_OFFSET(blockmode)];
 
@@ -561,7 +573,7 @@ static void write_partition(VP9_COMP *cpi, int hbs, int mi_row, int mi_col,
   const int has_cols = (mi_col + hbs) < cm->mi_cols;
 
   if (has_rows && has_cols) {
-    write_token(w, vp9_partition_tree, probs, &vp9_partition_encodings[p]);
+    write_token(w, vp9_partition_tree, probs, &partition_encodings[p]);
   } else if (!has_rows && has_cols) {
     assert(p == PARTITION_SPLIT || p == PARTITION_HORZ);
     vp9_write(w, p == PARTITION_SPLIT, probs[1]);

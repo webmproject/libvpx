@@ -290,15 +290,9 @@ void vp9_initialize_rd_consts(VP9_COMP *cpi) {
         &cm->fc.nmvc,
         cm->allow_high_precision_mv, 1, 1);
 
-    for (i = 0; i < INTER_MODE_CONTEXTS; i++) {
-      MB_PREDICTION_MODE m;
-
-      for (m = NEARESTMV; m < MB_MODE_COUNT; m++)
-        cpi->mb.inter_mode_cost[i][INTER_OFFSET(m)] =
-            cost_token(vp9_inter_mode_tree,
-                       cm->fc.inter_mode_probs[i],
-                       &vp9_inter_mode_encodings[INTER_OFFSET(m)]);
-    }
+    for (i = 0; i < INTER_MODE_CONTEXTS; ++i)
+      vp9_cost_tokens((int *)cpi->mb.inter_mode_cost[i],
+                      cm->fc.inter_mode_probs[i], vp9_inter_mode_tree);
   }
 }
 
