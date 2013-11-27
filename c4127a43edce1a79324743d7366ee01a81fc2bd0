@@ -72,6 +72,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdX//72s\u003d",
+        "filename": "vp9/encoder/vp9_ratectrl.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 603,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2013-11-27T20:00:02Z",
+      "side": 1,
+      "message": "I looked like the comment was broken over 2 lines and only the first was commented out.\n(same applies in the \"if\" clause above).",
+      "parentUuid": "AAAAdX//73M\u003d",
+      "revId": "c4127a43edce1a79324743d7366ee01a81fc2bd0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdX//734\u003d",
         "filename": "vp9/encoder/vp9_ratectrl.c",
         "patchSetId": 4
@@ -136,6 +154,24 @@
       "side": 1,
       "message": "Done. \nHowever one argument per line is recommended for readability:\nhttps://engdoc.corp.google.com/eng/doc/devguide/cpp/styleguide.shtml?cl\u003dhead#Function_Calls",
       "parentUuid": "AAAAdX//738\u003d",
+      "revId": "c4127a43edce1a79324743d7366ee01a81fc2bd0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX//72o\u003d",
+        "filename": "vp9/encoder/vp9_ratectrl.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 738,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2013-11-27T20:00:02Z",
+      "side": 1,
+      "message": "I stand corrected :)",
+      "parentUuid": "AAAAdX//73E\u003d",
       "revId": "c4127a43edce1a79324743d7366ee01a81fc2bd0",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
