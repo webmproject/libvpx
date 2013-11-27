@@ -514,11 +514,12 @@ static INLINE int cost_coeffs(MACROBLOCK *x,
                               const int16_t *scan, const int16_t *nb) {
   MACROBLOCKD *const xd = &x->e_mbd;
   MB_MODE_INFO *mbmi = &xd->mi_8x8[0]->mbmi;
+  struct macroblock_plane *p = &x->plane[plane];
   struct macroblockd_plane *pd = &xd->plane[plane];
   const PLANE_TYPE type = pd->plane_type;
   const int16_t *band_count = &band_counts[tx_size][1];
   const int eob = pd->eobs[block];
-  const int16_t *const qcoeff_ptr = BLOCK_OFFSET(pd->qcoeff, block);
+  const int16_t *const qcoeff_ptr = BLOCK_OFFSET(p->qcoeff, block);
   const int ref = mbmi->ref_frame[0] != INTRA_FRAME;
   unsigned int (*token_costs)[2][PREV_COEF_CONTEXTS][MAX_ENTROPY_TOKENS] =
                    x->token_costs[tx_size][type][ref];
@@ -1380,7 +1381,7 @@ static int64_t rd_pick_intra_sbuv_mode(VP9_COMP *cpi, MACROBLOCK *x,
         struct macroblockd_plane *const pd = x->e_mbd.plane;
         for (i = 1; i < MAX_MB_PLANE; ++i) {
           p[i].coeff    = ctx->coeff_pbuf[i][2];
-          pd[i].qcoeff  = ctx->qcoeff_pbuf[i][2];
+          p[i].qcoeff  = ctx->qcoeff_pbuf[i][2];
           pd[i].dqcoeff = ctx->dqcoeff_pbuf[i][2];
           pd[i].eobs    = ctx->eobs_pbuf[i][2];
 
@@ -1390,7 +1391,7 @@ static int64_t rd_pick_intra_sbuv_mode(VP9_COMP *cpi, MACROBLOCK *x,
           ctx->eobs_pbuf[i][2]    = ctx->eobs_pbuf[i][0];
 
           ctx->coeff_pbuf[i][0]   = p[i].coeff;
-          ctx->qcoeff_pbuf[i][0]  = pd[i].qcoeff;
+          ctx->qcoeff_pbuf[i][0]  = p[i].qcoeff;
           ctx->dqcoeff_pbuf[i][0] = pd[i].dqcoeff;
           ctx->eobs_pbuf[i][0]    = pd[i].eobs;
         }
@@ -3057,7 +3058,7 @@ static void swap_block_ptr(MACROBLOCK *x, PICK_MODE_CONTEXT *ctx,
 
   for (i = 0; i < max_plane; ++i) {
     p[i].coeff    = ctx->coeff_pbuf[i][1];
-    pd[i].qcoeff  = ctx->qcoeff_pbuf[i][1];
+    p[i].qcoeff  = ctx->qcoeff_pbuf[i][1];
     pd[i].dqcoeff = ctx->dqcoeff_pbuf[i][1];
     pd[i].eobs    = ctx->eobs_pbuf[i][1];
 
@@ -3067,7 +3068,7 @@ static void swap_block_ptr(MACROBLOCK *x, PICK_MODE_CONTEXT *ctx,
     ctx->eobs_pbuf[i][1]    = ctx->eobs_pbuf[i][0];
 
     ctx->coeff_pbuf[i][0]   = p[i].coeff;
-    ctx->qcoeff_pbuf[i][0]  = pd[i].qcoeff;
+    ctx->qcoeff_pbuf[i][0]  = p[i].qcoeff;
     ctx->dqcoeff_pbuf[i][0] = pd[i].dqcoeff;
     ctx->eobs_pbuf[i][0]    = pd[i].eobs;
   }

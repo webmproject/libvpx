@@ -108,7 +108,8 @@ static void tokenize_b(int plane, int block, BLOCK_SIZE plane_bsize,
   TOKENEXTRA *t = *tp;        /* store tokens starting here */
   const int eob = pd->eobs[block];
   const PLANE_TYPE type = pd->plane_type;
-  const int16_t *qcoeff_ptr = BLOCK_OFFSET(pd->qcoeff, block);
+  struct macroblock_plane *p = &cpi->mb.plane[plane];
+  const int16_t *qcoeff_ptr = BLOCK_OFFSET(p->qcoeff, block);
 
   const int segment_id = mbmi->segment_id;
   const int16_t *scan, *nb;

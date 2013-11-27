@@ -173,7 +173,7 @@ void vp9_regular_quantize_b_4x4(MACROBLOCK *x, int y_blocks, int b_idx,
   vp9_quantize_b(BLOCK_OFFSET(p->coeff, pb_idx.block),
            16, x->skip_block,
            p->zbin, p->round, p->quant, p->quant_shift,
-           BLOCK_OFFSET(pd->qcoeff, pb_idx.block),
+           BLOCK_OFFSET(p->qcoeff, pb_idx.block),
            BLOCK_OFFSET(pd->dqcoeff, pb_idx.block),
            pd->dequant, p->zbin_extra, &pd->eobs[pb_idx.block], scan, iscan);
 }

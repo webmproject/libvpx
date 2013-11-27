@@ -113,7 +113,6 @@ static void init_macroblockd(VP9D_COMP *const pbi) {
   int i;
 
   for (i = 0; i < MAX_MB_PLANE; ++i) {
-    pd[i].qcoeff  = pbi->qcoeff[i];
     pd[i].dqcoeff = pbi->dqcoeff[i];
     pd[i].eobs    = pbi->eobs[i];
   }

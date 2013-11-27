@@ -530,7 +530,7 @@ void vp9_first_pass(VP9_COMP *cpi) {
 
   for (i = 0; i < MAX_MB_PLANE; ++i) {
     p[i].coeff = ctx->coeff_pbuf[i][1];
-    pd[i].qcoeff = ctx->qcoeff_pbuf[i][1];
+    p[i].qcoeff = ctx->qcoeff_pbuf[i][1];
     pd[i].dqcoeff = ctx->dqcoeff_pbuf[i][1];
     pd[i].eobs = ctx->eobs_pbuf[i][1];
   }

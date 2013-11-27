@@ -439,14 +439,14 @@ static void update_state(VP9_COMP *cpi, PICK_MODE_CONTEXT *ctx,
   max_plane = is_inter_block(mbmi) ? MAX_MB_PLANE : 1;
   for (i = 0; i < max_plane; ++i) {
     p[i].coeff = ctx->coeff_pbuf[i][1];
-    pd[i].qcoeff = ctx->qcoeff_pbuf[i][1];
+    p[i].qcoeff = ctx->qcoeff_pbuf[i][1];
     pd[i].dqcoeff = ctx->dqcoeff_pbuf[i][1];
     pd[i].eobs = ctx->eobs_pbuf[i][1];
   }
 
   for (i = max_plane; i < MAX_MB_PLANE; ++i) {
     p[i].coeff = ctx->coeff_pbuf[i][2];
-    pd[i].qcoeff = ctx->qcoeff_pbuf[i][2];
+    p[i].qcoeff = ctx->qcoeff_pbuf[i][2];
     pd[i].dqcoeff = ctx->dqcoeff_pbuf[i][2];
     pd[i].eobs = ctx->eobs_pbuf[i][2];
   }
@@ -675,7 +675,7 @@ static void pick_sb_modes(VP9_COMP *cpi, const TileInfo *const tile,
 
   for (i = 0; i < MAX_MB_PLANE; ++i) {
     p[i].coeff = ctx->coeff_pbuf[i][0];
-    pd[i].qcoeff = ctx->qcoeff_pbuf[i][0];
+    p[i].qcoeff = ctx->qcoeff_pbuf[i][0];
     pd[i].dqcoeff = ctx->dqcoeff_pbuf[i][0];
     pd[i].eobs = ctx->eobs_pbuf[i][0];
   }

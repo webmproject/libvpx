@@ -69,6 +69,7 @@ typedef struct {
 
 struct macroblock_plane {
   DECLARE_ALIGNED(16, int16_t, src_diff[64 * 64]);
+  int16_t *qcoeff;
   int16_t *coeff;
   struct buf_2d src;
 

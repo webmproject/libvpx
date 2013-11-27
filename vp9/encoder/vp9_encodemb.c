@@ -136,6 +136,7 @@ static void optimize_b(MACROBLOCK *mb,
                        ENTROPY_CONTEXT *a, ENTROPY_CONTEXT *l,
                        TX_SIZE tx_size) {
   MACROBLOCKD *const xd = &mb->e_mbd;
+  struct macroblock_plane *p = &mb->plane[plane];
   struct macroblockd_plane *pd = &xd->plane[plane];
   const int ref = is_inter_block(&xd->mi_8x8[0]->mbmi);
   vp9_token_state tokens[1025][2];
@@ -163,7 +164,7 @@ static void optimize_b(MACROBLOCK *mb,
 
   assert((!type && !plane) || (type && plane));
   dqcoeff_ptr = BLOCK_OFFSET(pd->dqcoeff, block);
-  qcoeff_ptr = BLOCK_OFFSET(pd->qcoeff, block);
+  qcoeff_ptr = BLOCK_OFFSET(p->qcoeff, block);
   assert(eob <= default_eob);
 
   /* Now set up a Viterbi trellis to evaluate alternative roundings. */
@@ -368,7 +369,7 @@ void vp9_xform_quant(int plane, int block, BLOCK_SIZE plane_bsize,
   struct macroblock_plane *const p = &x->plane[plane];
   struct macroblockd_plane *const pd = &xd->plane[plane];
   int16_t *coeff = BLOCK_OFFSET(p->coeff, block);
-  int16_t *qcoeff = BLOCK_OFFSET(pd->qcoeff, block);
+  int16_t *qcoeff = BLOCK_OFFSET(p->qcoeff, block);
   int16_t *dqcoeff = BLOCK_OFFSET(pd->dqcoeff, block);
   const scan_order *so;
   uint16_t *eob = &pd->eobs[block];
@@ -530,7 +531,7 @@ void vp9_encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
   struct macroblock_plane *const p = &x->plane[plane];
   struct macroblockd_plane *const pd = &xd->plane[plane];
   int16_t *coeff = BLOCK_OFFSET(p->coeff, block);
-  int16_t *qcoeff = BLOCK_OFFSET(pd->qcoeff, block);
+  int16_t *qcoeff = BLOCK_OFFSET(p->qcoeff, block);
   int16_t *dqcoeff = BLOCK_OFFSET(pd->dqcoeff, block);
   const scan_order *so;
   TX_TYPE tx_type;

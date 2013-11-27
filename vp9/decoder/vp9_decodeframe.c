@@ -42,7 +42,6 @@ typedef struct TileWorkerData {
   vp9_reader bit_reader;
   DECLARE_ALIGNED(16, MACROBLOCKD, xd);
   DECLARE_ALIGNED(16, unsigned char, token_cache[1024]);
-  DECLARE_ALIGNED(16, int16_t,  qcoeff[MAX_MB_PLANE][64 * 64]);
   DECLARE_ALIGNED(16, int16_t,  dqcoeff[MAX_MB_PLANE][64 * 64]);
   DECLARE_ALIGNED(16, uint16_t, eobs[MAX_MB_PLANE][256]);
 } TileWorkerData;
@@ -952,7 +951,6 @@ static void setup_tile_macroblockd(TileWorkerData *const tile_data) {
   int i;
 
   for (i = 0; i < MAX_MB_PLANE; ++i) {
-    pd[i].qcoeff  = tile_data->qcoeff[i];
     pd[i].dqcoeff = tile_data->dqcoeff[i];
     pd[i].eobs    = tile_data->eobs[i];
     vpx_memset(xd->plane[i].dqcoeff, 0, 64 * 64 * sizeof(int16_t));

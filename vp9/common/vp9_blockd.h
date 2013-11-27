@@ -198,7 +198,6 @@ struct buf_2d {
 };
 
 struct macroblockd_plane {
-  int16_t *qcoeff;
   int16_t *dqcoeff;
   uint16_t *eobs;
   PLANE_TYPE plane_type;
