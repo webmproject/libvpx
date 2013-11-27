@@ -113,49 +113,6 @@ DECLARE_ALIGNED(16, const uint8_t, vp9_pt_energy_class[MAX_ENTROPY_TOKENS]) = {
   0, 1, 2, 3, 3, 4, 4, 5, 5, 5, 5, 5
 };
 
-// Array indices are identical to previously-existing CONTEXT_NODE indices
-const vp9_tree_index vp9_coef_tree[TREE_SIZE(MAX_ENTROPY_TOKENS)] = {
-  -DCT_EOB_TOKEN, 2,                          /* 0 = EOB */
-  -ZERO_TOKEN, 4,                             /* 1 = ZERO */
-  -ONE_TOKEN, 6,                              /* 2 = ONE */
-  8, 12,                                      /* 3 = LOW_VAL */
-  -TWO_TOKEN, 10,                            /* 4 = TWO */
-  -THREE_TOKEN, -FOUR_TOKEN,                /* 5 = THREE */
-  14, 16,                                   /* 6 = HIGH_LOW */
-  -DCT_VAL_CATEGORY1, -DCT_VAL_CATEGORY2,   /* 7 = CAT_ONE */
-  18, 20,                                   /* 8 = CAT_THREEFOUR */
-  -DCT_VAL_CATEGORY3, -DCT_VAL_CATEGORY4,   /* 9 = CAT_THREE */
-  -DCT_VAL_CATEGORY5, -DCT_VAL_CATEGORY6    /* 10 = CAT_FIVE */
-};
-
-// Unconstrained Node Tree
-const vp9_tree_index vp9_coef_con_tree[TREE_SIZE(MAX_ENTROPY_TOKENS)] = {
-  2, 6,                                     /* 0 = LOW_VAL */
-  -TWO_TOKEN, 4,                            /* 1 = TWO */
-  -THREE_TOKEN, -FOUR_TOKEN,                /* 2 = THREE */
-  8, 10,                                    /* 3 = HIGH_LOW */
-  -DCT_VAL_CATEGORY1, -DCT_VAL_CATEGORY2,   /* 4 = CAT_ONE */
-  12, 14,                                   /* 5 = CAT_THREEFOUR */
-  -DCT_VAL_CATEGORY3, -DCT_VAL_CATEGORY4,   /* 6 = CAT_THREE */
-  -DCT_VAL_CATEGORY5, -DCT_VAL_CATEGORY6    /* 7 = CAT_FIVE */
-};
-
-
-
-struct vp9_token vp9_coef_encodings[MAX_ENTROPY_TOKENS];
-
-/* Trees for extra bits.  Probabilities are constant and
-   do not depend on previously encoded bits */
-
-static const vp9_prob Pcat1[] = { 159};
-static const vp9_prob Pcat2[] = { 165, 145};
-static const vp9_prob Pcat3[] = { 173, 148, 140};
-static const vp9_prob Pcat4[] = { 176, 155, 140, 135};
-static const vp9_prob Pcat5[] = { 180, 157, 141, 134, 130};
-static const vp9_prob Pcat6[] = {
-  254, 254, 254, 252, 249, 243, 230, 196, 177, 153, 140, 133, 130, 129
-};
-
 const vp9_tree_index vp9_coefmodel_tree[6] = {
   -DCT_EOB_MODEL_TOKEN, 2,                      /* 0 = EOB */
   -ZERO_TOKEN, 4,                               /* 1 = ZERO */
@@ -446,43 +403,6 @@ void vp9_model_to_full_probs(const vp9_prob *model, vp9_prob *full) {
   extend_to_full_distribution(&full[UNCONSTRAINED_NODES], model[PIVOT_NODE]);
 }
 
-static vp9_tree_index cat1[2], cat2[4], cat3[6], cat4[8], cat5[10], cat6[28];
-
-static void init_bit_tree(vp9_tree_index *p, int n) {
-  int i = 0;
-
-  while (++i < n) {
-    p[0] = p[1] = i << 1;
-    p += 2;
-  }
-
-  p[0] = p[1] = 0;
-}
-
-static void init_bit_trees() {
-  init_bit_tree(cat1, 1);
-  init_bit_tree(cat2, 2);
-  init_bit_tree(cat3, 3);
-  init_bit_tree(cat4, 4);
-  init_bit_tree(cat5, 5);
-  init_bit_tree(cat6, 14);
-}
-
-const vp9_extra_bit vp9_extra_bits[MAX_ENTROPY_TOKENS] = {
-  {0, 0, 0, 0},           // ZERO_TOKEN
-  {0, 0, 0, 1},           // ONE_TOKEN
-  {0, 0, 0, 2},           // TWO_TOKEN
-  {0, 0, 0, 3},           // THREE_TOKEN
-  {0, 0, 0, 4},           // FOUR_TOKEN
-  {cat1, Pcat1, 1, 5},    // DCT_VAL_CATEGORY1
-  {cat2, Pcat2, 2, 7},    // DCT_VAL_CATEGORY2
-  {cat3, Pcat3, 3, 11},   // DCT_VAL_CATEGORY3
-  {cat4, Pcat4, 4, 19},   // DCT_VAL_CATEGORY4
-  {cat5, Pcat5, 5, 35},   // DCT_VAL_CATEGORY5
-  {cat6, Pcat6, 14, 67},  // DCT_VAL_CATEGORY6
-  {0, 0, 0, 0}            // DCT_EOB_TOKEN
-};
-
 #include "vp9/common/vp9_default_coef_probs.h"
 
 void vp9_default_coef_probs(VP9_COMMON *cm) {
@@ -490,11 +410,6 @@ void vp9_default_coef_probs(VP9_COMMON *cm) {
   vp9_copy(cm->fc.coef_probs[TX_8X8], default_coef_probs_8x8);
   vp9_copy(cm->fc.coef_probs[TX_16X16], default_coef_probs_16x16);
   vp9_copy(cm->fc.coef_probs[TX_32X32], default_coef_probs_32x32);
-}
-
-void vp9_coef_tree_initialize() {
-  init_bit_trees();
-  vp9_tokens_from_tree(vp9_coef_encodings, vp9_coef_tree);
 }
 
 #define COEF_COUNT_SAT 24
