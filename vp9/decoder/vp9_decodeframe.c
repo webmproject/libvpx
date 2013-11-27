@@ -51,7 +51,7 @@ static int read_be32(const uint8_t *p) {
   return (p[0] << 24) | (p[1] << 16) | (p[2] << 8) | p[3];
 }
 
-static int is_compound_prediction_allowed(const VP9_COMMON *cm) {
+static int is_compound_reference_allowed(const VP9_COMMON *cm) {
   int i;
   for (i = 1; i < ALLOWED_REFS_PER_FRAME; ++i)
     if  (cm->ref_frame_sign_bias[i + 1] != cm->ref_frame_sign_bias[1])
@@ -60,7 +60,7 @@ static int is_compound_prediction_allowed(const VP9_COMMON *cm) {
   return 0;
 }
 
-static void setup_compound_prediction(VP9_COMMON *cm) {
+static void setup_compound_reference(VP9_COMMON *cm) {
   if (cm->ref_frame_sign_bias[LAST_FRAME] ==
           cm->ref_frame_sign_bias[GOLDEN_FRAME]) {
     cm->comp_fixed_ref = ALTREF_FRAME;
@@ -95,7 +95,7 @@ static TX_MODE read_tx_mode(vp9_reader *r) {
   return tx_mode;
 }
 
-static void read_tx_probs(struct tx_probs *tx_probs, vp9_reader *r) {
+static void read_tx_mode_probs(struct tx_probs *tx_probs, vp9_reader *r) {
   int i, j;
 
   for (i = 0; i < TX_SIZE_CONTEXTS; ++i)
@@ -125,22 +125,20 @@ static void read_inter_mode_probs(FRAME_CONTEXT *fc, vp9_reader *r) {
       vp9_diff_update_prob(r, &fc->inter_mode_probs[i][j]);
 }
 
-static INLINE REFERENCE_MODE read_comp_pred_mode(vp9_reader *r) {
-  REFERENCE_MODE mode = vp9_read_bit(r);
-  if (mode)
-    mode += vp9_read_bit(r);
-  return mode;
+static REFERENCE_MODE read_reference_mode(VP9_COMMON *cm, vp9_reader *r) {
+  if (is_compound_reference_allowed(cm)) {
+    REFERENCE_MODE mode = vp9_read_bit(r);
+    if (mode)
+      mode += vp9_read_bit(r);
+    setup_compound_reference(cm);
+    return mode;
+  } else {
+    return SINGLE_REFERENCE;
+  }
 }
 
-static void read_comp_pred(VP9_COMMON *cm, vp9_reader *r) {
+static void read_reference_mode_probs(VP9_COMMON *cm, vp9_reader *r) {
   int i;
-
-  const int compound_allowed = is_compound_prediction_allowed(cm);
-  cm->comp_pred_mode = compound_allowed ? read_comp_pred_mode(r)
-                                        : SINGLE_REFERENCE;
-  if (compound_allowed)
-    setup_compound_prediction(cm);
-
   if (cm->comp_pred_mode == REFERENCE_MODE_SELECT)
     for (i = 0; i < COMP_INTER_CONTEXTS; i++)
       vp9_diff_update_prob(r, &cm->fc.comp_inter_prob[i]);
@@ -1217,7 +1215,7 @@ static int read_compressed_header(VP9D_COMP *pbi, const uint8_t *data,
 
   cm->tx_mode = xd->lossless ? ONLY_4X4 : read_tx_mode(&r);
   if (cm->tx_mode == TX_MODE_SELECT)
-    read_tx_probs(&fc->tx_probs, &r);
+    read_tx_mode_probs(&fc->tx_probs, &r);
   read_coef_probs(fc, cm->tx_mode, &r);
 
   for (k = 0; k < MBSKIP_CONTEXTS; ++k)
@@ -1235,7 +1233,8 @@ static int read_compressed_header(VP9D_COMP *pbi, const uint8_t *data,
     for (i = 0; i < INTRA_INTER_CONTEXTS; i++)
       vp9_diff_update_prob(&r, &fc->intra_inter_prob[i]);
 
-    read_comp_pred(cm, &r);
+    cm->comp_pred_mode = read_reference_mode(cm, &r);
+    read_reference_mode_probs(cm, &r);
 
     for (j = 0; j < BLOCK_SIZE_GROUPS; j++)
       for (i = 0; i < INTRA_MODES - 1; ++i)
