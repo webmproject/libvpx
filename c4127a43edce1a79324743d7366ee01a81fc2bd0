@@ -1,0 +1,123 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdX//74E\u003d",
+        "filename": "vp9/encoder/vp9_ratectrl.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 465,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2013-11-27T19:26:55Z",
+      "side": 1,
+      "message": "best/worst-allowedD\nremove trailing D",
+      "revId": "c4127a43edce1a79324743d7366ee01a81fc2bd0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX//74A\u003d",
+        "filename": "vp9/encoder/vp9_ratectrl.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 603,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2013-11-27T19:26:55Z",
+      "side": 1,
+      "message": "This won\u0027t compile if LIMIT_QRANGE_FOR_ALTREF_AND_KEY is set. Must comment out following line also (but should really delete both).",
+      "revId": "c4127a43edce1a79324743d7366ee01a81fc2bd0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX//734\u003d",
+        "filename": "vp9/encoder/vp9_ratectrl.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 725,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2013-11-27T19:26:55Z",
+      "side": 1,
+      "message": "Make more compact by putting as many parameters to a line as there is room.",
+      "revId": "c4127a43edce1a79324743d7366ee01a81fc2bd0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX//738\u003d",
+        "filename": "vp9/encoder/vp9_ratectrl.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 738,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2013-11-27T19:26:55Z",
+      "side": 1,
+      "message": "Make more compact by putting as many parameters to a line as there is room.",
+      "revId": "c4127a43edce1a79324743d7366ee01a81fc2bd0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX//730\u003d",
+        "filename": "vp9/encoder/vp9_ratectrl.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 755,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2013-11-27T19:26:55Z",
+      "side": 1,
+      "message": "Remove a blank line.",
+      "revId": "c4127a43edce1a79324743d7366ee01a81fc2bd0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX//73w\u003d",
+        "filename": "vp9/encoder/vp9_ratectrl.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 763,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2013-11-27T19:26:55Z",
+      "side": 1,
+      "message": "Change the format of the if below to make more compact.",
+      "revId": "c4127a43edce1a79324743d7366ee01a81fc2bd0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX//73s\u003d",
+        "filename": "vp9/encoder/vp9_ratectrl.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 782,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2013-11-27T19:26:55Z",
+      "side": 1,
+      "message": "Change the format of the if below to make more compact.",
+      "revId": "c4127a43edce1a79324743d7366ee01a81fc2bd0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
