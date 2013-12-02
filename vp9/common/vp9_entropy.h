@@ -44,14 +44,8 @@
 extern DECLARE_ALIGNED(16, const uint8_t,
                        vp9_pt_energy_class[MAX_ENTROPY_TOKENS]);
 
-extern const vp9_tree_index vp9_coef_tree[TREE_SIZE(MAX_ENTROPY_TOKENS)];
-
-extern const vp9_tree_index vp9_coef_con_tree[];
-
 #define DCT_EOB_MODEL_TOKEN     3      /* EOB       Extra Bits 0+0 */
 extern const vp9_tree_index vp9_coefmodel_tree[];
-
-extern struct vp9_token vp9_coef_encodings[MAX_ENTROPY_TOKENS];
 
 typedef struct {
   const vp9_tree_index *tree;
@@ -105,8 +99,6 @@ typedef unsigned int vp9_coeff_stats[REF_TYPES][COEF_BANDS][PREV_COEF_CONTEXTS]
 
 struct VP9Common;
 void vp9_default_coef_probs(struct VP9Common *cm);
-
-void vp9_coef_tree_initialize();
 void vp9_adapt_coef_probs(struct VP9Common *cm);
 
 static INLINE void reset_skip_context(MACROBLOCKD *xd, BLOCK_SIZE bsize) {

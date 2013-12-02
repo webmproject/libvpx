@@ -40,6 +40,7 @@
 #include "vpx_ports/vpx_timer.h"
 
 void vp9_entropy_mode_init();
+void vp9_coef_tree_initialize();
 
 static void set_default_lf_deltas(struct loopfilter *lf);
 
@@ -165,6 +166,7 @@ void vp9_initialize_enc() {
     // init_base_skip_probs();
     vp9_entropy_mv_init();
     vp9_entropy_mode_init();
+    vp9_coef_tree_initialize();
     init_done = 1;
   }
 }

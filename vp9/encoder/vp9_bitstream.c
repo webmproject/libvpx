@@ -32,6 +32,7 @@
 #include "vp9/encoder/vp9_bitstream.h"
 #include "vp9/encoder/vp9_segmentation.h"
 #include "vp9/encoder/vp9_subexp.h"
+#include "vp9/encoder/vp9_tokenize.h"
 #include "vp9/encoder/vp9_write_bit_buffer.h"
 
 
