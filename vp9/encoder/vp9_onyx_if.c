@@ -786,7 +786,7 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
         sf->last_partitioning_redo_frequency = 3;
 
         sf->use_uv_intra_rd_estimate = 1;
-        sf->skip_encode_sb = 1;
+        sf->skip_encode_sb = 0;
         sf->use_lp32x32fdct = 1;
         sf->subpel_iters_per_step = 1;
         sf->use_fast_coef_updates = 2;
@@ -819,7 +819,7 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
         sf->last_partitioning_redo_frequency = 3;
 
         sf->use_uv_intra_rd_estimate = 1;
-        sf->skip_encode_sb = 1;
+        sf->skip_encode_sb = 0;
         sf->use_lp32x32fdct = 1;
         sf->subpel_iters_per_step = 1;
         sf->use_fast_coef_updates = 2;
