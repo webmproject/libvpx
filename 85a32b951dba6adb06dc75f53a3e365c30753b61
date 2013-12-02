@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdX//7wE\u003d",
+        "filename": "vp9/encoder/vp9_ratectrl.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 363,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2013-12-02T22:36:26Z",
+      "side": 1,
+      "message": "Couldn\u0027t this be simplified to:\n} else if (cpi-\u003erc.buffer_level \u003e critical_level) {",
+      "revId": "85a32b951dba6adb06dc75f53a3e365c30753b61",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX//7wA\u003d",
+        "filename": "vp9/encoder/vp9_ratectrl.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 423,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2013-12-02T22:36:26Z",
+      "side": 1,
+      "message": "We don\u0027t need the vertical bars here and below.",
+      "revId": "85a32b951dba6adb06dc75f53a3e365c30753b61",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX//7v8\u003d",
+        "filename": "vp9/encoder/vp9_ratectrl.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 424,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2013-12-02T22:36:26Z",
+      "side": 1,
+      "message": "Do we need the \"~\" ? Does it only indicate that /16 loses precision in integer math?",
+      "revId": "85a32b951dba6adb06dc75f53a3e365c30753b61",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX//7v4\u003d",
+        "filename": "vp9/encoder/vp9_ratectrl.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 732,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2013-12-02T22:36:26Z",
+      "side": 1,
+      "message": "double space after \",\" ?",
+      "revId": "85a32b951dba6adb06dc75f53a3e365c30753b61",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
