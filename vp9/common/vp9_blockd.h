@@ -386,19 +386,6 @@ static INLINE void foreach_transformed_block_uv(
     foreach_transformed_block_in_plane(xd, bsize, plane, visit, arg);
 }
 
-static int raster_block_offset(BLOCK_SIZE plane_bsize,
-                               int raster_block, int stride) {
-  const int bw = b_width_log2(plane_bsize);
-  const int y = 4 * (raster_block >> bw);
-  const int x = 4 * (raster_block & ((1 << bw) - 1));
-  return y * stride + x;
-}
-static int16_t* raster_block_offset_int16(BLOCK_SIZE plane_bsize,
-                                          int raster_block, int16_t *base) {
-  const int stride = 4 << b_width_log2(plane_bsize);
-  return base + raster_block_offset(plane_bsize, raster_block, stride);
-}
-
 static void txfrm_block_to_raster_xy(BLOCK_SIZE plane_bsize,
                                      TX_SIZE tx_size, int block,
                                      int *x, int *y) {
