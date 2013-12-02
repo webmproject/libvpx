@@ -899,6 +899,9 @@ static void super_block_yrd(VP9_COMP *cpi,
   MB_MODE_INFO *const mbmi = &xd->mi_8x8[0]->mbmi;
   struct rdcost_block_args *rdcost_stack = &cpi->rdcost_stack;
   const int b_inter_mode = is_inter_block(mbmi);
+  const TX_SIZE max_tx_size = max_txsize_lookup[bs];
+  TX_SIZE tx_size;
+
 
   assert(bs == mbmi->sb_type);
   if (b_inter_mode)
@@ -917,34 +920,16 @@ static void super_block_yrd(VP9_COMP *cpi,
 
   if (cpi->sf.tx_size_search_method == USE_LARGESTINTRA_MODELINTER &&
       b_inter_mode) {
-    if (bs >= BLOCK_32X32)
-      model_rd_for_sb_y_tx(cpi, bs, TX_32X32, x, xd,
-                           &r[TX_32X32][0], &d[TX_32X32], &s[TX_32X32]);
-    if (bs >= BLOCK_16X16)
-      model_rd_for_sb_y_tx(cpi, bs, TX_16X16, x, xd,
-                           &r[TX_16X16][0], &d[TX_16X16], &s[TX_16X16]);
-
-    model_rd_for_sb_y_tx(cpi, bs, TX_8X8, x, xd,
-                         &r[TX_8X8][0], &d[TX_8X8], &s[TX_8X8]);
-
-    model_rd_for_sb_y_tx(cpi, bs, TX_4X4, x, xd,
-                         &r[TX_4X4][0], &d[TX_4X4], &s[TX_4X4]);
-
+    for (tx_size = TX_4X4; tx_size <= max_tx_size; ++tx_size)
+      model_rd_for_sb_y_tx(cpi, bs, tx_size, x, xd,
+                           &r[tx_size][0], &d[tx_size], &s[tx_size]);
     choose_txfm_size_from_modelrd(cpi, x, r, rate, d, distortion, s,
                                   skip, sse, ref_best_rd, bs);
   } else {
-    if (bs >= BLOCK_32X32)
-      txfm_rd_in_plane(x, rdcost_stack, &r[TX_32X32][0], &d[TX_32X32],
-                       &s[TX_32X32], &sse[TX_32X32],
-                       ref_best_rd, 0, bs, TX_32X32);
-    if (bs >= BLOCK_16X16)
-      txfm_rd_in_plane(x, rdcost_stack, &r[TX_16X16][0], &d[TX_16X16],
-                       &s[TX_16X16], &sse[TX_16X16],
-                       ref_best_rd, 0, bs, TX_16X16);
-    txfm_rd_in_plane(x, rdcost_stack, &r[TX_8X8][0], &d[TX_8X8], &s[TX_8X8],
-                     &sse[TX_8X8], ref_best_rd, 0, bs, TX_8X8);
-    txfm_rd_in_plane(x, rdcost_stack, &r[TX_4X4][0], &d[TX_4X4], &s[TX_4X4],
-                     &sse[TX_4X4], ref_best_rd, 0, bs, TX_4X4);
+    for (tx_size = TX_4X4; tx_size <= max_tx_size; ++tx_size)
+      txfm_rd_in_plane(x, rdcost_stack, &r[tx_size][0], &d[tx_size],
+                       &s[tx_size], &sse[tx_size],
+                       ref_best_rd, 0, bs, tx_size);
     choose_txfm_size_from_rd(cpi, x, r, rate, d, distortion, s,
                              skip, txfm_cache, bs);
   }
