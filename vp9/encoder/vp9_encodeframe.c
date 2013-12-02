@@ -1567,10 +1567,14 @@ static void rd_pick_partition(VP9_COMP *cpi, const TileInfo *const tile,
   // Override skipping rectangular partition operations for edge blocks
   const int force_horz_split = (mi_row + ms >= cm->mi_rows);
   const int force_vert_split = (mi_col + ms >= cm->mi_cols);
+  const int xss = x->e_mbd.plane[1].subsampling_x;
+  const int yss = x->e_mbd.plane[1].subsampling_y;
 
   int partition_none_allowed = !force_horz_split && !force_vert_split;
-  int partition_horz_allowed = !force_vert_split && bsize >= BLOCK_8X8;
-  int partition_vert_allowed = !force_horz_split && bsize >= BLOCK_8X8;
+  int partition_horz_allowed = !force_vert_split && yss <= xss &&
+                               bsize >= BLOCK_8X8;
+  int partition_vert_allowed = !force_horz_split && xss <= yss &&
+                               bsize >= BLOCK_8X8;
 
   int partition_split_done = 0;
   (void) *tp_orig;
