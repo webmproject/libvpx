@@ -353,19 +353,10 @@ static void filter_selectively_vert_row2(PLANE_TYPE plane_type,
 
     // TODO(yunqingwang): count in loopfilter functions should be removed.
     if (mask & 1) {
-      if ((mask_16x16_0 | mask_16x16_1) & 1) {
-        // TODO(yunqingwang): if (mask_16x16_0 & 1), then (mask_16x16_0 & 1)
-        // is always 1. Same is true for horizontal lf.
-        if ((mask_16x16_0 & mask_16x16_1) & 1) {
-          vp9_mb_lpf_vertical_edge_w_16(s, pitch, lfi0->mblim, lfi0->lim,
-                                     lfi0->hev_thr);
-        } else if (mask_16x16_0 & 1) {
-          vp9_mb_lpf_vertical_edge_w(s, pitch, lfi0->mblim, lfi0->lim,
-                                     lfi0->hev_thr);
-        } else {
-          vp9_mb_lpf_vertical_edge_w(s + 8 *pitch, pitch, lfi1->mblim,
-                                     lfi1->lim, lfi1->hev_thr);
-        }
+      if (mask_16x16_0 & 1) {
+        // if (mask_16x16_0 & 1) is 1, then (mask_16x16_1 & 1) is 1.
+        vp9_mb_lpf_vertical_edge_w_16(s, pitch, lfi0->mblim, lfi0->lim,
+                                      lfi0->hev_thr);
       }
 
       if ((mask_8x8_0 | mask_8x8_1) & 1) {
@@ -441,14 +432,10 @@ static void filter_selectively_horiz(uint8_t *s, int pitch,
     count = 1;
     if (mask & 1) {
       if (mask_16x16 & 1) {
-        if ((mask_16x16 & 3) == 3) {
-          vp9_mb_lpf_horizontal_edge_w(s, pitch, lfi->mblim, lfi->lim,
-                                       lfi->hev_thr, 2);
-          count = 2;
-        } else {
-          vp9_mb_lpf_horizontal_edge_w(s, pitch, lfi->mblim, lfi->lim,
-                                       lfi->hev_thr, 1);
-        }
+        // If (mask_16x16 & 1) is 1, then (mask_16x16 & 3) is 3.
+        vp9_mb_lpf_horizontal_edge_w(s, pitch, lfi->mblim, lfi->lim,
+                                     lfi->hev_thr, 2);
+        count = 2;
       } else if (mask_8x8 & 1) {
         if ((mask_8x8 & 3) == 3) {
           // Next block's thresholds
