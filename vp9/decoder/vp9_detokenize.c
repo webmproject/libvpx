@@ -93,7 +93,7 @@ static const int token_to_counttoken[MAX_ENTROPY_TOKENS] = {
 
 static int decode_coefs(VP9_COMMON *cm, const MACROBLOCKD *xd,
                         vp9_reader *r, int block_idx,
-                        PLANE_TYPE type, int seg_eob, int16_t *dqcoeff_ptr,
+                        PLANE_TYPE type, int max_eob, int16_t *dqcoeff_ptr,
                         TX_SIZE tx_size, const int16_t *dq, int pt,
                         uint8_t *token_cache) {
   const FRAME_CONTEXT *const fc = &cm->fc;
@@ -116,28 +116,27 @@ static int decode_coefs(VP9_COMMON *cm, const MACROBLOCKD *xd,
   int v;
   int16_t dqv = dq[0];
 
-
-
-  while (c < seg_eob) {
+  while (c < max_eob) {
     int val;
     band = *band_translate++;
     prob = coef_probs[band][pt];
     if (!cm->frame_parallel_decoding_mode)
       ++eob_branch_count[band][pt];
-    if (!vp9_read(r, prob[EOB_CONTEXT_NODE]))
+    if (!vp9_read(r, prob[EOB_CONTEXT_NODE])) {
+      if (!cm->frame_parallel_decoding_mode)
+        ++coef_counts[band][pt][DCT_EOB_MODEL_TOKEN];
       break;
+    }
 
-  DECODE_ZERO:
-    if (!vp9_read(r, prob[ZERO_CONTEXT_NODE])) {
+    while (!vp9_read(r, prob[ZERO_CONTEXT_NODE])) {
       INCREMENT_COUNT(ZERO_TOKEN);
       dqv = dq[1];
       ++c;
-      if (c >= seg_eob)
-        break;
+      if (c >= max_eob)
+        return c;  // zero tokens at the end (no eob token)
       pt = get_coef_context(nb, token_cache, c);
       band = *band_translate++;
       prob = coef_probs[band][pt];
-      goto DECODE_ZERO;
     }
 
     // ONE_CONTEXT_NODE_0_
@@ -145,7 +144,7 @@ static int decode_coefs(VP9_COMMON *cm, const MACROBLOCKD *xd,
       WRITE_COEF_CONTINUE(1, ONE_TOKEN);
     }
 
-    prob = vp9_pareto8_full[coef_probs[band][pt][PIVOT_NODE]-1];
+    prob = vp9_pareto8_full[prob[PIVOT_NODE] - 1];
 
     // LOW_VAL_CONTEXT_NODE_0_
     if (!vp9_read(r, prob[LOW_VAL_CONTEXT_NODE])) {
@@ -202,11 +201,6 @@ static int decode_coefs(VP9_COMMON *cm, const MACROBLOCKD *xd,
     val += CAT6_MIN_VAL;
 
     WRITE_COEF_CONTINUE(val, DCT_VAL_CATEGORY6);
-  }
-
-  if (c < seg_eob) {
-    if (!cm->frame_parallel_decoding_mode)
-      ++coef_counts[band][pt][DCT_EOB_MODEL_TOKEN];
   }
 
   return c;
