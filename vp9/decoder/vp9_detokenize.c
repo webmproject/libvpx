@@ -94,8 +94,7 @@ static const int token_to_counttoken[MAX_ENTROPY_TOKENS] = {
 static int decode_coefs(VP9_COMMON *cm, const MACROBLOCKD *xd,
                         vp9_reader *r, int block_idx,
                         PLANE_TYPE type, int max_eob, int16_t *dqcoeff_ptr,
-                        TX_SIZE tx_size, const int16_t *dq, int pt,
-                        uint8_t *token_cache) {
+                        TX_SIZE tx_size, const int16_t *dq, int pt) {
   const FRAME_CONTEXT *const fc = &cm->fc;
   FRAME_COUNTS *const counts = &cm->counts;
   const int ref = is_inter_block(&xd->mi_8x8[0]->mbmi);
@@ -107,6 +106,7 @@ static int decode_coefs(VP9_COMMON *cm, const MACROBLOCKD *xd,
       counts->coef[tx_size][type][ref];
   unsigned int (*eob_branch_count)[PREV_COEF_CONTEXTS] =
       counts->eob_branch[tx_size][type][ref];
+  uint8_t token_cache[32 * 32];
   const uint8_t *cat6;
   const uint8_t *band_translate = get_band_translate(tx_size);
   const int dq_shift = (tx_size == TX_32X32);
@@ -131,6 +131,7 @@ static int decode_coefs(VP9_COMMON *cm, const MACROBLOCKD *xd,
     while (!vp9_read(r, prob[ZERO_CONTEXT_NODE])) {
       INCREMENT_COUNT(ZERO_TOKEN);
       dqv = dq[1];
+      token_cache[scan[c]] = 0;
       ++c;
       if (c >= max_eob)
         return c;  // zero tokens at the end (no eob token)
@@ -208,8 +209,7 @@ static int decode_coefs(VP9_COMMON *cm, const MACROBLOCKD *xd,
 
 int vp9_decode_block_tokens(VP9_COMMON *cm, MACROBLOCKD *xd,
                             int plane, int block, BLOCK_SIZE plane_bsize,
-                            int x, int y, TX_SIZE tx_size, vp9_reader *r,
-                            uint8_t *token_cache) {
+                            int x, int y, TX_SIZE tx_size, vp9_reader *r) {
   struct macroblockd_plane *const pd = &xd->plane[plane];
   const int seg_eob = get_tx_eob(&cm->seg, xd->mi_8x8[0]->mbmi.segment_id,
                                  tx_size);
@@ -217,7 +217,7 @@ int vp9_decode_block_tokens(VP9_COMMON *cm, MACROBLOCKD *xd,
                                               pd->left_context + y);
   const int eob = decode_coefs(cm, xd, r, block, pd->plane_type, seg_eob,
                                BLOCK_OFFSET(pd->dqcoeff, block), tx_size,
-                               pd->dequant, pt, token_cache);
+                               pd->dequant, pt);
   set_contexts(xd, pd, plane_bsize, tx_size, eob > 0, x, y);
   pd->eobs[block] = eob;
   return eob;
