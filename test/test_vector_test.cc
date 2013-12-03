@@ -55,7 +55,8 @@ const char *kVP8TestVectors[] = {
   "vp80-05-sharpness-1430.ivf", "vp80-05-sharpness-1431.ivf",
   "vp80-05-sharpness-1433.ivf", "vp80-05-sharpness-1434.ivf",
   "vp80-05-sharpness-1438.ivf", "vp80-05-sharpness-1439.ivf",
-  "vp80-05-sharpness-1440.ivf", "vp80-05-sharpness-1443.ivf"
+  "vp80-05-sharpness-1440.ivf", "vp80-05-sharpness-1443.ivf",
+  "vp80-06-smallsize.ivf"
 };
 #endif
 #if CONFIG_VP9_DECODER
