@@ -159,6 +159,7 @@ void vp9_initialize_enc() {
 
   if (!init_done) {
     vp9_initialize_common();
+    vp9_coef_tree_initialize();
     vp9_tokenize_initialize();
     vp9_init_quant_tables();
     vp9_init_me_luts();
@@ -166,7 +167,6 @@ void vp9_initialize_enc() {
     // init_base_skip_probs();
     vp9_entropy_mv_init();
     vp9_entropy_mode_init();
-    vp9_coef_tree_initialize();
     init_done = 1;
   }
 }
