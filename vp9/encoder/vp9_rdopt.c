@@ -283,7 +283,7 @@ void vp9_initialize_rd_consts(VP9_COMP *cpi) {
 
   cpi->mb.select_txfm_size = (cpi->sf.tx_size_search_method == USE_LARGESTALL &&
                               cm->frame_type != KEY_FRAME) ?
-                             0 : 1;
+                              0 : 1;
 
   set_block_thresholds(cpi);
 
@@ -1299,11 +1299,7 @@ static int64_t rd_pick_intra_sbuv_mode(VP9_COMP *cpi, MACROBLOCK *x,
   int this_rate_tokenonly, this_rate, s;
   int64_t this_distortion, this_sse;
 
-  // int mode_mask = (bsize <= BLOCK_8X8)
-  //                ? ALL_INTRA_MODES : cpi->sf.intra_uv_mode_mask;
-
-  for (mode = DC_PRED; mode <= TM_PRED; mode ++) {
-    // if (!(mode_mask & (1 << mode)))
+  for (mode = DC_PRED; mode <= TM_PRED; ++mode) {
     if (!(cpi->sf.intra_uv_mode_mask[max_uv_txsize_lookup[bsize]]
           & (1 << mode)))
       continue;
@@ -1331,7 +1327,7 @@ static int64_t rd_pick_intra_sbuv_mode(VP9_COMP *cpi, MACROBLOCK *x,
         struct macroblockd_plane *const pd = x->e_mbd.plane;
         for (i = 1; i < MAX_MB_PLANE; ++i) {
           p[i].coeff    = ctx->coeff_pbuf[i][2];
-          p[i].qcoeff  = ctx->qcoeff_pbuf[i][2];
+          p[i].qcoeff   = ctx->qcoeff_pbuf[i][2];
           pd[i].dqcoeff = ctx->dqcoeff_pbuf[i][2];
           pd[i].eobs    = ctx->eobs_pbuf[i][2];
 
@@ -1350,7 +1346,6 @@ static int64_t rd_pick_intra_sbuv_mode(VP9_COMP *cpi, MACROBLOCK *x,
   }
 
   x->e_mbd.mi_8x8[0]->mbmi.uv_mode = mode_selected;
-
   return best_rd;
 }
 
@@ -3675,7 +3670,9 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
   if (cpi->sf.use_uv_intra_rd_estimate) {
     // Do Intra UV best rd mode selection if best mode choice above was intra.
     if (vp9_mode_order[best_mode_index].ref_frame == INTRA_FRAME) {
-      TX_SIZE uv_tx_size = get_uv_tx_size(mbmi);
+      TX_SIZE uv_tx_size;
+      *mbmi = best_mbmode;
+      uv_tx_size = get_uv_tx_size(mbmi);
       rd_pick_intra_sbuv_mode(cpi, x, ctx, &rate_uv_intra[uv_tx_size],
                               &rate_uv_tokenonly[uv_tx_size],
                               &dist_uv[uv_tx_size],
@@ -4423,7 +4420,9 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
   if (cpi->sf.use_uv_intra_rd_estimate) {
     // Do Intra UV best rd mode selection if best mode choice above was intra.
     if (vp9_ref_order[best_mode_index].ref_frame == INTRA_FRAME) {
-      TX_SIZE uv_tx_size = get_uv_tx_size(mbmi);
+      TX_SIZE uv_tx_size;
+      *mbmi = best_mbmode;
+      uv_tx_size = get_uv_tx_size(mbmi);
       rd_pick_intra_sbuv_mode(cpi, x, ctx, &rate_uv_intra[uv_tx_size],
                               &rate_uv_tokenonly[uv_tx_size],
                               &dist_uv[uv_tx_size],
