@@ -137,45 +137,18 @@ void vp9_quantize_b_32x32_c(const int16_t *coeff_ptr, intptr_t n_coeffs,
   *eob_ptr = eob + 1;
 }
 
-struct plane_block_idx {
-  int plane;
-  int block;
-};
-
-// TODO(jkoleszar): returning a struct so it can be used in a const context,
-// expect to refactor this further later.
-static INLINE struct plane_block_idx plane_block_idx(int y_blocks,
-                                                     int b_idx) {
-  const int v_offset = y_blocks * 5 / 4;
-  struct plane_block_idx res;
-
-  if (b_idx < y_blocks) {
-    res.plane = 0;
-    res.block = b_idx;
-  } else if (b_idx < v_offset) {
-    res.plane = 1;
-    res.block = b_idx - y_blocks;
-  } else {
-    assert(b_idx < y_blocks * 3 / 2);
-    res.plane = 2;
-    res.block = b_idx - v_offset;
-  }
-  return res;
-}
-
-void vp9_regular_quantize_b_4x4(MACROBLOCK *x, int y_blocks, int b_idx,
+void vp9_regular_quantize_b_4x4(MACROBLOCK *x, int plane, int block,
                                 const int16_t *scan, const int16_t *iscan) {
   MACROBLOCKD *const xd = &x->e_mbd;
-  const struct plane_block_idx pb_idx = plane_block_idx(y_blocks, b_idx);
-  struct macroblock_plane* p = &x->plane[pb_idx.plane];
-  struct macroblockd_plane* pd = &xd->plane[pb_idx.plane];
+  struct macroblock_plane* p = &x->plane[plane];
+  struct macroblockd_plane* pd = &xd->plane[plane];
 
-  vp9_quantize_b(BLOCK_OFFSET(p->coeff, pb_idx.block),
+  vp9_quantize_b(BLOCK_OFFSET(p->coeff, block),
            16, x->skip_block,
            p->zbin, p->round, p->quant, p->quant_shift,
-           BLOCK_OFFSET(p->qcoeff, pb_idx.block),
-           BLOCK_OFFSET(pd->dqcoeff, pb_idx.block),
-           pd->dequant, p->zbin_extra, &pd->eobs[pb_idx.block], scan, iscan);
+           BLOCK_OFFSET(p->qcoeff, block),
+           BLOCK_OFFSET(pd->dqcoeff, block),
+           pd->dequant, p->zbin_extra, &pd->eobs[block], scan, iscan);
 }
 
 static void invert_quant(int16_t *quant, int16_t *shift, int d) {

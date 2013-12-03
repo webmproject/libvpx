@@ -13,7 +13,7 @@
 
 #include "vp9/encoder/vp9_block.h"
 
-void vp9_regular_quantize_b_4x4(MACROBLOCK *x, int y_blocks, int b_idx,
+void vp9_regular_quantize_b_4x4(MACROBLOCK *x, int plane, int block,
                                 const int16_t *scan, const int16_t *iscan);
 
 struct VP9_COMP;
