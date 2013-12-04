@@ -3317,13 +3317,12 @@ static void Pass2Encode(VP9_COMP *cpi, unsigned long *size,
 }
 
 static void check_initial_width(VP9_COMP *cpi, YV12_BUFFER_CONFIG *sd) {
-  VP9_COMMON            *cm = &cpi->common;
+  VP9_COMMON *const cm = &cpi->common;
   if (!cpi->initial_width) {
-    // TODO(jkoleszar): Support 1/4 subsampling?
-    cm->subsampling_x = (sd != NULL) && sd->uv_width < sd->y_width;
-    cm->subsampling_y = (sd != NULL) && sd->uv_height < sd->y_height;
+    // TODO(agrange) Subsampling defaults to assuming sampled chroma.
+    cm->subsampling_x = sd != NULL ? (sd->uv_width < sd->y_width) : 1;
+    cm->subsampling_y = sd != NULL ? (sd->uv_height < sd->y_height) : 1;
     alloc_raw_frame_buffers(cpi);
-
     cpi->initial_width = cm->width;
     cpi->initial_height = cm->height;
   }
