@@ -22,7 +22,7 @@ VP8_DX_SRCS-yes += vp8_dx_iface.c
 
 VP8_DX_SRCS-yes += decoder/dboolhuff.c
 VP8_DX_SRCS-yes += decoder/decodemv.c
-VP8_DX_SRCS-yes += decoder/decodframe.c
+VP8_DX_SRCS-yes += decoder/decodeframe.c
 VP8_DX_SRCS-yes += decoder/detokenize.c
 VP8_DX_SRCS-$(CONFIG_ERROR_CONCEALMENT) += decoder/ec_types.h
 VP8_DX_SRCS-$(CONFIG_ERROR_CONCEALMENT) += decoder/error_concealment.h
