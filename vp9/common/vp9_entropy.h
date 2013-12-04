@@ -21,30 +21,27 @@
 
 #define DIFF_UPDATE_PROB 252
 
-/* Coefficient token alphabet */
+// Coefficient token alphabet
+#define ZERO_TOKEN      0   // 0     Extra Bits 0+0
+#define ONE_TOKEN       1   // 1     Extra Bits 0+1
+#define TWO_TOKEN       2   // 2     Extra Bits 0+1
+#define THREE_TOKEN     3   // 3     Extra Bits 0+1
+#define FOUR_TOKEN      4   // 4     Extra Bits 0+1
+#define CATEGORY1_TOKEN 5   // 5-6   Extra Bits 1+1
+#define CATEGORY2_TOKEN 6   // 7-10  Extra Bits 2+1
+#define CATEGORY3_TOKEN 7   // 11-18 Extra Bits 3+1
+#define CATEGORY4_TOKEN 8   // 19-34 Extra Bits 4+1
+#define CATEGORY5_TOKEN 9   // 35-66 Extra Bits 5+1
+#define CATEGORY6_TOKEN 10  // 67+   Extra Bits 14+1
+#define EOB_TOKEN       11  // EOB   Extra Bits 0+0
 
-#define ZERO_TOKEN              0       /* 0         Extra Bits 0+0 */
-#define ONE_TOKEN               1       /* 1         Extra Bits 0+1 */
-#define TWO_TOKEN               2       /* 2         Extra Bits 0+1 */
-#define THREE_TOKEN             3       /* 3         Extra Bits 0+1 */
-#define FOUR_TOKEN              4       /* 4         Extra Bits 0+1 */
-#define DCT_VAL_CATEGORY1       5       /* 5-6       Extra Bits 1+1 */
-#define DCT_VAL_CATEGORY2       6       /* 7-10      Extra Bits 2+1 */
-#define DCT_VAL_CATEGORY3       7       /* 11-18     Extra Bits 3+1 */
-#define DCT_VAL_CATEGORY4       8       /* 19-34     Extra Bits 4+1 */
-#define DCT_VAL_CATEGORY5       9       /* 35-66     Extra Bits 5+1 */
-#define DCT_VAL_CATEGORY6       10      /* 67+       Extra Bits 14+1 */
-#define DCT_EOB_TOKEN           11      /* EOB       Extra Bits 0+0 */
-#define MAX_ENTROPY_TOKENS      12
-#define ENTROPY_NODES           11
-#define EOSB_TOKEN              127     /* Not signalled, encoder only */
+#define ENTROPY_TOKENS 12
 
-#define INTER_MODE_CONTEXTS     7
+#define ENTROPY_NODES 11
 
-extern DECLARE_ALIGNED(16, const uint8_t,
-                       vp9_pt_energy_class[MAX_ENTROPY_TOKENS]);
+extern DECLARE_ALIGNED(16, const uint8_t, vp9_pt_energy_class[ENTROPY_TOKENS]);
 
-#define DCT_EOB_MODEL_TOKEN     3      /* EOB       Extra Bits 0+0 */
+#define EOB_MODEL_TOKEN 3
 extern const vp9_tree_index vp9_coefmodel_tree[];
 
 typedef struct {
@@ -55,7 +52,7 @@ typedef struct {
 } vp9_extra_bit;
 
 // indexed by token value
-extern const vp9_extra_bit vp9_extra_bits[MAX_ENTROPY_TOKENS];
+extern const vp9_extra_bit vp9_extra_bits[ENTROPY_TOKENS];
 
 #define MAX_PROB                255
 #define DCT_MAX_VALUE           16384
@@ -90,7 +87,7 @@ extern const vp9_extra_bit vp9_extra_bits[MAX_ENTROPY_TOKENS];
 // #define ENTROPY_STATS
 
 typedef unsigned int vp9_coeff_count[REF_TYPES][COEF_BANDS][PREV_COEF_CONTEXTS]
-                                    [MAX_ENTROPY_TOKENS];
+                                    [ENTROPY_TOKENS];
 typedef unsigned int vp9_coeff_stats[REF_TYPES][COEF_BANDS][PREV_COEF_CONTEXTS]
                                     [ENTROPY_NODES][2];
 

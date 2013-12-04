@@ -2609,9 +2609,9 @@ static void full_to_model_count(unsigned int *model_count,
   model_count[ZERO_TOKEN] = full_count[ZERO_TOKEN];
   model_count[ONE_TOKEN] = full_count[ONE_TOKEN];
   model_count[TWO_TOKEN] = full_count[TWO_TOKEN];
-  for (n = THREE_TOKEN; n < DCT_EOB_TOKEN; ++n)
+  for (n = THREE_TOKEN; n < EOB_TOKEN; ++n)
     model_count[TWO_TOKEN] += full_count[n];
-  model_count[DCT_EOB_MODEL_TOKEN] = full_count[DCT_EOB_TOKEN];
+  model_count[EOB_MODEL_TOKEN] = full_count[EOB_TOKEN];
 }
 
 static void full_to_model_counts(

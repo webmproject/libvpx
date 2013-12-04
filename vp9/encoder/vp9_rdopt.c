@@ -165,8 +165,8 @@ static void fill_token_costs(vp9_coeff_cost *c,
                             vp9_coef_tree);
             vp9_cost_tokens_skip((int *)c[t][i][j][k][1][l], probs,
                                  vp9_coef_tree);
-            assert(c[t][i][j][k][0][l][DCT_EOB_TOKEN] ==
-                   c[t][i][j][k][1][l][DCT_EOB_TOKEN]);
+            assert(c[t][i][j][k][0][l][EOB_TOKEN] ==
+                   c[t][i][j][k][1][l][EOB_TOKEN]);
           }
 }
 
@@ -528,7 +528,7 @@ static INLINE int cost_coeffs(MACROBLOCK *x,
   const int eob = pd->eobs[block];
   const int16_t *const qcoeff_ptr = BLOCK_OFFSET(p->qcoeff, block);
   const int ref = mbmi->ref_frame[0] != INTRA_FRAME;
-  unsigned int (*token_costs)[2][PREV_COEF_CONTEXTS][MAX_ENTROPY_TOKENS] =
+  unsigned int (*token_costs)[2][PREV_COEF_CONTEXTS][ENTROPY_TOKENS] =
                    x->token_costs[tx_size][type][ref];
   const ENTROPY_CONTEXT above_ec = !!*A, left_ec = !!*L;
   uint8_t *p_tok = x->token_cache;
@@ -541,7 +541,7 @@ static INLINE int cost_coeffs(MACROBLOCK *x,
 
   if (eob == 0) {
     // single eob token
-    cost = token_costs[0][0][pt][DCT_EOB_TOKEN];
+    cost = token_costs[0][0][pt][EOB_TOKEN];
     c = 0;
   } else {
     int band_left = *band_count++;
@@ -573,7 +573,7 @@ static INLINE int cost_coeffs(MACROBLOCK *x,
     // eob token
     if (band_left) {
       pt = get_coef_context(nb, p_tok, c);
-      cost += (*token_costs)[0][pt][DCT_EOB_TOKEN];
+      cost += (*token_costs)[0][pt][EOB_TOKEN];
     }
   }
 

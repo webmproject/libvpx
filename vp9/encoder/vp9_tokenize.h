@@ -16,6 +16,8 @@
 
 void vp9_tokenize_initialize();
 
+#define EOSB_TOKEN 127     // Not signalled, encoder only
+
 typedef struct {
   int16_t token;
   int16_t extra;

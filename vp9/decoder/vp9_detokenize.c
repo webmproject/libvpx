@@ -116,7 +116,7 @@ static int decode_coefs(VP9_COMMON *cm, const MACROBLOCKD *xd,
     if (!cm->frame_parallel_decoding_mode)
       ++eob_branch_count[band][pt];
     if (!vp9_read(r, prob[EOB_CONTEXT_NODE])) {
-      INCREMENT_COUNT(DCT_EOB_MODEL_TOKEN);
+      INCREMENT_COUNT(EOB_MODEL_TOKEN);
       break;
     }
 
@@ -156,12 +156,12 @@ static int decode_coefs(VP9_COMMON *cm, const MACROBLOCKD *xd,
       if (!vp9_read(r, prob[CAT_ONE_CONTEXT_NODE])) {
         val = CAT1_MIN_VAL;
         ADJUST_COEF(CAT1_PROB0, 0);
-        WRITE_COEF_CONTINUE(val, DCT_VAL_CATEGORY1);
+        WRITE_COEF_CONTINUE(val, CATEGORY1_TOKEN);
       }
       val = CAT2_MIN_VAL;
       ADJUST_COEF(CAT2_PROB1, 1);
       ADJUST_COEF(CAT2_PROB0, 0);
-      WRITE_COEF_CONTINUE(val, DCT_VAL_CATEGORY2);
+      WRITE_COEF_CONTINUE(val, CATEGORY2_TOKEN);
     }
 
     if (!vp9_read(r, prob[CAT_THREEFOUR_CONTEXT_NODE])) {
@@ -170,14 +170,14 @@ static int decode_coefs(VP9_COMMON *cm, const MACROBLOCKD *xd,
         ADJUST_COEF(CAT3_PROB2, 2);
         ADJUST_COEF(CAT3_PROB1, 1);
         ADJUST_COEF(CAT3_PROB0, 0);
-        WRITE_COEF_CONTINUE(val, DCT_VAL_CATEGORY3);
+        WRITE_COEF_CONTINUE(val, CATEGORY3_TOKEN);
       }
       val = CAT4_MIN_VAL;
       ADJUST_COEF(CAT4_PROB3, 3);
       ADJUST_COEF(CAT4_PROB2, 2);
       ADJUST_COEF(CAT4_PROB1, 1);
       ADJUST_COEF(CAT4_PROB0, 0);
-      WRITE_COEF_CONTINUE(val, DCT_VAL_CATEGORY4);
+      WRITE_COEF_CONTINUE(val, CATEGORY4_TOKEN);
     }
 
     if (!vp9_read(r, prob[CAT_FIVE_CONTEXT_NODE])) {
@@ -187,7 +187,7 @@ static int decode_coefs(VP9_COMMON *cm, const MACROBLOCKD *xd,
       ADJUST_COEF(CAT5_PROB2, 2);
       ADJUST_COEF(CAT5_PROB1, 1);
       ADJUST_COEF(CAT5_PROB0, 0);
-      WRITE_COEF_CONTINUE(val, DCT_VAL_CATEGORY5);
+      WRITE_COEF_CONTINUE(val, CATEGORY5_TOKEN);
     }
     val = 0;
     cat6 = cat6_prob;
@@ -195,7 +195,7 @@ static int decode_coefs(VP9_COMMON *cm, const MACROBLOCKD *xd,
       val = (val << 1) | vp9_read(r, *cat6++);
     val += CAT6_MIN_VAL;
 
-    WRITE_COEF_CONTINUE(val, DCT_VAL_CATEGORY6);
+    WRITE_COEF_CONTINUE(val, CATEGORY6_TOKEN);
   }
 
   return c;

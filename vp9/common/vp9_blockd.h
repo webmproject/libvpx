@@ -26,8 +26,9 @@
 #include "vp9/common/vp9_seg_common.h"
 #include "vp9/common/vp9_treecoder.h"
 
-#define BLOCK_SIZE_GROUPS   4
+#define BLOCK_SIZE_GROUPS 4
 #define MBSKIP_CONTEXTS 3
+#define INTER_MODE_CONTEXTS 7
 
 /* Segment Feature Masks */
 #define MAX_MV_REF_CANDIDATES 2
