@@ -168,10 +168,11 @@ static void set_entropy_context_b(int plane, int block, BLOCK_SIZE plane_bsize,
                                   TX_SIZE tx_size, void *arg) {
   struct tokenize_b_args* const args = arg;
   MACROBLOCKD *const xd = args->xd;
+  struct macroblock_plane *p = &args->cpi->mb.plane[plane];
   struct macroblockd_plane *pd = &xd->plane[plane];
   int aoff, loff;
   txfrm_block_to_raster_xy(plane_bsize, tx_size, block, &aoff, &loff);
-  set_contexts(xd, pd, plane_bsize, tx_size, pd->eobs[block] > 0, aoff, loff);
+  set_contexts(xd, pd, plane_bsize, tx_size, p->eobs[block] > 0, aoff, loff);
 }
 
 static void tokenize_b(int plane, int block, BLOCK_SIZE plane_bsize,
@@ -181,16 +182,15 @@ static void tokenize_b(int plane, int block, BLOCK_SIZE plane_bsize,
   MACROBLOCKD *xd = args->xd;
   TOKENEXTRA **tp = args->tp;
   uint8_t *token_cache = args->token_cache;
+  struct macroblock_plane *p = &cpi->mb.plane[plane];
   struct macroblockd_plane *pd = &xd->plane[plane];
   MB_MODE_INFO *mbmi = &xd->mi_8x8[0]->mbmi;
   int pt; /* near block/prev token context index */
   int c = 0, rc = 0;
   TOKENEXTRA *t = *tp;        /* store tokens starting here */
-  const int eob = pd->eobs[block];
+  const int eob = p->eobs[block];
   const PLANE_TYPE type = pd->plane_type;
-  struct macroblock_plane *p = &cpi->mb.plane[plane];
   const int16_t *qcoeff_ptr = BLOCK_OFFSET(p->qcoeff, block);
-
   const int segment_id = mbmi->segment_id;
   const int16_t *scan, *nb;
   const scan_order *so;
@@ -249,7 +249,7 @@ static void tokenize_b(int plane, int block, BLOCK_SIZE plane_bsize,
 }
 
 struct is_skippable_args {
-  MACROBLOCKD *xd;
+  MACROBLOCK *x;
   int *skippable;
 };
 
@@ -257,21 +257,21 @@ static void is_skippable(int plane, int block,
                          BLOCK_SIZE plane_bsize, TX_SIZE tx_size,
                          void *argv) {
   struct is_skippable_args *args = argv;
-  args->skippable[0] &= (!args->xd->plane[plane].eobs[block]);
+  args->skippable[0] &= (!args->x->plane[plane].eobs[block]);
 }
 
-int vp9_sb_is_skippable(MACROBLOCKD *xd, BLOCK_SIZE bsize) {
+static int sb_is_skippable(MACROBLOCK *x, BLOCK_SIZE bsize) {
   int result = 1;
-  struct is_skippable_args args = {xd, &result};
-  foreach_transformed_block(xd, bsize, is_skippable, &args);
+  struct is_skippable_args args = {x, &result};
+  foreach_transformed_block(&x->e_mbd, bsize, is_skippable, &args);
   return result;
 }
 
-int vp9_is_skippable_in_plane(MACROBLOCKD *xd, BLOCK_SIZE bsize,
-                              int plane) {
+int vp9_is_skippable_in_plane(MACROBLOCK *x, BLOCK_SIZE bsize, int plane) {
   int result = 1;
-  struct is_skippable_args args = {xd, &result};
-  foreach_transformed_block_in_plane(xd, bsize, plane, is_skippable, &args);
+  struct is_skippable_args args = {x, &result};
+  foreach_transformed_block_in_plane(&x->e_mbd, bsize, plane, is_skippable,
+                                     &args);
   return result;
 }
 
@@ -286,7 +286,7 @@ void vp9_tokenize_sb(VP9_COMP *cpi, TOKENEXTRA **t, int dry_run,
                                               SEG_LVL_SKIP);
   struct tokenize_b_args arg = {cpi, xd, t, mbmi->tx_size, cpi->mb.token_cache};
 
-  mbmi->skip_coeff = vp9_sb_is_skippable(xd, bsize);
+  mbmi->skip_coeff = sb_is_skippable(&cpi->mb, bsize);
   if (mbmi->skip_coeff) {
     if (!dry_run)
       cm->counts.mbskip[mb_skip_context][1] += skip_inc;

@@ -441,14 +441,14 @@ static void update_state(VP9_COMP *cpi, PICK_MODE_CONTEXT *ctx,
     p[i].coeff = ctx->coeff_pbuf[i][1];
     p[i].qcoeff = ctx->qcoeff_pbuf[i][1];
     pd[i].dqcoeff = ctx->dqcoeff_pbuf[i][1];
-    pd[i].eobs = ctx->eobs_pbuf[i][1];
+    p[i].eobs = ctx->eobs_pbuf[i][1];
   }
 
   for (i = max_plane; i < MAX_MB_PLANE; ++i) {
     p[i].coeff = ctx->coeff_pbuf[i][2];
     p[i].qcoeff = ctx->qcoeff_pbuf[i][2];
     pd[i].dqcoeff = ctx->dqcoeff_pbuf[i][2];
-    pd[i].eobs = ctx->eobs_pbuf[i][2];
+    p[i].eobs = ctx->eobs_pbuf[i][2];
   }
 
   // Restore the coding context of the MB to that that was in place
@@ -677,7 +677,7 @@ static void pick_sb_modes(VP9_COMP *cpi, const TileInfo *const tile,
     p[i].coeff = ctx->coeff_pbuf[i][0];
     p[i].qcoeff = ctx->qcoeff_pbuf[i][0];
     pd[i].dqcoeff = ctx->dqcoeff_pbuf[i][0];
-    pd[i].eobs = ctx->eobs_pbuf[i][0];
+    p[i].eobs = ctx->eobs_pbuf[i][0];
   }
   ctx->is_coded = 0;
   x->skip_recode = 0;

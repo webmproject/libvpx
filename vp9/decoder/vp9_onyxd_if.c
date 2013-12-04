@@ -112,10 +112,8 @@ static void init_macroblockd(VP9D_COMP *const pbi) {
   struct macroblockd_plane *const pd = xd->plane;
   int i;
 
-  for (i = 0; i < MAX_MB_PLANE; ++i) {
+  for (i = 0; i < MAX_MB_PLANE; ++i)
     pd[i].dqcoeff = pbi->dqcoeff[i];
-    pd[i].eobs    = pbi->eobs[i];
-  }
 }
 
 VP9D_PTR vp9_create_decompressor(VP9D_CONFIG *oxcf) {

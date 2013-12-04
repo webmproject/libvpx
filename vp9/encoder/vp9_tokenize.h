@@ -32,9 +32,8 @@ extern const vp9_tree_index vp9_coef_tree[];
 extern const vp9_tree_index vp9_coef_con_tree[];
 extern struct vp9_token vp9_coef_encodings[];
 
-int vp9_sb_is_skippable(MACROBLOCKD *xd, BLOCK_SIZE bsize);
-int vp9_is_skippable_in_plane(MACROBLOCKD *xd, BLOCK_SIZE bsize,
-                              int plane);
+int vp9_is_skippable_in_plane(MACROBLOCK *x, BLOCK_SIZE bsize, int plane);
+
 struct VP9_COMP;
 
 void vp9_tokenize_sb(struct VP9_COMP *cpi, TOKENEXTRA **t, int dry_run,

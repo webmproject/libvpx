@@ -199,7 +199,6 @@ struct buf_2d {
 
 struct macroblockd_plane {
   int16_t *dqcoeff;
-  uint16_t *eobs;
   PLANE_TYPE plane_type;
   int subsampling_x;
   int subsampling_y;
