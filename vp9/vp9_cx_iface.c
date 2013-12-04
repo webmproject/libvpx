@@ -198,6 +198,10 @@ static vpx_codec_err_t validate_config(vpx_codec_alg_priv_t      *ctx,
   RANGE_CHECK(vp8_cfg, arnr_type,       1, 3);
   RANGE_CHECK(vp8_cfg, cq_level, 0, 63);
 
+  // TODO(yaowu): remove this when ssim tuning is implemented for vp9
+  if (vp8_cfg->tuning == VP8_TUNE_SSIM)
+      ERROR("Option --tune=ssim is not currently supported in VP9.");
+
   if (cfg->g_pass == VPX_RC_LAST_PASS) {
     size_t           packet_sz = sizeof(FIRSTPASS_STATS);
     int              n_packets = (int)(cfg->rc_twopass_stats_in.sz / packet_sz);
