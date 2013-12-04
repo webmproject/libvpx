@@ -2170,21 +2170,6 @@ void vp9_second_pass(VP9_COMP *cpi) {
           (int)(cpi->twopass.bits_left / frames_left);
       cpi->twopass.est_max_qcorrection_factor = 1.0;
 
-      // Set a cq_level in constrained quality mode.
-      // Commenting this code out for now since it does not seem to be
-      // working well.
-      /*
-      if (cpi->oxcf.end_usage == USAGE_CONSTRAINED_QUALITY) {
-        int est_cq = estimate_cq(cpi, &cpi->twopass.total_left_stats,
-           section_target_bandwidth);
-
-        if (est_cq > cpi->cq_target_quality)
-          cpi->cq_target_quality = est_cq;
-        else
-          cpi->cq_target_quality = cpi->oxcf.cq_level;
-      }
-      */
-
       // guess at maxq needed in 2nd pass
       cpi->twopass.maxq_max_limit = cpi->rc.worst_quality;
       cpi->twopass.maxq_min_limit = cpi->rc.best_quality;

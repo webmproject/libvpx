@@ -31,23 +31,29 @@ void vp9_rc_update_rate_correction_factors(VP9_COMP *cpi, int damp_var);
 void vp9_rc_init_minq_luts(void);
 
 // return of 0 means drop frame
-// Changes rc.this_frame_target and rc.sb64_rate_target
-int vp9_rc_pick_frame_size_and_bounds(VP9_COMP *cpi,
+// Changes only rc.this_frame_target and rc.sb64_rate_target
+int vp9_rc_pick_frame_size_target(VP9_COMP *cpi);
+
+void vp9_rc_compute_frame_size_bounds(const VP9_COMP *cpi,
+                                      int this_frame_target,
                                       int *frame_under_shoot_limit,
                                       int *frame_over_shoot_limit);
+
 // Picks q and q bounds given the target for bits
-int vp9_rc_pick_q_and_adjust_q_bounds(VP9_COMP *cpi,
-                                      int * bottom_index,
-                                      int * top_index);
+int vp9_rc_pick_q_and_adjust_q_bounds(const VP9_COMP *cpi,
+                                      int *bottom_index,
+                                      int *top_index,
+                                      int *top_index_prop);
 
 // Estimates q to achieve a target bits per frame
-int vp9_rc_regulate_q(const VP9_COMP *cpi, int target_bits_per_frame);
+int vp9_rc_regulate_q(const VP9_COMP *cpi, int target_bits_per_frame,
+                      int active_best_quality, int active_worst_quality);
 
 // Post encode update of the rate control parameters based
 // on bytes used and q used for the frame
 void vp9_rc_postencode_update(VP9_COMP *cpi,
                               uint64_t bytes_used,
-                              int q_used);
+                              int worst_q);
 
 // estimates bits per mb for a given qindex and correction factor
 int vp9_rc_bits_per_mb(FRAME_TYPE frame_type, int qindex,

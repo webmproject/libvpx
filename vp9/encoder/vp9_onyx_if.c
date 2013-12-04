@@ -143,8 +143,9 @@ static INLINE void Scale2Ratio(int mode, int *hr, int *hs) {
   }
 }
 
-static void set_mvcost(VP9_COMP *cpi) {
+static void set_high_precision_mv(VP9_COMP *cpi, int allow_high_precision_mv) {
   MACROBLOCK *const mb = &cpi->mb;
+  cpi->common.allow_high_precision_mv = allow_high_precision_mv;
   if (cpi->common.allow_high_precision_mv) {
     mb->mvcost = mb->nmvcost_hp;
     mb->mvsadcost = mb->nmvsadcost_hp;
@@ -234,7 +235,7 @@ static void dealloc_compressor_data(VP9_COMP *cpi) {
 // Computes a q delta (in "q index" terms) to get from a starting q value
 // to a target value
 // target q value
-int vp9_compute_qdelta(VP9_COMP *cpi, double qstart, double qtarget) {
+int vp9_compute_qdelta(const VP9_COMP *cpi, double qstart, double qtarget) {
   int i;
   int start_index = cpi->rc.worst_quality;
   int target_index = cpi->rc.worst_quality;
@@ -1115,8 +1116,8 @@ static void init_config(VP9_PTR ptr, VP9_CONFIG *oxcf) {
   vp9_change_config(ptr, oxcf);
 
   // Initialize active best and worst q and average q values.
-  cpi->rc.active_worst_quality         = cpi->oxcf.worst_allowed_q;
-  cpi->rc.active_best_quality          = cpi->oxcf.best_allowed_q;
+  cpi->rc.active_worst_quality      = cpi->oxcf.worst_allowed_q;
+
   cpi->rc.avg_frame_qindex          = cpi->oxcf.worst_allowed_q;
 
   // Initialise the starting buffer levels
@@ -1205,8 +1206,7 @@ void vp9_change_config(VP9_PTR ptr, VP9_CONFIG *oxcf) {
   cm->reset_frame_context = 0;
 
   setup_features(cm);
-  cpi->common.allow_high_precision_mv = 0;  // Default mv precision
-  set_mvcost(cpi);
+  set_high_precision_mv(cpi, 0);
 
   {
     int i;
@@ -1253,12 +1253,8 @@ void vp9_change_config(VP9_PTR ptr, VP9_CONFIG *oxcf) {
 
   // active values should only be modified if out of new range
   cpi->rc.active_worst_quality = clamp(cpi->rc.active_worst_quality,
-                                    cpi->oxcf.best_allowed_q,
-                                    cpi->oxcf.worst_allowed_q);
-
-  cpi->rc.active_best_quality = clamp(cpi->rc.active_best_quality,
-                                   cpi->oxcf.best_allowed_q,
-                                   cpi->oxcf.worst_allowed_q);
+                                       cpi->rc.best_quality,
+                                       cpi->rc.worst_quality);
 
   cpi->cq_target_quality = cpi->oxcf.cq_level;
 
@@ -2369,16 +2365,6 @@ static int find_fp_qindex() {
   return i;
 }
 
-static void Pass1Encode(VP9_COMP *cpi, unsigned long *size, unsigned char *dest,
-                        unsigned int *frame_flags) {
-  (void) size;
-  (void) dest;
-  (void) frame_flags;
-
-  vp9_set_quantizer(cpi, find_fp_qindex());
-  vp9_first_pass(cpi);
-}
-
 #define WRITE_RECON_BUFFER 0
 #if WRITE_RECON_BUFFER
 void write_cx_frame_to_file(YV12_BUFFER_CONFIG *frame, int this_frame) {
@@ -2470,16 +2456,9 @@ static int recode_loop_test(VP9_COMP *cpi,
           cpi->rc.projected_frame_size <
           ((cpi->rc.this_frame_target * 7) >> 3)) {
         force_recode = 1;
-      } else if (q > cpi->oxcf.cq_level &&
-                 cpi->rc.projected_frame_size < cpi->rc.min_frame_bandwidth &&
-                 cpi->rc.active_best_quality > cpi->oxcf.cq_level) {
-        // Severe undershoot and between auto and user cq level
-        force_recode = 1;
-        cpi->rc.active_best_quality = cpi->oxcf.cq_level;
       }
     }
   }
-
   return force_recode;
 }
 
@@ -2639,7 +2618,7 @@ static void output_frame_level_debug_stats(VP9_COMP *cpi) {
 
   if (cpi->twopass.total_left_stats.coded_error != 0.0)
     fprintf(f, "%10d %10d %10d %10d %10d %10d %10d %10d %10d"
-        "%7.2f %7.2f %7.2f %7.2f %7.2f %7.2f %7.2f"
+        "%7.2f %7.2f %7.2f %7.2f %7.2f %7.2f"
         "%6d %6d %5d %5d %5d %8.2f %10d %10.3f"
         "%10.3f %8d %10d %10d %10d\n",
         cpi->common.current_video_frame, cpi->rc.this_frame_target,
@@ -2650,7 +2629,6 @@ static void output_frame_level_debug_stats(VP9_COMP *cpi) {
         (int)cpi->rc.total_actual_bits, cm->base_qindex,
         vp9_convert_qindex_to_q(cm->base_qindex),
         (double)vp9_dc_quant(cm->base_qindex, 0) / 4.0,
-        vp9_convert_qindex_to_q(cpi->rc.active_best_quality),
         vp9_convert_qindex_to_q(cpi->rc.active_worst_quality), cpi->rc.avg_q,
         vp9_convert_qindex_to_q(cpi->rc.ni_av_qi),
         vp9_convert_qindex_to_q(cpi->cq_target_quality),
@@ -2699,6 +2677,7 @@ static void encode_with_recode_loop(VP9_COMP *cpi,
   int overshoot_seen = 0;
   int undershoot_seen = 0;
   int q_low = bottom_index, q_high = top_index;
+
   do {
     vp9_clear_system_state();  // __asm emms;
 
@@ -2816,11 +2795,13 @@ static void encode_with_recode_loop(VP9_COMP *cpi,
             // Update rate_correction_factor unless
             vp9_rc_update_rate_correction_factors(cpi, 0);
 
-            *q = vp9_rc_regulate_q(cpi, cpi->rc.this_frame_target);
+            *q = vp9_rc_regulate_q(cpi, cpi->rc.this_frame_target,
+                                   bottom_index, top_index);
 
             while (*q < q_low && retries < 10) {
               vp9_rc_update_rate_correction_factors(cpi, 0);
-              *q = vp9_rc_regulate_q(cpi, cpi->rc.this_frame_target);
+              *q = vp9_rc_regulate_q(cpi, cpi->rc.this_frame_target,
+                                     bottom_index, top_index);
               retries++;
             }
           }
@@ -2831,18 +2812,12 @@ static void encode_with_recode_loop(VP9_COMP *cpi,
           q_high = *q > q_low ? *q - 1 : q_low;
 
           if (overshoot_seen || loop_count > 1) {
-            // Update rate_correction_factor unless
-            // cpi->rc.active_worst_quality has changed.
             vp9_rc_update_rate_correction_factors(cpi, 1);
-
             *q = (q_high + q_low) / 2;
           } else {
-            // Update rate_correction_factor unless
-            // cpi->rc.active_worst_quality has changed.
             vp9_rc_update_rate_correction_factors(cpi, 0);
-
-            *q = vp9_rc_regulate_q(cpi, cpi->rc.this_frame_target);
-
+            *q = vp9_rc_regulate_q(cpi, cpi->rc.this_frame_target,
+                                   bottom_index, top_index);
             // Special case reset for qlow for constrained quality.
             // This should only trigger where there is very substantial
             // undershoot on a frame and the auto cq level is above
@@ -2854,7 +2829,8 @@ static void encode_with_recode_loop(VP9_COMP *cpi,
 
             while (*q > q_high && retries < 10) {
               vp9_rc_update_rate_correction_factors(cpi, 0);
-              *q = vp9_rc_regulate_q(cpi, cpi->rc.this_frame_target);
+              *q = vp9_rc_regulate_q(cpi, cpi->rc.this_frame_target,
+                                     bottom_index, top_index);
               retries++;
             }
           }
@@ -2893,8 +2869,8 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
   int q;
   int frame_over_shoot_limit;
   int frame_under_shoot_limit;
-
   int top_index;
+  int top_index_prop;
   int bottom_index;
 
   SPEED_FEATURES *const sf = &cpi->sf;
@@ -3008,44 +2984,7 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
 
   vp9_clear_system_state();
 
-  // Decide how big to make the frame.
-  vp9_rc_pick_frame_size_and_bounds(cpi,
-                                    &frame_under_shoot_limit,
-                                    &frame_over_shoot_limit);
-
-  q = vp9_rc_pick_q_and_adjust_q_bounds(cpi,
-                                        &bottom_index,
-                                        &top_index);
-
-#if CONFIG_MULTIPLE_ARF
-  // Force the quantizer determined by the coding order pattern.
-  if (cpi->multi_arf_enabled && (cm->frame_type != KEY_FRAME) &&
-      cpi->oxcf.end_usage != USAGE_CONSTANT_QUALITY) {
-    double new_q;
-    double current_q = vp9_convert_qindex_to_q(cpi->rc.active_worst_quality);
-    int level = cpi->this_frame_weight;
-    assert(level >= 0);
-
-    // Set quantizer steps at 10% increments.
-    new_q = current_q * (1.0 - (0.2 * (cpi->max_arf_level - level)));
-    q = cpi->rc.active_worst_quality +
-        vp9_compute_qdelta(cpi, current_q, new_q);
-
-    bottom_index = q;
-    top_index    = q;
-
-    printf("frame:%d q:%d\n", cm->current_video_frame, q);
-  }
-#endif
-
   vp9_zero(cpi->rd_tx_select_threshes);
-
-  if (!frame_is_intra_only(cm)) {
-    cm->mcomp_filter_type = DEFAULT_INTERP_FILTER;
-    /* TODO: Decide this more intelligently */
-    cm->allow_high_precision_mv = q < HIGH_PRECISION_MV_QTHRESH;
-    set_mvcost(cpi);
-  }
 
 #if CONFIG_VP9_POSTPROC
   if (cpi->oxcf.noise_sensitivity > 0) {
@@ -3075,6 +3014,26 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
 #ifdef OUTPUT_YUV_SRC
   vp9_write_yuv_frame(cpi->Source);
 #endif
+
+  // Decide how big to make the frame.
+  vp9_rc_pick_frame_size_target(cpi);
+
+  // Decide frame size bounds
+  vp9_rc_compute_frame_size_bounds(cpi, cpi->rc.this_frame_target,
+                                   &frame_under_shoot_limit,
+                                   &frame_over_shoot_limit);
+
+  // Decide q and q bounds
+  q = vp9_rc_pick_q_and_adjust_q_bounds(cpi,
+                                        &bottom_index,
+                                        &top_index,
+                                        &top_index_prop);
+
+  if (!frame_is_intra_only(cm)) {
+    cm->mcomp_filter_type = DEFAULT_INTERP_FILTER;
+    /* TODO: Decide this more intelligently */
+    set_high_precision_mv(cpi, (q < HIGH_PRECISION_MV_QTHRESH));
+  }
 
   encode_with_recode_loop(cpi,
                           size,
@@ -3161,7 +3120,7 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
    * needed in motion search besides loopfilter */
   cm->last_frame_type = cm->frame_type;
 
-  vp9_rc_postencode_update(cpi, *size, q);
+  vp9_rc_postencode_update(cpi, *size, top_index_prop);
 
 #if 0
   output_frame_level_debug_stats(cpi);
@@ -3282,6 +3241,21 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
   cm->prev_mi_grid_visible = cm->prev_mi_grid_base + cm->mode_info_stride + 1;
 }
 
+static void Pass0Encode(VP9_COMP *cpi, unsigned long *size, unsigned char *dest,
+                        unsigned int *frame_flags) {
+  encode_frame_to_data_rate(cpi, size, dest, frame_flags);
+}
+
+static void Pass1Encode(VP9_COMP *cpi, unsigned long *size, unsigned char *dest,
+                        unsigned int *frame_flags) {
+  (void) size;
+  (void) dest;
+  (void) frame_flags;
+
+  vp9_set_quantizer(cpi, find_fp_qindex());
+  vp9_first_pass(cpi);
+}
+
 static void Pass2Encode(VP9_COMP *cpi, unsigned long *size,
                         unsigned char *dest, unsigned int *frame_flags) {
   cpi->enable_encode_breakout = 1;
@@ -3293,27 +3267,6 @@ static void Pass2Encode(VP9_COMP *cpi, unsigned long *size,
   // vp9_print_modes_and_motion_vectors(&cpi->common, "encode.stt");
 
   vp9_twopass_postencode_update(cpi, *size);
-
-  /*
-#ifdef DISABLE_RC_LONG_TERM_MEM
-  cpi->twopass.bits_left -=  cpi->rc.this_frame_target;
-#else
-  cpi->twopass.bits_left -= 8 * *size;
-#endif
-
-  if (!cpi->refresh_alt_ref_frame) {
-    double lower_bounds_min_rate = FRAME_OVERHEAD_BITS * cpi->oxcf.framerate;
-    double two_pass_min_rate = (double)(cpi->oxcf.target_bandwidth
-                                        * cpi->oxcf.two_pass_vbrmin_section
-                                        / 100);
-
-    if (two_pass_min_rate < lower_bounds_min_rate)
-      two_pass_min_rate = lower_bounds_min_rate;
-
-    cpi->twopass.bits_left += (int64_t)(two_pass_min_rate
-                              / cpi->oxcf.framerate);
-  }
-  */
 }
 
 static void check_initial_width(VP9_COMP *cpi, YV12_BUFFER_CONFIG *sd) {
@@ -3386,8 +3339,7 @@ int vp9_get_compressed_data(VP9_PTR ptr, unsigned int *frame_flags,
 
   cpi->source = NULL;
 
-  cpi->common.allow_high_precision_mv = ALTREF_HIGH_PRECISION_MV;
-  set_mvcost(cpi);
+  set_high_precision_mv(cpi, ALTREF_HIGH_PRECISION_MV);
 
   // Should we code an alternate reference frame.
   if (cpi->oxcf.play_alternate && cpi->source_alt_ref_pending) {
@@ -3627,7 +3579,8 @@ int vp9_get_compressed_data(VP9_PTR ptr, unsigned int *frame_flags,
   } else if (cpi->pass == 2) {
     Pass2Encode(cpi, size, dest, frame_flags);
   } else {
-    encode_frame_to_data_rate(cpi, size, dest, frame_flags);
+    // One pass encode
+    Pass0Encode(cpi, size, dest, frame_flags);
   }
 
   if (cm->refresh_frame_context)

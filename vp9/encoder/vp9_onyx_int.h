@@ -338,7 +338,7 @@ typedef struct {
   int worst_quality;
   int active_worst_quality;
   int best_quality;
-  int active_best_quality;
+  // int active_best_quality;
 } RATE_CONTROL;
 
 typedef struct VP9_COMP {
@@ -695,7 +695,7 @@ int vp9_calc_ss_err(YV12_BUFFER_CONFIG *source, YV12_BUFFER_CONFIG *dest);
 
 void vp9_alloc_compressor_data(VP9_COMP *cpi);
 
-int vp9_compute_qdelta(VP9_COMP *cpi, double qstart, double qtarget);
+int vp9_compute_qdelta(const VP9_COMP *cpi, double qstart, double qtarget);
 
 static int get_token_alloc(int mb_rows, int mb_cols) {
   return mb_rows * mb_cols * (48 * 16 + 4);
