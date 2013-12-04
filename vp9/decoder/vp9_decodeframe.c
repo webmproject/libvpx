@@ -687,12 +687,6 @@ static void apply_frame_size(VP9D_COMP *pbi, int width, int height) {
 
   if (cm->width != width || cm->height != height) {
     // Change in frame size.
-    if (cm->width == 0 || cm->height == 0) {
-      // Assign new frame buffer on first call.
-      cm->new_fb_idx = NUM_YV12_BUFFERS - 1;
-      cm->fb_idx_ref_cnt[cm->new_fb_idx] = 1;
-    }
-
     // TODO(agrange) Don't test width/height, check overall size.
     if (width > cm->width || height > cm->height) {
       // Rescale frame buffers only if they're not big enough already.
