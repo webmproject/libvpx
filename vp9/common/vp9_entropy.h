@@ -130,14 +130,14 @@ static const uint8_t *get_band_translate(TX_SIZE tx_size) {
 // 1, 3, 5, 7, ..., 253, 255
 // In between probabilities are interpolated linearly
 
-#define COEFPROB_MODELS             128
+#define COEFF_PROB_MODELS 256
 
 #define UNCONSTRAINED_NODES         3
 
 #define PIVOT_NODE                  2   // which node is pivot
 
 #define MODEL_NODES (ENTROPY_NODES - UNCONSTRAINED_NODES)
-extern const vp9_prob vp9_pareto8_full[256][MODEL_NODES];
+extern const vp9_prob vp9_pareto8_full[COEFF_PROB_MODELS][MODEL_NODES];
 
 typedef vp9_prob vp9_coeff_probs_model[REF_TYPES][COEF_BANDS]
                                       [PREV_COEF_CONTEXTS]
