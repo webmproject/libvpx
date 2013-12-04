@@ -545,7 +545,7 @@ void vp9_first_pass(VP9_COMP *cpi) {
     p[i].coeff = ctx->coeff_pbuf[i][1];
     p[i].qcoeff = ctx->qcoeff_pbuf[i][1];
     pd[i].dqcoeff = ctx->dqcoeff_pbuf[i][1];
-    pd[i].eobs = ctx->eobs_pbuf[i][1];
+    p[i].eobs = ctx->eobs_pbuf[i][1];
   }
   x->skip_recode = 0;
 

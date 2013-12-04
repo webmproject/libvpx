@@ -42,7 +42,6 @@ typedef struct TileWorkerData {
   vp9_reader bit_reader;
   DECLARE_ALIGNED(16, MACROBLOCKD, xd);
   DECLARE_ALIGNED(16, int16_t,  dqcoeff[MAX_MB_PLANE][64 * 64]);
-  DECLARE_ALIGNED(16, uint16_t, eobs[MAX_MB_PLANE][256]);
 } TileWorkerData;
 
 static int read_be32(const uint8_t *p) {
@@ -238,9 +237,9 @@ static void alloc_tile_storage(VP9D_COMP *pbi, int tile_rows, int tile_cols) {
 }
 
 static void inverse_transform_block(MACROBLOCKD* xd, int plane, int block,
-                                    TX_SIZE tx_size, uint8_t *dst, int stride) {
+                                    TX_SIZE tx_size, uint8_t *dst, int stride,
+                                    int eob) {
   struct macroblockd_plane *const pd = &xd->plane[plane];
-  const int eob = pd->eobs[block];
   if (eob > 0) {
     TX_TYPE tx_type;
     const int plane_type = pd->plane_type;
@@ -313,9 +312,11 @@ static void predict_and_reconstruct_intra_block(int plane, int block,
                           dst, pd->dst.stride, dst, pd->dst.stride);
 
   if (!mi->mbmi.skip_coeff) {
-    vp9_decode_block_tokens(cm, xd, plane, block, plane_bsize, x, y, tx_size,
-                            args->r);
-    inverse_transform_block(xd, plane, block, tx_size, dst, pd->dst.stride);
+    const int eob = vp9_decode_block_tokens(cm, xd, plane, block,
+                                            plane_bsize, x, y, tx_size,
+                                            args->r);
+    inverse_transform_block(xd, plane, block, tx_size, dst, pd->dst.stride,
+                            eob);
   }
 }
 
@@ -333,14 +334,14 @@ static void reconstruct_inter_block(int plane, int block,
   VP9_COMMON *const cm = args->cm;
   MACROBLOCKD *const xd = args->xd;
   struct macroblockd_plane *const pd = &xd->plane[plane];
-  int x, y;
+  int x, y, eob;
   txfrm_block_to_raster_xy(plane_bsize, tx_size, block, &x, &y);
-  *args->eobtotal += vp9_decode_block_tokens(cm, xd, plane, block,
-                                             plane_bsize, x, y, tx_size,
-                                             args->r);
+  eob = vp9_decode_block_tokens(cm, xd, plane, block, plane_bsize, x, y,
+                                tx_size, args->r);
   inverse_transform_block(xd, plane, block, tx_size,
                           &pd->dst.buf[4 * y * pd->dst.stride + 4 * x],
-                          pd->dst.stride);
+                          pd->dst.stride, eob);
+  *args->eobtotal += eob;
 }
 
 static void set_offsets(VP9_COMMON *const cm, MACROBLOCKD *const xd,
@@ -925,7 +926,6 @@ static void setup_tile_macroblockd(TileWorkerData *const tile_data) {
 
   for (i = 0; i < MAX_MB_PLANE; ++i) {
     pd[i].dqcoeff = tile_data->dqcoeff[i];
-    pd[i].eobs    = tile_data->eobs[i];
     vpx_memset(xd->plane[i].dqcoeff, 0, 64 * 64 * sizeof(int16_t));
   }
 }

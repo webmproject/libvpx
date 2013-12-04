@@ -23,7 +23,6 @@ typedef struct VP9Decompressor {
   DECLARE_ALIGNED(16, VP9_COMMON, common);
 
   DECLARE_ALIGNED(16, int16_t,  dqcoeff[MAX_MB_PLANE][64 * 64]);
-  DECLARE_ALIGNED(16, uint16_t, eobs[MAX_MB_PLANE][256]);
 
   VP9D_CONFIG oxcf;
 

@@ -213,7 +213,6 @@ int vp9_decode_block_tokens(VP9_COMMON *cm, MACROBLOCKD *xd,
                                BLOCK_OFFSET(pd->dqcoeff, block), tx_size,
                                pd->dequant, pt);
   set_contexts(xd, pd, plane_bsize, tx_size, eob > 0, x, y);
-  pd->eobs[block] = eob;
   return eob;
 }
 

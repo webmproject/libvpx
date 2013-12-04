@@ -148,7 +148,7 @@ void vp9_regular_quantize_b_4x4(MACROBLOCK *x, int plane, int block,
            p->zbin, p->round, p->quant, p->quant_shift,
            BLOCK_OFFSET(p->qcoeff, block),
            BLOCK_OFFSET(pd->dqcoeff, block),
-           pd->dequant, p->zbin_extra, &pd->eobs[block], scan, iscan);
+           pd->dequant, p->zbin_extra, &p->eobs[block], scan, iscan);
 }
 
 static void invert_quant(int16_t *quant, int16_t *shift, int d) {

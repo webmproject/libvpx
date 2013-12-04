@@ -525,7 +525,7 @@ static INLINE int cost_coeffs(MACROBLOCK *x,
   struct macroblockd_plane *pd = &xd->plane[plane];
   const PLANE_TYPE type = pd->plane_type;
   const int16_t *band_count = &band_counts[tx_size][1];
-  const int eob = pd->eobs[block];
+  const int eob = p->eobs[block];
   const int16_t *const qcoeff_ptr = BLOCK_OFFSET(p->qcoeff, block);
   const int ref = mbmi->ref_frame[0] != INTRA_FRAME;
   unsigned int (*token_costs)[2][PREV_COEF_CONTEXTS][MAX_ENTROPY_TOKENS] =
@@ -643,7 +643,7 @@ static void block_rd_txfm(int plane, int block, BLOCK_SIZE plane_bsize,
   // TODO(jingning): temporarily enabled only for luma component
   rd = MIN(rd1, rd2);
   if (plane == 0)
-    x->zcoeff_blk[tx_size][block] = !xd->plane[plane].eobs[block] ||
+    x->zcoeff_blk[tx_size][block] = !x->plane[plane].eobs[block] ||
                                     (rd1 > rd2 && !xd->lossless);
 
   args->this_rate += args->rate;
@@ -739,7 +739,7 @@ static void txfm_rd_in_plane(MACROBLOCK *x,
     *distortion = rd_stack->this_dist;
     *rate       = rd_stack->this_rate;
     *sse        = rd_stack->this_sse;
-    *skippable  = vp9_is_skippable_in_plane(xd, bsize, plane);
+    *skippable  = vp9_is_skippable_in_plane(x, bsize, plane);
   }
 }
 
@@ -1329,7 +1329,7 @@ static int64_t rd_pick_intra_sbuv_mode(VP9_COMP *cpi, MACROBLOCK *x,
           p[i].coeff    = ctx->coeff_pbuf[i][2];
           p[i].qcoeff   = ctx->qcoeff_pbuf[i][2];
           pd[i].dqcoeff = ctx->dqcoeff_pbuf[i][2];
-          pd[i].eobs    = ctx->eobs_pbuf[i][2];
+          p[i].eobs    = ctx->eobs_pbuf[i][2];
 
           ctx->coeff_pbuf[i][2]   = ctx->coeff_pbuf[i][0];
           ctx->qcoeff_pbuf[i][2]  = ctx->qcoeff_pbuf[i][0];
@@ -1339,7 +1339,7 @@ static int64_t rd_pick_intra_sbuv_mode(VP9_COMP *cpi, MACROBLOCK *x,
           ctx->coeff_pbuf[i][0]   = p[i].coeff;
           ctx->qcoeff_pbuf[i][0]  = p[i].qcoeff;
           ctx->dqcoeff_pbuf[i][0] = pd[i].dqcoeff;
-          ctx->eobs_pbuf[i][0]    = pd[i].eobs;
+          ctx->eobs_pbuf[i][0]    = p[i].eobs;
         }
       }
     }
@@ -1630,6 +1630,7 @@ static void rd_check_segment_txsize(VP9_COMP *cpi, MACROBLOCK *x,
   MB_PREDICTION_MODE this_mode;
   MODE_INFO *mi = x->e_mbd.mi_8x8[0];
   MB_MODE_INFO *const mbmi = &mi->mbmi;
+  struct macroblock_plane *const p = &x->plane[0];
   struct macroblockd_plane *const pd = &x->e_mbd.plane[0];
   const int label_count = 4;
   int64_t this_segment_rd = 0;
@@ -1958,11 +1959,11 @@ static void rd_check_segment_txsize(VP9_COMP *cpi, MACROBLOCK *x,
           bsi->rdstat[i][mode_idx].brdcost += RDCOST(x->rdmult, x->rddiv,
                                             bsi->rdstat[i][mode_idx].brate, 0);
           bsi->rdstat[i][mode_idx].brate += bsi->rdstat[i][mode_idx].byrate;
-          bsi->rdstat[i][mode_idx].eobs = pd->eobs[i];
+          bsi->rdstat[i][mode_idx].eobs = p->eobs[i];
           if (num_4x4_blocks_wide > 1)
-            bsi->rdstat[i + 1][mode_idx].eobs = pd->eobs[i + 1];
+            bsi->rdstat[i + 1][mode_idx].eobs = p->eobs[i + 1];
           if (num_4x4_blocks_high > 1)
-            bsi->rdstat[i + 2][mode_idx].eobs = pd->eobs[i + 2];
+            bsi->rdstat[i + 2][mode_idx].eobs = p->eobs[i + 2];
         }
 
         if (bsi->rdstat[i][mode_idx].brdcost < best_rd) {
@@ -2060,7 +2061,7 @@ static int64_t rd_pick_best_mbsegmentation(VP9_COMP *cpi, MACROBLOCK *x,
     mi->bmi[i].as_mv[0].as_int = bsi->rdstat[i][mode_idx].mvs[0].as_int;
     if (has_second_ref(mbmi))
       mi->bmi[i].as_mv[1].as_int = bsi->rdstat[i][mode_idx].mvs[1].as_int;
-    xd->plane[0].eobs[i] = bsi->rdstat[i][mode_idx].eobs;
+    x->plane[0].eobs[i] = bsi->rdstat[i][mode_idx].eobs;
     mi->bmi[i].as_mode = bsi->modes[i];
   }
 
@@ -2070,7 +2071,7 @@ static int64_t rd_pick_best_mbsegmentation(VP9_COMP *cpi, MACROBLOCK *x,
   *returntotrate = bsi->r;
   *returndistortion = bsi->d;
   *returnyrate = bsi->segment_yrate;
-  *skippable = vp9_is_skippable_in_plane(&x->e_mbd, BLOCK_8X8, 0);
+  *skippable = vp9_is_skippable_in_plane(x, BLOCK_8X8, 0);
   *psse = bsi->sse;
   mbmi->mode = bsi->modes[3];
 
@@ -3005,7 +3006,7 @@ static void swap_block_ptr(MACROBLOCK *x, PICK_MODE_CONTEXT *ctx,
     p[i].coeff    = ctx->coeff_pbuf[i][1];
     p[i].qcoeff  = ctx->qcoeff_pbuf[i][1];
     pd[i].dqcoeff = ctx->dqcoeff_pbuf[i][1];
-    pd[i].eobs    = ctx->eobs_pbuf[i][1];
+    p[i].eobs    = ctx->eobs_pbuf[i][1];
 
     ctx->coeff_pbuf[i][1]   = ctx->coeff_pbuf[i][0];
     ctx->qcoeff_pbuf[i][1]  = ctx->qcoeff_pbuf[i][0];
@@ -3015,7 +3016,7 @@ static void swap_block_ptr(MACROBLOCK *x, PICK_MODE_CONTEXT *ctx,
     ctx->coeff_pbuf[i][0]   = p[i].coeff;
     ctx->qcoeff_pbuf[i][0]  = p[i].qcoeff;
     ctx->dqcoeff_pbuf[i][0] = pd[i].dqcoeff;
-    ctx->eobs_pbuf[i][0]    = pd[i].eobs;
+    ctx->eobs_pbuf[i][0]    = p[i].eobs;
   }
 }
 
@@ -4133,7 +4134,7 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
               tmp_best_mbmode = *mbmi;
               for (i = 0; i < 4; i++) {
                 tmp_best_bmodes[i] = xd->mi_8x8[0]->bmi[i];
-                x->zcoeff_blk[TX_4X4][i] = !xd->plane[0].eobs[i];
+                x->zcoeff_blk[TX_4X4][i] = !x->plane[0].eobs[i];
               }
               pred_exists = 1;
               if (switchable_filter_index == 0 &&
