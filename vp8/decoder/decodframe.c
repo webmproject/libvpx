@@ -680,7 +680,6 @@ static void decode_mb_rows(VP8D_COMP *pbi)
                     vp8_loop_filter_row_simple(pc, lf_mic, mb_row-1,
                                                recon_y_stride, recon_uv_stride,
                                                lf_dst[0], lf_dst[1], lf_dst[2]);
-
                 if(mb_row > 1)
                 {
                     yv12_extend_frame_left_right_c(yv12_fb_new,
@@ -691,10 +690,6 @@ static void decode_mb_rows(VP8D_COMP *pbi)
                     eb_dst[0] += recon_y_stride  * 16;
                     eb_dst[1] += recon_uv_stride *  8;
                     eb_dst[2] += recon_uv_stride *  8;
-
-                    if(mb_row == 2)
-                        yv12_extend_frame_top_c(yv12_fb_new);
-
                 }
 
                 lf_dst[0] += recon_y_stride  * 16;
@@ -713,13 +708,9 @@ static void decode_mb_rows(VP8D_COMP *pbi)
                                                eb_dst[0],
                                                eb_dst[1],
                                                eb_dst[2]);
-
                 eb_dst[0] += recon_y_stride  * 16;
                 eb_dst[1] += recon_uv_stride *  8;
                 eb_dst[2] += recon_uv_stride *  8;
-
-                if(mb_row == 1)
-                    yv12_extend_frame_top_c(yv12_fb_new);
             }
         }
     }
@@ -747,7 +738,7 @@ static void decode_mb_rows(VP8D_COMP *pbi)
                                    eb_dst[0],
                                    eb_dst[1],
                                    eb_dst[2]);
-
+    yv12_extend_frame_top_c(yv12_fb_new);
     yv12_extend_frame_bottom_c(yv12_fb_new);
 
 }
