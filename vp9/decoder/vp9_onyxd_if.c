@@ -125,6 +125,9 @@ VP9D_PTR vp9_create_decompressor(VP9D_CONFIG *oxcf) {
 
   vp9_zero(*pbi);
 
+  // Initialize the references to not point to any frame buffers.
+  memset(&cm->ref_frame_map, -1, sizeof(cm->ref_frame_map));
+
   if (setjmp(cm->error.jmp)) {
     cm->error.setjmp = 0;
     vp9_remove_decompressor(pbi);
