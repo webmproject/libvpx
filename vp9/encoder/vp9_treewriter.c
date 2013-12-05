@@ -36,3 +36,24 @@ void vp9_cost_tokens_skip(int *costs, const vp9_prob *probs, vp9_tree tree) {
   costs[-tree[0]] = vp9_cost_bit(probs[0], 0);
   cost(costs, tree, probs, 2, 0);
 }
+
+static void tree2tok(struct vp9_token *tokens, const vp9_tree_index *tree,
+                     int i, int v, int l) {
+  v += v;
+  ++l;
+
+  do {
+    const vp9_tree_index j = tree[i++];
+    if (j <= 0) {
+      tokens[-j].value = v;
+      tokens[-j].len = l;
+    } else {
+      tree2tok(tokens, tree, j, v, l);
+    }
+  } while (++v & 1);
+}
+
+void vp9_tokens_from_tree(struct vp9_token *tokens,
+                          const vp9_tree_index *tree) {
+  tree2tok(tokens, tree, 0, 0, 0);
+}

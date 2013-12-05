@@ -44,6 +44,14 @@ static INLINE void treed_write(vp9_writer *w,
   } while (len);
 }
 
+struct vp9_token {
+  int value;
+  int len;
+};
+
+
+void vp9_tokens_from_tree(struct vp9_token*, const vp9_tree_index *);
+
 static INLINE void write_token(vp9_writer *w, vp9_tree tree,
                                const vp9_prob *probs,
                                const struct vp9_token *token) {

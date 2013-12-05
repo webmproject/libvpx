@@ -14,27 +14,6 @@
 #include "./vpx_config.h"
 #include "vp9/common/vp9_treecoder.h"
 
-static void tree2tok(struct vp9_token *const p, vp9_tree t,
-                    int i, int v, int l) {
-  v += v;
-  ++l;
-
-  do {
-    const vp9_tree_index j = t[i++];
-
-    if (j <= 0) {
-      p[-j].value = v;
-      p[-j].len = l;
-    } else {
-      tree2tok(p, t, j, v, l);
-    }
-  } while (++v & 1);
-}
-
-void vp9_tokens_from_tree(struct vp9_token *p, vp9_tree t) {
-  tree2tok(p, t, 0, 0, 0);
-}
-
 static unsigned int convert_distribution(unsigned int i, vp9_tree tree,
                                          unsigned int branch_ct[][2],
                                          const unsigned int num_events[]) {

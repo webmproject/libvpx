@@ -34,15 +34,6 @@ typedef int8_t vp9_tree_index;
 
 typedef const vp9_tree_index vp9_tree[];
 
-struct vp9_token {
-  int value;
-  int len;
-};
-
-/* Construct encoding array from tree. */
-
-void vp9_tokens_from_tree(struct vp9_token*, vp9_tree);
-
 /* Convert array of token occurrence counts into a table of probabilities
    for the associated binary encoding tree.  Also writes count of branches
    taken for each node on the tree; this facilitiates decisions as to

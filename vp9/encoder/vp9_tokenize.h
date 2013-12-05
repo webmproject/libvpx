@@ -12,7 +12,9 @@
 #define VP9_ENCODER_VP9_TOKENIZE_H_
 
 #include "vp9/common/vp9_entropy.h"
+
 #include "vp9/encoder/vp9_block.h"
+#include "vp9/encoder/vp9_treewriter.h"
 
 void vp9_tokenize_initialize();
 
