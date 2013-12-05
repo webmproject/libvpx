@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdX//7c0\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1657,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2013-12-05T23:08:12Z",
+      "side": 1,
+      "message": "The threshold shouldn\u0027t be on distortion we have RD?   \n\nShould we stop if we quantizer is 1 and we spent 40 bits per pixel?",
+      "revId": "afa70972664a5549a22ebd582ee6dbd068478fcd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
