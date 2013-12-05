@@ -240,7 +240,7 @@ static int get_free_fb(VP9_COMMON *cm) {
 static void ref_cnt_fb(int *buf, int *idx, int new_idx) {
   const int ref_index = *idx;
 
-  if (ref_index > 0 && buf[ref_index] > 0)
+  if (ref_index >= 0 && buf[ref_index] > 0)
     buf[ref_index]--;
 
   *idx = new_idx;
