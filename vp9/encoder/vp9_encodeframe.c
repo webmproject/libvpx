@@ -2592,27 +2592,19 @@ static void encode_superblock(VP9_COMP *cpi, TOKENEXTRA **t, int output_enabled,
                       context, &cm->counts.tx)[mbmi->tx_size];
     } else {
       int x, y;
-      TX_SIZE sz = tx_mode_to_biggest_tx_size[cm->tx_mode];
-      assert(sizeof(tx_mode_to_biggest_tx_size) /
-             sizeof(tx_mode_to_biggest_tx_size[0]) == TX_MODES);
+      TX_SIZE tx_size;
       // The new intra coding scheme requires no change of transform size
       if (is_inter_block(&mi->mbmi)) {
-        if (sz == TX_32X32 && bsize < BLOCK_32X32)
-          sz = TX_16X16;
-        if (sz == TX_16X16 && bsize < BLOCK_16X16)
-          sz = TX_8X8;
-        if (sz == TX_8X8 && bsize < BLOCK_8X8)
-          sz = TX_4X4;
-      } else if (bsize >= BLOCK_8X8) {
-        sz = mbmi->tx_size;
+        tx_size = MIN(tx_mode_to_biggest_tx_size[cm->tx_mode],
+                      max_txsize_lookup[bsize]);
       } else {
-        sz = TX_4X4;
+        tx_size = (bsize >= BLOCK_8X8) ? mbmi->tx_size : TX_4X4;
       }
 
       for (y = 0; y < mi_height; y++)
         for (x = 0; x < mi_width; x++)
           if (mi_col + x < cm->mi_cols && mi_row + y < cm->mi_rows)
-            mi_8x8[mis * y + x]->mbmi.tx_size = sz;
+            mi_8x8[mis * y + x]->mbmi.tx_size = tx_size;
     }
   }
 }
