@@ -369,31 +369,22 @@ unsigned char vp9_get_pred_context_single_ref_p2(const MACROBLOCKD *xd) {
 // left of the entries corresponding to real blocks.
 // The prediction flags in these dummy entries are initialized to 0.
 unsigned char vp9_get_pred_context_tx_size(const MACROBLOCKD *xd) {
-  const MODE_INFO *const above_mi = get_above_mi(xd);
-  const MODE_INFO *const left_mi = get_left_mi(xd);
-  const MB_MODE_INFO *const above_mbmi = get_above_mbmi(above_mi);
-  const MB_MODE_INFO *const left_mbmi = get_left_mbmi(left_mi);
-  const int above_in_image = above_mi != NULL;
-  const int left_in_image = left_mi != NULL;
   const int max_tx_size = max_txsize_lookup[xd->mi_8x8[0]->mbmi.sb_type];
-  int above_context = max_tx_size;
-  int left_context = max_tx_size;
+  const MB_MODE_INFO *const above_mbmi = get_above_mbmi(get_above_mi(xd));
+  const MB_MODE_INFO *const left_mbmi = get_left_mbmi(get_left_mi(xd));
+  const int has_above = above_mbmi != NULL;
+  const int has_left = left_mbmi != NULL;
+  int above_ctx = (has_above && !above_mbmi->skip_coeff) ? above_mbmi->tx_size
+                                                         : max_tx_size;
+  int left_ctx = (has_left && !left_mbmi->skip_coeff) ? left_mbmi->tx_size
+                                                      : max_tx_size;
+  if (!has_left)
+    left_ctx = above_ctx;
 
-  if (above_in_image)
-    above_context = above_mbmi->skip_coeff ? max_tx_size
-                                           : above_mbmi->tx_size;
+  if (!has_above)
+    above_ctx = left_ctx;
 
-  if (left_in_image)
-    left_context = left_mbmi->skip_coeff ? max_tx_size
-                                         : left_mbmi->tx_size;
-
-  if (!left_in_image)
-    left_context = above_context;
-
-  if (!above_in_image)
-    above_context = left_context;
-
-  return above_context + left_context > max_tx_size;
+  return (above_ctx + left_ctx) > max_tx_size;
 }
 
 int vp9_get_segment_id(VP9_COMMON *cm, const uint8_t *segment_ids,
