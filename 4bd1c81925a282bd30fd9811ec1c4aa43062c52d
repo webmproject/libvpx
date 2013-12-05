@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdX//7d0\u003d",
+        "filename": "warnings.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 84,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2013-12-05T22:27:22Z",
+      "side": 1,
+      "message": "How about:\n\n    const int lossless \u003d ((min_q \u003d\u003d 0) \u0026\u0026 (max_q \u003d\u003d 0));\n    if (!lossless \u0026\u0026 ...)\n\nMore explicit, and this way no one will ever ask why it\u0027s ok for max_q to be 0.",
+      "revId": "4bd1c81925a282bd30fd9811ec1c4aa43062c52d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
