@@ -1640,7 +1640,8 @@ static void rd_pick_partition(VP9_COMP *cpi, const TileInfo *const tile,
       }
       sum_rd = RDCOST(x->rdmult, x->rddiv, this_rate, this_dist);
       if (sum_rd < best_rd) {
-        int64_t stop_thresh = 2048;
+        int64_t stop_thresh = 4096;
+        int64_t stop_thresh_rd;
 
         best_rate = this_rate;
         best_dist = this_dist;
@@ -1652,9 +1653,10 @@ static void rd_pick_partition(VP9_COMP *cpi, const TileInfo *const tile,
         stop_thresh >>= 8 - (b_width_log2_lookup[bsize] +
             b_height_log2_lookup[bsize]);
 
+        stop_thresh_rd = RDCOST(x->rdmult, x->rddiv, 0, stop_thresh);
         // If obtained distortion is very small, choose current partition
         // and stop splitting.
-        if (this_dist < stop_thresh) {
+        if (!x->e_mbd.lossless && best_rd < stop_thresh_rd) {
           do_split = 0;
           do_rect = 0;
         }
