@@ -102,23 +102,13 @@ MV clamp_mv_to_umv_border_sb(const MACROBLOCKD *xd, const MV *src_mv,
 // calculate the subsampled BLOCK_SIZE, but that type isn't defined for
 // sizes smaller than 16x16 yet.
 static void build_inter_predictors(MACROBLOCKD *xd, int plane, int block,
-                                   BLOCK_SIZE bsize, int pred_w, int pred_h,
+                                   int bw, int bh,
+                                   int x, int y, int w, int h,
                                    int mi_x, int mi_y) {
   struct macroblockd_plane *const pd = &xd->plane[plane];
-  const BLOCK_SIZE plane_bsize = get_plane_block_size(bsize, pd);
-  const int bwl = b_width_log2(plane_bsize);
-  const int bw = 4 << bwl;
-  const int bh = 4 * num_4x4_blocks_high_lookup[plane_bsize];
-  const int x = 4 * (block & ((1 << bwl) - 1));
-  const int y = 4 * (block >> bwl);
   const MODE_INFO *mi = xd->mi_8x8[0];
   const int is_compound = has_second_ref(&mi->mbmi);
   int ref;
-
-  assert(x < bw);
-  assert(y < bh);
-  assert(mi->mbmi.sb_type < BLOCK_8X8 || 4 << pred_w == bw);
-  assert(mi->mbmi.sb_type < BLOCK_8X8 || 4 << pred_h == bh);
 
   for (ref = 0; ref < 1 + is_compound; ++ref) {
     struct scale_factors *const scale = &xd->scale_factor[ref];
@@ -162,9 +152,7 @@ static void build_inter_predictors(MACROBLOCKD *xd, int plane, int block,
     }
 
     inter_predictor(pre, pre_buf->stride, dst, dst_buf->stride,
-                    &scaled_mv, scale,
-                    4 << pred_w, 4 << pred_h, ref,
-                    &xd->subpix, xs, ys);
+                    &scaled_mv, scale, w, h, ref, &xd->subpix, xs, ys);
   }
 }
 
@@ -172,20 +160,26 @@ static void build_inter_predictors_for_planes(MACROBLOCKD *xd, BLOCK_SIZE bsize,
                                               int mi_row, int mi_col,
                                               int plane_from, int plane_to) {
   int plane;
+  const int mi_x = mi_col * MI_SIZE;
+  const int mi_y = mi_row * MI_SIZE;
   for (plane = plane_from; plane <= plane_to; ++plane) {
-    const int mi_x = mi_col * MI_SIZE;
-    const int mi_y = mi_row * MI_SIZE;
-    const int bwl = b_width_log2(bsize) - xd->plane[plane].subsampling_x;
-    const int bhl = b_height_log2(bsize) - xd->plane[plane].subsampling_y;
+    const BLOCK_SIZE plane_bsize = get_plane_block_size(bsize,
+                                                        &xd->plane[plane]);
+    const int num_4x4_w = num_4x4_blocks_wide_lookup[plane_bsize];
+    const int num_4x4_h = num_4x4_blocks_high_lookup[plane_bsize];
+    const int bw = 4 * num_4x4_w;
+    const int bh = 4 * num_4x4_h;
 
     if (xd->mi_8x8[0]->mbmi.sb_type < BLOCK_8X8) {
       int i = 0, x, y;
       assert(bsize == BLOCK_8X8);
-      for (y = 0; y < 1 << bhl; ++y)
-        for (x = 0; x < 1 << bwl; ++x)
-          build_inter_predictors(xd, plane, i++, bsize, 0, 0, mi_x, mi_y);
+      for (y = 0; y < num_4x4_h; ++y)
+        for (x = 0; x < num_4x4_w; ++x)
+           build_inter_predictors(xd, plane, i++, bw, bh,
+                                  4 * x, 4 * y, 4, 4, mi_x, mi_y);
     } else {
-      build_inter_predictors(xd, plane, 0, bsize, bwl, bhl, mi_x, mi_y);
+      build_inter_predictors(xd, plane, 0, bw, bh,
+                             0, 0, bw, bh, mi_x, mi_y);
     }
   }
 }
@@ -208,23 +202,13 @@ void vp9_build_inter_predictors_sb(MACROBLOCKD *xd, int mi_row, int mi_col,
 // TODO(jingning): This function serves as a placeholder for decoder prediction
 // using on demand border extension. It should be moved to /decoder/ directory.
 static void dec_build_inter_predictors(MACROBLOCKD *xd, int plane, int block,
-                                       BLOCK_SIZE bsize, int pred_w, int pred_h,
+                                       int bw, int bh,
+                                       int x, int y, int w, int h,
                                        int mi_x, int mi_y) {
   struct macroblockd_plane *const pd = &xd->plane[plane];
-  const BLOCK_SIZE plane_bsize = get_plane_block_size(bsize, pd);
-  const int bwl = b_width_log2(plane_bsize);
-  const int bw = 4 << bwl;
-  const int bh = 4 * num_4x4_blocks_high_lookup[plane_bsize];
-  const int x = 4 * (block & ((1 << bwl) - 1));
-  const int y = 4 * (block >> bwl);
   const MODE_INFO *mi = xd->mi_8x8[0];
   const int is_compound = has_second_ref(&mi->mbmi);
   int ref;
-
-  assert(x < bw);
-  assert(y < bh);
-  assert(mi->mbmi.sb_type < BLOCK_8X8 || 4 << pred_w == bw);
-  assert(mi->mbmi.sb_type < BLOCK_8X8 || 4 << pred_h == bh);
 
   for (ref = 0; ref < 1 + is_compound; ++ref) {
     struct scale_factors *const scale = &xd->scale_factor[ref];
@@ -268,29 +252,33 @@ static void dec_build_inter_predictors(MACROBLOCKD *xd, int plane, int block,
     }
 
     inter_predictor(pre, pre_buf->stride, dst, dst_buf->stride,
-                    &scaled_mv, scale,
-                    4 << pred_w, 4 << pred_h, ref,
-                    &xd->subpix, xs, ys);
+                    &scaled_mv, scale, w, h, ref, &xd->subpix, xs, ys);
   }
 }
 
 void vp9_dec_build_inter_predictors_sb(MACROBLOCKD *xd, int mi_row, int mi_col,
                                        BLOCK_SIZE bsize) {
   int plane;
+  const int mi_x = mi_col * MI_SIZE;
+  const int mi_y = mi_row * MI_SIZE;
   for (plane = 0; plane < MAX_MB_PLANE; ++plane) {
-    const int mi_x = mi_col * MI_SIZE;
-    const int mi_y = mi_row * MI_SIZE;
-    const int bwl = b_width_log2(bsize) - xd->plane[plane].subsampling_x;
-    const int bhl = b_height_log2(bsize) - xd->plane[plane].subsampling_y;
+    const BLOCK_SIZE plane_bsize = get_plane_block_size(bsize,
+                                                        &xd->plane[plane]);
+    const int num_4x4_w = num_4x4_blocks_wide_lookup[plane_bsize];
+    const int num_4x4_h = num_4x4_blocks_high_lookup[plane_bsize];
+    const int bw = 4 * num_4x4_w;
+    const int bh = 4 * num_4x4_h;
 
     if (xd->mi_8x8[0]->mbmi.sb_type < BLOCK_8X8) {
       int i = 0, x, y;
       assert(bsize == BLOCK_8X8);
-      for (y = 0; y < 1 << bhl; ++y)
-        for (x = 0; x < 1 << bwl; ++x)
-          dec_build_inter_predictors(xd, plane, i++, bsize, 0, 0, mi_x, mi_y);
+      for (y = 0; y < num_4x4_h; ++y)
+        for (x = 0; x < num_4x4_w; ++x)
+          dec_build_inter_predictors(xd, plane, i++, bw, bh,
+                                     4 * x, 4 * y, 4, 4, mi_x, mi_y);
     } else {
-      dec_build_inter_predictors(xd, plane, 0, bsize, bwl, bhl, mi_x, mi_y);
+      dec_build_inter_predictors(xd, plane, 0, bw, bh,
+                                 0, 0, bw, bh, mi_x, mi_y);
     }
   }
 }
