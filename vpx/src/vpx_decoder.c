@@ -172,7 +172,7 @@ vpx_codec_err_t vpx_codec_register_put_slice_cb(vpx_codec_ctx_t             *ctx
   if (!ctx || !cb)
     res = VPX_CODEC_INVALID_PARAM;
   else if (!ctx->iface || !ctx->priv
-           || !(ctx->iface->caps & VPX_CODEC_CAP_PUT_FRAME))
+           || !(ctx->iface->caps & VPX_CODEC_CAP_PUT_SLICE))
     res = VPX_CODEC_ERROR;
   else {
     ctx->priv->dec.put_slice_cb.u.put_slice = cb;
