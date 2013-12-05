@@ -176,7 +176,7 @@ static void optimize_b(MACROBLOCK *mb,
   tokens[eob][0].rate = 0;
   tokens[eob][0].error = 0;
   tokens[eob][0].next = default_eob;
-  tokens[eob][0].token = DCT_EOB_TOKEN;
+  tokens[eob][0].token = EOB_TOKEN;
   tokens[eob][0].qc = 0;
   *(tokens[eob] + 1) = *(tokens[eob] + 0);
   next = eob;
@@ -243,21 +243,19 @@ static void optimize_b(MACROBLOCK *mb,
         /* If we reduced this coefficient to zero, check to see if
          *  we need to move the EOB back here.
          */
-        t0 = tokens[next][0].token == DCT_EOB_TOKEN ?
-             DCT_EOB_TOKEN : ZERO_TOKEN;
-        t1 = tokens[next][1].token == DCT_EOB_TOKEN ?
-             DCT_EOB_TOKEN : ZERO_TOKEN;
+        t0 = tokens[next][0].token == EOB_TOKEN ? EOB_TOKEN : ZERO_TOKEN;
+        t1 = tokens[next][1].token == EOB_TOKEN ? EOB_TOKEN : ZERO_TOKEN;
       } else {
         t0 = t1 = (vp9_dct_value_tokens_ptr + x)->token;
       }
       if (next < default_eob) {
         band = band_translate[i + 1];
-        if (t0 != DCT_EOB_TOKEN) {
+        if (t0 != EOB_TOKEN) {
           pt = trellis_get_coeff_context(scan, nb, i, t0, token_cache);
           rate0 += mb->token_costs[tx_size][type][ref][band][!x][pt]
                                   [tokens[next][0].token];
         }
-        if (t1 != DCT_EOB_TOKEN) {
+        if (t1 != EOB_TOKEN) {
           pt = trellis_get_coeff_context(scan, nb, i, t1, token_cache);
           rate1 += mb->token_costs[tx_size][type][ref][band][!x][pt]
                                   [tokens[next][1].token];
@@ -289,12 +287,12 @@ static void optimize_b(MACROBLOCK *mb,
       t0 = tokens[next][0].token;
       t1 = tokens[next][1].token;
       /* Update the cost of each path if we're past the EOB token. */
-      if (t0 != DCT_EOB_TOKEN) {
+      if (t0 != EOB_TOKEN) {
         tokens[next][0].rate +=
             mb->token_costs[tx_size][type][ref][band][1][0][t0];
         tokens[next][0].token = ZERO_TOKEN;
       }
-      if (t1 != DCT_EOB_TOKEN) {
+      if (t1 != EOB_TOKEN) {
         tokens[next][1].rate +=
             mb->token_costs[tx_size][type][ref][band][1][0][t1];
         tokens[next][1].token = ZERO_TOKEN;

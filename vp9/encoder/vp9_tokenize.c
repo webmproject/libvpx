@@ -27,30 +27,30 @@ static int dct_value_cost[DCT_MAX_VALUE * 2];
 const int *vp9_dct_value_cost_ptr;
 
 // Array indices are identical to previously-existing CONTEXT_NODE indices
-const vp9_tree_index vp9_coef_tree[TREE_SIZE(MAX_ENTROPY_TOKENS)] = {
-  -DCT_EOB_TOKEN, 2,                          /* 0 = EOB */
-  -ZERO_TOKEN, 4,                             /* 1 = ZERO */
-  -ONE_TOKEN, 6,                              /* 2 = ONE */
-  8, 12,                                      /* 3 = LOW_VAL */
-  -TWO_TOKEN, 10,                            /* 4 = TWO */
-  -THREE_TOKEN, -FOUR_TOKEN,                /* 5 = THREE */
-  14, 16,                                   /* 6 = HIGH_LOW */
-  -DCT_VAL_CATEGORY1, -DCT_VAL_CATEGORY2,   /* 7 = CAT_ONE */
-  18, 20,                                   /* 8 = CAT_THREEFOUR */
-  -DCT_VAL_CATEGORY3, -DCT_VAL_CATEGORY4,   /* 9 = CAT_THREE */
-  -DCT_VAL_CATEGORY5, -DCT_VAL_CATEGORY6    /* 10 = CAT_FIVE */
+const vp9_tree_index vp9_coef_tree[TREE_SIZE(ENTROPY_TOKENS)] = {
+  -EOB_TOKEN, 2,                       // 0  = EOB
+  -ZERO_TOKEN, 4,                      // 1  = ZERO
+  -ONE_TOKEN, 6,                       // 2  = ONE
+  8, 12,                               // 3  = LOW_VAL
+  -TWO_TOKEN, 10,                      // 4  = TWO
+  -THREE_TOKEN, -FOUR_TOKEN,           // 5  = THREE
+  14, 16,                              // 6  = HIGH_LOW
+  -CATEGORY1_TOKEN, -CATEGORY2_TOKEN,  // 7  = CAT_ONE
+  18, 20,                              // 8  = CAT_THREEFOUR
+  -CATEGORY3_TOKEN, -CATEGORY4_TOKEN,  // 9  = CAT_THREE
+  -CATEGORY5_TOKEN, -CATEGORY6_TOKEN   // 10 = CAT_FIVE
 };
 
 // Unconstrained Node Tree
-const vp9_tree_index vp9_coef_con_tree[TREE_SIZE(MAX_ENTROPY_TOKENS)] = {
-  2, 6,                                     /* 0 = LOW_VAL */
-  -TWO_TOKEN, 4,                            /* 1 = TWO */
-  -THREE_TOKEN, -FOUR_TOKEN,                /* 2 = THREE */
-  8, 10,                                    /* 3 = HIGH_LOW */
-  -DCT_VAL_CATEGORY1, -DCT_VAL_CATEGORY2,   /* 4 = CAT_ONE */
-  12, 14,                                   /* 5 = CAT_THREEFOUR */
-  -DCT_VAL_CATEGORY3, -DCT_VAL_CATEGORY4,   /* 6 = CAT_THREE */
-  -DCT_VAL_CATEGORY5, -DCT_VAL_CATEGORY6    /* 7 = CAT_FIVE */
+const vp9_tree_index vp9_coef_con_tree[TREE_SIZE(ENTROPY_TOKENS)] = {
+  2, 6,                                // 0 = LOW_VAL
+  -TWO_TOKEN, 4,                       // 1 = TWO
+  -THREE_TOKEN, -FOUR_TOKEN,           // 2 = THREE
+  8, 10,                               // 3 = HIGH_LOW
+  -CATEGORY1_TOKEN, -CATEGORY2_TOKEN,  // 4 = CAT_ONE
+  12, 14,                              // 5 = CAT_THREEFOUR
+  -CATEGORY3_TOKEN, -CATEGORY4_TOKEN,  // 6 = CAT_THREE
+  -CATEGORY5_TOKEN, -CATEGORY6_TOKEN   // 7 = CAT_FIVE
 };
 
 static const vp9_prob Pcat1[] = { 159};
@@ -84,22 +84,22 @@ static void init_bit_trees() {
   init_bit_tree(cat6, 14);
 }
 
-const vp9_extra_bit vp9_extra_bits[MAX_ENTROPY_TOKENS] = {
+const vp9_extra_bit vp9_extra_bits[ENTROPY_TOKENS] = {
   {0, 0, 0, 0},           // ZERO_TOKEN
   {0, 0, 0, 1},           // ONE_TOKEN
   {0, 0, 0, 2},           // TWO_TOKEN
   {0, 0, 0, 3},           // THREE_TOKEN
   {0, 0, 0, 4},           // FOUR_TOKEN
-  {cat1, Pcat1, 1, 5},    // DCT_VAL_CATEGORY1
-  {cat2, Pcat2, 2, 7},    // DCT_VAL_CATEGORY2
-  {cat3, Pcat3, 3, 11},   // DCT_VAL_CATEGORY3
-  {cat4, Pcat4, 4, 19},   // DCT_VAL_CATEGORY4
-  {cat5, Pcat5, 5, 35},   // DCT_VAL_CATEGORY5
-  {cat6, Pcat6, 14, 67},  // DCT_VAL_CATEGORY6
-  {0, 0, 0, 0}            // DCT_EOB_TOKEN
+  {cat1, Pcat1, 1, 5},    // CATEGORY1_TOKEN
+  {cat2, Pcat2, 2, 7},    // CATEGORY2_TOKEN
+  {cat3, Pcat3, 3, 11},   // CATEGORY3_TOKEN
+  {cat4, Pcat4, 4, 19},   // CATEGORY4_TOKEN
+  {cat5, Pcat5, 5, 35},   // CATEGORY5_TOKEN
+  {cat6, Pcat6, 14, 67},  // CATEGORY6_TOKEN
+  {0, 0, 0, 0}            // EOB_TOKEN
 };
 
-struct vp9_token vp9_coef_encodings[MAX_ENTROPY_TOKENS];
+struct vp9_token vp9_coef_encodings[ENTROPY_TOKENS];
 
 void vp9_coef_tree_initialize() {
   init_bit_trees();
@@ -226,7 +226,7 @@ static void tokenize_b(int plane, int block, BLOCK_SIZE plane_bsize,
       t->extra = vp9_dct_value_tokens_ptr[v].extra;
       token    = vp9_dct_value_tokens_ptr[v].token;
     } else {
-      token = DCT_EOB_TOKEN;
+      token = EOB_TOKEN;
     }
 
     t->token = token;
