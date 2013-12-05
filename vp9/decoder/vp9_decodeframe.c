@@ -9,6 +9,7 @@
  */
 
 #include <assert.h>
+#include <stdlib.h>  // qsort()
 
 #include "./vp9_rtcd.h"
 #include "./vpx_scale_rtcd.h"
@@ -853,6 +854,7 @@ static size_t get_tile(const uint8_t *const data_end,
 typedef struct TileBuffer {
   const uint8_t *data;
   size_t size;
+  int col;  // only used with multi-threaded decoding
 } TileBuffer;
 
 static const uint8_t *decode_tiles(VP9D_COMP *pbi, const uint8_t *data) {
@@ -943,15 +945,32 @@ static int tile_worker_hook(void *arg1, void *arg2) {
   return !tile_data->xd.corrupted;
 }
 
+// sorts in descending order
+static int compare_tile_buffers(const void *a, const void *b) {
+  const TileBuffer *const buf1 = (const TileBuffer*)a;
+  const TileBuffer *const buf2 = (const TileBuffer*)b;
+  if (buf1->size < buf2->size) {
+    return 1;
+  } else if (buf1->size == buf2->size) {
+    return 0;
+  } else {
+    return -1;
+  }
+}
+
 static const uint8_t *decode_tiles_mt(VP9D_COMP *pbi, const uint8_t *data) {
   VP9_COMMON *const cm = &pbi->common;
+  const uint8_t *bit_reader_end = NULL;
   const uint8_t *const data_end = pbi->source + pbi->source_sz;
   const int aligned_mi_cols = mi_cols_aligned_to_sb(cm->mi_cols);
   const int tile_cols = 1 << cm->log2_tile_cols;
   const int tile_rows = 1 << cm->log2_tile_rows;
   const int num_workers = MIN(pbi->oxcf.max_threads & ~1, tile_cols);
-  int tile_col = 0;
+  TileBuffer tile_buffers[1 << 6];
+  int n;
+  int final_worker = -1;
 
+  assert(tile_cols <= (1 << 6));
   assert(tile_rows == 1);
   (void)tile_rows;
 
@@ -984,48 +1003,82 @@ static const uint8_t *decode_tiles_mt(VP9D_COMP *pbi, const uint8_t *data) {
   vpx_memset(pbi->above_seg_context, 0,
              sizeof(*pbi->above_seg_context) * aligned_mi_cols);
 
-  while (tile_col < tile_cols) {
+  // Load tile data into tile_buffers
+  for (n = 0; n < tile_cols; ++n) {
+    const size_t size =
+        get_tile(data_end, n == tile_cols - 1, &cm->error, &data);
+    TileBuffer *const buf = &tile_buffers[n];
+    buf->data = data;
+    buf->size = size;
+    buf->col = n;
+    data += size;
+  }
+
+  // Sort the buffers based on size in descending order.
+  qsort(tile_buffers, tile_cols, sizeof(tile_buffers[0]), compare_tile_buffers);
+
+  // Rearrange the tile buffers such that per-tile group the largest, and
+  // presumably the most difficult, tile will be decoded in the main thread.
+  // This should help minimize the number of instances where the main thread is
+  // waiting for a worker to complete.
+  {
+    int group_start = 0;
+    while (group_start < tile_cols) {
+      const TileBuffer largest = tile_buffers[group_start];
+      const int group_end = MIN(group_start + num_workers, tile_cols) - 1;
+      memmove(tile_buffers + group_start, tile_buffers + group_start + 1,
+              (group_end - group_start) * sizeof(tile_buffers[0]));
+      tile_buffers[group_end] = largest;
+      group_start = group_end + 1;
+    }
+  }
+
+  n = 0;
+  while (n < tile_cols) {
     int i;
-    for (i = 0; i < num_workers && tile_col < tile_cols; ++i) {
+    for (i = 0; i < num_workers && n < tile_cols; ++i) {
       VP9Worker *const worker = &pbi->tile_workers[i];
       TileWorkerData *const tile_data = (TileWorkerData*)worker->data1;
       TileInfo *const tile = (TileInfo*)worker->data2;
-      const size_t size =
-          get_tile(data_end, tile_col == tile_cols - 1, &cm->error, &data);
+      TileBuffer *const buf = &tile_buffers[n];
 
       tile_data->cm = cm;
       tile_data->xd = pbi->mb;
       tile_data->xd.corrupted = 0;
-      vp9_tile_init(tile, tile_data->cm, 0, tile_col);
+      vp9_tile_init(tile, tile_data->cm, 0, buf->col);
 
-      setup_token_decoder(data, data_end, size, &cm->error,
+      setup_token_decoder(buf->data, data_end, buf->size, &cm->error,
                           &tile_data->bit_reader);
-      setup_tile_context(pbi, &tile_data->xd, 0, tile_col);
+      setup_tile_context(pbi, &tile_data->xd, 0, buf->col);
       setup_tile_macroblockd(tile_data);
 
       worker->had_error = 0;
-      if (i == num_workers - 1 || tile_col == tile_cols - 1) {
+      if (i == num_workers - 1 || n == tile_cols - 1) {
         vp9_worker_execute(worker);
       } else {
         vp9_worker_launch(worker);
       }
 
-      data += size;
-      ++tile_col;
+      if (buf->col == tile_cols - 1) {
+        final_worker = i;
+      }
+
+      ++n;
     }
 
     for (; i > 0; --i) {
       VP9Worker *const worker = &pbi->tile_workers[i - 1];
       pbi->mb.corrupted |= !vp9_worker_sync(worker);
     }
+    if (final_worker > -1) {
+      TileWorkerData *const tile_data =
+          (TileWorkerData*)pbi->tile_workers[final_worker].data1;
+      bit_reader_end = vp9_reader_find_end(&tile_data->bit_reader);
+      final_worker = -1;
+    }
   }
 
-  {
-    const int final_worker = (tile_cols + num_workers - 1) % num_workers;
-    TileWorkerData *const tile_data =
-        (TileWorkerData*)pbi->tile_workers[final_worker].data1;
-    return vp9_reader_find_end(&tile_data->bit_reader);
-  }
+  return bit_reader_end;
 }
 
 static void check_sync_code(VP9_COMMON *cm, struct vp9_read_bit_buffer *rb) {
