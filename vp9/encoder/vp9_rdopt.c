@@ -2145,7 +2145,7 @@ static void estimate_ref_frame_costs(VP9_COMP *cpi, int segment_id,
     vpx_memset(ref_costs_comp,   0, MAX_REF_FRAMES * sizeof(*ref_costs_comp));
     *comp_mode_p = 128;
   } else {
-    vp9_prob intra_inter_p = vp9_get_pred_prob_intra_inter(cm, xd);
+    vp9_prob intra_inter_p = vp9_get_intra_inter_prob(cm, xd);
     vp9_prob comp_inter_p = 128;
 
     if (cm->comp_pred_mode == REFERENCE_MODE_SELECT) {

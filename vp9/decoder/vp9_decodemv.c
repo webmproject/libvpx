@@ -408,8 +408,8 @@ static int read_is_inter_block(VP9_COMMON *const cm, MACROBLOCKD *const xd,
     return vp9_get_segdata(&cm->seg, segment_id, SEG_LVL_REF_FRAME) !=
            INTRA_FRAME;
   } else {
-    const int ctx = vp9_get_pred_context_intra_inter(xd);
-    const int is_inter = vp9_read(r, vp9_get_pred_prob_intra_inter(cm, xd));
+    const int ctx = vp9_get_intra_inter_context(xd);
+    const int is_inter = vp9_read(r, cm->fc.intra_inter_prob[ctx]);
     if (!cm->frame_parallel_decoding_mode)
       ++cm->counts.intra_inter[ctx][is_inter];
     return is_inter;
