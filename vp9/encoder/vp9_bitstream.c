@@ -553,7 +553,7 @@ static void write_modes(VP9_COMP *cpi, const TileInfo *const tile,
 static void build_tree_distribution(VP9_COMP *cpi, TX_SIZE tx_size) {
   vp9_coeff_probs_model *coef_probs = cpi->frame_coef_probs[tx_size];
   vp9_coeff_count *coef_counts = cpi->coef_counts[tx_size];
-  unsigned int (*eob_branch_ct)[REF_TYPES][COEF_BANDS][PREV_COEF_CONTEXTS] =
+  unsigned int (*eob_branch_ct)[REF_TYPES][COEF_BANDS][COEFF_CONTEXTS] =
       cpi->common.counts.eob_branch[tx_size];
   vp9_coeff_stats *coef_branch_ct = cpi->frame_branch_ct[tx_size];
   int i, j, k, l, m;
@@ -561,9 +561,7 @@ static void build_tree_distribution(VP9_COMP *cpi, TX_SIZE tx_size) {
   for (i = 0; i < BLOCK_TYPES; ++i) {
     for (j = 0; j < REF_TYPES; ++j) {
       for (k = 0; k < COEF_BANDS; ++k) {
-        for (l = 0; l < PREV_COEF_CONTEXTS; ++l) {
-          if (l >= 3 && k == 0)
-            continue;
+        for (l = 0; l < BAND_COEFF_CONTEXTS(k); ++l) {
           vp9_tree_probs_from_distribution(vp9_coef_tree,
                                            coef_branch_ct[i][j][k][l],
                                            coef_counts[i][j][k][l]);
@@ -606,15 +604,12 @@ static void update_coef_probs_common(vp9_writer* const bc, VP9_COMP *cpi,
       for (i = 0; i < BLOCK_TYPES; ++i) {
         for (j = 0; j < REF_TYPES; ++j) {
           for (k = 0; k < COEF_BANDS; ++k) {
-            for (l = 0; l < PREV_COEF_CONTEXTS; ++l) {
+            for (l = 0; l < BAND_COEFF_CONTEXTS(k); ++l) {
               for (t = 0; t < entropy_nodes_update; ++t) {
                 vp9_prob newp = new_frame_coef_probs[i][j][k][l][t];
                 const vp9_prob oldp = old_frame_coef_probs[i][j][k][l][t];
                 int s;
                 int u = 0;
-
-                if (l >= 3 && k == 0)
-                  continue;
                 if (t == PIVOT_NODE)
                   s = vp9_prob_diff_update_savings_search_model(
                       frame_branch_ct[i][j][k][l][0],
@@ -645,7 +640,7 @@ static void update_coef_probs_common(vp9_writer* const bc, VP9_COMP *cpi,
       for (i = 0; i < BLOCK_TYPES; ++i) {
         for (j = 0; j < REF_TYPES; ++j) {
           for (k = 0; k < COEF_BANDS; ++k) {
-            for (l = 0; l < PREV_COEF_CONTEXTS; ++l) {
+            for (l = 0; l < BAND_COEFF_CONTEXTS(k); ++l) {
               // calc probs and branch cts for this frame only
               for (t = 0; t < entropy_nodes_update; ++t) {
                 vp9_prob newp = new_frame_coef_probs[i][j][k][l][t];
@@ -653,8 +648,6 @@ static void update_coef_probs_common(vp9_writer* const bc, VP9_COMP *cpi,
                 const vp9_prob upd = DIFF_UPDATE_PROB;
                 int s;
                 int u = 0;
-                if (l >= 3 && k == 0)
-                  continue;
                 if (t == PIVOT_NODE)
                   s = vp9_prob_diff_update_savings_search_model(
                       frame_branch_ct[i][j][k][l][0],
@@ -686,25 +679,23 @@ static void update_coef_probs_common(vp9_writer* const bc, VP9_COMP *cpi,
     case 1:
     case 2: {
       const int prev_coef_contexts_to_update =
-          (cpi->sf.use_fast_coef_updates == 2 ?
-           PREV_COEF_CONTEXTS >> 1 : PREV_COEF_CONTEXTS);
+          cpi->sf.use_fast_coef_updates == 2 ? COEFF_CONTEXTS >> 1
+                                             : COEFF_CONTEXTS;
       const int coef_band_to_update =
-          (cpi->sf.use_fast_coef_updates == 2 ?
-           COEF_BANDS >> 1 : COEF_BANDS);
+          cpi->sf.use_fast_coef_updates == 2 ? COEF_BANDS >> 1
+                                             : COEF_BANDS;
       int updates = 0;
       int noupdates_before_first = 0;
       for (i = 0; i < BLOCK_TYPES; ++i) {
         for (j = 0; j < REF_TYPES; ++j) {
           for (k = 0; k < COEF_BANDS; ++k) {
-            for (l = 0; l < PREV_COEF_CONTEXTS; ++l) {
+            for (l = 0; l < BAND_COEFF_CONTEXTS(k); ++l) {
               // calc probs and branch cts for this frame only
               for (t = 0; t < entropy_nodes_update; ++t) {
                 vp9_prob newp = new_frame_coef_probs[i][j][k][l][t];
                 vp9_prob *oldp = old_frame_coef_probs[i][j][k][l] + t;
                 int s;
                 int u = 0;
-                if (l >= 3 && k == 0)
-                  continue;
                 if (l >= prev_coef_contexts_to_update ||
                     k >= coef_band_to_update) {
                   u = 0;

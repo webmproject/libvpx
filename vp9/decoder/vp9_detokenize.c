@@ -87,12 +87,12 @@ static int decode_coefs(VP9_COMMON *cm, const MACROBLOCKD *xd, int block,
   FRAME_COUNTS *const counts = &cm->counts;
   const int ref = is_inter_block(&xd->mi_8x8[0]->mbmi);
   int band, c = 0;
-  const vp9_prob (*coef_probs)[PREV_COEF_CONTEXTS][UNCONSTRAINED_NODES] =
+  const vp9_prob (*coef_probs)[COEFF_CONTEXTS][UNCONSTRAINED_NODES] =
       fc->coef_probs[tx_size][type][ref];
   const vp9_prob *prob;
-  unsigned int (*coef_counts)[PREV_COEF_CONTEXTS][UNCONSTRAINED_NODES + 1] =
+  unsigned int (*coef_counts)[COEFF_CONTEXTS][UNCONSTRAINED_NODES + 1] =
       counts->coef[tx_size][type][ref];
-  unsigned int (*eob_branch_count)[PREV_COEF_CONTEXTS] =
+  unsigned int (*eob_branch_count)[COEFF_CONTEXTS] =
       counts->eob_branch[tx_size][type][ref];
   uint8_t token_cache[32 * 32];
   const uint8_t *cat6;

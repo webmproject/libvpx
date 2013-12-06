@@ -154,11 +154,11 @@ static void fill_token_costs(vp9_coeff_cost *c,
                              vp9_coeff_probs_model (*p)[BLOCK_TYPES]) {
   int i, j, k, l;
   TX_SIZE t;
-  for (t = TX_4X4; t <= TX_32X32; t++)
-    for (i = 0; i < BLOCK_TYPES; i++)
-      for (j = 0; j < REF_TYPES; j++)
-        for (k = 0; k < COEF_BANDS; k++)
-          for (l = 0; l < PREV_COEF_CONTEXTS; l++) {
+  for (t = TX_4X4; t <= TX_32X32; ++t)
+    for (i = 0; i < BLOCK_TYPES; ++i)
+      for (j = 0; j < REF_TYPES; ++j)
+        for (k = 0; k < COEF_BANDS; ++k)
+          for (l = 0; l < BAND_COEFF_CONTEXTS(k); ++l) {
             vp9_prob probs[ENTROPY_NODES];
             vp9_model_to_full_probs(p[t][i][j][k][l], probs);
             vp9_cost_tokens((int *)c[t][i][j][k][0][l], probs,
@@ -528,7 +528,7 @@ static INLINE int cost_coeffs(MACROBLOCK *x,
   const int eob = p->eobs[block];
   const int16_t *const qcoeff_ptr = BLOCK_OFFSET(p->qcoeff, block);
   const int ref = mbmi->ref_frame[0] != INTRA_FRAME;
-  unsigned int (*token_costs)[2][PREV_COEF_CONTEXTS][ENTROPY_TOKENS] =
+  unsigned int (*token_costs)[2][COEFF_CONTEXTS][ENTROPY_TOKENS] =
                    x->token_costs[tx_size][type][ref];
   const ENTROPY_CONTEXT above_ec = !!*A, left_ec = !!*L;
   uint8_t *p_tok = x->token_cache;
