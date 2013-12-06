@@ -75,4 +75,8 @@ static INLINE int treed_cost(vp9_tree tree, const vp9_prob *probs,
 void vp9_cost_tokens(int *costs, const vp9_prob *probs, vp9_tree tree);
 void vp9_cost_tokens_skip(int *costs, const vp9_prob *probs, vp9_tree tree);
 
+void vp9_tree_probs_from_distribution(vp9_tree tree,
+                                      unsigned int branch_ct[ /* n - 1 */ ][2],
+                                      const unsigned int num_events[ /* n */ ]);
+
 #endif  // VP9_ENCODER_VP9_TREEWRITER_H_
