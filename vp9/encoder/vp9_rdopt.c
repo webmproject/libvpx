@@ -122,7 +122,7 @@ static int raster_block_offset(BLOCK_SIZE plane_bsize,
 }
 static int16_t* raster_block_offset_int16(BLOCK_SIZE plane_bsize,
                                           int raster_block, int16_t *base) {
-  const int stride = 4 << b_width_log2(plane_bsize);
+  const int stride = 4 * num_4x4_blocks_wide_lookup[plane_bsize];
   return base + raster_block_offset(plane_bsize, raster_block, stride);
 }
 
@@ -2452,7 +2452,8 @@ static void joint_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
                                 int mi_row, int mi_col,
                                 int_mv single_newmv[MAX_REF_FRAMES],
                                 int *rate_mv) {
-  int pw = 4 << b_width_log2(bsize), ph = 4 << b_height_log2(bsize);
+  const int pw = 4 * num_4x4_blocks_wide_lookup[bsize];
+  const int ph = 4 * num_4x4_blocks_high_lookup[bsize];
   MACROBLOCKD *xd = &x->e_mbd;
   MB_MODE_INFO *mbmi = &xd->mi_8x8[0]->mbmi;
   const int refs[2] = { mbmi->ref_frame[0],
