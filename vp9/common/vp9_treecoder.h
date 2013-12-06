@@ -39,11 +39,6 @@ typedef const vp9_tree_index vp9_tree[];
    taken for each node on the tree; this facilitiates decisions as to
    probability updates. */
 
-void vp9_tree_probs_from_distribution(vp9_tree tree,
-                                      unsigned int branch_ct[ /* n - 1 */ ][2],
-                                      const unsigned int num_events[ /* n */ ]);
-
-
 static INLINE vp9_prob clip_prob(int p) {
   return (p > 255) ? 255u : (p < 1) ? 1u : p;
 }
