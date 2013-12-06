@@ -759,7 +759,7 @@ static void update_stats(VP9_COMP *cpi) {
     // the reference frame counts used to work out probabilities.
     if (is_inter_block(mbmi) && !seg_ref_active) {
       if (cm->comp_pred_mode == REFERENCE_MODE_SELECT)
-        cpi->comp_inter_count[vp9_get_pred_context_comp_inter_inter(cm, xd)]
+        cpi->comp_inter_count[vp9_get_reference_mode_context(cm, xd)]
                              [has_second_ref(mbmi)]++;
 
       if (has_second_ref(mbmi)) {

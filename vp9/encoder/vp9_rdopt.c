@@ -2149,7 +2149,7 @@ static void estimate_ref_frame_costs(VP9_COMP *cpi, int segment_id,
     vp9_prob comp_inter_p = 128;
 
     if (cm->comp_pred_mode == REFERENCE_MODE_SELECT) {
-      comp_inter_p = vp9_get_pred_prob_comp_inter_inter(cm, xd);
+      comp_inter_p = vp9_get_reference_mode_prob(cm, xd);
       *comp_mode_p = comp_inter_p;
     } else {
       *comp_mode_p = 128;
