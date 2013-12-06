@@ -45,6 +45,10 @@ static int gf_high_motion_minq[QINDEX_RANGE];
 static int inter_minq[QINDEX_RANGE];
 static int afq_low_motion_minq[QINDEX_RANGE];
 static int afq_high_motion_minq[QINDEX_RANGE];
+static int gf_high = 2000;
+static int gf_low = 400;
+static int kf_high = 5000;
+static int kf_low = 400;
 
 // Functions to compute the active minq lookup table entries based on a
 // formulaic approach to facilitate easier adjustment of the Q tables.
@@ -84,7 +88,7 @@ void vp9_rc_init_minq_luts(void) {
     kf_high_motion_minq[i] = calculate_minq_index(maxq,
                                                   0.000002,
                                                   -0.0012,
-                                                  0.5,
+                                                  0.50,
                                                   0.0);
 
     gf_low_motion_minq[i] = calculate_minq_index(maxq,
@@ -97,11 +101,6 @@ void vp9_rc_init_minq_luts(void) {
                                                   -0.00125,
                                                   0.50,
                                                   0.0);
-    inter_minq[i] = calculate_minq_index(maxq,
-                                         0.00000271,
-                                         -0.00113,
-                                         0.75,
-                                         0.0);
     afq_low_motion_minq[i] = calculate_minq_index(maxq,
                                                   0.0000015,
                                                   -0.0009,
@@ -112,6 +111,11 @@ void vp9_rc_init_minq_luts(void) {
                                                    -0.00125,
                                                    0.55,
                                                    0.0);
+    inter_minq[i] = calculate_minq_index(maxq,
+                                         0.00000271,
+                                         -0.00113,
+                                         0.75,
+                                         0.0);
   }
 }
 
@@ -285,7 +289,6 @@ static void calc_pframe_target_size(VP9_COMP *cpi) {
   }
 }
 
-
 void vp9_rc_update_rate_correction_factors(VP9_COMP *cpi, int damp_var) {
   const int q = cpi->common.base_qindex;
   int correction_factor = 100;
@@ -333,7 +336,6 @@ void vp9_rc_update_rate_correction_factors(VP9_COMP *cpi, int damp_var) {
       break;
   }
 
-  // if ( (correction_factor > 102) && (Q < cpi->rc.active_worst_quality) )
   if (correction_factor > 102) {
     // We are not already at the worst allowable quality
     correction_factor =
@@ -367,8 +369,9 @@ void vp9_rc_update_rate_correction_factors(VP9_COMP *cpi, int damp_var) {
 }
 
 
-int vp9_rc_regulate_q(const VP9_COMP *cpi, int target_bits_per_frame) {
-  int q = cpi->rc.active_worst_quality;
+int vp9_rc_regulate_q(const VP9_COMP *cpi, int target_bits_per_frame,
+                      int active_best_quality, int active_worst_quality) {
+  int q = active_worst_quality;
 
   int i;
   int last_error = INT_MAX;
@@ -396,7 +399,7 @@ int vp9_rc_regulate_q(const VP9_COMP *cpi, int target_bits_per_frame) {
     target_bits_per_mb =
         (target_bits_per_frame << BPER_MB_NORMBITS) / cpi->common.MBs;
 
-  i = cpi->rc.active_best_quality;
+  i = active_best_quality;
 
   do {
     bits_per_mb_at_this_q = (int)vp9_rc_bits_per_mb(cpi->common.frame_type, i,
@@ -412,7 +415,7 @@ int vp9_rc_regulate_q(const VP9_COMP *cpi, int target_bits_per_frame) {
     } else {
       last_error = bits_per_mb_at_this_q - target_bits_per_mb;
     }
-  } while (++i <= cpi->rc.active_worst_quality);
+  } while (++i <= active_worst_quality);
 
   return q;
 }
@@ -438,14 +441,17 @@ static int get_active_quality(int q,
   return active_best_quality;
 }
 
-int vp9_rc_pick_q_and_adjust_q_bounds(VP9_COMP *cpi,
+int vp9_rc_pick_q_and_adjust_q_bounds(const VP9_COMP *cpi,
                                       int *bottom_index,
-                                      int *top_index) {
-  // Set an active best quality and if necessary active worst quality
-  int q = cpi->rc.active_worst_quality;
-  VP9_COMMON *const cm = &cpi->common;
+                                      int *top_index,
+                                      int *top_index_prop) {
+  const VP9_COMMON *const cm = &cpi->common;
+  int active_best_quality;
+  int active_worst_quality = cpi->rc.active_worst_quality;
+  int q;
 
   if (frame_is_intra_only(cm)) {
+    active_best_quality = cpi->rc.best_quality;
 #if !CONFIG_MULTIPLE_ARF
     // Handle the special case for key frames forced when we have75 reached
     // the maximum key frame interval. Here force the Q to a range
@@ -457,25 +463,19 @@ int vp9_rc_pick_q_and_adjust_q_bounds(VP9_COMP *cpi,
 
       delta_qindex = vp9_compute_qdelta(cpi, last_boosted_q,
                                         (last_boosted_q * 0.75));
-
-      cpi->rc.active_best_quality = MAX(qindex + delta_qindex,
-                                        cpi->rc.best_quality);
-    } else if (cpi->pass == 0 && cpi->common.current_video_frame == 0) {
-      // If this is the first (key) frame in 1-pass, active best/worst is
-      // the user best/worst-allowed, and leave the top_index to active_worst.
-      cpi->rc.active_best_quality = cpi->oxcf.best_allowed_q;
-      cpi->rc.active_worst_quality = cpi->oxcf.worst_allowed_q;
-    } else {
-      int high = 5000;
-      int low = 400;
+      active_best_quality = MAX(qindex + delta_qindex,
+                                cpi->rc.best_quality);
+    } else if (!(cpi->pass == 0 && cpi->common.current_video_frame == 0)) {
+      // not first frame of one pass
       double q_adj_factor = 1.0;
       double q_val;
 
       // Baseline value derived from cpi->active_worst_quality and kf boost
-      cpi->rc.active_best_quality = get_active_quality(q, cpi->rc.kf_boost,
-                                                       low, high,
-                                                       kf_low_motion_minq,
-                                                       kf_high_motion_minq);
+      active_best_quality = get_active_quality(active_worst_quality,
+                                               cpi->rc.kf_boost,
+                                               kf_low, kf_high,
+                                               kf_low_motion_minq,
+                                               kf_high_motion_minq);
 
       // Allow somewhat lower kf minq with small image formats.
       if ((cm->width * cm->height) <= (352 * 288)) {
@@ -487,124 +487,128 @@ int vp9_rc_pick_q_and_adjust_q_bounds(VP9_COMP *cpi,
 
       // Convert the adjustment factor to a qindex delta
       // on active_best_quality.
-      q_val = vp9_convert_qindex_to_q(cpi->rc.active_best_quality);
-      cpi->rc.active_best_quality +=
+      q_val = vp9_convert_qindex_to_q(active_best_quality);
+      active_best_quality +=
           vp9_compute_qdelta(cpi, q_val, (q_val * q_adj_factor));
     }
 #else
     double current_q;
     // Force the KF quantizer to be 30% of the active_worst_quality.
-    current_q = vp9_convert_qindex_to_q(cpi->rc.active_worst_quality);
-    cpi->rc.active_best_quality = cpi->rc.active_worst_quality
+    current_q = vp9_convert_qindex_to_q(active_worst_quality);
+    active_best_quality = active_worst_quality
         + vp9_compute_qdelta(cpi, current_q, current_q * 0.3);
 #endif
   } else if (!cpi->is_src_frame_alt_ref &&
              (cpi->refresh_golden_frame || cpi->refresh_alt_ref_frame)) {
-    int high = 2000;
-    int low = 400;
 
-    // Use the lower of cpi->rc.active_worst_quality and recent
+    // Use the lower of active_worst_quality and recent
     // average Q as basis for GF/ARF best Q limit unless last frame was
     // a key frame.
     if (cpi->frames_since_key > 1 &&
-        cpi->rc.avg_frame_qindex < cpi->rc.active_worst_quality) {
+        cpi->rc.avg_frame_qindex < active_worst_quality) {
       q = cpi->rc.avg_frame_qindex;
+    } else {
+      q = active_worst_quality;
     }
     // For constrained quality dont allow Q less than the cq level
     if (cpi->oxcf.end_usage == USAGE_CONSTRAINED_QUALITY) {
       if (q < cpi->cq_target_quality)
         q = cpi->cq_target_quality;
       if (cpi->frames_since_key > 1) {
-        cpi->rc.active_best_quality = get_active_quality(q, cpi->rc.gfu_boost,
-                                                         low, high,
-                                                         afq_low_motion_minq,
-                                                         afq_high_motion_minq);
+        active_best_quality = get_active_quality(q, cpi->rc.gfu_boost,
+                                                 gf_low, gf_high,
+                                                 afq_low_motion_minq,
+                                                 afq_high_motion_minq);
       } else {
-        cpi->rc.active_best_quality = get_active_quality(q, cpi->rc.gfu_boost,
-                                                         low, high,
-                                                         gf_low_motion_minq,
-                                                         gf_high_motion_minq);
+        active_best_quality = get_active_quality(q, cpi->rc.gfu_boost,
+                                                 gf_low, gf_high,
+                                                 gf_low_motion_minq,
+                                                 gf_high_motion_minq);
       }
       // Constrained quality use slightly lower active best.
-      cpi->rc.active_best_quality = cpi->rc.active_best_quality * 15 / 16;
+      active_best_quality = active_best_quality * 15 / 16;
 
     } else if (cpi->oxcf.end_usage == USAGE_CONSTANT_QUALITY) {
       if (!cpi->refresh_alt_ref_frame) {
-        cpi->rc.active_best_quality = cpi->cq_target_quality;
+        active_best_quality = cpi->cq_target_quality;
       } else {
         if (cpi->frames_since_key > 1) {
-          cpi->rc.active_best_quality = get_active_quality(
-              q, cpi->rc.gfu_boost, low, high,
+          active_best_quality = get_active_quality(
+              q, cpi->rc.gfu_boost, gf_low, gf_high,
               afq_low_motion_minq, afq_high_motion_minq);
         } else {
-          cpi->rc.active_best_quality = get_active_quality(
-              q, cpi->rc.gfu_boost, low, high,
+          active_best_quality = get_active_quality(
+              q, cpi->rc.gfu_boost, gf_low, gf_high,
               gf_low_motion_minq, gf_high_motion_minq);
         }
       }
     } else {
-        cpi->rc.active_best_quality = get_active_quality(
-            q, cpi->rc.gfu_boost, low, high,
-            gf_low_motion_minq, gf_high_motion_minq);
+      active_best_quality = get_active_quality(
+          q, cpi->rc.gfu_boost, gf_low, gf_high,
+          gf_low_motion_minq, gf_high_motion_minq);
     }
   } else {
     if (cpi->oxcf.end_usage == USAGE_CONSTANT_QUALITY) {
-      cpi->rc.active_best_quality = cpi->cq_target_quality;
+      active_best_quality = cpi->cq_target_quality;
     } else {
-      cpi->rc.active_best_quality = inter_minq[q];
-      // 1-pass: for now, use the average Q for the active_best, if its lower
-      // than active_worst.
-      if (cpi->pass == 0 && (cpi->rc.avg_frame_qindex < q))
-        cpi->rc.active_best_quality = inter_minq[cpi->rc.avg_frame_qindex];
+      if (cpi->pass == 0 &&
+          cpi->rc.avg_frame_qindex < active_worst_quality)
+        // 1-pass: for now, use the average Q for the active_best, if its lower
+        // than active_worst.
+        active_best_quality = inter_minq[cpi->rc.avg_frame_qindex];
+      else
+        active_best_quality = inter_minq[active_worst_quality];
 
       // For the constrained quality mode we don't want
       // q to fall below the cq level.
       if ((cpi->oxcf.end_usage == USAGE_CONSTRAINED_QUALITY) &&
-          (cpi->rc.active_best_quality < cpi->cq_target_quality)) {
+          (active_best_quality < cpi->cq_target_quality)) {
         // If we are strongly undershooting the target rate in the last
         // frames then use the user passed in cq value not the auto
         // cq value.
         if (cpi->rc.rolling_actual_bits < cpi->rc.min_frame_bandwidth)
-          cpi->rc.active_best_quality = cpi->oxcf.cq_level;
+          active_best_quality = cpi->oxcf.cq_level;
         else
-          cpi->rc.active_best_quality = cpi->cq_target_quality;
+          active_best_quality = cpi->cq_target_quality;
       }
     }
   }
 
   // Clip the active best and worst quality values to limits
-  if (cpi->rc.active_worst_quality > cpi->rc.worst_quality)
-    cpi->rc.active_worst_quality = cpi->rc.worst_quality;
+  if (active_worst_quality > cpi->rc.worst_quality)
+    active_worst_quality = cpi->rc.worst_quality;
 
-  if (cpi->rc.active_best_quality < cpi->rc.best_quality)
-    cpi->rc.active_best_quality = cpi->rc.best_quality;
+  if (active_best_quality < cpi->rc.best_quality)
+    active_best_quality = cpi->rc.best_quality;
 
-  if (cpi->rc.active_best_quality > cpi->rc.worst_quality)
-    cpi->rc.active_best_quality = cpi->rc.worst_quality;
+  if (active_best_quality > cpi->rc.worst_quality)
+    active_best_quality = cpi->rc.worst_quality;
 
-  if (cpi->rc.active_worst_quality < cpi->rc.active_best_quality)
-    cpi->rc.active_worst_quality = cpi->rc.active_best_quality;
+  if (active_worst_quality < active_best_quality)
+    active_worst_quality = active_best_quality;
 
-  *top_index = cpi->rc.active_worst_quality;
-  *bottom_index = cpi->rc.active_best_quality;
+  *top_index_prop = active_worst_quality;
+  *top_index = active_worst_quality;
+  *bottom_index = active_best_quality;
 
 #if LIMIT_QRANGE_FOR_ALTREF_AND_KEY
   // Limit Q range for the adaptive loop.
   if (cm->frame_type == KEY_FRAME && !cpi->this_key_frame_forced) {
     if (!(cpi->pass == 0 && cpi->common.current_video_frame == 0)) {
+      *top_index = active_worst_quality;
       *top_index =
-          (cpi->rc.active_worst_quality + cpi->rc.active_best_quality * 3) / 4;
+          (active_worst_quality + active_best_quality * 3) / 4;
     }
   } else if (!cpi->is_src_frame_alt_ref &&
              (cpi->oxcf.end_usage != USAGE_STREAM_FROM_SERVER) &&
              (cpi->refresh_golden_frame || cpi->refresh_alt_ref_frame)) {
     *top_index =
-      (cpi->rc.active_worst_quality + cpi->rc.active_best_quality) / 2;
+      (active_worst_quality + active_best_quality) / 2;
   }
 #endif
 
   if (cpi->oxcf.end_usage == USAGE_CONSTANT_QUALITY) {
-    q = cpi->rc.active_best_quality;
+    q = active_best_quality;
   // Special case code to try and match quality with forced key frames
   } else if ((cm->frame_type == KEY_FRAME) && cpi->this_key_frame_forced) {
     q = cpi->rc.last_boosted_qindex;
@@ -614,16 +618,34 @@ int vp9_rc_pick_q_and_adjust_q_bounds(VP9_COMP *cpi,
       // 1-pass: for now, use per-frame-bw for target size of frame, scaled
       // by |x| for key frame.
       int scale = (cm->frame_type == KEY_FRAME) ? 5 : 1;
-      q = vp9_rc_regulate_q(cpi, scale * cpi->rc.av_per_frame_bandwidth);
+      q = vp9_rc_regulate_q(cpi, scale * cpi->rc.av_per_frame_bandwidth,
+                            active_best_quality, active_worst_quality);
     } else {
-      q = vp9_rc_regulate_q(cpi, cpi->rc.this_frame_target);
+      q = vp9_rc_regulate_q(cpi, cpi->rc.this_frame_target,
+                            active_best_quality, active_worst_quality);
     }
     if (q > *top_index)
       q = *top_index;
   }
+#if CONFIG_MULTIPLE_ARF
+  // Force the quantizer determined by the coding order pattern.
+  if (cpi->multi_arf_enabled && (cm->frame_type != KEY_FRAME) &&
+      cpi->oxcf.end_usage != USAGE_CONSTANT_QUALITY) {
+    double new_q;
+    double current_q = vp9_convert_qindex_to_q(active_worst_quality);
+    int level = cpi->this_frame_weight;
+    assert(level >= 0);
+    new_q = current_q * (1.0 - (0.2 * (cpi->max_arf_level - level)));
+    q = active_worst_quality +
+        vp9_compute_qdelta(cpi, current_q, new_q);
+
+    *bottom_index = q;
+    *top_index    = q;
+    printf("frame:%d q:%d\n", cm->current_video_frame, q);
+  }
+#endif
   return q;
 }
-
 
 static int estimate_keyframe_frequency(VP9_COMP *cpi) {
   int i;
@@ -680,8 +702,7 @@ static void adjust_key_frame_context(VP9_COMP *cpi) {
   cpi->rc.key_frame_count++;
 }
 
-
-static void compute_frame_size_bounds(const VP9_COMP *cpi,
+void vp9_rc_compute_frame_size_bounds(const VP9_COMP *cpi,
                                       int this_frame_target,
                                       int *frame_under_shoot_limit,
                                       int *frame_over_shoot_limit) {
@@ -720,9 +741,7 @@ static void compute_frame_size_bounds(const VP9_COMP *cpi,
 }
 
 // return of 0 means drop frame
-int vp9_rc_pick_frame_size_and_bounds(VP9_COMP *cpi,
-                                      int *frame_under_shoot_limit,
-                                      int *frame_over_shoot_limit) {
+int vp9_rc_pick_frame_size_target(VP9_COMP *cpi) {
   VP9_COMMON *cm = &cpi->common;
 
   if (cm->frame_type == KEY_FRAME)
@@ -733,13 +752,11 @@ int vp9_rc_pick_frame_size_and_bounds(VP9_COMP *cpi,
   // Target rate per SB64 (including partial SB64s.
   cpi->rc.sb64_target_rate = ((int64_t)cpi->rc.this_frame_target * 64 * 64) /
                              (cpi->common.width * cpi->common.height);
-  compute_frame_size_bounds(cpi, cpi->rc.this_frame_target,
-                            frame_under_shoot_limit, frame_over_shoot_limit);
-
   return 1;
 }
 
-void vp9_rc_postencode_update(VP9_COMP *cpi, uint64_t bytes_used, int q) {
+void vp9_rc_postencode_update(VP9_COMP *cpi, uint64_t bytes_used,
+                              int worst_q) {
   VP9_COMMON *const cm = &cpi->common;
   // Update rate control heuristics
   cpi->rc.projected_frame_size = (bytes_used << 3);
@@ -750,6 +767,7 @@ void vp9_rc_postencode_update(VP9_COMP *cpi, uint64_t bytes_used, int q) {
             cpi->oxcf.end_usage == USAGE_STREAM_FROM_SERVER) ? 2 : 0);
 
   cpi->rc.last_q[cm->frame_type] = cm->base_qindex;
+  cpi->rc.active_worst_quality = worst_q;
 
   // Keep record of last boosted (KF/KF/ARF) Q value.
   // If the current frame is coded at a lower Q then we also update it.
@@ -777,11 +795,11 @@ void vp9_rc_postencode_update(VP9_COMP *cpi, uint64_t bytes_used, int q) {
   if (cm->frame_type != KEY_FRAME &&
       !cpi->refresh_golden_frame && !cpi->refresh_alt_ref_frame) {
     cpi->rc.ni_frames++;
-    cpi->rc.tot_q += vp9_convert_qindex_to_q(q);
+    cpi->rc.tot_q += vp9_convert_qindex_to_q(cm->base_qindex);
     cpi->rc.avg_q = cpi->rc.tot_q / (double)cpi->rc.ni_frames;
 
     // Calculate the average Q for normal inter frames (not key or GFU frames).
-    cpi->rc.ni_tot_qi += q;
+    cpi->rc.ni_tot_qi += cm->base_qindex;
     cpi->rc.ni_av_qi = cpi->rc.ni_tot_qi / cpi->rc.ni_frames;
   }
 
