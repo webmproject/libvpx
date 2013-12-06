@@ -60,13 +60,11 @@ unsigned char vp9_get_pred_context_switchable_interp(const MACROBLOCKD *xd) {
     return SWITCHABLE_FILTERS;
 }
 // Returns a context number for the given MB prediction signal
-unsigned char vp9_get_pred_context_intra_inter(const MACROBLOCKD *xd) {
-  const MODE_INFO *const above_mi = get_above_mi(xd);
-  const MODE_INFO *const left_mi = get_left_mi(xd);
-  const MB_MODE_INFO *const above_mbmi = get_above_mbmi(above_mi);
-  const MB_MODE_INFO *const left_mbmi = get_left_mbmi(left_mi);
-  const int above_in_image = above_mi != NULL;
-  const int left_in_image = left_mi != NULL;
+int vp9_get_intra_inter_context(const MACROBLOCKD *xd) {
+  const MB_MODE_INFO *const above_mbmi = get_above_mbmi(get_above_mi(xd));
+  const MB_MODE_INFO *const left_mbmi = get_left_mbmi(get_left_mi(xd));
+  const int above_in_image = above_mbmi != NULL;
+  const int left_in_image = left_mbmi != NULL;
   const int above_intra = above_in_image ? !is_inter_block(above_mbmi) : 1;
   const int left_intra = left_in_image ? !is_inter_block(left_mbmi) : 1;
 

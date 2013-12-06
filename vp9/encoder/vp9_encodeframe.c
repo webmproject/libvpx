@@ -751,7 +751,7 @@ static void update_stats(VP9_COMP *cpi) {
                                                      SEG_LVL_REF_FRAME);
 
     if (!seg_ref_active)
-      cpi->intra_inter_count[vp9_get_pred_context_intra_inter(xd)]
+      cpi->intra_inter_count[vp9_get_intra_inter_context(xd)]
                             [is_inter_block(mbmi)]++;
 
     // If the segment reference feature is enabled we have only a single

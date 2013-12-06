@@ -61,12 +61,11 @@ static INLINE unsigned char vp9_get_pred_flag_mbskip(const MACROBLOCKD *xd) {
 
 unsigned char vp9_get_pred_context_switchable_interp(const MACROBLOCKD *xd);
 
-unsigned char vp9_get_pred_context_intra_inter(const MACROBLOCKD *xd);
+int vp9_get_intra_inter_context(const MACROBLOCKD *xd);
 
-static INLINE vp9_prob vp9_get_pred_prob_intra_inter(const VP9_COMMON *cm,
-                                                     const MACROBLOCKD *xd) {
-  const int pred_context = vp9_get_pred_context_intra_inter(xd);
-  return cm->fc.intra_inter_prob[pred_context];
+static INLINE vp9_prob vp9_get_intra_inter_prob(const VP9_COMMON *cm,
+                                                const MACROBLOCKD *xd) {
+  return cm->fc.intra_inter_prob[vp9_get_intra_inter_context(xd)];
 }
 
 unsigned char vp9_get_pred_context_comp_inter_inter(const VP9_COMMON *cm,

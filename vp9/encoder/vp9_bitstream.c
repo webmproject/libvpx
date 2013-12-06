@@ -292,8 +292,7 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, MODE_INFO *m, vp9_writer *bc) {
   skip_coeff = write_skip_coeff(cpi, segment_id, m, bc);
 
   if (!vp9_segfeature_active(seg, segment_id, SEG_LVL_REF_FRAME))
-    vp9_write(bc, rf != INTRA_FRAME,
-              vp9_get_pred_prob_intra_inter(cm, xd));
+    vp9_write(bc, rf != INTRA_FRAME, vp9_get_intra_inter_prob(cm, xd));
 
   if (bsize >= BLOCK_8X8 && cm->tx_mode == TX_MODE_SELECT &&
       !(rf != INTRA_FRAME &&
