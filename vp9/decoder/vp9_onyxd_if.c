@@ -261,7 +261,7 @@ int vp9_get_reference_dec(VP9D_PTR ptr, int index, YV12_BUFFER_CONFIG **fb) {
   VP9D_COMP *pbi = (VP9D_COMP *) ptr;
   VP9_COMMON *cm = &pbi->common;
 
-  if (index < 0 || index >= NUM_REF_FRAMES)
+  if (index < 0 || index >= REF_FRAMES)
     return -1;
 
   *fb = &cm->yv12_fb[cm->ref_frame_map[index]];

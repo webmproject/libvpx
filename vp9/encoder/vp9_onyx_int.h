@@ -366,7 +366,7 @@ typedef struct VP9_COMP {
   struct lookahead_ctx    *lookahead;
   struct lookahead_entry  *source;
 #if CONFIG_MULTIPLE_ARF
-  struct lookahead_entry  *alt_ref_source[NUM_REF_FRAMES];
+  struct lookahead_entry  *alt_ref_source[REF_FRAMES];
 #else
   struct lookahead_entry  *alt_ref_source;
 #endif
@@ -394,7 +394,7 @@ typedef struct VP9_COMP {
   int use_svc;
 
 #if CONFIG_MULTIPLE_ARF
-  int alt_ref_fb_idx[NUM_REF_FRAMES - 3];
+  int alt_ref_fb_idx[REF_FRAMES - 3];
 #endif
   int refresh_last_frame;
   int refresh_golden_frame;

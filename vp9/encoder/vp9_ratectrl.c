@@ -195,7 +195,7 @@ void vp9_setup_inter_frame(VP9_COMP *cpi) {
   if (cm->error_resilient_mode || cm->intra_only)
     vp9_setup_past_independence(cm);
 
-  assert(cm->frame_context_idx < NUM_FRAME_CONTEXTS);
+  assert(cm->frame_context_idx < FRAME_CONTEXTS);
   cm->fc = cm->frame_contexts[cm->frame_context_idx];
 }
 

@@ -50,7 +50,7 @@ static int read_be32(const uint8_t *p) {
 
 static int is_compound_reference_allowed(const VP9_COMMON *cm) {
   int i;
-  for (i = 1; i < ALLOWED_REFS_PER_FRAME; ++i)
+  for (i = 1; i < REFS_PER_FRAME; ++i)
     if  (cm->ref_frame_sign_bias[i + 1] != cm->ref_frame_sign_bias[1])
       return 1;
 
@@ -720,7 +720,7 @@ static void setup_frame_size_with_refs(VP9D_COMP *pbi,
 
   int width, height;
   int found = 0, i;
-  for (i = 0; i < ALLOWED_REFS_PER_FRAME; ++i) {
+  for (i = 0; i < REFS_PER_FRAME; ++i) {
     if (vp9_rb_read_bit(rb)) {
       YV12_BUFFER_CONFIG *const cfg = get_frame_ref_buffer(cm, i);
       width = cfg->y_crop_width;
@@ -1097,9 +1097,9 @@ static size_t read_uncompressed_header(VP9D_COMP *pbi,
       }
     }
 
-    pbi->refresh_frame_flags = (1 << NUM_REF_FRAMES) - 1;
+    pbi->refresh_frame_flags = (1 << REF_FRAMES) - 1;
 
-    for (i = 0; i < ALLOWED_REFS_PER_FRAME; ++i)
+    for (i = 0; i < REFS_PER_FRAME; ++i)
       cm->active_ref_idx[i] = cm->new_fb_idx;
 
     setup_frame_size(pbi, rb);
@@ -1112,13 +1112,13 @@ static size_t read_uncompressed_header(VP9D_COMP *pbi,
     if (cm->intra_only) {
       check_sync_code(cm, rb);
 
-      pbi->refresh_frame_flags = vp9_rb_read_literal(rb, NUM_REF_FRAMES);
+      pbi->refresh_frame_flags = vp9_rb_read_literal(rb, REF_FRAMES);
       setup_frame_size(pbi, rb);
     } else {
-      pbi->refresh_frame_flags = vp9_rb_read_literal(rb, NUM_REF_FRAMES);
+      pbi->refresh_frame_flags = vp9_rb_read_literal(rb, REF_FRAMES);
 
-      for (i = 0; i < ALLOWED_REFS_PER_FRAME; ++i) {
-        const int ref = vp9_rb_read_literal(rb, NUM_REF_FRAMES_LOG2);
+      for (i = 0; i < REFS_PER_FRAME; ++i) {
+        const int ref = vp9_rb_read_literal(rb, REF_FRAMES_LOG2);
         cm->active_ref_idx[i] = cm->ref_frame_map[ref];
         cm->ref_frame_sign_bias[LAST_FRAME + i] = vp9_rb_read_bit(rb);
       }
@@ -1128,7 +1128,7 @@ static size_t read_uncompressed_header(VP9D_COMP *pbi,
       cm->allow_high_precision_mv = vp9_rb_read_bit(rb);
       cm->mcomp_filter_type = read_interp_filter_type(rb);
 
-      for (i = 0; i < ALLOWED_REFS_PER_FRAME; ++i) {
+      for (i = 0; i < REFS_PER_FRAME; ++i) {
         vp9_setup_scale_factors(cm, i);
         if (vp9_is_scaled(&cm->active_ref_scale_comm[i]))
           vp9_extend_frame_borders(&cm->yv12_fb[cm->active_ref_idx[i]],
@@ -1147,7 +1147,7 @@ static size_t read_uncompressed_header(VP9D_COMP *pbi,
 
   // This flag will be overridden by the call to vp9_setup_past_independence
   // below, forcing the use of context 0 for those frame types.
-  cm->frame_context_idx = vp9_rb_read_literal(rb, NUM_FRAME_CONTEXTS_LOG2);
+  cm->frame_context_idx = vp9_rb_read_literal(rb, FRAME_CONTEXTS_LOG2);
 
   if (frame_is_intra_only(cm) || cm->error_resilient_mode)
     vp9_setup_past_independence(cm);

@@ -25,18 +25,18 @@
 #include "vp9/common/vp9_postproc.h"
 #endif
 
-#define ALLOWED_REFS_PER_FRAME 3
+#define REFS_PER_FRAME 3
 
-#define NUM_REF_FRAMES_LOG2 3
-#define NUM_REF_FRAMES (1 << NUM_REF_FRAMES_LOG2)
+#define REF_FRAMES_LOG2 3
+#define REF_FRAMES (1 << REF_FRAMES_LOG2)
 
 // 1 scratch frame for the new frame, 3 for scaled references on the encoder
 // TODO(jkoleszar): These 3 extra references could probably come from the
 // normal reference pool.
-#define NUM_YV12_BUFFERS (NUM_REF_FRAMES + 4)
+#define FRAME_BUFFERS (REF_FRAMES + 4)
 
-#define NUM_FRAME_CONTEXTS_LOG2 2
-#define NUM_FRAME_CONTEXTS (1 << NUM_FRAME_CONTEXTS_LOG2)
+#define FRAME_CONTEXTS_LOG2 2
+#define FRAME_CONTEXTS (1 << FRAME_CONTEXTS_LOG2)
 
 extern const struct {
   PARTITION_CONTEXT above;
@@ -113,17 +113,17 @@ typedef struct VP9Common {
 
   YV12_BUFFER_CONFIG *frame_to_show;
 
-  YV12_BUFFER_CONFIG yv12_fb[NUM_YV12_BUFFERS];
-  int fb_idx_ref_cnt[NUM_YV12_BUFFERS]; /* reference counts */
-  int ref_frame_map[NUM_REF_FRAMES]; /* maps fb_idx to reference slot */
+  YV12_BUFFER_CONFIG yv12_fb[FRAME_BUFFERS];
+  int fb_idx_ref_cnt[FRAME_BUFFERS]; /* reference counts */
+  int ref_frame_map[REF_FRAMES]; /* maps fb_idx to reference slot */
 
   // TODO(jkoleszar): could expand active_ref_idx to 4, with 0 as intra, and
   // roll new_fb_idx into it.
 
-  // Each frame can reference ALLOWED_REFS_PER_FRAME buffers
-  int active_ref_idx[ALLOWED_REFS_PER_FRAME];
-  struct scale_factors active_ref_scale[ALLOWED_REFS_PER_FRAME];
-  struct scale_factors_common active_ref_scale_comm[ALLOWED_REFS_PER_FRAME];
+  // Each frame can reference REFS_PER_FRAME buffers
+  int active_ref_idx[REFS_PER_FRAME];
+  struct scale_factors active_ref_scale[REFS_PER_FRAME];
+  struct scale_factors_common active_ref_scale_comm[REFS_PER_FRAME];
   int new_fb_idx;
 
   YV12_BUFFER_CONFIG post_proc_buffer;
@@ -198,7 +198,7 @@ typedef struct VP9Common {
   REFERENCE_MODE comp_pred_mode;
 
   FRAME_CONTEXT fc;  /* this frame entropy */
-  FRAME_CONTEXT frame_contexts[NUM_FRAME_CONTEXTS];
+  FRAME_CONTEXT frame_contexts[FRAME_CONTEXTS];
   unsigned int  frame_context_idx; /* Context to use/update */
   FRAME_COUNTS counts;
 
@@ -228,11 +228,11 @@ static YV12_BUFFER_CONFIG *get_frame_new_buffer(VP9_COMMON *cm) {
 
 static int get_free_fb(VP9_COMMON *cm) {
   int i;
-  for (i = 0; i < NUM_YV12_BUFFERS; i++)
+  for (i = 0; i < FRAME_BUFFERS; i++)
     if (cm->fb_idx_ref_cnt[i] == 0)
       break;
 
-  assert(i < NUM_YV12_BUFFERS);
+  assert(i < FRAME_BUFFERS);
   cm->fb_idx_ref_cnt[i] = 1;
   return i;
 }
