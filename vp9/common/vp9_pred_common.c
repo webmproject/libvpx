@@ -364,7 +364,7 @@ unsigned char vp9_get_pred_context_single_ref_p2(const MACROBLOCKD *xd) {
 // The mode info data structure has a one element border above and to the
 // left of the entries corresponding to real blocks.
 // The prediction flags in these dummy entries are initialized to 0.
-unsigned char vp9_get_pred_context_tx_size(const MACROBLOCKD *xd) {
+int vp9_get_tx_size_context(const MACROBLOCKD *xd) {
   const int max_tx_size = max_txsize_lookup[xd->mi_8x8[0]->mbmi.sb_type];
   const MB_MODE_INFO *const above_mbmi = get_above_mbmi(get_above_mi(xd));
   const MB_MODE_INFO *const left_mbmi = get_left_mbmi(get_left_mi(xd));
