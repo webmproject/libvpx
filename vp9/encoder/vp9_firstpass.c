@@ -1030,22 +1030,6 @@ static int estimate_max_q(VP9_COMP *cpi,
     sr_correction = 0.75;
   }
 
-  // Calculate a corrective factor based on a rolling ratio of bits spent
-  // vs target bits
-  if (cpi->rc.rolling_target_bits > 0 &&
-      cpi->rc.active_worst_quality < cpi->rc.worst_quality) {
-    double rolling_ratio = (double)cpi->rc.rolling_actual_bits /
-                               (double)cpi->rc.rolling_target_bits;
-
-    if (rolling_ratio < 0.95)
-      cpi->twopass.est_max_qcorrection_factor -= 0.005;
-    else if (rolling_ratio > 1.05)
-      cpi->twopass.est_max_qcorrection_factor += 0.005;
-
-    cpi->twopass.est_max_qcorrection_factor = fclamp(
-        cpi->twopass.est_max_qcorrection_factor, 0.1, 10.0);
-  }
-
   // Corrections for higher compression speed settings
   // (reduced compression expected)
   // FIXME(jimbankoski): Once we settle on vp9 speed features we need to
@@ -1062,8 +1046,7 @@ static int estimate_max_q(VP9_COMP *cpi,
 
     err_correction_factor = calc_correction_factor(err_per_mb,
                                                    ERR_DIVISOR, 0.4, 0.90, q) *
-                                sr_correction * speed_correction *
-                                cpi->twopass.est_max_qcorrection_factor;
+                                sr_correction * speed_correction;
 
     bits_per_mb_at_this_q = vp9_rc_bits_per_mb(INTER_FRAME, q,
                                                err_correction_factor);
@@ -2168,7 +2151,6 @@ void vp9_second_pass(VP9_COMP *cpi) {
     if (cpi->common.current_video_frame == 0) {
       int section_target_bandwidth =
           (int)(cpi->twopass.bits_left / frames_left);
-      cpi->twopass.est_max_qcorrection_factor = 1.0;
 
       // guess at maxq needed in 2nd pass
       cpi->twopass.maxq_max_limit = cpi->rc.worst_quality;

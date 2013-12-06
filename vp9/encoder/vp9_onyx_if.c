@@ -1632,7 +1632,6 @@ VP9_PTR vp9_create_compressor(VP9_CONFIG *oxcf) {
   cpi->rc.rate_correction_factor         = 1.0;
   cpi->rc.key_frame_rate_correction_factor = 1.0;
   cpi->rc.gf_rate_correction_factor  = 1.0;
-  cpi->twopass.est_max_qcorrection_factor  = 1.0;
 
   cal_nmvjointsadcost(cpi->mb.nmvjointsadcost);
   cpi->mb.nmvcost[0] = &cpi->mb.nmvcosts[0][MV_MAX];
@@ -2617,7 +2616,7 @@ static void output_frame_level_debug_stats(VP9_COMP *cpi) {
   if (cpi->twopass.total_left_stats.coded_error != 0.0)
     fprintf(f, "%10d %10d %10d %10d %10d %10d %10d %10d %10d"
         "%7.2f %7.2f %7.2f %7.2f %7.2f %7.2f"
-        "%6d %6d %5d %5d %5d %8.2f %10d %10.3f"
+        "%6d %6d %5d %5d %5d %10d %10.3f"
         "%10.3f %8d %10d %10d %10d\n",
         cpi->common.current_video_frame, cpi->rc.this_frame_target,
         cpi->rc.projected_frame_size, 0,
@@ -2632,7 +2631,7 @@ static void output_frame_level_debug_stats(VP9_COMP *cpi) {
         vp9_convert_qindex_to_q(cpi->cq_target_quality),
         cpi->refresh_last_frame, cpi->refresh_golden_frame,
         cpi->refresh_alt_ref_frame, cm->frame_type, cpi->rc.gfu_boost,
-        cpi->twopass.est_max_qcorrection_factor, (int)cpi->twopass.bits_left,
+        (int)cpi->twopass.bits_left,
         cpi->twopass.total_left_stats.coded_error,
         (double)cpi->twopass.bits_left /
             (1 + cpi->twopass.total_left_stats.coded_error),
