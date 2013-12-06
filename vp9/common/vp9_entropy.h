@@ -82,13 +82,14 @@ extern const vp9_extra_bit vp9_extra_bits[ENTROPY_TOKENS];
    coefficient band (and since zigzag positions 0, 1, and 2 are in
    distinct bands). */
 
-#define PREV_COEF_CONTEXTS          6
+#define COEFF_CONTEXTS 6
+#define BAND_COEFF_CONTEXTS(band) ((band) == 0 ? 3 : COEFF_CONTEXTS)
 
 // #define ENTROPY_STATS
 
-typedef unsigned int vp9_coeff_count[REF_TYPES][COEF_BANDS][PREV_COEF_CONTEXTS]
+typedef unsigned int vp9_coeff_count[REF_TYPES][COEF_BANDS][COEFF_CONTEXTS]
                                     [ENTROPY_TOKENS];
-typedef unsigned int vp9_coeff_stats[REF_TYPES][COEF_BANDS][PREV_COEF_CONTEXTS]
+typedef unsigned int vp9_coeff_stats[REF_TYPES][COEF_BANDS][COEFF_CONTEXTS]
                                     [ENTROPY_NODES][2];
 
 #define SUBEXP_PARAM                4   /* Subexponential code parameter */
@@ -137,11 +138,10 @@ static const uint8_t *get_band_translate(TX_SIZE tx_size) {
 extern const vp9_prob vp9_pareto8_full[COEFF_PROB_MODELS][MODEL_NODES];
 
 typedef vp9_prob vp9_coeff_probs_model[REF_TYPES][COEF_BANDS]
-                                      [PREV_COEF_CONTEXTS]
-                                      [UNCONSTRAINED_NODES];
+                                      [COEFF_CONTEXTS][UNCONSTRAINED_NODES];
 
 typedef unsigned int vp9_coeff_count_model[REF_TYPES][COEF_BANDS]
-                                          [PREV_COEF_CONTEXTS]
+                                          [COEFF_CONTEXTS]
                                           [UNCONSTRAINED_NODES + 1];
 
 void vp9_model_to_full_probs(const vp9_prob *model, vp9_prob *full);

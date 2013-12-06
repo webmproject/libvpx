@@ -87,7 +87,7 @@ struct macroblock_plane {
 /* The [2] dimension is for whether we skip the EOB node (i.e. if previous
  * coefficient in this block was zero) or not. */
 typedef unsigned int vp9_coeff_cost[BLOCK_TYPES][REF_TYPES][COEF_BANDS][2]
-                                   [PREV_COEF_CONTEXTS][ENTROPY_TOKENS];
+                                   [COEFF_CONTEXTS][ENTROPY_TOKENS];
 
 typedef struct macroblock MACROBLOCK;
 struct macroblock {

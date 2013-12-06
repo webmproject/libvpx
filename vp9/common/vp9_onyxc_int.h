@@ -66,7 +66,7 @@ typedef struct {
   unsigned int partition[PARTITION_CONTEXTS][PARTITION_TYPES];
   vp9_coeff_count_model coef[TX_SIZES][BLOCK_TYPES];
   unsigned int eob_branch[TX_SIZES][BLOCK_TYPES][REF_TYPES]
-                         [COEF_BANDS][PREV_COEF_CONTEXTS];
+                         [COEF_BANDS][COEFF_CONTEXTS];
   unsigned int switchable_interp[SWITCHABLE_FILTER_CONTEXTS]
                                 [SWITCHABLE_FILTERS];
   unsigned int inter_mode[INTER_MODE_CONTEXTS][INTER_MODES];
