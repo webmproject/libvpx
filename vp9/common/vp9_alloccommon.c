@@ -75,7 +75,6 @@ static void setup_mi(VP9_COMMON *cm) {
              cm->mode_info_stride * (cm->mi_rows + 1) *
              sizeof(*cm->mi_grid_base));
 
-  vp9_update_mode_info_border(cm, cm->mip);
   vp9_update_mode_info_border(cm, cm->prev_mip);
 }
 
