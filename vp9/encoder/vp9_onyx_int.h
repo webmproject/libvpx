@@ -684,8 +684,7 @@ static int get_scale_ref_frame_idx(VP9_COMP *cpi,
 
 void vp9_encode_frame(VP9_COMP *cpi);
 
-void vp9_pack_bitstream(VP9_COMP *cpi, unsigned char *dest,
-                        unsigned long *size);
+void vp9_pack_bitstream(VP9_COMP *cpi, uint8_t *dest, size_t *size);
 
 void vp9_activity_masking(VP9_COMP *cpi, MACROBLOCK *x);
 
