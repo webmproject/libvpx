@@ -569,7 +569,6 @@ typedef struct VP9_COMP {
     int alt_extra_bits;
 
     int sr_update_lag;
-    double est_max_qcorrection_factor;
   } twopass;
 
   YV12_BUFFER_CONFIG alt_ref_buffer;
