@@ -459,7 +459,7 @@ void vp9_setup_past_independence(VP9_COMMON *cm) {
   if (cm->frame_type == KEY_FRAME ||
       cm->error_resilient_mode || cm->reset_frame_context == 3) {
     // Reset all frame contexts.
-    for (i = 0; i < NUM_FRAME_CONTEXTS; ++i)
+    for (i = 0; i < FRAME_CONTEXTS; ++i)
       cm->frame_contexts[i] = cm->fc;
   } else if (cm->reset_frame_context == 2) {
     // Reset only the frame context specified in the frame header.

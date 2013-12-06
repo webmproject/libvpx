@@ -2151,7 +2151,7 @@ int vp9_get_reference_enc(VP9_PTR ptr, int index, YV12_BUFFER_CONFIG **fb) {
   VP9_COMP *cpi = (VP9_COMP *)(ptr);
   VP9_COMMON *cm = &cpi->common;
 
-  if (index < 0 || index >= NUM_REF_FRAMES)
+  if (index < 0 || index >= REF_FRAMES)
     return -1;
 
   *fb = &cm->yv12_fb[cm->ref_frame_map[index]];
@@ -2551,8 +2551,8 @@ static void loopfilter_frame(VP9_COMP *cpi, VP9_COMMON *cm) {
 static void scale_references(VP9_COMP *cpi) {
   VP9_COMMON *cm = &cpi->common;
   int i;
-  int refs[ALLOWED_REFS_PER_FRAME] = {cpi->lst_fb_idx, cpi->gld_fb_idx,
-                                      cpi->alt_fb_idx};
+  int refs[REFS_PER_FRAME] = {cpi->lst_fb_idx, cpi->gld_fb_idx,
+                              cpi->alt_fb_idx};
 
   for (i = 0; i < 3; i++) {
     YV12_BUFFER_CONFIG *ref = &cm->yv12_fb[cm->ref_frame_map[refs[i]]];
@@ -3558,7 +3558,7 @@ int vp9_get_compressed_data(VP9_PTR ptr, unsigned int *frame_flags,
                            VP9BORDERINPIXELS);
 
   // Calculate scaling factors for each of the 3 available references
-  for (i = 0; i < ALLOWED_REFS_PER_FRAME; ++i) {
+  for (i = 0; i < REFS_PER_FRAME; ++i) {
     vp9_setup_scale_factors(cm, i);
     if (vp9_is_scaled(&cm->active_ref_scale_comm[i]))
       vp9_extend_frame_borders(&cm->yv12_fb[cm->active_ref_idx[i]],
