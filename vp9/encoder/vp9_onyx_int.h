@@ -469,9 +469,9 @@ typedef struct VP9_COMP {
 
   nmv_context_counts NMVcount;
 
-  vp9_coeff_count coef_counts[TX_SIZES][BLOCK_TYPES];
-  vp9_coeff_probs_model frame_coef_probs[TX_SIZES][BLOCK_TYPES];
-  vp9_coeff_stats frame_branch_ct[TX_SIZES][BLOCK_TYPES];
+  vp9_coeff_count coef_counts[TX_SIZES][PLANE_TYPES];
+  vp9_coeff_probs_model frame_coef_probs[TX_SIZES][PLANE_TYPES];
+  vp9_coeff_stats frame_branch_ct[TX_SIZES][PLANE_TYPES];
 
   int kf_zeromotion_pct;
   int gf_zeromotion_pct;

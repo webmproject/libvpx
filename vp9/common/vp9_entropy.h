@@ -59,8 +59,6 @@ extern const vp9_extra_bit vp9_extra_bits[ENTROPY_TOKENS];
 
 /* Coefficients are predicted via a 3-dimensional probability table. */
 
-/* Outside dimension.  0 = Y with DC, 1 = UV */
-#define BLOCK_TYPES 2
 #define REF_TYPES 2  // intra=0, inter=1
 
 /* Middle dimension reflects the coefficient position within the transform. */
@@ -179,7 +177,7 @@ static const scan_order *get_scan(const MACROBLOCKD *xd, TX_SIZE tx_size,
   const MODE_INFO *const mi = xd->mi_8x8[0];
   const MB_MODE_INFO *const mbmi = &mi->mbmi;
 
-  if (is_inter_block(mbmi) || type != PLANE_TYPE_Y_WITH_DC || xd->lossless) {
+  if (is_inter_block(mbmi) || type != PLANE_TYPE_Y || xd->lossless) {
     return &vp9_default_scan_orders[tx_size];
   } else {
     const MB_PREDICTION_MODE mode =

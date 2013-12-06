@@ -44,7 +44,7 @@ unsigned __int64 Sectionbits[500];
 int intra_mode_stats[INTRA_MODES]
                     [INTRA_MODES]
                     [INTRA_MODES];
-vp9_coeff_stats tree_update_hist[TX_SIZES][BLOCK_TYPES];
+vp9_coeff_stats tree_update_hist[TX_SIZES][PLANE_TYPES];
 
 extern unsigned int active_section;
 #endif
@@ -557,7 +557,7 @@ static void build_tree_distribution(VP9_COMP *cpi, TX_SIZE tx_size) {
   vp9_coeff_stats *coef_branch_ct = cpi->frame_branch_ct[tx_size];
   int i, j, k, l, m;
 
-  for (i = 0; i < BLOCK_TYPES; ++i) {
+  for (i = 0; i < PLANE_TYPES; ++i) {
     for (j = 0; j < REF_TYPES; ++j) {
       for (k = 0; k < COEF_BANDS; ++k) {
         for (l = 0; l < BAND_COEFF_CONTEXTS(k); ++l) {
@@ -600,7 +600,7 @@ static void update_coef_probs_common(vp9_writer* const bc, VP9_COMP *cpi,
       /* dry run to see if there is any udpate at all needed */
       int savings = 0;
       int update[2] = {0, 0};
-      for (i = 0; i < BLOCK_TYPES; ++i) {
+      for (i = 0; i < PLANE_TYPES; ++i) {
         for (j = 0; j < REF_TYPES; ++j) {
           for (k = 0; k < COEF_BANDS; ++k) {
             for (l = 0; l < BAND_COEFF_CONTEXTS(k); ++l) {
@@ -636,7 +636,7 @@ static void update_coef_probs_common(vp9_writer* const bc, VP9_COMP *cpi,
         return;
       }
       vp9_write_bit(bc, 1);
-      for (i = 0; i < BLOCK_TYPES; ++i) {
+      for (i = 0; i < PLANE_TYPES; ++i) {
         for (j = 0; j < REF_TYPES; ++j) {
           for (k = 0; k < COEF_BANDS; ++k) {
             for (l = 0; l < BAND_COEFF_CONTEXTS(k); ++l) {
@@ -685,7 +685,7 @@ static void update_coef_probs_common(vp9_writer* const bc, VP9_COMP *cpi,
                                              : COEF_BANDS;
       int updates = 0;
       int noupdates_before_first = 0;
-      for (i = 0; i < BLOCK_TYPES; ++i) {
+      for (i = 0; i < PLANE_TYPES; ++i) {
         for (j = 0; j < REF_TYPES; ++j) {
           for (k = 0; k < COEF_BANDS; ++k) {
             for (l = 0; l < BAND_COEFF_CONTEXTS(k); ++l) {

@@ -151,11 +151,11 @@ static void fill_mode_costs(VP9_COMP *c) {
 }
 
 static void fill_token_costs(vp9_coeff_cost *c,
-                             vp9_coeff_probs_model (*p)[BLOCK_TYPES]) {
+                             vp9_coeff_probs_model (*p)[PLANE_TYPES]) {
   int i, j, k, l;
   TX_SIZE t;
   for (t = TX_4X4; t <= TX_32X32; ++t)
-    for (i = 0; i < BLOCK_TYPES; ++i)
+    for (i = 0; i < PLANE_TYPES; ++i)
       for (j = 0; j < REF_TYPES; ++j)
         for (k = 0; k < COEF_BANDS; ++k)
           for (l = 0; l < BAND_COEFF_CONTEXTS(k); ++l) {
@@ -536,7 +536,7 @@ static INLINE int cost_coeffs(MACROBLOCK *x,
   int c, cost;
 
   // Check for consistency of tx_size with mode info
-  assert(type == PLANE_TYPE_Y_WITH_DC ? mbmi->tx_size == tx_size
+  assert(type == PLANE_TYPE_Y ? mbmi->tx_size == tx_size
                                       : get_uv_tx_size(mbmi) == tx_size);
 
   if (eob == 0) {
@@ -1047,7 +1047,7 @@ static int64_t rd_pick_intra4x4block(VP9_COMP *cpi, MACROBLOCK *x, int ib,
                            src, src_stride,
                            dst, dst_stride);
 
-        tx_type = get_tx_type_4x4(PLANE_TYPE_Y_WITH_DC, xd, block);
+        tx_type = get_tx_type_4x4(PLANE_TYPE_Y, xd, block);
         so = &vp9_scan_orders[TX_4X4][tx_type];
 
         if (tx_type != DCT_DCT)
