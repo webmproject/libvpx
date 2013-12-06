@@ -2323,7 +2323,6 @@ static void single_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
   int_mv mvp_full;
   int ref = mbmi->ref_frame[0];
   int_mv ref_mv = mbmi->ref_mvs[ref][0];
-  const BLOCK_SIZE block_size = get_plane_block_size(bsize, &xd->plane[0]);
 
   int tmp_col_min = x->mv_col_min;
   int tmp_col_max = x->mv_col_max;
@@ -2397,24 +2396,24 @@ static void single_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
     bestsme = vp9_hex_search(x, &mvp_full.as_mv,
                              step_param,
                              sadpb, 1,
-                             &cpi->fn_ptr[block_size], 1,
+                             &cpi->fn_ptr[bsize], 1,
                              &ref_mv.as_mv, &tmp_mv->as_mv);
   } else if (cpi->sf.search_method == SQUARE) {
     bestsme = vp9_square_search(x, &mvp_full.as_mv,
                                 step_param,
                                 sadpb, 1,
-                                &cpi->fn_ptr[block_size], 1,
+                                &cpi->fn_ptr[bsize], 1,
                                 &ref_mv.as_mv, &tmp_mv->as_mv);
   } else if (cpi->sf.search_method == BIGDIA) {
     bestsme = vp9_bigdia_search(x, &mvp_full.as_mv,
                                 step_param,
                                 sadpb, 1,
-                                &cpi->fn_ptr[block_size], 1,
+                                &cpi->fn_ptr[bsize], 1,
                                 &ref_mv.as_mv, &tmp_mv->as_mv);
   } else {
     bestsme = vp9_full_pixel_diamond(cpi, x, &mvp_full, step_param,
                                      sadpb, further_steps, 1,
-                                     &cpi->fn_ptr[block_size],
+                                     &cpi->fn_ptr[bsize],
                                      &ref_mv, tmp_mv);
   }
 
@@ -2429,7 +2428,7 @@ static void single_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
     cpi->find_fractional_mv_step(x, &tmp_mv->as_mv, &ref_mv.as_mv,
                                  cm->allow_high_precision_mv,
                                  x->errorperbit,
-                                 &cpi->fn_ptr[block_size],
+                                 &cpi->fn_ptr[bsize],
                                  0, cpi->sf.subpel_iters_per_step,
                                  x->nmvjointcost, x->mvcost,
                                  &dis, &sse);
@@ -2459,7 +2458,6 @@ static void joint_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
   const int refs[2] = { mbmi->ref_frame[0],
                         mbmi->ref_frame[1] < 0 ? 0 : mbmi->ref_frame[1] };
   int_mv ref_mv[2];
-  const BLOCK_SIZE block_size = get_plane_block_size(bsize, &xd->plane[0]);
   int ite, ref;
   // Prediction buffer from second frame.
   uint8_t *second_pred = vpx_memalign(16, pw * ph * sizeof(uint8_t));
@@ -2533,7 +2531,7 @@ static void joint_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
     // Small-range full-pixel motion search
     bestsme = vp9_refining_search_8p_c(x, &tmp_mv, sadpb,
                                        search_range,
-                                       &cpi->fn_ptr[block_size],
+                                       &cpi->fn_ptr[bsize],
                                        x->nmvjointcost, x->mvcost,
                                        &ref_mv[id], second_pred,
                                        pw, ph);
@@ -2552,7 +2550,7 @@ static void joint_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
           &ref_mv[id].as_mv,
           cpi->common.allow_high_precision_mv,
           x->errorperbit,
-          &cpi->fn_ptr[block_size],
+          &cpi->fn_ptr[bsize],
           0, cpi->sf.subpel_iters_per_step,
           x->nmvjointcost, x->mvcost,
           &dis, &sse, second_pred,
