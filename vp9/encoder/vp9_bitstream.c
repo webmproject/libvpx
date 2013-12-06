@@ -233,10 +233,10 @@ static void encode_ref_frame(VP9_COMP *cpi, vp9_writer *bc) {
     // (if not specified at the frame/segment level)
     if (cm->comp_pred_mode == REFERENCE_MODE_SELECT) {
       vp9_write(bc, mi->ref_frame[1] > INTRA_FRAME,
-                vp9_get_pred_prob_comp_inter_inter(cm, xd));
+                vp9_get_reference_mode_prob(cm, xd));
     } else {
       assert((mi->ref_frame[1] <= INTRA_FRAME) ==
-                 (cm->comp_pred_mode == SINGLE_REFERENCE));
+             (cm->comp_pred_mode == SINGLE_REFERENCE));
     }
 
     if (mi->ref_frame[1] > INTRA_FRAME) {

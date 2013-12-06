@@ -68,15 +68,11 @@ static INLINE vp9_prob vp9_get_intra_inter_prob(const VP9_COMMON *cm,
   return cm->fc.intra_inter_prob[vp9_get_intra_inter_context(xd)];
 }
 
-unsigned char vp9_get_pred_context_comp_inter_inter(const VP9_COMMON *cm,
-                                                    const MACROBLOCKD *xd);
+int vp9_get_reference_mode_context(const VP9_COMMON *cm, const MACROBLOCKD *xd);
 
-
-static INLINE
-vp9_prob vp9_get_pred_prob_comp_inter_inter(const VP9_COMMON *cm,
-                                            const MACROBLOCKD *xd) {
-  const int pred_context = vp9_get_pred_context_comp_inter_inter(cm, xd);
-  return cm->fc.comp_inter_prob[pred_context];
+static INLINE vp9_prob vp9_get_reference_mode_prob(const VP9_COMMON *cm,
+                                                   const MACROBLOCKD *xd) {
+  return cm->fc.comp_inter_prob[vp9_get_reference_mode_context(cm, xd)];
 }
 
 unsigned char vp9_get_pred_context_comp_ref_p(const VP9_COMMON *cm,

@@ -258,10 +258,9 @@ static INLINE void read_mv(vp9_reader *r, MV *mv, const MV *ref,
   mv->col = ref->col + diff.col;
 }
 
-static REFERENCE_MODE read_reference_mode(VP9_COMMON *cm,
-                                             const MACROBLOCKD *xd,
-                                             vp9_reader *r) {
-  const int ctx = vp9_get_pred_context_comp_inter_inter(cm, xd);
+static REFERENCE_MODE read_reference_mode(VP9_COMMON *cm, const MACROBLOCKD *xd,
+                                          vp9_reader *r) {
+  const int ctx = vp9_get_reference_mode_context(cm, xd);
   const int mode = vp9_read(r, cm->fc.comp_inter_prob[ctx]);
   if (!cm->frame_parallel_decoding_mode)
     ++cm->counts.comp_inter[ctx][mode];

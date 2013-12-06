@@ -83,16 +83,14 @@ int vp9_get_intra_inter_context(const MACROBLOCKD *xd) {
   else
     return 0;
 }
-// Returns a context number for the given MB prediction signal
-unsigned char vp9_get_pred_context_comp_inter_inter(const VP9_COMMON *cm,
-                                                    const MACROBLOCKD *xd) {
-  int pred_context;
-  const MODE_INFO *const above_mi = get_above_mi(xd);
-  const MODE_INFO *const left_mi = get_left_mi(xd);
-  const MB_MODE_INFO *const above_mbmi = get_above_mbmi(above_mi);
-  const MB_MODE_INFO *const left_mbmi = get_left_mbmi(left_mi);
-  const int above_in_image = above_mi != NULL;
-  const int left_in_image = left_mi != NULL;
+
+int vp9_get_reference_mode_context(const VP9_COMMON *cm,
+                                   const MACROBLOCKD *xd) {
+  int ctx;
+  const MB_MODE_INFO *const above_mbmi = get_above_mbmi(get_above_mi(xd));
+  const MB_MODE_INFO *const left_mbmi = get_left_mbmi(get_left_mi(xd));
+  const int above_in_image = above_mbmi != NULL;
+  const int left_in_image = left_mbmi != NULL;
   // Note:
   // The mode info data structure has a one element border above and to the
   // left of the entries correpsonding to real macroblocks.
@@ -100,32 +98,32 @@ unsigned char vp9_get_pred_context_comp_inter_inter(const VP9_COMMON *cm,
   if (above_in_image && left_in_image) {  // both edges available
     if (!has_second_ref(above_mbmi) && !has_second_ref(left_mbmi))
       // neither edge uses comp pred (0/1)
-      pred_context = (above_mbmi->ref_frame[0] == cm->comp_fixed_ref) ^
-                     (left_mbmi->ref_frame[0] == cm->comp_fixed_ref);
+      ctx = (above_mbmi->ref_frame[0] == cm->comp_fixed_ref) ^
+            (left_mbmi->ref_frame[0] == cm->comp_fixed_ref);
     else if (!has_second_ref(above_mbmi))
       // one of two edges uses comp pred (2/3)
-      pred_context = 2 + (above_mbmi->ref_frame[0] == cm->comp_fixed_ref ||
-                          !is_inter_block(above_mbmi));
+      ctx = 2 + (above_mbmi->ref_frame[0] == cm->comp_fixed_ref ||
+                 !is_inter_block(above_mbmi));
     else if (!has_second_ref(left_mbmi))
       // one of two edges uses comp pred (2/3)
-      pred_context = 2 + (left_mbmi->ref_frame[0] == cm->comp_fixed_ref ||
-                          !is_inter_block(left_mbmi));
+      ctx = 2 + (left_mbmi->ref_frame[0] == cm->comp_fixed_ref ||
+                 !is_inter_block(left_mbmi));
     else  // both edges use comp pred (4)
-      pred_context = 4;
+      ctx = 4;
   } else if (above_in_image || left_in_image) {  // one edge available
     const MB_MODE_INFO *edge_mbmi = above_in_image ? above_mbmi : left_mbmi;
 
     if (!has_second_ref(edge_mbmi))
       // edge does not use comp pred (0/1)
-      pred_context = edge_mbmi->ref_frame[0] == cm->comp_fixed_ref;
+      ctx = edge_mbmi->ref_frame[0] == cm->comp_fixed_ref;
     else
       // edge uses comp pred (3)
-      pred_context = 3;
+      ctx = 3;
   } else {  // no edges available (1)
-    pred_context = 1;
+    ctx = 1;
   }
-  assert(pred_context >= 0 && pred_context < COMP_INTER_CONTEXTS);
-  return pred_context;
+  assert(ctx >= 0 && ctx < COMP_INTER_CONTEXTS);
+  return ctx;
 }
 
 // Returns a context number for the given MB prediction signal
