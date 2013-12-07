@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdX//7Sc\u003d",
+        "filename": "vp9/common/vp9_blockd.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 309,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2013-12-07T02:20:24Z",
+      "side": 1,
+      "message": "This MAX() seems redundant, if bsize \u003c BLOCK_8X8 we have already taken the top branch.",
+      "revId": "b155bb9e6fdeee8dc1e923480e8e1bc7c031911c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX//7Sg\u003d",
+        "filename": "vp9/common/vp9_blockd.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 315,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2013-12-07T02:20:24Z",
+      "side": 1,
+      "message": "Is there a reason that this is split into a wrapper and an impl function?\n\nCalling the _impl function directly from rdopt seems like a code smell so if we need to keep both then maybe we can rename them.",
+      "revId": "b155bb9e6fdeee8dc1e923480e8e1bc7c031911c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
