@@ -3266,12 +3266,12 @@ static void Pass2Encode(VP9_COMP *cpi, unsigned long *size,
   vp9_twopass_postencode_update(cpi, *size);
 }
 
-static void check_initial_width(VP9_COMP *cpi, YV12_BUFFER_CONFIG *sd) {
+static void check_initial_width(VP9_COMP *cpi, int subsampling_x,
+                                int subsampling_y) {
   VP9_COMMON *const cm = &cpi->common;
   if (!cpi->initial_width) {
-    // TODO(agrange) Subsampling defaults to assuming sampled chroma.
-    cm->subsampling_x = sd != NULL ? (sd->uv_width < sd->y_width) : 1;
-    cm->subsampling_y = sd != NULL ? (sd->uv_height < sd->y_height) : 1;
+    cm->subsampling_x = subsampling_x;
+    cm->subsampling_y = subsampling_y;
     alloc_raw_frame_buffers(cpi);
     cpi->initial_width = cm->width;
     cpi->initial_height = cm->height;
@@ -3285,8 +3285,10 @@ int vp9_receive_raw_frame(VP9_PTR ptr, unsigned int frame_flags,
   VP9_COMP              *cpi = (VP9_COMP *) ptr;
   struct vpx_usec_timer  timer;
   int                    res = 0;
+  const int    subsampling_x = sd->uv_width  < sd->y_width;
+  const int    subsampling_y = sd->uv_height < sd->y_height;
 
-  check_initial_width(cpi, sd);
+  check_initial_width(cpi, subsampling_x, subsampling_y);
   vpx_usec_timer_start(&timer);
   if (vp9_lookahead_push(cpi->lookahead, sd, time_stamp, end_time, frame_flags,
                          cpi->active_map_enabled ? cpi->active_map : NULL))
@@ -3836,7 +3838,7 @@ int vp9_set_size_literal(VP9_PTR comp, unsigned int width,
   VP9_COMP *cpi = (VP9_COMP *)comp;
   VP9_COMMON *cm = &cpi->common;
 
-  check_initial_width(cpi, NULL);
+  check_initial_width(cpi, 1, 1);
 
   if (width) {
     cm->width = width;
