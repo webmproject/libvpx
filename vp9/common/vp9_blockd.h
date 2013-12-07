@@ -38,8 +38,9 @@
 #define REF_CONTEXTS 5
 
 typedef enum {
-  PLANE_TYPE_Y_WITH_DC,
-  PLANE_TYPE_UV,
+  PLANE_TYPE_Y  = 0,
+  PLANE_TYPE_UV = 1,
+  PLANE_TYPES
 } PLANE_TYPE;
 
 typedef char ENTROPY_CONTEXT;
@@ -265,37 +266,36 @@ static INLINE TX_TYPE get_tx_type_4x4(PLANE_TYPE plane_type,
   const MODE_INFO *const mi = xd->mi_8x8[0];
   const MB_MODE_INFO *const mbmi = &mi->mbmi;
 
-  if (plane_type != PLANE_TYPE_Y_WITH_DC ||
-      xd->lossless ||
-      is_inter_block(mbmi))
+  if (plane_type != PLANE_TYPE_Y || xd->lossless || is_inter_block(mbmi))
     return DCT_DCT;
 
-  return mode2txfm_map[mbmi->sb_type < BLOCK_8X8 ?
-                       mi->bmi[ib].as_mode : mbmi->mode];
+  return mode2txfm_map[mbmi->sb_type < BLOCK_8X8 ? mi->bmi[ib].as_mode
+                                                 : mbmi->mode];
 }
 
 static INLINE TX_TYPE get_tx_type_8x8(PLANE_TYPE plane_type,
                                       const MACROBLOCKD *xd) {
-  return plane_type == PLANE_TYPE_Y_WITH_DC ?
-             mode2txfm_map[xd->mi_8x8[0]->mbmi.mode] : DCT_DCT;
+  return plane_type == PLANE_TYPE_Y ? mode2txfm_map[xd->mi_8x8[0]->mbmi.mode]
+                                    : DCT_DCT;
 }
 
 static INLINE TX_TYPE get_tx_type_16x16(PLANE_TYPE plane_type,
                                         const MACROBLOCKD *xd) {
-  return plane_type == PLANE_TYPE_Y_WITH_DC ?
-             mode2txfm_map[xd->mi_8x8[0]->mbmi.mode] : DCT_DCT;
+  return plane_type == PLANE_TYPE_Y ? mode2txfm_map[xd->mi_8x8[0]->mbmi.mode]
+                                    : DCT_DCT;
 }
 
 static void setup_block_dptrs(MACROBLOCKD *xd, int ss_x, int ss_y) {
   int i;
 
   for (i = 0; i < MAX_MB_PLANE; i++) {
-    xd->plane[i].plane_type = i ? PLANE_TYPE_UV : PLANE_TYPE_Y_WITH_DC;
+    xd->plane[i].plane_type = i ? PLANE_TYPE_UV : PLANE_TYPE_Y;
     xd->plane[i].subsampling_x = i ? ss_x : 0;
     xd->plane[i].subsampling_y = i ? ss_y : 0;
   }
 #if CONFIG_ALPHA
   // TODO(jkoleszar): Using the Y w/h for now
+  xd->plane[3].plane_type = PLANE_TYPE_Y;
   xd->plane[3].subsampling_x = 0;
   xd->plane[3].subsampling_y = 0;
 #endif

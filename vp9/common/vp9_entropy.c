@@ -391,7 +391,7 @@ const vp9_prob vp9_pareto8_full[COEFF_PROB_MODELS][MODEL_NODES] = {
   {255, 246, 247, 255, 239, 255, 253, 255},
 };
 
-static const vp9_coeff_probs_model default_coef_probs_4x4[BLOCK_TYPES] = {
+static const vp9_coeff_probs_model default_coef_probs_4x4[PLANE_TYPES] = {
   {  // Y plane
     {  // Intra
       {  // Band 0
@@ -475,7 +475,7 @@ static const vp9_coeff_probs_model default_coef_probs_4x4[BLOCK_TYPES] = {
   }
 };
 
-static const vp9_coeff_probs_model default_coef_probs_8x8[BLOCK_TYPES] = {
+static const vp9_coeff_probs_model default_coef_probs_8x8[PLANE_TYPES] = {
   {  // Y plane
     {  // Intra
       {  // Band 0
@@ -559,7 +559,7 @@ static const vp9_coeff_probs_model default_coef_probs_8x8[BLOCK_TYPES] = {
   }
 };
 
-static const vp9_coeff_probs_model default_coef_probs_16x16[BLOCK_TYPES] = {
+static const vp9_coeff_probs_model default_coef_probs_16x16[PLANE_TYPES] = {
   {  // Y plane
     {  // Intra
       {  // Band 0
@@ -643,7 +643,7 @@ static const vp9_coeff_probs_model default_coef_probs_16x16[BLOCK_TYPES] = {
   }
 };
 
-static const vp9_coeff_probs_model default_coef_probs_32x32[BLOCK_TYPES] = {
+static const vp9_coeff_probs_model default_coef_probs_32x32[PLANE_TYPES] = {
   {  // Y plane
     {  // Intra
       {  // Band 0
@@ -763,7 +763,7 @@ static void adapt_coef_probs(VP9_COMMON *cm, TX_SIZE tx_size,
       cm->counts.eob_branch[tx_size];
   int i, j, k, l, m;
 
-  for (i = 0; i < BLOCK_TYPES; ++i)
+  for (i = 0; i < PLANE_TYPES; ++i)
     for (j = 0; j < REF_TYPES; ++j)
       for (k = 0; k < COEF_BANDS; ++k)
         for (l = 0; l < BAND_COEFF_CONTEXTS(k); ++l) {
