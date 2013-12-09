@@ -301,9 +301,18 @@ static void setup_block_dptrs(MACROBLOCKD *xd, int ss_x, int ss_y) {
 #endif
 }
 
+static TX_SIZE get_uv_tx_size_impl(TX_SIZE y_tx_size, BLOCK_SIZE bsize) {
+  if (bsize < BLOCK_8X8) {
+    return TX_4X4;
+  } else {
+    // TODO(dkovalev): Assuming YUV420 (ss_x == 1, ss_y == 1)
+    const BLOCK_SIZE plane_bsize = ss_size_lookup[bsize][1][1];
+    return MIN(y_tx_size, max_txsize_lookup[plane_bsize]);
+  }
+}
 
-static INLINE TX_SIZE get_uv_tx_size(const MB_MODE_INFO *mbmi) {
-  return MIN(mbmi->tx_size, max_uv_txsize_lookup[mbmi->sb_type]);
+static TX_SIZE get_uv_tx_size(const MB_MODE_INFO *mbmi) {
+  return get_uv_tx_size_impl(mbmi->tx_size, mbmi->sb_type);
 }
 
 static BLOCK_SIZE get_plane_block_size(BLOCK_SIZE bsize,

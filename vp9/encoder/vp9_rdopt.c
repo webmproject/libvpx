@@ -1292,7 +1292,7 @@ static int64_t rd_pick_intra_sbuv_mode(VP9_COMP *cpi, MACROBLOCK *x,
                                        PICK_MODE_CONTEXT *ctx,
                                        int *rate, int *rate_tokenonly,
                                        int64_t *distortion, int *skippable,
-                                       BLOCK_SIZE bsize) {
+                                       BLOCK_SIZE bsize, TX_SIZE max_tx_size) {
   MB_PREDICTION_MODE mode;
   MB_PREDICTION_MODE mode_selected = DC_PRED;
   int64_t best_rd = INT64_MAX, this_rd;
@@ -1300,8 +1300,7 @@ static int64_t rd_pick_intra_sbuv_mode(VP9_COMP *cpi, MACROBLOCK *x,
   int64_t this_distortion, this_sse;
 
   for (mode = DC_PRED; mode <= TM_PRED; ++mode) {
-    if (!(cpi->sf.intra_uv_mode_mask[max_uv_txsize_lookup[bsize]]
-          & (1 << mode)))
+    if (!(cpi->sf.intra_uv_mode_mask[max_tx_size] & (1 << mode)))
       continue;
 
     x->e_mbd.mi_8x8[0]->mbmi.uv_mode = mode;
@@ -1367,8 +1366,8 @@ static int64_t rd_sbuv_dcpred(VP9_COMP *cpi, MACROBLOCK *x,
 }
 
 static void choose_intra_uv_mode(VP9_COMP *cpi, PICK_MODE_CONTEXT *ctx,
-                                 BLOCK_SIZE bsize, int *rate_uv,
-                                 int *rate_uv_tokenonly,
+                                 BLOCK_SIZE bsize, TX_SIZE max_tx_size,
+                                 int *rate_uv, int *rate_uv_tokenonly,
                                  int64_t *dist_uv, int *skip_uv,
                                  MB_PREDICTION_MODE *mode_uv) {
   MACROBLOCK *const x = &cpi->mb;
@@ -1383,7 +1382,7 @@ static void choose_intra_uv_mode(VP9_COMP *cpi, PICK_MODE_CONTEXT *ctx,
   } else {
     rd_pick_intra_sbuv_mode(cpi, x, ctx,
                             rate_uv, rate_uv_tokenonly, dist_uv, skip_uv,
-                            bsize < BLOCK_8X8 ? BLOCK_8X8 : bsize);
+                            bsize < BLOCK_8X8 ? BLOCK_8X8 : bsize, max_tx_size);
   }
   *mode_uv = x->e_mbd.mi_8x8[0]->mbmi.uv_mode;
 }
@@ -3028,9 +3027,11 @@ void vp9_rd_pick_intra_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
   int rate_y = 0, rate_uv = 0, rate_y_tokenonly = 0, rate_uv_tokenonly = 0;
   int y_skip = 0, uv_skip = 0;
   int64_t dist_y = 0, dist_uv = 0, tx_cache[TX_MODES] = { 0 };
+  TX_SIZE max_uv_tx_size;
   x->skip_encode = 0;
   ctx->skip = 0;
   xd->mi_8x8[0]->mbmi.ref_frame[0] = INTRA_FRAME;
+
   if (bsize >= BLOCK_8X8) {
     if (rd_pick_intra_sby_mode(cpi, x, &rate_y, &rate_y_tokenonly,
                                &dist_y, &y_skip, bsize, tx_cache,
@@ -3038,8 +3039,9 @@ void vp9_rd_pick_intra_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
       *returnrate = INT_MAX;
       return;
     }
+    max_uv_tx_size = get_uv_tx_size_impl(xd->mi_8x8[0]->mbmi.tx_size, bsize);
     rd_pick_intra_sbuv_mode(cpi, x, ctx, &rate_uv, &rate_uv_tokenonly,
-                            &dist_uv, &uv_skip, bsize);
+                            &dist_uv, &uv_skip, bsize, max_uv_tx_size);
   } else {
     y_skip = 0;
     if (rd_pick_intra_sub_8x8_y_mode(cpi, x, &rate_y, &rate_y_tokenonly,
@@ -3047,8 +3049,9 @@ void vp9_rd_pick_intra_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
       *returnrate = INT_MAX;
       return;
     }
+    max_uv_tx_size = get_uv_tx_size_impl(xd->mi_8x8[0]->mbmi.tx_size, bsize);
     rd_pick_intra_sbuv_mode(cpi, x, ctx, &rate_uv, &rate_uv_tokenonly,
-                            &dist_uv, &uv_skip, BLOCK_8X8);
+                            &dist_uv, &uv_skip, BLOCK_8X8, max_uv_tx_size);
   }
 
   if (y_skip && uv_skip) {
@@ -3411,12 +3414,11 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
       if (rate_y == INT_MAX)
         continue;
 
-      uv_tx = MIN(mbmi->tx_size, max_uv_txsize_lookup[bsize]);
+      uv_tx = get_uv_tx_size_impl(mbmi->tx_size, bsize);
       if (rate_uv_intra[uv_tx] == INT_MAX) {
-        choose_intra_uv_mode(cpi, ctx, bsize, &rate_uv_intra[uv_tx],
-                             &rate_uv_tokenonly[uv_tx],
-                             &dist_uv[uv_tx], &skip_uv[uv_tx],
-                             &mode_uv[uv_tx]);
+        choose_intra_uv_mode(cpi, ctx, bsize, uv_tx,
+                             &rate_uv_intra[uv_tx], &rate_uv_tokenonly[uv_tx],
+                             &dist_uv[uv_tx], &skip_uv[uv_tx], &mode_uv[uv_tx]);
       }
 
       rate_uv = rate_uv_tokenonly[uv_tx];
@@ -3677,7 +3679,8 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
                               &rate_uv_tokenonly[uv_tx_size],
                               &dist_uv[uv_tx_size],
                               &skip_uv[uv_tx_size],
-                              bsize < BLOCK_8X8 ? BLOCK_8X8 : bsize);
+                              bsize < BLOCK_8X8 ? BLOCK_8X8 : bsize,
+                              uv_tx_size);
     }
   }
 
@@ -4042,7 +4045,8 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
       distortion2 += distortion_y;
 
       if (rate_uv_intra[TX_4X4] == INT_MAX) {
-        choose_intra_uv_mode(cpi, ctx, bsize, &rate_uv_intra[TX_4X4],
+        choose_intra_uv_mode(cpi, ctx, bsize, TX_4X4,
+                             &rate_uv_intra[TX_4X4],
                              &rate_uv_tokenonly[TX_4X4],
                              &dist_uv[TX_4X4], &skip_uv[TX_4X4],
                              &mode_uv[TX_4X4]);
@@ -4427,7 +4431,7 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
                               &rate_uv_tokenonly[uv_tx_size],
                               &dist_uv[uv_tx_size],
                               &skip_uv[uv_tx_size],
-                              BLOCK_8X8);
+                              BLOCK_8X8, uv_tx_size);
     }
   }
 

@@ -108,12 +108,6 @@ const TX_SIZE max_txsize_lookup[BLOCK_SIZES] = {
   TX_16X16, TX_16X16, TX_16X16,
   TX_32X32, TX_32X32, TX_32X32, TX_32X32
 };
-const TX_SIZE max_uv_txsize_lookup[BLOCK_SIZES] = {
-  TX_4X4,   TX_4X4,   TX_4X4,
-  TX_4X4,   TX_4X4,   TX_4X4,
-  TX_8X8,   TX_8X8,   TX_8X8,
-  TX_16X16, TX_16X16, TX_16X16, TX_32X32
-};
 
 const TX_SIZE tx_mode_to_biggest_tx_size[TX_MODES] = {
   TX_4X4,  // ONLY_4X4
