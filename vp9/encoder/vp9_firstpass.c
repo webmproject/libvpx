@@ -954,7 +954,7 @@ static double calc_correction_factor(double err_per_mb,
   const double error_term = err_per_mb / err_divisor;
 
   // Adjustment based on actual quantizer to power term.
-  const double power_term = MIN(vp9_convert_qindex_to_q(q) * 0.01 + pt_low,
+  const double power_term = MIN(vp9_convert_qindex_to_q(q) * 0.0125 + pt_low,
                                 pt_high);
 
   // Calculate correction factor
@@ -1014,7 +1014,7 @@ static int estimate_max_q(VP9_COMP *cpi,
     int bits_per_mb_at_this_q;
 
     err_correction_factor = calc_correction_factor(err_per_mb,
-                                                   ERR_DIVISOR, 0.4, 0.90, q);
+                                                   ERR_DIVISOR, 0.5, 0.90, q);
 
     bits_per_mb_at_this_q = vp9_rc_bits_per_mb(INTER_FRAME, q,
                                                err_correction_factor);
@@ -1064,7 +1064,7 @@ static int estimate_cq(VP9_COMP *cpi,
 
     // Error per MB based correction factor
     err_correction_factor =
-      calc_correction_factor(err_per_mb, 100.0, 0.4, 0.90, q) * clip_iifactor;
+      calc_correction_factor(err_per_mb, 100.0, 0.5, 0.90, q) * clip_iifactor;
 
     bits_per_mb_at_this_q =
       vp9_rc_bits_per_mb(INTER_FRAME, q, err_correction_factor);
