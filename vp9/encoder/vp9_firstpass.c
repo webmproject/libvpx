@@ -1008,10 +1008,8 @@ static int estimate_max_q(VP9_COMP *cpi,
   int target_norm_bits_per_mb;
 
   double section_err = fpstats->coded_error / fpstats->count;
-  double sr_correction;
   double err_per_mb = section_err / num_mbs;
   double err_correction_factor;
-  double speed_correction = 1.0;
 
   if (section_target_bandwitdh <= 0)
     return cpi->twopass.maxq_max_limit;          // Highest value allowed
@@ -1020,24 +1018,6 @@ static int estimate_max_q(VP9_COMP *cpi,
                               ? (512 * section_target_bandwitdh) / num_mbs
                               : 512 * (section_target_bandwitdh / num_mbs);
 
-  // Look at the drop in prediction quality between the last frame
-  // and the GF buffer (which contained an older frame).
-  if (fpstats->sr_coded_error > fpstats->coded_error) {
-    double sr_err_diff = (fpstats->sr_coded_error - fpstats->coded_error) /
-                             (fpstats->count * cpi->common.MBs);
-    sr_correction = fclamp(pow(sr_err_diff / 32.0, 0.25), 0.75, 1.25);
-  } else {
-    sr_correction = 0.75;
-  }
-
-  // Corrections for higher compression speed settings
-  // (reduced compression expected)
-  // FIXME(jimbankoski): Once we settle on vp9 speed features we need to
-  // change this code.
-  if (cpi->compressor_speed == 1)
-    speed_correction = cpi->oxcf.cpu_used <= 5 ?
-                          1.04 + (/*cpi->oxcf.cpu_used*/0 * 0.04) :
-                          1.25;
 
   // Try and pick a max Q that will be high enough to encode the
   // content at the given rate.
@@ -1045,8 +1025,7 @@ static int estimate_max_q(VP9_COMP *cpi,
     int bits_per_mb_at_this_q;
 
     err_correction_factor = calc_correction_factor(err_per_mb,
-                                                   ERR_DIVISOR, 0.4, 0.90, q) *
-                                sr_correction * speed_correction;
+                                                   ERR_DIVISOR, 0.4, 0.90, q);
 
     bits_per_mb_at_this_q = vp9_rc_bits_per_mb(INTER_FRAME, q,
                                                err_correction_factor);
@@ -1059,14 +1038,6 @@ static int estimate_max_q(VP9_COMP *cpi,
   if (cpi->oxcf.end_usage == USAGE_CONSTRAINED_QUALITY &&
       q < cpi->cq_target_quality)
     q = cpi->cq_target_quality;
-
-  // Adjust maxq_min_limit and maxq_max_limit limits based on
-  // average q observed in clip for non kf/gf/arf frames
-  // Give average a chance to settle though.
-  // PGW TODO.. This code is broken for the extended Q range
-  if (cpi->rc.ni_frames > ((int)cpi->twopass.total_stats.count >> 8) &&
-      cpi->rc.ni_frames > 25)
-    adjust_maxq_qrange(cpi);
 
   return q;
 }
@@ -1083,9 +1054,6 @@ static int estimate_cq(VP9_COMP *cpi,
   double section_err = (fpstats->coded_error / fpstats->count);
   double err_per_mb = section_err / num_mbs;
   double err_correction_factor;
-  double sr_err_diff;
-  double sr_correction;
-  double speed_correction = 1.0;
   double clip_iiratio;
   double clip_iifactor;
 
@@ -1093,31 +1061,6 @@ static int estimate_cq(VP9_COMP *cpi,
                             ? (512 * section_target_bandwitdh) / num_mbs
                             : 512 * (section_target_bandwitdh / num_mbs);
 
-
-  // Corrections for higher compression speed settings
-  // (reduced compression expected)
-  if (cpi->compressor_speed == 1) {
-    if (cpi->oxcf.cpu_used <= 5)
-      speed_correction = 1.04 + (/*cpi->oxcf.cpu_used*/ 0 * 0.04);
-    else
-      speed_correction = 1.25;
-  }
-
-  // Look at the drop in prediction quality between the last frame
-  // and the GF buffer (which contained an older frame).
-  if (fpstats->sr_coded_error > fpstats->coded_error) {
-    sr_err_diff =
-      (fpstats->sr_coded_error - fpstats->coded_error) /
-      (fpstats->count * cpi->common.MBs);
-    sr_correction = (sr_err_diff / 32.0);
-    sr_correction = pow(sr_correction, 0.25);
-    if (sr_correction < 0.75)
-      sr_correction = 0.75;
-    else if (sr_correction > 1.25)
-      sr_correction = 1.25;
-  } else {
-    sr_correction = 0.75;
-  }
 
   // II ratio correction factor for clip as a whole
   clip_iiratio = cpi->twopass.total_stats.intra_error /
@@ -1132,8 +1075,7 @@ static int estimate_cq(VP9_COMP *cpi,
 
     // Error per MB based correction factor
     err_correction_factor =
-      calc_correction_factor(err_per_mb, 100.0, 0.4, 0.90, q) *
-      sr_correction * speed_correction * clip_iifactor;
+      calc_correction_factor(err_per_mb, 100.0, 0.4, 0.90, q) * clip_iifactor;
 
     bits_per_mb_at_this_q =
       vp9_rc_bits_per_mb(INTER_FRAME, q, err_correction_factor);
@@ -2146,53 +2088,28 @@ void vp9_second_pass(VP9_COMP *cpi) {
 
   if (cpi->oxcf.end_usage == USAGE_CONSTANT_QUALITY) {
     cpi->rc.active_worst_quality = cpi->oxcf.cq_level;
-  } else {
+  } else if (cpi->common.current_video_frame == 0) {
     // Special case code for first frame.
-    if (cpi->common.current_video_frame == 0) {
-      int section_target_bandwidth =
-          (int)(cpi->twopass.bits_left / frames_left);
+    int section_target_bandwidth =
+        (int)(cpi->twopass.bits_left / frames_left);
 
-      // guess at maxq needed in 2nd pass
-      cpi->twopass.maxq_max_limit = cpi->rc.worst_quality;
-      cpi->twopass.maxq_min_limit = cpi->rc.best_quality;
+    // guess at maxq needed in 2nd pass
+    cpi->twopass.maxq_max_limit = cpi->rc.worst_quality;
+    cpi->twopass.maxq_min_limit = cpi->rc.best_quality;
 
-      tmp_q = estimate_max_q(cpi, &cpi->twopass.total_left_stats,
-                             section_target_bandwidth);
+    tmp_q = estimate_max_q(cpi, &cpi->twopass.total_left_stats,
+                           section_target_bandwidth);
 
-      cpi->rc.active_worst_quality = tmp_q;
-      cpi->rc.ni_av_qi = tmp_q;
-      cpi->rc.avg_q = vp9_convert_qindex_to_q(tmp_q);
+    cpi->rc.active_worst_quality = tmp_q;
+    cpi->rc.ni_av_qi = tmp_q;
+    cpi->rc.avg_q = vp9_convert_qindex_to_q(tmp_q);
 
-      // Limit the maxq value returned subsequently.
-      // This increases the risk of overspend or underspend if the initial
-      // estimate for the clip is bad, but helps prevent excessive
-      // variation in Q, especially near the end of a clip
-      // where for example a small overspend may cause Q to crash
-      adjust_maxq_qrange(cpi);
-    }
-
-    // The last few frames of a clip almost always have to few or too many
-    // bits and for the sake of over exact rate control we dont want to make
-    // radical adjustments to the allowed quantizer range just to use up a
-    // few surplus bits or get beneath the target rate.
-    else if ((cpi->common.current_video_frame <
-              (((unsigned int)cpi->twopass.total_stats.count * 255) >> 8)) &&
-             ((cpi->common.current_video_frame + cpi->rc.baseline_gf_interval) <
-              (unsigned int)cpi->twopass.total_stats.count)) {
-      int section_target_bandwidth =
-          (int)(cpi->twopass.bits_left / frames_left);
-      if (frames_left < 1)
-        frames_left = 1;
-
-      tmp_q = estimate_max_q(
-          cpi,
-          &cpi->twopass.total_left_stats,
-          section_target_bandwidth);
-
-      // Make a damped adjustment to active max Q
-      cpi->rc.active_worst_quality =
-          adjust_active_maxq(cpi->rc.active_worst_quality, tmp_q);
-    }
+    // Limit the maxq value returned subsequently.
+    // This increases the risk of overspend or underspend if the initial
+    // estimate for the clip is bad, but helps prevent excessive
+    // variation in Q, especially near the end of a clip
+    // where for example a small overspend may cause Q to crash
+    adjust_maxq_qrange(cpi);
   }
   vp9_zero(this_frame);
   if (EOF == input_stats(cpi, &this_frame))
