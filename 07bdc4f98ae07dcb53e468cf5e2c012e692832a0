@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdX//7JM\u003d",
+        "filename": "vp9/common/arm/neon/vp9_mb_lpf_neon.asm",
+        "patchSetId": 8
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2013-12-09T19:01:05Z",
+      "side": 1,
+      "message": "The 8 and 16 designate how many different pieces of data that we operate on at one time. So 8 should be fine, but 16 should operate on 16 values at once.",
+      "revId": "07bdc4f98ae07dcb53e468cf5e2c012e692832a0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX//7JI\u003d",
+        "filename": "vp9/common/arm/neon/vp9_mb_lpf_neon.asm",
+        "patchSetId": 8
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2013-12-09T19:01:05Z",
+      "side": 1,
+      "message": "In your code this should be \"mov r12, #1\", not 8.\n\nAlso no Tabs. Should be spaces.\n\nAlso in your code the \";load count\" instruction above should be removed as it does nothing.",
+      "revId": "07bdc4f98ae07dcb53e468cf5e2c012e692832a0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
