@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdX//7Fk\u003d",
+        "filename": "vp9/common/vp9_reconinter.c",
+        "patchSetId": 11
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2013-12-09T23:25:30Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdX//7GE\u003d",
+      "revId": "55d9ae7aff9b17d464a8ac8061b5af0a963d76d9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdX//7F0\u003d",
         "filename": "vp9/common/vp9_reconinter.c",
         "patchSetId": 11
@@ -30,6 +48,24 @@
       "writtenOn": "2013-12-09T22:47:58Z",
       "side": 1,
       "message": "most of these params can be const",
+      "revId": "55d9ae7aff9b17d464a8ac8061b5af0a963d76d9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX//7Fg\u003d",
+        "filename": "vp9/common/vp9_reconinter.c",
+        "patchSetId": 11
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2013-12-09T23:25:30Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdX//7F0\u003d",
       "revId": "55d9ae7aff9b17d464a8ac8061b5af0a963d76d9",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdX//7Fc\u003d",
+        "filename": "vp9/common/vp9_reconinter.c",
+        "patchSetId": 11
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2013-12-09T23:25:30Z",
+      "side": 1,
+      "message": "Seems not. The current code seems better for understanding as it reflects the pointer movement.",
+      "parentUuid": "AAAAdX//7H0\u003d",
+      "revId": "55d9ae7aff9b17d464a8ac8061b5af0a963d76d9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdX//7HY\u003d",
         "filename": "vp9/common/vp9_reconinter.c",
         "patchSetId": 11
@@ -64,6 +118,24 @@
       "writtenOn": "2013-12-09T20:14:22Z",
       "side": 1,
       "message": "Combine declaration and initialization for \"left\" var.",
+      "revId": "55d9ae7aff9b17d464a8ac8061b5af0a963d76d9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX//7FY\u003d",
+        "filename": "vp9/common/vp9_reconinter.c",
+        "patchSetId": 11
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2013-12-09T23:25:30Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdX//7HY\u003d",
       "revId": "55d9ae7aff9b17d464a8ac8061b5af0a963d76d9",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdX//7FQ\u003d",
+        "filename": "vp9/common/vp9_reconinter.c",
+        "patchSetId": 11
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2013-12-09T23:25:30Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdX//7Hs\u003d",
+      "revId": "55d9ae7aff9b17d464a8ac8061b5af0a963d76d9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdX//7HI\u003d",
         "filename": "vp9/common/vp9_reconinter.c",
         "patchSetId": 11
@@ -98,6 +188,24 @@
       "writtenOn": "2013-12-09T20:14:22Z",
       "side": 1,
       "message": "Spaces around \"-\"",
+      "revId": "55d9ae7aff9b17d464a8ac8061b5af0a963d76d9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX//7FM\u003d",
+        "filename": "vp9/common/vp9_reconinter.c",
+        "patchSetId": 11
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2013-12-09T23:25:30Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdX//7HI\u003d",
       "revId": "55d9ae7aff9b17d464a8ac8061b5af0a963d76d9",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -121,6 +229,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdX//7FI\u003d",
+        "filename": "vp9/common/vp9_reconinter.c",
+        "patchSetId": 11
+      },
+      "lineNbr": 62,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2013-12-09T23:25:30Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdX//7F4\u003d",
+      "revId": "55d9ae7aff9b17d464a8ac8061b5af0a963d76d9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdX//7HQ\u003d",
         "filename": "vp9/common/vp9_reconinter.c",
         "patchSetId": 11
@@ -132,6 +258,24 @@
       "writtenOn": "2013-12-09T20:14:22Z",
       "side": 1,
       "message": "It seems (y \u003e 0 \u0026\u0026 y \u003c h) is better readable.",
+      "revId": "55d9ae7aff9b17d464a8ac8061b5af0a963d76d9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX//7FE\u003d",
+        "filename": "vp9/common/vp9_reconinter.c",
+        "patchSetId": 11
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2013-12-09T23:25:30Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdX//7HQ\u003d",
       "revId": "55d9ae7aff9b17d464a8ac8061b5af0a963d76d9",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -155,6 +299,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdX//7FA\u003d",
+        "filename": "vp9/common/vp9_reconinter.c",
+        "patchSetId": 11
+      },
+      "lineNbr": 287,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2013-12-09T23:25:30Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdX//7Go\u003d",
+      "revId": "55d9ae7aff9b17d464a8ac8061b5af0a963d76d9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdX//7Gk\u003d",
         "filename": "vp9/common/vp9_reconinter.c",
         "patchSetId": 11
@@ -166,6 +328,24 @@
       "writtenOn": "2013-12-09T22:47:58Z",
       "side": 1,
       "message": "Two spaces after \"\u003d\"",
+      "revId": "55d9ae7aff9b17d464a8ac8061b5af0a963d76d9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX//7E8\u003d",
+        "filename": "vp9/common/vp9_reconinter.c",
+        "patchSetId": 11
+      },
+      "lineNbr": 295,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2013-12-09T23:25:30Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdX//7Gk\u003d",
       "revId": "55d9ae7aff9b17d464a8ac8061b5af0a963d76d9",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -189,6 +369,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdX//7E4\u003d",
+        "filename": "vp9/common/vp9_reconinter.c",
+        "patchSetId": 11
+      },
+      "lineNbr": 299,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2013-12-09T23:25:30Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdX//7Gg\u003d",
+      "revId": "55d9ae7aff9b17d464a8ac8061b5af0a963d76d9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdX//7Gc\u003d",
         "filename": "vp9/common/vp9_reconinter.c",
         "patchSetId": 11
@@ -200,6 +398,24 @@
       "writtenOn": "2013-12-09T22:47:58Z",
       "side": 1,
       "message": "Capital \"G\" in \"Get\". Add \".\" at end.",
+      "revId": "55d9ae7aff9b17d464a8ac8061b5af0a963d76d9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX//7E0\u003d",
+        "filename": "vp9/common/vp9_reconinter.c",
+        "patchSetId": 11
+      },
+      "lineNbr": 309,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2013-12-09T23:25:30Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdX//7Gc\u003d",
       "revId": "55d9ae7aff9b17d464a8ac8061b5af0a963d76d9",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -223,6 +439,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdX//7Ew\u003d",
+        "filename": "vp9/common/vp9_reconinter.c",
+        "patchSetId": 11
+      },
+      "lineNbr": 319,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2013-12-09T23:25:30Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdX//7GY\u003d",
+      "revId": "55d9ae7aff9b17d464a8ac8061b5af0a963d76d9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdX//7Hg\u003d",
         "filename": "vp9/common/vp9_reconinter.c",
         "patchSetId": 11
@@ -234,6 +468,24 @@
       "writtenOn": "2013-12-09T20:14:22Z",
       "side": 1,
       "message": "Spaces around \"-\" and \"*\"",
+      "revId": "55d9ae7aff9b17d464a8ac8061b5af0a963d76d9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX//7Es\u003d",
+        "filename": "vp9/common/vp9_reconinter.c",
+        "patchSetId": 11
+      },
+      "lineNbr": 322,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2013-12-09T23:25:30Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdX//7Hg\u003d",
       "revId": "55d9ae7aff9b17d464a8ac8061b5af0a963d76d9",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -257,6 +509,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdX//7Eo\u003d",
+        "filename": "vp9/common/vp9_reconinter.c",
+        "patchSetId": 11
+      },
+      "lineNbr": 323,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2013-12-09T23:25:30Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdX//7Hc\u003d",
+      "revId": "55d9ae7aff9b17d464a8ac8061b5af0a963d76d9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdX//7Ho\u003d",
         "filename": "vp9/common/vp9_reconinter.c",
         "patchSetId": 11
@@ -268,6 +538,24 @@
       "writtenOn": "2013-12-09T22:47:58Z",
       "side": 1,
       "message": "\"Do border extension if there is motion or width/height is not a multiple of 8 pixels.\"",
+      "revId": "55d9ae7aff9b17d464a8ac8061b5af0a963d76d9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX//7Ek\u003d",
+        "filename": "vp9/common/vp9_reconinter.c",
+        "patchSetId": 11
+      },
+      "lineNbr": 325,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2013-12-09T23:25:30Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdX//7Ho\u003d",
       "revId": "55d9ae7aff9b17d464a8ac8061b5af0a963d76d9",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -291,6 +579,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdX//7Eg\u003d",
+        "filename": "vp9/common/vp9_reconinter.c",
+        "patchSetId": 11
+      },
+      "lineNbr": 343,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2013-12-09T23:25:30Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdX//7GM\u003d",
+      "revId": "55d9ae7aff9b17d464a8ac8061b5af0a963d76d9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdX//7GI\u003d",
         "filename": "vp9/common/vp9_reconinter.c",
         "patchSetId": 11
@@ -302,6 +608,24 @@
       "writtenOn": "2013-12-09T22:47:58Z",
       "side": 1,
       "message": "2 spaces after first +",
+      "revId": "55d9ae7aff9b17d464a8ac8061b5af0a963d76d9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX//7Ec\u003d",
+        "filename": "vp9/common/vp9_reconinter.c",
+        "patchSetId": 11
+      },
+      "lineNbr": 345,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2013-12-09T23:25:30Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdX//7GI\u003d",
       "revId": "55d9ae7aff9b17d464a8ac8061b5af0a963d76d9",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
