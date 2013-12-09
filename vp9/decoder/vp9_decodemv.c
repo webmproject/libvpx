@@ -425,19 +425,18 @@ static void read_inter_block_mode_info(VP9_COMMON *const cm,
   const int allow_hp = cm->allow_high_precision_mv;
 
   int_mv nearest[2], nearmv[2], best[2];
-  uint8_t inter_mode_ctx;
-  MV_REFERENCE_FRAME ref0;
-  int is_compound;
+  int inter_mode_ctx, ref, is_compound;
 
-  mbmi->uv_mode = DC_PRED;
   read_ref_frames(cm, xd, r, mbmi->segment_id, mbmi->ref_frame);
-  ref0 = mbmi->ref_frame[0];
   is_compound = has_second_ref(mbmi);
 
-  vp9_find_mv_refs(cm, xd, tile, mi, xd->last_mi, ref0, mbmi->ref_mvs[ref0],
-                   mi_row, mi_col);
+  for (ref = 0; ref < 1 + is_compound; ++ref) {
+    const MV_REFERENCE_FRAME frame = mbmi->ref_frame[ref];
+    vp9_find_mv_refs(cm, xd, tile, mi, xd->last_mi, frame, mbmi->ref_mvs[frame],
+                     mi_row, mi_col);
+  }
 
-  inter_mode_ctx = mbmi->mode_context[ref0];
+  inter_mode_ctx = mbmi->mode_context[mbmi->ref_frame[0]];
 
   if (vp9_segfeature_active(&cm->seg, mbmi->segment_id, SEG_LVL_SKIP)) {
     mbmi->mode = ZEROMV;
@@ -451,22 +450,11 @@ static void read_inter_block_mode_info(VP9_COMMON *const cm,
       mbmi->mode = read_inter_mode(cm, r, inter_mode_ctx);
   }
 
-  // nearest, nearby
   if (bsize < BLOCK_8X8 || mbmi->mode != ZEROMV) {
-    vp9_find_best_ref_mvs(xd, allow_hp,
-                          mbmi->ref_mvs[ref0], &nearest[0], &nearmv[0]);
-    best[0].as_int = nearest[0].as_int;
-  }
-
-  if (is_compound) {
-    const MV_REFERENCE_FRAME ref1 = mbmi->ref_frame[1];
-    vp9_find_mv_refs(cm, xd, tile, mi, xd->last_mi,
-                     ref1, mbmi->ref_mvs[ref1], mi_row, mi_col);
-
-    if (bsize < BLOCK_8X8 || mbmi->mode != ZEROMV) {
-      vp9_find_best_ref_mvs(xd, allow_hp,
-                            mbmi->ref_mvs[ref1], &nearest[1], &nearmv[1]);
-      best[1].as_int = nearest[1].as_int;
+    for (ref = 0; ref < 1 + is_compound; ++ref) {
+      vp9_find_best_ref_mvs(xd, allow_hp, mbmi->ref_mvs[mbmi->ref_frame[ref]],
+                            &nearest[ref], &nearmv[ref]);
+      best[ref].as_int = nearest[ref].as_int;
     }
   }
 
@@ -485,23 +473,16 @@ static void read_inter_block_mode_info(VP9_COMMON *const cm,
         const int j = idy * 2 + idx;
         b_mode = read_inter_mode(cm, r, inter_mode_ctx);
 
-        if (b_mode == NEARESTMV || b_mode == NEARMV) {
-          vp9_append_sub8x8_mvs_for_idx(cm, xd, tile, &nearest[0],
-                                        &nearmv[0], j, 0,
-                                        mi_row, mi_col);
-
-          if (is_compound)
-            vp9_append_sub8x8_mvs_for_idx(cm, xd, tile, &nearest[1],
-                                          &nearmv[1], j, 1,
-                                          mi_row, mi_col);
-        }
+        if (b_mode == NEARESTMV || b_mode == NEARMV)
+          for (ref = 0; ref < 1 + is_compound; ++ref)
+            vp9_append_sub8x8_mvs_for_idx(cm, xd, tile, &nearest[ref],
+                                          &nearmv[ref], j, ref, mi_row, mi_col);
 
         if (!assign_mv(cm, b_mode, block, best, nearest, nearmv,
                        is_compound, allow_hp, r)) {
           xd->corrupted |= 1;
           break;
         };
-
 
         mi->bmi[j].as_mv[0].as_int = block[0].as_int;
         if (is_compound)
