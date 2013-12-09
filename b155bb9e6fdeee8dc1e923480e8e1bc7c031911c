@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdX//7Iw\u003d",
+        "filename": "vp9/common/vp9_blockd.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 309,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2013-12-09T19:03:21Z",
+      "side": 1,
+      "message": "Thanks, done!",
+      "parentUuid": "AAAAdX//7Sc\u003d",
+      "revId": "b155bb9e6fdeee8dc1e923480e8e1bc7c031911c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdX//7Sg\u003d",
         "filename": "vp9/common/vp9_blockd.h",
         "patchSetId": 1
@@ -30,6 +48,24 @@
       "writtenOn": "2013-12-07T02:20:24Z",
       "side": 1,
       "message": "Is there a reason that this is split into a wrapper and an impl function?\n\nCalling the _impl function directly from rdopt seems like a code smell so if we need to keep both then maybe we can rename them.",
+      "revId": "b155bb9e6fdeee8dc1e923480e8e1bc7c031911c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX//7Ic\u003d",
+        "filename": "vp9/common/vp9_blockd.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 315,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2013-12-09T19:03:21Z",
+      "side": 1,
+      "message": "I completely agree with you -- it should be only one function. But for some reason block size is a function parameter (i.e. not a mbmi-\u003esb_type member) inside rd loop code, for example see vp9_rd_pick_intra_mode_sb function.",
+      "parentUuid": "AAAAdX//7Sg\u003d",
       "revId": "b155bb9e6fdeee8dc1e923480e8e1bc7c031911c",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
