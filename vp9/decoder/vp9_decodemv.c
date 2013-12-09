@@ -63,7 +63,7 @@ static int read_segment_id(vp9_reader *r, const struct segmentation *seg) {
 
 static TX_SIZE read_selected_tx_size(VP9_COMMON *cm, MACROBLOCKD *xd,
                                      TX_SIZE max_tx_size, vp9_reader *r) {
-  const int ctx = vp9_get_pred_context_tx_size(xd);
+  const int ctx = vp9_get_tx_size_context(xd);
   const vp9_prob *tx_probs = get_tx_probs(max_tx_size, ctx, &cm->fc.tx_probs);
   TX_SIZE tx_size = vp9_read(r, tx_probs[0]);
   if (tx_size != TX_4X4 && max_tx_size >= TX_16X16) {

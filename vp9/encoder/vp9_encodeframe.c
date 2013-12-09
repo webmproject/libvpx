@@ -2589,9 +2589,8 @@ static void encode_superblock(VP9_COMP *cpi, TOKENEXTRA **t, int output_enabled,
         !(is_inter_block(mbmi) &&
             (mbmi->skip_coeff ||
              vp9_segfeature_active(&cm->seg, segment_id, SEG_LVL_SKIP)))) {
-      const uint8_t context = vp9_get_pred_context_tx_size(xd);
-      ++get_tx_counts(max_txsize_lookup[bsize],
-                      context, &cm->counts.tx)[mbmi->tx_size];
+      ++get_tx_counts(max_txsize_lookup[bsize], vp9_get_tx_size_context(xd),
+                      &cm->counts.tx)[mbmi->tx_size];
     } else {
       int x, y;
       TX_SIZE tx_size;

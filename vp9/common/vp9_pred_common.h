@@ -100,7 +100,7 @@ static INLINE vp9_prob vp9_get_pred_prob_single_ref_p2(const VP9_COMMON *cm,
   return cm->fc.single_ref_prob[pred_context][1];
 }
 
-unsigned char vp9_get_pred_context_tx_size(const MACROBLOCKD *xd);
+int vp9_get_tx_size_context(const MACROBLOCKD *xd);
 
 static const vp9_prob *get_tx_probs(TX_SIZE max_tx_size, int ctx,
                                     const struct tx_probs *tx_probs) {
@@ -119,8 +119,7 @@ static const vp9_prob *get_tx_probs(TX_SIZE max_tx_size, int ctx,
 
 static const vp9_prob *get_tx_probs2(TX_SIZE max_tx_size, const MACROBLOCKD *xd,
                                      const struct tx_probs *tx_probs) {
-  const int ctx = vp9_get_pred_context_tx_size(xd);
-  return get_tx_probs(max_tx_size, ctx, tx_probs);
+  return get_tx_probs(max_tx_size, vp9_get_tx_size_context(xd), tx_probs);
 }
 
 static unsigned int *get_tx_counts(TX_SIZE max_tx_size, int ctx,
