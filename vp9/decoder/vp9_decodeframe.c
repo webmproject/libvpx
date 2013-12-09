@@ -136,17 +136,17 @@ static REFERENCE_MODE read_reference_mode(VP9_COMMON *cm, vp9_reader *r) {
 
 static void read_reference_mode_probs(VP9_COMMON *cm, vp9_reader *r) {
   int i;
-  if (cm->comp_pred_mode == REFERENCE_MODE_SELECT)
+  if (cm->reference_mode == REFERENCE_MODE_SELECT)
     for (i = 0; i < COMP_INTER_CONTEXTS; i++)
       vp9_diff_update_prob(r, &cm->fc.comp_inter_prob[i]);
 
-  if (cm->comp_pred_mode != COMPOUND_REFERENCE)
+  if (cm->reference_mode != COMPOUND_REFERENCE)
     for (i = 0; i < REF_CONTEXTS; i++) {
       vp9_diff_update_prob(r, &cm->fc.single_ref_prob[i][0]);
       vp9_diff_update_prob(r, &cm->fc.single_ref_prob[i][1]);
     }
 
-  if (cm->comp_pred_mode != SINGLE_REFERENCE)
+  if (cm->reference_mode != SINGLE_REFERENCE)
     for (i = 0; i < REF_CONTEXTS; i++)
       vp9_diff_update_prob(r, &cm->fc.comp_ref_prob[i]);
 }
@@ -1197,7 +1197,7 @@ static int read_compressed_header(VP9D_COMP *pbi, const uint8_t *data,
     for (i = 0; i < INTRA_INTER_CONTEXTS; i++)
       vp9_diff_update_prob(&r, &fc->intra_inter_prob[i]);
 
-    cm->comp_pred_mode = read_reference_mode(cm, &r);
+    cm->reference_mode = read_reference_mode(cm, &r);
     read_reference_mode_probs(cm, &r);
 
     for (j = 0; j < BLOCK_SIZE_GROUPS; j++)

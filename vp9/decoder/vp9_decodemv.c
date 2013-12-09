@@ -278,9 +278,9 @@ static void read_ref_frames(VP9_COMMON *const cm, MACROBLOCKD *const xd,
     ref_frame[0] = vp9_get_segdata(&cm->seg, segment_id, SEG_LVL_REF_FRAME);
     ref_frame[1] = NONE;
   } else {
-    const REFERENCE_MODE mode = (cm->comp_pred_mode == REFERENCE_MODE_SELECT)
+    const REFERENCE_MODE mode = (cm->reference_mode == REFERENCE_MODE_SELECT)
                                       ? read_reference_mode(cm, xd, r)
-                                      : cm->comp_pred_mode;
+                                      : cm->reference_mode;
 
     // FIXME(rbultje) I'm pretty sure this breaks segmentation ref frame coding
     if (mode == COMPOUND_REFERENCE) {

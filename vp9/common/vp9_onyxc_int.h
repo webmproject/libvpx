@@ -195,7 +195,7 @@ typedef struct VP9Common {
   int allow_comp_inter_inter;
   MV_REFERENCE_FRAME comp_fixed_ref;
   MV_REFERENCE_FRAME comp_var_ref[2];
-  REFERENCE_MODE comp_pred_mode;
+  REFERENCE_MODE reference_mode;
 
   FRAME_CONTEXT fc;  /* this frame entropy */
   FRAME_CONTEXT frame_contexts[FRAME_CONTEXTS];
