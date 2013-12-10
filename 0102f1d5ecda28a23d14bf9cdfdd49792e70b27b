@@ -52,6 +52,24 @@
       "revId": "0102f1d5ecda28a23d14bf9cdfdd49792e70b27b",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX//68k\u003d",
+        "filename": "vp9/encoder/vp9_mcomp.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1729,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2013-12-10T18:22:06Z",
+      "side": 1,
+      "message": "Where does it decide based on SSE4? The encoder should match with or without optimizations.",
+      "parentUuid": "AAAAdX//688\u003d",
+      "revId": "0102f1d5ecda28a23d14bf9cdfdd49792e70b27b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
