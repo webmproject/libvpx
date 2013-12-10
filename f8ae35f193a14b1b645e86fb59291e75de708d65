@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdX//67c\u003d",
+        "filename": "vp9/vp9_dx_iface.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 499,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2013-12-10T23:36:19Z",
+      "side": 1,
+      "message": "What space?",
+      "parentUuid": "AAAAdX//68M\u003d",
+      "revId": "f8ae35f193a14b1b645e86fb59291e75de708d65",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdX//6+M\u003d",
         "filename": "vpx/internal/vpx_codec_internal.h",
         "patchSetId": 4
@@ -30,6 +48,24 @@
       "writtenOn": "2013-12-10T19:14:58Z",
       "side": 1,
       "message": "cb one more space before?",
+      "revId": "f8ae35f193a14b1b645e86fb59291e75de708d65",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX//66E\u003d",
+        "filename": "vpx/internal/vpx_codec_internal.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 246,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2013-12-10T23:36:19Z",
+      "side": 1,
+      "message": "The style in this file is pretty inconsistent. I\u0027m going to use what is recommended in Google C+ style guide, as that is where I think we want to go.",
+      "parentUuid": "AAAAdX//6+M\u003d",
       "revId": "f8ae35f193a14b1b645e86fb59291e75de708d65",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdX//658\u003d",
+        "filename": "vpx/vpx_decoder.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 364,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2013-12-10T23:36:19Z",
+      "side": 1,
+      "message": "We use fb_count in for loops. I\u0027m going to keep this an int as it would be a lot of casting otherwise.",
+      "parentUuid": "AAAAdX//670\u003d",
+      "revId": "f8ae35f193a14b1b645e86fb59291e75de708d65",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdX//67w\u003d",
         "filename": "vpx/vpx_external_frame_buffer.h",
         "patchSetId": 4
@@ -64,6 +118,24 @@
       "writtenOn": "2013-12-10T19:14:58Z",
       "side": 1,
       "message": "new_size unsigned int?",
+      "revId": "f8ae35f193a14b1b645e86fb59291e75de708d65",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX//650\u003d",
+        "filename": "vpx/vpx_external_frame_buffer.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2013-12-10T23:36:19Z",
+      "side": 1,
+      "message": "Changed to size_t",
+      "parentUuid": "AAAAdX//67w\u003d",
       "revId": "f8ae35f193a14b1b645e86fb59291e75de708d65",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdX//65g\u003d",
+        "filename": "vpxdec.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 330,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2013-12-10T23:36:19Z",
+      "side": 1,
+      "message": "Shouldn\u0027t be possible. But I changed to size_t.",
+      "parentUuid": "AAAAdX//6+Q\u003d",
+      "revId": "f8ae35f193a14b1b645e86fb59291e75de708d65",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdX//67s\u003d",
         "filename": "vpxdec.c",
         "patchSetId": 4
@@ -98,6 +188,24 @@
       "writtenOn": "2013-12-10T19:14:58Z",
       "side": 1,
       "message": "Does fb-\u003edata need align?",
+      "revId": "f8ae35f193a14b1b645e86fb59291e75de708d65",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX//65c\u003d",
+        "filename": "vpxdec.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 333,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2013-12-10T23:36:19Z",
+      "side": 1,
+      "message": "No. I added text to the function pointer definition comment.",
+      "parentUuid": "AAAAdX//67s\u003d",
       "revId": "f8ae35f193a14b1b645e86fb59291e75de708d65",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -121,6 +229,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdX//65Y\u003d",
+        "filename": "vpxdec.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 336,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2013-12-10T23:36:19Z",
+      "side": 1,
+      "message": "Nothing. I added text saying that any negative valuer indicates failure. And I changed all failures to return -1.",
+      "parentUuid": "AAAAdX//69w\u003d",
+      "revId": "f8ae35f193a14b1b645e86fb59291e75de708d65",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdX//69s\u003d",
         "filename": "vpxdec.c",
         "patchSetId": 4
@@ -132,6 +258,24 @@
       "writtenOn": "2013-12-10T19:14:58Z",
       "side": 1,
       "message": "It seems this code will work for size \u003d 0 as malloc(0) will return valid pointer.",
+      "revId": "f8ae35f193a14b1b645e86fb59291e75de708d65",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX//65U\u003d",
+        "filename": "vpxdec.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 339,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2013-12-10T23:36:19Z",
+      "side": 1,
+      "message": "I added better checking after having libvpx call the callback. If size \u003c requested size we throw an error.",
+      "parentUuid": "AAAAdX//69s\u003d",
       "revId": "f8ae35f193a14b1b645e86fb59291e75de708d65",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
