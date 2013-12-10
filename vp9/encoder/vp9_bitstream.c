@@ -121,9 +121,9 @@ static int write_skip_coeff(const VP9_COMP *cpi, int segment_id, MODE_INFO *m,
   if (vp9_segfeature_active(&cpi->common.seg, segment_id, SEG_LVL_SKIP)) {
     return 1;
   } else {
-    const int skip_coeff = m->mbmi.skip_coeff;
-    vp9_write(w, skip_coeff, vp9_get_pred_prob_mbskip(&cpi->common, xd));
-    return skip_coeff;
+    const int skip = m->mbmi.skip_coeff;
+    vp9_write(w, skip, vp9_get_skip_prob(&cpi->common, xd));
+    return skip;
   }
 }
 

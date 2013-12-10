@@ -281,7 +281,7 @@ void vp9_tokenize_sb(VP9_COMP *cpi, TOKENEXTRA **t, int dry_run,
   MACROBLOCKD *const xd = &cpi->mb.e_mbd;
   MB_MODE_INFO *const mbmi = &xd->mi_8x8[0]->mbmi;
   TOKENEXTRA *t_backup = *t;
-  const int mb_skip_context = vp9_get_pred_context_mbskip(xd);
+  const int ctx = vp9_get_skip_context(xd);
   const int skip_inc = !vp9_segfeature_active(&cm->seg, mbmi->segment_id,
                                               SEG_LVL_SKIP);
   struct tokenize_b_args arg = {cpi, xd, t, mbmi->tx_size, cpi->mb.token_cache};
@@ -289,7 +289,7 @@ void vp9_tokenize_sb(VP9_COMP *cpi, TOKENEXTRA **t, int dry_run,
   mbmi->skip_coeff = sb_is_skippable(&cpi->mb, bsize);
   if (mbmi->skip_coeff) {
     if (!dry_run)
-      cm->counts.mbskip[mb_skip_context][1] += skip_inc;
+      cm->counts.mbskip[ctx][1] += skip_inc;
     reset_skip_context(xd, bsize);
     if (dry_run)
       *t = t_backup;
@@ -297,7 +297,7 @@ void vp9_tokenize_sb(VP9_COMP *cpi, TOKENEXTRA **t, int dry_run,
   }
 
   if (!dry_run) {
-    cm->counts.mbskip[mb_skip_context][0] += skip_inc;
+    cm->counts.mbskip[ctx][0] += skip_inc;
     foreach_transformed_block(xd, bsize, tokenize_b, &arg);
   } else {
     foreach_transformed_block(xd, bsize, set_entropy_context_b, &arg);

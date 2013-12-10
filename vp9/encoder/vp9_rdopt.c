@@ -772,7 +772,7 @@ static void choose_txfm_size_from_rd(VP9_COMP *cpi, MACROBLOCK *x,
   VP9_COMMON *const cm = &cpi->common;
   MACROBLOCKD *const xd = &x->e_mbd;
   MB_MODE_INFO *const mbmi = &xd->mi_8x8[0]->mbmi;
-  vp9_prob skip_prob = vp9_get_pred_prob_mbskip(cm, xd);
+  vp9_prob skip_prob = vp9_get_skip_prob(cm, xd);
   int64_t rd[TX_SIZES][2];
   int n, m;
   int s0, s1;
@@ -847,7 +847,7 @@ static void choose_txfm_size_from_modelrd(VP9_COMP *cpi, MACROBLOCK *x,
   VP9_COMMON *const cm = &cpi->common;
   MACROBLOCKD *const xd = &x->e_mbd;
   MB_MODE_INFO *const mbmi = &xd->mi_8x8[0]->mbmi;
-  vp9_prob skip_prob = vp9_get_pred_prob_mbskip(cm, xd);
+  vp9_prob skip_prob = vp9_get_skip_prob(cm, xd);
   int64_t rd[TX_SIZES][2];
   int n, m;
   int s0, s1;
@@ -2934,7 +2934,7 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
               x->skip = 1;
 
               // The cost of skip bit needs to be added.
-              *rate2 += vp9_cost_bit(vp9_get_pred_prob_mbskip(cm, xd), 1);
+              *rate2 += vp9_cost_bit(vp9_get_skip_prob(cm, xd), 1);
 
               // Scaling factor for SSE from spatial domain to frequency domain
               // is 16. Adjust distortion accordingly.
@@ -3053,13 +3053,12 @@ void vp9_rd_pick_intra_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
 
   if (y_skip && uv_skip) {
     *returnrate = rate_y + rate_uv - rate_y_tokenonly - rate_uv_tokenonly +
-                  vp9_cost_bit(vp9_get_pred_prob_mbskip(cm, xd), 1);
+                  vp9_cost_bit(vp9_get_skip_prob(cm, xd), 1);
     *returndist = dist_y + dist_uv;
     vp9_zero(ctx->tx_rd_diff);
   } else {
     int i;
-    *returnrate = rate_y + rate_uv +
-        vp9_cost_bit(vp9_get_pred_prob_mbskip(cm, xd), 0);
+    *returnrate = rate_y + rate_uv + vp9_cost_bit(vp9_get_skip_prob(cm, xd), 0);
     *returndist = dist_y + dist_uv;
     if (cpi->sf.tx_size_search_method == USE_FULL_RD)
       for (i = 0; i < TX_MODES; i++) {
@@ -3470,9 +3469,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
           int prob_skip_cost;
 
           // Cost the skip mb case
-          vp9_prob skip_prob =
-            vp9_get_pred_prob_mbskip(cm, xd);
-
+          vp9_prob skip_prob = vp9_get_skip_prob(cm, xd);
           if (skip_prob) {
             prob_skip_cost = vp9_cost_bit(skip_prob, 1);
             rate2 += prob_skip_cost;
@@ -3482,14 +3479,10 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
         if (RDCOST(x->rdmult, x->rddiv, rate_y + rate_uv, distortion2) <
             RDCOST(x->rdmult, x->rddiv, 0, total_sse)) {
           // Add in the cost of the no skip flag.
-          int prob_skip_cost = vp9_cost_bit(vp9_get_pred_prob_mbskip(cm, xd),
-                                            0);
-          rate2 += prob_skip_cost;
+          rate2 += vp9_cost_bit(vp9_get_skip_prob(cm, xd), 0);
         } else {
           // FIXME(rbultje) make this work for splitmv also
-          int prob_skip_cost = vp9_cost_bit(vp9_get_pred_prob_mbskip(cm, xd),
-                                            1);
-          rate2 += prob_skip_cost;
+          rate2 += vp9_cost_bit(vp9_get_skip_prob(cm, xd), 1);
           distortion2 = total_sse;
           assert(total_sse >= 0);
           rate2 -= (rate_y + rate_uv);
@@ -3499,9 +3492,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
         }
       } else if (mb_skip_allowed) {
         // Add in the cost of the no skip flag.
-        int prob_skip_cost = vp9_cost_bit(vp9_get_pred_prob_mbskip(cm, xd),
-                                          0);
-        rate2 += prob_skip_cost;
+        rate2 += vp9_cost_bit(vp9_get_skip_prob(cm, xd), 0);
       }
 
       // Calculate the final RD estimate for this mode.
@@ -4244,14 +4235,10 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
         if (RDCOST(x->rdmult, x->rddiv, rate_y + rate_uv, distortion2) <
             RDCOST(x->rdmult, x->rddiv, 0, total_sse)) {
           // Add in the cost of the no skip flag.
-          int prob_skip_cost = vp9_cost_bit(vp9_get_pred_prob_mbskip(cm, xd),
-                                            0);
-          rate2 += prob_skip_cost;
+          rate2 += vp9_cost_bit(vp9_get_skip_prob(cm, xd), 0);
         } else {
           // FIXME(rbultje) make this work for splitmv also
-          int prob_skip_cost = vp9_cost_bit(vp9_get_pred_prob_mbskip(cm, xd),
-                                            1);
-          rate2 += prob_skip_cost;
+          rate2 += vp9_cost_bit(vp9_get_skip_prob(cm, xd), 1);
           distortion2 = total_sse;
           assert(total_sse >= 0);
           rate2 -= (rate_y + rate_uv);
@@ -4261,9 +4248,7 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
         }
       } else if (mb_skip_allowed) {
         // Add in the cost of the no skip flag.
-        int prob_skip_cost = vp9_cost_bit(vp9_get_pred_prob_mbskip(cm, xd),
-                                          0);
-        rate2 += prob_skip_cost;
+        rate2 += vp9_cost_bit(vp9_get_skip_prob(cm, xd), 0);
       }
 
       // Calculate the final RD estimate for this mode.
