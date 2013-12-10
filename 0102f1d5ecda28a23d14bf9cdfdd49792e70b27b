@@ -70,6 +70,24 @@
       "revId": "0102f1d5ecda28a23d14bf9cdfdd49792e70b27b",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX//68c\u003d",
+        "filename": "vp9/encoder/vp9_mcomp.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1729,
+      "author": {
+        "id": 1003514
+      },
+      "writtenOn": "2013-12-10T18:32:18Z",
+      "side": 1,
+      "message": "In vp9_rtcd_defs.sh:\n\nvp9_full_search_sad_sse3\u003dvp9_full_search_sadx3\nvp9_full_search_sad_sse4_1\u003dvp9_full_search_sadx8\n\nSee also vp9/encoder/x86/vp9_mcomp_x86.h\n\nI don\u0027t think it\u0027s worth writing a C function for them, since sdx3f and sdx8f are just \"fast path\" which compute SAD 3 or 8 times, when we exit the loop (because there\u0027s less than 3 cols left to compute SAD on or because fn_ptr-\u003esdx3f \u003d\u003d NULL), the loop below will compute the remaining SADs.",
+      "parentUuid": "AAAAdX//68k\u003d",
+      "revId": "0102f1d5ecda28a23d14bf9cdfdd49792e70b27b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
