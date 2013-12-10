@@ -34,6 +34,24 @@
       "revId": "0102f1d5ecda28a23d14bf9cdfdd49792e70b27b",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX//680\u003d",
+        "filename": "vp9/encoder/vp9_mcomp.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1729,
+      "author": {
+        "id": 1003514
+      },
+      "writtenOn": "2013-12-10T18:14:02Z",
+      "side": 1,
+      "message": "The function pointers are set in vp9_onyx_if.c, lines 1692-1782",
+      "parentUuid": "AAAAdX//688\u003d",
+      "revId": "0102f1d5ecda28a23d14bf9cdfdd49792e70b27b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
