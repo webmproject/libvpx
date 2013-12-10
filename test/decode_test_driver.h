@@ -101,6 +101,10 @@ class DecoderTest {
   // Main decoding loop
   virtual void RunLoop(CompressedVideoSource *video);
 
+  // Hook to be called before decompressing every frame.
+  virtual void PreDecodeFrameHook(const CompressedVideoSource& video,
+                                  Decoder *decoder) {}
+
   // Hook to be called on every decompressed frame.
   virtual void DecompressedFrameHook(const vpx_image_t& img,
                                      const unsigned int frame_number) {}
