@@ -1231,7 +1231,7 @@ int vp9_diamond_search_sad_c(MACROBLOCK *x,
 
   // Work out the start point for the search
   in_what = (uint8_t *)(xd->plane[0].pre[0].buf +
-                        (ref_row * (xd->plane[0].pre[0].stride)) + ref_col);
+                        ref_row * in_what_stride + ref_col);
   best_address = in_what;
 
   // Check the starting position
@@ -1375,7 +1375,7 @@ int vp9_diamond_search_sadx4(MACROBLOCK *x,
 
   // Work out the start point for the search
   in_what = (uint8_t *)(xd->plane[0].pre[0].buf +
-                        (ref_row * (xd->plane[0].pre[0].stride)) + ref_col);
+                        ref_row * in_what_stride + ref_col);
   best_address = in_what;
 
   // Check the starting position
@@ -1522,7 +1522,6 @@ int vp9_full_pixel_diamond(VP9_COMP *cpi, MACROBLOCK *x,
                            int_mv *ref_mv, int_mv *dst_mv) {
   int_mv temp_mv;
   int thissme, n, num00;
-
   int bestsme = cpi->diamond_search_sad(x, mvp_full, &temp_mv,
                                         step_param, sadpb, &num00,
                                         fn_ptr, x->nmvjointcost,
