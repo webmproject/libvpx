@@ -16,6 +16,24 @@
       "revId": "0102f1d5ecda28a23d14bf9cdfdd49792e70b27b",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX//688\u003d",
+        "filename": "vp9/encoder/vp9_mcomp.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1729,
+      "author": {
+        "id": 1003514
+      },
+      "writtenOn": "2013-12-10T18:10:42Z",
+      "side": 1,
+      "message": "This checks mirrors a similar check in vp9_full_search_sadx8 (which is why the bug isn\u0027t triggered on SSE4 where sadx8 is used but not sadx3).\n\nHere\u0027s a backtrace (provided by basilgohar on IRC) showing the problem: http://fpaste.org/60530/\n\nfn_ptr-\u003esdx3f is NULL after fn_ptr \u003d \u0026cpi-\u003efn_ptr[BLOCK_8X4]",
+      "parentUuid": "AAAAdX//69Q\u003d",
+      "revId": "0102f1d5ecda28a23d14bf9cdfdd49792e70b27b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
