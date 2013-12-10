@@ -36,6 +36,23 @@
     },
     {
       "key": {
+        "uuid": "AAAAdX//7Bs\u003d",
+        "filename": "vp9/common/vp9_reconinter.c",
+        "patchSetId": 15
+      },
+      "lineNbr": 284,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2013-12-10T00:00:49Z",
+      "side": 1,
+      "message": "It seems but_ptr declaration can be moved under appropriate if statement.",
+      "revId": "80c5e3bfb9b31e3743251d24ee88de9778348772",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdX//7B8\u003d",
         "filename": "vp9/common/vp9_reconinter.c",
         "patchSetId": 15
