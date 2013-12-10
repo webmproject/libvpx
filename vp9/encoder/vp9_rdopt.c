@@ -2147,7 +2147,7 @@ static void estimate_ref_frame_costs(VP9_COMP *cpi, int segment_id,
     vp9_prob intra_inter_p = vp9_get_intra_inter_prob(cm, xd);
     vp9_prob comp_inter_p = 128;
 
-    if (cm->comp_pred_mode == REFERENCE_MODE_SELECT) {
+    if (cm->reference_mode == REFERENCE_MODE_SELECT) {
       comp_inter_p = vp9_get_reference_mode_prob(cm, xd);
       *comp_mode_p = comp_inter_p;
     } else {
@@ -2156,12 +2156,12 @@ static void estimate_ref_frame_costs(VP9_COMP *cpi, int segment_id,
 
     ref_costs_single[INTRA_FRAME] = vp9_cost_bit(intra_inter_p, 0);
 
-    if (cm->comp_pred_mode != COMPOUND_REFERENCE) {
+    if (cm->reference_mode != COMPOUND_REFERENCE) {
       vp9_prob ref_single_p1 = vp9_get_pred_prob_single_ref_p1(cm, xd);
       vp9_prob ref_single_p2 = vp9_get_pred_prob_single_ref_p2(cm, xd);
       unsigned int base_cost = vp9_cost_bit(intra_inter_p, 1);
 
-      if (cm->comp_pred_mode == REFERENCE_MODE_SELECT)
+      if (cm->reference_mode == REFERENCE_MODE_SELECT)
         base_cost += vp9_cost_bit(comp_inter_p, 0);
 
       ref_costs_single[LAST_FRAME] = ref_costs_single[GOLDEN_FRAME] =
@@ -2176,11 +2176,11 @@ static void estimate_ref_frame_costs(VP9_COMP *cpi, int segment_id,
       ref_costs_single[GOLDEN_FRAME] = 512;
       ref_costs_single[ALTREF_FRAME] = 512;
     }
-    if (cm->comp_pred_mode != SINGLE_REFERENCE) {
+    if (cm->reference_mode != SINGLE_REFERENCE) {
       vp9_prob ref_comp_p = vp9_get_pred_prob_comp_ref_p(cm, xd);
       unsigned int base_cost = vp9_cost_bit(intra_inter_p, 1);
 
-      if (cm->comp_pred_mode == REFERENCE_MODE_SELECT)
+      if (cm->reference_mode == REFERENCE_MODE_SELECT)
         base_cost += vp9_cost_bit(comp_inter_p, 1);
 
       ref_costs_comp[LAST_FRAME]   = base_cost + vp9_cost_bit(ref_comp_p, 0);
@@ -2732,13 +2732,10 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
   *rate2 += cost_mv_ref(cpi, this_mode,
                         mbmi->mode_context[mbmi->ref_frame[0]]);
 
-  if (!(*mode_excluded)) {
-    if (is_comp_pred) {
-      *mode_excluded = (cpi->common.comp_pred_mode == SINGLE_REFERENCE);
-    } else {
-      *mode_excluded = (cpi->common.comp_pred_mode == COMPOUND_REFERENCE);
-    }
-  }
+  if (!(*mode_excluded))
+    *mode_excluded = is_comp_pred
+        ? cpi->common.reference_mode == SINGLE_REFERENCE
+        : cpi->common.reference_mode == COMPOUND_REFERENCE;
 
   pred_exists = 0;
   // Are all MVs integer pel for Y and UV
@@ -3315,17 +3312,14 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
     if (comp_pred) {
       if (!(cpi->ref_frame_flags & flag_list[second_ref_frame]))
         continue;
-      set_scale_factors(xd, ref_frame, second_ref_frame, scale_factor);
 
-      mode_excluded = mode_excluded
-                         ? mode_excluded
-                         : cm->comp_pred_mode == SINGLE_REFERENCE;
+      set_scale_factors(xd, ref_frame, second_ref_frame, scale_factor);
+      mode_excluded = mode_excluded ? mode_excluded
+                                    : cm->reference_mode == SINGLE_REFERENCE;
     } else {
-      if (ref_frame != INTRA_FRAME && second_ref_frame != INTRA_FRAME) {
-        mode_excluded =
-            mode_excluded ?
-                mode_excluded : cm->comp_pred_mode == COMPOUND_REFERENCE;
-      }
+      if (ref_frame != INTRA_FRAME && second_ref_frame != INTRA_FRAME)
+        mode_excluded = mode_excluded ?
+            mode_excluded : cm->reference_mode == COMPOUND_REFERENCE;
     }
 
     // Select prediction reference frames.
@@ -3446,9 +3440,8 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
         continue;
     }
 
-    if (cm->comp_pred_mode == REFERENCE_MODE_SELECT) {
+    if (cm->reference_mode == REFERENCE_MODE_SELECT)
       rate2 += compmode_cost;
-    }
 
     // Estimate the reference frame signaling cost and add it
     // to the rolling cost variable.
@@ -3593,7 +3586,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
     if (!disable_skip && ref_frame != INTRA_FRAME) {
       int64_t single_rd, hybrid_rd, single_rate, hybrid_rate;
 
-      if (cm->comp_pred_mode == REFERENCE_MODE_SELECT) {
+      if (cm->reference_mode == REFERENCE_MODE_SELECT) {
         single_rate = rate2 - compmode_cost;
         hybrid_rate = rate2;
       } else {
@@ -3986,14 +3979,12 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
         continue;
       set_scale_factors(xd, ref_frame, second_ref_frame, scale_factor);
 
-      mode_excluded = mode_excluded
-                         ? mode_excluded
-                         : cm->comp_pred_mode == SINGLE_REFERENCE;
+      mode_excluded = mode_excluded ? mode_excluded
+                                    : cm->reference_mode == SINGLE_REFERENCE;
     } else {
       if (ref_frame != INTRA_FRAME && second_ref_frame != INTRA_FRAME) {
-        mode_excluded =
-            mode_excluded ?
-                mode_excluded : cm->comp_pred_mode == COMPOUND_REFERENCE;
+        mode_excluded = mode_excluded ?
+            mode_excluded : cm->reference_mode == COMPOUND_REFERENCE;
       }
     }
 
@@ -4198,12 +4189,11 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
       if (cpi->common.mcomp_filter_type == SWITCHABLE)
         rate2 += get_switchable_rate(x);
 
-      if (!mode_excluded) {
-        if (comp_pred)
-          mode_excluded = cpi->common.comp_pred_mode == SINGLE_REFERENCE;
-        else
-          mode_excluded = cpi->common.comp_pred_mode == COMPOUND_REFERENCE;
-      }
+      if (!mode_excluded)
+         mode_excluded = comp_pred
+             ? cpi->common.reference_mode == SINGLE_REFERENCE
+             : cpi->common.reference_mode == COMPOUND_REFERENCE;
+
       compmode_cost = vp9_cost_bit(comp_mode_p, comp_pred);
 
       tmp_best_rdu = best_rd -
@@ -4230,9 +4220,8 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
       }
     }
 
-    if (cpi->common.comp_pred_mode == REFERENCE_MODE_SELECT) {
+    if (cpi->common.reference_mode == REFERENCE_MODE_SELECT)
       rate2 += compmode_cost;
-    }
 
     // Estimate the reference frame signaling cost and add it
     // to the rolling cost variable.
@@ -4348,7 +4337,7 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
     if (!disable_skip && ref_frame != INTRA_FRAME) {
       int64_t single_rd, hybrid_rd, single_rate, hybrid_rate;
 
-      if (cpi->common.comp_pred_mode == REFERENCE_MODE_SELECT) {
+      if (cpi->common.reference_mode == REFERENCE_MODE_SELECT) {
         single_rate = rate2 - compmode_cost;
         hybrid_rate = rate2;
       } else {

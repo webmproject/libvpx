@@ -758,7 +758,7 @@ static void update_stats(VP9_COMP *cpi) {
     // reference frame allowed for the segment so exclude it from
     // the reference frame counts used to work out probabilities.
     if (is_inter_block(mbmi) && !seg_ref_active) {
-      if (cm->comp_pred_mode == REFERENCE_MODE_SELECT)
+      if (cm->reference_mode == REFERENCE_MODE_SELECT)
         cpi->comp_inter_count[vp9_get_reference_mode_context(cm, xd)]
                              [has_second_ref(mbmi)]++;
 
@@ -2361,7 +2361,7 @@ void vp9_encode_frame(VP9_COMP *cpi) {
 
     /* transform size selection (4x4, 8x8, 16x16 or select-per-mb) */
     select_tx_mode(cpi);
-    cpi->common.comp_pred_mode = pred_type;
+    cpi->common.reference_mode = pred_type;
     cpi->common.mcomp_filter_type = filter_type;
     encode_frame_internal(cpi);
 
@@ -2388,7 +2388,7 @@ void vp9_encode_frame(VP9_COMP *cpi) {
       cpi->rd_tx_select_threshes[frame_type][i] /= 2;
     }
 
-    if (cpi->common.comp_pred_mode == REFERENCE_MODE_SELECT) {
+    if (cpi->common.reference_mode == REFERENCE_MODE_SELECT) {
       int single_count_zero = 0;
       int comp_count_zero = 0;
 
@@ -2398,10 +2398,10 @@ void vp9_encode_frame(VP9_COMP *cpi) {
       }
 
       if (comp_count_zero == 0) {
-        cpi->common.comp_pred_mode = SINGLE_REFERENCE;
+        cpi->common.reference_mode = SINGLE_REFERENCE;
         vp9_zero(cpi->comp_inter_count);
       } else if (single_count_zero == 0) {
-        cpi->common.comp_pred_mode = COMPOUND_REFERENCE;
+        cpi->common.reference_mode = COMPOUND_REFERENCE;
         vp9_zero(cpi->comp_inter_count);
       }
     }
