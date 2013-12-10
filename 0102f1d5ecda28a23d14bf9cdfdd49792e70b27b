@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdX//69Q\u003d",
+        "filename": "vp9/encoder/vp9_mcomp.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1729,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2013-12-10T17:36:31Z",
+      "side": 1,
+      "message": "Can you figure out in what case this is null? The definitions are in vp9_onyx_if.c\n\nInstead of checking if this is null, it should make sure than a function is defined in the sse3 case. The should always be a backup C function.",
+      "revId": "0102f1d5ecda28a23d14bf9cdfdd49792e70b27b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
