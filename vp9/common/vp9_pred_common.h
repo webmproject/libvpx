@@ -59,7 +59,7 @@ static INLINE unsigned char vp9_get_pred_flag_mbskip(const MACROBLOCKD *xd) {
   return xd->mi_8x8[0]->mbmi.skip_coeff;
 }
 
-unsigned char vp9_get_pred_context_switchable_interp(const MACROBLOCKD *xd);
+int vp9_get_pred_context_switchable_interp(const MACROBLOCKD *xd);
 
 int vp9_get_intra_inter_context(const MACROBLOCKD *xd);
 
