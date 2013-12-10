@@ -40,19 +40,17 @@ static INLINE vp9_prob vp9_get_pred_prob_seg_id(struct segmentation *seg,
   return seg->pred_probs[vp9_get_pred_context_seg_id(xd)];
 }
 
-static INLINE int vp9_get_pred_context_mbskip(const MACROBLOCKD *xd) {
+static INLINE int vp9_get_skip_context(const MACROBLOCKD *xd) {
   const MODE_INFO *const above_mi = get_above_mi(xd);
   const MODE_INFO *const left_mi = get_left_mi(xd);
-  const int above_skip_coeff = (above_mi != NULL) ?
-                               above_mi->mbmi.skip_coeff : 0;
-  const int left_skip_coeff = (left_mi != NULL) ? left_mi->mbmi.skip_coeff : 0;
-
-  return above_skip_coeff + left_skip_coeff;
+  const int above_skip = (above_mi != NULL) ? above_mi->mbmi.skip_coeff : 0;
+  const int left_skip = (left_mi != NULL) ? left_mi->mbmi.skip_coeff : 0;
+  return above_skip + left_skip;
 }
 
-static INLINE vp9_prob vp9_get_pred_prob_mbskip(const VP9_COMMON *cm,
-                                                const MACROBLOCKD *xd) {
-  return cm->fc.mbskip_probs[vp9_get_pred_context_mbskip(xd)];
+static INLINE vp9_prob vp9_get_skip_prob(const VP9_COMMON *cm,
+                                         const MACROBLOCKD *xd) {
+  return cm->fc.mbskip_probs[vp9_get_skip_context(xd)];
 }
 
 int vp9_get_pred_context_switchable_interp(const MACROBLOCKD *xd);
