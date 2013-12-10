@@ -749,6 +749,9 @@ prototype int vp9_diamond_search_sad "struct macroblock *x, union int_mv *ref_mv
 specialize vp9_diamond_search_sad sse3
 vp9_diamond_search_sad_sse3=vp9_diamond_search_sadx4
 
+prototype int vp9_full_range_search "struct macroblock *x, union int_mv *ref_mv, union int_mv *best_mv, int search_param, int sad_per_bit, int *num00, struct vp9_variance_vtable *fn_ptr, DEC_MVCOSTS, union int_mv *center_mv"
+specialize vp9_full_range_search
+
 prototype void vp9_temporal_filter_apply "uint8_t *frame1, unsigned int stride, uint8_t *frame2, unsigned int block_size, int strength, int filter_weight, unsigned int *accumulator, uint16_t *count"
 specialize vp9_temporal_filter_apply sse2
 

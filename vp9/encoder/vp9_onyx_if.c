@@ -689,6 +689,7 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
 
   switch (mode) {
     case 0:  // This is the best quality mode.
+      cpi->diamond_search_sad = vp9_full_range_search;
       break;
 
     case 1:
