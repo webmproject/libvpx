@@ -64,15 +64,12 @@ static void build_mc_border(const uint8_t *src, uint8_t *dst, int stride,
 
 static void inter_predictor(const uint8_t *src, int src_stride,
                             uint8_t *dst, int dst_stride,
-                            const MV32 *mv,
+                            const int subpel_x,
+                            const int subpel_y,
                             const struct scale_factors *scale,
                             int w, int h, int ref,
                             const struct subpix_fn_table *subpix,
                             int xs, int ys) {
-  const int subpel_x = mv->col & SUBPEL_MASK;
-  const int subpel_y = mv->row & SUBPEL_MASK;
-
-  src += (mv->row >> SUBPEL_BITS) * src_stride + (mv->col >> SUBPEL_BITS);
   scale->sfc->predict[subpel_x != 0][subpel_y != 0][ref](
       src, src_stride, dst, dst_stride,
       subpix->filter_x[subpel_x], xs,
@@ -92,9 +89,12 @@ void vp9_build_inter_predictor(const uint8_t *src, int src_stride,
                      is_q4 ? src_mv->col : src_mv->col * 2 };
   const struct scale_factors_common *sfc = scale->sfc;
   const MV32 mv = sfc->scale_mv(&mv_q4, scale);
+  const int subpel_x = mv.col & SUBPEL_MASK;
+  const int subpel_y = mv.row & SUBPEL_MASK;
+  src += (mv.row >> SUBPEL_BITS) * src_stride + (mv.col >> SUBPEL_BITS);
 
-  inter_predictor(src, src_stride, dst, dst_stride, &mv, scale,
-                  w, h, ref, subpix, sfc->x_step_q4, sfc->y_step_q4);
+  inter_predictor(src, src_stride, dst, dst_stride, subpel_x, subpel_y,
+                  scale, w, h, ref, subpix, sfc->x_step_q4, sfc->y_step_q4);
 }
 
 static INLINE int round_mv_comp_q4(int value) {
@@ -177,7 +177,7 @@ static void build_inter_predictors(MACROBLOCKD *xd, int plane, int block,
 
     uint8_t *pre;
     MV32 scaled_mv;
-    int xs, ys;
+    int xs, ys, subpel_x, subpel_y;
 
     if (vp9_is_scaled(scale->sfc)) {
       pre = pre_buf->buf + scaled_buffer_offset(x, y, pre_buf->stride, scale);
@@ -191,9 +191,13 @@ static void build_inter_predictors(MACROBLOCKD *xd, int plane, int block,
       scaled_mv.col = mv_q4.col;
       xs = ys = 16;
     }
+    subpel_x = scaled_mv.col & SUBPEL_MASK;
+    subpel_y = scaled_mv.row & SUBPEL_MASK;
+    pre += (scaled_mv.row >> SUBPEL_BITS) * pre_buf->stride
+           + (scaled_mv.col >> SUBPEL_BITS);
 
     inter_predictor(pre, pre_buf->stride, dst, dst_buf->stride,
-                    &scaled_mv, scale, w, h, ref, &xd->subpix, xs, ys);
+                    subpel_x, subpel_y, scale, w, h, ref, &xd->subpix, xs, ys);
   }
 }
 
@@ -275,11 +279,10 @@ static void dec_build_inter_predictors(MACROBLOCKD *xd, int plane, int block,
                                                pd->subsampling_x,
                                                pd->subsampling_y);
 
-    uint8_t *pre;
     MV32 scaled_mv;
     int xs, ys, x0, y0, x0_16, y0_16, x1, y1, frame_width,
-        frame_height;
-    uint8_t *ref_frame;
+        frame_height, subpel_x, subpel_y;
+    uint8_t *ref_frame, *buf_ptr;
     const YV12_BUFFER_CONFIG *ref_buf = xd->ref_buf[ref];
 
     // Get reference frame pointer, width and height.
@@ -302,7 +305,6 @@ static void dec_build_inter_predictors(MACROBLOCKD *xd, int plane, int block,
     y0_16 = y0 << SUBPEL_BITS;
 
     if (vp9_is_scaled(scale->sfc)) {
-      pre = pre_buf->buf + scaled_buffer_offset(x, y, pre_buf->stride, scale);
       scale->sfc->set_scaled_offsets(scale, mi_y + y, mi_x + x);
       scaled_mv = scale->sfc->scale_mv(&mv_q4, scale);
       xs = scale->sfc->x_step_q4;
@@ -313,11 +315,12 @@ static void dec_build_inter_predictors(MACROBLOCKD *xd, int plane, int block,
       x0_16 = scale->sfc->scale_value_x(x0_16, scale->sfc);
       y0_16 = scale->sfc->scale_value_y(y0_16, scale->sfc);
     } else {
-      pre = pre_buf->buf + (y * pre_buf->stride + x);
       scaled_mv.row = mv_q4.row;
       scaled_mv.col = mv_q4.col;
       xs = ys = 16;
     }
+    subpel_x = scaled_mv.col & SUBPEL_MASK;
+    subpel_y = scaled_mv.row & SUBPEL_MASK;
 
     // Get reference block top left coordinate.
     x0 += scaled_mv.col >> SUBPEL_BITS;
@@ -329,12 +332,13 @@ static void dec_build_inter_predictors(MACROBLOCKD *xd, int plane, int block,
     x1 = ((x0_16 + (w - 1) * xs) >> SUBPEL_BITS) + 1;
     y1 = ((y0_16 + (h - 1) * xs) >> SUBPEL_BITS) + 1;
 
+    // Get reference block pointer.
+    buf_ptr = ref_frame + y0 * pre_buf->stride + x0;
+
     // Do border extension if there is motion or
     // width/height is not a multiple of 8 pixels.
     if (scaled_mv.col || scaled_mv.row ||
         (frame_width & 0x7) || (frame_height & 0x7)) {
-      const int subpel_x = scaled_mv.col & SUBPEL_MASK;
-      const int subpel_y = scaled_mv.row & SUBPEL_MASK;
 
       if (subpel_x) {
         x0 -= VP9_INTERP_EXTEND - 1;
@@ -349,18 +353,15 @@ static void dec_build_inter_predictors(MACROBLOCKD *xd, int plane, int block,
       // Skip border extension if block is inside the frame.
       if (x0 < 0 || x0 > frame_width - 1 || x1 < 0 || x1 > frame_width ||
           y0 < 0 || y0 > frame_height - 1 || y1 < 0 || y1 > frame_height - 1) {
-        // Get reference block pointer.
-        uint8_t *buf_ptr = ref_frame + y0 * pre_buf->stride + x0;
-        int buf_stride = pre_buf->stride;
-
+        uint8_t *buf_ptr1 = ref_frame + y0 * pre_buf->stride + x0;
         // Extend the border.
-        build_mc_border(buf_ptr, buf_ptr, buf_stride, x0, y0, x1 - x0, y1 - y0,
-                        frame_width, frame_height);
+        build_mc_border(buf_ptr1, buf_ptr1, pre_buf->stride, x0, y0, x1 - x0,
+                        y1 - y0, frame_width, frame_height);
       }
     }
 
-    inter_predictor(pre, pre_buf->stride, dst, dst_buf->stride, &scaled_mv,
-                    scale, w, h, ref, &xd->subpix, xs, ys);
+    inter_predictor(buf_ptr, pre_buf->stride, dst, dst_buf->stride, subpel_x,
+                    subpel_y, scale, w, h, ref, &xd->subpix, xs, ys);
   }
 }
 
