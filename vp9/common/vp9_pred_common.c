@@ -25,37 +25,26 @@ static INLINE const MB_MODE_INFO *get_left_mbmi(const MODE_INFO *const left) {
 }
 
 // Returns a context number for the given MB prediction signal
-unsigned char vp9_get_pred_context_switchable_interp(const MACROBLOCKD *xd) {
-  const MODE_INFO *const above_mi = get_above_mi(xd);
-  const MODE_INFO *const left_mi = get_left_mi(xd);
-  const int above_in_image = above_mi != NULL;
-  const int left_in_image = left_mi != NULL;
+int vp9_get_pred_context_switchable_interp(const MACROBLOCKD *xd) {
   // Note:
   // The mode info data structure has a one element border above and to the
   // left of the entries correpsonding to real macroblocks.
   // The prediction flags in these dummy entries are initialised to 0.
-  // left
-  const int left_mv_pred = left_in_image ? is_inter_block(&left_mi->mbmi)
-                                         : 0;
-  const int left_interp = left_in_image && left_mv_pred
-                              ? left_mi->mbmi.interp_filter
-                              : SWITCHABLE_FILTERS;
+  const MODE_INFO *const left_mi = get_left_mi(xd);
+  const int has_left = left_mi != NULL ? is_inter_block(&left_mi->mbmi) : 0;
+  const int left_type = has_left ? left_mi->mbmi.interp_filter
+                                 : SWITCHABLE_FILTERS;
 
-  // above
-  const int above_mv_pred = above_in_image ? is_inter_block(&above_mi->mbmi)
-                                           : 0;
-  const int above_interp = above_in_image && above_mv_pred
-                               ? above_mi->mbmi.interp_filter
-                               : SWITCHABLE_FILTERS;
-
-  if (left_interp == above_interp)
-    return left_interp;
-  else if (left_interp == SWITCHABLE_FILTERS &&
-           above_interp != SWITCHABLE_FILTERS)
-    return above_interp;
-  else if (left_interp != SWITCHABLE_FILTERS &&
-           above_interp == SWITCHABLE_FILTERS)
-    return left_interp;
+  const MODE_INFO *const above_mi = get_above_mi(xd);
+  const int has_above = above_mi != NULL ? is_inter_block(&above_mi->mbmi) : 0;
+  const int above_type = has_above ? above_mi->mbmi.interp_filter
+                                   : SWITCHABLE_FILTERS;
+  if (left_type == above_type)
+    return left_type;
+  else if (left_type == SWITCHABLE_FILTERS && above_type != SWITCHABLE_FILTERS)
+    return above_type;
+  else if (left_type != SWITCHABLE_FILTERS && above_type == SWITCHABLE_FILTERS)
+    return left_type;
   else
     return SWITCHABLE_FILTERS;
 }
