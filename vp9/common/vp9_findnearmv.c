@@ -36,46 +36,49 @@ void vp9_find_best_ref_mvs(MACROBLOCKD *xd, int allow_hp,
 
 void vp9_append_sub8x8_mvs_for_idx(VP9_COMMON *cm, MACROBLOCKD *xd,
                                    const TileInfo *const tile,
-                                   int_mv *dst_nearest, int_mv *dst_near,
-                                   int block_idx, int ref_idx,
-                                   int mi_row, int mi_col) {
+                                   int block, int ref, int mi_row, int mi_col,
+                                   int_mv *nearest, int_mv *near) {
   int_mv mv_list[MAX_MV_REF_CANDIDATES];
   MODE_INFO *const mi = xd->mi_8x8[0];
   b_mode_info *bmi = mi->bmi;
   int n;
 
-  assert(ref_idx == 0 || ref_idx == 1);
   assert(MAX_MV_REF_CANDIDATES == 2);
 
-  vp9_find_mv_refs_idx(cm, xd, tile, mi, xd->last_mi,
-                       mi->mbmi.ref_frame[ref_idx],
-                       mv_list, block_idx, mi_row, mi_col);
+  vp9_find_mv_refs_idx(cm, xd, tile, mi, xd->last_mi, mi->mbmi.ref_frame[ref],
+                       mv_list, block, mi_row, mi_col);
 
-  dst_near->as_int = 0;
-  if (block_idx == 0) {
-    dst_nearest->as_int = mv_list[0].as_int;
-    dst_near->as_int = mv_list[1].as_int;
-  } else if (block_idx == 1 || block_idx == 2) {
-    dst_nearest->as_int = bmi[0].as_mv[ref_idx].as_int;
-    for (n = 0; n < MAX_MV_REF_CANDIDATES; ++n)
-      if (dst_nearest->as_int != mv_list[n].as_int) {
-        dst_near->as_int = mv_list[n].as_int;
-        break;
-      }
-  } else {
-    int_mv candidates[2 + MAX_MV_REF_CANDIDATES];
-    candidates[0] = bmi[1].as_mv[ref_idx];
-    candidates[1] = bmi[0].as_mv[ref_idx];
-    candidates[2] = mv_list[0];
-    candidates[3] = mv_list[1];
+  near->as_int = 0;
+  switch (block) {
+    case 0:
+      nearest->as_int = mv_list[0].as_int;
+      near->as_int = mv_list[1].as_int;
+      break;
+    case 1:
+    case 2:
+      nearest->as_int = bmi[0].as_mv[ref].as_int;
+      for (n = 0; n < MAX_MV_REF_CANDIDATES; ++n)
+        if (nearest->as_int != mv_list[n].as_int) {
+          near->as_int = mv_list[n].as_int;
+          break;
+        }
+      break;
+    case 3: {
+      int_mv candidates[2 + MAX_MV_REF_CANDIDATES];
+      candidates[0] = bmi[1].as_mv[ref];
+      candidates[1] = bmi[0].as_mv[ref];
+      candidates[2] = mv_list[0];
+      candidates[3] = mv_list[1];
 
-    assert(block_idx == 3);
-    dst_nearest->as_int = bmi[2].as_mv[ref_idx].as_int;
-    for (n = 0; n < 2 + MAX_MV_REF_CANDIDATES; ++n) {
-      if (dst_nearest->as_int != candidates[n].as_int) {
-        dst_near->as_int = candidates[n].as_int;
-        break;
-      }
+      nearest->as_int = bmi[2].as_mv[ref].as_int;
+      for (n = 0; n < 2 + MAX_MV_REF_CANDIDATES; ++n)
+        if (nearest->as_int != candidates[n].as_int) {
+          near->as_int = candidates[n].as_int;
+          break;
+        }
+      break;
     }
+    default:
+      assert("Invalid block index.");
   }
 }

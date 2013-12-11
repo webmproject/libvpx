@@ -475,8 +475,8 @@ static void read_inter_block_mode_info(VP9_COMMON *const cm,
 
         if (b_mode == NEARESTMV || b_mode == NEARMV)
           for (ref = 0; ref < 1 + is_compound; ++ref)
-            vp9_append_sub8x8_mvs_for_idx(cm, xd, tile, &nearest[ref],
-                                          &nearmv[ref], j, ref, mi_row, mi_col);
+            vp9_append_sub8x8_mvs_for_idx(cm, xd, tile, j, ref, mi_row, mi_col,
+                                          &nearest[ref], &nearmv[ref]);
 
         if (!assign_mv(cm, b_mode, block, best, nearest, nearmv,
                        is_compound, allow_hp, r)) {
