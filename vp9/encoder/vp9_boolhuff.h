@@ -111,5 +111,6 @@ static void vp9_write_literal(vp9_writer *w, int data, int bits) {
     vp9_write_bit(w, 1 & (data >> bit));
 }
 
+#define vp9_write_prob(w, v) vp9_write_literal((w), (v), 8)
 
 #endif  // VP9_ENCODER_VP9_BOOLHUFF_H_

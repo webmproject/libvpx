@@ -47,13 +47,13 @@ static void encode_mv_component(vp9_writer* w, int comp,
   vp9_write(w, sign, mvcomp->sign);
 
   // Class
-  write_token(w, vp9_mv_class_tree, mvcomp->classes,
-              &mv_class_encodings[mv_class]);
+  vp9_write_token(w, vp9_mv_class_tree, mvcomp->classes,
+                  &mv_class_encodings[mv_class]);
 
   // Integer bits
   if (mv_class == MV_CLASS_0) {
-    write_token(w, vp9_mv_class0_tree, mvcomp->class0,
-                &mv_class0_encodings[d]);
+    vp9_write_token(w, vp9_mv_class0_tree, mvcomp->class0,
+                    &mv_class0_encodings[d]);
   } else {
     int i;
     const int n = mv_class + CLASS0_BITS - 1;  // number of bits
@@ -62,9 +62,9 @@ static void encode_mv_component(vp9_writer* w, int comp,
   }
 
   // Fractional bits
-  write_token(w, vp9_mv_fp_tree,
-              mv_class == MV_CLASS_0 ?  mvcomp->class0_fp[d] : mvcomp->fp,
-              &mv_fp_encodings[fr]);
+  vp9_write_token(w, vp9_mv_fp_tree,
+                  mv_class == MV_CLASS_0 ?  mvcomp->class0_fp[d] : mvcomp->fp,
+                  &mv_fp_encodings[fr]);
 
   // High precision bit
   if (usehp)
@@ -209,7 +209,7 @@ void vp9_encode_mv(VP9_COMP* cpi, vp9_writer* w,
   const MV_JOINT_TYPE j = vp9_get_mv_joint(&diff);
   usehp = usehp && vp9_use_mv_hp(ref);
 
-  write_token(w, vp9_mv_joint_tree, mvctx->joints, &mv_joint_encodings[j]);
+  vp9_write_token(w, vp9_mv_joint_tree, mvctx->joints, &mv_joint_encodings[j]);
   if (mv_joint_vertical(j))
     encode_mv_component(w, diff.row, &mvctx->comps[0], usehp);
 
