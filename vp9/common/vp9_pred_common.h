@@ -69,8 +69,8 @@ static INLINE vp9_prob vp9_get_reference_mode_prob(const VP9_COMMON *cm,
   return cm->fc.comp_inter_prob[vp9_get_reference_mode_context(cm, xd)];
 }
 
-unsigned char vp9_get_pred_context_comp_ref_p(const VP9_COMMON *cm,
-                                              const MACROBLOCKD *xd);
+int vp9_get_pred_context_comp_ref_p(const VP9_COMMON *cm,
+                                    const MACROBLOCKD *xd);
 
 static INLINE vp9_prob vp9_get_pred_prob_comp_ref_p(const VP9_COMMON *cm,
                                                     const MACROBLOCKD *xd) {
@@ -78,20 +78,18 @@ static INLINE vp9_prob vp9_get_pred_prob_comp_ref_p(const VP9_COMMON *cm,
   return cm->fc.comp_ref_prob[pred_context];
 }
 
-unsigned char vp9_get_pred_context_single_ref_p1(const MACROBLOCKD *xd);
+int vp9_get_pred_context_single_ref_p1(const MACROBLOCKD *xd);
 
 static INLINE vp9_prob vp9_get_pred_prob_single_ref_p1(const VP9_COMMON *cm,
                                                        const MACROBLOCKD *xd) {
-  const int pred_context = vp9_get_pred_context_single_ref_p1(xd);
-  return cm->fc.single_ref_prob[pred_context][0];
+  return cm->fc.single_ref_prob[vp9_get_pred_context_single_ref_p1(xd)][0];
 }
 
-unsigned char vp9_get_pred_context_single_ref_p2(const MACROBLOCKD *xd);
+int vp9_get_pred_context_single_ref_p2(const MACROBLOCKD *xd);
 
 static INLINE vp9_prob vp9_get_pred_prob_single_ref_p2(const VP9_COMMON *cm,
                                                        const MACROBLOCKD *xd) {
-  const int pred_context = vp9_get_pred_context_single_ref_p2(xd);
-  return cm->fc.single_ref_prob[pred_context][1];
+  return cm->fc.single_ref_prob[vp9_get_pred_context_single_ref_p2(xd)][1];
 }
 
 int vp9_get_tx_size_context(const MACROBLOCKD *xd);

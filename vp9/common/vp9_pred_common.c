@@ -52,10 +52,10 @@ int vp9_get_pred_context_switchable_interp(const MACROBLOCKD *xd) {
 int vp9_get_intra_inter_context(const MACROBLOCKD *xd) {
   const MB_MODE_INFO *const above_mbmi = get_above_mbmi(get_above_mi(xd));
   const MB_MODE_INFO *const left_mbmi = get_left_mbmi(get_left_mi(xd));
-  const int above_in_image = above_mbmi != NULL;
-  const int left_in_image = left_mbmi != NULL;
-  const int above_intra = above_in_image ? !is_inter_block(above_mbmi) : 1;
-  const int left_intra = left_in_image ? !is_inter_block(left_mbmi) : 1;
+  const int has_above = above_mbmi != NULL;
+  const int has_left = left_mbmi != NULL;
+  const int above_intra = has_above ? !is_inter_block(above_mbmi) : 1;
+  const int left_intra = has_left ? !is_inter_block(left_mbmi) : 1;
 
   // The mode info data structure has a one element border above and to the
   // left of the entries corresponding to real macroblocks.
@@ -64,11 +64,11 @@ int vp9_get_intra_inter_context(const MACROBLOCKD *xd) {
   // 1 - intra/inter, inter/intra
   // 2 - intra/--, --/intra
   // 3 - intra/intra
-  if (above_in_image && left_in_image)  // both edges available
+  if (has_above && has_left)  // both edges available
     return left_intra && above_intra ? 3
                                      : left_intra || above_intra;
-  else if (above_in_image || left_in_image)  // one edge available
-    return 2 * (above_in_image ? above_intra : left_intra);
+  else if (has_above || has_left)  // one edge available
+    return 2 * (has_above ? above_intra : left_intra);
   else
     return 0;
 }
@@ -78,13 +78,13 @@ int vp9_get_reference_mode_context(const VP9_COMMON *cm,
   int ctx;
   const MB_MODE_INFO *const above_mbmi = get_above_mbmi(get_above_mi(xd));
   const MB_MODE_INFO *const left_mbmi = get_left_mbmi(get_left_mi(xd));
-  const int above_in_image = above_mbmi != NULL;
-  const int left_in_image = left_mbmi != NULL;
+  const int has_above = above_mbmi != NULL;
+  const int has_left = left_mbmi != NULL;
   // Note:
   // The mode info data structure has a one element border above and to the
   // left of the entries correpsonding to real macroblocks.
   // The prediction flags in these dummy entries are initialised to 0.
-  if (above_in_image && left_in_image) {  // both edges available
+  if (has_above && has_left) {  // both edges available
     if (!has_second_ref(above_mbmi) && !has_second_ref(left_mbmi))
       // neither edge uses comp pred (0/1)
       ctx = (above_mbmi->ref_frame[0] == cm->comp_fixed_ref) ^
@@ -99,8 +99,8 @@ int vp9_get_reference_mode_context(const VP9_COMMON *cm,
                  !is_inter_block(left_mbmi));
     else  // both edges use comp pred (4)
       ctx = 4;
-  } else if (above_in_image || left_in_image) {  // one edge available
-    const MB_MODE_INFO *edge_mbmi = above_in_image ? above_mbmi : left_mbmi;
+  } else if (has_above || has_left) {  // one edge available
+    const MB_MODE_INFO *edge_mbmi = has_above ? above_mbmi : left_mbmi;
 
     if (!has_second_ref(edge_mbmi))
       // edge does not use comp pred (0/1)
@@ -116,8 +116,8 @@ int vp9_get_reference_mode_context(const VP9_COMMON *cm,
 }
 
 // Returns a context number for the given MB prediction signal
-unsigned char vp9_get_pred_context_comp_ref_p(const VP9_COMMON *cm,
-                                              const MACROBLOCKD *xd) {
+int vp9_get_pred_context_comp_ref_p(const VP9_COMMON *cm,
+                                    const MACROBLOCKD *xd) {
   int pred_context;
   const MODE_INFO *const above_mi = get_above_mi(xd);
   const MODE_INFO *const left_mi = get_left_mi(xd);
@@ -197,21 +197,20 @@ unsigned char vp9_get_pred_context_comp_ref_p(const VP9_COMMON *cm,
 
   return pred_context;
 }
-unsigned char vp9_get_pred_context_single_ref_p1(const MACROBLOCKD *xd) {
+
+int vp9_get_pred_context_single_ref_p1(const MACROBLOCKD *xd) {
   int pred_context;
-  const MODE_INFO *const above_mi = get_above_mi(xd);
-  const MODE_INFO *const left_mi = get_left_mi(xd);
-  const MB_MODE_INFO *const above_mbmi = get_above_mbmi(above_mi);
-  const MB_MODE_INFO *const left_mbmi = get_left_mbmi(left_mi);
-  const int above_in_image = above_mi != NULL;
-  const int left_in_image = left_mi != NULL;
-  const int above_intra = above_in_image ? !is_inter_block(above_mbmi) : 1;
-  const int left_intra = left_in_image ? !is_inter_block(left_mbmi) : 1;
+  const MB_MODE_INFO *const above_mbmi = get_above_mbmi(get_above_mi(xd));
+  const MB_MODE_INFO *const left_mbmi = get_left_mbmi(get_left_mi(xd));
+  const int has_above = above_mbmi != NULL;
+  const int has_left = left_mbmi != NULL;
+  const int above_intra = has_above ? !is_inter_block(above_mbmi) : 1;
+  const int left_intra = has_left ? !is_inter_block(left_mbmi) : 1;
   // Note:
   // The mode info data structure has a one element border above and to the
   // left of the entries correpsonding to real macroblocks.
   // The prediction flags in these dummy entries are initialised to 0.
-  if (above_in_image && left_in_image) {  // both edges available
+  if (has_above && has_left) {  // both edges available
     if (above_intra && left_intra) {  // intra/intra
       pred_context = 2;
     } else if (above_intra || left_intra) {  // intra/inter or inter/intra
@@ -244,8 +243,8 @@ unsigned char vp9_get_pred_context_single_ref_p1(const MACROBLOCKD *xd) {
           pred_context = crf1 == LAST_FRAME || crf2 == LAST_FRAME;
       }
     }
-  } else if (above_in_image || left_in_image) {  // one edge available
-    const MB_MODE_INFO *edge_mbmi = above_in_image ? above_mbmi : left_mbmi;
+  } else if (has_above || has_left) {  // one edge available
+    const MB_MODE_INFO *edge_mbmi = has_above ? above_mbmi : left_mbmi;
     if (!is_inter_block(edge_mbmi)) {  // intra
       pred_context = 2;
     } else {  // inter
@@ -263,22 +262,20 @@ unsigned char vp9_get_pred_context_single_ref_p1(const MACROBLOCKD *xd) {
   return pred_context;
 }
 
-unsigned char vp9_get_pred_context_single_ref_p2(const MACROBLOCKD *xd) {
+int vp9_get_pred_context_single_ref_p2(const MACROBLOCKD *xd) {
   int pred_context;
-  const MODE_INFO *const above_mi = get_above_mi(xd);
-  const MODE_INFO *const left_mi = get_left_mi(xd);
-  const MB_MODE_INFO *const above_mbmi = get_above_mbmi(above_mi);
-  const MB_MODE_INFO *const left_mbmi = get_left_mbmi(left_mi);
-  const int above_in_image = above_mi != NULL;
-  const int left_in_image = left_mi != NULL;
-  const int above_intra = above_in_image ? !is_inter_block(above_mbmi) : 1;
-  const int left_intra = left_in_image ? !is_inter_block(left_mbmi) : 1;
+  const MB_MODE_INFO *const above_mbmi = get_above_mbmi(get_above_mi(xd));
+  const MB_MODE_INFO *const left_mbmi = get_left_mbmi(get_left_mi(xd));
+  const int has_above = above_mbmi != NULL;
+  const int has_left = left_mbmi != NULL;
+  const int above_intra = has_above ? !is_inter_block(above_mbmi) : 1;
+  const int left_intra = has_left ? !is_inter_block(left_mbmi) : 1;
 
   // Note:
   // The mode info data structure has a one element border above and to the
   // left of the entries correpsonding to real macroblocks.
   // The prediction flags in these dummy entries are initialised to 0.
-  if (above_in_image && left_in_image) {  // both edges available
+  if (has_above && has_left) {  // both edges available
     if (above_intra && left_intra) {  // intra/intra
       pred_context = 2;
     } else if (above_intra || left_intra) {  // intra/inter or inter/intra
@@ -332,8 +329,8 @@ unsigned char vp9_get_pred_context_single_ref_p2(const MACROBLOCKD *xd) {
           pred_context = 1 + 2 * (crf1 == GOLDEN_FRAME || crf2 == GOLDEN_FRAME);
       }
     }
-  } else if (above_in_image || left_in_image) {  // one edge available
-    const MB_MODE_INFO *edge_mbmi = above_in_image ? above_mbmi : left_mbmi;
+  } else if (has_above || has_left) {  // one edge available
+    const MB_MODE_INFO *edge_mbmi = has_above ? above_mbmi : left_mbmi;
 
     if (!is_inter_block(edge_mbmi) ||
         (edge_mbmi->ref_frame[0] == LAST_FRAME && !has_second_ref(edge_mbmi)))
