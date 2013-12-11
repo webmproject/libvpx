@@ -71,11 +71,6 @@ static const unsigned char MV_REFERENCE_FRAME_colors[MAX_REF_FRAMES][3] =
 };
 #endif
 
-static const short kernel5[] =
-{
-    1, 1, 4, 1, 1
-};
-
 const short vp8_rv[] =
 {
     8, 5, 2, 2, 8, 12, 4, 9, 8, 3,
