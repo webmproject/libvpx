@@ -288,7 +288,7 @@ void vp9_setup_scale_factors(VP9_COMMON *cm, int i) {
   const int ref = cm->active_ref_idx[i];
   struct scale_factors *const sf = &cm->active_ref_scale[i];
   struct scale_factors_common *const sfc = &cm->active_ref_scale_comm[i];
-  if (ref >= FRAME_BUFFERS) {
+  if (ref >= cm->fb_count) {
     vp9_zero(*sf);
     vp9_zero(*sfc);
   } else {

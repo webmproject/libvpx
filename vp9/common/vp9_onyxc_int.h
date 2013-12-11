@@ -113,8 +113,8 @@ typedef struct VP9Common {
 
   YV12_BUFFER_CONFIG *frame_to_show;
 
-  YV12_BUFFER_CONFIG yv12_fb[FRAME_BUFFERS];
-  int fb_idx_ref_cnt[FRAME_BUFFERS]; /* reference counts */
+  YV12_BUFFER_CONFIG *yv12_fb;
+  int *fb_idx_ref_cnt; /* reference counts */
   int ref_frame_map[REF_FRAMES]; /* maps fb_idx to reference slot */
 
   // TODO(jkoleszar): could expand active_ref_idx to 4, with 0 as intra, and
@@ -213,6 +213,11 @@ typedef struct VP9Common {
   int frame_parallel_decoding_mode;
 
   int log2_tile_cols, log2_tile_rows;
+
+  vpx_codec_frame_buffer_t *fb_list;  // External frame buffers
+  int fb_count;  // Total number of frame buffers
+  vpx_realloc_frame_buffer_cb_fn_t realloc_fb_cb;
+  void *user_priv;  // Private data associated with the external frame buffers.
 } VP9_COMMON;
 
 // ref == 0 => LAST_FRAME
@@ -228,11 +233,11 @@ static YV12_BUFFER_CONFIG *get_frame_new_buffer(VP9_COMMON *cm) {
 
 static int get_free_fb(VP9_COMMON *cm) {
   int i;
-  for (i = 0; i < FRAME_BUFFERS; i++)
+  for (i = 0; i < cm->fb_count; i++)
     if (cm->fb_idx_ref_cnt[i] == 0)
       break;
 
-  assert(i < FRAME_BUFFERS);
+  assert(i < cm->fb_count);
   cm->fb_idx_ref_cnt[i] = 1;
   return i;
 }

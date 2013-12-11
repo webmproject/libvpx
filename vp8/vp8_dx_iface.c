@@ -929,6 +929,7 @@ CODEC_INTERFACE(vpx_codec_vp8_dx) =
         vp8_get_si,       /* vpx_codec_get_si_fn_t     get_si; */
         vp8_decode,       /* vpx_codec_decode_fn_t     decode; */
         vp8_get_frame,    /* vpx_codec_frame_get_fn_t  frame_get; */
+        NOT_IMPLEMENTED,
     },
     { /* encoder functions */
         NOT_IMPLEMENTED,

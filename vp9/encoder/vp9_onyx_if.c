@@ -920,7 +920,7 @@ static void alloc_raw_frame_buffers(VP9_COMP *cpi) {
   if (vp9_realloc_frame_buffer(&cpi->alt_ref_buffer,
                                cpi->oxcf.width, cpi->oxcf.height,
                                cm->subsampling_x, cm->subsampling_y,
-                               VP9BORDERINPIXELS))
+                               VP9BORDERINPIXELS, NULL, NULL, NULL))
     vpx_internal_error(&cpi->common.error, VPX_CODEC_MEM_ERROR,
                        "Failed to allocate altref buffer");
 }
@@ -988,14 +988,14 @@ static void update_frame_size(VP9_COMP *cpi) {
   if (vp9_realloc_frame_buffer(&cpi->last_frame_uf,
                                cm->width, cm->height,
                                cm->subsampling_x, cm->subsampling_y,
-                               VP9BORDERINPIXELS))
+                               VP9BORDERINPIXELS, NULL, NULL, NULL))
     vpx_internal_error(&cpi->common.error, VPX_CODEC_MEM_ERROR,
                        "Failed to reallocate last frame buffer");
 
   if (vp9_realloc_frame_buffer(&cpi->scaled_source,
                                cm->width, cm->height,
                                cm->subsampling_x, cm->subsampling_y,
-                               VP9BORDERINPIXELS))
+                               VP9BORDERINPIXELS, NULL, NULL, NULL))
     vpx_internal_error(&cpi->common.error, VPX_CODEC_MEM_ERROR,
                        "Failed to reallocate scaled source buffer");
 
@@ -2563,7 +2563,7 @@ static void scale_references(VP9_COMP *cpi) {
       vp9_realloc_frame_buffer(&cm->yv12_fb[new_fb],
                                cm->width, cm->height,
                                cm->subsampling_x, cm->subsampling_y,
-                               VP9BORDERINPIXELS);
+                               VP9BORDERINPIXELS, NULL, NULL, NULL);
       scale_and_extend_frame(ref, &cm->yv12_fb[new_fb]);
       cpi->scaled_ref_idx[i] = new_fb;
     } else {
@@ -3554,7 +3554,7 @@ int vp9_get_compressed_data(VP9_PTR ptr, unsigned int *frame_flags,
   vp9_realloc_frame_buffer(get_frame_new_buffer(cm),
                            cm->width, cm->height,
                            cm->subsampling_x, cm->subsampling_y,
-                           VP9BORDERINPIXELS);
+                           VP9BORDERINPIXELS, NULL, NULL, NULL);
 
   // Calculate scaling factors for each of the 3 available references
   for (i = 0; i < REFS_PER_FRAME; ++i) {

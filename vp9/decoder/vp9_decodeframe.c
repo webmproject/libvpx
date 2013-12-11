@@ -700,9 +700,21 @@ static void apply_frame_size(VP9D_COMP *pbi, int width, int height) {
     vp9_update_frame_size(cm);
   }
 
-  vp9_realloc_frame_buffer(get_frame_new_buffer(cm), cm->width, cm->height,
-                           cm->subsampling_x, cm->subsampling_y,
-                           VP9BORDERINPIXELS);
+  if (cm->fb_list != NULL) {
+    vpx_codec_frame_buffer_t *const ext_fb = &cm->fb_list[cm->new_fb_idx];
+    if (vp9_realloc_frame_buffer(get_frame_new_buffer(cm),
+                                 cm->width, cm->height,
+                                 cm->subsampling_x, cm->subsampling_y,
+                                 VP9BORDERINPIXELS, ext_fb,
+                                 cm->realloc_fb_cb, cm->user_priv)) {
+      vpx_internal_error(&cm->error, VPX_CODEC_MEM_ERROR,
+                         "Failed to allocate external frame buffer");
+    }
+  } else {
+    vp9_realloc_frame_buffer(get_frame_new_buffer(cm), cm->width, cm->height,
+                             cm->subsampling_x, cm->subsampling_y,
+                             VP9BORDERINPIXELS, NULL, NULL, NULL);
+  }
 }
 
 static void setup_frame_size(VP9D_COMP *pbi,
