@@ -467,8 +467,6 @@ typedef struct VP9_COMP {
   int y_mode_count[4][INTRA_MODES];
   int y_uv_mode_count[INTRA_MODES][INTRA_MODES];
 
-  nmv_context_counts NMVcount;
-
   vp9_coeff_count coef_counts[TX_SIZES][PLANE_TYPES];
   vp9_coeff_probs_model frame_coef_probs[TX_SIZES][PLANE_TYPES];
   vp9_coeff_stats frame_branch_ct[TX_SIZES][PLANE_TYPES];

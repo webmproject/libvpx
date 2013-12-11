@@ -3102,7 +3102,6 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
     vp9_copy(counts->comp_inter, cpi->comp_inter_count);
     vp9_copy(counts->single_ref, cpi->single_ref_count);
     vp9_copy(counts->comp_ref, cpi->comp_ref_count);
-    counts->mv = cpi->NMVcount;
     if (!cpi->common.error_resilient_mode &&
         !cpi->common.frame_parallel_decoding_mode) {
       vp9_adapt_mode_probs(&cpi->common);
