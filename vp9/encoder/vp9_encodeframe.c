@@ -1284,7 +1284,8 @@ static void rd_use_partition(VP9_COMP *cpi,
       split_dist += dt;
       pl = partition_plane_context(cpi->above_seg_context,
                                    cpi->left_seg_context,
-                                   mi_row + y_idx, mi_col + x_idx, bsize);
+                                   mi_row + y_idx, mi_col + x_idx,
+                                   split_subsize);
       split_rate += x->partition_cost[pl][PARTITION_NONE];
     }
     pl = partition_plane_context(cpi->above_seg_context, cpi->left_seg_context,
