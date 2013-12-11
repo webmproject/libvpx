@@ -28,7 +28,7 @@
 #define BORDER_MV_PIXELS_B16 (16 + VP9_INTERP_EXTEND)
 
 
-void vp9_clamp_mv_min_max(MACROBLOCK *x, MV *mv);
+void vp9_set_mv_search_range(MACROBLOCK *x, MV *mv);
 int vp9_mv_bit_cost(const MV *mv, const MV *ref,
                     const int *mvjcost, int *mvcost[2], int weight);
 void vp9_init_dsmotion_compensation(MACROBLOCK *x, int stride);

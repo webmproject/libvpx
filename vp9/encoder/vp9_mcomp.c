@@ -24,7 +24,7 @@
 
 // #define NEW_DIAMOND_SEARCH
 
-void vp9_clamp_mv_min_max(MACROBLOCK *x, MV *mv) {
+void vp9_set_mv_search_range(MACROBLOCK *x, MV *mv) {
   const int col_min = (mv->col >> 3) - MAX_FULL_PEL_VAL + (mv->col & 7 ? 1 : 0);
   const int row_min = (mv->row >> 3) - MAX_FULL_PEL_VAL + (mv->row & 7 ? 1 : 0);
   const int col_max = (mv->col >> 3) + MAX_FULL_PEL_VAL;
