@@ -218,6 +218,10 @@ typedef struct VP9Common {
   int fb_count;  // Total number of frame buffers
   vpx_realloc_frame_buffer_cb_fn_t realloc_fb_cb;
   void *user_priv;  // Private data associated with the external frame buffers.
+
+  int fb_lru;  // Flag telling if lru is on/off
+  uint32_t *fb_idx_ref_lru;  // Frame buffer lru cache
+  uint32_t fb_idx_ref_lru_count;
 } VP9_COMMON;
 
 // ref == 0 => LAST_FRAME
@@ -233,13 +237,27 @@ static YV12_BUFFER_CONFIG *get_frame_new_buffer(VP9_COMMON *cm) {
 
 static int get_free_fb(VP9_COMMON *cm) {
   int i;
-  for (i = 0; i < cm->fb_count; i++)
-    if (cm->fb_idx_ref_cnt[i] == 0)
-      break;
+  uint32_t lru_count = cm->fb_idx_ref_lru_count + 1;
+  int free_buffer_idx = cm->fb_count;
+  for (i = 0; i < cm->fb_count; i++) {
+    if (!cm->fb_lru) {
+      if (cm->fb_idx_ref_cnt[i] == 0) {
+        free_buffer_idx = i;
+        break;
+      }
+    } else {
+      if (cm->fb_idx_ref_cnt[i] == 0 && cm->fb_idx_ref_lru[i] < lru_count) {
+        free_buffer_idx = i;
+        lru_count = cm->fb_idx_ref_lru[i];
+      }
+    }
+  }
 
-  assert(i < cm->fb_count);
-  cm->fb_idx_ref_cnt[i] = 1;
-  return i;
+  assert(free_buffer_idx < cm->fb_count);
+  cm->fb_idx_ref_cnt[free_buffer_idx] = 1;
+  if (cm->fb_lru)
+    cm->fb_idx_ref_lru[free_buffer_idx] = ++cm->fb_idx_ref_lru_count;
+  return free_buffer_idx;
 }
 
 static void ref_cnt_fb(int *buf, int *idx, int new_idx) {

@@ -91,6 +91,8 @@ static const arg_def_t scalearg = ARG_DEF("S", "scale", 0,
                                             "Scale output frames uniformly");
 static const arg_def_t fb_arg =
     ARG_DEF(NULL, "frame-buffers", 1, "Number of frame buffers to use");
+static const arg_def_t fb_lru_arg =
+    ARG_DEF(NULL, "frame-buffers-lru", 1, "Turn on/off frame buffer lru");
 
 
 #if CONFIG_MD5
@@ -100,7 +102,7 @@ static const arg_def_t md5arg = ARG_DEF(NULL, "md5", 0,
 static const arg_def_t *all_args[] = {
   &codecarg, &use_yv12, &use_i420, &flipuvarg, &noblitarg,
   &progressarg, &limitarg, &skiparg, &postprocarg, &summaryarg, &outputfile,
-  &threadsarg, &verbosearg, &scalearg, &fb_arg,
+  &threadsarg, &verbosearg, &scalearg, &fb_arg, &fb_lru_arg,
 #if CONFIG_MD5
   &md5arg,
 #endif
@@ -456,6 +458,7 @@ int main_loop(int argc, const char **argv_) {
   vpx_image_t             *scaled_img = NULL;
   int                     frame_avail, got_data;
   int                     num_external_frame_buffers = 0;
+  int                     fb_lru_cache = 0;
   vpx_codec_frame_buffer_t *frame_buffers = NULL;
 
   struct VpxDecInputContext input = {0};
@@ -518,7 +521,8 @@ int main_loop(int argc, const char **argv_) {
       do_scale = 1;
     else if (arg_match(&arg, &fb_arg, argi))
       num_external_frame_buffers = arg_parse_uint(&arg);
-
+    else if (arg_match(&arg, &fb_lru_arg, argi))
+      fb_lru_cache = arg_parse_uint(&arg);
 
 #if CONFIG_VP8_DECODER
     else if (arg_match(&arg, &addnoise_level, argi)) {
@@ -750,6 +754,14 @@ int main_loop(int argc, const char **argv_) {
               vpx_codec_error(&decoder));
       return EXIT_FAILURE;
     }
+  }
+
+  if (fb_lru_cache > 0 &&
+      vpx_codec_control(&decoder, VP9D_SET_FRAME_BUFFER_LRU_CACHE,
+                        fb_lru_cache)) {
+    fprintf(stderr, "Failed to set frame buffer lru cache: %s\n",
+            vpx_codec_error(&decoder));
+    return EXIT_FAILURE;
   }
 
   frame_avail = 1;
