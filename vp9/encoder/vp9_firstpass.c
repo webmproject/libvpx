@@ -1639,9 +1639,8 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
     active_max_gf_interval = cpi->rc.max_gf_interval;
 
   i = 0;
-  while (((i < cpi->twopass.static_scene_max_gf_interval) ||
-          ((cpi->rc.frames_to_key - i) < MIN_GF_INTERVAL)) &&
-         (i < cpi->rc.frames_to_key)) {
+  while ((i < cpi->twopass.static_scene_max_gf_interval) &&
+         (i < (cpi->rc.frames_to_key - 1))) {
     i++;    // Increment the loop counter
 
     // Accumulate error score of frames in this gf group
@@ -1695,8 +1694,6 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
       (
         // Don't break out with a very short interval
         (i > MIN_GF_INTERVAL) &&
-        // Don't break out very close to a key frame
-        ((cpi->rc.frames_to_key - i) >= MIN_GF_INTERVAL) &&
         ((boost_score > 125.0) || (next_frame.pcnt_inter < 0.75)) &&
         (!flash_detected) &&
         ((mv_ratio_accumulator > mv_ratio_accumulator_thresh) ||
@@ -1716,7 +1713,7 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
 
   // Don't allow a gf too near the next kf
   if ((cpi->rc.frames_to_key - i) < MIN_GF_INTERVAL) {
-    while (i < cpi->rc.frames_to_key) {
+    while (i < (cpi->rc.frames_to_key - 1)) {
       i++;
 
       if (EOF == input_stats(cpi, this_frame))
@@ -1728,6 +1725,7 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
       }
     }
   }
+
 
   // Set the interval until the next gf or arf.
   cpi->rc.baseline_gf_interval = i;
@@ -1748,8 +1746,6 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   if (allow_alt_ref &&
       (i < cpi->oxcf.lag_in_frames) &&
       (i >= MIN_GF_INTERVAL) &&
-      // dont use ARF very near next kf
-      (i <= (cpi->rc.frames_to_key - MIN_GF_INTERVAL)) &&
       ((next_frame.pcnt_inter > 0.75) ||
        (next_frame.pcnt_second_ref > 0.5)) &&
       ((mv_in_out_accumulator / (double)i > -0.2) ||
