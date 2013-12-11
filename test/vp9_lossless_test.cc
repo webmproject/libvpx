@@ -66,7 +66,7 @@ TEST_P(LossLessTest, TestLossLessEncoding) {
 
   // intentionally changed the dimension for better testing coverage
   libvpx_test::I420VideoSource video("hantro_collage_w352h288.yuv", 352, 288,
-                                     timebase.den, timebase.num, 0, 30);
+                                     timebase.den, timebase.num, 0, 10);
   ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
   const double psnr_lossless = GetMinPsnr();
   EXPECT_GE(psnr_lossless, kMaxPsnr);
