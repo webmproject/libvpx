@@ -49,7 +49,7 @@ static void build_mc_border(const uint8_t *src, uint8_t *dst, int stride,
       memset(dst, ref_row[0], left);
 
     if (copy)
-      memcpy(dst + left, ref_row + x + left, copy);
+      memmove(dst + left, ref_row + x + left, copy);
 
     if (right)
       memset(dst + left + copy, ref_row[w - 1], right);
