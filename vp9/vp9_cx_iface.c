@@ -77,14 +77,14 @@ struct vpx_codec_alg_priv {
   vpx_codec_enc_cfg_t     cfg;
   struct vp9_extracfg     vp8_cfg;
   VP9_CONFIG              oxcf;
-  VP9_PTR             cpi;
+  VP9_PTR                 cpi;
   unsigned char          *cx_data;
-  unsigned int            cx_data_sz;
+  size_t                  cx_data_sz;
   unsigned char          *pending_cx_data;
-  unsigned int            pending_cx_data_sz;
+  size_t                  pending_cx_data_sz;
   int                     pending_frame_count;
-  uint32_t                pending_frame_sizes[8];
-  uint32_t                pending_frame_magnitude;
+  size_t                  pending_frame_sizes[8];
+  size_t                  pending_frame_magnitude;
   vpx_image_t             preview_img;
   vp8_postproc_cfg_t      preview_ppcfg;
   vpx_codec_pkt_list_decl(64) pkt_list;
@@ -708,7 +708,7 @@ static vpx_codec_err_t vp9e_encode(vpx_codec_alg_priv_t  *ctx,
     unsigned int lib_flags;
     YV12_BUFFER_CONFIG sd;
     int64_t dst_time_stamp, dst_end_time_stamp;
-    unsigned long size, cx_data_sz;
+    size_t size, cx_data_sz;
     unsigned char *cx_data;
 
     /* Set up internal flags */
