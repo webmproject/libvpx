@@ -1780,6 +1780,9 @@ static void rd_check_segment_txsize(VP9_COMP *cpi, MACROBLOCK *x,
           further_steps = (MAX_MVSEARCH_STEPS - 1) - step_param;
           // adjust src pointer for this block
           mi_buf_shift(x, i);
+
+          vp9_clamp_mv_min_max(x, &bsi->ref_mv->as_mv);
+
           if (cpi->sf.search_method == HEX) {
             bestsme = vp9_hex_search(x, &mvp_full.as_mv,
                                      step_param,
