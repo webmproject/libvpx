@@ -1238,7 +1238,6 @@ int vp8_regulate_q(VP8_COMP *cpi, int target_bits_per_frame)
         {
             Q = cpi->oxcf.gold_q;
         }
-
     }
     else
     {
