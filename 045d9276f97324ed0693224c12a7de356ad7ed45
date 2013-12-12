@@ -1,0 +1,89 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdX//6tw\u003d",
+        "filename": "test/test_vectors.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-12-12T05:37:42Z",
+      "side": 1,
+      "message": "grab a copyright from another file; for consistency these should start with \u0027*\u0027",
+      "revId": "045d9276f97324ed0693224c12a7de356ad7ed45",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX//6to\u003d",
+        "filename": "test/test_vectors.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-12-12T05:37:42Z",
+      "side": 1,
+      "message": "// CONFIG_VP8_DECODER",
+      "revId": "045d9276f97324ed0693224c12a7de356ad7ed45",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX//6ts\u003d",
+        "filename": "test/test_vectors.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 165,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-12-12T05:37:42Z",
+      "side": 1,
+      "message": "// CONFIG_VP9_DECODER",
+      "revId": "045d9276f97324ed0693224c12a7de356ad7ed45",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX//6tk\u003d",
+        "filename": "test/test_vectors.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-12-12T05:37:42Z",
+      "side": 1,
+      "message": "same comment for the copyright",
+      "revId": "045d9276f97324ed0693224c12a7de356ad7ed45",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX//6tg\u003d",
+        "filename": "test/test_vectors.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-12-12T05:37:42Z",
+      "side": 1,
+      "message": "should be kCamelCase",
+      "revId": "045d9276f97324ed0693224c12a7de356ad7ed45",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
