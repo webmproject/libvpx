@@ -557,8 +557,7 @@ void vp9_encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
     case TX_32X32:
       so = &vp9_default_scan_orders[TX_32X32];
       mode = plane == 0 ? mbmi->mode : mbmi->uv_mode;
-      block >>= 6;
-      vp9_predict_intra_block(xd, block, bwl, TX_32X32, mode,
+      vp9_predict_intra_block(xd, block >> 6, bwl, TX_32X32, mode,
                               x->skip_encode ? src : dst,
                               x->skip_encode ? p->src.stride : pd->dst.stride,
                               dst, pd->dst.stride);
@@ -581,8 +580,7 @@ void vp9_encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
       tx_type = get_tx_type_16x16(pd->plane_type, xd);
       so = &vp9_scan_orders[TX_16X16][tx_type];
       mode = plane == 0 ? mbmi->mode : mbmi->uv_mode;
-      block >>= 4;
-      vp9_predict_intra_block(xd, block, bwl, TX_16X16, mode,
+      vp9_predict_intra_block(xd, block >> 4, bwl, TX_16X16, mode,
                               x->skip_encode ? src : dst,
                               x->skip_encode ? p->src.stride : pd->dst.stride,
                               dst, pd->dst.stride);
@@ -601,8 +599,7 @@ void vp9_encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
       tx_type = get_tx_type_8x8(pd->plane_type, xd);
       so = &vp9_scan_orders[TX_8X8][tx_type];
       mode = plane == 0 ? mbmi->mode : mbmi->uv_mode;
-      block >>= 2;
-      vp9_predict_intra_block(xd, block, bwl, TX_8X8, mode,
+      vp9_predict_intra_block(xd, block >> 2, bwl, TX_8X8, mode,
                               x->skip_encode ? src : dst,
                               x->skip_encode ? p->src.stride : pd->dst.stride,
                               dst, pd->dst.stride);
