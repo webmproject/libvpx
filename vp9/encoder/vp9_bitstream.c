@@ -63,14 +63,14 @@ void vp9_entropy_mode_init() {
 
 static void write_intra_mode(vp9_writer *w, MB_PREDICTION_MODE mode,
                              const vp9_prob *probs) {
-  write_token(w, vp9_intra_mode_tree, probs, &intra_mode_encodings[mode]);
+  vp9_write_token(w, vp9_intra_mode_tree, probs, &intra_mode_encodings[mode]);
 }
 
 static void write_inter_mode(vp9_writer *w, MB_PREDICTION_MODE mode,
                              const vp9_prob *probs) {
   assert(is_inter_mode(mode));
-  write_token(w, vp9_inter_mode_tree, probs,
-              &inter_mode_encodings[INTER_OFFSET(mode)]);
+  vp9_write_token(w, vp9_inter_mode_tree, probs,
+                  &inter_mode_encodings[INTER_OFFSET(mode)]);
 }
 
 static INLINE void write_be32(uint8_t *p, int value) {
@@ -179,12 +179,12 @@ static void pack_mb_tokens(vp9_writer* const w,
     if (t >= TWO_TOKEN && t < EOB_TOKEN) {
       int len = UNCONSTRAINED_NODES - p->skip_eob_node;
       int bits = v >> (n - len);
-      treed_write(w, vp9_coef_tree, p->context_tree, bits, len, i);
-      treed_write(w, vp9_coef_con_tree,
-                  vp9_pareto8_full[p->context_tree[PIVOT_NODE] - 1], v, n - len,
-                  0);
+      vp9_write_tree(w, vp9_coef_tree, p->context_tree, bits, len, i);
+      vp9_write_tree(w, vp9_coef_con_tree,
+                     vp9_pareto8_full[p->context_tree[PIVOT_NODE] - 1],
+                     v, n - len, 0);
     } else {
-      treed_write(w, vp9_coef_tree, p->context_tree, v, n, i);
+      vp9_write_tree(w, vp9_coef_tree, p->context_tree, v, n, i);
     }
 
     if (b->base_val) {
@@ -214,7 +214,7 @@ static void pack_mb_tokens(vp9_writer* const w,
 static void write_segment_id(vp9_writer *w, const struct segmentation *seg,
                              int segment_id) {
   if (seg->enabled && seg->update_map)
-    treed_write(w, vp9_segment_tree, seg->tree_probs, segment_id, 3, 0);
+    vp9_write_tree(w, vp9_segment_tree, seg->tree_probs, segment_id, 3, 0);
 }
 
 // This function encodes the reference frame
@@ -332,16 +332,15 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, MODE_INFO *m, vp9_writer *bc) {
     if (!vp9_segfeature_active(seg, segment_id, SEG_LVL_SKIP)) {
       if (bsize >= BLOCK_8X8) {
         write_inter_mode(bc, mode, mv_ref_p);
-        ++cm->counts.inter_mode[mi->mode_context[rf]]
-                               [INTER_OFFSET(mode)];
+        ++cm->counts.inter_mode[mi->mode_context[rf]][INTER_OFFSET(mode)];
       }
     }
 
     if (cm->mcomp_filter_type == SWITCHABLE) {
       const int ctx = vp9_get_pred_context_switchable_interp(xd);
-      write_token(bc, vp9_switchable_interp_tree,
-                  cm->fc.switchable_interp_prob[ctx],
-                  &switchable_interp_encodings[mi->interp_filter]);
+      vp9_write_token(bc, vp9_switchable_interp_tree,
+                      cm->fc.switchable_interp_prob[ctx],
+                      &switchable_interp_encodings[mi->interp_filter]);
     } else {
       assert(mi->interp_filter == cm->mcomp_filter_type);
     }
@@ -470,7 +469,7 @@ static void write_partition(VP9_COMP *cpi, int hbs, int mi_row, int mi_col,
   const int has_cols = (mi_col + hbs) < cm->mi_cols;
 
   if (has_rows && has_cols) {
-    write_token(w, vp9_partition_tree, probs, &partition_encodings[p]);
+    vp9_write_token(w, vp9_partition_tree, probs, &partition_encodings[p]);
   } else if (!has_rows && has_cols) {
     assert(p == PARTITION_SPLIT || p == PARTITION_HORZ);
     vp9_write(w, p == PARTITION_SPLIT, probs[1]);
