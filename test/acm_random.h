@@ -26,6 +26,11 @@ class ACMRandom {
   void Reset(int seed) {
     random_.Reseed(seed);
   }
+  uint16_t Rand16(void) {
+    const uint32_t value =
+        random_.Generate(testing::internal::Random::kMaxRange);
+    return (value >> 16) & 0xffff;
+  }
 
   uint8_t Rand8(void) {
     const uint32_t value =
