@@ -3811,8 +3811,6 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
   int skip_uv[TX_SIZES];
   MB_PREDICTION_MODE mode_uv[TX_SIZES] = { 0 };
   struct scale_factors scale_factor[4];
-  unsigned int ref_frame_mask = 0;
-  unsigned int mode_mask = 0;
   int intra_cost_penalty = 20 * vp9_dc_quant(cpi->common.base_qindex,
                                              cpi->common.y_dc_delta_q);
   int_mv seg_mvs[4][MAX_REF_FRAMES];
@@ -3841,15 +3839,6 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
     rate_uv_intra[i] = INT_MAX;
 
   *returnrate = INT_MAX;
-
-  // Create a mask set to 1 for each reference frame used by a smaller
-  // resolution.
-  if (cpi->sf.use_avoid_tested_higherror) {
-    ref_frame_mask = 0;
-    mode_mask = 0;
-    ref_frame_mask = ~ref_frame_mask;
-    mode_mask = ~mode_mask;
-  }
 
   for (ref_frame = LAST_FRAME; ref_frame <= ALTREF_FRAME; ref_frame++) {
     if (cpi->ref_frame_flags & flag_list[ref_frame]) {
