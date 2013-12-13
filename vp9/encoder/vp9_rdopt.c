@@ -1042,7 +1042,7 @@ static int64_t rd_pick_intra4x4block(VP9_COMP *cpi, MACROBLOCK *x, int ib,
                                 TX_4X4, mode,
                                 x->skip_encode ? src : dst,
                                 x->skip_encode ? src_stride : dst_stride,
-                                dst, dst_stride);
+                                dst, dst_stride, idx, idy, 0);
         vp9_subtract_block(4, 4, src_diff, 8,
                            src, src_stride,
                            dst, dst_stride);

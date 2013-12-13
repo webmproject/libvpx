@@ -547,9 +547,6 @@ void vp9_encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
   src = &p->src.buf[4 * (j * p->src.stride + i)];
   src_diff = &p->src_diff[4 * (j * diff_stride + i)];
 
-  if (xd->mb_to_right_edge < 0 || xd->mb_to_bottom_edge < 0)
-    extend_for_intra(xd, plane_bsize, plane, i, j);
-
   // if (x->optimize)
   // vp9_optimize_b(plane, block, plane_bsize, tx_size, x, args->ctx);
 
@@ -560,7 +557,7 @@ void vp9_encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
       vp9_predict_intra_block(xd, block >> 6, bwl, TX_32X32, mode,
                               x->skip_encode ? src : dst,
                               x->skip_encode ? p->src.stride : pd->dst.stride,
-                              dst, pd->dst.stride);
+                              dst, pd->dst.stride, i, j, plane);
       if (!x->skip_recode) {
         vp9_subtract_block(32, 32, src_diff, diff_stride,
                            src, p->src.stride, dst, pd->dst.stride);
@@ -583,7 +580,7 @@ void vp9_encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
       vp9_predict_intra_block(xd, block >> 4, bwl, TX_16X16, mode,
                               x->skip_encode ? src : dst,
                               x->skip_encode ? p->src.stride : pd->dst.stride,
-                              dst, pd->dst.stride);
+                              dst, pd->dst.stride, i, j, plane);
       if (!x->skip_recode) {
         vp9_subtract_block(16, 16, src_diff, diff_stride,
                            src, p->src.stride, dst, pd->dst.stride);
@@ -602,7 +599,7 @@ void vp9_encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
       vp9_predict_intra_block(xd, block >> 2, bwl, TX_8X8, mode,
                               x->skip_encode ? src : dst,
                               x->skip_encode ? p->src.stride : pd->dst.stride,
-                              dst, pd->dst.stride);
+                              dst, pd->dst.stride, i, j, plane);
       if (!x->skip_recode) {
         vp9_subtract_block(8, 8, src_diff, diff_stride,
                            src, p->src.stride, dst, pd->dst.stride);
@@ -625,7 +622,7 @@ void vp9_encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
       vp9_predict_intra_block(xd, block, bwl, TX_4X4, mode,
                               x->skip_encode ? src : dst,
                               x->skip_encode ? p->src.stride : pd->dst.stride,
-                              dst, pd->dst.stride);
+                              dst, pd->dst.stride, i, j, plane);
 
       if (!x->skip_recode) {
         vp9_subtract_block(4, 4, src_diff, diff_stride,
