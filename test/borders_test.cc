@@ -67,7 +67,7 @@ TEST_P(BordersTest, TestLowBitrate) {
 
   cfg_.g_lag_in_frames = 25;
   cfg_.rc_2pass_vbr_minsection_pct = 5;
-  cfg_.rc_2pass_vbr_minsection_pct = 2000;
+  cfg_.rc_2pass_vbr_maxsection_pct = 2000;
   cfg_.rc_target_bitrate = 200;
   cfg_.rc_min_quantizer = 40;
 
