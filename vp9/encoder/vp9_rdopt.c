@@ -1669,15 +1669,15 @@ static void rd_check_segment_txsize(VP9_COMP *cpi, MACROBLOCK *x,
 
       frame_mv[ZEROMV][mbmi->ref_frame[0]].as_int = 0;
       vp9_append_sub8x8_mvs_for_idx(&cpi->common, &x->e_mbd, tile,
+                                    i, 0, mi_row, mi_col,
                                     &frame_mv[NEARESTMV][mbmi->ref_frame[0]],
-                                    &frame_mv[NEARMV][mbmi->ref_frame[0]],
-                                    i, 0, mi_row, mi_col);
+                                    &frame_mv[NEARMV][mbmi->ref_frame[0]]);
       if (has_second_rf) {
         frame_mv[ZEROMV][mbmi->ref_frame[1]].as_int = 0;
         vp9_append_sub8x8_mvs_for_idx(&cpi->common, &x->e_mbd, tile,
+                                      i, 1, mi_row, mi_col,
                                       &frame_mv[NEARESTMV][mbmi->ref_frame[1]],
-                                      &frame_mv[NEARMV][mbmi->ref_frame[1]],
-                                      i, 1, mi_row, mi_col);
+                                      &frame_mv[NEARMV][mbmi->ref_frame[1]]);
       }
       // search for the best motion vector on this segment
       for (this_mode = NEARESTMV; this_mode <= NEWMV; ++this_mode) {

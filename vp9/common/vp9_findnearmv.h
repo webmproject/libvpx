@@ -36,9 +36,7 @@ static void clamp_mv2(MV *mv, const MACROBLOCKD *xd) {
 
 void vp9_append_sub8x8_mvs_for_idx(VP9_COMMON *cm, MACROBLOCKD *xd,
                                    const TileInfo *const tile,
-                                   int_mv *dst_nearest,
-                                   int_mv *dst_near,
-                                   int block_idx, int ref_idx,
-                                   int mi_row, int mi_col);
+                                   int block, int ref, int mi_row, int mi_col,
+                                   int_mv *nearest, int_mv *near);
 
 #endif  // VP9_COMMON_VP9_FINDNEARMV_H_
