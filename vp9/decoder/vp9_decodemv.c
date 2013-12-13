@@ -162,12 +162,12 @@ static int read_skip_coeff(VP9_COMMON *cm, const MACROBLOCKD *xd,
 
 static void read_intra_frame_mode_info(VP9_COMMON *const cm,
                                        MACROBLOCKD *const xd,
-                                       MODE_INFO *const m,
                                        int mi_row, int mi_col, vp9_reader *r) {
-  MB_MODE_INFO *const mbmi = &m->mbmi;
-  const BLOCK_SIZE bsize = mbmi->sb_type;
+  MODE_INFO *const mi = xd->mi_8x8[0];
+  MB_MODE_INFO *const mbmi = &mi->mbmi;
   const MODE_INFO *above_mi = xd->mi_8x8[-cm->mode_info_stride];
   const MODE_INFO *left_mi  = xd->left_available ? xd->mi_8x8[-1] : NULL;
+  const BLOCK_SIZE bsize = mbmi->sb_type;
 
   mbmi->segment_id = read_intra_segment_id(cm, xd, mi_row, mi_col, r);
   mbmi->skip_coeff = read_skip_coeff(cm, xd, mbmi->segment_id, r);
@@ -176,8 +176,8 @@ static void read_intra_frame_mode_info(VP9_COMMON *const cm,
   mbmi->ref_frame[1] = NONE;
 
   if (bsize >= BLOCK_8X8) {
-    const MB_PREDICTION_MODE A = above_block_mode(m, above_mi, 0);
-    const MB_PREDICTION_MODE L = left_block_mode(m, left_mi, 0);
+    const MB_PREDICTION_MODE A = above_block_mode(mi, above_mi, 0);
+    const MB_PREDICTION_MODE L = left_block_mode(mi, left_mi, 0);
     mbmi->mode = read_intra_mode(r, vp9_kf_y_mode_prob[A][L]);
   } else {
     // Only 4x4, 4x8, 8x4 blocks
@@ -188,19 +188,19 @@ static void read_intra_frame_mode_info(VP9_COMMON *const cm,
     for (idy = 0; idy < 2; idy += num_4x4_h) {
       for (idx = 0; idx < 2; idx += num_4x4_w) {
         const int ib = idy * 2 + idx;
-        const MB_PREDICTION_MODE A = above_block_mode(m, above_mi, ib);
-        const MB_PREDICTION_MODE L = left_block_mode(m, left_mi, ib);
+        const MB_PREDICTION_MODE A = above_block_mode(mi, above_mi, ib);
+        const MB_PREDICTION_MODE L = left_block_mode(mi, left_mi, ib);
         const MB_PREDICTION_MODE b_mode = read_intra_mode(r,
                                               vp9_kf_y_mode_prob[A][L]);
-        m->bmi[ib].as_mode = b_mode;
+        mi->bmi[ib].as_mode = b_mode;
         if (num_4x4_h == 2)
-          m->bmi[ib + 2].as_mode = b_mode;
+          mi->bmi[ib + 2].as_mode = b_mode;
         if (num_4x4_w == 2)
-          m->bmi[ib + 1].as_mode = b_mode;
+          mi->bmi[ib + 1].as_mode = b_mode;
       }
     }
 
-    mbmi->mode = m->bmi[3].as_mode;
+    mbmi->mode = mi->bmi[3].as_mode;
   }
 
   mbmi->uv_mode = read_intra_mode(r, vp9_kf_uv_mode_prob[mbmi->mode]);
@@ -509,8 +509,8 @@ static void read_inter_block_mode_info(VP9_COMMON *const cm,
 static void read_inter_frame_mode_info(VP9_COMMON *const cm,
                                        MACROBLOCKD *const xd,
                                        const TileInfo *const tile,
-                                       MODE_INFO *const mi,
                                        int mi_row, int mi_col, vp9_reader *r) {
+  MODE_INFO *const mi = xd->mi_8x8[0];
   MB_MODE_INFO *const mbmi = &mi->mbmi;
   int inter_block;
 
@@ -528,25 +528,10 @@ static void read_inter_frame_mode_info(VP9_COMMON *const cm,
     read_intra_block_mode_info(cm, mi, r);
 }
 
-void vp9_read_mode_info(VP9_COMMON *cm, MACROBLOCKD *xd,
-                        const TileInfo *const tile,
+void vp9_read_mode_info(VP9_COMMON *cm, MACROBLOCKD *xd, const TileInfo *tile,
                         int mi_row, int mi_col, vp9_reader *r) {
-  MODE_INFO *const mi = xd->mi_8x8[0];
-  const BLOCK_SIZE bsize = mi->mbmi.sb_type;
-  const int bw = num_8x8_blocks_wide_lookup[bsize];
-  const int bh = num_8x8_blocks_high_lookup[bsize];
-  const int y_mis = MIN(bh, cm->mi_rows - mi_row);
-  const int x_mis = MIN(bw, cm->mi_cols - mi_col);
-  int x, y, z;
-
   if (frame_is_intra_only(cm))
-    read_intra_frame_mode_info(cm, xd, mi, mi_row, mi_col, r);
+    read_intra_frame_mode_info(cm, xd, mi_row, mi_col, r);
   else
-    read_inter_frame_mode_info(cm, xd, tile, mi, mi_row, mi_col, r);
-
-  for (y = 0, z = 0; y < y_mis; y++, z += cm->mode_info_stride) {
-    for (x = !y; x < x_mis; x++) {
-      xd->mi_8x8[z + x] = mi;
-    }
-  }
+    read_inter_frame_mode_info(cm, xd, tile, mi_row, mi_col, r);
 }

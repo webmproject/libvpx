@@ -348,22 +348,26 @@ static void reconstruct_inter_block(int plane, int block,
 static void set_offsets(VP9_COMMON *const cm, MACROBLOCKD *const xd,
                         const TileInfo *const tile,
                         BLOCK_SIZE bsize, int mi_row, int mi_col) {
-  const int bh = num_8x8_blocks_high_lookup[bsize];
   const int bw = num_8x8_blocks_wide_lookup[bsize];
+  const int bh = num_8x8_blocks_high_lookup[bsize];
+  const int x_mis = MIN(bw, cm->mi_cols - mi_col);
+  const int y_mis = MIN(bh, cm->mi_rows - mi_row);
   const int offset = mi_row * cm->mode_info_stride + mi_col;
   const int tile_offset = tile->mi_row_start * cm->mode_info_stride +
                           tile->mi_col_start;
+  int x, y;
 
   xd->mi_8x8 = cm->mi_grid_visible + offset;
   xd->prev_mi_8x8 = cm->prev_mi_grid_visible + offset;
-
-  // we are using the mode info context stream here
-  xd->mi_8x8[0] = xd->mi_stream + offset - tile_offset;
-  xd->mi_8x8[0]->mbmi.sb_type = bsize;
-
   // Special case: if prev_mi is NULL, the previous mode info context
   // cannot be used.
   xd->last_mi = cm->prev_mi ? xd->prev_mi_8x8[0] : NULL;
+
+  xd->mi_8x8[0] = xd->mi_stream + offset - tile_offset;
+  xd->mi_8x8[0]->mbmi.sb_type = bsize;
+  for (y = 0; y < y_mis; ++y)
+    for (x = !y; x < x_mis; ++x)
+      xd->mi_8x8[y * cm->mode_info_stride + x] = xd->mi_8x8[0];
 
   set_skip_context(xd, xd->above_context, xd->left_context, mi_row, mi_col);
 
