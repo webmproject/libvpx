@@ -1460,7 +1460,7 @@ static void compute_fast_motion_search_level(VP9_COMP *cpi, BLOCK_SIZE bsize) {
   // int use_8x8 = (MIN(cpi->common.width, cpi->common.height) < 720) ? 1 : 0;
   int use_8x8 = 1;
 
-  if (cm->frame_type && !cpi->is_src_frame_alt_ref &&
+  if (cm->frame_type && !cpi->rc.is_src_frame_alt_ref &&
       ((use_8x8 && bsize == BLOCK_16X16) ||
       bsize == BLOCK_32X32 || bsize == BLOCK_64X64)) {
     int ref0 = 0, ref1 = 0, ref2 = 0, ref3 = 0;
@@ -1949,7 +1949,7 @@ static void encode_sb_row(VP9_COMP *cpi, const TileInfo *const tile,
             || cm->prev_mi == 0
             || cpi->common.show_frame == 0
             || cpi->common.frame_type == KEY_FRAME
-            || cpi->is_src_frame_alt_ref
+            || cpi->rc.is_src_frame_alt_ref
             || ((cpi->sf.use_lastframe_partitioning ==
                  LAST_FRAME_PARTITION_LOW_MOTION) &&
                  sb_has_motion(cpi, prev_mi_8x8))) {
@@ -2279,7 +2279,7 @@ static int get_frame_type(VP9_COMP *cpi) {
   int frame_type;
   if (frame_is_intra_only(&cpi->common))
     frame_type = 0;
-  else if (cpi->is_src_frame_alt_ref && cpi->refresh_golden_frame)
+  else if (cpi->rc.is_src_frame_alt_ref && cpi->refresh_golden_frame)
     frame_type = 3;
   else if (cpi->refresh_golden_frame || cpi->refresh_alt_ref_frame)
     frame_type = 1;

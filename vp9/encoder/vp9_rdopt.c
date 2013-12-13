@@ -3351,7 +3351,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
       // unless ARNR filtering is enabled in which case we want
       // an unfiltered alternative. We allow near/nearest as well
       // because they may result in zero-zero MVs but be cheaper.
-      if (cpi->is_src_frame_alt_ref && (cpi->oxcf.arnr_max_frames == 0)) {
+      if (cpi->rc.is_src_frame_alt_ref && (cpi->oxcf.arnr_max_frames == 0)) {
         if ((this_mode != ZEROMV &&
              !(this_mode == NEARMV &&
                frame_mv[NEARMV][ALTREF_FRAME].as_int == 0) &&
@@ -3998,7 +3998,7 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
       // unless ARNR filtering is enabled in which case we want
       // an unfiltered alternative. We allow near/nearest as well
       // because they may result in zero-zero MVs but be cheaper.
-      if (cpi->is_src_frame_alt_ref && (cpi->oxcf.arnr_max_frames == 0))
+      if (cpi->rc.is_src_frame_alt_ref && (cpi->oxcf.arnr_max_frames == 0))
         continue;
     }
 
