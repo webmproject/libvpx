@@ -15,7 +15,7 @@
 
 #include "vp9/common/vp9_common.h"
 
-typedef struct {
+typedef struct mv {
   int16_t row;
   int16_t col;
 } MV;
@@ -25,7 +25,7 @@ typedef union int_mv {
   MV as_mv;
 } int_mv; /* facilitates faster equality tests and copies */
 
-typedef struct {
+typedef struct mv32 {
   int32_t row;
   int32_t col;
 } MV32;

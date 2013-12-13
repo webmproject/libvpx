@@ -1813,10 +1813,10 @@ static void rd_check_segment_txsize(VP9_COMP *cpi, MACROBLOCK *x,
             clamp_mv(&mvp_full.as_mv, x->mv_col_min, x->mv_col_max,
                      x->mv_row_min, x->mv_row_max);
 
-            thissme = cpi->full_search_sad(x, &mvp_full,
+            thissme = cpi->full_search_sad(x, &mvp_full.as_mv,
                                            sadpb, 16, v_fn_ptr,
                                            x->nmvjointcost, x->mvcost,
-                                           bsi->ref_mv, i);
+                                           &bsi->ref_mv->as_mv, i);
 
             if (thissme < bestsme) {
               bestsme = thissme;
