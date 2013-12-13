@@ -749,7 +749,7 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
         sf->adaptive_pred_filter_type = 2;
         sf->auto_mv_step_size = 1;
 
-        sf->disable_filter_search_var_thresh = 16;
+        sf->disable_filter_search_var_thresh = 50;
         sf->comp_inter_joint_search_thresh = BLOCK_SIZES;
 
         sf->auto_min_max_partition_size = 1;
@@ -785,7 +785,7 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
         sf->adaptive_pred_filter_type = 2;
         sf->auto_mv_step_size = 1;
 
-        sf->disable_filter_search_var_thresh = 16;
+        sf->disable_filter_search_var_thresh = 100;
         sf->comp_inter_joint_search_thresh = BLOCK_SIZES;
 
         sf->auto_min_max_partition_size = 1;
@@ -819,7 +819,7 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
         sf->adaptive_pred_filter_type = 2;
         sf->auto_mv_step_size = 1;
 
-        sf->disable_filter_search_var_thresh = 16;
+        sf->disable_filter_search_var_thresh = 200;
         sf->comp_inter_joint_search_thresh = BLOCK_SIZES;
 
         sf->auto_min_max_partition_size = 1;
@@ -865,7 +865,7 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
         sf->search_method = HEX;
         sf->subpel_iters_per_step = 1;
         sf->disable_split_var_thresh = 64;
-        sf->disable_filter_search_var_thresh = 96;
+        sf->disable_filter_search_var_thresh = 500;
         for (i = 0; i < TX_SIZES; i++) {
           sf->intra_y_mode_mask[i] = INTRA_DC_ONLY;
           sf->intra_uv_mode_mask[i] = INTRA_DC_ONLY;
