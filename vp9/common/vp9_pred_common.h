@@ -104,7 +104,7 @@ static const vp9_prob *get_tx_probs(TX_SIZE max_tx_size, int ctx,
     case TX_32X32:
       return tx_probs->p32x32[ctx];
     default:
-      assert(!"Invalid max_tx_size.");
+      assert(0 && "Invalid max_tx_size.");
       return NULL;
   }
 }
@@ -124,7 +124,7 @@ static unsigned int *get_tx_counts(TX_SIZE max_tx_size, int ctx,
     case TX_32X32:
       return tx_counts->p32x32[ctx];
     default:
-      assert(!"Invalid max_tx_size.");
+      assert(0 && "Invalid max_tx_size.");
       return NULL;
   }
 }

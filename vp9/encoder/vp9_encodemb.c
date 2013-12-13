@@ -471,7 +471,7 @@ static void encode_block(int plane, int block, BLOCK_SIZE plane_bsize,
       xd->itxm_add(dqcoeff, dst, pd->dst.stride, p->eobs[block]);
       break;
     default:
-      assert(!"Invalid transform size");
+      assert(0 && "Invalid transform size");
   }
 }
 

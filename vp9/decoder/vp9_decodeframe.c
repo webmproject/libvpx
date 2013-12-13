@@ -266,7 +266,7 @@ static void inverse_transform_block(MACROBLOCKD* xd, int plane, int block,
         vp9_idct32x32_add(dqcoeff, dst, stride, eob);
         break;
       default:
-        assert(!"Invalid transform size");
+        assert(0 && "Invalid transform size");
     }
 
     if (eob == 1) {
@@ -511,7 +511,7 @@ static void decode_modes_sb(VP9_COMMON *const cm, MACROBLOCKD *const xd,
         decode_modes_sb(cm, xd, tile, mi_row + hbs, mi_col + hbs, r, subsize);
         break;
       default:
-        assert(!"Invalid partition type");
+        assert(0 && "Invalid partition type");
     }
   }
 

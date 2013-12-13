@@ -308,7 +308,7 @@ static void read_ref_frames(VP9_COMMON *const cm, MACROBLOCKD *const xd,
 
       ref_frame[1] = NONE;
     } else {
-      assert(!"Invalid prediction mode.");
+      assert(0 && "Invalid prediction mode.");
     }
   }
 }
