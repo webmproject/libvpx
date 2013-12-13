@@ -321,7 +321,7 @@ bail:
   return 1;
 }
 
-char *parse_elf_string_table(elf_obj_t *elf, int s_idx, int idx) {
+const char *parse_elf_string_table(elf_obj_t *elf, int s_idx, int idx) {
   if (elf->bits == 32) {
     Elf32_Shdr shdr;
 
