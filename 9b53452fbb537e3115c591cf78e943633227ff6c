@@ -912,6 +912,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdX//6fg\u003d",
+        "filename": "vpx/internal/vpx_codec_internal.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 223,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-12-13T18:11:01Z",
+      "side": 1,
+      "message": "ok maybe a table after this block would be more extensible to describe the buffer requirements; i.e., VP8: unsupported, VP9: 8",
+      "parentUuid": "AAAAdX//6h8\u003d",
+      "revId": "9b53452fbb537e3115c591cf78e943633227ff6c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdX//6qs\u003d",
         "filename": "vpx/internal/vpx_codec_internal.h",
         "patchSetId": 6
@@ -1326,6 +1344,24 @@
       "side": 1,
       "message": "From 268 \u0026 177. I was going to do that but I would need a function with about 17 parameters. I could have one function with a callback parameter. If NULL libvpx will allocate.",
       "parentUuid": "AAAAdX//6qA\u003d",
+      "revId": "9b53452fbb537e3115c591cf78e943633227ff6c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX//6fY\u003d",
+        "filename": "vpx_scale/generic/yv12config.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 259,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-12-13T18:11:01Z",
+      "side": 1,
+      "message": "might be worth it to factor out the alloc portion as you mention; the preroll here and in realloc_...() is big and bad, so is the rest so they are likely to drift if left as is.",
+      "parentUuid": "AAAAdX//6gw\u003d",
       "revId": "9b53452fbb537e3115c591cf78e943633227ff6c",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
