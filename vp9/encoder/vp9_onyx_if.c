@@ -654,6 +654,7 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
   sf->tx_size_search_method = USE_FULL_RD;
   sf->use_lp32x32fdct = 0;
   sf->adaptive_motion_search = 0;
+  sf->adaptive_pred_filter_type = 0;
   sf->use_avoid_tested_higherror = 0;
   sf->reference_masking = 0;
   sf->use_one_partition_size_always = 0;
@@ -717,6 +718,7 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
 
         sf->use_rd_breakout = 1;
         sf->adaptive_motion_search = 1;
+        sf->adaptive_pred_filter_type = 1;
         sf->auto_mv_step_size = 1;
         sf->adaptive_rd_thresh = 2;
         sf->recode_loop = 2;
@@ -744,6 +746,7 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
 
         sf->use_rd_breakout = 1;
         sf->adaptive_motion_search = 1;
+        sf->adaptive_pred_filter_type = 2;
         sf->auto_mv_step_size = 1;
 
         sf->disable_filter_search_var_thresh = 16;
@@ -779,6 +782,7 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
 
         sf->use_rd_breakout = 1;
         sf->adaptive_motion_search = 1;
+        sf->adaptive_pred_filter_type = 2;
         sf->auto_mv_step_size = 1;
 
         sf->disable_filter_search_var_thresh = 16;
@@ -812,6 +816,7 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
 
         sf->use_rd_breakout = 1;
         sf->adaptive_motion_search = 1;
+        sf->adaptive_pred_filter_type = 2;
         sf->auto_mv_step_size = 1;
 
         sf->disable_filter_search_var_thresh = 16;
