@@ -686,7 +686,7 @@ void vp9_get_entropy_contexts(TX_SIZE tx_size,
         t_left[i] = !!*(const uint64_t *)&left[i];
       break;
     default:
-      assert(!"Invalid transform size.");
+      assert(0 && "Invalid transform size.");
   }
 }
 
@@ -3237,7 +3237,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
             break;
           case NONE:
           case MAX_REF_FRAMES:
-            assert(!"Invalid Reference frame");
+            assert(0 && "Invalid Reference frame");
         }
       }
       if (cpi->mode_skip_mask & ((int64_t)1 << mode_index))
@@ -3902,7 +3902,7 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
             break;
           case NONE:
           case MAX_REF_FRAMES:
-            assert(!"Invalid Reference frame");
+            assert(0 && "Invalid Reference frame");
         }
       }
       if (cpi->mode_skip_mask & ((int64_t)1 << mode_index))

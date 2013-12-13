@@ -166,7 +166,7 @@ static int get_entropy_context(TX_SIZE tx_size, const ENTROPY_CONTEXT *a,
       left_ec  = !!*(const uint64_t *)l;
       break;
     default:
-      assert(!"Invalid transform size.");
+      assert(0 && "Invalid transform size.");
   }
 
   return combine_entropy_contexts(above_ec, left_ec);
