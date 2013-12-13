@@ -364,36 +364,32 @@ void vp9_end_first_pass(VP9_COMP *cpi) {
   output_stats(cpi, cpi->output_pkt_list, &cpi->twopass.total_stats);
 }
 
-static void zz_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
-                             YV12_BUFFER_CONFIG *recon_buffer,
-                             int *best_motion_err, int recon_yoffset) {
+static unsigned int zz_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
+                                     YV12_BUFFER_CONFIG *recon_buffer,
+                                     int recon_yoffset) {
   MACROBLOCKD *const xd = &x->e_mbd;
+  const uint8_t *const src = x->plane[0].src.buf;
+  const int src_stride = x->plane[0].src.stride;
+  const uint8_t *const ref = xd->plane[0].pre[0].buf
+                           = recon_buffer->y_buffer + recon_yoffset;
+  const int ref_stride = xd->plane[0].pre[0].stride;
 
-  // Set up pointers for this macro block recon buffer
-  xd->plane[0].pre[0].buf = recon_buffer->y_buffer + recon_yoffset;
-
+  unsigned int sse;
   switch (xd->mi_8x8[0]->mbmi.sb_type) {
     case BLOCK_8X8:
-      vp9_mse8x8(x->plane[0].src.buf, x->plane[0].src.stride,
-                 xd->plane[0].pre[0].buf, xd->plane[0].pre[0].stride,
-                 (unsigned int *)(best_motion_err));
+      vp9_mse8x8(src, src_stride, ref, ref_stride, &sse);
       break;
     case BLOCK_16X8:
-      vp9_mse16x8(x->plane[0].src.buf, x->plane[0].src.stride,
-                  xd->plane[0].pre[0].buf, xd->plane[0].pre[0].stride,
-                  (unsigned int *)(best_motion_err));
+      vp9_mse16x8(src, src_stride, ref, ref_stride, &sse);
       break;
     case BLOCK_8X16:
-      vp9_mse8x16(x->plane[0].src.buf, x->plane[0].src.stride,
-                  xd->plane[0].pre[0].buf, xd->plane[0].pre[0].stride,
-                  (unsigned int *)(best_motion_err));
+      vp9_mse8x16(src, src_stride, ref, ref_stride, &sse);
       break;
     default:
-      vp9_mse16x16(x->plane[0].src.buf, x->plane[0].src.stride,
-                   xd->plane[0].pre[0].buf, xd->plane[0].pre[0].stride,
-                   (unsigned int *)(best_motion_err));
+      vp9_mse16x16(src, src_stride, ref, ref_stride, &sse);
       break;
   }
+  return sse;
 }
 
 static void first_pass_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
@@ -583,10 +579,9 @@ void vp9_first_pass(VP9_COMP *cpi) {
       int this_error;
       int gf_motion_error = INT_MAX;
       int use_dc_pred = (mb_col || mb_row) && (!mb_col || !mb_row);
-      double error_weight;
+      double error_weight = 1.0;
 
       vp9_clear_system_state();  // __asm emms;
-      error_weight = 1.0;  // avoid uninitialized warnings
 
       xd->plane[0].dst.buf = new_yv12->y_buffer + recon_yoffset;
       xd->plane[1].dst.buf = new_yv12->u_buffer + recon_uvoffset;
@@ -647,11 +642,9 @@ void vp9_first_pass(VP9_COMP *cpi) {
       // Other than for the first frame do a motion search
       if (cm->current_video_frame > 0) {
         int tmp_err;
-        int motion_error = INT_MAX;
+        int motion_error = zz_motion_search(cpi, x, lst_yv12, recon_yoffset);
         int_mv mv, tmp_mv;
-
         // Simple 0,0 motion with no mv overhead
-        zz_motion_search(cpi, x, lst_yv12, &motion_error, recon_yoffset);
         mv.as_int = tmp_mv.as_int = 0;
 
         // Test last reference frame using the previous best mv as the
@@ -684,8 +677,7 @@ void vp9_first_pass(VP9_COMP *cpi) {
         // Experimental search in an older reference frame
         if (cm->current_video_frame > 1) {
           // Simple 0,0 motion with no mv overhead
-          zz_motion_search(cpi, x, gld_yv12,
-                           &gf_motion_error, recon_yoffset);
+          gf_motion_error = zz_motion_search(cpi, x, gld_yv12, recon_yoffset);
 
           first_pass_motion_search(cpi, x, &zero_ref_mv,
                                    &tmp_mv.as_mv, gld_yv12,
@@ -724,11 +716,9 @@ void vp9_first_pass(VP9_COMP *cpi) {
           // very close and very low. This helps with scene cut
           // detection for example in cropped clips with black bars
           // at the sides or top and bottom.
-          if ((((this_error - intrapenalty) * 9) <=
-               (motion_error * 10)) &&
-              (this_error < (2 * intrapenalty))) {
+          if (((this_error - intrapenalty) * 9 <= motion_error * 10) &&
+              this_error < 2 * intrapenalty)
             neutral_count++;
-          }
 
           mv.as_mv.row *= 8;
           mv.as_mv.col *= 8;
@@ -737,8 +727,7 @@ void vp9_first_pass(VP9_COMP *cpi) {
           xd->mi_8x8[0]->mbmi.tx_size = TX_4X4;
           xd->mi_8x8[0]->mbmi.ref_frame[0] = LAST_FRAME;
           xd->mi_8x8[0]->mbmi.ref_frame[1] = NONE;
-          vp9_build_inter_predictors_sby(xd, mb_row << 1,
-                                         mb_col << 1,
+          vp9_build_inter_predictors_sby(xd, mb_row << 1, mb_col << 1,
                                          xd->mi_8x8[0]->mbmi.sb_type);
           vp9_encode_sby(x, xd->mi_8x8[0]->mbmi.sb_type);
           sum_mvr += mv.as_mv.row;
