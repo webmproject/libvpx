@@ -1686,6 +1686,10 @@ static void rd_pick_partition(VP9_COMP *cpi, const TileInfo *const tile,
       *get_sb_index(x, subsize) = i;
       if (cpi->sf.adaptive_motion_search)
         load_pred_mv(x, get_block_context(x, bsize));
+      if (cpi->sf.adaptive_pred_filter_type && bsize == BLOCK_8X8 &&
+          partition_none_allowed)
+        get_block_context(x, subsize)->pred_filter_type =
+            get_block_context(x, bsize)->mic.mbmi.interp_filter;
       rd_pick_partition(cpi, tile, tp, mi_row + y_idx, mi_col + x_idx, subsize,
                         &this_rate, &this_dist, i != 3, best_rd - sum_rd);
 
@@ -1733,6 +1737,10 @@ static void rd_pick_partition(VP9_COMP *cpi, const TileInfo *const tile,
     *get_sb_index(x, subsize) = 0;
     if (cpi->sf.adaptive_motion_search)
       load_pred_mv(x, get_block_context(x, bsize));
+    if (cpi->sf.adaptive_pred_filter_type && bsize == BLOCK_8X8 &&
+        partition_none_allowed)
+      get_block_context(x, subsize)->pred_filter_type =
+          get_block_context(x, bsize)->mic.mbmi.interp_filter;
     pick_sb_modes(cpi, tile, mi_row, mi_col, &sum_rate, &sum_dist, subsize,
                   get_block_context(x, subsize), best_rd);
     sum_rd = RDCOST(x->rdmult, x->rddiv, sum_rate, sum_dist);
@@ -1744,6 +1752,10 @@ static void rd_pick_partition(VP9_COMP *cpi, const TileInfo *const tile,
       *get_sb_index(x, subsize) = 1;
       if (cpi->sf.adaptive_motion_search)
         load_pred_mv(x, get_block_context(x, bsize));
+      if (cpi->sf.adaptive_pred_filter_type && bsize == BLOCK_8X8 &&
+          partition_none_allowed)
+        get_block_context(x, subsize)->pred_filter_type =
+            get_block_context(x, bsize)->mic.mbmi.interp_filter;
       pick_sb_modes(cpi, tile, mi_row + ms, mi_col, &this_rate,
                     &this_dist, subsize, get_block_context(x, subsize),
                     best_rd - sum_rd);
@@ -1778,6 +1790,10 @@ static void rd_pick_partition(VP9_COMP *cpi, const TileInfo *const tile,
     *get_sb_index(x, subsize) = 0;
     if (cpi->sf.adaptive_motion_search)
       load_pred_mv(x, get_block_context(x, bsize));
+    if (cpi->sf.adaptive_pred_filter_type && bsize == BLOCK_8X8 &&
+        partition_none_allowed)
+      get_block_context(x, subsize)->pred_filter_type =
+          get_block_context(x, bsize)->mic.mbmi.interp_filter;
     pick_sb_modes(cpi, tile, mi_row, mi_col, &sum_rate, &sum_dist, subsize,
                   get_block_context(x, subsize), best_rd);
     sum_rd = RDCOST(x->rdmult, x->rddiv, sum_rate, sum_dist);
@@ -1788,6 +1804,10 @@ static void rd_pick_partition(VP9_COMP *cpi, const TileInfo *const tile,
       *get_sb_index(x, subsize) = 1;
       if (cpi->sf.adaptive_motion_search)
         load_pred_mv(x, get_block_context(x, bsize));
+      if (cpi->sf.adaptive_pred_filter_type && bsize == BLOCK_8X8 &&
+          partition_none_allowed)
+        get_block_context(x, subsize)->pred_filter_type =
+            get_block_context(x, bsize)->mic.mbmi.interp_filter;
       pick_sb_modes(cpi, tile, mi_row, mi_col + ms, &this_rate,
                     &this_dist, subsize, get_block_context(x, subsize),
                     best_rd - sum_rd);
@@ -1888,6 +1908,18 @@ static void encode_sb_row(VP9_COMP *cpi, const TileInfo *const tile,
        mi_col += MI_BLOCK_SIZE) {
     int dummy_rate;
     int64_t dummy_dist;
+
+    BLOCK_SIZE i;
+    MACROBLOCK *x = &cpi->mb;
+    for (i = BLOCK_4X4; i < BLOCK_8X8; ++i) {
+      const int num_4x4_w = num_4x4_blocks_wide_lookup[i];
+      const int num_4x4_h = num_4x4_blocks_high_lookup[i];
+      const int num_4x4_blk = MAX(4, num_4x4_w * num_4x4_h);
+      for (x->sb_index = 0; x->sb_index < 4; ++x->sb_index)
+        for (x->mb_index = 0; x->mb_index < 4; ++x->mb_index)
+          for (x->b_index = 0; x->b_index < 16 / num_4x4_blk; ++x->b_index)
+            get_block_context(x, i)->pred_filter_type = SWITCHABLE;
+    }
 
     vp9_zero(cpi->mb.pred_mv);
 

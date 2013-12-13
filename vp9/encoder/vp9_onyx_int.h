@@ -270,6 +270,7 @@ typedef struct {
   int using_small_partition_info;
   // TODO(jingning): combine the related motion search speed features
   int adaptive_motion_search;
+  int adaptive_pred_filter_type;
 
   // Implements various heuristics to skip searching modes
   // The heuristics selected are based on  flags

@@ -4075,6 +4075,14 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
             cpi->sf.disable_filter_search_var_thresh) {
           tmp_best_filter = EIGHTTAP;
           vp9_zero(cpi->rd_filter_cache);
+        } else if (cpi->sf.adaptive_pred_filter_type == 1 &&
+                   ctx->pred_filter_type < SWITCHABLE) {
+          tmp_best_filter = ctx->pred_filter_type;
+          vp9_zero(cpi->rd_filter_cache);
+        } else if (cpi->sf.adaptive_pred_filter_type == 2) {
+          tmp_best_filter = ctx->pred_filter_type < SWITCHABLE ?
+                              ctx->pred_filter_type : 0;
+          vp9_zero(cpi->rd_filter_cache);
         } else {
           for (switchable_filter_index = 0;
                switchable_filter_index < SWITCHABLE_FILTERS;
@@ -4141,7 +4149,7 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
         }
       }
 
-      if (tmp_best_rdu == INT64_MAX)
+      if (tmp_best_rdu == INT64_MAX && pred_exists)
         continue;
 
       mbmi->interp_filter = (cm->mcomp_filter_type == SWITCHABLE ?
