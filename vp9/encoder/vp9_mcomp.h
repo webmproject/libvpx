@@ -124,9 +124,9 @@ typedef int (*vp9_diamond_search_fn_t)(MACROBLOCK *x,
                                        const MV *center_mv);
 
 int vp9_refining_search_8p_c(MACROBLOCK *x,
-                             int_mv *ref_mv, int error_per_bit,
+                             MV *ref_mv, int error_per_bit,
                              int search_range, vp9_variance_fn_ptr_t *fn_ptr,
                              int *mvjcost, int *mvcost[2],
-                             int_mv *center_mv, const uint8_t *second_pred,
+                             const MV *center_mv, const uint8_t *second_pred,
                              int w, int h);
 #endif  // VP9_ENCODER_VP9_MCOMP_H_

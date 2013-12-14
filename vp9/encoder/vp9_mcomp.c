@@ -688,7 +688,7 @@ int vp9_find_best_sub_pixel_comp_tree(MACROBLOCK *x,
     if (thissad < bestsad)\
     {\
       if (use_mvcost) \
-        thissad += mvsad_err_cost(&this_mv, &fcenter_mv.as_mv, \
+        thissad += mvsad_err_cost(&this_mv, &fcenter_mv, \
                                   mvjsadcost, mvsadcost, \
                                   sad_per_bit);\
       if (thissad < bestsad)\
@@ -741,13 +741,13 @@ static int vp9_pattern_search(MACROBLOCK *x,
   int k = -1;
   int all_in;
   int best_site = -1;
-  int_mv fcenter_mv;
+  MV fcenter_mv;
   int best_init_s = search_param_to_steps[search_param];
   int *mvjsadcost = x->nmvjointsadcost;
   int *mvsadcost[2] = {x->nmvsadcost[0], x->nmvsadcost[1]};
 
-  fcenter_mv.as_mv.row = center_mv->row >> 3;
-  fcenter_mv.as_mv.col = center_mv->col >> 3;
+  fcenter_mv.row = center_mv->row >> 3;
+  fcenter_mv.col = center_mv->col >> 3;
 
   // adjust ref_mv to make sure it is within MV range
   clamp_mv(ref_mv, x->mv_col_min, x->mv_col_max, x->mv_row_min, x->mv_row_max);
@@ -760,7 +760,7 @@ static int vp9_pattern_search(MACROBLOCK *x,
   this_mv.row = br;
   this_mv.col = bc;
   bestsad = vfp->sdf(what, what_stride, this_offset, in_what_stride, 0x7fffffff)
-                + mvsad_err_cost(&this_mv, &fcenter_mv.as_mv,
+                + mvsad_err_cost(&this_mv, &fcenter_mv,
                                  mvjsadcost, mvsadcost, sad_per_bit);
 
   // Search all possible scales upto the search param around the center point
@@ -1212,13 +1212,13 @@ int vp9_diamond_search_sad_c(MACROBLOCK *x,
 
   uint8_t *check_here;
   int thissad;
-  int_mv fcenter_mv;
+  MV fcenter_mv;
 
   int *mvjsadcost = x->nmvjointsadcost;
   int *mvsadcost[2] = {x->nmvsadcost[0], x->nmvsadcost[1]};
 
-  fcenter_mv.as_mv.row = center_mv->row >> 3;
-  fcenter_mv.as_mv.col = center_mv->col >> 3;
+  fcenter_mv.row = center_mv->row >> 3;
+  fcenter_mv.col = center_mv->col >> 3;
 
   clamp_mv(ref_mv, x->mv_col_min, x->mv_col_max, x->mv_row_min, x->mv_row_max);
   ref_row = ref_mv->row;
@@ -1234,7 +1234,7 @@ int vp9_diamond_search_sad_c(MACROBLOCK *x,
 
   // Check the starting position
   bestsad = fn_ptr->sdf(what, what_stride, in_what, in_what_stride, 0x7fffffff)
-                + mvsad_err_cost(best_mv, &fcenter_mv.as_mv,
+                + mvsad_err_cost(best_mv, &fcenter_mv,
                                  mvjsadcost, mvsadcost, sad_per_bit);
 
   // search_param determines the length of the initial step and hence the number
@@ -1263,7 +1263,7 @@ int vp9_diamond_search_sad_c(MACROBLOCK *x,
         if (thissad < bestsad) {
           this_mv.row = this_row_offset;
           this_mv.col = this_col_offset;
-          thissad += mvsad_err_cost(&this_mv, &fcenter_mv.as_mv,
+          thissad += mvsad_err_cost(&this_mv, &fcenter_mv,
                                     mvjsadcost, mvsadcost, sad_per_bit);
 
           if (thissad < bestsad) {
@@ -1295,7 +1295,7 @@ int vp9_diamond_search_sad_c(MACROBLOCK *x,
           if (thissad < bestsad) {
             this_mv.row = this_row_offset;
             this_mv.col = this_col_offset;
-            thissad += mvsad_err_cost(&this_mv, &fcenter_mv.as_mv,
+            thissad += mvsad_err_cost(&this_mv, &fcenter_mv,
                                       mvjsadcost, mvsadcost, sad_per_bit);
             if (thissad < bestsad) {
               bestsad = thissad;
@@ -1356,13 +1356,13 @@ int vp9_diamond_search_sadx4(MACROBLOCK *x,
 
   uint8_t *check_here;
   unsigned int thissad;
-  int_mv fcenter_mv;
+  MV fcenter_mv;
 
   int *mvjsadcost = x->nmvjointsadcost;
   int *mvsadcost[2] = {x->nmvsadcost[0], x->nmvsadcost[1]};
 
-  fcenter_mv.as_mv.row = center_mv->row >> 3;
-  fcenter_mv.as_mv.col = center_mv->col >> 3;
+  fcenter_mv.row = center_mv->row >> 3;
+  fcenter_mv.col = center_mv->col >> 3;
 
   clamp_mv(ref_mv, x->mv_col_min, x->mv_col_max, x->mv_row_min, x->mv_row_max);
   ref_row = ref_mv->row;
@@ -1378,7 +1378,7 @@ int vp9_diamond_search_sadx4(MACROBLOCK *x,
 
   // Check the starting position
   bestsad = fn_ptr->sdf(what, what_stride, in_what, in_what_stride, 0x7fffffff)
-                + mvsad_err_cost(best_mv, &fcenter_mv.as_mv,
+                + mvsad_err_cost(best_mv, &fcenter_mv,
                                  mvjsadcost, mvsadcost, sad_per_bit);
 
   // search_param determines the length of the initial step and hence the number
@@ -1420,7 +1420,7 @@ int vp9_diamond_search_sadx4(MACROBLOCK *x,
           if (sad_array[t] < bestsad) {
             this_mv.row = best_mv->row + ss[i].mv.row;
             this_mv.col = best_mv->col + ss[i].mv.col;
-            sad_array[t] += mvsad_err_cost(&this_mv, &fcenter_mv.as_mv,
+            sad_array[t] += mvsad_err_cost(&this_mv, &fcenter_mv,
                                            mvjsadcost, mvsadcost, sad_per_bit);
 
             if (sad_array[t] < bestsad) {
@@ -1447,7 +1447,7 @@ int vp9_diamond_search_sadx4(MACROBLOCK *x,
           if (thissad < bestsad) {
             this_mv.row = this_row_offset;
             this_mv.col = this_col_offset;
-            thissad += mvsad_err_cost(&this_mv, &fcenter_mv.as_mv,
+            thissad += mvsad_err_cost(&this_mv, &fcenter_mv,
                                       mvjsadcost, mvsadcost, sad_per_bit);
 
             if (thissad < bestsad) {
@@ -1478,7 +1478,7 @@ int vp9_diamond_search_sadx4(MACROBLOCK *x,
           if (thissad < bestsad) {
             this_mv.row = this_row_offset;
             this_mv.col = this_col_offset;
-            thissad += mvsad_err_cost(&this_mv, &fcenter_mv.as_mv,
+            thissad += mvsad_err_cost(&this_mv, &fcenter_mv,
                                       mvjsadcost, mvsadcost, sad_per_bit);
             if (thissad < bestsad) {
               bestsad = thissad;
@@ -1585,7 +1585,7 @@ int vp9_full_search_sad_c(MACROBLOCK *x, MV *ref_mv,
   int in_what_stride = xd->plane[0].pre[0].stride;
   int mv_stride = xd->plane[0].pre[0].stride;
   uint8_t *bestaddress;
-  int_mv *best_mv = &x->e_mbd.mi_8x8[0]->bmi[n].as_mv[0];
+  MV *best_mv = &x->e_mbd.mi_8x8[0]->bmi[n].as_mv[0].as_mv;
   MV this_mv;
   int bestsad = INT_MAX;
   int r, c;
@@ -1612,13 +1612,13 @@ int vp9_full_search_sad_c(MACROBLOCK *x, MV *ref_mv,
   in_what = xd->plane[0].pre[0].buf;
   bestaddress = in_what + (ref_row * xd->plane[0].pre[0].stride) + ref_col;
 
-  best_mv->as_mv.row = ref_row;
-  best_mv->as_mv.col = ref_col;
+  best_mv->row = ref_row;
+  best_mv->col = ref_col;
 
   // Baseline value at the centre
   bestsad = fn_ptr->sdf(what, what_stride, bestaddress,
                         in_what_stride, 0x7fffffff)
-                           + mvsad_err_cost(&best_mv->as_mv, &fcenter_mv,
+                           + mvsad_err_cost(best_mv, &fcenter_mv,
                                             mvjsadcost, mvsadcost, sad_per_bit);
 
   // Apply further limits to prevent us looking using vectors that stretch
@@ -1642,8 +1642,8 @@ int vp9_full_search_sad_c(MACROBLOCK *x, MV *ref_mv,
 
       if (thissad < bestsad) {
         bestsad = thissad;
-        best_mv->as_mv.row = r;
-        best_mv->as_mv.col = c;
+        best_mv->row = r;
+        best_mv->col = c;
         bestaddress = check_here;
       }
 
@@ -1651,8 +1651,8 @@ int vp9_full_search_sad_c(MACROBLOCK *x, MV *ref_mv,
     }
   }
 
-  this_mv.row = best_mv->as_mv.row * 8;
-  this_mv.col = best_mv->as_mv.col * 8;
+  this_mv.row = best_mv->row * 8;
+  this_mv.col = best_mv->col * 8;
 
   if (bestsad < INT_MAX)
     return fn_ptr->vf(what, what_stride, bestaddress, in_what_stride,
@@ -1674,7 +1674,7 @@ int vp9_full_search_sadx3(MACROBLOCK *x, MV *ref_mv,
   int in_what_stride = xd->plane[0].pre[0].stride;
   int mv_stride = xd->plane[0].pre[0].stride;
   uint8_t *bestaddress;
-  int_mv *best_mv = &x->e_mbd.mi_8x8[0]->bmi[n].as_mv[0];
+  MV *best_mv = &x->e_mbd.mi_8x8[0]->bmi[n].as_mv[0].as_mv;
   MV this_mv;
   unsigned int bestsad = INT_MAX;
   int r, c;
@@ -1703,13 +1703,13 @@ int vp9_full_search_sadx3(MACROBLOCK *x, MV *ref_mv,
   in_what = xd->plane[0].pre[0].buf;
   bestaddress = in_what + (ref_row * xd->plane[0].pre[0].stride) + ref_col;
 
-  best_mv->as_mv.row = ref_row;
-  best_mv->as_mv.col = ref_col;
+  best_mv->row = ref_row;
+  best_mv->col = ref_col;
 
   // Baseline value at the centre
   bestsad = fn_ptr->sdf(what, what_stride,
                         bestaddress, in_what_stride, 0x7fffffff)
-            + mvsad_err_cost(&best_mv->as_mv, &fcenter_mv,
+            + mvsad_err_cost(best_mv, &fcenter_mv,
                              mvjsadcost, mvsadcost, sad_per_bit);
 
   // Apply further limits to prevent us looking using vectors that stretch
@@ -1739,8 +1739,8 @@ int vp9_full_search_sadx3(MACROBLOCK *x, MV *ref_mv,
 
           if (thissad < bestsad) {
             bestsad = thissad;
-            best_mv->as_mv.row = r;
-            best_mv->as_mv.col = c;
+            best_mv->row = r;
+            best_mv->col = c;
             bestaddress = check_here;
           }
         }
@@ -1761,8 +1761,8 @@ int vp9_full_search_sadx3(MACROBLOCK *x, MV *ref_mv,
 
         if (thissad < bestsad) {
           bestsad = thissad;
-          best_mv->as_mv.row = r;
-          best_mv->as_mv.col = c;
+          best_mv->row = r;
+          best_mv->col = c;
           bestaddress = check_here;
         }
       }
@@ -1772,8 +1772,8 @@ int vp9_full_search_sadx3(MACROBLOCK *x, MV *ref_mv,
     }
   }
 
-  this_mv.row = best_mv->as_mv.row * 8;
-  this_mv.col = best_mv->as_mv.col * 8;
+  this_mv.row = best_mv->row * 8;
+  this_mv.col = best_mv->col * 8;
 
   if (bestsad < INT_MAX)
     return fn_ptr->vf(what, what_stride, bestaddress, in_what_stride,
@@ -1796,7 +1796,7 @@ int vp9_full_search_sadx8(MACROBLOCK *x, MV *ref_mv,
   int in_what_stride = xd->plane[0].pre[0].stride;
   int mv_stride = xd->plane[0].pre[0].stride;
   uint8_t *bestaddress;
-  int_mv *best_mv = &x->e_mbd.mi_8x8[0]->bmi[n].as_mv[0];
+  MV *best_mv = &x->e_mbd.mi_8x8[0]->bmi[n].as_mv[0].as_mv;
   MV this_mv;
   unsigned int bestsad = INT_MAX;
   int r, c;
@@ -1826,13 +1826,13 @@ int vp9_full_search_sadx8(MACROBLOCK *x, MV *ref_mv,
   in_what = xd->plane[0].pre[0].buf;
   bestaddress = in_what + (ref_row * xd->plane[0].pre[0].stride) + ref_col;
 
-  best_mv->as_mv.row = ref_row;
-  best_mv->as_mv.col = ref_col;
+  best_mv->row = ref_row;
+  best_mv->col = ref_col;
 
-  // Baseline value at the centre
+  // Baseline value at the center
   bestsad = fn_ptr->sdf(what, what_stride,
                         bestaddress, in_what_stride, 0x7fffffff)
-            + mvsad_err_cost(&best_mv->as_mv, &fcenter_mv,
+            + mvsad_err_cost(best_mv, &fcenter_mv,
                              mvjsadcost, mvsadcost, sad_per_bit);
 
   // Apply further limits to prevent us looking using vectors that stretch
@@ -1862,8 +1862,8 @@ int vp9_full_search_sadx8(MACROBLOCK *x, MV *ref_mv,
 
           if (thissad < bestsad) {
             bestsad = thissad;
-            best_mv->as_mv.row = r;
-            best_mv->as_mv.col = c;
+            best_mv->row = r;
+            best_mv->col = c;
             bestaddress = check_here;
           }
         }
@@ -1888,8 +1888,8 @@ int vp9_full_search_sadx8(MACROBLOCK *x, MV *ref_mv,
 
           if (thissad < bestsad) {
             bestsad = thissad;
-            best_mv->as_mv.row = r;
-            best_mv->as_mv.col = c;
+            best_mv->row = r;
+            best_mv->col = c;
             bestaddress = check_here;
           }
         }
@@ -1910,8 +1910,8 @@ int vp9_full_search_sadx8(MACROBLOCK *x, MV *ref_mv,
 
         if (thissad < bestsad) {
           bestsad = thissad;
-          best_mv->as_mv.row = r;
-          best_mv->as_mv.col = c;
+          best_mv->row = r;
+          best_mv->col = c;
           bestaddress = check_here;
         }
       }
@@ -1921,8 +1921,8 @@ int vp9_full_search_sadx8(MACROBLOCK *x, MV *ref_mv,
     }
   }
 
-  this_mv.row = best_mv->as_mv.row * 8;
-  this_mv.col = best_mv->as_mv.col * 8;
+  this_mv.row = best_mv->row * 8;
+  this_mv.col = best_mv->col * 8;
 
   if (bestsad < INT_MAX)
     return fn_ptr->vf(what, what_stride, bestaddress, in_what_stride,
@@ -2136,9 +2136,9 @@ int vp9_refining_search_sadx4(MACROBLOCK *x,
  * mode.
  */
 int vp9_refining_search_8p_c(MACROBLOCK *x,
-                             int_mv *ref_mv, int error_per_bit,
+                             MV *ref_mv, int error_per_bit,
                              int search_range, vp9_variance_fn_ptr_t *fn_ptr,
-                             int *mvjcost, int *mvcost[2], int_mv *center_mv,
+                             int *mvjcost, int *mvcost[2], const MV *center_mv,
                              const uint8_t *second_pred, int w, int h) {
   const MACROBLOCKD* const xd = &x->e_mbd;
   MV neighbors[8] = {{-1, 0}, {0, -1}, {0, 1}, {1, 0},
@@ -2150,32 +2150,32 @@ int vp9_refining_search_8p_c(MACROBLOCK *x,
   int in_what_stride = xd->plane[0].pre[0].stride;
   uint8_t *what = x->plane[0].src.buf;
   uint8_t *best_address = xd->plane[0].pre[0].buf +
-                          (ref_mv->as_mv.row * xd->plane[0].pre[0].stride) +
-                          ref_mv->as_mv.col;
+                          (ref_mv->row * xd->plane[0].pre[0].stride) +
+                          ref_mv->col;
   uint8_t *check_here;
   unsigned int thissad;
-  int_mv this_mv;
+  MV this_mv;
   unsigned int bestsad = INT_MAX;
-  int_mv fcenter_mv;
+  MV fcenter_mv;
 
   int *mvjsadcost = x->nmvjointsadcost;
   int *mvsadcost[2] = {x->nmvsadcost[0], x->nmvsadcost[1]};
 
-  fcenter_mv.as_mv.row = center_mv->as_mv.row >> 3;
-  fcenter_mv.as_mv.col = center_mv->as_mv.col >> 3;
+  fcenter_mv.row = center_mv->row >> 3;
+  fcenter_mv.col = center_mv->col >> 3;
 
   /* Get compound pred by averaging two pred blocks. */
   bestsad = fn_ptr->sdaf(what, what_stride, best_address, in_what_stride,
                          second_pred, 0x7fffffff) +
-      mvsad_err_cost(&ref_mv->as_mv, &fcenter_mv.as_mv,
+      mvsad_err_cost(ref_mv, &fcenter_mv,
                      mvjsadcost, mvsadcost, error_per_bit);
 
   for (i = 0; i < search_range; i++) {
     int best_site = -1;
 
     for (j = 0; j < 8; j++) {
-      this_row_offset = ref_mv->as_mv.row + neighbors[j].row;
-      this_col_offset = ref_mv->as_mv.col + neighbors[j].col;
+      this_row_offset = ref_mv->row + neighbors[j].row;
+      this_col_offset = ref_mv->col + neighbors[j].col;
 
       if ((this_col_offset > x->mv_col_min) &&
           (this_col_offset < x->mv_col_max) &&
@@ -2189,9 +2189,9 @@ int vp9_refining_search_8p_c(MACROBLOCK *x,
                                second_pred, bestsad);
 
         if (thissad < bestsad) {
-          this_mv.as_mv.row = this_row_offset;
-          this_mv.as_mv.col = this_col_offset;
-          thissad += mvsad_err_cost(&this_mv.as_mv, &fcenter_mv.as_mv,
+          this_mv.row = this_row_offset;
+          this_mv.col = this_col_offset;
+          thissad += mvsad_err_cost(&this_mv, &fcenter_mv,
                                     mvjsadcost, mvsadcost, error_per_bit);
           if (thissad < bestsad) {
             bestsad = thissad;
@@ -2204,22 +2204,22 @@ int vp9_refining_search_8p_c(MACROBLOCK *x,
     if (best_site == -1) {
       break;
     } else {
-      ref_mv->as_mv.row += neighbors[best_site].row;
-      ref_mv->as_mv.col += neighbors[best_site].col;
+      ref_mv->row += neighbors[best_site].row;
+      ref_mv->col += neighbors[best_site].col;
       best_address += (neighbors[best_site].row) * in_what_stride +
           neighbors[best_site].col;
     }
   }
 
-  this_mv.as_mv.row = ref_mv->as_mv.row * 8;
-  this_mv.as_mv.col = ref_mv->as_mv.col * 8;
+  this_mv.row = ref_mv->row * 8;
+  this_mv.col = ref_mv->col * 8;
 
   if (bestsad < INT_MAX) {
     // FIXME(rbultje, yunqing): add full-pixel averaging variance functions
     // so we don't have to use the subpixel with xoff=0,yoff=0 here.
     return fn_ptr->svaf(best_address, in_what_stride, 0, 0, what, what_stride,
                         (unsigned int *)(&thissad), second_pred) +
-                        mv_err_cost(&this_mv.as_mv, &center_mv->as_mv,
+                        mv_err_cost(&this_mv, center_mv,
                                     mvjcost, mvcost, x->errorperbit);
   } else {
     return INT_MAX;
