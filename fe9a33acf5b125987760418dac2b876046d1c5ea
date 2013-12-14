@@ -67,6 +67,57 @@
       "revId": "fe9a33acf5b125987760418dac2b876046d1c5ea",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX//6UE\u003d",
+        "filename": "vpx/internal/vpx_codec_internal.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 222,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-12-14T01:52:22Z",
+      "side": 1,
+      "message": "so maybe split this out to its own table instead of referencing vp9 alone in mid-paragraph",
+      "revId": "fe9a33acf5b125987760418dac2b876046d1c5ea",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX//6UA\u003d",
+        "filename": "vpx/vpx_decoder.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 347,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-12-14T01:52:22Z",
+      "side": 1,
+      "message": "ditto for relocating the vp9 mentions",
+      "revId": "fe9a33acf5b125987760418dac2b876046d1c5ea",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX//6T8\u003d",
+        "filename": "vpx_scale/generic/yv12config.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 246,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-12-14T01:52:22Z",
+      "side": 1,
+      "message": "ping on factoring this allocation out",
+      "revId": "fe9a33acf5b125987760418dac2b876046d1c5ea",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
