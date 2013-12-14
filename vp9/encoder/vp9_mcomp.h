@@ -103,25 +103,25 @@ extern fractional_mv_step_comp_fp vp9_find_best_sub_pixel_comp_iterative;
 extern fractional_mv_step_comp_fp vp9_find_best_sub_pixel_comp_tree;
 
 typedef int (*vp9_full_search_fn_t)(MACROBLOCK *x,
-                                    int_mv *ref_mv, int sad_per_bit,
+                                    MV *ref_mv, int sad_per_bit,
                                     int distance, vp9_variance_fn_ptr_t *fn_ptr,
                                     int *mvjcost, int *mvcost[2],
-                                    int_mv *center_mv, int n);
+                                    const MV *center_mv, int n);
 
 typedef int (*vp9_refining_search_fn_t)(MACROBLOCK *x,
-                                        int_mv *ref_mv, int sad_per_bit,
+                                        MV *ref_mv, int sad_per_bit,
                                         int distance,
                                         vp9_variance_fn_ptr_t *fn_ptr,
                                         int *mvjcost, int *mvcost[2],
-                                        int_mv *center_mv);
+                                        const MV *center_mv);
 
 typedef int (*vp9_diamond_search_fn_t)(MACROBLOCK *x,
-                                       int_mv *ref_mv, int_mv *best_mv,
+                                       MV *ref_mv, MV *best_mv,
                                        int search_param, int sad_per_bit,
                                        int *num00,
                                        vp9_variance_fn_ptr_t *fn_ptr,
                                        int *mvjcost, int *mvcost[2],
-                                       int_mv *center_mv);
+                                       const MV *center_mv);
 
 int vp9_refining_search_8p_c(MACROBLOCK *x,
                              int_mv *ref_mv, int error_per_bit,
