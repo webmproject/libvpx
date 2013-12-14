@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdX//6Ss\u003d",
+        "filename": "vp9/common/vp9_convolve.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 121,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2013-12-14T02:51:41Z",
+      "side": 1,
+      "message": "You need to update this comment to reflect the fact that you\u0027re constraining the maximum down-scaling factor to 2 (rather than 5).",
+      "revId": "327288c15c2c3a1161c67f6b9b84b48ce2b29f3b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
