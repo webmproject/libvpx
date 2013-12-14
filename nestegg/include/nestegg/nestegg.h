@@ -4,12 +4,12 @@
  * This program is made available under an ISC-style license.  See the
  * accompanying file LICENSE for details.
  */
-#ifndef   NESTEGG_671cac2a_365d_ed69_d7a3_4491d3538d79
-#define   NESTEGG_671cac2a_365d_ed69_d7a3_4491d3538d79
+#if !defined(NESTEGG_671cac2a_365d_ed69_d7a3_4491d3538d79)
+#define NESTEGG_671cac2a_365d_ed69_d7a3_4491d3538d79
 
 #include "vpx/vpx_integer.h"
 
-#ifdef __cplusplus
+#if defined(__cplusplus)
 extern "C" {
 #endif
 
@@ -17,10 +17,10 @@ extern "C" {
 
     @section intro Introduction
 
-    This is the documentation fot the <tt>libnestegg</tt> C API.
+    This is the documentation for the <tt>libnestegg</tt> C API.
     <tt>libnestegg</tt> is a demultiplexing library for <a
-    href="http://www.matroska.org/">Matroska</a> and <a
-    href="http://www.webmproject.org/">WebMedia</a> media files.
+    href="http://www.webmproject.org/code/specs/container/">WebM</a>
+    media files.
 
     @section example Example code
 
@@ -68,6 +68,13 @@ extern "C" {
 #define NESTEGG_CODEC_VP8    0 /**< Track uses Google On2 VP8 codec. */
 #define NESTEGG_CODEC_VORBIS 1 /**< Track uses Xiph Vorbis codec. */
 #define NESTEGG_CODEC_VP9    2 /**< Track uses Google On2 VP9 codec. */
+#define NESTEGG_CODEC_OPUS   3 /**< Track uses Xiph Opus codec. */
+
+#define NESTEGG_VIDEO_MONO              0 /**< Track is mono video. */
+#define NESTEGG_VIDEO_STEREO_LEFT_RIGHT 1 /**< Track is side-by-side stereo video.  Left first. */
+#define NESTEGG_VIDEO_STEREO_BOTTOM_TOP 2 /**< Track is top-bottom stereo video.  Right first. */
+#define NESTEGG_VIDEO_STEREO_TOP_BOTTOM 3 /**< Track is top-bottom stereo video.  Left first. */
+#define NESTEGG_VIDEO_STEREO_RIGHT_LEFT 11 /**< Track is side-by-side stereo video.  Right first. */
 
 #define NESTEGG_SEEK_SET 0 /**< Seek offset relative to beginning of stream. */
 #define NESTEGG_SEEK_CUR 1 /**< Seek offset relative to current position in stream. */
@@ -114,6 +121,10 @@ typedef struct {
 
 /** Parameters specific to a video track. */
 typedef struct {
+  unsigned int stereo_mode;    /**< Video mode.  One of #NESTEGG_VIDEO_MONO,
+                                    #NESTEGG_VIDEO_STEREO_LEFT_RIGHT,
+                                    #NESTEGG_VIDEO_STEREO_BOTTOM_TOP, or
+                                    #NESTEGG_VIDEO_STEREO_TOP_BOTTOM. */
   unsigned int width;          /**< Width of the video frame in pixels. */
   unsigned int height;         /**< Height of the video frame in pixels. */
   unsigned int display_width;  /**< Display width of the video frame in pixels. */
@@ -129,6 +140,8 @@ typedef struct {
   double rate;           /**< Sampling rate in Hz. */
   unsigned int channels; /**< Number of audio channels. */
   unsigned int depth;    /**< Bits per sample. */
+  uint64_t  codec_delay; /**< Nanoseconds that must be discarded from the start. */
+  uint64_t  seek_preroll;/**< Nanoseconds that must be discarded after a seek. */
 } nestegg_audio_params;
 
 /** Logging callback function pointer. */
@@ -140,9 +153,10 @@ typedef void (* nestegg_log)(nestegg * context, unsigned int severity, char cons
     @param context  Storage for the new nestegg context.  @see nestegg_destroy
     @param io       User supplied IO context.
     @param callback Optional logging callback function pointer.  May be NULL.
+    @param max_offset Optional maximum offset to be read. Set -1 to ignore.
     @retval  0 Success.
     @retval -1 Error. */
-int nestegg_init(nestegg ** context, nestegg_io io, nestegg_log callback);
+int nestegg_init(nestegg ** context, nestegg_io io, nestegg_log callback, int64_t max_offset);
 
 /** Destroy a nestegg context and free associated memory.
     @param context #nestegg context to be freed.  @see nestegg_init */
@@ -170,6 +184,29 @@ int nestegg_tstamp_scale(nestegg * context, uint64_t * scale);
     @retval  0 Success.
     @retval -1 Error. */
 int nestegg_track_count(nestegg * context, unsigned int * tracks);
+
+/** Query the start and end offset for a particular cluster.
+    @param context     Stream context initialized by #nestegg_init.
+    @param cluster_num Zero-based cluster number; order they appear in cues.
+    @param max_offset  Optional maximum offset to be read. Set -1 to ignore.
+    @param start_pos   Starting offset of the cluster. -1 means non-existant.
+    @param end_pos     Starting offset of the cluster. -1 means non-existant or
+                       final cluster.
+    @param tstamp      Starting timestamp of the cluster.
+    @retval  0 Success.
+    @retval -1 Error. */
+int nestegg_get_cue_point(nestegg * context, unsigned int cluster_num,
+                          int64_t max_offset, int64_t * start_pos,
+                          int64_t * end_pos, uint64_t * tstamp);
+
+/** Seek to @a offset.  Stream will seek directly to offset.
+    Should be used to seek to the start of a resync point, i.e. cluster; the
+    parser will not be able to understand other offsets.
+    @param context Stream context initialized by #nestegg_init.
+    @param offset  Absolute offset in bytes.
+    @retval  0 Success.
+    @retval -1 Error. */
+int nestegg_offset_seek(nestegg * context, uint64_t offset);
 
 /** Seek @a track to @a tstamp.  Stream seek will terminate at the earliest
     key point in the stream at or before @a tstamp.  Other tracks in the
@@ -286,7 +323,30 @@ int nestegg_packet_count(nestegg_packet * packet, unsigned int * count);
 int nestegg_packet_data(nestegg_packet * packet, unsigned int item,
                         unsigned char ** data, size_t * length);
 
-#ifdef __cplusplus
+/** Returns discard_padding for given packet
+    @param packet  Packet initialized by #nestegg_read_packet.
+    @param discard_padding pointer to store discard padding in.
+    @retval  0 Success.
+    @retval -1 Error. */
+int nestegg_packet_discard_padding(nestegg_packet * packet,
+                                   int64_t * discard_padding);
+
+/** Query the presence of cues.
+    @param context  Stream context initialized by #nestegg_init.
+    @retval 0 The media has no cues.
+    @retval 1 The media has cues. */
+int nestegg_has_cues(nestegg * context);
+
+/**
+ * Try to determine if the buffer looks like the beginning of a WebM file.
+ *
+ * @param buffer A buffer containing the beginning of a media file.
+ * @param length The size of the buffer.
+ * @retval 0 The file is not a WebM file.
+ * @retval 1 The file is a WebM file. */
+int nestegg_sniff(unsigned char const * buffer, size_t length);
+
+#if defined(__cplusplus)
 }
 #endif
 

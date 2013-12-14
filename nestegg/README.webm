@@ -1,0 +1,16 @@
+URL: https://github.com/kinetiknz/nestegg.git
+Version: f46223191d8116a36bf299b5b9793fcb798417b1
+License: ISC-style
+License File: LICENSE
+
+Description:
+The source under the halloc/ directory is licensed under a BSD license. See
+halloc/halloc.h for details.
+
+Local Modifications:
+- delete unnecessary docs and build files
+- nestegg/0001-include-paths.diff
+  include path modifications for the libvpx build system
+- 0002-ne_read_simple-uninitialized_variable.diff
+  fixes:
+nestegg.c|975 col 6| warning: ‘r’ may be used uninitialized in this function [-Wuninitialized]
