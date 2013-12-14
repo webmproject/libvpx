@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdX//6Uk\u003d",
+        "filename": "test/external_frame_buffer_test.cc",
+        "patchSetId": 8
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-12-14T01:43:27Z",
+      "side": 1,
+      "message": "prefer const char c[] with string constants -- this is a way to enforce readonly, similar to const char* const",
+      "revId": "fe9a33acf5b125987760418dac2b876046d1c5ea",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX//6Ug\u003d",
+        "filename": "test/external_frame_buffer_test.cc",
+        "patchSetId": 8
+      },
+      "lineNbr": 98,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-12-14T01:43:27Z",
+      "side": 1,
+      "message": "long line + weird alignment",
+      "revId": "fe9a33acf5b125987760418dac2b876046d1c5ea",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX//6UY\u003d",
+        "filename": "test/external_frame_buffer_test.cc",
+        "patchSetId": 8
+      },
+      "lineNbr": 196,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-12-14T01:43:27Z",
+      "side": 1,
+      "message": "DecodeRemainingFrames() ?",
+      "revId": "fe9a33acf5b125987760418dac2b876046d1c5ea",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX//6UU\u003d",
+        "filename": "test/external_frame_buffer_test.cc",
+        "patchSetId": 8
+      },
+      "lineNbr": 257,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-12-14T01:43:27Z",
+      "side": 1,
+      "message": "params are (expected, actual); from here onward needs a swap",
+      "revId": "fe9a33acf5b125987760418dac2b876046d1c5ea",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
