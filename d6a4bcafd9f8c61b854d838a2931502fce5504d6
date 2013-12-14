@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdX//6Qg\u003d",
+        "filename": "test/external_frame_buffer_test.cc",
+        "patchSetId": 9
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-12-14T20:24:21Z",
+      "side": 1,
+      "message": "here and the others: \u003d\u003d NULL",
+      "revId": "d6a4bcafd9f8c61b854d838a2931502fce5504d6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX//6Qc\u003d",
+        "filename": "test/external_frame_buffer_test.cc",
+        "patchSetId": 9
+      },
+      "lineNbr": 147,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-12-14T20:24:21Z",
+      "side": 1,
+      "message": "useful?",
+      "revId": "d6a4bcafd9f8c61b854d838a2931502fce5504d6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
