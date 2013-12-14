@@ -117,8 +117,10 @@ int webm_read_frame(struct WebmInputContext *webm_ctx,
 
     do {
       /* End of this packet, get another. */
-      if (webm_ctx->pkt)
+      if (webm_ctx->pkt) {
         nestegg_free_packet(webm_ctx->pkt);
+        webm_ctx->pkt = NULL;
+      }
 
       if (nestegg_read_packet(webm_ctx->nestegg_ctx, &webm_ctx->pkt) <= 0 ||
           nestegg_packet_track(webm_ctx->pkt, &track)) {
@@ -188,6 +190,9 @@ int webm_guess_framerate(struct WebmInputContext *webm_ctx,
 }
 
 void webm_free(struct WebmInputContext *webm_ctx) {
-  if (webm_ctx && webm_ctx->nestegg_ctx)
+  if (webm_ctx && webm_ctx->nestegg_ctx) {
+    if (webm_ctx->pkt)
+      nestegg_free_packet(webm_ctx->pkt);
     nestegg_destroy(webm_ctx->nestegg_ctx);
+  }
 }

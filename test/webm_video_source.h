@@ -90,8 +90,12 @@ class WebMVideoSource : public CompressedVideoSource {
   virtual ~WebMVideoSource() {
     if (input_file_)
       fclose(input_file_);
-    if (nestegg_ctx_)
+    if (nestegg_ctx_ != NULL) {
+      if (pkt_ != NULL) {
+        nestegg_free_packet(pkt_);
+      }
       nestegg_destroy(nestegg_ctx_);
+    }
   }
 
   virtual void Init() {
@@ -136,8 +140,10 @@ class WebMVideoSource : public CompressedVideoSource {
 
       do {
         /* End of this packet, get another. */
-        if (pkt_)
+        if (pkt_ != NULL) {
           nestegg_free_packet(pkt_);
+          pkt_ = NULL;
+        }
 
         int again = nestegg_read_packet(nestegg_ctx_, &pkt_);
         ASSERT_GE(again, 0) << "nestegg_read_packet failed";
