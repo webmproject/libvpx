@@ -777,38 +777,27 @@ static void encode_loopfilter(struct loopfilter *lf,
   vp9_wb_write_bit(wb, lf->mode_ref_delta_enabled);
 
   if (lf->mode_ref_delta_enabled) {
-    // Do the deltas need to be updated
     vp9_wb_write_bit(wb, lf->mode_ref_delta_update);
     if (lf->mode_ref_delta_update) {
-      // Send update
       for (i = 0; i < MAX_REF_LF_DELTAS; i++) {
         const int delta = lf->ref_deltas[i];
-
-        // Frame level data
-        if (delta != lf->last_ref_deltas[i]) {
+        const int changed = delta != lf->last_ref_deltas[i];
+        vp9_wb_write_bit(wb, changed);
+        if (changed) {
           lf->last_ref_deltas[i] = delta;
-          vp9_wb_write_bit(wb, 1);
-
-          assert(delta != 0);
           vp9_wb_write_literal(wb, abs(delta) & 0x3F, 6);
           vp9_wb_write_bit(wb, delta < 0);
-        } else {
-          vp9_wb_write_bit(wb, 0);
         }
       }
 
-      // Send update
       for (i = 0; i < MAX_MODE_LF_DELTAS; i++) {
         const int delta = lf->mode_deltas[i];
-        if (delta != lf->last_mode_deltas[i]) {
+        const int changed = delta != lf->last_mode_deltas[i];
+        vp9_wb_write_bit(wb, changed);
+        if (changed) {
           lf->last_mode_deltas[i] = delta;
-          vp9_wb_write_bit(wb, 1);
-
-          assert(delta != 0);
           vp9_wb_write_literal(wb, abs(delta) & 0x3F, 6);
           vp9_wb_write_bit(wb, delta < 0);
-        } else {
-          vp9_wb_write_bit(wb, 0);
         }
       }
     }
