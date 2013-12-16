@@ -9,8 +9,8 @@
  */
 
 
-#ifndef __INC_BLOCK_H
-#define __INC_BLOCK_H
+#ifndef VP8_ENCODER_BLOCK_H_
+#define VP8_ENCODER_BLOCK_H_
 
 #include "vp8/common/onyx.h"
 #include "vp8/common/blockd.h"
@@ -160,4 +160,4 @@ typedef struct macroblock
 } MACROBLOCK;
 
 
-#endif
+#endif  // VP8_ENCODER_BLOCK_H_

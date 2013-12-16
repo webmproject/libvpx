@@ -9,7 +9,8 @@
  */
 
 
-#if !defined __INC_RATECTRL_H
+#ifndef VP8_ENCODER_RATECTRL_H_
+#define VP8_ENCODER_RATECTRL_H_
 
 #include "onyx_int.h"
 
@@ -25,4 +26,4 @@ extern void vp8_compute_frame_size_bounds(VP8_COMP *cpi, int *frame_under_shoot_
 /* return of 0 means drop frame */
 extern int vp8_pick_frame_size(VP8_COMP *cpi);
 
-#endif
+#endif  // VP8_ENCODER_RATECTRL_H_

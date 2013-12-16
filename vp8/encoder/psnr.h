@@ -9,9 +9,9 @@
  */
 
 
-#ifndef __INC_PSNR_H
-#define __INC_PSNR_H
+#ifndef VP8_ENCODER_PSNR_H_
+#define VP8_ENCODER_PSNR_H_
 
 extern double vp8_mse2psnr(double Samples, double Peak, double Mse);
 
-#endif
+#endif  // VP8_ENCODER_PSNR_H_

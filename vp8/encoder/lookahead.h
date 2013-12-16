@@ -7,8 +7,8 @@
  *  in the file PATENTS.  All contributing project authors may
  *  be found in the AUTHORS file in the root of the source tree.
  */
-#ifndef LOOKAHEAD_H
-#define LOOKAHEAD_H
+#ifndef VP8_ENCODER_LOOKAHEAD_H_
+#define VP8_ENCODER_LOOKAHEAD_H_
 #include "vpx_scale/yv12config.h"
 #include "vpx/vpx_integer.h"
 
@@ -106,4 +106,4 @@ unsigned int
 vp8_lookahead_depth(struct lookahead_ctx *ctx);
 
 
-#endif
+#endif  // VP8_ENCODER_LOOKAHEAD_H_

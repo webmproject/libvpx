@@ -9,9 +9,9 @@
  */
 
 
-#ifndef __INC_MODECOSTS_H
-#define __INC_MODECOSTS_H
+#ifndef VP8_ENCODER_MODECOSTS_H_
+#define VP8_ENCODER_MODECOSTS_H_
 
 void vp8_init_mode_costs(VP8_COMP *x);
 
-#endif
+#endif  // VP8_ENCODER_MODECOSTS_H_

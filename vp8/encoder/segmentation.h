@@ -8,9 +8,13 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
+#ifndef VP8_ENCODER_SEGMENTATION_H_
+#define VP8_ENCODER_SEGMENTATION_H_
 
 #include "string.h"
 #include "vp8/common/blockd.h"
 #include "onyx_int.h"
 
 extern void vp8_update_gf_useage_maps(VP8_COMP *cpi, VP8_COMMON *cm, MACROBLOCK *x);
+
+#endif  // VP8_ENCODER_SEGMENTATION_H_

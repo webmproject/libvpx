@@ -39,4 +39,4 @@ void vp8_denoiser_denoise_mb(VP8_DENOISER *denoiser,
                              int recon_yoffset,
                              int recon_uvoffset);
 
-#endif  /* VP8_ENCODER_DENOISING_H_ */
+#endif  // VP8_ENCODER_DENOISING_H_

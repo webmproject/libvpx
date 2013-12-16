@@ -9,8 +9,8 @@
  */
 
 
-#ifndef __INC_VP8_INT_H
-#define __INC_VP8_INT_H
+#ifndef VP8_ENCODER_ONYX_INT_H_
+#define VP8_ENCODER_ONYX_INT_H_
 
 #include <stdio.h>
 #include "vpx_config.h"
@@ -721,4 +721,4 @@ void vp8_set_speed_features(VP8_COMP *cpi);
                                "Failed to allocate "#lval);\
     } while(0)
 #endif
-#endif
+#endif  // VP8_ENCODER_ONYX_INT_H_

@@ -9,8 +9,8 @@
  */
 
 
-#ifndef __INC_ENCODEMB_H
-#define __INC_ENCODEMB_H
+#ifndef VP8_ENCODER_ENCODEMB_H_
+#define VP8_ENCODER_ENCODEMB_H_
 
 #include "onyx_int.h"
 void vp8_encode_inter16x16(MACROBLOCK *x);
@@ -23,4 +23,4 @@ void vp8_transform_intra_mby(MACROBLOCK *x);
 void vp8_optimize_mby(MACROBLOCK *x);
 void vp8_optimize_mbuv(MACROBLOCK *x);
 void vp8_encode_inter16x16y(MACROBLOCK *x);
-#endif
+#endif  // VP8_ENCODER_ENCODEMB_H_

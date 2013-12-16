@@ -9,8 +9,8 @@
  */
 
 
-#ifndef __INC_PICKINTER_H
-#define __INC_PICKINTER_H
+#ifndef VP8_ENCODER_PICKINTER_H_
+#define VP8_ENCODER_PICKINTER_H_
 #include "vpx_config.h"
 #include "vp8/common/onyxc_int.h"
 
@@ -24,4 +24,4 @@ extern int vp8_get_inter_mbpred_error(MACROBLOCK *mb,
                                       const vp8_variance_fn_ptr_t *vfp,
                                       unsigned int *sse,
                                       int_mv this_mv);
-#endif
+#endif  // VP8_ENCODER_PICKINTER_H_

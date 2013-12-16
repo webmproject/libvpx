@@ -9,8 +9,8 @@
  */
 
 
-#ifndef __INC_TREEWRITER_H
-#define __INC_TREEWRITER_H
+#ifndef VP8_ENCODER_TREEWRITER_H_
+#define VP8_ENCODER_TREEWRITER_H_
 
 /* Trees map alphabets into huffman-like codes suitable for an arithmetic
    bit coder.  Timothy S Murphy  11 October 2004 */
@@ -123,4 +123,4 @@ void vp8_cost_tokens2(
     int *Costs, const vp8_prob *, vp8_tree, int
 );
 
-#endif
+#endif  // VP8_ENCODER_TREEWRITER_H_

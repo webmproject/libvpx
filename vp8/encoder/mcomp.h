@@ -9,8 +9,8 @@
  */
 
 
-#ifndef __INC_MCOMP_H
-#define __INC_MCOMP_H
+#ifndef VP8_ENCODER_MCOMP_H_
+#define VP8_ENCODER_MCOMP_H_
 
 #include "block.h"
 #include "vp8/common/variance.h"
@@ -104,4 +104,4 @@ typedef int (*vp8_diamond_search_fn_t)
      int_mv *center_mv
     );
 
-#endif
+#endif  // VP8_ENCODER_MCOMP_H_
