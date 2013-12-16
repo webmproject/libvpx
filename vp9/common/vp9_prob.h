@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2010 The WebM project authors. All Rights Reserved.
+ *  Copyright (c) 2013 The WebM project authors. All Rights Reserved.
  *
  *  Use of this source code is governed by a BSD-style license
  *  that can be found in the LICENSE file in the root of the source
@@ -8,11 +8,14 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#ifndef VP9_COMMON_VP9_TREECODER_H_
-#define VP9_COMMON_VP9_TREECODER_H_
+#ifndef VP9_COMMON_VP9_PROB_H_
+#define VP9_COMMON_VP9_PROB_H_
 
 #include "./vpx_config.h"
+
+#include "vpx_ports/mem.h"
 #include "vpx/vpx_integer.h"
+
 #include "vp9/common/vp9_common.h"
 
 typedef uint8_t vp9_prob;
@@ -107,5 +110,6 @@ static void tree_merge_probs(const vp9_tree_index *tree,
                         count_sat, max_update_factor, probs);
 }
 
+DECLARE_ALIGNED(16, extern const uint8_t, vp9_norm[256]);
 
-#endif  // VP9_COMMON_VP9_TREECODER_H_
+#endif  // VP9_COMMON_VP9_PROB_H_

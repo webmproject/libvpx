@@ -21,6 +21,8 @@
 
 #include "vpx_ports/mem.h"
 
+#include "vp9/common/vp9_prob.h"
+
 typedef struct {
   unsigned int lowvalue;
   unsigned int range;
@@ -38,8 +40,6 @@ extern const unsigned int vp9_prob_cost[256];
 
 void vp9_start_encode(vp9_writer *bc, uint8_t *buffer);
 void vp9_stop_encode(vp9_writer *bc);
-
-DECLARE_ALIGNED(16, extern const unsigned char, vp9_norm[256]);
 
 static void vp9_write(vp9_writer *br, int bit, int probability) {
   unsigned int split;

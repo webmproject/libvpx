@@ -18,13 +18,11 @@
 #include "vpx_ports/mem.h"
 #include "vpx/vpx_integer.h"
 
-#include "vp9/common/vp9_treecoder.h"
+#include "vp9/common/vp9_prob.h"
 
 typedef size_t BD_VALUE;
 
 #define BD_VALUE_SIZE ((int)sizeof(BD_VALUE) * CHAR_BIT)
-
-DECLARE_ALIGNED(16, extern const uint8_t, vp9_norm[256]);
 
 typedef struct {
   const uint8_t *buffer_end;

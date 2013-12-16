@@ -24,7 +24,6 @@
 #include "vp9/common/vp9_mv.h"
 #include "vp9/common/vp9_scale.h"
 #include "vp9/common/vp9_seg_common.h"
-#include "vp9/common/vp9_treecoder.h"
 
 #define BLOCK_SIZE_GROUPS 4
 #define MBSKIP_CONTEXTS 3
