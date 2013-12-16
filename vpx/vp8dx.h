@@ -18,8 +18,8 @@
  * \brief Provides definitions for using the VP8 algorithm within the vpx Decoder
  *        interface.
  */
-#ifndef VP8DX_H
-#define VP8DX_H
+#ifndef VPX_VP8DX_H_
+#define VPX_VP8DX_H_
 
 #ifdef __cplusplus
 extern "C" {
@@ -123,4 +123,4 @@ VPX_CTRL_USE_TYPE(VP9D_SET_FRAME_BUFFER_LRU_CACHE, int)
 }  // extern "C"
 #endif
 
-#endif
+#endif  // VPX_VP8DX_H_

@@ -17,8 +17,8 @@
 extern "C" {
 #endif
 
-#ifndef VPX_IMAGE_H
-#define VPX_IMAGE_H
+#ifndef VPX_VPX_IMAGE_H_
+#define VPX_VPX_IMAGE_H_
 
   /*!\brief Current ABI version number
    *
@@ -240,4 +240,4 @@ extern "C" {
 #endif
 #ifdef __cplusplus
 }
-#endif
+#endif  // VPX_VPX_IMAGE_H_

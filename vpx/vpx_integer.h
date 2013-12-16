@@ -9,8 +9,8 @@
  */
 
 
-#ifndef VPX_INTEGER_H
-#define VPX_INTEGER_H
+#ifndef VPX_VPX_INTEGER_H_
+#define VPX_VPX_INTEGER_H_
 
 /* get ptrdiff_t, size_t, wchar_t, NULL */
 #include <stddef.h>
@@ -54,4 +54,4 @@ typedef size_t uintptr_t;
 #include <inttypes.h>
 #endif
 
-#endif
+#endif  // VPX_VPX_INTEGER_H_

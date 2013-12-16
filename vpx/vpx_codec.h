@@ -36,8 +36,8 @@
  * Once initialized, the instance is manged using other functions from
  * the vpx_codec_* family.
  */
-#ifndef VPX_CODEC_H
-#define VPX_CODEC_H
+#ifndef VPX_VPX_CODEC_H_
+#define VPX_VPX_CODEC_H_
 
 #ifdef __cplusplus
 extern "C" {
@@ -554,5 +554,5 @@ extern "C" {
 #ifdef __cplusplus
 }
 #endif
-#endif
+#endif  // VPX_VPX_CODEC_H_
 

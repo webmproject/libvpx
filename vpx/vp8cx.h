@@ -7,8 +7,8 @@
  *  in the file PATENTS.  All contributing project authors may
  *  be found in the AUTHORS file in the root of the source tree.
  */
-#ifndef VP8CX_H
-#define VP8CX_H
+#ifndef VPX_VP8CX_H_
+#define VPX_VP8CX_H_
 
 /*!\defgroup vp8_encoder WebM VP8 Encoder
  * \ingroup vp8
@@ -351,4 +351,4 @@ VPX_CTRL_USE_TYPE(VP9E_SET_AQ_MODE, unsigned int)
 }  // extern "C"
 #endif
 
-#endif
+#endif  // VPX_VP8CX_H_

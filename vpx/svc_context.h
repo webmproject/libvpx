@@ -138,4 +138,4 @@ void vpx_svc_set_keyframe(SvcContext *svc_ctx);
 }  // extern "C"
 #endif
 
-#endif  /* VPX_SVC_CONTEXT_H_ */
+#endif  // VPX_SVC_CONTEXT_H_

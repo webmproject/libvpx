@@ -41,8 +41,8 @@
  * Once initialized, the instance is manged using other functions from
  * the vpx_codec_* family.
  */
-#ifndef VPX_CODEC_INTERNAL_H
-#define VPX_CODEC_INTERNAL_H
+#ifndef VPX_INTERNAL_VPX_CODEC_INTERNAL_H_
+#define VPX_INTERNAL_VPX_CODEC_INTERNAL_H_
 #include "../vpx_decoder.h"
 #include "../vpx_encoder.h"
 #include <stdarg.h>
@@ -531,4 +531,4 @@ vpx_codec_err_t vpx_validate_mmaps(const vpx_codec_stream_info_t *si,
                                    const vpx_codec_mmap_t *mmaps,
                                    const mem_req_t *mem_reqs, int nreqs,
                                    vpx_codec_flags_t init_flags);
-#endif
+#endif  // VPX_INTERNAL_VPX_CODEC_INTERNAL_H_
