@@ -8,8 +8,8 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#ifndef VP9_COMMON_VP9_COMMON_DSPR2_H_
-#define VP9_COMMON_VP9_COMMON_DSPR2_H_
+#ifndef VP9_COMMON_MIPS_DSPR2_VP9_COMMON_DSPR2_H_
+#define VP9_COMMON_MIPS_DSPR2_VP9_COMMON_DSPR2_H_
 
 #include <assert.h>
 
@@ -114,4 +114,4 @@ void vp9_convolve2_vert_dspr2(const uint8_t *src, ptrdiff_t src_stride,
                               int w, int h);
 
 #endif  // #if HAVE_DSPR2
-#endif  // VP9_COMMON_VP9_COMMON_DSPR2_H_
+#endif  // VP9_COMMON_MIPS_DSPR2_VP9_COMMON_DSPR2_H_

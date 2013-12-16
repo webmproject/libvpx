@@ -9,8 +9,8 @@
  */
 
 
-#ifndef VP9_ENCODER_VP9_CONFIG_VAQ_H_
-#define VP9_ENCODER_VP9_CONFIG_VAQ_H_
+#ifndef VP9_ENCODER_VP9_VAQ_H_
+#define VP9_ENCODER_VP9_VAQ_H_
 
 #include "vp9/encoder/vp9_onyx_int.h"
 
@@ -23,4 +23,4 @@ void vp9_vaq_frame_setup(VP9_COMP *cpi);
 
 int vp9_block_energy(VP9_COMP *cpi, MACROBLOCK *x, BLOCK_SIZE bs);
 
-#endif  // VP9_ENCODER_VP9_CONFIG_VAQ_H_
+#endif  // VP9_ENCODER_VP9_VAQ_H_

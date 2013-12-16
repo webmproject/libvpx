@@ -8,8 +8,8 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#ifndef VP9_BIT_WRITE_BUFFER_H_
-#define VP9_BIT_WRITE_BUFFER_H_
+#ifndef VP9_ENCODER_VP9_WRITE_BIT_BUFFER_H_
+#define VP9_ENCODER_VP9_WRITE_BIT_BUFFER_H_
 
 #include <limits.h>
 
@@ -45,4 +45,4 @@ static void vp9_wb_write_literal(struct vp9_write_bit_buffer *wb,
 }
 
 
-#endif  // VP9_BIT_WRITE_BUFFER_H_
+#endif  // VP9_ENCODER_VP9_WRITE_BIT_BUFFER_H_

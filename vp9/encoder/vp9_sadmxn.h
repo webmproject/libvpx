@@ -8,8 +8,8 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#ifndef VP9_COMMON_VP9_SADMXN_H_
-#define VP9_COMMON_VP9_SADMXN_H_
+#ifndef VP9_ENCODER_VP9_SADMXN_H_
+#define VP9_ENCODER_VP9_SADMXN_H_
 
 #include "./vpx_config.h"
 #include "vpx/vpx_integer.h"
@@ -35,4 +35,4 @@ static INLINE unsigned int sad_mx_n_c(const uint8_t *src_ptr,
   return sad;
 }
 
-#endif  // VP9_COMMON_VP9_SADMXN_H_
+#endif  // VP9_ENCODER_VP9_SADMXN_H_

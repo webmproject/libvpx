@@ -29,4 +29,4 @@ extern const TX_SIZE max_txsize_lookup[BLOCK_SIZES];
 extern const TX_SIZE tx_mode_to_biggest_tx_size[TX_MODES];
 extern const BLOCK_SIZE ss_size_lookup[BLOCK_SIZES][2][2];
 
-#endif  // VP9_COMMON_VP9_COMMON_DATA_H
+#endif  // VP9_COMMON_VP9_COMMON_DATA_H_

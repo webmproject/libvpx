@@ -36,5 +36,5 @@
 #endif
 #endif
 
-#endif
+#endif  // VP9_ENCODER_X86_VP9_MCOMP_X86_H_
 

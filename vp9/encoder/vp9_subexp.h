@@ -9,8 +9,8 @@
  */
 
 
-#ifndef VP9_DECODER_VP9_SUBEXP_H_
-#define VP9_DECODER_VP9_SUBEXP_H_
+#ifndef VP9_ENCODER_VP9_SUBEXP_H_
+#define VP9_ENCODER_VP9_SUBEXP_H_
 
 void vp9_compute_update_table();
 
@@ -32,4 +32,4 @@ int vp9_prob_diff_update_savings_search_model(const unsigned int *ct,
                                               vp9_prob upd,
                                               int b, int r);
 
-#endif  // VP9_DECODER_VP9_SUBEXP_H_
+#endif  // VP9_ENCODER_VP9_SUBEXP_H_
