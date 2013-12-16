@@ -30,4 +30,4 @@ void ivf_write_frame_size(FILE *outfile, size_t size);
 }  /* extern "C" */
 #endif
 
-#endif  /* IVFENC_H_ */
+#endif  // IVFENC_H_

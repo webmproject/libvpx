@@ -8,8 +8,8 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#ifndef YV12_CONFIG_H
-#define YV12_CONFIG_H
+#ifndef VPX_SCALE_YV12CONFIG_H_
+#define VPX_SCALE_YV12CONFIG_H_
 
 #ifdef __cplusplus
 extern "C" {
@@ -85,4 +85,4 @@ extern "C" {
 }
 #endif
 
-#endif  // YV12_CONFIG_H
+#endif  // VPX_SCALE_YV12CONFIG_H_

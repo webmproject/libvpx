@@ -9,8 +9,8 @@
  */
 
 
-#ifndef ARGS_H
-#define ARGS_H
+#ifndef ARGS_H_
+#define ARGS_H_
 #include <stdio.h>
 
 struct arg {
@@ -48,4 +48,4 @@ unsigned int arg_parse_uint(const struct arg *arg);
 int arg_parse_int(const struct arg *arg);
 struct vpx_rational arg_parse_rational(const struct arg *arg);
 int arg_parse_enum_or_int(const struct arg *arg);
-#endif
+#endif  // ARGS_H_

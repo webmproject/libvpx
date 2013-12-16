@@ -27,4 +27,4 @@ int ivf_read_frame(struct VpxInputContext *input,
 }  /* extern "C" */
 #endif
 
-#endif  /* IVFDEC_H_ */
+#endif  // IVFDEC_H_
