@@ -42,29 +42,30 @@ int vp9_get_pred_context_switchable_interp(const MACROBLOCKD *xd) {
   else
     return SWITCHABLE_FILTERS;
 }
-// Returns a context number for the given MB prediction signal
+
+// The mode info data structure has a one element border above and to the
+// left of the entries corresponding to real macroblocks.
+// The prediction flags in these dummy entries are initialized to 0.
+// 0 - inter/inter, inter/--, --/inter, --/--
+// 1 - intra/inter, inter/intra
+// 2 - intra/--, --/intra
+// 3 - intra/intra
 int vp9_get_intra_inter_context(const MACROBLOCKD *xd) {
   const MB_MODE_INFO *const above_mbmi = get_mbmi(get_above_mi(xd));
   const MB_MODE_INFO *const left_mbmi = get_mbmi(get_left_mi(xd));
   const int has_above = above_mbmi != NULL;
   const int has_left = left_mbmi != NULL;
-  const int above_intra = has_above ? !is_inter_block(above_mbmi) : 1;
-  const int left_intra = has_left ? !is_inter_block(left_mbmi) : 1;
 
-  // The mode info data structure has a one element border above and to the
-  // left of the entries corresponding to real macroblocks.
-  // The prediction flags in these dummy entries are initialized to 0.
-  // 0 - inter/inter, inter/--, --/inter, --/--
-  // 1 - intra/inter, inter/intra
-  // 2 - intra/--, --/intra
-  // 3 - intra/intra
-  if (has_above && has_left)  // both edges available
+  if (has_above && has_left) {  // both edges available
+    const int above_intra = !is_inter_block(above_mbmi);
+    const int left_intra = !is_inter_block(left_mbmi);
     return left_intra && above_intra ? 3
                                      : left_intra || above_intra;
-  else if (has_above || has_left)  // one edge available
-    return 2 * (has_above ? above_intra : left_intra);
-  else
+  } else if (has_above || has_left) {  // one edge available
+    return 2 * !is_inter_block(has_above ? above_mbmi : left_mbmi);
+  } else {
     return 0;
+  }
 }
 
 int vp9_get_reference_mode_context(const VP9_COMMON *cm,
@@ -117,8 +118,7 @@ int vp9_get_pred_context_comp_ref_p(const VP9_COMMON *cm,
   const MB_MODE_INFO *const left_mbmi = get_mbmi(get_left_mi(xd));
   const int above_in_image = above_mbmi != NULL;
   const int left_in_image = left_mbmi != NULL;
-  const int above_intra = above_in_image ? !is_inter_block(above_mbmi) : 1;
-  const int left_intra = left_in_image ? !is_inter_block(left_mbmi) : 1;
+
   // Note:
   // The mode info data structure has a one element border above and to the
   // left of the entries correpsonding to real macroblocks.
@@ -127,6 +127,9 @@ int vp9_get_pred_context_comp_ref_p(const VP9_COMMON *cm,
   const int var_ref_idx = !fix_ref_idx;
 
   if (above_in_image && left_in_image) {  // both edges available
+    const int above_intra = !is_inter_block(above_mbmi);
+    const int left_intra = !is_inter_block(left_mbmi);
+
     if (above_intra && left_intra) {  // intra/intra (2)
       pred_context = 2;
     } else if (above_intra || left_intra) {  // intra/inter
@@ -196,13 +199,14 @@ int vp9_get_pred_context_single_ref_p1(const MACROBLOCKD *xd) {
   const MB_MODE_INFO *const left_mbmi = get_mbmi(get_left_mi(xd));
   const int has_above = above_mbmi != NULL;
   const int has_left = left_mbmi != NULL;
-  const int above_intra = has_above ? !is_inter_block(above_mbmi) : 1;
-  const int left_intra = has_left ? !is_inter_block(left_mbmi) : 1;
   // Note:
   // The mode info data structure has a one element border above and to the
   // left of the entries correpsonding to real macroblocks.
   // The prediction flags in these dummy entries are initialised to 0.
   if (has_above && has_left) {  // both edges available
+    const int above_intra = !is_inter_block(above_mbmi);
+    const int left_intra = !is_inter_block(left_mbmi);
+
     if (above_intra && left_intra) {  // intra/intra
       pred_context = 2;
     } else if (above_intra || left_intra) {  // intra/inter or inter/intra
@@ -260,14 +264,15 @@ int vp9_get_pred_context_single_ref_p2(const MACROBLOCKD *xd) {
   const MB_MODE_INFO *const left_mbmi = get_mbmi(get_left_mi(xd));
   const int has_above = above_mbmi != NULL;
   const int has_left = left_mbmi != NULL;
-  const int above_intra = has_above ? !is_inter_block(above_mbmi) : 1;
-  const int left_intra = has_left ? !is_inter_block(left_mbmi) : 1;
 
   // Note:
   // The mode info data structure has a one element border above and to the
   // left of the entries correpsonding to real macroblocks.
   // The prediction flags in these dummy entries are initialised to 0.
   if (has_above && has_left) {  // both edges available
+    const int above_intra = !is_inter_block(above_mbmi);
+    const int left_intra = !is_inter_block(left_mbmi);
+
     if (above_intra && left_intra) {  // intra/intra
       pred_context = 2;
     } else if (above_intra || left_intra) {  // intra/inter or inter/intra
