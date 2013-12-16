@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdX//6E8\u003d",
+        "filename": "test/datarate_test.cc",
+        "patchSetId": 15
+      },
+      "lineNbr": 315,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2013-12-16T22:06:53Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdX//6Sc\u003d",
+      "revId": "29475ff127d57cd744e8d530b6bbe45a24198050",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdX//6SY\u003d",
         "filename": "test/datarate_test.cc",
         "patchSetId": 15
@@ -30,6 +48,24 @@
       "writtenOn": "2013-12-14T05:35:14Z",
       "side": 1,
       "message": "All of these indents should be 4 spaces, I think?",
+      "revId": "29475ff127d57cd744e8d530b6bbe45a24198050",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX//6FE\u003d",
+        "filename": "test/datarate_test.cc",
+        "patchSetId": 15
+      },
+      "lineNbr": 321,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2013-12-16T22:06:53Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdX//6SY\u003d",
       "revId": "29475ff127d57cd744e8d530b6bbe45a24198050",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdX//6E4\u003d",
+        "filename": "vp9/encoder/vp9_ratectrl.c",
+        "patchSetId": 15
+      },
+      "lineNbr": 237,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2013-12-16T22:06:53Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdX//6SU\u003d",
+      "revId": "29475ff127d57cd744e8d530b6bbe45a24198050",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdX//6SQ\u003d",
         "filename": "vp9/encoder/vp9_ratectrl.c",
         "patchSetId": 15
@@ -64,6 +118,24 @@
       "writtenOn": "2013-12-14T05:35:14Z",
       "side": 1,
       "message": "Remove \"|\"s. This comment is redundant--remove.",
+      "revId": "29475ff127d57cd744e8d530b6bbe45a24198050",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX//6E0\u003d",
+        "filename": "vp9/encoder/vp9_ratectrl.c",
+        "patchSetId": 15
+      },
+      "lineNbr": 247,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2013-12-16T22:06:53Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdX//6SQ\u003d",
       "revId": "29475ff127d57cd744e8d530b6bbe45a24198050",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdX//6EU\u003d",
+        "filename": "vp9/encoder/vp9_ratectrl.c",
+        "patchSetId": 15
+      },
+      "lineNbr": 275,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2013-12-16T22:06:53Z",
+      "side": 1,
+      "message": "This function needs to update both rc.bits_off_target and rc.buffer_level.  Also in future we will update buffer levels for layers in this same function, and so more rc-variables will need to be updated here. Prefer to leave this as is for now.",
+      "parentUuid": "AAAAdX//6R4\u003d",
+      "revId": "29475ff127d57cd744e8d530b6bbe45a24198050",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdX//6R0\u003d",
         "filename": "vp9/encoder/vp9_ratectrl.c",
         "patchSetId": 15
@@ -98,6 +188,24 @@
       "writtenOn": "2013-12-14T05:35:14Z",
       "side": 1,
       "message": "Pointer could be const.",
+      "revId": "29475ff127d57cd744e8d530b6bbe45a24198050",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX//6EQ\u003d",
+        "filename": "vp9/encoder/vp9_ratectrl.c",
+        "patchSetId": 15
+      },
+      "lineNbr": 291,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2013-12-16T22:06:53Z",
+      "side": 1,
+      "message": "Rather keep it as is. Both rc.decimation factor and rc.decimation count are updated here. Its possible we may want to update other variables in future for frame dropping, so i think better to not make cpi const here.",
+      "parentUuid": "AAAAdX//6R0\u003d",
       "revId": "29475ff127d57cd744e8d530b6bbe45a24198050",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -121,6 +229,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdX//6Ec\u003d",
+        "filename": "vp9/encoder/vp9_ratectrl.c",
+        "patchSetId": 15
+      },
+      "lineNbr": 305,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2013-12-16T22:06:53Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdX//6SM\u003d",
+      "revId": "29475ff127d57cd744e8d530b6bbe45a24198050",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdX//6SI\u003d",
         "filename": "vp9/encoder/vp9_ratectrl.c",
         "patchSetId": 15
@@ -132,6 +258,24 @@
       "writtenOn": "2013-12-14T05:35:14Z",
       "side": 1,
       "message": "Should only be indented by 2 spaces.",
+      "revId": "29475ff127d57cd744e8d530b6bbe45a24198050",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX//6Ek\u003d",
+        "filename": "vp9/encoder/vp9_ratectrl.c",
+        "patchSetId": 15
+      },
+      "lineNbr": 311,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2013-12-16T22:06:53Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdX//6SI\u003d",
       "revId": "29475ff127d57cd744e8d530b6bbe45a24198050",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -155,6 +299,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdX//6Eg\u003d",
+        "filename": "vp9/encoder/vp9_ratectrl.c",
+        "patchSetId": 15
+      },
+      "lineNbr": 312,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2013-12-16T22:06:53Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdX//6SE\u003d",
+      "revId": "29475ff127d57cd744e8d530b6bbe45a24198050",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdX//6R8\u003d",
         "filename": "vp9/encoder/vp9_ratectrl.c",
         "patchSetId": 15
@@ -166,6 +328,24 @@
       "writtenOn": "2013-12-14T05:35:14Z",
       "side": 1,
       "message": "Pointer could be const.",
+      "revId": "29475ff127d57cd744e8d530b6bbe45a24198050",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX//6EM\u003d",
+        "filename": "vp9/encoder/vp9_ratectrl.c",
+        "patchSetId": 15
+      },
+      "lineNbr": 327,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2013-12-16T22:06:53Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdX//6R8\u003d",
       "revId": "29475ff127d57cd744e8d530b6bbe45a24198050",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -189,6 +369,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdX//6EI\u003d",
+        "filename": "vp9/encoder/vp9_ratectrl.c",
+        "patchSetId": 15
+      },
+      "lineNbr": 368,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2013-12-16T22:06:53Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdX//6SA\u003d",
+      "revId": "29475ff127d57cd744e8d530b6bbe45a24198050",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdX//6Rw\u003d",
         "filename": "vp9/encoder/vp9_ratectrl.c",
         "patchSetId": 15
@@ -206,6 +404,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdX//6EA\u003d",
+        "filename": "vp9/encoder/vp9_ratectrl.c",
+        "patchSetId": 15
+      },
+      "lineNbr": 397,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2013-12-16T22:06:53Z",
+      "side": 1,
+      "message": "Will leave this one as is. This was an existing function, and several cpi quantities are updated here.",
+      "parentUuid": "AAAAdX//6Rw\u003d",
+      "revId": "29475ff127d57cd744e8d530b6bbe45a24198050",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdX//6Rs\u003d",
         "filename": "vp9/encoder/vp9_ratectrl.c",
         "patchSetId": 15
@@ -217,6 +433,24 @@
       "writtenOn": "2013-12-14T05:35:14Z",
       "side": 1,
       "message": "period at end of comment.",
+      "revId": "29475ff127d57cd744e8d530b6bbe45a24198050",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX//6Es\u003d",
+        "filename": "vp9/encoder/vp9_ratectrl.c",
+        "patchSetId": 15
+      },
+      "lineNbr": 406,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2013-12-16T22:06:53Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdX//6Rs\u003d",
       "revId": "29475ff127d57cd744e8d530b6bbe45a24198050",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
