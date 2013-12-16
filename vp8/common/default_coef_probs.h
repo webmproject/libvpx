@@ -8,6 +8,8 @@
  *  be found in the AUTHORS file in the root of the source tree.
 */
 
+#ifndef VP8_COMMON_DEFAULT_COEF_PROBS_H_
+#define VP8_COMMON_DEFAULT_COEF_PROBS_H_
 
 /*Generated file, included by entropy.c*/
 
@@ -186,3 +188,5 @@ static const vp8_prob default_coef_probs [BLOCK_TYPES]
         }
     }
 };
+
+#endif  // VP8_COMMON_DEFAULT_COEF_PROBS_H_

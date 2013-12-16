@@ -9,8 +9,8 @@
  */
 
 
-#ifndef POSTPROC_H
-#define POSTPROC_H
+#ifndef VP8_COMMON_POSTPROC_H_
+#define VP8_COMMON_POSTPROC_H_
 
 #include "vpx_ports/mem.h"
 struct postproc_state
@@ -47,4 +47,4 @@ void vp8_deblock(struct VP8Common           *oci,
 #define MFQE_PRECISION 4
 
 void vp8_multiframe_quality_enhance(struct VP8Common *cm);
-#endif
+#endif  // VP8_COMMON_POSTPROC_H_

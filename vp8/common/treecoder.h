@@ -9,8 +9,8 @@
  */
 
 
-#ifndef __INC_TREECODER_H
-#define __INC_TREECODER_H
+#ifndef VP8_COMMON_TREECODER_H_
+#define VP8_COMMON_TREECODER_H_
 
 typedef unsigned char vp8bc_index_t; /* probability index */
 
@@ -87,4 +87,4 @@ void vp8bc_tree_probs_from_distribution(
 );
 
 
-#endif
+#endif  // VP8_COMMON_TREECODER_H_

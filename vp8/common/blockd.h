@@ -9,8 +9,8 @@
  */
 
 
-#ifndef __INC_BLOCKD_H
-#define __INC_BLOCKD_H
+#ifndef VP8_COMMON_BLOCKD_H_
+#define VP8_COMMON_BLOCKD_H_
 
 void vpx_log(const char *format, ...);
 
@@ -297,4 +297,4 @@ typedef struct macroblockd
 extern void vp8_build_block_doffsets(MACROBLOCKD *x);
 extern void vp8_setup_block_dptrs(MACROBLOCKD *x);
 
-#endif  /* __INC_BLOCKD_H */
+#endif  // VP8_COMMON_BLOCKD_H_

@@ -9,8 +9,8 @@
  */
 
 
-#ifndef __INC_ENTROPYMODE_H
-#define __INC_ENTROPYMODE_H
+#ifndef VP8_COMMON_ENTROPYMODE_H_
+#define VP8_COMMON_ENTROPYMODE_H_
 
 #include "onyxc_int.h"
 #include "treecoder.h"
@@ -77,4 +77,4 @@ void vp8_init_mbmode_probs(VP8_COMMON *x);
 void vp8_default_bmode_probs(vp8_prob dest [VP8_BINTRAMODES-1]);
 void vp8_kf_default_bmode_probs(vp8_prob dest [VP8_BINTRAMODES] [VP8_BINTRAMODES] [VP8_BINTRAMODES-1]);
 
-#endif
+#endif  // VP8_COMMON_ENTROPYMODE_H_

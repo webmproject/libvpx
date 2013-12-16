@@ -9,8 +9,8 @@
  */
 
 
-#ifndef _PTHREAD_EMULATION
-#define _PTHREAD_EMULATION
+#ifndef VP8_COMMON_THREADING_H_
+#define VP8_COMMON_THREADING_H_
 
 #if CONFIG_OS_SUPPORT && CONFIG_MULTITHREAD
 
@@ -183,4 +183,4 @@ static inline int sem_destroy(sem_t * sem)
 
 #endif /* CONFIG_OS_SUPPORT && CONFIG_MULTITHREAD */
 
-#endif
+#endif  // VP8_COMMON_THREADING_H_

@@ -8,6 +8,9 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
+#ifndef VP8_COMMON_QUANT_COMMON_H_
+#define VP8_COMMON_QUANT_COMMON_H_
+
 
 #include "string.h"
 #include "blockd.h"
@@ -19,3 +22,5 @@ extern int vp8_dc2quant(int QIndex, int Delta);
 extern int vp8_ac2quant(int QIndex, int Delta);
 extern int vp8_dc_uv_quant(int QIndex, int Delta);
 extern int vp8_ac_uv_quant(int QIndex, int Delta);
+
+#endif  // VP8_COMMON_QUANT_COMMON_H_

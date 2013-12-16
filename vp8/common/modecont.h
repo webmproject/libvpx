@@ -9,9 +9,9 @@
  */
 
 
-#ifndef __INC_MODECONT_H
-#define __INC_MODECONT_H
+#ifndef VP8_COMMON_MODECONT_H_
+#define VP8_COMMON_MODECONT_H_
 
 extern const int vp8_mode_contexts[6][4];
 
-#endif
+#endif  // VP8_COMMON_MODECONT_H_

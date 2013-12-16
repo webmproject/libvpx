@@ -9,8 +9,8 @@
  */
 
 
-#ifndef __INC_VP8_H
-#define __INC_VP8_H
+#ifndef VP8_COMMON_ONYX_H_
+#define VP8_COMMON_ONYX_H_
 
 #ifdef __cplusplus
 extern "C"
@@ -267,4 +267,4 @@ extern "C"
 }
 #endif
 
-#endif
+#endif  // VP8_COMMON_ONYX_H_

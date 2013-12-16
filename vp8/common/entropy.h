@@ -9,8 +9,8 @@
  */
 
 
-#ifndef __INC_ENTROPY_H
-#define __INC_ENTROPY_H
+#ifndef VP8_COMMON_ENTROPY_H_
+#define VP8_COMMON_ENTROPY_H_
 
 #include "treecoder.h"
 #include "blockd.h"
@@ -98,4 +98,4 @@ extern DECLARE_ALIGNED(16, const short, vp8_default_zig_zag_mask[16]);
 extern const int vp8_mb_feature_data_bits[MB_LVL_MAX];
 
 void vp8_coef_tree_initialize(void);
-#endif
+#endif  // VP8_COMMON_ENTROPY_H_

@@ -9,8 +9,8 @@
  */
 
 
-#ifndef __INC_HEADER_H
-#define __INC_HEADER_H
+#ifndef VP8_COMMON_HEADER_H_
+#define VP8_COMMON_HEADER_H_
 
 /* 24 bits total */
 typedef struct
@@ -40,4 +40,4 @@ typedef struct
 #endif
 
 
-#endif
+#endif  // VP8_COMMON_HEADER_H_

@@ -9,8 +9,8 @@
  */
 
 
-#ifndef FILTER_H
-#define FILTER_H
+#ifndef VP8_COMMON_FILTER_H_
+#define VP8_COMMON_FILTER_H_
 
 #include "vpx_ports/mem.h"
 
@@ -21,4 +21,4 @@
 extern DECLARE_ALIGNED(16, const short, vp8_bilinear_filters[8][2]);
 extern DECLARE_ALIGNED(16, const short, vp8_sub_pel_filters[8][6]);
 
-#endif
+#endif  // VP8_COMMON_FILTER_H_

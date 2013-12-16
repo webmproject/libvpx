@@ -9,8 +9,8 @@
  */
 
 
-#ifndef __INC_RECONINTER_H
-#define __INC_RECONINTER_H
+#ifndef VP8_COMMON_RECONINTER_H_
+#define VP8_COMMON_RECONINTER_H_
 
 extern void vp8_build_inter_predictors_mb(MACROBLOCKD *x);
 extern void vp8_build_inter16x16_predictors_mb(MACROBLOCKD *x,
@@ -32,4 +32,4 @@ extern void vp8_build_inter_predictors_b(BLOCKD *d, int pitch,
 extern void vp8_build_inter16x16_predictors_mbuv(MACROBLOCKD *x);
 extern void vp8_build_inter4x4_predictors_mbuv(MACROBLOCKD *x);
 
-#endif
+#endif  // VP8_COMMON_RECONINTER_H_

@@ -9,8 +9,8 @@
  */
 
 
-#ifndef __INC_RECONINTRA4x4_H
-#define __INC_RECONINTRA4x4_H
+#ifndef VP8_COMMON_RECONINTRA4X4_H_
+#define VP8_COMMON_RECONINTRA4X4_H_
 #include "vp8/common/blockd.h"
 
 static void intra_prediction_down_copy(MACROBLOCKD *xd,
@@ -29,4 +29,4 @@ static void intra_prediction_down_copy(MACROBLOCKD *xd,
     *dst_ptr2 = *src_ptr;
 }
 
-#endif
+#endif  // VP8_COMMON_RECONINTRA4X4_H_

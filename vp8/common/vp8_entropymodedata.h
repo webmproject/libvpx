@@ -8,6 +8,8 @@
  *  be found in the AUTHORS file in the root of the source tree.
 */
 
+#ifndef VP8_COMMON_VP8_ENTROPYMODEDATA_H_
+#define VP8_COMMON_VP8_ENTROPYMODEDATA_H_
 
 /*Generated file, included by entropymode.c*/
 
@@ -240,3 +242,5 @@ const vp8_prob vp8_kf_bmode_prob
         { 112,  19,  12,  61, 195, 128,  48,   4,  24 }
     }
 };
+
+#endif  // VP8_COMMON_VP8_ENTROPYMODEDATA_H_

@@ -8,8 +8,8 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-
-
+#ifndef VP8_COMMON_PRAGMAS_H_
+#define VP8_COMMON_PRAGMAS_H_
 
 #ifdef __INTEL_COMPILER
 #pragma warning(disable:997 1011 170)
@@ -17,3 +17,5 @@
 #ifdef _MSC_VER
 #pragma warning(disable:4799)
 #endif
+
+#endif  // VP8_COMMON_PRAGMAS_H_

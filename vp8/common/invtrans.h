@@ -9,8 +9,8 @@
  */
 
 
-#ifndef __INC_INVTRANS_H
-#define __INC_INVTRANS_H
+#ifndef VP8_COMMON_INVTRANS_H_
+#define VP8_COMMON_INVTRANS_H_
 
 #include "vpx_config.h"
 #include "vp8_rtcd.h"
@@ -59,4 +59,4 @@ static void vp8_inverse_transform_mby(MACROBLOCKD *xd)
                      xd->dst.y_buffer,
                      xd->dst.y_stride, xd->eobs);
 }
-#endif
+#endif  // VP8_COMMON_INVTRANS_H_

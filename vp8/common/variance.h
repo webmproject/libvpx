@@ -9,8 +9,8 @@
  */
 
 
-#ifndef VARIANCE_H
-#define VARIANCE_H
+#ifndef VP8_COMMON_VARIANCE_H_
+#define VP8_COMMON_VARIANCE_H_
 
 #include "vpx_config.h"
 
@@ -112,4 +112,4 @@ typedef struct variance_vtable
 #endif
 } vp8_variance_fn_ptr_t;
 
-#endif
+#endif  // VP8_COMMON_VARIANCE_H_
