@@ -16,12 +16,8 @@
 #include "vp9/common/vp9_seg_common.h"
 #include "vp9/common/vp9_treecoder.h"
 
-static INLINE const MB_MODE_INFO *get_above_mbmi(const MODE_INFO *const above) {
-  return (above != NULL) ? &above->mbmi : NULL;
-}
-
-static INLINE const MB_MODE_INFO *get_left_mbmi(const MODE_INFO *const left) {
-  return (left != NULL) ? &left->mbmi : NULL;
+static INLINE const MB_MODE_INFO *get_mbmi(const MODE_INFO *const mi) {
+  return (mi != NULL) ? &mi->mbmi : NULL;
 }
 
 // Returns a context number for the given MB prediction signal
@@ -30,15 +26,13 @@ int vp9_get_pred_context_switchable_interp(const MACROBLOCKD *xd) {
   // The mode info data structure has a one element border above and to the
   // left of the entries correpsonding to real macroblocks.
   // The prediction flags in these dummy entries are initialised to 0.
-  const MODE_INFO *const left_mi = get_left_mi(xd);
-  const int has_left = left_mi != NULL ? is_inter_block(&left_mi->mbmi) : 0;
-  const int left_type = has_left ? left_mi->mbmi.interp_filter
-                                 : SWITCHABLE_FILTERS;
+  const MB_MODE_INFO *const left_mbmi = get_mbmi(get_left_mi(xd));
+  const int left_type = left_mbmi != NULL && is_inter_block(left_mbmi) ?
+                           left_mbmi->interp_filter : SWITCHABLE_FILTERS;
+  const MB_MODE_INFO *const above_mbmi = get_mbmi(get_above_mi(xd));
+  const int above_type = above_mbmi != NULL && is_inter_block(above_mbmi) ?
+                             above_mbmi->interp_filter : SWITCHABLE_FILTERS;
 
-  const MODE_INFO *const above_mi = get_above_mi(xd);
-  const int has_above = above_mi != NULL ? is_inter_block(&above_mi->mbmi) : 0;
-  const int above_type = has_above ? above_mi->mbmi.interp_filter
-                                   : SWITCHABLE_FILTERS;
   if (left_type == above_type)
     return left_type;
   else if (left_type == SWITCHABLE_FILTERS && above_type != SWITCHABLE_FILTERS)
@@ -50,8 +44,8 @@ int vp9_get_pred_context_switchable_interp(const MACROBLOCKD *xd) {
 }
 // Returns a context number for the given MB prediction signal
 int vp9_get_intra_inter_context(const MACROBLOCKD *xd) {
-  const MB_MODE_INFO *const above_mbmi = get_above_mbmi(get_above_mi(xd));
-  const MB_MODE_INFO *const left_mbmi = get_left_mbmi(get_left_mi(xd));
+  const MB_MODE_INFO *const above_mbmi = get_mbmi(get_above_mi(xd));
+  const MB_MODE_INFO *const left_mbmi = get_mbmi(get_left_mi(xd));
   const int has_above = above_mbmi != NULL;
   const int has_left = left_mbmi != NULL;
   const int above_intra = has_above ? !is_inter_block(above_mbmi) : 1;
@@ -76,8 +70,8 @@ int vp9_get_intra_inter_context(const MACROBLOCKD *xd) {
 int vp9_get_reference_mode_context(const VP9_COMMON *cm,
                                    const MACROBLOCKD *xd) {
   int ctx;
-  const MB_MODE_INFO *const above_mbmi = get_above_mbmi(get_above_mi(xd));
-  const MB_MODE_INFO *const left_mbmi = get_left_mbmi(get_left_mi(xd));
+  const MB_MODE_INFO *const above_mbmi = get_mbmi(get_above_mi(xd));
+  const MB_MODE_INFO *const left_mbmi = get_mbmi(get_left_mi(xd));
   const int has_above = above_mbmi != NULL;
   const int has_left = left_mbmi != NULL;
   // Note:
@@ -119,12 +113,10 @@ int vp9_get_reference_mode_context(const VP9_COMMON *cm,
 int vp9_get_pred_context_comp_ref_p(const VP9_COMMON *cm,
                                     const MACROBLOCKD *xd) {
   int pred_context;
-  const MODE_INFO *const above_mi = get_above_mi(xd);
-  const MODE_INFO *const left_mi = get_left_mi(xd);
-  const MB_MODE_INFO *const above_mbmi = get_above_mbmi(above_mi);
-  const MB_MODE_INFO *const left_mbmi = get_left_mbmi(left_mi);
-  const int above_in_image = above_mi != NULL;
-  const int left_in_image = left_mi != NULL;
+  const MB_MODE_INFO *const above_mbmi = get_mbmi(get_above_mi(xd));
+  const MB_MODE_INFO *const left_mbmi = get_mbmi(get_left_mi(xd));
+  const int above_in_image = above_mbmi != NULL;
+  const int left_in_image = left_mbmi != NULL;
   const int above_intra = above_in_image ? !is_inter_block(above_mbmi) : 1;
   const int left_intra = left_in_image ? !is_inter_block(left_mbmi) : 1;
   // Note:
@@ -148,10 +140,10 @@ int vp9_get_pred_context_comp_ref_p(const VP9_COMMON *cm,
     } else {  // inter/inter
       const int l_sg = !has_second_ref(left_mbmi);
       const int a_sg = !has_second_ref(above_mbmi);
-      MV_REFERENCE_FRAME vrfa = a_sg ? above_mbmi->ref_frame[0]
-                                     : above_mbmi->ref_frame[var_ref_idx];
-      MV_REFERENCE_FRAME vrfl = l_sg ? left_mbmi->ref_frame[0]
-                                     : left_mbmi->ref_frame[var_ref_idx];
+      const MV_REFERENCE_FRAME vrfa = a_sg ? above_mbmi->ref_frame[0]
+                                           : above_mbmi->ref_frame[var_ref_idx];
+      const MV_REFERENCE_FRAME vrfl = l_sg ? left_mbmi->ref_frame[0]
+                                           : left_mbmi->ref_frame[var_ref_idx];
 
       if (vrfa == vrfl && cm->comp_var_ref[1] == vrfa) {
         pred_context = 0;
@@ -164,8 +156,8 @@ int vp9_get_pred_context_comp_ref_p(const VP9_COMMON *cm,
         else
           pred_context = 1;
       } else if (l_sg || a_sg) {  // single/comp
-        MV_REFERENCE_FRAME vrfc = l_sg ? vrfa : vrfl;
-        MV_REFERENCE_FRAME rfs = a_sg ? vrfa : vrfl;
+        const MV_REFERENCE_FRAME vrfc = l_sg ? vrfa : vrfl;
+        const MV_REFERENCE_FRAME rfs = a_sg ? vrfa : vrfl;
         if (vrfc == cm->comp_var_ref[1] && rfs != cm->comp_var_ref[1])
           pred_context = 1;
         else if (rfs == cm->comp_var_ref[1] && vrfc != cm->comp_var_ref[1])
@@ -200,8 +192,8 @@ int vp9_get_pred_context_comp_ref_p(const VP9_COMMON *cm,
 
 int vp9_get_pred_context_single_ref_p1(const MACROBLOCKD *xd) {
   int pred_context;
-  const MB_MODE_INFO *const above_mbmi = get_above_mbmi(get_above_mi(xd));
-  const MB_MODE_INFO *const left_mbmi = get_left_mbmi(get_left_mi(xd));
+  const MB_MODE_INFO *const above_mbmi = get_mbmi(get_above_mi(xd));
+  const MB_MODE_INFO *const left_mbmi = get_mbmi(get_left_mi(xd));
   const int has_above = above_mbmi != NULL;
   const int has_left = left_mbmi != NULL;
   const int above_intra = has_above ? !is_inter_block(above_mbmi) : 1;
@@ -264,8 +256,8 @@ int vp9_get_pred_context_single_ref_p1(const MACROBLOCKD *xd) {
 
 int vp9_get_pred_context_single_ref_p2(const MACROBLOCKD *xd) {
   int pred_context;
-  const MB_MODE_INFO *const above_mbmi = get_above_mbmi(get_above_mi(xd));
-  const MB_MODE_INFO *const left_mbmi = get_left_mbmi(get_left_mi(xd));
+  const MB_MODE_INFO *const above_mbmi = get_mbmi(get_above_mi(xd));
+  const MB_MODE_INFO *const left_mbmi = get_mbmi(get_left_mi(xd));
   const int has_above = above_mbmi != NULL;
   const int has_left = left_mbmi != NULL;
   const int above_intra = has_above ? !is_inter_block(above_mbmi) : 1;
@@ -352,8 +344,8 @@ int vp9_get_pred_context_single_ref_p2(const MACROBLOCKD *xd) {
 // The prediction flags in these dummy entries are initialized to 0.
 int vp9_get_tx_size_context(const MACROBLOCKD *xd) {
   const int max_tx_size = max_txsize_lookup[xd->mi_8x8[0]->mbmi.sb_type];
-  const MB_MODE_INFO *const above_mbmi = get_above_mbmi(get_above_mi(xd));
-  const MB_MODE_INFO *const left_mbmi = get_left_mbmi(get_left_mi(xd));
+  const MB_MODE_INFO *const above_mbmi = get_mbmi(get_above_mi(xd));
+  const MB_MODE_INFO *const left_mbmi = get_mbmi(get_left_mi(xd));
   const int has_above = above_mbmi != NULL;
   const int has_left = left_mbmi != NULL;
   int above_ctx = (has_above && !above_mbmi->skip_coeff) ? above_mbmi->tx_size
