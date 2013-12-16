@@ -16,6 +16,24 @@
       "revId": "dc8e8179e0f23360418f08268d77966c05e3b093",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdX//6BM\u003d",
+        "filename": "vpx/vp8dx.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2013-12-16T22:53:13Z",
+      "side": 1,
+      "message": "Yes, it does look redundant. It\u0027s been there since the file was checked in in 2010. Want me to remove the one on line 12?",
+      "parentUuid": "AAAAdX//6C0\u003d",
+      "revId": "dc8e8179e0f23360418f08268d77966c05e3b093",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
