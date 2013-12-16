@@ -9,8 +9,8 @@
  */
 
 
-#ifndef VPX_PORTS_X86_H
-#define VPX_PORTS_X86_H
+#ifndef VPX_PORTS_X86_H_
+#define VPX_PORTS_X86_H_
 #include <stdlib.h>
 #include "vpx_config.h"
 
@@ -256,5 +256,5 @@ x87_set_double_precision(void) {
 
 
 extern void vpx_reset_mmx_state(void);
-#endif
+#endif  // VPX_PORTS_X86_H_
 

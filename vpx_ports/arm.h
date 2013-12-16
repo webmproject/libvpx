@@ -9,8 +9,8 @@
  */
 
 
-#ifndef VPX_PORTS_ARM_H
-#define VPX_PORTS_ARM_H
+#ifndef VPX_PORTS_ARM_H_
+#define VPX_PORTS_ARM_H_
 #include <stdlib.h>
 #include "vpx_config.h"
 
@@ -23,5 +23,5 @@
 
 int arm_cpu_caps(void);
 
-#endif
+#endif  // VPX_PORTS_ARM_H_
 
