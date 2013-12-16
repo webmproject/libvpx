@@ -89,6 +89,8 @@ static const arg_def_t error_concealment = ARG_DEF(NULL, "error-concealment", 0,
                                                    "Enable decoder error-concealment");
 static const arg_def_t scalearg = ARG_DEF("S", "scale", 0,
                                             "Scale output frames uniformly");
+static const arg_def_t fb_arg =
+    ARG_DEF(NULL, "frame-buffers", 1, "Number of frame buffers to use");
 
 
 #if CONFIG_MD5
@@ -98,7 +100,7 @@ static const arg_def_t md5arg = ARG_DEF(NULL, "md5", 0,
 static const arg_def_t *all_args[] = {
   &codecarg, &use_yv12, &use_i420, &flipuvarg, &noblitarg,
   &progressarg, &limitarg, &skiparg, &postprocarg, &summaryarg, &outputfile,
-  &threadsarg, &verbosearg, &scalearg,
+  &threadsarg, &verbosearg, &scalearg, &fb_arg,
 #if CONFIG_MD5
   &md5arg,
 #endif
@@ -314,6 +316,31 @@ void show_progress(int frame_in, int frame_out, unsigned long dx_time) {
           (float)frame_out * 1000000.0 / (float)dx_time);
 }
 
+// Called by libvpx if the frame buffer size needs to increase.
+//
+// Parameters:
+// user_priv    Data passed into libvpx.
+// new_size     Minimum size needed by libvpx to decompress the next frame.
+// fb           Pointer to the frame buffer to update.
+//
+// Returns 0 on success. Returns < 0 on failure.
+int realloc_vp9_frame_buffer(void *user_priv, size_t new_size,
+                             vpx_codec_frame_buffer_t *fb) {
+  (void)user_priv;
+  if (!fb)
+    return -1;
+
+  free(fb->data);
+  fb->data = (uint8_t*)malloc(new_size);
+  if (!fb->data) {
+    fb->size = 0;
+    return -1;
+  }
+
+  fb->size = new_size;
+  return 0;
+}
+
 void generate_filename(const char *pattern, char *out, size_t q_len,
                        unsigned int d_w, unsigned int d_h,
                        unsigned int frame_in) {
@@ -428,6 +455,8 @@ int main_loop(int argc, const char **argv_) {
   int                     do_scale = 0;
   vpx_image_t             *scaled_img = NULL;
   int                     frame_avail, got_data;
+  int                     num_external_frame_buffers = 0;
+  vpx_codec_frame_buffer_t *frame_buffers = NULL;
 
   struct VpxDecInputContext input = {0};
   struct VpxInputContext vpx_input_ctx = {0};
@@ -487,6 +516,9 @@ int main_loop(int argc, const char **argv_) {
       quiet = 0;
     else if (arg_match(&arg, &scalearg, argi))
       do_scale = 1;
+    else if (arg_match(&arg, &fb_arg, argi))
+      num_external_frame_buffers = arg_parse_uint(&arg);
+
 
 #if CONFIG_VP8_DECODER
     else if (arg_match(&arg, &addnoise_level, argi)) {
@@ -704,6 +736,22 @@ int main_loop(int argc, const char **argv_) {
     arg_skip--;
   }
 
+  if (num_external_frame_buffers > 0) {
+    // Allocate the frame buffer list, setting all of the values to 0.
+    // Including the size of frame buffers. Libvpx will request the
+    // application to realloc the frame buffer data if the size is too small.
+    frame_buffers = (vpx_codec_frame_buffer_t*)calloc(
+        num_external_frame_buffers, sizeof(*frame_buffers));
+    if (vpx_codec_set_frame_buffers(&decoder, frame_buffers,
+                                    num_external_frame_buffers,
+                                    realloc_vp9_frame_buffer,
+                                    NULL)) {
+      fprintf(stderr, "Failed to configure external frame buffers: %s\n",
+              vpx_codec_error(&decoder));
+      return EXIT_FAILURE;
+    }
+  }
+
   frame_avail = 1;
   got_data = 0;
 
@@ -878,6 +926,10 @@ fail:
     free(buf);
 
   if (scaled_img) vpx_img_free(scaled_img);
+  for (i = 0; i < num_external_frame_buffers; ++i) {
+    free(frame_buffers[i].data);
+  }
+  free(frame_buffers);
 
   fclose(infile);
   free(argv);

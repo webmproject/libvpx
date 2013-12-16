@@ -59,6 +59,12 @@ struct vpx_codec_alg_priv {
   int                     img_setup;
   int                     img_avail;
   int                     invert_tile_order;
+
+  /* External buffer info to save for VP9 common. */
+  vpx_codec_frame_buffer_t *fb_list;  // External frame buffers
+  int fb_count;  // Total number of frame buffers
+  vpx_realloc_frame_buffer_cb_fn_t realloc_fb_cb;
+  void *user_priv;  // Private data associated with the external frame buffers.
 };
 
 static unsigned long priv_sz(const vpx_codec_dec_cfg_t *si,
@@ -307,10 +313,26 @@ static vpx_codec_err_t decode_one(vpx_codec_alg_priv_t  *ctx,
         ctx->postproc_cfg.noise_level = 0;
       }
 
-      if (!optr)
+      if (!optr) {
         res = VPX_CODEC_ERROR;
-      else
+      } else {
+        VP9D_COMP *const pbi = (VP9D_COMP*)optr;
+        VP9_COMMON *const cm = &pbi->common;
+        if (ctx->fb_list != NULL && ctx->realloc_fb_cb != NULL &&
+            ctx->fb_count > 0) {
+          cm->fb_list = ctx->fb_list;
+          cm->fb_count = ctx->fb_count;
+          cm->realloc_fb_cb = ctx->realloc_fb_cb;
+          cm->user_priv = ctx->user_priv;
+        } else {
+          cm->fb_count = FRAME_BUFFERS;
+        }
+        CHECK_MEM_ERROR(cm, cm->yv12_fb,
+                        vpx_calloc(cm->fb_count, sizeof(*cm->yv12_fb)));
+        CHECK_MEM_ERROR(cm, cm->fb_idx_ref_cnt,
+                        vpx_calloc(cm->fb_count, sizeof(*cm->fb_idx_ref_cnt)));
         ctx->pbi = optr;
+      }
     }
 
     ctx->decoder_init = 1;
@@ -347,7 +369,7 @@ static vpx_codec_err_t decode_one(vpx_codec_alg_priv_t  *ctx,
     }
 
     if (vp9_receive_compressed_data(ctx->pbi, data_sz, data, deadline)) {
-      VP9D_COMP *pbi = (VP9D_COMP *)ctx->pbi;
+      VP9D_COMP *pbi = (VP9D_COMP*)ctx->pbi;
       res = update_error_state(ctx, &pbi->common.error);
     }
 
@@ -473,6 +495,27 @@ static vpx_image_t *vp9_get_frame(vpx_codec_alg_priv_t  *ctx,
   ctx->img_avail = 0;
 
   return img;
+}
+
+static vpx_codec_err_t vp9_set_frame_buffers(
+    vpx_codec_alg_priv_t *ctx,
+    vpx_codec_frame_buffer_t *fb_list, int fb_count,
+    vpx_realloc_frame_buffer_cb_fn_t cb, void *user_priv) {
+  if (fb_count < REF_FRAMES) {
+    /* The application must pass in at least REF_FRAMES frame buffers. */
+    return VPX_CODEC_INVALID_PARAM;
+  } else if (!ctx->pbi) {
+    /* If the decoder has already been initialized, do not accept external
+     * frame buffers.
+     */
+    ctx->fb_list = fb_list;
+    ctx->fb_count = fb_count;
+    ctx->realloc_fb_cb = cb;
+    ctx->user_priv = user_priv;
+    return VPX_CODEC_OK;
+  }
+
+  return VPX_CODEC_ERROR;
 }
 
 static vpx_codec_err_t vp9_xma_get_mmap(const vpx_codec_ctx_t      *ctx,
@@ -639,7 +682,7 @@ static vpx_codec_err_t get_last_ref_updates(vpx_codec_alg_priv_t *ctx,
                                             int ctrl_id,
                                             va_list args) {
   int *update_info = va_arg(args, int *);
-  VP9D_COMP *pbi = (VP9D_COMP *)ctx->pbi;
+  VP9D_COMP *pbi = (VP9D_COMP*)ctx->pbi;
 
   if (update_info) {
     *update_info = pbi->refresh_frame_flags;
@@ -657,7 +700,7 @@ static vpx_codec_err_t get_frame_corrupted(vpx_codec_alg_priv_t *ctx,
   int *corrupted = va_arg(args, int *);
 
   if (corrupted) {
-    VP9D_COMP *pbi = (VP9D_COMP *)ctx->pbi;
+    VP9D_COMP *pbi = (VP9D_COMP*)ctx->pbi;
     if (pbi)
       *corrupted = pbi->common.frame_to_show->corrupted;
     else
@@ -674,7 +717,7 @@ static vpx_codec_err_t get_display_size(vpx_codec_alg_priv_t *ctx,
   int *const display_size = va_arg(args, int *);
 
   if (display_size) {
-    const VP9D_COMP *const pbi = (VP9D_COMP *)ctx->pbi;
+    const VP9D_COMP *const pbi = (VP9D_COMP*)ctx->pbi;
     if (pbi) {
       display_size[0] = pbi->common.display_width;
       display_size[1] = pbi->common.display_height;
@@ -717,7 +760,8 @@ static vpx_codec_ctrl_fn_map_t ctf_maps[] = {
 CODEC_INTERFACE(vpx_codec_vp9_dx) = {
   "WebM Project VP9 Decoder" VERSION_STRING,
   VPX_CODEC_INTERNAL_ABI_VERSION,
-  VPX_CODEC_CAP_DECODER | VP9_CAP_POSTPROC,
+  VPX_CODEC_CAP_DECODER | VP9_CAP_POSTPROC |
+      VPX_CODEC_CAP_EXTERNAL_FRAME_BUFFER,
   /* vpx_codec_caps_t          caps; */
   vp9_init,         /* vpx_codec_init_fn_t       init; */
   vp9_destroy,      /* vpx_codec_destroy_fn_t    destroy; */
@@ -729,6 +773,7 @@ CODEC_INTERFACE(vpx_codec_vp9_dx) = {
     vp9_get_si,       /* vpx_codec_get_si_fn_t     get_si; */
     vp9_decode,       /* vpx_codec_decode_fn_t     decode; */
     vp9_get_frame,    /* vpx_codec_frame_get_fn_t  frame_get; */
+    vp9_set_frame_buffers,    /* vpx_codec_set_frame_buffers_fn_t  set_fb; */
   },
   { // NOLINT
     /* encoder functions */
