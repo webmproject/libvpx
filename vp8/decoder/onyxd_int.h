@@ -9,8 +9,8 @@
  */
 
 
-#ifndef ONYXD_INT_H_
-#define ONYXD_INT_H_
+#ifndef VP8_DECODER_ONYXD_INT_H_
+#define VP8_DECODER_ONYXD_INT_H_
 
 #include "vpx_config.h"
 #include "vp8/common/onyxd.h"
@@ -148,4 +148,4 @@ int vp8_remove_decoder_instances(struct frame_buffers *fb);
     } while(0)
 #endif
 
-#endif  // ONYXD_INT_H_
+#endif  // VP8_DECODER_ONYXD_INT_H_

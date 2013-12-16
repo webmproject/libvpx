@@ -8,8 +8,8 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#ifndef VP8_DEC_EC_TYPES_H
-#define VP8_DEC_EC_TYPES_H
+#ifndef VP8_DECODER_EC_TYPES_H_
+#define VP8_DECODER_EC_TYPES_H_
 
 #define MAX_OVERLAPS 16
 
@@ -47,4 +47,4 @@ typedef struct
     MV_REFERENCE_FRAME ref_frame;
 } EC_BLOCK;
 
-#endif  // VP8_DEC_EC_TYPES_H
+#endif  // VP8_DECODER_EC_TYPES_H_

@@ -9,8 +9,8 @@
  */
 
 
-#ifndef DBOOLHUFF_H_
-#define DBOOLHUFF_H_
+#ifndef VP8_DECODER_DBOOLHUFF_H_
+#define VP8_DECODER_DBOOLHUFF_H_
 
 #include <stddef.h>
 #include <limits.h>
@@ -135,4 +135,4 @@ static int vp8dx_bool_error(BOOL_DECODER *br)
     return 0;
 }
 
-#endif  // DBOOLHUFF_H_
+#endif  // VP8_DECODER_DBOOLHUFF_H_
