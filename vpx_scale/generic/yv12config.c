@@ -164,7 +164,7 @@ int vp9_realloc_frame_buffer(YV12_BUFFER_CONFIG *ybf,
 
     if (ext_fb != NULL) {
       const int align_addr_extra_size = 31;
-      const int external_frame_size = frame_size + align_addr_extra_size;
+      const size_t external_frame_size = frame_size + align_addr_extra_size;
       if (external_frame_size > ext_fb->size) {
         // Allocation to hold larger frame, or first allocation.
         if (cb(user_priv, external_frame_size, ext_fb) < 0) {
