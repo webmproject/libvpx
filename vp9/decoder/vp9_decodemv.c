@@ -528,7 +528,8 @@ static void read_inter_frame_mode_info(VP9_COMMON *const cm,
     read_intra_block_mode_info(cm, mi, r);
 }
 
-void vp9_read_mode_info(VP9_COMMON *cm, MACROBLOCKD *xd, const TileInfo *tile,
+void vp9_read_mode_info(VP9_COMMON *cm, MACROBLOCKD *xd,
+                        const TileInfo *const tile,
                         int mi_row, int mi_col, vp9_reader *r) {
   if (frame_is_intra_only(cm))
     read_intra_frame_mode_info(cm, xd, mi_row, mi_col, r);
