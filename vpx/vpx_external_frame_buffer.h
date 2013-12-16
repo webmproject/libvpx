@@ -15,7 +15,7 @@
 extern "C" {
 #endif
 
-#include "vpx/vpx_integer.h"
+#include "./vpx_integer.h"
 
 /*!\brief External frame buffer
  *
