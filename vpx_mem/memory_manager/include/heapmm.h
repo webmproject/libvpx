@@ -8,6 +8,8 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
+#ifndef VPX_MEM_MEMORY_MANAGER_INCLUDE_HEAPMM_H_
+#define VPX_MEM_MEMORY_MANAGER_INCLUDE_HEAPMM_H_
 
 /* This code is in the public domain.
 ** Version: 1.1  Author: Walt Karas
@@ -150,3 +152,4 @@ void HMM_UNIQUE(shrink_chunk)(
   HMM_UNIQUE(size_bau) num_block_align_units);
 
 #endif /* defined HMM_PROCESS */
+#endif  // VPX_MEM_MEMORY_MANAGER_INCLUDE_HEAPMM_H_

@@ -8,6 +8,8 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
+#ifndef VPX_MEM_MEMORY_MANAGER_INCLUDE_CAVL_IMPL_H_
+#define VPX_MEM_MEMORY_MANAGER_INCLUDE_CAVL_IMPL_H_
 
 /* Abstract AVL Tree Generic C Package.
 ** Implementation generation header file.
@@ -1146,3 +1148,5 @@ L_SC void L_(decr_iter)(L_(iter) *iter) {
 #undef L_SC
 #undef L_BALANCE_PARAM_CALL_PREFIX
 #undef L_BALANCE_PARAM_DECL_PREFIX
+
+#endif  // VPX_MEM_MEMORY_MANAGER_INCLUDE_CAVL_IMPL_H_

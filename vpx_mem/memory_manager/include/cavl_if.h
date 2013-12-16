@@ -8,6 +8,8 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
+#ifndef VPX_MEM_MEMORY_MANAGER_INCLUDE_CAVL_IF_H_
+#define VPX_MEM_MEMORY_MANAGER_INCLUDE_CAVL_IF_H_
 
 /* Abstract AVL Tree Generic C Package.
 ** Interface generation header file.
@@ -222,3 +224,5 @@ L_SC void L_(init_iter)(L_(iter) *iter);
 #undef L_SC
 #undef L_LONG_BIT
 #undef L_BIT_ARR_DEFN
+
+#endif  // VPX_MEM_MEMORY_MANAGER_INCLUDE_CAVL_IF_H_

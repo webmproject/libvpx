@@ -8,6 +8,8 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
+#ifndef VPX_MEM_MEMORY_MANAGER_INCLUDE_HMM_CNFG_H_
+#define VPX_MEM_MEMORY_MANAGER_INCLUDE_HMM_CNFG_H_
 
 /* This code is in the public domain.
 ** Version: 1.1  Author: Walt Karas
@@ -114,3 +116,5 @@ extern unsigned HMM_UNIQUE(fail_line);
 /* Put configuration 5 definitions here. */
 
 #endif
+
+#endif  // VPX_MEM_MEMORY_MANAGER_INCLUDE_HMM_CNFG_H_

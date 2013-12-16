@@ -13,8 +13,8 @@
 ** Version: 1.1  Author: Walt Karas
 */
 
-#ifndef HMM_INTRNL_H_
-#define HMM_INTRNL_H_
+#ifndef VPX_MEM_MEMORY_MANAGER_INCLUDE_HMM_INTRNL_H_
+#define VPX_MEM_MEMORY_MANAGER_INCLUDE_HMM_INTRNL_H_
 
 #ifdef __uClinux__
 # include <lddk.h>
@@ -156,4 +156,4 @@ int U(audit_block_fail_dummy_return)(void);
 
 #include "cavl_if.h"
 
-#endif /* Include once. */
+#endif  // VPX_MEM_MEMORY_MANAGER_INCLUDE_HMM_INTRNL_H_

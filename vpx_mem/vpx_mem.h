@@ -9,8 +9,8 @@
  */
 
 
-#ifndef __VPX_MEM_H__
-#define __VPX_MEM_H__
+#ifndef VPX_MEM_VPX_MEM_H_
+#define VPX_MEM_VPX_MEM_H_
 
 #include "vpx_config.h"
 #if defined(__uClinux__)
@@ -170,4 +170,4 @@ extern "C" {
 }
 #endif
 
-#endif /* __VPX_MEM_H__ */
+#endif  // VPX_MEM_VPX_MEM_H_
