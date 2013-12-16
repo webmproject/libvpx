@@ -166,7 +166,7 @@ static void write_mv_update(const vp9_tree_index *tree,
 void vp9_write_nmv_probs(VP9_COMP* const cpi, int usehp, vp9_writer *w) {
   int i, j;
   nmv_context *mvc = &cpi->common.fc.nmvc;
-  nmv_context_counts *counts = &cpi->NMVcount;
+  nmv_context_counts *counts = &cpi->common.counts.mv;
 
   write_mv_update(vp9_mv_joint_tree, mvc->joints, counts->joints, MV_JOINTS, w);
 
@@ -252,6 +252,7 @@ void vp9_update_mv_count(VP9_COMP *cpi, MACROBLOCK *x, int_mv best_ref_mv[2]) {
   MODE_INFO *mi = x->e_mbd.mi_8x8[0];
   MB_MODE_INFO *const mbmi = &mi->mbmi;
   const int is_compound = has_second_ref(mbmi);
+  nmv_context_counts *counts = &cpi->common.counts.mv;
 
   if (mbmi->sb_type < BLOCK_8X8) {
     const int num_4x4_w = num_4x4_blocks_wide_lookup[mbmi->sb_type];
@@ -262,11 +263,11 @@ void vp9_update_mv_count(VP9_COMP *cpi, MACROBLOCK *x, int_mv best_ref_mv[2]) {
       for (idx = 0; idx < 2; idx += num_4x4_w) {
         const int i = idy * 2 + idx;
         if (mi->bmi[i].as_mode == NEWMV)
-          inc_mvs(mi->bmi[i].as_mv, best_ref_mv, is_compound, &cpi->NMVcount);
+          inc_mvs(mi->bmi[i].as_mv, best_ref_mv, is_compound, counts);
       }
     }
   } else if (mbmi->mode == NEWMV) {
-    inc_mvs(mbmi->mv, best_ref_mv, is_compound, &cpi->NMVcount);
+    inc_mvs(mbmi->mv, best_ref_mv, is_compound, counts);
   }
 }
 

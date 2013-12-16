@@ -2074,7 +2074,7 @@ static void encode_frame_internal(VP9_COMP *cpi) {
 
   xd->last_mi = cm->prev_mi;
 
-  vp9_zero(cpi->NMVcount);
+  vp9_zero(cpi->common.counts.mv);
   vp9_zero(cpi->coef_counts);
   vp9_zero(cm->counts.eob_branch);
 
