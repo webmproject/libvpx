@@ -18,6 +18,12 @@
 void vp9_enable_segmentation(VP9_PTR ptr);
 void vp9_disable_segmentation(VP9_PTR ptr);
 
+void vp9_disable_segfeature(struct segmentation *seg,
+                            int segment_id,
+                            SEG_LVL_FEATURES feature_id);
+void vp9_clear_segdata(struct segmentation *seg,
+                       int segment_id,
+                       SEG_LVL_FEATURES feature_id);
 // Valid values for a segment are 0 to 3
 // Segmentation map is arrange as [Rows][Columns]
 void vp9_set_segmentation_map(VP9_PTR ptr, unsigned char *segmentation_map);
