@@ -3865,6 +3865,7 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
     int this_skip2 = 0;
     int64_t total_sse = INT_MAX;
     int early_term = 0;
+    int64_t mask_rd = 0;
 
     for (i = 0; i < TX_MODES; ++i)
       tx_cache[i] = INT64_MAX;
@@ -4058,21 +4059,20 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
           cpi->rd_thresh_sub8x8[segment_id][bsize][THR_GOLD] : this_rd_thresh;
       xd->mi_8x8[0]->mbmi.tx_size = TX_4X4;
 
-      cpi->rd_filter_cache[SWITCHABLE_FILTERS] = INT64_MAX;
+      for (i = 0; i < SWITCHABLE_FILTER_CONTEXTS; ++i)
+        cpi->rd_filter_cache[i] = INT64_MAX;
+
       if (cm->mcomp_filter_type != BILINEAR) {
         tmp_best_filter = EIGHTTAP;
         if (x->source_variance <
             cpi->sf.disable_filter_search_var_thresh) {
           tmp_best_filter = EIGHTTAP;
-          vp9_zero(cpi->rd_filter_cache);
         } else if (cpi->sf.adaptive_pred_filter_type == 1 &&
                    ctx->pred_filter_type < SWITCHABLE) {
           tmp_best_filter = ctx->pred_filter_type;
-          vp9_zero(cpi->rd_filter_cache);
         } else if (cpi->sf.adaptive_pred_filter_type == 2) {
           tmp_best_filter = ctx->pred_filter_type < SWITCHABLE ?
                               ctx->pred_filter_type : 0;
-          vp9_zero(cpi->rd_filter_cache);
         } else {
           for (switchable_filter_index = 0;
                switchable_filter_index < SWITCHABLE_FILTERS;
@@ -4094,7 +4094,6 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
 
             if (tmp_rd == INT64_MAX)
               continue;
-            cpi->rd_filter_cache[switchable_filter_index] = tmp_rd;
             rs = get_switchable_rate(x);
             rs_rd = RDCOST(x->rdmult, x->rddiv, rs, 0);
             cpi->rd_filter_cache[SWITCHABLE_FILTERS] =
@@ -4102,6 +4101,9 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
                     tmp_rd + rs_rd);
             if (cm->mcomp_filter_type == SWITCHABLE)
               tmp_rd += rs_rd;
+
+            cpi->rd_filter_cache[switchable_filter_index] = tmp_rd;
+            mask_rd = MAX(tmp_rd, mask_rd);
 
             newbest = (tmp_rd < tmp_best_rd);
             if (newbest) {
@@ -4350,16 +4352,17 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
         cm->mcomp_filter_type != BILINEAR) {
       int64_t ref = cpi->rd_filter_cache[cm->mcomp_filter_type == SWITCHABLE ?
                               SWITCHABLE_FILTERS : cm->mcomp_filter_type];
+      int64_t adj_rd;
+
       for (i = 0; i < SWITCHABLE_FILTER_CONTEXTS; i++) {
-        int64_t adj_rd;
-        // In cases of poor prediction, filter_cache[] can contain really big
-        // values, which actually are bigger than this_rd itself. This can
-        // cause negative best_filter_rd[] values, which is obviously silly.
-        // Therefore, if filter_cache < ref, we do an adjusted calculation.
-        if (cpi->rd_filter_cache[i] >= ref)
-          adj_rd = this_rd + cpi->rd_filter_cache[i] - ref;
-        else  // FIXME(rbultje) do this for comppred also
-          adj_rd = this_rd - (ref - cpi->rd_filter_cache[i]) * this_rd / ref;
+        if (ref == INT64_MAX)
+          adj_rd = 0;
+        else if (cpi->rd_filter_cache[i] == INT64_MAX)
+          adj_rd = mask_rd - ref + 10;
+        else
+          adj_rd = cpi->rd_filter_cache[i] - ref;
+
+        adj_rd += this_rd;
         best_filter_rd[i] = MIN(best_filter_rd[i], adj_rd);
       }
     }
