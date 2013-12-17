@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn////o\u003d",
+        "filename": "vp9/common/vp9_entropymode.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 448,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2013-12-17T23:28:12Z",
+      "side": 0,
+      "message": "It seems now we don\u0027t have the code which clears last_ref_deltas and last_mode_deltas, is that ok?",
+      "revId": "ed7e3d24478b9aa462f25ee18fa97a3087cd9049",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
