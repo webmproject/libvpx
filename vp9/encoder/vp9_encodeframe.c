@@ -762,17 +762,17 @@ static void update_stats(VP9_COMP *cpi) {
     // the reference frame counts used to work out probabilities.
     if (is_inter_block(mbmi) && !seg_ref_active) {
       if (cm->reference_mode == REFERENCE_MODE_SELECT)
-        cpi->comp_inter_count[vp9_get_reference_mode_context(cm, xd)]
+        cm->counts.comp_inter[vp9_get_reference_mode_context(cm, xd)]
                              [has_second_ref(mbmi)]++;
 
       if (has_second_ref(mbmi)) {
-        cpi->comp_ref_count[vp9_get_pred_context_comp_ref_p(cm, xd)]
+        cm->counts.comp_ref[vp9_get_pred_context_comp_ref_p(cm, xd)]
                            [mbmi->ref_frame[0] == GOLDEN_FRAME]++;
       } else {
-        cpi->single_ref_count[vp9_get_pred_context_single_ref_p1(xd)][0]
+        cm->counts.single_ref[vp9_get_pred_context_single_ref_p1(xd)][0]
                              [mbmi->ref_frame[0] != LAST_FRAME]++;
         if (mbmi->ref_frame[0] != LAST_FRAME)
-          cpi->single_ref_count[vp9_get_pred_context_single_ref_p2(xd)][1]
+          cm->counts.single_ref[vp9_get_pred_context_single_ref_p2(xd)][1]
                                [mbmi->ref_frame[0] != GOLDEN_FRAME]++;
       }
     }
@@ -2011,9 +2011,9 @@ static void init_encode_frame_mb_context(VP9_COMP *cpi) {
   vp9_zero(cm->counts.inter_mode);
   vp9_zero(cm->counts.partition);
   vp9_zero(cpi->intra_inter_count);
-  vp9_zero(cpi->comp_inter_count);
-  vp9_zero(cpi->single_ref_count);
-  vp9_zero(cpi->comp_ref_count);
+  vp9_zero(cm->counts.comp_inter);
+  vp9_zero(cm->counts.single_ref);
+  vp9_zero(cm->counts.comp_ref);
   vp9_zero(cm->counts.tx);
   vp9_zero(cm->counts.mbskip);
 
@@ -2431,16 +2431,16 @@ void vp9_encode_frame(VP9_COMP *cpi) {
       int comp_count_zero = 0;
 
       for (i = 0; i < COMP_INTER_CONTEXTS; i++) {
-        single_count_zero += cpi->comp_inter_count[i][0];
-        comp_count_zero += cpi->comp_inter_count[i][1];
+        single_count_zero += cm->counts.comp_inter[i][0];
+        comp_count_zero += cm->counts.comp_inter[i][1];
       }
 
       if (comp_count_zero == 0) {
         cpi->common.reference_mode = SINGLE_REFERENCE;
-        vp9_zero(cpi->comp_inter_count);
+        vp9_zero(cm->counts.comp_inter);
       } else if (single_count_zero == 0) {
         cpi->common.reference_mode = COMPOUND_REFERENCE;
-        vp9_zero(cpi->comp_inter_count);
+        vp9_zero(cm->counts.comp_inter);
       }
     }
 

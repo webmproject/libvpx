@@ -434,9 +434,6 @@ typedef struct VP9_COMP {
   int64_t rd_comp_pred_diff[REFERENCE_MODES];
   int64_t rd_prediction_type_threshes[4][REFERENCE_MODES];
   unsigned int intra_inter_count[INTRA_INTER_CONTEXTS][2];
-  unsigned int comp_inter_count[COMP_INTER_CONTEXTS][2];
-  unsigned int single_ref_count[REF_CONTEXTS][2][2];
-  unsigned int comp_ref_count[REF_CONTEXTS][2];
 
   int64_t rd_tx_select_diff[TX_MODES];
   // FIXME(rbultje) can this overflow?

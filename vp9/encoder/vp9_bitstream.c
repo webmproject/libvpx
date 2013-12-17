@@ -1256,23 +1256,23 @@ static size_t write_compressed_header(VP9_COMP *cpi, uint8_t *data) {
         if (use_hybrid_pred)
           for (i = 0; i < COMP_INTER_CONTEXTS; i++)
             vp9_cond_prob_diff_update(&header_bc, &fc->comp_inter_prob[i],
-                                      cpi->comp_inter_count[i]);
+                                      cm->counts.comp_inter[i]);
       }
     }
 
     if (cm->reference_mode != COMPOUND_REFERENCE) {
       for (i = 0; i < REF_CONTEXTS; i++) {
         vp9_cond_prob_diff_update(&header_bc, &fc->single_ref_prob[i][0],
-                                  cpi->single_ref_count[i][0]);
+                                  cm->counts.single_ref[i][0]);
         vp9_cond_prob_diff_update(&header_bc, &fc->single_ref_prob[i][1],
-                                  cpi->single_ref_count[i][1]);
+                                  cm->counts.single_ref[i][1]);
       }
     }
 
     if (cm->reference_mode != SINGLE_REFERENCE)
       for (i = 0; i < REF_CONTEXTS; i++)
         vp9_cond_prob_diff_update(&header_bc, &fc->comp_ref_prob[i],
-                                  cpi->comp_ref_count[i]);
+                                  cm->counts.comp_ref[i]);
 
     for (i = 0; i < BLOCK_SIZE_GROUPS; ++i)
       prob_diff_update(vp9_intra_mode_tree, cm->fc.y_mode_prob[i],
