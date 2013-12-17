@@ -61,4 +61,10 @@ int vp9_rc_bits_per_mb(FRAME_TYPE frame_type, int qindex,
 void vp9_twopass_postencode_update(VP9_COMP *cpi,
                                    uint64_t bytes_used);
 
+// Decide if we should drop this frame: For 1-pass CBR.
+int vp9_drop_frame(VP9_COMP *cpi);
+
+// Update the buffer level.
+void vp9_update_buffer_level(VP9_COMP *cpi, int encoded_frame_size);
+
 #endif  // VP9_ENCODER_VP9_RATECTRL_H_

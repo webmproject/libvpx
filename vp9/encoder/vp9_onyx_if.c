@@ -2987,6 +2987,20 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
     configure_static_seg_features(cpi);
   }
 
+  // For 1 pass CBR, check if we are dropping this frame.
+  // Never drop on key frame.
+  if (cpi->pass == 0 &&
+      cpi->oxcf.end_usage == USAGE_STREAM_FROM_SERVER &&
+      cm->frame_type != KEY_FRAME) {
+    if (vp9_drop_frame(cpi)) {
+      // Update buffer level with zero size, update frame counters, and return.
+      vp9_update_buffer_level(cpi, 0);
+      cm->current_video_frame++;
+      cpi->rc.frames_since_key++;
+      return;
+    }
+  }
+
   vp9_clear_system_state();
 
   vp9_zero(cpi->rd_tx_select_threshes);
@@ -3586,6 +3600,11 @@ int vp9_get_compressed_data(VP9_PTR ptr, unsigned int *frame_flags,
 
   if (cm->refresh_frame_context)
     cm->frame_contexts[cm->frame_context_idx] = cm->fc;
+
+  // Frame was dropped, release scaled references.
+  if (*size == 0) {
+    release_scaled_references(cpi);
+  }
 
   if (*size > 0) {
     // if its a dropped frame honor the requests on subsequent frames
