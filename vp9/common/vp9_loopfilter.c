@@ -221,23 +221,10 @@ static const uint16_t size_mask_uv[BLOCK_SIZES] = {
 static const uint16_t left_border_uv =  0x1111;
 static const uint16_t above_border_uv = 0x000f;
 
-
-static void lf_init_lut(loop_filter_info_n *lfi) {
-  lfi->mode_lf_lut[DC_PRED] = 0;
-  lfi->mode_lf_lut[D45_PRED] = 0;
-  lfi->mode_lf_lut[D135_PRED] = 0;
-  lfi->mode_lf_lut[D117_PRED] = 0;
-  lfi->mode_lf_lut[D153_PRED] = 0;
-  lfi->mode_lf_lut[D207_PRED] = 0;
-  lfi->mode_lf_lut[D63_PRED] = 0;
-  lfi->mode_lf_lut[V_PRED] = 0;
-  lfi->mode_lf_lut[H_PRED] = 0;
-  lfi->mode_lf_lut[TM_PRED] = 0;
-  lfi->mode_lf_lut[ZEROMV]  = 0;
-  lfi->mode_lf_lut[NEARESTMV] = 1;
-  lfi->mode_lf_lut[NEARMV] = 1;
-  lfi->mode_lf_lut[NEWMV] = 1;
-}
+static const int mode_lf_lut[MB_MODE_COUNT] = {
+  0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  // INTRA_MODES
+  1, 1, 0, 1                     // INTER_MODES (ZEROMV == 0)
+};
 
 static void update_sharpness(loop_filter_info_n *lfi, int sharpness_lvl) {
   int lvl;
@@ -269,9 +256,6 @@ void vp9_loop_filter_init(VP9_COMMON *cm) {
   // init limits for given sharpness
   update_sharpness(lfi, lf->sharpness_level);
   lf->last_sharpness_level = lf->sharpness_level;
-
-  // init LUT for lvl  and hev thr picking
-  lf_init_lut(lfi);
 
   // init hev threshold const vectors
   for (lvl = 0; lvl <= MAX_LOOP_FILTER; lvl++)
@@ -543,8 +527,7 @@ static void build_masks(const loop_filter_info_n *const lfi_n,
   const int skip = mi->mbmi.skip_coeff;
   const int seg = mi->mbmi.segment_id;
   const int ref = mi->mbmi.ref_frame[0];
-  const int mode = lfi_n->mode_lf_lut[mi->mbmi.mode];
-  const int filter_level = lfi_n->lvl[seg][ref][mode];
+  const int filter_level = lfi_n->lvl[seg][ref][mode_lf_lut[mi->mbmi.mode]];
   uint64_t *left_y = &lfm->left_y[tx_size_y];
   uint64_t *above_y = &lfm->above_y[tx_size_y];
   uint64_t *int_4x4_y = &lfm->int_4x4_y;
@@ -625,8 +608,7 @@ static void build_y_mask(const loop_filter_info_n *const lfi_n,
   const int skip = mi->mbmi.skip_coeff;
   const int seg = mi->mbmi.segment_id;
   const int ref = mi->mbmi.ref_frame[0];
-  const int mode = lfi_n->mode_lf_lut[mi->mbmi.mode];
-  const int filter_level = lfi_n->lvl[seg][ref][mode];
+  const int filter_level = lfi_n->lvl[seg][ref][mode_lf_lut[mi->mbmi.mode]];
   uint64_t *left_y = &lfm->left_y[tx_size_y];
   uint64_t *above_y = &lfm->above_y[tx_size_y];
   uint64_t *int_4x4_y = &lfm->int_4x4_y;
@@ -919,10 +901,7 @@ static uint8_t build_lfi(const loop_filter_info_n *lfi_n,
                      const MB_MODE_INFO *mbmi) {
   const int seg = mbmi->segment_id;
   const int ref = mbmi->ref_frame[0];
-  const int mode = lfi_n->mode_lf_lut[mbmi->mode];
-  const int filter_level = lfi_n->lvl[seg][ref][mode];
-
-  return filter_level;
+  return lfi_n->lvl[seg][ref][mode_lf_lut[mbmi->mode]];
 }
 
 static void filter_selectively_vert(uint8_t *s, int pitch,

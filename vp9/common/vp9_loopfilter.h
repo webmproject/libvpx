@@ -54,7 +54,6 @@ typedef struct {
 typedef struct {
   loop_filter_thresh lfthr[MAX_LOOP_FILTER + 1];
   uint8_t lvl[MAX_SEGMENTS][MAX_REF_FRAMES][MAX_MODE_LF_DELTAS];
-  uint8_t mode_lf_lut[MB_MODE_COUNT];
 } loop_filter_info_n;
 
 /* assorted loopfilter functions which get used elsewhere */
