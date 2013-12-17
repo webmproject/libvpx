@@ -440,6 +440,7 @@ typedef struct VP9_COMP {
   int64_t rd_filter_diff[SWITCHABLE_FILTER_CONTEXTS];
   int64_t rd_filter_threshes[4][SWITCHABLE_FILTER_CONTEXTS];
   int64_t rd_filter_cache[SWITCHABLE_FILTER_CONTEXTS];
+  int64_t mask_filter_rd;
 
   int RDMULT;
   int RDDIV;
