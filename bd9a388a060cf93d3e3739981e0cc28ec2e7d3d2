@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdX//54I\u003d",
+        "filename": "vp9/common/vp9_common_data.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2013-12-17T03:48:11Z",
+      "side": 1,
+      "message": "in chrome this might look lowercased thanks to the italic styling...it\u0027s not",
+      "revId": "bd9a388a060cf93d3e3739981e0cc28ec2e7d3d2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
