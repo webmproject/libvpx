@@ -13,6 +13,11 @@
 
 #define MVREF_NEIGHBOURS 8
 
+typedef struct position {
+  int row;
+  int col;
+} POSITION;
+
 typedef enum {
   BOTH_ZERO = 0,
   ZERO_PLUS_PREDICTED = 1,
@@ -71,7 +76,7 @@ static const int counter_to_context[19] = {
   BOTH_INTRA  // 18
 };
 
-static const MV mv_ref_blocks[BLOCK_SIZES][MVREF_NEIGHBOURS] = {
+static const POSITION mv_ref_blocks[BLOCK_SIZES][MVREF_NEIGHBOURS] = {
   // 4X4
   {{-1, 0}, {0, -1}, {-1, -1}, {-2, 0}, {0, -2}, {-2, -1}, {-1, -2}, {-2, -2}},
   // 4X8
@@ -172,11 +177,11 @@ static INLINE int_mv scale_mv(const MB_MODE_INFO *mbmi, int ref,
 // are inside the borders of the tile.
 static INLINE int is_inside(const TileInfo *const tile,
                             int mi_col, int mi_row, int mi_rows,
-                            const MV *mv) {
-  return !(mi_row + mv->row < 0 ||
-           mi_col + mv->col < tile->mi_col_start ||
-           mi_row + mv->row >= mi_rows ||
-           mi_col + mv->col >= tile->mi_col_end);
+                            const POSITION *mi_pos) {
+  return !(mi_row + mi_pos->row < 0 ||
+           mi_col + mi_pos->col < tile->mi_col_start ||
+           mi_row + mi_pos->row >= mi_rows ||
+           mi_col + mi_pos->col >= tile->mi_col_end);
 }
 
 // This function searches the neighbourhood of a given MB/SB
@@ -190,7 +195,7 @@ void vp9_find_mv_refs_idx(const VP9_COMMON *cm, const MACROBLOCKD *xd,
                           int mi_row, int mi_col) {
   const int *ref_sign_bias = cm->ref_frame_sign_bias;
   int i, refmv_count = 0;
-  const MV *const mv_ref_search = mv_ref_blocks[mi->mbmi.sb_type];
+  const POSITION *const mv_ref_search = mv_ref_blocks[mi->mbmi.sb_type];
   const MB_MODE_INFO *const prev_mbmi = prev_mi ? &prev_mi->mbmi : NULL;
   int different_ref_found = 0;
   int context_counter = 0;
@@ -202,7 +207,7 @@ void vp9_find_mv_refs_idx(const VP9_COMMON *cm, const MACROBLOCKD *xd,
   // if the size < 8x8 we get the mv from the bmi substructure,
   // and we also need to keep a mode count.
   for (i = 0; i < 2; ++i) {
-    const MV *const mv_ref = &mv_ref_search[i];
+    const POSITION *const mv_ref = &mv_ref_search[i];
     if (is_inside(tile, mi_col, mi_row, cm->mi_rows, mv_ref)) {
       const MODE_INFO *const candidate_mi = xd->mi_8x8[mv_ref->col + mv_ref->row
                                                    * xd->mode_info_stride];
@@ -229,7 +234,7 @@ void vp9_find_mv_refs_idx(const VP9_COMMON *cm, const MACROBLOCKD *xd,
   // as before except we don't need to keep track of sub blocks or
   // mode counts.
   for (; i < MVREF_NEIGHBOURS; ++i) {
-    const MV *const mv_ref = &mv_ref_search[i];
+    const POSITION *const mv_ref = &mv_ref_search[i];
     if (is_inside(tile, mi_col, mi_row, cm->mi_rows, mv_ref)) {
       const MB_MODE_INFO *const candidate = &xd->mi_8x8[mv_ref->col +
                                             mv_ref->row
@@ -259,7 +264,7 @@ void vp9_find_mv_refs_idx(const VP9_COMMON *cm, const MACROBLOCKD *xd,
   // different reference frames.
   if (different_ref_found) {
     for (i = 0; i < MVREF_NEIGHBOURS; ++i) {
-      const MV *mv_ref = &mv_ref_search[i];
+      const POSITION *mv_ref = &mv_ref_search[i];
       if (is_inside(tile, mi_col, mi_row, cm->mi_rows, mv_ref)) {
         const MB_MODE_INFO *const candidate = &xd->mi_8x8[mv_ref->col +
                                                           mv_ref->row
