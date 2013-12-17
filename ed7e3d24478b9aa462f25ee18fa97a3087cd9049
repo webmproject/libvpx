@@ -16,6 +16,24 @@
       "revId": "ed7e3d24478b9aa462f25ee18fa97a3087cd9049",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn////Q\u003d",
+        "filename": "vp9/common/vp9_entropymode.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 448,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2013-12-17T23:47:36Z",
+      "side": 0,
+      "message": "It was removed by mistake, thanks for catching this.",
+      "parentUuid": "AAAAdn////o\u003d",
+      "revId": "ed7e3d24478b9aa462f25ee18fa97a3087cd9049",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
