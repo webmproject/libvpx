@@ -2748,6 +2748,7 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
     intpel_mv &= (mbmi->mv[1].as_mv.row & 15) == 0 &&
         (mbmi->mv[1].as_mv.col & 15) == 0;
 
+
   // Search for best switchable filter by checking the variance of
   // pred error irrespective of whether the filter will be used
   if (cm->mcomp_filter_type != BILINEAR) {
@@ -2757,7 +2758,7 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
       *best_filter = EIGHTTAP;
       vp9_zero(cpi->rd_filter_cache);
     } else {
-      int i, newbest;
+      int newbest;
       int tmp_rate_sum = 0;
       int64_t tmp_dist_sum = 0;
 
