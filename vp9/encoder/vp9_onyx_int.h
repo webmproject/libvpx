@@ -294,7 +294,7 @@ typedef struct {
   int this_frame_target;
   int projected_frame_size;
   int sb64_target_rate;
-  int last_q[2];                   // Separate values for Intra/Inter
+  int last_q[3];                   // Separate values for Intra/Inter/ARF-GF
   int last_boosted_qindex;         // Last boosted GF/KF/ARF q
 
   int gfu_boost;
@@ -306,13 +306,17 @@ typedef struct {
   double gf_rate_correction_factor;
 
   unsigned int frames_since_golden;
-  int frames_till_gf_update_due;  // Count down till next GF
+  unsigned int frames_till_gf_update_due;  // Count down till next GF
+  unsigned int max_gf_interval;
+  unsigned int baseline_gf_interval;
+  unsigned int frames_to_key;
+  unsigned int frames_since_key;
+  unsigned int this_key_frame_forced;
+  unsigned int next_key_frame_forced;
+  unsigned int source_alt_ref_pending;
+  unsigned int source_alt_ref_active;
+  unsigned int is_src_frame_alt_ref;
 
-  int max_gf_interval;
-  int baseline_gf_interval;
-
-  int64_t key_frame_count;
-  int prior_key_frame_distance[KEY_FRAME_CONTEXT];
   int per_frame_bandwidth;  // Current section per frame bandwidth target
   int av_per_frame_bandwidth;  // Average frame size target for clip
   int min_frame_bandwidth;  // Minimum allocation used for any frame
@@ -320,7 +324,7 @@ typedef struct {
   int ni_av_qi;
   int ni_tot_qi;
   int ni_frames;
-  int avg_frame_qindex;
+  int avg_frame_qindex[3];  // 0 - KEY, 1 - INTER, 2 - ARF/GF
   double tot_q;
   double avg_q;
 
@@ -376,11 +380,7 @@ typedef struct VP9_COMP {
   YV12_BUFFER_CONFIG *un_scaled_source;
   YV12_BUFFER_CONFIG scaled_source;
 
-  unsigned int frames_till_alt_ref_frame;
-  int source_alt_ref_pending;
-  int source_alt_ref_active;
-
-  int is_src_frame_alt_ref;
+  unsigned int key_frame_frequency;
 
   int gold_is_last;  // gold same as last frame ( short circuit gold searches)
   int alt_is_last;  // Alt same as last ( short circuit altref search)
@@ -405,11 +405,6 @@ typedef struct VP9_COMP {
   TOKENEXTRA *tok;
   unsigned int tok_count[4][1 << 6];
 
-
-  unsigned int frames_since_key;
-  unsigned int key_frame_frequency;
-  unsigned int this_key_frame_forced;
-  unsigned int next_key_frame_forced;
 #if CONFIG_MULTIPLE_ARF
   // Position within a frame coding order (including any additional ARF frames).
   unsigned int sequence_number;
@@ -471,9 +466,6 @@ typedef struct VP9_COMP {
   vp9_coeff_count coef_counts[TX_SIZES][PLANE_TYPES];
   vp9_coeff_probs_model frame_coef_probs[TX_SIZES][PLANE_TYPES];
   vp9_coeff_stats frame_branch_ct[TX_SIZES][PLANE_TYPES];
-
-  int kf_zeromotion_pct;
-  int gf_zeromotion_pct;
 
   int64_t target_bandwidth;
   struct vpx_codec_pkt_list  *output_pkt_list;
@@ -547,7 +539,6 @@ typedef struct VP9_COMP {
     double modified_error_left;
     double kf_intra_err_min;
     double gf_intra_err_min;
-    int frames_to_key;
     int maxq_max_limit;
     int maxq_min_limit;
     int static_scene_max_gf_interval;
@@ -568,6 +559,9 @@ typedef struct VP9_COMP {
     int alt_extra_bits;
 
     int sr_update_lag;
+
+    int kf_zeromotion_pct;
+    int gf_zeromotion_pct;
   } twopass;
 
   YV12_BUFFER_CONFIG alt_ref_buffer;

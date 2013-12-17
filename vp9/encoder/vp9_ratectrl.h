@@ -42,18 +42,16 @@ void vp9_rc_compute_frame_size_bounds(const VP9_COMP *cpi,
 // Picks q and q bounds given the target for bits
 int vp9_rc_pick_q_and_adjust_q_bounds(const VP9_COMP *cpi,
                                       int *bottom_index,
-                                      int *top_index,
-                                      int *top_index_prop);
+                                      int *top_index);
 
 // Estimates q to achieve a target bits per frame
 int vp9_rc_regulate_q(const VP9_COMP *cpi, int target_bits_per_frame,
                       int active_best_quality, int active_worst_quality);
 
 // Post encode update of the rate control parameters based
-// on bytes used and q used for the frame
+// on bytes used
 void vp9_rc_postencode_update(VP9_COMP *cpi,
-                              uint64_t bytes_used,
-                              int worst_q);
+                              uint64_t bytes_used);
 
 // estimates bits per mb for a given qindex and correction factor
 int vp9_rc_bits_per_mb(FRAME_TYPE frame_type, int qindex,
