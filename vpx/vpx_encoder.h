@@ -29,7 +29,7 @@
 extern "C" {
 #endif
 
-#include "vpx_codec.h"
+#include "./vpx_codec.h"
 
   /*! Temporal Scalability: Maximum length of the sequence defining frame
    * layer membership

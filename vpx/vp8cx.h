@@ -15,7 +15,7 @@
  *
  * @{
  */
-#include "vp8.h"
+#include "./vp8.h"
 
 /*!\file
  * \brief Provides definitions for using the VP8 encoder algorithm within the

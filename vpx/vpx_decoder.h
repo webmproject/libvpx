@@ -29,8 +29,8 @@
 extern "C" {
 #endif
 
-#include "vpx_codec.h"
-#include "vpx_external_frame_buffer.h"
+#include "./vpx_codec.h"
+#include "./vpx_external_frame_buffer.h"
 
   /*!\brief Current ABI version number
    *

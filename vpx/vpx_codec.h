@@ -43,8 +43,8 @@
 extern "C" {
 #endif
 
-#include "vpx_integer.h"
-#include "vpx_image.h"
+#include "./vpx_integer.h"
+#include "./vpx_image.h"
 
   /*!\brief Decorator indicating a function is deprecated */
 #ifndef DEPRECATED
