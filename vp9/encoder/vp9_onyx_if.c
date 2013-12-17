@@ -329,7 +329,6 @@ static void setup_in_frame_q_adj(VP9_COMP *cpi) {
     }
   }
 }
-
 static void configure_static_seg_features(VP9_COMP *cpi) {
   VP9_COMMON *cm = &cpi->common;
   struct segmentation *seg = &cm->seg;

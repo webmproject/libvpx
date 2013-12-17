@@ -55,17 +55,9 @@ void vp9_enable_segfeature(struct segmentation *seg,
                            int segment_id,
                            SEG_LVL_FEATURES feature_id);
 
-void vp9_disable_segfeature(struct segmentation *seg,
-                            int segment_id,
-                            SEG_LVL_FEATURES feature_id);
-
 int vp9_seg_feature_data_max(SEG_LVL_FEATURES feature_id);
 
 int vp9_is_segfeature_signed(SEG_LVL_FEATURES feature_id);
-
-void vp9_clear_segdata(struct segmentation *seg,
-                       int segment_id,
-                       SEG_LVL_FEATURES feature_id);
 
 void vp9_set_segdata(struct segmentation *seg,
                      int segment_id,

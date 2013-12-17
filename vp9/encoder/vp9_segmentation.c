@@ -58,6 +58,15 @@ void vp9_set_segment_data(VP9_PTR ptr,
   // vpx_memcpy(cpi->mb.e_mbd.segment_feature_mask, 0,
   //            sizeof(cpi->mb.e_mbd.segment_feature_mask));
 }
+void vp9_disable_segfeature(struct segmentation *seg, int segment_id,
+                            SEG_LVL_FEATURES feature_id) {
+  seg->feature_mask[segment_id] &= ~(1 << feature_id);
+}
+
+void vp9_clear_segdata(struct segmentation *seg, int segment_id,
+                       SEG_LVL_FEATURES feature_id) {
+  seg->feature_data[segment_id][feature_id] = 0;
+}
 
 // Based on set of segment counts calculate a probability tree
 static void calc_segtree_probs(int *segcounts, vp9_prob *segment_tree_probs) {
