@@ -508,8 +508,9 @@ static vpx_codec_err_t vp9_set_frame_buffers(
     vpx_codec_alg_priv_t *ctx,
     vpx_codec_frame_buffer_t *fb_list, int fb_count,
     vpx_realloc_frame_buffer_cb_fn_t cb, void *user_priv) {
-  if (fb_count < REF_FRAMES) {
-    /* The application must pass in at least REF_FRAMES frame buffers. */
+  if (fb_count < (VP9_MAXIMUM_REF_BUFFERS + VPX_MAXIMUM_WORK_BUFFERS)) {
+    /* The application must pass in at least VP9_MAXIMUM_REF_BUFFERS +
+     * VPX_MAXIMUM_WORK_BUFFERS frame buffers. */
     return VPX_CODEC_INVALID_PARAM;
   } else if (!ctx->pbi) {
     /* If the decoder has already been initialized, do not accept external
