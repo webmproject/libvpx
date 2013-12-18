@@ -149,6 +149,7 @@ vpx_codec_err_t vpx_codec_enc_init_multi_ver(vpx_codec_ctx_t      *ctx,
         cfg++;
         dsf++;
       }
+      ctx--;
     }
   }
 
