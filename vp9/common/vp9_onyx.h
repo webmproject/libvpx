@@ -129,6 +129,9 @@ extern "C"
     int64_t optimal_buffer_level;
     int64_t maximum_buffer_size;
 
+    // Frame drop threshold.
+    int drop_frames_water_mark;
+
     // controlling quality
     int fixed_q;
     int worst_allowed_q;

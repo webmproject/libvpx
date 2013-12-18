@@ -193,7 +193,10 @@ class DatarateTestVP9 : public ::libvpx_test::EncoderTest,
 
   virtual void ResetModel() {
     last_pts_ = 0;
+    bits_in_buffer_model_ = cfg_.rc_target_bitrate * cfg_.rc_buf_initial_sz;
     frame_number_ = 0;
+    first_drop_ = 0;
+    num_drops_ = 0;
     bits_total_ = 0;
     duration_ = 0.0;
   }
@@ -209,8 +212,29 @@ class DatarateTestVP9 : public ::libvpx_test::EncoderTest,
   }
 
   virtual void FramePktHook(const vpx_codec_cx_pkt_t *pkt) {
+    // Time since last timestamp = duration.
+    vpx_codec_pts_t duration = pkt->data.frame.pts - last_pts_;
+
+    // Add to the buffer the bits we'd expect from a constant bitrate server.
+    bits_in_buffer_model_ += duration * timebase_ * cfg_.rc_target_bitrate
+        * 1000;
+
+    // Buffer should not go negative.
+    ASSERT_GE(bits_in_buffer_model_, 0) << "Buffer Underrun at frame "
+        << pkt->data.frame.pts;
+
     const int frame_size_in_bits = pkt->data.frame.sz * 8;
     bits_total_ += frame_size_in_bits;
+
+    // If first drop not set and we have a drop set it to this time.
+    if (!first_drop_ && duration > 1)
+      first_drop_ = last_pts_ + 1;
+
+    // Update the number of frame drops.
+    if (duration > 1) {
+      num_drops_+= (duration - 1);
+    }
+
     // Update the most recent pts.
     last_pts_ = pkt->data.frame.pts;
     ++frame_number_;
@@ -231,13 +255,17 @@ class DatarateTestVP9 : public ::libvpx_test::EncoderTest,
   double duration_;
   double effective_datarate_;
   int set_cpu_used_;
+  int bits_in_buffer_model_;
+  int first_drop_;
+  int num_drops_;
 };
 
-// There is no buffer model/frame dropper in VP9 currently, so for now we
-// have separate test for VP9 rate targeting for 1-pass CBR. We only check
-// that effective datarate is within some range of target bitrate.
-// No frame dropper, so we can't go to low bitrates.
+// Check basic rate targeting,
 TEST_P(DatarateTestVP9, BasicRateTargeting) {
+  cfg_.rc_buf_initial_sz = 500;
+  cfg_.rc_buf_optimal_sz = 500;
+  cfg_.rc_buf_sz = 1000;
+  cfg_.rc_dropframe_thresh = 1;
   cfg_.rc_min_quantizer = 0;
   cfg_.rc_max_quantizer = 63;
   cfg_.rc_end_usage = VPX_CBR;
@@ -254,6 +282,49 @@ TEST_P(DatarateTestVP9, BasicRateTargeting) {
     ASSERT_LE(static_cast<double>(cfg_.rc_target_bitrate),
               effective_datarate_ * 1.15)
         << " The datarate for the file missed the target!";
+  }
+}
+
+// Check that (1) the first dropped frame gets earlier and earlier
+// as the drop frame threshold is increased, and (2) that the total number of
+// frame drops does not decrease as we increase frame drop threshold.
+// Use a lower qp-max to force some frame drops.
+TEST_P(DatarateTestVP9, ChangingDropFrameThresh) {
+  cfg_.rc_buf_initial_sz = 500;
+  cfg_.rc_buf_optimal_sz = 500;
+  cfg_.rc_buf_sz = 1000;
+  cfg_.rc_undershoot_pct = 20;
+  cfg_.rc_undershoot_pct = 20;
+  cfg_.rc_dropframe_thresh = 10;
+  cfg_.rc_min_quantizer = 0;
+  cfg_.rc_max_quantizer = 50;
+  cfg_.rc_end_usage = VPX_CBR;
+  cfg_.rc_target_bitrate = 200;
+
+  ::libvpx_test::I420VideoSource video("hantro_collage_w352h288.yuv", 352, 288,
+                                       30, 1, 0, 140);
+
+  const int kDropFrameThreshTestStep = 30;
+  int last_drop = 140;
+  int last_num_drops = 0;
+  for (int i = 10; i < 100; i += kDropFrameThreshTestStep) {
+    cfg_.rc_dropframe_thresh = i;
+    ResetModel();
+    ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
+    ASSERT_GE(effective_datarate_, cfg_.rc_target_bitrate * 0.85)
+           << " The datarate for the file is lower than target by too much!";
+    ASSERT_LE(effective_datarate_, cfg_.rc_target_bitrate * 1.15)
+           << " The datarate for the file is greater than target by too much!";
+    ASSERT_LE(first_drop_, last_drop)
+        << " The first dropped frame for drop_thresh " << i
+        << " > first dropped frame for drop_thresh "
+        << i - kDropFrameThreshTestStep;
+    ASSERT_GE(num_drops_, last_num_drops)
+        << " The number of dropped frames for drop_thresh " << i
+        << " < number of dropped frames for drop_thresh "
+        << i - kDropFrameThreshTestStep;
+    last_drop = first_drop_;
+    last_num_drops = num_drops_;
   }
 }
 

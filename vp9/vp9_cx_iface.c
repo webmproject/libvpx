@@ -307,6 +307,8 @@ static vpx_codec_err_t set_vp9e_config(VP9_CONFIG *oxcf,
   oxcf->starting_buffer_level   = cfg.rc_buf_initial_sz;
   oxcf->optimal_buffer_level    = cfg.rc_buf_optimal_sz;
 
+  oxcf->drop_frames_water_mark   = cfg.rc_dropframe_thresh;
+
   oxcf->two_pass_vbrbias         = cfg.rc_2pass_vbr_bias_pct;
   oxcf->two_pass_vbrmin_section  = cfg.rc_2pass_vbr_minsection_pct;
   oxcf->two_pass_vbrmax_section  = cfg.rc_2pass_vbr_maxsection_pct;
