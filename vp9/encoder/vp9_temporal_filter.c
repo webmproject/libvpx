@@ -36,12 +36,22 @@ static void temporal_filter_predictors_mb_c(MACROBLOCKD *xd,
                                             uint8_t *u_mb_ptr,
                                             uint8_t *v_mb_ptr,
                                             int stride,
+                                            int uv_block_size,
                                             int mv_row,
                                             int mv_col,
                                             uint8_t *pred,
                                             struct scale_factors *scale) {
   const int which_mv = 0;
   MV mv = { mv_row, mv_col };
+  enum mv_precision mv_precision_uv;
+  int uv_stride;
+  if (uv_block_size == 8) {
+    uv_stride = (stride + 1) >> 1;
+    mv_precision_uv = MV_PRECISION_Q4;
+  } else {
+    uv_stride = stride;
+    mv_precision_uv = MV_PRECISION_Q3;
+  }
 
   vp9_build_inter_predictor(y_mb_ptr, stride,
                             &pred[0], 16,
@@ -51,23 +61,22 @@ static void temporal_filter_predictors_mb_c(MACROBLOCKD *xd,
                             which_mv,
                             &xd->subpix, MV_PRECISION_Q3);
 
-  stride = (stride + 1) >> 1;
 
-  vp9_build_inter_predictor(u_mb_ptr, stride,
-                            &pred[256], 8,
+  vp9_build_inter_predictor(u_mb_ptr, uv_stride,
+                            &pred[256], uv_block_size,
                             &mv,
                             scale,
-                            8, 8,
+                            uv_block_size, uv_block_size,
                             which_mv,
-                            &xd->subpix, MV_PRECISION_Q4);
+                            &xd->subpix, mv_precision_uv);
 
-  vp9_build_inter_predictor(v_mb_ptr, stride,
-                            &pred[320], 8,
+  vp9_build_inter_predictor(v_mb_ptr, uv_stride,
+                            &pred[512], uv_block_size,
                             &mv,
                             scale,
-                            8, 8,
+                            uv_block_size, uv_block_size,
                             which_mv,
-                            &xd->subpix, MV_PRECISION_Q4);
+                            &xd->subpix, mv_precision_uv);
 }
 
 void vp9_temporal_filter_apply_c(uint8_t *frame1,
@@ -197,16 +206,20 @@ static void temporal_filter_iterate_c(VP9_COMP *cpi,
   int mb_rows = cpi->common.mb_rows;
   int mb_y_offset = 0;
   int mb_uv_offset = 0;
-  DECLARE_ALIGNED_ARRAY(16, unsigned int, accumulator, 16 * 16 + 8 * 8 + 8 * 8);
-  DECLARE_ALIGNED_ARRAY(16, uint16_t, count, 16 * 16 + 8 * 8 + 8 * 8);
+  DECLARE_ALIGNED_ARRAY(16, unsigned int, accumulator, 16 * 16 * 3);
+  DECLARE_ALIGNED_ARRAY(16, uint16_t, count, 16 * 16 * 3);
   MACROBLOCKD *mbd = &cpi->mb.e_mbd;
   YV12_BUFFER_CONFIG *f = cpi->frames[alt_ref_index];
   uint8_t *dst1, *dst2;
-  DECLARE_ALIGNED_ARRAY(16, uint8_t,  predictor, 16 * 16 + 8 * 8 + 8 * 8);
+  DECLARE_ALIGNED_ARRAY(16, uint8_t,  predictor, 16 * 16 * 3);
+  const int mb_uv_height = 16 >> mbd->plane[1].subsampling_y;
 
   // Save input state
   uint8_t* input_buffer[MAX_MB_PLANE];
   int i;
+
+  // TODO(aconverse): Add 4:2:2 support
+  assert(mbd->plane[1].subsampling_x == mbd->plane[1].subsampling_y);
 
   for (i = 0; i < MAX_MB_PLANE; i++)
     input_buffer[i] = mbd->plane[i].pre[0].buf;
@@ -233,8 +246,8 @@ static void temporal_filter_iterate_c(VP9_COMP *cpi,
       int i, j, k;
       int stride;
 
-      vpx_memset(accumulator, 0, 384 * sizeof(unsigned int));
-      vpx_memset(count, 0, 384 * sizeof(uint16_t));
+      vpx_memset(accumulator, 0, 16 * 16 * 3 * sizeof(accumulator[0]));
+      vpx_memset(count, 0, 16 * 16 * 3 * sizeof(count[0]));
 
 #if ALT_REF_MC_ENABLED
       cpi->mb.mv_col_min = -((mb_col * 16) + (17 - 2 * VP9_INTERP_EXTEND));
@@ -280,6 +293,7 @@ static void temporal_filter_iterate_c(VP9_COMP *cpi,
            cpi->frames[frame]->u_buffer + mb_uv_offset,
            cpi->frames[frame]->v_buffer + mb_uv_offset,
            cpi->frames[frame]->y_stride,
+           mb_uv_height,
            mbd->mi_8x8[0]->bmi[0].as_mv[0].as_mv.row,
            mbd->mi_8x8[0]->bmi[0].as_mv[0].as_mv.col,
            predictor, scale);
@@ -290,12 +304,14 @@ static void temporal_filter_iterate_c(VP9_COMP *cpi,
                                     accumulator, count);
 
           vp9_temporal_filter_apply(f->u_buffer + mb_uv_offset, f->uv_stride,
-                                    predictor + 256, 8, strength, filter_weight,
-                                    accumulator + 256, count + 256);
+                                    predictor + 256, mb_uv_height, strength,
+                                    filter_weight, accumulator + 256,
+                                    count + 256);
 
           vp9_temporal_filter_apply(f->v_buffer + mb_uv_offset, f->uv_stride,
-                                    predictor + 320, 8, strength, filter_weight,
-                                    accumulator + 320, count + 320);
+                                    predictor + 512, mb_uv_height, strength,
+                                    filter_weight, accumulator + 512,
+                                    count + 512);
         }
       }
 
@@ -322,9 +338,9 @@ static void temporal_filter_iterate_c(VP9_COMP *cpi,
       dst2 = cpi->alt_ref_buffer.v_buffer;
       stride = cpi->alt_ref_buffer.uv_stride;
       byte = mb_uv_offset;
-      for (i = 0, k = 256; i < 8; i++) {
-        for (j = 0; j < 8; j++, k++) {
-          int m = k + 64;
+      for (i = 0, k = 256; i < mb_uv_height; i++) {
+        for (j = 0; j < mb_uv_height; j++, k++) {
+          int m = k + 256;
 
           // U
           unsigned int pval = accumulator[k] + (count[k] >> 1);
@@ -342,15 +358,15 @@ static void temporal_filter_iterate_c(VP9_COMP *cpi,
           byte++;
         }
 
-        byte += stride - 8;
+        byte += stride - mb_uv_height;
       }
 
       mb_y_offset += 16;
-      mb_uv_offset += 8;
+      mb_uv_offset += mb_uv_height;
     }
 
     mb_y_offset += 16 * (f->y_stride - mb_cols);
-    mb_uv_offset += 8 * (f->uv_stride - mb_cols);
+    mb_uv_offset += mb_uv_height * (f->uv_stride - mb_cols);
   }
 
   // Restore input state
