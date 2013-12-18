@@ -42,8 +42,6 @@
 void vp9_entropy_mode_init();
 void vp9_coef_tree_initialize();
 
-static void set_default_lf_deltas(struct loopfilter *lf);
-
 #define DEFAULT_INTERP_FILTER SWITCHABLE
 
 #define SHARP_FILTER_QTHRESH 0          /* Q threshold for 8-tap sharp filter */
@@ -172,27 +170,15 @@ void vp9_initialize_enc() {
   }
 }
 
-static void setup_features(VP9_COMMON *cm) {
-  struct loopfilter *const lf = &cm->lf;
+static void reset_segment_features(VP9_COMMON *cm) {
   struct segmentation *const seg = &cm->seg;
 
   // Set up default state for MB feature flags
   seg->enabled = 0;
-
   seg->update_map = 0;
   seg->update_data = 0;
   vpx_memset(seg->tree_probs, 255, sizeof(seg->tree_probs));
-
   vp9_clearall_segfeatures(seg);
-
-  lf->mode_ref_delta_enabled = 0;
-  lf->mode_ref_delta_update = 0;
-  vp9_zero(lf->ref_deltas);
-  vp9_zero(lf->mode_deltas);
-  vp9_zero(lf->last_ref_deltas);
-  vp9_zero(lf->last_mode_deltas);
-
-  set_default_lf_deltas(lf);
 }
 
 static void dealloc_compressor_data(VP9_COMP *cpi) {
@@ -487,23 +473,6 @@ static void update_reference_segmentation_map(VP9_COMP *cpi) {
     mi_8x8_ptr += cm->mode_info_stride;
     cache_ptr += cm->mi_cols;
   }
-}
-
-static void set_default_lf_deltas(struct loopfilter *lf) {
-  lf->mode_ref_delta_enabled = 1;
-  lf->mode_ref_delta_update = 1;
-
-  vp9_zero(lf->ref_deltas);
-  vp9_zero(lf->mode_deltas);
-
-  // Test of ref frame deltas
-  lf->ref_deltas[INTRA_FRAME] = 2;
-  lf->ref_deltas[LAST_FRAME] = 0;
-  lf->ref_deltas[GOLDEN_FRAME] = -2;
-  lf->ref_deltas[ALTREF_FRAME] = -2;
-
-  lf->mode_deltas[0] = 0;   // Zero
-  lf->mode_deltas[1] = 0;   // New mv
 }
 
 static void set_rd_speed_thresholds(VP9_COMP *cpi, int mode) {
@@ -1219,7 +1188,7 @@ void vp9_change_config(VP9_PTR ptr, VP9_CONFIG *oxcf) {
   cm->refresh_frame_context = 1;
   cm->reset_frame_context = 0;
 
-  setup_features(cm);
+  reset_segment_features(cm);
   set_high_precision_mv(cpi, 0);
 
   {
@@ -2955,7 +2924,7 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
   if (frame_is_intra_only(cm)) {
     vp9_setup_key_frame(cpi);
     // Reset the loop filter deltas and segmentation map.
-    setup_features(cm);
+    reset_segment_features(cm);
 
     // If segmentation is enabled force a map update for key frames.
     if (seg->enabled) {
