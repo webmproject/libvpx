@@ -232,8 +232,10 @@ TEST_P(ExternalFrameBufferMD5Test, ExtFBMD5Match) {
   const int num_buffers = 13;
   set_num_buffers(num_buffers);
 
+#if CONFIG_VP8_DECODER
   // Tell compiler we are not using kVP8TestVectors.
   (void)libvpx_test::kVP8TestVectors;
+#endif
 
   // Open compressed video file.
   if (filename.substr(filename.length() - 3, 3) == "ivf") {
