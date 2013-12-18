@@ -2751,18 +2751,20 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
 
   // Search for best switchable filter by checking the variance of
   // pred error irrespective of whether the filter will be used
+  cpi->mask_filter_rd = 0;
+  for (i = 0; i < SWITCHABLE_FILTER_CONTEXTS; ++i)
+    cpi->rd_filter_cache[i] = INT64_MAX;
+
   if (cm->mcomp_filter_type != BILINEAR) {
     *best_filter = EIGHTTAP;
     if (x->source_variance <
         cpi->sf.disable_filter_search_var_thresh) {
       *best_filter = EIGHTTAP;
-      vp9_zero(cpi->rd_filter_cache);
     } else {
       int newbest;
       int tmp_rate_sum = 0;
       int64_t tmp_dist_sum = 0;
 
-      cpi->rd_filter_cache[SWITCHABLE_FILTERS] = INT64_MAX;
       for (i = 0; i < SWITCHABLE_FILTERS; ++i) {
         int j;
         int64_t rs_rd;
@@ -2772,14 +2774,13 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
         rs_rd = RDCOST(x->rdmult, x->rddiv, rs, 0);
 
         if (i > 0 && intpel_mv) {
-          cpi->rd_filter_cache[i] = RDCOST(x->rdmult, x->rddiv,
-                                           tmp_rate_sum, tmp_dist_sum);
+          rd = RDCOST(x->rdmult, x->rddiv, tmp_rate_sum, tmp_dist_sum);
+          cpi->rd_filter_cache[i] = rd;
           cpi->rd_filter_cache[SWITCHABLE_FILTERS] =
-              MIN(cpi->rd_filter_cache[SWITCHABLE_FILTERS],
-                  cpi->rd_filter_cache[i] + rs_rd);
-          rd = cpi->rd_filter_cache[i];
+              MIN(cpi->rd_filter_cache[SWITCHABLE_FILTERS], rd + rs_rd);
           if (cm->mcomp_filter_type == SWITCHABLE)
             rd += rs_rd;
+          cpi->mask_filter_rd = MAX(cpi->mask_filter_rd, rd);
         } else {
           int rate_sum = 0;
           int64_t dist_sum = 0;
@@ -2797,19 +2798,21 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
           }
           vp9_build_inter_predictors_sb(xd, mi_row, mi_col, bsize);
           model_rd_for_sb(cpi, bsize, x, xd, &rate_sum, &dist_sum);
-          cpi->rd_filter_cache[i] = RDCOST(x->rdmult, x->rddiv,
-                                           rate_sum, dist_sum);
+
+          rd = RDCOST(x->rdmult, x->rddiv, rate_sum, dist_sum);
+          cpi->rd_filter_cache[i] = rd;
           cpi->rd_filter_cache[SWITCHABLE_FILTERS] =
-              MIN(cpi->rd_filter_cache[SWITCHABLE_FILTERS],
-                  cpi->rd_filter_cache[i] + rs_rd);
-          rd = cpi->rd_filter_cache[i];
+              MIN(cpi->rd_filter_cache[SWITCHABLE_FILTERS], rd + rs_rd);
           if (cm->mcomp_filter_type == SWITCHABLE)
             rd += rs_rd;
+          cpi->mask_filter_rd = MAX(cpi->mask_filter_rd, rd);
+
           if (i == 0 && intpel_mv) {
             tmp_rate_sum = rate_sum;
             tmp_dist_sum = dist_sum;
           }
         }
+
         if (i == 0 && cpi->sf.use_rd_breakout && ref_best_rd < INT64_MAX) {
           if (rd / 2 > ref_best_rd) {
             restore_dst_buf(xd, orig_dst, orig_dst_stride);
@@ -3608,23 +3611,21 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
         cm->mcomp_filter_type != BILINEAR) {
       int64_t ref = cpi->rd_filter_cache[cm->mcomp_filter_type == SWITCHABLE ?
                               SWITCHABLE_FILTERS : cm->mcomp_filter_type];
+
       for (i = 0; i < SWITCHABLE_FILTER_CONTEXTS; i++) {
         int64_t adj_rd;
-        // In cases of poor prediction, filter_cache[] can contain really big
-        // values, which actually are bigger than this_rd itself. This can
-        // cause negative best_filter_rd[] values, which is obviously silly.
-        // Therefore, if filter_cache < ref, we do an adjusted calculation.
-        if (cpi->rd_filter_cache[i] >= ref) {
-          adj_rd = this_rd + cpi->rd_filter_cache[i] - ref;
-        } else {
-          // FIXME(rbultje) do this for comppsred also
-          //
-          // To prevent out-of-range computation in
-          //    adj_rd = cpi->rd_filter_cache[i] * this_rd / ref
-          // cpi->rd_filter_cache[i] / ref is converted to a 256 based ratio.
-          int tmp = cpi->rd_filter_cache[i] * 256 / ref;
-          adj_rd = (this_rd * tmp) >> 8;
-        }
+        if (ref == INT64_MAX)
+          adj_rd = 0;
+        else if (cpi->rd_filter_cache[i] == INT64_MAX)
+          // when early termination is triggered, the encoder does not have
+          // access to the rate-distortion cost. it only knows that the cost
+          // should be above the maximum valid value. hence it takes the known
+          // maximum plus an arbitrary constant as the rate-distortion cost.
+          adj_rd = cpi->mask_filter_rd - ref + 10;
+        else
+          adj_rd = cpi->rd_filter_cache[i] - ref;
+
+        adj_rd += this_rd;
         best_filter_rd[i] = MIN(best_filter_rd[i], adj_rd);
       }
     }
@@ -3865,7 +3866,6 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
     int this_skip2 = 0;
     int64_t total_sse = INT_MAX;
     int early_term = 0;
-    int64_t mask_rd = 0;
 
     for (i = 0; i < TX_MODES; ++i)
       tx_cache[i] = INT64_MAX;
@@ -4059,6 +4059,7 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
           cpi->rd_thresh_sub8x8[segment_id][bsize][THR_GOLD] : this_rd_thresh;
       xd->mi_8x8[0]->mbmi.tx_size = TX_4X4;
 
+      cpi->mask_filter_rd = 0;
       for (i = 0; i < SWITCHABLE_FILTER_CONTEXTS; ++i)
         cpi->rd_filter_cache[i] = INT64_MAX;
 
@@ -4096,14 +4097,14 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
               continue;
             rs = get_switchable_rate(x);
             rs_rd = RDCOST(x->rdmult, x->rddiv, rs, 0);
+            cpi->rd_filter_cache[switchable_filter_index] = tmp_rd;
             cpi->rd_filter_cache[SWITCHABLE_FILTERS] =
                 MIN(cpi->rd_filter_cache[SWITCHABLE_FILTERS],
                     tmp_rd + rs_rd);
             if (cm->mcomp_filter_type == SWITCHABLE)
               tmp_rd += rs_rd;
 
-            cpi->rd_filter_cache[switchable_filter_index] = tmp_rd;
-            mask_rd = MAX(tmp_rd, mask_rd);
+            cpi->mask_filter_rd = MAX(cpi->mask_filter_rd, tmp_rd);
 
             newbest = (tmp_rd < tmp_best_rd);
             if (newbest) {
@@ -4353,12 +4354,15 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
       int64_t ref = cpi->rd_filter_cache[cm->mcomp_filter_type == SWITCHABLE ?
                               SWITCHABLE_FILTERS : cm->mcomp_filter_type];
       int64_t adj_rd;
-
       for (i = 0; i < SWITCHABLE_FILTER_CONTEXTS; i++) {
         if (ref == INT64_MAX)
           adj_rd = 0;
         else if (cpi->rd_filter_cache[i] == INT64_MAX)
-          adj_rd = mask_rd - ref + 10;
+          // when early termination is triggered, the encoder does not have
+          // access to the rate-distortion cost. it only knows that the cost
+          // should be above the maximum valid value. hence it takes the known
+          // maximum plus an arbitrary constant as the rate-distortion cost.
+          adj_rd = cpi->mask_filter_rd - ref + 10;
         else
           adj_rd = cpi->rd_filter_cache[i] - ref;
 
