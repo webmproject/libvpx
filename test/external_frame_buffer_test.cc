@@ -252,42 +252,51 @@ TEST_P(ExternalFrameBufferMD5Test, ExtFBMD5Match) {
   delete video;
 }
 
-TEST_F(ExternalFrameBufferTest, EightFrameBuffers) {
-  // Minimum number of reference buffers for VP9 is 8.
-  const int num_buffers = 8;
+TEST_F(ExternalFrameBufferTest, NineFrameBuffers) {
+  // Minimum number of external frame buffers for VP9 is
+  // #VP9_MAXIMUM_REF_BUFFERS + #VPX_MAXIMUM_WORK_BUFFERS.
+  const int num_buffers = VP9_MAXIMUM_REF_BUFFERS + VPX_MAXIMUM_WORK_BUFFERS;
   ASSERT_EQ(VPX_CODEC_OK,
             SetExternalFrameBuffers(num_buffers, realloc_vp9_frame_buffer));
   ASSERT_EQ(VPX_CODEC_OK, DecodeRemainingFrames());
 }
 
 TEST_F(ExternalFrameBufferTest, EightJitterBuffers) {
-  // Number of buffers equals number of possible reference buffers(8), plus
-  // one working buffer, plus eight jitter buffers.
-  const int num_buffers = 17;
+  // Number of buffers equals #VP9_MAXIMUM_REF_BUFFERS +
+  // #VPX_MAXIMUM_WORK_BUFFERS + eight jitter buffers.
+  const int jitter_buffers = 8;
+  const int num_buffers =
+      VP9_MAXIMUM_REF_BUFFERS + VPX_MAXIMUM_WORK_BUFFERS + jitter_buffers;
   ASSERT_EQ(VPX_CODEC_OK,
             SetExternalFrameBuffers(num_buffers, realloc_vp9_frame_buffer));
   ASSERT_EQ(VPX_CODEC_OK, DecodeRemainingFrames());
 }
 
 TEST_F(ExternalFrameBufferTest, NotEnoughBuffers) {
-  // Minimum number of reference buffers for VP9 is 8.
-  const int num_buffers = 7;
+  // Minimum number of external frame buffers for VP9 is
+  // #VP9_MAXIMUM_REF_BUFFERS + #VPX_MAXIMUM_WORK_BUFFERS. Set one less.
+  const int num_buffers =
+      VP9_MAXIMUM_REF_BUFFERS + VPX_MAXIMUM_WORK_BUFFERS - 1;
   ASSERT_EQ(VPX_CODEC_INVALID_PARAM,
             SetExternalFrameBuffers(num_buffers, realloc_vp9_frame_buffer));
 }
 
 TEST_F(ExternalFrameBufferTest, NullFrameBufferList) {
-  // Number of buffers equals number of possible reference buffers(8), plus
-  // one working buffer, plus four jitter buffers.
-  const int num_buffers = 13;
+  // Number of buffers equals #VP9_MAXIMUM_REF_BUFFERS +
+  // #VPX_MAXIMUM_WORK_BUFFERS + four jitter buffers.
+  const int jitter_buffers = 4;
+  const int num_buffers =
+      VP9_MAXIMUM_REF_BUFFERS + VPX_MAXIMUM_WORK_BUFFERS + jitter_buffers;
   ASSERT_EQ(VPX_CODEC_INVALID_PARAM,
             SetNullFrameBuffers(num_buffers, realloc_vp9_frame_buffer));
 }
 
 TEST_F(ExternalFrameBufferTest, NullRealloc) {
-  // Number of buffers equals number of possible reference buffers(8), plus
-  // one working buffer, plus four jitter buffers.
-  const int num_buffers = 13;
+  // Number of buffers equals #VP9_MAXIMUM_REF_BUFFERS +
+  // #VPX_MAXIMUM_WORK_BUFFERS + four jitter buffers.
+  const int jitter_buffers = 4;
+  const int num_buffers =
+      VP9_MAXIMUM_REF_BUFFERS + VPX_MAXIMUM_WORK_BUFFERS + jitter_buffers;
   ASSERT_EQ(VPX_CODEC_OK,
             SetExternalFrameBuffers(num_buffers,
                                     zero_realloc_vp9_frame_buffer));
@@ -295,9 +304,11 @@ TEST_F(ExternalFrameBufferTest, NullRealloc) {
 }
 
 TEST_F(ExternalFrameBufferTest, ReallocOneLessByte) {
-  // Number of buffers equals number of possible reference buffers(8), plus
-  // one working buffer, plus four jitter buffers.
-  const int num_buffers = 13;
+  // Number of buffers equals #VP9_MAXIMUM_REF_BUFFERS +
+  // #VPX_MAXIMUM_WORK_BUFFERS + four jitter buffers.
+  const int jitter_buffers = 4;
+  const int num_buffers =
+      VP9_MAXIMUM_REF_BUFFERS + VPX_MAXIMUM_WORK_BUFFERS + jitter_buffers;
   ASSERT_EQ(VPX_CODEC_OK,
             SetExternalFrameBuffers(num_buffers,
                                     one_less_byte_realloc_vp9_frame_buffer));
