@@ -177,6 +177,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn///qs\u003d",
+        "filename": "vp9/encoder/vp9_ratectrl.c",
+        "patchSetId": 15
+      },
+      "lineNbr": 275,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2013-12-18T16:56:16Z",
+      "side": 1,
+      "message": "You can mark the pointer, rather than the data that the pointer points to, constant:\nVP9_COMP *const cpi\nrather than:\nconst VP9_COMP *cpi\ni.e the value of cpi should not change in this function, whereas the data it points to might, as you say.",
+      "parentUuid": "AAAAdX//6EU\u003d",
+      "revId": "29475ff127d57cd744e8d530b6bbe45a24198050",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdX//6R0\u003d",
         "filename": "vp9/encoder/vp9_ratectrl.c",
         "patchSetId": 15
@@ -206,6 +224,24 @@
       "side": 1,
       "message": "Rather keep it as is. Both rc.decimation factor and rc.decimation count are updated here. Its possible we may want to update other variables in future for frame dropping, so i think better to not make cpi const here.",
       "parentUuid": "AAAAdX//6R0\u003d",
+      "revId": "29475ff127d57cd744e8d530b6bbe45a24198050",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn///qo\u003d",
+        "filename": "vp9/encoder/vp9_ratectrl.c",
+        "patchSetId": 15
+      },
+      "lineNbr": 291,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2013-12-18T16:56:16Z",
+      "side": 1,
+      "message": "See above comment.",
+      "parentUuid": "AAAAdX//6EQ\u003d",
       "revId": "29475ff127d57cd744e8d530b6bbe45a24198050",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -416,6 +452,24 @@
       "side": 1,
       "message": "Will leave this one as is. This was an existing function, and several cpi quantities are updated here.",
       "parentUuid": "AAAAdX//6Rw\u003d",
+      "revId": "29475ff127d57cd744e8d530b6bbe45a24198050",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn///qk\u003d",
+        "filename": "vp9/encoder/vp9_ratectrl.c",
+        "patchSetId": 15
+      },
+      "lineNbr": 397,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2013-12-18T16:56:16Z",
+      "side": 1,
+      "message": "See above comment.",
+      "parentUuid": "AAAAdX//6EA\u003d",
       "revId": "29475ff127d57cd744e8d530b6bbe45a24198050",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
