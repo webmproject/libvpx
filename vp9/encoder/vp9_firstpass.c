@@ -502,6 +502,7 @@ void vp9_first_pass(VP9_COMP *cpi) {
   YV12_BUFFER_CONFIG *const new_yv12 = get_frame_new_buffer(cm);
   const int recon_y_stride = lst_yv12->y_stride;
   const int recon_uv_stride = lst_yv12->uv_stride;
+  const int uv_mb_height = 16 >> (lst_yv12->y_height > lst_yv12->uv_height);
   int64_t intra_error = 0;
   int64_t coded_error = 0;
   int64_t sr_coded_error = 0;
@@ -565,7 +566,7 @@ void vp9_first_pass(VP9_COMP *cpi) {
     // reset above block coeffs
     xd->up_available = (mb_row != 0);
     recon_yoffset = (mb_row * recon_y_stride * 16);
-    recon_uvoffset = (mb_row * recon_uv_stride * 8);
+    recon_uvoffset = (mb_row * recon_uv_stride * uv_mb_height);
 
     // Set up limit values for motion vectors to prevent them extending
     // outside the UMV borders
@@ -780,17 +781,19 @@ void vp9_first_pass(VP9_COMP *cpi) {
 
       // adjust to the next column of macroblocks
       x->plane[0].src.buf += 16;
-      x->plane[1].src.buf += 8;
-      x->plane[2].src.buf += 8;
+      x->plane[1].src.buf += uv_mb_height;
+      x->plane[2].src.buf += uv_mb_height;
 
       recon_yoffset += 16;
-      recon_uvoffset += 8;
+      recon_uvoffset += uv_mb_height;
     }
 
     // adjust to the next row of mbs
     x->plane[0].src.buf += 16 * x->plane[0].src.stride - 16 * cm->mb_cols;
-    x->plane[1].src.buf += 8 * x->plane[1].src.stride - 8 * cm->mb_cols;
-    x->plane[2].src.buf += 8 * x->plane[1].src.stride - 8 * cm->mb_cols;
+    x->plane[1].src.buf += uv_mb_height * x->plane[1].src.stride -
+                           uv_mb_height * cm->mb_cols;
+    x->plane[2].src.buf += uv_mb_height * x->plane[1].src.stride -
+                           uv_mb_height * cm->mb_cols;
 
     vp9_clear_system_state();  // __asm emms;
   }
