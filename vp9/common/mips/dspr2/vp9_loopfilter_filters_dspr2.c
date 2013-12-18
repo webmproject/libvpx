@@ -20,12 +20,12 @@
 #include "vp9/common/mips/dspr2/vp9_loopfilter_filters_dspr2.h"
 
 #if HAVE_DSPR2
-void vp9_loop_filter_horizontal_edge_dspr2(unsigned char *s,
-                                           int pitch,
-                                           const uint8_t *blimit,
-                                           const uint8_t *limit,
-                                           const uint8_t *thresh,
-                                           int count) {
+void vp9_lpf_horizontal_4_dspr2(unsigned char *s,
+                                int pitch,
+                                const uint8_t *blimit,
+                                const uint8_t *limit,
+                                const uint8_t *thresh,
+                                int count) {
   uint8_t   i;
   uint32_t  mask;
   uint32_t  hev;
@@ -114,12 +114,12 @@ void vp9_loop_filter_horizontal_edge_dspr2(unsigned char *s,
   }
 }
 
-void vp9_loop_filter_vertical_edge_dspr2(unsigned char *s,
-                                         int pitch,
-                                         const uint8_t *blimit,
-                                         const uint8_t *limit,
-                                         const uint8_t *thresh,
-                                         int count) {
+void vp9_lpf_vertical_4_dspr2(unsigned char *s,
+                              int pitch,
+                              const uint8_t *blimit,
+                              const uint8_t *limit,
+                              const uint8_t *thresh,
+                              int count) {
   uint8_t   i;
   uint32_t  mask, hev;
   uint32_t  pm1, p0, p1, p2, p3, p4, p5, p6;
@@ -307,58 +307,56 @@ void vp9_loop_filter_vertical_edge_dspr2(unsigned char *s,
   }
 }
 
-void vp9_loop_filter_horizontal_edge_16_dspr2(uint8_t *s, int p /* pitch */,
-                                              const uint8_t *blimit0,
-                                              const uint8_t *limit0,
-                                              const uint8_t *thresh0,
-                                              const uint8_t *blimit1,
-                                              const uint8_t *limit1,
-                                              const uint8_t *thresh1) {
-  vp9_loop_filter_horizontal_edge_dspr2(s, p, blimit0, limit0, thresh0, 1);
-  vp9_loop_filter_horizontal_edge_dspr2(s + 8, p, blimit1, limit1, thresh1, 1);
+void vp9_lpf_horizontal_4_dual_dspr2(uint8_t *s, int p /* pitch */,
+                                     const uint8_t *blimit0,
+                                     const uint8_t *limit0,
+                                     const uint8_t *thresh0,
+                                     const uint8_t *blimit1,
+                                     const uint8_t *limit1,
+                                     const uint8_t *thresh1) {
+  vp9_lpf_horizontal_4_dspr2(s, p, blimit0, limit0, thresh0, 1);
+  vp9_lpf_horizontal_4_dspr2(s + 8, p, blimit1, limit1, thresh1, 1);
 }
 
-void vp9_mbloop_filter_horizontal_edge_16_dspr2(uint8_t *s, int p /* pitch */,
-                                                const uint8_t *blimit0,
-                                                const uint8_t *limit0,
-                                                const uint8_t *thresh0,
-                                                const uint8_t *blimit1,
-                                                const uint8_t *limit1,
-                                                const uint8_t *thresh1) {
-  vp9_mbloop_filter_horizontal_edge_dspr2(s, p, blimit0, limit0, thresh0, 1);
-  vp9_mbloop_filter_horizontal_edge_dspr2(s + 8, p, blimit1, limit1, thresh1,
-                                          1);
+void vp9_lpf_horizontal_8_dual_dspr2(uint8_t *s, int p /* pitch */,
+                                     const uint8_t *blimit0,
+                                     const uint8_t *limit0,
+                                     const uint8_t *thresh0,
+                                     const uint8_t *blimit1,
+                                     const uint8_t *limit1,
+                                     const uint8_t *thresh1) {
+  vp9_lpf_horizontal_8_dspr2(s, p, blimit0, limit0, thresh0, 1);
+  vp9_lpf_horizontal_8_dspr2(s + 8, p, blimit1, limit1, thresh1, 1);
 }
 
-void vp9_loop_filter_vertical_edge_16_dspr2(uint8_t *s, int p,
-                                            const uint8_t *blimit0,
-                                            const uint8_t *limit0,
-                                            const uint8_t *thresh0,
-                                            const uint8_t *blimit1,
-                                            const uint8_t *limit1,
-                                            const uint8_t *thresh1) {
-  vp9_loop_filter_vertical_edge_dspr2(s, p, blimit0, limit0, thresh0, 1);
-  vp9_loop_filter_vertical_edge_dspr2(s + 8 * p, p, blimit1, limit1, thresh1,
-                                      1);
+void vp9_lpf_vertical_4_dual_dspr2(uint8_t *s, int p,
+                                   const uint8_t *blimit0,
+                                   const uint8_t *limit0,
+                                   const uint8_t *thresh0,
+                                   const uint8_t *blimit1,
+                                   const uint8_t *limit1,
+                                   const uint8_t *thresh1) {
+  vp9_lpf_vertical_4_dspr2(s, p, blimit0, limit0, thresh0, 1);
+  vp9_lpf_vertical_4_dspr2(s + 8 * p, p, blimit1, limit1, thresh1, 1);
 }
 
-void vp9_mbloop_filter_vertical_edge_16_dspr2(uint8_t *s, int p,
-                                              const uint8_t *blimit0,
-                                              const uint8_t *limit0,
-                                              const uint8_t *thresh0,
-                                              const uint8_t *blimit1,
-                                              const uint8_t *limit1,
-                                              const uint8_t *thresh1) {
-  vp9_mbloop_filter_vertical_edge_dspr2(s, p, blimit0, limit0, thresh0, 1);
-  vp9_mbloop_filter_vertical_edge_dspr2(s + 8 * p, p, blimit1, limit1, thresh1,
+void vp9_lpf_vertical_8_dual_dspr2(uint8_t *s, int p,
+                                   const uint8_t *blimit0,
+                                   const uint8_t *limit0,
+                                   const uint8_t *thresh0,
+                                   const uint8_t *blimit1,
+                                   const uint8_t *limit1,
+                                   const uint8_t *thresh1) {
+  vp9_lpf_vertical_8_dspr2(s, p, blimit0, limit0, thresh0, 1);
+  vp9_lpf_vertical_8_dspr2(s + 8 * p, p, blimit1, limit1, thresh1,
                                        1);
 }
 
-void vp9_mb_lpf_vertical_edge_w_16_dspr2(uint8_t *s, int p,
-                                         const uint8_t *blimit,
-                                         const uint8_t *limit,
-                                         const uint8_t *thresh) {
-  vp9_mb_lpf_vertical_edge_w_dspr2(s, p, blimit, limit, thresh);
-  vp9_mb_lpf_vertical_edge_w_dspr2(s + 8 * p, p, blimit, limit, thresh);
+void vp9_lpf_vertical_16_dual_dspr2(uint8_t *s, int p,
+                                    const uint8_t *blimit,
+                                    const uint8_t *limit,
+                                    const uint8_t *thresh) {
+  vp9_lpf_vertical_16_dspr2(s, p, blimit, limit, thresh);
+  vp9_lpf_vertical_16_dspr2(s + 8 * p, p, blimit, limit, thresh);
 }
 #endif  // #if HAVE_DSPR2

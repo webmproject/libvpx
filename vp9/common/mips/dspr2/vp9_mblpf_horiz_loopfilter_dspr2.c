@@ -20,12 +20,12 @@
 #include "vp9/common/mips/dspr2/vp9_loopfilter_filters_dspr2.h"
 
 #if HAVE_DSPR2
-void vp9_mb_lpf_horizontal_edge_w_dspr2(unsigned char *s,
-                                        int pitch,
-                                        const uint8_t *blimit,
-                                        const uint8_t *limit,
-                                        const uint8_t *thresh,
-                                        int count) {
+void vp9_lpf_horizontal_16_dspr2(unsigned char *s,
+                                 int pitch,
+                                 const uint8_t *blimit,
+                                 const uint8_t *limit,
+                                 const uint8_t *thresh,
+                                 int count) {
   uint32_t  mask;
   uint32_t  hev, flat, flat2;
   uint8_t   i;

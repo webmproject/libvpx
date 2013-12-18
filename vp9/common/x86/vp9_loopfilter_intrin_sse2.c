@@ -846,24 +846,20 @@ static void mb_lpf_horizontal_edge_w_sse2_16(unsigned char *s,
 }
 
 // TODO(yunqingwang): remove count and call these 2 functions(8 or 16) directly.
-void vp9_mb_lpf_horizontal_edge_w_sse2(unsigned char *s,
-                                       int p,
-                                       const unsigned char *_blimit,
-                                       const unsigned char *_limit,
-                                       const unsigned char *_thresh,
-                                       int count) {
+void vp9_lpf_horizontal_16_sse2(unsigned char *s, int p,
+                                const unsigned char *_blimit,
+                                const unsigned char *_limit,
+                                const unsigned char *_thresh, int count) {
   if (count == 1)
     mb_lpf_horizontal_edge_w_sse2_8(s, p, _blimit, _limit, _thresh);
   else
     mb_lpf_horizontal_edge_w_sse2_16(s, p, _blimit, _limit, _thresh);
 }
 
-void vp9_mbloop_filter_horizontal_edge_sse2(unsigned char *s,
-                                            int p,
-                                            const unsigned char *_blimit,
-                                            const unsigned char *_limit,
-                                            const unsigned char *_thresh,
-                                            int count) {
+void vp9_lpf_horizontal_8_sse2(unsigned char *s, int p,
+                               const unsigned char *_blimit,
+                               const unsigned char *_limit,
+                               const unsigned char *_thresh, int count) {
   DECLARE_ALIGNED_ARRAY(16, unsigned char, flat_op2, 16);
   DECLARE_ALIGNED_ARRAY(16, unsigned char, flat_op1, 16);
   DECLARE_ALIGNED_ARRAY(16, unsigned char, flat_op0, 16);
@@ -1083,13 +1079,13 @@ void vp9_mbloop_filter_horizontal_edge_sse2(unsigned char *s,
   }
 }
 
-void vp9_mbloop_filter_horizontal_edge_16_sse2(uint8_t *s, int p,
-                                               const uint8_t *_blimit0,
-                                               const uint8_t *_limit0,
-                                               const uint8_t *_thresh0,
-                                               const uint8_t *_blimit1,
-                                               const uint8_t *_limit1,
-                                               const uint8_t *_thresh1) {
+void vp9_lpf_horizontal_8_dual_sse2(uint8_t *s, int p,
+                                    const uint8_t *_blimit0,
+                                    const uint8_t *_limit0,
+                                    const uint8_t *_thresh0,
+                                    const uint8_t *_blimit1,
+                                    const uint8_t *_limit1,
+                                    const uint8_t *_thresh1) {
   DECLARE_ALIGNED_ARRAY(16, unsigned char, flat_op2, 16);
   DECLARE_ALIGNED_ARRAY(16, unsigned char, flat_op1, 16);
   DECLARE_ALIGNED_ARRAY(16, unsigned char, flat_op0, 16);
@@ -1330,14 +1326,13 @@ void vp9_mbloop_filter_horizontal_edge_16_sse2(uint8_t *s, int p,
   }
 }
 
-void vp9_loop_filter_horizontal_edge_16_sse2(unsigned char *s,
-                                            int p,
-                                            const unsigned char *_blimit0,
-                                            const unsigned char *_limit0,
-                                            const unsigned char *_thresh0,
-                                            const unsigned char *_blimit1,
-                                            const unsigned char *_limit1,
-                                            const unsigned char *_thresh1) {
+void vp9_lpf_horizontal_4_dual_sse2(unsigned char *s, int p,
+                                    const unsigned char *_blimit0,
+                                    const unsigned char *_limit0,
+                                    const unsigned char *_thresh0,
+                                    const unsigned char *_blimit1,
+                                    const unsigned char *_limit1,
+                                    const unsigned char *_thresh1) {
   const __m128i blimit =
       _mm_unpacklo_epi64(_mm_load_si128((const __m128i *)_blimit0),
                          _mm_load_si128((const __m128i *)_blimit1));
@@ -1598,13 +1593,12 @@ static INLINE void transpose(unsigned char *src[], int in_p,
   } while (++idx8x8 < num_8x8_to_transpose);
 }
 
-void vp9_loop_filter_vertical_edge_16_sse2(uint8_t *s, int p,
-                                           const uint8_t *blimit0,
-                                           const uint8_t *limit0,
-                                           const uint8_t *thresh0,
-                                           const uint8_t *blimit1,
-                                           const uint8_t *limit1,
-                                           const uint8_t *thresh1) {
+void vp9_lpf_vertical_4_dual_sse2(uint8_t *s, int p, const uint8_t *blimit0,
+                                  const uint8_t *limit0,
+                                  const uint8_t *thresh0,
+                                  const uint8_t *blimit1,
+                                  const uint8_t *limit1,
+                                  const uint8_t *thresh1) {
   DECLARE_ALIGNED_ARRAY(16, unsigned char, t_dst, 16 * 8);
   unsigned char *src[2];
   unsigned char *dst[2];
@@ -1613,8 +1607,8 @@ void vp9_loop_filter_vertical_edge_16_sse2(uint8_t *s, int p,
   transpose8x16(s - 4, s - 4 + p * 8, p, t_dst, 16);
 
   // Loop filtering
-  vp9_loop_filter_horizontal_edge_16_sse2(t_dst + 4 * 16, 16, blimit0, limit0,
-                                          thresh0, blimit1, limit1, thresh1);
+  vp9_lpf_horizontal_4_dual_sse2(t_dst + 4 * 16, 16, blimit0, limit0, thresh0,
+                                 blimit1, limit1, thresh1);
   src[0] = t_dst;
   src[1] = t_dst + 8;
   dst[0] = s - 4;
@@ -1624,11 +1618,10 @@ void vp9_loop_filter_vertical_edge_16_sse2(uint8_t *s, int p,
   transpose(src, 16, dst, p, 2);
 }
 
-void vp9_mbloop_filter_vertical_edge_sse2(unsigned char *s, int p,
-                                          const unsigned char *blimit,
-                                          const unsigned char *limit,
-                                          const unsigned char *thresh,
-                                          int count) {
+void vp9_lpf_vertical_8_sse2(unsigned char *s, int p,
+                             const unsigned char *blimit,
+                             const unsigned char *limit,
+                             const unsigned char *thresh, int count) {
   DECLARE_ALIGNED_ARRAY(8, unsigned char, t_dst, 8 * 8);
   unsigned char *src[1];
   unsigned char *dst[1];
@@ -1641,8 +1634,7 @@ void vp9_mbloop_filter_vertical_edge_sse2(unsigned char *s, int p,
   transpose(src, p, dst, 8, 1);
 
   // Loop filtering
-  vp9_mbloop_filter_horizontal_edge_sse2(t_dst + 4 * 8, 8, blimit, limit,
-                                         thresh, 1);
+  vp9_lpf_horizontal_8_sse2(t_dst + 4 * 8, 8, blimit, limit, thresh, 1);
 
   src[0] = t_dst;
   dst[0] = s - 4;
@@ -1651,13 +1643,12 @@ void vp9_mbloop_filter_vertical_edge_sse2(unsigned char *s, int p,
   transpose(src, 8, dst, p, 1);
 }
 
-void vp9_mbloop_filter_vertical_edge_16_sse2(uint8_t *s, int p,
-                                             const uint8_t *blimit0,
-                                             const uint8_t *limit0,
-                                             const uint8_t *thresh0,
-                                             const uint8_t *blimit1,
-                                             const uint8_t *limit1,
-                                             const uint8_t *thresh1) {
+void vp9_lpf_vertical_8_dual_sse2(uint8_t *s, int p, const uint8_t *blimit0,
+                                  const uint8_t *limit0,
+                                  const uint8_t *thresh0,
+                                  const uint8_t *blimit1,
+                                  const uint8_t *limit1,
+                                  const uint8_t *thresh1) {
   DECLARE_ALIGNED_ARRAY(16, unsigned char, t_dst, 16 * 8);
   unsigned char *src[2];
   unsigned char *dst[2];
@@ -1666,8 +1657,8 @@ void vp9_mbloop_filter_vertical_edge_16_sse2(uint8_t *s, int p,
   transpose8x16(s - 4, s - 4 + p * 8, p, t_dst, 16);
 
   // Loop filtering
-  vp9_mbloop_filter_horizontal_edge_16_sse2(t_dst + 4 * 16, 16, blimit0, limit0,
-                                            thresh0, blimit1, limit1, thresh1);
+  vp9_lpf_horizontal_8_dual_sse2(t_dst + 4 * 16, 16, blimit0, limit0, thresh0,
+                                 blimit1, limit1, thresh1);
   src[0] = t_dst;
   src[1] = t_dst + 8;
 
@@ -1678,10 +1669,10 @@ void vp9_mbloop_filter_vertical_edge_16_sse2(uint8_t *s, int p,
   transpose(src, 16, dst, p, 2);
 }
 
-void vp9_mb_lpf_vertical_edge_w_sse2(unsigned char *s, int p,
-                                     const unsigned char *blimit,
-                                     const unsigned char *limit,
-                                     const unsigned char *thresh) {
+void vp9_lpf_vertical_16_sse2(unsigned char *s, int p,
+                              const unsigned char *blimit,
+                              const unsigned char *limit,
+                              const unsigned char *thresh) {
   DECLARE_ALIGNED_ARRAY(8, unsigned char, t_dst, 8 * 16);
   unsigned char *src[2];
   unsigned char *dst[2];
@@ -1706,10 +1697,9 @@ void vp9_mb_lpf_vertical_edge_w_sse2(unsigned char *s, int p,
   transpose(src, 8, dst, p, 2);
 }
 
-void vp9_mb_lpf_vertical_edge_w_16_sse2(unsigned char *s, int p,
-                                        const uint8_t *blimit,
-                                        const uint8_t *limit,
-                                        const uint8_t *thresh) {
+void vp9_lpf_vertical_16_dual_sse2(unsigned char *s, int p,
+                                   const uint8_t *blimit, const uint8_t *limit,
+                                   const uint8_t *thresh) {
   DECLARE_ALIGNED_ARRAY(16, unsigned char, t_dst, 256);
 
   // Transpose 16x16

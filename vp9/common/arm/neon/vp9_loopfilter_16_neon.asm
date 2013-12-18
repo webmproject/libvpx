@@ -8,18 +8,18 @@
 ;  be found in the AUTHORS file in the root of the source tree.
 ;
 
-    EXPORT  |vp9_loop_filter_horizontal_edge_16_neon|
+    EXPORT  |vp9_lpf_horizontal_4_dual_neon|
     ARM
 
     AREA ||.text||, CODE, READONLY, ALIGN=2
 
-;void vp9_loop_filter_horizontal_edge_16_neon(uint8_t *s, int p,
-;                                             const uint8_t *blimit0,
-;                                             const uint8_t *limit0,
-;                                             const uint8_t *thresh0,
-;                                             const uint8_t *blimit1,
-;                                             const uint8_t *limit1,
-;                                             const uint8_t *thresh1)
+;void vp9_lpf_horizontal_4_dual_neon(uint8_t *s, int p,
+;                                    const uint8_t *blimit0,
+;                                    const uint8_t *limit0,
+;                                    const uint8_t *thresh0,
+;                                    const uint8_t *blimit1,
+;                                    const uint8_t *limit1,
+;                                    const uint8_t *thresh1)
 ; r0    uint8_t *s,
 ; r1    int p,
 ; r2    const uint8_t *blimit0,
@@ -29,7 +29,7 @@
 ; sp+8  const uint8_t *limit1,
 ; sp+12 const uint8_t *thresh1,
 
-|vp9_loop_filter_horizontal_edge_16_neon| PROC
+|vp9_lpf_horizontal_4_dual_neon| PROC
     push        {lr}
 
     ldr         r12, [sp, #4]              ; load thresh0
@@ -76,7 +76,7 @@
     vpop        {d8-d15}                   ; restore neon registers
 
     pop         {pc}
-    ENDP        ; |vp9_loop_filter_horizontal_edge_16_neon|
+    ENDP        ; |vp9_lpf_horizontal_4_dual_neon|
 
 ; void vp9_loop_filter_neon_16();
 ; This is a helper function for the loopfilters. The invidual functions do the

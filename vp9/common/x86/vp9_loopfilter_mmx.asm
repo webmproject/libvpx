@@ -12,7 +12,7 @@
 %include "vpx_ports/x86_abi_support.asm"
 
 
-;void vp9_loop_filter_horizontal_edge_mmx
+;void vp9_lpf_horizontal_4_mmx
 ;(
 ;    unsigned char *src_ptr,
 ;    int src_pixel_step,
@@ -21,8 +21,8 @@
 ;    const char *thresh,
 ;    int  count
 ;)
-global sym(vp9_loop_filter_horizontal_edge_mmx) PRIVATE
-sym(vp9_loop_filter_horizontal_edge_mmx):
+global sym(vp9_lpf_horizontal_4_mmx) PRIVATE
+sym(vp9_lpf_horizontal_4_mmx):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 6
@@ -224,7 +224,7 @@ sym(vp9_loop_filter_horizontal_edge_mmx):
     ret
 
 
-;void vp9_loop_filter_vertical_edge_mmx
+;void vp9_lpf_vertical_4_mmx
 ;(
 ;    unsigned char *src_ptr,
 ;    int  src_pixel_step,
@@ -233,8 +233,8 @@ sym(vp9_loop_filter_horizontal_edge_mmx):
 ;    const char *thresh,
 ;    int count
 ;)
-global sym(vp9_loop_filter_vertical_edge_mmx) PRIVATE
-sym(vp9_loop_filter_vertical_edge_mmx):
+global sym(vp9_lpf_vertical_4_mmx) PRIVATE
+sym(vp9_lpf_vertical_4_mmx):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 6
