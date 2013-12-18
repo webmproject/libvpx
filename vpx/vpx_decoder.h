@@ -362,8 +362,9 @@ extern "C" {
    *     using external frame buffers.
    *
    * \note
-   * When decoding VP9, the application must pass in at least 8 external
-   * frame buffers, as VP9 can have up to 8 reference frames.
+   * When decoding VP9, the application must pass in at least
+   * #VP9_MAXIMUM_REF_BUFFERS external frame buffers, as VP9 can have up to
+   * that many reference frames.
    */
   vpx_codec_err_t vpx_codec_set_frame_buffers(
       vpx_codec_ctx_t *ctx,

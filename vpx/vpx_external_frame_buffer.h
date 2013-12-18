@@ -17,6 +17,14 @@ extern "C" {
 
 #include "./vpx_integer.h"
 
+/*!\brief The maximum number of work buffers used by libvpx.
+ */
+#define VPX_MAXIMUM_WORK_BUFFERS 1
+
+/*!\brief The maximum number of reference buffers that a VP9 encoder may use.
+ */
+#define VP9_MAXIMUM_REF_BUFFERS 8
+
 /*!\brief External frame buffer
  *
  * This structure is used to hold external frame buffers passed into the
