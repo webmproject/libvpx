@@ -58,21 +58,21 @@ TEST_P(PartialIDctTest, ResultsMatch) {
   ACMRandom rnd(ACMRandom::DeterministicSeed());
   int size;
   switch (tx_size_) {
-  case TX_4X4:
-    size = 4;
-    break;
-  case TX_8X8:
-    size = 8;
-    break;
-  case TX_16X16:
-    size = 16;
-    break;
-  case TX_32X32:
-    size = 32;
-    break;
-  default:
-    ASSERT_TRUE(0) << "Wrong Size!";
-    break;
+    case TX_4X4:
+      size = 4;
+      break;
+    case TX_8X8:
+      size = 8;
+      break;
+    case TX_16X16:
+      size = 16;
+      break;
+    case TX_32X32:
+      size = 32;
+      break;
+    default:
+      FAIL() << "Wrong Size!";
+      break;
   }
   DECLARE_ALIGNED_ARRAY(16, int16_t, test_coef_block1, kMaxNumCoeffs);
   DECLARE_ALIGNED_ARRAY(16, int16_t, test_coef_block2, kMaxNumCoeffs);
