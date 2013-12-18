@@ -594,6 +594,7 @@ static void set_rd_speed_thresholds_sub8x8(VP9_COMP *cpi, int mode) {
 
 void vp9_set_speed_features(VP9_COMP *cpi) {
   SPEED_FEATURES *sf = &cpi->sf;
+  VP9_COMMON *cm = &cpi->common;
   int mode = cpi->compressor_speed;
   int speed = cpi->speed;
   int i;
@@ -673,13 +674,13 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
       sf->recode_loop = (speed < 1);
 
       if (speed == 1) {
-        sf->use_square_partition_only = !frame_is_intra_only(&cpi->common);
+        sf->use_square_partition_only = !frame_is_intra_only(cm);
         sf->less_rectangular_check  = 1;
-        sf->tx_size_search_method = frame_is_intra_only(&cpi->common)
+        sf->tx_size_search_method = frame_is_intra_only(cm)
                                      ? USE_FULL_RD : USE_LARGESTALL;
 
-        if (MIN(cpi->common.width, cpi->common.height) >= 720)
-          sf->disable_split_mask = cpi->common.show_frame ?
+        if (MIN(cm->width, cm->height) >= 720)
+          sf->disable_split_mask = cm->show_frame ?
               DISABLE_ALL_SPLIT : DISABLE_ALL_INTER_SPLIT;
         else
           sf->disable_split_mask = DISABLE_COMPOUND_SPLIT;
@@ -695,13 +696,13 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
         sf->intra_uv_mode_mask[TX_16X16] = INTRA_DC_H_V;
       }
       if (speed == 2) {
-        sf->use_square_partition_only = !frame_is_intra_only(&cpi->common);
+        sf->use_square_partition_only = !frame_is_intra_only(cm);
         sf->less_rectangular_check  = 1;
-        sf->tx_size_search_method = frame_is_intra_only(&cpi->common)
+        sf->tx_size_search_method = frame_is_intra_only(cm)
                                      ? USE_FULL_RD : USE_LARGESTALL;
 
-        if (MIN(cpi->common.width, cpi->common.height) >= 720)
-          sf->disable_split_mask = cpi->common.show_frame ?
+        if (MIN(cm->width, cm->height) >= 720)
+          sf->disable_split_mask = cm->show_frame ?
               DISABLE_ALL_SPLIT : DISABLE_ALL_INTER_SPLIT;
         else
           sf->disable_split_mask = LAST_AND_INTRA_SPLIT_ONLY;
@@ -738,7 +739,7 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
         sf->use_square_partition_only = 1;
         sf->tx_size_search_method = USE_LARGESTALL;
 
-        if (MIN(cpi->common.width, cpi->common.height) >= 720)
+        if (MIN(cm->width, cm->height) >= 720)
           sf->disable_split_mask = DISABLE_ALL_SPLIT;
         else
           sf->disable_split_mask = DISABLE_ALL_INTER_SPLIT;
@@ -814,7 +815,7 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
         sf->comp_inter_joint_search_thresh = BLOCK_SIZES;
         sf->use_one_partition_size_always = 1;
         sf->always_this_block_size = BLOCK_16X16;
-        sf->tx_size_search_method = frame_is_intra_only(&cpi->common) ?
+        sf->tx_size_search_method = frame_is_intra_only(cm) ?
                                      USE_FULL_RD : USE_LARGESTALL;
         sf->mode_search_skip_flags = FLAG_SKIP_INTRA_DIRMISMATCH |
                                      FLAG_SKIP_INTRA_BESTINTER |
@@ -888,14 +889,14 @@ static void alloc_raw_frame_buffers(VP9_COMP *cpi) {
                                       cm->subsampling_x, cm->subsampling_y,
                                       cpi->oxcf.lag_in_frames);
   if (!cpi->lookahead)
-    vpx_internal_error(&cpi->common.error, VPX_CODEC_MEM_ERROR,
+    vpx_internal_error(&cm->error, VPX_CODEC_MEM_ERROR,
                        "Failed to allocate lag buffers");
 
   if (vp9_realloc_frame_buffer(&cpi->alt_ref_buffer,
                                cpi->oxcf.width, cpi->oxcf.height,
                                cm->subsampling_x, cm->subsampling_y,
                                VP9BORDERINPIXELS, NULL, NULL, NULL))
-    vpx_internal_error(&cpi->common.error, VPX_CODEC_MEM_ERROR,
+    vpx_internal_error(&cm->error, VPX_CODEC_MEM_ERROR,
                        "Failed to allocate altref buffer");
 }
 
@@ -903,21 +904,21 @@ void vp9_alloc_compressor_data(VP9_COMP *cpi) {
   VP9_COMMON *cm = &cpi->common;
 
   if (vp9_alloc_frame_buffers(cm, cm->width, cm->height))
-    vpx_internal_error(&cpi->common.error, VPX_CODEC_MEM_ERROR,
+    vpx_internal_error(&cm->error, VPX_CODEC_MEM_ERROR,
                        "Failed to allocate frame buffers");
 
   if (vp9_alloc_frame_buffer(&cpi->last_frame_uf,
                              cm->width, cm->height,
                              cm->subsampling_x, cm->subsampling_y,
                              VP9BORDERINPIXELS))
-    vpx_internal_error(&cpi->common.error, VPX_CODEC_MEM_ERROR,
+    vpx_internal_error(&cm->error, VPX_CODEC_MEM_ERROR,
                        "Failed to allocate last frame buffer");
 
   if (vp9_alloc_frame_buffer(&cpi->scaled_source,
                              cm->width, cm->height,
                              cm->subsampling_x, cm->subsampling_y,
                              VP9BORDERINPIXELS))
-    vpx_internal_error(&cpi->common.error, VPX_CODEC_MEM_ERROR,
+    vpx_internal_error(&cm->error, VPX_CODEC_MEM_ERROR,
                        "Failed to allocate scaled source buffer");
 
   vpx_free(cpi->tok);
@@ -963,14 +964,14 @@ static void update_frame_size(VP9_COMP *cpi) {
                                cm->width, cm->height,
                                cm->subsampling_x, cm->subsampling_y,
                                VP9BORDERINPIXELS, NULL, NULL, NULL))
-    vpx_internal_error(&cpi->common.error, VPX_CODEC_MEM_ERROR,
+    vpx_internal_error(&cm->error, VPX_CODEC_MEM_ERROR,
                        "Failed to reallocate last frame buffer");
 
   if (vp9_realloc_frame_buffer(&cpi->scaled_source,
                                cm->width, cm->height,
                                cm->subsampling_x, cm->subsampling_y,
                                VP9BORDERINPIXELS, NULL, NULL, NULL))
-    vpx_internal_error(&cpi->common.error, VPX_CODEC_MEM_ERROR,
+    vpx_internal_error(&cm->error, VPX_CODEC_MEM_ERROR,
                        "Failed to reallocate scaled source buffer");
 
   {
@@ -1764,7 +1765,7 @@ VP9_PTR vp9_create_compressor(VP9_CONFIG *oxcf) {
   cpi->refining_search_sad = vp9_refining_search_sad;
 
   // make sure frame 1 is okay
-  cpi->error_bins[0] = cpi->common.MBs;
+  cpi->error_bins[0] = cm->MBs;
 
   /* vp9_init_quantizer() is first called here. Add check in
    * vp9_frame_init_quantizer() so that vp9_init_quantizer is only
@@ -1775,7 +1776,7 @@ VP9_PTR vp9_create_compressor(VP9_CONFIG *oxcf) {
 
   vp9_loop_filter_init(cm);
 
-  cpi->common.error.setjmp = 0;
+  cm->error.setjmp = 0;
 
   vp9_zero(cpi->y_uv_mode_count);
 
