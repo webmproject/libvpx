@@ -40,7 +40,8 @@ static void temporal_filter_predictors_mb_c(MACROBLOCKD *xd,
                                             int mv_row,
                                             int mv_col,
                                             uint8_t *pred,
-                                            struct scale_factors *scale) {
+                                            struct scale_factors *scale,
+                                            int x, int y) {
   const int which_mv = 0;
   MV mv = { mv_row, mv_col };
   enum mv_precision mv_precision_uv;
@@ -59,8 +60,7 @@ static void temporal_filter_predictors_mb_c(MACROBLOCKD *xd,
                             scale,
                             16, 16,
                             which_mv,
-                            &xd->subpix, MV_PRECISION_Q3);
-
+                            &xd->subpix, MV_PRECISION_Q3, x, y);
 
   vp9_build_inter_predictor(u_mb_ptr, uv_stride,
                             &pred[256], uv_block_size,
@@ -68,7 +68,7 @@ static void temporal_filter_predictors_mb_c(MACROBLOCKD *xd,
                             scale,
                             uv_block_size, uv_block_size,
                             which_mv,
-                            &xd->subpix, mv_precision_uv);
+                            &xd->subpix, mv_precision_uv, x, y);
 
   vp9_build_inter_predictor(v_mb_ptr, uv_stride,
                             &pred[512], uv_block_size,
@@ -76,7 +76,7 @@ static void temporal_filter_predictors_mb_c(MACROBLOCKD *xd,
                             scale,
                             uv_block_size, uv_block_size,
                             which_mv,
-                            &xd->subpix, mv_precision_uv);
+                            &xd->subpix, mv_precision_uv, x, y);
 }
 
 void vp9_temporal_filter_apply_c(uint8_t *frame1,
@@ -296,7 +296,8 @@ static void temporal_filter_iterate_c(VP9_COMP *cpi,
            mb_uv_height,
            mbd->mi_8x8[0]->bmi[0].as_mv[0].as_mv.row,
            mbd->mi_8x8[0]->bmi[0].as_mv[0].as_mv.col,
-           predictor, scale);
+           predictor, scale,
+           mb_col * 16, mb_row * 16);
 
           // Apply the filter (YUV)
           vp9_temporal_filter_apply(f->y_buffer + mb_y_offset, f->y_stride,

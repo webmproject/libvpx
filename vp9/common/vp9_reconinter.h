@@ -30,10 +30,11 @@ void vp9_dec_build_inter_predictors_sb(MACROBLOCKD *xd, int mi_row, int mi_col,
 void vp9_build_inter_predictor(const uint8_t *src, int src_stride,
                                uint8_t *dst, int dst_stride,
                                const MV *mv_q3,
-                               const struct scale_factors *scale,
+                               struct scale_factors *scale,
                                int w, int h, int do_avg,
                                const struct subpix_fn_table *subpix,
-                               enum mv_precision precision);
+                               enum mv_precision precision,
+                               int x, int y);
 
 static int scaled_buffer_offset(int x_offset, int y_offset, int stride,
                                 const struct scale_factors *scale) {
