@@ -14,7 +14,6 @@
 
 #include "vp9/common/vp9_mv.h"
 #include "vp9/common/vp9_blockd.h"
-#include "vp9/common/vp9_treecoder.h"
 #include "vp9/common/vp9_onyxc_int.h"
 
 #define LEFT_TOP_MARGIN     ((VP9BORDERINPIXELS - VP9_INTERP_EXTEND) << 3)

@@ -14,7 +14,6 @@
 #include "vp9/common/vp9_common.h"
 #include "vp9/common/vp9_pred_common.h"
 #include "vp9/common/vp9_seg_common.h"
-#include "vp9/common/vp9_treecoder.h"
 
 static INLINE const MB_MODE_INFO *get_mbmi(const MODE_INFO *const mi) {
   return (mi != NULL) ? &mi->mbmi : NULL;
