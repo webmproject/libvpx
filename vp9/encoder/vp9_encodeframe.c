@@ -754,7 +754,7 @@ static void update_stats(VP9_COMP *cpi) {
                                                      SEG_LVL_REF_FRAME);
 
     if (!seg_ref_active)
-      cpi->intra_inter_count[vp9_get_intra_inter_context(xd)]
+      cm->counts.intra_inter[vp9_get_intra_inter_context(xd)]
                             [is_inter_block(mbmi)]++;
 
     // If the segment reference feature is enabled we have only a single
@@ -2006,11 +2006,11 @@ static void init_encode_frame_mb_context(VP9_COMP *cpi) {
   xd->mi_8x8[0]->mbmi.mode = DC_PRED;
   xd->mi_8x8[0]->mbmi.uv_mode = DC_PRED;
 
-  vp9_zero(cpi->y_mode_count);
-  vp9_zero(cpi->y_uv_mode_count);
+  vp9_zero(cm->counts.y_mode);
+  vp9_zero(cm->counts.uv_mode);
   vp9_zero(cm->counts.inter_mode);
   vp9_zero(cm->counts.partition);
-  vp9_zero(cpi->intra_inter_count);
+  vp9_zero(cm->counts.intra_inter);
   vp9_zero(cm->counts.comp_inter);
   vp9_zero(cm->counts.single_ref);
   vp9_zero(cm->counts.comp_ref);
@@ -2145,8 +2145,8 @@ static void encode_frame_internal(VP9_COMP *cpi) {
     int j;
     unsigned int intra_count = 0, inter_count = 0;
     for (j = 0; j < INTRA_INTER_CONTEXTS; ++j) {
-      intra_count += cpi->intra_inter_count[j][0];
-      inter_count += cpi->intra_inter_count[j][1];
+      intra_count += cm->counts.intra_inter[j][0];
+      inter_count += cm->counts.intra_inter[j][1];
     }
     cpi->sf.skip_encode_frame = ((intra_count << 2) < inter_count);
     cpi->sf.skip_encode_frame &= (cm->frame_type != KEY_FRAME);
@@ -2484,12 +2484,12 @@ void vp9_encode_frame(VP9_COMP *cpi) {
   }
 }
 
-static void sum_intra_stats(VP9_COMP *cpi, const MODE_INFO *mi) {
+static void sum_intra_stats(VP9_COMMON *cm, const MODE_INFO *mi) {
   const MB_PREDICTION_MODE y_mode = mi->mbmi.mode;
   const MB_PREDICTION_MODE uv_mode = mi->mbmi.uv_mode;
   const BLOCK_SIZE bsize = mi->mbmi.sb_type;
 
-  ++cpi->y_uv_mode_count[y_mode][uv_mode];
+  ++cm->counts.uv_mode[y_mode][uv_mode];
 
   if (bsize < BLOCK_8X8) {
     int idx, idy;
@@ -2497,9 +2497,9 @@ static void sum_intra_stats(VP9_COMP *cpi, const MODE_INFO *mi) {
     const int num_4x4_blocks_high = num_4x4_blocks_high_lookup[bsize];
     for (idy = 0; idy < 2; idy += num_4x4_blocks_high)
       for (idx = 0; idx < 2; idx += num_4x4_blocks_wide)
-        ++cpi->y_mode_count[0][mi->bmi[idy * 2 + idx].as_mode];
+        ++cm->counts.y_mode[0][mi->bmi[idy * 2 + idx].as_mode];
   } else {
-    ++cpi->y_mode_count[size_group_lookup[bsize]][y_mode];
+    ++cm->counts.y_mode[size_group_lookup[bsize]][y_mode];
   }
 }
 
@@ -2586,7 +2586,7 @@ static void encode_superblock(VP9_COMP *cpi, TOKENEXTRA **t, int output_enabled,
     vp9_encode_intra_block_y(x, MAX(bsize, BLOCK_8X8));
     vp9_encode_intra_block_uv(x, MAX(bsize, BLOCK_8X8));
     if (output_enabled)
-      sum_intra_stats(cpi, mi);
+      sum_intra_stats(cm, mi);
   } else {
     int idx = cm->ref_frame_map[get_ref_frame_idx(cpi, mbmi->ref_frame[0])];
     YV12_BUFFER_CONFIG *ref_fb = &cm->yv12_fb[idx];

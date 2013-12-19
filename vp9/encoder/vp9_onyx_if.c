@@ -1778,7 +1778,7 @@ VP9_PTR vp9_create_compressor(VP9_CONFIG *oxcf) {
 
   cm->error.setjmp = 0;
 
-  vp9_zero(cpi->y_uv_mode_count);
+  vp9_zero(cpi->common.counts.uv_mode);
 
 #ifdef MODE_TEST_HIT_STATS
   vp9_zero(cpi->mode_test_hits);
@@ -3084,11 +3084,6 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
   }
 
   if (!frame_is_intra_only(&cpi->common)) {
-    FRAME_COUNTS *counts = &cpi->common.counts;
-
-    vp9_copy(counts->y_mode, cpi->y_mode_count);
-    vp9_copy(counts->uv_mode, cpi->y_uv_mode_count);
-    vp9_copy(counts->intra_inter, cpi->intra_inter_count);
     if (!cpi->common.error_resilient_mode &&
         !cpi->common.frame_parallel_decoding_mode) {
       vp9_adapt_mode_probs(&cpi->common);
