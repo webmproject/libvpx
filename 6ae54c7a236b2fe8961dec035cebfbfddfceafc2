@@ -16,6 +16,24 @@
       "revId": "6ae54c7a236b2fe8961dec035cebfbfddfceafc2",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn///Wc\u003d",
+        "filename": "vp9/common/vp9_reconinter.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 80,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2013-12-19T19:16:20Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn///YI\u003d",
+      "revId": "6ae54c7a236b2fe8961dec035cebfbfddfceafc2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
