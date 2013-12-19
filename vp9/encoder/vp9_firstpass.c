@@ -1726,7 +1726,6 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
     }
   }
 
-
   // Set the interval until the next gf or arf.
   cpi->rc.baseline_gf_interval = i;
 
@@ -1932,15 +1931,18 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
     if (cpi->twopass.kf_group_bits < 0)
       cpi->twopass.kf_group_bits = 0;
 
-    // Note the error score left in the remaining frames of the group.
-    // For normal GFs we want to remove the error score for the first frame
-    // of the group (except in Key frame case where this has already
-    // happened)
-    if (!cpi->rc.source_alt_ref_pending && cpi->common.frame_type != KEY_FRAME)
+    // If this is an arf update we want to remove the score for the
+    // overlay frame at the end which will usually be very cheap to code.
+    // For normal GFs remove the score for the GF itself unless this is
+    // also a key frame in which case it has already been accounted for.
+    if (cpi->rc.source_alt_ref_pending) {
+      cpi->twopass.gf_group_error_left = (int64_t)gf_group_err - mod_frame_err;
+    } else if (cpi->common.frame_type != KEY_FRAME) {
       cpi->twopass.gf_group_error_left = (int64_t)(gf_group_err
                                                    - gf_first_frame_err);
-    else
+    } else {
       cpi->twopass.gf_group_error_left = (int64_t)gf_group_err;
+    }
 
     cpi->twopass.gf_group_bits -= cpi->twopass.gf_bits
         - cpi->rc.min_frame_bandwidth;
