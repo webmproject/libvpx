@@ -428,10 +428,7 @@ static void calc_pframe_target_size(VP9_COMP *const cpi) {
   }
 
   // Adjust target frame size for Golden Frames:
-  if (cpi->rc.frames_till_gf_update_due == 0 &&
-      !(cpi->pass == 0 && cpi->oxcf.end_usage == USAGE_STREAM_FROM_SERVER)) {
-    cpi->refresh_golden_frame = 1;
-    calc_gf_params(cpi);
+  if (cpi->refresh_golden_frame) {
     // If we are using alternate ref instead of gf then do not apply the boost
     // It will instead be applied to the altref update
     // Jims modified boost
