@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn///Ug\u003d",
+        "filename": "vp9/encoder/vp9_onyx_if.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1103,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2013-12-19T22:47:19Z",
+      "side": 1,
+      "message": "it would be nice to have a \"symmetry\", i.e.\n\nif (...) {\n  cpi-\u003erc.avg_frame_qindex[0] \u003d  ...\n  cpi-\u003erc.avg_frame_qindex[1] \u003d  ...\n  cpi-\u003erc.avg_frame_qindex[2] \u003d  ...\n} else {\n  cpi-\u003erc.avg_frame_qindex[0] \u003d ...\n  cpi-\u003erc.avg_frame_qindex[1] \u003d ...\n  cpi-\u003erc.avg_frame_qindex[2] \u003d ...\n}",
+      "revId": "cc1b6c24a3d541f415d93ef49e2364e334f014c1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
