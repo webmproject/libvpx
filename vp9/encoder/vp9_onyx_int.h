@@ -533,7 +533,6 @@ typedef struct VP9_COMP {
     int64_t clip_bits_total;
     double avg_iiratio;
     double modified_error_total;
-    double modified_error_used;
     double modified_error_left;
     double kf_intra_err_min;
     double gf_intra_err_min;

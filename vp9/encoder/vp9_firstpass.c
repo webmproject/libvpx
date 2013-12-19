@@ -1157,7 +1157,6 @@ void vp9_init_second_pass(VP9_COMP *cpi) {
     start_pos = cpi->twopass.stats_in;  // Note starting "file" position
 
     cpi->twopass.modified_error_total = 0.0;
-    cpi->twopass.modified_error_used = 0.0;
 
     while (input_stats(cpi, &this_frame) != EOF) {
       cpi->twopass.modified_error_total +=
@@ -1855,9 +1854,6 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   // Reset the file position
   reset_fpf_position(cpi, start_pos);
 
-  // Update the record of error used so far (only done once per gf group)
-  cpi->twopass.modified_error_used += gf_group_err;
-
   // Assign  bits to the arf or gf.
   for (i = 0;
       i <= (cpi->rc.source_alt_ref_pending &&
@@ -2041,26 +2037,6 @@ static void assign_std_frame_bits(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
 
   // Per frame bit target for this frame.
   cpi->rc.per_frame_bandwidth = target_frame_size;
-}
-
-// Make a damped adjustment to the active max q.
-static int adjust_active_maxq(int old_maxqi, int new_maxqi) {
-  int i;
-  const double old_q = vp9_convert_qindex_to_q(old_maxqi);
-  const double new_q = vp9_convert_qindex_to_q(new_maxqi);
-  const double target_q = ((old_q * 7.0) + new_q) / 8.0;
-
-  if (target_q > old_q) {
-    for (i = old_maxqi; i <= new_maxqi; i++)
-      if (vp9_convert_qindex_to_q(i) >= target_q)
-        return i;
-  } else {
-    for (i = old_maxqi; i >= new_maxqi; i--)
-      if (vp9_convert_qindex_to_q(i) <= target_q)
-        return i;
-  }
-
-  return new_maxqi;
 }
 
 void vp9_second_pass(VP9_COMP *cpi) {
