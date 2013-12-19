@@ -29,7 +29,7 @@ const double kUsecsInSec = 1000000.0;
 /*
  DecodePerfTest takes a tuple of filename + number of threads to decode with
  */
-typedef std::tr1::tuple<const char *const, unsigned> decode_perf_param_t;
+typedef std::tr1::tuple<const char *, unsigned> decode_perf_param_t;
 
 const decode_perf_param_t kVP9DecodePerfVectors[] = {
   make_tuple("vp90-2-bbb_426x240_tile_1x1_180kbps.webm", 1),
