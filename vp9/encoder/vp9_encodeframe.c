@@ -2340,7 +2340,8 @@ void vp9_encode_frame(VP9_COMP *cpi) {
   }
 
   if (cpi->sf.RD) {
-    int i, pred_type;
+    int i;
+    REFERENCE_MODE reference_mode;
     INTERPOLATION_TYPE filter_type;
     /*
      * This code does a single RD pass over the whole frame assuming
@@ -2351,55 +2352,47 @@ void vp9_encode_frame(VP9_COMP *cpi) {
      * that for subsequent frames.
      * It does the same analysis for transform size selection also.
      */
-    int frame_type = get_frame_type(cpi);
+    const int frame_type = get_frame_type(cpi);
+    const int64_t *mode_thresh = cpi->rd_prediction_type_threshes[frame_type];
+    const int64_t *filter_thresh = cpi->rd_filter_threshes[frame_type];
 
     /* prediction (compound, single or hybrid) mode selection */
     if (frame_type == 3 || !cm->allow_comp_inter_inter)
-      pred_type = SINGLE_REFERENCE;
-    else if (cpi->rd_prediction_type_threshes[frame_type][1]
-             > cpi->rd_prediction_type_threshes[frame_type][0]
-             && cpi->rd_prediction_type_threshes[frame_type][1]
-             > cpi->rd_prediction_type_threshes[frame_type][2]
-             && check_dual_ref_flags(cpi) && cpi->static_mb_pct == 100)
-      pred_type = COMPOUND_REFERENCE;
-    else if (cpi->rd_prediction_type_threshes[frame_type][0]
-             > cpi->rd_prediction_type_threshes[frame_type][2])
-      pred_type = SINGLE_REFERENCE;
+      reference_mode = SINGLE_REFERENCE;
+    else if (mode_thresh[COMPOUND_REFERENCE] > mode_thresh[SINGLE_REFERENCE] &&
+             mode_thresh[COMPOUND_REFERENCE] >
+                 mode_thresh[REFERENCE_MODE_SELECT] &&
+             check_dual_ref_flags(cpi) &&
+             cpi->static_mb_pct == 100)
+      reference_mode = COMPOUND_REFERENCE;
+    else if (mode_thresh[SINGLE_REFERENCE] > mode_thresh[REFERENCE_MODE_SELECT])
+      reference_mode = SINGLE_REFERENCE;
     else
-      pred_type = REFERENCE_MODE_SELECT;
+      reference_mode = REFERENCE_MODE_SELECT;
 
     /* filter type selection */
     // FIXME(rbultje) for some odd reason, we often select smooth_filter
     // as default filter for ARF overlay frames. This is a REALLY BAD
     // IDEA so we explicitly disable it here.
     if (frame_type != 3 &&
-        cpi->rd_filter_threshes[frame_type][1] >
-            cpi->rd_filter_threshes[frame_type][0] &&
-        cpi->rd_filter_threshes[frame_type][1] >
-            cpi->rd_filter_threshes[frame_type][2] &&
-        cpi->rd_filter_threshes[frame_type][1] >
-            cpi->rd_filter_threshes[frame_type][SWITCHABLE_FILTERS]) {
+        filter_thresh[EIGHTTAP_SMOOTH] > filter_thresh[EIGHTTAP] &&
+        filter_thresh[EIGHTTAP_SMOOTH] > filter_thresh[EIGHTTAP_SHARP] &&
+        filter_thresh[EIGHTTAP_SMOOTH] > filter_thresh[SWITCHABLE - 1]) {
       filter_type = EIGHTTAP_SMOOTH;
-    } else if (cpi->rd_filter_threshes[frame_type][2] >
-            cpi->rd_filter_threshes[frame_type][0] &&
-        cpi->rd_filter_threshes[frame_type][2] >
-            cpi->rd_filter_threshes[frame_type][SWITCHABLE_FILTERS]) {
+    } else if (filter_thresh[EIGHTTAP_SHARP] > filter_thresh[EIGHTTAP] &&
+               filter_thresh[EIGHTTAP_SHARP] > filter_thresh[SWITCHABLE - 1]) {
       filter_type = EIGHTTAP_SHARP;
-    } else if (cpi->rd_filter_threshes[frame_type][0] >
-                  cpi->rd_filter_threshes[frame_type][SWITCHABLE_FILTERS]) {
+    } else if (filter_thresh[EIGHTTAP] > filter_thresh[SWITCHABLE - 1]) {
       filter_type = EIGHTTAP;
     } else {
       filter_type = SWITCHABLE;
     }
 
-    cpi->mb.e_mbd.lossless = 0;
-    if (cpi->oxcf.lossless) {
-      cpi->mb.e_mbd.lossless = 1;
-    }
+    cpi->mb.e_mbd.lossless = cpi->oxcf.lossless;
 
     /* transform size selection (4x4, 8x8, 16x16 or select-per-mb) */
     select_tx_mode(cpi);
-    cpi->common.reference_mode = pred_type;
+    cpi->common.reference_mode = reference_mode;
     cpi->common.mcomp_filter_type = filter_type;
     encode_frame_internal(cpi);
 
