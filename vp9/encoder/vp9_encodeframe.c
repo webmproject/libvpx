@@ -368,8 +368,8 @@ static void select_in_frame_q_segment(VP9_COMP *cpi,
   int target_rate = cpi->rc.sb64_target_rate << 8;   // convert to bits << 8
 
   const int mi_offset = mi_row * cm->mi_cols + mi_col;
-  const int bw = 1 << mi_width_log2(BLOCK_64X64);
-  const int bh = 1 << mi_height_log2(BLOCK_64X64);
+  const int bw = num_8x8_blocks_wide_lookup[BLOCK_64X64];
+  const int bh = num_8x8_blocks_high_lookup[BLOCK_64X64];
   const int xmis = MIN(cm->mi_cols - mi_col, bw);
   const int ymis = MIN(cm->mi_rows - mi_row, bh);
   int complexity_metric = 64;
