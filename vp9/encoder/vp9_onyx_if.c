@@ -1094,12 +1094,18 @@ static void init_config(VP9_PTR ptr, VP9_CONFIG *oxcf) {
   // Initialize active best and worst q and average q values.
   cpi->rc.active_worst_quality      = cpi->oxcf.worst_allowed_q;
 
-  cpi->rc.avg_frame_qindex[0]       = (cpi->oxcf.worst_allowed_q +
-                                       cpi->oxcf.best_allowed_q) / 2;
-  cpi->rc.avg_frame_qindex[1]       = (cpi->oxcf.worst_allowed_q +
-                                       cpi->oxcf.best_allowed_q) / 2;
-  cpi->rc.avg_frame_qindex[2]       = (cpi->oxcf.worst_allowed_q +
-                                       cpi->oxcf.best_allowed_q) / 2;
+  if (cpi->pass == 0 && cpi->oxcf.end_usage == USAGE_STREAM_FROM_SERVER) {
+    cpi->rc.avg_frame_qindex[0] = cpi->oxcf.worst_allowed_q;
+    cpi->rc.avg_frame_qindex[1] = cpi->oxcf.worst_allowed_q;
+    cpi->rc.avg_frame_qindex[2] = cpi->oxcf.worst_allowed_q;
+  } else {
+    cpi->rc.avg_frame_qindex[0] = (cpi->oxcf.worst_allowed_q +
+                                   cpi->oxcf.best_allowed_q) / 2;
+    cpi->rc.avg_frame_qindex[1] = (cpi->oxcf.worst_allowed_q +
+                                   cpi->oxcf.best_allowed_q) / 2;
+    cpi->rc.avg_frame_qindex[2] = (cpi->oxcf.worst_allowed_q +
+                                   cpi->oxcf.best_allowed_q) / 2;
+  }
   cpi->rc.last_q[0]                 = cpi->oxcf.best_allowed_q;
   cpi->rc.last_q[1]                 = cpi->oxcf.best_allowed_q;
   cpi->rc.last_q[2]                 = cpi->oxcf.best_allowed_q;
