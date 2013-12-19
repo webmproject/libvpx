@@ -364,6 +364,19 @@ void vp9_end_first_pass(VP9_COMP *cpi) {
   output_stats(cpi, cpi->output_pkt_list, &cpi->twopass.total_stats);
 }
 
+static vp9_variance_fn_t get_block_variance_fn(BLOCK_SIZE bsize) {
+  switch (bsize) {
+    case BLOCK_8X8:
+      return vp9_mse8x8;
+    case BLOCK_16X8:
+      return vp9_mse16x8;
+    case BLOCK_8X16:
+      return vp9_mse8x16;
+    default:
+      return vp9_mse16x16;
+  }
+}
+
 static unsigned int zz_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
                                      YV12_BUFFER_CONFIG *recon_buffer,
                                      int recon_yoffset) {
@@ -375,20 +388,8 @@ static unsigned int zz_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
   const int ref_stride = xd->plane[0].pre[0].stride;
 
   unsigned int sse;
-  switch (xd->mi_8x8[0]->mbmi.sb_type) {
-    case BLOCK_8X8:
-      vp9_mse8x8(src, src_stride, ref, ref_stride, &sse);
-      break;
-    case BLOCK_16X8:
-      vp9_mse16x8(src, src_stride, ref, ref_stride, &sse);
-      break;
-    case BLOCK_8X16:
-      vp9_mse8x16(src, src_stride, ref, ref_stride, &sse);
-      break;
-    default:
-      vp9_mse16x16(src, src_stride, ref, ref_stride, &sse);
-      break;
-  }
+  vp9_variance_fn_t fn = get_block_variance_fn(xd->mi_8x8[0]->mbmi.sb_type);
+  fn(src, src_stride, ref, ref_stride, &sse);
   return sse;
 }
 
@@ -421,20 +422,7 @@ static void first_pass_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
   further_steps -= sr;
 
   // override the default variance function to use MSE
-  switch (xd->mi_8x8[0]->mbmi.sb_type) {
-    case BLOCK_8X8:
-      v_fn_ptr.vf = vp9_mse8x8;
-      break;
-    case BLOCK_16X8:
-      v_fn_ptr.vf = vp9_mse16x8;
-      break;
-    case BLOCK_8X16:
-      v_fn_ptr.vf = vp9_mse8x16;
-      break;
-    default:
-      v_fn_ptr.vf = vp9_mse16x16;
-      break;
-  }
+  v_fn_ptr.vf = get_block_variance_fn(xd->mi_8x8[0]->mbmi.sb_type);
 
   // Set up pointers for this macro block recon buffer
   xd->plane[0].pre[0].buf = recon_buffer->y_buffer + recon_yoffset;
