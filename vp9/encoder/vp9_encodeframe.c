@@ -2523,6 +2523,25 @@ static void adjust_act_zbin(VP9_COMP *cpi, MACROBLOCK *x) {
     x->act_zbin_adj = 1 - (int) (((int64_t) a + (b >> 1)) / b);
 #endif
 }
+
+static int get_zbin_mode_boost(MB_MODE_INFO *mbmi, int enabled) {
+  if (enabled) {
+    if (is_inter_block(mbmi)) {
+      if (mbmi->mode == ZEROMV) {
+        return mbmi->ref_frame[0] != LAST_FRAME ? GF_ZEROMV_ZBIN_BOOST
+                                                : LF_ZEROMV_ZBIN_BOOST;
+      } else {
+        return mbmi->sb_type < BLOCK_8X8 ? SPLIT_MV_ZBIN_BOOST
+                                         : MV_ZBIN_BOOST;
+      }
+    } else {
+      return INTRA_ZBIN_BOOST;
+    }
+  } else {
+    return 0;
+  }
+}
+
 static void encode_superblock(VP9_COMP *cpi, TOKENEXTRA **t, int output_enabled,
                               int mi_row, int mi_col, BLOCK_SIZE bsize) {
   VP9_COMMON * const cm = &cpi->common;
@@ -2561,24 +2580,8 @@ static void encode_superblock(VP9_COMP *cpi, TOKENEXTRA **t, int output_enabled,
 
     // Experimental code. Special case for gf and arf zeromv modes.
     // Increase zbin size to suppress noise
-    cpi->zbin_mode_boost = 0;
-    if (cpi->zbin_mode_boost_enabled) {
-      if (is_inter_block(mbmi)) {
-        if (mbmi->mode == ZEROMV) {
-          if (mbmi->ref_frame[0] != LAST_FRAME)
-            cpi->zbin_mode_boost = GF_ZEROMV_ZBIN_BOOST;
-          else
-            cpi->zbin_mode_boost = LF_ZEROMV_ZBIN_BOOST;
-        } else if (mbmi->sb_type < BLOCK_8X8) {
-          cpi->zbin_mode_boost = SPLIT_MV_ZBIN_BOOST;
-        } else {
-          cpi->zbin_mode_boost = MV_ZBIN_BOOST;
-        }
-      } else {
-        cpi->zbin_mode_boost = INTRA_ZBIN_BOOST;
-      }
-    }
-
+    cpi->zbin_mode_boost = get_zbin_mode_boost(mbmi,
+                                               cpi->zbin_mode_boost_enabled);
     vp9_update_zbin_extra(cpi, x);
   }
 
