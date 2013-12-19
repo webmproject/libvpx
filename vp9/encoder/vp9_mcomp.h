@@ -84,7 +84,7 @@ typedef int (fractional_mv_step_fp) (
     int *mvcost[2],
     int *distortion,
     unsigned int *sse);
-extern fractional_mv_step_fp vp9_find_best_sub_pixel_iterative;
+
 extern fractional_mv_step_fp vp9_find_best_sub_pixel_tree;
 
 typedef int (fractional_mv_step_comp_fp) (
@@ -99,7 +99,7 @@ typedef int (fractional_mv_step_comp_fp) (
     int *distortion, unsigned int *sse1,
     const uint8_t *second_pred,
     int w, int h);
-extern fractional_mv_step_comp_fp vp9_find_best_sub_pixel_comp_iterative;
+
 extern fractional_mv_step_comp_fp vp9_find_best_sub_pixel_comp_tree;
 
 typedef int (*vp9_full_search_fn_t)(MACROBLOCK *x,

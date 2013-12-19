@@ -216,8 +216,7 @@ typedef enum {
 } MODE_SEARCH_SKIP_LOGIC;
 
 typedef enum {
-  SUBPEL_ITERATIVE = 0,
-  SUBPEL_TREE = 1,
+  SUBPEL_TREE = 0,
   // Other methods to come
 } SUBPEL_SEARCH_METHODS;
 
