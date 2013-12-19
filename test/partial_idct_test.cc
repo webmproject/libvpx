@@ -90,7 +90,7 @@ TEST_P(PartialIDctTest, ResultsMatch) {
     memset(test_coef_block2, 0, sizeof(*test_coef_block2) * block_size);
     int max_energy_leftover = max_coeff * max_coeff;
     for (int j = 0; j < last_nonzero_; ++j) {
-      int16_t coef = static_cast<int16_t>(sqrt(max_energy_leftover) *
+      int16_t coef = static_cast<int16_t>(sqrt(1.0 * max_energy_leftover) *
                                           (rnd.Rand16() - 32768) / 65536);
       max_energy_leftover -= coef * coef;
       if (max_energy_leftover < 0) {
@@ -122,51 +122,51 @@ using std::tr1::make_tuple;
 INSTANTIATE_TEST_CASE_P(
     C, PartialIDctTest,
     ::testing::Values(
-        make_tuple(vp9_idct32x32_1024_add_c,
-                   vp9_idct32x32_34_add_c,
+        make_tuple(&vp9_idct32x32_1024_add_c,
+                   &vp9_idct32x32_34_add_c,
                    TX_32X32, 34),
-        make_tuple(vp9_idct32x32_1024_add_c,
-                   vp9_idct32x32_1_add_c,
+        make_tuple(&vp9_idct32x32_1024_add_c,
+                   &vp9_idct32x32_1_add_c,
                    TX_32X32, 1),
-        make_tuple(vp9_idct16x16_256_add_c,
-                   vp9_idct16x16_10_add_c,
+        make_tuple(&vp9_idct16x16_256_add_c,
+                   &vp9_idct16x16_10_add_c,
                    TX_16X16, 10),
-        make_tuple(vp9_idct16x16_256_add_c,
-                   vp9_idct16x16_1_add_c,
+        make_tuple(&vp9_idct16x16_256_add_c,
+                   &vp9_idct16x16_1_add_c,
                    TX_16X16, 1),
-        make_tuple(vp9_idct8x8_64_add_c,
-                   vp9_idct8x8_10_add_c,
+        make_tuple(&vp9_idct8x8_64_add_c,
+                   &vp9_idct8x8_10_add_c,
                    TX_8X8, 10),
-        make_tuple(vp9_idct8x8_64_add_c,
-                   vp9_idct8x8_1_add_c,
+        make_tuple(&vp9_idct8x8_64_add_c,
+                   &vp9_idct8x8_1_add_c,
                    TX_8X8, 1),
-        make_tuple(vp9_idct4x4_16_add_c,
-                   vp9_idct4x4_1_add_c,
+        make_tuple(&vp9_idct4x4_16_add_c,
+                   &vp9_idct4x4_1_add_c,
                    TX_4X4, 1)));
 #if HAVE_SSE2
 INSTANTIATE_TEST_CASE_P(
     SSE2, PartialIDctTest,
     ::testing::Values(
-        make_tuple(vp9_idct32x32_1024_add_c,
-                   vp9_idct32x32_34_add_sse2,
+        make_tuple(&vp9_idct32x32_1024_add_c,
+                   &vp9_idct32x32_34_add_sse2,
                    TX_32X32, 34),
-        make_tuple(vp9_idct32x32_1024_add_c,
-                   vp9_idct32x32_1_add_sse2,
+        make_tuple(&vp9_idct32x32_1024_add_c,
+                   &vp9_idct32x32_1_add_sse2,
                    TX_32X32, 1),
-        make_tuple(vp9_idct16x16_256_add_c,
-                   vp9_idct16x16_10_add_sse2,
+        make_tuple(&vp9_idct16x16_256_add_c,
+                   &vp9_idct16x16_10_add_sse2,
                    TX_16X16, 10),
-        make_tuple(vp9_idct16x16_256_add_c,
-                   vp9_idct16x16_1_add_sse2,
+        make_tuple(&vp9_idct16x16_256_add_c,
+                   &vp9_idct16x16_1_add_sse2,
                    TX_16X16, 1),
-        make_tuple(vp9_idct8x8_64_add_c,
-                   vp9_idct8x8_10_add_sse2,
+        make_tuple(&vp9_idct8x8_64_add_c,
+                   &vp9_idct8x8_10_add_sse2,
                    TX_8X8, 10),
-        make_tuple(vp9_idct8x8_64_add_c,
-                   vp9_idct8x8_1_add_sse2,
+        make_tuple(&vp9_idct8x8_64_add_c,
+                   &vp9_idct8x8_1_add_sse2,
                    TX_8X8, 1),
-        make_tuple(vp9_idct4x4_16_add_c,
-                   vp9_idct4x4_1_add_sse2,
+        make_tuple(&vp9_idct4x4_16_add_c,
+                   &vp9_idct4x4_1_add_sse2,
                    TX_4X4, 1)));
 #endif
 }  // namespace
