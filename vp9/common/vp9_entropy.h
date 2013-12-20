@@ -53,7 +53,6 @@ typedef struct {
 // indexed by token value
 extern const vp9_extra_bit vp9_extra_bits[ENTROPY_TOKENS];
 
-#define MAX_PROB                255
 #define DCT_MAX_VALUE           16384
 
 /* Coefficients are predicted via a 3-dimensional probability table. */

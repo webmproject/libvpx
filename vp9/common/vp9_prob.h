@@ -20,6 +20,8 @@
 
 typedef uint8_t vp9_prob;
 
+#define MAX_PROB 255
+
 #define vp9_prob_half ((vp9_prob) 128)
 
 typedef int8_t vp9_tree_index;
