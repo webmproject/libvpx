@@ -393,8 +393,7 @@ void vp9_temporal_filter_prepare(VP9_COMP *cpi, int distance) {
   const int num_frames_forward = vp9_lookahead_depth(cpi->lookahead)
                                - (num_frames_backward + 1);
 
-  struct scale_factors scale;
-  struct scale_factors_common scale_comm;
+  struct scale_factors sf;
 
   switch (blur_type) {
     case 1:
@@ -454,7 +453,7 @@ void vp9_temporal_filter_prepare(VP9_COMP *cpi, int distance) {
 #endif
 
   // Setup scaling factors. Scaling on each of the arnr frames is not supported
-  vp9_setup_scale_factors_for_frame(&scale, &scale_comm,
+  vp9_setup_scale_factors_for_frame(&sf,
       get_frame_new_buffer(cm)->y_crop_width,
       get_frame_new_buffer(cm)->y_crop_height,
       cm->width, cm->height);
@@ -469,7 +468,7 @@ void vp9_temporal_filter_prepare(VP9_COMP *cpi, int distance) {
   }
 
   temporal_filter_iterate_c(cpi, frames_to_blur, frames_to_blur_backward,
-                            strength, &scale);
+                            strength, &sf);
 }
 
 void configure_arnr_filter(VP9_COMP *cpi, const unsigned int this_frame,

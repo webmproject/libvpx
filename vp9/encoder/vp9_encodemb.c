@@ -31,11 +31,11 @@ void vp9_setup_interp_filters(MACROBLOCKD *xd,
   if (xd->mi_8x8 && xd->mi_8x8[0]) {
     MB_MODE_INFO *const mbmi = &xd->mi_8x8[0]->mbmi;
 
-    set_scale_factors(xd, mbmi->ref_frame[0] - LAST_FRAME,
-                          mbmi->ref_frame[1] - LAST_FRAME,
-                          cm->active_ref_scale);
+    set_scale_factors(cm, xd, mbmi->ref_frame[0] - LAST_FRAME,
+                              mbmi->ref_frame[1] - LAST_FRAME);
+
   } else {
-    set_scale_factors(xd, -1, -1, cm->active_ref_scale);
+    set_scale_factors(cm, xd, -1, -1);
   }
 
   xd->subpix.filter_x = xd->subpix.filter_y =

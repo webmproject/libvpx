@@ -380,15 +380,15 @@ static void set_ref(VP9_COMMON *const cm, MACROBLOCKD *const xd,
   MB_MODE_INFO *const mbmi = &xd->mi_8x8[0]->mbmi;
   const int ref = mbmi->ref_frame[idx] - LAST_FRAME;
   const YV12_BUFFER_CONFIG *cfg = get_frame_ref_buffer(cm, ref);
-  const struct scale_factors_common *sfc = &cm->active_ref_scale_comm[ref];
+  const struct scale_factors *sf = &cm->active_ref_scale[ref];
 
   xd->ref_buf[idx] = cfg;
-  if (!vp9_is_valid_scale(sfc))
+  if (!vp9_is_valid_scale(sf))
     vpx_internal_error(&cm->error, VPX_CODEC_UNSUP_BITSTREAM,
                        "Invalid scale factors");
 
-  xd->scale_factor[idx].sfc = sfc;
-  setup_pre_planes(xd, idx, cfg, mi_row, mi_col, &xd->scale_factor[idx]);
+  xd->scale_factors[idx] = sf;
+  setup_pre_planes(xd, idx, cfg, mi_row, mi_col, xd->scale_factors[idx]);
   xd->corrupted |= cfg->corrupted;
 }
 
@@ -1201,7 +1201,7 @@ static size_t read_uncompressed_header(VP9D_COMP *pbi,
 
       for (i = 0; i < REFS_PER_FRAME; ++i) {
         vp9_setup_scale_factors(cm, i);
-        if (vp9_is_scaled(&cm->active_ref_scale_comm[i]))
+        if (vp9_is_scaled(&cm->active_ref_scale[i]))
           vp9_extend_frame_borders(&cm->yv12_fb[cm->active_ref_idx[i]],
                                    cm->subsampling_x, cm->subsampling_y);
       }

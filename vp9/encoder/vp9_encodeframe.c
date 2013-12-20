@@ -2594,10 +2594,9 @@ static void encode_superblock(VP9_COMP *cpi, TOKENEXTRA **t, int output_enabled,
 
     assert(cm->frame_type != KEY_FRAME);
 
-    setup_pre_planes(xd, 0, ref_fb, mi_row, mi_col,
-                     &xd->scale_factor[0]);
+    setup_pre_planes(xd, 0, ref_fb, mi_row, mi_col, xd->scale_factors[0]);
     setup_pre_planes(xd, 1, second_ref_fb, mi_row, mi_col,
-                     &xd->scale_factor[1]);
+                     xd->scale_factors[1]);
 
     vp9_build_inter_predictors_sb(xd, mi_row, mi_col, MAX(bsize, BLOCK_8X8));
   }

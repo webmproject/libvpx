@@ -123,7 +123,6 @@ typedef struct VP9Common {
   // Each frame can reference REFS_PER_FRAME buffers
   int active_ref_idx[REFS_PER_FRAME];
   struct scale_factors active_ref_scale[REFS_PER_FRAME];
-  struct scale_factors_common active_ref_scale_comm[REFS_PER_FRAME];
   int new_fb_idx;
 
   YV12_BUFFER_CONFIG post_proc_buffer;
