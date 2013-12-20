@@ -13,7 +13,7 @@
 #define VP9_DECODER_VP9_DETOKENIZE_H_
 
 #include "vp9/decoder/vp9_onyxd_int.h"
-#include "vp9/decoder/vp9_dboolhuff.h"
+#include "vp9/decoder/vp9_reader.h"
 
 int vp9_decode_block_tokens(VP9_COMMON *cm, MACROBLOCKD *xd,
                             int plane, int block, BLOCK_SIZE plane_bsize,

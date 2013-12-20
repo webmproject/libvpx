@@ -11,7 +11,7 @@
 #include "vpx_ports/mem.h"
 #include "vpx_mem/vpx_mem.h"
 
-#include "vp9/decoder/vp9_dboolhuff.h"
+#include "vp9/decoder/vp9_reader.h"
 
 // This is meant to be a large, positive constant that can still be efficiently
 // loaded as an immediate (on platforms like ARM, for example).

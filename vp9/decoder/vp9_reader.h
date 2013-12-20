@@ -8,8 +8,8 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#ifndef VP9_DECODER_VP9_DBOOLHUFF_H_
-#define VP9_DECODER_VP9_DBOOLHUFF_H_
+#ifndef VP9_DECODER_VP9_READER_H_
+#define VP9_DECODER_VP9_READER_H_
 
 #include <stddef.h>
 #include <limits.h>
@@ -100,4 +100,4 @@ static int vp9_read_tree(vp9_reader *r, const vp9_tree_index *tree,
   return -i;
 }
 
-#endif  // VP9_DECODER_VP9_DBOOLHUFF_H_
+#endif  // VP9_DECODER_VP9_READER_H_

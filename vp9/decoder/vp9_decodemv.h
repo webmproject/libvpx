@@ -12,7 +12,7 @@
 #define VP9_DECODER_VP9_DECODEMV_H_
 
 #include "vp9/decoder/vp9_onyxd_int.h"
-#include "vp9/decoder/vp9_dboolhuff.h"
+#include "vp9/decoder/vp9_reader.h"
 
 struct TileInfo;
 
