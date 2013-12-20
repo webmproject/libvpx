@@ -3167,6 +3167,7 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
 #endif
 
     // As this frame is a key frame the next defaults to an inter frame.
+    cm->frame_type = INTER_FRAME;
     vp9_clear_system_state();
     cpi->rc.frames_since_key = 0;
   } else {
