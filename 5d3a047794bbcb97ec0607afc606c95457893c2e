@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn///IU\u003d",
+        "filename": "vp9/decoder/vp9_reader.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2013-12-20T18:26:54Z",
+      "side": 1,
+      "message": "fix the #ifdef and #define according to the fileanem.",
+      "revId": "5d3a047794bbcb97ec0607afc606c95457893c2e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
