@@ -9,7 +9,7 @@
  */
 
 #include <assert.h>
-#include "vp9/encoder/vp9_boolhuff.h"
+#include "vp9/encoder/vp9_writer.h"
 #include "vp9/common/vp9_entropy.h"
 
 #if defined(SECTIONBITS_OUTPUT)

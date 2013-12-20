@@ -8,16 +8,8 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-
-/****************************************************************************
-*
-*   Module Title :     vp9_boolhuff.h
-*
-*   Description  :     Bool Coder header file.
-*
-****************************************************************************/
-#ifndef VP9_ENCODER_VP9_BOOLHUFF_H_
-#define VP9_ENCODER_VP9_BOOLHUFF_H_
+#ifndef VP9_ENCODER_VP9_WRITER_H_
+#define VP9_ENCODER_VP9_WRITER_H_
 
 #include "vpx_ports/mem.h"
 
@@ -33,7 +25,7 @@ typedef struct {
 
   // Variables used to track bit costs without outputing to the bitstream
   unsigned int  measure_cost;
-  unsigned long bit_counter;
+  uint64_t bit_counter;
 } vp9_writer;
 
 extern const unsigned int vp9_prob_cost[256];
@@ -113,4 +105,4 @@ static void vp9_write_literal(vp9_writer *w, int data, int bits) {
 
 #define vp9_write_prob(w, v) vp9_write_literal((w), (v), 8)
 
-#endif  // VP9_ENCODER_VP9_BOOLHUFF_H_
+#endif  // VP9_ENCODER_VP9_WRITER_H_
