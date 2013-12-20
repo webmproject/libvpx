@@ -17,7 +17,6 @@
 
 #include "vp9/common/vp9_entropymode.h"
 #include "vp9/common/vp9_entropymv.h"
-#include "vp9/common/vp9_findnearmv.h"
 #include "vp9/common/vp9_tile_common.h"
 #include "vp9/common/vp9_seg_common.h"
 #include "vp9/common/vp9_pred_common.h"

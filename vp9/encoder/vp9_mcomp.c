@@ -16,7 +16,6 @@
 
 #include "vpx_mem/vpx_mem.h"
 
-#include "vp9/common/vp9_findnearmv.h"
 #include "vp9/common/vp9_common.h"
 
 #include "vp9/encoder/vp9_onyx_int.h"
