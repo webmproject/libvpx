@@ -431,8 +431,6 @@ typedef struct VP9_COMP {
 
   int64_t rd_comp_pred_diff[REFERENCE_MODES];
   int64_t rd_prediction_type_threshes[4][REFERENCE_MODES];
-  unsigned int intra_inter_count[INTRA_INTER_CONTEXTS][2];
-
   int64_t rd_tx_select_diff[TX_MODES];
   // FIXME(rbultje) can this overflow?
   int rd_tx_select_threshes[4][TX_MODES];
@@ -460,9 +458,6 @@ typedef struct VP9_COMP {
   RATE_CONTROL rc;
 
   int cq_target_quality;
-
-  int y_mode_count[4][INTRA_MODES];
-  int y_uv_mode_count[INTRA_MODES][INTRA_MODES];
 
   vp9_coeff_count coef_counts[TX_SIZES][PLANE_TYPES];
   vp9_coeff_probs_model frame_coef_probs[TX_SIZES][PLANE_TYPES];
