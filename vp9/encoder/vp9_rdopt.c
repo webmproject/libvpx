@@ -1522,7 +1522,7 @@ static int64_t encode_inter_mb_segment(VP9_COMP *cpi,
     vp9_build_inter_predictor(pre, pd->pre[ref].stride,
                               dst, pd->dst.stride,
                               &mi->bmi[i].as_mv[ref].as_mv,
-                              &xd->scale_factor[ref],
+                              xd->scale_factors[ref],
                               width, height, ref, &xd->subpix, MV_PRECISION_Q3,
                               mi_col * MI_SIZE + 4 * (i % 2),
                               mi_row * MI_SIZE + 4 * (i / 2));
@@ -2259,23 +2259,18 @@ static void setup_buffer_inter(VP9_COMP *cpi, MACROBLOCK *x,
                                int mi_row, int mi_col,
                                int_mv frame_nearest_mv[MAX_REF_FRAMES],
                                int_mv frame_near_mv[MAX_REF_FRAMES],
-                               struct buf_2d yv12_mb[4][MAX_MB_PLANE],
-                               struct scale_factors scale[MAX_REF_FRAMES]) {
+                               struct buf_2d yv12_mb[4][MAX_MB_PLANE]) {
   VP9_COMMON *cm = &cpi->common;
   YV12_BUFFER_CONFIG *yv12 = &cm->yv12_fb[cpi->common.ref_frame_map[idx]];
   MACROBLOCKD *const xd = &x->e_mbd;
   MB_MODE_INFO *const mbmi = &xd->mi_8x8[0]->mbmi;
+  const struct scale_factors *const sf =
+      &cpi->common.active_ref_scale[frame_type - 1];
 
-  // set up scaling factors
-  scale[frame_type] = cpi->common.active_ref_scale[frame_type - 1];
-
-  scale[frame_type].sfc->set_scaled_offsets(&scale[frame_type],
-                                            mi_row * MI_SIZE, mi_col * MI_SIZE);
 
   // TODO(jkoleszar): Is the UV buffer ever used here? If so, need to make this
   // use the UV scaling factors.
-  setup_pred_block(xd, yv12_mb[frame_type], yv12, mi_row, mi_col,
-                   &scale[frame_type], &scale[frame_type]);
+  setup_pred_block(xd, yv12_mb[frame_type], yv12, mi_row, mi_col, sf, sf);
 
   // Gets an initial list of candidate vectors from neighbours and orders them
   vp9_find_mv_refs(cm, xd, tile, xd->mi_8x8[0],
@@ -2292,7 +2287,7 @@ static void setup_buffer_inter(VP9_COMP *cpi, MACROBLOCK *x,
   // Further refinement that is encode side only to test the top few candidates
   // in full and choose the best as the centre point for subsequent searches.
   // The current implementation doesn't support scaling.
-  if (!vp9_is_scaled(scale[frame_type].sfc) && block_size >= BLOCK_8X8)
+  if (!vp9_is_scaled(sf) && block_size >= BLOCK_8X8)
     mv_pred(cpi, x, yv12_mb[frame_type][0].buf, yv12->y_stride,
             frame_type, block_size);
 }
@@ -2518,7 +2513,7 @@ static void joint_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
                               ref_yv12[!id].stride,
                               second_pred, pw,
                               &frame_mv[refs[!id]].as_mv,
-                              &xd->scale_factor[!id],
+                              xd->scale_factors[!id],
                               pw, ph, 0,
                               &xd->subpix, MV_PRECISION_Q3,
                               mi_col * MI_SIZE, mi_row * MI_SIZE);
@@ -3129,7 +3124,6 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
   int64_t dist_uv[TX_SIZES];
   int skip_uv[TX_SIZES];
   MB_PREDICTION_MODE mode_uv[TX_SIZES];
-  struct scale_factors scale_factor[4];
   unsigned int ref_frame_mask = 0;
   unsigned int mode_mask = 0;
   int64_t mode_distortions[MB_MODE_COUNT] = {-1};
@@ -3196,8 +3190,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
     if (cpi->ref_frame_flags & flag_list[ref_frame]) {
       setup_buffer_inter(cpi, x, tile, idx_list[ref_frame], ref_frame,
                          block_size, mi_row, mi_col,
-                         frame_mv[NEARESTMV], frame_mv[NEARMV],
-                         yv12_mb, scale_factor);
+                         frame_mv[NEARESTMV], frame_mv[NEARMV], yv12_mb);
     }
     frame_mv[NEWMV][ref_frame].as_int = INVALID_MV;
     frame_mv[ZEROMV][ref_frame].as_int = 0;
@@ -3310,7 +3303,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
           continue;
     }
 
-    set_scale_factors(xd, ref_frame, second_ref_frame, scale_factor);
+    set_scale_factors(cm, xd, ref_frame - 1, second_ref_frame - 1);
     mbmi->uv_mode = DC_PRED;
 
     // Evaluate all sub-pel filters irrespective of whether we can use
@@ -3322,7 +3315,6 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
       if (!(cpi->ref_frame_flags & flag_list[second_ref_frame]))
         continue;
 
-      set_scale_factors(xd, ref_frame, second_ref_frame, scale_factor);
       mode_excluded = mode_excluded ? mode_excluded
                                     : cm->reference_mode == SINGLE_REFERENCE;
     } else {
@@ -3760,8 +3752,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
     vp9_zero(best_tx_diff);
   }
 
-  set_scale_factors(xd, mbmi->ref_frame[0], mbmi->ref_frame[1],
-                    scale_factor);
+  set_scale_factors(cm, xd, mbmi->ref_frame[0] - 1, mbmi->ref_frame[1] - 1);
   store_coding_context(x, ctx, best_mode_index,
                        &mbmi->ref_mvs[mbmi->ref_frame[0]][0],
                        &mbmi->ref_mvs[mbmi->ref_frame[1] < 0 ? 0 :
@@ -3815,7 +3806,6 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
   int64_t dist_uv[TX_SIZES];
   int skip_uv[TX_SIZES];
   MB_PREDICTION_MODE mode_uv[TX_SIZES] = { 0 };
-  struct scale_factors scale_factor[4];
   int intra_cost_penalty = 20 * vp9_dc_quant(cpi->common.base_qindex,
                                              cpi->common.y_dc_delta_q);
   int_mv seg_mvs[4][MAX_REF_FRAMES];
@@ -3850,7 +3840,7 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
       setup_buffer_inter(cpi, x, tile, idx_list[ref_frame], ref_frame,
                          block_size, mi_row, mi_col,
                          frame_mv[NEARESTMV], frame_mv[NEARMV],
-                         yv12_mb, scale_factor);
+                         yv12_mb);
     }
     frame_mv[NEWMV][ref_frame].as_int = INVALID_MV;
     frame_mv[ZEROMV][ref_frame].as_int = 0;
@@ -3947,14 +3937,14 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
     // TODO(jingning, jkoleszar): scaling reference frame not supported for
     // sub8x8 blocks.
     if (ref_frame > 0 &&
-        vp9_is_scaled(scale_factor[ref_frame].sfc))
+        vp9_is_scaled(&cpi->common.active_ref_scale[ref_frame - 1]))
       continue;
 
     if (second_ref_frame > 0 &&
-        vp9_is_scaled(scale_factor[second_ref_frame].sfc))
+        vp9_is_scaled(&cpi->common.active_ref_scale[second_ref_frame - 1]))
       continue;
 
-    set_scale_factors(xd, ref_frame, second_ref_frame, scale_factor);
+    set_scale_factors(cm, xd, ref_frame - 1, second_ref_frame - 1);
     mbmi->uv_mode = DC_PRED;
 
     // Evaluate all sub-pel filters irrespective of whether we can use
@@ -3965,7 +3955,6 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
     if (comp_pred) {
       if (!(cpi->ref_frame_flags & flag_list[second_ref_frame]))
         continue;
-      set_scale_factors(xd, ref_frame, second_ref_frame, scale_factor);
 
       mode_excluded = mode_excluded ? mode_excluded
                                     : cm->reference_mode == SINGLE_REFERENCE;
@@ -4501,8 +4490,7 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
     vp9_zero(best_tx_diff);
   }
 
-  set_scale_factors(xd, mbmi->ref_frame[0], mbmi->ref_frame[1],
-                    scale_factor);
+  set_scale_factors(cm, xd, mbmi->ref_frame[0] - 1, mbmi->ref_frame[1] - 1);
   store_coding_context(x, ctx, best_mode_index,
                        &mbmi->ref_mvs[mbmi->ref_frame[0]][0],
                        &mbmi->ref_mvs[mbmi->ref_frame[1] < 0 ? 0 :

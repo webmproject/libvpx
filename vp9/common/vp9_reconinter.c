@@ -66,11 +66,11 @@ static void inter_predictor(const uint8_t *src, int src_stride,
                             uint8_t *dst, int dst_stride,
                             const int subpel_x,
                             const int subpel_y,
-                            const struct scale_factors *scale,
+                            const struct scale_factors *sf,
                             int w, int h, int ref,
                             const struct subpix_fn_table *subpix,
                             int xs, int ys) {
-  scale->sfc->predict[subpel_x != 0][subpel_y != 0][ref](
+  sf->predict[subpel_x != 0][subpel_y != 0][ref](
       src, src_stride, dst, dst_stride,
       subpix->filter_x[subpel_x], xs,
       subpix->filter_y[subpel_y], ys,
@@ -80,7 +80,7 @@ static void inter_predictor(const uint8_t *src, int src_stride,
 void vp9_build_inter_predictor(const uint8_t *src, int src_stride,
                                uint8_t *dst, int dst_stride,
                                const MV *src_mv,
-                               struct scale_factors *scale,
+                               const struct scale_factors *sf,
                                int w, int h, int ref,
                                const struct subpix_fn_table *subpix,
                                enum mv_precision precision,
@@ -88,19 +88,14 @@ void vp9_build_inter_predictor(const uint8_t *src, int src_stride,
   const int is_q4 = precision == MV_PRECISION_Q4;
   const MV mv_q4 = { is_q4 ? src_mv->row : src_mv->row * 2,
                      is_q4 ? src_mv->col : src_mv->col * 2 };
-  const struct scale_factors_common *sfc = scale->sfc;
-  int subpel_x, subpel_y;
-  MV32 mv;
-
-  sfc->set_scaled_offsets(scale, y, x);
-  mv = sfc->scale_mv(&mv_q4, scale);
-  subpel_x = mv.col & SUBPEL_MASK;
-  subpel_y = mv.row & SUBPEL_MASK;
+  MV32 mv = vp9_scale_mv(&mv_q4, x, y, sf);
+  const int subpel_x = mv.col & SUBPEL_MASK;
+  const int subpel_y = mv.row & SUBPEL_MASK;
 
   src += (mv.row >> SUBPEL_BITS) * src_stride + (mv.col >> SUBPEL_BITS);
 
   inter_predictor(src, src_stride, dst, dst_stride, subpel_x, subpel_y,
-                  scale, w, h, ref, subpix, sfc->x_step_q4, sfc->y_step_q4);
+                  sf, w, h, ref, subpix, sf->x_step_q4, sf->y_step_q4);
 }
 
 static INLINE int round_mv_comp_q4(int value) {
@@ -158,7 +153,7 @@ static void build_inter_predictors(MACROBLOCKD *xd, int plane, int block,
   int ref;
 
   for (ref = 0; ref < 1 + is_compound; ++ref) {
-    struct scale_factors *const scale = &xd->scale_factor[ref];
+    const struct scale_factors *const sf = xd->scale_factors[ref];
     struct buf_2d *const pre_buf = &pd->pre[ref];
     struct buf_2d *const dst_buf = &pd->dst;
     uint8_t *const dst = dst_buf->buf + dst_buf->stride * y + x;
@@ -185,12 +180,11 @@ static void build_inter_predictors(MACROBLOCKD *xd, int plane, int block,
     MV32 scaled_mv;
     int xs, ys, subpel_x, subpel_y;
 
-    if (vp9_is_scaled(scale->sfc)) {
-      pre = pre_buf->buf + scaled_buffer_offset(x, y, pre_buf->stride, scale);
-      scale->sfc->set_scaled_offsets(scale, mi_y + y, mi_x + x);
-      scaled_mv = scale->sfc->scale_mv(&mv_q4, scale);
-      xs = scale->sfc->x_step_q4;
-      ys = scale->sfc->y_step_q4;
+    if (vp9_is_scaled(sf)) {
+      pre = pre_buf->buf + scaled_buffer_offset(x, y, pre_buf->stride, sf);
+      scaled_mv = vp9_scale_mv(&mv_q4, mi_x + x, mi_y + y, sf);
+      xs = sf->x_step_q4;
+      ys = sf->y_step_q4;
     } else {
       pre = pre_buf->buf + (y * pre_buf->stride + x);
       scaled_mv.row = mv_q4.row;
@@ -203,7 +197,7 @@ static void build_inter_predictors(MACROBLOCKD *xd, int plane, int block,
            + (scaled_mv.col >> SUBPEL_BITS);
 
     inter_predictor(pre, pre_buf->stride, dst, dst_buf->stride,
-                    subpel_x, subpel_y, scale, w, h, ref, &xd->subpix, xs, ys);
+                    subpel_x, subpel_y, sf, w, h, ref, &xd->subpix, xs, ys);
   }
 }
 
@@ -262,7 +256,7 @@ static void dec_build_inter_predictors(MACROBLOCKD *xd, int plane, int block,
   int ref;
 
   for (ref = 0; ref < 1 + is_compound; ++ref) {
-    struct scale_factors *const scale = &xd->scale_factor[ref];
+    const struct scale_factors *const sf = xd->scale_factors[ref];
     struct buf_2d *const pre_buf = &pd->pre[ref];
     struct buf_2d *const dst_buf = &pd->dst;
     uint8_t *const dst = dst_buf->buf + dst_buf->stride * y + x;
@@ -310,16 +304,15 @@ static void dec_build_inter_predictors(MACROBLOCKD *xd, int plane, int block,
     x0_16 = x0 << SUBPEL_BITS;
     y0_16 = y0 << SUBPEL_BITS;
 
-    if (vp9_is_scaled(scale->sfc)) {
-      scale->sfc->set_scaled_offsets(scale, mi_y + y, mi_x + x);
-      scaled_mv = scale->sfc->scale_mv(&mv_q4, scale);
-      xs = scale->sfc->x_step_q4;
-      ys = scale->sfc->y_step_q4;
+    if (vp9_is_scaled(sf)) {
+      scaled_mv = vp9_scale_mv(&mv_q4, mi_x + x, mi_y + y, sf);
+      xs = sf->x_step_q4;
+      ys = sf->y_step_q4;
       // Get block position in the scaled reference frame.
-      x0 = scale->sfc->scale_value_x(x0, scale->sfc);
-      y0 = scale->sfc->scale_value_y(y0, scale->sfc);
-      x0_16 = scale->sfc->scale_value_x(x0_16, scale->sfc);
-      y0_16 = scale->sfc->scale_value_y(y0_16, scale->sfc);
+      x0 = sf->scale_value_x(x0, sf);
+      y0 = sf->scale_value_y(y0, sf);
+      x0_16 = sf->scale_value_x(x0_16, sf);
+      y0_16 = sf->scale_value_y(y0_16, sf);
     } else {
       scaled_mv.row = mv_q4.row;
       scaled_mv.col = mv_q4.col;
@@ -367,7 +360,7 @@ static void dec_build_inter_predictors(MACROBLOCKD *xd, int plane, int block,
     }
 
     inter_predictor(buf_ptr, pre_buf->stride, dst, dst_buf->stride, subpel_x,
-                    subpel_y, scale, w, h, ref, &xd->subpix, xs, ys);
+                    subpel_y, sf, w, h, ref, &xd->subpix, xs, ys);
   }
 }
 
@@ -402,15 +395,9 @@ void vp9_dec_build_inter_predictors_sb(MACROBLOCKD *xd, int mi_row, int mi_col,
 void vp9_setup_scale_factors(VP9_COMMON *cm, int i) {
   const int ref = cm->active_ref_idx[i];
   struct scale_factors *const sf = &cm->active_ref_scale[i];
-  struct scale_factors_common *const sfc = &cm->active_ref_scale_comm[i];
-  if (ref >= cm->fb_count) {
-    vp9_zero(*sf);
-    vp9_zero(*sfc);
-  } else {
-    YV12_BUFFER_CONFIG *const fb = &cm->yv12_fb[ref];
-    vp9_setup_scale_factors_for_frame(sf, sfc,
-                                      fb->y_crop_width, fb->y_crop_height,
-                                      cm->width, cm->height);
-  }
+  YV12_BUFFER_CONFIG *const fb = &cm->yv12_fb[ref];
+  vp9_setup_scale_factors_for_frame(sf,
+                                    fb->y_crop_width, fb->y_crop_height,
+                                    cm->width, cm->height);
 }
 

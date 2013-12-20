@@ -30,18 +30,16 @@ void vp9_dec_build_inter_predictors_sb(MACROBLOCKD *xd, int mi_row, int mi_col,
 void vp9_build_inter_predictor(const uint8_t *src, int src_stride,
                                uint8_t *dst, int dst_stride,
                                const MV *mv_q3,
-                               struct scale_factors *scale,
+                               const struct scale_factors *sf,
                                int w, int h, int do_avg,
                                const struct subpix_fn_table *subpix,
                                enum mv_precision precision,
                                int x, int y);
 
 static int scaled_buffer_offset(int x_offset, int y_offset, int stride,
-                                const struct scale_factors *scale) {
-  const int x = scale ? scale->sfc->scale_value_x(x_offset, scale->sfc) :
-      x_offset;
-  const int y = scale ? scale->sfc->scale_value_y(y_offset, scale->sfc) :
-      y_offset;
+                                const struct scale_factors *sf) {
+  const int x = sf ? sf->scale_value_x(x_offset, sf) : x_offset;
+  const int y = sf ? sf->scale_value_y(y_offset, sf) : y_offset;
   return y * stride + x;
 }
 
@@ -92,10 +90,10 @@ static void setup_pre_planes(MACROBLOCKD *xd, int i,
   }
 }
 
-static void set_scale_factors(MACROBLOCKD *xd, int ref0, int ref1,
-                              struct scale_factors sf[MAX_REF_FRAMES]) {
-  xd->scale_factor[0] = sf[ref0 >= 0 ? ref0 : 0];
-  xd->scale_factor[1] = sf[ref1 >= 0 ? ref1 : 0];
+static void set_scale_factors(VP9_COMMON *cm, MACROBLOCKD *xd,
+                              int ref0, int ref1) {
+  xd->scale_factors[0] = &cm->active_ref_scale[ref0 >= 0 ? ref0 : 0];
+  xd->scale_factors[1] = &cm->active_ref_scale[ref1 >= 0 ? ref1 : 0];
 }
 
 void vp9_setup_scale_factors(VP9_COMMON *cm, int i);
