@@ -26,7 +26,6 @@
 #include "vpx_ports/mem.h"
 #include "vpx/internal/vpx_codec_internal.h"
 #include "vp9/encoder/vp9_mcomp.h"
-#include "vp9/common/vp9_findnearmv.h"
 #include "vp9/encoder/vp9_lookahead.h"
 
 #define DISABLE_RC_LONG_TERM_MEM 0
