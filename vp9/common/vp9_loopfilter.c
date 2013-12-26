@@ -1625,6 +1625,17 @@ void vp9_loop_filter_frame(YV12_BUFFER_CONFIG *frame,
                        y_only);
 }
 
+void vp9_loop_filter_data_reset(
+    LFWorkerData *lf_data, YV12_BUFFER_CONFIG *frame_buffer,
+    struct VP9Common *cm, const struct macroblockd_plane planes[MAX_MB_PLANE]) {
+  lf_data->frame_buffer = frame_buffer;
+  lf_data->cm = cm;
+  lf_data->start = 0;
+  lf_data->stop = 0;
+  lf_data->y_only = 0;
+  vpx_memcpy(lf_data->planes, planes, sizeof(lf_data->planes));
+}
+
 int vp9_loop_filter_worker(LFWorkerData *const lf_data, void *unused) {
   (void)unused;
   vp9_loop_filter_rows(lf_data->frame_buffer, lf_data->cm, lf_data->planes,

@@ -126,6 +126,10 @@ typedef struct LoopFilterWorkerData {
   int y_only;
 } LFWorkerData;
 
+void vp9_loop_filter_data_reset(
+    LFWorkerData *lf_data, YV12_BUFFER_CONFIG *frame_buffer,
+    struct VP9Common *cm, const struct macroblockd_plane planes[MAX_MB_PLANE]);
+
 // Operates on the rows described by 'lf_data'.
 int vp9_loop_filter_worker(LFWorkerData *const lf_data, void *unused);
 #ifdef __cplusplus

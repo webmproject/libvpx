@@ -174,9 +174,7 @@ void vp9_loop_filter_frame_mt(VP9LfSync *lf_sync,
     worker->data2 = lf_data;
 
     // Loopfilter data
-    lf_data->frame_buffer = frame;
-    lf_data->cm = cm;
-    vpx_memcpy(lf_data->planes, planes, sizeof(lf_data->planes));
+    vp9_loop_filter_data_reset(lf_data, frame, cm, planes);
     lf_data->start = i;
     lf_data->stop = sb_rows;
     lf_data->y_only = y_only;
