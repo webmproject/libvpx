@@ -27,6 +27,7 @@
 #include "vpx_ports/vpx_timer.h"
 #include "vp9/decoder/vp9_decodeframe.h"
 #include "vp9/decoder/vp9_detokenize.h"
+#include "vp9/decoder/vp9_dthread.h"
 #include "./vpx_scale_rtcd.h"
 
 #define WRITE_RECON_BUFFER 0
@@ -177,6 +178,16 @@ void vp9_remove_decompressor(VP9D_PTR ptr) {
     vpx_free(worker->data2);
   }
   vpx_free(pbi->tile_workers);
+
+  if (pbi->num_tile_workers) {
+    VP9_COMMON *const cm = &pbi->common;
+    const int sb_rows =
+        mi_cols_aligned_to_sb(cm->mi_rows) >> MI_BLOCK_SIZE_LOG2;
+    VP9LfSync *const lf_sync = &pbi->lf_row_sync;
+
+    vp9_loop_filter_dealloc(lf_sync, sb_rows);
+  }
+
   vpx_free(pbi->mi_streams);
   vpx_free(pbi->above_context[0]);
   vpx_free(pbi->above_seg_context);
@@ -370,7 +381,13 @@ int vp9_receive_compressed_data(VP9D_PTR ptr,
 #endif
 
   if (!pbi->do_loopfilter_inline) {
-    vp9_loop_filter_frame(cm, &pbi->mb, pbi->common.lf.filter_level, 0, 0);
+    // If multiple threads are used to decode tiles, then we use those threads
+    // to do parallel loopfiltering.
+    if (pbi->num_tile_workers) {
+      vp9_loop_filter_frame_mt(pbi, cm, &pbi->mb, cm->lf.filter_level, 0, 0);
+    } else {
+      vp9_loop_filter_frame(cm, &pbi->mb, cm->lf.filter_level, 0, 0);
+    }
   }
 
 #if WRITE_RECON_BUFFER == 2
@@ -389,6 +406,9 @@ int vp9_receive_compressed_data(VP9D_PTR ptr,
 #endif
 
   vp9_clear_system_state();
+
+  cm->last_width = cm->width;
+  cm->last_height = cm->height;
 
   if (!cm->show_existing_frame)
     cm->last_show_frame = cm->show_frame;

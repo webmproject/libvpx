@@ -16,26 +16,6 @@
 
 #include "vp9/common/vp9_seg_common.h"
 
-// This structure holds bit masks for all 8x8 blocks in a 64x64 region.
-// Each 1 bit represents a position in which we want to apply the loop filter.
-// Left_ entries refer to whether we apply a filter on the border to the
-// left of the block.   Above_ entries refer to whether or not to apply a
-// filter on the above border.   Int_ entries refer to whether or not to
-// apply borders on the 4x4 edges within the 8x8 block that each bit
-// represents.
-// Since each transform is accompanied by a potentially different type of
-// loop filter there is a different entry in the array for each transform size.
-typedef struct {
-  uint64_t left_y[TX_SIZES];
-  uint64_t above_y[TX_SIZES];
-  uint64_t int_4x4_y;
-  uint16_t left_uv[TX_SIZES];
-  uint16_t above_uv[TX_SIZES];
-  uint16_t int_4x4_uv;
-  uint8_t lfl_y[64];
-  uint8_t lfl_uv[16];
-} LOOP_FILTER_MASK;
-
 // 64 bit masks for left transform size.  Each 1 represents a position where
 // we should apply a loop filter across the left border of an 8x8 block
 // boundary.
@@ -638,9 +618,9 @@ static void build_y_mask(const loop_filter_info_n *const lfi_n,
 // This function sets up the bit masks for the entire 64x64 region represented
 // by mi_row, mi_col.
 // TODO(JBB): This function only works for yv12.
-static void setup_mask(VP9_COMMON *const cm, const int mi_row, const int mi_col,
-                       MODE_INFO **mi_8x8, const int mode_info_stride,
-                       LOOP_FILTER_MASK *lfm) {
+void vp9_setup_mask(VP9_COMMON *const cm, const int mi_row, const int mi_col,
+                    MODE_INFO **mi_8x8, const int mode_info_stride,
+                    LOOP_FILTER_MASK *lfm) {
   int idx_32, idx_16, idx_8;
   const loop_filter_info_n *const lfi_n = &cm->lf_info;
   MODE_INFO **mip = mi_8x8;
@@ -1069,10 +1049,10 @@ static void filter_block_plane_non420(VP9_COMMON *cm,
 }
 #endif
 
-static void filter_block_plane(VP9_COMMON *const cm,
-                               struct macroblockd_plane *const plane,
-                               int mi_row,
-                               LOOP_FILTER_MASK *lfm) {
+void vp9_filter_block_plane(VP9_COMMON *const cm,
+                            struct macroblockd_plane *const plane,
+                            int mi_row,
+                            LOOP_FILTER_MASK *lfm) {
   struct buf_2d *const dst = &plane->dst;
   uint8_t* const dst0 = dst->buf;
   int r, c;
@@ -1244,14 +1224,14 @@ void vp9_loop_filter_rows(const YV12_BUFFER_CONFIG *frame_buffer,
 #if CONFIG_NON420
       if (use_420)
 #endif
-        setup_mask(cm, mi_row, mi_col, mi_8x8 + mi_col, cm->mode_info_stride,
-                   &lfm);
+        vp9_setup_mask(cm, mi_row, mi_col, mi_8x8 + mi_col,
+                       cm->mode_info_stride, &lfm);
 
       for (plane = 0; plane < num_planes; ++plane) {
 #if CONFIG_NON420
         if (use_420)
 #endif
-          filter_block_plane(cm, &xd->plane[plane], mi_row, &lfm);
+          vp9_filter_block_plane(cm, &xd->plane[plane], mi_row, &lfm);
 #if CONFIG_NON420
         else
           filter_block_plane_non420(cm, &xd->plane[plane], mi_8x8 + mi_col,
