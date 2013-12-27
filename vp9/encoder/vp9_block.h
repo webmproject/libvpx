@@ -118,7 +118,8 @@ struct macroblock {
   int mv_best_ref_index[MAX_REF_FRAMES];
   unsigned int max_mv_context[MAX_REF_FRAMES];
   unsigned int source_variance;
-  unsigned int pred_sse;
+  unsigned int pred_sse[MAX_REF_FRAMES];
+  int pred_mv_sad[MAX_REF_FRAMES];
 
   int nmvjointcost[MV_JOINTS];
   int nmvcosts[2][MV_VALS];
