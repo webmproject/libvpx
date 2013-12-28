@@ -29,9 +29,7 @@
 #include "vpx/vp8dx.h"
 #endif
 
-#if CONFIG_MD5
 #include "./md5_utils.h"
-#endif
 
 #include "./tools_common.h"
 #include "./webmdec.h"
@@ -95,17 +93,14 @@ static const arg_def_t fb_lru_arg =
     ARG_DEF(NULL, "frame-buffers-lru", 1, "Turn on/off frame buffer lru");
 
 
-#if CONFIG_MD5
 static const arg_def_t md5arg = ARG_DEF(NULL, "md5", 0,
                                         "Compute the MD5 sum of the decoded frame");
-#endif
+
 static const arg_def_t *all_args[] = {
   &codecarg, &use_yv12, &use_i420, &flipuvarg, &noblitarg,
   &progressarg, &limitarg, &skiparg, &postprocarg, &summaryarg, &outputfile,
   &threadsarg, &verbosearg, &scalearg, &fb_arg, &fb_lru_arg,
-#if CONFIG_MD5
   &md5arg,
-#endif
   &error_concealment,
   NULL
 };
@@ -236,11 +231,9 @@ void *out_open(const char *out_fn, int do_md5) {
   void *out = NULL;
 
   if (do_md5) {
-#if CONFIG_MD5
     MD5Context *md5_ctx = out = malloc(sizeof(MD5Context));
     (void)out_fn;
     MD5Init(md5_ctx);
-#endif
   } else {
     FILE *outfile = out = strcmp("-", out_fn) ? fopen(out_fn, "wb")
                           : set_binary_mode(stdout);
@@ -255,9 +248,7 @@ void *out_open(const char *out_fn, int do_md5) {
 
 void out_put(void *out, const uint8_t *buf, unsigned int len, int do_md5) {
   if (do_md5) {
-#if CONFIG_MD5
     MD5Update(out, buf, len);
-#endif
   } else {
     (void) fwrite(buf, 1, len, out);
   }
@@ -265,7 +256,6 @@ void out_put(void *out, const uint8_t *buf, unsigned int len, int do_md5) {
 
 void out_close(void *out, const char *out_fn, int do_md5) {
   if (do_md5) {
-#if CONFIG_MD5
     uint8_t md5[16];
     int i;
 
@@ -276,7 +266,6 @@ void out_close(void *out, const char *out_fn, int do_md5) {
       printf("%02x", md5[i]);
 
     printf("  %s\n", out_fn);
-#endif
   } else {
     fclose(out);
   }
