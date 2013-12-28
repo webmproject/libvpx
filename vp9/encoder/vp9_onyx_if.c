@@ -3317,6 +3317,7 @@ int vp9_get_compressed_data(VP9_PTR ptr, unsigned int *frame_flags,
   VP9_COMMON *cm = &cpi->common;
   struct vpx_usec_timer  cmptimer;
   YV12_BUFFER_CONFIG    *force_src_buffer = NULL;
+  const int refs[] = { cpi->lst_fb_idx, cpi->gld_fb_idx, cpi->alt_fb_idx };
   int i;
   // FILE *fp_out = fopen("enc_frame_type.txt", "a");
 
@@ -3518,16 +3519,13 @@ int vp9_get_compressed_data(VP9_PTR ptr, unsigned int *frame_flags,
   }
 #endif
 
-  /* Get the mapping of L/G/A to the reference buffer pool */
-  cm->active_ref_idx[0] = cm->ref_frame_map[cpi->lst_fb_idx];
-  cm->active_ref_idx[1] = cm->ref_frame_map[cpi->gld_fb_idx];
-  cm->active_ref_idx[2] = cm->ref_frame_map[cpi->alt_fb_idx];
-
 #if 0  // CONFIG_MULTIPLE_ARF
   if (cpi->multi_arf_enabled) {
     fprintf(fp_out, "      idx(%d, %d, %d, %d) active(%d, %d, %d)",
         cpi->lst_fb_idx, cpi->gld_fb_idx, cpi->alt_fb_idx, cm->new_fb_idx,
-        cm->active_ref_idx[0], cm->active_ref_idx[1], cm->active_ref_idx[2]);
+        cm->ref_frame_map[cpi->lst_fb_idx],
+        cm->ref_frame_map[cpi->gld_fb_idx],
+        cm->ref_frame_map[cpi->alt_fb_idx]);
     if (cpi->refresh_alt_ref_frame)
       fprintf(fp_out, "  type:ARF");
     if (cpi->rc.is_src_frame_alt_ref)
@@ -3544,12 +3542,20 @@ int vp9_get_compressed_data(VP9_PTR ptr, unsigned int *frame_flags,
                            cm->subsampling_x, cm->subsampling_y,
                            VP9BORDERINPIXELS, NULL, NULL, NULL);
 
-  // Calculate scaling factors for each of the 3 available references
+
   for (i = 0; i < REFS_PER_FRAME; ++i) {
-    vp9_setup_scale_factors(cm, i);
-    if (vp9_is_scaled(&cm->active_ref_scale[i]))
-      vp9_extend_frame_borders(&cm->yv12_fb[cm->active_ref_idx[i]],
-                               cm->subsampling_x, cm->subsampling_y);
+    const int idx = cm->ref_frame_map[refs[i]];
+    YV12_BUFFER_CONFIG *const buf = &cm->yv12_fb[idx];
+
+    RefBuffer *const ref_buf = &cm->frame_refs[i];
+    ref_buf->buf = buf;
+    ref_buf->idx = idx;
+    vp9_setup_scale_factors_for_frame(&ref_buf->sf,
+                                      buf->y_crop_width, buf->y_crop_height,
+                                      cm->width, cm->height);
+
+    if (vp9_is_scaled(&ref_buf->sf))
+      vp9_extend_frame_borders(buf, cm->subsampling_x, cm->subsampling_y);
   }
 
   vp9_setup_interp_filters(&cpi->mb.e_mbd, DEFAULT_INTERP_FILTER, cm);

@@ -153,7 +153,7 @@ static void build_inter_predictors(MACROBLOCKD *xd, int plane, int block,
   int ref;
 
   for (ref = 0; ref < 1 + is_compound; ++ref) {
-    const struct scale_factors *const sf = xd->scale_factors[ref];
+    const struct scale_factors *const sf = &xd->block_refs[ref]->sf;
     struct buf_2d *const pre_buf = &pd->pre[ref];
     struct buf_2d *const dst_buf = &pd->dst;
     uint8_t *const dst = dst_buf->buf + dst_buf->stride * y + x;
@@ -256,7 +256,7 @@ static void dec_build_inter_predictors(MACROBLOCKD *xd, int plane, int block,
   int ref;
 
   for (ref = 0; ref < 1 + is_compound; ++ref) {
-    const struct scale_factors *const sf = xd->scale_factors[ref];
+    const struct scale_factors *const sf = &xd->block_refs[ref]->sf;
     struct buf_2d *const pre_buf = &pd->pre[ref];
     struct buf_2d *const dst_buf = &pd->dst;
     uint8_t *const dst = dst_buf->buf + dst_buf->stride * y + x;
@@ -283,7 +283,7 @@ static void dec_build_inter_predictors(MACROBLOCKD *xd, int plane, int block,
     int xs, ys, x0, y0, x0_16, y0_16, x1, y1, frame_width,
         frame_height, subpel_x, subpel_y;
     uint8_t *ref_frame, *buf_ptr;
-    const YV12_BUFFER_CONFIG *ref_buf = xd->ref_buf[ref];
+    const YV12_BUFFER_CONFIG *ref_buf = xd->block_refs[ref]->buf;
 
     // Get reference frame pointer, width and height.
     if (plane == 0) {
@@ -390,14 +390,3 @@ void vp9_dec_build_inter_predictors_sb(MACROBLOCKD *xd, int mi_row, int mi_col,
     }
   }
 }
-
-// TODO(dkovalev: find better place for this function)
-void vp9_setup_scale_factors(VP9_COMMON *cm, int i) {
-  const int ref = cm->active_ref_idx[i];
-  struct scale_factors *const sf = &cm->active_ref_scale[i];
-  YV12_BUFFER_CONFIG *const fb = &cm->yv12_fb[ref];
-  vp9_setup_scale_factors_for_frame(sf,
-                                    fb->y_crop_width, fb->y_crop_height,
-                                    cm->width, cm->height);
-}
-

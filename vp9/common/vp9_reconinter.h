@@ -92,10 +92,8 @@ static void setup_pre_planes(MACROBLOCKD *xd, int i,
 
 static void set_scale_factors(VP9_COMMON *cm, MACROBLOCKD *xd,
                               int ref0, int ref1) {
-  xd->scale_factors[0] = &cm->active_ref_scale[ref0 >= 0 ? ref0 : 0];
-  xd->scale_factors[1] = &cm->active_ref_scale[ref1 >= 0 ? ref1 : 0];
+  xd->block_refs[0] = &cm->frame_refs[ref0 >= 0 ? ref0 : 0];
+  xd->block_refs[1] = &cm->frame_refs[ref1 >= 0 ? ref1 : 0];
 }
-
-void vp9_setup_scale_factors(VP9_COMMON *cm, int i);
 
 #endif  // VP9_COMMON_VP9_RECONINTER_H_

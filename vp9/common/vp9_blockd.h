@@ -212,10 +212,16 @@ struct macroblockd_plane {
 
 #define BLOCK_OFFSET(x, i) ((x) + (i) * 16)
 
+typedef struct RefBuffer {
+  // TODO(dkovalev): idx is not really required and should be removed, now it
+  // is used in vp9_onyxd_if.c
+  int idx;
+  YV12_BUFFER_CONFIG *buf;
+  struct scale_factors sf;
+} RefBuffer;
+
 typedef struct macroblockd {
   struct macroblockd_plane plane[MAX_MB_PLANE];
-
-  const struct scale_factors *scale_factors[2];
 
   MODE_INFO *last_mi;
   int mode_info_stride;
@@ -235,7 +241,7 @@ typedef struct macroblockd {
   int mb_to_bottom_edge;
 
   /* pointers to reference frames */
-  const YV12_BUFFER_CONFIG *ref_buf[2];
+  RefBuffer *block_refs[2];
 
   /* pointer to current frame */
   const YV12_BUFFER_CONFIG *cur_buf;

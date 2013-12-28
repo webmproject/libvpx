@@ -1524,7 +1524,7 @@ static int64_t encode_inter_mb_segment(VP9_COMP *cpi,
     vp9_build_inter_predictor(pre, pd->pre[ref].stride,
                               dst, pd->dst.stride,
                               &mi->bmi[i].as_mv[ref].as_mv,
-                              xd->scale_factors[ref],
+                              &xd->block_refs[ref]->sf,
                               width, height, ref, &xd->subpix, MV_PRECISION_Q3,
                               mi_col * MI_SIZE + 4 * (i % 2),
                               mi_row * MI_SIZE + 4 * (i / 2));
@@ -2267,8 +2267,7 @@ static void setup_buffer_inter(VP9_COMP *cpi, MACROBLOCK *x,
   YV12_BUFFER_CONFIG *yv12 = &cm->yv12_fb[cpi->common.ref_frame_map[idx]];
   MACROBLOCKD *const xd = &x->e_mbd;
   MB_MODE_INFO *const mbmi = &xd->mi_8x8[0]->mbmi;
-  const struct scale_factors *const sf =
-      &cpi->common.active_ref_scale[frame_type - 1];
+  const struct scale_factors *const sf = &cm->frame_refs[frame_type - 1].sf;
 
 
   // TODO(jkoleszar): Is the UV buffer ever used here? If so, need to make this
@@ -2539,7 +2538,7 @@ static void joint_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
                               ref_yv12[!id].stride,
                               second_pred, pw,
                               &frame_mv[refs[!id]].as_mv,
-                              xd->scale_factors[!id],
+                              &xd->block_refs[!id]->sf,
                               pw, ph, 0,
                               &xd->subpix, MV_PRECISION_Q3,
                               mi_col * MI_SIZE, mi_row * MI_SIZE);
@@ -3964,11 +3963,11 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
     // TODO(jingning, jkoleszar): scaling reference frame not supported for
     // sub8x8 blocks.
     if (ref_frame > 0 &&
-        vp9_is_scaled(&cpi->common.active_ref_scale[ref_frame - 1]))
+        vp9_is_scaled(&cpi->common.frame_refs[ref_frame - 1].sf))
       continue;
 
     if (second_ref_frame > 0 &&
-        vp9_is_scaled(&cpi->common.active_ref_scale[second_ref_frame - 1]))
+        vp9_is_scaled(&cpi->common.frame_refs[second_ref_frame - 1].sf))
       continue;
 
     set_scale_factors(cm, xd, ref_frame - 1, second_ref_frame - 1);
