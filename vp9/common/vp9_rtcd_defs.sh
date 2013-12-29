@@ -343,25 +343,25 @@ if [ "$CONFIG_VP9_ENCODER" = "yes" ]; then
 
 # variance
 prototype unsigned int vp9_variance32x16 "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse"
-specialize vp9_variance32x16 $sse2_x86inc
+specialize vp9_variance32x16 $sse2_x86inc $avx2_x86inc
 
 prototype unsigned int vp9_variance16x32 "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse"
 specialize vp9_variance16x32 $sse2_x86inc
 
 prototype unsigned int vp9_variance64x32 "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse"
-specialize vp9_variance64x32 $sse2_x86inc
+specialize vp9_variance64x32 $sse2_x86inc $avx2_x86inc
 
 prototype unsigned int vp9_variance32x64 "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse"
 specialize vp9_variance32x64 $sse2_x86inc
 
 prototype unsigned int vp9_variance32x32 "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse"
-specialize vp9_variance32x32 $sse2_x86inc
+specialize vp9_variance32x32 $sse2_x86inc $avx2_x86inc
 
 prototype unsigned int vp9_variance64x64 "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse"
-specialize vp9_variance64x64 $sse2_x86inc
+specialize vp9_variance64x64 $sse2_x86inc $avx2_x86inc
 
 prototype unsigned int vp9_variance16x16 "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse"
-specialize vp9_variance16x16 mmx $sse2_x86inc
+specialize vp9_variance16x16 mmx $sse2_x86inc $avx2_x86inc
 
 prototype unsigned int vp9_variance16x8 "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse"
 specialize vp9_variance16x8 mmx $sse2_x86inc
@@ -662,7 +662,7 @@ specialize vp9_sad4x4x4d sse
 #specialize vp9_sub_pixel_mse16x16 sse2 mmx
 
 prototype unsigned int vp9_mse16x16 "const uint8_t *src_ptr, int  source_stride, const uint8_t *ref_ptr, int  recon_stride, unsigned int *sse"
-specialize vp9_mse16x16 mmx $sse2_x86inc
+specialize vp9_mse16x16 mmx $sse2_x86inc $avx2_x86inc
 
 prototype unsigned int vp9_mse8x16 "const uint8_t *src_ptr, int  source_stride, const uint8_t *ref_ptr, int  recon_stride, unsigned int *sse"
 specialize vp9_mse8x16
