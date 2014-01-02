@@ -1132,7 +1132,8 @@ static size_t read_uncompressed_header(VP9D_COMP *pbi,
   cm->version = vp9_rb_read_bit(rb);
   RESERVED;
 
-  if (vp9_rb_read_bit(rb)) {
+  cm->show_existing_frame = vp9_rb_read_bit(rb);
+  if (cm->show_existing_frame) {
     // show an existing frame directly
     int frame_to_show = cm->ref_frame_map[vp9_rb_read_literal(rb, 3)];
     ref_cnt_fb(cm->fb_idx_ref_cnt, &cm->new_fb_idx, frame_to_show);

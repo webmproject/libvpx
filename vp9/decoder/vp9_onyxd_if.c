@@ -389,23 +389,25 @@ int vp9_receive_compressed_data(VP9D_PTR ptr,
 
   cm->last_show_frame = cm->show_frame;
   if (cm->show_frame) {
-    // current mip will be the prev_mip for the next frame
-    MODE_INFO *temp = cm->prev_mip;
-    MODE_INFO **temp2 = cm->prev_mi_grid_base;
-    cm->prev_mip = cm->mip;
-    cm->mip = temp;
-    cm->prev_mi_grid_base = cm->mi_grid_base;
-    cm->mi_grid_base = temp2;
+    if (!cm->show_existing_frame) {
+      // current mip will be the prev_mip for the next frame
+      MODE_INFO *temp = cm->prev_mip;
+      MODE_INFO **temp2 = cm->prev_mi_grid_base;
+      cm->prev_mip = cm->mip;
+      cm->mip = temp;
+      cm->prev_mi_grid_base = cm->mi_grid_base;
+      cm->mi_grid_base = temp2;
 
-    // update the upper left visible macroblock ptrs
-    cm->mi = cm->mip + cm->mode_info_stride + 1;
-    cm->prev_mi = cm->prev_mip + cm->mode_info_stride + 1;
-    cm->mi_grid_visible = cm->mi_grid_base + cm->mode_info_stride + 1;
-    cm->prev_mi_grid_visible = cm->prev_mi_grid_base + cm->mode_info_stride + 1;
+      // update the upper left visible macroblock ptrs
+      cm->mi = cm->mip + cm->mode_info_stride + 1;
+      cm->prev_mi = cm->prev_mip + cm->mode_info_stride + 1;
+      cm->mi_grid_visible = cm->mi_grid_base + cm->mode_info_stride + 1;
+      cm->prev_mi_grid_visible = cm->prev_mi_grid_base +
+                                 cm->mode_info_stride + 1;
 
-    pbi->mb.mi_8x8 = cm->mi_grid_visible;
-    pbi->mb.mi_8x8[0] = cm->mi;
-
+      pbi->mb.mi_8x8 = cm->mi_grid_visible;
+      pbi->mb.mi_8x8[0] = cm->mi;
+    }
     cm->current_video_frame++;
   }
 
