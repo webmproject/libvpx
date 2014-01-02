@@ -271,8 +271,17 @@ static double calculate_modified_err(VP9_COMP *cpi,
   const FIRSTPASS_STATS *const stats = &cpi->twopass.total_stats;
   const double av_err = stats->ssim_weighted_pred_err / stats->count;
   const double this_err = this_frame->ssim_weighted_pred_err;
-  return av_err * pow(this_err / DOUBLE_DIVIDE_CHECK(av_err),
-                      this_err > av_err ? POW1 : POW2);
+  double modified_error;
+
+  modified_error =  av_err * pow(this_err / DOUBLE_DIVIDE_CHECK(av_err),
+                                 this_err > av_err ? POW1 : POW2);
+
+  if (modified_error < cpi->twopass.modified_error_min)
+    modified_error = cpi->twopass.modified_error_min;
+  else if (modified_error > cpi->twopass.modified_error_max)
+    modified_error = cpi->twopass.modified_error_max;
+
+  return modified_error;
 }
 
 static const double weight_table[256] = {
@@ -1077,13 +1086,6 @@ void vp9_init_second_pass(VP9_COMP *cpi) {
   FIRSTPASS_STATS this_frame;
   FIRSTPASS_STATS *start_pos;
 
-  double lower_bounds_min_rate = FRAME_OVERHEAD_BITS * cpi->oxcf.framerate;
-  double two_pass_min_rate = (double)(cpi->oxcf.target_bandwidth *
-                                      cpi->oxcf.two_pass_vbrmin_section / 100);
-
-  if (two_pass_min_rate < lower_bounds_min_rate)
-    two_pass_min_rate = lower_bounds_min_rate;
-
   zero_stats(&cpi->twopass.total_stats);
   zero_stats(&cpi->twopass.total_left_stats);
 
@@ -1104,8 +1106,6 @@ void vp9_init_second_pass(VP9_COMP *cpi) {
   cpi->output_framerate = cpi->oxcf.framerate;
   cpi->twopass.bits_left = (int64_t)(cpi->twopass.total_stats.duration *
                                      cpi->oxcf.target_bandwidth / 10000000.0);
-  cpi->twopass.bits_left -= (int64_t)(cpi->twopass.total_stats.duration *
-                                      two_pass_min_rate / 10000000.0);
 
   // Calculate a minimum intra value to be used in determining the IIratio
   // scores used in the second pass. We have this minimum to make sure
@@ -1142,9 +1142,16 @@ void vp9_init_second_pass(VP9_COMP *cpi) {
   // Scan the first pass file and calculate a modified total error based upon
   // the bias/power function used to allocate bits.
   {
+    double av_error = cpi->twopass.total_stats.ssim_weighted_pred_err /
+                      DOUBLE_DIVIDE_CHECK(cpi->twopass.total_stats.count);
+
     start_pos = cpi->twopass.stats_in;  // Note starting "file" position
 
     cpi->twopass.modified_error_total = 0.0;
+    cpi->twopass.modified_error_min =
+      (av_error * cpi->oxcf.two_pass_vbrmin_section) / 100;
+    cpi->twopass.modified_error_max =
+      (av_error * cpi->oxcf.two_pass_vbrmax_section) / 100;
 
     while (input_stats(cpi, &this_frame) != EOF) {
       cpi->twopass.modified_error_total +=
@@ -2635,14 +2642,4 @@ void vp9_twopass_postencode_update(VP9_COMP *cpi, uint64_t bytes_used) {
 #else
   cpi->twopass.bits_left -= 8 * bytes_used;
 #endif
-  if (!cpi->refresh_alt_ref_frame) {
-    double lower_bounds_min_rate = FRAME_OVERHEAD_BITS * cpi->oxcf.framerate;
-    double two_pass_min_rate = (double)(cpi->oxcf.target_bandwidth *
-                                        cpi->oxcf.two_pass_vbrmin_section
-                                        / 100);
-    if (two_pass_min_rate < lower_bounds_min_rate)
-      two_pass_min_rate = lower_bounds_min_rate;
-    cpi->twopass.bits_left += (int64_t)(two_pass_min_rate /
-                                        cpi->oxcf.framerate);
-  }
 }
