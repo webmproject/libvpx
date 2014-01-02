@@ -535,7 +535,7 @@ specialize vp8_yv12_copy_partial_frame neon
 #
 if [ "$CONFIG_TEMPORAL_DENOISING" = "yes" ]; then
     prototype int vp8_denoiser_filter "struct yv12_buffer_config* mc_running_avg, struct yv12_buffer_config* running_avg, struct macroblock* signal, unsigned int motion_magnitude2, int y_offset, int uv_offset"
-    specialize vp8_denoiser_filter sse2
+    specialize vp8_denoiser_filter sse2 neon
 fi
 
 # End of encoder only functions
