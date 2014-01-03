@@ -32,7 +32,6 @@ Advanced options:
                                   supported by hardware [auto]
   ${toggle_codec_srcs}            in/exclude codec library source code
   ${toggle_debug_libs}            in/exclude debug version of libraries
-  ${toggle_md5}                   support for output of checksum data
   ${toggle_static_msvcrt}         use static MSVCRT (VS builds only)
   ${toggle_vp8}                   VP8 codec support
   ${toggle_vp9}                   VP9 codec support
@@ -184,7 +183,6 @@ enable_feature install_libs
 enable_feature static
 enable_feature optimizations
 enable_feature fast_unaligned #allow unaligned accesses, if supported by hw
-enable_feature md5
 enable_feature spatial_resampling
 enable_feature multithread
 enable_feature os_support
@@ -279,7 +277,6 @@ CONFIG_LIST="
     mem_manager
     mem_tracker
     mem_checks
-    md5
 
     dequant_tokens
     dc_recon
@@ -336,7 +333,6 @@ CMDLINE_SELECT="
     fast_unaligned
     codec_srcs
     debug_libs
-    md5
 
     dequant_tokens
     dc_recon
