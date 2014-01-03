@@ -2606,12 +2606,9 @@ static void encode_superblock(VP9_COMP *cpi, TOKENEXTRA **t, int output_enabled,
     vp9_encode_sb(x, MAX(bsize, BLOCK_8X8));
     vp9_tokenize_sb(cpi, t, !output_enabled, MAX(bsize, BLOCK_8X8));
   } else {
-    int mb_skip_context = xd->left_available ? mi_8x8[-1]->mbmi.skip_coeff : 0;
-    mb_skip_context += mi_8x8[-mis] ? mi_8x8[-mis]->mbmi.skip_coeff : 0;
-
     mbmi->skip_coeff = 1;
     if (output_enabled)
-      cm->counts.mbskip[mb_skip_context][1]++;
+      cm->counts.mbskip[vp9_get_skip_context(xd)][1]++;
     reset_skip_context(xd, MAX(bsize, BLOCK_8X8));
   }
 
