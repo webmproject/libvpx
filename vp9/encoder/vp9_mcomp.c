@@ -464,14 +464,12 @@ int vp9_find_best_sub_pixel_comp_tree(MACROBLOCK *x,
 #undef CHECK_BETTER
 #undef SP
 
-#define CHECK_BOUNDS(range) \
-  {\
-    all_in = 1;\
-    all_in &= ((br-range) >= x->mv_row_min);\
-    all_in &= ((br+range) <= x->mv_row_max);\
-    all_in &= ((bc-range) >= x->mv_col_min);\
-    all_in &= ((bc+range) <= x->mv_col_max);\
-  }
+static INLINE int check_bounds(MACROBLOCK *x, int row, int col, int range) {
+  return ((row - range) >= x->mv_row_min) &
+         ((row + range) <= x->mv_row_max) &
+         ((col - range) >= x->mv_col_min) &
+         ((col + range) <= x->mv_col_max);
+}
 
 #define CHECK_POINT \
   {\
@@ -537,7 +535,6 @@ static int vp9_pattern_search(MACROBLOCK *x,
   uint8_t *base_offset;
   uint8_t *this_offset;
   int k = -1;
-  int all_in;
   int best_site = -1;
   MV fcenter_mv;
   int best_init_s = search_param_to_steps[search_param];
@@ -569,8 +566,7 @@ static int vp9_pattern_search(MACROBLOCK *x,
     best_init_s = -1;
     for (t = 0; t <= s; ++t) {
       best_site = -1;
-      CHECK_BOUNDS((1 << t))
-      if (all_in) {
+      if (check_bounds(x, br, bc, 1 << t)) {
         for (i = 0; i < num_candidates[t]; i++) {
           this_mv.row = br + candidates[t][i].row;
           this_mv.col = bc + candidates[t][i].col;
@@ -613,8 +609,7 @@ static int vp9_pattern_search(MACROBLOCK *x,
     do {
       // No need to search all 6 points the 1st time if initial search was used
       if (!do_init_search || s != best_init_s) {
-        CHECK_BOUNDS((1 << s))
-        if (all_in) {
+        if (check_bounds(x, br, bc, 1 << s)) {
           for (i = 0; i < num_candidates[s]; i++) {
             this_mv.row = br + candidates[s][i].row;
             this_mv.col = bc + candidates[s][i].col;
@@ -649,10 +644,8 @@ static int vp9_pattern_search(MACROBLOCK *x,
       do {
         int next_chkpts_indices[PATTERN_CANDIDATES_REF];
         best_site = -1;
-        CHECK_BOUNDS((1 << s))
-
         get_next_chkpts(next_chkpts_indices, k, num_candidates[s]);
-        if (all_in) {
+        if (check_bounds(x, br, bc, 1 << s)) {
           for (i = 0; i < PATTERN_CANDIDATES_REF; i++) {
             this_mv.row = br + candidates[s][next_chkpts_indices[i]].row;
             this_mv.col = bc + candidates[s][next_chkpts_indices[i]].col;
@@ -692,8 +685,7 @@ static int vp9_pattern_search(MACROBLOCK *x,
     };
     for (j = 0; j < 16; j++) {
       best_site = -1;
-      CHECK_BOUNDS(1)
-      if (all_in) {
+      if (check_bounds(x, br, bc, 1)) {
         for (i = 0; i < 4; i++) {
           this_mv.row = br + neighbors[i].row;
           this_mv.col = bc + neighbors[i].col;
@@ -860,7 +852,6 @@ int vp9_square_search(MACROBLOCK *x,
                             square_num_candidates, square_candidates);
 };
 
-#undef CHECK_BOUNDS
 #undef CHECK_POINT
 #undef CHECK_BETTER
 
