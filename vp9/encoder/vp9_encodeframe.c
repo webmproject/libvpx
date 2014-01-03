@@ -513,8 +513,8 @@ static void update_state(VP9_COMP *cpi, PICK_MODE_CONTEXT *ctx,
       int_mv best_mv[2];
       const MV_REFERENCE_FRAME rf1 = mbmi->ref_frame[0];
       const MV_REFERENCE_FRAME rf2 = mbmi->ref_frame[1];
-      best_mv[0].as_int = ctx->best_ref_mv.as_int;
-      best_mv[1].as_int = ctx->second_best_ref_mv.as_int;
+      best_mv[0].as_int = ctx->best_ref_mv[0].as_int;
+      best_mv[1].as_int = ctx->best_ref_mv[1].as_int;
       if (mbmi->mode == NEWMV) {
         best_mv[0].as_int = mbmi->ref_mvs[rf1][0].as_int;
         if (rf2 > 0)

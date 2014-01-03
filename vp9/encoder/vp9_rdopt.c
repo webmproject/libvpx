@@ -2217,8 +2217,8 @@ static void store_coding_context(MACROBLOCK *x, PICK_MODE_CONTEXT *ctx,
   ctx->best_mode_index = mode_index;
   ctx->mic = *xd->mi_8x8[0];
 
-  ctx->best_ref_mv.as_int = ref_mv->as_int;
-  ctx->second_best_ref_mv.as_int = second_ref_mv->as_int;
+  ctx->best_ref_mv[0].as_int = ref_mv->as_int;
+  ctx->best_ref_mv[1].as_int = second_ref_mv->as_int;
 
   ctx->single_pred_diff = (int)comp_pred_diff[SINGLE_REFERENCE];
   ctx->comp_pred_diff   = (int)comp_pred_diff[COMPOUND_REFERENCE];
