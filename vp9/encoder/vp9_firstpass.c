@@ -2114,6 +2114,8 @@ void vp9_get_second_pass_params(VP9_COMP *cpi) {
     // Define next KF group and assign bits to it
     this_frame_copy = this_frame;
     find_next_key_frame(cpi, &this_frame_copy);
+  } else {
+    cpi->common.frame_type = INTER_FRAME;
   }
 
   // Is this a GF / ARF (Note that a KF is always also a GF)

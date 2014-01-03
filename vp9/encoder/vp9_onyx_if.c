@@ -2913,19 +2913,6 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
   // Current default encoder behavior for the altref sign bias.
   cpi->common.ref_frame_sign_bias[ALTREF_FRAME] = cpi->rc.source_alt_ref_active;
 
-  // Check to see if a key frame is signaled.
-  // For two pass with auto key frame enabled cm->frame_type may already be
-  // set, but not for one pass.
-  if ((cm->current_video_frame == 0) ||
-      (cm->frame_flags & FRAMEFLAGS_KEY) ||
-      (cpi->oxcf.auto_key && (cpi->rc.frames_since_key %
-                              cpi->key_frame_frequency == 0))) {
-    // Set frame type to key frame for the force key frame, if we exceed the
-    // maximum distance in an automatic keyframe selection or for the first
-    // frame.
-    cm->frame_type = KEY_FRAME;
-  }
-
   // Set default state for segment based loop filter update flags.
   cm->lf.mode_ref_delta_update = 0;
 
@@ -3165,7 +3152,6 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
 #endif
 
     // As this frame is a key frame the next defaults to an inter frame.
-    cm->frame_type = INTER_FRAME;
     vp9_clear_system_state();
     cpi->rc.frames_since_key = 0;
   } else {
