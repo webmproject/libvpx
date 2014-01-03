@@ -1163,32 +1163,15 @@ void vp9_end_second_pass(VP9_COMP *cpi) {
 // the prediction quality is decaying from frame to frame.
 static double get_prediction_decay_rate(VP9_COMP *cpi,
                                         FIRSTPASS_STATS *next_frame) {
-  double prediction_decay_rate;
-  double second_ref_decay;
-  double mb_sr_err_diff;
-
-  // Initial basis is the % mbs inter coded
-  prediction_decay_rate = next_frame->pcnt_inter;
-
   // Look at the observed drop in prediction quality between the last frame
   // and the GF buffer (which contains an older frame).
-  mb_sr_err_diff = (next_frame->sr_coded_error - next_frame->coded_error) /
-                   cpi->common.MBs;
-  if (mb_sr_err_diff <= 512.0) {
-    second_ref_decay = 1.0 - (mb_sr_err_diff / 512.0);
-    second_ref_decay = pow(second_ref_decay, 0.5);
-    if (second_ref_decay < 0.85)
-      second_ref_decay = 0.85;
-    else if (second_ref_decay > 1.0)
-      second_ref_decay = 1.0;
-  } else {
-    second_ref_decay = 0.85;
-  }
+  const double mb_sr_err_diff = (next_frame->sr_coded_error -
+                                     next_frame->coded_error) / cpi->common.MBs;
+  const double second_ref_decay = mb_sr_err_diff <= 512.0
+      ? fclamp(pow(1.0 - (mb_sr_err_diff / 512.0), 0.5), 0.85, 1.0)
+      : 0.85;
 
-  if (second_ref_decay < prediction_decay_rate)
-    prediction_decay_rate = second_ref_decay;
-
-  return prediction_decay_rate;
+  return MIN(second_ref_decay, next_frame->pcnt_inter);
 }
 
 // Function to test for a condition where a complex transition is followed
