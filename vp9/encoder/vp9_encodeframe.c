@@ -2583,19 +2583,13 @@ static void encode_superblock(VP9_COMP *cpi, TOKENEXTRA **t, int output_enabled,
     if (output_enabled)
       sum_intra_stats(cm, mi);
   } else {
-    int idx = cm->ref_frame_map[get_ref_frame_idx(cpi, mbmi->ref_frame[0])];
-    YV12_BUFFER_CONFIG *ref_fb = &cm->yv12_fb[idx];
-    YV12_BUFFER_CONFIG *second_ref_fb = NULL;
-    if (has_second_ref(mbmi)) {
-      idx = cm->ref_frame_map[get_ref_frame_idx(cpi, mbmi->ref_frame[1])];
-      second_ref_fb = &cm->yv12_fb[idx];
+    int ref;
+    const int is_compound = has_second_ref(mbmi);
+    for (ref = 0; ref < 1 + is_compound; ++ref) {
+      YV12_BUFFER_CONFIG *cfg = &cm->yv12_fb[cm->ref_frame_map[
+          get_ref_frame_idx(cpi, mbmi->ref_frame[ref])]];
+      setup_pre_planes(xd, ref, cfg, mi_row, mi_col, xd->scale_factors[ref]);
     }
-
-    assert(cm->frame_type != KEY_FRAME);
-
-    setup_pre_planes(xd, 0, ref_fb, mi_row, mi_col, xd->scale_factors[0]);
-    setup_pre_planes(xd, 1, second_ref_fb, mi_row, mi_col,
-                     xd->scale_factors[1]);
 
     vp9_build_inter_predictors_sb(xd, mi_row, mi_col, MAX(bsize, BLOCK_8X8));
   }
