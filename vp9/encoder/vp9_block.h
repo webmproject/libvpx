@@ -41,8 +41,7 @@ typedef struct {
   int is_coded;
   int num_4x4_blk;
   int skip;
-  int_mv best_ref_mv;
-  int_mv second_best_ref_mv;
+  int_mv best_ref_mv[2];
   int_mv ref_mvs[MAX_REF_FRAMES][MAX_MV_REF_CANDIDATES];
   int rate;
   int distortion;
