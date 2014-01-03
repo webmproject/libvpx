@@ -692,18 +692,9 @@ static void idct8_1d_sse2(__m128i *in) {
   __m128i stp2_0, stp2_1, stp2_2, stp2_3, stp2_4, stp2_5, stp2_6, stp2_7;
   __m128i tmp0, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7;
 
-  in0 = in[0];
-  in1 = in[1];
-  in2 = in[2];
-  in3 = in[3];
-  in4 = in[4];
-  in5 = in[5];
-  in6 = in[6];
-  in7 = in[7];
-
   // 8x8 Transpose is copied from vp9_fdct8x8_sse2()
-  TRANSPOSE_8X8(in0, in1, in2, in3, in4, in5, in6, in7, in0, in1, in2, in3,
-                in4, in5, in6, in7);
+  TRANSPOSE_8X8(in[0], in[1], in[2], in[3], in[4], in[5], in[6], in[7],
+                in0, in1, in2, in3, in4, in5, in6, in7);
 
   // 4-stage 1D idct8x8
   IDCT8_1D
