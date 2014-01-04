@@ -1742,7 +1742,7 @@ static void rd_check_segment_txsize(VP9_COMP *cpi, MACROBLOCK *x,
           int further_steps;
           int thissme, bestsme = INT_MAX;
           int sadpb = x->sadperbit4;
-          int_mv mvp_full;
+          MV mvp_full;
           int max_mv;
 
           /* Is the best so far sufficiently good that we cant justify doing
@@ -1773,12 +1773,12 @@ static void rd_check_segment_txsize(VP9_COMP *cpi, MACROBLOCK *x,
             step_param = cpi->mv_step_param;
           }
 
-          mvp_full.as_mv.row = bsi->mvp.as_mv.row >> 3;
-          mvp_full.as_mv.col = bsi->mvp.as_mv.col >> 3;
+          mvp_full.row = bsi->mvp.as_mv.row >> 3;
+          mvp_full.col = bsi->mvp.as_mv.col >> 3;
 
           if (cpi->sf.adaptive_motion_search && cpi->common.show_frame) {
-            mvp_full.as_mv.row = x->pred_mv[mbmi->ref_frame[0]].as_mv.row >> 3;
-            mvp_full.as_mv.col = x->pred_mv[mbmi->ref_frame[0]].as_mv.col >> 3;
+            mvp_full.row = x->pred_mv[mbmi->ref_frame[0]].as_mv.row >> 3;
+            mvp_full.col = x->pred_mv[mbmi->ref_frame[0]].as_mv.col >> 3;
             step_param = MAX(step_param, 8);
           }
 
@@ -1789,19 +1789,19 @@ static void rd_check_segment_txsize(VP9_COMP *cpi, MACROBLOCK *x,
           vp9_set_mv_search_range(x, &bsi->ref_mv->as_mv);
 
           if (cpi->sf.search_method == HEX) {
-            bestsme = vp9_hex_search(x, &mvp_full.as_mv,
+            bestsme = vp9_hex_search(x, &mvp_full,
                                      step_param,
                                      sadpb, 1, v_fn_ptr, 1,
                                      &bsi->ref_mv->as_mv,
                                      &mode_mv[NEWMV].as_mv);
           } else if (cpi->sf.search_method == SQUARE) {
-            bestsme = vp9_square_search(x, &mvp_full.as_mv,
+            bestsme = vp9_square_search(x, &mvp_full,
                                         step_param,
                                         sadpb, 1, v_fn_ptr, 1,
                                         &bsi->ref_mv->as_mv,
                                         &mode_mv[NEWMV].as_mv);
           } else if (cpi->sf.search_method == BIGDIA) {
-            bestsme = vp9_bigdia_search(x, &mvp_full.as_mv,
+            bestsme = vp9_bigdia_search(x, &mvp_full,
                                         step_param,
                                         sadpb, 1, v_fn_ptr, 1,
                                         &bsi->ref_mv->as_mv,
@@ -1809,16 +1809,17 @@ static void rd_check_segment_txsize(VP9_COMP *cpi, MACROBLOCK *x,
           } else {
             bestsme = vp9_full_pixel_diamond(cpi, x, &mvp_full, step_param,
                                              sadpb, further_steps, 0, v_fn_ptr,
-                                             bsi->ref_mv, &mode_mv[NEWMV]);
+                                             &bsi->ref_mv->as_mv,
+                                             &mode_mv[NEWMV]);
           }
 
           // Should we do a full search (best quality only)
           if (cpi->compressor_speed == 0) {
             /* Check if mvp_full is within the range. */
-            clamp_mv(&mvp_full.as_mv, x->mv_col_min, x->mv_col_max,
+            clamp_mv(&mvp_full, x->mv_col_min, x->mv_col_max,
                      x->mv_row_min, x->mv_row_max);
 
-            thissme = cpi->full_search_sad(x, &mvp_full.as_mv,
+            thissme = cpi->full_search_sad(x, &mvp_full,
                                            sadpb, 16, v_fn_ptr,
                                            x->nmvjointcost, x->mvcost,
                                            &bsi->ref_mv->as_mv, i);
@@ -2439,10 +2440,10 @@ static void single_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
                                 &cpi->fn_ptr[bsize], 1,
                                 &ref_mv.as_mv, &tmp_mv->as_mv);
   } else {
-    bestsme = vp9_full_pixel_diamond(cpi, x, &mvp_full, step_param,
+    bestsme = vp9_full_pixel_diamond(cpi, x, &mvp_full.as_mv, step_param,
                                      sadpb, further_steps, 1,
                                      &cpi->fn_ptr[bsize],
-                                     &ref_mv, tmp_mv);
+                                     &ref_mv.as_mv, tmp_mv);
   }
 
   x->mv_col_min = tmp_col_min;

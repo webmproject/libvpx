@@ -22,7 +22,7 @@
 
 
 static unsigned int do_16x16_motion_iteration(VP9_COMP *cpi,
-                                              int_mv *ref_mv,
+                                              const MV *ref_mv,
                                               int_mv *dst_mv,
                                               int mb_row,
                                               int mb_col) {
@@ -42,15 +42,14 @@ static unsigned int do_16x16_motion_iteration(VP9_COMP *cpi,
       (cpi->speed < 8 ? (cpi->speed > 5 ? 1 : 0) : 2);
   step_param = MIN(step_param, (cpi->sf.max_step_search_steps - 2));
 
-  vp9_set_mv_search_range(x, &ref_mv->as_mv);
+  vp9_set_mv_search_range(x, ref_mv);
 
-  ref_full.as_mv.col = ref_mv->as_mv.col >> 3;
-  ref_full.as_mv.row = ref_mv->as_mv.row >> 3;
+  ref_full.as_mv.col = ref_mv->col >> 3;
+  ref_full.as_mv.row = ref_mv->row >> 3;
 
   /*cpi->sf.search_method == HEX*/
   best_err = vp9_hex_search(x, &ref_full.as_mv, step_param, x->errorperbit,
-                            0, &v_fn_ptr,
-                            0, &ref_mv->as_mv, &dst_mv->as_mv);
+                            0, &v_fn_ptr, 0, ref_mv, &dst_mv->as_mv);
 
   // Try sub-pixel MC
   // if (bestsme > error_thresh && bestsme < INT_MAX)
@@ -59,7 +58,7 @@ static unsigned int do_16x16_motion_iteration(VP9_COMP *cpi,
     unsigned int sse;
     best_err = cpi->find_fractional_mv_step(
         x,
-        &dst_mv->as_mv, &ref_mv->as_mv,
+        &dst_mv->as_mv, ref_mv,
         cpi->common.allow_high_precision_mv,
         x->errorperbit, &v_fn_ptr,
         0, cpi->sf.subpel_iters_per_step, NULL, NULL,
@@ -81,8 +80,8 @@ static unsigned int do_16x16_motion_iteration(VP9_COMP *cpi,
   return best_err;
 }
 
-static int do_16x16_motion_search(VP9_COMP *cpi, int_mv *ref_mv, int_mv *dst_mv,
-                                  int mb_row, int mb_col) {
+static int do_16x16_motion_search(VP9_COMP *cpi, const int_mv *ref_mv,
+                                  int_mv *dst_mv, int mb_row, int mb_col) {
   MACROBLOCK *const x = &cpi->mb;
   MACROBLOCKD *const xd = &x->e_mbd;
   unsigned int err, tmp_err;
@@ -97,7 +96,8 @@ static int do_16x16_motion_search(VP9_COMP *cpi, int_mv *ref_mv, int_mv *dst_mv,
 
   // Test last reference frame using the previous best mv as the
   // starting point (best reference) for the search
-  tmp_err = do_16x16_motion_iteration(cpi, ref_mv, &tmp_mv, mb_row, mb_col);
+  tmp_err = do_16x16_motion_iteration(cpi, &ref_mv->as_mv, &tmp_mv,
+                                      mb_row, mb_col);
   if (tmp_err < err) {
     err = tmp_err;
     dst_mv->as_int = tmp_mv.as_int;
@@ -110,7 +110,7 @@ static int do_16x16_motion_search(VP9_COMP *cpi, int_mv *ref_mv, int_mv *dst_mv,
     int_mv zero_ref_mv, tmp_mv;
 
     zero_ref_mv.as_int = 0;
-    tmp_err = do_16x16_motion_iteration(cpi, &zero_ref_mv, &tmp_mv,
+    tmp_err = do_16x16_motion_iteration(cpi, &zero_ref_mv.as_mv, &tmp_mv,
                                         mb_row, mb_col);
     if (tmp_err < err) {
       dst_mv->as_int = tmp_mv.as_int;
