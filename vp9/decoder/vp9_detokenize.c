@@ -79,9 +79,10 @@ static const vp9_prob cat6_prob[15] = {
     val += (vp9_read(r, prob) << bits_count);           \
   } while (0)
 
-static int decode_coefs(VP9_COMMON *cm, const MACROBLOCKD *xd, int block,
-                        PLANE_TYPE type, int16_t *dqcoeff, TX_SIZE tx_size,
-                        const int16_t *dq, int ctx, vp9_reader *r) {
+static int decode_coefs(VP9_COMMON *cm, const MACROBLOCKD *xd, PLANE_TYPE type,
+                       int16_t *dqcoeff, TX_SIZE tx_size, const int16_t *dq,
+                       int ctx, const int16_t *scan, const int16_t *nb,
+                       vp9_reader *r) {
   const int max_eob = 16 << (tx_size << 1);
   const FRAME_CONTEXT *const fc = &cm->fc;
   FRAME_COUNTS *const counts = &cm->counts;
@@ -98,9 +99,6 @@ static int decode_coefs(VP9_COMMON *cm, const MACROBLOCKD *xd, int block,
   const uint8_t *cat6;
   const uint8_t *band_translate = get_band_translate(tx_size);
   const int dq_shift = (tx_size == TX_32X32);
-  const scan_order *so = get_scan(xd, tx_size, type, block);
-  const int16_t *scan = so->scan;
-  const int16_t *nb = so->neighbors;
   int v;
   int16_t dqv = dq[0];
 
@@ -202,9 +200,10 @@ int vp9_decode_block_tokens(VP9_COMMON *cm, MACROBLOCKD *xd,
   struct macroblockd_plane *const pd = &xd->plane[plane];
   const int ctx = get_entropy_context(tx_size, pd->above_context + x,
                                                pd->left_context + y);
-  const int eob = decode_coefs(cm, xd, block, pd->plane_type,
+  const scan_order *so = get_scan(xd, tx_size, pd->plane_type, block);
+  const int eob = decode_coefs(cm, xd, pd->plane_type,
                                BLOCK_OFFSET(pd->dqcoeff, block), tx_size,
-                               pd->dequant, ctx, r);
+                               pd->dequant, ctx, so->scan, so->neighbors, r);
   set_contexts(xd, pd, plane_bsize, tx_size, eob > 0, x, y);
   return eob;
 }
