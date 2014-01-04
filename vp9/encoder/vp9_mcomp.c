@@ -464,20 +464,20 @@ int vp9_find_best_sub_pixel_comp_tree(MACROBLOCK *x,
 #undef CHECK_BETTER
 #undef SP
 
-static INLINE int check_bounds(MACROBLOCK *x, int row, int col, int range) {
+static INLINE int check_bounds(const MACROBLOCK *x, int row, int col,
+                               int range) {
   return ((row - range) >= x->mv_row_min) &
          ((row + range) <= x->mv_row_max) &
          ((col - range) >= x->mv_col_min) &
          ((col + range) <= x->mv_col_max);
 }
 
-#define CHECK_POINT \
-  {\
-    if (this_mv.col < x->mv_col_min) continue;\
-    if (this_mv.col > x->mv_col_max) continue;\
-    if (this_mv.row < x->mv_row_min) continue;\
-    if (this_mv.row > x->mv_row_max) continue;\
-  }
+static INLINE int check_point(const MACROBLOCK *x, const MV *mv) {
+  return (mv->col < x->mv_col_min) |
+         (mv->col > x->mv_col_max) |
+         (mv->row < x->mv_row_min) |
+         (mv->row > x->mv_row_max);
+}
 
 #define CHECK_BETTER \
   {\
@@ -580,7 +580,8 @@ static int vp9_pattern_search(MACROBLOCK *x,
         for (i = 0; i < num_candidates[t]; i++) {
           this_mv.row = br + candidates[t][i].row;
           this_mv.col = bc + candidates[t][i].col;
-          CHECK_POINT
+          if (check_point(x, &this_mv))
+            continue;
           this_offset = base_offset + (this_mv.row * in_what_stride) +
                                        this_mv.col;
           thissad = vfp->sdf(what, what_stride, this_offset, in_what_stride,
@@ -623,7 +624,8 @@ static int vp9_pattern_search(MACROBLOCK *x,
           for (i = 0; i < num_candidates[s]; i++) {
             this_mv.row = br + candidates[s][i].row;
             this_mv.col = bc + candidates[s][i].col;
-            CHECK_POINT
+            if (check_point(x, &this_mv))
+              continue;
             this_offset = base_offset + (this_mv.row * in_what_stride) +
                                          this_mv.col;
             thissad = vfp->sdf(what, what_stride, this_offset, in_what_stride,
@@ -659,7 +661,8 @@ static int vp9_pattern_search(MACROBLOCK *x,
           for (i = 0; i < PATTERN_CANDIDATES_REF; i++) {
             this_mv.row = br + candidates[s][next_chkpts_indices[i]].row;
             this_mv.col = bc + candidates[s][next_chkpts_indices[i]].col;
-            CHECK_POINT
+            if (check_point(x, &this_mv))
+              continue;
             this_offset = base_offset + (this_mv.row * (in_what_stride)) +
                                          this_mv.col;
             thissad = vfp->sdf(what, what_stride, this_offset, in_what_stride,
@@ -699,7 +702,8 @@ static int vp9_pattern_search(MACROBLOCK *x,
         for (i = 0; i < 4; i++) {
           this_mv.row = br + neighbors[i].row;
           this_mv.col = bc + neighbors[i].col;
-          CHECK_POINT
+          if (check_point(x, &this_mv))
+            continue;
           this_offset = base_offset + (this_mv.row * (in_what_stride)) +
                                        this_mv.col;
           thissad = vfp->sdf(what, what_stride, this_offset, in_what_stride,
@@ -852,7 +856,6 @@ int vp9_square_search(MACROBLOCK *x,
                             square_num_candidates, square_candidates);
 };
 
-#undef CHECK_POINT
 #undef CHECK_BETTER
 
 int vp9_full_range_search_c(MACROBLOCK *x, MV *ref_mv, MV *best_mv,
