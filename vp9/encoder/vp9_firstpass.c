@@ -92,30 +92,31 @@ static int kfboost_qadjust(int qindex) {
 
 // Resets the first pass file to the given position using a relative seek from
 // the current position.
-static void reset_fpf_position(VP9_COMP *cpi, FIRSTPASS_STATS *position) {
-  cpi->twopass.stats_in = position;
+static void reset_fpf_position(struct twopass_rc *p,
+                               FIRSTPASS_STATS *position) {
+  p->stats_in = position;
 }
 
-static int lookup_next_frame_stats(VP9_COMP *cpi, FIRSTPASS_STATS *next_frame) {
-  if (cpi->twopass.stats_in >= cpi->twopass.stats_in_end)
+static int lookup_next_frame_stats(const struct twopass_rc *p,
+                                   FIRSTPASS_STATS *next_frame) {
+  if (p->stats_in >= p->stats_in_end)
     return EOF;
 
-  *next_frame = *cpi->twopass.stats_in;
+  *next_frame = *p->stats_in;
   return 1;
 }
 
 // Read frame stats at an offset from the current position
-static int read_frame_stats(VP9_COMP *cpi,
-                            FIRSTPASS_STATS *frame_stats,
-                            int offset) {
-  FIRSTPASS_STATS *fps_ptr = cpi->twopass.stats_in;
+static int read_frame_stats(const struct twopass_rc *p,
+                            FIRSTPASS_STATS *frame_stats, int offset) {
+  const FIRSTPASS_STATS *fps_ptr = p->stats_in;
 
   // Check legality of offset
   if (offset >= 0) {
-    if (&fps_ptr[offset] >= cpi->twopass.stats_in_end)
+    if (&fps_ptr[offset] >= p->stats_in_end)
       return EOF;
   } else if (offset < 0) {
-    if (&fps_ptr[offset] < cpi->twopass.stats_in_start)
+    if (&fps_ptr[offset] < p->stats_in_start)
       return EOF;
   }
 
@@ -123,13 +124,12 @@ static int read_frame_stats(VP9_COMP *cpi,
   return 1;
 }
 
-static int input_stats(VP9_COMP *cpi, FIRSTPASS_STATS *fps) {
-  if (cpi->twopass.stats_in >= cpi->twopass.stats_in_end)
+static int input_stats(struct twopass_rc *p, FIRSTPASS_STATS *fps) {
+  if (p->stats_in >= p->stats_in_end)
     return EOF;
 
-  *fps = *cpi->twopass.stats_in;
-  cpi->twopass.stats_in =
-    (void *)((char *)cpi->twopass.stats_in + sizeof(FIRSTPASS_STATS));
+  *fps = *p->stats_in;
+  ++p->stats_in;
   return 1;
 }
 
@@ -1125,7 +1125,7 @@ void vp9_init_second_pass(VP9_COMP *cpi) {
 
     start_pos = cpi->twopass.stats_in;  // Note the starting "file" position.
 
-    while (input_stats(cpi, &this_frame) != EOF) {
+    while (input_stats(&cpi->twopass, &this_frame) != EOF) {
       IIRatio = this_frame.intra_error
                 / DOUBLE_DIVIDE_CHECK(this_frame.coded_error);
       IIRatio = (IIRatio < 1.0) ? 1.0 : (IIRatio > 20.0) ? 20.0 : IIRatio;
@@ -1136,7 +1136,7 @@ void vp9_init_second_pass(VP9_COMP *cpi) {
         DOUBLE_DIVIDE_CHECK((double)cpi->twopass.total_stats.count);
 
     // Reset file position
-    reset_fpf_position(cpi, start_pos);
+    reset_fpf_position(&cpi->twopass, start_pos);
   }
 
   // Scan the first pass file and calculate a modified total error based upon
@@ -1153,13 +1153,13 @@ void vp9_init_second_pass(VP9_COMP *cpi) {
     cpi->twopass.modified_error_max =
       (av_error * cpi->oxcf.two_pass_vbrmax_section) / 100;
 
-    while (input_stats(cpi, &this_frame) != EOF) {
+    while (input_stats(&cpi->twopass, &this_frame) != EOF) {
       cpi->twopass.modified_error_total +=
           calculate_modified_err(cpi, &this_frame);
     }
     cpi->twopass.modified_error_left = cpi->twopass.modified_error_total;
 
-    reset_fpf_position(cpi, start_pos);  // Reset file position
+    reset_fpf_position(&cpi->twopass, start_pos);  // Reset file position
   }
 }
 
@@ -1206,7 +1206,7 @@ static int detect_transition_to_still(
     // Look ahead a few frames to see if static condition
     // persists...
     for (j = 0; j < still_interval; j++) {
-      if (EOF == input_stats(cpi, &tmp_next_frame))
+      if (EOF == input_stats(&cpi->twopass, &tmp_next_frame))
         break;
 
       zz_inter =
@@ -1215,7 +1215,7 @@ static int detect_transition_to_still(
         break;
     }
     // Reset file position
-    reset_fpf_position(cpi, position);
+    reset_fpf_position(&cpi->twopass, position);
 
     // Only if it does do we signal a transition to still
     if (j == still_interval)
@@ -1235,7 +1235,7 @@ static int detect_flash(VP9_COMP *cpi, int offset) {
 
   // Read the frame data.
   // The return is FALSE (no flash detected) if not a valid frame
-  if (read_frame_stats(cpi, &next_frame, offset) != EOF) {
+  if (read_frame_stats(&cpi->twopass, &next_frame, offset) != EOF) {
     // What we are looking for here is a situation where there is a
     // brief break in prediction (such as a flash) but subsequent frames
     // are reasonably well predicted by an earlier (pre flash) frame.
@@ -1340,7 +1340,7 @@ static int calc_arf_boost(VP9_COMP *cpi, int offset,
 
   // Search forward from the proposed arf/next gf position
   for (i = 0; i < f_frames; i++) {
-    if (read_frame_stats(cpi, &this_frame, (i + offset)) == EOF)
+    if (read_frame_stats(&cpi->twopass, &this_frame, (i + offset)) == EOF)
       break;
 
     // Update the motion related elements to the boost calculation
@@ -1377,7 +1377,7 @@ static int calc_arf_boost(VP9_COMP *cpi, int offset,
 
   // Search backward towards last gf position
   for (i = -1; i >= -b_frames; i--) {
-    if (read_frame_stats(cpi, &this_frame, (i + offset)) == EOF)
+    if (read_frame_stats(&cpi->twopass, &this_frame, (i + offset)) == EOF)
       break;
 
     // Update the motion related elements to the boost calculation
@@ -1625,7 +1625,7 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
     mod_frame_err = calculate_modified_err(cpi, this_frame);
     gf_group_err += mod_frame_err;
 
-    if (EOF == input_stats(cpi, &next_frame))
+    if (EOF == input_stats(&cpi->twopass, &next_frame))
       break;
 
     // Test for the case where there is a brief flash but the prediction
@@ -1694,7 +1694,7 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
     while (i < (cpi->rc.frames_to_key - 1)) {
       i++;
 
-      if (EOF == input_stats(cpi, this_frame))
+      if (EOF == input_stats(&cpi->twopass, this_frame))
         break;
 
       if (i < cpi->rc.frames_to_key) {
@@ -1825,7 +1825,7 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
         (int64_t)max_bits * cpi->rc.baseline_gf_interval;
 
   // Reset the file position
-  reset_fpf_position(cpi, start_pos);
+  reset_fpf_position(&cpi->twopass, start_pos);
 
   // Assign  bits to the arf or gf.
   for (i = 0;
@@ -1950,10 +1950,10 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
     FIRSTPASS_STATS sectionstats;
 
     zero_stats(&sectionstats);
-    reset_fpf_position(cpi, start_pos);
+    reset_fpf_position(&cpi->twopass, start_pos);
 
     for (i = 0; i < cpi->rc.baseline_gf_interval; i++) {
-      input_stats(cpi, &next_frame);
+      input_stats(&cpi->twopass, &next_frame);
       accumulate_stats(&sectionstats, &next_frame);
     }
 
@@ -1963,7 +1963,7 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
       (sectionstats.intra_error /
       DOUBLE_DIVIDE_CHECK(sectionstats.coded_error));
 
-    reset_fpf_position(cpi, start_pos);
+    reset_fpf_position(&cpi->twopass, start_pos);
   }
 }
 
@@ -2103,7 +2103,7 @@ void vp9_get_second_pass_params(VP9_COMP *cpi) {
     // adjust_maxq_qrange(cpi);
   }
   vp9_zero(this_frame);
-  if (EOF == input_stats(cpi, &this_frame))
+  if (EOF == input_stats(&cpi->twopass, &this_frame))
     return;
 
   this_frame_intra_error = this_frame.intra_error;
@@ -2171,7 +2171,7 @@ void vp9_get_second_pass_params(VP9_COMP *cpi) {
                               DOUBLE_DIVIDE_CHECK(this_frame_coded_error));
   {
     FIRSTPASS_STATS next_frame;
-    if (lookup_next_frame_stats(cpi, &next_frame) != EOF) {
+    if (lookup_next_frame_stats(&cpi->twopass, &next_frame) != EOF) {
       cpi->twopass.next_iiratio = (int)(next_frame.intra_error /
                                   DOUBLE_DIVIDE_CHECK(next_frame.coded_error));
     }
@@ -2261,7 +2261,7 @@ static int test_candidate_kf(VP9_COMP *cpi,
       old_boost_score = boost_score;
 
       // Get the next frame details
-      if (EOF == input_stats(cpi, &local_next_frame))
+      if (EOF == input_stats(&cpi->twopass, &local_next_frame))
         break;
     }
 
@@ -2271,7 +2271,7 @@ static int test_candidate_kf(VP9_COMP *cpi,
       is_viable_kf = 1;
     } else {
       // Reset the file position
-      reset_fpf_position(cpi, start_pos);
+      reset_fpf_position(&cpi->twopass, start_pos);
 
       is_viable_kf = 0;
     }
@@ -2338,11 +2338,11 @@ static void find_next_key_frame(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
 
     // load a the next frame's stats
     last_frame = *this_frame;
-    input_stats(cpi, this_frame);
+    input_stats(&cpi->twopass, this_frame);
 
     // Provided that we are not at the end of the file...
-    if (cpi->oxcf.auto_key
-        && lookup_next_frame_stats(cpi, &next_frame) != EOF) {
+    if (cpi->oxcf.auto_key &&
+        lookup_next_frame_stats(&cpi->twopass, &next_frame) != EOF) {
       // Normal scene cut check
       if (test_candidate_kf(cpi, &last_frame, this_frame, &next_frame))
         break;
@@ -2393,7 +2393,7 @@ static void find_next_key_frame(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
     tmp_frame = first_frame;
 
     // Reset to the start of the group
-    reset_fpf_position(cpi, start_position);
+    reset_fpf_position(&cpi->twopass, start_position);
 
     kf_group_err = 0;
     kf_group_intra_err = 0;
@@ -2407,11 +2407,11 @@ static void find_next_key_frame(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
       kf_group_coded_err += tmp_frame.coded_error;
 
       // Load a the next frame's stats
-      input_stats(cpi, &tmp_frame);
+      input_stats(&cpi->twopass, &tmp_frame);
     }
 
     // Reset to the start of the group
-    reset_fpf_position(cpi, current_pos);
+    reset_fpf_position(&cpi->twopass, current_pos);
 
     cpi->rc.next_key_frame_forced = 1;
   } else {
@@ -2452,7 +2452,7 @@ static void find_next_key_frame(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
     cpi->twopass.kf_group_bits = 0;
   }
   // Reset the first pass file position
-  reset_fpf_position(cpi, start_position);
+  reset_fpf_position(&cpi->twopass, start_position);
 
   // Determine how big to make this keyframe based on how well the subsequent
   // frames use inter blocks.
@@ -2464,7 +2464,7 @@ static void find_next_key_frame(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   for (i = 0; i < cpi->rc.frames_to_key; i++) {
     double r;
 
-    if (EOF == input_stats(cpi, &next_frame))
+    if (EOF == input_stats(&cpi->twopass, &next_frame))
       break;
 
     // Monitor for static sections.
@@ -2502,10 +2502,10 @@ static void find_next_key_frame(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
     FIRSTPASS_STATS sectionstats;
 
     zero_stats(&sectionstats);
-    reset_fpf_position(cpi, start_position);
+    reset_fpf_position(&cpi->twopass, start_position);
 
     for (i = 0; i < cpi->rc.frames_to_key; i++) {
-      input_stats(cpi, &next_frame);
+      input_stats(&cpi->twopass, &next_frame);
       accumulate_stats(&sectionstats, &next_frame);
     }
 
@@ -2517,7 +2517,7 @@ static void find_next_key_frame(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   }
 
   // Reset the first pass file position
-  reset_fpf_position(cpi, start_position);
+  reset_fpf_position(&cpi->twopass, start_position);
 
   // Work out how many bits to allocate for the key frame itself
   if (1) {
