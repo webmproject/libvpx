@@ -161,9 +161,6 @@ int vp9_alloc_frame_buffers(VP9_COMMON *cm, int width, int height) {
   cm->new_fb_idx = cm->fb_count - 1;
   cm->fb_idx_ref_cnt[cm->new_fb_idx] = 1;
 
-  for (i = 0; i < REFS_PER_FRAME; i++)
-    cm->active_ref_idx[i] = i;
-
   for (i = 0; i < REF_FRAMES; i++) {
     cm->ref_frame_map[i] = i;
     cm->fb_idx_ref_cnt[i] = 1;

@@ -2588,9 +2588,8 @@ static void encode_superblock(VP9_COMP *cpi, TOKENEXTRA **t, int output_enabled,
     for (ref = 0; ref < 1 + is_compound; ++ref) {
       YV12_BUFFER_CONFIG *cfg = &cm->yv12_fb[cm->ref_frame_map[
           get_ref_frame_idx(cpi, mbmi->ref_frame[ref])]];
-      setup_pre_planes(xd, ref, cfg, mi_row, mi_col, xd->scale_factors[ref]);
+      setup_pre_planes(xd, ref, cfg, mi_row, mi_col, &xd->block_refs[ref]->sf);
     }
-
     vp9_build_inter_predictors_sb(xd, mi_row, mi_col, MAX(bsize, BLOCK_8X8));
   }
 

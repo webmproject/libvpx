@@ -219,7 +219,7 @@ vpx_codec_err_t vp9_set_reference_dec(VP9D_PTR ptr, VP9_REFFRAME ref_frame_flag,
                                       YV12_BUFFER_CONFIG *sd) {
   VP9D_COMP *pbi = (VP9D_COMP *) ptr;
   VP9_COMMON *cm = &pbi->common;
-  int *ref_fb_ptr = NULL;
+  RefBuffer *ref_buf = NULL;
 
   /* TODO(jkoleszar): The decoder doesn't have any real knowledge of what the
    * encoder is using the frame buffers for. This is just a stub to keep the
@@ -227,21 +227,23 @@ vpx_codec_err_t vp9_set_reference_dec(VP9D_PTR ptr, VP9_REFFRAME ref_frame_flag,
    * later commit that adds VP9-specific controls for this functionality.
    */
   if (ref_frame_flag == VP9_LAST_FLAG) {
-    ref_fb_ptr = &pbi->common.active_ref_idx[0];
+    ref_buf = &cm->frame_refs[0];
   } else if (ref_frame_flag == VP9_GOLD_FLAG) {
-    ref_fb_ptr = &pbi->common.active_ref_idx[1];
+    ref_buf = &cm->frame_refs[1];
   } else if (ref_frame_flag == VP9_ALT_FLAG) {
-    ref_fb_ptr = &pbi->common.active_ref_idx[2];
+    ref_buf = &cm->frame_refs[2];
   } else {
     vpx_internal_error(&pbi->common.error, VPX_CODEC_ERROR,
                        "Invalid reference frame");
     return pbi->common.error.error_code;
   }
 
-  if (!equal_dimensions(&cm->yv12_fb[*ref_fb_ptr], sd)) {
+  if (!equal_dimensions(ref_buf->buf, sd)) {
     vpx_internal_error(&pbi->common.error, VPX_CODEC_ERROR,
                        "Incorrect buffer dimensions");
   } else {
+    int *ref_fb_ptr = &ref_buf->idx;
+
     // Find an empty frame buffer.
     const int free_fb = get_free_fb(cm);
     // Decrease fb_idx_ref_cnt since it will be increased again in
@@ -250,7 +252,8 @@ vpx_codec_err_t vp9_set_reference_dec(VP9D_PTR ptr, VP9_REFFRAME ref_frame_flag,
 
     // Manage the reference counters and copy image.
     ref_cnt_fb(cm->fb_idx_ref_cnt, ref_fb_ptr, free_fb);
-    vp8_yv12_copy_frame(sd, &cm->yv12_fb[*ref_fb_ptr]);
+    ref_buf->buf = &cm->yv12_fb[*ref_fb_ptr];
+    vp8_yv12_copy_frame(sd, ref_buf->buf);
   }
 
   return pbi->common.error.error_code;
@@ -285,7 +288,7 @@ static void swap_frame_buffers(VP9D_COMP *pbi) {
 
   // Invalidate these references until the next frame starts.
   for (ref_index = 0; ref_index < 3; ref_index++)
-    cm->active_ref_idx[ref_index] = INT_MAX;
+    cm->frame_refs[ref_index].idx = INT_MAX;
 }
 
 int vp9_receive_compressed_data(VP9D_PTR ptr,
@@ -317,8 +320,8 @@ int vp9_receive_compressed_data(VP9D_PTR ptr,
      * at this point, but if it becomes so, [0] may not always be the correct
      * thing to do here.
      */
-    if (cm->active_ref_idx[0] != INT_MAX)
-      get_frame_ref_buffer(cm, 0)->corrupted = 1;
+    if (cm->frame_refs[0].idx != INT_MAX)
+      cm->frame_refs[0].buf->corrupted = 1;
   }
 
   cm->new_fb_idx = get_free_fb(cm);
@@ -334,8 +337,8 @@ int vp9_receive_compressed_data(VP9D_PTR ptr,
      * at this point, but if it becomes so, [0] may not always be the correct
      * thing to do here.
      */
-    if (cm->active_ref_idx[0] != INT_MAX)
-      get_frame_ref_buffer(cm, 0)->corrupted = 1;
+    if (cm->frame_refs[0].idx != INT_MAX)
+      cm->frame_refs[0].buf->corrupted = 1;
 
     if (cm->fb_idx_ref_cnt[cm->new_fb_idx] > 0)
       cm->fb_idx_ref_cnt[cm->new_fb_idx]--;
