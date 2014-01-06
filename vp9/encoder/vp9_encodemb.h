@@ -16,17 +16,6 @@
 #include "vp9/encoder/vp9_onyx_int.h"
 #include "vp9/common/vp9_onyxc_int.h"
 
-typedef struct {
-  MB_PREDICTION_MODE mode;
-  MV_REFERENCE_FRAME ref_frame;
-  MV_REFERENCE_FRAME second_ref_frame;
-} MODE_DEFINITION;
-
-typedef struct {
-  MV_REFERENCE_FRAME ref_frame;
-  MV_REFERENCE_FRAME second_ref_frame;
-} REF_DEFINITION;
-
 struct optimize_ctx {
   ENTROPY_CONTEXT ta[MAX_MB_PLANE][16];
   ENTROPY_CONTEXT tl[MAX_MB_PLANE][16];
