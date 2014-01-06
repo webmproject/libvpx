@@ -296,3 +296,12 @@ void vp9_choose_segmap_coding_method(VP9_COMP *cpi) {
     vpx_memcpy(seg->tree_probs, no_pred_tree, sizeof(no_pred_tree));
   }
 }
+
+void vp9_reset_segment_features(struct segmentation *seg) {
+  // Set up default state for MB feature flags
+  seg->enabled = 0;
+  seg->update_map = 0;
+  seg->update_data = 0;
+  vpx_memset(seg->tree_probs, 255, sizeof(seg->tree_probs));
+  vp9_clearall_segfeatures(seg);
+}

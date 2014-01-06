@@ -170,17 +170,6 @@ void vp9_initialize_enc() {
   }
 }
 
-static void reset_segment_features(VP9_COMMON *cm) {
-  struct segmentation *const seg = &cm->seg;
-
-  // Set up default state for MB feature flags
-  seg->enabled = 0;
-  seg->update_map = 0;
-  seg->update_data = 0;
-  vpx_memset(seg->tree_probs, 255, sizeof(seg->tree_probs));
-  vp9_clearall_segfeatures(seg);
-}
-
 static void dealloc_compressor_data(VP9_COMP *cpi) {
   // Delete sementation map
   vpx_free(cpi->segmentation_map);
@@ -1192,7 +1181,7 @@ void vp9_change_config(VP9_PTR ptr, VP9_CONFIG *oxcf) {
   cm->refresh_frame_context = 1;
   cm->reset_frame_context = 0;
 
-  reset_segment_features(cm);
+  vp9_reset_segment_features(&cm->seg);
   set_high_precision_mv(cpi, 0);
 
   {
@@ -2939,7 +2928,7 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
   if (frame_is_intra_only(cm)) {
     vp9_setup_key_frame(cpi);
     // Reset the loop filter deltas and segmentation map.
-    reset_segment_features(cm);
+    vp9_reset_segment_features(&cm->seg);
 
     // If segmentation is enabled force a map update for key frames.
     if (seg->enabled) {
