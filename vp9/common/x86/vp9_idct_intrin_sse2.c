@@ -459,7 +459,9 @@ void vp9_iht4x4_16_add_sse2(const int16_t *input, uint8_t *dest, int stride,
       res1 = _mm_packs_epi32(tmp2, tmp3); \
   }
 
-#define IDCT8_1D  \
+#define IDCT8_1D(in0, in1, in2, in3, in4, in5, in6, in7, \
+                 out0, out1, out2, out3, out4, out5, out6, out7)  \
+  { \
   /* Stage1 */      \
   { \
     const __m128i lo_17 = _mm_unpacklo_epi16(in1, in7); \
@@ -519,14 +521,15 @@ void vp9_iht4x4_16_add_sse2(const int16_t *input, uint8_t *dest, int stride,
   } \
   \
   /* Stage4  */ \
-  in0 = _mm_adds_epi16(stp1_0, stp2_7); \
-  in1 = _mm_adds_epi16(stp1_1, stp1_6); \
-  in2 = _mm_adds_epi16(stp1_2, stp1_5); \
-  in3 = _mm_adds_epi16(stp1_3, stp2_4); \
-  in4 = _mm_subs_epi16(stp1_3, stp2_4); \
-  in5 = _mm_subs_epi16(stp1_2, stp1_5); \
-  in6 = _mm_subs_epi16(stp1_1, stp1_6); \
-  in7 = _mm_subs_epi16(stp1_0, stp2_7);
+  out0 = _mm_adds_epi16(stp1_0, stp2_7); \
+  out1 = _mm_adds_epi16(stp1_1, stp1_6); \
+  out2 = _mm_adds_epi16(stp1_2, stp1_5); \
+  out3 = _mm_adds_epi16(stp1_3, stp2_4); \
+  out4 = _mm_subs_epi16(stp1_3, stp2_4); \
+  out5 = _mm_subs_epi16(stp1_2, stp1_5); \
+  out6 = _mm_subs_epi16(stp1_1, stp1_6); \
+  out7 = _mm_subs_epi16(stp1_0, stp2_7); \
+  }
 
 #define RECON_AND_STORE(dest, in_x) \
   {                                                     \
@@ -574,7 +577,8 @@ void vp9_idct8x8_64_add_sse2(const int16_t *input, uint8_t *dest, int stride) {
                   in0, in1, in2, in3, in4, in5, in6, in7);
 
     // 4-stage 1D idct8x8
-    IDCT8_1D
+    IDCT8_1D(in0, in1, in2, in3, in4, in5, in6, in7,
+             in0, in1, in2, in3, in4, in5, in6, in7);
   }
 
   // Final rounding and shift
@@ -697,15 +701,8 @@ static void idct8_1d_sse2(__m128i *in) {
                 in0, in1, in2, in3, in4, in5, in6, in7);
 
   // 4-stage 1D idct8x8
-  IDCT8_1D
-  in[0] = in0;
-  in[1] = in1;
-  in[2] = in2;
-  in[3] = in3;
-  in[4] = in4;
-  in[5] = in5;
-  in[6] = in6;
-  in[7] = in7;
+  IDCT8_1D(in0, in1, in2, in3, in4, in5, in6, in7,
+           in[0], in[1], in[2], in[3], in[4], in[5], in[6], in[7]);
 }
 
 static void iadst8_1d_sse2(__m128i *in) {
@@ -1112,9 +1109,9 @@ void vp9_idct8x8_10_add_sse2(const int16_t *input, uint8_t *dest, int stride) {
   tmp3 = _mm_subs_epi16(stp1_2, stp1_5);
 
   TRANSPOSE_4X8_10(tmp0, tmp1, tmp2, tmp3, in0, in1, in2, in3)
-  in4 = in5 = in6 = in7 = zero;
 
-  IDCT8_1D
+  IDCT8_1D(in0, in1, in2, in3, zero, zero, zero, zero,
+           in0, in1, in2, in3, in4, in5, in6, in7);
   // Final rounding and shift
   in0 = _mm_adds_epi16(in0, final_rounding);
   in1 = _mm_adds_epi16(in1, final_rounding);
