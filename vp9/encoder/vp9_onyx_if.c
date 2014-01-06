@@ -1191,9 +1191,6 @@ void vp9_change_config(VP9_PTR ptr, VP9_CONFIG *oxcf) {
       cpi->segment_encode_breakout[i] = cpi->oxcf.encode_breakout;
   }
 
-  // At the moment the first order values may not be > MAXQ
-  cpi->oxcf.fixed_q = MIN(cpi->oxcf.fixed_q, MAXQ);
-
   // local file playback mode == really big buffer
   if (cpi->oxcf.end_usage == USAGE_LOCAL_FILE_PLAYBACK) {
     cpi->oxcf.starting_buffer_level   = 60000;
@@ -1254,13 +1251,6 @@ void vp9_change_config(VP9_PTR ptr, VP9_CONFIG *oxcf) {
     assert(cm->height <= cpi->initial_height);
   }
   update_frame_size(cpi);
-
-  if (cpi->oxcf.fixed_q >= 0) {
-    cpi->rc.last_q[0] = cpi->oxcf.fixed_q;
-    cpi->rc.last_q[1] = cpi->oxcf.fixed_q;
-    cpi->rc.last_q[2] = cpi->oxcf.fixed_q;
-    cpi->rc.last_boosted_qindex = cpi->oxcf.fixed_q;
-  }
 
   cpi->speed = cpi->oxcf.cpu_used;
 
@@ -1487,7 +1477,6 @@ VP9_PTR vp9_create_compressor(VP9_CONFIG *oxcf) {
   init_pick_mode_context(cpi);
 
   cm->current_video_frame   = 0;
-  cpi->rc.frames_till_gf_update_due = 0;
 
   // Set reference frame sign bias for ALTREF frame to 1 (for now)
   cm->ref_frame_sign_bias[ALTREF_FRAME] = 1;
@@ -2269,53 +2258,6 @@ static void scale_and_extend_frame(YV12_BUFFER_CONFIG *src_fb,
   vp8_yv12_extend_frame_borders(dst_fb);
 }
 
-
-static void update_alt_ref_frame_stats(VP9_COMP *cpi) {
-  // this frame refreshes means next frames don't unless specified by user
-  cpi->rc.frames_since_golden = 0;
-
-#if CONFIG_MULTIPLE_ARF
-  if (!cpi->multi_arf_enabled)
-#endif
-    // Clear the alternate reference update pending flag.
-    cpi->rc.source_alt_ref_pending = 0;
-
-  // Set the alternate reference frame active flag
-  cpi->rc.source_alt_ref_active = 1;
-}
-
-static void update_golden_frame_stats(VP9_COMP *cpi) {
-  // Update the Golden frame usage counts.
-  if (cpi->refresh_golden_frame) {
-    // this frame refreshes means next frames don't unless specified by user
-    cpi->refresh_golden_frame = 0;
-    cpi->rc.frames_since_golden = 0;
-
-    // ******** Fixed Q test code only ************
-    // If we are going to use the ALT reference for the next group of frames
-    // set a flag to say so.
-    if (cpi->oxcf.fixed_q >= 0 &&
-        cpi->oxcf.play_alternate && !cpi->refresh_alt_ref_frame) {
-      cpi->rc.source_alt_ref_pending = 1;
-      cpi->rc.frames_till_gf_update_due = cpi->rc.baseline_gf_interval;
-    }
-
-    if (!cpi->rc.source_alt_ref_pending)
-      cpi->rc.source_alt_ref_active = 0;
-
-    // Decrement count down till next gf
-    if (cpi->rc.frames_till_gf_update_due > 0)
-      cpi->rc.frames_till_gf_update_due--;
-
-  } else if (!cpi->refresh_alt_ref_frame) {
-    // Decrement count down till next gf
-    if (cpi->rc.frames_till_gf_update_due > 0)
-      cpi->rc.frames_till_gf_update_due--;
-
-    cpi->rc.frames_since_golden++;
-  }
-}
-
 static int find_fp_qindex() {
   int i;
 
@@ -2968,8 +2910,9 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
     if (vp9_drop_frame(cpi)) {
       // Update buffer level with zero size, update frame counters, and return.
       vp9_update_buffer_level(cpi, 0);
+      cm->last_frame_type = cm->frame_type;
+      vp9_rc_postencode_update_drop_frame(cpi);
       cm->current_video_frame++;
-      cpi->rc.frames_since_key++;
       return;
     }
   }
@@ -3038,7 +2981,7 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
   // Special case code to reduce pulsing when key frames are forced at a
   // fixed interval. Note the reconstruction error if it is the frame before
   // the force key frame
-  if (cpi->rc.next_key_frame_forced && (cpi->rc.frames_to_key == 0)) {
+  if (cpi->rc.next_key_frame_forced && cpi->rc.frames_to_key == 1) {
     cpi->ambient_err = vp9_calc_ss_err(cpi->Source, get_frame_new_buffer(cm));
   }
 
@@ -3102,8 +3045,6 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
    * needed in motion search besides loopfilter */
   cm->last_frame_type = cm->frame_type;
 
-  vp9_rc_postencode_update(cpi, *size);
-
 #if 0
   output_frame_level_debug_stats(cpi);
 #endif
@@ -3119,13 +3060,7 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
 
   get_ref_frame_flags(cpi);
 
-  if (cpi->oxcf.play_alternate && cpi->refresh_alt_ref_frame
-      && (cm->frame_type != KEY_FRAME))
-    // Update the alternate reference frame stats as appropriate.
-    update_alt_ref_frame_stats(cpi);
-  else
-    // Update the Golden frame stats as appropriate.
-    update_golden_frame_stats(cpi);
+  vp9_rc_postencode_update(cpi, *size);
 
   if (cm->frame_type == KEY_FRAME) {
     // Tell the caller that the frame was coded as a key frame
@@ -3139,10 +3074,6 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
       cpi->new_frame_coding_order_period = -1;
     }
 #endif
-
-    // As this frame is a key frame the next defaults to an inter frame.
-    vp9_clear_system_state();
-    cpi->rc.frames_since_key = 0;
   } else {
     *frame_flags = cm->frame_flags&~FRAMEFLAGS_KEY;
 
@@ -3192,7 +3123,6 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
     // Don't increment frame counters if this was an altref buffer
     // update not a real frame
     ++cm->current_video_frame;
-    ++cpi->rc.frames_since_key;
   }
   // restore prev_mi
   cm->prev_mi = cm->prev_mip + cm->mode_info_stride + 1;

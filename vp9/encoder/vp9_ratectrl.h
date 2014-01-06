@@ -52,6 +52,8 @@ int vp9_rc_regulate_q(const VP9_COMP *cpi, int target_bits_per_frame,
 // on bytes used
 void vp9_rc_postencode_update(VP9_COMP *cpi,
                               uint64_t bytes_used);
+// for dropped frames
+void vp9_rc_postencode_update_drop_frame(VP9_COMP *cpi);
 
 // estimates bits per mb for a given qindex and correction factor
 int vp9_rc_bits_per_mb(FRAME_TYPE frame_type, int qindex,
