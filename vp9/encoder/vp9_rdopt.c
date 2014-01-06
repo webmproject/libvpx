@@ -3123,10 +3123,6 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
   int_mv single_newmv[MAX_REF_FRAMES] = { { 0 } };
   static const int flag_list[4] = { 0, VP9_LAST_FLAG, VP9_GOLD_FLAG,
                                     VP9_ALT_FLAG };
-  int idx_list[4] = {0,
-                     cpi->lst_fb_idx,
-                     cpi->gld_fb_idx,
-                     cpi->alt_fb_idx};
   int64_t best_rd = best_rd_so_far;
   int64_t best_tx_rd[TX_MODES];
   int64_t best_tx_diff[TX_MODES];
@@ -3215,8 +3211,8 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
   for (ref_frame = LAST_FRAME; ref_frame <= ALTREF_FRAME; ref_frame++) {
     x->pred_mv_sad[ref_frame] = INT_MAX;
     if (cpi->ref_frame_flags & flag_list[ref_frame]) {
-      setup_buffer_inter(cpi, x, tile, idx_list[ref_frame], ref_frame,
-                         block_size, mi_row, mi_col,
+      setup_buffer_inter(cpi, x, tile, get_ref_frame_idx(cpi, ref_frame),
+                         ref_frame, block_size, mi_row, mi_col,
                          frame_mv[NEARESTMV], frame_mv[NEARMV], yv12_mb);
     }
     frame_mv[NEWMV][ref_frame].as_int = INVALID_MV;
@@ -3810,10 +3806,6 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
   struct buf_2d yv12_mb[4][MAX_MB_PLANE];
   static const int flag_list[4] = { 0, VP9_LAST_FLAG, VP9_GOLD_FLAG,
                                     VP9_ALT_FLAG };
-  int idx_list[4] = {0,
-                     cpi->lst_fb_idx,
-                     cpi->gld_fb_idx,
-                     cpi->alt_fb_idx};
   int64_t best_rd = best_rd_so_far;
   int64_t best_yrd = best_rd_so_far;  // FIXME(rbultje) more precise
   int64_t best_tx_rd[TX_MODES];
@@ -3864,8 +3856,8 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
 
   for (ref_frame = LAST_FRAME; ref_frame <= ALTREF_FRAME; ref_frame++) {
     if (cpi->ref_frame_flags & flag_list[ref_frame]) {
-      setup_buffer_inter(cpi, x, tile, idx_list[ref_frame], ref_frame,
-                         block_size, mi_row, mi_col,
+      setup_buffer_inter(cpi, x, tile, get_ref_frame_idx(cpi, ref_frame),
+                         ref_frame, block_size, mi_row, mi_col,
                          frame_mv[NEARESTMV], frame_mv[NEARMV],
                          yv12_mb);
     }

@@ -1996,8 +1996,7 @@ static void init_encode_frame_mb_context(VP9_COMP *cpi) {
   vp9_setup_src_planes(x, cpi->Source, 0, 0);
 
   // TODO(jkoleszar): are these initializations required?
-  setup_pre_planes(xd, 0, &cm->yv12_fb[cm->ref_frame_map[cpi->lst_fb_idx]],
-                   0, 0, NULL);
+  setup_pre_planes(xd, 0, get_ref_frame_buffer(cpi, LAST_FRAME), 0, 0, NULL);
   setup_dst_planes(xd, get_frame_new_buffer(cm), 0, 0);
 
   setup_block_dptrs(&x->e_mbd, cm->subsampling_x, cm->subsampling_y);
@@ -2586,8 +2585,8 @@ static void encode_superblock(VP9_COMP *cpi, TOKENEXTRA **t, int output_enabled,
     int ref;
     const int is_compound = has_second_ref(mbmi);
     for (ref = 0; ref < 1 + is_compound; ++ref) {
-      YV12_BUFFER_CONFIG *cfg = &cm->yv12_fb[cm->ref_frame_map[
-          get_ref_frame_idx(cpi, mbmi->ref_frame[ref])]];
+      YV12_BUFFER_CONFIG *cfg = get_ref_frame_buffer(cpi,
+                                                     mbmi->ref_frame[ref]);
       setup_pre_planes(xd, ref, cfg, mi_row, mi_col, &xd->block_refs[ref]->sf);
     }
     vp9_build_inter_predictors_sb(xd, mi_row, mi_col, MAX(bsize, BLOCK_8X8));
