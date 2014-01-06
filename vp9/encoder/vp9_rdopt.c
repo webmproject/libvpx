@@ -48,53 +48,62 @@
 
 #define MIN_EARLY_TERM_INDEX    3
 
+typedef struct {
+  MB_PREDICTION_MODE mode;
+  MV_REFERENCE_FRAME ref_frame[2];
+} MODE_DEFINITION;
+
+typedef struct {
+  MV_REFERENCE_FRAME ref_frame[2];
+} REF_DEFINITION;
+
 const MODE_DEFINITION vp9_mode_order[MAX_MODES] = {
-  {NEARESTMV, LAST_FRAME,   NONE},
-  {NEARESTMV, ALTREF_FRAME, NONE},
-  {NEARESTMV, GOLDEN_FRAME, NONE},
+  {NEARESTMV, {LAST_FRAME,   NONE}},
+  {NEARESTMV, {ALTREF_FRAME, NONE}},
+  {NEARESTMV, {GOLDEN_FRAME, NONE}},
 
-  {DC_PRED,   INTRA_FRAME,  NONE},
+  {DC_PRED,   {INTRA_FRAME,  NONE}},
 
-  {NEWMV,     LAST_FRAME,   NONE},
-  {NEWMV,     ALTREF_FRAME, NONE},
-  {NEWMV,     GOLDEN_FRAME, NONE},
+  {NEWMV,     {LAST_FRAME,   NONE}},
+  {NEWMV,     {ALTREF_FRAME, NONE}},
+  {NEWMV,     {GOLDEN_FRAME, NONE}},
 
-  {NEARMV,    LAST_FRAME,   NONE},
-  {NEARMV,    ALTREF_FRAME, NONE},
-  {NEARESTMV, LAST_FRAME,   ALTREF_FRAME},
-  {NEARESTMV, GOLDEN_FRAME, ALTREF_FRAME},
+  {NEARMV,    {LAST_FRAME,   NONE}},
+  {NEARMV,    {ALTREF_FRAME, NONE}},
+  {NEARESTMV, {LAST_FRAME,   ALTREF_FRAME}},
+  {NEARESTMV, {GOLDEN_FRAME, ALTREF_FRAME}},
 
-  {TM_PRED,   INTRA_FRAME,  NONE},
+  {TM_PRED,   {INTRA_FRAME,  NONE}},
 
-  {NEARMV,    LAST_FRAME,   ALTREF_FRAME},
-  {NEWMV,     LAST_FRAME,   ALTREF_FRAME},
-  {NEARMV,    GOLDEN_FRAME, NONE},
-  {NEARMV,    GOLDEN_FRAME, ALTREF_FRAME},
-  {NEWMV,     GOLDEN_FRAME, ALTREF_FRAME},
+  {NEARMV,    {LAST_FRAME,   ALTREF_FRAME}},
+  {NEWMV,     {LAST_FRAME,   ALTREF_FRAME}},
+  {NEARMV,    {GOLDEN_FRAME, NONE}},
+  {NEARMV,    {GOLDEN_FRAME, ALTREF_FRAME}},
+  {NEWMV,     {GOLDEN_FRAME, ALTREF_FRAME}},
 
-  {ZEROMV,    LAST_FRAME,   NONE},
-  {ZEROMV,    GOLDEN_FRAME, NONE},
-  {ZEROMV,    ALTREF_FRAME, NONE},
-  {ZEROMV,    LAST_FRAME,   ALTREF_FRAME},
-  {ZEROMV,    GOLDEN_FRAME, ALTREF_FRAME},
+  {ZEROMV,    {LAST_FRAME,   NONE}},
+  {ZEROMV,    {GOLDEN_FRAME, NONE}},
+  {ZEROMV,    {ALTREF_FRAME, NONE}},
+  {ZEROMV,    {LAST_FRAME,   ALTREF_FRAME}},
+  {ZEROMV,    {GOLDEN_FRAME, ALTREF_FRAME}},
 
-  {H_PRED,    INTRA_FRAME,  NONE},
-  {V_PRED,    INTRA_FRAME,  NONE},
-  {D135_PRED, INTRA_FRAME,  NONE},
-  {D207_PRED, INTRA_FRAME,  NONE},
-  {D153_PRED, INTRA_FRAME,  NONE},
-  {D63_PRED,  INTRA_FRAME,  NONE},
-  {D117_PRED, INTRA_FRAME,  NONE},
-  {D45_PRED,  INTRA_FRAME,  NONE},
+  {H_PRED,    {INTRA_FRAME,  NONE}},
+  {V_PRED,    {INTRA_FRAME,  NONE}},
+  {D135_PRED, {INTRA_FRAME,  NONE}},
+  {D207_PRED, {INTRA_FRAME,  NONE}},
+  {D153_PRED, {INTRA_FRAME,  NONE}},
+  {D63_PRED,  {INTRA_FRAME,  NONE}},
+  {D117_PRED, {INTRA_FRAME,  NONE}},
+  {D45_PRED,  {INTRA_FRAME,  NONE}},
 };
 
 const REF_DEFINITION vp9_ref_order[MAX_REFS] = {
-  {LAST_FRAME,   NONE},
-  {GOLDEN_FRAME, NONE},
-  {ALTREF_FRAME, NONE},
-  {LAST_FRAME,   ALTREF_FRAME},
-  {GOLDEN_FRAME, ALTREF_FRAME},
-  {INTRA_FRAME,  NONE},
+  {{LAST_FRAME,   NONE}},
+  {{GOLDEN_FRAME, NONE}},
+  {{ALTREF_FRAME, NONE}},
+  {{LAST_FRAME,   ALTREF_FRAME}},
+  {{GOLDEN_FRAME, ALTREF_FRAME}},
+  {{INTRA_FRAME,  NONE}},
 };
 
 // The baseline rd thresholds for breaking out of the rd loop for
@@ -3243,14 +3252,14 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
 
     x->skip = 0;
     this_mode = vp9_mode_order[mode_index].mode;
-    ref_frame = vp9_mode_order[mode_index].ref_frame;
-    second_ref_frame = vp9_mode_order[mode_index].second_ref_frame;
+    ref_frame = vp9_mode_order[mode_index].ref_frame[0];
+    second_ref_frame = vp9_mode_order[mode_index].ref_frame[1];
 
     // Look at the reference frame of the best mode so far and set the
     // skip mask to look at a subset of the remaining modes.
     if (mode_index > cpi->sf.mode_skip_start) {
       if (mode_index == (cpi->sf.mode_skip_start + 1)) {
-        switch (vp9_mode_order[best_mode_index].ref_frame) {
+        switch (vp9_mode_order[best_mode_index].ref_frame[0]) {
           case INTRA_FRAME:
             cpi->mode_skip_mask = 0;
             break;
@@ -3323,7 +3332,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
     comp_pred = second_ref_frame > INTRA_FRAME;
     if (comp_pred) {
       if (cpi->sf.mode_search_skip_flags & FLAG_SKIP_COMP_BESTINTRA)
-        if (vp9_mode_order[best_mode_index].ref_frame == INTRA_FRAME)
+        if (vp9_mode_order[best_mode_index].ref_frame[0] == INTRA_FRAME)
           continue;
       if (cpi->sf.mode_search_skip_flags & FLAG_SKIP_COMP_REFMISMATCH)
         if (ref_frame != best_inter_ref_frame &&
@@ -3422,7 +3431,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
       // one of the neighboring directional modes
       if ((cpi->sf.mode_search_skip_flags & FLAG_SKIP_INTRA_BESTINTER) &&
           (this_mode >= D45_PRED && this_mode <= TM_PRED)) {
-        if (vp9_mode_order[best_mode_index].ref_frame > INTRA_FRAME)
+        if (vp9_mode_order[best_mode_index].ref_frame[0] > INTRA_FRAME)
           continue;
       }
       mbmi->mode = this_mode;
@@ -3683,7 +3692,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
   // If we used an estimate for the uv intra rd in the loop above...
   if (cpi->sf.use_uv_intra_rd_estimate) {
     // Do Intra UV best rd mode selection if best mode choice above was intra.
-    if (vp9_mode_order[best_mode_index].ref_frame == INTRA_FRAME) {
+    if (vp9_mode_order[best_mode_index].ref_frame[0] == INTRA_FRAME) {
       TX_SIZE uv_tx_size;
       *mbmi = best_mbmode;
       uv_tx_size = get_uv_tx_size(mbmi);
@@ -3699,7 +3708,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
   // If we are using reference masking and the set mask flag is set then
   // create the reference frame mask.
   if (cpi->sf.reference_masking && cpi->set_ref_frame_mask)
-    cpi->ref_frame_mask = ~(1 << vp9_mode_order[best_mode_index].ref_frame);
+    cpi->ref_frame_mask = ~(1 << vp9_mode_order[best_mode_index].ref_frame[0]);
 
   // Flag all modes that have a distortion thats > 2x the best we found at
   // this level.
@@ -3892,14 +3901,14 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
       tx_cache[i] = INT64_MAX;
 
     x->skip = 0;
-    ref_frame = vp9_ref_order[mode_index].ref_frame;
-    second_ref_frame = vp9_ref_order[mode_index].second_ref_frame;
+    ref_frame = vp9_ref_order[mode_index].ref_frame[0];
+    second_ref_frame = vp9_ref_order[mode_index].ref_frame[1];
 
     // Look at the reference frame of the best mode so far and set the
     // skip mask to look at a subset of the remaining modes.
     if (mode_index > 2 && cpi->sf.mode_skip_start < MAX_MODES) {
       if (mode_index == 3) {
-        switch (vp9_ref_order[best_mode_index].ref_frame) {
+        switch (vp9_ref_order[best_mode_index].ref_frame[0]) {
           case INTRA_FRAME:
             cpi->mode_skip_mask = 0;
             break;
@@ -3954,7 +3963,7 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
     comp_pred = second_ref_frame > INTRA_FRAME;
     if (comp_pred) {
       if (cpi->sf.mode_search_skip_flags & FLAG_SKIP_COMP_BESTINTRA)
-        if (vp9_ref_order[best_mode_index].ref_frame == INTRA_FRAME)
+        if (vp9_ref_order[best_mode_index].ref_frame[0] == INTRA_FRAME)
           continue;
       if (cpi->sf.mode_search_skip_flags & FLAG_SKIP_COMP_REFMISMATCH)
         if (ref_frame != best_inter_ref_frame &&
@@ -4425,7 +4434,7 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
   // If we used an estimate for the uv intra rd in the loop above...
   if (cpi->sf.use_uv_intra_rd_estimate) {
     // Do Intra UV best rd mode selection if best mode choice above was intra.
-    if (vp9_ref_order[best_mode_index].ref_frame == INTRA_FRAME) {
+    if (vp9_ref_order[best_mode_index].ref_frame[0] == INTRA_FRAME) {
       TX_SIZE uv_tx_size;
       *mbmi = best_mbmode;
       uv_tx_size = get_uv_tx_size(mbmi);
@@ -4440,7 +4449,7 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
   // If we are using reference masking and the set mask flag is set then
   // create the reference frame mask.
   if (cpi->sf.reference_masking && cpi->set_ref_frame_mask)
-    cpi->ref_frame_mask = ~(1 << vp9_ref_order[best_mode_index].ref_frame);
+    cpi->ref_frame_mask = ~(1 << vp9_ref_order[best_mode_index].ref_frame[0]);
 
   if (best_rd == INT64_MAX && bsize < BLOCK_8X8) {
     *returnrate = INT_MAX;
