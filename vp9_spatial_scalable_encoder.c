@@ -79,7 +79,9 @@ typedef struct {
   struct VpxInputContext input_ctx;
 } AppInput;
 
-void usage_exit(const char *exec_name) {
+static const char *exec_name;
+
+void usage_exit() {
   fprintf(stderr, "Usage: %s <options> input_filename output_filename\n",
           exec_name);
   fprintf(stderr, "Options:\n");
@@ -93,12 +95,6 @@ static void die_codec(vpx_codec_ctx_t *ctx, const char *s) {
   printf("%s: %s\n", s, vpx_codec_error(ctx));
   if (detail) printf("    %s\n", detail);
   exit(EXIT_FAILURE);
-}
-
-static int create_dummy_frame(vpx_image_t *img) {
-  const size_t buf_size = img->w * img->h * 3 / 2;
-  memset(img->planes[0], 129, buf_size);
-  return 1;
 }
 
 static void parse_command_line(int argc, const char **argv_,
@@ -170,7 +166,7 @@ static void parse_command_line(int argc, const char **argv_,
       die("Error: Unrecognized option %s\n", *argi);
 
   if (argv[0] == NULL || argv[1] == 0) {
-    usage_exit(argv_[0]);
+    usage_exit();
   }
   app_input->input_ctx.filename = argv[0];
   app_input->output_filename = argv[1];
@@ -210,6 +206,7 @@ int main(int argc, const char **argv) {
 
   memset(&svc_ctx, 0, sizeof(svc_ctx));
   svc_ctx.log_print = 1;
+  exec_name = argv[0];
   parse_command_line(argc, argv, &app_input, &svc_ctx, &enc_cfg);
 
   // Allocate image buffer
@@ -260,8 +257,16 @@ int main(int argc, const char **argv) {
   fclose(app_input.input_ctx.file);
   if (vpx_codec_destroy(&codec)) die_codec(&codec, "Failed to destroy codec");
 
-  // rewrite the output file headers with the actual frame count
+  // rewrite the output file headers with the actual frame count, and
+  // resolution of the highest layer
   if (!fseek(outfile, 0, SEEK_SET)) {
+    // get resolution of highest layer
+    if (VPX_CODEC_OK != vpx_svc_get_layer_resolution(&svc_ctx,
+                                                     svc_ctx.spatial_layers - 1,
+                                                     &enc_cfg.g_w,
+                                                     &enc_cfg.g_h)) {
+      die("Failed to get output resolution");
+    }
     ivf_write_file_header(outfile, &enc_cfg, VP9_FOURCC, frame_cnt);
   }
   fclose(outfile);
