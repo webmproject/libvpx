@@ -531,8 +531,6 @@ typedef struct VP9_COMP {
     double modified_error_left;
     double kf_intra_err_min;
     double gf_intra_err_min;
-    int maxq_max_limit;
-    int maxq_min_limit;
     int static_scene_max_gf_interval;
     int kf_bits;
     // Remaining error from uncoded frames in a gf group. Two pass use only
