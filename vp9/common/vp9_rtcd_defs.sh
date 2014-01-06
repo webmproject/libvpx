@@ -42,7 +42,7 @@ prototype void vp9_d63_predictor_4x4 "uint8_t *dst, ptrdiff_t y_stride, const ui
 specialize vp9_d63_predictor_4x4 $ssse3_x86inc
 
 prototype void vp9_h_predictor_4x4 "uint8_t *dst, ptrdiff_t y_stride, const uint8_t *above, const uint8_t *left"
-specialize vp9_h_predictor_4x4 $ssse3_x86inc dspr2
+specialize vp9_h_predictor_4x4 $ssse3_x86inc neon dspr2
 
 prototype void vp9_d117_predictor_4x4 "uint8_t *dst, ptrdiff_t y_stride, const uint8_t *above, const uint8_t *left"
 specialize vp9_d117_predictor_4x4
@@ -54,7 +54,7 @@ prototype void vp9_d153_predictor_4x4 "uint8_t *dst, ptrdiff_t y_stride, const u
 specialize vp9_d153_predictor_4x4 $ssse3_x86inc
 
 prototype void vp9_v_predictor_4x4 "uint8_t *dst, ptrdiff_t y_stride, const uint8_t *above, const uint8_t *left"
-specialize vp9_v_predictor_4x4 $sse_x86inc
+specialize vp9_v_predictor_4x4 $sse_x86inc neon
 
 prototype void vp9_tm_predictor_4x4 "uint8_t *dst, ptrdiff_t y_stride, const uint8_t *above, const uint8_t *left"
 specialize vp9_tm_predictor_4x4 $sse_x86inc dspr2
@@ -81,7 +81,7 @@ prototype void vp9_d63_predictor_8x8 "uint8_t *dst, ptrdiff_t y_stride, const ui
 specialize vp9_d63_predictor_8x8 $ssse3_x86inc
 
 prototype void vp9_h_predictor_8x8 "uint8_t *dst, ptrdiff_t y_stride, const uint8_t *above, const uint8_t *left"
-specialize vp9_h_predictor_8x8 $ssse3_x86inc dspr2
+specialize vp9_h_predictor_8x8 $ssse3_x86inc neon dspr2
 
 prototype void vp9_d117_predictor_8x8 "uint8_t *dst, ptrdiff_t y_stride, const uint8_t *above, const uint8_t *left"
 specialize vp9_d117_predictor_8x8
@@ -93,7 +93,7 @@ prototype void vp9_d153_predictor_8x8 "uint8_t *dst, ptrdiff_t y_stride, const u
 specialize vp9_d153_predictor_8x8 $ssse3_x86inc
 
 prototype void vp9_v_predictor_8x8 "uint8_t *dst, ptrdiff_t y_stride, const uint8_t *above, const uint8_t *left"
-specialize vp9_v_predictor_8x8 $sse_x86inc
+specialize vp9_v_predictor_8x8 $sse_x86inc neon
 
 prototype void vp9_tm_predictor_8x8 "uint8_t *dst, ptrdiff_t y_stride, const uint8_t *above, const uint8_t *left"
 specialize vp9_tm_predictor_8x8 $sse2_x86inc dspr2
@@ -120,7 +120,7 @@ prototype void vp9_d63_predictor_16x16 "uint8_t *dst, ptrdiff_t y_stride, const 
 specialize vp9_d63_predictor_16x16 $ssse3_x86inc
 
 prototype void vp9_h_predictor_16x16 "uint8_t *dst, ptrdiff_t y_stride, const uint8_t *above, const uint8_t *left"
-specialize vp9_h_predictor_16x16 $ssse3_x86inc dspr2
+specialize vp9_h_predictor_16x16 $ssse3_x86inc neon dspr2
 
 prototype void vp9_d117_predictor_16x16 "uint8_t *dst, ptrdiff_t y_stride, const uint8_t *above, const uint8_t *left"
 specialize vp9_d117_predictor_16x16
@@ -132,7 +132,7 @@ prototype void vp9_d153_predictor_16x16 "uint8_t *dst, ptrdiff_t y_stride, const
 specialize vp9_d153_predictor_16x16 $ssse3_x86inc
 
 prototype void vp9_v_predictor_16x16 "uint8_t *dst, ptrdiff_t y_stride, const uint8_t *above, const uint8_t *left"
-specialize vp9_v_predictor_16x16 $sse2_x86inc
+specialize vp9_v_predictor_16x16 $sse2_x86inc neon
 
 prototype void vp9_tm_predictor_16x16 "uint8_t *dst, ptrdiff_t y_stride, const uint8_t *above, const uint8_t *left"
 specialize vp9_tm_predictor_16x16 $sse2_x86inc
@@ -159,7 +159,7 @@ prototype void vp9_d63_predictor_32x32 "uint8_t *dst, ptrdiff_t y_stride, const 
 specialize vp9_d63_predictor_32x32 $ssse3_x86inc
 
 prototype void vp9_h_predictor_32x32 "uint8_t *dst, ptrdiff_t y_stride, const uint8_t *above, const uint8_t *left"
-specialize vp9_h_predictor_32x32 $ssse3_x86inc
+specialize vp9_h_predictor_32x32 $ssse3_x86inc neon
 
 prototype void vp9_d117_predictor_32x32 "uint8_t *dst, ptrdiff_t y_stride, const uint8_t *above, const uint8_t *left"
 specialize vp9_d117_predictor_32x32
@@ -171,7 +171,7 @@ prototype void vp9_d153_predictor_32x32 "uint8_t *dst, ptrdiff_t y_stride, const
 specialize vp9_d153_predictor_32x32
 
 prototype void vp9_v_predictor_32x32 "uint8_t *dst, ptrdiff_t y_stride, const uint8_t *above, const uint8_t *left"
-specialize vp9_v_predictor_32x32 $sse2_x86inc
+specialize vp9_v_predictor_32x32 $sse2_x86inc neon
 
 prototype void vp9_tm_predictor_32x32 "uint8_t *dst, ptrdiff_t y_stride, const uint8_t *above, const uint8_t *left"
 specialize vp9_tm_predictor_32x32 $sse2_x86_64
