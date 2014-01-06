@@ -750,7 +750,6 @@ int vp9_rc_pick_q_and_adjust_q_bounds(const VP9_COMP *cpi,
   // Limit Q range for the adaptive loop.
   if (cm->frame_type == KEY_FRAME && !cpi->rc.this_key_frame_forced) {
     if (!(cpi->pass == 0 && cpi->common.current_video_frame == 0)) {
-      *top_index = active_worst_quality;
       *top_index =
           (active_worst_quality + active_best_quality * 3) / 4;
     }
@@ -790,6 +789,12 @@ int vp9_rc_pick_q_and_adjust_q_bounds(const VP9_COMP *cpi,
     printf("frame:%d q:%d\n", cm->current_video_frame, q);
   }
 #endif
+  assert(*top_index <= cpi->rc.worst_quality &&
+         *top_index >= cpi->rc.best_quality);
+  assert(*bottom_index <= cpi->rc.worst_quality &&
+         *bottom_index >= cpi->rc.best_quality);
+  assert(q <= cpi->rc.worst_quality &&
+         q >= cpi->rc.best_quality);
   return q;
 }
 
