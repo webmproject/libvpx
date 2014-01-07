@@ -961,31 +961,6 @@ static double calc_correction_factor(double err_per_mb,
   return fclamp(pow(error_term, power_term), 0.05, 5.0);
 }
 
-// Given a current maxQ value sets a range for future values.
-// PGW TODO..
-// This code removes direct dependency on QIndex to determine the range
-// (now uses the actual quantizer) but has not been tuned.
-static void adjust_maxq_qrange(VP9_COMP *cpi) {
-  int i;
-  // Set the max corresponding to cpi->rc.avg_q * 2.0
-  double q = cpi->rc.avg_q * 2.0;
-  cpi->twopass.maxq_max_limit = cpi->rc.worst_quality;
-  for (i = cpi->rc.best_quality; i <= cpi->rc.worst_quality; i++) {
-    cpi->twopass.maxq_max_limit = i;
-    if (vp9_convert_qindex_to_q(i) >= q)
-      break;
-  }
-
-  // Set the min corresponding to cpi->rc.avg_q * 0.5
-  q = cpi->rc.avg_q * 0.5;
-  cpi->twopass.maxq_min_limit = cpi->rc.best_quality;
-  for (i = cpi->rc.worst_quality; i >= cpi->rc.best_quality; i--) {
-    cpi->twopass.maxq_min_limit = i;
-    if (vp9_convert_qindex_to_q(i) <= q)
-      break;
-  }
-}
-
 static int estimate_max_q(VP9_COMP *cpi,
                           FIRSTPASS_STATS *fpstats,
                           int section_target_bandwitdh) {
@@ -998,16 +973,15 @@ static int estimate_max_q(VP9_COMP *cpi,
   double err_correction_factor;
 
   if (section_target_bandwitdh <= 0)
-    return cpi->twopass.maxq_max_limit;          // Highest value allowed
+    return cpi->rc.worst_quality;          // Highest value allowed
 
   target_norm_bits_per_mb = section_target_bandwitdh < (1 << 20)
                               ? (512 * section_target_bandwitdh) / num_mbs
                               : 512 * (section_target_bandwitdh / num_mbs);
 
-
   // Try and pick a max Q that will be high enough to encode the
   // content at the given rate.
-  for (q = cpi->twopass.maxq_min_limit; q < cpi->twopass.maxq_max_limit; q++) {
+  for (q = cpi->rc.best_quality; q < cpi->rc.worst_quality; q++) {
     int bits_per_mb_at_this_q;
 
     err_correction_factor = calc_correction_factor(err_per_mb,
@@ -2083,10 +2057,6 @@ void vp9_get_second_pass_params(VP9_COMP *cpi) {
     // Special case code for first frame.
     int section_target_bandwidth =
         (int)(cpi->twopass.bits_left / frames_left);
-
-    // guess at maxq needed in 2nd pass
-    cpi->twopass.maxq_max_limit = cpi->rc.worst_quality;
-    cpi->twopass.maxq_min_limit = cpi->rc.best_quality;
 
     tmp_q = estimate_max_q(cpi, &cpi->twopass.total_left_stats,
                            section_target_bandwidth);
