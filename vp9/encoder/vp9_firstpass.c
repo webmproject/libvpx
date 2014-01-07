@@ -492,10 +492,8 @@ void vp9_first_pass(VP9_COMP *cpi) {
   int i;
 
   int recon_yoffset, recon_uvoffset;
-  const int lst_yv12_idx = cm->ref_frame_map[cpi->lst_fb_idx];
-  const int gld_yv12_idx = cm->ref_frame_map[cpi->gld_fb_idx];
-  YV12_BUFFER_CONFIG *const lst_yv12 = &cm->yv12_fb[lst_yv12_idx];
-  YV12_BUFFER_CONFIG *const gld_yv12 = &cm->yv12_fb[gld_yv12_idx];
+  YV12_BUFFER_CONFIG *const lst_yv12 = get_ref_frame_buffer(cpi, LAST_FRAME);
+  YV12_BUFFER_CONFIG *const gld_yv12 = get_ref_frame_buffer(cpi, GOLDEN_FRAME);
   YV12_BUFFER_CONFIG *const new_yv12 = get_frame_new_buffer(cm);
   const int recon_y_stride = lst_yv12->y_stride;
   const int recon_uv_stride = lst_yv12->uv_stride;

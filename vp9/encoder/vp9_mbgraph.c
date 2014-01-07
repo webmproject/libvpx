@@ -392,8 +392,7 @@ static void separate_arf_mbs(VP9_COMP *cpi) {
 void vp9_update_mbgraph_stats(VP9_COMP *cpi) {
   VP9_COMMON *const cm = &cpi->common;
   int i, n_frames = vp9_lookahead_depth(cpi->lookahead);
-  YV12_BUFFER_CONFIG *golden_ref =
-      &cm->yv12_fb[cm->ref_frame_map[cpi->gld_fb_idx]];
+  YV12_BUFFER_CONFIG *golden_ref = get_ref_frame_buffer(cpi, GOLDEN_FRAME);
 
   // we need to look ahead beyond where the ARF transitions into
   // being a GF - so exit if we don't look ahead beyond that

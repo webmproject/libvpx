@@ -663,6 +663,12 @@ static int get_scale_ref_frame_idx(VP9_COMP *cpi,
   }
 }
 
+static YV12_BUFFER_CONFIG *get_ref_frame_buffer(VP9_COMP *cpi,
+                                                MV_REFERENCE_FRAME ref_frame) {
+  VP9_COMMON *const cm = &cpi->common;
+  return &cm->yv12_fb[cm->ref_frame_map[get_ref_frame_idx(cpi, ref_frame)]];
+}
+
 void vp9_encode_frame(VP9_COMP *cpi);
 
 void vp9_pack_bitstream(VP9_COMP *cpi, uint8_t *dest, size_t *size);
