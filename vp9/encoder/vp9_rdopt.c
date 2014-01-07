@@ -1641,6 +1641,7 @@ static void rd_check_segment_txsize(VP9_COMP *cpi, MACROBLOCK *x,
   int i, br = 0, idx, idy;
   int64_t bd = 0, block_sse = 0;
   MB_PREDICTION_MODE this_mode;
+  VP9_COMMON *cm = &cpi->common;
   MODE_INFO *mi = x->e_mbd.mi_8x8[0];
   MB_MODE_INFO *const mbmi = &mi->mbmi;
   struct macroblock_plane *const p = &x->plane[0];
@@ -1682,13 +1683,13 @@ static void rd_check_segment_txsize(VP9_COMP *cpi, MACROBLOCK *x,
       i = idy * 2 + idx;
 
       frame_mv[ZEROMV][mbmi->ref_frame[0]].as_int = 0;
-      vp9_append_sub8x8_mvs_for_idx(&cpi->common, &x->e_mbd, tile,
+      vp9_append_sub8x8_mvs_for_idx(cm, &x->e_mbd, tile,
                                     i, 0, mi_row, mi_col,
                                     &frame_mv[NEARESTMV][mbmi->ref_frame[0]],
                                     &frame_mv[NEARMV][mbmi->ref_frame[0]]);
       if (has_second_rf) {
         frame_mv[ZEROMV][mbmi->ref_frame[1]].as_int = 0;
-        vp9_append_sub8x8_mvs_for_idx(&cpi->common, &x->e_mbd, tile,
+        vp9_append_sub8x8_mvs_for_idx(cm, &x->e_mbd, tile,
                                       i, 1, mi_row, mi_col,
                                       &frame_mv[NEARESTMV][mbmi->ref_frame[1]],
                                       &frame_mv[NEARMV][mbmi->ref_frame[1]]);
@@ -1772,7 +1773,7 @@ static void rd_check_segment_txsize(VP9_COMP *cpi, MACROBLOCK *x,
           else
             max_mv = MAX(abs(bsi->mvp.as_mv.row), abs(bsi->mvp.as_mv.col)) >> 3;
 
-          if (cpi->sf.auto_mv_step_size && cpi->common.show_frame) {
+          if (cpi->sf.auto_mv_step_size && cm->show_frame) {
             // Take wtd average of the step_params based on the last frame's
             // max mv magnitude and the best ref mvs of the current block for
             // the given reference.
@@ -1785,7 +1786,7 @@ static void rd_check_segment_txsize(VP9_COMP *cpi, MACROBLOCK *x,
           mvp_full.row = bsi->mvp.as_mv.row >> 3;
           mvp_full.col = bsi->mvp.as_mv.col >> 3;
 
-          if (cpi->sf.adaptive_motion_search && cpi->common.show_frame) {
+          if (cpi->sf.adaptive_motion_search && cm->show_frame) {
             mvp_full.row = x->pred_mv[mbmi->ref_frame[0]].as_mv.row >> 3;
             mvp_full.col = x->pred_mv[mbmi->ref_frame[0]].as_mv.col >> 3;
             step_param = MAX(step_param, 8);
@@ -1848,7 +1849,7 @@ static void rd_check_segment_txsize(VP9_COMP *cpi, MACROBLOCK *x,
             cpi->find_fractional_mv_step(x,
                                          &mode_mv[NEWMV].as_mv,
                                          &bsi->ref_mv->as_mv,
-                                         cpi->common.allow_high_precision_mv,
+                                         cm->allow_high_precision_mv,
                                          x->errorperbit, v_fn_ptr,
                                          0, cpi->sf.subpel_iters_per_step,
                                          x->nmvjointcost, x->mvcost,
@@ -2768,9 +2769,8 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
                         mbmi->mode_context[mbmi->ref_frame[0]]);
 
   if (!(*mode_excluded))
-    *mode_excluded = is_comp_pred
-        ? cpi->common.reference_mode == SINGLE_REFERENCE
-        : cpi->common.reference_mode == COMPOUND_REFERENCE;
+    *mode_excluded = is_comp_pred ? cm->reference_mode == SINGLE_REFERENCE
+                                  : cm->reference_mode == COMPOUND_REFERENCE;
 
   pred_exists = 0;
   // Are all MVs integer pel for Y and UV
@@ -2902,7 +2902,7 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
     }
   }
 
-  if (cpi->common.mcomp_filter_type == SWITCHABLE)
+  if (cm->mcomp_filter_type == SWITCHABLE)
     *rate2 += get_switchable_rate(x);
 
   if (!is_comp_pred && cpi->enable_encode_breakout) {
@@ -3842,8 +3842,7 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
   int64_t dist_uv[TX_SIZES];
   int skip_uv[TX_SIZES];
   MB_PREDICTION_MODE mode_uv[TX_SIZES] = { 0 };
-  int intra_cost_penalty = 20 * vp9_dc_quant(cpi->common.base_qindex,
-                                             cpi->common.y_dc_delta_q);
+  int intra_cost_penalty = 20 * vp9_dc_quant(cm->base_qindex, cm->y_dc_delta_q);
   int_mv seg_mvs[4][MAX_REF_FRAMES];
   b_mode_info best_bmodes[4];
   int best_skip2 = 0;
@@ -3972,12 +3971,11 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
 
     // TODO(jingning, jkoleszar): scaling reference frame not supported for
     // sub8x8 blocks.
-    if (ref_frame > 0 &&
-        vp9_is_scaled(&cpi->common.frame_refs[ref_frame - 1].sf))
+    if (ref_frame > 0 && vp9_is_scaled(&cm->frame_refs[ref_frame - 1].sf))
       continue;
 
     if (second_ref_frame > 0 &&
-        vp9_is_scaled(&cpi->common.frame_refs[second_ref_frame - 1].sf))
+        vp9_is_scaled(&cm->frame_refs[second_ref_frame - 1].sf))
       continue;
 
     set_scale_factors(cm, xd, ref_frame - 1, second_ref_frame - 1);
@@ -3986,7 +3984,7 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
     // Evaluate all sub-pel filters irrespective of whether we can use
     // them for this frame.
     mbmi->interp_filter = cm->mcomp_filter_type;
-    vp9_setup_interp_filters(xd, mbmi->interp_filter, &cpi->common);
+    vp9_setup_interp_filters(xd, mbmi->interp_filter, cm);
 
     if (comp_pred) {
       if (!(cpi->ref_frame_flags & flag_list[second_ref_frame]))
@@ -4109,7 +4107,7 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
             int newbest, rs;
             int64_t rs_rd;
             mbmi->interp_filter = switchable_filter_index;
-            vp9_setup_interp_filters(xd, mbmi->interp_filter, &cpi->common);
+            vp9_setup_interp_filters(xd, mbmi->interp_filter, cm);
 
             tmp_rd = rd_pick_best_mbsegmentation(cpi, x, tile,
                                                  &mbmi->ref_mvs[ref_frame][0],
@@ -4175,7 +4173,7 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
 
       mbmi->interp_filter = (cm->mcomp_filter_type == SWITCHABLE ?
                              tmp_best_filter : cm->mcomp_filter_type);
-      vp9_setup_interp_filters(xd, mbmi->interp_filter, &cpi->common);
+      vp9_setup_interp_filters(xd, mbmi->interp_filter, cm);
       if (!pred_exists) {
         // Handles the special case when a filter that is not in the
         // switchable list (bilinear, 6-tap) is indicated at the frame level
@@ -4191,7 +4189,7 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
         if (tmp_rd == INT64_MAX)
           continue;
       } else {
-        if (cpi->common.mcomp_filter_type == SWITCHABLE) {
+        if (cm->mcomp_filter_type == SWITCHABLE) {
           int rs = get_switchable_rate(x);
           tmp_best_rdu -= RDCOST(x->rdmult, x->rddiv, rs, 0);
         }
@@ -4209,13 +4207,12 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
       rate2 += rate;
       distortion2 += distortion;
 
-      if (cpi->common.mcomp_filter_type == SWITCHABLE)
+      if (cm->mcomp_filter_type == SWITCHABLE)
         rate2 += get_switchable_rate(x);
 
       if (!mode_excluded)
-         mode_excluded = comp_pred
-             ? cpi->common.reference_mode == SINGLE_REFERENCE
-             : cpi->common.reference_mode == COMPOUND_REFERENCE;
+        mode_excluded = comp_pred ? cm->reference_mode == SINGLE_REFERENCE
+                                  : cm->reference_mode == COMPOUND_REFERENCE;
 
       compmode_cost = vp9_cost_bit(comp_mode_p, comp_pred);
 
@@ -4243,7 +4240,7 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
       }
     }
 
-    if (cpi->common.reference_mode == REFERENCE_MODE_SELECT)
+    if (cm->reference_mode == REFERENCE_MODE_SELECT)
       rate2 += compmode_cost;
 
     // Estimate the reference frame signaling cost and add it
@@ -4354,7 +4351,7 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
     if (!disable_skip && ref_frame != INTRA_FRAME) {
       int64_t single_rd, hybrid_rd, single_rate, hybrid_rate;
 
-      if (cpi->common.reference_mode == REFERENCE_MODE_SELECT) {
+      if (cm->reference_mode == REFERENCE_MODE_SELECT) {
         single_rate = rate2 - compmode_cost;
         hybrid_rate = rate2;
       } else {
