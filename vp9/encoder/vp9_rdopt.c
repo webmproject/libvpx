@@ -2334,7 +2334,7 @@ static void single_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
   int bestsme = INT_MAX;
   int further_steps, step_param;
   int sadpb = x->sadperbit16;
-  int_mv mvp_full;
+  MV mvp_full;
   int ref = mbmi->ref_frame[0];
   int_mv ref_mv = mbmi->ref_mvs[ref][0];
 
@@ -2360,21 +2360,10 @@ static void single_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
 
   // Adjust search parameters based on small partitions' result.
   if (x->fast_ms) {
-    // && abs(mvp_full.as_mv.row - x->pred_mv.as_mv.row) < 24 &&
-    // abs(mvp_full.as_mv.col - x->pred_mv.as_mv.col) < 24) {
     // adjust search range
     step_param = 6;
     if (x->fast_ms > 1)
       step_param = 8;
-
-    // Get prediction MV.
-    mvp_full.as_int = x->pred_mv[ref].as_int;
-
-    // Adjust MV sign if needed.
-    if (cm->ref_frame_sign_bias[ref]) {
-      mvp_full.as_mv.col *= -1;
-      mvp_full.as_mv.row *= -1;
-    }
   } else {
     // Work out the size of the first step in the mv step search.
     // 0 here is maximum length first step. 1 is MAX >> 1 etc.
@@ -2420,36 +2409,30 @@ static void single_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
     }
   }
 
-  mvp_full.as_int = x->mv_best_ref_index[ref] < MAX_MV_REF_CANDIDATES ?
-      mbmi->ref_mvs[ref][x->mv_best_ref_index[ref]].as_int :
-      x->pred_mv[ref].as_int;
+  mvp_full = x->mv_best_ref_index[ref] < MAX_MV_REF_CANDIDATES
+      ? mbmi->ref_mvs[ref][x->mv_best_ref_index[ref]].as_mv
+      : x->pred_mv[ref].as_mv;
 
-  mvp_full.as_mv.col >>= 3;
-  mvp_full.as_mv.row >>= 3;
+  mvp_full.col >>= 3;
+  mvp_full.row >>= 3;
 
   // Further step/diamond searches as necessary
   further_steps = (cpi->sf.max_step_search_steps - 1) - step_param;
 
   if (cpi->sf.search_method == HEX) {
-    bestsme = vp9_hex_search(x, &mvp_full.as_mv,
-                             step_param,
-                             sadpb, 1,
+    bestsme = vp9_hex_search(x, &mvp_full, step_param, sadpb, 1,
                              &cpi->fn_ptr[bsize], 1,
                              &ref_mv.as_mv, &tmp_mv->as_mv);
   } else if (cpi->sf.search_method == SQUARE) {
-    bestsme = vp9_square_search(x, &mvp_full.as_mv,
-                                step_param,
-                                sadpb, 1,
+    bestsme = vp9_square_search(x, &mvp_full, step_param, sadpb, 1,
                                 &cpi->fn_ptr[bsize], 1,
                                 &ref_mv.as_mv, &tmp_mv->as_mv);
   } else if (cpi->sf.search_method == BIGDIA) {
-    bestsme = vp9_bigdia_search(x, &mvp_full.as_mv,
-                                step_param,
-                                sadpb, 1,
+    bestsme = vp9_bigdia_search(x, &mvp_full, step_param, sadpb, 1,
                                 &cpi->fn_ptr[bsize], 1,
                                 &ref_mv.as_mv, &tmp_mv->as_mv);
   } else {
-    bestsme = vp9_full_pixel_diamond(cpi, x, &mvp_full.as_mv, step_param,
+    bestsme = vp9_full_pixel_diamond(cpi, x, &mvp_full, step_param,
                                      sadpb, further_steps, 1,
                                      &cpi->fn_ptr[bsize],
                                      &ref_mv.as_mv, tmp_mv);
