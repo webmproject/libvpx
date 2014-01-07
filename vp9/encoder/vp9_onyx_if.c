@@ -585,7 +585,6 @@ static void set_rt_speed_feature(VP9_COMMON *cm,
                                  SPEED_FEATURES *sf,
                                  int speed) {
   sf->static_segmentation = 0;
-  sf->use_avoid_tested_higherror = 1;
   sf->adaptive_rd_thresh = 1;
   sf->recode_loop = (speed < 1);
   if (speed >= 1) {
