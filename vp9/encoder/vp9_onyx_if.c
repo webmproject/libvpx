@@ -788,7 +788,6 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
   sf->use_lp32x32fdct = 0;
   sf->adaptive_motion_search = 0;
   sf->adaptive_pred_filter_type = 0;
-  sf->use_avoid_tested_higherror = 0;
   sf->reference_masking = 0;
   sf->use_one_partition_size_always = 0;
   sf->less_rectangular_check = 0;
@@ -834,7 +833,6 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
 #else
       sf->static_segmentation = 0;
 #endif
-      sf->use_avoid_tested_higherror = 1;
       sf->adaptive_rd_thresh = 1;
       sf->recode_loop = (speed < 1);
 

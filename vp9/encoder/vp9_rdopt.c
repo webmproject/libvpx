@@ -3144,7 +3144,6 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
   int64_t best_filter_rd[SWITCHABLE_FILTER_CONTEXTS];
   int64_t best_filter_diff[SWITCHABLE_FILTER_CONTEXTS];
   MB_MODE_INFO best_mbmode = { 0 };
-  int j;
   int mode_index, best_mode_index = 0;
   unsigned int ref_costs_single[MAX_REF_FRAMES], ref_costs_comp[MAX_REF_FRAMES];
   vp9_prob comp_mode_p;
@@ -3157,10 +3156,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
   int64_t dist_uv[TX_SIZES];
   int skip_uv[TX_SIZES];
   MB_PREDICTION_MODE mode_uv[TX_SIZES];
-  unsigned int ref_frame_mask = 0;
-  unsigned int mode_mask = 0;
   int64_t mode_distortions[MB_MODE_COUNT] = {-1};
-  int64_t frame_distortions[MAX_REF_FRAMES] = {-1};
   int intra_cost_penalty = 20 * vp9_dc_quant(cm->base_qindex, cm->y_dc_delta_q);
   const int bws = num_8x8_blocks_wide_lookup[bsize] / 2;
   const int bhs = num_8x8_blocks_high_lookup[bsize] / 2;
@@ -3169,7 +3165,6 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
   x->skip_encode = cpi->sf.skip_encode_frame && x->q_index < QIDX_SKIP_THRESH;
 
   // Everywhere the flag is set the error is much higher than its neighbors.
-  ctx->frames_with_high_error = 0;
   ctx->modes_with_high_error = 0;
 
   estimate_ref_frame_costs(cpi, segment_id, ref_costs_single, ref_costs_comp,
@@ -3187,39 +3182,6 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
     x->pred_sse[i] = INT_MAX;
 
   *returnrate = INT_MAX;
-
-  // Create a mask set to 1 for each reference frame used by a smaller
-  // resolution.
-  if (cpi->sf.use_avoid_tested_higherror) {
-    switch (block_size) {
-      case BLOCK_64X64:
-        for (i = 0; i < 4; i++) {
-          for (j = 0; j < 4; j++) {
-            ref_frame_mask |= x->mb_context[i][j].frames_with_high_error;
-            mode_mask |= x->mb_context[i][j].modes_with_high_error;
-          }
-        }
-        for (i = 0; i < 4; i++) {
-          ref_frame_mask |= x->sb32_context[i].frames_with_high_error;
-          mode_mask |= x->sb32_context[i].modes_with_high_error;
-        }
-        break;
-      case BLOCK_32X32:
-        for (i = 0; i < 4; i++) {
-          ref_frame_mask |=
-              x->mb_context[x->sb_index][i].frames_with_high_error;
-          mode_mask |= x->mb_context[x->sb_index][i].modes_with_high_error;
-        }
-        break;
-      default:
-        // Until we handle all block sizes set it to present;
-        ref_frame_mask = 0;
-        mode_mask = 0;
-        break;
-    }
-    ref_frame_mask = ~ref_frame_mask;
-    mode_mask = ~mode_mask;
-  }
 
   for (ref_frame = LAST_FRAME; ref_frame <= ALTREF_FRAME; ref_frame++) {
     x->pred_mv_sad[ref_frame] = INT_MAX;
@@ -3302,19 +3264,6 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
       continue;
     if (x->fast_ms > 2 && ref_frame != x->subblock_ref)
       continue;
-
-    if (cpi->sf.use_avoid_tested_higherror && bsize >= BLOCK_8X8) {
-      if (!(ref_frame_mask & (1 << ref_frame))) {
-        continue;
-      }
-      if (!(mode_mask & (1 << this_mode))) {
-        continue;
-      }
-      if (second_ref_frame != NONE
-          && !(ref_frame_mask & (1 << second_ref_frame))) {
-        continue;
-      }
-    }
 
     mbmi->ref_frame[0] = ref_frame;
     mbmi->ref_frame[1] = second_ref_frame;
@@ -3564,10 +3513,6 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
         || distortion2 < mode_distortions[this_mode]) {
       mode_distortions[this_mode] = distortion2;
     }
-    if (frame_distortions[ref_frame] == -1
-        || distortion2 < frame_distortions[ref_frame]) {
-      frame_distortions[ref_frame] = distortion2;
-    }
 
     // Did this mode help.. i.e. is it the new best mode
     if (this_rd < best_rd || x->skip) {
@@ -3717,14 +3662,6 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
 
     if (mode_distortions[mode_index] > 2 * *returndistortion) {
       ctx->modes_with_high_error |= (1 << mode_index);
-    }
-  }
-
-  // Flag all ref frames that have a distortion thats > 2x the best we found at
-  // this level.
-  for (ref_frame = INTRA_FRAME; ref_frame <= ALTREF_FRAME; ref_frame++) {
-    if (frame_distortions[ref_frame] > 2 * *returndistortion) {
-      ctx->frames_with_high_error |= (1 << ref_frame);
     }
   }
 
