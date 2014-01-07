@@ -16,6 +16,24 @@
       "revId": "8e6583b1a2accab44dbf68abd503ce31149835e7",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//+WI\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 2369,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2014-01-07T17:30:55Z",
+      "side": 0,
+      "message": "x-\u003efast_ms assumes that partition size search goes from bottom up. this feature was deprecated after we redesigned the partition size search.",
+      "parentUuid": "AAAAdn//+Wg\u003d",
+      "revId": "8e6583b1a2accab44dbf68abd503ce31149835e7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
