@@ -1747,6 +1747,7 @@ static void rd_check_segment_txsize(VP9_COMP *cpi, MACROBLOCK *x,
         // motion search for newmv (single predictor case only)
         if (!has_second_rf && this_mode == NEWMV &&
             seg_mvs[i][mbmi->ref_frame[0]].as_int == INVALID_MV) {
+          int_mv *const new_mv = &mode_mv[NEWMV];
           int step_param = 0;
           int further_steps;
           int thissme, bestsme = INT_MAX;
@@ -1802,24 +1803,24 @@ static void rd_check_segment_txsize(VP9_COMP *cpi, MACROBLOCK *x,
                                      step_param,
                                      sadpb, 1, v_fn_ptr, 1,
                                      &bsi->ref_mv->as_mv,
-                                     &mode_mv[NEWMV].as_mv);
+                                     &new_mv->as_mv);
           } else if (cpi->sf.search_method == SQUARE) {
             bestsme = vp9_square_search(x, &mvp_full,
                                         step_param,
                                         sadpb, 1, v_fn_ptr, 1,
                                         &bsi->ref_mv->as_mv,
-                                        &mode_mv[NEWMV].as_mv);
+                                        &new_mv->as_mv);
           } else if (cpi->sf.search_method == BIGDIA) {
             bestsme = vp9_bigdia_search(x, &mvp_full,
                                         step_param,
                                         sadpb, 1, v_fn_ptr, 1,
                                         &bsi->ref_mv->as_mv,
-                                        &mode_mv[NEWMV].as_mv);
+                                        &new_mv->as_mv);
           } else {
             bestsme = vp9_full_pixel_diamond(cpi, x, &mvp_full, step_param,
                                              sadpb, further_steps, 0, v_fn_ptr,
                                              &bsi->ref_mv->as_mv,
-                                             &mode_mv[NEWMV]);
+                                             new_mv);
           }
 
           // Should we do a full search (best quality only)
@@ -1835,18 +1836,18 @@ static void rd_check_segment_txsize(VP9_COMP *cpi, MACROBLOCK *x,
 
             if (thissme < bestsme) {
               bestsme = thissme;
-              mode_mv[NEWMV].as_int = mi->bmi[i].as_mv[0].as_int;
+              new_mv->as_int = mi->bmi[i].as_mv[0].as_int;
             } else {
               /* The full search result is actually worse so re-instate the
                * previous best vector */
-              mi->bmi[i].as_mv[0].as_int = mode_mv[NEWMV].as_int;
+              mi->bmi[i].as_mv[0].as_int = new_mv->as_int;
             }
           }
 
           if (bestsme < INT_MAX) {
             int distortion;
             cpi->find_fractional_mv_step(x,
-                                         &mode_mv[NEWMV].as_mv,
+                                         &new_mv->as_mv,
                                          &bsi->ref_mv->as_mv,
                                          cpi->common.allow_high_precision_mv,
                                          x->errorperbit, v_fn_ptr,
@@ -1856,11 +1857,11 @@ static void rd_check_segment_txsize(VP9_COMP *cpi, MACROBLOCK *x,
                                          &x->pred_sse[mbmi->ref_frame[0]]);
 
             // save motion search result for use in compound prediction
-            seg_mvs[i][mbmi->ref_frame[0]].as_int = mode_mv[NEWMV].as_int;
+            seg_mvs[i][mbmi->ref_frame[0]].as_int = new_mv->as_int;
           }
 
           if (cpi->sf.adaptive_motion_search)
-            x->pred_mv[mbmi->ref_frame[0]].as_int = mode_mv[NEWMV].as_int;
+            x->pred_mv[mbmi->ref_frame[0]].as_int = new_mv->as_int;
 
           // restore src pointers
           mi_buf_restore(x, orig_src, orig_pre);
