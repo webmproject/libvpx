@@ -17,11 +17,6 @@ int file_is_ivf(struct VpxInputContext *input_ctx) {
   char raw_hdr[32];
   int is_ivf = 0;
 
-  // TODO(tomfinegan): This can eventually go away, but for now it's required
-  // because the means by which file types are detected differ in vpxdec and
-  // vpxenc.
-  rewind(input_ctx->file);
-
   if (fread(raw_hdr, 1, 32, input_ctx->file) == 32) {
     if (raw_hdr[0] == 'D' && raw_hdr[1] == 'K' &&
         raw_hdr[2] == 'I' && raw_hdr[3] == 'F') {
