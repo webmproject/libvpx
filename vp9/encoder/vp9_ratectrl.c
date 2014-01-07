@@ -374,8 +374,6 @@ static int target_size_from_buffer_level(const VP9_COMP *cpi) {
         / one_percent_bits);
     if (percent_low > cpi->oxcf.under_shoot_pct) {
       percent_low = cpi->oxcf.under_shoot_pct;
-    } else if (percent_low < 0) {
-      percent_low = 0;
     }
     // Lower the target bandwidth for this frame.
     this_frame_target -= (this_frame_target * percent_low) / 200;
@@ -384,8 +382,6 @@ static int target_size_from_buffer_level(const VP9_COMP *cpi) {
         / one_percent_bits);
     if (percent_high > cpi->oxcf.over_shoot_pct) {
       percent_high = cpi->oxcf.over_shoot_pct;
-    } else if (percent_high < 0) {
-      percent_high = 0;
     }
     // Increase the target bandwidth for this frame.
     this_frame_target += (this_frame_target * percent_high) / 200;
