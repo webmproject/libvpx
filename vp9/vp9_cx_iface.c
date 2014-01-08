@@ -25,7 +25,7 @@ struct vp9_extracfg {
   int                         cpu_used;  /* available cpu percentage in 1/16 */
   unsigned int                enable_auto_alt_ref;
   unsigned int                noise_sensitivity;
-  unsigned int                Sharpness;
+  unsigned int                sharpness;
   unsigned int                static_thresh;
   unsigned int                tile_columns;
   unsigned int                tile_rows;
@@ -53,7 +53,7 @@ static const struct extraconfig_map extracfg_map[] = {
       0,                          /* cpu_used      */
       1,                          /* enable_auto_alt_ref */
       0,                          /* noise_sensitivity */
-      0,                          /* Sharpness */
+      0,                          /* sharpness */
       0,                          /* static_thresh */
       0,                          /* tile_columns */
       0,                          /* tile_rows */
@@ -190,7 +190,7 @@ static vpx_codec_err_t validate_config(vpx_codec_alg_priv_t      *ctx,
 
   RANGE_CHECK(vp8_cfg, tile_columns, 0, 6);
   RANGE_CHECK(vp8_cfg, tile_rows, 0, 2);
-  RANGE_CHECK_HI(vp8_cfg, Sharpness,       7);
+  RANGE_CHECK_HI(vp8_cfg, sharpness, 7);
   RANGE_CHECK(vp8_cfg, arnr_max_frames, 0, 15);
   RANGE_CHECK_HI(vp8_cfg, arnr_strength,   6);
   RANGE_CHECK(vp8_cfg, arnr_type,       1, 3);
@@ -323,7 +323,7 @@ static vpx_codec_err_t set_vp9e_config(VP9_CONFIG *oxcf,
   oxcf->encode_breakout        =  vp8_cfg.static_thresh;
   oxcf->play_alternate         =  vp8_cfg.enable_auto_alt_ref;
   oxcf->noise_sensitivity      =  vp8_cfg.noise_sensitivity;
-  oxcf->Sharpness              =  vp8_cfg.Sharpness;
+  oxcf->sharpness              =  vp8_cfg.sharpness;
 
   oxcf->two_pass_stats_in      =  cfg.rc_twopass_stats_in;
   oxcf->output_pkt_list        =  vp8_cfg.pkt_list;
@@ -349,7 +349,7 @@ static vpx_codec_err_t set_vp9e_config(VP9_CONFIG *oxcf,
   printf("Current VP9 Settings: \n");
   printf("target_bandwidth: %d\n", oxcf->target_bandwidth);
   printf("noise_sensitivity: %d\n", oxcf->noise_sensitivity);
-  printf("Sharpness: %d\n",    oxcf->Sharpness);
+  printf("sharpness: %d\n",    oxcf->sharpness);
   printf("cpu_used: %d\n",  oxcf->cpu_used);
   printf("Mode: %d\n",     oxcf->Mode);
   // printf("delete_first_pass_file: %d\n",  oxcf->delete_first_pass_file);
@@ -442,7 +442,7 @@ static vpx_codec_err_t set_param(vpx_codec_alg_priv_t *ctx,
       MAP(VP8E_SET_CPUUSED,                 xcfg.cpu_used);
       MAP(VP8E_SET_ENABLEAUTOALTREF,        xcfg.enable_auto_alt_ref);
       MAP(VP8E_SET_NOISE_SENSITIVITY,       xcfg.noise_sensitivity);
-      MAP(VP8E_SET_SHARPNESS,               xcfg.Sharpness);
+      MAP(VP8E_SET_SHARPNESS,               xcfg.sharpness);
       MAP(VP8E_SET_STATIC_THRESHOLD,        xcfg.static_thresh);
       MAP(VP9E_SET_TILE_COLUMNS,            xcfg.tile_columns);
       MAP(VP9E_SET_TILE_ROWS,               xcfg.tile_rows);

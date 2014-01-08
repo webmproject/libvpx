@@ -81,7 +81,7 @@ extern "C"
     int64_t target_bandwidth;  // bandwidth to be used in kilobits per second
 
     int noise_sensitivity;  // pre processing blur: recommendation 0
-    int Sharpness;  // sharpening output: recommendation 0:
+    int sharpness;  // sharpening output: recommendation 0:
     int cpu_used;
     unsigned int rc_max_intra_bitrate_pct;
 

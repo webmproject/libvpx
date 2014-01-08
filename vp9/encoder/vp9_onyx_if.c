@@ -1415,9 +1415,9 @@ void vp9_change_config(VP9_PTR ptr, VP9_CONFIG *oxcf) {
   cm->display_height = cpi->oxcf.height;
 
   // VP8 sharpness level mapping 0-7 (vs 0-10 in general VPx dialogs)
-  cpi->oxcf.Sharpness = MIN(7, cpi->oxcf.Sharpness);
+  cpi->oxcf.sharpness = MIN(7, cpi->oxcf.sharpness);
 
-  cpi->common.lf.sharpness_level = cpi->oxcf.Sharpness;
+  cpi->common.lf.sharpness_level = cpi->oxcf.sharpness;
 
   if (cpi->initial_width) {
     // Increasing the size of the frame beyond the first seen frame, or some
