@@ -3313,7 +3313,11 @@ static void SvcEncode(VP9_COMP *cpi, size_t *size, uint8_t *dest,
 
 static void Pass0Encode(VP9_COMP *cpi, size_t *size, uint8_t *dest,
                         unsigned int *frame_flags) {
-  vp9_get_one_pass_params(cpi);
+  if (cpi->oxcf.end_usage == USAGE_STREAM_FROM_SERVER) {
+    vp9_get_one_pass_cbr_params(cpi);
+  } else {
+    vp9_get_one_pass_params(cpi);
+  }
   encode_frame_to_data_rate(cpi, size, dest, frame_flags);
 }
 
