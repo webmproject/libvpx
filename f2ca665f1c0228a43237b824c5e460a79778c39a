@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//+Ps\u003d",
+        "filename": "vp9/common/vp9_systemdependent.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-01-08T20:03:34Z",
+      "side": 1,
+      "message": "note for this function in webp we use:\n\n#elif defined(_MSC_VER) \u0026\u0026 _MSC_VER \u003e 1310 \u0026\u0026 \\\n      (defined(_M_X64) || defined(_M_IX86))\n#include \u003cintrin.h\u003e\n#pragma intrinsic(_BitScanReverse)\n\ngiven [1]. The architecture check is off given more recent versions of vs with arm support add this intrinsic.\n\n[1] http://msdn.microsoft.com/en-us/library/fbxyd7zd(v\u003dvs.100).aspx",
+      "revId": "f2ca665f1c0228a43237b824c5e460a79778c39a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
