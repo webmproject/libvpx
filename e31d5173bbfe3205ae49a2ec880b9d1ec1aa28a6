@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//+SU\u003d",
+        "filename": "vp9/common/arm/neon/vp9_reconintra_neon.asm",
+        "patchSetId": 2
+      },
+      "lineNbr": 102,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2014-01-08T17:46:24Z",
+      "side": 1,
+      "message": "vld1.8 {q0, q1} should load both",
+      "revId": "e31d5173bbfe3205ae49a2ec880b9d1ec1aa28a6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//+SQ\u003d",
+        "filename": "vp9/common/arm/neon/vp9_reconintra_neon.asm",
+        "patchSetId": 2
+      },
+      "lineNbr": 106,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2014-01-08T17:46:24Z",
+      "side": 1,
+      "message": "similarly, vst1.8 {q0, q1}, [r0], r1",
+      "revId": "e31d5173bbfe3205ae49a2ec880b9d1ec1aa28a6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//+SI\u003d",
+        "filename": "vp9/common/arm/neon/vp9_reconintra_neon.asm",
+        "patchSetId": 2
+      },
+      "lineNbr": 152,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2014-01-08T17:46:24Z",
+      "side": 1,
+      "message": "I think there is a better way to do this but it escapes me at the moment. There should be some sort of extract/duplicate operation but I can\u0027t think of it. Maybe load a constant into q0 and multiply d1 by it?",
+      "revId": "e31d5173bbfe3205ae49a2ec880b9d1ec1aa28a6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
