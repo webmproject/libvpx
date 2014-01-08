@@ -1987,6 +1987,11 @@ static void assign_std_frame_bits(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   cpi->rc.per_frame_bandwidth = target_frame_size;
 }
 
+static int test_for_kf_one_pass(VP9_COMP *cpi) {
+  // Placeholder function for auto key frame
+  return 0;
+}
+
 void vp9_get_svc_params(VP9_COMP *cpi) {
   VP9_COMMON *const cm = &cpi->common;
   if ((cm->current_video_frame == 0) ||
@@ -2006,9 +2011,10 @@ void vp9_get_one_pass_params(VP9_COMP *cpi) {
   if (!cpi->refresh_alt_ref_frame &&
       (cm->current_video_frame == 0 ||
        cm->frame_flags & FRAMEFLAGS_KEY ||
-       (cpi->oxcf.auto_key && (cpi->rc.frames_since_key %
-                               cpi->key_frame_frequency == 0)))) {
+       cpi->rc.frames_to_key == 0 ||
+       (cpi->oxcf.auto_key && test_for_kf_one_pass(cpi)))) {
     cm->frame_type = KEY_FRAME;
+    cpi->rc.frames_to_key = cpi->key_frame_frequency;
   } else {
     cm->frame_type = INTER_FRAME;
   }
@@ -2027,6 +2033,8 @@ void vp9_get_first_pass_params(VP9_COMP *cpi) {
   } else {
     cm->frame_type = INTER_FRAME;
   }
+  cpi->rc.frames_to_key = INT_MAX;
+  // Do not use periodic key frames
 }
 
 void vp9_get_second_pass_params(VP9_COMP *cpi) {
@@ -2150,8 +2158,6 @@ void vp9_get_second_pass_params(VP9_COMP *cpi) {
                                 * cpi->output_framerate);
   if (cpi->target_bandwidth < 0)
     cpi->target_bandwidth = 0;
-
-  cpi->rc.frames_to_key--;
 
   // Update the total stats remaining structure
   subtract_stats(&cpi->twopass.total_left_stats, &this_frame);

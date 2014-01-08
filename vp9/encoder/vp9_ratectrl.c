@@ -257,16 +257,6 @@ static void calc_iframe_target_size(VP9_COMP *cpi) {
   cpi->rc.this_frame_target = target;
 }
 
-//  Do the best we can to define the parameters for the next GF based
-//  on what information we have available.
-//
-//  In this experimental code only two pass is supported
-//  so we just use the interval determined in the two pass code.
-static void calc_gf_params(VP9_COMP *cpi) {
-  // Set the gf interval
-  cpi->rc.frames_till_gf_update_due = cpi->rc.baseline_gf_interval;
-}
-
 // Update the buffer level: leaky bucket model.
 void vp9_update_buffer_level(VP9_COMP *const cpi, int encoded_frame_size) {
   VP9_COMMON *const cm = &cpi->common;
@@ -847,6 +837,43 @@ int vp9_rc_pick_frame_size_target(VP9_COMP *cpi) {
   return 1;
 }
 
+static void update_alt_ref_frame_stats(VP9_COMP *cpi) {
+  // this frame refreshes means next frames don't unless specified by user
+  cpi->rc.frames_since_golden = 0;
+
+#if CONFIG_MULTIPLE_ARF
+  if (!cpi->multi_arf_enabled)
+#endif
+    // Clear the alternate reference update pending flag.
+    cpi->rc.source_alt_ref_pending = 0;
+
+  // Set the alternate reference frame active flag
+  cpi->rc.source_alt_ref_active = 1;
+}
+
+static void update_golden_frame_stats(VP9_COMP *cpi) {
+  // Update the Golden frame usage counts.
+  if (cpi->refresh_golden_frame) {
+    // this frame refreshes means next frames don't unless specified by user
+    cpi->refresh_golden_frame = 0;
+    cpi->rc.frames_since_golden = 0;
+
+    if (!cpi->rc.source_alt_ref_pending)
+      cpi->rc.source_alt_ref_active = 0;
+
+    // Decrement count down till next gf
+    if (cpi->rc.frames_till_gf_update_due > 0)
+      cpi->rc.frames_till_gf_update_due--;
+
+  } else if (!cpi->refresh_alt_ref_frame) {
+    // Decrement count down till next gf
+    if (cpi->rc.frames_till_gf_update_due > 0)
+      cpi->rc.frames_till_gf_update_due--;
+
+    cpi->rc.frames_since_golden++;
+  }
+}
+
 void vp9_rc_postencode_update(VP9_COMP *cpi, uint64_t bytes_used) {
   VP9_COMMON *const cm = &cpi->common;
   // Update rate control heuristics
@@ -934,4 +961,24 @@ void vp9_rc_postencode_update(VP9_COMP *cpi, uint64_t bytes_used) {
     cpi->twopass.gf_group_bits = MAX(cpi->twopass.gf_group_bits, 0);
   }
 #endif
+
+  if (cpi->oxcf.play_alternate && cpi->refresh_alt_ref_frame
+      && (cm->frame_type != KEY_FRAME))
+    // Update the alternate reference frame stats as appropriate.
+    update_alt_ref_frame_stats(cpi);
+  else
+    // Update the Golden frame stats as appropriate.
+    update_golden_frame_stats(cpi);
+
+  if (cm->frame_type == KEY_FRAME)
+    cpi->rc.frames_since_key = 0;
+  if (cm->show_frame) {
+    cpi->rc.frames_since_key++;
+    cpi->rc.frames_to_key--;
+  }
+}
+
+void vp9_rc_postencode_update_drop_frame(VP9_COMP *cpi) {
+  cpi->rc.frames_since_key++;
+  // cpi->rc.frames_to_key--;
 }
