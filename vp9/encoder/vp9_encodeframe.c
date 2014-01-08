@@ -273,9 +273,9 @@ static void calc_activity_index(VP9_COMP *cpi, MACROBLOCK *x) {
 // Loop through all MBs. Note activity of each, average activity and
 // calculate a normalized activity for each
 static void build_activity_map(VP9_COMP *cpi) {
-  MACROBLOCK * const x = &cpi->mb;
+  MACROBLOCK *const x = &cpi->mb;
   MACROBLOCKD *xd = &x->e_mbd;
-  VP9_COMMON * const cm = &cpi->common;
+  VP9_COMMON *const cm = &cpi->common;
 
 #if ALT_ACT_MEASURE
   YV12_BUFFER_CONFIG *new_yv12 = get_frame_new_buffer(cm);
@@ -361,7 +361,7 @@ void vp9_activity_masking(VP9_COMP *cpi, MACROBLOCK *x) {
 static void select_in_frame_q_segment(VP9_COMP *cpi,
                                       int mi_row, int mi_col,
                                       int output_enabled, int projected_rate) {
-  VP9_COMMON * const cm = &cpi->common;
+  VP9_COMMON *const cm = &cpi->common;
   int target_rate = cpi->rc.sb64_target_rate << 8;   // convert to bits << 8
 
   const int mi_offset = mi_row * cm->mi_cols + mi_col;
@@ -1017,15 +1017,14 @@ static void set_partitioning(VP9_COMP *cpi, const TileInfo *const tile,
   }
 }
 
-static void copy_partitioning(VP9_COMP *cpi, MODE_INFO **mi_8x8,
+static void copy_partitioning(VP9_COMMON *cm, MODE_INFO **mi_8x8,
                               MODE_INFO **prev_mi_8x8) {
-  VP9_COMMON *const cm = &cpi->common;
   const int mis = cm->mode_info_stride;
   int block_row, block_col;
 
   for (block_row = 0; block_row < 8; ++block_row) {
     for (block_col = 0; block_col < 8; ++block_col) {
-      MODE_INFO * prev_mi = prev_mi_8x8[block_row * mis + block_col];
+      MODE_INFO *prev_mi = prev_mi_8x8[block_row * mis + block_col];
       BLOCK_SIZE sb_type = prev_mi ? prev_mi->mbmi.sb_type : 0;
       ptrdiff_t offset;
 
@@ -1038,8 +1037,7 @@ static void copy_partitioning(VP9_COMP *cpi, MODE_INFO **mi_8x8,
   }
 }
 
-static int sb_has_motion(VP9_COMP *cpi, MODE_INFO **prev_mi_8x8) {
-  VP9_COMMON *const cm = &cpi->common;
+static int sb_has_motion(VP9_COMMON *cm, MODE_INFO **prev_mi_8x8) {
   const int mis = cm->mode_info_stride;
   int block_row, block_col;
 
@@ -1898,7 +1896,7 @@ static void rd_pick_reference_frame(VP9_COMP *cpi, const TileInfo *const tile,
 
 static void encode_sb_row(VP9_COMP *cpi, const TileInfo *const tile,
                           int mi_row, TOKENEXTRA **tp) {
-  VP9_COMMON * const cm = &cpi->common;
+  VP9_COMMON *const cm = &cpi->common;
   int mi_col;
 
   // Initialize the left context for the new SB row
@@ -1941,15 +1939,15 @@ static void encode_sb_row(VP9_COMP *cpi, const TileInfo *const tile,
         rd_use_partition(cpi, tile, mi_8x8, tp, mi_row, mi_col, BLOCK_64X64,
                          &dummy_rate, &dummy_dist, 1);
       } else {
-        if ((cpi->common.current_video_frame
+        if ((cm->current_video_frame
             % cpi->sf.last_partitioning_redo_frequency) == 0
             || cm->prev_mi == 0
-            || cpi->common.show_frame == 0
-            || cpi->common.frame_type == KEY_FRAME
+            || cm->show_frame == 0
+            || cm->frame_type == KEY_FRAME
             || cpi->rc.is_src_frame_alt_ref
             || ((cpi->sf.use_lastframe_partitioning ==
                  LAST_FRAME_PARTITION_LOW_MOTION) &&
-                 sb_has_motion(cpi, prev_mi_8x8))) {
+                 sb_has_motion(cm, prev_mi_8x8))) {
           // If required set upper and lower partition size limits
           if (cpi->sf.auto_min_max_partition_size) {
             set_offsets(cpi, tile, mi_row, mi_col, BLOCK_64X64);
@@ -1960,7 +1958,7 @@ static void encode_sb_row(VP9_COMP *cpi, const TileInfo *const tile,
           rd_pick_partition(cpi, tile, tp, mi_row, mi_col, BLOCK_64X64,
                             &dummy_rate, &dummy_dist, 1, INT64_MAX);
         } else {
-          copy_partitioning(cpi, mi_8x8, prev_mi_8x8);
+          copy_partitioning(cm, mi_8x8, prev_mi_8x8);
           rd_use_partition(cpi, tile, mi_8x8, tp, mi_row, mi_col, BLOCK_64X64,
                            &dummy_rate, &dummy_dist, 1);
         }
@@ -2046,9 +2044,9 @@ static void switch_tx_mode(VP9_COMP *cpi) {
 
 static void encode_frame_internal(VP9_COMP *cpi) {
   int mi_row;
-  MACROBLOCK * const x = &cpi->mb;
-  VP9_COMMON * const cm = &cpi->common;
-  MACROBLOCKD * const xd = &x->e_mbd;
+  MACROBLOCK *const x = &cpi->mb;
+  VP9_COMMON *const cm = &cpi->common;
+  MACROBLOCKD *const xd = &x->e_mbd;
 
 //  fprintf(stderr, "encode_frame_internal frame %d (%d) type %d\n",
 //           cpi->common.current_video_frame, cpi->common.show_frame,
@@ -2073,7 +2071,7 @@ static void encode_frame_internal(VP9_COMP *cpi) {
 
   xd->last_mi = cm->prev_mi;
 
-  vp9_zero(cpi->common.counts.mv);
+  vp9_zero(cm->counts.mv);
   vp9_zero(cpi->coef_counts);
   vp9_zero(cm->counts.eob_branch);
 
@@ -2191,11 +2189,9 @@ static void set_txfm_flag(MODE_INFO **mi_8x8, int mis, int ymbs, int xmbs,
   }
 }
 
-static void reset_skip_txfm_size_b(VP9_COMP *cpi, MODE_INFO **mi_8x8,
+static void reset_skip_txfm_size_b(VP9_COMMON *cm, MODE_INFO **mi_8x8,
                                    int mis, TX_SIZE max_tx_size, int bw, int bh,
                                    int mi_row, int mi_col, BLOCK_SIZE bsize) {
-  VP9_COMMON * const cm = &cpi->common;
-
   if (mi_row >= cm->mi_rows || mi_col >= cm->mi_cols) {
     return;
   } else {
@@ -2211,10 +2207,9 @@ static void reset_skip_txfm_size_b(VP9_COMP *cpi, MODE_INFO **mi_8x8,
   }
 }
 
-static void reset_skip_txfm_size_sb(VP9_COMP *cpi, MODE_INFO **mi_8x8,
+static void reset_skip_txfm_size_sb(VP9_COMMON *cm, MODE_INFO **mi_8x8,
                                     TX_SIZE max_tx_size, int mi_row, int mi_col,
                                     BLOCK_SIZE bsize) {
-  VP9_COMMON * const cm = &cpi->common;
   const int mis = cm->mode_info_stride;
   int bw, bh;
   const int bs = num_8x8_blocks_wide_lookup[bsize], hbs = bs / 2;
@@ -2226,17 +2221,17 @@ static void reset_skip_txfm_size_sb(VP9_COMP *cpi, MODE_INFO **mi_8x8,
   bh = num_8x8_blocks_high_lookup[mi_8x8[0]->mbmi.sb_type];
 
   if (bw == bs && bh == bs) {
-    reset_skip_txfm_size_b(cpi, mi_8x8, mis, max_tx_size, bs, bs, mi_row,
+    reset_skip_txfm_size_b(cm, mi_8x8, mis, max_tx_size, bs, bs, mi_row,
                            mi_col, bsize);
   } else if (bw == bs && bh < bs) {
-    reset_skip_txfm_size_b(cpi, mi_8x8, mis, max_tx_size, bs, hbs, mi_row,
+    reset_skip_txfm_size_b(cm, mi_8x8, mis, max_tx_size, bs, hbs, mi_row,
                            mi_col, bsize);
-    reset_skip_txfm_size_b(cpi, mi_8x8 + hbs * mis, mis, max_tx_size, bs, hbs,
+    reset_skip_txfm_size_b(cm, mi_8x8 + hbs * mis, mis, max_tx_size, bs, hbs,
                            mi_row + hbs, mi_col, bsize);
   } else if (bw < bs && bh == bs) {
-    reset_skip_txfm_size_b(cpi, mi_8x8, mis, max_tx_size, hbs, bs, mi_row,
+    reset_skip_txfm_size_b(cm, mi_8x8, mis, max_tx_size, hbs, bs, mi_row,
                            mi_col, bsize);
-    reset_skip_txfm_size_b(cpi, mi_8x8 + hbs, mis, max_tx_size, hbs, bs, mi_row,
+    reset_skip_txfm_size_b(cm, mi_8x8 + hbs, mis, max_tx_size, hbs, bs, mi_row,
                            mi_col + hbs, bsize);
 
   } else {
@@ -2249,23 +2244,21 @@ static void reset_skip_txfm_size_sb(VP9_COMP *cpi, MODE_INFO **mi_8x8,
       const int mi_dc = hbs * (n & 1);
       const int mi_dr = hbs * (n >> 1);
 
-      reset_skip_txfm_size_sb(cpi, &mi_8x8[mi_dr * mis + mi_dc], max_tx_size,
+      reset_skip_txfm_size_sb(cm, &mi_8x8[mi_dr * mis + mi_dc], max_tx_size,
                               mi_row + mi_dr, mi_col + mi_dc, subsize);
     }
   }
 }
 
-static void reset_skip_txfm_size(VP9_COMP *cpi, TX_SIZE txfm_max) {
-  VP9_COMMON * const cm = &cpi->common;
+static void reset_skip_txfm_size(VP9_COMMON *cm, TX_SIZE txfm_max) {
   int mi_row, mi_col;
   const int mis = cm->mode_info_stride;
-//  MODE_INFO *mi, *mi_ptr = cm->mi;
   MODE_INFO **mi_8x8, **mi_ptr = cm->mi_grid_visible;
 
   for (mi_row = 0; mi_row < cm->mi_rows; mi_row += 8, mi_ptr += 8 * mis) {
     mi_8x8 = mi_ptr;
     for (mi_col = 0; mi_col < cm->mi_cols; mi_col += 8, mi_8x8 += 8) {
-      reset_skip_txfm_size_sb(cpi, mi_8x8, txfm_max, mi_row, mi_col,
+      reset_skip_txfm_size_sb(cm, mi_8x8, txfm_max, mi_row, mi_col,
                               BLOCK_64X64);
     }
   }
@@ -2313,7 +2306,7 @@ static void select_tx_mode(VP9_COMP *cpi) {
 }
 
 void vp9_encode_frame(VP9_COMP *cpi) {
-  VP9_COMMON * const cm = &cpi->common;
+  VP9_COMMON *const cm = &cpi->common;
 
   // In the longer term the encoder should be generalized to match the
   // decoder such that we allow compound where one of the 3 buffers has a
@@ -2388,18 +2381,18 @@ void vp9_encode_frame(VP9_COMP *cpi) {
 
     /* transform size selection (4x4, 8x8, 16x16 or select-per-mb) */
     select_tx_mode(cpi);
-    cpi->common.reference_mode = reference_mode;
-    cpi->common.mcomp_filter_type = filter_type;
+    cm->reference_mode = reference_mode;
+    cm->mcomp_filter_type = filter_type;
     encode_frame_internal(cpi);
 
     for (i = 0; i < REFERENCE_MODES; ++i) {
-      const int diff = (int) (cpi->rd_comp_pred_diff[i] / cpi->common.MBs);
+      const int diff = (int) (cpi->rd_comp_pred_diff[i] / cm->MBs);
       cpi->rd_prediction_type_threshes[frame_type][i] += diff;
       cpi->rd_prediction_type_threshes[frame_type][i] >>= 1;
     }
 
     for (i = 0; i < SWITCHABLE_FILTER_CONTEXTS; i++) {
-      const int64_t diff = cpi->rd_filter_diff[i] / cpi->common.MBs;
+      const int64_t diff = cpi->rd_filter_diff[i] / cm->MBs;
       cpi->rd_filter_threshes[frame_type][i] =
           (cpi->rd_filter_threshes[frame_type][i] + diff) / 2;
     }
@@ -2410,12 +2403,12 @@ void vp9_encode_frame(VP9_COMP *cpi) {
       if (i == TX_MODE_SELECT)
         pd -= RDCOST(cpi->mb.rdmult, cpi->mb.rddiv,
                      2048 * (TX_SIZES - 1), 0);
-      diff = (int) (pd / cpi->common.MBs);
+      diff = (int) (pd / cm->MBs);
       cpi->rd_tx_select_threshes[frame_type][i] += diff;
       cpi->rd_tx_select_threshes[frame_type][i] /= 2;
     }
 
-    if (cpi->common.reference_mode == REFERENCE_MODE_SELECT) {
+    if (cm->reference_mode == REFERENCE_MODE_SELECT) {
       int single_count_zero = 0;
       int comp_count_zero = 0;
 
@@ -2425,15 +2418,15 @@ void vp9_encode_frame(VP9_COMP *cpi) {
       }
 
       if (comp_count_zero == 0) {
-        cpi->common.reference_mode = SINGLE_REFERENCE;
+        cm->reference_mode = SINGLE_REFERENCE;
         vp9_zero(cm->counts.comp_inter);
       } else if (single_count_zero == 0) {
-        cpi->common.reference_mode = COMPOUND_REFERENCE;
+        cm->reference_mode = COMPOUND_REFERENCE;
         vp9_zero(cm->counts.comp_inter);
       }
     }
 
-    if (cpi->common.tx_mode == TX_MODE_SELECT) {
+    if (cm->tx_mode == TX_MODE_SELECT) {
       int count4x4 = 0;
       int count8x8_lp = 0, count8x8_8x8p = 0;
       int count16x16_16x16p = 0, count16x16_lp = 0;
@@ -2453,19 +2446,19 @@ void vp9_encode_frame(VP9_COMP *cpi) {
         count32x32 += cm->counts.tx.p32x32[i][TX_32X32];
       }
 
-      if (count4x4 == 0 && count16x16_lp == 0 && count16x16_16x16p == 0
-          && count32x32 == 0) {
-        cpi->common.tx_mode = ALLOW_8X8;
-        reset_skip_txfm_size(cpi, TX_8X8);
-      } else if (count8x8_8x8p == 0 && count16x16_16x16p == 0
-                 && count8x8_lp == 0 && count16x16_lp == 0 && count32x32 == 0) {
-        cpi->common.tx_mode = ONLY_4X4;
-        reset_skip_txfm_size(cpi, TX_4X4);
+      if (count4x4 == 0 && count16x16_lp == 0 && count16x16_16x16p == 0 &&
+          count32x32 == 0) {
+        cm->tx_mode = ALLOW_8X8;
+        reset_skip_txfm_size(cm, TX_8X8);
+      } else if (count8x8_8x8p == 0 && count16x16_16x16p == 0 &&
+                 count8x8_lp == 0 && count16x16_lp == 0 && count32x32 == 0) {
+        cm->tx_mode = ONLY_4X4;
+        reset_skip_txfm_size(cm, TX_4X4);
       } else if (count8x8_lp == 0 && count16x16_lp == 0 && count4x4 == 0) {
-        cpi->common.tx_mode = ALLOW_32X32;
+        cm->tx_mode = ALLOW_32X32;
       } else if (count32x32 == 0 && count8x8_lp == 0 && count4x4 == 0) {
-        cpi->common.tx_mode = ALLOW_16X16;
-        reset_skip_txfm_size(cpi, TX_16X16);
+        cm->tx_mode = ALLOW_16X16;
+        reset_skip_txfm_size(cm, TX_16X16);
       }
     }
   } else {
