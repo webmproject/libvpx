@@ -106,7 +106,7 @@ extern "C"
     //     were generated in the first encoding pass to create the compressed
     //     output using the highest possible quality, and taking a
     //    longer amount of time to encode.. ( speed setting ignored )
-    int Mode;
+    int mode;
 
     // Key Framing Operations
     int auto_key;  // autodetect cut scenes and set the keyframes
