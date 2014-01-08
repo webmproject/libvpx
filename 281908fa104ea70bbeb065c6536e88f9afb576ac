@@ -2,6 +2,40 @@
   "comments": [
     {
       "key": {
+        "uuid": "AAAAdn//+Qo\u003d",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 11
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2014-01-08T19:00:08Z",
+      "side": 1,
+      "message": "We already specify -mfpu\u003dneon for armv7 builds. You can leave this line out.",
+      "revId": "281908fa104ea70bbeb065c6536e88f9afb576ac",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//+Qk\u003d",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 11
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2014-01-08T19:00:08Z",
+      "side": 1,
+      "message": "List the function names this patch provides/updates here.",
+      "revId": "281908fa104ea70bbeb065c6536e88f9afb576ac",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//+SA\u003d",
         "filename": "vp8/common/arm/neon/bilinearpredict_neon_intrinsics.c",
         "patchSetId": 11
