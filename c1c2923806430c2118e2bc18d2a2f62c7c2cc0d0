@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//93c\u003d",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 3
+      },
+      "lineNbr": 8,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-01-09T23:39:24Z",
+      "side": 1,
+      "message": "you should include a message like: \u0027fixes issue #XXX\u0027 if this is addressing a bug...",
+      "revId": "c1c2923806430c2118e2bc18d2a2f62c7c2cc0d0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//93g\u003d",
+        "filename": "vpx_scale/generic/yv12config.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 183,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-01-09T23:39:24Z",
+      "side": 1,
+      "message": "buffer_alloc_sz isn\u0027t set in this path, I believe intentionally to signal an external frame buffer.",
+      "revId": "c1c2923806430c2118e2bc18d2a2f62c7c2cc0d0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
