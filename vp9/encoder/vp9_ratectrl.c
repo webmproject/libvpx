@@ -432,25 +432,38 @@ static void calc_pframe_target_size(VP9_COMP *const cpi) {
   }
 }
 
+static double get_rate_correction_factor(const VP9_COMP *cpi) {
+  if (cpi->common.frame_type == KEY_FRAME) {
+    return cpi->rc.key_frame_rate_correction_factor;
+  } else {
+    if (cpi->refresh_alt_ref_frame || cpi->refresh_golden_frame)
+      return cpi->rc.gf_rate_correction_factor;
+    else
+      return cpi->rc.rate_correction_factor;
+  }
+}
+
+static void set_rate_correction_factor(VP9_COMP *cpi, double factor) {
+  if (cpi->common.frame_type == KEY_FRAME) {
+    cpi->rc.key_frame_rate_correction_factor = factor;
+  } else {
+    if (cpi->refresh_alt_ref_frame || cpi->refresh_golden_frame)
+      cpi->rc.gf_rate_correction_factor = factor;
+    else
+      cpi->rc.rate_correction_factor = factor;
+  }
+}
+
 void vp9_rc_update_rate_correction_factors(VP9_COMP *cpi, int damp_var) {
   const int q = cpi->common.base_qindex;
   int correction_factor = 100;
-  double rate_correction_factor;
+  double rate_correction_factor = get_rate_correction_factor(cpi);
   double adjustment_limit;
 
   int projected_size_based_on_q = 0;
 
   // Clear down mmx registers to allow floating point in what follows
   vp9_clear_system_state();  // __asm emms;
-
-  if (cpi->common.frame_type == KEY_FRAME) {
-    rate_correction_factor = cpi->rc.key_frame_rate_correction_factor;
-  } else {
-    if (cpi->refresh_alt_ref_frame || cpi->refresh_golden_frame)
-      rate_correction_factor = cpi->rc.gf_rate_correction_factor;
-    else
-      rate_correction_factor = cpi->rc.rate_correction_factor;
-  }
 
   // Work out how big we would have expected the frame to be at this Q given
   // the current correction factor.
@@ -501,36 +514,16 @@ void vp9_rc_update_rate_correction_factors(VP9_COMP *cpi, int damp_var) {
       rate_correction_factor = MIN_BPB_FACTOR;
   }
 
-  if (cpi->common.frame_type == KEY_FRAME) {
-    cpi->rc.key_frame_rate_correction_factor = rate_correction_factor;
-  } else {
-    if (cpi->refresh_alt_ref_frame || cpi->refresh_golden_frame)
-      cpi->rc.gf_rate_correction_factor = rate_correction_factor;
-    else
-      cpi->rc.rate_correction_factor = rate_correction_factor;
-  }
+  set_rate_correction_factor(cpi, rate_correction_factor);
 }
 
 
 int vp9_rc_regulate_q(const VP9_COMP *cpi, int target_bits_per_frame,
                       int active_best_quality, int active_worst_quality) {
   int q = active_worst_quality;
-
-  int i;
   int last_error = INT_MAX;
-  int target_bits_per_mb;
-  int bits_per_mb_at_this_q;
-  double correction_factor;
-
-  // Select the appropriate correction factor based upon type of frame.
-  if (cpi->common.frame_type == KEY_FRAME) {
-    correction_factor = cpi->rc.key_frame_rate_correction_factor;
-  } else {
-    if (cpi->refresh_alt_ref_frame || cpi->refresh_golden_frame)
-      correction_factor = cpi->rc.gf_rate_correction_factor;
-    else
-      correction_factor = cpi->rc.rate_correction_factor;
-  }
+  int i, target_bits_per_mb, bits_per_mb_at_this_q;
+  const double correction_factor = get_rate_correction_factor(cpi);
 
   // Calculate required scaling factor based on target frame size and size of
   // frame produced using previous Q.
