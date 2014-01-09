@@ -2033,8 +2033,8 @@ void vp9_get_first_pass_params(VP9_COMP *cpi) {
   } else {
     cm->frame_type = INTER_FRAME;
   }
-  cpi->rc.frames_to_key = INT_MAX;
   // Do not use periodic key frames
+  cpi->rc.frames_to_key = INT_MAX;
 }
 
 void vp9_get_second_pass_params(VP9_COMP *cpi) {

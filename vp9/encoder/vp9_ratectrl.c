@@ -184,8 +184,6 @@ void vp9_setup_key_frame(VP9_COMP *cpi) {
 
   vp9_setup_past_independence(cm);
 
-  // interval before next GF
-  cpi->rc.frames_till_gf_update_due = cpi->rc.baseline_gf_interval;
   /* All buffers are implicitly updated on key frames. */
   cpi->refresh_golden_frame = 1;
   cpi->refresh_alt_ref_frame = 1;
@@ -855,7 +853,6 @@ static void update_golden_frame_stats(VP9_COMP *cpi) {
   // Update the Golden frame usage counts.
   if (cpi->refresh_golden_frame) {
     // this frame refreshes means next frames don't unless specified by user
-    cpi->refresh_golden_frame = 0;
     cpi->rc.frames_since_golden = 0;
 
     if (!cpi->rc.source_alt_ref_pending)
