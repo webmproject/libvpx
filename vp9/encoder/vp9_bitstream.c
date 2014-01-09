@@ -125,8 +125,7 @@ static int write_skip_coeff(const VP9_COMP *cpi, int segment_id, MODE_INFO *m,
   }
 }
 
-void vp9_update_skip_probs(VP9_COMP *cpi, vp9_writer *w) {
-  VP9_COMMON *cm = &cpi->common;
+void vp9_update_skip_probs(VP9_COMMON *cm, vp9_writer *w) {
   int k;
 
   for (k = 0; k < MBSKIP_CONTEXTS; ++k)
@@ -935,9 +934,7 @@ static void write_interp_filter_type(INTERPOLATION_TYPE type,
     vp9_wb_write_literal(wb, type_to_literal[type], 2);
 }
 
-static void fix_mcomp_filter_type(VP9_COMP *cpi) {
-  VP9_COMMON *const cm = &cpi->common;
-
+static void fix_mcomp_filter_type(VP9_COMMON *cm) {
   if (cm->mcomp_filter_type == SWITCHABLE) {
     // Check to see if only one of the filters is actually used
     int count[SWITCHABLE_FILTERS];
@@ -1066,9 +1063,8 @@ static size_t encode_tiles(VP9_COMP *cpi, uint8_t *data_ptr) {
   return total_size;
 }
 
-static void write_display_size(VP9_COMP *cpi, struct vp9_write_bit_buffer *wb) {
-  VP9_COMMON *const cm = &cpi->common;
-
+static void write_display_size(const VP9_COMMON *cm,
+                               struct vp9_write_bit_buffer *wb) {
   const int scaling_active = cm->width != cm->display_width ||
                              cm->height != cm->display_height;
   vp9_wb_write_bit(wb, scaling_active);
@@ -1078,13 +1074,12 @@ static void write_display_size(VP9_COMP *cpi, struct vp9_write_bit_buffer *wb) {
   }
 }
 
-static void write_frame_size(VP9_COMP *cpi,
+static void write_frame_size(const VP9_COMMON *cm,
                              struct vp9_write_bit_buffer *wb) {
-  VP9_COMMON *const cm = &cpi->common;
   vp9_wb_write_literal(wb, cm->width - 1, 16);
   vp9_wb_write_literal(wb, cm->height - 1, 16);
 
-  write_display_size(cpi, wb);
+  write_display_size(cm, wb);
 }
 
 static void write_frame_size_with_refs(VP9_COMP *cpi,
@@ -1114,7 +1109,7 @@ static void write_frame_size_with_refs(VP9_COMP *cpi,
     vp9_wb_write_literal(wb, cm->height - 1, 16);
   }
 
-  write_display_size(cpi, wb);
+  write_display_size(cm, wb);
 }
 
 static void write_sync_code(struct vp9_write_bit_buffer *wb) {
@@ -1156,7 +1151,7 @@ static void write_uncompressed_header(VP9_COMP *cpi,
       vp9_wb_write_bit(wb, 0);  // has extra plane
     }
 
-    write_frame_size(cpi, wb);
+    write_frame_size(cm, wb);
   } else {
     if (!cm->show_frame)
       vp9_wb_write_bit(wb, cm->intra_only);
@@ -1168,7 +1163,7 @@ static void write_uncompressed_header(VP9_COMP *cpi,
       write_sync_code(wb);
 
       vp9_wb_write_literal(wb, get_refresh_mask(cpi), REF_FRAMES);
-      write_frame_size(cpi, wb);
+      write_frame_size(cm, wb);
     } else {
       MV_REFERENCE_FRAME ref_frame;
       vp9_wb_write_literal(wb, get_refresh_mask(cpi), REF_FRAMES);
@@ -1182,7 +1177,7 @@ static void write_uncompressed_header(VP9_COMP *cpi,
 
       vp9_wb_write_bit(wb, cm->allow_high_precision_mv);
 
-      fix_mcomp_filter_type(cpi);
+      fix_mcomp_filter_type(cm);
       write_interp_filter_type(cm->mcomp_filter_type, wb);
     }
   }
@@ -1220,7 +1215,7 @@ static size_t write_compressed_header(VP9_COMP *cpi, uint8_t *data) {
   active_section = 2;
 #endif
 
-  vp9_update_skip_probs(cpi, &header_bc);
+  vp9_update_skip_probs(cm, &header_bc);
 
   if (!frame_is_intra_only(cm)) {
     int i;
@@ -1242,9 +1237,8 @@ static size_t write_compressed_header(VP9_COMP *cpi, uint8_t *data) {
                                 cm->counts.intra_inter[i]);
 
     if (cm->allow_comp_inter_inter) {
-      const int reference_mode = cpi->common.reference_mode;
-      const int use_compound_pred = reference_mode != SINGLE_REFERENCE;
-      const int use_hybrid_pred = reference_mode == REFERENCE_MODE_SELECT;
+      const int use_compound_pred = cm->reference_mode != SINGLE_REFERENCE;
+      const int use_hybrid_pred = cm->reference_mode == REFERENCE_MODE_SELECT;
 
       vp9_write_bit(&header_bc, use_compound_pred);
       if (use_compound_pred) {
@@ -1278,7 +1272,7 @@ static size_t write_compressed_header(VP9_COMP *cpi, uint8_t *data) {
       prob_diff_update(vp9_partition_tree, fc->partition_prob[i],
                        cm->counts.partition[i], PARTITION_TYPES, &header_bc);
 
-    vp9_write_nmv_probs(cpi, cm->allow_high_precision_mv, &header_bc);
+    vp9_write_nmv_probs(cm, cm->allow_high_precision_mv, &header_bc);
   }
 
   vp9_stop_encode(&header_bc);
