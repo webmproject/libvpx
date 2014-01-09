@@ -261,13 +261,13 @@ static vpx_codec_err_t set_vp9e_config(VP9_CONFIG *oxcf,
 
   switch (cfg.g_pass) {
     case VPX_RC_ONE_PASS:
-      oxcf->Mode = MODE_GOODQUALITY;
+      oxcf->mode = MODE_GOODQUALITY;
       break;
     case VPX_RC_FIRST_PASS:
-      oxcf->Mode = MODE_FIRSTPASS;
+      oxcf->mode = MODE_FIRSTPASS;
       break;
     case VPX_RC_LAST_PASS:
-      oxcf->Mode = MODE_SECONDPASS_BEST;
+      oxcf->mode = MODE_SECONDPASS_BEST;
       break;
   }
 
@@ -351,7 +351,7 @@ static vpx_codec_err_t set_vp9e_config(VP9_CONFIG *oxcf,
   printf("noise_sensitivity: %d\n", oxcf->noise_sensitivity);
   printf("Sharpness: %d\n",    oxcf->Sharpness);
   printf("cpu_used: %d\n",  oxcf->cpu_used);
-  printf("Mode: %d\n",     oxcf->Mode);
+  printf("Mode: %d\n",     oxcf->mode);
   // printf("delete_first_pass_file: %d\n",  oxcf->delete_first_pass_file);
   printf("auto_key: %d\n",  oxcf->auto_key);
   printf("key_freq: %d\n", oxcf->key_freq);
@@ -577,8 +577,8 @@ static void pick_quickcompress_mode(vpx_codec_alg_priv_t  *ctx,
              ? MODE_SECONDPASS_BEST
              : MODE_SECONDPASS;
 
-  if (ctx->oxcf.Mode != new_qc) {
-    ctx->oxcf.Mode = new_qc;
+  if (ctx->oxcf.mode != new_qc) {
+    ctx->oxcf.mode = new_qc;
     vp9_change_config(ctx->cpi, &ctx->oxcf);
   }
 }
