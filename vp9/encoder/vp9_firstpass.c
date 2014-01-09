@@ -106,6 +106,7 @@ static int lookup_next_frame_stats(const struct twopass_rc *p,
   return 1;
 }
 
+
 // Read frame stats at an offset from the current position
 static int read_frame_stats(const struct twopass_rc *p,
                             FIRSTPASS_STATS *frame_stats, int offset) {
@@ -149,7 +150,7 @@ static void output_stats(const VP9_COMP            *cpi,
     FILE *fpfile;
     fpfile = fopen("firstpass.stt", "a");
 
-    fprintf(stdout, "%12.0f %12.0f %12.0f %12.0f %12.0f %12.4f %12.4f"
+    fprintf(fpfile, "%12.0f %12.0f %12.0f %12.0f %12.0f %12.4f %12.4f"
             "%12.4f %12.4f %12.4f %12.4f %12.4f %12.4f %12.4f"
             "%12.0f %12.0f %12.4f %12.0f %12.0f %12.4f\n",
             stats->frame,
@@ -349,17 +350,14 @@ static double simple_weight(YV12_BUFFER_CONFIG *source) {
 }
 
 
-// This function returns the current per frame maximum bitrate target.
+// This function returns the maximum target rate per frame.
 static int frame_max_bits(VP9_COMP *cpi) {
-  // Max allocation for a single frame based on the max section guidelines
-  // passed in and how many bits are left.
-  // For VBR base this on the bits and frames left plus the
-  // two_pass_vbrmax_section rate passed in by the user.
-  const double max_bits = (1.0 * cpi->twopass.bits_left /
-      (cpi->twopass.total_stats.count - cpi->common.current_video_frame)) *
-      (cpi->oxcf.two_pass_vbrmax_section / 100.0);
+  int64_t max_bits =
+     ((int64_t)cpi->rc.av_per_frame_bandwidth *
+      (int64_t)cpi->oxcf.two_pass_vbrmax_section) / 100;
+
   if (max_bits < 0)
-      return 0;
+    return 0;
   if (max_bits >= INT_MAX)
     return INT_MAX;
   return (int)max_bits;
@@ -1765,18 +1763,6 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
 #endif
 #endif
 
-  // Now decide how many bits should be allocated to the GF group as  a
-  // proportion of those remaining in the kf group.
-  // The final key frame group in the clip is treated as a special case
-  // where cpi->twopass.kf_group_bits is tied to cpi->twopass.bits_left.
-  // This is also important for short clips where there may only be one
-  // key frame.
-  if (cpi->rc.frames_to_key >= (int)(cpi->twopass.total_stats.count -
-                                          cpi->common.current_video_frame)) {
-    cpi->twopass.kf_group_bits =
-      (cpi->twopass.bits_left > 0) ? cpi->twopass.bits_left : 0;
-  }
-
   // Calculate the bits to be allocated to the group as a whole
   if ((cpi->twopass.kf_group_bits > 0) &&
       (cpi->twopass.kf_group_error_left > 0)) {
@@ -1863,9 +1849,6 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
     if (gf_bits < 0)
       gf_bits = 0;
 
-    // Add in minimum for a frame
-    gf_bits += cpi->rc.min_frame_bandwidth;
-
     if (i == 0) {
       cpi->twopass.gf_bits = gf_bits;
     }
@@ -1899,8 +1882,7 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
       cpi->twopass.gf_group_error_left = (int64_t)gf_group_err;
     }
 
-    cpi->twopass.gf_group_bits -= cpi->twopass.gf_bits
-        - cpi->rc.min_frame_bandwidth;
+    cpi->twopass.gf_group_bits -= cpi->twopass.gf_bits;
 
     if (cpi->twopass.gf_group_bits < 0)
       cpi->twopass.gf_group_bits = 0;
@@ -1984,9 +1966,6 @@ static void assign_std_frame_bits(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
 
   if (cpi->twopass.gf_group_bits < 0)
     cpi->twopass.gf_group_bits = 0;
-
-  // Add in the minimum number of bits that is set aside for every frame.
-  target_frame_size += cpi->rc.min_frame_bandwidth;
 
   // Per frame bit target for this frame.
   cpi->rc.per_frame_bandwidth = target_frame_size;
@@ -2281,8 +2260,8 @@ static void find_next_key_frame(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   vp9_zero(next_frame);
 
   vp9_clear_system_state();  // __asm emms;
-  start_position = cpi->twopass.stats_in;
 
+  start_position = cpi->twopass.stats_in;
   cpi->common.frame_type = KEY_FRAME;
 
   // is this a forced key frame by interval
@@ -2364,7 +2343,6 @@ static void find_next_key_frame(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   // interval is between 1x and 2x
   if (cpi->oxcf.auto_key
       && cpi->rc.frames_to_key > (int)cpi->key_frame_frequency) {
-    FIRSTPASS_STATS *current_pos = cpi->twopass.stats_in;
     FIRSTPASS_STATS tmp_frame;
 
     cpi->rc.frames_to_key /= 2;
@@ -2389,15 +2367,12 @@ static void find_next_key_frame(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
       // Load a the next frame's stats
       input_stats(&cpi->twopass, &tmp_frame);
     }
-
-    // Reset to the start of the group
-    reset_fpf_position(&cpi->twopass, current_pos);
-
     cpi->rc.next_key_frame_forced = 1;
   } else {
     cpi->rc.next_key_frame_forced = 0;
   }
-  // Special case for the last frame of the file
+
+  // Special case for the last key frame of the file
   if (cpi->twopass.stats_in >= cpi->twopass.stats_in_end) {
     // Accumulate kf group error
     kf_group_err += calculate_modified_err(cpi, this_frame);
@@ -2582,8 +2557,6 @@ static void find_next_key_frame(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
     }
 
     cpi->twopass.kf_group_bits -= cpi->twopass.kf_bits;
-    // Add in the minimum frame allowance
-    cpi->twopass.kf_bits += cpi->rc.min_frame_bandwidth;
 
     // Peer frame bit target for this frame
     cpi->rc.per_frame_bandwidth = cpi->twopass.kf_bits;
