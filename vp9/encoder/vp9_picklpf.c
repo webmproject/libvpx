@@ -117,7 +117,7 @@ void vp9_pick_filter_level(YV12_BUFFER_CONFIG *sd, VP9_COMP *cpi, int partial) {
   vpx_yv12_copy_y(cm->frame_to_show, &cpi->last_frame_uf);
 
   lf->sharpness_level = cm->frame_type == KEY_FRAME ? 0
-                                                    : cpi->oxcf.Sharpness;
+                                                    : cpi->oxcf.sharpness;
 
   // Start the search at the previous frame filter level unless it is now out of
   // range.
