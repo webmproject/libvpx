@@ -587,7 +587,7 @@ static void set_rt_speed_feature(VP9_COMMON *cm,
   sf->static_segmentation = 0;
   sf->adaptive_rd_thresh = 1;
   sf->recode_loop = (speed < 1);
-  if (speed >= 1) {
+  if (speed == 1) {
     sf->use_square_partition_only = !frame_is_intra_only(cm);
     sf->less_rectangular_check = 1;
     sf->tx_size_search_method =
@@ -595,8 +595,7 @@ static void set_rt_speed_feature(VP9_COMMON *cm,
 
     if (MIN(cm->width, cm->height) >= 720)
       sf->disable_split_mask = cm->show_frame ?
-      DISABLE_ALL_SPLIT :
-                                                DISABLE_ALL_INTER_SPLIT;
+        DISABLE_ALL_SPLIT : DISABLE_ALL_INTER_SPLIT;
     else
       sf->disable_split_mask = DISABLE_COMPOUND_SPLIT;
 
@@ -618,8 +617,7 @@ static void set_rt_speed_feature(VP9_COMMON *cm,
 
     if (MIN(cm->width, cm->height) >= 720)
       sf->disable_split_mask = cm->show_frame ?
-      DISABLE_ALL_SPLIT :
-                                                DISABLE_ALL_INTER_SPLIT;
+        DISABLE_ALL_SPLIT : DISABLE_ALL_INTER_SPLIT;
     else
       sf->disable_split_mask = LAST_AND_INTRA_SPLIT_ONLY;
 
@@ -662,96 +660,25 @@ static void set_rt_speed_feature(VP9_COMMON *cm,
         | FLAG_SKIP_INTRA_BESTINTER | FLAG_SKIP_COMP_BESTINTRA
         | FLAG_SKIP_INTRA_LOWVAR;
 
-    sf->use_rd_breakout = 1;
-    sf->adaptive_motion_search = 1;
-    sf->adaptive_pred_filter_type = 2;
-    sf->auto_mv_step_size = 1;
-
     sf->disable_filter_search_var_thresh = 100;
-    sf->comp_inter_joint_search_thresh = BLOCK_SIZES;
-
-    sf->auto_min_max_partition_size = 1;
     sf->use_lastframe_partitioning = LAST_FRAME_PARTITION_ALL;
-    sf->adjust_partitioning_from_last_frame = 1;
-    sf->last_partitioning_redo_frequency = 3;
-
     sf->use_uv_intra_rd_estimate = 1;
     sf->skip_encode_sb = 1;
-    sf->use_lp32x32fdct = 1;
     sf->subpel_iters_per_step = 1;
     sf->use_fast_coef_updates = 2;
-
     sf->adaptive_rd_thresh = 4;
     sf->mode_skip_start = 6;
   }
   if (speed >= 4) {
-    sf->use_square_partition_only = 1;
-    sf->tx_size_search_method = USE_LARGESTALL;
-    sf->disable_split_mask = DISABLE_ALL_SPLIT;
-
-    sf->mode_search_skip_flags = FLAG_SKIP_INTRA_DIRMISMATCH
-        | FLAG_SKIP_INTRA_BESTINTER | FLAG_SKIP_COMP_BESTINTRA
-        | FLAG_SKIP_COMP_REFMISMATCH | FLAG_SKIP_INTRA_LOWVAR
-        | FLAG_EARLY_TERMINATE;
-
-    sf->use_rd_breakout = 1;
-    sf->adaptive_motion_search = 1;
-    sf->adaptive_pred_filter_type = 2;
-    sf->auto_mv_step_size = 1;
-
-    sf->disable_filter_search_var_thresh = 200;
-    sf->comp_inter_joint_search_thresh = BLOCK_SIZES;
-
-    sf->auto_min_max_partition_size = 1;
-    sf->use_lastframe_partitioning = LAST_FRAME_PARTITION_ALL;
-    sf->adjust_partitioning_from_last_frame = 1;
-    sf->last_partitioning_redo_frequency = 3;
-
-    sf->use_uv_intra_rd_estimate = 1;
-    sf->skip_encode_sb = 1;
-    sf->use_lp32x32fdct = 1;
-    sf->subpel_iters_per_step = 1;
-    sf->use_fast_coef_updates = 2;
-
-    sf->adaptive_rd_thresh = 4;
-    sf->mode_skip_start = 6;
-
-    /* sf->intra_y_mode_mask = INTRA_DC_ONLY;
-     sf->intra_uv_mode_mask = INTRA_DC_ONLY;
-     sf->search_method = BIGDIA;
-     sf->disable_split_var_thresh = 64;
-     sf->disable_filter_search_var_thresh = 64; */
+    sf->optimize_coefficients = 0;
   }
   if (speed >= 5) {
     int i;
-    sf->comp_inter_joint_search_thresh = BLOCK_SIZES;
-    sf->use_one_partition_size_always = 1;
-    sf->always_this_block_size = BLOCK_16X16;
-    sf->tx_size_search_method =
-        frame_is_intra_only(cm) ? USE_FULL_RD : USE_LARGESTALL;
-    sf->mode_search_skip_flags = FLAG_SKIP_INTRA_DIRMISMATCH
-        | FLAG_SKIP_INTRA_BESTINTER | FLAG_SKIP_COMP_BESTINTRA
-        | FLAG_SKIP_COMP_REFMISMATCH | FLAG_SKIP_INTRA_LOWVAR
-        | FLAG_EARLY_TERMINATE;
-    sf->use_rd_breakout = 1;
-    sf->use_lp32x32fdct = 1;
-    sf->optimize_coefficients = 0;
-    sf->auto_mv_step_size = 1;
-    // sf->reduce_first_step_size = 1;
-    // sf->reference_masking = 1;
-
     sf->disable_split_mask = DISABLE_ALL_SPLIT;
-    sf->search_method = HEX;
-    sf->subpel_iters_per_step = 1;
-    sf->disable_split_var_thresh = 64;
-    sf->disable_filter_search_var_thresh = 500;
     for (i = 0; i < TX_SIZES; i++) {
-      sf->intra_y_mode_mask[i] = INTRA_DC_ONLY;
+      sf->intra_y_mode_mask[i] = INTRA_DC_H_V;
       sf->intra_uv_mode_mask[i] = INTRA_DC_ONLY;
     }
-    sf->use_fast_coef_updates = 2;
-    sf->adaptive_rd_thresh = 4;
-    sf->mode_skip_start = 6;
   }
 }
 
@@ -812,26 +739,11 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
   sf->using_small_partition_info = 0;
   sf->mode_skip_start = MAX_MODES;  // Mode index at which mode skip mask set
 
-#if CONFIG_MULTIPLE_ARF
-  // Switch segmentation off.
-  sf->static_segmentation = 0;
-#else
-  sf->static_segmentation = 0;
-#endif
-
   switch (mode) {
     case 0:  // This is the best quality mode.
       cpi->diamond_search_sad = vp9_full_range_search;
       break;
-
     case 1:
-
-#if CONFIG_MULTIPLE_ARF
-      // Switch segmentation off.
-      sf->static_segmentation = 0;
-#else
-      sf->static_segmentation = 0;
-#endif
       sf->adaptive_rd_thresh = 1;
       sf->recode_loop = (speed < 1);
 
