@@ -33,6 +33,23 @@
       "revId": "c1c2923806430c2118e2bc18d2a2f62c7c2cc0d0",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//93U\u003d",
+        "filename": "vpx_scale/generic/yv12config.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 200,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2014-01-09T23:39:30Z",
+      "side": 1,
+      "message": "Move this up to after \"ybf-\u003ebuffer_alloc \u003d vpx_memalign(32, frame_size);\"",
+      "revId": "c1c2923806430c2118e2bc18d2a2f62c7c2cc0d0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
