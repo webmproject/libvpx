@@ -1978,8 +1978,7 @@ void vp9_remove_compressor(VP9_PTR *ptr) {
                   / time_encoded;
 
       if (cpi->b_calculate_psnr) {
-        YV12_BUFFER_CONFIG *lst_yv12 =
-            &cpi->common.yv12_fb[cpi->common.ref_frame_map[cpi->lst_fb_idx]];
+        YV12_BUFFER_CONFIG *lst_yv12 = get_ref_frame_buffer(cpi, LAST_FRAME);
         double samples = 3.0 / 2 * cpi->count *
                          lst_yv12->y_width * lst_yv12->y_height;
         double total_psnr = vp9_mse2psnr(samples, 255.0, cpi->total_sq_error);
@@ -2268,19 +2267,18 @@ int vp9_update_reference(VP9_PTR ptr, int ref_frame_flags) {
 int vp9_copy_reference_enc(VP9_PTR ptr, VP9_REFFRAME ref_frame_flag,
                            YV12_BUFFER_CONFIG *sd) {
   VP9_COMP *cpi = (VP9_COMP *)(ptr);
-  VP9_COMMON *cm = &cpi->common;
-  int ref_fb_idx;
+  YV12_BUFFER_CONFIG *cfg;
 
   if (ref_frame_flag == VP9_LAST_FLAG)
-    ref_fb_idx = cm->ref_frame_map[cpi->lst_fb_idx];
+    cfg = get_ref_frame_buffer(cpi, LAST_FRAME);
   else if (ref_frame_flag == VP9_GOLD_FLAG)
-    ref_fb_idx = cm->ref_frame_map[cpi->gld_fb_idx];
+    cfg = get_ref_frame_buffer(cpi, GOLDEN_FRAME);
   else if (ref_frame_flag == VP9_ALT_FLAG)
-    ref_fb_idx = cm->ref_frame_map[cpi->alt_fb_idx];
+    cfg = get_ref_frame_buffer(cpi, ALTREF_FRAME);
   else
     return -1;
 
-  vp8_yv12_copy_frame(&cm->yv12_fb[ref_fb_idx], sd);
+  vp8_yv12_copy_frame(cfg, sd);
 
   return 0;
 }
@@ -2634,26 +2632,24 @@ static void loopfilter_frame(VP9_COMP *cpi, VP9_COMMON *cm) {
 
 static void scale_references(VP9_COMP *cpi) {
   VP9_COMMON *cm = &cpi->common;
-  int i;
-  int refs[REFS_PER_FRAME] = {cpi->lst_fb_idx, cpi->gld_fb_idx,
-                              cpi->alt_fb_idx};
+  MV_REFERENCE_FRAME ref_frame;
 
-  for (i = 0; i < 3; i++) {
-    YV12_BUFFER_CONFIG *ref = &cm->yv12_fb[cm->ref_frame_map[refs[i]]];
+  for (ref_frame = LAST_FRAME; ref_frame <= ALTREF_FRAME; ++ref_frame) {
+    const int idx = cm->ref_frame_map[get_ref_frame_idx(cpi, ref_frame)];
+    YV12_BUFFER_CONFIG *ref = &cm->yv12_fb[idx];
 
     if (ref->y_crop_width != cm->width ||
         ref->y_crop_height != cm->height) {
-      int new_fb = get_free_fb(cm);
-
+      const int new_fb = get_free_fb(cm);
       vp9_realloc_frame_buffer(&cm->yv12_fb[new_fb],
                                cm->width, cm->height,
                                cm->subsampling_x, cm->subsampling_y,
                                VP9BORDERINPIXELS, NULL, NULL, NULL);
       scale_and_extend_frame(ref, &cm->yv12_fb[new_fb]);
-      cpi->scaled_ref_idx[i] = new_fb;
+      cpi->scaled_ref_idx[ref_frame - 1] = new_fb;
     } else {
-      cpi->scaled_ref_idx[i] = cm->ref_frame_map[refs[i]];
-      cm->fb_idx_ref_cnt[cm->ref_frame_map[refs[i]]]++;
+      cpi->scaled_ref_idx[ref_frame - 1] = idx;
+      cm->fb_idx_ref_cnt[idx]++;
     }
   }
 }
@@ -3397,9 +3393,8 @@ int vp9_get_compressed_data(VP9_PTR ptr, unsigned int *frame_flags,
   VP9_COMP *cpi = (VP9_COMP *) ptr;
   VP9_COMMON *cm = &cpi->common;
   struct vpx_usec_timer  cmptimer;
-  YV12_BUFFER_CONFIG    *force_src_buffer = NULL;
-  const int refs[] = { cpi->lst_fb_idx, cpi->gld_fb_idx, cpi->alt_fb_idx };
-  int i;
+  YV12_BUFFER_CONFIG *force_src_buffer = NULL;
+  MV_REFERENCE_FRAME ref_frame;
   // FILE *fp_out = fopen("enc_frame_type.txt", "a");
 
   if (!cpi)
@@ -3624,11 +3619,11 @@ int vp9_get_compressed_data(VP9_PTR ptr, unsigned int *frame_flags,
                            VP9BORDERINPIXELS, NULL, NULL, NULL);
 
 
-  for (i = 0; i < REFS_PER_FRAME; ++i) {
-    const int idx = cm->ref_frame_map[refs[i]];
+  for (ref_frame = LAST_FRAME; ref_frame <= ALTREF_FRAME; ++ref_frame) {
+    const int idx = cm->ref_frame_map[get_ref_frame_idx(cpi, ref_frame)];
     YV12_BUFFER_CONFIG *const buf = &cm->yv12_fb[idx];
 
-    RefBuffer *const ref_buf = &cm->frame_refs[i];
+    RefBuffer *const ref_buf = &cm->frame_refs[ref_frame - 1];
     ref_buf->buf = buf;
     ref_buf->idx = idx;
     vp9_setup_scale_factors_for_frame(&ref_buf->sf,
