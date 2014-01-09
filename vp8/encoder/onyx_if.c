@@ -1623,6 +1623,12 @@ void vp8_change_config(VP8_COMP *cpi, VP8_CONFIG *oxcf)
         cpi->oxcf.maximum_buffer_size =
             rescale((int)cpi->oxcf.maximum_buffer_size,
                     cpi->oxcf.target_bandwidth, 1000);
+    // Under a configuration change, where maximum_buffer_size may change,
+    // keep buffer level clipped to the maximum allowed buffer size.
+    if (cpi->bits_off_target > cpi->oxcf.maximum_buffer_size) {
+      cpi->bits_off_target = cpi->oxcf.maximum_buffer_size;
+      cpi->buffer_level = cpi->bits_off_target;
+    }
 
     /* Set up frame rate and related parameters rate control values. */
     vp8_new_framerate(cpi, cpi->framerate);
