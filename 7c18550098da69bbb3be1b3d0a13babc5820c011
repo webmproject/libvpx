@@ -16,6 +16,24 @@
       "revId": "7c18550098da69bbb3be1b3d0a13babc5820c011",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//948\u003d",
+        "filename": "vpx_scale/generic/yv12config.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 196,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2014-01-09T22:30:17Z",
+      "side": 1,
+      "message": "This only need to be called after an allocate",
+      "parentUuid": "AAAAdn//95E\u003d",
+      "revId": "7c18550098da69bbb3be1b3d0a13babc5820c011",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
