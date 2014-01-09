@@ -1566,10 +1566,9 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   // the GF frame error if we code a normal gf
   gf_first_frame_err = mod_frame_err;
 
-  // Special treatment if the current frame is a key frame (which is also
-  // a gf). If it is then its error score (and hence bit allocation) need
-  // to be subtracted out from the calculation for the GF group
-  if (cpi->common.frame_type == KEY_FRAME)
+  // If this is a key frame or the overlay from a previous arf then
+  // The error score / cost of this frame has already been accounted for.
+  if (cpi->common.frame_type == KEY_FRAME || cpi->rc.source_alt_ref_active)
     gf_group_err -= gf_first_frame_err;
 
   // Motion breakout threshold for loop below depends on image size.
@@ -1583,14 +1582,14 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   // interval to spread the cost of the GF.
   //
   active_max_gf_interval =
-    11 + ((int)vp9_convert_qindex_to_q(cpi->rc.last_q[INTER_FRAME]) >> 5);
+    12 + ((int)vp9_convert_qindex_to_q(cpi->rc.last_q[INTER_FRAME]) >> 5);
 
   if (active_max_gf_interval > cpi->rc.max_gf_interval)
     active_max_gf_interval = cpi->rc.max_gf_interval;
 
   i = 0;
   while ((i < cpi->twopass.static_scene_max_gf_interval) &&
-         (i < (cpi->rc.frames_to_key - 1))) {
+         (i < cpi->rc.frames_to_key)) {
     i++;    // Increment the loop counter
 
     // Accumulate error score of frames in this gf group
@@ -1663,7 +1662,7 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
 
   // Don't allow a gf too near the next kf
   if ((cpi->rc.frames_to_key - i) < MIN_GF_INTERVAL) {
-    while (i < (cpi->rc.frames_to_key - 1)) {
+    while (i < cpi->rc.frames_to_key) {
       i++;
 
       if (EOF == input_stats(&cpi->twopass, this_frame))
@@ -1675,9 +1674,6 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
       }
     }
   }
-
-  // Set the interval until the next gf or arf.
-  cpi->rc.baseline_gf_interval = i;
 
 #if CONFIG_MULTIPLE_ARF
   if (cpi->multi_arf_enabled) {
@@ -1691,6 +1687,12 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   }
 #endif
 
+  // Set the interval until the next gf.
+  if (cpi->common.frame_type == KEY_FRAME || cpi->rc.source_alt_ref_active)
+    cpi->rc.baseline_gf_interval = i - 1;
+  else
+    cpi->rc.baseline_gf_interval = i;
+
   // Should we use the alternate reference frame
   if (allow_alt_ref &&
       (i < cpi->oxcf.lag_in_frames) &&
@@ -1700,6 +1702,7 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
       ((mv_in_out_accumulator / (double)i > -0.2) ||
        (mv_in_out_accumulator > -2.0)) &&
       (boost_score > 100)) {
+
     // Alternative boost calculation for alt ref
     cpi->rc.gfu_boost = calc_arf_boost(cpi, 0, (i - 1), (i - 1), &f_boost,
                                     &b_boost);
@@ -1883,6 +1886,8 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
 
     // If this is an arf update we want to remove the score for the
     // overlay frame at the end which will usually be very cheap to code.
+    // The overlay frame has already in effect been coded so we want to spread
+    // the remaining bits amoung the other frames/
     // For normal GFs remove the score for the GF itself unless this is
     // also a key frame in which case it has already been accounted for.
     if (cpi->rc.source_alt_ref_pending) {
@@ -2118,21 +2123,6 @@ void vp9_get_second_pass_params(VP9_COMP *cpi) {
         cpi->enable_encode_breakout = 2;
     }
 
-    // If we are going to code an altref frame at the end of the group
-    // and the current frame is not a key frame....
-    // If the previous group used an arf this frame has already benefited
-    // from that arf boost and it should not be given extra bits
-    // If the previous group was NOT coded using arf we may want to apply
-    // some boost to this GF as well
-    if (cpi->rc.source_alt_ref_pending &&
-        cpi->common.frame_type != KEY_FRAME) {
-      // Assign a standard frames worth of bits from those allocated
-      // to the GF group
-      int bak = cpi->rc.per_frame_bandwidth;
-      this_frame_copy = this_frame;
-      assign_std_frame_bits(cpi, &this_frame_copy);
-      cpi->rc.per_frame_bandwidth = bak;
-    }
     cpi->rc.frames_till_gf_update_due = cpi->rc.baseline_gf_interval;
     cpi->refresh_golden_frame = 1;
   } else {
