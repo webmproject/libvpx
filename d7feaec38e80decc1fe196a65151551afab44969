@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//9l8\u003d",
+        "filename": "vp9/encoder/vp9_onyx_if.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1983,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2014-01-10T19:53:10Z",
+      "side": 1,
+      "message": "It looks like you compute and collect number of total samples on each frame, maybe we shall sum them together to get a sequence total? so we are sure the number of samples used Is consistent with the number of pixel error collected.",
+      "revId": "d7feaec38e80decc1fe196a65151551afab44969",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//9mg\u003d",
+        "filename": "vp9/encoder/vp9_onyx_if.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 2197,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2014-01-10T19:53:10Z",
+      "side": 1,
+      "message": "Initialization like this will fail compiling on visual studio 2008.",
+      "revId": "d7feaec38e80decc1fe196a65151551afab44969",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
