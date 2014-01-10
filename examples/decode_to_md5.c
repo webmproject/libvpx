@@ -66,81 +66,83 @@ static void die_codec(vpx_codec_ctx_t *ctx, const char *s) {
   exit(EXIT_FAILURE);
 }
 
+static void get_image_md5(const vpx_image_t *img, unsigned char md5_sum[16]) {
+  int plane, y;
+  MD5Context md5;
+
+  MD5Init(&md5);
+
+  for (plane = 0; plane < 3; ++plane) {
+    const unsigned char *buf = img->planes[plane];
+    const int stride = img->stride[plane];
+    const int w = plane ? (img->d_w + 1) >> 1 : img->d_w;
+    const int h = plane ? (img->d_h + 1) >> 1 : img->d_h;
+
+    for (y = 0; y < h; ++y) {
+      MD5Update(&md5, buf, w);
+      buf += stride;
+    }
+  }
+
+  MD5Final(md5_sum, &md5);
+}
 
 int main(int argc, char **argv) {
-  FILE            *infile, *outfile;
-  vpx_codec_ctx_t  codec;
-  int              flags = 0, frame_cnt = 0;
-  unsigned char    file_hdr[IVF_FILE_HDR_SZ];
-  unsigned char    frame_hdr[IVF_FRAME_HDR_SZ];
-  unsigned char    frame[256*1024];
-  vpx_codec_err_t  res;
+  FILE *infile, *outfile;
+  vpx_codec_ctx_t codec;
+  int flags = 0, frame_cnt = 0;
+  unsigned char file_hdr[IVF_FILE_HDR_SZ];
+  unsigned char frame_hdr[IVF_FRAME_HDR_SZ];
+  unsigned char frame[256 * 1024];
 
-  (void)res;
-  /* Open files */
-  if(argc!=3)
+  if (argc != 3)
     die("Usage: %s <infile> <outfile>\n", argv[0]);
-  if(!(infile = fopen(argv[1], "rb")))
+
+  if (!(infile = fopen(argv[1], "rb")))
     die("Failed to open %s for reading", argv[1]);
-  if(!(outfile = fopen(argv[2], "wb")))
+
+  if (!(outfile = fopen(argv[2], "wb")))
     die("Failed to open %s for writing", argv[2]);
 
-  /* Read file header */
-  if(!(fread(file_hdr, 1, IVF_FILE_HDR_SZ, infile) == IVF_FILE_HDR_SZ
-       && file_hdr[0]=='D' && file_hdr[1]=='K' && file_hdr[2]=='I'
-       && file_hdr[3]=='F'))
+  if (!(fread(file_hdr, 1, IVF_FILE_HDR_SZ, infile) == IVF_FILE_HDR_SZ &&
+     file_hdr[0] == 'D' && file_hdr[1] == 'K' &&
+     file_hdr[2] == 'I' && file_hdr[3] == 'F'))
     die("%s is not an IVF file.", argv[1]);
 
   printf("Using %s\n",vpx_codec_iface_name(interface));
-  /* Initialize codec */
-  if(vpx_codec_dec_init(&codec, interface, NULL, flags))
+
+  if (vpx_codec_dec_init(&codec, interface, NULL, flags))
     die_codec(&codec, "Failed to initialize decoder");
 
-  /* Read each frame */
-  while(fread(frame_hdr, 1, IVF_FRAME_HDR_SZ, infile) == IVF_FRAME_HDR_SZ) {
-    int               frame_sz = mem_get_le32(frame_hdr);
-    vpx_codec_iter_t  iter = NULL;
-    vpx_image_t      *img;
+  while (fread(frame_hdr, 1, IVF_FRAME_HDR_SZ, infile) == IVF_FRAME_HDR_SZ) {
+    const int frame_size = mem_get_le32(frame_hdr);
+    vpx_codec_iter_t iter = NULL;
+    vpx_image_t *img;
 
     frame_cnt++;
-    if(frame_sz > sizeof(frame))
-      die("Frame %d data too big for example code buffer", frame_sz);
-    if(fread(frame, 1, frame_sz, infile) != frame_sz)
+    if (frame_size > sizeof(frame))
+      die("Frame %d data too big for example code buffer", frame_size);
+
+    if (fread(frame, 1, frame_size, infile) != frame_size)
       die("Frame %d failed to read complete frame", frame_cnt);
 
-    /* Decode the frame */
-    if(vpx_codec_decode(&codec, frame, frame_sz, NULL, 0))
+    if (vpx_codec_decode(&codec, frame, frame_size, NULL, 0))
       die_codec(&codec, "Failed to decode frame");
 
-    /* Write decoded data to disk */
-    while((img = vpx_codec_get_frame(&codec, &iter))) {
-      unsigned int plane, y;
+    while ((img = vpx_codec_get_frame(&codec, &iter)) != NULL) {
+      int i;
+      unsigned char md5_sum[16];
 
-      unsigned char  md5_sum[16];
-      MD5Context     md5;
-      int            i;
-
-      MD5Init(&md5);
-
-      for(plane=0; plane < 3; plane++) {
-        unsigned char *buf =img->planes[plane];
-
-        for (y=0; y < (plane ? (img->d_h + 1) >> 1 : img->d_h); y++) {
-          MD5Update(&md5, buf, (plane ? (img->d_w + 1) >> 1 : img->d_w));
-          buf += img->stride[plane];
-        }
-      }
-
-      MD5Final(md5_sum, &md5);
-      for (i = 0; i < 16; i++)
-        fprintf(outfile, "%02x",md5_sum[i]);
+      get_image_md5(img, md5_sum);
+      for (i = 0; i < 16; ++i)
+        fprintf(outfile, "%02x", md5_sum[i]);
       fprintf(outfile, "  img-%dx%d-%04d.i420\n", img->d_w, img->d_h,
               frame_cnt);
     }
   }
 
-  printf("Processed %d frames.\n",frame_cnt);
-  if(vpx_codec_destroy(&codec))
+  printf("Processed %d frames.\n", frame_cnt);
+  if (vpx_codec_destroy(&codec))
     die_codec(&codec, "Failed to destroy codec");
 
   fclose(outfile);
