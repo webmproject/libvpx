@@ -22,6 +22,7 @@ void vp9_end_second_pass(VP9_COMP *cpi);
 
 void vp9_get_first_pass_params(VP9_COMP *cpi);
 void vp9_get_one_pass_params(VP9_COMP *cpi);
+void vp9_get_one_pass_cbr_params(VP9_COMP *cpi);
 void vp9_get_svc_params(VP9_COMP *cpi);
 
 #endif  // VP9_ENCODER_VP9_FIRSTPASS_H_
