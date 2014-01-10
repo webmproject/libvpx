@@ -16,7 +16,6 @@
 extern const int b_width_log2_lookup[BLOCK_SIZES];
 extern const int b_height_log2_lookup[BLOCK_SIZES];
 extern const int mi_width_log2_lookup[BLOCK_SIZES];
-extern const int mi_height_log2_lookup[BLOCK_SIZES];
 extern const int num_8x8_blocks_wide_lookup[BLOCK_SIZES];
 extern const int num_8x8_blocks_high_lookup[BLOCK_SIZES];
 extern const int num_4x4_blocks_high_lookup[BLOCK_SIZES];
