@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//9rA\u003d",
+        "filename": "vp9/encoder/vp9_firstpass.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 358,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2014-01-10T18:04:49Z",
+      "side": 1,
+      "message": "Should the type conversion happen in side the ( * / ), to make sure the multiply/divide done in double and not go out of integer range?\n\nalternatively, since both av_per_frame_bandwidth and two_pass_vbrmax are in int, it might be faster to make the intermediate variable in int64 instead.",
+      "revId": "21da4fc035ef8ff7d5c9c07abaa55b7a9e8f78be",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
