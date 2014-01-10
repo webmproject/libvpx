@@ -232,57 +232,185 @@ typedef enum {
 } LAST_FRAME_PARTITION_METHOD;
 
 typedef struct {
+  // This flag refers to whether or not to perform rd optimization.
   int RD;
+
+  // Motion search method (Diamond, NSTEP, Hex, Big Diamond, Square, etc).
   SEARCH_METHODS search_method;
-  int auto_filter;
+
+  // Recode_loop can be:
+  // 0 means we only encode a frame once
+  // 1 means we can re-encode based on bitrate constraints on any frame
+  // 2 means we can only recode gold, alt, and key frames.
   int recode_loop;
+
+  // Subpel_search_method can only be subpel_tree which does a subpixel
+  // logarithmic search that keeps stepping at 1/2 pixel units until
+  // you stop getting a gain, and then goes on to 1/4 and repeats
+  // the same process. Along the way it skips many diagonals.
   SUBPEL_SEARCH_METHODS subpel_search_method;
+
+  // Maximum number of steps in logarithmic subpel search before giving up.
   int subpel_iters_per_step;
+
+  // Thresh_mult is used to set a threshold for the rd score. A higher value
+  // means that we will accept the best mode so far more often. This number
+  // is used in combination with the current block size, and thresh_freq_fact
+  // to pick a threshold.
   int thresh_mult[MAX_MODES];
   int thresh_mult_sub8x8[MAX_REFS];
+
+  // This parameter controls the number of steps we'll do in a diamond
+  // search.
   int max_step_search_steps;
+
+  // This parameter controls which step in the n-step process we start at.
+  // It's changed adaptively based on circumstances.
   int reduce_first_step_size;
+
+  // If this is set to 1, we limit the motion search range to 2 times the
+  // largest motion vector found in the last frame.
   int auto_mv_step_size;
+
+  // Trellis (dynamic programming) optimization of quantized values (+1, 0).
   int optimize_coefficients;
+
+  // Always set to 0. If on it enables 0 cost background transmission
+  // (except for the initial transmission of the segmentation). The feature is
+  // disabled because the addition of very large block sizes make the
+  // backgrounds very to cheap to encode, and the segmentation we have
+  // adds overhead.
   int static_segmentation;
+
+  // If 1 we iterate finding a best reference for 2 ref frames together - via
+  // a log search that iterates 4 times (check around mv for last for best
+  // error of combined predictor then check around mv for alt). If 0 we
+  // we just use the best motion vector found for each frame by itself.
   int comp_inter_joint_search_thresh;
+
+  // This variable is used to cap the maximum number of times we skip testing a
+  // mode to be evaluated. A high value means we will be faster.
   int adaptive_rd_thresh;
+
+  // Enables skipping the reconstruction step (idct, recon) in the
+  // intermediate steps assuming the last frame didn't have too many intra
+  // blocks and the q is less than a threshold.
   int skip_encode_sb;
   int skip_encode_frame;
+
+  // This variable allows us to reuse the last frames partition choices
+  // (64x64 v 32x32 etc) for this frame. It can be set to only use the last
+  // frame as a starting point in low motion scenes or always use it. If set
+  // we use last partitioning_redo frequency to determine how often to redo
+  // the partitioning from scratch. Adjust_partitioning_from_last_frame
+  // enables us to adjust up or down one partitioning from the last frames
+  // partitioning.
   LAST_FRAME_PARTITION_METHOD use_lastframe_partitioning;
+
+  // Determine which method we use to determine transform size. We can choose
+  // between options like full rd, largest for prediction size, largest
+  // for intra and model coefs for the rest.
   TX_SIZE_SEARCH_METHOD tx_size_search_method;
+
+  // Low precision 32x32 fdct keeps everything in 16 bits and thus is less
+  // precise but significantly faster than the non lp version.
   int use_lp32x32fdct;
+
+  // TODO(JBB): remove this as its no longer used.
+
+  // If set partition size will always be always_this_block_size.
   int use_one_partition_size_always;
+
+  // Skip rectangular partition test when partition type none gives better
+  // rd than partition type split.
   int less_rectangular_check;
+
+  // Disable testing non square partitions. (eg 16x32)
   int use_square_partition_only;
+
+  // After looking at the first set of modes (set by index here), skip
+  // checking modes for reference frames that don't match the reference frame
+  // of the best so far.
   int mode_skip_start;
+
+  // TODO(JBB): Remove this.
   int reference_masking;
+
+  // Used in conjunction with use_one_partition_size_always.
   BLOCK_SIZE always_this_block_size;
+
+  // Sets min and max partition sizes for this 64x64 region based on the
+  // same superblock in last encoded frame, and the left and above neighbor
+  // in this block.
   int auto_min_max_partition_size;
+
+  // Min and max partition size we enable (block_size) as per auto
+  // min max, but also used by adjust partitioning, and pick_partitioning.
   BLOCK_SIZE min_partition_size;
   BLOCK_SIZE max_partition_size;
+
+  // Whether or not we allow partitions one smaller or one greater than the last
+  // frame's partitioning. Only used if use_lastframe_partitioning is set.
   int adjust_partitioning_from_last_frame;
+
+  // How frequently we re do the partitioning from scratch. Only used if
+  // use_lastframe_partitioning is set.
   int last_partitioning_redo_frequency;
+
+  // Disables sub 8x8 blocksizes in different scenarios: Choices are to disable
+  // it always, to allow it for only Last frame and Intra, disable it for all
+  // inter modes or to enable it always.
   int disable_split_mask;
+
+  // TODO(jbb): Remove this and everything that uses it. It's only valid if
+  // we were doing small to large partition checks. We currently do the
+  // reverse.
   int using_small_partition_info;
+
   // TODO(jingning): combine the related motion search speed features
+  // This allows us to use motion search at other sizes as a starting
+  // point for this motion search and limits the search range around it.
   int adaptive_motion_search;
+
+  // Allows sub 8x8 modes to use the prediction filter that was determined
+  // best for 8x8 mode. If set to 0 we always re check all the filters for
+  // sizes less than 8x8, 1 means we check all filter modes if no 8x8 filter
+  // was selected, and 2 means we use 8 tap if no 8x8 filter mode was selected.
   int adaptive_pred_filter_type;
 
   // Implements various heuristics to skip searching modes
   // The heuristics selected are based on  flags
   // defined in the MODE_SEARCH_SKIP_HEURISTICS enum
   unsigned int mode_search_skip_flags;
+
   // A source variance threshold below which the split mode is disabled
   unsigned int disable_split_var_thresh;
+
   // A source variance threshold below which filter search is disabled
   // Choose a very large value (UINT_MAX) to use 8-tap always
   unsigned int disable_filter_search_var_thresh;
+
+  // These bit masks allow you to enable or disable intra modes for each
+  // transform size separately.
   int intra_y_mode_mask[TX_SIZES];
   int intra_uv_mode_mask[TX_SIZES];
+
+  // This variable enables an early break out of mode testing if the model for
+  // rd built from the prediction signal indicates a value that's much
+  // higher than the best rd we've seen so far.
   int use_rd_breakout;
+
+  // This enables us to use an estimate for intra rd based on dc mode rather
+  // than choosing an actual uv mode in the stage of encoding before the actual
+  // final encode.
   int use_uv_intra_rd_estimate;
+
+  // This picks a loop filter strength by trying a small portion of the image
+  // with different values.
   int use_fast_lpf_pick;
+
+  // This feature limits the number of coefficients updates we actually do
+  // by only looking at counts from 1/2 the bands.
   int use_fast_coef_updates;  // 0: 2-loop, 1: 1-loop, 2: 1-loop reduced
 } SPEED_FEATURES;
 
@@ -601,7 +729,7 @@ typedef struct VP9_COMP {
   int *mb_norm_activity_map;
   int output_partition;
 
-  /* force next frame to intra when kf_auto says so */
+  // Force next frame to intra when kf_auto says so.
   int force_next_frame_intra;
 
   int droppable;
@@ -643,7 +771,7 @@ typedef struct VP9_COMP {
   int64_t mode_test_hits[BLOCK_SIZES];
 #endif
 
-  /* Y,U,V,(A) */
+  // Y,U,V,(A)
   ENTROPY_CONTEXT *above_context[MAX_MB_PLANE];
   ENTROPY_CONTEXT left_context[MAX_MB_PLANE][16];
 

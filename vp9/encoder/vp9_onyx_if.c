@@ -699,7 +699,6 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
   // best quality defaults
   sf->RD = 1;
   sf->search_method = NSTEP;
-  sf->auto_filter = 1;
   sf->recode_loop = 1;
   sf->subpel_search_method = SUBPEL_TREE;
   sf->subpel_iters_per_step = 2;
