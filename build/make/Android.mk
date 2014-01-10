@@ -135,10 +135,14 @@ CODEC_SRCS_UNIQUE = $(sort $(CODEC_SRCS))
 
 # Pull out C files.  vpx_config.c is in the immediate directory and
 # so it does not need libvpx/ prefixed like the rest of the source files.
+# The neon files with intrinsics need to have .neon appended so the proper
+# flags are applied.
 CODEC_SRCS_C = $(filter %.c, $(CODEC_SRCS_UNIQUE))
-LOCAL_CODEC_SRCS_C = $(filter-out vpx_config.c, $(CODEC_SRCS_C))
+LOCAL_NEON_SRCS_C = $(filter %_neon.c, $(CODEC_SRCS_C))
+LOCAL_CODEC_SRCS_C = $(filter-out vpx_config.c %_neon.c, $(CODEC_SRCS_C))
 
 LOCAL_SRC_FILES += $(foreach file, $(LOCAL_CODEC_SRCS_C), libvpx/$(file))
+LOCAL_SRC_FILES += $(foreach file, $(LOCAL_NEON_SRCS_C), libvpx/$(file).neon)
 
 # Pull out assembly files, splitting NEON from the rest.  This is
 # done to specify that the NEON assembly files use NEON assembler flags.
