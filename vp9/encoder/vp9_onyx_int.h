@@ -400,6 +400,15 @@ typedef struct VP9_COMP {
   int refresh_last_frame;
   int refresh_golden_frame;
   int refresh_alt_ref_frame;
+
+  int ext_refresh_frame_flags_pending;
+  int ext_refresh_last_frame;
+  int ext_refresh_golden_frame;
+  int ext_refresh_alt_ref_frame;
+
+  int ext_refresh_frame_context_pending;
+  int ext_refresh_frame_context;
+
   YV12_BUFFER_CONFIG last_frame_uf;
 
   TOKENEXTRA *tok;
