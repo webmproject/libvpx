@@ -25,7 +25,7 @@ typedef vpx_codec_stream_info_t  vp9_stream_info_t;
 
 /* Structures for handling memory allocations */
 typedef enum {
-  VP9_SEG_ALG_PRIV     = 256,
+  VP9_SEG_ALG_PRIV = 256,
   VP9_SEG_MAX
 } mem_seg_id_t;
 #define NELEMENTS(x) ((int)(sizeof(x)/sizeof(x[0])))
@@ -107,12 +107,11 @@ static void vp9_finalize_mmaps(vpx_codec_alg_priv_t *ctx) {
 
 static vpx_codec_err_t vp9_init(vpx_codec_ctx_t *ctx,
                                 vpx_codec_priv_enc_mr_cfg_t *data) {
-  vpx_codec_err_t        res = VPX_CODEC_OK;
+  vpx_codec_err_t res = VPX_CODEC_OK;
 
-  /* This function only allocates space for the vpx_codec_alg_priv_t
-   * structure. More memory may be required at the time the stream
-   * information becomes known.
-   */
+  // This function only allocates space for the vpx_codec_alg_priv_t
+  // structure. More memory may be required at the time the stream
+  // information becomes known.
   if (!ctx->priv) {
     vpx_codec_mmap_t mmap;
 
@@ -122,12 +121,10 @@ static vpx_codec_err_t vp9_init(vpx_codec_ctx_t *ctx,
     mmap.flags = vp9_mem_req_segs[0].flags;
 
     res = vpx_mmap_alloc(&mmap);
-
     if (!res) {
       vp9_init_ctx(ctx, &mmap);
 
       ctx->priv->alg_priv->defer_alloc = 1;
-      /*post processing level initialized to do nothing */
     }
   }
 
@@ -147,8 +144,7 @@ static vpx_codec_err_t vp9_destroy(vpx_codec_alg_priv_t *ctx) {
   return VPX_CODEC_OK;
 }
 
-static vpx_codec_err_t vp9_peek_si(const uint8_t         *data,
-                                   unsigned int           data_sz,
+static vpx_codec_err_t vp9_peek_si(const uint8_t *data, unsigned int data_sz,
                                    vpx_codec_stream_info_t *si) {
   if (data_sz <= 8) return VPX_CODEC_UNSUP_BITSTREAM;
   if (data + data_sz <= data) return VPX_CODEC_INVALID_PARAM;
@@ -213,13 +209,9 @@ static vpx_codec_err_t vp9_peek_si(const uint8_t         *data,
 
 static vpx_codec_err_t vp9_get_si(vpx_codec_alg_priv_t    *ctx,
                                   vpx_codec_stream_info_t *si) {
-  unsigned int sz;
-
-  if (si->sz >= sizeof(vp9_stream_info_t))
-    sz = sizeof(vp9_stream_info_t);
-  else
-    sz = sizeof(vpx_codec_stream_info_t);
-
+  const size_t sz = (si->sz >= sizeof(vp9_stream_info_t))
+                       ? sizeof(vp9_stream_info_t)
+                       : sizeof(vpx_codec_stream_info_t);
   memcpy(si, &ctx->si, sz);
   si->sz = sz;
 
@@ -227,24 +219,17 @@ static vpx_codec_err_t vp9_get_si(vpx_codec_alg_priv_t    *ctx,
 }
 
 
-static vpx_codec_err_t
-update_error_state(vpx_codec_alg_priv_t                 *ctx,
-                   const struct vpx_internal_error_info *error) {
-  vpx_codec_err_t res;
+static vpx_codec_err_t update_error_state(vpx_codec_alg_priv_t *ctx,
+                           const struct vpx_internal_error_info *error) {
+  if (error->error_code)
+    ctx->base.err_detail = error->has_detail ? error->detail : NULL;
 
-  if ((res = error->error_code))
-    ctx->base.err_detail = error->has_detail
-                           ? error->detail
-                           : NULL;
-
-  return res;
+  return error->error_code;
 }
 
-static vpx_codec_err_t decode_one(vpx_codec_alg_priv_t  *ctx,
-                                  const uint8_t        **data,
-                                  unsigned int           data_sz,
-                                  void                  *user_priv,
-                                  long                   deadline) {
+static vpx_codec_err_t decode_one(vpx_codec_alg_priv_t *ctx,
+                                  const uint8_t **data, unsigned int data_sz,
+                                  void *user_priv, int64_t deadline) {
   vpx_codec_err_t res = VPX_CODEC_OK;
 
   ctx->img_avail = 0;
@@ -304,13 +289,11 @@ static vpx_codec_err_t decode_one(vpx_codec_alg_priv_t  *ctx,
       oxcf.inv_tile_order = ctx->invert_tile_order;
       optr = vp9_create_decompressor(&oxcf);
 
-      /* If postprocessing was enabled by the application and a
-       * configuration has not been provided, default it.
-       */
-      if (!ctx->postproc_cfg_set
-          && (ctx->base.init_flags & VPX_CODEC_USE_POSTPROC)) {
-        ctx->postproc_cfg.post_proc_flag =
-          VP8_DEBLOCK | VP8_DEMACROBLOCK;
+      // If postprocessing was enabled by the application and a
+      // configuration has not been provided, default it.
+      if (!ctx->postproc_cfg_set &&
+          (ctx->base.init_flags & VPX_CODEC_USE_POSTPROC)) {
+        ctx->postproc_cfg.post_proc_flag = VP8_DEBLOCK | VP8_DEMACROBLOCK;
         ctx->postproc_cfg.deblocking_level = 4;
         ctx->postproc_cfg.noise_level = 0;
       }
@@ -354,25 +337,20 @@ static vpx_codec_err_t decode_one(vpx_codec_alg_priv_t  *ctx,
     if (ctx->base.init_flags & VPX_CODEC_USE_POSTPROC) {
       flags.post_proc_flag =
 #if CONFIG_POSTPROC_VISUALIZER
-          ((ctx->dbg_color_ref_frame_flag != 0) ?
-              VP9D_DEBUG_CLR_FRM_REF_BLKS : 0)
-          | ((ctx->dbg_color_mb_modes_flag != 0) ?
-              VP9D_DEBUG_CLR_BLK_MODES : 0)
-          | ((ctx->dbg_color_b_modes_flag != 0) ?
-              VP9D_DEBUG_CLR_BLK_MODES : 0)
-          | ((ctx->dbg_display_mv_flag != 0) ?
-              VP9D_DEBUG_DRAW_MV : 0)
-          |
+          (ctx->dbg_color_ref_frame_flag ? VP9D_DEBUG_CLR_FRM_REF_BLKS : 0) |
+          (ctx->dbg_color_mb_modes_flag ? VP9D_DEBUG_CLR_BLK_MODES : 0) |
+          (ctx->dbg_color_b_modes_flag ? VP9D_DEBUG_CLR_BLK_MODES : 0) |
+          (ctx->dbg_display_mv_flag ? VP9D_DEBUG_DRAW_MV : 0) |
 #endif
           ctx->postproc_cfg.post_proc_flag;
 
-      flags.deblocking_level      = ctx->postproc_cfg.deblocking_level;
-      flags.noise_level           = ctx->postproc_cfg.noise_level;
+      flags.deblocking_level = ctx->postproc_cfg.deblocking_level;
+      flags.noise_level = ctx->postproc_cfg.noise_level;
 #if CONFIG_POSTPROC_VISUALIZER
       flags.display_ref_frame_flag = ctx->dbg_color_ref_frame_flag;
       flags.display_mb_modes_flag = ctx->dbg_color_mb_modes_flag;
-      flags.display_b_modes_flag  = ctx->dbg_color_b_modes_flag;
-      flags.display_mv_flag       = ctx->dbg_display_mv_flag;
+      flags.display_b_modes_flag = ctx->dbg_color_b_modes_flag;
+      flags.display_mv_flag = ctx->dbg_display_mv_flag;
 #endif
     }
 
@@ -391,10 +369,8 @@ static vpx_codec_err_t decode_one(vpx_codec_alg_priv_t  *ctx,
   return res;
 }
 
-static void parse_superframe_index(const uint8_t *data,
-                                   size_t         data_sz,
-                                   uint32_t       sizes[8],
-                                   int           *count) {
+static void parse_superframe_index(const uint8_t *data, size_t data_sz,
+                                   uint32_t sizes[8], int *count) {
   uint8_t marker;
 
   assert(data_sz);
@@ -527,11 +503,11 @@ static vpx_codec_err_t vp9_set_frame_buffers(
   return VPX_CODEC_ERROR;
 }
 
-static vpx_codec_err_t vp9_xma_get_mmap(const vpx_codec_ctx_t      *ctx,
-                                        vpx_codec_mmap_t           *mmap,
-                                        vpx_codec_iter_t           *iter) {
-  vpx_codec_err_t     res;
-  const mem_req_t  *seg_iter = *iter;
+static vpx_codec_err_t vp9_xma_get_mmap(const vpx_codec_ctx_t *ctx,
+                                        vpx_codec_mmap_t *mmap,
+                                        vpx_codec_iter_t *iter) {
+  vpx_codec_err_t res;
+  const mem_req_t *seg_iter = *iter;
 
   /* Get address of next segment request */
   do {
@@ -560,7 +536,7 @@ static vpx_codec_err_t vp9_xma_get_mmap(const vpx_codec_ctx_t      *ctx,
   return res;
 }
 
-static vpx_codec_err_t vp9_xma_set_mmap(vpx_codec_ctx_t         *ctx,
+static vpx_codec_err_t vp9_xma_set_mmap(vpx_codec_ctx_t *ctx,
                                         const vpx_codec_mmap_t  *mmap) {
   vpx_codec_err_t res = VPX_CODEC_MEM_ERROR;
   int i, done;
@@ -596,8 +572,7 @@ static vpx_codec_err_t vp9_xma_set_mmap(vpx_codec_ctx_t         *ctx,
   return res;
 }
 
-static vpx_codec_err_t set_reference(vpx_codec_alg_priv_t *ctx,
-                                     int ctr_id,
+static vpx_codec_err_t set_reference(vpx_codec_alg_priv_t *ctx, int ctr_id,
                                      va_list args) {
   vpx_ref_frame_t *data = va_arg(args, vpx_ref_frame_t *);
 
@@ -606,7 +581,6 @@ static vpx_codec_err_t set_reference(vpx_codec_alg_priv_t *ctx,
     YV12_BUFFER_CONFIG sd;
 
     image2yuvconfig(&frame->img, &sd);
-
     return vp9_set_reference_dec(ctx->pbi,
                                  (VP9_REFFRAME)frame->frame_type, &sd);
   } else {
@@ -614,8 +588,7 @@ static vpx_codec_err_t set_reference(vpx_codec_alg_priv_t *ctx,
   }
 }
 
-static vpx_codec_err_t copy_reference(vpx_codec_alg_priv_t *ctx,
-                                      int ctr_id,
+static vpx_codec_err_t copy_reference(vpx_codec_alg_priv_t *ctx, int ctr_id,
                                       va_list args) {
   vpx_ref_frame_t *data = va_arg(args, vpx_ref_frame_t *);
 
@@ -632,8 +605,7 @@ static vpx_codec_err_t copy_reference(vpx_codec_alg_priv_t *ctx,
   }
 }
 
-static vpx_codec_err_t get_reference(vpx_codec_alg_priv_t *ctx,
-                                     int ctr_id,
+static vpx_codec_err_t get_reference(vpx_codec_alg_priv_t *ctx, int ctr_id,
                                      va_list args) {
   vp9_ref_frame_t *data = va_arg(args, vp9_ref_frame_t *);
 
@@ -648,8 +620,7 @@ static vpx_codec_err_t get_reference(vpx_codec_alg_priv_t *ctx,
   }
 }
 
-static vpx_codec_err_t set_postproc(vpx_codec_alg_priv_t *ctx,
-                                    int ctr_id,
+static vpx_codec_err_t set_postproc(vpx_codec_alg_priv_t *ctx, int ctr_id,
                                     va_list args) {
 #if CONFIG_VP9_POSTPROC
   vp8_postproc_cfg_t *data = va_arg(args, vp8_postproc_cfg_t *);
@@ -666,8 +637,7 @@ static vpx_codec_err_t set_postproc(vpx_codec_alg_priv_t *ctx,
 #endif
 }
 
-static vpx_codec_err_t set_dbg_options(vpx_codec_alg_priv_t *ctx,
-                                       int ctrl_id,
+static vpx_codec_err_t set_dbg_options(vpx_codec_alg_priv_t *ctx, int ctrl_id,
                                        va_list args) {
 #if CONFIG_POSTPROC_VISUALIZER && CONFIG_POSTPROC
   int data = va_arg(args, int);
@@ -688,8 +658,7 @@ static vpx_codec_err_t set_dbg_options(vpx_codec_alg_priv_t *ctx,
 }
 
 static vpx_codec_err_t get_last_ref_updates(vpx_codec_alg_priv_t *ctx,
-                                            int ctrl_id,
-                                            va_list args) {
+                                            int ctrl_id, va_list args) {
   int *update_info = va_arg(args, int *);
   VP9D_COMP *pbi = (VP9D_COMP*)ctx->pbi;
 
@@ -704,8 +673,7 @@ static vpx_codec_err_t get_last_ref_updates(vpx_codec_alg_priv_t *ctx,
 
 
 static vpx_codec_err_t get_frame_corrupted(vpx_codec_alg_priv_t *ctx,
-                                           int ctrl_id,
-                                           va_list args) {
+                                           int ctrl_id, va_list args) {
   int *corrupted = va_arg(args, int *);
 
   if (corrupted) {
@@ -721,8 +689,7 @@ static vpx_codec_err_t get_frame_corrupted(vpx_codec_alg_priv_t *ctx,
 }
 
 static vpx_codec_err_t get_display_size(vpx_codec_alg_priv_t *ctx,
-                                        int ctrl_id,
-                                        va_list args) {
+                                        int ctrl_id, va_list args) {
   int *const display_size = va_arg(args, int *);
 
   if (display_size) {
