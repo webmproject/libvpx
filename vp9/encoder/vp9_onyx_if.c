@@ -2184,27 +2184,33 @@ int vp9_update_reference(VP9_PTR ptr, int ref_frame_flags) {
   return 0;
 }
 
+static YV12_BUFFER_CONFIG *get_vp9_ref_frame_buffer(VP9_COMP *cpi,
+                                VP9_REFFRAME ref_frame_flag) {
+  MV_REFERENCE_FRAME ref_frame = NONE;
+  if (ref_frame_flag == VP9_LAST_FLAG)
+    ref_frame = LAST_FRAME;
+  else if (ref_frame_flag == VP9_GOLD_FLAG)
+    ref_frame = GOLDEN_FRAME;
+  else if (ref_frame_flag == VP9_ALT_FLAG)
+    ref_frame = ALTREF_FRAME;
+
+  return ref_frame == NONE ? NULL : get_ref_frame_buffer(cpi, ref_frame);
+}
+
 int vp9_copy_reference_enc(VP9_PTR ptr, VP9_REFFRAME ref_frame_flag,
                            YV12_BUFFER_CONFIG *sd) {
-  VP9_COMP *cpi = (VP9_COMP *)(ptr);
-  YV12_BUFFER_CONFIG *cfg;
-
-  if (ref_frame_flag == VP9_LAST_FLAG)
-    cfg = get_ref_frame_buffer(cpi, LAST_FRAME);
-  else if (ref_frame_flag == VP9_GOLD_FLAG)
-    cfg = get_ref_frame_buffer(cpi, GOLDEN_FRAME);
-  else if (ref_frame_flag == VP9_ALT_FLAG)
-    cfg = get_ref_frame_buffer(cpi, ALTREF_FRAME);
-  else
+  VP9_COMP *const cpi = (VP9_COMP *)ptr;
+  YV12_BUFFER_CONFIG *cfg = get_vp9_ref_frame_buffer(cpi, ref_frame_flag);
+  if (cfg) {
+    vp8_yv12_copy_frame(cfg, sd);
+    return 0;
+  } else {
     return -1;
-
-  vp8_yv12_copy_frame(cfg, sd);
-
-  return 0;
+  }
 }
 
 int vp9_get_reference_enc(VP9_PTR ptr, int index, YV12_BUFFER_CONFIG **fb) {
-  VP9_COMP *cpi = (VP9_COMP *)(ptr);
+  VP9_COMP *cpi = (VP9_COMP *)ptr;
   VP9_COMMON *cm = &cpi->common;
 
   if (index < 0 || index >= REF_FRAMES)
@@ -2216,23 +2222,14 @@ int vp9_get_reference_enc(VP9_PTR ptr, int index, YV12_BUFFER_CONFIG **fb) {
 
 int vp9_set_reference_enc(VP9_PTR ptr, VP9_REFFRAME ref_frame_flag,
                           YV12_BUFFER_CONFIG *sd) {
-  VP9_COMP *cpi = (VP9_COMP *)(ptr);
-  VP9_COMMON *cm = &cpi->common;
-
-  int ref_fb_idx;
-
-  if (ref_frame_flag == VP9_LAST_FLAG)
-    ref_fb_idx = cm->ref_frame_map[cpi->lst_fb_idx];
-  else if (ref_frame_flag == VP9_GOLD_FLAG)
-    ref_fb_idx = cm->ref_frame_map[cpi->gld_fb_idx];
-  else if (ref_frame_flag == VP9_ALT_FLAG)
-    ref_fb_idx = cm->ref_frame_map[cpi->alt_fb_idx];
-  else
+  VP9_COMP *cpi = (VP9_COMP *)ptr;
+  YV12_BUFFER_CONFIG *cfg = get_vp9_ref_frame_buffer(cpi, ref_frame_flag);
+  if (cfg) {
+    vp8_yv12_copy_frame(sd, cfg);
+    return 0;
+  } else {
     return -1;
-
-  vp8_yv12_copy_frame(sd, &cm->yv12_fb[ref_fb_idx]);
-
-  return 0;
+  }
 }
 
 int vp9_update_entropy(VP9_PTR comp, int update) {
