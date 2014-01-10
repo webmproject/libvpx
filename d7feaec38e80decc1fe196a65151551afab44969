@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//9kw\u003d",
+        "filename": "vp9/encoder/vp9_onyx_if.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1983,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-01-10T20:52:34Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//9l8\u003d",
+      "revId": "d7feaec38e80decc1fe196a65151551afab44969",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//9mg\u003d",
         "filename": "vp9/encoder/vp9_onyx_if.c",
         "patchSetId": 2
@@ -30,6 +48,24 @@
       "writtenOn": "2014-01-10T19:53:10Z",
       "side": 1,
       "message": "Initialization like this will fail compiling on visual studio 2008.",
+      "revId": "d7feaec38e80decc1fe196a65151551afab44969",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//9lQ\u003d",
+        "filename": "vp9/encoder/vp9_onyx_if.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 2197,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-01-10T20:52:34Z",
+      "side": 1,
+      "message": "In this case it will not, we have a lot code with such kind of initialization.",
+      "parentUuid": "AAAAdn//9mg\u003d",
       "revId": "d7feaec38e80decc1fe196a65151551afab44969",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
