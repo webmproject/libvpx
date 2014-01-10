@@ -34,6 +34,7 @@
 #include "vp9/encoder/vp9_encodemv.h"
 #include "vp9/encoder/vp9_extend.h"
 #include "vp9/encoder/vp9_onyx_int.h"
+#include "vp9/encoder/vp9_pickmode.h"
 #include "vp9/encoder/vp9_rdopt.h"
 #include "vp9/encoder/vp9_segmentation.h"
 #include "vp9/encoder/vp9_tokenize.h"
@@ -1038,6 +1039,132 @@ static int sb_has_motion(const VP9_COMMON *cm, MODE_INFO **prev_mi_8x8) {
   return 0;
 }
 
+// TODO(jingning) This currently serves as a test framework for non-RD mode
+// decision. To be continued on optimizing the partition type decisions.
+static void pick_partition_type(VP9_COMP *cpi,
+                                const TileInfo *const tile,
+                                MODE_INFO **mi_8x8, TOKENEXTRA **tp,
+                                int mi_row, int mi_col,
+                                BLOCK_SIZE bsize, int *rate, int64_t *dist,
+                                int do_recon) {
+  VP9_COMMON *const cm = &cpi->common;
+  MACROBLOCK *const x = &cpi->mb;
+  const int mi_stride = cm->mode_info_stride;
+  const int num_8x8_subsize = (num_8x8_blocks_wide_lookup[bsize] >> 1);
+  int i;
+  PARTITION_TYPE partition = PARTITION_NONE;
+  BLOCK_SIZE subsize;
+  BLOCK_SIZE bs_type = mi_8x8[0]->mbmi.sb_type;
+  int sub_rate[4] = {0};
+  int64_t sub_dist[4] = {0};
+  int mi_offset;
+
+  if (mi_row >= cm->mi_rows || mi_col >= cm->mi_cols)
+    return;
+
+  partition = partition_lookup[b_width_log2(bsize)][bs_type];
+  subsize = get_subsize(bsize, partition);
+
+  if (bsize < BLOCK_8X8) {
+    // When ab_index = 0 all sub-blocks are handled, so for ab_index != 0
+    // there is nothing to be done.
+    if (x->ab_index != 0) {
+      *rate = 0;
+      *dist = 0;
+      return;
+    }
+  } else {
+    *(get_sb_partitioning(x, bsize)) = subsize;
+  }
+
+  switch (partition) {
+    case PARTITION_NONE:
+      pick_sb_modes(cpi, tile, mi_row, mi_col, rate, dist,
+                    bsize, get_block_context(x, bsize), INT64_MAX);
+      break;
+    case PARTITION_HORZ:
+      *get_sb_index(x, subsize) = 0;
+      pick_sb_modes(cpi, tile, mi_row, mi_col, &sub_rate[0], &sub_dist[0],
+                    subsize, get_block_context(x, subsize), INT64_MAX);
+      if (bsize >= BLOCK_8X8 && mi_row + num_8x8_subsize < cm->mi_rows) {
+        update_state(cpi, get_block_context(x, subsize), subsize, 0);
+        encode_superblock(cpi, tp, 0, mi_row, mi_col, subsize);
+        *get_sb_index(x, subsize) = 1;
+        pick_sb_modes(cpi, tile, mi_row + num_8x8_subsize, mi_col,
+                      &sub_rate[1], &sub_dist[1], subsize,
+                      get_block_context(x, subsize), INT64_MAX);
+      }
+      *rate = sub_rate[0] + sub_rate[1];
+      *dist = sub_dist[0] + sub_dist[1];
+      break;
+    case PARTITION_VERT:
+      *get_sb_index(x, subsize) = 0;
+      pick_sb_modes(cpi, tile, mi_row, mi_col, &sub_rate[0], &sub_dist[0],
+                    subsize, get_block_context(x, subsize), INT64_MAX);
+      if (bsize >= BLOCK_8X8 && mi_col + num_8x8_subsize < cm->mi_cols) {
+        update_state(cpi, get_block_context(x, subsize), subsize, 0);
+        encode_superblock(cpi, tp, 0, mi_row, mi_col, subsize);
+        *get_sb_index(x, subsize) = 1;
+        pick_sb_modes(cpi, tile, mi_row, mi_col + num_8x8_subsize,
+                      &sub_rate[1], &sub_dist[1], subsize,
+                      get_block_context(x, subsize), INT64_MAX);
+      }
+      *rate = sub_rate[0] + sub_rate[1];
+      *dist = sub_dist[1] + sub_dist[1];
+      break;
+    case PARTITION_SPLIT:
+      *get_sb_index(x, subsize) = 0;
+      pick_partition_type(cpi, tile, mi_8x8, tp, mi_row, mi_col, subsize,
+                          &sub_rate[0], &sub_dist[0], 0);
+
+      if ((mi_col + num_8x8_subsize) < cm->mi_cols) {
+        *get_sb_index(x, subsize) = 1;
+        pick_partition_type(cpi, tile, mi_8x8 + num_8x8_subsize, tp,
+                            mi_row, mi_col + num_8x8_subsize, subsize,
+                            &sub_rate[1], &sub_dist[1], 0);
+      }
+
+      if ((mi_row + num_8x8_subsize) < cm->mi_rows) {
+        *get_sb_index(x, subsize) = 2;
+        pick_partition_type(cpi, tile, mi_8x8 + num_8x8_subsize * mi_stride, tp,
+                            mi_row + num_8x8_subsize, mi_col, subsize,
+                            &sub_rate[2], &sub_dist[2], 0);
+      }
+
+      if ((mi_col + num_8x8_subsize) < cm->mi_cols &&
+          (mi_row + num_8x8_subsize) < cm->mi_rows) {
+        *get_sb_index(x, subsize) = 3;
+        mi_offset = num_8x8_subsize * mi_stride + num_8x8_subsize;
+        pick_partition_type(cpi, tile, mi_8x8 + mi_offset, tp,
+                            mi_row + num_8x8_subsize, mi_col + num_8x8_subsize,
+                            subsize, &sub_rate[3], &sub_dist[3], 0);
+      }
+
+      for (i = 0; i < 4; ++i) {
+        *rate += sub_rate[i];
+        *dist += sub_dist[i];
+      }
+
+      break;
+    default:
+      assert(0);
+  }
+
+  if (do_recon) {
+    int output_enabled = (bsize == BLOCK_64X64);
+
+    // Check the projected output rate for this SB against it's target
+    // and and if necessary apply a Q delta using segmentation to get
+    // closer to the target.
+    if ((cpi->oxcf.aq_mode == COMPLEXITY_AQ) && cm->seg.update_map) {
+      select_in_frame_q_segment(cpi, mi_row, mi_col,
+                                output_enabled, *rate);
+    }
+
+    encode_sb(cpi, tile, tp, mi_row, mi_col, output_enabled, bsize);
+  }
+}
+
 static void rd_use_partition(VP9_COMP *cpi,
                              const TileInfo *const tile,
                              MODE_INFO **mi_8x8,
@@ -1875,6 +2002,34 @@ static void rd_pick_reference_frame(VP9_COMP *cpi, const TileInfo *const tile,
   restore_context(cpi, mi_row, mi_col, a, l, sa, sl, BLOCK_64X64);
 }
 
+static void encode_sb_row_rt(VP9_COMP *cpi, const TileInfo *const tile,
+                             int mi_row, TOKENEXTRA **tp) {
+  VP9_COMMON *const cm = &cpi->common;
+  int mi_col;
+
+  cpi->sf.always_this_block_size = BLOCK_8X8;
+
+  // Initialize the left context for the new SB row
+  vpx_memset(&cpi->left_context, 0, sizeof(cpi->left_context));
+  vpx_memset(cpi->left_seg_context, 0, sizeof(cpi->left_seg_context));
+
+  // Code each SB in the row
+  for (mi_col = tile->mi_col_start; mi_col < tile->mi_col_end;
+       mi_col += MI_BLOCK_SIZE) {
+    int dummy_rate;
+    int64_t dummy_dist;
+    const int idx_str = cm->mode_info_stride * mi_row + mi_col;
+    MODE_INFO **mi_8x8 = cm->mi_grid_visible + idx_str;
+
+    vp9_zero(cpi->mb.pred_mv);
+
+    set_offsets(cpi, tile, mi_row, mi_col, BLOCK_64X64);
+    set_partitioning(cpi, tile, mi_8x8, mi_row, mi_col);
+    pick_partition_type(cpi, tile, mi_8x8, tp, mi_row, mi_col, BLOCK_64X64,
+                        &dummy_rate, &dummy_dist, 1);
+  }
+}
+
 static void encode_sb_row(VP9_COMP *cpi, const TileInfo *const tile,
                           int mi_row, TOKENEXTRA **tp) {
   VP9_COMMON *const cm = &cpi->common;
@@ -2101,7 +2256,11 @@ static void encode_frame_internal(VP9_COMP *cpi) {
           vp9_tile_init(&tile, cm, tile_row, tile_col);
           for (mi_row = tile.mi_row_start;
                mi_row < tile.mi_row_end; mi_row += 8)
+#if 1
             encode_sb_row(cpi, &tile, mi_row, &tp);
+#else
+            encode_sb_row_rt(cpi, &tile, mi_row, &tp);
+#endif
 
           cpi->tok_count[tile_row][tile_col] = (unsigned int)(tp - tp_old);
           assert(tp - cpi->tok <= get_token_alloc(cm->mb_rows, cm->mb_cols));

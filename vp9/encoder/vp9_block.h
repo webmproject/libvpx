@@ -116,6 +116,7 @@ struct macroblock {
   unsigned int source_variance;
   unsigned int pred_sse[MAX_REF_FRAMES];
   int pred_mv_sad[MAX_REF_FRAMES];
+  int mode_sad[MAX_REF_FRAMES][INTER_MODES + 1];
 
   int nmvjointcost[MV_JOINTS];
   int nmvcosts[2][MV_VALS];

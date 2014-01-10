@@ -37,8 +37,6 @@
 #include "vp9/common/vp9_mvref_common.h"
 #include "vp9/common/vp9_common.h"
 
-#define INVALID_MV 0x80008000
-
 /* Factor to weigh the rate for switchable interp filters */
 #define SWITCHABLE_INTERP_RATE_FACTOR 1
 
@@ -112,14 +110,6 @@ const REF_DEFINITION vp9_ref_order[MAX_REFS] = {
 // The factors here are << 2 (2 = x0.5, 32 = x8 etc).
 static int rd_thresh_block_size_factor[BLOCK_SIZES] =
   {2, 3, 3, 4, 6, 6, 8, 12, 12, 16, 24, 24, 32};
-
-#define RD_THRESH_MAX_FACT 64
-#define RD_THRESH_INC      1
-#define RD_THRESH_POW      1.25
-#define RD_MULT_EPB_RATIO  64
-
-#define MV_COST_WEIGHT      108
-#define MV_COST_WEIGHT_SUB  120
 
 static int raster_block_offset(BLOCK_SIZE plane_bsize,
                                int raster_block, int stride) {
@@ -2133,8 +2123,10 @@ static void mv_pred(VP9_COMP *cpi, MACROBLOCK *x,
     max_mv = MAX(max_mv,
                  MAX(abs(this_mv.as_mv.row), abs(this_mv.as_mv.col)) >> 3);
     // only need to check zero mv once
-    if (!this_mv.as_int && zero_seen)
+    if (!this_mv.as_int && zero_seen) {
+      x->mode_sad[ref_frame][i] = x->mode_sad[ref_frame][INTER_OFFSET(ZEROMV)];
       continue;
+    }
     zero_seen = zero_seen || !this_mv.as_int;
 
     row_offset = this_mv.as_mv.row >> 3;
@@ -2145,6 +2137,9 @@ static void mv_pred(VP9_COMP *cpi, MACROBLOCK *x,
     this_sad = cpi->fn_ptr[block_size].sdf(src_y_ptr, x->plane[0].src.stride,
                                            ref_y_ptr, ref_y_stride,
                                            0x7fffffff);
+    x->mode_sad[ref_frame][i] = this_sad;
+    if (this_mv.as_int == 0)
+      x->mode_sad[ref_frame][INTER_OFFSET(ZEROMV)] = this_sad;
 
     // Note if it is the best so far.
     if (this_sad < best_sad) {
@@ -2152,6 +2147,12 @@ static void mv_pred(VP9_COMP *cpi, MACROBLOCK *x,
       best_index = i;
     }
   }
+
+  if (!zero_seen)
+    x->mode_sad[ref_frame][INTER_OFFSET(ZEROMV)] =
+        cpi->fn_ptr[block_size].sdf(src_y_ptr, x->plane[0].src.stride,
+                                    ref_y_buffer, ref_y_stride,
+                                    0x7fffffff);
 
   // Note the index of the mv that worked best in the reference list.
   x->mv_best_ref_index[ref_frame] = best_index;
@@ -2312,7 +2313,7 @@ void vp9_setup_buffer_inter(VP9_COMP *cpi, MACROBLOCK *x,
             frame_type, block_size);
 }
 
-static YV12_BUFFER_CONFIG *get_scaled_ref_frame(VP9_COMP *cpi, int ref_frame) {
+YV12_BUFFER_CONFIG *vp9_get_scaled_ref_frame(VP9_COMP *cpi, int ref_frame) {
   YV12_BUFFER_CONFIG *scaled_ref_frame = NULL;
   int fb = get_ref_frame_idx(cpi, ref_frame);
   int fb_scale = get_scale_ref_frame_idx(cpi, ref_frame);
@@ -2350,7 +2351,7 @@ static void single_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
   int tmp_row_min = x->mv_row_min;
   int tmp_row_max = x->mv_row_max;
 
-  YV12_BUFFER_CONFIG *scaled_ref_frame = get_scaled_ref_frame(cpi, ref);
+  YV12_BUFFER_CONFIG *scaled_ref_frame = vp9_get_scaled_ref_frame(cpi, ref);
 
   int_mv pred_mv[3];
   pred_mv[0] = mbmi->ref_mvs[ref][0];
@@ -2498,8 +2499,8 @@ static void joint_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
   struct buf_2d scaled_first_yv12 = xd->plane[0].pre[0];
   int last_besterr[2] = {INT_MAX, INT_MAX};
   YV12_BUFFER_CONFIG *const scaled_ref_frame[2] = {
-    get_scaled_ref_frame(cpi, mbmi->ref_frame[0]),
-    get_scaled_ref_frame(cpi, mbmi->ref_frame[1])
+    vp9_get_scaled_ref_frame(cpi, mbmi->ref_frame[0]),
+    vp9_get_scaled_ref_frame(cpi, mbmi->ref_frame[1])
   };
 
   for (ref = 0; ref < 2; ++ref) {

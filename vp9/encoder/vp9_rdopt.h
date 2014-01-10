@@ -19,6 +19,16 @@
   (((128 + ((int64_t)R) * (RM)) >> 8) + (D << DM))
 #define QIDX_SKIP_THRESH     115
 
+#define RD_THRESH_MAX_FACT 64
+#define RD_THRESH_INC      1
+#define RD_THRESH_POW      1.25
+#define RD_MULT_EPB_RATIO  64
+
+#define MV_COST_WEIGHT      108
+#define MV_COST_WEIGHT_SUB  120
+
+#define INVALID_MV 0x80008000
+
 struct TileInfo;
 
 int vp9_compute_rd_mult(VP9_COMP *cpi, int qindex);
@@ -35,6 +45,8 @@ void vp9_setup_buffer_inter(VP9_COMP *cpi, MACROBLOCK *x,
                             int_mv frame_nearest_mv[MAX_REF_FRAMES],
                             int_mv frame_near_mv[MAX_REF_FRAMES],
                             struct buf_2d yv12_mb[4][MAX_MB_PLANE]);
+
+YV12_BUFFER_CONFIG *vp9_get_scaled_ref_frame(VP9_COMP *cpi, int ref_frame);
 
 void vp9_rd_pick_intra_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
                                int *r, int64_t *d, BLOCK_SIZE bsize,
