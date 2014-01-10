@@ -3174,7 +3174,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
 
   *returnrate = INT_MAX;
 
-  for (ref_frame = LAST_FRAME; ref_frame <= ALTREF_FRAME; ref_frame++) {
+  for (ref_frame = LAST_FRAME; ref_frame <= ALTREF_FRAME; ++ref_frame) {
     x->pred_mv_sad[ref_frame] = INT_MAX;
     if (cpi->ref_frame_flags & flag_list[ref_frame]) {
       setup_buffer_inter(cpi, x, tile, get_ref_frame_idx(cpi, ref_frame),
@@ -3183,6 +3183,18 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
     }
     frame_mv[NEWMV][ref_frame].as_int = INVALID_MV;
     frame_mv[ZEROMV][ref_frame].as_int = 0;
+  }
+
+  cpi->ref_frame_mask = 0;
+  for (ref_frame = LAST_FRAME;
+       ref_frame <= ALTREF_FRAME && cpi->sf.reference_masking; ++ref_frame) {
+    int i;
+    for (i = LAST_FRAME; i <= ALTREF_FRAME; ++i) {
+      if ((x->pred_mv_sad[ref_frame] >> 2) > x->pred_mv_sad[i]) {
+        cpi->ref_frame_mask |= (1 << ref_frame);
+        break;
+      }
+    }
   }
 
   for (mode_index = 0; mode_index < MAX_MODES; ++mode_index) {
@@ -3234,8 +3246,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
     }
 
     // Skip if the current reference frame has been masked off
-    if (cpi->sf.reference_masking && !cpi->set_ref_frame_mask &&
-        (cpi->ref_frame_mask & (1 << ref_frame)))
+    if (cpi->ref_frame_mask & (1 << ref_frame) && this_mode != NEWMV)
       continue;
 
     // Test best rd so far against threshold for trying this mode.
@@ -3640,11 +3651,6 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
     }
   }
 
-  // If we are using reference masking and the set mask flag is set then
-  // create the reference frame mask.
-  if (cpi->sf.reference_masking && cpi->set_ref_frame_mask)
-    cpi->ref_frame_mask = ~(1 << vp9_mode_order[best_mode_index].ref_frame[0]);
-
   // Flag all modes that have a distortion thats > 2x the best we found at
   // this level.
   for (mode_index = 0; mode_index < MB_MODE_COUNT; ++mode_index) {
@@ -3805,6 +3811,18 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
     frame_mv[ZEROMV][ref_frame].as_int = 0;
   }
 
+  cpi->ref_frame_mask = 0;
+  for (ref_frame = LAST_FRAME;
+       ref_frame <= ALTREF_FRAME && cpi->sf.reference_masking; ++ref_frame) {
+    int i;
+    for (i = LAST_FRAME; i <= ALTREF_FRAME; ++i) {
+      if ((x->pred_mv_sad[ref_frame] >> 1) > x->pred_mv_sad[i]) {
+        cpi->ref_frame_mask |= (1 << ref_frame);
+        break;
+      }
+    }
+  }
+
   for (mode_index = 0; mode_index < MAX_REFS; ++mode_index) {
     int mode_excluded = 0;
     int64_t this_rd = INT64_MAX;
@@ -3851,11 +3869,6 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
       if (cpi->mode_skip_mask & ((int64_t)1 << mode_index))
         continue;
     }
-
-    // Skip if the current reference frame has been masked off
-    if (cpi->sf.reference_masking && !cpi->set_ref_frame_mask &&
-        (cpi->ref_frame_mask & (1 << ref_frame)))
-      continue;
 
     // Test best rd so far against threshold for trying this mode.
     if ((best_rd <
@@ -4365,11 +4378,6 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
                               BLOCK_8X8, uv_tx_size);
     }
   }
-
-  // If we are using reference masking and the set mask flag is set then
-  // create the reference frame mask.
-  if (cpi->sf.reference_masking && cpi->set_ref_frame_mask)
-    cpi->ref_frame_mask = ~(1 << vp9_ref_order[best_mode_index].ref_frame[0]);
 
   if (best_rd == INT64_MAX && bsize < BLOCK_8X8) {
     *returnrate = INT_MAX;
