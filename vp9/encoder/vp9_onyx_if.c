@@ -1302,6 +1302,12 @@ void vp9_change_config(VP9_PTR ptr, VP9_CONFIG *oxcf) {
   else
     cpi->oxcf.maximum_buffer_size = rescale(cpi->oxcf.maximum_buffer_size,
                                             cpi->oxcf.target_bandwidth, 1000);
+  // Under a configuration change, where maximum_buffer_size may change,
+  // keep buffer level clipped to the maximum allowed buffer size.
+  if (cpi->rc.bits_off_target > cpi->oxcf.maximum_buffer_size) {
+    cpi->rc.bits_off_target = cpi->oxcf.maximum_buffer_size;
+    cpi->rc.buffer_level = cpi->rc.bits_off_target;
+  }
 
   // Set up frame rate and related parameters rate control values.
   vp9_new_framerate(cpi, cpi->oxcf.framerate);
