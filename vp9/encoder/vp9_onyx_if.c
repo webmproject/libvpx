@@ -59,6 +59,11 @@ void vp9_coef_tree_initialize();
 #define DISABLE_COMPOUND_SPLIT    0x18
 #define LAST_AND_INTRA_SPLIT_ONLY 0x1E
 
+// Max rate target for 1080P and below encodes under normal circumstances
+// (1920 * 1080 / (16 * 16)) * MAX_MB_RATE bits per MB
+#define MAX_MB_RATE 250
+#define MAXRATE_1080P 2025000
+
 #if CONFIG_INTERNAL_STATS
 extern double vp9_calc_ssim(YV12_BUFFER_CONFIG *source,
                             YV12_BUFFER_CONFIG *dest, int lumamask,
@@ -1093,6 +1098,9 @@ int vp9_reverse_trans(int x) {
 };
 
 void vp9_new_framerate(VP9_COMP *cpi, double framerate) {
+  VP9_COMMON *const cm = &cpi->common;
+  int64_t vbr_max_bits;
+
   if (framerate < 0.1)
     framerate = 30;
 
@@ -1108,6 +1116,19 @@ void vp9_new_framerate(VP9_COMP *cpi, double framerate) {
 
   cpi->rc.min_frame_bandwidth = MAX(cpi->rc.min_frame_bandwidth,
                                     FRAME_OVERHEAD_BITS);
+
+  // A maximum bitrate for a frame is defined.
+  // The baseline for this aligns with HW implementations that
+  // can support decode of 1080P content up to a bitrate of MAX_MB_RATE bits
+  // per 16x16 MB (averaged over a frame). However this limit is extended if
+  // a very high rate is given on the command line or the the rate cannnot
+  // be acheived because of a user specificed max q (e.g. when the user
+  // specifies lossless encode.
+  //
+  vbr_max_bits = ((int64_t)cpi->rc.av_per_frame_bandwidth *
+                  (int64_t)cpi->oxcf.two_pass_vbrmax_section) / 100;
+  cpi->rc.max_frame_bandwidth =
+    MAX(MAX((cm->MBs * MAX_MB_RATE), MAXRATE_1080P), vbr_max_bits);
 
   // Set Maximum gf/arf interval
   cpi->rc.max_gf_interval = 16;
@@ -2449,10 +2470,14 @@ static int recode_loop_test(VP9_COMP *cpi,
   int force_recode = 0;
   VP9_COMMON *cm = &cpi->common;
 
-  // Is frame recode allowed at all
-  // Yes if either recode mode 1 is selected or mode two is selected
-  // and the frame is a key frame. golden frame or alt_ref_frame
-  if ((cpi->sf.recode_loop == 1) ||
+  // Special case trap if maximum allowed frame size exceeded.
+  if (cpi->rc.projected_frame_size > cpi->rc.max_frame_bandwidth) {
+    force_recode = 1;
+
+  // Is frame recode allowed.
+  // Yes if either recode mode 1 is selected or mode 2 is selected
+  // and the frame is a key frame, golden frame or alt_ref_frame
+  } else if ((cpi->sf.recode_loop == 1) ||
       ((cpi->sf.recode_loop == 2) &&
        ((cm->frame_type == KEY_FRAME) ||
         cpi->refresh_golden_frame ||
@@ -2630,7 +2655,8 @@ static void output_frame_level_debug_stats(VP9_COMP *cpi) {
         "%6d %6d %5d %5d %5d %10d %10.3f"
         "%10.3f %8d %10d %10d %10d\n",
         cpi->common.current_video_frame, cpi->rc.this_frame_target,
-        cpi->rc.projected_frame_size, 0,
+        cpi->rc.projected_frame_size,
+        cpi->rc.projected_frame_size / cpi->common.MBs,
         (cpi->rc.projected_frame_size - cpi->rc.this_frame_target),
         (int)cpi->rc.total_target_vs_actual,
         (int)(cpi->oxcf.starting_buffer_level - cpi->rc.bits_off_target),
@@ -2740,8 +2766,9 @@ static void encode_with_recode_loop(VP9_COMP *cpi,
     if (cpi->oxcf.end_usage == USAGE_CONSTANT_QUALITY) {
       loop = 0;
     } else {
-      // Special case handling for forced key frames
-      if ((cm->frame_type == KEY_FRAME) && cpi->rc.this_key_frame_forced) {
+      if ((cm->frame_type == KEY_FRAME) &&
+           cpi->rc.this_key_frame_forced &&
+           (cpi->rc.projected_frame_size < cpi->rc.max_frame_bandwidth)) {
         int last_q = *q;
         int kf_err = vp9_calc_ss_err(cpi->Source, get_frame_new_buffer(cm));
 
@@ -2780,7 +2807,7 @@ static void encode_with_recode_loop(VP9_COMP *cpi,
         loop = *q != last_q;
       } else if (recode_loop_test(
           cpi, frame_over_shoot_limit, frame_under_shoot_limit,
-          *q, top_index, bottom_index)) {
+          *q, MAX(q_high, top_index), bottom_index)) {
         // Is the projected frame size out of range and are we allowed
         // to attempt to recode.
         int last_q = *q;
@@ -2791,6 +2818,10 @@ static void encode_with_recode_loop(VP9_COMP *cpi,
 
         // Frame is too large
         if (cpi->rc.projected_frame_size > cpi->rc.this_frame_target) {
+          // Special case if the projected size is > the max allowed.
+          if (cpi->rc.projected_frame_size >= cpi->rc.max_frame_bandwidth)
+            q_high = cpi->rc.worst_quality;
+
           // Raise Qlow as to at least the current value
           q_low = *q < q_high ? *q + 1 : q_high;
 
@@ -2804,12 +2835,12 @@ static void encode_with_recode_loop(VP9_COMP *cpi,
             vp9_rc_update_rate_correction_factors(cpi, 0);
 
             *q = vp9_rc_regulate_q(cpi, cpi->rc.this_frame_target,
-                                   bottom_index, top_index);
+                                   bottom_index, MAX(q_high, top_index));
 
             while (*q < q_low && retries < 10) {
               vp9_rc_update_rate_correction_factors(cpi, 0);
               *q = vp9_rc_regulate_q(cpi, cpi->rc.this_frame_target,
-                                     bottom_index, top_index);
+                                     bottom_index, MAX(q_high, top_index));
               retries++;
             }
           }
@@ -2855,7 +2886,9 @@ static void encode_with_recode_loop(VP9_COMP *cpi,
       }
     }
 
-    if (cpi->rc.is_src_frame_alt_ref)
+    // Special case for overlay frame.
+    if (cpi->rc.is_src_frame_alt_ref &&
+        (cpi->rc.projected_frame_size < cpi->rc.max_frame_bandwidth))
       loop = 0;
 
     if (loop) {

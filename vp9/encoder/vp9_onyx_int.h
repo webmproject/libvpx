@@ -442,9 +442,10 @@ typedef struct {
   unsigned int source_alt_ref_active;
   unsigned int is_src_frame_alt_ref;
 
-  int per_frame_bandwidth;  // Current section per frame bandwidth target
-  int av_per_frame_bandwidth;  // Average frame size target for clip
-  int min_frame_bandwidth;  // Minimum allocation used for any frame
+  int per_frame_bandwidth;        // Current section per frame bandwidth target
+  int av_per_frame_bandwidth;     // Average frame size target for clip
+  int min_frame_bandwidth;        // Minimum allocation used for any frame
+  int max_frame_bandwidth;        // Maximum burst rate allowed for a frame.
 
   int ni_av_qi;
   int ni_tot_qi;

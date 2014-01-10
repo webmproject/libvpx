@@ -353,13 +353,14 @@ static double simple_weight(YV12_BUFFER_CONFIG *source) {
 // This function returns the maximum target rate per frame.
 static int frame_max_bits(VP9_COMP *cpi) {
   int64_t max_bits =
-     ((int64_t)cpi->rc.av_per_frame_bandwidth *
-      (int64_t)cpi->oxcf.two_pass_vbrmax_section) / 100;
+    ((int64_t)cpi->rc.av_per_frame_bandwidth *
+     (int64_t)cpi->oxcf.two_pass_vbrmax_section) / 100;
 
   if (max_bits < 0)
-    return 0;
-  if (max_bits >= INT_MAX)
-    return INT_MAX;
+    max_bits = 0;
+  else if (max_bits > cpi->rc.max_frame_bandwidth)
+    max_bits = cpi->rc.max_frame_bandwidth;
+
   return (int)max_bits;
 }
 

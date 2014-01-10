@@ -746,8 +746,13 @@ int vp9_rc_pick_q_and_adjust_q_bounds(const VP9_COMP *cpi,
   } else {
     q = vp9_rc_regulate_q(cpi, cpi->rc.this_frame_target,
                           active_best_quality, active_worst_quality);
-    if (q > *top_index)
-      q = *top_index;
+    if (q > *top_index) {
+      // Special case when we are targeting the max allowed rate
+      if (cpi->rc.this_frame_target >= cpi->rc.max_frame_bandwidth)
+        *top_index = q;
+      else
+        q = *top_index;
+    }
   }
 #if CONFIG_MULTIPLE_ARF
   // Force the quantizer determined by the coding order pattern.
@@ -810,6 +815,11 @@ void vp9_rc_compute_frame_size_bounds(const VP9_COMP *cpi,
     *frame_under_shoot_limit -= 200;
     if (*frame_under_shoot_limit < 0)
       *frame_under_shoot_limit = 0;
+
+    // Clip to maximum allowed rate for a frame.
+    if (*frame_over_shoot_limit > cpi->rc.max_frame_bandwidth) {
+      *frame_over_shoot_limit = cpi->rc.max_frame_bandwidth;
+    }
   }
 }
 
@@ -821,6 +831,10 @@ int vp9_rc_pick_frame_size_target(VP9_COMP *cpi) {
     calc_iframe_target_size(cpi);
   else
     calc_pframe_target_size(cpi);
+
+  // Clip the frame target to the maximum allowed value.
+  if (cpi->rc.this_frame_target > cpi->rc.max_frame_bandwidth)
+    cpi->rc.this_frame_target = cpi->rc.max_frame_bandwidth;
 
   // Target rate per SB64 (including partial SB64s.
   cpi->rc.sb64_target_rate = ((int64_t)cpi->rc.this_frame_target * 64 * 64) /
