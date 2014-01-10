@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//9g8\u003d",
+        "filename": "vp9/common/arm/neon/vp9_reconintra_neon.asm",
+        "patchSetId": 1
+      },
+      "lineNbr": 306,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2014-01-10T23:57:38Z",
+      "side": 1,
+      "message": "Should you just dup into d0. I don\u0027t think you use d1 anywhere.",
+      "revId": "6ec01fa3711247e28cb66df63df8806b7184fafe",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//9hU\u003d",
+        "filename": "vp9/common/arm/neon/vp9_reconintra_neon.asm",
+        "patchSetId": 1
+      },
+      "lineNbr": 308,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2014-01-10T23:57:38Z",
+      "side": 1,
+      "message": "Is d8-d15 saved somewhere before this call?",
+      "revId": "6ec01fa3711247e28cb66df63df8806b7184fafe",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
