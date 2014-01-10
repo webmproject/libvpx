@@ -866,36 +866,35 @@ static void update_golden_frame_stats(VP9_COMP *cpi) {
 
 void vp9_rc_postencode_update(VP9_COMP *cpi, uint64_t bytes_used) {
   VP9_COMMON *const cm = &cpi->common;
+  RATE_CONTROL *const rc = &cpi->rc;
   // Update rate control heuristics
-  cpi->rc.projected_frame_size = (bytes_used << 3);
+  rc->projected_frame_size = (bytes_used << 3);
 
   // Post encode loop adjustment of Q prediction.
-  vp9_rc_update_rate_correction_factors(
-      cpi, (cpi->sf.recode_loop ||
+  vp9_rc_update_rate_correction_factors(cpi, (cpi->sf.recode_loop ||
             cpi->oxcf.end_usage == USAGE_STREAM_FROM_SERVER) ? 2 : 0);
 
   // Keep a record of last Q and ambient average Q.
   if (cm->frame_type == KEY_FRAME) {
-    cpi->rc.last_q[KEY_FRAME] = cm->base_qindex;
-    cpi->rc.avg_frame_qindex[KEY_FRAME] =
-        (2 + 3 * cpi->rc.avg_frame_qindex[KEY_FRAME] + cm->base_qindex) >> 2;
-  } else if (!cpi->rc.is_src_frame_alt_ref &&
+    rc->last_q[KEY_FRAME] = cm->base_qindex;
+    rc->avg_frame_qindex[KEY_FRAME] = ROUND_POWER_OF_TWO(
+        3 * rc->avg_frame_qindex[KEY_FRAME] + cm->base_qindex, 2);
+  } else if (!rc->is_src_frame_alt_ref &&
              (cpi->refresh_golden_frame || cpi->refresh_alt_ref_frame)) {
-    cpi->rc.last_q[2] = cm->base_qindex;
-    cpi->rc.avg_frame_qindex[2] =
-        (2 + 3 * cpi->rc.avg_frame_qindex[2] + cm->base_qindex) >> 2;
+    rc->last_q[2] = cm->base_qindex;
+    rc->avg_frame_qindex[2] = ROUND_POWER_OF_TWO(
+        3 * rc->avg_frame_qindex[2] + cm->base_qindex, 2);
   } else {
-    cpi->rc.last_q[INTER_FRAME] = cm->base_qindex;
-    cpi->rc.avg_frame_qindex[INTER_FRAME] =
-        (2 + 3 * cpi->rc.avg_frame_qindex[INTER_FRAME] +
-         cm->base_qindex) >> 2;
-    cpi->rc.ni_frames++;
-    cpi->rc.tot_q += vp9_convert_qindex_to_q(cm->base_qindex);
-    cpi->rc.avg_q = cpi->rc.tot_q / (double)cpi->rc.ni_frames;
+    rc->last_q[INTER_FRAME] = cm->base_qindex;
+    rc->avg_frame_qindex[INTER_FRAME] = ROUND_POWER_OF_TWO(
+        3 * rc->avg_frame_qindex[INTER_FRAME] + cm->base_qindex, 2);
+    rc->ni_frames++;
+    rc->tot_q += vp9_convert_qindex_to_q(cm->base_qindex);
+    rc->avg_q = rc->tot_q / (double)rc->ni_frames;
 
     // Calculate the average Q for normal inter frames (not key or GFU frames).
-    cpi->rc.ni_tot_qi += cm->base_qindex;
-    cpi->rc.ni_av_qi = cpi->rc.ni_tot_qi / cpi->rc.ni_frames;
+    rc->ni_tot_qi += cm->base_qindex;
+    rc->ni_av_qi = rc->ni_tot_qi / rc->ni_frames;
   }
 
   // Keep record of last boosted (KF/KF/ARF) Q value.
@@ -903,38 +902,34 @@ void vp9_rc_postencode_update(VP9_COMP *cpi, uint64_t bytes_used) {
   // If all mbs in this group are skipped only update if the Q value is
   // better than that already stored.
   // This is used to help set quality in forced key frames to reduce popping
-  if ((cm->base_qindex < cpi->rc.last_boosted_qindex) ||
+  if ((cm->base_qindex < rc->last_boosted_qindex) ||
       ((cpi->static_mb_pct < 100) &&
        ((cm->frame_type == KEY_FRAME) || cpi->refresh_alt_ref_frame ||
-        (cpi->refresh_golden_frame && !cpi->rc.is_src_frame_alt_ref)))) {
-    cpi->rc.last_boosted_qindex = cm->base_qindex;
+        (cpi->refresh_golden_frame && !rc->is_src_frame_alt_ref)))) {
+    rc->last_boosted_qindex = cm->base_qindex;
   }
 
-  vp9_update_buffer_level(cpi, cpi->rc.projected_frame_size);
+  vp9_update_buffer_level(cpi, rc->projected_frame_size);
 
   // Rolling monitors of whether we are over or underspending used to help
   // regulate min and Max Q in two pass.
   if (cm->frame_type != KEY_FRAME) {
-    cpi->rc.rolling_target_bits =
-        ((cpi->rc.rolling_target_bits * 3) +
-         cpi->rc.this_frame_target + 2) / 4;
-    cpi->rc.rolling_actual_bits =
-        ((cpi->rc.rolling_actual_bits * 3) +
-         cpi->rc.projected_frame_size + 2) / 4;
-    cpi->rc.long_rolling_target_bits =
-        ((cpi->rc.long_rolling_target_bits * 31) +
-         cpi->rc.this_frame_target + 16) / 32;
-    cpi->rc.long_rolling_actual_bits =
-        ((cpi->rc.long_rolling_actual_bits * 31) +
-         cpi->rc.projected_frame_size + 16) / 32;
+    rc->rolling_target_bits = ROUND_POWER_OF_TWO(
+        rc->rolling_target_bits * 3 + rc->this_frame_target, 2);
+    rc->rolling_actual_bits = ROUND_POWER_OF_TWO(
+        rc->rolling_actual_bits * 3 + rc->projected_frame_size, 2);
+    rc->long_rolling_target_bits = ROUND_POWER_OF_TWO(
+        rc->long_rolling_target_bits * 31 + rc->this_frame_target, 5);
+    rc->long_rolling_actual_bits = ROUND_POWER_OF_TWO(
+        rc->long_rolling_actual_bits * 31 + rc->projected_frame_size, 5);
   }
 
   // Actual bits spent
-  cpi->rc.total_actual_bits += cpi->rc.projected_frame_size;
+  rc->total_actual_bits += rc->projected_frame_size;
 
   // Debug stats
-  cpi->rc.total_target_vs_actual += (cpi->rc.this_frame_target -
-                                     cpi->rc.projected_frame_size);
+  rc->total_target_vs_actual += (rc->this_frame_target -
+                                 rc->projected_frame_size);
 
 #ifndef DISABLE_RC_LONG_TERM_MEM
   // Update bits left to the kf and gf groups to account for overshoot or
@@ -952,8 +947,8 @@ void vp9_rc_postencode_update(VP9_COMP *cpi, uint64_t bytes_used) {
   }
 #endif
 
-  if (cpi->oxcf.play_alternate && cpi->refresh_alt_ref_frame
-      && (cm->frame_type != KEY_FRAME))
+  if (cpi->oxcf.play_alternate && cpi->refresh_alt_ref_frame &&
+      (cm->frame_type != KEY_FRAME))
     // Update the alternate reference frame stats as appropriate.
     update_alt_ref_frame_stats(cpi);
   else
@@ -961,10 +956,10 @@ void vp9_rc_postencode_update(VP9_COMP *cpi, uint64_t bytes_used) {
     update_golden_frame_stats(cpi);
 
   if (cm->frame_type == KEY_FRAME)
-    cpi->rc.frames_since_key = 0;
+    rc->frames_since_key = 0;
   if (cm->show_frame) {
-    cpi->rc.frames_since_key++;
-    cpi->rc.frames_to_key--;
+    rc->frames_since_key++;
+    rc->frames_to_key--;
   }
 }
 
