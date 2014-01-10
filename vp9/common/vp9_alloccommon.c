@@ -85,7 +85,7 @@ int vp9_resize_frame_buffers(VP9_COMMON *cm, int width, int height) {
   int mi_size;
 
   if (vp9_realloc_frame_buffer(&cm->post_proc_buffer, width, height, ss_x, ss_y,
-                               VP9BORDERINPIXELS, NULL, NULL, NULL) < 0)
+                               VP9_DEC_BORDER_IN_PIXELS, NULL, NULL, NULL) < 0)
     goto fail;
 
   set_mb_mi(cm, aligned_width, aligned_height);
@@ -154,7 +154,7 @@ int vp9_alloc_frame_buffers(VP9_COMMON *cm, int width, int height) {
   for (i = 0; i < cm->fb_count; i++) {
     cm->fb_idx_ref_cnt[i] = 0;
     if (vp9_alloc_frame_buffer(&cm->yv12_fb[i], width, height, ss_x, ss_y,
-                               VP9BORDERINPIXELS) < 0)
+                               VP9_ENC_BORDER_IN_PIXELS) < 0)
       goto fail;
   }
 
@@ -167,7 +167,7 @@ int vp9_alloc_frame_buffers(VP9_COMMON *cm, int width, int height) {
   }
 
   if (vp9_alloc_frame_buffer(&cm->post_proc_buffer, width, height, ss_x, ss_y,
-                             VP9BORDERINPIXELS) < 0)
+                             VP9_ENC_BORDER_IN_PIXELS) < 0)
     goto fail;
 
   set_mb_mi(cm, aligned_width, aligned_height);

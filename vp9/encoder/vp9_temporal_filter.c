@@ -227,7 +227,7 @@ static void temporal_filter_iterate_c(VP9_COMP *cpi,
   for (mb_row = 0; mb_row < mb_rows; mb_row++) {
 #if ALT_REF_MC_ENABLED
     // Source frames are extended to 16 pixels.  This is different than
-    //  L/A/G reference frames that have a border of 32 (VP9BORDERINPIXELS)
+    //  L/A/G reference frames that have a border of 32 (VP9ENCBORDERINPIXELS)
     // A 6/8 tap filter is used for motion search.  This requires 2 pixels
     //  before and 3 pixels after.  So the largest Y mv on a border would
     //  then be 16 - VP9_INTERP_EXTEND. The UV blocks are half the size of the

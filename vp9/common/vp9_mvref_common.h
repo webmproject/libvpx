@@ -32,8 +32,10 @@ static INLINE void vp9_find_mv_refs(const VP9_COMMON *cm, const MACROBLOCKD *xd,
                        mv_ref_list, -1, mi_row, mi_col);
 }
 
-#define LEFT_TOP_MARGIN     ((VP9BORDERINPIXELS - VP9_INTERP_EXTEND) << 3)
-#define RIGHT_BOTTOM_MARGIN ((VP9BORDERINPIXELS - VP9_INTERP_EXTEND) << 3)
+#define LEFT_TOP_MARGIN     ((VP9_ENC_BORDER_IN_PIXELS  \
+                            - VP9_INTERP_EXTEND) << 3)
+#define RIGHT_BOTTOM_MARGIN ((VP9_ENC_BORDER_IN_PIXELS  \
+                            - VP9_INTERP_EXTEND) << 3)
 
 // check a list of motion vectors by sad score using a number rows of pixels
 // above and a number cols of pixels in the left to select the one with best

@@ -73,7 +73,7 @@ struct lookahead_ctx * vp9_lookahead_init(unsigned int width,
     for (i = 0; i < depth; i++)
       if (vp9_alloc_frame_buffer(&ctx->buf[i].img,
                                  width, height, subsampling_x, subsampling_y,
-                                 VP9BORDERINPIXELS))
+                                 VP9_ENC_BORDER_IN_PIXELS))
         goto bail;
   }
   return ctx;

@@ -18,10 +18,11 @@ extern "C" {
 #include "vpx/vpx_external_frame_buffer.h"
 #include "vpx/vpx_integer.h"
 
-#define VP8BORDERINPIXELS       32
-#define VP9INNERBORDERINPIXELS  96
-#define VP9BORDERINPIXELS      160
-#define VP9_INTERP_EXTEND        4
+#define VP8BORDERINPIXELS           32
+#define VP9INNERBORDERINPIXELS      96
+#define VP9_INTERP_EXTEND           4
+#define VP9_ENC_BORDER_IN_PIXELS    160
+#define VP9_DEC_BORDER_IN_PIXELS    32
 
   typedef struct yv12_buffer_config {
     int   y_width;
