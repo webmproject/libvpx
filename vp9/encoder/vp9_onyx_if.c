@@ -789,6 +789,7 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
         sf->use_rd_breakout = 1;
         sf->adaptive_motion_search = 1;
         sf->adaptive_pred_filter_type = 2;
+        sf->reference_masking = 1;
         sf->auto_mv_step_size = 1;
 
         sf->disable_filter_search_var_thresh = 50;
@@ -825,6 +826,7 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
         sf->use_rd_breakout = 1;
         sf->adaptive_motion_search = 1;
         sf->adaptive_pred_filter_type = 2;
+        sf->reference_masking = 1;
         sf->auto_mv_step_size = 1;
 
         sf->disable_filter_search_var_thresh = 100;
@@ -859,6 +861,7 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
         sf->use_rd_breakout = 1;
         sf->adaptive_motion_search = 1;
         sf->adaptive_pred_filter_type = 2;
+        sf->reference_masking = 1;
         sf->auto_mv_step_size = 1;
 
         sf->disable_filter_search_var_thresh = 200;

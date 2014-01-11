@@ -1923,9 +1923,6 @@ static void encode_sb_row(VP9_COMP *cpi, const TileInfo *const tile,
 
     vp9_zero(cpi->mb.pred_mv);
 
-    if (cpi->sf.reference_masking)
-      rd_pick_reference_frame(cpi, tile, mi_row, mi_col);
-
     if (cpi->sf.use_lastframe_partitioning ||
         cpi->sf.use_one_partition_size_always ) {
       const int idx_str = cm->mode_info_stride * mi_row + mi_col;
