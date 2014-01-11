@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//9fk\u003d",
+        "filename": "vp9/encoder/vp9_onyx_int.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 567,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-01-11T00:16:51Z",
+      "side": 1,
+      "message": "Good point! I\u0027m changing uint32_t to uint64_t which is more that enough for samples. I think the same is applied to total_sq_error, so it is also uint64_t now. By the way, we still convert both these values to double inside vp9_mse2psnr, so it is probably worth to redesign this function to work with uint64_t values.",
+      "parentUuid": "AAAAdn//9gE\u003d",
+      "revId": "a5cddb5cdc07a9e3083dc0dfb487c2fc369cce45",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//9gI\u003d",
         "filename": "vp9/encoder/vp9_onyx_int.h",
         "patchSetId": 3
@@ -30,6 +48,24 @@
       "writtenOn": "2014-01-11T00:00:23Z",
       "side": 1,
       "message": "same here",
+      "revId": "a5cddb5cdc07a9e3083dc0dfb487c2fc369cce45",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//9fg\u003d",
+        "filename": "vp9/encoder/vp9_onyx_int.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 574,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-01-11T00:16:51Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//9gI\u003d",
       "revId": "a5cddb5cdc07a9e3083dc0dfb487c2fc369cce45",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
