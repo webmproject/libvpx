@@ -26,8 +26,6 @@ const int mi_width_log2_lookup[BLOCK_SIZES] =
   {0, 0, 0, 0, 0, 1, 1, 1, 2, 2, 2, 3, 3};
 const int num_8x8_blocks_wide_lookup[BLOCK_SIZES] =
   {1, 1, 1, 1, 1, 2, 2, 2, 4, 4, 4, 8, 8};
-const int mi_height_log2_lookup[BLOCK_SIZES] =
-  {0, 0, 0, 0, 1, 0, 1, 2, 1, 2, 3, 2, 3};
 const int num_8x8_blocks_high_lookup[BLOCK_SIZES] =
   {1, 1, 1, 1, 2, 1, 2, 4, 2, 4, 8, 4, 8};
 
