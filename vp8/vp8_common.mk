@@ -188,7 +188,7 @@ VP8_COMMON_SRCS-$(HAVE_NEON)  += common/arm/neon/vp8_subpixelvariance16x16_neon$
 VP8_COMMON_SRCS-$(HAVE_NEON)  += common/arm/neon/vp8_subpixelvariance16x16s_neon$(ASM)
 
 # common (neon intrinsics)
-VP8_COMMON_SRCS-$(HAVE_NEON)  += common/arm/neon/bilinearpredict_neon_intrinsics.c
+VP8_COMMON_SRCS-$(HAVE_NEON)  += common/arm/neon/bilinearpredict_neon.c
 
 
 $(eval $(call rtcd_h_template,vp8_rtcd,vp8/common/rtcd_defs.sh))
