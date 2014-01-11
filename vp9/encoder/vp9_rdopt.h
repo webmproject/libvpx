@@ -27,6 +27,15 @@ void vp9_initialize_rd_consts(VP9_COMP *cpi);
 
 void vp9_initialize_me_consts(VP9_COMP *cpi, int qindex);
 
+void vp9_setup_buffer_inter(VP9_COMP *cpi, MACROBLOCK *x,
+                            const TileInfo *const tile,
+                            int idx, MV_REFERENCE_FRAME frame_type,
+                            BLOCK_SIZE block_size,
+                            int mi_row, int mi_col,
+                            int_mv frame_nearest_mv[MAX_REF_FRAMES],
+                            int_mv frame_near_mv[MAX_REF_FRAMES],
+                            struct buf_2d yv12_mb[4][MAX_MB_PLANE]);
+
 void vp9_rd_pick_intra_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
                                int *r, int64_t *d, BLOCK_SIZE bsize,
                                PICK_MODE_CONTEXT *ctx, int64_t best_rd);

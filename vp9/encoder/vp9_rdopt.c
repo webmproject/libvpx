@@ -2276,14 +2276,14 @@ static void setup_pred_block(const MACROBLOCKD *xd,
   }
 }
 
-static void setup_buffer_inter(VP9_COMP *cpi, MACROBLOCK *x,
-                               const TileInfo *const tile,
-                               int idx, MV_REFERENCE_FRAME frame_type,
-                               BLOCK_SIZE block_size,
-                               int mi_row, int mi_col,
-                               int_mv frame_nearest_mv[MAX_REF_FRAMES],
-                               int_mv frame_near_mv[MAX_REF_FRAMES],
-                               struct buf_2d yv12_mb[4][MAX_MB_PLANE]) {
+void vp9_setup_buffer_inter(VP9_COMP *cpi, MACROBLOCK *x,
+                            const TileInfo *const tile,
+                            int idx, MV_REFERENCE_FRAME frame_type,
+                            BLOCK_SIZE block_size,
+                            int mi_row, int mi_col,
+                            int_mv frame_nearest_mv[MAX_REF_FRAMES],
+                            int_mv frame_near_mv[MAX_REF_FRAMES],
+                            struct buf_2d yv12_mb[4][MAX_MB_PLANE]) {
   VP9_COMMON *cm = &cpi->common;
   YV12_BUFFER_CONFIG *yv12 = &cm->yv12_fb[cpi->common.ref_frame_map[idx]];
   MACROBLOCKD *const xd = &x->e_mbd;
@@ -3178,9 +3178,9 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
   for (ref_frame = LAST_FRAME; ref_frame <= ALTREF_FRAME; ++ref_frame) {
     x->pred_mv_sad[ref_frame] = INT_MAX;
     if (cpi->ref_frame_flags & flag_list[ref_frame]) {
-      setup_buffer_inter(cpi, x, tile, get_ref_frame_idx(cpi, ref_frame),
-                         ref_frame, block_size, mi_row, mi_col,
-                         frame_mv[NEARESTMV], frame_mv[NEARMV], yv12_mb);
+      vp9_setup_buffer_inter(cpi, x, tile, get_ref_frame_idx(cpi, ref_frame),
+                             ref_frame, block_size, mi_row, mi_col,
+                             frame_mv[NEARESTMV], frame_mv[NEARMV], yv12_mb);
     }
     frame_mv[NEWMV][ref_frame].as_int = INVALID_MV;
     frame_mv[ZEROMV][ref_frame].as_int = 0;
@@ -3803,10 +3803,10 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
 
   for (ref_frame = LAST_FRAME; ref_frame <= ALTREF_FRAME; ref_frame++) {
     if (cpi->ref_frame_flags & flag_list[ref_frame]) {
-      setup_buffer_inter(cpi, x, tile, get_ref_frame_idx(cpi, ref_frame),
-                         ref_frame, block_size, mi_row, mi_col,
-                         frame_mv[NEARESTMV], frame_mv[NEARMV],
-                         yv12_mb);
+      vp9_setup_buffer_inter(cpi, x, tile, get_ref_frame_idx(cpi, ref_frame),
+                             ref_frame, block_size, mi_row, mi_col,
+                             frame_mv[NEARESTMV], frame_mv[NEARMV],
+                             yv12_mb);
     }
     frame_mv[NEWMV][ref_frame].as_int = INVALID_MV;
     frame_mv[ZEROMV][ref_frame].as_int = 0;
