@@ -793,58 +793,48 @@ void vp9_first_pass(VP9_COMP *cpi) {
 
   vp9_clear_system_state();  // __asm emms;
   {
-    double weight = 0.0;
-
     FIRSTPASS_STATS fps;
 
-    fps.frame      = cm->current_video_frame;
-    fps.intra_error = (double)(intra_error >> 8);
-    fps.coded_error = (double)(coded_error >> 8);
-    fps.sr_coded_error = (double)(sr_coded_error >> 8);
-    weight = simple_weight(cpi->Source);
-
-
-    if (weight < 0.1)
-      weight = 0.1;
-
-    fps.ssim_weighted_pred_err = fps.coded_error * weight;
-
-    fps.pcnt_inter  = 0.0;
+    fps.frame = cm->current_video_frame;
+    fps.intra_error = intra_error >> 8;
+    fps.coded_error = coded_error >> 8;
+    fps.sr_coded_error = sr_coded_error >> 8;
+    fps.ssim_weighted_pred_err = fps.coded_error *
+                                     MAX(0.1, simple_weight(cpi->Source));
+    fps.pcnt_inter = 0.0;
     fps.pcnt_motion = 0.0;
-    fps.MVr        = 0.0;
-    fps.mvr_abs     = 0.0;
-    fps.MVc        = 0.0;
-    fps.mvc_abs     = 0.0;
-    fps.MVrv       = 0.0;
-    fps.MVcv       = 0.0;
-    fps.mv_in_out_count  = 0.0;
+    fps.MVr = 0.0;
+    fps.mvr_abs = 0.0;
+    fps.MVc = 0.0;
+    fps.mvc_abs = 0.0;
+    fps.MVrv = 0.0;
+    fps.MVcv = 0.0;
+    fps.mv_in_out_count = 0.0;
     fps.new_mv_count = 0.0;
-    fps.count      = 1.0;
+    fps.count = 1.0;
 
-    fps.pcnt_inter   = 1.0 * (double)intercount / cm->MBs;
-    fps.pcnt_second_ref = 1.0 * (double)second_ref_count / cm->MBs;
-    fps.pcnt_neutral = 1.0 * (double)neutral_count / cm->MBs;
+    fps.pcnt_inter = (double)intercount / cm->MBs;
+    fps.pcnt_second_ref = (double)second_ref_count / cm->MBs;
+    fps.pcnt_neutral = (double)neutral_count / cm->MBs;
 
     if (mvcount > 0) {
-      fps.MVr = (double)sum_mvr / (double)mvcount;
-      fps.mvr_abs = (double)sum_mvr_abs / (double)mvcount;
-      fps.MVc = (double)sum_mvc / (double)mvcount;
-      fps.mvc_abs = (double)sum_mvc_abs / (double)mvcount;
-      fps.MVrv = ((double)sum_mvrs - (fps.MVr * fps.MVr / (double)mvcount)) /
-                 (double)mvcount;
-      fps.MVcv = ((double)sum_mvcs - (fps.MVc * fps.MVc / (double)mvcount)) /
-                 (double)mvcount;
-      fps.mv_in_out_count = (double)sum_in_vectors / (double)(mvcount * 2);
+      fps.MVr = (double)sum_mvr / mvcount;
+      fps.mvr_abs = (double)sum_mvr_abs / mvcount;
+      fps.MVc = (double)sum_mvc / mvcount;
+      fps.mvc_abs = (double)sum_mvc_abs / mvcount;
+      fps.MVrv = ((double)sum_mvrs - (fps.MVr * fps.MVr / mvcount)) /
+                     mvcount;
+      fps.MVcv = ((double)sum_mvcs - (fps.MVc * fps.MVc / mvcount)) /
+                     mvcount;
+      fps.mv_in_out_count = (double)sum_in_vectors / (mvcount * 2);
       fps.new_mv_count = new_mv_count;
-
       fps.pcnt_motion = 1.0 * (double)mvcount / cpi->common.MBs;
     }
 
     // TODO(paulwilkins):  Handle the case when duration is set to 0, or
     // something less than the full time between subsequent values of
     // cpi->source_time_stamp.
-    fps.duration = (double)(cpi->source->ts_end
-                            - cpi->source->ts_start);
+    fps.duration = (double)(cpi->source->ts_end - cpi->source->ts_start);
 
     // don't want to do output stats with a stack variable!
     cpi->twopass.this_frame_stats = fps;
