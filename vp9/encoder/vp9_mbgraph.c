@@ -23,7 +23,7 @@
 
 static unsigned int do_16x16_motion_iteration(VP9_COMP *cpi,
                                               const MV *ref_mv,
-                                              int_mv *dst_mv,
+                                              MV *dst_mv,
                                               int mb_row,
                                               int mb_col) {
   MACROBLOCK   *const x  = &cpi->mb;
@@ -35,7 +35,7 @@ static unsigned int do_16x16_motion_iteration(VP9_COMP *cpi,
   const int tmp_col_max = x->mv_col_max;
   const int tmp_row_min = x->mv_row_min;
   const int tmp_row_max = x->mv_row_max;
-  int_mv ref_full;
+  MV ref_full;
 
   // Further step/diamond searches as necessary
   int step_param = cpi->sf.reduce_first_step_size +
@@ -44,12 +44,12 @@ static unsigned int do_16x16_motion_iteration(VP9_COMP *cpi,
 
   vp9_set_mv_search_range(x, ref_mv);
 
-  ref_full.as_mv.col = ref_mv->col >> 3;
-  ref_full.as_mv.row = ref_mv->row >> 3;
+  ref_full.col = ref_mv->col >> 3;
+  ref_full.row = ref_mv->row >> 3;
 
   /*cpi->sf.search_method == HEX*/
-  best_err = vp9_hex_search(x, &ref_full.as_mv, step_param, x->errorperbit,
-                            0, &v_fn_ptr, 0, ref_mv, &dst_mv->as_mv);
+  best_err = vp9_hex_search(x, &ref_full, step_param, x->errorperbit,
+                            0, &v_fn_ptr, 0, ref_mv, dst_mv);
 
   // Try sub-pixel MC
   // if (bestsme > error_thresh && bestsme < INT_MAX)
@@ -57,15 +57,14 @@ static unsigned int do_16x16_motion_iteration(VP9_COMP *cpi,
     int distortion;
     unsigned int sse;
     best_err = cpi->find_fractional_mv_step(
-        x,
-        &dst_mv->as_mv, ref_mv,
+        x, dst_mv, ref_mv,
         cpi->common.allow_high_precision_mv,
         x->errorperbit, &v_fn_ptr,
         0, cpi->sf.subpel_iters_per_step, NULL, NULL,
         & distortion, &sse);
   }
 
-  vp9_set_mbmode_and_mvs(x, NEWMV, dst_mv);
+  vp9_set_mbmode_and_mvs(xd, NEWMV, dst_mv);
   vp9_build_inter_predictors_sby(xd, mb_row, mb_col, BLOCK_16X16);
   best_err = vp9_sad16x16(x->plane[0].src.buf, x->plane[0].src.stride,
                           xd->plane[0].dst.buf, xd->plane[0].dst.stride,
@@ -96,7 +95,7 @@ static int do_16x16_motion_search(VP9_COMP *cpi, const int_mv *ref_mv,
 
   // Test last reference frame using the previous best mv as the
   // starting point (best reference) for the search
-  tmp_err = do_16x16_motion_iteration(cpi, &ref_mv->as_mv, &tmp_mv,
+  tmp_err = do_16x16_motion_iteration(cpi, &ref_mv->as_mv, &tmp_mv.as_mv,
                                       mb_row, mb_col);
   if (tmp_err < err) {
     err = tmp_err;
@@ -110,7 +109,7 @@ static int do_16x16_motion_search(VP9_COMP *cpi, const int_mv *ref_mv,
     int_mv zero_ref_mv, tmp_mv;
 
     zero_ref_mv.as_int = 0;
-    tmp_err = do_16x16_motion_iteration(cpi, &zero_ref_mv.as_mv, &tmp_mv,
+    tmp_err = do_16x16_motion_iteration(cpi, &zero_ref_mv.as_mv, &tmp_mv.as_mv,
                                         mb_row, mb_col);
     if (tmp_err < err) {
       dst_mv->as_int = tmp_mv.as_int;
