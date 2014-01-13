@@ -167,11 +167,10 @@ void usage_exit() {
   exit(EXIT_FAILURE);
 }
 
-static int raw_read_frame(struct VpxInputContext *input_ctx, uint8_t **buffer,
+static int raw_read_frame(FILE *infile, uint8_t **buffer,
                           size_t *bytes_read, size_t *buffer_size) {
   char raw_hdr[RAW_FRAME_HDR_SZ];
   size_t frame_size = 0;
-  FILE *infile = input_ctx->file;
 
   if (fread(raw_hdr, RAW_FRAME_HDR_SZ, 1, infile) != 1) {
     if (!feof(infile))
@@ -221,10 +220,10 @@ static int read_frame(struct VpxDecInputContext *input, uint8_t **buf,
       return webm_read_frame(input->webm_ctx,
                              buf, bytes_in_buffer, buffer_size);
     case FILE_TYPE_RAW:
-      return raw_read_frame(input->vpx_input_ctx,
+      return raw_read_frame(input->vpx_input_ctx->file,
                             buf, bytes_in_buffer, buffer_size);
     case FILE_TYPE_IVF:
-      return ivf_read_frame(input->vpx_input_ctx,
+      return ivf_read_frame(input->vpx_input_ctx->file,
                             buf, bytes_in_buffer, buffer_size);
     default:
       return 1;
