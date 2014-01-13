@@ -1653,16 +1653,20 @@ VP9_PTR vp9_create_compressor(VP9_CONFIG *oxcf) {
   cpi->bytes = 0;
 
   if (cpi->b_calculate_psnr) {
-    cpi->total_sq_error = 0.0;
-    cpi->total_sq_error2 = 0.0;
     cpi->total_y = 0.0;
     cpi->total_u = 0.0;
     cpi->total_v = 0.0;
     cpi->total = 0.0;
+    cpi->total_sq_error = 0;
+    cpi->total_samples = 0;
+
     cpi->totalp_y = 0.0;
     cpi->totalp_u = 0.0;
     cpi->totalp_v = 0.0;
     cpi->totalp = 0.0;
+    cpi->totalp_sq_error = 0;
+    cpi->totalp_samples = 0;
+
     cpi->tot_recode_hits = 0;
     cpi->summed_quality = 0;
     cpi->summed_weights = 0;
@@ -1897,21 +1901,20 @@ void vp9_remove_compressor(VP9_PTR *ptr) {
                   / time_encoded;
 
       if (cpi->b_calculate_psnr) {
-        YV12_BUFFER_CONFIG *lst_yv12 = get_ref_frame_buffer(cpi, LAST_FRAME);
-        double samples = 3.0 / 2 * cpi->count *
-                         lst_yv12->y_width * lst_yv12->y_height;
-        double total_psnr = vp9_mse2psnr(samples, 255.0, cpi->total_sq_error);
-        double total_psnr2 = vp9_mse2psnr(samples, 255.0, cpi->total_sq_error2);
-        double total_ssim = 100 * pow(cpi->summed_quality /
-                                      cpi->summed_weights, 8.0);
-        double total_ssimp = 100 * pow(cpi->summedp_quality /
-                                       cpi->summedp_weights, 8.0);
+        const double total_psnr = vp9_mse2psnr(cpi->total_samples, 255.0,
+                                               cpi->total_sq_error);
+        const double totalp_psnr = vp9_mse2psnr(cpi->totalp_samples, 255.0,
+                                                cpi->totalp_sq_error);
+        const double total_ssim = 100 * pow(cpi->summed_quality /
+                                                cpi->summed_weights, 8.0);
+        const double totalp_ssim = 100 * pow(cpi->summedp_quality /
+                                                cpi->summedp_weights, 8.0);
 
         fprintf(f, "Bitrate\tAVGPsnr\tGLBPsnr\tAVPsnrP\tGLPsnrP\t"
                 "VPXSSIM\tVPSSIMP\t  Time(ms)\n");
         fprintf(f, "%7.2f\t%7.3f\t%7.3f\t%7.3f\t%7.3f\t%7.3f\t%7.3f\t%8.0f\n",
                 dr, cpi->total / cpi->count, total_psnr,
-                cpi->totalp / cpi->count, total_psnr2, total_ssim, total_ssimp,
+                cpi->totalp / cpi->count, totalp_psnr, total_ssim, totalp_ssim,
                 total_encode_time);
       }
 
@@ -2055,8 +2058,8 @@ void vp9_remove_compressor(VP9_PTR *ptr) {
 }
 
 
-static uint64_t calc_plane_error(uint8_t *orig, int orig_stride,
-                                 uint8_t *recon, int recon_stride,
+static uint64_t calc_plane_error(const uint8_t *orig, int orig_stride,
+                                 const uint8_t *recon, int recon_stride,
                                  unsigned int cols, unsigned int rows) {
   unsigned int row, col;
   uint64_t total_sse = 0;
@@ -2073,8 +2076,8 @@ static uint64_t calc_plane_error(uint8_t *orig, int orig_stride,
     /* Handle odd-sized width */
     if (col < cols) {
       unsigned int border_row, border_col;
-      uint8_t *border_orig = orig;
-      uint8_t *border_recon = recon;
+      const uint8_t *border_orig = orig;
+      const uint8_t *border_recon = recon;
 
       for (border_row = 0; border_row < 16; border_row++) {
         for (border_col = col; border_col < cols; border_col++) {
@@ -2105,51 +2108,57 @@ static uint64_t calc_plane_error(uint8_t *orig, int orig_stride,
   return total_sse;
 }
 
+typedef struct {
+  double psnr[4];       // total/y/u/v
+  uint64_t sse[4];      // total/y/u/v
+  uint32_t samples[4];  // total/y/u/v
+} PSNR_STATS;
 
-static void generate_psnr_packet(VP9_COMP *cpi) {
-  YV12_BUFFER_CONFIG      *orig = cpi->Source;
-  YV12_BUFFER_CONFIG      *recon = cpi->common.frame_to_show;
-  struct vpx_codec_cx_pkt  pkt;
-  uint64_t                 sse;
-  int                      i;
-  unsigned int             width = orig->y_crop_width;
-  unsigned int             height = orig->y_crop_height;
+static void calc_psnr(const YV12_BUFFER_CONFIG *a, const YV12_BUFFER_CONFIG *b,
+                      PSNR_STATS *psnr) {
+  const int widths[3]        = {a->y_width,  a->uv_width,  a->uv_width };
+  const int heights[3]       = {a->y_height, a->uv_height, a->uv_height};
+  const uint8_t *a_planes[3] = {a->y_buffer, a->u_buffer,  a->v_buffer };
+  const int a_strides[3]     = {a->y_stride, a->uv_stride, a->uv_stride};
+  const uint8_t *b_planes[3] = {b->y_buffer, b->u_buffer,  b->v_buffer };
+  const int b_strides[3]     = {b->y_stride, b->uv_stride, b->uv_stride};
+  int i;
+  uint64_t total_sse = 0;
+  uint32_t total_samples = 0;
 
-  pkt.kind = VPX_CODEC_PSNR_PKT;
-  sse = calc_plane_error(orig->y_buffer, orig->y_stride,
-                         recon->y_buffer, recon->y_stride,
-                         width, height);
-  pkt.data.psnr.sse[0] = sse;
-  pkt.data.psnr.sse[1] = sse;
-  pkt.data.psnr.samples[0] = width * height;
-  pkt.data.psnr.samples[1] = width * height;
+  for (i = 0; i < 3; ++i) {
+    const int w = widths[i];
+    const int h = heights[i];
+    const uint32_t samples = w * h;
+    const double sse = calc_plane_error(a_planes[i], a_strides[i],
+                                        b_planes[i], b_strides[i],
+                                        w, h);
+    psnr->sse[1 + i] = sse;
+    psnr->samples[1 + i] = samples;
+    psnr->psnr[1 + i] = vp9_mse2psnr(samples, 255.0, sse);
 
-  width = orig->uv_crop_width;
-  height = orig->uv_crop_height;
+    total_sse += sse;
+    total_samples += samples;
+  }
 
-  sse = calc_plane_error(orig->u_buffer, orig->uv_stride,
-                         recon->u_buffer, recon->uv_stride,
-                         width, height);
-  pkt.data.psnr.sse[0] += sse;
-  pkt.data.psnr.sse[2] = sse;
-  pkt.data.psnr.samples[0] += width * height;
-  pkt.data.psnr.samples[2] = width * height;
-
-  sse = calc_plane_error(orig->v_buffer, orig->uv_stride,
-                         recon->v_buffer, recon->uv_stride,
-                         width, height);
-  pkt.data.psnr.sse[0] += sse;
-  pkt.data.psnr.sse[3] = sse;
-  pkt.data.psnr.samples[0] += width * height;
-  pkt.data.psnr.samples[3] = width * height;
-
-  for (i = 0; i < 4; i++)
-    pkt.data.psnr.psnr[i] = vp9_mse2psnr(pkt.data.psnr.samples[i], 255.0,
-                                         (double)pkt.data.psnr.sse[i]);
-
-  vpx_codec_pkt_list_add(cpi->output_pkt_list, &pkt);
+  psnr->sse[0] = total_sse;
+  psnr->samples[0] = total_samples;
+  psnr->psnr[0] = vp9_mse2psnr(total_samples, 255.0, total_sse);
 }
 
+static void generate_psnr_packet(VP9_COMP *cpi) {
+  struct vpx_codec_cx_pkt pkt;
+  int i;
+  PSNR_STATS psnr;
+  calc_psnr(cpi->Source, cpi->common.frame_to_show, &psnr);
+  for (i = 0; i < 4; ++i) {
+    pkt.data.psnr.samples[i] = psnr.samples[i];
+    pkt.data.psnr.sse[i] = psnr.sse[i];
+    pkt.data.psnr.psnr[i] = psnr.psnr[i];
+  }
+  pkt.kind = VPX_CODEC_PSNR_PKT;
+  vpx_codec_pkt_list_add(cpi->output_pkt_list, &pkt);
+}
 
 int vp9_use_as_reference(VP9_PTR ptr, int ref_frame_flags) {
   VP9_COMP *cpi = (VP9_COMP *)(ptr);
@@ -3606,76 +3615,43 @@ int vp9_get_compressed_data(VP9_PTR ptr, unsigned int *frame_flags,
       cpi->count++;
 
       if (cpi->b_calculate_psnr) {
-        double ye, ue, ve;
-        double frame_psnr;
-        YV12_BUFFER_CONFIG      *orig = cpi->Source;
-        YV12_BUFFER_CONFIG      *recon = cpi->common.frame_to_show;
-        YV12_BUFFER_CONFIG      *pp = &cm->post_proc_buffer;
-        int y_samples = orig->y_height * orig->y_width;
-        int uv_samples = orig->uv_height * orig->uv_width;
-        int t_samples = y_samples + 2 * uv_samples;
-        double sq_error;
+        YV12_BUFFER_CONFIG *orig = cpi->Source;
+        YV12_BUFFER_CONFIG *recon = cpi->common.frame_to_show;
+        YV12_BUFFER_CONFIG *pp = &cm->post_proc_buffer;
+        PSNR_STATS psnr;
+        calc_psnr(orig, recon, &psnr);
 
-        ye = (double)calc_plane_error(orig->y_buffer, orig->y_stride,
-                              recon->y_buffer, recon->y_stride,
-                              orig->y_crop_width, orig->y_crop_height);
+        cpi->total += psnr.psnr[0];
+        cpi->total_y += psnr.psnr[1];
+        cpi->total_u += psnr.psnr[2];
+        cpi->total_v += psnr.psnr[3];
+        cpi->total_sq_error += psnr.sse[0];
+        cpi->total_samples += psnr.samples[0];
 
-        ue = (double)calc_plane_error(orig->u_buffer, orig->uv_stride,
-                              recon->u_buffer, recon->uv_stride,
-                              orig->uv_crop_width, orig->uv_crop_height);
-
-        ve = (double)calc_plane_error(orig->v_buffer, orig->uv_stride,
-                              recon->v_buffer, recon->uv_stride,
-                              orig->uv_crop_width, orig->uv_crop_height);
-
-        sq_error = ye + ue + ve;
-
-        frame_psnr = vp9_mse2psnr(t_samples, 255.0, sq_error);
-
-        cpi->total_y += vp9_mse2psnr(y_samples, 255.0, ye);
-        cpi->total_u += vp9_mse2psnr(uv_samples, 255.0, ue);
-        cpi->total_v += vp9_mse2psnr(uv_samples, 255.0, ve);
-        cpi->total_sq_error += sq_error;
-        cpi->total  += frame_psnr;
         {
-          double frame_psnr2, frame_ssim2 = 0;
-          double weight = 0;
+          PSNR_STATS psnr2;
+          double frame_ssim2 = 0, weight = 0;
 #if CONFIG_VP9_POSTPROC
           vp9_deblock(cm->frame_to_show, &cm->post_proc_buffer,
                       cm->lf.filter_level * 10 / 6);
 #endif
           vp9_clear_system_state();
 
-          ye = (double)calc_plane_error(orig->y_buffer, orig->y_stride,
-                                pp->y_buffer, pp->y_stride,
-                                orig->y_crop_width, orig->y_crop_height);
+          calc_psnr(orig, pp, &psnr2);
 
-          ue = (double)calc_plane_error(orig->u_buffer, orig->uv_stride,
-                                pp->u_buffer, pp->uv_stride,
-                                orig->uv_crop_width, orig->uv_crop_height);
+          cpi->totalp += psnr2.psnr[0];
+          cpi->totalp_y += psnr2.psnr[1];
+          cpi->totalp_u += psnr2.psnr[2];
+          cpi->totalp_v += psnr2.psnr[3];
+          cpi->totalp_sq_error += psnr2.sse[0];
+          cpi->totalp_samples += psnr2.samples[0];
 
-          ve = (double)calc_plane_error(orig->v_buffer, orig->uv_stride,
-                                pp->v_buffer, pp->uv_stride,
-                                orig->uv_crop_width, orig->uv_crop_height);
-
-          sq_error = ye + ue + ve;
-
-          frame_psnr2 = vp9_mse2psnr(t_samples, 255.0, sq_error);
-
-          cpi->totalp_y += vp9_mse2psnr(y_samples, 255.0, ye);
-          cpi->totalp_u += vp9_mse2psnr(uv_samples, 255.0, ue);
-          cpi->totalp_v += vp9_mse2psnr(uv_samples, 255.0, ve);
-          cpi->total_sq_error2 += sq_error;
-          cpi->totalp  += frame_psnr2;
-
-          frame_ssim2 = vp9_calc_ssim(cpi->Source,
-                                      recon, 1, &weight);
+          frame_ssim2 = vp9_calc_ssim(orig, recon, 1, &weight);
 
           cpi->summed_quality += frame_ssim2 * weight;
           cpi->summed_weights += weight;
 
-          frame_ssim2 = vp9_calc_ssim(cpi->Source,
-                                      &cm->post_proc_buffer, 1, &weight);
+          frame_ssim2 = vp9_calc_ssim(orig, &cm->post_proc_buffer, 1, &weight);
 
           cpi->summedp_quality += frame_ssim2 * weight;
           cpi->summedp_weights += weight;
@@ -3693,8 +3669,7 @@ int vp9_get_compressed_data(VP9_PTR ptr, unsigned int *frame_flags,
 
       if (cpi->b_calculate_ssimg) {
         double y, u, v, frame_all;
-        frame_all =  vp9_calc_ssimg(cpi->Source, cm->frame_to_show,
-                                    &y, &u, &v);
+        frame_all = vp9_calc_ssimg(cpi->Source, cm->frame_to_show, &y, &u, &v);
         cpi->total_ssimg_y += y;
         cpi->total_ssimg_u += u;
         cpi->total_ssimg_v += v;
