@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//9OI\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 1642,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2014-01-13T18:12:25Z",
+      "side": 1,
+      "message": "non-blocking, but I would have preferred 0xf as in the original code for \"bit masking\" instead of 15.",
+      "revId": "13f7a03596b36a92a59e2836cf344a93d3c83c38",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
