@@ -1638,6 +1638,10 @@ static INLINE void mi_buf_restore(MACROBLOCK *x, struct buf_2d orig_src,
     x->e_mbd.plane[0].pre[1] = orig_pre[1];
 }
 
+static INLINE int mv_has_subpel(const MV *mv) {
+  return (mv->row & 0x0F) || (mv->col & 0x0F);
+}
+
 static void rd_check_segment_txsize(VP9_COMP *cpi, MACROBLOCK *x,
                                     const TileInfo *const tile,
                                     BEST_SEG_INFO *bsi_buf, int filter_idx,
@@ -1931,15 +1935,13 @@ static void rd_check_segment_txsize(VP9_COMP *cpi, MACROBLOCK *x,
 
         if (filter_idx > 0) {
           BEST_SEG_INFO *ref_bsi = bsi_buf;
-          subpelmv = (mode_mv[this_mode].as_mv.row & 0x0f) ||
-                     (mode_mv[this_mode].as_mv.col & 0x0f);
+          subpelmv = mv_has_subpel(&mode_mv[this_mode].as_mv);
           have_ref = mode_mv[this_mode].as_int ==
-                     ref_bsi->rdstat[i][mode_idx].mvs[0].as_int;
+                         ref_bsi->rdstat[i][mode_idx].mvs[0].as_int;
           if (has_second_rf) {
-            subpelmv |= (second_mode_mv[this_mode].as_mv.row & 0x0f) ||
-                        (second_mode_mv[this_mode].as_mv.col & 0x0f);
-            have_ref  &= second_mode_mv[this_mode].as_int ==
-                         ref_bsi->rdstat[i][mode_idx].mvs[1].as_int;
+            subpelmv |= mv_has_subpel(&second_mode_mv[this_mode].as_mv);
+            have_ref &= second_mode_mv[this_mode].as_int ==
+                            ref_bsi->rdstat[i][mode_idx].mvs[1].as_int;
           }
 
           if (filter_idx > 1 && !subpelmv && !have_ref) {
@@ -2770,12 +2772,9 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
 
   pred_exists = 0;
   // Are all MVs integer pel for Y and UV
-  intpel_mv = (mbmi->mv[0].as_mv.row & 15) == 0 &&
-      (mbmi->mv[0].as_mv.col & 15) == 0;
+  intpel_mv = !mv_has_subpel(&mbmi->mv[0].as_mv);
   if (is_comp_pred)
-    intpel_mv &= (mbmi->mv[1].as_mv.row & 15) == 0 &&
-        (mbmi->mv[1].as_mv.col & 15) == 0;
-
+    intpel_mv &= !mv_has_subpel(&mbmi->mv[1].as_mv);
 
   // Search for best switchable filter by checking the variance of
   // pred error irrespective of whether the filter will be used
