@@ -1393,6 +1393,10 @@ static void show_stream_config(struct stream_state *stream,
 static void open_output_file(struct stream_state *stream,
                              struct VpxEncoderConfig *global) {
   const char *fn = stream->config.out_fn;
+  const struct vpx_codec_enc_cfg *const cfg = &stream->config.cfg;
+
+  if (cfg->g_pass == VPX_RC_FIRST_PASS)
+    return;
 
   stream->file = strcmp(fn, "-") ? fopen(fn, "wb") : set_binary_mode(stdout);
 
@@ -1404,18 +1408,23 @@ static void open_output_file(struct stream_state *stream,
 
   if (stream->config.write_webm) {
     stream->ebml.stream = stream->file;
-    write_webm_file_header(&stream->ebml, &stream->config.cfg,
+    write_webm_file_header(&stream->ebml, cfg,
                            &global->framerate,
                            stream->config.stereo_fmt,
                            global->codec->fourcc);
-  } else
-    ivf_write_file_header(stream->file, &stream->config.cfg,
-                          global->codec->fourcc, 0);
+  } else {
+    ivf_write_file_header(stream->file, cfg, global->codec->fourcc, 0);
+  }
 }
 
 
 static void close_output_file(struct stream_state *stream,
-                              unsigned int         fourcc) {
+                              unsigned int fourcc) {
+  const struct vpx_codec_enc_cfg *const cfg = &stream->config.cfg;
+
+  if (cfg->g_pass == VPX_RC_FIRST_PASS)
+    return;
+
   if (stream->config.write_webm) {
     write_webm_file_footer(&stream->ebml, stream->hash);
     free(stream->ebml.cue_list);
