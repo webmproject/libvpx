@@ -39,11 +39,7 @@ unsigned __int64 Sectionbits[500];
 #endif
 
 #ifdef ENTROPY_STATS
-int intra_mode_stats[INTRA_MODES]
-                    [INTRA_MODES]
-                    [INTRA_MODES];
 vp9_coeff_stats tree_update_hist[TX_SIZES][PLANE_TYPES];
-
 extern unsigned int active_section;
 #endif
 
@@ -414,9 +410,6 @@ static void write_mb_modes_kf(const VP9_COMP *cpi, MODE_INFO **mi_8x8,
         const MB_PREDICTION_MODE A = above_block_mode(m, above_mi, i);
         const MB_PREDICTION_MODE L = left_block_mode(m, left_mi, i);
         const int bm = m->bmi[i].as_mode;
-#ifdef ENTROPY_STATS
-        ++intra_mode_stats[A][L][bm];
-#endif
         write_intra_mode(bc, bm, vp9_kf_y_mode_prob[A][L]);
       }
     }

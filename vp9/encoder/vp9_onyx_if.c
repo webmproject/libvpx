@@ -88,12 +88,6 @@ FILE *keyfile;
 #endif
 
 
-#ifdef ENTROPY_STATS
-extern int intra_mode_stats[INTRA_MODES]
-                           [INTRA_MODES]
-                           [INTRA_MODES];
-#endif
-
 #ifdef MODE_STATS
 extern void init_tx_count_stats();
 extern void write_tx_count_stats();
@@ -1959,41 +1953,6 @@ void vp9_remove_compressor(VP9_PTR *ptr) {
       fclose(f);
     }
 #endif
-
-#ifdef ENTROPY_STATS
-    {
-      int i, j, k;
-      FILE *fmode = fopen("vp9_modecontext.c", "w");
-
-      fprintf(fmode, "\n#include \"vp9_entropymode.h\"\n\n");
-      fprintf(fmode, "const unsigned int vp9_kf_default_bmode_counts ");
-      fprintf(fmode, "[INTRA_MODES][INTRA_MODES]"
-                     "[INTRA_MODES] =\n{\n");
-
-      for (i = 0; i < INTRA_MODES; i++) {
-        fprintf(fmode, "    { // Above Mode :  %d\n", i);
-
-        for (j = 0; j < INTRA_MODES; j++) {
-          fprintf(fmode, "        {");
-
-          for (k = 0; k < INTRA_MODES; k++) {
-            if (!intra_mode_stats[i][j][k])
-              fprintf(fmode, " %5d, ", 1);
-            else
-              fprintf(fmode, " %5d, ", intra_mode_stats[i][j][k]);
-          }
-
-          fprintf(fmode, "}, // left_mode %d\n", j);
-        }
-
-        fprintf(fmode, "    },\n");
-      }
-
-      fprintf(fmode, "};\n");
-      fclose(fmode);
-    }
-#endif
-
 
 #if defined(SECTIONBITS_OUTPUT)
 
