@@ -167,64 +167,68 @@ void usage_exit() {
   exit(EXIT_FAILURE);
 }
 
-static int read_frame(struct VpxDecInputContext *input,
-                      uint8_t **buf,
-                      size_t *bytes_in_buffer,
-                      size_t *buffer_size) {
+static int raw_read_frame(struct VpxInputContext *input_ctx, uint8_t **buffer,
+                          size_t *bytes_read, size_t *buffer_size) {
   char raw_hdr[RAW_FRAME_HDR_SZ];
-  size_t bytes_to_read = 0;
-  FILE *infile = input->vpx_input_ctx->file;
-  enum VideoFileType kind = input->vpx_input_ctx->file_type;
-  if (kind == FILE_TYPE_WEBM) {
-    return webm_read_frame(input->webm_ctx,
-                           buf, bytes_in_buffer, buffer_size);
-  } else if (kind == FILE_TYPE_RAW) {
-    if (fread(raw_hdr, RAW_FRAME_HDR_SZ, 1, infile) != 1) {
-      if (!feof(infile))
-        warn("Failed to read RAW frame size\n");
-    } else {
-      const int kCorruptFrameThreshold = 256 * 1024 * 1024;
-      const int kFrameTooSmallThreshold = 256 * 1024;
-      bytes_to_read = mem_get_le32(raw_hdr);
+  size_t frame_size = 0;
+  FILE *infile = input_ctx->file;
 
-      if (bytes_to_read > kCorruptFrameThreshold) {
-        warn("Read invalid frame size (%u)\n", (unsigned int)bytes_to_read);
-        bytes_to_read = 0;
-      }
+  if (fread(raw_hdr, RAW_FRAME_HDR_SZ, 1, infile) != 1) {
+    if (!feof(infile))
+      warn("Failed to read RAW frame size\n");
+  } else {
+    const int kCorruptFrameThreshold = 256 * 1024 * 1024;
+    const int kFrameTooSmallThreshold = 256 * 1024;
+    frame_size = mem_get_le32(raw_hdr);
 
-      if (kind == FILE_TYPE_RAW && bytes_to_read < kFrameTooSmallThreshold) {
-        warn("Warning: Read invalid frame size (%u) - not a raw file?\n",
-             (unsigned int)bytes_to_read);
-      }
-
-      if (bytes_to_read > *buffer_size) {
-        uint8_t *new_buf = realloc(*buf, 2 * bytes_to_read);
-
-        if (new_buf) {
-          *buf = new_buf;
-          *buffer_size = 2 * bytes_to_read;
-        } else {
-          warn("Failed to allocate compressed data buffer\n");
-          bytes_to_read = 0;
-        }
-      }
+    if (frame_size > kCorruptFrameThreshold) {
+      warn("Read invalid frame size (%u)\n", (unsigned int)frame_size);
+      frame_size = 0;
     }
 
-    if (!feof(infile)) {
-      if (fread(*buf, 1, bytes_to_read, infile) != bytes_to_read) {
-        warn("Failed to read full frame\n");
-        return 1;
-      }
-      *bytes_in_buffer = bytes_to_read;
+    if (frame_size < kFrameTooSmallThreshold) {
+      warn("Warning: Read invalid frame size (%u) - not a raw file?\n",
+           (unsigned int)frame_size);
     }
 
-    return 0;
-  } else if (kind == FILE_TYPE_IVF) {
-    return ivf_read_frame(input->vpx_input_ctx,
-                          buf, bytes_in_buffer, buffer_size);
+    if (frame_size > *buffer_size) {
+      uint8_t *new_buf = realloc(*buffer, 2 * frame_size);
+      if (new_buf) {
+        *buffer = new_buf;
+        *buffer_size = 2 * frame_size;
+      } else {
+        warn("Failed to allocate compressed data buffer\n");
+        frame_size = 0;
+      }
+    }
   }
 
-  return 1;
+  if (!feof(infile)) {
+    if (fread(*buffer, 1, frame_size, infile) != frame_size) {
+      warn("Failed to read full frame\n");
+      return 1;
+    }
+    *bytes_read = frame_size;
+  }
+
+  return 0;
+}
+
+static int read_frame(struct VpxDecInputContext *input, uint8_t **buf,
+                      size_t *bytes_in_buffer, size_t *buffer_size) {
+  switch (input->vpx_input_ctx->file_type) {
+    case FILE_TYPE_WEBM:
+      return webm_read_frame(input->webm_ctx,
+                             buf, bytes_in_buffer, buffer_size);
+    case FILE_TYPE_RAW:
+      return raw_read_frame(input->vpx_input_ctx,
+                            buf, bytes_in_buffer, buffer_size);
+    case FILE_TYPE_IVF:
+      return ivf_read_frame(input->vpx_input_ctx,
+                            buf, bytes_in_buffer, buffer_size);
+    default:
+      return 1;
+  }
 }
 
 void *out_open(const char *out_fn, int do_md5) {
