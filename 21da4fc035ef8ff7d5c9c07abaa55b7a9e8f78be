@@ -16,6 +16,24 @@
       "revId": "21da4fc035ef8ff7d5c9c07abaa55b7a9e8f78be",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//9Ps\u003d",
+        "filename": "vp9/encoder/vp9_firstpass.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 358,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2014-01-13T11:26:48Z",
+      "side": 1,
+      "message": "I actually do this in a later patch but can pull it back to this one.",
+      "parentUuid": "AAAAdn//9rA\u003d",
+      "revId": "21da4fc035ef8ff7d5c9c07abaa55b7a9e8f78be",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
