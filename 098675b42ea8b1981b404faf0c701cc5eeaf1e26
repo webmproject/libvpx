@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//88Y\u003d",
+        "filename": "vp9_spatial_scalable_encoder.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 1003234
+      },
+      "writtenOn": "2014-01-14T17:16:37Z",
+      "side": 1,
+      "message": "nit: \"Output\" should be lower case \"output\"",
+      "revId": "098675b42ea8b1981b404faf0c701cc5eeaf1e26",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
