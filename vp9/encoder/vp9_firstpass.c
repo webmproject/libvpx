@@ -1933,12 +1933,9 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
 // Allocate bits to a normal frame that is neither a gf an arf or a key frame.
 static void assign_std_frame_bits(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   int target_frame_size;
-
   double modified_err;
   double err_fraction;
-
-  // Max for a single frame.
-  int max_bits = frame_max_bits(cpi);
+  const int max_bits = frame_max_bits(cpi);  // Max for a single frame.
 
   // Calculate modified prediction error used in bit allocation.
   modified_err = calculate_modified_err(cpi, this_frame);
@@ -1954,15 +1951,8 @@ static void assign_std_frame_bits(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
 
   // Clip target size to 0 - max_bits (or cpi->twopass.gf_group_bits) at
   // the top end.
-  if (target_frame_size < 0) {
-    target_frame_size = 0;
-  } else {
-    if (target_frame_size > max_bits)
-      target_frame_size = max_bits;
-
-    if (target_frame_size > cpi->twopass.gf_group_bits)
-      target_frame_size = (int)cpi->twopass.gf_group_bits;
-  }
+  target_frame_size = clamp(target_frame_size, 0,
+                            MIN(max_bits, (int)cpi->twopass.gf_group_bits));
 
   // Adjust error and bits remaining.
   cpi->twopass.gf_group_error_left -= (int64_t)modified_err;
