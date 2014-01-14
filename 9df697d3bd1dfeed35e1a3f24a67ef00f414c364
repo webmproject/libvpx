@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//87k\u003d",
+        "filename": "vp9/encoder/vp9_tokenize.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 177,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2014-01-14T19:56:23Z",
+      "side": 1,
+      "message": "space from last function",
+      "revId": "9df697d3bd1dfeed35e1a3f24a67ef00f414c364",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//87g\u003d",
+        "filename": "vp9/encoder/vp9_tokenize.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 188,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2014-01-14T19:56:23Z",
+      "side": 1,
+      "message": "ditto",
+      "revId": "9df697d3bd1dfeed35e1a3f24a67ef00f414c364",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//87c\u003d",
+        "filename": "vp9/encoder/vp9_tokenize.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 239,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2014-01-14T19:56:23Z",
+      "side": 1,
+      "message": "Does this handle the case that we encounter seg_eob before the actual end of the block? I guess it does not matter since the encoder would insert a EOB before that.",
+      "revId": "9df697d3bd1dfeed35e1a3f24a67ef00f414c364",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
