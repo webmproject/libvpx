@@ -965,5 +965,5 @@ void vp9_rc_postencode_update(VP9_COMP *cpi, uint64_t bytes_used) {
 
 void vp9_rc_postencode_update_drop_frame(VP9_COMP *cpi) {
   cpi->rc.frames_since_key++;
-  // cpi->rc.frames_to_key--;
+  cpi->rc.frames_to_key--;
 }
