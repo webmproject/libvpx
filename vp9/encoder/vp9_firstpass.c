@@ -1825,7 +1825,8 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
     // If the frame that is to be boosted is simpler than the average for
     // the gf/arf group then use an alternative calculation
     // based on the error score of the frame itself
-    if (mod_frame_err < gf_group_err / (double)cpi->rc.baseline_gf_interval) {
+    if (cpi->rc.baseline_gf_interval < 1 ||
+        mod_frame_err < gf_group_err / (double)cpi->rc.baseline_gf_interval) {
       double alt_gf_grp_bits =
         (double)cpi->twopass.kf_group_bits  *
         (mod_frame_err * (double)cpi->rc.baseline_gf_interval) /
