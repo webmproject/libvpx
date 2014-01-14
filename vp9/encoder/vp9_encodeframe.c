@@ -550,7 +550,6 @@ static void set_offsets(VP9_COMP *cpi, const TileInfo *const tile,
   VP9_COMMON *const cm = &cpi->common;
   MACROBLOCKD *const xd = &x->e_mbd;
   MB_MODE_INFO *mbmi;
-  const int dst_fb_idx = cm->new_fb_idx;
   const int idx_str = xd->mode_info_stride * mi_row + mi_col;
   const int mi_width = num_8x8_blocks_wide_lookup[bsize];
   const int mi_height = num_8x8_blocks_high_lookup[bsize];
@@ -577,7 +576,7 @@ static void set_offsets(VP9_COMP *cpi, const TileInfo *const tile,
   mbmi = &xd->mi_8x8[0]->mbmi;
 
   // Set up destination pointers
-  setup_dst_planes(xd, &cm->yv12_fb[dst_fb_idx], mi_row, mi_col);
+  setup_dst_planes(xd, get_frame_new_buffer(cm), mi_row, mi_col);
 
   // Set up limit values for MV components
   // mv beyond the range do not produce new/different prediction block
