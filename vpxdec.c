@@ -453,6 +453,8 @@ int main_loop(int argc, const char **argv_) {
   int                     num_external_frame_buffers = 0;
   int                     fb_lru_cache = 0;
   vpx_codec_frame_buffer_t *frame_buffers = NULL;
+  int                     display_width = 0;
+  int                     display_height = 0;
 
   struct VpxDecInputContext input = {0};
   struct VpxInputContext vpx_input_ctx = {0};
@@ -822,23 +824,31 @@ int main_loop(int argc, const char **argv_) {
         out_put(out, (const unsigned char*)color, strlen(color), do_md5);
       }
 
-      if (do_scale) {
-        int stream_w = 0, stream_h = 0;
-        if (img && frame_out == 1) {
-          int display_size[2];
-          if (vpx_codec_control(&decoder, VP9D_GET_DISPLAY_SIZE,
-                                display_size)) {
-            // Fallback to use raw image size if display size not available.
-            stream_w = img->d_w;
-            stream_h = img->d_h;
-          } else {
-            stream_w = display_size[0];
-            stream_h = display_size[1];
+      if (img && do_scale) {
+        if (frame_out == 1) {
+          // If the output frames are to be scaled to a fixed display size then
+          // use the width and height specified in the container. If either of
+          // these is set to 0, use the display size set in the first frame
+          // header.
+          display_width = vpx_input_ctx.width;
+          display_height = vpx_input_ctx.height;
+          if (!display_width || !display_height) {
+            int display_size[2];
+            if (vpx_codec_control(&decoder, VP9D_GET_DISPLAY_SIZE,
+                                  display_size)) {
+              // As last resort use size of first frame as display size.
+              display_width = img->d_w;
+              display_height = img->d_h;
+            } else {
+              display_width = display_size[0];
+              display_height = display_size[1];
+            }
           }
-          scaled_img = vpx_img_alloc(NULL, VPX_IMG_FMT_I420,
-                                     stream_w, stream_h, 16);
+          scaled_img = vpx_img_alloc(NULL, VPX_IMG_FMT_I420, display_width,
+                                     display_height, 16);
         }
-        if (img && (img->d_w != stream_w || img->d_h != stream_h)) {
+
+        if (img->d_w != display_width || img->d_h != display_height) {
           assert(img->fmt == VPX_IMG_FMT_I420);
           I420Scale(img->planes[VPX_PLANE_Y], img->stride[VPX_PLANE_Y],
                     img->planes[VPX_PLANE_U], img->stride[VPX_PLANE_U],
@@ -850,7 +860,7 @@ int main_loop(int argc, const char **argv_) {
                     scaled_img->stride[VPX_PLANE_U],
                     scaled_img->planes[VPX_PLANE_V],
                     scaled_img->stride[VPX_PLANE_V],
-                    stream_w, stream_h,
+                    display_width, display_height,
                     kFilterBox);
           img = scaled_img;
         }
