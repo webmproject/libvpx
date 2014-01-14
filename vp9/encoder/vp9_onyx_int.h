@@ -623,7 +623,6 @@ typedef struct VP9_COMP {
   int ref_frame_flags;
 
   SPEED_FEATURES sf;
-  int error_bins[1024];
 
   unsigned int max_mv_magnitude;
   int mv_step_param;
