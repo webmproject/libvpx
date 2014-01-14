@@ -1418,9 +1418,10 @@ static int cost_mv_ref(VP9_COMP *cpi, MB_PREDICTION_MODE mode,
   }
 }
 
-void vp9_set_mbmode_and_mvs(MACROBLOCK *x, MB_PREDICTION_MODE mb, int_mv *mv) {
-  x->e_mbd.mi_8x8[0]->mbmi.mode = mb;
-  x->e_mbd.mi_8x8[0]->mbmi.mv[0].as_int = mv->as_int;
+void vp9_set_mbmode_and_mvs(MACROBLOCKD *xd, MB_PREDICTION_MODE mode,
+                            const MV *mv) {
+  xd->mi_8x8[0]->mbmi.mode = mode;
+  xd->mi_8x8[0]->mbmi.mv[0].as_mv = *mv;
 }
 
 static void joint_motion_search(VP9_COMP *cpi, MACROBLOCK *x,

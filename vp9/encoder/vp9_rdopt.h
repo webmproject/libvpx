@@ -60,8 +60,8 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
 
 void vp9_init_me_luts();
 
-void vp9_set_mbmode_and_mvs(MACROBLOCK *x,
-                            MB_PREDICTION_MODE mb, int_mv *mv);
+void vp9_set_mbmode_and_mvs(MACROBLOCKD *xd, MB_PREDICTION_MODE mode,
+                            const MV *mv);
 
 void vp9_get_entropy_contexts(TX_SIZE tx_size,
     ENTROPY_CONTEXT t_above[16], ENTROPY_CONTEXT t_left[16],
