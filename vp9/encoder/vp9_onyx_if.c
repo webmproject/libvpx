@@ -3420,7 +3420,7 @@ int vp9_get_compressed_data(VP9_PTR ptr, unsigned int *frame_flags,
 #endif
       frames_to_arf = cpi->rc.frames_till_gf_update_due;
 
-    assert(frames_to_arf < cpi->rc.frames_to_key);
+    assert(frames_to_arf <= cpi->rc.frames_to_key);
 
     if ((cpi->source = vp9_lookahead_peek(cpi->lookahead, frames_to_arf))) {
 #if CONFIG_MULTIPLE_ARF
