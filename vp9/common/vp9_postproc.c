@@ -13,13 +13,16 @@
 #include <stdio.h>
 
 #include "./vpx_config.h"
-#include "vpx_scale/yv12config.h"
-#include "vp9/common/vp9_postproc.h"
-#include "vp9/common/vp9_textblit.h"
-#include "vpx_scale/vpx_scale.h"
-#include "vp9/common/vp9_systemdependent.h"
-#include "./vp9_rtcd.h"
 #include "./vpx_scale_rtcd.h"
+#include "./vp9_rtcd.h"
+
+#include "vpx_scale/vpx_scale.h"
+#include "vpx_scale/yv12config.h"
+
+#include "vp9/common/vp9_onyxc_int.h"
+#include "vp9/common/vp9_postproc.h"
+#include "vp9/common/vp9_systemdependent.h"
+#include "vp9/common/vp9_textblit.h"
 
 #define RGB_TO_YUV(t)                                            \
   ( (0.257*(float)(t >> 16))  + (0.504*(float)(t >> 8 & 0xff)) + \
@@ -127,9 +130,6 @@ const short vp9_rv[] = {
   0, 9, 5, 5, 11, 10, 13, 9, 10, 13,
 };
 
-
-/****************************************************************************
- */
 void vp9_post_proc_down_and_across_c(const uint8_t *src_ptr,
                                      uint8_t *dst_ptr,
                                      int src_pixels_per_line,
@@ -371,7 +371,7 @@ void vp9_denoise(const YV12_BUFFER_CONFIG *src, YV12_BUFFER_CONFIG *dst,
   }
 }
 
-double vp9_gaussian(double sigma, double mu, double x) {
+static double gaussian(double sigma, double mu, double x) {
   return 1 / (sigma * sqrt(2.0 * 3.14159265)) *
          (exp(-(x - mu) * (x - mu) / (2 * sigma * sigma)));
 }
@@ -396,7 +396,7 @@ static void fillrd(struct postproc_state *state, int q, int a) {
     next = 0;
 
     for (i = -32; i < 32; i++) {
-      int a = (int)(.5 + 256 * vp9_gaussian(sigma, 0, i));
+      int a = (int)(0.5 + 256 * gaussian(sigma, 0, i));
 
       if (a) {
         for (j = 0; j < a; j++) {
@@ -425,27 +425,6 @@ static void fillrd(struct postproc_state *state, int q, int a) {
   state->last_noise = a;
 }
 
-/****************************************************************************
- *
- *  ROUTINE       : plane_add_noise_c
- *
- *  INPUTS        : unsigned char *Start  starting address of buffer to
- *                                        add gaussian noise to
- *                  unsigned int width    width of plane
- *                  unsigned int height   height of plane
- *                  int  pitch    distance between subsequent lines of frame
- *                  int  q        quantizer used to determine amount of noise
- *                                  to add
- *
- *  OUTPUTS       : None.
- *
- *  RETURNS       : void.
- *
- *  FUNCTION      : adds gaussian noise to a plane of pixels
- *
- *  SPECIAL NOTES : None.
- *
- ****************************************************************************/
 void vp9_plane_add_noise_c(uint8_t *start, char *noise,
                            char blackclamp[16],
                            char whiteclamp[16],
@@ -628,49 +607,40 @@ static void constrain_line(int x0, int *x1, int y0, int *y1,
 
 int vp9_post_proc_frame(struct VP9Common *cm,
                         YV12_BUFFER_CONFIG *dest, vp9_ppflags_t *ppflags) {
-  int q = cm->lf.filter_level * 10 / 6;
-  int flags = ppflags->post_proc_flag;
-  int deblock_level = ppflags->deblocking_level;
-  int noise_level = ppflags->noise_level;
+  const int q = MIN(63, cm->lf.filter_level * 10 / 6);
+  const int flags = ppflags->post_proc_flag;
+  YV12_BUFFER_CONFIG *const ppbuf = &cm->post_proc_buffer;
+  struct postproc_state *const ppstate = &cm->postproc_state;
 
   if (!cm->frame_to_show)
     return -1;
-
-  if (q > 63)
-    q = 63;
 
   if (!flags) {
     *dest = *cm->frame_to_show;
     return 0;
   }
 
-#if ARCH_X86||ARCH_X86_64
-  vpx_reset_mmx_state();
-#endif
+  vp9_clear_system_state();
 
   if (flags & VP9D_DEMACROBLOCK) {
-    deblock_and_de_macro_block(cm->frame_to_show, &cm->post_proc_buffer,
-                               q + (deblock_level - 5) * 10, 1, 0);
+    deblock_and_de_macro_block(cm->frame_to_show, ppbuf,
+                               q + (ppflags->deblocking_level - 5) * 10, 1, 0);
   } else if (flags & VP9D_DEBLOCK) {
-    vp9_deblock(cm->frame_to_show, &cm->post_proc_buffer, q);
+    vp9_deblock(cm->frame_to_show, ppbuf, q);
   } else {
-    vp8_yv12_copy_frame(cm->frame_to_show, &cm->post_proc_buffer);
+    vp8_yv12_copy_frame(cm->frame_to_show, ppbuf);
   }
 
   if (flags & VP9D_ADDNOISE) {
-    if (cm->postproc_state.last_q != q
-        || cm->postproc_state.last_noise != noise_level) {
-      fillrd(&cm->postproc_state, 63 - q, noise_level);
+    const int noise_level = ppflags->noise_level;
+    if (ppstate->last_q != q ||
+        ppstate->last_noise != noise_level) {
+      fillrd(ppstate, 63 - q, noise_level);
     }
 
-    vp9_plane_add_noise(cm->post_proc_buffer.y_buffer,
-                        cm->postproc_state.noise,
-                        cm->postproc_state.blackclamp,
-                        cm->postproc_state.whiteclamp,
-                        cm->postproc_state.bothclamp,
-                        cm->post_proc_buffer.y_width,
-                        cm->post_proc_buffer.y_height,
-                        cm->post_proc_buffer.y_stride);
+    vp9_plane_add_noise(ppbuf->y_buffer, ppstate->noise, ppstate->blackclamp,
+                        ppstate->whiteclamp, ppstate->bothclamp,
+                        ppbuf->y_width, ppbuf->y_height, ppbuf->y_stride);
   }
 
 #if 0 && CONFIG_POSTPROC_VISUALIZER
@@ -684,16 +654,14 @@ int vp9_post_proc_frame(struct VP9Common *cm,
              cm->filter_level,
              flags,
              cm->mb_cols, cm->mb_rows);
-    vp9_blit_text(message, cm->post_proc_buffer.y_buffer,
-                  cm->post_proc_buffer.y_stride);
+    vp9_blit_text(message, ppbuf->y_buffer, ppbuf->y_stride);
   }
 
   if (flags & VP9D_DEBUG_TXT_MBLK_MODES) {
     int i, j;
     uint8_t *y_ptr;
-    YV12_BUFFER_CONFIG *post = &cm->post_proc_buffer;
-    int mb_rows = post->y_height >> 4;
-    int mb_cols = post->y_width  >> 4;
+    int mb_rows = ppbuf->y_height >> 4;
+    int mb_cols = ppbuf->y_width  >> 4;
     int mb_index = 0;
     MODE_INFO *mi = cm->mi;
 
@@ -719,9 +687,8 @@ int vp9_post_proc_frame(struct VP9Common *cm,
   if (flags & VP9D_DEBUG_TXT_DC_DIFF) {
     int i, j;
     uint8_t *y_ptr;
-    YV12_BUFFER_CONFIG *post = &cm->post_proc_buffer;
-    int mb_rows = post->y_height >> 4;
-    int mb_cols = post->y_width  >> 4;
+    int mb_rows = ppbuf->y_height >> 4;
+    int mb_cols = ppbuf->y_width  >> 4;
     int mb_index = 0;
     MODE_INFO *mi = cm->mi;
 
@@ -755,17 +722,15 @@ int vp9_post_proc_frame(struct VP9Common *cm,
     snprintf(message, sizeof(message),
              "Bitrate: %10.2f framerate: %10.2f ",
              cm->bitrate, cm->framerate);
-    vp9_blit_text(message, cm->post_proc_buffer.y_buffer,
-                  cm->post_proc_buffer.y_stride);
+    vp9_blit_text(message, ppbuf->y_buffer, ppbuf->y_stride);
   }
 
   /* Draw motion vectors */
   if ((flags & VP9D_DEBUG_DRAW_MV) && ppflags->display_mv_flag) {
-    YV12_BUFFER_CONFIG *post = &cm->post_proc_buffer;
-    int width  = post->y_width;
-    int height = post->y_height;
-    uint8_t *y_buffer = cm->post_proc_buffer.y_buffer;
-    int y_stride = cm->post_proc_buffer.y_stride;
+    int width  = ppbuf->y_width;
+    int height = ppbuf->y_height;
+    uint8_t *y_buffer = ppbuf->y_buffer;
+    int y_stride = ppbuf->y_stride;
     MODE_INFO *mi = cm->mi;
     int x0, y0;
 
@@ -904,13 +869,12 @@ int vp9_post_proc_frame(struct VP9Common *cm,
   if ((flags & VP9D_DEBUG_CLR_BLK_MODES)
       && (ppflags->display_mb_modes_flag || ppflags->display_b_modes_flag)) {
     int y, x;
-    YV12_BUFFER_CONFIG *post = &cm->post_proc_buffer;
-    int width  = post->y_width;
-    int height = post->y_height;
-    uint8_t *y_ptr = cm->post_proc_buffer.y_buffer;
-    uint8_t *u_ptr = cm->post_proc_buffer.u_buffer;
-    uint8_t *v_ptr = cm->post_proc_buffer.v_buffer;
-    int y_stride = cm->post_proc_buffer.y_stride;
+    int width  = ppbuf->y_width;
+    int height = ppbuf->y_height;
+    uint8_t *y_ptr = ppbuf->y_buffer;
+    uint8_t *u_ptr = ppbuf->u_buffer;
+    uint8_t *v_ptr = ppbuf->v_buffer;
+    int y_stride = ppbuf->y_stride;
     MODE_INFO *mi = cm->mi;
 
     for (y = 0; y < height; y += 16) {
@@ -969,13 +933,12 @@ int vp9_post_proc_frame(struct VP9Common *cm,
   if ((flags & VP9D_DEBUG_CLR_FRM_REF_BLKS) &&
       ppflags->display_ref_frame_flag) {
     int y, x;
-    YV12_BUFFER_CONFIG *post = &cm->post_proc_buffer;
-    int width  = post->y_width;
-    int height = post->y_height;
-    uint8_t *y_ptr = cm->post_proc_buffer.y_buffer;
-    uint8_t *u_ptr = cm->post_proc_buffer.u_buffer;
-    uint8_t *v_ptr = cm->post_proc_buffer.v_buffer;
-    int y_stride = cm->post_proc_buffer.y_stride;
+    int width  = ppbuf->y_width;
+    int height = ppbuf->y_height;
+    uint8_t *y_ptr = ppbuf->y_buffer;
+    uint8_t *u_ptr = ppbuf->u_buffer;
+    uint8_t *v_ptr = ppbuf->v_buffer;
+    int y_stride = ppbuf->y_stride;
     MODE_INFO *mi = cm->mi;
 
     for (y = 0; y < height; y += 16) {
@@ -1002,7 +965,7 @@ int vp9_post_proc_frame(struct VP9Common *cm,
   }
 #endif
 
-  *dest = cm->post_proc_buffer;
+  *dest = *ppbuf;
 
   /* handle problem with extending borders */
   dest->y_width = cm->width;
