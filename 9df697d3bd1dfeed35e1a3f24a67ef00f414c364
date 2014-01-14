@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//85U\u003d",
+        "filename": "vp9/encoder/vp9_tokenize.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 177,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2014-01-14T23:06:18Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//87k\u003d",
+      "revId": "9df697d3bd1dfeed35e1a3f24a67ef00f414c364",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//87g\u003d",
         "filename": "vp9/encoder/vp9_tokenize.c",
         "patchSetId": 4
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//85Q\u003d",
+        "filename": "vp9/encoder/vp9_tokenize.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 188,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2014-01-14T23:06:18Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//87g\u003d",
+      "revId": "9df697d3bd1dfeed35e1a3f24a67ef00f414c364",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//87c\u003d",
         "filename": "vp9/encoder/vp9_tokenize.c",
         "patchSetId": 4
@@ -47,6 +83,24 @@
       "writtenOn": "2014-01-14T19:56:23Z",
       "side": 1,
       "message": "Does this handle the case that we encounter seg_eob before the actual end of the block? I guess it does not matter since the encoder would insert a EOB before that.",
+      "revId": "9df697d3bd1dfeed35e1a3f24a67ef00f414c364",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//85I\u003d",
+        "filename": "vp9/encoder/vp9_tokenize.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 239,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2014-01-14T23:06:18Z",
+      "side": 1,
+      "message": "Nope doesn\u0027t but as stated the encoder doesn\u0027t produce that issue.   A decoder should worry about it it but the encoder \ncan do what it wants.",
+      "parentUuid": "AAAAdn//87c\u003d",
       "revId": "9df697d3bd1dfeed35e1a3f24a67ef00f414c364",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
