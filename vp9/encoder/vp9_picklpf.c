@@ -32,44 +32,6 @@ void vp9_yv12_copy_partial_frame_c(YV12_BUFFER_CONFIG *src_ybc,
              stride * (lines_to_copy + 16));
 }
 
-static int calc_partial_ssl_err(YV12_BUFFER_CONFIG *source,
-                                YV12_BUFFER_CONFIG *dest, int Fraction) {
-  int i, j;
-  int Total = 0;
-  int srcoffset, dstoffset;
-  uint8_t *src = source->y_buffer;
-  uint8_t *dst = dest->y_buffer;
-
-  int linestocopy = (source->y_height >> (Fraction + 4));
-
-  if (linestocopy < 1)
-    linestocopy = 1;
-
-  linestocopy <<= 4;
-
-
-  srcoffset = source->y_stride   * (dest->y_height >> 5) * 16;
-  dstoffset = dest->y_stride     * (dest->y_height >> 5) * 16;
-
-  src += srcoffset;
-  dst += dstoffset;
-
-  // Loop through the raw Y plane and reconstruction data summing the square
-  // differences.
-  for (i = 0; i < linestocopy; i += 16) {
-    for (j = 0; j < source->y_width; j += 16) {
-      unsigned int sse;
-      Total += vp9_mse16x16(src + j, source->y_stride, dst + j, dest->y_stride,
-                            &sse);
-    }
-
-    src += 16 * source->y_stride;
-    dst += 16 * dest->y_stride;
-  }
-
-  return Total;
-}
-
 // Enforce a minimum filter level based upon baseline Q
 static int get_min_filter_level(VP9_COMP *cpi, int base_qindex) {
   int min_filter_level;
