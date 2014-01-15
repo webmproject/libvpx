@@ -13,6 +13,25 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+static void fix_framerate(int *num, int *den) {
+  // Some versions of vpxenc used 1/(2*fps) for the timebase, so
+  // we can guess the framerate using only the timebase in this
+  // case. Other files would require reading ahead to guess the
+  // timebase, like we do for webm.
+  if (*num < 1000) {
+    // Correct for the factor of 2 applied to the timebase in the encoder.
+    if (*num & 1)
+      *den *= 2;
+    else
+      *num /= 2;
+  } else {
+    // Don't know FPS for sure, and don't have readahead code
+    // (yet?), so just default to 30fps.
+    *num = 30;
+    *den = 1;
+  }
+}
+
 int file_is_ivf(struct VpxInputContext *input_ctx) {
   char raw_hdr[32];
   int is_ivf = 0;
@@ -32,27 +51,8 @@ int file_is_ivf(struct VpxInputContext *input_ctx) {
       input_ctx->height = mem_get_le16(raw_hdr + 14);
       input_ctx->framerate.numerator = mem_get_le32(raw_hdr + 16);
       input_ctx->framerate.denominator = mem_get_le32(raw_hdr + 20);
-
-      /* Some versions of vpxenc used 1/(2*fps) for the timebase, so
-       * we can guess the framerate using only the timebase in this
-       * case. Other files would require reading ahead to guess the
-       * timebase, like we do for webm.
-       */
-      if (input_ctx->framerate.numerator < 1000) {
-        /* Correct for the factor of 2 applied to the timebase in the
-         * encoder.
-         */
-        if (input_ctx->framerate.numerator & 1)
-          input_ctx->framerate.denominator <<= 1;
-        else
-          input_ctx->framerate.numerator >>= 1;
-      } else {
-        /* Don't know FPS for sure, and don't have readahead code
-         * (yet?), so just default to 30fps.
-         */
-        input_ctx->framerate.numerator = 30;
-        input_ctx->framerate.denominator = 1;
-      }
+      fix_framerate(&input_ctx->framerate.numerator,
+                    &input_ctx->framerate.denominator);
     }
   }
 
