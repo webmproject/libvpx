@@ -122,6 +122,24 @@
       "revId": "4cd470a4c4426939df022cb4bdd644ea009a5ed2",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//8zo\u003d",
+        "filename": "vp9/common/arm/neon/vp9_reconintra_neon.asm",
+        "patchSetId": 4
+      },
+      "lineNbr": 315,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2014-01-15T17:29:43Z",
+      "side": 1,
+      "message": "Right",
+      "parentUuid": "AAAAdn//82E\u003d",
+      "revId": "4cd470a4c4426939df022cb4bdd644ea009a5ed2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
