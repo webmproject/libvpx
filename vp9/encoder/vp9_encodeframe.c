@@ -2543,6 +2543,7 @@ static void encode_superblock(VP9_COMP *cpi, TOKENEXTRA **t, int output_enabled,
   }
 
   if (!is_inter_block(mbmi)) {
+    mbmi->skip_coeff = 1;
     vp9_encode_intra_block_y(x, MAX(bsize, BLOCK_8X8));
     vp9_encode_intra_block_uv(x, MAX(bsize, BLOCK_8X8));
     if (output_enabled)
@@ -2561,6 +2562,7 @@ static void encode_superblock(VP9_COMP *cpi, TOKENEXTRA **t, int output_enabled,
   if (!is_inter_block(mbmi)) {
     vp9_tokenize_sb(cpi, t, !output_enabled, MAX(bsize, BLOCK_8X8));
   } else if (!x->skip) {
+    mbmi->skip_coeff = 1;
     vp9_encode_sb(x, MAX(bsize, BLOCK_8X8));
     vp9_tokenize_sb(cpi, t, !output_enabled, MAX(bsize, BLOCK_8X8));
   } else {
