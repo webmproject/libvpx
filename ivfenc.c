@@ -20,9 +20,6 @@ void ivf_write_file_header(FILE *outfile,
                            int frame_cnt) {
   char header[32];
 
-  if (cfg->g_pass != VPX_RC_ONE_PASS && cfg->g_pass != VPX_RC_LAST_PASS)
-    return;
-
   header[0] = 'D';
   header[1] = 'K';
   header[2] = 'I';
