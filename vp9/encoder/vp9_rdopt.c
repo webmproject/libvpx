@@ -464,8 +464,8 @@ static void model_rd_for_sb_y_tx(VP9_COMP *cpi, BLOCK_SIZE bsize,
   BLOCK_SIZE bs;
   struct macroblock_plane *const p = &x->plane[0];
   struct macroblockd_plane *const pd = &xd->plane[0];
-  const int width = 4 << num_4x4_blocks_wide_lookup[bsize];
-  const int height = 4 << num_4x4_blocks_high_lookup[bsize];
+  const int width = 4 * num_4x4_blocks_wide_lookup[bsize];
+  const int height = 4 * num_4x4_blocks_high_lookup[bsize];
   int rate_sum = 0;
   int64_t dist_sum = 0;
   const int t = 4 << tx_size;
