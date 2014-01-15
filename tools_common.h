@@ -63,10 +63,8 @@ typedef long off_t;  /* NOLINT */
 
 #define RAW_FRAME_HDR_SZ sizeof(uint32_t)
 
-#define VP8_FOURCC (0x30385056)
-#define VP9_FOURCC (0x30395056)
-#define VP8_FOURCC_MASK (0x00385056)
-#define VP9_FOURCC_MASK (0x00395056)
+#define VP8_FOURCC 0x30385056
+#define VP9_FOURCC 0x30395056
 
 enum VideoFileType {
   FILE_TYPE_RAW,

@@ -40,13 +40,12 @@ static const struct {
   char const *name;
   const vpx_codec_iface_t *(*iface)(void);
   uint32_t fourcc;
-  uint32_t fourcc_mask;
 } ifaces[] = {
 #if CONFIG_VP8_DECODER
-  {"vp8",  vpx_codec_vp8_dx,   VP8_FOURCC_MASK, 0x00FFFFFF},
+  {"vp8",  vpx_codec_vp8_dx,   VP8_FOURCC},
 #endif
 #if CONFIG_VP9_DECODER
-  {"vp9",  vpx_codec_vp9_dx,   VP9_FOURCC_MASK, 0x00FFFFFF},
+  {"vp9",  vpx_codec_vp9_dx,   VP9_FOURCC},
 #endif
 };
 
@@ -670,7 +669,7 @@ int main_loop(int argc, const char **argv_) {
 
   /* Try to determine the codec from the fourcc. */
   for (i = 0; i < sizeof(ifaces) / sizeof(ifaces[0]); i++)
-    if ((vpx_input_ctx.fourcc & ifaces[i].fourcc_mask) == ifaces[i].fourcc) {
+    if (vpx_input_ctx.fourcc == ifaces[i].fourcc) {
       vpx_codec_iface_t *vpx_iface = ifaces[i].iface();
 
       if (iface && iface != vpx_iface)

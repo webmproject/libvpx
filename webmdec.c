@@ -82,9 +82,9 @@ int file_is_webm(struct WebmInputContext *webm_ctx,
 
   codec_id = nestegg_track_codec_id(webm_ctx->nestegg_ctx, i);
   if (codec_id == NESTEGG_CODEC_VP8) {
-    vpx_ctx->fourcc = VP8_FOURCC_MASK;
+    vpx_ctx->fourcc = VP8_FOURCC;
   } else if (codec_id == NESTEGG_CODEC_VP9) {
-    vpx_ctx->fourcc = VP9_FOURCC_MASK;
+    vpx_ctx->fourcc = VP9_FOURCC;
   } else {
     fatal("Not VPx video, quitting.\n");
   }
