@@ -1,0 +1,123 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//8zY\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 1076,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2014-01-15T18:10:48Z",
+      "side": 1,
+      "message": "cm, x, sl, sa, l,a, mis,  bsl, bss, ms and mh are bad variables names\n\n2 - 3 variable names are ugly and hard to follow even if they are consistent.   \n\nI personally think  we ought to rework them all since this is a new function but am happy to be overruled.",
+      "revId": "b7a46901c4e6bfe39caf3ae76ff1fefc34f42cab",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//8zM\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 1114,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2014-01-15T18:10:48Z",
+      "side": 1,
+      "message": "horz_rate? horz_distortion  why not have pick_sb_modes return the error\n\nwhy aren\u0027t we summing the rate and distortions we get from pick modes, like we do for split? or conversely why do we for split?",
+      "revId": "b7a46901c4e6bfe39caf3ae76ff1fefc34f42cab",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//8zU\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 1142,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2014-01-15T18:10:48Z",
+      "side": 1,
+      "message": "x_idx , y_idx  don\u0027t tell me what this - mode_info_row_offset?\n\njj is a terrible name.  rt and dt seem silly ...",
+      "revId": "b7a46901c4e6bfe39caf3ae76ff1fefc34f42cab",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//8zE\u003d",
+        "filename": "vp9/encoder/vp9_pickmode.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2014-01-15T18:10:48Z",
+      "side": 1,
+      "message": "why do you need this?",
+      "revId": "b7a46901c4e6bfe39caf3ae76ff1fefc34f42cab",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//8zA\u003d",
+        "filename": "vp9/encoder/vp9_pickmode.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 83,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2014-01-15T18:10:48Z",
+      "side": 1,
+      "message": "in realtime mode we probably don\u0027t need to check 3 frames",
+      "revId": "b7a46901c4e6bfe39caf3ae76ff1fefc34f42cab",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//8y8\u003d",
+        "filename": "vp9/encoder/vp9_pickmode.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 195,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2014-01-15T18:10:48Z",
+      "side": 1,
+      "message": "this isn\u0027t a stack how about mode_sad?",
+      "revId": "b7a46901c4e6bfe39caf3ae76ff1fefc34f42cab",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//8y4\u003d",
+        "filename": "vp9/encoder/vp9_pickmode.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 208,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2014-01-15T18:10:48Z",
+      "side": 1,
+      "message": "I suspect the RDCOST works if our metric is sse not sad.  Cost in bits is related to square error not sad... :)",
+      "revId": "b7a46901c4e6bfe39caf3ae76ff1fefc34f42cab",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
