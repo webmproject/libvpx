@@ -175,6 +175,18 @@ static void set_entropy_context_b(int plane, int block, BLOCK_SIZE plane_bsize,
   set_contexts(xd, pd, plane_bsize, tx_size, p->eobs[block] > 0, aoff, loff);
 }
 
+static INLINE void add_token(TOKENEXTRA **t, const vp9_prob *context_tree,
+                             int16_t extra, uint8_t token,
+                             uint8_t skip_eob_node,
+                             unsigned int *counts) {
+  (*t)->token = token;
+  (*t)->extra = extra;
+  (*t)->context_tree = context_tree;
+  (*t)->skip_eob_node = skip_eob_node;
+  (*t)++;
+  ++counts[token];
+}
+
 static void tokenize_b(int plane, int block, BLOCK_SIZE plane_bsize,
                        TX_SIZE tx_size, void *arg) {
   struct tokenize_b_args* const args = arg;
@@ -186,9 +198,9 @@ static void tokenize_b(int plane, int block, BLOCK_SIZE plane_bsize,
   struct macroblockd_plane *pd = &xd->plane[plane];
   MB_MODE_INFO *mbmi = &xd->mi_8x8[0]->mbmi;
   int pt; /* near block/prev token context index */
-  int c = 0, rc = 0;
+  int c = 0;
   TOKENEXTRA *t = *tp;        /* store tokens starting here */
-  const int eob = p->eobs[block];
+  int eob = p->eobs[block];
   const PLANE_TYPE type = pd->plane_type;
   const int16_t *qcoeff_ptr = BLOCK_OFFSET(p->qcoeff, block);
   const int segment_id = mbmi->segment_id;
@@ -197,51 +209,53 @@ static void tokenize_b(int plane, int block, BLOCK_SIZE plane_bsize,
   vp9_coeff_count *const counts = cpi->coef_counts[tx_size];
   vp9_coeff_probs_model *const coef_probs = cpi->common.fc.coef_probs[tx_size];
   const int ref = is_inter_block(mbmi);
-  const uint8_t *const band_translate = get_band_translate(tx_size);
+  const uint8_t *const band = get_band_translate(tx_size);
   const int seg_eob = get_tx_eob(&cpi->common.seg, segment_id, tx_size);
 
   int aoff, loff;
   txfrm_block_to_raster_xy(plane_bsize, tx_size, block, &aoff, &loff);
 
-  assert((!type && !plane) || (type && plane));
-
   pt = get_entropy_context(tx_size, pd->above_context + aoff,
-                                    pd->left_context + loff);
+                           pd->left_context + loff);
   so = get_scan(xd, tx_size, type, block);
   scan = so->scan;
   nb = so->neighbors;
-
   c = 0;
-  do {
-    const int band = band_translate[c];
-    int token;
+  while (c < eob) {
     int v = 0;
-    rc = scan[c];
-    if (c)
+    int skip_eob = 0;
+    v = qcoeff_ptr[scan[c]];
+
+    while (!v) {
+      add_token(&t, coef_probs[type][ref][band[c]][pt], 0, ZERO_TOKEN, skip_eob,
+                counts[type][ref][band[c]][pt]);
+
+      cpi->common.counts.eob_branch[tx_size][type][ref][band[c]][pt] +=
+          !skip_eob;
+
+      skip_eob = 1;
+      token_cache[scan[c]] = 0;
+      ++c;
       pt = get_coef_context(nb, token_cache, c);
-    if (c < eob) {
-      v = qcoeff_ptr[rc];
-      assert(-DCT_MAX_VALUE <= v  &&  v < DCT_MAX_VALUE);
-
-      t->extra = vp9_dct_value_tokens_ptr[v].extra;
-      token    = vp9_dct_value_tokens_ptr[v].token;
-    } else {
-      token = EOB_TOKEN;
+      v = qcoeff_ptr[scan[c]];
     }
+    add_token(&t, coef_probs[type][ref][band[c]][pt],
+              vp9_dct_value_tokens_ptr[v].extra,
+              vp9_dct_value_tokens_ptr[v].token, skip_eob,
+              counts[type][ref][band[c]][pt]);
 
-    t->token = token;
-    t->context_tree = coef_probs[type][ref][band][pt];
-    t->skip_eob_node = (c > 0) && (token_cache[scan[c - 1]] == 0);
+    cpi->common.counts.eob_branch[tx_size][type][ref][band[c]][pt] += !skip_eob;
 
-    assert(vp9_coef_encodings[t->token].len - t->skip_eob_node > 0);
-
-    ++counts[type][ref][band][pt][token];
-    if (!t->skip_eob_node)
-      ++cpi->common.counts.eob_branch[tx_size][type][ref][band][pt];
-
-    token_cache[rc] = vp9_pt_energy_class[token];
-    ++t;
-  } while (c < eob && ++c < seg_eob);
+    token_cache[scan[c]] =
+        vp9_pt_energy_class[vp9_dct_value_tokens_ptr[v].token];
+    ++c;
+    pt = get_coef_context(nb, token_cache, c);
+  }
+  if (c < seg_eob) {
+    add_token(&t, coef_probs[type][ref][band[c]][pt], 0, EOB_TOKEN, 0,
+              counts[type][ref][band[c]][pt]);
+    ++cpi->common.counts.eob_branch[tx_size][type][ref][band[c]][pt];
+  }
 
   *tp = t;
 
