@@ -401,42 +401,35 @@ static unsigned int zz_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
 }
 
 static void first_pass_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
-                                     MV *ref_mv, MV *best_mv,
+                                     const MV *ref_mv, MV *best_mv,
                                      YV12_BUFFER_CONFIG *recon_buffer,
                                      int *best_motion_err, int recon_yoffset) {
   MACROBLOCKD *const xd = &x->e_mbd;
-  int num00;
-
   MV tmp_mv = {0, 0};
-  MV ref_mv_full;
-
-  int tmp_err;
+  MV ref_mv_full = {ref_mv->row >> 3, ref_mv->col >> 3};
+  int num00, tmp_err, n, sr = 0;
   int step_param = 3;
   int further_steps = (MAX_MVSEARCH_STEPS - 1) - step_param;
-  int n;
-  vp9_variance_fn_ptr_t v_fn_ptr = cpi->fn_ptr[xd->mi_8x8[0]->mbmi.sb_type];
+  const BLOCK_SIZE bsize = xd->mi_8x8[0]->mbmi.sb_type;
+  vp9_variance_fn_ptr_t v_fn_ptr = cpi->fn_ptr[bsize];
   int new_mv_mode_penalty = 256;
-
-  int sr = 0;
-  int quart_frm = MIN(cpi->common.width, cpi->common.height);
+  const int quart_frm = MIN(cpi->common.width, cpi->common.height);
 
   // refine the motion search range accroding to the frame dimension
   // for first pass test
   while ((quart_frm << sr) < MAX_FULL_PEL_VAL)
     sr++;
 
-  step_param    += sr;
+  step_param += sr;
   further_steps -= sr;
 
   // override the default variance function to use MSE
-  v_fn_ptr.vf = get_block_variance_fn(xd->mi_8x8[0]->mbmi.sb_type);
+  v_fn_ptr.vf = get_block_variance_fn(bsize);
 
   // Set up pointers for this macro block recon buffer
   xd->plane[0].pre[0].buf = recon_buffer->y_buffer + recon_yoffset;
 
   // Initial step/diamond search centred on best mv
-  ref_mv_full.col = ref_mv->col >> 3;
-  ref_mv_full.row = ref_mv->row >> 3;
   tmp_err = cpi->diamond_search_sad(x, &ref_mv_full, &tmp_mv,
                                     step_param,
                                     x->sadperbit16, &num00, &v_fn_ptr,
