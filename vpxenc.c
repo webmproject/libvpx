@@ -362,12 +362,6 @@ static const arg_def_t static_thresh = ARG_DEF(NULL, "static-thresh", 1,
                                                "Motion detection threshold");
 static const arg_def_t cpu_used = ARG_DEF(NULL, "cpu-used", 1,
                                           "CPU Used (-16..16)");
-static const arg_def_t token_parts = ARG_DEF(NULL, "token-parts", 1,
-                                     "Number of token partitions to use, log2");
-static const arg_def_t tile_cols = ARG_DEF(NULL, "tile-columns", 1,
-                                         "Number of tile columns to use, log2");
-static const arg_def_t tile_rows = ARG_DEF(NULL, "tile-rows", 1,
-                                           "Number of tile rows to use, log2");
 static const arg_def_t auto_altref = ARG_DEF(NULL, "auto-alt-ref", 1,
                                              "Enable automatic alt reference frames");
 static const arg_def_t arnr_maxframes = ARG_DEF(NULL, "arnr-maxframes", 1,
@@ -387,16 +381,10 @@ static const arg_def_t cq_level = ARG_DEF(NULL, "cq-level", 1,
                                           "Constant/Constrained Quality level");
 static const arg_def_t max_intra_rate_pct = ARG_DEF(NULL, "max-intra-rate", 1,
                                                     "Max I-frame bitrate (pct)");
-static const arg_def_t lossless = ARG_DEF(NULL, "lossless", 1, "Lossless mode");
-#if CONFIG_VP9_ENCODER
-static const arg_def_t frame_parallel_decoding  = ARG_DEF(
-    NULL, "frame-parallel", 1, "Enable frame parallel decodability features");
-static const arg_def_t aq_mode  = ARG_DEF(
-    NULL, "aq-mode", 1,
-    "Adaptive q mode (0: off (by default), 1: variance 2: complexity)");
-#endif
 
 #if CONFIG_VP8_ENCODER
+static const arg_def_t token_parts =
+    ARG_DEF(NULL, "token-parts", 1, "Number of token partitions to use, log2");
 static const arg_def_t *vp8_args[] = {
   &cpu_used, &auto_altref, &noise_sens, &sharpness, &static_thresh,
   &token_parts, &arnr_maxframes, &arnr_strength, &arnr_type,
@@ -414,6 +402,17 @@ static const int vp8_arg_ctrl_map[] = {
 #endif
 
 #if CONFIG_VP9_ENCODER
+static const arg_def_t tile_cols =
+    ARG_DEF(NULL, "tile-columns", 1, "Number of tile columns to use, log2");
+static const arg_def_t tile_rows =
+    ARG_DEF(NULL, "tile-rows", 1, "Number of tile rows to use, log2");
+static const arg_def_t lossless = ARG_DEF(NULL, "lossless", 1, "Lossless mode");
+static const arg_def_t frame_parallel_decoding = ARG_DEF(
+    NULL, "frame-parallel", 1, "Enable frame parallel decodability features");
+static const arg_def_t aq_mode = ARG_DEF(
+    NULL, "aq-mode", 1,
+    "Adaptive q mode (0: off (by default), 1: variance 2: complexity)");
+
 static const arg_def_t *vp9_args[] = {
   &cpu_used, &auto_altref, &noise_sens, &sharpness, &static_thresh,
   &tile_cols, &tile_rows, &arnr_maxframes, &arnr_strength, &arnr_type,
