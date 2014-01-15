@@ -65,16 +65,10 @@ int file_is_ivf(struct VpxInputContext *input_ctx) {
   return is_ivf;
 }
 
-int ivf_read_frame(struct VpxInputContext *input_ctx,
-                   uint8_t **buffer,
-                   size_t *bytes_read,
-                   size_t *buffer_size) {
+int ivf_read_frame(FILE *infile, uint8_t **buffer,
+                   size_t *bytes_read, size_t *buffer_size) {
   char raw_header[IVF_FRAME_HDR_SZ] = {0};
   size_t frame_size = 0;
-  FILE *infile = input_ctx->file;
-
-  if (input_ctx->file_type != FILE_TYPE_IVF)
-    return 0;
 
   if (fread(raw_header, IVF_FRAME_HDR_SZ, 1, infile) != 1) {
     if (!feof(infile))
