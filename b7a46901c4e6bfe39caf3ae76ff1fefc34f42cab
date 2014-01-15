@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//8sQ\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 1076,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2014-01-15T23:46:15Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//8zY\u003d",
+      "revId": "b7a46901c4e6bfe39caf3ae76ff1fefc34f42cab",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//8zM\u003d",
         "filename": "vp9/encoder/vp9_encodeframe.c",
         "patchSetId": 10
@@ -30,6 +48,24 @@
       "writtenOn": "2014-01-15T18:10:48Z",
       "side": 1,
       "message": "horz_rate? horz_distortion  why not have pick_sb_modes return the error\n\nwhy aren\u0027t we summing the rate and distortions we get from pick modes, like we do for split? or conversely why do we for split?",
+      "revId": "b7a46901c4e6bfe39caf3ae76ff1fefc34f42cab",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//8vk\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 1114,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2014-01-15T23:46:15Z",
+      "side": 1,
+      "message": "fixed the naming.\n\nwe need to keep rate and distortion values separately, as two of the features used for block size classification later.",
+      "parentUuid": "AAAAdn//8zM\u003d",
       "revId": "b7a46901c4e6bfe39caf3ae76ff1fefc34f42cab",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//8sM\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 1142,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2014-01-15T23:46:15Z",
+      "side": 1,
+      "message": "Done\n\nI will try to tune the flow in rd_pick_partition a bit next.",
+      "parentUuid": "AAAAdn//8zU\u003d",
+      "revId": "b7a46901c4e6bfe39caf3ae76ff1fefc34f42cab",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//8zE\u003d",
         "filename": "vp9/encoder/vp9_pickmode.c",
         "patchSetId": 10
@@ -64,6 +118,24 @@
       "writtenOn": "2014-01-15T18:10:48Z",
       "side": 1,
       "message": "why do you need this?",
+      "revId": "b7a46901c4e6bfe39caf3ae76ff1fefc34f42cab",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//8yE\u003d",
+        "filename": "vp9/encoder/vp9_pickmode.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2014-01-15T23:46:15Z",
+      "side": 1,
+      "message": "Yes, this is needed.\n\nx-\u003emv_col_min and the other 3 parameters are designed to represent the legal range of reference block location. The limits will be further restricted in vp_set_mv_search_range, to account for the effective motion search range.\n\nAt this point, we need to keep the original values, further restrict the limit, use these new values for motion search, and return the original values back to these variables.\n\nI will try to refactor this in a different patch.",
+      "parentUuid": "AAAAdn//8zE\u003d",
       "revId": "b7a46901c4e6bfe39caf3ae76ff1fefc34f42cab",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//8yQ\u003d",
+        "filename": "vp9/encoder/vp9_pickmode.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 83,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2014-01-15T23:46:15Z",
+      "side": 1,
+      "message": "I agreed.\n\nThis function is not fully completed. If we decide to use only last ref frame, this function can easily subsume to that case.\n\nIn case we still want any alter/golden ref frame, might be good to let the non-RD mode decision system have the ability to handle this.",
+      "parentUuid": "AAAAdn//8zA\u003d",
+      "revId": "b7a46901c4e6bfe39caf3ae76ff1fefc34f42cab",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//8y8\u003d",
         "filename": "vp9/encoder/vp9_pickmode.c",
         "patchSetId": 10
@@ -104,6 +194,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//8yc\u003d",
+        "filename": "vp9/encoder/vp9_pickmode.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 195,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2014-01-15T23:46:15Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//8y8\u003d",
+      "revId": "b7a46901c4e6bfe39caf3ae76ff1fefc34f42cab",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//8y4\u003d",
         "filename": "vp9/encoder/vp9_pickmode.c",
         "patchSetId": 10
@@ -115,6 +223,24 @@
       "writtenOn": "2014-01-15T18:10:48Z",
       "side": 1,
       "message": "I suspect the RDCOST works if our metric is sse not sad.  Cost in bits is related to square error not sad... :)",
+      "revId": "b7a46901c4e6bfe39caf3ae76ff1fefc34f42cab",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//8yU\u003d",
+        "filename": "vp9/encoder/vp9_pickmode.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 208,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2014-01-15T23:46:15Z",
+      "side": 1,
+      "message": "using sad^2 for the distortion metric as a temporary solution.\n\nwe need to re-work the motion search part to get this effectively fixed. i guess there are a lot of experiments need to be done.",
+      "parentUuid": "AAAAdn//8y4\u003d",
       "revId": "b7a46901c4e6bfe39caf3ae76ff1fefc34f42cab",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
