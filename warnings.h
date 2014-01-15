@@ -20,6 +20,6 @@ struct VpxEncoderConfig;
  */
 void check_encoder_config(int disable_prompt,
                           const struct VpxEncoderConfig *global_config,
-                          struct vpx_codec_enc_cfg *stream_config);
+                          const struct vpx_codec_enc_cfg *stream_config);
 
 #endif  // WARNINGS_H_

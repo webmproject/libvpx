@@ -78,9 +78,17 @@ static void check_quantizer(int min_q, int max_q,
     add_warning(quantizer_warning_string, warning_list);
 }
 
+static void check_lag_in_frames_realtime_deadline(
+    int lag_in_frames,
+    int deadline,
+    struct WarningList *warning_list) {
+  if (deadline == VPX_DL_REALTIME && lag_in_frames != 0)
+    add_warning(lag_in_frames_with_realtime, warning_list);
+}
+
 void check_encoder_config(int disable_prompt,
                           const struct VpxEncoderConfig *global_config,
-                          struct vpx_codec_enc_cfg *stream_config) {
+                          const struct vpx_codec_enc_cfg *stream_config) {
   int num_warnings = 0;
   struct WarningListNode *warning = NULL;
   struct WarningList warning_list = {0};
@@ -88,10 +96,9 @@ void check_encoder_config(int disable_prompt,
   check_quantizer(stream_config->rc_min_quantizer,
                   stream_config->rc_max_quantizer,
                   &warning_list);
-
-  if (global_config->deadline == VPX_DL_REALTIME)
-    stream_config->g_lag_in_frames = 0;
-
+  check_lag_in_frames_realtime_deadline(stream_config->g_lag_in_frames,
+                                        global_config->deadline,
+                                        &warning_list);
   /* Count and print warnings. */
   for (warning = warning_list.warning_node;
        warning != NULL;
