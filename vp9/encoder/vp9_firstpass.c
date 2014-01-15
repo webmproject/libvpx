@@ -49,9 +49,6 @@
 
 #define DOUBLE_DIVIDE_CHECK(x) ((x) < 0 ? (x) - 0.000001 : (x) + 0.000001)
 
-#define POW1 (double)cpi->oxcf.two_pass_vbrbias/100.0
-#define POW2 (double)cpi->oxcf.two_pass_vbrbias/100.0
-
 static void swap_yv12(YV12_BUFFER_CONFIG *a, YV12_BUFFER_CONFIG *b) {
   YV12_BUFFER_CONFIG temp = *a;
   *a = *b;
@@ -269,20 +266,15 @@ static void avg_stats(FIRSTPASS_STATS *section) {
 // harder frames.
 static double calculate_modified_err(VP9_COMP *cpi,
                                      FIRSTPASS_STATS *this_frame) {
-  const FIRSTPASS_STATS *const stats = &cpi->twopass.total_stats;
+  struct twopass_rc *const twopass = &cpi->twopass;
+  const FIRSTPASS_STATS *const stats = &twopass->total_stats;
   const double av_err = stats->ssim_weighted_pred_err / stats->count;
-  const double this_err = this_frame->ssim_weighted_pred_err;
-  double modified_error;
+  double modified_error = av_err * pow(this_frame->ssim_weighted_pred_err /
+                                           DOUBLE_DIVIDE_CHECK(av_err),
+                                       cpi->oxcf.two_pass_vbrbias / 100.0);
 
-  modified_error =  av_err * pow(this_err / DOUBLE_DIVIDE_CHECK(av_err),
-                                 this_err > av_err ? POW1 : POW2);
-
-  if (modified_error < cpi->twopass.modified_error_min)
-    modified_error = cpi->twopass.modified_error_min;
-  else if (modified_error > cpi->twopass.modified_error_max)
-    modified_error = cpi->twopass.modified_error_max;
-
-  return modified_error;
+  return fclamp(modified_error,
+                twopass->modified_error_min, twopass->modified_error_max);
 }
 
 static const double weight_table[256] = {
