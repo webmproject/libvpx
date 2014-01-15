@@ -451,6 +451,9 @@ static void encode_block(int plane, int block, BLOCK_SIZE plane_bsize,
     ctx->tl[plane][j] = p->eobs[block] > 0;
   }
 
+  if (p->eobs[block])
+    *(args->skip_coeff) = 0;
+
   if (x->skip_encode || p->eobs[block] == 0)
     return;
 
@@ -474,7 +477,6 @@ static void encode_block(int plane, int block, BLOCK_SIZE plane_bsize,
       assert(0 && "Invalid transform size");
   }
 }
-
 static void encode_block_pass1(int plane, int block, BLOCK_SIZE plane_bsize,
                                TX_SIZE tx_size, void *arg) {
   struct encode_b_args *const args = arg;
@@ -499,7 +501,8 @@ static void encode_block_pass1(int plane, int block, BLOCK_SIZE plane_bsize,
 void vp9_encode_sby(MACROBLOCK *x, BLOCK_SIZE bsize) {
   MACROBLOCKD *const xd = &x->e_mbd;
   struct optimize_ctx ctx;
-  struct encode_b_args arg = {x, &ctx};
+  MB_MODE_INFO *mbmi = &xd->mi_8x8[0]->mbmi;
+  struct encode_b_args arg = {x, &ctx, &mbmi->skip_coeff};
 
   vp9_subtract_sby(x, bsize);
   if (x->optimize)
@@ -511,7 +514,8 @@ void vp9_encode_sby(MACROBLOCK *x, BLOCK_SIZE bsize) {
 void vp9_encode_sb(MACROBLOCK *x, BLOCK_SIZE bsize) {
   MACROBLOCKD *const xd = &x->e_mbd;
   struct optimize_ctx ctx;
-  struct encode_b_args arg = {x, &ctx};
+  MB_MODE_INFO *mbmi = &xd->mi_8x8[0]->mbmi;
+  struct encode_b_args arg = {x, &ctx, &mbmi->skip_coeff};
 
   if (!x->skip_recode)
     vp9_subtract_sb(x, bsize);
@@ -655,12 +659,15 @@ void vp9_encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
     default:
       assert(0);
   }
+  if (*eob)
+    *(args->skip_coeff) = 0;
 }
 
 void vp9_encode_intra_block_y(MACROBLOCK *x, BLOCK_SIZE bsize) {
   MACROBLOCKD* const xd = &x->e_mbd;
   struct optimize_ctx ctx;
-  struct encode_b_args arg = {x, &ctx};
+  MB_MODE_INFO *mbmi = &xd->mi_8x8[0]->mbmi;
+  struct encode_b_args arg = {x, &ctx, &mbmi->skip_coeff};
 
   foreach_transformed_block_in_plane(xd, bsize, 0, vp9_encode_block_intra,
                                      &arg);
@@ -668,7 +675,8 @@ void vp9_encode_intra_block_y(MACROBLOCK *x, BLOCK_SIZE bsize) {
 void vp9_encode_intra_block_uv(MACROBLOCK *x, BLOCK_SIZE bsize) {
   MACROBLOCKD* const xd = &x->e_mbd;
   struct optimize_ctx ctx;
-  struct encode_b_args arg = {x, &ctx};
+  MB_MODE_INFO *mbmi = &xd->mi_8x8[0]->mbmi;
+  struct encode_b_args arg = {x, &ctx, &mbmi->skip_coeff};
   foreach_transformed_block_uv(xd, bsize, vp9_encode_block_intra, &arg);
 }
 

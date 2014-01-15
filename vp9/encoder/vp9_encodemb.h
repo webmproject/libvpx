@@ -24,6 +24,7 @@ struct optimize_ctx {
 struct encode_b_args {
   MACROBLOCK *x;
   struct optimize_ctx *ctx;
+  unsigned char *skip_coeff;
 };
 
 void vp9_encode_sb(MACROBLOCK *x, BLOCK_SIZE bsize);

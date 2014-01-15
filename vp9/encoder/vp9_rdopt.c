@@ -640,7 +640,9 @@ static void block_rd_txfm(int plane, int block, BLOCK_SIZE plane_bsize,
   struct rdcost_block_args *args = arg;
   MACROBLOCK *const x = args->x;
   MACROBLOCKD *const xd = &x->e_mbd;
-  struct encode_b_args encode_args = {x, NULL};
+  MB_MODE_INFO *mbmi = &xd->mi_8x8[0]->mbmi;
+  struct encode_b_args encode_args = {x, NULL, &mbmi->skip_coeff};
+
   int64_t rd1, rd2, rd;
 
   if (args->skip)
