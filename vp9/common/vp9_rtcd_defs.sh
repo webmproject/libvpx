@@ -57,7 +57,7 @@ prototype void vp9_v_predictor_4x4 "uint8_t *dst, ptrdiff_t y_stride, const uint
 specialize vp9_v_predictor_4x4 $sse_x86inc neon
 
 prototype void vp9_tm_predictor_4x4 "uint8_t *dst, ptrdiff_t y_stride, const uint8_t *above, const uint8_t *left"
-specialize vp9_tm_predictor_4x4 $sse_x86inc dspr2
+specialize vp9_tm_predictor_4x4 $sse_x86inc neon dspr2
 
 prototype void vp9_dc_predictor_4x4 "uint8_t *dst, ptrdiff_t y_stride, const uint8_t *above, const uint8_t *left"
 specialize vp9_dc_predictor_4x4 $sse_x86inc dspr2
