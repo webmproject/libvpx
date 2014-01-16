@@ -2707,14 +2707,16 @@ static void encode_with_recode_loop(VP9_COMP *cpi,
     // Dummy pack of the bitstream using up to date stats to get an
     // accurate estimate of output frame size to determine if we need
     // to recode.
-    vp9_save_coding_context(cpi);
-    cpi->dummy_packing = 1;
-    vp9_pack_bitstream(cpi, dest, size);
-    cpi->rc.projected_frame_size = (*size) << 3;
-    vp9_restore_coding_context(cpi);
+    if (cpi->sf.recode_loop != 0) {
+      vp9_save_coding_context(cpi);
+      cpi->dummy_packing = 1;
+      vp9_pack_bitstream(cpi, dest, size);
+      cpi->rc.projected_frame_size = (*size) << 3;
+      vp9_restore_coding_context(cpi);
 
-    if (frame_over_shoot_limit == 0)
-      frame_over_shoot_limit = 1;
+      if (frame_over_shoot_limit == 0)
+        frame_over_shoot_limit = 1;
+    }
 
     if (cpi->oxcf.end_usage == USAGE_CONSTANT_QUALITY) {
       loop = 0;
