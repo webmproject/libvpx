@@ -16,6 +16,24 @@
       "revId": "c463b06c6eac04760cedc73ed4a6dd1265fd0fd5",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//8jw\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 12
+      },
+      "lineNbr": 1059,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2014-01-16T20:39:32Z",
+      "side": 1,
+      "message": "Done\n\nremoved these variables.\n\nbsl is only used once, hence move it inline.\n\nother parameters are for the purpose of calculating bit-rate cost on partition types. they are not used in non-RD mode decision settings. hence removed.",
+      "parentUuid": "AAAAdn//8ns\u003d",
+      "revId": "c463b06c6eac04760cedc73ed4a6dd1265fd0fd5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
