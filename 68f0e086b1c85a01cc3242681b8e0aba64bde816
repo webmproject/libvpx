@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//8jg\u003d",
+        "filename": "vp9/encoder/vp9_firstpass.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1970,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2014-01-16T20:42:47Z",
+      "side": 1,
+      "message": "can we also set kf_boost here, to a default value, say 200.",
+      "revId": "68f0e086b1c85a01cc3242681b8e0aba64bde816",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//8jk\u003d",
+        "filename": "vp9/encoder/vp9_ratectrl.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 605,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2014-01-16T20:42:47Z",
+      "side": 1,
+      "message": "Can we set kf_boost in the get params function?",
+      "revId": "68f0e086b1c85a01cc3242681b8e0aba64bde816",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
