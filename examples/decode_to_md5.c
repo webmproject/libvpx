@@ -37,11 +37,23 @@
 #include "./vpx_config.h"
 #include "vpx/vp8dx.h"
 #include "vpx/vpx_decoder.h"
-#define interface (vpx_codec_vp8_dx())
 #include "md5_utils.h"
+
+#define VP8_FOURCC 0x30385056
+#define VP9_FOURCC 0x30395056
 
 #define IVF_FILE_HDR_SZ  (32)
 #define IVF_FRAME_HDR_SZ (12)
+
+static vpx_codec_iface_t *get_codec_interface(unsigned int fourcc) {
+  switch (fourcc) {
+    case VP8_FOURCC:
+      return vpx_codec_vp8_dx();
+    case VP9_FOURCC:
+      return vpx_codec_vp9_dx();
+  }
+  return NULL;
+}
 
 static unsigned int mem_get_le32(const unsigned char *mem) {
   return (mem[3] << 24) | (mem[2] << 16) | (mem[1] << 8) | (mem[0]);
@@ -52,7 +64,7 @@ static void die(const char *fmt, ...) {
 
   va_start(ap, fmt);
   vprintf(fmt, ap);
-  if(fmt[strlen(fmt)-1] != '\n')
+  if (fmt[strlen(fmt) - 1] != '\n')
     printf("\n");
   exit(EXIT_FAILURE);
 }
@@ -66,7 +78,7 @@ static void die_codec(vpx_codec_ctx_t *ctx, const char *s) {
   exit(EXIT_FAILURE);
 }
 
-static void get_image_md5(const vpx_image_t *img, unsigned char md5_sum[16]) {
+static void get_image_md5(const vpx_image_t *img, unsigned char digest[16]) {
   int plane, y;
   MD5Context md5;
 
@@ -84,12 +96,20 @@ static void get_image_md5(const vpx_image_t *img, unsigned char md5_sum[16]) {
     }
   }
 
-  MD5Final(md5_sum, &md5);
+  MD5Final(digest, &md5);
+}
+
+static void print_md5(FILE *stream, unsigned char digest[16]) {
+  int i;
+
+  for (i = 0; i < 16; ++i)
+    fprintf(stream, "%02x", digest[i]);
 }
 
 int main(int argc, char **argv) {
   FILE *infile, *outfile;
   vpx_codec_ctx_t codec;
+  vpx_codec_iface_t *iface;
   int flags = 0, frame_cnt = 0;
   unsigned char file_hdr[IVF_FILE_HDR_SZ];
   unsigned char frame_hdr[IVF_FRAME_HDR_SZ];
@@ -109,9 +129,14 @@ int main(int argc, char **argv) {
      file_hdr[2] == 'I' && file_hdr[3] == 'F'))
     die("%s is not an IVF file.", argv[1]);
 
-  printf("Using %s\n",vpx_codec_iface_name(interface));
+  iface = get_codec_interface(mem_get_le32(file_hdr + 8));
+  if (!iface)
+    die("Unknown FOURCC code.");
 
-  if (vpx_codec_dec_init(&codec, interface, NULL, flags))
+
+  printf("Using %s\n", vpx_codec_iface_name(iface));
+
+  if (vpx_codec_dec_init(&codec, iface, NULL, flags))
     die_codec(&codec, "Failed to initialize decoder");
 
   while (fread(frame_hdr, 1, IVF_FRAME_HDR_SZ, infile) == IVF_FRAME_HDR_SZ) {
@@ -119,25 +144,22 @@ int main(int argc, char **argv) {
     vpx_codec_iter_t iter = NULL;
     vpx_image_t *img;
 
-    frame_cnt++;
     if (frame_size > sizeof(frame))
       die("Frame %d data too big for example code buffer", frame_size);
 
     if (fread(frame, 1, frame_size, infile) != frame_size)
-      die("Frame %d failed to read complete frame", frame_cnt);
+      die("Failed to read complete frame");
 
     if (vpx_codec_decode(&codec, frame, frame_size, NULL, 0))
       die_codec(&codec, "Failed to decode frame");
 
     while ((img = vpx_codec_get_frame(&codec, &iter)) != NULL) {
-      int i;
-      unsigned char md5_sum[16];
+      unsigned char digest[16];
 
-      get_image_md5(img, md5_sum);
-      for (i = 0; i < 16; ++i)
-        fprintf(outfile, "%02x", md5_sum[i]);
-      fprintf(outfile, "  img-%dx%d-%04d.i420\n", img->d_w, img->d_h,
-              frame_cnt);
+      get_image_md5(img, digest);
+      print_md5(outfile, digest);
+      fprintf(outfile, "  img-%dx%d-%04d.i420\n",
+              img->d_w, img->d_h, ++frame_cnt);
     }
   }
 
