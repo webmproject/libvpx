@@ -504,6 +504,7 @@ void vp9_first_pass(VP9_COMP *cpi) {
   int new_mv_count = 0;
   int sum_in_vectors = 0;
   uint32_t lastmv_as_int = 0;
+  struct twopass_rc *const twopass = &cpi->twopass;
 
   int_mv zero_ref_mv;
 
@@ -830,23 +831,22 @@ void vp9_first_pass(VP9_COMP *cpi) {
     fps.duration = (double)(cpi->source->ts_end - cpi->source->ts_start);
 
     // don't want to do output stats with a stack variable!
-    cpi->twopass.this_frame_stats = fps;
-    output_stats(cpi, cpi->output_pkt_list, &cpi->twopass.this_frame_stats);
-    accumulate_stats(&cpi->twopass.total_stats, &fps);
+    twopass->this_frame_stats = fps;
+    output_stats(cpi, cpi->output_pkt_list, &twopass->this_frame_stats);
+    accumulate_stats(&twopass->total_stats, &fps);
   }
 
   // Copy the previous Last Frame back into gf and and arf buffers if
   // the prediction is good enough... but also dont allow it to lag too far
-  if ((cpi->twopass.sr_update_lag > 3) ||
+  if ((twopass->sr_update_lag > 3) ||
       ((cm->current_video_frame > 0) &&
-       (cpi->twopass.this_frame_stats.pcnt_inter > 0.20) &&
-       ((cpi->twopass.this_frame_stats.intra_error /
-         DOUBLE_DIVIDE_CHECK(cpi->twopass.this_frame_stats.coded_error)) >
-        2.0))) {
+       (twopass->this_frame_stats.pcnt_inter > 0.20) &&
+       ((twopass->this_frame_stats.intra_error /
+         DOUBLE_DIVIDE_CHECK(twopass->this_frame_stats.coded_error)) > 2.0))) {
     vp8_yv12_copy_frame(lst_yv12, gld_yv12);
-    cpi->twopass.sr_update_lag = 1;
+    twopass->sr_update_lag = 1;
   } else {
-    cpi->twopass.sr_update_lag++;
+    twopass->sr_update_lag++;
   }
   // swap frame pointers so last frame refers to the frame we just compressed
   swap_yv12(lst_yv12, new_yv12);
@@ -1034,37 +1034,38 @@ extern void vp9_new_framerate(VP9_COMP *cpi, double framerate);
 void vp9_init_second_pass(VP9_COMP *cpi) {
   FIRSTPASS_STATS this_frame;
   FIRSTPASS_STATS *start_pos;
+  struct twopass_rc *const twopass = &cpi->twopass;
 
-  zero_stats(&cpi->twopass.total_stats);
-  zero_stats(&cpi->twopass.total_left_stats);
+  zero_stats(&twopass->total_stats);
+  zero_stats(&twopass->total_left_stats);
 
-  if (!cpi->twopass.stats_in_end)
+  if (!twopass->stats_in_end)
     return;
 
-  cpi->twopass.total_stats = *cpi->twopass.stats_in_end;
-  cpi->twopass.total_left_stats = cpi->twopass.total_stats;
+  twopass->total_stats = *twopass->stats_in_end;
+  twopass->total_left_stats = twopass->total_stats;
 
   // each frame can have a different duration, as the frame rate in the source
   // isn't guaranteed to be constant.   The frame rate prior to the first frame
   // encoded in the second pass is a guess.  However the sum duration is not.
   // Its calculated based on the actual durations of all frames from the first
   // pass.
-  vp9_new_framerate(cpi, 10000000.0 * cpi->twopass.total_stats.count /
-                       cpi->twopass.total_stats.duration);
+  vp9_new_framerate(cpi, 10000000.0 * twopass->total_stats.count /
+                        twopass->total_stats.duration);
 
   cpi->output_framerate = cpi->oxcf.framerate;
-  cpi->twopass.bits_left = (int64_t)(cpi->twopass.total_stats.duration *
-                                     cpi->oxcf.target_bandwidth / 10000000.0);
+  twopass->bits_left = (int64_t)(twopass->total_stats.duration *
+                                 cpi->oxcf.target_bandwidth / 10000000.0);
 
   // Calculate a minimum intra value to be used in determining the IIratio
   // scores used in the second pass. We have this minimum to make sure
   // that clips that are static but "low complexity" in the intra domain
   // are still boosted appropriately for KF/GF/ARF
-  cpi->twopass.kf_intra_err_min = KF_MB_INTRA_MIN * cpi->common.MBs;
-  cpi->twopass.gf_intra_err_min = GF_MB_INTRA_MIN * cpi->common.MBs;
+  twopass->kf_intra_err_min = KF_MB_INTRA_MIN * cpi->common.MBs;
+  twopass->gf_intra_err_min = GF_MB_INTRA_MIN * cpi->common.MBs;
 
   // This variable monitors how far behind the second ref update is lagging
-  cpi->twopass.sr_update_lag = 1;
+  twopass->sr_update_lag = 1;
 
   // Scan the first pass file and calculate an average Intra / Inter error score
   // ratio for the sequence.
@@ -1072,43 +1073,43 @@ void vp9_init_second_pass(VP9_COMP *cpi) {
     double sum_iiratio = 0.0;
     double IIRatio;
 
-    start_pos = cpi->twopass.stats_in;  // Note the starting "file" position.
+    start_pos = twopass->stats_in;  // Note the starting "file" position.
 
-    while (input_stats(&cpi->twopass, &this_frame) != EOF) {
+    while (input_stats(twopass, &this_frame) != EOF) {
       IIRatio = this_frame.intra_error
                 / DOUBLE_DIVIDE_CHECK(this_frame.coded_error);
       IIRatio = (IIRatio < 1.0) ? 1.0 : (IIRatio > 20.0) ? 20.0 : IIRatio;
       sum_iiratio += IIRatio;
     }
 
-    cpi->twopass.avg_iiratio = sum_iiratio /
-        DOUBLE_DIVIDE_CHECK((double)cpi->twopass.total_stats.count);
+    twopass->avg_iiratio = sum_iiratio /
+        DOUBLE_DIVIDE_CHECK((double)twopass->total_stats.count);
 
     // Reset file position
-    reset_fpf_position(&cpi->twopass, start_pos);
+    reset_fpf_position(twopass, start_pos);
   }
 
   // Scan the first pass file and calculate a modified total error based upon
   // the bias/power function used to allocate bits.
   {
-    double av_error = cpi->twopass.total_stats.ssim_weighted_pred_err /
-                      DOUBLE_DIVIDE_CHECK(cpi->twopass.total_stats.count);
+    double av_error = twopass->total_stats.ssim_weighted_pred_err /
+                      DOUBLE_DIVIDE_CHECK(twopass->total_stats.count);
 
-    start_pos = cpi->twopass.stats_in;  // Note starting "file" position
+    start_pos = twopass->stats_in;  // Note starting "file" position
 
-    cpi->twopass.modified_error_total = 0.0;
-    cpi->twopass.modified_error_min =
+    twopass->modified_error_total = 0.0;
+    twopass->modified_error_min =
       (av_error * cpi->oxcf.two_pass_vbrmin_section) / 100;
-    cpi->twopass.modified_error_max =
+    twopass->modified_error_max =
       (av_error * cpi->oxcf.two_pass_vbrmax_section) / 100;
 
-    while (input_stats(&cpi->twopass, &this_frame) != EOF) {
-      cpi->twopass.modified_error_total +=
+    while (input_stats(twopass, &this_frame) != EOF) {
+      twopass->modified_error_total +=
           calculate_modified_err(cpi, &this_frame);
     }
-    cpi->twopass.modified_error_left = cpi->twopass.modified_error_total;
+    twopass->modified_error_left = twopass->modified_error_total;
 
-    reset_fpf_position(&cpi->twopass, start_pos);  // Reset file position
+    reset_fpf_position(twopass, start_pos);
   }
 }
 
@@ -2225,12 +2226,13 @@ static void find_next_key_frame(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   double recent_loop_decay[8] = {1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0};
 
   RATE_CONTROL *const rc = &cpi->rc;
+  struct twopass_rc *const twopass = &cpi->twopass;
 
   vp9_zero(next_frame);
 
   vp9_clear_system_state();  // __asm emms;
 
-  start_position = cpi->twopass.stats_in;
+  start_position = twopass->stats_in;
   cpi->common.frame_type = KEY_FRAME;
 
   // is this a forced key frame by interval
@@ -2247,14 +2249,14 @@ static void find_next_key_frame(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   // Take a copy of the initial frame details
   first_frame = *this_frame;
 
-  cpi->twopass.kf_group_bits = 0;        // Total bits available to kf group
-  cpi->twopass.kf_group_error_left = 0;  // Group modified error score.
+  twopass->kf_group_bits = 0;        // Total bits available to kf group
+  twopass->kf_group_error_left = 0;  // Group modified error score.
 
   kf_mod_err = calculate_modified_err(cpi, this_frame);
 
   // find the next keyframe
   i = 0;
-  while (cpi->twopass.stats_in < cpi->twopass.stats_in_end) {
+  while (twopass->stats_in < twopass->stats_in_end) {
     // Accumulate kf group error
     kf_group_err += calculate_modified_err(cpi, this_frame);
 
@@ -2266,11 +2268,11 @@ static void find_next_key_frame(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
 
     // load a the next frame's stats
     last_frame = *this_frame;
-    input_stats(&cpi->twopass, this_frame);
+    input_stats(twopass, this_frame);
 
     // Provided that we are not at the end of the file...
     if (cpi->oxcf.auto_key &&
-        lookup_next_frame_stats(&cpi->twopass, &next_frame) != EOF) {
+        lookup_next_frame_stats(twopass, &next_frame) != EOF) {
       // Normal scene cut check
       if (test_candidate_kf(cpi, &last_frame, this_frame, &next_frame))
         break;
@@ -2320,7 +2322,7 @@ static void find_next_key_frame(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
     tmp_frame = first_frame;
 
     // Reset to the start of the group
-    reset_fpf_position(&cpi->twopass, start_position);
+    reset_fpf_position(twopass, start_position);
 
     kf_group_err = 0;
     kf_group_intra_err = 0;
@@ -2334,17 +2336,17 @@ static void find_next_key_frame(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
       kf_group_coded_err += tmp_frame.coded_error;
 
       // Load a the next frame's stats
-      input_stats(&cpi->twopass, &tmp_frame);
+      input_stats(twopass, &tmp_frame);
     }
     rc->next_key_frame_forced = 1;
-  } else if (cpi->twopass.stats_in == cpi->twopass.stats_in_end) {
+  } else if (twopass->stats_in == twopass->stats_in_end) {
     rc->next_key_frame_forced = 1;
   } else {
     rc->next_key_frame_forced = 0;
   }
 
   // Special case for the last key frame of the file
-  if (cpi->twopass.stats_in >= cpi->twopass.stats_in_end) {
+  if (twopass->stats_in >= twopass->stats_in_end) {
     // Accumulate kf group error
     kf_group_err += calculate_modified_err(cpi, this_frame);
 
@@ -2356,8 +2358,7 @@ static void find_next_key_frame(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   }
 
   // Calculate the number of bits that should be assigned to the kf group.
-  if ((cpi->twopass.bits_left > 0) &&
-      (cpi->twopass.modified_error_left > 0.0)) {
+  if (twopass->bits_left > 0 && twopass->modified_error_left > 0.0) {
     // Max for a single normal frame (not key frame)
     int max_bits = frame_max_bits(cpi);
 
@@ -2366,19 +2367,18 @@ static void find_next_key_frame(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
 
     // Default allocation based on bits left and relative
     // complexity of the section
-    cpi->twopass.kf_group_bits = (int64_t)(cpi->twopass.bits_left *
-                                           (kf_group_err /
-                                            cpi->twopass.modified_error_left));
+    twopass->kf_group_bits = (int64_t)(twopass->bits_left *
+       (kf_group_err / twopass->modified_error_left));
 
     // Clip based on maximum per frame rate defined by the user.
     max_grp_bits = (int64_t)max_bits * (int64_t)rc->frames_to_key;
-    if (cpi->twopass.kf_group_bits > max_grp_bits)
-      cpi->twopass.kf_group_bits = max_grp_bits;
+    if (twopass->kf_group_bits > max_grp_bits)
+      twopass->kf_group_bits = max_grp_bits;
   } else {
-    cpi->twopass.kf_group_bits = 0;
+    twopass->kf_group_bits = 0;
   }
   // Reset the first pass file position
-  reset_fpf_position(&cpi->twopass, start_position);
+  reset_fpf_position(twopass, start_position);
 
   // Determine how big to make this keyframe based on how well the subsequent
   // frames use inter blocks.
@@ -2390,7 +2390,7 @@ static void find_next_key_frame(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   for (i = 0; i < rc->frames_to_key; i++) {
     double r;
 
-    if (EOF == input_stats(&cpi->twopass, &next_frame))
+    if (EOF == input_stats(twopass, &next_frame))
       break;
 
     // Monitor for static sections.
@@ -2402,11 +2402,11 @@ static void find_next_key_frame(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
 
     // For the first few frames collect data to decide kf boost.
     if (i <= (rc->max_gf_interval * 2)) {
-      if (next_frame.intra_error > cpi->twopass.kf_intra_err_min)
+      if (next_frame.intra_error > twopass->kf_intra_err_min)
         r = (IIKFACTOR2 * next_frame.intra_error /
              DOUBLE_DIVIDE_CHECK(next_frame.coded_error));
       else
-        r = (IIKFACTOR2 * cpi->twopass.kf_intra_err_min /
+        r = (IIKFACTOR2 * twopass->kf_intra_err_min /
              DOUBLE_DIVIDE_CHECK(next_frame.coded_error));
 
       if (r > RMAX)
@@ -2428,21 +2428,21 @@ static void find_next_key_frame(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
     FIRSTPASS_STATS sectionstats;
 
     zero_stats(&sectionstats);
-    reset_fpf_position(&cpi->twopass, start_position);
+    reset_fpf_position(twopass, start_position);
 
     for (i = 0; i < rc->frames_to_key; i++) {
-      input_stats(&cpi->twopass, &next_frame);
+      input_stats(twopass, &next_frame);
       accumulate_stats(&sectionstats, &next_frame);
     }
 
     avg_stats(&sectionstats);
 
-    cpi->twopass.section_intra_rating = (int) (sectionstats.intra_error /
+    twopass->section_intra_rating = (int) (sectionstats.intra_error /
         DOUBLE_DIVIDE_CHECK(sectionstats.coded_error));
   }
 
   // Reset the first pass file position
-  reset_fpf_position(&cpi->twopass, start_position);
+  reset_fpf_position(twopass, start_position);
 
   // Work out how many bits to allocate for the key frame itself
   if (1) {
@@ -2459,7 +2459,7 @@ static void find_next_key_frame(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
     // Make a note of baseline boost and the zero motion
     // accumulator value for use elsewhere.
     rc->kf_boost = kf_boost;
-    cpi->twopass.kf_zeromotion_pct = (int)(zero_motion_accumulator * 100.0);
+    twopass->kf_zeromotion_pct = (int)(zero_motion_accumulator * 100.0);
 
     // We do three calculations for kf size.
     // The first is based on the error score for the whole kf group.
@@ -2474,11 +2474,9 @@ static void find_next_key_frame(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
     // cpi->rc.frames_to_key-1 because key frame itself is taken
     // care of by kf_boost.
     if (zero_motion_accumulator >= 0.99) {
-      allocation_chunks =
-        ((rc->frames_to_key - 1) * 10) + kf_boost;
+      allocation_chunks = ((rc->frames_to_key - 1) * 10) + kf_boost;
     } else {
-      allocation_chunks =
-        ((rc->frames_to_key - 1) * 100) + kf_boost;
+      allocation_chunks = ((rc->frames_to_key - 1) * 100) + kf_boost;
     }
 
     // Prevent overflow
@@ -2488,58 +2486,54 @@ static void find_next_key_frame(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
       allocation_chunks /= divisor;
     }
 
-    cpi->twopass.kf_group_bits = (cpi->twopass.kf_group_bits < 0) ? 0
-           : cpi->twopass.kf_group_bits;
+    twopass->kf_group_bits = (twopass->kf_group_bits < 0) ? 0
+           : twopass->kf_group_bits;
 
     // Calculate the number of bits to be spent on the key frame
-    cpi->twopass.kf_bits = (int)((double)kf_boost *
-              ((double)cpi->twopass.kf_group_bits / (double)allocation_chunks));
+    twopass->kf_bits = (int)((double)kf_boost *
+        ((double)twopass->kf_group_bits / allocation_chunks));
 
     // If the key frame is actually easier than the average for the
     // kf group (which does sometimes happen... eg a blank intro frame)
     // Then use an alternate calculation based on the kf error score
     // which should give a smaller key frame.
     if (kf_mod_err < kf_group_err / rc->frames_to_key) {
-      double  alt_kf_grp_bits =
-        ((double)cpi->twopass.bits_left *
+      double  alt_kf_grp_bits = ((double)twopass->bits_left *
          (kf_mod_err * (double)rc->frames_to_key) /
-         DOUBLE_DIVIDE_CHECK(cpi->twopass.modified_error_left));
+         DOUBLE_DIVIDE_CHECK(twopass->modified_error_left));
 
       alt_kf_bits = (int)((double)kf_boost *
                           (alt_kf_grp_bits / (double)allocation_chunks));
 
-      if (cpi->twopass.kf_bits > alt_kf_bits) {
-        cpi->twopass.kf_bits = alt_kf_bits;
-      }
+      if (twopass->kf_bits > alt_kf_bits)
+        twopass->kf_bits = alt_kf_bits;
     } else {
     // Else if it is much harder than other frames in the group make sure
     // it at least receives an allocation in keeping with its relative
     // error score
-      alt_kf_bits = (int)((double)cpi->twopass.bits_left *
-              (kf_mod_err /
-               DOUBLE_DIVIDE_CHECK(cpi->twopass.modified_error_left)));
+      alt_kf_bits = (int)((double)twopass->bits_left * (kf_mod_err /
+               DOUBLE_DIVIDE_CHECK(twopass->modified_error_left)));
 
-      if (alt_kf_bits > cpi->twopass.kf_bits) {
-        cpi->twopass.kf_bits = alt_kf_bits;
+      if (alt_kf_bits > twopass->kf_bits) {
+        twopass->kf_bits = alt_kf_bits;
       }
     }
 
-    cpi->twopass.kf_group_bits -= cpi->twopass.kf_bits;
+    twopass->kf_group_bits -= twopass->kf_bits;
 
     // Peer frame bit target for this frame
-    rc->per_frame_bandwidth = cpi->twopass.kf_bits;
+    rc->per_frame_bandwidth = twopass->kf_bits;
     // Convert to a per second bitrate
-    cpi->target_bandwidth = (int)(cpi->twopass.kf_bits *
-                                  cpi->output_framerate);
+    cpi->target_bandwidth = (int)(twopass->kf_bits * cpi->output_framerate);
   }
 
   // Note the total error score of the kf group minus the key frame itself
-  cpi->twopass.kf_group_error_left = (int)(kf_group_err - kf_mod_err);
+  twopass->kf_group_error_left = (int)(kf_group_err - kf_mod_err);
 
   // Adjust the count of total modified error left.
   // The count of bits left is adjusted elsewhere based on real coded frame
   // sizes.
-  cpi->twopass.modified_error_left -= kf_group_err;
+  twopass->modified_error_left -= kf_group_err;
 }
 
 void vp9_twopass_postencode_update(VP9_COMP *cpi, uint64_t bytes_used) {
