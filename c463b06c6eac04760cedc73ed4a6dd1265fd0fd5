@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//8ns\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 12
+      },
+      "lineNbr": 1059,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2014-01-16T14:17:39Z",
+      "side": 1,
+      "message": "sl, sa, l a? \n\nwhat does the s stand for?  I\u0027m guessing that l, and a are left and above.  personally there are precisely 2 calls that use the vars... the save and the restore.  calling them entropy_left, entropy_above, partition_left, partition_above won\u0027t cost that much more in terms of code size and are a lot clearer than l,a, sl, sa...     \n\nYou could of course save the extra characters by just putting all of these contexts in one structure so that save_contexts and restore contexts becomes one memcopy...\n\nbsl could either have a better name or could be removed altogether as its used only once ...",
+      "revId": "c463b06c6eac04760cedc73ed4a6dd1265fd0fd5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
