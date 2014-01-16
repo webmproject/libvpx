@@ -44,7 +44,6 @@ VP9_CX_SRCS-yes += encoder/vp9_quantize.h
 VP9_CX_SRCS-yes += encoder/vp9_ratectrl.h
 VP9_CX_SRCS-yes += encoder/vp9_rdopt.h
 VP9_CX_SRCS-yes += encoder/vp9_pickmode.h
-VP9_CX_SRCS-yes += encoder/vp9_sadmxn.h
 VP9_CX_SRCS-yes += encoder/vp9_tokenize.h
 VP9_CX_SRCS-yes += encoder/vp9_treewriter.h
 VP9_CX_SRCS-yes += encoder/vp9_variance.h
