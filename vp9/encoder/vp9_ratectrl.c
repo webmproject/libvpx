@@ -258,25 +258,27 @@ static void calc_iframe_target_size(VP9_COMP *cpi) {
 // Update the buffer level: leaky bucket model.
 void vp9_update_buffer_level(VP9_COMP *const cpi, int encoded_frame_size) {
   VP9_COMMON *const cm = &cpi->common;
+  RATE_CONTROL *const rc = &cpi->rc;
   // Non-viewable frames are a special case and are treated as pure overhead.
   if (!cm->show_frame) {
-    cpi->rc.bits_off_target -= encoded_frame_size;
+    rc->bits_off_target -= encoded_frame_size;
   } else {
-    cpi->rc.bits_off_target += cpi->rc.av_per_frame_bandwidth -
-        encoded_frame_size;
+    rc->bits_off_target += rc->av_per_frame_bandwidth - encoded_frame_size;
   }
   // Clip the buffer level to the maximum specified buffer size.
-  if (cpi->rc.bits_off_target > cpi->oxcf.maximum_buffer_size) {
-    cpi->rc.bits_off_target = cpi->oxcf.maximum_buffer_size;
+  if (rc->bits_off_target > cpi->oxcf.maximum_buffer_size) {
+    rc->bits_off_target = cpi->oxcf.maximum_buffer_size;
   }
-  cpi->rc.buffer_level = cpi->rc.bits_off_target;
+  rc->buffer_level = rc->bits_off_target;
 }
 
 int vp9_drop_frame(VP9_COMP *const cpi) {
+  RATE_CONTROL *const rc = &cpi->rc;
+
   if (!cpi->oxcf.drop_frames_water_mark) {
     return 0;
   } else {
-    if (cpi->rc.buffer_level < 0) {
+    if (rc->buffer_level < 0) {
       // Always drop if buffer is below 0.
       return 1;
     } else {
@@ -284,23 +286,23 @@ int vp9_drop_frame(VP9_COMP *const cpi) {
       // (starting with the next frame) until it increases back over drop_mark.
       int drop_mark = (int)(cpi->oxcf.drop_frames_water_mark *
           cpi->oxcf.optimal_buffer_level / 100);
-      if ((cpi->rc.buffer_level > drop_mark) &&
-          (cpi->rc.decimation_factor > 0)) {
-        --cpi->rc.decimation_factor;
-      } else if (cpi->rc.buffer_level <= drop_mark &&
-          cpi->rc.decimation_factor == 0) {
-        cpi->rc.decimation_factor = 1;
+      if ((rc->buffer_level > drop_mark) &&
+          (rc->decimation_factor > 0)) {
+        --rc->decimation_factor;
+      } else if (rc->buffer_level <= drop_mark &&
+          rc->decimation_factor == 0) {
+        rc->decimation_factor = 1;
       }
-      if (cpi->rc.decimation_factor > 0) {
-        if (cpi->rc.decimation_count > 0) {
-          --cpi->rc.decimation_count;
+      if (rc->decimation_factor > 0) {
+        if (rc->decimation_count > 0) {
+          --rc->decimation_count;
           return 1;
         } else {
-          cpi->rc.decimation_count = cpi->rc.decimation_factor;
+          rc->decimation_count = rc->decimation_factor;
           return 0;
         }
       } else {
-        cpi->rc.decimation_count = 0;
+        rc->decimation_count = 0;
         return 0;
       }
     }
@@ -314,63 +316,65 @@ static int adjust_active_worst_quality_from_buffer_level(const VP9_COMP *cpi) {
   // If buffer is below the optimal level, let the active_worst_quality go from
   // ambient Q (at buffer = optimal level) to worst_quality level
   // (at buffer = critical level).
-  int active_worst_quality = cpi->rc.active_worst_quality;
+  const RATE_CONTROL *const rc = &cpi->rc;
+  const VP9_CONFIG *const oxcf = &cpi->oxcf;
+  int active_worst_quality = rc->active_worst_quality;
   // Maximum limit for down adjustment, ~20%.
   int max_adjustment_down = active_worst_quality / 5;
   // Buffer level below which we push active_worst to worst_quality.
-  int critical_level = cpi->oxcf.optimal_buffer_level >> 2;
+  int critical_level = oxcf->optimal_buffer_level >> 2;
   int adjustment = 0;
   int buff_lvl_step = 0;
-  if (cpi->rc.buffer_level > cpi->oxcf.optimal_buffer_level) {
+  if (rc->buffer_level > oxcf->optimal_buffer_level) {
     // Adjust down.
     if (max_adjustment_down) {
-      buff_lvl_step = (int)((cpi->oxcf.maximum_buffer_size -
-          cpi->oxcf.optimal_buffer_level) / max_adjustment_down);
-      if (buff_lvl_step) {
-        adjustment = (int)((cpi->rc.buffer_level -
-            cpi->oxcf.optimal_buffer_level) / buff_lvl_step);
-      }
+      buff_lvl_step = (int)((oxcf->maximum_buffer_size -
+          oxcf->optimal_buffer_level) / max_adjustment_down);
+      if (buff_lvl_step)
+        adjustment = (int)((rc->buffer_level - oxcf->optimal_buffer_level) /
+                            buff_lvl_step);
       active_worst_quality -= adjustment;
     }
-  } else if (cpi->rc.buffer_level > critical_level) {
+  } else if (rc->buffer_level > critical_level) {
     // Adjust up from ambient Q.
     if (critical_level) {
-      buff_lvl_step = (cpi->oxcf.optimal_buffer_level - critical_level);
+      buff_lvl_step = (oxcf->optimal_buffer_level - critical_level);
       if (buff_lvl_step) {
-        adjustment =
-            (cpi->rc.worst_quality - cpi->rc.avg_frame_qindex[INTER_FRAME]) *
-            (cpi->oxcf.optimal_buffer_level - cpi->rc.buffer_level) /
-            buff_lvl_step;
+        adjustment = (rc->worst_quality - rc->avg_frame_qindex[INTER_FRAME]) *
+                         (oxcf->optimal_buffer_level - rc->buffer_level) /
+                             buff_lvl_step;
       }
-      active_worst_quality = cpi->rc.avg_frame_qindex[INTER_FRAME] + adjustment;
+      active_worst_quality = rc->avg_frame_qindex[INTER_FRAME] + adjustment;
     }
   } else {
     // Set to worst_quality if buffer is below critical level.
-    active_worst_quality = cpi->rc.worst_quality;
+    active_worst_quality = rc->worst_quality;
   }
   return active_worst_quality;
 }
 
 // Adjust target frame size with respect to the buffering constraints:
 static int target_size_from_buffer_level(const VP9_COMP *cpi) {
+  const RATE_CONTROL *const rc = &cpi->rc;
+  const VP9_CONFIG *const oxcf = &cpi->oxcf;
   int this_frame_target = cpi->rc.this_frame_target;
   int percent_low = 0;
   int percent_high = 0;
-  int one_percent_bits = (int)(1 + cpi->oxcf.optimal_buffer_level / 100);
-  if (cpi->rc.buffer_level < cpi->oxcf.optimal_buffer_level) {
-    percent_low = (int)((cpi->oxcf.optimal_buffer_level - cpi->rc.buffer_level)
-        / one_percent_bits);
-    if (percent_low > cpi->oxcf.under_shoot_pct) {
-      percent_low = cpi->oxcf.under_shoot_pct;
-    }
+  int one_percent_bits = (int)(1 + oxcf->optimal_buffer_level / 100);
+  if (rc->buffer_level < oxcf->optimal_buffer_level) {
+    percent_low = (int)((oxcf->optimal_buffer_level - rc->buffer_level) /
+                      one_percent_bits);
+    if (percent_low > oxcf->under_shoot_pct)
+      percent_low = oxcf->under_shoot_pct;
+
     // Lower the target bandwidth for this frame.
     this_frame_target -= (this_frame_target * percent_low) / 200;
-  } else  if (cpi->rc.buffer_level > cpi->oxcf.optimal_buffer_level) {
-    percent_high = (int)((cpi->rc.buffer_level - cpi->oxcf.optimal_buffer_level)
-        / one_percent_bits);
-    if (percent_high > cpi->oxcf.over_shoot_pct) {
-      percent_high = cpi->oxcf.over_shoot_pct;
-    }
+  } else  if (rc->buffer_level > oxcf->optimal_buffer_level) {
+    percent_high = (int)((rc->buffer_level - oxcf->optimal_buffer_level) /
+                     one_percent_bits);
+    if (percent_high > oxcf->over_shoot_pct)
+      percent_high = oxcf->over_shoot_pct;
+
     // Increase the target bandwidth for this frame.
     this_frame_target += (this_frame_target * percent_high) / 200;
   }
@@ -378,25 +382,27 @@ static int target_size_from_buffer_level(const VP9_COMP *cpi) {
 }
 
 static void calc_pframe_target_size(VP9_COMP *const cpi) {
-  int min_frame_target = MAX(cpi->rc.min_frame_bandwidth,
-                             cpi->rc.av_per_frame_bandwidth >> 5);
+  RATE_CONTROL *const rc = &cpi->rc;
+  const VP9_CONFIG *const oxcf = &cpi->oxcf;
+  int min_frame_target = MAX(rc->min_frame_bandwidth,
+                             rc->av_per_frame_bandwidth >> 5);
   if (cpi->refresh_alt_ref_frame) {
     // Special alt reference frame case
     // Per frame bit target for the alt ref frame
-    cpi->rc.per_frame_bandwidth = cpi->twopass.gf_bits;
-    cpi->rc.this_frame_target = cpi->rc.per_frame_bandwidth;
+    rc->per_frame_bandwidth = cpi->twopass.gf_bits;
+    rc->this_frame_target = rc->per_frame_bandwidth;
   } else {
     // Normal frames (gf and inter).
-    cpi->rc.this_frame_target = cpi->rc.per_frame_bandwidth;
+    rc->this_frame_target = rc->per_frame_bandwidth;
     // Set target frame size based on buffer level, for 1 pass CBR.
-    if (cpi->pass == 0 && cpi->oxcf.end_usage == USAGE_STREAM_FROM_SERVER) {
+    if (cpi->pass == 0 && oxcf->end_usage == USAGE_STREAM_FROM_SERVER) {
       // Need to decide how low min_frame_target should be for 1-pass CBR.
       // For now, use: cpi->rc.av_per_frame_bandwidth / 16:
-      min_frame_target = MAX(cpi->rc.av_per_frame_bandwidth >> 4,
+      min_frame_target = MAX(rc->av_per_frame_bandwidth >> 4,
                              FRAME_OVERHEAD_BITS);
-      cpi->rc.this_frame_target = target_size_from_buffer_level(cpi);
+      rc->this_frame_target = target_size_from_buffer_level(cpi);
       // Adjust qp-max based on buffer level.
-      cpi->rc.active_worst_quality =
+      rc->active_worst_quality =
           adjust_active_worst_quality_from_buffer_level(cpi);
     }
   }
@@ -407,25 +413,24 @@ static void calc_pframe_target_size(VP9_COMP *const cpi) {
   // not capable of recovering all the extra bits we have spent in the KF or GF,
   // then the remainder will have to be recovered over a longer time span via
   // other buffer / rate control mechanisms.
-  if (cpi->rc.this_frame_target < min_frame_target) {
-    cpi->rc.this_frame_target = min_frame_target;
-  }
+  if (rc->this_frame_target < min_frame_target)
+    rc->this_frame_target = min_frame_target;
 
   // Adjust target frame size for Golden Frames:
   if (cpi->refresh_golden_frame) {
     // If we are using alternate ref instead of gf then do not apply the boost
     // It will instead be applied to the altref update
     // Jims modified boost
-    if (!cpi->rc.source_alt_ref_active) {
+    if (!rc->source_alt_ref_active) {
       // The spend on the GF is defined in the two pass code
       // for two pass encodes
-      cpi->rc.this_frame_target = cpi->rc.per_frame_bandwidth;
+      rc->this_frame_target = rc->per_frame_bandwidth;
     } else {
       // If there is an active ARF at this location use the minimum
       // bits on this frame even if it is a constructed arf.
       // The active maximum quantizer insures that an appropriate
       // number of bits will be spent if needed for constructed ARFs.
-      cpi->rc.this_frame_target = 0;
+      rc->this_frame_target = 0;
     }
   }
 }
@@ -576,36 +581,34 @@ static int get_active_quality(int q,
 }
 
 int vp9_rc_pick_q_and_adjust_q_bounds(const VP9_COMP *cpi,
-                                      int *bottom_index,
-                                      int *top_index) {
+                                      int *bottom_index, int *top_index) {
   const VP9_COMMON *const cm = &cpi->common;
+  const RATE_CONTROL *const rc = &cpi->rc;
+  const VP9_CONFIG *const oxcf = &cpi->oxcf;
   int active_best_quality;
-  int active_worst_quality = cpi->rc.active_worst_quality;
+  int active_worst_quality = rc->active_worst_quality;
   int q;
 
   if (frame_is_intra_only(cm)) {
-    active_best_quality = cpi->rc.best_quality;
+    active_best_quality = rc->best_quality;
 #if !CONFIG_MULTIPLE_ARF
     // Handle the special case for key frames forced when we have75 reached
     // the maximum key frame interval. Here force the Q to a range
     // based on the ambient Q to reduce the risk of popping.
-    if (cpi->rc.this_key_frame_forced) {
-      int delta_qindex;
-      int qindex = cpi->rc.last_boosted_qindex;
+    if (rc->this_key_frame_forced) {
+      int qindex = rc->last_boosted_qindex;
       double last_boosted_q = vp9_convert_qindex_to_q(qindex);
-
-      delta_qindex = vp9_compute_qdelta(cpi, last_boosted_q,
-                                        (last_boosted_q * 0.75));
-      active_best_quality = MAX(qindex + delta_qindex,
-                                cpi->rc.best_quality);
-    } else if (!(cpi->pass == 0 && cpi->common.current_video_frame == 0)) {
+      int delta_qindex = vp9_compute_qdelta(cpi, last_boosted_q,
+                                            (last_boosted_q * 0.75));
+      active_best_quality = MAX(qindex + delta_qindex, rc->best_quality);
+    } else if (!(cpi->pass == 0 && cm->current_video_frame == 0)) {
       // not first frame of one pass
       double q_adj_factor = 1.0;
       double q_val;
 
       // Baseline value derived from cpi->active_worst_quality and kf boost
       active_best_quality = get_active_quality(active_worst_quality,
-                                               cpi->rc.kf_boost,
+                                               rc->kf_boost,
                                                kf_low, kf_high,
                                                kf_low_motion_minq,
                                                kf_high_motion_minq);
@@ -631,29 +634,29 @@ int vp9_rc_pick_q_and_adjust_q_bounds(const VP9_COMP *cpi,
     active_best_quality = active_worst_quality
         + vp9_compute_qdelta(cpi, current_q, current_q * 0.3);
 #endif
-  } else if (!cpi->rc.is_src_frame_alt_ref &&
+  } else if (!rc->is_src_frame_alt_ref &&
              (cpi->refresh_golden_frame || cpi->refresh_alt_ref_frame)) {
 
     // Use the lower of active_worst_quality and recent
     // average Q as basis for GF/ARF best Q limit unless last frame was
     // a key frame.
-    if (cpi->rc.frames_since_key > 1 &&
-        cpi->rc.avg_frame_qindex[INTER_FRAME] < active_worst_quality) {
-      q = cpi->rc.avg_frame_qindex[INTER_FRAME];
+    if (rc->frames_since_key > 1 &&
+        rc->avg_frame_qindex[INTER_FRAME] < active_worst_quality) {
+      q = rc->avg_frame_qindex[INTER_FRAME];
     } else {
       q = active_worst_quality;
     }
     // For constrained quality dont allow Q less than the cq level
-    if (cpi->oxcf.end_usage == USAGE_CONSTRAINED_QUALITY) {
+    if (oxcf->end_usage == USAGE_CONSTRAINED_QUALITY) {
       if (q < cpi->cq_target_quality)
         q = cpi->cq_target_quality;
-      if (cpi->rc.frames_since_key > 1) {
-        active_best_quality = get_active_quality(q, cpi->rc.gfu_boost,
+      if (rc->frames_since_key > 1) {
+        active_best_quality = get_active_quality(q, rc->gfu_boost,
                                                  gf_low, gf_high,
                                                  afq_low_motion_minq,
                                                  afq_high_motion_minq);
       } else {
-        active_best_quality = get_active_quality(q, cpi->rc.gfu_boost,
+        active_best_quality = get_active_quality(q, rc->gfu_boost,
                                                  gf_low, gf_high,
                                                  gf_low_motion_minq,
                                                  gf_high_motion_minq);
@@ -661,46 +664,46 @@ int vp9_rc_pick_q_and_adjust_q_bounds(const VP9_COMP *cpi,
       // Constrained quality use slightly lower active best.
       active_best_quality = active_best_quality * 15 / 16;
 
-    } else if (cpi->oxcf.end_usage == USAGE_CONSTANT_QUALITY) {
+    } else if (oxcf->end_usage == USAGE_CONSTANT_QUALITY) {
       if (!cpi->refresh_alt_ref_frame) {
         active_best_quality = cpi->cq_target_quality;
       } else {
-        if (cpi->rc.frames_since_key > 1) {
+        if (rc->frames_since_key > 1) {
           active_best_quality = get_active_quality(
-              q, cpi->rc.gfu_boost, gf_low, gf_high,
+              q, rc->gfu_boost, gf_low, gf_high,
               afq_low_motion_minq, afq_high_motion_minq);
         } else {
           active_best_quality = get_active_quality(
-              q, cpi->rc.gfu_boost, gf_low, gf_high,
+              q, rc->gfu_boost, gf_low, gf_high,
               gf_low_motion_minq, gf_high_motion_minq);
         }
       }
     } else {
       active_best_quality = get_active_quality(
-          q, cpi->rc.gfu_boost, gf_low, gf_high,
+          q, rc->gfu_boost, gf_low, gf_high,
           gf_low_motion_minq, gf_high_motion_minq);
     }
   } else {
-    if (cpi->oxcf.end_usage == USAGE_CONSTANT_QUALITY) {
+    if (oxcf->end_usage == USAGE_CONSTANT_QUALITY) {
       active_best_quality = cpi->cq_target_quality;
     } else {
       if (cpi->pass == 0 &&
-          cpi->rc.avg_frame_qindex[INTER_FRAME] < active_worst_quality)
+          rc->avg_frame_qindex[INTER_FRAME] < active_worst_quality)
         // 1-pass: for now, use the average Q for the active_best, if its lower
         // than active_worst.
-        active_best_quality = inter_minq[cpi->rc.avg_frame_qindex[INTER_FRAME]];
+        active_best_quality = inter_minq[rc->avg_frame_qindex[INTER_FRAME]];
       else
         active_best_quality = inter_minq[active_worst_quality];
 
       // For the constrained quality mode we don't want
       // q to fall below the cq level.
-      if ((cpi->oxcf.end_usage == USAGE_CONSTRAINED_QUALITY) &&
+      if ((oxcf->end_usage == USAGE_CONSTRAINED_QUALITY) &&
           (active_best_quality < cpi->cq_target_quality)) {
         // If we are strongly undershooting the target rate in the last
         // frames then use the user passed in cq value not the auto
         // cq value.
-        if (cpi->rc.rolling_actual_bits < cpi->rc.min_frame_bandwidth)
-          active_best_quality = cpi->oxcf.cq_level;
+        if (rc->rolling_actual_bits < rc->min_frame_bandwidth)
+          active_best_quality = oxcf->cq_level;
         else
           active_best_quality = cpi->cq_target_quality;
       }
@@ -708,14 +711,14 @@ int vp9_rc_pick_q_and_adjust_q_bounds(const VP9_COMP *cpi,
   }
 
   // Clip the active best and worst quality values to limits
-  if (active_worst_quality > cpi->rc.worst_quality)
-    active_worst_quality = cpi->rc.worst_quality;
+  if (active_worst_quality > rc->worst_quality)
+    active_worst_quality = rc->worst_quality;
 
-  if (active_best_quality < cpi->rc.best_quality)
-    active_best_quality = cpi->rc.best_quality;
+  if (active_best_quality < rc->best_quality)
+    active_best_quality = rc->best_quality;
 
-  if (active_best_quality > cpi->rc.worst_quality)
-    active_best_quality = cpi->rc.worst_quality;
+  if (active_best_quality > rc->worst_quality)
+    active_best_quality = rc->worst_quality;
 
   if (active_worst_quality < active_best_quality)
     active_worst_quality = active_best_quality;
@@ -725,26 +728,26 @@ int vp9_rc_pick_q_and_adjust_q_bounds(const VP9_COMP *cpi,
 
 #if LIMIT_QRANGE_FOR_ALTREF_AND_KEY
   // Limit Q range for the adaptive loop.
-  if (cm->frame_type == KEY_FRAME && !cpi->rc.this_key_frame_forced) {
-    if (!(cpi->pass == 0 && cpi->common.current_video_frame == 0)) {
+  if (cm->frame_type == KEY_FRAME && !rc->this_key_frame_forced) {
+    if (!(cpi->pass == 0 && cm->current_video_frame == 0)) {
       *top_index =
           (active_worst_quality + active_best_quality * 3) / 4;
     }
-  } else if (!cpi->rc.is_src_frame_alt_ref &&
-             (cpi->oxcf.end_usage != USAGE_STREAM_FROM_SERVER) &&
+  } else if (!rc->is_src_frame_alt_ref &&
+             (oxcf->end_usage != USAGE_STREAM_FROM_SERVER) &&
              (cpi->refresh_golden_frame || cpi->refresh_alt_ref_frame)) {
     *top_index =
       (active_worst_quality + active_best_quality) / 2;
   }
 #endif
 
-  if (cpi->oxcf.end_usage == USAGE_CONSTANT_QUALITY) {
+  if (oxcf->end_usage == USAGE_CONSTANT_QUALITY) {
     q = active_best_quality;
   // Special case code to try and match quality with forced key frames
-  } else if ((cm->frame_type == KEY_FRAME) && cpi->rc.this_key_frame_forced) {
-    q = cpi->rc.last_boosted_qindex;
+  } else if ((cm->frame_type == KEY_FRAME) && rc->this_key_frame_forced) {
+    q = rc->last_boosted_qindex;
   } else {
-    q = vp9_rc_regulate_q(cpi, cpi->rc.this_frame_target,
+    q = vp9_rc_regulate_q(cpi, rc->this_frame_target,
                           active_best_quality, active_worst_quality);
     if (q > *top_index) {
       // Special case when we are targeting the max allowed rate
@@ -771,12 +774,11 @@ int vp9_rc_pick_q_and_adjust_q_bounds(const VP9_COMP *cpi,
     printf("frame:%d q:%d\n", cm->current_video_frame, q);
   }
 #endif
-  assert(*top_index <= cpi->rc.worst_quality &&
-         *top_index >= cpi->rc.best_quality);
-  assert(*bottom_index <= cpi->rc.worst_quality &&
-         *bottom_index >= cpi->rc.best_quality);
-  assert(q <= cpi->rc.worst_quality &&
-         q >= cpi->rc.best_quality);
+  assert(*top_index <= rc->worst_quality &&
+         *top_index >= rc->best_quality);
+  assert(*bottom_index <= rc->worst_quality &&
+         *bottom_index >= rc->best_quality);
+  assert(q <= rc->worst_quality && q >= rc->best_quality);
   return q;
 }
 
@@ -857,24 +859,26 @@ static void update_alt_ref_frame_stats(VP9_COMP *cpi) {
 }
 
 static void update_golden_frame_stats(VP9_COMP *cpi) {
+  RATE_CONTROL *const rc = &cpi->rc;
+
   // Update the Golden frame usage counts.
   if (cpi->refresh_golden_frame) {
     // this frame refreshes means next frames don't unless specified by user
-    cpi->rc.frames_since_golden = 0;
+    rc->frames_since_golden = 0;
 
-    if (!cpi->rc.source_alt_ref_pending)
-      cpi->rc.source_alt_ref_active = 0;
+    if (!rc->source_alt_ref_pending)
+      rc->source_alt_ref_active = 0;
 
     // Decrement count down till next gf
-    if (cpi->rc.frames_till_gf_update_due > 0)
-      cpi->rc.frames_till_gf_update_due--;
+    if (rc->frames_till_gf_update_due > 0)
+      rc->frames_till_gf_update_due--;
 
   } else if (!cpi->refresh_alt_ref_frame) {
     // Decrement count down till next gf
-    if (cpi->rc.frames_till_gf_update_due > 0)
-      cpi->rc.frames_till_gf_update_due--;
+    if (rc->frames_till_gf_update_due > 0)
+      rc->frames_till_gf_update_due--;
 
-    cpi->rc.frames_since_golden++;
+    rc->frames_since_golden++;
   }
 }
 
