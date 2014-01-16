@@ -1,0 +1,89 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//8g0\u003d",
+        "filename": "vpxdec.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 256,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-01-16T23:22:07Z",
+      "side": 1,
+      "message": "parentheses around condition; also (and this is just my preference), prefer keeping condition on a single line where possible. For example, wrap like this:\n\n    condition ?\n        true side : false side\n\nOr this:\n    condition ?\n        true side :\n        false side\n\nThis thread[1] sort of backs up my style; maybe this is against current convention in libvpx, though.\n\n[1] http://clang-developers.42468.n3.nabble.com/clang-format-chromium-ternary-operator-td4033822.html",
+      "revId": "ddce719c67c6e6602042bd74240e29496aaf0ac7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//8gw\u003d",
+        "filename": "vpxdec.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 262,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-01-16T23:22:07Z",
+      "side": 1,
+      "message": "parentheses around condition",
+      "revId": "ddce719c67c6e6602042bd74240e29496aaf0ac7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//8gs\u003d",
+        "filename": "vpxdec.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 909,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-01-16T23:22:07Z",
+      "side": 1,
+      "message": "potential for further cleanup:\n- Let\u0027s stop using fn as an abbreviation for filename; it\u0027s terrible (mainly because it\u0027s ambiguous-- does it mean function? filename? etc etc)\n- out_open() and out_close() are evil because both do more than is made obvious by their naming.",
+      "revId": "ddce719c67c6e6602042bd74240e29496aaf0ac7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//8go\u003d",
+        "filename": "vpxdec.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 912,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-01-16T23:22:07Z",
+      "side": 1,
+      "message": "I think this needs to be changed:\n- outfile name is ALWAYS a file name\n- add new arg (outfile_pattern); do this only when it\u0027s set and stop testing the output file name for magic chars",
+      "revId": "ddce719c67c6e6602042bd74240e29496aaf0ac7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//8gg\u003d",
+        "filename": "vpxdec.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 917,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-01-16T23:22:07Z",
+      "side": 1,
+      "message": "I still don\u0027t like this; would prefer:\n\nconst char kFrameString \u003d \"FRAME\\n\";\nfwrite(\u0026kFrameString[0], 1, strlen(kFrameString), out);\n\nI don\u0027t feel very strongly about this; I just hate the magic number (the 6; and I know it is particularly magical in this context).",
+      "revId": "ddce719c67c6e6602042bd74240e29496aaf0ac7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
