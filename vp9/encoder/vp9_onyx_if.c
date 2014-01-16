@@ -2603,17 +2603,19 @@ static void output_frame_level_debug_stats(VP9_COMP *cpi) {
   recon_err = vp9_calc_ss_err(cpi->Source, get_frame_new_buffer(cm));
 
   if (cpi->twopass.total_left_stats.coded_error != 0.0)
-    fprintf(f, "%10d %10d %10d %10d %10d %10d %10d %10d %10d"
-        "%7.2f %7.2f %7.2f %7.2f %7.2f %7.2f"
-        "%6d %6d %5d %5d %5d %10d %10.3f"
-        "%10.3f %8d %10d %10d %10d\n",
+    fprintf(f, "%10u %10d %10d %10d %10d %10d "
+        "%10"PRId64" %10"PRId64" %10d "
+        "%7.2lf %7.2lf %7.2lf %7.2lf %7.2lf %7.2lf"
+        "%6d %6d %5d %5d %5d "
+        "%10"PRId64" %10.3lf"
+        "%10lf %8u %10d %10d %10d\n",
         cpi->common.current_video_frame, cpi->rc.this_frame_target,
         cpi->rc.projected_frame_size,
         cpi->rc.projected_frame_size / cpi->common.MBs,
         (cpi->rc.projected_frame_size - cpi->rc.this_frame_target),
-        (int)cpi->rc.total_target_vs_actual,
-        (int)(cpi->oxcf.starting_buffer_level - cpi->rc.bits_off_target),
-        (int)cpi->rc.total_actual_bits, cm->base_qindex,
+        cpi->rc.total_target_vs_actual,
+        (cpi->oxcf.starting_buffer_level - cpi->rc.bits_off_target),
+        cpi->rc.total_actual_bits, cm->base_qindex,
         vp9_convert_qindex_to_q(cm->base_qindex),
         (double)vp9_dc_quant(cm->base_qindex, 0) / 4.0,
         vp9_convert_qindex_to_q(cpi->rc.active_worst_quality), cpi->rc.avg_q,
@@ -2621,9 +2623,9 @@ static void output_frame_level_debug_stats(VP9_COMP *cpi) {
         vp9_convert_qindex_to_q(cpi->cq_target_quality),
         cpi->refresh_last_frame, cpi->refresh_golden_frame,
         cpi->refresh_alt_ref_frame, cm->frame_type, cpi->rc.gfu_boost,
-        (int)cpi->twopass.bits_left,
+        cpi->twopass.bits_left,
         cpi->twopass.total_left_stats.coded_error,
-        (double)cpi->twopass.bits_left /
+        cpi->twopass.bits_left /
             (1 + cpi->twopass.total_left_stats.coded_error),
         cpi->tot_recode_hits, recon_err, cpi->rc.kf_boost,
         cpi->twopass.kf_zeromotion_pct);
