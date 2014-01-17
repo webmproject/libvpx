@@ -123,7 +123,7 @@ typedef int (*vp9_diamond_search_fn_t)(MACROBLOCK *x,
                                        int *mvjcost, int *mvcost[2],
                                        const MV *center_mv);
 
-int vp9_refining_search_8p_c(MACROBLOCK *x,
+int vp9_refining_search_8p_c(const MACROBLOCK *x,
                              MV *ref_mv, int error_per_bit,
                              int search_range, vp9_variance_fn_ptr_t *fn_ptr,
                              int *mvjcost, int *mvcost[2],
