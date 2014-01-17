@@ -264,13 +264,13 @@ prototype void vp9_convolve_avg "const uint8_t *src, ptrdiff_t src_stride, uint8
 specialize vp9_convolve_avg $sse2_x86inc neon dspr2
 
 prototype void vp9_convolve8 "const uint8_t *src, ptrdiff_t src_stride, uint8_t *dst, ptrdiff_t dst_stride, const int16_t *filter_x, int x_step_q4, const int16_t *filter_y, int y_step_q4, int w, int h"
-specialize vp9_convolve8 sse2 ssse3 neon dspr2
+specialize vp9_convolve8 sse2 ssse3 avx2 neon dspr2
 
 prototype void vp9_convolve8_horiz "const uint8_t *src, ptrdiff_t src_stride, uint8_t *dst, ptrdiff_t dst_stride, const int16_t *filter_x, int x_step_q4, const int16_t *filter_y, int y_step_q4, int w, int h"
-specialize vp9_convolve8_horiz sse2 ssse3 neon dspr2
+specialize vp9_convolve8_horiz sse2 ssse3 avx2 neon dspr2
 
 prototype void vp9_convolve8_vert "const uint8_t *src, ptrdiff_t src_stride, uint8_t *dst, ptrdiff_t dst_stride, const int16_t *filter_x, int x_step_q4, const int16_t *filter_y, int y_step_q4, int w, int h"
-specialize vp9_convolve8_vert sse2 ssse3 neon dspr2
+specialize vp9_convolve8_vert sse2 ssse3 avx2 neon dspr2
 
 prototype void vp9_convolve8_avg "const uint8_t *src, ptrdiff_t src_stride, uint8_t *dst, ptrdiff_t dst_stride, const int16_t *filter_x, int x_step_q4, const int16_t *filter_y, int y_step_q4, int w, int h"
 specialize vp9_convolve8_avg sse2 ssse3 neon dspr2
