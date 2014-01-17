@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//8ek\u003d",
+        "filename": "vpxdec.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 256,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-01-17T01:18:25Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//8g0\u003d",
+      "revId": "ddce719c67c6e6602042bd74240e29496aaf0ac7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//8gw\u003d",
         "filename": "vpxdec.c",
         "patchSetId": 1
@@ -30,6 +48,24 @@
       "writtenOn": "2014-01-16T23:22:07Z",
       "side": 1,
       "message": "parentheses around condition",
+      "revId": "ddce719c67c6e6602042bd74240e29496aaf0ac7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//8eo\u003d",
+        "filename": "vpxdec.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 262,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-01-17T01:18:25Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//8gw\u003d",
       "revId": "ddce719c67c6e6602042bd74240e29496aaf0ac7",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//8fc\u003d",
+        "filename": "vpxdec.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 909,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-01-17T01:18:25Z",
+      "side": 1,
+      "message": "Agree, the next effort is to remove out_open() and out_close() functions. I\u0027ve found that it\u0027s not an easy task, at least for the current change set. But I\u0027ll definitely remove them soon :-)",
+      "parentUuid": "AAAAdn//8gs\u003d",
+      "revId": "ddce719c67c6e6602042bd74240e29496aaf0ac7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//8go\u003d",
         "filename": "vpxdec.c",
         "patchSetId": 1
@@ -70,6 +124,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//8e0\u003d",
+        "filename": "vpxdec.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 912,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-01-17T01:18:25Z",
+      "side": 1,
+      "message": "Sure, but again, can it be done in separate change set?",
+      "parentUuid": "AAAAdn//8go\u003d",
+      "revId": "ddce719c67c6e6602042bd74240e29496aaf0ac7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//8gg\u003d",
         "filename": "vpxdec.c",
         "patchSetId": 1
@@ -81,6 +153,24 @@
       "writtenOn": "2014-01-16T23:22:07Z",
       "side": 1,
       "message": "I still don\u0027t like this; would prefer:\n\nconst char kFrameString \u003d \"FRAME\\n\";\nfwrite(\u0026kFrameString[0], 1, strlen(kFrameString), out);\n\nI don\u0027t feel very strongly about this; I just hate the magic number (the 6; and I know it is particularly magical in this context).",
+      "revId": "ddce719c67c6e6602042bd74240e29496aaf0ac7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//8fg\u003d",
+        "filename": "vpxdec.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 917,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-01-17T01:18:25Z",
+      "side": 1,
+      "message": "Sure, I\u0027m going to move all y4m specific code to separate file but no in this patch.",
+      "parentUuid": "AAAAdn//8gg\u003d",
       "revId": "ddce719c67c6e6602042bd74240e29496aaf0ac7",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
