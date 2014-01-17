@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//8dA\u003d",
+        "filename": "vpxdec.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 252,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-01-17T03:31:07Z",
+      "side": 1,
+      "message": "These can be locals in main().",
+      "revId": "df56584b0ae7301a60c4bc012f37ea748ab660f2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//8dM\u003d",
+        "filename": "vpxdec.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 257,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-01-17T03:31:07Z",
+      "side": 1,
+      "message": "sorry, I should have been more specific. The operator belongs at EoL:\n    return (plane \u003e 0 \u0026\u0026 img-\u003ex_chroma_shift \u003e 0) ?\n        (img-\u003ed_w + 1) \u003e\u003e img-\u003ex_chroma_shift :\n        img-\u003ed_w;",
+      "revId": "df56584b0ae7301a60c4bc012f37ea748ab660f2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//8c8\u003d",
+        "filename": "vpxdec.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 907,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-01-17T03:31:07Z",
+      "side": 1,
+      "message": "We have a scope here: Just move the PLANES_* declarations down here.",
+      "revId": "df56584b0ae7301a60c4bc012f37ea748ab660f2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
