@@ -131,6 +131,21 @@ static const arg_def_t *vp8_pp_args[] = {
 };
 #endif
 
+static int vpx_image_scale(vpx_image_t *src, vpx_image_t *dst,
+                           FilterMode mode) {
+  assert(src->fmt == VPX_IMG_FMT_I420);
+  assert(dst->fmt == VPX_IMG_FMT_I420);
+  return I420Scale(src->planes[VPX_PLANE_Y], src->stride[VPX_PLANE_Y],
+                   src->planes[VPX_PLANE_U], src->stride[VPX_PLANE_U],
+                   src->planes[VPX_PLANE_V], src->stride[VPX_PLANE_V],
+                   src->d_w, src->d_h,
+                   dst->planes[VPX_PLANE_Y], dst->stride[VPX_PLANE_Y],
+                   dst->planes[VPX_PLANE_U], dst->stride[VPX_PLANE_U],
+                   dst->planes[VPX_PLANE_V], dst->stride[VPX_PLANE_V],
+                   dst->d_w, dst->d_h,
+                   mode);
+}
+
 void usage_exit() {
   int i;
 
@@ -490,8 +505,6 @@ int main_loop(int argc, const char **argv_) {
   int                     num_external_frame_buffers = 0;
   int                     fb_lru_cache = 0;
   vpx_codec_frame_buffer_t *frame_buffers = NULL;
-  int                     display_width = 0;
-  int                     display_height = 0;
 
   struct VpxDecInputContext input = {0};
   struct VpxInputContext vpx_input_ctx = {0};
@@ -866,8 +879,8 @@ int main_loop(int argc, const char **argv_) {
           // use the width and height specified in the container. If either of
           // these is set to 0, use the display size set in the first frame
           // header.
-          display_width = vpx_input_ctx.width;
-          display_height = vpx_input_ctx.height;
+          int display_width = vpx_input_ctx.width;
+          int display_height = vpx_input_ctx.height;
           if (!display_width || !display_height) {
             int display_size[2];
             if (vpx_codec_control(&decoder, VP9D_GET_DISPLAY_SIZE,
@@ -884,23 +897,12 @@ int main_loop(int argc, const char **argv_) {
                                      display_height, 16);
         }
 
-        if (img->d_w != display_width || img->d_h != display_height) {
-          assert(img->fmt == VPX_IMG_FMT_I420);
-          I420Scale(img->planes[VPX_PLANE_Y], img->stride[VPX_PLANE_Y],
-                    img->planes[VPX_PLANE_U], img->stride[VPX_PLANE_U],
-                    img->planes[VPX_PLANE_V], img->stride[VPX_PLANE_V],
-                    img->d_w, img->d_h,
-                    scaled_img->planes[VPX_PLANE_Y],
-                    scaled_img->stride[VPX_PLANE_Y],
-                    scaled_img->planes[VPX_PLANE_U],
-                    scaled_img->stride[VPX_PLANE_U],
-                    scaled_img->planes[VPX_PLANE_V],
-                    scaled_img->stride[VPX_PLANE_V],
-                    display_width, display_height,
-                    kFilterBox);
+        if (img->d_w != scaled_img->d_w || img->d_h != scaled_img->d_h) {
+          vpx_image_scale(img, scaled_img, kFilterBox);
           img = scaled_img;
         }
       }
+
       if (img) {
         const int PLANES_YUV[] = {VPX_PLANE_Y, VPX_PLANE_U, VPX_PLANE_V};
         const int PLANES_YVU[] = {VPX_PLANE_Y, VPX_PLANE_V, VPX_PLANE_U};
