@@ -248,11 +248,51 @@ void *out_open(const char *out_fn, int do_md5) {
   return out;
 }
 
-void out_put(void *out, const uint8_t *buf, unsigned int len, int do_md5) {
-  if (do_md5) {
-    MD5Update(out, buf, len);
-  } else {
-    (void) fwrite(buf, 1, len, out);
+static int get_image_plane_width(int plane, const vpx_image_t *img) {
+  return (plane > 0 && img->x_chroma_shift > 0) ?
+             (img->d_w + 1) >> img->x_chroma_shift :
+             img->d_w;
+}
+
+static int get_image_plane_height(int plane, const vpx_image_t *img) {
+  return (plane > 0 &&  img->y_chroma_shift > 0) ?
+             (img->d_h + 1) >> img->y_chroma_shift :
+             img->d_h;
+}
+
+static void update_image_md5(const vpx_image_t *img, const int planes[3],
+                             MD5Context *md5) {
+  int i, y;
+
+  for (i = 0; i < 3; ++i) {
+    const int plane = planes[i];
+    const unsigned char *buf = img->planes[plane];
+    const int stride = img->stride[plane];
+    const int w = get_image_plane_width(plane, img);
+    const int h = get_image_plane_height(plane, img);
+
+    for (y = 0; y < h; ++y) {
+      MD5Update(md5, buf, w);
+      buf += stride;
+    }
+  }
+}
+
+static void write_image_file(const vpx_image_t *img, const int planes[3],
+                             FILE *file) {
+  int i, y;
+
+  for (i = 0; i < 3; ++i) {
+    const int plane = planes[i];
+    const unsigned char *buf = img->planes[plane];
+    const int stride = img->stride[plane];
+    const int w = get_image_plane_width(plane, img);
+    const int h = get_image_plane_height(plane, img);
+
+    for (y = 0; y < h; ++y) {
+      fwrite(buf, 1, w, file);
+      buf += stride;
+    }
   }
 }
 
@@ -412,7 +452,6 @@ void generate_filename(const char *pattern, char *out, size_t q_len,
     }
   } while (*p);
 }
-
 
 int main_loop(int argc, const char **argv_) {
   vpx_codec_ctx_t       decoder;
@@ -663,8 +702,7 @@ int main_loop(int argc, const char **argv_) {
              vpx_input_ctx.framerate.numerator,
              vpx_input_ctx.framerate.denominator,
              'p');
-    out_put(out, (unsigned char *)buffer,
-            (unsigned int)strlen(buffer), do_md5);
+    fwrite(buffer, 1, strlen(buffer), out);
   }
 
   /* Try to determine the codec from the fourcc. */
@@ -819,7 +857,7 @@ int main_loop(int argc, const char **argv_) {
             img->fmt == VPX_IMG_FMT_I422 ? "C422\n" :
             "C420jpeg\n";
 
-        out_put(out, (const unsigned char*)color, strlen(color), do_md5);
+        fwrite(color, 1, strlen(color), out);
       }
 
       if (img && do_scale) {
@@ -864,46 +902,25 @@ int main_loop(int argc, const char **argv_) {
         }
       }
       if (img) {
-        unsigned int y;
+        const int PLANES_YUV[] = {VPX_PLANE_Y, VPX_PLANE_U, VPX_PLANE_V};
+        const int PLANES_YVU[] = {VPX_PLANE_Y, VPX_PLANE_V, VPX_PLANE_U};
+
+        const int *planes = flipuv ? PLANES_YVU : PLANES_YUV;
         char out_fn[PATH_MAX];
-        uint8_t *buf;
-        unsigned int c_w =
-            img->x_chroma_shift ? (1 + img->d_w) >> img->x_chroma_shift
-                                : img->d_w;
-        unsigned int c_h =
-            img->y_chroma_shift ? (1 + img->d_h) >> img->y_chroma_shift
-                                : img->d_h;
 
         if (!single_file) {
-          size_t len = sizeof(out_fn) - 1;
-
-          out_fn[len] = '\0';
-          generate_filename(outfile_pattern, out_fn, len - 1,
+          generate_filename(outfile_pattern, out_fn, PATH_MAX,
                             img->d_w, img->d_h, frame_in);
           out = out_open(out_fn, do_md5);
-        } else if (use_y4m)
-          out_put(out, (unsigned char *)"FRAME\n", 6, do_md5);
-
-        buf = img->planes[VPX_PLANE_Y];
-
-        for (y = 0; y < img->d_h; y++) {
-          out_put(out, buf, img->d_w, do_md5);
-          buf += img->stride[VPX_PLANE_Y];
+        } else {
+          if (use_y4m)
+            fwrite("FRAME\n", 1, 6, out);
         }
 
-        buf = img->planes[flipuv ? VPX_PLANE_V : VPX_PLANE_U];
-
-        for (y = 0; y < c_h; y++) {
-          out_put(out, buf, c_w, do_md5);
-          buf += img->stride[VPX_PLANE_U];
-        }
-
-        buf = img->planes[flipuv ? VPX_PLANE_U : VPX_PLANE_V];
-
-        for (y = 0; y < c_h; y++) {
-          out_put(out, buf, c_w, do_md5);
-          buf += img->stride[VPX_PLANE_V];
-        }
+        if (do_md5)
+          update_image_md5(img, planes, out);
+        else
+          write_image_file(img, planes, out);
 
         if (!single_file)
           out_close(out, out_fn, do_md5);
