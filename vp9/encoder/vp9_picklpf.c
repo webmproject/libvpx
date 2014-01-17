@@ -20,18 +20,6 @@
 #include "vp9/common/vp9_loopfilter.h"
 #include "./vpx_scale_rtcd.h"
 
-void vp9_yv12_copy_partial_frame_c(YV12_BUFFER_CONFIG *src_ybc,
-                                   YV12_BUFFER_CONFIG *dst_ybc, int fraction) {
-  const int height = src_ybc->y_height;
-  const int stride = src_ybc->y_stride;
-  const int offset = stride * ((height >> 5) * 16 - 8);
-  const int lines_to_copy = MAX(height >> (fraction + 4), 1) << 4;
-
-  assert(src_ybc->y_stride == dst_ybc->y_stride);
-  vpx_memcpy(dst_ybc->y_buffer + offset, src_ybc->y_buffer + offset,
-             stride * (lines_to_copy + 16));
-}
-
 // Enforce a minimum filter level based upon baseline Q
 static int get_min_filter_level(VP9_COMP *cpi, int base_qindex) {
   int min_filter_level;

@@ -756,9 +756,5 @@ specialize vp9_full_range_search
 prototype void vp9_temporal_filter_apply "uint8_t *frame1, unsigned int stride, uint8_t *frame2, unsigned int block_size, int strength, int filter_weight, unsigned int *accumulator, uint16_t *count"
 specialize vp9_temporal_filter_apply sse2
 
-prototype void vp9_yv12_copy_partial_frame "struct yv12_buffer_config *src_ybc, struct yv12_buffer_config *dst_ybc, int fraction"
-specialize vp9_yv12_copy_partial_frame
-
-
 fi
 # end encoder functions
