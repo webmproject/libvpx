@@ -742,7 +742,7 @@ specialize vp9_full_search_sad sse3 sse4_1
 vp9_full_search_sad_sse3=vp9_full_search_sadx3
 vp9_full_search_sad_sse4_1=vp9_full_search_sadx8
 
-prototype int vp9_refining_search_sad "struct macroblock *x, struct mv *ref_mv, int sad_per_bit, int distance, struct vp9_variance_vtable *fn_ptr, DEC_MVCOSTS, const struct mv *center_mv"
+prototype int vp9_refining_search_sad "const struct macroblock *x, struct mv *ref_mv, int sad_per_bit, int distance, struct vp9_variance_vtable *fn_ptr, DEC_MVCOSTS, const struct mv *center_mv"
 specialize vp9_refining_search_sad sse3
 vp9_refining_search_sad_sse3=vp9_refining_search_sadx4
 
