@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//8cE\u003d",
+        "filename": "vpxdec.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 906,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-01-17T18:54:44Z",
+      "side": 1,
+      "message": "Drop the static.",
+      "revId": "866a0f475108d158613bb6a34b17b1110fda2fbf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
