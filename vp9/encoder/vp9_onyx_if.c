@@ -36,6 +36,7 @@
 #include "vp9/encoder/vp9_segmentation.h"
 #include "vp9/encoder/vp9_temporal_filter.h"
 #include "vp9/encoder/vp9_vaq.h"
+#include "vp9/encoder/vp9_resize.h"
 
 #include "vpx_ports/vpx_timer.h"
 
@@ -2295,6 +2296,42 @@ void vp9_write_yuv_rec_frame(VP9_COMMON *cm) {
 }
 #endif
 
+static void scale_and_extend_frame_nonnormative(YV12_BUFFER_CONFIG *src_fb,
+                                                YV12_BUFFER_CONFIG *dst_fb) {
+  const int in_w = src_fb->y_crop_width;
+  const int in_h = src_fb->y_crop_height;
+  const int out_w = dst_fb->y_crop_width;
+  const int out_h = dst_fb->y_crop_height;
+  const int in_w_uv = src_fb->uv_crop_width;
+  const int in_h_uv = src_fb->uv_crop_height;
+  const int out_w_uv = dst_fb->uv_crop_width;
+  const int out_h_uv = dst_fb->uv_crop_height;
+  int i;
+
+  uint8_t *srcs[4] = {src_fb->y_buffer, src_fb->u_buffer, src_fb->v_buffer,
+    src_fb->alpha_buffer};
+  int src_strides[4] = {src_fb->y_stride, src_fb->uv_stride, src_fb->uv_stride,
+    src_fb->alpha_stride};
+
+  uint8_t *dsts[4] = {dst_fb->y_buffer, dst_fb->u_buffer, dst_fb->v_buffer,
+    dst_fb->alpha_buffer};
+  int dst_strides[4] = {dst_fb->y_stride, dst_fb->uv_stride, dst_fb->uv_stride,
+    dst_fb->alpha_stride};
+
+  for (i = 0; i < MAX_MB_PLANE; ++i) {
+    if (i == 0 || i == 3) {
+      // Y and alpha planes
+      vp9_resize_plane(srcs[i], in_h, in_w, src_strides[i],
+                       dsts[i], out_h, out_w, dst_strides[i]);
+    } else {
+      // Chroma planes
+      vp9_resize_plane(srcs[i], in_h_uv, in_w_uv, src_strides[i],
+                       dsts[i], out_h_uv, out_w_uv, dst_strides[i]);
+    }
+  }
+  vp8_yv12_extend_frame_borders(dst_fb);
+}
+
 static void scale_and_extend_frame(YV12_BUFFER_CONFIG *src_fb,
                                    YV12_BUFFER_CONFIG *dst_fb) {
   const int in_w = src_fb->y_crop_width;
@@ -2316,7 +2353,7 @@ static void scale_and_extend_frame(YV12_BUFFER_CONFIG *src_fb,
   for (y = 0; y < out_h; y += 16) {
     for (x = 0; x < out_w; x += 16) {
       for (i = 0; i < MAX_MB_PLANE; ++i) {
-        const int factor = i == 0 ? 1 : 2;
+        const int factor = (i == 0 || i == 3 ? 1 : 2);
         const int x_q4 = x * (16 / factor) * in_w / out_w;
         const int y_q4 = y * (16 / factor) * in_h / out_h;
         const int src_stride = src_strides[i];
@@ -2924,7 +2961,8 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
   /* Scale the source buffer, if required. */
   if (cm->mi_cols * 8 != cpi->un_scaled_source->y_width ||
       cm->mi_rows * 8 != cpi->un_scaled_source->y_height) {
-    scale_and_extend_frame(cpi->un_scaled_source, &cpi->scaled_source);
+    scale_and_extend_frame_nonnormative(cpi->un_scaled_source,
+                                        &cpi->scaled_source);
     cpi->Source = &cpi->scaled_source;
   } else {
     cpi->Source = cpi->un_scaled_source;
