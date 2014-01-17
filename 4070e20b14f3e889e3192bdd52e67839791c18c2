@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//8XY\u003d",
+        "filename": "examples.mk",
+        "patchSetId": 4
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-01-17T23:33:37Z",
+      "side": 1,
+      "message": "Move this to after line 29 (the webmdec line). This sub grouping is alpha sorted; we should probably alpha sort everything after vpxdec, but that change doesn\u0027t belong in this patch set.",
+      "revId": "4070e20b14f3e889e3192bdd52e67839791c18c2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//8XU\u003d",
+        "filename": "vpxdec.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-01-17T23:33:37Z",
+      "side": 1,
+      "message": "This belongs below the webmdec.h include.",
+      "revId": "4070e20b14f3e889e3192bdd52e67839791c18c2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//8XI\u003d",
+        "filename": "vpxdec.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 910,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-01-17T23:33:37Z",
+      "side": 1,
+      "message": "Not in this patch set, but: write_image_file() should be write_yuv_frame(); it can probably live in tools_common.c (read_yuv_frame() already does).\n\nMaybe we need {yuv,raw}frame{enc,dec}.{c,h} ... I don\u0027t really like that raw_read_frame is in here. It\u0027s functionality is probably duplicated by read_yuv_frame() (or close to it, anyway).\n\nNote: I could be wrong; didn\u0027t look that closely.",
+      "revId": "4070e20b14f3e889e3192bdd52e67839791c18c2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//8Xk\u003d",
+        "filename": "y4menc.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-01-17T23:33:37Z",
+      "side": 1,
+      "message": "Use VpxRational from tools_common.h instead of separate args for num/den.",
+      "revId": "4070e20b14f3e889e3192bdd52e67839791c18c2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
