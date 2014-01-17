@@ -3689,7 +3689,8 @@ int vp9_get_preview_raw_frame(VP9_PTR comp, YV12_BUFFER_CONFIG *dest,
       *dest = *cpi->common.frame_to_show;
       dest->y_width = cpi->common.width;
       dest->y_height = cpi->common.height;
-      dest->uv_height = cpi->common.height / 2;
+      dest->uv_width = cpi->common.width >> cpi->common.subsampling_x;
+      dest->uv_height = cpi->common.height >> cpi->common.subsampling_y;
       ret = 0;
     } else {
       ret = -1;
