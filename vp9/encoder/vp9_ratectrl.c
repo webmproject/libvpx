@@ -602,7 +602,7 @@ int vp9_rc_pick_q_and_adjust_q_bounds(const VP9_COMP *cpi,
                                             (last_boosted_q * 0.75));
       active_best_quality = MAX(qindex + delta_qindex, rc->best_quality);
     } else if (!(cpi->pass == 0 && cm->current_video_frame == 0)) {
-      // not first frame of one pass
+      // not first frame of one pass and kf_boost is set
       double q_adj_factor = 1.0;
       double q_val;
 

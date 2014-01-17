@@ -1965,7 +1965,10 @@ void vp9_get_one_pass_params(VP9_COMP *cpi) {
        cpi->rc.frames_to_key == 0 ||
        (cpi->oxcf.auto_key && test_for_kf_one_pass(cpi)))) {
     cm->frame_type = KEY_FRAME;
+    cpi->rc.this_key_frame_forced = cm->current_video_frame != 0 &&
+                                    cpi->rc.frames_to_key == 0;
     cpi->rc.frames_to_key = cpi->key_frame_frequency;
+    cpi->rc.kf_boost = 300;
   } else {
     cm->frame_type = INTER_FRAME;
   }
@@ -1982,7 +1985,10 @@ void vp9_get_one_pass_cbr_params(VP9_COMP *cpi) {
       cpi->rc.frames_to_key == 0 ||
       (cpi->oxcf.auto_key && test_for_kf_one_pass(cpi)))) {
     cm->frame_type = KEY_FRAME;
+    cpi->rc.this_key_frame_forced = cm->current_video_frame != 0 &&
+                                    cpi->rc.frames_to_key == 0;
     cpi->rc.frames_to_key = cpi->key_frame_frequency;
+    cpi->rc.kf_boost = 300;
   } else {
     cm->frame_type = INTER_FRAME;
   }
