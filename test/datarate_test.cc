@@ -7,11 +7,13 @@
  *  in the file PATENTS.  All contributing project authors may
  *  be found in the AUTHORS file in the root of the source tree.
  */
+#include "./vpx_config.h"
 #include "third_party/googletest/src/include/gtest/gtest.h"
 #include "test/codec_factory.h"
 #include "test/encode_test_driver.h"
 #include "test/i420_video_source.h"
 #include "test/util.h"
+#include "test/y4m_video_source.h"
 
 namespace {
 
@@ -285,6 +287,37 @@ TEST_P(DatarateTestVP9, BasicRateTargeting) {
         << " The datarate for the file missed the target!";
   }
 }
+
+#if CONFIG_NON420
+// Check basic rate targeting,
+TEST_P(DatarateTestVP9, BasicRateTargeting444) {
+  ::libvpx_test::Y4mVideoSource video("rush_hour_444.y4m", 0, 140);
+
+  cfg_.g_profile = 1;
+  cfg_.g_timebase = video.timebase();
+
+  cfg_.rc_buf_initial_sz = 500;
+  cfg_.rc_buf_optimal_sz = 500;
+  cfg_.rc_buf_sz = 1000;
+  cfg_.rc_dropframe_thresh = 1;
+  cfg_.rc_min_quantizer = 0;
+  cfg_.rc_max_quantizer = 63;
+  cfg_.rc_end_usage = VPX_CBR;
+
+  for (int i = 250; i < 900; i += 200) {
+    cfg_.rc_target_bitrate = i;
+    ResetModel();
+    ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
+    ASSERT_GE(static_cast<double>(cfg_.rc_target_bitrate),
+              effective_datarate_ * 0.85)
+        << " The datarate for the file exceeds the target by too much!";
+    ASSERT_LE(static_cast<double>(cfg_.rc_target_bitrate),
+              effective_datarate_ * 1.15)
+        << " The datarate for the file missed the target!"
+        << cfg_.rc_target_bitrate << " "<< effective_datarate_;
+  }
+}
+#endif
 
 // Check that (1) the first dropped frame gets earlier and earlier
 // as the drop frame threshold is increased, and (2) that the total number of
