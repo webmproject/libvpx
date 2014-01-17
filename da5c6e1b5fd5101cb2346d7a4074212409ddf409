@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//8Zg\u003d",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 6
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-01-17T22:16:20Z",
+      "side": 1,
+      "message": "It should be max 80 chars long per line.",
+      "revId": "da5c6e1b5fd5101cb2346d7a4074212409ddf409",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//8Zk\u003d",
+        "filename": "vp9/common/vp9_blockd.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 246,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-01-17T22:16:20Z",
+      "side": 1,
+      "message": "Spaces between numbers: 80 * 2 * 80 * 2.",
+      "revId": "da5c6e1b5fd5101cb2346d7a4074212409ddf409",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
