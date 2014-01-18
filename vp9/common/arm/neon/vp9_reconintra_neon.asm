@@ -17,6 +17,7 @@
     EXPORT  |vp9_h_predictor_16x16_neon|
     EXPORT  |vp9_h_predictor_32x32_neon|
     EXPORT  |vp9_tm_predictor_4x4_neon|
+    EXPORT  |vp9_tm_predictor_8x8_neon|
     ARM
     REQUIRE8
     PRESERVE8
@@ -328,8 +329,78 @@ loop_h
     vqshrun.s16         d1, q2, #0
     vst1.32             {d0[0]}, [r0], r1
     vst1.32             {d1[0]}, [r0], r1
-
     bx                  lr
     ENDP                ; |vp9_tm_predictor_4x4_neon|
+
+;void vp9_tm_predictor_8x8_neon (uint8_t *dst, ptrdiff_t y_stride,
+;                                const uint8_t *above,
+;                                const uint8_t *left)
+; r0  uint8_t *dst
+; r1  ptrdiff_t y_stride
+; r2  const uint8_t *above
+; r3  const uint8_t *left
+
+|vp9_tm_predictor_8x8_neon| PROC
+    ; Load ytop_left = above[-1];
+    sub                 r12, r2, #1
+    ldrb                r12, [r12]
+    vdup.u8             d0, r12
+
+    ; Load above 8 pixels
+    vld1.64             {d2}, [r2]
+
+    ; Compute above - ytop_left
+    vsubl.u8            q3, d2, d0
+
+    ; Load left row by row and compute left + (above - ytop_left)
+    ; 1st row and 2nd row
+    ldrb                r12, [r3], #1
+    ldrb                r2, [r3], #1
+    vdup.u16            q1, r12
+    vdup.u16            q2, r2
+    vadd.s16            q1, q1, q3
+    vadd.s16            q2, q2, q3
+    vqshrun.s16         d0, q1, #0
+    vqshrun.s16         d1, q2, #0
+    vst1.64             {d0}, [r0], r1
+    vst1.64             {d1}, [r0], r1
+
+    ; 3rd row and 4th row
+    ldrb                r12, [r3], #1
+    ldrb                r2, [r3], #1
+    vdup.u16            q1, r12
+    vdup.u16            q2, r2
+    vadd.s16            q1, q1, q3
+    vadd.s16            q2, q2, q3
+    vqshrun.s16         d0, q1, #0
+    vqshrun.s16         d1, q2, #0
+    vst1.64             {d0}, [r0], r1
+    vst1.64             {d1}, [r0], r1
+
+    ; 5th row and 6th row
+    ldrb                r12, [r3], #1
+    ldrb                r2, [r3], #1
+    vdup.u16            q1, r12
+    vdup.u16            q2, r2
+    vadd.s16            q1, q1, q3
+    vadd.s16            q2, q2, q3
+    vqshrun.s16         d0, q1, #0
+    vqshrun.s16         d1, q2, #0
+    vst1.64             {d0}, [r0], r1
+    vst1.64             {d1}, [r0], r1
+
+    ; 7rd row and 8th row
+    ldrb                r12, [r3], #1
+    ldrb                r2, [r3], #1
+    vdup.u16            q1, r12
+    vdup.u16            q2, r2
+    vadd.s16            q1, q1, q3
+    vadd.s16            q2, q2, q3
+    vqshrun.s16         d0, q1, #0
+    vqshrun.s16         d1, q2, #0
+    vst1.64             {d0}, [r0], r1
+    vst1.64             {d1}, [r0], r1
+    bx                  lr
+    ENDP                ; |vp9_tm_predictor_8x8_neon|
 
     END
