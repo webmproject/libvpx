@@ -15,6 +15,10 @@
 
 #include "vp9/common/vp9_prob.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct {
   unsigned int lowvalue;
   unsigned int range;
@@ -104,5 +108,9 @@ static void vp9_write_literal(vp9_writer *w, int data, int bits) {
 }
 
 #define vp9_write_prob(w, v) vp9_write_literal((w), (v), 8)
+
+#ifdef __cplusplus
+}  // extern "C"
+#endif
 
 #endif  // VP9_ENCODER_VP9_WRITER_H_

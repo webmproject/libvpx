@@ -14,6 +14,10 @@
 #include "vpx_scale/yv12config.h"
 #include "vpx/vpx_integer.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define MAX_LAG_BUFFERS 25
 
 struct lookahead_entry {
@@ -93,5 +97,9 @@ struct lookahead_entry *vp9_lookahead_peek(struct lookahead_ctx *ctx,
  * \param[in] ctx       Pointer to the lookahead context
  */
 unsigned int vp9_lookahead_depth(struct lookahead_ctx *ctx);
+
+#ifdef __cplusplus
+}  // extern "C"
+#endif
 
 #endif  // VP9_ENCODER_VP9_LOOKAHEAD_H_

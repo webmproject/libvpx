@@ -17,6 +17,10 @@
 #include "vpx_ports/mem.h"
 #include "vp9/common/vp9_onyxc_int.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 // motion search site
 typedef struct {
   MV mv;
@@ -253,5 +257,9 @@ struct rdcost_block_args {
   int skip;
   const int16_t *scan, *nb;
 };
+
+#ifdef __cplusplus
+}  // extern "C"
+#endif
 
 #endif  // VP9_ENCODER_VP9_BLOCK_H_

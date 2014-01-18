@@ -12,6 +12,10 @@
 #ifndef VP9_ENCODER_VP9_SUBEXP_H_
 #define VP9_ENCODER_VP9_SUBEXP_H_
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 void vp9_compute_update_table();
 
 
@@ -31,5 +35,9 @@ int vp9_prob_diff_update_savings_search_model(const unsigned int *ct,
                                               vp9_prob *bestp,
                                               vp9_prob upd,
                                               int b, int r);
+
+#ifdef __cplusplus
+}  // extern "C"
+#endif
 
 #endif  // VP9_ENCODER_VP9_SUBEXP_H_

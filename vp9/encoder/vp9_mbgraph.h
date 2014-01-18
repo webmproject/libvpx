@@ -11,6 +11,14 @@
 #ifndef VP9_ENCODER_VP9_MBGRAPH_H_
 #define VP9_ENCODER_VP9_MBGRAPH_H_
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 void vp9_update_mbgraph_stats(VP9_COMP *cpi);
+
+#ifdef __cplusplus
+}  // extern "C"
+#endif
 
 #endif  // VP9_ENCODER_VP9_MBGRAPH_H_

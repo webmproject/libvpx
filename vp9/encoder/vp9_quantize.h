@@ -13,6 +13,10 @@
 
 #include "vp9/encoder/vp9_block.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 void vp9_regular_quantize_b_4x4(MACROBLOCK *x, int plane, int block,
                                 const int16_t *scan, const int16_t *iscan);
 
@@ -27,5 +31,9 @@ void vp9_update_zbin_extra(struct VP9_COMP *cpi, MACROBLOCK *x);
 void vp9_mb_init_quantizer(struct VP9_COMP *cpi, MACROBLOCK *x);
 
 void vp9_init_quantizer(struct VP9_COMP *cpi);
+
+#ifdef __cplusplus
+}  // extern "C"
+#endif
 
 #endif  // VP9_ENCODER_VP9_QUANTIZE_H_

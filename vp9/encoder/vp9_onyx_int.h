@@ -28,6 +28,10 @@
 #include "vp9/encoder/vp9_mcomp.h"
 #include "vp9/encoder/vp9_lookahead.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define DISABLE_RC_LONG_TERM_MEM 0
 // #define MODE_TEST_HIT_STATS
 
@@ -824,5 +828,9 @@ int vp9_compute_qdelta(const VP9_COMP *cpi, double qstart, double qtarget);
 static int get_token_alloc(int mb_rows, int mb_cols) {
   return mb_rows * mb_cols * (48 * 16 + 4);
 }
+
+#ifdef __cplusplus
+}  // extern "C"
+#endif
 
 #endif  // VP9_ENCODER_VP9_ONYX_INT_H_

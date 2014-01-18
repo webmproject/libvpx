@@ -13,6 +13,10 @@
 
 #include "vp9/encoder/vp9_writer.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define vp9_cost_zero(prob) (vp9_prob_cost[prob])
 
 #define vp9_cost_one(prob) vp9_cost_zero(vp9_complement(prob))
@@ -68,5 +72,9 @@ static INLINE void vp9_write_token(vp9_writer *w, const vp9_tree_index *tree,
                                    const struct vp9_token *token) {
   vp9_write_tree(w, tree, probs, token->value, token->len, 0);
 }
+
+#ifdef __cplusplus
+}  // extern "C"
+#endif
 
 #endif  // VP9_ENCODER_VP9_TREEWRITER_H_

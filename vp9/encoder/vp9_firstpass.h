@@ -12,6 +12,10 @@
 #define VP9_ENCODER_VP9_FIRSTPASS_H_
 #include "vp9/encoder/vp9_onyx_int.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 void vp9_init_first_pass(VP9_COMP *cpi);
 void vp9_first_pass(VP9_COMP *cpi);
 void vp9_end_first_pass(VP9_COMP *cpi);
@@ -24,5 +28,9 @@ void vp9_get_first_pass_params(VP9_COMP *cpi);
 void vp9_get_one_pass_params(VP9_COMP *cpi);
 void vp9_get_one_pass_cbr_params(VP9_COMP *cpi);
 void vp9_get_svc_params(VP9_COMP *cpi);
+
+#ifdef __cplusplus
+}  // extern "C"
+#endif
 
 #endif  // VP9_ENCODER_VP9_FIRSTPASS_H_

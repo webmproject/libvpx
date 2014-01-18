@@ -13,6 +13,10 @@
 
 #include "vp9/encoder/vp9_onyx_int.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define RDDIV_BITS          7
 
 #define RDCOST(RM, DM, R, D) \
@@ -79,5 +83,9 @@ void vp9_get_entropy_contexts(TX_SIZE tx_size,
     ENTROPY_CONTEXT t_above[16], ENTROPY_CONTEXT t_left[16],
     const ENTROPY_CONTEXT *above, const ENTROPY_CONTEXT *left,
     int num_4x4_w, int num_4x4_h);
+
+#ifdef __cplusplus
+}  // extern "C"
+#endif
 
 #endif  // VP9_ENCODER_VP9_RDOPT_H_
