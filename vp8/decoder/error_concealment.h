@@ -15,6 +15,10 @@
 #include "onyxd_int.h"
 #include "ec_types.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* Allocate memory for the overlap lists */
 int vp8_alloc_overlap_lists(VP8D_COMP *pbi);
 
@@ -37,5 +41,9 @@ void vp8_interpolate_motion(MACROBLOCKD *mb,
  * Copies the prediction signal to the reconstructed image.
  */
 void vp8_conceal_corrupt_mb(MACROBLOCKD *xd);
+
+#ifdef __cplusplus
+}  // extern "C"
+#endif
 
 #endif  // VP8_DECODER_ERROR_CONCEALMENT_H_

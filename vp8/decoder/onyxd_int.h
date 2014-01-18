@@ -22,6 +22,10 @@
 #include "ec_types.h"
 #endif
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct
 {
     int ithread;
@@ -146,6 +150,10 @@ int vp8_remove_decoder_instances(struct frame_buffers *fb);
             vpx_internal_error(&pbi->common.error, VPX_CODEC_MEM_ERROR,\
                                "Failed to allocate "#lval);\
     } while(0)
+#endif
+
+#ifdef __cplusplus
+}  // extern "C"
 #endif
 
 #endif  // VP8_DECODER_ONYXD_INT_H_

@@ -15,6 +15,10 @@
 #include "vp8/common/treecoder.h"
 #include "dboolhuff.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef BOOL_DECODER vp8_reader;
 
 #define vp8_read vp8dx_decode_bool
@@ -36,5 +40,9 @@ static int vp8_treed_read(
 
     return -i;
 }
+
+#ifdef __cplusplus
+}  // extern "C"
+#endif
 
 #endif  // VP8_DECODER_TREEREADER_H_
