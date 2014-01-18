@@ -18,12 +18,13 @@
 #include "test/register_state_check.h"
 #include "test/util.h"
 
-extern "C" {
-#include "vp9/common/vp9_entropy.h"
 #include "./vp9_rtcd.h"
+#include "vp9/common/vp9_entropy.h"
+#include "vpx/vpx_integer.h"
+
+extern "C" {
 void vp9_idct4x4_16_add_c(const int16_t *input, uint8_t *output, int pitch);
 }
-#include "vpx/vpx_integer.h"
 
 using libvpx_test::ACMRandom;
 

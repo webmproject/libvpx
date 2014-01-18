@@ -12,12 +12,10 @@
 #include "test/acm_random.h"
 #include "test/clear_system_state.h"
 #include "test/register_state_check.h"
-extern "C" {
 #include "./vpx_config.h"
 #include "./vp9_rtcd.h"
 #include "vp9/common/vp9_blockd.h"
 #include "vpx_mem/vpx_mem.h"
-}
 
 typedef void (*subtract_fn_t)(int rows, int cols,
                               int16_t *diff_ptr, ptrdiff_t diff_stride,

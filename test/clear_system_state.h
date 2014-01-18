@@ -11,11 +11,9 @@
 #define TEST_CLEAR_SYSTEM_STATE_H_
 
 #include "./vpx_config.h"
-extern "C" {
 #if ARCH_X86 || ARCH_X86_64
 # include "vpx_ports/x86.h"
 #endif
-}
 
 namespace libvpx_test {
 

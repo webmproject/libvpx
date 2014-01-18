@@ -12,9 +12,7 @@
 #include <string>
 
 #include "test/video_source.h"
-extern "C" {
 #include "./y4minput.h"
-}
 
 namespace libvpx_test {
 
