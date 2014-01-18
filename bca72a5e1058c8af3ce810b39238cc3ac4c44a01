@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//8SM\u003d",
+        "filename": "vp9/decoder/vp9_decodeframe.c",
+        "patchSetId": 11
+      },
+      "lineNbr": 1484,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2014-01-18T01:11:32Z",
+      "side": 1,
+      "message": "Yes. I will change it. Thanks.",
+      "parentUuid": "AAAAdn//8UI\u003d",
+      "revId": "bca72a5e1058c8af3ce810b39238cc3ac4c44a01",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//8T8\u003d",
         "filename": "vp9/decoder/vp9_decodeframe.c",
         "patchSetId": 11
@@ -30,6 +48,24 @@
       "writtenOn": "2014-01-18T00:23:50Z",
       "side": 1,
       "message": "have you tried varying the signal frequency to test performance?",
+      "revId": "bca72a5e1058c8af3ce810b39238cc3ac4c44a01",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//8R8\u003d",
+        "filename": "vp9/decoder/vp9_decodeframe.c",
+        "patchSetId": 11
+      },
+      "lineNbr": 1520,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2014-01-18T01:11:32Z",
+      "side": 1,
+      "message": "Yes, I tried. Low signal frequency gives better performance. The lowest signal frequency I can do is signaling every nsync superblocks.",
+      "parentUuid": "AAAAdn//8T8\u003d",
       "revId": "bca72a5e1058c8af3ce810b39238cc3ac4c44a01",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
