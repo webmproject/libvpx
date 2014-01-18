@@ -13,6 +13,10 @@
 
 #include "block.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define SUM_DIFF_THRESHOLD (16 * 16 * 2)
 #define MOTION_MAGNITUDE_THRESHOLD (8*3)
 
@@ -38,5 +42,9 @@ void vp8_denoiser_denoise_mb(VP8_DENOISER *denoiser,
                              unsigned int zero_mv_sse,
                              int recon_yoffset,
                              int recon_uvoffset);
+
+#ifdef __cplusplus
+}  // extern "C"
+#endif
 
 #endif  // VP8_ENCODER_DENOISING_H_

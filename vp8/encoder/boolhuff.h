@@ -22,6 +22,10 @@
 #include "vpx_ports/mem.h"
 #include "vpx/internal/vpx_codec_internal.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct
 {
     unsigned int lowvalue;
@@ -124,5 +128,9 @@ static void vp8_encode_bool(BOOL_CODER *br, int bit, int probability)
     br->lowvalue = lowvalue;
     br->range = range;
 }
+
+#ifdef __cplusplus
+}  // extern "C"
+#endif
 
 #endif  // VP8_ENCODER_BOOLHUFF_H_

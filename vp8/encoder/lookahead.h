@@ -12,6 +12,10 @@
 #include "vpx_scale/yv12config.h"
 #include "vpx/vpx_integer.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 struct lookahead_entry
 {
     YV12_BUFFER_CONFIG  img;
@@ -105,5 +109,9 @@ vp8_lookahead_peek(struct lookahead_ctx *ctx,
 unsigned int
 vp8_lookahead_depth(struct lookahead_ctx *ctx);
 
+
+#ifdef __cplusplus
+}  // extern "C"
+#endif
 
 #endif  // VP8_ENCODER_LOOKAHEAD_H_

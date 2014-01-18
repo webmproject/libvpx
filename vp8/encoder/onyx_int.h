@@ -33,6 +33,10 @@
 #include "vp8/encoder/denoising.h"
 #endif
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define MIN_GF_INTERVAL             4
 #define DEFAULT_GF_INTERVAL         7
 
@@ -721,4 +725,8 @@ void vp8_set_speed_features(VP8_COMP *cpi);
                                "Failed to allocate "#lval);\
     } while(0)
 #endif
+#ifdef __cplusplus
+}  // extern "C"
+#endif
+
 #endif  // VP8_ENCODER_ONYX_INT_H_
