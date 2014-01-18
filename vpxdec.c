@@ -33,6 +33,7 @@
 
 #include "./tools_common.h"
 #include "./webmdec.h"
+#include "./y4menc.h"
 
 static const char *exec_name;
 
@@ -691,31 +692,19 @@ int main_loop(int argc, const char **argv_) {
   }
 
   if (use_y4m && !noblit) {
-    char buffer[128];
-
     if (!single_file) {
       fprintf(stderr, "YUV4MPEG2 not supported with output patterns,"
               " try --i420 or --yv12.\n");
       return EXIT_FAILURE;
     }
 
-    if (vpx_input_ctx.file_type == FILE_TYPE_WEBM)
+    if (vpx_input_ctx.file_type == FILE_TYPE_WEBM) {
       if (webm_guess_framerate(input.webm_ctx, input.vpx_input_ctx)) {
         fprintf(stderr, "Failed to guess framerate -- error parsing "
                 "webm file?\n");
         return EXIT_FAILURE;
       }
-
-
-    /*Note: We can't output an aspect ratio here because IVF doesn't
-       store one, and neither does VP8.
-      That will have to wait until these tools support WebM natively.*/
-    snprintf(buffer, sizeof(buffer), "YUV4MPEG2 W%u H%u F%u:%u I%c ",
-             vpx_input_ctx.width, vpx_input_ctx.height,
-             vpx_input_ctx.framerate.numerator,
-             vpx_input_ctx.framerate.denominator,
-             'p');
-    fwrite(buffer, 1, strlen(buffer), out);
+    }
   }
 
   /* Try to determine the codec from the fourcc. */
@@ -863,14 +852,8 @@ int main_loop(int argc, const char **argv_) {
 
     if (!noblit) {
       if (frame_out == 1 && img && use_y4m) {
-        /* Write out the color format to terminate the header line */
-        const char *color =
-            img->fmt == VPX_IMG_FMT_444A ? "C444alpha\n" :
-            img->fmt == VPX_IMG_FMT_I444 ? "C444\n" :
-            img->fmt == VPX_IMG_FMT_I422 ? "C422\n" :
-            "C420jpeg\n";
-
-        fwrite(color, 1, strlen(color), out);
+        y4m_write_file_header(out, vpx_input_ctx.width, vpx_input_ctx.height,
+                              &vpx_input_ctx.framerate, img->fmt);
       }
 
       if (img && do_scale) {
@@ -916,7 +899,7 @@ int main_loop(int argc, const char **argv_) {
           out = out_open(out_fn, do_md5);
         } else {
           if (use_y4m)
-            fwrite("FRAME\n", 1, 6, out);
+            y4m_write_frame_header(out);
         }
 
         if (do_md5)
