@@ -15,9 +15,7 @@
 #include <string.h>
 #include <sys/types.h>
 
-extern "C" {
 #include "./vp8_rtcd.h"
-}
 
 #include "test/acm_random.h"
 #include "third_party/googletest/src/include/gtest/gtest.h"
