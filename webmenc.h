@@ -23,6 +23,10 @@ typedef __int64 off_t;
 #include "tools_common.h"
 #include "vpx/vpx_encoder.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef off_t EbmlLoc;
 
 struct cue_entry {
@@ -83,5 +87,9 @@ void write_webm_block(struct EbmlGlobal *glob,
                       const vpx_codec_cx_pkt_t *pkt);
 
 void write_webm_file_footer(struct EbmlGlobal *glob, int hash);
+
+#ifdef __cplusplus
+}  // extern "C"
+#endif
 
 #endif  // WEBMENC_H_

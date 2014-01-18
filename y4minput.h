@@ -17,6 +17,10 @@
 # include <stdio.h>
 # include "vpx/vpx_image.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 
 
 typedef struct y4m_input y4m_input;
@@ -61,5 +65,9 @@ int y4m_input_open(y4m_input *_y4m, FILE *_fin, char *_skip, int _nskip,
                    int only_420);
 void y4m_input_close(y4m_input *_y4m);
 int y4m_input_fetch_frame(y4m_input *_y4m, FILE *_fin, vpx_image_t *img);
+
+#ifdef __cplusplus
+}  // extern "C"
+#endif
 
 #endif  // Y4MINPUT_H_

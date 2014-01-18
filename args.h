@@ -13,6 +13,10 @@
 #define ARGS_H_
 #include <stdio.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 struct arg {
   char                 **argv;
   const char            *name;
@@ -48,4 +52,8 @@ unsigned int arg_parse_uint(const struct arg *arg);
 int arg_parse_int(const struct arg *arg);
 struct vpx_rational arg_parse_rational(const struct arg *arg);
 int arg_parse_enum_or_int(const struct arg *arg);
+#ifdef __cplusplus
+}  // extern "C"
+#endif
+
 #endif  // ARGS_H_
