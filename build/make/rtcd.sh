@@ -209,6 +209,10 @@ common_top() {
 #define RTCD_EXTERN extern
 #endif
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 $(process_forward_decls)
 
 $(declare_function_pointers c $ALL_ARCHS)
@@ -219,6 +223,11 @@ EOF
 
 common_bottom() {
   cat <<EOF
+
+#ifdef __cplusplus
+}  // extern "C"
+#endif
+
 #endif
 EOF
 }
