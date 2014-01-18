@@ -20,6 +20,10 @@ void vpx_log(const char *format, ...);
 #include "treecoder.h"
 #include "vpx_ports/mem.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /*#define DCPRED 1*/
 #define DCPREDSIMTHRESH 0
 #define DCPREDCNTTHRESH 3
@@ -296,5 +300,9 @@ typedef struct macroblockd
 
 extern void vp8_build_block_doffsets(MACROBLOCKD *x);
 extern void vp8_setup_block_dptrs(MACROBLOCKD *x);
+
+#ifdef __cplusplus
+}  // extern "C"
+#endif
 
 #endif  // VP8_COMMON_BLOCKD_H_

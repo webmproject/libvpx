@@ -26,6 +26,10 @@
 #include "header.h"
 /*#endif*/
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define MINQ 0
 #define MAXQ 127
 #define QINDEX_RANGE (MAXQ + 1)
@@ -173,5 +177,9 @@ typedef struct VP8Common
 #endif
     int cpu_caps;
 } VP8_COMMON;
+
+#ifdef __cplusplus
+}  // extern "C"
+#endif
 
 #endif  // VP8_COMMON_ONYXC_INT_H_

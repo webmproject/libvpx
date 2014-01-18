@@ -14,6 +14,10 @@
 
 #include "treecoder.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 enum
 {
     mv_max  = 1023,              /* max absolute value of a MV component */
@@ -40,5 +44,9 @@ typedef struct mv_context
 } MV_CONTEXT;
 
 extern const MV_CONTEXT vp8_mv_update_probs[2], vp8_default_mv_context[2];
+
+#ifdef __cplusplus
+}  // extern "C"
+#endif
 
 #endif  // VP8_COMMON_ENTROPYMV_H_

@@ -14,6 +14,10 @@
 
 #include "vpx_config.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef unsigned int(*vp8_sad_fn_t)(
     const unsigned char *src_ptr,
     int source_stride,
@@ -111,5 +115,9 @@ typedef struct variance_vtable
     vp8_copy32xn_fn_t       copymem;
 #endif
 } vp8_variance_fn_ptr_t;
+
+#ifdef __cplusplus
+}  // extern "C"
+#endif
 
 #endif  // VP8_COMMON_VARIANCE_H_

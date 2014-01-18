@@ -15,6 +15,10 @@
 #include "treecoder.h"
 #include "blockd.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* Coefficient token alphabet */
 
 #define ZERO_TOKEN              0       /* 0         Extra Bits 0+0 */
@@ -98,4 +102,8 @@ extern DECLARE_ALIGNED(16, const short, vp8_default_zig_zag_mask[16]);
 extern const int vp8_mb_feature_data_bits[MB_LVL_MAX];
 
 void vp8_coef_tree_initialize(void);
+#ifdef __cplusplus
+}  // extern "C"
+#endif
+
 #endif  // VP8_COMMON_ENTROPY_H_

@@ -11,6 +11,10 @@
 #ifndef VP8_COMMON_DEFAULT_COEF_PROBS_H_
 #define VP8_COMMON_DEFAULT_COEF_PROBS_H_
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /*Generated file, included by entropy.c*/
 
 
@@ -188,5 +192,9 @@ static const vp8_prob default_coef_probs [BLOCK_TYPES]
         }
     }
 };
+
+#ifdef __cplusplus
+}  // extern "C"
+#endif
 
 #endif  // VP8_COMMON_DEFAULT_COEF_PROBS_H_
