@@ -13,6 +13,10 @@
 
 #include "vp9/common/vp9_enums.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 extern const int b_width_log2_lookup[BLOCK_SIZES];
 extern const int b_height_log2_lookup[BLOCK_SIZES];
 extern const int mi_width_log2_lookup[BLOCK_SIZES];
@@ -27,5 +31,9 @@ extern const BLOCK_SIZE subsize_lookup[PARTITION_TYPES][BLOCK_SIZES];
 extern const TX_SIZE max_txsize_lookup[BLOCK_SIZES];
 extern const TX_SIZE tx_mode_to_biggest_tx_size[TX_MODES];
 extern const BLOCK_SIZE ss_size_lookup[BLOCK_SIZES][2][2];
+
+#ifdef __cplusplus
+}  // extern "C"
+#endif
 
 #endif  // VP9_COMMON_VP9_COMMON_DATA_H_

@@ -13,6 +13,10 @@
 
 #include "vp9/common/vp9_prob.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define SEGMENT_DELTADATA   0
 #define SEGMENT_ABSDATA     1
 
@@ -69,6 +73,10 @@ int vp9_get_segdata(const struct segmentation *seg,
                     SEG_LVL_FEATURES feature_id);
 
 extern const vp9_tree_index vp9_segment_tree[TREE_SIZE(MAX_SEGMENTS)];
+
+#ifdef __cplusplus
+}  // extern "C"
+#endif
 
 #endif  // VP9_COMMON_VP9_SEG_COMMON_H_
 

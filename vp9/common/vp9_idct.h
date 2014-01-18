@@ -18,6 +18,10 @@
 #include "vp9/common/vp9_common.h"
 #include "vp9/common/vp9_enums.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 
 // Constants and Macros used by all idct/dct functions
 #define DCT_CONST_BITS 14
@@ -102,5 +106,9 @@ void vp9_iht8x8_add(TX_TYPE tx_type, const int16_t *input, uint8_t *dest,
 void vp9_iht16x16_add(TX_TYPE tx_type, const int16_t *input, uint8_t *dest,
                       int stride, int eob);
 
+
+#ifdef __cplusplus
+}  // extern "C"
+#endif
 
 #endif  // VP9_COMMON_VP9_IDCT_H_

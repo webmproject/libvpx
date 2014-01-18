@@ -14,6 +14,10 @@
 #include "vpx/vpx_integer.h"
 #include "vp9/common/vp9_onyxc_int.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 struct subpix_fn_table;
 void vp9_build_inter_predictors_sby(MACROBLOCKD *xd, int mi_row, int mi_col,
                                     BLOCK_SIZE bsize);
@@ -95,5 +99,9 @@ static void set_scale_factors(VP9_COMMON *cm, MACROBLOCKD *xd,
   xd->block_refs[0] = &cm->frame_refs[ref0 >= 0 ? ref0 : 0];
   xd->block_refs[1] = &cm->frame_refs[ref1 >= 0 ? ref1 : 0];
 }
+
+#ifdef __cplusplus
+}  // extern "C"
+#endif
 
 #endif  // VP9_COMMON_VP9_RECONINTER_H_

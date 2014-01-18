@@ -13,6 +13,10 @@
 
 #include "vp9/common/vp9_blockd.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define TX_SIZE_CONTEXTS 2
 #define SWITCHABLE_FILTERS 3   // number of switchable filters
 #define SWITCHABLE_FILTER_CONTEXTS (SWITCHABLE_FILTERS + 1)
@@ -56,5 +60,9 @@ void tx_counts_to_branch_counts_16x16(const unsigned int *tx_count_16x16p,
                                       unsigned int (*ct_16x16p)[2]);
 void tx_counts_to_branch_counts_8x8(const unsigned int *tx_count_8x8p,
                                     unsigned int (*ct_8x8p)[2]);
+
+#ifdef __cplusplus
+}  // extern "C"
+#endif
 
 #endif  // VP9_COMMON_VP9_ENTROPYMODE_H_

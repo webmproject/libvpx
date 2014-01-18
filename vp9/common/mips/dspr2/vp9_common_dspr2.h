@@ -17,6 +17,10 @@
 #include "vpx/vpx_integer.h"
 #include "vp9/common/vp9_common.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #if HAVE_DSPR2
 #define CROP_WIDTH 512
 extern uint8_t *vp9_ff_cropTbl;
@@ -114,4 +118,8 @@ void vp9_convolve2_vert_dspr2(const uint8_t *src, ptrdiff_t src_stride,
                               int w, int h);
 
 #endif  // #if HAVE_DSPR2
+#ifdef __cplusplus
+}  // extern "C"
+#endif
+
 #endif  // VP9_COMMON_MIPS_DSPR2_VP9_COMMON_DSPR2_H_

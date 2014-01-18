@@ -17,6 +17,10 @@
 #include "vp9/common/vp9_common.h"
 #include "vp9/common/vp9_onyxc_int.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #if HAVE_DSPR2
 #define STORE_F0() {                                                    \
     __asm__ __volatile__ (                                              \
@@ -467,4 +471,8 @@
 }
 
 #endif  // #if HAVE_DSPR2
+#ifdef __cplusplus
+}  // extern "C"
+#endif
+
 #endif  // VP9_COMMON_MIPS_DSPR2_VP9_LOOPFILTER_MACROS_DSPR2_H_
