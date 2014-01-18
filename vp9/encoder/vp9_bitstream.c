@@ -135,11 +135,6 @@ static void update_switchable_interp_probs(VP9_COMP *cpi, vp9_writer *w) {
     prob_diff_update(vp9_switchable_interp_tree,
                      cm->fc.switchable_interp_prob[j],
                      cm->counts.switchable_interp[j], SWITCHABLE_FILTERS, w);
-
-#ifdef MODE_STATS
-  if (!cpi->dummy_packing)
-    update_switchable_interp_stats(cm);
-#endif
 }
 
 static void pack_mb_tokens(vp9_writer* const w,
@@ -911,10 +906,6 @@ static void encode_txfm_probs(VP9_COMP *cpi, vp9_writer *w) {
         vp9_cond_prob_diff_update(w, &cm->fc.tx_probs.p32x32[i][j],
                                   ct_32x32p[j]);
     }
-#ifdef MODE_STATS
-    if (!cpi->dummy_packing)
-      update_tx_count_stats(cm);
-#endif
   }
 }
 
