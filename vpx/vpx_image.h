@@ -13,12 +13,12 @@
  * \brief Describes the vpx image descriptor and associated operations
  *
  */
+#ifndef VPX_VPX_IMAGE_H_
+#define VPX_VPX_IMAGE_H_
+
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-#ifndef VPX_VPX_IMAGE_H_
-#define VPX_VPX_IMAGE_H_
 
   /*!\brief Current ABI version number
    *
@@ -237,7 +237,8 @@ extern "C" {
    */
   void vpx_img_free(vpx_image_t *img);
 
-#endif
 #ifdef __cplusplus
-}
+}  // extern "C"
+#endif
+
 #endif  // VPX_VPX_IMAGE_H_
