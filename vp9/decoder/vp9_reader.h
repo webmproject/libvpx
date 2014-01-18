@@ -20,6 +20,10 @@
 
 #include "vp9/common/vp9_prob.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef size_t BD_VALUE;
 
 #define BD_VALUE_SIZE ((int)sizeof(BD_VALUE) * CHAR_BIT)
@@ -99,5 +103,9 @@ static int vp9_read_tree(vp9_reader *r, const vp9_tree_index *tree,
 
   return -i;
 }
+
+#ifdef __cplusplus
+}  // extern "C"
+#endif
 
 #endif  // VP9_DECODER_VP9_READER_H_

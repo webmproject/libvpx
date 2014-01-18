@@ -19,7 +19,7 @@
 
 #include "./vpx_config.h"
 
-#if defined(__cplusplus) || defined(c_plusplus)
+#ifdef __cplusplus
 extern "C" {
 #endif
 
@@ -91,7 +91,7 @@ void vp9_worker_end(VP9Worker* const worker);
 
 //------------------------------------------------------------------------------
 
-#if defined(__cplusplus) || defined(c_plusplus)
+#ifdef __cplusplus
 }    // extern "C"
 #endif
 

@@ -15,6 +15,10 @@
 
 #include "vpx/vpx_integer.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef void (*vp9_rb_error_handler)(void *data, size_t bit_offset);
 
 struct vp9_read_bit_buffer {
@@ -56,5 +60,9 @@ static int vp9_rb_read_signed_literal(struct vp9_read_bit_buffer *rb,
   const int value = vp9_rb_read_literal(rb, bits);
   return vp9_rb_read_bit(rb) ? -value : value;
 }
+
+#ifdef __cplusplus
+}  // extern "C"
+#endif
 
 #endif  // VP9_DECODER_VP9_READ_BIT_BUFFER_H_
