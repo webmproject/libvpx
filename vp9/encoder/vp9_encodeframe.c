@@ -500,17 +500,8 @@ static void update_state(VP9_COMP *cpi, PICK_MODE_CONTEXT *ctx,
     if (is_inter_block(mbmi) &&
         (mbmi->sb_type < BLOCK_8X8 || mbmi->mode == NEWMV)) {
       int_mv best_mv[2];
-      const MV_REFERENCE_FRAME rf1 = mbmi->ref_frame[0];
-      const MV_REFERENCE_FRAME rf2 = mbmi->ref_frame[1];
-      best_mv[0].as_int = ctx->best_ref_mv[0].as_int;
-      best_mv[1].as_int = ctx->best_ref_mv[1].as_int;
-      if (mbmi->mode == NEWMV) {
-        best_mv[0].as_int = mbmi->ref_mvs[rf1][0].as_int;
-        if (rf2 > 0)
-          best_mv[1].as_int = mbmi->ref_mvs[rf2][0].as_int;
-      }
-      mbmi->best_mv[0].as_int = best_mv[0].as_int;
-      mbmi->best_mv[1].as_int = best_mv[1].as_int;
+      for (i = 0; i < 2; ++i)
+        best_mv[i].as_int = mbmi->ref_mvs[mbmi->ref_frame[i]][0].as_int;
       vp9_update_mv_count(cpi, x, best_mv);
     }
 

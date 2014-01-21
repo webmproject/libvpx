@@ -260,6 +260,7 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, MODE_INFO *m, vp9_writer *bc) {
   struct segmentation *seg = &cm->seg;
   MB_MODE_INFO *const mi = &m->mbmi;
   const MV_REFERENCE_FRAME rf = mi->ref_frame[0];
+  const MV_REFERENCE_FRAME sec_rf = mi->ref_frame[1];
   const MB_PREDICTION_MODE mode = mi->mode;
   const int segment_id = mi->segment_id;
   int skip_coeff;
@@ -355,11 +356,11 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, MODE_INFO *m, vp9_writer *bc) {
             active_section = 11;
 #endif
             vp9_encode_mv(cpi, bc, &m->bmi[j].as_mv[0].as_mv,
-                          &mi->best_mv[0].as_mv, nmvc, allow_hp);
+                          &mi->ref_mvs[rf][0].as_mv, nmvc, allow_hp);
 
             if (has_second_ref(mi))
               vp9_encode_mv(cpi, bc, &m->bmi[j].as_mv[1].as_mv,
-                            &mi->best_mv[1].as_mv, nmvc, allow_hp);
+                            &mi->ref_mvs[sec_rf][0].as_mv, nmvc, allow_hp);
           }
         }
       }
@@ -368,11 +369,11 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, MODE_INFO *m, vp9_writer *bc) {
       active_section = 5;
 #endif
       vp9_encode_mv(cpi, bc, &mi->mv[0].as_mv,
-                    &mi->best_mv[0].as_mv, nmvc, allow_hp);
+                    &mi->ref_mvs[rf][0].as_mv, nmvc, allow_hp);
 
       if (has_second_ref(mi))
         vp9_encode_mv(cpi, bc, &mi->mv[1].as_mv,
-                      &mi->best_mv[1].as_mv, nmvc, allow_hp);
+                      &mi->ref_mvs[sec_rf][0].as_mv, nmvc, allow_hp);
     }
   }
 }
