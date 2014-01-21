@@ -419,18 +419,12 @@ static void model_rd_for_sb(VP9_COMP *cpi, BLOCK_SIZE bsize,
     struct macroblock_plane *const p = &x->plane[i];
     struct macroblockd_plane *const pd = &xd->plane[i];
     const BLOCK_SIZE bs = get_plane_block_size(bsize, pd);
-    int rate;
-    int64_t dist;
     (void) cpi->fn_ptr[bs].vf(p->src.buf, p->src.stride,
                               pd->dst.buf, pd->dst.stride, &sse);
     if (i == 0)
       x->pred_sse[ref] = sse;
-    // sse works better than var, since there is no dc prediction used
-    model_rd_from_var_lapndz(sse, 1 << num_pels_log2_lookup[bs],
-                             pd->dequant[1] >> 3, &rate, &dist);
 
-    rate_sum += rate;
-    dist_sum += (int)dist;
+    dist_sum += (int)sse;
   }
 
   *out_rate_sum = rate_sum;
