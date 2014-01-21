@@ -148,7 +148,6 @@ VP9_COMMON_SRCS-$(HAVE_NEON_ASM) += common/arm/neon/vp9_idct32x32_add_neon$(ASM)
 VP9_COMMON_SRCS-$(HAVE_NEON_ASM) += common/arm/neon/vp9_iht4x4_add_neon$(ASM)
 VP9_COMMON_SRCS-$(HAVE_NEON_ASM) += common/arm/neon/vp9_iht8x8_add_neon$(ASM)
 VP9_COMMON_SRCS-$(HAVE_NEON_ASM) += common/arm/neon/vp9_mb_lpf_neon$(ASM)
-VP9_COMMON_SRCS-$(HAVE_NEON_ASM) += common/arm/neon/vp9_copy_neon$(ASM)
 VP9_COMMON_SRCS-$(HAVE_NEON_ASM) += common/arm/neon/vp9_save_reg_neon$(ASM)
 VP9_COMMON_SRCS-$(HAVE_NEON_ASM) += common/arm/neon/vp9_reconintra_neon$(ASM)
 
@@ -156,11 +155,13 @@ VP9_COMMON_SRCS-$(HAVE_NEON_ASM) += common/arm/neon/vp9_reconintra_neon$(ASM)
 # prefer assembly.
 ifeq ($(HAVE_NEON_ASM), yes)
 VP9_COMMON_SRCS-yes += common/arm/neon/vp9_avg_neon_asm$(ASM)
+VP9_COMMON_SRCS-yes += common/arm/neon/vp9_copy_neon_asm$(ASM)
 VP9_COMMON_SRCS-yes += common/arm/neon/vp9_loopfilter_neon_asm$(ASM)
 VP9_COMMON_SRCS-yes += common/arm/neon/vp9_loopfilter_16_neon.c
 else
 ifeq ($(HAVE_NEON), yes)
 VP9_COMMON_SRCS-yes += common/arm/neon/vp9_avg_neon.c
+VP9_COMMON_SRCS-yes += common/arm/neon/vp9_copy_neon.c
 VP9_COMMON_SRCS-yes += common/arm/neon/vp9_loopfilter_neon.c
 VP9_COMMON_SRCS-yes += common/arm/neon/vp9_loopfilter_16_neon.c
 endif  # HAVE_NEON
