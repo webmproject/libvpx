@@ -2060,7 +2060,8 @@ void vp9_get_second_pass_params(VP9_COMP *cpi) {
   this_frame_coded_error = this_frame.coded_error;
 
   // keyframe and section processing !
-  if (rc->frames_to_key == 0) {
+  if (rc->frames_to_key == 0 ||
+      (cpi->common.frame_flags & FRAMEFLAGS_KEY)) {
     // Define next KF group and assign bits to it
     this_frame_copy = this_frame;
     find_next_key_frame(cpi, &this_frame_copy);
