@@ -2,6 +2,125 @@
   "comments": [
     {
       "key": {
+        "uuid": "AAAAdn//8FM\u003d",
+        "filename": "vp9/encoder/vp9_onyx_if.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 2345,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-01-21T17:30:26Z",
+      "side": 1,
+      "message": "// Y and alpha planes.",
+      "revId": "6451b754dae769f7546db14cf2dea4ffb5d65dd3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//8FI\u003d",
+        "filename": "vp9/encoder/vp9_onyx_if.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 2349,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-01-21T17:30:26Z",
+      "side": 1,
+      "message": "// Assume 4:2:0 sampling of color.\nYou don\u0027t have to assume 4:2:0 sampling here; just use the uv_crop_[width|height] values.",
+      "revId": "6451b754dae769f7546db14cf2dea4ffb5d65dd3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//8FQ\u003d",
+        "filename": "vp9/encoder/vp9_onyx_if.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 2378,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-01-21T17:30:26Z",
+      "side": 1,
+      "message": "The alpha plane is plane 3:\nconst int factor \u003d (i \u003d\u003d 0 || i \u003d\u003d 3 ? 1 : 2);",
+      "revId": "6451b754dae769f7546db14cf2dea4ffb5d65dd3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//8FE\u003d",
+        "filename": "vp9/encoder/vp9_resize.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-01-21T17:30:26Z",
+      "side": 1,
+      "message": "Is this an existing file? Otherwise should update the copyright date to 2014.",
+      "revId": "6451b754dae769f7546db14cf2dea4ffb5d65dd3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//8FA\u003d",
+        "filename": "vp9/encoder/vp9_resize.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-01-21T17:30:26Z",
+      "side": 1,
+      "message": "This include file is not in alphabetical order. Any reason why it shouldn\u0027t be?",
+      "revId": "6451b754dae769f7546db14cf2dea4ffb5d65dd3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//8E8\u003d",
+        "filename": "vp9/encoder/vp9_resize.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-01-21T17:30:26Z",
+      "side": 1,
+      "message": "Comments should start with a capital letter and end with a period. Same for other comments in code below.",
+      "revId": "6451b754dae769f7546db14cf2dea4ffb5d65dd3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//8Ew\u003d",
+        "filename": "vp9/encoder/vp9_resize.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 73,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-01-21T17:30:26Z",
+      "side": 1,
+      "message": "const uint8_t *const input",
+      "revId": "6451b754dae769f7546db14cf2dea4ffb5d65dd3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//8Fg\u003d",
         "filename": "vp9/encoder/vp9_resize.c",
         "patchSetId": 5
@@ -30,6 +149,159 @@
       "writtenOn": "2014-01-21T15:59:07Z",
       "side": 1,
       "message": "const",
+      "revId": "6451b754dae769f7546db14cf2dea4ffb5d65dd3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//8E0\u003d",
+        "filename": "vp9/encoder/vp9_resize.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 137,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-01-21T17:30:26Z",
+      "side": 1,
+      "message": "const uint8_t *const input",
+      "revId": "6451b754dae769f7546db14cf2dea4ffb5d65dd3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//8E4\u003d",
+        "filename": "vp9/encoder/vp9_resize.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 178,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-01-21T17:30:26Z",
+      "side": 1,
+      "message": "const uint8_t *const input",
+      "revId": "6451b754dae769f7546db14cf2dea4ffb5d65dd3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//8Es\u003d",
+        "filename": "vp9/encoder/vp9_resize.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 220,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-01-21T17:30:26Z",
+      "side": 1,
+      "message": "++s",
+      "revId": "6451b754dae769f7546db14cf2dea4ffb5d65dd3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//8Eo\u003d",
+        "filename": "vp9/encoder/vp9_resize.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 229,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-01-21T17:30:26Z",
+      "side": 1,
+      "message": "++steps",
+      "revId": "6451b754dae769f7546db14cf2dea4ffb5d65dd3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//8Ek\u003d",
+        "filename": "vp9/encoder/vp9_resize.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 235,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-01-21T17:30:26Z",
+      "side": 1,
+      "message": "const uint8_t *const input",
+      "revId": "6451b754dae769f7546db14cf2dea4ffb5d65dd3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//8Ec\u003d",
+        "filename": "vp9/encoder/vp9_resize.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 299,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-01-21T17:30:26Z",
+      "side": 1,
+      "message": "const uint8_t *const input",
+      "revId": "6451b754dae769f7546db14cf2dea4ffb5d65dd3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//8EY\u003d",
+        "filename": "vp9/encoder/vp9_resize.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 325,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-01-21T17:30:26Z",
+      "side": 1,
+      "message": "const uint8_t *const y, u, v",
+      "revId": "6451b754dae769f7546db14cf2dea4ffb5d65dd3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//8EU\u003d",
+        "filename": "vp9/encoder/vp9_resize.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 339,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-01-21T17:30:26Z",
+      "side": 1,
+      "message": "const uint8_t *const y, u, v",
+      "revId": "6451b754dae769f7546db14cf2dea4ffb5d65dd3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//8EQ\u003d",
+        "filename": "vp9/encoder/vp9_resize.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 353,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-01-21T17:30:26Z",
+      "side": 1,
+      "message": "const uint8_t *const y, u, v",
       "revId": "6451b754dae769f7546db14cf2dea4ffb5d65dd3",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
