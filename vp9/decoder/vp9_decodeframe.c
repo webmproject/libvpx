@@ -1129,11 +1129,12 @@ static size_t read_uncompressed_header(VP9D_COMP *pbi,
 
   cm->show_existing_frame = vp9_rb_read_bit(rb);
   if (cm->show_existing_frame) {
-    // show an existing frame directly
+    // Show an existing frame directly.
     int frame_to_show = cm->ref_frame_map[vp9_rb_read_literal(rb, 3)];
     ref_cnt_fb(cm->fb_idx_ref_cnt, &cm->new_fb_idx, frame_to_show);
     pbi->refresh_frame_flags = 0;
     cm->lf.filter_level = 0;
+    cm->show_frame = 1;
     return 0;
   }
 
