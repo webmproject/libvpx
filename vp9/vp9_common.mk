@@ -133,11 +133,9 @@ endif
 
 VP9_COMMON_SRCS-$(HAVE_NEON_ASM) += common/arm/neon/vp9_convolve_neon.c
 VP9_COMMON_SRCS-$(HAVE_NEON_ASM) += common/arm/neon/vp9_idct16x16_neon.c
-VP9_COMMON_SRCS-$(HAVE_NEON_ASM) += common/arm/neon/vp9_loopfilter_16_neon.c
 VP9_COMMON_SRCS-$(HAVE_NEON_ASM) += common/arm/neon/vp9_convolve8_neon$(ASM)
 VP9_COMMON_SRCS-$(HAVE_NEON_ASM) += common/arm/neon/vp9_convolve8_avg_neon$(ASM)
-VP9_COMMON_SRCS-$(HAVE_NEON_ASM) += common/arm/neon/vp9_loopfilter_neon$(ASM)
-VP9_COMMON_SRCS-$(HAVE_NEON_ASM) += common/arm/neon/vp9_loopfilter_16_neon$(ASM)
+VP9_COMMON_SRCS-$(HAVE_NEON_ASM) += common/arm/neon/vp9_loopfilter_16_neon_asm$(ASM)
 VP9_COMMON_SRCS-$(HAVE_NEON_ASM) += common/arm/neon/vp9_dc_only_idct_add_neon$(ASM)
 VP9_COMMON_SRCS-$(HAVE_NEON_ASM) += common/arm/neon/vp9_idct4x4_1_add_neon$(ASM)
 VP9_COMMON_SRCS-$(HAVE_NEON_ASM) += common/arm/neon/vp9_idct4x4_add_neon$(ASM)
@@ -154,5 +152,17 @@ VP9_COMMON_SRCS-$(HAVE_NEON_ASM) += common/arm/neon/vp9_copy_neon$(ASM)
 VP9_COMMON_SRCS-$(HAVE_NEON_ASM) += common/arm/neon/vp9_avg_neon$(ASM)
 VP9_COMMON_SRCS-$(HAVE_NEON_ASM) += common/arm/neon/vp9_save_reg_neon$(ASM)
 VP9_COMMON_SRCS-$(HAVE_NEON_ASM) += common/arm/neon/vp9_reconintra_neon$(ASM)
+
+# neon with assembly and intrinsics implementations. If both are available
+# prefer assembly.
+ifeq ($(HAVE_NEON_ASM), yes)
+VP9_COMMON_SRCS-yes += common/arm/neon/vp9_loopfilter_neon_asm$(ASM)
+VP9_COMMON_SRCS-yes += common/arm/neon/vp9_loopfilter_16_neon.c
+else
+ifeq ($(HAVE_NEON), yes)
+VP9_COMMON_SRCS-yes += common/arm/neon/vp9_loopfilter_neon.c
+VP9_COMMON_SRCS-yes += common/arm/neon/vp9_loopfilter_16_neon.c
+endif  # HAVE_NEON
+endif  # HAVE_NEON_ASM
 
 $(eval $(call rtcd_h_template,vp9_rtcd,vp9/common/vp9_rtcd_defs.pl))
