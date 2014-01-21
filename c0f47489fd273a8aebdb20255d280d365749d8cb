@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//7/k\u003d",
+        "filename": "vp9/encoder/vp9_resize.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 79,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-01-21T20:45:40Z",
+      "side": 1,
+      "message": "I think the rounding needs to have the opposite sense in the negative case:\n-(((int64_t)(outlength - inlength) \u003c\u003c 31) - outlength / 2) / outlength;",
+      "revId": "c0f47489fd273a8aebdb20255d280d365749d8cb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
