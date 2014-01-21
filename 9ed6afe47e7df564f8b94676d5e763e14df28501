@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//7+A\u003d",
+        "filename": "vpx_scale/yv12config.h",
+        "patchSetId": 19
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-01-21T22:20:00Z",
+      "side": 1,
+      "message": "I would suggest to use VP9_ENC_BORDER_IN_PIXELS name for consistency with another constant names.",
+      "revId": "9ed6afe47e7df564f8b94676d5e763e14df28501",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//798\u003d",
+        "filename": "vpx_scale/yv12config.h",
+        "patchSetId": 19
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-01-21T22:20:00Z",
+      "side": 1,
+      "message": "VP9_DEC_BORDER_IN_PIXELS",
+      "revId": "9ed6afe47e7df564f8b94676d5e763e14df28501",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
