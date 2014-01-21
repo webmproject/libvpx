@@ -34,6 +34,24 @@
       "revId": "c0f47489fd273a8aebdb20255d280d365749d8cb",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//7/I\u003d",
+        "filename": "vp9/encoder/vp9_resize.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 79,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2014-01-21T21:03:25Z",
+      "side": 1,
+      "message": "this is okay I think.",
+      "parentUuid": "AAAAdn//7/k\u003d",
+      "revId": "c0f47489fd273a8aebdb20255d280d365749d8cb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
