@@ -53,6 +53,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//8DI\u003d",
+        "filename": "vp9/encoder/vp9_onyx_if.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 2345,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2014-01-21T20:16:46Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//8FM\u003d",
+      "revId": "6451b754dae769f7546db14cf2dea4ffb5d65dd3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//8FI\u003d",
         "filename": "vp9/encoder/vp9_onyx_if.c",
         "patchSetId": 5
@@ -64,6 +82,24 @@
       "writtenOn": "2014-01-21T17:30:26Z",
       "side": 1,
       "message": "// Assume 4:2:0 sampling of color.\nYou don\u0027t have to assume 4:2:0 sampling here; just use the uv_crop_[width|height] values.",
+      "revId": "6451b754dae769f7546db14cf2dea4ffb5d65dd3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//8DM\u003d",
+        "filename": "vp9/encoder/vp9_onyx_if.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 2349,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2014-01-21T20:16:46Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//8FI\u003d",
       "revId": "6451b754dae769f7546db14cf2dea4ffb5d65dd3",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -87,6 +123,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//8DE\u003d",
+        "filename": "vp9/encoder/vp9_onyx_if.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 2378,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2014-01-21T20:16:46Z",
+      "side": 1,
+      "message": "oops. Done.",
+      "parentUuid": "AAAAdn//8FQ\u003d",
+      "revId": "6451b754dae769f7546db14cf2dea4ffb5d65dd3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//8FE\u003d",
         "filename": "vp9/encoder/vp9_resize.c",
         "patchSetId": 5
@@ -98,6 +152,24 @@
       "writtenOn": "2014-01-21T17:30:26Z",
       "side": 1,
       "message": "Is this an existing file? Otherwise should update the copyright date to 2014.",
+      "revId": "6451b754dae769f7546db14cf2dea4ffb5d65dd3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//8Cs\u003d",
+        "filename": "vp9/encoder/vp9_resize.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2014-01-21T20:16:46Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//8FE\u003d",
       "revId": "6451b754dae769f7546db14cf2dea4ffb5d65dd3",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -121,6 +193,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//8Co\u003d",
+        "filename": "vp9/encoder/vp9_resize.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2014-01-21T20:16:46Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//8FA\u003d",
+      "revId": "6451b754dae769f7546db14cf2dea4ffb5d65dd3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//8E8\u003d",
         "filename": "vp9/encoder/vp9_resize.c",
         "patchSetId": 5
@@ -132,6 +222,24 @@
       "writtenOn": "2014-01-21T17:30:26Z",
       "side": 1,
       "message": "Comments should start with a capital letter and end with a period. Same for other comments in code below.",
+      "revId": "6451b754dae769f7546db14cf2dea4ffb5d65dd3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//8Ck\u003d",
+        "filename": "vp9/encoder/vp9_resize.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2014-01-21T20:16:46Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//8E8\u003d",
       "revId": "6451b754dae769f7546db14cf2dea4ffb5d65dd3",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -155,6 +263,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//8Cg\u003d",
+        "filename": "vp9/encoder/vp9_resize.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 71,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2014-01-21T20:16:46Z",
+      "side": 1,
+      "message": "Because we do not know how much down-sampling we need. The progressive down-sampling will automatically keep increasing the effective filter length.\n\nYou are right about the filters though - I made a mistake in copying from the matlab runs you sent me.",
+      "parentUuid": "AAAAdn//8SU\u003d",
+      "revId": "6451b754dae769f7546db14cf2dea4ffb5d65dd3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//8Ew\u003d",
         "filename": "vp9/encoder/vp9_resize.c",
         "patchSetId": 5
@@ -166,6 +292,24 @@
       "writtenOn": "2014-01-21T17:30:26Z",
       "side": 1,
       "message": "const uint8_t *const input",
+      "revId": "6451b754dae769f7546db14cf2dea4ffb5d65dd3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//8Cc\u003d",
+        "filename": "vp9/encoder/vp9_resize.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 73,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2014-01-21T20:16:46Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//8Ew\u003d",
       "revId": "6451b754dae769f7546db14cf2dea4ffb5d65dd3",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -189,6 +333,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//8CU\u003d",
+        "filename": "vp9/encoder/vp9_resize.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 75,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2014-01-21T20:16:46Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//8Fg\u003d",
+      "revId": "6451b754dae769f7546db14cf2dea4ffb5d65dd3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//8Fc\u003d",
         "filename": "vp9/encoder/vp9_resize.c",
         "patchSetId": 5
@@ -200,6 +362,24 @@
       "writtenOn": "2014-01-21T15:59:07Z",
       "side": 1,
       "message": "const",
+      "revId": "6451b754dae769f7546db14cf2dea4ffb5d65dd3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//8CQ\u003d",
+        "filename": "vp9/encoder/vp9_resize.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 76,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2014-01-21T20:16:46Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//8Fc\u003d",
       "revId": "6451b754dae769f7546db14cf2dea4ffb5d65dd3",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -223,6 +403,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//8Bw\u003d",
+        "filename": "vp9/encoder/vp9_resize.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 137,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2014-01-21T20:16:46Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//8E0\u003d",
+      "revId": "6451b754dae769f7546db14cf2dea4ffb5d65dd3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//8Ds\u003d",
         "filename": "vp9/encoder/vp9_resize.c",
         "patchSetId": 5
@@ -234,6 +432,24 @@
       "writtenOn": "2014-01-21T18:17:31Z",
       "side": 1,
       "message": "in order to split into initial/middle/end, you are assuming that the image is bigger than the filter length.  where do you enforce this? or at least  communicate this to the potential user.",
+      "revId": "6451b754dae769f7546db14cf2dea4ffb5d65dd3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//8BM\u003d",
+        "filename": "vp9/encoder/vp9_resize.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 147,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2014-01-21T20:16:46Z",
+      "side": 1,
+      "message": "good point. I added some code to keep the lib generic. But in the future when we optimize for speed, we may just specify a restriction and add asserts.",
+      "parentUuid": "AAAAdn//8Ds\u003d",
       "revId": "6451b754dae769f7546db14cf2dea4ffb5d65dd3",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -257,6 +473,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//8Bs\u003d",
+        "filename": "vp9/encoder/vp9_resize.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 178,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2014-01-21T20:16:46Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//8E4\u003d",
+      "revId": "6451b754dae769f7546db14cf2dea4ffb5d65dd3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//8Es\u003d",
         "filename": "vp9/encoder/vp9_resize.c",
         "patchSetId": 5
@@ -268,6 +502,24 @@
       "writtenOn": "2014-01-21T17:30:26Z",
       "side": 1,
       "message": "++s",
+      "revId": "6451b754dae769f7546db14cf2dea4ffb5d65dd3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//8Bo\u003d",
+        "filename": "vp9/encoder/vp9_resize.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 220,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2014-01-21T20:16:46Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//8Es\u003d",
       "revId": "6451b754dae769f7546db14cf2dea4ffb5d65dd3",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -291,6 +543,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//8Bk\u003d",
+        "filename": "vp9/encoder/vp9_resize.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 229,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2014-01-21T20:16:46Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//8Eo\u003d",
+      "revId": "6451b754dae769f7546db14cf2dea4ffb5d65dd3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//8Ek\u003d",
         "filename": "vp9/encoder/vp9_resize.c",
         "patchSetId": 5
@@ -302,6 +572,24 @@
       "writtenOn": "2014-01-21T17:30:26Z",
       "side": 1,
       "message": "const uint8_t *const input",
+      "revId": "6451b754dae769f7546db14cf2dea4ffb5d65dd3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//8Bg\u003d",
+        "filename": "vp9/encoder/vp9_resize.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 235,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2014-01-21T20:16:46Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//8Ek\u003d",
       "revId": "6451b754dae769f7546db14cf2dea4ffb5d65dd3",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -325,6 +613,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//8Bc\u003d",
+        "filename": "vp9/encoder/vp9_resize.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 299,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2014-01-21T20:16:46Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//8Ec\u003d",
+      "revId": "6451b754dae769f7546db14cf2dea4ffb5d65dd3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//8EY\u003d",
         "filename": "vp9/encoder/vp9_resize.c",
         "patchSetId": 5
@@ -336,6 +642,24 @@
       "writtenOn": "2014-01-21T17:30:26Z",
       "side": 1,
       "message": "const uint8_t *const y, u, v",
+      "revId": "6451b754dae769f7546db14cf2dea4ffb5d65dd3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//8BY\u003d",
+        "filename": "vp9/encoder/vp9_resize.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 325,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2014-01-21T20:16:46Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//8EY\u003d",
       "revId": "6451b754dae769f7546db14cf2dea4ffb5d65dd3",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -359,6 +683,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//8BU\u003d",
+        "filename": "vp9/encoder/vp9_resize.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 339,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2014-01-21T20:16:46Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//8EU\u003d",
+      "revId": "6451b754dae769f7546db14cf2dea4ffb5d65dd3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//8EQ\u003d",
         "filename": "vp9/encoder/vp9_resize.c",
         "patchSetId": 5
@@ -376,6 +718,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//8BQ\u003d",
+        "filename": "vp9/encoder/vp9_resize.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 353,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2014-01-21T20:16:46Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//8EQ\u003d",
+      "revId": "6451b754dae769f7546db14cf2dea4ffb5d65dd3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//8FY\u003d",
         "filename": "vp9/encoder/vp9_resize.h",
         "patchSetId": 5
@@ -387,6 +747,24 @@
       "writtenOn": "2014-01-21T15:59:07Z",
       "side": 1,
       "message": "const (multiple)",
+      "revId": "6451b754dae769f7546db14cf2dea4ffb5d65dd3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//8DA\u003d",
+        "filename": "vp9/encoder/vp9_resize.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2014-01-21T20:16:46Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//8FY\u003d",
       "revId": "6451b754dae769f7546db14cf2dea4ffb5d65dd3",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
