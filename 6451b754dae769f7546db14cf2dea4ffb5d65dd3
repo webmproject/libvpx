@@ -19,6 +19,23 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//8Dk\u003d",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 5
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1004101
+      },
+      "writtenOn": "2014-01-21T18:17:31Z",
+      "side": 1,
+      "message": "See cover message with my concerns about this approach.",
+      "revId": "6451b754dae769f7546db14cf2dea4ffb5d65dd3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//8FM\u003d",
         "filename": "vp9/encoder/vp9_onyx_if.c",
         "patchSetId": 5
@@ -121,6 +138,23 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//8SU\u003d",
+        "filename": "vp9/encoder/vp9_resize.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 71,
+      "author": {
+        "id": 1004101
+      },
+      "writtenOn": "2014-01-21T18:17:31Z",
+      "side": 1,
+      "message": "it is unclear that the results produced by this method will be good.  why not downsample directly instead of doing factor of two?\nAlso, These should be halfband filters which they do not seem to be.",
+      "revId": "6451b754dae769f7546db14cf2dea4ffb5d65dd3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//8Ew\u003d",
         "filename": "vp9/encoder/vp9_resize.c",
         "patchSetId": 5
@@ -183,6 +217,23 @@
       "writtenOn": "2014-01-21T17:30:26Z",
       "side": 1,
       "message": "const uint8_t *const input",
+      "revId": "6451b754dae769f7546db14cf2dea4ffb5d65dd3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//8Ds\u003d",
+        "filename": "vp9/encoder/vp9_resize.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 147,
+      "author": {
+        "id": 1004101
+      },
+      "writtenOn": "2014-01-21T18:17:31Z",
+      "side": 1,
+      "message": "in order to split into initial/middle/end, you are assuming that the image is bigger than the filter length.  where do you enforce this? or at least  communicate this to the potential user.",
       "revId": "6451b754dae769f7546db14cf2dea4ffb5d65dd3",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
