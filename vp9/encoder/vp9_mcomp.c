@@ -174,8 +174,10 @@ void vp9_init3smotion_compensation(MACROBLOCK *x, int stride) {
       error_per_bit + 4096) >> 13 : 0)
 
 
-#define SP(x) (((x) & 7) << 1)  // convert motion vector component to offset
-                                // for svf calc
+// convert motion vector component to offset for svf calc
+static INLINE int sp(int x) {
+  return (x & 7) << 1;
+}
 
 #define IFMVCV(r, c, s, e)                                \
     if (c >= minc && c <= maxc && r >= minr && r <= maxr) \
@@ -183,12 +185,14 @@ void vp9_init3smotion_compensation(MACROBLOCK *x, int stride) {
     else                                                  \
       e;
 
-/* pointer to predictor base of a motionvector */
-#define PRE(r, c) (y + (((r) >> 3) * y_stride + ((c) >> 3) -(offset)))
+static INLINE uint8_t *pre(uint8_t *buf, int stride, int r, int c, int offset) {
+  return &buf[(r >> 3) * stride + (c >> 3) - offset];
+}
 
 /* returns subpixel variance error function */
 #define DIST(r, c) \
-    vfp->svf(PRE(r, c), y_stride, SP(c), SP(r), z, src_stride, &sse)
+    vfp->svf(pre(y, y_stride, r, c, offset), y_stride, sp(c), sp(r), z, \
+             src_stride, &sse)
 
 /* checks if (r, c) has better score than previous best */
 #define CHECK_BETTER(v, r, c) \
@@ -358,7 +362,7 @@ int vp9_find_best_sub_pixel_tree(MACROBLOCK *x,
 #undef DIST
 /* returns subpixel variance error function */
 #define DIST(r, c) \
-    vfp->svaf(PRE(r, c), y_stride, SP(c), SP(r), \
+    vfp->svaf(pre(y, y_stride, r, c, offset), y_stride, sp(c), sp(r), \
               z, src_stride, &sse, second_pred)
 
 int vp9_find_best_sub_pixel_comp_tree(MACROBLOCK *x,
