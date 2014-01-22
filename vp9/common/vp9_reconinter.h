@@ -90,8 +90,7 @@ static void setup_pre_planes(MACROBLOCKD *xd, int idx,
   }
 }
 
-static void set_scale_factors(VP9_COMMON *cm, MACROBLOCKD *xd,
-                              int ref0, int ref1) {
+static void set_ref_ptrs(VP9_COMMON *cm, MACROBLOCKD *xd, int ref0, int ref1) {
   xd->block_refs[0] = &cm->frame_refs[ref0 >= 0 ? ref0 : 0];
   xd->block_refs[1] = &cm->frame_refs[ref1 >= 0 ? ref1 : 0];
 }
