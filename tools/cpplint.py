@@ -181,6 +181,7 @@ _ERROR_CATEGORIES = [
   'runtime/printf',
   'runtime/printf_format',
   'runtime/references',
+  'runtime/sizeof',
   'runtime/string',
   'runtime/threadsafe_fn',
   'runtime/vlog',
@@ -4154,10 +4155,12 @@ def CheckCStyleCast(filename, linenum, line, raw_line, cast_type, pattern,
   if not match:
     return False
 
-  # Exclude lines with sizeof, since sizeof looks like a cast.
+  # e.g., sizeof(int)
   sizeof_match = Match(r'.*sizeof\s*$', line[0:match.start(1) - 1])
   if sizeof_match:
-    return False
+    error(filename, linenum, 'runtime/sizeof', 1,
+          'Using sizeof(type).  Use sizeof(varname) instead if possible')
+    return True
 
   # operator++(int) and operator--(int)
   if (line[0:match.start(1) - 1].endswith(' operator++') or
