@@ -309,14 +309,14 @@ int vp9_drop_frame(VP9_COMP *const cpi) {
 }
 
 // Adjust active_worst_quality level based on buffer level.
-static int adjust_active_worst_quality_from_buffer_level(const VP9_COMP *cpi) {
+static int adjust_active_worst_quality_from_buffer_level(const VP9_CONFIG *oxcf,
+    const RATE_CONTROL *rc) {
   // Adjust active_worst_quality: If buffer is above the optimal/target level,
   // bring active_worst_quality down depending on fullness over buffer.
   // If buffer is below the optimal level, let the active_worst_quality go from
   // ambient Q (at buffer = optimal level) to worst_quality level
   // (at buffer = critical level).
-  const RATE_CONTROL *const rc = &cpi->rc;
-  const VP9_CONFIG *const oxcf = &cpi->oxcf;
+
   int active_worst_quality = rc->active_worst_quality;
   // Maximum limit for down adjustment, ~20%.
   int max_adjustment_down = active_worst_quality / 5;
@@ -353,31 +353,23 @@ static int adjust_active_worst_quality_from_buffer_level(const VP9_COMP *cpi) {
 }
 
 // Adjust target frame size with respect to the buffering constraints:
-static int target_size_from_buffer_level(const VP9_COMP *cpi) {
-  const RATE_CONTROL *const rc = &cpi->rc;
-  const VP9_CONFIG *const oxcf = &cpi->oxcf;
-  int this_frame_target = cpi->rc.this_frame_target;
-  int percent_low = 0;
-  int percent_high = 0;
-  int one_percent_bits = (int)(1 + oxcf->optimal_buffer_level / 100);
-  if (rc->buffer_level < oxcf->optimal_buffer_level) {
-    percent_low = (int)((oxcf->optimal_buffer_level - rc->buffer_level) /
-                      one_percent_bits);
-    if (percent_low > oxcf->under_shoot_pct)
-      percent_low = oxcf->under_shoot_pct;
+static int target_size_from_buffer_level(const VP9_CONFIG *oxcf,
+                                         const RATE_CONTROL *rc) {
+  int target = rc->this_frame_target;
+  const int64_t diff = oxcf->optimal_buffer_level - rc->buffer_level;
+  const int one_pct_bits = 1 + oxcf->optimal_buffer_level / 100;
 
+  if (diff > 0) {
     // Lower the target bandwidth for this frame.
-    this_frame_target -= (this_frame_target * percent_low) / 200;
-  } else  if (rc->buffer_level > oxcf->optimal_buffer_level) {
-    percent_high = (int)((rc->buffer_level - oxcf->optimal_buffer_level) /
-                     one_percent_bits);
-    if (percent_high > oxcf->over_shoot_pct)
-      percent_high = oxcf->over_shoot_pct;
-
+    const int pct_low = MIN(diff / one_pct_bits, oxcf->under_shoot_pct);
+    target -= (target * pct_low) / 200;
+  } else  if (diff < 0) {
     // Increase the target bandwidth for this frame.
-    this_frame_target += (this_frame_target * percent_high) / 200;
+    const int pct_high = MIN(-diff / one_pct_bits, oxcf->over_shoot_pct);
+    target += (target * pct_high) / 200;
   }
-  return this_frame_target;
+
+  return target;
 }
 
 static void calc_pframe_target_size(VP9_COMP *const cpi) {
@@ -399,10 +391,10 @@ static void calc_pframe_target_size(VP9_COMP *const cpi) {
       // For now, use: cpi->rc.av_per_frame_bandwidth / 16:
       min_frame_target = MAX(rc->av_per_frame_bandwidth >> 4,
                              FRAME_OVERHEAD_BITS);
-      rc->this_frame_target = target_size_from_buffer_level(cpi);
+      rc->this_frame_target = target_size_from_buffer_level(oxcf, rc);
       // Adjust qp-max based on buffer level.
       rc->active_worst_quality =
-          adjust_active_worst_quality_from_buffer_level(cpi);
+          adjust_active_worst_quality_from_buffer_level(oxcf, rc);
     }
   }
 
