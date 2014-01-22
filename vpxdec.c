@@ -861,7 +861,8 @@ int main_loop(int argc, const char **argv_) {
           // If the output frames are to be scaled to a fixed display size then
           // use the width and height specified in the container. If either of
           // these is set to 0, use the display size set in the first frame
-          // header.
+          // header. If that is unavailable, use the raw decoded size of the
+          // first decoded frame.
           int display_width = vpx_input_ctx.width;
           int display_height = vpx_input_ctx.height;
           if (!display_width || !display_height) {
