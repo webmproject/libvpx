@@ -256,6 +256,9 @@ typedef struct {
   // Maximum number of steps in logarithmic subpel search before giving up.
   int subpel_iters_per_step;
 
+  // Control when to stop subpel search
+  int subpel_force_stop;
+
   // Thresh_mult is used to set a threshold for the rd score. A higher value
   // means that we will accept the best mode so far more often. This number
   // is used in combination with the current block size, and thresh_freq_fact
