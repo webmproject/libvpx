@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//7pM\u003d",
+        "filename": "vp9/common/arm/neon/vp9_reconintra_neon.asm",
+        "patchSetId": 3
+      },
+      "lineNbr": 433,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2014-01-22T23:34:58Z",
+      "side": 1,
+      "message": "Can you load r12 initially outside the loop and dup it, then load the *next* r3-\u003er12-\u003eqN in each window? Over reads the last value but ...",
+      "revId": "306fcf4d1f13e7fea778357fe950598c9ccaf718",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
