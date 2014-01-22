@@ -9,7 +9,6 @@
  */
 
 #include <assert.h>
-#include <inttypes.h>
 #include <limits.h>
 #include <math.h>
 #include <stdio.h>
@@ -17,6 +16,7 @@
 #include <string.h>
 #include "vp9/common/vp9_common.h"
 #include "vp9/encoder/vp9_resize.h"
+#include "vpx/vpx_integer.h"
 
 #define FILTER_BITS               7
 
