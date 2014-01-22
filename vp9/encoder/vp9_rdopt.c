@@ -2270,41 +2270,38 @@ static void setup_pred_block(const MACROBLOCKD *xd,
 
 void vp9_setup_buffer_inter(VP9_COMP *cpi, MACROBLOCK *x,
                             const TileInfo *const tile,
-                            int idx, MV_REFERENCE_FRAME frame_type,
+                            MV_REFERENCE_FRAME ref_frame,
                             BLOCK_SIZE block_size,
                             int mi_row, int mi_col,
                             int_mv frame_nearest_mv[MAX_REF_FRAMES],
                             int_mv frame_near_mv[MAX_REF_FRAMES],
                             struct buf_2d yv12_mb[4][MAX_MB_PLANE]) {
-  VP9_COMMON *cm = &cpi->common;
-  YV12_BUFFER_CONFIG *yv12 = &cm->yv12_fb[cpi->common.ref_frame_map[idx]];
+  const VP9_COMMON *cm = &cpi->common;
+  const YV12_BUFFER_CONFIG *yv12 = get_ref_frame_buffer(cpi, ref_frame);
   MACROBLOCKD *const xd = &x->e_mbd;
-  MB_MODE_INFO *const mbmi = &xd->mi_8x8[0]->mbmi;
-  const struct scale_factors *const sf = &cm->frame_refs[frame_type - 1].sf;
-
+  MODE_INFO *const mi = xd->mi_8x8[0];
+  int_mv *const candidates = mi->mbmi.ref_mvs[ref_frame];
+  const struct scale_factors *const sf = &cm->frame_refs[ref_frame - 1].sf;
 
   // TODO(jkoleszar): Is the UV buffer ever used here? If so, need to make this
   // use the UV scaling factors.
-  setup_pred_block(xd, yv12_mb[frame_type], yv12, mi_row, mi_col, sf, sf);
+  setup_pred_block(xd, yv12_mb[ref_frame], yv12, mi_row, mi_col, sf, sf);
 
   // Gets an initial list of candidate vectors from neighbours and orders them
-  vp9_find_mv_refs(cm, xd, tile, xd->mi_8x8[0],
-                   xd->last_mi,
-                   frame_type,
-                   mbmi->ref_mvs[frame_type], mi_row, mi_col);
+  vp9_find_mv_refs(cm, xd, tile, mi, xd->last_mi, ref_frame, candidates,
+                   mi_row, mi_col);
 
   // Candidate refinement carried out at encoder and decoder
-  vp9_find_best_ref_mvs(xd, cm->allow_high_precision_mv,
-                        mbmi->ref_mvs[frame_type],
-                        &frame_nearest_mv[frame_type],
-                        &frame_near_mv[frame_type]);
+  vp9_find_best_ref_mvs(xd, cm->allow_high_precision_mv, candidates,
+                        &frame_nearest_mv[ref_frame],
+                        &frame_near_mv[ref_frame]);
 
   // Further refinement that is encode side only to test the top few candidates
   // in full and choose the best as the centre point for subsequent searches.
   // The current implementation doesn't support scaling.
   if (!vp9_is_scaled(sf) && block_size >= BLOCK_8X8)
-    mv_pred(cpi, x, yv12_mb[frame_type][0].buf, yv12->y_stride,
-            frame_type, block_size);
+    mv_pred(cpi, x, yv12_mb[ref_frame][0].buf, yv12->y_stride,
+            ref_frame, block_size);
 }
 
 YV12_BUFFER_CONFIG *vp9_get_scaled_ref_frame(VP9_COMP *cpi, int ref_frame) {
@@ -3167,7 +3164,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
   for (ref_frame = LAST_FRAME; ref_frame <= ALTREF_FRAME; ++ref_frame) {
     x->pred_mv_sad[ref_frame] = INT_MAX;
     if (cpi->ref_frame_flags & flag_list[ref_frame]) {
-      vp9_setup_buffer_inter(cpi, x, tile, get_ref_frame_idx(cpi, ref_frame),
+      vp9_setup_buffer_inter(cpi, x, tile,
                              ref_frame, block_size, mi_row, mi_col,
                              frame_mv[NEARESTMV], frame_mv[NEARMV], yv12_mb);
     }
@@ -3792,7 +3789,7 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
 
   for (ref_frame = LAST_FRAME; ref_frame <= ALTREF_FRAME; ref_frame++) {
     if (cpi->ref_frame_flags & flag_list[ref_frame]) {
-      vp9_setup_buffer_inter(cpi, x, tile, get_ref_frame_idx(cpi, ref_frame),
+      vp9_setup_buffer_inter(cpi, x, tile,
                              ref_frame, block_size, mi_row, mi_col,
                              frame_mv[NEARESTMV], frame_mv[NEARMV],
                              yv12_mb);
