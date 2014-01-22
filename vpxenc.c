@@ -833,8 +833,8 @@ static int compare_img(vpx_image_t *img1, vpx_image_t *img2)
   unsigned int i;
 
   match &= (img1->fmt == img2->fmt);
-  match &= (img1->w == img2->w);
-  match &= (img1->h == img2->h);
+  match &= (img1->d_w == img2->d_w);
+  match &= (img1->d_h == img2->d_h);
 
   for (i = 0; i < img1->d_h; i++)
     match &= (memcmp(img1->planes[VPX_PLANE_Y]+i*img1->stride[VPX_PLANE_Y],
