@@ -211,19 +211,16 @@ static int estimate_bits_at_q(int frame_kind, int q, int mbs,
 
 
 static void calc_iframe_target_size(VP9_COMP *cpi) {
-  // boost defaults to half second
+  const VP9_CONFIG *oxcf = &cpi->oxcf;
+  RATE_CONTROL *const rc = &cpi->rc;
   int target;
 
-  // Clear down mmx registers to allow floating point in what follows
   vp9_clear_system_state();  // __asm emms;
-
-  // New Two pass RC
-  target = cpi->rc.per_frame_bandwidth;
 
   // For 1-pass.
   if (cpi->pass == 0) {
     if (cpi->common.current_video_frame == 0) {
-      target = cpi->oxcf.starting_buffer_level / 2;
+      target = oxcf->starting_buffer_level / 2;
     } else {
       // TODO(marpan): Add in adjustment based on Q.
       // If this keyframe was forced, use a more recent Q estimate.
@@ -235,47 +232,49 @@ static void calc_iframe_target_size(VP9_COMP *cpi) {
       // Adjustment up based on q: need to fix.
       // kf_boost = kf_boost * kfboost_qadjust(Q) / 100;
       // Frame separation adjustment (down).
-      if (cpi->rc.frames_since_key  < cpi->output_framerate / 2) {
-        kf_boost = (int)(kf_boost * cpi->rc.frames_since_key /
-            (cpi->output_framerate / 2));
+      if (rc->frames_since_key  < cpi->output_framerate / 2) {
+        kf_boost = (int)(kf_boost * rc->frames_since_key /
+                       (cpi->output_framerate / 2));
       }
       kf_boost = (kf_boost < 16) ? 16 : kf_boost;
-      target = ((16 + kf_boost) * cpi->rc.per_frame_bandwidth) >> 4;
+      target = ((16 + kf_boost) * rc->per_frame_bandwidth) >> 4;
     }
-    cpi->rc.active_worst_quality = cpi->rc.worst_quality;
+    rc->active_worst_quality = rc->worst_quality;
+  } else {
+    target = rc->per_frame_bandwidth;
   }
 
-  if (cpi->oxcf.rc_max_intra_bitrate_pct) {
-    int max_rate = cpi->rc.per_frame_bandwidth
-                 * cpi->oxcf.rc_max_intra_bitrate_pct / 100;
-
-    if (target > max_rate)
-      target = max_rate;
+  if (oxcf->rc_max_intra_bitrate_pct) {
+    const int max_rate = rc->per_frame_bandwidth *
+                             oxcf->rc_max_intra_bitrate_pct / 100;
+    target = MIN(target, max_rate);
   }
-  cpi->rc.this_frame_target = target;
+  rc->this_frame_target = target;
 }
 
 // Update the buffer level: leaky bucket model.
 void vp9_update_buffer_level(VP9_COMP *const cpi, int encoded_frame_size) {
-  VP9_COMMON *const cm = &cpi->common;
+  const VP9_COMMON *const cm = &cpi->common;
+  const VP9_CONFIG *oxcf = &cpi->oxcf;
   RATE_CONTROL *const rc = &cpi->rc;
+
   // Non-viewable frames are a special case and are treated as pure overhead.
   if (!cm->show_frame) {
     rc->bits_off_target -= encoded_frame_size;
   } else {
     rc->bits_off_target += rc->av_per_frame_bandwidth - encoded_frame_size;
   }
+
   // Clip the buffer level to the maximum specified buffer size.
-  if (rc->bits_off_target > cpi->oxcf.maximum_buffer_size) {
-    rc->bits_off_target = cpi->oxcf.maximum_buffer_size;
-  }
-  rc->buffer_level = rc->bits_off_target;
+  rc->buffer_level = MIN(rc->bits_off_target, oxcf->maximum_buffer_size);
 }
 
 int vp9_drop_frame(VP9_COMP *const cpi) {
+  const VP9_CONFIG *oxcf = &cpi->oxcf;
   RATE_CONTROL *const rc = &cpi->rc;
 
-  if (!cpi->oxcf.drop_frames_water_mark) {
+
+  if (!oxcf->drop_frames_water_mark) {
     return 0;
   } else {
     if (rc->buffer_level < 0) {
@@ -284,8 +283,8 @@ int vp9_drop_frame(VP9_COMP *const cpi) {
     } else {
       // If buffer is below drop_mark, for now just drop every other frame
       // (starting with the next frame) until it increases back over drop_mark.
-      int drop_mark = (int)(cpi->oxcf.drop_frames_water_mark *
-          cpi->oxcf.optimal_buffer_level / 100);
+      int drop_mark = (int)(oxcf->drop_frames_water_mark *
+                                oxcf->optimal_buffer_level / 100);
       if ((rc->buffer_level > drop_mark) &&
           (rc->decimation_factor > 0)) {
         --rc->decimation_factor;
