@@ -840,7 +840,7 @@ int main_loop(int argc, const char **argv_) {
       show_progress(frame_in, frame_out, dx_time);
 
     if (!noblit) {
-      if (frame_out == 1 && img && use_y4m && single_file)
+      if (frame_out == 1 && img && single_file && !do_md5 && use_y4m)
         y4m_write_file_header(outfile,
                               vpx_input_ctx.width, vpx_input_ctx.height,
                               &vpx_input_ctx.framerate, img->fmt);
