@@ -245,25 +245,6 @@ static int read_frame(struct VpxDecInputContext *input, uint8_t **buf,
   }
 }
 
-void *out_open(const char *out_fn, int do_md5) {
-  void *out = NULL;
-
-  if (do_md5) {
-    MD5Context *md5_ctx = out = malloc(sizeof(MD5Context));
-    (void)out_fn;
-    MD5Init(md5_ctx);
-  } else {
-    FILE *outfile = out = strcmp("-", out_fn) ? fopen(out_fn, "wb")
-                          : set_binary_mode(stdout);
-
-    if (!outfile) {
-      fatal("Failed to output file");
-    }
-  }
-
-  return out;
-}
-
 static int get_image_plane_width(int plane, const vpx_image_t *img) {
   return (plane > 0 && img->x_chroma_shift > 0) ?
              (img->d_w + 1) >> img->x_chroma_shift :
@@ -309,23 +290,6 @@ static void write_image_file(const vpx_image_t *img, const int planes[3],
       fwrite(buf, 1, w, file);
       buf += stride;
     }
-  }
-}
-
-void out_close(void *out, const char *out_fn, int do_md5) {
-  if (do_md5) {
-    uint8_t md5[16];
-    int i;
-
-    MD5Final(md5, out);
-    free(out);
-
-    for (i = 0; i < 16; i++)
-      printf("%02x", md5[i]);
-
-    printf("  %s\n", out_fn);
-  } else {
-    fclose(out);
   }
 }
 
@@ -469,6 +433,40 @@ void generate_filename(const char *pattern, char *out, size_t q_len,
   } while (*p);
 }
 
+static int is_single_file(const char *outfile_pattern) {
+  const char *p = outfile_pattern;
+
+  do {
+    p = strchr(p, '%');
+    if (p && p[1] >= '1' && p[1] <= '9')
+      return 0;  // pattern contains sequence number, so it's not unique
+    if (p)
+      p++;
+  } while (p);
+
+  return 1;
+}
+
+static void print_md5(unsigned char digest[16], const char *filename) {
+  int i;
+
+  for (i = 0; i < 16; ++i)
+    printf("%02x", digest[i]);
+  printf("  %s\n", filename);
+}
+
+static FILE *open_outfile(const char *name) {
+  if (strcmp("-", name) == 0) {
+    set_binary_mode(stdout);
+    return stdout;
+  } else {
+    FILE *file = fopen(name, "wb");
+    if (!file)
+      fatal("Failed to output file %s", name);
+    return file;
+  }
+}
+
 int main_loop(int argc, const char **argv_) {
   vpx_codec_ctx_t       decoder;
   char                  *fn = NULL;
@@ -485,11 +483,9 @@ int main_loop(int argc, const char **argv_) {
   unsigned long          dx_time = 0;
   struct arg               arg;
   char                   **argv, **argi, **argj;
-  const char             *outfile_pattern = 0;
-  char                    outfile[PATH_MAX];
+
   int                     single_file;
   int                     use_y4m = 1;
-  void                   *out = NULL;
   vpx_codec_dec_cfg_t     cfg = {0};
 #if CONFIG_VP8_DECODER
   vp8_postproc_cfg_t      vp8_pp_cfg = {0};
@@ -506,6 +502,13 @@ int main_loop(int argc, const char **argv_) {
   int                     num_external_frame_buffers = 0;
   int                     fb_lru_cache = 0;
   vpx_codec_frame_buffer_t *frame_buffers = NULL;
+
+  const char *outfile_pattern = NULL;
+  char outfile_name[PATH_MAX] = {0};
+  FILE *outfile = NULL;
+
+  MD5Context md5_ctx;
+  unsigned char md5_digest[16];
 
   struct VpxDecInputContext input = {0};
   struct VpxInputContext vpx_input_ctx = {0};
@@ -641,8 +644,7 @@ int main_loop(int argc, const char **argv_) {
   infile = strcmp(fn, "-") ? fopen(fn, "rb") : set_binary_mode(stdin);
 
   if (!infile) {
-    fprintf(stderr, "Failed to open file '%s'",
-            strcmp(fn, "-") ? fn : "stdin");
+    fprintf(stderr, "Failed to open file '%s'", strcmp(fn, "-") ? fn : "stdin");
     return EXIT_FAILURE;
   }
 #if CONFIG_OS_SUPPORT
@@ -666,29 +668,16 @@ int main_loop(int argc, const char **argv_) {
     return EXIT_FAILURE;
   }
 
-  /* If the output file is not set or doesn't have a sequence number in
-   * it, then we only open it once.
-   */
   outfile_pattern = outfile_pattern ? outfile_pattern : "-";
-  single_file = 1;
-  {
-    const char *p = outfile_pattern;
-    do {
-      p = strchr(p, '%');
-      if (p && p[1] >= '1' && p[1] <= '9') {
-        /* pattern contains sequence number, so it's not unique. */
-        single_file = 0;
-        break;
-      }
-      if (p)
-        p++;
-    } while (p);
-  }
+  single_file = is_single_file(outfile_pattern);
 
-  if (single_file && !noblit) {
-    generate_filename(outfile_pattern, outfile, sizeof(outfile) - 1,
+  if (!noblit && single_file) {
+    generate_filename(outfile_pattern, outfile_name, PATH_MAX,
                       vpx_input_ctx.width, vpx_input_ctx.height, 0);
-    out = out_open(outfile, do_md5);
+    if (do_md5)
+      MD5Init(&md5_ctx);
+    else
+      outfile = open_outfile(outfile_name);
   }
 
   if (use_y4m && !noblit) {
@@ -851,10 +840,10 @@ int main_loop(int argc, const char **argv_) {
       show_progress(frame_in, frame_out, dx_time);
 
     if (!noblit) {
-      if (frame_out == 1 && img && use_y4m) {
-        y4m_write_file_header(out, vpx_input_ctx.width, vpx_input_ctx.height,
+      if (frame_out == 1 && img && use_y4m && single_file)
+        y4m_write_file_header(outfile,
+                              vpx_input_ctx.width, vpx_input_ctx.height,
                               &vpx_input_ctx.framerate, img->fmt);
-      }
 
       if (img && do_scale) {
         if (frame_out == 1) {
@@ -891,24 +880,29 @@ int main_loop(int argc, const char **argv_) {
         const int PLANES_YVU[] = {VPX_PLANE_Y, VPX_PLANE_V, VPX_PLANE_U};
 
         const int *planes = flipuv ? PLANES_YVU : PLANES_YUV;
-        char out_fn[PATH_MAX];
 
         if (!single_file) {
-          generate_filename(outfile_pattern, out_fn, PATH_MAX,
+          generate_filename(outfile_pattern, outfile_name, PATH_MAX,
                             img->d_w, img->d_h, frame_in);
-          out = out_open(out_fn, do_md5);
+          if (do_md5) {
+            MD5Init(&md5_ctx);
+            update_image_md5(img, planes, &md5_ctx);
+            MD5Final(md5_digest, &md5_ctx);
+            print_md5(md5_digest, outfile_name);
+          } else {
+            outfile = open_outfile(outfile_name);
+            write_image_file(img, planes, outfile);
+            fclose(outfile);
+          }
         } else {
-          if (use_y4m)
-            y4m_write_frame_header(out);
+          if (do_md5) {
+            update_image_md5(img, planes, &md5_ctx);
+          } else {
+            if (use_y4m)
+              y4m_write_frame_header(outfile);
+            write_image_file(img, planes, outfile);
+          }
         }
-
-        if (do_md5)
-          update_image_md5(img, planes, out);
-        else
-          write_image_file(img, planes, out);
-
-        if (!single_file)
-          out_close(out, out_fn, do_md5);
       }
     }
 
@@ -932,8 +926,14 @@ fail:
     return EXIT_FAILURE;
   }
 
-  if (single_file && !noblit)
-    out_close(out, outfile, do_md5);
+  if (!noblit && single_file) {
+    if (do_md5) {
+      MD5Final(md5_digest, &md5_ctx);
+      print_md5(md5_digest, outfile_name);
+    } else {
+      fclose(outfile);
+    }
+  }
 
   if (input.vpx_input_ctx->file_type == FILE_TYPE_WEBM)
     webm_free(input.webm_ctx);
