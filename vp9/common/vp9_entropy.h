@@ -112,8 +112,8 @@ static INLINE void reset_skip_context(MACROBLOCKD *xd, BLOCK_SIZE bsize) {
 // This macro is currently unused but may be used by certain implementations
 #define MAXBAND_INDEX 21
 
-extern const uint8_t vp9_coefband_trans_8x8plus[1024];
-extern const uint8_t vp9_coefband_trans_4x4[16];
+extern DECLARE_ALIGNED(16, const uint8_t, vp9_coefband_trans_8x8plus[1024]);
+extern DECLARE_ALIGNED(16, const uint8_t, vp9_coefband_trans_4x4[16]);
 
 static const uint8_t *get_band_translate(TX_SIZE tx_size) {
   return tx_size == TX_4X4 ? vp9_coefband_trans_4x4
