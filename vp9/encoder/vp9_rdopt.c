@@ -233,8 +233,8 @@ static void set_block_thresholds(VP9_COMP *cpi) {
     const int q = compute_rd_thresh_factor(qindex);
 
     for (bsize = 0; bsize < BLOCK_SIZES; ++bsize) {
-      // Threshold here seem unecessarily harsh but fine given actual
-      // range of values used for cpi->sf.thresh_mult[]
+      // Threshold here seems unnecessarily harsh but fine given actual
+      // range of values used for cpi->sf.thresh_mult[].
       const int t = q * rd_thresh_block_size_factor[bsize];
       const int thresh_max = INT_MAX / t;
 

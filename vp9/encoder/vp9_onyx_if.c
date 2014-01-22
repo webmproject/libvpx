@@ -3379,7 +3379,6 @@ int vp9_get_compressed_data(VP9_PTR ptr, unsigned int *frame_flags,
   struct vpx_usec_timer  cmptimer;
   YV12_BUFFER_CONFIG *force_src_buffer = NULL;
   MV_REFERENCE_FRAME ref_frame;
-  // FILE *fp_out = fopen("enc_frame_type.txt", "a");
 
   if (!cpi)
     return -1;
@@ -3501,8 +3500,6 @@ int vp9_get_compressed_data(VP9_PTR ptr, unsigned int *frame_flags,
       vp9_end_first_pass(cpi);    /* get last stats packet */
       cpi->twopass.first_pass_done = 1;
     }
-
-    // fclose(fp_out);
     return -1;
   }
 
@@ -3671,7 +3668,6 @@ int vp9_get_compressed_data(VP9_PTR ptr, unsigned int *frame_flags,
   }
 
 #endif
-  // fclose(fp_out);
   return 0;
 }
 

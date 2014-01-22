@@ -513,10 +513,8 @@ static vpx_codec_err_t vp9e_common_init(vpx_codec_ctx_t *ctx) {
     priv->vp8_cfg = extracfg_map[i].cfg;
     priv->vp8_cfg.pkt_list = &priv->pkt_list.head;
 
-    // TODO(agrange) Check the limits set on this buffer, or the check that is
-    // applied in vp9e_encode.
+    // Maximum buffer size approximated based on having multiple ARF.
     priv->cx_data_sz = priv->cfg.g_w * priv->cfg.g_h * 3 / 2 * 8;
-//    priv->cx_data_sz = priv->cfg.g_w * priv->cfg.g_h * 3 / 2 * 2;
 
     if (priv->cx_data_sz < 4096) priv->cx_data_sz = 4096;
 
@@ -692,7 +690,7 @@ static vpx_codec_err_t vp9e_encode(vpx_codec_alg_priv_t  *ctx,
     }
   }
 
-  /* Initialize the encoder instance on the first frame*/
+  /* Initialize the encoder instance on the first frame. */
   if (!res && ctx->cpi) {
     unsigned int lib_flags;
     YV12_BUFFER_CONFIG sd;
@@ -703,9 +701,6 @@ static vpx_codec_err_t vp9e_encode(vpx_codec_alg_priv_t  *ctx,
     /* Set up internal flags */
     if (ctx->base.init_flags & VPX_CODEC_USE_PSNR)
       ((VP9_COMP *)ctx->cpi)->b_calculate_psnr = 1;
-
-    // if (ctx->base.init_flags & VPX_CODEC_USE_OUTPUT_PARTITION)
-    //    ((VP9_COMP *)ctx->cpi)->output_partition = 1;
 
     /* Convert API flags to internal codec lib flags */
     lib_flags = (flags & VPX_EFLAG_FORCE_KF) ? FRAMEFLAGS_KEY : 0;
