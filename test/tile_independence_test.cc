@@ -17,9 +17,7 @@
 #include "test/i420_video_source.h"
 #include "test/util.h"
 #include "test/md5_helper.h"
-extern "C" {
 #include "vpx_mem/vpx_mem.h"
-}
 
 namespace {
 class TileIndependenceTest : public ::libvpx_test::EncoderTest,

@@ -19,9 +19,7 @@
 #include "test/test_vectors.h"
 #include "test/util.h"
 #include "test/webm_video_source.h"
-extern "C" {
 #include "vpx_mem/vpx_mem.h"
-}
 
 namespace {
 

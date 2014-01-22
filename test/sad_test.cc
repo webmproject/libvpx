@@ -13,7 +13,6 @@
 #include <limits.h>
 #include <stdio.h>
 
-extern "C" {
 #include "./vpx_config.h"
 #if CONFIG_VP8_ENCODER
 #include "./vp8_rtcd.h"
@@ -22,7 +21,6 @@ extern "C" {
 #include "./vp9_rtcd.h"
 #endif
 #include "vpx_mem/vpx_mem.h"
-}
 
 #include "test/acm_random.h"
 #include "test/clear_system_state.h"
