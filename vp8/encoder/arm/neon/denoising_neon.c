@@ -119,8 +119,10 @@ int vp8_denoiser_filter_neon(YV12_BUFFER_CONFIG *mc_running_avg,
                                                      v_abs_adjustment);
         v_running_avg_y = vqaddq_u8(v_sig, v_pos_adjustment);
         v_running_avg_y = vqsubq_u8(v_running_avg_y, v_neg_adjustment);
-        v_sum_diff = vqaddq_s8(v_sum_diff, (int8x16_t)v_pos_adjustment);
-        v_sum_diff = vqsubq_s8(v_sum_diff, (int8x16_t)v_neg_adjustment);
+        v_sum_diff = vqaddq_s8(v_sum_diff,
+                               vreinterpretq_s8_u8(v_pos_adjustment));
+        v_sum_diff = vqsubq_s8(v_sum_diff,
+                               vreinterpretq_s8_u8(v_neg_adjustment));
 
         /* Store results. */
         vst1q_u8(running_avg_y, v_running_avg_y);
