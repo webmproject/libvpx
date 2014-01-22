@@ -174,7 +174,7 @@ int64_t vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
   for (ref_frame = LAST_FRAME; ref_frame <= ALTREF_FRAME; ++ref_frame) {
     x->pred_mv_sad[ref_frame] = INT_MAX;
     if (cpi->ref_frame_flags & flag_list[ref_frame]) {
-      vp9_setup_buffer_inter(cpi, x, tile, get_ref_frame_idx(cpi, ref_frame),
+      vp9_setup_buffer_inter(cpi, x, tile,
                              ref_frame, block_size, mi_row, mi_col,
                              frame_mv[NEARESTMV], frame_mv[NEARMV], yv12_mb);
     }
