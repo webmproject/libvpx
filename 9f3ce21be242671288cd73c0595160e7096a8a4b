@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//7pw\u003d",
+        "filename": "vp9/common/arm/neon/vp9_reconintra_neon.asm",
+        "patchSetId": 2
+      },
+      "lineNbr": 430,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2014-01-22T23:29:22Z",
+      "side": 1,
+      "message": "Done. Add more comments about that. Total 16 rows and process 4 rows in each single loop.",
+      "parentUuid": "AAAAdn//7sc\u003d",
+      "revId": "9f3ce21be242671288cd73c0595160e7096a8a4b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//7sk\u003d",
         "filename": "vp9/common/arm/neon/vp9_reconintra_neon.asm",
         "patchSetId": 2
@@ -30,6 +48,24 @@
       "writtenOn": "2014-01-22T20:21:26Z",
       "side": 1,
       "message": "Can you rearragne the registers and replace the 2 vst1.64 instructions with:\nvst1.64  {d0-d1}, [r0], r1",
+      "revId": "9f3ce21be242671288cd73c0595160e7096a8a4b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//7ps\u003d",
+        "filename": "vp9/common/arm/neon/vp9_reconintra_neon.asm",
+        "patchSetId": 2
+      },
+      "lineNbr": 449,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2014-01-22T23:29:22Z",
+      "side": 1,
+      "message": "Done.",
+      "parentUuid": "AAAAdn//7sk\u003d",
       "revId": "9f3ce21be242671288cd73c0595160e7096a8a4b",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
