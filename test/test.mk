@@ -24,8 +24,8 @@ LIBVPX_TEST_SRCS-yes                   += encode_test_driver.cc
 LIBVPX_TEST_SRCS-yes                   += encode_test_driver.h
 LIBVPX_TEST_SRCS-$(CONFIG_ENCODERS)    += error_resilience_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_ENCODERS)    += i420_video_source.h
-LIBVPX_TEST_SRCS-$(CONFIG_VP9_ENCODER) += y4m_video_source.h
-LIBVPX_TEST_SRCS-$(CONFIG_VP9_ENCODER) += ../y4minput.h ../y4minput.c
+LIBVPX_TEST_SRCS-$(CONFIG_ENCODERS)    += y4m_video_source.h
+LIBVPX_TEST_SRCS-$(CONFIG_ENCODERS)    += ../y4minput.h ../y4minput.c
 LIBVPX_TEST_SRCS-$(CONFIG_VP8_ENCODER) += keyframe_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_VP9_ENCODER) += borders_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_VP9_ENCODER) += resize_test.cc
@@ -120,6 +120,7 @@ endif
 ##
 LIBVPX_TEST_DATA-$(CONFIG_ENCODERS) += hantro_collage_w352h288.yuv
 LIBVPX_TEST_DATA-$(CONFIG_ENCODERS) += hantro_odd.yuv
+LIBVPX_TEST_DATA-$(CONFIG_VP9_ENCODER) += rush_hour_444.y4m
 
 LIBVPX_TEST_DATA-$(CONFIG_VP8_DECODER) += vp80-00-comprehensive-001.ivf
 LIBVPX_TEST_DATA-$(CONFIG_VP8_DECODER) += vp80-00-comprehensive-002.ivf

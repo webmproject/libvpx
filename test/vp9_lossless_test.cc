@@ -7,12 +7,13 @@
  *  in the file PATENTS.  All contributing project authors may
  *  be found in the AUTHORS file in the root of the source tree.
  */
-
+#include "./vpx_config.h"
 #include "third_party/googletest/src/include/gtest/gtest.h"
 #include "test/codec_factory.h"
 #include "test/encode_test_driver.h"
 #include "test/i420_video_source.h"
 #include "test/util.h"
+#include "test/y4m_video_source.h"
 
 namespace {
 
@@ -71,5 +72,25 @@ TEST_P(LossLessTest, TestLossLessEncoding) {
   const double psnr_lossless = GetMinPsnr();
   EXPECT_GE(psnr_lossless, kMaxPsnr);
 }
+
+#if CONFIG_NON420
+TEST_P(LossLessTest, TestLossLessEncoding444) {
+  libvpx_test::Y4mVideoSource video("rush_hour_444.y4m", 0, 10);
+
+  cfg_.g_profile = 1;
+  cfg_.g_timebase = video.timebase();
+  cfg_.rc_target_bitrate = 2000;
+  cfg_.g_lag_in_frames = 25;
+  cfg_.rc_min_quantizer = 0;
+  cfg_.rc_max_quantizer = 0;
+
+  init_flags_ = VPX_CODEC_USE_PSNR;
+
+  ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
+  const double psnr_lossless = GetMinPsnr();
+  EXPECT_GE(psnr_lossless, kMaxPsnr);
+}
+#endif
+
 VP9_INSTANTIATE_TEST_CASE(LossLessTest, ALL_TEST_MODES);
 }  // namespace
