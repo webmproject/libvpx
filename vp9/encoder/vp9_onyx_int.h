@@ -780,24 +780,14 @@ typedef struct VP9_COMP {
   PARTITION_CONTEXT left_seg_context[8];
 } VP9_COMP;
 
-static int get_ref_frame_idx(VP9_COMP *cpi, MV_REFERENCE_FRAME ref_frame) {
+static int get_ref_frame_idx(const VP9_COMP *cpi,
+                             MV_REFERENCE_FRAME ref_frame) {
   if (ref_frame == LAST_FRAME) {
     return cpi->lst_fb_idx;
   } else if (ref_frame == GOLDEN_FRAME) {
     return cpi->gld_fb_idx;
   } else {
     return cpi->alt_fb_idx;
-  }
-}
-
-static int get_scale_ref_frame_idx(VP9_COMP *cpi,
-                                   MV_REFERENCE_FRAME ref_frame) {
-  if (ref_frame == LAST_FRAME) {
-    return 0;
-  } else if (ref_frame == GOLDEN_FRAME) {
-    return 1;
-  } else {
-    return 2;
   }
 }
 

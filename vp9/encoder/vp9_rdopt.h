@@ -46,7 +46,8 @@ void vp9_setup_buffer_inter(VP9_COMP *cpi, MACROBLOCK *x,
                             int_mv frame_near_mv[MAX_REF_FRAMES],
                             struct buf_2d yv12_mb[4][MAX_MB_PLANE]);
 
-YV12_BUFFER_CONFIG *vp9_get_scaled_ref_frame(VP9_COMP *cpi, int ref_frame);
+const YV12_BUFFER_CONFIG *vp9_get_scaled_ref_frame(const VP9_COMP *cpi,
+                                                   int ref_frame);
 
 void vp9_rd_pick_intra_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
                                int *r, int64_t *d, BLOCK_SIZE bsize,
