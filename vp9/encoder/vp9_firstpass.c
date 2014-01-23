@@ -927,7 +927,7 @@ static int estimate_max_q(VP9_COMP *cpi,
                           FIRSTPASS_STATS *fpstats,
                           int section_target_bandwitdh) {
   int q;
-  int num_mbs = cpi->common.MBs;
+  const int num_mbs = cpi->common.MBs;
   int target_norm_bits_per_mb;
   RATE_CONTROL *const rc = &cpi->rc;
 
@@ -953,9 +953,8 @@ static int estimate_max_q(VP9_COMP *cpi,
   }
 
   // Restriction on active max q for constrained quality mode.
-  if (cpi->oxcf.end_usage == USAGE_CONSTRAINED_QUALITY &&
-      q < cpi->cq_target_quality)
-    q = cpi->cq_target_quality;
+  if (cpi->oxcf.end_usage == USAGE_CONSTRAINED_QUALITY)
+    q = MAX(q, cpi->cq_target_quality);
 
   return q;
 }
@@ -1018,6 +1017,7 @@ void vp9_init_second_pass(VP9_COMP *cpi) {
   FIRSTPASS_STATS this_frame;
   FIRSTPASS_STATS *start_pos;
   struct twopass_rc *const twopass = &cpi->twopass;
+  const VP9_CONFIG *const oxcf = &cpi->oxcf;
 
   zero_stats(&twopass->total_stats);
   zero_stats(&twopass->total_left_stats);
@@ -1036,9 +1036,9 @@ void vp9_init_second_pass(VP9_COMP *cpi) {
   vp9_new_framerate(cpi, 10000000.0 * twopass->total_stats.count /
                         twopass->total_stats.duration);
 
-  cpi->output_framerate = cpi->oxcf.framerate;
+  cpi->output_framerate = oxcf->framerate;
   twopass->bits_left = (int64_t)(twopass->total_stats.duration *
-                                 cpi->oxcf.target_bandwidth / 10000000.0);
+                                 oxcf->target_bandwidth / 10000000.0);
 
   // Calculate a minimum intra value to be used in determining the IIratio
   // scores used in the second pass. We have this minimum to make sure
@@ -1054,15 +1054,12 @@ void vp9_init_second_pass(VP9_COMP *cpi) {
   // ratio for the sequence.
   {
     double sum_iiratio = 0.0;
-    double IIRatio;
-
     start_pos = twopass->stats_in;  // Note the starting "file" position.
 
     while (input_stats(twopass, &this_frame) != EOF) {
-      IIRatio = this_frame.intra_error
-                / DOUBLE_DIVIDE_CHECK(this_frame.coded_error);
-      IIRatio = (IIRatio < 1.0) ? 1.0 : (IIRatio > 20.0) ? 20.0 : IIRatio;
-      sum_iiratio += IIRatio;
+      const double iiratio = this_frame.intra_error /
+                                 DOUBLE_DIVIDE_CHECK(this_frame.coded_error);
+      sum_iiratio += fclamp(iiratio, 1.0, 20.0);
     }
 
     twopass->avg_iiratio = sum_iiratio /
@@ -1082,9 +1079,9 @@ void vp9_init_second_pass(VP9_COMP *cpi) {
 
     twopass->modified_error_total = 0.0;
     twopass->modified_error_min =
-      (av_error * cpi->oxcf.two_pass_vbrmin_section) / 100;
+      (av_error * oxcf->two_pass_vbrmin_section) / 100;
     twopass->modified_error_max =
-      (av_error * cpi->oxcf.two_pass_vbrmax_section) / 100;
+      (av_error * oxcf->two_pass_vbrmax_section) / 100;
 
     while (input_stats(twopass, &this_frame) != EOF) {
       twopass->modified_error_total +=
@@ -1188,9 +1185,6 @@ static void accumulate_frame_motion_stats(
   double *mv_in_out_accumulator,
   double *abs_mv_in_out_accumulator,
   double *mv_ratio_accumulator) {
-  // double this_frame_mv_in_out;
-  double this_frame_mvr_ratio;
-  double this_frame_mvc_ratio;
   double motion_pct;
 
   // Accumulate motion stats.
@@ -1205,29 +1199,25 @@ static void accumulate_frame_motion_stats(
   // Accumulate a measure of how uniform (or conversely how random)
   // the motion field is. (A ratio of absmv / mv)
   if (motion_pct > 0.05) {
-    this_frame_mvr_ratio = fabs(this_frame->mvr_abs) /
+    double this_frame_mvr_ratio = fabs(this_frame->mvr_abs) /
                            DOUBLE_DIVIDE_CHECK(fabs(this_frame->MVr));
 
-    this_frame_mvc_ratio = fabs(this_frame->mvc_abs) /
+    double this_frame_mvc_ratio = fabs(this_frame->mvc_abs) /
                            DOUBLE_DIVIDE_CHECK(fabs(this_frame->MVc));
 
-    *mv_ratio_accumulator +=
-      (this_frame_mvr_ratio < this_frame->mvr_abs)
+    *mv_ratio_accumulator += (this_frame_mvr_ratio < this_frame->mvr_abs)
       ? (this_frame_mvr_ratio * motion_pct)
       : this_frame->mvr_abs * motion_pct;
 
-    *mv_ratio_accumulator +=
-      (this_frame_mvc_ratio < this_frame->mvc_abs)
+    *mv_ratio_accumulator += (this_frame_mvc_ratio < this_frame->mvc_abs)
       ? (this_frame_mvc_ratio * motion_pct)
       : this_frame->mvc_abs * motion_pct;
   }
 }
 
 // Calculate a baseline boost number for the current frame.
-static double calc_frame_boost(
-  VP9_COMP *cpi,
-  FIRSTPASS_STATS *this_frame,
-  double this_frame_mv_in_out) {
+static double calc_frame_boost(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame,
+                               double this_frame_mv_in_out) {
   double frame_boost;
 
   // Underlying boost factor is based on inter intra error ratio
@@ -1248,11 +1238,7 @@ static double calc_frame_boost(
   else
     frame_boost += frame_boost * (this_frame_mv_in_out / 2.0);
 
-  // Clip to maximum
-  if (frame_boost > GF_RMAX)
-    frame_boost = GF_RMAX;
-
-  return frame_boost;
+  return MIN(frame_boost, GF_RMAX);
 }
 
 static int calc_arf_boost(VP9_COMP *cpi, int offset,
@@ -2137,7 +2123,6 @@ static int test_candidate_kf(VP9_COMP *cpi,
     double boost_score = 0.0;
     double old_boost_score = 0.0;
     double decay_accumulator = 1.0;
-    double next_iiratio;
 
     local_next_frame = *next_frame;
 
@@ -2146,8 +2131,8 @@ static int test_candidate_kf(VP9_COMP *cpi,
 
     // Examine how well the key frame predicts subsequent frames
     for (i = 0; i < 16; i++) {
-      next_iiratio = (IIKFACTOR1 * local_next_frame.intra_error /
-                      DOUBLE_DIVIDE_CHECK(local_next_frame.coded_error));
+      double next_iiratio = (IIKFACTOR1 * local_next_frame.intra_error /
+                             DOUBLE_DIVIDE_CHECK(local_next_frame.coded_error));
 
       if (next_iiratio > RMAX)
         next_iiratio = RMAX;
@@ -2405,7 +2390,7 @@ static void find_next_key_frame(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
       // How fast is prediction quality decaying
       if (!detect_flash(cpi, 0)) {
         loop_decay_rate = get_prediction_decay_rate(cpi, &next_frame);
-        decay_accumulator = decay_accumulator * loop_decay_rate;
+        decay_accumulator *= loop_decay_rate;
         decay_accumulator = decay_accumulator < MIN_DECAY_FACTOR
                               ? MIN_DECAY_FACTOR : decay_accumulator;
       }
