@@ -30,7 +30,6 @@ extern "C" {
 #endif
 
 #include "./vpx_codec.h"
-#include "./vpx_external_frame_buffer.h"
 
   /*!\brief Current ABI version number
    *
@@ -40,7 +39,7 @@ extern "C" {
    * types, removing or reassigning enums, adding/removing/rearranging
    * fields to structures
    */
-#define VPX_DECODER_ABI_VERSION (3 + VPX_CODEC_ABI_VERSION) /**<\hideinitializer*/
+#define VPX_DECODER_ABI_VERSION (2 + VPX_CODEC_ABI_VERSION) /**<\hideinitializer*/
 
   /*! \brief Decoder capabilities bitfield
    *
@@ -67,8 +66,6 @@ extern "C" {
    */
 #define VPX_CODEC_CAP_FRAME_THREADING   0x200000 /**< Can support frame-based
                                                       multi-threading */
-#define VPX_CODEC_CAP_EXTERNAL_FRAME_BUFFER 0x400000 /**< Can support external
-                                                      frame buffers */
 
 #define VPX_CODEC_USE_POSTPROC   0x10000 /**< Postprocess decoded frame */
 #define VPX_CODEC_USE_ERROR_CONCEALMENT 0x20000 /**< Conceal errors in decoded
@@ -328,50 +325,6 @@ extern "C" {
 
 
   /*!@} - end defgroup cap_put_slice*/
-
-  /*!\defgroup cap_external_frame_buffer External Frame Buffer Functions
-   *
-   * The following section is required to be implemented for all decoders
-   * that advertise the VPX_CODEC_CAP_EXTERNAL_FRAME_BUFFER capability.
-   * Calling this function for codecs that don't advertise this capability
-   * will result in an error code being returned, usually VPX_CODEC_ERROR.
-   *
-   * \note
-   * Currently this only works with VP9.
-   * @{
-   */
-
-  /*!\brief Pass in external frame buffers for the decoder to use.
-   *
-   * Registers a given function to be called when the current frame to
-   * decode will be bigger than the external frame buffer size. This
-   * function must be called before the first call to decode or libvpx
-   * will assume the default behavior of allocating frame buffers internally.
-   * Frame buffers with a size of 0 are valid.
-   *
-   * \param[in] ctx          Pointer to this instance's context
-   * \param[in] fb_list      Pointer to array of frame buffers
-   * \param[in] fb_count     Number of elements in frame buffer array
-   * \param[in] cb           Pointer to the callback function
-   * \param[in] user_priv    User's private data
-   *
-   * \retval #VPX_CODEC_OK
-   *     External frame buffers passed into the decoder.
-   * \retval #VPX_CODEC_ERROR
-   *     Decoder context not initialized, or algorithm not capable of
-   *     using external frame buffers.
-   *
-   * \note
-   * When decoding VP9, the application must pass in at least
-   * #VP9_MAXIMUM_REF_BUFFERS + #VPX_MAXIMUM_WORK_BUFFERS external frame
-   * buffers.
-   */
-  vpx_codec_err_t vpx_codec_set_frame_buffers(
-      vpx_codec_ctx_t *ctx,
-      vpx_codec_frame_buffer_t *fb_list, int fb_count,
-      vpx_realloc_frame_buffer_cb_fn_t cb, void *user_priv);
-
-  /*!@} - end defgroup cap_external_frame_buffer */
 
   /*!@} - end defgroup decoder*/
 #ifdef __cplusplus

@@ -24,8 +24,6 @@
 #include "test/encode_test_driver.h"
 namespace libvpx_test {
 
-const int kCodecFactoryParam = 0;
-
 class CodecFactory {
  public:
   CodecFactory() {}

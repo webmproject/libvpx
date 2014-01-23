@@ -56,7 +56,7 @@
  * types, removing or reassigning enums, adding/removing/rearranging
  * fields to structures
  */
-#define VPX_CODEC_INTERNAL_ABI_VERSION (5) /**<\hideinitializer*/
+#define VPX_CODEC_INTERNAL_ABI_VERSION (4) /**<\hideinitializer*/
 
 typedef struct vpx_codec_alg_priv  vpx_codec_alg_priv_t;
 typedef struct vpx_codec_priv_enc_mr_cfg vpx_codec_priv_enc_mr_cfg_t;
@@ -215,37 +215,6 @@ typedef vpx_codec_err_t (*vpx_codec_decode_fn_t)(vpx_codec_alg_priv_t  *ctx,
 typedef vpx_image_t *(*vpx_codec_get_frame_fn_t)(vpx_codec_alg_priv_t *ctx,
                                                  vpx_codec_iter_t     *iter);
 
-/*!\brief Pass in external frame buffers for the decoder to use.
- *
- * Registers a given function to be called when the current frame to
- * decode will be bigger than the external frame buffer size. This
- * function must be called before the first call to decode or libvpx
- * will assume the default behavior of allocating frame buffers internally.
- * Frame buffers with a size of 0 are valid.
- *
- * \param[in] ctx          Pointer to this instance's context
- * \param[in] fb_list      Pointer to array of frame buffers
- * \param[in] fb_count     Number of elements in frame buffer array
- * \param[in] cb           Pointer to the callback function
- * \param[in] user_priv    User's private data
- *
- * \retval #VPX_CODEC_OK
- *     External frame buffers will be used by libvpx.
- * \retval #VPX_CODEC_INVALID_PARAM
- *     fb_count was less than the value needed by the codec.
- * \retval #VPX_CODEC_ERROR
- *     Decoder context not initialized, or algorithm not capable of
- *     using external frame buffers.
- *
- * \note
- * When decoding VP9, the application must pass in at least
- * #VP9_MAXIMUM_REF_BUFFERS + #VPX_MAXIMUM_WORK_BUFFERS external frame
- * buffers.
- */
-typedef vpx_codec_err_t (*vpx_codec_set_frame_buffers_fn_t)(
-    vpx_codec_alg_priv_t *ctx,
-    vpx_codec_frame_buffer_t *fb_list, int fb_count,
-    vpx_realloc_frame_buffer_cb_fn_t cb, void *user_priv);
 
 /*\brief eXternal Memory Allocation memory map get iterator
  *
@@ -336,7 +305,6 @@ struct vpx_codec_iface {
     vpx_codec_get_si_fn_t     get_si;      /**< \copydoc ::vpx_codec_get_si_fn_t */
     vpx_codec_decode_fn_t     decode;      /**< \copydoc ::vpx_codec_decode_fn_t */
     vpx_codec_get_frame_fn_t  get_frame;   /**< \copydoc ::vpx_codec_get_frame_fn_t */
-    vpx_codec_set_frame_buffers_fn_t set_fb; /**< \copydoc ::vpx_codec_set_frame_buffers_fn_t */
   } dec;
   struct vpx_codec_enc_iface {
     vpx_codec_enc_cfg_map_t           *cfg_maps;      /**< \copydoc ::vpx_codec_enc_cfg_map_t */

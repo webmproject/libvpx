@@ -7,4 +7,3 @@ text vpx_codec_peek_stream_info
 text vpx_codec_register_put_frame_cb
 text vpx_codec_register_put_slice_cb
 text vpx_codec_set_mem_map
-text vpx_codec_set_frame_buffers

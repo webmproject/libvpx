@@ -33,7 +33,7 @@ void vp9_update_mode_info_border(VP9_COMMON *cm, MODE_INFO *mi) {
 void vp9_free_frame_buffers(VP9_COMMON *cm) {
   int i;
 
-  for (i = 0; i < cm->fb_count; i++)
+  for (i = 0; i < FRAME_BUFFERS; i++)
     vp9_free_frame_buffer(&cm->yv12_fb[i]);
 
   vp9_free_frame_buffer(&cm->post_proc_buffer);
@@ -85,7 +85,7 @@ int vp9_resize_frame_buffers(VP9_COMMON *cm, int width, int height) {
   int mi_size;
 
   if (vp9_realloc_frame_buffer(&cm->post_proc_buffer, width, height, ss_x, ss_y,
-                               VP9_DEC_BORDER_IN_PIXELS, NULL, NULL, NULL) < 0)
+                               VP9_DEC_BORDER_IN_PIXELS) < 0)
     goto fail;
 
   set_mb_mi(cm, aligned_width, aligned_height);
@@ -137,28 +137,16 @@ int vp9_alloc_frame_buffers(VP9_COMMON *cm, int width, int height) {
   const int ss_y = cm->subsampling_y;
   int mi_size;
 
-  if (cm->fb_count == 0) {
-    cm->fb_count = FRAME_BUFFERS;
-    CHECK_MEM_ERROR(cm, cm->yv12_fb,
-                    vpx_calloc(cm->fb_count, sizeof(*cm->yv12_fb)));
-    CHECK_MEM_ERROR(cm, cm->fb_idx_ref_cnt,
-                    vpx_calloc(cm->fb_count, sizeof(*cm->fb_idx_ref_cnt)));
-    if (cm->fb_lru) {
-      CHECK_MEM_ERROR(cm, cm->fb_idx_ref_lru,
-                      vpx_calloc(cm->fb_count, sizeof(*cm->fb_idx_ref_lru)));
-    }
-  }
-
   vp9_free_frame_buffers(cm);
 
-  for (i = 0; i < cm->fb_count; i++) {
+  for (i = 0; i < FRAME_BUFFERS; i++) {
     cm->fb_idx_ref_cnt[i] = 0;
     if (vp9_alloc_frame_buffer(&cm->yv12_fb[i], width, height, ss_x, ss_y,
                                VP9_ENC_BORDER_IN_PIXELS) < 0)
       goto fail;
   }
 
-  cm->new_fb_idx = cm->fb_count - 1;
+  cm->new_fb_idx = FRAME_BUFFERS - 1;
   cm->fb_idx_ref_cnt[cm->new_fb_idx] = 1;
 
   for (i = 0; i < REF_FRAMES; i++) {
@@ -211,14 +199,6 @@ void vp9_create_common(VP9_COMMON *cm) {
 
 void vp9_remove_common(VP9_COMMON *cm) {
   vp9_free_frame_buffers(cm);
-
-  vpx_free(cm->yv12_fb);
-  vpx_free(cm->fb_idx_ref_cnt);
-  vpx_free(cm->fb_idx_ref_lru);
-
-  cm->yv12_fb = NULL;
-  cm->fb_idx_ref_cnt = NULL;
-  cm->fb_idx_ref_lru = NULL;
 }
 
 void vp9_initialize_common() {

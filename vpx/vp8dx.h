@@ -77,13 +77,6 @@ enum vp8_dec_control_id {
   /** For testing. */
   VP9_INVERT_TILE_DECODE_ORDER,
 
-  /** control function to set the vp9 decoder into using the least recently
-   * used frame buffer when a new buffer is requested. Takes an int and if
-   * the value is zero will turn off using lru cache. The value of zero is
-   * the default. If the value is anything besides zero, then that will turn
-   * on lru cache.*/
-  VP9D_SET_FRAME_BUFFER_LRU_CACHE,
-
   VP8_DECODER_CTRL_ID_MAX
 };
 
@@ -115,7 +108,6 @@ VPX_CTRL_USE_TYPE(VP8D_GET_LAST_REF_USED,      int *)
 VPX_CTRL_USE_TYPE(VP8D_SET_DECRYPTOR,          vp8_decrypt_init *)
 VPX_CTRL_USE_TYPE(VP9D_GET_DISPLAY_SIZE,       int *)
 VPX_CTRL_USE_TYPE(VP9_INVERT_TILE_DECODE_ORDER, int)
-VPX_CTRL_USE_TYPE(VP9D_SET_FRAME_BUFFER_LRU_CACHE, int)
 
 /*! @} - end defgroup vp8_decoder */
 
