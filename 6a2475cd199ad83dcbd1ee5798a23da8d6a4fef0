@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//7fY\u003d",
+        "filename": "vp9/common/arm/neon/vp9_reconintra_neon.asm",
+        "patchSetId": 4
+      },
+      "lineNbr": 436,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2014-01-23T18:58:34Z",
+      "side": 1,
+      "message": "I don\u0027t think this is faster than PS3. \n\nMaybe do:\n\nvld1.8 dA, [r3]\n\nvmovl.u8 qB, dA\n\nThen in each row you only need to do:\nvdup q0, dB[0]\n\nthen for the next row (and so on)\nvdup q0, dB[1]",
+      "revId": "6a2475cd199ad83dcbd1ee5798a23da8d6a4fef0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
