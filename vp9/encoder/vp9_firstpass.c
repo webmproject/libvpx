@@ -55,8 +55,6 @@ static void swap_yv12(YV12_BUFFER_CONFIG *a, YV12_BUFFER_CONFIG *b) {
   *b = temp;
 }
 
-static void find_next_key_frame(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame);
-
 static int select_cq_level(int qindex) {
   int ret_val = QINDEX_RANGE - 1;
   int i;
@@ -1937,186 +1935,6 @@ static int test_for_kf_one_pass(VP9_COMP *cpi) {
   return 0;
 }
 
-void vp9_get_svc_params(VP9_COMP *cpi) {
-  VP9_COMMON *const cm = &cpi->common;
-  if ((cm->current_video_frame == 0) ||
-      (cm->frame_flags & FRAMEFLAGS_KEY) ||
-      (cpi->oxcf.auto_key && (cpi->rc.frames_since_key %
-                              cpi->key_frame_frequency == 0))) {
-    cm->frame_type = KEY_FRAME;
-  } else {
-    cm->frame_type = INTER_FRAME;
-  }
-  cpi->rc.frames_till_gf_update_due = INT_MAX;
-  cpi->rc.baseline_gf_interval = INT_MAX;
-}
-
-void vp9_get_one_pass_params(VP9_COMP *cpi) {
-  VP9_COMMON *const cm = &cpi->common;
-  if (!cpi->refresh_alt_ref_frame &&
-      (cm->current_video_frame == 0 ||
-       cm->frame_flags & FRAMEFLAGS_KEY ||
-       cpi->rc.frames_to_key == 0 ||
-       (cpi->oxcf.auto_key && test_for_kf_one_pass(cpi)))) {
-    cm->frame_type = KEY_FRAME;
-    cpi->rc.this_key_frame_forced = cm->current_video_frame != 0 &&
-                                    cpi->rc.frames_to_key == 0;
-    cpi->rc.frames_to_key = cpi->key_frame_frequency;
-    cpi->rc.kf_boost = 300;
-  } else {
-    cm->frame_type = INTER_FRAME;
-  }
-  if (cpi->rc.frames_till_gf_update_due == 0) {
-    cpi->rc.frames_till_gf_update_due = cpi->rc.baseline_gf_interval;
-    cpi->refresh_golden_frame = 1;
-  }
-}
-
-void vp9_get_one_pass_cbr_params(VP9_COMP *cpi) {
-  VP9_COMMON *const cm = &cpi->common;
-  if ((cm->current_video_frame == 0 ||
-      cm->frame_flags & FRAMEFLAGS_KEY ||
-      cpi->rc.frames_to_key == 0 ||
-      (cpi->oxcf.auto_key && test_for_kf_one_pass(cpi)))) {
-    cm->frame_type = KEY_FRAME;
-    cpi->rc.this_key_frame_forced = cm->current_video_frame != 0 &&
-                                    cpi->rc.frames_to_key == 0;
-    cpi->rc.frames_to_key = cpi->key_frame_frequency;
-    cpi->rc.kf_boost = 300;
-  } else {
-    cm->frame_type = INTER_FRAME;
-  }
-  // Don't use gf_update by default in CBR mode.
-  cpi->rc.frames_till_gf_update_due = INT_MAX;
-  cpi->rc.baseline_gf_interval = INT_MAX;
-}
-
-void vp9_get_first_pass_params(VP9_COMP *cpi) {
-  VP9_COMMON *const cm = &cpi->common;
-  if (!cpi->refresh_alt_ref_frame &&
-      (cm->current_video_frame == 0 ||
-       cm->frame_flags & FRAMEFLAGS_KEY)) {
-    cm->frame_type = KEY_FRAME;
-  } else {
-    cm->frame_type = INTER_FRAME;
-  }
-  // Do not use periodic key frames
-  cpi->rc.frames_to_key = INT_MAX;
-}
-
-void vp9_get_second_pass_params(VP9_COMP *cpi) {
-  int tmp_q;
-  int frames_left = (int)(cpi->twopass.total_stats.count -
-                          cpi->common.current_video_frame);
-
-  FIRSTPASS_STATS this_frame;
-  FIRSTPASS_STATS this_frame_copy;
-  RATE_CONTROL *rc = &cpi->rc;
-
-  double this_frame_intra_error;
-  double this_frame_coded_error;
-
-  if (cpi->refresh_alt_ref_frame) {
-    cpi->common.frame_type = INTER_FRAME;
-    return;
-  }
-  if (!cpi->twopass.stats_in)
-    return;
-
-  vp9_clear_system_state();
-
-  if (cpi->oxcf.end_usage == USAGE_CONSTANT_QUALITY) {
-    rc->active_worst_quality = cpi->oxcf.cq_level;
-  } else if (cpi->common.current_video_frame == 0) {
-    // Special case code for first frame.
-    int section_target_bandwidth =
-        (int)(cpi->twopass.bits_left / frames_left);
-
-    tmp_q = estimate_max_q(cpi, &cpi->twopass.total_left_stats,
-                           section_target_bandwidth);
-
-    rc->active_worst_quality = tmp_q;
-    rc->ni_av_qi = tmp_q;
-    rc->avg_q = vp9_convert_qindex_to_q(tmp_q);
-
-    // Limit the maxq value returned subsequently.
-    // This increases the risk of overspend or underspend if the initial
-    // estimate for the clip is bad, but helps prevent excessive
-    // variation in Q, especially near the end of a clip
-    // where for example a small overspend may cause Q to crash
-    // adjust_maxq_qrange(cpi);
-  }
-  vp9_zero(this_frame);
-  if (EOF == input_stats(&cpi->twopass, &this_frame))
-    return;
-
-  this_frame_intra_error = this_frame.intra_error;
-  this_frame_coded_error = this_frame.coded_error;
-
-  // keyframe and section processing !
-  if (rc->frames_to_key == 0 ||
-      (cpi->common.frame_flags & FRAMEFLAGS_KEY)) {
-    // Define next KF group and assign bits to it
-    this_frame_copy = this_frame;
-    find_next_key_frame(cpi, &this_frame_copy);
-  } else {
-    cpi->common.frame_type = INTER_FRAME;
-  }
-
-  // Is this a GF / ARF (Note that a KF is always also a GF)
-  if (rc->frames_till_gf_update_due == 0) {
-    // Define next gf group and assign bits to it
-    this_frame_copy = this_frame;
-
-#if CONFIG_MULTIPLE_ARF
-    if (cpi->multi_arf_enabled) {
-      define_fixed_arf_period(cpi);
-    } else {
-#endif
-      define_gf_group(cpi, &this_frame_copy);
-#if CONFIG_MULTIPLE_ARF
-    }
-#endif
-
-    if (cpi->twopass.gf_zeromotion_pct > 995) {
-      // As long as max_thresh for encode breakout is small enough, it is ok
-      // to enable it for no-show frame, i.e. set enable_encode_breakout to 2.
-      if (!cpi->common.show_frame)
-        cpi->enable_encode_breakout = 0;
-      else
-        cpi->enable_encode_breakout = 2;
-    }
-
-    rc->frames_till_gf_update_due = rc->baseline_gf_interval;
-    cpi->refresh_golden_frame = 1;
-  } else {
-    // Otherwise this is an ordinary frame
-    // Assign bits from those allocated to the GF group
-    this_frame_copy =  this_frame;
-    assign_std_frame_bits(cpi, &this_frame_copy);
-  }
-
-  // Keep a globally available copy of this and the next frame's iiratio.
-  cpi->twopass.this_iiratio = (int)(this_frame_intra_error /
-                              DOUBLE_DIVIDE_CHECK(this_frame_coded_error));
-  {
-    FIRSTPASS_STATS next_frame;
-    if (lookup_next_frame_stats(&cpi->twopass, &next_frame) != EOF) {
-      cpi->twopass.next_iiratio = (int)(next_frame.intra_error /
-                                  DOUBLE_DIVIDE_CHECK(next_frame.coded_error));
-    }
-  }
-
-  // Set nominal per second bandwidth for this frame
-  cpi->target_bandwidth = (int)(rc->per_frame_bandwidth *
-                                   cpi->output_framerate);
-  if (cpi->target_bandwidth < 0)
-    cpi->target_bandwidth = 0;
-
-  // Update the total stats remaining structure
-  subtract_stats(&cpi->twopass.total_left_stats, &this_frame);
-}
-
 static int test_candidate_kf(VP9_COMP *cpi,
                              FIRSTPASS_STATS *last_frame,
                              FIRSTPASS_STATS *this_frame,
@@ -2534,6 +2352,186 @@ static void find_next_key_frame(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   // The count of bits left is adjusted elsewhere based on real coded frame
   // sizes.
   twopass->modified_error_left -= kf_group_err;
+}
+
+void vp9_get_svc_params(VP9_COMP *cpi) {
+  VP9_COMMON *const cm = &cpi->common;
+  if ((cm->current_video_frame == 0) ||
+      (cm->frame_flags & FRAMEFLAGS_KEY) ||
+      (cpi->oxcf.auto_key && (cpi->rc.frames_since_key %
+                              cpi->key_frame_frequency == 0))) {
+    cm->frame_type = KEY_FRAME;
+  } else {
+    cm->frame_type = INTER_FRAME;
+  }
+  cpi->rc.frames_till_gf_update_due = INT_MAX;
+  cpi->rc.baseline_gf_interval = INT_MAX;
+}
+
+void vp9_get_one_pass_params(VP9_COMP *cpi) {
+  VP9_COMMON *const cm = &cpi->common;
+  if (!cpi->refresh_alt_ref_frame &&
+      (cm->current_video_frame == 0 ||
+       cm->frame_flags & FRAMEFLAGS_KEY ||
+       cpi->rc.frames_to_key == 0 ||
+       (cpi->oxcf.auto_key && test_for_kf_one_pass(cpi)))) {
+    cm->frame_type = KEY_FRAME;
+    cpi->rc.this_key_frame_forced = cm->current_video_frame != 0 &&
+                                    cpi->rc.frames_to_key == 0;
+    cpi->rc.frames_to_key = cpi->key_frame_frequency;
+    cpi->rc.kf_boost = 300;
+  } else {
+    cm->frame_type = INTER_FRAME;
+  }
+  if (cpi->rc.frames_till_gf_update_due == 0) {
+    cpi->rc.frames_till_gf_update_due = cpi->rc.baseline_gf_interval;
+    cpi->refresh_golden_frame = 1;
+  }
+}
+
+void vp9_get_one_pass_cbr_params(VP9_COMP *cpi) {
+  VP9_COMMON *const cm = &cpi->common;
+  if ((cm->current_video_frame == 0 ||
+      cm->frame_flags & FRAMEFLAGS_KEY ||
+      cpi->rc.frames_to_key == 0 ||
+      (cpi->oxcf.auto_key && test_for_kf_one_pass(cpi)))) {
+    cm->frame_type = KEY_FRAME;
+    cpi->rc.this_key_frame_forced = cm->current_video_frame != 0 &&
+                                    cpi->rc.frames_to_key == 0;
+    cpi->rc.frames_to_key = cpi->key_frame_frequency;
+    cpi->rc.kf_boost = 300;
+  } else {
+    cm->frame_type = INTER_FRAME;
+  }
+  // Don't use gf_update by default in CBR mode.
+  cpi->rc.frames_till_gf_update_due = INT_MAX;
+  cpi->rc.baseline_gf_interval = INT_MAX;
+}
+
+void vp9_get_first_pass_params(VP9_COMP *cpi) {
+  VP9_COMMON *const cm = &cpi->common;
+  if (!cpi->refresh_alt_ref_frame &&
+      (cm->current_video_frame == 0 ||
+       cm->frame_flags & FRAMEFLAGS_KEY)) {
+    cm->frame_type = KEY_FRAME;
+  } else {
+    cm->frame_type = INTER_FRAME;
+  }
+  // Do not use periodic key frames
+  cpi->rc.frames_to_key = INT_MAX;
+}
+
+void vp9_get_second_pass_params(VP9_COMP *cpi) {
+  int tmp_q;
+  int frames_left = (int)(cpi->twopass.total_stats.count -
+                          cpi->common.current_video_frame);
+
+  FIRSTPASS_STATS this_frame;
+  FIRSTPASS_STATS this_frame_copy;
+  RATE_CONTROL *rc = &cpi->rc;
+
+  double this_frame_intra_error;
+  double this_frame_coded_error;
+
+  if (cpi->refresh_alt_ref_frame) {
+    cpi->common.frame_type = INTER_FRAME;
+    return;
+  }
+  if (!cpi->twopass.stats_in)
+    return;
+
+  vp9_clear_system_state();
+
+  if (cpi->oxcf.end_usage == USAGE_CONSTANT_QUALITY) {
+    rc->active_worst_quality = cpi->oxcf.cq_level;
+  } else if (cpi->common.current_video_frame == 0) {
+    // Special case code for first frame.
+    int section_target_bandwidth =
+        (int)(cpi->twopass.bits_left / frames_left);
+
+    tmp_q = estimate_max_q(cpi, &cpi->twopass.total_left_stats,
+                           section_target_bandwidth);
+
+    rc->active_worst_quality = tmp_q;
+    rc->ni_av_qi = tmp_q;
+    rc->avg_q = vp9_convert_qindex_to_q(tmp_q);
+
+    // Limit the maxq value returned subsequently.
+    // This increases the risk of overspend or underspend if the initial
+    // estimate for the clip is bad, but helps prevent excessive
+    // variation in Q, especially near the end of a clip
+    // where for example a small overspend may cause Q to crash
+    // adjust_maxq_qrange(cpi);
+  }
+  vp9_zero(this_frame);
+  if (EOF == input_stats(&cpi->twopass, &this_frame))
+    return;
+
+  this_frame_intra_error = this_frame.intra_error;
+  this_frame_coded_error = this_frame.coded_error;
+
+  // keyframe and section processing !
+  if (rc->frames_to_key == 0 ||
+      (cpi->common.frame_flags & FRAMEFLAGS_KEY)) {
+    // Define next KF group and assign bits to it
+    this_frame_copy = this_frame;
+    find_next_key_frame(cpi, &this_frame_copy);
+  } else {
+    cpi->common.frame_type = INTER_FRAME;
+  }
+
+  // Is this a GF / ARF (Note that a KF is always also a GF)
+  if (rc->frames_till_gf_update_due == 0) {
+    // Define next gf group and assign bits to it
+    this_frame_copy = this_frame;
+
+#if CONFIG_MULTIPLE_ARF
+    if (cpi->multi_arf_enabled) {
+      define_fixed_arf_period(cpi);
+    } else {
+#endif
+      define_gf_group(cpi, &this_frame_copy);
+#if CONFIG_MULTIPLE_ARF
+    }
+#endif
+
+    if (cpi->twopass.gf_zeromotion_pct > 995) {
+      // As long as max_thresh for encode breakout is small enough, it is ok
+      // to enable it for no-show frame, i.e. set enable_encode_breakout to 2.
+      if (!cpi->common.show_frame)
+        cpi->enable_encode_breakout = 0;
+      else
+        cpi->enable_encode_breakout = 2;
+    }
+
+    rc->frames_till_gf_update_due = rc->baseline_gf_interval;
+    cpi->refresh_golden_frame = 1;
+  } else {
+    // Otherwise this is an ordinary frame
+    // Assign bits from those allocated to the GF group
+    this_frame_copy =  this_frame;
+    assign_std_frame_bits(cpi, &this_frame_copy);
+  }
+
+  // Keep a globally available copy of this and the next frame's iiratio.
+  cpi->twopass.this_iiratio = (int)(this_frame_intra_error /
+                              DOUBLE_DIVIDE_CHECK(this_frame_coded_error));
+  {
+    FIRSTPASS_STATS next_frame;
+    if (lookup_next_frame_stats(&cpi->twopass, &next_frame) != EOF) {
+      cpi->twopass.next_iiratio = (int)(next_frame.intra_error /
+                                  DOUBLE_DIVIDE_CHECK(next_frame.coded_error));
+    }
+  }
+
+  // Set nominal per second bandwidth for this frame
+  cpi->target_bandwidth = (int)(rc->per_frame_bandwidth *
+                                   cpi->output_framerate);
+  if (cpi->target_bandwidth < 0)
+    cpi->target_bandwidth = 0;
+
+  // Update the total stats remaining structure
+  subtract_stats(&cpi->twopass.total_left_stats, &this_frame);
 }
 
 void vp9_twopass_postencode_update(VP9_COMP *cpi, uint64_t bytes_used) {
