@@ -14,6 +14,7 @@
 #include "vp9/encoder/vp9_onyx_int.h"
 #include "vp9/encoder/vp9_picklpf.h"
 #include "vp9/encoder/vp9_quantize.h"
+#include "vp9/common/vp9_quant_common.h"
 #include "vpx_mem/vpx_mem.h"
 #include "vpx_scale/vpx_scale.h"
 #include "vp9/common/vp9_alloccommon.h"
@@ -33,7 +34,8 @@ static int get_max_filter_level(VP9_COMP *cpi, int base_qindex) {
 void vp9_set_alt_lf_level(VP9_COMP *cpi, int filt_val) {
 }
 
-void vp9_pick_filter_level(YV12_BUFFER_CONFIG *sd, VP9_COMP *cpi, int partial) {
+static void search_filter_level(YV12_BUFFER_CONFIG *sd, VP9_COMP *cpi,
+                                int partial) {
   MACROBLOCKD *const xd = &cpi->mb.e_mbd;
   VP9_COMMON *const cm = &cpi->common;
   struct loopfilter *const lf = &cm->lf;
@@ -47,9 +49,6 @@ void vp9_pick_filter_level(YV12_BUFFER_CONFIG *sd, VP9_COMP *cpi, int partial) {
   // range.
   int filt_mid = clamp(lf->filter_level, min_filter_level, max_filter_level);
   int filter_step = filt_mid < 16 ? 4 : filt_mid / 4;
-
-  lf->sharpness_level = cm->frame_type == KEY_FRAME ? 0
-                                                    : cpi->oxcf.sharpness;
 
   //  Make a copy of the unfiltered / processed recon buffer
   vpx_yv12_copy_y(cm->frame_to_show, &cpi->last_frame_uf);
@@ -127,4 +126,27 @@ void vp9_pick_filter_level(YV12_BUFFER_CONFIG *sd, VP9_COMP *cpi, int partial) {
   }
 
   lf->filter_level = filt_best;
+}
+
+void vp9_pick_filter_level(YV12_BUFFER_CONFIG *sd, VP9_COMP *cpi, int method) {
+  VP9_COMMON *const cm = &cpi->common;
+  struct loopfilter *const lf = &cm->lf;
+
+  lf->sharpness_level = cm->frame_type == KEY_FRAME ? 0
+                                                    : cpi->oxcf.sharpness;
+
+  if (method == 2) {
+    const int min_filter_level = get_min_filter_level(cpi, cm->base_qindex);
+    const int max_filter_level = get_max_filter_level(cpi, cm->base_qindex);
+    const int q = vp9_ac_quant(cm->base_qindex, 0);
+    // These values were determined by linear fitting the result of the
+    // searched level
+    // filt_guess = q * 0.316206 + 3.87252
+    int filt_guess = (q * 20723 + 1015158 + (1 << 17)) >> 18;
+    if (cm->frame_type == KEY_FRAME)
+      filt_guess -= 4;
+    lf->filter_level = clamp(filt_guess, min_filter_level, max_filter_level);
+  } else {
+    search_filter_level(sd, cpi, method == 1);
+  }
 }

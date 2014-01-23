@@ -851,6 +851,7 @@ static void set_rt_speed_feature(VP9_COMMON *cm,
       sf->intra_y_mode_mask[i] = INTRA_DC_H_V;
       sf->intra_uv_mode_mask[i] = INTRA_DC_ONLY;
     }
+    sf->use_fast_lpf_pick = 2;
   }
 }
 
