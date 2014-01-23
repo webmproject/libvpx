@@ -1,0 +1,174 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//7g4\u003d",
+        "filename": "vp9/common/vp9_loopfilter.h",
+        "patchSetId": 21
+      },
+      "lineNbr": 82,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2014-01-23T18:36:52Z",
+      "side": 1,
+      "message": "nit: Function comments would be nice.",
+      "revId": "a7c304095e92e65df5e1096a90bc90752363a114",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//7g8\u003d",
+        "filename": "vp9/common/vp9_loopfilter.h",
+        "patchSetId": 21
+      },
+      "lineNbr": 89,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2014-01-23T18:36:52Z",
+      "side": 1,
+      "message": "nit: alignment?",
+      "revId": "a7c304095e92e65df5e1096a90bc90752363a114",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//7hE\u003d",
+        "filename": "vp9/decoder/vp9_decodeframe.c",
+        "patchSetId": 21
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2014-01-23T18:36:52Z",
+      "side": 1,
+      "message": "nit:alphabetize the includes",
+      "revId": "a7c304095e92e65df5e1096a90bc90752363a114",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//7g0\u003d",
+        "filename": "vp9/decoder/vp9_dthread.c",
+        "patchSetId": 21
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2014-01-23T18:36:52Z",
+      "side": 1,
+      "message": "nit: Alphabetize includes",
+      "revId": "a7c304095e92e65df5e1096a90bc90752363a114",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//7gI\u003d",
+        "filename": "vp9/decoder/vp9_dthread.c",
+        "patchSetId": 21
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2014-01-23T18:36:52Z",
+      "side": 1,
+      "message": "you can move cur_row_sb_col code to the end of the function.",
+      "revId": "a7c304095e92e65df5e1096a90bc90752363a114",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//7hM\u003d",
+        "filename": "vp9/decoder/vp9_dthread.h",
+        "patchSetId": 21
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2014-01-23T18:36:52Z",
+      "side": 1,
+      "message": "nit: 2013",
+      "revId": "a7c304095e92e65df5e1096a90bc90752363a114",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//7hg\u003d",
+        "filename": "vp9/decoder/vp9_dthread.h",
+        "patchSetId": 21
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2014-01-23T18:36:52Z",
+      "side": 1,
+      "message": "Maybe change these names to vp9_lf_init() and vp9_lf_deinit() or something.\n\nstart makes it feel like the function should start doing something.",
+      "revId": "a7c304095e92e65df5e1096a90bc90752363a114",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//7hc\u003d",
+        "filename": "vp9/decoder/vp9_dthread.h",
+        "patchSetId": 21
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2014-01-23T18:36:52Z",
+      "side": 1,
+      "message": "nit: vertical ws before this comment.",
+      "revId": "a7c304095e92e65df5e1096a90bc90752363a114",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//7ik\u003d",
+        "filename": "vp9/decoder/vp9_onyxd_if.c",
+        "patchSetId": 21
+      },
+      "lineNbr": 183,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2014-01-23T18:36:52Z",
+      "side": 1,
+      "message": "nit: VP9_COMMON *const cm",
+      "revId": "a7c304095e92e65df5e1096a90bc90752363a114",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//7hk\u003d",
+        "filename": "vp9/decoder/vp9_thread.h",
+        "patchSetId": 21
+      },
+      "lineNbr": 79,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2014-01-23T18:36:52Z",
+      "side": 1,
+      "message": "You should put a comment there that sync_range must be equal to a power of 2. Or make it an enum.",
+      "revId": "a7c304095e92e65df5e1096a90bc90752363a114",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
