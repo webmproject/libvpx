@@ -1,0 +1,123 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//7mY\u003d",
+        "filename": "examples/decode_to_md5.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 118,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-01-23T02:14:28Z",
+      "side": 1,
+      "message": "Move this string to usage_exit(), call die() from tools_common, get rid of die_args().",
+      "revId": "f4618015222319ff587665f5770930fd1ac30e53",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//7mU\u003d",
+        "filename": "examples/decode_to_md5.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 121,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-01-23T02:14:28Z",
+      "side": 1,
+      "message": "call die() from tools_common",
+      "revId": "f4618015222319ff587665f5770930fd1ac30e53",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//7mQ\u003d",
+        "filename": "examples/decode_to_md5.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 124,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-01-23T02:14:28Z",
+      "side": 1,
+      "message": "ditto; for all remaining occurrences.",
+      "revId": "f4618015222319ff587665f5770930fd1ac30e53",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//7mI\u003d",
+        "filename": "examples/decode_to_md5.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 142,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-01-23T02:14:28Z",
+      "side": 1,
+      "message": "Init this to 0; should probably init img to NULL as well since we\u0027re in here.",
+      "revId": "f4618015222319ff587665f5770930fd1ac30e53",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//7lo\u003d",
+        "filename": "ivfdec.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-01-23T02:14:28Z",
+      "side": 1,
+      "message": "nit: Replace the brackets: they were wrapping a multi-line statement.",
+      "revId": "f4618015222319ff587665f5770930fd1ac30e53",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//7l8\u003d",
+        "filename": "ivfdec.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-01-23T02:14:28Z",
+      "side": 1,
+      "message": "Add a comment here that this is a work in progress toward adding video (input/possibly output) interface and should not be used until it moves into its final location.",
+      "revId": "f4618015222319ff587665f5770930fd1ac30e53",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//7mA\u003d",
+        "filename": "ivfdec.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-01-23T02:14:28Z",
+      "side": 1,
+      "message": "Add comment, something like:\n\nOpens the input file and inspects it to determine file type. Returns a vpx_video_t interface implementation that supports the input stream upon success, or NULL upon failure.",
+      "revId": "f4618015222319ff587665f5770930fd1ac30e53",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
