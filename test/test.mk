@@ -676,6 +676,8 @@ LIBVPX_TEST_DATA-$(CONFIG_VP9_DECODER) += vp90-2-09-lf_deltas.webm
 LIBVPX_TEST_DATA-$(CONFIG_VP9_DECODER) += vp90-2-09-lf_deltas.webm.md5
 LIBVPX_TEST_DATA-$(CONFIG_VP9_DECODER) += vp91-2-04-yv444.webm
 LIBVPX_TEST_DATA-$(CONFIG_VP9_DECODER) += vp91-2-04-yv444.webm.md5
+LIBVPX_TEST_DATA-$(CONFIG_VP9_DECODER) += vp90-2-10-show-existing-frame.webm
+LIBVPX_TEST_DATA-$(CONFIG_VP9_DECODER) += vp90-2-10-show-existing-frame.webm.md5
 
 ifeq ($(CONFIG_DECODE_PERF_TESTS),yes)
 # BBB VP9 streams

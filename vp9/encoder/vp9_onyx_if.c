@@ -3250,7 +3250,8 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
   cm->last_height = cm->height;
 
   // reset to normal state now that we are done.
-  cm->last_show_frame = cm->show_frame;
+  if (!cm->show_existing_frame)
+    cm->last_show_frame = cm->show_frame;
   if (cm->show_frame) {
     // current mip will be the prev_mip for the next frame
     MODE_INFO *temp = cm->prev_mip;
