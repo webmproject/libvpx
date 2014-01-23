@@ -317,30 +317,22 @@ static const double weight_table[256] = {
   1.000000, 1.000000, 1.000000, 1.000000
 };
 
-static double simple_weight(YV12_BUFFER_CONFIG *source) {
+static double simple_weight(const YV12_BUFFER_CONFIG *buf) {
   int i, j;
+  double sum = 0.0;
+  const int w = buf->y_crop_width;
+  const int h = buf->y_crop_height;
+  const uint8_t *row = buf->y_buffer;
 
-  uint8_t *src = source->y_buffer;
-  double sum_weights = 0.0;
+  for (i = 0; i < h; ++i) {
+    const uint8_t *pixel = row;
+    for (j = 0; j < w; ++j)
+      sum += weight_table[*pixel++];
+    row += buf->y_stride;
+  }
 
-  // Loop through the Y plane examining levels and creating a weight for
-  // the image.
-  i = source->y_height;
-  do {
-    j = source->y_width;
-    do {
-      sum_weights += weight_table[ *src];
-      src++;
-    } while (--j);
-    src -= source->y_width;
-    src += source->y_stride;
-  } while (--i);
-
-  sum_weights /= (source->y_height * source->y_width);
-
-  return sum_weights;
+  return MAX(0.1, sum / (w * h));
 }
-
 
 // This function returns the maximum target rate per frame.
 static int frame_max_bits(VP9_COMP *cpi) {
@@ -786,20 +778,8 @@ void vp9_first_pass(VP9_COMP *cpi) {
     fps.intra_error = intra_error >> 8;
     fps.coded_error = coded_error >> 8;
     fps.sr_coded_error = sr_coded_error >> 8;
-    fps.ssim_weighted_pred_err = fps.coded_error *
-                                     MAX(0.1, simple_weight(cpi->Source));
-    fps.pcnt_inter = 0.0;
-    fps.pcnt_motion = 0.0;
-    fps.MVr = 0.0;
-    fps.mvr_abs = 0.0;
-    fps.MVc = 0.0;
-    fps.mvc_abs = 0.0;
-    fps.MVrv = 0.0;
-    fps.MVcv = 0.0;
-    fps.mv_in_out_count = 0.0;
-    fps.new_mv_count = 0.0;
+    fps.ssim_weighted_pred_err = fps.coded_error * simple_weight(cpi->Source);
     fps.count = 1.0;
-
     fps.pcnt_inter = (double)intercount / cm->MBs;
     fps.pcnt_second_ref = (double)second_ref_count / cm->MBs;
     fps.pcnt_neutral = (double)neutral_count / cm->MBs;
@@ -815,7 +795,17 @@ void vp9_first_pass(VP9_COMP *cpi) {
                      mvcount;
       fps.mv_in_out_count = (double)sum_in_vectors / (mvcount * 2);
       fps.new_mv_count = new_mv_count;
-      fps.pcnt_motion = 1.0 * (double)mvcount / cpi->common.MBs;
+      fps.pcnt_motion = (double)mvcount / cpi->common.MBs;
+    } else {
+      fps.MVr = 0.0;
+      fps.mvr_abs = 0.0;
+      fps.MVc = 0.0;
+      fps.mvc_abs = 0.0;
+      fps.MVrv = 0.0;
+      fps.MVcv = 0.0;
+      fps.mv_in_out_count = 0.0;
+      fps.new_mv_count = 0.0;
+      fps.pcnt_motion = 0.0;
     }
 
     // TODO(paulwilkins):  Handle the case when duration is set to 0, or
