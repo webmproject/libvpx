@@ -173,7 +173,6 @@ struct lookahead_entry * vp9_lookahead_peek(struct lookahead_ctx *ctx,
                                             int index) {
   struct lookahead_entry *buf = NULL;
 
-  assert(index < (int)ctx->max_sz);
   if (index < (int)ctx->sz) {
     index += ctx->read_idx;
     if (index >= (int)ctx->max_sz)

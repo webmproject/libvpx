@@ -2953,15 +2953,6 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
   // Clear down mmx registers to allow floating point in what follows.
   vp9_clear_system_state();
 
-  // For an alt ref frame in 2 pass we skip the call to the second
-  // pass function that sets the target bandwidth so we must set it here.
-  if (cpi->refresh_alt_ref_frame) {
-    // Set a per frame bit target for the alt ref frame.
-    cpi->rc.per_frame_bandwidth = cpi->twopass.gf_bits;
-    // Set a per second target bitrate.
-    cpi->target_bandwidth = (int)(cpi->twopass.gf_bits * cpi->output_framerate);
-  }
-
   // Clear zbin over-quant value and mode boost values.
   cpi->zbin_mode_boost = 0;
 
@@ -3293,7 +3284,6 @@ static void Pass2Encode(VP9_COMP *cpi, size_t *size,
 
   vp9_get_second_pass_params(cpi);
   encode_frame_to_data_rate(cpi, size, dest, frame_flags);
-  // vp9_print_modes_and_motion_vectors(&cpi->common, "encode.stt");
 
   vp9_twopass_postencode_update(cpi, *size);
 }
@@ -3442,8 +3432,7 @@ int vp9_get_compressed_data(VP9_PTR ptr, unsigned int *frame_flags,
       if (cpi->oxcf.arnr_max_frames > 0) {
         // Produce the filtered ARF frame.
         // TODO(agrange) merge these two functions.
-        configure_arnr_filter(cpi, cm->current_video_frame + frames_to_arf,
-                              cpi->rc.gfu_boost);
+        vp9_configure_arnr_filter(cpi, frames_to_arf, cpi->rc.gfu_boost);
         vp9_temporal_filter_prepare(cpi, frames_to_arf);
         vp9_extend_frame_borders(&cpi->alt_ref_buffer,
                                  cm->subsampling_x, cm->subsampling_y);
@@ -3459,7 +3448,9 @@ int vp9_get_compressed_data(VP9_PTR ptr, unsigned int *frame_flags,
 #if CONFIG_MULTIPLE_ARF
       if (!cpi->multi_arf_enabled)
 #endif
-        cpi->rc.source_alt_ref_pending = 0;   // Clear Pending altf Ref flag.
+        cpi->rc.source_alt_ref_pending = 0;
+    } else {
+      cpi->rc.source_alt_ref_pending = 0;
     }
   }
 

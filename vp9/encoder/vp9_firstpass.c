@@ -2328,12 +2328,16 @@ void vp9_get_svc_params(VP9_COMP *cpi) {
       (cpi->oxcf.auto_key && (cpi->rc.frames_since_key %
                               cpi->key_frame_frequency == 0))) {
     cm->frame_type = KEY_FRAME;
+    cpi->rc.source_alt_ref_active = 0;
   } else {
     cm->frame_type = INTER_FRAME;
   }
   cpi->rc.frames_till_gf_update_due = INT_MAX;
   cpi->rc.baseline_gf_interval = INT_MAX;
 }
+
+// Use this macro to turn on/off use of alt-refs in one-pass mode.
+#define USE_ALTREF_FOR_ONE_PASS   1
 
 void vp9_get_one_pass_params(VP9_COMP *cpi) {
   VP9_COMMON *const cm = &cpi->common;
@@ -2346,13 +2350,20 @@ void vp9_get_one_pass_params(VP9_COMP *cpi) {
     cpi->rc.this_key_frame_forced = cm->current_video_frame != 0 &&
                                     cpi->rc.frames_to_key == 0;
     cpi->rc.frames_to_key = cpi->key_frame_frequency;
-    cpi->rc.kf_boost = 300;
+    cpi->rc.kf_boost = 2000;
+    cpi->rc.source_alt_ref_active = 0;
   } else {
     cm->frame_type = INTER_FRAME;
   }
   if (cpi->rc.frames_till_gf_update_due == 0) {
+    cpi->rc.baseline_gf_interval = DEFAULT_GF_INTERVAL;
     cpi->rc.frames_till_gf_update_due = cpi->rc.baseline_gf_interval;
+    // NOTE: frames_till_gf_update_due must be <= frames_to_key.
+    if (cpi->rc.frames_till_gf_update_due > cpi->rc.frames_to_key)
+      cpi->rc.frames_till_gf_update_due = cpi->rc.frames_to_key;
     cpi->refresh_golden_frame = 1;
+    cpi->rc.source_alt_ref_pending = USE_ALTREF_FOR_ONE_PASS;
+    cpi->rc.gfu_boost = 1000;
   }
 }
 
@@ -2366,7 +2377,8 @@ void vp9_get_one_pass_cbr_params(VP9_COMP *cpi) {
     cpi->rc.this_key_frame_forced = cm->current_video_frame != 0 &&
                                     cpi->rc.frames_to_key == 0;
     cpi->rc.frames_to_key = cpi->key_frame_frequency;
-    cpi->rc.kf_boost = 300;
+    cpi->rc.kf_boost = 2000;
+    cpi->rc.source_alt_ref_active = 0;
   } else {
     cm->frame_type = INTER_FRAME;
   }
@@ -2400,12 +2412,13 @@ void vp9_get_second_pass_params(VP9_COMP *cpi) {
   double this_frame_intra_error;
   double this_frame_coded_error;
 
-  if (cpi->refresh_alt_ref_frame) {
-    cpi->common.frame_type = INTER_FRAME;
-    return;
-  }
   if (!cpi->twopass.stats_in)
     return;
+  if (cpi->refresh_alt_ref_frame) {
+    cpi->common.frame_type = INTER_FRAME;
+    rc->per_frame_bandwidth = cpi->twopass.gf_bits;
+    return;
+  }
 
   vp9_clear_system_state();
 

@@ -218,7 +218,7 @@ static void calc_iframe_target_size(VP9_COMP *cpi) {
   vp9_clear_system_state();  // __asm emms;
 
   // For 1-pass.
-  if (cpi->pass == 0) {
+  if (cpi->pass == 0 && oxcf->end_usage == USAGE_STREAM_FROM_SERVER) {
     if (cpi->common.current_video_frame == 0) {
       target = oxcf->starting_buffer_level / 2;
     } else {
@@ -246,7 +246,7 @@ static void calc_iframe_target_size(VP9_COMP *cpi) {
 
   if (oxcf->rc_max_intra_bitrate_pct) {
     const int max_rate = rc->per_frame_bandwidth *
-                             oxcf->rc_max_intra_bitrate_pct / 100;
+        oxcf->rc_max_intra_bitrate_pct / 100;
     target = MIN(target, max_rate);
   }
   rc->this_frame_target = target;
@@ -375,27 +375,22 @@ static int target_size_from_buffer_level(const VP9_CONFIG *oxcf,
 static void calc_pframe_target_size(VP9_COMP *const cpi) {
   RATE_CONTROL *const rc = &cpi->rc;
   const VP9_CONFIG *const oxcf = &cpi->oxcf;
-  int min_frame_target = MAX(rc->min_frame_bandwidth,
-                             rc->av_per_frame_bandwidth >> 5);
-  if (cpi->refresh_alt_ref_frame) {
-    // Special alt reference frame case
-    // Per frame bit target for the alt ref frame
-    rc->per_frame_bandwidth = cpi->twopass.gf_bits;
-    rc->this_frame_target = rc->per_frame_bandwidth;
-  } else {
-    // Normal frames (gf and inter).
-    rc->this_frame_target = rc->per_frame_bandwidth;
-    // Set target frame size based on buffer level, for 1 pass CBR.
-    if (cpi->pass == 0 && oxcf->end_usage == USAGE_STREAM_FROM_SERVER) {
-      // Need to decide how low min_frame_target should be for 1-pass CBR.
-      // For now, use: cpi->rc.av_per_frame_bandwidth / 16:
-      min_frame_target = MAX(rc->av_per_frame_bandwidth >> 4,
-                             FRAME_OVERHEAD_BITS);
-      rc->this_frame_target = target_size_from_buffer_level(oxcf, rc);
-      // Adjust qp-max based on buffer level.
-      rc->active_worst_quality =
-          adjust_active_worst_quality_from_buffer_level(oxcf, rc);
-    }
+  int min_frame_target;
+  rc->this_frame_target = rc->per_frame_bandwidth;
+
+  if (cpi->pass == 0 && oxcf->end_usage == USAGE_STREAM_FROM_SERVER) {
+    // Need to decide how low min_frame_target should be for 1-pass CBR.
+    // For now, use: cpi->rc.av_per_frame_bandwidth / 16:
+    min_frame_target = MAX(rc->av_per_frame_bandwidth >> 4,
+                           FRAME_OVERHEAD_BITS);
+    rc->this_frame_target = target_size_from_buffer_level(oxcf, rc);
+    // Adjust qp-max based on buffer level.
+    rc->active_worst_quality =
+        adjust_active_worst_quality_from_buffer_level(oxcf, rc);
+
+    if (rc->this_frame_target < min_frame_target)
+      rc->this_frame_target = min_frame_target;
+    return;
   }
 
   // Check that the total sum of adjustments is not above the maximum allowed.
@@ -404,6 +399,9 @@ static void calc_pframe_target_size(VP9_COMP *const cpi) {
   // not capable of recovering all the extra bits we have spent in the KF or GF,
   // then the remainder will have to be recovered over a longer time span via
   // other buffer / rate control mechanisms.
+  min_frame_target = MAX(rc->min_frame_bandwidth,
+                         rc->av_per_frame_bandwidth >> 5);
+
   if (rc->this_frame_target < min_frame_target)
     rc->this_frame_target = min_frame_target;
 
