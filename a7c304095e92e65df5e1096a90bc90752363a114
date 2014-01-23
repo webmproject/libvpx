@@ -87,6 +87,57 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//7ck\u003d",
+        "filename": "vp9/decoder/vp9_dthread.c",
+        "patchSetId": 21
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-01-23T20:40:52Z",
+      "side": 1,
+      "message": "this won\u0027t build on windows, you might want to start by introducing a change to common with a vp9_... variant, rather than duplicating vp9_thread.c",
+      "revId": "a7c304095e92e65df5e1096a90bc90752363a114",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//7cc\u003d",
+        "filename": "vp9/decoder/vp9_dthread.c",
+        "patchSetId": 21
+      },
+      "lineNbr": 112,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-01-23T20:40:52Z",
+      "side": 1,
+      "message": "fix indent",
+      "revId": "a7c304095e92e65df5e1096a90bc90752363a114",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//7cY\u003d",
+        "filename": "vp9/decoder/vp9_dthread.c",
+        "patchSetId": 21
+      },
+      "lineNbr": 113,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-01-23T20:40:52Z",
+      "side": 1,
+      "message": "cast necessary?",
+      "revId": "a7c304095e92e65df5e1096a90bc90752363a114",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//7hM\u003d",
         "filename": "vp9/decoder/vp9_dthread.h",
         "patchSetId": 21
@@ -98,6 +149,41 @@
       "writtenOn": "2014-01-23T18:36:52Z",
       "side": 1,
       "message": "nit: 2013",
+      "revId": "a7c304095e92e65df5e1096a90bc90752363a114",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//7cQ\u003d",
+        "filename": "vp9/decoder/vp9_dthread.h",
+        "patchSetId": 21
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-01-23T20:40:52Z",
+      "side": 1,
+      "message": "2014 actually...",
+      "parentUuid": "AAAAdn//7hM\u003d",
+      "revId": "a7c304095e92e65df5e1096a90bc90752363a114",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//7cU\u003d",
+        "filename": "vp9/decoder/vp9_dthread.h",
+        "patchSetId": 21
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-01-23T20:40:52Z",
+      "side": 1,
+      "message": "I don\u0027t think this is necessary here",
       "revId": "a7c304095e92e65df5e1096a90bc90752363a114",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
