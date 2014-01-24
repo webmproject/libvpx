@@ -593,7 +593,7 @@ static void set_good_speed_feature(VP9_COMMON *cm,
 
     sf->use_rd_breakout = 1;
     sf->adaptive_motion_search = 1;
-    sf->adaptive_pred_filter_type = 1;
+    sf->adaptive_pred_interp_filter = 1;
     sf->auto_mv_step_size = 1;
     sf->adaptive_rd_thresh = 2;
     sf->recode_loop = 2;
@@ -619,7 +619,7 @@ static void set_good_speed_feature(VP9_COMMON *cm,
                                  FLAG_SKIP_INTRA_LOWVAR;
     sf->use_rd_breakout = 1;
     sf->adaptive_motion_search = 1;
-    sf->adaptive_pred_filter_type = 2;
+    sf->adaptive_pred_interp_filter = 2;
     sf->reference_masking = 1;
     sf->auto_mv_step_size = 1;
 
@@ -656,7 +656,7 @@ static void set_good_speed_feature(VP9_COMMON *cm,
 
     sf->use_rd_breakout = 1;
     sf->adaptive_motion_search = 1;
-    sf->adaptive_pred_filter_type = 2;
+    sf->adaptive_pred_interp_filter = 2;
     sf->reference_masking = 1;
     sf->auto_mv_step_size = 1;
 
@@ -691,7 +691,7 @@ static void set_good_speed_feature(VP9_COMMON *cm,
 
     sf->use_rd_breakout = 1;
     sf->adaptive_motion_search = 1;
-    sf->adaptive_pred_filter_type = 2;
+    sf->adaptive_pred_interp_filter = 2;
     sf->reference_masking = 1;
     sf->auto_mv_step_size = 1;
 
@@ -764,7 +764,7 @@ static void set_rt_speed_feature(VP9_COMMON *cm,
 
     sf->use_rd_breakout = 1;
     sf->adaptive_motion_search = 1;
-    sf->adaptive_pred_filter_type = 1;
+    sf->adaptive_pred_interp_filter = 1;
     sf->auto_mv_step_size = 1;
     sf->adaptive_rd_thresh = 2;
     sf->recode_loop = 2;
@@ -790,7 +790,7 @@ static void set_rt_speed_feature(VP9_COMMON *cm,
 
     sf->use_rd_breakout = 1;
     sf->adaptive_motion_search = 1;
-    sf->adaptive_pred_filter_type = 2;
+    sf->adaptive_pred_interp_filter = 2;
     sf->auto_mv_step_size = 1;
     sf->reference_masking = 1;
 
@@ -877,7 +877,7 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
   sf->tx_size_search_method = USE_FULL_RD;
   sf->use_lp32x32fdct = 0;
   sf->adaptive_motion_search = 0;
-  sf->adaptive_pred_filter_type = 0;
+  sf->adaptive_pred_interp_filter = 0;
   sf->reference_masking = 0;
   sf->use_one_partition_size_always = 0;
   sf->less_rectangular_check = 0;
@@ -1332,7 +1332,7 @@ void vp9_change_config(VP9_PTR ptr, VP9_CONFIG *oxcf) {
 
   cpi->cq_target_quality = cpi->oxcf.cq_level;
 
-  cm->mcomp_filter_type = DEFAULT_INTERP_FILTER;
+  cm->interp_filter = DEFAULT_INTERP_FILTER;
 
   cpi->target_bandwidth = cpi->oxcf.target_bandwidth;
 
@@ -3094,7 +3094,7 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
                                         &top_index);
 
   if (!frame_is_intra_only(cm)) {
-    cm->mcomp_filter_type = DEFAULT_INTERP_FILTER;
+    cm->interp_filter = DEFAULT_INTERP_FILTER;
     /* TODO: Decide this more intelligently */
     set_high_precision_mv(cpi, (q < HIGH_PRECISION_MV_QTHRESH));
   }

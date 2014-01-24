@@ -184,7 +184,7 @@ typedef struct VP9Common {
   // Persistent mb segment id map used in prediction.
   unsigned char *last_frame_seg_map;
 
-  INTERPOLATION_TYPE mcomp_filter_type;
+  INTERP_FILTER interp_filter;
 
   loop_filter_info_n lf_info;
 

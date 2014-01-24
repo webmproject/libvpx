@@ -379,7 +379,7 @@ typedef struct {
   // best for 8x8 mode. If set to 0 we always re check all the filters for
   // sizes less than 8x8, 1 means we check all filter modes if no 8x8 filter
   // was selected, and 2 means we use 8 tap if no 8x8 filter mode was selected.
-  int adaptive_pred_filter_type;
+  int adaptive_pred_interp_filter;
 
   // Implements various heuristics to skip searching modes
   // The heuristics selected are based on  flags

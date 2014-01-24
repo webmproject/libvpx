@@ -62,7 +62,7 @@ typedef struct {
   // motion vector cache for adaptive motion search control in partition
   // search loop
   int_mv pred_mv[MAX_REF_FRAMES];
-  int pred_filter_type;
+  INTERP_FILTER pred_interp_filter;
 
   // Bit flag for each mode whether it has high error in comparison to others.
   unsigned int modes_with_high_error;

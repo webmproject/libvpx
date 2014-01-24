@@ -385,7 +385,7 @@ void vp9_adapt_mode_probs(VP9_COMMON *cm) {
     adapt_probs(vp9_partition_tree, pre_fc->partition_prob[i],
                 counts->partition[i], fc->partition_prob[i]);
 
-  if (cm->mcomp_filter_type == SWITCHABLE) {
+  if (cm->interp_filter == SWITCHABLE) {
     for (i = 0; i < SWITCHABLE_FILTER_CONTEXTS; i++)
       adapt_probs(vp9_switchable_interp_tree, pre_fc->switchable_interp_prob[i],
                   counts->switchable_interp[i], fc->switchable_interp_prob[i]);
