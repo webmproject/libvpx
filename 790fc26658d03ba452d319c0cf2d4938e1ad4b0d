@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//7OA\u003d",
+        "filename": "vp9/common/arm/neon/vp9_reconintra_neon.asm",
+        "patchSetId": 7
+      },
+      "lineNbr": 441,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2014-01-24T15:16:46Z",
+      "side": 1,
+      "message": "I think you can get rid of some of the delays by doing 2 rows at a time. E.g.\n\nvdup.16             q0, d20[0]\n   vdup.16             q8, d20[1]\n    vadd.s16            q1, q0, q2\n    vadd.s16            q0, q0, q3\n   vadd.s16            q11, q8, q2\n    vadd.s16            q8, q8, q3\n    vqshrun.s16         d2, q1, #0\n    vqshrun.s16         d3, q0, #0\n   vqshrun.s16         d22, q11, #0\n    vqshrun.s16         d23, q8, #0\n    vst1.64             {d2,d3}, [r0], r1\n   vst1.64             {d22,d23}, [r0], r1\n\n\nThen I think you can get rid of another delay by moving the 2 vdups of the next 2 rows up above the vst1 of the current 2 rows. E.g.\n\nvdup.16             q0, d20[0]\n   vdup.16             q8, d20[1]\n    vadd.s16            q1, q0, q2\n    vadd.s16            q0, q0, q3\n   vadd.s16            q11, q8, q2\n    vadd.s16            q8, q8, q3\n    vqshrun.s16         d2, q1, #0\n    vqshrun.s16         d3, q0, #0\n   vqshrun.s16         d22, q11, #0\n    vqshrun.s16         d23, q8, #0\n\n    vdup.16             q0, d20[2]\n   vdup.16             q8, d20[3]\n\n    vst1.64             {d2,d3}, [r0], r1\n   vst1.64             {d22,d23}, [r0], r1\n\n\nThen on the last 2 rows move the vld1 and vmovl just before the 2 vst1. E.g.\n\n\nvqshrun.s16         d22, q11, #0\n    vqshrun.s16         d23, q8, #0\n\n     vld1.8              d18, [r3]!                  ; preload 8 left into r12\n     vmovl.u8            q10, d18\n\n    vst1.64             {d2,d3}, [r0], r1\n   vst1.64             {d22,d23}, [r0], r1",
+      "revId": "790fc26658d03ba452d319c0cf2d4938e1ad4b0d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
