@@ -16,6 +16,24 @@
       "revId": "6a2475cd199ad83dcbd1ee5798a23da8d6a4fef0",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//7XY\u003d",
+        "filename": "vp9/common/arm/neon/vp9_reconintra_neon.asm",
+        "patchSetId": 4
+      },
+      "lineNbr": 436,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2014-01-24T00:20:14Z",
+      "side": 1,
+      "message": "Done. Actually the performance is really closed that I dare not to say whether this way is better. But patch set 6 is doing in this way.",
+      "parentUuid": "AAAAdn//7fY\u003d",
+      "revId": "6a2475cd199ad83dcbd1ee5798a23da8d6a4fef0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
