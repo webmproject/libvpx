@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//7GQ\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 431,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-01-24T20:18:08Z",
+      "side": 1,
+      "message": "this is fine, but might be fragile if someone comes through with a good-intentioned cleanup. keep the original line and casting dist_sum to 64-bit with an added comment might help",
+      "revId": "68ec33fcb398934b5b5f66f17a7c20049a9c6cc9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
