@@ -16,6 +16,24 @@
       "revId": "790fc26658d03ba452d319c0cf2d4938e1ad4b0d",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//7Kg\u003d",
+        "filename": "vp9/common/arm/neon/vp9_reconintra_neon.asm",
+        "patchSetId": 7
+      },
+      "lineNbr": 441,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2014-01-24T18:25:11Z",
+      "side": 1,
+      "message": "Done. Was trying to optimize this and other code in another commit to make the code more clean and understandable. Now the code is 3.5 times faster than C versus 3.4 times faster before.",
+      "parentUuid": "AAAAdn//7OA\u003d",
+      "revId": "790fc26658d03ba452d319c0cf2d4938e1ad4b0d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
