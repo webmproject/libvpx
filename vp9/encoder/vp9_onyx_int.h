@@ -72,7 +72,6 @@ typedef struct {
   // 0 = ZERO_MV, MV
   signed char last_mode_lf_deltas[MAX_MODE_LF_DELTAS];
 
-  int inter_mode_counts[INTER_MODE_CONTEXTS][INTER_MODES - 1][2];
   FRAME_CONTEXT fc;
 } CODING_CONTEXT;
 
