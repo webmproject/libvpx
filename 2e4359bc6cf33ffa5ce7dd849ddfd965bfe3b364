@@ -16,6 +16,24 @@
       "revId": "2e4359bc6cf33ffa5ce7dd849ddfd965bfe3b364",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//7Do\u003d",
+        "filename": "resize_util.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2014-01-24T21:59:49Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//7Fg\u003d",
+      "revId": "2e4359bc6cf33ffa5ce7dd849ddfd965bfe3b364",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
