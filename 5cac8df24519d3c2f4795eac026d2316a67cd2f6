@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//7Lk\u003d",
+        "filename": "vp9/encoder/vp9_onyx_int.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 416,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2014-01-24T18:11:41Z",
+      "side": 1,
+      "message": "I think I will fold this in to \"use_fast_lpf_pick\" above and enumerate what each value means.\n\nThat way it is not possible for the ambiguous case of both being set",
+      "parentUuid": "AAAAdn//7M4\u003d",
+      "revId": "5cac8df24519d3c2f4795eac026d2316a67cd2f6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//7Sc\u003d",
         "filename": "vp9/encoder/vp9_picklpf.c",
         "patchSetId": 1
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//7LE\u003d",
+        "filename": "vp9/encoder/vp9_picklpf.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 131,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2014-01-24T18:11:41Z",
+      "side": 1,
+      "message": "This require propagating const through vp9_calc_ss_err() and family. \n\nThis probably should be done but it expands the scope of this into a bunch of unrelated stuff. I will follow up with a patch to do this.",
+      "parentUuid": "AAAAdn//7Sc\u003d",
+      "revId": "5cac8df24519d3c2f4795eac026d2316a67cd2f6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//7M0\u003d",
         "filename": "vp9/encoder/vp9_picklpf.c",
         "patchSetId": 1
@@ -47,6 +83,24 @@
       "writtenOn": "2014-01-24T16:34:56Z",
       "side": 1,
       "message": "If it is not too hard to find a good fixed point approximation, not using floating point would be preferred.  (non-blocking)",
+      "revId": "5cac8df24519d3c2f4795eac026d2316a67cd2f6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//7LA\u003d",
+        "filename": "vp9/encoder/vp9_picklpf.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 144,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2014-01-24T18:11:41Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//7M0\u003d",
       "revId": "5cac8df24519d3c2f4795eac026d2316a67cd2f6",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
