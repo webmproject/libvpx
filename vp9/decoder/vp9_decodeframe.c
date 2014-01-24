@@ -743,7 +743,7 @@ static void setup_frame_size_with_refs(VP9D_COMP *pbi,
   if (!found)
     read_frame_size(rb, &width, &height);
 
-  if (!width || !height)
+  if (width <= 0 || height <= 0)
     vpx_internal_error(&cm->error, VPX_CODEC_CORRUPT_FRAME,
                        "Referenced frame with invalid size");
 
