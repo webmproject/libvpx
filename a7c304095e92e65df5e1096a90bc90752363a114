@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//7Vo\u003d",
+        "filename": "vp9/common/vp9_loopfilter.h",
+        "patchSetId": 21
+      },
+      "lineNbr": 82,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2014-01-24T01:37:25Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//7g4\u003d",
+      "revId": "a7c304095e92e65df5e1096a90bc90752363a114",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//7g8\u003d",
         "filename": "vp9/common/vp9_loopfilter.h",
         "patchSetId": 21
@@ -30,6 +48,24 @@
       "writtenOn": "2014-01-23T18:36:52Z",
       "side": 1,
       "message": "nit: alignment?",
+      "revId": "a7c304095e92e65df5e1096a90bc90752363a114",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//7Vk\u003d",
+        "filename": "vp9/common/vp9_loopfilter.h",
+        "patchSetId": 21
+      },
+      "lineNbr": 89,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2014-01-24T01:37:25Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//7g8\u003d",
       "revId": "a7c304095e92e65df5e1096a90bc90752363a114",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//7VY\u003d",
+        "filename": "vp9/decoder/vp9_decodeframe.c",
+        "patchSetId": 21
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2014-01-24T01:37:25Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//7hE\u003d",
+      "revId": "a7c304095e92e65df5e1096a90bc90752363a114",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//7g0\u003d",
         "filename": "vp9/decoder/vp9_dthread.c",
         "patchSetId": 21
@@ -64,6 +118,24 @@
       "writtenOn": "2014-01-23T18:36:52Z",
       "side": 1,
       "message": "nit: Alphabetize includes",
+      "revId": "a7c304095e92e65df5e1096a90bc90752363a114",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//7VQ\u003d",
+        "filename": "vp9/decoder/vp9_dthread.c",
+        "patchSetId": 21
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2014-01-24T01:37:25Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//7g0\u003d",
       "revId": "a7c304095e92e65df5e1096a90bc90752363a114",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//7VM\u003d",
+        "filename": "vp9/decoder/vp9_dthread.c",
+        "patchSetId": 21
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2014-01-24T01:37:25Z",
+      "side": 1,
+      "message": "\"cur_row_sb_col \u003d \u0026lf_sync-\u003ecur_sb_col[r]\" is assigned at row level. Not easy to be move to end of function.",
+      "parentUuid": "AAAAdn//7gI\u003d",
+      "revId": "a7c304095e92e65df5e1096a90bc90752363a114",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//7ck\u003d",
         "filename": "vp9/decoder/vp9_dthread.c",
         "patchSetId": 21
@@ -98,6 +188,24 @@
       "writtenOn": "2014-01-23T20:40:52Z",
       "side": 1,
       "message": "this won\u0027t build on windows, you might want to start by introducing a change to common with a vp9_... variant, rather than duplicating vp9_thread.c",
+      "revId": "a7c304095e92e65df5e1096a90bc90752363a114",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//7Vs\u003d",
+        "filename": "vp9/decoder/vp9_dthread.c",
+        "patchSetId": 21
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2014-01-24T01:37:25Z",
+      "side": 1,
+      "message": "Done. Thanks.",
+      "parentUuid": "AAAAdn//7ck\u003d",
       "revId": "a7c304095e92e65df5e1096a90bc90752363a114",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -121,6 +229,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//7VE\u003d",
+        "filename": "vp9/decoder/vp9_dthread.c",
+        "patchSetId": 21
+      },
+      "lineNbr": 112,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2014-01-24T01:37:25Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//7cc\u003d",
+      "revId": "a7c304095e92e65df5e1096a90bc90752363a114",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//7cY\u003d",
         "filename": "vp9/decoder/vp9_dthread.c",
         "patchSetId": 21
@@ -132,6 +258,24 @@
       "writtenOn": "2014-01-23T20:40:52Z",
       "side": 1,
       "message": "cast necessary?",
+      "revId": "a7c304095e92e65df5e1096a90bc90752363a114",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//7U0\u003d",
+        "filename": "vp9/decoder/vp9_dthread.c",
+        "patchSetId": 21
+      },
+      "lineNbr": 113,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2014-01-24T01:37:25Z",
+      "side": 1,
+      "message": "LFWorkerData is defined in loopfilter.h (in common), so I use:\nvoid *lf_sync;\nThen, cast is needed here.",
+      "parentUuid": "AAAAdn//7cY\u003d",
       "revId": "a7c304095e92e65df5e1096a90bc90752363a114",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -173,6 +317,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//7Uk\u003d",
+        "filename": "vp9/decoder/vp9_dthread.h",
+        "patchSetId": 21
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2014-01-24T01:37:25Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//7cQ\u003d",
+      "revId": "a7c304095e92e65df5e1096a90bc90752363a114",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//7cU\u003d",
         "filename": "vp9/decoder/vp9_dthread.h",
         "patchSetId": 21
@@ -184,6 +346,24 @@
       "writtenOn": "2014-01-23T20:40:52Z",
       "side": 1,
       "message": "I don\u0027t think this is necessary here",
+      "revId": "a7c304095e92e65df5e1096a90bc90752363a114",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//7Ug\u003d",
+        "filename": "vp9/decoder/vp9_dthread.h",
+        "patchSetId": 21
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2014-01-24T01:37:25Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//7cU\u003d",
       "revId": "a7c304095e92e65df5e1096a90bc90752363a114",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -207,6 +387,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//7Uc\u003d",
+        "filename": "vp9/decoder/vp9_dthread.h",
+        "patchSetId": 21
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2014-01-24T01:37:25Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//7hg\u003d",
+      "revId": "a7c304095e92e65df5e1096a90bc90752363a114",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//7hc\u003d",
         "filename": "vp9/decoder/vp9_dthread.h",
         "patchSetId": 21
@@ -218,6 +416,24 @@
       "writtenOn": "2014-01-23T18:36:52Z",
       "side": 1,
       "message": "nit: vertical ws before this comment.",
+      "revId": "a7c304095e92e65df5e1096a90bc90752363a114",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//7UY\u003d",
+        "filename": "vp9/decoder/vp9_dthread.h",
+        "patchSetId": 21
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2014-01-24T01:37:25Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//7hc\u003d",
       "revId": "a7c304095e92e65df5e1096a90bc90752363a114",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -241,6 +457,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//7UM\u003d",
+        "filename": "vp9/decoder/vp9_onyxd_if.c",
+        "patchSetId": 21
+      },
+      "lineNbr": 183,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2014-01-24T01:37:25Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//7ik\u003d",
+      "revId": "a7c304095e92e65df5e1096a90bc90752363a114",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//7hk\u003d",
         "filename": "vp9/decoder/vp9_thread.h",
         "patchSetId": 21
@@ -252,6 +486,24 @@
       "writtenOn": "2014-01-23T18:36:52Z",
       "side": 1,
       "message": "You should put a comment there that sync_range must be equal to a power of 2. Or make it an enum.",
+      "revId": "a7c304095e92e65df5e1096a90bc90752363a114",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//7UI\u003d",
+        "filename": "vp9/decoder/vp9_thread.h",
+        "patchSetId": 21
+      },
+      "lineNbr": 79,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2014-01-24T01:37:25Z",
+      "side": 1,
+      "message": "sync_range could be any number in [1, number_of_super_blocks_per_row]. Will add a comment.",
+      "parentUuid": "AAAAdn//7hk\u003d",
       "revId": "a7c304095e92e65df5e1096a90bc90752363a114",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
