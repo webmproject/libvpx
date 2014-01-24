@@ -184,12 +184,6 @@ static INLINE int sp(int x) {
   return (x & 7) << 1;
 }
 
-#define IFMVCV(r, c, s, e)                                \
-    if (c >= minc && c <= maxc && r >= minr && r <= maxr) \
-      s                                                   \
-    else                                                  \
-      e;
-
 static INLINE uint8_t *pre(uint8_t *buf, int stride, int r, int c, int offset) {
   return &buf[(r >> 3) * stride + (c >> 3) - offset];
 }
@@ -201,17 +195,18 @@ static INLINE uint8_t *pre(uint8_t *buf, int stride, int r, int c, int offset) {
 
 /* checks if (r, c) has better score than previous best */
 #define CHECK_BETTER(v, r, c) \
-    IFMVCV(r, c, {                                                       \
-      thismse = (DIST(r, c));                                            \
-      if ((v = MVC(r, c) + thismse) < besterr) {                         \
-        besterr = v;                                                     \
-        br = r;                                                          \
-        bc = c;                                                          \
-        *distortion = thismse;                                           \
-        *sse1 = sse;                                                     \
-      }                                                                  \
-    },                                                                   \
-    v = INT_MAX;)
+  if (c >= minc && c <= maxc && r >= minr && r <= maxr) {              \
+    thismse = (DIST(r, c));                                            \
+    if ((v = MVC(r, c) + thismse) < besterr) {                         \
+      besterr = v;                                                     \
+      br = r;                                                          \
+      bc = c;                                                          \
+      *distortion = thismse;                                           \
+      *sse1 = sse;                                                     \
+    }                                                                  \
+  } else {                                                             \
+    v = INT_MAX;                                                       \
+  }
 
 #define FIRST_LEVEL_CHECKS                              \
   {                                                     \
@@ -469,7 +464,6 @@ int vp9_find_best_sub_pixel_comp_tree(MACROBLOCK *x,
 #undef MVC
 #undef PRE
 #undef DIST
-#undef IFMVCV
 #undef CHECK_BETTER
 #undef SP
 
