@@ -3872,24 +3872,25 @@ void vp9_set_svc(VP9_PTR comp, int use_svc) {
   return;
 }
 
-int vp9_calc_ss_err(YV12_BUFFER_CONFIG *source, YV12_BUFFER_CONFIG *dest) {
+int vp9_calc_ss_err(const YV12_BUFFER_CONFIG *source,
+                    const YV12_BUFFER_CONFIG *reference) {
   int i, j;
   int total = 0;
 
-  uint8_t *src = source->y_buffer;
-  uint8_t *dst = dest->y_buffer;
+  const uint8_t *src = source->y_buffer;
+  const uint8_t *ref = reference->y_buffer;
 
   // Loop through the Y plane raw and reconstruction data summing
   // (square differences)
   for (i = 0; i < source->y_height; i += 16) {
     for (j = 0; j < source->y_width; j += 16) {
       unsigned int sse;
-      total += vp9_mse16x16(src + j, source->y_stride, dst + j, dest->y_stride,
-                            &sse);
+      total += vp9_mse16x16(src + j, source->y_stride,
+                            ref + j, reference->y_stride, &sse);
     }
 
     src += 16 * source->y_stride;
-    dst += 16 * dest->y_stride;
+    ref += 16 * reference->y_stride;
   }
 
   return total;

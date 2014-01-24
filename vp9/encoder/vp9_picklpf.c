@@ -34,7 +34,7 @@ static int get_max_filter_level(VP9_COMP *cpi, int base_qindex) {
 void vp9_set_alt_lf_level(VP9_COMP *cpi, int filt_val) {
 }
 
-static void search_filter_level(YV12_BUFFER_CONFIG *sd, VP9_COMP *cpi,
+static void search_filter_level(const YV12_BUFFER_CONFIG *sd, VP9_COMP *cpi,
                                 int partial) {
   MACROBLOCKD *const xd = &cpi->mb.e_mbd;
   VP9_COMMON *const cm = &cpi->common;
@@ -128,7 +128,8 @@ static void search_filter_level(YV12_BUFFER_CONFIG *sd, VP9_COMP *cpi,
   lf->filter_level = filt_best;
 }
 
-void vp9_pick_filter_level(YV12_BUFFER_CONFIG *sd, VP9_COMP *cpi, int method) {
+void vp9_pick_filter_level(const YV12_BUFFER_CONFIG *sd, VP9_COMP *cpi,
+                           int method) {
   VP9_COMMON *const cm = &cpi->common;
   struct loopfilter *const lf = &cm->lf;
 
