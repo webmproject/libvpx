@@ -839,13 +839,12 @@ int main_loop(int argc, const char **argv_) {
     if (progress)
       show_progress(frame_in, frame_out, dx_time);
 
-    if (!noblit) {
-      if (frame_out == 1 && img && single_file && !do_md5 && use_y4m)
-        y4m_write_file_header(outfile,
-                              vpx_input_ctx.width, vpx_input_ctx.height,
-                              &vpx_input_ctx.framerate, img->fmt);
+    if (!noblit && img) {
+      const int PLANES_YUV[] = {VPX_PLANE_Y, VPX_PLANE_U, VPX_PLANE_V};
+      const int PLANES_YVU[] = {VPX_PLANE_Y, VPX_PLANE_V, VPX_PLANE_U};
+      const int *planes = flipuv ? PLANES_YVU : PLANES_YUV;
 
-      if (img && do_scale) {
+      if (do_scale) {
         if (frame_out == 1) {
           // If the output frames are to be scaled to a fixed display size then
           // use the width and height specified in the container. If either of
@@ -876,33 +875,32 @@ int main_loop(int argc, const char **argv_) {
         }
       }
 
-      if (img) {
-        const int PLANES_YUV[] = {VPX_PLANE_Y, VPX_PLANE_U, VPX_PLANE_V};
-        const int PLANES_YVU[] = {VPX_PLANE_Y, VPX_PLANE_V, VPX_PLANE_U};
-
-        const int *planes = flipuv ? PLANES_YVU : PLANES_YUV;
-
-        if (!single_file) {
-          generate_filename(outfile_pattern, outfile_name, PATH_MAX,
-                            img->d_w, img->d_h, frame_in);
-          if (do_md5) {
-            MD5Init(&md5_ctx);
-            update_image_md5(img, planes, &md5_ctx);
-            MD5Final(md5_digest, &md5_ctx);
-            print_md5(md5_digest, outfile_name);
-          } else {
-            outfile = open_outfile(outfile_name);
-            write_image_file(img, planes, outfile);
-            fclose(outfile);
-          }
+      if (single_file) {
+        if (do_md5) {
+          update_image_md5(img, planes, &md5_ctx);
         } else {
-          if (do_md5) {
-            update_image_md5(img, planes, &md5_ctx);
-          } else {
-            if (use_y4m)
-              y4m_write_frame_header(outfile);
-            write_image_file(img, planes, outfile);
+          if (use_y4m) {
+            if (frame_out == 1) {
+              y4m_write_file_header(outfile,
+                                    vpx_input_ctx.width, vpx_input_ctx.height,
+                                    &vpx_input_ctx.framerate, img->fmt);
+            }
+            y4m_write_frame_header(outfile);
           }
+          write_image_file(img, planes, outfile);
+        }
+      } else {
+        generate_filename(outfile_pattern, outfile_name, PATH_MAX,
+                          img->d_w, img->d_h, frame_in);
+        if (do_md5) {
+          MD5Init(&md5_ctx);
+          update_image_md5(img, planes, &md5_ctx);
+          MD5Final(md5_digest, &md5_ctx);
+          print_md5(md5_digest, outfile_name);
+        } else {
+          outfile = open_outfile(outfile_name);
+          write_image_file(img, planes, outfile);
+          fclose(outfile);
         }
       }
     }
