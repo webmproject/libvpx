@@ -15,6 +15,10 @@
 
 #include "vpx/vpx_integer.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 struct vp9_write_bit_buffer {
   uint8_t *bit_buffer;
   size_t bit_offset;
@@ -44,5 +48,9 @@ static void vp9_wb_write_literal(struct vp9_write_bit_buffer *wb,
     vp9_wb_write_bit(wb, (data >> bit) & 1);
 }
 
+
+#ifdef __cplusplus
+}  // extern "C"
+#endif
 
 #endif  // VP9_ENCODER_VP9_WRITE_BIT_BUFFER_H_

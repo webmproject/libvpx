@@ -14,6 +14,10 @@
 #include "vp9/common/vp9_blockd.h"
 #include "vp9/common/vp9_onyxc_int.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 static INLINE const MODE_INFO *get_above_mi(const MACROBLOCKD *const xd) {
   return xd->up_available ? xd->mi_8x8[-xd->mode_info_stride] : NULL;
 }
@@ -128,5 +132,9 @@ static unsigned int *get_tx_counts(TX_SIZE max_tx_size, int ctx,
       return NULL;
   }
 }
+
+#ifdef __cplusplus
+}  // extern "C"
+#endif
 
 #endif  // VP9_COMMON_VP9_PRED_COMMON_H_

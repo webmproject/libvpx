@@ -17,11 +17,19 @@
 
 #include "vpx/vpx_decoder.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 void y4m_write_file_header(FILE *file, int width, int height,
                            const struct VpxRational *framerate,
                            vpx_img_fmt_t fmt);
 
 void y4m_write_frame_header(FILE *file);
 
+
+#ifdef __cplusplus
+}  // extern "C"
+#endif
 
 #endif  // Y4MENC_H_

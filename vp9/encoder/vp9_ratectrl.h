@@ -14,6 +14,10 @@
 
 #include "vp9/encoder/vp9_onyx_int.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define FRAME_OVERHEAD_BITS 200
 
 void vp9_save_coding_context(VP9_COMP *cpi);
@@ -68,5 +72,9 @@ int vp9_drop_frame(VP9_COMP *cpi);
 
 // Update the buffer level.
 void vp9_update_buffer_level(VP9_COMP *cpi, int encoded_frame_size);
+
+#ifdef __cplusplus
+}  // extern "C"
+#endif
 
 #endif  // VP9_ENCODER_VP9_RATECTRL_H_

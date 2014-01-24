@@ -14,6 +14,10 @@
 #include "vp9/common/vp9_mv.h"
 #include "vp9/common/vp9_convolve.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define REF_SCALE_SHIFT 14
 #define REF_NO_SCALE (1 << REF_SCALE_SHIFT)
 #define REF_INVALID_SCALE -1
@@ -45,5 +49,9 @@ static int vp9_is_scaled(const struct scale_factors *sf) {
   return sf->x_scale_fp != REF_NO_SCALE ||
          sf->y_scale_fp != REF_NO_SCALE;
 }
+
+#ifdef __cplusplus
+}  // extern "C"
+#endif
 
 #endif  // VP9_COMMON_VP9_SCALE_H_

@@ -12,7 +12,10 @@
 #define VP9_ENCODER_VP9_VARIANCE_H_
 
 #include "vpx/vpx_integer.h"
-// #include "./vpx_config.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 void variance(const uint8_t *src_ptr,
               int  source_stride,
@@ -112,4 +115,8 @@ static void comp_avg_pred(uint8_t *comp_pred, const uint8_t *pred, int width,
     ref += ref_stride;
   }
 }
+#ifdef __cplusplus
+}  // extern "C"
+#endif
+
 #endif  // VP9_ENCODER_VP9_VARIANCE_H_

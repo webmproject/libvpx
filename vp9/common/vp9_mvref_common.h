@@ -7,12 +7,16 @@
  *  in the file PATENTS.  All contributing project authors may
  *  be found in the AUTHORS file in the root of the source tree.
  */
+#ifndef VP9_COMMON_VP9_MVREF_COMMON_H_
+#define VP9_COMMON_VP9_MVREF_COMMON_H_
 
 #include "vp9/common/vp9_onyxc_int.h"
 #include "vp9/common/vp9_blockd.h"
 
-#ifndef VP9_COMMON_VP9_MVREF_COMMON_H_
-#define VP9_COMMON_VP9_MVREF_COMMON_H_
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 
 void vp9_find_mv_refs_idx(const VP9_COMMON *cm, const MACROBLOCKD *xd,
                           const TileInfo *const tile,
@@ -55,5 +59,9 @@ void vp9_append_sub8x8_mvs_for_idx(VP9_COMMON *cm, MACROBLOCKD *xd,
                                    const TileInfo *const tile,
                                    int block, int ref, int mi_row, int mi_col,
                                    int_mv *nearest, int_mv *near);
+
+#ifdef __cplusplus
+}  // extern "C"
+#endif
 
 #endif  // VP9_COMMON_VP9_MVREF_COMMON_H_

@@ -11,16 +11,15 @@
 #ifndef VP9_COMMON_VP9_ONYX_H_
 #define VP9_COMMON_VP9_ONYX_H_
 
-#ifdef __cplusplus
-extern "C"
-{ // NOLINT
-#endif
-
 #include "./vpx_config.h"
 #include "vpx/internal/vpx_codec_internal.h"
 #include "vpx/vp8cx.h"
 #include "vpx_scale/yv12config.h"
 #include "vp9/common/vp9_ppflags.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #define MAX_SEGMENTS 8
 
@@ -237,7 +236,7 @@ extern "C"
   int vp9_get_quantizer(VP9_PTR c);
 
 #ifdef __cplusplus
-}
+}  // extern "C"
 #endif
 
 #endif  // VP9_COMMON_VP9_ONYX_H_

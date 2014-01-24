@@ -11,13 +11,13 @@
 #ifndef VP9_DECODER_VP9_ONYXD_H_
 #define VP9_DECODER_VP9_ONYXD_H_
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #include "vpx_scale/yv12config.h"
 #include "vp9/common/vp9_ppflags.h"
 #include "vpx/vpx_codec.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 typedef void *VP9D_PTR;
 
@@ -63,7 +63,7 @@ VP9D_PTR vp9_create_decompressor(VP9D_CONFIG *oxcf);
 void vp9_remove_decompressor(VP9D_PTR comp);
 
 #ifdef __cplusplus
-}
+}  // extern "C"
 #endif
 
 #endif  // VP9_DECODER_VP9_ONYXD_H_

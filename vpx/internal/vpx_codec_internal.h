@@ -47,6 +47,9 @@
 #include "../vpx_encoder.h"
 #include <stdarg.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /*!\brief Current ABI version number
  *
@@ -476,6 +479,7 @@ vpx_codec_pkt_list_get(struct vpx_codec_pkt_list *list,
 
 #include <stdio.h>
 #include <setjmp.h>
+
 struct vpx_internal_error_info {
   vpx_codec_err_t  error_code;
   int              has_detail;
@@ -532,4 +536,8 @@ vpx_codec_err_t vpx_validate_mmaps(const vpx_codec_stream_info_t *si,
                                    const vpx_codec_mmap_t *mmaps,
                                    const mem_req_t *mem_reqs, int nreqs,
                                    vpx_codec_flags_t init_flags);
+#ifdef __cplusplus
+}  // extern "C"
+#endif
+
 #endif  // VPX_INTERNAL_VPX_CODEC_INTERNAL_H_

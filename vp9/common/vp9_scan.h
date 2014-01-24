@@ -17,6 +17,10 @@
 #include "vp9/common/vp9_enums.h"
 #include "vp9/common/vp9_blockd.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define MAX_NEIGHBORS 2
 
 void vp9_init_neighbors();
@@ -35,5 +39,9 @@ static INLINE int get_coef_context(const int16_t *neighbors,
   return (1 + token_cache[neighbors[MAX_NEIGHBORS * c + 0]] +
           token_cache[neighbors[MAX_NEIGHBORS * c + 1]]) >> 1;
 }
+
+#ifdef __cplusplus
+}  // extern "C"
+#endif
 
 #endif  // VP9_COMMON_VP9_SCAN_H_

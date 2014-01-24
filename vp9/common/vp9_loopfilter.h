@@ -17,6 +17,10 @@
 #include "vp9/common/vp9_blockd.h"
 #include "vp9/common/vp9_seg_common.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define MAX_LOOP_FILTER 63
 #define MAX_SHARPNESS 7
 
@@ -90,4 +94,8 @@ typedef struct LoopFilterWorkerData {
 
 // Operates on the rows described by LFWorkerData passed as 'arg1'.
 int vp9_loop_filter_worker(void *arg1, void *arg2);
+#ifdef __cplusplus
+}  // extern "C"
+#endif
+
 #endif  // VP9_COMMON_VP9_LOOPFILTER_H_

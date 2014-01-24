@@ -25,6 +25,10 @@
 #include "vp9/common/vp9_scale.h"
 #include "vp9/common/vp9_seg_common.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define BLOCK_SIZE_GROUPS 4
 #define MBSKIP_CONTEXTS 3
 #define INTER_MODE_CONTEXTS 7
@@ -462,5 +466,9 @@ static int get_tx_eob(const struct segmentation *seg, int segment_id,
   const int eob_max = 16 << (tx_size << 1);
   return vp9_segfeature_active(seg, segment_id, SEG_LVL_SKIP) ? 0 : eob_max;
 }
+
+#ifdef __cplusplus
+}  // extern "C"
+#endif
 
 #endif  // VP9_COMMON_VP9_BLOCKD_H_

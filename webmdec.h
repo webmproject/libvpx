@@ -12,6 +12,10 @@
 
 #include "./tools_common.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 struct nestegg;
 struct nestegg_packet;
 struct VpxInputContext;
@@ -36,5 +40,9 @@ int webm_guess_framerate(struct WebmInputContext *webm_ctx,
                          struct VpxInputContext *vpx_ctx);
 
 void webm_free(struct WebmInputContext *webm_ctx);
+
+#ifdef __cplusplus
+}  // extern "C"
+#endif
 
 #endif  // WEBMDEC_H_

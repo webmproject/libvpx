@@ -25,6 +25,10 @@
 #include "vp9/common/vp9_postproc.h"
 #endif
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define REFS_PER_FRAME 3
 
 #define REF_FRAMES_LOG2 3
@@ -358,5 +362,9 @@ static INLINE int partition_plane_context(
 
   return (left * 2 + above) + bsl * PARTITION_PLOFFSET;
 }
+
+#ifdef __cplusplus
+}  // extern "C"
+#endif
 
 #endif  // VP9_COMMON_VP9_ONYXC_INT_H_

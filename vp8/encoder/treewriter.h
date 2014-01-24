@@ -19,6 +19,10 @@
 
 #include "boolhuff.h"       /* for now */
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef BOOL_CODER vp8_writer;
 
 #define vp8_write vp8_encode_bool
@@ -122,5 +126,9 @@ void vp8_cost_tokens(
 void vp8_cost_tokens2(
     int *Costs, const vp8_prob *, vp8_tree, int
 );
+
+#ifdef __cplusplus
+}  // extern "C"
+#endif
 
 #endif  // VP8_ENCODER_TREEWRITER_H_

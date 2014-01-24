@@ -14,6 +14,10 @@
 #include <stdlib.h>
 #include "vpx_config.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef enum {
   VPX_CPU_UNKNOWN = -1,
   VPX_CPU_AMD,
@@ -256,5 +260,9 @@ x87_set_double_precision(void) {
 
 
 extern void vpx_reset_mmx_state(void);
-#endif  // VPX_PORTS_X86_H_
 
+#ifdef __cplusplus
+}  // extern "C"
+#endif
+
+#endif  // VPX_PORTS_X86_H_

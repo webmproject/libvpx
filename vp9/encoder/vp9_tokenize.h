@@ -16,6 +16,10 @@
 #include "vp9/encoder/vp9_block.h"
 #include "vp9/encoder/vp9_treewriter.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 void vp9_tokenize_initialize();
 
 #define EOSB_TOKEN 127     // Not signalled, encoder only
@@ -49,5 +53,9 @@ extern const int *vp9_dct_value_cost_ptr;
  *  fields are not.
  */
 extern const TOKENVALUE *vp9_dct_value_tokens_ptr;
+
+#ifdef __cplusplus
+}  // extern "C"
+#endif
 
 #endif  // VP9_ENCODER_VP9_TOKENIZE_H_

@@ -13,6 +13,10 @@
 #define VP8_COMMON_RECONINTRA4X4_H_
 #include "vp8/common/blockd.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 static void intra_prediction_down_copy(MACROBLOCKD *xd,
                                              unsigned char *above_right_src)
 {
@@ -28,5 +32,9 @@ static void intra_prediction_down_copy(MACROBLOCKD *xd,
     *dst_ptr1 = *src_ptr;
     *dst_ptr2 = *src_ptr;
 }
+
+#ifdef __cplusplus
+}  // extern "C"
+#endif
 
 #endif  // VP8_COMMON_RECONINTRA4X4_H_

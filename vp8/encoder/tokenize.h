@@ -15,6 +15,10 @@
 #include "vp8/common/entropy.h"
 #include "block.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 void vp8_tokenize_initialize();
 
 typedef struct
@@ -46,5 +50,9 @@ extern const short *const vp8_dct_value_cost_ptr;
  *  fields are not.
  */
 extern const TOKENVALUE *const vp8_dct_value_tokens_ptr;
+
+#ifdef __cplusplus
+}  // extern "C"
+#endif
 
 #endif  // VP8_ENCODER_TOKENIZE_H_

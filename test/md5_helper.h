@@ -11,10 +11,8 @@
 #ifndef TEST_MD5_HELPER_H_
 #define TEST_MD5_HELPER_H_
 
-extern "C" {
 #include "./md5_utils.h"
 #include "vpx/vpx_decoder.h"
-}
 
 namespace libvpx_test {
 class MD5 {

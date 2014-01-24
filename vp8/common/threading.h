@@ -12,6 +12,10 @@
 #ifndef VP8_COMMON_THREADING_H_
 #define VP8_COMMON_THREADING_H_
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #if CONFIG_OS_SUPPORT && CONFIG_MULTITHREAD
 
 /* Thread management macros */
@@ -182,5 +186,9 @@ static inline int sem_destroy(sem_t * sem)
 #endif
 
 #endif /* CONFIG_OS_SUPPORT && CONFIG_MULTITHREAD */
+
+#ifdef __cplusplus
+}  // extern "C"
+#endif
 
 #endif  // VP8_COMMON_THREADING_H_

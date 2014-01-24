@@ -14,12 +14,11 @@
 #include "test/clear_system_state.h"
 #include "test/register_state_check.h"
 #include "third_party/googletest/src/include/gtest/gtest.h"
-extern "C" {
+
 #include "./vpx_config.h"
 #include "./vp8_rtcd.h"
 #include "vp8/common/blockd.h"
 #include "vpx_mem/vpx_mem.h"
-}
 
 namespace {
 

@@ -21,6 +21,10 @@
 #include "vpx_mem/vpx_mem.h"
 #endif
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 static void eob_adjust(char *eobs, short *diff)
 {
     /* eob adjust.... the idct can only skip if both the dc and eob are zero */
@@ -59,4 +63,8 @@ static void vp8_inverse_transform_mby(MACROBLOCKD *xd)
                      xd->dst.y_buffer,
                      xd->dst.y_stride, xd->eobs);
 }
+#ifdef __cplusplus
+}  // extern "C"
+#endif
+
 #endif  // VP8_COMMON_INVTRANS_H_

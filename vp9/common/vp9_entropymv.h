@@ -15,6 +15,10 @@
 #include "./vpx_config.h"
 #include "vp9/common/vp9_blockd.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 struct VP9Common;
 
 void vp9_init_mv_probs(struct VP9Common *cm);
@@ -120,5 +124,9 @@ typedef struct {
 } nmv_context_counts;
 
 void vp9_inc_mv(const MV *mv, nmv_context_counts *mvctx);
+
+#ifdef __cplusplus
+}  // extern "C"
+#endif
 
 #endif  // VP9_COMMON_VP9_ENTROPYMV_H_

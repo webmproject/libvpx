@@ -12,6 +12,10 @@
 
 #include "vpx/vpx_encoder.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 enum TestDecodeFatality {
   TEST_DECODE_OFF,
   TEST_DECODE_FATAL,
@@ -41,5 +45,9 @@ struct VpxEncoderConfig {
   int disable_warnings;
   int disable_warning_prompt;
 };
+
+#ifdef __cplusplus
+}  // extern "C"
+#endif
 
 #endif  // VPXENC_H_

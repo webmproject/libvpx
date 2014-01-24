@@ -11,6 +11,10 @@
 #ifndef VP8_DECODER_EC_TYPES_H_
 #define VP8_DECODER_EC_TYPES_H_
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define MAX_OVERLAPS 16
 
 
@@ -46,5 +50,9 @@ typedef struct
     MV mv;
     MV_REFERENCE_FRAME ref_frame;
 } EC_BLOCK;
+
+#ifdef __cplusplus
+}  // extern "C"
+#endif
 
 #endif  // VP8_DECODER_EC_TYPES_H_

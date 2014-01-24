@@ -18,6 +18,10 @@
 
 #include "vp9/common/vp9_common.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef uint8_t vp9_prob;
 
 #define MAX_PROB 255
@@ -108,5 +112,9 @@ static void tree_merge_probs(const vp9_tree_index *tree,
 }
 
 DECLARE_ALIGNED(16, extern const uint8_t, vp9_norm[256]);
+
+#ifdef __cplusplus
+}  // extern "C"
+#endif
 
 #endif  // VP9_COMMON_VP9_PROB_H_

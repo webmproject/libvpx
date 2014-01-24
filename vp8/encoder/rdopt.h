@@ -12,6 +12,10 @@
 #ifndef VP8_ENCODER_RDOPT_H_
 #define VP8_ENCODER_RDOPT_H_
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define RDCOST(RM,DM,R,D) ( ((128+(R)*(RM)) >> 8) + (DM)*(D) )
 
 static void insertsortmv(int arr[], int len)
@@ -129,5 +133,9 @@ extern void vp8_mv_pred
     int near_sadidx[]
 );
 void vp8_cal_sad(VP8_COMP *cpi, MACROBLOCKD *xd, MACROBLOCK *x, int recon_yoffset, int near_sadidx[]);
+
+#ifdef __cplusplus
+}  // extern "C"
+#endif
 
 #endif  // VP8_ENCODER_RDOPT_H_

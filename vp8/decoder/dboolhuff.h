@@ -19,6 +19,10 @@
 #include "vpx_ports/mem.h"
 #include "vpx/vpx_integer.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef size_t VP8_BD_VALUE;
 
 #define VP8_BD_VALUE_SIZE ((int)sizeof(VP8_BD_VALUE)*CHAR_BIT)
@@ -134,5 +138,9 @@ static int vp8dx_bool_error(BOOL_DECODER *br)
     /* No error. */
     return 0;
 }
+
+#ifdef __cplusplus
+}  // extern "C"
+#endif
 
 #endif  // VP8_DECODER_DBOOLHUFF_H_

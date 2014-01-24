@@ -18,12 +18,9 @@
 #include "test/register_state_check.h"
 #include "test/util.h"
 
-extern "C" {
 #include "./vp9_rtcd.h"
 #include "vp9/common/vp9_blockd.h"
 #include "vp9/common/vp9_scan.h"
-}
-
 #include "vpx/vpx_integer.h"
 
 using libvpx_test::ACMRandom;

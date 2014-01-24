@@ -15,6 +15,10 @@
 #include "vp9/encoder/vp9_block.h"
 #include "vp9/encoder/vp9_variance.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 // The maximum number of steps in a step search given the largest
 // allowed initial step
 #define MAX_MVSEARCH_STEPS 11
@@ -129,4 +133,8 @@ int vp9_refining_search_8p_c(const MACROBLOCK *x,
                              int *mvjcost, int *mvcost[2],
                              const MV *center_mv, const uint8_t *second_pred,
                              int w, int h);
+#ifdef __cplusplus
+}  // extern "C"
+#endif
+
 #endif  // VP9_ENCODER_VP9_MCOMP_H_

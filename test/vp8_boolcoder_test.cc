@@ -20,10 +20,8 @@
 #include "third_party/googletest/src/include/gtest/gtest.h"
 #include "vpx/vpx_integer.h"
 
-extern "C" {
 #include "vp8/encoder/boolhuff.h"
 #include "vp8/decoder/dboolhuff.h"
-}
 
 namespace {
 const int num_tests = 10;

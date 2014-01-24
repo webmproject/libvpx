@@ -17,6 +17,10 @@
 #include "vp9/common/vp9_common.h"
 #include "vp9/common/vp9_onyxc_int.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #if HAVE_DSPR2
 /* processing 4 pixels at the same time
  * compute hev and mask in the same function */
@@ -362,4 +366,8 @@ static INLINE void vp9_flatmask5(uint32_t p4, uint32_t p3,
   *flat2 = flat1;
 }
 #endif  // #if HAVE_DSPR2
+#ifdef __cplusplus
+}  // extern "C"
+#endif
+
 #endif  // VP9_COMMON_MIPS_DSPR2_VP9_LOOPFILTER_MASKS_DSPR2_H_

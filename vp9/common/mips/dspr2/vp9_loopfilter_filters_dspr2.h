@@ -17,6 +17,10 @@
 #include "vp9/common/vp9_common.h"
 #include "vp9/common/vp9_onyxc_int.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #if HAVE_DSPR2
 /* inputs & outputs are quad-byte vectors */
 static INLINE void vp9_filter_dspr2(uint32_t mask, uint32_t hev,
@@ -752,4 +756,8 @@ static INLINE void vp9_wide_mbfilter_dspr2(uint32_t *op7, uint32_t *op6,
   *oq6 = res_oq6;
 }
 #endif  // #if HAVE_DSPR2
+#ifdef __cplusplus
+}  // extern "C"
+#endif
+
 #endif  // VP9_COMMON_MIPS_DSPR2_VP9_LOOPFILTER_FILTERS_DSPR2_H_

@@ -12,13 +12,11 @@
 #include "test/acm_random.h"
 #include "test/clear_system_state.h"
 #include "test/register_state_check.h"
-extern "C" {
 #include "./vpx_config.h"
 #include "./vp8_rtcd.h"
 #include "vp8/common/blockd.h"
 #include "vp8/encoder/block.h"
 #include "vpx_mem/vpx_mem.h"
-}
 
 typedef void (*subtract_b_fn_t)(BLOCK *be, BLOCKD *bd, int pitch);
 

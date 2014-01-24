@@ -18,6 +18,10 @@
 #include "vp9/common/vp9_scan.h"
 #include "vp9/common/vp9_entropymode.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define DIFF_UPDATE_PROB 252
 
 // Coefficient token alphabet
@@ -183,5 +187,9 @@ static const scan_order *get_scan(const MACROBLOCKD *xd, TX_SIZE tx_size,
     return &vp9_scan_orders[tx_size][mode2txfm_map[mode]];
   }
 }
+
+#ifdef __cplusplus
+}  // extern "C"
+#endif
 
 #endif  // VP9_COMMON_VP9_ENTROPY_H_
