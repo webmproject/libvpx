@@ -16,6 +16,23 @@
       "revId": "dbc632788729d3af7f422be6b5c7162174b89949",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//7NE\u003d",
+        "filename": "resize_util.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2014-01-24T16:16:09Z",
+      "side": 1,
+      "message": "would prefer \"vpx/vpx_integer.h\"? As \u003cinttypes.h\u003e does not exist on vs2012 build and will need to be fixed.",
+      "revId": "dbc632788729d3af7f422be6b5c7162174b89949",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
