@@ -409,8 +409,10 @@ typedef struct {
   // final encode.
   int use_uv_intra_rd_estimate;
 
-  // This picks a loop filter strength by trying a small portion of the image
-  // with different values.
+  // This feature controls how the loop filter level is determined:
+  // 0: Try the full image with different values.
+  // 1: Try a small portion of the image with different values.
+  // 2: Estimate the level based on quantizer and frame type
   int use_fast_lpf_pick;
 
   // This feature limits the number of coefficients updates we actually do
