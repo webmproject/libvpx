@@ -64,16 +64,23 @@ static void search_filter_level(const YV12_BUFFER_CONFIG *sd, VP9_COMP *cpi,
   // range.
   int filt_mid = clamp(lf->filter_level, min_filter_level, max_filter_level);
   int filter_step = filt_mid < 16 ? 4 : filt_mid / 4;
+  // Sum squared error at each filter level
+  int ss_err[MAX_LOOP_FILTER + 1];
+
+  // Set each entry to -1
+  vpx_memset(ss_err, 0xFF, sizeof(ss_err));
 
   //  Make a copy of the unfiltered / processed recon buffer
   vpx_yv12_copy_y(cm->frame_to_show, &cpi->last_frame_uf);
 
   best_err = try_filter_frame(sd, cpi, xd, cm, filt_mid, partial);
   filt_best = filt_mid;
+  ss_err[filt_mid] = best_err;
 
   while (filter_step > 0) {
     const int filt_high = MIN(filt_mid + filter_step, max_filter_level);
     const int filt_low = MAX(filt_mid - filter_step, min_filter_level);
+    int filt_err;
 
     // Bias against raising loop filter in favor of lowering it.
     int bias = (best_err >> (15 - (filt_mid / 8))) * filter_step;
@@ -87,7 +94,12 @@ static void search_filter_level(const YV12_BUFFER_CONFIG *sd, VP9_COMP *cpi,
 
     if (filt_direction <= 0 && filt_low != filt_mid) {
       // Get Low filter error score
-      int filt_err = try_filter_frame(sd, cpi, xd, cm, filt_low, partial);
+      if (ss_err[filt_low] < 0) {
+        filt_err = try_filter_frame(sd, cpi, xd, cm, filt_low, partial);
+        ss_err[filt_low] = filt_err;
+      } else {
+        filt_err = ss_err[filt_low];
+      }
       // If value is close to the best so far then bias towards a lower loop
       // filter value.
       if ((filt_err - bias) < best_err) {
@@ -101,7 +113,12 @@ static void search_filter_level(const YV12_BUFFER_CONFIG *sd, VP9_COMP *cpi,
 
     // Now look at filt_high
     if (filt_direction >= 0 && filt_high != filt_mid) {
-      int filt_err = try_filter_frame(sd, cpi, xd, cm, filt_high, partial);
+      if (ss_err[filt_high] < 0) {
+        filt_err = try_filter_frame(sd, cpi, xd, cm, filt_high, partial);
+        ss_err[filt_high] = filt_err;
+      } else {
+        filt_err = ss_err[filt_high];
+      }
       // Was it better than the previous best?
       if (filt_err < (best_err - bias)) {
         best_err = filt_err;
