@@ -8,10 +8,13 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#include "./ivfdec.h"
-
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+
+#include "./ivfdec.h"
+
+static const char *IVF_SIGNATURE = "DKIF";
 
 static void fix_framerate(int *num, int *den) {
   // Some versions of vpxenc used 1/(2*fps) for the timebase, so
@@ -37,8 +40,7 @@ int file_is_ivf(struct VpxInputContext *input_ctx) {
   int is_ivf = 0;
 
   if (fread(raw_hdr, 1, 32, input_ctx->file) == 32) {
-    if (raw_hdr[0] == 'D' && raw_hdr[1] == 'K' &&
-        raw_hdr[2] == 'I' && raw_hdr[3] == 'F') {
+    if (memcmp(IVF_SIGNATURE, raw_hdr, 4) == 0) {
       is_ivf = 1;
 
       if (mem_get_le16(raw_hdr + 4) != 0) {
@@ -105,4 +107,69 @@ int ivf_read_frame(FILE *infile, uint8_t **buffer,
   }
 
   return 1;
+}
+
+struct vpx_video {
+  FILE *file;
+  unsigned char *buffer;
+  size_t buffer_size;
+  size_t frame_size;
+  unsigned int fourcc;
+  int width;
+  int height;
+};
+
+vpx_video_t *vpx_video_open_file(FILE *file) {
+  char raw_hdr[32];
+  vpx_video_t *video;
+
+  if (fread(raw_hdr, 1, 32, file) != 32)
+    return NULL;  // Can't read file header;
+
+  if (memcmp(IVF_SIGNATURE, raw_hdr, 4) != 0)
+    return NULL;  // Wrong IVF signature
+
+  if (mem_get_le16(raw_hdr + 4) != 0)
+    return NULL;  // Wrong IVF version
+
+  video = (vpx_video_t *)malloc(sizeof(*video));
+  video->file = file;
+  video->buffer = NULL;
+  video->buffer_size = 0;
+  video->frame_size = 0;
+  video->fourcc = mem_get_le32(raw_hdr + 8);
+  video->width = mem_get_le16(raw_hdr + 12);
+  video->height = mem_get_le16(raw_hdr + 14);
+  return video;
+}
+
+void vpx_video_close(vpx_video_t *video) {
+  if (video) {
+    free(video->buffer);
+    free(video);
+  }
+}
+
+int vpx_video_get_width(vpx_video_t *video) {
+  return video->width;
+}
+
+int vpx_video_get_height(vpx_video_t *video) {
+  return video->height;
+}
+
+unsigned int vpx_video_get_fourcc(vpx_video_t *video) {
+  return video->fourcc;
+}
+
+int vpx_video_read_frame(vpx_video_t *video) {
+  return !ivf_read_frame(video->file, &video->buffer, &video->frame_size,
+                         &video->buffer_size);
+}
+
+const unsigned char *vpx_video_get_frame(vpx_video_t *video, size_t *size) {
+  if (size)
+    *size = video->frame_size;
+
+  return video->buffer;
 }

@@ -76,9 +76,11 @@ GEN_EXAMPLES-$(CONFIG_VP8_DECODER) += postproc.c
 postproc.GUID                    = 65E33355-F35E-4088-884D-3FD4905881D7
 postproc.DESCRIPTION             = Decoder postprocessor control
 GEN_EXAMPLES-$(CONFIG_VP8_DECODER) += decode_to_md5.c
-decode_to_md5.SRCS              += md5_utils.h md5_utils.c
-decode_to_md5.GUID               = 59120B9B-2735-4BFE-B022-146CA340FE42
-decode_to_md5.DESCRIPTION        = Frame by frame MD5 checksum
+decode_to_md5.SRCS                 += md5_utils.h md5_utils.c
+decode_to_md5.SRCS                 += ivfdec.h ivfdec.c
+decode_to_md5.SRCS                 += tools_common.h tools_common.c
+decode_to_md5.GUID                 = 59120B9B-2735-4BFE-B022-146CA340FE42
+decode_to_md5.DESCRIPTION          = Frame by frame MD5 checksum
 
 GEN_EXAMPLES-$(CONFIG_VP8_ENCODER) += simple_encoder.c
 simple_encoder.GUID              = 4607D299-8A71-4D2C-9B1D-071899B6FBFD
