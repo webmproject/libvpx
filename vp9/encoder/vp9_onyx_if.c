@@ -93,14 +93,6 @@ FILE *kf_list;
 FILE *keyfile;
 #endif
 
-
-#ifdef MODE_STATS
-extern void init_tx_count_stats();
-extern void write_tx_count_stats();
-extern void init_switchable_interp_stats();
-extern void write_switchable_interp_stats();
-#endif
-
 #ifdef SPEEDSTATS
 unsigned int frames_at_speed[16] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                                     0, 0, 0};
@@ -1632,11 +1624,6 @@ VP9_PTR vp9_create_compressor(VP9_CONFIG *oxcf) {
     init_context_counters();
 #endif
 
-#ifdef MODE_STATS
-  init_tx_count_stats();
-  init_switchable_interp_stats();
-#endif
-
   /*Initialize the feed-forward activity masking.*/
   cpi->activity_avg = 90 << 12;
   cpi->key_frame_frequency = cpi->oxcf.key_freq;
@@ -1892,13 +1879,6 @@ void vp9_remove_compressor(VP9_PTR *ptr) {
     if (cpi->pass == 2) {
       vp9_end_second_pass(cpi);
     }
-
-#ifdef MODE_STATS
-    if (cpi->pass != 1) {
-      write_tx_count_stats();
-      write_switchable_interp_stats();
-    }
-#endif
 
 #if CONFIG_INTERNAL_STATS
 

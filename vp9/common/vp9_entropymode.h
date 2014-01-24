@@ -21,8 +21,6 @@ extern "C" {
 #define SWITCHABLE_FILTERS 3   // number of switchable filters
 #define SWITCHABLE_FILTER_CONTEXTS (SWITCHABLE_FILTERS + 1)
 
-// #define MODE_STATS
-
 struct VP9Common;
 
 struct tx_probs {
