@@ -2304,13 +2304,12 @@ void vp9_setup_buffer_inter(VP9_COMP *cpi, MACROBLOCK *x,
             ref_frame, block_size);
 }
 
-YV12_BUFFER_CONFIG *vp9_get_scaled_ref_frame(VP9_COMP *cpi, int ref_frame) {
-  YV12_BUFFER_CONFIG *scaled_ref_frame = NULL;
-  int fb = get_ref_frame_idx(cpi, ref_frame);
-  int fb_scale = get_scale_ref_frame_idx(cpi, ref_frame);
-  if (cpi->scaled_ref_idx[fb_scale] != cpi->common.ref_frame_map[fb])
-    scaled_ref_frame = &cpi->common.yv12_fb[cpi->scaled_ref_idx[fb_scale]];
-  return scaled_ref_frame;
+const YV12_BUFFER_CONFIG *vp9_get_scaled_ref_frame(const VP9_COMP *cpi,
+                                                   int ref_frame) {
+  const VP9_COMMON *const cm = &cpi->common;
+  const int ref_idx = cm->ref_frame_map[get_ref_frame_idx(cpi, ref_frame)];
+  const int scaled_idx = cpi->scaled_ref_idx[ref_frame - 1];
+  return (scaled_idx != ref_idx) ? &cm->yv12_fb[scaled_idx] : NULL;
 }
 
 static INLINE int get_switchable_rate(const MACROBLOCK *x) {
@@ -2342,7 +2341,8 @@ static void single_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
   int tmp_row_min = x->mv_row_min;
   int tmp_row_max = x->mv_row_max;
 
-  YV12_BUFFER_CONFIG *scaled_ref_frame = vp9_get_scaled_ref_frame(cpi, ref);
+  const YV12_BUFFER_CONFIG *scaled_ref_frame = vp9_get_scaled_ref_frame(cpi,
+                                                                        ref);
 
   int_mv pred_mv[3];
   pred_mv[0] = mbmi->ref_mvs[ref][0];
@@ -2489,7 +2489,7 @@ static void joint_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
   struct buf_2d backup_yv12[2][MAX_MB_PLANE];
   struct buf_2d scaled_first_yv12 = xd->plane[0].pre[0];
   int last_besterr[2] = {INT_MAX, INT_MAX};
-  YV12_BUFFER_CONFIG *const scaled_ref_frame[2] = {
+  const YV12_BUFFER_CONFIG *const scaled_ref_frame[2] = {
     vp9_get_scaled_ref_frame(cpi, mbmi->ref_frame[0]),
     vp9_get_scaled_ref_frame(cpi, mbmi->ref_frame[1])
   };

@@ -60,8 +60,8 @@ static int full_pixel_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
   int buf_offset;
   int stride = xd->plane[0].pre[0].stride;
 
-  YV12_BUFFER_CONFIG *scaled_ref_frame = vp9_get_scaled_ref_frame(cpi, ref);
-
+  const YV12_BUFFER_CONFIG *scaled_ref_frame = vp9_get_scaled_ref_frame(cpi,
+                                                                        ref);
   if (scaled_ref_frame) {
     int i;
     // Swap out the reference frame for a version that's been scaled to
