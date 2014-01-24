@@ -367,14 +367,11 @@ static vp9_variance_fn_t get_block_variance_fn(BLOCK_SIZE bsize) {
   }
 }
 
-static unsigned int zz_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
-                                     YV12_BUFFER_CONFIG *recon_buffer,
-                                     int recon_yoffset) {
-  MACROBLOCKD *const xd = &x->e_mbd;
+static unsigned int zz_motion_search(const VP9_COMP *cpi, const MACROBLOCK *x) {
+  const MACROBLOCKD *const xd = &x->e_mbd;
   const uint8_t *const src = x->plane[0].src.buf;
   const int src_stride = x->plane[0].src.stride;
-  const uint8_t *const ref = xd->plane[0].pre[0].buf
-                           = recon_buffer->y_buffer + recon_yoffset;
+  const uint8_t *const ref = xd->plane[0].pre[0].buf;
   const int ref_stride = xd->plane[0].pre[0].stride;
 
   unsigned int sse;
@@ -385,8 +382,7 @@ static unsigned int zz_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
 
 static void first_pass_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
                                      const MV *ref_mv, MV *best_mv,
-                                     YV12_BUFFER_CONFIG *recon_buffer,
-                                     int *best_motion_err, int recon_yoffset) {
+                                     int *best_motion_err) {
   MACROBLOCKD *const xd = &x->e_mbd;
   MV tmp_mv = {0, 0};
   MV ref_mv_full = {ref_mv->row >> 3, ref_mv->col >> 3};
@@ -408,9 +404,6 @@ static void first_pass_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
 
   // override the default variance function to use MSE
   v_fn_ptr.vf = get_block_variance_fn(bsize);
-
-  // Set up pointers for this macro block recon buffer
-  xd->plane[0].pre[0].buf = recon_buffer->y_buffer + recon_yoffset;
 
   // Initial step/diamond search centred on best mv
   tmp_err = cpi->diamond_search_sad(x, &ref_mv_full, &tmp_mv,
@@ -547,7 +540,6 @@ void vp9_first_pass(VP9_COMP *cpi) {
     // for each macroblock col in image
     for (mb_col = 0; mb_col < cm->mb_cols; mb_col++) {
       int this_error;
-      int gf_motion_error = INT_MAX;
       int use_dc_pred = (mb_col || mb_row) && (!mb_col || !mb_row);
       double error_weight = 1.0;
 
@@ -611,16 +603,18 @@ void vp9_first_pass(VP9_COMP *cpi) {
 
       // Other than for the first frame do a motion search
       if (cm->current_video_frame > 0) {
-        int tmp_err;
-        int motion_error = zz_motion_search(cpi, x, lst_yv12, recon_yoffset);
+        int tmp_err, motion_error;
         int_mv mv, tmp_mv;
+
+        xd->plane[0].pre[0].buf = lst_yv12->y_buffer + recon_yoffset;
+        motion_error = zz_motion_search(cpi, x);
         // Simple 0,0 motion with no mv overhead
         mv.as_int = tmp_mv.as_int = 0;
 
         // Test last reference frame using the previous best mv as the
         // starting point (best reference) for the search
         first_pass_motion_search(cpi, x, &best_ref_mv.as_mv, &mv.as_mv,
-                                 lst_yv12, &motion_error, recon_yoffset);
+                                 &motion_error);
         if (cpi->oxcf.aq_mode == VARIANCE_AQ) {
           vp9_clear_system_state();  // __asm emms;
           motion_error *= error_weight;
@@ -631,7 +625,7 @@ void vp9_first_pass(VP9_COMP *cpi) {
         if (best_ref_mv.as_int) {
           tmp_err = INT_MAX;
           first_pass_motion_search(cpi, x, &zero_ref_mv.as_mv, &tmp_mv.as_mv,
-                                   lst_yv12, &tmp_err, recon_yoffset);
+                                   &tmp_err);
           if (cpi->oxcf.aq_mode == VARIANCE_AQ) {
             vp9_clear_system_state();  // __asm emms;
             tmp_err *= error_weight;
@@ -646,10 +640,13 @@ void vp9_first_pass(VP9_COMP *cpi) {
         // Experimental search in an older reference frame
         if (cm->current_video_frame > 1) {
           // Simple 0,0 motion with no mv overhead
-          gf_motion_error = zz_motion_search(cpi, x, gld_yv12, recon_yoffset);
+          int gf_motion_error;
+
+          xd->plane[0].pre[0].buf = gld_yv12->y_buffer + recon_yoffset;
+          gf_motion_error = zz_motion_search(cpi, x);
 
           first_pass_motion_search(cpi, x, &zero_ref_mv.as_mv, &tmp_mv.as_mv,
-                                   gld_yv12, &gf_motion_error, recon_yoffset);
+                                   &gf_motion_error);
           if (cpi->oxcf.aq_mode == VARIANCE_AQ) {
             vp9_clear_system_state();  // __asm emms;
             gf_motion_error *= error_weight;
