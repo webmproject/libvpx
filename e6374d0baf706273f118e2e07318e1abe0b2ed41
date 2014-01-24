@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//7N0\u003d",
+        "filename": "vp9/encoder/vp9_firstpass.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 1963,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-01-24T15:45:17Z",
+      "side": 1,
+      "message": "Note",
+      "revId": "e6374d0baf706273f118e2e07318e1abe0b2ed41",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//7Nw\u003d",
+        "filename": "vp9/encoder/vp9_lookahead.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 176,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-01-24T15:45:17Z",
+      "side": 1,
+      "message": "Delete the code completely if we don\u0027t need it.",
+      "revId": "e6374d0baf706273f118e2e07318e1abe0b2ed41",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//7Nk\u003d",
+        "filename": "vp9/encoder/vp9_onyx_if.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 3481,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-01-24T15:45:17Z",
+      "side": 1,
+      "message": "Uneccessary comment (and the one above), remove.",
+      "revId": "e6374d0baf706273f118e2e07318e1abe0b2ed41",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//7No\u003d",
+        "filename": "vp9/encoder/vp9_temporal_filter.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 486,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-01-24T15:45:17Z",
+      "side": 1,
+      "message": "Update comment to match your change.",
+      "revId": "e6374d0baf706273f118e2e07318e1abe0b2ed41",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
