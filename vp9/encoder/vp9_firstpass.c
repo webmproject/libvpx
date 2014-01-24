@@ -447,6 +447,16 @@ static void first_pass_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
   }
 }
 
+static BLOCK_SIZE get_bsize(const VP9_COMMON *cm, int mb_row, int mb_col) {
+  if (2 * mb_col + 1 < cm->mi_cols) {
+    return 2 * mb_row + 1 < cm->mi_rows ? BLOCK_16X16
+                                        : BLOCK_16X8;
+  } else {
+    return 2 * mb_row + 1 < cm->mi_rows ? BLOCK_8X16
+                                        : BLOCK_8X8;
+  }
+}
+
 void vp9_first_pass(VP9_COMP *cpi) {
   int mb_row, mb_col;
   MACROBLOCK *const x = &cpi->mb;
@@ -542,6 +552,7 @@ void vp9_first_pass(VP9_COMP *cpi) {
       int this_error;
       int use_dc_pred = (mb_col || mb_row) && (!mb_col || !mb_row);
       double error_weight = 1.0;
+      const BLOCK_SIZE bsize = get_bsize(cm, mb_row, mb_col);
 
       vp9_clear_system_state();  // __asm emms;
 
@@ -549,30 +560,15 @@ void vp9_first_pass(VP9_COMP *cpi) {
       xd->plane[1].dst.buf = new_yv12->u_buffer + recon_uvoffset;
       xd->plane[2].dst.buf = new_yv12->v_buffer + recon_uvoffset;
       xd->left_available = (mb_col != 0);
-
-      if (mb_col * 2 + 1 < cm->mi_cols) {
-        if (mb_row * 2 + 1 < cm->mi_rows) {
-          xd->mi_8x8[0]->mbmi.sb_type = BLOCK_16X16;
-        } else {
-          xd->mi_8x8[0]->mbmi.sb_type = BLOCK_16X8;
-        }
-      } else {
-        if (mb_row * 2 + 1 < cm->mi_rows) {
-          xd->mi_8x8[0]->mbmi.sb_type = BLOCK_8X16;
-        } else {
-          xd->mi_8x8[0]->mbmi.sb_type = BLOCK_8X8;
-        }
-      }
+      xd->mi_8x8[0]->mbmi.sb_type = bsize;
       xd->mi_8x8[0]->mbmi.ref_frame[0] = INTRA_FRAME;
       set_mi_row_col(xd, &tile,
-                     mb_row << 1,
-                     num_8x8_blocks_high_lookup[xd->mi_8x8[0]->mbmi.sb_type],
-                     mb_col << 1,
-                     num_8x8_blocks_wide_lookup[xd->mi_8x8[0]->mbmi.sb_type],
+                     mb_row << 1, num_8x8_blocks_high_lookup[bsize],
+                     mb_col << 1, num_8x8_blocks_wide_lookup[bsize],
                      cm->mi_rows, cm->mi_cols);
 
       if (cpi->oxcf.aq_mode == VARIANCE_AQ) {
-        int energy = vp9_block_energy(cpi, x, xd->mi_8x8[0]->mbmi.sb_type);
+        int energy = vp9_block_energy(cpi, x, bsize);
         error_weight = vp9_vaq_inv_q_ratio(energy);
       }
 
@@ -692,9 +688,8 @@ void vp9_first_pass(VP9_COMP *cpi) {
           xd->mi_8x8[0]->mbmi.tx_size = TX_4X4;
           xd->mi_8x8[0]->mbmi.ref_frame[0] = LAST_FRAME;
           xd->mi_8x8[0]->mbmi.ref_frame[1] = NONE;
-          vp9_build_inter_predictors_sby(xd, mb_row << 1, mb_col << 1,
-                                         xd->mi_8x8[0]->mbmi.sb_type);
-          vp9_encode_sby(x, xd->mi_8x8[0]->mbmi.sb_type);
+          vp9_build_inter_predictors_sby(xd, mb_row << 1, mb_col << 1, bsize);
+          vp9_encode_sby(x, bsize);
           sum_mvr += mv.as_mv.row;
           sum_mvr_abs += abs(mv.as_mv.row);
           sum_mvc += mv.as_mv.col;
