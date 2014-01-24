@@ -34,6 +34,22 @@ static int get_max_filter_level(VP9_COMP *cpi, int base_qindex) {
 void vp9_set_alt_lf_level(VP9_COMP *cpi, int filt_val) {
 }
 
+static int try_filter_frame(const YV12_BUFFER_CONFIG *sd, VP9_COMP *const cpi,
+                            MACROBLOCKD *const xd, VP9_COMMON *const cm,
+                            int filt_level, int partial) {
+  int filt_err;
+
+  vp9_set_alt_lf_level(cpi, filt_level);
+  vp9_loop_filter_frame(cm, xd, filt_level, 1, partial);
+
+  filt_err = vp9_calc_ss_err(sd, cm->frame_to_show);
+
+  // Re-instate the unfiltered frame
+  vpx_yv12_copy_y(&cpi->last_frame_uf, cm->frame_to_show);
+
+  return filt_err;
+}
+
 static void search_filter_level(const YV12_BUFFER_CONFIG *sd, VP9_COMP *cpi,
                                 int partial) {
   MACROBLOCKD *const xd = &cpi->mb.e_mbd;
@@ -41,8 +57,7 @@ static void search_filter_level(const YV12_BUFFER_CONFIG *sd, VP9_COMP *cpi,
   struct loopfilter *const lf = &cm->lf;
   const int min_filter_level = get_min_filter_level(cpi, cm->base_qindex);
   const int max_filter_level = get_max_filter_level(cpi, cm->base_qindex);
-  int best_err = 0;
-  int filt_err = 0;
+  int best_err;
   int filt_best;
   int filt_direction = 0;
   // Start the search at the previous frame filter level unless it is now out of
@@ -53,15 +68,8 @@ static void search_filter_level(const YV12_BUFFER_CONFIG *sd, VP9_COMP *cpi,
   //  Make a copy of the unfiltered / processed recon buffer
   vpx_yv12_copy_y(cm->frame_to_show, &cpi->last_frame_uf);
 
-  // Get baseline error score
-  vp9_set_alt_lf_level(cpi, filt_mid);
-  vp9_loop_filter_frame(cm, xd, filt_mid, 1, partial);
-
-  best_err = vp9_calc_ss_err(sd, cm->frame_to_show);
+  best_err = try_filter_frame(sd, cpi, xd, cm, filt_mid, partial);
   filt_best = filt_mid;
-
-  //  Re-instate the unfiltered frame
-  vpx_yv12_copy_y(&cpi->last_frame_uf, cm->frame_to_show);
 
   while (filter_step > 0) {
     const int filt_high = MIN(filt_mid + filter_step, max_filter_level);
@@ -79,14 +87,7 @@ static void search_filter_level(const YV12_BUFFER_CONFIG *sd, VP9_COMP *cpi,
 
     if (filt_direction <= 0 && filt_low != filt_mid) {
       // Get Low filter error score
-      vp9_set_alt_lf_level(cpi, filt_low);
-      vp9_loop_filter_frame(cm, xd, filt_low, 1, partial);
-
-      filt_err = vp9_calc_ss_err(sd, cm->frame_to_show);
-
-      // Re-instate the unfiltered frame
-      vpx_yv12_copy_y(&cpi->last_frame_uf, cm->frame_to_show);
-
+      int filt_err = try_filter_frame(sd, cpi, xd, cm, filt_low, partial);
       // If value is close to the best so far then bias towards a lower loop
       // filter value.
       if ((filt_err - bias) < best_err) {
@@ -100,14 +101,7 @@ static void search_filter_level(const YV12_BUFFER_CONFIG *sd, VP9_COMP *cpi,
 
     // Now look at filt_high
     if (filt_direction >= 0 && filt_high != filt_mid) {
-      vp9_set_alt_lf_level(cpi, filt_high);
-      vp9_loop_filter_frame(cm, xd, filt_high, 1, partial);
-
-      filt_err = vp9_calc_ss_err(sd, cm->frame_to_show);
-
-      //  Re-instate the unfiltered frame
-      vpx_yv12_copy_y(&cpi->last_frame_uf, cm->frame_to_show);
-
+      int filt_err = try_filter_frame(sd, cpi, xd, cm, filt_high, partial);
       // Was it better than the previous best?
       if (filt_err < (best_err - bias)) {
         best_err = filt_err;
