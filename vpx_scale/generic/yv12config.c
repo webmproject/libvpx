@@ -19,18 +19,10 @@
 /****************************************************************************
  *
  ****************************************************************************/
-
-#define yv12_align_addr(addr, align) \
-  (void*)(((size_t)(addr) + ((align) - 1)) & (size_t)-(align))
-
 int
 vp8_yv12_de_alloc_frame_buffer(YV12_BUFFER_CONFIG *ybf) {
   if (ybf) {
-    // If libvpx is using external frame buffers then buffer_alloc_sz must
-    // not be set.
-    if (ybf->buffer_alloc_sz > 0) {
-      vpx_free(ybf->buffer_alloc);
-    }
+    vpx_free(ybf->buffer_alloc);
 
     /* buffer_alloc isn't accessed by most functions.  Rather y_buffer,
       u_buffer and v_buffer point to buffer_alloc and are used.  Clear out
@@ -116,9 +108,7 @@ int vp8_yv12_alloc_frame_buffer(YV12_BUFFER_CONFIG *ybf,
 
 int vp9_free_frame_buffer(YV12_BUFFER_CONFIG *ybf) {
   if (ybf) {
-    if (ybf->buffer_alloc_sz > 0) {
-      vpx_free(ybf->buffer_alloc);
-    }
+    vpx_free(ybf->buffer_alloc);
 
     /* buffer_alloc isn't accessed by most functions.  Rather y_buffer,
       u_buffer and v_buffer point to buffer_alloc and are used.  Clear out
@@ -133,10 +123,7 @@ int vp9_free_frame_buffer(YV12_BUFFER_CONFIG *ybf) {
 
 int vp9_realloc_frame_buffer(YV12_BUFFER_CONFIG *ybf,
                              int width, int height,
-                             int ss_x, int ss_y, int border,
-                             vpx_codec_frame_buffer_t *ext_fb,
-                             vpx_realloc_frame_buffer_cb_fn_t cb,
-                             void *user_priv) {
+                             int ss_x, int ss_y, int border) {
   if (ybf) {
     const int aligned_width = (width + 7) & ~7;
     const int aligned_height = (height + 7) & ~7;
@@ -161,47 +148,24 @@ int vp9_realloc_frame_buffer(YV12_BUFFER_CONFIG *ybf,
 #else
     const int frame_size = yplane_size + 2 * uvplane_size;
 #endif
-
-    if (ext_fb != NULL) {
-      const int align_addr_extra_size = 31;
-      const size_t external_frame_size = frame_size + align_addr_extra_size;
-      if (external_frame_size > ext_fb->size) {
-        // Allocation to hold larger frame, or first allocation.
-        if (cb(user_priv, external_frame_size, ext_fb) < 0) {
-          return -1;
-        }
-
-        if (ext_fb->data == NULL || ext_fb->size < external_frame_size) {
-          return -1;
-        }
-
-        // This memset is needed for fixing valgrind error from C loop filter
-        // due to access uninitialized memory in frame border. It could be
-        // removed if border is totally removed.
-        vpx_memset(ext_fb->data, 0, ext_fb->size);
-
-        ybf->buffer_alloc = yv12_align_addr(ext_fb->data, 32);
-      }
-    } else {
-      if (frame_size > ybf->buffer_alloc_sz) {
-        // Allocation to hold larger frame, or first allocation.
-        if (ybf->buffer_alloc)
-          vpx_free(ybf->buffer_alloc);
-        ybf->buffer_alloc = vpx_memalign(32, frame_size);
-        if (!ybf->buffer_alloc)
-          return -1;
-
-        ybf->buffer_alloc_sz = frame_size;
-
-        // This memset is needed for fixing valgrind error from C loop filter
-        // due to access uninitialized memory in frame boarder. It could be
-        // removed if border is totally removed.
-        vpx_memset(ybf->buffer_alloc, 0, ybf->buffer_alloc_sz);
-      }
-
-      if (ybf->buffer_alloc_sz < frame_size)
+    if (frame_size > ybf->buffer_alloc_sz) {
+      // Allocation to hold larger frame, or first allocation.
+      if (ybf->buffer_alloc)
+        vpx_free(ybf->buffer_alloc);
+      ybf->buffer_alloc = vpx_memalign(32, frame_size);
+      if (!ybf->buffer_alloc)
         return -1;
+
+      ybf->buffer_alloc_sz = frame_size;
+
+      // This memset is needed for fixing valgrind error from C loop filter
+      // due to access uninitialized memory in frame boarder. It could be
+      // removed if border is totally removed.
+      vpx_memset(ybf->buffer_alloc, 0, ybf->buffer_alloc_sz);
     }
+
+    if (ybf->buffer_alloc_sz < frame_size)
+      return -1;
 
     /* Only support allocating buffers that have a border that's a multiple
      * of 32. The border restriction is required to get 16-byte alignment of
@@ -250,8 +214,7 @@ int vp9_alloc_frame_buffer(YV12_BUFFER_CONFIG *ybf,
                            int ss_x, int ss_y, int border) {
   if (ybf) {
     vp9_free_frame_buffer(ybf);
-    return vp9_realloc_frame_buffer(ybf, width, height, ss_x, ss_y, border,
-                                    NULL, NULL, NULL);
+    return vp9_realloc_frame_buffer(ybf, width, height, ss_x, ss_y, border);
   }
   return -2;
 }

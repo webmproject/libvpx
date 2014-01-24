@@ -27,7 +27,6 @@ API_DOC_SRCS-yes += vpx_codec.h
 API_DOC_SRCS-yes += vpx_decoder.h
 API_DOC_SRCS-yes += vpx_encoder.h
 API_DOC_SRCS-yes += vpx_image.h
-API_DOC_SRCS-yes += vpx_external_frame_buffer.h
 
 API_SRCS-yes                += src/vpx_decoder.c
 API_SRCS-yes                += vpx_decoder.h
@@ -39,5 +38,4 @@ API_SRCS-yes                += src/vpx_image.c
 API_SRCS-yes                += vpx_codec.h
 API_SRCS-yes                += vpx_codec.mk
 API_SRCS-yes                += vpx_image.h
-API_SRCS-yes                += vpx_external_frame_buffer.h
 API_SRCS-$(BUILD_LIBVPX)    += vpx_integer.h
