@@ -471,7 +471,7 @@ void vp9_first_pass(VP9_COMP *cpi) {
 
   int sum_mvr = 0, sum_mvc = 0;
   int sum_mvr_abs = 0, sum_mvc_abs = 0;
-  int sum_mvrs = 0, sum_mvcs = 0;
+  int64_t sum_mvrs = 0, sum_mvcs = 0;
   int mvcount = 0;
   int intercount = 0;
   int second_ref_count = 0;
