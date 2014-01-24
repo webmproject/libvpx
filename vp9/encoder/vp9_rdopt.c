@@ -428,7 +428,7 @@ static void model_rd_for_sb(VP9_COMP *cpi, BLOCK_SIZE bsize,
   }
 
   *out_rate_sum = rate_sum;
-  *out_dist_sum = dist_sum << 4;
+  *out_dist_sum = (int64_t)dist_sum << 4;
 }
 
 static void model_rd_for_sb_y_tx(VP9_COMP *cpi, BLOCK_SIZE bsize,
