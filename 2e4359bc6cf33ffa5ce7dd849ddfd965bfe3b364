@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//7Fg\u003d",
+        "filename": "resize_util.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-01-24T20:38:16Z",
+      "side": 1,
+      "message": "lower case for consistency: usage()",
+      "revId": "2e4359bc6cf33ffa5ce7dd849ddfd965bfe3b364",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
