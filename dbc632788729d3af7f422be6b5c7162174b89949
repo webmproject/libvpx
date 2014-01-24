@@ -33,6 +33,42 @@
       "revId": "dbc632788729d3af7f422be6b5c7162174b89949",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//7ME\u003d",
+        "filename": "resize_util.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2014-01-24T17:41:46Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//7Ns\u003d",
+      "revId": "dbc632788729d3af7f422be6b5c7162174b89949",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//7MA\u003d",
+        "filename": "resize_util.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2014-01-24T17:41:46Z",
+      "side": 1,
+      "message": "inttypes not needed in this file. So removed and moved to vp9-resize.h",
+      "parentUuid": "AAAAdn//7NE\u003d",
+      "revId": "dbc632788729d3af7f422be6b5c7162174b89949",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
