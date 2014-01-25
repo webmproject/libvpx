@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2010 The WebM project authors. All Rights Reserved.
+ *  Copyright (c) 2014 The WebM project authors. All Rights Reserved.
  *
  *  Use of this source code is governed by a BSD-style license
  *  that can be found in the LICENSE file in the root of the source
@@ -12,6 +12,7 @@
 #define VP9_ENCODER_VP9_RESIZE_H_
 
 #include <stdio.h>
+#include "vpx/vpx_integer.h"
 
 void vp9_resize_plane(const uint8_t *const input,
                       int height,

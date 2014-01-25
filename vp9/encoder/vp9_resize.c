@@ -16,7 +16,6 @@
 #include <string.h>
 #include "vp9/common/vp9_common.h"
 #include "vp9/encoder/vp9_resize.h"
-#include "vpx/vpx_integer.h"
 
 #define FILTER_BITS               7
 
@@ -30,8 +29,44 @@
 
 typedef int16_t interp_kernel[INTERP_TAPS];
 
-// Filters for interpolation - note this also filters integer pels.
-const interp_kernel vp9_filteredinterp_filters[(1 << SUBPEL_BITS)] = {
+// Filters for interpolation (0.5-band) - note this also filters integer pels.
+const interp_kernel vp9_filteredinterp_filters500[(1 << SUBPEL_BITS)] = {
+  {-3,  0, 35, 64, 35,  0, -3, 0},
+  {-3, -1, 34, 64, 36,  1, -3, 0},
+  {-3, -1, 32, 64, 38,  1, -3, 0},
+  {-2, -2, 31, 63, 39,  2, -3, 0},
+  {-2, -2, 29, 63, 41,  2, -3, 0},
+  {-2, -2, 28, 63, 42,  3, -4, 0},
+  {-2, -3, 27, 63, 43,  4, -4, 0},
+  {-2, -3, 25, 62, 45,  5, -4, 0},
+  {-2, -3, 24, 62, 46,  5, -4, 0},
+  {-2, -3, 23, 61, 47,  6, -4, 0},
+  {-2, -3, 21, 60, 49,  7, -4, 0},
+  {-1, -4, 20, 60, 50,  8, -4, -1},
+  {-1, -4, 19, 59, 51,  9, -4, -1},
+  {-1, -4, 17, 58, 52, 10, -4, 0},
+  {-1, -4, 16, 57, 53, 12, -4, -1},
+  {-1, -4, 15, 56, 54, 13, -4, -1},
+  {-1, -4, 14, 55, 55, 14, -4, -1},
+  {-1, -4, 13, 54, 56, 15, -4, -1},
+  {-1, -4, 12, 53, 57, 16, -4, -1},
+  {0, -4, 10, 52, 58, 17, -4, -1},
+  {-1, -4,  9, 51, 59, 19, -4, -1},
+  {-1, -4,  8, 50, 60, 20, -4, -1},
+  {0, -4,  7, 49, 60, 21, -3, -2},
+  {0, -4,  6, 47, 61, 23, -3, -2},
+  {0, -4,  5, 46, 62, 24, -3, -2},
+  {0, -4,  5, 45, 62, 25, -3, -2},
+  {0, -4,  4, 43, 63, 27, -3, -2},
+  {0, -4,  3, 42, 63, 28, -2, -2},
+  {0, -3,  2, 41, 63, 29, -2, -2},
+  {0, -3,  2, 39, 63, 31, -2, -2},
+  {0, -3,  1, 38, 64, 32, -1, -3},
+  {0, -3,  1, 36, 64, 34, -1, -3}
+};
+
+// Filters for interpolation (0.625-band) - note this also filters integer pels.
+const interp_kernel vp9_filteredinterp_filters625[(1 << SUBPEL_BITS)] = {
   {-1, -8, 33, 80, 33, -8, -1, 0},
   {-1, -8, 30, 80, 35, -8, -1, 1},
   {-1, -8, 28, 80, 37, -7, -2, 1},
@@ -66,9 +101,131 @@ const interp_kernel vp9_filteredinterp_filters[(1 << SUBPEL_BITS)] = {
   {1, -1, -8, 35, 80, 30, -8, -1},
 };
 
+// Filters for interpolation (0.75-band) - note this also filters integer pels.
+const interp_kernel vp9_filteredinterp_filters750[(1 << SUBPEL_BITS)] = {
+  {2, -11,  25,  96,  25, -11,   2, 0},
+  {2, -11,  22,  96,  28, -11,   2, 0},
+  {2, -10,  19,  95,  31, -11,   2, 0},
+  {2, -10,  17,  95,  34, -12,   2, 0},
+  {2,  -9,  14,  94,  37, -12,   2, 0},
+  {2,  -8,  12,  93,  40, -12,   1, 0},
+  {2,  -8,   9,  92,  43, -12,   1, 1},
+  {2,  -7,   7,  91,  46, -12,   1, 0},
+  {2,  -7,   5,  90,  49, -12,   1, 0},
+  {2,  -6,   3,  88,  52, -12,   0, 1},
+  {2,  -5,   1,  86,  55, -12,   0, 1},
+  {2,  -5,  -1,  84,  58, -11,   0, 1},
+  {2,  -4,  -2,  82,  61, -11,  -1, 1},
+  {2,  -4,  -4,  80,  64, -10,  -1, 1},
+  {1, -3, -5, 77, 67, -9, -1, 1},
+  {1, -3, -6, 75, 70, -8, -2, 1},
+  {1, -2, -7, 72, 72, -7, -2, 1},
+  {1, -2, -8, 70, 75, -6, -3, 1},
+  {1, -1, -9, 67, 77, -5, -3, 1},
+  {1,  -1, -10,  64,  80,  -4,  -4, 2},
+  {1,  -1, -11,  61,  82,  -2,  -4, 2},
+  {1,   0, -11,  58,  84,  -1,  -5, 2},
+  {1,   0, -12,  55,  86,   1,  -5, 2},
+  {1,   0, -12,  52,  88,   3,  -6, 2},
+  {0,   1, -12,  49,  90,   5,  -7, 2},
+  {0,   1, -12,  46,  91,   7,  -7, 2},
+  {1,   1, -12,  43,  92,   9,  -8, 2},
+  {0,   1, -12,  40,  93,  12,  -8, 2},
+  {0,   2, -12,  37,  94,  14,  -9, 2},
+  {0,   2, -12,  34,  95,  17, -10, 2},
+  {0,   2, -11,  31,  95,  19, -10, 2},
+  {0,   2, -11,  28,  96,  22, -11, 2}
+};
+
+// Filters for interpolation (0.875-band) - note this also filters integer pels.
+const interp_kernel vp9_filteredinterp_filters875[(1 << SUBPEL_BITS)] = {
+  {3,  -8,  13, 112,  13,  -8,   3, 0},
+  {3,  -7,  10, 112,  17,  -9,   3, -1},
+  {2,  -6,   7, 111,  21,  -9,   3, -1},
+  {2,  -5,   4, 111,  24, -10,   3, -1},
+  {2,  -4,   1, 110,  28, -11,   3, -1},
+  {1,  -3,  -1, 108,  32, -12,   4, -1},
+  {1,  -2,  -3, 106,  36, -13,   4, -1},
+  {1,  -1,  -6, 105,  40, -14,   4, -1},
+  {1,  -1,  -7, 102,  44, -14,   4, -1},
+  {1,   0,  -9, 100,  48, -15,   4, -1},
+  {1,   1, -11,  97,  53, -16,   4, -1},
+  {0,   1, -12,  95,  57, -16,   4, -1},
+  {0,   2, -13,  91,  61, -16,   4, -1},
+  {0,   2, -14,  88,  65, -16,   4, -1},
+  {0,   3, -15,  84,  69, -17,   4, 0},
+  {0,   3, -16,  81,  73, -16,   3, 0},
+  {0,   3, -16,  77,  77, -16,   3, 0},
+  {0,   3, -16,  73,  81, -16,   3, 0},
+  {0,   4, -17,  69,  84, -15,   3, 0},
+  {-1,   4, -16,  65,  88, -14,   2, 0},
+  {-1,   4, -16,  61,  91, -13,   2, 0},
+  {-1,   4, -16,  57,  95, -12,   1, 0},
+  {-1,   4, -16,  53,  97, -11,   1, 1},
+  {-1,   4, -15,  48, 100,  -9,   0, 1},
+  {-1,   4, -14,  44, 102,  -7,  -1, 1},
+  {-1,   4, -14,  40, 105,  -6,  -1, 1},
+  {-1,   4, -13,  36, 106,  -3,  -2, 1},
+  {-1,   4, -12,  32, 108,  -1,  -3, 1},
+  {-1,   3, -11,  28, 110,   1,  -4, 2},
+  {-1,   3, -10,  24, 111,   4,  -5, 2},
+  {-1,   3,  -9,  21, 111,   7,  -6, 2},
+  {-1,   3,  -9,  17, 112,  10,  -7, 3}
+};
+
+// Filters for interpolation (full-band) - no filtering for integer pixels
+const interp_kernel vp9_filteredinterp_filters1000[(1 << SUBPEL_BITS)] = {
+  {0,   0,   0, 128,   0,   0,   0, 0},
+  {0,   1,  -3, 128,   3,  -1,   0, 0},
+  {-1,   2,  -6, 127,   7,  -2,   1, 0},
+  {-1,   3,  -9, 126,  12,  -4,   1, 0},
+  {-1,   4, -12, 125,  16,  -5,   1, 0},
+  {-1,   4, -14, 123,  20,  -6,   2, 0},
+  {-1,   5, -15, 120,  25,  -8,   2, 0},
+  {-1,   5, -17, 118,  30,  -9,   3, -1},
+  {-1,   6, -18, 114,  35, -10,   3, -1},
+  {-1,   6, -19, 111,  41, -12,   3, -1},
+  {-1,   6, -20, 107,  46, -13,   4, -1},
+  {-1,   6, -21, 103,  52, -14,   4, -1},
+  {-1,   6, -21,  99,  57, -16,   5, -1},
+  {-1,   6, -21,  94,  63, -17,   5, -1},
+  {-1,   6, -20,  89,  68, -18,   5, -1},
+  {-1,   6, -20,  84,  73, -19,   6, -1},
+  {-1,   6, -20,  79,  79, -20,   6, -1},
+  {-1,   6, -19,  73,  84, -20,   6, -1},
+  {-1,   5, -18,  68,  89, -20,   6, -1},
+  {-1,   5, -17,  63,  94, -21,   6, -1},
+  {-1,   5, -16,  57,  99, -21,   6, -1},
+  {-1,   4, -14,  52, 103, -21,   6, -1},
+  {-1,   4, -13,  46, 107, -20,   6, -1},
+  {-1,   3, -12,  41, 111, -19,   6, -1},
+  {-1,   3, -10,  35, 114, -18,   6, -1},
+  {-1,   3,  -9,  30, 118, -17,   5, -1},
+  {0,   2,  -8,  25, 120, -15,   5, -1},
+  {0,   2,  -6,  20, 123, -14,   4, -1},
+  {0,   1,  -5,  16, 125, -12,   4, -1},
+  {0,   1,  -4,  12, 126,  -9,   3, -1},
+  {0,   1,  -2,   7, 127,  -6,   2, -1},
+  {0,   0,  -1,   3, 128,  -3,   1, 0}
+};
+
 // Filters for factor of 2 downsampling.
 static const int16_t vp9_down2_symeven_half_filter[] = {56, 12, -3, -1};
 static const int16_t vp9_down2_symodd_half_filter[] = {64, 35, 0, -3};
+
+static const interp_kernel *choose_interp_filter(int inlength, int outlength) {
+  int outlength16 = outlength * 16;
+  if (outlength16 >= inlength * 16)
+    return vp9_filteredinterp_filters1000;
+  else if (outlength16 >= inlength * 13)
+    return vp9_filteredinterp_filters875;
+  else if (outlength16 >= inlength * 11)
+    return vp9_filteredinterp_filters750;
+  else if (outlength16 >= inlength * 9)
+    return vp9_filteredinterp_filters625;
+  else
+    return vp9_filteredinterp_filters500;
+}
 
 static void interpolate(const uint8_t *const input, int inlength,
                         uint8_t *output, int outlength) {
@@ -80,6 +237,9 @@ static void interpolate(const uint8_t *const input, int inlength,
   uint8_t *optr = output;
   int x, x1, x2, sum, k, int_pel, sub_pel;
   int64_t y;
+
+  const interp_kernel *interp_filters =
+      choose_interp_filter(inlength, outlength);
 
   x = 0;
   y = offset;
@@ -101,7 +261,7 @@ static void interpolate(const uint8_t *const input, int inlength,
       const int16_t *filter;
       int_pel = y >> INTERP_PRECISION_BITS;
       sub_pel = (y >> (INTERP_PRECISION_BITS - SUBPEL_BITS)) & SUBPEL_MASK;
-      filter = vp9_filteredinterp_filters[sub_pel];
+      filter = interp_filters[sub_pel];
       sum = 0;
       for (k = 0; k < INTERP_TAPS; ++k) {
         const int pk = int_pel - INTERP_TAPS / 2 + 1 + k;
@@ -116,7 +276,7 @@ static void interpolate(const uint8_t *const input, int inlength,
       const int16_t *filter;
       int_pel = y >> INTERP_PRECISION_BITS;
       sub_pel = (y >> (INTERP_PRECISION_BITS - SUBPEL_BITS)) & SUBPEL_MASK;
-      filter = vp9_filteredinterp_filters[sub_pel];
+      filter = interp_filters[sub_pel];
       sum = 0;
       for (k = 0; k < INTERP_TAPS; ++k)
         sum += filter[k] * input[(int_pel - INTERP_TAPS / 2 + 1 + k < 0 ?
@@ -129,7 +289,7 @@ static void interpolate(const uint8_t *const input, int inlength,
       const int16_t *filter;
       int_pel = y >> INTERP_PRECISION_BITS;
       sub_pel = (y >> (INTERP_PRECISION_BITS - SUBPEL_BITS)) & SUBPEL_MASK;
-      filter = vp9_filteredinterp_filters[sub_pel];
+      filter = interp_filters[sub_pel];
       sum = 0;
       for (k = 0; k < INTERP_TAPS; ++k)
         sum += filter[k] * input[int_pel - INTERP_TAPS / 2 + 1 + k];
@@ -140,7 +300,7 @@ static void interpolate(const uint8_t *const input, int inlength,
       const int16_t *filter;
       int_pel = y >> INTERP_PRECISION_BITS;
       sub_pel = (y >> (INTERP_PRECISION_BITS - SUBPEL_BITS)) & SUBPEL_MASK;
-      filter = vp9_filteredinterp_filters[sub_pel];
+      filter = interp_filters[sub_pel];
       sum = 0;
       for (k = 0; k < INTERP_TAPS; ++k)
         sum += filter[k] * input[(int_pel - INTERP_TAPS / 2 + 1 + k >=
