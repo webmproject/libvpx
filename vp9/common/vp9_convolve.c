@@ -20,7 +20,7 @@
 
 static void convolve_horiz(const uint8_t *src, ptrdiff_t src_stride,
                            uint8_t *dst, ptrdiff_t dst_stride,
-                           const subpel_kernel *x_filters,
+                           const interp_kernel *x_filters,
                            int x0_q4, int x_step_q4, int w, int h) {
   int x, y;
   src -= SUBPEL_TAPS / 2 - 1;
@@ -42,7 +42,7 @@ static void convolve_horiz(const uint8_t *src, ptrdiff_t src_stride,
 
 static void convolve_avg_horiz(const uint8_t *src, ptrdiff_t src_stride,
                                uint8_t *dst, ptrdiff_t dst_stride,
-                               const subpel_kernel *x_filters,
+                               const interp_kernel *x_filters,
                                int x0_q4, int x_step_q4, int w, int h) {
   int x, y;
   src -= SUBPEL_TAPS / 2 - 1;
@@ -65,7 +65,7 @@ static void convolve_avg_horiz(const uint8_t *src, ptrdiff_t src_stride,
 
 static void convolve_vert(const uint8_t *src, ptrdiff_t src_stride,
                           uint8_t *dst, ptrdiff_t dst_stride,
-                          const subpel_kernel *y_filters,
+                          const interp_kernel *y_filters,
                           int y0_q4, int y_step_q4, int w, int h) {
   int x, y;
   src -= src_stride * (SUBPEL_TAPS / 2 - 1);
@@ -88,7 +88,7 @@ static void convolve_vert(const uint8_t *src, ptrdiff_t src_stride,
 
 static void convolve_avg_vert(const uint8_t *src, ptrdiff_t src_stride,
                               uint8_t *dst, ptrdiff_t dst_stride,
-                              const subpel_kernel *y_filters,
+                              const interp_kernel *y_filters,
                               int y0_q4, int y_step_q4, int w, int h) {
   int x, y;
   src -= src_stride * (SUBPEL_TAPS / 2 - 1);
@@ -112,9 +112,9 @@ static void convolve_avg_vert(const uint8_t *src, ptrdiff_t src_stride,
 
 static void convolve(const uint8_t *src, ptrdiff_t src_stride,
                      uint8_t *dst, ptrdiff_t dst_stride,
-                     const subpel_kernel *const x_filters,
+                     const interp_kernel *const x_filters,
                      int x0_q4, int x_step_q4,
-                     const subpel_kernel *const y_filters,
+                     const interp_kernel *const y_filters,
                      int y0_q4, int y_step_q4,
                      int w, int h) {
   // Fixed size intermediate buffer places limits on parameters.
@@ -138,14 +138,14 @@ static void convolve(const uint8_t *src, ptrdiff_t src_stride,
                 y_filters, y0_q4, y_step_q4, w, h);
 }
 
-static const subpel_kernel *get_filter_base(const int16_t *filter) {
+static const interp_kernel *get_filter_base(const int16_t *filter) {
   // NOTE: This assumes that the filter table is 256-byte aligned.
   // TODO(agrange) Modify to make independent of table alignment.
-  return (const subpel_kernel *)(((intptr_t)filter) & ~((intptr_t)0xFF));
+  return (const interp_kernel *)(((intptr_t)filter) & ~((intptr_t)0xFF));
 }
 
-static int get_filter_offset(const int16_t *f, const subpel_kernel *base) {
-  return (const subpel_kernel *)(intptr_t)f - base;
+static int get_filter_offset(const int16_t *f, const interp_kernel *base) {
+  return (const interp_kernel *)(intptr_t)f - base;
 }
 
 void vp9_convolve8_horiz_c(const uint8_t *src, ptrdiff_t src_stride,
@@ -153,7 +153,7 @@ void vp9_convolve8_horiz_c(const uint8_t *src, ptrdiff_t src_stride,
                            const int16_t *filter_x, int x_step_q4,
                            const int16_t *filter_y, int y_step_q4,
                            int w, int h) {
-  const subpel_kernel *const filters_x = get_filter_base(filter_x);
+  const interp_kernel *const filters_x = get_filter_base(filter_x);
   const int x0_q4 = get_filter_offset(filter_x, filters_x);
 
   convolve_horiz(src, src_stride, dst, dst_stride, filters_x,
@@ -165,7 +165,7 @@ void vp9_convolve8_avg_horiz_c(const uint8_t *src, ptrdiff_t src_stride,
                                const int16_t *filter_x, int x_step_q4,
                                const int16_t *filter_y, int y_step_q4,
                                int w, int h) {
-  const subpel_kernel *const filters_x = get_filter_base(filter_x);
+  const interp_kernel *const filters_x = get_filter_base(filter_x);
   const int x0_q4 = get_filter_offset(filter_x, filters_x);
 
   convolve_avg_horiz(src, src_stride, dst, dst_stride, filters_x,
@@ -177,7 +177,7 @@ void vp9_convolve8_vert_c(const uint8_t *src, ptrdiff_t src_stride,
                           const int16_t *filter_x, int x_step_q4,
                           const int16_t *filter_y, int y_step_q4,
                           int w, int h) {
-  const subpel_kernel *const filters_y = get_filter_base(filter_y);
+  const interp_kernel *const filters_y = get_filter_base(filter_y);
   const int y0_q4 = get_filter_offset(filter_y, filters_y);
   convolve_vert(src, src_stride, dst, dst_stride, filters_y,
                 y0_q4, y_step_q4, w, h);
@@ -188,7 +188,7 @@ void vp9_convolve8_avg_vert_c(const uint8_t *src, ptrdiff_t src_stride,
                               const int16_t *filter_x, int x_step_q4,
                               const int16_t *filter_y, int y_step_q4,
                               int w, int h) {
-  const subpel_kernel *const filters_y = get_filter_base(filter_y);
+  const interp_kernel *const filters_y = get_filter_base(filter_y);
   const int y0_q4 = get_filter_offset(filter_y, filters_y);
   convolve_avg_vert(src, src_stride, dst, dst_stride, filters_y,
                     y0_q4, y_step_q4, w, h);
@@ -199,10 +199,10 @@ void vp9_convolve8_c(const uint8_t *src, ptrdiff_t src_stride,
                      const int16_t *filter_x, int x_step_q4,
                      const int16_t *filter_y, int y_step_q4,
                      int w, int h) {
-  const subpel_kernel *const filters_x = get_filter_base(filter_x);
+  const interp_kernel *const filters_x = get_filter_base(filter_x);
   const int x0_q4 = get_filter_offset(filter_x, filters_x);
 
-  const subpel_kernel *const filters_y = get_filter_base(filter_y);
+  const interp_kernel *const filters_y = get_filter_base(filter_y);
   const int y0_q4 = get_filter_offset(filter_y, filters_y);
 
   convolve(src, src_stride, dst, dst_stride,

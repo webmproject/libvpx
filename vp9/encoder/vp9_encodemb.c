@@ -25,8 +25,7 @@
 #include "vp9/encoder/vp9_rdopt.h"
 #include "vp9/encoder/vp9_tokenize.h"
 
-void vp9_setup_interp_filters(MACROBLOCKD *xd,
-                              INTERPOLATION_TYPE mcomp_filter_type,
+void vp9_setup_interp_filters(MACROBLOCKD *xd, INTERP_FILTER filter,
                               VP9_COMMON *cm) {
   if (xd->mi_8x8 && xd->mi_8x8[0]) {
     MB_MODE_INFO *const mbmi = &xd->mi_8x8[0]->mbmi;
@@ -39,8 +38,7 @@ void vp9_setup_interp_filters(MACROBLOCKD *xd,
   }
 
   xd->subpix.filter_x = xd->subpix.filter_y =
-      vp9_get_filter_kernel(mcomp_filter_type == SWITCHABLE ?
-                               EIGHTTAP : mcomp_filter_type);
+      vp9_get_interp_kernel(filter == SWITCHABLE ? EIGHTTAP : filter);
 
   assert(((intptr_t)xd->subpix.filter_x & 0xff) == 0);
 }

@@ -313,7 +313,7 @@ static void read_ref_frames(VP9_COMMON *const cm, MACROBLOCKD *const xd,
 }
 
 
-static INLINE INTERPOLATION_TYPE read_switchable_filter_type(
+static INLINE INTERP_FILTER read_switchable_interp_filter(
     VP9_COMMON *const cm, MACROBLOCKD *const xd, vp9_reader *r) {
   const int ctx = vp9_get_pred_context_switchable_interp(xd);
   const int type = vp9_read_tree(r, vp9_switchable_interp_tree,
@@ -459,9 +459,9 @@ static void read_inter_block_mode_info(VP9_COMMON *const cm,
     }
   }
 
-  mbmi->interp_filter = (cm->mcomp_filter_type == SWITCHABLE)
-                      ? read_switchable_filter_type(cm, xd, r)
-                      : cm->mcomp_filter_type;
+  mbmi->interp_filter = (cm->interp_filter == SWITCHABLE)
+                      ? read_switchable_interp_filter(cm, xd, r)
+                      : cm->interp_filter;
 
   if (bsize < BLOCK_8X8) {
     const int num_4x4_w = num_4x4_blocks_wide_lookup[bsize];  // 1 or 2

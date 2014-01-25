@@ -505,7 +505,7 @@ static void update_state(VP9_COMP *cpi, PICK_MODE_CONTEXT *ctx,
       vp9_update_mv_count(cpi, x, best_mv);
     }
 
-    if (cm->mcomp_filter_type == SWITCHABLE && is_inter_mode(mbmi->mode)) {
+    if (cm->interp_filter == SWITCHABLE && is_inter_mode(mbmi->mode)) {
       const int ctx = vp9_get_pred_context_switchable_interp(xd);
       ++cm->counts.switchable_interp[ctx][mbmi->interp_filter];
     }
@@ -1788,9 +1788,9 @@ static void rd_pick_partition(VP9_COMP *cpi, const TileInfo *const tile,
       *get_sb_index(x, subsize) = i;
       if (cpi->sf.adaptive_motion_search)
         load_pred_mv(x, get_block_context(x, bsize));
-      if (cpi->sf.adaptive_pred_filter_type && bsize == BLOCK_8X8 &&
+      if (cpi->sf.adaptive_pred_interp_filter && bsize == BLOCK_8X8 &&
           partition_none_allowed)
-        get_block_context(x, subsize)->pred_filter_type =
+        get_block_context(x, subsize)->pred_interp_filter =
             get_block_context(x, bsize)->mic.mbmi.interp_filter;
       rd_pick_partition(cpi, tile, tp, mi_row + y_idx, mi_col + x_idx, subsize,
                         &this_rate, &this_dist, i != 3, best_rd - sum_rd);
@@ -1839,9 +1839,9 @@ static void rd_pick_partition(VP9_COMP *cpi, const TileInfo *const tile,
     *get_sb_index(x, subsize) = 0;
     if (cpi->sf.adaptive_motion_search)
       load_pred_mv(x, get_block_context(x, bsize));
-    if (cpi->sf.adaptive_pred_filter_type && bsize == BLOCK_8X8 &&
+    if (cpi->sf.adaptive_pred_interp_filter && bsize == BLOCK_8X8 &&
         partition_none_allowed)
-      get_block_context(x, subsize)->pred_filter_type =
+      get_block_context(x, subsize)->pred_interp_filter =
           get_block_context(x, bsize)->mic.mbmi.interp_filter;
     rd_pick_sb_modes(cpi, tile, mi_row, mi_col, &sum_rate, &sum_dist, subsize,
                      get_block_context(x, subsize), best_rd);
@@ -1854,9 +1854,9 @@ static void rd_pick_partition(VP9_COMP *cpi, const TileInfo *const tile,
       *get_sb_index(x, subsize) = 1;
       if (cpi->sf.adaptive_motion_search)
         load_pred_mv(x, get_block_context(x, bsize));
-      if (cpi->sf.adaptive_pred_filter_type && bsize == BLOCK_8X8 &&
+      if (cpi->sf.adaptive_pred_interp_filter && bsize == BLOCK_8X8 &&
           partition_none_allowed)
-        get_block_context(x, subsize)->pred_filter_type =
+        get_block_context(x, subsize)->pred_interp_filter =
             get_block_context(x, bsize)->mic.mbmi.interp_filter;
       rd_pick_sb_modes(cpi, tile, mi_row + ms, mi_col, &this_rate,
                        &this_dist, subsize, get_block_context(x, subsize),
@@ -1892,9 +1892,9 @@ static void rd_pick_partition(VP9_COMP *cpi, const TileInfo *const tile,
     *get_sb_index(x, subsize) = 0;
     if (cpi->sf.adaptive_motion_search)
       load_pred_mv(x, get_block_context(x, bsize));
-    if (cpi->sf.adaptive_pred_filter_type && bsize == BLOCK_8X8 &&
+    if (cpi->sf.adaptive_pred_interp_filter && bsize == BLOCK_8X8 &&
         partition_none_allowed)
-      get_block_context(x, subsize)->pred_filter_type =
+      get_block_context(x, subsize)->pred_interp_filter =
           get_block_context(x, bsize)->mic.mbmi.interp_filter;
     rd_pick_sb_modes(cpi, tile, mi_row, mi_col, &sum_rate, &sum_dist, subsize,
                      get_block_context(x, subsize), best_rd);
@@ -1906,9 +1906,9 @@ static void rd_pick_partition(VP9_COMP *cpi, const TileInfo *const tile,
       *get_sb_index(x, subsize) = 1;
       if (cpi->sf.adaptive_motion_search)
         load_pred_mv(x, get_block_context(x, bsize));
-      if (cpi->sf.adaptive_pred_filter_type && bsize == BLOCK_8X8 &&
+      if (cpi->sf.adaptive_pred_interp_filter && bsize == BLOCK_8X8 &&
           partition_none_allowed)
-        get_block_context(x, subsize)->pred_filter_type =
+        get_block_context(x, subsize)->pred_interp_filter =
             get_block_context(x, bsize)->mic.mbmi.interp_filter;
       rd_pick_sb_modes(cpi, tile, mi_row, mi_col + ms, &this_rate,
                        &this_dist, subsize, get_block_context(x, subsize),
@@ -2048,7 +2048,7 @@ static void encode_sb_row(VP9_COMP *cpi, const TileInfo *const tile,
       for (x->sb_index = 0; x->sb_index < 4; ++x->sb_index)
         for (x->mb_index = 0; x->mb_index < 4; ++x->mb_index)
           for (x->b_index = 0; x->b_index < 16 / num_4x4_blk; ++x->b_index)
-            get_block_context(x, i)->pred_filter_type = SWITCHABLE;
+            get_block_context(x, i)->pred_interp_filter = SWITCHABLE;
     }
 
     vp9_zero(cpi->mb.pred_mv);
@@ -2460,7 +2460,7 @@ void vp9_encode_frame(VP9_COMP *cpi) {
   if (cpi->sf.RD) {
     int i;
     REFERENCE_MODE reference_mode;
-    INTERPOLATION_TYPE filter_type;
+    INTERP_FILTER interp_filter;
     /*
      * This code does a single RD pass over the whole frame assuming
      * either compound, single or hybrid prediction as per whatever has
@@ -2496,14 +2496,14 @@ void vp9_encode_frame(VP9_COMP *cpi) {
         filter_thresh[EIGHTTAP_SMOOTH] > filter_thresh[EIGHTTAP] &&
         filter_thresh[EIGHTTAP_SMOOTH] > filter_thresh[EIGHTTAP_SHARP] &&
         filter_thresh[EIGHTTAP_SMOOTH] > filter_thresh[SWITCHABLE - 1]) {
-      filter_type = EIGHTTAP_SMOOTH;
+      interp_filter = EIGHTTAP_SMOOTH;
     } else if (filter_thresh[EIGHTTAP_SHARP] > filter_thresh[EIGHTTAP] &&
                filter_thresh[EIGHTTAP_SHARP] > filter_thresh[SWITCHABLE - 1]) {
-      filter_type = EIGHTTAP_SHARP;
+      interp_filter = EIGHTTAP_SHARP;
     } else if (filter_thresh[EIGHTTAP] > filter_thresh[SWITCHABLE - 1]) {
-      filter_type = EIGHTTAP;
+      interp_filter = EIGHTTAP;
     } else {
-      filter_type = SWITCHABLE;
+      interp_filter = SWITCHABLE;
     }
 
     cpi->mb.e_mbd.lossless = cpi->oxcf.lossless;
@@ -2511,7 +2511,7 @@ void vp9_encode_frame(VP9_COMP *cpi) {
     /* transform size selection (4x4, 8x8, 16x16 or select-per-mb) */
     select_tx_mode(cpi);
     cm->reference_mode = reference_mode;
-    cm->mcomp_filter_type = filter_type;
+    cm->interp_filter = interp_filter;
     encode_frame_internal(cpi);
 
     for (i = 0; i < REFERENCE_MODES; ++i) {

@@ -422,7 +422,7 @@ static void decode_modes_b(VP9_COMMON *const cm, MACROBLOCKD *const xd,
       set_ref(cm, xd, 1, mi_row, mi_col);
 
     xd->subpix.filter_x = xd->subpix.filter_y =
-        vp9_get_filter_kernel(mbmi->interp_filter);
+        vp9_get_interp_kernel(mbmi->interp_filter);
 
     // Prediction
     vp9_dec_build_inter_predictors_sb(xd, mi_row, mi_col, bsize);
@@ -655,14 +655,13 @@ static void setup_quantization(VP9_COMMON *const cm, MACROBLOCKD *const xd,
   xd->itxm_add = xd->lossless ? vp9_iwht4x4_add : vp9_idct4x4_add;
 }
 
-static INTERPOLATION_TYPE read_interp_filter_type(
-                              struct vp9_read_bit_buffer *rb) {
-  const INTERPOLATION_TYPE literal_to_type[] = { EIGHTTAP_SMOOTH,
-                                                 EIGHTTAP,
-                                                 EIGHTTAP_SHARP,
-                                                 BILINEAR };
+static INTERP_FILTER read_interp_filter(struct vp9_read_bit_buffer *rb) {
+  const INTERP_FILTER literal_to_filter[] = { EIGHTTAP_SMOOTH,
+                                              EIGHTTAP,
+                                              EIGHTTAP_SHARP,
+                                              BILINEAR };
   return vp9_rb_read_bit(rb) ? SWITCHABLE
-                             : literal_to_type[vp9_rb_read_literal(rb, 2)];
+                             : literal_to_filter[vp9_rb_read_literal(rb, 2)];
 }
 
 static void read_frame_size(struct vp9_read_bit_buffer *rb,
@@ -1186,7 +1185,7 @@ static size_t read_uncompressed_header(VP9D_COMP *pbi,
       setup_frame_size_with_refs(pbi, rb);
 
       cm->allow_high_precision_mv = vp9_rb_read_bit(rb);
-      cm->mcomp_filter_type = read_interp_filter_type(rb);
+      cm->interp_filter = read_interp_filter(rb);
 
       for (i = 0; i < REFS_PER_FRAME; ++i) {
         RefBuffer *const ref_buf = &cm->frame_refs[i];
@@ -1256,7 +1255,7 @@ static int read_compressed_header(VP9D_COMP *pbi, const uint8_t *data,
 
     read_inter_mode_probs(fc, &r);
 
-    if (cm->mcomp_filter_type == SWITCHABLE)
+    if (cm->interp_filter == SWITCHABLE)
       read_switchable_interp_probs(fc, &r);
 
     for (i = 0; i < INTRA_INTER_CONTEXTS; i++)

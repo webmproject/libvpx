@@ -2626,7 +2626,7 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
                                  int *rate_y, int64_t *distortion_y,
                                  int *rate_uv, int64_t *distortion_uv,
                                  int *mode_excluded, int *disable_skip,
-                                 INTERPOLATION_TYPE *best_filter,
+                                 INTERP_FILTER *best_filter,
                                  int_mv (*mode_mv)[MAX_REF_FRAMES],
                                  int mi_row, int mi_col,
                                  int_mv single_newmv[MAX_REF_FRAMES],
@@ -2769,7 +2769,7 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
   for (i = 0; i < SWITCHABLE_FILTER_CONTEXTS; ++i)
     cpi->rd_filter_cache[i] = INT64_MAX;
 
-  if (cm->mcomp_filter_type != BILINEAR) {
+  if (cm->interp_filter != BILINEAR) {
     *best_filter = EIGHTTAP;
     if (x->source_variance <
         cpi->sf.disable_filter_search_var_thresh) {
@@ -2792,16 +2792,16 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
           cpi->rd_filter_cache[i] = rd;
           cpi->rd_filter_cache[SWITCHABLE_FILTERS] =
               MIN(cpi->rd_filter_cache[SWITCHABLE_FILTERS], rd + rs_rd);
-          if (cm->mcomp_filter_type == SWITCHABLE)
+          if (cm->interp_filter == SWITCHABLE)
             rd += rs_rd;
           cpi->mask_filter_rd = MAX(cpi->mask_filter_rd, rd);
         } else {
           int rate_sum = 0;
           int64_t dist_sum = 0;
-          if ((cm->mcomp_filter_type == SWITCHABLE &&
+          if ((cm->interp_filter == SWITCHABLE &&
                (!i || best_needs_copy)) ||
-              (cm->mcomp_filter_type != SWITCHABLE &&
-               (cm->mcomp_filter_type == mbmi->interp_filter ||
+              (cm->interp_filter != SWITCHABLE &&
+               (cm->interp_filter == mbmi->interp_filter ||
                 (i == 0 && intpel_mv)))) {
             restore_dst_buf(xd, orig_dst, orig_dst_stride);
           } else {
@@ -2817,7 +2817,7 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
           cpi->rd_filter_cache[i] = rd;
           cpi->rd_filter_cache[SWITCHABLE_FILTERS] =
               MIN(cpi->rd_filter_cache[SWITCHABLE_FILTERS], rd + rs_rd);
-          if (cm->mcomp_filter_type == SWITCHABLE)
+          if (cm->interp_filter == SWITCHABLE)
             rd += rs_rd;
           cpi->mask_filter_rd = MAX(cpi->mask_filter_rd, rd);
 
@@ -2838,13 +2838,13 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
         if (newbest) {
           best_rd = rd;
           *best_filter = mbmi->interp_filter;
-          if (cm->mcomp_filter_type == SWITCHABLE && i && !intpel_mv)
+          if (cm->interp_filter == SWITCHABLE && i && !intpel_mv)
             best_needs_copy = !best_needs_copy;
         }
 
-        if ((cm->mcomp_filter_type == SWITCHABLE && newbest) ||
-            (cm->mcomp_filter_type != SWITCHABLE &&
-             cm->mcomp_filter_type == mbmi->interp_filter)) {
+        if ((cm->interp_filter == SWITCHABLE && newbest) ||
+            (cm->interp_filter != SWITCHABLE &&
+             cm->interp_filter == mbmi->interp_filter)) {
           pred_exists = 1;
         }
       }
@@ -2852,10 +2852,10 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
     }
   }
   // Set the appropriate filter
-  mbmi->interp_filter = cm->mcomp_filter_type != SWITCHABLE ?
-      cm->mcomp_filter_type : *best_filter;
+  mbmi->interp_filter = cm->interp_filter != SWITCHABLE ?
+      cm->interp_filter : *best_filter;
   vp9_setup_interp_filters(xd, mbmi->interp_filter, cm);
-  rs = cm->mcomp_filter_type == SWITCHABLE ? get_switchable_rate(x) : 0;
+  rs = cm->interp_filter == SWITCHABLE ? get_switchable_rate(x) : 0;
 
   if (pred_exists) {
     if (best_needs_copy) {
@@ -2884,7 +2884,7 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
     }
   }
 
-  if (cm->mcomp_filter_type == SWITCHABLE)
+  if (cm->interp_filter == SWITCHABLE)
     *rate2 += get_switchable_rate(x);
 
   if (!is_comp_pred && cpi->enable_encode_breakout) {
@@ -3129,7 +3129,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
   int64_t best_inter_rd = INT64_MAX;
   MB_PREDICTION_MODE best_intra_mode = DC_PRED;
   MV_REFERENCE_FRAME best_inter_ref_frame = LAST_FRAME;
-  INTERPOLATION_TYPE tmp_best_filter = SWITCHABLE;
+  INTERP_FILTER tmp_best_filter = SWITCHABLE;
   int rate_uv_intra[TX_SIZES], rate_uv_tokenonly[TX_SIZES];
   int64_t dist_uv[TX_SIZES];
   int skip_uv[TX_SIZES];
@@ -3282,7 +3282,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
 
     // Evaluate all sub-pel filters irrespective of whether we can use
     // them for this frame.
-    mbmi->interp_filter = cm->mcomp_filter_type;
+    mbmi->interp_filter = cm->interp_filter;
     vp9_setup_interp_filters(xd, mbmi->interp_filter, cm);
 
     if (comp_pred) {
@@ -3573,9 +3573,9 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
 
     /* keep record of best filter type */
     if (!mode_excluded && !disable_skip && ref_frame != INTRA_FRAME &&
-        cm->mcomp_filter_type != BILINEAR) {
-      int64_t ref = cpi->rd_filter_cache[cm->mcomp_filter_type == SWITCHABLE ?
-                              SWITCHABLE_FILTERS : cm->mcomp_filter_type];
+        cm->interp_filter != BILINEAR) {
+      int64_t ref = cpi->rd_filter_cache[cm->interp_filter == SWITCHABLE ?
+                              SWITCHABLE_FILTERS : cm->interp_filter];
 
       for (i = 0; i < SWITCHABLE_FILTER_CONTEXTS; i++) {
         int64_t adj_rd;
@@ -3649,8 +3649,8 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
     }
   }
 
-  assert((cm->mcomp_filter_type == SWITCHABLE) ||
-         (cm->mcomp_filter_type == best_mbmode.interp_filter) ||
+  assert((cm->interp_filter == SWITCHABLE) ||
+         (cm->interp_filter == best_mbmode.interp_filter) ||
          !is_inter_block(&best_mbmode));
 
   // Updating rd_thresh_freq_fact[] here means that the different
@@ -3692,7 +3692,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
       else
         best_filter_diff[i] = best_rd - best_filter_rd[i];
     }
-    if (cm->mcomp_filter_type == SWITCHABLE)
+    if (cm->interp_filter == SWITCHABLE)
       assert(best_filter_diff[SWITCHABLE_FILTERS] == 0);
   } else {
     vp9_zero(best_filter_diff);
@@ -3754,7 +3754,7 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
   vp9_prob comp_mode_p;
   int64_t best_inter_rd = INT64_MAX;
   MV_REFERENCE_FRAME best_inter_ref_frame = LAST_FRAME;
-  INTERPOLATION_TYPE tmp_best_filter = SWITCHABLE;
+  INTERP_FILTER tmp_best_filter = SWITCHABLE;
   int rate_uv_intra[TX_SIZES], rate_uv_tokenonly[TX_SIZES];
   int64_t dist_uv[TX_SIZES];
   int skip_uv[TX_SIZES];
@@ -3907,7 +3907,7 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
 
     // Evaluate all sub-pel filters irrespective of whether we can use
     // them for this frame.
-    mbmi->interp_filter = cm->mcomp_filter_type;
+    mbmi->interp_filter = cm->interp_filter;
     vp9_setup_interp_filters(xd, mbmi->interp_filter, cm);
 
     if (comp_pred) {
@@ -4013,17 +4013,17 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
       for (i = 0; i < SWITCHABLE_FILTER_CONTEXTS; ++i)
         cpi->rd_filter_cache[i] = INT64_MAX;
 
-      if (cm->mcomp_filter_type != BILINEAR) {
+      if (cm->interp_filter != BILINEAR) {
         tmp_best_filter = EIGHTTAP;
         if (x->source_variance <
             cpi->sf.disable_filter_search_var_thresh) {
           tmp_best_filter = EIGHTTAP;
-        } else if (cpi->sf.adaptive_pred_filter_type == 1 &&
-                   ctx->pred_filter_type < SWITCHABLE) {
-          tmp_best_filter = ctx->pred_filter_type;
-        } else if (cpi->sf.adaptive_pred_filter_type == 2) {
-          tmp_best_filter = ctx->pred_filter_type < SWITCHABLE ?
-                              ctx->pred_filter_type : 0;
+        } else if (cpi->sf.adaptive_pred_interp_filter == 1 &&
+                   ctx->pred_interp_filter < SWITCHABLE) {
+          tmp_best_filter = ctx->pred_interp_filter;
+        } else if (cpi->sf.adaptive_pred_interp_filter == 2) {
+          tmp_best_filter = ctx->pred_interp_filter < SWITCHABLE ?
+                              ctx->pred_interp_filter : 0;
         } else {
           for (switchable_filter_index = 0;
                switchable_filter_index < SWITCHABLE_FILTERS;
@@ -4051,7 +4051,7 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
             cpi->rd_filter_cache[SWITCHABLE_FILTERS] =
                 MIN(cpi->rd_filter_cache[SWITCHABLE_FILTERS],
                     tmp_rd + rs_rd);
-            if (cm->mcomp_filter_type == SWITCHABLE)
+            if (cm->interp_filter == SWITCHABLE)
               tmp_rd += rs_rd;
 
             cpi->mask_filter_rd = MAX(cpi->mask_filter_rd, tmp_rd);
@@ -4061,9 +4061,9 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
               tmp_best_filter = mbmi->interp_filter;
               tmp_best_rd = tmp_rd;
             }
-            if ((newbest && cm->mcomp_filter_type == SWITCHABLE) ||
-                (mbmi->interp_filter == cm->mcomp_filter_type &&
-                 cm->mcomp_filter_type != SWITCHABLE)) {
+            if ((newbest && cm->interp_filter == SWITCHABLE) ||
+                (mbmi->interp_filter == cm->interp_filter &&
+                 cm->interp_filter != SWITCHABLE)) {
               tmp_best_rdu = tmp_rd;
               tmp_best_rate = rate;
               tmp_best_ratey = rate_y;
@@ -4095,8 +4095,8 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
       if (tmp_best_rdu == INT64_MAX && pred_exists)
         continue;
 
-      mbmi->interp_filter = (cm->mcomp_filter_type == SWITCHABLE ?
-                             tmp_best_filter : cm->mcomp_filter_type);
+      mbmi->interp_filter = (cm->interp_filter == SWITCHABLE ?
+                             tmp_best_filter : cm->interp_filter);
       vp9_setup_interp_filters(xd, mbmi->interp_filter, cm);
       if (!pred_exists) {
         // Handles the special case when a filter that is not in the
@@ -4113,7 +4113,7 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
         if (tmp_rd == INT64_MAX)
           continue;
       } else {
-        if (cm->mcomp_filter_type == SWITCHABLE) {
+        if (cm->interp_filter == SWITCHABLE) {
           int rs = get_switchable_rate(x);
           tmp_best_rdu -= RDCOST(x->rdmult, x->rddiv, rs, 0);
         }
@@ -4131,7 +4131,7 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
       rate2 += rate;
       distortion2 += distortion;
 
-      if (cm->mcomp_filter_type == SWITCHABLE)
+      if (cm->interp_filter == SWITCHABLE)
         rate2 += get_switchable_rate(x);
 
       if (!mode_excluded)
@@ -4299,9 +4299,9 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
 
     /* keep record of best filter type */
     if (!mode_excluded && !disable_skip && ref_frame != INTRA_FRAME &&
-        cm->mcomp_filter_type != BILINEAR) {
-      int64_t ref = cpi->rd_filter_cache[cm->mcomp_filter_type == SWITCHABLE ?
-                              SWITCHABLE_FILTERS : cm->mcomp_filter_type];
+        cm->interp_filter != BILINEAR) {
+      int64_t ref = cpi->rd_filter_cache[cm->interp_filter == SWITCHABLE ?
+                              SWITCHABLE_FILTERS : cm->interp_filter];
       int64_t adj_rd;
       for (i = 0; i < SWITCHABLE_FILTER_CONTEXTS; i++) {
         if (ref == INT64_MAX)
@@ -4372,8 +4372,8 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
     return best_rd;
   }
 
-  assert((cm->mcomp_filter_type == SWITCHABLE) ||
-         (cm->mcomp_filter_type == best_mbmode.interp_filter) ||
+  assert((cm->interp_filter == SWITCHABLE) ||
+         (cm->interp_filter == best_mbmode.interp_filter) ||
          !is_inter_block(&best_mbmode));
 
   // Updating rd_thresh_freq_fact[] here means that the different
@@ -4425,7 +4425,7 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
       else
         best_filter_diff[i] = best_rd - best_filter_rd[i];
     }
-    if (cm->mcomp_filter_type == SWITCHABLE)
+    if (cm->interp_filter == SWITCHABLE)
       assert(best_filter_diff[SWITCHABLE_FILTERS] == 0);
   } else {
     vp9_zero(best_filter_diff);
