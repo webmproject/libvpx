@@ -69,13 +69,11 @@ static void inter_predictor(const uint8_t *src, int src_stride,
                             const int subpel_y,
                             const struct scale_factors *sf,
                             int w, int h, int ref,
-                            const struct subpix_fn_table *subpix,
+                            const interp_kernel *kernel,
                             int xs, int ys) {
   sf->predict[subpel_x != 0][subpel_y != 0][ref](
       src, src_stride, dst, dst_stride,
-      subpix->filter_x[subpel_x], xs,
-      subpix->filter_y[subpel_y], ys,
-      w, h);
+      kernel[subpel_x], xs, kernel[subpel_y], ys, w, h);
 }
 
 void vp9_build_inter_predictor(const uint8_t *src, int src_stride,
@@ -83,7 +81,7 @@ void vp9_build_inter_predictor(const uint8_t *src, int src_stride,
                                const MV *src_mv,
                                const struct scale_factors *sf,
                                int w, int h, int ref,
-                               const struct subpix_fn_table *subpix,
+                               const interp_kernel *kernel,
                                enum mv_precision precision,
                                int x, int y) {
   const int is_q4 = precision == MV_PRECISION_Q4;
@@ -96,7 +94,7 @@ void vp9_build_inter_predictor(const uint8_t *src, int src_stride,
   src += (mv.row >> SUBPEL_BITS) * src_stride + (mv.col >> SUBPEL_BITS);
 
   inter_predictor(src, src_stride, dst, dst_stride, subpel_x, subpel_y,
-                  sf, w, h, ref, subpix, sf->x_step_q4, sf->y_step_q4);
+                  sf, w, h, ref, kernel, sf->x_step_q4, sf->y_step_q4);
 }
 
 static INLINE int round_mv_comp_q4(int value) {
@@ -198,7 +196,8 @@ static void build_inter_predictors(MACROBLOCKD *xd, int plane, int block,
            + (scaled_mv.col >> SUBPEL_BITS);
 
     inter_predictor(pre, pre_buf->stride, dst, dst_buf->stride,
-                    subpel_x, subpel_y, sf, w, h, ref, &xd->subpix, xs, ys);
+                    subpel_x, subpel_y, sf, w, h, ref, xd->interp_kernel,
+                    xs, ys);
   }
 }
 
@@ -367,7 +366,7 @@ static void dec_build_inter_predictors(MACROBLOCKD *xd, int plane, int block,
     }
 
     inter_predictor(buf_ptr, buf_stride, dst, dst_buf->stride, subpel_x,
-                    subpel_y, sf, w, h, ref, &xd->subpix, xs, ys);
+                    subpel_y, sf, w, h, ref, xd->interp_kernel, xs, ys);
   }
 }
 

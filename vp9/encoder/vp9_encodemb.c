@@ -37,10 +37,9 @@ void vp9_setup_interp_filters(MACROBLOCKD *xd, INTERP_FILTER filter,
     set_ref_ptrs(cm, xd, -1, -1);
   }
 
-  xd->subpix.filter_x = xd->subpix.filter_y =
-      vp9_get_interp_kernel(filter == SWITCHABLE ? EIGHTTAP : filter);
-
-  assert(((intptr_t)xd->subpix.filter_x & 0xff) == 0);
+  xd->interp_kernel = vp9_get_interp_kernel(filter == SWITCHABLE ? EIGHTTAP
+                                                                 : filter);
+  assert(((intptr_t)xd->interp_kernel & 0xff) == 0);
 }
 
 void vp9_subtract_block_c(int rows, int cols,

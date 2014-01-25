@@ -1517,8 +1517,8 @@ static int64_t encode_inter_mb_segment(VP9_COMP *cpi,
     vp9_build_inter_predictor(pre, pd->pre[ref].stride,
                               dst, pd->dst.stride,
                               &mi->bmi[i].as_mv[ref].as_mv,
-                              &xd->block_refs[ref]->sf,
-                              width, height, ref, &xd->subpix, MV_PRECISION_Q3,
+                              &xd->block_refs[ref]->sf, width, height, ref,
+                              xd->interp_kernel, MV_PRECISION_Q3,
                               mi_col * MI_SIZE + 4 * (i % 2),
                               mi_row * MI_SIZE + 4 * (i / 2));
   }
@@ -2536,7 +2536,7 @@ static void joint_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
                               &frame_mv[refs[!id]].as_mv,
                               &xd->block_refs[!id]->sf,
                               pw, ph, 0,
-                              &xd->subpix, MV_PRECISION_Q3,
+                              xd->interp_kernel, MV_PRECISION_Q3,
                               mi_col * MI_SIZE, mi_row * MI_SIZE);
 
     // Compound motion search on first ref frame.

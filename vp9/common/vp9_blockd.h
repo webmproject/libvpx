@@ -252,7 +252,7 @@ typedef struct macroblockd {
   /* Inverse transform function pointers. */
   void (*itxm_add)(const int16_t *input, uint8_t *dest, int stride, int eob);
 
-  struct subpix_fn_table  subpix;
+  const interp_kernel *interp_kernel;
 
   int corrupted;
 

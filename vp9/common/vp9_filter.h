@@ -35,11 +35,6 @@ typedef enum {
 
 typedef int16_t interp_kernel[SUBPEL_TAPS];
 
-struct subpix_fn_table {
-  const interp_kernel *filter_x;
-  const interp_kernel *filter_y;
-};
-
 const interp_kernel *vp9_get_interp_kernel(INTERP_FILTER filter);
 
 extern const interp_kernel vp9_bilinear_filters[SUBPEL_SHIFTS];
