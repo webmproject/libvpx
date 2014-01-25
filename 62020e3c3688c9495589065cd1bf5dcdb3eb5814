@@ -70,6 +70,23 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//67k\u003d",
+        "filename": "vp9/decoder/vp9_dthread.c",
+        "patchSetId": 24
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-01-25T01:38:33Z",
+      "side": 1,
+      "message": "Make a #define for 4000 constant.",
+      "revId": "62020e3c3688c9495589065cd1bf5dcdb3eb5814",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//68M\u003d",
         "filename": "vp9/decoder/vp9_dthread.c",
         "patchSetId": 24
@@ -121,6 +138,23 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//67g\u003d",
+        "filename": "vp9/decoder/vp9_dthread.c",
+        "patchSetId": 24
+      },
+      "lineNbr": 212,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-01-25T01:38:33Z",
+      "side": 1,
+      "message": "Could you move that code to separate inline function? So it would be lf_sync-\u003esync_ragne \u003d get_sync_range_by_width(width);",
+      "revId": "62020e3c3688c9495589065cd1bf5dcdb3eb5814",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//68o\u003d",
         "filename": "vp9/decoder/vp9_dthread.c",
         "patchSetId": 24
@@ -155,6 +189,23 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//67c\u003d",
+        "filename": "vp9/decoder/vp9_dthread.h",
+        "patchSetId": 24
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-01-25T01:38:33Z",
+      "side": 1,
+      "message": "It seems \"partial\" is a Microsoft-specific c++ keyword, may be it is better to rename.",
+      "revId": "62020e3c3688c9495589065cd1bf5dcdb3eb5814",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//68E\u003d",
         "filename": "vp9/decoder/vp9_onyxd_if.c",
         "patchSetId": 24
@@ -183,6 +234,23 @@
       "writtenOn": "2014-01-25T01:22:30Z",
       "side": 1,
       "message": "better to make these inline if they\u0027re going to be in a header. this should probably be done in a standalone changeset building to your final loopfilter one",
+      "revId": "62020e3c3688c9495589065cd1bf5dcdb3eb5814",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//67U\u003d",
+        "filename": "vp9/decoder/vp9_thread.h",
+        "patchSetId": 24
+      },
+      "lineNbr": 178,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-01-25T01:38:33Z",
+      "side": 1,
+      "message": "I think vp9_thread.{h, c} files should contain only general thread management code without any vp8/vp9-specific code (except \"vp9_\"name prefix). Could you move VP9LfSyncData to another file?",
       "revId": "62020e3c3688c9495589065cd1bf5dcdb3eb5814",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
