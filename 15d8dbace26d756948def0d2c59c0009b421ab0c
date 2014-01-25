@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//66Y\u003d",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-01-25T02:17:22Z",
+      "side": 1,
+      "message": "s/reverting/restoring/",
+      "revId": "15d8dbace26d756948def0d2c59c0009b421ab0c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//66c\u003d",
+        "filename": "y4menc.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-01-25T02:17:22Z",
+      "side": 1,
+      "message": "Remove these two lines. This isn\u0027t IVF.",
+      "revId": "15d8dbace26d756948def0d2c59c0009b421ab0c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
