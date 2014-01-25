@@ -1,0 +1,191 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//68s\u003d",
+        "filename": "vp9/common/vp9_loopfilter.h",
+        "patchSetId": 24
+      },
+      "lineNbr": 77,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-01-25T01:22:30Z",
+      "side": 1,
+      "message": "can this mask just be opaque here? is it modified anywhere expect setup_mask()?",
+      "revId": "62020e3c3688c9495589065cd1bf5dcdb3eb5814",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//68A\u003d",
+        "filename": "vp9/decoder/vp9_dthread.c",
+        "patchSetId": 24
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-01-25T01:22:30Z",
+      "side": 1,
+      "message": "with static functions, prefer using *const for the parameters",
+      "revId": "62020e3c3688c9495589065cd1bf5dcdb3eb5814",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//68I\u003d",
+        "filename": "vp9/decoder/vp9_dthread.c",
+        "patchSetId": 24
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-01-25T01:22:30Z",
+      "side": 1,
+      "message": "given this is derived from the lf_sync param, I don\u0027t this needs to be volatile",
+      "revId": "62020e3c3688c9495589065cd1bf5dcdb3eb5814",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//69E\u003d",
+        "filename": "vp9/decoder/vp9_dthread.c",
+        "patchSetId": 24
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-01-25T01:22:30Z",
+      "side": 1,
+      "message": "// CONFIG_MULTITHREAD here and elsewhere",
+      "revId": "62020e3c3688c9495589065cd1bf5dcdb3eb5814",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//68M\u003d",
+        "filename": "vp9/decoder/vp9_dthread.c",
+        "patchSetId": 24
+      },
+      "lineNbr": 94,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-01-25T01:22:30Z",
+      "side": 1,
+      "message": "does this need to happen when you won\u0027t be signaling?",
+      "revId": "62020e3c3688c9495589065cd1bf5dcdb3eb5814",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//68Q\u003d",
+        "filename": "vp9/decoder/vp9_dthread.c",
+        "patchSetId": 24
+      },
+      "lineNbr": 130,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-01-25T01:22:30Z",
+      "side": 1,
+      "message": "why? unlikely, but if the level was always 0 wouldn\u0027t this be a waste?",
+      "revId": "62020e3c3688c9495589065cd1bf5dcdb3eb5814",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//68k\u003d",
+        "filename": "vp9/decoder/vp9_dthread.c",
+        "patchSetId": 24
+      },
+      "lineNbr": 210,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-01-25T01:22:30Z",
+      "side": 1,
+      "message": "was all the 4k tested actually 3840x2160? that would affect the #  of tiles.",
+      "revId": "62020e3c3688c9495589065cd1bf5dcdb3eb5814",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//68o\u003d",
+        "filename": "vp9/decoder/vp9_dthread.c",
+        "patchSetId": 24
+      },
+      "lineNbr": 223,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-01-25T01:22:30Z",
+      "side": 1,
+      "message": "you should check lf_sync",
+      "revId": "62020e3c3688c9495589065cd1bf5dcdb3eb5814",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//684\u003d",
+        "filename": "vp9/decoder/vp9_dthread.c",
+        "patchSetId": 24
+      },
+      "lineNbr": 228,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-01-25T01:22:30Z",
+      "side": 1,
+      "message": "here and elsewhere, the internal ()s are unnecessary",
+      "revId": "62020e3c3688c9495589065cd1bf5dcdb3eb5814",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//68E\u003d",
+        "filename": "vp9/decoder/vp9_onyxd_if.c",
+        "patchSetId": 24
+      },
+      "lineNbr": 186,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-01-25T01:22:30Z",
+      "side": 1,
+      "message": "*const",
+      "revId": "62020e3c3688c9495589065cd1bf5dcdb3eb5814",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//680\u003d",
+        "filename": "vp9/decoder/vp9_thread.h",
+        "patchSetId": 24
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-01-25T01:22:30Z",
+      "side": 1,
+      "message": "better to make these inline if they\u0027re going to be in a header. this should probably be done in a standalone changeset building to your final loopfilter one",
+      "revId": "62020e3c3688c9495589065cd1bf5dcdb3eb5814",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
