@@ -347,29 +347,32 @@ loop_h
     ldrb                r12, [r12]
     vdup.u8             d0, r12
 
+    ; preload 8 left
+    vld1.8              d30, [r3]
+
     ; Load above 8 pixels
     vld1.64             {d2}, [r2]
+
+    vmovl.u8            q10, d30
 
     ; Compute above - ytop_left
     vsubl.u8            q3, d2, d0
 
     ; Load left row by row and compute left + (above - ytop_left)
-    vld1.u8             {d6}, [r3]
-
     ; 1st row and 2nd row
-    vdup.u8             d0, d6[0]
-    vdup.u8             d1, d6[1]
-    vaddw.s16           q1, q3, d0
-    vaddw.s16           q2, q3, d1
+    vdup.16             q0, d20[0]
+    vdup.16             q1, d20[1]
+    vadd.s16            q0, q3, q0
+    vadd.s16            q1, q3, q1
 
     ; 3rd row and 4th row
-    vdup.u8             d0, d6[2]
-    vdup.u8             d1, d6[3]
-    vaddw.s16           q8, q3, d0
-    vaddw.s16           q9, q3, d1
+    vdup.16             q8, d20[2]
+    vdup.16             q9, d20[3]
+    vadd.s16            q8, q3, q8
+    vadd.s16            q9, q3, q9
 
-    vqshrun.s16         d0, q1, #0
-    vqshrun.s16         d1, q2, #0
+    vqshrun.s16         d0, q0, #0
+    vqshrun.s16         d1, q1, #0
     vqshrun.s16         d2, q8, #0
     vqshrun.s16         d3, q9, #0
 
@@ -379,19 +382,19 @@ loop_h
     vst1.64             {d3}, [r0], r1
 
     ; 5th row and 6th row
-    vdup.u8             d0, d6[4]
-    vdup.u8             d1, d6[5]
-    vaddw.s16           q1, q3, d0
-    vaddw.s16           q2, q3, d1
+    vdup.16             q0, d21[0]
+    vdup.16             q1, d21[1]
+    vadd.s16            q0, q3, q0
+    vadd.s16            q1, q3, q1
 
-    ; 7rd row and 8th row
-    vdup.u8             d0, d6[6]
-    vdup.u8             d1, d6[7]
-    vaddw.s16           q8, q3, d0
-    vaddw.s16           q9, q3, d1
+    ; 7th row and 8th row
+    vdup.16             q8, d21[2]
+    vdup.16             q9, d21[3]
+    vadd.s16            q8, q3, q8
+    vadd.s16            q9, q3, q9
 
-    vqshrun.s16         d0, q1, #0
-    vqshrun.s16         d1, q2, #0
+    vqshrun.s16         d0, q0, #0
+    vqshrun.s16         d1, q1, #0
     vqshrun.s16         d2, q8, #0
     vqshrun.s16         d3, q9, #0
 
