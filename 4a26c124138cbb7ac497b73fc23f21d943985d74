@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//6yc\u003d",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-01-27T20:21:51Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//66Q\u003d",
+      "revId": "4a26c124138cbb7ac497b73fc23f21d943985d74",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//62Y\u003d",
         "filename": "examples/decode_to_md5.c",
         "patchSetId": 2
@@ -30,6 +48,24 @@
       "writtenOn": "2014-01-27T17:32:28Z",
       "side": 1,
       "message": "Move this function to tools_common. Duping it everywhere is lame.",
+      "revId": "4a26c124138cbb7ac497b73fc23f21d943985d74",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//6yg\u003d",
+        "filename": "examples/decode_to_md5.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 59,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-01-27T20:21:51Z",
+      "side": 1,
+      "message": "See my reply for simple_decoder.c. I agree, but let\u0027s do it later.",
+      "parentUuid": "AAAAdn//62Y\u003d",
       "revId": "4a26c124138cbb7ac497b73fc23f21d943985d74",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//6zQ\u003d",
+        "filename": "examples/simple_decoder.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 94,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-01-27T20:21:51Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//62Q\u003d",
+      "revId": "4a26c124138cbb7ac497b73fc23f21d943985d74",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//62M\u003d",
         "filename": "examples/simple_decoder.c",
         "patchSetId": 2
@@ -64,6 +118,24 @@
       "writtenOn": "2014-01-27T17:32:28Z",
       "side": 1,
       "message": "Move to tools_common.",
+      "revId": "4a26c124138cbb7ac497b73fc23f21d943985d74",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//6zE\u003d",
+        "filename": "examples/simple_decoder.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 96,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-01-27T20:21:51Z",
+      "side": 1,
+      "message": "That\u0027s definitely a duplication but I prefer to fix it after converting all examples to new API. Tools_common doesn\u0027t have all required includes, so I can\u0027t simple move this function there. And in general I don\u0027t like the idea to move every common peace of code just to tools_common, may be we need to create another file with fourcc definitions and this function defined.",
+      "parentUuid": "AAAAdn//62M\u003d",
       "revId": "4a26c124138cbb7ac497b73fc23f21d943985d74",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//6y8\u003d",
+        "filename": "examples/simple_decoder.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 106,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-01-27T20:21:51Z",
+      "side": 1,
+      "message": "I totally agree but I would like to do the same as with get_codec_interface(). I\u0027m not even sure that we need this function.",
+      "parentUuid": "AAAAdn//62U\u003d",
+      "revId": "4a26c124138cbb7ac497b73fc23f21d943985d74",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//62E\u003d",
         "filename": "examples/simple_decoder.c",
         "patchSetId": 2
@@ -104,6 +194,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//6yw\u003d",
+        "filename": "examples/simple_decoder.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 115,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-01-27T20:21:51Z",
+      "side": 1,
+      "message": "I have a plan to move this function into vpx_image.{h, c}, so it will become an API call. But I prefer to do this in another chageset -- this function is duplicated in many places not just in example code :-)",
+      "parentUuid": "AAAAdn//62E\u003d",
+      "revId": "4a26c124138cbb7ac497b73fc23f21d943985d74",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//614\u003d",
         "filename": "examples/simple_decoder.c",
         "patchSetId": 2
@@ -115,6 +223,24 @@
       "writtenOn": "2014-01-27T17:32:28Z",
       "side": 1,
       "message": "Remove this-- it doesn\u0027t really belong in here. Maybe in a README or something. (Or just leave it in a comment)",
+      "revId": "4a26c124138cbb7ac497b73fc23f21d943985d74",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//6yk\u003d",
+        "filename": "examples/simple_decoder.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 187,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-01-27T20:21:51Z",
+      "side": 1,
+      "message": "I think this is actually very helpful and don\u0027t see any reason why it doesn\u0027t belong in here.  But let\u0027s make a comment for now.",
+      "parentUuid": "AAAAdn//614\u003d",
       "revId": "4a26c124138cbb7ac497b73fc23f21d943985d74",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
