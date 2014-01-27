@@ -21,6 +21,7 @@ typedef enum {
   OUTPUT_FMT_PLAIN,
   OUTPUT_FMT_RVDS,
   OUTPUT_FMT_GAS,
+  OUTPUT_FMT_C_HEADER,
 } output_fmt_t;
 
 int log_msg(const char *fmt, ...) {
@@ -45,6 +46,9 @@ int print_macho_equ(output_fmt_t mode, uint8_t* name, int val) {
       return 0;
     case  OUTPUT_FMT_GAS:
       printf(".set %-40s, %5d\n", name, val);
+      return 0;
+    case OUTPUT_C_HEADER:
+      printf("#define %-40s %5d\n", name, val);
       return 0;
     default:
       log_msg("Unsupported mode: %d", mode);
@@ -491,6 +495,13 @@ int parse_elf(uint8_t *buf, size_t sz, output_fmt_t mode) {
                                               sym.st_name),
                        val);
                 break;
+              case OUTPUT_FMT_C_HEADER:
+                printf("#define %-40s %5d\n",
+                       parse_elf_string_table(&elf,
+                                              shdr.sh_link,
+                                              sym.st_name),
+                       val);
+                break;
               default:
                 printf("%s = %d\n",
                        parse_elf_string_table(&elf,
@@ -762,6 +773,7 @@ int main(int argc, char **argv) {
     fprintf(stderr, "Output Formats:\n");
     fprintf(stderr, "  gas  - compatible with GNU assembler\n");
     fprintf(stderr, "  rvds - compatible with armasm\n");
+    fprintf(stderr, "  cheader - c/c++ header file\n");
     goto bail;
   }
 
@@ -771,6 +783,8 @@ int main(int argc, char **argv) {
     mode = OUTPUT_FMT_RVDS;
   else if (!strcmp(argv[1], "gas"))
     mode = OUTPUT_FMT_GAS;
+  else if (!strcmp(argv[1], "cheader"))
+    mode = OUTPUT_FMT_C_HEADER;
   else
     f = argv[1];
 
