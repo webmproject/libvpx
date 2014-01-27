@@ -88,6 +88,24 @@
       "revId": "321f0ee272349b66535b56e0b10cf753755f1bd8",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//6s4\u003d",
+        "filename": "vp9/encoder/vp9_onyx_if.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 3332,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2014-01-27T23:54:15Z",
+      "side": 1,
+      "message": "From what I understand The \"--enable-non420\" flag is going to be dropped and 4:4:4 will be supported in a regular build. \n\nAnd what about API usage. Choose one option:\n\nA) Ignore the g_profile value from the caller and set an appropriate profile based to features used\n\nB) Use the g_profile value specified by the caller and spit out an invalid bitstream. \n\nC) Fail to encode if g_profile cannot support the features requested. \n\nD) Other\n\nOur current behavior is option \"B.\" This patchset implements option \"C.\"",
+      "parentUuid": "AAAAdn//6tE\u003d",
+      "revId": "321f0ee272349b66535b56e0b10cf753755f1bd8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
