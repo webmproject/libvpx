@@ -106,6 +106,7 @@ static const interp_kernel* vp9_filter_kernels[4] = {
 };
 
 const interp_kernel *vp9_get_interp_kernel(INTERP_FILTER filter) {
+  assert(filter != SWITCHABLE);
   return vp9_filter_kernels[filter];
 }
 
