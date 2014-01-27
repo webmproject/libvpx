@@ -52,6 +52,24 @@
       "revId": "321f0ee272349b66535b56e0b10cf753755f1bd8",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//6tQ\u003d",
+        "filename": "vp9/encoder/vp9_onyx_if.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 3332,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2014-01-27T23:32:31Z",
+      "side": 1,
+      "message": "You said: \"4:4:4 will not be available for libvpx uses unless the provide special configuration options. So there is no need to do extra protection with --profile option.\" but AFAIK we are dropping the \"special configuration options\" so all that remains is the profile option. \n\nAlso your solution does nothing to protect API users. Right now you can pass the API g_profile \u003d0 and non-420 frames and get an nonsensical bitstream back.",
+      "parentUuid": "AAAAdn//6tw\u003d",
+      "revId": "321f0ee272349b66535b56e0b10cf753755f1bd8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
