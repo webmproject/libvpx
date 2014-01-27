@@ -421,8 +421,7 @@ static void decode_modes_b(VP9_COMMON *const cm, MACROBLOCKD *const xd,
     if (has_second_ref(mbmi))
       set_ref(cm, xd, 1, mi_row, mi_col);
 
-    xd->subpix.filter_x = xd->subpix.filter_y =
-        vp9_get_interp_kernel(mbmi->interp_filter);
+    xd->interp_kernel = vp9_get_interp_kernel(mbmi->interp_filter);
 
     // Prediction
     vp9_dec_build_inter_predictors_sb(xd, mi_row, mi_col, bsize);

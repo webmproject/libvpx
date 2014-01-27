@@ -18,7 +18,6 @@
 extern "C" {
 #endif
 
-struct subpix_fn_table;
 void vp9_build_inter_predictors_sby(MACROBLOCKD *xd, int mi_row, int mi_col,
                                     BLOCK_SIZE bsize);
 
@@ -36,7 +35,7 @@ void vp9_build_inter_predictor(const uint8_t *src, int src_stride,
                                const MV *mv_q3,
                                const struct scale_factors *sf,
                                int w, int h, int do_avg,
-                               const struct subpix_fn_table *subpix,
+                               const interp_kernel *kernel,
                                enum mv_precision precision,
                                int x, int y);
 
