@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//60I\u003d",
+        "filename": "vp9/common/vp9_loopfilter.h",
+        "patchSetId": 24
+      },
+      "lineNbr": 77,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2014-01-27T22:22:21Z",
+      "side": 1,
+      "message": "The masks are only set once before loopfiltering. This would be done in another patch.",
+      "parentUuid": "AAAAdn//68s\u003d",
+      "revId": "62020e3c3688c9495589065cd1bf5dcdb3eb5814",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//68A\u003d",
         "filename": "vp9/decoder/vp9_dthread.c",
         "patchSetId": 24
@@ -30,6 +48,24 @@
       "writtenOn": "2014-01-25T01:22:30Z",
       "side": 1,
       "message": "with static functions, prefer using *const for the parameters",
+      "revId": "62020e3c3688c9495589065cd1bf5dcdb3eb5814",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//60E\u003d",
+        "filename": "vp9/decoder/vp9_dthread.c",
+        "patchSetId": 24
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2014-01-27T22:22:21Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//68A\u003d",
       "revId": "62020e3c3688c9495589065cd1bf5dcdb3eb5814",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//6zo\u003d",
+        "filename": "vp9/decoder/vp9_dthread.c",
+        "patchSetId": 24
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2014-01-27T22:22:21Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//68I\u003d",
+      "revId": "62020e3c3688c9495589065cd1bf5dcdb3eb5814",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//69E\u003d",
         "filename": "vp9/decoder/vp9_dthread.c",
         "patchSetId": 24
@@ -64,6 +118,24 @@
       "writtenOn": "2014-01-25T01:22:30Z",
       "side": 1,
       "message": "// CONFIG_MULTITHREAD here and elsewhere",
+      "revId": "62020e3c3688c9495589065cd1bf5dcdb3eb5814",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//6zk\u003d",
+        "filename": "vp9/decoder/vp9_dthread.c",
+        "patchSetId": 24
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2014-01-27T22:22:21Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//69E\u003d",
       "revId": "62020e3c3688c9495589065cd1bf5dcdb3eb5814",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//6zY\u003d",
+        "filename": "vp9/decoder/vp9_dthread.c",
+        "patchSetId": 24
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2014-01-27T22:22:21Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//67k\u003d",
+      "revId": "62020e3c3688c9495589065cd1bf5dcdb3eb5814",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//68M\u003d",
         "filename": "vp9/decoder/vp9_dthread.c",
         "patchSetId": 24
@@ -98,6 +188,24 @@
       "writtenOn": "2014-01-25T01:22:30Z",
       "side": 1,
       "message": "does this need to happen when you won\u0027t be signaling?",
+      "revId": "62020e3c3688c9495589065cd1bf5dcdb3eb5814",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//6zU\u003d",
+        "filename": "vp9/decoder/vp9_dthread.c",
+        "patchSetId": 24
+      },
+      "lineNbr": 94,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2014-01-27T22:22:21Z",
+      "side": 1,
+      "message": "Yes. This only needs to be done while signalling.",
+      "parentUuid": "AAAAdn//68M\u003d",
       "revId": "62020e3c3688c9495589065cd1bf5dcdb3eb5814",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -121,6 +229,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//6yM\u003d",
+        "filename": "vp9/decoder/vp9_dthread.c",
+        "patchSetId": 24
+      },
+      "lineNbr": 130,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2014-01-27T22:22:21Z",
+      "side": 1,
+      "message": "The memory is allocated at 1st frame, and is used for all following frames unless resize happens. Confirmed that we don\u0027t have a file-level flag saying if all frames\u0027 lf level is 0. So, we have to do the allocation.",
+      "parentUuid": "AAAAdn//68Q\u003d",
+      "revId": "62020e3c3688c9495589065cd1bf5dcdb3eb5814",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//68k\u003d",
         "filename": "vp9/decoder/vp9_dthread.c",
         "patchSetId": 24
@@ -132,6 +258,24 @@
       "writtenOn": "2014-01-25T01:22:30Z",
       "side": 1,
       "message": "was all the 4k tested actually 3840x2160? that would affect the #  of tiles.",
+      "revId": "62020e3c3688c9495589065cd1bf5dcdb3eb5814",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//6yA\u003d",
+        "filename": "vp9/decoder/vp9_dthread.c",
+        "patchSetId": 24
+      },
+      "lineNbr": 210,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2014-01-27T22:22:21Z",
+      "side": 1,
+      "message": "# of tiles decides how many threads are used in loopfiltering, which relates to frame rows. The sync_range here is more related to SB columns, and not to # of tiles.",
+      "parentUuid": "AAAAdn//68k\u003d",
       "revId": "62020e3c3688c9495589065cd1bf5dcdb3eb5814",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -155,6 +299,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//6vw\u003d",
+        "filename": "vp9/decoder/vp9_dthread.c",
+        "patchSetId": 24
+      },
+      "lineNbr": 212,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2014-01-27T22:22:21Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//67g\u003d",
+      "revId": "62020e3c3688c9495589065cd1bf5dcdb3eb5814",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//68o\u003d",
         "filename": "vp9/decoder/vp9_dthread.c",
         "patchSetId": 24
@@ -166,6 +328,24 @@
       "writtenOn": "2014-01-25T01:22:30Z",
       "side": 1,
       "message": "you should check lf_sync",
+      "revId": "62020e3c3688c9495589065cd1bf5dcdb3eb5814",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//6xc\u003d",
+        "filename": "vp9/decoder/vp9_dthread.c",
+        "patchSetId": 24
+      },
+      "lineNbr": 223,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2014-01-27T22:22:21Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//68o\u003d",
       "revId": "62020e3c3688c9495589065cd1bf5dcdb3eb5814",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -189,6 +369,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//6xU\u003d",
+        "filename": "vp9/decoder/vp9_dthread.c",
+        "patchSetId": 24
+      },
+      "lineNbr": 228,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2014-01-27T22:22:21Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//684\u003d",
+      "revId": "62020e3c3688c9495589065cd1bf5dcdb3eb5814",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//67c\u003d",
         "filename": "vp9/decoder/vp9_dthread.h",
         "patchSetId": 24
@@ -200,6 +398,24 @@
       "writtenOn": "2014-01-25T01:38:33Z",
       "side": 1,
       "message": "It seems \"partial\" is a Microsoft-specific c++ keyword, may be it is better to rename.",
+      "revId": "62020e3c3688c9495589065cd1bf5dcdb3eb5814",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//6xQ\u003d",
+        "filename": "vp9/decoder/vp9_dthread.h",
+        "patchSetId": 24
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2014-01-27T22:22:21Z",
+      "side": 1,
+      "message": "Will be done in a later patch.",
+      "parentUuid": "AAAAdn//67c\u003d",
       "revId": "62020e3c3688c9495589065cd1bf5dcdb3eb5814",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -223,6 +439,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//6xE\u003d",
+        "filename": "vp9/decoder/vp9_onyxd_if.c",
+        "patchSetId": 24
+      },
+      "lineNbr": 186,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2014-01-27T22:22:21Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//68E\u003d",
+      "revId": "62020e3c3688c9495589065cd1bf5dcdb3eb5814",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//680\u003d",
         "filename": "vp9/decoder/vp9_thread.h",
         "patchSetId": 24
@@ -240,6 +474,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//6w8\u003d",
+        "filename": "vp9/decoder/vp9_thread.h",
+        "patchSetId": 24
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2014-01-27T22:22:21Z",
+      "side": 1,
+      "message": "Ok.",
+      "parentUuid": "AAAAdn//680\u003d",
+      "revId": "62020e3c3688c9495589065cd1bf5dcdb3eb5814",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//67U\u003d",
         "filename": "vp9/decoder/vp9_thread.h",
         "patchSetId": 24
@@ -251,6 +503,24 @@
       "writtenOn": "2014-01-25T01:38:33Z",
       "side": 1,
       "message": "I think vp9_thread.{h, c} files should contain only general thread management code without any vp8/vp9-specific code (except \"vp9_\"name prefix). Could you move VP9LfSyncData to another file?",
+      "revId": "62020e3c3688c9495589065cd1bf5dcdb3eb5814",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//6v0\u003d",
+        "filename": "vp9/decoder/vp9_thread.h",
+        "patchSetId": 24
+      },
+      "lineNbr": 178,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2014-01-27T22:22:21Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//67U\u003d",
       "revId": "62020e3c3688c9495589065cd1bf5dcdb3eb5814",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
