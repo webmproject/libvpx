@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//6wk\u003d",
+        "filename": "vp9/encoder/vp9_onyx_if.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 3332,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-01-27T21:13:25Z",
+      "side": 1,
+      "message": "May be you should just delete --profile option from command line and use right profile number based on subsampling values?  4:4:4 will not be available for  libvpx uses unless the provide special configuration options. So there is no need to do extra protection with --profile option.",
+      "revId": "321f0ee272349b66535b56e0b10cf753755f1bd8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
