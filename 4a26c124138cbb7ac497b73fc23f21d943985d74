@@ -1,0 +1,123 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//66Q\u003d",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-01-27T17:32:28Z",
+      "side": 1,
+      "message": "s/Adopting/Adapting/",
+      "revId": "4a26c124138cbb7ac497b73fc23f21d943985d74",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//62Y\u003d",
+        "filename": "examples/decode_to_md5.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 59,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-01-27T17:32:28Z",
+      "side": 1,
+      "message": "Move this function to tools_common. Duping it everywhere is lame.",
+      "revId": "4a26c124138cbb7ac497b73fc23f21d943985d74",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//62Q\u003d",
+        "filename": "examples/simple_decoder.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 94,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-01-27T17:32:28Z",
+      "side": 1,
+      "message": "Already defined by tools_common.",
+      "revId": "4a26c124138cbb7ac497b73fc23f21d943985d74",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//62M\u003d",
+        "filename": "examples/simple_decoder.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 96,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-01-27T17:32:28Z",
+      "side": 1,
+      "message": "Move to tools_common.",
+      "revId": "4a26c124138cbb7ac497b73fc23f21d943985d74",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//62U\u003d",
+        "filename": "examples/simple_decoder.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 106,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-01-27T17:32:28Z",
+      "side": 1,
+      "message": "Ditto re tools_common.",
+      "revId": "4a26c124138cbb7ac497b73fc23f21d943985d74",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//62E\u003d",
+        "filename": "examples/simple_decoder.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 115,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-01-27T17:32:28Z",
+      "side": 1,
+      "message": "This should probably move to tools_common as well.",
+      "revId": "4a26c124138cbb7ac497b73fc23f21d943985d74",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//614\u003d",
+        "filename": "examples/simple_decoder.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 187,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-01-27T17:32:28Z",
+      "side": 1,
+      "message": "Remove this-- it doesn\u0027t really belong in here. Maybe in a README or something. (Or just leave it in a comment)",
+      "revId": "4a26c124138cbb7ac497b73fc23f21d943985d74",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
