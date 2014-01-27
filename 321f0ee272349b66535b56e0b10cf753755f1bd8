@@ -70,6 +70,24 @@
       "revId": "321f0ee272349b66535b56e0b10cf753755f1bd8",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//6tE\u003d",
+        "filename": "vp9/encoder/vp9_onyx_if.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 3332,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-01-27T23:44:51Z",
+      "side": 1,
+      "message": "If understand correctly, now user has to provide \"--enable-experimental --enable-non420\" options to enable YUV 4:4:4 support. I think this should the only step to enable it, so it will not be necessary to provide additional --profile option for encoder. Encoder will be able to detect that user encodes 4:4:4 content and it will put correct profile version automatically into bitstream.",
+      "parentUuid": "AAAAdn//6tQ\u003d",
+      "revId": "321f0ee272349b66535b56e0b10cf753755f1bd8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
