@@ -74,8 +74,10 @@ endif
 #example_xma.DESCRIPTION      = External Memory Allocation mode usage
 
 GEN_EXAMPLES-$(CONFIG_VP8_DECODER) += simple_decoder.c
-simple_decoder.GUID              = D3BBF1E9-2427-450D-BBFF-B2843C1D44CC
-simple_decoder.DESCRIPTION       = Simplified decoder loop
+simple_decoder.GUID                = D3BBF1E9-2427-450D-BBFF-B2843C1D44CC
+simple_decoder.SRCS                += ivfdec.h ivfdec.c
+simple_decoder.SRCS                += tools_common.h tools_common.c
+simple_decoder.DESCRIPTION         = Simplified decoder loop
 GEN_EXAMPLES-$(CONFIG_VP8_DECODER) += postproc.c
 postproc.GUID                    = 65E33355-F35E-4088-884D-3FD4905881D7
 postproc.DESCRIPTION             = Decoder postprocessor control

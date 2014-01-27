@@ -89,14 +89,6 @@ void usage_exit() {
   exit(EXIT_FAILURE);
 }
 
-static void die_codec(vpx_codec_ctx_t *ctx, const char *s) {
-  const char *detail = vpx_codec_error_detail(ctx);
-
-  printf("%s: %s\n", s, vpx_codec_error(ctx));
-  if (detail) printf("    %s\n", detail);
-  exit(EXIT_FAILURE);
-}
-
 static void parse_command_line(int argc, const char **argv_,
                                AppInput *app_input, SvcContext *svc_ctx,
                                vpx_codec_enc_cfg_t *enc_cfg) {
