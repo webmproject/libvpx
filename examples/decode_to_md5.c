@@ -29,7 +29,6 @@
 // is processed, then U, then V. It is important to honor the image's `stride`
 // values.
 
-#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -43,28 +42,6 @@
 #include "./md5_utils.h"
 #include "./tools_common.h"
 #include "./vpx_config.h"
-
-#define VP8_FOURCC 0x30385056
-#define VP9_FOURCC 0x30395056
-
-static vpx_codec_iface_t *get_codec_interface(unsigned int fourcc) {
-  switch (fourcc) {
-    case VP8_FOURCC:
-      return vpx_codec_vp8_dx();
-    case VP9_FOURCC:
-      return vpx_codec_vp9_dx();
-  }
-  return NULL;
-}
-
-static void die_codec(vpx_codec_ctx_t *ctx, const char *s) {
-  const char *detail = vpx_codec_error_detail(ctx);
-
-  printf("%s: %s\n", s, vpx_codec_error(ctx));
-  if(detail)
-    printf("    %s\n",detail);
-  exit(EXIT_FAILURE);
-}
 
 static void get_image_md5(const vpx_image_t *img, unsigned char digest[16]) {
   int plane, y;

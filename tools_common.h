@@ -13,6 +13,7 @@
 #include <stdio.h>
 
 #include "./vpx_config.h"
+#include "vpx/vpx_codec.h"
 #include "vpx/vpx_image.h"
 #include "vpx/vpx_integer.h"
 
@@ -112,6 +113,8 @@ void die(const char *fmt, ...);
 void fatal(const char *fmt, ...);
 void warn(const char *fmt, ...);
 
+void die_codec(vpx_codec_ctx_t *ctx, const char *s);
+
 /* The tool including this file must define usage_exit() */
 void usage_exit();
 
@@ -119,6 +122,12 @@ uint16_t mem_get_le16(const void *data);
 uint32_t mem_get_le32(const void *data);
 
 int read_yuv_frame(struct VpxInputContext *input_ctx, vpx_image_t *yuv_frame);
+
+vpx_codec_iface_t *get_codec_interface(unsigned int fourcc);
+
+// TODO(dkovalev): move this function to vpx_image.{c, h}, so it will be part
+// of vpx_image_t support
+void vpx_img_write(const vpx_image_t *img, FILE *file);
 
 #ifdef __cplusplus
 }  /* extern "C" */

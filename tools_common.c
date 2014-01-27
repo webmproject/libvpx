@@ -15,6 +15,10 @@
 #include <stdlib.h>
 #include <string.h>
 
+#if CONFIG_VP8_DECODER || CONFIG_VP9_DECODER
+#include "vpx/vp8dx.h"
+#endif
+
 #if defined(_WIN32) || defined(__OS2__)
 #include <io.h>
 #include <fcntl.h>
@@ -58,6 +62,15 @@ void fatal(const char *fmt, ...) {
 
 void warn(const char *fmt, ...) {
   LOG_ERROR("Warning");
+}
+
+void die_codec(vpx_codec_ctx_t *ctx, const char *s) {
+  const char *detail = vpx_codec_error_detail(ctx);
+
+  printf("%s: %s\n", s, vpx_codec_error(ctx));
+  if (detail)
+    printf("    %s\n", detail);
+  exit(EXIT_FAILURE);
 }
 
 uint16_t mem_get_le16(const void *data) {
@@ -129,4 +142,35 @@ int read_yuv_frame(struct VpxInputContext *input_ctx, vpx_image_t *yuv_frame) {
   }
 
   return shortread;
+}
+
+vpx_codec_iface_t *get_codec_interface(unsigned int fourcc) {
+  switch (fourcc) {
+#if CONFIG_VP8_DECODER
+    case VP8_FOURCC:
+      return vpx_codec_vp8_dx();
+#endif
+#if CONFIG_VP9_DECODER
+    case VP9_FOURCC:
+      return vpx_codec_vp9_dx();
+#endif
+    default:
+      return NULL;
+  }
+  return NULL;
+}
+
+void vpx_img_write(const vpx_image_t *img, FILE *file) {
+  int plane, y;
+
+  for (plane = 0; plane < 3; ++plane) {
+    const unsigned char *buf = img->planes[plane];
+    const int stride = img->stride[plane];
+    const int w = plane ? (img->d_w + 1) >> 1 : img->d_w;
+    const int h = plane ? (img->d_h + 1) >> 1 : img->d_h;
+    for (y = 0; y < h; ++y) {
+      fwrite(buf, 1, w, file);
+      buf += stride;
+    }
+  }
 }
