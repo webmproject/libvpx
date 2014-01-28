@@ -247,6 +247,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//6ps\u003d",
+        "filename": "vp9/decoder/vp9_dthread.c",
+        "patchSetId": 24
+      },
+      "lineNbr": 130,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-01-28T02:46:28Z",
+      "side": 1,
+      "message": "So I guess the main issue here is if height changes while not filtering. Otherwise I\u0027d expect you could just check the allocation.",
+      "parentUuid": "AAAAdn//6yM\u003d",
+      "revId": "62020e3c3688c9495589065cd1bf5dcdb3eb5814",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//68k\u003d",
         "filename": "vp9/decoder/vp9_dthread.c",
         "patchSetId": 24
