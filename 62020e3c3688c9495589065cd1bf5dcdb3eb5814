@@ -37,6 +37,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//6pk\u003d",
+        "filename": "vp9/common/vp9_loopfilter.h",
+        "patchSetId": 24
+      },
+      "lineNbr": 77,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-01-28T02:49:51Z",
+      "side": 1,
+      "message": "not sure I follow. why not in this patchset removing the need to move this struct typedef?",
+      "parentUuid": "AAAAdn//60I\u003d",
+      "revId": "62020e3c3688c9495589065cd1bf5dcdb3eb5814",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//68A\u003d",
         "filename": "vp9/decoder/vp9_dthread.c",
         "patchSetId": 24
