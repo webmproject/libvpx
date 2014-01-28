@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//6eg\u003d",
+        "filename": "vp9/encoder/vp9_firstpass.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 2380,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2014-01-28T20:15:20Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//6fc\u003d",
+      "revId": "f815796b1d0cf0e38555cf9fdd028803dcdffc7a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//6fk\u003d",
         "filename": "vp9/encoder/vp9_firstpass.c",
         "patchSetId": 7
@@ -30,6 +48,24 @@
       "writtenOn": "2014-01-28T19:28:13Z",
       "side": 1,
       "message": "repeated on line 2387",
+      "revId": "f815796b1d0cf0e38555cf9fdd028803dcdffc7a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//6ec\u003d",
+        "filename": "vp9/encoder/vp9_firstpass.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 2385,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2014-01-28T20:15:20Z",
+      "side": 1,
+      "message": "oops. removed.",
+      "parentUuid": "AAAAdn//6fk\u003d",
       "revId": "f815796b1d0cf0e38555cf9fdd028803dcdffc7a",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//6eQ\u003d",
+        "filename": "vp9/encoder/vp9_ratectrl.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 381,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2014-01-28T20:15:20Z",
+      "side": 1,
+      "message": "Currently, svc just uses fixed q encoding. There is a lot more to supporting rate ctrl with svc currently than these changes. I would prefer to defer that to until we get to supporting that properly.",
+      "parentUuid": "AAAAdn//6fw\u003d",
+      "revId": "f815796b1d0cf0e38555cf9fdd028803dcdffc7a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//6fs\u003d",
         "filename": "vp9/encoder/vp9_ratectrl.c",
         "patchSetId": 7
@@ -64,6 +118,24 @@
       "writtenOn": "2014-01-28T19:28:13Z",
       "side": 1,
       "message": "...\u0026\u0026 !cpi-\u003euse_svc).\n\ngolden_ref may be updated periodically for a certain layer in svc.",
+      "revId": "f815796b1d0cf0e38555cf9fdd028803dcdffc7a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//6eE\u003d",
+        "filename": "vp9/encoder/vp9_ratectrl.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 405,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2014-01-28T20:15:20Z",
+      "side": 1,
+      "message": "ditto.",
+      "parentUuid": "AAAAdn//6fs\u003d",
       "revId": "f815796b1d0cf0e38555cf9fdd028803dcdffc7a",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
