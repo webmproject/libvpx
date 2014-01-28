@@ -3279,7 +3279,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
           continue;
     }
 
-    set_ref_ptrs(cm, xd, ref_frame - 1, second_ref_frame - 1);
+    set_ref_ptrs(cm, xd, ref_frame, second_ref_frame);
     mbmi->uv_mode = DC_PRED;
 
     // Evaluate all sub-pel filters irrespective of whether we can use
@@ -3711,7 +3711,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
     vp9_zero(best_tx_diff);
   }
 
-  set_ref_ptrs(cm, xd, mbmi->ref_frame[0] - 1, mbmi->ref_frame[1] - 1);
+  set_ref_ptrs(cm, xd, mbmi->ref_frame[0], mbmi->ref_frame[1]);
   store_coding_context(x, ctx, best_mode_index,
                        &mbmi->ref_mvs[mbmi->ref_frame[0]][0],
                        &mbmi->ref_mvs[mbmi->ref_frame[1] < 0 ? 0 :
@@ -3904,7 +3904,7 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
         vp9_is_scaled(&cm->frame_refs[second_ref_frame - 1].sf))
       continue;
 
-    set_ref_ptrs(cm, xd, ref_frame - 1, second_ref_frame - 1);
+    set_ref_ptrs(cm, xd, ref_frame, second_ref_frame);
     mbmi->uv_mode = DC_PRED;
 
     // Evaluate all sub-pel filters irrespective of whether we can use
@@ -4444,7 +4444,7 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
     vp9_zero(best_tx_diff);
   }
 
-  set_ref_ptrs(cm, xd, mbmi->ref_frame[0] - 1, mbmi->ref_frame[1] - 1);
+  set_ref_ptrs(cm, xd, mbmi->ref_frame[0], mbmi->ref_frame[1]);
   store_coding_context(x, ctx, best_mode_index,
                        &mbmi->ref_mvs[mbmi->ref_frame[0]][0],
                        &mbmi->ref_mvs[mbmi->ref_frame[1] < 0 ? 0 :

@@ -3397,6 +3397,7 @@ int vp9_get_compressed_data(VP9_PTR ptr, unsigned int *frame_flags,
                             int64_t *time_stamp, int64_t *time_end, int flush) {
   VP9_COMP *cpi = (VP9_COMP *) ptr;
   VP9_COMMON *cm = &cpi->common;
+  MACROBLOCKD *xd = &cpi->mb.e_mbd;
   struct vpx_usec_timer  cmptimer;
   YV12_BUFFER_CONFIG *force_src_buffer = NULL;
   MV_REFERENCE_FRAME ref_frame;
@@ -3580,7 +3581,8 @@ int vp9_get_compressed_data(VP9_PTR ptr, unsigned int *frame_flags,
       vp9_extend_frame_borders(buf, cm->subsampling_x, cm->subsampling_y);
   }
 
-  vp9_setup_interp_filters(&cpi->mb.e_mbd, DEFAULT_INTERP_FILTER, cm);
+  set_ref_ptrs(cm, xd, LAST_FRAME, LAST_FRAME);
+  vp9_setup_interp_filters(xd, DEFAULT_INTERP_FILTER, cm);
 
   if (cpi->oxcf.aq_mode == VARIANCE_AQ) {
       vp9_vaq_init();

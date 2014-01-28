@@ -824,6 +824,12 @@ static int get_token_alloc(int mb_rows, int mb_cols) {
   return mb_rows * mb_cols * (48 * 16 + 4);
 }
 
+static void set_ref_ptrs(VP9_COMMON *cm, MACROBLOCKD *xd,
+                         MV_REFERENCE_FRAME ref0, MV_REFERENCE_FRAME ref1) {
+  xd->block_refs[0] = &cm->frame_refs[ref0 - LAST_FRAME];
+  xd->block_refs[1] = &cm->frame_refs[ref1 - LAST_FRAME];
+}
+
 #ifdef __cplusplus
 }  // extern "C"
 #endif
