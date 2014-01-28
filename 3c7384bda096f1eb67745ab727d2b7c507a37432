@@ -16,6 +16,24 @@
       "revId": "3c7384bda096f1eb67745ab727d2b7c507a37432",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//6sc\u003d",
+        "filename": "vp9/common/arm/neon/vp9_reconintra_neon.asm",
+        "patchSetId": 2
+      },
+      "lineNbr": 563,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2014-01-28T00:06:32Z",
+      "side": 1,
+      "message": "Done.",
+      "parentUuid": "AAAAdn//6sw\u003d",
+      "revId": "3c7384bda096f1eb67745ab727d2b7c507a37432",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
