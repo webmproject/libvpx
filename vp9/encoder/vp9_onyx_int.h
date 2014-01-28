@@ -98,18 +98,6 @@ typedef struct {
 } FIRSTPASS_STATS;
 
 typedef struct {
-  int frames_so_far;
-  double frame_intra_error;
-  double frame_coded_error;
-  double frame_pcnt_inter;
-  double frame_pcnt_motion;
-  double frame_mvr;
-  double frame_mvr_abs;
-  double frame_mvc;
-  double frame_mvc_abs;
-} ONEPASS_FRAMESTATS;
-
-typedef struct {
   struct {
     int err;
     union {
@@ -609,11 +597,6 @@ typedef struct VP9_COMP {
   int64_t target_bandwidth;
   struct vpx_codec_pkt_list  *output_pkt_list;
 
-#if 0
-  // Experimental code for lagged and one pass
-  ONEPASS_FRAMESTATS one_pass_frame_stats[MAX_LAG_BUFFERS];
-  int one_pass_frame_index;
-#endif
   MBGRAPH_FRAME_STATS mbgraph_stats[MAX_LAG_BUFFERS];
   int mbgraph_n_frames;             // number of frames filled in the above
   int static_mb_pct;                // % forced skip mbs by segmentation
