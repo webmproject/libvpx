@@ -99,6 +99,8 @@ force_keyframe.GUID              = 3C67CADF-029F-4C86-81F5-D6D4F51177F0
 force_keyframe.DESCRIPTION       = Force generation of keyframes
 ifeq ($(CONFIG_DECODERS),yes)
 GEN_EXAMPLES-$(CONFIG_VP8_ENCODER) += decode_with_drops.c
+decode_with_drops.SRCS             += ivfdec.h ivfdec.c
+decode_with_drops.SRCS             += tools_common.h tools_common.c
 endif
 decode_with_drops.GUID           = CE5C53C4-8DDA-438A-86ED-0DDD3CDB8D26
 decode_with_drops.DESCRIPTION    = Drops frames while decoding
