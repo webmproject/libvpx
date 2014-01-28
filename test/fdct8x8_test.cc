@@ -699,6 +699,9 @@ INSTANTIATE_TEST_CASE_P(
     ::testing::Values(
         make_tuple(&vp9_fdct8x8_neon, &vp9_idct8x8_64_add_neon, 0,
                    VPX_BITS_8)));
+#endif  // HAVE_NEON_ASM && !CONFIG_VP9_HIGHBITDEPTH && !CONFIG_EMULATE_HARDWARE
+
+#if HAVE_NEON && !CONFIG_VP9_HIGHBITDEPTH && !CONFIG_EMULATE_HARDWARE
 INSTANTIATE_TEST_CASE_P(
     NEON, FwdTrans8x8HT,
     ::testing::Values(
@@ -706,7 +709,7 @@ INSTANTIATE_TEST_CASE_P(
         make_tuple(&vp9_fht8x8_c, &vp9_iht8x8_64_add_neon, 1, VPX_BITS_8),
         make_tuple(&vp9_fht8x8_c, &vp9_iht8x8_64_add_neon, 2, VPX_BITS_8),
         make_tuple(&vp9_fht8x8_c, &vp9_iht8x8_64_add_neon, 3, VPX_BITS_8)));
-#endif  // HAVE_NEON_ASM && !CONFIG_VP9_HIGHBITDEPTH && !CONFIG_EMULATE_HARDWARE
+#endif  // HAVE_NEON && !CONFIG_VP9_HIGHBITDEPTH && !CONFIG_EMULATE_HARDWARE
 
 #if HAVE_SSE2 && !CONFIG_VP9_HIGHBITDEPTH && !CONFIG_EMULATE_HARDWARE
 // TODO(jingning): re-enable after these handle the expanded range [0, 65535]
