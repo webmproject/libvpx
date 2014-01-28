@@ -8,25 +8,28 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-
 #ifndef VP9_ENCODER_VP9_ONYX_INT_H_
 #define VP9_ENCODER_VP9_ONYX_INT_H_
 
 #include <stdio.h>
+
 #include "./vpx_config.h"
-#include "vp9/common/vp9_onyx.h"
-#include "vp9/encoder/vp9_treewriter.h"
-#include "vp9/encoder/vp9_tokenize.h"
-#include "vp9/common/vp9_onyxc_int.h"
-#include "vp9/encoder/vp9_variance.h"
-#include "vp9/encoder/vp9_encodemb.h"
-#include "vp9/encoder/vp9_quantize.h"
-#include "vp9/common/vp9_entropy.h"
-#include "vp9/common/vp9_entropymode.h"
 #include "vpx_ports/mem.h"
 #include "vpx/internal/vpx_codec_internal.h"
-#include "vp9/encoder/vp9_mcomp.h"
+
+#include "vp9/common/vp9_entropy.h"
+#include "vp9/common/vp9_entropymode.h"
+#include "vp9/common/vp9_onyx.h"
+#include "vp9/common/vp9_onyxc_int.h"
+
+#include "vp9/encoder/vp9_encodemb.h"
 #include "vp9/encoder/vp9_lookahead.h"
+#include "vp9/encoder/vp9_mcomp.h"
+#include "vp9/encoder/vp9_quantize.h"
+#include "vp9/encoder/vp9_ratectrl.h"
+#include "vp9/encoder/vp9_tokenize.h"
+#include "vp9/encoder/vp9_treewriter.h"
+#include "vp9/encoder/vp9_variance.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -421,67 +424,6 @@ typedef struct {
   // by only looking at counts from 1/2 the bands.
   int use_fast_coef_updates;  // 0: 2-loop, 1: 1-loop, 2: 1-loop reduced
 } SPEED_FEATURES;
-
-typedef struct {
-  // Rate targetting variables
-  int this_frame_target;
-  int projected_frame_size;
-  int sb64_target_rate;
-  int last_q[3];                   // Separate values for Intra/Inter/ARF-GF
-  int last_boosted_qindex;         // Last boosted GF/KF/ARF q
-
-  int gfu_boost;
-  int last_boost;
-  int kf_boost;
-
-  double rate_correction_factor;
-  double key_frame_rate_correction_factor;
-  double gf_rate_correction_factor;
-
-  unsigned int frames_since_golden;
-  unsigned int frames_till_gf_update_due;  // Count down till next GF
-  unsigned int max_gf_interval;
-  unsigned int baseline_gf_interval;
-  unsigned int frames_to_key;
-  unsigned int frames_since_key;
-  unsigned int this_key_frame_forced;
-  unsigned int next_key_frame_forced;
-  unsigned int source_alt_ref_pending;
-  unsigned int source_alt_ref_active;
-  unsigned int is_src_frame_alt_ref;
-
-  int per_frame_bandwidth;        // Current section per frame bandwidth target
-  int av_per_frame_bandwidth;     // Average frame size target for clip
-  int min_frame_bandwidth;        // Minimum allocation used for any frame
-  int max_frame_bandwidth;        // Maximum burst rate allowed for a frame.
-
-  int ni_av_qi;
-  int ni_tot_qi;
-  int ni_frames;
-  int avg_frame_qindex[3];  // 0 - KEY, 1 - INTER, 2 - ARF/GF
-  double tot_q;
-  double avg_q;
-
-  int buffer_level;
-  int bits_off_target;
-
-  int decimation_factor;
-  int decimation_count;
-
-  int rolling_target_bits;
-  int rolling_actual_bits;
-
-  int long_rolling_target_bits;
-  int long_rolling_actual_bits;
-
-  int64_t total_actual_bits;
-  int total_target_vs_actual;        // debug stats
-
-  int worst_quality;
-  int active_worst_quality;
-  int best_quality;
-  // int active_best_quality;
-} RATE_CONTROL;
 
 typedef struct VP9_COMP {
   DECLARE_ALIGNED(16, int16_t, y_quant[QINDEX_RANGE][8]);
