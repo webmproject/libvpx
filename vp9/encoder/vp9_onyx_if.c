@@ -839,6 +839,7 @@ static void set_rt_speed_feature(VP9_COMMON *cm,
   if (speed >= 5) {
     int i;
     sf->disable_split_mask = DISABLE_ALL_SPLIT;
+    sf->subpel_force_stop = 1;
     for (i = 0; i < TX_SIZES; i++) {
       sf->intra_y_mode_mask[i] = INTRA_DC_H_V;
       sf->intra_uv_mode_mask[i] = INTRA_DC_ONLY;
@@ -867,6 +868,7 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
   sf->recode_loop = 1;
   sf->subpel_search_method = SUBPEL_TREE;
   sf->subpel_iters_per_step = 2;
+  sf->subpel_force_stop = 0;
   sf->optimize_coefficients = !cpi->oxcf.lossless;
   sf->reduce_first_step_size = 0;
   sf->auto_mv_step_size = 0;
