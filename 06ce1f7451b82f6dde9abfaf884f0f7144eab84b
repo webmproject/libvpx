@@ -37,6 +37,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//6rc\u003d",
+        "filename": "vpxdec.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 836,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-01-28T00:52:17Z",
+      "side": 1,
+      "message": "my mistake I was using a (too) old binary for verifying the old behavior. the difference was in vp80-06-smallsize, which changed for different  reasons.\nI was concerned about alt-ref and producing a frame header when no frame was produced, but the img check about handles this",
+      "parentUuid": "AAAAdn//6xM\u003d",
+      "revId": "06ce1f7451b82f6dde9abfaf884f0f7144eab84b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//6zc\u003d",
         "filename": "y4menc.c",
         "patchSetId": 2
