@@ -2681,6 +2681,7 @@ static void encode_superblock(VP9_COMP *cpi, TOKENEXTRA **t, int output_enabled,
       vp9_update_zbin_extra(cpi, x);
     }
   } else {
+    set_ref_ptrs(cm, xd, mbmi->ref_frame[0], mbmi->ref_frame[1]);
     vp9_setup_interp_filters(xd, mbmi->interp_filter, cm);
 
     if (cpi->oxcf.tuning == VP8_TUNE_SSIM) {
