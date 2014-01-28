@@ -997,7 +997,7 @@ static INLINE int half_round_shift(int input) {
   return rv;
 }
 
-static void dct32_1d(const int *input, int *output, int round) {
+static void fdct32(const int *input, int *output, int round) {
   int step[32];
   // Stage 1
   step[0] = input[0] + input[(32 - 1)];
@@ -1329,7 +1329,7 @@ void vp9_fdct32x32_c(const int16_t *input, int16_t *out, int stride) {
     int temp_in[32], temp_out[32];
     for (j = 0; j < 32; ++j)
       temp_in[j] = input[j * stride + i] * 4;
-    dct32_1d(temp_in, temp_out, 0);
+    fdct32(temp_in, temp_out, 0);
     for (j = 0; j < 32; ++j)
       output[j * 32 + i] = (temp_out[j] + 1 + (temp_out[j] > 0)) >> 2;
   }
@@ -1339,13 +1339,13 @@ void vp9_fdct32x32_c(const int16_t *input, int16_t *out, int stride) {
     int temp_in[32], temp_out[32];
     for (j = 0; j < 32; ++j)
       temp_in[j] = output[j + i * 32];
-    dct32_1d(temp_in, temp_out, 0);
+    fdct32(temp_in, temp_out, 0);
     for (j = 0; j < 32; ++j)
       out[j + i * 32] = (temp_out[j] + 1 + (temp_out[j] < 0)) >> 2;
   }
 }
 
-// Note that although we use dct_32_round in dct32_1d computation flow,
+// Note that although we use dct_32_round in dct32 computation flow,
 // this 2d fdct32x32 for rate-distortion optimization loop is operating
 // within 16 bits precision.
 void vp9_fdct32x32_rd_c(const int16_t *input, int16_t *out, int stride) {
@@ -1357,7 +1357,7 @@ void vp9_fdct32x32_rd_c(const int16_t *input, int16_t *out, int stride) {
     int temp_in[32], temp_out[32];
     for (j = 0; j < 32; ++j)
       temp_in[j] = input[j * stride + i] * 4;
-    dct32_1d(temp_in, temp_out, 0);
+    fdct32(temp_in, temp_out, 0);
     for (j = 0; j < 32; ++j)
       // TODO(cd): see quality impact of only doing
       //           output[j * 32 + i] = (temp_out[j] + 1) >> 2;
@@ -1370,7 +1370,7 @@ void vp9_fdct32x32_rd_c(const int16_t *input, int16_t *out, int stride) {
     int temp_in[32], temp_out[32];
     for (j = 0; j < 32; ++j)
       temp_in[j] = output[j + i * 32];
-    dct32_1d(temp_in, temp_out, 1);
+    fdct32(temp_in, temp_out, 1);
     for (j = 0; j < 32; ++j)
       out[j + i * 32] = temp_out[j];
   }

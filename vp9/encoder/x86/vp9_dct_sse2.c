@@ -161,7 +161,7 @@ static INLINE void transpose_4x4(__m128i *res) {
   res[3] = _mm_unpackhi_epi64(res[2], res[2]);
 }
 
-void fdct4_1d_sse2(__m128i *in) {
+void fdct4_sse2(__m128i *in) {
   const __m128i k__cospi_p16_p16 = _mm_set1_epi16(cospi_16_64);
   const __m128i k__cospi_p16_m16 = pair_set_epi16(cospi_16_64, -cospi_16_64);
   const __m128i k__cospi_p08_p24 = pair_set_epi16(cospi_8_64, cospi_24_64);
@@ -194,7 +194,7 @@ void fdct4_1d_sse2(__m128i *in) {
   transpose_4x4(in);
 }
 
-void fadst4_1d_sse2(__m128i *in) {
+void fadst4_sse2(__m128i *in) {
   const __m128i k__sinpi_p01_p02 = pair_set_epi16(sinpi_1_9, sinpi_2_9);
   const __m128i k__sinpi_p04_m01 = pair_set_epi16(sinpi_4_9, -sinpi_1_9);
   const __m128i k__sinpi_p03_p04 = pair_set_epi16(sinpi_3_9, sinpi_4_9);
@@ -248,20 +248,20 @@ void vp9_short_fht4x4_sse2(const int16_t *input, int16_t *output,
   load_buffer_4x4(input, in, stride);
   switch (tx_type) {
     case 0:  // DCT_DCT
-      fdct4_1d_sse2(in);
-      fdct4_1d_sse2(in);
+      fdct4_sse2(in);
+      fdct4_sse2(in);
       break;
     case 1:  // ADST_DCT
-      fadst4_1d_sse2(in);
-      fdct4_1d_sse2(in);
+      fadst4_sse2(in);
+      fdct4_sse2(in);
       break;
     case 2:  // DCT_ADST
-      fdct4_1d_sse2(in);
-      fadst4_1d_sse2(in);
+      fdct4_sse2(in);
+      fadst4_sse2(in);
       break;
     case 3:  // ADST_ADST
-      fadst4_1d_sse2(in);
-      fadst4_1d_sse2(in);
+      fadst4_sse2(in);
+      fadst4_sse2(in);
       break;
     default:
       assert(0);
@@ -656,7 +656,7 @@ static INLINE void array_transpose_8x8(__m128i *in, __m128i *res) {
   // 07 17 27 37 47 57 67 77
 }
 
-void fdct8_1d_sse2(__m128i *in) {
+void fdct8_sse2(__m128i *in) {
   // constants
   const __m128i k__cospi_p16_p16 = _mm_set1_epi16(cospi_16_64);
   const __m128i k__cospi_p16_m16 = pair_set_epi16(cospi_16_64, -cospi_16_64);
@@ -796,7 +796,7 @@ void fdct8_1d_sse2(__m128i *in) {
   array_transpose_8x8(in, in);
 }
 
-void fadst8_1d_sse2(__m128i *in) {
+void fadst8_sse2(__m128i *in) {
   // Constants
   const __m128i k__cospi_p02_p30 = pair_set_epi16(cospi_2_64, cospi_30_64);
   const __m128i k__cospi_p30_m02 = pair_set_epi16(cospi_30_64, -cospi_2_64);
@@ -1032,20 +1032,20 @@ void vp9_short_fht8x8_sse2(const int16_t *input, int16_t *output,
   load_buffer_8x8(input, in, stride);
   switch (tx_type) {
     case 0:  // DCT_DCT
-      fdct8_1d_sse2(in);
-      fdct8_1d_sse2(in);
+      fdct8_sse2(in);
+      fdct8_sse2(in);
       break;
     case 1:  // ADST_DCT
-      fadst8_1d_sse2(in);
-      fdct8_1d_sse2(in);
+      fadst8_sse2(in);
+      fdct8_sse2(in);
       break;
     case 2:  // DCT_ADST
-      fdct8_1d_sse2(in);
-      fadst8_1d_sse2(in);
+      fdct8_sse2(in);
+      fadst8_sse2(in);
       break;
     case 3:  // ADST_ADST
-      fadst8_1d_sse2(in);
-      fadst8_1d_sse2(in);
+      fadst8_sse2(in);
+      fadst8_sse2(in);
       break;
     default:
       assert(0);
@@ -1214,7 +1214,7 @@ void vp9_fdct16x16_sse2(const int16_t *input, int16_t *output, int stride) {
         step1_6 = _mm_sub_epi16(in01, in14);
         step1_7 = _mm_sub_epi16(in00, in15);
       }
-      // Work on the first eight values; fdct8_1d(input, even_results);
+      // Work on the first eight values; fdct8(input, even_results);
       {
         // Add/substract
         const __m128i q0 = _mm_add_epi16(input0, input7);
@@ -1728,7 +1728,7 @@ static INLINE void right_shift_16x16(__m128i *res0, __m128i *res1) {
   right_shift_8x8(res1 + 8, 2);
 }
 
-void fdct16_1d_8col(__m128i *in) {
+void fdct16_8col(__m128i *in) {
   // perform 16x16 1-D DCT for 8 columns
   __m128i i[8], s[8], p[8], t[8], u[16], v[16];
   const __m128i k__cospi_p16_p16 = _mm_set1_epi16(cospi_16_64);
@@ -2050,7 +2050,7 @@ void fdct16_1d_8col(__m128i *in) {
   in[15] = _mm_packs_epi32(v[14], v[15]);
 }
 
-void fadst16_1d_8col(__m128i *in) {
+void fadst16_8col(__m128i *in) {
   // perform 16x16 1-D ADST for 8 columns
   __m128i s[16], x[16], u[32], v[32];
   const __m128i k__cospi_p01_p31 = pair_set_epi16(cospi_1_64, cospi_31_64);
@@ -2520,15 +2520,15 @@ void fadst16_1d_8col(__m128i *in) {
   in[15] = _mm_sub_epi16(kZero, s[1]);
 }
 
-void fdct16_1d_sse2(__m128i *in0, __m128i *in1) {
-  fdct16_1d_8col(in0);
-  fdct16_1d_8col(in1);
+void fdct16_sse2(__m128i *in0, __m128i *in1) {
+  fdct16_8col(in0);
+  fdct16_8col(in1);
   array_transpose_16x16(in0, in1);
 }
 
-void fadst16_1d_sse2(__m128i *in0, __m128i *in1) {
-  fadst16_1d_8col(in0);
-  fadst16_1d_8col(in1);
+void fadst16_sse2(__m128i *in0, __m128i *in1) {
+  fadst16_8col(in0);
+  fadst16_8col(in1);
   array_transpose_16x16(in0, in1);
 }
 
@@ -2538,24 +2538,24 @@ void vp9_short_fht16x16_sse2(const int16_t *input, int16_t *output,
   load_buffer_16x16(input, in0, in1, stride);
   switch (tx_type) {
     case 0:  // DCT_DCT
-      fdct16_1d_sse2(in0, in1);
+      fdct16_sse2(in0, in1);
       right_shift_16x16(in0, in1);
-      fdct16_1d_sse2(in0, in1);
+      fdct16_sse2(in0, in1);
       break;
     case 1:  // ADST_DCT
-      fadst16_1d_sse2(in0, in1);
+      fadst16_sse2(in0, in1);
       right_shift_16x16(in0, in1);
-      fdct16_1d_sse2(in0, in1);
+      fdct16_sse2(in0, in1);
       break;
     case 2:  // DCT_ADST
-      fdct16_1d_sse2(in0, in1);
+      fdct16_sse2(in0, in1);
       right_shift_16x16(in0, in1);
-      fadst16_1d_sse2(in0, in1);
+      fadst16_sse2(in0, in1);
       break;
     case 3:  // ADST_ADST
-      fadst16_1d_sse2(in0, in1);
+      fadst16_sse2(in0, in1);
       right_shift_16x16(in0, in1);
-      fadst16_1d_sse2(in0, in1);
+      fadst16_sse2(in0, in1);
       break;
     default:
       assert(0);
