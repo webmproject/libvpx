@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//6mk\u003d",
+        "filename": "vp9/decoder/vp9_dthread.c",
+        "patchSetId": 27
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2014-01-28T17:53:10Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//6pU\u003d",
+      "revId": "817ab97fb468b591bd1c5bb9b6eb1d9e768ae12e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//6pQ\u003d",
         "filename": "vp9/decoder/vp9_dthread.c",
         "patchSetId": 27
@@ -30,6 +48,24 @@
       "writtenOn": "2014-01-28T03:19:04Z",
       "side": 1,
       "message": "drop the inner ()s",
+      "revId": "817ab97fb468b591bd1c5bb9b6eb1d9e768ae12e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//6mg\u003d",
+        "filename": "vp9/decoder/vp9_dthread.c",
+        "patchSetId": 27
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2014-01-28T17:53:10Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//6pQ\u003d",
       "revId": "817ab97fb468b591bd1c5bb9b6eb1d9e768ae12e",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//6mY\u003d",
+        "filename": "vp9/decoder/vp9_dthread.c",
+        "patchSetId": 27
+      },
+      "lineNbr": 93,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2014-01-28T17:53:10Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//6pM\u003d",
+      "revId": "817ab97fb468b591bd1c5bb9b6eb1d9e768ae12e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//6pE\u003d",
         "filename": "vp9/decoder/vp9_dthread.c",
         "patchSetId": 27
@@ -64,6 +118,24 @@
       "writtenOn": "2014-01-28T03:19:04Z",
       "side": 1,
       "message": "*const",
+      "revId": "817ab97fb468b591bd1c5bb9b6eb1d9e768ae12e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//6mQ\u003d",
+        "filename": "vp9/decoder/vp9_dthread.c",
+        "patchSetId": 27
+      },
+      "lineNbr": 110,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2014-01-28T17:53:10Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//6pE\u003d",
       "revId": "817ab97fb468b591bd1c5bb9b6eb1d9e768ae12e",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//6mM\u003d",
+        "filename": "vp9/decoder/vp9_dthread.c",
+        "patchSetId": 27
+      },
+      "lineNbr": 111,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2014-01-28T17:53:10Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//6pI\u003d",
+      "revId": "817ab97fb468b591bd1c5bb9b6eb1d9e768ae12e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//6o4\u003d",
         "filename": "vp9/decoder/vp9_dthread.c",
         "patchSetId": 27
@@ -98,6 +188,24 @@
       "writtenOn": "2014-01-28T03:19:04Z",
       "side": 1,
       "message": "you could forward declare the struct in the header to avoid casting",
+      "revId": "817ab97fb468b591bd1c5bb9b6eb1d9e768ae12e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//6mI\u003d",
+        "filename": "vp9/decoder/vp9_dthread.c",
+        "patchSetId": 27
+      },
+      "lineNbr": 116,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2014-01-28T17:53:10Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//6o4\u003d",
       "revId": "817ab97fb468b591bd1c5bb9b6eb1d9e768ae12e",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -121,6 +229,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//6mE\u003d",
+        "filename": "vp9/decoder/vp9_dthread.c",
+        "patchSetId": 27
+      },
+      "lineNbr": 192,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2014-01-28T17:53:10Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//6o0\u003d",
+      "revId": "817ab97fb468b591bd1c5bb9b6eb1d9e768ae12e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//6ow\u003d",
         "filename": "vp9/decoder/vp9_dthread.c",
         "patchSetId": 27
@@ -132,6 +258,24 @@
       "writtenOn": "2014-01-28T03:19:04Z",
       "side": 1,
       "message": "just return the value",
+      "revId": "817ab97fb468b591bd1c5bb9b6eb1d9e768ae12e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//6mA\u003d",
+        "filename": "vp9/decoder/vp9_dthread.c",
+        "patchSetId": 27
+      },
+      "lineNbr": 198,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2014-01-28T17:53:10Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//6ow\u003d",
       "revId": "817ab97fb468b591bd1c5bb9b6eb1d9e768ae12e",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -155,6 +299,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//6l8\u003d",
+        "filename": "vp9/decoder/vp9_dthread.c",
+        "patchSetId": 27
+      },
+      "lineNbr": 217,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2014-01-28T17:53:10Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//6oo\u003d",
+      "revId": "817ab97fb468b591bd1c5bb9b6eb1d9e768ae12e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//6os\u003d",
         "filename": "vp9/decoder/vp9_dthread.c",
         "patchSetId": 27
@@ -166,6 +328,24 @@
       "writtenOn": "2014-01-28T03:19:04Z",
       "side": 1,
       "message": "merge this with the loop at line 221",
+      "revId": "817ab97fb468b591bd1c5bb9b6eb1d9e768ae12e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//6l4\u003d",
+        "filename": "vp9/decoder/vp9_dthread.c",
+        "patchSetId": 27
+      },
+      "lineNbr": 224,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2014-01-28T17:53:10Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//6os\u003d",
       "revId": "817ab97fb468b591bd1c5bb9b6eb1d9e768ae12e",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -189,6 +369,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//6l0\u003d",
+        "filename": "vp9/decoder/vp9_dthread.c",
+        "patchSetId": 27
+      },
+      "lineNbr": 237,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2014-01-28T17:53:10Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//6pA\u003d",
+      "revId": "817ab97fb468b591bd1c5bb9b6eb1d9e768ae12e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//6o8\u003d",
         "filename": "vp9/decoder/vp9_dthread.c",
         "patchSetId": 27
@@ -200,6 +398,24 @@
       "writtenOn": "2014-01-28T03:19:04Z",
       "side": 1,
       "message": "fix indent",
+      "revId": "817ab97fb468b591bd1c5bb9b6eb1d9e768ae12e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//6lw\u003d",
+        "filename": "vp9/decoder/vp9_dthread.c",
+        "patchSetId": 27
+      },
+      "lineNbr": 249,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2014-01-28T17:53:10Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//6o8\u003d",
       "revId": "817ab97fb468b591bd1c5bb9b6eb1d9e768ae12e",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -223,6 +439,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//6ls\u003d",
+        "filename": "vp9/decoder/vp9_dthread.h",
+        "patchSetId": 27
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2014-01-28T17:53:10Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//6ok\u003d",
+      "revId": "817ab97fb468b591bd1c5bb9b6eb1d9e768ae12e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//6og\u003d",
         "filename": "vp9/decoder/vp9_dthread.h",
         "patchSetId": 27
@@ -234,6 +468,24 @@
       "writtenOn": "2014-01-28T03:19:04Z",
       "side": 1,
       "message": "sort these",
+      "revId": "817ab97fb468b591bd1c5bb9b6eb1d9e768ae12e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//6lo\u003d",
+        "filename": "vp9/decoder/vp9_dthread.h",
+        "patchSetId": 27
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2014-01-28T17:53:10Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//6og\u003d",
       "revId": "817ab97fb468b591bd1c5bb9b6eb1d9e768ae12e",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -257,6 +509,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//6lk\u003d",
+        "filename": "vp9/decoder/vp9_dthread.h",
+        "patchSetId": 27
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2014-01-28T17:53:10Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//6oc\u003d",
+      "revId": "817ab97fb468b591bd1c5bb9b6eb1d9e768ae12e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//6oY\u003d",
         "filename": "vp9/decoder/vp9_dthread.h",
         "patchSetId": 27
@@ -268,6 +538,24 @@
       "writtenOn": "2014-01-28T03:19:04Z",
       "side": 1,
       "message": "drop the \u0027VP9 decoder: Implement\u0027 portion",
+      "revId": "817ab97fb468b591bd1c5bb9b6eb1d9e768ae12e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//6lg\u003d",
+        "filename": "vp9/decoder/vp9_dthread.h",
+        "patchSetId": 27
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2014-01-28T17:53:10Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//6oY\u003d",
       "revId": "817ab97fb468b591bd1c5bb9b6eb1d9e768ae12e",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -291,6 +579,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//6lY\u003d",
+        "filename": "vp9/decoder/vp9_onyxd_if.c",
+        "patchSetId": 27
+      },
+      "lineNbr": 182,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2014-01-28T17:53:10Z",
+      "side": 1,
+      "message": "This is done only once -- not need a loop.",
+      "parentUuid": "AAAAdn//6oU\u003d",
+      "revId": "817ab97fb468b591bd1c5bb9b6eb1d9e768ae12e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//6oQ\u003d",
         "filename": "vp9/decoder/vp9_thread.h",
         "patchSetId": 27
@@ -302,6 +608,24 @@
       "writtenOn": "2014-01-28T03:19:04Z",
       "side": 1,
       "message": "ping on the inline comment",
+      "revId": "817ab97fb468b591bd1c5bb9b6eb1d9e768ae12e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//6lU\u003d",
+        "filename": "vp9/decoder/vp9_thread.h",
+        "patchSetId": 27
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2014-01-28T17:53:10Z",
+      "side": 1,
+      "message": "May want to be careful here. If \"inline\" is added, it has to work for all compilers. In vp8, we removed all \"inline\", and instead put the static functions in header files to get them inlined by compiler.",
+      "parentUuid": "AAAAdn//6oQ\u003d",
       "revId": "817ab97fb468b591bd1c5bb9b6eb1d9e768ae12e",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
