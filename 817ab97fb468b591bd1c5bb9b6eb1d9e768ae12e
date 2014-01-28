@@ -1,0 +1,310 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//6pU\u003d",
+        "filename": "vp9/decoder/vp9_dthread.c",
+        "patchSetId": 27
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-01-28T03:19:04Z",
+      "side": 1,
+      "message": "use a const for (r \u003c\u003c MI_BLOCK_SIZE_LOG2) and (c \u003c\u003c...), they\u0027re used quite a bit here...",
+      "revId": "817ab97fb468b591bd1c5bb9b6eb1d9e768ae12e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//6pQ\u003d",
+        "filename": "vp9/decoder/vp9_dthread.c",
+        "patchSetId": 27
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-01-28T03:19:04Z",
+      "side": 1,
+      "message": "drop the inner ()s",
+      "revId": "817ab97fb468b591bd1c5bb9b6eb1d9e768ae12e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//6pM\u003d",
+        "filename": "vp9/decoder/vp9_dthread.c",
+        "patchSetId": 27
+      },
+      "lineNbr": 93,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-01-28T03:19:04Z",
+      "side": 1,
+      "message": "seems you don\u0027t need to lock unless sig is true...",
+      "revId": "817ab97fb468b591bd1c5bb9b6eb1d9e768ae12e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//6pE\u003d",
+        "filename": "vp9/decoder/vp9_dthread.c",
+        "patchSetId": 27
+      },
+      "lineNbr": 110,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-01-28T03:19:04Z",
+      "side": 1,
+      "message": "*const",
+      "revId": "817ab97fb468b591bd1c5bb9b6eb1d9e768ae12e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//6pI\u003d",
+        "filename": "vp9/decoder/vp9_dthread.c",
+        "patchSetId": 27
+      },
+      "lineNbr": 111,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-01-28T03:19:04Z",
+      "side": 1,
+      "message": "drop this line",
+      "revId": "817ab97fb468b591bd1c5bb9b6eb1d9e768ae12e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//6o4\u003d",
+        "filename": "vp9/decoder/vp9_dthread.c",
+        "patchSetId": 27
+      },
+      "lineNbr": 116,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-01-28T03:19:04Z",
+      "side": 1,
+      "message": "you could forward declare the struct in the header to avoid casting",
+      "revId": "817ab97fb468b591bd1c5bb9b6eb1d9e768ae12e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//6o0\u003d",
+        "filename": "vp9/decoder/vp9_dthread.c",
+        "patchSetId": 27
+      },
+      "lineNbr": 192,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-01-28T03:19:04Z",
+      "side": 1,
+      "message": "_by_width is redundant given the parameter name, I think you can drop it with an added comment for the function",
+      "revId": "817ab97fb468b591bd1c5bb9b6eb1d9e768ae12e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//6ow\u003d",
+        "filename": "vp9/decoder/vp9_dthread.c",
+        "patchSetId": 27
+      },
+      "lineNbr": 198,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-01-28T03:19:04Z",
+      "side": 1,
+      "message": "just return the value",
+      "revId": "817ab97fb468b591bd1c5bb9b6eb1d9e768ae12e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//6oo\u003d",
+        "filename": "vp9/decoder/vp9_dthread.c",
+        "patchSetId": 27
+      },
+      "lineNbr": 217,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-01-28T03:19:04Z",
+      "side": 1,
+      "message": "drop this line",
+      "revId": "817ab97fb468b591bd1c5bb9b6eb1d9e768ae12e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//6os\u003d",
+        "filename": "vp9/decoder/vp9_dthread.c",
+        "patchSetId": 27
+      },
+      "lineNbr": 224,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-01-28T03:19:04Z",
+      "side": 1,
+      "message": "merge this with the loop at line 221",
+      "revId": "817ab97fb468b591bd1c5bb9b6eb1d9e768ae12e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//6pA\u003d",
+        "filename": "vp9/decoder/vp9_dthread.c",
+        "patchSetId": 27
+      },
+      "lineNbr": 237,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-01-28T03:19:04Z",
+      "side": 1,
+      "message": "!\u003d NULL",
+      "revId": "817ab97fb468b591bd1c5bb9b6eb1d9e768ae12e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//6o8\u003d",
+        "filename": "vp9/decoder/vp9_dthread.c",
+        "patchSetId": 27
+      },
+      "lineNbr": 249,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-01-28T03:19:04Z",
+      "side": 1,
+      "message": "fix indent",
+      "revId": "817ab97fb468b591bd1c5bb9b6eb1d9e768ae12e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//6ok\u003d",
+        "filename": "vp9/decoder/vp9_dthread.h",
+        "patchSetId": 27
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-01-28T03:19:04Z",
+      "side": 1,
+      "message": "1 space is enough before 4000",
+      "revId": "817ab97fb468b591bd1c5bb9b6eb1d9e768ae12e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//6og\u003d",
+        "filename": "vp9/decoder/vp9_dthread.h",
+        "patchSetId": 27
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-01-28T03:19:04Z",
+      "side": 1,
+      "message": "sort these",
+      "revId": "817ab97fb468b591bd1c5bb9b6eb1d9e768ae12e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//6oc\u003d",
+        "filename": "vp9/decoder/vp9_dthread.h",
+        "patchSetId": 27
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-01-28T03:19:04Z",
+      "side": 1,
+      "message": "try to avoid the horizontal whitespace, it often falls out of sync when code moves -- just 1 space before \u0027*\u0027 here",
+      "revId": "817ab97fb468b591bd1c5bb9b6eb1d9e768ae12e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//6oY\u003d",
+        "filename": "vp9/decoder/vp9_dthread.h",
+        "patchSetId": 27
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-01-28T03:19:04Z",
+      "side": 1,
+      "message": "drop the \u0027VP9 decoder: Implement\u0027 portion",
+      "revId": "817ab97fb468b591bd1c5bb9b6eb1d9e768ae12e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//6oU\u003d",
+        "filename": "vp9/decoder/vp9_onyxd_if.c",
+        "patchSetId": 27
+      },
+      "lineNbr": 182,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-01-28T03:19:04Z",
+      "side": 1,
+      "message": "just put this in the loop at 174",
+      "revId": "817ab97fb468b591bd1c5bb9b6eb1d9e768ae12e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//6oQ\u003d",
+        "filename": "vp9/decoder/vp9_thread.h",
+        "patchSetId": 27
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-01-28T03:19:04Z",
+      "side": 1,
+      "message": "ping on the inline comment",
+      "revId": "817ab97fb468b591bd1c5bb9b6eb1d9e768ae12e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
