@@ -44,10 +44,10 @@ int print_macho_equ(output_fmt_t mode, uint8_t* name, int val) {
     case OUTPUT_FMT_RVDS:
       printf("%-40s EQU %5d\n", name, val);
       return 0;
-    case  OUTPUT_FMT_GAS:
+    case OUTPUT_FMT_GAS:
       printf(".set %-40s, %5d\n", name, val);
       return 0;
-    case OUTPUT_C_HEADER:
+    case OUTPUT_FMT_C_HEADER:
       printf("#define %-40s %5d\n", name, val);
       return 0;
     default:
