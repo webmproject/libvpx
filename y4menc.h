@@ -11,8 +11,6 @@
 #ifndef Y4MENC_H_
 #define Y4MENC_H_
 
-#include <stdio.h>
-
 #include "./tools_common.h"
 
 #include "vpx/vpx_decoder.h"
@@ -21,12 +19,12 @@
 extern "C" {
 #endif
 
-void y4m_write_file_header(FILE *file, int width, int height,
-                           const struct VpxRational *framerate,
-                           vpx_img_fmt_t fmt);
+#define Y4M_BUFFER_SIZE 128
 
-void y4m_write_frame_header(FILE *file);
-
+int y4m_write_file_header(char *buf, size_t len, int width, int height,
+                          const struct VpxRational *framerate,
+                          vpx_img_fmt_t fmt);
+int y4m_write_frame_header(char *buf, size_t len);
 
 #ifdef __cplusplus
 }  // extern "C"

@@ -816,17 +816,34 @@ int main_loop(int argc, const char **argv_) {
       }
 
       if (single_file) {
+        if (use_y4m) {
+          char buf[Y4M_BUFFER_SIZE] = {0};
+          size_t len = 0;
+          if (frame_out == 1) {
+            // Y4M file header
+            len = y4m_write_file_header(buf, sizeof(buf),
+                                        vpx_input_ctx.width,
+                                        vpx_input_ctx.height,
+                                        &vpx_input_ctx.framerate, img->fmt);
+            if (do_md5) {
+              MD5Update(&md5_ctx, (md5byte *)buf, len);
+            } else {
+              fputs(buf, outfile);
+            }
+          }
+
+          // Y4M frame header
+          len = y4m_write_frame_header(buf, sizeof(buf));
+          if (do_md5) {
+            MD5Update(&md5_ctx, (md5byte *)buf, len);
+          } else {
+            fputs(buf, outfile);
+          }
+        }
+
         if (do_md5) {
           update_image_md5(img, planes, &md5_ctx);
         } else {
-          if (use_y4m) {
-            if (frame_out == 1) {
-              y4m_write_file_header(outfile,
-                                    vpx_input_ctx.width, vpx_input_ctx.height,
-                                    &vpx_input_ctx.framerate, img->fmt);
-            }
-            y4m_write_frame_header(outfile);
-          }
           write_image_file(img, planes, outfile);
         }
       } else {
