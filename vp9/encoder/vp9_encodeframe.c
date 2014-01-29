@@ -42,12 +42,6 @@
 
 #define DBG_PRNT_SEGMAP 0
 
-
-// #define ENC_DEBUG
-#ifdef ENC_DEBUG
-int enc_debug = 0;
-#endif
-
 static INLINE uint8_t *get_sb_index(MACROBLOCK *x, BLOCK_SIZE subsize) {
   switch (subsize) {
     case BLOCK_64X64:

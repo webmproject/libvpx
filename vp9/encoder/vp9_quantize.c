@@ -18,10 +18,6 @@
 
 #include "vp9/common/vp9_seg_common.h"
 
-#ifdef ENC_DEBUG
-extern int enc_debug;
-#endif
-
 void vp9_quantize_b_c(const int16_t *coeff_ptr, intptr_t count,
                       int skip_block,
                       const int16_t *zbin_ptr, const int16_t *round_ptr,
