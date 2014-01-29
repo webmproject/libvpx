@@ -355,7 +355,6 @@ static void optimize_init_b(int plane, BLOCK_SIZE bsize,
                            pd->above_context, pd->left_context,
                            num_4x4_w, num_4x4_h);
 }
-
 void vp9_xform_quant(int plane, int block, BLOCK_SIZE plane_bsize,
                      TX_SIZE tx_size, void *arg) {
   struct encode_b_args* const args = arg;
