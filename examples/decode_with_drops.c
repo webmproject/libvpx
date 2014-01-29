@@ -52,126 +52,103 @@
 // The example decides whether to drop the frame based on the current
 // frame number, immediately before decoding the frame.
 
-#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+#include "./ivfdec.h"
+
 #define VPX_CODEC_DISABLE_COMPAT 1
-#include "./vpx_config.h"
+
 #include "vpx/vp8dx.h"
 #include "vpx/vpx_decoder.h"
-#define interface (vpx_codec_vp8_dx())
 
+#include "./tools_common.h"
+#include "./vpx_config.h"
 
-#define IVF_FILE_HDR_SZ  (32)
-#define IVF_FRAME_HDR_SZ (12)
+static const char *exec_name;
 
-static unsigned int mem_get_le32(const unsigned char *mem) {
-    return (mem[3] << 24)|(mem[2] << 16)|(mem[1] << 8)|(mem[0]);
+void usage_exit() {
+  fprintf(stderr, "Usage: %s <infile> <outfile> <N-M|N/M>\n", exec_name);
+  exit(EXIT_FAILURE);
 }
-
-static void die(const char *fmt, ...) {
-    va_list ap;
-
-    va_start(ap, fmt);
-    vprintf(fmt, ap);
-    if(fmt[strlen(fmt)-1] != '\n')
-        printf("\n");
-    exit(EXIT_FAILURE);
-}
-
-static void die_codec(vpx_codec_ctx_t *ctx, const char *s) {
-    const char *detail = vpx_codec_error_detail(ctx);
-
-    printf("%s: %s\n", s, vpx_codec_error(ctx));
-    if(detail)
-        printf("    %s\n",detail);
-    exit(EXIT_FAILURE);
-}
-
 
 int main(int argc, char **argv) {
-    FILE            *infile, *outfile;
-    vpx_codec_ctx_t  codec;
-    int              flags = 0, frame_cnt = 0;
-    unsigned char    file_hdr[IVF_FILE_HDR_SZ];
-    unsigned char    frame_hdr[IVF_FRAME_HDR_SZ];
-    unsigned char    frame[256*1024];
-    vpx_codec_err_t  res;
-    int              n, m, is_range;
+  FILE *infile, *outfile;
+  vpx_codec_ctx_t codec;
+  vpx_codec_iface_t *iface;
+  int flags = 0, frame_cnt = 0;
+  vpx_video_t *video;
+  int n, m, is_range;
+  char *nptr;
 
-    (void)res;
-    /* Open files */
-    if(argc!=4)
-        die("Usage: %s <infile> <outfile> <N-M|N/M>\n", argv[0]);
-    {
-        char *nptr;
-        n = strtol(argv[3], &nptr, 0);
-        m = strtol(nptr+1, NULL, 0);
-        is_range = *nptr == '-';
-        if(!n || !m || (*nptr != '-' && *nptr != '/'))
-            die("Couldn't parse pattern %s\n", argv[3]);
+  exec_name = argv[0];
+
+  if (argc != 4)
+    die("Invalid number of arguments");
+
+  if (!(infile = fopen(argv[1], "rb")))
+    die("Failed to open %s for reading", argv[1]);
+
+  if (!(outfile = fopen(argv[2], "wb")))
+    die("Failed to open %s for writing", argv[2]);
+
+  n = strtol(argv[3], &nptr, 0);
+  m = strtol(nptr + 1, NULL, 0);
+  is_range = (*nptr == '-');
+  if (!n || !m || (*nptr != '-' && *nptr != '/'))
+    die("Couldn't parse pattern %s\n", argv[3]);
+
+  video = vpx_video_open_file(infile);
+  if (!video)
+    die("%s is not a supported input file.", argv[1]);
+
+  iface = get_codec_interface(vpx_video_get_fourcc(video));
+  if (!iface)
+    die("Unknown FOURCC code.");
+
+  printf("Using %s\n", vpx_codec_iface_name(iface));
+
+  if (vpx_codec_dec_init(&codec, iface, NULL, flags))
+    die_codec(&codec, "Failed to initialize decoder");
+
+  while (vpx_video_read_frame(video)) {
+    vpx_codec_iter_t iter = NULL;
+    vpx_image_t *img = NULL;
+    size_t frame_size = 0;
+    int skip;
+    const unsigned char *frame = vpx_video_get_frame(video, &frame_size);
+    if (vpx_codec_decode(&codec, frame, frame_size, NULL, 0))
+      die_codec(&codec, "Failed to decode frame");
+
+    ++frame_cnt;
+
+    skip = (is_range && frame_cnt >= n && frame_cnt <= m) ||
+           (!is_range && m - (frame_cnt - 1) % m <= n);
+
+    if (!skip) {
+      putc('.', stdout);
+
+      while ((img = vpx_codec_get_frame(&codec, &iter)) != NULL)
+        vpx_img_write(img, outfile);
+    } else {
+      putc('X', stdout);
     }
-    if(!(infile = fopen(argv[1], "rb")))
-        die("Failed to open %s for reading", argv[1]);
-    if(!(outfile = fopen(argv[2], "wb")))
-        die("Failed to open %s for writing", argv[2]);
 
-    /* Read file header */
-    if(!(fread(file_hdr, 1, IVF_FILE_HDR_SZ, infile) == IVF_FILE_HDR_SZ
-         && file_hdr[0]=='D' && file_hdr[1]=='K' && file_hdr[2]=='I'
-         && file_hdr[3]=='F'))
-        die("%s is not an IVF file.", argv[1]);
+    fflush(stdout);
+  }
 
-    printf("Using %s\n",vpx_codec_iface_name(interface));
-    /* Initialize codec */
-    if(vpx_codec_dec_init(&codec, interface, NULL, flags))
-        die_codec(&codec, "Failed to initialize decoder");
+  printf("Processed %d frames.\n", frame_cnt);
+  if (vpx_codec_destroy(&codec))
+    die_codec(&codec, "Failed to destroy codec");
 
-    /* Read each frame */
-    while(fread(frame_hdr, 1, IVF_FRAME_HDR_SZ, infile) == IVF_FRAME_HDR_SZ) {
-        int               frame_sz = mem_get_le32(frame_hdr);
-        vpx_codec_iter_t  iter = NULL;
-        vpx_image_t      *img;
+  printf("Play: ffplay -f rawvideo -pix_fmt yuv420p -s %dx%d %s\n",
+         vpx_video_get_width(video), vpx_video_get_height(video), argv[2]);
 
+  vpx_video_close(video);
 
-        frame_cnt++;
-        if(frame_sz > sizeof(frame))
-            die("Frame %d data too big for example code buffer", frame_sz);
-        if(fread(frame, 1, frame_sz, infile) != frame_sz)
-            die("Frame %d failed to read complete frame", frame_cnt);
+  fclose(outfile);
+  fclose(infile);
 
-        if((is_range && frame_cnt >= n && frame_cnt <= m)
-           ||(!is_range && m - (frame_cnt-1)%m <= n)) {
-           putc('X', stdout);
-           continue;
-        }
-        putc('.', stdout);
-        fflush(stdout);
-        /* Decode the frame */
-        if(vpx_codec_decode(&codec, frame, frame_sz, NULL, 0))
-            die_codec(&codec, "Failed to decode frame");
-
-        /* Write decoded data to disk */
-        while((img = vpx_codec_get_frame(&codec, &iter))) {
-            unsigned int plane, y;
-
-            for(plane=0; plane < 3; plane++) {
-                unsigned char *buf =img->planes[plane];
-            
-                for(y=0; y < (plane ? (img->d_h + 1) >> 1 : img->d_h); y++) {
-                    (void) fwrite(buf, 1, (plane ? (img->d_w + 1) >> 1 : img->d_w),
-                                  outfile);
-                    buf += img->stride[plane];
-                }
-            }
-        }
-    }
-    printf("Processed %d frames.\n",frame_cnt);
-    if(vpx_codec_destroy(&codec))
-        die_codec(&codec, "Failed to destroy codec");
-
-    fclose(outfile);
-    fclose(infile);
-    return EXIT_SUCCESS;
+  return EXIT_SUCCESS;
 }
