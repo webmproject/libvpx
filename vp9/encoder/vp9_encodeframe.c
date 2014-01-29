@@ -40,8 +40,6 @@
 #include "vp9/encoder/vp9_tokenize.h"
 #include "vp9/encoder/vp9_vaq.h"
 
-#define DBG_PRNT_SEGMAP 0
-
 static INLINE uint8_t *get_sb_index(MACROBLOCK *x, BLOCK_SIZE subsize) {
   switch (subsize) {
     case BLOCK_64X64:
@@ -2192,16 +2190,6 @@ static void encode_frame_internal(VP9_COMP *cpi) {
 //  fprintf(stderr, "encode_frame_internal frame %d (%d) type %d\n",
 //           cpi->common.current_video_frame, cpi->common.show_frame,
 //           cm->frame_type);
-
-// debug output
-#if DBG_PRNT_SEGMAP
-  {
-    FILE *statsfile;
-    statsfile = fopen("segmap2.stt", "a");
-    fprintf(statsfile, "\n");
-    fclose(statsfile);
-  }
-#endif
 
   vp9_zero(cm->counts.switchable_interp);
   vp9_zero(cpi->tx_stepdown_count);
