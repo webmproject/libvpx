@@ -1,0 +1,123 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//6Zg\u003d",
+        "filename": "rate_hist.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-01-29T00:10:26Z",
+      "side": 1,
+      "message": "one per line",
+      "revId": "81dd966c352379b18bc62370f3cf43f60c6e311c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//6Z0\u003d",
+        "filename": "rate_hist.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 72,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-01-29T00:10:26Z",
+      "side": 1,
+      "message": "Let\u0027s clean this up a little: one variable declaration per line and init them all.",
+      "revId": "81dd966c352379b18bc62370f3cf43f60c6e311c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//6Zw\u003d",
+        "filename": "rate_hist.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 74,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-01-29T00:10:26Z",
+      "side": 1,
+      "message": "prefer operator at eol",
+      "revId": "81dd966c352379b18bc62370f3cf43f60c6e311c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//6Zo\u003d",
+        "filename": "rate_hist.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 113,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-01-29T00:10:26Z",
+      "side": 1,
+      "message": "s/buckets_/num_buckets/\n\nAlso, since it\u0027s in/out, make it the last arg.",
+      "revId": "81dd966c352379b18bc62370f3cf43f60c6e311c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//6Zk\u003d",
+        "filename": "rate_hist.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 246,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-01-29T00:10:26Z",
+      "side": 1,
+      "message": "Remove extra vertical whitespace",
+      "revId": "81dd966c352379b18bc62370f3cf43f60c6e311c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//6Z8\u003d",
+        "filename": "rate_hist.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-01-29T00:10:26Z",
+      "side": 1,
+      "message": "Move these to rate_hist.c, and can they be static const int kCamelCased?",
+      "revId": "81dd966c352379b18bc62370f3cf43f60c6e311c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//6Z4\u003d",
+        "filename": "rate_hist.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-01-29T00:10:26Z",
+      "side": 1,
+      "message": "I know I\u0027m a pain, sorry: Add a brief comment for each function declaration.",
+      "revId": "81dd966c352379b18bc62370f3cf43f60c6e311c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
