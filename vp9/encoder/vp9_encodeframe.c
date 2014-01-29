@@ -2138,7 +2138,7 @@ static void init_encode_frame_mb_context(VP9_COMP *cpi) {
   vp9_zero(cm->counts.single_ref);
   vp9_zero(cm->counts.comp_ref);
   vp9_zero(cm->counts.tx);
-  vp9_zero(cm->counts.mbskip);
+  vp9_zero(cm->counts.skip);
 
   // Note: this memset assumes above_context[0], [1] and [2]
   // are allocated as part of the same buffer.
@@ -2724,7 +2724,7 @@ static void encode_superblock(VP9_COMP *cpi, TOKENEXTRA **t, int output_enabled,
   } else {
     mbmi->skip_coeff = 1;
     if (output_enabled)
-      cm->counts.mbskip[vp9_get_skip_context(xd)][1]++;
+      cm->counts.skip[vp9_get_skip_context(xd)][1]++;
     reset_skip_context(xd, MAX(bsize, BLOCK_8X8));
   }
 

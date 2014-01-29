@@ -54,7 +54,7 @@ static INLINE int vp9_get_skip_context(const MACROBLOCKD *xd) {
 
 static INLINE vp9_prob vp9_get_skip_prob(const VP9_COMMON *cm,
                                          const MACROBLOCKD *xd) {
-  return cm->fc.mbskip_probs[vp9_get_skip_context(xd)];
+  return cm->fc.skip_probs[vp9_get_skip_context(xd)];
 }
 
 int vp9_get_pred_context_switchable_interp(const MACROBLOCKD *xd);

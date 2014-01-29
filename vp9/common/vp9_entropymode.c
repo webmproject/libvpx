@@ -303,7 +303,7 @@ void tx_counts_to_branch_counts_8x8(const unsigned int *tx_count_8x8p,
   ct_8x8p[0][1] = tx_count_8x8p[TX_8X8];
 }
 
-static const vp9_prob default_mbskip_probs[MBSKIP_CONTEXTS] = {
+static const vp9_prob default_skip_probs[SKIP_CONTEXTS] = {
   192, 128, 64
 };
 
@@ -325,7 +325,7 @@ void vp9_init_mbmode_probs(VP9_COMMON *cm) {
   vp9_copy(cm->fc.comp_ref_prob, default_comp_ref_p);
   vp9_copy(cm->fc.single_ref_prob, default_single_ref_p);
   cm->fc.tx_probs = default_tx_probs;
-  vp9_copy(cm->fc.mbskip_probs, default_mbskip_probs);
+  vp9_copy(cm->fc.skip_probs, default_skip_probs);
   vp9_copy(cm->fc.inter_mode_probs, default_inter_mode_probs);
 }
 
@@ -415,9 +415,8 @@ void vp9_adapt_mode_probs(VP9_COMMON *cm) {
     }
   }
 
-  for (i = 0; i < MBSKIP_CONTEXTS; ++i)
-    fc->mbskip_probs[i] = adapt_prob(pre_fc->mbskip_probs[i],
-                                     counts->mbskip[i]);
+  for (i = 0; i < SKIP_CONTEXTS; ++i)
+    fc->skip_probs[i] = adapt_prob(pre_fc->skip_probs[i], counts->skip[i]);
 }
 
 static void set_default_lf_deltas(struct loopfilter *lf) {

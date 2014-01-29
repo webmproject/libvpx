@@ -1245,8 +1245,8 @@ static int read_compressed_header(VP9D_COMP *pbi, const uint8_t *data,
     read_tx_mode_probs(&fc->tx_probs, &r);
   read_coef_probs(fc, cm->tx_mode, &r);
 
-  for (k = 0; k < MBSKIP_CONTEXTS; ++k)
-    vp9_diff_update_prob(&r, &fc->mbskip_probs[k]);
+  for (k = 0; k < SKIP_CONTEXTS; ++k)
+    vp9_diff_update_prob(&r, &fc->skip_probs[k]);
 
   if (!frame_is_intra_only(cm)) {
     nmv_context *const nmvc = &fc->nmvc;
@@ -1321,8 +1321,7 @@ static void debug_check_frame_counts(const VP9_COMMON *const cm) {
   assert(!memcmp(cm->counts.comp_ref, zero_counts.comp_ref,
                  sizeof(cm->counts.comp_ref)));
   assert(!memcmp(&cm->counts.tx, &zero_counts.tx, sizeof(cm->counts.tx)));
-  assert(!memcmp(cm->counts.mbskip, zero_counts.mbskip,
-                 sizeof(cm->counts.mbskip)));
+  assert(!memcmp(cm->counts.skip, zero_counts.skip, sizeof(cm->counts.skip)));
   assert(!memcmp(&cm->counts.mv, &zero_counts.mv, sizeof(cm->counts.mv)));
 }
 #endif  // NDEBUG

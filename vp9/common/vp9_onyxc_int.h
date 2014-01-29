@@ -60,7 +60,7 @@ typedef struct frame_contexts {
   vp9_prob single_ref_prob[REF_CONTEXTS][2];
   vp9_prob comp_ref_prob[REF_CONTEXTS];
   struct tx_probs tx_probs;
-  vp9_prob mbskip_probs[MBSKIP_CONTEXTS];
+  vp9_prob skip_probs[SKIP_CONTEXTS];
   nmv_context nmvc;
 } FRAME_CONTEXT;
 
@@ -79,7 +79,7 @@ typedef struct {
   unsigned int single_ref[REF_CONTEXTS][2][2];
   unsigned int comp_ref[REF_CONTEXTS][2];
   struct tx_counts tx;
-  unsigned int mbskip[MBSKIP_CONTEXTS][2];
+  unsigned int skip[SKIP_CONTEXTS][2];
   nmv_context_counts mv;
 } FRAME_COUNTS;
 
