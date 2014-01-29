@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//6MI\u003d",
+        "filename": "vp9/decoder/vp9_dthread.c",
+        "patchSetId": 29
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2014-01-29T20:56:10Z",
+      "side": 1,
+      "message": "I thought about that. The goal here is to reduce code duplication. A macro works well for that. And also, it is not guaranteed that the compiler will always inline a static function, that may bring overhead.",
+      "parentUuid": "AAAAdn//6OQ\u003d",
+      "revId": "2e10fd7b4ecb4e40b461b9bdc04a6fcda299b9b7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//6OI\u003d",
         "filename": "vp9/decoder/vp9_dthread.c",
         "patchSetId": 29
@@ -30,6 +48,24 @@
       "writtenOn": "2014-01-29T19:40:48Z",
       "side": 1,
       "message": "is it worth having all the ifdef\u0027s for MT here? with MT disabled you\u0027re effectively doing the default loopfilter. maybe expose a non-mt function and use this CONFIG check file-wide:\n\n#if CONFIG_MULTITHREAD\n// the current file\n#else\n// wrapper that calls the default loopfilter\n#endif",
+      "revId": "2e10fd7b4ecb4e40b461b9bdc04a6fcda299b9b7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//6Lw\u003d",
+        "filename": "vp9/decoder/vp9_dthread.c",
+        "patchSetId": 29
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2014-01-29T20:56:10Z",
+      "side": 1,
+      "message": "The usage of #if CONFIG_MULTITHREAD in this file is consistent with that in vp9_thread. Actually, we could move #if CONFIG_MULTITHREAD to a higher level. If multi-threading is disabled, these multi-thread functions won\u0027t be called at all. Then, we could remove all #if CONFIG_MULTITHREAD in this file. This can be done later in another patch.",
+      "parentUuid": "AAAAdn//6OI\u003d",
       "revId": "2e10fd7b4ecb4e40b461b9bdc04a6fcda299b9b7",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
