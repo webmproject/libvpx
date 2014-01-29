@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//6NY\u003d",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 3
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-01-29T20:28:58Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//6Ns\u003d",
+      "revId": "ea68d456289dfabf5e0f93812b87f53db127688e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//6Nw\u003d",
         "filename": "rate_hist.c",
         "patchSetId": 3
@@ -30,6 +48,24 @@
       "writtenOn": "2014-01-29T20:17:14Z",
       "side": 1,
       "message": "one per line",
+      "revId": "ea68d456289dfabf5e0f93812b87f53db127688e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//6NM\u003d",
+        "filename": "rate_hist.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 77,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-01-29T20:28:58Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//6Nw\u003d",
       "revId": "ea68d456289dfabf5e0f93812b87f53db127688e",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
