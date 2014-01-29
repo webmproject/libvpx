@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//6SU\u003d",
+        "filename": "vp9/decoder/vp9_dthread.c",
+        "patchSetId": 28
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2014-01-29T17:39:07Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//6Wk\u003d",
+      "revId": "79684238a3d77d7d2f05957bd99aab6598682b82",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//6Wg\u003d",
         "filename": "vp9/decoder/vp9_dthread.c",
         "patchSetId": 28
@@ -30,6 +48,24 @@
       "writtenOn": "2014-01-29T06:57:30Z",
       "side": 1,
       "message": "so you have a spin lock on the read side, but not here on the write. maybe factorize that code and reuse it here as there is likely equal amounts of contention",
+      "revId": "79684238a3d77d7d2f05957bd99aab6598682b82",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//6R0\u003d",
+        "filename": "vp9/decoder/vp9_dthread.c",
+        "patchSetId": 28
+      },
+      "lineNbr": 92,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2014-01-29T17:39:07Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//6Wg\u003d",
       "revId": "79684238a3d77d7d2f05957bd99aab6598682b82",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
