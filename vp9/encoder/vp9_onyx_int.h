@@ -190,6 +190,12 @@ typedef enum {
 } TX_SIZE_SEARCH_METHOD;
 
 typedef enum {
+  NOT_IN_USE = 0,
+  RELAXED_NEIGHBORING_MIN_MAX = 1,
+  STRICT_NEIGHBORING_MIN_MAX = 2
+} AUTO_MIN_MAX_MODE;
+
+typedef enum {
   // Values should be powers of 2 so that they can be selected as bits of
   // an integer flags field
 
@@ -346,9 +352,8 @@ typedef struct {
   BLOCK_SIZE always_this_block_size;
 
   // Sets min and max partition sizes for this 64x64 region based on the
-  // same superblock in last encoded frame, and the left and above neighbor
-  // in this block.
-  int auto_min_max_partition_size;
+  // same 64x64 in last encoded frame, and the left and above neighbor.
+  AUTO_MIN_MAX_MODE auto_min_max_partition_size;
 
   // Min and max partition size we enable (block_size) as per auto
   // min max, but also used by adjust partitioning, and pick_partitioning.
