@@ -38,6 +38,7 @@
 #include "./tools_common.h"
 #include "vpx_ports/mem_ops.h"
 #include "vpx_ports/vpx_timer.h"
+#include "./rate_hist.h"
 #include "./vpxstats.h"
 #include "./warnings.h"
 #include "./webmenc.h"
@@ -472,274 +473,6 @@ void usage_exit() {
   exit(EXIT_FAILURE);
 }
 
-
-#define HIST_BAR_MAX 40
-struct hist_bucket {
-  int low, high, count;
-};
-
-
-static int merge_hist_buckets(struct hist_bucket *bucket,
-                              int *buckets_,
-                              int max_buckets) {
-  int small_bucket = 0, merge_bucket = INT_MAX, big_bucket = 0;
-  int buckets = *buckets_;
-  int i;
-
-  /* Find the extrema for this list of buckets */
-  big_bucket = small_bucket = 0;
-  for (i = 0; i < buckets; i++) {
-    if (bucket[i].count < bucket[small_bucket].count)
-      small_bucket = i;
-    if (bucket[i].count > bucket[big_bucket].count)
-      big_bucket = i;
-  }
-
-  /* If we have too many buckets, merge the smallest with an adjacent
-   * bucket.
-   */
-  while (buckets > max_buckets) {
-    int last_bucket = buckets - 1;
-
-    /* merge the small bucket with an adjacent one. */
-    if (small_bucket == 0)
-      merge_bucket = 1;
-    else if (small_bucket == last_bucket)
-      merge_bucket = last_bucket - 1;
-    else if (bucket[small_bucket - 1].count < bucket[small_bucket + 1].count)
-      merge_bucket = small_bucket - 1;
-    else
-      merge_bucket = small_bucket + 1;
-
-    assert(abs(merge_bucket - small_bucket) <= 1);
-    assert(small_bucket < buckets);
-    assert(big_bucket < buckets);
-    assert(merge_bucket < buckets);
-
-    if (merge_bucket < small_bucket) {
-      bucket[merge_bucket].high = bucket[small_bucket].high;
-      bucket[merge_bucket].count += bucket[small_bucket].count;
-    } else {
-      bucket[small_bucket].high = bucket[merge_bucket].high;
-      bucket[small_bucket].count += bucket[merge_bucket].count;
-      merge_bucket = small_bucket;
-    }
-
-    assert(bucket[merge_bucket].low != bucket[merge_bucket].high);
-
-    buckets--;
-
-    /* Remove the merge_bucket from the list, and find the new small
-     * and big buckets while we're at it
-     */
-    big_bucket = small_bucket = 0;
-    for (i = 0; i < buckets; i++) {
-      if (i > merge_bucket)
-        bucket[i] = bucket[i + 1];
-
-      if (bucket[i].count < bucket[small_bucket].count)
-        small_bucket = i;
-      if (bucket[i].count > bucket[big_bucket].count)
-        big_bucket = i;
-    }
-
-  }
-
-  *buckets_ = buckets;
-  return bucket[big_bucket].count;
-}
-
-
-static void show_histogram(const struct hist_bucket *bucket,
-                           int                       buckets,
-                           int                       total,
-                           int                       scale) {
-  const char *pat1, *pat2;
-  int i;
-
-  switch ((int)(log(bucket[buckets - 1].high) / log(10)) + 1) {
-    case 1:
-    case 2:
-      pat1 = "%4d %2s: ";
-      pat2 = "%4d-%2d: ";
-      break;
-    case 3:
-      pat1 = "%5d %3s: ";
-      pat2 = "%5d-%3d: ";
-      break;
-    case 4:
-      pat1 = "%6d %4s: ";
-      pat2 = "%6d-%4d: ";
-      break;
-    case 5:
-      pat1 = "%7d %5s: ";
-      pat2 = "%7d-%5d: ";
-      break;
-    case 6:
-      pat1 = "%8d %6s: ";
-      pat2 = "%8d-%6d: ";
-      break;
-    case 7:
-      pat1 = "%9d %7s: ";
-      pat2 = "%9d-%7d: ";
-      break;
-    default:
-      pat1 = "%12d %10s: ";
-      pat2 = "%12d-%10d: ";
-      break;
-  }
-
-  for (i = 0; i < buckets; i++) {
-    int len;
-    int j;
-    float pct;
-
-    pct = (float)(100.0 * bucket[i].count / total);
-    len = HIST_BAR_MAX * bucket[i].count / scale;
-    if (len < 1)
-      len = 1;
-    assert(len <= HIST_BAR_MAX);
-
-    if (bucket[i].low == bucket[i].high)
-      fprintf(stderr, pat1, bucket[i].low, "");
-    else
-      fprintf(stderr, pat2, bucket[i].low, bucket[i].high);
-
-    for (j = 0; j < HIST_BAR_MAX; j++)
-      fprintf(stderr, j < len ? "=" : " ");
-    fprintf(stderr, "\t%5d (%6.2f%%)\n", bucket[i].count, pct);
-  }
-}
-
-
-static void show_q_histogram(const int counts[64], int max_buckets) {
-  struct hist_bucket bucket[64];
-  int buckets = 0;
-  int total = 0;
-  int scale;
-  int i;
-
-
-  for (i = 0; i < 64; i++) {
-    if (counts[i]) {
-      bucket[buckets].low = bucket[buckets].high = i;
-      bucket[buckets].count = counts[i];
-      buckets++;
-      total += counts[i];
-    }
-  }
-
-  fprintf(stderr, "\nQuantizer Selection:\n");
-  scale = merge_hist_buckets(bucket, &buckets, max_buckets);
-  show_histogram(bucket, buckets, total, scale);
-}
-
-
-#define RATE_BINS (100)
-struct rate_hist {
-  int64_t            *pts;
-  int                *sz;
-  int                 samples;
-  int                 frames;
-  struct hist_bucket  bucket[RATE_BINS];
-  int                 total;
-};
-
-
-static void init_rate_histogram(struct rate_hist *hist,
-                                const vpx_codec_enc_cfg_t *cfg,
-                                const vpx_rational_t *fps) {
-  int i;
-
-  /* Determine the number of samples in the buffer. Use the file's framerate
-   * to determine the number of frames in rc_buf_sz milliseconds, with an
-   * adjustment (5/4) to account for alt-refs
-   */
-  hist->samples = cfg->rc_buf_sz * 5 / 4 * fps->num / fps->den / 1000;
-
-  /* prevent division by zero */
-  if (hist->samples == 0)
-    hist->samples = 1;
-
-  hist->pts = calloc(hist->samples, sizeof(*hist->pts));
-  hist->sz = calloc(hist->samples, sizeof(*hist->sz));
-  for (i = 0; i < RATE_BINS; i++) {
-    hist->bucket[i].low = INT_MAX;
-    hist->bucket[i].high = 0;
-    hist->bucket[i].count = 0;
-  }
-}
-
-
-static void destroy_rate_histogram(struct rate_hist *hist) {
-  free(hist->pts);
-  free(hist->sz);
-}
-
-
-static void update_rate_histogram(struct rate_hist          *hist,
-                                  const vpx_codec_enc_cfg_t *cfg,
-                                  const vpx_codec_cx_pkt_t  *pkt) {
-  int i, idx;
-  int64_t now, then, sum_sz = 0, avg_bitrate;
-
-  now = pkt->data.frame.pts * 1000
-        * (uint64_t)cfg->g_timebase.num / (uint64_t)cfg->g_timebase.den;
-
-  idx = hist->frames++ % hist->samples;
-  hist->pts[idx] = now;
-  hist->sz[idx] = (int)pkt->data.frame.sz;
-
-  if (now < cfg->rc_buf_initial_sz)
-    return;
-
-  then = now;
-
-  /* Sum the size over the past rc_buf_sz ms */
-  for (i = hist->frames; i > 0 && hist->frames - i < hist->samples; i--) {
-    int i_idx = (i - 1) % hist->samples;
-
-    then = hist->pts[i_idx];
-    if (now - then > cfg->rc_buf_sz)
-      break;
-    sum_sz += hist->sz[i_idx];
-  }
-
-  if (now == then)
-    return;
-
-  avg_bitrate = sum_sz * 8 * 1000 / (now - then);
-  idx = (int)(avg_bitrate * (RATE_BINS / 2) / (cfg->rc_target_bitrate * 1000));
-  if (idx < 0)
-    idx = 0;
-  if (idx > RATE_BINS - 1)
-    idx = RATE_BINS - 1;
-  if (hist->bucket[idx].low > avg_bitrate)
-    hist->bucket[idx].low = (int)avg_bitrate;
-  if (hist->bucket[idx].high < avg_bitrate)
-    hist->bucket[idx].high = (int)avg_bitrate;
-  hist->bucket[idx].count++;
-  hist->total++;
-}
-
-
-static void show_rate_histogram(struct rate_hist          *hist,
-                                const vpx_codec_enc_cfg_t *cfg,
-                                int                        max_buckets) {
-  int i, scale;
-  int buckets = 0;
-
-  for (i = 0; i < RATE_BINS; i++) {
-    if (hist->bucket[i].low == INT_MAX)
-      continue;
-    hist->bucket[buckets++] = hist->bucket[i];
-  }
-
-  fprintf(stderr, "\nRate (over %dms window):\n", cfg->rc_buf_sz);
-  scale = merge_hist_buckets(hist->bucket, &buckets, max_buckets);
-  show_histogram(hist->bucket, buckets, hist->total, scale);
-}
-
 #define mmin(a, b)  ((a) < (b) ? (a) : (b))
 static void find_mismatch(vpx_image_t *img1, vpx_image_t *img2,
                           int yloc[4], int uloc[4], int vloc[4]) {
@@ -884,7 +617,7 @@ struct stream_state {
   struct stream_state      *next;
   struct stream_config      config;
   FILE                     *file;
-  struct rate_hist          rate_hist;
+  struct rate_hist         *rate_hist;
   struct EbmlGlobal         ebml;
   uint32_t                  hash;
   uint64_t                  psnr_sse_total;
@@ -1576,7 +1309,7 @@ static void get_cx_data(struct stream_state *stream,
         if (!global->quiet)
           fprintf(stderr, " %6luF", (unsigned long)pkt->data.frame.sz);
 
-        update_rate_histogram(&stream->rate_hist, cfg, pkt);
+        update_rate_histogram(stream->rate_hist, cfg, pkt);
         if (stream->config.write_webm) {
           /* Update the hash */
           if (!stream->ebml.debug)
@@ -1881,9 +1614,9 @@ int main(int argc, const char **argv_) {
                       : VPX_IMG_FMT_YV12,
                       input.width, input.height, 32);
 
-      FOREACH_STREAM(init_rate_histogram(&stream->rate_hist,
-                                         &stream->config.cfg,
-                                         &global.framerate));
+      FOREACH_STREAM(stream->rate_hist =
+                         init_rate_histogram(&stream->config.cfg,
+                                             &global.framerate));
     }
 
     FOREACH_STREAM(setup_pass(stream, &global, pass));
@@ -2020,10 +1753,10 @@ int main(int argc, const char **argv_) {
                                     global.show_q_hist_buckets));
 
   if (global.show_rate_hist_buckets)
-    FOREACH_STREAM(show_rate_histogram(&stream->rate_hist,
+    FOREACH_STREAM(show_rate_histogram(stream->rate_hist,
                                        &stream->config.cfg,
                                        global.show_rate_hist_buckets));
-  FOREACH_STREAM(destroy_rate_histogram(&stream->rate_hist));
+  FOREACH_STREAM(destroy_rate_histogram(stream->rate_hist));
 
 #if CONFIG_INTERNAL_STATS
   /* TODO(jkoleszar): This doesn't belong in this executable. Do it for now,
