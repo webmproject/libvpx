@@ -1,0 +1,310 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//6UI\u003d",
+        "filename": "test/datarate_test.cc",
+        "patchSetId": 28
+      },
+      "lineNbr": 204,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-01-29T16:59:30Z",
+      "side": 1,
+      "message": "++i",
+      "revId": "394b01d89481a5e98f3a0c9b4e64458bfd9bf3b5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//6UE\u003d",
+        "filename": "test/datarate_test.cc",
+        "patchSetId": 28
+      },
+      "lineNbr": 220,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-01-29T16:59:30Z",
+      "side": 1,
+      "message": "GOLDEN is updated on layer 1 (since you start from base\u003dlayer 0)",
+      "revId": "394b01d89481a5e98f3a0c9b4e64458bfd9bf3b5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//6T8\u003d",
+        "filename": "test/datarate_test.cc",
+        "patchSetId": 28
+      },
+      "lineNbr": 326,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-01-29T16:59:30Z",
+      "side": 1,
+      "message": "More compact:\nfor (int i \u003d layer; i \u003c cfg_.ts_number_layers; ++i)\n  bits_total_[i] +\u003d frame_size_in_bits;",
+      "revId": "394b01d89481a5e98f3a0c9b4e64458bfd9bf3b5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//6T0\u003d",
+        "filename": "test/datarate_test.cc",
+        "patchSetId": 28
+      },
+      "lineNbr": 482,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-01-29T16:59:30Z",
+      "side": 1,
+      "message": "i \u003c\u003d 800 so you get the 4th sample point?",
+      "revId": "394b01d89481a5e98f3a0c9b4e64458bfd9bf3b5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//6T4\u003d",
+        "filename": "test/datarate_test.cc",
+        "patchSetId": 28
+      },
+      "lineNbr": 490,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-01-29T16:59:30Z",
+      "side": 1,
+      "message": "Maybe add the layer number into the output message? And maybe the overshoot as a percentage? (Same for 3 layer test below)",
+      "revId": "394b01d89481a5e98f3a0c9b4e64458bfd9bf3b5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//6Tw\u003d",
+        "filename": "test/datarate_test.cc",
+        "patchSetId": 28
+      },
+      "lineNbr": 520,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-01-29T16:59:30Z",
+      "side": 1,
+      "message": "i \u003c\u003d 800 so you get the 4th sample point?",
+      "revId": "394b01d89481a5e98f3a0c9b4e64458bfd9bf3b5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//6Ts\u003d",
+        "filename": "vp9/encoder/vp9_onyx_if.c",
+        "patchSetId": 28
+      },
+      "lineNbr": 1160,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-01-29T16:59:30Z",
+      "side": 1,
+      "message": "++temporal_layer",
+      "revId": "394b01d89481a5e98f3a0c9b4e64458bfd9bf3b5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//6To\u003d",
+        "filename": "vp9/encoder/vp9_onyx_if.c",
+        "patchSetId": 28
+      },
+      "lineNbr": 1188,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-01-29T16:59:30Z",
+      "side": 1,
+      "message": "++temporal_layer",
+      "revId": "394b01d89481a5e98f3a0c9b4e64458bfd9bf3b5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//6Tg\u003d",
+        "filename": "vp9/encoder/vp9_ratectrl.c",
+        "patchSetId": 28
+      },
+      "lineNbr": 262,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-01-29T16:59:30Z",
+      "side": 1,
+      "message": "++temporal_layer",
+      "revId": "394b01d89481a5e98f3a0c9b4e64458bfd9bf3b5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//6TE\u003d",
+        "filename": "vpx_temporal_scalable_patterns.c",
+        "patchSetId": 28
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-01-29T16:59:30Z",
+      "side": 1,
+      "message": "These includes should be in alphabetical order.",
+      "revId": "394b01d89481a5e98f3a0c9b4e64458bfd9bf3b5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//6TA\u003d",
+        "filename": "vpx_temporal_scalable_patterns.c",
+        "patchSetId": 28
+      },
+      "lineNbr": 92,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-01-29T16:59:30Z",
+      "side": 1,
+      "message": "remove space before period.",
+      "revId": "394b01d89481a5e98f3a0c9b4e64458bfd9bf3b5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//6Sw\u003d",
+        "filename": "vpx_temporal_scalable_patterns.c",
+        "patchSetId": 28
+      },
+      "lineNbr": 234,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-01-29T16:59:30Z",
+      "side": 1,
+      "message": "Indent is wrong from here down to end of this case.",
+      "revId": "394b01d89481a5e98f3a0c9b4e64458bfd9bf3b5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//6Ss\u003d",
+        "filename": "vpx_temporal_scalable_patterns.c",
+        "patchSetId": 28
+      },
+      "lineNbr": 428,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-01-29T16:59:30Z",
+      "side": 1,
+      "message": "++i",
+      "revId": "394b01d89481a5e98f3a0c9b4e64458bfd9bf3b5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//6So\u003d",
+        "filename": "vpx_temporal_scalable_patterns.c",
+        "patchSetId": 28
+      },
+      "lineNbr": 467,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-01-29T16:59:30Z",
+      "side": 1,
+      "message": "++i",
+      "revId": "394b01d89481a5e98f3a0c9b4e64458bfd9bf3b5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//6Sg\u003d",
+        "filename": "vpx_temporal_scalable_patterns.c",
+        "patchSetId": 28
+      },
+      "lineNbr": 520,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-01-29T16:59:30Z",
+      "side": 1,
+      "message": "++i",
+      "revId": "394b01d89481a5e98f3a0c9b4e64458bfd9bf3b5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//6Sk\u003d",
+        "filename": "vpx_temporal_scalable_patterns.c",
+        "patchSetId": 28
+      },
+      "lineNbr": 524,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-01-29T16:59:30Z",
+      "side": 1,
+      "message": "++frames_in_layer[i];",
+      "revId": "394b01d89481a5e98f3a0c9b4e64458bfd9bf3b5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//6Sc\u003d",
+        "filename": "vpx_temporal_scalable_patterns.c",
+        "patchSetId": 28
+      },
+      "lineNbr": 531,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-01-29T16:59:30Z",
+      "side": 1,
+      "message": "++frame_cnt;",
+      "revId": "394b01d89481a5e98f3a0c9b4e64458bfd9bf3b5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//6SY\u003d",
+        "filename": "vpx_temporal_scalable_patterns.c",
+        "patchSetId": 28
+      },
+      "lineNbr": 540,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-01-29T16:59:30Z",
+      "side": 1,
+      "message": "++i",
+      "revId": "394b01d89481a5e98f3a0c9b4e64458bfd9bf3b5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
