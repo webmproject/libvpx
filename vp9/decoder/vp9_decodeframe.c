@@ -1117,7 +1117,7 @@ static size_t read_uncompressed_header(VP9D_COMP *pbi,
   if (cm->show_existing_frame) {
     // Show an existing frame directly.
     int frame_to_show = cm->ref_frame_map[vp9_rb_read_literal(rb, 3)];
-    ref_cnt_fb(cm->fb_idx_ref_cnt, &cm->new_fb_idx, frame_to_show);
+    ref_cnt_fb(cm->frame_bufs, &cm->new_fb_idx, frame_to_show);
     pbi->refresh_frame_flags = 0;
     cm->lf.filter_level = 0;
     cm->show_frame = 1;
@@ -1177,7 +1177,7 @@ static size_t read_uncompressed_header(VP9D_COMP *pbi,
         const int ref = vp9_rb_read_literal(rb, REF_FRAMES_LOG2);
         const int idx = cm->ref_frame_map[ref];
         cm->frame_refs[i].idx = idx;
-        cm->frame_refs[i].buf = &cm->yv12_fb[idx];
+        cm->frame_refs[i].buf = &cm->frame_bufs[idx].buf;
         cm->ref_frame_sign_bias[LAST_FRAME + i] = vp9_rb_read_bit(rb);
       }
 

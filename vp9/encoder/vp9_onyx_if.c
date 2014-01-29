@@ -2186,7 +2186,7 @@ int vp9_get_reference_enc(VP9_PTR ptr, int index, YV12_BUFFER_CONFIG **fb) {
   if (index < 0 || index >= REF_FRAMES)
     return -1;
 
-  *fb = &cm->yv12_fb[cm->ref_frame_map[index]];
+  *fb = &cm->frame_bufs[cm->ref_frame_map[index]].buf;
   return 0;
 }
 
@@ -2478,9 +2478,9 @@ static void update_reference_frames(VP9_COMP * const cpi) {
   // At this point the new frame has been encoded.
   // If any buffer copy / swapping is signaled it should be done here.
   if (cm->frame_type == KEY_FRAME) {
-    ref_cnt_fb(cm->fb_idx_ref_cnt,
+    ref_cnt_fb(cm->frame_bufs,
                &cm->ref_frame_map[cpi->gld_fb_idx], cm->new_fb_idx);
-    ref_cnt_fb(cm->fb_idx_ref_cnt,
+    ref_cnt_fb(cm->frame_bufs,
                &cm->ref_frame_map[cpi->alt_fb_idx], cm->new_fb_idx);
   }
 #if CONFIG_MULTIPLE_ARF
@@ -2501,7 +2501,7 @@ static void update_reference_frames(VP9_COMP * const cpi) {
      */
     int tmp;
 
-    ref_cnt_fb(cm->fb_idx_ref_cnt,
+    ref_cnt_fb(cm->frame_bufs,
                &cm->ref_frame_map[cpi->alt_fb_idx], cm->new_fb_idx);
 
     tmp = cpi->alt_fb_idx;
@@ -2515,18 +2515,18 @@ static void update_reference_frames(VP9_COMP * const cpi) {
         arf_idx = cpi->arf_buffer_idx[cpi->sequence_number + 1];
       }
 #endif
-      ref_cnt_fb(cm->fb_idx_ref_cnt,
+      ref_cnt_fb(cm->frame_bufs,
                  &cm->ref_frame_map[arf_idx], cm->new_fb_idx);
     }
 
     if (cpi->refresh_golden_frame) {
-      ref_cnt_fb(cm->fb_idx_ref_cnt,
+      ref_cnt_fb(cm->frame_bufs,
                  &cm->ref_frame_map[cpi->gld_fb_idx], cm->new_fb_idx);
     }
   }
 
   if (cpi->refresh_last_frame) {
-    ref_cnt_fb(cm->fb_idx_ref_cnt,
+    ref_cnt_fb(cm->frame_bufs,
                &cm->ref_frame_map[cpi->lst_fb_idx], cm->new_fb_idx);
   }
 }
@@ -2564,20 +2564,20 @@ static void scale_references(VP9_COMP *cpi) {
 
   for (ref_frame = LAST_FRAME; ref_frame <= ALTREF_FRAME; ++ref_frame) {
     const int idx = cm->ref_frame_map[get_ref_frame_idx(cpi, ref_frame)];
-    YV12_BUFFER_CONFIG *ref = &cm->yv12_fb[idx];
+    YV12_BUFFER_CONFIG *const ref = &cm->frame_bufs[idx].buf;
 
     if (ref->y_crop_width != cm->width ||
         ref->y_crop_height != cm->height) {
       const int new_fb = get_free_fb(cm);
-      vp9_realloc_frame_buffer(&cm->yv12_fb[new_fb],
+      vp9_realloc_frame_buffer(&cm->frame_bufs[new_fb].buf,
                                cm->width, cm->height,
                                cm->subsampling_x, cm->subsampling_y,
                                VP9_ENC_BORDER_IN_PIXELS);
-      scale_and_extend_frame(ref, &cm->yv12_fb[new_fb]);
+      scale_and_extend_frame(ref, &cm->frame_bufs[new_fb].buf);
       cpi->scaled_ref_idx[ref_frame - 1] = new_fb;
     } else {
       cpi->scaled_ref_idx[ref_frame - 1] = idx;
-      cm->fb_idx_ref_cnt[idx]++;
+      cm->frame_bufs[idx].ref_count++;
     }
   }
 }
@@ -2587,7 +2587,7 @@ static void release_scaled_references(VP9_COMP *cpi) {
   int i;
 
   for (i = 0; i < 3; i++)
-    cm->fb_idx_ref_cnt[cpi->scaled_ref_idx[i]]--;
+    cm->frame_bufs[cpi->scaled_ref_idx[i]].ref_count--;
 }
 
 static void full_to_model_count(unsigned int *model_count,
@@ -3544,7 +3544,7 @@ int vp9_get_compressed_data(VP9_PTR ptr, unsigned int *frame_flags,
   /* find a free buffer for the new frame, releasing the reference previously
    * held.
    */
-  cm->fb_idx_ref_cnt[cm->new_fb_idx]--;
+  cm->frame_bufs[cm->new_fb_idx].ref_count--;
   cm->new_fb_idx = get_free_fb(cm);
 
 #if CONFIG_MULTIPLE_ARF
@@ -3568,8 +3568,7 @@ int vp9_get_compressed_data(VP9_PTR ptr, unsigned int *frame_flags,
 
   for (ref_frame = LAST_FRAME; ref_frame <= ALTREF_FRAME; ++ref_frame) {
     const int idx = cm->ref_frame_map[get_ref_frame_idx(cpi, ref_frame)];
-    YV12_BUFFER_CONFIG *const buf = &cm->yv12_fb[idx];
-
+    YV12_BUFFER_CONFIG *const buf = &cm->frame_bufs[idx].buf;
     RefBuffer *const ref_buf = &cm->frame_refs[ref_frame - 1];
     ref_buf->buf = buf;
     ref_buf->idx = idx;

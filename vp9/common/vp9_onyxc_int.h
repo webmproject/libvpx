@@ -91,6 +91,12 @@ typedef enum {
   REFERENCE_MODES       = 3,
 } REFERENCE_MODE;
 
+
+typedef struct {
+  int ref_count;
+  YV12_BUFFER_CONFIG buf;
+} RefCntBuffer;
+
 typedef struct VP9Common {
   struct vpx_internal_error_info  error;
 
@@ -117,8 +123,8 @@ typedef struct VP9Common {
 
   YV12_BUFFER_CONFIG *frame_to_show;
 
-  YV12_BUFFER_CONFIG yv12_fb[FRAME_BUFFERS];
-  int fb_idx_ref_cnt[FRAME_BUFFERS]; /* reference counts */
+  RefCntBuffer frame_bufs[FRAME_BUFFERS];
+
   int ref_frame_map[REF_FRAMES]; /* maps fb_idx to reference slot */
 
   // TODO(jkoleszar): could expand active_ref_idx to 4, with 0 as intra, and
@@ -220,29 +226,29 @@ typedef struct VP9Common {
 } VP9_COMMON;
 
 static YV12_BUFFER_CONFIG *get_frame_new_buffer(VP9_COMMON *cm) {
-  return &cm->yv12_fb[cm->new_fb_idx];
+  return &cm->frame_bufs[cm->new_fb_idx].buf;
 }
 
 static int get_free_fb(VP9_COMMON *cm) {
   int i;
   for (i = 0; i < FRAME_BUFFERS; i++)
-    if (cm->fb_idx_ref_cnt[i] == 0)
+    if (cm->frame_bufs[i].ref_count == 0)
       break;
 
   assert(i < FRAME_BUFFERS);
-  cm->fb_idx_ref_cnt[i] = 1;
+  cm->frame_bufs[i].ref_count = 1;
   return i;
 }
 
-static void ref_cnt_fb(int *buf, int *idx, int new_idx) {
+static void ref_cnt_fb(RefCntBuffer *bufs, int *idx, int new_idx) {
   const int ref_index = *idx;
 
-  if (ref_index >= 0 && buf[ref_index] > 0)
-    buf[ref_index]--;
+  if (ref_index >= 0 && bufs[ref_index].ref_count > 0)
+    bufs[ref_index].ref_count--;
 
   *idx = new_idx;
 
-  buf[new_idx]++;
+  bufs[new_idx].ref_count++;
 }
 
 static int mi_cols_aligned_to_sb(int n_mis) {
