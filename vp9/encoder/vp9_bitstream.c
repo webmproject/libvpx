@@ -33,11 +33,6 @@
 #include "vp9/encoder/vp9_tokenize.h"
 #include "vp9/encoder/vp9_write_bit_buffer.h"
 
-
-#if defined(SECTIONBITS_OUTPUT)
-unsigned __int64 Sectionbits[500];
-#endif
-
 #ifdef ENTROPY_STATS
 vp9_coeff_stats tree_update_hist[TX_SIZES][PLANE_TYPES];
 extern unsigned int active_section;

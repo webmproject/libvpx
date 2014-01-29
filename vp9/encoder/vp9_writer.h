@@ -44,17 +44,6 @@ static void vp9_write(vp9_writer *br, int bit, int probability) {
   unsigned int lowvalue = br->lowvalue;
   register unsigned int shift;
 
-#ifdef ENTROPY_STATS
-#if defined(SECTIONBITS_OUTPUT)
-
-  if (bit)
-    Sectionbits[active_section] += vp9_prob_cost[255 - probability];
-  else
-    Sectionbits[active_section] += vp9_prob_cost[probability];
-
-#endif
-#endif
-
   split = 1 + (((range - 1) * probability) >> 8);
 
   range = split;
