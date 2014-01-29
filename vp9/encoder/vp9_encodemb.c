@@ -25,13 +25,6 @@
 #include "vp9/encoder/vp9_rdopt.h"
 #include "vp9/encoder/vp9_tokenize.h"
 
-void vp9_setup_interp_filters(MACROBLOCKD *xd, INTERP_FILTER filter,
-                              VP9_COMMON *cm) {
-  xd->interp_kernel = vp9_get_interp_kernel(filter == SWITCHABLE ? EIGHTTAP
-                                                                 : filter);
-  assert(((intptr_t)xd->interp_kernel & 0xff) == 0);
-}
-
 void vp9_subtract_block_c(int rows, int cols,
                           int16_t *diff_ptr, ptrdiff_t diff_stride,
                           const uint8_t *src_ptr, ptrdiff_t src_stride,

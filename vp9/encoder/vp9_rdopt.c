@@ -2795,7 +2795,7 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
         int j;
         int64_t rs_rd;
         mbmi->interp_filter = i;
-        vp9_setup_interp_filters(xd, mbmi->interp_filter, cm);
+        xd->interp_kernel = vp9_get_interp_kernel(mbmi->interp_filter);
         rs = get_switchable_rate(x);
         rs_rd = RDCOST(x->rdmult, x->rddiv, rs, 0);
 
@@ -2866,7 +2866,7 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
   // Set the appropriate filter
   mbmi->interp_filter = cm->interp_filter != SWITCHABLE ?
       cm->interp_filter : *best_filter;
-  vp9_setup_interp_filters(xd, mbmi->interp_filter, cm);
+  xd->interp_kernel = vp9_get_interp_kernel(mbmi->interp_filter);
   rs = cm->interp_filter == SWITCHABLE ? get_switchable_rate(x) : 0;
 
   if (pred_exists) {
@@ -3294,8 +3294,9 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
 
     // Evaluate all sub-pel filters irrespective of whether we can use
     // them for this frame.
-    mbmi->interp_filter = cm->interp_filter;
-    vp9_setup_interp_filters(xd, mbmi->interp_filter, cm);
+    mbmi->interp_filter = cm->interp_filter == SWITCHABLE ? EIGHTTAP
+                                                          : cm->interp_filter;
+    xd->interp_kernel = vp9_get_interp_kernel(mbmi->interp_filter);
 
     if (comp_pred) {
       if (!(cpi->ref_frame_flags & flag_list[second_ref_frame]))
@@ -3919,8 +3920,9 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
 
     // Evaluate all sub-pel filters irrespective of whether we can use
     // them for this frame.
-    mbmi->interp_filter = cm->interp_filter;
-    vp9_setup_interp_filters(xd, mbmi->interp_filter, cm);
+    mbmi->interp_filter = cm->interp_filter == SWITCHABLE ? EIGHTTAP
+                                                          : cm->interp_filter;
+    xd->interp_kernel = vp9_get_interp_kernel(mbmi->interp_filter);
 
     if (comp_pred) {
       if (!(cpi->ref_frame_flags & flag_list[second_ref_frame]))
@@ -4043,8 +4045,7 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
             int newbest, rs;
             int64_t rs_rd;
             mbmi->interp_filter = switchable_filter_index;
-            vp9_setup_interp_filters(xd, mbmi->interp_filter, cm);
-
+            xd->interp_kernel = vp9_get_interp_kernel(mbmi->interp_filter);
             tmp_rd = rd_pick_best_mbsegmentation(cpi, x, tile,
                                                  &mbmi->ref_mvs[ref_frame][0],
                                                  second_ref,
@@ -4109,7 +4110,7 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
 
       mbmi->interp_filter = (cm->interp_filter == SWITCHABLE ?
                              tmp_best_filter : cm->interp_filter);
-      vp9_setup_interp_filters(xd, mbmi->interp_filter, cm);
+      xd->interp_kernel = vp9_get_interp_kernel(mbmi->interp_filter);
       if (!pred_exists) {
         // Handles the special case when a filter that is not in the
         // switchable list (bilinear, 6-tap) is indicated at the frame level
