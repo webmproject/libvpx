@@ -629,6 +629,24 @@
       "revId": "817ab97fb468b591bd1c5bb9b6eb1d9e768ae12e",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//6Ws\u003d",
+        "filename": "vp9/decoder/vp9_thread.h",
+        "patchSetId": 27
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-01-29T06:50:15Z",
+      "side": 1,
+      "message": "of course. that\u0027s usually why a macro like INLINE is used. in strict ansi/c89 it will default to nothing and produce a warning, but elsewhere will prevent warnings about unused functions",
+      "parentUuid": "AAAAdn//6lU\u003d",
+      "revId": "817ab97fb468b591bd1c5bb9b6eb1d9e768ae12e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
