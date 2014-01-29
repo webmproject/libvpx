@@ -491,10 +491,7 @@ void vp9_first_pass(VP9_COMP *cpi) {
   int sum_in_vectors = 0;
   uint32_t lastmv_as_int = 0;
   struct twopass_rc *const twopass = &cpi->twopass;
-
-  int_mv zero_ref_mv;
-
-  zero_ref_mv.as_int = 0;
+  const MV zero_mv = {0, 0};
 
   vp9_clear_system_state();  // __asm emms;
 
@@ -503,8 +500,7 @@ void vp9_first_pass(VP9_COMP *cpi) {
   setup_dst_planes(xd, new_yv12, 0, 0);
 
   xd->mi_8x8 = cm->mi_grid_visible;
-  // required for vp9_frame_init_quantizer
-  xd->mi_8x8[0] = cm->mi;
+  xd->mi_8x8[0] = cm->mi;  // required for vp9_frame_init_quantizer
 
   setup_block_dptrs(&x->e_mbd, cm->subsampling_x, cm->subsampling_y);
 
@@ -518,14 +514,8 @@ void vp9_first_pass(VP9_COMP *cpi) {
   }
   x->skip_recode = 0;
 
-
-  // Initialise the MV cost table to the defaults
-  // if( cm->current_video_frame == 0)
-  // if ( 0 )
-  {
-    vp9_init_mv_probs(cm);
-    vp9_initialize_rd_consts(cpi);
-  }
+  vp9_init_mv_probs(cm);
+  vp9_initialize_rd_consts(cpi);
 
   // tiling is ignored in the first pass
   vp9_tile_init(&tile, cm, 0, 0);
@@ -550,7 +540,7 @@ void vp9_first_pass(VP9_COMP *cpi) {
     // for each macroblock col in image
     for (mb_col = 0; mb_col < cm->mb_cols; mb_col++) {
       int this_error;
-      int use_dc_pred = (mb_col || mb_row) && (!mb_col || !mb_row);
+      const int use_dc_pred = (mb_col || mb_row) && (!mb_col || !mb_row);
       double error_weight = 1.0;
       const BLOCK_SIZE bsize = get_bsize(cm, mb_row, mb_col);
 
@@ -568,7 +558,7 @@ void vp9_first_pass(VP9_COMP *cpi) {
                      cm->mi_rows, cm->mi_cols);
 
       if (cpi->oxcf.aq_mode == VARIANCE_AQ) {
-        int energy = vp9_block_energy(cpi, x, bsize);
+        const int energy = vp9_block_energy(cpi, x, bsize);
         error_weight = vp9_vaq_inv_q_ratio(energy);
       }
 
@@ -594,8 +584,7 @@ void vp9_first_pass(VP9_COMP *cpi) {
       // Set up limit values for motion vectors to prevent them extending
       // outside the UMV borders.
       x->mv_col_min = -((mb_col * 16) + BORDER_MV_PIXELS_B16);
-      x->mv_col_max = ((cm->mb_cols - 1 - mb_col) * 16)
-                      + BORDER_MV_PIXELS_B16;
+      x->mv_col_max = ((cm->mb_cols - 1 - mb_col) * 16) + BORDER_MV_PIXELS_B16;
 
       // Other than for the first frame do a motion search
       if (cm->current_video_frame > 0) {
@@ -620,7 +609,7 @@ void vp9_first_pass(VP9_COMP *cpi) {
         // based search as well.
         if (best_ref_mv.as_int) {
           tmp_err = INT_MAX;
-          first_pass_motion_search(cpi, x, &zero_ref_mv.as_mv, &tmp_mv.as_mv,
+          first_pass_motion_search(cpi, x, &zero_mv, &tmp_mv.as_mv,
                                    &tmp_err);
           if (cpi->oxcf.aq_mode == VARIANCE_AQ) {
             vp9_clear_system_state();  // __asm emms;
@@ -641,17 +630,15 @@ void vp9_first_pass(VP9_COMP *cpi) {
           xd->plane[0].pre[0].buf = gld_yv12->y_buffer + recon_yoffset;
           gf_motion_error = zz_motion_search(cpi, x);
 
-          first_pass_motion_search(cpi, x, &zero_ref_mv.as_mv, &tmp_mv.as_mv,
+          first_pass_motion_search(cpi, x, &zero_mv, &tmp_mv.as_mv,
                                    &gf_motion_error);
           if (cpi->oxcf.aq_mode == VARIANCE_AQ) {
             vp9_clear_system_state();  // __asm emms;
             gf_motion_error *= error_weight;
           }
 
-          if ((gf_motion_error < motion_error) &&
-              (gf_motion_error < this_error)) {
+          if (gf_motion_error < motion_error && gf_motion_error < this_error)
             second_ref_count++;
-          }
 
           // Reset to last frame as reference buffer
           xd->plane[0].pre[0].buf = lst_yv12->y_buffer + recon_yoffset;
@@ -779,13 +766,11 @@ void vp9_first_pass(VP9_COMP *cpi) {
       fps.mvr_abs = (double)sum_mvr_abs / mvcount;
       fps.MVc = (double)sum_mvc / mvcount;
       fps.mvc_abs = (double)sum_mvc_abs / mvcount;
-      fps.MVrv = ((double)sum_mvrs - (fps.MVr * fps.MVr / mvcount)) /
-                     mvcount;
-      fps.MVcv = ((double)sum_mvcs - (fps.MVc * fps.MVc / mvcount)) /
-                     mvcount;
+      fps.MVrv = ((double)sum_mvrs - (fps.MVr * fps.MVr / mvcount)) / mvcount;
+      fps.MVcv = ((double)sum_mvcs - (fps.MVc * fps.MVc / mvcount)) / mvcount;
       fps.mv_in_out_count = (double)sum_in_vectors / (mvcount * 2);
       fps.new_mv_count = new_mv_count;
-      fps.pcnt_motion = (double)mvcount / cpi->common.MBs;
+      fps.pcnt_motion = (double)mvcount / cm->MBs;
     } else {
       fps.MVr = 0.0;
       fps.mvr_abs = 0.0;
@@ -913,8 +898,7 @@ static double calc_correction_factor(double err_per_mb,
   return fclamp(pow(error_term, power_term), 0.05, 5.0);
 }
 
-static int estimate_max_q(VP9_COMP *cpi,
-                          FIRSTPASS_STATS *fpstats,
+static int estimate_max_q(VP9_COMP *cpi, FIRSTPASS_STATS *fpstats,
                           int section_target_bandwitdh) {
   int q;
   const int num_mbs = cpi->common.MBs;
@@ -1088,12 +1072,12 @@ void vp9_end_second_pass(VP9_COMP *cpi) {
 
 // This function gives and estimate of how badly we believe
 // the prediction quality is decaying from frame to frame.
-static double get_prediction_decay_rate(VP9_COMP *cpi,
-                                        FIRSTPASS_STATS *next_frame) {
+static double get_prediction_decay_rate(const VP9_COMMON *cm,
+                                        const FIRSTPASS_STATS *next_frame) {
   // Look at the observed drop in prediction quality between the last frame
   // and the GF buffer (which contains an older frame).
   const double mb_sr_err_diff = (next_frame->sr_coded_error -
-                                     next_frame->coded_error) / cpi->common.MBs;
+                                     next_frame->coded_error) / cm->MBs;
   const double second_ref_decay = mb_sr_err_diff <= 512.0
       ? fclamp(pow(1.0 - (mb_sr_err_diff / 512.0), 0.5), 0.85, 1.0)
       : 0.85;
@@ -1121,7 +1105,6 @@ static int detect_transition_to_still(
     int j;
     FIRSTPASS_STATS *position = cpi->twopass.stats_in;
     FIRSTPASS_STATS tmp_next_frame;
-    double zz_inter;
 
     // Look ahead a few frames to see if static condition
     // persists...
@@ -1129,11 +1112,10 @@ static int detect_transition_to_still(
       if (EOF == input_stats(&cpi->twopass, &tmp_next_frame))
         break;
 
-      zz_inter = (tmp_next_frame.pcnt_inter - tmp_next_frame.pcnt_motion);
-      if (zz_inter < 0.999)
+      if (tmp_next_frame.pcnt_inter - tmp_next_frame.pcnt_motion < 0.999)
         break;
     }
-    // Reset file position
+
     reset_fpf_position(&cpi->twopass, position);
 
     // Only if it does do we signal a transition to still
@@ -1147,14 +1129,14 @@ static int detect_transition_to_still(
 // This function detects a flash through the high relative pcnt_second_ref
 // score in the frame following a flash frame. The offset passed in should
 // reflect this
-static int detect_flash(VP9_COMP *cpi, int offset) {
+static int detect_flash(const struct twopass_rc *twopass, int offset) {
   FIRSTPASS_STATS next_frame;
 
   int flash_detected = 0;
 
   // Read the frame data.
   // The return is FALSE (no flash detected) if not a valid frame
-  if (read_frame_stats(&cpi->twopass, &next_frame, offset) != EOF) {
+  if (read_frame_stats(twopass, &next_frame, offset) != EOF) {
     // What we are looking for here is a situation where there is a
     // brief break in prediction (such as a flash) but subsequent frames
     // are reasonably well predicted by an earlier (pre flash) frame.
@@ -1183,16 +1165,15 @@ static void accumulate_frame_motion_stats(
   // Accumulate Motion In/Out of frame stats
   *this_frame_mv_in_out = this_frame->mv_in_out_count * motion_pct;
   *mv_in_out_accumulator += this_frame->mv_in_out_count * motion_pct;
-  *abs_mv_in_out_accumulator +=
-    fabs(this_frame->mv_in_out_count * motion_pct);
+  *abs_mv_in_out_accumulator += fabs(this_frame->mv_in_out_count * motion_pct);
 
   // Accumulate a measure of how uniform (or conversely how random)
   // the motion field is. (A ratio of absmv / mv)
   if (motion_pct > 0.05) {
-    double this_frame_mvr_ratio = fabs(this_frame->mvr_abs) /
+    const double this_frame_mvr_ratio = fabs(this_frame->mvr_abs) /
                            DOUBLE_DIVIDE_CHECK(fabs(this_frame->MVr));
 
-    double this_frame_mvc_ratio = fabs(this_frame->mvc_abs) /
+    const double this_frame_mvc_ratio = fabs(this_frame->mvc_abs) /
                            DOUBLE_DIVIDE_CHECK(fabs(this_frame->MVc));
 
     *mv_ratio_accumulator += (this_frame_mvr_ratio < this_frame->mvr_abs)
@@ -1235,7 +1216,7 @@ static int calc_arf_boost(VP9_COMP *cpi, int offset,
                           int f_frames, int b_frames,
                           int *f_boost, int *b_boost) {
   FIRSTPASS_STATS this_frame;
-
+  struct twopass_rc *const twopass = &cpi->twopass;
   int i;
   double boost_score = 0.0;
   double mv_ratio_accumulator = 0.0;
@@ -1248,7 +1229,7 @@ static int calc_arf_boost(VP9_COMP *cpi, int offset,
 
   // Search forward from the proposed arf/next gf position
   for (i = 0; i < f_frames; i++) {
-    if (read_frame_stats(&cpi->twopass, &this_frame, (i + offset)) == EOF)
+    if (read_frame_stats(twopass, &this_frame, (i + offset)) == EOF)
       break;
 
     // Update the motion related elements to the boost calculation
@@ -1259,12 +1240,12 @@ static int calc_arf_boost(VP9_COMP *cpi, int offset,
 
     // We want to discount the flash frame itself and the recovery
     // frame that follows as both will have poor scores.
-    flash_detected = detect_flash(cpi, (i + offset)) ||
-                     detect_flash(cpi, (i + offset + 1));
+    flash_detected = detect_flash(twopass, i + offset) ||
+                     detect_flash(twopass, i + offset + 1);
 
     // Cumulative effect of prediction quality decay
     if (!flash_detected) {
-      decay_accumulator *= get_prediction_decay_rate(cpi, &this_frame);
+      decay_accumulator *= get_prediction_decay_rate(&cpi->common, &this_frame);
       decay_accumulator = decay_accumulator < MIN_DECAY_FACTOR
                           ? MIN_DECAY_FACTOR : decay_accumulator;
     }
@@ -1285,7 +1266,7 @@ static int calc_arf_boost(VP9_COMP *cpi, int offset,
 
   // Search backward towards last gf position
   for (i = -1; i >= -b_frames; i--) {
-    if (read_frame_stats(&cpi->twopass, &this_frame, (i + offset)) == EOF)
+    if (read_frame_stats(twopass, &this_frame, (i + offset)) == EOF)
       break;
 
     // Update the motion related elements to the boost calculation
@@ -1296,12 +1277,12 @@ static int calc_arf_boost(VP9_COMP *cpi, int offset,
 
     // We want to discount the the flash frame itself and the recovery
     // frame that follows as both will have poor scores.
-    flash_detected = detect_flash(cpi, (i + offset)) ||
-                     detect_flash(cpi, (i + offset + 1));
+    flash_detected = detect_flash(twopass, i + offset) ||
+                     detect_flash(twopass, i + offset + 1);
 
     // Cumulative effect of prediction quality decay
     if (!flash_detected) {
-      decay_accumulator *= get_prediction_decay_rate(cpi, &this_frame);
+      decay_accumulator *= get_prediction_decay_rate(&cpi->common, &this_frame);
       decay_accumulator = decay_accumulator < MIN_DECAY_FACTOR
                               ? MIN_DECAY_FACTOR : decay_accumulator;
     }
@@ -1461,6 +1442,7 @@ void define_fixed_arf_period(VP9_COMP *cpi) {
 static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   FIRSTPASS_STATS next_frame = { 0 };
   FIRSTPASS_STATS *start_pos;
+  struct twopass_rc *const twopass = &cpi->twopass;
   int i;
   double boost_score = 0.0;
   double old_boost_score = 0.0;
@@ -1481,8 +1463,8 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   double mv_ratio_accumulator_thresh;
   int max_bits = frame_max_bits(cpi);     // Max for a single frame
 
-  unsigned int allow_alt_ref =
-    cpi->oxcf.play_alternate && cpi->oxcf.lag_in_frames;
+  unsigned int allow_alt_ref = cpi->oxcf.play_alternate &&
+                               cpi->oxcf.lag_in_frames;
 
   int f_boost = 0;
   int b_boost = 0;
@@ -1490,11 +1472,11 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   int active_max_gf_interval;
   RATE_CONTROL *const rc = &cpi->rc;
 
-  cpi->twopass.gf_group_bits = 0;
+  twopass->gf_group_bits = 0;
 
   vp9_clear_system_state();  // __asm emms;
 
-  start_pos = cpi->twopass.stats_in;
+  start_pos = twopass->stats_in;
 
   // Load stats for the current frame.
   mod_frame_err = calculate_modified_err(cpi, this_frame);
@@ -1525,20 +1507,19 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
     active_max_gf_interval = rc->max_gf_interval;
 
   i = 0;
-  while ((i < cpi->twopass.static_scene_max_gf_interval) &&
-         (i < rc->frames_to_key)) {
+  while (i < twopass->static_scene_max_gf_interval && i < rc->frames_to_key) {
     i++;    // Increment the loop counter
 
     // Accumulate error score of frames in this gf group
     mod_frame_err = calculate_modified_err(cpi, this_frame);
     gf_group_err += mod_frame_err;
 
-    if (EOF == input_stats(&cpi->twopass, &next_frame))
+    if (EOF == input_stats(twopass, &next_frame))
       break;
 
     // Test for the case where there is a brief flash but the prediction
     // quality back to an earlier frame is then restored.
-    flash_detected = detect_flash(cpi, 0);
+    flash_detected = detect_flash(twopass, 0);
 
     // Update the motion related elements to the boost calculation
     accumulate_frame_motion_stats(&next_frame,
@@ -1549,14 +1530,14 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
     // Cumulative effect of prediction quality decay
     if (!flash_detected) {
       last_loop_decay_rate = loop_decay_rate;
-      loop_decay_rate = get_prediction_decay_rate(cpi, &next_frame);
+      loop_decay_rate = get_prediction_decay_rate(&cpi->common, &next_frame);
       decay_accumulator = decay_accumulator * loop_decay_rate;
 
       // Monitor for static sections.
       if ((next_frame.pcnt_inter - next_frame.pcnt_motion) <
           zero_motion_accumulator) {
-        zero_motion_accumulator =
-          (next_frame.pcnt_inter - next_frame.pcnt_motion);
+        zero_motion_accumulator = next_frame.pcnt_inter -
+                                      next_frame.pcnt_motion;
       }
 
       // Break clause to detect very still sections after motion
@@ -1594,14 +1575,14 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
     old_boost_score = boost_score;
   }
 
-  cpi->twopass.gf_zeromotion_pct = (int)(zero_motion_accumulator * 1000.0);
+  twopass->gf_zeromotion_pct = (int)(zero_motion_accumulator * 1000.0);
 
   // Don't allow a gf too near the next kf
   if ((rc->frames_to_key - i) < MIN_GF_INTERVAL) {
     while (i < (rc->frames_to_key + !rc->next_key_frame_forced)) {
       i++;
 
-      if (EOF == input_stats(&cpi->twopass, this_frame))
+      if (EOF == input_stats(twopass, this_frame))
         break;
 
       if (i < rc->frames_to_key) {
@@ -2064,7 +2045,7 @@ static void find_next_key_frame(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
 
 
       // How fast is prediction quality decaying
-      loop_decay_rate = get_prediction_decay_rate(cpi, &next_frame);
+      loop_decay_rate = get_prediction_decay_rate(&cpi->common, &next_frame);
 
       // We want to know something about the recent past... rather than
       // as used elsewhere where we are concened with decay in prediction
@@ -2198,8 +2179,8 @@ static void find_next_key_frame(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
         r = RMAX;
 
       // How fast is prediction quality decaying
-      if (!detect_flash(cpi, 0)) {
-        loop_decay_rate = get_prediction_decay_rate(cpi, &next_frame);
+      if (!detect_flash(twopass, 0)) {
+        loop_decay_rate = get_prediction_decay_rate(&cpi->common, &next_frame);
         decay_accumulator *= loop_decay_rate;
         decay_accumulator = decay_accumulator < MIN_DECAY_FACTOR
                               ? MIN_DECAY_FACTOR : decay_accumulator;
