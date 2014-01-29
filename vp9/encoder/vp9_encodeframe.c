@@ -380,8 +380,10 @@ static void select_in_frame_q_segment(VP9_COMP *cpi,
       segment = 0;
     }
 
-    complexity_metric =
-      clamp((int)((projected_rate * 64) / target_rate), 16, 255);
+    if (target_rate > 0) {
+      complexity_metric =
+        clamp((int)((projected_rate * 64) / target_rate), 16, 255);
+    }
   }
 
   // Fill in the entires in the segment map corresponding to this SB64
