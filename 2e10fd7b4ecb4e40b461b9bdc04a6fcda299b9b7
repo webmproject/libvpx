@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//6OQ\u003d",
+        "filename": "vp9/decoder/vp9_dthread.c",
+        "patchSetId": 29
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-01-29T19:40:48Z",
+      "side": 1,
+      "message": "just make it a static inline (INLINE) function. macros are hard to debug and give reduced type checking",
+      "revId": "2e10fd7b4ecb4e40b461b9bdc04a6fcda299b9b7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//6OI\u003d",
+        "filename": "vp9/decoder/vp9_dthread.c",
+        "patchSetId": 29
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-01-29T19:40:48Z",
+      "side": 1,
+      "message": "is it worth having all the ifdef\u0027s for MT here? with MT disabled you\u0027re effectively doing the default loopfilter. maybe expose a non-mt function and use this CONFIG check file-wide:\n\n#if CONFIG_MULTITHREAD\n// the current file\n#else\n// wrapper that calls the default loopfilter\n#endif",
+      "revId": "2e10fd7b4ecb4e40b461b9bdc04a6fcda299b9b7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
