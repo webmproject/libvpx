@@ -193,8 +193,6 @@ int main(int argc, const char **argv) {
   vpx_codec_err_t res;
   int pts = 0;            /* PTS starts at 0 */
   int frame_duration = 1; /* 1 timebase tick per frame */
-  vpx_codec_cx_pkt_t packet = {0};
-  packet.kind = VPX_CODEC_CX_FRAME_PKT;
 
   memset(&svc_ctx, 0, sizeof(svc_ctx));
   svc_ctx.log_print = 1;
@@ -234,9 +232,7 @@ int main(int argc, const char **argv) {
       die_codec(&codec, "Failed to encode frame");
     }
     if (vpx_svc_get_frame_size(&svc_ctx) > 0) {
-      packet.data.frame.pts = pts;
-      packet.data.frame.sz = vpx_svc_get_frame_size(&svc_ctx);
-      ivf_write_frame_header(outfile, &packet);
+      ivf_write_frame_header(outfile, pts, vpx_svc_get_frame_size(&svc_ctx));
       (void)fwrite(vpx_svc_get_buffer(&svc_ctx), 1,
                    vpx_svc_get_frame_size(&svc_ctx), outfile);
     }

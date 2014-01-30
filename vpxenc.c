@@ -1323,7 +1323,7 @@ static void get_cx_data(struct stream_state *stream,
             ivf_header_pos = ftello(stream->file);
             fsize = pkt->data.frame.sz;
 
-            ivf_write_frame_header(stream->file, pkt);
+            ivf_write_frame_header(stream->file, pkt->data.frame.pts, fsize);
           } else {
             fsize += pkt->data.frame.sz;
 
