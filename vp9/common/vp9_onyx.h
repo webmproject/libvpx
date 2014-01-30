@@ -55,6 +55,7 @@ extern "C" {
     MODE_FIRSTPASS      = 0x3,
     MODE_SECONDPASS     = 0x4,
     MODE_SECONDPASS_BEST = 0x5,
+    MODE_REALTIME       = 0x6,
   } MODE;
 
   typedef enum {

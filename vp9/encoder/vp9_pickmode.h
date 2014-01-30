@@ -22,8 +22,7 @@ int64_t vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
                             int mi_row, int mi_col,
                             int *returnrate,
                             int64_t *returndistortion,
-                            BLOCK_SIZE bsize,
-                            PICK_MODE_CONTEXT *ctx);
+                            BLOCK_SIZE bsize);
 
 #ifdef __cplusplus
 }  // extern "C"

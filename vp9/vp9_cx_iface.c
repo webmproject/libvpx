@@ -563,10 +563,21 @@ static void pick_quickcompress_mode(vpx_codec_alg_priv_t  *ctx,
   unsigned int new_qc;
 
   /* Use best quality mode if no deadline is given. */
-  if (deadline)
-    new_qc = MODE_GOODQUALITY;
-  else
-    new_qc = MODE_BESTQUALITY;
+  new_qc = MODE_BESTQUALITY;
+
+  if (deadline) {
+      uint64_t     duration_us;
+
+      /* Convert duration parameter from stream timebase to microseconds */
+      duration_us = (uint64_t)duration * 1000000
+                    * (uint64_t)ctx->cfg.g_timebase.num
+                    / (uint64_t)ctx->cfg.g_timebase.den;
+
+      /* If the deadline is more that the duration this frame is to be shown,
+       * use good quality mode. Otherwise use realtime mode.
+       */
+      new_qc = (deadline > duration_us) ? MODE_GOODQUALITY : MODE_REALTIME;
+  }
 
   if (ctx->cfg.g_pass == VPX_RC_FIRST_PASS)
     new_qc = MODE_FIRSTPASS;

@@ -234,7 +234,7 @@ TEST_F(SvcTest, FirstFrameHasLayers) {
   video.Begin();
 
   res = vpx_svc_encode(&svc_, &codec_, video.img(), video.pts(),
-                       video.duration(), VPX_DL_REALTIME);
+                       video.duration(), VPX_DL_GOOD_QUALITY);
   EXPECT_EQ(VPX_CODEC_OK, res);
 
   const vpx_codec_err_t res_dec = decoder_->DecodeFrame(
@@ -262,7 +262,7 @@ TEST_F(SvcTest, EncodeThreeFrames) {
   video.Begin();
   // This frame is a keyframe.
   res = vpx_svc_encode(&svc_, &codec_, video.img(), video.pts(),
-                       video.duration(), VPX_DL_REALTIME);
+                       video.duration(), VPX_DL_GOOD_QUALITY);
   ASSERT_EQ(VPX_CODEC_OK, res);
   EXPECT_EQ(1, vpx_svc_is_keyframe(&svc_));
 
@@ -275,7 +275,7 @@ TEST_F(SvcTest, EncodeThreeFrames) {
   video.Next();
   // This is a P-frame.
   res = vpx_svc_encode(&svc_, &codec_, video.img(), video.pts(),
-                       video.duration(), VPX_DL_REALTIME);
+                       video.duration(), VPX_DL_GOOD_QUALITY);
   ASSERT_EQ(VPX_CODEC_OK, res);
   EXPECT_EQ(0, vpx_svc_is_keyframe(&svc_));
 
@@ -288,7 +288,7 @@ TEST_F(SvcTest, EncodeThreeFrames) {
   video.Next();
   // This is a P-frame.
   res = vpx_svc_encode(&svc_, &codec_, video.img(), video.pts(),
-                       video.duration(), VPX_DL_REALTIME);
+                       video.duration(), VPX_DL_GOOD_QUALITY);
   ASSERT_EQ(VPX_CODEC_OK, res);
   EXPECT_EQ(0, vpx_svc_is_keyframe(&svc_));
 
