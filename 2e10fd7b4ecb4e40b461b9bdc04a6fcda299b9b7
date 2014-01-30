@@ -55,6 +55,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//6CA\u003d",
+        "filename": "vp9/decoder/vp9_dthread.c",
+        "patchSetId": 29
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2014-01-30T20:32:15Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//6Ho\u003d",
+      "revId": "2e10fd7b4ecb4e40b461b9bdc04a6fcda299b9b7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//6OI\u003d",
         "filename": "vp9/decoder/vp9_dthread.c",
         "patchSetId": 29
@@ -108,6 +126,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//6B8\u003d",
+        "filename": "vp9/decoder/vp9_dthread.c",
+        "patchSetId": 29
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2014-01-30T20:32:15Z",
+      "side": 1,
+      "message": "I moved read and write out of this function, which should be a better way for improving the code readability.",
+      "parentUuid": "AAAAdn//6Hk\u003d",
+      "revId": "2e10fd7b4ecb4e40b461b9bdc04a6fcda299b9b7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//6Ek\u003d",
         "filename": "vp9/decoder/vp9_dthread.c",
         "patchSetId": 29
@@ -119,6 +155,24 @@
       "writtenOn": "2014-01-30T05:07:31Z",
       "side": 1,
       "message": "this can be static for now, no?",
+      "revId": "2e10fd7b4ecb4e40b461b9bdc04a6fcda299b9b7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//6B4\u003d",
+        "filename": "vp9/decoder/vp9_dthread.c",
+        "patchSetId": 29
+      },
+      "lineNbr": 113,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2014-01-30T20:32:15Z",
+      "side": 1,
+      "message": "Done. It is a hook function, and defined for using by all functions. I think either way is fine.",
+      "parentUuid": "AAAAdn//6Ek\u003d",
       "revId": "2e10fd7b4ecb4e40b461b9bdc04a6fcda299b9b7",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -142,6 +196,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//6B0\u003d",
+        "filename": "vp9/decoder/vp9_dthread.c",
+        "patchSetId": 29
+      },
+      "lineNbr": 137,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2014-01-30T20:32:15Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//6Eg\u003d",
+      "revId": "2e10fd7b4ecb4e40b461b9bdc04a6fcda299b9b7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//6EY\u003d",
         "filename": "vp9/decoder/vp9_dthread.h",
         "patchSetId": 29
@@ -153,6 +225,24 @@
       "writtenOn": "2014-01-30T05:07:31Z",
       "side": 1,
       "message": "note, strictly speaking this function doesn\u0027t need to be public right now",
+      "revId": "2e10fd7b4ecb4e40b461b9bdc04a6fcda299b9b7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//6Bs\u003d",
+        "filename": "vp9/decoder/vp9_dthread.h",
+        "patchSetId": 29
+      },
+      "lineNbr": 56,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2014-01-30T20:32:15Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//6EY\u003d",
       "revId": "2e10fd7b4ecb4e40b461b9bdc04a6fcda299b9b7",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -176,6 +266,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//6Bo\u003d",
+        "filename": "vp9/decoder/vp9_dthread.h",
+        "patchSetId": 29
+      },
+      "lineNbr": 63,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2014-01-30T20:32:15Z",
+      "side": 1,
+      "message": "ok",
+      "parentUuid": "AAAAdn//6Ec\u003d",
+      "revId": "2e10fd7b4ecb4e40b461b9bdc04a6fcda299b9b7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//6EU\u003d",
         "filename": "vp9/decoder/vp9_thread.h",
         "patchSetId": 29
@@ -187,6 +295,24 @@
       "writtenOn": "2014-01-30T05:07:31Z",
       "side": 1,
       "message": "ping on the inline, we have an INLINE in vpx_config.h",
+      "revId": "2e10fd7b4ecb4e40b461b9bdc04a6fcda299b9b7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//6Bw\u003d",
+        "filename": "vp9/decoder/vp9_thread.h",
+        "patchSetId": 29
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2014-01-30T20:32:15Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//6EU\u003d",
       "revId": "2e10fd7b4ecb4e40b461b9bdc04a6fcda299b9b7",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
