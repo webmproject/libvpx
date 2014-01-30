@@ -839,6 +839,7 @@ static void set_rt_speed_feature(VP9_COMMON *cm,
   if (speed >= 5) {
     int i;
     sf->disable_split_mask = DISABLE_ALL_SPLIT;
+    sf->auto_min_max_partition_size = 2;
     sf->subpel_force_stop = 1;
     for (i = 0; i < TX_SIZES; i++) {
       sf->intra_y_mode_mask[i] = INTRA_DC_H_V;
