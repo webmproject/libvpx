@@ -626,7 +626,7 @@ static void set_good_speed_feature(VP9_COMMON *cm,
     sf->disable_filter_search_var_thresh = 50;
     sf->comp_inter_joint_search_thresh = BLOCK_SIZES;
 
-    sf->auto_min_max_partition_size = 1;
+    sf->auto_min_max_partition_size = RELAXED_NEIGHBORING_MIN_MAX;
     sf->use_lastframe_partitioning = LAST_FRAME_PARTITION_LOW_MOTION;
     sf->adjust_partitioning_from_last_frame = 1;
     sf->last_partitioning_redo_frequency = 3;
@@ -663,7 +663,7 @@ static void set_good_speed_feature(VP9_COMMON *cm,
     sf->disable_filter_search_var_thresh = 100;
     sf->comp_inter_joint_search_thresh = BLOCK_SIZES;
 
-    sf->auto_min_max_partition_size = 1;
+    sf->auto_min_max_partition_size = RELAXED_NEIGHBORING_MIN_MAX;
     sf->use_lastframe_partitioning = LAST_FRAME_PARTITION_ALL;
     sf->adjust_partitioning_from_last_frame = 1;
     sf->last_partitioning_redo_frequency = 3;
@@ -698,7 +698,7 @@ static void set_good_speed_feature(VP9_COMMON *cm,
     sf->disable_filter_search_var_thresh = 200;
     sf->comp_inter_joint_search_thresh = BLOCK_SIZES;
 
-    sf->auto_min_max_partition_size = 1;
+    sf->auto_min_max_partition_size = RELAXED_NEIGHBORING_MIN_MAX;
     sf->use_lastframe_partitioning = LAST_FRAME_PARTITION_ALL;
     sf->adjust_partitioning_from_last_frame = 1;
     sf->last_partitioning_redo_frequency = 3;
@@ -797,7 +797,7 @@ static void set_rt_speed_feature(VP9_COMMON *cm,
     sf->disable_filter_search_var_thresh = 50;
     sf->comp_inter_joint_search_thresh = BLOCK_SIZES;
 
-    sf->auto_min_max_partition_size = 1;
+    sf->auto_min_max_partition_size = RELAXED_NEIGHBORING_MIN_MAX;
     sf->use_lastframe_partitioning = LAST_FRAME_PARTITION_LOW_MOTION;
     sf->adjust_partitioning_from_last_frame = 1;
     sf->last_partitioning_redo_frequency = 3;
@@ -839,7 +839,8 @@ static void set_rt_speed_feature(VP9_COMMON *cm,
   if (speed >= 5) {
     int i;
     sf->disable_split_mask = DISABLE_ALL_SPLIT;
-    sf->auto_min_max_partition_size = 2;
+    sf->auto_min_max_partition_size = frame_is_intra_only(cm) ?
+        RELAXED_NEIGHBORING_MIN_MAX : STRICT_NEIGHBORING_MIN_MAX;
     sf->subpel_force_stop = 1;
     for (i = 0; i < TX_SIZES; i++) {
       sf->intra_y_mode_mask[i] = INTRA_DC_H_V;
@@ -885,7 +886,7 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
   sf->use_one_partition_size_always = 0;
   sf->less_rectangular_check = 0;
   sf->use_square_partition_only = 0;
-  sf->auto_min_max_partition_size = 0;
+  sf->auto_min_max_partition_size = NOT_IN_USE;
   sf->max_partition_size = BLOCK_64X64;
   sf->min_partition_size = BLOCK_4X4;
   sf->adjust_partitioning_from_last_frame = 0;
