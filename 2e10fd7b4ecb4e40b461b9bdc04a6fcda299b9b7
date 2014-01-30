@@ -37,6 +37,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//6Ho\u003d",
+        "filename": "vp9/decoder/vp9_dthread.c",
+        "patchSetId": 29
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-01-30T01:24:07Z",
+      "side": 1,
+      "message": "this isn\u0027t so critical that a function call would slow things; it\u0027s easily translated to a function in any case.",
+      "parentUuid": "AAAAdn//6MI\u003d",
+      "revId": "2e10fd7b4ecb4e40b461b9bdc04a6fcda299b9b7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//6OI\u003d",
         "filename": "vp9/decoder/vp9_dthread.c",
         "patchSetId": 29
@@ -66,6 +84,24 @@
       "side": 1,
       "message": "The usage of #if CONFIG_MULTITHREAD in this file is consistent with that in vp9_thread. Actually, we could move #if CONFIG_MULTITHREAD to a higher level. If multi-threading is disabled, these multi-thread functions won\u0027t be called at all. Then, we could remove all #if CONFIG_MULTITHREAD in this file. This can be done later in another patch.",
       "parentUuid": "AAAAdn//6OI\u003d",
+      "revId": "2e10fd7b4ecb4e40b461b9bdc04a6fcda299b9b7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//6Hk\u003d",
+        "filename": "vp9/decoder/vp9_dthread.c",
+        "patchSetId": 29
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-01-30T01:24:07Z",
+      "side": 1,
+      "message": "as discussed, better to reduce the ifdef checks in this module one around most of the file + a pass-through wrapper in the disabled case would make the functions themselves more readable.",
+      "parentUuid": "AAAAdn//6Lw\u003d",
       "revId": "2e10fd7b4ecb4e40b461b9bdc04a6fcda299b9b7",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
