@@ -214,8 +214,11 @@ CLEAN-OBJS += libvpx_srcs.txt
 ifeq ($(CONFIG_EXTERNAL_BUILD),yes)
 ifeq ($(CONFIG_MSVS),yes)
 
+obj_int_extract.bat: $(SRC_PATH_BARE)/build/$(MSVS_ARCH_DIR)/obj_int_extract.bat
+	@cp $^ $@
+
+obj_int_extract.$(VCPROJ_SFX): obj_int_extract.bat
 obj_int_extract.$(VCPROJ_SFX): $(SRC_PATH_BARE)/build/make/obj_int_extract.c
-	@cp $(SRC_PATH_BARE)/build/$(MSVS_ARCH_DIR)/obj_int_extract.bat .
 	@echo "    [CREATE] $@"
 	$(qexec)$(GEN_VCPROJ) \
     --exe \
