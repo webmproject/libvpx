@@ -429,8 +429,7 @@ if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
     $vp9_idct4x4_16_add_neon_asm=vp9_idct4x4_16_add_neon;
 
     add_proto qw/void vp9_idct8x8_1_add/, "const tran_low_t *input, uint8_t *dest, int dest_stride";
-    specialize qw/vp9_idct8x8_1_add sse2 neon_asm dspr2/;
-    $vp9_idct8x8_1_add_neon_asm=vp9_idct8x8_1_add_neon;
+    specialize qw/vp9_idct8x8_1_add sse2 neon dspr2/;
 
     add_proto qw/void vp9_idct8x8_64_add/, "const tran_low_t *input, uint8_t *dest, int dest_stride";
     specialize qw/vp9_idct8x8_64_add sse2 neon_asm dspr2/, "$ssse3_x86_64";
