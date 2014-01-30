@@ -3330,6 +3330,7 @@ int vp9_receive_raw_frame(VP9_PTR ptr, unsigned int frame_flags,
                           YV12_BUFFER_CONFIG *sd, int64_t time_stamp,
                           int64_t end_time) {
   VP9_COMP              *cpi = (VP9_COMP *) ptr;
+  VP9_COMMON             *cm = &cpi->common;
   struct vpx_usec_timer  timer;
   int                    res = 0;
   const int    subsampling_x = sd->uv_width  < sd->y_width;
@@ -3342,6 +3343,12 @@ int vp9_receive_raw_frame(VP9_PTR ptr, unsigned int frame_flags,
     res = -1;
   vpx_usec_timer_mark(&timer);
   cpi->time_receive_data += vpx_usec_timer_elapsed(&timer);
+
+  if (cm->version == 0 && (subsampling_x != 1 || subsampling_y != 1)) {
+    vpx_internal_error(&cm->error, VPX_CODEC_INVALID_PARAM,
+                       "Non-4:2:0 color space requires profile >= 1");
+    res = -1;
+  }
 
   return res;
 }
