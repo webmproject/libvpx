@@ -59,7 +59,7 @@ TEST_P(SubtractBlockTest, SimpleSubtract) {
     int16_t *src_diff = be.src_diff;
     for (int r = 0; r < kBlockHeight; ++r) {
       for (int c = 0; c < kBlockWidth; ++c) {
-        src_diff[c] = static_cast<int16_t>(0xa5a5);
+        src_diff[c] = static_cast<int16_t>(0xa5a5u);
       }
       src_diff += kDiffPredStride;
     }

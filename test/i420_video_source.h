@@ -52,7 +52,7 @@ class I420VideoSource : public VideoSource {
     ASSERT_TRUE(input_file_ != NULL) << "Input file open failed. Filename: "
         << file_name_;
     if (start_) {
-      fseek(input_file_, raw_sz_ * start_, SEEK_SET);
+      fseek(input_file_, static_cast<unsigned>(raw_sz_) * start_, SEEK_SET);
     }
 
     frame_ = start_;
