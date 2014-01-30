@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//6Gk\u003d",
+        "filename": "ivfenc.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-01-30T01:49:37Z",
+      "side": 1,
+      "message": "move tools_common down below the vpx/... stuff (missed this when I refactored)",
+      "revId": "1f3fd9bc6c0e0c974a3839a65f640772523def99",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//6HM\u003d",
+        "filename": "ivfenc.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-01-30T01:49:37Z",
+      "side": 1,
+      "message": "Old alignment was correct: you really only want to join the lines when the two variables are tightly related (widths and heights, pointers and lengths, etc).",
+      "revId": "1f3fd9bc6c0e0c974a3839a65f640772523def99",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//6HA\u003d",
+        "filename": "ivfenc.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-01-30T01:49:37Z",
+      "side": 1,
+      "message": "ditto on old alignment.",
+      "revId": "1f3fd9bc6c0e0c974a3839a65f640772523def99",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
