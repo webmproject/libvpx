@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//55k\u003d",
+        "filename": "vp9/decoder/vp9_dthread.c",
+        "patchSetId": 33
+      },
+      "lineNbr": 240,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2014-01-31T20:26:01Z",
+      "side": 1,
+      "message": "Since the memory is always re-allocated whenever resize happens, so, it is sure that the rows used here is always correct.",
+      "parentUuid": "AAAAdn//56Q\u003d",
+      "revId": "3f1490bcc59eed0c40068ebd80d1e40a85f0a821",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//56Y\u003d",
         "filename": "vp9/decoder/vp9_dthread.c",
         "patchSetId": 33
@@ -30,6 +48,24 @@
       "writtenOn": "2014-01-31T20:04:38Z",
       "side": 1,
       "message": "you could put this back inside the original if block and drop the duplicate check and free()",
+      "revId": "3f1490bcc59eed0c40068ebd80d1e40a85f0a821",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//55g\u003d",
+        "filename": "vp9/decoder/vp9_dthread.c",
+        "patchSetId": 33
+      },
+      "lineNbr": 254,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2014-01-31T20:26:01Z",
+      "side": 1,
+      "message": "I think it is good to keep \"(void)rows;\" as the first row in this function when multi-thread is disabled. Also, keep multi-thread code before the non-multi-thread code consistently through the file.",
+      "parentUuid": "AAAAdn//56Y\u003d",
       "revId": "3f1490bcc59eed0c40068ebd80d1e40a85f0a821",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
