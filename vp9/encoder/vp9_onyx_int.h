@@ -733,7 +733,8 @@ static int get_ref_frame_idx(const VP9_COMP *cpi,
 static YV12_BUFFER_CONFIG *get_ref_frame_buffer(VP9_COMP *cpi,
                                                 MV_REFERENCE_FRAME ref_frame) {
   VP9_COMMON *const cm = &cpi->common;
-  return &cm->yv12_fb[cm->ref_frame_map[get_ref_frame_idx(cpi, ref_frame)]];
+  return &cm->frame_bufs[cm->ref_frame_map[get_ref_frame_idx(cpi,
+                                                             ref_frame)]].buf;
 }
 
 void vp9_encode_frame(VP9_COMP *cpi);

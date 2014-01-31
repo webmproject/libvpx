@@ -34,7 +34,7 @@ void vp9_free_frame_buffers(VP9_COMMON *cm) {
   int i;
 
   for (i = 0; i < FRAME_BUFFERS; i++)
-    vp9_free_frame_buffer(&cm->yv12_fb[i]);
+    vp9_free_frame_buffer(&cm->frame_bufs[i].buf);
 
   vp9_free_frame_buffer(&cm->post_proc_buffer);
 
@@ -140,18 +140,18 @@ int vp9_alloc_frame_buffers(VP9_COMMON *cm, int width, int height) {
   vp9_free_frame_buffers(cm);
 
   for (i = 0; i < FRAME_BUFFERS; i++) {
-    cm->fb_idx_ref_cnt[i] = 0;
-    if (vp9_alloc_frame_buffer(&cm->yv12_fb[i], width, height, ss_x, ss_y,
-                               VP9_ENC_BORDER_IN_PIXELS) < 0)
+    cm->frame_bufs[i].ref_count = 0;
+    if (vp9_alloc_frame_buffer(&cm->frame_bufs[i].buf, width, height,
+                               ss_x, ss_y, VP9_ENC_BORDER_IN_PIXELS) < 0)
       goto fail;
   }
 
   cm->new_fb_idx = FRAME_BUFFERS - 1;
-  cm->fb_idx_ref_cnt[cm->new_fb_idx] = 1;
+  cm->frame_bufs[cm->new_fb_idx].ref_count = 1;
 
   for (i = 0; i < REF_FRAMES; i++) {
     cm->ref_frame_map[i] = i;
-    cm->fb_idx_ref_cnt[i] = 1;
+    cm->frame_bufs[i].ref_count = 1;
   }
 
   if (vp9_alloc_frame_buffer(&cm->post_proc_buffer, width, height, ss_x, ss_y,
