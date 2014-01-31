@@ -30,7 +30,7 @@ extern "C" {
 #endif
 
 #define BLOCK_SIZE_GROUPS 4
-#define MBSKIP_CONTEXTS 3
+#define SKIP_CONTEXTS 3
 #define INTER_MODE_CONTEXTS 7
 
 /* Segment Feature Masks */

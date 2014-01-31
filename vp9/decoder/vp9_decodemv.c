@@ -152,9 +152,9 @@ static int read_skip_coeff(VP9_COMMON *cm, const MACROBLOCKD *xd,
     return 1;
   } else {
     const int ctx = vp9_get_skip_context(xd);
-    const int skip = vp9_read(r, cm->fc.mbskip_probs[ctx]);
+    const int skip = vp9_read(r, cm->fc.skip_probs[ctx]);
     if (!cm->frame_parallel_decoding_mode)
-      ++cm->counts.mbskip[ctx][skip];
+      ++cm->counts.skip[ctx][skip];
     return skip;
   }
 }

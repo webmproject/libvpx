@@ -124,8 +124,8 @@ static int write_skip_coeff(const VP9_COMP *cpi, int segment_id, MODE_INFO *m,
 void vp9_update_skip_probs(VP9_COMMON *cm, vp9_writer *w) {
   int k;
 
-  for (k = 0; k < MBSKIP_CONTEXTS; ++k)
-    vp9_cond_prob_diff_update(w, &cm->fc.mbskip_probs[k], cm->counts.mbskip[k]);
+  for (k = 0; k < SKIP_CONTEXTS; ++k)
+    vp9_cond_prob_diff_update(w, &cm->fc.skip_probs[k], cm->counts.skip[k]);
 }
 
 static void update_switchable_interp_probs(VP9_COMP *cpi, vp9_writer *w) {

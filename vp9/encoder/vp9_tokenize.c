@@ -301,7 +301,7 @@ void vp9_tokenize_sb(VP9_COMP *cpi, TOKENEXTRA **t, int dry_run,
   struct tokenize_b_args arg = {cpi, xd, t, mbmi->tx_size, cpi->mb.token_cache};
   if (mbmi->skip_coeff) {
     if (!dry_run)
-      cm->counts.mbskip[ctx][1] += skip_inc;
+      cm->counts.skip[ctx][1] += skip_inc;
     reset_skip_context(xd, bsize);
     if (dry_run)
       *t = t_backup;
@@ -309,7 +309,7 @@ void vp9_tokenize_sb(VP9_COMP *cpi, TOKENEXTRA **t, int dry_run,
   }
 
   if (!dry_run) {
-    cm->counts.mbskip[ctx][0] += skip_inc;
+    cm->counts.skip[ctx][0] += skip_inc;
     foreach_transformed_block(xd, bsize, tokenize_b, &arg);
   } else {
     foreach_transformed_block(xd, bsize, set_entropy_context_b, &arg);
