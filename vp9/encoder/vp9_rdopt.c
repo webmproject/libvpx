@@ -296,7 +296,7 @@ void vp9_initialize_rd_consts(VP9_COMP *cpi) {
 
   fill_token_costs(x->token_costs, cm->fc.coef_probs);
 
-  if (cpi->oxcf.mode != MODE_REALTIME) {
+  if (!cpi->sf.super_fast_rtc) {
     for (i = 0; i < PARTITION_CONTEXTS; i++)
       vp9_cost_tokens(x->partition_cost[i], get_partition_probs(cm, i),
                       vp9_partition_tree);
@@ -443,7 +443,7 @@ static void model_rd_for_sb(VP9_COMP *cpi, BLOCK_SIZE bsize,
 
     if (i == 0)
       x->pred_sse[ref] = sse;
-    if (cpi->oxcf.mode == MODE_REALTIME) {
+    if (cpi->sf.super_fast_rtc) {
       dist_sum += (int)sse;
     } else {
       int rate;
@@ -2489,7 +2489,6 @@ static void single_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
     for (i = 0; i < MAX_MB_PLANE; i++)
       xd->plane[i].pre[0] = backup_yv12[i];
   }
-  return;
 }
 
 static void joint_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
