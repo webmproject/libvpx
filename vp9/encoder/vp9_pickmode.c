@@ -124,8 +124,8 @@ static int full_pixel_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
                                    stride, 0x7fffffff);
 
   // scale to 1/8 pixel resolution
-  tmp_mv->as_mv.row = tmp_mv->as_mv.row << 3;
-  tmp_mv->as_mv.col = tmp_mv->as_mv.col << 3;
+  tmp_mv->as_mv.row = tmp_mv->as_mv.row * 8;
+  tmp_mv->as_mv.col = tmp_mv->as_mv.col * 8;
 
   // calculate the bit cost on motion vector
   *rate_mv = vp9_mv_bit_cost(&tmp_mv->as_mv, &ref_mv.as_mv,
