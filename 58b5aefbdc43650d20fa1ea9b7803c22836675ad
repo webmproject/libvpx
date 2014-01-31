@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//55E\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 2765,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-01-31T22:07:14Z",
+      "side": 1,
+      "message": "Replacee 3 with ALTREF_FRAME.",
+      "revId": "58b5aefbdc43650d20fa1ea9b7803c22836675ad",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//55A\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 2866,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-01-31T22:07:14Z",
+      "side": 1,
+      "message": "// Force the usage of the BILINEAR interp_filter.",
+      "revId": "58b5aefbdc43650d20fa1ea9b7803c22836675ad",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
