@@ -850,6 +850,7 @@ static void set_rt_speed_feature(VP9_COMMON *cm,
       sf->intra_uv_mode_mask[i] = INTRA_DC_ONLY;
     }
     sf->use_fast_lpf_pick = 2;
+    sf->RD = 0;
   }
   if (speed >= 6) {
     sf->super_fast_rtc = 1;

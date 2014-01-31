@@ -2411,15 +2411,15 @@ static void reset_skip_txfm_size(VP9_COMMON *cm, TX_SIZE txfm_max) {
   }
 }
 
-static int get_frame_type(VP9_COMP *cpi) {
+static MV_REFERENCE_FRAME get_frame_type(VP9_COMP *cpi) {
   if (frame_is_intra_only(&cpi->common))
-    return 0;
+    return INTRA_FRAME;
   else if (cpi->rc.is_src_frame_alt_ref && cpi->refresh_golden_frame)
-    return 3;
+    return ALTREF_FRAME;
   else if (cpi->refresh_golden_frame || cpi->refresh_alt_ref_frame)
-    return 1;
+    return LAST_FRAME;
   else
-    return 2;
+    return GOLDEN_FRAME;
 }
 
 static void select_tx_mode(VP9_COMP *cpi) {
@@ -2734,7 +2734,6 @@ void vp9_encode_frame(VP9_COMP *cpi) {
   if (cpi->sf.RD) {
     int i;
     REFERENCE_MODE reference_mode;
-    INTERP_FILTER interp_filter;
     /*
      * This code does a single RD pass over the whole frame assuming
      * either compound, single or hybrid prediction as per whatever has
@@ -2744,7 +2743,7 @@ void vp9_encode_frame(VP9_COMP *cpi) {
      * that for subsequent frames.
      * It does the same analysis for transform size selection also.
      */
-    const int frame_type = get_frame_type(cpi);
+    const MV_REFERENCE_FRAME frame_type = get_frame_type(cpi);
     const int64_t *mode_thresh = cpi->rd_prediction_type_threshes[frame_type];
     const int64_t *filter_thresh = cpi->rd_filter_threshes[frame_type];
 
@@ -2762,22 +2761,18 @@ void vp9_encode_frame(VP9_COMP *cpi) {
     else
       reference_mode = REFERENCE_MODE_SELECT;
 
-    /* filter type selection */
-    // FIXME(rbultje) for some odd reason, we often select smooth_filter
-    // as default filter for ARF overlay frames. This is a REALLY BAD
-    // IDEA so we explicitly disable it here.
-    if (frame_type != 3 &&
-        filter_thresh[EIGHTTAP_SMOOTH] > filter_thresh[EIGHTTAP] &&
-        filter_thresh[EIGHTTAP_SMOOTH] > filter_thresh[EIGHTTAP_SHARP] &&
-        filter_thresh[EIGHTTAP_SMOOTH] > filter_thresh[SWITCHABLE - 1]) {
-      interp_filter = EIGHTTAP_SMOOTH;
-    } else if (filter_thresh[EIGHTTAP_SHARP] > filter_thresh[EIGHTTAP] &&
-               filter_thresh[EIGHTTAP_SHARP] > filter_thresh[SWITCHABLE - 1]) {
-      interp_filter = EIGHTTAP_SHARP;
-    } else if (filter_thresh[EIGHTTAP] > filter_thresh[SWITCHABLE - 1]) {
-      interp_filter = EIGHTTAP;
-    } else {
-      interp_filter = SWITCHABLE;
+    if (cm->interp_filter == SWITCHABLE) {
+      if (frame_type != ALTREF_FRAME &&
+          filter_thresh[EIGHTTAP_SMOOTH] > filter_thresh[EIGHTTAP] &&
+          filter_thresh[EIGHTTAP_SMOOTH] > filter_thresh[EIGHTTAP_SHARP] &&
+          filter_thresh[EIGHTTAP_SMOOTH] > filter_thresh[SWITCHABLE - 1]) {
+        cm->interp_filter = EIGHTTAP_SMOOTH;
+      } else if (filter_thresh[EIGHTTAP_SHARP] > filter_thresh[EIGHTTAP] &&
+          filter_thresh[EIGHTTAP_SHARP] > filter_thresh[SWITCHABLE - 1]) {
+        cm->interp_filter = EIGHTTAP_SHARP;
+      } else if (filter_thresh[EIGHTTAP] > filter_thresh[SWITCHABLE - 1]) {
+        cm->interp_filter = EIGHTTAP;
+      }
     }
 
     cpi->mb.e_mbd.lossless = cpi->oxcf.lossless;
@@ -2785,7 +2780,6 @@ void vp9_encode_frame(VP9_COMP *cpi) {
     /* transform size selection (4x4, 8x8, 16x16 or select-per-mb) */
     select_tx_mode(cpi);
     cm->reference_mode = reference_mode;
-    cm->interp_filter = interp_filter;
 
     if (cpi->sf.super_fast_rtc)
       encode_rtc_frame_internal(cpi);
@@ -2868,6 +2862,8 @@ void vp9_encode_frame(VP9_COMP *cpi) {
       }
     }
   } else {
+    // Force the usage of the BILINEAR interp_filter.
+    cm->interp_filter = BILINEAR;
     if (cpi->sf.super_fast_rtc)
       encode_rtc_frame_internal(cpi);
     else
