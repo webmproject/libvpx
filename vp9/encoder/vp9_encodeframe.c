@@ -2787,7 +2787,7 @@ void vp9_encode_frame(VP9_COMP *cpi) {
     cm->reference_mode = reference_mode;
     cm->interp_filter = interp_filter;
 
-    if (cpi->compressor_speed == 3)
+    if (cpi->oxcf.mode == MODE_REALTIME)
       encode_rtc_frame_internal(cpi);
     else
       encode_frame_internal(cpi);
@@ -2945,7 +2945,7 @@ static void encode_superblock(VP9_COMP *cpi, TOKENEXTRA **t, int output_enabled,
   const int mi_height = num_8x8_blocks_high_lookup[bsize];
   x->skip_recode = !x->select_txfm_size && mbmi->sb_type >= BLOCK_8X8 &&
                    (cpi->oxcf.aq_mode != COMPLEXITY_AQ) &&
-                   cpi->compressor_speed != 3;
+                   cpi->oxcf.mode != MODE_REALTIME;
   x->skip_optimize = ctx->is_coded;
   ctx->is_coded = 1;
   x->use_lp32x32fdct = cpi->sf.use_lp32x32fdct;

@@ -455,14 +455,17 @@ static void update_reference_segmentation_map(VP9_COMP *cpi) {
     cache_ptr += cm->mi_cols;
   }
 }
+static int is_slowest_mode(int mode) {
+  return (mode == MODE_SECONDPASS_BEST || mode == MODE_BESTQUALITY);
+}
 
-static void set_rd_speed_thresholds(VP9_COMP *cpi, int mode) {
+static void set_rd_speed_thresholds(VP9_COMP *cpi) {
   SPEED_FEATURES *sf = &cpi->sf;
   int i;
 
   // Set baseline threshold values
   for (i = 0; i < MAX_MODES; ++i)
-    sf->thresh_mult[i] = mode == 0 ? -500 : 0;
+    sf->thresh_mult[i] = is_slowest_mode(cpi->oxcf.mode) ? -500 : 0;
 
   sf->thresh_mult[THR_NEARESTMV] = 0;
   sf->thresh_mult[THR_NEARESTG] = 0;
@@ -538,12 +541,12 @@ static void set_rd_speed_thresholds(VP9_COMP *cpi, int mode) {
   }
 }
 
-static void set_rd_speed_thresholds_sub8x8(VP9_COMP *cpi, int mode) {
+static void set_rd_speed_thresholds_sub8x8(VP9_COMP *cpi) {
   SPEED_FEATURES *sf = &cpi->sf;
   int i;
 
   for (i = 0; i < MAX_REFS; ++i)
-    sf->thresh_mult_sub8x8[i] = mode == 0 ? -500 : 0;
+    sf->thresh_mult_sub8x8[i] = is_slowest_mode(cpi->oxcf.mode)  ? -500 : 0;
 
   sf->thresh_mult_sub8x8[THR_LAST] += 2500;
   sf->thresh_mult_sub8x8[THR_GOLD] += 2500;
@@ -853,7 +856,6 @@ static void set_rt_speed_feature(VP9_COMMON *cm,
 void vp9_set_speed_features(VP9_COMP *cpi) {
   SPEED_FEATURES *sf = &cpi->sf;
   VP9_COMMON *cm = &cpi->common;
-  int mode = cpi->compressor_speed;
   int speed = cpi->speed;
   int i;
 
@@ -907,22 +909,25 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
   sf->using_small_partition_info = 0;
   sf->mode_skip_start = MAX_MODES;  // Mode index at which mode skip mask set
 
-  switch (mode) {
-    case 0:  // This is the best quality mode.
+  switch (cpi->oxcf.mode) {
+    case MODE_BESTQUALITY:
+    case MODE_SECONDPASS_BEST:  // This is the best quality mode.
       cpi->diamond_search_sad = vp9_full_range_search;
       break;
-    case 1:
-      set_good_speed_feature(cm, sf, speed);
+    case MODE_FIRSTPASS:
+    case MODE_GOODQUALITY:
+    case MODE_SECONDPASS:
+     set_good_speed_feature(cm, sf, speed);
       break;
       break;
-    case 2:
+    case MODE_REALTIME:
       set_rt_speed_feature(cm, sf, speed);
       break;
   }; /* switch */
 
   // Set rd thresholds based on mode and speed setting
-  set_rd_speed_thresholds(cpi, mode);
-  set_rd_speed_thresholds_sub8x8(cpi, mode);
+  set_rd_speed_thresholds(cpi);
+  set_rd_speed_thresholds_sub8x8(cpi);
 
   // Slow quant, dct and trellis not worthwhile for first pass
   // so make sure they are always turned off.
@@ -1243,29 +1248,24 @@ void vp9_change_config(VP9_PTR ptr, VP9_CONFIG *oxcf) {
       // Real time and one pass deprecated in test code base
     case MODE_GOODQUALITY:
       cpi->pass = 0;
-      cpi->compressor_speed = 2;
       cpi->oxcf.cpu_used = clamp(cpi->oxcf.cpu_used, -5, 5);
       break;
 
     case MODE_FIRSTPASS:
       cpi->pass = 1;
-      cpi->compressor_speed = 1;
       break;
 
     case MODE_SECONDPASS:
       cpi->pass = 2;
-      cpi->compressor_speed = 1;
       cpi->oxcf.cpu_used = clamp(cpi->oxcf.cpu_used, -5, 5);
       break;
 
     case MODE_SECONDPASS_BEST:
       cpi->pass = 2;
-      cpi->compressor_speed = 0;
       break;
 
     case MODE_REALTIME:
       cpi->pass = 0;
-      cpi->compressor_speed = 3;
       break;
   }
 
@@ -2550,7 +2550,7 @@ static void loopfilter_frame(VP9_COMP *cpi, VP9_COMMON *cm) {
 
     vpx_usec_timer_start(&timer);
 
-    if (cpi->compressor_speed == 3)
+    if (cpi->oxcf.mode == MODE_REALTIME)
       lf->filter_level = 4;
     else
       vp9_pick_filter_level(cpi->Source, cpi, cpi->sf.use_fast_lpf_pick);
@@ -2742,7 +2742,7 @@ static void encode_with_recode_loop(VP9_COMP *cpi,
     if (cpi->sf.recode_loop != 0) {
       vp9_save_coding_context(cpi);
       cpi->dummy_packing = 1;
-      if (cpi->compressor_speed != 3)
+      if (cpi->oxcf.mode != MODE_REALTIME)
         vp9_pack_bitstream(cpi, dest, size);
 
       cpi->rc.projected_frame_size = (*size) << 3;
@@ -3101,7 +3101,7 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
   // JBB : This is realtime mode.  In real time mode the first frame
   // should be larger. Q of 0 is disabled because we force tx size to be
   // 16x16...
-  if (cpi->compressor_speed == 3) {
+  if (cpi->oxcf.mode == MODE_REALTIME) {
     if (cpi->common.current_video_frame == 0)
       q /= 3;
 

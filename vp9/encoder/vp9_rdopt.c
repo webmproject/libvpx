@@ -280,7 +280,7 @@ void vp9_initialize_rd_consts(VP9_COMP *cpi) {
 
   fill_token_costs(x->token_costs, cm->fc.coef_probs);
 
-  if (cpi->compressor_speed != 3) {
+  if (cpi->oxcf.mode != MODE_REALTIME) {
     for (i = 0; i < PARTITION_CONTEXTS; i++)
       vp9_cost_tokens(x->partition_cost[i], get_partition_probs(cm, i),
                       vp9_partition_tree);
@@ -427,7 +427,7 @@ static void model_rd_for_sb(VP9_COMP *cpi, BLOCK_SIZE bsize,
 
     if (i == 0)
       x->pred_sse[ref] = sse;
-    if (cpi->compressor_speed > 2) {
+    if (cpi->oxcf.mode == MODE_REALTIME) {
       dist_sum += (int)sse;
     } else {
       int rate;
@@ -1761,7 +1761,8 @@ static void rd_check_segment_txsize(VP9_COMP *cpi, MACROBLOCK *x,
           if (best_rd < label_mv_thresh)
             break;
 
-          if (cpi->compressor_speed) {
+          if (cpi->oxcf.mode != MODE_SECONDPASS_BEST &&
+              cpi->oxcf.mode != MODE_BESTQUALITY) {
             // use previous block's result as next block's MV predictor.
             if (i > 0) {
               bsi->mvp.as_int = mi->bmi[i - 1].as_mv[0].as_int;
@@ -1825,7 +1826,8 @@ static void rd_check_segment_txsize(VP9_COMP *cpi, MACROBLOCK *x,
           }
 
           // Should we do a full search (best quality only)
-          if (cpi->compressor_speed == 0) {
+          if (cpi->oxcf.mode == MODE_BESTQUALITY ||
+              cpi->oxcf.mode == MODE_SECONDPASS_BEST) {
             /* Check if mvp_full is within the range. */
             clamp_mv(&mvp_full, x->mv_col_min, x->mv_col_max,
                      x->mv_row_min, x->mv_row_max);

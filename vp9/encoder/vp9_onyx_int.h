@@ -551,7 +551,6 @@ typedef struct VP9_COMP {
 
   // for real time encoding
   int speed;
-  int compressor_speed;
 
   int cpu_used;
   int pass;
