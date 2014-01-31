@@ -10,11 +10,6 @@
 #ifndef MKV_CONTEXT_HPP
 #define MKV_CONTEXT_HPP 1
 
-void writeSimpleBock(EbmlGlobal *ebml, unsigned char trackNumber, unsigned short timeCode,
-                     int isKeyframe, unsigned char lacingFlag, int  discardable,
-                     unsigned char *data, unsigned long dataLength);
-
-
 // these are helper functions
 void writeHeader(EbmlGlobal *ebml);
 void writeSegmentInformation(EbmlGlobal *ebml, EbmlLoc *startInfo, unsigned long timeCodeScale, double duration);
