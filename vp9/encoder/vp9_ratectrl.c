@@ -253,7 +253,7 @@ static void calc_iframe_target_size(VP9_COMP *cpi) {
 }
 
 // Update the buffer level: leaky bucket model.
-void vp9_update_buffer_level(VP9_COMP *const cpi, int encoded_frame_size) {
+void vp9_update_buffer_level(VP9_COMP *cpi, int encoded_frame_size) {
   const VP9_COMMON *const cm = &cpi->common;
   const VP9_CONFIG *oxcf = &cpi->oxcf;
   RATE_CONTROL *const rc = &cpi->rc;
@@ -269,7 +269,7 @@ void vp9_update_buffer_level(VP9_COMP *const cpi, int encoded_frame_size) {
   rc->buffer_level = MIN(rc->bits_off_target, oxcf->maximum_buffer_size);
 }
 
-int vp9_drop_frame(VP9_COMP *const cpi) {
+int vp9_drop_frame(VP9_COMP *cpi) {
   const VP9_CONFIG *oxcf = &cpi->oxcf;
   RATE_CONTROL *const rc = &cpi->rc;
 
