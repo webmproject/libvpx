@@ -148,14 +148,14 @@ TEST_P(ResizeTest, TestExternalResizeWorks) {
 
   for (std::vector<FrameInfo>::iterator info = frame_info_list_.begin();
        info != frame_info_list_.end(); ++info) {
-    const vpx_codec_pts_t pts = info->pts;
-    const unsigned int expected_w = ScaleForFrameNumber(pts, kInitialWidth);
-    const unsigned int expected_h = ScaleForFrameNumber(pts, kInitialHeight);
+    const unsigned int frame = static_cast<unsigned>(info->pts);
+    const unsigned int expected_w = ScaleForFrameNumber(frame, kInitialWidth);
+    const unsigned int expected_h = ScaleForFrameNumber(frame, kInitialHeight);
 
     EXPECT_EQ(expected_w, info->w)
-        << "Frame " << pts << "had unexpected width";
+        << "Frame " << frame << "had unexpected width";
     EXPECT_EQ(expected_h, info->h)
-        << "Frame " << pts << "had unexpected height";
+        << "Frame " << frame << "had unexpected height";
   }
 }
 
