@@ -85,8 +85,8 @@ static INLINE void vp9_prefetch_store_streamed(unsigned char *dst) {
   );
 }
 
-void vp9_idct32_1d_cols_add_blk_dspr2(int16_t *input, uint8_t *dest,
-                                      int dest_stride);
+void vp9_idct32_cols_add_blk_dspr2(int16_t *input, uint8_t *dest,
+                                   int dest_stride);
 
 void vp9_convolve2_horiz_dspr2(const uint8_t *src, ptrdiff_t src_stride,
                                uint8_t *dst, ptrdiff_t dst_stride,
