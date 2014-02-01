@@ -55,6 +55,6 @@ void vp9_loop_filter_frame_mt(struct VP9Decompressor *pbi,
                               struct VP9Common *cm,
                               struct macroblockd *xd,
                               int frame_filter_level,
-                              int y_only, int partial);
+                              int y_only, int partial_frame);
 
 #endif  // VP9_DECODER_VP9_DTHREAD_H_
