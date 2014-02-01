@@ -128,7 +128,7 @@ class Encoder {
   }
 
  protected:
-  virtual const vpx_codec_iface_t* CodecInterface() const = 0;
+  virtual vpx_codec_iface_t* CodecInterface() const = 0;
 
   const char *EncoderError() {
     const char *detail = vpx_codec_error_detail(&encoder_);

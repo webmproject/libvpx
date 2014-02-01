@@ -62,8 +62,8 @@ static const char *exec_name;
 
 static const struct codec_item {
   char const              *name;
-  const vpx_codec_iface_t *(*iface)(void);
-  const vpx_codec_iface_t *(*dx_iface)(void);
+  vpx_codec_iface_t *(*iface)(void);
+  vpx_codec_iface_t *(*dx_iface)(void);
   unsigned int             fourcc;
 } codecs[] = {
 #if CONFIG_VP8_ENCODER && CONFIG_VP8_DECODER
