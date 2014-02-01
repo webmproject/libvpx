@@ -18,8 +18,6 @@ void Ebml_Write(EbmlGlobal *glob, const void *buffer_in, unsigned long len) {
 static void _Serialize(EbmlGlobal *glob, const unsigned char *p, const unsigned char *q) {
   while (q != p) {
     --q;
-
-    unsigned long cbWritten;
     memcpy(&(glob->buf[glob->offset]), q, 1);
     glob->offset++;
   }
