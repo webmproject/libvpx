@@ -27,7 +27,7 @@ static int   verbose = 0;
 
 static const struct {
   const char *name;
-  const vpx_codec_iface_t *iface;
+  vpx_codec_iface_t *iface;
 } ifaces[] = {
 #if CONFIG_VP9_DECODER
   {"vp9",  &vpx_codec_vp8_dx_algo},

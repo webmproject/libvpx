@@ -39,7 +39,7 @@ static const char *exec_name;
 
 static const struct {
   char const *name;
-  const vpx_codec_iface_t *(*iface)(void);
+  vpx_codec_iface_t *(*iface)(void);
   uint32_t fourcc;
 } ifaces[] = {
 #if CONFIG_VP8_DECODER

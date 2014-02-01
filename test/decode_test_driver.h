@@ -77,7 +77,7 @@ class Decoder {
   }
 
  protected:
-  virtual const vpx_codec_iface_t* CodecInterface() const = 0;
+  virtual vpx_codec_iface_t* CodecInterface() const = 0;
 
   void InitOnce() {
     if (!init_done_) {
