@@ -134,7 +134,7 @@ void vp9_loop_filter_frame_mt(VP9D_COMP *pbi,
                               VP9_COMMON *cm,
                               MACROBLOCKD *xd,
                               int frame_filter_level,
-                              int y_only, int partial) {
+                              int y_only, int partial_frame) {
   // Number of superblock rows and cols
   const int sb_rows = mi_cols_aligned_to_sb(cm->mi_rows) >> MI_BLOCK_SIZE_LOG2;
   int i;

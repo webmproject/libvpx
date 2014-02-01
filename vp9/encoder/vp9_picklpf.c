@@ -36,11 +36,11 @@ void vp9_set_alt_lf_level(VP9_COMP *cpi, int filt_val) {
 
 static int try_filter_frame(const YV12_BUFFER_CONFIG *sd, VP9_COMP *const cpi,
                             MACROBLOCKD *const xd, VP9_COMMON *const cm,
-                            int filt_level, int partial) {
+                            int filt_level, int partial_frame) {
   int filt_err;
 
   vp9_set_alt_lf_level(cpi, filt_level);
-  vp9_loop_filter_frame(cm, xd, filt_level, 1, partial);
+  vp9_loop_filter_frame(cm, xd, filt_level, 1, partial_frame);
 
   filt_err = vp9_calc_ss_err(sd, cm->frame_to_show);
 
@@ -51,7 +51,7 @@ static int try_filter_frame(const YV12_BUFFER_CONFIG *sd, VP9_COMP *const cpi,
 }
 
 static void search_filter_level(const YV12_BUFFER_CONFIG *sd, VP9_COMP *cpi,
-                                int partial) {
+                                int partial_frame) {
   MACROBLOCKD *const xd = &cpi->mb.e_mbd;
   VP9_COMMON *const cm = &cpi->common;
   struct loopfilter *const lf = &cm->lf;
@@ -73,7 +73,7 @@ static void search_filter_level(const YV12_BUFFER_CONFIG *sd, VP9_COMP *cpi,
   //  Make a copy of the unfiltered / processed recon buffer
   vpx_yv12_copy_y(cm->frame_to_show, &cpi->last_frame_uf);
 
-  best_err = try_filter_frame(sd, cpi, xd, cm, filt_mid, partial);
+  best_err = try_filter_frame(sd, cpi, xd, cm, filt_mid, partial_frame);
   filt_best = filt_mid;
   ss_err[filt_mid] = best_err;
 
@@ -95,7 +95,7 @@ static void search_filter_level(const YV12_BUFFER_CONFIG *sd, VP9_COMP *cpi,
     if (filt_direction <= 0 && filt_low != filt_mid) {
       // Get Low filter error score
       if (ss_err[filt_low] < 0) {
-        filt_err = try_filter_frame(sd, cpi, xd, cm, filt_low, partial);
+        filt_err = try_filter_frame(sd, cpi, xd, cm, filt_low, partial_frame);
         ss_err[filt_low] = filt_err;
       } else {
         filt_err = ss_err[filt_low];
@@ -114,7 +114,7 @@ static void search_filter_level(const YV12_BUFFER_CONFIG *sd, VP9_COMP *cpi,
     // Now look at filt_high
     if (filt_direction >= 0 && filt_high != filt_mid) {
       if (ss_err[filt_high] < 0) {
-        filt_err = try_filter_frame(sd, cpi, xd, cm, filt_high, partial);
+        filt_err = try_filter_frame(sd, cpi, xd, cm, filt_high, partial_frame);
         ss_err[filt_high] = filt_err;
       } else {
         filt_err = ss_err[filt_high];
