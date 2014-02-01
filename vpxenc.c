@@ -477,13 +477,15 @@ void usage_exit() {
 static void find_mismatch(const vpx_image_t *const img1,
                           const vpx_image_t *const img2,
                           int yloc[4], int uloc[4], int vloc[4]) {
-  const unsigned int bsize = 64;
-  const unsigned int bsizey = bsize >> img1->y_chroma_shift;
-  const unsigned int bsizex = bsize >> img1->x_chroma_shift;
-  const int c_w = (img1->d_w + img1->x_chroma_shift) >> img1->x_chroma_shift;
-  const int c_h = (img1->d_h + img1->y_chroma_shift) >> img1->y_chroma_shift;
-  unsigned int match = 1;
-  unsigned int i, j;
+  const uint32_t bsize = 64;
+  const uint32_t bsizey = bsize >> img1->y_chroma_shift;
+  const uint32_t bsizex = bsize >> img1->x_chroma_shift;
+  const uint32_t c_w =
+      (img1->d_w + img1->x_chroma_shift) >> img1->x_chroma_shift;
+  const uint32_t c_h =
+      (img1->d_h + img1->y_chroma_shift) >> img1->y_chroma_shift;
+  int match = 1;
+  uint32_t i, j;
   yloc[0] = yloc[1] = yloc[2] = yloc[3] = -1;
   for (i = 0, match = 1; match && i < img1->d_h; i += bsize) {
     for (j = 0; match && j < img1->d_w; j += bsize) {
@@ -564,10 +566,12 @@ static void find_mismatch(const vpx_image_t *const img1,
 
 static int compare_img(const vpx_image_t *const img1,
                        const vpx_image_t *const img2) {
-  const int c_w = (img1->d_w + img1->x_chroma_shift) >> img1->x_chroma_shift;
-  const int c_h = (img1->d_h + img1->y_chroma_shift) >> img1->y_chroma_shift;
+  const uint32_t c_w =
+      (img1->d_w + img1->x_chroma_shift) >> img1->x_chroma_shift;
+  const uint32_t c_h =
+      (img1->d_h + img1->y_chroma_shift) >> img1->y_chroma_shift;
+  uint32_t i;
   int match = 1;
-  unsigned int i;
 
   match &= (img1->fmt == img2->fmt);
   match &= (img1->d_w == img2->d_w);
