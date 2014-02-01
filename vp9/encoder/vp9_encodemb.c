@@ -487,7 +487,8 @@ void vp9_encode_sby(MACROBLOCK *x, BLOCK_SIZE bsize) {
   if (x->optimize)
     optimize_init_b(0, bsize, &arg);
 
-  foreach_transformed_block_in_plane(xd, bsize, 0, encode_block_pass1, &arg);
+  vp9_foreach_transformed_block_in_plane(xd, bsize, 0, encode_block_pass1,
+                                         &arg);
 }
 
 void vp9_encode_sb(MACROBLOCK *x, BLOCK_SIZE bsize) {
@@ -505,7 +506,7 @@ void vp9_encode_sb(MACROBLOCK *x, BLOCK_SIZE bsize) {
       optimize_init_b(i, bsize, &arg);
   }
 
-  foreach_transformed_block(xd, bsize, encode_block, &arg);
+  vp9_foreach_transformed_block(xd, bsize, encode_block, &arg);
 }
 
 void vp9_encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
@@ -648,7 +649,7 @@ void vp9_encode_intra_block_y(MACROBLOCK *x, BLOCK_SIZE bsize) {
   MB_MODE_INFO *mbmi = &xd->mi_8x8[0]->mbmi;
   struct encode_b_args arg = {x, &ctx, &mbmi->skip_coeff};
 
-  foreach_transformed_block_in_plane(xd, bsize, 0, vp9_encode_block_intra,
+  vp9_foreach_transformed_block_in_plane(xd, bsize, 0, vp9_encode_block_intra,
                                      &arg);
 }
 void vp9_encode_intra_block_uv(MACROBLOCK *x, BLOCK_SIZE bsize) {
@@ -656,7 +657,7 @@ void vp9_encode_intra_block_uv(MACROBLOCK *x, BLOCK_SIZE bsize) {
   struct optimize_ctx ctx;
   MB_MODE_INFO *mbmi = &xd->mi_8x8[0]->mbmi;
   struct encode_b_args arg = {x, &ctx, &mbmi->skip_coeff};
-  foreach_transformed_block_uv(xd, bsize, vp9_encode_block_intra, &arg);
+  vp9_foreach_transformed_block_uv(xd, bsize, vp9_encode_block_intra, &arg);
 }
 
 int vp9_encode_intra(MACROBLOCK *x, int use_16x16_pred) {

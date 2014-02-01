@@ -505,7 +505,7 @@ void vp9_first_pass(VP9_COMP *cpi) {
   xd->mi_8x8 = cm->mi_grid_visible;
   xd->mi_8x8[0] = cm->mi;  // required for vp9_frame_init_quantizer
 
-  setup_block_dptrs(&x->e_mbd, cm->subsampling_x, cm->subsampling_y);
+  vp9_setup_block_planes(&x->e_mbd, cm->subsampling_x, cm->subsampling_y);
 
   vp9_frame_init_quantizer(cpi);
 

@@ -407,8 +407,8 @@ static void decode_modes_b(VP9_COMMON *const cm, MACROBLOCKD *const xd,
 
   if (!is_inter_block(mbmi)) {
     struct intra_args arg = { cm, xd, r };
-    foreach_transformed_block(xd, bsize, predict_and_reconstruct_intra_block,
-                              &arg);
+    vp9_foreach_transformed_block(xd, bsize,
+                                  predict_and_reconstruct_intra_block, &arg);
   } else {
     // Setup
     set_ref(cm, xd, 0, mi_row, mi_col);
@@ -424,7 +424,7 @@ static void decode_modes_b(VP9_COMMON *const cm, MACROBLOCKD *const xd,
     if (!mbmi->skip_coeff) {
       int eobtotal = 0;
       struct inter_args arg = { cm, xd, r, &eobtotal };
-      foreach_transformed_block(xd, bsize, reconstruct_inter_block, &arg);
+      vp9_foreach_transformed_block(xd, bsize, reconstruct_inter_block, &arg);
       if (!less8x8 && eobtotal == 0)
         mbmi->skip_coeff = 1;  // skip loopfilter
     }
@@ -1371,7 +1371,7 @@ int vp9_decode_frame(VP9D_COMP *pbi, const uint8_t **p_data_end) {
   set_prev_mi(cm);
 
   setup_plane_dequants(cm, xd, cm->base_qindex);
-  setup_block_dptrs(xd, cm->subsampling_x, cm->subsampling_y);
+  vp9_setup_block_planes(xd, cm->subsampling_x, cm->subsampling_y);
 
   cm->fc = cm->frame_contexts[cm->frame_context_idx];
   vp9_zero(cm->counts);

@@ -175,8 +175,8 @@ static void read_intra_frame_mode_info(VP9_COMMON *const cm,
   mbmi->ref_frame[1] = NONE;
 
   if (bsize >= BLOCK_8X8) {
-    const MB_PREDICTION_MODE A = above_block_mode(mi, above_mi, 0);
-    const MB_PREDICTION_MODE L = left_block_mode(mi, left_mi, 0);
+    const MB_PREDICTION_MODE A = vp9_above_block_mode(mi, above_mi, 0);
+    const MB_PREDICTION_MODE L = vp9_left_block_mode(mi, left_mi, 0);
     mbmi->mode = read_intra_mode(r, vp9_kf_y_mode_prob[A][L]);
   } else {
     // Only 4x4, 4x8, 8x4 blocks
@@ -187,8 +187,8 @@ static void read_intra_frame_mode_info(VP9_COMMON *const cm,
     for (idy = 0; idy < 2; idy += num_4x4_h) {
       for (idx = 0; idx < 2; idx += num_4x4_w) {
         const int ib = idy * 2 + idx;
-        const MB_PREDICTION_MODE A = above_block_mode(mi, above_mi, ib);
-        const MB_PREDICTION_MODE L = left_block_mode(mi, left_mi, ib);
+        const MB_PREDICTION_MODE A = vp9_above_block_mode(mi, above_mi, ib);
+        const MB_PREDICTION_MODE L = vp9_left_block_mode(mi, left_mi, ib);
         const MB_PREDICTION_MODE b_mode = read_intra_mode(r,
                                               vp9_kf_y_mode_prob[A][L]);
         mi->bmi[ib].as_mode = b_mode;
