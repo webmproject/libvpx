@@ -2104,7 +2104,7 @@ static void find_next_key_frame(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
       kf_group_intra_err += tmp_frame.intra_error;
       kf_group_coded_err += tmp_frame.coded_error;
 
-      // Load a the next frame's stats
+      // Load the next frame's stats.
       input_stats(twopass, &tmp_frame);
     }
     rc->next_key_frame_forced = 1;
@@ -2232,7 +2232,7 @@ static void find_next_key_frame(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
 
     // We do three calculations for kf size.
     // The first is based on the error score for the whole kf group.
-    // The second (optionaly) on the key frames own error if this is
+    // The second (optionally) on the key frames own error if this is
     // smaller than the average for the group.
     // The final one insures that the frame receives at least the
     // allocation it would have received based on its own error score vs
@@ -2263,8 +2263,8 @@ static void find_next_key_frame(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
         ((double)twopass->kf_group_bits / allocation_chunks));
 
     // If the key frame is actually easier than the average for the
-    // kf group (which does sometimes happen... eg a blank intro frame)
-    // Then use an alternate calculation based on the kf error score
+    // kf group (which does sometimes happen, e.g. a blank intro frame)
+    // then use an alternate calculation based on the kf error score
     // which should give a smaller key frame.
     if (kf_mod_err < kf_group_err / rc->frames_to_key) {
       double  alt_kf_grp_bits = ((double)twopass->bits_left *
