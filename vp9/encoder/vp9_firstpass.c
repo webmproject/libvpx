@@ -2385,22 +2385,23 @@ void vp9_get_first_pass_params(VP9_COMP *cpi) {
 }
 
 void vp9_get_second_pass_params(VP9_COMP *cpi) {
-  int tmp_q;
-  int frames_left = (int)(cpi->twopass.total_stats.count -
-                          cpi->common.current_video_frame);
-
+  VP9_COMMON *const cm = &cpi->common;
+  RATE_CONTROL *const rc = &cpi->rc;
+  struct twopass_rc *const twopass = &cpi->twopass;
+  const int frames_left = (int)(twopass->total_stats.count -
+                              cm->current_video_frame);
   FIRSTPASS_STATS this_frame;
   FIRSTPASS_STATS this_frame_copy;
-  RATE_CONTROL *rc = &cpi->rc;
 
   double this_frame_intra_error;
   double this_frame_coded_error;
 
-  if (!cpi->twopass.stats_in)
+  if (!twopass->stats_in)
     return;
+
   if (cpi->refresh_alt_ref_frame) {
-    cpi->common.frame_type = INTER_FRAME;
-    rc->per_frame_bandwidth = cpi->twopass.gf_bits;
+    cm->frame_type = INTER_FRAME;
+    rc->per_frame_bandwidth = twopass->gf_bits;
     return;
   }
 
@@ -2408,13 +2409,12 @@ void vp9_get_second_pass_params(VP9_COMP *cpi) {
 
   if (cpi->oxcf.end_usage == USAGE_CONSTANT_QUALITY) {
     rc->active_worst_quality = cpi->oxcf.cq_level;
-  } else if (cpi->common.current_video_frame == 0) {
+  } else if (cm->current_video_frame == 0) {
     // Special case code for first frame.
-    int section_target_bandwidth =
-        (int)(cpi->twopass.bits_left / frames_left);
-
-    tmp_q = estimate_max_q(cpi, &cpi->twopass.total_left_stats,
-                           section_target_bandwidth);
+    const int section_target_bandwidth = (int)(twopass->bits_left /
+                                             frames_left);
+    const int tmp_q = estimate_max_q(cpi, &twopass->total_left_stats,
+                                     section_target_bandwidth);
 
     rc->active_worst_quality = tmp_q;
     rc->ni_av_qi = tmp_q;
@@ -2428,7 +2428,7 @@ void vp9_get_second_pass_params(VP9_COMP *cpi) {
     // adjust_maxq_qrange(cpi);
   }
   vp9_zero(this_frame);
-  if (EOF == input_stats(&cpi->twopass, &this_frame))
+  if (EOF == input_stats(twopass, &this_frame))
     return;
 
   this_frame_intra_error = this_frame.intra_error;
@@ -2436,12 +2436,12 @@ void vp9_get_second_pass_params(VP9_COMP *cpi) {
 
   // keyframe and section processing !
   if (rc->frames_to_key == 0 ||
-      (cpi->common.frame_flags & FRAMEFLAGS_KEY)) {
+      (cm->frame_flags & FRAMEFLAGS_KEY)) {
     // Define next KF group and assign bits to it
     this_frame_copy = this_frame;
     find_next_key_frame(cpi, &this_frame_copy);
   } else {
-    cpi->common.frame_type = INTER_FRAME;
+    cm->frame_type = INTER_FRAME;
   }
 
   // Is this a GF / ARF (Note that a KF is always also a GF)
@@ -2459,10 +2459,10 @@ void vp9_get_second_pass_params(VP9_COMP *cpi) {
     }
 #endif
 
-    if (cpi->twopass.gf_zeromotion_pct > 995) {
+    if (twopass->gf_zeromotion_pct > 995) {
       // As long as max_thresh for encode breakout is small enough, it is ok
       // to enable it for no-show frame, i.e. set enable_encode_breakout to 2.
-      if (!cpi->common.show_frame)
+      if (!cm->show_frame)
         cpi->enable_encode_breakout = 0;
       else
         cpi->enable_encode_breakout = 2;
@@ -2478,13 +2478,13 @@ void vp9_get_second_pass_params(VP9_COMP *cpi) {
   }
 
   // Keep a globally available copy of this and the next frame's iiratio.
-  cpi->twopass.this_iiratio = (int)(this_frame_intra_error /
+  twopass->this_iiratio = (int)(this_frame_intra_error /
                               DOUBLE_DIVIDE_CHECK(this_frame_coded_error));
   {
     FIRSTPASS_STATS next_frame;
-    if (lookup_next_frame_stats(&cpi->twopass, &next_frame) != EOF) {
-      cpi->twopass.next_iiratio = (int)(next_frame.intra_error /
-                                  DOUBLE_DIVIDE_CHECK(next_frame.coded_error));
+    if (lookup_next_frame_stats(twopass, &next_frame) != EOF) {
+      twopass->next_iiratio = (int)(next_frame.intra_error /
+                                 DOUBLE_DIVIDE_CHECK(next_frame.coded_error));
     }
   }
 
@@ -2495,7 +2495,7 @@ void vp9_get_second_pass_params(VP9_COMP *cpi) {
     cpi->target_bandwidth = 0;
 
   // Update the total stats remaining structure
-  subtract_stats(&cpi->twopass.total_left_stats, &this_frame);
+  subtract_stats(&twopass->total_left_stats, &this_frame);
 }
 
 void vp9_twopass_postencode_update(VP9_COMP *cpi, uint64_t bytes_used) {
