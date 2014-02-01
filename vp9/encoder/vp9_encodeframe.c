@@ -2142,7 +2142,7 @@ static void init_encode_frame_mb_context(VP9_COMP *cpi) {
   setup_pre_planes(xd, 0, get_ref_frame_buffer(cpi, LAST_FRAME), 0, 0, NULL);
   setup_dst_planes(xd, get_frame_new_buffer(cm), 0, 0);
 
-  setup_block_dptrs(&x->e_mbd, cm->subsampling_x, cm->subsampling_y);
+  vp9_setup_block_planes(&x->e_mbd, cm->subsampling_x, cm->subsampling_y);
 
   xd->mi_8x8[0]->mbmi.mode = DC_PRED;
   xd->mi_8x8[0]->mbmi.uv_mode = DC_PRED;

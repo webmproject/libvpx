@@ -204,7 +204,7 @@ int vp9_decode_block_tokens(VP9_COMMON *cm, MACROBLOCKD *xd,
   const int eob = decode_coefs(cm, xd, pd->plane_type,
                                BLOCK_OFFSET(pd->dqcoeff, block), tx_size,
                                pd->dequant, ctx, so->scan, so->neighbors, r);
-  set_contexts(xd, pd, plane_bsize, tx_size, eob > 0, x, y);
+  vp9_set_contexts(xd, pd, plane_bsize, tx_size, eob > 0, x, y);
   return eob;
 }
 

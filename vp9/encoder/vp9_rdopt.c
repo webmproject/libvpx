@@ -742,8 +742,8 @@ static void txfm_rd_in_plane(MACROBLOCK *x,
   rd_stack.scan = so->scan;
   rd_stack.nb = so->neighbors;
 
-  foreach_transformed_block_in_plane(xd, bsize, plane,
-                                     block_rd_txfm, &rd_stack);
+  vp9_foreach_transformed_block_in_plane(xd, bsize, plane,
+                                         block_rd_txfm, &rd_stack);
   if (rd_stack.skip) {
     *rate       = INT_MAX;
     *distortion = INT64_MAX;
@@ -1150,8 +1150,8 @@ static int64_t rd_pick_intra_sub_8x8_y_mode(VP9_COMP * const cpi,
       int64_t d = INT64_MAX, this_rd = INT64_MAX;
       i = idy * 2 + idx;
       if (cpi->common.frame_type == KEY_FRAME) {
-        const MB_PREDICTION_MODE A = above_block_mode(mic, above_mi, i);
-        const MB_PREDICTION_MODE L = left_block_mode(mic, left_mi, i);
+        const MB_PREDICTION_MODE A = vp9_above_block_mode(mic, above_mi, i);
+        const MB_PREDICTION_MODE L = vp9_left_block_mode(mic, left_mi, i);
 
         bmode_costs  = mb->y_mode_costs[A][L];
       }
@@ -1216,8 +1216,8 @@ static int64_t rd_pick_intra_sby_mode(VP9_COMP *cpi, MACROBLOCK *x,
       continue;
 
     if (cpi->common.frame_type == KEY_FRAME) {
-      const MB_PREDICTION_MODE A = above_block_mode(mic, above_mi, 0);
-      const MB_PREDICTION_MODE L = left_block_mode(mic, left_mi, 0);
+      const MB_PREDICTION_MODE A = vp9_above_block_mode(mic, above_mi, 0);
+      const MB_PREDICTION_MODE L = vp9_left_block_mode(mic, left_mi, 0);
 
       bmode_costs = x->y_mode_costs[A][L];
     }
