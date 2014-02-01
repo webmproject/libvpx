@@ -146,7 +146,7 @@ TEST_P(ResizeTest, TestExternalResizeWorks) {
   ResizingVideoSource video;
   ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
 
-  for (std::vector<FrameInfo>::iterator info = frame_info_list_.begin();
+  for (std::vector<FrameInfo>::const_iterator info = frame_info_list_.begin();
        info != frame_info_list_.end(); ++info) {
     const unsigned int frame = static_cast<unsigned>(info->pts);
     const unsigned int expected_w = ScaleForFrameNumber(frame, kInitialWidth);
@@ -247,7 +247,7 @@ TEST_P(ResizeInternalTest, TestInternalResizeWorks) {
   cfg_.g_lag_in_frames = 0;
   ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
 
-  for (std::vector<FrameInfo>::iterator info = frame_info_list_.begin();
+  for (std::vector<FrameInfo>::const_iterator info = frame_info_list_.begin();
        info != frame_info_list_.end(); ++info) {
     const vpx_codec_pts_t pts = info->pts;
     if (pts >= kStepDownFrame && pts < kStepUpFrame) {
