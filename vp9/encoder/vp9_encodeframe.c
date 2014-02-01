@@ -2538,7 +2538,7 @@ static void rtc_use_partition(VP9_COMP *cpi,
 
         vp9_pick_inter_mode(cpi, x, tile,
                             mi_row + block_row, mi_col + block_col,
-                            &rate, &dist, cpi->sf.always_this_block_size);
+                            &rate, &dist, bsize);
       } else {
         set_mode_info(&mi_8x8[index]->mbmi, bsize, mode,
                       mi_row + block_row, mi_col + block_col);
