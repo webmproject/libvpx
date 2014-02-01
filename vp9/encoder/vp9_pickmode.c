@@ -219,7 +219,8 @@ int64_t vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
         mbmi->ref_frame[0] = ref_frame;
         mbmi->mv[0].as_int = frame_mv[this_mode][ref_frame].as_int;
         xd->mi_8x8[0]->bmi[0].as_mv[0].as_int = mbmi->mv[0].as_int;
-        mbmi->interp_filter = EIGHTTAP;
+        mbmi->interp_filter = cpi->common.interp_filter == SWITCHABLE ?
+            EIGHTTAP : cpi->common.interp_filter;
 
         mbmi->ref_frame[1] = INTRA_FRAME;
         mbmi->tx_size = max_txsize_lookup[bsize];
