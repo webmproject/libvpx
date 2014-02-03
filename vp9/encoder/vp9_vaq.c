@@ -19,8 +19,8 @@
 #include "vp9/encoder/vp9_segmentation.h"
 #include "vp9/common/vp9_systemdependent.h"
 
-#define ENERGY_MIN (-3)
-#define ENERGY_MAX (3)
+#define ENERGY_MIN (-1)
+#define ENERGY_MAX (1)
 #define ENERGY_SPAN (ENERGY_MAX - ENERGY_MIN +  1)
 #define ENERGY_IN_BOUNDS(energy)\
   assert((energy) >= ENERGY_MIN && (energy) <= ENERGY_MAX)
@@ -65,7 +65,7 @@ void vp9_vaq_init() {
 
   vp9_clear_system_state();  // __asm emms;
 
-  base_ratio = 1.8;
+  base_ratio = 1.5;
 
   for (i = ENERGY_MIN; i <= ENERGY_MAX; i++) {
     Q_RATIO(i) = pow(base_ratio, i/3.0);
@@ -80,30 +80,34 @@ void vp9_vaq_frame_setup(VP9_COMP *cpi) {
                                         cm->y_dc_delta_q);
   int i;
 
-  vp9_enable_segmentation((VP9_PTR)cpi);
-  vp9_clearall_segfeatures(seg);
+  if (cm->frame_type == KEY_FRAME ||
+      cpi->refresh_alt_ref_frame ||
+      (cpi->refresh_golden_frame && !cpi->rc.is_src_frame_alt_ref)) {
+    vp9_enable_segmentation((VP9_PTR)cpi);
+    vp9_clearall_segfeatures(seg);
 
-  seg->abs_delta = SEGMENT_DELTADATA;
+    seg->abs_delta = SEGMENT_DELTADATA;
 
-  vp9_clear_system_state();  // __asm emms;
+    vp9_clear_system_state();  // __asm emms;
 
-  for (i = ENERGY_MIN; i <= ENERGY_MAX; i++) {
-    int qindex_delta, segment_rdmult;
+    for (i = ENERGY_MIN; i <= ENERGY_MAX; i++) {
+      int qindex_delta, segment_rdmult;
 
-    if (Q_RATIO(i) == 1) {
-      // No need to enable SEG_LVL_ALT_Q for this segment
-      RDMULT_RATIO(i) = 1;
-      continue;
+      if (Q_RATIO(i) == 1) {
+        // No need to enable SEG_LVL_ALT_Q for this segment
+        RDMULT_RATIO(i) = 1;
+        continue;
+      }
+
+      qindex_delta = vp9_compute_qdelta(cpi, base_q, base_q * Q_RATIO(i));
+      vp9_set_segdata(seg, SEGMENT_ID(i), SEG_LVL_ALT_Q, qindex_delta);
+      vp9_enable_segfeature(seg, SEGMENT_ID(i), SEG_LVL_ALT_Q);
+
+      segment_rdmult = vp9_compute_rd_mult(cpi, cm->base_qindex + qindex_delta +
+                                           cm->y_dc_delta_q);
+
+      RDMULT_RATIO(i) = (double) segment_rdmult / base_rdmult;
     }
-
-    qindex_delta = vp9_compute_qdelta(cpi, base_q, base_q * Q_RATIO(i));
-    vp9_set_segdata(seg, SEGMENT_ID(i), SEG_LVL_ALT_Q, qindex_delta);
-    vp9_enable_segfeature(seg, SEGMENT_ID(i), SEG_LVL_ALT_Q);
-
-    segment_rdmult = vp9_compute_rd_mult(cpi, cm->base_qindex + qindex_delta +
-                                         cm->y_dc_delta_q);
-
-    RDMULT_RATIO(i) = (double) segment_rdmult / base_rdmult;
   }
 }
 

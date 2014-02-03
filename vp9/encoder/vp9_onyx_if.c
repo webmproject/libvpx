@@ -96,7 +96,7 @@ FILE *keyfile;
 void vp9_init_quantizer(VP9_COMP *cpi);
 
 static const double in_frame_q_adj_ratio[MAX_SEGMENTS] =
-  {1.0, 1.5, 2.0, 1.0, 1.0, 1.0, 1.0, 1.0};
+  {1.0, 2.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0};
 
 static INLINE void Scale2Ratio(int mode, int *hr, int *hs) {
   switch (mode) {
@@ -267,7 +267,6 @@ static void setup_in_frame_q_adj(VP9_COMP *cpi) {
     // Clear down the complexity map used for rd
     vpx_memset(cpi->complexity_map, 0, cm->mi_rows * cm->mi_cols);
 
-    // Enable segmentation
     vp9_enable_segmentation((VP9_PTR)cpi);
     vp9_clearall_segfeatures(seg);
 
@@ -278,7 +277,7 @@ static void setup_in_frame_q_adj(VP9_COMP *cpi) {
     vp9_disable_segfeature(seg, 0, SEG_LVL_ALT_Q);
 
     // Use some of the segments for in frame Q adjustment
-    for (segment = 1; segment < 3; segment++) {
+    for (segment = 1; segment < 2; segment++) {
       qindex_delta =
         vp9_compute_qdelta_by_rate(cpi, cm->base_qindex,
                                    in_frame_q_adj_ratio[segment]);
@@ -3553,8 +3552,9 @@ int vp9_get_compressed_data(VP9_PTR ptr, unsigned int *frame_flags,
   xd->interp_kernel = vp9_get_interp_kernel(
       DEFAULT_INTERP_FILTER == SWITCHABLE ? EIGHTTAP : DEFAULT_INTERP_FILTER);
 
-  if (cpi->oxcf.aq_mode == VARIANCE_AQ)
+  if (cpi->oxcf.aq_mode == VARIANCE_AQ) {
     vp9_vaq_init();
+  }
 
   if (cpi->use_svc) {
     SvcEncode(cpi, size, dest, frame_flags);
