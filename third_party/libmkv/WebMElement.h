@@ -12,19 +12,21 @@
 
 // these are helper functions
 void writeHeader(EbmlGlobal *ebml);
-void writeSegmentInformation(EbmlGlobal *ebml, EbmlLoc *startInfo, unsigned long timeCodeScale, double duration);
+void writeSegmentInformation(EbmlGlobal *ebml, EbmlLoc *startInfo,
+                             unsigned long timeCodeScale, double duration);
 // this function is a helper only, it assumes a lot of defaults
-void writeVideoTrack(EbmlGlobal *ebml, unsigned int trackNumber, int flagLacing,
-                     char *codecId, unsigned int pixelWidth, unsigned int pixelHeight,
+void writeVideoTrack(EbmlGlobal *ebml, unsigned int trackNumber,
+                     int flagLacing, const char *codecId,
+                     unsigned int pixelWidth, unsigned int pixelHeight,
                      double frameRate);
-void writeAudioTrack(EbmlGlobal *glob, unsigned int trackNumber, int flagLacing,
-                     char *codecId, double samplingFrequency, unsigned int channels,
+void writeAudioTrack(EbmlGlobal *glob, unsigned int trackNumber,
+                     int flagLacing, const char *codecId,
+                     double samplingFrequency, unsigned int channels,
                      unsigned char *private, unsigned long privateSize);
 
-void writeSimpleBlock(EbmlGlobal *ebml, unsigned char trackNumber, short timeCode,
-                      int isKeyframe, unsigned char lacingFlag, int discardable,
+void writeSimpleBlock(EbmlGlobal *ebml, unsigned char trackNumber,
+                      short timeCode, int isKeyframe,
+                      unsigned char lacingFlag, int discardable,
                       unsigned char *data, unsigned long dataLength);
-
-
 
 #endif

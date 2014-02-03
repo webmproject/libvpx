@@ -52,8 +52,9 @@ static UInt64 generateTrackID(unsigned int trackNumber) {
   return rval;
 }
 
-void writeVideoTrack(EbmlGlobal *glob, unsigned int trackNumber, int flagLacing,
-                     char *codecId, unsigned int pixelWidth, unsigned int pixelHeight,
+void writeVideoTrack(EbmlGlobal *glob, unsigned int trackNumber,
+                     int flagLacing, const char *codecId,
+                     unsigned int pixelWidth, unsigned int pixelHeight,
                      double frameRate) {
   EbmlLoc start;
   Ebml_StartSubElement(glob, &start, TrackEntry);
@@ -74,8 +75,9 @@ void writeVideoTrack(EbmlGlobal *glob, unsigned int trackNumber, int flagLacing,
   }
   Ebml_EndSubElement(glob, &start); // Track Entry
 }
-void writeAudioTrack(EbmlGlobal *glob, unsigned int trackNumber, int flagLacing,
-                     char *codecId, double samplingFrequency, unsigned int channels,
+void writeAudioTrack(EbmlGlobal *glob, unsigned int trackNumber,
+                     int flagLacing, const char *codecId,
+                     double samplingFrequency, unsigned int channels,
                      unsigned char *private, unsigned long privateSize) {
   EbmlLoc start;
   Ebml_StartSubElement(glob, &start, TrackEntry);
