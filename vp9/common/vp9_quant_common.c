@@ -130,7 +130,8 @@ int16_t vp9_ac_quant(int qindex, int delta) {
 }
 
 
-int vp9_get_qindex(struct segmentation *seg, int segment_id, int base_qindex) {
+int vp9_get_qindex(const struct segmentation *seg, int segment_id,
+                   int base_qindex) {
   if (vp9_segfeature_active(seg, segment_id, SEG_LVL_ALT_Q)) {
     const int data = vp9_get_segdata(seg, segment_id, SEG_LVL_ALT_Q);
     return seg->abs_delta == SEGMENT_ABSDATA ?
