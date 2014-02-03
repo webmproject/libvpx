@@ -18,6 +18,7 @@
 #include "./vpx_config.h"
 #include "vpx_mem/vpx_mem.h"
 #include "vpx/vpx_integer.h"
+#include "vp9/common/vp9_systemdependent.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -59,16 +60,8 @@ static INLINE double fclamp(double value, double low, double high) {
   return value < low ? low : (value > high ? high : value);
 }
 
-static int get_unsigned_bits(unsigned int num_values) {
-  int cat = 0;
-  if (num_values <= 1)
-    return 0;
-  num_values--;
-  while (num_values > 0) {
-    cat++;
-    num_values >>= 1;
-  }
-  return cat;
+static INLINE int get_unsigned_bits(unsigned int num_values) {
+  return num_values > 0 ? get_msb(num_values) + 1 : 0;
 }
 
 #if CONFIG_DEBUG
