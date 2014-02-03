@@ -48,7 +48,7 @@ int vp9_full_pixel_diamond(struct VP9_COMP *cpi, MACROBLOCK *x,
                            vp9_variance_fn_ptr_t *fn_ptr,
                            const MV *ref_mv, int_mv *dst_mv);
 
-int vp9_hex_search(MACROBLOCK *x,
+int vp9_hex_search(const MACROBLOCK *x,
                    MV *ref_mv,
                    int search_param,
                    int error_per_bit,
@@ -57,7 +57,7 @@ int vp9_hex_search(MACROBLOCK *x,
                    int use_mvcost,
                    const MV *center_mv,
                    MV *best_mv);
-int vp9_bigdia_search(MACROBLOCK *x,
+int vp9_bigdia_search(const MACROBLOCK *x,
                       MV *ref_mv,
                       int search_param,
                       int error_per_bit,
@@ -66,7 +66,7 @@ int vp9_bigdia_search(MACROBLOCK *x,
                       int use_mvcost,
                       const MV *center_mv,
                       MV *best_mv);
-int vp9_square_search(MACROBLOCK *x,
+int vp9_square_search(const MACROBLOCK *x,
                       MV *ref_mv,
                       int search_param,
                       int error_per_bit,
@@ -77,7 +77,7 @@ int vp9_square_search(MACROBLOCK *x,
                       MV *best_mv);
 
 typedef int (fractional_mv_step_fp) (
-    MACROBLOCK *x,
+    const MACROBLOCK *x,
     MV *bestmv, const MV *ref_mv,
     int allow_hp,
     int error_per_bit,
@@ -92,7 +92,7 @@ typedef int (fractional_mv_step_fp) (
 extern fractional_mv_step_fp vp9_find_best_sub_pixel_tree;
 
 typedef int (fractional_mv_step_comp_fp) (
-    MACROBLOCK *x,
+    const MACROBLOCK *x,
     MV *bestmv, const MV *ref_mv,
     int allow_hp,
     int error_per_bit,
