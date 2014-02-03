@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//5ks\u003d",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-02-03T22:55:56Z",
+      "side": 1,
+      "message": "sounds like the fix is what is bad...",
+      "revId": "a155213126084be14846ded5e95df7bdc4b3dc04",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//5kw\u003d",
+        "filename": "tools/diff.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-02-03T22:55:56Z",
+      "side": 1,
+      "message": "this will affect the style warning output I think. you probably just want \u0027pass\u0027 with a comment",
+      "revId": "a155213126084be14846ded5e95df7bdc4b3dc04",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
