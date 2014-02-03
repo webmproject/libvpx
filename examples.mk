@@ -64,11 +64,6 @@ vp9_spatial_scalable_encoder.SRCS += ivfenc.c ivfenc.h
 vp9_spatial_scalable_encoder.SRCS += tools_common.c tools_common.h
 vp9_spatial_scalable_encoder.GUID   = 4A38598D-627D-4505-9C7B-D4020C84100D
 vp9_spatial_scalable_encoder.DESCRIPTION = Spatial Scalable Encoder
-UTILS-$(CONFIG_ENCODERS)    += vpx_temporal_scalable_patterns.c
-vpx_temporal_scalable_patterns.SRCS += ivfenc.c ivfenc.h
-vpx_temporal_scalable_patterns.SRCS += tools_common.c tools_common.h
-vpx_temporal_scalable_patterns.GUID   = B18C08F2-A439-4502-A78E-849BE3D60947
-vpx_temporal_scalable_patterns.DESCRIPTION = Temporal Scalability Encoder
 
 ifeq ($(CONFIG_SHARED),no)
 UTILS-$(CONFIG_VP9_ENCODER)    += resize_util.c

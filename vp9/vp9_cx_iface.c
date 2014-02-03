@@ -175,23 +175,6 @@ static vpx_codec_err_t validate_config(vpx_codec_alg_priv_t      *ctx,
 
   RANGE_CHECK(cfg, ss_number_layers,      1,
               VPX_SS_MAX_LAYERS); /*Spatial layers max */
-
-  RANGE_CHECK(cfg, ts_number_layers, 1, VPX_TS_MAX_LAYERS);
-  if (cfg->ts_number_layers > 1) {
-    unsigned int i;
-    for (i = 1; i <cfg->ts_number_layers; i++) {
-      if (cfg->ts_target_bitrate[i] < cfg->ts_target_bitrate[i-1]) {
-        ERROR("ts_target_bitrate entries are not increasing");
-      }
-    }
-    RANGE_CHECK(cfg, ts_rate_decimator[cfg->ts_number_layers-1], 1, 1);
-    for (i = cfg->ts_number_layers-2; i > 0; i--) {
-      if (cfg->ts_rate_decimator[i-1] != 2*cfg->ts_rate_decimator[i]) {
-        ERROR("ts_rate_decimator factors are not powers of 2");
-      }
-    }
-  }
-
   /* VP8 does not support a lower bound on the keyframe interval in
    * automatic keyframe placement mode.
    */
@@ -362,19 +345,6 @@ static vpx_codec_err_t set_vp9e_config(VP9_CONFIG *oxcf,
   oxcf->aq_mode = vp8_cfg.aq_mode;
 
   oxcf->ss_number_layers = cfg.ss_number_layers;
-
-  oxcf->ts_number_layers = cfg.ts_number_layers;
-
-  if (oxcf->ts_number_layers > 1) {
-    memcpy(oxcf->ts_target_bitrate, cfg.ts_target_bitrate,
-           sizeof(cfg.ts_target_bitrate));
-    memcpy(oxcf->ts_rate_decimator, cfg.ts_rate_decimator,
-           sizeof(cfg.ts_rate_decimator));
-  } else if (oxcf->ts_number_layers == 1) {
-    oxcf->ts_target_bitrate[0] = oxcf->target_bandwidth;
-    oxcf->ts_rate_decimator[0] = 1;
-  }
-
   /*
   printf("Current VP9 Settings: \n");
   printf("target_bandwidth: %d\n", oxcf->target_bandwidth);
@@ -1046,32 +1016,6 @@ static vpx_codec_err_t vp9e_set_svc(vpx_codec_alg_priv_t *ctx, int ctr_id,
                                     va_list args) {
   int data = va_arg(args, int);
   vp9_set_svc(ctx->cpi, data);
-  // CBR mode for SVC with both temporal and spatial layers not yet supported.
-  if (data == 1 &&
-      ctx->cfg.rc_end_usage == VPX_CBR &&
-      ctx->cfg.ss_number_layers > 1 &&
-      ctx->cfg.ts_number_layers > 1) {
-    return VPX_CODEC_INVALID_PARAM;
-  }
-  return VPX_CODEC_OK;
-}
-
-static vpx_codec_err_t vp9e_set_svc_layer_id(vpx_codec_alg_priv_t *ctx,
-                                             int ctr_id,
-                                             va_list args) {
-  vpx_svc_layer_id_t *data = va_arg(args, vpx_svc_layer_id_t *);
-  VP9_COMP *cpi = (VP9_COMP *)ctx->cpi;
-  cpi->svc.spatial_layer_id = data->spatial_layer_id;
-  cpi->svc.temporal_layer_id = data->temporal_layer_id;
-  // Checks on valid layer_id input.
-  if (cpi->svc.temporal_layer_id < 0 ||
-      cpi->svc.temporal_layer_id >= ctx->cfg.ts_number_layers) {
-    return VPX_CODEC_INVALID_PARAM;
-  }
-  if (cpi->svc.spatial_layer_id < 0 ||
-      cpi->svc.spatial_layer_id >= ctx->cfg.ss_number_layers) {
-    return VPX_CODEC_INVALID_PARAM;
-  }
   return VPX_CODEC_OK;
 }
 
@@ -1087,9 +1031,7 @@ static vpx_codec_err_t vp9e_set_svc_parameters(vpx_codec_alg_priv_t *ctx,
 
   params = *(vpx_svc_parameters_t *)data;
 
-  cpi->svc.spatial_layer_id = params.spatial_layer;
-  cpi->svc.temporal_layer_id = params.temporal_layer;
-
+  cpi->current_layer = params.layer;
   cpi->lst_fb_idx = params.lst_fb_idx;
   cpi->gld_fb_idx = params.gld_fb_idx;
   cpi->alt_fb_idx = params.alt_fb_idx;
@@ -1138,7 +1080,6 @@ static vpx_codec_ctrl_fn_map_t vp9e_ctf_maps[] = {
   {VP9_GET_REFERENCE,                 get_reference},
   {VP9E_SET_SVC,                      vp9e_set_svc},
   {VP9E_SET_SVC_PARAMETERS,           vp9e_set_svc_parameters},
-  {VP9E_SET_SVC_LAYER_ID,             vp9e_set_svc_layer_id},
   { -1, NULL},
 };
 
@@ -1189,11 +1130,7 @@ static vpx_codec_enc_cfg_map_t vp9e_usage_cfg_map[] = {
       9999,               /* kf_max_dist */
 
       VPX_SS_DEFAULT_LAYERS, /* ss_number_layers */
-      1,                  /* ts_number_layers */
-      {0},                /* ts_target_bitrate */
-      {0},                /* ts_rate_decimator */
-      0,                  /* ts_periodicity */
-      {0},                /* ts_layer_id */
+
 #if VPX_ENCODER_ABI_VERSION == (1 + VPX_CODEC_ABI_VERSION)
       1,                  /* g_delete_first_pass_file */
       "vp8.fpf"           /* first pass filename */
