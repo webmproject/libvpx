@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//5kI\u003d",
+        "filename": "vp9/encoder/vp9_firstpass.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 2430,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2014-02-03T23:17:59Z",
+      "side": 1,
+      "message": "Need to add the bound on target size:\n(though wil duplicate code from calc_iframe_target_size)\n\nif (oxcf-\u003erc_max_intra_bitrate_pct) {\n    .\n    .\n    .\n}",
+      "revId": "545cecc7ed5545c8474edf26e73a17b0118dacd5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//5kQ\u003d",
+        "filename": "vp9/encoder/vp9_firstpass.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 2446,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2014-02-03T23:17:59Z",
+      "side": 1,
+      "message": "cpi-\u003ethis_frame_target \u003d calc_iframe_target_size_one_pass_cbr(cpi);",
+      "revId": "545cecc7ed5545c8474edf26e73a17b0118dacd5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//5kM\u003d",
+        "filename": "vp9/encoder/vp9_firstpass.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 2450,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2014-02-03T23:17:59Z",
+      "side": 1,
+      "message": "cpi-\u003ethis_frame_target \u003d calc_pframe_target_size_one_pass_cbr(cpi);",
+      "revId": "545cecc7ed5545c8474edf26e73a17b0118dacd5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
