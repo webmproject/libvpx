@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//5jw\u003d",
+        "filename": "vp9/encoder/vp9_firstpass.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 2430,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2014-02-03T23:34:46Z",
+      "side": 1,
+      "message": "bound is enforced in the corresponding function in the actual encode step.",
+      "parentUuid": "AAAAdn//5kI\u003d",
+      "revId": "545cecc7ed5545c8474edf26e73a17b0118dacd5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//5kQ\u003d",
         "filename": "vp9/encoder/vp9_firstpass.c",
         "patchSetId": 6
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//5js\u003d",
+        "filename": "vp9/encoder/vp9_firstpass.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 2446,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2014-02-03T23:34:46Z",
+      "side": 1,
+      "message": "currently the vp9_get_*_params() functions set per_frame_bandwidth. This frame target is derived from that in the actual encode function. Eventually we should merge these two variables. But until then, we should only set per_frame_bandwidth here.",
+      "parentUuid": "AAAAdn//5kQ\u003d",
+      "revId": "545cecc7ed5545c8474edf26e73a17b0118dacd5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//5kM\u003d",
         "filename": "vp9/encoder/vp9_firstpass.c",
         "patchSetId": 6
@@ -47,6 +83,24 @@
       "writtenOn": "2014-02-03T23:17:59Z",
       "side": 1,
       "message": "cpi-\u003ethis_frame_target \u003d calc_pframe_target_size_one_pass_cbr(cpi);",
+      "revId": "545cecc7ed5545c8474edf26e73a17b0118dacd5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//5jo\u003d",
+        "filename": "vp9/encoder/vp9_firstpass.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 2450,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2014-02-03T23:34:46Z",
+      "side": 1,
+      "message": "ditto",
+      "parentUuid": "AAAAdn//5kM\u003d",
       "revId": "545cecc7ed5545c8474edf26e73a17b0118dacd5",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
