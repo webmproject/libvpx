@@ -421,15 +421,6 @@ typedef struct {
   int super_fast_rtc;
 } SPEED_FEATURES;
 
-typedef struct {
-  RATE_CONTROL rc;
-  int target_bandwidth;
-  int64_t starting_buffer_level;
-  int64_t optimal_buffer_level;
-  int64_t maximum_buffer_size;
-  double framerate;
-} LAYER_CONTEXT;
-
 typedef struct VP9_COMP {
   DECLARE_ALIGNED(16, int16_t, y_quant[QINDEX_RANGE][8]);
   DECLARE_ALIGNED(16, int16_t, y_quant_shift[QINDEX_RANGE][8]);
@@ -473,6 +464,9 @@ typedef struct VP9_COMP {
   int lst_fb_idx;
   int gld_fb_idx;
   int alt_fb_idx;
+
+  int current_layer;
+  int use_svc;
 
 #if CONFIG_MULTIPLE_ARF
   int alt_ref_fb_idx[REF_FRAMES - 3];
@@ -690,18 +684,7 @@ typedef struct VP9_COMP {
   int initial_width;
   int initial_height;
 
-  int use_svc;
-
-  struct svc {
-    int spatial_layer_id;
-    int temporal_layer_id;
-    int number_spatial_layers;
-    int number_temporal_layers;
-    // Layer context used for rate control in CBR mode, only defined for
-    // temporal layers for now.
-    LAYER_CONTEXT layer_context[VPX_TS_MAX_LAYERS];
-  } svc;
-
+  int number_spatial_layers;
   int enable_encode_breakout;   // Default value is 1. From first pass stats,
                                 // encode_breakout may be disabled.
 
