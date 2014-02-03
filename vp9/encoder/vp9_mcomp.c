@@ -466,7 +466,6 @@ int vp9_find_best_sub_pixel_comp_tree(const MACROBLOCK *x,
 #undef PRE
 #undef DIST
 #undef CHECK_BETTER
-#undef SP
 
 static INLINE int check_bounds(const MACROBLOCK *x, int row, int col,
                                int range) {
@@ -495,11 +494,6 @@ static INLINE int check_point(const MACROBLOCK *x, const MV *mv) {
       }\
     }\
   }
-
-#define get_next_chkpts(list, i, n)   \
-    list[0] = ((i) == 0 ? (n) - 1 : (i) - 1);  \
-    list[1] = (i);                             \
-    list[2] = ((i) == (n) - 1 ? 0 : (i) + 1);
 
 #define MAX_PATTERN_SCALES         11
 #define MAX_PATTERN_CANDIDATES      8  // max number of canddiates per scale
@@ -644,7 +638,10 @@ static int vp9_pattern_search(const MACROBLOCK *x,
       do {
         int next_chkpts_indices[PATTERN_CANDIDATES_REF];
         best_site = -1;
-        get_next_chkpts(next_chkpts_indices, k, num_candidates[s]);
+        next_chkpts_indices[0] = (k == 0) ? num_candidates[s] - 1 : k - 1;
+        next_chkpts_indices[1] = k;
+        next_chkpts_indices[2] = (k == num_candidates[s] - 1) ? 0 : k + 1;
+
         if (check_bounds(x, br, bc, 1 << s)) {
           for (i = 0; i < PATTERN_CANDIDATES_REF; i++) {
             this_mv.row = br + candidates[s][next_chkpts_indices[i]].row;
