@@ -666,7 +666,11 @@ int parse_coff(uint8_t *buf, size_t sz) {
     }
     strcpy(sectionlist[i], sectionname);
 
-    if (!strcmp(sectionname, ".rdata")) sectionrawdata_ptr = get_le32(ptr + 20);
+    // check if it's .rdata and is not a COMDAT section.
+    if (!strcmp(sectionname, ".rdata") &&
+        (get_le32(ptr + 36) & 0x1000) == 0) {
+      sectionrawdata_ptr = get_le32(ptr + 20);
+    }
 
     ptr += 40;
   }
