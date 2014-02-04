@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//5XQ\u003d",
+        "filename": "examples/vpx_temporal_scalable_patterns.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 378,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2014-02-04T23:02:47Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//5Z8\u003d",
+      "revId": "94fe6e75438c5461f6adf19a9e9160860f2bb428",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//5Z4\u003d",
         "filename": "examples/vpx_temporal_scalable_patterns.c",
         "patchSetId": 3
@@ -30,6 +48,24 @@
       "writtenOn": "2014-02-04T20:23:59Z",
       "side": 1,
       "message": "This is now not guaranteed to be correct. Why not put the codec after \u003coutfile\u003e and up this to \"9 + ...\". You\u0027ll also have to modify the indices above \u0026 below slightly.",
+      "revId": "94fe6e75438c5461f6adf19a9e9160860f2bb428",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//5XE\u003d",
+        "filename": "examples/vpx_temporal_scalable_patterns.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 387,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2014-02-04T23:02:47Z",
+      "side": 1,
+      "message": "Done. Put the codec_type after \u003coutfile\u003e, but note that argc is still equal to  \"8 + mode_to_num_layers[0] + 1\"",
+      "parentUuid": "AAAAdn//5Z4\u003d",
       "revId": "94fe6e75438c5461f6adf19a9e9160860f2bb428",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//5Xw\u003d",
+        "filename": "test/datarate_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 221,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2014-02-04T23:02:47Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//5Z0\u003d",
+      "revId": "94fe6e75438c5461f6adf19a9e9160860f2bb428",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//5Zw\u003d",
         "filename": "test/datarate_test.cc",
         "patchSetId": 3
@@ -64,6 +118,24 @@
       "writtenOn": "2014-02-04T20:23:59Z",
       "side": 1,
       "message": "++layer",
+      "revId": "94fe6e75438c5461f6adf19a9e9160860f2bb428",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//5Xs\u003d",
+        "filename": "test/datarate_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 334,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2014-02-04T23:02:47Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//5Zw\u003d",
       "revId": "94fe6e75438c5461f6adf19a9e9160860f2bb428",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//5Xo\u003d",
+        "filename": "vp9/vp9_cx_iface.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 182,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2014-02-04T23:02:47Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//5Zo\u003d",
+      "revId": "94fe6e75438c5461f6adf19a9e9160860f2bb428",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//5Zk\u003d",
         "filename": "vp9/vp9_cx_iface.c",
         "patchSetId": 3
@@ -98,6 +188,24 @@
       "writtenOn": "2014-02-04T20:23:59Z",
       "side": 1,
       "message": "--i",
+      "revId": "94fe6e75438c5461f6adf19a9e9160860f2bb428",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//5Xk\u003d",
+        "filename": "vp9/vp9_cx_iface.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 188,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2014-02-04T23:02:47Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//5Zk\u003d",
       "revId": "94fe6e75438c5461f6adf19a9e9160860f2bb428",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -121,6 +229,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//5Xc\u003d",
+        "filename": "vpx/vpx_encoder.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 634,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2014-02-04T23:02:47Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//5Zg\u003d",
+      "revId": "94fe6e75438c5461f6adf19a9e9160860f2bb428",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//5Zc\u003d",
         "filename": "vpx/vpx_encoder.h",
         "patchSetId": 3
@@ -132,6 +258,24 @@
       "writtenOn": "2014-02-04T20:23:59Z",
       "side": 1,
       "message": "Asterisks mis-aligned in this block.",
+      "revId": "94fe6e75438c5461f6adf19a9e9160860f2bb428",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//5XY\u003d",
+        "filename": "vpx/vpx_encoder.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 643,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2014-02-04T23:02:47Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//5Zc\u003d",
       "revId": "94fe6e75438c5461f6adf19a9e9160860f2bb428",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
