@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//5Wc\u003d",
+        "filename": "tools/diff.py",
+        "patchSetId": 3
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-02-04T23:13:16Z",
+      "side": 1,
+      "message": "\u0027#\u0027 is OK rather than the docstring \"\"\" used to describe the function",
+      "revId": "c566fcd576a9c275362acc26d8c93feed1280522",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
