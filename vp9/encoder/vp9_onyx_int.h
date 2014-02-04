@@ -36,7 +36,6 @@
 extern "C" {
 #endif
 
-#define DISABLE_RC_LONG_TERM_MEM 0
 // #define MODE_TEST_HIT_STATS
 
 // #define SPEEDSTATS 1
@@ -47,6 +46,7 @@ extern "C" {
 #define MIN_GF_INTERVAL             4
 #endif
 #define DEFAULT_GF_INTERVAL         7
+#define DEFAULT_KF_BOOST            2000
 
 #define KEY_FRAME_CONTEXT 5
 
@@ -530,7 +530,6 @@ typedef struct VP9_COMP {
   vp9_coeff_probs_model frame_coef_probs[TX_SIZES][PLANE_TYPES];
   vp9_coeff_stats frame_branch_ct[TX_SIZES][PLANE_TYPES];
 
-  int64_t target_bandwidth;
   struct vpx_codec_pkt_list  *output_pkt_list;
 
   MBGRAPH_FRAME_STATS mbgraph_stats[MAX_LAG_BUFFERS];

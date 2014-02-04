@@ -1104,8 +1104,6 @@ void vp9_new_framerate(VP9_COMP *cpi, double framerate) {
 
   cpi->oxcf.framerate = framerate;
   cpi->output_framerate = cpi->oxcf.framerate;
-  cpi->rc.per_frame_bandwidth = (int)(cpi->oxcf.target_bandwidth
-                                      / cpi->output_framerate);
   cpi->rc.av_per_frame_bandwidth = (int)(cpi->oxcf.target_bandwidth
                                          / cpi->output_framerate);
   cpi->rc.min_frame_bandwidth = (int)(cpi->rc.av_per_frame_bandwidth *
@@ -1343,8 +1341,6 @@ void vp9_change_config(VP9_PTR ptr, VP9_CONFIG *oxcf) {
   cpi->cq_target_quality = cpi->oxcf.cq_level;
 
   cm->interp_filter = DEFAULT_INTERP_FILTER;
-
-  cpi->target_bandwidth = cpi->oxcf.target_bandwidth;
 
   cm->display_width = cpi->oxcf.width;
   cm->display_height = cpi->oxcf.height;
@@ -3025,10 +3021,7 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
   if (cpi->pass == 0 &&
       cpi->oxcf.end_usage == USAGE_STREAM_FROM_SERVER &&
       cm->frame_type != KEY_FRAME) {
-    if (vp9_drop_frame(cpi)) {
-      // Update buffer level with zero size, update frame counters, and return.
-      vp9_update_buffer_level(cpi, 0);
-      cm->last_frame_type = cm->frame_type;
+    if (vp9_rc_drop_frame(cpi)) {
       vp9_rc_postencode_update_drop_frame(cpi);
       cm->current_video_frame++;
       return;
@@ -3067,9 +3060,6 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
 #ifdef OUTPUT_YUV_SRC
   vp9_write_yuv_frame(cpi->Source);
 #endif
-
-  // Decide how big to make the frame.
-  vp9_rc_pick_frame_size_target(cpi);
 
   // Decide frame size bounds
   vp9_rc_compute_frame_size_bounds(cpi, cpi->rc.this_frame_target,
@@ -3171,10 +3161,6 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
   vp9_update_mode_context_stats(cpi);
 #endif
 
-  /* Move storing frame_type out of the above loop since it is also
-   * needed in motion search besides loopfilter */
-  cm->last_frame_type = cm->frame_type;
-
 #if 0
   output_frame_level_debug_stats(cpi);
 #endif
@@ -3262,16 +3248,16 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
 
 static void SvcEncode(VP9_COMP *cpi, size_t *size, uint8_t *dest,
                       unsigned int *frame_flags) {
-  vp9_get_svc_params(cpi);
+  vp9_rc_get_svc_params(cpi);
   encode_frame_to_data_rate(cpi, size, dest, frame_flags);
 }
 
 static void Pass0Encode(VP9_COMP *cpi, size_t *size, uint8_t *dest,
                         unsigned int *frame_flags) {
   if (cpi->oxcf.end_usage == USAGE_STREAM_FROM_SERVER) {
-    vp9_get_one_pass_cbr_params(cpi);
+    vp9_rc_get_one_pass_cbr_params(cpi);
   } else {
-    vp9_get_one_pass_params(cpi);
+    vp9_rc_get_one_pass_vbr_params(cpi);
   }
   encode_frame_to_data_rate(cpi, size, dest, frame_flags);
 }
@@ -3282,7 +3268,7 @@ static void Pass1Encode(VP9_COMP *cpi, size_t *size, uint8_t *dest,
   (void) dest;
   (void) frame_flags;
 
-  vp9_get_first_pass_params(cpi);
+  vp9_rc_get_first_pass_params(cpi);
   vp9_set_quantizer(cpi, find_fp_qindex());
   vp9_first_pass(cpi);
 }
@@ -3291,7 +3277,7 @@ static void Pass2Encode(VP9_COMP *cpi, size_t *size,
                         uint8_t *dest, unsigned int *frame_flags) {
   cpi->enable_encode_breakout = 1;
 
-  vp9_get_second_pass_params(cpi);
+  vp9_rc_get_second_pass_params(cpi);
   encode_frame_to_data_rate(cpi, size, dest, frame_flags);
 
   vp9_twopass_postencode_update(cpi, *size);

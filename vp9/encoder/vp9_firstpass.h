@@ -17,18 +17,17 @@ extern "C" {
 #endif
 
 void vp9_init_first_pass(VP9_COMP *cpi);
+void vp9_rc_get_first_pass_params(VP9_COMP *cpi);
 void vp9_first_pass(VP9_COMP *cpi);
 void vp9_end_first_pass(VP9_COMP *cpi);
 
 void vp9_init_second_pass(VP9_COMP *cpi);
-void vp9_get_second_pass_params(VP9_COMP *cpi);
+void vp9_rc_get_second_pass_params(VP9_COMP *cpi);
 void vp9_end_second_pass(VP9_COMP *cpi);
 
-void vp9_get_first_pass_params(VP9_COMP *cpi);
-void vp9_get_one_pass_params(VP9_COMP *cpi);
-void vp9_get_one_pass_cbr_params(VP9_COMP *cpi);
-void vp9_get_svc_params(VP9_COMP *cpi);
-
+// Post encode update of the rate control parameters for 2-pass
+void vp9_twopass_postencode_update(struct VP9_COMP *cpi,
+                                   uint64_t bytes_used);
 #ifdef __cplusplus
 }  // extern "C"
 #endif
