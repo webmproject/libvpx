@@ -838,10 +838,12 @@ static void set_rt_speed_feature(VP9_COMMON *cm,
   }
   if (speed >= 4) {
     sf->optimize_coefficients = 0;
+    sf->disable_split_mask = DISABLE_ALL_SPLIT;
+    sf->use_fast_lpf_pick = 2;
   }
   if (speed >= 5) {
     int i;
-    sf->disable_split_mask = DISABLE_ALL_SPLIT;
+    sf->adaptive_rd_thresh = 5;
     sf->auto_min_max_partition_size = frame_is_intra_only(cm) ?
         RELAXED_NEIGHBORING_MIN_MAX : STRICT_NEIGHBORING_MIN_MAX;
     sf->subpel_force_stop = 1;
@@ -849,7 +851,6 @@ static void set_rt_speed_feature(VP9_COMMON *cm,
       sf->intra_y_mode_mask[i] = INTRA_DC_H_V;
       sf->intra_uv_mode_mask[i] = INTRA_DC_ONLY;
     }
-    sf->use_fast_lpf_pick = 2;
     sf->RD = 0;
   }
   if (speed >= 6) {
