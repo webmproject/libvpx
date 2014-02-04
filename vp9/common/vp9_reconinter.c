@@ -270,8 +270,8 @@ static void dec_build_inter_predictors(MACROBLOCKD *xd, int plane, int block,
                              : mi_mv_pred_q4(mi, ref))
                : mi->mbmi.mv[ref].as_mv;
     MV32 scaled_mv;
-    int xs, ys, x0, y0, x0_16, y0_16, x1, y1, frame_width,
-        frame_height, subpel_x, subpel_y, buf_stride;
+    int xs, ys, x0, y0, x0_16, y0_16, frame_width, frame_height, buf_stride,
+        subpel_x, subpel_y;
     uint8_t *ref_frame, *buf_ptr;
     const YV12_BUFFER_CONFIG *ref_buf = xd->block_refs[ref]->buf;
     const MV mv_q4 = {
@@ -321,10 +321,6 @@ static void dec_build_inter_predictors(MACROBLOCKD *xd, int plane, int block,
     x0_16 += scaled_mv.col;
     y0_16 += scaled_mv.row;
 
-    // Get reference block bottom right coordinate.
-    x1 = ((x0_16 + (w - 1) * xs) >> SUBPEL_BITS) + 1;
-    y1 = ((y0_16 + (h - 1) * ys) >> SUBPEL_BITS) + 1;
-
     // Get reference block pointer.
     buf_ptr = ref_frame + y0 * pre_buf->stride + x0;
     buf_stride = pre_buf->stride;
@@ -333,6 +329,9 @@ static void dec_build_inter_predictors(MACROBLOCKD *xd, int plane, int block,
     // width/height is not a multiple of 8 pixels.
     if (scaled_mv.col || scaled_mv.row ||
         (frame_width & 0x7) || (frame_height & 0x7)) {
+      // Get reference block bottom right coordinate.
+      int x1 = ((x0_16 + (w - 1) * xs) >> SUBPEL_BITS) + 1;
+      int y1 = ((y0_16 + (h - 1) * ys) >> SUBPEL_BITS) + 1;
       int x_pad = 0, y_pad = 0;
 
       if (subpel_x || (sf->x_step_q4 & SUBPEL_MASK)) {
