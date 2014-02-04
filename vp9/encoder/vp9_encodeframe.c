@@ -483,18 +483,18 @@ static void update_state(VP9_COMP *cpi, PICK_MODE_CONTEXT *ctx,
   if (frame_is_intra_only(cm)) {
 #if CONFIG_INTERNAL_STATS
     static const int kf_mode_index[] = {
-      THR_DC /*DC_PRED*/,
-      THR_V_PRED /*V_PRED*/,
-      THR_H_PRED /*H_PRED*/,
-      THR_D45_PRED /*D45_PRED*/,
+      THR_DC        /*DC_PRED*/,
+      THR_V_PRED    /*V_PRED*/,
+      THR_H_PRED    /*H_PRED*/,
+      THR_D45_PRED  /*D45_PRED*/,
       THR_D135_PRED /*D135_PRED*/,
       THR_D117_PRED /*D117_PRED*/,
       THR_D153_PRED /*D153_PRED*/,
       THR_D207_PRED /*D207_PRED*/,
-      THR_D63_PRED /*D63_PRED*/,
-      THR_TM /*TM_PRED*/,
+      THR_D63_PRED  /*D63_PRED*/,
+      THR_TM        /*TM_PRED*/,
     };
-    cpi->mode_chosen_counts[kf_mode_index[mi->mbmi.mode]]++;
+    cpi->mode_chosen_counts[kf_mode_index[mbmi->mode]]++;
 #endif
   } else {
     // Note how often each mode chosen as best
