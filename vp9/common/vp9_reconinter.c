@@ -69,7 +69,7 @@ static void inter_predictor(const uint8_t *src, int src_stride,
                             const int subpel_y,
                             const struct scale_factors *sf,
                             int w, int h, int ref,
-                            const interp_kernel *kernel,
+                            const InterpKernel *kernel,
                             int xs, int ys) {
   sf->predict[subpel_x != 0][subpel_y != 0][ref](
       src, src_stride, dst, dst_stride,
@@ -81,7 +81,7 @@ void vp9_build_inter_predictor(const uint8_t *src, int src_stride,
                                const MV *src_mv,
                                const struct scale_factors *sf,
                                int w, int h, int ref,
-                               const interp_kernel *kernel,
+                               const InterpKernel *kernel,
                                enum mv_precision precision,
                                int x, int y) {
   const int is_q4 = precision == MV_PRECISION_Q4;

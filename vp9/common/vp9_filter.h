@@ -33,14 +33,14 @@ typedef enum {
   SWITCHABLE = 4  /* should be the last one */
 } INTERP_FILTER;
 
-typedef int16_t interp_kernel[SUBPEL_TAPS];
+typedef int16_t InterpKernel[SUBPEL_TAPS];
 
-const interp_kernel *vp9_get_interp_kernel(INTERP_FILTER filter);
+const InterpKernel *vp9_get_interp_kernel(INTERP_FILTER filter);
 
-extern const interp_kernel vp9_bilinear_filters[SUBPEL_SHIFTS];
-extern const interp_kernel vp9_sub_pel_filters_8[SUBPEL_SHIFTS];
-extern const interp_kernel vp9_sub_pel_filters_8s[SUBPEL_SHIFTS];
-extern const interp_kernel vp9_sub_pel_filters_8lp[SUBPEL_SHIFTS];
+extern const InterpKernel vp9_bilinear_filters[SUBPEL_SHIFTS];
+extern const InterpKernel vp9_sub_pel_filters_8[SUBPEL_SHIFTS];
+extern const InterpKernel vp9_sub_pel_filters_8s[SUBPEL_SHIFTS];
+extern const InterpKernel vp9_sub_pel_filters_8lp[SUBPEL_SHIFTS];
 
 // The VP9_BILINEAR_FILTERS_2TAP macro returns a pointer to the bilinear
 // filter kernel as a 2 tap filter.
