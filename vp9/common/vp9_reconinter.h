@@ -35,7 +35,7 @@ void vp9_build_inter_predictor(const uint8_t *src, int src_stride,
                                const MV *mv_q3,
                                const struct scale_factors *sf,
                                int w, int h, int do_avg,
-                               const interp_kernel *kernel,
+                               const InterpKernel *kernel,
                                enum mv_precision precision,
                                int x, int y);
 
