@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//5fA\u003d",
+        "filename": "video_reader.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1002833
+      },
+      "writtenOn": "2014-02-04T19:34:05Z",
+      "side": 1,
+      "message": "Another option:\n\nstatic const char IVF_SIGNATURE[] \u003d \"DKIF\";\n\nor \n\nstatic const char* const IVF_SIGNATURE \u003d \"DKIF\";",
+      "revId": "2ae2db43e6c37d55995deaed437c37e734776149",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//5fY\u003d",
+        "filename": "video_reader.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1002833
+      },
+      "writtenOn": "2014-02-04T19:34:05Z",
+      "side": 1,
+      "message": "Do we need \n\nextern \"C\" \n\nsomewhere?",
+      "revId": "2ae2db43e6c37d55995deaed437c37e734776149",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//5a0\u003d",
+        "filename": "video_writer.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1002833
+      },
+      "writtenOn": "2014-02-04T19:34:05Z",
+      "side": 1,
+      "message": "If you follow this path, you leak memory.",
+      "revId": "2ae2db43e6c37d55995deaed437c37e734776149",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
