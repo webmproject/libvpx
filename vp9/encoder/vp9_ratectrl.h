@@ -46,7 +46,6 @@ typedef struct {
   unsigned int source_alt_ref_active;
   unsigned int is_src_frame_alt_ref;
 
-  int per_frame_bandwidth;        // Current section per frame bandwidth target
   int av_per_frame_bandwidth;     // Average frame size target for clip
   int min_frame_bandwidth;        // Minimum allocation used for any frame
   int max_frame_bandwidth;        // Maximum burst rate allowed for a frame.
@@ -89,16 +88,53 @@ void vp9_setup_inter_frame(struct VP9_COMP *cpi);
 
 double vp9_convert_qindex_to_q(int qindex);
 
-// Updates rate correction factors
-void vp9_rc_update_rate_correction_factors(struct VP9_COMP *cpi, int damp_var);
-
 // initialize luts for minq
 void vp9_rc_init_minq_luts(void);
 
-// return of 0 means drop frame
-// Changes only rc.this_frame_target and rc.sb64_rate_target
-int vp9_rc_pick_frame_size_target(struct VP9_COMP *cpi);
+// Generally at the high level, the following flow is expected
+// to be enforced for rate control:
+// First call per frame, one of:
+//   vp9_rc_get_one_pass_vbr_params()
+//   vp9_rc_get_one_pass_cbr_params()
+//   vp9_rc_get_svc_params()
+//   vp9_rc_get_first_pass_params()
+//   vp9_rc_get_second_pass_params()
+// depending on the usage to set the rate control encode parameters desired.
+//
+// Then, call encode_frame_to_data_rate() to perform the
+// actual encode. This function will in turn call encode_frame()
+// one or more times, followed by one of:
+//   vp9_rc_postencode_update()
+//   vp9_rc_postencode_update_drop_frame()
+//
+// The majority of rate control parameters are only expected
+// to be set in the vp9_rc_get_..._params() functions and
+// updated during the vp9_rc_postencode_update...() functions.
+// The only exceptions are vp9_rc_drop_frame() and
+// vp9_rc_update_rate_correction_factors() functions.
 
+// Functions to set parameters for encoding before the actual
+// encode_frame_to_data_rate() function.
+void vp9_rc_get_one_pass_vbr_params(struct VP9_COMP *cpi);
+void vp9_rc_get_one_pass_cbr_params(struct VP9_COMP *cpi);
+void vp9_rc_get_svc_params(struct VP9_COMP *cpi);
+
+// Post encode update of the rate control parameters based
+// on bytes used
+void vp9_rc_postencode_update(struct VP9_COMP *cpi,
+                              uint64_t bytes_used);
+// Post encode update of the rate control parameters for dropped frames
+void vp9_rc_postencode_update_drop_frame(struct VP9_COMP *cpi);
+
+// Updates rate correction factors
+// Changes only the rate correction factors in the rate control structure.
+void vp9_rc_update_rate_correction_factors(struct VP9_COMP *cpi, int damp_var);
+
+// Decide if we should drop this frame: For 1-pass CBR.
+// Changes only the decimation count in the rate control structure
+int vp9_rc_drop_frame(struct VP9_COMP *cpi);
+
+// Computes frame size bounds.
 void vp9_rc_compute_frame_size_bounds(const struct VP9_COMP *cpi,
                                       int this_frame_target,
                                       int *frame_under_shoot_limit,
@@ -113,26 +149,18 @@ int vp9_rc_pick_q_and_adjust_q_bounds(const struct VP9_COMP *cpi,
 int vp9_rc_regulate_q(const struct VP9_COMP *cpi, int target_bits_per_frame,
                       int active_best_quality, int active_worst_quality);
 
-// Post encode update of the rate control parameters based
-// on bytes used
-void vp9_rc_postencode_update(struct VP9_COMP *cpi,
-                              uint64_t bytes_used);
-// for dropped frames
-void vp9_rc_postencode_update_drop_frame(struct VP9_COMP *cpi);
-
-// estimates bits per mb for a given qindex and correction factor
+// Estimates bits per mb for a given qindex and correction factor.
 int vp9_rc_bits_per_mb(FRAME_TYPE frame_type, int qindex,
                        double correction_factor);
 
-// Post encode update of the rate control parameters for 2-pass
-void vp9_twopass_postencode_update(struct VP9_COMP *cpi,
-                                   uint64_t bytes_used);
-
-// Decide if we should drop this frame: For 1-pass CBR.
-int vp9_drop_frame(struct VP9_COMP *cpi);
-
-// Update the buffer level.
-void vp9_update_buffer_level(struct VP9_COMP *cpi, int encoded_frame_size);
+// Clamping utilities for bitrate targets for iframes and pframes.
+int vp9_rc_clamp_iframe_target_size(const struct VP9_COMP *const cpi,
+                                    int target);
+int vp9_rc_clamp_pframe_target_size(const struct VP9_COMP *const cpi,
+                                    int target);
+// Utility to set frame_target into the RATE_CONTROL structure
+// This function is called only from the vp9_rc_get_..._params() functions.
+void vp9_rc_set_frame_target(struct VP9_COMP *cpi, int target);
 
 #ifdef __cplusplus
 }  // extern "C"

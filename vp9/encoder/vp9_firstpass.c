@@ -49,8 +49,9 @@
 
 #define DOUBLE_DIVIDE_CHECK(x) ((x) < 0 ? (x) - 0.000001 : (x) + 0.000001)
 
-#define MIN_BOOST        300
-#define KEY_FRAME_BOOST 2000
+#define MIN_KF_BOOST        300
+
+#define DISABLE_RC_LONG_TERM_MEM 0
 
 static void swap_yv12(YV12_BUFFER_CONFIG *a, YV12_BUFFER_CONFIG *b) {
   YV12_BUFFER_CONFIG temp = *a;
@@ -1725,7 +1726,7 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
         (!rc->source_alt_ref_pending &&
          (cpi->common.frame_type != KEY_FRAME))) {
       // Per frame bit target for this frame
-      rc->per_frame_bandwidth = gf_bits;
+      vp9_rc_set_frame_target(cpi, gf_bits);
     }
   }
 
@@ -1827,12 +1828,7 @@ static void assign_std_frame_bits(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
     cpi->twopass.gf_group_bits = 0;
 
   // Per frame bit target for this frame.
-  cpi->rc.per_frame_bandwidth = target_frame_size;
-}
-
-static int test_for_kf_one_pass(VP9_COMP *cpi) {
-  // Placeholder function for auto key frame
-  return 0;
+  vp9_rc_set_frame_target(cpi, target_frame_size);
 }
 
 static int test_candidate_kf(VP9_COMP *cpi,
@@ -2170,8 +2166,8 @@ static void find_next_key_frame(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
     if (kf_boost < (rc->frames_to_key * 3))
       kf_boost = (rc->frames_to_key * 3);
 
-    if (kf_boost < MIN_BOOST)
-      kf_boost = MIN_BOOST;
+    if (kf_boost < MIN_KF_BOOST)
+      kf_boost = MIN_KF_BOOST;
 
     // Make a note of baseline boost and the zero motion
     // accumulator value for use elsewhere.
@@ -2235,13 +2231,9 @@ static void find_next_key_frame(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
         twopass->kf_bits = alt_kf_bits;
       }
     }
-
     twopass->kf_group_bits -= twopass->kf_bits;
-
-    // Peer frame bit target for this frame
-    rc->per_frame_bandwidth = twopass->kf_bits;
-    // Convert to a per second bitrate
-    cpi->target_bandwidth = (int)(twopass->kf_bits * cpi->output_framerate);
+    // Per frame bit target for this frame.
+    vp9_rc_set_frame_target(cpi, twopass->kf_bits);
   }
 
   // Note the total error score of the kf group minus the key frame itself
@@ -2253,176 +2245,7 @@ static void find_next_key_frame(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   twopass->modified_error_left -= kf_group_err;
 }
 
-void vp9_get_svc_params(VP9_COMP *cpi) {
-  VP9_COMMON *const cm = &cpi->common;
-  if ((cm->current_video_frame == 0) ||
-      (cm->frame_flags & FRAMEFLAGS_KEY) ||
-      (cpi->oxcf.auto_key && (cpi->rc.frames_since_key %
-                              cpi->key_frame_frequency == 0))) {
-    cm->frame_type = KEY_FRAME;
-    cpi->rc.source_alt_ref_active = 0;
-  } else {
-    cm->frame_type = INTER_FRAME;
-  }
-  cpi->rc.frames_till_gf_update_due = INT_MAX;
-  cpi->rc.baseline_gf_interval = INT_MAX;
-}
-
-// Use this macro to turn on/off use of alt-refs in one-pass mode.
-#define USE_ALTREF_FOR_ONE_PASS   1
-
-void vp9_get_one_pass_params(VP9_COMP *cpi) {
-  VP9_COMMON *const cm = &cpi->common;
-  if (!cpi->refresh_alt_ref_frame &&
-      (cm->current_video_frame == 0 ||
-       cm->frame_flags & FRAMEFLAGS_KEY ||
-       cpi->rc.frames_to_key == 0 ||
-       (cpi->oxcf.auto_key && test_for_kf_one_pass(cpi)))) {
-    cm->frame_type = KEY_FRAME;
-    cpi->rc.this_key_frame_forced = cm->current_video_frame != 0 &&
-                                    cpi->rc.frames_to_key == 0;
-    cpi->rc.frames_to_key = cpi->key_frame_frequency;
-    cpi->rc.kf_boost = KEY_FRAME_BOOST;
-    cpi->rc.source_alt_ref_active = 0;
-    cpi->rc.per_frame_bandwidth = cpi->rc.av_per_frame_bandwidth * 8;
-    if (cm->current_video_frame == 0) {
-      cpi->rc.active_worst_quality = cpi->rc.worst_quality;
-    } else {
-      // Choose active worst quality twice as large as the last q.
-      cpi->rc.active_worst_quality = cpi->rc.last_q[KEY_FRAME] * 2;
-      if (cpi->rc.active_worst_quality > cpi->rc.worst_quality)
-        cpi->rc.active_worst_quality = cpi->rc.worst_quality;
-    }
-  } else {
-    cm->frame_type = INTER_FRAME;
-    cpi->rc.per_frame_bandwidth = cpi->rc.av_per_frame_bandwidth;
-    if (cm->current_video_frame == 1) {
-      cpi->rc.active_worst_quality = cpi->rc.worst_quality;
-    } else {
-      // Choose active worst quality twice as large as the last q.
-      cpi->rc.active_worst_quality = cpi->rc.last_q[INTER_FRAME] * 2;
-      if (cpi->rc.active_worst_quality > cpi->rc.worst_quality)
-        cpi->rc.active_worst_quality = cpi->rc.worst_quality;
-    }
-  }
-  if (cpi->rc.frames_till_gf_update_due == 0) {
-    cpi->rc.baseline_gf_interval = DEFAULT_GF_INTERVAL;
-    cpi->rc.frames_till_gf_update_due = cpi->rc.baseline_gf_interval;
-    // NOTE: frames_till_gf_update_due must be <= frames_to_key.
-    if (cpi->rc.frames_till_gf_update_due > cpi->rc.frames_to_key)
-      cpi->rc.frames_till_gf_update_due = cpi->rc.frames_to_key;
-    cpi->refresh_golden_frame = 1;
-    cpi->rc.source_alt_ref_pending = USE_ALTREF_FOR_ONE_PASS;
-    cpi->rc.gfu_boost = 2000;
-  }
-}
-
-// Adjust active_worst_quality level based on buffer level.
-static int calc_active_worst_quality_from_buffer_level(const VP9_COMP *cpi) {
-  // Adjust active_worst_quality: If buffer is above the optimal/target level,
-  // bring active_worst_quality down depending on fullness of buffer.
-  // If buffer is below the optimal level, let the active_worst_quality go from
-  // ambient Q (at buffer = optimal level) to worst_quality level
-  // (at buffer = critical level).
-  const VP9_CONFIG *oxcf = &cpi->oxcf;
-  const RATE_CONTROL *rc = &cpi->rc;
-  int active_worst_quality = rc->active_worst_quality;
-  // Maximum limit for down adjustment, ~20%.
-  int max_adjustment_down = active_worst_quality / 5;
-  // Buffer level below which we push active_worst to worst_quality.
-  int critical_level = oxcf->optimal_buffer_level >> 2;
-  int adjustment = 0;
-  int buff_lvl_step = 0;
-  if (rc->buffer_level > oxcf->optimal_buffer_level) {
-    // Adjust down.
-    if (max_adjustment_down) {
-      buff_lvl_step = (int)((oxcf->maximum_buffer_size -
-          oxcf->optimal_buffer_level) / max_adjustment_down);
-      if (buff_lvl_step)
-        adjustment = (int)((rc->buffer_level - oxcf->optimal_buffer_level) /
-                            buff_lvl_step);
-      active_worst_quality -= adjustment;
-    }
-  } else if (rc->buffer_level > critical_level) {
-    // Adjust up from ambient Q.
-    if (critical_level) {
-      buff_lvl_step = (oxcf->optimal_buffer_level - critical_level);
-      if (buff_lvl_step) {
-        adjustment = (rc->worst_quality - rc->avg_frame_qindex[INTER_FRAME]) *
-                         (oxcf->optimal_buffer_level - rc->buffer_level) /
-                             buff_lvl_step;
-      }
-      active_worst_quality = rc->avg_frame_qindex[INTER_FRAME] + adjustment;
-    }
-  } else {
-    // Set to worst_quality if buffer is below critical level.
-    active_worst_quality = rc->worst_quality;
-  }
-  return active_worst_quality;
-}
-
-static int calc_pframe_target_size_one_pass_cbr(const VP9_COMP *cpi) {
-  const VP9_CONFIG *oxcf = &cpi->oxcf;
-  const RATE_CONTROL *rc = &cpi->rc;
-  int target = rc->av_per_frame_bandwidth;
-  const int64_t diff = oxcf->optimal_buffer_level - rc->buffer_level;
-  const int one_pct_bits = 1 + oxcf->optimal_buffer_level / 100;
-  if (diff > 0) {
-    // Lower the target bandwidth for this frame.
-    const int pct_low = MIN(diff / one_pct_bits, oxcf->under_shoot_pct);
-    target -= (target * pct_low) / 200;
-  } else if (diff < 0) {
-    // Increase the target bandwidth for this frame.
-    const int pct_high = MIN(-diff / one_pct_bits, oxcf->over_shoot_pct);
-    target += (target * pct_high) / 200;
-  }
-  return target;
-}
-
-static int calc_iframe_target_size_one_pass_cbr(const VP9_COMP *cpi) {
-  int per_frame_bandwidth;
-  const RATE_CONTROL *rc = &cpi->rc;
-  if (cpi->common.current_video_frame == 0) {
-    per_frame_bandwidth = cpi->oxcf.starting_buffer_level / 2;
-  } else {
-    int initial_boost = 32;
-    int kf_boost = MAX(initial_boost, (int)(2 * cpi->output_framerate - 16));
-    if (rc->frames_since_key < cpi->output_framerate / 2) {
-      kf_boost = (int)(kf_boost * rc->frames_since_key /
-                       (cpi->output_framerate / 2));
-    }
-    per_frame_bandwidth =
-        ((16 + kf_boost) * rc->av_per_frame_bandwidth) >> 4;
-  }
-  return per_frame_bandwidth;
-}
-
-void vp9_get_one_pass_cbr_params(VP9_COMP *cpi) {
-  VP9_COMMON *const cm = &cpi->common;
-  if ((cm->current_video_frame == 0 ||
-      cm->frame_flags & FRAMEFLAGS_KEY ||
-      cpi->rc.frames_to_key == 0 ||
-      (cpi->oxcf.auto_key && test_for_kf_one_pass(cpi)))) {
-    cm->frame_type = KEY_FRAME;
-    cpi->rc.this_key_frame_forced = cm->current_video_frame != 0 &&
-                                    cpi->rc.frames_to_key == 0;
-    cpi->rc.frames_to_key = cpi->key_frame_frequency;
-    cpi->rc.kf_boost = KEY_FRAME_BOOST;
-    cpi->rc.source_alt_ref_active = 0;
-    cpi->rc.per_frame_bandwidth = calc_iframe_target_size_one_pass_cbr(cpi);
-    cpi->rc.active_worst_quality = cpi->rc.worst_quality;
-  } else {
-    cm->frame_type = INTER_FRAME;
-    cpi->rc.per_frame_bandwidth = calc_pframe_target_size_one_pass_cbr(cpi);
-    cpi->rc.active_worst_quality =
-        calc_active_worst_quality_from_buffer_level(cpi);
-  }
-  // Don't use gf_update by default in CBR mode.
-  cpi->rc.frames_till_gf_update_due = INT_MAX;
-  cpi->rc.baseline_gf_interval = INT_MAX;
-}
-
-void vp9_get_first_pass_params(VP9_COMP *cpi) {
+void vp9_rc_get_first_pass_params(VP9_COMP *cpi) {
   VP9_COMMON *const cm = &cpi->common;
   if (!cpi->refresh_alt_ref_frame &&
       (cm->current_video_frame == 0 ||
@@ -2435,7 +2258,7 @@ void vp9_get_first_pass_params(VP9_COMP *cpi) {
   cpi->rc.frames_to_key = INT_MAX;
 }
 
-void vp9_get_second_pass_params(VP9_COMP *cpi) {
+void vp9_rc_get_second_pass_params(VP9_COMP *cpi) {
   VP9_COMMON *const cm = &cpi->common;
   RATE_CONTROL *const rc = &cpi->rc;
   struct twopass_rc *const twopass = &cpi->twopass;
@@ -2446,13 +2269,14 @@ void vp9_get_second_pass_params(VP9_COMP *cpi) {
 
   double this_frame_intra_error;
   double this_frame_coded_error;
+  int target;
 
   if (!twopass->stats_in)
     return;
 
   if (cpi->refresh_alt_ref_frame) {
     cm->frame_type = INTER_FRAME;
-    rc->per_frame_bandwidth = twopass->gf_bits;
+    vp9_rc_set_frame_target(cpi, twopass->gf_bits);
     return;
   }
 
@@ -2463,7 +2287,7 @@ void vp9_get_second_pass_params(VP9_COMP *cpi) {
   } else if (cm->current_video_frame == 0) {
     // Special case code for first frame.
     const int section_target_bandwidth = (int)(twopass->bits_left /
-                                             frames_left);
+                                               frames_left);
     const int tmp_q = estimate_max_q(cpi, &twopass->total_left_stats,
                                      section_target_bandwidth);
 
@@ -2539,11 +2363,11 @@ void vp9_get_second_pass_params(VP9_COMP *cpi) {
     }
   }
 
-  // Set nominal per second bandwidth for this frame
-  cpi->target_bandwidth = (int)(rc->per_frame_bandwidth *
-                                   cpi->output_framerate);
-  if (cpi->target_bandwidth < 0)
-    cpi->target_bandwidth = 0;
+  if (cpi->common.frame_type == KEY_FRAME)
+    target = vp9_rc_clamp_iframe_target_size(cpi, rc->this_frame_target);
+  else
+    target = vp9_rc_clamp_pframe_target_size(cpi, rc->this_frame_target);
+  vp9_rc_set_frame_target(cpi, target);
 
   // Update the total stats remaining structure
   subtract_stats(&twopass->total_left_stats, &this_frame);
@@ -2554,5 +2378,18 @@ void vp9_twopass_postencode_update(VP9_COMP *cpi, uint64_t bytes_used) {
   cpi->twopass.bits_left -=  cpi->rc.this_frame_target;
 #else
   cpi->twopass.bits_left -= 8 * bytes_used;
+  // Update bits left to the kf and gf groups to account for overshoot or
+  // undershoot on these frames
+  if (cm->frame_type == KEY_FRAME) {
+    cpi->twopass.kf_group_bits += cpi->rc.this_frame_target -
+        cpi->rc.projected_frame_size;
+
+    cpi->twopass.kf_group_bits = MAX(cpi->twopass.kf_group_bits, 0);
+  } else if (cpi->refresh_golden_frame || cpi->refresh_alt_ref_frame) {
+    cpi->twopass.gf_group_bits += cpi->rc.this_frame_target -
+        cpi->rc.projected_frame_size;
+
+    cpi->twopass.gf_group_bits = MAX(cpi->twopass.gf_group_bits, 0);
+  }
 #endif
 }
