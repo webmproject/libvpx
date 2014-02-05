@@ -134,17 +134,16 @@ static int temporal_filter_find_matching_mb_c(VP9_COMP *cpi,
   int sadpb = x->sadperbit16;
   int bestsme = INT_MAX;
 
-  int_mv best_ref_mv1;
-  int_mv best_ref_mv1_full; /* full-pixel value of best_ref_mv1 */
-  int_mv *ref_mv;
+  MV best_ref_mv1 = {0, 0};
+  MV best_ref_mv1_full; /* full-pixel value of best_ref_mv1 */
+  MV *ref_mv = &x->e_mbd.mi_8x8[0]->bmi[0].as_mv[0].as_mv;
 
   // Save input state
   struct buf_2d src = x->plane[0].src;
   struct buf_2d pre = xd->plane[0].pre[0];
 
-  best_ref_mv1.as_int = 0;
-  best_ref_mv1_full.as_mv.col = best_ref_mv1.as_mv.col >> 3;
-  best_ref_mv1_full.as_mv.row = best_ref_mv1.as_mv.row >> 3;
+  best_ref_mv1_full.col = best_ref_mv1.col >> 3;
+  best_ref_mv1_full.row = best_ref_mv1.row >> 3;
 
   // Setup frame pointers
   x->plane[0].src.buf = arf_frame_buf;
@@ -161,11 +160,9 @@ static int temporal_filter_find_matching_mb_c(VP9_COMP *cpi,
 
   /*cpi->sf.search_method == HEX*/
   // Ignore mv costing by sending NULL pointer instead of cost arrays
-  ref_mv = &x->e_mbd.mi_8x8[0]->bmi[0].as_mv[0];
-  bestsme = vp9_hex_search(x, &best_ref_mv1_full.as_mv,
-                           step_param, sadpb, 1,
+  bestsme = vp9_hex_search(x, &best_ref_mv1_full, step_param, sadpb, 1,
                            &cpi->fn_ptr[BLOCK_16X16],
-                           0, &best_ref_mv1.as_mv, &ref_mv->as_mv);
+                           0, &best_ref_mv1, ref_mv);
 
 #if ALT_REF_SUBPEL_ENABLED
   // Try sub-pixel MC?
@@ -174,8 +171,8 @@ static int temporal_filter_find_matching_mb_c(VP9_COMP *cpi,
     int distortion;
     unsigned int sse;
     // Ignore mv costing by sending NULL pointer instead of cost array
-    bestsme = cpi->find_fractional_mv_step(x, &ref_mv->as_mv,
-                                           &best_ref_mv1.as_mv,
+    bestsme = cpi->find_fractional_mv_step(x, ref_mv,
+                                           &best_ref_mv1,
                                            cpi->common.allow_high_precision_mv,
                                            x->errorperbit,
                                            &cpi->fn_ptr[BLOCK_16X16],
