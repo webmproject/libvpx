@@ -75,16 +75,16 @@ while (<STDIN>)
     s/:SHR:/ >> /g;
 
     # Convert ELSE to .else
-    s/ELSE/.else/g;
+    s/\bELSE\b/.else/g;
 
     # Convert ENDIF to .endif
-    s/ENDIF/.endif/g;
+    s/\bENDIF\b/.endif/g;
 
     # Convert ELSEIF to .elseif
-    s/ELSEIF/.elseif/g;
+    s/\bELSEIF\b/.elseif/g;
 
     # Convert LTORG to .ltorg
-    s/LTORG/.ltorg/g;
+    s/\bLTORG\b/.ltorg/g;
 
     # Convert IF :DEF:to .if
     # gcc doesn't have the ability to do a conditional
@@ -164,7 +164,7 @@ while (<STDIN>)
     s/^([a-zA-Z_0-9\$]+)/$1:/ if !/EQU/;
 
     # ALIGN directive
-    s/ALIGN/.balign/g;
+    s/\bALIGN\b/.balign/g;
 
     # Strip ARM
     s/\sARM/@ ARM/g;
@@ -184,7 +184,7 @@ while (<STDIN>)
     s/(.*)EQU(.*)/.set $1, $2/;
 
     # Begin macro definition
-    if (/MACRO/)
+    if (/\bMACRO\b/)
     {
         # Process next line down, which will be the macro definition
         $_ = <STDIN>;
@@ -215,7 +215,7 @@ while (<STDIN>)
 
     # For macros, use \ to reference formal params
 #   s/\$/\\/g;                  # End macro definition
-    s/MEND/.endm/;              # No need to tell it where to stop assembling
+    s/\bMEND\b/.endm/;              # No need to tell it where to stop assembling
     next if /^\s*END\s*$/;
 
     # Clang used by Chromium differs slightly from clang in XCode in what it
