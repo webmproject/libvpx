@@ -422,7 +422,7 @@ loop_h
     vdup.u8             q0, r12
 
     ; Load above 8 pixels
-    vld1.8              q1, [r2]
+    vld1.8              {q1}, [r2]
 
     ; preload 8 left into r12
     vld1.8              d18, [r3]!
@@ -518,8 +518,8 @@ loop_16x16_neon
     vdup.u8             q0, r12
 
     ; Load above 32 pixels
-    vld1.8              q1, [r2]!
-    vld1.8              q2, [r2]
+    vld1.8              {q1}, [r2]!
+    vld1.8              {q2}, [r2]
 
     ; preload 8 left pixels
     vld1.8              d26, [r3]!
