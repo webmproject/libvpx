@@ -316,9 +316,6 @@ static vpx_codec_err_t set_vp9e_config(VP9_CONFIG *oxcf,
   // oxcf->kf_min_dist         = cfg.kf_min_dis;
   oxcf->key_freq               = cfg.kf_max_dist;
 
-  // oxcf->delete_first_pass_file = cfg.g_delete_firstpassfile;
-  // strcpy(oxcf->first_pass_file, cfg.g_firstpass_file);
-
   oxcf->cpu_used               =  vp8_cfg.cpu_used;
   oxcf->encode_breakout        =  vp8_cfg.static_thresh;
   oxcf->play_alternate         =  vp8_cfg.enable_auto_alt_ref;
@@ -352,7 +349,6 @@ static vpx_codec_err_t set_vp9e_config(VP9_CONFIG *oxcf,
   printf("sharpness: %d\n",    oxcf->sharpness);
   printf("cpu_used: %d\n",  oxcf->cpu_used);
   printf("Mode: %d\n",     oxcf->mode);
-  // printf("delete_first_pass_file: %d\n",  oxcf->delete_first_pass_file);
   printf("auto_key: %d\n",  oxcf->auto_key);
   printf("key_freq: %d\n", oxcf->key_freq);
   printf("end_usage: %d\n", oxcf->end_usage);
@@ -1132,7 +1128,6 @@ static vpx_codec_enc_cfg_map_t vp9e_usage_cfg_map[] = {
       VPX_SS_DEFAULT_LAYERS, /* ss_number_layers */
 
 #if VPX_ENCODER_ABI_VERSION == (1 + VPX_CODEC_ABI_VERSION)
-      1,                  /* g_delete_first_pass_file */
       "vp8.fpf"           /* first pass filename */
 #endif
     }

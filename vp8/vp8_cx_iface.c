@@ -414,7 +414,6 @@ static vpx_codec_err_t set_vp8e_config(VP8_CONFIG *oxcf,
         printf("Sharpness: %d\n",    oxcf->Sharpness);
         printf("cpu_used: %d\n",  oxcf->cpu_used);
         printf("Mode: %d\n",     oxcf->Mode);
-        printf("delete_first_pass_file: %d\n",  oxcf->delete_first_pass_file);
         printf("auto_key: %d\n",  oxcf->auto_key);
         printf("key_freq: %d\n", oxcf->key_freq);
         printf("end_usage: %d\n", oxcf->end_usage);
@@ -1263,7 +1262,6 @@ static vpx_codec_enc_cfg_map_t vp8e_usage_cfg_map[] =
         128,                /* kf_max_dist */
 
 #if VPX_ENCODER_ABI_VERSION == (1 + VPX_CODEC_ABI_VERSION)
-        1,                  /* g_delete_first_pass_file */
         "vp8.fpf"           /* first pass filename */
 #endif
         VPX_SS_DEFAULT_LAYERS, /* ss_number_layers */
