@@ -11,13 +11,17 @@
 #ifndef VP9_COMMON_VP9_SYSTEMDEPENDENT_H_
 #define VP9_COMMON_VP9_SYSTEMDEPENDENT_H_
 
-#ifdef __cplusplus
-extern "C" {
+#ifdef _MSC_VER
+# if _MSC_VER > 1310 && (defined(_M_X64) || defined(_M_IX86))
+#  include <intrin.h>
+#  define USE_MSC_INTRIN
+# endif
+# include <math.h>
+# define snprintf _snprintf
 #endif
 
-#ifdef _MSC_VER
-#include <math.h>
-#define snprintf _snprintf
+#ifdef __cplusplus
+extern "C" {
 #endif
 
 #include "./vpx_config.h"
@@ -44,9 +48,7 @@ static int round(double x) {
 static INLINE int get_msb(unsigned int n) {
   return 31 ^ __builtin_clz(n);
 }
-#elif defined(_MSC_VER) && _MSC_VER > 1310 && \
-      (defined(_M_X64) || defined(_M_IX86))
-#include <intrin.h>
+#elif defined(USE_MSC_INTRIN)
 #pragma intrinsic(_BitScanReverse)
 
 static INLINE int get_msb(unsigned int n) {
@@ -54,6 +56,7 @@ static INLINE int get_msb(unsigned int n) {
   _BitScanReverse(&first_set_bit, n);
   return first_set_bit;
 }
+#undef USE_MSC_INTRIN
 #else
 // Returns (int)floor(log2(n)). n must be > 0.
 static INLINE int get_msb(unsigned int n) {
