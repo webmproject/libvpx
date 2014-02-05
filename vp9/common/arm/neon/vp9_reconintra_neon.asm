@@ -349,7 +349,7 @@ loop_h
     vdup.u8             d0, r12
 
     ; preload 8 left
-    vld1.8              d30, [r3]
+    vld1.8              {d30}, [r3]
 
     ; Load above 8 pixels
     vld1.64             {d2}, [r2]
@@ -425,7 +425,7 @@ loop_h
     vld1.8              {q1}, [r2]
 
     ; preload 8 left into r12
-    vld1.8              d18, [r3]!
+    vld1.8              {d18}, [r3]!
 
     ; Compute above - ytop_left
     vsubl.u8            q2, d2, d0
@@ -492,7 +492,7 @@ loop_16x16_neon
     vqshrun.s16         d23, q8, #0
     vdup.16             q0, d20[2]
     vdup.16             q8, d20[3]
-    vld1.8              d18, [r3]!                  ; preload 8 left into r12
+    vld1.8              {d18}, [r3]!                  ; preload 8 left into r12
     vmovl.u8            q10, d18
     vst1.64             {d2,d3}, [r0], r1
     vst1.64             {d22,d23}, [r0], r1
@@ -522,7 +522,7 @@ loop_16x16_neon
     vld1.8              {q2}, [r2]
 
     ; preload 8 left pixels
-    vld1.8              d26, [r3]!
+    vld1.8              {d26}, [r3]!
 
     ; Compute above - ytop_left
     vsubl.u8            q8, d2, d0
@@ -621,7 +621,7 @@ loop_32x32_neon
     vst1.64             {d0-d3}, [r0], r1
     vqshrun.s16         d24, q12, #0
     vqshrun.s16         d25, q13, #0
-    vld1.8              d0, [r3]!                   ; preload 8 left pixels
+    vld1.8              {d0}, [r3]!                   ; preload 8 left pixels
     vqshrun.s16         d26, q14, #0
     vqshrun.s16         d27, q15, #0
     vmovl.u8            q3, d0
