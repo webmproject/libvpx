@@ -936,58 +936,6 @@ static int estimate_max_q(VP9_COMP *cpi, FIRSTPASS_STATS *fpstats,
   return q;
 }
 
-// For cq mode estimate a cq level that matches the observed
-// complexity and data rate.
-static int estimate_cq(VP9_COMP *cpi,
-                       FIRSTPASS_STATS *fpstats,
-                       int section_target_bandwitdh) {
-  int q;
-  int num_mbs = cpi->common.MBs;
-  int target_norm_bits_per_mb;
-
-  double section_err = (fpstats->coded_error / fpstats->count);
-  double err_per_mb = section_err / num_mbs;
-  double err_correction_factor;
-  double clip_iiratio;
-  double clip_iifactor;
-
-  target_norm_bits_per_mb = (section_target_bandwitdh < (1 << 20))
-                            ? (512 * section_target_bandwitdh) / num_mbs
-                            : 512 * (section_target_bandwitdh / num_mbs);
-
-
-  // II ratio correction factor for clip as a whole
-  clip_iiratio = cpi->twopass.total_stats.intra_error /
-                 DOUBLE_DIVIDE_CHECK(cpi->twopass.total_stats.coded_error);
-  clip_iifactor = 1.0 - ((clip_iiratio - 10.0) * 0.025);
-  if (clip_iifactor < 0.80)
-    clip_iifactor = 0.80;
-
-  // Try and pick a Q that can encode the content at the given rate.
-  for (q = 0; q < MAXQ; q++) {
-    int bits_per_mb_at_this_q;
-
-    // Error per MB based correction factor
-    err_correction_factor =
-      calc_correction_factor(err_per_mb, 100.0, 0.5, 0.90, q) * clip_iifactor;
-
-    bits_per_mb_at_this_q =
-      vp9_rc_bits_per_mb(INTER_FRAME, q, err_correction_factor);
-
-    if (bits_per_mb_at_this_q <= target_norm_bits_per_mb)
-      break;
-  }
-
-  // Clip value to range "best allowed to (worst allowed - 1)"
-  q = select_cq_level(q);
-  if (q >= cpi->rc.worst_quality)
-    q = cpi->rc.worst_quality - 1;
-  if (q < cpi->rc.best_quality)
-    q = cpi->rc.best_quality;
-
-  return q;
-}
-
 extern void vp9_new_framerate(VP9_COMP *cpi, double framerate);
 
 void vp9_init_second_pass(VP9_COMP *cpi) {
