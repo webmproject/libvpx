@@ -1481,7 +1481,7 @@ void vp9_change_config(VP9_PTR ptr, VP9_CONFIG *oxcf) {
 
   if (cpi->initial_width) {
     // Increasing the size of the frame beyond the first seen frame, or some
-    // otherwise signalled maximum size, is not supported.
+    // otherwise signaled maximum size, is not supported.
     // TODO(jkoleszar): exit gracefully.
     assert(cm->width <= cpi->initial_width);
     assert(cm->height <= cpi->initial_height);
@@ -1496,14 +1496,13 @@ void vp9_change_config(VP9_PTR ptr, VP9_CONFIG *oxcf) {
   cpi->speed = cpi->oxcf.cpu_used;
 
   if (cpi->oxcf.lag_in_frames == 0) {
-    // force to allowlag to 0 if lag_in_frames is 0;
+    // Force allow_lag to 0 if lag_in_frames is 0.
     cpi->oxcf.allow_lag = 0;
   } else if (cpi->oxcf.lag_in_frames > MAX_LAG_BUFFERS) {
-     // Limit on lag buffers as these are not currently dynamically allocated
+     // Limit on lag buffers as these are not currently dynamically allocated.
     cpi->oxcf.lag_in_frames = MAX_LAG_BUFFERS;
   }
 
-  // YX Temp
 #if CONFIG_MULTIPLE_ARF
   vp9_zero(cpi->alt_ref_source);
 #else
@@ -3963,11 +3962,11 @@ int vp9_set_size_literal(VP9_PTR comp, unsigned int width,
     cm->width = width;
     if (cm->width * 5 < cpi->initial_width) {
       cm->width = cpi->initial_width / 5 + 1;
-      printf("Warning: Desired width too small, changed to %d \n", cm->width);
+      printf("Warning: Desired width too small, changed to %d\n", cm->width);
     }
     if (cm->width > cpi->initial_width) {
       cm->width = cpi->initial_width;
-      printf("Warning: Desired width too large, changed to %d \n", cm->width);
+      printf("Warning: Desired width too large, changed to %d\n", cm->width);
     }
   }
 
@@ -3975,11 +3974,11 @@ int vp9_set_size_literal(VP9_PTR comp, unsigned int width,
     cm->height = height;
     if (cm->height * 5 < cpi->initial_height) {
       cm->height = cpi->initial_height / 5 + 1;
-      printf("Warning: Desired height too small, changed to %d \n", cm->height);
+      printf("Warning: Desired height too small, changed to %d\n", cm->height);
     }
     if (cm->height > cpi->initial_height) {
       cm->height = cpi->initial_height;
-      printf("Warning: Desired height too large, changed to %d \n", cm->height);
+      printf("Warning: Desired height too large, changed to %d\n", cm->height);
     }
   }
 
