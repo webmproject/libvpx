@@ -11,6 +11,7 @@
 #include "EbmlIDs.h"
 #include "WebMElement.h"
 #include <stdio.h>
+#include "vpx/vpx_integer.h"
 
 #define kVorbisPrivateMaxSize  4000
 
@@ -43,12 +44,12 @@ void writeSimpleBlock(EbmlGlobal *glob, unsigned char trackNumber, short timeCod
   Ebml_Write(glob, data, dataLength);
 }
 
-static UInt64 generateTrackID(unsigned int trackNumber) {
-  UInt64 t = time(NULL) * trackNumber;
-  UInt64 r = rand();
+static uint64_t generateTrackID(unsigned int trackNumber) {
+  uint64_t t = time(NULL) * trackNumber;
+  uint64_t r = rand();
   r = r << 32;
   r +=  rand();
-  UInt64 rval = t ^ r;
+  uint64_t rval = t ^ r;
   return rval;
 }
 
@@ -59,7 +60,7 @@ void writeVideoTrack(EbmlGlobal *glob, unsigned int trackNumber,
   EbmlLoc start;
   Ebml_StartSubElement(glob, &start, TrackEntry);
   Ebml_SerializeUnsigned(glob, TrackNumber, trackNumber);
-  UInt64 trackID = generateTrackID(trackNumber);
+  uint64_t trackID = generateTrackID(trackNumber);
   Ebml_SerializeUnsigned(glob, TrackUID, trackID);
   Ebml_SerializeString(glob, CodecName, "VP8");  // TODO shouldn't be fixed
 
@@ -82,7 +83,7 @@ void writeAudioTrack(EbmlGlobal *glob, unsigned int trackNumber,
   EbmlLoc start;
   Ebml_StartSubElement(glob, &start, TrackEntry);
   Ebml_SerializeUnsigned(glob, TrackNumber, trackNumber);
-  UInt64 trackID = generateTrackID(trackNumber);
+  uint64_t trackID = generateTrackID(trackNumber);
   Ebml_SerializeUnsigned(glob, TrackUID, trackID);
   Ebml_SerializeUnsigned(glob, TrackType, 2); // audio is always 2
   // I am using defaults for thesed required fields
