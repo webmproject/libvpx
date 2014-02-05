@@ -142,6 +142,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//5EE\u003d",
+        "filename": "video_common.h",
+        "patchSetId": 10
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-02-05T23:59:16Z",
+      "side": 1,
+      "message": "None of the reasoning above supports using fourCCs, in my opinion. From my perspective the only argument for using them that I can see is that it avoids changing a very small amount of code.\n\n- FourCCs are inadequate for use with WebM (has backwards compatibility with fourCCs, but uses strings for codec identifiers under normal circumstances)\n- Constants are supposed to be typed, and preprocessor macros are to be avoided (per the style guide): http://google-styleguide.googlecode.com/svn/trunk/cppguide.xml?showone\u003dPreprocessor_Macros#Preprocessor_Macros\n- Using the fourcc or an enum member to determine the outcome of a vpx_video_reader_get_frame() operation is two different ways of doing the same thing.\n\nWhy is knowing the codec ID in advance important? Any input API must support failing gracefully when given bad input. We should not have an API that supports operations on file types we do not support. In other words, our API should not be saying: \"Hey, I have this data here with a fourCC, but I don\u0027t know what it is, have fun API user\". It should inspect the fourCC, decide if it likes it, and report the codec type via the value in the enumeration after confirming its known and understood.\n\nNote, my enum looks like this:\n\n    enum VpxVideoCodecType {\n      kCodecVP8 \u003d VP8_FOURCC,\n      kCodecVP9 \u003d VP9_FOURCC,\n    }\n\nUsing that instead of the four CCs directly should be a very minor change. Are we using any other four CCs? Do I420 and YV12 pop up somewhere?\n\nAnyway, you can ignore this and choose to leave things as they are. I\u0027ll even +1 the change, but I will not approve it. Just getting my thoughts on the situation into the code review. (in other words, you\u0027ll have to +2 and submit yourself, or get someone else\u0027s +2 before landing)",
+      "parentUuid": "AAAAdn//5Gg\u003d",
+      "revId": "e8e651846bb1979f14902bb9941f83a7f84a7a35",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//5Kg\u003d",
         "filename": "video_common.h",
         "patchSetId": 10
@@ -171,6 +189,24 @@
       "side": 1,
       "message": "No, that\u0027s time base -- the same as g_timebase in vpx_codec_enc_cfg_t or time_base in ffmpeg AVStream.",
       "parentUuid": "AAAAdn//5Kg\u003d",
+      "revId": "e8e651846bb1979f14902bb9941f83a7f84a7a35",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//5D4\u003d",
+        "filename": "video_common.h",
+        "patchSetId": 10
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-02-05T23:59:16Z",
+      "side": 1,
+      "message": "Ah, so the one in VpxVideoInputContext is misnamed, or I misused it in ivfdec.c (see file_is_ivf()).",
+      "parentUuid": "AAAAdn//5IM\u003d",
       "revId": "e8e651846bb1979f14902bb9941f83a7f84a7a35",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -247,6 +283,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//5D0\u003d",
+        "filename": "video_reader.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-02-05T23:59:16Z",
+      "side": 1,
+      "message": "I just wanted you to add it, not replace something. Fine to do in another patchset.",
+      "parentUuid": "AAAAdn//5Hg\u003d",
+      "revId": "e8e651846bb1979f14902bb9941f83a7f84a7a35",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//5LU\u003d",
         "filename": "video_reader.c",
         "patchSetId": 10
@@ -282,6 +336,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//5Dw\u003d",
+        "filename": "video_reader.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-02-05T23:59:16Z",
+      "side": 1,
+      "message": "OK.",
+      "parentUuid": "AAAAdn//5HY\u003d",
+      "revId": "e8e651846bb1979f14902bb9941f83a7f84a7a35",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//5LY\u003d",
         "filename": "video_reader.c",
         "patchSetId": 10
@@ -311,6 +383,24 @@
       "side": 1,
       "message": "That\u0027s not actually true. The purpose of this API just to open video container and get general information about video data: frame width \u0026 height and video codec. This API doesn\u0027t care about the codec -- it is the higher level task to decide what to do with opened file. And again this is the reason to use fourcc instead of enumeration (which could be considered as unnecessary restriction of this API.\n\nBut changing this function to return VpxVideoInfo*.",
       "parentUuid": "AAAAdn//5LY\u003d",
+      "revId": "e8e651846bb1979f14902bb9941f83a7f84a7a35",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//5Do\u003d",
+        "filename": "video_reader.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 82,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-02-05T23:59:16Z",
+      "side": 1,
+      "message": "This is one of the problems that having an enum that maps to supported fourCCs would help to solve.\n\nWhat you have now could have complete junk after the IVF version, but the reader API happily sends it back to the user and lets them have the fun of determining why every field in VpxVideoInfo is garbage data. The act of inspecting the codec type and converting it to the enumeration value provides an extra check that the input data is valid.",
+      "parentUuid": "AAAAdn//5HQ\u003d",
       "revId": "e8e651846bb1979f14902bb9941f83a7f84a7a35",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -486,6 +576,24 @@
       "side": 1,
       "message": "Yes, we will. I\u0027m not sure right now. Most likely it will be switch/if-else-if because IVF and Y4M have different interfaces now (function signatures are very different).",
       "parentUuid": "AAAAdn//5Ko\u003d",
+      "revId": "e8e651846bb1979f14902bb9941f83a7f84a7a35",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//5Dk\u003d",
+        "filename": "video_writer.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 73,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-02-05T23:59:16Z",
+      "side": 1,
+      "message": "Ok, just curious. Would be really nice if we could some day get to the point where this just unconditionally calls a function pointer.",
+      "parentUuid": "AAAAdn//5IQ\u003d",
       "revId": "e8e651846bb1979f14902bb9941f83a7f84a7a35",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
