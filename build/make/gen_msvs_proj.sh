@@ -155,8 +155,8 @@ generate_filter() {
                             tag Tool \
                                 Name="VCCustomBuildTool" \
                                 Description="Assembling \$(InputFileName)" \
-                                CommandLine="$(eval echo \$asm_${cfg}_cmdline) -o \$(IntDir)$objf" \
-                                Outputs="\$(IntDir)$objf" \
+                                CommandLine="$(eval echo \$asm_${cfg}_cmdline) -o \$(IntDir)\\$objf" \
+                                Outputs="\$(IntDir)\\$objf" \
 
                             close_tag FileConfiguration
                         done
@@ -170,7 +170,7 @@ generate_filter() {
 
                             tag Tool \
                                 Name="VCCLCompilerTool" \
-                                ObjectFile="\$(IntDir)$objf" \
+                                ObjectFile="\$(IntDir)\\$objf" \
 
                             close_tag FileConfiguration
                         done
