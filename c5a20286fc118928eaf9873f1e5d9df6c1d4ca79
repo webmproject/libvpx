@@ -1,0 +1,259 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//5Hc\u003d",
+        "filename": "vp9/common/vp9_rtcd_defs.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 389,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2014-02-05T22:49:12Z",
+      "side": 1,
+      "message": "avx2 instead of $avx2_x86inc",
+      "revId": "c5a20286fc118928eaf9873f1e5d9df6c1d4ca79",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//5HU\u003d",
+        "filename": "vp9/common/vp9_rtcd_defs.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 419,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2014-02-05T22:49:12Z",
+      "side": 1,
+      "message": "avx2 instead of $avx2_x86inc",
+      "revId": "c5a20286fc118928eaf9873f1e5d9df6c1d4ca79",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//5JI\u003d",
+        "filename": "vp9/encoder/x86/vp9_variance_avx2.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2014-02-05T22:49:12Z",
+      "side": 1,
+      "message": "Delete it if not used.",
+      "revId": "c5a20286fc118928eaf9873f1e5d9df6c1d4ca79",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//5JE\u003d",
+        "filename": "vp9/encoder/x86/vp9_variance_avx2.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2014-02-05T22:49:12Z",
+      "side": 1,
+      "message": "Can also be deleted?",
+      "revId": "c5a20286fc118928eaf9873f1e5d9df6c1d4ca79",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//5JA\u003d",
+        "filename": "vp9/encoder/x86/vp9_variance_avx2.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2014-02-05T22:49:12Z",
+      "side": 1,
+      "message": "Remove EOL character in this patch.",
+      "revId": "c5a20286fc118928eaf9873f1e5d9df6c1d4ca79",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//5Ho\u003d",
+        "filename": "vp9/encoder/x86/vp9_variance_avx2.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 183,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2014-02-05T22:49:12Z",
+      "side": 1,
+      "message": "indent",
+      "revId": "c5a20286fc118928eaf9873f1e5d9df6c1d4ca79",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//5Hs\u003d",
+        "filename": "vp9/encoder/x86/vp9_variance_avx2.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 191,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2014-02-05T22:49:12Z",
+      "side": 1,
+      "message": "indent -- 2 whitespaces in the front. same for next 3 lines.",
+      "revId": "c5a20286fc118928eaf9873f1e5d9df6c1d4ca79",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//5IA\u003d",
+        "filename": "vp9/encoder/x86/vp9_variance_avx2.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 194,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2014-02-05T22:49:12Z",
+      "side": 1,
+      "message": "(((int64_t)se * se)  \u003e\u003e 12)",
+      "revId": "c5a20286fc118928eaf9873f1e5d9df6c1d4ca79",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//5Hk\u003d",
+        "filename": "vp9/encoder/x86/vp9_variance_avx2.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 209,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2014-02-05T22:49:12Z",
+      "side": 1,
+      "message": "indent",
+      "revId": "c5a20286fc118928eaf9873f1e5d9df6c1d4ca79",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//5H8\u003d",
+        "filename": "vp9/encoder/x86/vp9_variance_avx2.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 210,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2014-02-05T22:49:12Z",
+      "side": 1,
+      "message": "(((int64_t)se * se)  \u003e\u003e 10)",
+      "revId": "c5a20286fc118928eaf9873f1e5d9df6c1d4ca79",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//5G0\u003d",
+        "filename": "vp9/encoder/x86/vp9_variance_impl_intrin_avx2.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2014-02-05T22:49:12Z",
+      "side": 1,
+      "message": "Do you need to include vp9_variance.h?",
+      "revId": "c5a20286fc118928eaf9873f1e5d9df6c1d4ca79",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//5Gs\u003d",
+        "filename": "vp9/encoder/x86/vp9_variance_impl_intrin_avx2.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2014-02-05T22:49:12Z",
+      "side": 1,
+      "message": "Change to ...) \u003d {",
+      "revId": "c5a20286fc118928eaf9873f1e5d9df6c1d4ca79",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//5Go\u003d",
+        "filename": "vp9/encoder/x86/vp9_variance_impl_intrin_avx2.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2014-02-05T22:49:12Z",
+      "side": 1,
+      "message": "2-space indent",
+      "revId": "c5a20286fc118928eaf9873f1e5d9df6c1d4ca79",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//5HM\u003d",
+        "filename": "vp9/encoder/x86/vp9_variance_impl_intrin_avx2.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 259,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2014-02-05T22:49:12Z",
+      "side": 1,
+      "message": "Remove all tabs and new line character.",
+      "revId": "c5a20286fc118928eaf9873f1e5d9df6c1d4ca79",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//5HI\u003d",
+        "filename": "vp9/encoder/x86/vp9_variance_impl_intrin_avx2.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 261,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2014-02-05T22:49:12Z",
+      "side": 1,
+      "message": "Change to 2-space indent in this function.",
+      "revId": "c5a20286fc118928eaf9873f1e5d9df6c1d4ca79",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
