@@ -24,6 +24,7 @@
 
 #include "vp9/encoder/vp9_encodemb.h"
 #include "vp9/encoder/vp9_lookahead.h"
+#include "vp9/encoder/vp9_mbgraph.h"
 #include "vp9/encoder/vp9_mcomp.h"
 #include "vp9/encoder/vp9_quantize.h"
 #include "vp9/encoder/vp9_ratectrl.h"
@@ -99,20 +100,6 @@ typedef struct {
   double duration;
   double count;
 } FIRSTPASS_STATS;
-
-typedef struct {
-  struct {
-    int err;
-    union {
-      int_mv mv;
-      MB_PREDICTION_MODE mode;
-    } m;
-  } ref[MAX_REF_FRAMES];
-} MBGRAPH_MB_STATS;
-
-typedef struct {
-  MBGRAPH_MB_STATS *mb_stats;
-} MBGRAPH_FRAME_STATS;
 
 // This enumerator type needs to be kept aligned with the mode order in
 // const MODE_DEFINITION vp9_mode_order[MAX_MODES] used in the rd code.
