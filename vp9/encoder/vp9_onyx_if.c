@@ -2417,34 +2417,33 @@ static double compute_edge_pixel_proportion(YV12_BUFFER_CONFIG *frame) {
 
 // Function to test for conditions that indicate we should loop
 // back and recode a frame.
-static int recode_loop_test(VP9_COMP *cpi,
+static int recode_loop_test(const VP9_COMP *cpi,
                             int high_limit, int low_limit,
                             int q, int maxq, int minq) {
+  const VP9_COMMON *const cm = &cpi->common;
+  const RATE_CONTROL *const rc = &cpi->rc;
   int force_recode = 0;
-  VP9_COMMON *cm = &cpi->common;
 
   // Special case trap if maximum allowed frame size exceeded.
-  if (cpi->rc.projected_frame_size > cpi->rc.max_frame_bandwidth) {
+  if (rc->projected_frame_size > rc->max_frame_bandwidth) {
     force_recode = 1;
 
   // Is frame recode allowed.
   // Yes if either recode mode 1 is selected or mode 2 is selected
   // and the frame is a key frame, golden frame or alt_ref_frame
   } else if ((cpi->sf.recode_loop == 1) ||
-      ((cpi->sf.recode_loop == 2) &&
-       ((cm->frame_type == KEY_FRAME) ||
-        cpi->refresh_golden_frame ||
-        cpi->refresh_alt_ref_frame))) {
+             ((cpi->sf.recode_loop == 2) &&
+              (cm->frame_type == KEY_FRAME ||
+               cpi->refresh_golden_frame || cpi->refresh_alt_ref_frame))) {
     // General over and under shoot tests
-    if (((cpi->rc.projected_frame_size > high_limit) && (q < maxq)) ||
-        ((cpi->rc.projected_frame_size < low_limit) && (q > minq))) {
+    if ((rc->projected_frame_size > high_limit && q < maxq) ||
+        (rc->projected_frame_size < low_limit && q > minq)) {
       force_recode = 1;
     } else if (cpi->oxcf.end_usage == USAGE_CONSTRAINED_QUALITY) {
       // Deal with frame undershoot and whether or not we are
       // below the automatically set cq level.
       if (q > cpi->cq_target_quality &&
-          cpi->rc.projected_frame_size <
-          ((cpi->rc.this_frame_target * 7) >> 3)) {
+          rc->projected_frame_size < ((rc->this_frame_target * 7) >> 3)) {
         force_recode = 1;
       }
     }
