@@ -187,8 +187,8 @@ static int raw_read_frame(FILE *infile, uint8_t **buffer,
     if (!feof(infile))
       warn("Failed to read RAW frame size\n");
   } else {
-    const int kCorruptFrameThreshold = 256 * 1024 * 1024;
-    const int kFrameTooSmallThreshold = 256 * 1024;
+    const size_t kCorruptFrameThreshold = 256 * 1024 * 1024;
+    const size_t kFrameTooSmallThreshold = 256 * 1024;
     frame_size = mem_get_le32(raw_hdr);
 
     if (frame_size > kCorruptFrameThreshold) {
