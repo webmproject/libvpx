@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//5Is\u003d",
+        "filename": "examples/decode_to_md5.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 86,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-02-05T22:41:03Z",
+      "side": 1,
+      "message": "Done (and for all other examples as well)",
+      "parentUuid": "AAAAdn//5Mo\u003d",
+      "revId": "e8e651846bb1979f14902bb9941f83a7f84a7a35",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//5Mk\u003d",
         "filename": "examples/decode_to_md5.c",
         "patchSetId": 10
@@ -30,6 +48,24 @@
       "writtenOn": "2014-02-05T19:48:08Z",
       "side": 1,
       "message": "\u003d {0};",
+      "revId": "e8e651846bb1979f14902bb9941f83a7f84a7a35",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//5Iw\u003d",
+        "filename": "examples/decode_to_md5.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 87,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-02-05T22:41:03Z",
+      "side": 1,
+      "message": "Converted to const pointer and assigned NULL.",
+      "parentUuid": "AAAAdn//5Mk\u003d",
       "revId": "e8e651846bb1979f14902bb9941f83a7f84a7a35",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//5Io\u003d",
+        "filename": "examples/decode_with_drops.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 107,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-02-05T22:41:03Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//5Lw\u003d",
+      "revId": "e8e651846bb1979f14902bb9941f83a7f84a7a35",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//5KY\u003d",
         "filename": "video_common.h",
         "patchSetId": 10
@@ -64,6 +118,24 @@
       "writtenOn": "2014-02-05T19:48:08Z",
       "side": 1,
       "message": "Prefer VpxVideoCodec enum, and:\n- removal of four CC defines and usage from tools/examples\n- usage of four CCs only where required (in reader/writer plug-ins and when dealing directly with libvpx where libvpx itself requires a four CC)",
+      "revId": "e8e651846bb1979f14902bb9941f83a7f84a7a35",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//5Gg\u003d",
+        "filename": "video_common.h",
+        "patchSetId": 10
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-02-05T22:41:03Z",
+      "side": 1,
+      "message": "I know we already discussed this issue but I still don\u0027t like to do that change (at least not now). The purpose of codec_fourcc is just to identify the codec (both for reader and writer). This codec id allows us to decide what we are going to do with the raw data returned from vpx_video_reader_get_frame(). API doesn\u0027t care about data semantic value -- it just works with raw bytes.\nWe don\u0027t know codec id in advance that\u0027s why I don\u0027t like the enum. Current API could be easily reused outside of libvxp -- it is not unnecessary restricted with VP8/VP9/whatever codec in that enum. \n\nI agree that fourcc could be considered old fashioned but it\u0027s perfectly ok for current task and it doesn\u0027t put any limitations right now. In the case of problems we could change the code at any time -- that\u0027s our internal API and we don\u0027t provide any guaranties about it.",
+      "parentUuid": "AAAAdn//5KY\u003d",
       "revId": "e8e651846bb1979f14902bb9941f83a7f84a7a35",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//5IM\u003d",
+        "filename": "video_common.h",
+        "patchSetId": 10
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-02-05T22:41:03Z",
+      "side": 1,
+      "message": "No, that\u0027s time base -- the same as g_timebase in vpx_codec_enc_cfg_t or time_base in ffmpeg AVStream.",
+      "parentUuid": "AAAAdn//5Kg\u003d",
+      "revId": "e8e651846bb1979f14902bb9941f83a7f84a7a35",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//5LQ\u003d",
         "filename": "video_reader.c",
         "patchSetId": 10
@@ -98,6 +188,24 @@
       "writtenOn": "2014-02-05T19:48:08Z",
       "side": 1,
       "message": "kIVFSignature or kIvfSignature",
+      "revId": "e8e651846bb1979f14902bb9941f83a7f84a7a35",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//5Hw\u003d",
+        "filename": "video_reader.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-02-05T22:41:03Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//5LQ\u003d",
       "revId": "e8e651846bb1979f14902bb9941f83a7f84a7a35",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -121,6 +229,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//5Hg\u003d",
+        "filename": "video_reader.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-02-05T22:41:03Z",
+      "side": 1,
+      "message": "I agree. Let me please fix it in the next patch. It will be required to make changes in vpxdec/vpxenc if I modify IVF reading functions. I just want to limit the scope of current change set.",
+      "parentUuid": "AAAAdn//5Lg\u003d",
+      "revId": "e8e651846bb1979f14902bb9941f83a7f84a7a35",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//5LU\u003d",
         "filename": "video_reader.c",
         "patchSetId": 10
@@ -132,6 +258,24 @@
       "writtenOn": "2014-02-05T19:48:08Z",
       "side": 1,
       "message": "These offset magic numbers should be constants. i.e. kCodecFourCCOffset, kWidthOffset, kHeightOffset.",
+      "revId": "e8e651846bb1979f14902bb9941f83a7f84a7a35",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//5HY\u003d",
+        "filename": "video_reader.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-02-05T22:41:03Z",
+      "side": 1,
+      "message": "I agree here as well. All IVF-specific code should be defined in ivfenc/ivfdec files along with all appropriate constants, error checks and etc. I\u0027ll put this on my todo list.",
+      "parentUuid": "AAAAdn//5LU\u003d",
       "revId": "e8e651846bb1979f14902bb9941f83a7f84a7a35",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -155,6 +299,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//5HQ\u003d",
+        "filename": "video_reader.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 82,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-02-05T22:41:03Z",
+      "side": 1,
+      "message": "That\u0027s not actually true. The purpose of this API just to open video container and get general information about video data: frame width \u0026 height and video codec. This API doesn\u0027t care about the codec -- it is the higher level task to decide what to do with opened file. And again this is the reason to use fourcc instead of enumeration (which could be considered as unnecessary restriction of this API.\n\nBut changing this function to return VpxVideoInfo*.",
+      "parentUuid": "AAAAdn//5LY\u003d",
+      "revId": "e8e651846bb1979f14902bb9941f83a7f84a7a35",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//5LM\u003d",
         "filename": "video_reader.h",
         "patchSetId": 10
@@ -166,6 +328,24 @@
       "writtenOn": "2014-02-05T19:48:08Z",
       "side": 1,
       "message": "transparent reading of input files. There\u0027s little point in doing this if we\u0027re supporting only IVF and Y4M.",
+      "revId": "e8e651846bb1979f14902bb9941f83a7f84a7a35",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//5IE\u003d",
+        "filename": "video_reader.h",
+        "patchSetId": 10
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-02-05T22:41:03Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//5LM\u003d",
       "revId": "e8e651846bb1979f14902bb9941f83a7f84a7a35",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -189,6 +369,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//5II\u003d",
+        "filename": "video_reader.h",
+        "patchSetId": 10
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-02-05T22:41:03Z",
+      "side": 1,
+      "message": "We are going in that direction. Examples is the first target because it is just easier and allows to reduce example code complexity by removing *a lot of* identical copy-pasted code. \n\nvxpenc/vpxdec is the second target when examples are done. Removing \"probably\" from the comment.",
+      "parentUuid": "AAAAdn//5LI\u003d",
+      "revId": "e8e651846bb1979f14902bb9941f83a7f84a7a35",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//5LA\u003d",
         "filename": "video_reader.h",
         "patchSetId": 10
@@ -200,6 +398,24 @@
       "writtenOn": "2014-02-05T19:48:08Z",
       "side": 1,
       "message": "Drop \"bytes\", and s/them into/it in/",
+      "revId": "e8e651846bb1979f14902bb9941f83a7f84a7a35",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//5H4\u003d",
+        "filename": "video_reader.h",
+        "patchSetId": 10
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-02-05T22:41:03Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//5LA\u003d",
       "revId": "e8e651846bb1979f14902bb9941f83a7f84a7a35",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -223,6 +439,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//5H0\u003d",
+        "filename": "video_reader.h",
+        "patchSetId": 10
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-02-05T22:41:03Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//5K8\u003d",
+      "revId": "e8e651846bb1979f14902bb9941f83a7f84a7a35",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//5Ko\u003d",
         "filename": "video_writer.c",
         "patchSetId": 10
@@ -234,6 +468,24 @@
       "writtenOn": "2014-02-05T19:48:08Z",
       "side": 1,
       "message": "How do you intend to support Y4M here (will we support writing Y4M?) ?\n\nAre you going to assign function pointers in _open(), and call them unconditionally here, or will you switch/if-else-if?",
+      "revId": "e8e651846bb1979f14902bb9941f83a7f84a7a35",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//5IQ\u003d",
+        "filename": "video_writer.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 73,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-02-05T22:41:03Z",
+      "side": 1,
+      "message": "Yes, we will. I\u0027m not sure right now. Most likely it will be switch/if-else-if because IVF and Y4M have different interfaces now (function signatures are very different).",
+      "parentUuid": "AAAAdn//5Ko\u003d",
       "revId": "e8e651846bb1979f14902bb9941f83a7f84a7a35",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -257,6 +509,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//5Ig\u003d",
+        "filename": "video_writer.h",
+        "patchSetId": 10
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-02-05T22:41:03Z",
+      "side": 1,
+      "message": "Renamed to kContainerIVF. \n\nThis constant is not strictly necessary for the VpxVideoReader interface because container format is going to be transparent for the client (i.e. client doesn\u0027t care). Let\u0027s put it here for now and move if it would be really required.",
+      "parentUuid": "AAAAdn//5Kw\u003d",
+      "revId": "e8e651846bb1979f14902bb9941f83a7f84a7a35",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//5Kk\u003d",
         "filename": "video_writer.h",
         "patchSetId": 10
@@ -268,6 +538,24 @@
       "writtenOn": "2014-02-05T19:48:08Z",
       "side": 1,
       "message": "Finds and opens writer for specified container format.",
+      "revId": "e8e651846bb1979f14902bb9941f83a7f84a7a35",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//5Ik\u003d",
+        "filename": "video_writer.h",
+        "patchSetId": 10
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-02-05T22:41:03Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//5Kk\u003d",
       "revId": "e8e651846bb1979f14902bb9941f83a7f84a7a35",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
