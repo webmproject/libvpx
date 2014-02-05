@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//5Fo\u003d",
+        "filename": "vp9/common/x86/vp9_subpixel_8t_intrin_avx2.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2014-02-05T23:28:55Z",
+      "side": 1,
+      "message": "Do you need to include emmintrin_compat.h?",
+      "revId": "d8a4682549bd22795e044c949c54ece8294e0469",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//5FY\u003d",
+        "filename": "vp9/common/x86/vp9_subpixel_8t_intrin_avx2.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2014-02-05T23:28:55Z",
+      "side": 1,
+      "message": "Add #if defined(__GNUC__) in gcc version check",
+      "revId": "d8a4682549bd22795e044c949c54ece8294e0469",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//5Ew\u003d",
+        "filename": "vp9/common/x86/vp9_subpixel_8t_intrin_avx2.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 304,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2014-02-05T23:28:55Z",
+      "side": 1,
+      "message": "same as above",
+      "revId": "d8a4682549bd22795e044c949c54ece8294e0469",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
