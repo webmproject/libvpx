@@ -291,23 +291,23 @@ int vp9_get_pred_context_single_ref_p2(const MACROBLOCKD *xd) {
     } else {  // inter/inter
       const int above_has_second = has_second_ref(above_mbmi);
       const int left_has_second = has_second_ref(left_mbmi);
+      const MV_REFERENCE_FRAME above0 = above_mbmi->ref_frame[0];
+      const MV_REFERENCE_FRAME above1 = above_mbmi->ref_frame[1];
+      const MV_REFERENCE_FRAME left0 = left_mbmi->ref_frame[0];
+      const MV_REFERENCE_FRAME left1 = left_mbmi->ref_frame[1];
 
       if (above_has_second && left_has_second) {
-        if (above_mbmi->ref_frame[0] == left_mbmi->ref_frame[0] &&
-            above_mbmi->ref_frame[1] == left_mbmi->ref_frame[1])
-          pred_context = 3 * (above_mbmi->ref_frame[0] == GOLDEN_FRAME ||
-                              above_mbmi->ref_frame[1] == GOLDEN_FRAME ||
-                              left_mbmi->ref_frame[0] == GOLDEN_FRAME ||
-                              left_mbmi->ref_frame[1] == GOLDEN_FRAME);
+        if (above0 == left0 && above1 == left1)
+          pred_context = 3 * (above0 == GOLDEN_FRAME ||
+                              above1 == GOLDEN_FRAME ||
+                              left0 == GOLDEN_FRAME ||
+                              left1 == GOLDEN_FRAME);
         else
           pred_context = 2;
       } else if (above_has_second || left_has_second) {
-        const MV_REFERENCE_FRAME rfs = !above_has_second ?
-                     above_mbmi->ref_frame[0] : left_mbmi->ref_frame[0];
-        const MV_REFERENCE_FRAME crf1 = above_has_second ?
-                   above_mbmi->ref_frame[0] : left_mbmi->ref_frame[0];
-        const MV_REFERENCE_FRAME crf2 = above_has_second ?
-                     above_mbmi->ref_frame[1] : left_mbmi->ref_frame[1];
+        const MV_REFERENCE_FRAME rfs = !above_has_second ? above0 : left0;
+        const MV_REFERENCE_FRAME crf1 = above_has_second ? above0 : left0;
+        const MV_REFERENCE_FRAME crf2 = above_has_second ? above1 : left1;
 
         if (rfs == GOLDEN_FRAME)
           pred_context = 3 + (crf1 == GOLDEN_FRAME || crf2 == GOLDEN_FRAME);
@@ -316,17 +316,15 @@ int vp9_get_pred_context_single_ref_p2(const MACROBLOCKD *xd) {
         else
           pred_context = 1 + 2 * (crf1 == GOLDEN_FRAME || crf2 == GOLDEN_FRAME);
       } else {
-        if (above_mbmi->ref_frame[0] == LAST_FRAME &&
-            left_mbmi->ref_frame[0] == LAST_FRAME) {
+        if (above0 == LAST_FRAME && left0 == LAST_FRAME) {
           pred_context = 3;
-        } else if (above_mbmi->ref_frame[0] == LAST_FRAME ||
-                   left_mbmi->ref_frame[0] == LAST_FRAME) {
-          const MB_MODE_INFO *edge_mbmi =
-              above_mbmi->ref_frame[0] == LAST_FRAME ? left_mbmi : above_mbmi;
-            pred_context = 4 * (edge_mbmi->ref_frame[0] == GOLDEN_FRAME);
+        } else if (above0 == LAST_FRAME || left0 == LAST_FRAME) {
+          const MV_REFERENCE_FRAME edge0 = (above0 == LAST_FRAME) ? left0
+                                                                  : above0;
+          pred_context = 4 * (edge0 == GOLDEN_FRAME);
         } else {
-          pred_context = 2 * (above_mbmi->ref_frame[0] == GOLDEN_FRAME) +
-                         2 * (left_mbmi->ref_frame[0] == GOLDEN_FRAME);
+          pred_context = 2 * (above0 == GOLDEN_FRAME) +
+                             2 * (left0 == GOLDEN_FRAME);
         }
       }
     }
