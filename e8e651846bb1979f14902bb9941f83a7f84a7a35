@@ -1,0 +1,276 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//5Mo\u003d",
+        "filename": "examples/decode_to_md5.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 86,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-02-05T19:48:08Z",
+      "side": 1,
+      "message": "\u003d NULL;\nThough I\u0027m probably being pedantic...",
+      "revId": "e8e651846bb1979f14902bb9941f83a7f84a7a35",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//5Mk\u003d",
+        "filename": "examples/decode_to_md5.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 87,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-02-05T19:48:08Z",
+      "side": 1,
+      "message": "\u003d {0};",
+      "revId": "e8e651846bb1979f14902bb9941f83a7f84a7a35",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//5Lw\u003d",
+        "filename": "examples/decode_with_drops.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 107,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-02-05T19:48:08Z",
+      "side": 1,
+      "message": "s/FOURCC code/input codec/",
+      "revId": "e8e651846bb1979f14902bb9941f83a7f84a7a35",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//5KY\u003d",
+        "filename": "video_common.h",
+        "patchSetId": 10
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-02-05T19:48:08Z",
+      "side": 1,
+      "message": "Prefer VpxVideoCodec enum, and:\n- removal of four CC defines and usage from tools/examples\n- usage of four CCs only where required (in reader/writer plug-ins and when dealing directly with libvpx where libvpx itself requires a four CC)",
+      "revId": "e8e651846bb1979f14902bb9941f83a7f84a7a35",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//5Kg\u003d",
+        "filename": "video_common.h",
+        "patchSetId": 10
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-02-05T19:48:08Z",
+      "side": 1,
+      "message": "Isn\u0027t this frame rate?",
+      "revId": "e8e651846bb1979f14902bb9941f83a7f84a7a35",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//5LQ\u003d",
+        "filename": "video_reader.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-02-05T19:48:08Z",
+      "side": 1,
+      "message": "kIVFSignature or kIvfSignature",
+      "revId": "e8e651846bb1979f14902bb9941f83a7f84a7a35",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//5Lg\u003d",
+        "filename": "video_reader.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-02-05T19:48:08Z",
+      "side": 1,
+      "message": "I think the code in this function should be in a function called ivf_reader_open(), and should remain in ivfdec.c.\n\nfile_is_ivf() should probably be refactored to use this code.",
+      "revId": "e8e651846bb1979f14902bb9941f83a7f84a7a35",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//5LU\u003d",
+        "filename": "video_reader.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-02-05T19:48:08Z",
+      "side": 1,
+      "message": "These offset magic numbers should be constants. i.e. kCodecFourCCOffset, kWidthOffset, kHeightOffset.",
+      "revId": "e8e651846bb1979f14902bb9941f83a7f84a7a35",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//5LY\u003d",
+        "filename": "video_reader.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 82,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-02-05T19:48:08Z",
+      "side": 1,
+      "message": "From looking at the implementation it\u0027s impossible to tell if there\u0027s unsupported input until the call to get_codec_interface(). It would be better if this returned VpxVideoInfo* instead, and returned NULL when the input is bad/unsupported.",
+      "revId": "e8e651846bb1979f14902bb9941f83a7f84a7a35",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//5LM\u003d",
+        "filename": "video_reader.h",
+        "patchSetId": 10
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-02-05T19:48:08Z",
+      "side": 1,
+      "message": "transparent reading of input files. There\u0027s little point in doing this if we\u0027re supporting only IVF and Y4M.",
+      "revId": "e8e651846bb1979f14902bb9941f83a7f84a7a35",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//5LI\u003d",
+        "filename": "video_reader.h",
+        "patchSetId": 10
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-02-05T19:48:08Z",
+      "side": 1,
+      "message": "Again, this is not worthwhile if it will not replace the nastiness in vpxenc and vpxdec.",
+      "revId": "e8e651846bb1979f14902bb9941f83a7f84a7a35",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//5LA\u003d",
+        "filename": "video_reader.h",
+        "patchSetId": 10
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-02-05T19:48:08Z",
+      "side": 1,
+      "message": "Drop \"bytes\", and s/them into/it in/",
+      "revId": "e8e651846bb1979f14902bb9941f83a7f84a7a35",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//5K8\u003d",
+        "filename": "video_reader.h",
+        "patchSetId": 10
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-02-05T19:48:08Z",
+      "side": 1,
+      "message": "s/bytes/data/\n\n\n\ns/from/by/",
+      "revId": "e8e651846bb1979f14902bb9941f83a7f84a7a35",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//5Ko\u003d",
+        "filename": "video_writer.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 73,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-02-05T19:48:08Z",
+      "side": 1,
+      "message": "How do you intend to support Y4M here (will we support writing Y4M?) ?\n\nAre you going to assign function pointers in _open(), and call them unconditionally here, or will you switch/if-else-if?",
+      "revId": "e8e651846bb1979f14902bb9941f83a7f84a7a35",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//5Kw\u003d",
+        "filename": "video_writer.h",
+        "patchSetId": 10
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-02-05T19:48:08Z",
+      "side": 1,
+      "message": "kContainerIVF or kContainerIvf\n\nI think this should be in video_common: It\u0027s fine here now, but I suspect it\u0027ll become necessary for reading purposes pretty quickly.",
+      "revId": "e8e651846bb1979f14902bb9941f83a7f84a7a35",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//5Kk\u003d",
+        "filename": "video_writer.h",
+        "patchSetId": 10
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-02-05T19:48:08Z",
+      "side": 1,
+      "message": "Finds and opens writer for specified container format.",
+      "revId": "e8e651846bb1979f14902bb9941f83a7f84a7a35",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
