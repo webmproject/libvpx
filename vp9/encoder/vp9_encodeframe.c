@@ -491,24 +491,26 @@ static void update_state(VP9_COMP *cpi, PICK_MODE_CONTEXT *ctx,
   } else {
     // Note how often each mode chosen as best
     cpi->mode_chosen_counts[mb_mode_index]++;
-    if (is_inter_block(mbmi) &&
-        (mbmi->sb_type < BLOCK_8X8 || mbmi->mode == NEWMV)) {
-      int_mv best_mv[2];
-      for (i = 0; i < 1 + has_second_ref(mbmi); ++i)
-        best_mv[i].as_int = mbmi->ref_mvs[mbmi->ref_frame[i]][0].as_int;
-      vp9_update_mv_count(cpi, x, best_mv);
-    }
 
-    if (cm->interp_filter == SWITCHABLE && is_inter_mode(mbmi->mode)) {
-      const int ctx = vp9_get_pred_context_switchable_interp(xd);
-      ++cm->counts.switchable_interp[ctx][mbmi->interp_filter];
+    if (is_inter_block(mbmi)) {
+      if (mbmi->sb_type < BLOCK_8X8 || mbmi->mode == NEWMV) {
+        int_mv best_mv[2];
+        for (i = 0; i < 1 + has_second_ref(mbmi); ++i)
+          best_mv[i].as_int = mbmi->ref_mvs[mbmi->ref_frame[i]][0].as_int;
+        vp9_update_mv_count(cpi, x, best_mv);
+      }
+
+      if (cm->interp_filter == SWITCHABLE) {
+        const int ctx = vp9_get_pred_context_switchable_interp(xd);
+        ++cm->counts.switchable_interp[ctx][mbmi->interp_filter];
+      }
     }
 
     cpi->rd_comp_pred_diff[SINGLE_REFERENCE] += ctx->single_pred_diff;
     cpi->rd_comp_pred_diff[COMPOUND_REFERENCE] += ctx->comp_pred_diff;
     cpi->rd_comp_pred_diff[REFERENCE_MODE_SELECT] += ctx->hybrid_pred_diff;
 
-    for (i = 0; i < SWITCHABLE_FILTER_CONTEXTS; i++)
+    for (i = 0; i < SWITCHABLE_FILTER_CONTEXTS; ++i)
       cpi->rd_filter_diff[i] += ctx->best_filter_diff[i];
   }
 }
@@ -1072,17 +1074,18 @@ static void update_state_rt(VP9_COMP *cpi, PICK_MODE_CONTEXT *ctx,
   } else {
     // Note how often each mode chosen as best
     cpi->mode_chosen_counts[mb_mode_index]++;
-    if (is_inter_block(mbmi) &&
-        (mbmi->sb_type < BLOCK_8X8 || mbmi->mode == NEWMV)) {
-      int_mv best_mv[2];
-      for (i = 0; i < 1 + has_second_ref(mbmi); ++i)
-        best_mv[i].as_int = mbmi->ref_mvs[mbmi->ref_frame[i]][0].as_int;
-      vp9_update_mv_count(cpi, x, best_mv);
-    }
+    if (is_inter_block(mbmi)) {
+      if (mbmi->sb_type < BLOCK_8X8 || mbmi->mode == NEWMV) {
+        int_mv best_mv[2];
+        for (i = 0; i < 1 + has_second_ref(mbmi); ++i)
+          best_mv[i].as_int = mbmi->ref_mvs[mbmi->ref_frame[i]][0].as_int;
+        vp9_update_mv_count(cpi, x, best_mv);
+      }
 
-    if (cm->interp_filter == SWITCHABLE && is_inter_mode(mbmi->mode)) {
-      const int ctx = vp9_get_pred_context_switchable_interp(xd);
-      ++cm->counts.switchable_interp[ctx][mbmi->interp_filter];
+      if (cm->interp_filter == SWITCHABLE) {
+        const int ctx = vp9_get_pred_context_switchable_interp(xd);
+        ++cm->counts.switchable_interp[ctx][mbmi->interp_filter];
+      }
     }
   }
 }
