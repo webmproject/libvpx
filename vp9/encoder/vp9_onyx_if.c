@@ -98,10 +98,6 @@ unsigned int frames_at_speed[16] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                                     0, 0, 0};
 #endif
 
-#if defined(SECTIONBITS_OUTPUT)
-extern unsigned __int64 Sectionbits[500];
-#endif
-
 extern void vp9_init_quantizer(VP9_COMP *cpi);
 
 static const double in_frame_q_adj_ratio[MAX_SEGMENTS] =
@@ -1965,21 +1961,6 @@ void vp9_remove_compressor(VP9_PTR *ptr) {
       fprintf(f, "%6.4f\n", norm_per_pixel_mode_tests);
       fclose(f);
     }
-#endif
-
-#if defined(SECTIONBITS_OUTPUT)
-
-    if (0) {
-      int i;
-      FILE *f = fopen("tokenbits.stt", "a");
-
-      for (i = 0; i < 28; i++)
-        fprintf(f, "%8d", (int)(Sectionbits[i] / 256));
-
-      fprintf(f, "\n");
-      fclose(f);
-    }
-
 #endif
 
 #if 0

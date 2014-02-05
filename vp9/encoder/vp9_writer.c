@@ -12,11 +12,6 @@
 #include "vp9/encoder/vp9_writer.h"
 #include "vp9/common/vp9_entropy.h"
 
-#if defined(SECTIONBITS_OUTPUT)
-unsigned __int64 Sectionbits[500];
-
-#endif
-
 #ifdef ENTROPY_STATS
 unsigned int active_section = 0;
 #endif
