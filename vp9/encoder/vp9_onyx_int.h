@@ -39,7 +39,6 @@ extern "C" {
 #define DISABLE_RC_LONG_TERM_MEM 0
 // #define MODE_TEST_HIT_STATS
 
-// #define SPEEDSTATS 1
 #if CONFIG_MULTIPLE_ARF
 // Set MIN_GF_INTERVAL to 1 for the full decomposition.
 #define MIN_GF_INTERVAL             2

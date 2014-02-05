@@ -93,12 +93,7 @@ FILE *kf_list;
 FILE *keyfile;
 #endif
 
-#ifdef SPEEDSTATS
-unsigned int frames_at_speed[16] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                                    0, 0, 0};
-#endif
-
-extern void vp9_init_quantizer(VP9_COMP *cpi);
+void vp9_init_quantizer(VP9_COMP *cpi);
 
 static const double in_frame_q_adj_ratio[MAX_SEGMENTS] =
   {1.0, 1.5, 2.0, 1.0, 1.0, 1.0, 1.0, 1.0};
@@ -953,10 +948,6 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
   }
 
   cpi->mb.optimize = cpi->sf.optimize_coefficients == 1 && cpi->pass != 1;
-
-#ifdef SPEEDSTATS
-  frames_at_speed[cpi->speed]++;
-#endif
 }
 
 static void alloc_raw_frame_buffers(VP9_COMP *cpi) {
