@@ -70,7 +70,7 @@ vpx_codec_err_t vpx_codec_enc_init_multi_ver(vpx_codec_ctx_t      *ctx,
                                              vpx_codec_flags_t     flags,
                                              vpx_rational_t       *dsf,
                                              int                   ver) {
-  vpx_codec_err_t res = 0;
+  vpx_codec_err_t res = VPX_CODEC_OK;
 
   if (ver != VPX_ENCODER_ABI_VERSION)
     res = VPX_CODEC_ABI_MISMATCH;
@@ -207,7 +207,7 @@ vpx_codec_err_t  vpx_codec_encode(vpx_codec_ctx_t            *ctx,
                                   unsigned long               duration,
                                   vpx_enc_frame_flags_t       flags,
                                   unsigned long               deadline) {
-  vpx_codec_err_t res = 0;
+  vpx_codec_err_t res = VPX_CODEC_OK;
 
   if (!ctx || (img && !duration))
     res = VPX_CODEC_INVALID_PARAM;

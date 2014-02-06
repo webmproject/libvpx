@@ -272,7 +272,7 @@ static vpx_codec_err_t parse_quantizer_values(SvcContext *svc_ctx,
   char *save_ptr;
   int found = 0;
   int i, q;
-  int res = VPX_CODEC_OK;
+  vpx_codec_err_t res = VPX_CODEC_OK;
   SvcInternal *const si = get_svc_internal(svc_ctx);
 
   if (quantizer_values == NULL || strlen(quantizer_values) == 0) {
@@ -322,7 +322,7 @@ static vpx_codec_err_t parse_scale_factors(SvcContext *svc_ctx,
   int found = 0;
   int i;
   int64_t num, den;
-  int res = VPX_CODEC_OK;
+  vpx_codec_err_t res = VPX_CODEC_OK;
   SvcInternal *const si = get_svc_internal(svc_ctx);
 
   if (scale_factors == NULL || strlen(scale_factors) == 0) {
@@ -381,7 +381,7 @@ static vpx_codec_err_t parse_options(SvcContext *svc_ctx, const char *options) {
   char *option_name;
   char *option_value;
   char *input_ptr;
-  int res = VPX_CODEC_OK;
+  vpx_codec_err_t res = VPX_CODEC_OK;
 
   if (options == NULL) return VPX_CODEC_OK;
   input_string = strdup(options);
