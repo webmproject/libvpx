@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//42s\u003d",
+        "filename": "vp9/encoder/vp9_onyx_if.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 575,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2014-02-06T21:17:30Z",
+      "side": 1,
+      "message": "nice to write as?  sf-\u003erecode_loop \u003d (speed \u003c 1) ? ALLOW_RECODE : ALLOW_RECODE_KFMAXBW;\n\nsame on line 746",
+      "revId": "7fe05cb6b1553008528a62535a395a16ea848a8e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//42w\u003d",
+        "filename": "vp9/encoder/vp9_onyx_if.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 937,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2014-02-06T21:17:30Z",
+      "side": 1,
+      "message": "would prefer to have DISALLOW_RECODE as default for 1-pass.\nMaybe set ALLOW_RECODE_KFMAXBW only for non-cbr for now?",
+      "revId": "7fe05cb6b1553008528a62535a395a16ea848a8e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
