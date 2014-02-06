@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//49w\u003d",
+        "filename": "examples/vp8_set_maps.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 204,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-02-06T04:51:54Z",
+      "side": 1,
+      "message": "yay, another file filled with declarations that need clean up!\n\nAt least you had room to preserve the alignment.",
+      "revId": "7474aebf8cfc931e6ad9b3a7443730c26224bda3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
