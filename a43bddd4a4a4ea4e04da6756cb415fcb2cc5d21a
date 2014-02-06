@@ -138,6 +138,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//448\u003d",
+        "filename": "vp9/common/vp9_frame_buffers.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1002174
+      },
+      "writtenOn": "2014-02-06T20:33:40Z",
+      "side": 1,
+      "message": "I think release is the correct term here. The point of this call is to notify the application that libvpx is no longer using the frame buffer (i.e.) it\u0027s \"releasing\" it back to the application. Same goes for the get function too.",
+      "parentUuid": "AAAAdn//45Y\u003d",
+      "revId": "a43bddd4a4a4ea4e04da6756cb415fcb2cc5d21a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//45U\u003d",
         "filename": "vpx/vpx_frame_buffer.h",
         "patchSetId": 2
