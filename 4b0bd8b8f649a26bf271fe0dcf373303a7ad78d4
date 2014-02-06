@@ -36,6 +36,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//460\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1066,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-02-06T19:51:52Z",
+      "side": 1,
+      "message": "This is because DCT_DCT indicates either 2D DCT or 2D WHT.",
+      "parentUuid": "AAAAdn//488\u003d",
+      "revId": "4b0bd8b8f649a26bf271fe0dcf373303a7ad78d4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//484\u003d",
         "filename": "vp9/encoder/x86/vp9_dct_avx2.c",
         "patchSetId": 1
@@ -47,6 +65,24 @@
       "writtenOn": "2014-02-06T14:24:43Z",
       "side": 1,
       "message": "Seems like unnecessary if,  could fold it in with switch and just repeat load and write,  I think this would be marginally faster ( one less if for the situation tx_type !\u003d dct_dct)?\n\nWhy isn\u0027t tx_type enum TX_TYPE? Once it is you could remove the default and assert...",
+      "revId": "4b0bd8b8f649a26bf271fe0dcf373303a7ad78d4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//47E\u003d",
+        "filename": "vp9/encoder/x86/vp9_dct_avx2.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 249,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-02-06T19:51:52Z",
+      "side": 1,
+      "message": "Done. But still using int for now. I\u0027ll try to replace int with TX_TYPE in the next changesets.",
+      "parentUuid": "AAAAdn//484\u003d",
       "revId": "4b0bd8b8f649a26bf271fe0dcf373303a7ad78d4",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -70,6 +106,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//47A\u003d",
+        "filename": "vp9/encoder/x86/vp9_dct_avx2.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1033,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-02-06T19:51:52Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//480\u003d",
+      "revId": "4b0bd8b8f649a26bf271fe0dcf373303a7ad78d4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//48w\u003d",
         "filename": "vp9/encoder/x86/vp9_dct_avx2.c",
         "patchSetId": 1
@@ -81,6 +135,24 @@
       "writtenOn": "2014-02-06T14:24:43Z",
       "side": 1,
       "message": "if unnecessary maybe ..  tx_type should be enum",
+      "revId": "4b0bd8b8f649a26bf271fe0dcf373303a7ad78d4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//468\u003d",
+        "filename": "vp9/encoder/x86/vp9_dct_avx2.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 2538,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-02-06T19:51:52Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//48w\u003d",
       "revId": "4b0bd8b8f649a26bf271fe0dcf373303a7ad78d4",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -104,6 +176,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//47Q\u003d",
+        "filename": "vp9/encoder/x86/vp9_dct_sse2.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 247,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-02-06T19:51:52Z",
+      "side": 1,
+      "message": "Done. But still using int for now.",
+      "parentUuid": "AAAAdn//48s\u003d",
+      "revId": "4b0bd8b8f649a26bf271fe0dcf373303a7ad78d4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//48o\u003d",
         "filename": "vp9/encoder/x86/vp9_dct_sse2.c",
         "patchSetId": 1
@@ -121,6 +211,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//47M\u003d",
+        "filename": "vp9/encoder/x86/vp9_dct_sse2.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1030,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-02-06T19:51:52Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//48o\u003d",
+      "revId": "4b0bd8b8f649a26bf271fe0dcf373303a7ad78d4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//48k\u003d",
         "filename": "vp9/encoder/x86/vp9_dct_sse2.c",
         "patchSetId": 1
@@ -132,6 +240,24 @@
       "writtenOn": "2014-02-06T14:24:43Z",
       "side": 1,
       "message": "ditto above comment",
+      "revId": "4b0bd8b8f649a26bf271fe0dcf373303a7ad78d4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//47I\u003d",
+        "filename": "vp9/encoder/x86/vp9_dct_sse2.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 2537,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-02-06T19:51:52Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//48k\u003d",
       "revId": "4b0bd8b8f649a26bf271fe0dcf373303a7ad78d4",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
