@@ -337,7 +337,7 @@ check_cxxflags() {
 
     # Catch CFLAGS that trigger CXX warnings
     case "$CXX" in
-      *g++*) check_cxx -Werror "$@" <<EOF
+      *c++-analyzer|*clang++|*g++*) check_cxx -Werror "$@" <<EOF
 int x;
 EOF
       ;;
