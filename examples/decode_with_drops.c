@@ -56,14 +56,13 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "./ivfdec.h"
-
 #define VPX_CODEC_DISABLE_COMPAT 1
 
 #include "vpx/vp8dx.h"
 #include "vpx/vpx_decoder.h"
 
 #include "./tools_common.h"
+#include "./video_reader.h"
 #include "./vpx_config.h"
 
 static const char *exec_name;
@@ -74,52 +73,55 @@ void usage_exit() {
 }
 
 int main(int argc, char **argv) {
-  FILE *infile, *outfile;
+  int frame_cnt = 0;
+  FILE *outfile = NULL;
   vpx_codec_ctx_t codec;
-  vpx_codec_iface_t *iface;
-  int flags = 0, frame_cnt = 0;
-  vpx_video_t *video;
-  int n, m, is_range;
-  char *nptr;
+  vpx_codec_iface_t *iface = NULL;
+  VpxVideoReader *reader = NULL;
+  const VpxVideoInfo *info = NULL;
+  int n = 0;
+  int m = 0;
+  int is_range = 0;
+  char *nptr = NULL;
 
   exec_name = argv[0];
 
   if (argc != 4)
-    die("Invalid number of arguments");
+    die("Invalid number of arguments.");
 
-  if (!(infile = fopen(argv[1], "rb")))
-    die("Failed to open %s for reading", argv[1]);
+  reader = vpx_video_reader_open(argv[1]);
+  if (!reader)
+    die("Failed to open %s for reading.", argv[1]);
 
   if (!(outfile = fopen(argv[2], "wb")))
-    die("Failed to open %s for writing", argv[2]);
+    die("Failed to open %s for writing.", argv[2]);
 
   n = strtol(argv[3], &nptr, 0);
   m = strtol(nptr + 1, NULL, 0);
   is_range = (*nptr == '-');
   if (!n || !m || (*nptr != '-' && *nptr != '/'))
-    die("Couldn't parse pattern %s\n", argv[3]);
+    die("Couldn't parse pattern %s.\n", argv[3]);
 
-  video = vpx_video_open_file(infile);
-  if (!video)
-    die("%s is not a supported input file.", argv[1]);
+  info = vpx_video_reader_get_info(reader);
 
-  iface = get_codec_interface(vpx_video_get_fourcc(video));
+  iface = get_codec_interface(info->codec_fourcc);
   if (!iface)
-    die("Unknown FOURCC code.");
+    die("Unknown input codec.");
 
   printf("Using %s\n", vpx_codec_iface_name(iface));
 
-  if (vpx_codec_dec_init(&codec, iface, NULL, flags))
-    die_codec(&codec, "Failed to initialize decoder");
+  if (vpx_codec_dec_init(&codec, iface, NULL, 0))
+    die_codec(&codec, "Failed to initialize decoder.");
 
-  while (vpx_video_read_frame(video)) {
+  while (vpx_video_reader_read_frame(reader)) {
     vpx_codec_iter_t iter = NULL;
     vpx_image_t *img = NULL;
     size_t frame_size = 0;
     int skip;
-    const unsigned char *frame = vpx_video_get_frame(video, &frame_size);
+    const unsigned char *frame = vpx_video_reader_get_frame(reader,
+                                                            &frame_size);
     if (vpx_codec_decode(&codec, frame, frame_size, NULL, 0))
-      die_codec(&codec, "Failed to decode frame");
+      die_codec(&codec, "Failed to decode frame.");
 
     ++frame_cnt;
 
@@ -140,15 +142,13 @@ int main(int argc, char **argv) {
 
   printf("Processed %d frames.\n", frame_cnt);
   if (vpx_codec_destroy(&codec))
-    die_codec(&codec, "Failed to destroy codec");
+    die_codec(&codec, "Failed to destroy codec.");
 
   printf("Play: ffplay -f rawvideo -pix_fmt yuv420p -s %dx%d %s\n",
-         vpx_video_get_width(video), vpx_video_get_height(video), argv[2]);
+         info->frame_width, info->frame_height, argv[2]);
 
-  vpx_video_close(video);
-
+  vpx_video_reader_close(reader);
   fclose(outfile);
-  fclose(infile);
 
   return EXIT_SUCCESS;
 }
