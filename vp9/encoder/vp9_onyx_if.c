@@ -2917,14 +2917,14 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
   int bottom_index;
 
   SPEED_FEATURES *const sf = &cpi->sf;
-  unsigned int max_mv_def = MIN(cpi->common.width, cpi->common.height);
+  unsigned int max_mv_def = MIN(cm->width, cm->height);
   struct segmentation *const seg = &cm->seg;
 
   set_ext_overrides(cpi);
 
   /* Scale the source buffer, if required. */
-  if (cm->mi_cols * 8 != cpi->un_scaled_source->y_width ||
-      cm->mi_rows * 8 != cpi->un_scaled_source->y_height) {
+  if (cm->mi_cols * MI_SIZE != cpi->un_scaled_source->y_width ||
+      cm->mi_rows * MI_SIZE != cpi->un_scaled_source->y_height) {
     scale_and_extend_frame_nonnormative(cpi->un_scaled_source,
                                         &cpi->scaled_source);
     cpi->Source = &cpi->scaled_source;
@@ -2933,11 +2933,7 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
   }
   scale_references(cpi);
 
-  // Clear down mmx registers to allow floating point in what follows.
   vp9_clear_system_state();
-
-  // Clear zbin over-quant value and mode boost values.
-  cpi->zbin_mode_boost = 0;
 
   // Enable or disable mode based tweaking of the zbin.
   // For 2 pass only used where GF/ARF prediction quality
@@ -2946,7 +2942,7 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
   cpi->zbin_mode_boost_enabled = 0;
 
   // Current default encoder behavior for the altref sign bias.
-  cpi->common.ref_frame_sign_bias[ALTREF_FRAME] = cpi->rc.source_alt_ref_active;
+  cm->ref_frame_sign_bias[ALTREF_FRAME] = cpi->rc.source_alt_ref_active;
 
   // Set default state for segment based loop filter update flags.
   cm->lf.mode_ref_delta_update = 0;
@@ -2955,7 +2951,7 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
   cpi->mv_step_param = vp9_init_search_range(cpi, max_mv_def);
   // Initialize cpi->max_mv_magnitude and cpi->mv_step_param if appropriate.
   if (sf->auto_mv_step_size) {
-    if (frame_is_intra_only(&cpi->common)) {
+    if (frame_is_intra_only(cm)) {
       // Initialize max_mv_magnitude for use in the first INTER frame
       // after a key/intra-only frame.
       cpi->max_mv_magnitude = max_mv_def;
@@ -2964,8 +2960,8 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
         // Allow mv_steps to correspond to twice the max mv magnitude found
         // in the previous frame, capped by the default max_mv_magnitude based
         // on resolution.
-        cpi->mv_step_param = vp9_init_search_range(
-            cpi, MIN(max_mv_def, 2 * cpi->max_mv_magnitude));
+        cpi->mv_step_param = vp9_init_search_range(cpi, MIN(max_mv_def, 2 *
+                                 cpi->max_mv_magnitude));
       cpi->max_mv_magnitude = 0;
     }
   }
@@ -3002,9 +2998,8 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
   // static regions if indicated.
   // Only allowed in second pass of two pass (as requires lagged coding)
   // and if the relevant speed feature flag is set.
-  if ((cpi->pass == 2) && (cpi->sf.static_segmentation)) {
+  if (cpi->pass == 2 && cpi->sf.static_segmentation)
     configure_static_seg_features(cpi);
-  }
 
   // For 1 pass CBR, check if we are dropping this frame.
   // Never drop on key frame.
@@ -3065,7 +3060,7 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
   // should be larger. Q of 0 is disabled because we force tx size to be
   // 16x16...
   if (cpi->sf.super_fast_rtc) {
-    if (cpi->common.current_video_frame == 0)
+    if (cm->current_video_frame == 0)
       q /= 3;
 
     if (q == 0)
@@ -3078,14 +3073,8 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
     set_high_precision_mv(cpi, (q < HIGH_PRECISION_MV_QTHRESH));
   }
 
-  encode_with_recode_loop(cpi,
-                          size,
-                          dest,
-                          &q,
-                          bottom_index,
-                          top_index,
-                          frame_over_shoot_limit,
-                          frame_under_shoot_limit);
+  encode_with_recode_loop(cpi, size, dest, &q, bottom_index, top_index,
+                          frame_over_shoot_limit, frame_under_shoot_limit);
 
   // Special case code to reduce pulsing when key frames are forced at a
   // fixed interval. Note the reconstruction error if it is the frame before
@@ -3132,18 +3121,15 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
   update_reference_frames(cpi);
 
   for (t = TX_4X4; t <= TX_32X32; t++)
-    full_to_model_counts(cpi->common.counts.coef[t],
-                         cpi->coef_counts[t]);
-  if (!cpi->common.error_resilient_mode &&
-      !cpi->common.frame_parallel_decoding_mode) {
-    vp9_adapt_coef_probs(&cpi->common);
-  }
+    full_to_model_counts(cm->counts.coef[t], cpi->coef_counts[t]);
 
-  if (!frame_is_intra_only(&cpi->common)) {
-    if (!cpi->common.error_resilient_mode &&
-        !cpi->common.frame_parallel_decoding_mode) {
-      vp9_adapt_mode_probs(&cpi->common);
-      vp9_adapt_mv_probs(&cpi->common, cpi->common.allow_high_precision_mv);
+  if (!cm->error_resilient_mode && !cm->frame_parallel_decoding_mode)
+    vp9_adapt_coef_probs(cm);
+
+  if (!frame_is_intra_only(cm)) {
+    if (!cm->error_resilient_mode && !cm->frame_parallel_decoding_mode) {
+      vp9_adapt_mode_probs(cm);
+      vp9_adapt_mv_probs(cm, cm->allow_high_precision_mv);
     }
   }
 
@@ -3155,14 +3141,14 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
   output_frame_level_debug_stats(cpi);
 #endif
   if (cpi->refresh_golden_frame == 1)
-    cm->frame_flags = cm->frame_flags | FRAMEFLAGS_GOLDEN;
+    cm->frame_flags |= FRAMEFLAGS_GOLDEN;
   else
-    cm->frame_flags = cm->frame_flags&~FRAMEFLAGS_GOLDEN;
+    cm->frame_flags &= ~FRAMEFLAGS_GOLDEN;
 
   if (cpi->refresh_alt_ref_frame == 1)
-    cm->frame_flags = cm->frame_flags | FRAMEFLAGS_ALTREF;
+    cm->frame_flags |= FRAMEFLAGS_ALTREF;
   else
-    cm->frame_flags = cm->frame_flags&~FRAMEFLAGS_ALTREF;
+    cm->frame_flags &= ~FRAMEFLAGS_ALTREF;
 
   get_ref_frame_flags(cpi);
 
@@ -3211,6 +3197,7 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
   // reset to normal state now that we are done.
   if (!cm->show_existing_frame)
     cm->last_show_frame = cm->show_frame;
+
   if (cm->show_frame) {
     // current mip will be the prev_mip for the next frame
     MODE_INFO *temp = cm->prev_mip;
@@ -3231,6 +3218,7 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
     // update not a real frame
     ++cm->current_video_frame;
   }
+
   // restore prev_mi
   cm->prev_mi = cm->prev_mip + cm->mode_info_stride + 1;
   cm->prev_mi_grid_visible = cm->prev_mi_grid_base + cm->mode_info_stride + 1;
