@@ -16,6 +16,24 @@
       "revId": "89ce3b9f728ae7670827b1c4fd01cd35f97bce4c",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//5Ac\u003d",
+        "filename": "examples/simple_encoder.c",
+        "patchSetId": 12
+      },
+      "lineNbr": 118,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-02-06T02:35:56Z",
+      "side": 1,
+      "message": "I\u0027ll double check dimension restrictions. Adding parentheses as you suggested.",
+      "parentUuid": "AAAAdn//5BA\u003d",
+      "revId": "89ce3b9f728ae7670827b1c4fd01cd35f97bce4c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
