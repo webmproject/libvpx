@@ -45,7 +45,7 @@ void fdct4x4_ref(const int16_t *in, int16_t *out, int stride, int tx_type) {
 }
 
 void fht4x4_ref(const int16_t *in, int16_t *out, int stride, int tx_type) {
-  vp9_short_fht4x4_c(in, out, stride, tx_type);
+  vp9_fht4x4_c(in, out, stride, tx_type);
 }
 
 class Trans4x4TestBase {
@@ -281,10 +281,10 @@ INSTANTIATE_TEST_CASE_P(
 INSTANTIATE_TEST_CASE_P(
     C, Trans4x4HT,
     ::testing::Values(
-        make_tuple(&vp9_short_fht4x4_c, &vp9_iht4x4_16_add_c, 0),
-        make_tuple(&vp9_short_fht4x4_c, &vp9_iht4x4_16_add_c, 1),
-        make_tuple(&vp9_short_fht4x4_c, &vp9_iht4x4_16_add_c, 2),
-        make_tuple(&vp9_short_fht4x4_c, &vp9_iht4x4_16_add_c, 3)));
+        make_tuple(&vp9_fht4x4_c, &vp9_iht4x4_16_add_c, 0),
+        make_tuple(&vp9_fht4x4_c, &vp9_iht4x4_16_add_c, 1),
+        make_tuple(&vp9_fht4x4_c, &vp9_iht4x4_16_add_c, 2),
+        make_tuple(&vp9_fht4x4_c, &vp9_iht4x4_16_add_c, 3)));
 
 #if HAVE_SSE2
 INSTANTIATE_TEST_CASE_P(
@@ -295,10 +295,10 @@ INSTANTIATE_TEST_CASE_P(
 INSTANTIATE_TEST_CASE_P(
     SSE2, Trans4x4HT,
     ::testing::Values(
-        make_tuple(&vp9_short_fht4x4_sse2, &vp9_iht4x4_16_add_sse2, 0),
-        make_tuple(&vp9_short_fht4x4_sse2, &vp9_iht4x4_16_add_sse2, 1),
-        make_tuple(&vp9_short_fht4x4_sse2, &vp9_iht4x4_16_add_sse2, 2),
-        make_tuple(&vp9_short_fht4x4_sse2, &vp9_iht4x4_16_add_sse2, 3)));
+        make_tuple(&vp9_fht4x4_sse2, &vp9_iht4x4_16_add_sse2, 0),
+        make_tuple(&vp9_fht4x4_sse2, &vp9_iht4x4_16_add_sse2, 1),
+        make_tuple(&vp9_fht4x4_sse2, &vp9_iht4x4_16_add_sse2, 2),
+        make_tuple(&vp9_fht4x4_sse2, &vp9_iht4x4_16_add_sse2, 3)));
 #endif
 
 }  // namespace

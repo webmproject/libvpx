@@ -273,7 +273,7 @@ void fdct16x16_ref(const int16_t *in, int16_t *out, int stride, int tx_type) {
 }
 
 void fht16x16_ref(const int16_t *in, int16_t *out, int stride, int tx_type) {
-  vp9_short_fht16x16_c(in, out, stride, tx_type);
+  vp9_fht16x16_c(in, out, stride, tx_type);
 }
 
 class Trans16x16TestBase {
@@ -507,10 +507,10 @@ INSTANTIATE_TEST_CASE_P(
 INSTANTIATE_TEST_CASE_P(
     C, Trans16x16HT,
     ::testing::Values(
-        make_tuple(&vp9_short_fht16x16_c, &vp9_iht16x16_256_add_c, 0),
-        make_tuple(&vp9_short_fht16x16_c, &vp9_iht16x16_256_add_c, 1),
-        make_tuple(&vp9_short_fht16x16_c, &vp9_iht16x16_256_add_c, 2),
-        make_tuple(&vp9_short_fht16x16_c, &vp9_iht16x16_256_add_c, 3)));
+        make_tuple(&vp9_fht16x16_c, &vp9_iht16x16_256_add_c, 0),
+        make_tuple(&vp9_fht16x16_c, &vp9_iht16x16_256_add_c, 1),
+        make_tuple(&vp9_fht16x16_c, &vp9_iht16x16_256_add_c, 2),
+        make_tuple(&vp9_fht16x16_c, &vp9_iht16x16_256_add_c, 3)));
 
 #if HAVE_SSE2
 INSTANTIATE_TEST_CASE_P(
@@ -521,9 +521,9 @@ INSTANTIATE_TEST_CASE_P(
 INSTANTIATE_TEST_CASE_P(
     SSE2, Trans16x16HT,
     ::testing::Values(
-        make_tuple(&vp9_short_fht16x16_sse2, &vp9_iht16x16_256_add_sse2, 0),
-        make_tuple(&vp9_short_fht16x16_sse2, &vp9_iht16x16_256_add_sse2, 1),
-        make_tuple(&vp9_short_fht16x16_sse2, &vp9_iht16x16_256_add_sse2, 2),
-        make_tuple(&vp9_short_fht16x16_sse2, &vp9_iht16x16_256_add_sse2, 3)));
+        make_tuple(&vp9_fht16x16_sse2, &vp9_iht16x16_256_add_sse2, 0),
+        make_tuple(&vp9_fht16x16_sse2, &vp9_iht16x16_256_add_sse2, 1),
+        make_tuple(&vp9_fht16x16_sse2, &vp9_iht16x16_256_add_sse2, 2),
+        make_tuple(&vp9_fht16x16_sse2, &vp9_iht16x16_256_add_sse2, 3)));
 #endif
 }  // namespace

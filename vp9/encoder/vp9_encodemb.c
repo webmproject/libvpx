@@ -19,7 +19,6 @@
 #include "vp9/common/vp9_reconintra.h"
 #include "vp9/common/vp9_systemdependent.h"
 
-#include "vp9/encoder/vp9_dct.h"
 #include "vp9/encoder/vp9_encodemb.h"
 #include "vp9/encoder/vp9_quantize.h"
 #include "vp9/encoder/vp9_rdopt.h"
@@ -571,7 +570,7 @@ void vp9_encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
       if (!x->skip_recode) {
         vp9_subtract_block(16, 16, src_diff, diff_stride,
                            src, p->src.stride, dst, pd->dst.stride);
-        vp9_fht16x16(tx_type, src_diff, coeff, diff_stride);
+        vp9_fht16x16(src_diff, coeff, diff_stride, tx_type);
         vp9_quantize_b(coeff, 256, x->skip_block, p->zbin, p->round,
                        p->quant, p->quant_shift, qcoeff, dqcoeff,
                        pd->dequant, p->zbin_extra, eob, scan_order->scan,
@@ -591,7 +590,7 @@ void vp9_encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
       if (!x->skip_recode) {
         vp9_subtract_block(8, 8, src_diff, diff_stride,
                            src, p->src.stride, dst, pd->dst.stride);
-        vp9_fht8x8(tx_type, src_diff, coeff, diff_stride);
+        vp9_fht8x8(src_diff, coeff, diff_stride, tx_type);
         vp9_quantize_b(coeff, 64, x->skip_block, p->zbin, p->round, p->quant,
                        p->quant_shift, qcoeff, dqcoeff,
                        pd->dequant, p->zbin_extra, eob, scan_order->scan,
@@ -617,7 +616,7 @@ void vp9_encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
         vp9_subtract_block(4, 4, src_diff, diff_stride,
                            src, p->src.stride, dst, pd->dst.stride);
         if (tx_type != DCT_DCT)
-          vp9_short_fht4x4(src_diff, coeff, diff_stride, tx_type);
+          vp9_fht4x4(src_diff, coeff, diff_stride, tx_type);
         else
           x->fwd_txm4x4(src_diff, coeff, diff_stride);
         vp9_quantize_b(coeff, 16, x->skip_block, p->zbin, p->round, p->quant,

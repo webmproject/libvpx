@@ -1064,7 +1064,7 @@ static int64_t rd_pick_intra4x4block(VP9_COMP *cpi, MACROBLOCK *x, int ib,
         so = &vp9_scan_orders[TX_4X4][tx_type];
 
         if (tx_type != DCT_DCT)
-          vp9_short_fht4x4(src_diff, coeff, 8, tx_type);
+          vp9_fht4x4(src_diff, coeff, 8, tx_type);
         else
           x->fwd_txm4x4(src_diff, coeff, 8);
 

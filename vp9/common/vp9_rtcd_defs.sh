@@ -707,14 +707,14 @@ if [ "$CONFIG_INTERNAL_STATS" = "yes" ]; then
 fi
 
 # fdct functions
-prototype void vp9_short_fht4x4 "const int16_t *input, int16_t *output, int stride, int tx_type"
-specialize vp9_short_fht4x4 sse2 avx2
+prototype void vp9_fht4x4 "const int16_t *input, int16_t *output, int stride, int tx_type"
+specialize vp9_fht4x4 sse2 avx2
 
-prototype void vp9_short_fht8x8 "const int16_t *input, int16_t *output, int stride, int tx_type"
-specialize vp9_short_fht8x8 sse2 avx2
+prototype void vp9_fht8x8 "const int16_t *input, int16_t *output, int stride, int tx_type"
+specialize vp9_fht8x8 sse2 avx2
 
-prototype void vp9_short_fht16x16 "const int16_t *input, int16_t *output, int stride, int tx_type"
-specialize vp9_short_fht16x16 sse2 avx2
+prototype void vp9_fht16x16 "const int16_t *input, int16_t *output, int stride, int tx_type"
+specialize vp9_fht16x16 sse2 avx2
 
 prototype void vp9_fwht4x4 "const int16_t *input, int16_t *output, int stride"
 specialize vp9_fwht4x4

@@ -18,8 +18,6 @@
 #include "vp9/common/vp9_idct.h"
 #include "vp9/common/vp9_systemdependent.h"
 
-#include "vp9/encoder/vp9_dct.h"
-
 static INLINE int fdct_round_shift(int input) {
   int rv = ROUND_POWER_OF_TWO(input, DCT_CONST_BITS);
   assert(INT16_MIN <= rv && rv <= INT16_MAX);
@@ -157,32 +155,36 @@ static const transform_2d FHT_4[] = {
   { fadst4, fadst4 }   // ADST_ADST = 3
 };
 
-void vp9_short_fht4x4_c(const int16_t *input, int16_t *output,
-                        int stride, int tx_type) {
-  int16_t out[4 * 4];
-  int16_t *outptr = &out[0];
-  int i, j;
-  int16_t temp_in[4], temp_out[4];
-  const transform_2d ht = FHT_4[tx_type];
+void vp9_fht4x4_c(const int16_t *input, int16_t *output,
+                  int stride, int tx_type) {
+  if (tx_type == DCT_DCT) {
+    vp9_fdct4x4_c(input, output, stride);
+  } else {
+    int16_t out[4 * 4];
+    int16_t *outptr = &out[0];
+    int i, j;
+    int16_t temp_in[4], temp_out[4];
+    const transform_2d ht = FHT_4[tx_type];
 
-  // Columns
-  for (i = 0; i < 4; ++i) {
-    for (j = 0; j < 4; ++j)
-      temp_in[j] = input[j * stride + i] * 16;
-    if (i == 0 && temp_in[0])
-      temp_in[0] += 1;
-    ht.cols(temp_in, temp_out);
-    for (j = 0; j < 4; ++j)
-      outptr[j * 4 + i] = temp_out[j];
-  }
+    // Columns
+    for (i = 0; i < 4; ++i) {
+      for (j = 0; j < 4; ++j)
+        temp_in[j] = input[j * stride + i] * 16;
+      if (i == 0 && temp_in[0])
+        temp_in[0] += 1;
+      ht.cols(temp_in, temp_out);
+      for (j = 0; j < 4; ++j)
+        outptr[j * 4 + i] = temp_out[j];
+    }
 
-  // Rows
-  for (i = 0; i < 4; ++i) {
-    for (j = 0; j < 4; ++j)
-      temp_in[j] = out[j + i * 4];
-    ht.rows(temp_in, temp_out);
-    for (j = 0; j < 4; ++j)
-      output[j + i * 4] = (temp_out[j] + 1) >> 2;
+    // Rows
+    for (i = 0; i < 4; ++i) {
+      for (j = 0; j < 4; ++j)
+        temp_in[j] = out[j + i * 4];
+      ht.rows(temp_in, temp_out);
+      for (j = 0; j < 4; ++j)
+        output[j + i * 4] = (temp_out[j] + 1) >> 2;
+    }
   }
 }
 
@@ -565,30 +567,34 @@ static const transform_2d FHT_8[] = {
   { fadst8, fadst8 }   // ADST_ADST = 3
 };
 
-void vp9_short_fht8x8_c(const int16_t *input, int16_t *output,
-                        int stride, int tx_type) {
-  int16_t out[64];
-  int16_t *outptr = &out[0];
-  int i, j;
-  int16_t temp_in[8], temp_out[8];
-  const transform_2d ht = FHT_8[tx_type];
+void vp9_fht8x8_c(const int16_t *input, int16_t *output,
+                  int stride, int tx_type) {
+  if (tx_type == DCT_DCT) {
+    vp9_fdct8x8_c(input, output, stride);
+  } else {
+    int16_t out[64];
+    int16_t *outptr = &out[0];
+    int i, j;
+    int16_t temp_in[8], temp_out[8];
+    const transform_2d ht = FHT_8[tx_type];
 
-  // Columns
-  for (i = 0; i < 8; ++i) {
-    for (j = 0; j < 8; ++j)
-      temp_in[j] = input[j * stride + i] * 4;
-    ht.cols(temp_in, temp_out);
-    for (j = 0; j < 8; ++j)
-      outptr[j * 8 + i] = temp_out[j];
-  }
+    // Columns
+    for (i = 0; i < 8; ++i) {
+      for (j = 0; j < 8; ++j)
+        temp_in[j] = input[j * stride + i] * 4;
+      ht.cols(temp_in, temp_out);
+      for (j = 0; j < 8; ++j)
+        outptr[j * 8 + i] = temp_out[j];
+    }
 
-  // Rows
-  for (i = 0; i < 8; ++i) {
-    for (j = 0; j < 8; ++j)
-      temp_in[j] = out[j + i * 8];
-    ht.rows(temp_in, temp_out);
-    for (j = 0; j < 8; ++j)
-      output[j + i * 8] = (temp_out[j] + (temp_out[j] < 0)) >> 1;
+    // Rows
+    for (i = 0; i < 8; ++i) {
+      for (j = 0; j < 8; ++j)
+        temp_in[j] = out[j + i * 8];
+      ht.rows(temp_in, temp_out);
+      for (j = 0; j < 8; ++j)
+        output[j + i * 8] = (temp_out[j] + (temp_out[j] < 0)) >> 1;
+    }
   }
 }
 
@@ -958,31 +964,34 @@ static const transform_2d FHT_16[] = {
   { fadst16, fadst16 }   // ADST_ADST = 3
 };
 
-void vp9_short_fht16x16_c(const int16_t *input, int16_t *output,
-                          int stride, int tx_type) {
-  int16_t out[256];
-  int16_t *outptr = &out[0];
-  int i, j;
-  int16_t temp_in[16], temp_out[16];
-  const transform_2d ht = FHT_16[tx_type];
+void vp9_fht16x16_c(const int16_t *input, int16_t *output,
+                    int stride, int tx_type) {
+  if (tx_type == DCT_DCT) {
+    vp9_fdct16x16_c(input, output, stride);
+  } else {
+    int16_t out[256];
+    int16_t *outptr = &out[0];
+    int i, j;
+    int16_t temp_in[16], temp_out[16];
+    const transform_2d ht = FHT_16[tx_type];
 
-  // Columns
-  for (i = 0; i < 16; ++i) {
-    for (j = 0; j < 16; ++j)
-      temp_in[j] = input[j * stride + i] * 4;
-    ht.cols(temp_in, temp_out);
-    for (j = 0; j < 16; ++j)
-      outptr[j * 16 + i] = (temp_out[j] + 1 + (temp_out[j] < 0)) >> 2;
-//      outptr[j * 16 + i] = (temp_out[j] + 1 + (temp_out[j] > 0)) >> 2;
-  }
+    // Columns
+    for (i = 0; i < 16; ++i) {
+      for (j = 0; j < 16; ++j)
+        temp_in[j] = input[j * stride + i] * 4;
+      ht.cols(temp_in, temp_out);
+      for (j = 0; j < 16; ++j)
+        outptr[j * 16 + i] = (temp_out[j] + 1 + (temp_out[j] < 0)) >> 2;
+    }
 
-  // Rows
-  for (i = 0; i < 16; ++i) {
-    for (j = 0; j < 16; ++j)
-      temp_in[j] = out[j + i * 16];
-    ht.rows(temp_in, temp_out);
-    for (j = 0; j < 16; ++j)
-      output[j + i * 16] = temp_out[j];
+    // Rows
+    for (i = 0; i < 16; ++i) {
+      for (j = 0; j < 16; ++j)
+        temp_in[j] = out[j + i * 16];
+      ht.rows(temp_in, temp_out);
+      for (j = 0; j < 16; ++j)
+        output[j + i * 16] = temp_out[j];
+    }
   }
 }
 
@@ -1374,28 +1383,4 @@ void vp9_fdct32x32_rd_c(const int16_t *input, int16_t *out, int stride) {
     for (j = 0; j < 32; ++j)
       out[j + i * 32] = temp_out[j];
   }
-}
-
-void vp9_fht4x4(TX_TYPE tx_type, const int16_t *input, int16_t *output,
-                int stride) {
-  if (tx_type == DCT_DCT)
-    vp9_fdct4x4(input, output, stride);
-  else
-    vp9_short_fht4x4(input, output, stride, tx_type);
-}
-
-void vp9_fht8x8(TX_TYPE tx_type, const int16_t *input, int16_t *output,
-                int stride) {
-  if (tx_type == DCT_DCT)
-    vp9_fdct8x8(input, output, stride);
-  else
-    vp9_short_fht8x8(input, output, stride, tx_type);
-}
-
-void vp9_fht16x16(TX_TYPE tx_type, const int16_t *input, int16_t *output,
-                  int stride) {
-  if (tx_type == DCT_DCT)
-    vp9_fdct16x16(input, output, stride);
-  else
-    vp9_short_fht16x16(input, output, stride, tx_type);
 }
