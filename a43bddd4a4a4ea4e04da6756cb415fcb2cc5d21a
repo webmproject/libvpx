@@ -1,0 +1,157 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//45I\u003d",
+        "filename": "vp9/common/vp9_frame_buffers.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-02-06T20:29:13Z",
+      "side": 1,
+      "message": "init -\u003e alloc?",
+      "revId": "a43bddd4a4a4ea4e04da6756cb415fcb2cc5d21a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//45Q\u003d",
+        "filename": "vp9/common/vp9_frame_buffers.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-02-06T20:29:13Z",
+      "side": 1,
+      "message": "I think list should guaranteed to be not null, so this check is unnecessary. Just assert() is fine.",
+      "revId": "a43bddd4a4a4ea4e04da6756cb415fcb2cc5d21a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//46A\u003d",
+        "filename": "vp9/common/vp9_frame_buffers.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-02-06T20:29:13Z",
+      "side": 1,
+      "message": "Space after \"+\". It is probably better to move VP9_MAXIMUM_REF_BUFFERS  to the same line as assignment.",
+      "revId": "a43bddd4a4a4ea4e04da6756cb415fcb2cc5d21a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//45M\u003d",
+        "filename": "vp9/common/vp9_frame_buffers.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-02-06T20:29:13Z",
+      "side": 1,
+      "message": "deinit -\u003e free ?",
+      "revId": "a43bddd4a4a4ea4e04da6756cb415fcb2cc5d21a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//45k\u003d",
+        "filename": "vp9/common/vp9_frame_buffers.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-02-06T20:29:13Z",
+      "side": 1,
+      "message": "Ditto about null check.",
+      "revId": "a43bddd4a4a4ea4e04da6756cb415fcb2cc5d21a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//45o\u003d",
+        "filename": "vp9/common/vp9_frame_buffers.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-02-06T20:29:13Z",
+      "side": 1,
+      "message": "Please use typedef, so it will not be required to use \"struct\" every time.",
+      "revId": "a43bddd4a4a4ea4e04da6756cb415fcb2cc5d21a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//45c\u003d",
+        "filename": "vp9/common/vp9_frame_buffers.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-02-06T20:29:13Z",
+      "side": 1,
+      "message": "Can it be called vp9_alloc_frame_buffer() ? It doesn\u0027t mean that the buffer should be allocated every time but I guess the *semantic* is identical to alloc/free. May be that\u0027s more natural but  I\u0027m not sure.",
+      "revId": "a43bddd4a4a4ea4e04da6756cb415fcb2cc5d21a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//45Y\u003d",
+        "filename": "vp9/common/vp9_frame_buffers.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-02-06T20:29:13Z",
+      "side": 1,
+      "message": "vp9_free_frame_buffer() but, again, I\u0027m not sure.",
+      "revId": "a43bddd4a4a4ea4e04da6756cb415fcb2cc5d21a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//45U\u003d",
+        "filename": "vpx/vpx_frame_buffer.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-02-06T20:29:13Z",
+      "side": 1,
+      "message": "May be just \"priv\" because we know the context -- it is inside vpx_codec_frame_buffer.",
+      "revId": "a43bddd4a4a4ea4e04da6756cb415fcb2cc5d21a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
