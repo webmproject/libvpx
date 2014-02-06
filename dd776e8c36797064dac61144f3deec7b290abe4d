@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//41o\u003d",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-02-06T21:54:25Z",
+      "side": 1,
+      "message": "in general it\u0027s more type normalization + removal of implicit conversions, something you can get a c compiler to warn about in some cases",
+      "revId": "dd776e8c36797064dac61144f3deec7b290abe4d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
