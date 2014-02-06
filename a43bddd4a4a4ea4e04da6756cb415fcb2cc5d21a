@@ -87,6 +87,23 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//42I\u003d",
+        "filename": "vp9/common/vp9_frame_buffers.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 67,
+      "author": {
+        "id": 1002174
+      },
+      "writtenOn": "2014-02-06T21:59:20Z",
+      "side": 1,
+      "message": "Can the above 4 lines be replaced by vpx_realloc?",
+      "revId": "a43bddd4a4a4ea4e04da6756cb415fcb2cc5d21a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//45o\u003d",
         "filename": "vp9/common/vp9_frame_buffers.h",
         "patchSetId": 2
@@ -168,6 +185,40 @@
       "side": 1,
       "message": "Yes, that\u0027s right, I can\u0027t argue much here. But it seems that semantic is exactly alloc/free (from libvpx point of view). It is similar to allocators in C++ (http://www.cplusplus.com/reference/memory/allocator/) but you can actually do whatever you want inside alloc/free calls. All buffer \"reusability\" is hidden under API calls.",
       "parentUuid": "AAAAdn//448\u003d",
+      "revId": "a43bddd4a4a4ea4e04da6756cb415fcb2cc5d21a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//42E\u003d",
+        "filename": "vp9/decoder/vp9_decodeframe.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 700,
+      "author": {
+        "id": 1002174
+      },
+      "writtenOn": "2014-02-06T21:59:20Z",
+      "side": 1,
+      "message": "nit: we have stopped using the term \"external\" right?",
+      "revId": "a43bddd4a4a4ea4e04da6756cb415fcb2cc5d21a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//42A\u003d",
+        "filename": "vp9/decoder/vp9_decodeframe.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1124,
+      "author": {
+        "id": 1002174
+      },
+      "writtenOn": "2014-02-06T21:59:20Z",
+      "side": 1,
+      "message": "nit: unnecessary new line.",
       "revId": "a43bddd4a4a4ea4e04da6756cb415fcb2cc5d21a",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
