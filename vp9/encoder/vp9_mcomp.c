@@ -475,11 +475,9 @@ static INLINE int check_bounds(const MACROBLOCK *x, int row, int col,
          ((col + range) <= x->mv_col_max);
 }
 
-static INLINE int check_point(const MACROBLOCK *x, const MV *mv) {
-  return (mv->col < x->mv_col_min) |
-         (mv->col > x->mv_col_max) |
-         (mv->row < x->mv_row_min) |
-         (mv->row > x->mv_row_max);
+static INLINE int is_mv_in(const MACROBLOCK *x, const MV *mv) {
+  return (mv->col >= x->mv_col_min) && (mv->col <= x->mv_col_max) &&
+         (mv->row >= x->mv_row_min) && (mv->row <= x->mv_row_max);
 }
 
 #define CHECK_BETTER \
@@ -572,7 +570,7 @@ static int vp9_pattern_search(const MACROBLOCK *x,
         for (i = 0; i < num_candidates[t]; i++) {
           this_mv.row = br + candidates[t][i].row;
           this_mv.col = bc + candidates[t][i].col;
-          if (check_point(x, &this_mv))
+          if (!is_mv_in(x, &this_mv))
             continue;
           this_offset = base_offset + (this_mv.row * in_what_stride) +
                                        this_mv.col;
@@ -616,7 +614,7 @@ static int vp9_pattern_search(const MACROBLOCK *x,
           for (i = 0; i < num_candidates[s]; i++) {
             this_mv.row = br + candidates[s][i].row;
             this_mv.col = bc + candidates[s][i].col;
-            if (check_point(x, &this_mv))
+            if (!is_mv_in(x, &this_mv))
               continue;
             this_offset = base_offset + (this_mv.row * in_what_stride) +
                                          this_mv.col;
@@ -656,7 +654,7 @@ static int vp9_pattern_search(const MACROBLOCK *x,
           for (i = 0; i < PATTERN_CANDIDATES_REF; i++) {
             this_mv.row = br + candidates[s][next_chkpts_indices[i]].row;
             this_mv.col = bc + candidates[s][next_chkpts_indices[i]].col;
-            if (check_point(x, &this_mv))
+            if (!is_mv_in(x, &this_mv))
               continue;
             this_offset = base_offset + (this_mv.row * (in_what_stride)) +
                                          this_mv.col;
@@ -695,7 +693,7 @@ static int vp9_pattern_search(const MACROBLOCK *x,
         for (i = 0; i < 4; i++) {
           this_mv.row = br + neighbors[i].row;
           this_mv.col = bc + neighbors[i].col;
-          if (check_point(x, &this_mv))
+          if (!is_mv_in(x, &this_mv))
             continue;
           this_offset = base_offset + this_mv.row * in_what_stride +
                             this_mv.col;
@@ -1685,10 +1683,7 @@ int vp9_refining_search_sad_c(const MACROBLOCK *x,
       this_mv.row = ref_mv->row + neighbors[j].row;
       this_mv.col = ref_mv->col + neighbors[j].col;
 
-      if ((this_mv.col > x->mv_col_min) &&
-          (this_mv.col < x->mv_col_max) &&
-          (this_mv.row > x->mv_row_min) &&
-          (this_mv.row < x->mv_row_max)) {
+      if (is_mv_in(x, &this_mv)) {
         const uint8_t *check_here = &in_what[this_mv.row * in_what_stride +
                                                 this_mv.col];
         thissad = fn_ptr->sdf(what, what_stride, check_here, in_what_stride,
@@ -1875,10 +1870,7 @@ int vp9_refining_search_8p_c(const MACROBLOCK *x,
       this_mv.row = ref_mv->row + neighbors[j].row;
       this_mv.col = ref_mv->col + neighbors[j].col;
 
-      if ((this_mv.col > x->mv_col_min) &&
-          (this_mv.col < x->mv_col_max) &&
-          (this_mv.row > x->mv_row_min) &&
-          (this_mv.row < x->mv_row_max)) {
+      if (is_mv_in(x, &this_mv)) {
         const uint8_t *check_here = &in_what[this_mv.row * in_what_stride +
                                                 this_mv.col];
 
