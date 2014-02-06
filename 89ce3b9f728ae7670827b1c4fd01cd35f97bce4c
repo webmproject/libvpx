@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//5BA\u003d",
+        "filename": "examples/simple_encoder.c",
+        "patchSetId": 12
+      },
+      "lineNbr": 118,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-02-06T02:18:27Z",
+      "side": 1,
+      "message": "I (think) libvpx can handle odd dimensions; this should probably check only the value \u003e\u003d 16 condition.\n\nIt looks like vpxenc ignores this entirely, and just lets the library do its thing.\n\nIf you decide to keep it: I think the right side needs parentheses. \n\nreturn value \u003e\u003d 16 \u0026\u0026 (value % 2 \u003d\u003d 0);",
+      "revId": "89ce3b9f728ae7670827b1c4fd01cd35f97bce4c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
