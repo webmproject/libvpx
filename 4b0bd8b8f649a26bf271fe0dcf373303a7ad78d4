@@ -1,0 +1,140 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//488\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1066,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2014-02-06T14:24:43Z",
+      "side": 1,
+      "message": "Do you need this if?  Won\u0027t it just do the same if as soon as you go into vp9_fht?",
+      "revId": "4b0bd8b8f649a26bf271fe0dcf373303a7ad78d4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//49A\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1066,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2014-02-06T14:24:43Z",
+      "side": 1,
+      "message": "Do you need this if?  Won\u0027t it just do the same if as soon as you go into vp9_fht?",
+      "revId": "4b0bd8b8f649a26bf271fe0dcf373303a7ad78d4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//484\u003d",
+        "filename": "vp9/encoder/x86/vp9_dct_avx2.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 249,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2014-02-06T14:24:43Z",
+      "side": 1,
+      "message": "Seems like unnecessary if,  could fold it in with switch and just repeat load and write,  I think this would be marginally faster ( one less if for the situation tx_type !\u003d dct_dct)?\n\nWhy isn\u0027t tx_type enum TX_TYPE? Once it is you could remove the default and assert...",
+      "revId": "4b0bd8b8f649a26bf271fe0dcf373303a7ad78d4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//480\u003d",
+        "filename": "vp9/encoder/x86/vp9_dct_avx2.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1033,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2014-02-06T14:24:43Z",
+      "side": 1,
+      "message": "If maybe not necessary ( see above)?  Also tx_type should be enum?",
+      "revId": "4b0bd8b8f649a26bf271fe0dcf373303a7ad78d4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//48w\u003d",
+        "filename": "vp9/encoder/x86/vp9_dct_avx2.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 2538,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2014-02-06T14:24:43Z",
+      "side": 1,
+      "message": "if unnecessary maybe ..  tx_type should be enum",
+      "revId": "4b0bd8b8f649a26bf271fe0dcf373303a7ad78d4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//48s\u003d",
+        "filename": "vp9/encoder/x86/vp9_dct_sse2.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 247,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2014-02-06T14:24:43Z",
+      "side": 1,
+      "message": "if unnecessary / I think better to repeat load and write.  also tx_type should be enum?",
+      "revId": "4b0bd8b8f649a26bf271fe0dcf373303a7ad78d4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//48o\u003d",
+        "filename": "vp9/encoder/x86/vp9_dct_sse2.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1030,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2014-02-06T14:24:43Z",
+      "side": 1,
+      "message": "ditto above comment.",
+      "revId": "4b0bd8b8f649a26bf271fe0dcf373303a7ad78d4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//48k\u003d",
+        "filename": "vp9/encoder/x86/vp9_dct_sse2.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 2537,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2014-02-06T14:24:43Z",
+      "side": 1,
+      "message": "ditto above comment",
+      "revId": "4b0bd8b8f649a26bf271fe0dcf373303a7ad78d4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
