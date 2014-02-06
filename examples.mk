@@ -73,6 +73,8 @@ endif
 EXAMPLES-$(CONFIG_ENCODERS)         += vpx_temporal_scalable_patterns.c
 vpx_temporal_scalable_patterns.SRCS += ivfenc.c ivfenc.h
 vpx_temporal_scalable_patterns.SRCS += tools_common.c tools_common.h
+vpx_temporal_scalable_patterns.SRCS += video_common.h
+vpx_temporal_scalable_patterns.SRCS += video_writer.h video_writer.c
 vpx_temporal_scalable_patterns.GUID  = B18C08F2-A439-4502-A78E-849BE3D60947
 vpx_temporal_scalable_patterns.DESCRIPTION = Temporal Scalability Encoder
 EXAMPLES-$(CONFIG_VP8_DECODER)     += simple_decoder.c

@@ -12,17 +12,16 @@
 //  encoding scheme based on temporal scalability for video applications
 //  that benefit from a scalable bitstream.
 
-#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
 #define VPX_CODEC_DISABLE_COMPAT 1
-#include "./ivfenc.h"
-#include "./tools_common.h"
-#include "./vpx_config.h"
 #include "vpx/vp8cx.h"
 #include "vpx/vpx_encoder.h"
+
+#include "./tools_common.h"
+#include "./video_writer.h"
 
 static const char *exec_name;
 
@@ -341,7 +340,7 @@ static void set_temporal_layer_pattern(int layering_mode,
 }
 
 int main(int argc, char **argv) {
-  FILE *outfile[VPX_TS_MAX_LAYERS];
+  VpxVideoWriter *outfile[VPX_TS_MAX_LAYERS];
   vpx_codec_ctx_t codec;
   vpx_codec_enc_cfg_t cfg;
   int frame_cnt = 0;
@@ -378,14 +377,14 @@ int main(int argc, char **argv) {
   if (strncmp(codec_type, "vp9", 3) == 0) {
 #if CONFIG_VP9_ENCODER
     interface = vpx_codec_vp9_cx;
-    fourcc = 0x30395056;
+    fourcc = VP9_FOURCC;
 #else
     die("Encoder vp9 selected but not configured");
 #endif
   } else  {
 #if CONFIG_VP8_ENCODER
     interface = vpx_codec_vp8_cx;
-    fourcc = 0x30385056;
+    fourcc = VP8_FOURCC;
 #else
     die("Encoder vp8 selected but not configured");
 #endif
@@ -427,7 +426,7 @@ int main(int argc, char **argv) {
   cfg.g_timebase.den = strtol(argv[7], NULL, 0);
 
   for (i = 9; i < 9 + mode_to_num_layers[layering_mode]; ++i) {
-    cfg.ts_target_bitrate[i-9] = strtol(argv[i], NULL, 0);
+    cfg.ts_target_bitrate[i - 9] = strtol(argv[i], NULL, 0);
   }
 
   // Real time parameters.
@@ -466,11 +465,18 @@ int main(int argc, char **argv) {
 
   // Open an output file for each stream.
   for (i = 0; i < cfg.ts_number_layers; ++i) {
-    char file_name[512];
+    char file_name[PATH_MAX];
+    VpxVideoInfo info;
+    info.codec_fourcc = fourcc;
+    info.frame_width = cfg.g_w;
+    info.frame_height = cfg.g_h;
+    info.time_base.numerator = cfg.g_timebase.num;
+    info.time_base.denominator = cfg.g_timebase.den;
+
     snprintf(file_name, sizeof(file_name), "%s_%d.ivf", argv[2], i);
-    if (!(outfile[i] = fopen(file_name, "wb")))
+    outfile[i] = vpx_video_writer_open(file_name, kContainerIVF, &info);
+    if (!outfile[i])
       die("Failed to open %s for writing", file_name);
-    ivf_write_file_header(outfile[i], &cfg, fourcc, 0);
   }
   // No spatial layers in this encoder.
   cfg.ss_number_layers = 1;
@@ -520,9 +526,8 @@ int main(int argc, char **argv) {
         case VPX_CODEC_CX_FRAME_PKT:
           for (i = cfg.ts_layer_id[frame_cnt % cfg.ts_periodicity];
               i < cfg.ts_number_layers; ++i) {
-            ivf_write_frame_header(outfile[i], pts, pkt->data.frame.sz);
-            (void) fwrite(pkt->data.frame.buf, 1, pkt->data.frame.sz,
-                          outfile[i]);
+            vpx_video_writer_write_frame(outfile[i], pkt->data.frame.buf,
+                                         pkt->data.frame.sz, pts);
             ++frames_in_layer[i];
           }
           break;
@@ -534,15 +539,13 @@ int main(int argc, char **argv) {
     pts += frame_duration;
   }
   fclose(input_ctx.file);
-  printf("Processed %d frames: \n", frame_cnt-1);
-  if (vpx_codec_destroy(&codec)) {
+  printf("Processed %d frames: \n", frame_cnt - 1);
+  if (vpx_codec_destroy(&codec))
     die_codec(&codec, "Failed to destroy codec");
-  }
+
   // Try to rewrite the output file headers with the actual frame count.
-  for (i = 0; i < cfg.ts_number_layers; ++i) {
-    if (!fseek(outfile[i], 0, SEEK_SET))
-      ivf_write_file_header(outfile[i], &cfg, fourcc, frame_cnt);
-    fclose(outfile[i]);
-  }
+  for (i = 0; i < cfg.ts_number_layers; ++i)
+    vpx_video_writer_close(outfile[i]);
+
   return EXIT_SUCCESS;
 }
