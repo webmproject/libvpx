@@ -133,9 +133,9 @@ static int input_stats(struct twopass_rc *p, FIRSTPASS_STATS *fps) {
   return 1;
 }
 
-static void output_stats(const VP9_COMP            *cpi,
+static void output_stats(const VP9_COMP *cpi,
                          struct vpx_codec_pkt_list *pktlist,
-                         FIRSTPASS_STATS            *stats) {
+                         FIRSTPASS_STATS *stats) {
   struct vpx_codec_cx_pkt pkt;
   pkt.kind = VPX_CODEC_STATS_PKT;
   pkt.data.twopass_stats.buf = stats;
@@ -266,9 +266,9 @@ static void avg_stats(FIRSTPASS_STATS *section) {
 
 // Calculate a modified Error used in distributing bits between easier and
 // harder frames.
-static double calculate_modified_err(VP9_COMP *cpi,
-                                     FIRSTPASS_STATS *this_frame) {
-  struct twopass_rc *const twopass = &cpi->twopass;
+static double calculate_modified_err(const VP9_COMP *cpi,
+                                     const FIRSTPASS_STATS *this_frame) {
+  const struct twopass_rc *const twopass = &cpi->twopass;
   const FIRSTPASS_STATS *const stats = &twopass->total_stats;
   const double av_err = stats->ssim_weighted_pred_err / stats->count;
   double modified_error = av_err * pow(this_frame->ssim_weighted_pred_err /
@@ -337,7 +337,7 @@ static double simple_weight(const YV12_BUFFER_CONFIG *buf) {
 }
 
 // This function returns the maximum target rate per frame.
-static int frame_max_bits(VP9_COMP *cpi) {
+static int frame_max_bits(const VP9_COMP *cpi) {
   int64_t max_bits =
     ((int64_t)cpi->rc.av_per_frame_bandwidth *
      (int64_t)cpi->oxcf.two_pass_vbrmax_section) / 100;
@@ -469,7 +469,7 @@ void vp9_first_pass(VP9_COMP *cpi) {
   TileInfo tile;
   struct macroblock_plane *const p = x->plane;
   struct macroblockd_plane *const pd = xd->plane;
-  PICK_MODE_CONTEXT *ctx = &x->sb64_context;
+  const PICK_MODE_CONTEXT *ctx = &x->sb64_context;
   int i;
 
   int recon_yoffset, recon_uvoffset;
@@ -907,7 +907,7 @@ static int estimate_max_q(VP9_COMP *cpi, FIRSTPASS_STATS *fpstats,
   int q;
   const int num_mbs = cpi->common.MBs;
   int target_norm_bits_per_mb;
-  RATE_CONTROL *const rc = &cpi->rc;
+  const RATE_CONTROL *const rc = &cpi->rc;
 
   const double section_err = fpstats->coded_error / fpstats->count;
   const double err_per_mb = section_err / num_mbs;
@@ -1040,12 +1040,10 @@ static double get_prediction_decay_rate(const VP9_COMMON *cm,
 // Function to test for a condition where a complex transition is followed
 // by a static section. For example in slide shows where there is a fade
 // between slides. This is to help with more optimal kf and gf positioning.
-static int detect_transition_to_still(
-  VP9_COMP *cpi,
-  int frame_interval,
-  int still_interval,
-  double loop_decay_rate,
-  double last_decay_rate) {
+static int detect_transition_to_still(VP9_COMP *cpi, int frame_interval,
+                                      int still_interval,
+                                      double loop_decay_rate,
+                                      double last_decay_rate) {
   int trans_to_still = 0;
 
   // Break clause to detect very still sections after motion
@@ -1413,7 +1411,7 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   double mv_in_out_accumulator = 0.0;
   double abs_mv_in_out_accumulator = 0.0;
   double mv_ratio_accumulator_thresh;
-  int max_bits = frame_max_bits(cpi);     // Max for a single frame
+  const int max_bits = frame_max_bits(cpi);     // Max for a single frame
 
   unsigned int allow_alt_ref = cpi->oxcf.play_alternate &&
                                cpi->oxcf.lag_in_frames;
@@ -1638,27 +1636,23 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
 #endif
 
   // Calculate the bits to be allocated to the group as a whole
-  if ((cpi->twopass.kf_group_bits > 0) &&
-      (cpi->twopass.kf_group_error_left > 0)) {
-    cpi->twopass.gf_group_bits =
-      (int64_t)(cpi->twopass.kf_group_bits *
+  if (twopass->kf_group_bits > 0 && twopass->kf_group_error_left > 0) {
+    twopass->gf_group_bits = (int64_t)(cpi->twopass.kf_group_bits *
                 (gf_group_err / cpi->twopass.kf_group_error_left));
   } else {
-    cpi->twopass.gf_group_bits = 0;
+    twopass->gf_group_bits = 0;
   }
-  cpi->twopass.gf_group_bits =
-    (cpi->twopass.gf_group_bits < 0)
-    ? 0
-    : (cpi->twopass.gf_group_bits > cpi->twopass.kf_group_bits)
-    ? cpi->twopass.kf_group_bits : cpi->twopass.gf_group_bits;
+  twopass->gf_group_bits = (twopass->gf_group_bits < 0) ?
+     0 : (twopass->gf_group_bits > twopass->kf_group_bits) ?
+     twopass->kf_group_bits : twopass->gf_group_bits;
 
   // Clip cpi->twopass.gf_group_bits based on user supplied data rate
   // variability limit (cpi->oxcf.two_pass_vbrmax_section)
-  if (cpi->twopass.gf_group_bits > (int64_t)max_bits * rc->baseline_gf_interval)
-    cpi->twopass.gf_group_bits = (int64_t)max_bits * rc->baseline_gf_interval;
+  if (twopass->gf_group_bits > (int64_t)max_bits * rc->baseline_gf_interval)
+    twopass->gf_group_bits = (int64_t)max_bits * rc->baseline_gf_interval;
 
   // Reset the file position
-  reset_fpf_position(&cpi->twopass, start_pos);
+  reset_fpf_position(twopass, start_pos);
 
   // Assign  bits to the arf or gf.
   for (i = 0; i <= (rc->source_alt_ref_pending &&
@@ -1686,17 +1680,17 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
 
     // Calculate the number of bits to be spent on the gf or arf based on
     // the boost number
-    gf_bits = (int)((double)boost * (cpi->twopass.gf_group_bits /
-                                       (double)allocation_chunks));
+    gf_bits = (int)((double)boost * (twopass->gf_group_bits /
+                  (double)allocation_chunks));
 
     // If the frame that is to be boosted is simpler than the average for
     // the gf/arf group then use an alternative calculation
     // based on the error score of the frame itself
     if (rc->baseline_gf_interval < 1 ||
         mod_frame_err < gf_group_err / (double)rc->baseline_gf_interval) {
-      double alt_gf_grp_bits = (double)cpi->twopass.kf_group_bits  *
+      double alt_gf_grp_bits = (double)twopass->kf_group_bits  *
         (mod_frame_err * (double)rc->baseline_gf_interval) /
-        DOUBLE_DIVIDE_CHECK(cpi->twopass.kf_group_error_left);
+        DOUBLE_DIVIDE_CHECK(twopass->kf_group_error_left);
 
       int alt_gf_bits = (int)((double)boost * (alt_gf_grp_bits /
                                            (double)allocation_chunks));
@@ -1707,9 +1701,9 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
       // If it is harder than other frames in the group make sure it at
       // least receives an allocation in keeping with its relative error
       // score, otherwise it may be worse off than an "un-boosted" frame.
-      int alt_gf_bits = (int)((double)cpi->twopass.kf_group_bits *
+      int alt_gf_bits = (int)((double)twopass->kf_group_bits *
                         mod_frame_err /
-                        DOUBLE_DIVIDE_CHECK(cpi->twopass.kf_group_error_left));
+                        DOUBLE_DIVIDE_CHECK(twopass->kf_group_error_left));
 
       if (alt_gf_bits > gf_bits)
         gf_bits = alt_gf_bits;
@@ -1720,11 +1714,11 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
       gf_bits = 0;
 
     if (i == 0) {
-      cpi->twopass.gf_bits = gf_bits;
+      twopass->gf_bits = gf_bits;
     }
     if (i == 1 ||
         (!rc->source_alt_ref_pending &&
-         (cpi->common.frame_type != KEY_FRAME))) {
+         cpi->common.frame_type != KEY_FRAME)) {
       // Per frame bit target for this frame
       vp9_rc_set_frame_target(cpi, gf_bits);
     }
@@ -1732,11 +1726,11 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
 
   {
     // Adjust KF group bits and error remaining
-    cpi->twopass.kf_group_error_left -= (int64_t)gf_group_err;
-    cpi->twopass.kf_group_bits -= cpi->twopass.gf_group_bits;
+    twopass->kf_group_error_left -= (int64_t)gf_group_err;
+    twopass->kf_group_bits -= twopass->gf_group_bits;
 
-    if (cpi->twopass.kf_group_bits < 0)
-      cpi->twopass.kf_group_bits = 0;
+    if (twopass->kf_group_bits < 0)
+      twopass->kf_group_bits = 0;
 
     // If this is an arf update we want to remove the score for the
     // overlay frame at the end which will usually be very cheap to code.
@@ -1745,18 +1739,18 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
     // For normal GFs remove the score for the GF itself unless this is
     // also a key frame in which case it has already been accounted for.
     if (rc->source_alt_ref_pending) {
-      cpi->twopass.gf_group_error_left = (int64_t)gf_group_err - mod_frame_err;
+      twopass->gf_group_error_left = (int64_t)gf_group_err - mod_frame_err;
     } else if (cpi->common.frame_type != KEY_FRAME) {
-      cpi->twopass.gf_group_error_left = (int64_t)(gf_group_err
+      twopass->gf_group_error_left = (int64_t)(gf_group_err
                                                    - gf_first_frame_err);
     } else {
-      cpi->twopass.gf_group_error_left = (int64_t)gf_group_err;
+      twopass->gf_group_error_left = (int64_t)gf_group_err;
     }
 
-    cpi->twopass.gf_group_bits -= cpi->twopass.gf_bits;
+    twopass->gf_group_bits -= twopass->gf_bits;
 
-    if (cpi->twopass.gf_group_bits < 0)
-      cpi->twopass.gf_group_bits = 0;
+    if (twopass->gf_group_bits < 0)
+      twopass->gf_group_bits = 0;
 
     // This condition could fail if there are two kfs very close together
     // despite (MIN_GF_INTERVAL) and would cause a divide by 0 in the
@@ -1765,12 +1759,10 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
       const int boost = rc->source_alt_ref_pending ? b_boost : rc->gfu_boost;
 
       if (boost >= 150) {
-        int alt_extra_bits;
-        int pct_extra = (boost - 100) / 50;
-        pct_extra = (pct_extra > 20) ? 20 : pct_extra;
-
-        alt_extra_bits = (int)((cpi->twopass.gf_group_bits * pct_extra) / 100);
-        cpi->twopass.gf_group_bits -= alt_extra_bits;
+        const int pct_extra = MIN(20, (boost - 100) / 50);
+        const int alt_extra_bits = (int)((twopass->gf_group_bits * pct_extra) /
+                                       100);
+        twopass->gf_group_bits -= alt_extra_bits;
       }
     }
   }
@@ -1779,20 +1771,20 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
     FIRSTPASS_STATS sectionstats;
 
     zero_stats(&sectionstats);
-    reset_fpf_position(&cpi->twopass, start_pos);
+    reset_fpf_position(twopass, start_pos);
 
     for (i = 0; i < rc->baseline_gf_interval; i++) {
-      input_stats(&cpi->twopass, &next_frame);
+      input_stats(twopass, &next_frame);
       accumulate_stats(&sectionstats, &next_frame);
     }
 
     avg_stats(&sectionstats);
 
-    cpi->twopass.section_intra_rating = (int)
+    twopass->section_intra_rating = (int)
       (sectionstats.intra_error /
       DOUBLE_DIVIDE_CHECK(sectionstats.coded_error));
 
-    reset_fpf_position(&cpi->twopass, start_pos);
+    reset_fpf_position(twopass, start_pos);
   }
 }
 
@@ -1832,9 +1824,9 @@ static void assign_std_frame_bits(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
 }
 
 static int test_candidate_kf(VP9_COMP *cpi,
-                             FIRSTPASS_STATS *last_frame,
-                             FIRSTPASS_STATS *this_frame,
-                             FIRSTPASS_STATS *next_frame) {
+                             const FIRSTPASS_STATS *last_frame,
+                             const FIRSTPASS_STATS *this_frame,
+                             const FIRSTPASS_STATS *next_frame) {
   int is_viable_kf = 0;
 
   // Does the frame satisfy the primary criteria of a key frame
