@@ -44,8 +44,9 @@ extern "C" {
 #else
 #define MIN_GF_INTERVAL             4
 #endif
-#define DEFAULT_GF_INTERVAL         7
+#define DEFAULT_GF_INTERVAL         11
 #define DEFAULT_KF_BOOST            2000
+#define DEFAULT_GF_BOOST            2000
 
 #define KEY_FRAME_CONTEXT 5
 
@@ -217,6 +218,17 @@ typedef enum {
   LAST_FRAME_PARTITION_ALL = 2
 } LAST_FRAME_PARTITION_METHOD;
 
+typedef enum {
+  // No recode.
+  DISALLOW_RECODE = 0,
+  // Allow recode for KF and exceeding maximum frame bandwidth.
+  ALLOW_RECODE_KFMAXBW = 1,
+  // Allow recode only for KF/ARF/GF frames.
+  ALLOW_RECODE_KFARFGF = 2,
+  // Allow recode for all frames based on bitrate constraints.
+  ALLOW_RECODE = 3,
+} RECODE_LOOP_TYPE;
+
 typedef struct {
   // This flag refers to whether or not to perform rd optimization.
   int RD;
@@ -224,11 +236,7 @@ typedef struct {
   // Motion search method (Diamond, NSTEP, Hex, Big Diamond, Square, etc).
   SEARCH_METHODS search_method;
 
-  // Recode_loop can be:
-  // 0 means we only encode a frame once
-  // 1 means we can re-encode based on bitrate constraints on any frame
-  // 2 means we can only recode gold, alt, and key frames.
-  int recode_loop;
+  RECODE_LOOP_TYPE recode_loop;
 
   // Subpel_search_method can only be subpel_tree which does a subpixel
   // logarithmic search that keeps stepping at 1/2 pixel units until
