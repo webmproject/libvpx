@@ -612,7 +612,7 @@ int main(int argc, char **argv) {
         die("Failed to open %s for reading", argv[1]);
 
     /* Open an output file for each stream */
-    for (i=0; i<cfg.ts_number_layers; i++)
+    for (i=0; i<(int)cfg.ts_number_layers; i++)
     {
         char file_name[512];
         sprintf (file_name, "%s_%d.ivf", argv[2], i);
@@ -661,7 +661,7 @@ int main(int argc, char **argv) {
             switch (pkt->kind) {
             case VPX_CODEC_CX_FRAME_PKT:
                 for (i=cfg.ts_layer_id[frame_cnt % cfg.ts_periodicity];
-                                              i<cfg.ts_number_layers; i++)
+                                              i<(int)cfg.ts_number_layers; i++)
                 {
                     write_ivf_frame_header(outfile[i], pkt);
                     (void) fwrite(pkt->data.frame.buf, 1, pkt->data.frame.sz,
@@ -683,7 +683,7 @@ int main(int argc, char **argv) {
             die_codec (&codec, "Failed to destroy codec");
 
     /* Try to rewrite the output file headers with the actual frame count */
-    for (i=0; i<cfg.ts_number_layers; i++)
+    for (i=0; i<(int)cfg.ts_number_layers; i++)
     {
         if (!fseek(outfile[i], 0, SEEK_SET))
             write_ivf_file_header (outfile[i], &cfg, frames_in_layer[i]);
