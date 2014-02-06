@@ -34,6 +34,24 @@
       "revId": "f9d4eb9357b6fcfaec26f232deb37b081e735e9c",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//47Y\u003d",
+        "filename": "vp9/decoder/vp9_dthread.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 263,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2014-02-06T19:30:26Z",
+      "side": 1,
+      "message": "Use vpx_memset() ?",
+      "parentUuid": "AAAAdn//47o\u003d",
+      "revId": "f9d4eb9357b6fcfaec26f232deb37b081e735e9c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
