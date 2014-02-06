@@ -572,7 +572,7 @@ static void set_good_speed_feature(VP9_COMMON *cm,
                                    int speed) {
   int i;
   sf->adaptive_rd_thresh = 1;
-  sf->recode_loop = (speed < 1);
+  sf->recode_loop = ((speed < 1) ? ALLOW_RECODE : ALLOW_RECODE_KFMAXBW);
   if (speed == 1) {
     sf->use_square_partition_only = !frame_is_intra_only(cm);
     sf->less_rectangular_check  = 1;
@@ -590,7 +590,7 @@ static void set_good_speed_feature(VP9_COMMON *cm,
     sf->adaptive_pred_interp_filter = 1;
     sf->auto_mv_step_size = 1;
     sf->adaptive_rd_thresh = 2;
-    sf->recode_loop = 2;
+    sf->recode_loop = ALLOW_RECODE_KFARFGF;
     sf->intra_y_mode_mask[TX_32X32] = INTRA_DC_H_V;
     sf->intra_uv_mode_mask[TX_32X32] = INTRA_DC_H_V;
     sf->intra_uv_mode_mask[TX_16X16] = INTRA_DC_H_V;
@@ -626,7 +626,7 @@ static void set_good_speed_feature(VP9_COMMON *cm,
     sf->last_partitioning_redo_frequency = 3;
 
     sf->adaptive_rd_thresh = 2;
-    sf->recode_loop = 2;
+    sf->recode_loop = ALLOW_RECODE_KFARFGF;
     sf->use_lp32x32fdct = 1;
     sf->mode_skip_start = 11;
     sf->intra_y_mode_mask[TX_32X32] = INTRA_DC_H_V;
@@ -743,7 +743,7 @@ static void set_rt_speed_feature(VP9_COMMON *cm,
                                  int speed) {
   sf->static_segmentation = 0;
   sf->adaptive_rd_thresh = 1;
-  sf->recode_loop = (speed < 1);
+  sf->recode_loop = ((speed < 1) ? ALLOW_RECODE : ALLOW_RECODE_KFMAXBW);
   if (speed == 1) {
     sf->use_square_partition_only = !frame_is_intra_only(cm);
     sf->less_rectangular_check = 1;
@@ -761,7 +761,7 @@ static void set_rt_speed_feature(VP9_COMMON *cm,
     sf->adaptive_pred_interp_filter = 1;
     sf->auto_mv_step_size = 1;
     sf->adaptive_rd_thresh = 2;
-    sf->recode_loop = 2;
+    sf->recode_loop = ALLOW_RECODE_KFARFGF;
     sf->intra_y_mode_mask[TX_32X32] = INTRA_DC_H_V;
     sf->intra_uv_mode_mask[TX_32X32] = INTRA_DC_H_V;
     sf->intra_uv_mode_mask[TX_16X16] = INTRA_DC_H_V;
@@ -797,7 +797,7 @@ static void set_rt_speed_feature(VP9_COMMON *cm,
     sf->last_partitioning_redo_frequency = 3;
 
     sf->adaptive_rd_thresh = 2;
-    sf->recode_loop = 2;
+    sf->recode_loop = ALLOW_RECODE_KFARFGF;
     sf->use_lp32x32fdct = 1;
     sf->mode_skip_start = 11;
     sf->intra_y_mode_mask[TX_32X32] = INTRA_DC_H_V;
@@ -865,7 +865,7 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
   // best quality defaults
   sf->RD = 1;
   sf->search_method = NSTEP;
-  sf->recode_loop = 1;
+  sf->recode_loop = ALLOW_RECODE;
   sf->subpel_search_method = SUBPEL_TREE;
   sf->subpel_iters_per_step = 2;
   sf->subpel_force_stop = 0;
@@ -933,7 +933,7 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
 
   // No recode for 1 pass.
   if (cpi->pass == 0) {
-    sf->recode_loop = 0;
+    sf->recode_loop = DISALLOW_RECODE;
     sf->optimize_coefficients = 0;
   }
 
@@ -2544,8 +2544,8 @@ static int recode_loop_test(const VP9_COMP *cpi,
   // Is frame recode allowed.
   // Yes if either recode mode 1 is selected or mode 2 is selected
   // and the frame is a key frame, golden frame or alt_ref_frame
-  } else if ((cpi->sf.recode_loop == 1) ||
-             ((cpi->sf.recode_loop == 2) &&
+  } else if ((cpi->sf.recode_loop == ALLOW_RECODE) ||
+             ((cpi->sf.recode_loop == ALLOW_RECODE_KFARFGF) &&
               (cm->frame_type == KEY_FRAME ||
                cpi->refresh_golden_frame || cpi->refresh_alt_ref_frame))) {
     // General over and under shoot tests
@@ -2764,20 +2764,62 @@ static void output_frame_level_debug_stats(VP9_COMP *cpi) {
 }
 #endif
 
+static void encode_without_recode_loop(VP9_COMP *cpi,
+                                       size_t *size,
+                                       uint8_t *dest,
+                                       int *q) {
+  VP9_COMMON *const cm = &cpi->common;
+  vp9_clear_system_state();  // __asm emms;
+  vp9_set_quantizer(cpi, *q);
+
+  // Set up entropy context depending on frame type. The decoder mandates
+  // the use of the default context, index 0, for keyframes and inter
+  // frames where the error_resilient_mode or intra_only flag is set. For
+  // other inter-frames the encoder currently uses only two contexts;
+  // context 1 for ALTREF frames and context 0 for the others.
+  if (cm->frame_type == KEY_FRAME) {
+    vp9_setup_key_frame(cpi);
+  } else {
+    if (!cm->intra_only && !cm->error_resilient_mode) {
+      cpi->common.frame_context_idx = cpi->refresh_alt_ref_frame;
+    }
+    vp9_setup_inter_frame(cpi);
+  }
+  // Variance adaptive and in frame q adjustment experiments are mutually
+  // exclusive.
+  if (cpi->oxcf.aq_mode == VARIANCE_AQ) {
+    vp9_vaq_frame_setup(cpi);
+  } else if (cpi->oxcf.aq_mode == COMPLEXITY_AQ) {
+    setup_in_frame_q_adj(cpi);
+  }
+  // transform / motion compensation build reconstruction frame
+  vp9_encode_frame(cpi);
+
+  // Update the skip mb flag probabilities based on the distribution
+  // seen in the last encoder iteration.
+  // update_base_skip_probs(cpi);
+  vp9_clear_system_state();  // __asm emms;
+}
+
 static void encode_with_recode_loop(VP9_COMP *cpi,
                                     size_t *size,
                                     uint8_t *dest,
                                     int *q,
                                     int bottom_index,
-                                    int top_index,
-                                    int frame_over_shoot_limit,
-                                    int frame_under_shoot_limit) {
+                                    int top_index) {
   VP9_COMMON *const cm = &cpi->common;
   int loop_count = 0;
   int loop = 0;
   int overshoot_seen = 0;
   int undershoot_seen = 0;
   int q_low = bottom_index, q_high = top_index;
+  int frame_over_shoot_limit;
+  int frame_under_shoot_limit;
+
+  // Decide frame size bounds
+  vp9_rc_compute_frame_size_bounds(cpi, cpi->rc.this_frame_target,
+                                   &frame_under_shoot_limit,
+                                   &frame_over_shoot_limit);
 
   do {
     vp9_clear_system_state();  // __asm emms;
@@ -2809,7 +2851,6 @@ static void encode_with_recode_loop(VP9_COMP *cpi,
     }
 
     // transform / motion compensation build reconstruction frame
-
     vp9_encode_frame(cpi);
 
     // Update the skip mb flag probabilities based on the distribution
@@ -2821,7 +2862,7 @@ static void encode_with_recode_loop(VP9_COMP *cpi,
     // Dummy pack of the bitstream using up to date stats to get an
     // accurate estimate of output frame size to determine if we need
     // to recode.
-    if (cpi->sf.recode_loop != 0) {
+    if (cpi->sf.recode_loop >= ALLOW_RECODE_KFARFGF) {
       vp9_save_coding_context(cpi);
       cpi->dummy_packing = 1;
       if (!cpi->sf.super_fast_rtc)
@@ -3024,8 +3065,6 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
   VP9_COMMON *const cm = &cpi->common;
   TX_SIZE t;
   int q;
-  int frame_over_shoot_limit;
-  int frame_under_shoot_limit;
   int top_index;
   int bottom_index;
 
@@ -3121,7 +3160,7 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
       cm->frame_type != KEY_FRAME) {
     if (vp9_rc_drop_frame(cpi)) {
       vp9_rc_postencode_update_drop_frame(cpi);
-      cm->current_video_frame++;
+      ++cm->current_video_frame;
       return;
     }
   }
@@ -3159,26 +3198,10 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
   vp9_write_yuv_frame(cpi->Source);
 #endif
 
-  // Decide frame size bounds
-  vp9_rc_compute_frame_size_bounds(cpi, cpi->rc.this_frame_target,
-                                   &frame_under_shoot_limit,
-                                   &frame_over_shoot_limit);
-
   // Decide q and q bounds.
   q = vp9_rc_pick_q_and_adjust_q_bounds(cpi,
                                         &bottom_index,
                                         &top_index);
-
-  // JBB : This is realtime mode.  In real time mode the first frame
-  // should be larger. Q of 0 is disabled because we force tx size to be
-  // 16x16...
-  if (cpi->sf.super_fast_rtc) {
-    if (cm->current_video_frame == 0)
-      q /= 3;
-
-    if (q == 0)
-      q++;
-  }
 
   if (!frame_is_intra_only(cm)) {
     cm->interp_filter = DEFAULT_INTERP_FILTER;
@@ -3186,8 +3209,11 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
     set_high_precision_mv(cpi, (q < HIGH_PRECISION_MV_QTHRESH));
   }
 
-  encode_with_recode_loop(cpi, size, dest, &q, bottom_index, top_index,
-                          frame_over_shoot_limit, frame_under_shoot_limit);
+  if (cpi->sf.recode_loop == DISALLOW_RECODE) {
+    encode_without_recode_loop(cpi, size, dest, &q);
+  } else {
+    encode_with_recode_loop(cpi, size, dest, &q, bottom_index, top_index);
+  }
 
   // Special case code to reduce pulsing when key frames are forced at a
   // fixed interval. Note the reconstruction error if it is the frame before

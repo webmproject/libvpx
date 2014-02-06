@@ -220,7 +220,7 @@ int vp9_rc_clamp_pframe_target_size(const VP9_COMP *const cpi, int target) {
     // bits on this frame even if it is a constructed arf.
     // The active maximum quantizer insures that an appropriate
     // number of bits will be spent if needed for constructed ARFs.
-    target = 0;
+    target = min_frame_target;
   }
   // Clip the frame target to the maximum allowed value.
   if (target > rc->max_frame_bandwidth)
@@ -569,7 +569,6 @@ static int rc_pick_q_and_adjust_q_bounds_one_pass(const VP9_COMP *cpi,
        active_best_quality = inter_minq[rc->avg_frame_qindex[INTER_FRAME]];
       else
         active_best_quality = inter_minq[active_worst_quality];
-      //
       // For the constrained quality mode we don't want
       // q to fall below the cq level.
       if ((oxcf->end_usage == USAGE_CONSTRAINED_QUALITY) &&
@@ -840,12 +839,28 @@ static int rc_pick_q_and_adjust_q_bounds_two_pass(const VP9_COMP *cpi,
 int vp9_rc_pick_q_and_adjust_q_bounds(const VP9_COMP *cpi,
                                       int *bottom_index,
                                       int *top_index) {
+  int q;
   if (cpi->pass == 0)
-    return rc_pick_q_and_adjust_q_bounds_one_pass(
+    q = rc_pick_q_and_adjust_q_bounds_one_pass(
         cpi, bottom_index, top_index);
   else
-    return rc_pick_q_and_adjust_q_bounds_two_pass(
+    q = rc_pick_q_and_adjust_q_bounds_two_pass(
         cpi, bottom_index, top_index);
+
+  // JBB : This is realtime mode.  In real time mode the first frame
+  // should be larger. Q of 0 is disabled because we force tx size to be
+  // 16x16...
+  if (cpi->sf.super_fast_rtc) {
+    if (cpi->common.current_video_frame == 0)
+      q /= 3;
+    if (q == 0)
+      q++;
+    if (q < *bottom_index)
+      *bottom_index = q;
+    else if (q > *top_index)
+      *top_index = q;
+  }
+  return q;
 }
 
 void vp9_rc_compute_frame_size_bounds(const VP9_COMP *cpi,
@@ -948,7 +963,8 @@ void vp9_rc_postencode_update(VP9_COMP *cpi, uint64_t bytes_used) {
   rc->projected_frame_size = (bytes_used << 3);
 
   // Post encode loop adjustment of Q prediction.
-  vp9_rc_update_rate_correction_factors(cpi, (cpi->sf.recode_loop ||
+  vp9_rc_update_rate_correction_factors(
+      cpi, (cpi->sf.recode_loop >= ALLOW_RECODE_KFARFGF ||
             cpi->oxcf.end_usage == USAGE_STREAM_FROM_SERVER) ? 2 : 0);
 
   // Keep a record of last Q and ambient average Q.
@@ -1040,17 +1056,27 @@ static int test_for_kf_one_pass(VP9_COMP *cpi) {
 #define USE_ALTREF_FOR_ONE_PASS   1
 
 static int calc_pframe_target_size_one_pass_vbr(const VP9_COMP *const cpi) {
+  static const int af_ratio = 5;
   const RATE_CONTROL *rc = &cpi->rc;
-  int target = rc->av_per_frame_bandwidth;
-  target = vp9_rc_clamp_pframe_target_size(cpi, target);
-  return target;
+  int target;
+#if USE_ALTREF_FOR_ONE_PASS
+  target = (!rc->is_src_frame_alt_ref &&
+            (cpi->refresh_golden_frame || cpi->refresh_alt_ref_frame)) ?
+      (rc->av_per_frame_bandwidth * cpi->rc.baseline_gf_interval * af_ratio) /
+      (cpi->rc.baseline_gf_interval + af_ratio - 1) :
+      (rc->av_per_frame_bandwidth * cpi->rc.baseline_gf_interval) /
+      (cpi->rc.baseline_gf_interval + af_ratio - 1);
+#else
+  target = rc->av_per_frame_bandwidth;
+#endif
+  return vp9_rc_clamp_pframe_target_size(cpi, target);
 }
 
 static int calc_iframe_target_size_one_pass_vbr(const VP9_COMP *const cpi) {
+  static const int kf_ratio = 12;
   const RATE_CONTROL *rc = &cpi->rc;
-  int target = rc->av_per_frame_bandwidth * 8;
-  target = vp9_rc_clamp_iframe_target_size(cpi, target);
-  return target;
+  int target = rc->av_per_frame_bandwidth * kf_ratio;
+  return vp9_rc_clamp_iframe_target_size(cpi, target);
 }
 
 void vp9_rc_get_one_pass_vbr_params(VP9_COMP *cpi) {
@@ -1094,7 +1120,7 @@ void vp9_rc_get_one_pass_vbr_params(VP9_COMP *cpi) {
       cpi->rc.frames_till_gf_update_due = cpi->rc.frames_to_key;
     cpi->refresh_golden_frame = 1;
     cpi->rc.source_alt_ref_pending = USE_ALTREF_FOR_ONE_PASS;
-    cpi->rc.gfu_boost = 2000;
+    cpi->rc.gfu_boost = DEFAULT_GF_BOOST;
   }
   if (cm->frame_type == KEY_FRAME)
     target = calc_iframe_target_size_one_pass_vbr(cpi);
