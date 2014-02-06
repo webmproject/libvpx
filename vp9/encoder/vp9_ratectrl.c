@@ -241,6 +241,26 @@ int vp9_rc_clamp_iframe_target_size(const VP9_COMP *const cpi, int target) {
   return target;
 }
 
+
+// Update the buffer level for higher layers, given the encoded current layer.
+static void update_layer_buffer_level(VP9_COMP *const cpi,
+                                      int encoded_frame_size) {
+  int temporal_layer = 0;
+  int current_temporal_layer = cpi->svc.temporal_layer_id;
+  for (temporal_layer = current_temporal_layer + 1;
+      temporal_layer < cpi->svc.number_temporal_layers; ++temporal_layer) {
+    LAYER_CONTEXT *lc = &cpi->svc.layer_context[temporal_layer];
+    RATE_CONTROL *lrc = &lc->rc;
+    int bits_off_for_this_layer = (int)(lc->target_bandwidth / lc->framerate -
+        encoded_frame_size);
+    lrc->bits_off_target += bits_off_for_this_layer;
+
+    // Clip buffer level to maximum buffer size for the layer.
+    lrc->bits_off_target = MIN(lrc->bits_off_target, lc->maximum_buffer_size);
+    lrc->buffer_level = lrc->bits_off_target;
+  }
+}
+
 // Update the buffer level: leaky bucket model.
 static void update_buffer_level(VP9_COMP *cpi, int encoded_frame_size) {
   const VP9_COMMON *const cm = &cpi->common;
@@ -255,13 +275,17 @@ static void update_buffer_level(VP9_COMP *cpi, int encoded_frame_size) {
   }
 
   // Clip the buffer level to the maximum specified buffer size.
-  rc->buffer_level = MIN(rc->bits_off_target, oxcf->maximum_buffer_size);
+  rc->bits_off_target = MIN(rc->bits_off_target, oxcf->maximum_buffer_size);
+  rc->buffer_level = rc->bits_off_target;
+
+  if (cpi->use_svc && cpi->oxcf.end_usage == USAGE_STREAM_FROM_SERVER) {
+    update_layer_buffer_level(cpi, encoded_frame_size);
+  }
 }
 
 int vp9_rc_drop_frame(VP9_COMP *cpi) {
   const VP9_CONFIG *oxcf = &cpi->oxcf;
   RATE_CONTROL *const rc = &cpi->rc;
-
 
   if (!oxcf->drop_frames_water_mark) {
     return 0;
@@ -273,7 +297,7 @@ int vp9_rc_drop_frame(VP9_COMP *cpi) {
       // If buffer is below drop_mark, for now just drop every other frame
       // (starting with the next frame) until it increases back over drop_mark.
       int drop_mark = (int)(oxcf->drop_frames_water_mark *
-                                oxcf->optimal_buffer_level / 100);
+          oxcf->optimal_buffer_level / 100);
       if ((rc->buffer_level > drop_mark) &&
           (rc->decimation_factor > 0)) {
         --rc->decimation_factor;
@@ -301,7 +325,8 @@ static double get_rate_correction_factor(const VP9_COMP *cpi) {
   if (cpi->common.frame_type == KEY_FRAME) {
     return cpi->rc.key_frame_rate_correction_factor;
   } else {
-    if (cpi->refresh_alt_ref_frame || cpi->refresh_golden_frame)
+    if ((cpi->refresh_alt_ref_frame || cpi->refresh_golden_frame) &&
+        !(cpi->use_svc && cpi->oxcf.end_usage == USAGE_STREAM_FROM_SERVER))
       return cpi->rc.gf_rate_correction_factor;
     else
       return cpi->rc.rate_correction_factor;
@@ -312,7 +337,8 @@ static void set_rate_correction_factor(VP9_COMP *cpi, double factor) {
   if (cpi->common.frame_type == KEY_FRAME) {
     cpi->rc.key_frame_rate_correction_factor = factor;
   } else {
-    if (cpi->refresh_alt_ref_frame || cpi->refresh_golden_frame)
+    if ((cpi->refresh_alt_ref_frame || cpi->refresh_golden_frame) &&
+        !(cpi->use_svc && cpi->oxcf.end_usage == USAGE_STREAM_FROM_SERVER))
       cpi->rc.gf_rate_correction_factor = factor;
     else
       cpi->rc.rate_correction_factor = factor;
@@ -538,7 +564,12 @@ static int rc_pick_q_and_adjust_q_bounds_one_pass(const VP9_COMP *cpi,
     if (oxcf->end_usage == USAGE_CONSTANT_QUALITY) {
       active_best_quality = cpi->cq_target_quality;
     } else {
-      active_best_quality = inter_minq[rc->avg_frame_qindex[INTER_FRAME]];
+      // Use the lower of active_worst_quality and recent/average Q.
+      if (rc->avg_frame_qindex[INTER_FRAME] < active_worst_quality)
+       active_best_quality = inter_minq[rc->avg_frame_qindex[INTER_FRAME]];
+      else
+        active_best_quality = inter_minq[active_worst_quality];
+      //
       // For the constrained quality mode we don't want
       // q to fall below the cq level.
       if ((oxcf->end_usage == USAGE_CONSTRAINED_QUALITY) &&
@@ -574,7 +605,6 @@ static int rc_pick_q_and_adjust_q_bounds_one_pass(const VP9_COMP *cpi,
     *top_index = (active_worst_quality + active_best_quality) / 2;
   }
 #endif
-
   if (oxcf->end_usage == USAGE_CONSTANT_QUALITY) {
     q = active_best_quality;
   // Special case code to try and match quality with forced key frames
@@ -1002,21 +1032,6 @@ void vp9_rc_postencode_update_drop_frame(VP9_COMP *cpi) {
   cpi->rc.frames_to_key--;
 }
 
-void vp9_rc_get_svc_params(VP9_COMP *cpi) {
-  VP9_COMMON *const cm = &cpi->common;
-  if ((cm->current_video_frame == 0) ||
-      (cm->frame_flags & FRAMEFLAGS_KEY) ||
-      (cpi->oxcf.auto_key && (cpi->rc.frames_since_key %
-                              cpi->key_frame_frequency == 0))) {
-    cm->frame_type = KEY_FRAME;
-    cpi->rc.source_alt_ref_active = 0;
-  } else {
-    cm->frame_type = INTER_FRAME;
-  }
-  cpi->rc.frames_till_gf_update_due = INT_MAX;
-  cpi->rc.baseline_gf_interval = INT_MAX;
-}
-
 static int test_for_kf_one_pass(VP9_COMP *cpi) {
   // Placeholder function for auto key frame
   return 0;
@@ -1169,6 +1184,32 @@ static int calc_iframe_target_size_one_pass_cbr(const VP9_COMP *cpi) {
     target = ((16 + kf_boost) * rc->av_per_frame_bandwidth) >> 4;
   }
   return target;
+}
+
+void vp9_rc_get_svc_params(VP9_COMP *cpi) {
+  VP9_COMMON *const cm = &cpi->common;
+  int target = cpi->rc.av_per_frame_bandwidth;
+  if ((cm->current_video_frame == 0) ||
+      (cm->frame_flags & FRAMEFLAGS_KEY) ||
+      (cpi->oxcf.auto_key && (cpi->rc.frames_since_key %
+                              cpi->key_frame_frequency == 0))) {
+    cm->frame_type = KEY_FRAME;
+    cpi->rc.source_alt_ref_active = 0;
+    if (cpi->pass == 0 && cpi->oxcf.end_usage == USAGE_STREAM_FROM_SERVER) {
+      target = calc_iframe_target_size_one_pass_cbr(cpi);
+      cpi->rc.active_worst_quality = cpi->rc.worst_quality;
+    }
+  } else {
+    cm->frame_type = INTER_FRAME;
+    if (cpi->pass == 0 && cpi->oxcf.end_usage == USAGE_STREAM_FROM_SERVER) {
+      target = calc_pframe_target_size_one_pass_cbr(cpi);
+      cpi->rc.active_worst_quality =
+          calc_active_worst_quality_one_pass_cbr(cpi);
+    }
+  }
+  vp9_rc_set_frame_target(cpi, target);
+  cpi->rc.frames_till_gf_update_due = INT_MAX;
+  cpi->rc.baseline_gf_interval = INT_MAX;
 }
 
 void vp9_rc_get_one_pass_cbr_params(VP9_COMP *cpi) {

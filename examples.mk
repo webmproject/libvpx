@@ -54,9 +54,6 @@ vpxenc.SRCS                 += third_party/libmkv/EbmlWriter.h
 vpxenc.SRCS                 += $(LIBYUV_SRCS)
 vpxenc.GUID                  = 548DEC74-7A15-4B2B-AFC3-AA102E7C25C1
 vpxenc.DESCRIPTION           = Full featured encoder
-UTILS-$(CONFIG_VP8_ENCODER)    += vp8_scalable_patterns.c
-vp8_scalable_patterns.GUID   = 0D6A210B-F482-4D6F-8570-4A9C01ACC88C
-vp8_scalable_patterns.DESCRIPTION = Temporal Scalability Encoder
 UTILS-$(CONFIG_VP9_ENCODER)    += vp9_spatial_scalable_encoder.c
 vp9_spatial_scalable_encoder.SRCS += args.c args.h
 vp9_spatial_scalable_encoder.SRCS += ivfenc.c ivfenc.h
@@ -73,6 +70,11 @@ endif
 #example_xma.GUID             = A955FC4A-73F1-44F7-135E-30D84D32F022
 #example_xma.DESCRIPTION      = External Memory Allocation mode usage
 
+EXAMPLES-$(CONFIG_ENCODERS)         += vpx_temporal_scalable_patterns.c
+vpx_temporal_scalable_patterns.SRCS += ivfenc.c ivfenc.h
+vpx_temporal_scalable_patterns.SRCS += tools_common.c tools_common.h
+vpx_temporal_scalable_patterns.GUID  = B18C08F2-A439-4502-A78E-849BE3D60947
+vpx_temporal_scalable_patterns.DESCRIPTION = Temporal Scalability Encoder
 EXAMPLES-$(CONFIG_VP8_DECODER)     += simple_decoder.c
 simple_decoder.GUID                 = D3BBF1E9-2427-450D-BBFF-B2843C1D44CC
 simple_decoder.SRCS                += ivfdec.h ivfdec.c

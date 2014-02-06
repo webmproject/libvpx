@@ -1144,6 +1144,109 @@ static int64_t rescale(int val, int64_t num, int denom) {
   return (llval * llnum / llden);
 }
 
+// Initialize layer context data from init_config().
+static void init_layer_context(VP9_COMP *const cpi) {
+  const VP9_CONFIG *const oxcf = &cpi->oxcf;
+  int temporal_layer = 0;
+  cpi->svc.spatial_layer_id = 0;
+  cpi->svc.temporal_layer_id = 0;
+  for (temporal_layer = 0; temporal_layer < cpi->svc.number_temporal_layers;
+      ++temporal_layer) {
+    LAYER_CONTEXT *const lc = &cpi->svc.layer_context[temporal_layer];
+    RATE_CONTROL *const lrc = &lc->rc;
+    lrc->active_worst_quality = q_trans[oxcf->worst_allowed_q];
+    lrc->avg_frame_qindex[INTER_FRAME] = q_trans[oxcf->worst_allowed_q];
+    lrc->last_q[INTER_FRAME] = q_trans[oxcf->worst_allowed_q];
+    lrc->ni_av_qi = lrc->active_worst_quality;
+    lrc->total_actual_bits = 0;
+    lrc->total_target_vs_actual = 0;
+    lrc->ni_tot_qi = 0;
+    lrc->tot_q = 0.0;
+    lrc->ni_frames = 0;
+    lrc->rate_correction_factor = 1.0;
+    lrc->key_frame_rate_correction_factor = 1.0;
+    lc->target_bandwidth = oxcf->ts_target_bitrate[temporal_layer] *
+        1000;
+    lrc->buffer_level = rescale((int)(oxcf->starting_buffer_level),
+                               lc->target_bandwidth, 1000);
+    lrc->bits_off_target = lrc->buffer_level;
+  }
+}
+
+// Update the layer context from a change_config() call.
+static void update_layer_context_change_config(VP9_COMP *const cpi,
+                                               const int target_bandwidth) {
+  const VP9_CONFIG *const oxcf = &cpi->oxcf;
+  const RATE_CONTROL *const rc = &cpi->rc;
+  int temporal_layer = 0;
+  float bitrate_alloc = 1.0;
+  for (temporal_layer = 0; temporal_layer < cpi->svc.number_temporal_layers;
+      ++temporal_layer) {
+    LAYER_CONTEXT *const lc = &cpi->svc.layer_context[temporal_layer];
+    RATE_CONTROL *const lrc = &lc->rc;
+    lc->target_bandwidth = oxcf->ts_target_bitrate[temporal_layer] * 1000;
+    bitrate_alloc = (float)lc->target_bandwidth / (float)target_bandwidth;
+    // Update buffer-related quantities.
+    lc->starting_buffer_level = oxcf->starting_buffer_level * bitrate_alloc;
+    lc->optimal_buffer_level = oxcf->optimal_buffer_level * bitrate_alloc;
+    lc->maximum_buffer_size = oxcf->maximum_buffer_size * bitrate_alloc;
+    lrc->bits_off_target = MIN(lrc->bits_off_target, lc->maximum_buffer_size);
+    lrc->buffer_level = MIN(lrc->buffer_level, lc->maximum_buffer_size);
+    // Update framerate-related quantities.
+    lc->framerate = oxcf->framerate / oxcf->ts_rate_decimator[temporal_layer];
+    lrc->av_per_frame_bandwidth = (int)(lc->target_bandwidth / lc->framerate);
+    lrc->max_frame_bandwidth = rc->max_frame_bandwidth;
+    // Update qp-related quantities.
+    lrc->worst_quality = rc->worst_quality;
+    lrc->best_quality = rc->best_quality;
+    lrc->active_worst_quality = rc->active_worst_quality;
+  }
+}
+
+// Prior to encoding the frame, update framerate-related quantities
+// for the current layer.
+static void update_layer_framerate(VP9_COMP *const cpi) {
+  int temporal_layer = cpi->svc.temporal_layer_id;
+  LAYER_CONTEXT *const lc = &cpi->svc.layer_context[temporal_layer];
+  RATE_CONTROL *const lrc = &lc->rc;
+  lc->framerate = cpi->oxcf.framerate /
+      cpi->oxcf.ts_rate_decimator[temporal_layer];
+  lrc->av_per_frame_bandwidth = (int)(lc->target_bandwidth /
+      lc->framerate);
+  lrc->max_frame_bandwidth = cpi->rc.max_frame_bandwidth;
+}
+
+// Prior to encoding the frame, set the layer context, for the current layer
+// to be encoded, to the cpi struct.
+static void restore_layer_context(VP9_COMP *const cpi) {
+  int temporal_layer = cpi->svc.temporal_layer_id;
+  LAYER_CONTEXT *lc = &cpi->svc.layer_context[temporal_layer];
+  int frame_since_key = cpi->rc.frames_since_key;
+  int frame_to_key = cpi->rc.frames_to_key;
+  cpi->rc = lc->rc;
+  cpi->oxcf.target_bandwidth = lc->target_bandwidth;
+  cpi->oxcf.starting_buffer_level = lc->starting_buffer_level;
+  cpi->oxcf.optimal_buffer_level = lc->optimal_buffer_level;
+  cpi->oxcf.maximum_buffer_size = lc->maximum_buffer_size;
+  cpi->output_framerate = lc->framerate;
+  // Reset the frames_since_key and frames_to_key counters to their values
+  // before the layer restore. Keep these defined for the stream (not layer).
+  cpi->rc.frames_since_key = frame_since_key;
+  cpi->rc.frames_to_key = frame_to_key;
+}
+
+// Save the layer context after encoding the frame.
+static void save_layer_context(VP9_COMP *const cpi) {
+  int temporal_layer = cpi->svc.temporal_layer_id;
+  LAYER_CONTEXT *lc = &cpi->svc.layer_context[temporal_layer];
+  lc->rc = cpi->rc;
+  lc->target_bandwidth = cpi->oxcf.target_bandwidth;
+  lc->starting_buffer_level = cpi->oxcf.starting_buffer_level;
+  lc->optimal_buffer_level = cpi->oxcf.optimal_buffer_level;
+  lc->maximum_buffer_size = cpi->oxcf.maximum_buffer_size;
+  lc->framerate = cpi->output_framerate;
+}
+
 static void set_tile_limits(VP9_COMP *cpi) {
   VP9_COMMON *const cm = &cpi->common;
 
@@ -1169,6 +1272,16 @@ static void init_config(VP9_PTR ptr, VP9_CONFIG *oxcf) {
   cm->subsampling_x = 0;
   cm->subsampling_y = 0;
   vp9_alloc_compressor_data(cpi);
+
+  // Spatial scalability.
+  cpi->svc.number_spatial_layers = oxcf->ss_number_layers;
+  // Temporal scalability.
+  cpi->svc.number_temporal_layers = oxcf->ts_number_layers;
+
+  if (cpi->svc.number_temporal_layers > 1 &&
+      cpi->oxcf.end_usage == USAGE_STREAM_FROM_SERVER) {
+    init_layer_context(cpi);
+  }
 
   // change includes all joint functionality
   vp9_change_config(ptr, oxcf);
@@ -1210,16 +1323,12 @@ static void init_config(VP9_PTR ptr, VP9_CONFIG *oxcf) {
   cpi->gld_fb_idx = 1;
   cpi->alt_fb_idx = 2;
 
-  cpi->current_layer = 0;
-  cpi->use_svc = 0;
-
   set_tile_limits(cpi);
 
   cpi->fixed_divide[0] = 0;
   for (i = 1; i < 512; i++)
     cpi->fixed_divide[i] = 0x80000 / i;
 }
-
 
 void vp9_change_config(VP9_PTR ptr, VP9_CONFIG *oxcf) {
   VP9_COMP *cpi = (VP9_COMP *)(ptr);
@@ -1312,10 +1421,10 @@ void vp9_change_config(VP9_PTR ptr, VP9_CONFIG *oxcf) {
                                             cpi->oxcf.target_bandwidth, 1000);
   // Under a configuration change, where maximum_buffer_size may change,
   // keep buffer level clipped to the maximum allowed buffer size.
-  if (cpi->rc.bits_off_target > cpi->oxcf.maximum_buffer_size) {
-    cpi->rc.bits_off_target = cpi->oxcf.maximum_buffer_size;
-    cpi->rc.buffer_level = cpi->rc.bits_off_target;
-  }
+  cpi->rc.bits_off_target = MIN(cpi->rc.bits_off_target,
+                                cpi->oxcf.maximum_buffer_size);
+  cpi->rc.buffer_level = MIN(cpi->rc.buffer_level,
+                             cpi->oxcf.maximum_buffer_size);
 
   // Set up frame rate and related parameters rate control values.
   vp9_new_framerate(cpi, cpi->oxcf.framerate);
@@ -1349,6 +1458,11 @@ void vp9_change_config(VP9_PTR ptr, VP9_CONFIG *oxcf) {
     assert(cm->height <= cpi->initial_height);
   }
   update_frame_size(cpi);
+
+  if (cpi->svc.number_temporal_layers > 1 &&
+      cpi->oxcf.end_usage == USAGE_STREAM_FROM_SERVER) {
+    update_layer_context_change_config(cpi, cpi->oxcf.target_bandwidth);
+  }
 
   cpi->speed = cpi->oxcf.cpu_used;
 
@@ -1573,6 +1687,8 @@ VP9_PTR vp9_create_compressor(VP9_CONFIG *oxcf) {
 
   vp9_create_common(cm);
 
+  cpi->use_svc = 0;
+
   init_config((VP9_PTR)cpi, oxcf);
 
   init_pick_mode_context(cpi);
@@ -1587,9 +1703,6 @@ VP9_PTR vp9_create_compressor(VP9_CONFIG *oxcf) {
   cpi->gold_is_last = 0;
   cpi->alt_is_last  = 0;
   cpi->gold_is_alt  = 0;
-
-  // Spatial scalability
-  cpi->number_spatial_layers = oxcf->ss_number_layers;
 
   // Create the encoder segmentation map and set all entries to 0
   CHECK_MEM_ERROR(cm, cpi->segmentation_map,
@@ -3504,6 +3617,12 @@ int vp9_get_compressed_data(VP9_PTR ptr, unsigned int *frame_flags,
     adjust_frame_rate(cpi);
   }
 
+  if (cpi->svc.number_temporal_layers > 1 &&
+      cpi->oxcf.end_usage == USAGE_STREAM_FROM_SERVER) {
+    update_layer_framerate(cpi);
+    restore_layer_context(cpi);
+  }
+
   // start with a 0 size frame
   *size = 0;
 
@@ -3577,6 +3696,12 @@ int vp9_get_compressed_data(VP9_PTR ptr, unsigned int *frame_flags,
 
   if (*size > 0) {
     cpi->droppable = !frame_is_reference(cpi);
+  }
+
+  // Save layer specific state.
+  if (cpi->svc.number_temporal_layers > 1 &&
+      cpi->oxcf.end_usage == USAGE_STREAM_FROM_SERVER) {
+    save_layer_context(cpi);
   }
 
   vpx_usec_timer_mark(&cmptimer);

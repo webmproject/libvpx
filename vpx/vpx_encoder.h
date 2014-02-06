@@ -604,47 +604,48 @@ extern "C" {
      * Spatial scalability settings (ss)
      */
 
-    /*!\brief Number of coding layers (spatial)
+    /*!\brief Number of spatial coding layers.
      *
-     * This value specifies the number of coding layers to be used.
+     * This value specifies the number of spatial coding layers to be used.
      */
     unsigned int           ss_number_layers;
 
-    /*!\brief Number of coding layers
+    /*!\brief Number of temporal coding layers.
      *
-     * This value specifies the number of coding layers to be used.
+     * This value specifies the number of temporal layers to be used.
      */
     unsigned int           ts_number_layers;
 
-    /*!\brief Target bitrate for each layer
+    /*!\brief Target bitrate for each temporal layer.
      *
-     * These values specify the target coding bitrate for each coding layer.
+     * These values specify the target coding bitrate to be used for each
+     * temporal layer.
      */
     unsigned int           ts_target_bitrate[VPX_TS_MAX_LAYERS];
 
-    /*!\brief Frame rate decimation factor for each layer
+    /*!\brief Frame rate decimation factor for each temporal layer.
      *
      * These values specify the frame rate decimation factors to apply
-     * to each layer.
+     * to each temporal layer.
      */
     unsigned int           ts_rate_decimator[VPX_TS_MAX_LAYERS];
 
-    /*!\brief Length of the sequence defining frame layer membership
+    /*!\brief Length of the sequence defining frame temporal layer membership.
      *
      * This value specifies the length of the sequence that defines the
-     * membership of frames to layers. For example, if ts_periodicity=8 then
-     * frames are assigned to coding layers with a repeated sequence of
-     * length 8.
-     */
+     * membership of frames to temporal layers. For example, if the
+     * ts_periodicity = 8, then the frames are assigned to coding layers with a
+     * repeated sequence of length 8.
+    */
     unsigned int           ts_periodicity;
 
-    /*!\brief Template defining the membership of frames to coding layers
+    /*!\brief Template defining the membership of frames to temporal layers.
      *
-     * This array defines the membership of frames to coding layers. For a
-     * 2-layer encoding that assigns even numbered frames to one layer (0)
-     * and odd numbered frames to a second layer (1) with ts_periodicity=8,
-     * then ts_layer_id = (0,1,0,1,0,1,0,1).
-     */
+     * This array defines the membership of frames to temporal coding layers.
+     * For a 2-layer encoding that assigns even numbered frames to one temporal
+     * layer (0) and odd numbered frames to a second temporal layer (1) with
+     * ts_periodicity=8, then ts_layer_id = (0,1,0,1,0,1,0,1).
+    */
     unsigned int           ts_layer_id[VPX_TS_MAX_PERIODICITY];
   } vpx_codec_enc_cfg_t; /**< alias for struct vpx_codec_enc_cfg */
 

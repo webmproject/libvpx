@@ -194,7 +194,8 @@ enum vp8e_enc_control_id {
   VP9E_SET_AQ_MODE,
 
   VP9E_SET_SVC,
-  VP9E_SET_SVC_PARAMETERS
+  VP9E_SET_SVC_PARAMETERS,
+  VP9E_SET_SVC_LAYER_ID
 };
 
 /*!\brief vpx 1-D scaling mode
@@ -285,7 +286,8 @@ typedef enum {
 typedef struct vpx_svc_parameters {
   unsigned int width;         /**< width of current spatial layer */
   unsigned int height;        /**< height of current spatial layer */
-  int layer;                  /**< current layer number - 0 = base */
+  int spatial_layer;          /**< current spatial layer number - 0 = base */
+  int temporal_layer;         /**< current temporal layer number - 0 = base */
   int flags;                  /**< encode frame flags */
   int max_quantizer;          /**< max quantizer for current layer */
   int min_quantizer;          /**< min quantizer for current layer */
@@ -294,6 +296,11 @@ typedef struct vpx_svc_parameters {
   int gld_fb_idx;             /**< golden frame frame buffer index */
   int alt_fb_idx;             /**< alt reference frame frame buffer index */
 } vpx_svc_parameters_t;
+
+typedef struct vpx_svc_layer_id {
+  int spatial_layer_id;
+  int temporal_layer_id;
+} vpx_svc_layer_id_t;
 
 /*!\brief VP8 encoder control function parameter type
  *
@@ -316,6 +323,7 @@ VPX_CTRL_USE_TYPE(VP8E_SET_SCALEMODE,          vpx_scaling_mode_t *)
 
 VPX_CTRL_USE_TYPE(VP9E_SET_SVC,                int)
 VPX_CTRL_USE_TYPE(VP9E_SET_SVC_PARAMETERS,     vpx_svc_parameters_t *)
+VPX_CTRL_USE_TYPE(VP9E_SET_SVC_LAYER_ID,       vpx_svc_layer_id_t *)
 
 VPX_CTRL_USE_TYPE(VP8E_SET_CPUUSED,            int)
 VPX_CTRL_USE_TYPE(VP8E_SET_ENABLEAUTOALTREF,   unsigned int)
