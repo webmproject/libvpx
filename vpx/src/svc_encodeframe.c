@@ -95,7 +95,8 @@ struct LayerData {
 
 // create LayerData from encoder output
 static struct LayerData *ld_create(void *buf, size_t size) {
-  struct LayerData *const layer_data = malloc(sizeof(*layer_data));
+  struct LayerData *const layer_data =
+      (struct LayerData *)malloc(sizeof(*layer_data));
   if (layer_data == NULL) {
     return NULL;
   }
@@ -201,18 +202,18 @@ static void sf_create_index(struct Superframe *sf) {
 static SvcInternal *get_svc_internal(SvcContext *svc_ctx) {
   if (svc_ctx == NULL) return NULL;
   if (svc_ctx->internal == NULL) {
-    SvcInternal *const si = malloc(sizeof(*si));
+    SvcInternal *const si = (SvcInternal *)malloc(sizeof(*si));
     if (si != NULL) {
       memset(si, 0, sizeof(*si));
     }
     svc_ctx->internal = si;
   }
-  return svc_ctx->internal;
+  return (SvcInternal *)svc_ctx->internal;
 }
 
 static const SvcInternal *get_const_svc_internal(const SvcContext *svc_ctx) {
   if (svc_ctx == NULL) return NULL;
-  return svc_ctx->internal;
+  return (const SvcInternal *)svc_ctx->internal;
 }
 
 static void svc_log_reset(SvcContext *svc_ctx) {
@@ -819,7 +820,7 @@ vpx_codec_err_t vpx_svc_encode(SvcContext *svc_ctx, vpx_codec_ctx_t *codec_ctx,
               ld_create(cx_pkt->data.frame.buf, (size_t)frame_pkt_size);
           if (layer_data == NULL) {
             svc_log(svc_ctx, SVC_LOG_ERROR, "Error allocating LayerData\n");
-            return 0;
+            return VPX_CODEC_OK;
           }
           ld_list_add(&cx_layer_list, layer_data);
 
@@ -864,7 +865,7 @@ vpx_codec_err_t vpx_svc_encode(SvcContext *svc_ctx, vpx_codec_ctx_t *codec_ctx,
     si->buffer_size = si->frame_size;
   }
   // copy layer data into packet
-  ld_list_copy_to_buffer(cx_layer_list, si->buffer);
+  ld_list_copy_to_buffer(cx_layer_list, (uint8_t *)si->buffer);
 
   ld_list_free(cx_layer_list);
 
