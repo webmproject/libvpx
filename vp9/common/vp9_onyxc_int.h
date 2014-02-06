@@ -18,6 +18,7 @@
 #include "vp9/common/vp9_entropymv.h"
 #include "vp9/common/vp9_entropy.h"
 #include "vp9/common/vp9_entropymode.h"
+#include "vp9/common/vp9_frame_buffers.h"
 #include "vp9/common/vp9_quant_common.h"
 #include "vp9/common/vp9_tile_common.h"
 
@@ -94,6 +95,7 @@ typedef enum {
 
 typedef struct {
   int ref_count;
+  vpx_codec_frame_buffer_t raw_frame_buffer;
   YV12_BUFFER_CONFIG buf;
 } RefCntBuffer;
 
@@ -223,6 +225,14 @@ typedef struct VP9Common {
   int frame_parallel_decoding_mode;
 
   int log2_tile_cols, log2_tile_rows;
+
+  // Private data associated with the frame buffer callbacks.
+  void *cb_priv;
+  vpx_get_frame_buffer_cb_fn_t get_fb_cb;
+  vpx_release_frame_buffer_cb_fn_t release_fb_cb;
+
+  // Handles memory for the codec.
+  InternalFrameBufferList int_frame_buffers;
 } VP9_COMMON;
 
 static YV12_BUFFER_CONFIG *get_frame_new_buffer(VP9_COMMON *cm) {
