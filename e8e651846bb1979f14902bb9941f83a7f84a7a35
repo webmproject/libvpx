@@ -160,6 +160,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//5CM\u003d",
+        "filename": "video_common.h",
+        "patchSetId": 10
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-02-06T01:28:08Z",
+      "side": 1,
+      "message": "I see you point in having this enum but my original design intent for this API was different -- that\u0027s why there is a disagreement. In my opinion it should\u0027ve been kind of \"low level\" API which doesn\u0027t do any codec-specific checks.\nThis is a very thin layer which extracts bytes from the video container and forwards them to the user without any additional processing. User is going to decide what to do with data and how to interpret it.  \n\nKnowing codec ID in advance limits the scope of current API. In real life you don\u0027t know all available codec IDs in advance. I\u0027m considering any valid IVF file as good input (which could be rejected by the API user). You are considering valid only those valid IVF files which has codec ID from predefined set. \n\nYou are suggesting to do all checks independently from the user and decide what is valid and what is not. But in any case user has to check (compare) returned enum member to select right decoder, so it will be a double check.\n\nFourCC has nothing to do with WebM in this case. This is just a constant indicating codec gets used. It would be something like this inside vpx_video_writer_open():\n\nif (container \u003d\u003d kContainerWebM) {\n  if (info-\u003ecodec_fourcc !\u003d VP8_FOURCC \u0026\u0026\n      info-\u003ecodec_fourcc !\u003d VP9_FOURCC)\n    return NULL; // Unsupported codec\n   \n   ...\n}",
+      "parentUuid": "AAAAdn//5EE\u003d",
+      "revId": "e8e651846bb1979f14902bb9941f83a7f84a7a35",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//5Kg\u003d",
         "filename": "video_common.h",
         "patchSetId": 10
@@ -207,6 +225,24 @@
       "side": 1,
       "message": "Ah, so the one in VpxVideoInputContext is misnamed, or I misused it in ivfdec.c (see file_is_ivf()).",
       "parentUuid": "AAAAdn//5IM\u003d",
+      "revId": "e8e651846bb1979f14902bb9941f83a7f84a7a35",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//5Cs\u003d",
+        "filename": "video_common.h",
+        "patchSetId": 10
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-02-06T01:28:08Z",
+      "side": 1,
+      "message": "Oh, I\u0027ll double check this in my next ivf-related changeset.",
+      "parentUuid": "AAAAdn//5D4\u003d",
       "revId": "e8e651846bb1979f14902bb9941f83a7f84a7a35",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
