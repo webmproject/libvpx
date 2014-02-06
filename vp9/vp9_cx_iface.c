@@ -296,14 +296,11 @@ static vpx_codec_err_t set_vp9e_config(VP9_CONFIG *oxcf,
     oxcf->lag_in_frames = cfg.g_lag_in_frames;
   }
 
-  // VBR only supported for now.
-  // CBR code has been deprectated for experimental phase.
-  // CQ mode not yet tested
-  oxcf->end_usage        = USAGE_LOCAL_FILE_PLAYBACK;
+  oxcf->end_usage   = USAGE_LOCAL_FILE_PLAYBACK;
   if (cfg.rc_end_usage == VPX_CQ)
-    oxcf->end_usage      = USAGE_CONSTRAINED_QUALITY;
+    oxcf->end_usage = USAGE_CONSTRAINED_QUALITY;
   else if (cfg.rc_end_usage == VPX_Q)
-    oxcf->end_usage      = USAGE_CONSTANT_QUALITY;
+    oxcf->end_usage = USAGE_CONSTANT_QUALITY;
   else if (cfg.rc_end_usage == VPX_CBR)
     oxcf->end_usage = USAGE_STREAM_FROM_SERVER;
 
