@@ -23,6 +23,7 @@
 #include "vp9/common/vp9_onyxc_int.h"
 
 #include "vp9/encoder/vp9_encodemb.h"
+#include "vp9/encoder/vp9_firstpass.h"
 #include "vp9/encoder/vp9_lookahead.h"
 #include "vp9/encoder/vp9_mbgraph.h"
 #include "vp9/encoder/vp9_mcomp.h"
@@ -77,28 +78,6 @@ typedef struct {
 
   FRAME_CONTEXT fc;
 } CODING_CONTEXT;
-
-typedef struct {
-  double frame;
-  double intra_error;
-  double coded_error;
-  double sr_coded_error;
-  double ssim_weighted_pred_err;
-  double pcnt_inter;
-  double pcnt_motion;
-  double pcnt_second_ref;
-  double pcnt_neutral;
-  double MVr;
-  double mvr_abs;
-  double MVc;
-  double mvc_abs;
-  double MVrv;
-  double MVcv;
-  double mv_in_out_count;
-  double new_mv_count;
-  double duration;
-  double count;
-} FIRSTPASS_STATS;
 
 // This enumerator type needs to be kept aligned with the mode order in
 // const MODE_DEFINITION vp9_mode_order[MAX_MODES] used in the rd code.
@@ -573,46 +552,7 @@ typedef struct VP9_COMP {
   uint64_t time_pick_lpf;
   uint64_t time_encode_sb_row;
 
-  struct twopass_rc {
-    unsigned int section_intra_rating;
-    unsigned int next_iiratio;
-    unsigned int this_iiratio;
-    FIRSTPASS_STATS total_stats;
-    FIRSTPASS_STATS this_frame_stats;
-    FIRSTPASS_STATS *stats_in, *stats_in_end, *stats_in_start;
-    FIRSTPASS_STATS total_left_stats;
-    int first_pass_done;
-    int64_t bits_left;
-    int64_t clip_bits_total;
-    double avg_iiratio;
-    double modified_error_min;
-    double modified_error_max;
-    double modified_error_total;
-    double modified_error_left;
-    double kf_intra_err_min;
-    double gf_intra_err_min;
-    int static_scene_max_gf_interval;
-    int kf_bits;
-    // Remaining error from uncoded frames in a gf group. Two pass use only
-    int64_t gf_group_error_left;
-
-    // Projected total bits available for a key frame group of frames
-    int64_t kf_group_bits;
-
-    // Error score of frames still to be coded in kf group
-    int64_t kf_group_error_left;
-
-    // Projected Bits available for a group of frames including 1 GF or ARF
-    int64_t gf_group_bits;
-    // Bits for the golden frame or ARF - 2 pass only
-    int gf_bits;
-    int alt_extra_bits;
-
-    int sr_update_lag;
-
-    int kf_zeromotion_pct;
-    int gf_zeromotion_pct;
-  } twopass;
+  struct twopass_rc twopass;
 
   YV12_BUFFER_CONFIG alt_ref_buffer;
   YV12_BUFFER_CONFIG *frames[MAX_LAG_BUFFERS];
