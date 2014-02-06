@@ -19,7 +19,7 @@
 #include "vp9/common/mips/dspr2/vp9_common_dspr2.h"
 
 #if HAVE_DSPR2
-static void vp9_idct4_1d_rows_dspr2(const int16_t *input, int16_t *output) {
+static void vp9_idct4_rows_dspr2(const int16_t *input, int16_t *output) {
   int16_t   step_0, step_1, step_2, step_3;
   int       Temp0, Temp1, Temp2, Temp3;
   const int const_2_power_13 = 8192;
@@ -104,7 +104,7 @@ static void vp9_idct4_1d_rows_dspr2(const int16_t *input, int16_t *output) {
   }
 }
 
-static void vp9_idct4_1d_columns_add_blk_dspr2(int16_t *input, uint8_t *dest,
+static void vp9_idct4_columns_add_blk_dspr2(int16_t *input, uint8_t *dest,
                                                int dest_stride) {
   int16_t   step_0, step_1, step_2, step_3;
   int       Temp0, Temp1, Temp2, Temp3;
@@ -240,10 +240,10 @@ void vp9_idct4x4_16_add_dspr2(const int16_t *input, uint8_t *dest,
   );
 
   // Rows
-  vp9_idct4_1d_rows_dspr2(input, outptr);
+  vp9_idct4_rows_dspr2(input, outptr);
 
   // Columns
-  vp9_idct4_1d_columns_add_blk_dspr2(&out[0], dest, dest_stride);
+  vp9_idct4_columns_add_blk_dspr2(&out[0], dest, dest_stride);
 }
 
 void vp9_idct4x4_1_add_dspr2(const int16_t *input, uint8_t *dest,
@@ -319,7 +319,7 @@ void vp9_idct4x4_1_add_dspr2(const int16_t *input, uint8_t *dest,
   }
 }
 
-static void iadst4_1d_dspr2(const int16_t *input, int16_t *output) {
+static void iadst4_dspr2(const int16_t *input, int16_t *output) {
   int s0, s1, s2, s3, s4, s5, s6, s7;
   int x0, x1, x2, x3;
 
@@ -379,16 +379,16 @@ void vp9_iht4x4_16_add_dspr2(const int16_t *input, uint8_t *dest,
 
   switch (tx_type) {
     case DCT_DCT:   // DCT in both horizontal and vertical
-      vp9_idct4_1d_rows_dspr2(input, outptr);
-      vp9_idct4_1d_columns_add_blk_dspr2(&out[0], dest, dest_stride);
+      vp9_idct4_rows_dspr2(input, outptr);
+      vp9_idct4_columns_add_blk_dspr2(&out[0], dest, dest_stride);
       break;
     case ADST_DCT:  // ADST in vertical, DCT in horizontal
-      vp9_idct4_1d_rows_dspr2(input, outptr);
+      vp9_idct4_rows_dspr2(input, outptr);
 
       outptr = out;
 
       for (i = 0; i < 4; ++i) {
-        iadst4_1d_dspr2(outptr, temp_out);
+        iadst4_dspr2(outptr, temp_out);
 
         for (j = 0; j < 4; ++j)
           dest[j * dest_stride + i] =
@@ -400,7 +400,7 @@ void vp9_iht4x4_16_add_dspr2(const int16_t *input, uint8_t *dest,
       break;
     case DCT_ADST:  // DCT in vertical, ADST in horizontal
       for (i = 0; i < 4; ++i) {
-        iadst4_1d_dspr2(input, outptr);
+        iadst4_dspr2(input, outptr);
         input  += 4;
         outptr += 4;
       }
@@ -410,11 +410,11 @@ void vp9_iht4x4_16_add_dspr2(const int16_t *input, uint8_t *dest,
           temp_in[i * 4 + j] = out[j * 4 + i];
         }
       }
-      vp9_idct4_1d_columns_add_blk_dspr2(&temp_in[0], dest, dest_stride);
+      vp9_idct4_columns_add_blk_dspr2(&temp_in[0], dest, dest_stride);
       break;
     case ADST_ADST:  // ADST in both directions
       for (i = 0; i < 4; ++i) {
-        iadst4_1d_dspr2(input, outptr);
+        iadst4_dspr2(input, outptr);
         input  += 4;
         outptr += 4;
       }
@@ -422,7 +422,7 @@ void vp9_iht4x4_16_add_dspr2(const int16_t *input, uint8_t *dest,
       for (i = 0; i < 4; ++i) {
         for (j = 0; j < 4; ++j)
           temp_in[j] = out[j * 4 + i];
-        iadst4_1d_dspr2(temp_in, temp_out);
+        iadst4_dspr2(temp_in, temp_out);
 
         for (j = 0; j < 4; ++j)
           dest[j * dest_stride + i] =

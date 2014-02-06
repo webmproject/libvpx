@@ -19,8 +19,8 @@
 #include "vp9/common/mips/dspr2/vp9_common_dspr2.h"
 
 #if HAVE_DSPR2
-static void idct16_1d_rows_dspr2(const int16_t *input, int16_t *output,
-                                 uint32_t no_rows) {
+static void idct16_rows_dspr2(const int16_t *input, int16_t *output,
+                              uint32_t no_rows) {
   int i;
   int step1_0, step1_1, step1_2, step1_3, step1_4, step1_5, step1_6, step1_7;
   int step1_10, step1_11, step1_12, step1_13;
@@ -404,8 +404,8 @@ static void idct16_1d_rows_dspr2(const int16_t *input, int16_t *output,
   }
 }
 
-static void idct16_1d_cols_add_blk_dspr2(int16_t *input, uint8_t *dest,
-                                         int dest_stride) {
+static void idct16_cols_add_blk_dspr2(int16_t *input, uint8_t *dest,
+                                      int dest_stride) {
   int i;
   int step1_0, step1_1, step1_2, step1_3, step1_4, step1_5, step1_6, step1_7;
   int step1_8, step1_9, step1_10, step1_11;
@@ -905,13 +905,13 @@ void vp9_idct16x16_256_add_dspr2(const int16_t *input, uint8_t *dest,
   );
 
   // First transform rows
-  idct16_1d_rows_dspr2(input, out, 16);
+  idct16_rows_dspr2(input, out, 16);
 
   // Then transform columns and add to dest
-  idct16_1d_cols_add_blk_dspr2(out, dest, dest_stride);
+  idct16_cols_add_blk_dspr2(out, dest, dest_stride);
 }
 
-static void iadst16_1d(const int16_t *input, int16_t *output) {
+static void iadst16(const int16_t *input, int16_t *output) {
   int s0, s1, s2, s3, s4, s5, s6, s7, s8, s9, s10, s11, s12, s13, s14, s15;
 
   int x0 = input[15];
@@ -1099,16 +1099,16 @@ void vp9_iht16x16_256_add_dspr2(const int16_t *input, uint8_t *dest,
 
   switch (tx_type) {
     case DCT_DCT:     // DCT in both horizontal and vertical
-      idct16_1d_rows_dspr2(input, outptr, 16);
-      idct16_1d_cols_add_blk_dspr2(out, dest, pitch);
+      idct16_rows_dspr2(input, outptr, 16);
+      idct16_cols_add_blk_dspr2(out, dest, pitch);
       break;
     case ADST_DCT:    // ADST in vertical, DCT in horizontal
-      idct16_1d_rows_dspr2(input, outptr, 16);
+      idct16_rows_dspr2(input, outptr, 16);
 
       outptr = out;
 
       for (i = 0; i < 16; ++i) {
-        iadst16_1d(outptr, temp_out);
+        iadst16(outptr, temp_out);
 
         for (j = 0; j < 16; ++j)
           dest[j * pitch + i] =
@@ -1125,7 +1125,7 @@ void vp9_iht16x16_256_add_dspr2(const int16_t *input, uint8_t *dest,
         /* prefetch row */
         vp9_prefetch_load((const uint8_t *)(input + 16));
 
-        iadst16_1d(input, outptr);
+        iadst16(input, outptr);
         input += 16;
         outptr += 16;
       }
@@ -1134,7 +1134,7 @@ void vp9_iht16x16_256_add_dspr2(const int16_t *input, uint8_t *dest,
         for (j = 0; j < 16; ++j)
             temp_in[j * 16 + i] = out[i * 16 + j];
 
-      idct16_1d_cols_add_blk_dspr2(temp_in, dest, pitch);
+      idct16_cols_add_blk_dspr2(temp_in, dest, pitch);
     }
     break;
     case ADST_ADST:   // ADST in both directions
@@ -1145,7 +1145,7 @@ void vp9_iht16x16_256_add_dspr2(const int16_t *input, uint8_t *dest,
         /* prefetch row */
         vp9_prefetch_load((const uint8_t *)(input + 16));
 
-        iadst16_1d(input, outptr);
+        iadst16(input, outptr);
         input += 16;
         outptr += 16;
       }
@@ -1153,7 +1153,7 @@ void vp9_iht16x16_256_add_dspr2(const int16_t *input, uint8_t *dest,
       for (i = 0; i < 16; ++i) {
         for (j = 0; j < 16; ++j)
           temp_in[j] = out[j * 16 + i];
-        iadst16_1d(temp_in, temp_out);
+        iadst16(temp_in, temp_out);
         for (j = 0; j < 16; ++j)
           dest[j * pitch + i] =
                     clip_pixel(ROUND_POWER_OF_TWO(temp_out[j], 6)
@@ -1183,7 +1183,7 @@ void vp9_idct16x16_10_add_dspr2(const int16_t *input, uint8_t *dest,
 
   // First transform rows. Since all non-zero dct coefficients are in
   // upper-left 4x4 area, we only need to calculate first 4 rows here.
-  idct16_1d_rows_dspr2(input, outptr, 4);
+  idct16_rows_dspr2(input, outptr, 4);
 
   outptr += 4;
   for (i = 0; i < 6; ++i) {
@@ -1213,7 +1213,7 @@ void vp9_idct16x16_10_add_dspr2(const int16_t *input, uint8_t *dest,
   }
 
   // Then transform columns
-  idct16_1d_cols_add_blk_dspr2(out, dest, dest_stride);
+  idct16_cols_add_blk_dspr2(out, dest, dest_stride);
 }
 
 void vp9_idct16x16_1_add_dspr2(const int16_t *input, uint8_t *dest,

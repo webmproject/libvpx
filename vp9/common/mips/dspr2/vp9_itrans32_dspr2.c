@@ -19,8 +19,8 @@
 #include "vp9/common/mips/dspr2/vp9_common_dspr2.h"
 
 #if HAVE_DSPR2
-static void idct32_1d_rows_dspr2(const int16_t *input, int16_t *output,
-                                 uint32_t no_rows) {
+static void idct32_rows_dspr2(const int16_t *input, int16_t *output,
+                              uint32_t no_rows) {
   int16_t step1_0, step1_1, step1_2, step1_3, step1_4, step1_5, step1_6;
   int16_t step1_7, step1_8, step1_9, step1_10, step1_11, step1_12, step1_13;
   int16_t step1_14, step1_15, step1_16, step1_17, step1_18, step1_19, step1_20;
@@ -882,10 +882,10 @@ void vp9_idct32x32_1024_add_dspr2(const int16_t *input, uint8_t *dest,
   );
 
   // Rows
-  idct32_1d_rows_dspr2(input, outptr, 32);
+  idct32_rows_dspr2(input, outptr, 32);
 
   // Columns
-  vp9_idct32_1d_cols_add_blk_dspr2(out, dest, dest_stride);
+  vp9_idct32_cols_add_blk_dspr2(out, dest, dest_stride);
 }
 
 void vp9_idct32x32_34_add_dspr2(const int16_t *input, uint8_t *dest,
@@ -903,7 +903,7 @@ void vp9_idct32x32_34_add_dspr2(const int16_t *input, uint8_t *dest,
   );
 
   // Rows
-  idct32_1d_rows_dspr2(input, outptr, 8);
+  idct32_rows_dspr2(input, outptr, 8);
 
   outptr += 8;
   __asm__ __volatile__ (
@@ -947,7 +947,7 @@ void vp9_idct32x32_34_add_dspr2(const int16_t *input, uint8_t *dest,
   }
 
   // Columns
-  vp9_idct32_1d_cols_add_blk_dspr2(out, dest, stride);
+  vp9_idct32_cols_add_blk_dspr2(out, dest, stride);
 }
 
 void vp9_idct32x32_1_add_dspr2(const int16_t *input, uint8_t *dest,

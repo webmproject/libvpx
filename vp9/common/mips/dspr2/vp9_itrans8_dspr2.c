@@ -19,8 +19,8 @@
 #include "vp9/common/mips/dspr2/vp9_common_dspr2.h"
 
 #if HAVE_DSPR2
-static void idct8_1d_rows_dspr2(const int16_t *input, int16_t *output,
-                                uint32_t no_rows) {
+static void idct8_rows_dspr2(const int16_t *input, int16_t *output,
+                             uint32_t no_rows) {
   int step1_0, step1_1, step1_2, step1_3, step1_4, step1_5, step1_6, step1_7;
   const int const_2_power_13 = 8192;
   int Temp0, Temp1, Temp2, Temp3, Temp4;
@@ -200,8 +200,8 @@ static void idct8_1d_rows_dspr2(const int16_t *input, int16_t *output,
   }
 }
 
-static void idct8_1d_columns_add_blk_dspr2(int16_t *input, uint8_t *dest,
-                                           int dest_stride) {
+static void idct8_columns_add_blk_dspr2(int16_t *input, uint8_t *dest,
+                                        int dest_stride) {
   int step1_0, step1_1, step1_2, step1_3, step1_4, step1_5, step1_6, step1_7;
   int Temp0, Temp1, Temp2, Temp3;
   int i;
@@ -462,13 +462,13 @@ void vp9_idct8x8_64_add_dspr2(const int16_t *input, uint8_t *dest,
   );
 
   // First transform rows
-  idct8_1d_rows_dspr2(input, outptr, 8);
+  idct8_rows_dspr2(input, outptr, 8);
 
   // Then transform columns and add to dest
-  idct8_1d_columns_add_blk_dspr2(&out[0], dest, dest_stride);
+  idct8_columns_add_blk_dspr2(&out[0], dest, dest_stride);
 }
 
-static void iadst8_1d_dspr2(const int16_t *input, int16_t *output) {
+static void iadst8_dspr2(const int16_t *input, int16_t *output) {
   int s0, s1, s2, s3, s4, s5, s6, s7;
   int x0, x1, x2, x3, x4, x5, x6, x7;
 
@@ -563,14 +563,14 @@ void vp9_iht8x8_64_add_dspr2(const int16_t *input, uint8_t *dest,
 
   switch (tx_type) {
     case DCT_DCT:     // DCT in both horizontal and vertical
-      idct8_1d_rows_dspr2(input, outptr, 8);
-      idct8_1d_columns_add_blk_dspr2(&out[0], dest, dest_stride);
+      idct8_rows_dspr2(input, outptr, 8);
+      idct8_columns_add_blk_dspr2(&out[0], dest, dest_stride);
       break;
     case ADST_DCT:    // ADST in vertical, DCT in horizontal
-      idct8_1d_rows_dspr2(input, outptr, 8);
+      idct8_rows_dspr2(input, outptr, 8);
 
       for (i = 0; i < 8; ++i) {
-        iadst8_1d_dspr2(&out[i * 8], temp_out);
+        iadst8_dspr2(&out[i * 8], temp_out);
 
         for (j = 0; j < 8; ++j)
           dest[j * dest_stride + i] =
@@ -580,7 +580,7 @@ void vp9_iht8x8_64_add_dspr2(const int16_t *input, uint8_t *dest,
       break;
     case DCT_ADST:    // DCT in vertical, ADST in horizontal
       for (i = 0; i < 8; ++i) {
-        iadst8_1d_dspr2(input, outptr);
+        iadst8_dspr2(input, outptr);
         input += 8;
         outptr += 8;
       }
@@ -590,11 +590,11 @@ void vp9_iht8x8_64_add_dspr2(const int16_t *input, uint8_t *dest,
           temp_in[i * 8 + j] = out[j * 8 + i];
         }
       }
-      idct8_1d_columns_add_blk_dspr2(&temp_in[0], dest, dest_stride);
+      idct8_columns_add_blk_dspr2(&temp_in[0], dest, dest_stride);
       break;
     case ADST_ADST:   // ADST in both directions
       for (i = 0; i < 8; ++i) {
-        iadst8_1d_dspr2(input, outptr);
+        iadst8_dspr2(input, outptr);
         input += 8;
         outptr += 8;
       }
@@ -603,7 +603,7 @@ void vp9_iht8x8_64_add_dspr2(const int16_t *input, uint8_t *dest,
         for (j = 0; j < 8; ++j)
           temp_in[j] = out[j * 8 + i];
 
-        iadst8_1d_dspr2(temp_in, temp_out);
+        iadst8_dspr2(temp_in, temp_out);
 
         for (j = 0; j < 8; ++j)
           dest[j * dest_stride + i] =
@@ -631,7 +631,7 @@ void vp9_idct8x8_10_add_dspr2(const int16_t *input, uint8_t *dest,
   );
 
   // First transform rows
-  idct8_1d_rows_dspr2(input, outptr, 4);
+  idct8_rows_dspr2(input, outptr, 4);
 
   outptr += 4;
 
@@ -659,7 +659,7 @@ void vp9_idct8x8_10_add_dspr2(const int16_t *input, uint8_t *dest,
 
 
   // Then transform columns and add to dest
-  idct8_1d_columns_add_blk_dspr2(&out[0], dest, dest_stride);
+  idct8_columns_add_blk_dspr2(&out[0], dest, dest_stride);
 }
 
 void vp9_idct8x8_1_add_dspr2(const int16_t *input, uint8_t *dest,
