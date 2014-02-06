@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//41I\u003d",
+        "filename": "vp9/common/vp9_frame_buffers.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2014-02-06T22:50:22Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//45I\u003d",
+      "revId": "a43bddd4a4a4ea4e04da6756cb415fcb2cc5d21a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//45Q\u003d",
         "filename": "vp9/common/vp9_frame_buffers.c",
         "patchSetId": 2
@@ -30,6 +48,24 @@
       "writtenOn": "2014-02-06T20:29:13Z",
       "side": 1,
       "message": "I think list should guaranteed to be not null, so this check is unnecessary. Just assert() is fine.",
+      "revId": "a43bddd4a4a4ea4e04da6756cb415fcb2cc5d21a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//41E\u003d",
+        "filename": "vp9/common/vp9_frame_buffers.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2014-02-06T22:50:22Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//45Q\u003d",
       "revId": "a43bddd4a4a4ea4e04da6756cb415fcb2cc5d21a",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//41A\u003d",
+        "filename": "vp9/common/vp9_frame_buffers.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2014-02-06T22:50:22Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//46A\u003d",
+      "revId": "a43bddd4a4a4ea4e04da6756cb415fcb2cc5d21a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//45M\u003d",
         "filename": "vp9/common/vp9_frame_buffers.c",
         "patchSetId": 2
@@ -64,6 +118,24 @@
       "writtenOn": "2014-02-06T20:29:13Z",
       "side": 1,
       "message": "deinit -\u003e free ?",
+      "revId": "a43bddd4a4a4ea4e04da6756cb415fcb2cc5d21a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//41Q\u003d",
+        "filename": "vp9/common/vp9_frame_buffers.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2014-02-06T22:50:22Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//45M\u003d",
       "revId": "a43bddd4a4a4ea4e04da6756cb415fcb2cc5d21a",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//408\u003d",
+        "filename": "vp9/common/vp9_frame_buffers.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2014-02-06T22:50:22Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//45k\u003d",
+      "revId": "a43bddd4a4a4ea4e04da6756cb415fcb2cc5d21a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//42I\u003d",
         "filename": "vp9/common/vp9_frame_buffers.c",
         "patchSetId": 2
@@ -98,6 +188,24 @@
       "writtenOn": "2014-02-06T21:59:20Z",
       "side": 1,
       "message": "Can the above 4 lines be replaced by vpx_realloc?",
+      "revId": "a43bddd4a4a4ea4e04da6756cb415fcb2cc5d21a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//404\u003d",
+        "filename": "vp9/common/vp9_frame_buffers.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 67,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2014-02-06T22:50:22Z",
+      "side": 1,
+      "message": "I removed the free",
+      "parentUuid": "AAAAdn//42I\u003d",
       "revId": "a43bddd4a4a4ea4e04da6756cb415fcb2cc5d21a",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -121,6 +229,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//41Y\u003d",
+        "filename": "vp9/common/vp9_frame_buffers.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2014-02-06T22:50:22Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//45o\u003d",
+      "revId": "a43bddd4a4a4ea4e04da6756cb415fcb2cc5d21a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//45c\u003d",
         "filename": "vp9/common/vp9_frame_buffers.h",
         "patchSetId": 2
@@ -132,6 +258,24 @@
       "writtenOn": "2014-02-06T20:29:13Z",
       "side": 1,
       "message": "Can it be called vp9_alloc_frame_buffer() ? It doesn\u0027t mean that the buffer should be allocated every time but I guess the *semantic* is identical to alloc/free. May be that\u0027s more natural but  I\u0027m not sure.",
+      "revId": "a43bddd4a4a4ea4e04da6756cb415fcb2cc5d21a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//41U\u003d",
+        "filename": "vp9/common/vp9_frame_buffers.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2014-02-06T22:50:22Z",
+      "side": 1,
+      "message": "I think I\u0027m going to keep it get/release to stress that in general we don\u0027t want applications allocating data.",
+      "parentUuid": "AAAAdn//45c\u003d",
       "revId": "a43bddd4a4a4ea4e04da6756cb415fcb2cc5d21a",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -208,6 +352,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//400\u003d",
+        "filename": "vp9/decoder/vp9_decodeframe.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 700,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2014-02-06T22:50:22Z",
+      "side": 1,
+      "message": "Yeah in the internal code. Removed.",
+      "parentUuid": "AAAAdn//42E\u003d",
+      "revId": "a43bddd4a4a4ea4e04da6756cb415fcb2cc5d21a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//42A\u003d",
         "filename": "vp9/decoder/vp9_decodeframe.c",
         "patchSetId": 2
@@ -225,6 +387,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//40w\u003d",
+        "filename": "vp9/decoder/vp9_decodeframe.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1124,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2014-02-06T22:50:22Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//42A\u003d",
+      "revId": "a43bddd4a4a4ea4e04da6756cb415fcb2cc5d21a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//45U\u003d",
         "filename": "vpx/vpx_frame_buffer.h",
         "patchSetId": 2
@@ -236,6 +416,24 @@
       "writtenOn": "2014-02-06T20:29:13Z",
       "side": 1,
       "message": "May be just \"priv\" because we know the context -- it is inside vpx_codec_frame_buffer.",
+      "revId": "a43bddd4a4a4ea4e04da6756cb415fcb2cc5d21a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//40o\u003d",
+        "filename": "vpx/vpx_frame_buffer.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2014-02-06T22:50:22Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//45U\u003d",
       "revId": "a43bddd4a4a4ea4e04da6756cb415fcb2cc5d21a",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
