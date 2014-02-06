@@ -201,7 +201,7 @@ int main(int argc, char **argv) {
 
             if(frame_cnt + 1 == 22) {
                 vpx_roi_map_t  roi;
-                int            i;
+                unsigned int   i;
 
                 roi.rows = cfg.g_h/16;
                 roi.cols = cfg.g_w/16;
@@ -232,7 +232,7 @@ int main(int argc, char **argv) {
                 free(roi.roi_map);
             } else if(frame_cnt + 1 == 33) {
                 vpx_active_map_t  active;
-                int               i;
+                unsigned int      i;
 
                 active.rows = cfg.g_h/16;
                 active.cols = cfg.g_w/16;
