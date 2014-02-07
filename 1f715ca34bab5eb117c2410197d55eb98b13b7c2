@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//4u8\u003d",
+        "filename": "examples/simple_encoder.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 131,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-02-07T19:26:35Z",
+      "side": 1,
+      "message": "That\u0027s tricky because the input format is yv12 and it has to have width/height divisible by 2  (by format definition) to avoid ambiguity in U/V planes size because of subsampling. I think it is ok for now to have this check in the example code.",
+      "parentUuid": "AAAAdn//4zM\u003d",
+      "revId": "1f715ca34bab5eb117c2410197d55eb98b13b7c2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//4zA\u003d",
         "filename": "examples/simple_encoder.c",
         "patchSetId": 1
@@ -30,6 +48,24 @@
       "writtenOn": "2014-02-07T00:49:59Z",
       "side": 1,
       "message": "Braces (same rule as when breaking a line within the condition; any thing making the condition or code within it multiple line means add braces).",
+      "revId": "1f715ca34bab5eb117c2410197d55eb98b13b7c2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//4vA\u003d",
+        "filename": "examples/simple_encoder.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 134,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-02-07T19:26:35Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//4zA\u003d",
       "revId": "1f715ca34bab5eb117c2410197d55eb98b13b7c2",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//4vI\u003d",
+        "filename": "examples/twopass_encoder.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 122,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-02-07T19:26:35Z",
+      "side": 1,
+      "message": "In general, yes. Similar functionality exists in vpxenc and all encoder examples, so... will see after further cleanups.",
+      "parentUuid": "AAAAdn//4y4\u003d",
+      "revId": "1f715ca34bab5eb117c2410197d55eb98b13b7c2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//4y0\u003d",
         "filename": "examples/twopass_encoder.c",
         "patchSetId": 1
@@ -70,6 +124,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//4vE\u003d",
+        "filename": "examples/twopass_encoder.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 154,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-02-07T19:26:35Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//4y0\u003d",
+      "revId": "1f715ca34bab5eb117c2410197d55eb98b13b7c2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//4yw\u003d",
         "filename": "tools_common.c",
         "patchSetId": 1
@@ -81,6 +153,24 @@
       "writtenOn": "2014-02-07T00:49:59Z",
       "side": 1,
       "message": "One per line.",
+      "revId": "1f715ca34bab5eb117c2410197d55eb98b13b7c2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//4vM\u003d",
+        "filename": "tools_common.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 179,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-02-07T19:26:35Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//4yw\u003d",
       "revId": "1f715ca34bab5eb117c2410197d55eb98b13b7c2",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
