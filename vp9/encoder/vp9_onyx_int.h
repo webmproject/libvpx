@@ -401,6 +401,7 @@ typedef struct {
   int64_t optimal_buffer_level;
   int64_t maximum_buffer_size;
   double framerate;
+  int avg_frame_size;
 } LAYER_CONTEXT;
 
 typedef struct VP9_COMP {

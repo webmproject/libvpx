@@ -1155,14 +1155,17 @@ static void init_layer_context(VP9_COMP *const cpi) {
     LAYER_CONTEXT *const lc = &cpi->svc.layer_context[temporal_layer];
     RATE_CONTROL *const lrc = &lc->rc;
     lrc->active_worst_quality = q_trans[oxcf->worst_allowed_q];
-    lrc->avg_frame_qindex[INTER_FRAME] = q_trans[oxcf->worst_allowed_q];
-    lrc->last_q[INTER_FRAME] = q_trans[oxcf->worst_allowed_q];
+    lrc->avg_frame_qindex[INTER_FRAME] = lrc->active_worst_quality;
+    lrc->last_q[INTER_FRAME] = lrc->active_worst_quality;
     lrc->ni_av_qi = lrc->active_worst_quality;
     lrc->total_actual_bits = 0;
     lrc->total_target_vs_actual = 0;
     lrc->ni_tot_qi = 0;
     lrc->tot_q = 0.0;
+    lrc->avg_q = 0.0;
     lrc->ni_frames = 0;
+    lrc->decimation_count = 0;
+    lrc->decimation_factor = 0;
     lrc->rate_correction_factor = 1.0;
     lrc->key_frame_rate_correction_factor = 1.0;
     lc->target_bandwidth = oxcf->ts_target_bitrate[temporal_layer] *
@@ -1207,13 +1210,24 @@ static void update_layer_context_change_config(VP9_COMP *const cpi,
 // for the current layer.
 static void update_layer_framerate(VP9_COMP *const cpi) {
   int temporal_layer = cpi->svc.temporal_layer_id;
+  const VP9_CONFIG *const oxcf = &cpi->oxcf;
   LAYER_CONTEXT *const lc = &cpi->svc.layer_context[temporal_layer];
   RATE_CONTROL *const lrc = &lc->rc;
-  lc->framerate = cpi->oxcf.framerate /
-      cpi->oxcf.ts_rate_decimator[temporal_layer];
-  lrc->av_per_frame_bandwidth = (int)(lc->target_bandwidth /
-      lc->framerate);
+  lc->framerate = oxcf->framerate / oxcf->ts_rate_decimator[temporal_layer];
+  lrc->av_per_frame_bandwidth = (int)(lc->target_bandwidth / lc->framerate);
   lrc->max_frame_bandwidth = cpi->rc.max_frame_bandwidth;
+  // Update the average layer frame size (non-cumulative per-frame-bw).
+  if (temporal_layer == 0) {
+    lc->avg_frame_size = lrc->av_per_frame_bandwidth;
+  } else {
+    double prev_layer_framerate = oxcf->framerate /
+        oxcf->ts_rate_decimator[temporal_layer - 1];
+    int prev_layer_target_bandwidth =
+        oxcf->ts_target_bitrate[temporal_layer - 1] * 1000;
+    lc->avg_frame_size =
+        (int)(lc->target_bandwidth - prev_layer_target_bandwidth) /
+        (lc->framerate - prev_layer_framerate);
+  }
 }
 
 // Prior to encoding the frame, set the layer context, for the current layer

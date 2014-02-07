@@ -973,7 +973,8 @@ void vp9_rc_postencode_update(VP9_COMP *cpi, uint64_t bytes_used) {
     rc->avg_frame_qindex[KEY_FRAME] = ROUND_POWER_OF_TWO(
         3 * rc->avg_frame_qindex[KEY_FRAME] + cm->base_qindex, 2);
   } else if (!rc->is_src_frame_alt_ref &&
-             (cpi->refresh_golden_frame || cpi->refresh_alt_ref_frame)) {
+      (cpi->refresh_golden_frame || cpi->refresh_alt_ref_frame) &&
+      !(cpi->use_svc && cpi->oxcf.end_usage == USAGE_STREAM_FROM_SERVER)) {
     rc->last_q[2] = cm->base_qindex;
     rc->avg_frame_qindex[2] = ROUND_POWER_OF_TWO(
         3 * rc->avg_frame_qindex[2] + cm->base_qindex, 2);
@@ -1175,11 +1176,20 @@ static int calc_active_worst_quality_one_pass_cbr(const VP9_COMP *cpi) {
 static int calc_pframe_target_size_one_pass_cbr(const VP9_COMP *cpi) {
   const VP9_CONFIG *oxcf = &cpi->oxcf;
   const RATE_CONTROL *rc = &cpi->rc;
-  int target = rc->av_per_frame_bandwidth;
-  const int min_frame_target = MAX(rc->av_per_frame_bandwidth >> 4,
-                                   FRAME_OVERHEAD_BITS);
   const int64_t diff = oxcf->optimal_buffer_level - rc->buffer_level;
   const int one_pct_bits = 1 + oxcf->optimal_buffer_level / 100;
+  int min_frame_target = MAX(rc->av_per_frame_bandwidth >> 4,
+                             FRAME_OVERHEAD_BITS);
+  int target = rc->av_per_frame_bandwidth;
+  if (cpi->use_svc && cpi->oxcf.end_usage == USAGE_STREAM_FROM_SERVER) {
+    // Note that for layers, av_per_frame_bandwidth is the cumulative
+    // per-frame-bandwidth. For the target size of this frame, use the
+    // layer average frame size (i.e., non-cumulative per-frame-bw).
+    int current_temporal_layer = cpi->svc.temporal_layer_id;
+    const LAYER_CONTEXT *lc = &cpi->svc.layer_context[current_temporal_layer];
+    target = lc->avg_frame_size;
+    min_frame_target = MAX(lc->avg_frame_size >> 4, FRAME_OVERHEAD_BITS);
+  }
   if (diff > 0) {
     // Lower the target bandwidth for this frame.
     const int pct_low = MIN(diff / one_pct_bits, oxcf->under_shoot_pct);
