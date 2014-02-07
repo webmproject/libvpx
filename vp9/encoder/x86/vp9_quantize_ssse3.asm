@@ -188,7 +188,8 @@ cglobal quantize_%1, 0, %2, 15, coeff, ncoeff, skip, zbin, round, quant, \
   pmaxsw                          m8, m7
   pshuflw                         m7, m8, 0x1
   pmaxsw                          m8, m7
-  pextrw                        [r2], m8, 0
+  pextrw                          r6, m8, 0
+  mov                             [r2], r6
   RET
 
   ; skip-block, i.e. just write all zeroes
@@ -214,5 +215,5 @@ cglobal quantize_%1, 0, %2, 15, coeff, ncoeff, skip, zbin, round, quant, \
 %endmacro
 
 INIT_XMM ssse3
-QUANTIZE_FN b, 6
+QUANTIZE_FN b, 7
 QUANTIZE_FN b_32x32, 7
