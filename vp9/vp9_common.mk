@@ -131,10 +131,8 @@ ifeq ($(ARCH_X86_64), yes)
 VP9_COMMON_SRCS-$(HAVE_SSSE3) += common/x86/vp9_idct_ssse3_x86_64.asm
 endif
 
-VP9_COMMON_SRCS-$(HAVE_NEON_ASM) += common/arm/neon/vp9_idct16x16_neon.c
 VP9_COMMON_SRCS-$(HAVE_NEON_ASM) += common/arm/neon/vp9_loopfilter_16_neon_asm$(ASM)
 VP9_COMMON_SRCS-$(HAVE_NEON_ASM) += common/arm/neon/vp9_dc_only_idct_add_neon$(ASM)
-VP9_COMMON_SRCS-$(HAVE_NEON_ASM) += common/arm/neon/vp9_idct16x16_add_neon$(ASM)
 VP9_COMMON_SRCS-$(HAVE_NEON_ASM) += common/arm/neon/vp9_idct32x32_add_neon$(ASM)
 VP9_COMMON_SRCS-$(HAVE_NEON_ASM) += common/arm/neon/vp9_iht4x4_add_neon$(ASM)
 VP9_COMMON_SRCS-$(HAVE_NEON_ASM) += common/arm/neon/vp9_iht8x8_add_neon$(ASM)
@@ -151,6 +149,8 @@ VP9_COMMON_SRCS-yes += common/arm/neon/vp9_convolve8_neon_asm$(ASM)
 VP9_COMMON_SRCS-yes += common/arm/neon/vp9_convolve_neon.c
 VP9_COMMON_SRCS-yes += common/arm/neon/vp9_copy_neon_asm$(ASM)
 VP9_COMMON_SRCS-yes += common/arm/neon/vp9_idct16x16_1_add_neon_asm$(ASM)
+VP9_COMMON_SRCS-yes += common/arm/neon/vp9_idct16x16_add_neon_asm$(ASM)
+VP9_COMMON_SRCS-yes += common/arm/neon/vp9_idct16x16_neon.c
 VP9_COMMON_SRCS-yes += common/arm/neon/vp9_idct32x32_1_add_neon_asm$(ASM)
 VP9_COMMON_SRCS-yes += common/arm/neon/vp9_idct4x4_1_add_neon_asm$(ASM)
 VP9_COMMON_SRCS-yes += common/arm/neon/vp9_idct4x4_add_neon_asm$(ASM)
@@ -166,6 +166,8 @@ VP9_COMMON_SRCS-yes += common/arm/neon/vp9_convolve8_neon.c
 VP9_COMMON_SRCS-yes += common/arm/neon/vp9_convolve_neon.c
 VP9_COMMON_SRCS-yes += common/arm/neon/vp9_copy_neon.c
 VP9_COMMON_SRCS-yes += common/arm/neon/vp9_idct16x16_1_add_neon.c
+VP9_COMMON_SRCS-yes += common/arm/neon/vp9_idct16x16_add_neon.c
+VP9_COMMON_SRCS-yes += common/arm/neon/vp9_idct16x16_neon.c
 VP9_COMMON_SRCS-yes += common/arm/neon/vp9_idct32x32_1_add_neon.c
 VP9_COMMON_SRCS-yes += common/arm/neon/vp9_idct4x4_1_add_neon.c
 VP9_COMMON_SRCS-yes += common/arm/neon/vp9_idct4x4_add_neon.c
