@@ -1,0 +1,89 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//4zM\u003d",
+        "filename": "examples/simple_encoder.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 131,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-02-07T00:49:59Z",
+      "side": 1,
+      "message": "Should add this to your TODO list regarding the check being truly necessary. I think libvpx might be OK as long as w/h are \u003e 0.",
+      "revId": "1f715ca34bab5eb117c2410197d55eb98b13b7c2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//4zA\u003d",
+        "filename": "examples/simple_encoder.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 134,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-02-07T00:49:59Z",
+      "side": 1,
+      "message": "Braces (same rule as when breaking a line within the condition; any thing making the condition or code within it multiple line means add braces).",
+      "revId": "1f715ca34bab5eb117c2410197d55eb98b13b7c2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//4y4\u003d",
+        "filename": "examples/twopass_encoder.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 122,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-02-07T00:49:59Z",
+      "side": 1,
+      "message": "Hmm... maybe another clean up opportunity: Are get_frame_stats() and encode_frame() duped in vpxenc.c or elsewhere?",
+      "revId": "1f715ca34bab5eb117c2410197d55eb98b13b7c2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//4y0\u003d",
+        "filename": "examples/twopass_encoder.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 154,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-02-07T00:49:59Z",
+      "side": 1,
+      "message": "Ditto on braces",
+      "revId": "1f715ca34bab5eb117c2410197d55eb98b13b7c2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//4yw\u003d",
+        "filename": "tools_common.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 179,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-02-07T00:49:59Z",
+      "side": 1,
+      "message": "One per line.",
+      "revId": "1f715ca34bab5eb117c2410197d55eb98b13b7c2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
