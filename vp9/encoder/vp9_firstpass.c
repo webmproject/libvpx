@@ -902,8 +902,8 @@ static double calc_correction_factor(double err_per_mb,
   return fclamp(pow(error_term, power_term), 0.05, 5.0);
 }
 
-static int estimate_max_q(VP9_COMP *cpi, FIRSTPASS_STATS *fpstats,
-                          int section_target_bandwitdh) {
+int vp9_twopass_worst_quality(VP9_COMP *cpi, FIRSTPASS_STATS *fpstats,
+                              int section_target_bandwitdh) {
   int q;
   const int num_mbs = cpi->common.MBs;
   int target_norm_bits_per_mb;
@@ -2280,8 +2280,8 @@ void vp9_rc_get_second_pass_params(VP9_COMP *cpi) {
     // Special case code for first frame.
     const int section_target_bandwidth = (int)(twopass->bits_left /
                                                frames_left);
-    const int tmp_q = estimate_max_q(cpi, &twopass->total_left_stats,
-                                     section_target_bandwidth);
+    const int tmp_q = vp9_twopass_worst_quality(cpi, &twopass->total_left_stats,
+                                                section_target_bandwidth);
 
     rc->active_worst_quality = tmp_q;
     rc->ni_av_qi = tmp_q;
