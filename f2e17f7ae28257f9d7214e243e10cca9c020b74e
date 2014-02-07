@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//4xk\u003d",
+        "filename": "vp9/common/vp9_convolve.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 148,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-02-07T05:40:35Z",
+      "side": 1,
+      "message": "just cast the difference of the pointers (which is ptrdiff_t) to int and drop the first 2",
+      "revId": "f2e17f7ae28257f9d7214e243e10cca9c020b74e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
