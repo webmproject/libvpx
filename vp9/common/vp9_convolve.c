@@ -145,7 +145,7 @@ static const InterpKernel *get_filter_base(const int16_t *filter) {
 }
 
 static int get_filter_offset(const int16_t *f, const InterpKernel *base) {
-  return (const InterpKernel *)(intptr_t)f - base;
+  return (int)((const InterpKernel *)(intptr_t)f - base);
 }
 
 void vp9_convolve8_horiz_c(const uint8_t *src, ptrdiff_t src_stride,
