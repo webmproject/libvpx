@@ -16,6 +16,24 @@
       "revId": "f2e17f7ae28257f9d7214e243e10cca9c020b74e",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//4xY\u003d",
+        "filename": "vp9/common/vp9_convolve.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 148,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-02-07T05:48:42Z",
+      "side": 1,
+      "message": "Got rid of the intptr_t cast; can\u0027t get rid of the InterpKernel* cast because MSVC says C4047 (well, unless we\u0027re going to disable it):\n\nvp9\\common\\vp9_convolve.c(148): warning C4047: \u0027-\u0027 : \u0027const int16_t *\u0027 differs in levels of indirection from \u0027const InterpKernel (*)\u0027",
+      "parentUuid": "AAAAdn//4xk\u003d",
+      "revId": "f2e17f7ae28257f9d7214e243e10cca9c020b74e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
