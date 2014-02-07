@@ -50,218 +50,172 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdarg.h>
 #include <string.h>
+
 #define VPX_CODEC_DISABLE_COMPAT 1
-#include "vpx/vpx_encoder.h"
 #include "vpx/vp8cx.h"
+#include "vpx/vpx_encoder.h"
+
+#include "./tools_common.h"
+#include "./video_writer.h"
+
 #define interface (vpx_codec_vp8_cx())
-#define fourcc    0x30385056
 
-#define IVF_FILE_HDR_SZ  (32)
-#define IVF_FRAME_HDR_SZ (12)
+static const char *exec_name;
 
-static void mem_put_le16(char *mem, unsigned int val) {
-    mem[0] = val;
-    mem[1] = val>>8;
+void usage_exit() {
+  fprintf(stderr, "Usage: %s <width> <height> <infile> <outfile>\n", exec_name);
+  exit(EXIT_FAILURE);
 }
 
-static void mem_put_le32(char *mem, unsigned int val) {
-    mem[0] = val;
-    mem[1] = val>>8;
-    mem[2] = val>>16;
-    mem[3] = val>>24;
-}
+static void get_frame_stats(vpx_codec_ctx_t *ctx,
+                            const vpx_image_t *img,
+                            vpx_codec_pts_t pts,
+                            uint64_t duration,
+                            vpx_enc_frame_flags_t flags,
+                            uint64_t deadline,
+                            vpx_fixed_buf_t *stats) {
+  vpx_codec_iter_t iter = NULL;
+  const vpx_codec_cx_pkt_t *pkt = NULL;
+  const vpx_codec_err_t res = vpx_codec_encode(ctx, img, pts, duration, flags,
+                                               deadline);
+  if (res != VPX_CODEC_OK)
+    die_codec(ctx, "Failed to get frame stats.");
 
-static void die(const char *fmt, ...) {
-    va_list ap;
-
-    va_start(ap, fmt);
-    vprintf(fmt, ap);
-    if(fmt[strlen(fmt)-1] != '\n')
-        printf("\n");
-    exit(EXIT_FAILURE);
-}
-
-static void die_codec(vpx_codec_ctx_t *ctx, const char *s) {
-    const char *detail = vpx_codec_error_detail(ctx);
-
-    printf("%s: %s\n", s, vpx_codec_error(ctx));
-    if(detail)
-        printf("    %s\n",detail);
-    exit(EXIT_FAILURE);
-}
-
-static int read_frame(FILE *f, vpx_image_t *img) {
-    size_t nbytes, to_read;
-    int    res = 1;
-
-    to_read = img->w*img->h*3/2;
-    nbytes = fread(img->planes[0], 1, to_read, f);
-    if(nbytes != to_read) {
-        res = 0;
-        if(nbytes > 0)
-            printf("Warning: Read partial frame. Check your width & height!\n");
+  while ((pkt = vpx_codec_get_cx_data(ctx, &iter)) != NULL) {
+    if (pkt->kind == VPX_CODEC_STATS_PKT) {
+      const uint8_t *const pkt_buf = pkt->data.twopass_stats.buf;
+      const size_t pkt_size = pkt->data.twopass_stats.sz;
+      stats->buf = realloc(stats->buf, stats->sz + pkt_size);
+      memcpy((uint8_t *)stats->buf + stats->sz, pkt_buf, pkt_size);
+      stats->sz += pkt_size;
     }
-    return res;
+  }
 }
 
-static void write_ivf_file_header(FILE *outfile,
-                                  const vpx_codec_enc_cfg_t *cfg,
-                                  int frame_cnt) {
-    char header[32];
+static void encode_frame(vpx_codec_ctx_t *ctx,
+                         const vpx_image_t *img,
+                         vpx_codec_pts_t pts,
+                         uint64_t duration,
+                         vpx_enc_frame_flags_t flags,
+                         uint64_t deadline,
+                         VpxVideoWriter *writer) {
+  vpx_codec_iter_t iter = NULL;
+  const vpx_codec_cx_pkt_t *pkt = NULL;
+  const vpx_codec_err_t res = vpx_codec_encode(ctx, img, pts, duration, flags,
+                                               deadline);
+  if (res != VPX_CODEC_OK)
+    die_codec(ctx, "Failed to encode frame.");
 
-    if(cfg->g_pass != VPX_RC_ONE_PASS && cfg->g_pass != VPX_RC_LAST_PASS)
-        return;
-    header[0] = 'D';
-    header[1] = 'K';
-    header[2] = 'I';
-    header[3] = 'F';
-    mem_put_le16(header+4,  0);                   /* version */
-    mem_put_le16(header+6,  32);                  /* headersize */
-    mem_put_le32(header+8,  fourcc);              /* headersize */
-    mem_put_le16(header+12, cfg->g_w);            /* width */
-    mem_put_le16(header+14, cfg->g_h);            /* height */
-    mem_put_le32(header+16, cfg->g_timebase.den); /* rate */
-    mem_put_le32(header+20, cfg->g_timebase.num); /* scale */
-    mem_put_le32(header+24, frame_cnt);           /* length */
-    mem_put_le32(header+28, 0);                   /* unused */
+  while ((pkt = vpx_codec_get_cx_data(ctx, &iter)) != NULL) {
+    if (pkt->kind == VPX_CODEC_CX_FRAME_PKT) {
+      const int keyframe = (pkt->data.frame.flags & VPX_FRAME_IS_KEY) != 0;
 
-    (void) fwrite(header, 1, 32, outfile);
-}
-
-
-static void write_ivf_frame_header(FILE *outfile,
-                                   const vpx_codec_cx_pkt_t *pkt)
-{
-    char             header[12];
-    vpx_codec_pts_t  pts;
-
-    if(pkt->kind != VPX_CODEC_CX_FRAME_PKT)
-        return;
-
-    pts = pkt->data.frame.pts;
-    mem_put_le32(header, pkt->data.frame.sz);
-    mem_put_le32(header+4, pts&0xFFFFFFFF);
-    mem_put_le32(header+8, pts >> 32);
-
-    (void) fwrite(header, 1, 12, outfile);
+      if (!vpx_video_writer_write_frame(writer, pkt->data.frame.buf,
+                                                pkt->data.frame.sz,
+                                                pkt->data.frame.pts))
+        die_codec(ctx, "Failed to write compressed frame.");
+      printf(keyframe ? "K" : ".");
+      fflush(stdout);
+    }
+  }
 }
 
 int main(int argc, char **argv) {
-    FILE                *infile, *outfile;
-    vpx_codec_ctx_t      codec;
-    vpx_codec_enc_cfg_t  cfg;
-    int                  frame_cnt = 0;
-    vpx_image_t          raw;
-    vpx_codec_err_t      res;
-    long                 width;
-    long                 height;
-    int                  frame_avail;
-    int                  got_data;
-    int                  flags = 0;
-    int                  pass;
-    vpx_fixed_buf_t      stats = {0};
+  FILE *infile = NULL;
+  VpxVideoWriter *writer = NULL;
+  vpx_codec_ctx_t codec;
+  vpx_codec_enc_cfg_t cfg;
+  vpx_image_t raw;
+  vpx_codec_err_t res;
+  vpx_fixed_buf_t stats = {0};
+  VpxVideoInfo info = {0};
+  int pass;
+  const int fps = 30;        // TODO(dkovalev) add command line argument
+  const int bitrate = 200;   // kbit/s TODO(dkovalev) add command line argument
 
-    /* Open files */
-    if(argc!=5)
-        die("Usage: %s <width> <height> <infile> <outfile>\n", argv[0]);
-    width = strtol(argv[1], NULL, 0);
-    height = strtol(argv[2], NULL, 0);
-    if(width < 16 || width%2 || height <16 || height%2)
-        die("Invalid resolution: %ldx%ld", width, height);
-    if(!vpx_img_alloc(&raw, VPX_IMG_FMT_I420, width, height, 1))
-        die("Faile to allocate image", width, height);
-    if(!(outfile = fopen(argv[4], "wb")))
-        die("Failed to open %s for writing", argv[4]);
+  if (argc != 5)
+    die("Invalid number of arguments.");
 
-    printf("Using %s\n",vpx_codec_iface_name(interface));
+  info.codec_fourcc = VP8_FOURCC;
+  info.time_base.numerator = 1;
+  info.time_base.denominator = fps;
+  info.frame_width = strtol(argv[1], NULL, 0);
+  info.frame_height = strtol(argv[2], NULL, 0);
 
-    /* Populate encoder configuration */
-    res = vpx_codec_enc_config_default(interface, &cfg, 0);
-    if(res) {
-        printf("Failed to get config: %s\n", vpx_codec_err_to_string(res));
-        return EXIT_FAILURE;
+  if (info.frame_width <= 0 ||
+      info.frame_height <= 0 ||
+      (info.frame_width % 2) != 0 ||
+      (info.frame_height % 2) != 0) {
+    die("Invalid frame size: %dx%d", info.frame_width, info.frame_height);
+  }
+
+  if (!vpx_img_alloc(&raw, VPX_IMG_FMT_I420, info.frame_width,
+                                             info.frame_height, 1)) {
+    die("Failed to allocate image", info.frame_width, info.frame_height);
+  }
+
+  writer = vpx_video_writer_open(argv[4], kContainerIVF, &info);
+  if (!writer)
+    die("Failed to open %s for writing", argv[4]);
+
+  printf("Using %s\n", vpx_codec_iface_name(interface));
+
+  res = vpx_codec_enc_config_default(interface, &cfg, 0);
+  if (res)
+    die_codec(&codec, "Failed to get default codec config.");
+
+  cfg.g_w = info.frame_width;
+  cfg.g_h = info.frame_height;
+  cfg.g_timebase.num = info.time_base.numerator;
+  cfg.g_timebase.den = info.time_base.denominator;
+  cfg.rc_target_bitrate = bitrate;
+
+  for (pass = 0; pass < 2; ++pass) {
+    int frame_count = 0;
+
+    if (pass == 0) {
+      cfg.g_pass = VPX_RC_FIRST_PASS;
+    } else {
+      cfg.g_pass = VPX_RC_LAST_PASS;
+      cfg.rc_twopass_stats_in = stats;
     }
 
-    /* Update the default configuration with our settings */
-    cfg.rc_target_bitrate = width * height * cfg.rc_target_bitrate
-                            / cfg.g_w / cfg.g_h;
-    cfg.g_w = width;
-    cfg.g_h = height;
+    if (!(infile = fopen(argv[3], "rb")))
+      die("Failed to open %s for reading", argv[3]);
 
-    write_ivf_file_header(outfile, &cfg, 0);
+    if (vpx_codec_enc_init(&codec, interface, &cfg, 0))
+      die_codec(&codec, "Failed to initialize encoder");
 
-    for(pass=0; pass<2; pass++) {
-        frame_cnt = 0;
+    while (vpx_img_read(&raw, infile)) {
+      ++frame_count;
 
-        if(pass == 0)
-            cfg.g_pass = VPX_RC_FIRST_PASS;
-        else {
-            cfg.g_pass              = VPX_RC_LAST_PASS;
-            cfg.rc_twopass_stats_in = stats;
-        }
-
-        /* Open input file for this encoding pass */
-        if(!(infile = fopen(argv[3], "rb")))
-            die("Failed to open %s for reading", argv[3]);
-
-        /* Initialize codec */
-        if(vpx_codec_enc_init(&codec, interface, &cfg, 0))
-            die_codec(&codec, "Failed to initialize encoder");
-
-        frame_avail = 1;
-        got_data = 0;
-        while(frame_avail || got_data) {
-            vpx_codec_iter_t iter = NULL;
-            const vpx_codec_cx_pkt_t *pkt;
-
-            frame_avail = read_frame(infile, &raw);
-            if(vpx_codec_encode(&codec, frame_avail? &raw : NULL, frame_cnt,
-                                1, flags, VPX_DL_BEST_QUALITY))
-                die_codec(&codec, "Failed to encode frame");
-            got_data = 0;
-            while( (pkt = vpx_codec_get_cx_data(&codec, &iter)) ) {
-                got_data = 1;
-                switch(pkt->kind) {
-                case VPX_CODEC_CX_FRAME_PKT:
-                    write_ivf_frame_header(outfile, pkt);
-                    (void) fwrite(pkt->data.frame.buf, 1, pkt->data.frame.sz,
-                                  outfile);
-                    break;
-                case VPX_CODEC_STATS_PKT:
-                    stats.buf = realloc(stats.buf, stats.sz
-                                        + pkt->data.twopass_stats.sz);
-                    if(!stats.buf)
-                        die("Memory reallocation failed.\n");
-                    memcpy((char*)stats.buf + stats.sz,
-                           pkt->data.twopass_stats.buf,
-                           pkt->data.twopass_stats.sz);
-                    stats.sz +=  pkt->data.twopass_stats.sz;
-                    break;
-                default:
-                    break;
-                }
-                printf(pkt->kind == VPX_CODEC_CX_FRAME_PKT
-                       && (pkt->data.frame.flags & VPX_FRAME_IS_KEY)? "K":".");
-                fflush(stdout);
-            }
-            frame_cnt++;
-        }
-        printf("\n");
-        fclose(infile);
-        printf("Pass %d complete.\n", pass+1);
-        if(vpx_codec_destroy(&codec))
-            die_codec(&codec, "Failed to destroy codec");
+      if (pass == 0) {
+        get_frame_stats(&codec, &raw, frame_count, 1, 0, VPX_DL_BEST_QUALITY,
+                        &stats);
+      } else {
+        encode_frame(&codec, &raw, frame_count, 1, 0, VPX_DL_BEST_QUALITY,
+                     writer);
+      }
     }
 
-    printf("Processed %d frames.\n",frame_cnt-1);
-    vpx_img_free(&raw);
-    free(stats.buf);
+    if (pass == 0) {
+      get_frame_stats(&codec, NULL, frame_count, 1, 0, VPX_DL_BEST_QUALITY,
+                      &stats);
+    } else {
+      printf("\n");
+    }
 
-    /* Try to rewrite the file header with the actual frame count */
-    if(!fseek(outfile, 0, SEEK_SET))
-        write_ivf_file_header(outfile, &cfg, frame_cnt-1);
-    fclose(outfile);
-    return EXIT_SUCCESS;
+    fclose(infile);
+    printf("Pass %d complete. Processed %d frames.\n", pass + 1, frame_count);
+    if (vpx_codec_destroy(&codec))
+      die_codec(&codec, "Failed to destroy codec.");
+  }
+
+  vpx_img_free(&raw);
+  free(stats.buf);
+
+  vpx_video_writer_close(writer);
+
+  return EXIT_SUCCESS;
 }

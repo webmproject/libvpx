@@ -86,7 +86,6 @@
 #include <string.h>
 
 #define VPX_CODEC_DISABLE_COMPAT 1
-
 #include "vpx/vp8cx.h"
 #include "vpx/vpx_encoder.h"
 
@@ -102,33 +101,17 @@ void usage_exit() {
   exit(EXIT_FAILURE);
 }
 
-static int read_frame(FILE *f, vpx_image_t *img) {
-  int res = 1;
-  size_t to_read = img->w * img->h * 3 / 2;
-  size_t nbytes = fread(img->planes[0], 1, to_read, f);
-  if (nbytes != to_read) {
-    res = 0;
-    if (nbytes > 0)
-      printf("Warning: Read partial frame. Check your width & height!\n");
-  }
-  return res;
-}
-
-static int is_valid_dimension(int value) {
-  return value >= 16 && (value % 2 == 0);
-}
-
 int main(int argc, char **argv) {
-  FILE *infile;
+  FILE *infile = NULL;
   vpx_codec_ctx_t codec;
   vpx_codec_enc_cfg_t cfg;
   int frame_count = 0;
   vpx_image_t raw;
   vpx_codec_err_t res;
-  VpxVideoInfo info;
-  VpxVideoWriter *writer;
-  const int fps = 30;  // TODO(dkovalev) add command line argument
-  const int bitrate = 100;  // kbit/s TODO(dkovalev) add command line argument
+  VpxVideoInfo info = {0};
+  VpxVideoWriter *writer = NULL;
+  const int fps = 30;        // TODO(dkovalev) add command line argument
+  const int bitrate = 200;   // kbit/s TODO(dkovalev) add command line argument
 
   exec_name = argv[0];
 
@@ -141,21 +124,23 @@ int main(int argc, char **argv) {
   info.time_base.numerator = 1;
   info.time_base.denominator = fps;
 
-  if (!is_valid_dimension(info.frame_width) ||
-      !is_valid_dimension(info.frame_height))
-    die("Invalid resolution: %dx%d", info.frame_width, info.frame_height);
+  if (info.frame_width <= 0 ||
+      info.frame_height <= 0 ||
+      (info.frame_width % 2) != 0 ||
+      (info.frame_height % 2) != 0) {
+    die("Invalid frame size: %dx%d", info.frame_width, info.frame_height);
+  }
 
   if (!vpx_img_alloc(&raw, VPX_IMG_FMT_I420, info.frame_width,
-                                             info.frame_height, 1))
-    die("Failed to allocate image");
+                                             info.frame_height, 1)) {
+    die("Failed to allocate image.");
+  }
 
   printf("Using %s\n", vpx_codec_iface_name(interface));
 
   res = vpx_codec_enc_config_default(interface, &cfg, 0);
-  if (res) {
-    printf("Failed to get config: %s\n", vpx_codec_err_to_string(res));
-    return EXIT_FAILURE;
-  }
+  if (res)
+    die_codec(&codec, "Failed to get default codec config.");
 
   cfg.g_w = info.frame_width;
   cfg.g_h = info.frame_height;
@@ -167,24 +152,22 @@ int main(int argc, char **argv) {
   if (!writer)
     die("Failed to open %s for writing.", argv[4]);
 
-  // Open input file for this encoding pass
   if (!(infile = fopen(argv[3], "rb")))
     die("Failed to open %s for reading.", argv[3]);
 
-  // Initialize codec
   if (vpx_codec_enc_init(&codec, interface, &cfg, 0))
     die_codec(&codec, "Failed to initialize encoder");
 
-
-  while (read_frame(infile, &raw)) {
+  while (vpx_img_read(&raw, infile)) {
     vpx_codec_iter_t iter = NULL;
     const vpx_codec_cx_pkt_t *pkt = NULL;
+
+    ++frame_count;
+
     res = vpx_codec_encode(&codec, &raw, frame_count, 1, 0,
                            VPX_DL_GOOD_QUALITY);
     if (res != VPX_CODEC_OK)
       die_codec(&codec, "Failed to encode frame");
-
-    ++frame_count;
 
     while ((pkt = vpx_codec_get_cx_data(&codec, &iter)) != NULL) {
       if (pkt->kind == VPX_CODEC_CX_FRAME_PKT) {
@@ -195,14 +178,14 @@ int main(int argc, char **argv) {
                                           pkt->data.frame.pts))
           die_codec(&codec, "Failed to write compressed frame.");
         printf(keyframe ? "K" : ".");
+        fflush(stdout);
       }
     }
   }
   printf("\n");
-
   fclose(infile);
-
   printf("Processed %d frames.\n", frame_count);
+
   vpx_img_free(&raw);
   if (vpx_codec_destroy(&codec))
     die_codec(&codec, "Failed to destroy codec.");

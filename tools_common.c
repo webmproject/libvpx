@@ -168,9 +168,31 @@ void vpx_img_write(const vpx_image_t *img, FILE *file) {
     const int stride = img->stride[plane];
     const int w = plane ? (img->d_w + 1) >> 1 : img->d_w;
     const int h = plane ? (img->d_h + 1) >> 1 : img->d_h;
+
     for (y = 0; y < h; ++y) {
       fwrite(buf, 1, w, file);
       buf += stride;
     }
   }
 }
+
+int vpx_img_read(vpx_image_t *img, FILE *file) {
+  int plane;
+
+  for (plane = 0; plane < 3; ++plane) {
+    unsigned char *buf = img->planes[plane];
+    const int stride = img->stride[plane];
+    const int w = plane ? (img->d_w + 1) >> 1 : img->d_w;
+    const int h = plane ? (img->d_h + 1) >> 1 : img->d_h;
+    int y;
+
+    for (y = 0; y < h; ++y) {
+      if (fread(buf, 1, w, file) != w)
+        return 0;
+      buf += stride;
+    }
+  }
+
+  return 1;
+}
+
