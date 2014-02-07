@@ -148,7 +148,9 @@ static vpx_codec_err_t vp9_peek_si(const uint8_t *data, unsigned int data_sz,
   {
     struct vp9_read_bit_buffer rb = { data, data + data_sz, 0, NULL, NULL };
     const int frame_marker = vp9_rb_read_literal(&rb, 2);
-    const int version = vp9_rb_read_bit(&rb) | (vp9_rb_read_bit(&rb) << 1);
+    const int version = vp9_rb_read_bit(&rb);
+    (void) vp9_rb_read_bit(&rb);  // unused version bit
+
     if (frame_marker != VP9_FRAME_MARKER)
       return VPX_CODEC_UNSUP_BITSTREAM;
 #if CONFIG_NON420
