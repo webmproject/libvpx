@@ -36,6 +36,7 @@ LIBVPX_TEST_SRCS-$(CONFIG_DECODERS)    += ../md5_utils.h ../md5_utils.c
 LIBVPX_TEST_SRCS-yes                   += decode_test_driver.cc
 LIBVPX_TEST_SRCS-yes                   += decode_test_driver.h
 LIBVPX_TEST_SRCS-$(CONFIG_DECODERS)    += ivf_video_source.h
+LIBVPX_TEST_SRCS-$(CONFIG_VP9_DECODER) += external_frame_buffer_test.cc
 
 ## WebM Parsing
 NESTEGG_SRCS                           += ../nestegg/halloc/halloc.h

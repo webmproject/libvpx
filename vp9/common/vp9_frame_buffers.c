@@ -42,7 +42,7 @@ int vp9_get_frame_buffer(void *cb_priv, size_t min_size,
   int i;
   InternalFrameBufferList *const int_fb_list =
       (InternalFrameBufferList *)cb_priv;
-  if (int_fb_list == NULL || fb == NULL)
+  if (int_fb_list == NULL)
     return -1;
 
   // Find a free frame buffer.
@@ -73,12 +73,8 @@ int vp9_get_frame_buffer(void *cb_priv, size_t min_size,
 }
 
 int vp9_release_frame_buffer(void *cb_priv, vpx_codec_frame_buffer_t *fb) {
-  InternalFrameBuffer *int_fb;
+  InternalFrameBuffer *const int_fb = (InternalFrameBuffer *)fb->priv;
   (void)cb_priv;
-  if (fb == NULL)
-    return -1;
-
-  int_fb = (InternalFrameBuffer *)fb->priv;
   int_fb->in_use = 0;
   return 0;
 }

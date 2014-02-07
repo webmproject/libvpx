@@ -45,8 +45,9 @@ typedef struct vpx_codec_frame_buffer {
  * decoder needs a frame buffer to decode a compressed image into. This
  * function may be called more than once for every call to vpx_codec_decode.
  * The application may set fb->priv to some data which will be passed
- * back in the ximage and the release function call. On success the callback
- * must return 0. Any failure the callback must return a value less than 0.
+ * back in the ximage and the release function call. |fb| is guaranteed to
+ * not be NULL. On success the callback must return 0. Any failure the
+ * callback must return a value less than 0.
  *
  * \param[in] priv         Callback's private data
  * \param[in] new_size     Size in bytes needed by the buffer
@@ -58,8 +59,9 @@ typedef int (*vpx_get_frame_buffer_cb_fn_t)(
 /*!\brief release frame buffer callback prototype
  *
  * This callback is invoked by the decoder when the frame buffer is not
- * referenced by any other buffers. On success the callback must return 0.
- * Any failure the callback must return a value less than 0.
+ * referenced by any other buffers. |fb| is guaranteed to not be NULL. On
+ * success the callback must return 0. Any failure the callback must return
+ * a value less than 0.
  *
  * \param[in] priv         Callback's private data
  * \param[in] fb           Pointer to vpx_codec_frame_buffer_t
