@@ -220,11 +220,13 @@ void vp9_loop_filter_alloc(VP9_COMMON *cm, VP9LfSync *lf_sync, int rows,
 
   CHECK_MEM_ERROR(cm, lf_sync->mutex_,
                   vpx_malloc(sizeof(*lf_sync->mutex_) * rows));
-  CHECK_MEM_ERROR(cm, lf_sync->cond_,
-                  vpx_malloc(sizeof(*lf_sync->cond_) * rows));
-
   for (i = 0; i < rows; ++i) {
     pthread_mutex_init(&lf_sync->mutex_[i], NULL);
+  }
+
+  CHECK_MEM_ERROR(cm, lf_sync->cond_,
+                  vpx_malloc(sizeof(*lf_sync->cond_) * rows));
+  for (i = 0; i < rows; ++i) {
     pthread_cond_init(&lf_sync->cond_[i], NULL);
   }
 #endif  // CONFIG_MULTITHREAD
@@ -242,18 +244,29 @@ void vp9_loop_filter_dealloc(VP9LfSync *lf_sync, int rows) {
   if (lf_sync != NULL) {
     int i;
 
-    for (i = 0; i < rows; ++i) {
-      pthread_mutex_destroy(&lf_sync->mutex_[i]);
-      pthread_cond_destroy(&lf_sync->cond_[i]);
+    if (lf_sync->mutex_ != NULL) {
+      for (i = 0; i < rows; ++i) {
+        pthread_mutex_destroy(&lf_sync->mutex_[i]);
+      }
+      vpx_free(lf_sync->mutex_);
+    }
+    if (lf_sync->cond_ != NULL) {
+      for (i = 0; i < rows; ++i) {
+        pthread_cond_destroy(&lf_sync->cond_[i]);
+      }
+      vpx_free(lf_sync->cond_);
     }
 
-    vpx_free(lf_sync->mutex_);
-    vpx_free(lf_sync->cond_);
     vpx_free(lf_sync->cur_sb_col);
+    // clear the structure as the source of this call may be a resize in which
+    // case this call will be followed by an _alloc() which may fail.
+    vpx_memset(lf_sync, 0, sizeof(*lf_sync));
   }
 #else
   (void)rows;
-  if (lf_sync != NULL)
+  if (lf_sync != NULL) {
     vpx_free(lf_sync->cur_sb_col);
+    vpx_memset(lf_sync, 0, sizeof(*lf_sync));
+  }
 #endif  // CONFIG_MULTITHREAD
 }
