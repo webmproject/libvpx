@@ -1729,11 +1729,6 @@ VP9_PTR vp9_create_compressor(VP9_CONFIG *oxcf) {
                                sizeof(*cpi->mbgraph_stats[i].mb_stats), 1));
   }
 
-#ifdef ENTROPY_STATS
-  if (cpi->pass != 1)
-    init_context_counters();
-#endif
-
   /*Initialize the feed-forward activity masking.*/
   cpi->activity_avg = 90 << 12;
   cpi->key_frame_frequency = cpi->oxcf.key_freq;
@@ -3271,10 +3266,6 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
       vp9_adapt_mv_probs(cm, cm->allow_high_precision_mv);
     }
   }
-
-#ifdef ENTROPY_STATS
-  vp9_update_mode_context_stats(cpi);
-#endif
 
 #if 0
   output_frame_level_debug_stats(cpi);
