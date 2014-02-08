@@ -1081,46 +1081,45 @@ static int calc_iframe_target_size_one_pass_vbr(const VP9_COMP *const cpi) {
 
 void vp9_rc_get_one_pass_vbr_params(VP9_COMP *cpi) {
   VP9_COMMON *const cm = &cpi->common;
+  RATE_CONTROL *const rc = &cpi->rc;
   int target;
   if (!cpi->refresh_alt_ref_frame &&
       (cm->current_video_frame == 0 ||
        cm->frame_flags & FRAMEFLAGS_KEY ||
-       cpi->rc.frames_to_key == 0 ||
+       rc->frames_to_key == 0 ||
        (cpi->oxcf.auto_key && test_for_kf_one_pass(cpi)))) {
     cm->frame_type = KEY_FRAME;
-    cpi->rc.this_key_frame_forced = cm->current_video_frame != 0 &&
-                                    cpi->rc.frames_to_key == 0;
-    cpi->rc.frames_to_key = cpi->key_frame_frequency;
-    cpi->rc.kf_boost = DEFAULT_KF_BOOST;
-    cpi->rc.source_alt_ref_active = 0;
+    rc->this_key_frame_forced = cm->current_video_frame != 0 &&
+                                rc->frames_to_key == 0;
+    rc->frames_to_key = cpi->key_frame_frequency;
+    rc->kf_boost = DEFAULT_KF_BOOST;
+    rc->source_alt_ref_active = 0;
     if (cm->current_video_frame == 0) {
-      cpi->rc.active_worst_quality = cpi->rc.worst_quality;
+      rc->active_worst_quality = rc->worst_quality;
     } else {
       // Choose active worst quality twice as large as the last q.
-      cpi->rc.active_worst_quality = cpi->rc.last_q[KEY_FRAME] * 2;
-      if (cpi->rc.active_worst_quality > cpi->rc.worst_quality)
-        cpi->rc.active_worst_quality = cpi->rc.worst_quality;
+      rc->active_worst_quality = MIN(rc->worst_quality,
+                                     rc->last_q[KEY_FRAME] * 2);
     }
   } else {
     cm->frame_type = INTER_FRAME;
     if (cm->current_video_frame == 1) {
-      cpi->rc.active_worst_quality = cpi->rc.worst_quality;
+      rc->active_worst_quality = rc->worst_quality;
     } else {
       // Choose active worst quality twice as large as the last q.
-      cpi->rc.active_worst_quality = cpi->rc.last_q[INTER_FRAME] * 2;
-      if (cpi->rc.active_worst_quality > cpi->rc.worst_quality)
-        cpi->rc.active_worst_quality = cpi->rc.worst_quality;
+      rc->active_worst_quality = MIN(rc->worst_quality,
+                                     rc->last_q[INTER_FRAME] * 2);
     }
   }
-  if (cpi->rc.frames_till_gf_update_due == 0) {
-    cpi->rc.baseline_gf_interval = DEFAULT_GF_INTERVAL;
-    cpi->rc.frames_till_gf_update_due = cpi->rc.baseline_gf_interval;
+  if (rc->frames_till_gf_update_due == 0) {
+    rc->baseline_gf_interval = DEFAULT_GF_INTERVAL;
+    rc->frames_till_gf_update_due = rc->baseline_gf_interval;
     // NOTE: frames_till_gf_update_due must be <= frames_to_key.
-    if (cpi->rc.frames_till_gf_update_due > cpi->rc.frames_to_key)
-      cpi->rc.frames_till_gf_update_due = cpi->rc.frames_to_key;
+    if (rc->frames_till_gf_update_due > rc->frames_to_key)
+      rc->frames_till_gf_update_due = rc->frames_to_key;
     cpi->refresh_golden_frame = 1;
-    cpi->rc.source_alt_ref_pending = USE_ALTREF_FOR_ONE_PASS;
-    cpi->rc.gfu_boost = DEFAULT_GF_BOOST;
+    rc->source_alt_ref_pending = USE_ALTREF_FOR_ONE_PASS;
+    rc->gfu_boost = DEFAULT_GF_BOOST;
   }
   if (cm->frame_type == KEY_FRAME)
     target = calc_iframe_target_size_one_pass_vbr(cpi);
@@ -1190,26 +1189,23 @@ static int calc_pframe_target_size_one_pass_cbr(const VP9_COMP *cpi) {
     const int pct_high = MIN(-diff / one_pct_bits, oxcf->over_shoot_pct);
     target += (target * pct_high) / 200;
   }
-  if (target < min_frame_target)
-    target = min_frame_target;
-  return target;
+  return MAX(min_frame_target, target);
 }
 
 static int calc_iframe_target_size_one_pass_cbr(const VP9_COMP *cpi) {
-  int target;
   const RATE_CONTROL *rc = &cpi->rc;
+
   if (cpi->common.current_video_frame == 0) {
-    target = cpi->oxcf.starting_buffer_level / 2;
+    return cpi->oxcf.starting_buffer_level / 2;
   } else {
-    int initial_boost = 32;
+    const int initial_boost = 32;
     int kf_boost = MAX(initial_boost, (int)(2 * cpi->output_framerate - 16));
     if (rc->frames_since_key < cpi->output_framerate / 2) {
       kf_boost = (int)(kf_boost * rc->frames_since_key /
                        (cpi->output_framerate / 2));
     }
-    target = ((16 + kf_boost) * rc->av_per_frame_bandwidth) >> 4;
+    return ((16 + kf_boost) * rc->av_per_frame_bandwidth) >> 4;
   }
-  return target;
 }
 
 void vp9_rc_get_svc_params(VP9_COMP *cpi) {
@@ -1240,27 +1236,27 @@ void vp9_rc_get_svc_params(VP9_COMP *cpi) {
 
 void vp9_rc_get_one_pass_cbr_params(VP9_COMP *cpi) {
   VP9_COMMON *const cm = &cpi->common;
+  RATE_CONTROL *const rc = &cpi->rc;
   int target;
   if ((cm->current_video_frame == 0 ||
       cm->frame_flags & FRAMEFLAGS_KEY ||
-      cpi->rc.frames_to_key == 0 ||
+      rc->frames_to_key == 0 ||
       (cpi->oxcf.auto_key && test_for_kf_one_pass(cpi)))) {
     cm->frame_type = KEY_FRAME;
-    cpi->rc.this_key_frame_forced = cm->current_video_frame != 0 &&
-                                    cpi->rc.frames_to_key == 0;
-    cpi->rc.frames_to_key = cpi->key_frame_frequency;
-    cpi->rc.kf_boost = DEFAULT_KF_BOOST;
-    cpi->rc.source_alt_ref_active = 0;
+    rc->this_key_frame_forced = cm->current_video_frame != 0 &&
+                                rc->frames_to_key == 0;
+    rc->frames_to_key = cpi->key_frame_frequency;
+    rc->kf_boost = DEFAULT_KF_BOOST;
+    rc->source_alt_ref_active = 0;
     target = calc_iframe_target_size_one_pass_cbr(cpi);
-    cpi->rc.active_worst_quality = cpi->rc.worst_quality;
+    rc->active_worst_quality = rc->worst_quality;
   } else {
     cm->frame_type = INTER_FRAME;
     target = calc_pframe_target_size_one_pass_cbr(cpi);
-    cpi->rc.active_worst_quality =
-        calc_active_worst_quality_one_pass_cbr(cpi);
+    rc->active_worst_quality = calc_active_worst_quality_one_pass_cbr(cpi);
   }
   vp9_rc_set_frame_target(cpi, target);
   // Don't use gf_update by default in CBR mode.
-  cpi->rc.frames_till_gf_update_due = INT_MAX;
-  cpi->rc.baseline_gf_interval = INT_MAX;
+  rc->frames_till_gf_update_due = INT_MAX;
+  rc->baseline_gf_interval = INT_MAX;
 }
