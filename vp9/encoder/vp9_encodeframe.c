@@ -1596,30 +1596,14 @@ static void compute_fast_motion_search_level(VP9_COMP *cpi, BLOCK_SIZE bsize) {
   VP9_COMMON *const cm = &cpi->common;
   MACROBLOCK *const x = &cpi->mb;
 
-  // Only use 8x8 result for non HD videos.
-  // int use_8x8 = (MIN(cpi->common.width, cpi->common.height) < 720) ? 1 : 0;
-  int use_8x8 = 1;
-
-  if (cm->frame_type && !cpi->rc.is_src_frame_alt_ref &&
-      ((use_8x8 && bsize == BLOCK_16X16) ||
-      bsize == BLOCK_32X32 || bsize == BLOCK_64X64)) {
-    int ref0 = 0, ref1 = 0, ref2 = 0, ref3 = 0;
-    PICK_MODE_CONTEXT *block_context = NULL;
-
-    if (bsize == BLOCK_16X16) {
-      block_context = x->sb8x8_context[x->sb_index][x->mb_index];
-    } else if (bsize == BLOCK_32X32) {
-      block_context = x->mb_context[x->sb_index];
-    } else if (bsize == BLOCK_64X64) {
-      block_context = x->sb32_context;
-    }
-
-    if (block_context) {
-      ref0 = block_context[0].mic.mbmi.ref_frame[0];
-      ref1 = block_context[1].mic.mbmi.ref_frame[0];
-      ref2 = block_context[2].mic.mbmi.ref_frame[0];
-      ref3 = block_context[3].mic.mbmi.ref_frame[0];
-    }
+  if (cm->frame_type == INTER_FRAME &&
+      !cpi->rc.is_src_frame_alt_ref &&
+      (bsize == BLOCK_16X16 || bsize == BLOCK_32X32 || bsize == BLOCK_64X64)) {
+    const PICK_MODE_CONTEXT *block_context = get_block_context(x, bsize);
+    const int ref0 = block_context[0].mic.mbmi.ref_frame[0];
+    const int ref1 = block_context[1].mic.mbmi.ref_frame[0];
+    const int ref2 = block_context[2].mic.mbmi.ref_frame[0];
+    const int ref3 = block_context[3].mic.mbmi.ref_frame[0];
 
     // Currently, only consider 4 inter reference frames.
     if (ref0 && ref1 && ref2 && ref3) {
