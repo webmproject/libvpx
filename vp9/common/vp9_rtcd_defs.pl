@@ -249,8 +249,7 @@ add_proto qw/void vp9_lpf_horizontal_4/, "uint8_t *s, int pitch, const uint8_t *
 specialize qw/vp9_lpf_horizontal_4 mmx neon dspr2/;
 
 add_proto qw/void vp9_lpf_horizontal_4_dual/, "uint8_t *s, int pitch, const uint8_t *blimit0, const uint8_t *limit0, const uint8_t *thresh0, const uint8_t *blimit1, const uint8_t *limit1, const uint8_t *thresh1";
-specialize qw/vp9_lpf_horizontal_4_dual sse2 neon_asm dspr2/;
-$vp9_lpf_horizontal_4_dual_neon_asm=vp9_lpf_horizontal_4_dual_neon;
+specialize qw/vp9_lpf_horizontal_4_dual sse2 neon dspr2/;
 
 #
 # post proc

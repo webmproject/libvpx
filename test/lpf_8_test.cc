@@ -613,10 +613,8 @@ INSTANTIATE_TEST_CASE_P(
 INSTANTIATE_TEST_CASE_P(
     NEON, Loop8Test9Param,
     ::testing::Values(
-#if HAVE_NEON_ASM
         make_tuple(&vp9_lpf_horizontal_4_dual_neon,
                    &vp9_lpf_horizontal_4_dual_c, 8),
-#endif  // HAVE_NEON_ASM
         make_tuple(&vp9_lpf_horizontal_8_dual_neon,
                    &vp9_lpf_horizontal_8_dual_c, 8),
         make_tuple(&vp9_lpf_vertical_4_dual_neon,
