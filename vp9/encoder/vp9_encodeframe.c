@@ -319,7 +319,7 @@ static void build_activity_map(VP9_COMP *cpi) {
 }
 
 // Macroblock activity masking
-void vp9_activity_masking(VP9_COMP *cpi, MACROBLOCK *x) {
+static void activity_masking(VP9_COMP *cpi, MACROBLOCK *x) {
 #if USE_ACT_INDEX
   x->rdmult += *(x->mb_activity_ptr) * (x->rdmult >> 2);
   x->errorperbit = x->rdmult * 100 / (110 * x->rddiv);
@@ -673,7 +673,7 @@ static void rd_pick_sb_modes(VP9_COMP *cpi, const TileInfo *const tile,
   }
 
   if (cpi->oxcf.tuning == VP8_TUNE_SSIM)
-    vp9_activity_masking(cpi, x);
+    activity_masking(cpi, x);
 
   if (cpi->oxcf.aq_mode == VARIANCE_AQ) {
     vp9_clear_system_state();  // __asm emms;
