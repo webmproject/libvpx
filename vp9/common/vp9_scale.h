@@ -40,12 +40,12 @@ void vp9_setup_scale_factors_for_frame(struct scale_factors *sf,
                                        int other_w, int other_h,
                                        int this_w, int this_h);
 
-static int vp9_is_valid_scale(const struct scale_factors *sf) {
+static INLINE int vp9_is_valid_scale(const struct scale_factors *sf) {
   return sf->x_scale_fp != REF_INVALID_SCALE &&
          sf->y_scale_fp != REF_INVALID_SCALE;
 }
 
-static int vp9_is_scaled(const struct scale_factors *sf) {
+static INLINE int vp9_is_scaled(const struct scale_factors *sf) {
   return sf->x_scale_fp != REF_NO_SCALE ||
          sf->y_scale_fp != REF_NO_SCALE;
 }
