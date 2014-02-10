@@ -199,7 +199,7 @@ int64_t vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
     clamp_mv2(&frame_mv[NEARMV][ref_frame].as_mv, xd);
 
     for (this_mode = NEARESTMV; this_mode <= NEWMV; ++this_mode) {
-      int rate = cost[this_mode - NEARESTMV];
+      int rate = cost[INTER_OFFSET(this_mode)];
       int64_t dist;
 
       if (this_mode == NEWMV) {
