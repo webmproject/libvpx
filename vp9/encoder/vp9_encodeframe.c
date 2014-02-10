@@ -2184,108 +2184,6 @@ static void switch_tx_mode(VP9_COMP *cpi) {
     cpi->common.tx_mode = ALLOW_32X32;
 }
 
-static void encode_frame_internal(VP9_COMP *cpi) {
-  int mi_row;
-  MACROBLOCK *const x = &cpi->mb;
-  VP9_COMMON *const cm = &cpi->common;
-  MACROBLOCKD *const xd = &x->e_mbd;
-
-//  fprintf(stderr, "encode_frame_internal frame %d (%d) type %d\n",
-//           cpi->common.current_video_frame, cpi->common.show_frame,
-//           cm->frame_type);
-
-  vp9_zero(cm->counts.switchable_interp);
-  vp9_zero(cpi->tx_stepdown_count);
-
-  xd->mi_8x8 = cm->mi_grid_visible;
-  // required for vp9_frame_init_quantizer
-  xd->mi_8x8[0] = cm->mi;
-
-  xd->last_mi = cm->prev_mi;
-
-  vp9_zero(cm->counts.mv);
-  vp9_zero(cpi->coef_counts);
-  vp9_zero(cm->counts.eob_branch);
-
-  cpi->mb.e_mbd.lossless = cm->base_qindex == 0 && cm->y_dc_delta_q == 0
-      && cm->uv_dc_delta_q == 0 && cm->uv_ac_delta_q == 0;
-  switch_lossless_mode(cpi, cpi->mb.e_mbd.lossless);
-
-  vp9_frame_init_quantizer(cpi);
-
-  vp9_initialize_rd_consts(cpi);
-  vp9_initialize_me_consts(cpi, cm->base_qindex);
-  switch_tx_mode(cpi);
-
-  if (cpi->oxcf.tuning == VP8_TUNE_SSIM) {
-    // Initialize encode frame context.
-    init_encode_frame_mb_context(cpi);
-
-    // Build a frame level activity map
-    build_activity_map(cpi);
-  }
-
-  // Re-initialize encode frame context.
-  init_encode_frame_mb_context(cpi);
-
-  vp9_zero(cpi->rd_comp_pred_diff);
-  vp9_zero(cpi->rd_filter_diff);
-  vp9_zero(cpi->rd_tx_select_diff);
-  vp9_zero(cpi->rd_tx_select_threshes);
-
-  set_prev_mi(cm);
-
-  {
-    struct vpx_usec_timer emr_timer;
-    vpx_usec_timer_start(&emr_timer);
-
-    {
-      // Take tiles into account and give start/end MB
-      int tile_col, tile_row;
-      TOKENEXTRA *tp = cpi->tok;
-      const int tile_cols = 1 << cm->log2_tile_cols;
-      const int tile_rows = 1 << cm->log2_tile_rows;
-
-      for (tile_row = 0; tile_row < tile_rows; tile_row++) {
-        for (tile_col = 0; tile_col < tile_cols; tile_col++) {
-          TileInfo tile;
-          TOKENEXTRA *tp_old = tp;
-
-          // For each row of SBs in the frame
-          vp9_tile_init(&tile, cm, tile_row, tile_col);
-          for (mi_row = tile.mi_row_start;
-               mi_row < tile.mi_row_end; mi_row += 8)
-            encode_sb_row(cpi, &tile, mi_row, &tp);
-
-          cpi->tok_count[tile_row][tile_col] = (unsigned int)(tp - tp_old);
-          assert(tp - cpi->tok <= get_token_alloc(cm->mb_rows, cm->mb_cols));
-        }
-      }
-    }
-
-    vpx_usec_timer_mark(&emr_timer);
-    cpi->time_encode_sb_row += vpx_usec_timer_elapsed(&emr_timer);
-  }
-
-  if (cpi->sf.skip_encode_sb) {
-    int j;
-    unsigned int intra_count = 0, inter_count = 0;
-    for (j = 0; j < INTRA_INTER_CONTEXTS; ++j) {
-      intra_count += cm->counts.intra_inter[j][0];
-      inter_count += cm->counts.intra_inter[j][1];
-    }
-    cpi->sf.skip_encode_frame = ((intra_count << 2) < inter_count);
-    cpi->sf.skip_encode_frame &= (cm->frame_type != KEY_FRAME);
-    cpi->sf.skip_encode_frame &= cm->show_frame;
-  } else {
-    cpi->sf.skip_encode_frame = 0;
-  }
-
-#if 0
-  // Keep record of the total distortion this time around for future use
-  cpi->last_frame_distortion = cpi->frame_distortion;
-#endif
-}
 
 static int check_dual_ref_flags(VP9_COMP *cpi) {
   const int ref_flags = cpi->ref_frame_flags;
@@ -2575,27 +2473,17 @@ static void encode_rtc_sb_row(VP9_COMP *cpi, const TileInfo *const tile,
                      &dummy_rate, &dummy_dist, 1);
   }
 }
+// end RTC play code
 
-
-static void encode_rtc_frame_internal(VP9_COMP *cpi) {
+static void encode_frame_internal(VP9_COMP *cpi) {
   int mi_row;
-  MACROBLOCK * const x = &cpi->mb;
-  VP9_COMMON * const cm = &cpi->common;
-  MACROBLOCKD * const xd = &x->e_mbd;
+  MACROBLOCK *const x = &cpi->mb;
+  VP9_COMMON *const cm = &cpi->common;
+  MACROBLOCKD *const xd = &x->e_mbd;
 
 //  fprintf(stderr, "encode_frame_internal frame %d (%d) type %d\n",
 //           cpi->common.current_video_frame, cpi->common.show_frame,
 //           cm->frame_type);
-
-// debug output
-#if DBG_PRNT_SEGMAP
-  {
-    FILE *statsfile;
-    statsfile = fopen("segmap2.stt", "a");
-    fprintf(statsfile, "\n");
-    fclose(statsfile);
-  }
-#endif
 
   vp9_zero(cm->counts.switchable_interp);
   vp9_zero(cpi->tx_stepdown_count);
@@ -2606,7 +2494,7 @@ static void encode_rtc_frame_internal(VP9_COMP *cpi) {
 
   xd->last_mi = cm->prev_mi;
 
-  vp9_zero(cpi->common.counts.mv);
+  vp9_zero(cm->counts.mv);
   vp9_zero(cpi->coef_counts);
   vp9_zero(cm->counts.eob_branch);
 
@@ -2619,7 +2507,6 @@ static void encode_rtc_frame_internal(VP9_COMP *cpi) {
   vp9_initialize_rd_consts(cpi);
   vp9_initialize_me_consts(cpi, cm->base_qindex);
   switch_tx_mode(cpi);
-  cpi->sf.always_this_block_size = BLOCK_16X16;
 
   if (cpi->oxcf.tuning == VP8_TUNE_SSIM) {
     // Initialize encode frame context.
@@ -2658,9 +2545,12 @@ static void encode_rtc_frame_internal(VP9_COMP *cpi) {
           // For each row of SBs in the frame
           vp9_tile_init(&tile, cm, tile_row, tile_col);
           for (mi_row = tile.mi_row_start;
-               mi_row < tile.mi_row_end; mi_row += 8)
-            encode_rtc_sb_row(cpi, &tile, mi_row, &tp);
-
+               mi_row < tile.mi_row_end; mi_row += 8) {
+            if (cpi->sf.super_fast_rtc)
+              encode_rtc_sb_row(cpi, &tile, mi_row, &tp);
+            else
+              encode_sb_row(cpi, &tile, mi_row, &tp);
+          }
           cpi->tok_count[tile_row][tile_col] = (unsigned int)(tp - tp_old);
           assert(tp - cpi->tok <= get_token_alloc(cm->mb_rows, cm->mb_cols));
         }
@@ -2690,8 +2580,6 @@ static void encode_rtc_frame_internal(VP9_COMP *cpi) {
   cpi->last_frame_distortion = cpi->frame_distortion;
 #endif
 }
-// end RTC play code
-
 
 void vp9_encode_frame(VP9_COMP *cpi) {
   VP9_COMMON *const cm = &cpi->common;
@@ -2766,10 +2654,7 @@ void vp9_encode_frame(VP9_COMP *cpi) {
     select_tx_mode(cpi);
     cm->reference_mode = reference_mode;
 
-    if (cpi->sf.super_fast_rtc)
-      encode_rtc_frame_internal(cpi);
-    else
-      encode_frame_internal(cpi);
+    encode_frame_internal(cpi);
 
     for (i = 0; i < REFERENCE_MODES; ++i) {
       const int diff = (int) (cpi->rd_comp_pred_diff[i] / cm->MBs);
@@ -2849,10 +2734,7 @@ void vp9_encode_frame(VP9_COMP *cpi) {
   } else {
     // Force the usage of the BILINEAR interp_filter.
     cm->interp_filter = BILINEAR;
-    if (cpi->sf.super_fast_rtc)
-      encode_rtc_frame_internal(cpi);
-    else
-      encode_frame_internal(cpi);
+    encode_frame_internal(cpi);
   }
 }
 

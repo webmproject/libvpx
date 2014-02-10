@@ -846,6 +846,7 @@ static void set_rt_speed_feature(VP9_COMMON *cm,
   }
   if (speed >= 6) {
     sf->super_fast_rtc = 1;
+    sf->always_this_block_size = BLOCK_16X16;
   }
 }
 
