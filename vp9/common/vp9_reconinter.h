@@ -39,18 +39,18 @@ void vp9_build_inter_predictor(const uint8_t *src, int src_stride,
                                enum mv_precision precision,
                                int x, int y);
 
-static int scaled_buffer_offset(int x_offset, int y_offset, int stride,
-                                const struct scale_factors *sf) {
+static INLINE int scaled_buffer_offset(int x_offset, int y_offset, int stride,
+                                       const struct scale_factors *sf) {
   const int x = sf ? sf->scale_value_x(x_offset, sf) : x_offset;
   const int y = sf ? sf->scale_value_y(y_offset, sf) : y_offset;
   return y * stride + x;
 }
 
-static void setup_pred_plane(struct buf_2d *dst,
-                             uint8_t *src, int stride,
-                             int mi_row, int mi_col,
-                             const struct scale_factors *scale,
-                             int subsampling_x, int subsampling_y) {
+static INLINE void setup_pred_plane(struct buf_2d *dst,
+                                    uint8_t *src, int stride,
+                                    int mi_row, int mi_col,
+                                    const struct scale_factors *scale,
+                                    int subsampling_x, int subsampling_y) {
   const int x = (MI_SIZE * mi_col) >> subsampling_x;
   const int y = (MI_SIZE * mi_row) >> subsampling_y;
   dst->buf = src + scaled_buffer_offset(x, y, stride, scale);
