@@ -34,8 +34,8 @@ typedef struct mv32 {
   int32_t col;
 } MV32;
 
-static void clamp_mv(MV *mv, int min_col, int max_col,
-                             int min_row, int max_row) {
+static INLINE void clamp_mv(MV *mv, int min_col, int max_col,
+                            int min_row, int max_row) {
   mv->col = clamp(mv->col, min_col, max_col);
   mv->row = clamp(mv->row, min_row, max_row);
 }
