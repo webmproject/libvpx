@@ -170,6 +170,10 @@ int64_t vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
   mbmi->ref_frame[1] = NONE;
   mbmi->tx_size = MIN(max_txsize_lookup[bsize],
                       tx_mode_to_biggest_tx_size[cpi->common.tx_mode]);
+  mbmi->interp_filter = cpi->common.interp_filter == SWITCHABLE ?
+                        EIGHTTAP : cpi->common.interp_filter;
+  mbmi->skip_coeff = 0;
+  mbmi->segment_id = 0;
 
   for (ref_frame = LAST_FRAME; ref_frame <= LAST_FRAME ; ++ref_frame) {
     x->pred_mv_sad[ref_frame] = INT_MAX;
@@ -219,15 +223,7 @@ int64_t vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
         mbmi->ref_frame[0] = ref_frame;
         mbmi->mv[0].as_int = frame_mv[this_mode][ref_frame].as_int;
         xd->mi_8x8[0]->bmi[0].as_mv[0].as_int = mbmi->mv[0].as_int;
-        mbmi->interp_filter = cpi->common.interp_filter == SWITCHABLE ?
-            EIGHTTAP : cpi->common.interp_filter;
-
-        mbmi->ref_frame[1] = INTRA_FRAME;
-        mbmi->tx_size = max_txsize_lookup[bsize];
         mbmi->uv_mode = this_mode;
-        mbmi->skip_coeff = 0;
-        mbmi->sb_type = bsize;
-        mbmi->segment_id = 0;
       }
     }
   }
