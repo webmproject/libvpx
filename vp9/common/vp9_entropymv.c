@@ -192,8 +192,8 @@ static vp9_prob adapt_prob(vp9_prob prep, const unsigned int ct[2]) {
 
 static void adapt_probs(const vp9_tree_index *tree, const vp9_prob *pre_probs,
                         const unsigned int *counts, vp9_prob *probs) {
-  tree_merge_probs(tree, pre_probs, counts, MV_COUNT_SAT, MV_MAX_UPDATE_FACTOR,
-                   probs);
+  vp9_tree_merge_probs(tree, pre_probs, counts, MV_COUNT_SAT,
+                       MV_MAX_UPDATE_FACTOR, probs);
 }
 
 void vp9_adapt_mv_probs(VP9_COMMON *cm, int allow_hp) {
