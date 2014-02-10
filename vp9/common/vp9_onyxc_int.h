@@ -225,11 +225,11 @@ typedef struct VP9Common {
   int log2_tile_cols, log2_tile_rows;
 } VP9_COMMON;
 
-static YV12_BUFFER_CONFIG *get_frame_new_buffer(VP9_COMMON *cm) {
+static INLINE YV12_BUFFER_CONFIG *get_frame_new_buffer(VP9_COMMON *cm) {
   return &cm->frame_bufs[cm->new_fb_idx].buf;
 }
 
-static int get_free_fb(VP9_COMMON *cm) {
+static INLINE int get_free_fb(VP9_COMMON *cm) {
   int i;
   for (i = 0; i < FRAME_BUFFERS; i++)
     if (cm->frame_bufs[i].ref_count == 0)
@@ -240,7 +240,7 @@ static int get_free_fb(VP9_COMMON *cm) {
   return i;
 }
 
-static void ref_cnt_fb(RefCntBuffer *bufs, int *idx, int new_idx) {
+static INLINE void ref_cnt_fb(RefCntBuffer *bufs, int *idx, int new_idx) {
   const int ref_index = *idx;
 
   if (ref_index >= 0 && bufs[ref_index].ref_count > 0)
@@ -251,7 +251,7 @@ static void ref_cnt_fb(RefCntBuffer *bufs, int *idx, int new_idx) {
   bufs[new_idx].ref_count++;
 }
 
-static int mi_cols_aligned_to_sb(int n_mis) {
+static INLINE int mi_cols_aligned_to_sb(int n_mis) {
   return ALIGN_POWER_OF_TWO(n_mis, MI_BLOCK_SIZE_LOG2);
 }
 
@@ -275,10 +275,10 @@ static INLINE void set_skip_context(
   }
 }
 
-static void set_mi_row_col(MACROBLOCKD *xd, const TileInfo *const tile,
-                           int mi_row, int bh,
-                           int mi_col, int bw,
-                           int mi_rows, int mi_cols) {
+static INLINE void set_mi_row_col(MACROBLOCKD *xd, const TileInfo *const tile,
+                                  int mi_row, int bh,
+                                  int mi_col, int bw,
+                                  int mi_rows, int mi_cols) {
   xd->mb_to_top_edge    = -((mi_row * MI_SIZE) * 8);
   xd->mb_to_bottom_edge = ((mi_rows - bh - mi_row) * MI_SIZE) * 8;
   xd->mb_to_left_edge   = -((mi_col * MI_SIZE) * 8);
