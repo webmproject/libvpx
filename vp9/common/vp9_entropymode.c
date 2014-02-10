@@ -345,7 +345,7 @@ static int adapt_prob(vp9_prob pre_prob, const unsigned int ct[2]) {
 static void adapt_probs(const vp9_tree_index *tree,
                         const vp9_prob *pre_probs, const unsigned int *counts,
                         vp9_prob *probs) {
-  tree_merge_probs(tree, pre_probs, counts, COUNT_SAT, MAX_UPDATE_FACTOR,
+  vp9_tree_merge_probs(tree, pre_probs, counts, COUNT_SAT, MAX_UPDATE_FACTOR,
                    probs);
 }
 
