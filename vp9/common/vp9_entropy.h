@@ -119,7 +119,7 @@ static INLINE void reset_skip_context(MACROBLOCKD *xd, BLOCK_SIZE bsize) {
 extern DECLARE_ALIGNED(16, const uint8_t, vp9_coefband_trans_8x8plus[1024]);
 extern DECLARE_ALIGNED(16, const uint8_t, vp9_coefband_trans_4x4[16]);
 
-static const uint8_t *get_band_translate(TX_SIZE tx_size) {
+static INLINE const uint8_t *get_band_translate(TX_SIZE tx_size) {
   return tx_size == TX_4X4 ? vp9_coefband_trans_4x4
                            : vp9_coefband_trans_8x8plus;
 }
@@ -146,8 +146,8 @@ typedef unsigned int vp9_coeff_count_model[REF_TYPES][COEF_BANDS]
 
 void vp9_model_to_full_probs(const vp9_prob *model, vp9_prob *full);
 
-static int get_entropy_context(TX_SIZE tx_size, const ENTROPY_CONTEXT *a,
-                                                const ENTROPY_CONTEXT *l) {
+static INLINE int get_entropy_context(TX_SIZE tx_size, const ENTROPY_CONTEXT *a,
+                                      const ENTROPY_CONTEXT *l) {
   ENTROPY_CONTEXT above_ec = 0, left_ec = 0;
 
   switch (tx_size) {
@@ -174,8 +174,8 @@ static int get_entropy_context(TX_SIZE tx_size, const ENTROPY_CONTEXT *a,
   return combine_entropy_contexts(above_ec, left_ec);
 }
 
-static const scan_order *get_scan(const MACROBLOCKD *xd, TX_SIZE tx_size,
-                                  PLANE_TYPE type, int block_idx) {
+static const INLINE scan_order *get_scan(const MACROBLOCKD *xd, TX_SIZE tx_size,
+                                         PLANE_TYPE type, int block_idx) {
   const MODE_INFO *const mi = xd->mi_8x8[0];
   const MB_MODE_INFO *const mbmi = &mi->mbmi;
 
