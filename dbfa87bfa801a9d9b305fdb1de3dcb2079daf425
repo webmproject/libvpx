@@ -1,0 +1,89 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//4fc\u003d",
+        "filename": "vp9/encoder/vp9_onyx_if.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 3212,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2014-02-10T19:45:41Z",
+      "side": 1,
+      "message": "remove printf?",
+      "revId": "dbfa87bfa801a9d9b305fdb1de3dcb2079daf425",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//4gU\u003d",
+        "filename": "vp9/encoder/vp9_ratectrl.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 569,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2014-02-10T19:45:41Z",
+      "side": 1,
+      "message": "do you mean: cm-\u003ecurrent_video_frame \u003e 0 ?",
+      "revId": "dbfa87bfa801a9d9b305fdb1de3dcb2079daf425",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//4fg\u003d",
+        "filename": "vp9/encoder/vp9_ratectrl.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 574,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2014-02-10T19:45:41Z",
+      "side": 1,
+      "message": "don\u0027t think we need this switch for first frame in cbr mode, \nsince in that mode we set (in init_config()), avg_frame_qindex[0/1/2] \u003d worst_allowed.",
+      "revId": "dbfa87bfa801a9d9b305fdb1de3dcb2079daf425",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//4go\u003d",
+        "filename": "vp9/encoder/vp9_ratectrl.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 631,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2014-02-10T19:45:41Z",
+      "side": 1,
+      "message": "remove printf",
+      "revId": "dbfa87bfa801a9d9b305fdb1de3dcb2079daf425",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//4gs\u003d",
+        "filename": "vp9/encoder/vp9_ratectrl.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 1270,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2014-02-10T19:45:41Z",
+      "side": 1,
+      "message": "This is meant to be only for CBR mode, maybe better to keep it after line 1267? If svc is used in an non-cbr mode, then we would get different behavior. Similar with line 1262.",
+      "revId": "dbfa87bfa801a9d9b305fdb1de3dcb2079daf425",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
