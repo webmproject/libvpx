@@ -1645,14 +1645,15 @@ static void rd_check_segment_txsize(VP9_COMP *cpi, MACROBLOCK *x,
                                     BEST_SEG_INFO *bsi_buf, int filter_idx,
                                     int_mv seg_mvs[4][MAX_REF_FRAMES],
                                     int mi_row, int mi_col) {
-  int i, br = 0, idx, idy;
+  int k, br = 0, idx, idy;
   int64_t bd = 0, block_sse = 0;
   MB_PREDICTION_MODE this_mode;
+  MACROBLOCKD *xd = &x->e_mbd;
   VP9_COMMON *cm = &cpi->common;
-  MODE_INFO *mi = x->e_mbd.mi_8x8[0];
+  MODE_INFO *mi = xd->mi_8x8[0];
   MB_MODE_INFO *const mbmi = &mi->mbmi;
   struct macroblock_plane *const p = &x->plane[0];
-  struct macroblockd_plane *const pd = &x->e_mbd.plane[0];
+  struct macroblockd_plane *const pd = &xd->plane[0];
   const int label_count = 4;
   int64_t this_segment_rd = 0;
   int label_mv_thresh;
@@ -1660,7 +1661,7 @@ static void rd_check_segment_txsize(VP9_COMP *cpi, MACROBLOCK *x,
   const BLOCK_SIZE bsize = mbmi->sb_type;
   const int num_4x4_blocks_wide = num_4x4_blocks_wide_lookup[bsize];
   const int num_4x4_blocks_high = num_4x4_blocks_high_lookup[bsize];
-  vp9_variance_fn_ptr_t *v_fn_ptr;
+  vp9_variance_fn_ptr_t *v_fn_ptr = &cpi->fn_ptr[bsize];
   ENTROPY_CONTEXT t_above[2], t_left[2];
   BEST_SEG_INFO *bsi = bsi_buf + filter_idx;
   int mode_idx;
@@ -1669,8 +1670,6 @@ static void rd_check_segment_txsize(VP9_COMP *cpi, MACROBLOCK *x,
 
   vpx_memcpy(t_above, pd->above_context, sizeof(t_above));
   vpx_memcpy(t_left, pd->left_context, sizeof(t_left));
-
-  v_fn_ptr = &cpi->fn_ptr[bsize];
 
   // 64 makes this threshold really big effectively
   // making it so that we very rarely check mvs on
@@ -1687,20 +1686,17 @@ static void rd_check_segment_txsize(VP9_COMP *cpi, MACROBLOCK *x,
       int_mv frame_mv[MB_MODE_COUNT][MAX_REF_FRAMES];
       MB_PREDICTION_MODE mode_selected = ZEROMV;
       int64_t best_rd = INT64_MAX;
-      i = idy * 2 + idx;
+      const int i = idy * 2 + idx;
+      int ref;
 
-      frame_mv[ZEROMV][mbmi->ref_frame[0]].as_int = 0;
-      vp9_append_sub8x8_mvs_for_idx(cm, &x->e_mbd, tile,
-                                    i, 0, mi_row, mi_col,
-                                    &frame_mv[NEARESTMV][mbmi->ref_frame[0]],
-                                    &frame_mv[NEARMV][mbmi->ref_frame[0]]);
-      if (has_second_rf) {
-        frame_mv[ZEROMV][mbmi->ref_frame[1]].as_int = 0;
-        vp9_append_sub8x8_mvs_for_idx(cm, &x->e_mbd, tile,
-                                      i, 1, mi_row, mi_col,
-                                      &frame_mv[NEARESTMV][mbmi->ref_frame[1]],
-                                      &frame_mv[NEARMV][mbmi->ref_frame[1]]);
+      for (ref = 0; ref < 1 + has_second_rf; ++ref) {
+        const MV_REFERENCE_FRAME frame = mbmi->ref_frame[ref];
+        frame_mv[ZEROMV][frame].as_int = 0;
+        vp9_append_sub8x8_mvs_for_idx(cm, xd, tile, i, ref, mi_row, mi_col,
+                                      &frame_mv[NEARESTMV][frame],
+                                      &frame_mv[NEARMV][frame]);
       }
+
       // search for the best motion vector on this segment
       for (this_mode = NEARESTMV; this_mode <= NEWMV; ++this_mode) {
         const struct buf_2d orig_src = x->plane[0].src;
@@ -2042,8 +2038,8 @@ static void rd_check_segment_txsize(VP9_COMP *cpi, MACROBLOCK *x,
   bsi->sse = block_sse;
 
   // update the coding decisions
-  for (i = 0; i < 4; ++i)
-    bsi->modes[i] = mi->bmi[i].as_mode;
+  for (k = 0; k < 4; ++k)
+    bsi->modes[k] = mi->bmi[k].as_mode;
 }
 
 static int64_t rd_pick_best_mbsegmentation(VP9_COMP *cpi, MACROBLOCK *x,
