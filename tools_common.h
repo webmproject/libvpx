@@ -129,6 +129,10 @@ vpx_codec_iface_t *get_codec_interface(unsigned int fourcc);
 // of vpx_image_t support
 void vpx_img_write(const vpx_image_t *img, FILE *file);
 
+// TODO(dkovalev): move this function to vpx_image.{c, h}, so it will be part
+// of vpx_image_t support
+int vpx_img_read(vpx_image_t *img, FILE *file);
+
 #ifdef __cplusplus
 }  /* extern "C" */
 #endif
