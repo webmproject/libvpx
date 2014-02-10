@@ -37,6 +37,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//4bo\u003d",
+        "filename": "examples/simple_encoder.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 131,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-02-10T22:16:40Z",
+      "side": 1,
+      "message": "I\u0027m aware of this, but I don\u0027t think the example code should be doing things we\u0027re not doing in vpxenc. \n\nEither the check should not be here, or it should be added to vpxenc. I would remove it here to be consistent with vpxenc, but I\u0027m fine with this landing as long as the question of whether or not libvpx can handle odd dimensions gets resolved at some point in the future.",
+      "parentUuid": "AAAAdn//4u8\u003d",
+      "revId": "1f715ca34bab5eb117c2410197d55eb98b13b7c2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//4zA\u003d",
         "filename": "examples/simple_encoder.c",
         "patchSetId": 1
