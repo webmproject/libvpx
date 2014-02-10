@@ -54,11 +54,10 @@ static void add_warning(const char *warning_string,
 }
 
 static void free_warning_list(struct WarningList *warning_list) {
-  struct WarningListNode *node = warning_list->warning_node;
   while (warning_list->warning_node != NULL) {
-    node = warning_list->warning_node->next_warning;
-    free(warning_list->warning_node);
-    warning_list->warning_node = node;
+    struct WarningListNode *const node = warning_list->warning_node;
+    warning_list->warning_node = node->next_warning;
+    free(node);
   }
 }
 
