@@ -107,6 +107,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//4MI\u003d",
+        "filename": "tools_common.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 133,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-02-11T19:01:43Z",
+      "side": 1,
+      "message": "Yeah, seems long and redundant given what it actually does, but I think it\u0027s better that all functions that \"get the {de|en}coder interface\" look identical and have the same naming convention.",
+      "parentUuid": "AAAAdn//4NA\u003d",
+      "revId": "d85a25cf0ceeb88d719f88aa593e28fcfc05b1cb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//4Nw\u003d",
         "filename": "tools_common.h",
         "patchSetId": 2
