@@ -489,7 +489,7 @@ TEST_P(DatarateTestVP9, BasicRateTargeting2TemporalLayers) {
 }
 
 // Check basic rate targeting for 3 temporal layers.
-TEST_P(DatarateTestVP9, BasicRateTargeting3TemporalLayers) {
+TEST_P(DatarateTestVP9, DISABLED_BasicRateTargeting3TemporalLayers) {
   cfg_.rc_buf_initial_sz = 500;
   cfg_.rc_buf_optimal_sz = 500;
   cfg_.rc_buf_sz = 1000;
