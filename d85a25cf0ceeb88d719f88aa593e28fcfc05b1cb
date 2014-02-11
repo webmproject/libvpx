@@ -1,0 +1,89 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//4OM\u003d",
+        "filename": "examples/decode_to_md5.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 87,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-02-11T17:56:36Z",
+      "side": 1,
+      "message": "Interface",
+      "revId": "d85a25cf0ceeb88d719f88aa593e28fcfc05b1cb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//4OE\u003d",
+        "filename": "tools_common.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 130,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-02-11T17:56:36Z",
+      "side": 1,
+      "message": "Interface. I know libvpx uses iface. It\u0027s a terrible name and violates the style guide.\n\nhttp://google-styleguide.googlecode.com/svn/trunk/cppguide.xml#General_Naming_Rules\n\nI\u0027m aware that we have locals named \"iface\" all over the place, and libvpx API functions as well . It sucks that things have gone that way. Anyway, please change to:\n- VpxInterface\n- vpx_codec_iface_t *(*const interface)();",
+      "revId": "d85a25cf0ceeb88d719f88aa593e28fcfc05b1cb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//4N0\u003d",
+        "filename": "tools_common.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 133,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-02-11T17:56:36Z",
+      "side": 1,
+      "message": "Should be by_index to follow the convention of the other two functions.",
+      "revId": "d85a25cf0ceeb88d719f88aa593e28fcfc05b1cb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//4Nw\u003d",
+        "filename": "tools_common.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 137,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-02-11T17:56:36Z",
+      "side": 1,
+      "message": "Ditto.",
+      "revId": "d85a25cf0ceeb88d719f88aa593e28fcfc05b1cb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//4No\u003d",
+        "filename": "vpxenc.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-02-11T17:56:36Z",
+      "side": 1,
+      "message": "Can\u0027t you just forward declare VpxIface in here?",
+      "revId": "d85a25cf0ceeb88d719f88aa593e28fcfc05b1cb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
