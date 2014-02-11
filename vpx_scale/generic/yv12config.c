@@ -8,6 +8,8 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
+#include <assert.h>
+
 #include "./vpx_config.h"
 #include "vpx_scale/yv12config.h"
 #include "vpx_mem/vpx_mem.h"
@@ -19,10 +21,17 @@
 /****************************************************************************
  *
  ****************************************************************************/
+#define yv12_align_addr(addr, align) \
+    (void*)(((size_t)(addr) + ((align) - 1)) & (size_t)-(align))
+
 int
 vp8_yv12_de_alloc_frame_buffer(YV12_BUFFER_CONFIG *ybf) {
   if (ybf) {
-    vpx_free(ybf->buffer_alloc);
+    // If libvpx is using frame buffer callbacks then buffer_alloc_sz must
+    // not be set.
+    if (ybf->buffer_alloc_sz > 0) {
+      vpx_free(ybf->buffer_alloc);
+    }
 
     /* buffer_alloc isn't accessed by most functions.  Rather y_buffer,
       u_buffer and v_buffer point to buffer_alloc and are used.  Clear out
@@ -108,7 +117,9 @@ int vp8_yv12_alloc_frame_buffer(YV12_BUFFER_CONFIG *ybf,
 
 int vp9_free_frame_buffer(YV12_BUFFER_CONFIG *ybf) {
   if (ybf) {
-    vpx_free(ybf->buffer_alloc);
+    if (ybf->buffer_alloc_sz > 0) {
+      vpx_free(ybf->buffer_alloc);
+    }
 
     /* buffer_alloc isn't accessed by most functions.  Rather y_buffer,
       u_buffer and v_buffer point to buffer_alloc and are used.  Clear out
@@ -123,7 +134,10 @@ int vp9_free_frame_buffer(YV12_BUFFER_CONFIG *ybf) {
 
 int vp9_realloc_frame_buffer(YV12_BUFFER_CONFIG *ybf,
                              int width, int height,
-                             int ss_x, int ss_y, int border) {
+                             int ss_x, int ss_y, int border,
+                             vpx_codec_frame_buffer_t *fb,
+                             vpx_get_frame_buffer_cb_fn_t cb,
+                             void *cb_priv) {
   if (ybf) {
     const int aligned_width = (width + 7) & ~7;
     const int aligned_height = (height + 7) & ~7;
@@ -148,7 +162,26 @@ int vp9_realloc_frame_buffer(YV12_BUFFER_CONFIG *ybf,
 #else
     const int frame_size = yplane_size + 2 * uvplane_size;
 #endif
-    if (frame_size > ybf->buffer_alloc_sz) {
+    if (cb != NULL) {
+      const int align_addr_extra_size = 31;
+      const size_t external_frame_size = frame_size + align_addr_extra_size;
+
+      assert(fb != NULL);
+
+      // Allocation to hold larger frame, or first allocation.
+      if (cb(cb_priv, external_frame_size, fb) < 0)
+        return -1;
+
+      if (fb->data == NULL || fb->size < external_frame_size)
+        return -1;
+
+      // This memset is needed for fixing valgrind error from C loop filter
+      // due to access uninitialized memory in frame border. It could be
+      // removed if border is totally removed.
+      vpx_memset(fb->data, 0, fb->size);
+
+      ybf->buffer_alloc = yv12_align_addr(fb->data, 32);
+    } else if (frame_size > ybf->buffer_alloc_sz) {
       // Allocation to hold larger frame, or first allocation.
       if (ybf->buffer_alloc)
         vpx_free(ybf->buffer_alloc);
@@ -159,13 +192,10 @@ int vp9_realloc_frame_buffer(YV12_BUFFER_CONFIG *ybf,
       ybf->buffer_alloc_sz = frame_size;
 
       // This memset is needed for fixing valgrind error from C loop filter
-      // due to access uninitialized memory in frame boarder. It could be
+      // due to access uninitialized memory in frame border. It could be
       // removed if border is totally removed.
       vpx_memset(ybf->buffer_alloc, 0, ybf->buffer_alloc_sz);
     }
-
-    if (ybf->buffer_alloc_sz < frame_size)
-      return -1;
 
     /* Only support allocating buffers that have a border that's a multiple
      * of 32. The border restriction is required to get 16-byte alignment of
@@ -214,7 +244,8 @@ int vp9_alloc_frame_buffer(YV12_BUFFER_CONFIG *ybf,
                            int ss_x, int ss_y, int border) {
   if (ybf) {
     vp9_free_frame_buffer(ybf);
-    return vp9_realloc_frame_buffer(ybf, width, height, ss_x, ss_y, border);
+    return vp9_realloc_frame_buffer(ybf, width, height, ss_x, ss_y, border,
+                                    NULL, NULL, NULL);
   }
   return -2;
 }

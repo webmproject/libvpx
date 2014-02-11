@@ -33,8 +33,15 @@ void vp9_update_mode_info_border(VP9_COMMON *cm, MODE_INFO *mi) {
 void vp9_free_frame_buffers(VP9_COMMON *cm) {
   int i;
 
-  for (i = 0; i < FRAME_BUFFERS; i++)
+  for (i = 0; i < FRAME_BUFFERS; i++) {
     vp9_free_frame_buffer(&cm->frame_bufs[i].buf);
+
+    if (cm->frame_bufs[i].ref_count > 0 &&
+        cm->frame_bufs[i].raw_frame_buffer.data != NULL) {
+      cm->release_fb_cb(cm->cb_priv, &cm->frame_bufs[i].raw_frame_buffer);
+      cm->frame_bufs[i].ref_count = 0;
+    }
+  }
 
   vp9_free_frame_buffer(&cm->post_proc_buffer);
 
@@ -85,7 +92,7 @@ int vp9_resize_frame_buffers(VP9_COMMON *cm, int width, int height) {
   int mi_size;
 
   if (vp9_realloc_frame_buffer(&cm->post_proc_buffer, width, height, ss_x, ss_y,
-                               VP9_DEC_BORDER_IN_PIXELS) < 0)
+                               VP9_DEC_BORDER_IN_PIXELS, NULL, NULL, NULL) < 0)
     goto fail;
 
   set_mb_mi(cm, aligned_width, aligned_height);
@@ -199,6 +206,7 @@ void vp9_create_common(VP9_COMMON *cm) {
 
 void vp9_remove_common(VP9_COMMON *cm) {
   vp9_free_frame_buffers(cm);
+  vp9_free_internal_frame_buffers(&cm->int_frame_buffers);
 }
 
 void vp9_initialize_common() {

@@ -15,6 +15,7 @@
 #include "vpx/vp8dx.h"
 #include "vpx/internal/vpx_codec_internal.h"
 #include "./vpx_version.h"
+#include "vp9/common/vp9_frame_buffers.h"
 #include "vp9/decoder/vp9_onyxd.h"
 #include "vp9/decoder/vp9_onyxd_int.h"
 #include "vp9/decoder/vp9_read_bit_buffer.h"
@@ -293,10 +294,22 @@ static vpx_codec_err_t decode_one(vpx_codec_alg_priv_t *ctx,
         ctx->postproc_cfg.noise_level = 0;
       }
 
-      if (!optr)
+      if (!optr) {
         res = VPX_CODEC_ERROR;
-      else
+      } else {
+        VP9D_COMP *const pbi = (VP9D_COMP*)optr;
+        VP9_COMMON *const cm = &pbi->common;
+
+        cm->get_fb_cb = vp9_get_frame_buffer;
+        cm->release_fb_cb = vp9_release_frame_buffer;
+
+        if (vp9_alloc_internal_frame_buffers(&cm->int_frame_buffers))
+          vpx_internal_error(&cm->error, VPX_CODEC_MEM_ERROR,
+                             "Failed to initialize internal frame buffers");
+        cm->cb_priv = &cm->int_frame_buffers;
+
         ctx->pbi = optr;
+      }
     }
 
     ctx->decoder_init = 1;
