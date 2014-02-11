@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//4VY\u003d",
+        "filename": "examples/vpx_temporal_scalable_patterns.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 364,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-02-11T02:09:38Z",
+      "side": 1,
+      "message": "typedef already includes const",
+      "revId": "b37e0a33c1e94a2b95494e16b610f7e022588b28",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
