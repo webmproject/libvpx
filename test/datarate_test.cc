@@ -198,6 +198,7 @@ class DatarateTestVP9 : public ::libvpx_test::EncoderTest,
     last_pts_ = 0;
     bits_in_buffer_model_ = cfg_.rc_target_bitrate * cfg_.rc_buf_initial_sz;
     frame_number_ = 0;
+    tot_frame_number_ = 0;
     first_drop_ = 0;
     num_drops_ = 0;
     // For testing up to 3 layers.
@@ -294,10 +295,21 @@ class DatarateTestVP9 : public ::libvpx_test::EncoderTest,
 
 
   virtual void FramePktHook(const vpx_codec_cx_pkt_t *pkt) {
-    int layer = SetLayerId(frame_number_, cfg_.ts_number_layers);
-
     // Time since last timestamp = duration.
     vpx_codec_pts_t duration = pkt->data.frame.pts - last_pts_;
+
+    if (duration > 1) {
+      // If first drop not set and we have a drop set it to this time.
+      if (!first_drop_)
+        first_drop_ = last_pts_ + 1;
+      // Update the number of frame drops.
+      num_drops_ += static_cast<int>(duration - 1);
+      // Update counter for total number of frames (#frames input to encoder).
+      // Needed for setting the proper layer_id below.
+      tot_frame_number_ += static_cast<int>(duration - 1);
+    }
+
+    int layer = SetLayerId(tot_frame_number_, cfg_.ts_number_layers);
 
     // Add to the buffer the bits we'd expect from a constant bitrate server.
     bits_in_buffer_model_ += static_cast<int64_t>(
@@ -315,18 +327,10 @@ class DatarateTestVP9 : public ::libvpx_test::EncoderTest,
       bits_total_[i] += frame_size_in_bits;
     }
 
-    // If first drop not set and we have a drop set it to this time.
-    if (!first_drop_ && duration > 1)
-      first_drop_ = last_pts_ + 1;
-
-    // Update the number of frame drops.
-    if (duration > 1) {
-      num_drops_ += static_cast<int>(duration - 1);
-    }
-
     // Update the most recent pts.
     last_pts_ = pkt->data.frame.pts;
     ++frame_number_;
+    ++tot_frame_number_;
   }
 
   virtual void EndPassHook(void) {
@@ -342,7 +346,8 @@ class DatarateTestVP9 : public ::libvpx_test::EncoderTest,
 
   vpx_codec_pts_t last_pts_;
   double timebase_;
-  int frame_number_;
+  int frame_number_;      // Counter for number of non-dropped/encoded frames.
+  int tot_frame_number_;  // Counter for total number of input frames.
   int64_t bits_total_[3];
   double duration_;
   double effective_datarate_[3];
@@ -493,10 +498,7 @@ TEST_P(DatarateTestVP9, BasicRateTargeting3TemporalLayers) {
   cfg_.rc_buf_initial_sz = 500;
   cfg_.rc_buf_optimal_sz = 500;
   cfg_.rc_buf_sz = 1000;
-  // TODO(marpan): For now keep frame dropper off. Need to investigate an
-  // issue (rate-mismatch) that occcurs at speed 3 and low bitrate (200k) when
-  // frame dropper is on.
-  cfg_.rc_dropframe_thresh = 0;
+  cfg_.rc_dropframe_thresh = 1;
   cfg_.rc_min_quantizer = 0;
   cfg_.rc_max_quantizer = 63;
   cfg_.rc_end_usage = VPX_CBR;
@@ -529,8 +531,53 @@ TEST_P(DatarateTestVP9, BasicRateTargeting3TemporalLayers) {
     }
   }
 }
+
+// Check basic rate targeting for 3 temporal layers, with frame dropping.
+// Only for one (low) bitrate with lower max_quantizer, and somewhat higher
+// frame drop threshold, to force frame dropping.
+TEST_P(DatarateTestVP9, BasicRateTargeting3TemporalLayersFrameDropping) {
+  cfg_.rc_buf_initial_sz = 500;
+  cfg_.rc_buf_optimal_sz = 500;
+  cfg_.rc_buf_sz = 1000;
+  // Set frame drop threshold and rc_max_quantizer to force some frame drops.
+  cfg_.rc_dropframe_thresh = 20;
+  cfg_.rc_max_quantizer = 45;
+  cfg_.rc_min_quantizer = 0;
+  cfg_.rc_end_usage = VPX_CBR;
+  cfg_.g_lag_in_frames = 0;
+
+  // 3 Temporal layers, no spatial layers: Framerate decimation (4, 2, 1).
+  cfg_.ss_number_layers = 1;
+  cfg_.ts_number_layers = 3;
+  cfg_.ts_rate_decimator[0] = 4;
+  cfg_.ts_rate_decimator[1] = 2;
+  cfg_.ts_rate_decimator[2] = 1;
+
+  ::libvpx_test::I420VideoSource video("hantro_collage_w352h288.yuv", 352, 288,
+                                       30, 1, 0, 200);
+  cfg_.rc_target_bitrate = 200;
+  ResetModel();
+  // 40-20-40 bitrate allocation for 3 temporal layers.
+  cfg_.ts_target_bitrate[0] = 40 * cfg_.rc_target_bitrate / 100;
+  cfg_.ts_target_bitrate[1] = 60 * cfg_.rc_target_bitrate / 100;
+  cfg_.ts_target_bitrate[2] = cfg_.rc_target_bitrate;
+  ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
+  for (int j = 0; j < static_cast<int>(cfg_.ts_number_layers); ++j) {
+    ASSERT_GE(effective_datarate_[j], cfg_.ts_target_bitrate[j] * 0.85)
+        << " The datarate for the file is lower than target by too much, "
+            "for layer: " << j;
+    ASSERT_LE(effective_datarate_[j], cfg_.ts_target_bitrate[j] * 1.15)
+        << " The datarate for the file is greater than target by too much, "
+            "for layer: " << j;
+    // Expect some frame drops in this test: for this 200 frames test,
+    // expect at least 10% and not more than 50% drops.
+    ASSERT_GE(num_drops_, 20);
+    ASSERT_LE(num_drops_, 100);
+  }
+}
+
 VP8_INSTANTIATE_TEST_CASE(DatarateTest, ALL_TEST_MODES);
 VP9_INSTANTIATE_TEST_CASE(DatarateTestVP9,
                           ::testing::Values(::libvpx_test::kOnePassGood),
-                          ::testing::Range(1, 5));
+                          ::testing::Range(2, 5));
 }  // namespace
