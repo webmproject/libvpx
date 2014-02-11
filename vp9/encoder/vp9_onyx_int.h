@@ -209,8 +209,8 @@ typedef enum {
 } RECODE_LOOP_TYPE;
 
 typedef struct {
-  // This flag refers to whether or not to perform rd optimization.
-  int RD;
+  // Frame level coding parameter update
+  int frame_parameter_update;
 
   // Motion search method (Diamond, NSTEP, Hex, Big Diamond, Square, etc).
   SEARCH_METHODS search_method;
@@ -390,8 +390,8 @@ typedef struct {
   // by only looking at counts from 1/2 the bands.
   int use_fast_coef_updates;  // 0: 2-loop, 1: 1-loop, 2: 1-loop reduced
 
-  // This flag control the use of the new super fast rtc mode
-  int super_fast_rtc;
+  // This flag controls the use of non-RD mode decision.
+  int use_pick_mode;
 } SPEED_FEATURES;
 
 typedef struct {

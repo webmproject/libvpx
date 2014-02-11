@@ -296,7 +296,7 @@ void vp9_initialize_rd_consts(VP9_COMP *cpi) {
 
   fill_token_costs(x->token_costs, cm->fc.coef_probs);
 
-  if (!cpi->sf.super_fast_rtc) {
+  if (!cpi->sf.use_pick_mode) {
     for (i = 0; i < PARTITION_CONTEXTS; i++)
       vp9_cost_tokens(x->partition_cost[i], get_partition_probs(cm, i),
                       vp9_partition_tree);
@@ -443,7 +443,7 @@ static void model_rd_for_sb(VP9_COMP *cpi, BLOCK_SIZE bsize,
 
     if (i == 0)
       x->pred_sse[ref] = sse;
-    if (cpi->sf.super_fast_rtc) {
+    if (cpi->sf.use_pick_mode) {
       dist_sum += (int)sse;
     } else {
       int rate;
