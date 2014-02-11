@@ -2275,15 +2275,14 @@ void vp9_rc_get_second_pass_params(VP9_COMP *cpi) {
   vp9_clear_system_state();
 
   if (cpi->oxcf.end_usage == USAGE_CONSTANT_QUALITY) {
-    rc->active_worst_quality = cpi->oxcf.cq_level;
+    twopass->active_worst_quality = cpi->oxcf.cq_level;
   } else if (cm->current_video_frame == 0) {
     // Special case code for first frame.
     const int section_target_bandwidth = (int)(twopass->bits_left /
                                                frames_left);
     const int tmp_q = vp9_twopass_worst_quality(cpi, &twopass->total_left_stats,
                                                 section_target_bandwidth);
-
-    rc->active_worst_quality = tmp_q;
+    twopass->active_worst_quality = tmp_q;
     rc->ni_av_qi = tmp_q;
     rc->avg_q = vp9_convert_qindex_to_q(tmp_q);
 
