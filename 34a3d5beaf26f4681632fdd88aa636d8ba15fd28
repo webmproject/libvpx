@@ -1,0 +1,89 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//4IM\u003d",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2014-02-11T22:15:05Z",
+      "side": 1,
+      "message": "remove following 3 lines",
+      "revId": "34a3d5beaf26f4681632fdd88aa636d8ba15fd28",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//4IE\u003d",
+        "filename": "vp9/common/x86/vp9_subpixel_8t_intrin_avx2.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2014-02-11T22:15:05Z",
+      "side": 1,
+      "message": "Do you need to include emmintrin_compat.h?",
+      "revId": "34a3d5beaf26f4681632fdd88aa636d8ba15fd28",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//4H4\u003d",
+        "filename": "vp9/common/x86/vp9_subpixel_8t_intrin_avx2.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2014-02-11T22:15:05Z",
+      "side": 1,
+      "message": "Please change this file to 2-space-indentation style as you did in \"SSSE3 convolution optimization\".",
+      "revId": "34a3d5beaf26f4681632fdd88aa636d8ba15fd28",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//4IA\u003d",
+        "filename": "vp9/common/x86/vp9_subpixel_8t_intrin_avx2.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2014-02-11T22:15:05Z",
+      "side": 1,
+      "message": "Add #if defined(__GNUC__) in gcc version check",
+      "revId": "34a3d5beaf26f4681632fdd88aa636d8ba15fd28",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//4H8\u003d",
+        "filename": "vp9/common/x86/vp9_subpixel_8t_intrin_avx2.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 303,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2014-02-11T22:15:05Z",
+      "side": 1,
+      "message": "Same as above.",
+      "revId": "34a3d5beaf26f4681632fdd88aa636d8ba15fd28",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
