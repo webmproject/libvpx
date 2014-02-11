@@ -713,36 +713,40 @@ static void rd_pick_sb_modes(VP9_COMP *cpi, const TileInfo *const tile,
 
 static void update_stats(VP9_COMP *cpi) {
   VP9_COMMON *const cm = &cpi->common;
-  MACROBLOCK *const x = &cpi->mb;
-  MACROBLOCKD *const xd = &x->e_mbd;
-  MODE_INFO *mi = xd->mi_8x8[0];
-  MB_MODE_INFO *const mbmi = &mi->mbmi;
+  const MACROBLOCK *const x = &cpi->mb;
+  const MACROBLOCKD *const xd = &x->e_mbd;
+  const MODE_INFO *const mi = xd->mi_8x8[0];
+  const MB_MODE_INFO *const mbmi = &mi->mbmi;
 
   if (!frame_is_intra_only(cm)) {
     const int seg_ref_active = vp9_segfeature_active(&cm->seg, mbmi->segment_id,
                                                      SEG_LVL_REF_FRAME);
+    if (!seg_ref_active) {
+      FRAME_COUNTS *const counts = &cm->counts;
+      const int inter_block = is_inter_block(mbmi);
 
-    if (!seg_ref_active)
-      cm->counts.intra_inter[vp9_get_intra_inter_context(xd)]
-                            [is_inter_block(mbmi)]++;
+      counts->intra_inter[vp9_get_intra_inter_context(xd)][inter_block]++;
 
-    // If the segment reference feature is enabled we have only a single
-    // reference frame allowed for the segment so exclude it from
-    // the reference frame counts used to work out probabilities.
-    if (is_inter_block(mbmi) && !seg_ref_active) {
-      if (cm->reference_mode == REFERENCE_MODE_SELECT)
-        cm->counts.comp_inter[vp9_get_reference_mode_context(cm, xd)]
-                             [has_second_ref(mbmi)]++;
+      // If the segment reference feature is enabled we have only a single
+      // reference frame allowed for the segment so exclude it from
+      // the reference frame counts used to work out probabilities.
+      if (inter_block) {
+        const MV_REFERENCE_FRAME ref0 = mbmi->ref_frame[0];
 
-      if (has_second_ref(mbmi)) {
-        cm->counts.comp_ref[vp9_get_pred_context_comp_ref_p(cm, xd)]
-                           [mbmi->ref_frame[0] == GOLDEN_FRAME]++;
-      } else {
-        cm->counts.single_ref[vp9_get_pred_context_single_ref_p1(xd)][0]
-                             [mbmi->ref_frame[0] != LAST_FRAME]++;
-        if (mbmi->ref_frame[0] != LAST_FRAME)
-          cm->counts.single_ref[vp9_get_pred_context_single_ref_p2(xd)][1]
-                               [mbmi->ref_frame[0] != GOLDEN_FRAME]++;
+        if (cm->reference_mode == REFERENCE_MODE_SELECT)
+          counts->comp_inter[vp9_get_reference_mode_context(cm, xd)]
+                            [has_second_ref(mbmi)]++;
+
+        if (has_second_ref(mbmi)) {
+          counts->comp_ref[vp9_get_pred_context_comp_ref_p(cm, xd)]
+                          [ref0 == GOLDEN_FRAME]++;
+        } else {
+          counts->single_ref[vp9_get_pred_context_single_ref_p1(xd)][0]
+                            [ref0 != LAST_FRAME]++;
+          if (ref0 != LAST_FRAME)
+            counts->single_ref[vp9_get_pred_context_single_ref_p2(xd)][1]
+                              [ref0 != GOLDEN_FRAME]++;
+        }
       }
     }
   }
