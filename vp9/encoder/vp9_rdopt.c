@@ -285,7 +285,8 @@ void vp9_initialize_rd_consts(VP9_COMP *cpi) {
   cpi->RDDIV = RDDIV_BITS;  // in bits (to multiply D by 128)
   cpi->RDMULT = vp9_compute_rd_mult(cpi, qindex);
 
-  x->errorperbit = cpi->RDMULT / RD_MULT_EPB_RATIO + (x->errorperbit == 0);
+  x->errorperbit = cpi->RDMULT / RD_MULT_EPB_RATIO;
+  x->errorperbit += (x->errorperbit == 0);
 
   vp9_set_speed_features(cpi);
 
