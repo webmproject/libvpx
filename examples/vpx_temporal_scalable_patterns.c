@@ -361,7 +361,7 @@ int main(int argc, char **argv) {
   int max_intra_size_pct;
   vpx_svc_layer_id_t layer_id = {0, 0};
   char *codec_type;
-  const vpx_codec_iface_t *(*interface)(void);
+  vpx_codec_iface_t *(*interface)(void);
   unsigned int fourcc;
   struct VpxInputContext input_ctx = {0};
 
