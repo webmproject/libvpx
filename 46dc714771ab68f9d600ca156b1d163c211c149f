@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//4Us\u003d",
+        "filename": "build/make/gen_msvs_vcxproj.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 178,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-02-11T03:35:22Z",
+      "side": 1,
+      "message": "(note, unquoted) $f \u003d~ avx.?\\.c$ should work",
+      "revId": "46dc714771ab68f9d600ca156b1d163c211c149f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
