@@ -45,7 +45,7 @@ extern "C" {
 #else
 #define MIN_GF_INTERVAL             4
 #endif
-#define DEFAULT_GF_INTERVAL         11
+#define DEFAULT_GF_INTERVAL         10
 #define DEFAULT_KF_BOOST            2000
 #define DEFAULT_GF_BOOST            2000
 
