@@ -692,8 +692,6 @@ void vp9_encode_frame(VP9_COMP *cpi);
 
 void vp9_pack_bitstream(VP9_COMP *cpi, uint8_t *dest, size_t *size);
 
-void vp9_activity_masking(VP9_COMP *cpi, MACROBLOCK *x);
-
 void vp9_set_speed_features(VP9_COMP *cpi);
 
 int vp9_calc_ss_err(const YV12_BUFFER_CONFIG *source,
