@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//4YE\u003d",
+        "filename": "test/datarate_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 310,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-02-11T00:40:56Z",
+      "side": 1,
+      "message": "Repeated ; at end of line.\n\nCould also restructure to take the form:\n\nif (duration \u003e 1) {\n  if (!first_drop_)\n    first_drop_ \u003d last_pts_ + 1;\n\n  num_drops_ +\u003d static_cast\u003cint\u003e(duration - 1);\n  // Update counter for total number of frames (#frames input to encoder).\n  // Needed for setting the proper layer_id below.\n  tot_frame_number_ +\u003d static_cast\u003cint\u003e(duration - 1);\n}",
+      "revId": "9d1e1385106771c094caced9f85efc0d3a4cc5f1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
