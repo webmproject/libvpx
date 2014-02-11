@@ -349,6 +349,10 @@ int vp9_find_best_sub_pixel_tree(const MACROBLOCK *x,
     tr = br;
     tc = bc;
   }
+  // These lines insure static analysis doesn't warn that
+  // tr and tc aren't used after the above point.
+  (void) tr;
+  (void) tc;
 
   bestmv->row = br;
   bestmv->col = bc;
@@ -452,6 +456,11 @@ int vp9_find_best_sub_pixel_comp_tree(const MACROBLOCK *x,
     tr = br;
     tc = bc;
   }
+  // These lines insure static analysis doesn't warn that
+  // tr and tc aren't used after the above point.
+  (void) tr;
+  (void) tc;
+
   bestmv->row = br;
   bestmv->col = bc;
 
