@@ -182,7 +182,7 @@ struct macroblockd_plane {
   int subsampling_y;
   struct buf_2d dst;
   struct buf_2d pre[2];
-  int16_t *dequant;
+  const int16_t *dequant;
   ENTROPY_CONTEXT *above_context;
   ENTROPY_CONTEXT *left_context;
 };

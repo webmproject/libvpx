@@ -79,55 +79,47 @@ void vp9_quantize_b_32x32_c(const int16_t *coeff_ptr, intptr_t n_coeffs,
                             const int16_t *dequant_ptr,
                             int zbin_oq_value, uint16_t *eob_ptr,
                             const int16_t *scan, const int16_t *iscan) {
-  int i, rc, eob;
-  int zbins[2], nzbins[2];
-  int x, y, z, sz;
+  const int zbins[2] = { ROUND_POWER_OF_TWO(zbin_ptr[0] + zbin_oq_value, 1),
+                         ROUND_POWER_OF_TWO(zbin_ptr[1] + zbin_oq_value, 1) };
+  const int nzbins[2] = {zbins[0] * -1, zbins[1] * -1};
+
   int idx = 0;
   int idx_arr[1024];
+  int i, eob = -1;
 
-  vpx_memset(qcoeff_ptr, 0, n_coeffs*sizeof(int16_t));
-  vpx_memset(dqcoeff_ptr, 0, n_coeffs*sizeof(int16_t));
-
-  eob = -1;
-
-  // Base ZBIN
-  zbins[0] = ROUND_POWER_OF_TWO(zbin_ptr[0] + zbin_oq_value, 1);
-  zbins[1] = ROUND_POWER_OF_TWO(zbin_ptr[1] + zbin_oq_value, 1);
-  nzbins[0] = zbins[0] * -1;
-  nzbins[1] = zbins[1] * -1;
+  vpx_memset(qcoeff_ptr, 0, n_coeffs * sizeof(int16_t));
+  vpx_memset(dqcoeff_ptr, 0, n_coeffs * sizeof(int16_t));
 
   if (!skip_block) {
     // Pre-scan pass
     for (i = 0; i < n_coeffs; i++) {
-      rc = scan[i];
-      z = coeff_ptr[rc];
+      const int rc = scan[i];
+      const int coeff = coeff_ptr[rc];
 
       // If the coefficient is out of the base ZBIN range, keep it for
       // quantization.
-      if (z >= zbins[rc != 0] || z <= nzbins[rc != 0])
+      if (coeff >= zbins[rc != 0] || coeff <= nzbins[rc != 0])
         idx_arr[idx++] = i;
     }
 
     // Quantization pass: only process the coefficients selected in
     // pre-scan pass. Note: idx can be zero.
     for (i = 0; i < idx; i++) {
-      rc = scan[idx_arr[i]];
+      const int rc = scan[idx_arr[i]];
+      const int coeff = coeff_ptr[rc];
+      const int coeff_sign = (coeff >> 31);
+      int tmp;
+      int abs_coeff = (coeff ^ coeff_sign) - coeff_sign;
+      abs_coeff += ROUND_POWER_OF_TWO(round_ptr[rc != 0], 1);
+      abs_coeff = clamp(abs_coeff, INT16_MIN, INT16_MAX);
+      tmp = ((((abs_coeff * quant_ptr[rc != 0]) >> 16) + abs_coeff) *
+               quant_shift_ptr[rc != 0]) >> 15;
 
-      z = coeff_ptr[rc];
-      sz = (z >> 31);                               // sign of z
-      x  = (z ^ sz) - sz;                           // x = abs(z)
+      qcoeff_ptr[rc] = (tmp ^ coeff_sign) - coeff_sign;
+      dqcoeff_ptr[rc] = qcoeff_ptr[rc] * dequant_ptr[rc != 0] / 2;
 
-      x += ROUND_POWER_OF_TWO(round_ptr[rc != 0], 1);
-      x  = clamp(x, INT16_MIN, INT16_MAX);
-      y  = ((((x * quant_ptr[rc != 0]) >> 16) + x) *
-            quant_shift_ptr[rc != 0]) >> 15;      // quantize (x)
-
-      x  = (y ^ sz) - sz;                         // get the sign back
-      qcoeff_ptr[rc]  = x;                        // write to destination
-      dqcoeff_ptr[rc] = x * dequant_ptr[rc != 0] / 2;  // dequantized value
-
-      if (y)
-        eob = idx_arr[i];                         // last nonzero coeffs
+      if (tmp)
+        eob = idx_arr[i];
     }
   }
   *eob_ptr = eob + 1;
@@ -136,8 +128,8 @@ void vp9_quantize_b_32x32_c(const int16_t *coeff_ptr, intptr_t n_coeffs,
 void vp9_regular_quantize_b_4x4(MACROBLOCK *x, int plane, int block,
                                 const int16_t *scan, const int16_t *iscan) {
   MACROBLOCKD *const xd = &x->e_mbd;
-  struct macroblock_plane* p = &x->plane[plane];
-  struct macroblockd_plane* pd = &xd->plane[plane];
+  struct macroblock_plane *p = &x->plane[plane];
+  struct macroblockd_plane *pd = &xd->plane[plane];
 
   vp9_quantize_b(BLOCK_OFFSET(p->coeff, block),
            16, x->skip_block,
@@ -223,38 +215,30 @@ void vp9_init_quantizer(VP9_COMP *cpi) {
 }
 
 void vp9_mb_init_quantizer(VP9_COMP *cpi, MACROBLOCK *x) {
-  int i;
-  VP9_COMMON *const cm = &cpi->common;
+  const VP9_COMMON *const cm = &cpi->common;
   MACROBLOCKD *xd = &x->e_mbd;
-  int zbin_extra;
-  int segment_id = xd->mi_8x8[0]->mbmi.segment_id;
-  const int qindex = vp9_get_qindex(&cpi->common.seg, segment_id,
-                                    cpi->common.base_qindex);
-
-  int rdmult = vp9_compute_rd_mult(cpi, qindex + cm->y_dc_delta_q);
+  const int segment_id = xd->mi_8x8[0]->mbmi.segment_id;
+  const int qindex = vp9_get_qindex(&cm->seg, segment_id, cm->base_qindex);
+  const int rdmult = vp9_compute_rd_mult(cpi, qindex + cm->y_dc_delta_q);
+  const int zbin = cpi->zbin_mode_boost + x->act_zbin_adj;
+  int i;
 
   // Y
-  zbin_extra = (cpi->common.y_dequant[qindex][1] *
-                 (cpi->zbin_mode_boost + x->act_zbin_adj)) >> 7;
-
   x->plane[0].quant = cpi->y_quant[qindex];
   x->plane[0].quant_shift = cpi->y_quant_shift[qindex];
   x->plane[0].zbin = cpi->y_zbin[qindex];
   x->plane[0].round = cpi->y_round[qindex];
-  x->plane[0].zbin_extra = (int16_t)zbin_extra;
-  x->e_mbd.plane[0].dequant = cpi->common.y_dequant[qindex];
+  x->plane[0].zbin_extra = (int16_t)((cm->y_dequant[qindex][1] * zbin) >> 7);
+  xd->plane[0].dequant = cm->y_dequant[qindex];
 
   // UV
-  zbin_extra = (cpi->common.uv_dequant[qindex][1] *
-                (cpi->zbin_mode_boost + x->act_zbin_adj)) >> 7;
-
   for (i = 1; i < 3; i++) {
     x->plane[i].quant = cpi->uv_quant[qindex];
     x->plane[i].quant_shift = cpi->uv_quant_shift[qindex];
     x->plane[i].zbin = cpi->uv_zbin[qindex];
     x->plane[i].round = cpi->uv_round[qindex];
-    x->plane[i].zbin_extra = (int16_t)zbin_extra;
-    x->e_mbd.plane[i].dequant = cpi->common.uv_dequant[qindex];
+    x->plane[i].zbin_extra = (int16_t)((cm->uv_dequant[qindex][1] * zbin) >> 7);
+    xd->plane[i].dequant = cm->uv_dequant[qindex];
   }
 
 #if CONFIG_ALPHA
@@ -263,18 +247,14 @@ void vp9_mb_init_quantizer(VP9_COMP *cpi, MACROBLOCK *x) {
   x->plane[3].zbin = cpi->a_zbin[qindex];
   x->plane[3].round = cpi->a_round[qindex];
   x->plane[3].zbin_extra = (int16_t)zbin_extra;
-  x->e_mbd.plane[3].dequant = cpi->common.a_dequant[qindex];
+  xd->plane[3].dequant = cm->a_dequant[qindex];
 #endif
 
-  x->skip_block = vp9_segfeature_active(&cpi->common.seg, segment_id,
-                                        SEG_LVL_SKIP);
-
-  /* save this macroblock QIndex for vp9_update_zbin_extra() */
+  x->skip_block = vp9_segfeature_active(&cm->seg, segment_id, SEG_LVL_SKIP);
   x->q_index = qindex;
 
-  /* R/D setup */
-  cpi->mb.errorperbit = rdmult >> 6;
-  cpi->mb.errorperbit += (cpi->mb.errorperbit == 0);
+  x->errorperbit = rdmult >> 6;
+  x->errorperbit += (x->errorperbit == 0);
 
   vp9_initialize_me_consts(cpi, x->q_index);
 }
