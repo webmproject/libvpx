@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//4Dg\u003d",
+        "filename": "vp9/encoder/vp9_onyx_if.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 229,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-02-12T01:34:00Z",
+      "side": 0,
+      "message": "The enclosing function gets called from setup_in_frame_q_adj() which already invokes vp9_clear_system_state().",
+      "revId": "f6bc927070f555187b13bcee38724ba22462425f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
