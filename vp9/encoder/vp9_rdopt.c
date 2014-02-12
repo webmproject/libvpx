@@ -1604,13 +1604,11 @@ typedef struct {
   int mvthresh;
 } BEST_SEG_INFO;
 
-static INLINE int mv_check_bounds(MACROBLOCK *x, int_mv *mv) {
-  int r = 0;
-  r |= (mv->as_mv.row >> 3) < x->mv_row_min;
-  r |= (mv->as_mv.row >> 3) > x->mv_row_max;
-  r |= (mv->as_mv.col >> 3) < x->mv_col_min;
-  r |= (mv->as_mv.col >> 3) > x->mv_col_max;
-  return r;
+static INLINE int mv_check_bounds(const MACROBLOCK *x, const MV *mv) {
+  return (mv->row >> 3) < x->mv_row_min ||
+         (mv->row >> 3) > x->mv_row_max ||
+         (mv->col >> 3) < x->mv_col_min ||
+         (mv->col >> 3) > x->mv_col_max;
 }
 
 static INLINE void mi_buf_shift(MACROBLOCK *x, int i) {
@@ -1924,10 +1922,9 @@ static void rd_check_segment_txsize(VP9_COMP *cpi, MACROBLOCK *x,
         }
 
         // Trap vectors that reach beyond the UMV borders
-        if (mv_check_bounds(x, &mode_mv[this_mode]))
-          continue;
-        if (has_second_rf &&
-            mv_check_bounds(x, &second_mode_mv[this_mode]))
+        if (mv_check_bounds(x, &mode_mv[this_mode].as_mv) ||
+            (has_second_rf &&
+             mv_check_bounds(x, &second_mode_mv[this_mode].as_mv)))
           continue;
 
         if (filter_idx > 0) {
@@ -2750,7 +2747,7 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
     if (this_mode != NEWMV)
       clamp_mv2(&cur_mv[i].as_mv, xd);
 
-    if (mv_check_bounds(x, &cur_mv[i]))
+    if (mv_check_bounds(x, &cur_mv[i].as_mv))
       return INT64_MAX;
     mbmi->mv[i].as_int = cur_mv[i].as_int;
   }
