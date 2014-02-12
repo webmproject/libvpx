@@ -73,7 +73,6 @@ typedef struct {
   int total_target_vs_actual;        // debug stats
 
   int worst_quality;
-  int active_worst_quality;
   int best_quality;
   // int active_best_quality;
 } RATE_CONTROL;
@@ -141,9 +140,9 @@ void vp9_rc_compute_frame_size_bounds(const struct VP9_COMP *cpi,
                                       int *frame_over_shoot_limit);
 
 // Picks q and q bounds given the target for bits
-int vp9_rc_pick_q_and_adjust_q_bounds(const struct VP9_COMP *cpi,
-                                      int *bottom_index,
-                                      int *top_index);
+int vp9_rc_pick_q_and_bounds(const struct VP9_COMP *cpi,
+                             int *bottom_index,
+                             int *top_index);
 
 // Estimates q to achieve a target bits per frame
 int vp9_rc_regulate_q(const struct VP9_COMP *cpi, int target_bits_per_frame,
