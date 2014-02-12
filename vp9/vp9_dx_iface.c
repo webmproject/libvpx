@@ -303,6 +303,9 @@ static vpx_codec_err_t decode_one(vpx_codec_alg_priv_t *ctx,
         cm->get_fb_cb = vp9_get_frame_buffer;
         cm->release_fb_cb = vp9_release_frame_buffer;
 
+        // Set index to not initialized.
+        cm->new_fb_idx = -1;
+
         if (vp9_alloc_internal_frame_buffers(&cm->int_frame_buffers))
           vpx_internal_error(&cm->error, VPX_CODEC_MEM_ERROR,
                              "Failed to initialize internal frame buffers");
