@@ -98,16 +98,6 @@ void vp9_foreach_transformed_block(const MACROBLOCKD* const xd,
     vp9_foreach_transformed_block_in_plane(xd, bsize, plane, visit, arg);
 }
 
-void vp9_foreach_transformed_block_uv(const MACROBLOCKD* const xd,
-                                      BLOCK_SIZE bsize,
-                                      foreach_transformed_block_visitor visit,
-                                      void *arg) {
-  int plane;
-
-  for (plane = 1; plane < MAX_MB_PLANE; plane++)
-    vp9_foreach_transformed_block_in_plane(xd, bsize, plane, visit, arg);
-}
-
 void vp9_set_contexts(const MACROBLOCKD *xd, struct macroblockd_plane *pd,
                       BLOCK_SIZE plane_bsize, TX_SIZE tx_size, int has_eob,
                       int aoff, int loff) {
