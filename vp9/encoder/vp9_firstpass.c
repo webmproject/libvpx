@@ -2328,11 +2328,11 @@ void vp9_rc_get_second_pass_params(VP9_COMP *cpi) {
 
     if (twopass->gf_zeromotion_pct > 995) {
       // As long as max_thresh for encode breakout is small enough, it is ok
-      // to enable it for no-show frame, i.e. set enable_encode_breakout to 2.
+      // to enable it for show frame, i.e. set allow_encode_breakout to 2.
       if (!cm->show_frame)
-        cpi->enable_encode_breakout = 0;
+        cpi->allow_encode_breakout = ENCODE_BREAKOUT_DISABLED;
       else
-        cpi->enable_encode_breakout = 2;
+        cpi->allow_encode_breakout = ENCODE_BREAKOUT_LIMITED;
     }
 
     rc->frames_till_gf_update_due = rc->baseline_gf_interval;

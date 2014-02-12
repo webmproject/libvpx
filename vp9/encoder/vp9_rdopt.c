@@ -2906,33 +2906,26 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
   if (cm->interp_filter == SWITCHABLE)
     *rate2 += get_switchable_rate(x);
 
-  if (!is_comp_pred && cpi->enable_encode_breakout) {
+  if (!is_comp_pred) {
     if (cpi->active_map_enabled && x->active_ptr[0] == 0)
       x->skip = 1;
-    else if (x->encode_breakout) {
+    else if (cpi->allow_encode_breakout && x->encode_breakout) {
       const BLOCK_SIZE y_size = get_plane_block_size(bsize, &xd->plane[0]);
       const BLOCK_SIZE uv_size = get_plane_block_size(bsize, &xd->plane[1]);
       unsigned int var, sse;
       // Skipping threshold for ac.
       unsigned int thresh_ac;
-      // The encode_breakout input
-      unsigned int encode_breakout = x->encode_breakout << 4;
-      unsigned int max_thresh = 36000;
-
+      // Set a maximum for threshold to avoid big PSNR loss in low bitrate case.
       // Use extreme low threshold for static frames to limit skipping.
-      if (cpi->enable_encode_breakout == 2)
-        max_thresh = 128;
+      const unsigned int max_thresh = (cpi->allow_encode_breakout ==
+                                      ENCODE_BREAKOUT_LIMITED) ? 128 : 36000;
+      // The encode_breakout input
+      const unsigned int min_thresh = ((x->encode_breakout << 4) > max_thresh) ?
+                                      max_thresh : (x->encode_breakout << 4);
 
       // Calculate threshold according to dequant value.
       thresh_ac = (xd->plane[0].dequant[1] * xd->plane[0].dequant[1]) / 9;
-
-      // Use encode_breakout input if it is bigger than internal threshold.
-      if (thresh_ac < encode_breakout)
-        thresh_ac = encode_breakout;
-
-      // Set a maximum for threshold to avoid big PSNR loss in low bitrate case.
-      if (thresh_ac > max_thresh)
-        thresh_ac = max_thresh;
+      thresh_ac = clamp(thresh_ac, min_thresh, max_thresh);
 
       var = cpi->fn_ptr[y_size].vf(x->plane[0].src.buf, x->plane[0].src.stride,
                                    xd->plane[0].dst.buf,

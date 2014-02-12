@@ -613,7 +613,7 @@ static void set_offsets(VP9_COMP *cpi, const TileInfo *const tile,
     x->encode_breakout = cpi->segment_encode_breakout[mbmi->segment_id];
   } else {
     mbmi->segment_id = 0;
-    x->encode_breakout = cpi->oxcf.encode_breakout;
+    x->encode_breakout = cpi->encode_breakout;
   }
 }
 
