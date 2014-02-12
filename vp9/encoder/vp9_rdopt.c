@@ -2380,24 +2380,16 @@ static void single_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
 
   vp9_set_mv_search_range(x, &ref_mv.as_mv);
 
-  // Adjust search parameters based on small partitions' result.
-  if (x->fast_ms) {
-    // adjust search range
-    step_param = 6;
-    if (x->fast_ms > 1)
-      step_param = 8;
+  // Work out the size of the first step in the mv step search.
+  // 0 here is maximum length first step. 1 is MAX >> 1 etc.
+  if (cpi->sf.auto_mv_step_size && cpi->common.show_frame) {
+    // Take wtd average of the step_params based on the last frame's
+    // max mv magnitude and that based on the best ref mvs of the current
+    // block for the given reference.
+    step_param = (vp9_init_search_range(cpi, x->max_mv_context[ref]) +
+                  cpi->mv_step_param) >> 1;
   } else {
-    // Work out the size of the first step in the mv step search.
-    // 0 here is maximum length first step. 1 is MAX >> 1 etc.
-    if (cpi->sf.auto_mv_step_size && cpi->common.show_frame) {
-      // Take wtd average of the step_params based on the last frame's
-      // max mv magnitude and that based on the best ref mvs of the current
-      // block for the given reference.
-      step_param = (vp9_init_search_range(cpi, x->max_mv_context[ref]) +
-                    cpi->mv_step_param) >> 1;
-    } else {
-      step_param = cpi->mv_step_param;
-    }
+    step_param = cpi->mv_step_param;
   }
 
   if (cpi->sf.adaptive_motion_search && bsize < BLOCK_64X64 &&
@@ -3258,12 +3250,6 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
     // frame feature is in use as in this case there can only be one reference.
     if ((second_ref_frame > INTRA_FRAME) &&
          vp9_segfeature_active(seg, segment_id, SEG_LVL_REF_FRAME))
-      continue;
-
-    // Skip some checking based on small partitions' result.
-    if (x->fast_ms > 1 && !ref_frame)
-      continue;
-    if (x->fast_ms > 2 && ref_frame != x->subblock_ref)
       continue;
 
     mbmi->ref_frame[0] = ref_frame;
