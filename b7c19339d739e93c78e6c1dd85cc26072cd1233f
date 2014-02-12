@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//3y4\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 791,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-02-12T23:04:49Z",
+      "side": 1,
+      "message": "It should be one line above, i.e.  rd[][] \u003d { { INT64_MAX, ...",
+      "revId": "b7c19339d739e93c78e6c1dd85cc26072cd1233f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//3y0\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 869,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-02-12T23:04:49Z",
+      "side": 1,
+      "message": "The same",
+      "revId": "b7c19339d739e93c78e6c1dd85cc26072cd1233f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
