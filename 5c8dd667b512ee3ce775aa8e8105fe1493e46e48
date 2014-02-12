@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//33Q\u003d",
+        "filename": "vp9/encoder/vp9_mbgraph.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-02-12T20:41:55Z",
+      "side": 1,
+      "message": "It seems you could even remove this declaration and return result of vp9_sad16x16() directly. Something like this at the function end:\n\n  vp9_set_mbmode_and_mvs(xd, NEWMV, dst_mv);\n  vp9_build_inter_predictors_sby(xd, mb_row, mb_col, BLOCK_16X16);\n  \n  /* restore UMV window */\n  x-\u003emv_col_min \u003d tmp_col_min;\n  x-\u003emv_col_max \u003d tmp_col_max;\n  x-\u003emv_row_min \u003d tmp_row_min;\n  x-\u003emv_row_max \u003d tmp_row_max;\n\n  return vp9_sad16x16(x-\u003eplane[0].src.buf, x-\u003eplane[0].src.stride,\n          xd-\u003eplane[0].dst.buf, xd-\u003eplane[0].dst.stride,\n          INT_MAX);",
+      "revId": "5c8dd667b512ee3ce775aa8e8105fe1493e46e48",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
