@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//3/g\u003d",
+        "filename": "vp9/encoder/vp9_mcomp.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 353,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-02-12T07:41:34Z",
+      "side": 1,
+      "message": "this function is awful. it took me some time to realize that the variables aren\u0027t dead stores throughout the function, but tucked away in the macros...",
+      "revId": "bc144598f47355580134719cd10562ca553c4af9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
