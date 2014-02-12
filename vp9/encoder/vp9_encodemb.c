@@ -659,17 +659,12 @@ void vp9_encode_block_intra(MACROBLOCK *x, int plane, int block,
 }
 
 
-void vp9_encode_intra_block_y(MACROBLOCK *x, BLOCK_SIZE bsize) {
+void vp9_encode_intra_block_plane(MACROBLOCK *x, BLOCK_SIZE bsize, int plane) {
   const MACROBLOCKD *const xd = &x->e_mbd;
   struct encode_b_args arg = {x, NULL, &xd->mi_8x8[0]->mbmi.skip_coeff};
 
-  vp9_foreach_transformed_block_in_plane(xd, bsize, 0, encode_block_intra,
+  vp9_foreach_transformed_block_in_plane(xd, bsize, plane, encode_block_intra,
                                          &arg);
-}
-void vp9_encode_intra_block_uv(MACROBLOCK *x, BLOCK_SIZE bsize) {
-  const MACROBLOCKD *const xd = &x->e_mbd;
-  struct encode_b_args arg = {x, NULL, &xd->mi_8x8[0]->mbmi.skip_coeff};
-  vp9_foreach_transformed_block_uv(xd, bsize, encode_block_intra, &arg);
 }
 
 int vp9_encode_intra(MACROBLOCK *x, int use_16x16_pred) {
@@ -680,6 +675,6 @@ int vp9_encode_intra(MACROBLOCK *x, int use_16x16_pred) {
   mbmi->tx_size = use_16x16_pred ? (mbmi->sb_type >= BLOCK_16X16 ? TX_16X16
                                                                  : TX_8X8)
                                    : TX_4X4;
-  vp9_encode_intra_block_y(x, mbmi->sb_type);
+  vp9_encode_intra_block_plane(x, mbmi->sb_type, 0);
   return vp9_get_mb_ss(x->plane[0].src_diff);
 }

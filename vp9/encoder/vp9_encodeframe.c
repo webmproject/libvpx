@@ -2830,9 +2830,10 @@ static void encode_superblock(VP9_COMP *cpi, TOKENEXTRA **t, int output_enabled,
   }
 
   if (!is_inter_block(mbmi)) {
+    int plane;
     mbmi->skip_coeff = 1;
-    vp9_encode_intra_block_y(x, MAX(bsize, BLOCK_8X8));
-    vp9_encode_intra_block_uv(x, MAX(bsize, BLOCK_8X8));
+    for (plane = 0; plane < MAX_MB_PLANE; ++plane)
+      vp9_encode_intra_block_plane(x, MAX(bsize, BLOCK_8X8), plane);
     if (output_enabled)
       sum_intra_stats(&cm->counts, mi);
   } else {
