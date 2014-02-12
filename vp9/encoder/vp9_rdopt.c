@@ -68,7 +68,7 @@ struct rdcost_block_args {
   int64_t this_rd;
   int64_t best_rd;
   int skip;
-  const int16_t *scan, *nb;
+  const scan_order *so;
 };
 
 const MODE_DEFINITION vp9_mode_order[MAX_MODES] = {
@@ -635,7 +635,7 @@ static void rate_block(int plane, int block, BLOCK_SIZE plane_bsize,
 
   args->rate = cost_coeffs(args->x, plane, block, args->t_above + x_idx,
                            args->t_left + y_idx, tx_size,
-                           args->scan, args->nb);
+                           args->so->scan, args->so->neighbors);
 }
 
 static void block_rd_txfm(int plane, int block, BLOCK_SIZE plane_bsize,
@@ -710,49 +710,40 @@ void vp9_get_entropy_contexts(TX_SIZE tx_size,
   }
 }
 
-static void init_rdcost_stack(MACROBLOCK *x, const int64_t ref_rdcost,
-                              struct rdcost_block_args *arg) {
-  vpx_memset(arg, 0, sizeof(struct rdcost_block_args));
-  arg->x = x;
-  arg->best_rd = ref_rdcost;
-}
-
 static void txfm_rd_in_plane(MACROBLOCK *x,
                              int *rate, int64_t *distortion,
                              int *skippable, int64_t *sse,
                              int64_t ref_best_rd, int plane,
                              BLOCK_SIZE bsize, TX_SIZE tx_size) {
-  struct rdcost_block_args rd_stack;
   MACROBLOCKD *const xd = &x->e_mbd;
   struct macroblockd_plane *const pd = &xd->plane[plane];
   const BLOCK_SIZE bs = get_plane_block_size(bsize, pd);
   const int num_4x4_w = num_4x4_blocks_wide_lookup[bs];
   const int num_4x4_h = num_4x4_blocks_high_lookup[bs];
-  const scan_order *so;
+  struct rdcost_block_args args = { 0 };
+  args.x = x;
+  args.best_rd = ref_best_rd;
 
-  init_rdcost_stack(x, ref_best_rd, &rd_stack);
   if (plane == 0)
     xd->mi_8x8[0]->mbmi.tx_size = tx_size;
 
-  vp9_get_entropy_contexts(tx_size, rd_stack.t_above, rd_stack.t_left,
+  vp9_get_entropy_contexts(tx_size, args.t_above, args.t_left,
                            pd->above_context, pd->left_context,
                            num_4x4_w, num_4x4_h);
 
-  so = get_scan(xd, tx_size, pd->plane_type, 0);
-  rd_stack.scan = so->scan;
-  rd_stack.nb = so->neighbors;
+  args.so = get_scan(xd, tx_size, pd->plane_type, 0);
 
   vp9_foreach_transformed_block_in_plane(xd, bsize, plane,
-                                         block_rd_txfm, &rd_stack);
-  if (rd_stack.skip) {
+                                         block_rd_txfm, &args);
+  if (args.skip) {
     *rate       = INT_MAX;
     *distortion = INT64_MAX;
     *sse        = INT64_MAX;
     *skippable  = 0;
   } else {
-    *distortion = rd_stack.this_dist;
-    *rate       = rd_stack.this_rate;
-    *sse        = rd_stack.this_sse;
+    *distortion = args.this_dist;
+    *rate       = args.this_rate;
+    *sse        = args.this_sse;
     *skippable  = vp9_is_skippable_in_plane(x, bsize, plane);
   }
 }
