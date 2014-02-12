@@ -82,9 +82,9 @@ int main(int argc, char **argv) {
   int frame_cnt = 0;
   FILE *outfile = NULL;
   vpx_codec_ctx_t codec;
-  vpx_codec_iface_t *iface = NULL;
   VpxVideoReader *reader = NULL;
   const VpxVideoInfo *info = NULL;
+  const VpxInterface *decoder = NULL;
 
   exec_name = argv[0];
 
@@ -100,13 +100,13 @@ int main(int argc, char **argv) {
 
   info = vpx_video_reader_get_info(reader);
 
-  iface = get_codec_interface(info->codec_fourcc);
-  if (!iface)
+  decoder = get_vpx_decoder_by_fourcc(info->codec_fourcc);
+  if (!decoder)
     die("Unknown input codec.");
 
-  printf("Using %s\n", vpx_codec_iface_name(iface));
+  printf("Using %s\n", vpx_codec_iface_name(decoder->interface()));
 
-  if (vpx_codec_dec_init(&codec, iface, NULL, 0))
+  if (vpx_codec_dec_init(&codec, decoder->interface(), NULL, 0))
     die_codec(&codec, "Failed to initialize decoder");
 
   while (vpx_video_reader_read_frame(reader)) {

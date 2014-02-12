@@ -360,9 +360,7 @@ int main(int argc, char **argv) {
   int flag_periodicity = 1;
   int max_intra_size_pct;
   vpx_svc_layer_id_t layer_id = {0, 0};
-  char *codec_type;
-  vpx_codec_iface_t *(*interface)(void);
-  unsigned int fourcc;
+  const VpxInterface *encoder = NULL;
   struct VpxInputContext input_ctx = {0};
 
   exec_name = argv[0];
@@ -373,23 +371,11 @@ int main(int argc, char **argv) {
         argv[0]);
   }
 
-  codec_type = argv[3];
-  if (strncmp(codec_type, "vp9", 3) == 0) {
-#if CONFIG_VP9_ENCODER
-    interface = vpx_codec_vp9_cx;
-    fourcc = VP9_FOURCC;
-#else
-    die("Encoder vp9 selected but not configured");
-#endif
-  } else  {
-#if CONFIG_VP8_ENCODER
-    interface = vpx_codec_vp8_cx;
-    fourcc = VP8_FOURCC;
-#else
-    die("Encoder vp8 selected but not configured");
-#endif
-  }
-  printf("Using %s\n", vpx_codec_iface_name(interface()));
+  encoder = get_vpx_encoder_by_name(argv[3]);
+  if (!encoder)
+    die("Unsupported codec.");
+
+  printf("Using %s\n", vpx_codec_iface_name(encoder->interface()));
 
   width = strtol(argv[4], NULL, 0);
   height = strtol(argv[5], NULL, 0);
@@ -411,7 +397,7 @@ int main(int argc, char **argv) {
   }
 
   // Populate encoder configuration.
-  res = vpx_codec_enc_config_default(interface(), &cfg, 0);
+  res = vpx_codec_enc_config_default(encoder->interface(), &cfg, 0);
   if (res) {
     printf("Failed to get config: %s\n", vpx_codec_err_to_string(res));
     return EXIT_FAILURE;
@@ -467,7 +453,7 @@ int main(int argc, char **argv) {
   for (i = 0; i < cfg.ts_number_layers; ++i) {
     char file_name[PATH_MAX];
     VpxVideoInfo info;
-    info.codec_fourcc = fourcc;
+    info.codec_fourcc = encoder->fourcc;
     info.frame_width = cfg.g_w;
     info.frame_height = cfg.g_h;
     info.time_base.numerator = cfg.g_timebase.num;
@@ -482,12 +468,12 @@ int main(int argc, char **argv) {
   cfg.ss_number_layers = 1;
 
   // Initialize codec.
-  if (vpx_codec_enc_init(&codec, interface(), &cfg, 0))
+  if (vpx_codec_enc_init(&codec, encoder->interface(), &cfg, 0))
     die_codec(&codec, "Failed to initialize encoder");
 
   vpx_codec_control(&codec, VP8E_SET_CPUUSED, -6);
   vpx_codec_control(&codec, VP8E_SET_NOISE_SENSITIVITY, 1);
-  if (strncmp(codec_type, "vp9", 3) == 0) {
+  if (strncmp(encoder->name, "vp9", 3) == 0) {
     vpx_codec_control(&codec, VP8E_SET_CPUUSED, 3);
     vpx_codec_control(&codec, VP8E_SET_NOISE_SENSITIVITY, 0);
     if (vpx_codec_control(&codec, VP9E_SET_SVC, 1)) {

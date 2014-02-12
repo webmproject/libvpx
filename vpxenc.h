@@ -22,9 +22,11 @@ enum TestDecodeFatality {
   TEST_DECODE_WARN,
 };
 
+struct VpxInterface;
+
 /* Configuration elements common to all streams. */
 struct VpxEncoderConfig {
-  const struct codec_item *codec;
+  const struct VpxInterface *codec;
   int passes;
   int pass;
   int usage;

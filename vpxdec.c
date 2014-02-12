@@ -37,19 +37,6 @@
 
 static const char *exec_name;
 
-static const struct {
-  char const *name;
-  vpx_codec_iface_t *(*iface)(void);
-  uint32_t fourcc;
-} ifaces[] = {
-#if CONFIG_VP8_DECODER
-  {"vp8",  vpx_codec_vp8_dx,   VP8_FOURCC},
-#endif
-#if CONFIG_VP9_DECODER
-  {"vp9",  vpx_codec_vp9_dx,   VP9_FOURCC},
-#endif
-};
-
 struct VpxDecInputContext {
   struct VpxInputContext *vpx_input_ctx;
   struct WebmInputContext *webm_ctx;
@@ -170,10 +157,11 @@ void usage_exit() {
          );
   fprintf(stderr, "\nIncluded decoders:\n\n");
 
-  for (i = 0; i < sizeof(ifaces) / sizeof(ifaces[0]); i++)
+  for (i = 0; i < get_vpx_decoder_count(); ++i) {
+    const VpxInterface *const decoder = get_vpx_decoder_by_index(i);
     fprintf(stderr, "    %-6s - %s\n",
-            ifaces[i].name,
-            vpx_codec_iface_name(ifaces[i].iface()));
+            decoder->name, vpx_codec_iface_name(decoder->interface()));
+  }
 
   exit(EXIT_FAILURE);
 }
@@ -300,11 +288,12 @@ int file_is_raw(struct VpxInputContext *input) {
     int i;
 
     if (mem_get_le32(buf) < 256 * 1024 * 1024) {
-      for (i = 0; i < sizeof(ifaces) / sizeof(ifaces[0]); i++) {
-        if (!vpx_codec_peek_stream_info(ifaces[i].iface(),
+      for (i = 0; i < get_vpx_decoder_count(); ++i) {
+        const VpxInterface *const decoder = get_vpx_decoder_by_index(i);
+        if (!vpx_codec_peek_stream_info(decoder->interface(),
                                         buf + 4, 32 - 4, &si)) {
           is_raw = 1;
-          input->fourcc = ifaces[i].fourcc;
+          input->fourcc = decoder->fourcc;
           input->width = si.w;
           input->height = si.h;
           input->framerate.numerator = 30;
@@ -441,7 +430,6 @@ static FILE *open_outfile(const char *name) {
 int main_loop(int argc, const char **argv_) {
   vpx_codec_ctx_t       decoder;
   char                  *fn = NULL;
-  int                    i;
   uint8_t               *buf = NULL;
   size_t                 bytes_in_buffer = 0, buffer_size = 0;
   FILE                  *infile;
@@ -450,7 +438,8 @@ int main_loop(int argc, const char **argv_) {
   int                    stop_after = 0, postproc = 0, summary = 0, quiet = 1;
   int                    arg_skip = 0;
   int                    ec_enabled = 0;
-  vpx_codec_iface_t       *iface = NULL;
+  const VpxInterface *interface = NULL;
+  const VpxInterface *fourcc_interface = NULL;
   unsigned long          dx_time = 0;
   struct arg               arg;
   char                   **argv, **argi, **argj;
@@ -493,17 +482,9 @@ int main_loop(int argc, const char **argv_) {
     arg.argv_step = 1;
 
     if (arg_match(&arg, &codecarg, argi)) {
-      int j, k = -1;
-
-      for (j = 0; j < sizeof(ifaces) / sizeof(ifaces[0]); j++)
-        if (!strcmp(ifaces[j].name, arg.val))
-          k = j;
-
-      if (k >= 0)
-        iface = ifaces[k].iface();
-      else
-        die("Error: Unrecognized argument (%s) to --codec\n",
-            arg.val);
+      interface = get_vpx_decoder_by_name(arg.val);
+      if (!interface)
+        die("Error: Unrecognized argument (%s) to --codec\n", arg.val);
     } else if (arg_match(&arg, &looparg, argi)) {
       // no-op
     } else if (arg_match(&arg, &outputfile, argi))
@@ -660,24 +641,20 @@ int main_loop(int argc, const char **argv_) {
     }
   }
 
-  /* Try to determine the codec from the fourcc. */
-  for (i = 0; i < sizeof(ifaces) / sizeof(ifaces[0]); i++)
-    if (vpx_input_ctx.fourcc == ifaces[i].fourcc) {
-      vpx_codec_iface_t *vpx_iface = ifaces[i].iface();
+  fourcc_interface = get_vpx_decoder_by_fourcc(vpx_input_ctx.fourcc);
+  if (interface && fourcc_interface && interface != fourcc_interface)
+    warn("Header indicates codec: %s\n", fourcc_interface->name);
+  else
+    interface = fourcc_interface;
 
-      if (iface && iface != vpx_iface)
-        warn("Header indicates codec: %s\n", ifaces[i].name);
-      else
-        iface = vpx_iface;
-
-      break;
-    }
+  if (!interface)
+    interface = get_vpx_decoder_by_index(0);
 
   dec_flags = (postproc ? VPX_CODEC_USE_POSTPROC : 0) |
               (ec_enabled ? VPX_CODEC_USE_ERROR_CONCEALMENT : 0);
-  if (vpx_codec_dec_init(&decoder, iface ? iface :  ifaces[0].iface(), &cfg,
-                         dec_flags)) {
-    fprintf(stderr, "Failed to initialize decoder: %s\n", vpx_codec_error(&decoder));
+  if (vpx_codec_dec_init(&decoder, interface->interface(), &cfg, dec_flags)) {
+    fprintf(stderr, "Failed to initialize decoder: %s\n",
+            vpx_codec_error(&decoder));
     return EXIT_FAILURE;
   }
 

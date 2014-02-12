@@ -15,6 +15,10 @@
 #include <stdlib.h>
 #include <string.h>
 
+#if CONFIG_VP8_ENCODER || CONFIG_VP9_ENCODER
+#include "vpx/vp8cx.h"
+#endif
+
 #if CONFIG_VP8_DECODER || CONFIG_VP9_DECODER
 #include "vpx/vp8dx.h"
 #endif
@@ -144,19 +148,75 @@ int read_yuv_frame(struct VpxInputContext *input_ctx, vpx_image_t *yuv_frame) {
   return shortread;
 }
 
-vpx_codec_iface_t *get_codec_interface(unsigned int fourcc) {
-  switch (fourcc) {
-#if CONFIG_VP8_DECODER
-    case VP8_FOURCC:
-      return vpx_codec_vp8_dx();
+static const VpxInterface vpx_encoders[] = {
+#if CONFIG_VP8_ENCODER
+  {"vp8", VP8_FOURCC, &vpx_codec_vp8_cx},
 #endif
-#if CONFIG_VP9_DECODER
-    case VP9_FOURCC:
-      return vpx_codec_vp9_dx();
+
+#if CONFIG_VP9_ENCODER
+  {"vp9", VP9_FOURCC, &vpx_codec_vp9_cx},
 #endif
-    default:
-      return NULL;
+};
+
+int get_vpx_encoder_count() {
+  return sizeof(vpx_encoders) / sizeof(vpx_encoders[0]);
+}
+
+const VpxInterface *get_vpx_encoder_by_index(int i) {
+  return &vpx_encoders[i];
+}
+
+const VpxInterface *get_vpx_encoder_by_name(const char *name) {
+  int i;
+
+  for (i = 0; i < get_vpx_encoder_count(); ++i) {
+    const VpxInterface *encoder = get_vpx_encoder_by_index(i);
+    if (strcmp(encoder->name, name) == 0)
+      return encoder;
   }
+
+  return NULL;
+}
+
+static const VpxInterface vpx_decoders[] = {
+#if CONFIG_VP8_DECODER
+  {"vp8", VP8_FOURCC, &vpx_codec_vp8_dx},
+#endif
+
+#if CONFIG_VP9_DECODER
+  {"vp9", VP9_FOURCC, &vpx_codec_vp9_dx},
+#endif
+};
+
+int get_vpx_decoder_count() {
+  return sizeof(vpx_decoders) / sizeof(vpx_decoders[0]);
+}
+
+const VpxInterface *get_vpx_decoder_by_index(int i) {
+  return &vpx_decoders[i];
+}
+
+const VpxInterface *get_vpx_decoder_by_name(const char *name) {
+  int i;
+
+  for (i = 0; i < get_vpx_decoder_count(); ++i) {
+     const VpxInterface *const decoder = get_vpx_decoder_by_index(i);
+     if (strcmp(decoder->name, name) == 0)
+       return decoder;
+  }
+
+  return NULL;
+}
+
+const VpxInterface *get_vpx_decoder_by_fourcc(uint32_t fourcc) {
+  int i;
+
+  for (i = 0; i < get_vpx_decoder_count(); ++i) {
+    const VpxInterface *const decoder = get_vpx_decoder_by_index(i);
+    if (decoder->fourcc == fourcc)
+      return decoder;
+  }
+
   return NULL;
 }
 
