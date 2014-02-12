@@ -1528,6 +1528,15 @@ static void get_sb_partition_size_range(VP9_COMP *cpi, MODE_INFO ** mi_8x8,
   }
 }
 
+// Next square block size less or equal than current block size.
+static const BLOCK_SIZE next_square_size[BLOCK_SIZES] = {
+  BLOCK_4X4, BLOCK_4X4, BLOCK_4X4,
+  BLOCK_8X8, BLOCK_8X8, BLOCK_8X8,
+  BLOCK_16X16, BLOCK_16X16, BLOCK_16X16,
+  BLOCK_32X32, BLOCK_32X32, BLOCK_32X32,
+  BLOCK_64X64
+};
+
 // Look at neighboring blocks and set a min and max partition size based on
 // what they chose.
 static void rd_auto_partition_range(VP9_COMP *cpi, const TileInfo *const tile,
@@ -1594,6 +1603,14 @@ static void rd_auto_partition_range(VP9_COMP *cpi, const TileInfo *const tile,
                                         row8x8_remaining, col8x8_remaining,
                                         &bh, &bw);
   *min_block_size = MIN(*min_block_size, *max_block_size);
+
+  // When use_square_partition_only is true, make sure at least one square
+  // partition is allowed by selecting the next smaller square size as
+  // *min_block_size.
+  if (cpi->sf.use_square_partition_only &&
+      (*max_block_size - *min_block_size) < 2) {
+    *min_block_size = next_square_size[*min_block_size];
+  }
 }
 
 static void compute_fast_motion_search_level(VP9_COMP *cpi, BLOCK_SIZE bsize) {
