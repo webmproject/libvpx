@@ -160,7 +160,6 @@ struct tokenize_b_args {
   VP9_COMP *cpi;
   MACROBLOCKD *xd;
   TOKENEXTRA **tp;
-  TX_SIZE tx_size;
   uint8_t *token_cache;
 };
 
@@ -188,6 +187,18 @@ static INLINE void add_token(TOKENEXTRA **t, const vp9_prob *context_tree,
   ++counts[token];
 }
 
+static INLINE void add_token_no_extra(TOKENEXTRA **t,
+                                      const vp9_prob *context_tree,
+                                      uint8_t token,
+                                      uint8_t skip_eob_node,
+                                      unsigned int *counts) {
+  (*t)->token = token;
+  (*t)->context_tree = context_tree;
+  (*t)->skip_eob_node = skip_eob_node;
+  (*t)++;
+  ++counts[token];
+}
+
 static void tokenize_b(int plane, int block, BLOCK_SIZE plane_bsize,
                        TX_SIZE tx_size, void *arg) {
   struct tokenize_b_args* const args = arg;
@@ -199,7 +210,7 @@ static void tokenize_b(int plane, int block, BLOCK_SIZE plane_bsize,
   struct macroblockd_plane *pd = &xd->plane[plane];
   MB_MODE_INFO *mbmi = &xd->mi_8x8[0]->mbmi;
   int pt; /* near block/prev token context index */
-  int c = 0;
+  int c;
   TOKENEXTRA *t = *tp;        /* store tokens starting here */
   int eob = p->eobs[block];
   const PLANE_TYPE type = pd->plane_type;
@@ -207,9 +218,14 @@ static void tokenize_b(int plane, int block, BLOCK_SIZE plane_bsize,
   const int segment_id = mbmi->segment_id;
   const int16_t *scan, *nb;
   const scan_order *so;
-  vp9_coeff_count *const counts = cpi->coef_counts[tx_size];
-  vp9_coeff_probs_model *const coef_probs = cpi->common.fc.coef_probs[tx_size];
   const int ref = is_inter_block(mbmi);
+  unsigned int (*const counts)[COEFF_CONTEXTS][ENTROPY_TOKENS] =
+      cpi->coef_counts[tx_size][type][ref];
+  vp9_prob (*const coef_probs)[COEFF_CONTEXTS][UNCONSTRAINED_NODES] =
+      cpi->common.fc.coef_probs[tx_size][type][ref];
+  unsigned int (*const eob_branch)[COEFF_CONTEXTS] =
+      cpi->common.counts.eob_branch[tx_size][type][ref];
+
   const uint8_t *const band = get_band_translate(tx_size);
   const int seg_eob = get_tx_eob(&cpi->common.seg, segment_id, tx_size);
 
@@ -228,11 +244,9 @@ static void tokenize_b(int plane, int block, BLOCK_SIZE plane_bsize,
     v = qcoeff_ptr[scan[c]];
 
     while (!v) {
-      add_token(&t, coef_probs[type][ref][band[c]][pt], 0, ZERO_TOKEN, skip_eob,
-                counts[type][ref][band[c]][pt]);
-
-      cpi->common.counts.eob_branch[tx_size][type][ref][band[c]][pt] +=
-          !skip_eob;
+      add_token_no_extra(&t, coef_probs[band[c]][pt], ZERO_TOKEN, skip_eob,
+                         counts[band[c]][pt]);
+      eob_branch[band[c]][pt] += !skip_eob;
 
       skip_eob = 1;
       token_cache[scan[c]] = 0;
@@ -240,12 +254,12 @@ static void tokenize_b(int plane, int block, BLOCK_SIZE plane_bsize,
       pt = get_coef_context(nb, token_cache, c);
       v = qcoeff_ptr[scan[c]];
     }
-    add_token(&t, coef_probs[type][ref][band[c]][pt],
+
+    add_token(&t, coef_probs[band[c]][pt],
               vp9_dct_value_tokens_ptr[v].extra,
               vp9_dct_value_tokens_ptr[v].token, skip_eob,
-              counts[type][ref][band[c]][pt]);
-
-    cpi->common.counts.eob_branch[tx_size][type][ref][band[c]][pt] += !skip_eob;
+              counts[band[c]][pt]);
+    eob_branch[band[c]][pt] += !skip_eob;
 
     token_cache[scan[c]] =
         vp9_pt_energy_class[vp9_dct_value_tokens_ptr[v].token];
@@ -253,9 +267,9 @@ static void tokenize_b(int plane, int block, BLOCK_SIZE plane_bsize,
     pt = get_coef_context(nb, token_cache, c);
   }
   if (c < seg_eob) {
-    add_token(&t, coef_probs[type][ref][band[c]][pt], 0, EOB_TOKEN, 0,
-              counts[type][ref][band[c]][pt]);
-    ++cpi->common.counts.eob_branch[tx_size][type][ref][band[c]][pt];
+    add_token_no_extra(&t, coef_probs[band[c]][pt], EOB_TOKEN, 0,
+                       counts[band[c]][pt]);
+    ++eob_branch[band[c]][pt];
   }
 
   *tp = t;
@@ -299,7 +313,7 @@ void vp9_tokenize_sb(VP9_COMP *cpi, TOKENEXTRA **t, int dry_run,
   const int ctx = vp9_get_skip_context(xd);
   const int skip_inc = !vp9_segfeature_active(&cm->seg, mbmi->segment_id,
                                               SEG_LVL_SKIP);
-  struct tokenize_b_args arg = {cpi, xd, t, mbmi->tx_size, cpi->mb.token_cache};
+  struct tokenize_b_args arg = {cpi, xd, t, cpi->mb.token_cache};
   if (mbmi->skip_coeff) {
     if (!dry_run)
       cm->counts.skip[ctx][1] += skip_inc;
