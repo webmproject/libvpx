@@ -342,6 +342,10 @@ int vp9_receive_compressed_data(VP9D_PTR ptr,
       cm->frame_refs[0].buf->corrupted = 1;
   }
 
+  // Check if the previous frame was a frame without any references to it.
+  if (cm->new_fb_idx >= 0 && cm->frame_bufs[cm->new_fb_idx].ref_count == 0)
+    cm->release_fb_cb(cm->cb_priv,
+                      &cm->frame_bufs[cm->new_fb_idx].raw_frame_buffer);
   cm->new_fb_idx = get_free_fb(cm);
 
   if (setjmp(cm->error.jmp)) {
