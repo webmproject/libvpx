@@ -2284,10 +2284,6 @@ static void rtc_use_partition(VP9_COMP *cpi,
       int rate;
       int64_t dist;
 
-      int_mv frame_nearest_mv[MAX_REF_FRAMES];
-      int_mv frame_near_mv[MAX_REF_FRAMES];
-      struct buf_2d yv12_mb[MAX_REF_FRAMES][MAX_MB_PLANE];
-
       // Find a partition size that fits
       bsize = find_partition_size(cpi->sf.always_this_block_size,
                                   (row8x8_remaining - block_row),
@@ -2309,10 +2305,6 @@ static void rtc_use_partition(VP9_COMP *cpi,
       } else {
         set_mode_info(&mi_8x8[index]->mbmi, bsize, mode,
                       mi_row + block_row, mi_col + block_col);
-        vp9_setup_buffer_inter(cpi, x, tile,
-                               LAST_FRAME, cpi->sf.always_this_block_size,
-                               mi_row + block_row, mi_col + block_col,
-                               frame_nearest_mv, frame_near_mv, yv12_mb);
       }
 
       for (j = 0; j < mi_height; j++)
