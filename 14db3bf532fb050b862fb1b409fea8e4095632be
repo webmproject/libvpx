@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//3yU\u003d",
+        "filename": "vp9_spatial_scalable_encoder.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 222,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-02-12T23:24:22Z",
+      "side": 1,
+      "message": "Hmm... I\u0027m surprised that the libvpx side of things uses unsigned integers for dimensions. I always thought they were ints. Maybe we should update VpxVideoInfo to use unsigned integers as well. \n\nAnyway, that\u0027s for another CL. Just something to think about, and not that important.",
+      "revId": "14db3bf532fb050b862fb1b409fea8e4095632be",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
