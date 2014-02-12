@@ -16,6 +16,23 @@
       "revId": "24ba396e14971f15bb4bd3d744e75de983f5249d",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//36Q\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 1984,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-02-12T19:29:45Z",
+      "side": 1,
+      "message": "Just for curiosity, why is it necessary to do this in the middle of a function?",
+      "revId": "24ba396e14971f15bb4bd3d744e75de983f5249d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
