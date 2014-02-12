@@ -45,7 +45,7 @@ int vp9_init_search_range(struct VP9_COMP *cpi, int size);
 int vp9_full_pixel_diamond(struct VP9_COMP *cpi, MACROBLOCK *x,
                            MV *mvp_full, int step_param,
                            int sadpb, int further_steps, int do_refine,
-                           vp9_variance_fn_ptr_t *fn_ptr,
+                           const vp9_variance_fn_ptr_t *fn_ptr,
                            const MV *ref_mv, int_mv *dst_mv);
 
 int vp9_hex_search(const MACROBLOCK *x,
@@ -107,15 +107,16 @@ typedef int (fractional_mv_step_comp_fp) (
 extern fractional_mv_step_comp_fp vp9_find_best_sub_pixel_comp_tree;
 
 typedef int (*vp9_full_search_fn_t)(const MACROBLOCK *x,
-                                    MV *ref_mv, int sad_per_bit,
-                                    int distance, vp9_variance_fn_ptr_t *fn_ptr,
+                                    const MV *ref_mv, int sad_per_bit,
+                                    int distance,
+                                    const vp9_variance_fn_ptr_t *fn_ptr,
                                     int *mvjcost, int *mvcost[2],
                                     const MV *center_mv, int n);
 
 typedef int (*vp9_refining_search_fn_t)(const MACROBLOCK *x,
                                         MV *ref_mv, int sad_per_bit,
                                         int distance,
-                                        vp9_variance_fn_ptr_t *fn_ptr,
+                                        const vp9_variance_fn_ptr_t *fn_ptr,
                                         int *mvjcost, int *mvcost[2],
                                         const MV *center_mv);
 
@@ -123,13 +124,14 @@ typedef int (*vp9_diamond_search_fn_t)(const MACROBLOCK *x,
                                        MV *ref_mv, MV *best_mv,
                                        int search_param, int sad_per_bit,
                                        int *num00,
-                                       vp9_variance_fn_ptr_t *fn_ptr,
+                                       const vp9_variance_fn_ptr_t *fn_ptr,
                                        int *mvjcost, int *mvcost[2],
                                        const MV *center_mv);
 
 int vp9_refining_search_8p_c(const MACROBLOCK *x,
                              MV *ref_mv, int error_per_bit,
-                             int search_range, vp9_variance_fn_ptr_t *fn_ptr,
+                             int search_range,
+                             const vp9_variance_fn_ptr_t *fn_ptr,
                              int *mvjcost, int *mvcost[2],
                              const MV *center_mv, const uint8_t *second_pred,
                              int w, int h);
