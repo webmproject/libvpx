@@ -16,6 +16,24 @@
       "revId": "46dc714771ab68f9d600ca156b1d163c211c149f",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//30I\u003d",
+        "filename": "build/make/gen_msvs_vcxproj.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 178,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-02-12T22:47:31Z",
+      "side": 1,
+      "message": "Done: Used your version since I think it looks less hideous.",
+      "parentUuid": "AAAAdn//4Us\u003d",
+      "revId": "46dc714771ab68f9d600ca156b1d163c211c149f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
