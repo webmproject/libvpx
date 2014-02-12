@@ -3153,7 +3153,11 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
     cm->error_resilient_mode = (cpi->oxcf.error_resilient_mode != 0);
     cm->frame_parallel_decoding_mode =
       (cpi->oxcf.frame_parallel_decoding_mode != 0);
+
+    // By default, encoder assumes decoder can use prev_mi.
+    cm->coding_use_prev_mi = 1;
     if (cm->error_resilient_mode) {
+      cm->coding_use_prev_mi = 0;
       cm->frame_parallel_decoding_mode = 1;
       cm->reset_frame_context = 0;
       cm->refresh_frame_context = 0;

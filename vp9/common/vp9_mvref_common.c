@@ -196,7 +196,8 @@ void vp9_find_mv_refs_idx(const VP9_COMMON *cm, const MACROBLOCKD *xd,
   const int *ref_sign_bias = cm->ref_frame_sign_bias;
   int i, refmv_count = 0;
   const POSITION *const mv_ref_search = mv_ref_blocks[mi->mbmi.sb_type];
-  const MB_MODE_INFO *const prev_mbmi = prev_mi ? &prev_mi->mbmi : NULL;
+  const MB_MODE_INFO *const prev_mbmi = cm->coding_use_prev_mi && prev_mi ?
+      &prev_mi->mbmi : NULL;
   int different_ref_found = 0;
   int context_counter = 0;
 

@@ -555,8 +555,6 @@ static void set_offsets(VP9_COMP *cpi, const TileInfo *const tile,
   xd->mi_8x8 = cm->mi_grid_visible + idx_str;
   xd->prev_mi_8x8 = cm->prev_mi_grid_visible + idx_str;
 
-  // Special case: if prev_mi is NULL, the previous mode info context
-  // cannot be used.
   xd->last_mi = cm->prev_mi ? xd->prev_mi_8x8[0] : NULL;
 
   xd->mi_8x8[0] = cm->mi + idx_str;
