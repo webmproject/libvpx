@@ -18,9 +18,11 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+
 #include "./args.h"
-#include "./ivfenc.h"
 #include "./tools_common.h"
+#include "./video_writer.h"
+
 #include "vpx/svc_context.h"
 #include "vpx/vp8cx.h"
 #include "vpx/vpx_encoder.h"
@@ -183,7 +185,8 @@ static void parse_command_line(int argc, const char **argv_,
 
 int main(int argc, const char **argv) {
   AppInput app_input = {0};
-  FILE *outfile;
+  VpxVideoWriter *writer = NULL;
+  VpxVideoInfo info = {0};
   vpx_codec_ctx_t codec;
   vpx_codec_enc_cfg_t enc_cfg;
   SvcContext svc_ctx;
@@ -206,15 +209,24 @@ int main(int argc, const char **argv) {
   if (!(app_input.input_ctx.file = fopen(app_input.input_ctx.filename, "rb")))
     die("Failed to open %s for reading\n", app_input.input_ctx.filename);
 
-  if (!(outfile = fopen(app_input.output_filename, "wb")))
-    die("Failed to open %s for writing\n", app_input.output_filename);
-
   // Initialize codec
   if (vpx_svc_init(&svc_ctx, &codec, vpx_codec_vp9_cx(), &enc_cfg) !=
       VPX_CODEC_OK)
     die("Failed to initialize encoder\n");
 
-  ivf_write_file_header(outfile, &enc_cfg, VP9_FOURCC, 0);
+  info.codec_fourcc = VP9_FOURCC;
+  info.time_base.numerator = enc_cfg.g_timebase.num;
+  info.time_base.denominator = enc_cfg.g_timebase.den;
+  if (vpx_svc_get_layer_resolution(&svc_ctx, svc_ctx.spatial_layers - 1,
+                                   (unsigned int *)&info.frame_width,
+                                   (unsigned int *)&info.frame_height) !=
+      VPX_CODEC_OK) {
+    die("Failed to get output resolution");
+  }
+  writer = vpx_video_writer_open(app_input.output_filename, kContainerIVF,
+                                 &info);
+  if (!writer)
+    die("Failed to open %s for writing\n", app_input.output_filename);
 
   // skip initial frames
   for (i = 0; i < app_input.frames_to_skip; ++i) {
@@ -232,9 +244,10 @@ int main(int argc, const char **argv) {
       die_codec(&codec, "Failed to encode frame");
     }
     if (vpx_svc_get_frame_size(&svc_ctx) > 0) {
-      ivf_write_frame_header(outfile, pts, vpx_svc_get_frame_size(&svc_ctx));
-      (void)fwrite(vpx_svc_get_buffer(&svc_ctx), 1,
-                   vpx_svc_get_frame_size(&svc_ctx), outfile);
+      vpx_video_writer_write_frame(writer,
+                                   vpx_svc_get_buffer(&svc_ctx),
+                                   vpx_svc_get_frame_size(&svc_ctx),
+                                   pts);
     }
     ++frame_cnt;
     pts += frame_duration;
@@ -245,19 +258,8 @@ int main(int argc, const char **argv) {
   fclose(app_input.input_ctx.file);
   if (vpx_codec_destroy(&codec)) die_codec(&codec, "Failed to destroy codec");
 
-  // rewrite the output file headers with the actual frame count, and
-  // resolution of the highest layer
-  if (!fseek(outfile, 0, SEEK_SET)) {
-    // get resolution of highest layer
-    if (VPX_CODEC_OK != vpx_svc_get_layer_resolution(&svc_ctx,
-                                                     svc_ctx.spatial_layers - 1,
-                                                     &enc_cfg.g_w,
-                                                     &enc_cfg.g_h)) {
-      die("Failed to get output resolution");
-    }
-    ivf_write_file_header(outfile, &enc_cfg, VP9_FOURCC, frame_cnt);
-  }
-  fclose(outfile);
+  vpx_video_writer_close(writer);
+
   vpx_img_free(&raw);
 
   // display average size, psnr
