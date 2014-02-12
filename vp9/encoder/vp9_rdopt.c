@@ -644,17 +644,16 @@ static void block_rd_txfm(int plane, int block, BLOCK_SIZE plane_bsize,
   MACROBLOCK *const x = args->x;
   MACROBLOCKD *const xd = &x->e_mbd;
   MB_MODE_INFO *mbmi = &xd->mi_8x8[0]->mbmi;
-  struct encode_b_args encode_args = {x, NULL, &mbmi->skip_coeff};
-
   int64_t rd1, rd2, rd;
 
   if (args->skip)
     return;
 
-  if (!is_inter_block(&xd->mi_8x8[0]->mbmi))
-    vp9_encode_block_intra(plane, block, plane_bsize, tx_size, &encode_args);
+  if (!is_inter_block(mbmi))
+    vp9_encode_block_intra(x, plane, block, plane_bsize, tx_size,
+                           &mbmi->skip_coeff);
   else
-    vp9_xform_quant(plane, block, plane_bsize, tx_size, &encode_args);
+    vp9_xform_quant(x, plane, block, plane_bsize, tx_size);
 
   dist_block(plane, block, tx_size, args);
   rate_block(plane, block, plane_bsize, tx_size, args);

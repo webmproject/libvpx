@@ -24,6 +24,17 @@
 #include "vp9/encoder/vp9_rdopt.h"
 #include "vp9/encoder/vp9_tokenize.h"
 
+struct optimize_ctx {
+  ENTROPY_CONTEXT ta[MAX_MB_PLANE][16];
+  ENTROPY_CONTEXT tl[MAX_MB_PLANE][16];
+};
+
+struct encode_b_args {
+  MACROBLOCK *x;
+  struct optimize_ctx *ctx;
+  unsigned char *skip_coeff;
+};
+
 void vp9_subtract_block_c(int rows, int cols,
                           int16_t *diff_ptr, ptrdiff_t diff_stride,
                           const uint8_t *src_ptr, ptrdiff_t src_stride,
@@ -337,11 +348,9 @@ static void optimize_init_b(int plane, BLOCK_SIZE bsize,
                            pd->above_context, pd->left_context,
                            num_4x4_w, num_4x4_h);
 }
-void vp9_xform_quant(int plane, int block, BLOCK_SIZE plane_bsize,
-                     TX_SIZE tx_size, void *arg) {
-  struct encode_b_args* const args = arg;
-  MACROBLOCK* const x = args->x;
-  MACROBLOCKD* const xd = &x->e_mbd;
+void vp9_xform_quant(MACROBLOCK *x, int plane, int block,
+                     BLOCK_SIZE plane_bsize, TX_SIZE tx_size) {
+  MACROBLOCKD *const xd = &x->e_mbd;
   struct macroblock_plane *const p = &x->plane[plane];
   struct macroblockd_plane *const pd = &xd->plane[plane];
   int16_t *coeff = BLOCK_OFFSET(p->coeff, block);
@@ -420,7 +429,7 @@ static void encode_block(int plane, int block, BLOCK_SIZE plane_bsize,
   }
 
   if (!x->skip_recode)
-    vp9_xform_quant(plane, block, plane_bsize, tx_size, arg);
+    vp9_xform_quant(x, plane, block, plane_bsize, tx_size);
 
   if (x->optimize && (!x->skip_recode || !x->skip_optimize)) {
     vp9_optimize_b(plane, block, plane_bsize, tx_size, x, ctx);
@@ -468,7 +477,7 @@ static void encode_block_pass1(int plane, int block, BLOCK_SIZE plane_bsize,
   txfrm_block_to_raster_xy(plane_bsize, tx_size, block, &i, &j);
   dst = &pd->dst.buf[4 * j * pd->dst.stride + 4 * i];
 
-  vp9_xform_quant(plane, block, plane_bsize, tx_size, arg);
+  vp9_xform_quant(x, plane, block, plane_bsize, tx_size);
 
   if (p->eobs[block] == 0)
     return;
@@ -508,8 +517,8 @@ void vp9_encode_sb(MACROBLOCK *x, BLOCK_SIZE bsize) {
   vp9_foreach_transformed_block(xd, bsize, encode_block, &arg);
 }
 
-void vp9_encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
-                            TX_SIZE tx_size, void *arg) {
+static void encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
+                               TX_SIZE tx_size, void *arg) {
   struct encode_b_args* const args = arg;
   MACROBLOCK *const x = args->x;
   MACROBLOCKD *const xd = &x->e_mbd;
@@ -642,21 +651,25 @@ void vp9_encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
     *(args->skip_coeff) = 0;
 }
 
-void vp9_encode_intra_block_y(MACROBLOCK *x, BLOCK_SIZE bsize) {
-  MACROBLOCKD* const xd = &x->e_mbd;
-  struct optimize_ctx ctx;
-  MB_MODE_INFO *mbmi = &xd->mi_8x8[0]->mbmi;
-  struct encode_b_args arg = {x, &ctx, &mbmi->skip_coeff};
+void vp9_encode_block_intra(MACROBLOCK *x, int plane, int block,
+                            BLOCK_SIZE plane_bsize, TX_SIZE tx_size,
+                            unsigned char *skip_coeff) {
+  struct encode_b_args arg = {x, NULL, skip_coeff};
+  encode_block_intra(plane, block, plane_bsize, tx_size, &arg);
+}
 
-  vp9_foreach_transformed_block_in_plane(xd, bsize, 0, vp9_encode_block_intra,
-                                     &arg);
+
+void vp9_encode_intra_block_y(MACROBLOCK *x, BLOCK_SIZE bsize) {
+  const MACROBLOCKD *const xd = &x->e_mbd;
+  struct encode_b_args arg = {x, NULL, &xd->mi_8x8[0]->mbmi.skip_coeff};
+
+  vp9_foreach_transformed_block_in_plane(xd, bsize, 0, encode_block_intra,
+                                         &arg);
 }
 void vp9_encode_intra_block_uv(MACROBLOCK *x, BLOCK_SIZE bsize) {
-  MACROBLOCKD* const xd = &x->e_mbd;
-  struct optimize_ctx ctx;
-  MB_MODE_INFO *mbmi = &xd->mi_8x8[0]->mbmi;
-  struct encode_b_args arg = {x, &ctx, &mbmi->skip_coeff};
-  vp9_foreach_transformed_block_uv(xd, bsize, vp9_encode_block_intra, &arg);
+  const MACROBLOCKD *const xd = &x->e_mbd;
+  struct encode_b_args arg = {x, NULL, &xd->mi_8x8[0]->mbmi.skip_coeff};
+  vp9_foreach_transformed_block_uv(xd, bsize, encode_block_intra, &arg);
 }
 
 int vp9_encode_intra(MACROBLOCK *x, int use_16x16_pred) {
