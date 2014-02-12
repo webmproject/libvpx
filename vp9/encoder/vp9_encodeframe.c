@@ -1613,80 +1613,6 @@ static void rd_auto_partition_range(VP9_COMP *cpi, const TileInfo *const tile,
   }
 }
 
-static void compute_fast_motion_search_level(VP9_COMP *cpi, BLOCK_SIZE bsize) {
-  VP9_COMMON *const cm = &cpi->common;
-  MACROBLOCK *const x = &cpi->mb;
-
-  if (cm->frame_type == INTER_FRAME &&
-      !cpi->rc.is_src_frame_alt_ref &&
-      (bsize == BLOCK_16X16 || bsize == BLOCK_32X32 || bsize == BLOCK_64X64)) {
-    const PICK_MODE_CONTEXT *block_context = get_block_context(x, bsize);
-    const int ref0 = block_context[0].mic.mbmi.ref_frame[0];
-    const int ref1 = block_context[1].mic.mbmi.ref_frame[0];
-    const int ref2 = block_context[2].mic.mbmi.ref_frame[0];
-    const int ref3 = block_context[3].mic.mbmi.ref_frame[0];
-
-    // Currently, only consider 4 inter reference frames.
-    if (ref0 && ref1 && ref2 && ref3) {
-      int d01, d23, d02, d13;
-
-      // Motion vectors for the four subblocks.
-      int16_t mvr0 = block_context[0].mic.mbmi.mv[0].as_mv.row;
-      int16_t mvc0 = block_context[0].mic.mbmi.mv[0].as_mv.col;
-      int16_t mvr1 = block_context[1].mic.mbmi.mv[0].as_mv.row;
-      int16_t mvc1 = block_context[1].mic.mbmi.mv[0].as_mv.col;
-      int16_t mvr2 = block_context[2].mic.mbmi.mv[0].as_mv.row;
-      int16_t mvc2 = block_context[2].mic.mbmi.mv[0].as_mv.col;
-      int16_t mvr3 = block_context[3].mic.mbmi.mv[0].as_mv.row;
-      int16_t mvc3 = block_context[3].mic.mbmi.mv[0].as_mv.col;
-
-      // Adjust sign if ref is alt_ref.
-      if (cm->ref_frame_sign_bias[ref0]) {
-        mvr0 *= -1;
-        mvc0 *= -1;
-      }
-
-      if (cm->ref_frame_sign_bias[ref1]) {
-        mvr1 *= -1;
-        mvc1 *= -1;
-      }
-
-      if (cm->ref_frame_sign_bias[ref2]) {
-        mvr2 *= -1;
-        mvc2 *= -1;
-      }
-
-      if (cm->ref_frame_sign_bias[ref3]) {
-        mvr3 *= -1;
-        mvc3 *= -1;
-      }
-
-      // Calculate mv distances.
-      d01 = MAX(abs(mvr0 - mvr1), abs(mvc0 - mvc1));
-      d23 = MAX(abs(mvr2 - mvr3), abs(mvc2 - mvc3));
-      d02 = MAX(abs(mvr0 - mvr2), abs(mvc0 - mvc2));
-      d13 = MAX(abs(mvr1 - mvr3), abs(mvc1 - mvc3));
-
-      if (d01 < FAST_MOTION_MV_THRESH && d23 < FAST_MOTION_MV_THRESH &&
-          d02 < FAST_MOTION_MV_THRESH && d13 < FAST_MOTION_MV_THRESH) {
-        // Set fast motion search level.
-        x->fast_ms = 1;
-
-        if (ref0 == ref1 && ref1 == ref2 && ref2 == ref3 &&
-            d01 < 2 && d23 < 2 && d02 < 2 && d13 < 2) {
-          // Set fast motion search level.
-          x->fast_ms = 2;
-
-          if (!d01 && !d23 && !d02 && !d13) {
-            x->fast_ms = 3;
-            x->subblock_ref = ref0;
-          }
-        }
-      }
-    }
-  }
-}
-
 static INLINE void store_pred_mv(MACROBLOCK *x, PICK_MODE_CONTEXT *ctx) {
   vpx_memcpy(ctx->pred_mv, x->pred_mv, sizeof(x->pred_mv));
 }
@@ -1726,8 +1652,6 @@ static void rd_pick_partition(VP9_COMP *cpi, const TileInfo *const tile,
                                bsize >= BLOCK_8X8;
   int partition_vert_allowed = !force_horz_split && xss <= yss &&
                                bsize >= BLOCK_8X8;
-
-  int partition_split_done = 0;
   (void) *tp_orig;
 
   if (bsize < BLOCK_8X8) {
@@ -1869,17 +1793,11 @@ static void rd_pick_partition(VP9_COMP *cpi, const TileInfo *const tile,
       if (cpi->sf.less_rectangular_check)
         do_rect &= !partition_none_allowed;
     }
-    partition_split_done = 1;
     restore_context(cpi, mi_row, mi_col, a, l, sa, sl, bsize);
   }
 
   x->fast_ms = 0;
   x->subblock_ref = 0;
-
-  if (partition_split_done &&
-      cpi->sf.using_small_partition_info) {
-    compute_fast_motion_search_level(cpi, bsize);
-  }
 
   // PARTITION_HORZ
   if (partition_horz_allowed && do_rect) {

@@ -911,7 +911,6 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
   sf->use_uv_intra_rd_estimate = 0;
   sf->use_fast_lpf_pick = 0;
   sf->use_fast_coef_updates = 0;
-  sf->using_small_partition_info = 0;
   sf->mode_skip_start = MAX_MODES;  // Mode index at which mode skip mask set
   sf->use_pick_mode = 0;
   sf->encode_breakout_thresh = 0;
