@@ -444,8 +444,21 @@ static void model_rd_for_sb(VP9_COMP *cpi, BLOCK_SIZE bsize,
 
     if (i == 0)
       x->pred_sse[ref] = sse;
-    if (cpi->sf.use_pick_mode) {
-      dist_sum += (int)sse;
+
+    // Fast approximate the modelling function.
+    if (cpi->oxcf.cpu_used < -4) {
+      int rate;
+      int64_t dist;
+      int64_t square_error = sse;
+      int quantizer = (pd->dequant[1] >> 3);
+
+      if ( quantizer < 120)
+        rate = (square_error * (280-quantizer) )>> 8;
+      else
+        rate = 0;
+      dist = (square_error * quantizer) >> 8;
+      rate_sum += rate;
+      dist_sum += dist;
     } else {
       int rate;
       int64_t dist;
