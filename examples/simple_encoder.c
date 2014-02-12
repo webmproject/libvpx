@@ -86,18 +86,16 @@
 #include <string.h>
 
 #define VPX_CODEC_DISABLE_COMPAT 1
-#include "vpx/vp8cx.h"
 #include "vpx/vpx_encoder.h"
 
 #include "./tools_common.h"
 #include "./video_writer.h"
 
-#define interface (vpx_codec_vp8_cx())
-
 static const char *exec_name;
 
 void usage_exit() {
-  fprintf(stderr, "Usage: %s <width> <height> <infile> <outfile>\n", exec_name);
+  fprintf(stderr, "Usage: %s <codec> <width> <height> <infile> <outfile>\n",
+          exec_name);
   exit(EXIT_FAILURE);
 }
 
@@ -110,17 +108,27 @@ int main(int argc, char **argv) {
   vpx_codec_err_t res;
   VpxVideoInfo info = {0};
   VpxVideoWriter *writer = NULL;
+  const VpxInterface *encoder = NULL;
   const int fps = 30;        // TODO(dkovalev) add command line argument
   const int bitrate = 200;   // kbit/s TODO(dkovalev) add command line argument
+  const char *const codec_arg = argv[1];
+  const char *const width_arg = argv[2];
+  const char *const height_arg = argv[3];
+  const char *const infile_arg = argv[4];
+  const char *const outfile_arg = argv[5];
 
   exec_name = argv[0];
 
-  if (argc != 5)
+  if (argc != 6)
     die("Invalid number of arguments");
 
-  info.codec_fourcc = VP8_FOURCC;
-  info.frame_width = strtol(argv[1], NULL, 0);
-  info.frame_height = strtol(argv[2], NULL, 0);
+  encoder = get_vpx_encoder_by_name(codec_arg);
+  if (!encoder)
+     die("Unsupported codec.");
+
+  info.codec_fourcc = encoder->fourcc;
+  info.frame_width = strtol(width_arg, NULL, 0);
+  info.frame_height = strtol(height_arg, NULL, 0);
   info.time_base.numerator = 1;
   info.time_base.denominator = fps;
 
@@ -136,9 +144,9 @@ int main(int argc, char **argv) {
     die("Failed to allocate image.");
   }
 
-  printf("Using %s\n", vpx_codec_iface_name(interface));
+  printf("Using %s\n", vpx_codec_iface_name(encoder->interface()));
 
-  res = vpx_codec_enc_config_default(interface, &cfg, 0);
+  res = vpx_codec_enc_config_default(encoder->interface(), &cfg, 0);
   if (res)
     die_codec(&codec, "Failed to get default codec config.");
 
@@ -148,14 +156,14 @@ int main(int argc, char **argv) {
   cfg.g_timebase.den = info.time_base.denominator;
   cfg.rc_target_bitrate = bitrate;
 
-  writer = vpx_video_writer_open(argv[4], kContainerIVF, &info);
+  writer = vpx_video_writer_open(outfile_arg, kContainerIVF, &info);
   if (!writer)
-    die("Failed to open %s for writing.", argv[4]);
+    die("Failed to open %s for writing.", outfile_arg);
 
-  if (!(infile = fopen(argv[3], "rb")))
-    die("Failed to open %s for reading.", argv[3]);
+  if (!(infile = fopen(infile_arg, "rb")))
+    die("Failed to open %s for reading.", infile_arg);
 
-  if (vpx_codec_enc_init(&codec, interface, &cfg, 0))
+  if (vpx_codec_enc_init(&codec, encoder->interface(), &cfg, 0))
     die_codec(&codec, "Failed to initialize encoder");
 
   while (vpx_img_read(&raw, infile)) {

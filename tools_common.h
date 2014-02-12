@@ -123,7 +123,20 @@ uint32_t mem_get_le32(const void *data);
 
 int read_yuv_frame(struct VpxInputContext *input_ctx, vpx_image_t *yuv_frame);
 
-vpx_codec_iface_t *get_codec_interface(unsigned int fourcc);
+typedef struct VpxInterface {
+  const char *const name;
+  const uint32_t fourcc;
+  vpx_codec_iface_t *(*const interface)();
+} VpxInterface;
+
+int get_vpx_encoder_count();
+const VpxInterface *get_vpx_encoder_by_index(int i);
+const VpxInterface *get_vpx_encoder_by_name(const char *name);
+
+int get_vpx_decoder_count();
+const VpxInterface *get_vpx_decoder_by_index(int i);
+const VpxInterface *get_vpx_decoder_by_name(const char *name);
+const VpxInterface *get_vpx_decoder_by_fourcc(uint32_t fourcc);
 
 // TODO(dkovalev): move this function to vpx_image.{c, h}, so it will be part
 // of vpx_image_t support

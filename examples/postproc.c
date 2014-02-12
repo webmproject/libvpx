@@ -64,8 +64,8 @@ int main(int argc, char **argv) {
   FILE *outfile = NULL;
   vpx_codec_ctx_t codec;
   vpx_codec_err_t res;
-  vpx_codec_iface_t *iface = NULL;
   VpxVideoReader *reader = NULL;
+  const VpxInterface *decoder = NULL;
   const VpxVideoInfo *info = NULL;
 
   exec_name = argv[0];
@@ -82,17 +82,16 @@ int main(int argc, char **argv) {
 
   info = vpx_video_reader_get_info(reader);
 
-  iface = get_codec_interface(info->codec_fourcc);
-  if (!iface)
+  decoder = get_vpx_decoder_by_fourcc(info->codec_fourcc);
+  if (!decoder)
     die("Unknown input codec.");
 
-  printf("Using %s\n", vpx_codec_iface_name(iface));
+  printf("Using %s\n", vpx_codec_iface_name(decoder->interface()));
 
-  res = vpx_codec_dec_init(&codec, iface, NULL, VPX_CODEC_USE_POSTPROC);
-  if (res == VPX_CODEC_INCAPABLE) {
-    printf("NOTICE: Postproc not supported.\n");
-    res = vpx_codec_dec_init(&codec, iface, NULL, 0);
-  }
+  res = vpx_codec_dec_init(&codec, decoder->interface(), NULL,
+                           VPX_CODEC_USE_POSTPROC);
+  if (res == VPX_CODEC_INCAPABLE)
+    die_codec(&codec, "Postproc not supported by this decoder.");
 
   if (res)
     die_codec(&codec, "Failed to initialize decoder.");

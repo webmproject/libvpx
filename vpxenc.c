@@ -61,24 +61,6 @@ static size_t wrap_fwrite(const void *ptr, size_t size, size_t nmemb,
 
 static const char *exec_name;
 
-static const struct codec_item {
-  char const              *name;
-  vpx_codec_iface_t *(*iface)(void);
-  vpx_codec_iface_t *(*dx_iface)(void);
-  unsigned int             fourcc;
-} codecs[] = {
-#if CONFIG_VP8_ENCODER && CONFIG_VP8_DECODER
-  {"vp8", &vpx_codec_vp8_cx, &vpx_codec_vp8_dx, VP8_FOURCC},
-#elif CONFIG_VP8_ENCODER && !CONFIG_VP8_DECODER
-  {"vp8", &vpx_codec_vp8_cx, NULL, VP8_FOURCC},
-#endif
-#if CONFIG_VP9_ENCODER && CONFIG_VP9_DECODER
-  {"vp9", &vpx_codec_vp9_cx, &vpx_codec_vp9_dx, VP9_FOURCC},
-#elif CONFIG_VP9_ENCODER && !CONFIG_VP9_DECODER
-  {"vp9", &vpx_codec_vp9_cx, NULL, VP9_FOURCC},
-#endif
-};
-
 static void warn_or_exit_on_errorv(vpx_codec_ctx_t *ctx, int fatal,
                                    const char *s, va_list ap) {
   if (ctx->err) {
@@ -462,14 +444,13 @@ void usage_exit() {
   fprintf(stderr, "\nStream timebase (--timebase):\n"
           "  The desired precision of timestamps in the output, expressed\n"
           "  in fractional seconds. Default is 1/1000.\n");
-  fprintf(stderr, "\n"
-          "Included encoders:\n"
-          "\n");
+  fprintf(stderr, "\nIncluded encoders:\n\n");
 
-  for (i = 0; i < sizeof(codecs) / sizeof(codecs[0]); i++)
+  for (i = 0; i < get_vpx_encoder_count(); ++i) {
+    const VpxInterface *const encoder = get_vpx_encoder_by_index(i);
     fprintf(stderr, "    %-6s - %s\n",
-            codecs[i].name,
-            vpx_codec_iface_name(codecs[i].iface()));
+            encoder->name, vpx_codec_iface_name(encoder->interface()));
+  }
 
   exit(EXIT_FAILURE);
 }
@@ -666,7 +647,7 @@ static void parse_global_config(struct VpxEncoderConfig *global, char **argv) {
 
   /* Initialize default parameters */
   memset(global, 0, sizeof(*global));
-  global->codec = codecs;
+  global->codec = get_vpx_encoder_by_index(0);
   global->passes = 0;
   global->use_i420 = 1;
   /* Assign default deadline to good quality */
@@ -676,18 +657,9 @@ static void parse_global_config(struct VpxEncoderConfig *global, char **argv) {
     arg.argv_step = 1;
 
     if (arg_match(&arg, &codecarg, argi)) {
-      int j, k = -1;
-
-      for (j = 0; j < sizeof(codecs) / sizeof(codecs[0]); j++)
-        if (!strcmp(codecs[j].name, arg.val))
-          k = j;
-
-      if (k >= 0)
-        global->codec = codecs + k;
-      else
-        die("Error: Unrecognized argument (%s) to --codec\n",
-            arg.val);
-
+      global->codec = get_vpx_encoder_by_name(arg.val);
+      if (!global->codec)
+        die("Error: Unrecognized argument (%s) to --codec\n", arg.val);
     } else if (arg_match(&arg, &passes, argi)) {
       global->passes = arg_parse_uint(&arg);
 
@@ -750,7 +722,7 @@ static void parse_global_config(struct VpxEncoderConfig *global, char **argv) {
 #if CONFIG_VP9_ENCODER
     // Make default VP9 passes = 2 until there is a better quality 1-pass
     // encoder
-    global->passes = (global->codec->iface == vpx_codec_vp9_cx ? 2 : 1);
+    global->passes = strcmp(global->codec->name, "vp9") == 0 ? 2 : 1;
 #else
     global->passes = 1;
 #endif
@@ -830,7 +802,7 @@ static struct stream_state *new_stream(struct VpxEncoderConfig *global,
     vpx_codec_err_t  res;
 
     /* Populate encoder configuration */
-    res = vpx_codec_enc_config_default(global->codec->iface(),
+    res = vpx_codec_enc_config_default(global->codec->interface(),
                                        &stream->config.cfg,
                                        global->usage);
     if (res)
@@ -874,15 +846,15 @@ static int parse_stream_params(struct VpxEncoderConfig *global,
   struct stream_config    *config = &stream->config;
   int                      eos_mark_found = 0;
 
-  /* Handle codec specific options */
+  // Handle codec specific options
   if (0) {
 #if CONFIG_VP8_ENCODER
-  } else if (global->codec->iface == vpx_codec_vp8_cx) {
+  } else if (strcmp(global->codec->name, "vp8") == 0) {
     ctrl_args = vp8_args;
     ctrl_args_map = vp8_arg_ctrl_map;
 #endif
 #if CONFIG_VP9_ENCODER
-  } else if (global->codec->iface == vpx_codec_vp9_cx) {
+  } else if (strcmp(global->codec->name, "vp9") == 0) {
     ctrl_args = vp9_args;
     ctrl_args_map = vp9_arg_ctrl_map;
 #endif
@@ -1090,7 +1062,7 @@ static void show_stream_config(struct stream_state *stream,
 
   if (stream->index == 0) {
     fprintf(stderr, "Codec: %s\n",
-            vpx_codec_iface_name(global->codec->iface()));
+            vpx_codec_iface_name(global->codec->interface()));
     fprintf(stderr, "Source file: %s Format: %s\n", input->filename,
             input->use_i420 ? "I420" : "YV12");
   }
@@ -1214,7 +1186,7 @@ static void initialize_encoder(struct stream_state *stream,
   flags |= global->out_part ? VPX_CODEC_USE_OUTPUT_PARTITION : 0;
 
   /* Construct Encoder Context */
-  vpx_codec_enc_init(&stream->encoder, global->codec->iface(),
+  vpx_codec_enc_init(&stream->encoder, global->codec->interface(),
                      &stream->config.cfg, flags);
   ctx_exit_on_error(&stream->encoder, "Failed to initialize encoder");
 
@@ -1234,7 +1206,8 @@ static void initialize_encoder(struct stream_state *stream,
 
 #if CONFIG_DECODERS
   if (global->test_decode != TEST_DECODE_OFF) {
-    vpx_codec_dec_init(&stream->decoder, global->codec->dx_iface(), NULL, 0);
+    const VpxInterface *decoder = get_vpx_decoder_by_name(global->codec->name);
+    vpx_codec_dec_init(&stream->decoder, decoder->interface(), NULL, 0);
   }
 #endif
 }
@@ -1420,14 +1393,14 @@ static float usec_to_fps(uint64_t usec, unsigned int frames) {
 
 static void test_decode(struct stream_state  *stream,
                         enum TestDecodeFatality fatal,
-                        const struct codec_item *codec) {
+                        const VpxInterface *codec) {
   vpx_image_t enc_img, dec_img;
 
   if (stream->mismatch_seen)
     return;
 
   /* Get the internal reference frame */
-  if (codec->fourcc == VP8_FOURCC) {
+  if (strcmp(codec->name, "vp8") == 0) {
     struct vpx_ref_frame ref_enc, ref_dec;
     int width, height;
 
