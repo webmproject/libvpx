@@ -170,7 +170,7 @@ int64_t vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
                       tx_mode_to_biggest_tx_size[cpi->common.tx_mode]);
   mbmi->interp_filter = cpi->common.interp_filter == SWITCHABLE ?
                         EIGHTTAP : cpi->common.interp_filter;
-  mbmi->skip_coeff = 0;
+  mbmi->skip = 0;
   mbmi->segment_id = 0;
 
   for (ref_frame = LAST_FRAME; ref_frame <= LAST_FRAME ; ++ref_frame) {

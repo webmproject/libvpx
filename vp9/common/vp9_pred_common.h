@@ -47,8 +47,8 @@ static INLINE vp9_prob vp9_get_pred_prob_seg_id(struct segmentation *seg,
 static INLINE int vp9_get_skip_context(const MACROBLOCKD *xd) {
   const MODE_INFO *const above_mi = get_above_mi(xd);
   const MODE_INFO *const left_mi = get_left_mi(xd);
-  const int above_skip = (above_mi != NULL) ? above_mi->mbmi.skip_coeff : 0;
-  const int left_skip = (left_mi != NULL) ? left_mi->mbmi.skip_coeff : 0;
+  const int above_skip = (above_mi != NULL) ? above_mi->mbmi.skip : 0;
+  const int left_skip = (left_mi != NULL) ? left_mi->mbmi.skip : 0;
   return above_skip + left_skip;
 }
 

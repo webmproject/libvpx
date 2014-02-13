@@ -658,7 +658,7 @@ static void rd_pick_sb_modes(VP9_COMP *cpi, const TileInfo *const tile,
   x->skip_recode = 0;
 
   // Set to zero to make sure we do not use the previous encoded frame stats
-  xd->mi_8x8[0]->mbmi.skip_coeff = 0;
+  xd->mi_8x8[0]->mbmi.skip = 0;
 
   x->source_variance = get_sby_perpixel_variance(cpi, x, bsize);
 
@@ -2100,7 +2100,7 @@ static int get_skip_flag(MODE_INFO **mi_8x8, int mis, int ymbs, int xmbs) {
 
   for (y = 0; y < ymbs; y++) {
     for (x = 0; x < xmbs; x++) {
-      if (!mi_8x8[y * mis + x]->mbmi.skip_coeff)
+      if (!mi_8x8[y * mis + x]->mbmi.skip)
         return 0;
     }
   }
@@ -2259,7 +2259,7 @@ static void set_mode_info(MB_MODE_INFO *mbmi, BLOCK_SIZE bsize,
   mbmi->ref_frame[1] = INTRA_FRAME;
   mbmi->tx_size = max_txsize_lookup[bsize];
   mbmi->uv_mode = mode;
-  mbmi->skip_coeff = 0;
+  mbmi->skip = 0;
   mbmi->sb_type = bsize;
   mbmi->segment_id = 0;
 }
@@ -2736,7 +2736,7 @@ static void encode_superblock(VP9_COMP *cpi, TOKENEXTRA **t, int output_enabled,
 
   if (!is_inter_block(mbmi)) {
     int plane;
-    mbmi->skip_coeff = 1;
+    mbmi->skip = 1;
     for (plane = 0; plane < MAX_MB_PLANE; ++plane)
       vp9_encode_intra_block_plane(x, MAX(bsize, BLOCK_8X8), plane);
     if (output_enabled)
@@ -2755,11 +2755,11 @@ static void encode_superblock(VP9_COMP *cpi, TOKENEXTRA **t, int output_enabled,
   if (!is_inter_block(mbmi)) {
     vp9_tokenize_sb(cpi, t, !output_enabled, MAX(bsize, BLOCK_8X8));
   } else if (!x->skip) {
-    mbmi->skip_coeff = 1;
+    mbmi->skip = 1;
     vp9_encode_sb(x, MAX(bsize, BLOCK_8X8));
     vp9_tokenize_sb(cpi, t, !output_enabled, MAX(bsize, BLOCK_8X8));
   } else {
-    mbmi->skip_coeff = 1;
+    mbmi->skip = 1;
     if (output_enabled)
       cm->counts.skip[vp9_get_skip_context(xd)][1]++;
     reset_skip_context(xd, MAX(bsize, BLOCK_8X8));
@@ -2769,7 +2769,7 @@ static void encode_superblock(VP9_COMP *cpi, TOKENEXTRA **t, int output_enabled,
     if (cm->tx_mode == TX_MODE_SELECT &&
         mbmi->sb_type >= BLOCK_8X8  &&
         !(is_inter_block(mbmi) &&
-            (mbmi->skip_coeff ||
+            (mbmi->skip ||
              vp9_segfeature_active(&cm->seg, segment_id, SEG_LVL_SKIP)))) {
       ++get_tx_counts(max_txsize_lookup[bsize], vp9_get_tx_size_context(xd),
                       &cm->counts.tx)[mbmi->tx_size];

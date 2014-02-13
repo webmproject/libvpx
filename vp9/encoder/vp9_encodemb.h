@@ -32,7 +32,7 @@ void vp9_subtract_sb(MACROBLOCK *x, BLOCK_SIZE bsize);
 
 void vp9_encode_block_intra(MACROBLOCK *x, int plane, int block,
                             BLOCK_SIZE plane_bsize, TX_SIZE tx_size,
-                            unsigned char *skip_coeff);
+                            unsigned char *skip);
 
 void vp9_encode_intra_block_plane(MACROBLOCK *x, BLOCK_SIZE bsize, int plane);
 
