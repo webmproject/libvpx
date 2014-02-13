@@ -29,7 +29,6 @@
 #include "vpx_scale/vpx_scale.h"
 
 #define ALT_REF_MC_ENABLED 1    // dis/enable MC in AltRef filtering
-#define ALT_REF_SUBPEL_ENABLED 1  // dis/enable subpel in MC AltRef filtering
 
 static void temporal_filter_predictors_mb_c(MACROBLOCKD *xd,
                                             uint8_t *y_mb_ptr,
@@ -160,11 +159,9 @@ static int temporal_filter_find_matching_mb_c(VP9_COMP *cpi,
 
   /*cpi->sf.search_method == HEX*/
   // Ignore mv costing by sending NULL pointer instead of cost arrays
-  bestsme = vp9_hex_search(x, &best_ref_mv1_full, step_param, sadpb, 1,
-                           &cpi->fn_ptr[BLOCK_16X16],
-                           0, &best_ref_mv1, ref_mv);
+  vp9_hex_search(x, &best_ref_mv1_full, step_param, sadpb, 1,
+                 &cpi->fn_ptr[BLOCK_16X16], 0, &best_ref_mv1, ref_mv);
 
-#if ALT_REF_SUBPEL_ENABLED
   // Try sub-pixel MC?
   // if (bestsme > error_thresh && bestsme < INT_MAX)
   {
@@ -180,7 +177,6 @@ static int temporal_filter_find_matching_mb_c(VP9_COMP *cpi,
                                            NULL, NULL,
                                            &distortion, &sse);
   }
-#endif
 
   // Restore input state
   x->plane[0].src = src;
