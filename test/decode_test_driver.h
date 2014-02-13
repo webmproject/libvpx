@@ -49,7 +49,7 @@ class Decoder {
     vpx_codec_destroy(&decoder_);
   }
 
-  vpx_codec_err_t DecodeFrame(const uint8_t *cxdata, int size);
+  vpx_codec_err_t DecodeFrame(const uint8_t *cxdata, size_t size);
 
   DxDataIterator GetDxData() {
     return DxDataIterator(&decoder_);
