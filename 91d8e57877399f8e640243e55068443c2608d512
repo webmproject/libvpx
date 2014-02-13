@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//3iE\u003d",
+        "filename": "test/test-data.sha1",
+        "patchSetId": 1
+      },
+      "lineNbr": 579,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-02-13T16:48:52Z",
+      "side": 1,
+      "message": "Move these up above with the other vp90-2-02-size-* vectors.",
+      "revId": "91d8e57877399f8e640243e55068443c2608d512",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//3ig\u003d",
+        "filename": "test/test_vectors.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 161,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-02-13T16:48:52Z",
+      "side": 1,
+      "message": "Remove blank lines.",
+      "revId": "91d8e57877399f8e640243e55068443c2608d512",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
