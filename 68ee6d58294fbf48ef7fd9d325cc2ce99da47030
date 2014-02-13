@@ -1,0 +1,89 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//3j4\u003d",
+        "filename": "examples/vpx_temporal_scalable_patterns.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 85,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-02-13T15:11:59Z",
+      "side": 1,
+      "message": "remove the space between %d \\n (same below)",
+      "revId": "68ee6d58294fbf48ef7fd9d325cc2ce99da47030",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//3kE\u003d",
+        "filename": "examples/vpx_temporal_scalable_patterns.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 86,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-02-13T15:11:59Z",
+      "side": 1,
+      "message": "Put this in the previous printf \u0026 remove this line.",
+      "revId": "68ee6d58294fbf48ef7fd9d325cc2ce99da47030",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//3kA\u003d",
+        "filename": "examples/vpx_temporal_scalable_patterns.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 88,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-02-13T15:11:59Z",
+      "side": 1,
+      "message": "Put this in the previous printf \u0026 remove this line.",
+      "revId": "68ee6d58294fbf48ef7fd9d325cc2ce99da47030",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//3j8\u003d",
+        "filename": "examples/vpx_temporal_scalable_patterns.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 90,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-02-13T15:11:59Z",
+      "side": 1,
+      "message": "const",
+      "revId": "68ee6d58294fbf48ef7fd9d325cc2ce99da47030",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//3j0\u003d",
+        "filename": "examples/vpx_temporal_scalable_patterns.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 498,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-02-13T15:11:59Z",
+      "side": 1,
+      "message": "Don\u0027t need the local variable frame_drop_threshold:\n cfg.rc_frame_dropframe_thresh \u003d strtol(argv[8], NULL, 0);",
+      "revId": "68ee6d58294fbf48ef7fd9d325cc2ce99da47030",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
