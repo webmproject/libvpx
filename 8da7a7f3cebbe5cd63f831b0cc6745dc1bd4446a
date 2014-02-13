@@ -142,6 +142,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//3Uk\u003d",
+        "filename": "examples/vp8_set_maps.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 129,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-02-13T22:24:49Z",
+      "side": 1,
+      "message": "I disagree. We should use a common encode_frame() function that serves as a single canonical example of how to pass frames to libvpx for encoding. \n\nDuping the same function everywhere is an egregious DRY (Don\u0027t Repeat Yourself) violation and wastes time for:\n- the bots rebuilding the same code over and over in multiple places\n- the reviewers having to look at it\n- the maintainers (us) having to patch it when new features are available or API changes occur\n- the people reading the code to learn from it have to look at N versions of the same thing to determine if one is better, or if they\u0027re all the same. \n\nIt belongs in tools_common as much as anything else does. We should probably have a decode_frame() as well, but I digress. \n\nThe above is not to say that the work belongs in this CL, or that you should be the one doing it. Anyway, my point is that there\u0027s no valid reason to be duplicating this code everywhere. Doing so isn\u0027t helping anyone.",
+      "parentUuid": "AAAAdn//3VM\u003d",
+      "revId": "8da7a7f3cebbe5cd63f831b0cc6745dc1bd4446a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//3Yk\u003d",
         "filename": "examples/vp8_set_maps.c",
         "patchSetId": 2
@@ -276,6 +294,24 @@
       "side": 1,
       "message": "Right now that\u0027s just inlined in every example. As we talked before, it is probably ok to just check that width \u003e 0 \u0026\u0026 height \u003e 0 (because it seems yv12 with odd width/height is allowed). I\u0027ll revisit all these checks in one of the next patches.",
       "parentUuid": "AAAAdn//3Yc\u003d",
+      "revId": "8da7a7f3cebbe5cd63f831b0cc6745dc1bd4446a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//3Ug\u003d",
+        "filename": "examples/vp8_set_maps.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 184,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-02-13T22:24:49Z",
+      "side": 1,
+      "message": "Ok; thought I was experiencing deja vu",
+      "parentUuid": "AAAAdn//3Uw\u003d",
       "revId": "8da7a7f3cebbe5cd63f831b0cc6745dc1bd4446a",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
