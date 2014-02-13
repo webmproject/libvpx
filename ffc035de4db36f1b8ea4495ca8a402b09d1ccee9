@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//3qY\u003d",
+        "filename": "tools_common.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 228,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-02-13T01:56:50Z",
+      "side": 1,
+      "message": "Just use if/else. ?: isn\u0027t making this clearer.",
+      "revId": "ffc035de4db36f1b8ea4495ca8a402b09d1ccee9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//3qU\u003d",
+        "filename": "tools_common.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 234,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-02-13T01:56:50Z",
+      "side": 1,
+      "message": "Ditto.",
+      "revId": "ffc035de4db36f1b8ea4495ca8a402b09d1ccee9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
