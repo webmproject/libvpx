@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//3TQ\u003d",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-02-13T23:19:55Z",
+      "side": 1,
+      "message": "vpx_temporal_scalable_patterns.c",
+      "revId": "31f19b82773140af6c6c8eb7cab78172e483d83b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
