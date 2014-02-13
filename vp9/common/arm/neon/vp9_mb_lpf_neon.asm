@@ -439,6 +439,9 @@ v_end
     tst         r7, #1
     bxne        lr
 
+    orrs        r5, r5, r6                 ; Check for 0
+    orreq       r7, r7, #2                 ; Only do mbfilter branch
+
     ; mbfilter flat && mask branch
     ; TODO(fgalligan): Can I decrease the cycles shifting to consective d's
     ; and using vibt on the q's?
