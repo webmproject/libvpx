@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//3ZM\u003d",
+        "filename": "vp9_spatial_scalable_encoder.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 97,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-02-13T20:57:49Z",
+      "side": 1,
+      "message": "\u003d {0}",
+      "revId": "ae1a3028279043fad7aaab5f7b05b69251f579ae",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//3ZI\u003d",
+        "filename": "vp9_spatial_scalable_encoder.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 98,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-02-13T20:57:49Z",
+      "side": 1,
+      "message": "one per line",
+      "revId": "ae1a3028279043fad7aaab5f7b05b69251f579ae",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//3ZE\u003d",
+        "filename": "vp9_spatial_scalable_encoder.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 234,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-02-13T20:57:49Z",
+      "side": 1,
+      "message": "Can drop the braces here if you\u0027d like.",
+      "revId": "ae1a3028279043fad7aaab5f7b05b69251f579ae",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
