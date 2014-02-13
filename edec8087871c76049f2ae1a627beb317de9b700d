@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//3VY\u003d",
+        "filename": "vp9/encoder/vp9_onyx_if.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 499,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2014-02-13T22:11:41Z",
+      "side": 1,
+      "message": "Is there a more reliable way to determine if golden frame will be used or not?If not, maybe we could also add a new flag for turning on and off the use of golden frame as reference frame.",
+      "revId": "edec8087871c76049f2ae1a627beb317de9b700d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
