@@ -46,7 +46,7 @@ int vp9_full_pixel_diamond(struct VP9_COMP *cpi, MACROBLOCK *x,
                            MV *mvp_full, int step_param,
                            int sadpb, int further_steps, int do_refine,
                            const vp9_variance_fn_ptr_t *fn_ptr,
-                           const MV *ref_mv, int_mv *dst_mv);
+                           const MV *ref_mv, MV *dst_mv);
 
 int vp9_hex_search(const MACROBLOCK *x,
                    MV *ref_mv,

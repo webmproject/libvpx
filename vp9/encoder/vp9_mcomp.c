@@ -1289,62 +1289,57 @@ int vp9_diamond_search_sadx4(const MACROBLOCK *x,
 
 int vp9_full_pixel_diamond(VP9_COMP *cpi, MACROBLOCK *x,
                            MV *mvp_full, int step_param,
-                           int sadpb, int further_steps,
-                           int do_refine,
+                           int sadpb, int further_steps, int do_refine,
                            const vp9_variance_fn_ptr_t *fn_ptr,
-                           const MV *ref_mv, int_mv *dst_mv) {
-  int_mv temp_mv;
-  int thissme, n, num00;
-  int bestsme = cpi->diamond_search_sad(x, mvp_full, &temp_mv.as_mv,
-                                        step_param, sadpb, &num00,
+                           const MV *ref_mv, MV *dst_mv) {
+  MV temp_mv;
+  int thissme, n, num00 = 0;
+  int bestsme = cpi->diamond_search_sad(x, mvp_full, &temp_mv,
+                                        step_param, sadpb, &n,
                                         fn_ptr, x->nmvjointcost,
                                         x->mvcost, ref_mv);
-  dst_mv->as_int = temp_mv.as_int;
+  *dst_mv = temp_mv;
 
-  n = num00;
-  num00 = 0;
-
-  /* If there won't be more n-step search, check to see if refining search is
-   * needed. */
+  // If there won't be more n-step search, check to see if refining search is
+  // needed.
   if (n > further_steps)
     do_refine = 0;
 
   while (n < further_steps) {
-    n++;
+    ++n;
 
     if (num00) {
       num00--;
     } else {
-      thissme = cpi->diamond_search_sad(x, mvp_full, &temp_mv.as_mv,
+      thissme = cpi->diamond_search_sad(x, mvp_full, &temp_mv,
                                         step_param + n, sadpb, &num00,
                                         fn_ptr, x->nmvjointcost, x->mvcost,
                                         ref_mv);
 
-      /* check to see if refining search is needed. */
-      if (num00 > (further_steps - n))
+      // check to see if refining search is needed.
+      if (num00 > further_steps - n)
         do_refine = 0;
 
       if (thissme < bestsme) {
         bestsme = thissme;
-        dst_mv->as_int = temp_mv.as_int;
+        *dst_mv = temp_mv;
       }
     }
   }
 
-  /* final 1-away diamond refining search */
-  if (do_refine == 1) {
-    int search_range = 8;
-    int_mv best_mv;
-    best_mv.as_int = dst_mv->as_int;
-    thissme = cpi->refining_search_sad(x, &best_mv.as_mv, sadpb, search_range,
+  // final 1-away diamond refining search
+  if (do_refine) {
+    const int search_range = 8;
+    MV best_mv = *dst_mv;
+    thissme = cpi->refining_search_sad(x, &best_mv, sadpb, search_range,
                                        fn_ptr, x->nmvjointcost, x->mvcost,
                                        ref_mv);
-
     if (thissme < bestsme) {
       bestsme = thissme;
-      dst_mv->as_int = best_mv.as_int;
+      *dst_mv = best_mv;
     }
   }
+
   return bestsme;
 }
 
