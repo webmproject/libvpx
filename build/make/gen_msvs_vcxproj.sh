@@ -174,6 +174,10 @@ generate_filter() {
                         Include=".\\$f"
                     # Separate file names with Condition?
                     tag_content ObjectFileName "\$(IntDir)$objf"
+                    # Check for AVX and turn it on to avoid warnings.
+                    if [[ $f =~ avx.?\.c$ ]]; then
+                        tag_content AdditionalOptions "/arch:AVX"
+                    fi
                     close_tag ClCompile
                 elif [ "$pat" == "h" ] ; then
                     tag ClInclude \
