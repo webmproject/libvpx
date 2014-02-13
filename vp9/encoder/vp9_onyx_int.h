@@ -346,11 +346,6 @@ typedef struct {
   // inter modes or to enable it always.
   int disable_split_mask;
 
-  // TODO(jbb): Remove this and everything that uses it. It's only valid if
-  // we were doing small to large partition checks. We currently do the
-  // reverse.
-  int using_small_partition_info;
-
   // TODO(jingning): combine the related motion search speed features
   // This allows us to use motion search at other sizes as a starting
   // point for this motion search and limits the search range around it.
