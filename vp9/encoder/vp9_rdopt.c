@@ -787,7 +787,10 @@ static void choose_txfm_size_from_rd(VP9_COMP *cpi, MACROBLOCK *x,
   MACROBLOCKD *const xd = &x->e_mbd;
   MB_MODE_INFO *const mbmi = &xd->mi_8x8[0]->mbmi;
   vp9_prob skip_prob = vp9_get_skip_prob(cm, xd);
-  int64_t rd[TX_SIZES][2];
+  int64_t rd[TX_SIZES][2] = {{INT64_MAX, INT64_MAX},
+                             {INT64_MAX, INT64_MAX},
+                             {INT64_MAX, INT64_MAX},
+                             {INT64_MAX, INT64_MAX}};
   int n, m;
   int s0, s1;
   const TX_SIZE max_mode_tx_size = tx_mode_to_biggest_tx_size[cm->tx_mode];
@@ -862,7 +865,10 @@ static void choose_txfm_size_from_modelrd(VP9_COMP *cpi, MACROBLOCK *x,
   MACROBLOCKD *const xd = &x->e_mbd;
   MB_MODE_INFO *const mbmi = &xd->mi_8x8[0]->mbmi;
   vp9_prob skip_prob = vp9_get_skip_prob(cm, xd);
-  int64_t rd[TX_SIZES][2];
+  int64_t rd[TX_SIZES][2] = {{INT64_MAX, INT64_MAX},
+                             {INT64_MAX, INT64_MAX},
+                             {INT64_MAX, INT64_MAX},
+                             {INT64_MAX, INT64_MAX}};
   int n, m;
   int s0, s1;
   double scale_rd[TX_SIZES] = {1.73, 1.44, 1.20, 1.00};
@@ -4137,11 +4143,6 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
         if (tmp_rd == INT64_MAX)
           continue;
       } else {
-        if (cm->interp_filter == SWITCHABLE) {
-          int rs = get_switchable_rate(x);
-          tmp_best_rdu -= RDCOST(x->rdmult, x->rddiv, rs, 0);
-        }
-        tmp_rd = tmp_best_rdu;
         total_sse = tmp_best_sse;
         rate = tmp_best_rate;
         rate_y = tmp_best_ratey;
