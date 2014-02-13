@@ -255,8 +255,8 @@ vpx_codec_err_t  vpx_codec_encode(vpx_codec_ctx_t            *ctx,
 }
 
 
-const vpx_codec_cx_pkt_t *vpx_codec_get_cx_data(vpx_codec_ctx_t   *ctx,
-                                                vpx_codec_iter_t  *iter) {
+const vpx_codec_cx_pkt_t *vpx_codec_get_cx_data(vpx_codec_ctx_t *ctx,
+                                                vpx_codec_iter_t *iter) {
   const vpx_codec_cx_pkt_t *pkt = NULL;
 
   if (ctx) {
@@ -271,32 +271,30 @@ const vpx_codec_cx_pkt_t *vpx_codec_get_cx_data(vpx_codec_ctx_t   *ctx,
   }
 
   if (pkt && pkt->kind == VPX_CODEC_CX_FRAME_PKT) {
-    /* If the application has specified a destination area for the
-     * compressed data, and the codec has not placed the data there,
-     * and it fits, copy it.
-     */
-    char *dst_buf = ctx->priv->enc.cx_data_dst_buf.buf;
+    // If the application has specified a destination area for the
+    // compressed data, and the codec has not placed the data there,
+    // and it fits, copy it.
+    vpx_codec_priv_t *const priv = ctx->priv;
+    char *const dst_buf = (char *)priv->enc.cx_data_dst_buf.buf;
 
-    if (dst_buf
-        && pkt->data.raw.buf != dst_buf
-        && pkt->data.raw.sz
-        + ctx->priv->enc.cx_data_pad_before
-        + ctx->priv->enc.cx_data_pad_after
-        <= ctx->priv->enc.cx_data_dst_buf.sz) {
-      vpx_codec_cx_pkt_t *modified_pkt = &ctx->priv->enc.cx_data_pkt;
+    if (dst_buf &&
+        pkt->data.raw.buf != dst_buf &&
+        pkt->data.raw.sz + priv->enc.cx_data_pad_before +
+            priv->enc.cx_data_pad_after <= priv->enc.cx_data_dst_buf.sz) {
+      vpx_codec_cx_pkt_t *modified_pkt = &priv->enc.cx_data_pkt;
 
-      memcpy(dst_buf + ctx->priv->enc.cx_data_pad_before,
-             pkt->data.raw.buf, pkt->data.raw.sz);
+      memcpy(dst_buf + priv->enc.cx_data_pad_before, pkt->data.raw.buf,
+             pkt->data.raw.sz);
       *modified_pkt = *pkt;
       modified_pkt->data.raw.buf = dst_buf;
-      modified_pkt->data.raw.sz += ctx->priv->enc.cx_data_pad_before
-                                   + ctx->priv->enc.cx_data_pad_after;
+      modified_pkt->data.raw.sz += priv->enc.cx_data_pad_before +
+                                       priv->enc.cx_data_pad_after;
       pkt = modified_pkt;
     }
 
     if (dst_buf == pkt->data.raw.buf) {
-      ctx->priv->enc.cx_data_dst_buf.buf = dst_buf + pkt->data.raw.sz;
-      ctx->priv->enc.cx_data_dst_buf.sz -= pkt->data.raw.sz;
+      priv->enc.cx_data_dst_buf.buf = dst_buf + pkt->data.raw.sz;
+      priv->enc.cx_data_dst_buf.sz -= pkt->data.raw.sz;
     }
   }
 
