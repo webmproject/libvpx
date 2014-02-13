@@ -178,7 +178,7 @@ static vpx_codec_err_t validate_config(vpx_codec_alg_priv_t      *ctx,
 
   RANGE_CHECK(cfg, ts_number_layers, 1, VPX_TS_MAX_LAYERS);
   if (cfg->ts_number_layers > 1) {
-    int i;
+    unsigned int i;
     for (i = 1; i < cfg->ts_number_layers; ++i) {
       if (cfg->ts_target_bitrate[i] < cfg->ts_target_bitrate[i-1]) {
         ERROR("ts_target_bitrate entries are not increasing");
@@ -1045,7 +1045,7 @@ static vpx_codec_err_t vp9e_set_svc_layer_id(vpx_codec_alg_priv_t *ctx,
   cpi->svc.temporal_layer_id = data->temporal_layer_id;
   // Checks on valid layer_id input.
   if (cpi->svc.temporal_layer_id < 0 ||
-      cpi->svc.temporal_layer_id >= ctx->cfg.ts_number_layers) {
+      cpi->svc.temporal_layer_id >= (int)ctx->cfg.ts_number_layers) {
     return VPX_CODEC_INVALID_PARAM;
   }
   if (cpi->svc.spatial_layer_id < 0 ||
