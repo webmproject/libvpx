@@ -1558,6 +1558,7 @@ static void alloc_mode_context(VP9_COMMON *cm, int num_4x4_blk,
   int num_pix = num_4x4_blk << 4;
   int i, k;
   ctx->num_4x4_blk = num_4x4_blk;
+
   CHECK_MEM_ERROR(cm, ctx->zcoeff_blk,
                   vpx_calloc(num_4x4_blk, sizeof(uint8_t)));
   for (i = 0; i < MAX_MB_PLANE; ++i) {
@@ -1600,7 +1601,6 @@ static void init_pick_mode_context(VP9_COMP *cpi) {
   int i;
   VP9_COMMON *const cm = &cpi->common;
   MACROBLOCK *const x  = &cpi->mb;
-
 
   for (i = 0; i < BLOCK_SIZES; ++i) {
     const int num_4x4_w = num_4x4_blocks_wide_lookup[i];
