@@ -16,7 +16,7 @@ void vp9_fdct4x4_sse2(const int16_t *input, int16_t *output, int stride) {
   // The 2D transform is done with two passes which are actually pretty
   // similar. In the first one, we transform the columns and transpose
   // the results. In the second one, we transform the rows. To achieve that,
-  // as the first pass results are transposed, we tranpose the columns (that
+  // as the first pass results are transposed, we transpose the columns (that
   // is the transposed rows) and transpose the results (so that it goes back
   // in normal/row positions).
   int pass;
@@ -47,7 +47,7 @@ void vp9_fdct4x4_sse2(const int16_t *input, int16_t *output, int stride) {
     in1 = _mm_slli_epi16(in1, 4);
     // if (i == 0 && input[0]) input[0] += 1;
     {
-      // The mask will only contain wether the first value is zero, all
+      // The mask will only contain whether the first value is zero, all
       // other comparison will fail as something shifted by 4 (above << 4)
       // can never be equal to one. To increment in the non-zero case, we
       // add the mask and one for the first element:
@@ -60,7 +60,7 @@ void vp9_fdct4x4_sse2(const int16_t *input, int16_t *output, int stride) {
   }
   // Do the two transform/transpose passes
   for (pass = 0; pass < 2; ++pass) {
-    // Transform 1/2: Add/substract
+    // Transform 1/2: Add/subtract
     const __m128i r0 = _mm_add_epi16(in0, in1);
     const __m128i r1 = _mm_sub_epi16(in0, in1);
     const __m128i r2 = _mm_unpacklo_epi64(r0, r1);
@@ -315,7 +315,7 @@ void vp9_fdct8x8_sse2(const int16_t *input, int16_t *output, int stride) {
   for (pass = 0; pass < 2; pass++) {
     // To store results of each pass before the transpose.
     __m128i res0, res1, res2, res3, res4, res5, res6, res7;
-    // Add/substract
+    // Add/subtract
     const __m128i q0 = _mm_add_epi16(in0, in7);
     const __m128i q1 = _mm_add_epi16(in1, in6);
     const __m128i q2 = _mm_add_epi16(in2, in5);
@@ -326,7 +326,7 @@ void vp9_fdct8x8_sse2(const int16_t *input, int16_t *output, int stride) {
     const __m128i q7 = _mm_sub_epi16(in0, in7);
     // Work on first four results
     {
-      // Add/substract
+      // Add/subtract
       const __m128i r0 = _mm_add_epi16(q0, q3);
       const __m128i r1 = _mm_add_epi16(q1, q2);
       const __m128i r2 = _mm_sub_epi16(q1, q2);
@@ -388,7 +388,7 @@ void vp9_fdct8x8_sse2(const int16_t *input, int16_t *output, int stride) {
       // Combine
       const __m128i r0 = _mm_packs_epi32(s0, s1);
       const __m128i r1 = _mm_packs_epi32(s2, s3);
-      // Add/substract
+      // Add/subtract
       const __m128i x0 = _mm_add_epi16(q4, r0);
       const __m128i x1 = _mm_sub_epi16(q4, r0);
       const __m128i x2 = _mm_sub_epi16(q7, r1);
@@ -1069,7 +1069,7 @@ void vp9_fdct16x16_sse2(const int16_t *input, int16_t *output, int stride) {
   // The 2D transform is done with two passes which are actually pretty
   // similar. In the first one, we transform the columns and transpose
   // the results. In the second one, we transform the rows. To achieve that,
-  // as the first pass results are transposed, we tranpose the columns (that
+  // as the first pass results are transposed, we transpose the columns (that
   // is the transposed rows) and transpose the results (so that it goes back
   // in normal/row positions).
   int pass;
@@ -1226,7 +1226,7 @@ void vp9_fdct16x16_sse2(const int16_t *input, int16_t *output, int stride) {
       }
       // Work on the first eight values; fdct8(input, even_results);
       {
-        // Add/substract
+        // Add/subtract
         const __m128i q0 = _mm_add_epi16(input0, input7);
         const __m128i q1 = _mm_add_epi16(input1, input6);
         const __m128i q2 = _mm_add_epi16(input2, input5);
@@ -1237,7 +1237,7 @@ void vp9_fdct16x16_sse2(const int16_t *input, int16_t *output, int stride) {
         const __m128i q7 = _mm_sub_epi16(input0, input7);
         // Work on first four results
         {
-          // Add/substract
+          // Add/subtract
           const __m128i r0 = _mm_add_epi16(q0, q3);
           const __m128i r1 = _mm_add_epi16(q1, q2);
           const __m128i r2 = _mm_sub_epi16(q1, q2);
@@ -1301,7 +1301,7 @@ void vp9_fdct16x16_sse2(const int16_t *input, int16_t *output, int stride) {
           // Combine
           const __m128i r0 = _mm_packs_epi32(s0, s1);
           const __m128i r1 = _mm_packs_epi32(s2, s3);
-          // Add/substract
+          // Add/subtract
           const __m128i x0 = _mm_add_epi16(q4, r0);
           const __m128i x1 = _mm_sub_epi16(q4, r0);
           const __m128i x2 = _mm_sub_epi16(q7, r1);
