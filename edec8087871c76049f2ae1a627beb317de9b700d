@@ -16,6 +16,24 @@
       "revId": "edec8087871c76049f2ae1a627beb317de9b700d",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//3To\u003d",
+        "filename": "vp9/encoder/vp9_onyx_if.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 499,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2014-02-13T22:59:51Z",
+      "side": 1,
+      "message": "vp9_rc_get_one_pass_cbr_params() [and vp9_rc_get_svc_params()] sets:\n\n  // Don\u0027t use gf_update by default in CBR mode.\n  rc-\u003eframes_till_gf_update_due \u003d INT_MAX;\n  rc-\u003ebaseline_gf_interval \u003d INT_MAX;\n\nIs there a use case for GF updates but no GF references?",
+      "parentUuid": "AAAAdn//3VY\u003d",
+      "revId": "edec8087871c76049f2ae1a627beb317de9b700d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
