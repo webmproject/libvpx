@@ -1042,6 +1042,7 @@ static int sb_has_motion(const VP9_COMMON *cm, MODE_INFO **prev_mi_8x8) {
   }
   return 0;
 }
+
 static void update_state_rt(VP9_COMP *cpi, PICK_MODE_CONTEXT *ctx,
                          BLOCK_SIZE bsize, int output_enabled) {
   int i;
@@ -2358,9 +2359,8 @@ static void encode_rtc_sb_row(VP9_COMP *cpi, const TileInfo *const tile,
 
     const int idx_str = cm->mode_info_stride * mi_row + mi_col;
     MODE_INFO **mi_8x8 = cm->mi_grid_visible + idx_str;
-
     cpi->mb.source_variance = UINT_MAX;
-    set_offsets(cpi, tile, mi_row, mi_col, BLOCK_64X64);
+
     set_partitioning(cpi, tile, mi_8x8, mi_row, mi_col);
     rtc_use_partition(cpi, tile, mi_8x8, tp, mi_row, mi_col, BLOCK_64X64,
                      &dummy_rate, &dummy_dist, 1);
