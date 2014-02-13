@@ -345,7 +345,6 @@ static void select_in_frame_q_segment(VP9_COMP *cpi,
                                       int mi_row, int mi_col,
                                       int output_enabled, int projected_rate) {
   VP9_COMMON *const cm = &cpi->common;
-  int target_rate = cpi->rc.sb64_target_rate << 8;   // convert to bits << 8
 
   const int mi_offset = mi_row * cm->mi_cols + mi_col;
   const int bw = num_8x8_blocks_wide_lookup[BLOCK_64X64];
@@ -362,7 +361,8 @@ static void select_in_frame_q_segment(VP9_COMP *cpi,
   } else {
     // Rate depends on fraction of a SB64 in frame (xmis * ymis / bw * bh).
     // It is converted to bits * 256 units
-    target_rate = (cpi->rc.sb64_target_rate * xmis * ymis * 256) / (bw * bh);
+    const int target_rate = (cpi->rc.sb64_target_rate * xmis * ymis * 256) /
+                            (bw * bh);
 
     if (projected_rate < (target_rate / 4)) {
       segment = 2;
@@ -1897,7 +1897,11 @@ static void rd_pick_partition(VP9_COMP *cpi, const TileInfo *const tile,
     restore_context(cpi, mi_row, mi_col, a, l, sa, sl, bsize);
   }
 
-
+  // TODO(jbb): This code added so that we avoid static analysis
+  // warning related to the fact that best_rd isn't used after this
+  // point.  This code should be refactored so that the duplicate
+  // checks occur in some sub function and thus are used...
+  (void) best_rd;
   *rate = best_rate;
   *dist = best_dist;
 
