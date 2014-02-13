@@ -871,10 +871,10 @@ int vp9_full_range_search_c(const MACROBLOCK *x, MV *ref_mv, MV *best_mv,
 
   MV this_mv;
 
-  int bestsad = INT_MAX;
+  unsigned int bestsad = INT_MAX;
   int ref_row, ref_col;
 
-  int thissad;
+  unsigned int thissad;
   const MV fcenter_mv = {center_mv->row >> 3, center_mv->col >> 3};
 
   const int *mvjsadcost = x->nmvjointsadcost;
