@@ -1253,9 +1253,6 @@ static void rd_use_partition(VP9_COMP *cpi,
     x->mb_energy = vp9_block_energy(cpi, x, bsize);
   }
 
-  x->fast_ms = 0;
-  x->subblock_ref = 0;
-
   if (cpi->sf.adjust_partitioning_from_last_frame) {
     // Check if any of the sub blocks are further split.
     if (partition == PARTITION_SPLIT && subsize > BLOCK_8X8) {
@@ -1796,9 +1793,6 @@ static void rd_pick_partition(VP9_COMP *cpi, const TileInfo *const tile,
     restore_context(cpi, mi_row, mi_col, a, l, sa, sl, bsize);
   }
 
-  x->fast_ms = 0;
-  x->subblock_ref = 0;
-
   // PARTITION_HORZ
   if (partition_horz_allowed && do_rect) {
     subsize = get_subsize(bsize, PARTITION_HORZ);
@@ -2220,6 +2214,7 @@ static void select_tx_mode(VP9_COMP *cpi) {
     }
   }
 }
+
 // Start RTC Exploration
 typedef enum {
   BOTH_ZERO = 0,
@@ -2251,12 +2246,15 @@ static void set_mode_info(MB_MODE_INFO *mbmi, BLOCK_SIZE bsize,
   mbmi->sb_type = bsize;
   mbmi->segment_id = 0;
 }
+
 static INLINE int get_block_row(int b32i, int b16i, int b8i) {
   return ((b32i >> 1) << 2) + ((b16i >> 1) << 1) + (b8i >> 1);
 }
+
 static INLINE int get_block_col(int b32i, int b16i, int b8i) {
   return ((b32i & 1) << 2) + ((b16i & 1) << 1) + (b8i & 1);
 }
+
 static void rtc_use_partition(VP9_COMP *cpi,
                              const TileInfo *const tile,
                              MODE_INFO **mi_8x8,
@@ -2276,8 +2274,6 @@ static void rtc_use_partition(VP9_COMP *cpi,
   int row8x8_remaining = tile->mi_row_end - mi_row;
   int col8x8_remaining = tile->mi_col_end - mi_col;
   int b32i;
-  x->fast_ms = 0;
-  x->subblock_ref = 0;
   for (b32i = 0; b32i < 4; b32i++) {
     int b16i;
     for (b16i = 0; b16i < 4; b16i++) {

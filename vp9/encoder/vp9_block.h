@@ -172,9 +172,7 @@ struct macroblock {
   int skip_encode;
 
   // Used to store sub partition's choices.
-  int fast_ms;
   int_mv pred_mv[MAX_REF_FRAMES];
-  int subblock_ref;
 
   // TODO(jingning): Need to refactor the structure arrays that buffers the
   // coding mode decisions of each partition type.
