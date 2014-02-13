@@ -229,18 +229,6 @@ static int read_frame(struct VpxDecInputContext *input, uint8_t **buf,
   }
 }
 
-static int get_image_plane_width(int plane, const vpx_image_t *img) {
-  return (plane > 0 && img->x_chroma_shift > 0) ?
-             (img->d_w + 1) >> img->x_chroma_shift :
-             img->d_w;
-}
-
-static int get_image_plane_height(int plane, const vpx_image_t *img) {
-  return (plane > 0 &&  img->y_chroma_shift > 0) ?
-             (img->d_h + 1) >> img->y_chroma_shift :
-             img->d_h;
-}
-
 static void update_image_md5(const vpx_image_t *img, const int planes[3],
                              MD5Context *md5) {
   int i, y;
@@ -249,8 +237,8 @@ static void update_image_md5(const vpx_image_t *img, const int planes[3],
     const int plane = planes[i];
     const unsigned char *buf = img->planes[plane];
     const int stride = img->stride[plane];
-    const int w = get_image_plane_width(plane, img);
-    const int h = get_image_plane_height(plane, img);
+    const int w = vpx_img_plane_width(img, plane);
+    const int h = vpx_img_plane_height(img, plane);
 
     for (y = 0; y < h; ++y) {
       MD5Update(md5, buf, w);
@@ -267,8 +255,8 @@ static void write_image_file(const vpx_image_t *img, const int planes[3],
     const int plane = planes[i];
     const unsigned char *buf = img->planes[plane];
     const int stride = img->stride[plane];
-    const int w = get_image_plane_width(plane, img);
-    const int h = get_image_plane_height(plane, img);
+    const int w = vpx_img_plane_width(img, plane);
+    const int h = vpx_img_plane_height(img, plane);
 
     for (y = 0; y < h; ++y) {
       fwrite(buf, 1, w, file);

@@ -220,14 +220,31 @@ const VpxInterface *get_vpx_decoder_by_fourcc(uint32_t fourcc) {
   return NULL;
 }
 
+// TODO(dkovalev): move this function to vpx_image.{c, h}, so it will be part
+// of vpx_image_t support
+int vpx_img_plane_width(const vpx_image_t *img, int plane) {
+  if (plane > 0 && img->x_chroma_shift > 0)
+    return (img->d_w + 1) >> img->x_chroma_shift;
+  else
+    return img->d_w;
+}
+
+int vpx_img_plane_height(const vpx_image_t *img, int plane) {
+  if (plane > 0 &&  img->y_chroma_shift > 0)
+    return (img->d_h + 1) >> img->y_chroma_shift;
+  else
+    return img->d_h;
+}
+
 void vpx_img_write(const vpx_image_t *img, FILE *file) {
-  int plane, y;
+  int plane;
 
   for (plane = 0; plane < 3; ++plane) {
     const unsigned char *buf = img->planes[plane];
     const int stride = img->stride[plane];
-    const int w = plane ? (img->d_w + 1) >> 1 : img->d_w;
-    const int h = plane ? (img->d_h + 1) >> 1 : img->d_h;
+    const int w = vpx_img_plane_width(img, plane);
+    const int h = vpx_img_plane_height(img, plane);
+    int y;
 
     for (y = 0; y < h; ++y) {
       fwrite(buf, 1, w, file);
@@ -242,8 +259,8 @@ int vpx_img_read(vpx_image_t *img, FILE *file) {
   for (plane = 0; plane < 3; ++plane) {
     unsigned char *buf = img->planes[plane];
     const int stride = img->stride[plane];
-    const int w = plane ? (img->d_w + 1) >> 1 : img->d_w;
-    const int h = plane ? (img->d_h + 1) >> 1 : img->d_h;
+    const int w = vpx_img_plane_width(img, plane);
+    const int h = vpx_img_plane_height(img, plane);
     int y;
 
     for (y = 0; y < h; ++y) {

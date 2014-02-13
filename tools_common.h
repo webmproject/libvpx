@@ -140,10 +140,9 @@ const VpxInterface *get_vpx_decoder_by_fourcc(uint32_t fourcc);
 
 // TODO(dkovalev): move this function to vpx_image.{c, h}, so it will be part
 // of vpx_image_t support
+int vpx_img_plane_width(const vpx_image_t *img, int plane);
+int vpx_img_plane_height(const vpx_image_t *img, int plane);
 void vpx_img_write(const vpx_image_t *img, FILE *file);
-
-// TODO(dkovalev): move this function to vpx_image.{c, h}, so it will be part
-// of vpx_image_t support
 int vpx_img_read(vpx_image_t *img, FILE *file);
 
 #ifdef __cplusplus
