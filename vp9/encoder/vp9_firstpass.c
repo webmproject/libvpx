@@ -1566,13 +1566,7 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
       (i >= MIN_GF_INTERVAL) &&
       // for real scene cuts (not forced kfs) dont allow arf very near kf.
       (rc->next_key_frame_forced ||
-        (i <= (rc->frames_to_key - MIN_GF_INTERVAL))) &&
-      ((next_frame.pcnt_inter > 0.75) ||
-       (next_frame.pcnt_second_ref > 0.5)) &&
-      ((mv_in_out_accumulator / (double)i > -0.2) ||
-       (mv_in_out_accumulator > -2.0)) &&
-      (boost_score > 100)) {
-
+      (i <= (rc->frames_to_key - MIN_GF_INTERVAL)))) {
     // Alternative boost calculation for alt ref
     rc->gfu_boost = calc_arf_boost(cpi, 0, (i - 1), (i - 1), &f_boost,
                                    &b_boost);
