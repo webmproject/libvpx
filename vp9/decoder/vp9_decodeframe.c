@@ -303,7 +303,7 @@ static void predict_and_reconstruct_intra_block(int plane, int block,
                           dst, pd->dst.stride, dst, pd->dst.stride,
                           x, y, plane);
 
-  if (!mi->mbmi.skip_coeff) {
+  if (!mi->mbmi.skip) {
     const int eob = vp9_decode_block_tokens(cm, xd, plane, block,
                                             plane_bsize, x, y, tx_size,
                                             args->r);
@@ -397,7 +397,7 @@ static void decode_modes_b(VP9_COMMON *const cm, MACROBLOCKD *const xd,
   // Has to be called after set_offsets
   mbmi = &xd->mi_8x8[0]->mbmi;
 
-  if (mbmi->skip_coeff) {
+  if (mbmi->skip) {
     reset_skip_context(xd, bsize);
   } else {
     if (cm->seg.enabled)
@@ -421,12 +421,12 @@ static void decode_modes_b(VP9_COMMON *const cm, MACROBLOCKD *const xd,
     vp9_dec_build_inter_predictors_sb(xd, mi_row, mi_col, bsize);
 
     // Reconstruction
-    if (!mbmi->skip_coeff) {
+    if (!mbmi->skip) {
       int eobtotal = 0;
       struct inter_args arg = { cm, xd, r, &eobtotal };
       vp9_foreach_transformed_block(xd, bsize, reconstruct_inter_block, &arg);
       if (!less8x8 && eobtotal == 0)
-        mbmi->skip_coeff = 1;  // skip loopfilter
+        mbmi->skip = 1;  // skip loopfilter
     }
   }
 

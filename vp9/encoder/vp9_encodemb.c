@@ -32,7 +32,7 @@ struct optimize_ctx {
 struct encode_b_args {
   MACROBLOCK *x;
   struct optimize_ctx *ctx;
-  unsigned char *skip_coeff;
+  unsigned char *skip;
 };
 
 void vp9_subtract_block_c(int rows, int cols,
@@ -439,7 +439,7 @@ static void encode_block(int plane, int block, BLOCK_SIZE plane_bsize,
   }
 
   if (p->eobs[block])
-    *(args->skip_coeff) = 0;
+    *(args->skip) = 0;
 
   if (x->skip_encode || p->eobs[block] == 0)
     return;
@@ -489,7 +489,7 @@ void vp9_encode_sby(MACROBLOCK *x, BLOCK_SIZE bsize) {
   MACROBLOCKD *const xd = &x->e_mbd;
   struct optimize_ctx ctx;
   MB_MODE_INFO *mbmi = &xd->mi_8x8[0]->mbmi;
-  struct encode_b_args arg = {x, &ctx, &mbmi->skip_coeff};
+  struct encode_b_args arg = {x, &ctx, &mbmi->skip};
 
   vp9_subtract_sby(x, bsize);
   if (x->optimize)
@@ -503,7 +503,7 @@ void vp9_encode_sb(MACROBLOCK *x, BLOCK_SIZE bsize) {
   MACROBLOCKD *const xd = &x->e_mbd;
   struct optimize_ctx ctx;
   MB_MODE_INFO *mbmi = &xd->mi_8x8[0]->mbmi;
-  struct encode_b_args arg = {x, &ctx, &mbmi->skip_coeff};
+  struct encode_b_args arg = {x, &ctx, &mbmi->skip};
 
   if (!x->skip_recode)
     vp9_subtract_sb(x, bsize);
@@ -648,20 +648,20 @@ static void encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
       assert(0);
   }
   if (*eob)
-    *(args->skip_coeff) = 0;
+    *(args->skip) = 0;
 }
 
 void vp9_encode_block_intra(MACROBLOCK *x, int plane, int block,
                             BLOCK_SIZE plane_bsize, TX_SIZE tx_size,
-                            unsigned char *skip_coeff) {
-  struct encode_b_args arg = {x, NULL, skip_coeff};
+                            unsigned char *skip) {
+  struct encode_b_args arg = {x, NULL, skip};
   encode_block_intra(plane, block, plane_bsize, tx_size, &arg);
 }
 
 
 void vp9_encode_intra_block_plane(MACROBLOCK *x, BLOCK_SIZE bsize, int plane) {
   const MACROBLOCKD *const xd = &x->e_mbd;
-  struct encode_b_args arg = {x, NULL, &xd->mi_8x8[0]->mbmi.skip_coeff};
+  struct encode_b_args arg = {x, NULL, &xd->mi_8x8[0]->mbmi.skip};
 
   vp9_foreach_transformed_block_in_plane(xd, bsize, plane, encode_block_intra,
                                          &arg);

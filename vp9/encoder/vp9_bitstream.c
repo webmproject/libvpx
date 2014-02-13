@@ -104,13 +104,13 @@ static void write_selected_tx_size(const VP9_COMP *cpi, MODE_INFO *m,
   }
 }
 
-static int write_skip_coeff(const VP9_COMP *cpi, int segment_id, MODE_INFO *m,
-                            vp9_writer *w) {
+static int write_skip(const VP9_COMP *cpi, int segment_id, MODE_INFO *m,
+                      vp9_writer *w) {
   const MACROBLOCKD *const xd = &cpi->mb.e_mbd;
   if (vp9_segfeature_active(&cpi->common.seg, segment_id, SEG_LVL_SKIP)) {
     return 1;
   } else {
-    const int skip = m->mbmi.skip_coeff;
+    const int skip = m->mbmi.skip;
     vp9_write(w, skip, vp9_get_skip_prob(&cpi->common, xd));
     return skip;
   }
@@ -253,7 +253,7 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, MODE_INFO *m, vp9_writer *bc) {
   const MV_REFERENCE_FRAME sec_rf = mi->ref_frame[1];
   const MB_PREDICTION_MODE mode = mi->mode;
   const int segment_id = mi->segment_id;
-  int skip_coeff;
+  int skip;
   const BLOCK_SIZE bsize = mi->sb_type;
   const int allow_hp = cm->allow_high_precision_mv;
 
@@ -273,14 +273,14 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, MODE_INFO *m, vp9_writer *bc) {
     }
   }
 
-  skip_coeff = write_skip_coeff(cpi, segment_id, m, bc);
+  skip = write_skip(cpi, segment_id, m, bc);
 
   if (!vp9_segfeature_active(seg, segment_id, SEG_LVL_REF_FRAME))
     vp9_write(bc, rf != INTRA_FRAME, vp9_get_intra_inter_prob(cm, xd));
 
   if (bsize >= BLOCK_8X8 && cm->tx_mode == TX_MODE_SELECT &&
       !(rf != INTRA_FRAME &&
-        (skip_coeff || vp9_segfeature_active(seg, segment_id, SEG_LVL_SKIP)))) {
+        (skip || vp9_segfeature_active(seg, segment_id, SEG_LVL_SKIP)))) {
     write_selected_tx_size(cpi, m, mi->tx_size, bsize, bc);
   }
 
@@ -382,7 +382,7 @@ static void write_mb_modes_kf(const VP9_COMP *cpi, MODE_INFO **mi_8x8,
   if (seg->update_map)
     write_segment_id(bc, seg, m->mbmi.segment_id);
 
-  write_skip_coeff(cpi, segment_id, m, bc);
+  write_skip(cpi, segment_id, m, bc);
 
   if (m->mbmi.sb_type >= BLOCK_8X8 && cm->tx_mode == TX_MODE_SELECT)
     write_selected_tx_size(cpi, m, m->mbmi.tx_size, m->mbmi.sb_type, bc);

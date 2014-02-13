@@ -496,7 +496,7 @@ static void build_masks(const loop_filter_info_n *const lfi_n,
   const BLOCK_SIZE block_size = mi->mbmi.sb_type;
   const TX_SIZE tx_size_y = mi->mbmi.tx_size;
   const TX_SIZE tx_size_uv = get_uv_tx_size(&mi->mbmi);
-  const int skip = mi->mbmi.skip_coeff;
+  const int skip = mi->mbmi.skip;
   const int seg = mi->mbmi.segment_id;
   const int ref = mi->mbmi.ref_frame[0];
   const int filter_level = lfi_n->lvl[seg][ref][mode_lf_lut[mi->mbmi.mode]];
@@ -577,7 +577,7 @@ static void build_y_mask(const loop_filter_info_n *const lfi_n,
                          LOOP_FILTER_MASK *lfm) {
   const BLOCK_SIZE block_size = mi->mbmi.sb_type;
   const TX_SIZE tx_size_y = mi->mbmi.tx_size;
-  const int skip = mi->mbmi.skip_coeff;
+  const int skip = mi->mbmi.skip;
   const int seg = mi->mbmi.segment_id;
   const int ref = mi->mbmi.ref_frame[0];
   const int filter_level = lfi_n->lvl[seg][ref][mode_lf_lut[mi->mbmi.mode]];
@@ -937,8 +937,7 @@ static void filter_block_plane_non420(VP9_COMMON *cm,
     for (c = 0; c < MI_BLOCK_SIZE && mi_col + c < cm->mi_cols; c += col_step) {
       const MODE_INFO *mi = mi_8x8[c];
       const BLOCK_SIZE sb_type = mi[0].mbmi.sb_type;
-      const int skip_this = mi[0].mbmi.skip_coeff
-                            && is_inter_block(&mi[0].mbmi);
+      const int skip_this = mi[0].mbmi.skip && is_inter_block(&mi[0].mbmi);
       // left edge of current unit is block/partition edge -> no skip
       const int block_edge_left = (num_4x4_blocks_wide_lookup[sb_type] > 1) ?
           !(c & (num_8x8_blocks_wide_lookup[sb_type] - 1)) : 1;

@@ -314,7 +314,7 @@ void vp9_tokenize_sb(VP9_COMP *cpi, TOKENEXTRA **t, int dry_run,
   const int skip_inc = !vp9_segfeature_active(&cm->seg, mbmi->segment_id,
                                               SEG_LVL_SKIP);
   struct tokenize_b_args arg = {cpi, xd, t, cpi->mb.token_cache};
-  if (mbmi->skip_coeff) {
+  if (mbmi->skip) {
     if (!dry_run)
       cm->counts.skip[ctx][1] += skip_inc;
     reset_skip_context(xd, bsize);

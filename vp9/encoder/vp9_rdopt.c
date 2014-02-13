@@ -650,8 +650,7 @@ static void block_rd_txfm(int plane, int block, BLOCK_SIZE plane_bsize,
     return;
 
   if (!is_inter_block(mbmi))
-    vp9_encode_block_intra(x, plane, block, plane_bsize, tx_size,
-                           &mbmi->skip_coeff);
+    vp9_encode_block_intra(x, plane, block, plane_bsize, tx_size, &mbmi->skip);
   else
     vp9_xform_quant(x, plane, block, plane_bsize, tx_size);
 

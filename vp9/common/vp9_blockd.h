@@ -128,7 +128,7 @@ typedef struct {
 
   uint8_t mode_context[MAX_REF_FRAMES];
 
-  unsigned char skip_coeff;    // 0=need to decode coeffs, 1=no coefficients
+  unsigned char skip;    // 0=need to decode coeffs, 1=no coefficients
   unsigned char segment_id;    // Segment id for this block.
 
   // Flags used for prediction status of various bit-stream signals

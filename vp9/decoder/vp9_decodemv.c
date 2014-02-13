@@ -146,8 +146,8 @@ static int read_inter_segment_id(VP9_COMMON *const cm, MACROBLOCKD *const xd,
   return segment_id;
 }
 
-static int read_skip_coeff(VP9_COMMON *cm, const MACROBLOCKD *xd,
-                           int segment_id, vp9_reader *r) {
+static int read_skip(VP9_COMMON *cm, const MACROBLOCKD *xd,
+                     int segment_id, vp9_reader *r) {
   if (vp9_segfeature_active(&cm->seg, segment_id, SEG_LVL_SKIP)) {
     return 1;
   } else {
@@ -169,7 +169,7 @@ static void read_intra_frame_mode_info(VP9_COMMON *const cm,
   const BLOCK_SIZE bsize = mbmi->sb_type;
 
   mbmi->segment_id = read_intra_segment_id(cm, xd, mi_row, mi_col, r);
-  mbmi->skip_coeff = read_skip_coeff(cm, xd, mbmi->segment_id, r);
+  mbmi->skip = read_skip(cm, xd, mbmi->segment_id, r);
   mbmi->tx_size = read_tx_size(cm, xd, cm->tx_mode, bsize, 1, r);
   mbmi->ref_frame[0] = INTRA_FRAME;
   mbmi->ref_frame[1] = NONE;
@@ -520,10 +520,10 @@ static void read_inter_frame_mode_info(VP9_COMMON *const cm,
   mbmi->mv[0].as_int = 0;
   mbmi->mv[1].as_int = 0;
   mbmi->segment_id = read_inter_segment_id(cm, xd, mi_row, mi_col, r);
-  mbmi->skip_coeff = read_skip_coeff(cm, xd, mbmi->segment_id, r);
+  mbmi->skip = read_skip(cm, xd, mbmi->segment_id, r);
   inter_block = read_is_inter_block(cm, xd, mbmi->segment_id, r);
   mbmi->tx_size = read_tx_size(cm, xd, cm->tx_mode, mbmi->sb_type,
-                               !mbmi->skip_coeff || !inter_block, r);
+                               !mbmi->skip || !inter_block, r);
 
   if (inter_block)
     read_inter_block_mode_info(cm, xd, tile, mi, mi_row, mi_col, r);
