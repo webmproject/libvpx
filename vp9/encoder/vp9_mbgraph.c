@@ -29,7 +29,6 @@ static unsigned int do_16x16_motion_iteration(VP9_COMP *cpi,
   MACROBLOCK   *const x  = &cpi->mb;
   MACROBLOCKD *const xd = &x->e_mbd;
   vp9_variance_fn_ptr_t v_fn_ptr = cpi->fn_ptr[BLOCK_16X16];
-  unsigned int best_err;
 
   const int tmp_col_min = x->mv_col_min;
   const int tmp_col_max = x->mv_col_max;
@@ -48,27 +47,22 @@ static unsigned int do_16x16_motion_iteration(VP9_COMP *cpi,
   ref_full.row = ref_mv->row >> 3;
 
   /*cpi->sf.search_method == HEX*/
-  best_err = vp9_hex_search(x, &ref_full, step_param, x->errorperbit,
-                            0, &v_fn_ptr, 0, ref_mv, dst_mv);
+  vp9_hex_search(x, &ref_full, step_param, x->errorperbit, 0, &v_fn_ptr, 0,
+                 ref_mv, dst_mv);
 
   // Try sub-pixel MC
   // if (bestsme > error_thresh && bestsme < INT_MAX)
   {
     int distortion;
     unsigned int sse;
-    best_err = cpi->find_fractional_mv_step(
-        x, dst_mv, ref_mv,
-        cpi->common.allow_high_precision_mv,
-        x->errorperbit, &v_fn_ptr,
-        0, cpi->sf.subpel_iters_per_step, NULL, NULL,
-        & distortion, &sse);
+    cpi->find_fractional_mv_step(
+        x, dst_mv, ref_mv, cpi->common.allow_high_precision_mv, x->errorperbit,
+        &v_fn_ptr, 0, cpi->sf.subpel_iters_per_step, NULL, NULL, &distortion,
+        &sse);
   }
 
   vp9_set_mbmode_and_mvs(xd, NEWMV, dst_mv);
   vp9_build_inter_predictors_sby(xd, mb_row, mb_col, BLOCK_16X16);
-  best_err = vp9_sad16x16(x->plane[0].src.buf, x->plane[0].src.stride,
-                          xd->plane[0].dst.buf, xd->plane[0].dst.stride,
-                          INT_MAX);
 
   /* restore UMV window */
   x->mv_col_min = tmp_col_min;
@@ -76,7 +70,9 @@ static unsigned int do_16x16_motion_iteration(VP9_COMP *cpi,
   x->mv_row_min = tmp_row_min;
   x->mv_row_max = tmp_row_max;
 
-  return best_err;
+  return vp9_sad16x16(x->plane[0].src.buf, x->plane[0].src.stride,
+          xd->plane[0].dst.buf, xd->plane[0].dst.stride,
+          INT_MAX);
 }
 
 static int do_16x16_motion_search(VP9_COMP *cpi, const int_mv *ref_mv,
@@ -355,7 +351,7 @@ static void separate_arf_mbs(VP9_COMP *cpi) {
     for (mi_col = 0; mi_col < cm->mi_cols; mi_col++) {
       // If any of the blocks in the sequence failed then the MB
       // goes in segment 0
-      if (arf_not_zz[mi_row/2*cm->mb_cols + mi_col/2]) {
+      if (arf_not_zz[mi_row / 2 * cm->mb_cols + mi_col / 2]) {
         ncnt[0]++;
         cpi->segmentation_map[mi_row * cm->mi_cols + mi_col] = 0;
       } else {
