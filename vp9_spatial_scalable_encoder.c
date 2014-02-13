@@ -75,10 +75,10 @@ static const uint32_t default_spatial_layers = 5;
 static const uint32_t default_kf_dist = 100;
 
 typedef struct {
-  char *output_filename;
+  const char *input_filename;
+  const char *output_filename;
   uint32_t frames_to_code;
   uint32_t frames_to_skip;
-  struct VpxInputContext input_ctx;
 } AppInput;
 
 static const char *exec_name;
@@ -94,8 +94,10 @@ void usage_exit() {
 static void parse_command_line(int argc, const char **argv_,
                                AppInput *app_input, SvcContext *svc_ctx,
                                vpx_codec_enc_cfg_t *enc_cfg) {
-  struct arg arg;
-  char **argv, **argi, **argj;
+  struct arg arg = {0};
+  char **argv = NULL;
+  char **argi = NULL;
+  char **argj = NULL;
   vpx_codec_err_t res;
 
   // initialize SvcContext with parameters that will be passed to vpx_svc_init
@@ -162,7 +164,7 @@ static void parse_command_line(int argc, const char **argv_,
   if (argv[0] == NULL || argv[1] == 0) {
     usage_exit();
   }
-  app_input->input_ctx.filename = argv[0];
+  app_input->input_filename = argv[0];
   app_input->output_filename = argv[1];
   free(argv);
 
@@ -196,6 +198,7 @@ int main(int argc, const char **argv) {
   vpx_codec_err_t res;
   int pts = 0;            /* PTS starts at 0 */
   int frame_duration = 1; /* 1 timebase tick per frame */
+  FILE *infile = NULL;
 
   memset(&svc_ctx, 0, sizeof(svc_ctx));
   svc_ctx.log_print = 1;
@@ -206,8 +209,8 @@ int main(int argc, const char **argv) {
   if (!vpx_img_alloc(&raw, VPX_IMG_FMT_I420, enc_cfg.g_w, enc_cfg.g_h, 32))
     die("Failed to allocate image %dx%d\n", enc_cfg.g_w, enc_cfg.g_h);
 
-  if (!(app_input.input_ctx.file = fopen(app_input.input_ctx.filename, "rb")))
-    die("Failed to open %s for reading\n", app_input.input_ctx.filename);
+  if (!(infile = fopen(app_input.input_filename, "rb")))
+    die("Failed to open %s for reading\n", app_input.input_filename);
 
   // Initialize codec
   if (vpx_svc_init(&svc_ctx, &codec, vpx_codec_vp9_cx(), &enc_cfg) !=
@@ -229,13 +232,13 @@ int main(int argc, const char **argv) {
     die("Failed to open %s for writing\n", app_input.output_filename);
 
   // skip initial frames
-  for (i = 0; i < app_input.frames_to_skip; ++i) {
-    read_yuv_frame(&app_input.input_ctx, &raw);
-  }
+  for (i = 0; i < app_input.frames_to_skip; ++i)
+    vpx_img_read(&raw, infile);
 
   // Encode frames
   while (frame_cnt < app_input.frames_to_code) {
-    if (read_yuv_frame(&app_input.input_ctx, &raw)) break;
+    if (!vpx_img_read(&raw, infile))
+      break;
 
     res = vpx_svc_encode(&svc_ctx, &codec, &raw, pts, frame_duration,
                          VPX_DL_REALTIME);
@@ -255,7 +258,7 @@ int main(int argc, const char **argv) {
 
   printf("Processed %d frames\n", frame_cnt);
 
-  fclose(app_input.input_ctx.file);
+  fclose(infile);
   if (vpx_codec_destroy(&codec)) die_codec(&codec, "Failed to destroy codec");
 
   vpx_video_writer_close(writer);
