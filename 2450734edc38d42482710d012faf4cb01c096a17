@@ -16,6 +16,24 @@
       "revId": "2450734edc38d42482710d012faf4cb01c096a17",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//3uw\u003d",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-02-13T00:52:33Z",
+      "side": 1,
+      "message": "agreed; Dmitry, please rebase into 3 (or more) patches:\n- read\n- write\n- other stuff",
+      "parentUuid": "AAAAdn//3vc\u003d",
+      "revId": "2450734edc38d42482710d012faf4cb01c096a17",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
