@@ -365,8 +365,6 @@ static void select_in_frame_q_segment(VP9_COMP *cpi,
                             (bw * bh);
 
     if (projected_rate < (target_rate / 4)) {
-      segment = 2;
-    } else if (projected_rate < (target_rate / 2)) {
       segment = 1;
     } else {
       segment = 0;
@@ -667,7 +665,18 @@ static void rd_pick_sb_modes(VP9_COMP *cpi, const TileInfo *const tile,
   if (cpi->oxcf.aq_mode == VARIANCE_AQ) {
     const int energy = bsize <= BLOCK_16X16 ? x->mb_energy
                                             : vp9_block_energy(cpi, x, bsize);
-    xd->mi_8x8[0]->mbmi.segment_id = vp9_vaq_segment_id(energy);
+
+    if (cm->frame_type == KEY_FRAME ||
+        cpi->refresh_alt_ref_frame ||
+        (cpi->refresh_golden_frame && !cpi->rc.is_src_frame_alt_ref)) {
+      xd->mi_8x8[0]->mbmi.segment_id = vp9_vaq_segment_id(energy);
+    } else {
+      const uint8_t *const map = cm->seg.update_map ? cpi->segmentation_map
+                                                    : cm->last_frame_seg_map;
+      xd->mi_8x8[0]->mbmi.segment_id =
+        vp9_get_segment_id(cm, map, bsize, mi_row, mi_col);
+    }
+
     rdmult_ratio = vp9_vaq_rdmult_ratio(energy);
     vp9_mb_init_quantizer(cpi, x);
   }
@@ -681,11 +690,12 @@ static void rd_pick_sb_modes(VP9_COMP *cpi, const TileInfo *const tile,
   } else if (cpi->oxcf.aq_mode == COMPLEXITY_AQ) {
     const int mi_offset = mi_row * cm->mi_cols + mi_col;
     unsigned char complexity = cpi->complexity_map[mi_offset];
-    const int is_edge = (mi_row == 0) || (mi_row == (cm->mi_rows - 1)) ||
-                        (mi_col == 0) || (mi_col == (cm->mi_cols - 1));
+    const int is_edge = (mi_row <= 1) || (mi_row >= (cm->mi_rows - 2)) ||
+                        (mi_col <= 1) || (mi_col >= (cm->mi_cols - 2));
 
-    if (!is_edge && (complexity > 128))
+    if (!is_edge && (complexity > 128)) {
       x->rdmult = x->rdmult  + ((x->rdmult * (complexity - 128)) / 256);
+    }
   }
 
   // Find best coding mode & reconstruct the MB so it is available
@@ -708,6 +718,9 @@ static void rd_pick_sb_modes(VP9_COMP *cpi, const TileInfo *const tile,
       vp9_clear_system_state();  // __asm emms;
       *totalrate = round(*totalrate * rdmult_ratio);
     }
+  }
+  else if (cpi->oxcf.aq_mode == COMPLEXITY_AQ) {
+    x->rdmult = orig_rdmult;
   }
 }
 
