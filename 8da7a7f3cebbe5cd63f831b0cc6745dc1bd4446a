@@ -160,6 +160,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//3UE\u003d",
+        "filename": "examples/vp8_set_maps.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 129,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-02-13T22:36:11Z",
+      "side": 1,
+      "message": "In general I agree with your comments. Every your point is obviously right but for some reason we obviously have a lot of duplication in libvpx :-) Right now it is clear that we have the same encode_frame() in many examples (because it was extracted from the while loop), so it is a step further. Let\u0027s think how to solve this problem in one of the next patches. There is a small chance (but it\u0027s really small) that we\u0027ll write something specific into encode_frame() depending on the example file.",
+      "parentUuid": "AAAAdn//3Uk\u003d",
+      "revId": "8da7a7f3cebbe5cd63f831b0cc6745dc1bd4446a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//3Yk\u003d",
         "filename": "examples/vp8_set_maps.c",
         "patchSetId": 2
