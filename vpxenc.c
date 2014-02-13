@@ -717,17 +717,6 @@ static void parse_global_config(struct VpxEncoderConfig *global, char **argv) {
       argj++;
   }
 
-  /* Validate global config */
-  if (global->passes == 0) {
-#if CONFIG_VP9_ENCODER
-    // Make default VP9 passes = 2 until there is a better quality 1-pass
-    // encoder
-    global->passes = strcmp(global->codec->name, "vp9") == 0 ? 2 : 1;
-#else
-    global->passes = 1;
-#endif
-  }
-
   if (global->pass) {
     /* DWIM: Assume the user meant passes=2 if pass=2 is specified */
     if (global->pass > global->passes) {
@@ -735,6 +724,23 @@ static void parse_global_config(struct VpxEncoderConfig *global, char **argv) {
            global->pass, global->pass);
       global->passes = global->pass;
     }
+  }
+  /* Validate global config */
+  if (global->passes == 0) {
+#if CONFIG_VP9_ENCODER
+    // Make default VP9 passes = 2 until there is a better quality 1-pass
+    // encoder
+    global->passes = (strcmp(global->codec->name, "vp9") == 0 &&
+                      global->deadline != VPX_DL_REALTIME) ? 2 : 1;
+#else
+    global->passes = 1;
+#endif
+  }
+
+  if (global->deadline == VPX_DL_REALTIME &&
+      global->passes > 1) {
+    warn("Enforcing one-pass encoding in realtime mode\n");
+    global->passes = 1;
   }
 }
 
@@ -826,6 +832,10 @@ static struct stream_state *new_stream(struct VpxEncoderConfig *global,
 
     /* Allows removal of the application version from the EBML tags */
     stream->ebml.debug = global->debug;
+
+    /* Default lag_in_frames is 0 in realtime mode */
+    if (global->deadline == VPX_DL_REALTIME)
+      stream->config.cfg.g_lag_in_frames = 0;
   }
 
   /* Output files must be specified for each stream */
@@ -874,59 +884,63 @@ static int parse_stream_params(struct VpxEncoderConfig *global,
       continue;
     }
 
-    if (0);
-    else if (arg_match(&arg, &outputfile, argi))
+    if (0) {
+    } else if (arg_match(&arg, &outputfile, argi)) {
       config->out_fn = arg.val;
-    else if (arg_match(&arg, &fpf_name, argi))
+    } else if (arg_match(&arg, &fpf_name, argi)) {
       config->stats_fn = arg.val;
-    else if (arg_match(&arg, &use_ivf, argi))
+    } else if (arg_match(&arg, &use_ivf, argi)) {
       config->write_webm = 0;
-    else if (arg_match(&arg, &threads, argi))
+    } else if (arg_match(&arg, &threads, argi)) {
       config->cfg.g_threads = arg_parse_uint(&arg);
-    else if (arg_match(&arg, &profile, argi))
+    } else if (arg_match(&arg, &profile, argi)) {
       config->cfg.g_profile = arg_parse_uint(&arg);
-    else if (arg_match(&arg, &width, argi))
+    } else if (arg_match(&arg, &width, argi)) {
       config->cfg.g_w = arg_parse_uint(&arg);
-    else if (arg_match(&arg, &height, argi))
+    } else if (arg_match(&arg, &height, argi)) {
       config->cfg.g_h = arg_parse_uint(&arg);
-    else if (arg_match(&arg, &stereo_mode, argi))
+    } else if (arg_match(&arg, &stereo_mode, argi)) {
       config->stereo_fmt = arg_parse_enum_or_int(&arg);
-    else if (arg_match(&arg, &timebase, argi)) {
+    } else if (arg_match(&arg, &timebase, argi)) {
       config->cfg.g_timebase = arg_parse_rational(&arg);
       validate_positive_rational(arg.name, &config->cfg.g_timebase);
-    } else if (arg_match(&arg, &error_resilient, argi))
+    } else if (arg_match(&arg, &error_resilient, argi)) {
       config->cfg.g_error_resilient = arg_parse_uint(&arg);
-    else if (arg_match(&arg, &lag_in_frames, argi))
+    } else if (arg_match(&arg, &lag_in_frames, argi)) {
       config->cfg.g_lag_in_frames = arg_parse_uint(&arg);
-    else if (arg_match(&arg, &dropframe_thresh, argi))
+      if (global->deadline == VPX_DL_REALTIME &&
+          config->cfg.g_lag_in_frames != 0) {
+        warn("non-zero %s option ignored in realtime mode.\n", arg.name);
+        config->cfg.g_lag_in_frames = 0;
+      }
+    } else if (arg_match(&arg, &dropframe_thresh, argi)) {
       config->cfg.rc_dropframe_thresh = arg_parse_uint(&arg);
-    else if (arg_match(&arg, &resize_allowed, argi))
+    } else if (arg_match(&arg, &resize_allowed, argi)) {
       config->cfg.rc_resize_allowed = arg_parse_uint(&arg);
-    else if (arg_match(&arg, &resize_up_thresh, argi))
+    } else if (arg_match(&arg, &resize_up_thresh, argi)) {
       config->cfg.rc_resize_up_thresh = arg_parse_uint(&arg);
-    else if (arg_match(&arg, &resize_down_thresh, argi))
+    } else if (arg_match(&arg, &resize_down_thresh, argi)) {
       config->cfg.rc_resize_down_thresh = arg_parse_uint(&arg);
-    else if (arg_match(&arg, &end_usage, argi))
+    } else if (arg_match(&arg, &end_usage, argi)) {
       config->cfg.rc_end_usage = arg_parse_enum_or_int(&arg);
-    else if (arg_match(&arg, &target_bitrate, argi))
+    } else if (arg_match(&arg, &target_bitrate, argi)) {
       config->cfg.rc_target_bitrate = arg_parse_uint(&arg);
-    else if (arg_match(&arg, &min_quantizer, argi))
+    } else if (arg_match(&arg, &min_quantizer, argi)) {
       config->cfg.rc_min_quantizer = arg_parse_uint(&arg);
-    else if (arg_match(&arg, &max_quantizer, argi))
+    } else if (arg_match(&arg, &max_quantizer, argi)) {
       config->cfg.rc_max_quantizer = arg_parse_uint(&arg);
-    else if (arg_match(&arg, &undershoot_pct, argi))
+    } else if (arg_match(&arg, &undershoot_pct, argi)) {
       config->cfg.rc_undershoot_pct = arg_parse_uint(&arg);
-    else if (arg_match(&arg, &overshoot_pct, argi))
+    } else if (arg_match(&arg, &overshoot_pct, argi)) {
       config->cfg.rc_overshoot_pct = arg_parse_uint(&arg);
-    else if (arg_match(&arg, &buf_sz, argi))
+    } else if (arg_match(&arg, &buf_sz, argi)) {
       config->cfg.rc_buf_sz = arg_parse_uint(&arg);
-    else if (arg_match(&arg, &buf_initial_sz, argi))
+    } else if (arg_match(&arg, &buf_initial_sz, argi)) {
       config->cfg.rc_buf_initial_sz = arg_parse_uint(&arg);
-    else if (arg_match(&arg, &buf_optimal_sz, argi))
+    } else if (arg_match(&arg, &buf_optimal_sz, argi)) {
       config->cfg.rc_buf_optimal_sz = arg_parse_uint(&arg);
-    else if (arg_match(&arg, &bias_pct, argi)) {
-      config->cfg.rc_2pass_vbr_bias_pct = arg_parse_uint(&arg);
-
+    } else if (arg_match(&arg, &bias_pct, argi)) {
+        config->cfg.rc_2pass_vbr_bias_pct = arg_parse_uint(&arg);
       if (global->passes < 2)
         warn("option %s ignored in one-pass mode.\n", arg.name);
     } else if (arg_match(&arg, &minsection_pct, argi)) {
@@ -939,16 +953,15 @@ static int parse_stream_params(struct VpxEncoderConfig *global,
 
       if (global->passes < 2)
         warn("option %s ignored in one-pass mode.\n", arg.name);
-    } else if (arg_match(&arg, &kf_min_dist, argi))
+    } else if (arg_match(&arg, &kf_min_dist, argi)) {
       config->cfg.kf_min_dist = arg_parse_uint(&arg);
-    else if (arg_match(&arg, &kf_max_dist, argi)) {
+    } else if (arg_match(&arg, &kf_max_dist, argi)) {
       config->cfg.kf_max_dist = arg_parse_uint(&arg);
       config->have_kf_max_dist = 1;
-    } else if (arg_match(&arg, &kf_disabled, argi))
+    } else if (arg_match(&arg, &kf_disabled, argi)) {
       config->cfg.kf_mode = VPX_KF_DISABLED;
-    else {
+    } else {
       int i, match = 0;
-
       for (i = 0; ctrl_args[i]; i++) {
         if (arg_match(&arg, ctrl_args[i], argi)) {
           int j;
@@ -972,12 +985,10 @@ static int parse_stream_params(struct VpxEncoderConfig *global,
 
         }
       }
-
       if (!match)
         argj++;
     }
   }
-
   return eos_mark_found;
 }
 
