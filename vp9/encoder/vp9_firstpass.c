@@ -106,12 +106,12 @@ static int lookup_next_frame_stats(const struct twopass_rc *p,
 }
 
 
-// Read frame stats at an offset from the current position
+// Read frame stats at an offset from the current position.
 static int read_frame_stats(const struct twopass_rc *p,
                             FIRSTPASS_STATS *frame_stats, int offset) {
   const FIRSTPASS_STATS *fps_ptr = p->stats_in;
 
-  // Check legality of offset
+  // Check legality of offset.
   if (offset >= 0) {
     if (&fps_ptr[offset] >= p->stats_in_end)
       return EOF;
@@ -144,7 +144,6 @@ static void output_stats(const VP9_COMP *cpi,
 
 // TEMP debug code
 #if OUTPUT_FPF
-
   {
     FILE *fpfile;
     fpfile = fopen("firstpass.stt", "a");
@@ -377,7 +376,6 @@ static unsigned int zz_motion_search(const VP9_COMP *cpi, const MACROBLOCK *x) {
   const int src_stride = x->plane[0].src.stride;
   const uint8_t *const ref = xd->plane[0].pre[0].buf;
   const int ref_stride = xd->plane[0].pre[0].stride;
-
   unsigned int sse;
   vp9_variance_fn_t fn = get_block_variance_fn(xd->mi_8x8[0]->mbmi.sb_type);
   fn(src, src_stride, ref, ref_stride, &sse);
@@ -398,18 +396,18 @@ static void first_pass_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
   int new_mv_mode_penalty = 256;
   const int quart_frm = MIN(cpi->common.width, cpi->common.height);
 
-  // refine the motion search range accroding to the frame dimension
-  // for first pass test
+  // Refine the motion search range according to the frame dimension
+  // for first pass test.
   while ((quart_frm << sr) < MAX_FULL_PEL_VAL)
     sr++;
 
   step_param += sr;
   further_steps -= sr;
 
-  // override the default variance function to use MSE
+  // Override the default variance function to use MSE.
   v_fn_ptr.vf = get_block_variance_fn(bsize);
 
-  // Initial step/diamond search centred on best mv
+  // Center the initial step/diamond search on best mv.
   tmp_err = cpi->diamond_search_sad(x, &ref_mv_full, &tmp_mv,
                                     step_param,
                                     x->sadperbit16, &num00, &v_fn_ptr,
@@ -424,7 +422,7 @@ static void first_pass_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
     best_mv->col = tmp_mv.col;
   }
 
-  // Further step/diamond searches as necessary
+  // Carry out further step/diamond searches as necessary.
   n = num00;
   num00 = 0;
 
@@ -504,7 +502,7 @@ void vp9_first_pass(VP9_COMP *cpi) {
   setup_dst_planes(xd, new_yv12, 0, 0);
 
   xd->mi_8x8 = cm->mi_grid_visible;
-  xd->mi_8x8[0] = cm->mi;  // required for vp9_frame_init_quantizer
+  xd->mi_8x8[0] = cm->mi;
 
   vp9_setup_block_planes(&x->e_mbd, cm->subsampling_x, cm->subsampling_y);
 
@@ -521,27 +519,25 @@ void vp9_first_pass(VP9_COMP *cpi) {
   vp9_init_mv_probs(cm);
   vp9_initialize_rd_consts(cpi);
 
-  // tiling is ignored in the first pass
+  // Tiling is ignored in the first pass.
   vp9_tile_init(&tile, cm, 0, 0);
 
-  // for each macroblock row in image
   for (mb_row = 0; mb_row < cm->mb_rows; mb_row++) {
     int_mv best_ref_mv;
 
     best_ref_mv.as_int = 0;
 
-    // reset above block coeffs
+    // Reset above block coeffs.
     xd->up_available = (mb_row != 0);
     recon_yoffset = (mb_row * recon_y_stride * 16);
     recon_uvoffset = (mb_row * recon_uv_stride * uv_mb_height);
 
     // Set up limit values for motion vectors to prevent them extending
-    // outside the UMV borders
+    // outside the UMV borders.
     x->mv_row_min = -((mb_row * 16) + BORDER_MV_PIXELS_B16);
     x->mv_row_max = ((cm->mb_rows - 1 - mb_row) * 16)
                     + BORDER_MV_PIXELS_B16;
 
-    // for each macroblock col in image
     for (mb_col = 0; mb_col < cm->mb_cols; mb_col++) {
       int this_error;
       const int use_dc_pred = (mb_col || mb_row) && (!mb_col || !mb_row);
@@ -566,15 +562,15 @@ void vp9_first_pass(VP9_COMP *cpi) {
         error_weight = vp9_vaq_inv_q_ratio(energy);
       }
 
-      // do intra 16x16 prediction
+      // Do intra 16x16 prediction.
       this_error = vp9_encode_intra(x, use_dc_pred);
       if (cpi->oxcf.aq_mode == VARIANCE_AQ) {
         vp9_clear_system_state();  // __asm emms;
         this_error = (int)(this_error * error_weight);
       }
 
-      // intrapenalty below deals with situations where the intra and inter
-      // error scores are very low (eg a plain black frame).
+      // Intrapenalty below deals with situations where the intra and inter
+      // error scores are very low (e.g. a plain black frame).
       // We do not have special cases in first pass for 0,0 and nearest etc so
       // all inter modes carry an overhead cost estimate for the mv.
       // When the error score is very low this causes us to pick all or lots of
@@ -582,7 +578,7 @@ void vp9_first_pass(VP9_COMP *cpi) {
       // This penalty adds a cost matching that of a 0,0 mv to the intra case.
       this_error += intrapenalty;
 
-      // Cumulative intra error total
+      // Accumulate the intra error.
       intra_error += (int64_t)this_error;
 
       // Set up limit values for motion vectors to prevent them extending
@@ -590,18 +586,18 @@ void vp9_first_pass(VP9_COMP *cpi) {
       x->mv_col_min = -((mb_col * 16) + BORDER_MV_PIXELS_B16);
       x->mv_col_max = ((cm->mb_cols - 1 - mb_col) * 16) + BORDER_MV_PIXELS_B16;
 
-      // Other than for the first frame do a motion search
+      // Other than for the first frame do a motion search.
       if (cm->current_video_frame > 0) {
         int tmp_err, motion_error;
         int_mv mv, tmp_mv;
 
         xd->plane[0].pre[0].buf = lst_yv12->y_buffer + recon_yoffset;
         motion_error = zz_motion_search(cpi, x);
-        // Simple 0,0 motion with no mv overhead
+        // Assume 0,0 motion with no mv overhead.
         mv.as_int = tmp_mv.as_int = 0;
 
         // Test last reference frame using the previous best mv as the
-        // starting point (best reference) for the search
+        // starting point (best reference) for the search.
         first_pass_motion_search(cpi, x, &best_ref_mv.as_mv, &mv.as_mv,
                                  &motion_error);
         if (cpi->oxcf.aq_mode == VARIANCE_AQ) {
@@ -626,9 +622,9 @@ void vp9_first_pass(VP9_COMP *cpi) {
           }
         }
 
-        // Experimental search in an older reference frame
+        // Search in an older reference frame.
         if (cm->current_video_frame > 1) {
-          // Simple 0,0 motion with no mv overhead
+          // Assume 0,0 motion with no mv overhead.
           int gf_motion_error;
 
           xd->plane[0].pre[0].buf = gld_yv12->y_buffer + recon_yoffset;
@@ -644,15 +640,15 @@ void vp9_first_pass(VP9_COMP *cpi) {
           if (gf_motion_error < motion_error && gf_motion_error < this_error)
             second_ref_count++;
 
-          // Reset to last frame as reference buffer
+          // Reset to last frame as reference buffer.
           xd->plane[0].pre[0].buf = lst_yv12->y_buffer + recon_yoffset;
           xd->plane[1].pre[0].buf = lst_yv12->u_buffer + recon_uvoffset;
           xd->plane[2].pre[0].buf = lst_yv12->v_buffer + recon_uvoffset;
 
-          // In accumulating a score for the older reference frame
-          // take the best of the motion predicted score and
-          // the intra coded error (just as will be done for)
-          // accumulation of "coded_error" for the last frame.
+          // In accumulating a score for the older reference frame take the
+          // best of the motion predicted score and the intra coded error
+          // (just as will be done for) accumulation of "coded_error" for
+          // the last frame.
           if (gf_motion_error < this_error)
             sr_coded_error += gf_motion_error;
           else
@@ -660,14 +656,13 @@ void vp9_first_pass(VP9_COMP *cpi) {
         } else {
           sr_coded_error += motion_error;
         }
-        /* Intra assumed best */
+        // Start by assuming that intra mode is best.
         best_ref_mv.as_int = 0;
 
         if (motion_error <= this_error) {
-          // Keep a count of cases where the inter and intra were
-          // very close and very low. This helps with scene cut
-          // detection for example in cropped clips with black bars
-          // at the sides or top and bottom.
+          // Keep a count of cases where the inter and intra were very close
+          // and very low. This helps with scene cut detection for example in
+          // cropped clips with black bars at the sides or top and bottom.
           if (((this_error - intrapenalty) * 9 <= motion_error * 10) &&
               this_error < 2 * intrapenalty)
             neutral_count++;
@@ -691,16 +686,15 @@ void vp9_first_pass(VP9_COMP *cpi) {
 
           best_ref_mv.as_int = mv.as_int;
 
-          // Was the vector non-zero
           if (mv.as_int) {
             mvcount++;
 
-            // Was it different from the last non zero vector
+            // Non-zero vector, was it different from the last non zero vector?
             if (mv.as_int != lastmv_as_int)
               new_mv_count++;
             lastmv_as_int = mv.as_int;
 
-            // Does the Row vector point inwards or outwards
+            // Does the row vector point inwards or outwards?
             if (mb_row < cm->mb_rows / 2) {
               if (mv.as_mv.row > 0)
                 sum_in_vectors--;
@@ -713,7 +707,7 @@ void vp9_first_pass(VP9_COMP *cpi) {
                 sum_in_vectors--;
             }
 
-            // Does the Row vector point inwards or outwards
+            // Does the col vector point inwards or outwards?
             if (mb_col < cm->mb_cols / 2) {
               if (mv.as_mv.col > 0)
                 sum_in_vectors--;
@@ -732,7 +726,7 @@ void vp9_first_pass(VP9_COMP *cpi) {
       }
       coded_error += (int64_t)this_error;
 
-      // adjust to the next column of macroblocks
+      // Adjust to the next column of MBs.
       x->plane[0].src.buf += 16;
       x->plane[1].src.buf += uv_mb_height;
       x->plane[2].src.buf += uv_mb_height;
@@ -741,7 +735,7 @@ void vp9_first_pass(VP9_COMP *cpi) {
       recon_uvoffset += uv_mb_height;
     }
 
-    // adjust to the next row of mbs
+    // Adjust to the next row of MBs.
     x->plane[0].src.buf += 16 * x->plane[0].src.stride - 16 * cm->mb_cols;
     x->plane[1].src.buf += uv_mb_height * x->plane[1].src.stride -
                            uv_mb_height * cm->mb_cols;
@@ -792,14 +786,14 @@ void vp9_first_pass(VP9_COMP *cpi) {
     // cpi->source_time_stamp.
     fps.duration = (double)(cpi->source->ts_end - cpi->source->ts_start);
 
-    // don't want to do output stats with a stack variable!
+    // Don't want to do output stats with a stack variable!
     twopass->this_frame_stats = fps;
     output_stats(cpi, cpi->output_pkt_list, &twopass->this_frame_stats);
     accumulate_stats(&twopass->total_stats, &fps);
   }
 
   // Copy the previous Last Frame back into gf and and arf buffers if
-  // the prediction is good enough... but also dont allow it to lag too far
+  // the prediction is good enough... but also don't allow it to lag too far.
   if ((twopass->sr_update_lag > 3) ||
       ((cm->current_video_frame > 0) &&
        (twopass->this_frame_stats.pcnt_inter > 0.20) &&
@@ -810,7 +804,7 @@ void vp9_first_pass(VP9_COMP *cpi) {
   } else {
     twopass->sr_update_lag++;
   }
-  // swap frame pointers so last frame refers to the frame we just compressed
+  // Swap frame pointers so last frame refers to the frame we just compressed.
   swap_yv12(lst_yv12, new_yv12);
 
   vp9_extend_frame_borders(lst_yv12, cm->subsampling_x, cm->subsampling_y);
@@ -820,7 +814,7 @@ void vp9_first_pass(VP9_COMP *cpi) {
   if (cm->current_video_frame == 0)
     vp8_yv12_copy_frame(lst_yv12, gld_yv12);
 
-  // use this to see what the first pass reconstruction looks like
+  // Use this to see what the first pass reconstruction looks like.
   if (0) {
     char filename[512];
     FILE *recon_file;
@@ -839,12 +833,8 @@ void vp9_first_pass(VP9_COMP *cpi) {
   cm->current_video_frame++;
 }
 
-// Estimate a cost per mb attributable to overheads such as the coding of
-// modes and motion vectors.
-// Currently simplistic in its assumptions for testing.
-//
-
-
+// Estimate a cost per mb attributable to overheads such as the coding of modes
+// and motion vectors. This currently makes simplistic assumptions for testing.
 static double bitcost(double prob) {
   return -(log(prob) / log(2.0));
 }
@@ -867,18 +857,17 @@ static int64_t estimate_modemvcost(VP9_COMP *cpi,
   motion_cost = bitcost(av_pct_motion);
   intra_cost = bitcost(av_intra);
 
-  // Estimate of extra bits per mv overhead for mbs
-  // << 9 is the normalization to the (bits * 512) used in vp9_rc_bits_per_mb
+  // Estimate the number of extra bits per mv overhead for mbs. We shift (<< 9)
+  // to match the scaling of number of bits by 512.
   mv_cost = ((int)(fpstats->new_mv_count / fpstats->count) * 8) << 9;
 
-  // Crude estimate of overhead cost from modes
-  // << 9 is the normalization to (bits * 512) used in vp9_rc_bits_per_mb
+  // Produce a crude estimate of the overhead cost from modes. We shift (<< 9)
+  // to match the scaling of number of bits by 512.
   mode_cost =
     (int)((((av_pct_inter - av_pct_motion) * zz_cost) +
            (av_pct_motion * motion_cost) +
            (av_intra * intra_cost)) * cpi->common.MBs) << 9;
 
-  // return mv_cost + mode_cost;
   // TODO(paulwilkins): Fix overhead costs for extended Q range.
 #endif
   return 0;
@@ -895,7 +884,7 @@ static double calc_correction_factor(double err_per_mb,
   const double power_term = MIN(vp9_convert_qindex_to_q(q) * 0.0125 + pt_low,
                                 pt_high);
 
-  // Calculate correction factor
+  // Calculate correction factor.
   if (power_term < 1.0)
     assert(error_term >= 0.0);
 
@@ -954,11 +943,11 @@ void vp9_init_second_pass(VP9_COMP *cpi) {
   twopass->total_stats = *twopass->stats_in_end;
   twopass->total_left_stats = twopass->total_stats;
 
-  // each frame can have a different duration, as the frame rate in the source
-  // isn't guaranteed to be constant.   The frame rate prior to the first frame
-  // encoded in the second pass is a guess.  However the sum duration is not.
-  // Its calculated based on the actual durations of all frames from the first
-  // pass.
+  // Each frame can have a different duration, as the frame rate in the source
+  // isn't guaranteed to be constant. The frame rate prior to the first frame
+  // encoded in the second pass is a guess. However, the sum duration is not.
+  // It is calculated based on the actual durations of all frames from the
+  // first pass.
   vp9_new_framerate(cpi, 10000000.0 * twopass->total_stats.count /
                         twopass->total_stats.duration);
 
@@ -969,18 +958,18 @@ void vp9_init_second_pass(VP9_COMP *cpi) {
   // Calculate a minimum intra value to be used in determining the IIratio
   // scores used in the second pass. We have this minimum to make sure
   // that clips that are static but "low complexity" in the intra domain
-  // are still boosted appropriately for KF/GF/ARF
+  // are still boosted appropriately for KF/GF/ARF.
   twopass->kf_intra_err_min = KF_MB_INTRA_MIN * cpi->common.MBs;
   twopass->gf_intra_err_min = GF_MB_INTRA_MIN * cpi->common.MBs;
 
-  // This variable monitors how far behind the second ref update is lagging
+  // This variable monitors how far behind the second ref update is lagging.
   twopass->sr_update_lag = 1;
 
   // Scan the first pass file and calculate an average Intra / Inter error score
   // ratio for the sequence.
   {
     double sum_iiratio = 0.0;
-    start_pos = twopass->stats_in;  // Note the starting "file" position.
+    start_pos = twopass->stats_in;
 
     while (input_stats(twopass, &this_frame) != EOF) {
       const double iiratio = this_frame.intra_error /
@@ -991,7 +980,6 @@ void vp9_init_second_pass(VP9_COMP *cpi) {
     twopass->avg_iiratio = sum_iiratio /
         DOUBLE_DIVIDE_CHECK((double)twopass->total_stats.count);
 
-    // Reset file position
     reset_fpf_position(twopass, start_pos);
   }
 
@@ -1001,7 +989,7 @@ void vp9_init_second_pass(VP9_COMP *cpi) {
     double av_error = twopass->total_stats.ssim_weighted_pred_err /
                       DOUBLE_DIVIDE_CHECK(twopass->total_stats.count);
 
-    start_pos = twopass->stats_in;  // Note starting "file" position
+    start_pos = twopass->stats_in;
 
     twopass->modified_error_total = 0.0;
     twopass->modified_error_min =
@@ -1022,8 +1010,8 @@ void vp9_init_second_pass(VP9_COMP *cpi) {
 void vp9_end_second_pass(VP9_COMP *cpi) {
 }
 
-// This function gives and estimate of how badly we believe
-// the prediction quality is decaying from frame to frame.
+// This function gives an estimate of how badly we believe the prediction
+// quality is decaying from frame to frame.
 static double get_prediction_decay_rate(const VP9_COMMON *cm,
                                         const FIRSTPASS_STATS *next_frame) {
   // Look at the observed drop in prediction quality between the last frame
@@ -1056,8 +1044,7 @@ static int detect_transition_to_still(VP9_COMP *cpi, int frame_interval,
     FIRSTPASS_STATS *position = cpi->twopass.stats_in;
     FIRSTPASS_STATS tmp_next_frame;
 
-    // Look ahead a few frames to see if static condition
-    // persists...
+    // Look ahead a few frames to see if static condition persists...
     for (j = 0; j < still_interval; j++) {
       if (EOF == input_stats(&cpi->twopass, &tmp_next_frame))
         break;
@@ -1068,7 +1055,7 @@ static int detect_transition_to_still(VP9_COMP *cpi, int frame_interval,
 
     reset_fpf_position(&cpi->twopass, position);
 
-    // Only if it does do we signal a transition to still
+    // Only if it does do we signal a transition to still.
     if (j == still_interval)
       trans_to_still = 1;
   }
@@ -1078,7 +1065,7 @@ static int detect_transition_to_still(VP9_COMP *cpi, int frame_interval,
 
 // This function detects a flash through the high relative pcnt_second_ref
 // score in the frame following a flash frame. The offset passed in should
-// reflect this
+// reflect this.
 static int detect_flash(const struct twopass_rc *twopass, int offset) {
   FIRSTPASS_STATS next_frame;
 
@@ -1091,7 +1078,7 @@ static int detect_flash(const struct twopass_rc *twopass, int offset) {
     // brief break in prediction (such as a flash) but subsequent frames
     // are reasonably well predicted by an earlier (pre flash) frame.
     // The recovery after a flash is indicated by a high pcnt_second_ref
-    // comapred to pcnt_inter.
+    // compared to pcnt_inter.
     if (next_frame.pcnt_second_ref > next_frame.pcnt_inter &&
         next_frame.pcnt_second_ref >= 0.5)
       flash_detected = 1;
@@ -1100,7 +1087,7 @@ static int detect_flash(const struct twopass_rc *twopass, int offset) {
   return flash_detected;
 }
 
-// Update the motion related elements to the GF arf boost calculation
+// Update the motion related elements to the GF arf boost calculation.
 static void accumulate_frame_motion_stats(
   FIRSTPASS_STATS *this_frame,
   double *this_frame_mv_in_out,
@@ -1112,13 +1099,13 @@ static void accumulate_frame_motion_stats(
   // Accumulate motion stats.
   motion_pct = this_frame->pcnt_motion;
 
-  // Accumulate Motion In/Out of frame stats
+  // Accumulate Motion In/Out of frame stats.
   *this_frame_mv_in_out = this_frame->mv_in_out_count * motion_pct;
   *mv_in_out_accumulator += this_frame->mv_in_out_count * motion_pct;
   *abs_mv_in_out_accumulator += fabs(this_frame->mv_in_out_count * motion_pct);
 
   // Accumulate a measure of how uniform (or conversely how random)
-  // the motion field is. (A ratio of absmv / mv)
+  // the motion field is (a ratio of absmv / mv).
   if (motion_pct > 0.05) {
     const double this_frame_mvr_ratio = fabs(this_frame->mvr_abs) /
                            DOUBLE_DIVIDE_CHECK(fabs(this_frame->MVr));
@@ -1141,7 +1128,7 @@ static double calc_frame_boost(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame,
                                double this_frame_mv_in_out) {
   double frame_boost;
 
-  // Underlying boost factor is based on inter intra error ratio
+  // Underlying boost factor is based on inter intra error ratio.
   if (this_frame->intra_error > cpi->twopass.gf_intra_err_min)
     frame_boost = (IIFACTOR * this_frame->intra_error /
                    DOUBLE_DIVIDE_CHECK(this_frame->coded_error));
@@ -1149,13 +1136,12 @@ static double calc_frame_boost(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame,
     frame_boost = (IIFACTOR * cpi->twopass.gf_intra_err_min /
                    DOUBLE_DIVIDE_CHECK(this_frame->coded_error));
 
-  // Increase boost for frames where new data coming into frame
-  // (eg zoom out). Slightly reduce boost if there is a net balance
-  // of motion out of the frame (zoom in).
-  // The range for this_frame_mv_in_out is -1.0 to +1.0
+  // Increase boost for frames where new data coming into frame (e.g. zoom out).
+  // Slightly reduce boost if there is a net balance of motion out of the frame
+  // (zoom in). The range for this_frame_mv_in_out is -1.0 to +1.0.
   if (this_frame_mv_in_out > 0.0)
     frame_boost += frame_boost * (this_frame_mv_in_out * 2.0);
-  // In extreme case boost is halved
+  // In the extreme case the boost is halved.
   else
     frame_boost += frame_boost * (this_frame_mv_in_out / 2.0);
 
@@ -1177,12 +1163,12 @@ static int calc_arf_boost(VP9_COMP *cpi, int offset,
   int arf_boost;
   int flash_detected = 0;
 
-  // Search forward from the proposed arf/next gf position
+  // Search forward from the proposed arf/next gf position.
   for (i = 0; i < f_frames; i++) {
     if (read_frame_stats(twopass, &this_frame, (i + offset)) == EOF)
       break;
 
-    // Update the motion related elements to the boost calculation
+    // Update the motion related elements to the boost calculation.
     accumulate_frame_motion_stats(&this_frame,
                                   &this_frame_mv_in_out, &mv_in_out_accumulator,
                                   &abs_mv_in_out_accumulator,
@@ -1193,7 +1179,7 @@ static int calc_arf_boost(VP9_COMP *cpi, int offset,
     flash_detected = detect_flash(twopass, i + offset) ||
                      detect_flash(twopass, i + offset + 1);
 
-    // Cumulative effect of prediction quality decay
+    // Accumulate the effect of prediction quality decay.
     if (!flash_detected) {
       decay_accumulator *= get_prediction_decay_rate(&cpi->common, &this_frame);
       decay_accumulator = decay_accumulator < MIN_DECAY_FACTOR
@@ -1206,7 +1192,7 @@ static int calc_arf_boost(VP9_COMP *cpi, int offset,
 
   *f_boost = (int)boost_score;
 
-  // Reset for backward looking loop
+  // Reset for backward looking loop.
   boost_score = 0.0;
   mv_ratio_accumulator = 0.0;
   decay_accumulator = 1.0;
@@ -1214,12 +1200,12 @@ static int calc_arf_boost(VP9_COMP *cpi, int offset,
   mv_in_out_accumulator = 0.0;
   abs_mv_in_out_accumulator = 0.0;
 
-  // Search backward towards last gf position
+  // Search backward towards last gf position.
   for (i = -1; i >= -b_frames; i--) {
     if (read_frame_stats(twopass, &this_frame, (i + offset)) == EOF)
       break;
 
-    // Update the motion related elements to the boost calculation
+    // Update the motion related elements to the boost calculation.
     accumulate_frame_motion_stats(&this_frame,
                                   &this_frame_mv_in_out, &mv_in_out_accumulator,
                                   &abs_mv_in_out_accumulator,
@@ -1230,7 +1216,7 @@ static int calc_arf_boost(VP9_COMP *cpi, int offset,
     flash_detected = detect_flash(twopass, i + offset) ||
                      detect_flash(twopass, i + offset + 1);
 
-    // Cumulative effect of prediction quality decay
+    // Cumulative effect of prediction quality decay.
     if (!flash_detected) {
       decay_accumulator *= get_prediction_decay_rate(&cpi->common, &this_frame);
       decay_accumulator = decay_accumulator < MIN_DECAY_FACTOR
@@ -1280,8 +1266,7 @@ static void schedule_frames(VP9_COMP *cpi, const int start, const int end,
     return;
   }
 
-  // ARF Group: work out the ARF schedule.
-  // Mark ARF frames as negative.
+  // ARF Group: Work out the ARF schedule and mark ARF frames as negative.
   if (end < 0) {
     // printf("start:%d end:%d\n", -end, -end);
     // ARF frame is at the end of the range.
@@ -1404,14 +1389,14 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   double decay_accumulator = 1.0;
   double zero_motion_accumulator = 1.0;
 
-  double loop_decay_rate = 1.00;          // Starting decay rate
+  double loop_decay_rate = 1.00;
   double last_loop_decay_rate = 1.00;
 
   double this_frame_mv_in_out = 0.0;
   double mv_in_out_accumulator = 0.0;
   double abs_mv_in_out_accumulator = 0.0;
   double mv_ratio_accumulator_thresh;
-  const int max_bits = frame_max_bits(cpi);     // Max for a single frame
+  const int max_bits = frame_max_bits(cpi);  // Max bits for a single frame.
 
   unsigned int allow_alt_ref = cpi->oxcf.play_alternate &&
                                cpi->oxcf.lag_in_frames;
@@ -1431,12 +1416,12 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   // Load stats for the current frame.
   mod_frame_err = calculate_modified_err(cpi, this_frame);
 
-  // Note the error of the frame at the start of the group (this will be
-  // the GF frame error if we code a normal gf
+  // Note the error of the frame at the start of the group. This will be
+  // the GF frame error if we code a normal gf.
   gf_first_frame_err = mod_frame_err;
 
   // If this is a key frame or the overlay from a previous arf then
-  // The error score / cost of this frame has already been accounted for.
+  // the error score / cost of this frame has already been accounted for.
   if (cpi->common.frame_type == KEY_FRAME || rc->source_alt_ref_active)
     gf_group_err -= gf_first_frame_err;
 
@@ -1457,11 +1442,10 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
     active_max_gf_interval = rc->max_gf_interval;
 
   i = 0;
-  while (i < twopass->static_scene_max_gf_interval &&
-         i < rc->frames_to_key) {
-    i++;    // Increment the loop counter
+  while (i < twopass->static_scene_max_gf_interval && i < rc->frames_to_key) {
+    i++;
 
-    // Accumulate error score of frames in this gf group
+    // Accumulate error score of frames in this gf group.
     mod_frame_err = calculate_modified_err(cpi, this_frame);
     gf_group_err += mod_frame_err;
 
@@ -1472,13 +1456,13 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
     // quality back to an earlier frame is then restored.
     flash_detected = detect_flash(twopass, 0);
 
-    // Update the motion related elements to the boost calculation
+    // Update the motion related elements to the boost calculation.
     accumulate_frame_motion_stats(&next_frame,
                                   &this_frame_mv_in_out, &mv_in_out_accumulator,
                                   &abs_mv_in_out_accumulator,
                                   &mv_ratio_accumulator);
 
-    // Cumulative effect of prediction quality decay
+    // Accumulate the effect of prediction quality decay.
     if (!flash_detected) {
       last_loop_decay_rate = loop_decay_rate;
       loop_decay_rate = get_prediction_decay_rate(&cpi->common, &next_frame);
@@ -1491,8 +1475,8 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
                                       next_frame.pcnt_motion;
       }
 
-      // Break clause to detect very still sections after motion
-      // (for example a static image after a fade or other transition).
+      // Break clause to detect very still sections after motion. For example,
+      // a static image after a fade or other transition.
       if (detect_transition_to_still(cpi, i, 5, loop_decay_rate,
                                      last_loop_decay_rate)) {
         allow_alt_ref = 0;
@@ -1500,16 +1484,16 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
       }
     }
 
-    // Calculate a boost number for this frame
+    // Calculate a boost number for this frame.
     boost_score += (decay_accumulator *
        calc_frame_boost(cpi, &next_frame, this_frame_mv_in_out));
 
     // Break out conditions.
     if (
-      // Break at cpi->max_gf_interval unless almost totally static
+      // Break at cpi->max_gf_interval unless almost totally static.
       (i >= active_max_gf_interval && (zero_motion_accumulator < 0.995)) ||
       (
-        // Don't break out with a very short interval
+        // Don't break out with a very short interval.
         (i > MIN_GF_INTERVAL) &&
         ((boost_score > 125.0) || (next_frame.pcnt_inter < 0.75)) &&
         (!flash_detected) &&
@@ -1528,7 +1512,7 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
 
   twopass->gf_zeromotion_pct = (int)(zero_motion_accumulator * 1000.0);
 
-  // Don't allow a gf too near the next kf
+  // Don't allow a gf too near the next kf.
   if ((rc->frames_to_key - i) < MIN_GF_INTERVAL) {
     while (i < (rc->frames_to_key + !rc->next_key_frame_forced)) {
       i++;
@@ -1561,14 +1545,14 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   else
     rc->baseline_gf_interval = i;
 
-  // Should we use the alternate reference frame
+  // Should we use the alternate reference frame.
   if (allow_alt_ref &&
       (i < cpi->oxcf.lag_in_frames) &&
       (i >= MIN_GF_INTERVAL) &&
-      // for real scene cuts (not forced kfs) dont allow arf very near kf.
+      // For real scene cuts (not forced kfs) don't allow arf very near kf.
       (rc->next_key_frame_forced ||
       (i <= (rc->frames_to_key - MIN_GF_INTERVAL)))) {
-    // Alternative boost calculation for alt ref
+    // Calculate the boost for alt ref.
     rc->gfu_boost = calc_arf_boost(cpi, 0, (i - 1), (i - 1), &f_boost,
                                    &b_boost);
     rc->source_alt_ref_pending = 1;
@@ -1630,7 +1614,7 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
 #endif
 #endif
 
-  // Calculate the bits to be allocated to the group as a whole
+  // Calculate the bits to be allocated to the group as a whole.
   if (twopass->kf_group_bits > 0 && twopass->kf_group_error_left > 0) {
     twopass->gf_group_bits = (int64_t)(cpi->twopass.kf_group_bits *
                 (gf_group_err / cpi->twopass.kf_group_error_left));
@@ -1642,11 +1626,11 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
      twopass->kf_group_bits : twopass->gf_group_bits;
 
   // Clip cpi->twopass.gf_group_bits based on user supplied data rate
-  // variability limit (cpi->oxcf.two_pass_vbrmax_section)
+  // variability limit, cpi->oxcf.two_pass_vbrmax_section.
   if (twopass->gf_group_bits > (int64_t)max_bits * rc->baseline_gf_interval)
     twopass->gf_group_bits = (int64_t)max_bits * rc->baseline_gf_interval;
 
-  // Reset the file position
+  // Reset the file position.
   reset_fpf_position(twopass, start_pos);
 
   // Assign  bits to the arf or gf.
@@ -1658,7 +1642,7 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
 
     int boost = (rc->gfu_boost * gfboost_qadjust(q)) / 100;
 
-    // Set max and minimum boost and hence minimum allocation
+    // Set max and minimum boost and hence minimum allocation.
     boost = clamp(boost, 125, (rc->baseline_gf_interval + 1) * 200);
 
     if (rc->source_alt_ref_pending && i == 0)
@@ -1666,7 +1650,7 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
     else
       allocation_chunks = (rc->baseline_gf_interval * 100) + (boost - 100);
 
-    // Prevent overflow
+    // Prevent overflow.
     if (boost > 1023) {
       int divisor = boost >> 10;
       boost /= divisor;
@@ -1674,13 +1658,13 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
     }
 
     // Calculate the number of bits to be spent on the gf or arf based on
-    // the boost number
+    // the boost number.
     gf_bits = (int)((double)boost * (twopass->gf_group_bits /
                   (double)allocation_chunks));
 
     // If the frame that is to be boosted is simpler than the average for
     // the gf/arf group then use an alternative calculation
-    // based on the error score of the frame itself
+    // based on the error score of the frame itself.
     if (rc->baseline_gf_interval < 1 ||
         mod_frame_err < gf_group_err / (double)rc->baseline_gf_interval) {
       double alt_gf_grp_bits = (double)twopass->kf_group_bits  *
@@ -1704,7 +1688,7 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
         gf_bits = alt_gf_bits;
     }
 
-    // Dont allow a negative value for gf_bits
+    // Don't allow a negative value for gf_bits.
     if (gf_bits < 0)
       gf_bits = 0;
 
@@ -1714,23 +1698,23 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
     if (i == 1 ||
         (!rc->source_alt_ref_pending &&
          cpi->common.frame_type != KEY_FRAME)) {
-      // Per frame bit target for this frame
+      // Calculate the per frame bit target for this frame.
       vp9_rc_set_frame_target(cpi, gf_bits);
     }
   }
 
   {
-    // Adjust KF group bits and error remaining
+    // Adjust KF group bits and error remaining.
     twopass->kf_group_error_left -= (int64_t)gf_group_err;
     twopass->kf_group_bits -= twopass->gf_group_bits;
 
     if (twopass->kf_group_bits < 0)
       twopass->kf_group_bits = 0;
 
-    // If this is an arf update we want to remove the score for the
-    // overlay frame at the end which will usually be very cheap to code.
-    // The overlay frame has already in effect been coded so we want to spread
-    // the remaining bits amoung the other frames/
+    // If this is an arf update we want to remove the score for the overlay
+    // frame at the end which will usually be very cheap to code.
+    // The overlay frame has already, in effect, been coded so we want to spread
+    // the remaining bits among the other frames.
     // For normal GFs remove the score for the GF itself unless this is
     // also a key frame in which case it has already been accounted for.
     if (rc->source_alt_ref_pending) {
@@ -1748,7 +1732,7 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
       twopass->gf_group_bits = 0;
 
     // This condition could fail if there are two kfs very close together
-    // despite (MIN_GF_INTERVAL) and would cause a divide by 0 in the
+    // despite MIN_GF_INTERVAL and would cause a divide by 0 in the
     // calculation of alt_extra_bits.
     if (rc->baseline_gf_interval >= 3) {
       const int boost = rc->source_alt_ref_pending ? b_boost : rc->gfu_boost;
@@ -1824,20 +1808,18 @@ static int test_candidate_kf(VP9_COMP *cpi,
                              const FIRSTPASS_STATS *next_frame) {
   int is_viable_kf = 0;
 
-  // Does the frame satisfy the primary criteria of a key frame
-  //      If so, then examine how well it predicts subsequent frames
+  // Does the frame satisfy the primary criteria of a key frame?
+  // If so, then examine how well it predicts subsequent frames.
   if ((this_frame->pcnt_second_ref < 0.10) &&
       (next_frame->pcnt_second_ref < 0.10) &&
       ((this_frame->pcnt_inter < 0.05) ||
-       (((this_frame->pcnt_inter - this_frame->pcnt_neutral) < .35) &&
+       (((this_frame->pcnt_inter - this_frame->pcnt_neutral) < 0.35) &&
         ((this_frame->intra_error /
           DOUBLE_DIVIDE_CHECK(this_frame->coded_error)) < 2.5) &&
         ((fabs(last_frame->coded_error - this_frame->coded_error) /
-              DOUBLE_DIVIDE_CHECK(this_frame->coded_error) >
-          .40) ||
+              DOUBLE_DIVIDE_CHECK(this_frame->coded_error) > 0.40) ||
          (fabs(last_frame->intra_error - this_frame->intra_error) /
-              DOUBLE_DIVIDE_CHECK(this_frame->intra_error) >
-          .40) ||
+              DOUBLE_DIVIDE_CHECK(this_frame->intra_error) > 0.40) ||
          ((next_frame->intra_error /
            DOUBLE_DIVIDE_CHECK(next_frame->coded_error)) > 3.5))))) {
     int i;
@@ -1851,10 +1833,10 @@ static int test_candidate_kf(VP9_COMP *cpi,
 
     local_next_frame = *next_frame;
 
-    // Note the starting file position so we can reset to it
+    // Note the starting file position so we can reset to it.
     start_pos = cpi->twopass.stats_in;
 
-    // Examine how well the key frame predicts subsequent frames
+    // Examine how well the key frame predicts subsequent frames.
     for (i = 0; i < 16; i++) {
       double next_iiratio = (IIKFACTOR1 * local_next_frame.intra_error /
                              DOUBLE_DIVIDE_CHECK(local_next_frame.coded_error));
@@ -1862,26 +1844,23 @@ static int test_candidate_kf(VP9_COMP *cpi,
       if (next_iiratio > RMAX)
         next_iiratio = RMAX;
 
-      // Cumulative effect of decay in prediction quality
+      // Cumulative effect of decay in prediction quality.
       if (local_next_frame.pcnt_inter > 0.85)
         decay_accumulator *= local_next_frame.pcnt_inter;
       else
         decay_accumulator *= (0.85 + local_next_frame.pcnt_inter) / 2.0;
 
-      // decay_accumulator = decay_accumulator * local_next_frame.pcnt_inter;
-
-      // Keep a running total
+      // Keep a running total.
       boost_score += (decay_accumulator * next_iiratio);
 
-      // Test various breakout clauses
+      // Test various breakout clauses.
       if ((local_next_frame.pcnt_inter < 0.05) ||
           (next_iiratio < 1.5) ||
           (((local_next_frame.pcnt_inter -
              local_next_frame.pcnt_neutral) < 0.20) &&
            (next_iiratio < 3.0)) ||
           ((boost_score - old_boost_score) < 3.0) ||
-          (local_next_frame.intra_error < 200)
-         ) {
+          (local_next_frame.intra_error < 200)) {
         break;
       }
 
@@ -1933,18 +1912,18 @@ static void find_next_key_frame(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   start_position = twopass->stats_in;
   cpi->common.frame_type = KEY_FRAME;
 
-  // is this a forced key frame by interval
+  // Is this a forced key frame by interval.
   rc->this_key_frame_forced = rc->next_key_frame_forced;
 
-  // Clear the alt ref active flag as this can never be active on a key frame
+  // Clear the alt ref active flag as this can never be active on a key frame.
   rc->source_alt_ref_active = 0;
 
-  // Kf is always a gf so clear frames till next gf counter
+  // KF is always a GF so clear frames till next gf counter.
   rc->frames_till_gf_update_due = 0;
 
   rc->frames_to_key = 1;
 
-  // Take a copy of the initial frame details
+  // Take a copy of the initial frame details.
   first_frame = *this_frame;
 
   twopass->kf_group_bits = 0;        // Total bits available to kf group
@@ -1952,29 +1931,28 @@ static void find_next_key_frame(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
 
   kf_mod_err = calculate_modified_err(cpi, this_frame);
 
-  // find the next keyframe
+  // Find the next keyframe.
   i = 0;
   while (twopass->stats_in < twopass->stats_in_end) {
-    // Accumulate kf group error
+    // Accumulate kf group error.
     kf_group_err += calculate_modified_err(cpi, this_frame);
 
-    // load a the next frame's stats
+    // Load the next frame's stats.
     last_frame = *this_frame;
     input_stats(twopass, this_frame);
 
     // Provided that we are not at the end of the file...
     if (cpi->oxcf.auto_key &&
         lookup_next_frame_stats(twopass, &next_frame) != EOF) {
-      // Normal scene cut check
+      // Check for a scene cut.
       if (test_candidate_kf(cpi, &last_frame, this_frame, &next_frame))
         break;
 
-
-      // How fast is prediction quality decaying
+      // How fast is the prediction quality decaying?
       loop_decay_rate = get_prediction_decay_rate(&cpi->common, &next_frame);
 
       // We want to know something about the recent past... rather than
-      // as used elsewhere where we are concened with decay in prediction
+      // as used elsewhere where we are concerned with decay in prediction
       // quality since the last GF or KF.
       recent_loop_decay[i % 8] = loop_decay_rate;
       decay_accumulator = 1.0;
@@ -1982,45 +1960,45 @@ static void find_next_key_frame(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
         decay_accumulator *= recent_loop_decay[j];
 
       // Special check for transition or high motion followed by a
-      // to a static scene.
+      // static scene.
       if (detect_transition_to_still(cpi, i, cpi->key_frame_frequency - i,
                                      loop_decay_rate, decay_accumulator))
         break;
 
-      // Step on to the next frame
+      // Step on to the next frame.
       rc->frames_to_key++;
 
       // If we don't have a real key frame within the next two
-      // forcekeyframeevery intervals then break out of the loop.
+      // key_frame_frequency intervals then break out of the loop.
       if (rc->frames_to_key >= 2 * (int)cpi->key_frame_frequency)
         break;
     } else {
-      rc->frames_to_key++;
+      ++rc->frames_to_key;
     }
     i++;
   }
 
   // If there is a max kf interval set by the user we must obey it.
   // We already breakout of the loop above at 2x max.
-  // This code centers the extra kf if the actual natural
-  // interval is between 1x and 2x
+  // This code centers the extra kf if the actual natural interval
+  // is between 1x and 2x.
   if (cpi->oxcf.auto_key &&
       rc->frames_to_key > (int)cpi->key_frame_frequency) {
     FIRSTPASS_STATS tmp_frame;
 
     rc->frames_to_key /= 2;
 
-    // Copy first frame details
+    // Copy first frame details.
     tmp_frame = first_frame;
 
-    // Reset to the start of the group
+    // Reset to the start of the group.
     reset_fpf_position(twopass, start_position);
 
     kf_group_err = 0;
 
-    // Rescan to get the correct error data for the forced kf group
+    // Rescan to get the correct error data for the forced kf group.
     for (i = 0; i < rc->frames_to_key; i++) {
-      // Accumulate kf group errors
+      // Accumulate kf group errors.
       kf_group_err += calculate_modified_err(cpi, &tmp_frame);
 
       // Load the next frame's stats.
@@ -2033,22 +2011,22 @@ static void find_next_key_frame(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
     rc->next_key_frame_forced = 0;
   }
 
-  // Special case for the last key frame of the file
+  // Special case for the last key frame of the file.
   if (twopass->stats_in >= twopass->stats_in_end) {
-    // Accumulate kf group error
+    // Accumulate kf group error.
     kf_group_err += calculate_modified_err(cpi, this_frame);
   }
 
   // Calculate the number of bits that should be assigned to the kf group.
   if (twopass->bits_left > 0 && twopass->modified_error_left > 0.0) {
-    // Max for a single normal frame (not key frame)
+    // Maximum number of bits for a single normal frame (not key frame).
     int max_bits = frame_max_bits(cpi);
 
-    // Maximum bits for the kf group
+    // Maximum number of bits allocated to the key frame group.
     int64_t max_grp_bits;
 
     // Default allocation based on bits left and relative
-    // complexity of the section
+    // complexity of the section.
     twopass->kf_group_bits = (int64_t)(twopass->bits_left *
        (kf_group_err / twopass->modified_error_left));
 
@@ -2059,7 +2037,7 @@ static void find_next_key_frame(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   } else {
     twopass->kf_group_bits = 0;
   }
-  // Reset the first pass file position
+  // Reset the first pass file position.
   reset_fpf_position(twopass, start_position);
 
   // Determine how big to make this keyframe based on how well the subsequent
@@ -2093,7 +2071,7 @@ static void find_next_key_frame(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
       if (r > RMAX)
         r = RMAX;
 
-      // How fast is prediction quality decaying
+      // How fast is prediction quality decaying.
       if (!detect_flash(twopass, 0)) {
         loop_decay_rate = get_prediction_decay_rate(&cpi->common, &next_frame);
         decay_accumulator *= loop_decay_rate;
@@ -2122,10 +2100,10 @@ static void find_next_key_frame(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
         DOUBLE_DIVIDE_CHECK(sectionstats.coded_error));
   }
 
-  // Reset the first pass file position
+  // Reset the first pass file position.
   reset_fpf_position(twopass, start_position);
 
-  // Work out how many bits to allocate for the key frame itself
+  // Work out how many bits to allocate for the key frame itself.
   if (1) {
     int kf_boost = (int)boost_score;
     int allocation_chunks;
@@ -2142,25 +2120,26 @@ static void find_next_key_frame(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
     rc->kf_boost = kf_boost;
     twopass->kf_zeromotion_pct = (int)(zero_motion_accumulator * 100.0);
 
-    // We do three calculations for kf size.
-    // The first is based on the error score for the whole kf group.
-    // The second (optionally) on the key frames own error if this is
-    // smaller than the average for the group.
-    // The final one insures that the frame receives at least the
-    // allocation it would have received based on its own error score vs
-    // the error score remaining
-    // Special case if the sequence appears almost totaly static
-    // In this case we want to spend almost all of the bits on the
-    // key frame.
-    // cpi->rc.frames_to_key-1 because key frame itself is taken
-    // care of by kf_boost.
+    // Key frame size depends on:
+    // (1) the error score for the whole key frame group,
+    // (2) the key frames' own error if this is smaller than the
+    //     average for the group (optional),
+    // (3) insuring that the frame receives at least the allocation it would
+    //     have received based on its own error score vs the error score
+    //     remaining.
+    // Special case:
+    // If the sequence appears almost totally static we want to spend almost
+    // all of the bits on the key frame.
+    //
+    // We use (cpi->rc.frames_to_key - 1) below because the key frame itself is
+    // taken care of by kf_boost.
     if (zero_motion_accumulator >= 0.99) {
       allocation_chunks = ((rc->frames_to_key - 1) * 10) + kf_boost;
     } else {
       allocation_chunks = ((rc->frames_to_key - 1) * 100) + kf_boost;
     }
 
-    // Prevent overflow
+    // Prevent overflow.
     if (kf_boost > 1028) {
       int divisor = kf_boost >> 10;
       kf_boost /= divisor;
@@ -2170,7 +2149,7 @@ static void find_next_key_frame(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
     twopass->kf_group_bits = (twopass->kf_group_bits < 0) ? 0
            : twopass->kf_group_bits;
 
-    // Calculate the number of bits to be spent on the key frame
+    // Calculate the number of bits to be spent on the key frame.
     twopass->kf_bits = (int)((double)kf_boost *
         ((double)twopass->kf_group_bits / allocation_chunks));
 
@@ -2189,9 +2168,9 @@ static void find_next_key_frame(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
       if (twopass->kf_bits > alt_kf_bits)
         twopass->kf_bits = alt_kf_bits;
     } else {
-    // Else if it is much harder than other frames in the group make sure
-    // it at least receives an allocation in keeping with its relative
-    // error score
+      // Else if it is much harder than other frames in the group make sure
+      // it at least receives an allocation in keeping with its relative
+      // error score.
       alt_kf_bits = (int)((double)twopass->bits_left * (kf_mod_err /
                DOUBLE_DIVIDE_CHECK(twopass->modified_error_left)));
 
@@ -2204,7 +2183,7 @@ static void find_next_key_frame(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
     vp9_rc_set_frame_target(cpi, twopass->kf_bits);
   }
 
-  // Note the total error score of the kf group minus the key frame itself
+  // Note the total error score of the kf group minus the key frame itself.
   twopass->kf_group_error_left = (int)(kf_group_err - kf_mod_err);
 
   // Adjust the count of total modified error left.
@@ -2222,7 +2201,7 @@ void vp9_rc_get_first_pass_params(VP9_COMP *cpi) {
   } else {
     cm->frame_type = INTER_FRAME;
   }
-  // Do not use periodic key frames
+  // Do not use periodic key frames.
   cpi->rc.frames_to_key = INT_MAX;
 }
 
@@ -2261,13 +2240,6 @@ void vp9_rc_get_second_pass_params(VP9_COMP *cpi) {
     twopass->active_worst_quality = tmp_q;
     rc->ni_av_qi = tmp_q;
     rc->avg_q = vp9_convert_qindex_to_q(tmp_q);
-
-    // Limit the maxq value returned subsequently.
-    // This increases the risk of overspend or underspend if the initial
-    // estimate for the clip is bad, but helps prevent excessive
-    // variation in Q, especially near the end of a clip
-    // where for example a small overspend may cause Q to crash
-    // adjust_maxq_qrange(cpi);
   }
   vp9_zero(this_frame);
   if (EOF == input_stats(twopass, &this_frame))
@@ -2276,19 +2248,19 @@ void vp9_rc_get_second_pass_params(VP9_COMP *cpi) {
   this_frame_intra_error = this_frame.intra_error;
   this_frame_coded_error = this_frame.coded_error;
 
-  // keyframe and section processing !
+  // Keyframe and section processing.
   if (rc->frames_to_key == 0 ||
       (cm->frame_flags & FRAMEFLAGS_KEY)) {
-    // Define next KF group and assign bits to it
+    // Define next KF group and assign bits to it.
     this_frame_copy = this_frame;
     find_next_key_frame(cpi, &this_frame_copy);
   } else {
     cm->frame_type = INTER_FRAME;
   }
 
-  // Is this a GF / ARF (Note that a KF is always also a GF)
+  // Is this frame a GF / ARF? (Note: a key frame is always also a GF).
   if (rc->frames_till_gf_update_due == 0) {
-    // Define next gf group and assign bits to it
+    // Define next gf group and assign bits to it.
     this_frame_copy = this_frame;
 
 #if CONFIG_MULTIPLE_ARF
@@ -2303,7 +2275,8 @@ void vp9_rc_get_second_pass_params(VP9_COMP *cpi) {
 
     if (twopass->gf_zeromotion_pct > 995) {
       // As long as max_thresh for encode breakout is small enough, it is ok
-      // to enable it for show frame, i.e. set allow_encode_breakout to 2.
+      // to enable it for show frame, i.e. set allow_encode_breakout to
+      // ENCODE_BREAKOUT_LIMITED.
       if (!cm->show_frame)
         cpi->allow_encode_breakout = ENCODE_BREAKOUT_DISABLED;
       else
@@ -2313,8 +2286,8 @@ void vp9_rc_get_second_pass_params(VP9_COMP *cpi) {
     rc->frames_till_gf_update_due = rc->baseline_gf_interval;
     cpi->refresh_golden_frame = 1;
   } else {
-    // Otherwise this is an ordinary frame
-    // Assign bits from those allocated to the GF group
+    // Otherwise this is an ordinary frame.
+    // Assign bits from those allocated to the GF group.
     this_frame_copy =  this_frame;
     assign_std_frame_bits(cpi, &this_frame_copy);
   }
@@ -2336,7 +2309,7 @@ void vp9_rc_get_second_pass_params(VP9_COMP *cpi) {
     target = vp9_rc_clamp_pframe_target_size(cpi, rc->this_frame_target);
   vp9_rc_set_frame_target(cpi, target);
 
-  // Update the total stats remaining structure
+  // Update the total stats remaining structure.
   subtract_stats(&twopass->total_left_stats, &this_frame);
 }
 
@@ -2346,7 +2319,7 @@ void vp9_twopass_postencode_update(VP9_COMP *cpi, uint64_t bytes_used) {
 #else
   cpi->twopass.bits_left -= 8 * bytes_used;
   // Update bits left to the kf and gf groups to account for overshoot or
-  // undershoot on these frames
+  // undershoot on these frames.
   if (cm->frame_type == KEY_FRAME) {
     cpi->twopass.kf_group_bits += cpi->rc.this_frame_target -
         cpi->rc.projected_frame_size;
