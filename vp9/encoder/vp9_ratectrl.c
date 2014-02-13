@@ -499,8 +499,6 @@ static int calc_active_worst_quality_one_pass_cbr(const VP9_COMP *cpi) {
   // (at buffer = critical level).
   const VP9_CONFIG *oxcf = &cpi->oxcf;
   const RATE_CONTROL *rc = &cpi->rc;
-  // int active_worst_quality = rc->active_worst_quality;
-  // Maximum limit for down adjustment, ~20%.
   // Buffer level below which we push active_worst to worst_quality.
   int critical_level = oxcf->optimal_buffer_level >> 2;
   int adjustment = 0;
@@ -516,6 +514,7 @@ static int calc_active_worst_quality_one_pass_cbr(const VP9_COMP *cpi) {
                                rc->avg_frame_qindex[KEY_FRAME] * 3 / 2);
   if (rc->buffer_level > oxcf->optimal_buffer_level) {
     // Adjust down.
+    // Maximum limit for down adjustment, ~30%.
     int max_adjustment_down = active_worst_quality / 3;
     if (max_adjustment_down) {
       buff_lvl_step = (int)((oxcf->maximum_buffer_size -
@@ -1314,7 +1313,8 @@ static int calc_pframe_target_size_one_pass_cbr(const VP9_COMP *cpi) {
   int min_frame_target = MAX(rc->av_per_frame_bandwidth >> 4,
                              FRAME_OVERHEAD_BITS);
   int target = rc->av_per_frame_bandwidth;
-  if (cpi->use_svc && cpi->oxcf.end_usage == USAGE_STREAM_FROM_SERVER) {
+  if (cpi->svc.number_temporal_layers > 1 &&
+      cpi->oxcf.end_usage == USAGE_STREAM_FROM_SERVER) {
     // Note that for layers, av_per_frame_bandwidth is the cumulative
     // per-frame-bandwidth. For the target size of this frame, use the
     // layer average frame size (i.e., non-cumulative per-frame-bw).
