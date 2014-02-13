@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//37o\u003d",
+        "filename": "vp9/encoder/x86/vp9_variance_impl_intrin_avx2.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2014-02-13T17:53:30Z",
+      "side": 1,
+      "message": "Remove above 2 lines. This file should be unchanged.",
+      "revId": "dd1cff908d8b68fe71ea818696b17373336b2cc3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
