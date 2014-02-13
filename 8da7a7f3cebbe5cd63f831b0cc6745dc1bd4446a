@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//3Vo\u003d",
+        "filename": "examples/vp8_set_maps.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-02-13T22:17:54Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//3Y8\u003d",
+      "revId": "8da7a7f3cebbe5cd63f831b0cc6745dc1bd4446a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//3Y4\u003d",
         "filename": "examples/vp8_set_maps.c",
         "patchSetId": 2
@@ -30,6 +48,24 @@
       "writtenOn": "2014-02-13T21:03:33Z",
       "side": 1,
       "message": "\u003d {0}",
+      "revId": "8da7a7f3cebbe5cd63f831b0cc6745dc1bd4446a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//3Vk\u003d",
+        "filename": "examples/vp8_set_maps.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 99,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-02-13T22:17:54Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//3Y4\u003d",
       "revId": "8da7a7f3cebbe5cd63f831b0cc6745dc1bd4446a",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//3Vg\u003d",
+        "filename": "examples/vp8_set_maps.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 116,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-02-13T22:17:54Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//3Y0\u003d",
+      "revId": "8da7a7f3cebbe5cd63f831b0cc6745dc1bd4446a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//3Yw\u003d",
         "filename": "examples/vp8_set_maps.c",
         "patchSetId": 2
@@ -64,6 +118,24 @@
       "writtenOn": "2014-02-13T21:03:33Z",
       "side": 1,
       "message": "Please move this to a common place soon: Reviewing it in every encoder patch is becoming tedious. :)",
+      "revId": "8da7a7f3cebbe5cd63f831b0cc6745dc1bd4446a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//3VM\u003d",
+        "filename": "examples/vp8_set_maps.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 129,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-02-13T22:17:54Z",
+      "side": 1,
+      "message": "I also don\u0027t like to put the same code in several places. But that\u0027s probably ok for examples -- they should be kind of self-contained. I know we already use some common stuff like reader/writer APIs and get_vpx_{encoder, decoder}_by_name but these are common for the whole code base, not only for examples. Contrary, encode_frame() gets used only by examples, so it obviously shouldn\u0027t go to tools_common. We could create something like examples_common but it seems like an overhead (at least right now).",
+      "parentUuid": "AAAAdn//3Yw\u003d",
       "revId": "8da7a7f3cebbe5cd63f831b0cc6745dc1bd4446a",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//3U4\u003d",
+        "filename": "examples/vp8_set_maps.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 155,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-02-13T22:17:54Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//3Yk\u003d",
+      "revId": "8da7a7f3cebbe5cd63f831b0cc6745dc1bd4446a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//3Yg\u003d",
         "filename": "examples/vp8_set_maps.c",
         "patchSetId": 2
@@ -98,6 +188,24 @@
       "writtenOn": "2014-02-13T21:03:33Z",
       "side": 1,
       "message": "\u003d {0}",
+      "revId": "8da7a7f3cebbe5cd63f831b0cc6745dc1bd4446a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//3U8\u003d",
+        "filename": "examples/vp8_set_maps.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 156,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-02-13T22:17:54Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//3Yg\u003d",
       "revId": "8da7a7f3cebbe5cd63f831b0cc6745dc1bd4446a",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -121,6 +229,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//3VA\u003d",
+        "filename": "examples/vp8_set_maps.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 158,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-02-13T22:17:54Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//3Ys\u003d",
+      "revId": "8da7a7f3cebbe5cd63f831b0cc6745dc1bd4446a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//3Yc\u003d",
         "filename": "examples/vp8_set_maps.c",
         "patchSetId": 2
@@ -132,6 +258,24 @@
       "writtenOn": "2014-02-13T21:03:33Z",
       "side": 1,
       "message": "Didn\u0027t you write an is_valid_dimensions() util function or something?",
+      "revId": "8da7a7f3cebbe5cd63f831b0cc6745dc1bd4446a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//3Uw\u003d",
+        "filename": "examples/vp8_set_maps.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 184,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-02-13T22:17:54Z",
+      "side": 1,
+      "message": "Right now that\u0027s just inlined in every example. As we talked before, it is probably ok to just check that width \u003e 0 \u0026\u0026 height \u003e 0 (because it seems yv12 with odd width/height is allowed). I\u0027ll revisit all these checks in one of the next patches.",
+      "parentUuid": "AAAAdn//3Yc\u003d",
       "revId": "8da7a7f3cebbe5cd63f831b0cc6745dc1bd4446a",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
