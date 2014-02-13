@@ -75,6 +75,8 @@ static const arg_def_t error_concealment = ARG_DEF(NULL, "error-concealment", 0,
 static const arg_def_t scalearg = ARG_DEF("S", "scale", 0,
                                             "Scale output frames uniformly");
 
+static const arg_def_t fb_arg =
+    ARG_DEF(NULL, "frame-buffers", 1, "Number of frame buffers to use");
 
 static const arg_def_t md5arg = ARG_DEF(NULL, "md5", 0,
                                         "Compute the MD5 sum of the decoded frame");
@@ -82,7 +84,7 @@ static const arg_def_t md5arg = ARG_DEF(NULL, "md5", 0,
 static const arg_def_t *all_args[] = {
   &codecarg, &use_yv12, &use_i420, &flipuvarg, &noblitarg,
   &progressarg, &limitarg, &skiparg, &postprocarg, &summaryarg, &outputfile,
-  &threadsarg, &verbosearg, &scalearg,
+  &threadsarg, &verbosearg, &scalearg, &fb_arg,
   &md5arg,
   &error_concealment,
   NULL
@@ -302,6 +304,68 @@ void show_progress(int frame_in, int frame_out, unsigned long dx_time) {
           (float)frame_out * 1000000.0 / (float)dx_time);
 }
 
+struct ExternalFrameBuffer {
+  uint8_t* data;
+  size_t size;
+  int in_use;
+};
+
+struct ExternalFrameBufferList {
+  int num_external_frame_buffers;
+  struct ExternalFrameBuffer *ext_fb;
+};
+
+// Callback used by libvpx to request an external frame buffer. |cb_priv|
+// Application private data passed into the set function. |min_size| is the
+// minimum size in bytes needed to decode the next frame. |fb| pointer to the
+// frame buffer.
+int get_vp9_frame_buffer(void *cb_priv, size_t min_size,
+                         vpx_codec_frame_buffer_t *fb) {
+  int i;
+  struct ExternalFrameBufferList *const ext_fb_list =
+      (struct ExternalFrameBufferList *)cb_priv;
+  if (ext_fb_list == NULL)
+    return -1;
+
+  // Find a free frame buffer.
+  for (i = 0; i < ext_fb_list->num_external_frame_buffers; ++i) {
+    if (!ext_fb_list->ext_fb[i].in_use)
+      break;
+  }
+
+  if (i == ext_fb_list->num_external_frame_buffers)
+    return -1;
+
+  if (ext_fb_list->ext_fb[i].size < min_size) {
+    free(ext_fb_list->ext_fb[i].data);
+    ext_fb_list->ext_fb[i].data = (uint8_t *)malloc(min_size);
+    if (!ext_fb_list->ext_fb[i].data)
+      return -1;
+
+    ext_fb_list->ext_fb[i].size = min_size;
+  }
+
+  fb->data = ext_fb_list->ext_fb[i].data;
+  fb->size = ext_fb_list->ext_fb[i].size;
+  ext_fb_list->ext_fb[i].in_use = 1;
+
+  // Set the frame buffer's private data to point at the external frame buffer.
+  fb->priv = &ext_fb_list->ext_fb[i];
+  return 0;
+}
+
+// Callback used by libvpx when there are no references to the frame buffer.
+// |cb_priv| user private data passed into the set function. |fb| pointer
+// to the frame buffer.
+int release_vp9_frame_buffer(void *cb_priv,
+                             vpx_codec_frame_buffer_t *fb) {
+  struct ExternalFrameBuffer *const ext_fb =
+      (struct ExternalFrameBuffer *)fb->priv;
+  (void)cb_priv;
+  ext_fb->in_use = 0;
+  return 0;
+}
+
 void generate_filename(const char *pattern, char *out, size_t q_len,
                        unsigned int d_w, unsigned int d_h,
                        unsigned int frame_in) {
@@ -447,6 +511,8 @@ int main_loop(int argc, const char **argv_) {
   int                     do_scale = 0;
   vpx_image_t             *scaled_img = NULL;
   int                     frame_avail, got_data;
+  int                     num_external_frame_buffers = 0;
+  struct ExternalFrameBufferList ext_fb_list = {0};
 
   const char *outfile_pattern = NULL;
   char outfile_name[PATH_MAX] = {0};
@@ -505,6 +571,8 @@ int main_loop(int argc, const char **argv_) {
       quiet = 0;
     else if (arg_match(&arg, &scalearg, argi))
       do_scale = 1;
+    else if (arg_match(&arg, &fb_arg, argi))
+      num_external_frame_buffers = arg_parse_uint(&arg);
 
 #if CONFIG_VP8_DECODER
     else if (arg_match(&arg, &addnoise_level, argi)) {
@@ -691,6 +759,19 @@ int main_loop(int argc, const char **argv_) {
     arg_skip--;
   }
 
+  if (num_external_frame_buffers > 0) {
+    ext_fb_list.num_external_frame_buffers = num_external_frame_buffers;
+    ext_fb_list.ext_fb = (struct ExternalFrameBuffer *)calloc(
+        num_external_frame_buffers, sizeof(*ext_fb_list.ext_fb));
+    if (vpx_codec_set_frame_buffer_functions(
+            &decoder, get_vp9_frame_buffer, release_vp9_frame_buffer,
+            &ext_fb_list)) {
+      fprintf(stderr, "Failed to configure external frame buffers: %s\n",
+              vpx_codec_error(&decoder));
+      return EXIT_FAILURE;
+    }
+  }
+
   frame_avail = 1;
   got_data = 0;
 
@@ -862,6 +943,11 @@ fail:
     free(buf);
 
   if (scaled_img) vpx_img_free(scaled_img);
+
+  for (i = 0; i < ext_fb_list.num_external_frame_buffers; ++i) {
+    free(ext_fb_list.ext_fb[i].data);
+  }
+  free(ext_fb_list.ext_fb);
 
   fclose(infile);
   free(argv);

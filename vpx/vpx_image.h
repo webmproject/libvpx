@@ -28,7 +28,7 @@ extern "C" {
    * types, removing or reassigning enums, adding/removing/rearranging
    * fields to structures
    */
-#define VPX_IMAGE_ABI_VERSION (1) /**<\hideinitializer*/
+#define VPX_IMAGE_ABI_VERSION (2) /**<\hideinitializer*/
 
 
 #define VPX_IMG_FMT_PLANAR     0x100  /**< Image is a planar format */
@@ -139,6 +139,8 @@ extern "C" {
     unsigned char *img_data;       /**< private */
     int      img_data_owner; /**< private */
     int      self_allocd;    /**< private */
+
+    void    *fb_priv; /**< Frame buffer data associated with the image. */
   } vpx_image_t; /**< alias for struct vpx_image */
 
   /**\brief Representation of a rectangle on a surface */
