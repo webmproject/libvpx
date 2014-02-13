@@ -26,7 +26,7 @@ void vp9_quantize_b_c(const int16_t *coeff_ptr, intptr_t count,
                       const int16_t *dequant_ptr,
                       int zbin_oq_value, uint16_t *eob_ptr,
                       const int16_t *scan, const int16_t *iscan) {
-  int i, non_zero_count = count, eob = -1;
+  int i, non_zero_count = (int)count, eob = -1;
   const int zbins[2] = { zbin_ptr[0] + zbin_oq_value,
                          zbin_ptr[1] + zbin_oq_value };
   const int nzbins[2] = { zbins[0] * -1,
@@ -37,7 +37,7 @@ void vp9_quantize_b_c(const int16_t *coeff_ptr, intptr_t count,
 
   if (!skip_block) {
     // Pre-scan pass
-    for (i = count - 1; i >= 0; i--) {
+    for (i = (int)count - 1; i >= 0; i--) {
       const int rc = scan[i];
       const int coeff = coeff_ptr[rc];
 
