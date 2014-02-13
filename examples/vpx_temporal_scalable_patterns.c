@@ -441,7 +441,7 @@ int main(int argc, char **argv) {
   int max_intra_size_pct;
   vpx_svc_layer_id_t layer_id = {0, 0};
   const VpxInterface *encoder = NULL;
-  struct VpxInputContext input_ctx = {0};
+  FILE *infile = NULL;
   struct RateControlMetrics rc;
 
   exec_name = argv[0];
@@ -527,8 +527,7 @@ int main(int argc, char **argv) {
   set_rate_control_metrics(&rc, &cfg);
 
   // Open input file.
-  input_ctx.filename = argv[1];
-  if (!(input_ctx.file = fopen(input_ctx.filename, "rb"))) {
+  if (!(infile = fopen(argv[1], "rb"))) {
     die("Failed to open %s for reading", argv[1]);
   }
 
@@ -581,7 +580,7 @@ int main(int argc, char **argv) {
       vpx_codec_control(&codec, VP9E_SET_SVC_LAYER_ID, &layer_id);
     }
     flags = layer_flags[frame_cnt % flag_periodicity];
-    frame_avail = !read_yuv_frame(&input_ctx, &raw);
+    frame_avail = vpx_img_read(&raw, infile);
     if (frame_avail)
       ++rc.layer_input_frames[layer_id.temporal_layer_id];
     if (vpx_codec_encode(&codec, frame_avail? &raw : NULL, pts, 1, flags,
@@ -621,7 +620,7 @@ int main(int argc, char **argv) {
     ++frame_cnt;
     pts += frame_duration;
   }
-  fclose(input_ctx.file);
+  fclose(infile);
   printout_rate_control_summary(&rc, &cfg, frame_cnt);
 
   if (vpx_codec_destroy(&codec))
