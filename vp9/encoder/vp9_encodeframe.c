@@ -2009,41 +2009,6 @@ static void rd_pick_partition(VP9_COMP *cpi, const TileInfo *const tile,
   }
 }
 
-// Examines 64x64 block and chooses a best reference frame
-static void rd_pick_reference_frame(VP9_COMP *cpi, const TileInfo *const tile,
-                                    int mi_row, int mi_col) {
-  VP9_COMMON * const cm = &cpi->common;
-  MACROBLOCK * const x = &cpi->mb;
-  int bsl = b_width_log2(BLOCK_64X64), bs = 1 << bsl;
-  int ms = bs / 2;
-  ENTROPY_CONTEXT l[16 * MAX_MB_PLANE], a[16 * MAX_MB_PLANE];
-  PARTITION_CONTEXT sl[8], sa[8];
-  int pl;
-  int r;
-  int64_t d;
-
-  save_context(cpi, mi_row, mi_col, a, l, sa, sl, BLOCK_64X64);
-
-  // Default is non mask (all reference frames allowed.
-  cpi->ref_frame_mask = 0;
-
-  // Do RD search for 64x64.
-  if ((mi_row + (ms >> 1) < cm->mi_rows) &&
-      (mi_col + (ms >> 1) < cm->mi_cols)) {
-    cpi->set_ref_frame_mask = 1;
-    rd_pick_sb_modes(cpi, tile, mi_row, mi_col, &r, &d, BLOCK_64X64,
-                     get_block_context(x, BLOCK_64X64), INT64_MAX);
-    pl = partition_plane_context(cpi->above_seg_context, cpi->left_seg_context,
-                                 mi_row, mi_col, BLOCK_64X64);
-    r += x->partition_cost[pl][PARTITION_NONE];
-
-    *(get_sb_partitioning(x, BLOCK_64X64)) = BLOCK_64X64;
-    cpi->set_ref_frame_mask = 0;
-  }
-
-  restore_context(cpi, mi_row, mi_col, a, l, sa, sl, BLOCK_64X64);
-}
-
 static void encode_sb_row(VP9_COMP *cpi, const TileInfo *const tile,
                           int mi_row, TOKENEXTRA **tp) {
   VP9_COMMON *const cm = &cpi->common;
