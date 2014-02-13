@@ -846,7 +846,6 @@ static int rc_pick_q_and_bounds_two_pass(const VP9_COMP *cpi,
   int q;
 
   if (frame_is_intra_only(cm)) {
-    active_best_quality = rc->best_quality;
 #if !CONFIG_MULTIPLE_ARF
     // Handle the special case for key frames forced when we have75 reached
     // the maximum key frame interval. Here force the Q to a range
