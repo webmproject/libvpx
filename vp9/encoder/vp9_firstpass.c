@@ -495,7 +495,7 @@ void vp9_first_pass(VP9_COMP *cpi) {
   struct twopass_rc *const twopass = &cpi->twopass;
   const MV zero_mv = {0, 0};
 
-  vp9_clear_system_state();  // __asm emms;
+  vp9_clear_system_state();
 
   vp9_setup_src_planes(x, cpi->Source, 0, 0);
   setup_pre_planes(xd, 0, lst_yv12, 0, 0, NULL);
@@ -544,7 +544,7 @@ void vp9_first_pass(VP9_COMP *cpi) {
       double error_weight = 1.0;
       const BLOCK_SIZE bsize = get_bsize(cm, mb_row, mb_col);
 
-      vp9_clear_system_state();  // __asm emms;
+      vp9_clear_system_state();
 
       xd->plane[0].dst.buf = new_yv12->y_buffer + recon_yoffset;
       xd->plane[1].dst.buf = new_yv12->u_buffer + recon_uvoffset;
@@ -565,7 +565,7 @@ void vp9_first_pass(VP9_COMP *cpi) {
       // Do intra 16x16 prediction.
       this_error = vp9_encode_intra(x, use_dc_pred);
       if (cpi->oxcf.aq_mode == VARIANCE_AQ) {
-        vp9_clear_system_state();  // __asm emms;
+        vp9_clear_system_state();
         this_error = (int)(this_error * error_weight);
       }
 
@@ -601,7 +601,7 @@ void vp9_first_pass(VP9_COMP *cpi) {
         first_pass_motion_search(cpi, x, &best_ref_mv.as_mv, &mv.as_mv,
                                  &motion_error);
         if (cpi->oxcf.aq_mode == VARIANCE_AQ) {
-          vp9_clear_system_state();  // __asm emms;
+          vp9_clear_system_state();
           motion_error = (int)(motion_error * error_weight);
         }
 
@@ -612,7 +612,7 @@ void vp9_first_pass(VP9_COMP *cpi) {
           first_pass_motion_search(cpi, x, &zero_mv, &tmp_mv.as_mv,
                                    &tmp_err);
           if (cpi->oxcf.aq_mode == VARIANCE_AQ) {
-            vp9_clear_system_state();  // __asm emms;
+            vp9_clear_system_state();
             tmp_err = (int)(tmp_err * error_weight);
           }
 
@@ -633,7 +633,7 @@ void vp9_first_pass(VP9_COMP *cpi) {
           first_pass_motion_search(cpi, x, &zero_mv, &tmp_mv.as_mv,
                                    &gf_motion_error);
           if (cpi->oxcf.aq_mode == VARIANCE_AQ) {
-            vp9_clear_system_state();  // __asm emms;
+            vp9_clear_system_state();
             gf_motion_error = (int)(gf_motion_error * error_weight);
           }
 
@@ -742,10 +742,10 @@ void vp9_first_pass(VP9_COMP *cpi) {
     x->plane[2].src.buf += uv_mb_height * x->plane[1].src.stride -
                            uv_mb_height * cm->mb_cols;
 
-    vp9_clear_system_state();  // __asm emms;
+    vp9_clear_system_state();
   }
 
-  vp9_clear_system_state();  // __asm emms;
+  vp9_clear_system_state();
   {
     FIRSTPASS_STATS fps;
 
@@ -1409,7 +1409,7 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
 
   twopass->gf_group_bits = 0;
 
-  vp9_clear_system_state();  // __asm emms;
+  vp9_clear_system_state();
 
   start_pos = twopass->stats_in;
 
@@ -1907,7 +1907,7 @@ static void find_next_key_frame(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
 
   vp9_zero(next_frame);
 
-  vp9_clear_system_state();  // __asm emms;
+  vp9_clear_system_state();
 
   start_position = twopass->stats_in;
   cpi->common.frame_type = KEY_FRAME;

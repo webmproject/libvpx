@@ -354,7 +354,7 @@ void vp9_rc_update_rate_correction_factors(VP9_COMP *cpi, int damp_var) {
   int projected_size_based_on_q = 0;
 
   // Clear down mmx registers to allow floating point in what follows
-  vp9_clear_system_state();  // __asm emms;
+  vp9_clear_system_state();
 
   // Work out how big we would have expected the frame to be at this Q given
   // the current correction factor.

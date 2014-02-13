@@ -2740,7 +2740,7 @@ static void output_frame_level_debug_stats(VP9_COMP *cpi) {
   FILE *const f = fopen("tmp.stt", cm->current_video_frame ? "a" : "w");
   int recon_err;
 
-  vp9_clear_system_state();  // __asm emms;
+  vp9_clear_system_state();
 
   recon_err = vp9_calc_ss_err(cpi->Source, get_frame_new_buffer(cm));
 
@@ -2799,7 +2799,7 @@ static void encode_without_recode_loop(VP9_COMP *cpi,
                                        uint8_t *dest,
                                        int q) {
   VP9_COMMON *const cm = &cpi->common;
-  vp9_clear_system_state();  // __asm emms;
+  vp9_clear_system_state();
   vp9_set_quantizer(cpi, q);
 
   // Set up entropy context depending on frame type. The decoder mandates
@@ -2828,7 +2828,7 @@ static void encode_without_recode_loop(VP9_COMP *cpi,
   // Update the skip mb flag probabilities based on the distribution
   // seen in the last encoder iteration.
   // update_base_skip_probs(cpi);
-  vp9_clear_system_state();  // __asm emms;
+  vp9_clear_system_state();
 }
 
 static void encode_with_recode_loop(VP9_COMP *cpi,
@@ -2852,7 +2852,7 @@ static void encode_with_recode_loop(VP9_COMP *cpi,
                                    &frame_over_shoot_limit);
 
   do {
-    vp9_clear_system_state();  // __asm emms;
+    vp9_clear_system_state();
 
     vp9_set_quantizer(cpi, q);
 
@@ -2887,7 +2887,7 @@ static void encode_with_recode_loop(VP9_COMP *cpi,
     // seen in the last encoder iteration.
     // update_base_skip_probs(cpi);
 
-    vp9_clear_system_state();  // __asm emms;
+    vp9_clear_system_state();
 
     // Dummy pack of the bitstream using up to date stats to get an
     // accurate estimate of output frame size to determine if we need
@@ -3681,7 +3681,7 @@ int vp9_get_compressed_data(VP9_PTR ptr, unsigned int *frame_flags,
   *size = 0;
 
   // Clear down mmx registers
-  vp9_clear_system_state();  // __asm emms;
+  vp9_clear_system_state();
 
   /* find a free buffer for the new frame, releasing the reference previously
    * held.

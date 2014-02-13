@@ -627,7 +627,7 @@ static void rd_pick_sb_modes(VP9_COMP *cpi, const TileInfo *const tile,
   int orig_rdmult = x->rdmult;
   double rdmult_ratio;
 
-  vp9_clear_system_state();  // __asm emms;
+  vp9_clear_system_state();
   rdmult_ratio = 1.0;  // avoid uninitialized warnings
 
   // Use the lower precision, but faster, 32x32 fdct for mode selection.
@@ -683,7 +683,7 @@ static void rd_pick_sb_modes(VP9_COMP *cpi, const TileInfo *const tile,
     activity_masking(cpi, x);
 
   if (cpi->oxcf.aq_mode == VARIANCE_AQ) {
-    vp9_clear_system_state();  // __asm emms;
+    vp9_clear_system_state();
     x->rdmult = round(x->rdmult * rdmult_ratio);
   } else if (cpi->oxcf.aq_mode == COMPLEXITY_AQ) {
     const int mi_offset = mi_row * cm->mi_cols + mi_col;
@@ -713,7 +713,7 @@ static void rd_pick_sb_modes(VP9_COMP *cpi, const TileInfo *const tile,
   if (cpi->oxcf.aq_mode == VARIANCE_AQ) {
     x->rdmult = orig_rdmult;
     if (*totalrate != INT_MAX) {
-      vp9_clear_system_state();  // __asm emms;
+      vp9_clear_system_state();
       *totalrate = round(*totalrate * rdmult_ratio);
     }
   }

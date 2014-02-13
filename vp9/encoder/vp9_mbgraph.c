@@ -419,7 +419,7 @@ void vp9_update_mbgraph_stats(VP9_COMP *cpi) {
                                golden_ref, cpi->Source);
   }
 
-  vp9_clear_system_state();  // __asm emms;
+  vp9_clear_system_state();
 
   separate_arf_mbs(cpi);
 }

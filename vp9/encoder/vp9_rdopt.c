@@ -274,7 +274,7 @@ void vp9_initialize_rd_consts(VP9_COMP *cpi) {
   MACROBLOCK *x = &cpi->mb;
   int qindex, i;
 
-  vp9_clear_system_state();  // __asm emms;
+  vp9_clear_system_state();
 
   // Further tests required to see if optimum is different
   // for key frames, golden frames and arf frames.
