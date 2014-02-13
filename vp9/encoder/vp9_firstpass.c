@@ -1926,8 +1926,6 @@ static void find_next_key_frame(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
 
   double kf_mod_err = 0.0;
   double kf_group_err = 0.0;
-  double kf_group_intra_err = 0.0;
-  double kf_group_coded_err = 0.0;
   double recent_loop_decay[8] = {1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0};
 
   RATE_CONTROL *const rc = &cpi->rc;
@@ -1964,12 +1962,6 @@ static void find_next_key_frame(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   while (twopass->stats_in < twopass->stats_in_end) {
     // Accumulate kf group error
     kf_group_err += calculate_modified_err(cpi, this_frame);
-
-    // These figures keep intra and coded error counts for all frames including
-    // key frames in the group. The effect of the key frame itself can be
-    // subtracted out using the first_frame data collected above.
-    kf_group_intra_err += this_frame->intra_error;
-    kf_group_coded_err += this_frame->coded_error;
 
     // load a the next frame's stats
     last_frame = *this_frame;
@@ -2030,15 +2022,11 @@ static void find_next_key_frame(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
     reset_fpf_position(twopass, start_position);
 
     kf_group_err = 0;
-    kf_group_intra_err = 0;
-    kf_group_coded_err = 0;
 
     // Rescan to get the correct error data for the forced kf group
     for (i = 0; i < rc->frames_to_key; i++) {
       // Accumulate kf group errors
       kf_group_err += calculate_modified_err(cpi, &tmp_frame);
-      kf_group_intra_err += tmp_frame.intra_error;
-      kf_group_coded_err += tmp_frame.coded_error;
 
       // Load the next frame's stats.
       input_stats(twopass, &tmp_frame);
@@ -2054,12 +2042,6 @@ static void find_next_key_frame(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   if (twopass->stats_in >= twopass->stats_in_end) {
     // Accumulate kf group error
     kf_group_err += calculate_modified_err(cpi, this_frame);
-
-    // These figures keep intra and coded error counts for all frames including
-    // key frames in the group. The effect of the key frame itself can be
-    // subtracted out using the first_frame data collected above.
-    kf_group_intra_err += this_frame->intra_error;
-    kf_group_coded_err += this_frame->coded_error;
   }
 
   // Calculate the number of bits that should be assigned to the kf group.
@@ -2089,7 +2071,6 @@ static void find_next_key_frame(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   // frames use inter blocks.
   decay_accumulator = 1.0;
   boost_score = 0.0;
-  loop_decay_rate = 1.00;       // Starting decay rate
 
   // Scan through the kf group collating various stats.
   for (i = 0; i < rc->frames_to_key; i++) {
