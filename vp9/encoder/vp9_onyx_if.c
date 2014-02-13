@@ -217,9 +217,8 @@ int vp9_compute_qdelta(const VP9_COMP *cpi, double qstart, double qtarget) {
 
 // Computes a q delta (in "q index" terms) to get from a starting q value
 // to a value that should equate to thegiven rate ratio.
-
-int vp9_compute_qdelta_by_rate(VP9_COMP *cpi,
-                               double base_q_index, double rate_target_ratio) {
+static int compute_qdelta_by_rate(VP9_COMP *cpi, int base_q_index,
+                                  double rate_target_ratio) {
   int i;
   int base_bits_per_mb;
   int target_bits_per_mb;
@@ -233,7 +232,7 @@ int vp9_compute_qdelta_by_rate(VP9_COMP *cpi,
                                         base_q_index, 1.0);
 
   // Find the target bits per mb based on the base value and given ratio.
-  target_bits_per_mb = rate_target_ratio * base_bits_per_mb;
+  target_bits_per_mb = (int)(rate_target_ratio * base_bits_per_mb);
 
   // Convert the q target to an index
   for (i = cpi->rc.best_quality; i < cpi->rc.worst_quality; i++) {
@@ -278,9 +277,8 @@ static void setup_in_frame_q_adj(VP9_COMP *cpi) {
 
     // Use some of the segments for in frame Q adjustment
     for (segment = 1; segment < 2; segment++) {
-      qindex_delta =
-        vp9_compute_qdelta_by_rate(cpi, cm->base_qindex,
-                                   in_frame_q_adj_ratio[segment]);
+      qindex_delta = compute_qdelta_by_rate(cpi, cm->base_qindex,
+                                            in_frame_q_adj_ratio[segment]);
       vp9_enable_segfeature(seg, segment, SEG_LVL_ALT_Q);
       vp9_set_segdata(seg, segment, SEG_LVL_ALT_Q, qindex_delta);
     }
