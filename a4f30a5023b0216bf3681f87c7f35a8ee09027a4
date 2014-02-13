@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//3Xg\u003d",
+        "filename": "test/external_frame_buffer_test.cc",
+        "patchSetId": 6
+      },
+      "lineNbr": 456,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-02-13T21:17:20Z",
+      "side": 1,
+      "message": "maybe a NULL param test too",
+      "revId": "a4f30a5023b0216bf3681f87c7f35a8ee09027a4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
