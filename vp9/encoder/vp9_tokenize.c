@@ -214,7 +214,7 @@ static void tokenize_b(int plane, int block, BLOCK_SIZE plane_bsize,
   TOKENEXTRA *t = *tp;        /* store tokens starting here */
   int eob = p->eobs[block];
   const PLANE_TYPE type = pd->plane_type;
-  const int16_t *qcoeff_ptr = BLOCK_OFFSET(p->qcoeff, block);
+  const int16_t *qcoeff = BLOCK_OFFSET(p->qcoeff, block);
   const int segment_id = mbmi->segment_id;
   const int16_t *scan, *nb;
   const scan_order *so;
@@ -241,7 +241,7 @@ static void tokenize_b(int plane, int block, BLOCK_SIZE plane_bsize,
   while (c < eob) {
     int v = 0;
     int skip_eob = 0;
-    v = qcoeff_ptr[scan[c]];
+    v = qcoeff[scan[c]];
 
     while (!v) {
       add_token_no_extra(&t, coef_probs[band[c]][pt], ZERO_TOKEN, skip_eob,
@@ -252,7 +252,7 @@ static void tokenize_b(int plane, int block, BLOCK_SIZE plane_bsize,
       token_cache[scan[c]] = 0;
       ++c;
       pt = get_coef_context(nb, token_cache, c);
-      v = qcoeff_ptr[scan[c]];
+      v = qcoeff[scan[c]];
     }
 
     add_token(&t, coef_probs[band[c]][pt],

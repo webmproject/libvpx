@@ -36,18 +36,18 @@ struct encode_b_args {
 };
 
 void vp9_subtract_block_c(int rows, int cols,
-                          int16_t *diff_ptr, ptrdiff_t diff_stride,
-                          const uint8_t *src_ptr, ptrdiff_t src_stride,
-                          const uint8_t *pred_ptr, ptrdiff_t pred_stride) {
+                          int16_t *diff, ptrdiff_t diff_stride,
+                          const uint8_t *src, ptrdiff_t src_stride,
+                          const uint8_t *pred, ptrdiff_t pred_stride) {
   int r, c;
 
   for (r = 0; r < rows; r++) {
     for (c = 0; c < cols; c++)
-      diff_ptr[c] = src_ptr[c] - pred_ptr[c];
+      diff[c] = src[c] - pred[c];
 
-    diff_ptr += diff_stride;
-    pred_ptr += pred_stride;
-    src_ptr  += src_stride;
+    diff += diff_stride;
+    pred += pred_stride;
+    src  += src_stride;
   }
 }
 
@@ -131,9 +131,9 @@ static void optimize_b(MACROBLOCK *mb,
   const int ref = is_inter_block(&xd->mi_8x8[0]->mbmi);
   vp9_token_state tokens[1025][2];
   unsigned best_index[1025][2];
-  const int16_t *coeff_ptr = BLOCK_OFFSET(mb->plane[plane].coeff, block);
-  int16_t *qcoeff_ptr;
-  int16_t *dqcoeff_ptr;
+  const int16_t *coeff = BLOCK_OFFSET(mb->plane[plane].coeff, block);
+  int16_t *qcoeff = BLOCK_OFFSET(p->qcoeff, block);
+  int16_t *dqcoeff = BLOCK_OFFSET(pd->dqcoeff, block);
   int eob = p->eobs[block], final_eob, sz = 0;
   const int i0 = 0;
   int rc, x, next, i;
@@ -143,7 +143,6 @@ static void optimize_b(MACROBLOCK *mb,
   PLANE_TYPE type = pd->plane_type;
   int err_mult = plane_rd_mult[type];
   const int default_eob = 16 << (tx_size << 1);
-
   const int mul = 1 + (tx_size == TX_32X32);
   uint8_t token_cache[1024];
   const int16_t *dequant_ptr = pd->dequant;
@@ -153,8 +152,6 @@ static void optimize_b(MACROBLOCK *mb,
   const int16_t *nb = so->neighbors;
 
   assert((!type && !plane) || (type && plane));
-  dqcoeff_ptr = BLOCK_OFFSET(pd->dqcoeff, block);
-  qcoeff_ptr = BLOCK_OFFSET(p->qcoeff, block);
   assert(eob <= default_eob);
 
   /* Now set up a Viterbi trellis to evaluate alternative roundings. */
@@ -172,13 +169,13 @@ static void optimize_b(MACROBLOCK *mb,
   next = eob;
   for (i = 0; i < eob; i++)
     token_cache[scan[i]] = vp9_pt_energy_class[vp9_dct_value_tokens_ptr[
-        qcoeff_ptr[scan[i]]].token];
+        qcoeff[scan[i]]].token];
 
   for (i = eob; i-- > i0;) {
     int base_bits, d2, dx;
 
     rc = scan[i];
-    x = qcoeff_ptr[rc];
+    x = qcoeff[rc];
     /* Only add a trellis state for non-zero coefficients. */
     if (x) {
       int shortcut = 0;
@@ -203,7 +200,7 @@ static void optimize_b(MACROBLOCK *mb,
       /* And pick the best. */
       best = rd_cost1 < rd_cost0;
       base_bits = *(vp9_dct_value_cost_ptr + x);
-      dx = mul * (dqcoeff_ptr[rc] - coeff_ptr[rc]);
+      dx = mul * (dqcoeff[rc] - coeff[rc]);
       d2 = dx * dx;
       tokens[i][0].rate = base_bits + (best ? rate1 : rate0);
       tokens[i][0].error = d2 + (best ? error1 : error0);
@@ -216,8 +213,8 @@ static void optimize_b(MACROBLOCK *mb,
       rate0 = tokens[next][0].rate;
       rate1 = tokens[next][1].rate;
 
-      if ((abs(x)*dequant_ptr[rc != 0] > abs(coeff_ptr[rc]) * mul) &&
-          (abs(x)*dequant_ptr[rc != 0] < abs(coeff_ptr[rc]) * mul +
+      if ((abs(x)*dequant_ptr[rc != 0] > abs(coeff[rc]) * mul) &&
+          (abs(x)*dequant_ptr[rc != 0] < abs(coeff[rc]) * mul +
                                          dequant_ptr[rc != 0]))
         shortcut = 1;
       else
@@ -306,16 +303,16 @@ static void optimize_b(MACROBLOCK *mb,
   UPDATE_RD_COST();
   best = rd_cost1 < rd_cost0;
   final_eob = i0 - 1;
-  vpx_memset(qcoeff_ptr, 0, sizeof(*qcoeff_ptr) * (16 << (tx_size * 2)));
-  vpx_memset(dqcoeff_ptr, 0, sizeof(*dqcoeff_ptr) * (16 << (tx_size * 2)));
+  vpx_memset(qcoeff, 0, sizeof(*qcoeff) * (16 << (tx_size * 2)));
+  vpx_memset(dqcoeff, 0, sizeof(*dqcoeff) * (16 << (tx_size * 2)));
   for (i = next; i < eob; i = next) {
     x = tokens[i][best].qc;
     if (x) {
       final_eob = i;
     }
     rc = scan[i];
-    qcoeff_ptr[rc] = x;
-    dqcoeff_ptr[rc] = (x * dequant_ptr[rc != 0]) / mul;
+    qcoeff[rc] = x;
+    dqcoeff[rc] = (x * dequant_ptr[rc != 0]) / mul;
 
     next = tokens[i][best].next;
     best = best_index[i][best];
