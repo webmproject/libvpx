@@ -19,6 +19,23 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//3Qo\u003d",
+        "filename": "test/test_vectors.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-02-14T00:26:42Z",
+      "side": 1,
+      "message": "Why every line is modified? It should be just 2 space indent...",
+      "revId": "91d8e57877399f8e640243e55068443c2608d512",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//3ig\u003d",
         "filename": "test/test_vectors.cc",
         "patchSetId": 1
