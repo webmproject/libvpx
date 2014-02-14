@@ -137,6 +137,10 @@ error_resilient.GUID             = DF5837B9-4145-4F92-A031-44E4F832E00C
 error_resilient.DESCRIPTION      = Error Resiliency Feature
 
 EXAMPLES-$(CONFIG_VP8_ENCODER)     += vp8_set_maps.c
+vp8_set_maps.SRCS                  += ivfenc.h ivfenc.c
+vp8_set_maps.SRCS                  += tools_common.h tools_common.c
+vp8_set_maps.SRCS                  += video_common.h
+vp8_set_maps.SRCS                  += video_writer.h video_writer.c
 vp8_set_maps.GUID                   = ECB2D24D-98B8-4015-A465-A4AF3DCC145F
 vp8_set_maps.DESCRIPTION            = VP8 set active and ROI maps
 EXAMPLES-$(CONFIG_VP8_ENCODER)     += vp8cx_set_ref.c
