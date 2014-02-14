@@ -34,6 +34,24 @@
       "revId": "edec8087871c76049f2ae1a627beb317de9b700d",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//3RE\u003d",
+        "filename": "vp9/encoder/vp9_onyx_if.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 499,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2014-02-14T00:23:23Z",
+      "side": 1,
+      "message": "Yes, I noticed these earlier, the logic should work as far as I could see, hence my +2.\n\nI am just a bit anxious about relying on the value being set as INT_MAX, but ok with merge as is.",
+      "parentUuid": "AAAAdn//3To\u003d",
+      "revId": "edec8087871c76049f2ae1a627beb317de9b700d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
