@@ -550,16 +550,6 @@ static void build_tree_distribution(VP9_COMP *cpi, TX_SIZE tx_size) {
             coef_probs[i][j][k][l][m] = get_binary_prob(
                                             coef_branch_ct[i][j][k][l][m][0],
                                             coef_branch_ct[i][j][k][l][m][1]);
-#ifdef ENTROPY_STATS
-          if (!cpi->dummy_packing) {
-            int t;
-            for (t = 0; t < ENTROPY_TOKENS; ++t)
-              context_counters[tx_size][i][j][k][l][t] +=
-                  coef_counts[i][j][k][l][t];
-            context_counters[tx_size][i][j][k][l][ENTROPY_TOKENS] +=
-                eob_branch_ct[i][j][k][l];
-          }
-#endif
         }
       }
     }
