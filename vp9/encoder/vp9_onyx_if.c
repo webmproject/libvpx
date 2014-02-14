@@ -861,6 +861,8 @@ static void set_rt_speed_feature(VP9_COMMON *cm,
     }
     sf->frame_parameter_update = 0;
     sf->encode_breakout_thresh = 1000;
+
+    sf->search_method = FAST_HEX;
   }
   if (speed >= 6) {
     sf->always_this_block_size = BLOCK_16X16;

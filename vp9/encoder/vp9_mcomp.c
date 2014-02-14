@@ -855,6 +855,184 @@ int vp9_square_search(const MACROBLOCK *x,
                             square_num_candidates, square_candidates);
 };
 
+// Number of candidates in first hex search
+#define FIRST_HEX_CANDIDATES 6
+// Index of previous hex search's best match
+#define PRE_BEST_CANDIDATE 6
+// Number of candidates in following hex search
+#define NEXT_HEX_CANDIDATES 3
+// Number of candidates in refining search
+#define REFINE_CANDIDATES 4
+
+int vp9_fast_hex_search(const MACROBLOCK *x,
+                        MV *ref_mv,
+                        int search_param,
+                        int sad_per_bit,
+                        const vp9_variance_fn_ptr_t *vfp,
+                        int use_mvcost,
+                        const MV *center_mv,
+                        MV *best_mv) {
+  const MACROBLOCKD* const xd = &x->e_mbd;
+  static const MV hex[FIRST_HEX_CANDIDATES] = {
+    { -1, -2}, {1, -2}, {2, 0}, {1, 2}, { -1, 2}, { -2, 0}
+  };
+  static const MV next_chkpts[PRE_BEST_CANDIDATE][NEXT_HEX_CANDIDATES] = {
+    {{ -2, 0}, { -1, -2}, {1, -2}},
+    {{ -1, -2}, {1, -2}, {2, 0}},
+    {{1, -2}, {2, 0}, {1, 2}},
+    {{2, 0}, {1, 2}, { -1, 2}},
+    {{1, 2}, { -1, 2}, { -2, 0}},
+    {{ -1, 2}, { -2, 0}, { -1, -2}}
+  };
+  static const MV neighbors[REFINE_CANDIDATES] = {
+      {0, -1}, { -1, 0}, {1, 0}, {0, 1}
+  };
+  int i, j;
+
+  const uint8_t *what = x->plane[0].src.buf;
+  const int what_stride = x->plane[0].src.stride;
+  const int in_what_stride = xd->plane[0].pre[0].stride;
+  int br, bc;
+  MV this_mv;
+  unsigned int bestsad = 0x7fffffff;
+  unsigned int thissad;
+  const uint8_t *base_offset;
+  const uint8_t *this_offset;
+  int k = -1;
+  int best_site = -1;
+  const int max_hex_search = 512;
+  const int max_dia_search = 32;
+
+  const int *mvjsadcost = x->nmvjointsadcost;
+  int *mvsadcost[2] = {x->nmvsadcost[0], x->nmvsadcost[1]};
+
+  const MV fcenter_mv = {center_mv->row >> 3, center_mv->col >> 3};
+
+  // Adjust ref_mv to make sure it is within MV range
+  clamp_mv(ref_mv, x->mv_col_min, x->mv_col_max, x->mv_row_min, x->mv_row_max);
+  br = ref_mv->row;
+  bc = ref_mv->col;
+
+  // Check the start point
+  base_offset = xd->plane[0].pre[0].buf;
+  this_offset = base_offset + (br * in_what_stride) + bc;
+  this_mv.row = br;
+  this_mv.col = bc;
+  bestsad = vfp->sdf(what, what_stride, this_offset, in_what_stride, 0x7fffffff)
+            + mvsad_err_cost(&this_mv, &fcenter_mv, mvjsadcost, mvsadcost,
+                             sad_per_bit);
+
+  // Initial 6-point hex search
+  if (check_bounds(x, br, bc, 2)) {
+    for (i = 0; i < FIRST_HEX_CANDIDATES; i++) {
+      this_mv.row = br + hex[i].row;
+      this_mv.col = bc + hex[i].col;
+      this_offset = base_offset + (this_mv.row * in_what_stride) + this_mv.col;
+      thissad = vfp->sdf(what, what_stride, this_offset, in_what_stride,
+                         bestsad);
+      CHECK_BETTER
+    }
+  } else {
+    for (i = 0; i < FIRST_HEX_CANDIDATES; i++) {
+      this_mv.row = br + hex[i].row;
+      this_mv.col = bc + hex[i].col;
+      if (!is_mv_in(x, &this_mv))
+        continue;
+      this_offset = base_offset + (this_mv.row * in_what_stride) + this_mv.col;
+      thissad = vfp->sdf(what, what_stride, this_offset, in_what_stride,
+                         bestsad);
+      CHECK_BETTER
+    }
+  }
+
+  // Continue hex search if we find a better match in first round
+  if (best_site != -1) {
+    br += hex[best_site].row;
+    bc += hex[best_site].col;
+    k = best_site;
+
+    // Allow search covering maximum MV range
+    for (j = 1; j < max_hex_search; j++) {
+      best_site = -1;
+
+      if (check_bounds(x, br, bc, 2)) {
+        for (i = 0; i < 3; i++) {
+          this_mv.row = br + next_chkpts[k][i].row;
+          this_mv.col = bc + next_chkpts[k][i].col;
+          this_offset = base_offset + (this_mv.row * in_what_stride) +
+              this_mv.col;
+          thissad = vfp->sdf(what, what_stride, this_offset, in_what_stride,
+                             bestsad);
+          CHECK_BETTER
+        }
+      } else {
+        for (i = 0; i < 3; i++) {
+          this_mv.row = br + next_chkpts[k][i].row;
+          this_mv.col = bc + next_chkpts[k][i].col;
+          if (!is_mv_in(x, &this_mv))
+            continue;
+          this_offset = base_offset + (this_mv.row * in_what_stride) +
+              this_mv.col;
+          thissad = vfp->sdf(what, what_stride, this_offset, in_what_stride,
+                             bestsad);
+          CHECK_BETTER
+        }
+      }
+
+      if (best_site == -1) {
+        break;
+      } else {
+        br += next_chkpts[k][best_site].row;
+        bc += next_chkpts[k][best_site].col;
+        k += 5 + best_site;
+        if (k >= 12) k -= 12;
+        else if (k >= 6) k -= 6;
+      }
+    }
+  }
+
+  // Check 4 1-away neighbors
+  for (j = 0; j < max_dia_search; j++) {
+    best_site = -1;
+
+    if (check_bounds(x, br, bc, 1)) {
+      for (i = 0; i < REFINE_CANDIDATES; i++) {
+        this_mv.row = br + neighbors[i].row;
+        this_mv.col = bc + neighbors[i].col;
+        this_offset = base_offset + (this_mv.row * in_what_stride) +
+            this_mv.col;
+        thissad = vfp->sdf(what, what_stride, this_offset, in_what_stride,
+                           bestsad);
+        CHECK_BETTER
+      }
+    } else {
+      for (i = 0; i < REFINE_CANDIDATES; i++) {
+        this_mv.row = br + neighbors[i].row;
+        this_mv.col = bc + neighbors[i].col;
+        if (!is_mv_in(x, &this_mv))
+          continue;
+        this_offset = base_offset + (this_mv.row * in_what_stride) +
+            this_mv.col;
+        thissad = vfp->sdf(what, what_stride, this_offset, in_what_stride,
+                           bestsad);
+        CHECK_BETTER
+      }
+    }
+
+    if (best_site == -1) {
+      break;
+    } else {
+      br += neighbors[best_site].row;
+      bc += neighbors[best_site].col;
+    }
+  }
+
+  best_mv->row = br;
+  best_mv->col = bc;
+
+  return bestsad;
+}
+
 #undef CHECK_BETTER
 
 int vp9_full_range_search_c(const MACROBLOCK *x, MV *ref_mv, MV *best_mv,
