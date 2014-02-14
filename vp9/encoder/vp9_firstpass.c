@@ -1453,8 +1453,8 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   active_max_gf_interval =
     12 + ((int)vp9_convert_qindex_to_q(rc->last_q[INTER_FRAME]) >> 5);
 
-  if (active_max_gf_interval > (int)rc->max_gf_interval)
-    active_max_gf_interval = (int)rc->max_gf_interval;
+  if (active_max_gf_interval > rc->max_gf_interval)
+    active_max_gf_interval = rc->max_gf_interval;
 
   i = 0;
   while (i < twopass->static_scene_max_gf_interval &&
