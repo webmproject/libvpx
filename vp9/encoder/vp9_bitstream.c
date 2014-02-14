@@ -34,7 +34,6 @@
 #include "vp9/encoder/vp9_write_bit_buffer.h"
 
 #ifdef ENTROPY_STATS
-vp9_coeff_stats tree_update_hist[TX_SIZES][PLANE_TYPES];
 extern unsigned int active_section;
 #endif
 
@@ -628,10 +627,6 @@ static void update_coef_probs_common(vp9_writer* const bc, VP9_COMP *cpi,
                 if (s > 0 && newp != *oldp)
                   u = 1;
                 vp9_write(bc, u, upd);
-#ifdef ENTROPY_STATS
-                if (!cpi->dummy_packing)
-                  ++tree_update_hist[tx_size][i][j][k][l][t][u];
-#endif
                 if (u) {
                   /* send/use new probability */
                   vp9_write_prob_diff_update(bc, newp, *oldp);
@@ -683,10 +678,6 @@ static void update_coef_probs_common(vp9_writer* const bc, VP9_COMP *cpi,
                 updates += u;
                 if (u == 0 && updates == 0) {
                   noupdates_before_first++;
-#ifdef ENTROPY_STATS
-                  if (!cpi->dummy_packing)
-                    ++tree_update_hist[tx_size][i][j][k][l][t][u];
-#endif
                   continue;
                 }
                 if (u == 1 && updates == 1) {
@@ -697,10 +688,6 @@ static void update_coef_probs_common(vp9_writer* const bc, VP9_COMP *cpi,
                     vp9_write(bc, 0, upd);
                 }
                 vp9_write(bc, u, upd);
-#ifdef ENTROPY_STATS
-                if (!cpi->dummy_packing)
-                  ++tree_update_hist[tx_size][i][j][k][l][t][u];
-#endif
                 if (u) {
                   /* send/use new probability */
                   vp9_write_prob_diff_update(bc, newp, *oldp);
