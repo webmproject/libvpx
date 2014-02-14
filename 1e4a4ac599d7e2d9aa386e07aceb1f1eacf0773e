@@ -16,6 +16,24 @@
       "revId": "1e4a4ac599d7e2d9aa386e07aceb1f1eacf0773e",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//25g\u003d",
+        "filename": "vp9/encoder/vp9_quantize.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2014-02-14T22:26:55Z",
+      "side": 1,
+      "message": "unfortunately this is codified in the assembly and hard to get around.   Maybe in a separate patch we could try.",
+      "parentUuid": "AAAAdn//3bk\u003d",
+      "revId": "1e4a4ac599d7e2d9aa386e07aceb1f1eacf0773e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
