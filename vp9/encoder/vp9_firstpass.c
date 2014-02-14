@@ -570,7 +570,7 @@ void vp9_first_pass(VP9_COMP *cpi) {
       this_error = vp9_encode_intra(x, use_dc_pred);
       if (cpi->oxcf.aq_mode == VARIANCE_AQ) {
         vp9_clear_system_state();  // __asm emms;
-        this_error *= error_weight;
+        this_error = (int)(this_error * error_weight);
       }
 
       // intrapenalty below deals with situations where the intra and inter
@@ -606,7 +606,7 @@ void vp9_first_pass(VP9_COMP *cpi) {
                                  &motion_error);
         if (cpi->oxcf.aq_mode == VARIANCE_AQ) {
           vp9_clear_system_state();  // __asm emms;
-          motion_error *= error_weight;
+          motion_error = (int)(motion_error * error_weight);
         }
 
         // If the current best reference mv is not centered on 0,0 then do a 0,0
@@ -617,7 +617,7 @@ void vp9_first_pass(VP9_COMP *cpi) {
                                    &tmp_err);
           if (cpi->oxcf.aq_mode == VARIANCE_AQ) {
             vp9_clear_system_state();  // __asm emms;
-            tmp_err *= error_weight;
+            tmp_err = (int)(tmp_err * error_weight);
           }
 
           if (tmp_err < motion_error) {
@@ -638,7 +638,7 @@ void vp9_first_pass(VP9_COMP *cpi) {
                                    &gf_motion_error);
           if (cpi->oxcf.aq_mode == VARIANCE_AQ) {
             vp9_clear_system_state();  // __asm emms;
-            gf_motion_error *= error_weight;
+            gf_motion_error = (int)(gf_motion_error * error_weight);
           }
 
           if (gf_motion_error < motion_error && gf_motion_error < this_error)
@@ -756,9 +756,9 @@ void vp9_first_pass(VP9_COMP *cpi) {
     FIRSTPASS_STATS fps;
 
     fps.frame = cm->current_video_frame;
-    fps.intra_error = intra_error >> 8;
-    fps.coded_error = coded_error >> 8;
-    fps.sr_coded_error = sr_coded_error >> 8;
+    fps.intra_error = (double)(intra_error >> 8);
+    fps.coded_error = (double)(coded_error >> 8);
+    fps.sr_coded_error = (double)(sr_coded_error >> 8);
     fps.ssim_weighted_pred_err = fps.coded_error * simple_weight(cpi->Source);
     fps.count = 1.0;
     fps.pcnt_inter = (double)intercount / cm->MBs;
@@ -1453,11 +1453,12 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   active_max_gf_interval =
     12 + ((int)vp9_convert_qindex_to_q(rc->last_q[INTER_FRAME]) >> 5);
 
-  if (active_max_gf_interval > rc->max_gf_interval)
-    active_max_gf_interval = rc->max_gf_interval;
+  if (active_max_gf_interval > (int)rc->max_gf_interval)
+    active_max_gf_interval = (int)rc->max_gf_interval;
 
   i = 0;
-  while (i < twopass->static_scene_max_gf_interval && i < rc->frames_to_key) {
+  while (i < twopass->static_scene_max_gf_interval &&
+         i < rc->frames_to_key) {
     i++;    // Increment the loop counter
 
     // Accumulate error score of frames in this gf group
@@ -1733,7 +1734,7 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
     // For normal GFs remove the score for the GF itself unless this is
     // also a key frame in which case it has already been accounted for.
     if (rc->source_alt_ref_pending) {
-      twopass->gf_group_error_left = (int64_t)gf_group_err - mod_frame_err;
+      twopass->gf_group_error_left = (int64_t)(gf_group_err - mod_frame_err);
     } else if (cpi->common.frame_type != KEY_FRAME) {
       twopass->gf_group_error_left = (int64_t)(gf_group_err
                                                    - gf_first_frame_err);
