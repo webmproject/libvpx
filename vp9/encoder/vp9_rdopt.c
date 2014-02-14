@@ -415,9 +415,10 @@ static void model_rd_from_var_lapndz(unsigned int var, unsigned int n,
     *dist = 0;
   } else {
     int d_q10, r_q10;
-    uint64_t xsq_q10_64 =
+    const uint64_t xsq_q10_64 =
         ((((uint64_t)qstep * qstep * n) << 10) + (var >> 1)) / var;
-    int xsq_q10 = xsq_q10_64 > MAX_XSQ_Q10 ? MAX_XSQ_Q10 : xsq_q10_64;
+    const int xsq_q10 = xsq_q10_64 > MAX_XSQ_Q10 ?
+                        MAX_XSQ_Q10 : (int)xsq_q10_64;
     model_rd_norm(xsq_q10, &r_q10, &d_q10);
     *rate = (n * r_q10 + 2) >> 2;
     *dist = (var * (int64_t)d_q10 + 512) >> 10;
@@ -857,6 +858,11 @@ static void choose_txfm_size_from_rd(VP9_COMP *cpi, MACROBLOCK *x,
   }
 }
 
+static int64_t scaled_rd_cost(int rdmult, int rddiv,
+                              int rate, int64_t dist, double scale) {
+  return (int64_t) (RDCOST(rdmult, rddiv, rate, dist) * scale);
+}
+
 static void choose_txfm_size_from_modelrd(VP9_COMP *cpi, MACROBLOCK *x,
                                           int (*r)[2], int *rate,
                                           int64_t *d, int64_t *distortion,
@@ -894,10 +900,13 @@ static void choose_txfm_size_from_modelrd(VP9_COMP *cpi, MACROBLOCK *x,
         r[n][1] += vp9_cost_one(tx_probs[m]);
     }
     if (s[n]) {
-      rd[n][0] = rd[n][1] = RDCOST(x->rdmult, x->rddiv, s1, d[n]) * scale;
+      rd[n][0] = rd[n][1] = scaled_rd_cost(x->rdmult, x->rddiv, s1, d[n],
+                                           scale);
     } else {
-      rd[n][0] = RDCOST(x->rdmult, x->rddiv, r[n][0] + s0, d[n]) * scale;
-      rd[n][1] = RDCOST(x->rdmult, x->rddiv, r[n][1] + s0, d[n]) * scale;
+      rd[n][0] = scaled_rd_cost(x->rdmult, x->rddiv, r[n][0] + s0, d[n],
+                                scale);
+      rd[n][1] = scaled_rd_cost(x->rdmult, x->rddiv, r[n][1] + s0, d[n],
+                                scale);
     }
     if (rd[n][1] < best_rd) {
       best_rd = rd[n][1];
@@ -2918,8 +2927,8 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
       const unsigned int max_thresh = (cpi->allow_encode_breakout ==
                                       ENCODE_BREAKOUT_LIMITED) ? 128 : 36000;
       // The encode_breakout input
-      const unsigned int min_thresh = ((x->encode_breakout << 4) > max_thresh) ?
-                                      max_thresh : (x->encode_breakout << 4);
+      const unsigned int min_thresh =
+          MIN(((unsigned int)x->encode_breakout << 4), max_thresh);
 
       // Calculate threshold according to dequant value.
       thresh_ac = (xd->plane[0].dequant[1] * xd->plane[0].dequant[1]) / 9;
