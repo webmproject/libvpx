@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//3IE\u003d",
+        "filename": "vp9/encoder/vp9_mcomp.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 921,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2014-02-14T14:26:51Z",
+      "side": 1,
+      "message": "casting away the signed ness is dangerous.   I went \nthe other way and converted to unsigned.   \n\nIf we want to change all the sad functions to return int \ninstead of unsigned int I think this change would be fine.",
+      "revId": "46cae9186999b1f22e7315cbfbb0c174b1075d1b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
