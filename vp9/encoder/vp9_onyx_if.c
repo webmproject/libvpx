@@ -217,6 +217,7 @@ int vp9_compute_qdelta(const VP9_COMP *cpi, double qstart, double qtarget) {
 
 // Computes a q delta (in "q index" terms) to get from a starting q value
 // to a value that should equate to thegiven rate ratio.
+
 static int compute_qdelta_by_rate(VP9_COMP *cpi, int base_q_index,
                                   double rate_target_ratio) {
   int i;
@@ -1110,7 +1111,7 @@ int vp9_reverse_trans(int x) {
 
 void vp9_new_framerate(VP9_COMP *cpi, double framerate) {
   VP9_COMMON *const cm = &cpi->common;
-  int64_t vbr_max_bits;
+  int vbr_max_bits;
 
   if (framerate < 0.1)
     framerate = 30;
@@ -1134,10 +1135,10 @@ void vp9_new_framerate(VP9_COMP *cpi, double framerate) {
   // be acheived because of a user specificed max q (e.g. when the user
   // specifies lossless encode.
   //
-  vbr_max_bits = ((int64_t)cpi->rc.av_per_frame_bandwidth *
-                  (int64_t)cpi->oxcf.two_pass_vbrmax_section) / 100;
+  vbr_max_bits = (int)(((int64_t)cpi->rc.av_per_frame_bandwidth *
+      cpi->oxcf.two_pass_vbrmax_section) / 100);
   cpi->rc.max_frame_bandwidth =
-    MAX(MAX((cm->MBs * MAX_MB_RATE), MAXRATE_1080P), vbr_max_bits);
+      MAX(MAX((cm->MBs * MAX_MB_RATE), MAXRATE_1080P), vbr_max_bits);
 
   // Set Maximum gf/arf interval
   cpi->rc.max_gf_interval = 16;
@@ -1158,7 +1159,7 @@ void vp9_new_framerate(VP9_COMP *cpi, double framerate) {
     cpi->rc.max_gf_interval = cpi->twopass.static_scene_max_gf_interval;
 }
 
-static int64_t rescale(int val, int64_t num, int denom) {
+static int64_t rescale(int64_t val, int64_t num, int denom) {
   int64_t llnum = num;
   int64_t llden = denom;
   int64_t llval = val;
@@ -1211,9 +1212,12 @@ static void update_layer_context_change_config(VP9_COMP *const cpi,
     lc->target_bandwidth = oxcf->ts_target_bitrate[temporal_layer] * 1000;
     bitrate_alloc = (float)lc->target_bandwidth / (float)target_bandwidth;
     // Update buffer-related quantities.
-    lc->starting_buffer_level = oxcf->starting_buffer_level * bitrate_alloc;
-    lc->optimal_buffer_level = oxcf->optimal_buffer_level * bitrate_alloc;
-    lc->maximum_buffer_size = oxcf->maximum_buffer_size * bitrate_alloc;
+    lc->starting_buffer_level =
+        (int64_t)(oxcf->starting_buffer_level * bitrate_alloc);
+    lc->optimal_buffer_level =
+        (int64_t)(oxcf->optimal_buffer_level * bitrate_alloc);
+    lc->maximum_buffer_size =
+        (int64_t)(oxcf->maximum_buffer_size * bitrate_alloc);
     lrc->bits_off_target = MIN(lrc->bits_off_target, lc->maximum_buffer_size);
     lrc->buffer_level = MIN(lrc->buffer_level, lc->maximum_buffer_size);
     // Update framerate-related quantities.
@@ -1245,8 +1249,8 @@ static void update_layer_framerate(VP9_COMP *const cpi) {
     int prev_layer_target_bandwidth =
         oxcf->ts_target_bitrate[temporal_layer - 1] * 1000;
     lc->avg_frame_size =
-        (int)(lc->target_bandwidth - prev_layer_target_bandwidth) /
-        (lc->framerate - prev_layer_framerate);
+        (int)((lc->target_bandwidth - prev_layer_target_bandwidth) /
+              (lc->framerate - prev_layer_framerate));
   }
 }
 
@@ -1274,7 +1278,7 @@ static void save_layer_context(VP9_COMP *const cpi) {
   int temporal_layer = cpi->svc.temporal_layer_id;
   LAYER_CONTEXT *lc = &cpi->svc.layer_context[temporal_layer];
   lc->rc = cpi->rc;
-  lc->target_bandwidth = cpi->oxcf.target_bandwidth;
+  lc->target_bandwidth = (int)cpi->oxcf.target_bandwidth;
   lc->starting_buffer_level = cpi->oxcf.starting_buffer_level;
   lc->optimal_buffer_level = cpi->oxcf.optimal_buffer_level;
   lc->maximum_buffer_size = cpi->oxcf.maximum_buffer_size;
@@ -1491,7 +1495,7 @@ void vp9_change_config(VP9_PTR ptr, VP9_CONFIG *oxcf) {
 
   if (cpi->svc.number_temporal_layers > 1 &&
       cpi->oxcf.end_usage == USAGE_STREAM_FROM_SERVER) {
-    update_layer_context_change_config(cpi, cpi->oxcf.target_bandwidth);
+    update_layer_context_change_config(cpi, (int)cpi->oxcf.target_bandwidth);
   }
 
   cpi->speed = abs(cpi->oxcf.cpu_used);
@@ -2029,10 +2033,12 @@ void vp9_remove_compressor(VP9_PTR *ptr) {
                   / time_encoded;
 
       if (cpi->b_calculate_psnr) {
-        const double total_psnr = vp9_mse2psnr(cpi->total_samples, 255.0,
-                                               cpi->total_sq_error);
-        const double totalp_psnr = vp9_mse2psnr(cpi->totalp_samples, 255.0,
-                                                cpi->totalp_sq_error);
+        const double total_psnr =
+            vp9_mse2psnr((double)cpi->total_samples, 255.0,
+                         (double)cpi->total_sq_error);
+        const double totalp_psnr =
+            vp9_mse2psnr((double)cpi->totalp_samples, 255.0,
+                         (double)cpi->totalp_sq_error);
         const double total_ssim = 100 * pow(cpi->summed_quality /
                                                 cpi->summed_weights, 8.0);
         const double totalp_ssim = 100 * pow(cpi->summedp_quality /
@@ -2208,20 +2214,20 @@ static void calc_psnr(const YV12_BUFFER_CONFIG *a, const YV12_BUFFER_CONFIG *b,
     const int w = widths[i];
     const int h = heights[i];
     const uint32_t samples = w * h;
-    const double sse = calc_plane_error(a_planes[i], a_strides[i],
-                                        b_planes[i], b_strides[i],
-                                        w, h);
+    const uint64_t sse = calc_plane_error(a_planes[i], a_strides[i],
+                                          b_planes[i], b_strides[i],
+                                          w, h);
     psnr->sse[1 + i] = sse;
     psnr->samples[1 + i] = samples;
-    psnr->psnr[1 + i] = vp9_mse2psnr(samples, 255.0, sse);
+    psnr->psnr[1 + i] = vp9_mse2psnr(samples, 255.0, (double) sse);
 
-    total_sse += sse;
+    total_sse += (uint64_t)sse;
     total_samples += samples;
   }
 
   psnr->sse[0] = total_sse;
   psnr->samples[0] = total_samples;
-  psnr->psnr[0] = vp9_mse2psnr(total_samples, 255.0, total_sse);
+  psnr->psnr[0] = vp9_mse2psnr((double)total_samples, 255.0, (double)total_sse);
 }
 
 static void generate_psnr_packet(VP9_COMP *cpi) {
@@ -2892,7 +2898,7 @@ static void encode_with_recode_loop(VP9_COMP *cpi,
       if (!cpi->sf.use_pick_mode)
         vp9_pack_bitstream(cpi, dest, size);
 
-      cpi->rc.projected_frame_size = (*size) << 3;
+      cpi->rc.projected_frame_size = (int)(*size) << 3;
       vp9_restore_coding_context(cpi);
 
       if (frame_over_shoot_limit == 0)
@@ -3762,7 +3768,7 @@ int vp9_get_compressed_data(VP9_PTR ptr, unsigned int *frame_flags,
 #if CONFIG_INTERNAL_STATS
 
   if (cpi->pass != 1) {
-    cpi->bytes += *size;
+    cpi->bytes += (int)(*size);
 
     if (cm->show_frame) {
       cpi->count++;
