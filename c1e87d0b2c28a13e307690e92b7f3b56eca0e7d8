@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//2/M\u003d",
+        "filename": "vp9/encoder/vp9_vaq.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 149,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-02-14T18:56:40Z",
+      "side": 1,
+      "message": "I think it could be just: log(var + 1.0)",
+      "revId": "c1e87d0b2c28a13e307690e92b7f3b56eca0e7d8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
