@@ -350,9 +350,9 @@ static void set_offsets(VP9_COMMON *const cm, MACROBLOCKD *const xd,
 
   xd->mi_8x8 = cm->mi_grid_visible + offset;
   xd->prev_mi_8x8 = cm->prev_mi_grid_visible + offset;
-  // Special case: if prev_mi is NULL, the previous mode info context
-  // cannot be used.
-  xd->last_mi = cm->prev_mi ? xd->prev_mi_8x8[0] : NULL;
+
+  xd->last_mi = cm->coding_use_prev_mi && cm->prev_mi ?
+      xd->prev_mi_8x8[0] : NULL;
 
   xd->mi_8x8[0] = xd->mi_stream + offset - tile_offset;
   xd->mi_8x8[0]->mbmi.sb_type = bsize;
@@ -1203,9 +1203,11 @@ static size_t read_uncompressed_header(VP9D_COMP *pbi,
   }
 
   if (!cm->error_resilient_mode) {
+    cm->coding_use_prev_mi = 1;
     cm->refresh_frame_context = vp9_rb_read_bit(rb);
     cm->frame_parallel_decoding_mode = vp9_rb_read_bit(rb);
   } else {
+    cm->coding_use_prev_mi = 0;
     cm->refresh_frame_context = 0;
     cm->frame_parallel_decoding_mode = 1;
   }
@@ -1373,7 +1375,10 @@ int vp9_decode_frame(VP9D_COMP *pbi, const uint8_t **p_data_end) {
   alloc_tile_storage(pbi, tile_rows, tile_cols);
 
   xd->mode_info_stride = cm->mode_info_stride;
-  set_prev_mi(cm);
+  if (cm->coding_use_prev_mi)
+    set_prev_mi(cm);
+  else
+    cm->prev_mi = NULL;
 
   setup_plane_dequants(cm, xd, cm->base_qindex);
   vp9_setup_block_planes(xd, cm->subsampling_x, cm->subsampling_y);

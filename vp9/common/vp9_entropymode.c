@@ -465,8 +465,10 @@ void vp9_setup_past_independence(VP9_COMMON *cm) {
     cm->frame_contexts[cm->frame_context_idx] = cm->fc;
   }
 
-  vpx_memset(cm->prev_mip, 0,
-             cm->mode_info_stride * (cm->mi_rows + 1) * sizeof(MODE_INFO));
+  if (frame_is_intra_only(cm))
+    vpx_memset(cm->prev_mip, 0,
+               cm->mode_info_stride * (cm->mi_rows + 1) * sizeof(MODE_INFO));
+
   vpx_memset(cm->mip, 0,
              cm->mode_info_stride * (cm->mi_rows + 1) * sizeof(MODE_INFO));
 
