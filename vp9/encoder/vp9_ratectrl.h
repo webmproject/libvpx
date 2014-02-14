@@ -57,8 +57,8 @@ typedef struct {
   double tot_q;
   double avg_q;
 
-  int buffer_level;
-  int bits_off_target;
+  int64_t buffer_level;
+  int64_t bits_off_target;
 
   int decimation_factor;
   int decimation_count;
