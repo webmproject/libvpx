@@ -488,9 +488,6 @@ typedef struct VP9_COMP {
 
   unsigned int mode_chosen_counts[MAX_MODES];
   unsigned int sub8x8_mode_chosen_counts[MAX_REFS];
-  int64_t mode_skip_mask;
-  int ref_frame_mask;
-  int set_ref_frame_mask;
 
   int rd_threshes[MAX_SEGMENTS][BLOCK_SIZES][MAX_MODES];
   int rd_thresh_freq_fact[BLOCK_SIZES][MAX_MODES];

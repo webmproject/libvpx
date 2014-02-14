@@ -3149,6 +3149,8 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
   const int bws = num_8x8_blocks_wide_lookup[bsize] / 2;
   const int bhs = num_8x8_blocks_high_lookup[bsize] / 2;
   int best_skip2 = 0;
+  int ref_frame_mask = 0;
+  int mode_skip_mask = 0;
 
   x->skip_encode = cpi->sf.skip_encode_frame && x->q_index < QIDX_SKIP_THRESH;
 
@@ -3182,13 +3184,12 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
     frame_mv[ZEROMV][ref_frame].as_int = 0;
   }
 
-  cpi->ref_frame_mask = 0;
   for (ref_frame = LAST_FRAME;
        ref_frame <= ALTREF_FRAME && cpi->sf.reference_masking; ++ref_frame) {
     int i;
     for (i = LAST_FRAME; i <= ALTREF_FRAME; ++i) {
       if ((x->pred_mv_sad[ref_frame] >> 2) > x->pred_mv_sad[i]) {
-        cpi->ref_frame_mask |= (1 << ref_frame);
+        ref_frame_mask |= (1 << ref_frame);
         break;
       }
     }
@@ -3222,28 +3223,28 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
       if (mode_index == (cpi->sf.mode_skip_start + 1)) {
         switch (vp9_mode_order[best_mode_index].ref_frame[0]) {
           case INTRA_FRAME:
-            cpi->mode_skip_mask = 0;
+            mode_skip_mask = 0;
             break;
           case LAST_FRAME:
-            cpi->mode_skip_mask = LAST_FRAME_MODE_MASK;
+            mode_skip_mask = LAST_FRAME_MODE_MASK;
             break;
           case GOLDEN_FRAME:
-            cpi->mode_skip_mask = GOLDEN_FRAME_MODE_MASK;
+            mode_skip_mask = GOLDEN_FRAME_MODE_MASK;
             break;
           case ALTREF_FRAME:
-            cpi->mode_skip_mask = ALT_REF_MODE_MASK;
+            mode_skip_mask = ALT_REF_MODE_MASK;
             break;
           case NONE:
           case MAX_REF_FRAMES:
             assert(0 && "Invalid Reference frame");
         }
       }
-      if (cpi->mode_skip_mask & ((int64_t)1 << mode_index))
+      if (mode_skip_mask & (1 << mode_index))
         continue;
     }
 
     // Skip if the current reference frame has been masked off
-    if (cpi->ref_frame_mask & (1 << ref_frame) && this_mode != NEWMV)
+    if (ref_frame_mask & (1 << ref_frame) && this_mode != NEWMV)
       continue;
 
     // Test best rd so far against threshold for trying this mode.
@@ -3768,6 +3769,8 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
   int_mv seg_mvs[4][MAX_REF_FRAMES];
   b_mode_info best_bmodes[4];
   int best_skip2 = 0;
+  int ref_frame_mask = 0;
+  int mode_skip_mask = 0;
 
   x->skip_encode = cpi->sf.skip_encode_frame && x->q_index < QIDX_SKIP_THRESH;
   vpx_memset(x->zcoeff_blk[TX_4X4], 0, 4);
@@ -3803,13 +3806,12 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
     frame_mv[ZEROMV][ref_frame].as_int = 0;
   }
 
-  cpi->ref_frame_mask = 0;
   for (ref_frame = LAST_FRAME;
        ref_frame <= ALTREF_FRAME && cpi->sf.reference_masking; ++ref_frame) {
     int i;
     for (i = LAST_FRAME; i <= ALTREF_FRAME; ++i) {
       if ((x->pred_mv_sad[ref_frame] >> 1) > x->pred_mv_sad[i]) {
-        cpi->ref_frame_mask |= (1 << ref_frame);
+        ref_frame_mask |= (1 << ref_frame);
         break;
       }
     }
@@ -3842,23 +3844,23 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
       if (mode_index == 3) {
         switch (vp9_ref_order[best_mode_index].ref_frame[0]) {
           case INTRA_FRAME:
-            cpi->mode_skip_mask = 0;
+            mode_skip_mask = 0;
             break;
           case LAST_FRAME:
-            cpi->mode_skip_mask = 0x0010;
+            mode_skip_mask = 0x0010;
             break;
           case GOLDEN_FRAME:
-            cpi->mode_skip_mask = 0x0008;
+            mode_skip_mask = 0x0008;
             break;
           case ALTREF_FRAME:
-            cpi->mode_skip_mask = 0x0000;
+            mode_skip_mask = 0x0000;
             break;
           case NONE:
           case MAX_REF_FRAMES:
             assert(0 && "Invalid Reference frame");
         }
       }
-      if (cpi->mode_skip_mask & ((int64_t)1 << mode_index))
+      if (mode_skip_mask & (1 << mode_index))
         continue;
     }
 
