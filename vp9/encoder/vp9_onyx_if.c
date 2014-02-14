@@ -1496,7 +1496,7 @@ void vp9_change_config(VP9_PTR ptr, VP9_CONFIG *oxcf) {
     update_layer_context_change_config(cpi, cpi->oxcf.target_bandwidth);
   }
 
-  cpi->speed = cpi->oxcf.cpu_used;
+  cpi->speed = abs(cpi->oxcf.cpu_used);
 
   if (cpi->oxcf.lag_in_frames == 0) {
     // Force allow_lag to 0 if lag_in_frames is 0.
