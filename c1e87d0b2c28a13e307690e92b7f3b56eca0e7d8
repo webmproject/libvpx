@@ -16,6 +16,24 @@
       "revId": "c1e87d0b2c28a13e307690e92b7f3b56eca0e7d8",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//2+U\u003d",
+        "filename": "vp9/encoder/vp9_vaq.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 149,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2014-02-14T19:29:20Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//2/M\u003d",
+      "revId": "c1e87d0b2c28a13e307690e92b7f3b56eca0e7d8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
