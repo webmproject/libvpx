@@ -247,15 +247,15 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, MODE_INFO *m, vp9_writer *bc) {
   const nmv_context *nmvc = &cm->fc.nmvc;
   MACROBLOCK *const x = &cpi->mb;
   MACROBLOCKD *const xd = &x->e_mbd;
-  struct segmentation *seg = &cm->seg;
+  const struct segmentation *const seg = &cm->seg;
   MB_MODE_INFO *const mi = &m->mbmi;
-  const MV_REFERENCE_FRAME rf = mi->ref_frame[0];
-  const MV_REFERENCE_FRAME sec_rf = mi->ref_frame[1];
+  const MV_REFERENCE_FRAME ref0 = mi->ref_frame[0];
+  const MV_REFERENCE_FRAME ref1 = mi->ref_frame[1];
   const MB_PREDICTION_MODE mode = mi->mode;
   const int segment_id = mi->segment_id;
-  int skip;
   const BLOCK_SIZE bsize = mi->sb_type;
   const int allow_hp = cm->allow_high_precision_mv;
+  int skip;
 
 #ifdef ENTROPY_STATS
   active_section = 9;
@@ -276,15 +276,15 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, MODE_INFO *m, vp9_writer *bc) {
   skip = write_skip(cpi, segment_id, m, bc);
 
   if (!vp9_segfeature_active(seg, segment_id, SEG_LVL_REF_FRAME))
-    vp9_write(bc, rf != INTRA_FRAME, vp9_get_intra_inter_prob(cm, xd));
+    vp9_write(bc, ref0 != INTRA_FRAME, vp9_get_intra_inter_prob(cm, xd));
 
   if (bsize >= BLOCK_8X8 && cm->tx_mode == TX_MODE_SELECT &&
-      !(rf != INTRA_FRAME &&
+      !(ref0 != INTRA_FRAME &&
         (skip || vp9_segfeature_active(seg, segment_id, SEG_LVL_SKIP)))) {
     write_selected_tx_size(cpi, m, mi->tx_size, bsize, bc);
   }
 
-  if (rf == INTRA_FRAME) {
+  if (ref0 == INTRA_FRAME) {
 #ifdef ENTROPY_STATS
     active_section = 6;
 #endif
@@ -306,7 +306,7 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, MODE_INFO *m, vp9_writer *bc) {
   } else {
     vp9_prob *mv_ref_p;
     encode_ref_frame(cpi, bc);
-    mv_ref_p = cpi->common.fc.inter_mode_probs[mi->mode_context[rf]];
+    mv_ref_p = cm->fc.inter_mode_probs[mi->mode_context[ref0]];
 
 #ifdef ENTROPY_STATS
     active_section = 3;
@@ -316,7 +316,7 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, MODE_INFO *m, vp9_writer *bc) {
     if (!vp9_segfeature_active(seg, segment_id, SEG_LVL_SKIP)) {
       if (bsize >= BLOCK_8X8) {
         write_inter_mode(bc, mode, mv_ref_p);
-        ++cm->counts.inter_mode[mi->mode_context[rf]][INTER_OFFSET(mode)];
+        ++cm->counts.inter_mode[mi->mode_context[ref0]][INTER_OFFSET(mode)];
       }
     }
 
@@ -336,21 +336,19 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, MODE_INFO *m, vp9_writer *bc) {
       for (idy = 0; idy < 2; idy += num_4x4_blocks_high) {
         for (idx = 0; idx < 2; idx += num_4x4_blocks_wide) {
           const int j = idy * 2 + idx;
-          const MB_PREDICTION_MODE blockmode = m->bmi[j].as_mode;
-          write_inter_mode(bc, blockmode, mv_ref_p);
-          ++cm->counts.inter_mode[mi->mode_context[rf]]
-                                 [INTER_OFFSET(blockmode)];
-
-          if (blockmode == NEWMV) {
+          const MB_PREDICTION_MODE b_mode = m->bmi[j].as_mode;
+          write_inter_mode(bc, b_mode, mv_ref_p);
+          ++cm->counts.inter_mode[mi->mode_context[ref0]][INTER_OFFSET(b_mode)];
+          if (b_mode == NEWMV) {
 #ifdef ENTROPY_STATS
             active_section = 11;
 #endif
             vp9_encode_mv(cpi, bc, &m->bmi[j].as_mv[0].as_mv,
-                          &mi->ref_mvs[rf][0].as_mv, nmvc, allow_hp);
+                          &mi->ref_mvs[ref0][0].as_mv, nmvc, allow_hp);
 
             if (has_second_ref(mi))
               vp9_encode_mv(cpi, bc, &m->bmi[j].as_mv[1].as_mv,
-                            &mi->ref_mvs[sec_rf][0].as_mv, nmvc, allow_hp);
+                            &mi->ref_mvs[ref1][0].as_mv, nmvc, allow_hp);
           }
         }
       }
@@ -359,11 +357,11 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, MODE_INFO *m, vp9_writer *bc) {
       active_section = 5;
 #endif
       vp9_encode_mv(cpi, bc, &mi->mv[0].as_mv,
-                    &mi->ref_mvs[rf][0].as_mv, nmvc, allow_hp);
+                    &mi->ref_mvs[ref0][0].as_mv, nmvc, allow_hp);
 
       if (has_second_ref(mi))
         vp9_encode_mv(cpi, bc, &mi->mv[1].as_mv,
-                      &mi->ref_mvs[sec_rf][0].as_mv, nmvc, allow_hp);
+                      &mi->ref_mvs[ref1][0].as_mv, nmvc, allow_hp);
     }
   }
 }
