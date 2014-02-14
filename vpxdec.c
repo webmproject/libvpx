@@ -791,7 +791,8 @@ int main_loop(int argc, const char **argv_) {
 
         vpx_usec_timer_start(&timer);
 
-        if (vpx_codec_decode(&decoder, buf, bytes_in_buffer, NULL, 0)) {
+        if (vpx_codec_decode(&decoder, buf, (unsigned int)bytes_in_buffer,
+                             NULL, 0)) {
           const char *detail = vpx_codec_error_detail(&decoder);
           warn("Failed to decode frame %d: %s",
                frame_in, vpx_codec_error(&decoder));
@@ -873,7 +874,7 @@ int main_loop(int argc, const char **argv_) {
                                         vpx_input_ctx.height,
                                         &vpx_input_ctx.framerate, img->fmt);
             if (do_md5) {
-              MD5Update(&md5_ctx, (md5byte *)buf, len);
+              MD5Update(&md5_ctx, (md5byte *)buf, (unsigned int)len);
             } else {
               fputs(buf, outfile);
             }
@@ -882,7 +883,7 @@ int main_loop(int argc, const char **argv_) {
           // Y4M frame header
           len = y4m_write_frame_header(buf, sizeof(buf));
           if (do_md5) {
-            MD5Update(&md5_ctx, (md5byte *)buf, len);
+            MD5Update(&md5_ctx, (md5byte *)buf, (unsigned int)len);
           } else {
             fputs(buf, outfile);
           }

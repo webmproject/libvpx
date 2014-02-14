@@ -365,7 +365,7 @@ static vpx_codec_err_t set_vp9e_config(VP9_CONFIG *oxcf,
     memcpy(oxcf->ts_rate_decimator, cfg.ts_rate_decimator,
            sizeof(cfg.ts_rate_decimator));
   } else if (oxcf->ts_number_layers == 1) {
-    oxcf->ts_target_bitrate[0] = oxcf->target_bandwidth;
+    oxcf->ts_target_bitrate[0] = (int)oxcf->target_bandwidth;
     oxcf->ts_rate_decimator[0] = 1;
   }
 
@@ -639,7 +639,7 @@ static int write_superframe_index(vpx_codec_alg_priv_t *ctx) {
 
     *x++ = marker;
     for (i = 0; i < ctx->pending_frame_count; i++) {
-      int this_sz = ctx->pending_frame_sizes[i];
+      unsigned int this_sz = (unsigned int)ctx->pending_frame_sizes[i];
 
       for (j = 0; j <= mag; j++) {
         *x++ = this_sz & 0xff;
@@ -1049,7 +1049,7 @@ static vpx_codec_err_t vp9e_set_svc_layer_id(vpx_codec_alg_priv_t *ctx,
     return VPX_CODEC_INVALID_PARAM;
   }
   if (cpi->svc.spatial_layer_id < 0 ||
-      cpi->svc.spatial_layer_id >= ctx->cfg.ss_number_layers) {
+      cpi->svc.spatial_layer_id >= (int)ctx->cfg.ss_number_layers) {
     return VPX_CODEC_INVALID_PARAM;
   }
   return VPX_CODEC_OK;
