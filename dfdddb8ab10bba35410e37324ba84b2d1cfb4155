@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//2/8\u003d",
+        "filename": "vp9/encoder/vp9_vaq.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 78,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2014-02-14T18:48:57Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//3AU\u003d",
+      "revId": "dfdddb8ab10bba35410e37324ba84b2d1cfb4155",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//3AY\u003d",
         "filename": "vp9/encoder/vp9_vaq.c",
         "patchSetId": 2
@@ -30,6 +48,24 @@
       "writtenOn": "2014-02-14T18:24:37Z",
       "side": 1,
       "message": "fix the whitespace while you\u0027re here and just use log() since everything else is double",
+      "revId": "dfdddb8ab10bba35410e37324ba84b2d1cfb4155",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//3AA\u003d",
+        "filename": "vp9/encoder/vp9_vaq.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 149,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2014-02-14T18:48:57Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//3AY\u003d",
       "revId": "dfdddb8ab10bba35410e37324ba84b2d1cfb4155",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
