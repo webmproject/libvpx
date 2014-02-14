@@ -151,7 +151,7 @@ int64_t vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
                                     VP9_ALT_FLAG };
   int64_t best_rd = INT64_MAX;
   int64_t this_rd;
-  int64_t cost[4]= { 0, 100, 150,  205 };
+  int cost[4]= { 0, 100, 150,  205 };
 
   x->skip_encode = cpi->sf.skip_encode_frame && x->q_index < QIDX_SKIP_THRESH;
 
