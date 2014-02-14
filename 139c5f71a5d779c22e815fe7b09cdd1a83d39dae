@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//28E\u003d",
+        "filename": "vp9/encoder/vp9_onyx_if.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 2218,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-02-14T20:29:02Z",
+      "side": 1,
+      "message": "calc_plane_error() returns uint64_t. You are assigning it to double and then convert double back to uint64_t. It seems it could be more optimal. May be we should also return int64_t instead of uint64_t from calc_plane_error().",
+      "revId": "139c5f71a5d779c22e815fe7b09cdd1a83d39dae",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
