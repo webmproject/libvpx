@@ -495,6 +495,18 @@ static void set_rd_speed_thresholds(VP9_COMP *cpi) {
   sf->thresh_mult[THR_D207_PRED] += 2500;
   sf->thresh_mult[THR_D63_PRED] += 2500;
 
+  // disable using golden frame modes if golden frames are not being used
+  if (cpi->rc.frames_till_gf_update_due == INT_MAX) {
+    sf->thresh_mult[THR_NEARESTG ] = INT_MAX;
+    sf->thresh_mult[THR_ZEROG    ] = INT_MAX;
+    sf->thresh_mult[THR_NEARG    ] = INT_MAX;
+    sf->thresh_mult[THR_NEWG     ] = INT_MAX;
+    sf->thresh_mult[THR_COMP_ZEROGA   ] = INT_MAX;
+    sf->thresh_mult[THR_COMP_NEARESTGA] = INT_MAX;
+    sf->thresh_mult[THR_COMP_NEARGA   ] = INT_MAX;
+    sf->thresh_mult[THR_COMP_NEWGA    ] = INT_MAX;
+  }
+
   /* disable frame modes if flags not set */
   if (!(cpi->ref_frame_flags & VP9_LAST_FLAG)) {
     sf->thresh_mult[THR_NEWMV    ] = INT_MAX;
