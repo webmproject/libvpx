@@ -75,9 +75,9 @@ void vp9_vaq_init() {
 void vp9_vaq_frame_setup(VP9_COMP *cpi) {
   VP9_COMMON *cm = &cpi->common;
   struct segmentation *seg = &cm->seg;
-  int base_q = vp9_convert_qindex_to_q(cm->base_qindex);
-  int base_rdmult = vp9_compute_rd_mult(cpi, cm->base_qindex +
-                                        cm->y_dc_delta_q);
+  const double base_q = vp9_convert_qindex_to_q(cm->base_qindex);
+  const int base_rdmult = vp9_compute_rd_mult(cpi, cm->base_qindex +
+                                              cm->y_dc_delta_q);
   int i;
 
   if (cm->frame_type == KEY_FRAME ||
@@ -143,9 +143,6 @@ int vp9_block_energy(VP9_COMP *cpi, MACROBLOCK *x, BLOCK_SIZE bs) {
 
   vp9_clear_system_state();  // __asm emms;
 
-  // if (var <= 1000)
-  //   return 0;
-
-  energy = 0.9*(logf(var + 1) - 10.0);
+  energy = 0.9 * (log(var + 1.0) - 10.0);
   return clamp(round(energy), ENERGY_MIN, ENERGY_MAX);
 }
