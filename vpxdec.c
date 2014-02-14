@@ -482,6 +482,7 @@ static FILE *open_outfile(const char *name) {
 int main_loop(int argc, const char **argv_) {
   vpx_codec_ctx_t       decoder;
   char                  *fn = NULL;
+  int                    i;
   uint8_t               *buf = NULL;
   size_t                 bytes_in_buffer = 0, buffer_size = 0;
   FILE                  *infile;
