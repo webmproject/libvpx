@@ -490,8 +490,6 @@ loop_16x16_neon
     vqshrun.s16         d3, q0, #0
     vqshrun.s16         d22, q11, #0
     vqshrun.s16         d23, q8, #0
-    vdup.16             q0, d20[2]
-    vdup.16             q8, d20[3]
     vld1.8              {d18}, [r3]!                  ; preload 8 left into r12
     vmovl.u8            q10, d18
     vst1.64             {d2,d3}, [r0], r1
