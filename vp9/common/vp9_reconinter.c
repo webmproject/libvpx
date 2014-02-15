@@ -139,9 +139,6 @@ MV clamp_mv_to_umv_border_sb(const MACROBLOCKD *xd, const MV *src_mv,
   return clamped_mv;
 }
 
-// TODO(jkoleszar): In principle, pred_w, pred_h are unnecessary, as we could
-// calculate the subsampled BLOCK_SIZE, but that type isn't defined for
-// sizes smaller than 16x16 yet.
 static void build_inter_predictors(MACROBLOCKD *xd, int plane, int block,
                                    int bw, int bh,
                                    int x, int y, int w, int h,

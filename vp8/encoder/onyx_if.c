@@ -2681,8 +2681,8 @@ static int resize_key_frame(VP8_COMP *cpi)
     VP8_COMMON *cm = &cpi->common;
 
     /* Do we need to apply resampling for one pass cbr.
-     * In one pass this is more limited than in two pass cbr
-     * The test and any change is only made one per key frame sequence
+     * In one pass this is more limited than in two pass cbr.
+     * The test and any change is only made once per key frame sequence.
      */
     if (cpi->oxcf.allow_spatial_resampling && (cpi->oxcf.end_usage == USAGE_STREAM_FROM_SERVER))
     {
@@ -2705,7 +2705,7 @@ static int resize_key_frame(VP8_COMP *cpi)
             cm->vert_scale = (cm->vert_scale > NORMAL) ? cm->vert_scale - 1 : NORMAL;
         }
 
-        /* Get the new hieght and width */
+        /* Get the new height and width */
         Scale2Ratio(cm->horiz_scale, &hr, &hs);
         Scale2Ratio(cm->vert_scale, &vr, &vs);
         new_width = ((hs - 1) + (cpi->oxcf.Width * hr)) / hs;
