@@ -111,7 +111,7 @@ typedef int (*vp9_full_search_fn_t)(const MACROBLOCK *x,
                                     int distance,
                                     const vp9_variance_fn_ptr_t *fn_ptr,
                                     int *mvjcost, int *mvcost[2],
-                                    const MV *center_mv, int n);
+                                    const MV *center_mv, MV *best_mv);
 
 typedef int (*vp9_refining_search_fn_t)(const MACROBLOCK *x,
                                         MV *ref_mv, int sad_per_bit,
