@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//2yY\u003d",
+        "filename": "vp9/encoder/vp9_onyx_if.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 2224,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2014-02-17T11:09:47Z",
+      "side": 1,
+      "message": "This cast no longer needed if sse is already a uint64_t",
+      "revId": "6c5f6b306bfa0cd70ec9c5728f2b6c602dec2f74",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
