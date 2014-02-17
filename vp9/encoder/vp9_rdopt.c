@@ -949,7 +949,7 @@ static void super_block_yrd(VP9_COMP *cpi,
 
   assert(bs == mbmi->sb_type);
   if (b_inter_mode)
-    vp9_subtract_sby(x, bs);
+    vp9_subtract_plane(x, bs, 0);
 
   if (cpi->sf.tx_size_search_method == USE_LARGESTALL ||
       (cpi->sf.tx_size_search_method != USE_FULL_RD &&
@@ -1291,8 +1291,11 @@ static void super_block_uvrd(VP9_COMP *const cpi, MACROBLOCK *x,
   if (ref_best_rd < 0)
     goto term;
 
-  if (is_inter_block(mbmi))
-    vp9_subtract_sbuv(x, bsize);
+  if (is_inter_block(mbmi)) {
+    int plane;
+    for (plane = 1; plane < MAX_MB_PLANE; ++plane)
+      vp9_subtract_plane(x, bsize, plane);
+  }
 
   *rate = 0;
   *distortion = 0;
