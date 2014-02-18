@@ -2708,6 +2708,8 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
       int_mv tmp_mv;
       single_motion_search(cpi, x, tile, bsize, mi_row, mi_col,
                            &tmp_mv, &rate_mv);
+      if (tmp_mv.as_int == INVALID_MV)
+        return INT64_MAX;
       *rate2 += rate_mv;
       frame_mv[refs[0]].as_int =
           xd->mi_8x8[0]->bmi[0].as_mv[0].as_int = tmp_mv.as_int;
