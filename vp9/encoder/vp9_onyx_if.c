@@ -2221,7 +2221,7 @@ static void calc_psnr(const YV12_BUFFER_CONFIG *a, const YV12_BUFFER_CONFIG *b,
     psnr->samples[1 + i] = samples;
     psnr->psnr[1 + i] = vp9_mse2psnr(samples, 255.0, (double) sse);
 
-    total_sse += (uint64_t)sse;
+    total_sse += sse;
     total_samples += samples;
   }
 
