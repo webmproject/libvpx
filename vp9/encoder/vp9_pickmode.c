@@ -192,7 +192,7 @@ int64_t vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
                                     VP9_ALT_FLAG };
   int64_t best_rd = INT64_MAX;
   int64_t this_rd;
-  int cost[4]= { 0, 100, 150,  205 };
+  int64_t cost[4]= { 0, 50, 75, 100 };
 
   x->skip_encode = cpi->sf.skip_encode_frame && x->q_index < QIDX_SKIP_THRESH;
 
@@ -264,7 +264,7 @@ int64_t vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
     }
   }
 
-  // TODO(jingning) sub-pixel motion search, if NEWMV is chosen
+  // Perform sub-pixel motion search, if NEWMV is chosen
   if (mbmi->mode == NEWMV) {
     ref_frame = mbmi->ref_frame[0];
     sub_pixel_motion_search(cpi, x, tile, bsize, mi_row, mi_col,
