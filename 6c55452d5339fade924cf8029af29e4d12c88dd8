@@ -70,6 +70,41 @@
       "revId": "6c55452d5339fade924cf8029af29e4d12c88dd8",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//2sw\u003d",
+        "filename": "vp9/encoder/vp9_onyx_if.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-02-18T22:09:21Z",
+      "side": 1,
+      "message": "the answer is: sort. the only exception made should be for config/rtcd if needed. for our purposes these can all be considered a part of the same lib, i..e., libvpx, not something external.\n\nhttp://google-styleguide.googlecode.com/svn/trunk/cppguide.xml#Names_and_Order_of_Includes",
+      "parentUuid": "AAAAdn//2tA\u003d",
+      "revId": "6c55452d5339fade924cf8029af29e4d12c88dd8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//2s0\u003d",
+        "filename": "vpx/vpx_codec.mk",
+        "patchSetId": 6
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-02-18T22:09:21Z",
+      "side": 1,
+      "message": "this looks like a convenience function, not something that should be part of the public api; consider moving it to internal/",
+      "revId": "6c55452d5339fade924cf8029af29e4d12c88dd8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
