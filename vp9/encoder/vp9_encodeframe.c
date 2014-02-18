@@ -1109,8 +1109,8 @@ static void encode_b_rt(VP9_COMP *cpi, const TileInfo *const tile,
 }
 
 static void encode_sb_rt(VP9_COMP *cpi, const TileInfo *const tile,
-                      TOKENEXTRA **tp, int mi_row, int mi_col,
-                      int output_enabled, BLOCK_SIZE bsize) {
+                         TOKENEXTRA **tp, int mi_row, int mi_col,
+                         int output_enabled, BLOCK_SIZE bsize) {
   VP9_COMMON *const cm = &cpi->common;
   MACROBLOCK *const x = &cpi->mb;
   const int bsl = b_width_log2(bsize), hbs = (1 << bsl) / 4;
@@ -2252,11 +2252,11 @@ static INLINE int get_block_col(int b32i, int b16i, int b8i) {
 }
 
 static void rtc_use_partition(VP9_COMP *cpi,
-                             const TileInfo *const tile,
-                             MODE_INFO **mi_8x8,
-                             TOKENEXTRA **tp, int mi_row, int mi_col,
-                             BLOCK_SIZE bsize, int *rate, int64_t *dist,
-                             int do_recon) {
+                              const TileInfo *const tile,
+                              MODE_INFO **mi_8x8,
+                              TOKENEXTRA **tp, int mi_row, int mi_col,
+                              BLOCK_SIZE bsize, int *rate, int64_t *dist,
+                              int do_recon) {
   VP9_COMMON *const cm = &cpi->common;
   MACROBLOCK *const x = &cpi->mb;
   MACROBLOCKD *const xd = &cpi->mb.e_mbd;
@@ -2314,6 +2314,7 @@ static void rtc_use_partition(VP9_COMP *cpi,
       }
     }
   }
+
   encode_sb_rt(cpi, tile, tp, mi_row, mi_col, 1, BLOCK_64X64);
 
   *rate = chosen_rate;
@@ -2696,6 +2697,7 @@ static void encode_superblock(VP9_COMP *cpi, TOKENEXTRA **t, int output_enabled,
   const int mis = cm->mode_info_stride;
   const int mi_width = num_8x8_blocks_wide_lookup[bsize];
   const int mi_height = num_8x8_blocks_high_lookup[bsize];
+
   x->skip_recode = !x->select_txfm_size && mbmi->sb_type >= BLOCK_8X8 &&
                    (cpi->oxcf.aq_mode != COMPLEXITY_AQ) &&
                    !cpi->sf.use_pick_mode;

@@ -127,9 +127,50 @@ static int full_pixel_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
   // calculate the bit cost on motion vector
   *rate_mv = vp9_mv_bit_cost(&tmp_mv->as_mv, &ref_mv.as_mv,
                              x->nmvjointcost, x->mvcost, MV_COST_WEIGHT);
-
-
   return bestsme;
+}
+
+static void sub_pixel_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
+                                    const TileInfo *const tile,
+                                    BLOCK_SIZE bsize, int mi_row, int mi_col,
+                                    int_mv *tmp_mv) {
+  MACROBLOCKD *xd = &x->e_mbd;
+  MB_MODE_INFO *mbmi = &xd->mi_8x8[0]->mbmi;
+  struct buf_2d backup_yv12[MAX_MB_PLANE] = {{0}};
+  int ref = mbmi->ref_frame[0];
+  int_mv ref_mv = mbmi->ref_mvs[ref][0];
+  int dis;
+
+  const YV12_BUFFER_CONFIG *scaled_ref_frame = vp9_get_scaled_ref_frame(cpi,
+                                                                        ref);
+  if (scaled_ref_frame) {
+    int i;
+    // Swap out the reference frame for a version that's been scaled to
+    // match the resolution of the current frame, allowing the existing
+    // motion search code to be used without additional modifications.
+    for (i = 0; i < MAX_MB_PLANE; i++)
+      backup_yv12[i] = xd->plane[i].pre[0];
+
+    setup_pre_planes(xd, 0, scaled_ref_frame, mi_row, mi_col, NULL);
+  }
+
+  tmp_mv->as_mv.col >>= 3;
+  tmp_mv->as_mv.row >>= 3;
+
+  cpi->find_fractional_mv_step(x, &tmp_mv->as_mv, &ref_mv.as_mv,
+                               cpi->common.allow_high_precision_mv,
+                               x->errorperbit,
+                               &cpi->fn_ptr[bsize],
+                               cpi->sf.subpel_force_stop,
+                               cpi->sf.subpel_iters_per_step,
+                               x->nmvjointcost, x->mvcost,
+                               &dis, &x->pred_sse[ref]);
+
+  if (scaled_ref_frame) {
+    int i;
+    for (i = 0; i < MAX_MB_PLANE; i++)
+      xd->plane[i].pre[0] = backup_yv12[i];
+  }
 }
 
 // TODO(jingning) placeholder for inter-frame non-RD mode decision.
@@ -161,6 +202,7 @@ int64_t vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
 
   // initialize mode decisions
   *returnrate = INT_MAX;
+  *returndistortion = INT64_MAX;
   vpx_memset(mbmi, 0, sizeof(MB_MODE_INFO));
   mbmi->sb_type = bsize;
   mbmi->ref_frame[0] = NONE;
@@ -200,9 +242,6 @@ int64_t vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
       int64_t dist;
 
       if (this_mode == NEWMV) {
-        if (this_rd < 300)
-          continue;
-
         x->mode_sad[ref_frame][INTER_OFFSET(NEWMV)] =
             full_pixel_motion_search(cpi, x, tile, bsize, mi_row, mi_col,
                                      &frame_mv[NEWMV][ref_frame], &rate_mv);
@@ -226,6 +265,13 @@ int64_t vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
   }
 
   // TODO(jingning) sub-pixel motion search, if NEWMV is chosen
+  if (mbmi->mode == NEWMV) {
+    ref_frame = mbmi->ref_frame[0];
+    sub_pixel_motion_search(cpi, x, tile, bsize, mi_row, mi_col,
+                            &frame_mv[NEWMV][ref_frame]);
+    mbmi->mv[0].as_int = frame_mv[NEWMV][ref_frame].as_int;
+    xd->mi_8x8[0]->bmi[0].as_mv[0].as_int = mbmi->mv[0].as_int;
+  }
 
   // TODO(jingning) intra prediction search, if the best SAD is above a certain
   // threshold.
