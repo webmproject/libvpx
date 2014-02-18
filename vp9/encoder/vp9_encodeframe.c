@@ -1047,28 +1047,9 @@ static void update_state_rt(VP9_COMP *cpi, PICK_MODE_CONTEXT *ctx,
   VP9_COMMON *const cm = &cpi->common;
   MACROBLOCK *const x = &cpi->mb;
   MACROBLOCKD *const xd = &x->e_mbd;
-  struct macroblock_plane *const p = x->plane;
-  struct macroblockd_plane *const pd = xd->plane;
   MB_MODE_INFO *const mbmi = &xd->mi_8x8[0]->mbmi;
 
   const int mb_mode_index = ctx->best_mode_index;
-  int max_plane;
-
-  max_plane = is_inter_block(mbmi) ? MAX_MB_PLANE : 1;
-  for (i = 0; i < max_plane; ++i) {
-    p[i].coeff = ctx->coeff_pbuf[i][1];
-    p[i].qcoeff = ctx->qcoeff_pbuf[i][1];
-    pd[i].dqcoeff = ctx->dqcoeff_pbuf[i][1];
-    p[i].eobs = ctx->eobs_pbuf[i][1];
-  }
-
-  for (i = max_plane; i < MAX_MB_PLANE; ++i) {
-    p[i].coeff = ctx->coeff_pbuf[i][2];
-    p[i].qcoeff = ctx->qcoeff_pbuf[i][2];
-    pd[i].dqcoeff = ctx->dqcoeff_pbuf[i][2];
-    p[i].eobs = ctx->eobs_pbuf[i][2];
-  }
-
   x->skip = ctx->skip;
 
   if (frame_is_intra_only(cm)) {
@@ -1147,7 +1128,6 @@ static void encode_sb_rt(VP9_COMP *cpi, const TileInfo *const tile,
     ctx = partition_plane_context(cpi->above_seg_context, cpi->left_seg_context,
                                  mi_row, mi_col, bsize);
     subsize = mi_8x8[0]->mbmi.sb_type;
-
   } else {
     ctx = 0;
     subsize = BLOCK_4X4;
@@ -2416,6 +2396,22 @@ static void encode_frame_internal(VP9_COMP *cpi) {
   vp9_zero(cpi->rd_tx_select_threshes);
 
   set_prev_mi(cm);
+
+  if (cpi->sf.use_pick_mode) {
+    // Initialize internal buffer pointers for rtc coding, where non-RD
+    // mode decision is used and hence no buffer pointer swap needed.
+    int i;
+    struct macroblock_plane *const p = x->plane;
+    struct macroblockd_plane *const pd = xd->plane;
+    PICK_MODE_CONTEXT *ctx = &cpi->mb.sb64_context;
+
+    for (i = 0; i < MAX_MB_PLANE; ++i) {
+      p[i].coeff = ctx->coeff_pbuf[i][0];
+      p[i].qcoeff = ctx->qcoeff_pbuf[i][0];
+      pd[i].dqcoeff = ctx->dqcoeff_pbuf[i][0];
+      p[i].eobs = ctx->eobs_pbuf[i][0];
+    }
+  }
 
   {
     struct vpx_usec_timer emr_timer;
