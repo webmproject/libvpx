@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//2jk\u003d",
+        "filename": "examples/simple_encoder.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 102,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-02-19T09:49:41Z",
+      "side": 1,
+      "message": "It seems that encode_vpx_frame() doesn\u0027t remove all code duplication. You still have to do all these manipulations with packets and video writer in each example. And, as I mentioned before, this logic is probably incorrect -- there can be several packets for one input image.\n\nI had my own plan regarding this function but you already started to work on this, so it can be useful to share my thoughts regarding this function. May be, we could make encode_frame() as a common function (i.e. in tools_common) and use callback pointer to handle each packet. This callback can encapsulate additional logic for handling each packet with compressed data, i.e. print something to stdout. So, it could be something like this:\n\nvoid vpx_encode_and_write_frame(code, img, timestamp, duration, flags, quality, writer, packet_callback) {\n  vpx_codec_iter_t iter \u003d NULL;\n  const vpx_codec_cx_pkt_t *pkt \u003d NULL;\n  const vpx_codec_err_t res \u003d vpx_codec_encode(codec, img, frame_index, duration, flags, quality);\n  if (res !\u003d VPX_CODEC_OK)\n    die_codec(codec, \"Failed to encode frame\");\n\n  while ((pkt \u003d vpx_codec_get_cx_data(codec, \u0026iter)) !\u003d NULL) {\n    if (pkt-\u003ekind \u003d\u003d VPX_CODEC_CX_FRAME_PKT) {\n      const int keyframe \u003d (pkt-\u003edata.frame.flags \u0026 VPX_FRAME_IS_KEY) !\u003d 0;\n      if (!vpx_video_writer_write_frame(writer,\n                                        pkt-\u003edata.frame.buf,\n                                        pkt-\u003edata.frame.sz,\n                                        pkt-\u003edata.frame.pts)) {\n        die_codec(codec, \"Failed to write compressed frame\");\n      }\n\n      if (packet_callback)\n        packet_callback(pkt);\n     \n    }\n  }\n}\n\nThis function will allow to remove much more code (i.e. do it more readable, maintainable) and still can be reusable. Callback function for all examples could be something like this:\n\nvoid print_packet_type(const vpx_codec_cx_pkt_t *pkt) {\n  const int keyframe \u003d (packet.data.frame.flags \u0026 VPX_FRAME_IS_KEY) !\u003d 0;\n  printf(keyframe ? \"K\" : \".\");\n  fflush(stdout);\n}",
+      "revId": "f914c3916d2029eecd5b299d5400127b31bb61a3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
