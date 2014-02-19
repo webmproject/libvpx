@@ -118,7 +118,7 @@ int main(int argc, char **argv) {
     };
 
     // Decode the frame with 15ms deadline
-    if (vpx_codec_decode(&codec, frame, frame_size, NULL, 15000))
+    if (vpx_codec_decode(&codec, frame, (unsigned int)frame_size, NULL, 15000))
       die_codec(&codec, "Failed to decode frame");
 
     while ((img = vpx_codec_get_frame(&codec, &iter)) != NULL) {
