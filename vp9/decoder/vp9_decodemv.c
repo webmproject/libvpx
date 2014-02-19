@@ -356,6 +356,11 @@ static void read_intra_block_mode_info(VP9_COMMON *const cm, MODE_INFO *mi,
   mbmi->uv_mode = read_intra_mode_uv(cm, r, mbmi->mode);
 }
 
+static INLINE int is_mv_valid(const MV *mv) {
+  return mv->row > MV_LOW && mv->row < MV_UPP &&
+         mv->col > MV_LOW && mv->col < MV_UPP;
+}
+
 static INLINE int assign_mv(VP9_COMMON *cm, MB_PREDICTION_MODE mode,
                             int_mv mv[2], int_mv ref_mv[2],
                             int_mv nearest_mv[2], int_mv near_mv[2],
@@ -367,14 +372,10 @@ static INLINE int assign_mv(VP9_COMMON *cm, MB_PREDICTION_MODE mode,
     case NEWMV: {
       nmv_context_counts *const mv_counts = cm->frame_parallel_decoding_mode ?
                                             NULL : &cm->counts.mv;
-      read_mv(r, &mv[0].as_mv, &ref_mv[0].as_mv,
-              &cm->fc.nmvc, mv_counts, allow_hp);
-      if (is_compound)
-        read_mv(r, &mv[1].as_mv, &ref_mv[1].as_mv,
-                &cm->fc.nmvc, mv_counts, allow_hp);
       for (i = 0; i < 1 + is_compound; ++i) {
-        ret = ret && mv[i].as_mv.row < MV_UPP && mv[i].as_mv.row > MV_LOW;
-        ret = ret && mv[i].as_mv.col < MV_UPP && mv[i].as_mv.col > MV_LOW;
+        read_mv(r, &mv[i].as_mv, &ref_mv[i].as_mv, &cm->fc.nmvc, mv_counts,
+                allow_hp);
+        ret = ret && is_mv_valid(&mv[i].as_mv);
       }
       break;
     }
