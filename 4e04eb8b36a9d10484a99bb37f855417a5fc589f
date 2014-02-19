@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//2gY\u003d",
+        "filename": "examples/vpx_temporal_scalable_patterns.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 63,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-02-19T19:00:33Z",
+      "side": 1,
+      "message": "so this is just local stats, wouldn\u0027t it be simpler to convert the struct double?",
+      "revId": "4e04eb8b36a9d10484a99bb37f855417a5fc589f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
