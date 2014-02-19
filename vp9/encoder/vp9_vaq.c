@@ -44,7 +44,7 @@ unsigned int vp9_vaq_segment_id(int energy) {
 double vp9_vaq_rdmult_ratio(int energy) {
   ENERGY_IN_BOUNDS(energy);
 
-  vp9_clear_system_state();  // __asm emms;
+  vp9_clear_system_state();
 
   return RDMULT_RATIO(energy);
 }
@@ -52,7 +52,7 @@ double vp9_vaq_rdmult_ratio(int energy) {
 double vp9_vaq_inv_q_ratio(int energy) {
   ENERGY_IN_BOUNDS(energy);
 
-  vp9_clear_system_state();  // __asm emms;
+  vp9_clear_system_state();
 
   return Q_RATIO(-energy);
 }
@@ -63,7 +63,7 @@ void vp9_vaq_init() {
 
   assert(ENERGY_SPAN <= MAX_SEGMENTS);
 
-  vp9_clear_system_state();  // __asm emms;
+  vp9_clear_system_state();
 
   base_ratio = 1.5;
 
@@ -88,7 +88,7 @@ void vp9_vaq_frame_setup(VP9_COMP *cpi) {
 
     seg->abs_delta = SEGMENT_DELTADATA;
 
-    vp9_clear_system_state();  // __asm emms;
+  vp9_clear_system_state();
 
     for (i = ENERGY_MIN; i <= ENERGY_MAX; i++) {
       int qindex_delta, segment_rdmult;
@@ -141,7 +141,7 @@ int vp9_block_energy(VP9_COMP *cpi, MACROBLOCK *x, BLOCK_SIZE bs) {
   double energy;
   unsigned int var = block_variance(cpi, x, bs);
 
-  vp9_clear_system_state();  // __asm emms;
+  vp9_clear_system_state();
 
   energy = 0.9 * (log(var + 1.0) - 10.0);
   return clamp(round(energy), ENERGY_MIN, ENERGY_MAX);

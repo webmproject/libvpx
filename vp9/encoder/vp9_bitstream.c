@@ -1257,7 +1257,7 @@ void vp9_pack_bitstream(VP9_COMP *cpi, uint8_t *dest, size_t *size) {
     active_section = 7;
 #endif
 
-  vp9_clear_system_state();  // __asm emms;
+  vp9_clear_system_state();
 
   first_part_size = write_compressed_header(cpi, data);
   data += first_part_size;
