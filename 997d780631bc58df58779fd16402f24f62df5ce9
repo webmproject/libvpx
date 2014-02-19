@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//2fg\u003d",
+        "filename": "examples/vpx_temporal_scalable_patterns.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-02-19T19:22:21Z",
+      "side": 1,
+      "message": "const",
+      "revId": "997d780631bc58df58779fd16402f24f62df5ce9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//2fk\u003d",
+        "filename": "examples/vpx_temporal_scalable_patterns.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 495,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-02-19T19:22:21Z",
+      "side": 1,
+      "message": "not needed here, but seems like this could be simpler by going [0, mode_to_num) and adding 10 once...",
+      "revId": "997d780631bc58df58779fd16402f24f62df5ce9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
