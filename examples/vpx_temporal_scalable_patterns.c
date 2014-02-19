@@ -41,23 +41,23 @@ struct RateControlMetrics {
   // Number of encoded non-key frames per layer.
   int layer_enc_frames[VPX_TS_MAX_LAYERS];
   // Framerate per layer layer (cumulative).
-  float layer_framerate[VPX_TS_MAX_LAYERS];
+  double layer_framerate[VPX_TS_MAX_LAYERS];
   // Target average frame size per layer (per-frame-bandwidth per layer).
-  float layer_pfb[VPX_TS_MAX_LAYERS];
+  double layer_pfb[VPX_TS_MAX_LAYERS];
   // Actual average frame size per layer.
-  float layer_avg_frame_size[VPX_TS_MAX_LAYERS];
+  double layer_avg_frame_size[VPX_TS_MAX_LAYERS];
   // Average rate mismatch per layer (|target - actual| / target).
-  float layer_avg_rate_mismatch[VPX_TS_MAX_LAYERS];
+  double layer_avg_rate_mismatch[VPX_TS_MAX_LAYERS];
   // Actual encoding bitrate per layer (cumulative).
-  float layer_encoding_bitrate[VPX_TS_MAX_LAYERS];
+  double layer_encoding_bitrate[VPX_TS_MAX_LAYERS];
 };
 
 static void set_rate_control_metrics(struct RateControlMetrics *rc,
                                      vpx_codec_enc_cfg_t *cfg) {
-  int i = 0;
+  unsigned int i = 0;
   // Set the layer (cumulative) framerate and the target layer (non-cumulative)
   // per-frame-bandwidth, for the rate control encoding stats below.
-  float framerate = cfg->g_timebase.den / cfg->g_timebase.num;
+  const double framerate = cfg->g_timebase.den / cfg->g_timebase.num;
   rc->layer_framerate[0] = framerate / cfg->ts_rate_decimator[0];
   rc->layer_pfb[0] = 1000.0 * cfg->ts_target_bitrate[0] /
       rc->layer_framerate[0];
@@ -80,7 +80,7 @@ static void set_rate_control_metrics(struct RateControlMetrics *rc,
 static void printout_rate_control_summary(struct RateControlMetrics *rc,
                                           vpx_codec_enc_cfg_t *cfg,
                                           int frame_cnt) {
-  int i = 0;
+  unsigned int i = 0;
   int check_num_frames = 0;
   printf("Total number of processed frames: %d\n\n", frame_cnt -1);
   printf("Rate control layer stats for %d layer(s):\n\n",
@@ -432,7 +432,7 @@ int main(int argc, char **argv) {
   int frame_avail;
   int got_data;
   int flags = 0;
-  int i;
+  unsigned int i;
   int pts = 0;  // PTS starts at 0.
   int frame_duration = 1;  // 1 timebase tick per frame.
   int layering_mode = 0;
@@ -492,7 +492,7 @@ int main(int argc, char **argv) {
   cfg.g_timebase.num = strtol(argv[6], NULL, 0);
   cfg.g_timebase.den = strtol(argv[7], NULL, 0);
 
-  for (i = 10; i < 10 + mode_to_num_layers[layering_mode]; ++i) {
+  for (i = 10; (int)i < 10 + mode_to_num_layers[layering_mode]; ++i) {
     cfg.ts_target_bitrate[i - 10] = strtol(argv[i], NULL, 0);
   }
 
