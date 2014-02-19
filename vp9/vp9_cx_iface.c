@@ -264,7 +264,7 @@ static vpx_codec_err_t validate_img(vpx_codec_alg_priv_t *ctx,
 
 static vpx_codec_err_t set_vp9e_config(VP9_CONFIG *oxcf,
                                        vpx_codec_enc_cfg_t cfg,
-                                       struct vp9_extracfg vp8_cfg) {
+                                       struct vp9_extracfg vp9_cfg) {
   oxcf->version = cfg.g_profile;
   oxcf->width   = cfg.g_w;
   oxcf->height  = cfg.g_h;
@@ -305,11 +305,11 @@ static vpx_codec_err_t set_vp9e_config(VP9_CONFIG *oxcf,
     oxcf->end_usage = USAGE_STREAM_FROM_SERVER;
 
   oxcf->target_bandwidth         = cfg.rc_target_bitrate;
-  oxcf->rc_max_intra_bitrate_pct = vp8_cfg.rc_max_intra_bitrate_pct;
+  oxcf->rc_max_intra_bitrate_pct = vp9_cfg.rc_max_intra_bitrate_pct;
 
   oxcf->best_allowed_q          = cfg.rc_min_quantizer;
   oxcf->worst_allowed_q         = cfg.rc_max_quantizer;
-  oxcf->cq_level                = vp8_cfg.cq_level;
+  oxcf->cq_level                = vp9_cfg.cq_level;
   oxcf->fixed_q = -1;
 
   oxcf->under_shoot_pct         = cfg.rc_undershoot_pct;
@@ -330,30 +330,30 @@ static vpx_codec_err_t set_vp9e_config(VP9_CONFIG *oxcf,
   // oxcf->kf_min_dist         = cfg.kf_min_dis;
   oxcf->key_freq               = cfg.kf_max_dist;
 
-  oxcf->cpu_used               =  vp8_cfg.cpu_used;
-  oxcf->encode_breakout        =  vp8_cfg.static_thresh;
-  oxcf->play_alternate         =  vp8_cfg.enable_auto_alt_ref;
-  oxcf->noise_sensitivity      =  vp8_cfg.noise_sensitivity;
-  oxcf->sharpness              =  vp8_cfg.sharpness;
+  oxcf->cpu_used               =  vp9_cfg.cpu_used;
+  oxcf->encode_breakout        =  vp9_cfg.static_thresh;
+  oxcf->play_alternate         =  vp9_cfg.enable_auto_alt_ref;
+  oxcf->noise_sensitivity      =  vp9_cfg.noise_sensitivity;
+  oxcf->sharpness              =  vp9_cfg.sharpness;
 
   oxcf->two_pass_stats_in      =  cfg.rc_twopass_stats_in;
-  oxcf->output_pkt_list        =  vp8_cfg.pkt_list;
+  oxcf->output_pkt_list        =  vp9_cfg.pkt_list;
 
-  oxcf->arnr_max_frames = vp8_cfg.arnr_max_frames;
-  oxcf->arnr_strength   = vp8_cfg.arnr_strength;
-  oxcf->arnr_type       = vp8_cfg.arnr_type;
+  oxcf->arnr_max_frames = vp9_cfg.arnr_max_frames;
+  oxcf->arnr_strength   = vp9_cfg.arnr_strength;
+  oxcf->arnr_type       = vp9_cfg.arnr_type;
 
-  oxcf->tuning = vp8_cfg.tuning;
+  oxcf->tuning = vp9_cfg.tuning;
 
-  oxcf->tile_columns = vp8_cfg.tile_columns;
-  oxcf->tile_rows    = vp8_cfg.tile_rows;
+  oxcf->tile_columns = vp9_cfg.tile_columns;
+  oxcf->tile_rows    = vp9_cfg.tile_rows;
 
-  oxcf->lossless = vp8_cfg.lossless;
+  oxcf->lossless = vp9_cfg.lossless;
 
   oxcf->error_resilient_mode         = cfg.g_error_resilient;
-  oxcf->frame_parallel_decoding_mode = vp8_cfg.frame_parallel_decoding_mode;
+  oxcf->frame_parallel_decoding_mode = vp9_cfg.frame_parallel_decoding_mode;
 
-  oxcf->aq_mode = vp8_cfg.aq_mode;
+  oxcf->aq_mode = vp9_cfg.aq_mode;
 
   oxcf->ss_number_layers = cfg.ss_number_layers;
 
