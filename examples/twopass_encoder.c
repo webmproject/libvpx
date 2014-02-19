@@ -69,9 +69,9 @@ void usage_exit() {
 static void get_frame_stats(vpx_codec_ctx_t *ctx,
                             const vpx_image_t *img,
                             vpx_codec_pts_t pts,
-                            uint64_t duration,
+                            unsigned int duration,
                             vpx_enc_frame_flags_t flags,
-                            uint64_t deadline,
+                            unsigned int deadline,
                             vpx_fixed_buf_t *stats) {
   vpx_codec_iter_t iter = NULL;
   const vpx_codec_cx_pkt_t *pkt = NULL;
@@ -94,9 +94,9 @@ static void get_frame_stats(vpx_codec_ctx_t *ctx,
 static void encode_frame(vpx_codec_ctx_t *ctx,
                          const vpx_image_t *img,
                          vpx_codec_pts_t pts,
-                         uint64_t duration,
+                         unsigned int duration,
                          vpx_enc_frame_flags_t flags,
-                         uint64_t deadline,
+                         unsigned int deadline,
                          VpxVideoWriter *writer) {
   vpx_codec_iter_t iter = NULL;
   const vpx_codec_cx_pkt_t *pkt = NULL;
