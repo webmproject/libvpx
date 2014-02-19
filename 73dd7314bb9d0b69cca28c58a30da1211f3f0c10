@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//2k8\u003d",
+        "filename": "tools_common.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-02-19T07:20:41Z",
+      "side": 1,
+      "message": "I think this is more correct and future proof, but maybe it should be its own CL?",
+      "revId": "73dd7314bb9d0b69cca28c58a30da1211f3f0c10",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//2k4\u003d",
+        "filename": "tools_common.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 278,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-02-19T07:20:41Z",
+      "side": 1,
+      "message": "Since we die_codec() here it seems fine for this to be void, but this is largely copy/pasted from simple_encoder.c (a bunch of our remaining noise is related to duplicated encoder boiler plate in the examples, and I think encode_frame() is one of the final missing pieces of tools code that will help clean up things on the examples side).\n\nAnyway, not especially fond of this/and could probably use more thought. Likely good enough for the examples, though.",
+      "revId": "73dd7314bb9d0b69cca28c58a30da1211f3f0c10",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
