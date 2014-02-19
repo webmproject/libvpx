@@ -297,9 +297,16 @@ typedef struct vpx_svc_parameters {
   int alt_fb_idx;             /**< alt reference frame frame buffer index */
 } vpx_svc_parameters_t;
 
+/*!\brief  vp9 svc layer parameters
+ *
+ * This defines the spatial and temporal layer id numbers for svc encoding.
+ * This is used with the #VP9E_SET_SVC_LAYER_ID control to set the spatial and
+ * temporal layer id for the current frame.
+ *
+ */
 typedef struct vpx_svc_layer_id {
-  int spatial_layer_id;
-  int temporal_layer_id;
+  int spatial_layer_id;       /**< Spatial layer id number. */
+  int temporal_layer_id;      /**< Temporal layer id number. */
 } vpx_svc_layer_id_t;
 
 /*!\brief VP8 encoder control function parameter type
