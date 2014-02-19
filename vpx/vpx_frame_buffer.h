@@ -11,6 +11,10 @@
 #ifndef VPX_VPX_FRAME_BUFFER_H_
 #define VPX_VPX_FRAME_BUFFER_H_
 
+/*!\file
+ * \brief Describes the decoder external frame buffer interface.
+ */
+
 #ifdef __cplusplus
 extern "C" {
 #endif
