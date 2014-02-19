@@ -120,7 +120,7 @@ int main(int argc, char **argv) {
     int skip;
     const unsigned char *frame = vpx_video_reader_get_frame(reader,
                                                             &frame_size);
-    if (vpx_codec_decode(&codec, frame, frame_size, NULL, 0))
+    if (vpx_codec_decode(&codec, frame, (unsigned int)frame_size, NULL, 0))
       die_codec(&codec, "Failed to decode frame.");
 
     ++frame_cnt;
