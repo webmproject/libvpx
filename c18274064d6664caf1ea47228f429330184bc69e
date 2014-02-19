@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//2qk\u003d",
+        "filename": "vpx/src/svc_encodeframe.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 286,
+      "author": {
+        "id": 1003234
+      },
+      "writtenOn": "2014-02-19T01:03:54Z",
+      "side": 1,
+      "message": "nit: Comment is confusing. better:\n// is_keyframe is specified, but there are no quantizer values",
+      "revId": "c18274064d6664caf1ea47228f429330184bc69e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
