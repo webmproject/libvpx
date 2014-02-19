@@ -285,3 +285,36 @@ INSTALL-BINS-$(CONFIG_MSVS) += $(foreach p,$(VS_PLATFORMS),\
                                $(addprefix bin/$(p)/,$(ALL_EXAMPLES_BASENAME:.c=.exe)))
 $(foreach proj,$(call enabled,PROJECTS),\
     $(eval $(call vcproj_template,$(proj))))
+
+#
+# Documentation Rules
+#
+%.dox: %.c
+	@echo "    [DOXY] $@"
+	@echo "/*!\page example_$(@F:.dox=) $(@F:.dox=)" > $@
+	@echo "   \includelineno $(<F)" >> $@
+	@echo "*/" >> $@
+
+samples.dox: examples.mk
+	@echo "    [DOXY] $@"
+	@echo "/*!\page samples Sample Code" > $@
+	@echo "    This SDK includes a number of sample applications."\
+	      "Each sample documents a feature of the SDK in both prose"\
+	      "and the associated C code."\
+	      "The following samples are included: ">>$@
+	@$(foreach ex,$(sort $(notdir $(EXAMPLES:.c=))),\
+	   echo "     - \subpage example_$(ex) $($(ex).DESCRIPTION)" >> $@;)
+	@echo >> $@
+	@echo "    In addition, the SDK contains a number of utilities."\
+              "Since these utilities are built upon the concepts described"\
+              "in the sample code listed above, they are not documented in"\
+              "pieces like the samples are. Their source is included here"\
+              "for reference. The following utilities are included:" >> $@
+	@$(foreach ex,$(sort $(UTILS:.c=)),\
+	   echo "     - \subpage example_$(ex) $($(ex).DESCRIPTION)" >> $@;)
+	@echo "*/" >> $@
+
+CLEAN-OBJS += examples.doxy samples.dox $(ALL_EXAMPLES:.c=.dox)
+DOCS-yes += examples.doxy samples.dox
+examples.doxy: samples.dox $(ALL_EXAMPLES:.c=.dox)
+	@echo "INPUT += $^" > $@
