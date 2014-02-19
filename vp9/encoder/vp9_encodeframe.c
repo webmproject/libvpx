@@ -684,7 +684,7 @@ static void rd_pick_sb_modes(VP9_COMP *cpi, const TileInfo *const tile,
 
   if (cpi->oxcf.aq_mode == VARIANCE_AQ) {
     vp9_clear_system_state();
-    x->rdmult = round(x->rdmult * rdmult_ratio);
+    x->rdmult = (int)round(x->rdmult * rdmult_ratio);
   } else if (cpi->oxcf.aq_mode == COMPLEXITY_AQ) {
     const int mi_offset = mi_row * cm->mi_cols + mi_col;
     unsigned char complexity = cpi->complexity_map[mi_offset];
