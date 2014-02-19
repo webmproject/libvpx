@@ -169,8 +169,8 @@ class WebMVideoSource : public CompressedVideoSource {
   virtual const uint8_t *cxdata() const {
     return end_of_file_ ? NULL : buf_;
   }
-  virtual const unsigned int frame_size() const { return buf_sz_; }
-  virtual const unsigned int frame_number() const { return frame_; }
+  virtual size_t frame_size() const { return buf_sz_; }
+  virtual unsigned int frame_number() const { return frame_; }
 
  protected:
   std::string file_name_;

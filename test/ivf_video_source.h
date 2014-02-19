@@ -94,14 +94,14 @@ class IVFVideoSource : public CompressedVideoSource {
   virtual const uint8_t *cxdata() const {
     return end_of_file_ ? NULL : compressed_frame_buf_;
   }
-  virtual const unsigned int frame_size() const { return frame_sz_; }
-  virtual const unsigned int frame_number() const { return frame_; }
+  virtual size_t frame_size() const { return frame_sz_; }
+  virtual unsigned int frame_number() const { return frame_; }
 
  protected:
   std::string file_name_;
   FILE *input_file_;
   uint8_t *compressed_frame_buf_;
-  unsigned int frame_sz_;
+  size_t frame_sz_;
   unsigned int frame_;
   bool end_of_file_;
 };
