@@ -144,5 +144,5 @@ int vp9_block_energy(VP9_COMP *cpi, MACROBLOCK *x, BLOCK_SIZE bs) {
   vp9_clear_system_state();  // __asm emms;
 
   energy = 0.9 * (log(var + 1.0) - 10.0);
-  return clamp(round(energy), ENERGY_MIN, ENERGY_MAX);
+  return clamp((int)round(energy), ENERGY_MIN, ENERGY_MAX);
 }
