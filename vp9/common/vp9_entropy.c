@@ -16,7 +16,7 @@
 #include "vpx/vpx_integer.h"
 
 
-DECLARE_ALIGNED(16, const uint8_t, vp9_coefband_trans_8x8plus[1024]) = {
+const uint8_t vp9_coefband_trans_8x8plus[1024] = {
   0, 1, 1, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4,
   4, 4, 4, 4, 4, 5,
   // beyond MAXBAND_INDEX+1 all values are filled as 5
@@ -85,11 +85,11 @@ DECLARE_ALIGNED(16, const uint8_t, vp9_coefband_trans_8x8plus[1024]) = {
   5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5,
 };
 
-DECLARE_ALIGNED(16, const uint8_t, vp9_coefband_trans_4x4[16]) = {
+const uint8_t vp9_coefband_trans_4x4[16] = {
   0, 1, 1, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 5, 5, 5,
 };
 
-DECLARE_ALIGNED(16, const uint8_t, vp9_pt_energy_class[ENTROPY_TOKENS]) = {
+const uint8_t vp9_pt_energy_class[ENTROPY_TOKENS] = {
   0, 1, 2, 3, 3, 4, 4, 5, 5, 5, 5, 5
 };
 

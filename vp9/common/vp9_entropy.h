@@ -42,7 +42,7 @@ extern "C" {
 
 #define ENTROPY_NODES 11
 
-extern DECLARE_ALIGNED(16, const uint8_t, vp9_pt_energy_class[ENTROPY_TOKENS]);
+DECLARE_ALIGNED(16, extern const uint8_t, vp9_pt_energy_class[ENTROPY_TOKENS]);
 
 #define EOB_MODEL_TOKEN 3
 extern const vp9_tree_index vp9_coefmodel_tree[];
@@ -116,8 +116,8 @@ static INLINE void reset_skip_context(MACROBLOCKD *xd, BLOCK_SIZE bsize) {
 // This macro is currently unused but may be used by certain implementations
 #define MAXBAND_INDEX 21
 
-extern DECLARE_ALIGNED(16, const uint8_t, vp9_coefband_trans_8x8plus[1024]);
-extern DECLARE_ALIGNED(16, const uint8_t, vp9_coefband_trans_4x4[16]);
+DECLARE_ALIGNED(16, extern const uint8_t, vp9_coefband_trans_8x8plus[1024]);
+DECLARE_ALIGNED(16, extern const uint8_t, vp9_coefband_trans_4x4[16]);
 
 static INLINE const uint8_t *get_band_translate(TX_SIZE tx_size) {
   return tx_size == TX_4X4 ? vp9_coefband_trans_4x4
