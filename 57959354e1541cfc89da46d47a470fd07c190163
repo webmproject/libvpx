@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//2oM\u003d",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 3
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-02-19T02:49:15Z",
+      "side": 1,
+      "message": "lgtm. in the body add \u0027fixes issue #705\u0027 this will auto-update the ticket.",
+      "revId": "57959354e1541cfc89da46d47a470fd07c190163",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
