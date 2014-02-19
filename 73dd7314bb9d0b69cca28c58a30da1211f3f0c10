@@ -51,6 +51,40 @@
       "revId": "73dd7314bb9d0b69cca28c58a30da1211f3f0c10",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//2js\u003d",
+        "filename": "tools_common.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 284,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-02-19T09:32:54Z",
+      "side": 1,
+      "message": "I think it would be better to pass \u0027duration\u0027, \u0027flags\u0027, and \u0027quality\u0027 as arguments to encode_vpx_frame().",
+      "revId": "73dd7314bb9d0b69cca28c58a30da1211f3f0c10",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//2jw\u003d",
+        "filename": "tools_common.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 293,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-02-19T09:32:54Z",
+      "side": 1,
+      "message": "If my understanding is correct, you can get several (i.e. more than one) packets for single input image, at least for VP8 with alt-ref frames. Each packet should be written to bitstream. According to logic here you are writing only one packet (actually, the last one) to bitstream. Sorry, if I missed something here.",
+      "revId": "73dd7314bb9d0b69cca28c58a30da1211f3f0c10",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
