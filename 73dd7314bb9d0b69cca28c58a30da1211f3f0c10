@@ -71,6 +71,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//2hk\u003d",
+        "filename": "tools_common.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 284,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-02-19T17:09:59Z",
+      "side": 1,
+      "message": "Out of curiosity: Did you read my comments above?",
+      "parentUuid": "AAAAdn//2js\u003d",
+      "revId": "73dd7314bb9d0b69cca28c58a30da1211f3f0c10",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//2jw\u003d",
         "filename": "tools_common.c",
         "patchSetId": 1
@@ -82,6 +100,24 @@
       "writtenOn": "2014-02-19T09:32:54Z",
       "side": 1,
       "message": "If my understanding is correct, you can get several (i.e. more than one) packets for single input image, at least for VP8 with alt-ref frames. Each packet should be written to bitstream. According to logic here you are writing only one packet (actually, the last one) to bitstream. Sorry, if I missed something here.",
+      "revId": "73dd7314bb9d0b69cca28c58a30da1211f3f0c10",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//2ho\u003d",
+        "filename": "tools_common.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 293,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-02-19T17:09:59Z",
+      "side": 1,
+      "message": "I know all of these things.\n\nTBH, I think this have worked for most of the examples (since, for the most part, VP8 alt ref isn\u0027t enabled), but it isn\u0027t strictly correct because of the packet handling and the potential that people will experiment with settings.. \n\nAnway, the root problem is that I didn\u0027t want to make tools_common depend on video_writer. Probably should have just put this in video_writer in the first place as a direct copy/paste from simple_encoder. Instead I\u0027ve tried to break encoding and I/O up... which won\u0027t work in all cases.\n\nAnyway, moving this to video_writer and jamming I/O and encode back together. The main thing I care about is the final clean up (and silencing of warnings) that this util function will hopefully allow.",
+      "parentUuid": "AAAAdn//2jw\u003d",
       "revId": "73dd7314bb9d0b69cca28c58a30da1211f3f0c10",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
