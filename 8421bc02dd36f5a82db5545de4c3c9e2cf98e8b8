@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//2r0\u003d",
+        "filename": "vp9_spatial_scalable_encoder.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 62,
+      "author": {
+        "id": 1129385
+      },
+      "writtenOn": "2014-02-19T00:17:29Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//2tM\u003d",
+      "revId": "8421bc02dd36f5a82db5545de4c3c9e2cf98e8b8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//2tI\u003d",
         "filename": "vp9_spatial_scalable_encoder.c",
         "patchSetId": 1
@@ -30,6 +48,24 @@
       "writtenOn": "2014-02-18T21:36:35Z",
       "side": 1,
       "message": "quantizers_keyframe_arg",
+      "revId": "8421bc02dd36f5a82db5545de4c3c9e2cf98e8b8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//2rw\u003d",
+        "filename": "vp9_spatial_scalable_encoder.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 68,
+      "author": {
+        "id": 1129385
+      },
+      "writtenOn": "2014-02-19T00:17:29Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//2tI\u003d",
       "revId": "8421bc02dd36f5a82db5545de4c3c9e2cf98e8b8",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//2rs\u003d",
+        "filename": "vpx/src/svc_encodeframe.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1129385
+      },
+      "writtenOn": "2014-02-19T00:17:29Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//2ts\u003d",
+      "revId": "8421bc02dd36f5a82db5545de4c3c9e2cf98e8b8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//2tg\u003d",
         "filename": "vpx/src/svc_encodeframe.c",
         "patchSetId": 1
@@ -64,6 +118,24 @@
       "writtenOn": "2014-02-18T21:36:35Z",
       "side": 1,
       "message": "const int",
+      "revId": "8421bc02dd36f5a82db5545de4c3c9e2cf98e8b8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//2ro\u003d",
+        "filename": "vpx/src/svc_encodeframe.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 272,
+      "author": {
+        "id": 1129385
+      },
+      "writtenOn": "2014-02-19T00:17:29Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//2tg\u003d",
       "revId": "8421bc02dd36f5a82db5545de4c3c9e2cf98e8b8",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//2rk\u003d",
+        "filename": "vpx/src/svc_encodeframe.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 284,
+      "author": {
+        "id": 1129385
+      },
+      "writtenOn": "2014-02-19T00:17:29Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//2to\u003d",
+      "revId": "8421bc02dd36f5a82db5545de4c3c9e2cf98e8b8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//2tk\u003d",
         "filename": "vpx/src/svc_encodeframe.c",
         "patchSetId": 1
@@ -98,6 +188,24 @@
       "writtenOn": "2014-02-18T21:36:35Z",
       "side": 1,
       "message": "Keep \"\u003d q\" assignment on same line.\nUse braces around if and else clauses.",
+      "revId": "8421bc02dd36f5a82db5545de4c3c9e2cf98e8b8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//2rg\u003d",
+        "filename": "vpx/src/svc_encodeframe.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 307,
+      "author": {
+        "id": 1129385
+      },
+      "writtenOn": "2014-02-19T00:17:29Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//2tk\u003d",
       "revId": "8421bc02dd36f5a82db5545de4c3c9e2cf98e8b8",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -121,6 +229,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//2rc\u003d",
+        "filename": "vpx/src/svc_encodeframe.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 454,
+      "author": {
+        "id": 1129385
+      },
+      "writtenOn": "2014-02-19T00:17:29Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//2tY\u003d",
+      "revId": "8421bc02dd36f5a82db5545de4c3c9e2cf98e8b8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//2tw\u003d",
         "filename": "vpx/svc_context.h",
         "patchSetId": 1
@@ -138,6 +264,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//2rY\u003d",
+        "filename": "vpx/svc_context.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 68,
+      "author": {
+        "id": 1129385
+      },
+      "writtenOn": "2014-02-19T00:17:29Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//2tw\u003d",
+      "revId": "8421bc02dd36f5a82db5545de4c3c9e2cf98e8b8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//2tc\u003d",
         "filename": "vpx/svc_context.h",
         "patchSetId": 1
@@ -149,6 +293,24 @@
       "writtenOn": "2014-02-18T21:36:35Z",
       "side": 1,
       "message": "This change in interface will cause ffmpeg/libvpx.c to fail to compile. That can be avoided with a new interface:\nvpx_svc_set_keyframe_quantizers",
+      "revId": "8421bc02dd36f5a82db5545de4c3c9e2cf98e8b8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//2rU\u003d",
+        "filename": "vpx/svc_context.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 1129385
+      },
+      "writtenOn": "2014-02-19T00:17:29Z",
+      "side": 1,
+      "message": "This will not impact libvpx in ffmpeg.",
+      "parentUuid": "AAAAdn//2tc\u003d",
       "revId": "8421bc02dd36f5a82db5545de4c3c9e2cf98e8b8",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
