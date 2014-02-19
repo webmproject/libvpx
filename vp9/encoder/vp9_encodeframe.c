@@ -2407,7 +2407,7 @@ static void encode_frame_internal(VP9_COMP *cpi) {
           // For each row of SBs in the frame
           vp9_tile_init(&tile, cm, tile_row, tile_col);
           for (mi_row = tile.mi_row_start;
-               mi_row < tile.mi_row_end; mi_row += 8) {
+               mi_row < tile.mi_row_end; mi_row += MI_BLOCK_SIZE) {
             if (cpi->sf.use_pick_mode)
               encode_rtc_sb_row(cpi, &tile, mi_row, &tp);
             else
