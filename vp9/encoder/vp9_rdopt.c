@@ -431,7 +431,9 @@ static void model_rd_for_sb(VP9_COMP *cpi, BLOCK_SIZE bsize,
   // Note our transform coeffs are 8 times an orthogonal transform.
   // Hence quantizer step is also 8 times. To get effective quantizer
   // we need to divide by 8 before sending to modeling function.
-  int i, rate_sum = 0, dist_sum = 0;
+  int i;
+  int64_t rate_sum = 0;
+  int64_t dist_sum = 0;
   int ref = xd->mi_8x8[0]->mbmi.ref_frame[0];
   unsigned int sse;
 
@@ -448,13 +450,13 @@ static void model_rd_for_sb(VP9_COMP *cpi, BLOCK_SIZE bsize,
 
     // Fast approximate the modelling function.
     if (cpi->speed > 4) {
-      int rate;
+      int64_t rate;
       int64_t dist;
       int64_t square_error = sse;
       int quantizer = (pd->dequant[1] >> 3);
 
-      if ( quantizer < 120)
-        rate = (square_error * (280-quantizer) )>> 8;
+      if (quantizer < 120)
+        rate = (square_error * (280 - quantizer)) >> 8;
       else
         rate = 0;
       dist = (square_error * quantizer) >> 8;
@@ -466,12 +468,12 @@ static void model_rd_for_sb(VP9_COMP *cpi, BLOCK_SIZE bsize,
       model_rd_from_var_lapndz(sse, 1 << num_pels_log2_lookup[bs],
                                pd->dequant[1] >> 3, &rate, &dist);
       rate_sum += rate;
-      dist_sum += (int)dist;
+      dist_sum += dist;
     }
   }
 
-  *out_rate_sum = rate_sum;
-  *out_dist_sum = (int64_t)dist_sum << 4;
+  *out_rate_sum = (int)rate_sum;
+  *out_dist_sum = dist_sum << 4;
 }
 
 static void model_rd_for_sb_y_tx(VP9_COMP *cpi, BLOCK_SIZE bsize,
