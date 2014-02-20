@@ -75,6 +75,14 @@ int vp9_square_search(const MACROBLOCK *x,
                       int use_mvcost,
                       const MV *center_mv,
                       MV *best_mv);
+int vp9_fast_hex_search(const MACROBLOCK *x,
+                        MV *ref_mv,
+                        int search_param,
+                        int sad_per_bit,
+                        const vp9_variance_fn_ptr_t *vfp,
+                        int use_mvcost,
+                        const MV *center_mv,
+                        MV *best_mv);
 
 typedef int (fractional_mv_step_fp) (
     const MACROBLOCK *x,
