@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//2Ws\u003d",
+        "filename": "test/vp8_decrypt_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-02-20T05:03:53Z",
+      "side": 1,
+      "message": "code is duped in vp8_boolcoder_test; offset here seems unnecessary",
+      "revId": "b4d4f8a3406a517a2e680828592f89e1618c772a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
