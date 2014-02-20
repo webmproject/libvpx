@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//2SE\u003d",
+        "filename": "vp9/encoder/vp9_encodemb.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 490,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2014-02-20T20:40:26Z",
+      "side": 1,
+      "message": "what if we have alpha supported but choose not to use it?   \n\nMaybe shouldn\u0027t be MAX_MB_PLANE ?",
+      "revId": "f6fd5b2704690d8c83745175001a359863a96e69",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//2SA\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1296,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2014-02-20T20:40:26Z",
+      "side": 1,
+      "message": "what if we have an alpha plane but it isn\u0027t used in this encode?  \n\nMaybe Shouldn\u0027t use the constant?",
+      "revId": "f6fd5b2704690d8c83745175001a359863a96e69",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
