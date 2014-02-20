@@ -62,7 +62,7 @@ void usage_exit() {
 
 static void set_roi_map(const vpx_codec_enc_cfg_t *cfg,
                         vpx_codec_ctx_t *codec) {
-  int i;
+  unsigned int i;
   vpx_roi_map_t roi = {0};
 
   roi.rows = cfg->g_h / 16;
@@ -95,7 +95,7 @@ static void set_roi_map(const vpx_codec_enc_cfg_t *cfg,
 
 static void set_active_map(const vpx_codec_enc_cfg_t *cfg,
                            vpx_codec_ctx_t *codec) {
-  int i;
+  unsigned int i;
   vpx_active_map_t map = {0};
 
   map.rows = cfg->g_h / 16;
