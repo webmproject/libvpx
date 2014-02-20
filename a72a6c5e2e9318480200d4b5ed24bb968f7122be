@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//2O8\u003d",
+        "filename": "test/test-data.sha1",
+        "patchSetId": 2
+      },
+      "lineNbr": 531,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2014-02-20T22:02:00Z",
+      "side": 1,
+      "message": "I apparently payed no attention to the -02 -03 rules \n\nI guess I created my clips with bitrate 300 which means these should be -04 not 02",
+      "parentUuid": "AAAAdn//2P8\u003d",
+      "revId": "a72a6c5e2e9318480200d4b5ed24bb968f7122be",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//2P4\u003d",
         "filename": "test/test.mk",
         "patchSetId": 2
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//2Ow\u003d",
+        "filename": "test/test.mk",
+        "patchSetId": 2
+      },
+      "lineNbr": 652,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2014-02-20T22:02:00Z",
+      "side": 1,
+      "message": "no they should be named -04 since the bitrate used was actually default of 300 ... which doesn\u0027t match 02 or 03",
+      "parentUuid": "AAAAdn//2P4\u003d",
+      "revId": "a72a6c5e2e9318480200d4b5ed24bb968f7122be",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//2Pw\u003d",
         "filename": "test/test_vectors.cc",
         "patchSetId": 2
@@ -47,6 +83,24 @@
       "writtenOn": "2014-02-20T21:43:54Z",
       "side": 1,
       "message": "It seems to me that the order is wrong here. It would be easier ti find stuff if the clips were in order by the first part of the name: vp90-2-XX-....\nWhy hss vp90-2-09 been used multiple times?\nI know this insn\u0027t part of your patch :(",
+      "revId": "a72a6c5e2e9318480200d4b5ed24bb968f7122be",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//2Oo\u003d",
+        "filename": "test/test_vectors.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 161,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2014-02-20T22:02:00Z",
+      "side": 1,
+      "message": "I think the -02 -03 numbers are silly not sure why we have them at all.  nonetheless clear to me that I mis numbered the clips 02 they should be 04 and honestly deserve to be where they are renamed.",
+      "parentUuid": "AAAAdn//2Pw\u003d",
       "revId": "a72a6c5e2e9318480200d4b5ed24bb968f7122be",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
