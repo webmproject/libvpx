@@ -2808,7 +2808,7 @@ static void encode_without_recode_loop(VP9_COMP *cpi,
   if (cm->frame_type == KEY_FRAME) {
     vp9_setup_key_frame(cpi);
   } else {
-    if (!cm->intra_only && !cm->error_resilient_mode) {
+    if (!cm->intra_only && !cm->error_resilient_mode && !cpi->use_svc) {
       cpi->common.frame_context_idx = cpi->refresh_alt_ref_frame;
     }
     vp9_setup_inter_frame(cpi);
@@ -2864,7 +2864,7 @@ static void encode_with_recode_loop(VP9_COMP *cpi,
       if (cm->frame_type == KEY_FRAME) {
         vp9_setup_key_frame(cpi);
       } else {
-        if (!cm->intra_only && !cm->error_resilient_mode) {
+        if (!cm->intra_only && !cm->error_resilient_mode && !cpi->use_svc) {
           cpi->common.frame_context_idx = cpi->refresh_alt_ref_frame;
         }
         vp9_setup_inter_frame(cpi);
