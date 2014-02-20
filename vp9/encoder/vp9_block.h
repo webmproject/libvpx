@@ -49,7 +49,6 @@ typedef struct {
   int_mv ref_mvs[MAX_REF_FRAMES][MAX_MV_REF_CANDIDATES];
   int rate;
   int distortion;
-  int64_t intra_error;
   int best_mode_index;
   int rddiv;
   int rdmult;
@@ -63,9 +62,6 @@ typedef struct {
   // search loop
   int_mv pred_mv[MAX_REF_FRAMES];
   INTERP_FILTER pred_interp_filter;
-
-  // Bit flag for each mode whether it has high error in comparison to others.
-  unsigned int modes_with_high_error;
 } PICK_MODE_CONTEXT;
 
 struct macroblock_plane {
