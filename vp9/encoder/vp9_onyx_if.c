@@ -875,8 +875,10 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
   if (speed < 0)
     speed = -speed;
 
+#if CONFIG_INTERNAL_STATS
   for (i = 0; i < MAX_MODES; ++i)
     cpi->mode_chosen_counts[i] = 0;
+#endif
 
   // best quality defaults
   sf->frame_parameter_update = 1;
@@ -2782,8 +2784,6 @@ static void output_frame_level_debug_stats(VP9_COMP *cpi) {
 
     for (i = 0; i < MAX_MODES; ++i)
       fprintf(fmodes, "%5d ", cpi->mode_chosen_counts[i]);
-    for (i = 0; i < MAX_REFS; ++i)
-      fprintf(fmodes, "%5d ", cpi->sub8x8_mode_chosen_counts[i]);
 
     fprintf(fmodes, "\n");
 

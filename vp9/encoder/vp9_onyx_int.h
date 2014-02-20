@@ -486,9 +486,6 @@ typedef struct VP9_COMP {
   // Ambient reconstruction err target for force key frames
   int ambient_err;
 
-  unsigned int mode_chosen_counts[MAX_MODES];
-  unsigned int sub8x8_mode_chosen_counts[MAX_REFS];
-
   int rd_threshes[MAX_SEGMENTS][BLOCK_SIZES][MAX_MODES];
   int rd_thresh_freq_fact[BLOCK_SIZES][MAX_MODES];
   int rd_thresh_sub8x8[MAX_SEGMENTS][BLOCK_SIZES][MAX_REFS];
@@ -586,6 +583,8 @@ typedef struct VP9_COMP {
   int fixed_divide[512];
 
 #if CONFIG_INTERNAL_STATS
+  unsigned int mode_chosen_counts[MAX_MODES];
+
   int    count;
   double total_y;
   double total_u;
