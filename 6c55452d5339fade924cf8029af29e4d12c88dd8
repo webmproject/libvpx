@@ -91,6 +91,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//2ZQ\u003d",
+        "filename": "vp9/encoder/vp9_onyx_if.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-02-20T00:42:06Z",
+      "side": 1,
+      "message": "Tried to do this in the latest patch.",
+      "parentUuid": "AAAAdn//2sw\u003d",
+      "revId": "6c55452d5339fade924cf8029af29e4d12c88dd8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//2s0\u003d",
         "filename": "vpx/vpx_codec.mk",
         "patchSetId": 6
@@ -102,6 +120,24 @@
       "writtenOn": "2014-02-18T22:09:21Z",
       "side": 1,
       "message": "this looks like a convenience function, not something that should be part of the public api; consider moving it to internal/",
+      "revId": "6c55452d5339fade924cf8029af29e4d12c88dd8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//2ZU\u003d",
+        "filename": "vpx/vpx_codec.mk",
+        "patchSetId": 6
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-02-20T00:42:06Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//2s0\u003d",
       "revId": "6c55452d5339fade924cf8029af29e4d12c88dd8",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
