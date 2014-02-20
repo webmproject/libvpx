@@ -516,15 +516,16 @@ int main(int argc, char **argv) {
   // Disable automatic keyframe placement.
   cfg.kf_min_dist = cfg.kf_max_dist = 3000;
 
-  // Default setting for bitrate: used in special case of 1 layer (case 0).
-  cfg.rc_target_bitrate = cfg.ts_target_bitrate[0];
-
   set_temporal_layer_pattern(layering_mode,
                              &cfg,
                              layer_flags,
                              &flag_periodicity);
 
   set_rate_control_metrics(&rc, &cfg);
+
+  // Target bandwidth for the whole stream.
+  // Set to ts_target_bitrate for highest layer (total bitrate).
+  cfg.rc_target_bitrate = cfg.ts_target_bitrate[cfg.ts_number_layers - 1];
 
   // Open input file.
   if (!(infile = fopen(argv[1], "rb"))) {
