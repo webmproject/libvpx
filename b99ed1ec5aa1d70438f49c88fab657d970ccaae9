@@ -16,6 +16,24 @@
       "revId": "b99ed1ec5aa1d70438f49c88fab657d970ccaae9",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//2OA\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 2286,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2014-02-20T22:28:55Z",
+      "side": 1,
+      "message": "i did try it. but the problem is for key frame, using SAD as a single metric does not give significant performance improvement. we probably have to introduce a simplified RD mode decision for key frame rtc coding.",
+      "parentUuid": "AAAAdn//2PY\u003d",
+      "revId": "b99ed1ec5aa1d70438f49c88fab657d970ccaae9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
