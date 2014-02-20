@@ -16,6 +16,24 @@
       "revId": "d31fce60c5a08917c63ee1c7f53433a2c6858564",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//2M8\u003d",
+        "filename": "vp9/vp9_cx_iface.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 336,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2014-02-20T23:28:20Z",
+      "side": 1,
+      "message": "Done\n\nI am guessing that lag_in_frames might be used for bit allocation even if we turn off alt ref, like throw in a look-ahead of a few frames and determine whether we want to put more bits in the earlier frames? Not quite sure how it goes, so leave lag_in_frames untouched as for now.",
+      "parentUuid": "AAAAdn//2RU\u003d",
+      "revId": "d31fce60c5a08917c63ee1c7f53433a2c6858564",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
