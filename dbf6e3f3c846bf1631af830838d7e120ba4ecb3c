@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//2UQ\u003d",
+        "filename": "build/make/gen_msvs_vcxproj.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 162,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-02-20T18:28:48Z",
+      "side": 1,
+      "message": "this should be ok, but really the problem, like x86inc.asm, is probably that it\u0027s being built at all. these two files should be treated as the includes they are...",
+      "revId": "dbf6e3f3c846bf1631af830838d7e120ba4ecb3c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
