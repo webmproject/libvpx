@@ -55,6 +55,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//2Y8\u003d",
+        "filename": "test/svc_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 183,
+      "author": {
+        "id": 1129385
+      },
+      "writtenOn": "2014-02-20T18:33:40Z",
+      "side": 1,
+      "message": "I checked the code again. We only copy the option string in vpx_svc_set_options() without doing any check. So we will always return OK. We will return error in vpx_svc_init() because we parse the options there.",
+      "parentUuid": "AAAAdn//2ZI\u003d",
+      "revId": "c18274064d6664caf1ea47228f429330184bc69e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//2aQ\u003d",
         "filename": "test/svc_test.cc",
         "patchSetId": 3
