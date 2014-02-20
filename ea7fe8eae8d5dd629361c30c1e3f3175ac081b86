@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//2PE\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 3208,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2014-02-20T22:02:55Z",
+      "side": 1,
+      "message": "I\u0027ve expanded my descriptions a little bit. Let me know what info you still think is missing.\n\nDo you want the generating code?",
+      "parentUuid": "AAAAdn//2QI\u003d",
+      "revId": "ea7fe8eae8d5dd629361c30c1e3f3175ac081b86",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//2QE\u003d",
         "filename": "vp9/encoder/vp9_rdopt.c",
         "patchSetId": 1
@@ -30,6 +48,24 @@
       "writtenOn": "2014-02-20T21:32:30Z",
       "side": 1,
       "message": "best_mode_index starts at 0 ?  Even before getting any real look at our first mode we are deciding to skip_some modes.\n\nis that the intention?",
+      "revId": "ea7fe8eae8d5dd629361c30c1e3f3175ac081b86",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//2PA\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 3242,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2014-02-20T22:02:55Z",
+      "side": 1,
+      "message": "The lowest mode_skip_start is 6+1. That\u0027s where we add mode skips based on the best_mode_index.\n\nStarting from mode zero we skip all modes where the reference is unavailable or useless.",
+      "parentUuid": "AAAAdn//2QE\u003d",
       "revId": "ea7fe8eae8d5dd629361c30c1e3f3175ac081b86",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
