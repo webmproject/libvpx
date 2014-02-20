@@ -2,6 +2,40 @@
   "comments": [
     {
       "key": {
+        "uuid": "AAAAdn//2aI\u003d",
+        "filename": "test/svc_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 183,
+      "author": {
+        "id": 1003066
+      },
+      "writtenOn": "2014-02-20T00:02:31Z",
+      "side": 1,
+      "message": "why is this returning VPX_CODEC_OK and not an error?  Are default quantizers being used?",
+      "revId": "c18274064d6664caf1ea47228f429330184bc69e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//2aQ\u003d",
+        "filename": "test/svc_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 188,
+      "author": {
+        "id": 1003066
+      },
+      "writtenOn": "2014-02-20T00:02:31Z",
+      "side": 1,
+      "message": "please assert the result of vpx_svc_set_options",
+      "revId": "c18274064d6664caf1ea47228f429330184bc69e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//2qk\u003d",
         "filename": "vpx/src/svc_encodeframe.c",
         "patchSetId": 3
