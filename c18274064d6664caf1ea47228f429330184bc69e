@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//2Zg\u003d",
+        "filename": "test/svc_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 183,
+      "author": {
+        "id": 1129385
+      },
+      "writtenOn": "2014-02-20T00:40:13Z",
+      "side": 1,
+      "message": "I followed the code in SetQuantizersOption. I guess the idea was we will return OK for whatever we set in the option but will fail in vpx_svc_init.",
+      "parentUuid": "AAAAdn//2aI\u003d",
+      "revId": "c18274064d6664caf1ea47228f429330184bc69e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//2aQ\u003d",
         "filename": "test/svc_test.cc",
         "patchSetId": 3
@@ -30,6 +48,24 @@
       "writtenOn": "2014-02-20T00:02:31Z",
       "side": 1,
       "message": "please assert the result of vpx_svc_set_options",
+      "revId": "c18274064d6664caf1ea47228f429330184bc69e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//2Zc\u003d",
+        "filename": "test/svc_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 188,
+      "author": {
+        "id": 1129385
+      },
+      "writtenOn": "2014-02-20T00:40:13Z",
+      "side": 1,
+      "message": "Same reason as above.",
+      "parentUuid": "AAAAdn//2aQ\u003d",
       "revId": "c18274064d6664caf1ea47228f429330184bc69e",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
