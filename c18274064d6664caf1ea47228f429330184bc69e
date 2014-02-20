@@ -37,6 +37,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//2ZI\u003d",
+        "filename": "test/svc_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 183,
+      "author": {
+        "id": 1003066
+      },
+      "writtenOn": "2014-02-20T00:48:02Z",
+      "side": 1,
+      "message": "This is not intuitive.  So if I have an error in my quantizers-keyframe parameter, it gets silently ignored and the options in the quantizers string is used.\n\nI think we should use the default when quantizers-keyframe parameter if not specified, but if it is, it should be allowed to return an error.",
+      "parentUuid": "AAAAdn//2Zg\u003d",
+      "revId": "c18274064d6664caf1ea47228f429330184bc69e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//2aQ\u003d",
         "filename": "test/svc_test.cc",
         "patchSetId": 3
