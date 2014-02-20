@@ -16,6 +16,24 @@
       "revId": "2700a67368a6225569d974426231f327ebe66511",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//2Mc\u003d",
+        "filename": "test/vp8_decrypt_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-02-20T23:47:49Z",
+      "side": 1,
+      "message": "(being pedantic) technically you could have a problem here if size \u003e\u003d 1\u003c\u003c32. either way factorize/normalize the code in vp8_boolcoder_test",
+      "parentUuid": "AAAAdn//2OQ\u003d",
+      "revId": "2700a67368a6225569d974426231f327ebe66511",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
