@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//2QI\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 3208,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2014-02-20T21:32:30Z",
+      "side": 1,
+      "message": "I think these constants need some explanation?",
+      "revId": "ea7fe8eae8d5dd629361c30c1e3f3175ac081b86",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//2QE\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 3242,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2014-02-20T21:32:30Z",
+      "side": 1,
+      "message": "best_mode_index starts at 0 ?  Even before getting any real look at our first mode we are deciding to skip_some modes.\n\nis that the intention?",
+      "revId": "ea7fe8eae8d5dd629361c30c1e3f3175ac081b86",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
