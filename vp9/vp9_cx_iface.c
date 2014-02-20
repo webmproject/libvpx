@@ -289,10 +289,8 @@ static vpx_codec_err_t set_vp9e_config(VP9_CONFIG *oxcf,
   }
 
   if (cfg.g_pass == VPX_RC_FIRST_PASS) {
-    oxcf->allow_lag     = 0;
     oxcf->lag_in_frames = 0;
   } else {
-    oxcf->allow_lag     = (cfg.g_lag_in_frames) > 0;
     oxcf->lag_in_frames = cfg.g_lag_in_frames;
   }
 
@@ -390,7 +388,6 @@ static vpx_codec_err_t set_vp9e_config(VP9_CONFIG *oxcf,
   printf("two_pass_vbrbias: %d\n",  oxcf->two_pass_vbrbias);
   printf("two_pass_vbrmin_section: %d\n", oxcf->two_pass_vbrmin_section);
   printf("two_pass_vbrmax_section: %d\n", oxcf->two_pass_vbrmax_section);
-  printf("allow_lag: %d\n", oxcf->allow_lag);
   printf("lag_in_frames: %d\n", oxcf->lag_in_frames);
   printf("play_alternate: %d\n", oxcf->play_alternate);
   printf("Version: %d\n", oxcf->Version);

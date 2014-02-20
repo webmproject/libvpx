@@ -112,7 +112,6 @@ extern "C" {
     int auto_key;  // autodetect cut scenes and set the keyframes
     int key_freq;  // maximum distance to key frame.
 
-    int allow_lag;  // allow lagged compression (if 0 lagin frames is ignored)
     int lag_in_frames;  // how many frames lag before we start encoding
 
     // ----------------------------------------------------------------

@@ -1502,13 +1502,9 @@ void vp9_change_config(VP9_PTR ptr, VP9_CONFIG *oxcf) {
 
   cpi->speed = abs(cpi->oxcf.cpu_used);
 
-  if (cpi->oxcf.lag_in_frames == 0) {
-    // Force allow_lag to 0 if lag_in_frames is 0.
-    cpi->oxcf.allow_lag = 0;
-  } else if (cpi->oxcf.lag_in_frames > MAX_LAG_BUFFERS) {
-     // Limit on lag buffers as these are not currently dynamically allocated.
+  // Limit on lag buffers as these are not currently dynamically allocated.
+  if (cpi->oxcf.lag_in_frames > MAX_LAG_BUFFERS)
     cpi->oxcf.lag_in_frames = MAX_LAG_BUFFERS;
-  }
 
 #if CONFIG_MULTIPLE_ARF
   vp9_zero(cpi->alt_ref_source);
