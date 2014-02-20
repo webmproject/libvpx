@@ -184,9 +184,9 @@ class CompressedVideoSource {
 
   virtual const uint8_t *cxdata() const = 0;
 
-  virtual const unsigned int frame_size() const = 0;
+  virtual size_t frame_size() const = 0;
 
-  virtual const unsigned int frame_number() const = 0;
+  virtual unsigned int frame_number() const = 0;
 };
 
 }  // namespace libvpx_test
