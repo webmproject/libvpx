@@ -430,6 +430,14 @@ generate_vcxproj() {
                 Condition="'\$(Configuration)|\$(Platform)'=='$config|$plat'"
             tag_content OutDir "\$(SolutionDir)$plat_no_ws\\\$(Configuration)\\"
             tag_content IntDir "$plat_no_ws\\\$(Configuration)\\${name}\\"
+            if [ "$proj_kind" == "lib" ]; then
+              if [ "$config" == "Debug" ]; then
+                config_suffix=d
+              else
+                config_suffix=""
+              fi
+              tag_content TargetName "${name}${lib_sfx}${config_suffix}"
+            fi
             close_tag PropertyGroup
         done
     done
@@ -448,7 +456,6 @@ generate_vcxproj() {
                 opt=Disabled
                 runtime=$debug_runtime
                 curlibs=$debug_libs
-                confsuffix=d
                 case "$name" in
                 obj_int_extract)
                     debug=DEBUG
@@ -461,7 +468,6 @@ generate_vcxproj() {
                 opt=MaxSpeed
                 runtime=$release_runtime
                 curlibs=$libs
-                confsuffix=""
                 tag_content FavorSizeOrSpeed Speed
                 debug=NDEBUG
             fi
@@ -499,9 +505,6 @@ generate_vcxproj() {
                 close_tag Link
                 ;;
             lib)
-                open_tag Lib
-                tag_content OutputFile "\$(OutDir)${name}${lib_sfx}${confsuffix}.lib"
-                close_tag Lib
                 ;;
             esac
             close_tag ItemDefinitionGroup
