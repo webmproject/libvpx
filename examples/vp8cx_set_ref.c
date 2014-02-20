@@ -139,7 +139,7 @@ static void write_ivf_frame_header(FILE *outfile,
         return;
 
     pts = pkt->data.frame.pts;
-    mem_put_le32(header, pkt->data.frame.sz);
+    mem_put_le32(header, (unsigned int)pkt->data.frame.sz);
     mem_put_le32(header+4, pts&0xFFFFFFFF);
     mem_put_le32(header+8, pts >> 32);
 
