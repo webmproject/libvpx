@@ -34,6 +34,24 @@
       "revId": "2700a67368a6225569d974426231f327ebe66511",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//2Lg\u003d",
+        "filename": "test/vp8_decrypt_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-02-21T00:17:21Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//2Mc\u003d",
+      "revId": "2700a67368a6225569d974426231f327ebe66511",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
