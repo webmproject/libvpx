@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//2DU\u003d",
+        "filename": "vpx/src/svc_encodeframe.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 536,
+      "author": {
+        "id": 1129385
+      },
+      "writtenOn": "2014-02-21T22:59:49Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//2D4\u003d",
+      "revId": "38925da3aa7d1d81dd04a314f414066c804be70c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//2Dw\u003d",
         "filename": "vpx/src/svc_encodeframe.c",
         "patchSetId": 1
@@ -30,6 +48,24 @@
       "writtenOn": "2014-02-21T22:53:26Z",
       "side": 1,
       "message": "Should the allocation be based on the square of the ratio? (proportional to # of pixels in the image)",
+      "revId": "38925da3aa7d1d81dd04a314f414066c804be70c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//2DQ\u003d",
+        "filename": "vpx/src/svc_encodeframe.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 547,
+      "author": {
+        "id": 1129385
+      },
+      "writtenOn": "2014-02-21T22:59:49Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//2Dw\u003d",
       "revId": "38925da3aa7d1d81dd04a314f414066c804be70c",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
