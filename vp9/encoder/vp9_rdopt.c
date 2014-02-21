@@ -3127,10 +3127,10 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
                                   BLOCK_SIZE bsize,
                                   PICK_MODE_CONTEXT *ctx,
                                   int64_t best_rd_so_far) {
-  VP9_COMMON *cm = &cpi->common;
-  MACROBLOCKD *xd = &x->e_mbd;
-  MB_MODE_INFO *mbmi = &xd->mi_8x8[0]->mbmi;
-  const struct segmentation *seg = &cm->seg;
+  VP9_COMMON *const cm = &cpi->common;
+  MACROBLOCKD *const xd = &x->e_mbd;
+  MB_MODE_INFO *const mbmi = &xd->mi_8x8[0]->mbmi;
+  const struct segmentation *const seg = &cm->seg;
   const BLOCK_SIZE block_size = get_plane_block_size(bsize, &xd->plane[0]);
   MB_PREDICTION_MODE this_mode;
   MV_REFERENCE_FRAME ref_frame, second_ref_frame;
@@ -3166,13 +3166,13 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
   const int bws = num_8x8_blocks_wide_lookup[bsize] / 2;
   const int bhs = num_8x8_blocks_high_lookup[bsize] / 2;
   int best_skip2 = 0;
-  int ref_frame_mask = 0;
   int mode_skip_mask = 0;
+  const int mode_skip_start = cpi->sf.mode_skip_start + 1;
+  const int *const rd_threshes = cpi->rd_threshes[segment_id][bsize];
+  const int *const rd_thresh_freq_fact = cpi->rd_thresh_freq_fact[bsize];
+  const int mode_search_skip_flags = cpi->sf.mode_search_skip_flags;
 
   x->skip_encode = cpi->sf.skip_encode_frame && x->q_index < QIDX_SKIP_THRESH;
-
-  // Everywhere the flag is set the error is much higher than its neighbors.
-  ctx->modes_with_high_error = 0;
 
   estimate_ref_frame_costs(cpi, segment_id, ref_costs_single, ref_costs_comp,
                            &comp_mode_p);
@@ -3201,13 +3201,26 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
     frame_mv[ZEROMV][ref_frame].as_int = 0;
   }
 
-  for (ref_frame = LAST_FRAME;
-       ref_frame <= ALTREF_FRAME && cpi->sf.reference_masking; ++ref_frame) {
-    int i;
-    for (i = LAST_FRAME; i <= ALTREF_FRAME; ++i) {
-      if ((x->pred_mv_sad[ref_frame] >> 2) > x->pred_mv_sad[i]) {
-        ref_frame_mask |= (1 << ref_frame);
-        break;
+  for (ref_frame = LAST_FRAME; ref_frame <= ALTREF_FRAME; ++ref_frame) {
+    // All modes from vp9_mode_order that use this frame as any ref
+    static const int ref_frame_mask_all[] = {
+        0x123291, 0x25c444, 0x39b722
+    };
+    // Fixed mv modes (NEARESTMV, NEARMV, ZEROMV) from vp9_mode_order that use
+    // this frame as their primary ref
+    static const int ref_frame_mask_fixedmv[] = {
+        0x121281, 0x24c404, 0x080102
+    };
+    if (!(cpi->ref_frame_flags & flag_list[ref_frame])) {
+      // Skip modes for missing references
+      mode_skip_mask |= ref_frame_mask_all[ref_frame - LAST_FRAME];
+    } else if (cpi->sf.reference_masking) {
+      for (i = LAST_FRAME; i <= ALTREF_FRAME; ++i) {
+        // Skip fixed mv modes for poor references
+        if ((x->pred_mv_sad[ref_frame] >> 2) > x->pred_mv_sad[i]) {
+          mode_skip_mask |= ref_frame_mask_fixedmv[ref_frame - LAST_FRAME];
+          break;
+        }
       }
     }
   }
@@ -3226,105 +3239,59 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
     int64_t total_sse = INT_MAX;
     int early_term = 0;
 
-    for (i = 0; i < TX_MODES; ++i)
-      tx_cache[i] = INT64_MAX;
+    // Look at the reference frame of the best mode so far and set the
+    // skip mask to look at a subset of the remaining modes.
+    if (mode_index == mode_skip_start) {
+      switch (vp9_mode_order[best_mode_index].ref_frame[0]) {
+        case INTRA_FRAME:
+          break;
+        case LAST_FRAME:
+          mode_skip_mask |= LAST_FRAME_MODE_MASK;
+          break;
+        case GOLDEN_FRAME:
+          mode_skip_mask |= GOLDEN_FRAME_MODE_MASK;
+          break;
+        case ALTREF_FRAME:
+          mode_skip_mask |= ALT_REF_MODE_MASK;
+          break;
+        case NONE:
+        case MAX_REF_FRAMES:
+          assert(0 && "Invalid Reference frame");
+      }
+    }
+    if (mode_skip_mask & (1 << mode_index))
+      continue;
 
-    x->skip = 0;
+    // Test best rd so far against threshold for trying this mode.
+    if (best_rd < ((int64_t)rd_threshes[mode_index] *
+                  rd_thresh_freq_fact[mode_index] >> 5) ||
+        rd_threshes[mode_index] == INT_MAX)
+     continue;
+
     this_mode = vp9_mode_order[mode_index].mode;
     ref_frame = vp9_mode_order[mode_index].ref_frame[0];
     second_ref_frame = vp9_mode_order[mode_index].ref_frame[1];
 
-    // Look at the reference frame of the best mode so far and set the
-    // skip mask to look at a subset of the remaining modes.
-    if (mode_index > cpi->sf.mode_skip_start) {
-      if (mode_index == (cpi->sf.mode_skip_start + 1)) {
-        switch (vp9_mode_order[best_mode_index].ref_frame[0]) {
-          case INTRA_FRAME:
-            mode_skip_mask = 0;
-            break;
-          case LAST_FRAME:
-            mode_skip_mask = LAST_FRAME_MODE_MASK;
-            break;
-          case GOLDEN_FRAME:
-            mode_skip_mask = GOLDEN_FRAME_MODE_MASK;
-            break;
-          case ALTREF_FRAME:
-            mode_skip_mask = ALT_REF_MODE_MASK;
-            break;
-          case NONE:
-          case MAX_REF_FRAMES:
-            assert(0 && "Invalid Reference frame");
-        }
-      }
-      if (mode_skip_mask & (1 << mode_index))
-        continue;
-    }
-
-    // Skip if the current reference frame has been masked off
-    if (ref_frame_mask & (1 << ref_frame) && this_mode != NEWMV)
-      continue;
-
-    // Test best rd so far against threshold for trying this mode.
-    if ((best_rd < ((int64_t)cpi->rd_threshes[segment_id][bsize][mode_index] *
-                     cpi->rd_thresh_freq_fact[bsize][mode_index] >> 5)) ||
-        cpi->rd_threshes[segment_id][bsize][mode_index] == INT_MAX)
-      continue;
-
-    // Do not allow compound prediction if the segment level reference
-    // frame feature is in use as in this case there can only be one reference.
-    if ((second_ref_frame > INTRA_FRAME) &&
-         vp9_segfeature_active(seg, segment_id, SEG_LVL_REF_FRAME))
-      continue;
-
-    mbmi->ref_frame[0] = ref_frame;
-    mbmi->ref_frame[1] = second_ref_frame;
-
-    if (!(ref_frame == INTRA_FRAME
-        || (cpi->ref_frame_flags & flag_list[ref_frame]))) {
-      continue;
-    }
-    if (!(second_ref_frame == NONE
-        || (cpi->ref_frame_flags & flag_list[second_ref_frame]))) {
-      continue;
-    }
-
     comp_pred = second_ref_frame > INTRA_FRAME;
     if (comp_pred) {
-      if (cpi->sf.mode_search_skip_flags & FLAG_SKIP_COMP_BESTINTRA)
-        if (vp9_mode_order[best_mode_index].ref_frame[0] == INTRA_FRAME)
-          continue;
-      if (cpi->sf.mode_search_skip_flags & FLAG_SKIP_COMP_REFMISMATCH)
-        if (ref_frame != best_inter_ref_frame &&
-            second_ref_frame != best_inter_ref_frame)
-          continue;
-    }
-
-    set_ref_ptrs(cm, xd, ref_frame, second_ref_frame);
-    mbmi->uv_mode = DC_PRED;
-
-    // Evaluate all sub-pel filters irrespective of whether we can use
-    // them for this frame.
-    mbmi->interp_filter = cm->interp_filter == SWITCHABLE ? EIGHTTAP
-                                                          : cm->interp_filter;
-    xd->interp_kernel = vp9_get_interp_kernel(mbmi->interp_filter);
-
-    if (comp_pred) {
-      if (!(cpi->ref_frame_flags & flag_list[second_ref_frame]))
+      // Do not allow compound prediction if the segment level reference
+      // frame feature is in use as in this case there can only be one
+      // reference.
+      if (vp9_segfeature_active(seg, segment_id, SEG_LVL_REF_FRAME))
         continue;
-
-      mode_excluded = mode_excluded ? mode_excluded
-                                    : cm->reference_mode == SINGLE_REFERENCE;
+      if ((mode_search_skip_flags & FLAG_SKIP_COMP_BESTINTRA) &&
+          vp9_mode_order[best_mode_index].ref_frame[0] == INTRA_FRAME)
+        continue;
+      if ((mode_search_skip_flags & FLAG_SKIP_COMP_REFMISMATCH) &&
+          ref_frame != best_inter_ref_frame &&
+          second_ref_frame != best_inter_ref_frame)
+        continue;
+      mode_excluded = mode_excluded ?
+            mode_excluded : cm->reference_mode == SINGLE_REFERENCE;
     } else {
       if (ref_frame != INTRA_FRAME && second_ref_frame != INTRA_FRAME)
         mode_excluded = mode_excluded ?
             mode_excluded : cm->reference_mode == COMPOUND_REFERENCE;
-    }
-
-    // Select prediction reference frames.
-    for (i = 0; i < MAX_MB_PLANE; i++) {
-      xd->plane[i].pre[0] = yv12_mb[ref_frame][i];
-      if (comp_pred)
-        xd->plane[i].pre[1] = yv12_mb[second_ref_frame][i];
     }
 
     // If the segment reference frame feature is enabled....
@@ -3368,38 +3335,60 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
       continue;
     }
 
-#ifdef MODE_TEST_HIT_STATS
-    // TEST/DEBUG CODE
-    // Keep a rcord of the number of test hits at each size
-    cpi->mode_test_hits[bsize]++;
-#endif
-
-
     if (ref_frame == INTRA_FRAME) {
-      TX_SIZE uv_tx;
       // Disable intra modes other than DC_PRED for blocks with low variance
       // Threshold for intra skipping based on source variance
       // TODO(debargha): Specialize the threshold for super block sizes
       static const unsigned int skip_intra_var_thresh[BLOCK_SIZES] = {
         64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64,
       };
-      if ((cpi->sf.mode_search_skip_flags & FLAG_SKIP_INTRA_LOWVAR) &&
+      if ((mode_search_skip_flags & FLAG_SKIP_INTRA_LOWVAR) &&
           this_mode != DC_PRED &&
-          x->source_variance < skip_intra_var_thresh[mbmi->sb_type])
+          x->source_variance < skip_intra_var_thresh[bsize])
         continue;
       // Only search the oblique modes if the best so far is
       // one of the neighboring directional modes
-      if ((cpi->sf.mode_search_skip_flags & FLAG_SKIP_INTRA_BESTINTER) &&
+      if ((mode_search_skip_flags & FLAG_SKIP_INTRA_BESTINTER) &&
           (this_mode >= D45_PRED && this_mode <= TM_PRED)) {
         if (vp9_mode_order[best_mode_index].ref_frame[0] > INTRA_FRAME)
           continue;
       }
-      mbmi->mode = this_mode;
-      if (cpi->sf.mode_search_skip_flags & FLAG_SKIP_INTRA_DIRMISMATCH) {
-        if (conditional_skipintra(mbmi->mode, best_intra_mode))
+      if (mode_search_skip_flags & FLAG_SKIP_INTRA_DIRMISMATCH) {
+        if (conditional_skipintra(this_mode, best_intra_mode))
             continue;
       }
+    }
 
+    mbmi->mode = this_mode;
+    mbmi->uv_mode = DC_PRED;
+    mbmi->ref_frame[0] = ref_frame;
+    mbmi->ref_frame[1] = second_ref_frame;
+    // Evaluate all sub-pel filters irrespective of whether we can use
+    // them for this frame.
+    mbmi->interp_filter = cm->interp_filter == SWITCHABLE ? EIGHTTAP
+                                                          : cm->interp_filter;
+    x->skip = 0;
+    set_ref_ptrs(cm, xd, ref_frame, second_ref_frame);
+    xd->interp_kernel = vp9_get_interp_kernel(mbmi->interp_filter);
+
+    // Select prediction reference frames.
+    for (i = 0; i < MAX_MB_PLANE; i++) {
+      xd->plane[i].pre[0] = yv12_mb[ref_frame][i];
+      if (comp_pred)
+        xd->plane[i].pre[1] = yv12_mb[second_ref_frame][i];
+    }
+
+    for (i = 0; i < TX_MODES; ++i)
+      tx_cache[i] = INT64_MAX;
+
+#ifdef MODE_TEST_HIT_STATS
+    // TEST/DEBUG CODE
+    // Keep a rcord of the number of test hits at each size
+    cpi->mode_test_hits[bsize]++;
+#endif
+
+    if (ref_frame == INTRA_FRAME) {
+      TX_SIZE uv_tx;
       super_block_yrd(cpi, x, &rate_y, &distortion_y, &skippable, NULL,
                       bsize, tx_cache, best_rd);
 
@@ -3423,8 +3412,6 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
         rate2 += intra_cost_penalty;
       distortion2 = distortion_y + distortion_uv;
     } else {
-      mbmi->mode = this_mode;
-      compmode_cost = vp9_cost_bit(comp_mode_p, second_ref_frame > INTRA_FRAME);
       this_rd = handle_inter_mode(cpi, x, tile, bsize,
                                   tx_cache,
                                   &rate2, &distortion2, &skippable,
@@ -3436,14 +3423,16 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
                                   single_newmv, &total_sse, best_rd);
       if (this_rd == INT64_MAX)
         continue;
-    }
 
-    if (cm->reference_mode == REFERENCE_MODE_SELECT)
-      rate2 += compmode_cost;
+      compmode_cost = vp9_cost_bit(comp_mode_p, comp_pred);
+
+      if (cm->reference_mode == REFERENCE_MODE_SELECT)
+        rate2 += compmode_cost;
+    }
 
     // Estimate the reference frame signaling cost and add it
     // to the rolling cost variable.
-    if (second_ref_frame > INTRA_FRAME) {
+    if (comp_pred) {
       rate2 += ref_costs_comp[ref_frame];
     } else {
       rate2 += ref_costs_single[ref_frame];
@@ -3551,7 +3540,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
 
         // TODO(debargha): enhance this test with a better distortion prediction
         // based on qp, activity mask and history
-        if ((cpi->sf.mode_search_skip_flags & FLAG_EARLY_TERMINATE) &&
+        if ((mode_search_skip_flags & FLAG_EARLY_TERMINATE) &&
             (mode_index > MIN_EARLY_TERM_INDEX)) {
           const int qstep = xd->plane[0].dequant[1];
           // TODO(debargha): Enhance this by specializing for each mode_index
@@ -3658,17 +3647,6 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
                               &skip_uv[uv_tx_size],
                               bsize < BLOCK_8X8 ? BLOCK_8X8 : bsize,
                               uv_tx_size);
-    }
-  }
-
-  // Flag all modes that have a distortion thats > 2x the best we found at
-  // this level.
-  for (mode_index = 0; mode_index < MB_MODE_COUNT; ++mode_index) {
-    if (mode_index == NEARESTMV || mode_index == NEARMV || mode_index == NEWMV)
-      continue;
-
-    if (mode_distortions[mode_index] > 2 * *returndistortion) {
-      ctx->modes_with_high_error |= (1 << mode_index);
     }
   }
 
