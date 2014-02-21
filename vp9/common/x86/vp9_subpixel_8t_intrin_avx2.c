@@ -12,22 +12,25 @@
 #include "vpx_ports/mem.h"
 
 // filters for 16_h8 and 16_v8
-DECLARE_ALIGNED(32, const unsigned char, filt1_global_avx2[32])= {
+DECLARE_ALIGNED(32, static const uint8_t, filt1_global_avx2[32]) = {
   0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8,
-  0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8};
+  0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8
+};
 
-DECLARE_ALIGNED(32, const unsigned char, filt2_global_avx2[32])= {
+DECLARE_ALIGNED(32, static const uint8_t, filt2_global_avx2[32]) = {
   2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 10,
-  2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 10};
+  2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 10
+};
 
-DECLARE_ALIGNED(32, const unsigned char, filt3_global_avx2[32])= {
+DECLARE_ALIGNED(32, static const uint8_t, filt3_global_avx2[32]) = {
   4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 10, 10, 11, 11, 12,
-  4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 10, 10, 11, 11, 12};
+  4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 10, 10, 11, 11, 12
+};
 
-DECLARE_ALIGNED(32, const unsigned char, filt4_global_avx2[32])= {
+DECLARE_ALIGNED(32, static const uint8_t, filt4_global_avx2[32]) = {
   6, 7, 7, 8, 8, 9, 9, 10, 10, 11, 11, 12, 12, 13, 13, 14,
-  6, 7, 7, 8, 8, 9, 9, 10, 10, 11, 11, 12, 12, 13, 13, 14};
-
+  6, 7, 7, 8, 8, 9, 9, 10, 10, 11, 11, 12, 12, 13, 13, 14
+};
 
 void vp9_filter_block1d16_h8_avx2(unsigned char *src_ptr,
                                   unsigned int src_pixels_per_line,
