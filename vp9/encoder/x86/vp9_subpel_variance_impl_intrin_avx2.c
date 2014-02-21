@@ -12,7 +12,7 @@
 #include "vpx_ports/mem.h"
 #include "vp9/encoder/vp9_variance.h"
 
-DECLARE_ALIGNED(32, const unsigned char, vp9_bilinear_filters_avx2[512])= {
+DECLARE_ALIGNED(32, static const uint8_t, bilinear_filters_avx2[512]) = {
   16, 0, 16, 0, 16, 0, 16, 0, 16, 0, 16, 0, 16, 0, 16, 0,
   16, 0, 16, 0, 16, 0, 16, 0, 16, 0, 16, 0, 16, 0, 16, 0,
   15, 1, 15, 1, 15, 1, 15, 1, 15, 1, 15, 1, 15, 1, 15, 1,
@@ -44,7 +44,8 @@ DECLARE_ALIGNED(32, const unsigned char, vp9_bilinear_filters_avx2[512])= {
   2, 14, 2, 14, 2, 14, 2, 14, 2, 14, 2, 14, 2, 14, 2, 14,
   2, 14, 2, 14, 2, 14, 2, 14, 2, 14, 2, 14, 2, 14, 2, 14,
   1, 15, 1, 15, 1, 15, 1, 15, 1, 15, 1, 15, 1, 15, 1, 15,
-  1, 15, 1, 15, 1, 15, 1, 15, 1, 15, 1, 15, 1, 15, 1, 15};
+  1, 15, 1, 15, 1, 15, 1, 15, 1, 15, 1, 15, 1, 15, 1, 15
+};
 
 unsigned int vp9_sub_pixel_variance32xh_avx2(const uint8_t *src,
                                              int src_stride,
@@ -137,12 +138,12 @@ unsigned int vp9_sub_pixel_variance32xh_avx2(const uint8_t *src,
         int64_t y_offset64;
         y_offset64 = y_offset;
         y_offset64 <<= 5;
-        filter = _mm256_load_si256((__m256i const *)
-                 (vp9_bilinear_filters_avx2 + y_offset64));
+        filter = _mm256_load_si256(
+            (__m256i const *)(bilinear_filters_avx2 + y_offset64));
 #else
         y_offset <<= 5;
-        filter = _mm256_load_si256((__m256i const *)
-                 (vp9_bilinear_filters_avx2 + y_offset));
+        filter = _mm256_load_si256(
+            (__m256i const *)(bilinear_filters_avx2 + y_offset));
 #endif
         pw8 = _mm256_set1_epi16(8);
         for (i = 0; i < height ; i++) {
@@ -283,12 +284,12 @@ unsigned int vp9_sub_pixel_variance32xh_avx2(const uint8_t *src,
           int64_t y_offset64;
           y_offset64 = y_offset;
           y_offset64 <<= 5;
-          filter = _mm256_load_si256((__m256i const *)
-                   (vp9_bilinear_filters_avx2+y_offset64));
+          filter = _mm256_load_si256(
+              (__m256i const *)(bilinear_filters_avx2 + y_offset64));
 #else
           y_offset <<= 5;
-          filter = _mm256_load_si256((__m256i const *)
-                   (vp9_bilinear_filters_avx2 + y_offset));
+          filter = _mm256_load_si256(
+              (__m256i const *)(bilinear_filters_avx2 + y_offset));
 #endif
           pw8 = _mm256_set1_epi16(8);
           // load source and another source starting from the next
@@ -354,12 +355,12 @@ unsigned int vp9_sub_pixel_variance32xh_avx2(const uint8_t *src,
         int64_t x_offset64;
         x_offset64 = x_offset;
         x_offset64 <<= 5;
-        filter = _mm256_load_si256((__m256i const *)
-                (vp9_bilinear_filters_avx2+x_offset64));
+        filter = _mm256_load_si256(
+            (__m256i const *)(bilinear_filters_avx2 + x_offset64));
 #else
         x_offset <<= 5;
-        filter = _mm256_load_si256((__m256i const *)
-                 (vp9_bilinear_filters_avx2 + x_offset));
+        filter = _mm256_load_si256(
+            (__m256i const *)(bilinear_filters_avx2 + x_offset));
 #endif
         pw8 = _mm256_set1_epi16(8);
         for (i = 0; i < height ; i++) {
@@ -413,12 +414,12 @@ unsigned int vp9_sub_pixel_variance32xh_avx2(const uint8_t *src,
           int64_t x_offset64;
           x_offset64 = x_offset;
           x_offset64 <<= 5;
-          filter = _mm256_load_si256((__m256i const *)
-                  (vp9_bilinear_filters_avx2+x_offset64));
+          filter = _mm256_load_si256(
+              (__m256i const *)(bilinear_filters_avx2 + x_offset64));
 #else
           x_offset <<= 5;
-          filter = _mm256_load_si256((__m256i const *)
-                  (vp9_bilinear_filters_avx2 + x_offset));
+          filter = _mm256_load_si256(
+              (__m256i const *)(bilinear_filters_avx2 + x_offset));
 #endif
           pw8 = _mm256_set1_epi16(8);
           // load source and another source starting from the next
@@ -508,17 +509,17 @@ unsigned int vp9_sub_pixel_variance32xh_avx2(const uint8_t *src,
           x_offset64 <<= 5;
           y_offset64 = y_offset;
           y_offset64 <<= 5;
-          xfilter = _mm256_load_si256((__m256i const *)
-                   (vp9_bilinear_filters_avx2+x_offset64));
-          yfilter = _mm256_load_si256((__m256i const *)
-                   (vp9_bilinear_filters_avx2+y_offset64));
+          xfilter = _mm256_load_si256(
+              (__m256i const *)(bilinear_filters_avx2 + x_offset64));
+          yfilter = _mm256_load_si256(
+              (__m256i const *)(bilinear_filters_avx2 + y_offset64));
 #else
           x_offset <<= 5;
-          xfilter = _mm256_load_si256((__m256i const *)
-                   (vp9_bilinear_filters_avx2 + x_offset));
+          xfilter = _mm256_load_si256(
+              (__m256i const *)(bilinear_filters_avx2 + x_offset));
           y_offset <<= 5;
-          yfilter = _mm256_load_si256((__m256i const *)
-                   (vp9_bilinear_filters_avx2 + y_offset));
+          yfilter = _mm256_load_si256(
+              (__m256i const *)(bilinear_filters_avx2 + y_offset));
 #endif
           pw8 = _mm256_set1_epi16(8);
           // load source and another source starting from the next
