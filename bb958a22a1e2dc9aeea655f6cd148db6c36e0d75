@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//2Jc\u003d",
+        "filename": "vpx/vp8cx.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 199,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2014-02-21T05:28:14Z",
+      "side": 1,
+      "message": "Maybe we should say something like (since this sets both spatial and temporal id#):\n\n\\brief control function to set svc layer, for spatial and temporal. \n\n\\note Valid ranges: 0..#vpx_codec_enc_cfg::ss_number_layers for spatial layer, and 0..#vpx_codec_enc_cfg::ts_number_layers for temporal layer.",
+      "revId": "bb958a22a1e2dc9aeea655f6cd148db6c36e0d75",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
