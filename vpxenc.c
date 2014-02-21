@@ -1553,11 +1553,9 @@ int main(int argc, const char **argv_) {
   if (!input.filename)
     usage_exit();
 
-#if CONFIG_NON420
   /* Decide if other chroma subsamplings than 4:2:0 are supported */
   if (global.codec->fourcc == VP9_FOURCC)
     input.only_i420 = 0;
-#endif
 
   for (pass = global.pass ? global.pass - 1 : 0; pass < global.passes; pass++) {
     int frames_in = 0, seen_frames = 0;

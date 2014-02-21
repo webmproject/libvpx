@@ -161,9 +161,7 @@ const char *kVP9TestVectors[kNumVp9TestVectors] = {
   "vp90-2-11-size-351x287.webm", "vp90-2-11-size-351x288.webm",
   "vp90-2-11-size-352x287.webm", "vp90-2-12-droppable_1.ivf",
   "vp90-2-12-droppable_2.ivf", "vp90-2-12-droppable_3.ivf",
-#if CONFIG_NON420
   "vp91-2-04-yv444.webm"
-#endif
 };
 #endif  // CONFIG_VP9_DECODER
 
