@@ -231,6 +231,10 @@ static const arg_def_t disable_warnings =
 static const arg_def_t disable_warning_prompt =
     ARG_DEF("y", "disable-warning-prompt", 0,
             "Display warnings, but do not prompt user to continue.");
+static const arg_def_t experimental_bitstream =
+    ARG_DEF(NULL, "experimental-bitstream", 0,
+            "Allow experimental bitstream features.");
+
 
 static const arg_def_t *main_args[] = {
   &debugmode,
@@ -713,6 +717,8 @@ static void parse_global_config(struct VpxEncoderConfig *global, char **argv) {
       global->disable_warnings = 1;
     else if (arg_match(&arg, &disable_warning_prompt, argi))
       global->disable_warning_prompt = 1;
+    else if (arg_match(&arg, &experimental_bitstream, argi))
+      global->experimental_bitstream = 1;
     else
       argj++;
   }
@@ -1002,12 +1008,19 @@ static int parse_stream_params(struct VpxEncoderConfig *global,
   } while (0)
 
 
-static void validate_stream_config(struct stream_state *stream) {
-  struct stream_state *streami;
+static void validate_stream_config(const struct stream_state *stream,
+                                   const struct VpxEncoderConfig *global) {
+  const struct stream_state *streami;
 
   if (!stream->config.cfg.g_w || !stream->config.cfg.g_h)
     fatal("Stream %d: Specify stream dimensions with --width (-w) "
           " and --height (-h)", stream->index);
+
+  if (stream->config.cfg.g_profile != 0 && !global->experimental_bitstream) {
+    fatal("Stream %d: profile %d is experimental and requires the --%s flag",
+          stream->index, stream->config.cfg.g_profile,
+          experimental_bitstream.long_name);
+  }
 
   for (streami = stream; streami; streami = streami->next) {
     /* All streams require output files */
@@ -1571,7 +1584,7 @@ int main(int argc, const char **argv_) {
       fatal("Specify stream dimensions with --width (-w) "
             " and --height (-h)");
     FOREACH_STREAM(set_stream_dimensions(stream, input.width, input.height));
-    FOREACH_STREAM(validate_stream_config(stream));
+    FOREACH_STREAM(validate_stream_config(stream, &global));
 
     /* Ensure that --passes and --pass are consistent. If --pass is set and
      * --passes=2, ensure --fpf was set.
