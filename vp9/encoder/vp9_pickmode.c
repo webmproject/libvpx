@@ -194,6 +194,9 @@ int64_t vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
   int64_t this_rd;
   int64_t cost[4]= { 0, 50, 75, 100 };
 
+  const int64_t inter_mode_thresh = 300;
+  const int64_t intra_mode_cost = 50;
+
   x->skip_encode = cpi->sf.skip_encode_frame && x->q_index < QIDX_SKIP_THRESH;
 
   x->skip = 0;
@@ -264,6 +267,31 @@ int64_t vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
     }
   }
 
+  // Perform intra prediction search, if the best SAD is above a certain
+  // threshold.
+  if (best_rd > inter_mode_thresh) {
+    struct macroblock_plane *const p = &x->plane[0];
+    struct macroblockd_plane *const pd = &xd->plane[0];
+    for (this_mode = DC_PRED; this_mode <= H_PRED; ++this_mode) {
+      vp9_predict_intra_block(xd, 0, b_width_log2(bsize),
+                              mbmi->tx_size, this_mode,
+                              &p->src.buf[0], p->src.stride,
+                              &pd->dst.buf[0], pd->dst.stride, 0, 0, 0);
+
+      this_rd = cpi->fn_ptr[bsize].sdf(p->src.buf,
+                                       p->src.stride,
+                                       pd->dst.buf,
+                                       pd->dst.stride, INT_MAX);
+
+      if (this_rd + intra_mode_cost < best_rd) {
+        best_rd = this_rd;
+        mbmi->mode = this_mode;
+        mbmi->ref_frame[0] = INTRA_FRAME;
+        mbmi->uv_mode = this_mode;
+      }
+    }
+  }
+
   // Perform sub-pixel motion search, if NEWMV is chosen
   if (mbmi->mode == NEWMV) {
     ref_frame = mbmi->ref_frame[0];
@@ -272,9 +300,6 @@ int64_t vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
     mbmi->mv[0].as_int = frame_mv[NEWMV][ref_frame].as_int;
     xd->mi_8x8[0]->bmi[0].as_mv[0].as_int = mbmi->mv[0].as_int;
   }
-
-  // TODO(jingning) intra prediction search, if the best SAD is above a certain
-  // threshold.
 
   return INT64_MAX;
 }
