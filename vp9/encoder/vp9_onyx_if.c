@@ -1381,6 +1381,9 @@ void vp9_change_config(VP9_PTR ptr, VP9_CONFIG *oxcf) {
 
   cpi->oxcf = *oxcf;
 
+  if (cpi->oxcf.cpu_used == -6)
+    cpi->oxcf.play_alternate = 0;
+
   switch (cpi->oxcf.mode) {
       // Real time and one pass deprecated in test code base
     case MODE_GOODQUALITY:
