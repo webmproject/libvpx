@@ -159,11 +159,7 @@ static vpx_codec_err_t vp9_peek_si(const uint8_t *data, unsigned int data_sz,
 
     if (frame_marker != VP9_FRAME_MARKER)
       return VPX_CODEC_UNSUP_BITSTREAM;
-#if CONFIG_NON420
     if (version > 1) return VPX_CODEC_UNSUP_BITSTREAM;
-#else
-    if (version != 0) return VPX_CODEC_UNSUP_BITSTREAM;
-#endif
 
     if (vp9_rb_read_bit(&rb)) {  // show an existing frame
       return VPX_CODEC_OK;

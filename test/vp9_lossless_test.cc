@@ -73,7 +73,6 @@ TEST_P(LossLessTest, TestLossLessEncoding) {
   EXPECT_GE(psnr_lossless, kMaxPsnr);
 }
 
-#if CONFIG_NON420
 TEST_P(LossLessTest, TestLossLessEncoding444) {
   libvpx_test::Y4mVideoSource video("rush_hour_444.y4m", 0, 10);
 
@@ -90,7 +89,6 @@ TEST_P(LossLessTest, TestLossLessEncoding444) {
   const double psnr_lossless = GetMinPsnr();
   EXPECT_GE(psnr_lossless, kMaxPsnr);
 }
-#endif
 
 VP9_INSTANTIATE_TEST_CASE(LossLessTest, ALL_TEST_MODES);
 }  // namespace

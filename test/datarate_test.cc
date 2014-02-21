@@ -381,7 +381,6 @@ TEST_P(DatarateTestVP9, BasicRateTargeting) {
   }
 }
 
-#if CONFIG_NON420
 // Check basic rate targeting,
 TEST_P(DatarateTestVP9, BasicRateTargeting444) {
   ::libvpx_test::Y4mVideoSource video("rush_hour_444.y4m", 0, 140);
@@ -410,7 +409,6 @@ TEST_P(DatarateTestVP9, BasicRateTargeting444) {
         << cfg_.rc_target_bitrate << " "<< effective_datarate_;
   }
 }
-#endif
 
 // Check that (1) the first dropped frame gets earlier and earlier
 // as the drop frame threshold is increased, and (2) that the total number of
