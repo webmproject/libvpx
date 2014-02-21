@@ -46,6 +46,7 @@ struct VpxEncoderConfig {
   int show_rate_hist_buckets;
   int disable_warnings;
   int disable_warning_prompt;
+  int experimental_bitstream;
 };
 
 #ifdef __cplusplus
