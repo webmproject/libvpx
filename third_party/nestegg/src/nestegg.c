@@ -8,8 +8,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "nestegg/halloc/halloc.h"
-#include "nestegg/include/nestegg/nestegg.h"
+#include "third_party/nestegg/halloc/halloc.h"
+#include "third_party/nestegg/include/nestegg/nestegg.h"
 
 /* EBML Elements */
 #define ID_EBML                 0x1a45dfa3

@@ -14,7 +14,7 @@
 #include <cstdlib>
 #include <new>
 #include <string>
-#include "nestegg/include/nestegg/nestegg.h"
+#include "third_party/nestegg/include/nestegg/nestegg.h"
 #include "test/video_source.h"
 
 namespace libvpx_test {

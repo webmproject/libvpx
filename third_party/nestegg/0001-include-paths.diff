@@ -7,7 +7,7 @@ index 5758fc0..837b3ff 100644
  #include <string.h>  /* memset & co */
  
 -#include "halloc.h"
-+#include "nestegg/halloc/halloc.h"
++#include "third_party/nestegg/halloc/halloc.h"
  #include "align.h"
  #include "hlist.h"
  
@@ -34,8 +34,8 @@ index daf1eed..4fb10e7 100644
  
 -#include "halloc.h"
 -#include "nestegg/nestegg.h"
-+#include "nestegg/halloc/halloc.h"
-+#include "nestegg/include/nestegg/nestegg.h"
++#include "third_party/nestegg/halloc/halloc.h"
++#include "third_party/nestegg/include/nestegg/nestegg.h"
  
  /* EBML Elements */
  #define ID_EBML                 0x1a45dfa3

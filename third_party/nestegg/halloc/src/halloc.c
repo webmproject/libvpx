@@ -15,7 +15,7 @@
 #include <stdlib.h>  /* realloc */
 #include <string.h>  /* memset & co */
 
-#include "nestegg/halloc/halloc.h"
+#include "third_party/nestegg/halloc/halloc.h"
 #include "align.h"
 #include "hlist.h"
 

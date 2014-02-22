@@ -39,12 +39,12 @@ LIBVPX_TEST_SRCS-$(CONFIG_DECODERS)    += ivf_video_source.h
 LIBVPX_TEST_SRCS-$(CONFIG_VP9_DECODER) += external_frame_buffer_test.cc
 
 ## WebM Parsing
-NESTEGG_SRCS                           += ../nestegg/halloc/halloc.h
-NESTEGG_SRCS                           += ../nestegg/halloc/src/align.h
-NESTEGG_SRCS                           += ../nestegg/halloc/src/halloc.c
-NESTEGG_SRCS                           += ../nestegg/halloc/src/hlist.h
-NESTEGG_SRCS                           += ../nestegg/include/nestegg/nestegg.h
-NESTEGG_SRCS                           += ../nestegg/src/nestegg.c
+NESTEGG_SRCS                           += ../third_party/nestegg/halloc/halloc.h
+NESTEGG_SRCS                           += ../third_party/nestegg/halloc/src/align.h
+NESTEGG_SRCS                           += ../third_party/nestegg/halloc/src/halloc.c
+NESTEGG_SRCS                           += ../third_party/nestegg/halloc/src/hlist.h
+NESTEGG_SRCS                           += ../third_party/nestegg/include/nestegg/nestegg.h
+NESTEGG_SRCS                           += ../third_party/nestegg/src/nestegg.c
 LIBVPX_TEST_SRCS-$(CONFIG_DECODERS)    += $(NESTEGG_SRCS)
 LIBVPX_TEST_SRCS-$(CONFIG_DECODERS)    += webm_video_source.h
 

@@ -12,7 +12,7 @@
 
 #include <stdarg.h>
 
-#include "nestegg/include/nestegg/nestegg.h"
+#include "third_party/nestegg/include/nestegg/nestegg.h"
 
 static int nestegg_read_cb(void *buffer, size_t length, void *userdata) {
   FILE *f = userdata;
