@@ -262,9 +262,9 @@ void vp9_loop_filter_frame_init(VP9_COMMON *cm, int default_filt_lvl) {
     int lvl_seg = default_filt_lvl;
     if (vp9_segfeature_active(seg, seg_id, SEG_LVL_ALT_LF)) {
       const int data = vp9_get_segdata(seg, seg_id, SEG_LVL_ALT_LF);
-      lvl_seg = seg->abs_delta == SEGMENT_ABSDATA
-                  ? data
-                  : clamp(default_filt_lvl + data, 0, MAX_LOOP_FILTER);
+      lvl_seg = clamp(seg->abs_delta == SEGMENT_ABSDATA ?
+                      data : default_filt_lvl + data,
+                      0, MAX_LOOP_FILTER);
     }
 
     if (!lf->mode_ref_delta_enabled) {
