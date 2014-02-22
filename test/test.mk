@@ -18,7 +18,7 @@ LIBVPX_TEST_SRCS-yes += test_vectors.cc
 LIBVPX_TEST_SRCS-$(CONFIG_VP8_ENCODER) += altref_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_VP8_ENCODER) += config_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_VP8_ENCODER) += cq_test.cc
-LIBVPX_TEST_SRCS-$(CONFIG_VP8_ENCODER) += datarate_test.cc
+LIBVPX_TEST_SRCS-$(CONFIG_ENCODERS)    += datarate_test.cc
 
 LIBVPX_TEST_SRCS-yes                   += encode_test_driver.cc
 LIBVPX_TEST_SRCS-yes                   += encode_test_driver.h
