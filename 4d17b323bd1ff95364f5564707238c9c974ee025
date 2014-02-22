@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//18g\u003d",
+        "filename": "vpx/internal/vpx_psnr.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-02-22T18:29:18Z",
+      "side": 1,
+      "message": "sse is most commonly stored as an int/int64, so rather than cast everywhere change the type here. the same goes for samples probably. elsewhere consider changing the types to fit rather than just casting to double",
+      "revId": "4d17b323bd1ff95364f5564707238c9c974ee025",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
