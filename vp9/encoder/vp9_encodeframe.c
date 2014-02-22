@@ -2261,15 +2261,17 @@ static void rtc_use_partition(VP9_COMP *cpi,
   VP9_COMMON *const cm = &cpi->common;
   MACROBLOCK *const x = &cpi->mb;
   MACROBLOCKD *const xd = &cpi->mb.e_mbd;
+  int mis = cm->mode_info_stride;
+  int br, bc;
   int i, j;
   int chosen_rate = INT_MAX;
   int64_t chosen_dist = INT_MAX;
   MB_PREDICTION_MODE mode = DC_PRED;
-  int row8x8_remaining = MIN(MI_BLOCK_SIZE, tile->mi_row_end - mi_row);
-  int col8x8_remaining = MIN(MI_BLOCK_SIZE, tile->mi_col_end - mi_col);
+  int rows = MIN(MI_BLOCK_SIZE, tile->mi_row_end - mi_row);
+  int cols = MIN(MI_BLOCK_SIZE, tile->mi_col_end - mi_col);
 
-  int rows = mi_row + row8x8_remaining;
-  int cols = mi_col + col8x8_remaining;
+  int mi_8x8_width = num_8x8_blocks_wide_lookup[bsize];
+  int mi_8x8_hight = num_8x8_blocks_high_lookup[bsize];
 
   int brate;
   int64_t bdist;
@@ -2277,17 +2279,27 @@ static void rtc_use_partition(VP9_COMP *cpi,
   *dist = 0;
 
   // find prediction mode for each 8x8 block
-  for (j = mi_row; j < rows; ++j) {
-    for (i = mi_col; i < cols; ++i) {
-      set_offsets(cpi, tile, j, i, BLOCK_8X8);
+  for (br = 0; br < rows; br += mi_8x8_hight) {
+    for (bc = 0; bc < cols; bc += mi_8x8_width) {
+      int row = mi_row + br;
+      int col = mi_col + bc;
+      int bh = 0, bw = 0;
+      BLOCK_SIZE bs = find_partition_size(bsize, rows - br, cols - bc,
+                                          &bh, &bw);
+
+      set_offsets(cpi, tile, row, col, bs);
 
       if (cm->frame_type != KEY_FRAME)
-        vp9_pick_inter_mode(cpi, x, tile, j, i, &brate, &bdist, BLOCK_8X8);
+        vp9_pick_inter_mode(cpi, x, tile, row, col, &brate, &bdist, bs);
       else
-        set_mode_info(&xd->mi_8x8[0]->mbmi, BLOCK_8X8, mode, j, i);
+        set_mode_info(&xd->mi_8x8[0]->mbmi, bs, mode, row, col);
 
       *rate += brate;
       *dist += bdist;
+
+      for (j = 0; j < bh; ++j)
+        for (i = 0; i < bw; ++i)
+          xd->mi_8x8[j * mis + i] = xd->mi_8x8[0];
     }
   }
 
@@ -2316,7 +2328,7 @@ static void encode_rtc_sb_row(VP9_COMP *cpi, const TileInfo *const tile,
     MODE_INFO **mi_8x8 = cm->mi_grid_visible + idx_str;
     cpi->mb.source_variance = UINT_MAX;
 
-    rtc_use_partition(cpi, tile, mi_8x8, tp, mi_row, mi_col, BLOCK_64X64,
+    rtc_use_partition(cpi, tile, mi_8x8, tp, mi_row, mi_col, BLOCK_16X16,
                      &dummy_rate, &dummy_dist, 1);
   }
 }
