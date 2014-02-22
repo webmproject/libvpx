@@ -108,7 +108,7 @@ class WebMVideoSource : public CompressedVideoSource {
 
     nestegg_io io = {nestegg_read_cb, nestegg_seek_cb, nestegg_tell_cb,
                      input_file_};
-    ASSERT_FALSE(nestegg_init(&nestegg_ctx_, io, NULL))
+    ASSERT_FALSE(nestegg_init(&nestegg_ctx_, io, NULL, -1))
         << "nestegg_init failed";
 
     unsigned int n;

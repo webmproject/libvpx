@@ -65,7 +65,7 @@ int file_is_webm(struct WebmInputContext *webm_ctx,
   nestegg_video_params params;
 
   io.userdata = vpx_ctx->file;
-  if (nestegg_init(&webm_ctx->nestegg_ctx, io, NULL))
+  if (nestegg_init(&webm_ctx->nestegg_ctx, io, NULL, -1))
     goto fail;
 
   if (nestegg_track_count(webm_ctx->nestegg_ctx, &n))
