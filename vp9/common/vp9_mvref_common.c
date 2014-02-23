@@ -186,13 +186,12 @@ static INLINE int is_inside(const TileInfo *const tile,
 
 // This function searches the neighbourhood of a given MB/SB
 // to try and find candidate reference vectors.
-void vp9_find_mv_refs_idx(const VP9_COMMON *cm, const MACROBLOCKD *xd,
-                          const TileInfo *const tile,
-                          MODE_INFO *mi, const MODE_INFO *prev_mi,
-                          MV_REFERENCE_FRAME ref_frame,
-                          int_mv *mv_ref_list,
-                          int block_idx,
-                          int mi_row, int mi_col) {
+static void find_mv_refs_idx(const VP9_COMMON *cm, const MACROBLOCKD *xd,
+                             const TileInfo *const tile,
+                             MODE_INFO *mi, const MODE_INFO *prev_mi,
+                             MV_REFERENCE_FRAME ref_frame,
+                             int_mv *mv_ref_list,
+                             int block_idx, int mi_row, int mi_col) {
   const int *ref_sign_bias = cm->ref_frame_sign_bias;
   int i, refmv_count = 0;
   const POSITION *const mv_ref_search = mv_ref_blocks[mi->mbmi.sb_type];
@@ -291,6 +290,16 @@ void vp9_find_mv_refs_idx(const VP9_COMMON *cm, const MACROBLOCKD *xd,
     clamp_mv_ref(&mv_ref_list[i].as_mv, xd);
 }
 
+void vp9_find_mv_refs(const VP9_COMMON *cm, const MACROBLOCKD *xd,
+                                    const TileInfo *const tile,
+                                    MODE_INFO *mi, const MODE_INFO *prev_mi,
+                                    MV_REFERENCE_FRAME ref_frame,
+                                    int_mv *mv_ref_list,
+                                    int mi_row, int mi_col) {
+  find_mv_refs_idx(cm, xd, tile, mi, prev_mi, ref_frame, mv_ref_list, -1,
+                   mi_row, mi_col);
+}
+
 static void lower_mv_precision(MV *mv, int allow_hp) {
   const int use_hp = allow_hp && vp9_use_mv_hp(mv);
   if (!use_hp) {
@@ -325,8 +334,8 @@ void vp9_append_sub8x8_mvs_for_idx(VP9_COMMON *cm, MACROBLOCKD *xd,
 
   assert(MAX_MV_REF_CANDIDATES == 2);
 
-  vp9_find_mv_refs_idx(cm, xd, tile, mi, xd->last_mi, mi->mbmi.ref_frame[ref],
-                       mv_list, block, mi_row, mi_col);
+  find_mv_refs_idx(cm, xd, tile, mi, xd->last_mi, mi->mbmi.ref_frame[ref],
+                   mv_list, block, mi_row, mi_col);
 
   near->as_int = 0;
   switch (block) {
