@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//1vs\u003d",
+        "filename": "test/vp8_decrypt_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1002658
+      },
+      "writtenOn": "2014-02-24T17:46:55Z",
+      "side": 1,
+      "message": "The old code used decrypt_state with the original buffer start because I don\u0027t think there\u0027s any guarantee that the decryptor will be called with a consistent view of the buffer. (I.e. for a 1000 byte frame, it might be decrypted all in one call, or in three calls of 17 + 900 + 83 bytes or whatever).",
+      "revId": "fbc16a66f568f18d764338dca5ad28fbcd44f3a0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
