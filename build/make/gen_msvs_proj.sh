@@ -371,7 +371,7 @@ generate_vcproj() {
                     vpx)
                         tag Tool \
                             Name="VCPreBuildEventTool" \
-                            CommandLine="call obj_int_extract.bat $src_path_bare" \
+                            CommandLine="call obj_int_extract.bat $src_path_bare $plat_no_ws\\\$(ConfigurationName)" \
 
                         tag Tool \
                             Name="VCCLCompilerTool" \
@@ -412,7 +412,6 @@ generate_vcproj() {
                             obj_int_extract)
                                 tag Tool \
                                     Name="VCLinkerTool" \
-                                    OutputFile="${name}.exe" \
                                     GenerateDebugInformation="true" \
                             ;;
                             *)
@@ -479,7 +478,7 @@ generate_vcproj() {
                     vpx)
                         tag Tool \
                             Name="VCPreBuildEventTool" \
-                            CommandLine="call obj_int_extract.bat $src_path_bare" \
+                            CommandLine="call obj_int_extract.bat $src_path_bare $plat_no_ws\\\$(ConfigurationName)" \
 
                         tag Tool \
                             Name="VCCLCompilerTool" \
@@ -522,7 +521,6 @@ generate_vcproj() {
                             obj_int_extract)
                                 tag Tool \
                                     Name="VCLinkerTool" \
-                                    OutputFile="${name}.exe" \
                                     GenerateDebugInformation="true" \
                             ;;
                             *)
