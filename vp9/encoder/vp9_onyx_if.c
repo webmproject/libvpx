@@ -717,7 +717,7 @@ static void set_good_speed_feature(VP9_COMMON *cm,
   }
   if (speed >= 5) {
     sf->comp_inter_joint_search_thresh = BLOCK_SIZES;
-    sf->use_one_partition_size_always = 1;
+    sf->partition_search_type = FIXED_PARTITION;
     sf->always_this_block_size = BLOCK_16X16;
     sf->tx_size_search_method = frame_is_intra_only(cm) ?
       USE_FULL_RD : USE_LARGESTALL;
@@ -863,12 +863,12 @@ static void set_rt_speed_feature(VP9_COMMON *cm,
     sf->search_method = FAST_HEX;
   }
   if (speed >= 6) {
-    sf->use_one_partition_size_always = 1;
-    sf->always_this_block_size = BLOCK_32X32;
+    sf->partition_search_type = VAR_BASED_FIXED_PARTITION;
   }
   if (speed >= 7) {
+    sf->partition_search_type = FIXED_PARTITION;
     sf->always_this_block_size = BLOCK_16X16;
-    sf->use_pick_mode = 1;
+    sf->use_nonrd_pick_mode = 1;
   }
 }
 
@@ -906,7 +906,7 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
   sf->adaptive_motion_search = 0;
   sf->adaptive_pred_interp_filter = 0;
   sf->reference_masking = 0;
-  sf->use_one_partition_size_always = 0;
+  sf->partition_search_type = SEARCH_PARTITION;
   sf->less_rectangular_check = 0;
   sf->use_square_partition_only = 0;
   sf->auto_min_max_partition_size = NOT_IN_USE;
@@ -928,7 +928,7 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
   sf->use_fast_lpf_pick = 0;
   sf->use_fast_coef_updates = 0;
   sf->mode_skip_start = MAX_MODES;  // Mode index at which mode skip mask set
-  sf->use_pick_mode = 0;
+  sf->use_nonrd_pick_mode = 0;
   sf->encode_breakout_thresh = 0;
 
   switch (cpi->oxcf.mode) {
@@ -2900,7 +2900,7 @@ static void encode_with_recode_loop(VP9_COMP *cpi,
     if (cpi->sf.recode_loop >= ALLOW_RECODE_KFARFGF) {
       vp9_save_coding_context(cpi);
       cpi->dummy_packing = 1;
-      if (!cpi->sf.use_pick_mode)
+      if (!cpi->sf.use_nonrd_pick_mode)
         vp9_pack_bitstream(cpi, dest, size);
 
       rc->projected_frame_size = (int)(*size) << 3;

@@ -295,7 +295,7 @@ void vp9_initialize_rd_consts(VP9_COMP *cpi) {
 
   set_block_thresholds(cpi);
 
-  if (!cpi->sf.use_pick_mode) {
+  if (!cpi->sf.use_nonrd_pick_mode) {
     fill_token_costs(x->token_costs, cm->fc.coef_probs);
 
     for (i = 0; i < PARTITION_CONTEXTS; i++)
@@ -303,7 +303,7 @@ void vp9_initialize_rd_consts(VP9_COMP *cpi) {
                       vp9_partition_tree);
   }
 
-  if (!cpi->sf.use_pick_mode || (cm->current_video_frame & 0x07) == 1) {
+  if (!cpi->sf.use_nonrd_pick_mode || (cm->current_video_frame & 0x07) == 1) {
     fill_mode_costs(cpi);
 
     if (!frame_is_intra_only(cm)) {
