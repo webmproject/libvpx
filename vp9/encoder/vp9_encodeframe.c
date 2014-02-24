@@ -1935,14 +1935,17 @@ static void encode_sb_row(VP9_COMP *cpi, const TileInfo *const tile,
 
     BLOCK_SIZE i;
     MACROBLOCK *x = &cpi->mb;
-    for (i = BLOCK_4X4; i < BLOCK_8X8; ++i) {
-      const int num_4x4_w = num_4x4_blocks_wide_lookup[i];
-      const int num_4x4_h = num_4x4_blocks_high_lookup[i];
-      const int num_4x4_blk = MAX(4, num_4x4_w * num_4x4_h);
-      for (x->sb_index = 0; x->sb_index < 4; ++x->sb_index)
-        for (x->mb_index = 0; x->mb_index < 4; ++x->mb_index)
-          for (x->b_index = 0; x->b_index < 16 / num_4x4_blk; ++x->b_index)
-            get_block_context(x, i)->pred_interp_filter = SWITCHABLE;
+
+    if (cpi->sf.adaptive_pred_interp_filter) {
+      for (i = BLOCK_4X4; i < BLOCK_8X8; ++i) {
+        const int num_4x4_w = num_4x4_blocks_wide_lookup[i];
+        const int num_4x4_h = num_4x4_blocks_high_lookup[i];
+        const int num_4x4_blk = MAX(4, num_4x4_w * num_4x4_h);
+        for (x->sb_index = 0; x->sb_index < 4; ++x->sb_index)
+          for (x->mb_index = 0; x->mb_index < 4; ++x->mb_index)
+            for (x->b_index = 0; x->b_index < 16 / num_4x4_blk; ++x->b_index)
+              get_block_context(x, i)->pred_interp_filter = SWITCHABLE;
+      }
     }
 
     vp9_zero(cpi->mb.pred_mv);

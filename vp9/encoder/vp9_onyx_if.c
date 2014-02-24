@@ -972,6 +972,9 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
   if (cpi->encode_breakout && cpi->oxcf.mode == MODE_REALTIME &&
       sf->encode_breakout_thresh > cpi->encode_breakout)
     cpi->encode_breakout = sf->encode_breakout_thresh;
+
+  if (sf->disable_split_mask == DISABLE_ALL_SPLIT)
+    sf->adaptive_pred_interp_filter = 0;
 }
 
 static void alloc_raw_frame_buffers(VP9_COMP *cpi) {
