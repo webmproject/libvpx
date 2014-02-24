@@ -47,7 +47,7 @@ VP8_COMMON_SRCS-yes += common/quant_common.h
 VP8_COMMON_SRCS-yes += common/reconinter.h
 VP8_COMMON_SRCS-yes += common/reconintra4x4.h
 VP8_COMMON_SRCS-yes += common/rtcd.c
-VP8_COMMON_SRCS-yes += common/rtcd_defs.sh
+VP8_COMMON_SRCS-yes += common/rtcd_defs.pl
 VP8_COMMON_SRCS-yes += common/setupintrarecon.h
 VP8_COMMON_SRCS-yes += common/swapyv12buffer.h
 VP8_COMMON_SRCS-yes += common/systemdependent.h
@@ -189,4 +189,4 @@ VP8_COMMON_SRCS-$(HAVE_NEON)  += common/arm/neon/dequant_idct_neon.c
 VP8_COMMON_SRCS-$(HAVE_NEON)  += common/arm/neon/dequantizeb_neon.c
 
 
-$(eval $(call rtcd_h_template,vp8_rtcd,vp8/common/rtcd_defs.sh))
+$(eval $(call rtcd_h_template,vp8_rtcd,vp8/common/rtcd_defs.pl))
