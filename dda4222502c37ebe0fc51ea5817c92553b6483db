@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//1r4\u003d",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 3
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-02-24T23:29:27Z",
+      "side": 1,
+      "message": "s/for/to/",
+      "revId": "dda4222502c37ebe0fc51ea5817c92553b6483db",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//1r0\u003d",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 3
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-02-24T23:29:27Z",
+      "side": 1,
+      "message": "s/decode/decoding/",
+      "revId": "dda4222502c37ebe0fc51ea5817c92553b6483db",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//1rw\u003d",
+        "filename": "vpxdec.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 303,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-02-24T23:29:27Z",
+      "side": 1,
+      "message": "Please fix alignment:\n\n      fprintf(stderr, \n              \"%d decoded frames/%d showed frames in %\"PRId64\"us (%.2f fps)\\r\",\n              frame_in, frame_out, dx_time,\n              (double)frame_out * 1000000.0 / (double)dx_time));",
+      "revId": "dda4222502c37ebe0fc51ea5817c92553b6483db",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//1rk\u003d",
+        "filename": "vpxdec.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 497,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-02-24T23:29:27Z",
+      "side": 1,
+      "message": "Please do not preserve this alignment, just do this:\n    uint64_t dx_time \u003d 0;",
+      "revId": "dda4222502c37ebe0fc51ea5817c92553b6483db",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
