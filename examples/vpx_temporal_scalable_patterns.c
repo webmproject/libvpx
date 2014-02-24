@@ -81,7 +81,7 @@ static void printout_rate_control_summary(struct RateControlMetrics *rc,
                                           vpx_codec_enc_cfg_t *cfg,
                                           int frame_cnt) {
   unsigned int i = 0;
-  int check_num_frames = 0;
+  int tot_num_frames = 0;
   printf("Total number of processed frames: %d\n\n", frame_cnt -1);
   printf("Rate control layer stats for %d layer(s):\n\n",
       cfg->ts_number_layers);
@@ -89,8 +89,9 @@ static void printout_rate_control_summary(struct RateControlMetrics *rc,
     const int num_dropped = (i > 0) ?
         (rc->layer_input_frames[i] - rc->layer_enc_frames[i]) :
         (rc->layer_input_frames[i] - rc->layer_enc_frames[i] - 1);
+    tot_num_frames += rc->layer_input_frames[i];
     rc->layer_encoding_bitrate[i] = 0.001 * rc->layer_framerate[i] *
-        rc->layer_encoding_bitrate[i] / rc->layer_tot_enc_frames[i];
+        rc->layer_encoding_bitrate[i] / tot_num_frames;
     rc->layer_avg_frame_size[i] = rc->layer_avg_frame_size[i] /
         rc->layer_enc_frames[i];
     rc->layer_avg_rate_mismatch[i] = 100.0 * rc->layer_avg_rate_mismatch[i] /
@@ -105,10 +106,9 @@ static void printout_rate_control_summary(struct RateControlMetrics *rc,
         "and perc dropped frames: %d %d %f \n", rc->layer_input_frames[i],
         rc->layer_enc_frames[i],
         100.0 * num_dropped / rc->layer_input_frames[i]);
-    check_num_frames += rc->layer_input_frames[i];
     printf("\n");
   }
-  if ((frame_cnt - 1) != check_num_frames)
+  if ((frame_cnt - 1) != tot_num_frames)
     die("Error: Number of input frames not equal to output! \n");
 }
 
