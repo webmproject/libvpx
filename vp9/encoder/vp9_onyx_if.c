@@ -661,6 +661,7 @@ static void set_good_speed_feature(VP9_COMMON *cm,
     sf->reference_masking = 1;
     sf->auto_mv_step_size = 1;
 
+    sf->disable_split_var_thresh = 32;
     sf->disable_filter_search_var_thresh = 100;
     sf->comp_inter_joint_search_thresh = BLOCK_SIZES;
 
@@ -696,6 +697,7 @@ static void set_good_speed_feature(VP9_COMMON *cm,
     sf->reference_masking = 1;
     sf->auto_mv_step_size = 1;
 
+    sf->disable_split_var_thresh = 64;
     sf->disable_filter_search_var_thresh = 200;
     sf->comp_inter_joint_search_thresh = BLOCK_SIZES;
 
@@ -713,7 +715,7 @@ static void set_good_speed_feature(VP9_COMMON *cm,
     sf->adaptive_rd_thresh = 4;
     sf->mode_skip_start = 6;
   }
-  if (speed == 5) {
+  if (speed >= 5) {
     sf->comp_inter_joint_search_thresh = BLOCK_SIZES;
     sf->use_one_partition_size_always = 1;
     sf->always_this_block_size = BLOCK_16X16;
@@ -861,9 +863,12 @@ static void set_rt_speed_feature(VP9_COMMON *cm,
     sf->search_method = FAST_HEX;
   }
   if (speed >= 6) {
+    sf->use_one_partition_size_always = 1;
+    sf->always_this_block_size = BLOCK_32X32;
+  }
+  if (speed >= 7) {
     sf->always_this_block_size = BLOCK_16X16;
     sf->use_pick_mode = 1;
-    sf->encode_breakout_thresh = 1000;
   }
 }
 

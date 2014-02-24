@@ -965,9 +965,9 @@ static BLOCK_SIZE find_partition_size(BLOCK_SIZE bsize,
 // may not be allowed in which case this code attempts to choose the largest
 // allowable partition.
 static void set_partitioning(VP9_COMP *cpi, const TileInfo *const tile,
-                             MODE_INFO **mi_8x8, int mi_row, int mi_col) {
+                             MODE_INFO **mi_8x8, int mi_row, int mi_col,
+                             BLOCK_SIZE bsize) {
   VP9_COMMON *const cm = &cpi->common;
-  BLOCK_SIZE bsize = cpi->sf.always_this_block_size;
   const int mis = cm->mode_info_stride;
   int row8x8_remaining = tile->mi_row_end - mi_row;
   int col8x8_remaining = tile->mi_col_end - mi_col;
@@ -1956,7 +1956,8 @@ static void encode_sb_row(VP9_COMP *cpi, const TileInfo *const tile,
       cpi->mb.source_variance = UINT_MAX;
       if (cpi->sf.use_one_partition_size_always) {
         set_offsets(cpi, tile, mi_row, mi_col, BLOCK_64X64);
-        set_partitioning(cpi, tile, mi_8x8, mi_row, mi_col);
+        set_partitioning(cpi, tile, mi_8x8, mi_row, mi_col,
+                         cpi->sf.always_this_block_size);
         rd_use_partition(cpi, tile, mi_8x8, tp, mi_row, mi_col, BLOCK_64X64,
                          &dummy_rate, &dummy_dist, 1);
       } else {
@@ -2328,8 +2329,9 @@ static void encode_rtc_sb_row(VP9_COMP *cpi, const TileInfo *const tile,
     MODE_INFO **mi_8x8 = cm->mi_grid_visible + idx_str;
     cpi->mb.source_variance = UINT_MAX;
 
-    rtc_use_partition(cpi, tile, mi_8x8, tp, mi_row, mi_col, BLOCK_16X16,
-                     &dummy_rate, &dummy_dist, 1);
+    rtc_use_partition(cpi, tile, mi_8x8, tp, mi_row, mi_col,
+                      cpi->sf.always_this_block_size,
+                      &dummy_rate, &dummy_dist, 1);
   }
 }
 // end RTC play code
