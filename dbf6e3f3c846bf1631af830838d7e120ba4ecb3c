@@ -16,6 +16,24 @@
       "revId": "dbf6e3f3c846bf1631af830838d7e120ba4ecb3c",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//1tE\u003d",
+        "filename": "build/make/gen_msvs_vcxproj.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 162,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-02-24T19:49:51Z",
+      "side": 1,
+      "message": "agreed: Just want to silence the warning.\n\nAlso, though it is not the case with vpx_config.asm, it seems reasonably pessimistic to assume that a name collision between a .c and .asm file could occur with files that are meant to be built instead of only included.",
+      "parentUuid": "AAAAdn//2UQ\u003d",
+      "revId": "dbf6e3f3c846bf1631af830838d7e120ba4ecb3c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
