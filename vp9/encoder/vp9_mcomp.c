@@ -1830,11 +1830,7 @@ int vp9_refining_search_sad_c(const MACROBLOCK *x,
   const uint8_t *const in_what = xd->plane[0].pre[0].buf;
   const uint8_t *best_address = &in_what[ref_mv->row * in_what_stride +
                                              ref_mv->col];
-  unsigned int thissad;
-
   const MV fcenter_mv = {center_mv->row >> 3, center_mv->col >> 3};
-  MV this_mv;
-
   const int *mvjsadcost = x->nmvjointsadcost;
   int *mvsadcost[2] = {x->nmvsadcost[0], x->nmvsadcost[1]};
 
@@ -1846,15 +1842,13 @@ int vp9_refining_search_sad_c(const MACROBLOCK *x,
     int best_site = -1;
 
     for (j = 0; j < 4; j++) {
-      this_mv.row = ref_mv->row + neighbors[j].row;
-      this_mv.col = ref_mv->col + neighbors[j].col;
-
+      const MV this_mv = {ref_mv->row + neighbors[j].row,
+                          ref_mv->col + neighbors[j].col};
       if (is_mv_in(x, &this_mv)) {
         const uint8_t *check_here = &in_what[this_mv.row * in_what_stride +
                                                 this_mv.col];
-        thissad = fn_ptr->sdf(what, what_stride, check_here, in_what_stride,
-                              bestsad);
-
+        unsigned int thissad = fn_ptr->sdf(what, what_stride, check_here,
+                                           in_what_stride, bestsad);
         if (thissad < bestsad) {
           thissad += mvsad_err_cost(&this_mv, &fcenter_mv,
                                     mvjsadcost, mvsadcost, error_per_bit);
@@ -1876,15 +1870,15 @@ int vp9_refining_search_sad_c(const MACROBLOCK *x,
     }
   }
 
-  this_mv.row = ref_mv->row * 8;
-  this_mv.col = ref_mv->col * 8;
-
-  if (bestsad < INT_MAX)
+  if (bestsad < INT_MAX) {
+    unsigned int unused;
+    const MV mv = {ref_mv->row * 8, ref_mv->col * 8};
     return fn_ptr->vf(what, what_stride, best_address, in_what_stride,
-                      (unsigned int *)(&thissad)) +
-        mv_err_cost(&this_mv, center_mv, mvjcost, mvcost, x->errorperbit);
-  else
+                      &unused) +
+        mv_err_cost(&mv, center_mv, mvjcost, mvcost, x->errorperbit);
+  } else {
     return INT_MAX;
+  }
 }
 
 int vp9_refining_search_sadx4(const MACROBLOCK *x,
