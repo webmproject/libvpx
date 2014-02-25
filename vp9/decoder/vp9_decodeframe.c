@@ -1120,6 +1120,12 @@ static size_t read_uncompressed_header(VP9D_COMP *pbi,
   if (cm->show_existing_frame) {
     // Show an existing frame directly.
     const int frame_to_show = cm->ref_frame_map[vp9_rb_read_literal(rb, 3)];
+
+    if (cm->frame_bufs[frame_to_show].ref_count < 1)
+      vpx_internal_error(&cm->error, VPX_CODEC_UNSUP_BITSTREAM,
+                         "Buffer %d does not contain a decoded frame",
+                         frame_to_show);
+
     ref_cnt_fb(cm->frame_bufs, &cm->new_fb_idx, frame_to_show);
     pbi->refresh_frame_flags = 0;
     cm->lf.filter_level = 0;
