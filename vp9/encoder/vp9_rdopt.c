@@ -3238,7 +3238,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
     int64_t tx_cache[TX_MODES];
     int i;
     int this_skip2 = 0;
-    int64_t total_sse = INT_MAX;
+    int64_t total_sse = INT64_MAX;
     int early_term = 0;
 
     // Look at the reference frame of the best mode so far and set the
@@ -4367,7 +4367,7 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
 
   if (best_rd == INT64_MAX && bsize < BLOCK_8X8) {
     *returnrate = INT_MAX;
-    *returndistortion = INT_MAX;
+    *returndistortion = INT64_MAX;
     return best_rd;
   }
 

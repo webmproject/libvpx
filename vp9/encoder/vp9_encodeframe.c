@@ -1211,13 +1211,11 @@ static void rd_use_partition(VP9_COMP *cpi,
   ENTROPY_CONTEXT l[16 * MAX_MB_PLANE], a[16 * MAX_MB_PLANE];
   PARTITION_CONTEXT sl[8], sa[8];
   int last_part_rate = INT_MAX;
-  int64_t last_part_dist = INT_MAX;
-  int split_rate = INT_MAX;
-  int64_t split_dist = INT_MAX;
+  int64_t last_part_dist = INT64_MAX;
   int none_rate = INT_MAX;
-  int64_t none_dist = INT_MAX;
+  int64_t none_dist = INT64_MAX;
   int chosen_rate = INT_MAX;
-  int64_t chosen_dist = INT_MAX;
+  int64_t chosen_dist = INT64_MAX;
   BLOCK_SIZE sub_subsize = BLOCK_4X4;
   int splits_below = 0;
   BLOCK_SIZE bs_type = mi_8x8[0]->mbmi.sb_type;
@@ -1300,9 +1298,9 @@ static void rd_use_partition(VP9_COMP *cpi,
         *get_sb_index(x, subsize) = 1;
         rd_pick_sb_modes(cpi, tile, mi_row + (ms >> 1), mi_col, &rt, &dt,
                          subsize, get_block_context(x, subsize), INT64_MAX);
-        if (rt == INT_MAX || dt == INT_MAX) {
+        if (rt == INT_MAX || dt == INT64_MAX) {
           last_part_rate = INT_MAX;
-          last_part_dist = INT_MAX;
+          last_part_dist = INT64_MAX;
           break;
         }
 
@@ -1324,9 +1322,9 @@ static void rd_use_partition(VP9_COMP *cpi,
         *get_sb_index(x, subsize) = 1;
         rd_pick_sb_modes(cpi, tile, mi_row, mi_col + (ms >> 1), &rt, &dt,
                          subsize, get_block_context(x, subsize), INT64_MAX);
-        if (rt == INT_MAX || dt == INT_MAX) {
+        if (rt == INT_MAX || dt == INT64_MAX) {
           last_part_rate = INT_MAX;
-          last_part_dist = INT_MAX;
+          last_part_dist = INT64_MAX;
           break;
         }
         last_part_rate += rt;
@@ -1352,9 +1350,9 @@ static void rd_use_partition(VP9_COMP *cpi,
         rd_use_partition(cpi, tile, mi_8x8 + jj * bss * mis + ii * bss, tp,
                          mi_row + y_idx, mi_col + x_idx, subsize, &rt, &dt,
                          i != 3);
-        if (rt == INT_MAX || dt == INT_MAX) {
+        if (rt == INT_MAX || dt == INT64_MAX) {
           last_part_rate = INT_MAX;
-          last_part_dist = INT_MAX;
+          last_part_dist = INT64_MAX;
           break;
         }
         last_part_rate += rt;
@@ -1375,8 +1373,8 @@ static void rd_use_partition(VP9_COMP *cpi,
       && (mi_row + ms < cm->mi_rows || mi_row + (ms >> 1) == cm->mi_rows)
       && (mi_col + ms < cm->mi_cols || mi_col + (ms >> 1) == cm->mi_cols)) {
     BLOCK_SIZE split_subsize = get_subsize(bsize, PARTITION_SPLIT);
-    split_rate = 0;
-    split_dist = 0;
+    chosen_rate = 0;
+    chosen_dist = 0;
     restore_context(cpi, mi_row, mi_col, a, l, sa, sl, bsize);
 
     // Split partition.
@@ -1403,31 +1401,29 @@ static void rd_use_partition(VP9_COMP *cpi,
 
       restore_context(cpi, mi_row, mi_col, a, l, sa, sl, bsize);
 
-      if (rt == INT_MAX || dt == INT_MAX) {
-        split_rate = INT_MAX;
-        split_dist = INT_MAX;
+      if (rt == INT_MAX || dt == INT64_MAX) {
+        chosen_rate = INT_MAX;
+        chosen_dist = INT64_MAX;
         break;
       }
+
+      chosen_rate += rt;
+      chosen_dist += dt;
 
       if (i != 3)
         encode_sb(cpi, tile, tp,  mi_row + y_idx, mi_col + x_idx, 0,
                   split_subsize);
 
-      split_rate += rt;
-      split_dist += dt;
       pl = partition_plane_context(cpi->above_seg_context,
                                    cpi->left_seg_context,
                                    mi_row + y_idx, mi_col + x_idx,
                                    split_subsize);
-      split_rate += x->partition_cost[pl][PARTITION_NONE];
+      chosen_rate += x->partition_cost[pl][PARTITION_NONE];
     }
     pl = partition_plane_context(cpi->above_seg_context, cpi->left_seg_context,
                                  mi_row, mi_col, bsize);
-    if (split_rate < INT_MAX) {
-      split_rate += x->partition_cost[pl][PARTITION_SPLIT];
-
-      chosen_rate = split_rate;
-      chosen_dist = split_dist;
+    if (chosen_rate < INT_MAX) {
+      chosen_rate += x->partition_cost[pl][PARTITION_SPLIT];
     }
   }
 
@@ -1454,7 +1450,7 @@ static void rd_use_partition(VP9_COMP *cpi,
   // We must have chosen a partitioning and encoding or we'll fail later on.
   // No other opportunities for success.
   if ( bsize == BLOCK_64X64)
-    assert(chosen_rate < INT_MAX && chosen_dist < INT_MAX);
+    assert(chosen_rate < INT_MAX && chosen_dist < INT64_MAX);
 
   if (do_recon) {
     int output_enabled = (bsize == BLOCK_64X64);
@@ -1912,7 +1908,7 @@ static void rd_pick_partition(VP9_COMP *cpi, const TileInfo *const tile,
   if (bsize == BLOCK_64X64) {
     assert(tp_orig < *tp);
     assert(best_rate < INT_MAX);
-    assert(best_dist < INT_MAX);
+    assert(best_dist < INT64_MAX);
   } else {
     assert(tp_orig == *tp);
   }
@@ -2266,7 +2262,7 @@ static void rtc_use_partition(VP9_COMP *cpi,
   int br, bc;
   int i, j;
   int chosen_rate = INT_MAX;
-  int64_t chosen_dist = INT_MAX;
+  int64_t chosen_dist = INT64_MAX;
   MB_PREDICTION_MODE mode = DC_PRED;
   int rows = MIN(MI_BLOCK_SIZE, tile->mi_row_end - mi_row);
   int cols = MIN(MI_BLOCK_SIZE, tile->mi_col_end - mi_col);
