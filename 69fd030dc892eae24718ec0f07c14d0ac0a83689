@@ -16,6 +16,24 @@
       "revId": "69fd030dc892eae24718ec0f07c14d0ac0a83689",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//1nM\u003d",
+        "filename": "vp9/decoder/vp9_decodeframe.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1270,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-02-25T10:10:46Z",
+      "side": 1,
+      "message": "I don\u0027t see why it\u0027s slower... Previously setup_compound_reference_mode() was called from read_frame_reference_mode(). Now it is called outside of that function. Now it\u0027s actually called fewer times -- only when reference_mode !\u003d SINGLE_REFERENCE.",
+      "parentUuid": "AAAAdn//2Rc\u003d",
+      "revId": "69fd030dc892eae24718ec0f07c14d0ac0a83689",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
