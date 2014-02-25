@@ -218,6 +218,22 @@ typedef enum {
   ENCODE_BREAKOUT_LIMITED = 2
 } ENCODE_BREAKOUT_TYPE;
 
+typedef enum {
+  // Search partitions using RD/NONRD criterion
+  SEARCH_PARTITION = 0,
+
+  // Always use a fixed size partition
+  FIXED_PARTITION = 1,
+
+  // Use a fixed size partition in every 64X64 SB, where the size is
+  // determined based on source variance
+  VAR_BASED_FIXED_PARTITION = 2,
+
+  // Use an arbitrary partitioning scheme based on source variance within
+  // a 64X64 SB
+  VAR_BASED_PARTITION
+} PARTITION_SEARCH_TYPE;
+
 typedef struct {
   // Frame level coding parameter update
   int frame_parameter_update;
@@ -304,16 +320,6 @@ typedef struct {
 
   // TODO(JBB): remove this as its no longer used.
 
-  // If set partition size will always be always_this_block_size.
-  int use_one_partition_size_always;
-
-  // Skip rectangular partition test when partition type none gives better
-  // rd than partition type split.
-  int less_rectangular_check;
-
-  // Disable testing non square partitions. (eg 16x32)
-  int use_square_partition_only;
-
   // After looking at the first set of modes (set by index here), skip
   // checking modes for reference frames that don't match the reference frame
   // of the best so far.
@@ -322,8 +328,17 @@ typedef struct {
   // TODO(JBB): Remove this.
   int reference_masking;
 
-  // Used in conjunction with use_one_partition_size_always.
+  PARTITION_SEARCH_TYPE partition_search_type;
+
+  // Used if partition_search_type = FIXED_SIZE_PARTITION
   BLOCK_SIZE always_this_block_size;
+
+  // Skip rectangular partition test when partition type none gives better
+  // rd than partition type split.
+  int less_rectangular_check;
+
+  // Disable testing non square partitions. (eg 16x32)
+  int use_square_partition_only;
 
   // Sets min and max partition sizes for this 64x64 region based on the
   // same 64x64 in last encoded frame, and the left and above neighbor.
@@ -396,7 +411,7 @@ typedef struct {
   int use_fast_coef_updates;  // 0: 2-loop, 1: 1-loop, 2: 1-loop reduced
 
   // This flag controls the use of non-RD mode decision.
-  int use_pick_mode;
+  int use_nonrd_pick_mode;
 
   // This variable sets the encode_breakout threshold. Currently, it is only
   // enabled in real time mode.
