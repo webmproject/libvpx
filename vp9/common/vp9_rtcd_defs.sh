@@ -737,7 +737,7 @@ specialize vp9_fdct32x32_rd sse2 avx2
 #
 # Motion search
 #
-prototype int vp9_full_search_sad "const struct macroblock *x, const struct mv *ref_mv, int sad_per_bit, int distance, const struct vp9_variance_vtable *fn_ptr, DEC_MVCOSTS, const struct mv *center_mv, int n"
+prototype int vp9_full_search_sad "const struct macroblock *x, const struct mv *ref_mv, int sad_per_bit, int distance, const struct vp9_variance_vtable *fn_ptr, DEC_MVCOSTS, const struct mv *center_mv, struct mv *best_mv"
 specialize vp9_full_search_sad sse3 sse4_1
 vp9_full_search_sad_sse3=vp9_full_search_sadx3
 vp9_full_search_sad_sse4_1=vp9_full_search_sadx8

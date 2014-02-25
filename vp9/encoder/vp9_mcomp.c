@@ -1525,7 +1525,7 @@ int vp9_full_search_sad_c(const MACROBLOCK *x, const MV *ref_mv,
                           int sad_per_bit, int distance,
                           const vp9_variance_fn_ptr_t *fn_ptr,
                           int *mvjcost, int *mvcost[2],
-                          const MV *center_mv, int block) {
+                          const MV *center_mv, MV *best_mv) {
   int r, c;
   const MACROBLOCKD *const xd = &x->e_mbd;
   const uint8_t *const what = x->plane[0].src.buf;
@@ -1544,7 +1544,6 @@ int vp9_full_search_sad_c(const MACROBLOCK *x, const MV *ref_mv,
   int best_sad = fn_ptr->sdf(what, what_stride, best_address, in_what_stride,
                              0x7fffffff) +
       mvsad_err_cost(ref_mv, &fcenter_mv, mvjsadcost, mvsadcost, sad_per_bit);
-  MV *best_mv = &xd->mi_8x8[0]->bmi[block].as_mv[0].as_mv;
   *best_mv = *ref_mv;
 
   for (r = row_min; r < row_max; ++r) {
@@ -1578,13 +1577,12 @@ int vp9_full_search_sadx3(const MACROBLOCK *x, const MV *ref_mv,
                           int sad_per_bit, int distance,
                           const vp9_variance_fn_ptr_t *fn_ptr,
                           int *mvjcost, int *mvcost[2],
-                          const MV *center_mv, int n) {
+                          const MV *center_mv, MV *best_mv) {
   const MACROBLOCKD *const xd = &x->e_mbd;
   const uint8_t *const what = x->plane[0].src.buf;
   const int what_stride = x->plane[0].src.stride;
   const uint8_t *const in_what = xd->plane[0].pre[0].buf;
   const int in_what_stride = xd->plane[0].pre[0].stride;
-  MV *best_mv = &xd->mi_8x8[0]->bmi[n].as_mv[0].as_mv;
   MV this_mv;
   unsigned int bestsad = INT_MAX;
   int r, c;
@@ -1684,13 +1682,12 @@ int vp9_full_search_sadx8(const MACROBLOCK *x, const MV *ref_mv,
                           int sad_per_bit, int distance,
                           const vp9_variance_fn_ptr_t *fn_ptr,
                           int *mvjcost, int *mvcost[2],
-                          const MV *center_mv, int n) {
+                          const MV *center_mv, MV *best_mv) {
   const MACROBLOCKD *const xd = &x->e_mbd;
   const uint8_t *const what = x->plane[0].src.buf;
   const int what_stride = x->plane[0].src.stride;
   const uint8_t *const in_what = xd->plane[0].pre[0].buf;
   const int in_what_stride = xd->plane[0].pre[0].stride;
-  MV *best_mv = &xd->mi_8x8[0]->bmi[n].as_mv[0].as_mv;
   MV this_mv;
   unsigned int bestsad = INT_MAX;
   int r, c;

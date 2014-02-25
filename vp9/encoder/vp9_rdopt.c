@@ -1851,22 +1851,22 @@ static void rd_check_segment_txsize(VP9_COMP *cpi, MACROBLOCK *x,
           // Should we do a full search (best quality only)
           if (cpi->oxcf.mode == MODE_BESTQUALITY ||
               cpi->oxcf.mode == MODE_SECONDPASS_BEST) {
+            int_mv *const best_mv = &mi->bmi[i].as_mv[0];
             /* Check if mvp_full is within the range. */
             clamp_mv(&mvp_full, x->mv_col_min, x->mv_col_max,
                      x->mv_row_min, x->mv_row_max);
-
             thissme = cpi->full_search_sad(x, &mvp_full,
                                            sadpb, 16, v_fn_ptr,
                                            x->nmvjointcost, x->mvcost,
-                                           &bsi->ref_mv->as_mv, i);
-
+                                           &bsi->ref_mv->as_mv,
+                                           &best_mv->as_mv);
             if (thissme < bestsme) {
               bestsme = thissme;
-              new_mv->as_int = mi->bmi[i].as_mv[0].as_int;
+              new_mv->as_int = best_mv->as_int;
             } else {
-              /* The full search result is actually worse so re-instate the
-               * previous best vector */
-              mi->bmi[i].as_mv[0].as_int = new_mv->as_int;
+              // The full search result is actually worse so re-instate the
+              // previous best vector
+              best_mv->as_int = new_mv->as_int;
             }
           }
 
