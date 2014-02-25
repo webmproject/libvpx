@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//1hk\u003d",
+        "filename": "vp8/common/arm/neon/idct_dequant_full_2x_neon.c",
+        "patchSetId": 17
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2014-02-25T23:13:47Z",
+      "side": 1,
+      "message": "Since this uses the same trick as the assembly, this needs similar comments about why sinpi8sqrt2 is not the same value here as it is in other files",
+      "revId": "ffb142caadd39235b6d8d7ae4a2f4de445482d93",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
