@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//1iI\u003d",
+        "filename": "vp8/common/arm/neon/dequant_idct_neon.c",
+        "patchSetId": 18
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2014-02-25T23:10:04Z",
+      "side": 1,
+      "message": "Put input +\u003d 8 on it\u0027s own line (one statement per line), throughout the file",
+      "revId": "e4119a3af32057bd4db5ffce69a8eb8bc2130b6e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//1h4\u003d",
+        "filename": "vp8/common/arm/neon/dequant_idct_neon.c",
+        "patchSetId": 18
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2014-02-25T23:10:04Z",
+      "side": 1,
+      "message": "Not having a vswp intrinsic makes me sad :/ Can this be done with some combination of vtrn/vzip?",
+      "revId": "e4119a3af32057bd4db5ffce69a8eb8bc2130b6e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
