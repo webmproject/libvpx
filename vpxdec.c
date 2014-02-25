@@ -298,10 +298,11 @@ int file_is_raw(struct VpxInputContext *input) {
   return is_raw;
 }
 
-void show_progress(int frame_in, int frame_out, unsigned long dx_time) {
-  fprintf(stderr, "%d decoded frames/%d showed frames in %lu us (%.2f fps)\r",
+void show_progress(int frame_in, int frame_out, uint64_t dx_time) {
+  fprintf(stderr,
+          "%d decoded frames/%d showed frames in %"PRId64" us (%.2f fps)\r",
           frame_in, frame_out, dx_time,
-          (float)frame_out * 1000000.0 / (float)dx_time);
+          (double)frame_out * 1000000.0 / (double)dx_time);
 }
 
 struct ExternalFrameBuffer {
@@ -493,7 +494,7 @@ int main_loop(int argc, const char **argv_) {
   int                    ec_enabled = 0;
   const VpxInterface *interface = NULL;
   const VpxInterface *fourcc_interface = NULL;
-  unsigned long          dx_time = 0;
+  uint64_t dx_time = 0;
   struct arg               arg;
   char                   **argv, **argi, **argj;
 
@@ -803,7 +804,7 @@ int main_loop(int argc, const char **argv_) {
         }
 
         vpx_usec_timer_mark(&timer);
-        dx_time += (unsigned int)vpx_usec_timer_elapsed(&timer);
+        dx_time += vpx_usec_timer_elapsed(&timer);
       }
     }
 
