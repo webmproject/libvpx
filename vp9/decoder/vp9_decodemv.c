@@ -257,13 +257,18 @@ static INLINE void read_mv(vp9_reader *r, MV *mv, const MV *ref,
   mv->col = ref->col + diff.col;
 }
 
-static REFERENCE_MODE read_reference_mode(VP9_COMMON *cm, const MACROBLOCKD *xd,
-                                          vp9_reader *r) {
-  const int ctx = vp9_get_reference_mode_context(cm, xd);
-  const int mode = vp9_read(r, cm->fc.comp_inter_prob[ctx]);
-  if (!cm->frame_parallel_decoding_mode)
-    ++cm->counts.comp_inter[ctx][mode];
-  return mode;  // SINGLE_REFERENCE or COMPOUND_REFERENCE
+static REFERENCE_MODE read_block_reference_mode(VP9_COMMON *cm,
+                                                const MACROBLOCKD *xd,
+                                                vp9_reader *r) {
+  if (cm->reference_mode == REFERENCE_MODE_SELECT) {
+    const int ctx = vp9_get_reference_mode_context(cm, xd);
+    const int mode = vp9_read(r, cm->fc.comp_inter_prob[ctx]);
+    if (!cm->frame_parallel_decoding_mode)
+      ++cm->counts.comp_inter[ctx][mode];
+    return mode;  // SINGLE_REFERENCE or COMPOUND_REFERENCE
+  } else {
+    return cm->reference_mode;
+  }
 }
 
 // Read the referncence frame
@@ -277,10 +282,7 @@ static void read_ref_frames(VP9_COMMON *const cm, MACROBLOCKD *const xd,
     ref_frame[0] = vp9_get_segdata(&cm->seg, segment_id, SEG_LVL_REF_FRAME);
     ref_frame[1] = NONE;
   } else {
-    const REFERENCE_MODE mode = (cm->reference_mode == REFERENCE_MODE_SELECT)
-                                      ? read_reference_mode(cm, xd, r)
-                                      : cm->reference_mode;
-
+    const REFERENCE_MODE mode = read_block_reference_mode(cm, xd, r);
     // FIXME(rbultje) I'm pretty sure this breaks segmentation ref frame coding
     if (mode == COMPOUND_REFERENCE) {
       const int idx = cm->ref_frame_sign_bias[cm->comp_fixed_ref];

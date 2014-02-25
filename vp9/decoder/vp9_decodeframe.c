@@ -46,13 +46,13 @@ static int read_be32(const uint8_t *p) {
 static int is_compound_reference_allowed(const VP9_COMMON *cm) {
   int i;
   for (i = 1; i < REFS_PER_FRAME; ++i)
-    if  (cm->ref_frame_sign_bias[i + 1] != cm->ref_frame_sign_bias[1])
+    if (cm->ref_frame_sign_bias[i + 1] != cm->ref_frame_sign_bias[1])
       return 1;
 
   return 0;
 }
 
-static void setup_compound_reference(VP9_COMMON *cm) {
+static void setup_compound_reference_mode(VP9_COMMON *cm) {
   if (cm->ref_frame_sign_bias[LAST_FRAME] ==
           cm->ref_frame_sign_bias[GOLDEN_FRAME]) {
     cm->comp_fixed_ref = ALTREF_FRAME;
@@ -116,33 +116,34 @@ static void read_inter_mode_probs(FRAME_CONTEXT *fc, vp9_reader *r) {
       vp9_diff_update_prob(r, &fc->inter_mode_probs[i][j]);
 }
 
-static REFERENCE_MODE read_reference_mode(VP9_COMMON *cm, vp9_reader *r) {
+static REFERENCE_MODE read_frame_reference_mode(const VP9_COMMON *cm,
+                                                vp9_reader *r) {
   if (is_compound_reference_allowed(cm)) {
-    REFERENCE_MODE mode = vp9_read_bit(r);
-    if (mode)
-      mode += vp9_read_bit(r);
-    setup_compound_reference(cm);
-    return mode;
+    return vp9_read_bit(r) ? (vp9_read_bit(r) ? REFERENCE_MODE_SELECT
+                                              : COMPOUND_REFERENCE)
+                           : SINGLE_REFERENCE;
   } else {
     return SINGLE_REFERENCE;
   }
 }
 
-static void read_reference_mode_probs(VP9_COMMON *cm, vp9_reader *r) {
+static void read_frame_reference_mode_probs(VP9_COMMON *cm, vp9_reader *r) {
+  FRAME_CONTEXT *const fc = &cm->fc;
   int i;
+
   if (cm->reference_mode == REFERENCE_MODE_SELECT)
-    for (i = 0; i < COMP_INTER_CONTEXTS; i++)
-      vp9_diff_update_prob(r, &cm->fc.comp_inter_prob[i]);
+    for (i = 0; i < COMP_INTER_CONTEXTS; ++i)
+      vp9_diff_update_prob(r, &fc->comp_inter_prob[i]);
 
   if (cm->reference_mode != COMPOUND_REFERENCE)
-    for (i = 0; i < REF_CONTEXTS; i++) {
-      vp9_diff_update_prob(r, &cm->fc.single_ref_prob[i][0]);
-      vp9_diff_update_prob(r, &cm->fc.single_ref_prob[i][1]);
+    for (i = 0; i < REF_CONTEXTS; ++i) {
+      vp9_diff_update_prob(r, &fc->single_ref_prob[i][0]);
+      vp9_diff_update_prob(r, &fc->single_ref_prob[i][1]);
     }
 
   if (cm->reference_mode != SINGLE_REFERENCE)
-    for (i = 0; i < REF_CONTEXTS; i++)
-      vp9_diff_update_prob(r, &cm->fc.comp_ref_prob[i]);
+    for (i = 0; i < REF_CONTEXTS; ++i)
+      vp9_diff_update_prob(r, &fc->comp_ref_prob[i]);
 }
 
 static void update_mv_probs(vp9_prob *p, int n, vp9_reader *r) {
@@ -1271,8 +1272,10 @@ static int read_compressed_header(VP9D_COMP *pbi, const uint8_t *data,
     for (i = 0; i < INTRA_INTER_CONTEXTS; i++)
       vp9_diff_update_prob(&r, &fc->intra_inter_prob[i]);
 
-    cm->reference_mode = read_reference_mode(cm, &r);
-    read_reference_mode_probs(cm, &r);
+    cm->reference_mode = read_frame_reference_mode(cm, &r);
+    if (cm->reference_mode != SINGLE_REFERENCE)
+      setup_compound_reference_mode(cm);
+    read_frame_reference_mode_probs(cm, &r);
 
     for (j = 0; j < BLOCK_SIZE_GROUPS; j++)
       for (i = 0; i < INTRA_MODES - 1; ++i)
