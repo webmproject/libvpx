@@ -16,8 +16,8 @@
 
 namespace {
 
-const int kMaxErrorFrames = 8;
-const int kMaxDroppableFrames = 8;
+const int kMaxErrorFrames = 12;
+const int kMaxDroppableFrames = 12;
 
 class ErrorResilienceTest : public ::libvpx_test::EncoderTest,
     public ::libvpx_test::CodecTestWithParam<libvpx_test::TestMode> {
@@ -175,6 +175,10 @@ TEST_P(ErrorResilienceTest, OnVersusOff) {
   }
 }
 
+// Check for successful decoding and no encoder/decoder mismatch
+// if we lose (i.e., drop before decoding) a set of droppable
+// frames (i.e., frames that don't update any reference buffers).
+// Check both isolated and consecutive loss.
 TEST_P(ErrorResilienceTest, DropFramesWithoutRecovery) {
   const vpx_rational timebase = { 33333333, 1000000000 };
   cfg_.g_timebase = timebase;
@@ -186,14 +190,18 @@ TEST_P(ErrorResilienceTest, DropFramesWithoutRecovery) {
   init_flags_ = VPX_CODEC_USE_PSNR;
 
   libvpx_test::I420VideoSource video("hantro_collage_w352h288.yuv", 352, 288,
-                                     timebase.den, timebase.num, 0, 30);
+                                     timebase.den, timebase.num, 0, 40);
 
   // Error resilient mode ON.
   cfg_.g_error_resilient = 1;
+  cfg_.kf_mode = VPX_KF_DISABLED;
 
-  // Set an arbitrary set of error frames same as droppable frames
-  unsigned int num_droppable_frames = 2;
-  unsigned int droppable_frame_list[] = {5, 16};
+  // Set an arbitrary set of error frames same as droppable frames.
+  // In addition to isolated loss/drop, add a long consecutive series
+  // (of size 9) of dropped frames.
+  unsigned int num_droppable_frames = 11;
+  unsigned int droppable_frame_list[] = {5, 16, 22, 23, 24, 25, 26, 27, 28,
+                                         29, 30};
   SetDroppableFrames(num_droppable_frames, droppable_frame_list);
   SetErrorFrames(num_droppable_frames, droppable_frame_list);
   ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
@@ -202,7 +210,7 @@ TEST_P(ErrorResilienceTest, DropFramesWithoutRecovery) {
             << GetMismatchFrames() << "\n";
   EXPECT_EQ(GetMismatchFrames(), (unsigned int) 0);
 
-  // reset previously set error/droppable frames
+  // Reset previously set of error/droppable frames.
   Reset();
 
 #if 0
