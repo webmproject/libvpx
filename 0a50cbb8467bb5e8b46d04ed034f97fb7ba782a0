@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//1iQ\u003d",
+        "filename": "vp8/common/arm/neon/dc_only_idct_add_neon.c",
+        "patchSetId": 19
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2014-02-25T22:58:38Z",
+      "side": 1,
+      "message": "Is it necessary to 0 these values first? Or does that help the compiler behave (ignore uninitialized values)",
+      "revId": "0a50cbb8467bb5e8b46d04ed034f97fb7ba782a0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
