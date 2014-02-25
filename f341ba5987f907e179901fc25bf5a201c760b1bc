@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//1io\u003d",
+        "filename": "examples/simple_encoder.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 82,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-02-25T22:55:28Z",
+      "side": 1,
+      "message": "You should find a way to work in the comments from lines 11-26 from error_resilient.c-- it\u0027s documentation that someone looking at the examples would find useful.",
+      "revId": "f341ba5987f907e179901fc25bf5a201c760b1bc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//1ic\u003d",
+        "filename": "examples/simple_encoder.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 99,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-02-25T22:55:28Z",
+      "side": 1,
+      "message": "Add one more line of usage output: \n\nSee comments in simple_encoder.c for more information.",
+      "revId": "f341ba5987f907e179901fc25bf5a201c760b1bc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//1iY\u003d",
+        "filename": "examples/simple_encoder.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 143,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-02-25T22:55:28Z",
+      "side": 1,
+      "message": "nit: one per line, all initialized.",
+      "revId": "f341ba5987f907e179901fc25bf5a201c760b1bc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
