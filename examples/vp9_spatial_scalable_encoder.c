@@ -54,12 +54,18 @@ static const arg_def_t kf_dist_arg =
 static const arg_def_t scale_factors_arg =
     ARG_DEF("r", "scale-factors", 1, "scale factors (lowest to highest layer)");
 static const arg_def_t quantizers_arg =
-    ARG_DEF("q", "quantizers", 1, "quantizers (lowest to highest layer)");
+    ARG_DEF("q", "quantizers", 1, "quantizers for non key frames, also will "
+            "be applied to key frames if -qn is not specified (lowest to "
+            "highest layer)");
+static const arg_def_t quantizers_keyframe_arg =
+    ARG_DEF("qn", "quantizers-keyframe", 1, "quantizers for key frames (lowest "
+        "to highest layer)");
 
 static const arg_def_t *svc_args[] = {
   &encoding_mode_arg, &frames_arg,        &width_arg,       &height_arg,
   &timebase_arg,      &bitrate_arg,       &skip_frames_arg, &layers_arg,
-  &kf_dist_arg,       &scale_factors_arg, &quantizers_arg,  NULL
+  &kf_dist_arg,       &scale_factors_arg, &quantizers_arg,
+  &quantizers_keyframe_arg, NULL
 };
 
 static const SVC_ENCODING_MODE default_encoding_mode =
@@ -150,7 +156,9 @@ static void parse_command_line(int argc, const char **argv_,
     } else if (arg_match(&arg, &scale_factors_arg, argi)) {
       vpx_svc_set_scale_factors(svc_ctx, arg.val);
     } else if (arg_match(&arg, &quantizers_arg, argi)) {
-      vpx_svc_set_quantizers(svc_ctx, arg.val);
+      vpx_svc_set_quantizers(svc_ctx, arg.val, 0);
+    } else if (arg_match(&arg, &quantizers_keyframe_arg, argi)) {
+      vpx_svc_set_quantizers(svc_ctx, arg.val, 1);
     } else {
       ++argj;
     }

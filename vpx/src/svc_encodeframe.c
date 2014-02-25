@@ -47,11 +47,14 @@ static const char *DEFAULT_SCALE_FACTORS = "4/16,5/16,7/16,11/16,16/16";
 typedef struct SvcInternal {
   char options[OPTION_BUFFER_SIZE];        // set by vpx_svc_set_options
   char quantizers[OPTION_BUFFER_SIZE];     // set by vpx_svc_set_quantizers
+  char quantizers_keyframe[OPTION_BUFFER_SIZE];  // set by
+                                                 // vpx_svc_set_quantizers
   char scale_factors[OPTION_BUFFER_SIZE];  // set by vpx_svc_set_scale_factors
 
   // values extracted from option, quantizers
   int scaling_factor_num[VPX_SS_MAX_LAYERS];
   int scaling_factor_den[VPX_SS_MAX_LAYERS];
+  int quantizer_keyframe[VPX_SS_MAX_LAYERS];
   int quantizer[VPX_SS_MAX_LAYERS];
 
   // accumulated statistics
@@ -268,7 +271,8 @@ static vpx_codec_err_t set_option_encoding_mode(SvcContext *svc_ctx,
 }
 
 static vpx_codec_err_t parse_quantizer_values(SvcContext *svc_ctx,
-                                              const char *quantizer_values) {
+                                              const char *quantizer_values,
+                                              const int is_keyframe) {
   char *input_string;
   char *token;
   const char *delim = ",";
@@ -279,6 +283,11 @@ static vpx_codec_err_t parse_quantizer_values(SvcContext *svc_ctx,
   SvcInternal *const si = get_svc_internal(svc_ctx);
 
   if (quantizer_values == NULL || strlen(quantizer_values) == 0) {
+    if (is_keyframe) {
+      // If there non settings for key frame, we will apply settings from
+      // non key frame. So just simply return here.
+      return VPX_CODEC_INVALID_PARAM;
+    }
     input_string = strdup(DEFAULT_QUANTIZER_VALUES);
   } else {
     input_string = strdup(quantizer_values);
@@ -299,7 +308,12 @@ static vpx_codec_err_t parse_quantizer_values(SvcContext *svc_ctx,
     } else {
       q = 0;
     }
-    si->quantizer[i + VPX_SS_MAX_LAYERS - svc_ctx->spatial_layers] = q;
+    if (is_keyframe) {
+      si->quantizer_keyframe[i + VPX_SS_MAX_LAYERS - svc_ctx->spatial_layers]
+      = q;
+    } else {
+      si->quantizer[i + VPX_SS_MAX_LAYERS - svc_ctx->spatial_layers] = q;
+    }
   }
   if (res == VPX_CODEC_OK && found != svc_ctx->spatial_layers) {
     svc_log(svc_ctx, SVC_LOG_ERROR,
@@ -384,6 +398,7 @@ static vpx_codec_err_t parse_options(SvcContext *svc_ctx, const char *options) {
   char *option_name;
   char *option_value;
   char *input_ptr;
+  int is_keyframe_qaunt_set = 0;
   vpx_codec_err_t res = VPX_CODEC_OK;
 
   if (options == NULL) return VPX_CODEC_OK;
@@ -409,8 +424,17 @@ static vpx_codec_err_t parse_options(SvcContext *svc_ctx, const char *options) {
       res = parse_scale_factors(svc_ctx, option_value);
       if (res != VPX_CODEC_OK) break;
     } else if (strcmp("quantizers", option_name) == 0) {
-      res = parse_quantizer_values(svc_ctx, option_value);
+      res = parse_quantizer_values(svc_ctx, option_value, 0);
       if (res != VPX_CODEC_OK) break;
+      if (!is_keyframe_qaunt_set) {
+        SvcInternal *const si = get_svc_internal(svc_ctx);
+        memcpy(get_svc_internal(svc_ctx)->quantizer_keyframe, si->quantizer,
+               sizeof(si->quantizer));
+      }
+    } else if (strcmp("quantizers-keyframe", option_name) == 0) {
+      res = parse_quantizer_values(svc_ctx, option_value, 1);
+      if (res != VPX_CODEC_OK) break;
+      is_keyframe_qaunt_set = 1;
     } else {
       svc_log(svc_ctx, SVC_LOG_ERROR, "invalid option: %s\n", option_name);
       res = VPX_CODEC_INVALID_PARAM;
@@ -433,13 +457,19 @@ vpx_codec_err_t vpx_svc_set_options(SvcContext *svc_ctx, const char *options) {
 }
 
 vpx_codec_err_t vpx_svc_set_quantizers(SvcContext *svc_ctx,
-                                       const char *quantizers) {
+                                       const char *quantizers,
+                                       const int is_for_keyframe) {
   SvcInternal *const si = get_svc_internal(svc_ctx);
   if (svc_ctx == NULL || quantizers == NULL || si == NULL) {
     return VPX_CODEC_INVALID_PARAM;
   }
-  strncpy(si->quantizers, quantizers, sizeof(si->quantizers));
-  si->quantizers[sizeof(si->quantizers) - 1] = '\0';
+  if (is_for_keyframe) {
+    strncpy(si->quantizers_keyframe, quantizers, sizeof(si->quantizers));
+    si->quantizers_keyframe[sizeof(si->quantizers_keyframe) - 1] = '\0';
+  } else {
+    strncpy(si->quantizers, quantizers, sizeof(si->quantizers));
+    si->quantizers[sizeof(si->quantizers) - 1] = '\0';
+  }
   return VPX_CODEC_OK;
 }
 
@@ -490,8 +520,12 @@ vpx_codec_err_t vpx_svc_init(SvcContext *svc_ctx, vpx_codec_ctx_t *codec_ctx,
   // for first frame
   si->layers = svc_ctx->spatial_layers;
 
-  res = parse_quantizer_values(svc_ctx, si->quantizers);
+  res = parse_quantizer_values(svc_ctx, si->quantizers, 0);
   if (res != VPX_CODEC_OK) return res;
+
+  res = parse_quantizer_values(svc_ctx, si->quantizers_keyframe, 1);
+  if (res != VPX_CODEC_OK)
+    memcpy(si->quantizer_keyframe, si->quantizer, sizeof(si->quantizer));
 
   res = parse_scale_factors(svc_ctx, si->scale_factors);
   if (res != VPX_CODEC_OK) return res;
@@ -713,8 +747,15 @@ static void set_svc_parameters(SvcContext *svc_ctx,
     svc_log(svc_ctx, SVC_LOG_ERROR, "vpx_svc_get_layer_resolution failed\n");
   }
   layer_index = layer + VPX_SS_MAX_LAYERS - si->layers;
-  svc_params.min_quantizer = si->quantizer[layer_index];
-  svc_params.max_quantizer = si->quantizer[layer_index];
+
+  if (vpx_svc_is_keyframe(svc_ctx)) {
+    svc_params.min_quantizer = si->quantizer_keyframe[layer_index];
+    svc_params.max_quantizer = si->quantizer_keyframe[layer_index];
+  } else {
+    svc_params.min_quantizer = si->quantizer[layer_index];
+    svc_params.max_quantizer = si->quantizer[layer_index];
+  }
+
   svc_params.distance_from_i_frame = si->frame_within_gop;
 
   // Use buffer i for layer i LST
