@@ -23,8 +23,8 @@
 
 static TOKENVALUE dct_value_tokens[DCT_MAX_VALUE * 2];
 const TOKENVALUE *vp9_dct_value_tokens_ptr;
-static int dct_value_cost[DCT_MAX_VALUE * 2];
-const int *vp9_dct_value_cost_ptr;
+static int16_t dct_value_cost[DCT_MAX_VALUE * 2];
+const int16_t *vp9_dct_value_cost_ptr;
 
 // Array indices are identical to previously-existing CONTEXT_NODE indices
 const vp9_tree_index vp9_coef_tree[TREE_SIZE(ENTROPY_TOKENS)] = {
