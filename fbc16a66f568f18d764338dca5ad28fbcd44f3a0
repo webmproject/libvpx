@@ -16,6 +16,24 @@
       "revId": "fbc16a66f568f18d764338dca5ad28fbcd44f3a0",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//1qs\u003d",
+        "filename": "test/vp8_decrypt_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-02-25T00:51:23Z",
+      "side": 1,
+      "message": "Restored the offset arg and pointer arithmetic.",
+      "parentUuid": "AAAAdn//1vs\u003d",
+      "revId": "fbc16a66f568f18d764338dca5ad28fbcd44f3a0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
