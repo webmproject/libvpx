@@ -184,8 +184,8 @@ int64_t vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
   MACROBLOCKD *xd = &x->e_mbd;
   MB_MODE_INFO *mbmi = &xd->mi_8x8[0]->mbmi;
   const BLOCK_SIZE block_size = get_plane_block_size(bsize, &xd->plane[0]);
-  MB_PREDICTION_MODE this_mode;
-  MV_REFERENCE_FRAME ref_frame;
+  MB_PREDICTION_MODE this_mode, best_mode = ZEROMV;
+  MV_REFERENCE_FRAME ref_frame, best_ref_frame = LAST_FRAME;
   int_mv frame_mv[MB_MODE_COUNT][MAX_REF_FRAMES];
   struct buf_2d yv12_mb[4][MAX_MB_PLANE];
   static const int flag_list[4] = { 0, VP9_LAST_FLAG, VP9_GOLD_FLAG,
@@ -240,6 +240,8 @@ int64_t vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
     clamp_mv2(&frame_mv[NEARESTMV][ref_frame].as_mv, xd);
     clamp_mv2(&frame_mv[NEARMV][ref_frame].as_mv, xd);
 
+    mbmi->ref_frame[0] = ref_frame;
+
     for (this_mode = NEARESTMV; this_mode <= NEWMV; ++this_mode) {
       int rate = cost[INTER_OFFSET(this_mode)];
       int64_t dist;
@@ -258,14 +260,16 @@ int64_t vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
 
       if (this_rd < best_rd) {
         best_rd = this_rd;
-        mbmi->mode = this_mode;
-        mbmi->ref_frame[0] = ref_frame;
-        mbmi->mv[0].as_int = frame_mv[this_mode][ref_frame].as_int;
-        xd->mi_8x8[0]->bmi[0].as_mv[0].as_int = mbmi->mv[0].as_int;
-        mbmi->uv_mode = this_mode;
+        best_mode = this_mode;
+        best_ref_frame = ref_frame;
       }
     }
   }
+
+  mbmi->mode = best_mode;
+  mbmi->ref_frame[0] = best_ref_frame;
+  mbmi->mv[0].as_int = frame_mv[best_mode][best_ref_frame].as_int;
+  xd->mi_8x8[0]->bmi[0].as_mv[0].as_int = mbmi->mv[0].as_int;
 
   // Perform intra prediction search, if the best SAD is above a certain
   // threshold.
