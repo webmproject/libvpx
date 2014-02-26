@@ -94,7 +94,8 @@ static const uint8_t VP9_VAR_OFFS[64] = {
   128, 128, 128, 128, 128, 128, 128, 128
 };
 
-static unsigned int get_sby_perpixel_variance(VP9_COMP *cpi, MACROBLOCK *x,
+static unsigned int get_sby_perpixel_variance(VP9_COMP *cpi,
+                                              MACROBLOCK *x,
                                               BLOCK_SIZE bs) {
   unsigned int var, sse;
   var = cpi->fn_ptr[bs].vf(x->plane[0].src.buf, x->plane[0].src.stride,
@@ -102,19 +103,49 @@ static unsigned int get_sby_perpixel_variance(VP9_COMP *cpi, MACROBLOCK *x,
   return ROUND_POWER_OF_TWO(var, num_pels_log2_lookup[bs]);
 }
 
-static BLOCK_SIZE get_rd_var_based_fixed_partition(VP9_COMP *cpi) {
-  unsigned int var = get_sby_perpixel_variance(cpi, &cpi->mb, BLOCK_64X64);
-  if (var < 256)
-    return BLOCK_64X64;
-  else
-    return BLOCK_32X32;
+static unsigned int get_sby_perpixel_diff_variance(VP9_COMP *cpi,
+                                                   MACROBLOCK *x,
+                                                   int mi_row,
+                                                   int mi_col,
+                                                   BLOCK_SIZE bs) {
+  const YV12_BUFFER_CONFIG *yv12 = get_ref_frame_buffer(cpi, LAST_FRAME);
+  int offset = (mi_row * MI_SIZE) * yv12->y_stride + (mi_col * MI_SIZE);
+  unsigned int var, sse;
+  var = cpi->fn_ptr[bs].vf(x->plane[0].src.buf,
+                           x->plane[0].src.stride,
+                           yv12->y_buffer + offset,
+                           yv12->y_stride,
+                           &sse);
+  return ROUND_POWER_OF_TWO(var, num_pels_log2_lookup[bs]);
 }
 
-static BLOCK_SIZE get_nonrd_var_based_fixed_partition(VP9_COMP *cpi) {
-  unsigned int var = get_sby_perpixel_variance(cpi, &cpi->mb, BLOCK_64X64);
-  if (var < 1024)
+static BLOCK_SIZE get_rd_var_based_fixed_partition(VP9_COMP *cpi,
+                                                   int mi_row,
+                                                   int mi_col) {
+  unsigned int var = get_sby_perpixel_diff_variance(cpi, &cpi->mb,
+                                                    mi_row, mi_col,
+                                                    BLOCK_64X64);
+  if (var < 8)
+    return BLOCK_64X64;
+  else if (var < 128)
     return BLOCK_32X32;
-  else if (var < 4096)
+  else if (var < 2048)
+    return BLOCK_16X16;
+  else
+    return BLOCK_8X8;
+}
+
+static BLOCK_SIZE get_nonrd_var_based_fixed_partition(VP9_COMP *cpi,
+                                                      int mi_row,
+                                                      int mi_col) {
+  unsigned int var = get_sby_perpixel_diff_variance(cpi, &cpi->mb,
+                                                    mi_row, mi_col,
+                                                    BLOCK_64X64);
+  if (var < 8)
+    return BLOCK_64X64;
+  else if (var < 64)
+    return BLOCK_32X32;
+  else if (var < 2048)
     return BLOCK_16X16;
   else
     return BLOCK_8X8;
@@ -1262,7 +1293,8 @@ static void rd_use_partition(VP9_COMP *cpi,
     x->mb_energy = vp9_block_energy(cpi, x, bsize);
   }
 
-  if (cpi->sf.adjust_partitioning_from_last_frame) {
+  if (cpi->sf.partition_search_type == SEARCH_PARTITION &&
+      cpi->sf.adjust_partitioning_from_last_frame) {
     // Check if any of the sub blocks are further split.
     if (partition == PARTITION_SPLIT && subsize > BLOCK_8X8) {
       sub_subsize = get_subsize(subsize, PARTITION_SPLIT);
@@ -1387,6 +1419,7 @@ static void rd_use_partition(VP9_COMP *cpi,
     last_part_rate += x->partition_cost[pl][partition];
 
   if (cpi->sf.adjust_partitioning_from_last_frame
+      && cpi->sf.partition_search_type == SEARCH_PARTITION
       && partition != PARTITION_SPLIT && bsize > BLOCK_8X8
       && (mi_row + ms < cm->mi_rows || mi_row + (ms >> 1) == cm->mi_rows)
       && (mi_col + ms < cm->mi_cols || mi_col + (ms >> 1) == cm->mi_cols)) {
@@ -1986,7 +2019,7 @@ static void encode_rd_sb_row(VP9_COMP *cpi, const TileInfo *const tile,
         // map to the same thing.
         BLOCK_SIZE bsize;
         set_offsets(cpi, tile, mi_row, mi_col, BLOCK_64X64);
-        bsize = get_rd_var_based_fixed_partition(cpi);
+        bsize = get_rd_var_based_fixed_partition(cpi, mi_row, mi_col);
         set_partitioning(cpi, tile, mi_8x8, mi_row, mi_col, bsize);
         rd_use_partition(cpi, tile, mi_8x8, tp, mi_row, mi_col, BLOCK_64X64,
                          &dummy_rate, &dummy_dist, 1);
@@ -2368,7 +2401,9 @@ static void encode_nonrd_sb_row(VP9_COMP *cpi, const TileInfo *const tile,
       // TODO(debargha): Implement VAR_BASED_PARTITION as a separate case.
       // Currently both VAR_BASED_FIXED_PARTITION/VAR_BASED_PARTITION
       // map to the same thing.
-      BLOCK_SIZE bsize = get_nonrd_var_based_fixed_partition(cpi);
+      BLOCK_SIZE bsize = get_nonrd_var_based_fixed_partition(cpi,
+                                                             mi_row,
+                                                             mi_col);
       nonrd_use_partition(cpi, tile, mi_8x8, tp, mi_row, mi_col,
                           bsize, &dummy_rate, &dummy_dist, 1);
     } else {
