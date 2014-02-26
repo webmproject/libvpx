@@ -1281,7 +1281,7 @@ static int64_t rd_pick_intra_sby_mode(VP9_COMP *cpi, MACROBLOCK *x,
   return best_rd;
 }
 
-static void super_block_uvrd(VP9_COMP *const cpi, MACROBLOCK *x,
+static void super_block_uvrd(MACROBLOCK *x,
                              int *rate, int64_t *distortion, int *skippable,
                              int64_t *sse, BLOCK_SIZE bsize,
                              int64_t ref_best_rd) {
@@ -1331,6 +1331,7 @@ static int64_t rd_pick_intra_sbuv_mode(VP9_COMP *cpi, MACROBLOCK *x,
                                        int *rate, int *rate_tokenonly,
                                        int64_t *distortion, int *skippable,
                                        BLOCK_SIZE bsize, TX_SIZE max_tx_size) {
+  MACROBLOCKD *xd = &x->e_mbd;
   MB_PREDICTION_MODE mode;
   MB_PREDICTION_MODE mode_selected = DC_PRED;
   int64_t best_rd = INT64_MAX, this_rd;
@@ -1341,9 +1342,9 @@ static int64_t rd_pick_intra_sbuv_mode(VP9_COMP *cpi, MACROBLOCK *x,
     if (!(cpi->sf.intra_uv_mode_mask[max_tx_size] & (1 << mode)))
       continue;
 
-    x->e_mbd.mi_8x8[0]->mbmi.uv_mode = mode;
+    xd->mi_8x8[0]->mbmi.uv_mode = mode;
 
-    super_block_uvrd(cpi, x, &this_rate_tokenonly,
+    super_block_uvrd(x, &this_rate_tokenonly,
                      &this_distortion, &s, &this_sse, bsize, best_rd);
     if (this_rate_tokenonly == INT_MAX)
       continue;
@@ -1361,7 +1362,7 @@ static int64_t rd_pick_intra_sbuv_mode(VP9_COMP *cpi, MACROBLOCK *x,
       if (!x->select_txfm_size) {
         int i;
         struct macroblock_plane *const p = x->plane;
-        struct macroblockd_plane *const pd = x->e_mbd.plane;
+        struct macroblockd_plane *const pd = xd->plane;
         for (i = 1; i < MAX_MB_PLANE; ++i) {
           p[i].coeff    = ctx->coeff_pbuf[i][2];
           p[i].qcoeff   = ctx->qcoeff_pbuf[i][2];
@@ -1382,25 +1383,21 @@ static int64_t rd_pick_intra_sbuv_mode(VP9_COMP *cpi, MACROBLOCK *x,
     }
   }
 
-  x->e_mbd.mi_8x8[0]->mbmi.uv_mode = mode_selected;
+  xd->mi_8x8[0]->mbmi.uv_mode = mode_selected;
   return best_rd;
 }
 
-static int64_t rd_sbuv_dcpred(VP9_COMP *cpi, MACROBLOCK *x,
+static int64_t rd_sbuv_dcpred(const VP9_COMMON *cm, MACROBLOCK *x,
                               int *rate, int *rate_tokenonly,
                               int64_t *distortion, int *skippable,
                               BLOCK_SIZE bsize) {
-  int64_t this_rd;
-  int64_t this_sse;
+  int64_t unused;
 
   x->e_mbd.mi_8x8[0]->mbmi.uv_mode = DC_PRED;
-  super_block_uvrd(cpi, x, rate_tokenonly, distortion,
-                   skippable, &this_sse, bsize, INT64_MAX);
-  *rate = *rate_tokenonly +
-          x->intra_uv_mode_cost[cpi->common.frame_type][DC_PRED];
-  this_rd = RDCOST(x->rdmult, x->rddiv, *rate, *distortion);
-
-  return this_rd;
+  super_block_uvrd(x, rate_tokenonly, distortion,
+                   skippable, &unused, bsize, INT64_MAX);
+  *rate = *rate_tokenonly + x->intra_uv_mode_cost[cm->frame_type][DC_PRED];
+  return RDCOST(x->rdmult, x->rddiv, *rate, *distortion);
 }
 
 static void choose_intra_uv_mode(VP9_COMP *cpi, PICK_MODE_CONTEXT *ctx,
@@ -1413,8 +1410,8 @@ static void choose_intra_uv_mode(VP9_COMP *cpi, PICK_MODE_CONTEXT *ctx,
   // Use an estimated rd for uv_intra based on DC_PRED if the
   // appropriate speed flag is set.
   if (cpi->sf.use_uv_intra_rd_estimate) {
-    rd_sbuv_dcpred(cpi, x, rate_uv, rate_uv_tokenonly, dist_uv, skip_uv,
-                   bsize < BLOCK_8X8 ? BLOCK_8X8 : bsize);
+    rd_sbuv_dcpred(&cpi->common, x, rate_uv, rate_uv_tokenonly, dist_uv,
+                   skip_uv, bsize < BLOCK_8X8 ? BLOCK_8X8 : bsize);
   // Else do a proper rd search for each possible transform size that may
   // be considered in the main rd loop.
   } else {
@@ -1428,8 +1425,7 @@ static void choose_intra_uv_mode(VP9_COMP *cpi, PICK_MODE_CONTEXT *ctx,
 static int cost_mv_ref(VP9_COMP *cpi, MB_PREDICTION_MODE mode,
                        int mode_context) {
   MACROBLOCK *const x = &cpi->mb;
-  MACROBLOCKD *const xd = &x->e_mbd;
-  const int segment_id = xd->mi_8x8[0]->mbmi.segment_id;
+  const int segment_id = x->e_mbd.mi_8x8[0]->mbmi.segment_id;
 
   // Don't account for mode here if segment skip is enabled.
   if (!vp9_segfeature_active(&cpi->common.seg, segment_id, SEG_LVL_SKIP)) {
@@ -1454,7 +1450,7 @@ static void joint_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
                                 int *rate_mv);
 
 static int labels2mode(MACROBLOCK *x, int i,
-                       MB_PREDICTION_MODE this_mode,
+                       MB_PREDICTION_MODE mode,
                        int_mv *this_mv, int_mv *this_second_mv,
                        int_mv frame_mv[MB_MODE_COUNT][MAX_REF_FRAMES],
                        int_mv seg_mvs[MAX_REF_FRAMES],
@@ -1464,23 +1460,18 @@ static int labels2mode(MACROBLOCK *x, int i,
   MACROBLOCKD *const xd = &x->e_mbd;
   MODE_INFO *const mic = xd->mi_8x8[0];
   MB_MODE_INFO *mbmi = &mic->mbmi;
-  int cost = 0, thismvcost = 0;
+  int thismvcost = 0;
   int idx, idy;
   const int num_4x4_blocks_wide = num_4x4_blocks_wide_lookup[mbmi->sb_type];
   const int num_4x4_blocks_high = num_4x4_blocks_high_lookup[mbmi->sb_type];
   const int has_second_rf = has_second_ref(mbmi);
 
-  /* We have to be careful retrieving previously-encoded motion vectors.
-   Ones from this macroblock have to be pulled from the BLOCKD array
-   as they have not yet made it to the bmi array in our MB_MODE_INFO. */
-  MB_PREDICTION_MODE m;
-
   // the only time we should do costing for new motion vector or mode
   // is when we are on a new label  (jbb May 08, 2007)
-  switch (m = this_mode) {
+  switch (mode) {
     case NEWMV:
       this_mv->as_int = seg_mvs[mbmi->ref_frame[0]].as_int;
-      thismvcost  = vp9_mv_bit_cost(&this_mv->as_mv, &best_ref_mv->as_mv,
+      thismvcost += vp9_mv_bit_cost(&this_mv->as_mv, &best_ref_mv->as_mv,
                                     mvjcost, mvcost, MV_COST_WEIGHT_SUB);
       if (has_second_rf) {
         this_second_mv->as_int = seg_mvs[mbmi->ref_frame[1]].as_int;
@@ -1492,14 +1483,12 @@ static int labels2mode(MACROBLOCK *x, int i,
     case NEARESTMV:
       this_mv->as_int = frame_mv[NEARESTMV][mbmi->ref_frame[0]].as_int;
       if (has_second_rf)
-        this_second_mv->as_int =
-            frame_mv[NEARESTMV][mbmi->ref_frame[1]].as_int;
+        this_second_mv->as_int = frame_mv[NEARESTMV][mbmi->ref_frame[1]].as_int;
       break;
     case NEARMV:
       this_mv->as_int = frame_mv[NEARMV][mbmi->ref_frame[0]].as_int;
       if (has_second_rf)
-        this_second_mv->as_int =
-            frame_mv[NEARMV][mbmi->ref_frame[1]].as_int;
+        this_second_mv->as_int = frame_mv[NEARMV][mbmi->ref_frame[1]].as_int;
       break;
     case ZEROMV:
       this_mv->as_int = 0;
@@ -1510,22 +1499,19 @@ static int labels2mode(MACROBLOCK *x, int i,
       break;
   }
 
-  cost = cost_mv_ref(cpi, this_mode,
-                     mbmi->mode_context[mbmi->ref_frame[0]]);
-
   mic->bmi[i].as_mv[0].as_int = this_mv->as_int;
   if (has_second_rf)
     mic->bmi[i].as_mv[1].as_int = this_second_mv->as_int;
 
-  mic->bmi[i].as_mode = m;
+  mic->bmi[i].as_mode = mode;
 
   for (idy = 0; idy < num_4x4_blocks_high; ++idy)
     for (idx = 0; idx < num_4x4_blocks_wide; ++idx)
       vpx_memcpy(&mic->bmi[i + idy * 2 + idx],
                  &mic->bmi[i], sizeof(mic->bmi[i]));
 
-  cost += thismvcost;
-  return cost;
+  return cost_mv_ref(cpi, mode, mbmi->mode_context[mbmi->ref_frame[0]]) +
+            thismvcost;
 }
 
 static int64_t encode_inter_mb_segment(VP9_COMP *cpi,
@@ -3024,7 +3010,7 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
     rdcosty = RDCOST(x->rdmult, x->rddiv, *rate2, *distortion);
     rdcosty = MIN(rdcosty, RDCOST(x->rdmult, x->rddiv, 0, *psse));
 
-    super_block_uvrd(cpi, x, rate_uv, distortion_uv, &skippable_uv, &sseuv,
+    super_block_uvrd(x, rate_uv, distortion_uv, &skippable_uv, &sseuv,
                      bsize, ref_best_rd - rdcosty);
     if (*rate_uv == INT_MAX) {
       *rate2 = INT_MAX;
@@ -4151,7 +4137,7 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
         // then dont bother looking at UV
         vp9_build_inter_predictors_sbuv(&x->e_mbd, mi_row, mi_col,
                                         BLOCK_8X8);
-        super_block_uvrd(cpi, x, &rate_uv, &distortion_uv, &uv_skippable,
+        super_block_uvrd(x, &rate_uv, &distortion_uv, &uv_skippable,
                          &uv_sse, BLOCK_8X8, tmp_best_rdu);
         if (rate_uv == INT_MAX)
           continue;
