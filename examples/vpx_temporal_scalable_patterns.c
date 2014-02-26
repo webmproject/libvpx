@@ -52,6 +52,12 @@ struct RateControlMetrics {
   double layer_encoding_bitrate[VPX_TS_MAX_LAYERS];
 };
 
+// Note: these rate control metrics assume only 1 key frame in the
+// sequence (i.e., first frame only). So for temporal pattern# 7
+// (which has key frame for every frame on base layer), the metrics
+// computation will be off/wrong.
+// TODO(marpan): Update these metrics to account for multiple key frames
+// in the stream.
 static void set_rate_control_metrics(struct RateControlMetrics *rc,
                                      vpx_codec_enc_cfg_t *cfg) {
   unsigned int i = 0;
@@ -565,6 +571,9 @@ int main(int argc, char **argv) {
   }
   vpx_codec_control(&codec, VP8E_SET_STATIC_THRESHOLD, 1);
   vpx_codec_control(&codec, VP8E_SET_TOKEN_PARTITIONS, 1);
+  // This controls the maximum target size of the key frame.
+  // For generating smaller key frames, use a smaller max_intra_size_pct
+  // value, like 100 or 200.
   max_intra_size_pct = (int) (((double)cfg.rc_buf_optimal_sz * 0.5)
       * ((double) cfg.g_timebase.den / cfg.g_timebase.num) / 10.0);
   vpx_codec_control(&codec, VP8E_SET_MAX_INTRA_BITRATE_PCT, max_intra_size_pct);
