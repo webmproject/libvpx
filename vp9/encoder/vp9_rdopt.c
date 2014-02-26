@@ -36,6 +36,7 @@
 #include "./vp9_rtcd.h"
 #include "vp9/common/vp9_mvref_common.h"
 #include "vp9/common/vp9_common.h"
+#include "vp9/common/vp9_idct.h"
 
 /* Factor to weigh the rate for switchable interp filters */
 #define SWITCHABLE_INTERP_RATE_FACTOR 1
@@ -1014,10 +1015,9 @@ static int64_t rd_pick_intra4x4block(VP9_COMP *cpi, MACROBLOCK *x, int ib,
                                      int64_t *bestdistortion,
                                      BLOCK_SIZE bsize, int64_t rd_thresh) {
   MB_PREDICTION_MODE mode;
-  MACROBLOCKD *xd = &x->e_mbd;
+  MACROBLOCKD *const xd = &x->e_mbd;
   int64_t best_rd = rd_thresh;
-  int rate = 0;
-  int64_t distortion;
+
   struct macroblock_plane *p = &x->plane[0];
   struct macroblockd_plane *pd = &xd->plane[0];
   const int src_stride = p->src.stride;
@@ -1026,8 +1026,6 @@ static int64_t rd_pick_intra4x4block(VP9_COMP *cpi, MACROBLOCK *x, int ib,
                                                             src_stride)];
   uint8_t *dst_init = &pd->dst.buf[raster_block_offset(BLOCK_8X8, ib,
                                                        dst_stride)];
-  int16_t *src_diff, *coeff;
-
   ENTROPY_CONTEXT ta[2], tempa[2];
   ENTROPY_CONTEXT tl[2], templ[2];
 
@@ -1045,6 +1043,8 @@ static int64_t rd_pick_intra4x4block(VP9_COMP *cpi, MACROBLOCK *x, int ib,
   for (mode = DC_PRED; mode <= TM_PRED; ++mode) {
     int64_t this_rd;
     int ratey = 0;
+    int64_t distortion = 0;
+    int rate = bmode_costs[mode];
 
     if (!(cpi->sf.intra_y_mode_mask[TX_4X4] & (1 << mode)))
       continue;
@@ -1056,55 +1056,50 @@ static int64_t rd_pick_intra4x4block(VP9_COMP *cpi, MACROBLOCK *x, int ib,
           continue;
     }
 
-    rate = bmode_costs[mode];
-    distortion = 0;
-
     vpx_memcpy(tempa, ta, sizeof(ta));
     vpx_memcpy(templ, tl, sizeof(tl));
 
     for (idy = 0; idy < num_4x4_blocks_high; ++idy) {
       for (idx = 0; idx < num_4x4_blocks_wide; ++idx) {
-        int64_t ssz;
-        const scan_order *so;
-        const uint8_t *src = src_init + idx * 4 + idy * 4 * src_stride;
-        uint8_t *dst = dst_init + idx * 4 + idy * 4 * dst_stride;
         const int block = ib + idy * 2 + idx;
-        TX_TYPE tx_type;
+        const uint8_t *const src = &src_init[idx * 4 + idy * 4 * src_stride];
+        uint8_t *const dst = &dst_init[idx * 4 + idy * 4 * dst_stride];
+        int16_t *const src_diff = raster_block_offset_int16(BLOCK_8X8, block,
+                                                            p->src_diff);
+        int16_t *const coeff = BLOCK_OFFSET(x->plane[0].coeff, block);
         xd->mi_8x8[0]->bmi[block].as_mode = mode;
-        src_diff = raster_block_offset_int16(BLOCK_8X8, block, p->src_diff);
-        coeff = BLOCK_OFFSET(x->plane[0].coeff, block);
         vp9_predict_intra_block(xd, block, 1,
                                 TX_4X4, mode,
                                 x->skip_encode ? src : dst,
                                 x->skip_encode ? src_stride : dst_stride,
                                 dst, dst_stride, idx, idy, 0);
-        vp9_subtract_block(4, 4, src_diff, 8,
-                           src, src_stride,
-                           dst, dst_stride);
+        vp9_subtract_block(4, 4, src_diff, 8, src, src_stride, dst, dst_stride);
 
-        tx_type = get_tx_type_4x4(PLANE_TYPE_Y, xd, block);
-        so = &vp9_scan_orders[TX_4X4][tx_type];
-
-        if (tx_type != DCT_DCT)
+        if (xd->lossless) {
+          const scan_order *so = &vp9_default_scan_orders[TX_4X4];
+          vp9_fwht4x4(src_diff, coeff, 8);
+          vp9_regular_quantize_b_4x4(x, 0, block, so->scan, so->iscan);
+          ratey += cost_coeffs(x, 0, block, tempa + idx, templ + idy, TX_4X4,
+                               so->scan, so->neighbors);
+          if (RDCOST(x->rdmult, x->rddiv, ratey, distortion) >= best_rd)
+            goto next;
+          vp9_iwht4x4_add(BLOCK_OFFSET(pd->dqcoeff, block), dst, dst_stride,
+                          p->eobs[block]);
+        } else {
+          int64_t unused;
+          const TX_TYPE tx_type = get_tx_type_4x4(PLANE_TYPE_Y, xd, block);
+          const scan_order *so = &vp9_scan_orders[TX_4X4][tx_type];
           vp9_fht4x4(src_diff, coeff, 8, tx_type);
-        else
-          x->fwd_txm4x4(src_diff, coeff, 8);
-
-        vp9_regular_quantize_b_4x4(x, 0, block, so->scan, so->iscan);
-
-        ratey += cost_coeffs(x, 0, block, tempa + idx, templ + idy, TX_4X4,
-                             so->scan, so->neighbors);
-        distortion += vp9_block_error(coeff, BLOCK_OFFSET(pd->dqcoeff, block),
-                                      16, &ssz) >> 2;
-        if (RDCOST(x->rdmult, x->rddiv, ratey, distortion) >= best_rd)
-          goto next;
-
-        if (tx_type != DCT_DCT)
-          vp9_iht4x4_16_add(BLOCK_OFFSET(pd->dqcoeff, block),
-                               dst, pd->dst.stride, tx_type);
-        else
-          xd->itxm_add(BLOCK_OFFSET(pd->dqcoeff, block), dst, pd->dst.stride,
-                       16);
+          vp9_regular_quantize_b_4x4(x, 0, block, so->scan, so->iscan);
+          ratey += cost_coeffs(x, 0, block, tempa + idx, templ + idy, TX_4X4,
+                               so->scan, so->neighbors);
+          distortion += vp9_block_error(coeff, BLOCK_OFFSET(pd->dqcoeff, block),
+                                        16, &unused) >> 2;
+          if (RDCOST(x->rdmult, x->rddiv, ratey, distortion) >= best_rd)
+            goto next;
+          vp9_iht4x4_add(tx_type, BLOCK_OFFSET(pd->dqcoeff, block),
+                         dst, dst_stride, p->eobs[block]);
+        }
       }
     }
 
