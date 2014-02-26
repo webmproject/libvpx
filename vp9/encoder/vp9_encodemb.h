@@ -21,7 +21,7 @@ extern "C" {
 #endif
 
 void vp9_encode_sb(MACROBLOCK *x, BLOCK_SIZE bsize);
-void vp9_encode_sby(MACROBLOCK *x, BLOCK_SIZE bsize);
+void vp9_encode_sby_pass1(MACROBLOCK *x, BLOCK_SIZE bsize);
 
 void vp9_xform_quant(MACROBLOCK *x, int plane, int block,
                      BLOCK_SIZE plane_bsize, TX_SIZE tx_size);
