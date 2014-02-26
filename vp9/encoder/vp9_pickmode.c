@@ -183,6 +183,8 @@ int64_t vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
                             BLOCK_SIZE bsize) {
   MACROBLOCKD *xd = &x->e_mbd;
   MB_MODE_INFO *mbmi = &xd->mi_8x8[0]->mbmi;
+  struct macroblock_plane *const p = &x->plane[0];
+  struct macroblockd_plane *const pd = &xd->plane[0];
   const BLOCK_SIZE block_size = get_plane_block_size(bsize, &xd->plane[0]);
   MB_PREDICTION_MODE this_mode, best_mode = ZEROMV;
   MV_REFERENCE_FRAME ref_frame, best_ref_frame = LAST_FRAME;
@@ -255,7 +257,14 @@ int64_t vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
           continue;
       }
 
-      dist = x->mode_sad[ref_frame][INTER_OFFSET(this_mode)];
+      mbmi->mode = this_mode;
+      mbmi->mv[0].as_int = frame_mv[this_mode][ref_frame].as_int;
+
+      vp9_build_inter_predictors_sby(xd, mi_row, mi_col, bsize);
+
+      dist = cpi->fn_ptr[bsize].sdf(p->src.buf, p->src.stride,
+                                    pd->dst.buf, pd->dst.stride, INT_MAX);
+
       this_rd = rate + dist;
 
       if (this_rd < best_rd) {
@@ -274,8 +283,6 @@ int64_t vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
   // Perform intra prediction search, if the best SAD is above a certain
   // threshold.
   if (best_rd > inter_mode_thresh) {
-    struct macroblock_plane *const p = &x->plane[0];
-    struct macroblockd_plane *const pd = &xd->plane[0];
     for (this_mode = DC_PRED; this_mode <= DC_PRED; ++this_mode) {
       vp9_predict_intra_block(xd, 0, b_width_log2(bsize),
                               mbmi->tx_size, this_mode,
