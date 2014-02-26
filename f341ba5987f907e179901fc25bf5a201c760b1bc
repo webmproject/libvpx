@@ -72,6 +72,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//1fg\u003d",
+        "filename": "examples/simple_encoder.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 99,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-02-26T00:14:49Z",
+      "side": 1,
+      "message": "That\u0027s the line of text I want the usage to output:\n\n    \"Usage: %s \u003ccodec\u003e \u003cwidth\u003e \u003cheight\u003e \u003cinfile\u003e \u003coutfile\u003e \"\n     \"[\u003cerror-resilient\u003e]\\nSee comments in simple_encoder.c for more information.\\n\"",
+      "parentUuid": "AAAAdn//1gE\u003d",
+      "revId": "f341ba5987f907e179901fc25bf5a201c760b1bc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//1iY\u003d",
         "filename": "examples/simple_encoder.c",
         "patchSetId": 1
