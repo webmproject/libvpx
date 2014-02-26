@@ -382,34 +382,34 @@ static void build_intra_predictors(const MACROBLOCKD *xd, const uint8_t *ref,
       /* slower path if the block needs border extension */
       if (x0 + 2 * bs <= frame_width) {
         if (right_available && bs == 4) {
-          vpx_memcpy(above_row - 1, above_ref - 1, 2 * bs + 1);
+          vpx_memcpy(above_row, above_ref, 2 * bs);
         } else {
-          vpx_memcpy(above_row - 1, above_ref - 1, bs + 1);
+          vpx_memcpy(above_row, above_ref, bs);
           vpx_memset(above_row + bs, above_row[bs - 1], bs);
         }
       } else if (x0 + bs <= frame_width) {
         const int r = frame_width - x0;
         if (right_available && bs == 4) {
-          vpx_memcpy(above_row - 1, above_ref - 1, r + 1);
+          vpx_memcpy(above_row, above_ref, r);
           vpx_memset(above_row + r, above_row[r - 1],
                      x0 + 2 * bs - frame_width);
         } else {
-          vpx_memcpy(above_row - 1, above_ref - 1, bs + 1);
+          vpx_memcpy(above_row, above_ref, bs);
           vpx_memset(above_row + bs, above_row[bs - 1], bs);
         }
       } else if (x0 <= frame_width) {
         const int r = frame_width - x0;
         if (right_available && bs == 4) {
-          vpx_memcpy(above_row - 1, above_ref - 1, r + 1);
+          vpx_memcpy(above_row, above_ref, r);
           vpx_memset(above_row + r, above_row[r - 1],
                      x0 + 2 * bs - frame_width);
         } else {
-          vpx_memcpy(above_row - 1, above_ref - 1, r + 1);
+          vpx_memcpy(above_row, above_ref, r);
           vpx_memset(above_row + r, above_row[r - 1],
                      x0 + 2 * bs - frame_width);
         }
-        above_row[-1] = left_available ? above_ref[-1] : 129;
       }
+      above_row[-1] = left_available ? above_ref[-1] : 129;
     } else {
       /* faster path if the block does not need extension */
       if (bs == 4 && right_available && left_available) {
