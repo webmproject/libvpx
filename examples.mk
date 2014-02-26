@@ -132,10 +132,6 @@ EXAMPLES-$(CONFIG_ERROR_CONCEALMENT)    += decode_with_partial_drops.c
 endif
 decode_with_partial_drops.GUID           = 61C2D026-5754-46AC-916F-1343ECC5537E
 decode_with_partial_drops.DESCRIPTION    = Drops parts of frames while decoding
-EXAMPLES-$(CONFIG_VP8_ENCODER)  += error_resilient.c
-error_resilient.GUID             = DF5837B9-4145-4F92-A031-44E4F832E00C
-error_resilient.DESCRIPTION      = Error Resiliency Feature
-
 EXAMPLES-$(CONFIG_VP8_ENCODER)     += vp8_set_maps.c
 vp8_set_maps.SRCS                  += ivfenc.h ivfenc.c
 vp8_set_maps.SRCS                  += tools_common.h tools_common.c
