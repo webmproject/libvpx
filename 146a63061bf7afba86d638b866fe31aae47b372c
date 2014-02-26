@@ -1,0 +1,327 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//1Kg\u003d",
+        "filename": "vp9/encoder/x86/vp9_subpel_variance_impl_intrin_avx2.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2014-02-26T23:22:28Z",
+      "side": 1,
+      "message": "Please remove vp9_ \nIt is only needed if it is global.",
+      "revId": "146a63061bf7afba86d638b866fe31aae47b372c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//1KE\u003d",
+        "filename": "vp9/encoder/x86/vp9_subpel_variance_impl_intrin_avx2.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2014-02-26T23:22:28Z",
+      "side": 1,
+      "message": "These part should not be a macro.",
+      "revId": "146a63061bf7afba86d638b866fe31aae47b372c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//1J4\u003d",
+        "filename": "vp9/encoder/x86/vp9_subpel_variance_impl_intrin_avx2.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 61,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2014-02-26T23:22:28Z",
+      "side": 1,
+      "message": "I think it is better to leave if () condition in the function.",
+      "revId": "146a63061bf7afba86d638b866fe31aae47b372c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//1Js\u003d",
+        "filename": "vp9/encoder/x86/vp9_subpel_variance_impl_intrin_avx2.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 62,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2014-02-26T23:22:28Z",
+      "side": 1,
+      "message": "It doesn\u0027t look right to include half of for-loop in a macro. This part doesn\u0027t have to be a macro.",
+      "revId": "146a63061bf7afba86d638b866fe31aae47b372c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//1Jo\u003d",
+        "filename": "vp9/encoder/x86/vp9_subpel_variance_impl_intrin_avx2.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2014-02-26T23:22:28Z",
+      "side": 1,
+      "message": "Similarly, not include half of if-else in a macro.",
+      "revId": "146a63061bf7afba86d638b866fe31aae47b372c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//1Jk\u003d",
+        "filename": "vp9/encoder/x86/vp9_subpel_variance_impl_intrin_avx2.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 82,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2014-02-26T23:22:28Z",
+      "side": 1,
+      "message": "same as above",
+      "revId": "146a63061bf7afba86d638b866fe31aae47b372c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//1Jg\u003d",
+        "filename": "vp9/encoder/x86/vp9_subpel_variance_impl_intrin_avx2.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 114,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2014-02-26T23:22:28Z",
+      "side": 1,
+      "message": "same as above",
+      "revId": "146a63061bf7afba86d638b866fe31aae47b372c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//1Jc\u003d",
+        "filename": "vp9/encoder/x86/vp9_subpel_variance_impl_intrin_avx2.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 128,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2014-02-26T23:22:28Z",
+      "side": 1,
+      "message": "same as above",
+      "revId": "146a63061bf7afba86d638b866fe31aae47b372c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//1JY\u003d",
+        "filename": "vp9/encoder/x86/vp9_subpel_variance_impl_intrin_avx2.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 150,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2014-02-26T23:22:28Z",
+      "side": 1,
+      "message": "same as above",
+      "revId": "146a63061bf7afba86d638b866fe31aae47b372c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//1JU\u003d",
+        "filename": "vp9/encoder/x86/vp9_subpel_variance_impl_intrin_avx2.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 190,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2014-02-26T23:22:28Z",
+      "side": 1,
+      "message": "same as above",
+      "revId": "146a63061bf7afba86d638b866fe31aae47b372c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//1JQ\u003d",
+        "filename": "vp9/encoder/x86/vp9_subpel_variance_impl_intrin_avx2.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 223,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2014-02-26T23:22:28Z",
+      "side": 1,
+      "message": "same as above",
+      "revId": "146a63061bf7afba86d638b866fe31aae47b372c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//1JM\u003d",
+        "filename": "vp9/encoder/x86/vp9_subpel_variance_impl_intrin_avx2.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 286,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2014-02-26T23:22:28Z",
+      "side": 1,
+      "message": "same as above",
+      "revId": "146a63061bf7afba86d638b866fe31aae47b372c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//1JI\u003d",
+        "filename": "vp9/encoder/x86/vp9_subpel_variance_impl_intrin_avx2.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 376,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2014-02-26T23:22:28Z",
+      "side": 1,
+      "message": "} should not be in the macro.\n\nsrc+\u003d src_stride; \\\ndst+\u003d dst_stride; \\\n\ncan also be left in the function.",
+      "revId": "146a63061bf7afba86d638b866fe31aae47b372c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//1JE\u003d",
+        "filename": "vp9/encoder/x86/vp9_subpel_variance_impl_intrin_avx2.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 379,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2014-02-26T23:22:28Z",
+      "side": 1,
+      "message": "Don\u0027t do this.",
+      "revId": "146a63061bf7afba86d638b866fe31aae47b372c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//1JA\u003d",
+        "filename": "vp9/encoder/x86/vp9_subpel_variance_impl_intrin_avx2.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 382,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2014-02-26T23:22:28Z",
+      "side": 1,
+      "message": "same as above",
+      "revId": "146a63061bf7afba86d638b866fe31aae47b372c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//1I4\u003d",
+        "filename": "vp9/encoder/x86/vp9_subpel_variance_impl_intrin_avx2.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 387,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2014-02-26T23:22:28Z",
+      "side": 1,
+      "message": "Please move the comments out of the macro if you could. If some comments have to be kept in macro, make them short. We may have to ignore the style warnings for those.",
+      "revId": "146a63061bf7afba86d638b866fe31aae47b372c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//1I8\u003d",
+        "filename": "vp9/encoder/x86/vp9_subpel_variance_impl_intrin_avx2.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 414,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2014-02-26T23:22:28Z",
+      "side": 1,
+      "message": "Leave\nreturn sum;\nin the function.",
+      "revId": "146a63061bf7afba86d638b866fe31aae47b372c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//1KY\u003d",
+        "filename": "vp9/encoder/x86/vp9_variance_avx2.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 248,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2014-02-26T23:22:28Z",
+      "side": 1,
+      "message": "Wrong parentheses. Refer to non-avg functions.",
+      "revId": "146a63061bf7afba86d638b866fe31aae47b372c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//1KQ\u003d",
+        "filename": "vp9/encoder/x86/vp9_variance_avx2.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 265,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2014-02-26T23:22:28Z",
+      "side": 1,
+      "message": "Same as above",
+      "revId": "146a63061bf7afba86d638b866fe31aae47b372c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
