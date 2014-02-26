@@ -193,6 +193,16 @@ INSTANTIATE_TEST_CASE_P(
         make_tuple(8, 8, sixtap_8x8_c),
         make_tuple(8, 4, sixtap_8x4_c),
         make_tuple(4, 4, sixtap_4x4_c)));
+#if HAVE_NEON
+const sixtap_predict_fn_t sixtap_16x16_neon = vp8_sixtap_predict16x16_neon;
+const sixtap_predict_fn_t sixtap_8x8_neon = vp8_sixtap_predict8x8_neon;
+const sixtap_predict_fn_t sixtap_8x4_neon = vp8_sixtap_predict8x4_neon;
+INSTANTIATE_TEST_CASE_P(
+    NEON, SixtapPredictTest, ::testing::Values(
+        make_tuple(16, 16, sixtap_16x16_neon),
+        make_tuple(8, 8, sixtap_8x8_neon),
+        make_tuple(8, 4, sixtap_8x4_neon)));
+#endif
 #if HAVE_MMX
 const sixtap_predict_fn_t sixtap_16x16_mmx = vp8_sixtap_predict16x16_mmx;
 const sixtap_predict_fn_t sixtap_8x8_mmx = vp8_sixtap_predict8x8_mmx;
