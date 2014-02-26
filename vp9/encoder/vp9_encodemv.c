@@ -224,18 +224,11 @@ void vp9_encode_mv(VP9_COMP* cpi, vp9_writer* w,
   }
 }
 
-void vp9_build_nmv_cost_table(int *mvjoint,
-                              int *mvcost[2],
-                              const nmv_context* const mvctx,
-                              int usehp,
-                              int mvc_flag_v,
-                              int mvc_flag_h) {
-  vp9_clear_system_state();
-  vp9_cost_tokens(mvjoint, mvctx->joints, vp9_mv_joint_tree);
-  if (mvc_flag_v)
-    build_nmv_component_cost_table(mvcost[0], &mvctx->comps[0], usehp);
-  if (mvc_flag_h)
-    build_nmv_component_cost_table(mvcost[1], &mvctx->comps[1], usehp);
+void vp9_build_nmv_cost_table(int *mvjoint, int *mvcost[2],
+                              const nmv_context* ctx, int usehp) {
+  vp9_cost_tokens(mvjoint, ctx->joints, vp9_mv_joint_tree);
+  build_nmv_component_cost_table(mvcost[0], &ctx->comps[0], usehp);
+  build_nmv_component_cost_table(mvcost[1], &ctx->comps[1], usehp);
 }
 
 static void inc_mvs(int_mv mv[2], int_mv ref[2], int is_compound,
