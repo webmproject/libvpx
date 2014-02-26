@@ -20,7 +20,7 @@ namespace {
 const int kCQLevelMin = 4;
 const int kCQLevelMax = 63;
 const int kCQLevelStep = 8;
-const int kCQTargetBitrate = 2000;
+const unsigned int kCQTargetBitrate = 2000;
 
 class CQTest : public ::libvpx_test::EncoderTest,
     public ::libvpx_test::CodecTestWithParam<int> {
@@ -66,17 +66,17 @@ class CQTest : public ::libvpx_test::EncoderTest,
     return pow(10.0, avg_psnr / 10.0) / file_size_;
   }
 
-  int file_size() const { return file_size_; }
+  size_t file_size() const { return file_size_; }
   int n_frames() const { return n_frames_; }
 
  private:
   int cq_level_;
-  int file_size_;
+  size_t file_size_;
   double psnr_;
   int n_frames_;
 };
 
-int prev_actual_bitrate = kCQTargetBitrate;
+unsigned int prev_actual_bitrate = kCQTargetBitrate;
 TEST_P(CQTest, LinearPSNRIsHigherForCQLevel) {
   const vpx_rational timebase = { 33333333, 1000000000 };
   cfg_.g_timebase = timebase;
@@ -88,7 +88,8 @@ TEST_P(CQTest, LinearPSNRIsHigherForCQLevel) {
                                      timebase.den, timebase.num, 0, 30);
   ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
   const double cq_psnr_lin = GetLinearPSNROverBitrate();
-  const int cq_actual_bitrate = file_size() * 8 * 30 / (n_frames() * 1000);
+  const unsigned int cq_actual_bitrate =
+      static_cast<unsigned int>(file_size()) * 8 * 30 / (n_frames() * 1000);
   EXPECT_LE(cq_actual_bitrate, kCQTargetBitrate);
   EXPECT_LE(cq_actual_bitrate, prev_actual_bitrate);
   prev_actual_bitrate = cq_actual_bitrate;
