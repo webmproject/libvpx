@@ -310,8 +310,7 @@ void vp9_initialize_rd_consts(VP9_COMP *cpi) {
       vp9_build_nmv_cost_table(x->nmvjointcost,
                                cm->allow_high_precision_mv ? x->nmvcost_hp
                                                            : x->nmvcost,
-                               &cm->fc.nmvc,
-                               cm->allow_high_precision_mv, 1, 1);
+                               &cm->fc.nmvc, cm->allow_high_precision_mv);
 
       for (i = 0; i < INTER_MODE_CONTEXTS; ++i)
         vp9_cost_tokens((int *)x->inter_mode_cost[i],
