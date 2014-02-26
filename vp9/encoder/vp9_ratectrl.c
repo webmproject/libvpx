@@ -958,17 +958,10 @@ static int rc_pick_q_and_bounds_two_pass(const VP9_COMP *cpi,
   }
 
   // Clip the active best and worst quality values to limits.
-  if (active_worst_quality > rc->worst_quality)
-    active_worst_quality = rc->worst_quality;
-
-  if (active_best_quality < rc->best_quality)
-    active_best_quality = rc->best_quality;
-
-  if (active_best_quality > rc->worst_quality)
-    active_best_quality = rc->worst_quality;
-
-  if (active_worst_quality < active_best_quality)
-    active_worst_quality = active_best_quality;
+  active_best_quality = clamp(active_best_quality,
+                              rc->best_quality, rc->worst_quality);
+  active_worst_quality = clamp(active_worst_quality,
+                               active_best_quality, rc->worst_quality);
 
   *top_index = active_worst_quality;
   *bottom_index = active_best_quality;
