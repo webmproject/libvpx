@@ -105,10 +105,9 @@ static int trellis_get_coeff_context(const int16_t *scan,
   return pt;
 }
 
-static void optimize_b(MACROBLOCK *mb,
-                       int plane, int block, BLOCK_SIZE plane_bsize,
-                       ENTROPY_CONTEXT *a, ENTROPY_CONTEXT *l,
-                       TX_SIZE tx_size) {
+static void optimize_b(int plane, int block, BLOCK_SIZE plane_bsize,
+                       TX_SIZE tx_size, MACROBLOCK *mb,
+                       struct optimize_ctx *ctx) {
   MACROBLOCKD *const xd = &mb->e_mbd;
   struct macroblock_plane *p = &mb->plane[plane];
   struct macroblockd_plane *pd = &xd->plane[plane];
@@ -134,6 +133,11 @@ static void optimize_b(MACROBLOCK *mb,
   const scan_order *so = get_scan(xd, tx_size, type, block);
   const int16_t *scan = so->scan;
   const int16_t *nb = so->neighbors;
+  ENTROPY_CONTEXT *a, *l;
+  int tx_x, tx_y;
+  txfrm_block_to_raster_xy(plane_bsize, tx_size, block, &tx_x, &tx_y);
+  a = &ctx->ta[plane][tx_x];
+  l = &ctx->tl[plane][tx_y];
 
   assert((!type && !plane) || (type && plane));
   assert(eob <= default_eob);
@@ -307,14 +311,6 @@ static void optimize_b(MACROBLOCK *mb,
   *a = *l = (final_eob > 0);
 }
 
-void vp9_optimize_b(int plane, int block, BLOCK_SIZE plane_bsize,
-                    TX_SIZE tx_size, MACROBLOCK *mb, struct optimize_ctx *ctx) {
-  int x, y;
-  txfrm_block_to_raster_xy(plane_bsize, tx_size, block, &x, &y);
-  optimize_b(mb, plane, block, plane_bsize,
-             &ctx->ta[plane][x], &ctx->tl[plane][y], tx_size);
-}
-
 static void optimize_init_b(int plane, BLOCK_SIZE bsize,
                             struct encode_b_args *args) {
   const MACROBLOCKD *xd = &args->x->e_mbd;
@@ -419,7 +415,7 @@ static void encode_block(int plane, int block, BLOCK_SIZE plane_bsize,
     vp9_xform_quant(x, plane, block, plane_bsize, tx_size);
 
   if (x->optimize && (!x->skip_recode || !x->skip_optimize)) {
-    vp9_optimize_b(plane, block, plane_bsize, tx_size, x, ctx);
+    optimize_b(plane, block, plane_bsize, tx_size, x, ctx);
   } else {
     ctx->ta[plane][i] = p->eobs[block] > 0;
     ctx->tl[plane][j] = p->eobs[block] > 0;
@@ -533,7 +529,7 @@ static void encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
   src_diff = &p->src_diff[4 * (j * diff_stride + i)];
 
   // if (x->optimize)
-  // vp9_optimize_b(plane, block, plane_bsize, tx_size, x, args->ctx);
+  //   optimize_b(plane, block, plane_bsize, tx_size, x, args->ctx);
 
   switch (tx_size) {
     case TX_32X32:
