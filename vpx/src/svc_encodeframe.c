@@ -534,6 +534,29 @@ vpx_codec_err_t vpx_svc_init(SvcContext *svc_ctx, vpx_codec_ctx_t *codec_ctx,
   res = parse_options(svc_ctx, si->options);
   if (res != VPX_CODEC_OK) return res;
 
+  // Assign target bitrate for each layer. We calculate the ratio
+  // from the resolution for now.
+  // TODO(Minghai): Optimize the mechanism of allocating bits after
+  // implementing svc two pass rate control.
+  if (si->layers > 1) {
+    int i;
+    float total = 0;
+    float alloc_ratio[VPX_SS_MAX_LAYERS] = {0};
+
+    for (i = 0; i < si->layers; ++i) {
+      int pos = i + VPX_SS_MAX_LAYERS - svc_ctx->spatial_layers;
+      alloc_ratio[i] = si->scaling_factor_num[pos] * 1.0 /
+                       si->scaling_factor_den[pos];
+      alloc_ratio[i] *= alloc_ratio[i];
+      total += alloc_ratio[i];
+    }
+
+    for (i = 0; i < si->layers; ++i) {
+      enc_cfg->ss_target_bitrate[i] = enc_cfg->rc_target_bitrate *
+          alloc_ratio[i] / total;
+    }
+  }
+
   // modify encoder configuration
   enc_cfg->ss_number_layers = si->layers;
   enc_cfg->ts_number_layers = 1;  // Temporal layers not used in this encoder.
