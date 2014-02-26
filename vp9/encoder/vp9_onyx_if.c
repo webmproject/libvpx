@@ -14,6 +14,8 @@
 
 #include "./vpx_config.h"
 #include "./vpx_scale_rtcd.h"
+#include "vpx/internal/vpx_psnr.h"
+#include "vpx_ports/vpx_timer.h"
 
 #include "vp9/common/vp9_alloccommon.h"
 #include "vp9/common/vp9_filter.h"
@@ -30,15 +32,12 @@
 #include "vp9/encoder/vp9_mbgraph.h"
 #include "vp9/encoder/vp9_onyx_int.h"
 #include "vp9/encoder/vp9_picklpf.h"
-#include "vp9/encoder/vp9_psnr.h"
 #include "vp9/encoder/vp9_ratectrl.h"
 #include "vp9/encoder/vp9_rdopt.h"
 #include "vp9/encoder/vp9_segmentation.h"
 #include "vp9/encoder/vp9_temporal_filter.h"
 #include "vp9/encoder/vp9_vaq.h"
 #include "vp9/encoder/vp9_resize.h"
-
-#include "vpx_ports/vpx_timer.h"
 
 void vp9_entropy_mode_init();
 void vp9_coef_tree_initialize();
@@ -2043,11 +2042,11 @@ void vp9_remove_compressor(VP9_PTR *ptr) {
 
       if (cpi->b_calculate_psnr) {
         const double total_psnr =
-            vp9_mse2psnr((double)cpi->total_samples, 255.0,
-                         (double)cpi->total_sq_error);
+            vpx_sse_to_psnr((double)cpi->total_samples, 255.0,
+                            (double)cpi->total_sq_error);
         const double totalp_psnr =
-            vp9_mse2psnr((double)cpi->totalp_samples, 255.0,
-                         (double)cpi->totalp_sq_error);
+            vpx_sse_to_psnr((double)cpi->totalp_samples, 255.0,
+                            (double)cpi->totalp_sq_error);
         const double total_ssim = 100 * pow(cpi->summed_quality /
                                                 cpi->summed_weights, 8.0);
         const double totalp_ssim = 100 * pow(cpi->summedp_quality /
@@ -2228,7 +2227,7 @@ static void calc_psnr(const YV12_BUFFER_CONFIG *a, const YV12_BUFFER_CONFIG *b,
                                           w, h);
     psnr->sse[1 + i] = sse;
     psnr->samples[1 + i] = samples;
-    psnr->psnr[1 + i] = vp9_mse2psnr(samples, 255.0, (double) sse);
+    psnr->psnr[1 + i] = vpx_sse_to_psnr(samples, 255.0, (double)sse);
 
     total_sse += sse;
     total_samples += samples;
@@ -2236,7 +2235,8 @@ static void calc_psnr(const YV12_BUFFER_CONFIG *a, const YV12_BUFFER_CONFIG *b,
 
   psnr->sse[0] = total_sse;
   psnr->samples[0] = total_samples;
-  psnr->psnr[0] = vp9_mse2psnr((double)total_samples, 255.0, (double)total_sse);
+  psnr->psnr[0] = vpx_sse_to_psnr((double)total_samples, 255.0,
+                                  (double)total_sse);
 }
 
 static void generate_psnr_packet(VP9_COMP *cpi) {
