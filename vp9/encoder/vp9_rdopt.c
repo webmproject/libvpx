@@ -564,18 +564,16 @@ static INLINE int cost_coeffs(MACROBLOCK *x,
   const PLANE_TYPE type = pd->plane_type;
   const int16_t *band_count = &band_counts[tx_size][1];
   const int eob = p->eobs[block];
-  const int16_t *const qcoeff_ptr = BLOCK_OFFSET(p->qcoeff, block);
-  const int ref = mbmi->ref_frame[0] != INTRA_FRAME;
+  const int16_t *const qcoeff = BLOCK_OFFSET(p->qcoeff, block);
   unsigned int (*token_costs)[2][COEFF_CONTEXTS][ENTROPY_TOKENS] =
-                   x->token_costs[tx_size][type][ref];
-  const ENTROPY_CONTEXT above_ec = !!*A, left_ec = !!*L;
+                   x->token_costs[tx_size][type][is_inter_block(mbmi)];
   uint8_t *p_tok = x->token_cache;
-  int pt = combine_entropy_contexts(above_ec, left_ec);
+  int pt = combine_entropy_contexts(*A, *L);
   int c, cost;
 
   // Check for consistency of tx_size with mode info
   assert(type == PLANE_TYPE_Y ? mbmi->tx_size == tx_size
-                                      : get_uv_tx_size(mbmi) == tx_size);
+                              : get_uv_tx_size(mbmi) == tx_size);
 
   if (eob == 0) {
     // single eob token
@@ -585,7 +583,7 @@ static INLINE int cost_coeffs(MACROBLOCK *x,
     int band_left = *band_count++;
 
     // dc token
-    int v = qcoeff_ptr[0];
+    int v = qcoeff[0];
     int prev_t = vp9_dct_value_tokens_ptr[v].token;
     cost = (*token_costs)[0][pt][prev_t] + vp9_dct_value_cost_ptr[v];
     p_tok[0] = vp9_pt_energy_class[prev_t];
@@ -596,7 +594,7 @@ static INLINE int cost_coeffs(MACROBLOCK *x,
       const int rc = scan[c];
       int t;
 
-      v = qcoeff_ptr[rc];
+      v = qcoeff[rc];
       t = vp9_dct_value_tokens_ptr[v].token;
       pt = get_coef_context(nb, p_tok, c);
       cost += (*token_costs)[!prev_t][pt][t] + vp9_dct_value_cost_ptr[v];
