@@ -303,6 +303,7 @@ int64_t vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
         mbmi->mode = this_mode;
         mbmi->ref_frame[0] = INTRA_FRAME;
         mbmi->uv_mode = this_mode;
+        mbmi->mv[0].as_int = INVALID_MV;
       }
     }
   }
