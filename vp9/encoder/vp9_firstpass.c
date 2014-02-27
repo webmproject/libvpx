@@ -675,7 +675,7 @@ void vp9_first_pass(VP9_COMP *cpi) {
           xd->mi_8x8[0]->mbmi.ref_frame[0] = LAST_FRAME;
           xd->mi_8x8[0]->mbmi.ref_frame[1] = NONE;
           vp9_build_inter_predictors_sby(xd, mb_row << 1, mb_col << 1, bsize);
-          vp9_encode_sby(x, bsize);
+          vp9_encode_sby_pass1(x, bsize);
           sum_mvr += mv.as_mv.row;
           sum_mvr_abs += abs(mv.as_mv.row);
           sum_mvc += mv.as_mv.col;

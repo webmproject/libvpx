@@ -449,8 +449,7 @@ static void encode_block(int plane, int block, BLOCK_SIZE plane_bsize,
 }
 static void encode_block_pass1(int plane, int block, BLOCK_SIZE plane_bsize,
                                TX_SIZE tx_size, void *arg) {
-  struct encode_b_args *const args = arg;
-  MACROBLOCK *const x = args->x;
+  MACROBLOCK *const x = (MACROBLOCK *)arg;
   MACROBLOCKD *const xd = &x->e_mbd;
   struct macroblock_plane *const p = &x->plane[plane];
   struct macroblockd_plane *const pd = &xd->plane[plane];
@@ -462,24 +461,14 @@ static void encode_block_pass1(int plane, int block, BLOCK_SIZE plane_bsize,
 
   vp9_xform_quant(x, plane, block, plane_bsize, tx_size);
 
-  if (p->eobs[block] == 0)
-    return;
-
-  xd->itxm_add(dqcoeff, dst, pd->dst.stride, p->eobs[block]);
+  if (p->eobs[block] > 0)
+    xd->itxm_add(dqcoeff, dst, pd->dst.stride, p->eobs[block]);
 }
 
-void vp9_encode_sby(MACROBLOCK *x, BLOCK_SIZE bsize) {
-  MACROBLOCKD *const xd = &x->e_mbd;
-  struct optimize_ctx ctx;
-  MB_MODE_INFO *mbmi = &xd->mi_8x8[0]->mbmi;
-  struct encode_b_args arg = {x, &ctx, &mbmi->skip};
-
+void vp9_encode_sby_pass1(MACROBLOCK *x, BLOCK_SIZE bsize) {
   vp9_subtract_plane(x, bsize, 0);
-  if (x->optimize)
-    optimize_init_b(0, bsize, &arg);
-
-  vp9_foreach_transformed_block_in_plane(xd, bsize, 0, encode_block_pass1,
-                                         &arg);
+  vp9_foreach_transformed_block_in_plane(&x->e_mbd, bsize, 0,
+                                         encode_block_pass1, x);
 }
 
 void vp9_encode_sb(MACROBLOCK *x, BLOCK_SIZE bsize) {
