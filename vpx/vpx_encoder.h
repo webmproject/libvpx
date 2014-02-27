@@ -610,6 +610,13 @@ extern "C" {
      */
     unsigned int           ss_number_layers;
 
+    /*!\brief Target bitrate for each spatial layer.
+     *
+     * These values specify the target coding bitrate to be used for each
+     * spatial layer.
+     */
+    unsigned int           ss_target_bitrate[VPX_SS_MAX_LAYERS];
+
     /*!\brief Number of temporal coding layers.
      *
      * This value specifies the number of temporal layers to be used.

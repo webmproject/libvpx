@@ -355,6 +355,13 @@ static vpx_codec_err_t set_vp9e_config(VP9_CONFIG *oxcf,
 
   oxcf->ss_number_layers = cfg.ss_number_layers;
 
+  if (oxcf->ss_number_layers > 1) {
+    memcpy(oxcf->ss_target_bitrate, cfg.ss_target_bitrate,
+           sizeof(cfg.ss_target_bitrate));
+  } else if (oxcf->ss_number_layers == 1) {
+    oxcf->ss_target_bitrate[0] = oxcf->target_bandwidth;
+  }
+
   oxcf->ts_number_layers = cfg.ts_number_layers;
 
   if (oxcf->ts_number_layers > 1) {
@@ -1160,6 +1167,7 @@ static vpx_codec_enc_cfg_map_t vp9e_usage_cfg_map[] = {
       9999,               /* kf_max_dist */
 
       VPX_SS_DEFAULT_LAYERS, /* ss_number_layers */
+      {0},                /* ss_target_bitrate */
       1,                  /* ts_number_layers */
       {0},                /* ts_target_bitrate */
       {0},                /* ts_rate_decimator */
