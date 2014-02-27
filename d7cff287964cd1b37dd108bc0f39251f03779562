@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//02I\u003d",
+        "filename": "test/sad_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 378,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2014-02-27T22:23:43Z",
+      "side": 0,
+      "message": "endif comments?",
+      "revId": "d7cff287964cd1b37dd108bc0f39251f03779562",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
