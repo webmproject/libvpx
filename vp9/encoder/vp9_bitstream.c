@@ -15,19 +15,19 @@
 #include "vpx/vpx_encoder.h"
 #include "vpx_mem/vpx_mem.h"
 
+#include "vp9/common/vp9_entropy.h"
 #include "vp9/common/vp9_entropymode.h"
 #include "vp9/common/vp9_entropymv.h"
-#include "vp9/common/vp9_tile_common.h"
-#include "vp9/common/vp9_seg_common.h"
-#include "vp9/common/vp9_pred_common.h"
-#include "vp9/common/vp9_entropy.h"
 #include "vp9/common/vp9_mvref_common.h"
-#include "vp9/common/vp9_systemdependent.h"
 #include "vp9/common/vp9_pragmas.h"
+#include "vp9/common/vp9_pred_common.h"
+#include "vp9/common/vp9_seg_common.h"
+#include "vp9/common/vp9_systemdependent.h"
+#include "vp9/common/vp9_tile_common.h"
 
-#include "vp9/encoder/vp9_mcomp.h"
-#include "vp9/encoder/vp9_encodemv.h"
 #include "vp9/encoder/vp9_bitstream.h"
+#include "vp9/encoder/vp9_encodemv.h"
+#include "vp9/encoder/vp9_mcomp.h"
 #include "vp9/encoder/vp9_segmentation.h"
 #include "vp9/encoder/vp9_subexp.h"
 #include "vp9/encoder/vp9_tokenize.h"
@@ -68,8 +68,8 @@ static INLINE void write_be32(uint8_t *p, int value) {
   p[3] = value;
 }
 
-void vp9_encode_unsigned_max(struct vp9_write_bit_buffer *wb,
-                             int data, int max) {
+static void encode_unsigned_max(struct vp9_write_bit_buffer *wb,
+                                int data, int max) {
   vp9_wb_write_literal(wb, data, get_unsigned_bits(max));
 }
 
@@ -115,15 +115,14 @@ static int write_skip(const VP9_COMP *cpi, int segment_id, MODE_INFO *m,
   }
 }
 
-void vp9_update_skip_probs(VP9_COMMON *cm, vp9_writer *w) {
+static void update_skip_probs(VP9_COMMON *cm, vp9_writer *w) {
   int k;
 
   for (k = 0; k < SKIP_CONTEXTS; ++k)
     vp9_cond_prob_diff_update(w, &cm->fc.skip_probs[k], cm->counts.skip[k]);
 }
 
-static void update_switchable_interp_probs(VP9_COMP *cpi, vp9_writer *w) {
-  VP9_COMMON *const cm = &cpi->common;
+static void update_switchable_interp_probs(VP9_COMMON *cm, vp9_writer *w) {
   int j;
   for (j = 0; j < SWITCHABLE_FILTER_CONTEXTS; ++j)
     prob_diff_update(vp9_switchable_interp_tree,
@@ -131,9 +130,8 @@ static void update_switchable_interp_probs(VP9_COMP *cpi, vp9_writer *w) {
                      cm->counts.switchable_interp[j], SWITCHABLE_FILTERS, w);
 }
 
-static void pack_mb_tokens(vp9_writer* const w,
-                           TOKENEXTRA **tp,
-                           const TOKENEXTRA *const stop) {
+static void pack_mb_tokens(vp9_writer *w,
+                           TOKENEXTRA **tp, const TOKENEXTRA *stop) {
   TOKENEXTRA *p = *tp;
 
   while (p < stop && p->token != EOSB_TOKEN) {
@@ -247,7 +245,7 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, MODE_INFO *m, vp9_writer *bc) {
   MACROBLOCK *const x = &cpi->mb;
   MACROBLOCKD *const xd = &x->e_mbd;
   const struct segmentation *const seg = &cm->seg;
-  MB_MODE_INFO *const mi = &m->mbmi;
+  const MB_MODE_INFO *const mi = &m->mbmi;
   const MV_REFERENCE_FRAME ref0 = mi->ref_frame[0];
   const MV_REFERENCE_FRAME ref1 = mi->ref_frame[1];
   const MB_PREDICTION_MODE mode = mi->mode;
@@ -707,7 +705,7 @@ static void update_coef_probs_common(vp9_writer* const bc, VP9_COMP *cpi,
   }
 }
 
-static void update_coef_probs(VP9_COMP* cpi, vp9_writer* w) {
+static void update_coef_probs(VP9_COMP *cpi, vp9_writer* w) {
   const TX_MODE tx_mode = cpi->common.tx_mode;
   const TX_SIZE max_tx_size = tx_mode_to_biggest_tx_size[tx_mode];
   TX_SIZE tx_size;
@@ -830,10 +828,10 @@ static void encode_segmentation(VP9_COMP *cpi,
           const int data_max = vp9_seg_feature_data_max(j);
 
           if (vp9_is_segfeature_signed(j)) {
-            vp9_encode_unsigned_max(wb, abs(data), data_max);
+            encode_unsigned_max(wb, abs(data), data_max);
             vp9_wb_write_bit(wb, data < 0);
           } else {
-            vp9_encode_unsigned_max(wb, data, data_max);
+            encode_unsigned_max(wb, data, data_max);
           }
         }
       }
@@ -842,9 +840,7 @@ static void encode_segmentation(VP9_COMP *cpi,
 }
 
 
-static void encode_txfm_probs(VP9_COMP *cpi, vp9_writer *w) {
-  VP9_COMMON *const cm = &cpi->common;
-
+static void encode_txfm_probs(VP9_COMMON *cm, vp9_writer *w) {
   // Mode
   vp9_write_literal(w, MIN(cm->tx_mode, ALLOW_32X32), 2);
   if (cm->tx_mode >= ALLOW_32X32)
@@ -1162,7 +1158,7 @@ static size_t write_compressed_header(VP9_COMP *cpi, uint8_t *data) {
   if (xd->lossless)
     cm->tx_mode = ONLY_4X4;
   else
-    encode_txfm_probs(cpi, &header_bc);
+    encode_txfm_probs(cm, &header_bc);
 
   update_coef_probs(cpi, &header_bc);
 
@@ -1170,7 +1166,7 @@ static size_t write_compressed_header(VP9_COMP *cpi, uint8_t *data) {
   active_section = 2;
 #endif
 
-  vp9_update_skip_probs(cm, &header_bc);
+  update_skip_probs(cm, &header_bc);
 
   if (!frame_is_intra_only(cm)) {
     int i;
@@ -1185,7 +1181,7 @@ static size_t write_compressed_header(VP9_COMP *cpi, uint8_t *data) {
     vp9_zero(cm->counts.inter_mode);
 
     if (cm->interp_filter == SWITCHABLE)
-      update_switchable_interp_probs(cpi, &header_bc);
+      update_switchable_interp_probs(cm, &header_bc);
 
     for (i = 0; i < INTRA_INTER_CONTEXTS; i++)
       vp9_cond_prob_diff_update(&header_bc, &fc->intra_inter_prob[i],

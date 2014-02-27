@@ -27,6 +27,7 @@
 #include "vp9/common/vp9_systemdependent.h"
 #include "vp9/common/vp9_tile_common.h"
 
+#include "vp9/encoder/vp9_bitstream.h"
 #include "vp9/encoder/vp9_encodemv.h"
 #include "vp9/encoder/vp9_firstpass.h"
 #include "vp9/encoder/vp9_mbgraph.h"
@@ -39,7 +40,6 @@
 #include "vp9/encoder/vp9_vaq.h"
 #include "vp9/encoder/vp9_resize.h"
 
-void vp9_entropy_mode_init();
 void vp9_coef_tree_initialize();
 
 #define DEFAULT_INTERP_FILTER SWITCHABLE
