@@ -307,6 +307,19 @@ INSTANTIATE_TEST_CASE_P(
                       make_tuple(4, 3, variance16x8_c),
                       make_tuple(4, 4, variance16x16_c)));
 
+#if HAVE_NEON
+const vp8_variance_fn_t variance8x8_neon = vp8_variance8x8_neon;
+const vp8_variance_fn_t variance8x16_neon = vp8_variance8x16_neon;
+const vp8_variance_fn_t variance16x8_neon = vp8_variance16x8_neon;
+const vp8_variance_fn_t variance16x16_neon = vp8_variance16x16_neon;
+INSTANTIATE_TEST_CASE_P(
+    NEON, VP8VarianceTest,
+    ::testing::Values(make_tuple(3, 3, variance8x8_neon),
+                      make_tuple(3, 4, variance8x16_neon),
+                      make_tuple(4, 3, variance16x8_neon),
+                      make_tuple(4, 4, variance16x16_neon)));
+#endif
+
 #if HAVE_MMX
 const vp8_variance_fn_t variance4x4_mmx = vp8_variance4x4_mmx;
 const vp8_variance_fn_t variance8x8_mmx = vp8_variance8x8_mmx;

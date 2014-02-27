@@ -313,6 +313,20 @@ INSTANTIATE_TEST_CASE_P(
         make_tuple(&vp9_fht8x8_c, &vp9_iht8x8_64_add_c, 2),
         make_tuple(&vp9_fht8x8_c, &vp9_iht8x8_64_add_c, 3)));
 
+#if HAVE_NEON
+INSTANTIATE_TEST_CASE_P(
+    NEON, FwdTrans8x8DCT,
+    ::testing::Values(
+        make_tuple(&vp9_fdct8x8_c, &vp9_idct8x8_64_add_neon, 0)));
+INSTANTIATE_TEST_CASE_P(
+    DISABLED_NEON, FwdTrans8x8HT,
+    ::testing::Values(
+        make_tuple(&vp9_fht8x8_c, &vp9_iht8x8_64_add_neon, 0),
+        make_tuple(&vp9_fht8x8_c, &vp9_iht8x8_64_add_neon, 1),
+        make_tuple(&vp9_fht8x8_c, &vp9_iht8x8_64_add_neon, 2),
+        make_tuple(&vp9_fht8x8_c, &vp9_iht8x8_64_add_neon, 3)));
+#endif
+
 #if HAVE_SSE2
 INSTANTIATE_TEST_CASE_P(
     SSE2, FwdTrans8x8DCT,

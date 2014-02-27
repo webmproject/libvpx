@@ -286,6 +286,21 @@ INSTANTIATE_TEST_CASE_P(
         make_tuple(&vp9_fht4x4_c, &vp9_iht4x4_16_add_c, 2),
         make_tuple(&vp9_fht4x4_c, &vp9_iht4x4_16_add_c, 3)));
 
+#if HAVE_NEON
+INSTANTIATE_TEST_CASE_P(
+    NEON, Trans4x4DCT,
+    ::testing::Values(
+        make_tuple(&vp9_fdct4x4_c,
+                   &vp9_idct4x4_16_add_neon, 0)));
+INSTANTIATE_TEST_CASE_P(
+    DISABLED_NEON, Trans4x4HT,
+    ::testing::Values(
+        make_tuple(&vp9_fht4x4_c, &vp9_iht4x4_16_add_neon, 0),
+        make_tuple(&vp9_fht4x4_c, &vp9_iht4x4_16_add_neon, 1),
+        make_tuple(&vp9_fht4x4_c, &vp9_iht4x4_16_add_neon, 2),
+        make_tuple(&vp9_fht4x4_c, &vp9_iht4x4_16_add_neon, 3)));
+#endif
+
 #if HAVE_SSE2
 INSTANTIATE_TEST_CASE_P(
     SSE2, Trans4x4DCT,

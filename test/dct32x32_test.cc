@@ -248,6 +248,16 @@ INSTANTIATE_TEST_CASE_P(
         make_tuple(&vp9_fdct32x32_c, &vp9_idct32x32_1024_add_c, 0),
         make_tuple(&vp9_fdct32x32_rd_c, &vp9_idct32x32_1024_add_c, 1)));
 
+#if HAVE_NEON
+INSTANTIATE_TEST_CASE_P(
+    NEON, Trans32x32Test,
+    ::testing::Values(
+        make_tuple(&vp9_fdct32x32_c,
+                   &vp9_idct32x32_1024_add_neon, 0),
+        make_tuple(&vp9_fdct32x32_rd_c,
+                   &vp9_idct32x32_1024_add_neon, 1)));
+#endif
+
 #if HAVE_SSE2
 INSTANTIATE_TEST_CASE_P(
     SSE2, Trans32x32Test,

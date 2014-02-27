@@ -140,6 +140,30 @@ INSTANTIATE_TEST_CASE_P(
         make_tuple(&vp9_idct4x4_16_add_c,
                    &vp9_idct4x4_1_add_c,
                    TX_4X4, 1)));
+#if HAVE_NEON
+INSTANTIATE_TEST_CASE_P(
+    NEON, PartialIDctTest,
+    ::testing::Values(
+        make_tuple(&vp9_idct32x32_1024_add_c,
+                   &vp9_idct32x32_1_add_neon,
+                   TX_32X32, 1),
+        make_tuple(&vp9_idct16x16_256_add_c,
+                   &vp9_idct16x16_10_add_neon,
+                   TX_16X16, 10),
+        make_tuple(&vp9_idct16x16_256_add_c,
+                   &vp9_idct16x16_1_add_neon,
+                   TX_16X16, 1),
+        make_tuple(&vp9_idct8x8_64_add_c,
+                   &vp9_idct8x8_10_add_neon,
+                   TX_8X8, 10),
+        make_tuple(&vp9_idct8x8_64_add_c,
+                   &vp9_idct8x8_1_add_neon,
+                   TX_8X8, 1),
+        make_tuple(&vp9_idct4x4_16_add_c,
+                   &vp9_idct4x4_1_add_neon,
+                   TX_4X4, 1)));
+#endif
+
 #if HAVE_SSE2
 INSTANTIATE_TEST_CASE_P(
     SSE2, PartialIDctTest,
