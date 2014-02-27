@@ -852,6 +852,9 @@ static void set_rt_speed_feature(VP9_COMMON *cm,
     sf->adaptive_rd_thresh = 5;
     sf->auto_min_max_partition_size = frame_is_intra_only(cm) ?
         RELAXED_NEIGHBORING_MIN_MAX : STRICT_NEIGHBORING_MIN_MAX;
+    sf->adjust_partitioning_from_last_frame =
+        cm->last_frame_type == KEY_FRAME || (0 ==
+        (cm->current_video_frame + 1) % sf->last_partitioning_redo_frequency);
     sf->subpel_force_stop = 1;
     for (i = 0; i < TX_SIZES; i++) {
       sf->intra_y_mode_mask[i] = INTRA_DC_H_V;
@@ -859,7 +862,6 @@ static void set_rt_speed_feature(VP9_COMMON *cm,
     }
     sf->frame_parameter_update = 0;
     sf->encode_breakout_thresh = 1000;
-
     sf->search_method = FAST_HEX;
   }
   if (speed >= 6) {
