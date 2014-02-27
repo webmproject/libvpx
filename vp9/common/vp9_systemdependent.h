@@ -76,9 +76,6 @@ static INLINE int get_msb(unsigned int n) {
 }
 #endif
 
-struct VP9Common;
-void vp9_machine_specific_config(struct VP9Common *cm);
-
 #ifdef __cplusplus
 }  // extern "C"
 #endif
