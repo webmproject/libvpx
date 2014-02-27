@@ -2384,7 +2384,7 @@ static void single_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
   int sadpb = x->sadperbit16;
   MV mvp_full;
   int ref = mbmi->ref_frame[0];
-  int_mv ref_mv = mbmi->ref_mvs[ref][0];
+  MV ref_mv = mbmi->ref_mvs[ref][0].as_mv;
 
   int tmp_col_min = x->mv_col_min;
   int tmp_col_max = x->mv_col_max;
@@ -2394,10 +2394,10 @@ static void single_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
   const YV12_BUFFER_CONFIG *scaled_ref_frame = vp9_get_scaled_ref_frame(cpi,
                                                                         ref);
 
-  int_mv pred_mv[3];
-  pred_mv[0] = mbmi->ref_mvs[ref][0];
-  pred_mv[1] = mbmi->ref_mvs[ref][1];
-  pred_mv[2] = x->pred_mv[ref];
+  MV pred_mv[3];
+  pred_mv[0] = mbmi->ref_mvs[ref][0].as_mv;
+  pred_mv[1] = mbmi->ref_mvs[ref][1].as_mv;
+  pred_mv[2] = x->pred_mv[ref].as_mv;
 
   if (scaled_ref_frame) {
     int i;
@@ -2410,7 +2410,7 @@ static void single_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
     setup_pre_planes(xd, 0, scaled_ref_frame, mi_row, mi_col, NULL);
   }
 
-  vp9_set_mv_search_range(x, &ref_mv.as_mv);
+  vp9_set_mv_search_range(x, &ref_mv);
 
   // Work out the size of the first step in the mv step search.
   // 0 here is maximum length first step. 1 is MAX >> 1 etc.
@@ -2455,7 +2455,7 @@ static void single_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
     }
   }
 
-  mvp_full = pred_mv[x->mv_best_ref_index[ref]].as_mv;
+  mvp_full = pred_mv[x->mv_best_ref_index[ref]];
 
   mvp_full.col >>= 3;
   mvp_full.row >>= 3;
@@ -2466,24 +2466,24 @@ static void single_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
   if (cpi->sf.search_method == FAST_HEX) {
     bestsme = vp9_fast_hex_search(x, &mvp_full, step_param, sadpb,
                                   &cpi->fn_ptr[bsize], 1,
-                                  &ref_mv.as_mv, &tmp_mv->as_mv);
+                                  &ref_mv, &tmp_mv->as_mv);
   } else if (cpi->sf.search_method == HEX) {
     bestsme = vp9_hex_search(x, &mvp_full, step_param, sadpb, 1,
                              &cpi->fn_ptr[bsize], 1,
-                             &ref_mv.as_mv, &tmp_mv->as_mv);
+                             &ref_mv, &tmp_mv->as_mv);
   } else if (cpi->sf.search_method == SQUARE) {
     bestsme = vp9_square_search(x, &mvp_full, step_param, sadpb, 1,
                                 &cpi->fn_ptr[bsize], 1,
-                                &ref_mv.as_mv, &tmp_mv->as_mv);
+                                &ref_mv, &tmp_mv->as_mv);
   } else if (cpi->sf.search_method == BIGDIA) {
     bestsme = vp9_bigdia_search(x, &mvp_full, step_param, sadpb, 1,
                                 &cpi->fn_ptr[bsize], 1,
-                                &ref_mv.as_mv, &tmp_mv->as_mv);
+                                &ref_mv, &tmp_mv->as_mv);
   } else {
     bestsme = vp9_full_pixel_diamond(cpi, x, &mvp_full, step_param,
                                      sadpb, further_steps, 1,
                                      &cpi->fn_ptr[bsize],
-                                     &ref_mv.as_mv, &tmp_mv->as_mv);
+                                     &ref_mv, &tmp_mv->as_mv);
   }
 
   x->mv_col_min = tmp_col_min;
@@ -2493,7 +2493,7 @@ static void single_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
 
   if (bestsme < INT_MAX) {
     int dis;  /* TODO: use dis in distortion calculation later. */
-    cpi->find_fractional_mv_step(x, &tmp_mv->as_mv, &ref_mv.as_mv,
+    cpi->find_fractional_mv_step(x, &tmp_mv->as_mv, &ref_mv,
                                  cm->allow_high_precision_mv,
                                  x->errorperbit,
                                  &cpi->fn_ptr[bsize],
@@ -2502,7 +2502,7 @@ static void single_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
                                  x->nmvjointcost, x->mvcost,
                                  &dis, &x->pred_sse[ref]);
   }
-  *rate_mv = vp9_mv_bit_cost(&tmp_mv->as_mv, &ref_mv.as_mv,
+  *rate_mv = vp9_mv_bit_cost(&tmp_mv->as_mv, &ref_mv,
                              x->nmvjointcost, x->mvcost, MV_COST_WEIGHT);
 
   if (cpi->sf.adaptive_motion_search && cpi->common.show_frame)
