@@ -16,6 +16,24 @@
       "revId": "114b9fa8fc967243e8f5d83eec28df6194de1c79",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//1CE\u003d",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-02-27T03:06:10Z",
+      "side": 1,
+      "message": "oops. I got lazy with the basenames. if they don\u0027t all have _test in them I\u0027ll add the test/ prefix.",
+      "parentUuid": "AAAAdn//1CQ\u003d",
+      "revId": "114b9fa8fc967243e8f5d83eec28df6194de1c79",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
