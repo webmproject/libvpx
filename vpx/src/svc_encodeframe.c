@@ -13,6 +13,7 @@
  * VP9 SVC encoding support via libvpx
  */
 
+#include <math.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -40,6 +41,7 @@ _CRTIMP char *__cdecl strtok_s(char *str, const char *delim, char **context);
 #define SUPERFRAME_SLOTS (8)
 #define SUPERFRAME_BUFFER_SIZE (SUPERFRAME_SLOTS * sizeof(uint32_t) + 2)
 #define OPTION_BUFFER_SIZE 256
+#define COMPONENTS 4  // psnr & sse statistics maintained for total, y, u, v
 
 static const char *DEFAULT_QUANTIZER_VALUES = "60,53,39,33,27";
 static const char *DEFAULT_SCALE_FACTORS = "4/16,5/16,7/16,11/16,16/16";
@@ -55,8 +57,9 @@ typedef struct SvcInternal {
   int quantizer[VPX_SS_MAX_LAYERS];
 
   // accumulated statistics
-  double psnr_in_layer[VPX_SS_MAX_LAYERS];
-  uint32_t bytes_in_layer[VPX_SS_MAX_LAYERS];
+  double psnr_sum[VPX_SS_MAX_LAYERS][COMPONENTS];   // total/Y/U/V
+  uint64_t sse_sum[VPX_SS_MAX_LAYERS][COMPONENTS];
+  uint32_t bytes_sum[VPX_SS_MAX_LAYERS];
 
   // codec encoding values
   int width;    // width of highest layer
@@ -814,7 +817,7 @@ vpx_codec_err_t vpx_svc_encode(SvcContext *svc_ctx, vpx_codec_ctx_t *codec_ctx,
       switch (cx_pkt->kind) {
         case VPX_CODEC_CX_FRAME_PKT: {
           const uint32_t frame_pkt_size = (uint32_t)(cx_pkt->data.frame.sz);
-          si->bytes_in_layer[si->layer] += frame_pkt_size;
+          si->bytes_sum[si->layer] += frame_pkt_size;
           svc_log(svc_ctx, SVC_LOG_DEBUG,
                   "SVC frame: %d, layer: %d, size: %u\n",
                   si->encode_frame_count, si->layer, frame_pkt_size);
@@ -832,13 +835,23 @@ vpx_codec_err_t vpx_svc_encode(SvcContext *svc_ctx, vpx_codec_ctx_t *codec_ctx,
           break;
         }
         case VPX_CODEC_PSNR_PKT: {
+          int i;
           svc_log(svc_ctx, SVC_LOG_DEBUG,
                   "SVC frame: %d, layer: %d, PSNR(Total/Y/U/V): "
                   "%2.3f  %2.3f  %2.3f  %2.3f \n",
                   si->encode_frame_count, si->layer,
                   cx_pkt->data.psnr.psnr[0], cx_pkt->data.psnr.psnr[1],
                   cx_pkt->data.psnr.psnr[2], cx_pkt->data.psnr.psnr[3]);
-          si->psnr_in_layer[si->layer] += cx_pkt->data.psnr.psnr[0];
+          svc_log(svc_ctx, SVC_LOG_DEBUG,
+                  "SVC frame: %d, layer: %d, SSE(Total/Y/U/V): "
+                  "%2.3f  %2.3f  %2.3f  %2.3f \n",
+                  si->encode_frame_count, si->layer,
+                  cx_pkt->data.psnr.sse[0], cx_pkt->data.psnr.sse[1],
+                  cx_pkt->data.psnr.sse[2], cx_pkt->data.psnr.sse[3]);
+          for (i = 0; i < COMPONENTS; i++) {
+            si->psnr_sum[si->layer][i] += cx_pkt->data.psnr.psnr[i];
+            si->sse_sum[si->layer][i] += cx_pkt->data.psnr.sse[i];
+          }
           break;
         }
         default: {
@@ -916,11 +929,21 @@ void vpx_svc_set_keyframe(SvcContext *svc_ctx) {
   si->frame_within_gop = 0;
 }
 
+static double calc_psnr(double d) {
+  if (d == 0) return 100;
+  return -10.0 * log(d) / log(10.0);
+}
+
 // dump accumulated statistics and reset accumulated values
 const char *vpx_svc_dump_statistics(SvcContext *svc_ctx) {
   int number_of_frames, number_of_keyframes, encode_frame_count;
-  int i;
+  int i, j;
   uint32_t bytes_total = 0;
+  double scale[COMPONENTS];
+  double psnr[COMPONENTS];
+  double mse[COMPONENTS];
+  double y_scale;
+
   SvcInternal *const si = get_svc_internal(svc_ctx);
   if (svc_ctx == NULL || si == NULL) return NULL;
 
@@ -938,12 +961,36 @@ const char *vpx_svc_dump_statistics(SvcContext *svc_ctx) {
         (i == 1 || i == 3)) {
       number_of_frames -= number_of_keyframes;
     }
-    svc_log(svc_ctx, SVC_LOG_INFO, "Layer %d PSNR=[%2.3f], Bytes=[%u]\n", i,
-            (double)si->psnr_in_layer[i] / number_of_frames,
-            si->bytes_in_layer[i]);
-    bytes_total += si->bytes_in_layer[i];
-    si->psnr_in_layer[i] = 0;
-    si->bytes_in_layer[i] = 0;
+    svc_log(svc_ctx, SVC_LOG_INFO,
+            "Layer %d Average PSNR=[%2.3f, %2.3f, %2.3f, %2.3f], Bytes=[%u]\n",
+            i, (double)si->psnr_sum[i][0] / number_of_frames,
+            (double)si->psnr_sum[i][1] / number_of_frames,
+            (double)si->psnr_sum[i][2] / number_of_frames,
+            (double)si->psnr_sum[i][3] / number_of_frames, si->bytes_sum[i]);
+    // the following psnr calculation is deduced from ffmpeg.c#print_report
+    y_scale = si->width * si->height * 255.0 * 255.0 * number_of_frames;
+    scale[1] = y_scale;
+    scale[2] = scale[3] = y_scale / 4;  // U or V
+    scale[0] = y_scale * 1.5;           // total
+
+    for (j = 0; j < COMPONENTS; j++) {
+      psnr[j] = calc_psnr(si->sse_sum[i][j] / scale[j]);
+      mse[j] = si->sse_sum[i][j] * 255.0 * 255.0 / scale[j];
+    }
+    svc_log(svc_ctx, SVC_LOG_INFO,
+            "Layer %d Overall PSNR=[%2.3f, %2.3f, %2.3f, %2.3f]\n", i, psnr[0],
+            psnr[1], psnr[2], psnr[3]);
+    svc_log(svc_ctx, SVC_LOG_INFO,
+            "Layer %d Overall MSE=[%2.3f, %2.3f, %2.3f, %2.3f]\n", i, mse[0],
+            mse[1], mse[2], mse[3]);
+
+    bytes_total += si->bytes_sum[i];
+    // clear sums for next time
+    si->bytes_sum[i] = 0;
+    for (j = 0; j < COMPONENTS; ++j) {
+      si->psnr_sum[i][j] = 0;
+      si->sse_sum[i][j] = 0;
+    }
   }
 
   // only display statistics once
