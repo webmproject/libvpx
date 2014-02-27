@@ -2742,7 +2742,7 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
       frame_mv[refs[0]].as_int == 0 &&
       !vp9_segfeature_active(&cm->seg, mbmi->segment_id, SEG_LVL_SKIP) &&
       (num_refs == 1 || frame_mv[refs[1]].as_int == 0)) {
-    int rfc = mbmi->mode_context[mbmi->ref_frame[0]];
+    int rfc = mbmi->mode_context[refs[0]];
     int c1 = cost_mv_ref(cpi, NEARMV, rfc);
     int c2 = cost_mv_ref(cpi, NEARESTMV, rfc);
     int c3 = cost_mv_ref(cpi, ZEROMV, rfc);
@@ -2757,17 +2757,17 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
       assert(this_mode == ZEROMV);
       if (num_refs == 1) {
         if ((c3 >= c2 &&
-             mode_mv[NEARESTMV][mbmi->ref_frame[0]].as_int == 0) ||
+             mode_mv[NEARESTMV][refs[0]].as_int == 0) ||
             (c3 >= c1 &&
-             mode_mv[NEARMV][mbmi->ref_frame[0]].as_int == 0))
+             mode_mv[NEARMV][refs[0]].as_int == 0))
           return INT64_MAX;
       } else {
         if ((c3 >= c2 &&
-             mode_mv[NEARESTMV][mbmi->ref_frame[0]].as_int == 0 &&
-             mode_mv[NEARESTMV][mbmi->ref_frame[1]].as_int == 0) ||
+             mode_mv[NEARESTMV][refs[0]].as_int == 0 &&
+             mode_mv[NEARESTMV][refs[1]].as_int == 0) ||
             (c3 >= c1 &&
-             mode_mv[NEARMV][mbmi->ref_frame[0]].as_int == 0 &&
-             mode_mv[NEARMV][mbmi->ref_frame[1]].as_int == 0))
+             mode_mv[NEARMV][refs[0]].as_int == 0 &&
+             mode_mv[NEARMV][refs[1]].as_int == 0))
           return INT64_MAX;
       }
     }
@@ -2798,8 +2798,7 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
    * are only three options: Last/Golden, ARF/Last or Golden/ARF, or in other
    * words if you present them in that order, the second one is always known
    * if the first is known */
-  *rate2 += cost_mv_ref(cpi, this_mode,
-                        mbmi->mode_context[mbmi->ref_frame[0]]);
+  *rate2 += cost_mv_ref(cpi, this_mode, mbmi->mode_context[refs[0]]);
 
   if (!(*mode_excluded))
     *mode_excluded = is_comp_pred ? cm->reference_mode == SINGLE_REFERENCE
