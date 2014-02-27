@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//01s\u003d",
+        "filename": "examples.mk",
+        "patchSetId": 7
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-02-27T22:45:06Z",
+      "side": 1,
+      "message": "consider breaking this and the dependent modules out to a helper variable in a future change",
+      "revId": "4334c07357e70b2653e83abb3601680c8366d677",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
