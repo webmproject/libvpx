@@ -77,26 +77,6 @@ void die_codec(vpx_codec_ctx_t *ctx, const char *s) {
   exit(EXIT_FAILURE);
 }
 
-uint16_t mem_get_le16(const void *data) {
-  uint16_t val;
-  const uint8_t *mem = (const uint8_t*)data;
-
-  val = mem[1] << 8;
-  val |= mem[0];
-  return val;
-}
-
-uint32_t mem_get_le32(const void *data) {
-  uint32_t val;
-  const uint8_t *mem = (const uint8_t*)data;
-
-  val = mem[3] << 24;
-  val |= mem[2] << 16;
-  val |= mem[1] << 8;
-  val |= mem[0];
-  return val;
-}
-
 int read_yuv_frame(struct VpxInputContext *input_ctx, vpx_image_t *yuv_frame) {
   FILE *f = input_ctx->file;
   struct FileTypeDetectionBuffer *detect = &input_ctx->detect;
