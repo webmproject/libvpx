@@ -245,11 +245,11 @@ static void inverse_transform_block(MACROBLOCKD* xd, int plane, int block,
           vp9_iht4x4_16_add(dqcoeff, dst, stride, tx_type);
         break;
       case TX_8X8:
-        tx_type = get_tx_type_8x8(plane_type, xd);
+        tx_type = get_tx_type(plane_type, xd);
         vp9_iht8x8_add(tx_type, dqcoeff, dst, stride, eob);
         break;
       case TX_16X16:
-        tx_type = get_tx_type_16x16(plane_type, xd);
+        tx_type = get_tx_type(plane_type, xd);
         vp9_iht16x16_add(tx_type, dqcoeff, dst, stride, eob);
         break;
       case TX_32X32:
