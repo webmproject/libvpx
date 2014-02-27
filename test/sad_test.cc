@@ -371,12 +371,15 @@ INSTANTIATE_TEST_CASE_P(C, SADx4Test, ::testing::Values(
 //------------------------------------------------------------------------------
 // ARM functions
 #if HAVE_MEDIA
+#if CONFIG_VP8_ENCODER
 const sad_m_by_n_fn_t sad_16x16_armv6 = vp8_sad16x16_armv6;
 INSTANTIATE_TEST_CASE_P(MEDIA, SADTest, ::testing::Values(
                         make_tuple(16, 16, sad_16x16_armv6)));
-
 #endif
+#endif
+
 #if HAVE_NEON
+#if CONFIG_VP8_ENCODER
 const sad_m_by_n_fn_t sad_16x16_neon = vp8_sad16x16_neon;
 const sad_m_by_n_fn_t sad_8x16_neon = vp8_sad8x16_neon;
 const sad_m_by_n_fn_t sad_16x8_neon = vp8_sad16x8_neon;
@@ -388,6 +391,7 @@ INSTANTIATE_TEST_CASE_P(NEON, SADTest, ::testing::Values(
                         make_tuple(16, 8, sad_16x8_neon),
                         make_tuple(8, 8, sad_8x8_neon),
                         make_tuple(4, 4, sad_4x4_neon)));
+#endif
 #endif
 
 //------------------------------------------------------------------------------
