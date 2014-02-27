@@ -25,7 +25,6 @@ VP9_COMMON_SRCS-yes += common/vp9_filter.c
 VP9_COMMON_SRCS-yes += common/vp9_filter.h
 VP9_COMMON_SRCS-yes += common/vp9_frame_buffers.c
 VP9_COMMON_SRCS-yes += common/vp9_frame_buffers.h
-VP9_COMMON_SRCS-yes += common/generic/vp9_systemdependent.c
 VP9_COMMON_SRCS-yes += common/vp9_idct.c
 VP9_COMMON_SRCS-yes += common/vp9_alloccommon.h
 VP9_COMMON_SRCS-yes += common/vp9_blockd.h
