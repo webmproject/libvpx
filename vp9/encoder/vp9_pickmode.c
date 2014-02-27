@@ -249,22 +249,26 @@ int64_t vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
       int64_t dist;
 
       if (this_mode == NEWMV) {
+        if (this_rd < 500)
+          continue;
+
         x->mode_sad[ref_frame][INTER_OFFSET(NEWMV)] =
             full_pixel_motion_search(cpi, x, tile, bsize, mi_row, mi_col,
                                      &frame_mv[NEWMV][ref_frame], &rate_mv);
 
         if (frame_mv[NEWMV][ref_frame].as_int == INVALID_MV)
           continue;
+
+        sub_pixel_motion_search(cpi, x, tile, bsize, mi_row, mi_col,
+                                &frame_mv[NEWMV][ref_frame]);
       }
 
       mbmi->mode = this_mode;
       mbmi->mv[0].as_int = frame_mv[this_mode][ref_frame].as_int;
-
       vp9_build_inter_predictors_sby(xd, mi_row, mi_col, bsize);
 
       dist = cpi->fn_ptr[bsize].sdf(p->src.buf, p->src.stride,
                                     pd->dst.buf, pd->dst.stride, INT_MAX);
-
       this_rd = rate + dist;
 
       if (this_rd < best_rd) {
@@ -301,15 +305,6 @@ int64_t vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
         mbmi->uv_mode = this_mode;
       }
     }
-  }
-
-  // Perform sub-pixel motion search, if NEWMV is chosen
-  if (mbmi->mode == NEWMV) {
-    ref_frame = mbmi->ref_frame[0];
-    sub_pixel_motion_search(cpi, x, tile, bsize, mi_row, mi_col,
-                            &frame_mv[NEWMV][ref_frame]);
-    mbmi->mv[0].as_int = frame_mv[NEWMV][ref_frame].as_int;
-    xd->mi_8x8[0]->bmi[0].as_mv[0].as_int = mbmi->mv[0].as_int;
   }
 
   return INT64_MAX;
