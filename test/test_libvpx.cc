@@ -22,8 +22,10 @@ extern void vp9_rtcd();
 }
 #include "third_party/googletest/src/include/gtest/gtest.h"
 
-static void append_gtest_filter(const char *str) {
+static void append_negative_gtest_filter(const char *str) {
   std::string filter = ::testing::FLAGS_gtest_filter;
+  // Negative patterns begin with one '-' followed by a ':' separated list.
+  if (filter.find('-') == std::string::npos) filter += '-';
   filter += str;
   ::testing::FLAGS_gtest_filter = filter;
 }
@@ -34,21 +36,21 @@ int main(int argc, char **argv) {
 #if ARCH_X86 || ARCH_X86_64
   const int simd_caps = x86_simd_caps();
   if (!(simd_caps & HAS_MMX))
-    append_gtest_filter(":-MMX/*");
+    append_negative_gtest_filter(":-MMX/*");
   if (!(simd_caps & HAS_SSE))
-    append_gtest_filter(":-SSE/*");
+    append_negative_gtest_filter(":-SSE/*");
   if (!(simd_caps & HAS_SSE2))
-    append_gtest_filter(":-SSE2/*");
+    append_negative_gtest_filter(":-SSE2/*");
   if (!(simd_caps & HAS_SSE3))
-    append_gtest_filter(":-SSE3/*");
+    append_negative_gtest_filter(":-SSE3/*");
   if (!(simd_caps & HAS_SSSE3))
-    append_gtest_filter(":-SSSE3/*");
+    append_negative_gtest_filter(":-SSSE3/*");
   if (!(simd_caps & HAS_SSE4_1))
-    append_gtest_filter(":-SSE4_1/*");
+    append_negative_gtest_filter(":-SSE4_1/*");
   if (!(simd_caps & HAS_AVX))
-    append_gtest_filter(":-AVX/*");
+    append_negative_gtest_filter(":AVX/*");
   if (!(simd_caps & HAS_AVX2))
-    append_gtest_filter(":-AVX2/*");
+    append_negative_gtest_filter(":AVX2/*");
 #endif
 
 #if !CONFIG_SHARED

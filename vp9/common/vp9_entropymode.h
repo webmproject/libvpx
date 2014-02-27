@@ -18,6 +18,10 @@
 #define SWITCHABLE_FILTERS 3   // number of switchable filters
 #define SWITCHABLE_FILTER_CONTEXTS (SWITCHABLE_FILTERS + 1)
 
+#if CONFIG_INTERINTRA
+#define SEPARATE_INTERINTRA_UV  0
+#endif
+
 // #define MODE_STATS
 
 struct VP9Common;

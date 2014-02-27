@@ -120,9 +120,73 @@ static INLINE int mi_height_log2(BLOCK_SIZE sb_type) {
   return mi_height_log2_lookup[sb_type];
 }
 
+#if CONFIG_MASKED_INTERINTER
+#define MASK_BITS_SML   3
+#define MASK_BITS_MED   4
+#define MASK_BITS_BIG   5
+#define MASK_NONE      -1
+
+static inline int get_mask_bits(BLOCK_SIZE sb_type) {
+  if (sb_type < BLOCK_8X8)
+    return 0;
+  if (sb_type <= BLOCK_8X8)
+    return MASK_BITS_SML;
+  else if (sb_type <= BLOCK_32X32)
+    return MASK_BITS_MED;
+  else
+    return MASK_BITS_BIG;
+}
+#endif
+
+#if CONFIG_INTERINTRA
+static INLINE TX_SIZE intra_size_log2_for_interintra(int bs) {
+  switch (bs) {
+    case 4:
+      return TX_4X4;
+      break;
+    case 8:
+      return TX_8X8;
+      break;
+    case 16:
+      return TX_16X16;
+      break;
+    case 32:
+      return TX_32X32;
+      break;
+    default:
+      return TX_32X32;
+      break;
+  }
+}
+
+static INLINE int is_interintra_allowed(BLOCK_SIZE sb_type) {
+  return ((sb_type >= BLOCK_8X8) && (sb_type < BLOCK_64X64));
+}
+
+#if CONFIG_MASKED_INTERINTRA
+#define MASK_BITS_SML_INTERINTRA   3
+#define MASK_BITS_MED_INTERINTRA   4
+#define MASK_BITS_BIG_INTERINTRA   5
+#define MASK_NONE_INTERINTRA      -1
+static INLINE int get_mask_bits_interintra(BLOCK_SIZE sb_type) {
+  if (sb_type == BLOCK_4X4)
+     return 0;
+  if (sb_type <= BLOCK_8X8)
+    return MASK_BITS_SML_INTERINTRA;
+  else if (sb_type <= BLOCK_32X32)
+    return MASK_BITS_MED_INTERINTRA;
+  else
+    return MASK_BITS_BIG_INTERINTRA;
+}
+#endif
+#endif
+
 // This structure now relates to 8x8 block regions.
 typedef struct {
   MB_PREDICTION_MODE mode, uv_mode;
+#if CONFIG_FILTERINTRA
+  int filterbit, uv_filterbit;
+#endif
   MV_REFERENCE_FRAME ref_frame[2];
   TX_SIZE tx_size;
   int_mv mv[2];                // for each reference frame used
@@ -140,16 +204,42 @@ typedef struct {
   INTERPOLATION_TYPE interp_filter;
 
   BLOCK_SIZE sb_type;
+#if CONFIG_MASKED_INTERINTER
+  int use_masked_interinter;
+  int mask_index;
+#endif
+#if CONFIG_INTERINTRA
+  MB_PREDICTION_MODE interintra_mode, interintra_uv_mode;
+#if CONFIG_MASKED_INTERINTRA
+  int interintra_mask_index;
+  int interintra_uv_mask_index;
+  int use_masked_interintra;
+#endif
+#endif
 } MB_MODE_INFO;
 
 typedef struct {
   MB_MODE_INFO mbmi;
+#if CONFIG_FILTERINTRA
+  int b_filter_info[4];
+#endif
   b_mode_info bmi[4];
 } MODE_INFO;
 
 static INLINE int is_inter_block(const MB_MODE_INFO *mbmi) {
   return mbmi->ref_frame[0] > INTRA_FRAME;
 }
+
+#if CONFIG_FILTERINTRA
+static INLINE int
+is_filter_allowed(MB_PREDICTION_MODE mode) {
+  return 1;
+}
+
+static INLINE int is_filter_enabled(TX_SIZE txsize) {
+  return (txsize <= TX_32X32);
+}
+#endif
 
 static INLINE int has_second_ref(const MB_MODE_INFO *mbmi) {
   return mbmi->ref_frame[1] > INTRA_FRAME;

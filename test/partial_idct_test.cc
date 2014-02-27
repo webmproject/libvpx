@@ -71,7 +71,7 @@ TEST_P(PartialIDctTest, ResultsMatch) {
     size = 32;
     break;
   default:
-    ASSERT_TRUE(0) << "Wrong Size!";
+    FAIL() << "Wrong Size!";
     break;
   }
   DECLARE_ALIGNED_ARRAY(16, int16_t, test_coef_block1, kMaxNumCoeffs);

@@ -58,6 +58,18 @@ typedef struct frame_contexts {
   struct tx_probs tx_probs;
   vp9_prob mbskip_probs[MBSKIP_CONTEXTS];
   nmv_context nmvc;
+#if CONFIG_FILTERINTRA
+  vp9_prob filterintra_prob[TX_SIZES][INTRA_MODES];
+#endif
+#if CONFIG_MASKED_INTERINTER
+  vp9_prob masked_interinter_prob[BLOCK_SIZES];
+#endif
+#if CONFIG_INTERINTRA
+  vp9_prob interintra_prob[BLOCK_SIZES];
+#if CONFIG_MASKED_INTERINTRA
+  vp9_prob masked_interintra_prob[BLOCK_SIZES];
+#endif
+#endif
 } FRAME_CONTEXT;
 
 typedef struct {
@@ -77,6 +89,18 @@ typedef struct {
   struct tx_counts tx;
   unsigned int mbskip[MBSKIP_CONTEXTS][2];
   nmv_context_counts mv;
+#if CONFIG_FILTERINTRA
+  unsigned int filterintra[TX_SIZES][INTRA_MODES][2];
+#endif
+#if CONFIG_MASKED_INTERINTER
+  unsigned int masked_interinter[BLOCK_SIZES][2];
+#endif
+#if CONFIG_INTERINTRA
+  unsigned int interintra[BLOCK_SIZES][2];
+#if CONFIG_MASKED_INTERINTRA
+  unsigned int masked_interintra[BLOCK_SIZES][2];
+#endif
+#endif
 } FRAME_COUNTS;
 
 
@@ -222,6 +246,15 @@ typedef struct VP9Common {
   int fb_lru;  // Flag telling if lru is on/off
   uint32_t *fb_idx_ref_lru;  // Frame buffer lru cache
   uint32_t fb_idx_ref_lru_count;
+#if CONFIG_MASKED_INTERINTER
+  int use_masked_interinter;
+#endif
+#if CONFIG_INTERINTRA
+  int use_interintra;
+#if CONFIG_MASKED_INTERINTRA
+  int use_masked_interintra;
+#endif
+#endif
 } VP9_COMMON;
 
 // ref == 0 => LAST_FRAME

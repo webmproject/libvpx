@@ -129,4 +129,38 @@ int vp9_refining_search_8p_c(MACROBLOCK *x,
                              int *mvjcost, int *mvcost[2],
                              const MV *center_mv, const uint8_t *second_pred,
                              int w, int h);
+#if ((CONFIG_MASKED_INTERINTRA && CONFIG_INTERINTRA) || \
+    CONFIG_MASKED_INTERINTER)
+int vp9_find_best_masked_sub_pixel_iterative(MACROBLOCK *x,
+                                      uint8_t *mask, int mask_stride,
+                                      MV *bestmv, const MV *ref_mv,
+                                      int allow_hp,
+                                      int error_per_bit,
+                                      const vp9_variance_fn_ptr_t *vfp,
+                                      int forced_stop,
+                                      int iters_per_step,
+                                      int *mvjcost, int *mvcost[2],
+                                      int *distortion,
+                                      unsigned int *sse1,
+                                      int is_second);
+
+int vp9_find_best_masked_sub_pixel_tree(MACROBLOCK *x,
+                                      uint8_t *mask, int mask_stride,
+                                      MV *bestmv, const MV *ref_mv,
+                                      int allow_hp,
+                                      int error_per_bit,
+                                      const vp9_variance_fn_ptr_t *vfp,
+                                      int forced_stop,
+                                      int iters_per_step,
+                                      int *mvjcost, int *mvcost[2],
+                                      int *distortion,
+                                      unsigned int *sse1,
+                                      int is_second);
+
+int vp9_masked_full_pixel_diamond(
+    struct VP9_COMP *cpi, MACROBLOCK *x, uint8_t *mask, int mask_stride,
+    int_mv *mvp_full, int step_param, int sadpb, int further_steps,
+    int do_refine, vp9_variance_fn_ptr_t *fn_ptr, int_mv *ref_mv,
+    int_mv *dst_mv, int is_second);
+#endif
 #endif  // VP9_ENCODER_VP9_MCOMP_H_

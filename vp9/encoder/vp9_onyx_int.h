@@ -43,7 +43,11 @@
 
 #define KEY_FRAME_CONTEXT 5
 
+#if CONFIG_INTERINTRA
+#define MAX_MODES 42
+#else
 #define MAX_MODES 30
+#endif
 #define MAX_REFS  6
 
 #define MIN_THRESHMULT  32
@@ -161,6 +165,23 @@ typedef enum {
   THR_D63_PRED,
   THR_D117_PRED,
   THR_D45_PRED,
+
+#if CONFIG_INTERINTRA
+  THR_COMP_INTERINTRA_ZEROL,
+  THR_COMP_INTERINTRA_NEARESTL,
+  THR_COMP_INTERINTRA_NEARL,
+  THR_COMP_INTERINTRA_NEWL,
+
+  THR_COMP_INTERINTRA_ZEROG,
+  THR_COMP_INTERINTRA_NEARESTG,
+  THR_COMP_INTERINTRA_NEARG,
+  THR_COMP_INTERINTRA_NEWG,
+
+  THR_COMP_INTERINTRA_ZEROA,
+  THR_COMP_INTERINTRA_NEARESTA,
+  THR_COMP_INTERINTRA_NEARA,
+  THR_COMP_INTERINTRA_NEWA,
+#endif
 } THR_MODES;
 
 typedef enum {
@@ -470,6 +491,19 @@ typedef struct VP9_COMP {
   vp9_coeff_count coef_counts[TX_SIZES][PLANE_TYPES];
   vp9_coeff_probs_model frame_coef_probs[TX_SIZES][PLANE_TYPES];
   vp9_coeff_stats frame_branch_ct[TX_SIZES][PLANE_TYPES];
+
+#if CONFIG_MASKED_INTERINTER
+  unsigned int masked_interinter_counts[BLOCK_SIZES][2];
+  unsigned int masked_interinter_select_counts[2];
+#endif
+#if CONFIG_INTERINTRA
+  unsigned int interintra_count[BLOCK_SIZES][2];
+  unsigned int interintra_select_count[2];
+#if CONFIG_MASKED_INTERINTRA
+  unsigned int masked_interintra_count[BLOCK_SIZES][2];
+  unsigned int masked_interintra_select_count[2];
+#endif
+#endif
 
   int64_t target_bandwidth;
   struct vpx_codec_pkt_list  *output_pkt_list;

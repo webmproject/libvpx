@@ -1401,6 +1401,7 @@ static void update_layer_contexts (VP8_COMP *cpi)
         unsigned int i;
         double prev_layer_framerate=0;
 
+        assert(oxcf->number_of_layers <= VPX_TS_MAX_LAYERS);
         for (i=0; i<oxcf->number_of_layers; i++)
         {
             LAYER_CONTEXT *lc = &cpi->layer_context[i];
@@ -1623,6 +1624,12 @@ void vp8_change_config(VP8_COMP *cpi, VP8_CONFIG *oxcf)
         cpi->oxcf.maximum_buffer_size =
             rescale((int)cpi->oxcf.maximum_buffer_size,
                     cpi->oxcf.target_bandwidth, 1000);
+    // Under a configuration change, where maximum_buffer_size may change,
+    // keep buffer level clipped to the maximum allowed buffer size.
+    if (cpi->bits_off_target > cpi->oxcf.maximum_buffer_size) {
+      cpi->bits_off_target = cpi->oxcf.maximum_buffer_size;
+      cpi->buffer_level = cpi->bits_off_target;
+    }
 
     /* Set up frame rate and related parameters rate control values. */
     vp8_new_framerate(cpi, cpi->framerate);
@@ -2164,10 +2171,12 @@ void vp8_remove_compressor(VP8_COMP **ptr)
                                               8.0 / 1000.0  / time_encoded;
                         double samples = 3.0 / 2 * cpi->frames_in_layer[i] *
                                          lst_yv12->y_width * lst_yv12->y_height;
-                        double total_psnr = vp8_mse2psnr(samples, 255.0,
-                                                  cpi->total_error2[i]);
-                        double total_psnr2 = vp8_mse2psnr(samples, 255.0,
-                                                  cpi->total_error2_p[i]);
+                        double total_psnr =
+                            vp8_mse2psnr(samples, 255.0,
+                                         cpi->total_error2[i]);
+                        double total_psnr2 =
+                            vp8_mse2psnr(samples, 255.0,
+                                         cpi->total_error2_p[i]);
                         double total_ssim = 100 * pow(cpi->sum_ssim[i] /
                                                       cpi->sum_weights[i], 8.0);
 
@@ -2185,9 +2194,9 @@ void vp8_remove_compressor(VP8_COMP **ptr)
                     double samples = 3.0 / 2 * cpi->count *
                                         lst_yv12->y_width * lst_yv12->y_height;
                     double total_psnr = vp8_mse2psnr(samples, 255.0,
-                                                         cpi->total_sq_error);
+                                                     cpi->total_sq_error);
                     double total_psnr2 = vp8_mse2psnr(samples, 255.0,
-                                                         cpi->total_sq_error2);
+                                                      cpi->total_sq_error2);
                     double total_ssim = 100 * pow(cpi->summed_quality /
                                                       cpi->summed_weights, 8.0);
 
@@ -2516,8 +2525,8 @@ static void generate_psnr_packet(VP8_COMP *cpi)
     pkt.data.psnr.samples[3] = width * height;
 
     for (i = 0; i < 4; i++)
-        pkt.data.psnr.psnr[i] = vp8_mse2psnr(pkt.data.psnr.samples[i], 255.0,
-                                             (double)(pkt.data.psnr.sse[i]));
+      pkt.data.psnr.psnr[i] = vp8_mse2psnr(pkt.data.psnr.samples[i], 255.0,
+                                           (double)(pkt.data.psnr.sse[i]));
 
     vpx_codec_pkt_list_add(cpi->output_pkt_list, &pkt);
 }
@@ -2675,8 +2684,8 @@ static int resize_key_frame(VP8_COMP *cpi)
     VP8_COMMON *cm = &cpi->common;
 
     /* Do we need to apply resampling for one pass cbr.
-     * In one pass this is more limited than in two pass cbr
-     * The test and any change is only made one per key frame sequence
+     * In one pass this is more limited than in two pass cbr.
+     * The test and any change is only made once per key frame sequence.
      */
     if (cpi->oxcf.allow_spatial_resampling && (cpi->oxcf.end_usage == USAGE_STREAM_FROM_SERVER))
     {
@@ -2699,7 +2708,7 @@ static int resize_key_frame(VP8_COMP *cpi)
             cm->vert_scale = (cm->vert_scale > NORMAL) ? cm->vert_scale - 1 : NORMAL;
         }
 
-        /* Get the new hieght and width */
+        /* Get the new height and width */
         Scale2Ratio(cm->horiz_scale, &hr, &hs);
         Scale2Ratio(cm->vert_scale, &vr, &vs);
         new_width = ((hs - 1) + (cpi->oxcf.Width * hr)) / hs;
@@ -5063,6 +5072,7 @@ int vp8_get_compressed_data(VP8_COMP *cpi, unsigned int *frame_flags, unsigned l
                 unsigned int i;
 
                 /* Update frame rates for each layer */
+                assert(cpi->oxcf.number_of_layers <= VPX_TS_MAX_LAYERS);
                 for (i=0; i<cpi->oxcf.number_of_layers; i++)
                 {
                     LAYER_CONTEXT *lc = &cpi->layer_context[i];
