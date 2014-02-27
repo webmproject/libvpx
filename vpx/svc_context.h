@@ -64,7 +64,8 @@ vpx_codec_err_t vpx_svc_set_options(SvcContext *svc_ctx, const char *options);
  * e.g., "60,53,39,33,27"
  */
 vpx_codec_err_t vpx_svc_set_quantizers(SvcContext *svc_ctx,
-                                       const char *quantizer_values);
+                                       const char *quantizer_values,
+                                       const int is_for_keyframe);
 
 /**
  * Set SVC scale factors
