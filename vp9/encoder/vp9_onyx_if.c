@@ -855,8 +855,7 @@ static void set_rt_speed_feature(VP9_COMMON *cm,
     sf->partition_search_type = VAR_BASED_FIXED_PARTITION;
   }
   if (speed >= 7) {
-    sf->partition_search_type = FIXED_PARTITION;
-    sf->always_this_block_size = BLOCK_16X16;
+    sf->partition_search_type = VAR_BASED_FIXED_PARTITION;
     sf->use_nonrd_pick_mode = 1;
   }
 }
