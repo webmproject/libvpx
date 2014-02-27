@@ -2,6 +2,23 @@
   "comments": [
     {
       "key": {
+        "uuid": "AAAAdn//1Bk\u003d",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-02-27T03:10:10Z",
+      "side": 1,
+      "message": "function name typo",
+      "revId": "872ea0d6d7728658e326f028180d3cd900c1dc08",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//1CY\u003d",
         "filename": "test/dct32x32_test.cc",
         "patchSetId": 1
@@ -13,6 +30,24 @@
       "writtenOn": "2014-02-27T03:01:48Z",
       "side": 1,
       "message": "Would it be reasonable to pass NULL for the un-implemented functions, and then make the tests skip/pass for those? If they don\u0027t take long, it\u0027s probably not worth the effort.",
+      "revId": "872ea0d6d7728658e326f028180d3cd900c1dc08",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//1Bs\u003d",
+        "filename": "test/dct32x32_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 255,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-02-27T03:10:10Z",
+      "side": 1,
+      "message": "these tests are still valid, if one sided. adding NULL cases doesn\u0027t do much for rot or anything. gaps in neon can be found via the rtcd, so reviewers just need to remember to require the tests are updated",
+      "parentUuid": "AAAAdn//1CY\u003d",
       "revId": "872ea0d6d7728658e326f028180d3cd900c1dc08",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
