@@ -19,7 +19,7 @@
 #include "vp8/common/alloccommon.h"
 #include "mcomp.h"
 #include "firstpass.h"
-#include "psnr.h"
+#include "vpx/internal/vpx_psnr.h"
 #include "vpx_scale/vpx_scale.h"
 #include "vp8/common/extend.h"
 #include "ratectrl.h"
@@ -2170,10 +2170,12 @@ void vp8_remove_compressor(VP8_COMP **ptr)
                                               8.0 / 1000.0  / time_encoded;
                         double samples = 3.0 / 2 * cpi->frames_in_layer[i] *
                                          lst_yv12->y_width * lst_yv12->y_height;
-                        double total_psnr = vp8_mse2psnr(samples, 255.0,
-                                                  cpi->total_error2[i]);
-                        double total_psnr2 = vp8_mse2psnr(samples, 255.0,
-                                                  cpi->total_error2_p[i]);
+                        double total_psnr =
+                            vpx_sse_to_psnr(samples, 255.0,
+                                            cpi->total_error2[i]);
+                        double total_psnr2 =
+                            vpx_sse_to_psnr(samples, 255.0,
+                                            cpi->total_error2_p[i]);
                         double total_ssim = 100 * pow(cpi->sum_ssim[i] /
                                                       cpi->sum_weights[i], 8.0);
 
@@ -2190,9 +2192,9 @@ void vp8_remove_compressor(VP8_COMP **ptr)
                 {
                     double samples = 3.0 / 2 * cpi->count *
                                         lst_yv12->y_width * lst_yv12->y_height;
-                    double total_psnr = vp8_mse2psnr(samples, 255.0,
-                                                         cpi->total_sq_error);
-                    double total_psnr2 = vp8_mse2psnr(samples, 255.0,
+                    double total_psnr = vpx_sse_to_psnr(samples, 255.0,
+                                                        cpi->total_sq_error);
+                    double total_psnr2 = vpx_sse_to_psnr(samples, 255.0,
                                                          cpi->total_sq_error2);
                     double total_ssim = 100 * pow(cpi->summed_quality /
                                                       cpi->summed_weights, 8.0);
@@ -2522,8 +2524,8 @@ static void generate_psnr_packet(VP8_COMP *cpi)
     pkt.data.psnr.samples[3] = width * height;
 
     for (i = 0; i < 4; i++)
-        pkt.data.psnr.psnr[i] = vp8_mse2psnr(pkt.data.psnr.samples[i], 255.0,
-                                             (double)(pkt.data.psnr.sse[i]));
+        pkt.data.psnr.psnr[i] = vpx_sse_to_psnr(pkt.data.psnr.samples[i], 255.0,
+                                                (double)(pkt.data.psnr.sse[i]));
 
     vpx_codec_pkt_list_add(cpi->output_pkt_list, &pkt);
 }
@@ -5284,11 +5286,11 @@ int vp8_get_compressed_data(VP8_COMP *cpi, unsigned int *frame_flags, unsigned l
 
                 sq_error = (double)(ye + ue + ve);
 
-                frame_psnr = vp8_mse2psnr(t_samples, 255.0, sq_error);
+                frame_psnr = vpx_sse_to_psnr(t_samples, 255.0, sq_error);
 
-                cpi->total_y += vp8_mse2psnr(y_samples, 255.0, (double)ye);
-                cpi->total_u += vp8_mse2psnr(uv_samples, 255.0, (double)ue);
-                cpi->total_v += vp8_mse2psnr(uv_samples, 255.0, (double)ve);
+                cpi->total_y += vpx_sse_to_psnr(y_samples, 255.0, (double)ye);
+                cpi->total_u += vpx_sse_to_psnr(uv_samples, 255.0, (double)ue);
+                cpi->total_v += vpx_sse_to_psnr(uv_samples, 255.0, (double)ve);
                 cpi->total_sq_error += sq_error;
                 cpi->total  += frame_psnr;
 #if CONFIG_POSTPROC
@@ -5311,14 +5313,14 @@ int vp8_get_compressed_data(VP8_COMP *cpi, unsigned int *frame_flags, unsigned l
 
                     sq_error2 = (double)(ye + ue + ve);
 
-                    frame_psnr2 = vp8_mse2psnr(t_samples, 255.0, sq_error2);
+                    frame_psnr2 = vpx_sse_to_psnr(t_samples, 255.0, sq_error2);
 
-                    cpi->totalp_y += vp8_mse2psnr(y_samples,
-                                                  255.0, (double)ye);
-                    cpi->totalp_u += vp8_mse2psnr(uv_samples,
-                                                  255.0, (double)ue);
-                    cpi->totalp_v += vp8_mse2psnr(uv_samples,
-                                                  255.0, (double)ve);
+                    cpi->totalp_y += vpx_sse_to_psnr(y_samples,
+                                                     255.0, (double)ye);
+                    cpi->totalp_u += vpx_sse_to_psnr(uv_samples,
+                                                     255.0, (double)ue);
+                    cpi->totalp_v += vpx_sse_to_psnr(uv_samples,
+                                                     255.0, (double)ve);
                     cpi->total_sq_error2 += sq_error2;
                     cpi->totalp  += frame_psnr2;
 
