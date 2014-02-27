@@ -34,6 +34,24 @@
       "revId": "d7cff287964cd1b37dd108bc0f39251f03779562",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//00o\u003d",
+        "filename": "test/sad_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 378,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2014-02-27T23:27:20Z",
+      "side": 0,
+      "message": "I agree that it\u0027s excessive, but refactorings and additions will frequently create issues where there were not. Add the lack of indentation for these and I personally think always including the comment is best.",
+      "parentUuid": "AAAAdn//01c\u003d",
+      "revId": "d7cff287964cd1b37dd108bc0f39251f03779562",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
