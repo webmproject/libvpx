@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//00c\u003d",
+        "filename": "test/test.mk",
+        "patchSetId": 1
+      },
+      "lineNbr": 112,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2014-02-27T23:30:03Z",
+      "side": 1,
+      "message": "Not sure whether to follow the precedence of variance_test of take this approach instead. I think I like this one better.",
+      "revId": "2f6fc644734d585154aeca27660a8fb3a88d2065",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
