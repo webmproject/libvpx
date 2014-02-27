@@ -35,14 +35,11 @@ class Y4mVideoSource : public VideoSource {
 
   virtual ~Y4mVideoSource() {
     vpx_img_free(img_.get());
-    y4m_input_close(&y4m_);
-    if (input_file_)
-      fclose(input_file_);
+    CloseSource();
   }
 
   virtual void Begin() {
-    if (input_file_)
-      fclose(input_file_);
+    CloseSource();
     input_file_ = OpenTestDataFile(file_name_);
     ASSERT_TRUE(input_file_ != NULL) << "Input file open failed. Filename: "
         << file_name_;
@@ -89,6 +86,15 @@ class Y4mVideoSource : public VideoSource {
   }
 
  protected:
+  void CloseSource() {
+    y4m_input_close(&y4m_);
+    y4m_ = y4m_input();
+    if (input_file_ != NULL) {
+      fclose(input_file_);
+      input_file_ = NULL;
+    }
+  }
+
   std::string file_name_;
   FILE *input_file_;
   testing::internal::scoped_ptr<vpx_image_t> img_;
