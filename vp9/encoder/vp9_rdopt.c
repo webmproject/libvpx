@@ -1725,6 +1725,8 @@ static void rd_check_segment_txsize(VP9_COMP *cpi, MACROBLOCK *x,
 
         mode_idx = INTER_OFFSET(this_mode);
         bsi->rdstat[i][mode_idx].brdcost = INT64_MAX;
+        if (cpi->sf.disable_inter_mode_mask[bsize] & (1 << mode_idx))
+          continue;
 
         // if we're near/nearest and mv == 0,0, compare to zeromv
         if ((this_mode == NEARMV || this_mode == NEARESTMV ||
@@ -3316,6 +3318,9 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
 
     this_mode = vp9_mode_order[mode_index].mode;
     ref_frame = vp9_mode_order[mode_index].ref_frame[0];
+    if (ref_frame != INTRA_FRAME &&
+        cpi->sf.disable_inter_mode_mask[bsize] & (1 << INTER_OFFSET(this_mode)))
+      continue;
     second_ref_frame = vp9_mode_order[mode_index].ref_frame[1];
 
     comp_pred = second_ref_frame > INTRA_FRAME;
