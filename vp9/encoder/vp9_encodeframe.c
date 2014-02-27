@@ -1230,10 +1230,13 @@ static void rd_use_partition(VP9_COMP *cpi,
   PARTITION_CONTEXT sl[8], sa[8];
   int last_part_rate = INT_MAX;
   int64_t last_part_dist = INT64_MAX;
+  int64_t last_part_rd = INT64_MAX;
   int none_rate = INT_MAX;
   int64_t none_dist = INT64_MAX;
+  int64_t none_rd = INT64_MAX;
   int chosen_rate = INT_MAX;
   int64_t chosen_dist = INT64_MAX;
+  int64_t chosen_rd = INT64_MAX;
   BLOCK_SIZE sub_subsize = BLOCK_4X4;
   int splits_below = 0;
   BLOCK_SIZE bs_type = mi_8x8[0]->mbmi.sb_type;
@@ -1288,7 +1291,11 @@ static void rd_use_partition(VP9_COMP *cpi,
       pl = partition_plane_context(cpi->above_seg_context,
                                    cpi->left_seg_context,
                                    mi_row, mi_col, bsize);
-      none_rate += x->partition_cost[pl][PARTITION_NONE];
+
+      if (none_rate < INT_MAX) {
+        none_rate += x->partition_cost[pl][PARTITION_NONE];
+        none_rd = RDCOST(x->rdmult, x->rddiv, none_rate, none_dist);
+      }
 
       restore_context(cpi, mi_row, mi_col, a, l, sa, sl, bsize);
       mi_8x8[0]->mbmi.sb_type = bs_type;
@@ -1383,8 +1390,10 @@ static void rd_use_partition(VP9_COMP *cpi,
 
   pl = partition_plane_context(cpi->above_seg_context, cpi->left_seg_context,
                                mi_row, mi_col, bsize);
-  if (last_part_rate < INT_MAX)
+  if (last_part_rate < INT_MAX) {
     last_part_rate += x->partition_cost[pl][partition];
+    last_part_rd = RDCOST(x->rdmult, x->rddiv, last_part_rate, last_part_dist);
+  }
 
   if (cpi->sf.adjust_partitioning_from_last_frame
       && partition != PARTITION_SPLIT && bsize > BLOCK_8X8
@@ -1442,21 +1451,21 @@ static void rd_use_partition(VP9_COMP *cpi,
                                  mi_row, mi_col, bsize);
     if (chosen_rate < INT_MAX) {
       chosen_rate += x->partition_cost[pl][PARTITION_SPLIT];
+      chosen_rd = RDCOST(x->rdmult, x->rddiv, chosen_rate, chosen_dist);
     }
   }
 
   // If last_part is better set the partitioning to that...
-  if (RDCOST(x->rdmult, x->rddiv, last_part_rate, last_part_dist)
-      < RDCOST(x->rdmult, x->rddiv, chosen_rate, chosen_dist)) {
+  if (last_part_rd < chosen_rd) {
     mi_8x8[0]->mbmi.sb_type = bsize;
     if (bsize >= BLOCK_8X8)
       *(get_sb_partitioning(x, bsize)) = subsize;
     chosen_rate = last_part_rate;
     chosen_dist = last_part_dist;
+    chosen_rd = last_part_rd;
   }
   // If none was better set the partitioning to that...
-  if (RDCOST(x->rdmult, x->rddiv, chosen_rate, chosen_dist)
-      > RDCOST(x->rdmult, x->rddiv, none_rate, none_dist)) {
+  if (none_rd < chosen_rd) {
     if (bsize >= BLOCK_8X8)
       *(get_sb_partitioning(x, bsize)) = bsize;
     chosen_rate = none_rate;
@@ -2304,8 +2313,8 @@ static void nonrd_use_partition(VP9_COMP *cpi,
   int bw = num_8x8_blocks_wide_lookup[bsize];
   int bh = num_8x8_blocks_high_lookup[bsize];
 
-  int brate;
-  int64_t bdist;
+  int brate = 0;
+  int64_t bdist = 0;
   *rate = 0;
   *dist = 0;
 
