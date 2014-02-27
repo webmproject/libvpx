@@ -14,6 +14,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
 #include "vp9/common/vp9_common.h"
 #include "vp9/encoder/vp9_resize.h"
 
@@ -23,9 +24,6 @@
 #define SUBPEL_BITS               5
 #define SUBPEL_MASK               ((1 << SUBPEL_BITS) - 1)
 #define INTERP_PRECISION_BITS     32
-
-#define ROUND_POWER_OF_TWO(value, n) \
-    (((value) + (1 << ((n) - 1))) >> (n))
 
 typedef int16_t interp_kernel[INTERP_TAPS];
 
