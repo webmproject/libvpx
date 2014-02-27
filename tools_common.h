@@ -145,6 +145,8 @@ int vpx_img_plane_height(const vpx_image_t *img, int plane);
 void vpx_img_write(const vpx_image_t *img, FILE *file);
 int vpx_img_read(vpx_image_t *img, FILE *file);
 
+double sse_to_psnr(double samples, double peak, double mse);
+
 #ifdef __cplusplus
 }  /* extern "C" */
 #endif
