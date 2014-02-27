@@ -315,15 +315,11 @@ static void optimize_init_b(int plane, BLOCK_SIZE bsize,
                             struct encode_b_args *args) {
   const MACROBLOCKD *xd = &args->x->e_mbd;
   const struct macroblockd_plane* const pd = &xd->plane[plane];
-  const BLOCK_SIZE plane_bsize = get_plane_block_size(bsize, pd);
-  const int num_4x4_w = num_4x4_blocks_wide_lookup[plane_bsize];
-  const int num_4x4_h = num_4x4_blocks_high_lookup[plane_bsize];
   const MB_MODE_INFO *mbmi = &xd->mi_8x8[0]->mbmi;
   const TX_SIZE tx_size = plane ? get_uv_tx_size(mbmi) : mbmi->tx_size;
 
-  vp9_get_entropy_contexts(tx_size, args->ctx->ta[plane], args->ctx->tl[plane],
-                           pd->above_context, pd->left_context,
-                           num_4x4_w, num_4x4_h);
+  vp9_get_entropy_contexts(bsize, tx_size, pd,
+                           args->ctx->ta[plane], args->ctx->tl[plane]);
 }
 
 static INLINE void fdct32x32(int rd_transform,

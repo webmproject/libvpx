@@ -691,10 +691,16 @@ static void block_rd_txfm(int plane, int block, BLOCK_SIZE plane_bsize,
   }
 }
 
-void vp9_get_entropy_contexts(TX_SIZE tx_size,
-    ENTROPY_CONTEXT t_above[16], ENTROPY_CONTEXT t_left[16],
-    const ENTROPY_CONTEXT *above, const ENTROPY_CONTEXT *left,
-    int num_4x4_w, int num_4x4_h) {
+void vp9_get_entropy_contexts(BLOCK_SIZE bsize, TX_SIZE tx_size,
+                              const struct macroblockd_plane *pd,
+                              ENTROPY_CONTEXT t_above[16],
+                              ENTROPY_CONTEXT t_left[16]) {
+  const BLOCK_SIZE plane_bsize = get_plane_block_size(bsize, pd);
+  const int num_4x4_w = num_4x4_blocks_wide_lookup[plane_bsize];
+  const int num_4x4_h = num_4x4_blocks_high_lookup[plane_bsize];
+  const ENTROPY_CONTEXT *const above = pd->above_context;
+  const ENTROPY_CONTEXT *const left = pd->left_context;
+
   int i;
   switch (tx_size) {
     case TX_4X4:
@@ -731,9 +737,6 @@ static void txfm_rd_in_plane(MACROBLOCK *x,
                              BLOCK_SIZE bsize, TX_SIZE tx_size) {
   MACROBLOCKD *const xd = &x->e_mbd;
   struct macroblockd_plane *const pd = &xd->plane[plane];
-  const BLOCK_SIZE bs = get_plane_block_size(bsize, pd);
-  const int num_4x4_w = num_4x4_blocks_wide_lookup[bs];
-  const int num_4x4_h = num_4x4_blocks_high_lookup[bs];
   struct rdcost_block_args args = { 0 };
   args.x = x;
   args.best_rd = ref_best_rd;
@@ -741,9 +744,7 @@ static void txfm_rd_in_plane(MACROBLOCK *x,
   if (plane == 0)
     xd->mi_8x8[0]->mbmi.tx_size = tx_size;
 
-  vp9_get_entropy_contexts(tx_size, args.t_above, args.t_left,
-                           pd->above_context, pd->left_context,
-                           num_4x4_w, num_4x4_h);
+  vp9_get_entropy_contexts(bsize, tx_size, pd, args.t_above, args.t_left);
 
   args.so = get_scan(xd, tx_size, pd->plane_type, 0);
 

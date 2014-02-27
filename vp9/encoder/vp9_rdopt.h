@@ -80,10 +80,10 @@ void vp9_init_me_luts();
 void vp9_set_mbmode_and_mvs(MACROBLOCKD *xd, MB_PREDICTION_MODE mode,
                             const MV *mv);
 
-void vp9_get_entropy_contexts(TX_SIZE tx_size,
-    ENTROPY_CONTEXT t_above[16], ENTROPY_CONTEXT t_left[16],
-    const ENTROPY_CONTEXT *above, const ENTROPY_CONTEXT *left,
-    int num_4x4_w, int num_4x4_h);
+void vp9_get_entropy_contexts(BLOCK_SIZE bsize, TX_SIZE tx_size,
+                              const struct macroblockd_plane *pd,
+                              ENTROPY_CONTEXT t_above[16],
+                              ENTROPY_CONTEXT t_left[16]);
 
 #ifdef __cplusplus
 }  // extern "C"
