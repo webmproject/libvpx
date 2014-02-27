@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//1CY\u003d",
+        "filename": "test/dct32x32_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 255,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2014-02-27T03:01:48Z",
+      "side": 1,
+      "message": "Would it be reasonable to pass NULL for the un-implemented functions, and then make the tests skip/pass for those? If they don\u0027t take long, it\u0027s probably not worth the effort.",
+      "revId": "872ea0d6d7728658e326f028180d3cd900c1dc08",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
