@@ -118,9 +118,6 @@ void die_codec(vpx_codec_ctx_t *ctx, const char *s);
 /* The tool including this file must define usage_exit() */
 void usage_exit();
 
-uint16_t mem_get_le16(const void *data);
-uint32_t mem_get_le32(const void *data);
-
 int read_yuv_frame(struct VpxInputContext *input_ctx, vpx_image_t *yuv_frame);
 
 typedef struct VpxInterface {

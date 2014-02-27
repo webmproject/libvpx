@@ -12,6 +12,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "vpx_ports/mem_ops.h"
+
 #include "./ivfdec.h"
 
 static const char *IVF_SIGNATURE = "DKIF";
