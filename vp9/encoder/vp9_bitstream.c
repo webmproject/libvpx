@@ -14,6 +14,7 @@
 
 #include "vpx/vpx_encoder.h"
 #include "vpx_mem/vpx_mem.h"
+#include "vpx_ports/mem_ops.h"
 
 #include "vp9/common/vp9_entropymode.h"
 #include "vp9/common/vp9_entropymv.h"
@@ -59,13 +60,6 @@ static void write_inter_mode(vp9_writer *w, MB_PREDICTION_MODE mode,
   assert(is_inter_mode(mode));
   vp9_write_token(w, vp9_inter_mode_tree, probs,
                   &inter_mode_encodings[INTER_OFFSET(mode)]);
-}
-
-static INLINE void write_be32(uint8_t *p, int value) {
-  p[0] = value >> 24;
-  p[1] = value >> 16;
-  p[2] = value >> 8;
-  p[3] = value;
 }
 
 void vp9_encode_unsigned_max(struct vp9_write_bit_buffer *wb,
@@ -1007,7 +1001,7 @@ static size_t encode_tiles(VP9_COMP *cpi, uint8_t *data_ptr) {
       vp9_stop_encode(&residual_bc);
       if (tile_col < tile_cols - 1 || tile_row < tile_rows - 1) {
         // size of this tile
-        write_be32(data_ptr + total_size, residual_bc.pos);
+        mem_put_be32(data_ptr + total_size, residual_bc.pos);
         total_size += 4;
       }
 

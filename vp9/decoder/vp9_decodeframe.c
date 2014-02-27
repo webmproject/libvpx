@@ -15,6 +15,7 @@
 #include "./vpx_scale_rtcd.h"
 
 #include "vpx_mem/vpx_mem.h"
+#include "vpx_ports/mem_ops.h"
 #include "vpx_scale/vpx_scale.h"
 
 #include "vp9/common/vp9_alloccommon.h"
@@ -38,10 +39,6 @@
 #include "vp9/decoder/vp9_read_bit_buffer.h"
 #include "vp9/decoder/vp9_reader.h"
 #include "vp9/decoder/vp9_thread.h"
-
-static int read_be32(const uint8_t *p) {
-  return (p[0] << 24) | (p[1] << 16) | (p[2] << 8) | p[3];
-}
 
 static int is_compound_reference_allowed(const VP9_COMMON *cm) {
   int i;
@@ -837,7 +834,7 @@ static size_t get_tile(const uint8_t *const data_end,
       vpx_internal_error(error_info, VPX_CODEC_CORRUPT_FRAME,
                          "Truncated packet or corrupt tile length");
 
-    size = read_be32(*data);
+    size = mem_get_be32(*data);
     *data += 4;
 
     if (size > (size_t)(data_end - *data))
