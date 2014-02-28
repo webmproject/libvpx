@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//0qc\u003d",
+        "filename": "vpx/src/svc_encodeframe.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 915,
+      "author": {
+        "id": 1003066
+      },
+      "writtenOn": "2014-02-28T17:11:39Z",
+      "side": 1,
+      "message": "It might make sense to grow the buffer more than just the required amount so you don\u0027t have to do realloc for every stats packet after the buffer gets full.",
+      "revId": "f550ced7844ac0677aa45a58d91680b07442a998",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//0qg\u003d",
+        "filename": "vpx/src/svc_encodeframe.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 926,
+      "author": {
+        "id": 1003066
+      },
+      "writtenOn": "2014-02-28T17:11:39Z",
+      "side": 1,
+      "message": "can you do si-\u003erc_stats_buf_used +\u003d cx_pkt-\u003edata.twopass_stats.sz instead?",
+      "revId": "f550ced7844ac0677aa45a58d91680b07442a998",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
