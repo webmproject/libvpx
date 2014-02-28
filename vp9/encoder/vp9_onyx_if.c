@@ -263,7 +263,7 @@ static void setup_in_frame_q_adj(VP9_COMP *cpi) {
     // Clear down the complexity map used for rd
     vpx_memset(cpi->complexity_map, 0, cm->mi_rows * cm->mi_cols);
 
-    vp9_enable_segmentation((VP9_PTR)cpi);
+    vp9_enable_segmentation(seg);
     vp9_clearall_segfeatures(seg);
 
     // Select delta coding method
@@ -297,7 +297,7 @@ static void configure_static_seg_features(VP9_COMP *cpi) {
     cpi->static_mb_pct = 0;
 
     // Disable segmentation
-    vp9_disable_segmentation((VP9_PTR)cpi);
+    vp9_disable_segmentation(seg);
 
     // Clear down the segment features.
     vp9_clearall_segfeatures(seg);
@@ -310,7 +310,7 @@ static void configure_static_seg_features(VP9_COMP *cpi) {
     cpi->static_mb_pct = 0;
 
     // Disable segmentation and individual segment features by default
-    vp9_disable_segmentation((VP9_PTR)cpi);
+    vp9_disable_segmentation(seg);
     vp9_clearall_segfeatures(seg);
 
     // Scan frames from current to arf frame.
@@ -363,7 +363,7 @@ static void configure_static_seg_features(VP9_COMP *cpi) {
         // Disable segmentation and clear down features if alt ref
         // is not active for this group
 
-        vp9_disable_segmentation((VP9_PTR)cpi);
+        vp9_disable_segmentation(seg);
 
         vpx_memset(cpi->segmentation_map, 0, cm->mi_rows * cm->mi_cols);
 
@@ -3885,15 +3885,15 @@ int vp9_set_roimap(VP9_PTR comp, unsigned char *map, unsigned int rows,
     return -1;
 
   if (!map) {
-    vp9_disable_segmentation((VP9_PTR)cpi);
+    vp9_disable_segmentation(seg);
     return 0;
   }
 
   // Set the segmentation Map
-  vp9_set_segmentation_map((VP9_PTR)cpi, map);
+  vp9_set_segmentation_map(cpi, map);
 
   // Activate segmentation.
-  vp9_enable_segmentation((VP9_PTR)cpi);
+  vp9_enable_segmentation(seg);
 
   // Set up the quant, LF and breakout threshold segment data
   for (i = 0; i < MAX_SEGMENTS; i++) {
@@ -3917,7 +3917,7 @@ int vp9_set_roimap(VP9_PTR comp, unsigned char *map, unsigned int rows,
 
   // Initialize the feature data structure
   // SEGMENT_DELTADATA    0, SEGMENT_ABSDATA      1
-  vp9_set_segment_data((VP9_PTR)cpi, &feature_data[0][0], SEGMENT_DELTADATA);
+  vp9_set_segment_data(seg, &feature_data[0][0], SEGMENT_DELTADATA);
 
   return 0;
 }
