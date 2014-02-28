@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//0r4\u003d",
+        "filename": "vp9/encoder/vp9_quantize.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 273,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2014-02-28T16:06:17Z",
+      "side": 1,
+      "message": "may be  name without \"mb\"?",
+      "revId": "96828379d62af1c634d81806148dbc2a69fc6326",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//0r0\u003d",
+        "filename": "vp9/encoder/vp9_quantize.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 282,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2014-02-28T16:06:17Z",
+      "side": 1,
+      "message": "Can we leave some comments here? so we would be careful in making changes here. i.e. any change here on any frame require a call to vp9_init_quantizer();",
+      "revId": "96828379d62af1c634d81806148dbc2a69fc6326",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
