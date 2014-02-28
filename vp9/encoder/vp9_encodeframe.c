@@ -995,7 +995,7 @@ static BLOCK_SIZE find_partition_size(BLOCK_SIZE bsize,
   if (rows_left <= 0 || cols_left <= 0) {
     return MIN(bsize, BLOCK_8X8);
   } else {
-    for (; bsize > 0; --bsize) {
+    for (; bsize > 0; bsize -= 3) {
       *bh = num_8x8_blocks_high_lookup[bsize];
       *bw = num_8x8_blocks_wide_lookup[bsize];
       if ((*bh <= rows_left) && (*bw <= cols_left)) {
@@ -2332,8 +2332,6 @@ static void nonrd_use_partition(VP9_COMP *cpi, const TileInfo *const tile,
   int mis = cm->mode_info_stride;
   int br, bc;
   int i, j;
-  int chosen_rate = INT_MAX;
-  int64_t chosen_dist = INT64_MAX;
   MB_PREDICTION_MODE mode = DC_PRED;
   int rows = MIN(MI_BLOCK_SIZE, tile->mi_row_end - mi_row);
   int cols = MIN(MI_BLOCK_SIZE, tile->mi_col_end - mi_col);
@@ -2354,6 +2352,7 @@ static void nonrd_use_partition(VP9_COMP *cpi, const TileInfo *const tile,
 
       BLOCK_SIZE bs = find_partition_size(bsize, rows - br, cols - bc,
                                           &bh, &bw);
+
       set_offsets(cpi, tile, row, col, bs);
 
       if (cm->frame_type != KEY_FRAME)
@@ -2365,16 +2364,10 @@ static void nonrd_use_partition(VP9_COMP *cpi, const TileInfo *const tile,
       *dist += bdist;
 
       for (j = 0; j < bh; ++j)
-        for (i = 0; i < bw; ++i) {
+        for (i = 0; i < bw; ++i)
           xd->mi_8x8[j * mis + i] = xd->mi_8x8[0];
-        }
     }
   }
-
-  *rate = chosen_rate;
-  *dist = chosen_dist;
-
-  encode_sb_rt(cpi, tile, tp, mi_row, mi_col, 1, BLOCK_64X64);
 }
 
 static void encode_nonrd_sb_row(VP9_COMP *cpi, const TileInfo *const tile,
@@ -2397,6 +2390,7 @@ static void encode_nonrd_sb_row(VP9_COMP *cpi, const TileInfo *const tile,
       nonrd_use_partition(cpi, tile, tp, mi_row, mi_col,
                           cpi->sf.always_this_block_size,
                           &dummy_rate, &dummy_dist);
+      encode_sb_rt(cpi, tile, tp, mi_row, mi_col, 1, BLOCK_64X64);
     } else if (cpi->sf.partition_search_type == VAR_BASED_FIXED_PARTITION ||
                cpi->sf.partition_search_type == VAR_BASED_PARTITION) {
       // TODO(debargha): Implement VAR_BASED_PARTITION as a separate case.
@@ -2407,6 +2401,7 @@ static void encode_nonrd_sb_row(VP9_COMP *cpi, const TileInfo *const tile,
                                                              mi_col);
       nonrd_use_partition(cpi, tile, tp, mi_row, mi_col,
                           bsize, &dummy_rate, &dummy_dist);
+      encode_sb_rt(cpi, tile, tp, mi_row, mi_col, 1, BLOCK_64X64);
     } else {
       assert(0);
     }
