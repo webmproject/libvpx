@@ -8,23 +8,24 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-#include <limits.h>
 #include <assert.h>
+#include <limits.h>
 #include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#include "vpx_mem/vpx_mem.h"
 
 #include "vp9/common/vp9_alloccommon.h"
 #include "vp9/common/vp9_common.h"
-#include "vp9/encoder/vp9_ratectrl.h"
 #include "vp9/common/vp9_entropymode.h"
-#include "vpx_mem/vpx_mem.h"
-#include "vp9/common/vp9_systemdependent.h"
-#include "vp9/encoder/vp9_encodemv.h"
 #include "vp9/common/vp9_quant_common.h"
 #include "vp9/common/vp9_seg_common.h"
+#include "vp9/common/vp9_systemdependent.h"
+
+#include "vp9/encoder/vp9_encodemv.h"
+#include "vp9/encoder/vp9_ratectrl.h"
 
 #define LIMIT_QRANGE_FOR_ALTREF_AND_KEY 1
 
