@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//0sI\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 2361,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2014-02-28T15:43:28Z",
+      "side": 1,
+      "message": "Suggestions for you to consider: \na. adding a speed feature and change the feature based on speed in set_rt_speed_feature(), so we have all speed feature adjustment in one place.\nb. would it be easier to read if replace 14 and 0 with more meaningful constants?",
+      "revId": "cdb910209df539287b2a4159b83a9cacab33440d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//0sE\u003d",
+        "filename": "vp9/encoder/vp9_pickmode.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2014-02-28T15:43:28Z",
+      "side": 1,
+      "message": "If you take my suggestion on making a new speed feature, the comment here can go to the speed feature declaration, together with all other speed features.",
+      "revId": "cdb910209df539287b2a4159b83a9cacab33440d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
