@@ -46,7 +46,7 @@ struct vpx_codec_alg_priv {
   vp9_stream_info_t       si;
   int                     defer_alloc;
   int                     decoder_init;
-  VP9D_PTR                pbi;
+  struct VP9Decompressor *pbi;
   int                     postproc_cfg_set;
   vp8_postproc_cfg_t      postproc_cfg;
 #if CONFIG_POSTPROC_VISUALIZER
@@ -274,7 +274,7 @@ static vpx_codec_err_t decode_one(vpx_codec_alg_priv_t *ctx,
 
     if (!res) {
       VP9D_CONFIG oxcf;
-      VP9D_PTR optr;
+      struct VP9Decompressor *optr;
 
       vp9_initialize_dec();
 
