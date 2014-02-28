@@ -1,0 +1,412 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//0po\u003d",
+        "filename": "vp9/encoder/x86/vp9_subpel_variance_impl_intrin_avx2.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2014-02-28T19:32:24Z",
+      "side": 1,
+      "message": "space between )\u003d",
+      "revId": "42431b03112e644e135689f27f2d27dee4dbf8cb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//0pk\u003d",
+        "filename": "vp9/encoder/x86/vp9_subpel_variance_impl_intrin_avx2.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2014-02-28T19:32:24Z",
+      "side": 1,
+      "message": "Move }; to next line.",
+      "revId": "42431b03112e644e135689f27f2d27dee4dbf8cb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//0ps\u003d",
+        "filename": "vp9/encoder/x86/vp9_subpel_variance_impl_intrin_avx2.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2014-02-28T19:32:24Z",
+      "side": 1,
+      "message": "FILTER_X: Why is X here? Is this only for X?",
+      "revId": "42431b03112e644e135689f27f2d27dee4dbf8cb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//0nY\u003d",
+        "filename": "vp9/encoder/x86/vp9_subpel_variance_impl_intrin_avx2.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 62,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2014-02-28T19:32:24Z",
+      "side": 1,
+      "message": "Could you rename all the macros according to what they do? Something like: LOAD_...",
+      "revId": "42431b03112e644e135689f27f2d27dee4dbf8cb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//0mg\u003d",
+        "filename": "vp9/encoder/x86/vp9_subpel_variance_impl_intrin_avx2.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 73,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2014-02-28T19:32:24Z",
+      "side": 1,
+      "message": "If this macro does loading, this above line does filtering, and does not belong here.",
+      "revId": "42431b03112e644e135689f27f2d27dee4dbf8cb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//0lQ\u003d",
+        "filename": "vp9/encoder/x86/vp9_subpel_variance_impl_intrin_avx2.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 84,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2014-02-28T19:32:24Z",
+      "side": 1,
+      "message": "Can these 2 lines be added in FILTER or  X_ANY_Y_ANY_SUF macro? The src regs can be passed in.",
+      "revId": "42431b03112e644e135689f27f2d27dee4dbf8cb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//0lI\u003d",
+        "filename": "vp9/encoder/x86/vp9_subpel_variance_impl_intrin_avx2.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 86,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2014-02-28T19:32:24Z",
+      "side": 1,
+      "message": "FILTER macro doesn\u0027t need to be included here.",
+      "revId": "42431b03112e644e135689f27f2d27dee4dbf8cb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//0kw\u003d",
+        "filename": "vp9/encoder/x86/vp9_subpel_variance_impl_intrin_avx2.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 88,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2014-02-28T19:32:24Z",
+      "side": 1,
+      "message": "rename",
+      "revId": "42431b03112e644e135689f27f2d27dee4dbf8cb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//0ks\u003d",
+        "filename": "vp9/encoder/x86/vp9_subpel_variance_impl_intrin_avx2.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 93,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2014-02-28T19:32:24Z",
+      "side": 1,
+      "message": "not belong here?",
+      "revId": "42431b03112e644e135689f27f2d27dee4dbf8cb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//0ko\u003d",
+        "filename": "vp9/encoder/x86/vp9_subpel_variance_impl_intrin_avx2.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 95,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2014-02-28T19:32:24Z",
+      "side": 1,
+      "message": "same as above",
+      "revId": "42431b03112e644e135689f27f2d27dee4dbf8cb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//0kU\u003d",
+        "filename": "vp9/encoder/x86/vp9_subpel_variance_impl_intrin_avx2.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 102,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2014-02-28T19:32:24Z",
+      "side": 1,
+      "message": "same as above",
+      "revId": "42431b03112e644e135689f27f2d27dee4dbf8cb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//0kY\u003d",
+        "filename": "vp9/encoder/x86/vp9_subpel_variance_impl_intrin_avx2.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 104,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2014-02-28T19:32:24Z",
+      "side": 1,
+      "message": "rename",
+      "revId": "42431b03112e644e135689f27f2d27dee4dbf8cb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//0kQ\u003d",
+        "filename": "vp9/encoder/x86/vp9_subpel_variance_impl_intrin_avx2.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 109,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2014-02-28T19:32:24Z",
+      "side": 1,
+      "message": "same as above",
+      "revId": "42431b03112e644e135689f27f2d27dee4dbf8cb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//0kk\u003d",
+        "filename": "vp9/encoder/x86/vp9_subpel_variance_impl_intrin_avx2.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 113,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2014-02-28T19:32:24Z",
+      "side": 1,
+      "message": "Can these 2 lines be added in FILTER or  X_ANY_Y_ANY_SUF macro?",
+      "revId": "42431b03112e644e135689f27f2d27dee4dbf8cb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//0kM\u003d",
+        "filename": "vp9/encoder/x86/vp9_subpel_variance_impl_intrin_avx2.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 117,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2014-02-28T19:32:24Z",
+      "side": 1,
+      "message": "rename",
+      "revId": "42431b03112e644e135689f27f2d27dee4dbf8cb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//0kc\u003d",
+        "filename": "vp9/encoder/x86/vp9_subpel_variance_impl_intrin_avx2.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 124,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2014-02-28T19:32:24Z",
+      "side": 1,
+      "message": "Can these 2 lines be added in FILTER or  X_ANY_Y_ANY_SUF macro?",
+      "revId": "42431b03112e644e135689f27f2d27dee4dbf8cb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//0kE\u003d",
+        "filename": "vp9/encoder/x86/vp9_subpel_variance_impl_intrin_avx2.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 127,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2014-02-28T19:32:24Z",
+      "side": 1,
+      "message": "rename",
+      "revId": "42431b03112e644e135689f27f2d27dee4dbf8cb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//0j8\u003d",
+        "filename": "vp9/encoder/x86/vp9_subpel_variance_impl_intrin_avx2.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 133,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2014-02-28T19:32:24Z",
+      "side": 1,
+      "message": "same as above",
+      "revId": "42431b03112e644e135689f27f2d27dee4dbf8cb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//0j0\u003d",
+        "filename": "vp9/encoder/x86/vp9_subpel_variance_impl_intrin_avx2.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 137,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2014-02-28T19:32:24Z",
+      "side": 1,
+      "message": "above 2 lines not belong here?",
+      "revId": "42431b03112e644e135689f27f2d27dee4dbf8cb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//0js\u003d",
+        "filename": "vp9/encoder/x86/vp9_subpel_variance_impl_intrin_avx2.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 139,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2014-02-28T19:32:24Z",
+      "side": 1,
+      "message": "rename",
+      "revId": "42431b03112e644e135689f27f2d27dee4dbf8cb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//0jo\u003d",
+        "filename": "vp9/encoder/x86/vp9_subpel_variance_impl_intrin_avx2.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 146,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2014-02-28T19:32:24Z",
+      "side": 1,
+      "message": "same as above",
+      "revId": "42431b03112e644e135689f27f2d27dee4dbf8cb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//0jk\u003d",
+        "filename": "vp9/encoder/x86/vp9_subpel_variance_impl_intrin_avx2.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 152,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2014-02-28T19:32:24Z",
+      "side": 1,
+      "message": "same as above",
+      "revId": "42431b03112e644e135689f27f2d27dee4dbf8cb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//0jg\u003d",
+        "filename": "vp9/encoder/x86/vp9_subpel_variance_impl_intrin_avx2.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 156,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2014-02-28T19:32:24Z",
+      "side": 1,
+      "message": "rename",
+      "revId": "42431b03112e644e135689f27f2d27dee4dbf8cb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//0k8\u003d",
+        "filename": "vp9/encoder/x86/vp9_subpel_variance_impl_intrin_avx2.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 175,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2014-02-28T19:32:24Z",
+      "side": 1,
+      "message": "Can you restructure the comment?",
+      "revId": "42431b03112e644e135689f27f2d27dee4dbf8cb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
