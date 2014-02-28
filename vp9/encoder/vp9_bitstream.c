@@ -200,45 +200,40 @@ static void write_segment_id(vp9_writer *w, const struct segmentation *seg,
 }
 
 // This function encodes the reference frame
-static void encode_ref_frame(VP9_COMP *cpi, vp9_writer *bc) {
-  VP9_COMMON *const cm = &cpi->common;
-  MACROBLOCK *const x = &cpi->mb;
-  MACROBLOCKD *const xd = &x->e_mbd;
-  MB_MODE_INFO *mi = &xd->mi_8x8[0]->mbmi;
-  const int segment_id = mi->segment_id;
-  int seg_ref_active = vp9_segfeature_active(&cm->seg, segment_id,
-                                             SEG_LVL_REF_FRAME);
+static void write_ref_frames(const VP9_COMP *cpi, vp9_writer *w) {
+  const VP9_COMMON *const cm = &cpi->common;
+  const MACROBLOCKD *const xd = &cpi->mb.e_mbd;
+  const MB_MODE_INFO *const mbmi = &xd->mi_8x8[0]->mbmi;
+  const int is_compound = has_second_ref(mbmi);
+  const int segment_id = mbmi->segment_id;
+
   // If segment level coding of this signal is disabled...
   // or the segment allows multiple reference frame options
-  if (!seg_ref_active) {
+  if (vp9_segfeature_active(&cm->seg, segment_id, SEG_LVL_REF_FRAME)) {
+    assert(!is_compound);
+    assert(mbmi->ref_frame[0] ==
+               vp9_get_segdata(&cm->seg, segment_id, SEG_LVL_REF_FRAME));
+  } else {
     // does the feature use compound prediction or not
     // (if not specified at the frame/segment level)
     if (cm->reference_mode == REFERENCE_MODE_SELECT) {
-      vp9_write(bc, mi->ref_frame[1] > INTRA_FRAME,
-                vp9_get_reference_mode_prob(cm, xd));
+      vp9_write(w, is_compound, vp9_get_reference_mode_prob(cm, xd));
     } else {
-      assert((mi->ref_frame[1] <= INTRA_FRAME) ==
-             (cm->reference_mode == SINGLE_REFERENCE));
+      assert(!is_compound == (cm->reference_mode == SINGLE_REFERENCE));
     }
 
-    if (mi->ref_frame[1] > INTRA_FRAME) {
-      vp9_write(bc, mi->ref_frame[0] == GOLDEN_FRAME,
+    if (is_compound) {
+      vp9_write(w, mbmi->ref_frame[0] == GOLDEN_FRAME,
                 vp9_get_pred_prob_comp_ref_p(cm, xd));
     } else {
-      vp9_write(bc, mi->ref_frame[0] != LAST_FRAME,
-                vp9_get_pred_prob_single_ref_p1(cm, xd));
-      if (mi->ref_frame[0] != LAST_FRAME)
-        vp9_write(bc, mi->ref_frame[0] != GOLDEN_FRAME,
-                  vp9_get_pred_prob_single_ref_p2(cm, xd));
+      const int bit0 = mbmi->ref_frame[0] != LAST_FRAME;
+      vp9_write(w, bit0, vp9_get_pred_prob_single_ref_p1(cm, xd));
+      if (bit0) {
+        const int bit1 = mbmi->ref_frame[0] != GOLDEN_FRAME;
+        vp9_write(w, bit1, vp9_get_pred_prob_single_ref_p2(cm, xd));
+      }
     }
-  } else {
-    assert(mi->ref_frame[1] <= INTRA_FRAME);
-    assert(vp9_get_segdata(&cm->seg, segment_id, SEG_LVL_REF_FRAME) ==
-           mi->ref_frame[0]);
   }
-
-  // If using the prediction model we have nothing further to do because
-  // the reference frame is fully coded by the segment.
 }
 
 static void pack_inter_mode_mvs(VP9_COMP *cpi, MODE_INFO *m, vp9_writer *bc) {
@@ -304,7 +299,7 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, MODE_INFO *m, vp9_writer *bc) {
     write_intra_mode(bc, mi->uv_mode, cm->fc.uv_mode_prob[mode]);
   } else {
     vp9_prob *mv_ref_p;
-    encode_ref_frame(cpi, bc);
+    write_ref_frames(cpi, bc);
     mv_ref_p = cm->fc.inter_mode_probs[mi->mode_context[ref0]];
 
 #ifdef ENTROPY_STATS
