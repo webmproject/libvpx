@@ -270,12 +270,21 @@ int64_t vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
                                 &frame_mv[NEWMV][ref_frame]);
       }
 
-      mbmi->mode = this_mode;
-      mbmi->mv[0].as_int = frame_mv[this_mode][ref_frame].as_int;
-      vp9_build_inter_predictors_sby(xd, mi_row, mi_col, bsize);
+      if (frame_mv[this_mode][ref_frame].as_int == 0) {
+        dist = x->mode_sad[ref_frame][INTER_OFFSET(ZEROMV)];
+      } else if (this_mode != NEARESTMV &&
+                 frame_mv[NEARESTMV][ref_frame].as_int ==
+                     frame_mv[this_mode][ref_frame].as_int) {
+        dist = x->mode_sad[ref_frame][INTER_OFFSET(NEARESTMV)];
+      } else {
+        mbmi->mode = this_mode;
+        mbmi->mv[0].as_int = frame_mv[this_mode][ref_frame].as_int;
+        vp9_build_inter_predictors_sby(xd, mi_row, mi_col, bsize);
+        dist = x->mode_sad[ref_frame][INTER_OFFSET(this_mode)] =
+            cpi->fn_ptr[bsize].sdf(p->src.buf, p->src.stride,
+                                   pd->dst.buf, pd->dst.stride, INT_MAX);
+      }
 
-      dist = cpi->fn_ptr[bsize].sdf(p->src.buf, p->src.stride,
-                                    pd->dst.buf, pd->dst.stride, INT_MAX);
       this_rd = rate + dist;
 
       if (this_rd < best_rd) {
