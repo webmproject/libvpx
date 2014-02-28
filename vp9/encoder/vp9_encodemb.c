@@ -311,17 +311,6 @@ static void optimize_b(int plane, int block, BLOCK_SIZE plane_bsize,
   *a = *l = (final_eob > 0);
 }
 
-static void optimize_init_b(int plane, BLOCK_SIZE bsize,
-                            struct encode_b_args *args) {
-  const MACROBLOCKD *xd = &args->x->e_mbd;
-  const struct macroblockd_plane* const pd = &xd->plane[plane];
-  const MB_MODE_INFO *mbmi = &xd->mi_8x8[0]->mbmi;
-  const TX_SIZE tx_size = plane ? get_uv_tx_size(mbmi) : mbmi->tx_size;
-
-  vp9_get_entropy_contexts(bsize, tx_size, pd,
-                           args->ctx->ta[plane], args->ctx->tl[plane]);
-}
-
 static INLINE void fdct32x32(int rd_transform,
                              const int16_t *src, int16_t *dst, int src_stride) {
   if (rd_transform)
@@ -474,8 +463,12 @@ void vp9_encode_sb(MACROBLOCK *x, BLOCK_SIZE bsize) {
     if (!x->skip_recode)
       vp9_subtract_plane(x, bsize, plane);
 
-    if (x->optimize && (!x->skip_recode || !x->skip_optimize))
-      optimize_init_b(plane, bsize, &arg);
+    if (x->optimize && (!x->skip_recode || !x->skip_optimize)) {
+      const struct macroblockd_plane* const pd = &xd->plane[plane];
+      const TX_SIZE tx_size = plane ? get_uv_tx_size(mbmi) : mbmi->tx_size;
+      vp9_get_entropy_contexts(bsize, tx_size, pd,
+                               ctx.ta[plane], ctx.tl[plane]);
+    }
 
     vp9_foreach_transformed_block_in_plane(xd, bsize, plane, encode_block,
                                            &arg);
