@@ -488,7 +488,7 @@ static void update_state(VP9_COMP *cpi, PICK_MODE_CONTEXT *ctx,
 
     if ((cpi->oxcf.aq_mode == VARIANCE_AQ) ||
         (cpi->oxcf.aq_mode == COMPLEXITY_AQ)) {
-    vp9_mb_init_quantizer(cpi, x);
+    vp9_init_plane_quantizers(cpi, x);
   }
 
   // FIXME(rbultje) I'm pretty sure this should go to the end of this block
@@ -635,7 +635,7 @@ static void set_offsets(VP9_COMP *cpi, const TileInfo *const tile,
                                                  : cm->last_frame_seg_map;
       mbmi->segment_id = vp9_get_segment_id(cm, map, bsize, mi_row, mi_col);
     }
-    vp9_mb_init_quantizer(cpi, x);
+    vp9_init_plane_quantizers(cpi, x);
 
     if (seg->enabled && cpi->seg0_cnt > 0 &&
         !vp9_segfeature_active(seg, 0, SEG_LVL_REF_FRAME) &&
@@ -723,7 +723,7 @@ static void rd_pick_sb_modes(VP9_COMP *cpi, const TileInfo *const tile,
     }
 
     rdmult_ratio = vp9_vaq_rdmult_ratio(energy);
-    vp9_mb_init_quantizer(cpi, x);
+    vp9_init_plane_quantizers(cpi, x);
   }
 
   if (cpi->oxcf.tuning == VP8_TUNE_SSIM)
