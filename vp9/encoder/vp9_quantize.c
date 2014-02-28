@@ -9,13 +9,14 @@
  */
 
 #include <math.h>
+
 #include "vpx_mem/vpx_mem.h"
 
 #include "vp9/encoder/vp9_onyx_int.h"
-#include "vp9/encoder/vp9_rdopt.h"
 #include "vp9/encoder/vp9_quantize.h"
-#include "vp9/common/vp9_quant_common.h"
+#include "vp9/encoder/vp9_rdopt.h"
 
+#include "vp9/common/vp9_quant_common.h"
 #include "vp9/common/vp9_seg_common.h"
 
 void vp9_quantize_b_c(const int16_t *coeff_ptr, intptr_t count,
@@ -151,44 +152,40 @@ static void invert_quant(int16_t *quant, int16_t *shift, int d) {
 }
 
 void vp9_init_quantizer(VP9_COMP *cpi) {
-  int i, q;
   VP9_COMMON *const cm = &cpi->common;
+  int i, q, quant;
 
   for (q = 0; q < QINDEX_RANGE; q++) {
     const int qzbin_factor = q == 0 ? 64 : (vp9_dc_quant(q, 0) < 148 ? 84 : 80);
     const int qrounding_factor = q == 0 ? 64 : 48;
 
-    // y
     for (i = 0; i < 2; ++i) {
-      const int quant = i == 0 ? vp9_dc_quant(q, cm->y_dc_delta_q)
-                               : vp9_ac_quant(q, 0);
+      // y
+      quant = i == 0 ? vp9_dc_quant(q, cm->y_dc_delta_q)
+                     : vp9_ac_quant(q, 0);
       invert_quant(&cpi->y_quant[q][i], &cpi->y_quant_shift[q][i], quant);
       cpi->y_zbin[q][i] = ROUND_POWER_OF_TWO(qzbin_factor * quant, 7);
       cpi->y_round[q][i] = (qrounding_factor * quant) >> 7;
       cm->y_dequant[q][i] = quant;
-    }
 
-    // uv
-    for (i = 0; i < 2; ++i) {
-      const int quant = i == 0 ? vp9_dc_quant(q, cm->uv_dc_delta_q)
-                               : vp9_ac_quant(q, cm->uv_ac_delta_q);
+      // uv
+      quant = i == 0 ? vp9_dc_quant(q, cm->uv_dc_delta_q)
+                     : vp9_ac_quant(q, cm->uv_ac_delta_q);
       invert_quant(&cpi->uv_quant[q][i], &cpi->uv_quant_shift[q][i], quant);
       cpi->uv_zbin[q][i] = ROUND_POWER_OF_TWO(qzbin_factor * quant, 7);
       cpi->uv_round[q][i] = (qrounding_factor * quant) >> 7;
       cm->uv_dequant[q][i] = quant;
-    }
 
 #if CONFIG_ALPHA
-    // alpha
-    for (i = 0; i < 2; ++i) {
-      const int quant = i == 0 ? vp9_dc_quant(q, cm->a_dc_delta_q)
-                               : vp9_ac_quant(q, cm->a_ac_delta_q);
+      // alpha
+      quant = i == 0 ? vp9_dc_quant(q, cm->a_dc_delta_q)
+                     : vp9_ac_quant(q, cm->a_ac_delta_q);
       invert_quant(&cpi->a_quant[q][i], &cpi->a_quant_shift[q][i], quant);
       cpi->a_zbin[q][i] = ROUND_POWER_OF_TWO(qzbin_factor * quant, 7);
       cpi->a_round[q][i] = (qrounding_factor * quant) >> 7;
       cm->a_dequant[q][i] = quant;
-    }
 #endif
+    }
 
     for (i = 2; i < 8; i++) {
       cpi->y_quant[q][i] = cpi->y_quant[q][1];
@@ -214,7 +211,7 @@ void vp9_init_quantizer(VP9_COMP *cpi) {
   }
 }
 
-void vp9_mb_init_quantizer(VP9_COMP *cpi, MACROBLOCK *x) {
+void vp9_init_plane_quantizers(VP9_COMP *cpi, MACROBLOCK *x) {
   const VP9_COMMON *const cm = &cpi->common;
   MACROBLOCKD *xd = &x->e_mbd;
   const int segment_id = xd->mi_8x8[0]->mbmi.segment_id;
@@ -246,7 +243,7 @@ void vp9_mb_init_quantizer(VP9_COMP *cpi, MACROBLOCK *x) {
   x->plane[3].quant_shift = cpi->a_quant_shift[qindex];
   x->plane[3].zbin = cpi->a_zbin[qindex];
   x->plane[3].round = cpi->a_round[qindex];
-  x->plane[3].zbin_extra = (int16_t)zbin_extra;
+  x->plane[3].zbin_extra = (int16_t)((cm->a_dequant[qindex][1] * zbin) >> 7);
   xd->plane[3].dequant = cm->a_dequant[qindex];
 #endif
 
@@ -272,26 +269,17 @@ void vp9_update_zbin_extra(VP9_COMP *cpi, MACROBLOCK *x) {
 }
 
 void vp9_frame_init_quantizer(VP9_COMP *cpi) {
-  // Clear Zbin mode boost for default case
   cpi->zbin_mode_boost = 0;
-
-  // MB level quantizer setup
-  vp9_mb_init_quantizer(cpi, &cpi->mb);
+  vp9_init_plane_quantizers(cpi, &cpi->mb);
 }
 
 void vp9_set_quantizer(struct VP9_COMP *cpi, int q) {
-  VP9_COMMON *cm = &cpi->common;
+  VP9_COMMON *const cm = &cpi->common;
 
+  // quantizer has to be reinitialized with vp9_init_quantizer() if any
+  // delta_q changes.
   cm->base_qindex = q;
-
-  // if any of the delta_q values are changing update flag will
-  // have to be set.
   cm->y_dc_delta_q = 0;
   cm->uv_dc_delta_q = 0;
   cm->uv_ac_delta_q = 0;
-
-  // quantizer has to be reinitialized if any delta_q changes.
-  // As there are not any here for now this is inactive code.
-  // if(update)
-  //    vp9_init_quantizer(cpi);
 }
