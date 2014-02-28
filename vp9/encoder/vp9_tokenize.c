@@ -199,6 +199,12 @@ static INLINE void add_token_no_extra(TOKENEXTRA **t,
   ++counts[token];
 }
 
+static INLINE int get_tx_eob(const struct segmentation *seg, int segment_id,
+                             TX_SIZE tx_size) {
+  const int eob_max = 16 << (tx_size << 1);
+  return vp9_segfeature_active(seg, segment_id, SEG_LVL_SKIP) ? 0 : eob_max;
+}
+
 static void tokenize_b(int plane, int block, BLOCK_SIZE plane_bsize,
                        TX_SIZE tx_size, void *arg) {
   struct tokenize_b_args* const args = arg;

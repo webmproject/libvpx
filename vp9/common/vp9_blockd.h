@@ -328,13 +328,6 @@ void vp9_set_contexts(const MACROBLOCKD *xd, struct macroblockd_plane *pd,
                       BLOCK_SIZE plane_bsize, TX_SIZE tx_size, int has_eob,
                       int aoff, int loff);
 
-
-static INLINE int get_tx_eob(const struct segmentation *seg, int segment_id,
-                             TX_SIZE tx_size) {
-  const int eob_max = 16 << (tx_size << 1);
-  return vp9_segfeature_active(seg, segment_id, SEG_LVL_SKIP) ? 0 : eob_max;
-}
-
 #ifdef __cplusplus
 }  // extern "C"
 #endif
