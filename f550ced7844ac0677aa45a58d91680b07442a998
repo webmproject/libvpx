@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//0fo\u003d",
+        "filename": "vpx/src/svc_encodeframe.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 915,
+      "author": {
+        "id": 1129385
+      },
+      "writtenOn": "2014-02-28T22:33:09Z",
+      "side": 1,
+      "message": "There\u0027s only one rc stats packet each frame each layer. The packet size is fixed. So the buffer will not grow after the first frame. I think it\u0027s fine to do it this way. Otherwise we have to make some number that we can use.",
+      "parentUuid": "AAAAdn//0qc\u003d",
+      "revId": "f550ced7844ac0677aa45a58d91680b07442a998",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//0qg\u003d",
         "filename": "vpx/src/svc_encodeframe.c",
         "patchSetId": 2
@@ -30,6 +48,24 @@
       "writtenOn": "2014-02-28T17:11:39Z",
       "side": 1,
       "message": "can you do si-\u003erc_stats_buf_used +\u003d cx_pkt-\u003edata.twopass_stats.sz instead?",
+      "revId": "f550ced7844ac0677aa45a58d91680b07442a998",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//0fs\u003d",
+        "filename": "vpx/src/svc_encodeframe.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 926,
+      "author": {
+        "id": 1129385
+      },
+      "writtenOn": "2014-02-28T22:33:09Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//0qg\u003d",
       "revId": "f550ced7844ac0677aa45a58d91680b07442a998",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
