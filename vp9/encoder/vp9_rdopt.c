@@ -3338,24 +3338,19 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
           ref_frame != best_inter_ref_frame &&
           second_ref_frame != best_inter_ref_frame)
         continue;
-      mode_excluded = mode_excluded ?
-            mode_excluded : cm->reference_mode == SINGLE_REFERENCE;
+      mode_excluded = cm->reference_mode == SINGLE_REFERENCE;
     } else {
-      if (ref_frame != INTRA_FRAME && second_ref_frame != INTRA_FRAME)
-        mode_excluded = mode_excluded ?
-            mode_excluded : cm->reference_mode == COMPOUND_REFERENCE;
+      if (ref_frame != INTRA_FRAME)
+        mode_excluded = cm->reference_mode == COMPOUND_REFERENCE;
     }
 
-    if (ref_frame == INTRA_FRAME) {
+    if (ref_frame == INTRA_FRAME && this_mode != DC_PRED) {
       // Disable intra modes other than DC_PRED for blocks with low variance
       // Threshold for intra skipping based on source variance
       // TODO(debargha): Specialize the threshold for super block sizes
-      static const unsigned int skip_intra_var_thresh[BLOCK_SIZES] = {
-        64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64,
-      };
+      const unsigned int skip_intra_var_thresh = 64;
       if ((mode_search_skip_flags & FLAG_SKIP_INTRA_LOWVAR) &&
-          this_mode != DC_PRED &&
-          x->source_variance < skip_intra_var_thresh[bsize])
+          x->source_variance < skip_intra_var_thresh)
         continue;
       // Only search the oblique modes if the best so far is
       // one of the neighboring directional modes
@@ -3498,19 +3493,18 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
       this_rd = RDCOST(x->rdmult, x->rddiv, rate2, distortion2);
     }
 
+    if (ref_frame == INTRA_FRAME) {
     // Keep record of best intra rd
-    if (!is_inter_block(&xd->mi_8x8[0]->mbmi) &&
-        this_rd < best_intra_rd) {
-      best_intra_rd = this_rd;
-      best_intra_mode = xd->mi_8x8[0]->mbmi.mode;
-    }
-
-    // Keep record of best inter rd with single reference
-    if (is_inter_block(&xd->mi_8x8[0]->mbmi) &&
-        !has_second_ref(&xd->mi_8x8[0]->mbmi) &&
-        !mode_excluded && this_rd < best_inter_rd) {
-      best_inter_rd = this_rd;
-      best_inter_ref_frame = ref_frame;
+      if (this_rd < best_intra_rd) {
+        best_intra_rd = this_rd;
+        best_intra_mode = mbmi->mode;
+      }
+    } else {
+      // Keep record of best inter rd with single reference
+      if (!comp_pred && !mode_excluded && this_rd < best_inter_rd) {
+        best_inter_rd = this_rd;
+        best_inter_ref_frame = ref_frame;
+      }
     }
 
     if (!disable_skip && ref_frame == INTRA_FRAME) {
@@ -3583,38 +3577,39 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
       single_rd = RDCOST(x->rdmult, x->rddiv, single_rate, distortion2);
       hybrid_rd = RDCOST(x->rdmult, x->rddiv, hybrid_rate, distortion2);
 
-      if (second_ref_frame <= INTRA_FRAME &&
-          single_rd < best_pred_rd[SINGLE_REFERENCE]) {
-        best_pred_rd[SINGLE_REFERENCE] = single_rd;
-      } else if (second_ref_frame > INTRA_FRAME &&
-                 single_rd < best_pred_rd[COMPOUND_REFERENCE]) {
-        best_pred_rd[COMPOUND_REFERENCE] = single_rd;
+      if (!comp_pred) {
+        if (single_rd < best_pred_rd[SINGLE_REFERENCE]) {
+          best_pred_rd[SINGLE_REFERENCE] = single_rd;
+        }
+      } else {
+        if (single_rd < best_pred_rd[COMPOUND_REFERENCE]) {
+          best_pred_rd[COMPOUND_REFERENCE] = single_rd;
+        }
       }
       if (hybrid_rd < best_pred_rd[REFERENCE_MODE_SELECT])
         best_pred_rd[REFERENCE_MODE_SELECT] = hybrid_rd;
-    }
 
-    /* keep record of best filter type */
-    if (!mode_excluded && !disable_skip && ref_frame != INTRA_FRAME &&
-        cm->interp_filter != BILINEAR) {
-      int64_t ref = cpi->rd_filter_cache[cm->interp_filter == SWITCHABLE ?
+      /* keep record of best filter type */
+      if (!mode_excluded && cm->interp_filter != BILINEAR) {
+        int64_t ref = cpi->rd_filter_cache[cm->interp_filter == SWITCHABLE ?
                               SWITCHABLE_FILTERS : cm->interp_filter];
 
-      for (i = 0; i < SWITCHABLE_FILTER_CONTEXTS; i++) {
-        int64_t adj_rd;
-        if (ref == INT64_MAX)
-          adj_rd = 0;
-        else if (cpi->rd_filter_cache[i] == INT64_MAX)
-          // when early termination is triggered, the encoder does not have
-          // access to the rate-distortion cost. it only knows that the cost
-          // should be above the maximum valid value. hence it takes the known
-          // maximum plus an arbitrary constant as the rate-distortion cost.
-          adj_rd = cpi->mask_filter_rd - ref + 10;
-        else
-          adj_rd = cpi->rd_filter_cache[i] - ref;
+        for (i = 0; i < SWITCHABLE_FILTER_CONTEXTS; i++) {
+          int64_t adj_rd;
+          if (ref == INT64_MAX)
+            adj_rd = 0;
+          else if (cpi->rd_filter_cache[i] == INT64_MAX)
+            // when early termination is triggered, the encoder does not have
+            // access to the rate-distortion cost. it only knows that the cost
+            // should be above the maximum valid value. hence it takes the known
+            // maximum plus an arbitrary constant as the rate-distortion cost.
+            adj_rd = cpi->mask_filter_rd - ref + 10;
+          else
+            adj_rd = cpi->rd_filter_cache[i] - ref;
 
-        adj_rd += this_rd;
-        best_filter_rd[i] = MIN(best_filter_rd[i], adj_rd);
+          adj_rd += this_rd;
+          best_filter_rd[i] = MIN(best_filter_rd[i], adj_rd);
+        }
       }
     }
 
@@ -3706,11 +3701,6 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
     }
     if (cm->interp_filter == SWITCHABLE)
       assert(best_filter_diff[SWITCHABLE_FILTERS] == 0);
-  } else {
-    vp9_zero(best_filter_diff);
-  }
-
-  if (!x->skip) {
     for (i = 0; i < TX_MODES; i++) {
       if (best_tx_rd[i] == INT64_MAX)
         best_tx_diff[i] = 0;
@@ -3718,6 +3708,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
         best_tx_diff[i] = best_rd - best_tx_rd[i];
     }
   } else {
+    vp9_zero(best_filter_diff);
     vp9_zero(best_tx_diff);
   }
 
