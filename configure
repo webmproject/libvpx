@@ -160,6 +160,10 @@ for t in ${all_targets}; do
     [ -f ${source_path}/${t}.mk ] && enable_feature ${t}
 done
 
+if ! perl --version >/dev/null; then
+    die "Perl is required to build"
+fi
+
 # check installed doxygen version
 doxy_version=$(doxygen --version 2>/dev/null)
 doxy_major=${doxy_version%%.*}
