@@ -2674,8 +2674,7 @@ static void loopfilter_frame(VP9_COMP *cpi, VP9_COMMON *cm) {
     vp9_loop_filter_frame(cm, xd, lf->filter_level, 0, 0);
   }
 
-  vp9_extend_frame_inner_borders(cm->frame_to_show,
-                                 cm->subsampling_x, cm->subsampling_y);
+  vp9_extend_frame_inner_borders(cm->frame_to_show);
 }
 
 static void scale_references(VP9_COMP *cpi) {
@@ -3583,8 +3582,7 @@ int vp9_get_compressed_data(VP9_PTR ptr, unsigned int *frame_flags,
         // TODO(agrange) merge these two functions.
         vp9_configure_arnr_filter(cpi, frames_to_arf, cpi->rc.gfu_boost);
         vp9_temporal_filter_prepare(cpi, frames_to_arf);
-        vp9_extend_frame_borders(&cpi->alt_ref_buffer,
-                                 cm->subsampling_x, cm->subsampling_y);
+        vp9_extend_frame_borders(&cpi->alt_ref_buffer);
         force_src_buffer = &cpi->alt_ref_buffer;
       }
 
@@ -3720,7 +3718,7 @@ int vp9_get_compressed_data(VP9_PTR ptr, unsigned int *frame_flags,
                                       cm->width, cm->height);
 
     if (vp9_is_scaled(&ref_buf->sf))
-      vp9_extend_frame_borders(buf, cm->subsampling_x, cm->subsampling_y);
+      vp9_extend_frame_borders(buf);
   }
 
   set_ref_ptrs(cm, xd, LAST_FRAME, LAST_FRAME);
