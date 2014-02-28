@@ -16,7 +16,11 @@
 extern "C" {
 #endif
 
-void vp9_update_skip_probs(VP9_COMMON *cm, vp9_writer *bc);
+struct VP9_COMP;
+
+void vp9_entropy_mode_init();
+
+void vp9_pack_bitstream(struct VP9_COMP *cpi, uint8_t *dest, size_t *size);
 
 #ifdef __cplusplus
 }  // extern "C"
