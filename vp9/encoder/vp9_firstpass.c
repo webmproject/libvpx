@@ -415,6 +415,8 @@ static void first_pass_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
                                     x->sadperbit16, &num00, &v_fn_ptr,
                                     x->nmvjointcost,
                                     x->mvcost, ref_mv);
+  if (tmp_err < INT_MAX)
+    tmp_err = vp9_get_mvpred_var(x, &tmp_mv, ref_mv, &v_fn_ptr, 1);
   if (tmp_err < INT_MAX - new_mv_mode_penalty)
     tmp_err += new_mv_mode_penalty;
 
@@ -439,6 +441,8 @@ static void first_pass_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
                                         &num00, &v_fn_ptr,
                                         x->nmvjointcost,
                                         x->mvcost, ref_mv);
+      if (tmp_err < INT_MAX)
+        tmp_err = vp9_get_mvpred_var(x, &tmp_mv, ref_mv, &v_fn_ptr, 1);
       if (tmp_err < INT_MAX - new_mv_mode_penalty)
         tmp_err += new_mv_mode_penalty;
 

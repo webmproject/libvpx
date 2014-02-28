@@ -34,7 +34,7 @@ static int full_pixel_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
   MB_MODE_INFO *mbmi = &xd->mi_8x8[0]->mbmi;
   struct buf_2d backup_yv12[MAX_MB_PLANE] = {{0}};
   int bestsme = INT_MAX;
-  int further_steps, step_param;
+  int step_param;
   int sadpb = x->sadperbit16;
   MV mvp_full;
   int ref = mbmi->ref_frame[0];
@@ -67,7 +67,6 @@ static int full_pixel_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
   // TODO(jingning) exploiting adaptive motion search control in non-RD
   // mode decision too.
   step_param = 6;
-  further_steps = (cpi->sf.max_step_search_steps - 1) - step_param;
 
   for (i = LAST_FRAME; i <= LAST_FRAME && cpi->common.show_frame; ++i) {
     if ((x->pred_mv_sad[ref] >> 3) > x->pred_mv_sad[i]) {
@@ -88,22 +87,28 @@ static int full_pixel_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
   mvp_full.row >>= 3;
 
   if (cpi->sf.search_method == FAST_HEX) {
-    bestsme = vp9_fast_hex_search(x, &mvp_full, step_param, sadpb,
+    // NOTE: this returns SAD
+    bestsme = vp9_fast_hex_search(x, &mvp_full, step_param, sadpb, 0,
                                   &cpi->fn_ptr[bsize], 1,
                                   &ref_mv.as_mv, &tmp_mv->as_mv);
   } else if (cpi->sf.search_method == HEX) {
+    // NOTE: this returns SAD
     bestsme = vp9_hex_search(x, &mvp_full, step_param, sadpb, 1,
                              &cpi->fn_ptr[bsize], 1,
                              &ref_mv.as_mv, &tmp_mv->as_mv);
   } else if (cpi->sf.search_method == SQUARE) {
+    // NOTE: this returns SAD
     bestsme = vp9_square_search(x, &mvp_full, step_param, sadpb, 1,
                                 &cpi->fn_ptr[bsize], 1,
                                 &ref_mv.as_mv, &tmp_mv->as_mv);
   } else if (cpi->sf.search_method == BIGDIA) {
+    // NOTE: this returns SAD
     bestsme = vp9_bigdia_search(x, &mvp_full, step_param, sadpb, 1,
                                 &cpi->fn_ptr[bsize], 1,
                                 &ref_mv.as_mv, &tmp_mv->as_mv);
   } else {
+    int further_steps = (cpi->sf.max_step_search_steps - 1) - step_param;
+    // NOTE: this returns variance
     bestsme = vp9_full_pixel_diamond(cpi, x, &mvp_full, step_param,
                                      sadpb, further_steps, 1,
                                      &cpi->fn_ptr[bsize],
