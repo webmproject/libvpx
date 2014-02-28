@@ -8,39 +8,28 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#include <stdio.h>
-#include <math.h>
-#include <limits.h>
 #include <assert.h>
+#include <limits.h>
+#include <math.h>
+#include <stdio.h>
 
-#include "vp9/common/vp9_pragmas.h"
-#include "vp9/encoder/vp9_tokenize.h"
-#include "vp9/encoder/vp9_treewriter.h"
-#include "vp9/encoder/vp9_onyx_int.h"
-#include "vp9/common/vp9_entropymode.h"
+#include "./vp9_rtcd.h"
+
+#include "vpx_mem/vpx_mem.h"
+
+#include "vp9/common/vp9_common.h"
+#include "vp9/common/vp9_mvref_common.h"
 #include "vp9/common/vp9_reconinter.h"
 #include "vp9/common/vp9_reconintra.h"
-#include "vp9/common/vp9_quant_common.h"
-#include "vp9/encoder/vp9_encodemb.h"
-#include "vp9/encoder/vp9_quantize.h"
-#include "vp9/encoder/vp9_variance.h"
-#include "vp9/encoder/vp9_mcomp.h"
-#include "vp9/encoder/vp9_rdopt.h"
+
+#include "vp9/encoder/vp9_onyx_int.h"
 #include "vp9/encoder/vp9_ratectrl.h"
-#include "vpx_mem/vpx_mem.h"
-#include "vp9/common/vp9_systemdependent.h"
-#include "vp9/encoder/vp9_encodemv.h"
-#include "vp9/common/vp9_seg_common.h"
-#include "vp9/common/vp9_pred_common.h"
-#include "vp9/common/vp9_entropy.h"
-#include "./vp9_rtcd.h"
-#include "vp9/common/vp9_mvref_common.h"
-#include "vp9/common/vp9_common.h"
+#include "vp9/encoder/vp9_rdopt.h"
 
 static int full_pixel_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
-                                     const TileInfo *const tile,
-                                     BLOCK_SIZE bsize, int mi_row, int mi_col,
-                                     int_mv *tmp_mv, int *rate_mv) {
+                                    const TileInfo *const tile,
+                                    BLOCK_SIZE bsize, int mi_row, int mi_col,
+                                    int_mv *tmp_mv, int *rate_mv) {
   MACROBLOCKD *xd = &x->e_mbd;
   MB_MODE_INFO *mbmi = &xd->mi_8x8[0]->mbmi;
   struct buf_2d backup_yv12[MAX_MB_PLANE] = {{0}};
