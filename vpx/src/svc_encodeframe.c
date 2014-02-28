@@ -548,15 +548,20 @@ vpx_codec_err_t vpx_svc_init(SvcContext *svc_ctx, vpx_codec_ctx_t *codec_ctx,
 
     for (i = 0; i < si->layers; ++i) {
       int pos = i + VPX_SS_MAX_LAYERS - svc_ctx->spatial_layers;
-      alloc_ratio[i] = si->scaling_factor_num[pos] * 1.0 /
-                       si->scaling_factor_den[pos];
-      alloc_ratio[i] *= alloc_ratio[i];
-      total += alloc_ratio[i];
+      if (pos < VPX_SS_MAX_LAYERS && si->scaling_factor_den[pos] > 0) {
+        alloc_ratio[i] = (float)(si->scaling_factor_num[pos] * 1.0 /
+            si->scaling_factor_den[pos]);
+
+        alloc_ratio[i] *= alloc_ratio[i];
+        total += alloc_ratio[i];
+      }
     }
 
     for (i = 0; i < si->layers; ++i) {
-      enc_cfg->ss_target_bitrate[i] = enc_cfg->rc_target_bitrate *
-          alloc_ratio[i] / total;
+      if (total > 0) {
+        enc_cfg->ss_target_bitrate[i] = (unsigned int)
+            (enc_cfg->rc_target_bitrate * alloc_ratio[i] / total);
+      }
     }
   }
 
