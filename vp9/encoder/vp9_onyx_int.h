@@ -424,6 +424,11 @@ typedef struct {
   // This feature controls whether we do the expensive context update and
   // calculation in the rd coefficient costing loop.
   int use_fast_coef_costing;
+
+  // This variable controls the maximum block size where intra blocks can be
+  // used in inter frames.
+  // TODO(aconverse): Fold this into one of the other many mode skips
+  BLOCK_SIZE max_intra_bsize;
 } SPEED_FEATURES;
 
 typedef struct {

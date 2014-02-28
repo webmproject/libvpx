@@ -852,9 +852,15 @@ static void set_rt_speed_feature(VP9_COMMON *cm,
       sf->intra_y_mode_mask[i] = INTRA_DC_H_V;
       sf->intra_uv_mode_mask[i] = INTRA_DC_ONLY;
     }
+    sf->intra_y_mode_mask[TX_32X32] = INTRA_DC_ONLY;
     sf->frame_parameter_update = 0;
     sf->encode_breakout_thresh = 1000;
     sf->search_method = FAST_HEX;
+    sf->disable_inter_mode_mask[BLOCK_32X32] = 1 << INTER_OFFSET(ZEROMV);
+    sf->disable_inter_mode_mask[BLOCK_32X64] = ~(1 << INTER_OFFSET(NEARESTMV));
+    sf->disable_inter_mode_mask[BLOCK_64X32] = ~(1 << INTER_OFFSET(NEARESTMV));
+    sf->disable_inter_mode_mask[BLOCK_64X64] = ~(1 << INTER_OFFSET(NEARESTMV));
+    sf->max_intra_bsize = BLOCK_32X32;
   }
   if (speed >= 6) {
     sf->partition_search_type = VAR_BASED_FIXED_PARTITION;
@@ -933,6 +939,7 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
   sf->encode_breakout_thresh = 0;
   for (i = 0; i < BLOCK_SIZES; ++i)
     sf->disable_inter_mode_mask[i] = 0;
+  sf->max_intra_bsize = BLOCK_64X64;
 
   switch (cpi->oxcf.mode) {
     case MODE_BESTQUALITY:

@@ -1704,6 +1704,7 @@ static void rd_check_segment_txsize(VP9_COMP *cpi, MACROBLOCK *x,
   int mode_idx;
   int subpelmv = 1, have_ref = 0;
   const int has_second_rf = has_second_ref(mbmi);
+  const int disable_inter_mode_mask = cpi->sf.disable_inter_mode_mask[bsize];
 
   vpx_memcpy(t_above, pd->above_context, sizeof(t_above));
   vpx_memcpy(t_left, pd->left_context, sizeof(t_left));
@@ -1741,11 +1742,12 @@ static void rd_check_segment_txsize(VP9_COMP *cpi, MACROBLOCK *x,
 
         mode_idx = INTER_OFFSET(this_mode);
         bsi->rdstat[i][mode_idx].brdcost = INT64_MAX;
-        if (cpi->sf.disable_inter_mode_mask[bsize] & (1 << mode_idx))
+        if (disable_inter_mode_mask & (1 << mode_idx))
           continue;
 
         // if we're near/nearest and mv == 0,0, compare to zeromv
-        if ((this_mode == NEARMV || this_mode == NEARESTMV ||
+        if (!(disable_inter_mode_mask & (1 << INTER_OFFSET(ZEROMV))) &&
+            (this_mode == NEARMV || this_mode == NEARESTMV ||
              this_mode == ZEROMV) &&
             frame_mv[this_mode][mbmi->ref_frame[0]].as_int == 0 &&
             (!has_second_rf ||
@@ -3184,6 +3186,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
   const int mode_search_skip_flags = cpi->sf.mode_search_skip_flags;
   const int intra_y_mode_mask =
       cpi->sf.intra_y_mode_mask[max_txsize_lookup[bsize]];
+  const int disable_inter_mode_mask = cpi->sf.disable_inter_mode_mask[bsize];
 
   x->skip_encode = cpi->sf.skip_encode_frame && x->q_index < QIDX_SKIP_THRESH;
 
@@ -3282,6 +3285,10 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
     mode_skip_mask |= new_modes_mask;
   }
 
+  if (bsize > cpi->sf.max_intra_bsize) {
+    mode_skip_mask |= 0xFF30808;
+  }
+
   for (mode_index = 0; mode_index < MAX_MODES; ++mode_index) {
     int mode_excluded = 0;
     int64_t this_rd = INT64_MAX;
@@ -3328,7 +3335,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
     this_mode = vp9_mode_order[mode_index].mode;
     ref_frame = vp9_mode_order[mode_index].ref_frame[0];
     if (ref_frame != INTRA_FRAME &&
-        cpi->sf.disable_inter_mode_mask[bsize] & (1 << INTER_OFFSET(this_mode)))
+        disable_inter_mode_mask & (1 << INTER_OFFSET(this_mode)))
       continue;
     second_ref_frame = vp9_mode_order[mode_index].ref_frame[1];
 
@@ -3372,7 +3379,8 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
       }
     } else {
       // if we're near/nearest and mv == 0,0, compare to zeromv
-      if ((this_mode == NEARMV || this_mode == NEARESTMV ||
+      if (!(disable_inter_mode_mask & (1 << INTER_OFFSET(ZEROMV))) &&
+          (this_mode == NEARMV || this_mode == NEARESTMV ||
           this_mode == ZEROMV) &&
           frame_mv[this_mode][ref_frame].as_int == 0 &&
           !vp9_segfeature_active(&cm->seg, mbmi->segment_id, SEG_LVL_SKIP) &&
