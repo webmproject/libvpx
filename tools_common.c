@@ -8,12 +8,13 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#include "tools_common.h"
-
+#include <math.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+#include "./tools_common.h"
 
 #if CONFIG_VP8_ENCODER || CONFIG_VP9_ENCODER
 #include "vpx/vp8cx.h"
@@ -253,3 +254,14 @@ int vpx_img_read(vpx_image_t *img, FILE *file) {
   return 1;
 }
 
+// TODO(dkovalev) change sse_to_psnr signature: double -> int64_t
+double sse_to_psnr(double samples, double peak, double sse) {
+  static const double kMaxPSNR = 100.0;
+
+  if (sse > 0.0) {
+    const double psnr = 10.0 * log10(samples * peak * peak / sse);
+    return psnr > kMaxPSNR ? kMaxPSNR : psnr;
+  } else {
+    return kMaxPSNR;
+  }
+}

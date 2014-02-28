@@ -18,11 +18,12 @@
 #include <stdlib.h>
 #include <stdarg.h>
 #include <string.h>
-#include "math.h"
+#include <math.h>
 #define VPX_CODEC_DISABLE_COMPAT 1
 #include "vpx/vpx_encoder.h"
 #include "vpx/vp8cx.h"
 #include "vpx_ports/mem_ops.h"
+#include "./tools_common.h"
 #define interface (vpx_codec_vp8_cx())
 #define fourcc    0x30385056
 
@@ -43,21 +44,6 @@
 #include "third_party/libyuv/include/libyuv/basic_types.h"
 #include "third_party/libyuv/include/libyuv/scale.h"
 #include "third_party/libyuv/include/libyuv/cpu_id.h"
-
-static double vp8_mse2psnr(double Samples, double Peak, double Mse)
-{
-    double psnr;
-
-    if ((double)Mse > 0.0)
-        psnr = 10.0 * log10(Peak * Peak * Samples / Mse);
-    else
-        psnr = 60;      // Limit to prevent / 0
-
-    if (psnr > 60)
-        psnr = 60;
-
-    return psnr;
-}
 
 static void die(const char *fmt, ...) {
     va_list ap;
@@ -454,8 +440,8 @@ int main(int argc, char **argv)
         if ( (show_psnr) && (psnr_count[i]>0) )
         {
             int j;
-            double ovpsnr = vp8_mse2psnr(psnr_samples_total[i], 255.0,
-                                         psnr_sse_total[i]);
+            double ovpsnr = sse_to_psnr(psnr_samples_total[i], 255.0,
+                                        psnr_sse_total[i]);
 
             fprintf(stderr, "\n ENC%d PSNR (Overall/Avg/Y/U/V)", i);
 
