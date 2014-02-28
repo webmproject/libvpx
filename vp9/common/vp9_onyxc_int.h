@@ -48,42 +48,6 @@ extern const struct {
   PARTITION_CONTEXT left;
 } partition_context_lookup[BLOCK_SIZES];
 
-typedef struct frame_contexts {
-  vp9_prob y_mode_prob[BLOCK_SIZE_GROUPS][INTRA_MODES - 1];
-  vp9_prob uv_mode_prob[INTRA_MODES][INTRA_MODES - 1];
-  vp9_prob partition_prob[PARTITION_CONTEXTS][PARTITION_TYPES - 1];
-  vp9_coeff_probs_model coef_probs[TX_SIZES][PLANE_TYPES];
-  vp9_prob switchable_interp_prob[SWITCHABLE_FILTER_CONTEXTS]
-                                 [SWITCHABLE_FILTERS - 1];
-  vp9_prob inter_mode_probs[INTER_MODE_CONTEXTS][INTER_MODES - 1];
-  vp9_prob intra_inter_prob[INTRA_INTER_CONTEXTS];
-  vp9_prob comp_inter_prob[COMP_INTER_CONTEXTS];
-  vp9_prob single_ref_prob[REF_CONTEXTS][2];
-  vp9_prob comp_ref_prob[REF_CONTEXTS];
-  struct tx_probs tx_probs;
-  vp9_prob skip_probs[SKIP_CONTEXTS];
-  nmv_context nmvc;
-} FRAME_CONTEXT;
-
-typedef struct {
-  unsigned int y_mode[BLOCK_SIZE_GROUPS][INTRA_MODES];
-  unsigned int uv_mode[INTRA_MODES][INTRA_MODES];
-  unsigned int partition[PARTITION_CONTEXTS][PARTITION_TYPES];
-  vp9_coeff_count_model coef[TX_SIZES][PLANE_TYPES];
-  unsigned int eob_branch[TX_SIZES][PLANE_TYPES][REF_TYPES]
-                         [COEF_BANDS][COEFF_CONTEXTS];
-  unsigned int switchable_interp[SWITCHABLE_FILTER_CONTEXTS]
-                                [SWITCHABLE_FILTERS];
-  unsigned int inter_mode[INTER_MODE_CONTEXTS][INTER_MODES];
-  unsigned int intra_inter[INTRA_INTER_CONTEXTS][2];
-  unsigned int comp_inter[COMP_INTER_CONTEXTS][2];
-  unsigned int single_ref[REF_CONTEXTS][2][2];
-  unsigned int comp_ref[REF_CONTEXTS][2];
-  struct tx_counts tx;
-  unsigned int skip[SKIP_CONTEXTS][2];
-  nmv_context_counts mv;
-} FRAME_COUNTS;
-
 
 typedef enum {
   SINGLE_REFERENCE      = 0,

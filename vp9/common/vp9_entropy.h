@@ -16,7 +16,6 @@
 #include "vp9/common/vp9_blockd.h"
 #include "vp9/common/vp9_common.h"
 #include "vp9/common/vp9_scan.h"
-#include "vp9/common/vp9_entropymode.h"
 
 #ifdef __cplusplus
 extern "C" {
