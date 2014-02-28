@@ -98,8 +98,15 @@ static int full_pixel_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
   mvp_full.col >>= 3;
   mvp_full.row >>= 3;
 
-  vp9_full_pixel_diamond(cpi, x, &mvp_full, step_param, sadpb, further_steps, 1,
-                         &cpi->fn_ptr[bsize], &ref_mv.as_mv, &tmp_mv->as_mv);
+  if (cpi->sf.search_method == FAST_HEX) {
+    vp9_fast_hex_search(x, &mvp_full, step_param, sadpb, &cpi->fn_ptr[bsize],
+                        1, &ref_mv.as_mv, &tmp_mv->as_mv);
+  } else {
+    vp9_full_pixel_diamond(cpi, x, &mvp_full, step_param, sadpb, further_steps,
+                           1, &cpi->fn_ptr[bsize], &ref_mv.as_mv,
+                           &tmp_mv->as_mv);
+  }
+
   x->mv_col_min = tmp_col_min;
   x->mv_col_max = tmp_col_max;
   x->mv_row_min = tmp_row_min;
