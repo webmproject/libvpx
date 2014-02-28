@@ -16,6 +16,24 @@
       "revId": "40a65cd1e56b1121386e7fd5c3e169fc610ff34e",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//0n8\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-02-28T18:47:04Z",
+      "side": 1,
+      "message": "Will be done as a separate patch.",
+      "parentUuid": "AAAAdn//0oU\u003d",
+      "revId": "40a65cd1e56b1121386e7fd5c3e169fc610ff34e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
