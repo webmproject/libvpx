@@ -191,7 +191,7 @@ static void find_mv_refs_idx(const VP9_COMMON *cm, const MACROBLOCKD *xd,
                              MODE_INFO *mi, const MODE_INFO *prev_mi,
                              MV_REFERENCE_FRAME ref_frame,
                              int_mv *mv_ref_list,
-                             int block_idx, int mi_row, int mi_col) {
+                             int block, int mi_row, int mi_col) {
   const int *ref_sign_bias = cm->ref_frame_sign_bias;
   int i, refmv_count = 0;
   const POSITION *const mv_ref_search = mv_ref_blocks[mi->mbmi.sb_type];
@@ -214,19 +214,12 @@ static void find_mv_refs_idx(const VP9_COMMON *cm, const MACROBLOCKD *xd,
       const MB_MODE_INFO *const candidate = &candidate_mi->mbmi;
       // Keep counts for entropy encoding.
       context_counter += mode_2_counter[candidate->mode];
+      different_ref_found = 1;
 
-      // Check if the candidate comes from the same reference frame.
-      if (candidate->ref_frame[0] == ref_frame) {
-        ADD_MV_REF_LIST(get_sub_block_mv(candidate_mi, 0,
-                                         mv_ref->col, block_idx));
-        different_ref_found = candidate->ref_frame[1] != ref_frame;
-      } else {
-        if (candidate->ref_frame[1] == ref_frame)
-          // Add second motion vector if it has the same ref_frame.
-          ADD_MV_REF_LIST(get_sub_block_mv(candidate_mi, 1,
-                                           mv_ref->col, block_idx));
-        different_ref_found = 1;
-      }
+      if (candidate->ref_frame[0] == ref_frame)
+        ADD_MV_REF_LIST(get_sub_block_mv(candidate_mi, 0, mv_ref->col, block));
+      else if (candidate->ref_frame[1] == ref_frame)
+        ADD_MV_REF_LIST(get_sub_block_mv(candidate_mi, 1, mv_ref->col, block));
     }
   }
 
@@ -239,15 +232,12 @@ static void find_mv_refs_idx(const VP9_COMMON *cm, const MACROBLOCKD *xd,
       const MB_MODE_INFO *const candidate = &xd->mi_8x8[mv_ref->col +
                                             mv_ref->row
                                             * xd->mode_info_stride]->mbmi;
+      different_ref_found = 1;
 
-      if (candidate->ref_frame[0] == ref_frame) {
+      if (candidate->ref_frame[0] == ref_frame)
         ADD_MV_REF_LIST(candidate->mv[0]);
-        different_ref_found = candidate->ref_frame[1] != ref_frame;
-      } else {
-        if (candidate->ref_frame[1] == ref_frame)
-          ADD_MV_REF_LIST(candidate->mv[1]);
-        different_ref_found = 1;
-      }
+      else if (candidate->ref_frame[1] == ref_frame)
+        ADD_MV_REF_LIST(candidate->mv[1]);
     }
   }
 
