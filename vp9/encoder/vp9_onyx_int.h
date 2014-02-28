@@ -416,6 +416,10 @@ typedef struct {
   // This variable sets the encode_breakout threshold. Currently, it is only
   // enabled in real time mode.
   int encode_breakout_thresh;
+
+  // A binary mask indicating if NEARESTMV, NEARMV, ZEROMV, NEWMV
+  // modes are disabled in order from LSB to MSB for each BLOCK_SIZE.
+  int disable_inter_mode_mask[BLOCK_SIZES];
 } SPEED_FEATURES;
 
 typedef struct {
