@@ -3217,25 +3217,69 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
   for (ref_frame = LAST_FRAME; ref_frame <= ALTREF_FRAME; ++ref_frame) {
     // All modes from vp9_mode_order that use this frame as any ref
     static const int ref_frame_mask_all[] = {
-        0x123291, 0x25c444, 0x39b722
+        0x0, 0x123291, 0x25c444, 0x39b722
     };
     // Fixed mv modes (NEARESTMV, NEARMV, ZEROMV) from vp9_mode_order that use
     // this frame as their primary ref
     static const int ref_frame_mask_fixedmv[] = {
-        0x121281, 0x24c404, 0x080102
+        0x0, 0x121281, 0x24c404, 0x080102
     };
     if (!(cpi->ref_frame_flags & flag_list[ref_frame])) {
       // Skip modes for missing references
-      mode_skip_mask |= ref_frame_mask_all[ref_frame - LAST_FRAME];
+      mode_skip_mask |= ref_frame_mask_all[ref_frame];
     } else if (cpi->sf.reference_masking) {
       for (i = LAST_FRAME; i <= ALTREF_FRAME; ++i) {
         // Skip fixed mv modes for poor references
         if ((x->pred_mv_sad[ref_frame] >> 2) > x->pred_mv_sad[i]) {
-          mode_skip_mask |= ref_frame_mask_fixedmv[ref_frame - LAST_FRAME];
+          mode_skip_mask |= ref_frame_mask_fixedmv[ref_frame];
           break;
         }
       }
     }
+    // If the segment reference frame feature is enabled....
+    // then do nothing if the current ref frame is not allowed..
+    if (vp9_segfeature_active(seg, segment_id, SEG_LVL_REF_FRAME) &&
+        vp9_get_segdata(seg, segment_id, SEG_LVL_REF_FRAME) != (int)ref_frame) {
+      mode_skip_mask |= ref_frame_mask_all[ref_frame];
+    }
+  }
+
+  // If the segment skip feature is enabled....
+  // then do nothing if the current mode is not allowed..
+  if (vp9_segfeature_active(seg, segment_id, SEG_LVL_SKIP)) {
+    const int inter_non_zero_mode_mask = 0x1F7F7;
+    mode_skip_mask |= inter_non_zero_mode_mask;
+  }
+
+  // Disable this drop out case if the ref frame
+  // segment level feature is enabled for this segment. This is to
+  // prevent the possibility that we end up unable to pick any mode.
+  if (!vp9_segfeature_active(seg, segment_id, SEG_LVL_REF_FRAME)) {
+    // Only consider ZEROMV/ALTREF_FRAME for alt ref frame,
+    // unless ARNR filtering is enabled in which case we want
+    // an unfiltered alternative. We allow near/nearest as well
+    // because they may result in zero-zero MVs but be cheaper.
+    if (cpi->rc.is_src_frame_alt_ref && (cpi->oxcf.arnr_max_frames == 0)) {
+      const int altref_zero_mask =
+          ~((1 << THR_NEARESTA) | (1 << THR_NEARA) | (1 << THR_ZEROA));
+      mode_skip_mask |= altref_zero_mask;
+      if (frame_mv[NEARMV][ALTREF_FRAME].as_int != 0)
+        mode_skip_mask |= (1 << THR_NEARA);
+      if (frame_mv[NEARESTMV][ALTREF_FRAME].as_int != 0)
+        mode_skip_mask |= (1 << THR_NEARESTA);
+    }
+  }
+
+  // TODO(JBB): This is to make up for the fact that we don't have sad
+  // functions that work when the block size reads outside the umv.  We
+  // should fix this either by making the motion search just work on
+  // a representative block in the boundary ( first ) and then implement a
+  // function that does sads when inside the border..
+  if ((mi_row + bhs) > cm->mi_rows || (mi_col + bws) > cm->mi_cols) {
+    const int new_modes_mask =
+        (1 << THR_NEWMV) | (1 << THR_NEWG) | (1 << THR_NEWA) |
+        (1 << THR_COMP_NEWLA) | (1 << THR_COMP_NEWGA);
+    mode_skip_mask |= new_modes_mask;
   }
 
   for (mode_index = 0; mode_index < MAX_MODES; ++mode_index) {
@@ -3287,11 +3331,6 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
 
     comp_pred = second_ref_frame > INTRA_FRAME;
     if (comp_pred) {
-      // Do not allow compound prediction if the segment level reference
-      // frame feature is in use as in this case there can only be one
-      // reference.
-      if (vp9_segfeature_active(seg, segment_id, SEG_LVL_REF_FRAME))
-        continue;
       if ((mode_search_skip_flags & FLAG_SKIP_COMP_BESTINTRA) &&
           vp9_mode_order[best_mode_index].ref_frame[0] == INTRA_FRAME)
         continue;
@@ -3305,47 +3344,6 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
       if (ref_frame != INTRA_FRAME && second_ref_frame != INTRA_FRAME)
         mode_excluded = mode_excluded ?
             mode_excluded : cm->reference_mode == COMPOUND_REFERENCE;
-    }
-
-    // If the segment reference frame feature is enabled....
-    // then do nothing if the current ref frame is not allowed..
-    if (vp9_segfeature_active(seg, segment_id, SEG_LVL_REF_FRAME) &&
-        vp9_get_segdata(seg, segment_id, SEG_LVL_REF_FRAME) !=
-            (int)ref_frame) {
-      continue;
-    // If the segment skip feature is enabled....
-    // then do nothing if the current mode is not allowed..
-    } else if (vp9_segfeature_active(seg, segment_id, SEG_LVL_SKIP) &&
-               (this_mode != ZEROMV && ref_frame != INTRA_FRAME)) {
-      continue;
-    // Disable this drop out case if the ref frame
-    // segment level feature is enabled for this segment. This is to
-    // prevent the possibility that we end up unable to pick any mode.
-    } else if (!vp9_segfeature_active(seg, segment_id,
-                                      SEG_LVL_REF_FRAME)) {
-      // Only consider ZEROMV/ALTREF_FRAME for alt ref frame,
-      // unless ARNR filtering is enabled in which case we want
-      // an unfiltered alternative. We allow near/nearest as well
-      // because they may result in zero-zero MVs but be cheaper.
-      if (cpi->rc.is_src_frame_alt_ref && (cpi->oxcf.arnr_max_frames == 0)) {
-        if ((this_mode != ZEROMV &&
-             !(this_mode == NEARMV &&
-               frame_mv[NEARMV][ALTREF_FRAME].as_int == 0) &&
-             !(this_mode == NEARESTMV &&
-               frame_mv[NEARESTMV][ALTREF_FRAME].as_int == 0)) ||
-            ref_frame != ALTREF_FRAME) {
-          continue;
-        }
-      }
-    }
-    // TODO(JBB): This is to make up for the fact that we don't have sad
-    // functions that work when the block size reads outside the umv.  We
-    // should fix this either by making the motion search just work on
-    // a representative block in the boundary ( first ) and then implement a
-    // function that does sads when inside the border..
-    if (((mi_row + bhs) > cm->mi_rows || (mi_col + bws) > cm->mi_cols) &&
-        this_mode == NEWMV) {
-      continue;
     }
 
     if (ref_frame == INTRA_FRAME) {
