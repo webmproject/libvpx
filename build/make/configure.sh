@@ -1199,8 +1199,8 @@ EOF
     fi
 
     # default use_x86inc to yes if pic is no or 64bit or we are not on darwin
-    echo "  checking here for x86inc \"${tgt_isa}\" \"$pic\" "
-    if [ ${tgt_isa} = x86_64 -o ! "$pic" = "yes" -o "${tgt_os#darwin}" = "${tgt_os}"  ]; then
+    if [ ${tgt_isa} = x86_64 -o ! "$pic" = "yes" -o \
+         "${tgt_os#darwin}" = "${tgt_os}"  ]; then
       soft_enable use_x86inc
     fi
 
