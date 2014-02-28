@@ -22,7 +22,6 @@ void vp9_initialize_common();
 
 void vp9_update_mode_info_border(VP9_COMMON *cm, MODE_INFO *mi);
 
-void vp9_create_common(VP9_COMMON *cm);
 void vp9_remove_common(VP9_COMMON *cm);
 
 int vp9_resize_frame_buffers(VP9_COMMON *cm, int width, int height);

@@ -138,7 +138,7 @@ VP9D_PTR vp9_create_decompressor(VP9D_CONFIG *oxcf) {
   cm->error.setjmp = 1;
   vp9_initialize_dec();
 
-  vp9_create_common(cm);
+  vp9_rtcd();
 
   pbi->oxcf = *oxcf;
   pbi->ready_for_new_data = 1;
