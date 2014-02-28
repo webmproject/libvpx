@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//0wk\u003d",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2014-02-28T02:09:31Z",
+      "side": 1,
+      "message": "It was suggested that the summary line should be under 50 characters.",
+      "revId": "3156d15faafe8ca643322388f8c4744f20f208e4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
