@@ -62,6 +62,7 @@ vp9_spatial_scalable_encoder.SRCS += ivfenc.c ivfenc.h
 vp9_spatial_scalable_encoder.SRCS += tools_common.c tools_common.h
 vp9_spatial_scalable_encoder.SRCS += video_common.h
 vp9_spatial_scalable_encoder.SRCS += video_writer.h video_writer.c
+vp9_spatial_scalable_encoder.SRCS += vpxstats.c vpxstats.h
 vp9_spatial_scalable_encoder.GUID   = 4A38598D-627D-4505-9C7B-D4020C84100D
 vp9_spatial_scalable_encoder.DESCRIPTION = Spatial Scalable Encoder
 

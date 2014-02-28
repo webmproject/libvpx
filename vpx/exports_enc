@@ -21,3 +21,5 @@ text vpx_svc_set_options
 text vpx_svc_set_quantizers
 text vpx_svc_set_scale_factors
 text vpx_svc_get_layer_resolution
+text vpx_svc_get_rc_stats_buffer_size
+text vpx_svc_get_rc_stats_buffer
