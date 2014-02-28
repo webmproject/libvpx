@@ -82,7 +82,7 @@ static void prob_diff_update(const vp9_tree_index *tree,
     vp9_cond_prob_diff_update(w, &probs[i], branch_ct[i]);
 }
 
-static void write_selected_tx_size(const VP9_COMP *cpi, MODE_INFO *m,
+static void write_selected_tx_size(const VP9_COMP *cpi,
                                    TX_SIZE tx_size, BLOCK_SIZE bsize,
                                    vp9_writer *w) {
   const TX_SIZE max_tx_size = max_txsize_lookup[bsize];
@@ -267,7 +267,7 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, MODE_INFO *m, vp9_writer *bc) {
   if (bsize >= BLOCK_8X8 && cm->tx_mode == TX_MODE_SELECT &&
       !(ref0 != INTRA_FRAME &&
         (skip || vp9_segfeature_active(seg, segment_id, SEG_LVL_SKIP)))) {
-    write_selected_tx_size(cpi, m, mi->tx_size, bsize, bc);
+    write_selected_tx_size(cpi, mi->tx_size, bsize, bc);
   }
 
   if (ref0 == INTRA_FRAME) {
@@ -369,7 +369,7 @@ static void write_mb_modes_kf(const VP9_COMP *cpi, MODE_INFO **mi_8x8,
   write_skip(cpi, segment_id, m, bc);
 
   if (m->mbmi.sb_type >= BLOCK_8X8 && cm->tx_mode == TX_MODE_SELECT)
-    write_selected_tx_size(cpi, m, m->mbmi.tx_size, m->mbmi.sb_type, bc);
+    write_selected_tx_size(cpi, m->mbmi.tx_size, m->mbmi.sb_type, bc);
 
   if (m->mbmi.sb_type >= BLOCK_8X8) {
     const MB_PREDICTION_MODE A = vp9_above_block_mode(m, above_mi, 0);
