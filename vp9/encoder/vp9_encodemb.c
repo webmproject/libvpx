@@ -575,11 +575,7 @@ static void encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
     case TX_4X4:
       tx_type = get_tx_type_4x4(pd->plane_type, xd, block);
       scan_order = &vp9_scan_orders[TX_4X4][tx_type];
-      if (mbmi->sb_type < BLOCK_8X8 && plane == 0)
-        mode = xd->mi_8x8[0]->bmi[block].as_mode;
-      else
-        mode = plane == 0 ? mbmi->mode : mbmi->uv_mode;
-
+      mode = plane == 0 ? get_y_mode(xd->mi_8x8[0], block) : mbmi->uv_mode;
       vp9_predict_intra_block(xd, block, bwl, TX_4X4, mode,
                               x->skip_encode ? src : dst,
                               x->skip_encode ? src_stride : dst_stride,

@@ -144,6 +144,11 @@ typedef struct {
   b_mode_info bmi[4];
 } MODE_INFO;
 
+static INLINE MB_PREDICTION_MODE get_y_mode(const MODE_INFO *mi, int block) {
+  return mi->mbmi.sb_type < BLOCK_8X8 ? mi->bmi[block].as_mode
+                                      : mi->mbmi.mode;
+}
+
 static INLINE int is_inter_block(const MB_MODE_INFO *mbmi) {
   return mbmi->ref_frame[0] > INTRA_FRAME;
 }
@@ -255,13 +260,11 @@ extern const TX_TYPE mode2txfm_map[MB_MODE_COUNT];
 static INLINE TX_TYPE get_tx_type_4x4(PLANE_TYPE plane_type,
                                       const MACROBLOCKD *xd, int ib) {
   const MODE_INFO *const mi = xd->mi_8x8[0];
-  const MB_MODE_INFO *const mbmi = &mi->mbmi;
 
-  if (plane_type != PLANE_TYPE_Y || xd->lossless || is_inter_block(mbmi))
+  if (plane_type != PLANE_TYPE_Y || xd->lossless || is_inter_block(&mi->mbmi))
     return DCT_DCT;
 
-  return mode2txfm_map[mbmi->sb_type < BLOCK_8X8 ? mi->bmi[ib].as_mode
-                                                 : mbmi->mode];
+  return mode2txfm_map[get_y_mode(mi, ib)];
 }
 
 static INLINE TX_TYPE get_tx_type_8x8(PLANE_TYPE plane_type,
