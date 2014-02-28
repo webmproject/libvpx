@@ -8,35 +8,38 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#include <stdio.h>
-#include <math.h>
-#include <limits.h>
 #include <assert.h>
+#include <limits.h>
+#include <math.h>
+#include <stdio.h>
 
-#include "vp9/common/vp9_pragmas.h"
-#include "vp9/encoder/vp9_tokenize.h"
-#include "vp9/encoder/vp9_treewriter.h"
-#include "vp9/encoder/vp9_onyx_int.h"
+#include "./vp9_rtcd.h"
+
+#include "vpx_mem/vpx_mem.h"
+
+#include "vp9/common/vp9_common.h"
+#include "vp9/common/vp9_entropy.h"
 #include "vp9/common/vp9_entropymode.h"
+#include "vp9/common/vp9_idct.h"
+#include "vp9/common/vp9_mvref_common.h"
+#include "vp9/common/vp9_pragmas.h"
+#include "vp9/common/vp9_pred_common.h"
+#include "vp9/common/vp9_quant_common.h"
 #include "vp9/common/vp9_reconinter.h"
 #include "vp9/common/vp9_reconintra.h"
-#include "vp9/common/vp9_quant_common.h"
-#include "vp9/encoder/vp9_encodemb.h"
-#include "vp9/encoder/vp9_quantize.h"
-#include "vp9/encoder/vp9_variance.h"
-#include "vp9/encoder/vp9_mcomp.h"
-#include "vp9/encoder/vp9_rdopt.h"
-#include "vp9/encoder/vp9_ratectrl.h"
-#include "vpx_mem/vpx_mem.h"
-#include "vp9/common/vp9_systemdependent.h"
-#include "vp9/encoder/vp9_encodemv.h"
 #include "vp9/common/vp9_seg_common.h"
-#include "vp9/common/vp9_pred_common.h"
-#include "vp9/common/vp9_entropy.h"
-#include "./vp9_rtcd.h"
-#include "vp9/common/vp9_mvref_common.h"
-#include "vp9/common/vp9_common.h"
-#include "vp9/common/vp9_idct.h"
+#include "vp9/common/vp9_systemdependent.h"
+
+#include "vp9/encoder/vp9_encodemb.h"
+#include "vp9/encoder/vp9_encodemv.h"
+#include "vp9/encoder/vp9_mcomp.h"
+#include "vp9/encoder/vp9_onyx_int.h"
+#include "vp9/encoder/vp9_quantize.h"
+#include "vp9/encoder/vp9_ratectrl.h"
+#include "vp9/encoder/vp9_rdopt.h"
+#include "vp9/encoder/vp9_tokenize.h"
+#include "vp9/encoder/vp9_treewriter.h"
+#include "vp9/encoder/vp9_variance.h"
 
 /* Factor to weigh the rate for switchable interp filters */
 #define SWITCHABLE_INTERP_RATE_FACTOR 1
