@@ -11,13 +11,14 @@
 #ifndef TEST_REGISTER_STATE_CHECK_H_
 #define TEST_REGISTER_STATE_CHECK_H_
 
-#ifdef _WIN64
+#include "third_party/googletest/src/include/gtest/gtest.h"
+#include "./vpx_config.h"
+
+#if defined(_WIN64)
 
 #define _WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #include <winnt.h>
-
-#include "third_party/googletest/src/include/gtest/gtest.h"
 
 namespace testing {
 namespace internal {
@@ -81,7 +82,61 @@ class RegisterStateCheck {
 
 }  // namespace libvpx_test
 
-#else  // !_WIN64
+#elif defined(CONFIG_SHARED) && defined(HAVE_NEON) \
+      && !CONFIG_SHARED && HAVE_NEON
+
+#include "vpx/vpx_integer.h"
+
+extern "C" {
+// Save the d8-d15 registers into store.
+void vp9_push_neon(int64_t *store);
+}
+
+namespace libvpx_test {
+
+// Compares the state of d8-d15 at construction with their state at
+// destruction. These registers should be preserved by the callee on
+// arm platform.
+// Usage:
+// {
+//   RegisterStateCheck reg_check;
+//   FunctionToVerify();
+// }
+class RegisterStateCheck {
+ public:
+  RegisterStateCheck() { initialized_ = StoreRegisters(pre_store_); }
+  ~RegisterStateCheck() { EXPECT_TRUE(Check()); }
+
+ private:
+  static bool StoreRegisters(int64_t store[8]) {
+    vp9_push_neon(store);
+    return true;
+  }
+
+  // Compares the register state. Returns true if the states match.
+  bool Check() const {
+    if (!initialized_) return false;
+    int64_t post_store[8];
+    vp9_push_neon(post_store);
+    for (int i = 0; i < 8; ++i) {
+      EXPECT_EQ(pre_store_[i], post_store[i]) << "d"
+          << i + 8 << " has been modified";
+    }
+    return !testing::Test::HasNonfatalFailure();
+  }
+
+  bool initialized_;
+  int64_t pre_store_[8];
+};
+
+#define REGISTER_STATE_CHECK(statement) do { \
+  libvpx_test::RegisterStateCheck reg_check; \
+  statement;                               \
+} while (false)
+
+}  // namespace libvpx_test
+
+#else
 
 namespace libvpx_test {
 
