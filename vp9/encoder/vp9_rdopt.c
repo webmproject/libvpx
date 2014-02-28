@@ -2731,42 +2731,6 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
     }
   }
 
-  // if we're near/nearest and mv == 0,0, compare to zeromv
-  if ((this_mode == NEARMV || this_mode == NEARESTMV || this_mode == ZEROMV) &&
-      frame_mv[refs[0]].as_int == 0 &&
-      !vp9_segfeature_active(&cm->seg, mbmi->segment_id, SEG_LVL_SKIP) &&
-      (num_refs == 1 || frame_mv[refs[1]].as_int == 0)) {
-    int rfc = mbmi->mode_context[refs[0]];
-    int c1 = cost_mv_ref(cpi, NEARMV, rfc);
-    int c2 = cost_mv_ref(cpi, NEARESTMV, rfc);
-    int c3 = cost_mv_ref(cpi, ZEROMV, rfc);
-
-    if (this_mode == NEARMV) {
-      if (c1 > c3)
-        return INT64_MAX;
-    } else if (this_mode == NEARESTMV) {
-      if (c2 > c3)
-        return INT64_MAX;
-    } else {
-      assert(this_mode == ZEROMV);
-      if (num_refs == 1) {
-        if ((c3 >= c2 &&
-             mode_mv[NEARESTMV][refs[0]].as_int == 0) ||
-            (c3 >= c1 &&
-             mode_mv[NEARMV][refs[0]].as_int == 0))
-          return INT64_MAX;
-      } else {
-        if ((c3 >= c2 &&
-             mode_mv[NEARESTMV][refs[0]].as_int == 0 &&
-             mode_mv[NEARESTMV][refs[1]].as_int == 0) ||
-            (c3 >= c1 &&
-             mode_mv[NEARMV][refs[0]].as_int == 0 &&
-             mode_mv[NEARMV][refs[1]].as_int == 0))
-          return INT64_MAX;
-      }
-    }
-  }
-
   for (i = 0; i < num_refs; ++i) {
     cur_mv[i] = frame_mv[refs[i]];
     // Clip "next_nearest" so that it does not extend to far out of image
@@ -3359,6 +3323,43 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
       if (mode_search_skip_flags & FLAG_SKIP_INTRA_DIRMISMATCH) {
         if (conditional_skipintra(this_mode, best_intra_mode))
             continue;
+      }
+    } else {
+      // if we're near/nearest and mv == 0,0, compare to zeromv
+      if ((this_mode == NEARMV || this_mode == NEARESTMV ||
+          this_mode == ZEROMV) &&
+          frame_mv[this_mode][ref_frame].as_int == 0 &&
+          !vp9_segfeature_active(&cm->seg, mbmi->segment_id, SEG_LVL_SKIP) &&
+          (!comp_pred || frame_mv[this_mode][second_ref_frame].as_int == 0)) {
+        int rfc = mbmi->mode_context[ref_frame];
+        int c1 = cost_mv_ref(cpi, NEARMV, rfc);
+        int c2 = cost_mv_ref(cpi, NEARESTMV, rfc);
+        int c3 = cost_mv_ref(cpi, ZEROMV, rfc);
+
+        if (this_mode == NEARMV) {
+          if (c1 > c3)
+            continue;
+        } else if (this_mode == NEARESTMV) {
+          if (c2 > c3)
+            continue;
+        } else {
+          assert(this_mode == ZEROMV);
+          if (!comp_pred) {
+            if ((c3 >= c2 &&
+                 frame_mv[NEARESTMV][ref_frame].as_int == 0) ||
+                (c3 >= c1 &&
+                 frame_mv[NEARMV][ref_frame].as_int == 0))
+              continue;
+          } else {
+            if ((c3 >= c2 &&
+                 frame_mv[NEARESTMV][ref_frame].as_int == 0 &&
+                 frame_mv[NEARESTMV][second_ref_frame].as_int == 0) ||
+                (c3 >= c1 &&
+                 frame_mv[NEARMV][ref_frame].as_int == 0 &&
+                 frame_mv[NEARMV][second_ref_frame].as_int == 0))
+              continue;
+          }
+        }
       }
     }
 
