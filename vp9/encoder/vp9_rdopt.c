@@ -272,18 +272,12 @@ static void set_block_thresholds(VP9_COMP *cpi) {
 void vp9_initialize_rd_consts(VP9_COMP *cpi) {
   VP9_COMMON *cm = &cpi->common;
   MACROBLOCK *x = &cpi->mb;
-  int qindex, i;
+  int i;
 
   vp9_clear_system_state();
 
-  // Further tests required to see if optimum is different
-  // for key frames, golden frames and arf frames.
-  // if (cpi->common.refresh_golden_frame ||
-  //     cpi->common.refresh_alt_ref_frame)
-  qindex = clamp(cm->base_qindex + cm->y_dc_delta_q, 0, MAXQ);
-
   cpi->RDDIV = RDDIV_BITS;  // in bits (to multiply D by 128)
-  cpi->RDMULT = vp9_compute_rd_mult(cpi, qindex);
+  cpi->RDMULT = vp9_compute_rd_mult(cpi, cm->base_qindex + cm->y_dc_delta_q);
 
   x->errorperbit = cpi->RDMULT / RD_MULT_EPB_RATIO;
   x->errorperbit += (x->errorperbit == 0);
