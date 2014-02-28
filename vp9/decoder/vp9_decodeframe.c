@@ -287,10 +287,8 @@ static void predict_and_reconstruct_intra_block(int plane, int block,
   MACROBLOCKD *const xd = args->xd;
   struct macroblockd_plane *const pd = &xd->plane[plane];
   MODE_INFO *const mi = xd->mi_8x8[0];
-  const MB_PREDICTION_MODE mode = (plane == 0)
-          ? ((mi->mbmi.sb_type < BLOCK_8X8) ? mi->bmi[block].as_mode
-                                            : mi->mbmi.mode)
-          : mi->mbmi.uv_mode;
+  const MB_PREDICTION_MODE mode = (plane == 0) ? get_y_mode(mi, block)
+                                               : mi->mbmi.uv_mode;
   int x, y;
   uint8_t *dst;
   txfrm_block_to_raster_xy(plane_bsize, tx_size, block, &x, &y);

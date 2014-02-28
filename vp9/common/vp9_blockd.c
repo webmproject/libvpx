@@ -16,8 +16,7 @@ MB_PREDICTION_MODE vp9_left_block_mode(const MODE_INFO *cur_mi,
     if (!left_mi || is_inter_block(&left_mi->mbmi))
       return DC_PRED;
 
-    return left_mi->mbmi.sb_type < BLOCK_8X8 ? left_mi->bmi[b + 1].as_mode
-                                             : left_mi->mbmi.mode;
+    return get_y_mode(left_mi, b + 1);
   } else {
     assert(b == 1 || b == 3);
     return cur_mi->bmi[b - 1].as_mode;
@@ -30,8 +29,7 @@ MB_PREDICTION_MODE vp9_above_block_mode(const MODE_INFO *cur_mi,
     if (!above_mi || is_inter_block(&above_mi->mbmi))
       return DC_PRED;
 
-    return above_mi->mbmi.sb_type < BLOCK_8X8 ? above_mi->bmi[b + 2].as_mode
-                                              : above_mi->mbmi.mode;
+    return get_y_mode(above_mi, b + 2);
   } else {
     assert(b == 2 || b == 3);
     return cur_mi->bmi[b - 2].as_mode;

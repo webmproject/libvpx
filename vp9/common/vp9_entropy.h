@@ -177,13 +177,11 @@ static INLINE int get_entropy_context(TX_SIZE tx_size, const ENTROPY_CONTEXT *a,
 static const INLINE scan_order *get_scan(const MACROBLOCKD *xd, TX_SIZE tx_size,
                                          PLANE_TYPE type, int block_idx) {
   const MODE_INFO *const mi = xd->mi_8x8[0];
-  const MB_MODE_INFO *const mbmi = &mi->mbmi;
 
-  if (is_inter_block(mbmi) || type != PLANE_TYPE_Y || xd->lossless) {
+  if (is_inter_block(&mi->mbmi) || type != PLANE_TYPE_Y || xd->lossless) {
     return &vp9_default_scan_orders[tx_size];
   } else {
-    const MB_PREDICTION_MODE mode =
-        mbmi->sb_type < BLOCK_8X8 ? mi->bmi[block_idx].as_mode : mbmi->mode;
+    const MB_PREDICTION_MODE mode = get_y_mode(mi, block_idx);
     return &vp9_scan_orders[tx_size][mode2txfm_map[mode]];
   }
 }
