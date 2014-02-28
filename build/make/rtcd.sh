@@ -333,6 +333,7 @@ EOF
 #
 # Main Driver
 #
+ALL_FUNCS=$(export LC_ALL=C; echo $ALL_FUNCS | tr ' ' '\n' | sort |tr '\n' ' ')
 require c
 case $arch in
   x86)
