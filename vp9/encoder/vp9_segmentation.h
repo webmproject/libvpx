@@ -19,8 +19,8 @@
 extern "C" {
 #endif
 
-void vp9_enable_segmentation(VP9_PTR ptr);
-void vp9_disable_segmentation(VP9_PTR ptr);
+void vp9_enable_segmentation(struct segmentation *seg);
+void vp9_disable_segmentation(struct segmentation *seg);
 
 void vp9_disable_segfeature(struct segmentation *seg,
                             int segment_id,
@@ -30,7 +30,7 @@ void vp9_clear_segdata(struct segmentation *seg,
                        SEG_LVL_FEATURES feature_id);
 // Valid values for a segment are 0 to 3
 // Segmentation map is arrange as [Rows][Columns]
-void vp9_set_segmentation_map(VP9_PTR ptr, unsigned char *segmentation_map);
+void vp9_set_segmentation_map(VP9_COMP *cpi, unsigned char *segmentation_map);
 
 // The values given for each segment can be either deltas (from the default
 // value chosen for the frame) or absolute values.
@@ -42,7 +42,7 @@ void vp9_set_segmentation_map(VP9_PTR ptr, unsigned char *segmentation_map);
 //
 // abs_delta = SEGMENT_DELTADATA (deltas) abs_delta = SEGMENT_ABSDATA (use
 // the absolute values given).
-void vp9_set_segment_data(VP9_PTR ptr, signed char *feature_data,
+void vp9_set_segment_data(struct segmentation *seg, signed char *feature_data,
                           unsigned char abs_delta);
 
 void vp9_choose_segmap_coding_method(VP9_COMP *cpi);
