@@ -16,6 +16,24 @@
       "revId": "ec83b847d5e60dc8902cb6b9d90f25e750316567",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//0Xw\u003d",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2014-03-01T19:16:58Z",
+      "side": 1,
+      "message": "Thanks, I have reworded the summary and comments to better reflect the change.",
+      "parentUuid": "AAAAdn//0bE\u003d",
+      "revId": "ec83b847d5e60dc8902cb6b9d90f25e750316567",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
