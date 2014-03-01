@@ -1617,7 +1617,7 @@ typedef struct {
 } SEG_RDSTAT;
 
 typedef struct {
-  int_mv *ref_mv, *second_ref_mv;
+  int_mv *ref_mv[2];
   int_mv mvp;
 
   int64_t segment_rd;
@@ -1827,30 +1827,30 @@ static void rd_check_segment_txsize(VP9_COMP *cpi, MACROBLOCK *x,
           // adjust src pointer for this block
           mi_buf_shift(x, i);
 
-          vp9_set_mv_search_range(x, &bsi->ref_mv->as_mv);
+          vp9_set_mv_search_range(x, &bsi->ref_mv[0]->as_mv);
 
           if (cpi->sf.search_method == HEX) {
             bestsme = vp9_hex_search(x, &mvp_full,
                                      step_param,
                                      sadpb, 1, v_fn_ptr, 1,
-                                     &bsi->ref_mv->as_mv,
+                                     &bsi->ref_mv[0]->as_mv,
                                      &new_mv->as_mv);
           } else if (cpi->sf.search_method == SQUARE) {
             bestsme = vp9_square_search(x, &mvp_full,
                                         step_param,
                                         sadpb, 1, v_fn_ptr, 1,
-                                        &bsi->ref_mv->as_mv,
+                                        &bsi->ref_mv[0]->as_mv,
                                         &new_mv->as_mv);
           } else if (cpi->sf.search_method == BIGDIA) {
             bestsme = vp9_bigdia_search(x, &mvp_full,
                                         step_param,
                                         sadpb, 1, v_fn_ptr, 1,
-                                        &bsi->ref_mv->as_mv,
+                                        &bsi->ref_mv[0]->as_mv,
                                         &new_mv->as_mv);
           } else {
             bestsme = vp9_full_pixel_diamond(cpi, x, &mvp_full, step_param,
                                              sadpb, further_steps, 0, v_fn_ptr,
-                                             &bsi->ref_mv->as_mv,
+                                             &bsi->ref_mv[0]->as_mv,
                                              &new_mv->as_mv);
           }
 
@@ -1864,7 +1864,7 @@ static void rd_check_segment_txsize(VP9_COMP *cpi, MACROBLOCK *x,
             thissme = cpi->full_search_sad(x, &mvp_full,
                                            sadpb, 16, v_fn_ptr,
                                            x->nmvjointcost, x->mvcost,
-                                           &bsi->ref_mv->as_mv,
+                                           &bsi->ref_mv[0]->as_mv,
                                            &best_mv->as_mv);
             if (thissme < bestsme) {
               bestsme = thissme;
@@ -1880,7 +1880,7 @@ static void rd_check_segment_txsize(VP9_COMP *cpi, MACROBLOCK *x,
             int distortion;
             cpi->find_fractional_mv_step(x,
                                          &new_mv->as_mv,
-                                         &bsi->ref_mv->as_mv,
+                                         &bsi->ref_mv[0]->as_mv,
                                          cm->allow_high_precision_mv,
                                          x->errorperbit, v_fn_ptr,
                                          cpi->sf.subpel_force_stop,
@@ -1927,7 +1927,7 @@ static void rd_check_segment_txsize(VP9_COMP *cpi, MACROBLOCK *x,
         bsi->rdstat[i][mode_idx].brate =
             labels2mode(x, i, this_mode, &mode_mv[this_mode],
                         &second_mode_mv[this_mode], frame_mv, seg_mvs[i],
-                        bsi->ref_mv, bsi->second_ref_mv, x->nmvjointcost,
+                        bsi->ref_mv[0], bsi->ref_mv[1], x->nmvjointcost,
                         x->mvcost, cpi);
 
 
@@ -2036,7 +2036,7 @@ static void rd_check_segment_txsize(VP9_COMP *cpi, MACROBLOCK *x,
 
       labels2mode(x, i, mode_selected, &mode_mv[mode_selected],
                   &second_mode_mv[mode_selected], frame_mv, seg_mvs[i],
-                  bsi->ref_mv, bsi->second_ref_mv, x->nmvjointcost,
+                  bsi->ref_mv[0], bsi->ref_mv[1], x->nmvjointcost,
                   x->mvcost, cpi);
 
       br += bsi->rdstat[i][mode_idx].brate;
@@ -2091,8 +2091,8 @@ static int64_t rd_pick_best_mbsegmentation(VP9_COMP *cpi, MACROBLOCK *x,
   vp9_zero(*bsi);
 
   bsi->segment_rd = best_rd;
-  bsi->ref_mv = best_ref_mv;
-  bsi->second_ref_mv = second_best_ref_mv;
+  bsi->ref_mv[0] = best_ref_mv;
+  bsi->ref_mv[1] = second_best_ref_mv;
   bsi->mvp.as_int = best_ref_mv->as_int;
   bsi->mvthresh = mvthresh;
 
