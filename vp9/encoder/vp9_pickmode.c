@@ -142,12 +142,12 @@ static int full_pixel_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
 static void sub_pixel_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
                                     const TileInfo *const tile,
                                     BLOCK_SIZE bsize, int mi_row, int mi_col,
-                                    int_mv *tmp_mv) {
+                                    MV *tmp_mv) {
   MACROBLOCKD *xd = &x->e_mbd;
   MB_MODE_INFO *mbmi = &xd->mi_8x8[0]->mbmi;
   struct buf_2d backup_yv12[MAX_MB_PLANE] = {{0}};
   int ref = mbmi->ref_frame[0];
-  int_mv ref_mv = mbmi->ref_mvs[ref][0];
+  MV ref_mv = mbmi->ref_mvs[ref][0].as_mv;
   int dis;
 
   const YV12_BUFFER_CONFIG *scaled_ref_frame = vp9_get_scaled_ref_frame(cpi,
@@ -163,10 +163,10 @@ static void sub_pixel_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
     setup_pre_planes(xd, 0, scaled_ref_frame, mi_row, mi_col, NULL);
   }
 
-  tmp_mv->as_mv.col >>= 3;
-  tmp_mv->as_mv.row >>= 3;
+  tmp_mv->col >>= 3;
+  tmp_mv->row >>= 3;
 
-  cpi->find_fractional_mv_step(x, &tmp_mv->as_mv, &ref_mv.as_mv,
+  cpi->find_fractional_mv_step(x, tmp_mv, &ref_mv,
                                cpi->common.allow_high_precision_mv,
                                x->errorperbit,
                                &cpi->fn_ptr[bsize],
@@ -272,7 +272,7 @@ int64_t vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
           continue;
 
         sub_pixel_motion_search(cpi, x, tile, bsize, mi_row, mi_col,
-                                &frame_mv[NEWMV][ref_frame]);
+                                &frame_mv[NEWMV][ref_frame].as_mv);
       }
 
       if (frame_mv[this_mode][ref_frame].as_int == 0) {
