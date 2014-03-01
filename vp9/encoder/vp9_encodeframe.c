@@ -1088,8 +1088,7 @@ static int sb_has_motion(const VP9_COMMON *cm, MODE_INFO **prev_mi_8x8) {
   return 0;
 }
 
-static void update_state_rt(VP9_COMP *cpi, PICK_MODE_CONTEXT *ctx,
-                         BLOCK_SIZE bsize, int output_enabled) {
+static void update_state_rt(VP9_COMP *cpi, const PICK_MODE_CONTEXT *ctx) {
   int i;
   VP9_COMMON *const cm = &cpi->common;
   MACROBLOCK *const x = &cpi->mb;
@@ -1128,8 +1127,8 @@ static void update_state_rt(VP9_COMP *cpi, PICK_MODE_CONTEXT *ctx,
       }
 
       if (cm->interp_filter == SWITCHABLE) {
-        const int ctx = vp9_get_pred_context_switchable_interp(xd);
-        ++cm->counts.switchable_interp[ctx][mbmi->interp_filter];
+        const int pred_ctx = vp9_get_pred_context_switchable_interp(xd);
+        ++cm->counts.switchable_interp[pred_ctx][mbmi->interp_filter];
       }
     }
   }
@@ -1147,7 +1146,7 @@ static void encode_b_rt(VP9_COMP *cpi, const TileInfo *const tile,
       return;
   }
   set_offsets(cpi, tile, mi_row, mi_col, bsize);
-  update_state_rt(cpi, get_block_context(x, bsize), bsize, output_enabled);
+  update_state_rt(cpi, get_block_context(x, bsize));
 
   encode_superblock(cpi, tp, output_enabled, mi_row, mi_col, bsize);
   update_stats(cpi);
