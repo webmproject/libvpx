@@ -14,3 +14,4 @@ Local Modifications:
 - 0002-ne_read_simple-uninitialized_variable.diff
   fixes:
 nestegg.c|975 col 6| warning: ‘r’ may be used uninitialized in this function [-Wuninitialized]
+- add ne_get_uint32 convenience function

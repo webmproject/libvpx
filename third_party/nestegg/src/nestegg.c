@@ -730,6 +730,20 @@ ne_get_uint(struct ebml_type type, uint64_t * value)
 }
 
 static int
+ne_get_uint32(struct ebml_type type, unsigned int * value)
+{
+  uint64_t v;
+  if (ne_get_uint(type, &v))
+    return -1;
+
+  assert((unsigned int)v == v);
+
+  *value = (unsigned int)v;
+
+  return 0;
+}
+
+static int
 ne_get_float(struct ebml_type type, double * value)
 {
   if (!type.read)
@@ -1451,13 +1465,13 @@ static struct cue_track_positions *
 ne_find_cue_position_for_track(nestegg * ctx, struct ebml_list_node * node, unsigned int track)
 {
   struct cue_track_positions * pos = NULL;
-  uint64_t track_number;
+  unsigned int track_number;
   unsigned int t;
 
   while (node) {
     assert(node->id == ID_CUE_TRACK_POSITIONS);
     pos = node->data;
-    if (ne_get_uint(pos->track, &track_number) != 0)
+    if (ne_get_uint32(pos->track, &track_number) != 0)
       return NULL;
 
     if (ne_map_track_number_to_index(ctx, track_number, &t) != 0)
@@ -2076,7 +2090,7 @@ nestegg_track_video_params(nestegg * ctx, unsigned int track,
                            nestegg_video_params * params)
 {
   struct track_entry * entry;
-  uint64_t value;
+  unsigned int value;
 
   memset(params, 0, sizeof(*params));
 
@@ -2088,41 +2102,41 @@ nestegg_track_video_params(nestegg * ctx, unsigned int track,
     return -1;
 
   value = 0;
-  ne_get_uint(entry->video.stereo_mode, &value);
+  ne_get_uint32(entry->video.stereo_mode, &value);
   if (value <= NESTEGG_VIDEO_STEREO_TOP_BOTTOM ||
       value == NESTEGG_VIDEO_STEREO_RIGHT_LEFT)
     params->stereo_mode = value;
 
-  if (ne_get_uint(entry->video.pixel_width, &value) != 0)
+  if (ne_get_uint32(entry->video.pixel_width, &value) != 0)
     return -1;
   params->width = value;
 
-  if (ne_get_uint(entry->video.pixel_height, &value) != 0)
+  if (ne_get_uint32(entry->video.pixel_height, &value) != 0)
     return -1;
   params->height = value;
 
   value = 0;
-  ne_get_uint(entry->video.pixel_crop_bottom, &value);
+  ne_get_uint32(entry->video.pixel_crop_bottom, &value);
   params->crop_bottom = value;
 
   value = 0;
-  ne_get_uint(entry->video.pixel_crop_top, &value);
+  ne_get_uint32(entry->video.pixel_crop_top, &value);
   params->crop_top = value;
 
   value = 0;
-  ne_get_uint(entry->video.pixel_crop_left, &value);
+  ne_get_uint32(entry->video.pixel_crop_left, &value);
   params->crop_left = value;
 
   value = 0;
-  ne_get_uint(entry->video.pixel_crop_right, &value);
+  ne_get_uint32(entry->video.pixel_crop_right, &value);
   params->crop_right = value;
 
   value = params->width;
-  ne_get_uint(entry->video.display_width, &value);
+  ne_get_uint32(entry->video.display_width, &value);
   params->display_width = value;
 
   value = params->height;
-  ne_get_uint(entry->video.display_height, &value);
+  ne_get_uint32(entry->video.display_height, &value);
   params->display_height = value;
 
   return 0;
@@ -2133,7 +2147,7 @@ nestegg_track_audio_params(nestegg * ctx, unsigned int track,
                            nestegg_audio_params * params)
 {
   struct track_entry * entry;
-  uint64_t value;
+  unsigned int value;
 
   memset(params, 0, sizeof(*params));
 
@@ -2148,19 +2162,19 @@ nestegg_track_audio_params(nestegg * ctx, unsigned int track,
   ne_get_float(entry->audio.sampling_frequency, &params->rate);
 
   value = 1;
-  ne_get_uint(entry->audio.channels, &value);
+  ne_get_uint32(entry->audio.channels, &value);
   params->channels = value;
 
   value = 16;
-  ne_get_uint(entry->audio.bit_depth, &value);
+  ne_get_uint32(entry->audio.bit_depth, &value);
   params->depth = value;
 
   value = 0;
-  ne_get_uint(entry->codec_delay, &value);
+  ne_get_uint32(entry->codec_delay, &value);
   params->codec_delay = value;
 
   value = 0;
-  ne_get_uint(entry->seek_preroll, &value);
+  ne_get_uint32(entry->seek_preroll, &value);
   params->seek_preroll = value;
 
   return 0;
