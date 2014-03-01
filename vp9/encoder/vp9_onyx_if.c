@@ -2021,10 +2021,6 @@ void vp9_remove_compressor(VP9_PTR *ptr) {
     return;
 
   if (cpi && (cpi->common.current_video_frame > 0)) {
-    if (cpi->pass == 2) {
-      vp9_end_second_pass(cpi);
-    }
-
 #if CONFIG_INTERNAL_STATS
 
     vp9_clear_system_state();

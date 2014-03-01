@@ -133,9 +133,8 @@ static int input_stats(struct twopass_rc *p, FIRSTPASS_STATS *fps) {
   return 1;
 }
 
-static void output_stats(const VP9_COMP *cpi,
-                         struct vpx_codec_pkt_list *pktlist,
-                         FIRSTPASS_STATS *stats) {
+static void output_stats(FIRSTPASS_STATS *stats,
+                         struct vpx_codec_pkt_list *pktlist) {
   struct vpx_codec_cx_pkt pkt;
   pkt.kind = VPX_CODEC_STATS_PKT;
   pkt.data.twopass_stats.buf = stats;
@@ -354,7 +353,7 @@ void vp9_init_first_pass(VP9_COMP *cpi) {
 }
 
 void vp9_end_first_pass(VP9_COMP *cpi) {
-  output_stats(cpi, cpi->output_pkt_list, &cpi->twopass.total_stats);
+  output_stats(&cpi->twopass.total_stats, cpi->output_pkt_list);
 }
 
 static vp9_variance_fn_t get_block_variance_fn(BLOCK_SIZE bsize) {
@@ -370,7 +369,7 @@ static vp9_variance_fn_t get_block_variance_fn(BLOCK_SIZE bsize) {
   }
 }
 
-static unsigned int zz_motion_search(const VP9_COMP *cpi, const MACROBLOCK *x) {
+static unsigned int zz_motion_search(const MACROBLOCK *x) {
   const MACROBLOCKD *const xd = &x->e_mbd;
   const uint8_t *const src = x->plane[0].src.buf;
   const int src_stride = x->plane[0].src.stride;
@@ -592,7 +591,7 @@ void vp9_first_pass(VP9_COMP *cpi) {
         int_mv mv, tmp_mv;
 
         xd->plane[0].pre[0].buf = lst_yv12->y_buffer + recon_yoffset;
-        motion_error = zz_motion_search(cpi, x);
+        motion_error = zz_motion_search(x);
         // Assume 0,0 motion with no mv overhead.
         mv.as_int = tmp_mv.as_int = 0;
 
@@ -628,7 +627,7 @@ void vp9_first_pass(VP9_COMP *cpi) {
           int gf_motion_error;
 
           xd->plane[0].pre[0].buf = gld_yv12->y_buffer + recon_yoffset;
-          gf_motion_error = zz_motion_search(cpi, x);
+          gf_motion_error = zz_motion_search(x);
 
           first_pass_motion_search(cpi, x, &zero_mv, &tmp_mv.as_mv,
                                    &gf_motion_error);
@@ -788,7 +787,7 @@ void vp9_first_pass(VP9_COMP *cpi) {
 
     // Don't want to do output stats with a stack variable!
     twopass->this_frame_stats = fps;
-    output_stats(cpi, cpi->output_pkt_list, &twopass->this_frame_stats);
+    output_stats(&twopass->this_frame_stats, cpi->output_pkt_list);
     accumulate_stats(&twopass->total_stats, &fps);
   }
 
@@ -837,40 +836,6 @@ void vp9_first_pass(VP9_COMP *cpi) {
 // and motion vectors. This currently makes simplistic assumptions for testing.
 static double bitcost(double prob) {
   return -(log(prob) / log(2.0));
-}
-
-static int64_t estimate_modemvcost(VP9_COMP *cpi,
-                                     FIRSTPASS_STATS *fpstats) {
-#if 0
-  int mv_cost;
-  int mode_cost;
-
-  double av_pct_inter = fpstats->pcnt_inter / fpstats->count;
-  double av_pct_motion = fpstats->pcnt_motion / fpstats->count;
-  double av_intra = (1.0 - av_pct_inter);
-
-  double zz_cost;
-  double motion_cost;
-  double intra_cost;
-
-  zz_cost = bitcost(av_pct_inter - av_pct_motion);
-  motion_cost = bitcost(av_pct_motion);
-  intra_cost = bitcost(av_intra);
-
-  // Estimate the number of extra bits per mv overhead for mbs. We shift (<< 9)
-  // to match the scaling of number of bits by 512.
-  mv_cost = ((int)(fpstats->new_mv_count / fpstats->count) * 8) << 9;
-
-  // Produce a crude estimate of the overhead cost from modes. We shift (<< 9)
-  // to match the scaling of number of bits by 512.
-  mode_cost =
-    (int)((((av_pct_inter - av_pct_motion) * zz_cost) +
-           (av_pct_motion * motion_cost) +
-           (av_intra * intra_cost)) * cpi->common.MBs) << 9;
-
-  // TODO(paulwilkins): Fix overhead costs for extended Q range.
-#endif
-  return 0;
 }
 
 static double calc_correction_factor(double err_per_mb,
@@ -1005,9 +970,6 @@ void vp9_init_second_pass(VP9_COMP *cpi) {
 
     reset_fpf_position(twopass, start_pos);
   }
-}
-
-void vp9_end_second_pass(VP9_COMP *cpi) {
 }
 
 // This function gives an estimate of how badly we believe the prediction
