@@ -16,6 +16,24 @@
       "revId": "124581429c46b13220035356321267e9c31b7f69",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//0YU\u003d",
+        "filename": "vp9/common/vp9_alloccommon.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 203,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2014-03-01T19:02:25Z",
+      "side": 1,
+      "message": "I have changed the commit to remove the vp9_create_common() function, and call vp9_rtcd() directly.",
+      "parentUuid": "AAAAdn//0bY\u003d",
+      "revId": "124581429c46b13220035356321267e9c31b7f69",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
