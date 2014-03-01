@@ -1260,7 +1260,7 @@ ne_read_block(nestegg * ctx, uint64_t block_id, uint64_t block_size, nestegg_pac
   if (r != 1)
     return r;
 
-  if (track_number == 0)
+  if (track_number == 0 || (unsigned int)track_number != track_number)
     return -1;
 
   consumed += length;
@@ -1333,7 +1333,7 @@ ne_read_block(nestegg * ctx, uint64_t block_id, uint64_t block_size, nestegg_pac
   if (total > block_size)
     return -1;
 
-  if (ne_map_track_number_to_index(ctx, track_number, &track) != 0)
+  if (ne_map_track_number_to_index(ctx, (unsigned int)track_number, &track) != 0)
     return -1;
 
   entry = ne_find_track_entry(ctx, track);
@@ -1858,7 +1858,7 @@ nestegg_get_cue_point(nestegg * ctx, unsigned int cluster_num, int64_t max_offse
         if (ne_get_uint(pos->track, &track_number) != 0)
           return -1;
 
-        if (ne_map_track_number_to_index(ctx, track_number, &track_index) != 0)
+        if (ne_map_track_number_to_index(ctx, (unsigned int)track_number, &track_index) != 0)
           return -1;
 
         if (track_index == track) {
