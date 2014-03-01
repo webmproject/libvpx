@@ -1,0 +1,106 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//0aw\u003d",
+        "filename": "vp9/encoder/x86/vp9_subpel_variance_impl_intrin_avx2.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 65,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2014-03-01T02:20:03Z",
+      "side": 1,
+      "message": "remove space",
+      "revId": "ae82739a695e7d5835e2a99dec0b69f6a974a35d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//0as\u003d",
+        "filename": "vp9/encoder/x86/vp9_subpel_variance_impl_intrin_avx2.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 73,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2014-03-01T02:20:03Z",
+      "side": 1,
+      "message": "indent",
+      "revId": "ae82739a695e7d5835e2a99dec0b69f6a974a35d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//0ao\u003d",
+        "filename": "vp9/encoder/x86/vp9_subpel_variance_impl_intrin_avx2.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 79,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2014-03-01T02:20:03Z",
+      "side": 1,
+      "message": "indent",
+      "revId": "ae82739a695e7d5835e2a99dec0b69f6a974a35d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//0ak\u003d",
+        "filename": "vp9/encoder/x86/vp9_subpel_variance_impl_intrin_avx2.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 140,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2014-03-01T02:20:03Z",
+      "side": 1,
+      "message": "Comments for macro can be put in front of macro definition or here. But better do it consistently through the file.",
+      "revId": "ae82739a695e7d5835e2a99dec0b69f6a974a35d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//0ac\u003d",
+        "filename": "vp9/encoder/x86/vp9_subpel_variance_impl_intrin_avx2.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 196,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2014-03-01T02:20:03Z",
+      "side": 1,
+      "message": "indent",
+      "revId": "ae82739a695e7d5835e2a99dec0b69f6a974a35d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//0aQ\u003d",
+        "filename": "vp9/encoder/x86/vp9_subpel_variance_impl_intrin_avx2.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 404,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2014-03-01T02:20:03Z",
+      "side": 1,
+      "message": "remove space",
+      "revId": "ae82739a695e7d5835e2a99dec0b69f6a974a35d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
