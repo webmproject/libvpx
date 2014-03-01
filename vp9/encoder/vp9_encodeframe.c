@@ -2168,9 +2168,10 @@ static void set_txfm_flag(MODE_INFO **mi_8x8, int mis, int ymbs, int xmbs,
   }
 }
 
-static void reset_skip_txfm_size_b(VP9_COMMON *cm, MODE_INFO **mi_8x8,
-                                   int mis, TX_SIZE max_tx_size, int bw, int bh,
-                                   int mi_row, int mi_col, BLOCK_SIZE bsize) {
+static void reset_skip_txfm_size_b(const VP9_COMMON *cm, int mis,
+                                   TX_SIZE max_tx_size, int bw, int bh,
+                                   int mi_row, int mi_col,
+                                   MODE_INFO **mi_8x8) {
   if (mi_row >= cm->mi_rows || mi_col >= cm->mi_cols) {
     return;
   } else {
@@ -2200,19 +2201,18 @@ static void reset_skip_txfm_size_sb(VP9_COMMON *cm, MODE_INFO **mi_8x8,
   bh = num_8x8_blocks_high_lookup[mi_8x8[0]->mbmi.sb_type];
 
   if (bw == bs && bh == bs) {
-    reset_skip_txfm_size_b(cm, mi_8x8, mis, max_tx_size, bs, bs, mi_row,
-                           mi_col, bsize);
+    reset_skip_txfm_size_b(cm, mis, max_tx_size, bs, bs, mi_row, mi_col,
+                           mi_8x8);
   } else if (bw == bs && bh < bs) {
-    reset_skip_txfm_size_b(cm, mi_8x8, mis, max_tx_size, bs, hbs, mi_row,
-                           mi_col, bsize);
-    reset_skip_txfm_size_b(cm, mi_8x8 + hbs * mis, mis, max_tx_size, bs, hbs,
-                           mi_row + hbs, mi_col, bsize);
+    reset_skip_txfm_size_b(cm, mis, max_tx_size, bs, hbs, mi_row, mi_col,
+                           mi_8x8);
+    reset_skip_txfm_size_b(cm, mis, max_tx_size, bs, hbs, mi_row + hbs,
+                           mi_col, mi_8x8 + hbs * mis);
   } else if (bw < bs && bh == bs) {
-    reset_skip_txfm_size_b(cm, mi_8x8, mis, max_tx_size, hbs, bs, mi_row,
-                           mi_col, bsize);
-    reset_skip_txfm_size_b(cm, mi_8x8 + hbs, mis, max_tx_size, hbs, bs, mi_row,
-                           mi_col + hbs, bsize);
-
+    reset_skip_txfm_size_b(cm, mis, max_tx_size, hbs, bs, mi_row, mi_col,
+                           mi_8x8);
+    reset_skip_txfm_size_b(cm, mis, max_tx_size, hbs, bs, mi_row,
+                           mi_col + hbs, mi_8x8 + hbs);
   } else {
     const BLOCK_SIZE subsize = subsize_lookup[PARTITION_SPLIT][bsize];
     int n;
@@ -2295,7 +2295,7 @@ typedef enum {
 } motion_vector_context;
 
 static void set_mode_info(MB_MODE_INFO *mbmi, BLOCK_SIZE bsize,
-                          MB_PREDICTION_MODE mode, int mi_row, int mi_col) {
+                          MB_PREDICTION_MODE mode) {
   mbmi->interp_filter = EIGHTTAP;
   mbmi->mode = mode;
   mbmi->mv[0].as_int = 0;
@@ -2358,7 +2358,7 @@ static void nonrd_use_partition(VP9_COMP *cpi, const TileInfo *const tile,
         vp9_pick_inter_mode(cpi, x, tile, row, col,
                             &brate, &bdist, bs);
       else
-        set_mode_info(&xd->mi_8x8[0]->mbmi, bs, mode, row, col);
+        set_mode_info(&xd->mi_8x8[0]->mbmi, bs, mode);
 
       *rate += brate;
       *dist += bdist;
