@@ -16,3 +16,4 @@ Local Modifications:
 nestegg.c|975 col 6| warning: ‘r’ may be used uninitialized in this function [-Wuninitialized]
 - add ne_get_uint32 convenience function
 - fix track_number uint64->uint32 warnings
+- fix track_scale double->uint64 warning

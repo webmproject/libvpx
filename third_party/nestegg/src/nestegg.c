@@ -1246,7 +1246,7 @@ ne_read_block(nestegg * ctx, uint64_t block_id, uint64_t block_size, nestegg_pac
   struct cluster * cluster;
   struct frame * f, * last;
   struct track_entry * entry;
-  double track_scale;
+  const int track_scale = 1;
   uint64_t track_number, length, frame_sizes[256], cluster_tc, flags, frames, tc_scale, total;
   unsigned int i, lacing, track;
   size_t consumed = 0;
@@ -1339,8 +1339,6 @@ ne_read_block(nestegg * ctx, uint64_t block_id, uint64_t block_size, nestegg_pac
   entry = ne_find_track_entry(ctx, track);
   if (!entry)
     return -1;
-
-  track_scale = 1.0;
 
   tc_scale = ne_get_timecode_scale(ctx);
 
