@@ -2236,7 +2236,7 @@ nestegg_free_packet(nestegg_packet * pkt)
 int
 nestegg_packet_track(nestegg_packet * pkt, unsigned int * track)
 {
-  *track = pkt->track;
+  *track = (unsigned int)pkt->track;
   return 0;
 }
 

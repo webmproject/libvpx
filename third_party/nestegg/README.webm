@@ -17,3 +17,4 @@ nestegg.c|975 col 6| warning: ‘r’ may be used uninitialized in this function
 - add ne_get_uint32 convenience function
 - fix track_number uint64->uint32 warnings
 - fix track_scale double->uint64 warning
+- nestegg_packet_track: fix uint64->uint32 warning
