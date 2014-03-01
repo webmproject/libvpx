@@ -26,9 +26,9 @@ prototype void vpx_yv12_copy_y "const struct yv12_buffer_config *src_ybc, struct
 specialize vpx_yv12_copy_y neon
 
 if [ "$CONFIG_VP9" = "yes" ]; then
-    prototype void vp9_extend_frame_borders "struct yv12_buffer_config *ybf, int subsampling_x, int subsampling_y"
+    prototype void vp9_extend_frame_borders "struct yv12_buffer_config *ybf"
     specialize vp9_extend_frame_borders dspr2
 
-    prototype void vp9_extend_frame_inner_borders "struct yv12_buffer_config *ybf, int subsampling_x, int subsampling_y"
+    prototype void vp9_extend_frame_inner_borders "struct yv12_buffer_config *ybf"
     specialize vp9_extend_frame_inner_borders dspr2
 fi

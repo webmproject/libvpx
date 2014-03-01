@@ -81,9 +81,7 @@ void vp8_yv12_extend_frame_borders_c(YV12_BUFFER_CONFIG *ybf) {
 }
 
 #if CONFIG_VP9
-static void extend_frame(YV12_BUFFER_CONFIG *const ybf,
-                         int subsampling_x, int subsampling_y,
-                         int ext_size) {
+static void extend_frame(YV12_BUFFER_CONFIG *const ybf, int ext_size) {
   const int c_w = ybf->uv_crop_width;
   const int c_h = ybf->uv_crop_height;
   const int c_ext_size = ext_size >> 1;
@@ -110,16 +108,14 @@ static void extend_frame(YV12_BUFFER_CONFIG *const ybf,
                c_w, c_h, c_et, c_el, c_eb, c_er);
 }
 
-void vp9_extend_frame_borders_c(YV12_BUFFER_CONFIG *ybf,
-                                int subsampling_x, int subsampling_y) {
-  extend_frame(ybf, subsampling_x, subsampling_y, ybf->border);
+void vp9_extend_frame_borders_c(YV12_BUFFER_CONFIG *ybf) {
+  extend_frame(ybf, ybf->border);
 }
 
-void vp9_extend_frame_inner_borders_c(YV12_BUFFER_CONFIG *ybf,
-                                      int subsampling_x, int subsampling_y) {
+void vp9_extend_frame_inner_borders_c(YV12_BUFFER_CONFIG *ybf) {
   const int inner_bw = (ybf->border > VP9INNERBORDERINPIXELS) ?
                        VP9INNERBORDERINPIXELS : ybf->border;
-  extend_frame(ybf, subsampling_x, subsampling_y, inner_bw);
+  extend_frame(ybf, inner_bw);
 }
 #endif  // CONFIG_VP9
 

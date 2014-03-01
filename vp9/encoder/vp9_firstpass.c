@@ -807,7 +807,7 @@ void vp9_first_pass(VP9_COMP *cpi) {
   // Swap frame pointers so last frame refers to the frame we just compressed.
   swap_yv12(lst_yv12, new_yv12);
 
-  vp9_extend_frame_borders(lst_yv12, cm->subsampling_x, cm->subsampling_y);
+  vp9_extend_frame_borders(lst_yv12);
 
   // Special case for the first frame. Copy into the GF buffer as a second
   // reference.
