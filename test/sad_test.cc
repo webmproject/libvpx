@@ -545,9 +545,11 @@ INSTANTIATE_TEST_CASE_P(SSE3, SADx4Test, ::testing::Values(
 
 #if HAVE_SSSE3
 #if CONFIG_USE_X86INC
+#if CONFIG_VP8_ENCODER
 const sad_m_by_n_fn_t sad_16x16_sse3 = vp8_sad16x16_sse3;
 INSTANTIATE_TEST_CASE_P(SSE3, SADTest, ::testing::Values(
                         make_tuple(16, 16, sad_16x16_sse3)));
+#endif
 #endif
 #endif
 
