@@ -19,7 +19,7 @@
 extern "C" {
 #endif
 
-typedef void (*vp9_rb_error_handler)(void *data, size_t bit_offset);
+typedef void (*vp9_rb_error_handler)(void *data);
 
 struct vp9_read_bit_buffer {
   const uint8_t *bit_buffer;
@@ -39,7 +39,7 @@ static int vp9_rb_read_bit(struct vp9_read_bit_buffer *rb) {
   const size_t p = off / CHAR_BIT;
   const int q = CHAR_BIT - 1 - (int)off % CHAR_BIT;
   if (rb->bit_buffer + p >= rb->bit_buffer_end) {
-    rb->error_handler(rb->error_handler_data, rb->bit_offset);
+    rb->error_handler(rb->error_handler_data);
     return 0;
   } else {
     const int bit = (rb->bit_buffer[p] & (1 << q)) >> q;
