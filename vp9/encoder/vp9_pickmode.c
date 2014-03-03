@@ -38,7 +38,7 @@ static int full_pixel_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
   int sadpb = x->sadperbit16;
   MV mvp_full;
   int ref = mbmi->ref_frame[0];
-  int_mv ref_mv = mbmi->ref_mvs[ref][0];
+  const MV ref_mv = mbmi->ref_mvs[ref][0].as_mv;
   int i;
 
   int tmp_col_min = x->mv_col_min;
@@ -62,7 +62,7 @@ static int full_pixel_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
     setup_pre_planes(xd, 0, scaled_ref_frame, mi_row, mi_col, NULL);
   }
 
-  vp9_set_mv_search_range(x, &ref_mv.as_mv);
+  vp9_set_mv_search_range(x, &ref_mv);
 
   // TODO(jingning) exploiting adaptive motion search control in non-RD
   // mode decision too.
@@ -90,24 +90,24 @@ static int full_pixel_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
   if (cpi->sf.search_method == FAST_HEX) {
     bestsme = vp9_fast_hex_search(x, &mvp_full, step_param, sadpb,
                                   &cpi->fn_ptr[bsize], 1,
-                                  &ref_mv.as_mv, &tmp_mv->as_mv);
+                                  &ref_mv, &tmp_mv->as_mv);
   } else if (cpi->sf.search_method == HEX) {
     bestsme = vp9_hex_search(x, &mvp_full, step_param, sadpb, 1,
                              &cpi->fn_ptr[bsize], 1,
-                             &ref_mv.as_mv, &tmp_mv->as_mv);
+                             &ref_mv, &tmp_mv->as_mv);
   } else if (cpi->sf.search_method == SQUARE) {
     bestsme = vp9_square_search(x, &mvp_full, step_param, sadpb, 1,
                                 &cpi->fn_ptr[bsize], 1,
-                                &ref_mv.as_mv, &tmp_mv->as_mv);
+                                &ref_mv, &tmp_mv->as_mv);
   } else if (cpi->sf.search_method == BIGDIA) {
     bestsme = vp9_bigdia_search(x, &mvp_full, step_param, sadpb, 1,
                                 &cpi->fn_ptr[bsize], 1,
-                                &ref_mv.as_mv, &tmp_mv->as_mv);
+                                &ref_mv, &tmp_mv->as_mv);
   } else {
     bestsme = vp9_full_pixel_diamond(cpi, x, &mvp_full, step_param,
                                      sadpb, further_steps, 1,
                                      &cpi->fn_ptr[bsize],
-                                     &ref_mv.as_mv, &tmp_mv->as_mv);
+                                     &ref_mv, &tmp_mv->as_mv);
   }
   x->mv_col_min = tmp_col_min;
   x->mv_col_max = tmp_col_max;
@@ -134,7 +134,7 @@ static int full_pixel_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
   tmp_mv->as_mv.col = tmp_mv->as_mv.col * 8;
 
   // calculate the bit cost on motion vector
-  *rate_mv = vp9_mv_bit_cost(&tmp_mv->as_mv, &ref_mv.as_mv,
+  *rate_mv = vp9_mv_bit_cost(&tmp_mv->as_mv, &ref_mv,
                              x->nmvjointcost, x->mvcost, MV_COST_WEIGHT);
   return bestsme;
 }
