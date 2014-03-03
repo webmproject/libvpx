@@ -89,7 +89,6 @@ void vp9_end_first_pass(struct VP9_COMP *cpi);
 
 void vp9_init_second_pass(struct VP9_COMP *cpi);
 void vp9_rc_get_second_pass_params(struct VP9_COMP *cpi);
-void vp9_end_second_pass(struct VP9_COMP *cpi);
 int vp9_twopass_worst_quality(struct VP9_COMP *cpi, FIRSTPASS_STATS *fpstats,
                               int section_target_bandwitdh);
 
