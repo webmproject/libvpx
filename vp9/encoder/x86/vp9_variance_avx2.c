@@ -54,6 +54,20 @@ unsigned int vp9_sub_pixel_variance32xh_avx2
   unsigned int *sse
 );
 
+unsigned int vp9_sub_pixel_avg_variance32xh_avx2
+(
+  const uint8_t *src,
+  int src_stride,
+  int x_offset,
+  int y_offset,
+  const uint8_t *dst,
+  int dst_stride,
+  const uint8_t *sec,
+  int sec_stride,
+  int height,
+  unsigned int *sseptr
+);
+
 static void variance_avx2(const unsigned char *src_ptr, int  source_stride,
                         const unsigned char *ref_ptr, int  recon_stride,
                         int  w, int  h, unsigned int *sse, int *sum,
@@ -207,3 +221,48 @@ unsigned int vp9_sub_pixel_variance32x32_avx2(const uint8_t *src,
   *sse_ptr = sse;
   return sse - (((int64_t)se * se) >> 10);
 }
+
+unsigned int vp9_sub_pixel_avg_variance64x64_avx2(const uint8_t *src,
+                                                  int src_stride,
+                                                  int x_offset,
+                                                  int y_offset,
+                                                  const uint8_t *dst,
+                                                  int dst_stride,
+                                                  unsigned int *sseptr,
+                                                  const uint8_t *sec) {
+  // processing 32 elements in parallel
+  unsigned int sse;
+
+  int se = vp9_sub_pixel_avg_variance32xh_avx2(src, src_stride, x_offset,
+                                               y_offset, dst, dst_stride,
+                                               sec, 64, 64, &sse);
+  unsigned int sse2;
+  // processing the next 32 elements in parallel
+  int se2 = vp9_sub_pixel_avg_variance32xh_avx2(src + 32, src_stride, x_offset,
+                                                y_offset, dst + 32, dst_stride,
+                                                sec + 32, 64, 64, &sse2);
+  se += se2;
+  sse += sse2;
+  *sseptr = sse;
+
+  return sse - (((int64_t)se * se) >> 12);
+}
+
+unsigned int vp9_sub_pixel_avg_variance32x32_avx2(const uint8_t *src,
+                                                  int src_stride,
+                                                  int x_offset,
+                                                  int y_offset,
+                                                  const uint8_t *dst,
+                                                  int dst_stride,
+                                                  unsigned int *sseptr,
+                                                  const uint8_t *sec) {
+  // processing 32 element in parallel
+  unsigned int sse;
+  int se = vp9_sub_pixel_avg_variance32xh_avx2(src, src_stride, x_offset,
+                                                 y_offset, dst, dst_stride,
+                                                 sec, 32, 32, &sse);
+  *sseptr = sse;
+  return sse - (((int64_t)se * se) >> 10);
+}
+
+
