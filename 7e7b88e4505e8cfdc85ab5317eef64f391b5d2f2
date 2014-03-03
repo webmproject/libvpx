@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//0Q8\u003d",
+        "filename": "vp9_spatial_scalable_encoder.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 1003234
+      },
+      "writtenOn": "2014-03-03T16:49:21Z",
+      "side": 1,
+      "message": "nit: lowercase \"output\" for consistency",
+      "revId": "7e7b88e4505e8cfdc85ab5317eef64f391b5d2f2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
