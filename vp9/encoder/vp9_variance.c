@@ -216,7 +216,7 @@ unsigned int vp9_sub_pixel_avg_variance64x32_c(const uint8_t *src_ptr,
   var_filter_block2d_bil_first_pass(src_ptr, fdata3, src_pixels_per_line,
                                     1, 33, 64, hfilter);
   var_filter_block2d_bil_second_pass(fdata3, temp2, 64, 64, 32, 64, vfilter);
-  comp_avg_pred(temp3, second_pred, 64, 32, temp2, 64);
+  vp9_comp_avg_pred(temp3, second_pred, 64, 32, temp2, 64);
   return vp9_variance64x32(temp3, 64, dst_ptr, dst_pixels_per_line, sse);
 }
 
@@ -273,7 +273,7 @@ unsigned int vp9_sub_pixel_avg_variance32x64_c(const uint8_t *src_ptr,
   var_filter_block2d_bil_first_pass(src_ptr, fdata3, src_pixels_per_line,
                                     1, 65, 32, hfilter);
   var_filter_block2d_bil_second_pass(fdata3, temp2, 32, 32, 64, 32, vfilter);
-  comp_avg_pred(temp3, second_pred, 32, 64, temp2, 32);
+  vp9_comp_avg_pred(temp3, second_pred, 32, 64, temp2, 32);
   return vp9_variance32x64(temp3, 32, dst_ptr, dst_pixels_per_line, sse);
 }
 
@@ -330,7 +330,7 @@ unsigned int vp9_sub_pixel_avg_variance32x16_c(const uint8_t *src_ptr,
   var_filter_block2d_bil_first_pass(src_ptr, fdata3, src_pixels_per_line,
                                     1, 17, 32, hfilter);
   var_filter_block2d_bil_second_pass(fdata3, temp2, 32, 32, 16, 32, vfilter);
-  comp_avg_pred(temp3, second_pred, 32, 16, temp2, 32);
+  vp9_comp_avg_pred(temp3, second_pred, 32, 16, temp2, 32);
   return vp9_variance32x16(temp3, 32, dst_ptr, dst_pixels_per_line, sse);
 }
 
@@ -387,7 +387,7 @@ unsigned int vp9_sub_pixel_avg_variance16x32_c(const uint8_t *src_ptr,
   var_filter_block2d_bil_first_pass(src_ptr, fdata3, src_pixels_per_line,
                                     1, 33, 16, hfilter);
   var_filter_block2d_bil_second_pass(fdata3, temp2, 16, 16, 32, 16, vfilter);
-  comp_avg_pred(temp3, second_pred, 16, 32, temp2, 16);
+  vp9_comp_avg_pred(temp3, second_pred, 16, 32, temp2, 16);
   return vp9_variance16x32(temp3, 16, dst_ptr, dst_pixels_per_line, sse);
 }
 
@@ -614,7 +614,7 @@ unsigned int vp9_sub_pixel_avg_variance4x4_c(const uint8_t *src_ptr,
 
   // Now filter Verticaly
   var_filter_block2d_bil_second_pass(fdata3, temp2, 4,  4,  4,  4, vfilter);
-  comp_avg_pred(temp3, second_pred, 4, 4, temp2, 4);
+  vp9_comp_avg_pred(temp3, second_pred, 4, 4, temp2, 4);
   return vp9_variance4x4(temp3, 4, dst_ptr, dst_pixels_per_line, sse);
 }
 
@@ -658,7 +658,7 @@ unsigned int vp9_sub_pixel_avg_variance8x8_c(const uint8_t *src_ptr,
   var_filter_block2d_bil_first_pass(src_ptr, fdata3, src_pixels_per_line,
                                     1, 9, 8, hfilter);
   var_filter_block2d_bil_second_pass(fdata3, temp2, 8, 8, 8, 8, vfilter);
-  comp_avg_pred(temp3, second_pred, 8, 8, temp2, 8);
+  vp9_comp_avg_pred(temp3, second_pred, 8, 8, temp2, 8);
   return vp9_variance8x8(temp3, 8, dst_ptr, dst_pixels_per_line, sse);
 }
 
@@ -703,7 +703,7 @@ unsigned int vp9_sub_pixel_avg_variance16x16_c(const uint8_t *src_ptr,
                                     1, 17, 16, hfilter);
   var_filter_block2d_bil_second_pass(fdata3, temp2, 16, 16, 16, 16, vfilter);
 
-  comp_avg_pred(temp3, second_pred, 16, 16, temp2, 16);
+  vp9_comp_avg_pred(temp3, second_pred, 16, 16, temp2, 16);
   return vp9_variance16x16(temp3, 16, dst_ptr, dst_pixels_per_line, sse);
 }
 
@@ -747,7 +747,7 @@ unsigned int vp9_sub_pixel_avg_variance64x64_c(const uint8_t *src_ptr,
   var_filter_block2d_bil_first_pass(src_ptr, fdata3, src_pixels_per_line,
                                     1, 65, 64, hfilter);
   var_filter_block2d_bil_second_pass(fdata3, temp2, 64, 64, 64, 64, vfilter);
-  comp_avg_pred(temp3, second_pred, 64, 64, temp2, 64);
+  vp9_comp_avg_pred(temp3, second_pred, 64, 64, temp2, 64);
   return vp9_variance64x64(temp3, 64, dst_ptr, dst_pixels_per_line, sse);
 }
 
@@ -791,7 +791,7 @@ unsigned int vp9_sub_pixel_avg_variance32x32_c(const uint8_t *src_ptr,
   var_filter_block2d_bil_first_pass(src_ptr, fdata3, src_pixels_per_line,
                                     1, 33, 32, hfilter);
   var_filter_block2d_bil_second_pass(fdata3, temp2, 32, 32, 32, 32, vfilter);
-  comp_avg_pred(temp3, second_pred, 32, 32, temp2, 32);
+  vp9_comp_avg_pred(temp3, second_pred, 32, 32, temp2, 32);
   return vp9_variance32x32(temp3, 32, dst_ptr, dst_pixels_per_line, sse);
 }
 
@@ -955,7 +955,7 @@ unsigned int vp9_sub_pixel_avg_variance16x8_c(const uint8_t *src_ptr,
   var_filter_block2d_bil_first_pass(src_ptr, fdata3, src_pixels_per_line,
                                     1, 9, 16, hfilter);
   var_filter_block2d_bil_second_pass(fdata3, temp2, 16, 16, 8, 16, vfilter);
-  comp_avg_pred(temp3, second_pred, 16, 8, temp2, 16);
+  vp9_comp_avg_pred(temp3, second_pred, 16, 8, temp2, 16);
   return vp9_variance16x8(temp3, 16, dst_ptr, dst_pixels_per_line, sse);
 }
 
@@ -999,7 +999,7 @@ unsigned int vp9_sub_pixel_avg_variance8x16_c(const uint8_t *src_ptr,
   var_filter_block2d_bil_first_pass(src_ptr, fdata3, src_pixels_per_line,
                                     1, 17, 8, hfilter);
   var_filter_block2d_bil_second_pass(fdata3, temp2, 8, 8, 16, 8, vfilter);
-  comp_avg_pred(temp3, second_pred, 8, 16, temp2, 8);
+  vp9_comp_avg_pred(temp3, second_pred, 8, 16, temp2, 8);
   return vp9_variance8x16(temp3, 8, dst_ptr, dst_pixels_per_line, sse);
 }
 
@@ -1043,7 +1043,7 @@ unsigned int vp9_sub_pixel_avg_variance8x4_c(const uint8_t *src_ptr,
   var_filter_block2d_bil_first_pass(src_ptr, fdata3, src_pixels_per_line,
                                     1, 5, 8, hfilter);
   var_filter_block2d_bil_second_pass(fdata3, temp2, 8, 8, 4, 8, vfilter);
-  comp_avg_pred(temp3, second_pred, 8, 4, temp2, 8);
+  vp9_comp_avg_pred(temp3, second_pred, 8, 4, temp2, 8);
   return vp9_variance8x4(temp3, 8, dst_ptr, dst_pixels_per_line, sse);
 }
 
@@ -1089,6 +1089,23 @@ unsigned int vp9_sub_pixel_avg_variance4x8_c(const uint8_t *src_ptr,
   var_filter_block2d_bil_first_pass(src_ptr, fdata3, src_pixels_per_line,
                                     1, 9, 4, hfilter);
   var_filter_block2d_bil_second_pass(fdata3, temp2, 4, 4, 8, 4, vfilter);
-  comp_avg_pred(temp3, second_pred, 4, 8, temp2, 4);
+  vp9_comp_avg_pred(temp3, second_pred, 4, 8, temp2, 4);
   return vp9_variance4x8(temp3, 4, dst_ptr, dst_pixels_per_line, sse);
+}
+
+
+void vp9_comp_avg_pred(uint8_t *comp_pred, const uint8_t *pred, int width,
+                       int height, const uint8_t *ref, int ref_stride) {
+  int i, j;
+
+  for (i = 0; i < height; i++) {
+    for (j = 0; j < width; j++) {
+      int tmp;
+      tmp = pred[j] + ref[j];
+      comp_pred[j] = (tmp + 1) >> 1;
+    }
+    comp_pred += width;
+    pred += width;
+    ref += ref_stride;
+  }
 }
