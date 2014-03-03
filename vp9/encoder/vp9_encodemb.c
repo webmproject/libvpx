@@ -526,7 +526,7 @@ static void encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
         vp9_idct32x32_add(dqcoeff, dst, dst_stride, *eob);
       break;
     case TX_16X16:
-      tx_type = get_tx_type_16x16(pd->plane_type, xd);
+      tx_type = get_tx_type(pd->plane_type, xd);
       scan_order = &vp9_scan_orders[TX_16X16][tx_type];
       mode = plane == 0 ? mbmi->mode : mbmi->uv_mode;
       vp9_predict_intra_block(xd, block >> 4, bwl, TX_16X16, mode,
@@ -546,7 +546,7 @@ static void encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
         vp9_iht16x16_add(tx_type, dqcoeff, dst, dst_stride, *eob);
       break;
     case TX_8X8:
-      tx_type = get_tx_type_8x8(pd->plane_type, xd);
+      tx_type = get_tx_type(pd->plane_type, xd);
       scan_order = &vp9_scan_orders[TX_8X8][tx_type];
       mode = plane == 0 ? mbmi->mode : mbmi->uv_mode;
       vp9_predict_intra_block(xd, block >> 2, bwl, TX_8X8, mode,

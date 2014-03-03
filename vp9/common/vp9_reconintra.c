@@ -18,21 +18,17 @@
 #include "vp9/common/vp9_reconintra.h"
 #include "vp9/common/vp9_onyxc_int.h"
 
-const TX_TYPE mode2txfm_map[MB_MODE_COUNT] = {
-    DCT_DCT,    // DC
-    ADST_DCT,   // V
-    DCT_ADST,   // H
-    DCT_DCT,    // D45
-    ADST_ADST,  // D135
-    ADST_DCT,   // D117
-    DCT_ADST,   // D153
-    DCT_ADST,   // D207
-    ADST_DCT,   // D63
-    ADST_ADST,  // TM
-    DCT_DCT,    // NEARESTMV
-    DCT_DCT,    // NEARMV
-    DCT_DCT,    // ZEROMV
-    DCT_DCT     // NEWMV
+const TX_TYPE mode2txfm_map[INTRA_MODES] = {
+  DCT_DCT,    // DC
+  ADST_DCT,   // V
+  DCT_ADST,   // H
+  DCT_DCT,    // D45
+  ADST_ADST,  // D135
+  ADST_DCT,   // D117
+  DCT_ADST,   // D153
+  DCT_ADST,   // D207
+  ADST_DCT,   // D63
+  ADST_ADST,  // TM
 };
 
 #define intra_pred_sized(type, size) \
