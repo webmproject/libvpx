@@ -269,7 +269,7 @@ static INLINE void set_mi_row_col(MACROBLOCKD *xd, const TileInfo *const tile,
   xd->left_available  = (mi_col > tile->mi_col_start);
 }
 
-static void set_prev_mi(VP9_COMMON *cm) {
+static INLINE void set_prev_mi(VP9_COMMON *cm) {
   const int use_prev_in_find_mv_refs = cm->width == cm->last_width &&
                                        cm->height == cm->last_height &&
                                        !cm->intra_only &&
