@@ -359,7 +359,7 @@ static vpx_codec_err_t set_vp9e_config(VP9_CONFIG *oxcf,
     memcpy(oxcf->ss_target_bitrate, cfg.ss_target_bitrate,
            sizeof(cfg.ss_target_bitrate));
   } else if (oxcf->ss_number_layers == 1) {
-    oxcf->ss_target_bitrate[0] = oxcf->target_bandwidth;
+    oxcf->ss_target_bitrate[0] = (int)oxcf->target_bandwidth;
   }
 
   oxcf->ts_number_layers = cfg.ts_number_layers;
