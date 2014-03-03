@@ -8,31 +8,34 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#include <math.h>
 #include <limits.h>
+#include <math.h>
 #include <stdio.h>
+
+#include "./vpx_scale_rtcd.h"
+
+#include "vpx_mem/vpx_mem.h"
+#include "vpx_scale/vpx_scale.h"
+#include "vpx_scale/yv12config.h"
+
+#include "vp9/common/vp9_entropymv.h"
+#include "vp9/common/vp9_quant_common.h"
+#include "vp9/common/vp9_reconinter.h"  // setup_dst_planes()
 #include "vp9/common/vp9_systemdependent.h"
+
 #include "vp9/encoder/vp9_block.h"
 #include "vp9/encoder/vp9_encodeframe.h"
 #include "vp9/encoder/vp9_encodemb.h"
+#include "vp9/encoder/vp9_encodemv.h"
 #include "vp9/encoder/vp9_extend.h"
 #include "vp9/encoder/vp9_firstpass.h"
 #include "vp9/encoder/vp9_mcomp.h"
 #include "vp9/encoder/vp9_onyx_int.h"
-#include "vp9/encoder/vp9_variance.h"
-#include "vpx_scale/vpx_scale.h"
-#include "vpx_mem/vpx_mem.h"
-#include "vpx_scale/yv12config.h"
 #include "vp9/encoder/vp9_quantize.h"
-#include "vp9/encoder/vp9_rdopt.h"
 #include "vp9/encoder/vp9_ratectrl.h"
-#include "vp9/common/vp9_quant_common.h"
-#include "vp9/common/vp9_entropymv.h"
-#include "vp9/encoder/vp9_encodemv.h"
+#include "vp9/encoder/vp9_rdopt.h"
 #include "vp9/encoder/vp9_vaq.h"
-#include "./vpx_scale_rtcd.h"
-// TODO(jkoleszar): for setup_dst_planes
-#include "vp9/common/vp9_reconinter.h"
+#include "vp9/encoder/vp9_variance.h"
 
 #define OUTPUT_FPF 0
 
