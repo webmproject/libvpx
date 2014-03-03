@@ -270,7 +270,8 @@ static INLINE int mi_cols_aligned_to_sb(int n_mis) {
   return ALIGN_POWER_OF_TWO(n_mis, MI_BLOCK_SIZE_LOG2);
 }
 
-static INLINE const vp9_prob* get_partition_probs(VP9_COMMON *cm, int ctx) {
+static INLINE const vp9_prob* get_partition_probs(const VP9_COMMON *cm,
+                                                  int ctx) {
   return cm->frame_type == KEY_FRAME ? vp9_kf_partition_probs[ctx]
                                      : cm->fc.partition_prob[ctx];
 }
