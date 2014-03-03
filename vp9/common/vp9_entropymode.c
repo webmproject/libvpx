@@ -10,7 +10,6 @@
 
 #include "vpx_mem/vpx_mem.h"
 
-#include "vp9/common/vp9_alloccommon.h"
 #include "vp9/common/vp9_onyxc_int.h"
 #include "vp9/common/vp9_seg_common.h"
 
@@ -315,18 +314,18 @@ static const vp9_prob default_switchable_interp_prob[SWITCHABLE_FILTER_CONTEXTS]
   { 149, 144, },
 };
 
-void vp9_init_mbmode_probs(VP9_COMMON *cm) {
-  vp9_copy(cm->fc.uv_mode_prob, default_if_uv_probs);
-  vp9_copy(cm->fc.y_mode_prob, default_if_y_probs);
-  vp9_copy(cm->fc.switchable_interp_prob, default_switchable_interp_prob);
-  vp9_copy(cm->fc.partition_prob, default_partition_probs);
-  vp9_copy(cm->fc.intra_inter_prob, default_intra_inter_p);
-  vp9_copy(cm->fc.comp_inter_prob, default_comp_inter_p);
-  vp9_copy(cm->fc.comp_ref_prob, default_comp_ref_p);
-  vp9_copy(cm->fc.single_ref_prob, default_single_ref_p);
-  cm->fc.tx_probs = default_tx_probs;
-  vp9_copy(cm->fc.skip_probs, default_skip_probs);
-  vp9_copy(cm->fc.inter_mode_probs, default_inter_mode_probs);
+void vp9_init_mode_probs(FRAME_CONTEXT *fc) {
+  vp9_copy(fc->uv_mode_prob, default_if_uv_probs);
+  vp9_copy(fc->y_mode_prob, default_if_y_probs);
+  vp9_copy(fc->switchable_interp_prob, default_switchable_interp_prob);
+  vp9_copy(fc->partition_prob, default_partition_probs);
+  vp9_copy(fc->intra_inter_prob, default_intra_inter_p);
+  vp9_copy(fc->comp_inter_prob, default_comp_inter_p);
+  vp9_copy(fc->comp_ref_prob, default_comp_ref_p);
+  vp9_copy(fc->single_ref_prob, default_single_ref_p);
+  fc->tx_probs = default_tx_probs;
+  vp9_copy(fc->skip_probs, default_skip_probs);
+  vp9_copy(fc->inter_mode_probs, default_inter_mode_probs);
 }
 
 const vp9_tree_index vp9_switchable_interp_tree
@@ -452,7 +451,7 @@ void vp9_setup_past_independence(VP9_COMMON *cm) {
   lf->last_sharpness_level = -1;
 
   vp9_default_coef_probs(cm);
-  vp9_init_mbmode_probs(cm);
+  vp9_init_mode_probs(&cm->fc);
   vp9_init_mv_probs(cm);
 
   if (cm->frame_type == KEY_FRAME ||
