@@ -261,7 +261,7 @@ int64_t vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
         continue;
 
       if (this_mode == NEWMV) {
-        if (this_rd < (1 << num_pels_log2_lookup[bsize]))
+        if (this_rd < (int64_t)(1 << num_pels_log2_lookup[bsize]))
           continue;
 
         x->mode_sad[ref_frame][INTER_OFFSET(NEWMV)] =
