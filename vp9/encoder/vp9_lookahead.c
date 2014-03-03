@@ -88,8 +88,7 @@ struct lookahead_ctx * vp9_lookahead_init(unsigned int width,
 #define USE_PARTIAL_COPY 0
 
 int vp9_lookahead_push(struct lookahead_ctx *ctx, YV12_BUFFER_CONFIG   *src,
-                       int64_t ts_start, int64_t ts_end, unsigned int flags,
-                       unsigned char *active_map) {
+                       int64_t ts_start, int64_t ts_end, unsigned int flags) {
   struct lookahead_entry *buf;
 #if USE_PARTIAL_COPY
   int row, col, active_end;

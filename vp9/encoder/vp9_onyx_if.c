@@ -3459,8 +3459,8 @@ int vp9_receive_raw_frame(VP9_PTR ptr, unsigned int frame_flags,
 
   check_initial_width(cpi, subsampling_x, subsampling_y);
   vpx_usec_timer_start(&timer);
-  if (vp9_lookahead_push(cpi->lookahead, sd, time_stamp, end_time, frame_flags,
-                         cpi->active_map_enabled ? cpi->active_map : NULL))
+  if (vp9_lookahead_push(cpi->lookahead,
+                         sd, time_stamp, end_time, frame_flags))
     res = -1;
   vpx_usec_timer_mark(&timer);
   cpi->time_receive_data += vpx_usec_timer_elapsed(&timer);
