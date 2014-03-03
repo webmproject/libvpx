@@ -35,7 +35,7 @@ extern "C" {
 
 struct TileInfo;
 
-int vp9_compute_rd_mult(VP9_COMP *cpi, int qindex);
+int vp9_compute_rd_mult(const VP9_COMP *cpi, int qindex);
 
 void vp9_initialize_rd_consts(VP9_COMP *cpi);
 

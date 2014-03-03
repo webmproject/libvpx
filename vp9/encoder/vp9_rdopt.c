@@ -146,9 +146,8 @@ static int16_t* raster_block_offset_int16(BLOCK_SIZE plane_bsize,
 }
 
 static void fill_mode_costs(VP9_COMP *cpi) {
-  VP9_COMMON *const cm = &cpi->common;
   MACROBLOCK *const x = &cpi->mb;
-  FRAME_CONTEXT *const fc = &cm->fc;
+  const FRAME_CONTEXT *const fc = &cpi->common.fc;
   int i, j;
 
   for (i = 0; i < INTRA_MODES; i++)
@@ -165,8 +164,7 @@ static void fill_mode_costs(VP9_COMP *cpi) {
 
   for (i = 0; i < SWITCHABLE_FILTER_CONTEXTS; ++i)
     vp9_cost_tokens((int *)x->switchable_interp_costs[i],
-                    fc->switchable_interp_prob[i],
-                    vp9_switchable_interp_tree);
+                    fc->switchable_interp_prob[i], vp9_switchable_interp_tree);
 }
 
 static void fill_token_costs(vp9_coeff_cost *c,
@@ -215,7 +213,7 @@ void vp9_init_me_luts() {
   }
 }
 
-int vp9_compute_rd_mult(VP9_COMP *cpi, int qindex) {
+int vp9_compute_rd_mult(const VP9_COMP *cpi, int qindex) {
   const int q = vp9_dc_quant(qindex, 0);
   // TODO(debargha): Adjust the function below
   int rdmult = 88 * q * q / 25;
@@ -229,12 +227,9 @@ int vp9_compute_rd_mult(VP9_COMP *cpi, int qindex) {
 }
 
 static int compute_rd_thresh_factor(int qindex) {
-  int q;
   // TODO(debargha): Adjust the function below
-  q = (int)(pow(vp9_dc_quant(qindex, 0) / 4.0, RD_THRESH_POW) * 5.12);
-  if (q < 8)
-    q = 8;
-  return q;
+  const int q = (int)(pow(vp9_dc_quant(qindex, 0) / 4.0, RD_THRESH_POW) * 5.12);
+  return MAX(q, 8);
 }
 
 void vp9_initialize_me_consts(VP9_COMP *cpi, int qindex) {
@@ -243,9 +238,9 @@ void vp9_initialize_me_consts(VP9_COMP *cpi, int qindex) {
 }
 
 static void set_block_thresholds(VP9_COMP *cpi) {
+  const VP9_COMMON *const cm = &cpi->common;
+  const SPEED_FEATURES *const sf = &cpi->sf;
   int i, bsize, segment_id;
-  VP9_COMMON *cm = &cpi->common;
-  SPEED_FEATURES *sf = &cpi->sf;
 
   for (segment_id = 0; segment_id < MAX_SEGMENTS; ++segment_id) {
     const int qindex = clamp(vp9_get_qindex(&cm->seg, segment_id,
@@ -275,8 +270,8 @@ static void set_block_thresholds(VP9_COMP *cpi) {
 }
 
 void vp9_initialize_rd_consts(VP9_COMP *cpi) {
-  VP9_COMMON *cm = &cpi->common;
-  MACROBLOCK *x = &cpi->mb;
+  VP9_COMMON *const cm = &cpi->common;
+  MACROBLOCK *const x = &cpi->mb;
   int i;
 
   vp9_clear_system_state();
@@ -434,7 +429,7 @@ static void model_rd_for_sb(VP9_COMP *cpi, BLOCK_SIZE bsize,
   int i;
   int64_t rate_sum = 0;
   int64_t dist_sum = 0;
-  int ref = xd->mi_8x8[0]->mbmi.ref_frame[0];
+  const int ref = xd->mi_8x8[0]->mbmi.ref_frame[0];
   unsigned int sse;
 
   for (i = 0; i < MAX_MB_PLANE; ++i) {
@@ -483,8 +478,8 @@ static void model_rd_for_sb_y_tx(VP9_COMP *cpi, BLOCK_SIZE bsize,
                                  int *out_skip) {
   int j, k;
   BLOCK_SIZE bs;
-  struct macroblock_plane *const p = &x->plane[0];
-  struct macroblockd_plane *const pd = &xd->plane[0];
+  const struct macroblock_plane *const p = &x->plane[0];
+  const struct macroblockd_plane *const pd = &xd->plane[0];
   const int width = 4 * num_4x4_blocks_wide_lookup[bsize];
   const int height = 4 * num_4x4_blocks_high_lookup[bsize];
   int rate_sum = 0;
@@ -558,8 +553,8 @@ static INLINE int cost_coeffs(MACROBLOCK *x,
                               int use_fast_coef_costing) {
   MACROBLOCKD *const xd = &x->e_mbd;
   MB_MODE_INFO *mbmi = &xd->mi_8x8[0]->mbmi;
-  struct macroblock_plane *p = &x->plane[plane];
-  struct macroblockd_plane *pd = &xd->plane[plane];
+  const struct macroblock_plane *p = &x->plane[plane];
+  const struct macroblockd_plane *pd = &xd->plane[plane];
   const PLANE_TYPE type = pd->plane_type;
   const int16_t *band_count = &band_counts[tx_size][1];
   const int eob = p->eobs[block];
@@ -629,8 +624,8 @@ static void dist_block(int plane, int block, TX_SIZE tx_size,
   const int ss_txfrm_size = tx_size << 1;
   MACROBLOCK* const x = args->x;
   MACROBLOCKD* const xd = &x->e_mbd;
-  struct macroblock_plane *const p = &x->plane[plane];
-  struct macroblockd_plane *const pd = &xd->plane[plane];
+  const struct macroblock_plane *const p = &x->plane[plane];
+  const struct macroblockd_plane *const pd = &xd->plane[plane];
   int64_t this_sse;
   int shift = tx_size == TX_32X32 ? 0 : 2;
   int16_t *const coeff = BLOCK_OFFSET(p->coeff, block);
@@ -664,7 +659,7 @@ static void block_rd_txfm(int plane, int block, BLOCK_SIZE plane_bsize,
   struct rdcost_block_args *args = arg;
   MACROBLOCK *const x = args->x;
   MACROBLOCKD *const xd = &x->e_mbd;
-  MB_MODE_INFO *mbmi = &xd->mi_8x8[0]->mbmi;
+  MB_MODE_INFO *const mbmi = &xd->mi_8x8[0]->mbmi;
   int64_t rd1, rd2, rd;
 
   if (args->skip)
@@ -743,7 +738,7 @@ static void txfm_rd_in_plane(MACROBLOCK *x,
                              BLOCK_SIZE bsize, TX_SIZE tx_size,
                              int use_fast_coef_casting) {
   MACROBLOCKD *const xd = &x->e_mbd;
-  struct macroblockd_plane *const pd = &xd->plane[plane];
+  const struct macroblockd_plane *const pd = &xd->plane[plane];
   struct rdcost_block_args args = { 0 };
   args.x = x;
   args.best_rd = ref_best_rd;
