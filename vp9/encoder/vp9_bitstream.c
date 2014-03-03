@@ -566,7 +566,7 @@ static void update_coef_probs_common(vp9_writer* const bc, VP9_COMP *cpi,
                 if (t == PIVOT_NODE)
                   s = vp9_prob_diff_update_savings_search_model(
                       frame_branch_ct[i][j][k][l][0],
-                      old_frame_coef_probs[i][j][k][l], &newp, upd, i, j);
+                      old_frame_coef_probs[i][j][k][l], &newp, upd);
                 else
                   s = vp9_prob_diff_update_savings_search(
                       frame_branch_ct[i][j][k][l][t], oldp, &newp, upd);
@@ -604,7 +604,7 @@ static void update_coef_probs_common(vp9_writer* const bc, VP9_COMP *cpi,
                 if (t == PIVOT_NODE)
                   s = vp9_prob_diff_update_savings_search_model(
                       frame_branch_ct[i][j][k][l][0],
-                      old_frame_coef_probs[i][j][k][l], &newp, upd, i, j);
+                      old_frame_coef_probs[i][j][k][l], &newp, upd);
                 else
                   s = vp9_prob_diff_update_savings_search(
                       frame_branch_ct[i][j][k][l][t],
@@ -652,7 +652,7 @@ static void update_coef_probs_common(vp9_writer* const bc, VP9_COMP *cpi,
                   if (t == PIVOT_NODE)
                     s = vp9_prob_diff_update_savings_search_model(
                         frame_branch_ct[i][j][k][l][0],
-                        old_frame_coef_probs[i][j][k][l], &newp, upd, i, j);
+                        old_frame_coef_probs[i][j][k][l], &newp, upd);
                   else
                     s = vp9_prob_diff_update_savings_search(
                         frame_branch_ct[i][j][k][l][t],
