@@ -21,7 +21,6 @@
 
 #include "vp9/decoder/vp9_decodemv.h"
 #include "vp9/decoder/vp9_decodeframe.h"
-#include "vp9/decoder/vp9_onyxd_int.h"
 #include "vp9/decoder/vp9_reader.h"
 
 static MB_PREDICTION_MODE read_intra_mode(vp9_reader *r, const vp9_prob *p) {

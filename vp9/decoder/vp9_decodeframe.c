@@ -35,7 +35,7 @@
 #include "vp9/decoder/vp9_decodemv.h"
 #include "vp9/decoder/vp9_dsubexp.h"
 #include "vp9/decoder/vp9_dthread.h"
-#include "vp9/decoder/vp9_onyxd_int.h"
+#include "vp9/decoder/vp9_onyxd.h"
 #include "vp9/decoder/vp9_read_bit_buffer.h"
 #include "vp9/decoder/vp9_reader.h"
 #include "vp9/decoder/vp9_thread.h"

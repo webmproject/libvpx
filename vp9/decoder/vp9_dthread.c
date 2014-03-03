@@ -9,10 +9,13 @@
  */
 
 #include "./vpx_config.h"
-#include "vp9/common/vp9_reconinter.h"
-#include "vp9/decoder/vp9_dthread.h"
-#include "vp9/decoder/vp9_onyxd_int.h"
+
 #include "vpx_mem/vpx_mem.h"
+
+#include "vp9/common/vp9_reconinter.h"
+
+#include "vp9/decoder/vp9_dthread.h"
+#include "vp9/decoder/vp9_onyxd.h"
 
 #if CONFIG_MULTITHREAD
 static INLINE void mutex_lock(pthread_mutex_t *const mutex) {
