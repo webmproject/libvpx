@@ -2665,7 +2665,6 @@ static void loopfilter_frame(VP9_COMP *cpi, VP9_COMMON *cm) {
   }
 
   if (lf->filter_level > 0) {
-    vp9_set_alt_lf_level(cpi, lf->filter_level);
     vp9_loop_filter_frame(cm, xd, lf->filter_level, 0, 0);
   }
 

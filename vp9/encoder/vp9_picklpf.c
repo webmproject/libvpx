@@ -21,27 +21,18 @@
 #include "vp9/common/vp9_loopfilter.h"
 #include "./vpx_scale_rtcd.h"
 
-static int get_min_filter_level(VP9_COMP *cpi, int base_qindex) {
-  return 0;
-}
-
-static int get_max_filter_level(VP9_COMP *cpi, int base_qindex) {
+static int get_max_filter_level(VP9_COMP *cpi) {
   return cpi->twopass.section_intra_rating > 8 ? MAX_LOOP_FILTER * 3 / 4
                                                : MAX_LOOP_FILTER;
 }
 
-// Stub function for now Alt LF not used
-void vp9_set_alt_lf_level(VP9_COMP *cpi, int filt_val) {
-}
 
 static int try_filter_frame(const YV12_BUFFER_CONFIG *sd, VP9_COMP *const cpi,
                             MACROBLOCKD *const xd, VP9_COMMON *const cm,
                             int filt_level, int partial_frame) {
   int filt_err;
 
-  vp9_set_alt_lf_level(cpi, filt_level);
   vp9_loop_filter_frame(cm, xd, filt_level, 1, partial_frame);
-
   filt_err = vp9_calc_ss_err(sd, cm->frame_to_show);
 
   // Re-instate the unfiltered frame
@@ -55,8 +46,8 @@ static void search_filter_level(const YV12_BUFFER_CONFIG *sd, VP9_COMP *cpi,
   MACROBLOCKD *const xd = &cpi->mb.e_mbd;
   VP9_COMMON *const cm = &cpi->common;
   struct loopfilter *const lf = &cm->lf;
-  const int min_filter_level = get_min_filter_level(cpi, cm->base_qindex);
-  const int max_filter_level = get_max_filter_level(cpi, cm->base_qindex);
+  const int min_filter_level = 0;
+  const int max_filter_level = get_max_filter_level(cpi);
   int best_err;
   int filt_best;
   int filt_direction = 0;
@@ -148,8 +139,8 @@ void vp9_pick_filter_level(const YV12_BUFFER_CONFIG *sd, VP9_COMP *cpi,
                                                     : cpi->oxcf.sharpness;
 
   if (method == 2) {
-    const int min_filter_level = get_min_filter_level(cpi, cm->base_qindex);
-    const int max_filter_level = get_max_filter_level(cpi, cm->base_qindex);
+    const int min_filter_level = 0;
+    const int max_filter_level = get_max_filter_level(cpi);
     const int q = vp9_ac_quant(cm->base_qindex, 0);
     // These values were determined by linear fitting the result of the
     // searched level
