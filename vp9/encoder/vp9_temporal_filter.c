@@ -124,8 +124,7 @@ void vp9_temporal_filter_apply_c(uint8_t *frame1,
 static int temporal_filter_find_matching_mb_c(VP9_COMP *cpi,
                                               uint8_t *arf_frame_buf,
                                               uint8_t *frame_ptr_buf,
-                                              int stride,
-                                              int error_thresh) {
+                                              int stride) {
   MACROBLOCK *x = &cpi->mb;
   MACROBLOCKD* const xd = &x->e_mbd;
   int step_param;
@@ -267,8 +266,7 @@ static void temporal_filter_iterate_c(VP9_COMP *cpi,
                 (cpi,
                  cpi->frames[alt_ref_index]->y_buffer + mb_y_offset,
                  cpi->frames[frame]->y_buffer + mb_y_offset,
-                 cpi->frames[frame]->y_stride,
-                 THRESH_LOW);
+                 cpi->frames[frame]->y_stride);
 #endif
           // Assign higher weight to matching MB if it's error
           // score is lower. If not applying MC default behavior
