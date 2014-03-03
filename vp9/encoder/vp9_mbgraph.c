@@ -132,7 +132,6 @@ static int do_16x16_zerozero_search(VP9_COMP *cpi, int_mv *dst_mv) {
   return err;
 }
 static int find_best_16x16_intra(VP9_COMP *cpi,
-                                 int mb_y_offset,
                                  MB_PREDICTION_MODE *pbest_mode) {
   MACROBLOCK   *const x  = &cpi->mb;
   MACROBLOCKD *const xd = &x->e_mbd;
@@ -173,10 +172,7 @@ static void update_mbgraph_mb_stats
   int mb_y_offset,
   YV12_BUFFER_CONFIG *golden_ref,
   int_mv *prev_golden_ref_mv,
-  int gld_y_offset,
   YV12_BUFFER_CONFIG *alt_ref,
-  int_mv *prev_alt_ref_mv,
-  int arf_y_offset,
   int mb_row,
   int mb_col
 ) {
@@ -193,7 +189,7 @@ static void update_mbgraph_mb_stats
   xd->plane[0].dst.stride = get_frame_new_buffer(cm)->y_stride;
 
   // do intra 16x16 prediction
-  intra_error = find_best_16x16_intra(cpi, mb_y_offset,
+  intra_error = find_best_16x16_intra(cpi,
                                       &stats->ref[INTRA_FRAME].m.mode);
   if (intra_error <= 0)
     intra_error = 1;
@@ -277,8 +273,7 @@ static void update_mbgraph_frame_stats(VP9_COMP *cpi,
       MBGRAPH_MB_STATS *mb_stats = &stats->mb_stats[offset + mb_col];
 
       update_mbgraph_mb_stats(cpi, mb_stats, buf, mb_y_in_offset,
-                              golden_ref, &gld_left_mv, gld_y_in_offset,
-                              alt_ref,    &arf_left_mv, arf_y_in_offset,
+                              golden_ref, &gld_left_mv, alt_ref,
                               mb_row, mb_col);
       arf_left_mv.as_int = mb_stats->ref[ALTREF_FRAME].m.mv.as_int;
       gld_left_mv.as_int = mb_stats->ref[GOLDEN_FRAME].m.mv.as_int;
