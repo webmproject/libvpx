@@ -117,7 +117,7 @@ static void init_macroblockd(VP9D_COMP *const pbi) {
     pd[i].dqcoeff = pbi->dqcoeff[i];
 }
 
-VP9D_PTR vp9_create_decompressor(VP9D_CONFIG *oxcf) {
+VP9D_COMP *vp9_create_decompressor(VP9D_CONFIG *oxcf) {
   VP9D_COMP *const pbi = vpx_memalign(32, sizeof(VP9D_COMP));
   VP9_COMMON *const cm = pbi ? &pbi->common : NULL;
 
@@ -161,9 +161,8 @@ VP9D_PTR vp9_create_decompressor(VP9D_CONFIG *oxcf) {
   return pbi;
 }
 
-void vp9_remove_decompressor(VP9D_PTR ptr) {
+void vp9_remove_decompressor(VP9D_COMP *pbi) {
   int i;
-  VP9D_COMP *const pbi = (VP9D_COMP *)ptr;
 
   if (!pbi)
     return;
@@ -200,10 +199,9 @@ static int equal_dimensions(const YV12_BUFFER_CONFIG *a,
            a->uv_height == b->uv_height && a->uv_width == b->uv_width;
 }
 
-vpx_codec_err_t vp9_copy_reference_dec(VP9D_PTR ptr,
+vpx_codec_err_t vp9_copy_reference_dec(VP9D_COMP *pbi,
                                        VP9_REFFRAME ref_frame_flag,
                                        YV12_BUFFER_CONFIG *sd) {
-  VP9D_COMP *pbi = (VP9D_COMP *) ptr;
   VP9_COMMON *cm = &pbi->common;
 
   /* TODO(jkoleszar): The decoder doesn't have any real knowledge of what the
@@ -228,9 +226,9 @@ vpx_codec_err_t vp9_copy_reference_dec(VP9D_PTR ptr,
 }
 
 
-vpx_codec_err_t vp9_set_reference_dec(VP9D_PTR ptr, VP9_REFFRAME ref_frame_flag,
+vpx_codec_err_t vp9_set_reference_dec(VP9D_COMP *pbi,
+                                      VP9_REFFRAME ref_frame_flag,
                                       YV12_BUFFER_CONFIG *sd) {
-  VP9D_COMP *pbi = (VP9D_COMP *) ptr;
   VP9_COMMON *cm = &pbi->common;
   RefBuffer *ref_buf = NULL;
 
@@ -273,8 +271,7 @@ vpx_codec_err_t vp9_set_reference_dec(VP9D_PTR ptr, VP9_REFFRAME ref_frame_flag,
 }
 
 
-int vp9_get_reference_dec(VP9D_PTR ptr, int index, YV12_BUFFER_CONFIG **fb) {
-  VP9D_COMP *pbi = (VP9D_COMP *) ptr;
+int vp9_get_reference_dec(VP9D_COMP *pbi, int index, YV12_BUFFER_CONFIG **fb) {
   VP9_COMMON *cm = &pbi->common;
 
   if (index < 0 || index >= REF_FRAMES)
@@ -309,20 +306,20 @@ static void swap_frame_buffers(VP9D_COMP *pbi) {
     cm->frame_refs[ref_index].idx = INT_MAX;
 }
 
-int vp9_receive_compressed_data(VP9D_PTR ptr,
+int vp9_receive_compressed_data(VP9D_COMP *pbi,
                                 size_t size, const uint8_t **psource,
                                 int64_t time_stamp) {
-  VP9D_COMP *pbi = (VP9D_COMP *) ptr;
-  VP9_COMMON *cm = &pbi->common;
+  VP9_COMMON *cm = NULL;
   const uint8_t *source = *psource;
   int retcode = 0;
 
   /*if(pbi->ready_for_new_data == 0)
       return -1;*/
 
-  if (ptr == 0)
+  if (!pbi)
     return -1;
 
+  cm = &pbi->common;
   cm->error.error_code = VPX_CODEC_OK;
 
   pbi->source = source;
@@ -454,11 +451,10 @@ int vp9_receive_compressed_data(VP9D_PTR ptr,
   return retcode;
 }
 
-int vp9_get_raw_frame(VP9D_PTR ptr, YV12_BUFFER_CONFIG *sd,
+int vp9_get_raw_frame(VP9D_COMP *pbi, YV12_BUFFER_CONFIG *sd,
                       int64_t *time_stamp, int64_t *time_end_stamp,
                       vp9_ppflags_t *flags) {
   int ret = -1;
-  VP9D_COMP *pbi = (VP9D_COMP *) ptr;
 
   if (pbi->ready_for_new_data == 1)
     return ret;
