@@ -2413,7 +2413,7 @@ static void single_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
     for (i = 0; i < MAX_MB_PLANE; i++)
       backup_yv12[i] = xd->plane[i].pre[0];
 
-    setup_pre_planes(xd, 0, scaled_ref_frame, mi_row, mi_col, NULL);
+    vp9_setup_pre_planes(xd, 0, scaled_ref_frame, mi_row, mi_col, NULL);
   }
 
   vp9_set_mv_search_range(x, &ref_mv);
@@ -2557,7 +2557,8 @@ static void joint_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
       // motion search code to be used without additional modifications.
       for (i = 0; i < MAX_MB_PLANE; i++)
         backup_yv12[ref][i] = xd->plane[i].pre[ref];
-      setup_pre_planes(xd, ref, scaled_ref_frame[ref], mi_row, mi_col, NULL);
+      vp9_setup_pre_planes(xd, ref, scaled_ref_frame[ref], mi_row, mi_col,
+                           NULL);
     }
 
     frame_mv[refs[ref]].as_int = single_newmv[refs[ref]].as_int;

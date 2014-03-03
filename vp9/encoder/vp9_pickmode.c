@@ -59,7 +59,7 @@ static int full_pixel_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
     for (i = 0; i < MAX_MB_PLANE; i++)
       backup_yv12[i] = xd->plane[i].pre[0];
 
-    setup_pre_planes(xd, 0, scaled_ref_frame, mi_row, mi_col, NULL);
+    vp9_setup_pre_planes(xd, 0, scaled_ref_frame, mi_row, mi_col, NULL);
   }
 
   vp9_set_mv_search_range(x, &ref_mv.as_mv);
@@ -160,7 +160,7 @@ static void sub_pixel_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
     for (i = 0; i < MAX_MB_PLANE; i++)
       backup_yv12[i] = xd->plane[i].pre[0];
 
-    setup_pre_planes(xd, 0, scaled_ref_frame, mi_row, mi_col, NULL);
+    vp9_setup_pre_planes(xd, 0, scaled_ref_frame, mi_row, mi_col, NULL);
   }
 
   tmp_mv->col >>= 3;

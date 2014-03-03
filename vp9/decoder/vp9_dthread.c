@@ -104,7 +104,7 @@ static void loop_filter_rows_mt(const YV12_BUFFER_CONFIG *const frame_buffer,
 
       sync_read(lf_sync, r, c);
 
-      setup_dst_planes(xd, frame_buffer, mi_row, mi_col);
+      vp9_setup_dst_planes(xd, frame_buffer, mi_row, mi_col);
       vp9_setup_mask(cm, mi_row, mi_col, mi_8x8 + mi_col, cm->mode_info_stride,
                      &lfm);
 

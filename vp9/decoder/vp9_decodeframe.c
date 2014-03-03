@@ -362,7 +362,7 @@ static void set_offsets(VP9_COMMON *const cm, MACROBLOCKD *const xd,
   // as they are always compared to values that are in 1/8th pel units
   set_mi_row_col(xd, tile, mi_row, bh, mi_col, bw, cm->mi_rows, cm->mi_cols);
 
-  setup_dst_planes(xd, get_frame_new_buffer(cm), mi_row, mi_col);
+  vp9_setup_dst_planes(xd, get_frame_new_buffer(cm), mi_row, mi_col);
 }
 
 static void set_ref(VP9_COMMON *const cm, MACROBLOCKD *const xd,
@@ -373,7 +373,8 @@ static void set_ref(VP9_COMMON *const cm, MACROBLOCKD *const xd,
   if (!vp9_is_valid_scale(&ref_buffer->sf))
     vpx_internal_error(&cm->error, VPX_CODEC_UNSUP_BITSTREAM,
                        "Invalid scale factors");
-  setup_pre_planes(xd, idx, ref_buffer->buf, mi_row, mi_col, &ref_buffer->sf);
+  vp9_setup_pre_planes(xd, idx, ref_buffer->buf, mi_row, mi_col,
+                       &ref_buffer->sf);
   xd->corrupted |= ref_buffer->buf->corrupted;
 }
 

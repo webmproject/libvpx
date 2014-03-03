@@ -20,7 +20,7 @@
 
 #include "vp9/common/vp9_entropymv.h"
 #include "vp9/common/vp9_quant_common.h"
-#include "vp9/common/vp9_reconinter.h"  // setup_dst_planes()
+#include "vp9/common/vp9_reconinter.h"  // vp9_setup_dst_planes()
 #include "vp9/common/vp9_systemdependent.h"
 
 #include "vp9/encoder/vp9_block.h"
@@ -500,8 +500,8 @@ void vp9_first_pass(VP9_COMP *cpi) {
   vp9_clear_system_state();
 
   vp9_setup_src_planes(x, cpi->Source, 0, 0);
-  setup_pre_planes(xd, 0, lst_yv12, 0, 0, NULL);
-  setup_dst_planes(xd, new_yv12, 0, 0);
+  vp9_setup_pre_planes(xd, 0, lst_yv12, 0, 0, NULL);
+  vp9_setup_dst_planes(xd, new_yv12, 0, 0);
 
   xd->mi_8x8 = cm->mi_grid_visible;
   xd->mi_8x8[0] = cm->mi;
