@@ -662,6 +662,7 @@ static void set_good_speed_feature(VP9_COMMON *cm,
     sf->use_lp32x32fdct = 1;
     sf->subpel_iters_per_step = 1;
     sf->use_fast_coef_updates = 2;
+    sf->use_fast_coef_costing = 1;
 
     sf->adaptive_rd_thresh = 4;
     sf->mode_skip_start = 6;
@@ -698,6 +699,7 @@ static void set_good_speed_feature(VP9_COMMON *cm,
     sf->use_lp32x32fdct = 1;
     sf->subpel_iters_per_step = 1;
     sf->use_fast_coef_updates = 2;
+    sf->use_fast_coef_costing = 1;
 
     sf->adaptive_rd_thresh = 4;
     sf->mode_skip_start = 6;
@@ -730,6 +732,7 @@ static void set_good_speed_feature(VP9_COMMON *cm,
       sf->intra_uv_mode_mask[i] = INTRA_DC_ONLY;
     }
     sf->use_fast_coef_updates = 2;
+    sf->use_fast_coef_costing = 1;
     sf->adaptive_rd_thresh = 4;
     sf->mode_skip_start = 6;
   }
@@ -742,6 +745,7 @@ static void set_rt_speed_feature(VP9_COMMON *cm,
   sf->adaptive_rd_thresh = 1;
   sf->recode_loop = ((speed < 1) ? ALLOW_RECODE : ALLOW_RECODE_KFMAXBW);
   sf->encode_breakout_thresh = 1;
+  sf->use_fast_coef_costing = 1;
 
   if (speed == 1) {
     sf->use_square_partition_only = !frame_is_intra_only(cm);
@@ -923,6 +927,7 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
   sf->use_uv_intra_rd_estimate = 0;
   sf->use_fast_lpf_pick = 0;
   sf->use_fast_coef_updates = 0;
+  sf->use_fast_coef_costing = 0;
   sf->mode_skip_start = MAX_MODES;  // Mode index at which mode skip mask set
   sf->use_nonrd_pick_mode = 0;
   sf->encode_breakout_thresh = 0;
