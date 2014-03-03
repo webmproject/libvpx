@@ -30,6 +30,7 @@ VP9_CX_SRCS-yes += encoder/vp9_firstpass.c
 VP9_CX_SRCS-yes += encoder/vp9_block.h
 VP9_CX_SRCS-yes += encoder/vp9_writer.h
 VP9_CX_SRCS-yes += encoder/vp9_writer.c
+VP9_CX_SRCS-yes += encoder/vp9_write_bit_buffer.c
 VP9_CX_SRCS-yes += encoder/vp9_write_bit_buffer.h
 VP9_CX_SRCS-yes += encoder/vp9_bitstream.h
 VP9_CX_SRCS-yes += encoder/vp9_encodemb.h
