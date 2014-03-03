@@ -150,8 +150,7 @@ int vp9_prob_diff_update_savings_search(const unsigned int *ct,
 int vp9_prob_diff_update_savings_search_model(const unsigned int *ct,
                                               const vp9_prob *oldp,
                                               vp9_prob *bestp,
-                                              vp9_prob upd,
-                                              int b, int r) {
+                                              vp9_prob upd) {
   int i, old_b, new_b, update_b, savings, bestsavings, step;
   int newp;
   vp9_prob bestnewp, newplist[ENTROPY_NODES], oldplist[ENTROPY_NODES];
