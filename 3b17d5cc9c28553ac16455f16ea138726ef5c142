@@ -2,6 +2,23 @@
   "comments": [
     {
       "key": {
+        "uuid": "AAAAdn//0IQ\u003d",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 4
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-03-04T00:30:20Z",
+      "side": 1,
+      "message": "vp8",
+      "revId": "3b17d5cc9c28553ac16455f16ea138726ef5c142",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//0Io\u003d",
         "filename": "examples/vp8cx_set_ref.c",
         "patchSetId": 4
