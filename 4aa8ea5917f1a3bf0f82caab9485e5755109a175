@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//0AM\u003d",
+        "filename": "test/vp8_boolcoder_test.cc",
+        "patchSetId": 6
+      },
+      "lineNbr": 98,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-03-04T22:02:10Z",
+      "side": 1,
+      "message": "kBufferSize or kBitsToTest? not sure what the intent was here",
+      "revId": "4aa8ea5917f1a3bf0f82caab9485e5755109a175",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
