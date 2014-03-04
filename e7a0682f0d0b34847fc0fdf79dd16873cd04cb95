@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//0II\u003d",
+        "filename": "examples/simple_encoder.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 68,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-03-04T00:41:44Z",
+      "side": 1,
+      "message": "Forced Keyframes",
+      "revId": "e7a0682f0d0b34847fc0fdf79dd16873cd04cb95",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//0IE\u003d",
+        "filename": "examples/simple_encoder.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 72,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-03-04T00:41:44Z",
+      "side": 1,
+      "message": "Add another sentence:\n\nNote, the output stream can contain additional keyframes beyond those that have been forced using the VPX_EFLAG_FORCE_KF flag because of automatic keyframe placement by the encoder.",
+      "revId": "e7a0682f0d0b34847fc0fdf79dd16873cd04cb95",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//0H8\u003d",
+        "filename": "examples/simple_encoder.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 168,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-03-04T00:41:44Z",
+      "side": 1,
+      "message": "I don\u0027t like that the keyframe interval is required, but not much you can do about it short of using args.h or writing some parsing code. \n\nMaybe TODO: Add some simple command line parsing code to make the command line more flexible.\n\nNote: I still don\u0027t want to see args.h in here. I prefer positional parameter abuse to that monstrosity.\n\nAnyway, no action required here. You can add the TODO at your discretion.",
+      "revId": "e7a0682f0d0b34847fc0fdf79dd16873cd04cb95",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
