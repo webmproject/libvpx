@@ -35,14 +35,14 @@ const uint8_t secret_key[16] = {
   0x89, 0x9a, 0xab, 0xbc, 0xcd, 0xde, 0xef, 0xf0
 };
 
-void encrypt_buffer(uint8_t *buffer, int size) {
-  for (int i = 0; i < size; ++i) {
+void encrypt_buffer(uint8_t *buffer, size_t size) {
+  for (size_t i = 0; i < size; ++i) {
     buffer[i] ^= secret_key[i & 15];
   }
 }
 
 void test_decrypt_cb(void *decrypt_state, const uint8_t *input,
-                           uint8_t *output, int count) {
+                     uint8_t *output, int count) {
   const size_t offset = input - reinterpret_cast<uint8_t*>(decrypt_state);
   for (int i = 0; i < count; i++) {
     output[i] = input[i] ^ secret_key[(offset + i) & 15];
