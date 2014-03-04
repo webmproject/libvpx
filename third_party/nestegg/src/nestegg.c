@@ -694,14 +694,15 @@ ne_read_string(nestegg * ctx, char ** val, uint64_t length)
 {
   char * str;
   int r;
+  const size_t alloc_size = (size_t)length + 1;
 
   if (length == 0 || length > LIMIT_STRING)
     return -1;
-  str = ne_pool_alloc(length + 1, ctx->alloc_pool);
-  r = ne_io_read(ctx->io, (unsigned char *) str, length);
+  str = ne_pool_alloc(alloc_size, ctx->alloc_pool);
+  r = ne_io_read(ctx->io, (unsigned char *) str, alloc_size - 1);
   if (r != 1)
     return r;
-  str[length] = '\0';
+  str[alloc_size - 1] = '\0';
   *val = str;
   return 1;
 }
@@ -711,9 +712,9 @@ ne_read_binary(nestegg * ctx, struct ebml_binary * val, uint64_t length)
 {
   if (length == 0 || length > LIMIT_BINARY)
     return -1;
-  val->data = ne_pool_alloc(length, ctx->alloc_pool);
-  val->length = length;
-  return ne_io_read(ctx->io, val->data, length);
+  val->length = (size_t)length;
+  val->data = ne_pool_alloc(val->length, ctx->alloc_pool);
+  return ne_io_read(ctx->io, val->data, val->length);
 }
 
 static int
@@ -1263,7 +1264,8 @@ ne_read_block(nestegg * ctx, uint64_t block_id, uint64_t block_size, nestegg_pac
   if (track_number == 0 || (unsigned int)track_number != track_number)
     return -1;
 
-  consumed += length;
+  assert(length <= 8);
+  consumed += (size_t)length;
 
   r = ne_read_int(ctx->io, &timecode, 2);
   if (r != 1)
@@ -1307,7 +1309,7 @@ ne_read_block(nestegg * ctx, uint64_t block_id, uint64_t block_size, nestegg_pac
   case LACING_XIPH:
     if (frames == 1)
       return -1;
-    r = ne_read_xiph_lacing(ctx->io, block_size, &consumed, frames, frame_sizes);
+    r = ne_read_xiph_lacing(ctx->io, (size_t)block_size, &consumed, frames, frame_sizes);
     if (r != 1)
       return r;
     break;
@@ -1320,7 +1322,7 @@ ne_read_block(nestegg * ctx, uint64_t block_id, uint64_t block_size, nestegg_pac
   case LACING_EBML:
     if (frames == 1)
       return -1;
-    r = ne_read_ebml_lacing(ctx->io, block_size, &consumed, frames, frame_sizes);
+    r = ne_read_ebml_lacing(ctx->io, (size_t)block_size, &consumed, frames, frame_sizes);
     if (r != 1)
       return r;
     break;
@@ -1365,9 +1367,9 @@ ne_read_block(nestegg * ctx, uint64_t block_id, uint64_t block_size, nestegg_pac
       return -1;
     }
     f = ne_alloc(sizeof(*f));
-    f->data = ne_alloc(frame_sizes[i]);
-    f->length = frame_sizes[i];
-    r = ne_io_read(ctx->io, f->data, frame_sizes[i]);
+    f->length = (size_t)frame_sizes[i];
+    f->data = ne_alloc(f->length);
+    r = ne_io_read(ctx->io, f->data, f->length);
     if (r != 1) {
       free(f->data);
       free(f);
@@ -2074,7 +2076,7 @@ nestegg_track_codec_data(nestegg * ctx, unsigned int track, unsigned int item,
         p += sizes[i];
       }
       *data = p;
-      *length = sizes[item];
+      *length = (size_t)sizes[item];
   } else {
     *data = codec_private.data;
     *length = codec_private.length;
