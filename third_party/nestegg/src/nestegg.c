@@ -1605,7 +1605,7 @@ ne_buffer_read(void * buffer, size_t length, void * user_data)
   struct sniff_buffer * sb = user_data;
 
   int rv = 1;
-  size_t available = sb->length - sb->offset;
+  size_t available = sb->length - (size_t)sb->offset;
 
   if (available < length)
     return 0;
