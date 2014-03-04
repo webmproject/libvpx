@@ -1044,7 +1044,7 @@ ne_parse(nestegg * ctx, struct ebml_element_desc * top_level, int64_t max_offset
           ne_read_single_master(ctx, element);
         continue;
       } else {
-        r = ne_read_simple(ctx, element, size);
+        r = ne_read_simple(ctx, element, (size_t)size);
         if (r < 0)
           break;
       }
@@ -1063,7 +1063,7 @@ ne_parse(nestegg * ctx, struct ebml_element_desc * top_level, int64_t max_offset
 
       if (id != ID_VOID && id != ID_CRC32)
         ctx->log(ctx, NESTEGG_LOG_DEBUG, "unknown element %llx", id);
-      r = ne_io_read_skip(ctx->io, size);
+      r = ne_io_read_skip(ctx->io, (size_t)size);
       if (r != 1)
         break;
     }
