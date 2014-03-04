@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//0Fc\u003d",
+        "filename": "examples/simple_encoder.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 68,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-03-04T01:47:47Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//0II\u003d",
+      "revId": "e7a0682f0d0b34847fc0fdf79dd16873cd04cb95",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//0IE\u003d",
         "filename": "examples/simple_encoder.c",
         "patchSetId": 1
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//0FY\u003d",
+        "filename": "examples/simple_encoder.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 72,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-03-04T01:47:47Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//0IE\u003d",
+      "revId": "e7a0682f0d0b34847fc0fdf79dd16873cd04cb95",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//0H8\u003d",
         "filename": "examples/simple_encoder.c",
         "patchSetId": 1
@@ -47,6 +83,24 @@
       "writtenOn": "2014-03-04T00:41:44Z",
       "side": 1,
       "message": "I don\u0027t like that the keyframe interval is required, but not much you can do about it short of using args.h or writing some parsing code. \n\nMaybe TODO: Add some simple command line parsing code to make the command line more flexible.\n\nNote: I still don\u0027t want to see args.h in here. I prefer positional parameter abuse to that monstrosity.\n\nAnyway, no action required here. You can add the TODO at your discretion.",
+      "revId": "e7a0682f0d0b34847fc0fdf79dd16873cd04cb95",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//0FU\u003d",
+        "filename": "examples/simple_encoder.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 168,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-03-04T01:47:47Z",
+      "side": 1,
+      "message": "Agree, suggested TODO item.",
+      "parentUuid": "AAAAdn//0H8\u003d",
       "revId": "e7a0682f0d0b34847fc0fdf79dd16873cd04cb95",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
