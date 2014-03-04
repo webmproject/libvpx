@@ -587,6 +587,7 @@ static int rc_pick_q_and_bounds_one_pass_cbr(const VP9_COMP *cpi,
                                                    q_adj_factor);
     }
   } else if (!rc->is_src_frame_alt_ref &&
+             !cpi->use_svc &&
              (cpi->refresh_golden_frame || cpi->refresh_alt_ref_frame)) {
     // Use the lower of active_worst_quality and recent
     // average Q as basis for GF/ARF best Q limit unless last frame was
