@@ -16,6 +16,24 @@
       "revId": "6273122385559e1fecc49f8ed7030e6669c025c1",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//0E8\u003d",
+        "filename": "test/vp8_decrypt_test.cc",
+        "patchSetId": 5
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-03-04T02:05:38Z",
+      "side": 1,
+      "message": "That was just sloppiness on my part: Fixed.",
+      "parentUuid": "AAAAdn//1d4\u003d",
+      "revId": "6273122385559e1fecc49f8ed7030e6669c025c1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
