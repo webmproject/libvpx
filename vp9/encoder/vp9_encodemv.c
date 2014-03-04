@@ -160,7 +160,7 @@ static void write_mv_update(const vp9_tree_index *tree,
 
   vp9_tree_probs_from_distribution(tree, branch_ct, counts);
   for (i = 0; i < n - 1; ++i)
-    update_mv(w, branch_ct[i], &probs[i], NMV_UPDATE_PROB);
+    update_mv(w, branch_ct[i], &probs[i], MV_UPDATE_PROB);
 }
 
 void vp9_write_nmv_probs(VP9_COMMON *cm, int usehp, vp9_writer *w) {
@@ -174,13 +174,13 @@ void vp9_write_nmv_probs(VP9_COMMON *cm, int usehp, vp9_writer *w) {
     nmv_component *comp = &mvc->comps[i];
     nmv_component_counts *comp_counts = &counts->comps[i];
 
-    update_mv(w, comp_counts->sign, &comp->sign, NMV_UPDATE_PROB);
+    update_mv(w, comp_counts->sign, &comp->sign, MV_UPDATE_PROB);
     write_mv_update(vp9_mv_class_tree, comp->classes, comp_counts->classes,
                     MV_CLASSES, w);
     write_mv_update(vp9_mv_class0_tree, comp->class0, comp_counts->class0,
                     CLASS0_SIZE, w);
     for (j = 0; j < MV_OFFSET_BITS; ++j)
-      update_mv(w, comp_counts->bits[j], &comp->bits[j], NMV_UPDATE_PROB);
+      update_mv(w, comp_counts->bits[j], &comp->bits[j], MV_UPDATE_PROB);
   }
 
   for (i = 0; i < 2; ++i) {
@@ -195,8 +195,8 @@ void vp9_write_nmv_probs(VP9_COMMON *cm, int usehp, vp9_writer *w) {
   if (usehp) {
     for (i = 0; i < 2; ++i) {
       update_mv(w, counts->comps[i].class0_hp, &mvc->comps[i].class0_hp,
-                NMV_UPDATE_PROB);
-      update_mv(w, counts->comps[i].hp, &mvc->comps[i].hp, NMV_UPDATE_PROB);
+                MV_UPDATE_PROB);
+      update_mv(w, counts->comps[i].hp, &mvc->comps[i].hp, MV_UPDATE_PROB);
     }
   }
 }
