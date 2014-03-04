@@ -35,10 +35,6 @@
 #include "vp9/encoder/vp9_tokenize.h"
 #include "vp9/encoder/vp9_write_bit_buffer.h"
 
-#ifdef ENTROPY_STATS
-extern unsigned int active_section;
-#endif
-
 static struct vp9_token intra_mode_encodings[INTRA_MODES];
 static struct vp9_token switchable_interp_encodings[SWITCHABLE_FILTERS];
 static struct vp9_token partition_encodings[PARTITION_TYPES];
@@ -244,10 +240,6 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, MODE_INFO *m, vp9_writer *bc) {
   const int allow_hp = cm->allow_high_precision_mv;
   int skip;
 
-#ifdef ENTROPY_STATS
-  active_section = 9;
-#endif
-
   if (seg->update_map) {
     if (seg->temporal_update) {
       const int pred_flag = mi->seg_id_predicted;
@@ -272,10 +264,6 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, MODE_INFO *m, vp9_writer *bc) {
   }
 
   if (ref0 == INTRA_FRAME) {
-#ifdef ENTROPY_STATS
-    active_section = 6;
-#endif
-
     if (bsize >= BLOCK_8X8) {
       write_intra_mode(bc, mode, cm->fc.y_mode_prob[size_group_lookup[bsize]]);
     } else {
@@ -294,10 +282,6 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, MODE_INFO *m, vp9_writer *bc) {
     vp9_prob *mv_ref_p;
     write_ref_frames(cpi, bc);
     mv_ref_p = cm->fc.inter_mode_probs[mi->mode_context[ref0]];
-
-#ifdef ENTROPY_STATS
-    active_section = 3;
-#endif
 
     // If segment skip is not enabled code the mode.
     if (!vp9_segfeature_active(seg, segment_id, SEG_LVL_SKIP)) {
@@ -327,9 +311,6 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, MODE_INFO *m, vp9_writer *bc) {
           write_inter_mode(bc, b_mode, mv_ref_p);
           ++cm->counts.inter_mode[mi->mode_context[ref0]][INTER_OFFSET(b_mode)];
           if (b_mode == NEWMV) {
-#ifdef ENTROPY_STATS
-            active_section = 11;
-#endif
             vp9_encode_mv(cpi, bc, &m->bmi[j].as_mv[0].as_mv,
                           &mi->ref_mvs[ref0][0].as_mv, nmvc, allow_hp);
 
@@ -340,9 +321,6 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, MODE_INFO *m, vp9_writer *bc) {
         }
       }
     } else if (mode == NEWMV) {
-#ifdef ENTROPY_STATS
-      active_section = 5;
-#endif
       vp9_encode_mv(cpi, bc, &mi->mv[0].as_mv,
                     &mi->ref_mvs[ref0][0].as_mv, nmvc, allow_hp);
 
@@ -410,14 +388,8 @@ static void write_modes_b(VP9_COMP *cpi, const TileInfo *const tile,
                  cm->mi_rows, cm->mi_cols);
   if (frame_is_intra_only(cm)) {
     write_mb_modes_kf(cpi, xd->mi_8x8, w);
-#ifdef ENTROPY_STATS
-    active_section = 8;
-#endif
   } else {
     pack_inter_mode_mvs(cpi, m, w);
-#ifdef ENTROPY_STATS
-    active_section = 1;
-#endif
   }
 
   assert(*tok < tok_end);
@@ -1151,18 +1123,10 @@ static size_t write_compressed_header(VP9_COMP *cpi, uint8_t *data) {
     encode_txfm_probs(cm, &header_bc);
 
   update_coef_probs(cpi, &header_bc);
-
-#ifdef ENTROPY_STATS
-  active_section = 2;
-#endif
-
   update_skip_probs(cm, &header_bc);
 
   if (!frame_is_intra_only(cm)) {
     int i;
-#ifdef ENTROPY_STATS
-    active_section = 1;
-#endif
 
     for (i = 0; i < INTER_MODE_CONTEXTS; ++i)
       prob_diff_update(vp9_inter_mode_tree, cm->fc.inter_mode_probs[i],
@@ -1235,13 +1199,6 @@ void vp9_pack_bitstream(VP9_COMP *cpi, uint8_t *dest, size_t *size) {
   data += vp9_rb_bytes_written(&wb);
 
   vp9_compute_update_table();
-
-#ifdef ENTROPY_STATS
-  if (cm->frame_type == INTER_FRAME)
-    active_section = 0;
-  else
-    active_section = 7;
-#endif
 
   vp9_clear_system_state();
 
