@@ -20,3 +20,4 @@ nestegg.c|975 col 6| warning: ‘r’ may be used uninitialized in this function
 - nestegg_packet_track: fix uint64->uint32 warning
 - ne_read_(string|binary|block): normalize size_t usage
 - ne_parse: normalize size_t usage
+- quiet read related uint64->size_t warnings

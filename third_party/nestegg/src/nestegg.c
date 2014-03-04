@@ -1152,7 +1152,8 @@ ne_read_ebml_lacing(nestegg_io * io, size_t block, size_t * read, uint64_t n, ui
   r = ne_read_vint(io, &lace, &length);
   if (r != 1)
     return r;
-  *read += length;
+  assert(length <= 8);
+  *read += (size_t)length;
 
   sizes[i] = lace;
   sum = sizes[i];
@@ -1164,7 +1165,8 @@ ne_read_ebml_lacing(nestegg_io * io, size_t block, size_t * read, uint64_t n, ui
     r = ne_read_svint(io, &slace, &length);
     if (r != 1)
       return r;
-    *read += length;
+    assert(length <= 8);
+    *read += (size_t)length;
     sizes[i] = sizes[i - 1] + slace;
     sum += sizes[i];
     i += 1;
@@ -1408,7 +1410,8 @@ ne_read_discard_padding(nestegg * ctx, nestegg_packet * pkt)
   if (!element)
     return 1;
 
-  r = ne_read_simple(ctx, element, size);
+  assert((size_t)size == size);
+  r = ne_read_simple(ctx, element, (size_t)size);
   if (r != 1)
     return r;
   storage = (struct ebml_type *) (ctx->ancestor->data + element->offset);
