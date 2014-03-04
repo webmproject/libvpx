@@ -23,7 +23,7 @@ extern "C" {
 
 #define MAX_SEGMENTS 8
 
-  typedef int *VP9_PTR;
+  struct VP9_COMP;
 
   /* Create/destroy static data structures. */
 
@@ -187,59 +187,59 @@ extern "C" {
   } VP9_CONFIG;
 
 
-  void vp9_initialize_enc();
+void vp9_initialize_enc();
 
-  VP9_PTR vp9_create_compressor(VP9_CONFIG *oxcf);
-  void vp9_remove_compressor(VP9_PTR *comp);
+struct VP9_COMP *vp9_create_compressor(VP9_CONFIG *oxcf);
+void vp9_remove_compressor(struct VP9_COMP *cpi);
 
-  void vp9_change_config(VP9_PTR onyx, VP9_CONFIG *oxcf);
+void vp9_change_config(struct VP9_COMP *cpi, VP9_CONFIG *oxcf);
 
   // receive a frames worth of data. caller can assume that a copy of this
   // frame is made and not just a copy of the pointer..
-  int vp9_receive_raw_frame(VP9_PTR comp, unsigned int frame_flags,
-                            YV12_BUFFER_CONFIG *sd, int64_t time_stamp,
-                            int64_t end_time_stamp);
+int vp9_receive_raw_frame(struct VP9_COMP *cpi, unsigned int frame_flags,
+                          YV12_BUFFER_CONFIG *sd, int64_t time_stamp,
+                          int64_t end_time_stamp);
 
-  int vp9_get_compressed_data(VP9_PTR comp, unsigned int *frame_flags,
-                              size_t *size, uint8_t *dest,
-                              int64_t *time_stamp, int64_t *time_end,
-                              int flush);
+int vp9_get_compressed_data(struct VP9_COMP *cpi, unsigned int *frame_flags,
+                            size_t *size, uint8_t *dest,
+                            int64_t *time_stamp, int64_t *time_end, int flush);
 
-  int vp9_get_preview_raw_frame(VP9_PTR comp, YV12_BUFFER_CONFIG *dest,
-                                vp9_ppflags_t *flags);
+int vp9_get_preview_raw_frame(struct VP9_COMP *cpi, YV12_BUFFER_CONFIG *dest,
+                              vp9_ppflags_t *flags);
 
-  int vp9_use_as_reference(VP9_PTR comp, int ref_frame_flags);
+int vp9_use_as_reference(struct VP9_COMP *cpi, int ref_frame_flags);
 
-  int vp9_update_reference(VP9_PTR comp, int ref_frame_flags);
+int vp9_update_reference(struct VP9_COMP *cpi, int ref_frame_flags);
 
-  int vp9_copy_reference_enc(VP9_PTR comp, VP9_REFFRAME ref_frame_flag,
-                             YV12_BUFFER_CONFIG *sd);
+int vp9_copy_reference_enc(struct VP9_COMP *cpi, VP9_REFFRAME ref_frame_flag,
+                           YV12_BUFFER_CONFIG *sd);
 
-  int vp9_get_reference_enc(VP9_PTR ptr, int index, YV12_BUFFER_CONFIG **fb);
+int vp9_get_reference_enc(struct VP9_COMP *cpi, int index,
+                          YV12_BUFFER_CONFIG **fb);
 
-  int vp9_set_reference_enc(VP9_PTR comp, VP9_REFFRAME ref_frame_flag,
-                            YV12_BUFFER_CONFIG *sd);
+int vp9_set_reference_enc(struct VP9_COMP *cpi, VP9_REFFRAME ref_frame_flag,
+                          YV12_BUFFER_CONFIG *sd);
 
-  int vp9_update_entropy(VP9_PTR comp, int update);
+int vp9_update_entropy(struct VP9_COMP *cpi, int update);
 
-  int vp9_set_roimap(VP9_PTR comp, unsigned char *map,
-                     unsigned int rows, unsigned int cols,
-                     int delta_q[MAX_SEGMENTS],
-                     int delta_lf[MAX_SEGMENTS],
-                     unsigned int threshold[MAX_SEGMENTS]);
+int vp9_set_roimap(struct VP9_COMP *cpi, unsigned char *map,
+                   unsigned int rows, unsigned int cols,
+                   int delta_q[MAX_SEGMENTS],
+                   int delta_lf[MAX_SEGMENTS],
+                   unsigned int threshold[MAX_SEGMENTS]);
 
-  int vp9_set_active_map(VP9_PTR comp, unsigned char *map,
-                         unsigned int rows, unsigned int cols);
+int vp9_set_active_map(struct VP9_COMP *cpi, unsigned char *map,
+                       unsigned int rows, unsigned int cols);
 
-  int vp9_set_internal_size(VP9_PTR comp,
-                            VPX_SCALING horiz_mode, VPX_SCALING vert_mode);
+int vp9_set_internal_size(struct VP9_COMP *cpi,
+                          VPX_SCALING horiz_mode, VPX_SCALING vert_mode);
 
-  int vp9_set_size_literal(VP9_PTR comp, unsigned int width,
-                           unsigned int height);
+int vp9_set_size_literal(struct VP9_COMP *cpi, unsigned int width,
+                         unsigned int height);
 
-  void vp9_set_svc(VP9_PTR comp, int use_svc);
+void vp9_set_svc(struct VP9_COMP *cpi, int use_svc);
 
-  int vp9_get_quantizer(VP9_PTR c);
+int vp9_get_quantizer(struct VP9_COMP *cpi);
 
 #ifdef __cplusplus
 }  // extern "C"
