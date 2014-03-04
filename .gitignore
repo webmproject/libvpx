@@ -28,9 +28,7 @@
 /examples/decode_to_md5
 /examples/decode_with_drops
 /examples/decode_with_partial_drops
-/examples/error_resilient
 /examples/example_xma
-/examples/force_keyframe
 /examples/postproc
 /examples/simple_decoder
 /examples/simple_encoder
