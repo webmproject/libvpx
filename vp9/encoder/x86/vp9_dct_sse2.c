@@ -13,39 +13,80 @@
 #include "vpx_ports/mem.h"
 
 void vp9_fdct4x4_sse2(const int16_t *input, int16_t *output, int stride) {
-  // The 2D transform is done with two passes which are actually pretty
-  // similar. In the first one, we transform the columns and transpose
-  // the results. In the second one, we transform the rows. To achieve that,
-  // as the first pass results are transposed, we transpose the columns (that
-  // is the transposed rows) and transpose the results (so that it goes back
-  // in normal/row positions).
-  int pass;
+  // This 2D transform implements 4 vertical 1D transforms followed
+  // by 4 horizontal 1D transforms.  The multiplies and adds are as given
+  // by Chen, Smith and Fralick ('77).  The commands for moving the data
+  // around have been minimized by hand.
+  // For the purposes of the comments, the 16 inputs are referred to at i0
+  // through iF (in raster order), intermediate variables are a0, b0, c0
+  // through f, and correspond to the in-place computations mapped to input
+  // locations.  The outputs, o0 through oF are labeled according to the
+  // output locations.
+
   // Constants
-  //    When we use them, in one case, they are all the same. In all others
-  //    it's a pair of them that we need to repeat four times. This is done
-  //    by constructing the 32 bit constant corresponding to that pair.
-  const __m128i k__cospi_p16_p16 = _mm_set1_epi16(cospi_16_64);
-  const __m128i k__cospi_p16_m16 = pair_set_epi16(cospi_16_64, -cospi_16_64);
-  const __m128i k__cospi_p08_p24 = pair_set_epi16(cospi_8_64, cospi_24_64);
-  const __m128i k__cospi_p24_m08 = pair_set_epi16(cospi_24_64, -cospi_8_64);
+  // These are the coefficients used for the multiplies.
+  // In the comments, pN means cos(N pi /64) and mN is -cos(N pi /64),
+  // where cospi_N_64 = cos(N pi /64)
+  const __m128i k__cospi_A = _mm_setr_epi16(cospi_16_64, cospi_16_64,
+                                            cospi_16_64, cospi_16_64,
+                                            cospi_16_64, -cospi_16_64,
+                                            cospi_16_64, -cospi_16_64);
+  const __m128i k__cospi_B = _mm_setr_epi16(cospi_16_64, -cospi_16_64,
+                                            cospi_16_64, -cospi_16_64,
+                                            cospi_16_64, cospi_16_64,
+                                            cospi_16_64, cospi_16_64);
+  const __m128i k__cospi_C = _mm_setr_epi16(cospi_8_64, cospi_24_64,
+                                            cospi_8_64, cospi_24_64,
+                                            cospi_24_64, -cospi_8_64,
+                                            cospi_24_64, -cospi_8_64);
+  const __m128i k__cospi_D = _mm_setr_epi16(cospi_24_64, -cospi_8_64,
+                                            cospi_24_64, -cospi_8_64,
+                                            cospi_8_64, cospi_24_64,
+                                            cospi_8_64, cospi_24_64);
+  const __m128i k__cospi_E = _mm_setr_epi16(cospi_16_64, cospi_16_64,
+                                            cospi_16_64, cospi_16_64,
+                                            cospi_16_64, cospi_16_64,
+                                            cospi_16_64, cospi_16_64);
+  const __m128i k__cospi_F = _mm_setr_epi16(cospi_16_64, -cospi_16_64,
+                                            cospi_16_64, -cospi_16_64,
+                                            cospi_16_64, -cospi_16_64,
+                                            cospi_16_64, -cospi_16_64);
+  const __m128i k__cospi_G = _mm_setr_epi16(cospi_8_64, cospi_24_64,
+                                            cospi_8_64, cospi_24_64,
+                                            -cospi_8_64, -cospi_24_64,
+                                            -cospi_8_64, -cospi_24_64);
+  const __m128i k__cospi_H = _mm_setr_epi16(cospi_24_64, -cospi_8_64,
+                                            cospi_24_64, -cospi_8_64,
+                                            -cospi_24_64, cospi_8_64,
+                                            -cospi_24_64, cospi_8_64);
+
   const __m128i k__DCT_CONST_ROUNDING = _mm_set1_epi32(DCT_CONST_ROUNDING);
+  // This second rounding constant saves doing some extra adds at the end
+  const __m128i k__DCT_CONST_ROUNDING2 = _mm_set1_epi32(DCT_CONST_ROUNDING
+                                               +(DCT_CONST_ROUNDING << 1));
+  const int DCT_CONST_BITS2 =  DCT_CONST_BITS+2;
   const __m128i k__nonzero_bias_a = _mm_setr_epi16(0, 1, 1, 1, 1, 1, 1, 1);
   const __m128i k__nonzero_bias_b = _mm_setr_epi16(1, 0, 0, 0, 0, 0, 0, 0);
-  const __m128i kOne = _mm_set1_epi16(1);
   __m128i in0, in1;
+
   // Load inputs.
   {
     in0  = _mm_loadl_epi64((const __m128i *)(input +  0 * stride));
+    in1  = _mm_loadl_epi64((const __m128i *)(input +  1 * stride));
+    in1  = _mm_unpacklo_epi64(in1, _mm_loadl_epi64((const __m128i *)
+           (input +  2 * stride)));
     in0  = _mm_unpacklo_epi64(in0, _mm_loadl_epi64((const __m128i *)
-           (input +  1 * stride)));
-    in1  = _mm_loadl_epi64((const __m128i *)(input +  2 * stride));
-    in1  = _mm_unpacklo_epi64(_mm_loadl_epi64((const __m128i *)
-           (input +  3 * stride)), in1);
+           (input +  3 * stride)));
+    // in0 = [i0 i1 i2 i3 iC iD iE iF]
+    // in1 = [i4 i5 i6 i7 i8 i9 iA iB]
 
-    // x = x << 4
+
+    // multiply by 16 to give some extra precision
     in0 = _mm_slli_epi16(in0, 4);
     in1 = _mm_slli_epi16(in1, 4);
     // if (i == 0 && input[0]) input[0] += 1;
+    // add 1 to the upper left pixel if it is non-zero, which helps reduce
+    // the round-trip error
     {
       // The mask will only contain whether the first value is zero, all
       // other comparison will fail as something shifted by 4 (above << 4)
@@ -58,56 +99,118 @@ void vp9_fdct4x4_sse2(const int16_t *input, int16_t *output, int stride) {
       in0 = _mm_add_epi16(in0, k__nonzero_bias_b);
     }
   }
-  // Do the two transform/transpose passes
-  for (pass = 0; pass < 2; ++pass) {
-    // Transform 1/2: Add/subtract
-    const __m128i r0 = _mm_add_epi16(in0, in1);
-    const __m128i r1 = _mm_sub_epi16(in0, in1);
-    const __m128i r2 = _mm_unpacklo_epi64(r0, r1);
-    const __m128i r3 = _mm_unpackhi_epi64(r0, r1);
-    // Transform 1/2: Interleave to do the multiply by constants which gets us
-    //                into 32 bits.
-    const __m128i t0 = _mm_unpacklo_epi16(r2, r3);
-    const __m128i t2 = _mm_unpackhi_epi16(r2, r3);
-    const __m128i u0 = _mm_madd_epi16(t0, k__cospi_p16_p16);
-    const __m128i u2 = _mm_madd_epi16(t0, k__cospi_p16_m16);
-    const __m128i u4 = _mm_madd_epi16(t2, k__cospi_p08_p24);
-    const __m128i u6 = _mm_madd_epi16(t2, k__cospi_p24_m08);
-    const __m128i v0 = _mm_add_epi32(u0, k__DCT_CONST_ROUNDING);
-    const __m128i v2 = _mm_add_epi32(u2, k__DCT_CONST_ROUNDING);
-    const __m128i v4 = _mm_add_epi32(u4, k__DCT_CONST_ROUNDING);
-    const __m128i v6 = _mm_add_epi32(u6, k__DCT_CONST_ROUNDING);
-    const __m128i w0 = _mm_srai_epi32(v0, DCT_CONST_BITS);
-    const __m128i w2 = _mm_srai_epi32(v2, DCT_CONST_BITS);
-    const __m128i w4 = _mm_srai_epi32(v4, DCT_CONST_BITS);
-    const __m128i w6 = _mm_srai_epi32(v6, DCT_CONST_BITS);
-    // Combine and transpose
-    const __m128i res0 = _mm_packs_epi32(w0, w2);
-    const __m128i res1 = _mm_packs_epi32(w4, w6);
-    // 00 01 02 03 20 21 22 23
-    // 10 11 12 13 30 31 32 33
-    const __m128i tr0_0 = _mm_unpacklo_epi16(res0, res1);
-    const __m128i tr0_1 = _mm_unpackhi_epi16(res0, res1);
-    // 00 10 01 11 02 12 03 13
-    // 20 30 21 31 22 32 23 33
-    in0 = _mm_unpacklo_epi32(tr0_0, tr0_1);
-    in1 = _mm_unpackhi_epi32(tr0_0, tr0_1);
-    in1 = _mm_shuffle_epi32(in1, 0x4E);
-    // 00 10 20 30 01 11 21 31      in0 contains 0 followed by 1
-    // 02 12 22 32 03 13 23 33      in1 contains 2 followed by 3
-  }
-  in1 = _mm_shuffle_epi32(in1, 0x4E);
-  // Post-condition output and store it (v + 1) >> 2, taking advantage
-  // of the fact 1/3 are stored just after 0/2.
+  // There are 4 total stages, alternating between an add/subtract stage
+  // followed by an multiply-and-add stage.
   {
-     __m128i out01 = _mm_add_epi16(in0, kOne);
-     __m128i out23 = _mm_add_epi16(in1, kOne);
-     out01 = _mm_srai_epi16(out01, 2);
-     out23 = _mm_srai_epi16(out23, 2);
-     _mm_storeu_si128((__m128i *)(output + 0 * 4), out01);
-     _mm_storeu_si128((__m128i *)(output + 2 * 4), out23);
+    // Stage 1: Add/subtract
+
+    // in0 = [i0 i1 i2 i3 iC iD iE iF]
+    // in1 = [i4 i5 i6 i7 i8 i9 iA iB]
+    const __m128i r0 = _mm_unpacklo_epi16(in0, in1);
+    const __m128i r1 = _mm_unpackhi_epi16(in0, in1);
+    // r0 = [i0 i4 i1 i5 i2 i6 i3 i7]
+    // r1 = [iC i8 iD i9 iE iA iF iB]
+    const __m128i r2 = _mm_shuffle_epi32(r0, 0xB4);
+    const __m128i r3 = _mm_shuffle_epi32(r1, 0xB4);
+    // r2 = [i0 i4 i1 i5 i3 i7 i2 i6]
+    // r3 = [iC i8 iD i9 iF iB iE iA]
+
+    const __m128i t0 = _mm_add_epi16(r2, r3);
+    const __m128i t1 = _mm_sub_epi16(r2, r3);
+    // t0 = [a0 a4 a1 a5 a3 a7 a2 a6]
+    // t1 = [aC a8 aD a9 aF aB aE aA]
+
+    // Stage 2: multiply by constants (which gets us into 32 bits).
+    // The constants needed here are:
+    // k__cospi_A = [p16 p16 p16 p16 p16 m16 p16 m16]
+    // k__cospi_B = [p16 m16 p16 m16 p16 p16 p16 p16]
+    // k__cospi_C = [p08 p24 p08 p24 p24 m08 p24 m08]
+    // k__cospi_D = [p24 m08 p24 m08 p08 p24 p08 p24]
+    const __m128i u0 = _mm_madd_epi16(t0, k__cospi_A);
+    const __m128i u2 = _mm_madd_epi16(t0, k__cospi_B);
+    const __m128i u1 = _mm_madd_epi16(t1, k__cospi_C);
+    const __m128i u3 = _mm_madd_epi16(t1, k__cospi_D);
+    // Then add and right-shift to get back to 16-bit range
+    const __m128i v0 = _mm_add_epi32(u0, k__DCT_CONST_ROUNDING);
+    const __m128i v1 = _mm_add_epi32(u1, k__DCT_CONST_ROUNDING);
+    const __m128i v2 = _mm_add_epi32(u2, k__DCT_CONST_ROUNDING);
+    const __m128i v3 = _mm_add_epi32(u3, k__DCT_CONST_ROUNDING);
+    const __m128i w0 = _mm_srai_epi32(v0, DCT_CONST_BITS);
+    const __m128i w1 = _mm_srai_epi32(v1, DCT_CONST_BITS);
+    const __m128i w2 = _mm_srai_epi32(v2, DCT_CONST_BITS);
+    const __m128i w3 = _mm_srai_epi32(v3, DCT_CONST_BITS);
+    // w0 = [b0 b1 b7 b6]
+    // w1 = [b8 b9 bF bE]
+    // w2 = [b4 b5 b3 b2]
+    // w3 = [bC bD bB bA]
+    const __m128i x0 = _mm_packs_epi32(w0, w1);
+    const __m128i x1 = _mm_packs_epi32(w2, w3);
+    // x0 = [b0 b1 b7 b6 b8 b9 bF bE]
+    // x1 = [b4 b5 b3 b2 bC bD bB bA]
+    in0 = _mm_shuffle_epi32(x0, 0xD8);
+    in1 = _mm_shuffle_epi32(x1, 0x8D);
+    // in0 = [b0 b1 b8 b9 b7 b6 bF bE]
+    // in1 = [b3 b2 bB bA b4 b5 bC bD]
+  }
+  {
+    // vertical DCTs finished. Now we do the horizontal DCTs.
+    // Stage 3: Add/subtract
+
+    const __m128i t0 = _mm_add_epi16(in0, in1);
+    const __m128i t1 = _mm_sub_epi16(in0, in1);
+    // t0 = [c0 c1 c8 c9  c4  c5  cC  cD]
+    // t1 = [c3 c2 cB cA -c7 -c6 -cF -cE]
+
+    // Stage 4: multiply by constants (which gets us into 32 bits).
+    // The constants needed here are:
+    // k__cospi_E = [p16 p16 p16 p16 p16 p16 p16 p16]
+    // k__cospi_F = [p16 m16 p16 m16 p16 m16 p16 m16]
+    // k__cospi_G = [p08 p24 p08 p24 m08 m24 m08 m24]
+    // k__cospi_H = [p24 m08 p24 m08 m24 p08 m24 p08]
+    const __m128i u0 = _mm_madd_epi16(t0, k__cospi_E);
+    const __m128i u1 = _mm_madd_epi16(t0, k__cospi_F);
+    const __m128i u2 = _mm_madd_epi16(t1, k__cospi_G);
+    const __m128i u3 = _mm_madd_epi16(t1, k__cospi_H);
+    // Then add and right-shift to get back to 16-bit range
+    // but this combines the final right-shift as well to save operations
+    // This unusual rounding operations is to maintain bit-accurate
+    // compatibility with the c version of this function which has two
+    // rounding steps in a row.
+    const __m128i v0 = _mm_add_epi32(u0, k__DCT_CONST_ROUNDING2);
+    const __m128i v1 = _mm_add_epi32(u1, k__DCT_CONST_ROUNDING2);
+    const __m128i v2 = _mm_add_epi32(u2, k__DCT_CONST_ROUNDING2);
+    const __m128i v3 = _mm_add_epi32(u3, k__DCT_CONST_ROUNDING2);
+    const __m128i w0 = _mm_srai_epi32(v0, DCT_CONST_BITS2);
+    const __m128i w1 = _mm_srai_epi32(v1, DCT_CONST_BITS2);
+    const __m128i w2 = _mm_srai_epi32(v2, DCT_CONST_BITS2);
+    const __m128i w3 = _mm_srai_epi32(v3, DCT_CONST_BITS2);
+    // w0 = [o0 o4 o8 oC]
+    // w1 = [o2 o6 oA oE]
+    // w2 = [o1 o5 o9 oD]
+    // w3 = [o3 o7 oB oF]
+    // remember the o's are numbered according to the correct output location
+    const __m128i x0 = _mm_packs_epi32(w0, w1);
+    const __m128i x1 = _mm_packs_epi32(w2, w3);
+    // x0 = [o0 o4 o8 oC o2 o6 oA oE]
+    // x1 = [o1 o5 o9 oD o3 o7 oB oF]
+    const __m128i y0 = _mm_unpacklo_epi16(x0, x1);
+    const __m128i y1 = _mm_unpackhi_epi16(x0, x1);
+    // y0 = [o0 o1 o4 o5 o8 o9 oC oD]
+    // y1 = [o2 o3 o6 o7 oA oB oE oF]
+    in0 = _mm_unpacklo_epi32(y0, y1);
+    // in0 = [o0 o1 o2 o3 o4 o5 o6 o7]
+    in1 = _mm_unpackhi_epi32(y0, y1);
+    // in1 = [o8 o9 oA oB oC oD oE oF]
+  }
+  // Post-condition (v + 1) >> 2 is now incorporated into previous
+  // add and right-shift commands.  Only 2 store instructions needed
+  // because we are using the fact that 1/3 are stored just after 0/2.
+  {
+     _mm_storeu_si128((__m128i *)(output + 0 * 4), in0);
+     _mm_storeu_si128((__m128i *)(output + 2 * 4), in1);
   }
 }
+
 
 static INLINE void load_buffer_4x4(const int16_t *input, __m128i *in,
                                    int stride) {
