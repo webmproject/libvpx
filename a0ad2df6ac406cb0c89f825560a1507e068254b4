@@ -16,6 +16,24 @@
       "revId": "a0ad2df6ac406cb0c89f825560a1507e068254b4",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//zy0\u003d",
+        "filename": "test/register_state_check.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 87,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2014-03-05T22:24:28Z",
+      "side": 1,
+      "message": "Done. Was right in patch 6. But then make this stupid change in order to retrigger Jenkins.",
+      "parentUuid": "AAAAdn//zzM\u003d",
+      "revId": "a0ad2df6ac406cb0c89f825560a1507e068254b4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
