@@ -236,6 +236,13 @@ vpx.def: $(call enabled,CODEC_EXPORTS)
             --out=$@ $^
 CLEAN-OBJS += vpx.def
 
+# Assembly files that are included, but don't define symbols themselves.
+# Filtered out to avoid Visual Studio build warnings.
+ASM_INCLUDES := \
+    third_party/x86inc/x86inc.asm \
+    vpx_config.asm \
+    vpx_ports/x86_abi_support.asm \
+
 vpx.$(VCPROJ_SFX): $(CODEC_SRCS) vpx.def obj_int_extract.$(VCPROJ_SFX)
 	@echo "    [CREATE] $@"
 	$(qexec)$(GEN_VCPROJ) \
@@ -246,7 +253,8 @@ vpx.$(VCPROJ_SFX): $(CODEC_SRCS) vpx.def obj_int_extract.$(VCPROJ_SFX)
             --proj-guid=DCE19DAF-69AC-46DB-B14A-39F0FAA5DB74 \
             --module-def=vpx.def \
             --ver=$(CONFIG_VS_VERSION) \
-            --out=$@ $(CFLAGS) $^ \
+            --out=$@ $(CFLAGS) \
+            $(filter-out $(addprefix %, $(ASM_INCLUDES)), $^) \
             --src-path-bare="$(SRC_PATH_BARE)" \
 
 PROJECTS-$(BUILD_LIBVPX) += vpx.$(VCPROJ_SFX)
