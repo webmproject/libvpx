@@ -707,7 +707,6 @@ static void set_good_speed_feature(VP9_COMMON *cm,
   if (speed >= 5) {
     sf->comp_inter_joint_search_thresh = BLOCK_SIZES;
     sf->partition_search_type = FIXED_PARTITION;
-    sf->always_this_block_size = BLOCK_16X16;
     sf->tx_size_search_method = frame_is_intra_only(cm) ?
       USE_FULL_RD : USE_LARGESTALL;
     sf->mode_search_skip_flags = FLAG_SKIP_INTRA_DIRMISMATCH |
@@ -943,6 +942,9 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
   for (i = 0; i < BLOCK_SIZES; ++i)
     sf->disable_inter_mode_mask[i] = 0;
   sf->max_intra_bsize = BLOCK_64X64;
+  // This setting only takes effect when partition_search_type is set
+  // to FIXED_PARTITION.
+  sf->always_this_block_size = BLOCK_16X16;
 
   switch (cpi->oxcf.mode) {
     case MODE_BESTQUALITY:
