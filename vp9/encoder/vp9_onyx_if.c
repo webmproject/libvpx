@@ -841,6 +841,9 @@ static void set_rt_speed_feature(VP9_COMMON *cm,
   }
   if (speed >= 5) {
     int i;
+    sf->mode_search_skip_flags |= FLAG_SKIP_COMP_REFMISMATCH |
+                                  FLAG_EARLY_TERMINATE;
+    sf->use_fast_coef_costing = 0;
     sf->adaptive_rd_thresh = 5;
     sf->auto_min_max_partition_size = frame_is_intra_only(cm) ?
         RELAXED_NEIGHBORING_MIN_MAX : STRICT_NEIGHBORING_MIN_MAX;
