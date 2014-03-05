@@ -123,9 +123,6 @@ twopass_encoder.SRCS            += video_common.h
 twopass_encoder.SRCS            += video_writer.h video_writer.c
 twopass_encoder.GUID             = 73494FA6-4AF9-4763-8FBB-265C92402FD8
 twopass_encoder.DESCRIPTION      = Two-pass encoder loop
-EXAMPLES-$(CONFIG_VP8_ENCODER)  += force_keyframe.c
-force_keyframe.GUID              = 3C67CADF-029F-4C86-81F5-D6D4F51177F0
-force_keyframe.DESCRIPTION       = Force generation of keyframes
 ifeq ($(CONFIG_DECODERS),yes)
 EXAMPLES-$(CONFIG_VP8_ENCODER)  += decode_with_drops.c
 decode_with_drops.SRCS          += ivfdec.h ivfdec.c
