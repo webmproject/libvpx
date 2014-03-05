@@ -94,6 +94,16 @@ clean::
 	rm -f $(OBJS-yes) $(OBJS-yes:.o=.d) $(OBJS-yes:.asm.s.o=.asm.s)
 	rm -f $(CLEAN-OBJS)
 
+.PHONY: clean
+distclean: clean
+	if [ -z "$(target)" ]; then \
+      rm -f Makefile; \
+      rm -f config.log config.mk; \
+      rm -f vpx_config.[hc] vpx_config.asm; \
+    else \
+      rm -f $(target)-$(TOOLCHAIN).mk; \
+    fi
+
 .PHONY: dist
 dist:
 .PHONY: install
@@ -307,7 +317,7 @@ endef
 ifneq ($(target),)
 include $(SRC_PATH_BARE)/$(target:-$(TOOLCHAIN)=).mk
 endif
-ifeq ($(filter clean,$(MAKECMDGOALS)),)
+ifeq ($(filter %clean,$(MAKECMDGOALS)),)
   # Older versions of make don't like -include directives with no arguments
   ifneq ($(filter %.d,$(OBJS-yes:.o=.d)),)
     -include $(filter %.d,$(OBJS-yes:.o=.d))
