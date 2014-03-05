@@ -1309,8 +1309,7 @@ static void set_tile_limits(VP9_COMP *cpi) {
   cm->log2_tile_rows = cpi->oxcf.tile_rows;
 }
 
-static void init_config(VP9_PTR ptr, VP9_CONFIG *oxcf) {
-  VP9_COMP *cpi = (VP9_COMP *)(ptr);
+static void init_config(struct VP9_COMP *cpi, VP9_CONFIG *oxcf) {
   VP9_COMMON *const cm = &cpi->common;
   int i;
 
@@ -1335,7 +1334,7 @@ static void init_config(VP9_PTR ptr, VP9_CONFIG *oxcf) {
   }
 
   // change includes all joint functionality
-  vp9_change_config(ptr, oxcf);
+  vp9_change_config(cpi, oxcf);
 
   // Initialize active best and worst q and average q values.
   if (cpi->pass == 0 && cpi->oxcf.end_usage == USAGE_STREAM_FROM_SERVER) {
@@ -1379,8 +1378,7 @@ static void init_config(VP9_PTR ptr, VP9_CONFIG *oxcf) {
     cpi->fixed_divide[i] = 0x80000 / i;
 }
 
-void vp9_change_config(VP9_PTR ptr, VP9_CONFIG *oxcf) {
-  VP9_COMP *cpi = (VP9_COMP *)(ptr);
+void vp9_change_config(struct VP9_COMP *cpi, VP9_CONFIG *oxcf) {
   VP9_COMMON *const cm = &cpi->common;
 
   if (!cpi || !oxcf)
@@ -1698,30 +1696,19 @@ static void free_pick_mode_context(MACROBLOCK *x) {
   }
 }
 
-VP9_PTR vp9_create_compressor(VP9_CONFIG *oxcf) {
+VP9_COMP *vp9_create_compressor(VP9_CONFIG *oxcf) {
   int i, j;
-  volatile union {
-    VP9_COMP *cpi;
-    VP9_PTR   ptr;
-  } ctx;
+  VP9_COMP *cpi = vpx_memalign(32, sizeof(VP9_COMP));
+  VP9_COMMON *cm = cpi != NULL ? &cpi->common : NULL;
 
-  VP9_COMP *cpi;
-  VP9_COMMON *cm;
-
-  cpi = ctx.cpi = vpx_memalign(32, sizeof(VP9_COMP));
-  // Check that the CPI instance is valid
-  if (!cpi)
-    return 0;
-
-  cm = &cpi->common;
+  if (!cm)
+    return NULL;
 
   vp9_zero(*cpi);
 
   if (setjmp(cm->error.jmp)) {
-    VP9_PTR ptr = ctx.ptr;
-
-    ctx.cpi->common.error.setjmp = 0;
-    vp9_remove_compressor(&ptr);
+    cm->error.setjmp = 0;
+    vp9_remove_compressor(cpi);
     return 0;
   }
 
@@ -1734,11 +1721,10 @@ VP9_PTR vp9_create_compressor(VP9_CONFIG *oxcf) {
 
   cpi->use_svc = 0;
 
-  init_config((VP9_PTR)cpi, oxcf);
-
+  init_config(cpi, oxcf);
   init_pick_mode_context(cpi);
 
-  cm->current_video_frame   = 0;
+  cm->current_video_frame = 0;
 
   // Set reference frame sign bias for ALTREF frame to 1 (for now)
   cm->ref_frame_sign_bias[ALTREF_FRAME] = 1;
@@ -1746,8 +1732,8 @@ VP9_PTR vp9_create_compressor(VP9_CONFIG *oxcf) {
   cpi->rc.baseline_gf_interval = DEFAULT_GF_INTERVAL;
 
   cpi->gold_is_last = 0;
-  cpi->alt_is_last  = 0;
-  cpi->gold_is_alt  = 0;
+  cpi->alt_is_last = 0;
+  cpi->gold_is_alt = 0;
 
   // Create the encoder segmentation map and set all entries to 0
   CHECK_MEM_ERROR(cm, cpi->segmentation_map,
@@ -2015,11 +2001,10 @@ VP9_PTR vp9_create_compressor(VP9_CONFIG *oxcf) {
   vp9_zero(cpi->mode_test_hits);
 #endif
 
-  return (VP9_PTR) cpi;
+  return cpi;
 }
 
-void vp9_remove_compressor(VP9_PTR *ptr) {
-  VP9_COMP *cpi = (VP9_COMP *)(*ptr);
+void vp9_remove_compressor(VP9_COMP *cpi) {
   int i;
 
   if (!cpi)
@@ -2126,7 +2111,6 @@ void vp9_remove_compressor(VP9_PTR *ptr) {
 
   vp9_remove_common(&cpi->common);
   vpx_free(cpi);
-  *ptr = 0;
 
 #ifdef OUTPUT_YUV_SRC
   fclose(yuv_file);
@@ -2253,9 +2237,7 @@ static void generate_psnr_packet(VP9_COMP *cpi) {
   vpx_codec_pkt_list_add(cpi->output_pkt_list, &pkt);
 }
 
-int vp9_use_as_reference(VP9_PTR ptr, int ref_frame_flags) {
-  VP9_COMP *cpi = (VP9_COMP *)(ptr);
-
+int vp9_use_as_reference(VP9_COMP *cpi, int ref_frame_flags) {
   if (ref_frame_flags > 7)
     return -1;
 
@@ -2263,9 +2245,7 @@ int vp9_use_as_reference(VP9_PTR ptr, int ref_frame_flags) {
   return 0;
 }
 
-int vp9_update_reference(VP9_PTR ptr, int ref_frame_flags) {
-  VP9_COMP *cpi = (VP9_COMP *)(ptr);
-
+int vp9_update_reference(VP9_COMP *cpi, int ref_frame_flags) {
   if (ref_frame_flags > 7)
     return -1;
 
@@ -2299,9 +2279,8 @@ static YV12_BUFFER_CONFIG *get_vp9_ref_frame_buffer(VP9_COMP *cpi,
   return ref_frame == NONE ? NULL : get_ref_frame_buffer(cpi, ref_frame);
 }
 
-int vp9_copy_reference_enc(VP9_PTR ptr, VP9_REFFRAME ref_frame_flag,
+int vp9_copy_reference_enc(VP9_COMP *cpi, VP9_REFFRAME ref_frame_flag,
                            YV12_BUFFER_CONFIG *sd) {
-  VP9_COMP *const cpi = (VP9_COMP *)ptr;
   YV12_BUFFER_CONFIG *cfg = get_vp9_ref_frame_buffer(cpi, ref_frame_flag);
   if (cfg) {
     vp8_yv12_copy_frame(cfg, sd);
@@ -2311,8 +2290,7 @@ int vp9_copy_reference_enc(VP9_PTR ptr, VP9_REFFRAME ref_frame_flag,
   }
 }
 
-int vp9_get_reference_enc(VP9_PTR ptr, int index, YV12_BUFFER_CONFIG **fb) {
-  VP9_COMP *cpi = (VP9_COMP *)ptr;
+int vp9_get_reference_enc(VP9_COMP *cpi, int index, YV12_BUFFER_CONFIG **fb) {
   VP9_COMMON *cm = &cpi->common;
 
   if (index < 0 || index >= REF_FRAMES)
@@ -2322,9 +2300,8 @@ int vp9_get_reference_enc(VP9_PTR ptr, int index, YV12_BUFFER_CONFIG **fb) {
   return 0;
 }
 
-int vp9_set_reference_enc(VP9_PTR ptr, VP9_REFFRAME ref_frame_flag,
+int vp9_set_reference_enc(VP9_COMP *cpi, VP9_REFFRAME ref_frame_flag,
                           YV12_BUFFER_CONFIG *sd) {
-  VP9_COMP *cpi = (VP9_COMP *)ptr;
   YV12_BUFFER_CONFIG *cfg = get_vp9_ref_frame_buffer(cpi, ref_frame_flag);
   if (cfg) {
     vp8_yv12_copy_frame(sd, cfg);
@@ -2334,9 +2311,9 @@ int vp9_set_reference_enc(VP9_PTR ptr, VP9_REFFRAME ref_frame_flag,
   }
 }
 
-int vp9_update_entropy(VP9_PTR comp, int update) {
-  ((VP9_COMP *)comp)->ext_refresh_frame_context = update;
-  ((VP9_COMP *)comp)->ext_refresh_frame_context_pending = 1;
+int vp9_update_entropy(VP9_COMP * cpi, int update) {
+  cpi->ext_refresh_frame_context = update;
+  cpi->ext_refresh_frame_context_pending = 1;
   return 0;
 }
 
@@ -3452,10 +3429,9 @@ static void check_initial_width(VP9_COMP *cpi, int subsampling_x,
 }
 
 
-int vp9_receive_raw_frame(VP9_PTR ptr, unsigned int frame_flags,
+int vp9_receive_raw_frame(VP9_COMP *cpi, unsigned int frame_flags,
                           YV12_BUFFER_CONFIG *sd, int64_t time_stamp,
                           int64_t end_time) {
-  VP9_COMP *cpi = (VP9_COMP *)ptr;
   VP9_COMMON *cm = &cpi->common;
   struct vpx_usec_timer timer;
   int res = 0;
@@ -3538,10 +3514,9 @@ void adjust_frame_rate(VP9_COMP *cpi) {
   cpi->last_end_time_stamp_seen = cpi->source->ts_end;
 }
 
-int vp9_get_compressed_data(VP9_PTR ptr, unsigned int *frame_flags,
+int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
                             size_t *size, uint8_t *dest,
                             int64_t *time_stamp, int64_t *time_end, int flush) {
-  VP9_COMP *cpi = (VP9_COMP *) ptr;
   VP9_COMMON *cm = &cpi->common;
   MACROBLOCKD *xd = &cpi->mb.e_mbd;
   struct vpx_usec_timer  cmptimer;
@@ -3851,9 +3826,8 @@ int vp9_get_compressed_data(VP9_PTR ptr, unsigned int *frame_flags,
   return 0;
 }
 
-int vp9_get_preview_raw_frame(VP9_PTR comp, YV12_BUFFER_CONFIG *dest,
+int vp9_get_preview_raw_frame(VP9_COMP *cpi, YV12_BUFFER_CONFIG *dest,
                               vp9_ppflags_t *flags) {
-  VP9_COMP *cpi = (VP9_COMP *)comp;
   VP9_COMMON *cm = &cpi->common;
 
   if (!cm->show_frame) {
@@ -3881,11 +3855,10 @@ int vp9_get_preview_raw_frame(VP9_PTR comp, YV12_BUFFER_CONFIG *dest,
   }
 }
 
-int vp9_set_roimap(VP9_PTR comp, unsigned char *map, unsigned int rows,
+int vp9_set_roimap(VP9_COMP *cpi, unsigned char *map, unsigned int rows,
                    unsigned int cols, int delta_q[MAX_SEGMENTS],
                    int delta_lf[MAX_SEGMENTS],
                    unsigned int threshold[MAX_SEGMENTS]) {
-  VP9_COMP *cpi = (VP9_COMP *) comp;
   signed char feature_data[SEG_LVL_MAX][MAX_SEGMENTS];
   struct segmentation *seg = &cpi->common.seg;
   int i;
@@ -3931,10 +3904,8 @@ int vp9_set_roimap(VP9_PTR comp, unsigned char *map, unsigned int rows,
   return 0;
 }
 
-int vp9_set_active_map(VP9_PTR comp, unsigned char *map,
+int vp9_set_active_map(VP9_COMP *cpi, unsigned char *map,
                        unsigned int rows, unsigned int cols) {
-  VP9_COMP *cpi = (VP9_COMP *) comp;
-
   if (rows == cpi->common.mb_rows && cols == cpi->common.mb_cols) {
     if (map) {
       vpx_memcpy(cpi->active_map, map, rows * cols);
@@ -3950,9 +3921,8 @@ int vp9_set_active_map(VP9_PTR comp, unsigned char *map,
   }
 }
 
-int vp9_set_internal_size(VP9_PTR comp,
+int vp9_set_internal_size(VP9_COMP *cpi,
                           VPX_SCALING horiz_mode, VPX_SCALING vert_mode) {
-  VP9_COMP *cpi = (VP9_COMP *) comp;
   VP9_COMMON *cm = &cpi->common;
   int hr = 0, hs = 0, vr = 0, vs = 0;
 
@@ -3972,9 +3942,8 @@ int vp9_set_internal_size(VP9_PTR comp,
   return 0;
 }
 
-int vp9_set_size_literal(VP9_PTR comp, unsigned int width,
+int vp9_set_size_literal(VP9_COMP *cpi, unsigned int width,
                          unsigned int height) {
-  VP9_COMP *cpi = (VP9_COMP *)comp;
   VP9_COMMON *cm = &cpi->common;
 
   check_initial_width(cpi, 1, 1);
@@ -4009,8 +3978,7 @@ int vp9_set_size_literal(VP9_PTR comp, unsigned int width,
   return 0;
 }
 
-void vp9_set_svc(VP9_PTR comp, int use_svc) {
-  VP9_COMP *cpi = (VP9_COMP *)comp;
+void vp9_set_svc(VP9_COMP *cpi, int use_svc) {
   cpi->use_svc = use_svc;
   return;
 }
@@ -4040,6 +4008,6 @@ int vp9_calc_ss_err(const YV12_BUFFER_CONFIG *source,
 }
 
 
-int vp9_get_quantizer(VP9_PTR c) {
-  return ((VP9_COMP *)c)->common.base_qindex;
+int vp9_get_quantizer(VP9_COMP *cpi) {
+  return cpi->common.base_qindex;
 }

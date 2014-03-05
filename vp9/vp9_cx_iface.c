@@ -75,7 +75,7 @@ struct vpx_codec_alg_priv {
   vpx_codec_enc_cfg_t     cfg;
   struct vp9_extracfg     vp8_cfg;
   VP9_CONFIG              oxcf;
-  VP9_PTR                 cpi;
+  VP9_COMP               *cpi;
   unsigned char          *cx_data;
   size_t                  cx_data_sz;
   unsigned char          *pending_cx_data;
@@ -502,8 +502,6 @@ static vpx_codec_err_t vp9e_common_init(vpx_codec_ctx_t *ctx) {
   vpx_codec_enc_cfg_t       *cfg;
   unsigned int               i;
 
-  VP9_PTR optr;
-
   if (ctx->priv == NULL) {
     priv = calloc(1, sizeof(struct vpx_codec_alg_priv));
 
@@ -551,15 +549,15 @@ static vpx_codec_err_t vp9e_common_init(vpx_codec_ctx_t *ctx) {
     res = validate_config(priv, &priv->cfg, &priv->vp8_cfg);
 
     if (res == VPX_CODEC_OK) {
+      VP9_COMP *cpi;
       set_vp9e_config(&ctx->priv->alg_priv->oxcf,
                       ctx->priv->alg_priv->cfg,
                       ctx->priv->alg_priv->vp8_cfg);
-      optr = vp9_create_compressor(&ctx->priv->alg_priv->oxcf);
-
-      if (optr == NULL)
+      cpi = vp9_create_compressor(&ctx->priv->alg_priv->oxcf);
+      if (cpi == NULL)
         res = VPX_CODEC_MEM_ERROR;
       else
-        ctx->priv->alg_priv->cpi = optr;
+        ctx->priv->alg_priv->cpi = cpi;
     }
   }
 
@@ -574,7 +572,7 @@ static vpx_codec_err_t vp9e_init(vpx_codec_ctx_t *ctx,
 
 static vpx_codec_err_t vp9e_destroy(vpx_codec_alg_priv_t *ctx) {
   free(ctx->cx_data);
-  vp9_remove_compressor(&ctx->cpi);
+  vp9_remove_compressor(ctx->cpi);
   free(ctx);
   return VPX_CODEC_OK;
 }
