@@ -61,7 +61,9 @@ static unsigned int do_16x16_motion_iteration(VP9_COMP *cpi,
         &sse);
   }
 
-  vp9_set_mbmode_and_mvs(xd, NEWMV, dst_mv);
+  xd->mi_8x8[0]->mbmi.mode = NEWMV;
+  xd->mi_8x8[0]->mbmi.mv[0].as_mv = *dst_mv;
+
   vp9_build_inter_predictors_sby(xd, mb_row, mb_col, BLOCK_16X16);
 
   /* restore UMV window */

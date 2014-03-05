@@ -676,7 +676,8 @@ void vp9_first_pass(VP9_COMP *cpi) {
           mv.as_mv.row *= 8;
           mv.as_mv.col *= 8;
           this_error = motion_error;
-          vp9_set_mbmode_and_mvs(xd, NEWMV, &mv.as_mv);
+          xd->mi_8x8[0]->mbmi.mode = NEWMV;
+          xd->mi_8x8[0]->mbmi.mv[0] = mv;
           xd->mi_8x8[0]->mbmi.tx_size = TX_4X4;
           xd->mi_8x8[0]->mbmi.ref_frame[0] = LAST_FRAME;
           xd->mi_8x8[0]->mbmi.ref_frame[1] = NONE;
