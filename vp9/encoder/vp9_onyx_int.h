@@ -30,7 +30,6 @@
 #include "vp9/encoder/vp9_quantize.h"
 #include "vp9/encoder/vp9_ratectrl.h"
 #include "vp9/encoder/vp9_tokenize.h"
-#include "vp9/encoder/vp9_treewriter.h"
 #include "vp9/encoder/vp9_variance.h"
 
 #ifdef __cplusplus

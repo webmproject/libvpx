@@ -30,6 +30,7 @@
 #include "vp9/common/vp9_seg_common.h"
 #include "vp9/common/vp9_systemdependent.h"
 
+#include "vp9/encoder/vp9_cost.h"
 #include "vp9/encoder/vp9_encodemb.h"
 #include "vp9/encoder/vp9_encodemv.h"
 #include "vp9/encoder/vp9_mcomp.h"
@@ -38,7 +39,6 @@
 #include "vp9/encoder/vp9_ratectrl.h"
 #include "vp9/encoder/vp9_rdopt.h"
 #include "vp9/encoder/vp9_tokenize.h"
-#include "vp9/encoder/vp9_treewriter.h"
 #include "vp9/encoder/vp9_variance.h"
 
 /* Factor to weigh the rate for switchable interp filters */
