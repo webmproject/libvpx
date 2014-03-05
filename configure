@@ -164,6 +164,14 @@ if ! perl --version >/dev/null; then
     die "Perl is required to build"
 fi
 
+
+if [ "`cd ${source_path} && pwd`" != "`pwd`" ]; then
+  # test to see if source_path already configured
+  if [ -f ${source_path}/vpx_config.h ]; then
+    die "source directory already configured; run 'make distclean' there first"
+  fi
+fi
+
 # check installed doxygen version
 doxy_version=$(doxygen --version 2>/dev/null)
 doxy_major=${doxy_version%%.*}
