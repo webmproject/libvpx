@@ -150,6 +150,10 @@ vp8_set_maps.SRCS                  += video_writer.h video_writer.c
 vp8_set_maps.GUID                   = ECB2D24D-98B8-4015-A465-A4AF3DCC145F
 vp8_set_maps.DESCRIPTION            = VP8 set active and ROI maps
 EXAMPLES-$(CONFIG_VP8_ENCODER)     += vp8cx_set_ref.c
+vp8cx_set_ref.SRCS                 += ivfenc.h ivfenc.c
+vp8cx_set_ref.SRCS                 += tools_common.h tools_common.c
+vp8cx_set_ref.SRCS                 += video_common.h
+vp8cx_set_ref.SRCS                 += video_writer.h video_writer.c
 vp8cx_set_ref.GUID                  = C5E31F7F-96F6-48BD-BD3E-10EBF6E8057A
 vp8cx_set_ref.DESCRIPTION           = VP8 set encoder reference frame
 
