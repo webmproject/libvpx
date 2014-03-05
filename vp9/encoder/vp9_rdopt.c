@@ -157,10 +157,10 @@ static void fill_mode_costs(VP9_COMP *cpi) {
 
   // TODO(rbultje) separate tables for superblock costing?
   vp9_cost_tokens(x->mbmode_cost, fc->y_mode_prob[1], vp9_intra_mode_tree);
-  vp9_cost_tokens(x->intra_uv_mode_cost[1],
-                  fc->uv_mode_prob[INTRA_MODES - 1], vp9_intra_mode_tree);
-  vp9_cost_tokens(x->intra_uv_mode_cost[0],
-                  vp9_kf_uv_mode_prob[INTRA_MODES - 1], vp9_intra_mode_tree);
+  vp9_cost_tokens(x->intra_uv_mode_cost[KEY_FRAME],
+                  vp9_kf_uv_mode_prob[TM_PRED], vp9_intra_mode_tree);
+  vp9_cost_tokens(x->intra_uv_mode_cost[INTER_FRAME],
+                  fc->uv_mode_prob[TM_PRED], vp9_intra_mode_tree);
 
   for (i = 0; i < SWITCHABLE_FILTER_CONTEXTS; ++i)
     vp9_cost_tokens((int *)x->switchable_interp_costs[i],
@@ -1037,7 +1037,7 @@ static int conditional_skipintra(MB_PREDICTION_MODE mode,
 
 static int64_t rd_pick_intra4x4block(VP9_COMP *cpi, MACROBLOCK *x, int ib,
                                      MB_PREDICTION_MODE *best_mode,
-                                     int *bmode_costs,
+                                     const int *bmode_costs,
                                      ENTROPY_CONTEXT *a, ENTROPY_CONTEXT *l,
                                      int *bestrate, int *bestratey,
                                      int64_t *bestdistortion,
@@ -1162,14 +1162,12 @@ static int64_t rd_pick_intra4x4block(VP9_COMP *cpi, MACROBLOCK *x, int ib,
   return best_rd;
 }
 
-static int64_t rd_pick_intra_sub_8x8_y_mode(VP9_COMP * const cpi,
-                                            MACROBLOCK * const mb,
-                                            int * const rate,
-                                            int * const rate_y,
-                                            int64_t * const distortion,
+static int64_t rd_pick_intra_sub_8x8_y_mode(VP9_COMP *cpi, MACROBLOCK *mb,
+                                            int *rate, int *rate_y,
+                                            int64_t *distortion,
                                             int64_t best_rd) {
   int i, j;
-  MACROBLOCKD *const xd = &mb->e_mbd;
+  const MACROBLOCKD *const xd = &mb->e_mbd;
   MODE_INFO *const mic = xd->mi_8x8[0];
   const MODE_INFO *above_mi = xd->mi_8x8[-xd->mode_info_stride];
   const MODE_INFO *left_mi = xd->left_available ? xd->mi_8x8[-1] : NULL;
@@ -1182,12 +1180,10 @@ static int64_t rd_pick_intra_sub_8x8_y_mode(VP9_COMP * const cpi,
   int tot_rate_y = 0;
   int64_t total_rd = 0;
   ENTROPY_CONTEXT t_above[4], t_left[4];
-  int *bmode_costs;
+  const int *bmode_costs = mb->mbmode_cost;
 
   vpx_memcpy(t_above, xd->plane[0].above_context, sizeof(t_above));
   vpx_memcpy(t_left, xd->plane[0].left_context, sizeof(t_left));
-
-  bmode_costs = mb->mbmode_cost;
 
   // Pick modes for each sub-block (of size 4x4, 4x8, or 8x4) in an 8x8 block.
   for (idy = 0; idy < 2; idy += num_4x4_blocks_high) {
