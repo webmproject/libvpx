@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//zpE\u003d",
+        "filename": "build/make/configure.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 353,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-03-06T07:34:37Z",
+      "side": 1,
+      "message": "a better way to handle this is to check flags with -Werror enabled\n\nhttps://gerrit.chromium.org/gerrit/gitweb?p\u003dwebm/libwebp.git;a\u003dblob;f\u003dconfigure.ac;h\u003d4bc62fe42749a491d624f2cd00c74765b186038e;hb\u003dHEAD#l39\n\nhttps://gerrit.chromium.org/gerrit/gitweb?p\u003dwebm/libwebp.git;a\u003dblob;f\u003dm4/ax_pthread.m4;h\u003dd383ad5c6d6a5061370800bb1dc89b7a334c0638;hb\u003dHEAD#l167",
+      "revId": "55b562bffb8757d5c428e622b71909feec1eec98",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
