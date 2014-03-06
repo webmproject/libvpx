@@ -32,6 +32,26 @@ DECLARE_ALIGNED(32, static const uint8_t, filt4_global_avx2[32]) = {
   6, 7, 7, 8, 8, 9, 9, 10, 10, 11, 11, 12, 12, 13, 13, 14
 };
 
+#if defined(__clang__)
+# if __clang_major__ < 3 || (__clang_major__ == 3 && __clang_minor__ <= 3)
+#  define MM256_BROADCASTSI128_SI256(x) \
+       _mm_broadcastsi128_si256((__m128i const *)&(x))
+# else  // clang > 3.3
+#  define MM256_BROADCASTSI128_SI256(x) _mm256_broadcastsi128_si256(x)
+# endif  // clang <= 3.3
+#elif defined(__GNUC__)
+# if __GNUC__ < 4 || (__GNUC__ == 4 && __GNUC_MINOR__ <= 6)
+#  define MM256_BROADCASTSI128_SI256(x) \
+       _mm_broadcastsi128_si256((__m128i const *)&(x))
+# elif __GNUC__ == 4 && __GNUC_MINOR__ == 7
+#  define MM256_BROADCASTSI128_SI256(x) _mm_broadcastsi128_si256(x)
+# else  // gcc > 4.7
+#  define MM256_BROADCASTSI128_SI256(x) _mm256_broadcastsi128_si256(x)
+# endif  // gcc <= 4.6
+#else  // !(gcc || clang)
+# define MM256_BROADCASTSI128_SI256(x) _mm256_broadcastsi128_si256(x)
+#endif  // __clang__
+
 void vp9_filter_block1d16_h8_avx2(unsigned char *src_ptr,
                                   unsigned int src_pixels_per_line,
                                   unsigned char *output_ptr,
@@ -53,18 +73,7 @@ void vp9_filter_block1d16_h8_avx2(unsigned char *src_ptr,
   // in both lanes of 128 bit register.
   filtersReg =_mm_packs_epi16(filtersReg, filtersReg);
   // have the same data in both lanes of a 256 bit register
-#if defined (__GNUC__)
-#if ( __GNUC__ < 4 || (__GNUC__ == 4 && \
-(__GNUC_MINOR__ < 6 || (__GNUC_MINOR__ == 6 && __GNUC_PATCHLEVEL__ > 0))))
-  filtersReg32 = _mm_broadcastsi128_si256((__m128i const *)&filtersReg);
-#elif(__GNUC__ == 4 && (__GNUC_MINOR__ == 7 && __GNUC_PATCHLEVEL__ > 0))
-  filtersReg32 = _mm_broadcastsi128_si256(filtersReg);
-#else
-  filtersReg32 = _mm256_broadcastsi128_si256(filtersReg);
-#endif
-#else
-  filtersReg32 = _mm256_broadcastsi128_si256(filtersReg);
-#endif
+  filtersReg32 = MM256_BROADCASTSI128_SI256(filtersReg);
 
   // duplicate only the first 16 bits (first and second byte)
   // across 256 bit register
@@ -309,18 +318,7 @@ void vp9_filter_block1d16_v8_avx2(unsigned char *src_ptr,
   // same data in both lanes of 128 bit register.
   filtersReg =_mm_packs_epi16(filtersReg, filtersReg);
   // have the same data in both lanes of a 256 bit register
-#if defined (__GNUC__)
-#if ( __GNUC__ < 4 || (__GNUC__ == 4 && \
-(__GNUC_MINOR__ < 6 || (__GNUC_MINOR__ == 6 && __GNUC_PATCHLEVEL__ > 0))))
-  filtersReg32 = _mm_broadcastsi128_si256((__m128i const *)&filtersReg);
-#elif(__GNUC__ == 4 && (__GNUC_MINOR__ == 7 && __GNUC_PATCHLEVEL__ > 0))
-  filtersReg32 = _mm_broadcastsi128_si256(filtersReg);
-#else
-  filtersReg32 = _mm256_broadcastsi128_si256(filtersReg);
-#endif
-#else
-  filtersReg32 = _mm256_broadcastsi128_si256(filtersReg);
-#endif
+  filtersReg32 = MM256_BROADCASTSI128_SI256(filtersReg);
 
   // duplicate only the first 16 bits (first and second byte)
   // across 256 bit register
