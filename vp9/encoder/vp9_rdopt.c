@@ -1464,59 +1464,56 @@ static void joint_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
                                 int_mv single_newmv[MAX_REF_FRAMES],
                                 int *rate_mv);
 
-static int labels2mode(MACROBLOCK *x, int i,
+static int labels2mode(VP9_COMP *cpi, MACROBLOCKD *xd, int i,
                        MB_PREDICTION_MODE mode,
-                       int_mv *this_mv, int_mv *this_second_mv,
+                       int_mv this_mv[2],
                        int_mv frame_mv[MB_MODE_COUNT][MAX_REF_FRAMES],
                        int_mv seg_mvs[MAX_REF_FRAMES],
-                       int_mv *best_ref_mv,
-                       int_mv *second_best_ref_mv,
-                       int *mvjcost, int *mvcost[2], VP9_COMP *cpi) {
-  MACROBLOCKD *const xd = &x->e_mbd;
+                       int_mv *best_ref_mv[2],
+                       const int *mvjcost, int *mvcost[2]) {
   MODE_INFO *const mic = xd->mi_8x8[0];
-  MB_MODE_INFO *mbmi = &mic->mbmi;
+  const MB_MODE_INFO *const mbmi = &mic->mbmi;
   int thismvcost = 0;
   int idx, idy;
   const int num_4x4_blocks_wide = num_4x4_blocks_wide_lookup[mbmi->sb_type];
   const int num_4x4_blocks_high = num_4x4_blocks_high_lookup[mbmi->sb_type];
-  const int has_second_rf = has_second_ref(mbmi);
+  const int is_compound = has_second_ref(mbmi);
 
   // the only time we should do costing for new motion vector or mode
   // is when we are on a new label  (jbb May 08, 2007)
   switch (mode) {
     case NEWMV:
-      this_mv->as_int = seg_mvs[mbmi->ref_frame[0]].as_int;
-      thismvcost += vp9_mv_bit_cost(&this_mv->as_mv, &best_ref_mv->as_mv,
+      this_mv[0].as_int = seg_mvs[mbmi->ref_frame[0]].as_int;
+      thismvcost += vp9_mv_bit_cost(&this_mv[0].as_mv, &best_ref_mv[0]->as_mv,
                                     mvjcost, mvcost, MV_COST_WEIGHT_SUB);
-      if (has_second_rf) {
-        this_second_mv->as_int = seg_mvs[mbmi->ref_frame[1]].as_int;
-        thismvcost += vp9_mv_bit_cost(&this_second_mv->as_mv,
-                                      &second_best_ref_mv->as_mv,
+      if (is_compound) {
+        this_mv[1].as_int = seg_mvs[mbmi->ref_frame[1]].as_int;
+        thismvcost += vp9_mv_bit_cost(&this_mv[1].as_mv, &best_ref_mv[1]->as_mv,
                                       mvjcost, mvcost, MV_COST_WEIGHT_SUB);
       }
       break;
     case NEARESTMV:
-      this_mv->as_int = frame_mv[NEARESTMV][mbmi->ref_frame[0]].as_int;
-      if (has_second_rf)
-        this_second_mv->as_int = frame_mv[NEARESTMV][mbmi->ref_frame[1]].as_int;
+      this_mv[0].as_int = frame_mv[NEARESTMV][mbmi->ref_frame[0]].as_int;
+      if (is_compound)
+        this_mv[1].as_int = frame_mv[NEARESTMV][mbmi->ref_frame[1]].as_int;
       break;
     case NEARMV:
-      this_mv->as_int = frame_mv[NEARMV][mbmi->ref_frame[0]].as_int;
-      if (has_second_rf)
-        this_second_mv->as_int = frame_mv[NEARMV][mbmi->ref_frame[1]].as_int;
+      this_mv[0].as_int = frame_mv[NEARMV][mbmi->ref_frame[0]].as_int;
+      if (is_compound)
+        this_mv[1].as_int = frame_mv[NEARMV][mbmi->ref_frame[1]].as_int;
       break;
     case ZEROMV:
-      this_mv->as_int = 0;
-      if (has_second_rf)
-        this_second_mv->as_int = 0;
+      this_mv[0].as_int = 0;
+      if (is_compound)
+        this_mv[1].as_int = 0;
       break;
     default:
       break;
   }
 
-  mic->bmi[i].as_mv[0].as_int = this_mv->as_int;
-  if (has_second_rf)
-    mic->bmi[i].as_mv[1].as_int = this_second_mv->as_int;
+  mic->bmi[i].as_mv[0].as_int = this_mv[0].as_int;
+  if (is_compound)
+    mic->bmi[i].as_mv[1].as_int = this_mv[1].as_int;
 
   mic->bmi[i].as_mode = mode;
 
@@ -1940,10 +1937,8 @@ static void rd_check_segment_txsize(VP9_COMP *cpi, MACROBLOCK *x,
         }
 
         bsi->rdstat[i][mode_idx].brate =
-            labels2mode(x, i, this_mode, &mode_mv[this_mode][0],
-                        &mode_mv[this_mode][1], frame_mv, seg_mvs[i],
-                        bsi->ref_mv[0], bsi->ref_mv[1], x->nmvjointcost,
-                        x->mvcost, cpi);
+            labels2mode(cpi, xd, i, this_mode, mode_mv[this_mode], frame_mv,
+                        seg_mvs[i], bsi->ref_mv, x->nmvjointcost, x->mvcost);
 
         for (ref = 0; ref < 1 + has_second_rf; ++ref) {
           bsi->rdstat[i][mode_idx].mvs[ref].as_int =
@@ -2039,10 +2034,9 @@ static void rd_check_segment_txsize(VP9_COMP *cpi, MACROBLOCK *x,
       vpx_memcpy(t_above, bsi->rdstat[i][mode_idx].ta, sizeof(t_above));
       vpx_memcpy(t_left, bsi->rdstat[i][mode_idx].tl, sizeof(t_left));
 
-      labels2mode(x, i, mode_selected, &mode_mv[mode_selected][0],
-                  &mode_mv[mode_selected][1], frame_mv, seg_mvs[i],
-                  bsi->ref_mv[0], bsi->ref_mv[1], x->nmvjointcost,
-                  x->mvcost, cpi);
+      labels2mode(cpi, xd, i, mode_selected, mode_mv[mode_selected],
+                  frame_mv, seg_mvs[i], bsi->ref_mv, x->nmvjointcost,
+                  x->mvcost);
 
       br += bsi->rdstat[i][mode_idx].brate;
       bd += bsi->rdstat[i][mode_idx].bdist;
