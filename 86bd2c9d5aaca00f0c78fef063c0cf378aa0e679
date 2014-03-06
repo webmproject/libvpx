@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//zms\u003d",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 8,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2014-03-06T19:46:45Z",
+      "side": 1,
+      "message": "Can you also mention the change to use AQ_MODE type in commit message as well?",
+      "revId": "86bd2c9d5aaca00f0c78fef063c0cf378aa0e679",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
