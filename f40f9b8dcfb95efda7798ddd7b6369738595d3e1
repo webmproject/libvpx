@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//zrA\u003d",
+        "filename": "test/register_state_check.h",
+        "patchSetId": 9
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2014-03-06T04:50:02Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//zug\u003d",
+      "revId": "f40f9b8dcfb95efda7798ddd7b6369738595d3e1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//zuo\u003d",
         "filename": "test/register_state_check.h",
         "patchSetId": 9
@@ -30,6 +48,24 @@
       "writtenOn": "2014-03-06T02:06:31Z",
       "side": 1,
       "message": "this should be \u0027pre_store_[8]\u0027",
+      "revId": "f40f9b8dcfb95efda7798ddd7b6369738595d3e1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//zq4\u003d",
+        "filename": "test/register_state_check.h",
+        "patchSetId": 9
+      },
+      "lineNbr": 129,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2014-03-06T04:50:02Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//zuo\u003d",
       "revId": "f40f9b8dcfb95efda7798ddd7b6369738595d3e1",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
