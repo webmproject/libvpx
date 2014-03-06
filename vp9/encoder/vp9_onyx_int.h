@@ -849,11 +849,6 @@ typedef struct VP9_COMP {
   int max_arf_level;
 #endif
 
-#ifdef ENTROPY_STATS
-  int64_t mv_ref_stats[INTER_MODE_CONTEXTS][INTER_MODES - 1][2];
-#endif
-
-
 #ifdef MODE_TEST_HIT_STATS
   // Debug / test stats
   int64_t mode_test_hits[BLOCK_SIZES];
