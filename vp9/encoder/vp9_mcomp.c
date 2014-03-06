@@ -1002,14 +1002,11 @@ int vp9_diamond_search_sad_c(const MACROBLOCK *x,
   const int in_what_stride = xd->plane[0].pre[0].stride;
   const uint8_t *best_address;
 
-  MV this_mv;
-
   int bestsad = INT_MAX;
   int best_site = 0;
   int last_site = 0;
 
   int ref_row, ref_col;
-  int this_row_offset, this_col_offset;
 
   // search_param determines the length of the initial step and hence the number
   // of iterations
@@ -1018,7 +1015,6 @@ int vp9_diamond_search_sad_c(const MACROBLOCK *x,
   const search_site *const ss = &x->ss[search_param * x->searches_per_step];
   const int tot_steps = (x->ss_count / x->searches_per_step) - search_param;
 
-  int thissad;
   const MV fcenter_mv = {center_mv->row >> 3, center_mv->col >> 3};
 
   const int *mvjsadcost = x->nmvjointsadcost;
@@ -1044,21 +1040,14 @@ int vp9_diamond_search_sad_c(const MACROBLOCK *x,
 
   for (step = 0; step < tot_steps; step++) {
     for (j = 0; j < x->searches_per_step; j++) {
-      // Trap illegal vectors
-      this_row_offset = best_mv->row + ss[i].mv.row;
-      this_col_offset = best_mv->col + ss[i].mv.col;
-
-      if ((this_col_offset > x->mv_col_min) &&
-          (this_col_offset < x->mv_col_max) &&
-          (this_row_offset > x->mv_row_min) &&
-          (this_row_offset < x->mv_row_max)) {
+      const MV this_mv = {best_mv->row + ss[i].mv.row,
+                          best_mv->col + ss[i].mv.col};
+      if (is_mv_in(x, &this_mv)) {
         const uint8_t *const check_here = ss[i].offset + best_address;
-        thissad = fn_ptr->sdf(what, what_stride, check_here, in_what_stride,
+        int thissad = fn_ptr->sdf(what, what_stride, check_here, in_what_stride,
                               bestsad);
 
         if (thissad < bestsad) {
-          this_mv.row = this_row_offset;
-          this_mv.col = this_col_offset;
           thissad += mvsad_err_cost(&this_mv, &fcenter_mv,
                                     mvjsadcost, mvsadcost, sad_per_bit);
 
@@ -1079,18 +1068,13 @@ int vp9_diamond_search_sad_c(const MACROBLOCK *x,
       last_site = best_site;
 #if defined(NEW_DIAMOND_SEARCH)
       while (1) {
-        this_row_offset = best_mv->row + ss[best_site].mv.row;
-        this_col_offset = best_mv->col + ss[best_site].mv.col;
-        if ((this_col_offset > x->mv_col_min) &&
-            (this_col_offset < x->mv_col_max) &&
-            (this_row_offset > x->mv_row_min) &&
-            (this_row_offset < x->mv_row_max)) {
-          check_here = ss[best_site].offset + best_address;
-          thissad = fn_ptr->sdf(what, what_stride, check_here, in_what_stride,
-                                bestsad);
+        const MV this_mv = {best_mv->row + ss[best_site].mv.row,
+                            best_mv->col + ss[best_site].mv.col};
+        if (is_mv_in(x, &this_mv)) {
+          const uint8_t *const check_here = ss[best_site].offset + best_address;
+          int thissad = fn_ptr->sdf(what, what_stride, check_here,
+                                    in_what_stride, bestsad);
           if (thissad < bestsad) {
-            this_mv.row = this_row_offset;
-            this_mv.col = this_col_offset;
             thissad += mvsad_err_cost(&this_mv, &fcenter_mv,
                                       mvjsadcost, mvsadcost, sad_per_bit);
             if (thissad < bestsad) {
@@ -1127,16 +1111,12 @@ int vp9_diamond_search_sadx4(const MACROBLOCK *x,
   const int in_what_stride = xd->plane[0].pre[0].stride;
   const uint8_t *best_address;
 
-  MV this_mv;
-
   unsigned int bestsad = INT_MAX;
   int best_site = 0;
   int last_site = 0;
 
   int ref_row;
   int ref_col;
-  int this_row_offset;
-  int this_col_offset;
 
   // search_param determines the length of the initial step and hence the number
   // of iterations.
@@ -1146,7 +1126,6 @@ int vp9_diamond_search_sadx4(const MACROBLOCK *x,
   const search_site *ss = &x->ss[search_param * x->searches_per_step];
   const int tot_steps = (x->ss_count / x->searches_per_step) - search_param;
 
-  unsigned int thissad;
   const MV fcenter_mv = {center_mv->row >> 3, center_mv->col >> 3};
 
   const int *mvjsadcost = x->nmvjointsadcost;
@@ -1197,8 +1176,8 @@ int vp9_diamond_search_sadx4(const MACROBLOCK *x,
 
         for (t = 0; t < 4; t++, i++) {
           if (sad_array[t] < bestsad) {
-            this_mv.row = best_mv->row + ss[i].mv.row;
-            this_mv.col = best_mv->col + ss[i].mv.col;
+            const MV this_mv = {best_mv->row + ss[i].mv.row,
+                                best_mv->col + ss[i].mv.col};
             sad_array[t] += mvsad_err_cost(&this_mv, &fcenter_mv,
                                            mvjsadcost, mvsadcost, sad_per_bit);
 
@@ -1212,20 +1191,15 @@ int vp9_diamond_search_sadx4(const MACROBLOCK *x,
     } else {
       for (j = 0; j < x->searches_per_step; j++) {
         // Trap illegal vectors
-        this_row_offset = best_mv->row + ss[i].mv.row;
-        this_col_offset = best_mv->col + ss[i].mv.col;
+        const MV this_mv = {best_mv->row + ss[i].mv.row,
+                            best_mv->col + ss[i].mv.col};
 
-        if ((this_col_offset > x->mv_col_min) &&
-            (this_col_offset < x->mv_col_max) &&
-            (this_row_offset > x->mv_row_min) &&
-            (this_row_offset < x->mv_row_max)) {
+        if (is_mv_in(x, &this_mv)) {
           const uint8_t *const check_here = ss[i].offset + best_address;
-          thissad = fn_ptr->sdf(what, what_stride, check_here, in_what_stride,
-                                bestsad);
+          unsigned int thissad = fn_ptr->sdf(what, what_stride, check_here,
+                                             in_what_stride, bestsad);
 
           if (thissad < bestsad) {
-            this_mv.row = this_row_offset;
-            this_mv.col = this_col_offset;
             thissad += mvsad_err_cost(&this_mv, &fcenter_mv,
                                       mvjsadcost, mvsadcost, sad_per_bit);
 
@@ -1245,18 +1219,13 @@ int vp9_diamond_search_sadx4(const MACROBLOCK *x,
       last_site = best_site;
 #if defined(NEW_DIAMOND_SEARCH)
       while (1) {
-        this_row_offset = best_mv->row + ss[best_site].mv.row;
-        this_col_offset = best_mv->col + ss[best_site].mv.col;
-        if ((this_col_offset > x->mv_col_min) &&
-            (this_col_offset < x->mv_col_max) &&
-            (this_row_offset > x->mv_row_min) &&
-            (this_row_offset < x->mv_row_max)) {
-          check_here = ss[best_site].offset + best_address;
-          thissad = fn_ptr->sdf(what, what_stride, check_here, in_what_stride,
-                                bestsad);
+        const MV this_mv = {best_mv->row + ss[best_site].mv.row,
+                            best_mv->col + ss[best_site].mv.col};
+        if (is_mv_in(x, &this_mv)) {
+          const uint8_t *const check_here = ss[best_site].offset + best_address;
+          unsigned int thissad = fn_ptr->sdf(what, what_stride, check_here,
+                                             in_what_stride, bestsad);
           if (thissad < bestsad) {
-            this_mv.row = this_row_offset;
-            this_mv.col = this_col_offset;
             thissad += mvsad_err_cost(&this_mv, &fcenter_mv,
                                       mvjsadcost, mvsadcost, sad_per_bit);
             if (thissad < bestsad) {
