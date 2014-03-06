@@ -132,9 +132,9 @@ struct macroblock {
   int *nmvsadcost_hp[2];
   int **mvsadcost;
 
-  int mbmode_cost[MB_MODE_COUNT];
+  int mbmode_cost[INTRA_MODES];
   unsigned inter_mode_cost[INTER_MODE_CONTEXTS][INTER_MODES];
-  int intra_uv_mode_cost[2][MB_MODE_COUNT];
+  int intra_uv_mode_cost[FRAME_TYPES][INTRA_MODES];
   int y_mode_costs[INTRA_MODES][INTRA_MODES][INTRA_MODES];
   int switchable_interp_costs[SWITCHABLE_FILTER_CONTEXTS][SWITCHABLE_FILTERS];
 
