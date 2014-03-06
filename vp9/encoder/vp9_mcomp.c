@@ -705,8 +705,6 @@ static int vp9_pattern_search(const MACROBLOCK *x,
   best_mv->row = br;
   best_mv->col = bc;
 
-  this_offset = base_offset + (best_mv->row * in_what_stride) +
-                               best_mv->col;
   this_mv.row = best_mv->row * 8;
   this_mv.col = best_mv->col * 8;
   return bestsad;
@@ -1382,7 +1380,6 @@ int vp9_full_search_sad_c(const MACROBLOCK *x, const MV *ref_mv,
       if (sad < best_sad) {
         best_sad = sad;
         *best_mv = this_mv;
-        best_address = check_here;
       }
     }
   }
@@ -1451,10 +1448,8 @@ int vp9_full_search_sadx3(const MACROBLOCK *x, const MV *ref_mv,
             bestsad = thissad;
             best_mv->row = r;
             best_mv->col = c;
-            bestaddress = check_here;
           }
         }
-
         check_here++;
         c++;
       }
@@ -1473,7 +1468,6 @@ int vp9_full_search_sadx3(const MACROBLOCK *x, const MV *ref_mv,
           bestsad = thissad;
           best_mv->row = r;
           best_mv->col = c;
-          bestaddress = check_here;
         }
       }
 
@@ -1548,7 +1542,6 @@ int vp9_full_search_sadx8(const MACROBLOCK *x, const MV *ref_mv,
             bestsad = thissad;
             best_mv->row = r;
             best_mv->col = c;
-            bestaddress = check_here;
           }
         }
 
@@ -1574,7 +1567,6 @@ int vp9_full_search_sadx8(const MACROBLOCK *x, const MV *ref_mv,
             bestsad = thissad;
             best_mv->row = r;
             best_mv->col = c;
-            bestaddress = check_here;
           }
         }
 
@@ -1596,7 +1588,6 @@ int vp9_full_search_sadx8(const MACROBLOCK *x, const MV *ref_mv,
           bestsad = thissad;
           best_mv->row = r;
           best_mv->col = c;
-          bestaddress = check_here;
         }
       }
 
@@ -1659,7 +1650,6 @@ int vp9_refining_search_sad_c(const MACROBLOCK *x,
     } else {
       ref_mv->row += neighbors[best_site].row;
       ref_mv->col += neighbors[best_site].col;
-      best_address = &in_what[ref_mv->row * in_what_stride + ref_mv->col];
     }
   }
   return bestsad;
@@ -1822,7 +1812,6 @@ int vp9_refining_search_8p_c(const MACROBLOCK *x,
     } else {
       ref_mv->row += neighbors[best_site].row;
       ref_mv->col += neighbors[best_site].col;
-      best_address = &in_what[ref_mv->row * in_what_stride + ref_mv->col];
     }
   }
   return bestsad;

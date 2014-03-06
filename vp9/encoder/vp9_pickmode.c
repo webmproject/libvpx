@@ -88,31 +88,31 @@ static int full_pixel_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
 
   if (cpi->sf.search_method == FAST_HEX) {
     // NOTE: this returns SAD
-    bestsme = vp9_fast_hex_search(x, &mvp_full, step_param, sadpb, 0,
-                                  &cpi->fn_ptr[bsize], 1,
-                                  &ref_mv, &tmp_mv->as_mv);
+    vp9_fast_hex_search(x, &mvp_full, step_param, sadpb, 0,
+                        &cpi->fn_ptr[bsize], 1,
+                        &ref_mv, &tmp_mv->as_mv);
   } else if (cpi->sf.search_method == HEX) {
     // NOTE: this returns SAD
-    bestsme = vp9_hex_search(x, &mvp_full, step_param, sadpb, 1,
-                             &cpi->fn_ptr[bsize], 1,
-                             &ref_mv, &tmp_mv->as_mv);
+    vp9_hex_search(x, &mvp_full, step_param, sadpb, 1,
+                   &cpi->fn_ptr[bsize], 1,
+                   &ref_mv, &tmp_mv->as_mv);
   } else if (cpi->sf.search_method == SQUARE) {
     // NOTE: this returns SAD
-    bestsme = vp9_square_search(x, &mvp_full, step_param, sadpb, 1,
-                                &cpi->fn_ptr[bsize], 1,
-                                &ref_mv, &tmp_mv->as_mv);
+    vp9_square_search(x, &mvp_full, step_param, sadpb, 1,
+                      &cpi->fn_ptr[bsize], 1,
+                      &ref_mv, &tmp_mv->as_mv);
   } else if (cpi->sf.search_method == BIGDIA) {
     // NOTE: this returns SAD
-    bestsme = vp9_bigdia_search(x, &mvp_full, step_param, sadpb, 1,
-                                &cpi->fn_ptr[bsize], 1,
-                                &ref_mv, &tmp_mv->as_mv);
+    vp9_bigdia_search(x, &mvp_full, step_param, sadpb, 1,
+                      &cpi->fn_ptr[bsize], 1,
+                      &ref_mv, &tmp_mv->as_mv);
   } else {
     int further_steps = (cpi->sf.max_step_search_steps - 1) - step_param;
     // NOTE: this returns variance
-    bestsme = vp9_full_pixel_diamond(cpi, x, &mvp_full, step_param,
-                                     sadpb, further_steps, 1,
-                                     &cpi->fn_ptr[bsize],
-                                     &ref_mv, &tmp_mv->as_mv);
+    vp9_full_pixel_diamond(cpi, x, &mvp_full, step_param,
+                           sadpb, further_steps, 1,
+                           &cpi->fn_ptr[bsize],
+                           &ref_mv, &tmp_mv->as_mv);
   }
   x->mv_col_min = tmp_col_min;
   x->mv_col_max = tmp_col_max;
