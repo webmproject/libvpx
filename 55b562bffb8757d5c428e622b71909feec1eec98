@@ -16,6 +16,23 @@
       "revId": "55b562bffb8757d5c428e622b71909feec1eec98",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//zo8\u003d",
+        "filename": "build/make/configure.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 359,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-03-06T07:37:10Z",
+      "side": 1,
+      "message": "I guess check_cc() and check_cxx() should always use Werror instead of checking the log file for a specific warning, but maybe there\u0027s a reason why it hasn\u0027t always done that. Anyway, this seemed least harmful.",
+      "revId": "55b562bffb8757d5c428e622b71909feec1eec98",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
