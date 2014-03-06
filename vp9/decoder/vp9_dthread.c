@@ -15,7 +15,7 @@
 #include "vp9/common/vp9_reconinter.h"
 
 #include "vp9/decoder/vp9_dthread.h"
-#include "vp9/decoder/vp9_onyxd.h"
+#include "vp9/decoder/vp9_decoder.h"
 
 #if CONFIG_MULTITHREAD
 static INLINE void mutex_lock(pthread_mutex_t *const mutex) {
