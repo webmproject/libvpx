@@ -13,6 +13,8 @@
 #include "vp9/common/vp9_common.h"
 #include "vp9/common/vp9_entropymode.h"
 #include "vp9/common/vp9_systemdependent.h"
+
+#include "vp9/encoder/vp9_cost.h"
 #include "vp9/encoder/vp9_encodemv.h"
 
 #ifdef ENTROPY_STATS

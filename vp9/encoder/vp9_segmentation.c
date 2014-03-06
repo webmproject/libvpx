@@ -16,6 +16,7 @@
 #include "vp9/common/vp9_pred_common.h"
 #include "vp9/common/vp9_tile_common.h"
 
+#include "vp9/encoder/vp9_cost.h"
 #include "vp9/encoder/vp9_segmentation.h"
 
 void vp9_enable_segmentation(struct segmentation *seg) {

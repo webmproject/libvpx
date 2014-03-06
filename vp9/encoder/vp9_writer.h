@@ -32,8 +32,6 @@ typedef struct {
   uint64_t bit_counter;
 } vp9_writer;
 
-extern const unsigned int vp9_prob_cost[256];
-
 void vp9_start_encode(vp9_writer *bc, uint8_t *buffer);
 void vp9_stop_encode(vp9_writer *bc);
 

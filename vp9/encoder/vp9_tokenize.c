@@ -8,18 +8,20 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-
+#include <assert.h>
 #include <math.h>
 #include <stdio.h>
 #include <string.h>
-#include <assert.h>
-#include "vp9/encoder/vp9_onyx_int.h"
-#include "vp9/encoder/vp9_tokenize.h"
+
 #include "vpx_mem/vpx_mem.h"
 
+#include "vp9/common/vp9_entropy.h"
 #include "vp9/common/vp9_pred_common.h"
 #include "vp9/common/vp9_seg_common.h"
-#include "vp9/common/vp9_entropy.h"
+
+#include "vp9/encoder/vp9_cost.h"
+#include "vp9/encoder/vp9_onyx_int.h"
+#include "vp9/encoder/vp9_tokenize.h"
 
 static TOKENVALUE dct_value_tokens[DCT_MAX_VALUE * 2];
 const TOKENVALUE *vp9_dct_value_tokens_ptr;

@@ -18,6 +18,8 @@ VP9_CX_SRCS_REMOVE-no  += $(VP9_COMMON_SRCS_REMOVE-no)
 VP9_CX_SRCS-yes += vp9_cx_iface.c
 
 VP9_CX_SRCS-yes += encoder/vp9_bitstream.c
+VP9_CX_SRCS-yes += encoder/vp9_cost.h
+VP9_CX_SRCS-yes += encoder/vp9_cost.c
 VP9_CX_SRCS-yes += encoder/vp9_dct.c
 VP9_CX_SRCS-yes += encoder/vp9_encodeframe.c
 VP9_CX_SRCS-yes += encoder/vp9_encodeframe.h
