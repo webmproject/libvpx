@@ -16,6 +16,24 @@
       "revId": "5c39b38549ead7c1fa37d2d4029408418399fd3d",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//ziI\u003d",
+        "filename": "build/make/configure.sh",
+        "patchSetId": 4
+      },
+      "lineNbr": 292,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-03-06T22:57:45Z",
+      "side": 1,
+      "message": "moved to check_{c,cxx}flags",
+      "parentUuid": "AAAAdn//zi0\u003d",
+      "revId": "5c39b38549ead7c1fa37d2d4029408418399fd3d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
