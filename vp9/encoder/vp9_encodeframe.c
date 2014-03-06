@@ -2432,6 +2432,9 @@ static void encode_frame_internal(VP9_COMP *cpi) {
   vp9_zero(cpi->coef_counts);
   vp9_zero(cm->counts.eob_branch);
 
+  // Set frame level transform size use case
+  select_tx_mode(cpi);
+
   cpi->mb.e_mbd.lossless = cm->base_qindex == 0 && cm->y_dc_delta_q == 0
       && cm->uv_dc_delta_q == 0 && cm->uv_ac_delta_q == 0;
   switch_lossless_mode(cpi, cpi->mb.e_mbd.lossless);
@@ -2440,7 +2443,6 @@ static void encode_frame_internal(VP9_COMP *cpi) {
 
   vp9_initialize_rd_consts(cpi);
   vp9_initialize_me_consts(cpi, cm->base_qindex);
-  switch_tx_mode(cpi);
 
   if (cpi->oxcf.tuning == VP8_TUNE_SSIM) {
     // Initialize encode frame context.
@@ -2600,8 +2602,6 @@ void vp9_encode_frame(VP9_COMP *cpi) {
 
     cpi->mb.e_mbd.lossless = cpi->oxcf.lossless;
 
-    /* transform size selection (4x4, 8x8, 16x16 or select-per-mb) */
-    select_tx_mode(cpi);
     cm->reference_mode = reference_mode;
 
     encode_frame_internal(cpi);
@@ -2683,7 +2683,6 @@ void vp9_encode_frame(VP9_COMP *cpi) {
     }
   } else {
     cpi->mb.e_mbd.lossless = cpi->oxcf.lossless;
-    select_tx_mode(cpi);
     cm->reference_mode = SINGLE_REFERENCE;
     // Force the usage of the BILINEAR interp_filter.
     cm->interp_filter = BILINEAR;
