@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//zl4\u003d",
+        "filename": "build/make/configure.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 353,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-03-06T19:53:55Z",
+      "side": 1,
+      "message": "Switched over to Werror instead of inspecting the the log file.",
+      "parentUuid": "AAAAdn//zpE\u003d",
+      "revId": "55b562bffb8757d5c428e622b71909feec1eec98",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//zo8\u003d",
         "filename": "build/make/configure.sh",
         "patchSetId": 1
