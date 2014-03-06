@@ -1708,7 +1708,7 @@ static void rd_check_segment_txsize(VP9_COMP *cpi, MACROBLOCK *x,
     for (idx = 0; idx < 2; idx += num_4x4_blocks_wide) {
       // TODO(jingning,rbultje): rewrite the rate-distortion optimization
       // loop for 4x4/4x8/8x4 block coding. to be replaced with new rd loop
-      int_mv mode_mv[MB_MODE_COUNT], second_mode_mv[MB_MODE_COUNT];
+      int_mv mode_mv[MB_MODE_COUNT][2];
       int_mv frame_mv[MB_MODE_COUNT][MAX_REF_FRAMES];
       MB_PREDICTION_MODE mode_selected = ZEROMV;
       int64_t best_rd = INT64_MAX;
@@ -1780,7 +1780,7 @@ static void rd_check_segment_txsize(VP9_COMP *cpi, MACROBLOCK *x,
         // motion search for newmv (single predictor case only)
         if (!has_second_rf && this_mode == NEWMV &&
             seg_mvs[i][mbmi->ref_frame[0]].as_int == INVALID_MV) {
-          int_mv *const new_mv = &mode_mv[NEWMV];
+          int_mv *const new_mv = &mode_mv[NEWMV][0];
           int step_param = 0;
           int further_steps;
           int thissme, bestsme = INT_MAX;
@@ -1940,55 +1940,45 @@ static void rd_check_segment_txsize(VP9_COMP *cpi, MACROBLOCK *x,
         }
 
         bsi->rdstat[i][mode_idx].brate =
-            labels2mode(x, i, this_mode, &mode_mv[this_mode],
-                        &second_mode_mv[this_mode], frame_mv, seg_mvs[i],
+            labels2mode(x, i, this_mode, &mode_mv[this_mode][0],
+                        &mode_mv[this_mode][1], frame_mv, seg_mvs[i],
                         bsi->ref_mv[0], bsi->ref_mv[1], x->nmvjointcost,
                         x->mvcost, cpi);
 
-
-        bsi->rdstat[i][mode_idx].mvs[0].as_int = mode_mv[this_mode].as_int;
-        if (num_4x4_blocks_wide > 1)
-          bsi->rdstat[i + 1][mode_idx].mvs[0].as_int =
-              mode_mv[this_mode].as_int;
-        if (num_4x4_blocks_high > 1)
-          bsi->rdstat[i + 2][mode_idx].mvs[0].as_int =
-              mode_mv[this_mode].as_int;
-        if (has_second_rf) {
-          bsi->rdstat[i][mode_idx].mvs[1].as_int =
-              second_mode_mv[this_mode].as_int;
+        for (ref = 0; ref < 1 + has_second_rf; ++ref) {
+          bsi->rdstat[i][mode_idx].mvs[ref].as_int =
+              mode_mv[this_mode][ref].as_int;
           if (num_4x4_blocks_wide > 1)
-            bsi->rdstat[i + 1][mode_idx].mvs[1].as_int =
-                second_mode_mv[this_mode].as_int;
+            bsi->rdstat[i + 1][mode_idx].mvs[ref].as_int =
+                mode_mv[this_mode][ref].as_int;
           if (num_4x4_blocks_high > 1)
-            bsi->rdstat[i + 2][mode_idx].mvs[1].as_int =
-                second_mode_mv[this_mode].as_int;
+            bsi->rdstat[i + 2][mode_idx].mvs[ref].as_int =
+                mode_mv[this_mode][ref].as_int;
         }
 
         // Trap vectors that reach beyond the UMV borders
-        if (mv_check_bounds(x, &mode_mv[this_mode].as_mv) ||
+        if (mv_check_bounds(x, &mode_mv[this_mode][0].as_mv) ||
             (has_second_rf &&
-             mv_check_bounds(x, &second_mode_mv[this_mode].as_mv)))
+             mv_check_bounds(x, &mode_mv[this_mode][1].as_mv)))
           continue;
 
         if (filter_idx > 0) {
           BEST_SEG_INFO *ref_bsi = bsi_buf;
-          subpelmv = mv_has_subpel(&mode_mv[this_mode].as_mv);
-          have_ref = mode_mv[this_mode].as_int ==
-                         ref_bsi->rdstat[i][mode_idx].mvs[0].as_int;
-          if (has_second_rf) {
-            subpelmv |= mv_has_subpel(&second_mode_mv[this_mode].as_mv);
-            have_ref &= second_mode_mv[this_mode].as_int ==
-                            ref_bsi->rdstat[i][mode_idx].mvs[1].as_int;
+          subpelmv = 0;
+          have_ref = 1;
+
+          for (ref = 0; ref < 1 + has_second_rf; ++ref) {
+            subpelmv |= mv_has_subpel(&mode_mv[this_mode][ref].as_mv);
+            have_ref &= mode_mv[this_mode][ref].as_int ==
+                ref_bsi->rdstat[i][mode_idx].mvs[ref].as_int;
           }
 
           if (filter_idx > 1 && !subpelmv && !have_ref) {
             ref_bsi = bsi_buf + 1;
-            have_ref = mode_mv[this_mode].as_int ==
-                       ref_bsi->rdstat[i][mode_idx].mvs[0].as_int;
-            if (has_second_rf) {
-              have_ref  &= second_mode_mv[this_mode].as_int ==
-                           ref_bsi->rdstat[i][mode_idx].mvs[1].as_int;
-            }
+            have_ref = 1;
+            for (ref = 0; ref < 1 + has_second_rf; ++ref)
+              have_ref &= mode_mv[this_mode][ref].as_int ==
+                  ref_bsi->rdstat[i][mode_idx].mvs[ref].as_int;
           }
 
           if (!subpelmv && have_ref &&
@@ -2049,8 +2039,8 @@ static void rd_check_segment_txsize(VP9_COMP *cpi, MACROBLOCK *x,
       vpx_memcpy(t_above, bsi->rdstat[i][mode_idx].ta, sizeof(t_above));
       vpx_memcpy(t_left, bsi->rdstat[i][mode_idx].tl, sizeof(t_left));
 
-      labels2mode(x, i, mode_selected, &mode_mv[mode_selected],
-                  &second_mode_mv[mode_selected], frame_mv, seg_mvs[i],
+      labels2mode(x, i, mode_selected, &mode_mv[mode_selected][0],
+                  &mode_mv[mode_selected][1], frame_mv, seg_mvs[i],
                   bsi->ref_mv[0], bsi->ref_mv[1], x->nmvjointcost,
                   x->mvcost, cpi);
 
