@@ -2296,19 +2296,13 @@ typedef enum {
 
 static void set_mode_info(MB_MODE_INFO *mbmi, BLOCK_SIZE bsize,
                           MB_PREDICTION_MODE mode) {
-  mbmi->interp_filter = EIGHTTAP;
   mbmi->mode = mode;
+  mbmi->uv_mode = mode;
   mbmi->mv[0].as_int = 0;
   mbmi->mv[1].as_int = 0;
-  if (mode < NEARESTMV) {
-    mbmi->ref_frame[0] = INTRA_FRAME;
-  } else {
-    mbmi->ref_frame[0] = LAST_FRAME;
-  }
-
-  mbmi->ref_frame[1] = INTRA_FRAME;
+  mbmi->ref_frame[0] = INTRA_FRAME;
+  mbmi->ref_frame[1] = NONE;
   mbmi->tx_size = max_txsize_lookup[bsize];
-  mbmi->uv_mode = mode;
   mbmi->skip = 0;
   mbmi->sb_type = bsize;
   mbmi->segment_id = 0;
