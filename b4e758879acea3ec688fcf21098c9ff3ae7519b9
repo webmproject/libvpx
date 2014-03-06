@@ -16,6 +16,24 @@
       "revId": "b4e758879acea3ec688fcf21098c9ff3ae7519b9",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//zuU\u003d",
+        "filename": "vp9/common/x86/vp9_subpixel_8t_intrin_avx2.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-03-06T02:10:58Z",
+      "side": 1,
+      "message": "no, I ended up not needing something so heavy. good catch!",
+      "parentUuid": "AAAAdn//zxU\u003d",
+      "revId": "b4e758879acea3ec688fcf21098c9ff3ae7519b9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
