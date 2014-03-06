@@ -405,8 +405,8 @@ true
 }
 
 write_common_target_config_mk() {
-    local CC=${CC}
-    local CXX=${CXX}
+    local CC="${CC}"
+    local CXX="${CXX}"
     enabled ccache && CC="ccache ${CC}"
     enabled ccache && CXX="ccache ${CXX}"
     print_webm_license $1 "##" ""
