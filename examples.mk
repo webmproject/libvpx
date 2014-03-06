@@ -66,7 +66,7 @@ vp9_spatial_scalable_encoder.GUID   = 4A38598D-627D-4505-9C7B-D4020C84100D
 vp9_spatial_scalable_encoder.DESCRIPTION = Spatial Scalable Encoder
 
 ifeq ($(CONFIG_SHARED),no)
-UTILS-$(CONFIG_VP9_ENCODER)    += resize_util.c
+EXAMPLES-$(CONFIG_VP9_ENCODER)    += resize_util.c
 endif
 
 # XMA example disabled for now, not used in VP8
