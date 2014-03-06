@@ -79,7 +79,7 @@ TEST_P(CpuSpeedTest, TestEncodeHighBitrate) {
   cfg_.rc_min_quantizer = 0;
 
   ::libvpx_test::I420VideoSource video("hantro_odd.yuv", 208, 144, 30, 1, 0,
-                                       40);
+                                       20);
 
   ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
 }
@@ -95,7 +95,7 @@ TEST_P(CpuSpeedTest, TestLowBitrate) {
   cfg_.rc_min_quantizer = 40;
 
   ::libvpx_test::I420VideoSource video("hantro_odd.yuv", 208, 144, 30, 1, 0,
-                                       40);
+                                       20);
 
   ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
 }
@@ -107,6 +107,6 @@ using std::tr1::make_tuple;
 
 VP9_INSTANTIATE_TEST_CASE(
     CpuSpeedTest,
-    ::testing::Values(::libvpx_test::kTwoPassGood),
-    ::testing::Range(0, 5));
+    ::testing::Values(::libvpx_test::kTwoPassGood, ::libvpx_test::kOnePassGood),
+    ::testing::Range(0, 8));
 }  // namespace
