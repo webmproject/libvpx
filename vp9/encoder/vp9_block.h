@@ -11,7 +11,6 @@
 #ifndef VP9_ENCODER_VP9_BLOCK_H_
 #define VP9_ENCODER_VP9_BLOCK_H_
 
-#include "vp9/common/vp9_onyx.h"
 #include "vp9/common/vp9_entropymv.h"
 #include "vp9/common/vp9_entropy.h"
 #include "vpx_ports/mem.h"

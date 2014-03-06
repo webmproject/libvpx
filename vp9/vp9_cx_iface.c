@@ -17,7 +17,6 @@
 #include "vp9/encoder/vp9_onyx_int.h"
 #include "vpx/vp8cx.h"
 #include "vp9/encoder/vp9_firstpass.h"
-#include "vp9/common/vp9_onyx.h"
 #include "vp9/vp9_iface_common.h"
 
 struct vp9_extracfg {

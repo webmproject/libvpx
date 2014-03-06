@@ -12,7 +12,6 @@ VP9_COMMON_SRCS-yes += vp9_common.mk
 VP9_COMMON_SRCS-yes += vp9_iface_common.h
 VP9_COMMON_SRCS-yes += common/vp9_pragmas.h
 VP9_COMMON_SRCS-yes += common/vp9_ppflags.h
-VP9_COMMON_SRCS-yes += common/vp9_onyx.h
 VP9_COMMON_SRCS-yes += common/vp9_alloccommon.c
 VP9_COMMON_SRCS-yes += common/vp9_blockd.c
 VP9_COMMON_SRCS-yes += common/vp9_convolve.c
