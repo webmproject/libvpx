@@ -327,7 +327,7 @@ EOF
 
 check_cflags() {
     log check_cflags "$@"
-    check_cc "$@" <<EOF
+    check_cc -Werror "$@" <<EOF
 int x;
 EOF
 }
@@ -341,7 +341,7 @@ check_cxxflags() {
 int x;
 EOF
       ;;
-      *) check_cxx "$@" <<EOF
+      *) check_cxx -Werror "$@" <<EOF
 int x;
 EOF
       ;;
