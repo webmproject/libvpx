@@ -17,7 +17,6 @@
 #include "vp9/common/vp9_postproc.h"
 #endif
 #include "vp9/decoder/vp9_onyxd.h"
-#include "vp9/decoder/vp9_onyxd_int.h"
 #include "vpx_mem/vpx_mem.h"
 #include "vp9/common/vp9_alloccommon.h"
 #include "vp9/common/vp9_loopfilter.h"

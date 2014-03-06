@@ -17,7 +17,6 @@
 #include "./vpx_version.h"
 #include "vp9/common/vp9_frame_buffers.h"
 #include "vp9/decoder/vp9_onyxd.h"
-#include "vp9/decoder/vp9_onyxd_int.h"
 #include "vp9/decoder/vp9_read_bit_buffer.h"
 #include "vp9/vp9_iface_common.h"
 
