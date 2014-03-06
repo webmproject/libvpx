@@ -41,7 +41,7 @@ log(){
 
 log_file(){
     log BEGIN $1
-    pr -n -t $1 >>$logfile
+    cat -n $1 >>$logfile
     log END $1
 }
 
