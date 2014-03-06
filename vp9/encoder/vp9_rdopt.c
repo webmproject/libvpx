@@ -282,8 +282,6 @@ void vp9_initialize_rd_consts(VP9_COMP *cpi) {
   x->errorperbit = cpi->RDMULT / RD_MULT_EPB_RATIO;
   x->errorperbit += (x->errorperbit == 0);
 
-  vp9_set_speed_features(cpi);
-
   x->select_txfm_size = (cpi->sf.tx_size_search_method == USE_LARGESTALL &&
                          cm->frame_type != KEY_FRAME) ? 0 : 1;
 
