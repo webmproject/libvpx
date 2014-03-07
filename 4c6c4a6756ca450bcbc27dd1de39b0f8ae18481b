@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//ze4\u003d",
+        "filename": "build/make/configure.sh",
+        "patchSetId": 5
+      },
+      "lineNbr": 344,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-03-07T04:28:01Z",
+      "side": 1,
+      "message": "may not be necessary given the above block, but ok for symmetry",
+      "revId": "4c6c4a6756ca450bcbc27dd1de39b0f8ae18481b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
