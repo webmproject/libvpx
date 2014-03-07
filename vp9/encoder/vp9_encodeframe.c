@@ -29,6 +29,7 @@
 #include "vp9/common/vp9_seg_common.h"
 #include "vp9/common/vp9_systemdependent.h"
 #include "vp9/common/vp9_tile_common.h"
+
 #include "vp9/encoder/vp9_encodeframe.h"
 #include "vp9/encoder/vp9_encodemb.h"
 #include "vp9/encoder/vp9_encodemv.h"
@@ -74,10 +75,10 @@ static void adjust_act_zbin(VP9_COMP *cpi, MACROBLOCK *x);
 //  (infinite lambda), which confounds analysis.
 // This also avoids the need for divide by zero checks in
 //  vp9_activity_masking().
-#define ACTIVITY_AVG_MIN (64)
+#define ACTIVITY_AVG_MIN 64
 
 // Motion vector component magnitude threshold for defining fast motion.
-#define FAST_MOTION_MV_THRESH (24)
+#define FAST_MOTION_MV_THRESH 24
 
 // This is used as a reference when computing the source variance for the
 //  purposes of activity masking.
@@ -152,21 +153,17 @@ static BLOCK_SIZE get_nonrd_var_based_fixed_partition(VP9_COMP *cpi,
 // Original activity measure from Tim T's code.
 static unsigned int tt_activity_measure(MACROBLOCK *x) {
   unsigned int sse;
-  /* TODO: This could also be done over smaller areas (8x8), but that would
-   *  require extensive changes elsewhere, as lambda is assumed to be fixed
-   *  over an entire MB in most of the code.
-   * Another option is to compute four 8x8 variances, and pick a single
-   *  lambda using a non-linear combination (e.g., the smallest, or second
-   *  smallest, etc.).
-   */
-  unsigned int act = vp9_variance16x16(x->plane[0].src.buf,
-                                       x->plane[0].src.stride,
-                                       VP9_VAR_OFFS, 0, &sse) << 4;
+  // TODO: This could also be done over smaller areas (8x8), but that would
+  // require extensive changes elsewhere, as lambda is assumed to be fixed
+  // over an entire MB in most of the code.
+  // Another option is to compute four 8x8 variances, and pick a single
+  // lambda using a non-linear combination (e.g., the smallest, or second
+  // smallest, etc.).
+  const unsigned int act = vp9_variance16x16(x->plane[0].src.buf,
+                                             x->plane[0].src.stride,
+                                             VP9_VAR_OFFS, 0, &sse) << 4;
   // If the region is flat, lower the activity some more.
-  if (act < (8 << 12))
-    act = MIN(act, 5 << 12);
-
-  return act;
+  return act < (8 << 12) ? MIN(act, 5 << 12) : act;
 }
 
 // Stub for alternative experimental activity measures.
@@ -450,9 +447,6 @@ static void update_state(VP9_COMP *cpi, PICK_MODE_CONTEXT *ctx,
   const int mi_height = num_8x8_blocks_high_lookup[bsize];
   int max_plane;
 
-  assert(mi->mbmi.mode < MB_MODE_COUNT);
-  assert(mi->mbmi.ref_frame[0] < MAX_REF_FRAMES);
-  assert(mi->mbmi.ref_frame[1] < MAX_REF_FRAMES);
   assert(mi->mbmi.sb_type == bsize);
 
   // For in frame adaptive Q copy over the chosen segment id into the
@@ -2126,13 +2120,6 @@ static void switch_lossless_mode(VP9_COMP *cpi, int lossless) {
   }
 }
 
-static void switch_tx_mode(VP9_COMP *cpi) {
-  if (cpi->sf.tx_size_search_method == USE_LARGESTALL &&
-      cpi->common.tx_mode >= ALLOW_32X32)
-    cpi->common.tx_mode = ALLOW_32X32;
-}
-
-
 static int check_dual_ref_flags(VP9_COMP *cpi) {
   const int ref_flags = cpi->ref_frame_flags;
 
@@ -2174,7 +2161,7 @@ static void reset_skip_txfm_size_b(const VP9_COMMON *cm, int mis,
   if (mi_row >= cm->mi_rows || mi_col >= cm->mi_cols) {
     return;
   } else {
-    MB_MODE_INFO * const mbmi = &mi_8x8[0]->mbmi;
+    const MB_MODE_INFO *const mbmi = &mi_8x8[0]->mbmi;
     if (mbmi->tx_size > max_tx_size) {
       const int ymbs = MIN(bh, cm->mi_rows - mi_row);
       const int xmbs = MIN(bw, cm->mi_cols - mi_col);
@@ -2307,23 +2294,13 @@ static void set_mode_info(MB_MODE_INFO *mbmi, BLOCK_SIZE bsize,
   mbmi->segment_id = 0;
 }
 
-static INLINE int get_block_row(int b32i, int b16i, int b8i) {
-  return ((b32i >> 1) << 2) + ((b16i >> 1) << 1) + (b8i >> 1);
-}
-
-static INLINE int get_block_col(int b32i, int b16i, int b8i) {
-  return ((b32i & 1) << 2) + ((b16i & 1) << 1) + (b8i & 1);
-}
-
 static void nonrd_use_partition(VP9_COMP *cpi, const TileInfo *const tile,
                                 TOKENEXTRA **tp, int mi_row, int mi_col,
                                 BLOCK_SIZE bsize, int *rate, int64_t *dist) {
   VP9_COMMON *const cm = &cpi->common;
   MACROBLOCK *const x = &cpi->mb;
   MACROBLOCKD *const xd = &cpi->mb.e_mbd;
-  int mis = cm->mode_info_stride;
   int br, bc;
-  int i, j;
   MB_PREDICTION_MODE mode = DC_PRED;
   int rows = MIN(MI_BLOCK_SIZE, tile->mi_row_end - mi_row);
   int cols = MIN(MI_BLOCK_SIZE, tile->mi_col_end - mi_col);
@@ -2339,17 +2316,16 @@ static void nonrd_use_partition(VP9_COMP *cpi, const TileInfo *const tile,
   // find prediction mode for each 8x8 block
   for (br = 0; br < rows; br += bh) {
     for (bc = 0; bc < cols; bc += bw) {
-      int row = mi_row + br;
-      int col = mi_col + bc;
-
-      BLOCK_SIZE bs = find_partition_size(bsize, rows - br, cols - bc,
-                                          &bh, &bw);
+      const int row = mi_row + br;
+      const int col = mi_col + bc;
+      const BLOCK_SIZE bs = find_partition_size(bsize, rows - br, cols - bc,
+                                                &bh, &bw);
+      int i, j;
 
       set_offsets(cpi, tile, row, col, bs);
 
       if (cm->frame_type != KEY_FRAME)
-        vp9_pick_inter_mode(cpi, x, tile, row, col,
-                            &brate, &bdist, bs);
+        vp9_pick_inter_mode(cpi, x, tile, row, col, &brate, &bdist, bs);
       else
         set_mode_info(&xd->mi_8x8[0]->mbmi, bs, mode);
 
@@ -2358,7 +2334,7 @@ static void nonrd_use_partition(VP9_COMP *cpi, const TileInfo *const tile,
 
       for (j = 0; j < bh; ++j)
         for (i = 0; i < bw; ++i)
-          xd->mi_8x8[j * mis + i] = xd->mi_8x8[0];
+          xd->mi_8x8[j * cm->mode_info_stride + i] = xd->mi_8x8[0];
     }
   }
 }
@@ -2513,9 +2489,9 @@ static void encode_frame_internal(VP9_COMP *cpi) {
       intra_count += cm->counts.intra_inter[j][0];
       inter_count += cm->counts.intra_inter[j][1];
     }
-    cpi->sf.skip_encode_frame = ((intra_count << 2) < inter_count);
-    cpi->sf.skip_encode_frame &= (cm->frame_type != KEY_FRAME);
-    cpi->sf.skip_encode_frame &= cm->show_frame;
+    cpi->sf.skip_encode_frame = (intra_count << 2) < inter_count &&
+                                cm->frame_type != KEY_FRAME &&
+                                cm->show_frame;
   } else {
     cpi->sf.skip_encode_frame = 0;
   }
@@ -2688,18 +2664,18 @@ static void sum_intra_stats(FRAME_COUNTS *counts, const MODE_INFO *mi) {
   const MB_PREDICTION_MODE uv_mode = mi->mbmi.uv_mode;
   const BLOCK_SIZE bsize = mi->mbmi.sb_type;
 
-  ++counts->uv_mode[y_mode][uv_mode];
-
   if (bsize < BLOCK_8X8) {
     int idx, idy;
-    const int num_4x4_blocks_wide = num_4x4_blocks_wide_lookup[bsize];
-    const int num_4x4_blocks_high = num_4x4_blocks_high_lookup[bsize];
-    for (idy = 0; idy < 2; idy += num_4x4_blocks_high)
-      for (idx = 0; idx < 2; idx += num_4x4_blocks_wide)
+    const int num_4x4_w = num_4x4_blocks_wide_lookup[bsize];
+    const int num_4x4_h = num_4x4_blocks_high_lookup[bsize];
+    for (idy = 0; idy < 2; idy += num_4x4_h)
+      for (idx = 0; idx < 2; idx += num_4x4_w)
         ++counts->y_mode[0][mi->bmi[idy * 2 + idx].as_mode];
   } else {
     ++counts->y_mode[size_group_lookup[bsize]][y_mode];
   }
+
+  ++counts->uv_mode[y_mode][uv_mode];
 }
 
 // Experimental stub function to create a per MB zbin adjustment based on
@@ -2708,13 +2684,10 @@ static void adjust_act_zbin(VP9_COMP *cpi, MACROBLOCK *x) {
 #if USE_ACT_INDEX
   x->act_zbin_adj = *(x->mb_activity_ptr);
 #else
-  int64_t a;
-  int64_t b;
-  int64_t act = *(x->mb_activity_ptr);
-
   // Apply the masking to the RD multiplier.
-  a = act + 4 * cpi->activity_avg;
-  b = 4 * act + cpi->activity_avg;
+  const int64_t act = *(x->mb_activity_ptr);
+  const int64_t a = act + 4 * cpi->activity_avg;
+  const int64_t b = 4 * act + cpi->activity_avg;
 
   if (act > cpi->activity_avg)
     x->act_zbin_adj = (int) (((int64_t) b + (a >> 1)) / a) - 1;
