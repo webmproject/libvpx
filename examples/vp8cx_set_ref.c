@@ -162,7 +162,9 @@ int main(int argc, char **argv) {
 
   while (vpx_img_read(&raw, infile)) {
     if (frame_count + 1 == update_frame_num) {
-      vpx_ref_frame_t ref = {VP8_LAST_FRAME, raw};
+      vpx_ref_frame_t ref;
+      ref.frame_type = VP8_LAST_FRAME;
+      ref.img = raw;
       if (vpx_codec_control(&codec, VP8_SET_REFERENCE, &ref))
         die_codec(&codec, "Failed to set reference frame");
     }
