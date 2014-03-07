@@ -12,10 +12,6 @@
 #include "vp9/encoder/vp9_writer.h"
 #include "vp9/common/vp9_entropy.h"
 
-#ifdef ENTROPY_STATS
-unsigned int active_section = 0;
-#endif
-
 void vp9_start_encode(vp9_writer *br, uint8_t *source) {
   br->lowvalue = 0;
   br->range    = 255;

@@ -17,10 +17,6 @@
 #include "vp9/encoder/vp9_cost.h"
 #include "vp9/encoder/vp9_encodemv.h"
 
-#ifdef ENTROPY_STATS
-extern unsigned int active_section;
-#endif
-
 static struct vp9_token mv_joint_encodings[MV_JOINTS];
 static struct vp9_token mv_class_encodings[MV_CLASSES];
 static struct vp9_token mv_fp_encodings[MV_FP_SIZE];
