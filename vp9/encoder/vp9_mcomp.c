@@ -711,23 +711,21 @@ static int vp9_pattern_search(const MACROBLOCK *x,
 }
 
 int vp9_get_mvpred_var(const MACROBLOCK *x,
-                       MV *best_mv,
-                       const MV *center_mv,
+                       const MV *best_mv, const MV *center_mv,
                        const vp9_variance_fn_ptr_t *vfp,
                        int use_mvcost) {
-  unsigned int bestsad;
-  MV this_mv;
+  unsigned int unused;
+
   const MACROBLOCKD *const xd = &x->e_mbd;
   const uint8_t *what = x->plane[0].src.buf;
   const int what_stride = x->plane[0].src.stride;
   const int in_what_stride = xd->plane[0].pre[0].stride;
   const uint8_t *base_offset = xd->plane[0].pre[0].buf;
-  const uint8_t *this_offset = base_offset + (best_mv->row * in_what_stride) +
-      best_mv->col;
-  this_mv.row = best_mv->row * 8;
-  this_mv.col = best_mv->col * 8;
-  return vfp->vf(what, what_stride, this_offset, in_what_stride, &bestsad) +
-      (use_mvcost ?  mv_err_cost(&this_mv, center_mv, x->nmvjointcost,
+  const uint8_t *this_offset = &base_offset[best_mv->row * in_what_stride +
+                                            best_mv->col];
+  const MV mv = {best_mv->row * 8, best_mv->col * 8};
+  return vfp->vf(what, what_stride, this_offset, in_what_stride, &unused) +
+      (use_mvcost ?  mv_err_cost(&mv, center_mv, x->nmvjointcost,
                                  x->mvcost, x->errorperbit) : 0);
 }
 
