@@ -577,5 +577,5 @@ TEST_P(DatarateTestVP9, BasicRateTargeting3TemporalLayersFrameDropping) {
 VP8_INSTANTIATE_TEST_CASE(DatarateTest, ALL_TEST_MODES);
 VP9_INSTANTIATE_TEST_CASE(DatarateTestVP9,
                           ::testing::Values(::libvpx_test::kOnePassGood),
-                          ::testing::Range(2, 5));
+                          ::testing::Range(2, 6));
 }  // namespace
