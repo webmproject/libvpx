@@ -576,6 +576,11 @@ TEST_P(DatarateTestVP9, BasicRateTargeting3TemporalLayersFrameDropping) {
 
 VP8_INSTANTIATE_TEST_CASE(DatarateTest, ALL_TEST_MODES);
 VP9_INSTANTIATE_TEST_CASE(DatarateTestVP9,
-                          ::testing::Values(::libvpx_test::kOnePassGood),
-                          ::testing::Range(2, 6));
+                          ::testing::Values(::libvpx_test::kOnePassGood,
+                          ::libvpx_test::kRealTime),
+                          ::testing::Range(2, 7));
+// TODO(marpan): Speed 7 fails on one of these tests (likely just a threshold
+// needs to be changed), so for now test up to speed 6, and start at 2 (since
+// speed 0 and 1 are slow). Allow speed 7 (for real-time mode) after
+// looking into/fix failing issue.
 }  // namespace
