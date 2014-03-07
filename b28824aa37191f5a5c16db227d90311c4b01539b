@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//zdw\u003d",
+        "filename": "vp9/encoder/vp9_craq.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2014-03-07T11:06:19Z",
+      "side": 1,
+      "message": "Why duplicate this function. Seems a bit silly to have two identical static functions in different files?",
+      "revId": "b28824aa37191f5a5c16db227d90311c4b01539b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
