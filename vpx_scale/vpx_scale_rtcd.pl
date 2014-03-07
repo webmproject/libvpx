@@ -23,7 +23,6 @@ add_proto qw/void vp8_yv12_copy_frame/, "const struct yv12_buffer_config *src_yb
 specialize qw/vp8_yv12_copy_frame neon/;
 
 add_proto qw/void vpx_yv12_copy_y/, "const struct yv12_buffer_config *src_ybc, struct yv12_buffer_config *dst_ybc";
-specialize qw/vpx_yv12_copy_y neon/;
 
 if (vpx_config("CONFIG_VP9") eq "yes") {
     add_proto qw/void vp9_extend_frame_borders/, "struct yv12_buffer_config *ybf";
