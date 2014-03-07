@@ -81,6 +81,10 @@ typedef struct SvcInternal {
   size_t buffer_size;
   void *buffer;
 
+  char *rc_stats_buf;
+  size_t rc_stats_buf_size;
+  size_t rc_stats_buf_used;
+
   char message_buffer[2048];
   vpx_codec_ctx_t *codec_ctx;
 } SvcInternal;
@@ -569,7 +573,6 @@ vpx_codec_err_t vpx_svc_init(SvcContext *svc_ctx, vpx_codec_ctx_t *codec_ctx,
   enc_cfg->ss_number_layers = si->layers;
   enc_cfg->ts_number_layers = 1;  // Temporal layers not used in this encoder.
   enc_cfg->kf_mode = VPX_KF_DISABLED;
-  enc_cfg->g_pass = VPX_RC_ONE_PASS;
   // Lag in frames not currently supported
   enc_cfg->g_lag_in_frames = 0;
 
@@ -851,6 +854,7 @@ vpx_codec_err_t vpx_svc_encode(SvcContext *svc_ctx, vpx_codec_ctx_t *codec_ctx,
 
   memset(&superframe, 0, sizeof(superframe));
   svc_log_reset(svc_ctx);
+  si->rc_stats_buf_used = 0;
 
   si->layers = svc_ctx->spatial_layers;
   if (si->frame_within_gop >= si->kf_dist ||
@@ -921,6 +925,25 @@ vpx_codec_err_t vpx_svc_encode(SvcContext *svc_ctx, vpx_codec_ctx_t *codec_ctx,
             si->psnr_sum[si->layer][i] += cx_pkt->data.psnr.psnr[i];
             si->sse_sum[si->layer][i] += cx_pkt->data.psnr.sse[i];
           }
+          break;
+        }
+        case VPX_CODEC_STATS_PKT: {
+          size_t new_size = si->rc_stats_buf_used +
+              cx_pkt->data.twopass_stats.sz;
+
+          if (new_size > si->rc_stats_buf_size) {
+            char *p = (char*)realloc(si->rc_stats_buf, new_size);
+            if (p == NULL) {
+              svc_log(svc_ctx, SVC_LOG_ERROR, "Error allocating stats buf\n");
+              break;
+            }
+            si->rc_stats_buf = p;
+            si->rc_stats_buf_size = new_size;
+          }
+
+          memcpy(si->rc_stats_buf + si->rc_stats_buf_used,
+                 cx_pkt->data.twopass_stats.buf, cx_pkt->data.twopass_stats.sz);
+          si->rc_stats_buf_used += cx_pkt->data.twopass_stats.sz;
           break;
         }
         default: {
@@ -1077,7 +1100,24 @@ void vpx_svc_release(SvcContext *svc_ctx) {
   si = (SvcInternal *)svc_ctx->internal;
   if (si != NULL) {
     free(si->buffer);
+    if (si->rc_stats_buf) {
+      free(si->rc_stats_buf);
+    }
     free(si);
     svc_ctx->internal = NULL;
   }
 }
+
+size_t vpx_svc_get_rc_stats_buffer_size(const SvcContext *svc_ctx) {
+  const SvcInternal *const si = get_const_svc_internal(svc_ctx);
+  if (svc_ctx == NULL || si == NULL) return 0;
+  return si->rc_stats_buf_used;
+}
+
+char *vpx_svc_get_rc_stats_buffer(const SvcContext *svc_ctx) {
+  const SvcInternal *const si = get_const_svc_internal(svc_ctx);
+  if (svc_ctx == NULL || si == NULL) return NULL;
+  return si->rc_stats_buf;
+}
+
+
