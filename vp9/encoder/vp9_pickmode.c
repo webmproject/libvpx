@@ -187,6 +187,38 @@ static void sub_pixel_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
   }
 }
 
+static void model_rd_for_sb_y(VP9_COMP *cpi, BLOCK_SIZE bsize,
+                              MACROBLOCK *x, MACROBLOCKD *xd,
+                              int *out_rate_sum, int64_t *out_dist_sum) {
+  // Note our transform coeffs are 8 times an orthogonal transform.
+  // Hence quantizer step is also 8 times. To get effective quantizer
+  // we need to divide by 8 before sending to modeling function.
+  int64_t rate_sum = 0;
+  int64_t dist_sum = 0;
+  unsigned int sse;
+
+
+  struct macroblock_plane *const p = &x->plane[0];
+  struct macroblockd_plane *const pd = &xd->plane[0];
+  const BLOCK_SIZE bs = get_plane_block_size(bsize, pd);
+
+  (void) cpi->fn_ptr[bs].vf(p->src.buf, p->src.stride,
+                            pd->dst.buf, pd->dst.stride, &sse);
+
+  {
+    int rate;
+    int64_t dist;
+    vp9_model_rd_from_var_lapndz(sse, 1 << num_pels_log2_lookup[bs],
+                                 pd->dequant[1] >> 3, &rate, &dist);
+    rate_sum += rate;
+    dist_sum += dist;
+  }
+
+
+  *out_rate_sum = (int)rate_sum;
+  *out_dist_sum = dist_sum << 4;
+}
+
 // TODO(jingning) placeholder for inter-frame non-RD mode decision.
 // this needs various further optimizations. to be continued..
 int64_t vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
@@ -208,10 +240,12 @@ int64_t vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
                                     VP9_ALT_FLAG };
   int64_t best_rd = INT64_MAX;
   int64_t this_rd = INT64_MAX;
-  static const int cost[4]= { 0, 2, 4, 6 };
 
   const int64_t inter_mode_thresh = 300;
   const int64_t intra_mode_cost = 50;
+
+  int rate = INT_MAX;
+  int64_t dist = INT64_MAX;
 
   x->skip_encode = cpi->sf.skip_encode_frame && x->q_index < QIDX_SKIP_THRESH;
 
@@ -245,7 +279,6 @@ int64_t vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
   }
 
   for (ref_frame = LAST_FRAME; ref_frame <= LAST_FRAME ; ++ref_frame) {
-    int rate_mv = 0;
     if (!(cpi->ref_frame_flags & flag_list[ref_frame]))
       continue;
 
@@ -258,9 +291,8 @@ int64_t vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
     mbmi->ref_frame[0] = ref_frame;
 
     for (this_mode = NEARESTMV; this_mode <= NEWMV; ++this_mode) {
-      int rate = cost[INTER_OFFSET(this_mode)]
-          << (num_pels_log2_lookup[bsize] - 4);
-      int64_t dist;
+      int rate_mv = 0;
+
       if (cpi->sf.disable_inter_mode_mask[bsize] &
           (1 << INTER_OFFSET(this_mode)))
         continue;
@@ -280,22 +312,15 @@ int64_t vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
                                 &frame_mv[NEWMV][ref_frame].as_mv);
       }
 
-      if (frame_mv[this_mode][ref_frame].as_int == 0) {
-        dist = x->mode_sad[ref_frame][INTER_OFFSET(ZEROMV)];
-      } else if (this_mode != NEARESTMV &&
-                 frame_mv[NEARESTMV][ref_frame].as_int ==
-                     frame_mv[this_mode][ref_frame].as_int) {
-        dist = x->mode_sad[ref_frame][INTER_OFFSET(NEARESTMV)];
-      } else {
-        mbmi->mode = this_mode;
-        mbmi->mv[0].as_int = frame_mv[this_mode][ref_frame].as_int;
-        vp9_build_inter_predictors_sby(xd, mi_row, mi_col, bsize);
-        dist = x->mode_sad[ref_frame][INTER_OFFSET(this_mode)] =
-            cpi->fn_ptr[bsize].sdf(p->src.buf, p->src.stride,
-                                   pd->dst.buf, pd->dst.stride, INT_MAX);
-      }
+      mbmi->mode = this_mode;
+      mbmi->mv[0].as_int = frame_mv[this_mode][ref_frame].as_int;
+      vp9_build_inter_predictors_sby(xd, mi_row, mi_col, bsize);
 
-      this_rd = rate + dist;
+      model_rd_for_sb_y(cpi, bsize, x, xd, &rate, &dist);
+      rate += rate_mv;
+      rate += x->inter_mode_cost[mbmi->mode_context[ref_frame]]
+                                [INTER_OFFSET(this_mode)];
+      this_rd = RDCOST(x->rdmult, x->rddiv, rate, dist);
 
       if (this_rd < best_rd) {
         best_rd = this_rd;
@@ -319,10 +344,9 @@ int64_t vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
                               &p->src.buf[0], p->src.stride,
                               &pd->dst.buf[0], pd->dst.stride, 0, 0, 0);
 
-      this_rd = cpi->fn_ptr[bsize].sdf(p->src.buf,
-                                       p->src.stride,
-                                       pd->dst.buf,
-                                       pd->dst.stride, INT_MAX);
+      model_rd_for_sb_y(cpi, bsize, x, xd, &rate, &dist);
+      rate += x->mbmode_cost[this_mode];
+      this_rd = RDCOST(x->rdmult, x->rddiv, rate, dist);
 
       if (this_rd + intra_mode_cost < best_rd) {
         best_rd = this_rd;
