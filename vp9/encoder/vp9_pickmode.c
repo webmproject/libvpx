@@ -305,6 +305,11 @@ int64_t vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
                                 &frame_mv[NEWMV][ref_frame].as_mv);
       }
 
+      if (this_mode != NEARESTMV)
+        if (frame_mv[this_mode][ref_frame].as_int ==
+            frame_mv[NEARESTMV][ref_frame].as_int)
+          continue;
+
       mbmi->mode = this_mode;
       mbmi->mv[0].as_int = frame_mv[this_mode][ref_frame].as_int;
       vp9_build_inter_predictors_sby(xd, mi_row, mi_col, bsize);
