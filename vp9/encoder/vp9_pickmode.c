@@ -193,9 +193,9 @@ static void model_rd_for_sb_y(VP9_COMP *cpi, BLOCK_SIZE bsize,
   // Note our transform coeffs are 8 times an orthogonal transform.
   // Hence quantizer step is also 8 times. To get effective quantizer
   // we need to divide by 8 before sending to modeling function.
-  int64_t rate_sum = 0;
-  int64_t dist_sum = 0;
   unsigned int sse;
+  int rate;
+  int64_t dist;
 
 
   struct macroblock_plane *const p = &x->plane[0];
@@ -205,18 +205,11 @@ static void model_rd_for_sb_y(VP9_COMP *cpi, BLOCK_SIZE bsize,
   (void) cpi->fn_ptr[bs].vf(p->src.buf, p->src.stride,
                             pd->dst.buf, pd->dst.stride, &sse);
 
-  {
-    int rate;
-    int64_t dist;
-    vp9_model_rd_from_var_lapndz(sse, 1 << num_pels_log2_lookup[bs],
-                                 pd->dequant[1] >> 3, &rate, &dist);
-    rate_sum += rate;
-    dist_sum += dist;
-  }
+  vp9_model_rd_from_var_lapndz(sse, 1 << num_pels_log2_lookup[bs],
+                               pd->dequant[1] >> 3, &rate, &dist);
 
-
-  *out_rate_sum = (int)rate_sum;
-  *out_dist_sum = dist_sum << 4;
+  *out_rate_sum = rate;
+  *out_dist_sum = dist << 4;
 }
 
 // TODO(jingning) placeholder for inter-frame non-RD mode decision.
@@ -357,5 +350,6 @@ int64_t vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
       }
     }
   }
+
   return INT64_MAX;
 }
