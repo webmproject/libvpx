@@ -41,6 +41,10 @@ void vp9_initialize_rd_consts(VP9_COMP *cpi);
 
 void vp9_initialize_me_consts(VP9_COMP *cpi, int qindex);
 
+void vp9_model_rd_from_var_lapndz(unsigned int var, unsigned int n,
+                                  unsigned int qstep, int *rate,
+                                  int64_t *dist);
+
 void vp9_setup_buffer_inter(VP9_COMP *cpi, MACROBLOCK *x,
                             const TileInfo *const tile,
                             MV_REFERENCE_FRAME ref_frame,

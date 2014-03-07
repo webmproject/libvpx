@@ -287,7 +287,7 @@ void vp9_initialize_rd_consts(VP9_COMP *cpi) {
 
   set_block_thresholds(cpi);
 
-  if (!cpi->sf.use_nonrd_pick_mode) {
+  if (!cpi->sf.use_nonrd_pick_mode || cm->frame_type == KEY_FRAME) {
     fill_token_costs(x->token_costs, cm->fc.coef_probs);
 
     for (i = 0; i < PARTITION_CONTEXTS; i++)
@@ -295,7 +295,8 @@ void vp9_initialize_rd_consts(VP9_COMP *cpi) {
                       vp9_partition_tree);
   }
 
-  if (!cpi->sf.use_nonrd_pick_mode || (cm->current_video_frame & 0x07) == 1) {
+  if (!cpi->sf.use_nonrd_pick_mode || (cm->current_video_frame & 0x07) == 1 ||
+      cm->frame_type == KEY_FRAME) {
     fill_mode_costs(cpi);
 
     if (!frame_is_intra_only(cm)) {
@@ -394,9 +395,9 @@ static void model_rd_norm(int xsq_q10, int *r_q10, int *d_q10) {
   *d_q10 = (dist_tab_q10[xq] * b_q10 + dist_tab_q10[xq + 1] * a_q10) >> 10;
 }
 
-static void model_rd_from_var_lapndz(unsigned int var, unsigned int n,
-                                     unsigned int qstep, int *rate,
-                                     int64_t *dist) {
+void vp9_model_rd_from_var_lapndz(unsigned int var, unsigned int n,
+                                  unsigned int qstep, int *rate,
+                                  int64_t *dist) {
   // This function models the rate and distortion for a Laplacian
   // source with given variance when quantized with a uniform quantizer
   // with given stepsize. The closed form expressions are in:
@@ -458,8 +459,8 @@ static void model_rd_for_sb(VP9_COMP *cpi, BLOCK_SIZE bsize,
     } else {
       int rate;
       int64_t dist;
-      model_rd_from_var_lapndz(sse, 1 << num_pels_log2_lookup[bs],
-                               pd->dequant[1] >> 3, &rate, &dist);
+      vp9_model_rd_from_var_lapndz(sse, 1 << num_pels_log2_lookup[bs],
+                                   pd->dequant[1] >> 3, &rate, &dist);
       rate_sum += rate;
       dist_sum += dist;
     }
@@ -506,7 +507,8 @@ static void model_rd_for_sb_y_tx(VP9_COMP *cpi, BLOCK_SIZE bsize,
                          &pd->dst.buf[j * pd->dst.stride + k], pd->dst.stride,
                          &sse);
       // sse works better than var, since there is no dc prediction used
-      model_rd_from_var_lapndz(sse, t * t, pd->dequant[1] >> 3, &rate, &dist);
+      vp9_model_rd_from_var_lapndz(sse, t * t, pd->dequant[1] >> 3,
+                                   &rate, &dist);
       rate_sum += rate;
       dist_sum += dist;
       *out_skip &= (rate < 1024);

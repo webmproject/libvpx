@@ -2010,7 +2010,6 @@ static void encode_rd_sb_row(VP9_COMP *cpi, const TileInfo *const tile,
       const int idx_str = cm->mode_info_stride * mi_row + mi_col;
       MODE_INFO **mi_8x8 = cm->mi_grid_visible + idx_str;
       MODE_INFO **prev_mi_8x8 = cm->prev_mi_grid_visible + idx_str;
-
       cpi->mb.source_variance = UINT_MAX;
       if (cpi->sf.partition_search_type == FIXED_PARTITION) {
         set_offsets(cpi, tile, mi_row, mi_col, BLOCK_64X64);
@@ -2492,7 +2491,7 @@ static void encode_frame_internal(VP9_COMP *cpi) {
           vp9_tile_init(&tile, cm, tile_row, tile_col);
           for (mi_row = tile.mi_row_start;
                mi_row < tile.mi_row_end; mi_row += MI_BLOCK_SIZE) {
-            if (cpi->sf.use_nonrd_pick_mode)
+            if (cpi->sf.use_nonrd_pick_mode && cm->frame_type != KEY_FRAME)
               encode_nonrd_sb_row(cpi, &tile, mi_row, &tp);
             else
               encode_rd_sb_row(cpi, &tile, mi_row, &tp);
