@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//zXw\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 157,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2014-03-08T01:21:02Z",
+      "side": 1,
+      "message": "This is the same function - I just moved it up.",
+      "parentUuid": "AAAAdn//zY8\u003d",
+      "revId": "b78cb991cbb7f0b297a089ec20f59e5a56f60bcf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//zYk\u003d",
         "filename": "vp9/encoder/vp9_encodeframe.c",
         "patchSetId": 4
