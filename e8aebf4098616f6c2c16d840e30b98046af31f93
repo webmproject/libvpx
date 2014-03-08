@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//zY4\u003d",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 3
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-03-08T00:42:59Z",
+      "side": 1,
+      "message": "keep the summary short: \u0027Disable sixtap_predict_test for neon\u0027, then add the explanation in the summary; maybe link the bug too.",
+      "revId": "e8aebf4098616f6c2c16d840e30b98046af31f93",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
