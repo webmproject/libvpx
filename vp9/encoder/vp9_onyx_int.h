@@ -137,7 +137,8 @@ typedef enum {
   HEX = 2,
   BIGDIA = 3,
   SQUARE = 4,
-  FAST_HEX = 5
+  FAST_HEX = 5,
+  FAST_DIAMOND = 6
 } SEARCH_METHODS;
 
 typedef enum {

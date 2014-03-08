@@ -2457,7 +2457,14 @@ static void single_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
   // Further step/diamond searches as necessary
   further_steps = (cpi->sf.max_step_search_steps - 1) - step_param;
 
-  if (cpi->sf.search_method == FAST_HEX) {
+  if (cpi->sf.search_method == FAST_DIAMOND) {
+    bestsme = vp9_fast_dia_search(x, &mvp_full, step_param, sadpb, 0,
+                                  &cpi->fn_ptr[bsize], 1,
+                                  &ref_mv, &tmp_mv->as_mv);
+    if (bestsme < INT_MAX)
+      bestsme = vp9_get_mvpred_var(x, &tmp_mv->as_mv, &ref_mv,
+                                   &cpi->fn_ptr[bsize], 1);
+  } else if (cpi->sf.search_method == FAST_HEX) {
     bestsme = vp9_fast_hex_search(x, &mvp_full, step_param, sadpb, 0,
                                   &cpi->fn_ptr[bsize], 1,
                                   &ref_mv, &tmp_mv->as_mv);
