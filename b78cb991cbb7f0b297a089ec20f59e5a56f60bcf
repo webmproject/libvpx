@@ -1,0 +1,123 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//zY8\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 157,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2014-03-08T00:55:06Z",
+      "side": 1,
+      "message": "I get the feeling that we replaced this function with another some where else?   We have to do much of this in pick rd..  \n\nIsn\u0027t there a way to do this in common function",
+      "revId": "b78cb991cbb7f0b297a089ec20f59e5a56f60bcf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//zYk\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 256,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2014-03-08T00:55:06Z",
+      "side": 1,
+      "message": "I thought we stopped using bw and bh?",
+      "revId": "b78cb991cbb7f0b297a089ec20f59e5a56f60bcf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//zYg\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 284,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2014-03-08T00:55:06Z",
+      "side": 1,
+      "message": "rename vt -\u003e to something more descriptive globally won\u0027t point it out everywhere.",
+      "revId": "b78cb991cbb7f0b297a089ec20f59e5a56f60bcf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//zYo\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 314,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2014-03-08T00:55:06Z",
+      "side": 1,
+      "message": "data -\u003e variance_node? const?",
+      "revId": "b78cb991cbb7f0b297a089ec20f59e5a56f60bcf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//zYw\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 347,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2014-03-08T00:55:06Z",
+      "side": 1,
+      "message": "if we are asserting just assert get rid of the for...",
+      "revId": "b78cb991cbb7f0b297a089ec20f59e5a56f60bcf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//zYc\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 355,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2014-03-08T00:55:06Z",
+      "side": 1,
+      "message": "inputs then outputs",
+      "revId": "b78cb991cbb7f0b297a089ec20f59e5a56f60bcf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//zYU\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 367,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2014-03-08T00:55:06Z",
+      "side": 1,
+      "message": "inputs then outputs ,  const a and b.",
+      "revId": "b78cb991cbb7f0b297a089ec20f59e5a56f60bcf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
