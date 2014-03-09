@@ -1879,13 +1879,12 @@ VP9_COMP *vp9_create_compressor(VP9_CONFIG *oxcf) {
   if (cpi->pass == 1) {
     vp9_init_first_pass(cpi);
   } else if (cpi->pass == 2) {
-    size_t packet_sz = sizeof(FIRSTPASS_STATS);
-    int packets = (int)(oxcf->two_pass_stats_in.sz / packet_sz);
+    const size_t packet_sz = sizeof(FIRSTPASS_STATS);
+    const int packets = (int)(oxcf->two_pass_stats_in.sz / packet_sz);
 
     cpi->twopass.stats_in_start = oxcf->two_pass_stats_in.buf;
     cpi->twopass.stats_in = cpi->twopass.stats_in_start;
-    cpi->twopass.stats_in_end = (void *)((char *)cpi->twopass.stats_in
-                                         + (packets - 1) * packet_sz);
+    cpi->twopass.stats_in_end = &cpi->twopass.stats_in[packets - 1];
     vp9_init_second_pass(cpi);
   }
 

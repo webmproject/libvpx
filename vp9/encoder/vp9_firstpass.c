@@ -95,7 +95,7 @@ static int kfboost_qadjust(int qindex) {
 // Resets the first pass file to the given position using a relative seek from
 // the current position.
 static void reset_fpf_position(struct twopass_rc *p,
-                               FIRSTPASS_STATS *position) {
+                               const FIRSTPASS_STATS *position) {
   p->stats_in = position;
 }
 
@@ -903,7 +903,7 @@ extern void vp9_new_framerate(VP9_COMP *cpi, double framerate);
 
 void vp9_init_second_pass(VP9_COMP *cpi) {
   FIRSTPASS_STATS this_frame;
-  FIRSTPASS_STATS *start_pos;
+  const FIRSTPASS_STATS *start_pos;
   struct twopass_rc *const twopass = &cpi->twopass;
   const VP9_CONFIG *const oxcf = &cpi->oxcf;
 
@@ -1011,7 +1011,7 @@ static int detect_transition_to_still(VP9_COMP *cpi, int frame_interval,
       loop_decay_rate >= 0.999 &&
       last_decay_rate < 0.9) {
     int j;
-    FIRSTPASS_STATS *position = cpi->twopass.stats_in;
+    const FIRSTPASS_STATS *position = cpi->twopass.stats_in;
     FIRSTPASS_STATS tmp_next_frame;
 
     // Look ahead a few frames to see if static condition persists...
@@ -1346,7 +1346,7 @@ void define_fixed_arf_period(VP9_COMP *cpi) {
 // Analyse and define a gf/arf group.
 static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   FIRSTPASS_STATS next_frame = { 0 };
-  FIRSTPASS_STATS *start_pos;
+  const FIRSTPASS_STATS *start_pos;
   struct twopass_rc *const twopass = &cpi->twopass;
   int i;
   double boost_score = 0.0;
@@ -1793,18 +1793,11 @@ static int test_candidate_kf(VP9_COMP *cpi,
          ((next_frame->intra_error /
            DOUBLE_DIVIDE_CHECK(next_frame->coded_error)) > 3.5))))) {
     int i;
-    FIRSTPASS_STATS *start_pos;
-
-    FIRSTPASS_STATS local_next_frame;
-
+    const FIRSTPASS_STATS *start_pos = cpi->twopass.stats_in;
+    FIRSTPASS_STATS local_next_frame = *next_frame;
     double boost_score = 0.0;
     double old_boost_score = 0.0;
     double decay_accumulator = 1.0;
-
-    local_next_frame = *next_frame;
-
-    // Note the starting file position so we can reset to it.
-    start_pos = cpi->twopass.stats_in;
 
     // Examine how well the key frame predicts subsequent frames.
     for (i = 0; i < 16; ++i) {
@@ -1861,7 +1854,7 @@ static void find_next_key_frame(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   FIRSTPASS_STATS last_frame;
   FIRSTPASS_STATS first_frame;
   FIRSTPASS_STATS next_frame;
-  FIRSTPASS_STATS *start_position;
+  const FIRSTPASS_STATS *start_position;
 
   double decay_accumulator = 1.0;
   double zero_motion_accumulator = 1.0;

@@ -43,7 +43,9 @@ struct twopass_rc {
   unsigned int this_iiratio;
   FIRSTPASS_STATS total_stats;
   FIRSTPASS_STATS this_frame_stats;
-  FIRSTPASS_STATS *stats_in, *stats_in_end, *stats_in_start;
+  const FIRSTPASS_STATS *stats_in;
+  const FIRSTPASS_STATS *stats_in_start;
+  const FIRSTPASS_STATS *stats_in_end;
   FIRSTPASS_STATS total_left_stats;
   int first_pass_done;
   int64_t bits_left;
