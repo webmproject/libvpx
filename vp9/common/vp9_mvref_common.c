@@ -188,12 +188,13 @@ static INLINE int is_inside(const TileInfo *const tile,
 // to try and find candidate reference vectors.
 static void find_mv_refs_idx(const VP9_COMMON *cm, const MACROBLOCKD *xd,
                              const TileInfo *const tile,
-                             MODE_INFO *mi, const MODE_INFO *prev_mi,
-                             MV_REFERENCE_FRAME ref_frame,
+                             MODE_INFO *mi, MV_REFERENCE_FRAME ref_frame,
                              int_mv *mv_ref_list,
                              int block, int mi_row, int mi_col) {
   const int *ref_sign_bias = cm->ref_frame_sign_bias;
   int i, refmv_count = 0;
+  const MODE_INFO *prev_mi = cm->coding_use_prev_mi && cm->prev_mi ?
+                                 xd->prev_mi_8x8[0] : NULL;
   const POSITION *const mv_ref_search = mv_ref_blocks[mi->mbmi.sb_type];
   const MB_MODE_INFO *const prev_mbmi = cm->coding_use_prev_mi && prev_mi ?
       &prev_mi->mbmi : NULL;
@@ -282,11 +283,10 @@ static void find_mv_refs_idx(const VP9_COMMON *cm, const MACROBLOCKD *xd,
 
 void vp9_find_mv_refs(const VP9_COMMON *cm, const MACROBLOCKD *xd,
                                     const TileInfo *const tile,
-                                    MODE_INFO *mi, const MODE_INFO *prev_mi,
-                                    MV_REFERENCE_FRAME ref_frame,
+                                    MODE_INFO *mi, MV_REFERENCE_FRAME ref_frame,
                                     int_mv *mv_ref_list,
                                     int mi_row, int mi_col) {
-  find_mv_refs_idx(cm, xd, tile, mi, prev_mi, ref_frame, mv_ref_list, -1,
+  find_mv_refs_idx(cm, xd, tile, mi, ref_frame, mv_ref_list, -1,
                    mi_row, mi_col);
 }
 
@@ -324,8 +324,8 @@ void vp9_append_sub8x8_mvs_for_idx(VP9_COMMON *cm, MACROBLOCKD *xd,
 
   assert(MAX_MV_REF_CANDIDATES == 2);
 
-  find_mv_refs_idx(cm, xd, tile, mi, xd->last_mi, mi->mbmi.ref_frame[ref],
-                   mv_list, block, mi_row, mi_col);
+  find_mv_refs_idx(cm, xd, tile, mi, mi->mbmi.ref_frame[ref], mv_list, block,
+                   mi_row, mi_col);
 
   near->as_int = 0;
   switch (block) {

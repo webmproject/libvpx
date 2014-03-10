@@ -346,10 +346,6 @@ static void set_offsets(VP9_COMMON *const cm, MACROBLOCKD *const xd,
 
   xd->mi_8x8 = cm->mi_grid_visible + offset;
   xd->prev_mi_8x8 = cm->prev_mi_grid_visible + offset;
-
-  xd->last_mi = cm->coding_use_prev_mi && cm->prev_mi ?
-      xd->prev_mi_8x8[0] : NULL;
-
   xd->mi_8x8[0] = xd->mi_stream + offset - tile_offset;
   xd->mi_8x8[0]->mbmi.sb_type = bsize;
   for (y = 0; y < y_mis; ++y)

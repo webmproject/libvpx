@@ -432,7 +432,7 @@ static void read_inter_block_mode_info(VP9_COMMON *const cm,
 
   for (ref = 0; ref < 1 + is_compound; ++ref) {
     const MV_REFERENCE_FRAME frame = mbmi->ref_frame[ref];
-    vp9_find_mv_refs(cm, xd, tile, mi, xd->last_mi, frame, mbmi->ref_mvs[frame],
+    vp9_find_mv_refs(cm, xd, tile, mi, frame, mbmi->ref_mvs[frame],
                      mi_row, mi_col);
   }
 

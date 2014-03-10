@@ -593,9 +593,6 @@ static void set_offsets(VP9_COMP *cpi, const TileInfo *const tile,
 
   xd->mi_8x8 = cm->mi_grid_visible + idx_str;
   xd->prev_mi_8x8 = cm->prev_mi_grid_visible + idx_str;
-
-  xd->last_mi = cm->prev_mi ? xd->prev_mi_8x8[0] : NULL;
-
   xd->mi_8x8[0] = cm->mi + idx_str;
 
   mbmi = &xd->mi_8x8[0]->mbmi;
@@ -2395,8 +2392,6 @@ static void encode_frame_internal(VP9_COMP *cpi) {
   xd->mi_8x8 = cm->mi_grid_visible;
   // required for vp9_frame_init_quantizer
   xd->mi_8x8[0] = cm->mi;
-
-  xd->last_mi = cm->prev_mi;
 
   vp9_zero(cm->counts.mv);
   vp9_zero(cpi->coef_counts);
