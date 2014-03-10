@@ -394,7 +394,7 @@ const vpx_codec_cx_pkt_t *vpx_codec_pkt_list_get(struct vpx_codec_pkt_list *list
     *iter = list->pkts;
   }
 
-  pkt = (const void *) * iter;
+  pkt = (const vpx_codec_cx_pkt_t *)*iter;
 
   if ((size_t)(pkt - list->pkts) < list->cnt)
     *iter = pkt + 1;
