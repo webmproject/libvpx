@@ -16,6 +16,24 @@
       "revId": "b07ae88ec490cde22ce16435b038822d442f7163",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//zSc\u003d",
+        "filename": "vp9/encoder/vp9_encodemb.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 110,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-03-10T17:40:04Z",
+      "side": 1,
+      "message": "Unfortunately, no. There is an assignment at the end of optimize_b function: *a \u003d *l \u003d (final_eob \u003e 0);",
+      "parentUuid": "AAAAdn//zVM\u003d",
+      "revId": "b07ae88ec490cde22ce16435b038822d442f7163",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
