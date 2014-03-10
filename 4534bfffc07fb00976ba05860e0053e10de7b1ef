@@ -34,6 +34,24 @@
       "revId": "4534bfffc07fb00976ba05860e0053e10de7b1ef",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//zUs\u003d",
+        "filename": "vp9/encoder/vp9_onyx_if.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 866,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2014-03-10T16:28:05Z",
+      "side": 1,
+      "message": "yes - whenever we want to use sf-\u003epartition_search_type \u003d FIXED_PARTITION, we also need to set sf-\u003ealways_this_block_size.\nWe can have a default on the top of the function for this, but ideally it should be set in whichever speed setting we use partition_search_type \u003d FIXED_PARTITION. Different speed settings can use different values of always_this_block_size (since 32x32 is faster than 16x16, etc.)",
+      "parentUuid": "AAAAdn//z4Y\u003d",
+      "revId": "4534bfffc07fb00976ba05860e0053e10de7b1ef",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
