@@ -65,8 +65,8 @@ static void set_roi_map(const vpx_codec_enc_cfg_t *cfg,
   unsigned int i;
   vpx_roi_map_t roi = {0};
 
-  roi.rows = cfg->g_h / 16;
-  roi.cols = cfg->g_w / 16;
+  roi.rows = (cfg->g_h + 15) / 16;
+  roi.cols = (cfg->g_w + 15) / 16;
 
   roi.delta_q[0] = 0;
   roi.delta_q[1] = -2;
@@ -98,8 +98,8 @@ static void set_active_map(const vpx_codec_enc_cfg_t *cfg,
   unsigned int i;
   vpx_active_map_t map = {0};
 
-  map.rows = cfg->g_h / 16;
-  map.cols = cfg->g_w / 16;
+  map.rows = (cfg->g_h + 15) / 16;
+  map.cols = (cfg->g_w + 15) / 16;
 
   map.active_map = (uint8_t *)malloc(map.rows * map.cols);
   for (i = 0; i < map.rows * map.cols; ++i)
@@ -115,8 +115,8 @@ static void unset_active_map(const vpx_codec_enc_cfg_t *cfg,
                              vpx_codec_ctx_t *codec) {
   vpx_active_map_t map = {0};
 
-  map.rows = cfg->g_h / 16;
-  map.cols = cfg->g_w / 16;
+  map.rows = (cfg->g_h + 15) / 16;
+  map.cols = (cfg->g_w + 15) / 16;
   map.active_map = NULL;
 
   if (vpx_codec_control(codec, VP8E_SET_ACTIVEMAP, &map))
@@ -161,7 +161,7 @@ int main(int argc, char **argv) {
   VpxVideoWriter *writer = NULL;
   const VpxInterface *encoder = NULL;
   const int fps = 2;        // TODO(dkovalev) add command line argument
-  const int bitrate = 200;   // kbit/s TODO(dkovalev) add command line argument
+  const double bits_per_pixel_per_frame = 0.067;
 
   exec_name = argv[0];
 
@@ -200,7 +200,8 @@ int main(int argc, char **argv) {
   cfg.g_h = info.frame_height;
   cfg.g_timebase.num = info.time_base.numerator;
   cfg.g_timebase.den = info.time_base.denominator;
-  cfg.rc_target_bitrate = bitrate;
+  cfg.rc_target_bitrate = (unsigned int)(bits_per_pixel_per_frame * cfg.g_w *
+                                         cfg.g_h * fps / 1000);
 
   writer = vpx_video_writer_open(argv[4], kContainerIVF, &info);
   if (!writer)
