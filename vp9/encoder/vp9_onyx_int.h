@@ -484,8 +484,8 @@ typedef enum {
   NO_AQ = 0,
   VARIANCE_AQ = 1,
   COMPLEXITY_AQ = 2,
-  AQ_MODES_COUNT  // This should always be the last member of the enum
-} AQ_MODES;
+  AQ_MODE_COUNT  // This should always be the last member of the enum
+} AQ_MODE;
 
 typedef struct {
   int version;  // 4 versions of bitstream defined:
@@ -553,7 +553,7 @@ typedef struct {
   int best_allowed_q;
   int cq_level;
   int lossless;
-  int aq_mode;  // Adaptive Quantization mode
+  AQ_MODE aq_mode;  // Adaptive Quantization mode
 
   // two pass datarate control
   int two_pass_vbrbias;        // two pass datarate control tweaks

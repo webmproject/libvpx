@@ -662,10 +662,11 @@ static void rd_pick_sb_modes(VP9_COMP *cpi, const TileInfo *const tile,
   VP9_COMMON *const cm = &cpi->common;
   MACROBLOCK *const x = &cpi->mb;
   MACROBLOCKD *const xd = &x->e_mbd;
+  MB_MODE_INFO *mbmi;
   struct macroblock_plane *const p = x->plane;
   struct macroblockd_plane *const pd = xd->plane;
-  int i;
-  int orig_rdmult = x->rdmult;
+  const AQ_MODE aq_mode = cpi->oxcf.aq_mode;
+  int i, orig_rdmult = x->rdmult;
   double rdmult_ratio;
 
   vp9_clear_system_state();
@@ -685,7 +686,8 @@ static void rd_pick_sb_modes(VP9_COMP *cpi, const TileInfo *const tile,
   }
 
   set_offsets(cpi, tile, mi_row, mi_col, bsize);
-  xd->mi_8x8[0]->mbmi.sb_type = bsize;
+  mbmi = &xd->mi_8x8[0]->mbmi;
+  mbmi->sb_type = bsize;
 
   for (i = 0; i < MAX_MB_PLANE; ++i) {
     p[i].coeff = ctx->coeff_pbuf[i][0];
@@ -697,23 +699,22 @@ static void rd_pick_sb_modes(VP9_COMP *cpi, const TileInfo *const tile,
   x->skip_recode = 0;
 
   // Set to zero to make sure we do not use the previous encoded frame stats
-  xd->mi_8x8[0]->mbmi.skip = 0;
+  mbmi->skip = 0;
 
   x->source_variance = get_sby_perpixel_variance(cpi, x, bsize);
 
-  if (cpi->oxcf.aq_mode == VARIANCE_AQ) {
+  if (aq_mode == VARIANCE_AQ) {
     const int energy = bsize <= BLOCK_16X16 ? x->mb_energy
                                             : vp9_block_energy(cpi, x, bsize);
 
     if (cm->frame_type == KEY_FRAME ||
         cpi->refresh_alt_ref_frame ||
         (cpi->refresh_golden_frame && !cpi->rc.is_src_frame_alt_ref)) {
-      xd->mi_8x8[0]->mbmi.segment_id = vp9_vaq_segment_id(energy);
+      mbmi->segment_id = vp9_vaq_segment_id(energy);
     } else {
       const uint8_t *const map = cm->seg.update_map ? cpi->segmentation_map
                                                     : cm->last_frame_seg_map;
-      xd->mi_8x8[0]->mbmi.segment_id =
-        vp9_get_segment_id(cm, map, bsize, mi_row, mi_col);
+      mbmi->segment_id = vp9_get_segment_id(cm, map, bsize, mi_row, mi_col);
     }
 
     rdmult_ratio = vp9_vaq_rdmult_ratio(energy);
@@ -723,18 +724,17 @@ static void rd_pick_sb_modes(VP9_COMP *cpi, const TileInfo *const tile,
   if (cpi->oxcf.tuning == VP8_TUNE_SSIM)
     activity_masking(cpi, x);
 
-  if (cpi->oxcf.aq_mode == VARIANCE_AQ) {
+  if (aq_mode == VARIANCE_AQ) {
     vp9_clear_system_state();
     x->rdmult = (int)round(x->rdmult * rdmult_ratio);
-  } else if (cpi->oxcf.aq_mode == COMPLEXITY_AQ) {
+  } else if (aq_mode == COMPLEXITY_AQ) {
     const int mi_offset = mi_row * cm->mi_cols + mi_col;
     unsigned char complexity = cpi->complexity_map[mi_offset];
     const int is_edge = (mi_row <= 1) || (mi_row >= (cm->mi_rows - 2)) ||
                         (mi_col <= 1) || (mi_col >= (cm->mi_cols - 2));
 
-    if (!is_edge && (complexity > 128)) {
-      x->rdmult = x->rdmult  + ((x->rdmult * (complexity - 128)) / 256);
-    }
+    if (!is_edge && (complexity > 128))
+      x->rdmult += ((x->rdmult * (complexity - 128)) / 256);
   }
 
   // Find best coding mode & reconstruct the MB so it is available
@@ -751,14 +751,13 @@ static void rd_pick_sb_modes(VP9_COMP *cpi, const TileInfo *const tile,
                                     totaldist, bsize, ctx, best_rd);
   }
 
-  if (cpi->oxcf.aq_mode == VARIANCE_AQ) {
+  if (aq_mode == VARIANCE_AQ) {
     x->rdmult = orig_rdmult;
     if (*totalrate != INT_MAX) {
       vp9_clear_system_state();
       *totalrate = (int)round(*totalrate * rdmult_ratio);
     }
-  }
-  else if (cpi->oxcf.aq_mode == COMPLEXITY_AQ) {
+  } else if (aq_mode == COMPLEXITY_AQ) {
     x->rdmult = orig_rdmult;
   }
 }

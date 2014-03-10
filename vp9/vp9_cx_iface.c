@@ -156,7 +156,7 @@ static vpx_codec_err_t validate_config(vpx_codec_alg_priv_t      *ctx,
     RANGE_CHECK_HI(cfg, rc_max_quantizer, 0);
     RANGE_CHECK_HI(cfg, rc_min_quantizer, 0);
   }
-  RANGE_CHECK(vp8_cfg, aq_mode,           0, AQ_MODES_COUNT - 1);
+  RANGE_CHECK(vp8_cfg, aq_mode,           0, AQ_MODE_COUNT - 1);
 
   RANGE_CHECK_HI(cfg, g_threads,          64);
   RANGE_CHECK_HI(cfg, g_lag_in_frames,    MAX_LAG_BUFFERS);
