@@ -1,0 +1,89 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//zUM\u003d",
+        "filename": "vp9/encoder/vp9_firstpass.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 1003234
+      },
+      "writtenOn": "2014-03-10T16:47:18Z",
+      "side": 1,
+      "message": "It is clearer to declare references to functions defined in an another file in a a .h file that is included by the defining .c file.",
+      "revId": "0630bcd576ec22b368c3f5907a20513675fb2b6c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//zUI\u003d",
+        "filename": "vp9/encoder/vp9_firstpass.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 527,
+      "author": {
+        "id": 1003234
+      },
+      "writtenOn": "2014-03-10T16:47:18Z",
+      "side": 1,
+      "message": "put \"disable golden frame\" comment near the code that does it.",
+      "revId": "0630bcd576ec22b368c3f5907a20513675fb2b6c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//zUg\u003d",
+        "filename": "vp9/encoder/vp9_onyx_if.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 2593,
+      "author": {
+        "id": 1003234
+      },
+      "writtenOn": "2014-03-10T16:47:18Z",
+      "side": 1,
+      "message": "If this function is no longer static, shouldn\u0027t it be defined in vp9_onyx.h?",
+      "revId": "0630bcd576ec22b368c3f5907a20513675fb2b6c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//zUY\u003d",
+        "filename": "vp9/encoder/vp9_onyx_if.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 2677,
+      "author": {
+        "id": 1003234
+      },
+      "writtenOn": "2014-03-10T16:47:18Z",
+      "side": 1,
+      "message": "ditto",
+      "revId": "0630bcd576ec22b368c3f5907a20513675fb2b6c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//zUw\u003d",
+        "filename": "vp9/encoder/vp9_onyx_int.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 837,
+      "author": {
+        "id": 1003234
+      },
+      "writtenOn": "2014-03-10T16:47:18Z",
+      "side": 1,
+      "message": "Comment says only defined for temporal layers, but layer_context allocates space for spatial layers.",
+      "revId": "0630bcd576ec22b368c3f5907a20513675fb2b6c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
