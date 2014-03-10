@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//zVk\u003d",
+        "filename": "vp9/encoder/vp9_craq.c",
+        "patchSetId": 12
+      },
+      "lineNbr": 283,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2014-03-10T14:44:54Z",
+      "side": 1,
+      "message": "I am pretty sure you mean \u003e here not \u003c else you will always set the qindex_delta to \"at least the max\"!\n\neg if delta is -5 for the target rate % but the base index is 250 and max_delta_perc is 50 then you will reset the delta to -125.",
+      "revId": "d0f79df3e5c23296bc1fc13eb45c8cb80250d67a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
