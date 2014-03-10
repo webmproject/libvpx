@@ -3701,16 +3701,13 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
   // combination that wins out.
   if (cpi->sf.adaptive_rd_thresh) {
     for (mode_index = 0; mode_index < MAX_MODES; ++mode_index) {
+      int *const fact = &cpi->rd_thresh_freq_fact[bsize][mode_index];
+
       if (mode_index == best_mode_index) {
-        cpi->rd_thresh_freq_fact[bsize][mode_index] -=
-          (cpi->rd_thresh_freq_fact[bsize][mode_index] >> 3);
+        *fact -= (*fact >> 3);
       } else {
-        cpi->rd_thresh_freq_fact[bsize][mode_index] += RD_THRESH_INC;
-        if (cpi->rd_thresh_freq_fact[bsize][mode_index] >
-            (cpi->sf.adaptive_rd_thresh * RD_THRESH_MAX_FACT)) {
-          cpi->rd_thresh_freq_fact[bsize][mode_index] =
-            cpi->sf.adaptive_rd_thresh * RD_THRESH_MAX_FACT;
-        }
+        *fact = MIN(*fact + RD_THRESH_INC,
+                    cpi->sf.adaptive_rd_thresh * RD_THRESH_MAX_FACT);
       }
     }
   }
@@ -4416,16 +4413,13 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
   // combination that wins out.
   if (cpi->sf.adaptive_rd_thresh) {
     for (mode_index = 0; mode_index < MAX_REFS; ++mode_index) {
+      int *const fact = &cpi->rd_thresh_freq_sub8x8[bsize][mode_index];
+
       if (mode_index == best_mode_index) {
-        cpi->rd_thresh_freq_sub8x8[bsize][mode_index] -=
-          (cpi->rd_thresh_freq_sub8x8[bsize][mode_index] >> 3);
+        *fact -= (*fact >> 3);
       } else {
-        cpi->rd_thresh_freq_sub8x8[bsize][mode_index] += RD_THRESH_INC;
-        if (cpi->rd_thresh_freq_sub8x8[bsize][mode_index] >
-            (cpi->sf.adaptive_rd_thresh * RD_THRESH_MAX_FACT)) {
-          cpi->rd_thresh_freq_sub8x8[bsize][mode_index] =
-            cpi->sf.adaptive_rd_thresh * RD_THRESH_MAX_FACT;
-        }
+        *fact = MIN(*fact + RD_THRESH_INC,
+                    cpi->sf.adaptive_rd_thresh * RD_THRESH_MAX_FACT);
       }
     }
   }
