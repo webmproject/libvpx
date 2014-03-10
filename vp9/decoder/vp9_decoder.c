@@ -189,7 +189,7 @@ void vp9_remove_decompressor(VP9D_COMP *pbi) {
     vp9_loop_filter_dealloc(lf_sync, sb_rows);
   }
 
-  vpx_free(pbi->mi_streams);
+  vpx_free(pbi->common.mi_streams);
   vpx_free(pbi->above_context[0]);
   vpx_free(pbi->above_seg_context);
   vpx_free(pbi);

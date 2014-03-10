@@ -153,6 +153,10 @@ typedef struct VP9Common {
   MODE_INFO **prev_mi_grid_base;
   MODE_INFO **prev_mi_grid_visible;
 
+  // Each tile column has its own MODE_INFO stream. This array indexes them by
+  // tile column index.
+  MODE_INFO **mi_streams;
+
   // Persistent mb segment id map used in prediction.
   unsigned char *last_frame_seg_map;
 
