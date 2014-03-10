@@ -331,44 +331,41 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, const MODE_INFO *mi,
 }
 
 static void write_mb_modes_kf(const VP9_COMP *cpi, MODE_INFO **mi_8x8,
-                              vp9_writer *bc) {
+                              vp9_writer *w) {
   const VP9_COMMON *const cm = &cpi->common;
   const MACROBLOCKD *const xd = &cpi->mb.e_mbd;
   const struct segmentation *const seg = &cm->seg;
-  MODE_INFO *m = mi_8x8[0];
-  const int ym = m->mbmi.mode;
-  const int segment_id = m->mbmi.segment_id;
-  MODE_INFO *above_mi = mi_8x8[-xd->mode_info_stride];
-  MODE_INFO *left_mi = xd->left_available ? mi_8x8[-1] : NULL;
+  const MODE_INFO *const mi = mi_8x8[0];
+  const MODE_INFO *const above_mi = mi_8x8[-xd->mode_info_stride];
+  const MODE_INFO *const left_mi = xd->left_available ? mi_8x8[-1] : NULL;
+  const MB_MODE_INFO *const mbmi = &mi->mbmi;
+  const BLOCK_SIZE bsize = mbmi->sb_type;
 
   if (seg->update_map)
-    write_segment_id(bc, seg, m->mbmi.segment_id);
+    write_segment_id(w, seg, mbmi->segment_id);
 
-  write_skip(cpi, segment_id, m, bc);
+  write_skip(cpi, mbmi->segment_id, mi, w);
 
-  if (m->mbmi.sb_type >= BLOCK_8X8 && cm->tx_mode == TX_MODE_SELECT)
-    write_selected_tx_size(cpi, m->mbmi.tx_size, m->mbmi.sb_type, bc);
+  if (bsize >= BLOCK_8X8 && cm->tx_mode == TX_MODE_SELECT)
+    write_selected_tx_size(cpi, mbmi->tx_size, bsize, w);
 
-  if (m->mbmi.sb_type >= BLOCK_8X8) {
-    const MB_PREDICTION_MODE A = vp9_above_block_mode(m, above_mi, 0);
-    const MB_PREDICTION_MODE L = vp9_left_block_mode(m, left_mi, 0);
-    write_intra_mode(bc, ym, vp9_kf_y_mode_prob[A][L]);
+  if (bsize >= BLOCK_8X8) {
+    write_intra_mode(w, mbmi->mode, get_y_mode_probs(mi, above_mi, left_mi, 0));
   } else {
+    const int num_4x4_w = num_4x4_blocks_wide_lookup[bsize];
+    const int num_4x4_h = num_4x4_blocks_high_lookup[bsize];
     int idx, idy;
-    const int num_4x4_blocks_wide = num_4x4_blocks_wide_lookup[m->mbmi.sb_type];
-    const int num_4x4_blocks_high = num_4x4_blocks_high_lookup[m->mbmi.sb_type];
-    for (idy = 0; idy < 2; idy += num_4x4_blocks_high) {
-      for (idx = 0; idx < 2; idx += num_4x4_blocks_wide) {
-        int i = idy * 2 + idx;
-        const MB_PREDICTION_MODE A = vp9_above_block_mode(m, above_mi, i);
-        const MB_PREDICTION_MODE L = vp9_left_block_mode(m, left_mi, i);
-        const int bm = m->bmi[i].as_mode;
-        write_intra_mode(bc, bm, vp9_kf_y_mode_prob[A][L]);
+
+    for (idy = 0; idy < 2; idy += num_4x4_h) {
+      for (idx = 0; idx < 2; idx += num_4x4_w) {
+        const int block = idy * 2 + idx;
+        write_intra_mode(w, mi->bmi[block].as_mode,
+                         get_y_mode_probs(mi, above_mi, left_mi, block));
       }
     }
   }
 
-  write_intra_mode(bc, m->mbmi.uv_mode, vp9_kf_uv_mode_prob[ym]);
+  write_intra_mode(w, mbmi->uv_mode, vp9_kf_uv_mode_prob[mbmi->mode]);
 }
 
 static void write_modes_b(VP9_COMP *cpi, const TileInfo *const tile,
