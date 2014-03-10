@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//zQA\u003d",
+        "filename": "vp9/encoder/vp9_firstpass.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 1129385
+      },
+      "writtenOn": "2014-03-10T18:18:21Z",
+      "side": 1,
+      "message": "Functions in vp9_onyx_int.h are encoder interfaces. But these two are not. Actually vp9_firstpass.c should be part of vp9_onyx_if.c. They declared them as static before because no one else will use them. Now we only need them here so I think I should put them here rather than the interface header file.",
+      "parentUuid": "AAAAdn//zUM\u003d",
+      "revId": "0630bcd576ec22b368c3f5907a20513675fb2b6c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//zUI\u003d",
         "filename": "vp9/encoder/vp9_firstpass.c",
         "patchSetId": 2
@@ -30,6 +48,24 @@
       "writtenOn": "2014-03-10T16:47:18Z",
       "side": 1,
       "message": "put \"disable golden frame\" comment near the code that does it.",
+      "revId": "0630bcd576ec22b368c3f5907a20513675fb2b6c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//zQI\u003d",
+        "filename": "vp9/encoder/vp9_firstpass.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 527,
+      "author": {
+        "id": 1129385
+      },
+      "writtenOn": "2014-03-10T18:18:21Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//zUI\u003d",
       "revId": "0630bcd576ec22b368c3f5907a20513675fb2b6c",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -81,6 +117,24 @@
       "writtenOn": "2014-03-10T16:47:18Z",
       "side": 1,
       "message": "Comment says only defined for temporal layers, but layer_context allocates space for spatial layers.",
+      "revId": "0630bcd576ec22b368c3f5907a20513675fb2b6c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//zP8\u003d",
+        "filename": "vp9/encoder/vp9_onyx_int.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 837,
+      "author": {
+        "id": 1129385
+      },
+      "writtenOn": "2014-03-10T18:18:21Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//zUw\u003d",
       "revId": "0630bcd576ec22b368c3f5907a20513675fb2b6c",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
