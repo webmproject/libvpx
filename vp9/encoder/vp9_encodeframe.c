@@ -2230,7 +2230,7 @@ static void reset_skip_txfm_size(VP9_COMMON *cm, TX_SIZE txfm_max) {
   }
 }
 
-static MV_REFERENCE_FRAME get_frame_type(VP9_COMP *cpi) {
+static MV_REFERENCE_FRAME get_frame_type(const VP9_COMP *cpi) {
   if (frame_is_intra_only(&cpi->common))
     return INTRA_FRAME;
   else if (cpi->rc.is_src_frame_alt_ref && cpi->refresh_golden_frame)
@@ -2241,30 +2241,31 @@ static MV_REFERENCE_FRAME get_frame_type(VP9_COMP *cpi) {
     return GOLDEN_FRAME;
 }
 
-static void select_tx_mode(VP9_COMP *cpi) {
+static TX_MODE select_tx_mode(const VP9_COMP *cpi) {
   if (cpi->oxcf.lossless) {
-    cpi->common.tx_mode = ONLY_4X4;
+    return ONLY_4X4;
   } else if (cpi->common.current_video_frame == 0) {
-    cpi->common.tx_mode = TX_MODE_SELECT;
+    return TX_MODE_SELECT;
   } else {
     if (cpi->sf.tx_size_search_method == USE_LARGESTALL) {
-      cpi->common.tx_mode = ALLOW_32X32;
+      return ALLOW_32X32;
     } else if (cpi->sf.tx_size_search_method == USE_FULL_RD) {
-      int frame_type = get_frame_type(cpi);
-      cpi->common.tx_mode =
-          cpi->rd_tx_select_threshes[frame_type][ALLOW_32X32]
-          > cpi->rd_tx_select_threshes[frame_type][TX_MODE_SELECT] ?
-          ALLOW_32X32 : TX_MODE_SELECT;
+      const int frame_type = get_frame_type(cpi);
+      return cpi->rd_tx_select_threshes[frame_type][ALLOW_32X32] >
+                 cpi->rd_tx_select_threshes[frame_type][TX_MODE_SELECT] ?
+                     ALLOW_32X32 : TX_MODE_SELECT;
     } else {
       unsigned int total = 0;
       int i;
       for (i = 0; i < TX_SIZES; ++i)
         total += cpi->tx_stepdown_count[i];
+
       if (total) {
-        double fraction = (double)cpi->tx_stepdown_count[0] / total;
-        cpi->common.tx_mode = fraction > 0.90 ? ALLOW_32X32 : TX_MODE_SELECT;
-        // printf("fraction = %f\n", fraction);
-      }  // else keep unchanged
+        const double fraction = (double)cpi->tx_stepdown_count[0] / total;
+        return fraction > 0.90 ? ALLOW_32X32 : TX_MODE_SELECT;
+      } else {
+        return cpi->common.tx_mode;
+      }
     }
   }
 }
@@ -2403,7 +2404,7 @@ static void encode_frame_internal(VP9_COMP *cpi) {
   vp9_zero(cm->counts.eob_branch);
 
   // Set frame level transform size use case
-  select_tx_mode(cpi);
+  cm->tx_mode = select_tx_mode(cpi);
 
   cpi->mb.e_mbd.lossless = cm->base_qindex == 0 && cm->y_dc_delta_q == 0
       && cm->uv_dc_delta_q == 0 && cm->uv_ac_delta_q == 0;
@@ -2571,7 +2572,6 @@ void vp9_encode_frame(VP9_COMP *cpi) {
     }
 
     cpi->mb.e_mbd.lossless = cpi->oxcf.lossless;
-
     cm->reference_mode = reference_mode;
 
     encode_frame_internal(cpi);
