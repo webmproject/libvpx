@@ -25,6 +25,7 @@ VP9_DX_SRCS-yes += decoder/vp9_dthread.c
 VP9_DX_SRCS-yes += decoder/vp9_dthread.h
 VP9_DX_SRCS-yes += decoder/vp9_reader.h
 VP9_DX_SRCS-yes += decoder/vp9_reader.c
+VP9_DX_SRCS-yes += decoder/vp9_read_bit_buffer.c
 VP9_DX_SRCS-yes += decoder/vp9_read_bit_buffer.h
 VP9_DX_SRCS-yes += decoder/vp9_decodemv.h
 VP9_DX_SRCS-yes += decoder/vp9_detokenize.h
