@@ -56,7 +56,8 @@
 static const char *exec_name;
 
 void usage_exit() {
-  fprintf(stderr, "Usage: %s <width> <height> <infile> <outfile>\n", exec_name);
+  fprintf(stderr, "Usage: %s <codec> <width> <height> <infile> <outfile>\n",
+          exec_name);
   exit(EXIT_FAILURE);
 }
 
@@ -165,16 +166,16 @@ int main(int argc, char **argv) {
 
   exec_name = argv[0];
 
-  if (argc != 5)
+  if (argc != 6)
     die("Invalid number of arguments");
 
-  encoder = get_vpx_encoder_by_name("vp8");  // only vp8 for now
+  encoder = get_vpx_encoder_by_name(argv[1]);
   if (!encoder)
     die("Unsupported codec.");
 
   info.codec_fourcc = encoder->fourcc;
-  info.frame_width = strtol(argv[1], NULL, 0);
-  info.frame_height = strtol(argv[2], NULL, 0);
+  info.frame_width = strtol(argv[2], NULL, 0);
+  info.frame_height = strtol(argv[3], NULL, 0);
   info.time_base.numerator = 1;
   info.time_base.denominator = fps;
 
@@ -202,13 +203,14 @@ int main(int argc, char **argv) {
   cfg.g_timebase.den = info.time_base.denominator;
   cfg.rc_target_bitrate = (unsigned int)(bits_per_pixel_per_frame * cfg.g_w *
                                          cfg.g_h * fps / 1000);
+  cfg.g_lag_in_frames = 0;
 
-  writer = vpx_video_writer_open(argv[4], kContainerIVF, &info);
+  writer = vpx_video_writer_open(argv[5], kContainerIVF, &info);
   if (!writer)
-    die("Failed to open %s for writing.", argv[4]);
+    die("Failed to open %s for writing.", argv[5]);
 
-  if (!(infile = fopen(argv[3], "rb")))
-    die("Failed to open %s for reading.", argv[3]);
+  if (!(infile = fopen(argv[4], "rb")))
+    die("Failed to open %s for reading.", argv[4]);
 
   if (vpx_codec_enc_init(&codec, encoder->interface(), &cfg, 0))
     die_codec(&codec, "Failed to initialize encoder");
@@ -216,7 +218,7 @@ int main(int argc, char **argv) {
   while (vpx_img_read(&raw, infile)) {
     ++frame_count;
 
-    if (frame_count == 22) {
+    if (frame_count == 22 && encoder->fourcc == VP8_FOURCC) {
       set_roi_map(&cfg, &codec);
     } else if (frame_count == 33) {
       set_active_map(&cfg, &codec);
