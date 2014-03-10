@@ -75,6 +75,7 @@ integer_mv_pattern_search_fn vp9_hex_search;
 integer_mv_pattern_search_fn vp9_bigdia_search;
 integer_mv_pattern_search_fn vp9_square_search;
 integer_mv_pattern_search_fn vp9_fast_hex_search;
+integer_mv_pattern_search_fn vp9_fast_dia_search;
 
 typedef int (fractional_mv_step_fp) (
     const MACROBLOCK *x,

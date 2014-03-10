@@ -882,6 +882,20 @@ int vp9_fast_hex_search(const MACROBLOCK *x,
                         center_mv, best_mv);
 }
 
+int vp9_fast_dia_search(const MACROBLOCK *x,
+                        MV *ref_mv,
+                        int search_param,
+                        int sad_per_bit,
+                        int do_init_search,
+                        const vp9_variance_fn_ptr_t *vfp,
+                        int use_mvcost,
+                        const MV *center_mv,
+                        MV *best_mv) {
+  return vp9_bigdia_search(x, ref_mv, MAX(MAX_MVSEARCH_STEPS - 2, search_param),
+                           sad_per_bit, do_init_search, vfp, use_mvcost,
+                           center_mv, best_mv);
+}
+
 #undef CHECK_BETTER
 
 int vp9_full_range_search_c(const MACROBLOCK *x, MV *ref_mv, MV *best_mv,

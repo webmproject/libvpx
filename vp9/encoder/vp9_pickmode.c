@@ -86,7 +86,12 @@ static int full_pixel_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
   mvp_full.col >>= 3;
   mvp_full.row >>= 3;
 
-  if (cpi->sf.search_method == FAST_HEX) {
+  if (cpi->sf.search_method == FAST_DIAMOND) {
+    // NOTE: this returns SAD
+    vp9_fast_dia_search(x, &mvp_full, step_param, sadpb, 0,
+                        &cpi->fn_ptr[bsize], 1,
+                        &ref_mv, &tmp_mv->as_mv);
+  } else if (cpi->sf.search_method == FAST_HEX) {
     // NOTE: this returns SAD
     vp9_fast_hex_search(x, &mvp_full, step_param, sadpb, 0,
                         &cpi->fn_ptr[bsize], 1,
