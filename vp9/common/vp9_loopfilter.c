@@ -1213,7 +1213,7 @@ void vp9_loop_filter_rows(const YV12_BUFFER_CONFIG *frame_buffer,
     for (mi_col = 0; mi_col < cm->mi_cols; mi_col += MI_BLOCK_SIZE) {
       int plane;
 
-      setup_dst_planes(xd, frame_buffer, mi_row, mi_col);
+      vp9_setup_dst_planes(xd, frame_buffer, mi_row, mi_col);
 
       // TODO(JBB): Make setup_mask work for non 420.
       if (use_420)

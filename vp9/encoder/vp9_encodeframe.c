@@ -607,7 +607,7 @@ static void set_offsets(VP9_COMP *cpi, const TileInfo *const tile,
   mbmi = &xd->mi_8x8[0]->mbmi;
 
   // Set up destination pointers
-  setup_dst_planes(xd, get_frame_new_buffer(cm), mi_row, mi_col);
+  vp9_setup_dst_planes(xd, get_frame_new_buffer(cm), mi_row, mi_col);
 
   // Set up limit values for MV components
   // mv beyond the range do not produce new/different prediction block
@@ -2082,8 +2082,9 @@ static void init_encode_frame_mb_context(VP9_COMP *cpi) {
   vp9_setup_src_planes(x, cpi->Source, 0, 0);
 
   // TODO(jkoleszar): are these initializations required?
-  setup_pre_planes(xd, 0, get_ref_frame_buffer(cpi, LAST_FRAME), 0, 0, NULL);
-  setup_dst_planes(xd, get_frame_new_buffer(cm), 0, 0);
+  vp9_setup_pre_planes(xd, 0, get_ref_frame_buffer(cpi, LAST_FRAME), 0, 0,
+                       NULL);
+  vp9_setup_dst_planes(xd, get_frame_new_buffer(cm), 0, 0);
 
   vp9_setup_block_planes(&x->e_mbd, cm->subsampling_x, cm->subsampling_y);
 
@@ -2801,7 +2802,8 @@ static void encode_superblock(VP9_COMP *cpi, TOKENEXTRA **t, int output_enabled,
     for (ref = 0; ref < 1 + is_compound; ++ref) {
       YV12_BUFFER_CONFIG *cfg = get_ref_frame_buffer(cpi,
                                                      mbmi->ref_frame[ref]);
-      setup_pre_planes(xd, ref, cfg, mi_row, mi_col, &xd->block_refs[ref]->sf);
+      vp9_setup_pre_planes(xd, ref, cfg, mi_row, mi_col,
+                           &xd->block_refs[ref]->sf);
     }
     vp9_build_inter_predictors_sb(xd, mi_row, mi_col, MAX(bsize, BLOCK_8X8));
 
