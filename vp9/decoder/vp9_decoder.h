@@ -8,8 +8,8 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#ifndef VP9_DECODER_VP9_ONYXD_H_
-#define VP9_DECODER_VP9_ONYXD_H_
+#ifndef VP9_DECODER_VP9_DECODER_H_
+#define VP9_DECODER_VP9_DECODER_H_
 
 #include "./vpx_config.h"
 
@@ -19,8 +19,8 @@
 #include "vp9/common/vp9_onyxc_int.h"
 #include "vp9/common/vp9_ppflags.h"
 
+#include "vp9/decoder/vp9_decoder.h"
 #include "vp9/decoder/vp9_dthread.h"
-#include "vp9/decoder/vp9_onyxd.h"
 #include "vp9/decoder/vp9_thread.h"
 
 #ifdef __cplusplus
@@ -112,4 +112,4 @@ void vp9_remove_decompressor(struct VP9Decompressor *pbi);
 }  // extern "C"
 #endif
 
-#endif  // VP9_DECODER_VP9_ONYXD_H_
+#endif  // VP9_DECODER_VP9_DECODER_H_

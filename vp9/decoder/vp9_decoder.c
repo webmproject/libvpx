@@ -12,22 +12,25 @@
 #include <limits.h>
 #include <stdio.h>
 
+#include "./vpx_scale_rtcd.h"
+
+#include "vpx_mem/vpx_mem.h"
+#include "vpx_ports/vpx_timer.h"
+#include "vpx_scale/vpx_scale.h"
+
+#include "vp9/common/vp9_alloccommon.h"
+#include "vp9/common/vp9_loopfilter.h"
 #include "vp9/common/vp9_onyxc_int.h"
 #if CONFIG_VP9_POSTPROC
 #include "vp9/common/vp9_postproc.h"
 #endif
-#include "vp9/decoder/vp9_onyxd.h"
-#include "vpx_mem/vpx_mem.h"
-#include "vp9/common/vp9_alloccommon.h"
-#include "vp9/common/vp9_loopfilter.h"
 #include "vp9/common/vp9_quant_common.h"
-#include "vpx_scale/vpx_scale.h"
 #include "vp9/common/vp9_systemdependent.h"
-#include "vpx_ports/vpx_timer.h"
+
 #include "vp9/decoder/vp9_decodeframe.h"
+#include "vp9/decoder/vp9_decoder.h"
 #include "vp9/decoder/vp9_detokenize.h"
 #include "vp9/decoder/vp9_dthread.h"
-#include "./vpx_scale_rtcd.h"
 
 #define WRITE_RECON_BUFFER 0
 #if WRITE_RECON_BUFFER == 1
