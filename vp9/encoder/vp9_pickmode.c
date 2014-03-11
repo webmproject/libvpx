@@ -248,7 +248,7 @@ int64_t vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
   x->skip_encode = cpi->sf.skip_encode_frame && x->q_index < QIDX_SKIP_THRESH;
 
   x->skip = 0;
-  if (cpi->active_map_enabled && x->active_ptr[0] == 0)
+  if (!x->in_active_map)
     x->skip = 1;
 
   // initialize mode decisions

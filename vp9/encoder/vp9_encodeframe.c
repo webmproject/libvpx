@@ -571,6 +571,32 @@ void vp9_setup_src_planes(MACROBLOCK *x, const YV12_BUFFER_CONFIG *src,
                      x->e_mbd.plane[i].subsampling_y);
 }
 
+static int is_block_in_mb_map(VP9_COMP *cpi, int mi_row, int mi_col,
+                              BLOCK_SIZE bsize) {
+  VP9_COMMON *const cm = &cpi->common;
+  const int mb_rows = cm->mb_rows;
+  const int mb_cols = cm->mb_cols;
+  const int mb_row = mi_row >> 1;
+  const int mb_col = mi_col >> 1;
+  const int mb_width = num_8x8_blocks_wide_lookup[bsize] >> 1;
+  const int mb_height = num_8x8_blocks_high_lookup[bsize] >> 1;
+  int r, c;
+  if (bsize <= BLOCK_16X16) {
+    return cpi->active_map[mb_row * mb_cols + mb_col];
+  }
+  for (r = 0; r < mb_height; ++r) {
+    for (c = 0; c < mb_width; ++c) {
+      int row = mb_row + r;
+      int col = mb_col + c;
+      if (row >= mb_rows || col >= mb_cols)
+        continue;
+      if (cpi->active_map[row * mb_cols + col])
+        return 1;
+    }
+  }
+  return 0;
+}
+
 static void set_offsets(VP9_COMP *cpi, const TileInfo *const tile,
                         int mi_row, int mi_col, BLOCK_SIZE bsize) {
   MACROBLOCK *const x = &cpi->mb;
@@ -589,7 +615,12 @@ static void set_offsets(VP9_COMP *cpi, const TileInfo *const tile,
 
   // Activity map pointer
   x->mb_activity_ptr = &cpi->mb_activity_map[idx_map];
-  x->active_ptr = cpi->active_map + idx_map;
+
+  if (cpi->active_map_enabled && !x->e_mbd.lossless) {
+    x->in_active_map = is_block_in_mb_map(cpi, mi_row, mi_col, bsize);
+  } else {
+    x->in_active_map = 1;
+  }
 
   xd->mi_8x8 = cm->mi_grid_visible + idx_str;
   xd->prev_mi_8x8 = cm->prev_mi_grid_visible + idx_str;
@@ -1772,6 +1803,10 @@ static void rd_pick_partition(VP9_COMP *cpi, const TileInfo *const tile,
           do_rect = 0;
         }
       }
+    }
+    if (!x->in_active_map) {
+      do_split = 0;
+      do_rect = 0;
     }
     restore_context(cpi, mi_row, mi_col, a, l, sa, sl, bsize);
   }
