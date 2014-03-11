@@ -1769,6 +1769,8 @@ static void rd_pick_partition(VP9_COMP *cpi, const TileInfo *const tile,
     }
   }
 
+  if (!x->in_active_map && (partition_horz_allowed || partition_vert_allowed))
+    do_split = 0;
   // PARTITION_NONE
   if (partition_none_allowed) {
     rd_pick_sb_modes(cpi, tile, mi_row, mi_col, &this_rate, &this_dist, bsize,

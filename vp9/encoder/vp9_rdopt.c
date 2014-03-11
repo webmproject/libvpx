@@ -3171,7 +3171,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
   const int mode_search_skip_flags = cpi->sf.mode_search_skip_flags;
   const int intra_y_mode_mask =
       cpi->sf.intra_y_mode_mask[max_txsize_lookup[bsize]];
-  const int disable_inter_mode_mask = cpi->sf.disable_inter_mode_mask[bsize];
+  int disable_inter_mode_mask = cpi->sf.disable_inter_mode_mask[bsize];
 
   x->skip_encode = cpi->sf.skip_encode_frame && x->q_index < QIDX_SKIP_THRESH;
 
@@ -3285,6 +3285,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
       mode_index = THR_ZEROMV;
     mode_skip_mask = ~(1 << mode_index);
     mode_skip_start = MAX_MODES;
+    disable_inter_mode_mask = 0;
   }
 
   for (mode_index = 0; mode_index < MAX_MODES; ++mode_index) {
