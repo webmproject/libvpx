@@ -1644,8 +1644,8 @@ static void rd_auto_partition_range(VP9_COMP *cpi, const TileInfo *const tile,
   // partition is allowed by selecting the next smaller square size as
   // *min_block_size.
   if (cpi->sf.use_square_partition_only &&
-      (*max_block_size - *min_block_size) < 2) {
-    *min_block_size = next_square_size[*min_block_size];
+      next_square_size[*max_block_size] < *min_block_size) {
+    *min_block_size = next_square_size[*max_block_size];
   }
 }
 
