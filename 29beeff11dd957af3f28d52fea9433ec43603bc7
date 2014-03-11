@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//zJc\u003d",
+        "filename": "vp9/encoder/vp9_firstpass.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1873,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-03-11T01:04:27Z",
+      "side": 0,
+      "message": "This is not required because vp9_clear_system_state() gets called before",
+      "revId": "29beeff11dd957af3f28d52fea9433ec43603bc7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
