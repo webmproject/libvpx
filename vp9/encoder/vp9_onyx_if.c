@@ -97,7 +97,7 @@ void vp9_init_quantizer(VP9_COMP *cpi);
 static const double in_frame_q_adj_ratio[MAX_SEGMENTS] =
   {1.0, 2.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0};
 
-static INLINE void Scale2Ratio(int mode, int *hr, int *hs) {
+static INLINE void Scale2Ratio(VPX_SCALING mode, int *hr, int *hs) {
   switch (mode) {
     case NORMAL:
       *hr = 1;
@@ -1408,6 +1408,10 @@ void vp9_change_config(struct VP9_COMP *cpi, VP9_CONFIG *oxcf) {
     case MODE_GOODQUALITY:
       cpi->pass = 0;
       cpi->oxcf.cpu_used = clamp(cpi->oxcf.cpu_used, -5, 5);
+      break;
+
+    case MODE_BESTQUALITY:
+      cpi->pass = 0;
       break;
 
     case MODE_FIRSTPASS:

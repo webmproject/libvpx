@@ -442,8 +442,6 @@ typedef struct {
   int avg_frame_size;
 } LAYER_CONTEXT;
 
-#define MAX_SEGMENTS 8
-
 typedef enum {
   NORMAL      = 0,
   FOURFIVE    = 1,
@@ -522,7 +520,7 @@ typedef struct {
   //     were generated in the first encoding pass to create the compressed
   //     output using the highest possible quality, and taking a
   //    longer amount of time to encode.. ( speed setting ignored )
-  int mode;
+  MODE mode;
 
   // Key Framing Operations
   int auto_key;  // autodetect cut scenes and set the keyframes
@@ -533,7 +531,7 @@ typedef struct {
   // ----------------------------------------------------------------
   // DATARATE CONTROL OPTIONS
 
-  int end_usage;  // vbr or cbr
+  END_USAGE end_usage;  // vbr or cbr
 
   // buffer targeting aggressiveness
   int under_shoot_pct;
