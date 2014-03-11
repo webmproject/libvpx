@@ -682,13 +682,13 @@ typedef struct VP9_COMP {
   int rd_thresh_freq_sub8x8[BLOCK_SIZES][MAX_REFS];
 
   int64_t rd_comp_pred_diff[REFERENCE_MODES];
-  int64_t rd_prediction_type_threshes[4][REFERENCE_MODES];
+  int64_t rd_prediction_type_threshes[MAX_REF_FRAMES][REFERENCE_MODES];
   int64_t rd_tx_select_diff[TX_MODES];
   // FIXME(rbultje) can this overflow?
-  int rd_tx_select_threshes[4][TX_MODES];
+  int rd_tx_select_threshes[MAX_REF_FRAMES][TX_MODES];
 
   int64_t rd_filter_diff[SWITCHABLE_FILTER_CONTEXTS];
-  int64_t rd_filter_threshes[4][SWITCHABLE_FILTER_CONTEXTS];
+  int64_t rd_filter_threshes[MAX_REF_FRAMES][SWITCHABLE_FILTER_CONTEXTS];
   int64_t rd_filter_cache[SWITCHABLE_FILTER_CONTEXTS];
   int64_t mask_filter_rd;
 

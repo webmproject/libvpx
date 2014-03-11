@@ -2249,7 +2249,7 @@ static TX_MODE select_tx_mode(const VP9_COMP *cpi) {
     if (cpi->sf.tx_size_search_method == USE_LARGESTALL) {
       return ALLOW_32X32;
     } else if (cpi->sf.tx_size_search_method == USE_FULL_RD) {
-      const int frame_type = get_frame_type(cpi);
+      const MV_REFERENCE_FRAME frame_type = get_frame_type(cpi);
       return cpi->rd_tx_select_threshes[frame_type][ALLOW_32X32] >
                  cpi->rd_tx_select_threshes[frame_type][TX_MODE_SELECT] ?
                      ALLOW_32X32 : TX_MODE_SELECT;
