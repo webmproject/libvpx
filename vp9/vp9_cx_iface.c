@@ -577,33 +577,27 @@ static vpx_codec_err_t vp9e_destroy(vpx_codec_alg_priv_t *ctx) {
 }
 
 static void pick_quickcompress_mode(vpx_codec_alg_priv_t  *ctx,
-                                    unsigned long          duration,
-                                    unsigned long          deadline) {
-  unsigned int new_qc;
-
-  /* Use best quality mode if no deadline is given. */
-  new_qc = MODE_BESTQUALITY;
+                                    unsigned long duration,
+                                    unsigned long deadline) {
+  // Use best quality mode if no deadline is given.
+  MODE new_qc = MODE_BESTQUALITY;
 
   if (deadline) {
-      uint64_t     duration_us;
+    // Convert duration parameter from stream timebase to microseconds
+    const uint64_t duration_us = (uint64_t)duration * 1000000 *
+                               (uint64_t)ctx->cfg.g_timebase.num /
+                               (uint64_t)ctx->cfg.g_timebase.den;
 
-      /* Convert duration parameter from stream timebase to microseconds */
-      duration_us = (uint64_t)duration * 1000000
-                    * (uint64_t)ctx->cfg.g_timebase.num
-                    / (uint64_t)ctx->cfg.g_timebase.den;
-
-      /* If the deadline is more that the duration this frame is to be shown,
-       * use good quality mode. Otherwise use realtime mode.
-       */
-      new_qc = (deadline > duration_us) ? MODE_GOODQUALITY : MODE_REALTIME;
+    // If the deadline is more that the duration this frame is to be shown,
+    // use good quality mode. Otherwise use realtime mode.
+    new_qc = (deadline > duration_us) ? MODE_GOODQUALITY : MODE_REALTIME;
   }
 
   if (ctx->cfg.g_pass == VPX_RC_FIRST_PASS)
     new_qc = MODE_FIRSTPASS;
   else if (ctx->cfg.g_pass == VPX_RC_LAST_PASS)
-    new_qc = (new_qc == MODE_BESTQUALITY)
-             ? MODE_SECONDPASS_BEST
-             : MODE_SECONDPASS;
+    new_qc = (new_qc == MODE_BESTQUALITY) ? MODE_SECONDPASS_BEST
+                                          : MODE_SECONDPASS;
 
   if (ctx->oxcf.mode != new_qc) {
     ctx->oxcf.mode = new_qc;
