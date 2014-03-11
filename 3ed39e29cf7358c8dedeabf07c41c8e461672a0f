@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//zJI\u003d",
+        "filename": "examples/vp8_set_maps.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 202,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2014-03-11T01:12:15Z",
+      "side": 1,
+      "message": "67LL looks like a magic number here, how about a meaningfully named constant or a few words of comment explaining the reasoning.",
+      "revId": "3ed39e29cf7358c8dedeabf07c41c8e461672a0f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
