@@ -29,6 +29,7 @@ LIBVPX_TEST_SRCS-$(CONFIG_VP8_ENCODER) += cq_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_VP8_ENCODER) += keyframe_test.cc
 
 LIBVPX_TEST_SRCS-$(CONFIG_VP9_DECODER) += external_frame_buffer_test.cc
+LIBVPX_TEST_SRCS-$(CONFIG_VP9_ENCODER) += active_map_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_VP9_ENCODER) += borders_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_VP9_ENCODER) += cpu_speed_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_VP9_ENCODER) += resize_test.cc
