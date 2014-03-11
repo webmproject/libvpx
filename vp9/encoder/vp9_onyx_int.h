@@ -726,9 +726,6 @@ typedef struct VP9_COMP {
   int cpu_used;
   int pass;
 
-  vp9_prob last_skip_false_probs[3][SKIP_CONTEXTS];
-  int last_skip_probs_q[3];
-
   int ref_frame_flags;
 
   SPEED_FEATURES sf;
