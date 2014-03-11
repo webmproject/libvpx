@@ -1412,7 +1412,7 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
     active_max_gf_interval = rc->max_gf_interval;
 
   i = 0;
-  while (i < twopass->static_scene_max_gf_interval && i < rc->frames_to_key) {
+  while (i < rc->static_scene_max_gf_interval && i < rc->frames_to_key) {
     ++i;
 
     // Accumulate error score of frames in this gf group.
