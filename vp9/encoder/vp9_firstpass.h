@@ -57,7 +57,6 @@ struct twopass_rc {
   double modified_error_left;
   double kf_intra_err_min;
   double gf_intra_err_min;
-  int static_scene_max_gf_interval;
   int kf_bits;
   // Remaining error from uncoded frames in a gf group. Two pass use only
   int64_t gf_group_error_left;

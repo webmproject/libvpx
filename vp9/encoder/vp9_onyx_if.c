@@ -1134,21 +1134,19 @@ int vp9_reverse_trans(int x) {
 
 void vp9_new_framerate(VP9_COMP *cpi, double framerate) {
   VP9_COMMON *const cm = &cpi->common;
+  RATE_CONTROL *const rc = &cpi->rc;
+  VP9_CONFIG *const oxcf = &cpi->oxcf;
   int vbr_max_bits;
 
-  if (framerate < 0.1)
-    framerate = 30;
-
-  cpi->oxcf.framerate = framerate;
+  oxcf->framerate = framerate < 0.1 ? 30 : framerate;
   cpi->output_framerate = cpi->oxcf.framerate;
-  cpi->rc.av_per_frame_bandwidth = (int)(cpi->oxcf.target_bandwidth
-                                         / cpi->output_framerate);
-  cpi->rc.min_frame_bandwidth = (int)(cpi->rc.av_per_frame_bandwidth *
-                                      cpi->oxcf.two_pass_vbrmin_section / 100);
+  rc->av_per_frame_bandwidth = (int)(oxcf->target_bandwidth /
+                                         cpi->output_framerate);
+  rc->min_frame_bandwidth = (int)(rc->av_per_frame_bandwidth *
+                                      oxcf->two_pass_vbrmin_section / 100);
 
 
-  cpi->rc.min_frame_bandwidth = MAX(cpi->rc.min_frame_bandwidth,
-                                    FRAME_OVERHEAD_BITS);
+  rc->min_frame_bandwidth = MAX(rc->min_frame_bandwidth, FRAME_OVERHEAD_BITS);
 
   // A maximum bitrate for a frame is defined.
   // The baseline for this aligns with HW implementations that
@@ -1158,28 +1156,28 @@ void vp9_new_framerate(VP9_COMP *cpi, double framerate) {
   // be acheived because of a user specificed max q (e.g. when the user
   // specifies lossless encode.
   //
-  vbr_max_bits = (int)(((int64_t)cpi->rc.av_per_frame_bandwidth *
-      cpi->oxcf.two_pass_vbrmax_section) / 100);
-  cpi->rc.max_frame_bandwidth =
-      MAX(MAX((cm->MBs * MAX_MB_RATE), MAXRATE_1080P), vbr_max_bits);
+  vbr_max_bits = (int)(((int64_t)rc->av_per_frame_bandwidth *
+      oxcf->two_pass_vbrmax_section) / 100);
+  rc->max_frame_bandwidth = MAX(MAX((cm->MBs * MAX_MB_RATE), MAXRATE_1080P),
+                                vbr_max_bits);
 
   // Set Maximum gf/arf interval
-  cpi->rc.max_gf_interval = 16;
+  rc->max_gf_interval = 16;
 
   // Extended interval for genuinely static scenes
-  cpi->twopass.static_scene_max_gf_interval = cpi->key_frame_frequency >> 1;
+  rc->static_scene_max_gf_interval = cpi->key_frame_frequency >> 1;
 
   // Special conditions when alt ref frame enabled in lagged compress mode
-  if (cpi->oxcf.play_alternate && cpi->oxcf.lag_in_frames) {
-    if (cpi->rc.max_gf_interval > cpi->oxcf.lag_in_frames - 1)
-      cpi->rc.max_gf_interval = cpi->oxcf.lag_in_frames - 1;
+  if (oxcf->play_alternate && oxcf->lag_in_frames) {
+    if (rc->max_gf_interval > oxcf->lag_in_frames - 1)
+      rc->max_gf_interval = oxcf->lag_in_frames - 1;
 
-    if (cpi->twopass.static_scene_max_gf_interval > cpi->oxcf.lag_in_frames - 1)
-      cpi->twopass.static_scene_max_gf_interval = cpi->oxcf.lag_in_frames - 1;
+    if (rc->static_scene_max_gf_interval > oxcf->lag_in_frames - 1)
+      rc->static_scene_max_gf_interval = oxcf->lag_in_frames - 1;
   }
 
-  if (cpi->rc.max_gf_interval > cpi->twopass.static_scene_max_gf_interval)
-    cpi->rc.max_gf_interval = cpi->twopass.static_scene_max_gf_interval;
+  if (rc->max_gf_interval > rc->static_scene_max_gf_interval)
+    rc->max_gf_interval = rc->static_scene_max_gf_interval;
 }
 
 static int64_t rescale(int64_t val, int64_t num, int denom) {
