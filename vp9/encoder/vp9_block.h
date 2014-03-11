@@ -197,7 +197,8 @@ struct macroblock {
 // TODO(jingning): the variables used here are little complicated. need further
 // refactoring on organizing the temporary buffers, when recursive
 // partition down to 4x4 block size is enabled.
-static PICK_MODE_CONTEXT *get_block_context(MACROBLOCK *x, BLOCK_SIZE bsize) {
+static INLINE PICK_MODE_CONTEXT *get_block_context(MACROBLOCK *x,
+                                                   BLOCK_SIZE bsize) {
   switch (bsize) {
     case BLOCK_64X64:
       return &x->sb64_context;
