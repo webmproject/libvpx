@@ -204,7 +204,6 @@ typedef struct RefBuffer {
 typedef struct macroblockd {
   struct macroblockd_plane plane[MAX_MB_PLANE];
 
-  MODE_INFO *last_mi;
   int mode_info_stride;
 
   // A NULL indicates that the 8x8 is not part of the image
