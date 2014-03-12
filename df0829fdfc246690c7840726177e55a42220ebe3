@@ -16,6 +16,23 @@
       "revId": "df0829fdfc246690c7840726177e55a42220ebe3",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//ytI\u003d",
+        "filename": "y4minput.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2014-03-12T15:21:12Z",
+      "side": 1,
+      "message": "if it failed once shouldn\u0027t we sleep or something before trying again?  I thought there was a throughput concern...",
+      "revId": "df0829fdfc246690c7840726177e55a42220ebe3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
