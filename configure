@@ -689,6 +689,7 @@ process_toolchain() {
              10|11|12)
                  VCPROJ_SFX=vcxproj
                  gen_vcproj_cmd=${source_path}/build/make/gen_msvs_vcxproj.sh
+                 enabled werror && gen_vcproj_cmd="${gen_vcproj_cmd} --enable-werror"
                  ;;
              esac
              all_targets="${all_targets} solution"

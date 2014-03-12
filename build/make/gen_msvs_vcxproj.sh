@@ -28,6 +28,7 @@ Options:
     --lib                       Generate a project for creating a static library
     --dll                       Generate a project for creating a dll
     --static-crt                Use the static C runtime (/MT)
+    --enable-werror             Treat warnings as errors (/WX)
     --target=isa-os-cc          Target specifier (required)
     --out=filename              Write output to a file [stdout]
     --name=project_name         Name of the project (required)
@@ -232,6 +233,8 @@ for opt in "$@"; do
         --src-path-bare=*) src_path_bare="$optval"
         ;;
         --static-crt) use_static_runtime=true
+        ;;
+        --enable-werror) werror=true
         ;;
         --ver=*)
             vs_ver="$optval"
@@ -492,7 +495,9 @@ generate_vcxproj() {
             tag_content PreprocessorDefinitions "WIN32;$debug;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_NO_DEPRECATE$extradefines;%(PreprocessorDefinitions)"
             tag_content RuntimeLibrary $runtime
             tag_content WarningLevel Level3
-            # DebugInformationFormat
+            if ${werror:-false}; then
+                tag_content TreatWarningAsError true
+            fi
             close_tag ClCompile
             case "$proj_kind" in
             exe)
