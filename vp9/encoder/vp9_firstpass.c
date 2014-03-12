@@ -199,7 +199,8 @@ static void zero_stats(FIRSTPASS_STATS *section) {
   section->duration   = 1.0;
 }
 
-static void accumulate_stats(FIRSTPASS_STATS *section, FIRSTPASS_STATS *frame) {
+static void accumulate_stats(FIRSTPASS_STATS *section,
+                             const FIRSTPASS_STATS *frame) {
   section->frame += frame->frame;
   section->intra_error += frame->intra_error;
   section->coded_error += frame->coded_error;
@@ -221,7 +222,8 @@ static void accumulate_stats(FIRSTPASS_STATS *section, FIRSTPASS_STATS *frame) {
   section->duration   += frame->duration;
 }
 
-static void subtract_stats(FIRSTPASS_STATS *section, FIRSTPASS_STATS *frame) {
+static void subtract_stats(FIRSTPASS_STATS *section,
+                           const FIRSTPASS_STATS *frame) {
   section->frame -= frame->frame;
   section->intra_error -= frame->intra_error;
   section->coded_error -= frame->coded_error;
@@ -1851,10 +1853,12 @@ static int test_candidate_kf(VP9_COMP *cpi,
 
 static void find_next_key_frame(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   int i, j;
+  RATE_CONTROL *const rc = &cpi->rc;
+  struct twopass_rc *const twopass = &cpi->twopass;
   FIRSTPASS_STATS last_frame;
-  FIRSTPASS_STATS first_frame;
+  const FIRSTPASS_STATS first_frame = *this_frame;
   FIRSTPASS_STATS next_frame;
-  const FIRSTPASS_STATS *start_position;
+  const FIRSTPASS_STATS *start_position = twopass->stats_in;
 
   double decay_accumulator = 1.0;
   double zero_motion_accumulator = 1.0;
@@ -1865,14 +1869,8 @@ static void find_next_key_frame(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   double kf_group_err = 0.0;
   double recent_loop_decay[8] = {1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0};
 
-  RATE_CONTROL *const rc = &cpi->rc;
-  struct twopass_rc *const twopass = &cpi->twopass;
-
   vp9_zero(next_frame);
 
-  vp9_clear_system_state();
-
-  start_position = twopass->stats_in;
   cpi->common.frame_type = KEY_FRAME;
 
   // Is this a forced key frame by interval.
@@ -1885,9 +1883,6 @@ static void find_next_key_frame(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   rc->frames_till_gf_update_due = 0;
 
   rc->frames_to_key = 1;
-
-  // Take a copy of the initial frame details.
-  first_frame = *this_frame;
 
   twopass->kf_group_bits = 0;        // Total bits available to kf group
   twopass->kf_group_error_left = 0;  // Group modified error score.
@@ -1947,12 +1942,9 @@ static void find_next_key_frame(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   // is between 1x and 2x.
   if (cpi->oxcf.auto_key &&
       rc->frames_to_key > (int)cpi->key_frame_frequency) {
-    FIRSTPASS_STATS tmp_frame;
+    FIRSTPASS_STATS tmp_frame = first_frame;
 
     rc->frames_to_key /= 2;
-
-    // Copy first frame details.
-    tmp_frame = first_frame;
 
     // Reset to the start of the group.
     reset_fpf_position(twopass, start_position);
@@ -1961,10 +1953,7 @@ static void find_next_key_frame(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
 
     // Rescan to get the correct error data for the forced kf group.
     for (i = 0; i < rc->frames_to_key; ++i) {
-      // Accumulate kf group errors.
       kf_group_err += calculate_modified_err(cpi, &tmp_frame);
-
-      // Load the next frame's stats.
       input_stats(twopass, &tmp_frame);
     }
     rc->next_key_frame_forced = 1;
@@ -1983,7 +1972,7 @@ static void find_next_key_frame(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   // Calculate the number of bits that should be assigned to the kf group.
   if (twopass->bits_left > 0 && twopass->modified_error_left > 0.0) {
     // Maximum number of bits for a single normal frame (not key frame).
-    int max_bits = frame_max_bits(cpi);
+    const int max_bits = frame_max_bits(cpi);
 
     // Maximum number of bits allocated to the key frame group.
     int64_t max_grp_bits;
@@ -2010,20 +1999,19 @@ static void find_next_key_frame(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
 
   // Scan through the kf group collating various stats.
   for (i = 0; i < rc->frames_to_key; ++i) {
-    double r;
-
     if (EOF == input_stats(twopass, &next_frame))
       break;
 
     // Monitor for static sections.
     if ((next_frame.pcnt_inter - next_frame.pcnt_motion) <
-        zero_motion_accumulator) {
-      zero_motion_accumulator =
-        (next_frame.pcnt_inter - next_frame.pcnt_motion);
+            zero_motion_accumulator) {
+      zero_motion_accumulator = (next_frame.pcnt_inter -
+                                     next_frame.pcnt_motion);
     }
 
     // For the first few frames collect data to decide kf boost.
     if (i <= (rc->max_gf_interval * 2)) {
+      double r;
       if (next_frame.intra_error > twopass->kf_intra_err_min)
         r = (IIKFACTOR2 * next_frame.intra_error /
              DOUBLE_DIVIDE_CHECK(next_frame.coded_error));
