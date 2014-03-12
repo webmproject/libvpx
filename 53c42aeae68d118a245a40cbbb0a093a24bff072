@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//yl0\u003d",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-03-12T23:16:09Z",
+      "side": 1,
+      "message": "it\u0027s",
+      "revId": "53c42aeae68d118a245a40cbbb0a093a24bff072",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//yl4\u003d",
+        "filename": "test/datarate_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-03-12T23:16:09Z",
+      "side": 1,
+      "message": "while you\u0027re here add a virtual dtor:\n\nhttps://gerrit.chromium.org/gerrit/#/c/69213",
+      "revId": "53c42aeae68d118a245a40cbbb0a093a24bff072",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
