@@ -21,6 +21,7 @@ class SuperframeTest : public ::libvpx_test::EncoderTest,
  protected:
   SuperframeTest() : EncoderTest(GET_PARAM(0)), modified_buf_(NULL),
       last_sf_pts_(0) {}
+  virtual ~SuperframeTest() {}
 
   virtual void SetUp() {
     InitializeConfig();

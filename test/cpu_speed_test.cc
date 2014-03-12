@@ -22,6 +22,7 @@ class CpuSpeedTest : public ::libvpx_test::EncoderTest,
         libvpx_test::TestMode, int> {
  protected:
   CpuSpeedTest() : EncoderTest(GET_PARAM(0)) {}
+  virtual ~CpuSpeedTest() {}
 
   virtual void SetUp() {
     InitializeConfig();
