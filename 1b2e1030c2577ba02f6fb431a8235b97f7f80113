@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//yx0\u003d",
+        "filename": "test/encode_test_driver.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 131,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2014-03-12T00:42:33Z",
+      "side": 1,
+      "message": "I\u0027m not sure how to fix the decoder only build.\n\nThe error is:\n    [CXX] test/decode_test_driver.cc.o\nIn file included from ../libvpx/test/codec_factory.h:24:0,\n                 from ../libvpx/test/decode_test_driver.cc:10:\n../libvpx/test/encode_test_driver.h:131:29: error: \u0027vpx_active_map_t\u0027 has not been declared\nmake[1]: *** [test/decode_test_driver.cc.o] Error 1\n\nThis file is included in decoder-only builds.\nvpx/vp8cx.h is only included if encoders aren\u0027t being built.\nI can\u0027t foward declare a typedef.\nI could:\n1) cast through void*\n2) change Control to void Control\u003ctypename T\u003e(int ctrl_id, T *arg)\n3) Other?",
+      "revId": "1b2e1030c2577ba02f6fb431a8235b97f7f80113",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
