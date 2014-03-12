@@ -73,10 +73,6 @@ typedef struct VP9Decompressor {
 
   VP9LfSync lf_row_sync;
 
-  /* Each tile column has its own MODE_INFO stream. This array indexes them by
-     tile column index. */
-  MODE_INFO **mi_streams;
-
   ENTROPY_CONTEXT *above_context[MAX_MB_PLANE];
   PARTITION_CONTEXT *above_seg_context;
 } VP9D_COMP;

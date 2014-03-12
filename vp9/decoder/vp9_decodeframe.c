@@ -195,16 +195,15 @@ static void alloc_tile_storage(VP9D_COMP *pbi, int tile_rows, int tile_cols) {
   const int aligned_mi_cols = mi_cols_aligned_to_sb(cm->mi_cols);
   int i, tile_row, tile_col;
 
-  CHECK_MEM_ERROR(cm, pbi->mi_streams,
-                  vpx_realloc(pbi->mi_streams, tile_rows * tile_cols *
-                              sizeof(*pbi->mi_streams)));
+  CHECK_MEM_ERROR(cm, cm->mi_streams,
+                  vpx_realloc(cm->mi_streams, tile_rows * tile_cols *
+                              sizeof(*cm->mi_streams)));
   for (tile_row = 0; tile_row < tile_rows; ++tile_row) {
     for (tile_col = 0; tile_col < tile_cols; ++tile_col) {
       TileInfo tile;
       vp9_tile_init(&tile, cm, tile_row, tile_col);
-      pbi->mi_streams[tile_row * tile_cols + tile_col] =
-          &cm->mi[tile.mi_row_start * cm->mode_info_stride
-                  + tile.mi_col_start];
+      cm->mi_streams[tile_row * tile_cols + tile_col] =
+          &cm->mi[tile.mi_row_start * cm->mode_info_stride + tile.mi_col_start];
     }
   }
 
@@ -731,9 +730,11 @@ static void setup_frame_size_with_refs(VP9D_COMP *pbi,
 
 static void setup_tile_context(VP9D_COMP *const pbi, MACROBLOCKD *const xd,
                                int tile_row, int tile_col) {
+  VP9_COMMON *const cm = &pbi->common;
+  const int tile_cols = 1 << cm->log2_tile_cols;
   int i;
-  const int tile_cols = 1 << pbi->common.log2_tile_cols;
-  xd->mi_stream = pbi->mi_streams[tile_row * tile_cols + tile_col];
+
+  xd->mi_stream = cm->mi_streams[tile_row * tile_cols + tile_col];
 
   for (i = 0; i < MAX_MB_PLANE; ++i) {
     xd->above_context[i] = pbi->above_context[i];
