@@ -33,6 +33,24 @@
       "revId": "df0829fdfc246690c7840726177e55a42220ebe3",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//yqU\u003d",
+        "filename": "y4minput.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-03-12T18:51:59Z",
+      "side": 1,
+      "message": "better to get something in place, then if the failures look like something we can correct we can try a sleep",
+      "parentUuid": "AAAAdn//ytI\u003d",
+      "revId": "df0829fdfc246690c7840726177e55a42220ebe3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
