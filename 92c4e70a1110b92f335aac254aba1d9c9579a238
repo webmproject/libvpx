@@ -16,6 +16,24 @@
       "revId": "92c4e70a1110b92f335aac254aba1d9c9579a238",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//yx8\u003d",
+        "filename": "vp9/encoder/vp9_onyx_if.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 849,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2014-03-12T00:41:29Z",
+      "side": 1,
+      "message": "ok, maybe the previous version is easy to understand, I revered this condition back to same as in Patch#3. \nTo answer your question: 3 \u003dlast_partitioning_redo_frequency - 1\n\nPartitioning is tested and picked on 0, 1, 4, 8, 12, 16..., then we directly copy partition for a couple of frames, by frame 3, 7, 11, etc, we do copy partition from previous frame with some possible adjustment if helpful.",
+      "parentUuid": "AAAAdn//yyQ\u003d",
+      "revId": "92c4e70a1110b92f335aac254aba1d9c9579a238",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
