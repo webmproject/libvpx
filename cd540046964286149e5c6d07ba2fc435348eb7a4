@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//yuU\u003d",
+        "filename": "test/active_map_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-03-12T06:00:10Z",
+      "side": 1,
+      "message": "probably a habit I picked up in other projects, but I\u0027ve been preferring these to be indented 2 spaces. there\u0027s probably still a mix in the codebase",
+      "revId": "cd540046964286149e5c6d07ba2fc435348eb7a4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//yuQ\u003d",
+        "filename": "test/active_map_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 80,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-03-12T06:00:10Z",
+      "side": 1,
+      "message": "kWidth/kHeight?",
+      "revId": "cd540046964286149e5c6d07ba2fc435348eb7a4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
