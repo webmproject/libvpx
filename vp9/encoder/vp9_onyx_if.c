@@ -840,14 +840,12 @@ static void set_rt_speed_feature(VP9_COMMON *cm,
   }
   if (speed >= 5) {
     int i;
-    sf->mode_search_skip_flags |= FLAG_SKIP_COMP_REFMISMATCH |
-                                  FLAG_EARLY_TERMINATE;
-    sf->use_fast_coef_costing = 0;
+    sf->last_partitioning_redo_frequency = 4;
     sf->adaptive_rd_thresh = 5;
-    sf->auto_min_max_partition_size = frame_is_intra_only(cm) ?
-        RELAXED_NEIGHBORING_MIN_MAX : STRICT_NEIGHBORING_MIN_MAX;
+    sf->use_fast_coef_costing = 0;
+    sf->auto_min_max_partition_size = STRICT_NEIGHBORING_MIN_MAX;
     sf->adjust_partitioning_from_last_frame =
-        cm->last_frame_type == KEY_FRAME || (0 ==
+        cm->last_frame_type != cm->frame_type || (0 ==
         (cm->current_video_frame + 1) % sf->last_partitioning_redo_frequency);
     sf->subpel_force_stop = 1;
     for (i = 0; i < TX_SIZES; i++) {
