@@ -875,7 +875,7 @@ static void set_rt_speed_feature(VP9_COMMON *cm,
   if (speed >= 8) {
     int i;
     for (i = 0; i < BLOCK_SIZES; ++i)
-      sf->disable_inter_mode_mask[i] = 14;   // only search NEARESTMV (0)
+      sf->disable_inter_mode_mask[i] = 14;    // only search NEARESTMV (0)
   }
 }
 

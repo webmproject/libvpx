@@ -866,7 +866,7 @@ int vp9_square_search(const MACROBLOCK *x,
                             do_init_search, 0, vfp, use_mvcost,
                             center_mv, best_mv,
                             square_num_candidates, square_candidates);
-};
+}
 
 int vp9_fast_hex_search(const MACROBLOCK *x,
                         MV *ref_mv,
