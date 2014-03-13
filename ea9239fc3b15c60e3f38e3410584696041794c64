@@ -16,6 +16,24 @@
       "revId": "ea9239fc3b15c60e3f38e3410584696041794c64",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//ytU\u003d",
+        "filename": "test/error_resilience_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2014-03-13T13:08:58Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//yxI\u003d",
+      "revId": "ea9239fc3b15c60e3f38e3410584696041794c64",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
