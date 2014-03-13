@@ -28,6 +28,7 @@
 #include "vp9/common/vp9_tile_common.h"
 
 #include "vp9/encoder/vp9_bitstream.h"
+#include "vp9/encoder/vp9_encodeframe.h"
 #include "vp9/encoder/vp9_encodemv.h"
 #include "vp9/encoder/vp9_firstpass.h"
 #include "vp9/encoder/vp9_mbgraph.h"

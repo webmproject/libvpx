@@ -930,8 +930,6 @@ static YV12_BUFFER_CONFIG *get_ref_frame_buffer(VP9_COMP *cpi,
                                                              ref_frame)]].buf;
 }
 
-void vp9_encode_frame(VP9_COMP *cpi);
-
 void vp9_set_speed_features(VP9_COMP *cpi);
 
 int vp9_calc_ss_err(const YV12_BUFFER_CONFIG *source,
