@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//yco\u003d",
+        "filename": "vp9/encoder/vp9_svc_layercontext.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2014-03-13T21:41:43Z",
+      "side": 1,
+      "message": "Not sure, because this svc layer context can be used for spatial and well. So i prefer to leave is svc_layercontext, at least for now.",
+      "parentUuid": "AAAAdn//ydk\u003d",
+      "revId": "7c742308b3a6035e383590fabe8a7a17281128f3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//ydg\u003d",
         "filename": "vp9/encoder/vp9_svc_layercontext.h",
         "patchSetId": 4
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//ycw\u003d",
+        "filename": "vp9/encoder/vp9_svc_layercontext.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2014-03-13T21:41:43Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//ydg\u003d",
+      "revId": "7c742308b3a6035e383590fabe8a7a17281128f3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//ydc\u003d",
         "filename": "vp9/encoder/vp9_svc_layercontext.h",
         "patchSetId": 4
@@ -47,6 +83,24 @@
       "writtenOn": "2014-03-13T21:07:38Z",
       "side": 1,
       "message": "Fix alignment: 2 spaces.",
+      "revId": "7c742308b3a6035e383590fabe8a7a17281128f3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//ycs\u003d",
+        "filename": "vp9/encoder/vp9_svc_layercontext.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2014-03-13T21:41:43Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//ydc\u003d",
       "revId": "7c742308b3a6035e383590fabe8a7a17281128f3",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
