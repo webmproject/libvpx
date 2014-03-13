@@ -62,22 +62,6 @@ static void swap_yv12(YV12_BUFFER_CONFIG *a, YV12_BUFFER_CONFIG *b) {
   *b = temp;
 }
 
-static int select_cq_level(int qindex) {
-  int ret_val = QINDEX_RANGE - 1;
-  int i;
-
-  double target_q = (vp9_convert_qindex_to_q(qindex) * 0.5847) + 1.0;
-
-  for (i = 0; i < QINDEX_RANGE; ++i) {
-    if (target_q <= vp9_convert_qindex_to_q(i)) {
-      ret_val = i;
-      break;
-    }
-  }
-
-  return ret_val;
-}
-
 static int gfboost_qadjust(int qindex) {
   const double q = vp9_convert_qindex_to_q(qindex);
   return (int)((0.00000828 * q * q * q) +
