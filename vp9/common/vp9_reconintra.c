@@ -18,7 +18,7 @@
 #include "vp9/common/vp9_reconintra.h"
 #include "vp9/common/vp9_onyxc_int.h"
 
-const TX_TYPE mode2txfm_map[INTRA_MODES] = {
+const TX_TYPE intra_mode_to_tx_type_lookup[INTRA_MODES] = {
   DCT_DCT,    // DC
   ADST_DCT,   // V
   DCT_ADST,   // H
