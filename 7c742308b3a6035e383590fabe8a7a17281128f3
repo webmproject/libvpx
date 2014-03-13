@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//ydk\u003d",
+        "filename": "vp9/encoder/vp9_svc_layercontext.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-03-13T21:07:38Z",
+      "side": 1,
+      "message": "May be \u0027vp9_temporal_svc.{h, c}\u0027 are better names for these new files? Now it has not only LAYER_CONTEXT but also SVC. (VP9_ENCODER_VP9_SVC_LAYERCONTEXT_H_ also should be changed)",
+      "revId": "7c742308b3a6035e383590fabe8a7a17281128f3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//ydg\u003d",
+        "filename": "vp9/encoder/vp9_svc_layercontext.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-03-13T21:07:38Z",
+      "side": 1,
+      "message": "Fix alignment: 2 spaces.",
+      "revId": "7c742308b3a6035e383590fabe8a7a17281128f3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//ydc\u003d",
+        "filename": "vp9/encoder/vp9_svc_layercontext.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-03-13T21:07:38Z",
+      "side": 1,
+      "message": "Fix alignment: 2 spaces.",
+      "revId": "7c742308b3a6035e383590fabe8a7a17281128f3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
