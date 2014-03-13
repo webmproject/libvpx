@@ -2836,35 +2836,22 @@ static void encode_nonrd_sb_row(VP9_COMP *cpi, const TileInfo *const tile,
        mi_col += MI_BLOCK_SIZE) {
     int dummy_rate;
     int64_t dummy_dist;
+    const int idx_str = cm->mode_info_stride * mi_row + mi_col;
+    MODE_INFO **mi_8x8 = cm->mi_grid_visible + idx_str;
+    BLOCK_SIZE bsize = cpi->sf.partition_search_type == FIXED_PARTITION ?
+        cpi->sf.always_this_block_size :
+        get_nonrd_var_based_fixed_partition(cpi, mi_row, mi_col);
 
     cpi->mb.source_variance = UINT_MAX;
 
-    if (cpi->sf.partition_search_type == FIXED_PARTITION) {
-      const int idx_str = cm->mode_info_stride * mi_row + mi_col;
-      MODE_INFO **mi_8x8 = cm->mi_grid_visible + idx_str;
-      set_fixed_partitioning(cpi, tile, mi_8x8, mi_row, mi_col,
-                             cpi->sf.always_this_block_size);
-      nonrd_use_partition(cpi, tile, mi_8x8, tp, mi_row, mi_col, BLOCK_64X64,
-                          &dummy_rate, &dummy_dist);
-    } else if (cpi->sf.partition_search_type == VAR_BASED_FIXED_PARTITION) {
-      BLOCK_SIZE bsize = get_nonrd_var_based_fixed_partition(cpi, mi_row,
-                                                             mi_col);
-      const int idx_str = cm->mode_info_stride * mi_row + mi_col;
-      MODE_INFO **mi_8x8 = cm->mi_grid_visible + idx_str;
-      set_fixed_partitioning(cpi, tile, mi_8x8, mi_row, mi_col, bsize);
-      nonrd_use_partition(cpi, tile, mi_8x8, tp, mi_row, mi_col, BLOCK_64X64,
-                          &dummy_rate, &dummy_dist);
-    } else if (cpi->sf.partition_search_type == VAR_BASED_PARTITION) {
-      const int idx_str = cpi->common.mode_info_stride * mi_row + mi_col;
-      MODE_INFO **mi_8x8 = cpi->common.mi_grid_visible + idx_str;
-      int dummy_rate;
-      int64_t dummy_dist;
+    // Set the partition type of the 64X64 block
+    if (cpi->sf.partition_search_type == VAR_BASED_PARTITION)
       choose_partitioning(cpi, tile, mi_row, mi_col);
-      nonrd_use_partition(cpi, tile, mi_8x8, tp, mi_row, mi_col, BLOCK_64X64,
-                          &dummy_rate, &dummy_dist);
-    } else {
-      assert(0);
-    }
+    else
+      set_fixed_partitioning(cpi, tile, mi_8x8, mi_row, mi_col, bsize);
+
+    nonrd_use_partition(cpi, tile, mi_8x8, tp, mi_row, mi_col, BLOCK_64X64,
+                        &dummy_rate, &dummy_dist);
   }
 }
 // end RTC play code
