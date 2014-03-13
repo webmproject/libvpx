@@ -263,6 +263,7 @@ int64_t vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
                         EIGHTTAP : cpi->common.interp_filter;
   mbmi->skip = 0;
   mbmi->segment_id = 0;
+  xd->interp_kernel = vp9_get_interp_kernel(mbmi->interp_filter);
 
   for (ref_frame = LAST_FRAME; ref_frame <= LAST_FRAME ; ++ref_frame) {
     x->pred_mv_sad[ref_frame] = INT_MAX;
