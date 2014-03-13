@@ -12,6 +12,10 @@
 #ifndef VP9_ENCODER_VP9_RATECTRL_H_
 #define VP9_ENCODER_VP9_RATECTRL_H_
 
+#include "vpx/vpx_integer.h"
+
+#include "vp9/common/vp9_blockd.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
