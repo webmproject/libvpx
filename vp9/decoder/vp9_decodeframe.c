@@ -373,10 +373,10 @@ static void set_ref(VP9_COMMON *const cm, MACROBLOCKD *const xd,
   xd->corrupted |= ref_buffer->buf->corrupted;
 }
 
-static void decode_modes_b(VP9_COMMON *const cm, MACROBLOCKD *const xd,
-                           const TileInfo *const tile,
-                           int mi_row, int mi_col,
-                           vp9_reader *r, BLOCK_SIZE bsize) {
+static void decode_block(VP9_COMMON *const cm, MACROBLOCKD *const xd,
+                         const TileInfo *const tile,
+                         int mi_row, int mi_col,
+                         vp9_reader *r, BLOCK_SIZE bsize) {
   const int less8x8 = bsize < BLOCK_8X8;
   MB_MODE_INFO *mbmi;
 
@@ -451,10 +451,10 @@ static PARTITION_TYPE read_partition(VP9_COMMON *cm, MACROBLOCKD *xd, int hbs,
   return p;
 }
 
-static void decode_modes_sb(VP9_COMMON *const cm, MACROBLOCKD *const xd,
-                            const TileInfo *const tile,
-                            int mi_row, int mi_col,
-                            vp9_reader* r, BLOCK_SIZE bsize) {
+static void decode_partition(VP9_COMMON *const cm, MACROBLOCKD *const xd,
+                             const TileInfo *const tile,
+                             int mi_row, int mi_col,
+                             vp9_reader* r, BLOCK_SIZE bsize) {
   const int hbs = num_8x8_blocks_wide_lookup[bsize] / 2;
   PARTITION_TYPE partition;
   BLOCK_SIZE subsize;
@@ -465,27 +465,27 @@ static void decode_modes_sb(VP9_COMMON *const cm, MACROBLOCKD *const xd,
   partition = read_partition(cm, xd, hbs, mi_row, mi_col, bsize, r);
   subsize = get_subsize(bsize, partition);
   if (subsize < BLOCK_8X8) {
-    decode_modes_b(cm, xd, tile, mi_row, mi_col, r, subsize);
+    decode_block(cm, xd, tile, mi_row, mi_col, r, subsize);
   } else {
     switch (partition) {
       case PARTITION_NONE:
-        decode_modes_b(cm, xd, tile, mi_row, mi_col, r, subsize);
+        decode_block(cm, xd, tile, mi_row, mi_col, r, subsize);
         break;
       case PARTITION_HORZ:
-        decode_modes_b(cm, xd, tile, mi_row, mi_col, r, subsize);
+        decode_block(cm, xd, tile, mi_row, mi_col, r, subsize);
         if (mi_row + hbs < cm->mi_rows)
-          decode_modes_b(cm, xd, tile, mi_row + hbs, mi_col, r, subsize);
+          decode_block(cm, xd, tile, mi_row + hbs, mi_col, r, subsize);
         break;
       case PARTITION_VERT:
-        decode_modes_b(cm, xd, tile, mi_row, mi_col, r, subsize);
+        decode_block(cm, xd, tile, mi_row, mi_col, r, subsize);
         if (mi_col + hbs < cm->mi_cols)
-          decode_modes_b(cm, xd, tile, mi_row, mi_col + hbs, r, subsize);
+          decode_block(cm, xd, tile, mi_row, mi_col + hbs, r, subsize);
         break;
       case PARTITION_SPLIT:
-        decode_modes_sb(cm, xd, tile, mi_row, mi_col, r, subsize);
-        decode_modes_sb(cm, xd, tile, mi_row, mi_col + hbs, r, subsize);
-        decode_modes_sb(cm, xd, tile, mi_row + hbs, mi_col, r, subsize);
-        decode_modes_sb(cm, xd, tile, mi_row + hbs, mi_col + hbs, r, subsize);
+        decode_partition(cm, xd, tile, mi_row,       mi_col,       r, subsize);
+        decode_partition(cm, xd, tile, mi_row,       mi_col + hbs, r, subsize);
+        decode_partition(cm, xd, tile, mi_row + hbs, mi_col,       r, subsize);
+        decode_partition(cm, xd, tile, mi_row + hbs, mi_col + hbs, r, subsize);
         break;
       default:
         assert(0 && "Invalid partition type");
@@ -767,7 +767,7 @@ static void decode_tile(VP9D_COMP *pbi, const TileInfo *const tile,
     vp9_zero(xd->left_seg_context);
     for (mi_col = tile->mi_col_start; mi_col < tile->mi_col_end;
          mi_col += MI_BLOCK_SIZE) {
-      decode_modes_sb(cm, xd, tile, mi_row, mi_col, r, BLOCK_64X64);
+      decode_partition(cm, xd, tile, mi_row, mi_col, r, BLOCK_64X64);
     }
 
     if (pbi->do_loopfilter_inline) {
@@ -929,8 +929,8 @@ static int tile_worker_hook(void *arg1, void *arg2) {
     vp9_zero(tile_data->xd.left_seg_context);
     for (mi_col = tile->mi_col_start; mi_col < tile->mi_col_end;
          mi_col += MI_BLOCK_SIZE) {
-      decode_modes_sb(tile_data->cm, &tile_data->xd, tile,
-                      mi_row, mi_col, &tile_data->bit_reader, BLOCK_64X64);
+      decode_partition(tile_data->cm, &tile_data->xd, tile,
+                       mi_row, mi_col, &tile_data->bit_reader, BLOCK_64X64);
     }
   }
   return !tile_data->xd.corrupted;
