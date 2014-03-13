@@ -16,6 +16,23 @@
       "revId": "d39d536b1ee4ce3a2cb28484ce0abe106cadfe86",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//yg8\u003d",
+        "filename": "vp9/encoder/vp9_craq.c",
+        "patchSetId": 20
+      },
+      "lineNbr": 120,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2014-03-13T14:26:49Z",
+      "side": 1,
+      "message": "I think you need an extra test here\n    if (cr-\u003emap[block_index] \u003d\u003d 1)\t\n      new_map_value \u003d 0;\n    else\n      // Leave it as it is.\n      new_map_value \u003d cpi-\u003ecyclic_refresh.map[block_index];\n\nIf you don\u0027t have the else then the -ve refresh cycle count set above (currently -1) will simply get reset to either 0 or 1 next time around so -99 will be the same as -1.\n\nCorrecting this seems to help quite a lot in my tests when using larger -ve counts for the delay before a clean block is refreshed again.",
+      "revId": "d39d536b1ee4ce3a2cb28484ce0abe106cadfe86",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
