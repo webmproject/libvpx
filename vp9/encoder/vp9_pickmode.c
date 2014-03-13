@@ -327,6 +327,8 @@ int64_t vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
 
       if (this_rd < best_rd) {
         best_rd = this_rd;
+        *returnrate = rate;
+        *returndistortion = dist;
         best_mode = this_mode;
         best_ref_frame = ref_frame;
       }
@@ -353,6 +355,8 @@ int64_t vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
 
       if (this_rd + intra_mode_cost < best_rd) {
         best_rd = this_rd;
+        *returnrate = rate;
+        *returndistortion = dist;
         mbmi->mode = this_mode;
         mbmi->ref_frame[0] = INTRA_FRAME;
         mbmi->uv_mode = this_mode;
