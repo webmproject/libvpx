@@ -30,6 +30,7 @@
 #include "vp9/encoder/vp9_mcomp.h"
 #include "vp9/encoder/vp9_quantize.h"
 #include "vp9/encoder/vp9_ratectrl.h"
+#include "vp9/encoder/vp9_svc_layercontext.h"
 #include "vp9/encoder/vp9_tokenize.h"
 #include "vp9/encoder/vp9_variance.h"
 
@@ -432,16 +433,6 @@ typedef struct {
   BLOCK_SIZE max_intra_bsize;
 } SPEED_FEATURES;
 
-typedef struct {
-  RATE_CONTROL rc;
-  int target_bandwidth;
-  int64_t starting_buffer_level;
-  int64_t optimal_buffer_level;
-  int64_t maximum_buffer_size;
-  double framerate;
-  int avg_frame_size;
-} LAYER_CONTEXT;
-
 typedef enum {
   NORMAL      = 0,
   FOURFIVE    = 1,
@@ -822,15 +813,7 @@ typedef struct VP9_COMP {
 
   int use_svc;
 
-  struct svc {
-    int spatial_layer_id;
-    int temporal_layer_id;
-    int number_spatial_layers;
-    int number_temporal_layers;
-    // Layer context used for rate control in CBR mode, only defined for
-    // temporal layers for now.
-    LAYER_CONTEXT layer_context[VPX_TS_MAX_LAYERS];
-  } svc;
+  SVC svc;
 
 #if CONFIG_MULTIPLE_ARF
   // ARF tracking variables.
@@ -942,6 +925,10 @@ int vp9_compute_qdelta(const VP9_COMP *cpi, double qstart, double qtarget);
 static int get_token_alloc(int mb_rows, int mb_cols) {
   return mb_rows * mb_cols * (48 * 16 + 4);
 }
+
+extern const int q_trans[];
+
+int64_t vp9_rescale(int64_t val, int64_t num, int denom);
 
 static void set_ref_ptrs(VP9_COMMON *cm, MACROBLOCKD *xd,
                          MV_REFERENCE_FRAME ref0, MV_REFERENCE_FRAME ref1) {
