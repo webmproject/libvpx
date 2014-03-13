@@ -944,7 +944,7 @@ static vpx_image_t *vp9e_get_preview(vpx_codec_alg_priv_t *ctx) {
     flags.noise_level           = ctx->preview_ppcfg.noise_level;
   }
 
-  if (0 == vp9_get_preview_raw_frame(ctx->cpi, &sd, &flags)) {
+  if (vp9_get_preview_raw_frame(ctx->cpi, &sd, &flags) == 0) {
     yuvconfig2image(&ctx->preview_img, &sd, NULL);
     return &ctx->preview_img;
   } else {
@@ -955,7 +955,7 @@ static vpx_image_t *vp9e_get_preview(vpx_codec_alg_priv_t *ctx) {
 static vpx_codec_err_t vp9e_update_entropy(vpx_codec_alg_priv_t *ctx,
                                            int ctr_id,
                                            va_list args) {
-  int update = va_arg(args, int);
+  const int update = va_arg(args, int);
   vp9_update_entropy(ctx->cpi, update);
   return VPX_CODEC_OK;
 }
@@ -963,7 +963,7 @@ static vpx_codec_err_t vp9e_update_entropy(vpx_codec_alg_priv_t *ctx,
 static vpx_codec_err_t vp9e_update_reference(vpx_codec_alg_priv_t *ctx,
                                              int ctr_id,
                                              va_list args) {
-  int update = va_arg(args, int);
+  const int update = va_arg(args, int);
   vp9_update_reference(ctx->cpi, update);
   return VPX_CODEC_OK;
 }
@@ -971,7 +971,7 @@ static vpx_codec_err_t vp9e_update_reference(vpx_codec_alg_priv_t *ctx,
 static vpx_codec_err_t vp9e_use_reference(vpx_codec_alg_priv_t *ctx,
                                           int ctr_id,
                                           va_list args) {
-  int reference_flag = va_arg(args, int);
+  const int reference_flag = va_arg(args, int);
   vp9_use_as_reference(ctx->cpi, reference_flag);
   return VPX_CODEC_OK;
 }
@@ -987,10 +987,9 @@ static vpx_codec_err_t vp9e_set_roi_map(vpx_codec_alg_priv_t *ctx,
 static vpx_codec_err_t vp9e_set_activemap(vpx_codec_alg_priv_t *ctx,
                                           int ctr_id,
                                           va_list args) {
-  vpx_active_map_t *data = va_arg(args, vpx_active_map_t *);
+  vpx_active_map_t *const map = va_arg(args, vpx_active_map_t *);
 
-  if (data) {
-    vpx_active_map_t *map = (vpx_active_map_t *)data;
+  if (map) {
     if (!vp9_set_active_map(ctx->cpi, map->active_map, map->rows, map->cols))
       return VPX_CODEC_OK;
     else
@@ -1001,15 +1000,13 @@ static vpx_codec_err_t vp9e_set_activemap(vpx_codec_alg_priv_t *ctx,
 }
 
 static vpx_codec_err_t vp9e_set_scalemode(vpx_codec_alg_priv_t *ctx,
-                                          int ctr_id,
-                                          va_list args) {
-  vpx_scaling_mode_t *scalemode =  va_arg(args, vpx_scaling_mode_t *);
+                                          int ctr_id, va_list args) {
+  vpx_scaling_mode_t *const mode = va_arg(args, vpx_scaling_mode_t *);
 
-  if (scalemode != NULL) {
-    int res;
-    res = vp9_set_internal_size(ctx->cpi,
-                                (VPX_SCALING)scalemode->h_scaling_mode,
-                                (VPX_SCALING)scalemode->v_scaling_mode);
+  if (mode) {
+    const int res = vp9_set_internal_size(ctx->cpi,
+                                          (VPX_SCALING)mode->h_scaling_mode,
+                                          (VPX_SCALING)mode->v_scaling_mode);
     return (res == 0) ? VPX_CODEC_OK : VPX_CODEC_INVALID_PARAM;
   } else {
     return VPX_CODEC_INVALID_PARAM;
@@ -1051,10 +1048,11 @@ static vpx_codec_err_t vp9e_set_svc_layer_id(vpx_codec_alg_priv_t *ctx,
 
 static vpx_codec_err_t vp9e_set_svc_parameters(vpx_codec_alg_priv_t *ctx,
                                                int ctr_id, va_list args) {
-  VP9_COMP *cpi = (VP9_COMP *)ctx->cpi;
-  vpx_svc_parameters_t *params = va_arg(args, vpx_svc_parameters_t *);
+  VP9_COMP *const cpi = ctx->cpi;
+  vpx_svc_parameters_t *const params = va_arg(args, vpx_svc_parameters_t *);
 
-  if (params == NULL) return VPX_CODEC_INVALID_PARAM;
+  if (params == NULL)
+    return VPX_CODEC_INVALID_PARAM;
 
   cpi->svc.spatial_layer_id = params->spatial_layer;
   cpi->svc.temporal_layer_id = params->temporal_layer;
