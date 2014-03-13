@@ -224,3 +224,19 @@ void vp9_update_frame_size(VP9_COMMON *cm) {
   if (cm->last_frame_seg_map)
     vpx_memset(cm->last_frame_seg_map, 0, cm->mi_rows * cm->mi_cols);
 }
+
+void vp9_swap_mi_and_prev_mi(VP9_COMMON *cm) {
+  // Current mip will be the prev_mip for the next frame.
+  MODE_INFO *temp = cm->prev_mip;
+  MODE_INFO **temp2 = cm->prev_mi_grid_base;
+  cm->prev_mip = cm->mip;
+  cm->mip = temp;
+  cm->prev_mi_grid_base = cm->mi_grid_base;
+  cm->mi_grid_base = temp2;
+
+  // Update the upper left visible macroblock ptrs.
+  cm->mi = cm->mip + cm->mode_info_stride + 1;
+  cm->prev_mi = cm->prev_mip + cm->mode_info_stride + 1;
+  cm->mi_grid_visible = cm->mi_grid_base + cm->mode_info_stride + 1;
+  cm->prev_mi_grid_visible = cm->prev_mi_grid_base + cm->mode_info_stride + 1;
+}

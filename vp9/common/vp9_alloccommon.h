@@ -31,6 +31,8 @@ void vp9_free_frame_buffers(VP9_COMMON *cm);
 
 void vp9_update_frame_size(VP9_COMMON *cm);
 
+void vp9_swap_mi_and_prev_mi(VP9_COMMON *cm);
+
 #ifdef __cplusplus
 }  // extern "C"
 #endif
