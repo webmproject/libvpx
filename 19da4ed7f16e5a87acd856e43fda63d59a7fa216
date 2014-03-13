@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//yjs\u003d",
+        "filename": "build/make/Makefile",
+        "patchSetId": 1
+      },
+      "lineNbr": 150,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-03-13T02:12:58Z",
+      "side": 1,
+      "message": "there\u0027s some other duplication, so ok to start with. note this could be a template shared between cc/cpp to avoid drift",
+      "revId": "19da4ed7f16e5a87acd856e43fda63d59a7fa216",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//yj0\u003d",
+        "filename": "third_party/libwebm/UPSTREAM_HASH",
+        "patchSetId": 1
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-03-13T02:12:58Z",
+      "side": 1,
+      "message": "if this is going to be a straight snapshot then we could use a submodule. at a minimum, do like the other third_party\u0027s now and add a README.webm",
+      "revId": "19da4ed7f16e5a87acd856e43fda63d59a7fa216",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//yjo\u003d",
+        "filename": "vpxenc.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1614,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-03-13T02:12:58Z",
+      "side": 1,
+      "message": "vpxenc was built...",
+      "revId": "19da4ed7f16e5a87acd856e43fda63d59a7fa216",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
