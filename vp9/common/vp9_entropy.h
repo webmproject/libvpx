@@ -181,7 +181,7 @@ static const INLINE scan_order *get_scan(const MACROBLOCKD *xd, TX_SIZE tx_size,
     return &vp9_default_scan_orders[tx_size];
   } else {
     const MB_PREDICTION_MODE mode = get_y_mode(mi, block_idx);
-    return &vp9_scan_orders[tx_size][mode2txfm_map[mode]];
+    return &vp9_scan_orders[tx_size][intra_mode_to_tx_type_lookup[mode]];
   }
 }
 
