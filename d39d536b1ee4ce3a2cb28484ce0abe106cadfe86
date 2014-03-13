@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//yhM\u003d",
+        "filename": "vp9/encoder/vp9_craq.c",
+        "patchSetId": 20
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2014-03-13T13:36:24Z",
+      "side": 1,
+      "message": "What is the value of this if the mode is set tot INTRA !!!\n\nI think you need to at least check for intra mode as well unless you are Ok with refreshing an intra block.",
+      "revId": "d39d536b1ee4ce3a2cb28484ce0abe106cadfe86",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
