@@ -67,13 +67,22 @@ static const arg_def_t pass_arg =
     ARG_DEF(NULL, "pass", 1, "Pass to execute (1/2)");
 static const arg_def_t fpf_name_arg =
     ARG_DEF(NULL, "fpf", 1, "First pass statistics file name");
+static const arg_def_t min_q_arg =
+    ARG_DEF(NULL, "min-q", 1, "Minimum quantizer");
+static const arg_def_t max_q_arg =
+    ARG_DEF(NULL, "max-q", 1, "Maximum quantizer");
+static const arg_def_t min_bitrate_arg =
+    ARG_DEF(NULL, "min-bitrate", 1, "Minimum bitrate");
+static const arg_def_t max_bitrate_arg =
+    ARG_DEF(NULL, "max-bitrate", 1, "Maximum bitrate");
 
 static const arg_def_t *svc_args[] = {
   &encoding_mode_arg, &frames_arg,        &width_arg,       &height_arg,
   &timebase_arg,      &bitrate_arg,       &skip_frames_arg, &layers_arg,
   &kf_dist_arg,       &scale_factors_arg, &quantizers_arg,
-  &quantizers_keyframe_arg,               &passes_arg,       &pass_arg,
-  &fpf_name_arg,      NULL
+  &quantizers_keyframe_arg,               &passes_arg,      &pass_arg,
+  &fpf_name_arg,      &min_q_arg,         &max_q_arg,       &min_bitrate_arg,
+  &max_bitrate_arg,   NULL
 };
 
 static const SVC_ENCODING_MODE default_encoding_mode =
@@ -120,6 +129,8 @@ static void parse_command_line(int argc, const char **argv_,
   int passes = 0;
   int pass = 0;
   const char *fpf_file_name = NULL;
+  unsigned int min_bitrate = 0;
+  unsigned int max_bitrate = 0;
 
   // initialize SvcContext with parameters that will be passed to vpx_svc_init
   svc_ctx->log_level = SVC_LOG_DEBUG;
@@ -186,6 +197,14 @@ static void parse_command_line(int argc, const char **argv_,
       }
     } else if (arg_match(&arg, &fpf_name_arg, argi)) {
       fpf_file_name = arg.val;
+    } else if (arg_match(&arg, &min_q_arg, argi)) {
+      enc_cfg->rc_min_quantizer = arg_parse_uint(&arg);
+    } else if (arg_match(&arg, &max_q_arg, argi)) {
+      enc_cfg->rc_max_quantizer = arg_parse_uint(&arg);
+    } else if (arg_match(&arg, &min_bitrate_arg, argi)) {
+      min_bitrate = arg_parse_uint(&arg);
+    } else if (arg_match(&arg, &max_bitrate_arg, argi)) {
+      max_bitrate = arg_parse_uint(&arg);
     } else {
       ++argj;
     }
@@ -219,6 +238,17 @@ static void parse_command_line(int argc, const char **argv_,
     }
     app_input->passes = passes;
     app_input->pass = pass;
+  }
+
+  if (enc_cfg->rc_target_bitrate > 0) {
+    if (min_bitrate > 0) {
+      enc_cfg->rc_2pass_vbr_minsection_pct =
+          min_bitrate * 100 / enc_cfg->rc_target_bitrate;
+    }
+    if (max_bitrate > 0) {
+      enc_cfg->rc_2pass_vbr_maxsection_pct =
+          max_bitrate * 100 / enc_cfg->rc_target_bitrate;
+    }
   }
 
   // Check for unrecognized options
