@@ -1022,7 +1022,7 @@ static void rd_pick_sb_modes(VP9_COMP *cpi, const TileInfo *const tile,
   struct macroblock_plane *const p = x->plane;
   struct macroblockd_plane *const pd = xd->plane;
   const AQ_MODE aq_mode = cpi->oxcf.aq_mode;
-  int i, orig_rdmult = x->rdmult;
+  int i, orig_rdmult;
   double rdmult_ratio;
 
   vp9_clear_system_state();
@@ -1077,6 +1077,8 @@ static void rd_pick_sb_modes(VP9_COMP *cpi, const TileInfo *const tile,
     vp9_init_plane_quantizers(cpi, x);
   }
 
+  // Save rdmult before it might be changed, so it can be restored later.
+  orig_rdmult = x->rdmult;
   if (cpi->oxcf.tuning == VP8_TUNE_SSIM)
     activity_masking(cpi, x);
 
