@@ -29,7 +29,7 @@
 static int full_pixel_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
                                     const TileInfo *const tile,
                                     BLOCK_SIZE bsize, int mi_row, int mi_col,
-                                    int_mv *tmp_mv, int *rate_mv) {
+                                    int_mv *tmp_mv) {
   MACROBLOCKD *xd = &x->e_mbd;
   MB_MODE_INFO *mbmi = &xd->mi_8x8[0]->mbmi;
   struct buf_2d backup_yv12[MAX_MB_PLANE] = {{0}};
@@ -139,20 +139,13 @@ static int full_pixel_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
                                    xd->plane[0].pre[0].buf + buf_offset,
                                    stride, 0x7fffffff);
 
-  // scale to 1/8 pixel resolution
-  tmp_mv->as_mv.row = tmp_mv->as_mv.row * 8;
-  tmp_mv->as_mv.col = tmp_mv->as_mv.col * 8;
-
-  // calculate the bit cost on motion vector
-  *rate_mv = vp9_mv_bit_cost(&tmp_mv->as_mv, &ref_mv,
-                             x->nmvjointcost, x->mvcost, MV_COST_WEIGHT);
   return bestsme;
 }
 
 static void sub_pixel_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
                                     const TileInfo *const tile,
                                     BLOCK_SIZE bsize, int mi_row, int mi_col,
-                                    MV *tmp_mv) {
+                                    MV *tmp_mv, int *rate_mv) {
   MACROBLOCKD *xd = &x->e_mbd;
   MB_MODE_INFO *mbmi = &xd->mi_8x8[0]->mbmi;
   struct buf_2d backup_yv12[MAX_MB_PLANE] = {{0}};
@@ -173,9 +166,6 @@ static void sub_pixel_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
     vp9_setup_pre_planes(xd, 0, scaled_ref_frame, mi_row, mi_col, NULL);
   }
 
-  tmp_mv->col >>= 3;
-  tmp_mv->row >>= 3;
-
   cpi->find_fractional_mv_step(x, tmp_mv, &ref_mv,
                                cpi->common.allow_high_precision_mv,
                                x->errorperbit,
@@ -184,6 +174,10 @@ static void sub_pixel_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
                                cpi->sf.subpel_iters_per_step,
                                x->nmvjointcost, x->mvcost,
                                &dis, &x->pred_sse[ref]);
+
+  // calculate the bit cost on motion vector
+  *rate_mv = vp9_mv_bit_cost(tmp_mv, &ref_mv,
+                             x->nmvjointcost, x->mvcost, MV_COST_WEIGHT);
 
   if (scaled_ref_frame) {
     int i;
@@ -301,13 +295,13 @@ int64_t vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
 
         x->mode_sad[ref_frame][INTER_OFFSET(NEWMV)] =
             full_pixel_motion_search(cpi, x, tile, bsize, mi_row, mi_col,
-                                     &frame_mv[NEWMV][ref_frame], &rate_mv);
+                                     &frame_mv[NEWMV][ref_frame]);
 
         if (frame_mv[NEWMV][ref_frame].as_int == INVALID_MV)
           continue;
 
         sub_pixel_motion_search(cpi, x, tile, bsize, mi_row, mi_col,
-                                &frame_mv[NEWMV][ref_frame].as_mv);
+                                &frame_mv[NEWMV][ref_frame].as_mv, &rate_mv);
       }
 
       if (this_mode != NEARESTMV)
