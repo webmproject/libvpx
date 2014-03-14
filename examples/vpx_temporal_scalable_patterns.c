@@ -563,7 +563,8 @@ int main(int argc, char **argv) {
   vpx_codec_control(&codec, VP8E_SET_CPUUSED, -6);
   vpx_codec_control(&codec, VP8E_SET_NOISE_SENSITIVITY, 1);
   if (strncmp(encoder->name, "vp9", 3) == 0) {
-    vpx_codec_control(&codec, VP8E_SET_CPUUSED, 3);
+    vpx_codec_control(&codec, VP8E_SET_CPUUSED, 5);
+    vpx_codec_control(&codec, VP9E_SET_AQ_MODE, 3);
     vpx_codec_control(&codec, VP8E_SET_NOISE_SENSITIVITY, 0);
     if (vpx_codec_control(&codec, VP9E_SET_SVC, 1)) {
       die_codec(&codec, "Failed to set SVC");
@@ -576,6 +577,8 @@ int main(int argc, char **argv) {
   // value, like 100 or 200.
   max_intra_size_pct = (int) (((double)cfg.rc_buf_optimal_sz * 0.5)
       * ((double) cfg.g_timebase.den / cfg.g_timebase.num) / 10.0);
+  // For low-quality key frame.
+  max_intra_size_pct = 200;
   vpx_codec_control(&codec, VP8E_SET_MAX_INTRA_BITRATE_PCT, max_intra_size_pct);
 
   frame_avail = 1;
