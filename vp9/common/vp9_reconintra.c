@@ -434,7 +434,7 @@ static void build_intra_predictors(const MACROBLOCKD *xd, const uint8_t *ref,
 }
 
 void vp9_predict_intra_block(const MACROBLOCKD *xd, int block_idx, int bwl_in,
-                             TX_SIZE tx_size, int mode,
+                             TX_SIZE tx_size, MB_PREDICTION_MODE mode,
                              const uint8_t *ref, int ref_stride,
                              uint8_t *dst, int dst_stride,
                              int aoff, int loff, int plane) {
