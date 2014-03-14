@@ -16,6 +16,24 @@
       "revId": "5127c6e404edc838bb2545dbab84a844e74fb626",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//yX0\u003d",
+        "filename": "vpx/src/svc_encodeframe.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 799,
+      "author": {
+        "id": 1129385
+      },
+      "writtenOn": "2014-03-14T06:24:52Z",
+      "side": 1,
+      "message": "It seems there\u0027s no function to return current quantizer. So it\u0027s hard to test this.",
+      "parentUuid": "AAAAdn//yZg\u003d",
+      "revId": "5127c6e404edc838bb2545dbab84a844e74fb626",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
