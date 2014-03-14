@@ -159,7 +159,6 @@ static inline void set_modeinfo_offsets(VP9_COMMON *const cm,
   const int idx_str = xd->mode_info_stride * mi_row + mi_col;
   xd->mi_8x8 = cm->mi_grid_visible + idx_str;
   xd->prev_mi_8x8 = cm->prev_mi_grid_visible + idx_str;
-  // xd->last_mi = cm->prev_mi ? xd->prev_mi_8x8[0] : NULL;
   xd->mi_8x8[0] = cm->mi + idx_str;
 }
 
