@@ -10,9 +10,36 @@
  *  Based on code from the OggTheora software codec source code,
  *  Copyright (C) 2002-2010 The Xiph.Org Foundation and contributors.
  */
+#include <errno.h>
 #include <stdlib.h>
 #include <string.h>
+
+#include "vpx/vpx_integer.h"
 #include "y4minput.h"
+
+// Reads 'size' bytes from 'file' into 'buf' with some fault tolerance.
+// Returns true on success.
+static int file_read(void *buf, size_t size, FILE *file) {
+  const int kMaxRetries = 5;
+  int retry_count = 0;
+  size_t len = 0;
+  do {
+    const size_t n = fread((uint8_t*)buf + len, 1, size - len, file);
+    len += n;
+    if (ferror(file)) {
+      if (errno == EINTR || errno == EAGAIN) {
+        ++retry_count;
+        clearerr(file);
+        continue;
+      } else {
+        fprintf(stderr, "Error reading file: %u of %u bytes read, %d: %s\n",
+                (uint32_t)len, (uint32_t)size, errno, strerror(errno));
+        return 0;
+      }
+    }
+  } while (!feof(file) && len < size && retry_count < kMaxRetries);
+  return len == size;
+}
 
 static int y4m_parse_tags(y4m_input *_y4m, char *_tags) {
   int   got_w;
@@ -670,8 +697,7 @@ int y4m_input_open(y4m_input *_y4m, FILE *_fin, char *_skip, int _nskip,
       buffer[i] = *_skip++;
       _nskip--;
     } else {
-      ret = (int)fread(buffer + i, 1, 1, _fin);
-      if (ret < 1)return -1;
+      if (!file_read(buffer + i, 1, _fin)) return -1;
     }
     if (buffer[i] == '\n')break;
   }
@@ -853,10 +879,8 @@ int y4m_input_fetch_frame(y4m_input *_y4m, FILE *_fin, vpx_image_t *_img) {
   int  c_w;
   int  c_h;
   int  c_sz;
-  int  ret;
   /*Read and skip the frame header.*/
-  ret = (int)fread(frame, 1, 6, _fin);
-  if (ret < 6)return 0;
+  if (!file_read(frame, 6, _fin)) return 0;
   if (memcmp(frame, "FRAME", 5)) {
     fprintf(stderr, "Loss of framing in Y4M input data\n");
     return -1;
@@ -864,19 +888,19 @@ int y4m_input_fetch_frame(y4m_input *_y4m, FILE *_fin, vpx_image_t *_img) {
   if (frame[5] != '\n') {
     char c;
     int  j;
-    for (j = 0; j < 79 && fread(&c, 1, 1, _fin) && c != '\n'; j++);
+    for (j = 0; j < 79 && file_read(&c, 1, _fin) && c != '\n'; j++) {}
     if (j == 79) {
       fprintf(stderr, "Error parsing Y4M frame header\n");
       return -1;
     }
   }
   /*Read the frame data that needs no conversion.*/
-  if (fread(_y4m->dst_buf, 1, _y4m->dst_buf_read_sz, _fin) != _y4m->dst_buf_read_sz) {
+  if (!file_read(_y4m->dst_buf, _y4m->dst_buf_read_sz, _fin)) {
     fprintf(stderr, "Error reading Y4M frame data.\n");
     return -1;
   }
   /*Read the frame data that does need conversion.*/
-  if (fread(_y4m->aux_buf, 1, _y4m->aux_buf_read_sz, _fin) != _y4m->aux_buf_read_sz) {
+  if (!file_read(_y4m->aux_buf, _y4m->aux_buf_read_sz, _fin)) {
     fprintf(stderr, "Error reading Y4M frame data.\n");
     return -1;
   }
