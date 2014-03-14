@@ -152,7 +152,7 @@ static BLOCK_SIZE get_nonrd_var_based_fixed_partition(VP9_COMP *cpi,
 
 // Lighter version of set_offsets that only sets the mode info
 // pointers.
-static inline void set_modeinfo_offsets(VP9_COMMON *const cm,
+static INLINE void set_modeinfo_offsets(VP9_COMMON *const cm,
                                         MACROBLOCKD *const xd,
                                         int mi_row,
                                         int mi_col) {
