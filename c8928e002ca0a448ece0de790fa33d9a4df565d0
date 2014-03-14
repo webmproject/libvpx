@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//yHA\u003d",
+        "filename": "configure",
+        "patchSetId": 2
+      },
+      "lineNbr": 708,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-03-14T19:49:41Z",
+      "side": 1,
+      "message": "you don\u0027t need a C++ compiler here, only when you later add libwebm",
+      "revId": "c8928e002ca0a448ece0de790fa33d9a4df565d0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
