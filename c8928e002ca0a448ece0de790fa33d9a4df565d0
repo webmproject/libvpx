@@ -16,6 +16,24 @@
       "revId": "c8928e002ca0a448ece0de790fa33d9a4df565d0",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//yGo\u003d",
+        "filename": "configure",
+        "patchSetId": 2
+      },
+      "lineNbr": 708,
+      "author": {
+        "id": 1002174
+      },
+      "writtenOn": "2014-03-14T20:00:46Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//yHA\u003d",
+      "revId": "c8928e002ca0a448ece0de790fa33d9a4df565d0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
