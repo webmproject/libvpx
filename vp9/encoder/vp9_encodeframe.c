@@ -2721,33 +2721,6 @@ static void nonrd_use_fixed_partition(VP9_COMP *cpi,
   encode_sb_rt(cpi, tile, tp, mi_row, mi_col, 1, BLOCK_64X64);
 }
 
-static void nonrd_pick_fixed_partition(VP9_COMP *cpi,
-                                      const TileInfo *const tile,
-                                      int mi_row, int mi_col,
-                                      BLOCK_SIZE bsize) {
-  MACROBLOCKD *const xd = &cpi->mb.e_mbd;
-  int br, bc;
-  int rows = MIN(MI_BLOCK_SIZE, tile->mi_row_end - mi_row);
-  int cols = MIN(MI_BLOCK_SIZE, tile->mi_col_end - mi_col);
-
-  int bw = num_8x8_blocks_wide_lookup[bsize];
-  int bh = num_8x8_blocks_high_lookup[bsize];
-
-  // Find prediction mode for each 8x8 block.
-  for (br = 0; br < rows; br += bh) {
-    for (bc = 0; bc < cols; bc += bw) {
-      int row = mi_row + br;
-      int col = mi_col + bc;
-
-      BLOCK_SIZE bs = find_partition_size(bsize, rows - br, cols - bc,
-                                          &bh, &bw);
-      set_offsets(cpi, tile, row, col, bs);
-      xd->mi_8x8[0]->mbmi.sb_type = bs;
-      duplicate_modeinfo_in_sb(&cpi->common, xd, row, col, bs);
-    }
-  }
-}
-
 static void nonrd_use_partition(VP9_COMP *cpi,
                                 const TileInfo *const tile,
                                 MODE_INFO **mi_8x8,
@@ -2851,6 +2824,7 @@ static void nonrd_use_partition(VP9_COMP *cpi,
 
 static void encode_nonrd_sb_row(VP9_COMP *cpi, const TileInfo *const tile,
                                 int mi_row, TOKENEXTRA **tp) {
+  VP9_COMMON *cm = &cpi->common;
   int mi_col;
 
   // Initialize the left context for the new SB row
@@ -2866,15 +2840,20 @@ static void encode_nonrd_sb_row(VP9_COMP *cpi, const TileInfo *const tile,
     cpi->mb.source_variance = UINT_MAX;
 
     if (cpi->sf.partition_search_type == FIXED_PARTITION) {
-      nonrd_use_fixed_partition(cpi, tile, tp, mi_row, mi_col,
-                                cpi->sf.always_this_block_size,
-                                &dummy_rate, &dummy_dist);
+      const int idx_str = cm->mode_info_stride * mi_row + mi_col;
+      MODE_INFO **mi_8x8 = cm->mi_grid_visible + idx_str;
+      set_fixed_partitioning(cpi, tile, mi_8x8, mi_row, mi_col,
+                             cpi->sf.always_this_block_size);
+      nonrd_use_partition(cpi, tile, mi_8x8, tp, mi_row, mi_col, BLOCK_64X64,
+                          &dummy_rate, &dummy_dist);
     } else if (cpi->sf.partition_search_type == VAR_BASED_FIXED_PARTITION) {
-      BLOCK_SIZE bsize = get_nonrd_var_based_fixed_partition(cpi,
-                                                             mi_row,
+      BLOCK_SIZE bsize = get_nonrd_var_based_fixed_partition(cpi, mi_row,
                                                              mi_col);
-      nonrd_use_fixed_partition(cpi, tile, tp, mi_row, mi_col,
-                                bsize, &dummy_rate, &dummy_dist);
+      const int idx_str = cm->mode_info_stride * mi_row + mi_col;
+      MODE_INFO **mi_8x8 = cm->mi_grid_visible + idx_str;
+      set_fixed_partitioning(cpi, tile, mi_8x8, mi_row, mi_col, bsize);
+      nonrd_use_partition(cpi, tile, mi_8x8, tp, mi_row, mi_col, BLOCK_64X64,
+                          &dummy_rate, &dummy_dist);
     } else if (cpi->sf.partition_search_type == VAR_BASED_PARTITION) {
       const int idx_str = cpi->common.mode_info_stride * mi_row + mi_col;
       MODE_INFO **mi_8x8 = cpi->common.mi_grid_visible + idx_str;
