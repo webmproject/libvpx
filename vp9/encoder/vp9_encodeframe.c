@@ -2685,41 +2685,6 @@ static void nonrd_pick_sb_modes(VP9_COMP *cpi, const TileInfo *const tile,
   duplicate_modeinfo_in_sb(cm, xd, mi_row, mi_col, bsize);
 }
 
-static void nonrd_use_fixed_partition(VP9_COMP *cpi,
-                                      const TileInfo *const tile,
-                                      TOKENEXTRA **tp,
-                                      int mi_row, int mi_col,
-                                      BLOCK_SIZE bsize,
-                                      int *rate, int64_t *dist) {
-  int br, bc;
-  int rows = MIN(MI_BLOCK_SIZE, tile->mi_row_end - mi_row);
-  int cols = MIN(MI_BLOCK_SIZE, tile->mi_col_end - mi_col);
-
-  int bw = num_8x8_blocks_wide_lookup[bsize];
-  int bh = num_8x8_blocks_high_lookup[bsize];
-
-  int brate = 0;
-  int64_t bdist = 0;
-  *rate = 0;
-  *dist = 0;
-
-  // find prediction mode for each 8x8 block
-  for (br = 0; br < rows; br += bh) {
-    for (bc = 0; bc < cols; bc += bw) {
-      int row = mi_row + br;
-      int col = mi_col + bc;
-
-      BLOCK_SIZE bs = find_partition_size(bsize, rows - br, cols - bc,
-                                          &bh, &bw);
-      nonrd_pick_sb_modes(cpi, tile, row, col, &brate, &bdist, bs);
-
-      *rate += brate;
-      *dist += bdist;
-    }
-  }
-  encode_sb_rt(cpi, tile, tp, mi_row, mi_col, 1, BLOCK_64X64);
-}
-
 static void nonrd_use_partition(VP9_COMP *cpi,
                                 const TileInfo *const tile,
                                 MODE_INFO **mi_8x8,
