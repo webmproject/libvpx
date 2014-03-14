@@ -26,14 +26,13 @@
 #include "vp9/encoder/vp9_ratectrl.h"
 #include "vp9/encoder/vp9_rdopt.h"
 
-static int full_pixel_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
+static void full_pixel_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
                                     const TileInfo *const tile,
                                     BLOCK_SIZE bsize, int mi_row, int mi_col,
                                     int_mv *tmp_mv) {
   MACROBLOCKD *xd = &x->e_mbd;
   MB_MODE_INFO *mbmi = &xd->mi_8x8[0]->mbmi;
   struct buf_2d backup_yv12[MAX_MB_PLANE] = {{0}};
-  int bestsme = INT_MAX;
   int step_param;
   int sadpb = x->sadperbit16;
   MV mvp_full;
@@ -45,9 +44,6 @@ static int full_pixel_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
   int tmp_col_max = x->mv_col_max;
   int tmp_row_min = x->mv_row_min;
   int tmp_row_max = x->mv_row_max;
-
-  int buf_offset;
-  int stride = xd->plane[0].pre[0].stride;
 
   const YV12_BUFFER_CONFIG *scaled_ref_frame = vp9_get_scaled_ref_frame(cpi,
                                                                         ref);
@@ -77,7 +73,7 @@ static int full_pixel_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
         for (i = 0; i < MAX_MB_PLANE; i++)
           xd->plane[i].pre[0] = backup_yv12[i];
       }
-      return INT_MAX;
+      return;
     }
   }
 
@@ -129,17 +125,6 @@ static int full_pixel_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
     for (i = 0; i < MAX_MB_PLANE; i++)
       xd->plane[i].pre[0] = backup_yv12[i];
   }
-
-  // TODO(jingning) This step can be merged into full pixel search step in the
-  // re-designed log-diamond search
-  buf_offset = tmp_mv->as_mv.row * stride + tmp_mv->as_mv.col;
-
-  // Find sad for current vector.
-  bestsme = cpi->fn_ptr[bsize].sdf(x->plane[0].src.buf, x->plane[0].src.stride,
-                                   xd->plane[0].pre[0].buf + buf_offset,
-                                   stride, 0x7fffffff);
-
-  return bestsme;
 }
 
 static void sub_pixel_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
@@ -195,7 +180,6 @@ static void model_rd_for_sb_y(VP9_COMP *cpi, BLOCK_SIZE bsize,
   unsigned int sse;
   int rate;
   int64_t dist;
-
 
   struct macroblock_plane *const p = &x->plane[0];
   struct macroblockd_plane *const pd = &xd->plane[0];
@@ -297,9 +281,8 @@ int64_t vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
         if (this_rd < (int64_t)(1 << num_pels_log2_lookup[bsize]))
           continue;
 
-        x->mode_sad[ref_frame][INTER_OFFSET(NEWMV)] =
-            full_pixel_motion_search(cpi, x, tile, bsize, mi_row, mi_col,
-                                     &frame_mv[NEWMV][ref_frame]);
+        full_pixel_motion_search(cpi, x, tile, bsize, mi_row, mi_col,
+                                 &frame_mv[NEWMV][ref_frame]);
 
         if (frame_mv[NEWMV][ref_frame].as_int == INVALID_MV)
           continue;

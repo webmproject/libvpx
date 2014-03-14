@@ -2166,10 +2166,9 @@ static void mv_pred(VP9_COMP *cpi, MACROBLOCK *x,
     max_mv = MAX(max_mv,
                  MAX(abs(this_mv.as_mv.row), abs(this_mv.as_mv.col)) >> 3);
     // only need to check zero mv once
-    if (!this_mv.as_int && zero_seen) {
-      x->mode_sad[ref_frame][i] = x->mode_sad[ref_frame][INTER_OFFSET(ZEROMV)];
+    if (!this_mv.as_int && zero_seen)
       continue;
-    }
+
     zero_seen = zero_seen || !this_mv.as_int;
 
     row_offset = this_mv.as_mv.row >> 3;
@@ -2180,9 +2179,6 @@ static void mv_pred(VP9_COMP *cpi, MACROBLOCK *x,
     this_sad = cpi->fn_ptr[block_size].sdf(src_y_ptr, x->plane[0].src.stride,
                                            ref_y_ptr, ref_y_stride,
                                            0x7fffffff);
-    x->mode_sad[ref_frame][i] = this_sad;
-    if (this_mv.as_int == 0)
-      x->mode_sad[ref_frame][INTER_OFFSET(ZEROMV)] = this_sad;
 
     // Note if it is the best so far.
     if (this_sad < best_sad) {
@@ -2190,12 +2186,6 @@ static void mv_pred(VP9_COMP *cpi, MACROBLOCK *x,
       best_index = i;
     }
   }
-
-  if (!zero_seen)
-    x->mode_sad[ref_frame][INTER_OFFSET(ZEROMV)] =
-        cpi->fn_ptr[block_size].sdf(src_y_ptr, x->plane[0].src.stride,
-                                    ref_y_buffer, ref_y_stride,
-                                    0x7fffffff);
 
   // Note the index of the mv that worked best in the reference list.
   x->mv_best_ref_index[ref_frame] = best_index;
