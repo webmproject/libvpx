@@ -1401,6 +1401,7 @@ static void update_layer_contexts (VP8_COMP *cpi)
         unsigned int i;
         double prev_layer_framerate=0;
 
+        assert(oxcf->number_of_layers <= VPX_TS_MAX_LAYERS);
         for (i=0; i<oxcf->number_of_layers; i++)
         {
             LAYER_CONTEXT *lc = &cpi->layer_context[i];
@@ -5071,6 +5072,7 @@ int vp8_get_compressed_data(VP8_COMP *cpi, unsigned int *frame_flags, unsigned l
                 unsigned int i;
 
                 /* Update frame rates for each layer */
+                assert(cpi->oxcf.number_of_layers <= VPX_TS_MAX_LAYERS);
                 for (i=0; i<cpi->oxcf.number_of_layers; i++)
                 {
                     LAYER_CONTEXT *lc = &cpi->layer_context[i];
