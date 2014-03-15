@@ -156,31 +156,27 @@ typedef enum {
 } AUTO_MIN_MAX_MODE;
 
 typedef enum {
-  // Values should be powers of 2 so that they can be selected as bits of
-  // an integer flags field
-
-  // terminate search early based on distortion so far compared to
+  // Terminate search early based on distortion so far compared to
   // qp step, distortion in the neighborhood of the frame, etc.
-  FLAG_EARLY_TERMINATE = 1,
+  FLAG_EARLY_TERMINATE = 1 << 0,
 
-  // skips comp inter modes if the best so far is an intra mode
-  FLAG_SKIP_COMP_BESTINTRA = 2,
+  // Skips comp inter modes if the best so far is an intra mode.
+  FLAG_SKIP_COMP_BESTINTRA = 1 << 1,
 
-  // skips comp inter modes if the best single intermode so far does
+  // Skips comp inter modes if the best single intermode so far does
   // not have the same reference as one of the two references being
-  // tested
-  FLAG_SKIP_COMP_REFMISMATCH = 4,
+  // tested.
+  FLAG_SKIP_COMP_REFMISMATCH = 1 << 2,
 
-  // skips oblique intra modes if the best so far is an inter mode
-  FLAG_SKIP_INTRA_BESTINTER = 8,
+  // Skips oblique intra modes if the best so far is an inter mode.
+  FLAG_SKIP_INTRA_BESTINTER = 1 << 3,
 
-  // skips oblique intra modes  at angles 27, 63, 117, 153 if the best
-  // intra so far is not one of the neighboring directions
-  FLAG_SKIP_INTRA_DIRMISMATCH = 16,
+  // Skips oblique intra modes  at angles 27, 63, 117, 153 if the best
+  // intra so far is not one of the neighboring directions.
+  FLAG_SKIP_INTRA_DIRMISMATCH = 1 << 4,
 
-  // skips intra modes other than DC_PRED if the source variance
-  // is small
-  FLAG_SKIP_INTRA_LOWVAR = 32,
+  // Skips intra modes other than DC_PRED if the source variance is small
+  FLAG_SKIP_INTRA_LOWVAR = 1 << 5,
 } MODE_SEARCH_SKIP_LOGIC;
 
 typedef enum {
@@ -441,32 +437,55 @@ typedef enum {
 } VPX_SCALING;
 
 typedef enum {
-  VP9_LAST_FLAG = 1,
-  VP9_GOLD_FLAG = 2,
-  VP9_ALT_FLAG = 4
+  VP9_LAST_FLAG = 1 << 0,
+  VP9_GOLD_FLAG = 1 << 1,
+  VP9_ALT_FLAG = 1 << 2,
 } VP9_REFFRAME;
 
 typedef enum {
-  USAGE_LOCAL_FILE_PLAYBACK   = 0x0,
-  USAGE_STREAM_FROM_SERVER    = 0x1,
-  USAGE_CONSTRAINED_QUALITY   = 0x2,
-  USAGE_CONSTANT_QUALITY      = 0x3,
+  USAGE_LOCAL_FILE_PLAYBACK = 0,
+  USAGE_STREAM_FROM_SERVER  = 1,
+  USAGE_CONSTRAINED_QUALITY = 2,
+  USAGE_CONSTANT_QUALITY    = 3,
 } END_USAGE;
 
-
 typedef enum {
-  MODE_GOODQUALITY    = 0x1,
-  MODE_BESTQUALITY    = 0x2,
-  MODE_FIRSTPASS      = 0x3,
-  MODE_SECONDPASS     = 0x4,
-  MODE_SECONDPASS_BEST = 0x5,
-  MODE_REALTIME       = 0x6,
+  // Good Quality Fast Encoding. The encoder balances quality with the
+  // amount of time it takes to encode the output. (speed setting
+  // controls how fast)
+  MODE_GOODQUALITY = 1,
+
+  // One Pass - Best Quality. The encoder places priority on the
+  // quality of the output over encoding speed. The output is compressed
+  // at the highest possible quality. This option takes the longest
+  // amount of time to encode. (speed setting ignored)
+  MODE_BESTQUALITY = 2,
+
+  // Two Pass - First Pass. The encoder generates a file of statistics
+  // for use in the second encoding pass. (speed setting controls how fast)
+  MODE_FIRSTPASS = 3,
+
+  // Two Pass - Second Pass. The encoder uses the statistics that were
+  // generated in the first encoding pass to create the compressed
+  // output. (speed setting controls how fast)
+  MODE_SECONDPASS = 4,
+
+  // Two Pass - Second Pass Best.  The encoder uses the statistics that
+  // were generated in the first encoding pass to create the compressed
+  // output using the highest possible quality, and taking a
+  // longer amount of time to encode. (speed setting ignored)
+  MODE_SECONDPASS_BEST = 5,
+
+  // Realtime/Live Encoding. This mode is optimized for realtime
+  // encoding (for example, capturing a television signal or feed from
+  // a live camera). (speed setting controls how fast)
+  MODE_REALTIME = 6,
 } MODE;
 
 typedef enum {
-  FRAMEFLAGS_KEY    = 1,
-  FRAMEFLAGS_GOLDEN = 2,
-  FRAMEFLAGS_ALTREF = 4,
+  FRAMEFLAGS_KEY    = 1 << 0,
+  FRAMEFLAGS_GOLDEN = 1 << 1,
+  FRAMEFLAGS_ALTREF = 1 << 2,
 } FRAMETYPE_FLAGS;
 
 typedef enum {
@@ -490,27 +509,6 @@ typedef struct {
   int cpu_used;
   unsigned int rc_max_intra_bitrate_pct;
 
-  // mode ->
-  // (0)=Realtime/Live Encoding. This mode is optimized for realtime
-  //     encoding (for example, capturing a television signal or feed from
-  //     a live camera). ( speed setting controls how fast )
-  // (1)=Good Quality Fast Encoding. The encoder balances quality with the
-  //     amount of time it takes to encode the output. ( speed setting
-  //     controls how fast )
-  // (2)=One Pass - Best Quality. The encoder places priority on the
-  //     quality of the output over encoding speed. The output is compressed
-  //     at the highest possible quality. This option takes the longest
-  //     amount of time to encode. ( speed setting ignored )
-  // (3)=Two Pass - First Pass. The encoder generates a file of statistics
-  //     for use in the second encoding pass. ( speed setting controls how
-  //     fast )
-  // (4)=Two Pass - Second Pass. The encoder uses the statistics that were
-  //     generated in the first encoding pass to create the compressed
-  //     output. ( speed setting controls how fast )
-  // (5)=Two Pass - Second Pass Best.  The encoder uses the statistics that
-  //     were generated in the first encoding pass to create the compressed
-  //     output using the highest possible quality, and taking a
-  //    longer amount of time to encode.. ( speed setting ignored )
   MODE mode;
 
   // Key Framing Operations
