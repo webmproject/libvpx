@@ -279,6 +279,24 @@
       "revId": "910d79c6758e35fad287abbd14af5fa5181d4353",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//yHc\u003d",
+        "filename": "vp9/encoder/vp9_firstpass.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-03-15T01:55:39Z",
+      "side": 1,
+      "message": "I wasn\u0027t talking about svc stats, but non-svc encodes. try:\ngit checkout HEAD^\n./vpxenc input.y4m --pass\u003d1 --passes\u003d2 --fpf\u003d/tmp/fpf-old.log --codec\u003dvp9 -o /tmp/out-old.webm\n./vpxenc input.y4m --pass\u003d2 --passes\u003d2 --fpf\u003d/tmp/fpf-old.log --codec\u003dvp9 -o /tmp/out-old.webm\n\nand then -new with your change. the webm should be the same, but if this affects the reading of the stats file it won\u0027t",
+      "parentUuid": "AAAAdn//yI8\u003d",
+      "revId": "910d79c6758e35fad287abbd14af5fa5181d4353",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
