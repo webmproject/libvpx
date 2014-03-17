@@ -2689,7 +2689,7 @@ static void nonrd_use_partition(VP9_COMP *cpi,
                                 MODE_INFO **mi_8x8,
                                 TOKENEXTRA **tp,
                                 int mi_row, int mi_col,
-                                BLOCK_SIZE bsize,
+                                BLOCK_SIZE bsize, int output_enabled,
                                 int *totrate, int64_t *totdist) {
   VP9_COMMON *const cm = &cpi->common;
   MACROBLOCK *const x = &cpi->mb;
@@ -2748,10 +2748,10 @@ static void nonrd_use_partition(VP9_COMP *cpi,
 
       *get_sb_index(x, subsize) = 0;
       nonrd_use_partition(cpi, tile, mi_8x8, tp, mi_row, mi_col,
-                          subsize, totrate, totdist);
+                          subsize, output_enabled, totrate, totdist);
       *get_sb_index(x, subsize) = 1;
       nonrd_use_partition(cpi, tile, mi_8x8 + hbs, tp,
-                          mi_row, mi_col + hbs, subsize,
+                          mi_row, mi_col + hbs, subsize, output_enabled,
                           &rate, &dist);
       if (rate != INT_MAX && dist != INT64_MAX &&
           *totrate != INT_MAX && *totdist != INT64_MAX) {
@@ -2760,7 +2760,7 @@ static void nonrd_use_partition(VP9_COMP *cpi,
       }
       *get_sb_index(x, subsize) = 2;
       nonrd_use_partition(cpi, tile, mi_8x8 + hbs * mis, tp,
-                          mi_row + hbs, mi_col, subsize,
+                          mi_row + hbs, mi_col, subsize, output_enabled,
                           &rate, &dist);
       if (rate != INT_MAX && dist != INT64_MAX &&
           *totrate != INT_MAX && *totdist != INT64_MAX) {
@@ -2769,7 +2769,7 @@ static void nonrd_use_partition(VP9_COMP *cpi,
       }
       *get_sb_index(x, subsize) = 3;
       nonrd_use_partition(cpi, tile, mi_8x8 + hbs * mis + hbs, tp,
-                          mi_row + hbs, mi_col + hbs, subsize,
+                          mi_row + hbs, mi_col + hbs, subsize, output_enabled,
                           &rate, &dist);
       if (rate != INT_MAX && dist != INT64_MAX &&
           *totrate != INT_MAX && *totdist != INT64_MAX) {
@@ -2781,7 +2781,7 @@ static void nonrd_use_partition(VP9_COMP *cpi,
       assert("Invalid partition type.");
   }
 
-  if (bsize == BLOCK_64X64)
+  if (bsize == BLOCK_64X64 && output_enabled)
     encode_sb_rt(cpi, tile, tp, mi_row, mi_col, 1, bsize);
 }
 
@@ -2813,7 +2813,7 @@ static void encode_nonrd_sb_row(VP9_COMP *cpi, const TileInfo *const tile,
     else
       set_fixed_partitioning(cpi, tile, mi_8x8, mi_row, mi_col, bsize);
 
-    nonrd_use_partition(cpi, tile, mi_8x8, tp, mi_row, mi_col, BLOCK_64X64,
+    nonrd_use_partition(cpi, tile, mi_8x8, tp, mi_row, mi_col, BLOCK_64X64, 1,
                         &dummy_rate, &dummy_dist);
   }
 }
