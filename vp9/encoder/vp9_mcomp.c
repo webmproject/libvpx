@@ -370,9 +370,9 @@ int vp9_find_best_sub_pixel_comp_tree(const MACROBLOCK *x,
   unsigned int sse;
   unsigned int whichdir;
   int thismse;
-  unsigned int halfiters = iters_per_step;
-  unsigned int quarteriters = iters_per_step;
-  unsigned int eighthiters = iters_per_step;
+  const unsigned int halfiters = iters_per_step;
+  const unsigned int quarteriters = iters_per_step;
+  const unsigned int eighthiters = iters_per_step;
 
   DECLARE_ALIGNED_ARRAY(16, uint8_t, comp_pred, 64 * 64);
   const int y_stride = xd->plane[0].pre[0].stride;
@@ -736,7 +736,6 @@ int vp9_get_mvpred_av_var(const MACROBLOCK *x,
                           const vp9_variance_fn_ptr_t *vfp,
                           int use_mvcost) {
   unsigned int bestsad;
-  MV this_mv;
   const MACROBLOCKD *const xd = &x->e_mbd;
   const uint8_t *what = x->plane[0].src.buf;
   const int what_stride = x->plane[0].src.stride;
@@ -744,8 +743,7 @@ int vp9_get_mvpred_av_var(const MACROBLOCK *x,
   const uint8_t *base_offset = xd->plane[0].pre[0].buf;
   const uint8_t *this_offset = base_offset + (best_mv->row * in_what_stride) +
       best_mv->col;
-  this_mv.row = best_mv->row * 8;
-  this_mv.col = best_mv->col * 8;
+  const MV this_mv = {best_mv->row * 8, best_mv->col * 8};
   return vfp->svaf(this_offset, in_what_stride, 0, 0, what, what_stride,
                    &bestsad, second_pred) +
       (use_mvcost ?  mv_err_cost(&this_mv, center_mv, x->nmvjointcost,
@@ -908,7 +906,6 @@ int vp9_full_range_search_c(const MACROBLOCK *x, MV *ref_mv, MV *best_mv,
   const int what_stride = x->plane[0].src.stride;
   const uint8_t *in_what;
   const int in_what_stride = xd->plane[0].pre[0].stride;
-  MV this_mv;
 
   unsigned int bestsad = INT_MAX;
   int ref_row, ref_col;
@@ -960,8 +957,7 @@ int vp9_full_range_search_c(const MACROBLOCK *x, MV *ref_mv, MV *best_mv,
 
         for (i = 0; i < 4; ++i) {
           if (sad_array[i] < bestsad) {
-            this_mv.row = ref_row + tr;
-            this_mv.col = ref_col + tc + i;
+            const MV this_mv = {ref_row + tr, ref_col + tc + i};
             thissad = sad_array[i] +
                       mvsad_err_cost(&this_mv, &fcenter_mv,
                                       mvjsadcost, mvsadcost, sad_per_bit);
@@ -979,8 +975,7 @@ int vp9_full_range_search_c(const MACROBLOCK *x, MV *ref_mv, MV *best_mv,
                                 bestsad);
 
           if (thissad < bestsad) {
-            this_mv.row = ref_row + tr;
-            this_mv.col = ref_col + tc + i;
+            const MV this_mv = {ref_row + tr, ref_col + tc + i};
             thissad += mvsad_err_cost(&this_mv, &fcenter_mv,
                                       mvjsadcost, mvsadcost, sad_per_bit);
 
@@ -1472,7 +1467,6 @@ int vp9_full_search_sadx8(const MACROBLOCK *x, const MV *ref_mv,
   MV this_mv;
   unsigned int bestsad = INT_MAX;
   int r, c;
-  unsigned int thissad;
   int ref_row = ref_mv->row;
   int ref_col = ref_mv->col;
 
@@ -1512,7 +1506,7 @@ int vp9_full_search_sadx8(const MACROBLOCK *x, const MV *ref_mv,
       fn_ptr->sdx8f(what, what_stride, check_here, in_what_stride, sad_array8);
 
       for (i = 0; i < 8; i++) {
-        thissad = (unsigned int)sad_array8[i];
+        unsigned int thissad = (unsigned int)sad_array8[i];
 
         if (thissad < bestsad) {
           this_mv.col = c;
@@ -1537,12 +1531,12 @@ int vp9_full_search_sadx8(const MACROBLOCK *x, const MV *ref_mv,
       fn_ptr->sdx3f(what, what_stride, check_here, in_what_stride, sad_array);
 
       for (i = 0; i < 3; i++) {
-        thissad = sad_array[i];
+        unsigned int thissad = sad_array[i];
 
         if (thissad < bestsad) {
           this_mv.col = c;
-          thissad  += mvsad_err_cost(&this_mv, &fcenter_mv,
-                                     mvjsadcost, mvsadcost, sad_per_bit);
+          thissad += mvsad_err_cost(&this_mv, &fcenter_mv,
+                                    mvjsadcost, mvsadcost, sad_per_bit);
 
           if (thissad < bestsad) {
             bestsad = thissad;
@@ -1557,8 +1551,8 @@ int vp9_full_search_sadx8(const MACROBLOCK *x, const MV *ref_mv,
     }
 
     while (c < col_max) {
-      thissad = fn_ptr->sdf(what, what_stride, check_here, in_what_stride,
-                            bestsad);
+      unsigned int thissad = fn_ptr->sdf(what, what_stride,
+                                         check_here, in_what_stride, bestsad);
 
       if (thissad < bestsad) {
         this_mv.col = c;
@@ -1702,8 +1696,9 @@ int vp9_refining_search_sadx4(const MACROBLOCK *x,
         if (is_mv_in(x, &this_mv)) {
           const uint8_t *check_here = neighbors[j].row * in_what_stride +
                                       neighbors[j].col + best_address;
-          unsigned int thissad = fn_ptr->sdf(what, what_stride, check_here,
-                                             in_what_stride, bestsad);
+          unsigned int thissad = fn_ptr->sdf(what, what_stride,
+                                             check_here, in_what_stride,
+                                             bestsad);
 
           if (thissad < bestsad) {
             thissad += mvsad_err_cost(&this_mv, &fcenter_mv,
@@ -1751,8 +1746,6 @@ int vp9_refining_search_8p_c(const MACROBLOCK *x,
   const int in_what_stride = xd->plane[0].pre[0].stride;
   const uint8_t *best_address = &in_what[ref_mv->row * in_what_stride +
                                              ref_mv->col];
-  unsigned int thissad;
-  MV this_mv;
   const MV fcenter_mv = {center_mv->row >> 3, center_mv->col >> 3};
 
   const int *mvjsadcost = x->nmvjointsadcost;
@@ -1768,15 +1761,15 @@ int vp9_refining_search_8p_c(const MACROBLOCK *x,
     int best_site = -1;
 
     for (j = 0; j < 8; j++) {
-      this_mv.row = ref_mv->row + neighbors[j].row;
-      this_mv.col = ref_mv->col + neighbors[j].col;
+      const MV this_mv = {ref_mv->row + neighbors[j].row,
+                          ref_mv->col + neighbors[j].col};
 
       if (is_mv_in(x, &this_mv)) {
         const uint8_t *check_here = &in_what[this_mv.row * in_what_stride +
                                                 this_mv.col];
-
-        thissad = fn_ptr->sdaf(what, what_stride, check_here, in_what_stride,
-                               second_pred, bestsad);
+        unsigned int thissad = fn_ptr->sdaf(what, what_stride,
+                                            check_here, in_what_stride,
+                                            second_pred, bestsad);
         if (thissad < bestsad) {
           thissad += mvsad_err_cost(&this_mv, &fcenter_mv,
                                     mvjsadcost, mvsadcost, error_per_bit);
