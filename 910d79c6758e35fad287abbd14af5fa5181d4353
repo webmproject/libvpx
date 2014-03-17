@@ -297,6 +297,24 @@
       "revId": "910d79c6758e35fad287abbd14af5fa5181d4353",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//x7s\u003d",
+        "filename": "vp9/encoder/vp9_firstpass.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1129385
+      },
+      "writtenOn": "2014-03-17T19:14:47Z",
+      "side": 1,
+      "message": "The output bitstream will not change. Because there are some changes between this CL and HEAD that will change the output bitstream, I synced to HEAD then merged this CL. I got same bitstream with HEAD and merged CL.",
+      "parentUuid": "AAAAdn//yHc\u003d",
+      "revId": "910d79c6758e35fad287abbd14af5fa5181d4353",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
