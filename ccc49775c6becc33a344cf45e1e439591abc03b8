@@ -16,6 +16,24 @@
       "revId": "ccc49775c6becc33a344cf45e1e439591abc03b8",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//x4A\u003d",
+        "filename": "vp9/encoder/vp9_craq.c",
+        "patchSetId": 24
+      },
+      "lineNbr": 171,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2014-03-17T22:59:56Z",
+      "side": 1,
+      "message": "agree, actual Q makes more sense.\nDone.",
+      "parentUuid": "AAAAdn//x8Y\u003d",
+      "revId": "ccc49775c6becc33a344cf45e1e439591abc03b8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
