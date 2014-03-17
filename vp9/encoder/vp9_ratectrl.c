@@ -27,6 +27,9 @@
 #include "vp9/encoder/vp9_encodemv.h"
 #include "vp9/encoder/vp9_ratectrl.h"
 
+#define DEFAULT_KF_BOOST 2000
+#define DEFAULT_GF_BOOST 2000
+
 #define LIMIT_QRANGE_FOR_ALTREF_AND_KEY 1
 
 #define MIN_BPB_FACTOR 0.005

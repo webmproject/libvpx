@@ -47,8 +47,6 @@ extern "C" {
 #define MIN_GF_INTERVAL             4
 #endif
 #define DEFAULT_GF_INTERVAL         10
-#define DEFAULT_KF_BOOST            2000
-#define DEFAULT_GF_BOOST            2000
 
 #define KEY_FRAME_CONTEXT 5
 
@@ -57,12 +55,6 @@ extern "C" {
 
 #define MIN_THRESHMULT  32
 #define MAX_THRESHMULT  512
-
-#define GF_ZEROMV_ZBIN_BOOST 0
-#define LF_ZEROMV_ZBIN_BOOST 0
-#define MV_ZBIN_BOOST        0
-#define SPLIT_MV_ZBIN_BOOST  0
-#define INTRA_ZBIN_BOOST     0
 
 typedef struct {
   int nmvjointcost[MV_JOINTS];
@@ -187,12 +179,6 @@ typedef enum {
   SUBPEL_TREE = 0,
   // Other methods to come
 } SUBPEL_SEARCH_METHODS;
-
-#define ALL_INTRA_MODES 0x3FF
-#define INTRA_DC_ONLY 0x01
-#define INTRA_DC_TM ((1 << TM_PRED) | (1 << DC_PRED))
-#define INTRA_DC_H_V ((1 << DC_PRED) | (1 << V_PRED) | (1 << H_PRED))
-#define INTRA_DC_TM_H_V (INTRA_DC_TM | (1 << V_PRED) | (1 << H_PRED))
 
 typedef enum {
   LAST_FRAME_PARTITION_OFF = 0,

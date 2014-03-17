@@ -34,12 +34,17 @@
 #include "vp9/encoder/vp9_encodemb.h"
 #include "vp9/encoder/vp9_encodemv.h"
 #include "vp9/encoder/vp9_extend.h"
-#include "vp9/encoder/vp9_onyx_int.h"
 #include "vp9/encoder/vp9_pickmode.h"
 #include "vp9/encoder/vp9_rdopt.h"
 #include "vp9/encoder/vp9_segmentation.h"
 #include "vp9/encoder/vp9_tokenize.h"
 #include "vp9/encoder/vp9_vaq.h"
+
+#define GF_ZEROMV_ZBIN_BOOST 0
+#define LF_ZEROMV_ZBIN_BOOST 0
+#define MV_ZBIN_BOOST        0
+#define SPLIT_MV_ZBIN_BOOST  0
+#define INTRA_ZBIN_BOOST     0
 
 static INLINE uint8_t *get_sb_index(MACROBLOCK *x, BLOCK_SIZE subsize) {
   switch (subsize) {
