@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//x8Y\u003d",
+        "filename": "vp9/encoder/vp9_craq.c",
+        "patchSetId": 24
+      },
+      "lineNbr": 171,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2014-03-17T18:28:55Z",
+      "side": 1,
+      "message": "I am not sure about using (Q index * Q index) here as opposed to the actual QxQ",
+      "revId": "ccc49775c6becc33a344cf45e1e439591abc03b8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
