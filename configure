@@ -51,6 +51,7 @@ Advanced options:
   ${toggle_postproc_visualizer}   macro block / block level visualizers
   ${toggle_multi_res_encoding}    enable multiple-resolution encoding
   ${toggle_temporal_denoising}    enable temporal denoising and disable the spatial denoiser
+  ${toggle_webm_io}               enable input from and output to WebM container
 
 Codecs:
   Codecs can be selectively enabled or disabled individually, or by family:
@@ -314,6 +315,7 @@ CONFIG_LIST="
     postproc_visualizer
     os_support
     unit_tests
+    webm_io
     decode_perf_tests
     multi_res_encoding
     temporal_denoising
@@ -367,6 +369,7 @@ CMDLINE_SELECT="
     small
     postproc_visualizer
     unit_tests
+    webm_io
     decode_perf_tests
     multi_res_encoding
     temporal_denoising
@@ -703,6 +706,9 @@ process_toolchain() {
     if enabled postproc_visualizer; then
         enabled postproc || die "postproc_visualizer requires postproc to be enabled"
     fi
+
+    # Enable WebM IO by default.
+    soft_enable webm_io
 
     # Enable unit tests by default if we have a working C++ compiler.
     case "$toolchain" in

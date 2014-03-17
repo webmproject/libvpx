@@ -123,6 +123,7 @@ int fourcc_is_ivf(const char detect[4]) {
   return 0;
 }
 
+#if CONFIG_WEBM_IO
 /* Murmur hash derived from public domain reference implementation at
  *   http:// sites.google.com/site/murmurhash/
  */
@@ -169,7 +170,7 @@ static unsigned int murmur(const void *key, int len, unsigned int seed) {
 
   return h;
 }
-
+#endif  // CONFIG_WEBM_IO
 
 static const arg_def_t debugmode = ARG_DEF("D", "debug", 0,
                                            "Debug mode (makes output deterministic)");
@@ -218,7 +219,7 @@ static const arg_def_t recontest = ARG_DEF_ENUM(NULL, "test-decode", 1,
 static const arg_def_t framerate        = ARG_DEF(NULL, "fps", 1,
                                                   "Stream frame rate (rate/scale)");
 static const arg_def_t use_ivf          = ARG_DEF(NULL, "ivf", 0,
-                                                  "Output IVF (default is WebM)");
+                                                  "Output IVF (default is WebM if WebM IO is enabled)");
 static const arg_def_t out_part = ARG_DEF("P", "output-partitions", 0,
                                           "Makes encoder output partitions. Requires IVF output!");
 static const arg_def_t q_hist_n         = ARG_DEF(NULL, "q-hist", 1,
@@ -834,7 +835,9 @@ static struct stream_state *new_stream(struct VpxEncoderConfig *global,
     /* Initialize remaining stream parameters */
     stream->config.stereo_fmt = STEREO_FORMAT_MONO;
     stream->config.write_webm = 1;
+#if CONFIG_WEBM_IO
     stream->ebml.last_pts_ms = -1;
+#endif
 
     /* Allows removal of the application version from the EBML tags */
     stream->ebml.debug = global->debug;
@@ -1143,13 +1146,17 @@ static void open_output_file(struct stream_state *stream,
   if (stream->config.write_webm && fseek(stream->file, 0, SEEK_CUR))
     fatal("WebM output to pipes not supported.");
 
+#if CONFIG_WEBM_IO
   if (stream->config.write_webm) {
     stream->ebml.stream = stream->file;
     write_webm_file_header(&stream->ebml, cfg,
                            &global->framerate,
                            stream->config.stereo_fmt,
                            global->codec->fourcc);
-  } else {
+  }
+#endif
+
+  if (!stream->config.write_webm) {
     ivf_write_file_header(stream->file, cfg, global->codec->fourcc, 0);
   }
 }
@@ -1162,11 +1169,15 @@ static void close_output_file(struct stream_state *stream,
   if (cfg->g_pass == VPX_RC_FIRST_PASS)
     return;
 
+#if CONFIG_WEBM_IO
   if (stream->config.write_webm) {
     write_webm_file_footer(&stream->ebml, stream->hash);
     free(stream->ebml.cue_list);
     stream->ebml.cue_list = NULL;
-  } else {
+  }
+#endif
+
+  if (!stream->config.write_webm) {
     if (!fseek(stream->file, 0, SEEK_SET))
       ivf_write_file_header(stream->file, &stream->config.cfg,
                             fourcc,
@@ -1316,6 +1327,7 @@ static void get_cx_data(struct stream_state *stream,
           fprintf(stderr, " %6luF", (unsigned long)pkt->data.frame.sz);
 
         update_rate_histogram(stream->rate_hist, cfg, pkt);
+#if CONFIG_WEBM_IO
         if (stream->config.write_webm) {
           /* Update the hash */
           if (!stream->ebml.debug)
@@ -1324,7 +1336,9 @@ static void get_cx_data(struct stream_state *stream,
                                   stream->hash);
 
           write_webm_block(&stream->ebml, cfg, pkt);
-        } else {
+        }
+#endif
+        if (!stream->config.write_webm) {
           if (pkt->data.frame.partition_id <= 0) {
             ivf_header_pos = ftello(stream->file);
             fsize = pkt->data.frame.sz;
@@ -1593,6 +1607,14 @@ int main(int argc, const char **argv_) {
         die("Stream %d: Must specify --fpf when --pass=%d"
         " and --passes=2\n", stream->index, global.pass);
     });
+
+#if !CONFIG_WEBM_IO
+    FOREACH_STREAM({
+      stream->config.write_webm = 0;
+      warn("vpxenc was compiled without WebM container support."
+           "Producing IVF output");
+    });
+#endif
 
     /* Use the frame rate from the file only if none was specified
      * on the command-line.
