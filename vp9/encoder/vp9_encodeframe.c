@@ -2660,14 +2660,6 @@ static void set_mode_info(MB_MODE_INFO *mbmi, BLOCK_SIZE bsize,
   mbmi->segment_id = 0;
 }
 
-static INLINE int get_block_row(int b32i, int b16i, int b8i) {
-  return ((b32i >> 1) << 2) + ((b16i >> 1) << 1) + (b8i >> 1);
-}
-
-static INLINE int get_block_col(int b32i, int b16i, int b8i) {
-  return ((b32i & 1) << 2) + ((b16i & 1) << 1) + (b8i & 1);
-}
-
 static void nonrd_pick_sb_modes(VP9_COMP *cpi, const TileInfo *const tile,
                                 int mi_row, int mi_col,
                                 int *rate, int64_t *dist,
