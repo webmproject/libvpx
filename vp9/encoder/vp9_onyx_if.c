@@ -42,6 +42,12 @@
 #include "vp9/encoder/vp9_resize.h"
 #include "vp9/encoder/vp9_svc_layercontext.h"
 
+#define ALL_INTRA_MODES 0x3FF
+#define INTRA_DC_ONLY 0x01
+#define INTRA_DC_TM ((1 << TM_PRED) | (1 << DC_PRED))
+#define INTRA_DC_H_V ((1 << DC_PRED) | (1 << V_PRED) | (1 << H_PRED))
+#define INTRA_DC_TM_H_V (INTRA_DC_TM | (1 << V_PRED) | (1 << H_PRED))
+
 void vp9_coef_tree_initialize();
 
 #define DEFAULT_INTERP_FILTER SWITCHABLE
