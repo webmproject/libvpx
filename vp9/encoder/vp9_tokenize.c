@@ -298,13 +298,6 @@ static void is_skippable(int plane, int block,
   args->skippable[0] &= (!args->x->plane[plane].eobs[block]);
 }
 
-static int sb_is_skippable(MACROBLOCK *x, BLOCK_SIZE bsize) {
-  int result = 1;
-  struct is_skippable_args args = {x, &result};
-  vp9_foreach_transformed_block(&x->e_mbd, bsize, is_skippable, &args);
-  return result;
-}
-
 int vp9_is_skippable_in_plane(MACROBLOCK *x, BLOCK_SIZE bsize, int plane) {
   int result = 1;
   struct is_skippable_args args = {x, &result};

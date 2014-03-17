@@ -24,10 +24,6 @@ extern unsigned int vp9_get4x4var_mmx
   int *Sum
 );
 
-unsigned int vp9_get_mb_ss_sse2
-(
-  const int16_t *src_ptr
-);
 unsigned int vp9_get16x16var_sse2
 (
   const unsigned char *src_ptr,

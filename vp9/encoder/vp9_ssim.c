@@ -65,12 +65,6 @@ static double similarity(unsigned long sum_s, unsigned long sum_r,
   return ssim_n * 1.0 / ssim_d;
 }
 
-static double ssim_16x16(uint8_t *s, int sp, uint8_t *r, int rp) {
-  unsigned long sum_s = 0, sum_r = 0, sum_sq_s = 0, sum_sq_r = 0, sum_sxr = 0;
-  vp9_ssim_parms_16x16(s, sp, r, rp, &sum_s, &sum_r, &sum_sq_s, &sum_sq_r,
-                       &sum_sxr);
-  return similarity(sum_s, sum_r, sum_sq_s, sum_sq_r, sum_sxr, 256);
-}
 static double ssim_8x8(uint8_t *s, int sp, uint8_t *r, int rp) {
   unsigned long sum_s = 0, sum_r = 0, sum_sq_s = 0, sum_sq_r = 0, sum_sxr = 0;
   vp9_ssim_parms_8x8(s, sp, r, rp, &sum_s, &sum_r, &sum_sq_s, &sum_sq_r,
