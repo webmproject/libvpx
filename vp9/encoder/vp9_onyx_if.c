@@ -2055,53 +2055,42 @@ void vp9_remove_compressor(VP9_COMP *cpi) {
 
 #endif
 }
+static int64_t get_sse(const uint8_t *a, int a_stride,
+                       const uint8_t *b, int b_stride,
+                       int width, int height) {
+  const int dw = width % 16;
+  const int dh = height % 16;
+  int64_t total_sse = 0;
+  unsigned int sse = 0;
+  int sum = 0;
+  int x, y;
 
-
-static uint64_t calc_plane_error(const uint8_t *orig, int orig_stride,
-                                 const uint8_t *recon, int recon_stride,
-                                 unsigned int cols, unsigned int rows) {
-  unsigned int row, col;
-  uint64_t total_sse = 0;
-  int diff;
-
-  for (row = 0; row + 16 <= rows; row += 16) {
-    for (col = 0; col + 16 <= cols; col += 16) {
-      unsigned int sse;
-
-      vp9_mse16x16(orig + col, orig_stride, recon + col, recon_stride, &sse);
-      total_sse += sse;
-    }
-
-    /* Handle odd-sized width */
-    if (col < cols) {
-      unsigned int border_row, border_col;
-      const uint8_t *border_orig = orig;
-      const uint8_t *border_recon = recon;
-
-      for (border_row = 0; border_row < 16; border_row++) {
-        for (border_col = col; border_col < cols; border_col++) {
-          diff = border_orig[border_col] - border_recon[border_col];
-          total_sse += diff * diff;
-        }
-
-        border_orig += orig_stride;
-        border_recon += recon_stride;
-      }
-    }
-
-    orig += orig_stride * 16;
-    recon += recon_stride * 16;
+  if (dw > 0) {
+    variance(&a[width - dw], a_stride, &b[width - dw], b_stride,
+             dw, height, &sse, &sum);
+    total_sse += sse;
   }
 
-  /* Handle odd-sized height */
-  for (; row < rows; row++) {
-    for (col = 0; col < cols; col++) {
-      diff = orig[col] - recon[col];
-      total_sse += diff * diff;
+  if (dh > 0) {
+    variance(&a[(height - dh) * a_stride], a_stride,
+             &b[(height - dh) * b_stride], b_stride,
+             width - dw, dh, &sse, &sum);
+    total_sse += sse;
+  }
+
+  for (y = 0; y < height / 16; ++y) {
+    const uint8_t *pa = a;
+    const uint8_t *pb = b;
+    for (x = 0; x < width / 16; ++x) {
+      vp9_mse16x16(pa, a_stride, pb, b_stride, &sse);
+      total_sse += sse;
+
+      pa += 16;
+      pb += 16;
     }
 
-    orig += orig_stride;
-    recon += recon_stride;
+    a += 16 * a_stride;
+    b += 16 * b_stride;
   }
 
   return total_sse;
@@ -2129,9 +2118,9 @@ static void calc_psnr(const YV12_BUFFER_CONFIG *a, const YV12_BUFFER_CONFIG *b,
     const int w = widths[i];
     const int h = heights[i];
     const uint32_t samples = w * h;
-    const uint64_t sse = calc_plane_error(a_planes[i], a_strides[i],
-                                          b_planes[i], b_strides[i],
-                                          w, h);
+    const uint64_t sse = get_sse(a_planes[i], a_strides[i],
+                                 b_planes[i], b_strides[i],
+                                 w, h);
     psnr->sse[1 + i] = sse;
     psnr->samples[1 + i] = samples;
     psnr->psnr[1 + i] = vpx_sse_to_psnr(samples, 255.0, (double)sse);
@@ -2605,7 +2594,7 @@ static void output_frame_level_debug_stats(VP9_COMP *cpi) {
 
   vp9_clear_system_state();
 
-  recon_err = vp9_calc_ss_err(cpi->Source, get_frame_new_buffer(cm));
+  recon_err = vp9_get_y_sse(cpi->Source, get_frame_new_buffer(cm));
 
   if (cpi->twopass.total_left_stats.coded_error != 0.0)
     fprintf(f, "%10u %10d %10d %10d %10d %10d "
@@ -2776,7 +2765,7 @@ static void encode_with_recode_loop(VP9_COMP *cpi,
            rc->this_key_frame_forced &&
            (rc->projected_frame_size < rc->max_frame_bandwidth)) {
         int last_q = q;
-        int kf_err = vp9_calc_ss_err(cpi->Source, get_frame_new_buffer(cm));
+        int kf_err = vp9_get_y_sse(cpi->Source, get_frame_new_buffer(cm));
 
         int high_err_target = cpi->ambient_err;
         int low_err_target = cpi->ambient_err >> 1;
@@ -3120,7 +3109,7 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
   // fixed interval. Note the reconstruction error if it is the frame before
   // the force key frame
   if (cpi->rc.next_key_frame_forced && cpi->rc.frames_to_key == 1) {
-    cpi->ambient_err = vp9_calc_ss_err(cpi->Source, get_frame_new_buffer(cm));
+    cpi->ambient_err = vp9_get_y_sse(cpi->Source, get_frame_new_buffer(cm));
   }
 
   // If the encoder forced a KEY_FRAME decision
@@ -3853,28 +3842,12 @@ void vp9_set_svc(VP9_COMP *cpi, int use_svc) {
   return;
 }
 
-int vp9_calc_ss_err(const YV12_BUFFER_CONFIG *source,
-                    const YV12_BUFFER_CONFIG *reference) {
-  int i, j;
-  int total = 0;
+int vp9_get_y_sse(const YV12_BUFFER_CONFIG *a, const YV12_BUFFER_CONFIG *b) {
+  assert(a->y_crop_width == b->y_crop_width);
+  assert(a->y_crop_height == b->y_crop_height);
 
-  const uint8_t *src = source->y_buffer;
-  const uint8_t *ref = reference->y_buffer;
-
-  // Loop through the Y plane raw and reconstruction data summing
-  // (square differences)
-  for (i = 0; i < source->y_height; i += 16) {
-    for (j = 0; j < source->y_width; j += 16) {
-      unsigned int sse;
-      total += vp9_mse16x16(src + j, source->y_stride,
-                            ref + j, reference->y_stride, &sse);
-    }
-
-    src += 16 * source->y_stride;
-    ref += 16 * reference->y_stride;
-  }
-
-  return total;
+  return (int)get_sse(a->y_buffer, a->y_stride, b->y_buffer, b->y_stride,
+                      a->y_crop_width, a->y_crop_height);
 }
 
 
