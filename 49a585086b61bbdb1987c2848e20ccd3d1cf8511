@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//xzM\u003d",
+        "filename": "vp9/encoder/vp9_craq.c",
+        "patchSetId": 27
+      },
+      "lineNbr": 176,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2014-03-18T17:49:04Z",
+      "side": 1,
+      "message": "You might want to move this up to the top of the function as you now have an earlier call to vp9_convert_qindex_to_q()",
+      "revId": "49a585086b61bbdb1987c2848e20ccd3d1cf8511",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
