@@ -122,12 +122,8 @@ static const uint8_t log_in_base_2[] = {
 };
 
 MV_CLASS_TYPE vp9_get_mv_class(int z, int *offset) {
-  MV_CLASS_TYPE c = MV_CLASS_0;
-  if (z >= CLASS0_SIZE * 4096)
-    c = MV_CLASS_10;
-  else
-    c = log_in_base_2[z >> 3];
-
+  const MV_CLASS_TYPE c = (z >= CLASS0_SIZE * 4096) ? MV_CLASS_10 :
+                              (MV_CLASS_TYPE)log_in_base_2[z >> 3];
   if (offset)
     *offset = z - mv_class_base(c);
   return c;

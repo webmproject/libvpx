@@ -63,7 +63,7 @@ static TX_SIZE read_selected_tx_size(VP9_COMMON *cm, MACROBLOCKD *xd,
                                      TX_SIZE max_tx_size, vp9_reader *r) {
   const int ctx = vp9_get_tx_size_context(xd);
   const vp9_prob *tx_probs = get_tx_probs(max_tx_size, ctx, &cm->fc.tx_probs);
-  TX_SIZE tx_size = vp9_read(r, tx_probs[0]);
+  TX_SIZE tx_size = (TX_SIZE)vp9_read(r, tx_probs[0]);
   if (tx_size != TX_4X4 && max_tx_size >= TX_16X16) {
     tx_size += vp9_read(r, tx_probs[1]);
     if (tx_size != TX_8X8 && max_tx_size >= TX_32X32)
@@ -258,7 +258,8 @@ static REFERENCE_MODE read_block_reference_mode(VP9_COMMON *cm,
                                                 vp9_reader *r) {
   if (cm->reference_mode == REFERENCE_MODE_SELECT) {
     const int ctx = vp9_get_reference_mode_context(cm, xd);
-    const int mode = vp9_read(r, cm->fc.comp_inter_prob[ctx]);
+    const REFERENCE_MODE mode =
+        (REFERENCE_MODE)vp9_read(r, cm->fc.comp_inter_prob[ctx]);
     if (!cm->frame_parallel_decoding_mode)
       ++cm->counts.comp_inter[ctx][mode];
     return mode;  // SINGLE_REFERENCE or COMPOUND_REFERENCE
@@ -314,8 +315,9 @@ static void read_ref_frames(VP9_COMMON *const cm, MACROBLOCKD *const xd,
 static INLINE INTERP_FILTER read_switchable_interp_filter(
     VP9_COMMON *const cm, MACROBLOCKD *const xd, vp9_reader *r) {
   const int ctx = vp9_get_pred_context_switchable_interp(xd);
-  const int type = vp9_read_tree(r, vp9_switchable_interp_tree,
-                                 cm->fc.switchable_interp_prob[ctx]);
+  const INTERP_FILTER type =
+      (INTERP_FILTER)vp9_read_tree(r, vp9_switchable_interp_tree,
+                                   cm->fc.switchable_interp_prob[ctx]);
   if (!cm->frame_parallel_decoding_mode)
     ++cm->counts.switchable_interp[ctx][type];
   return type;
@@ -465,7 +467,7 @@ static void read_inter_block_mode_info(VP9_COMMON *const cm,
     const int num_4x4_w = num_4x4_blocks_wide_lookup[bsize];  // 1 or 2
     const int num_4x4_h = num_4x4_blocks_high_lookup[bsize];  // 1 or 2
     int idx, idy;
-    int b_mode;
+    MB_PREDICTION_MODE b_mode;
     int_mv nearest_sub8x8[2], near_sub8x8[2];
     for (idy = 0; idy < 2; idy += num_4x4_h) {
       for (idx = 0; idx < 2; idx += num_4x4_w) {

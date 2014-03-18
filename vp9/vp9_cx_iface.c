@@ -36,7 +36,7 @@ struct vp9_extracfg {
   unsigned int                rc_max_intra_bitrate_pct;
   unsigned int                lossless;
   unsigned int                frame_parallel_decoding_mode;
-  unsigned int                aq_mode;
+  AQ_MODE                     aq_mode;
 };
 
 struct extraconfig_map {
@@ -59,12 +59,12 @@ static const struct extraconfig_map extracfg_map[] = {
       7,                          /* arnr_max_frames */
       5,                          /* arnr_strength */
       3,                          /* arnr_type*/
-      0,                          /* tuning*/
+      VP8_TUNE_PSNR,              /* tuning*/
       10,                         /* cq_level */
       0,                          /* rc_max_intra_bitrate_pct */
       0,                          /* lossless */
       0,                          /* frame_parallel_decoding_mode */
-      0,                          /* aq_mode */
+      NO_AQ,                      /* aq_mode */
     }
   }
 };
@@ -217,7 +217,7 @@ static vpx_codec_err_t validate_config(vpx_codec_alg_priv_t      *ctx,
   if (cfg->g_pass == VPX_RC_LAST_PASS) {
     size_t           packet_sz = sizeof(FIRSTPASS_STATS);
     int              n_packets = (int)(cfg->rc_twopass_stats_in.sz / packet_sz);
-    FIRSTPASS_STATS *stats;
+    const FIRSTPASS_STATS *stats;
 
     if (cfg->rc_twopass_stats_in.buf == NULL)
       ERROR("rc_twopass_stats_in.buf not set.");
@@ -228,8 +228,8 @@ static vpx_codec_err_t validate_config(vpx_codec_alg_priv_t      *ctx,
     if (cfg->rc_twopass_stats_in.sz < 2 * packet_sz)
       ERROR("rc_twopass_stats_in requires at least two packets.");
 
-    stats = (void *)((char *)cfg->rc_twopass_stats_in.buf
-                     + (n_packets - 1) * packet_sz);
+    stats =
+        (const FIRSTPASS_STATS *)cfg->rc_twopass_stats_in.buf + n_packets - 1;
 
     if ((int)(stats->count + 0.5) != n_packets - 1)
       ERROR("rc_twopass_stats_in missing EOS stats packet");
@@ -529,7 +529,7 @@ static vpx_codec_err_t vp9e_common_init(vpx_codec_ctx_t *ctx) {
 
     if (priv->cx_data_sz < 4096) priv->cx_data_sz = 4096;
 
-    priv->cx_data = malloc(priv->cx_data_sz);
+    priv->cx_data = (unsigned char *)malloc(priv->cx_data_sz);
 
     if (priv->cx_data == NULL) return VPX_CODEC_MEM_ERROR;
 
