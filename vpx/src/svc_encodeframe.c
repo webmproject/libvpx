@@ -13,6 +13,7 @@
  * VP9 SVC encoding support via libvpx
  */
 
+#include <assert.h>
 #include <math.h>
 #include <stdarg.h>
 #include <stdio.h>
@@ -550,6 +551,7 @@ vpx_codec_err_t vpx_svc_init(SvcContext *svc_ctx, vpx_codec_ctx_t *codec_ctx,
     float total = 0;
     float alloc_ratio[VPX_SS_MAX_LAYERS] = {0};
 
+    assert(si->layers <= VPX_SS_MAX_LAYERS);
     for (i = 0; i < si->layers; ++i) {
       int pos = i + VPX_SS_MAX_LAYERS - svc_ctx->spatial_layers;
       if (pos < VPX_SS_MAX_LAYERS && si->scaling_factor_den[pos] > 0) {
