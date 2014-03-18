@@ -56,6 +56,13 @@
 
 #define DISABLE_RC_LONG_TERM_MEM 0
 
+#if CONFIG_MULTIPLE_ARF
+// Set MIN_GF_INTERVAL to 1 for the full decomposition.
+#define MIN_GF_INTERVAL             2
+#else
+#define MIN_GF_INTERVAL             4
+#endif
+
 static void swap_yv12(YV12_BUFFER_CONFIG *a, YV12_BUFFER_CONFIG *b) {
   YV12_BUFFER_CONFIG temp = *a;
   *a = *b;

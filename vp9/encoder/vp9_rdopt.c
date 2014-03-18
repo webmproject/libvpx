@@ -41,6 +41,11 @@
 #include "vp9/encoder/vp9_tokenize.h"
 #include "vp9/encoder/vp9_variance.h"
 
+#define RD_THRESH_MAX_FACT 64
+#define RD_THRESH_INC      1
+#define RD_THRESH_POW      1.25
+#define RD_MULT_EPB_RATIO  64
+
 /* Factor to weigh the rate for switchable interp filters */
 #define SWITCHABLE_INTERP_RATE_FACTOR 1
 

@@ -40,21 +40,10 @@ extern "C" {
 
 // #define MODE_TEST_HIT_STATS
 
-#if CONFIG_MULTIPLE_ARF
-// Set MIN_GF_INTERVAL to 1 for the full decomposition.
-#define MIN_GF_INTERVAL             2
-#else
-#define MIN_GF_INTERVAL             4
-#endif
 #define DEFAULT_GF_INTERVAL         10
-
-#define KEY_FRAME_CONTEXT 5
 
 #define MAX_MODES 30
 #define MAX_REFS  6
-
-#define MIN_THRESHMULT  32
-#define MAX_THRESHMULT  512
 
 typedef struct {
   int nmvjointcost[MV_JOINTS];
