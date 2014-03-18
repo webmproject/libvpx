@@ -315,6 +315,24 @@
       "revId": "910d79c6758e35fad287abbd14af5fa5181d4353",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//x3I\u003d",
+        "filename": "vp9/encoder/vp9_firstpass.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-03-18T00:59:59Z",
+      "side": 1,
+      "message": "thanks for checking. in the future you don\u0027t have to go to so much trouble, simply checking out the parent (HEAD^) will suffice",
+      "parentUuid": "AAAAdn//x7s\u003d",
+      "revId": "910d79c6758e35fad287abbd14af5fa5181d4353",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
