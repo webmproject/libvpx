@@ -80,10 +80,10 @@ static unsigned long priv_sz(const vpx_codec_dec_cfg_t *si,
 static void vp9_init_ctx(vpx_codec_ctx_t *ctx, const vpx_codec_mmap_t *mmap) {
   int i;
 
-  ctx->priv = mmap->base;
+  ctx->priv = (vpx_codec_priv_t *)mmap->base;
   ctx->priv->sz = sizeof(*ctx->priv);
   ctx->priv->iface = ctx->iface;
-  ctx->priv->alg_priv = mmap->base;
+  ctx->priv->alg_priv = (struct vpx_codec_alg_priv *)mmap->base;
 
   for (i = 0; i < NELEMENTS(ctx->priv->alg_priv->mmaps); i++)
     ctx->priv->alg_priv->mmaps[i].id = vp9_mem_req_segs[i].id;
@@ -406,7 +406,7 @@ static vpx_codec_err_t vp9_decode(vpx_codec_alg_priv_t  *ctx,
                                   long                   deadline) {
   const uint8_t *data_start = data;
   const uint8_t *data_end = data + data_sz;
-  vpx_codec_err_t res = 0;
+  vpx_codec_err_t res = VPX_CODEC_OK;
   uint32_t sizes[8];
   int frames_this_pts, frame_count = 0;
 
@@ -502,7 +502,7 @@ static vpx_codec_err_t vp9_xma_get_mmap(const vpx_codec_ctx_t *ctx,
                                         vpx_codec_mmap_t *mmap,
                                         vpx_codec_iter_t *iter) {
   vpx_codec_err_t res;
-  const mem_req_t *seg_iter = *iter;
+  const mem_req_t *seg_iter = (const mem_req_t *)*iter;
 
   /* Get address of next segment request */
   do {
