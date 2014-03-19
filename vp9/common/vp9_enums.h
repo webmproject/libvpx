@@ -94,6 +94,12 @@ typedef enum {
   SRGB       = 7   // RGB
 } COLOR_SPACE;
 
+typedef enum {
+  VP9_LAST_FLAG = 1 << 0,
+  VP9_GOLD_FLAG = 1 << 1,
+  VP9_ALT_FLAG = 1 << 2,
+} VP9_REFFRAME;
+
 #ifdef __cplusplus
 }  // extern "C"
 #endif
