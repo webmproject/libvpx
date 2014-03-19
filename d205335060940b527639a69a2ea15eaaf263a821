@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//xng\u003d",
+        "filename": "vp9/encoder/vp9_firstpass.c",
+        "patchSetId": 13
+      },
+      "lineNbr": 177,
+      "author": {
+        "id": 1129385
+      },
+      "writtenOn": "2014-03-19T18:55:32Z",
+      "side": 1,
+      "message": "This is to identify which layer this stat belongs to. Currently we have fixed layer per frame. But we have this idea that we may have different layers per frame in the future. So I put it in advance so that we don\u0027t have change it again.",
+      "parentUuid": "AAAAdn//xoI\u003d",
+      "revId": "d205335060940b527639a69a2ea15eaaf263a821",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//xoE\u003d",
         "filename": "vp9/encoder/vp9_firstpass.c",
         "patchSetId": 13
@@ -30,6 +48,24 @@
       "writtenOn": "2014-03-19T18:43:21Z",
       "side": 1,
       "message": "That also looks weird, you are just overriding the value instead of accumulating.",
+      "revId": "d205335060940b527639a69a2ea15eaaf263a821",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//xnc\u003d",
+        "filename": "vp9/encoder/vp9_firstpass.c",
+        "patchSetId": 13
+      },
+      "lineNbr": 183,
+      "author": {
+        "id": 1129385
+      },
+      "writtenOn": "2014-03-19T18:55:32Z",
+      "side": 1,
+      "message": "Just because we need layer id for total_stats.",
+      "parentUuid": "AAAAdn//xoE\u003d",
       "revId": "d205335060940b527639a69a2ea15eaaf263a821",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
