@@ -229,22 +229,21 @@ void vp9_build_nmv_cost_table(int *mvjoint, int *mvcost[2],
   build_nmv_component_cost_table(mvcost[1], &ctx->comps[1], usehp);
 }
 
-static void inc_mvs(const int_mv mv[2], const MV ref[2], int is_compound,
+static void inc_mvs(const MB_MODE_INFO *mbmi, const int_mv mvs[2],
                     nmv_context_counts *counts) {
   int i;
-  for (i = 0; i < 1 + is_compound; ++i) {
-    const MV diff = { mv[i].as_mv.row - ref[i].row,
-                      mv[i].as_mv.col - ref[i].col };
+
+  for (i = 0; i < 1 + has_second_ref(mbmi); ++i) {
+    const MV *ref = &mbmi->ref_mvs[mbmi->ref_frame[i]][0].as_mv;
+    const MV diff = {mvs[i].as_mv.row - ref->row,
+                     mvs[i].as_mv.col - ref->col};
     vp9_inc_mv(&diff, counts);
   }
 }
 
-void vp9_update_mv_count(VP9_COMMON *cm, const MACROBLOCKD *xd,
-                         const MV best_ref_mv[2]) {
+void vp9_update_mv_count(VP9_COMMON *cm, const MACROBLOCKD *xd) {
   const MODE_INFO *mi = xd->mi_8x8[0];
   const MB_MODE_INFO *const mbmi = &mi->mbmi;
-  const int is_compound = has_second_ref(mbmi);
-  nmv_context_counts *counts = &cm->counts.mv;
 
   if (mbmi->sb_type < BLOCK_8X8) {
     const int num_4x4_w = num_4x4_blocks_wide_lookup[mbmi->sb_type];
@@ -255,11 +254,12 @@ void vp9_update_mv_count(VP9_COMMON *cm, const MACROBLOCKD *xd,
       for (idx = 0; idx < 2; idx += num_4x4_w) {
         const int i = idy * 2 + idx;
         if (mi->bmi[i].as_mode == NEWMV)
-          inc_mvs(mi->bmi[i].as_mv, best_ref_mv, is_compound, counts);
+          inc_mvs(mbmi, mi->bmi[i].as_mv, &cm->counts.mv);
       }
     }
-  } else if (mbmi->mode == NEWMV) {
-    inc_mvs(mbmi->mv, best_ref_mv, is_compound, counts);
+  } else {
+    if (mbmi->mode == NEWMV)
+      inc_mvs(mbmi, mbmi->mv, &cm->counts.mv);
   }
 }
 

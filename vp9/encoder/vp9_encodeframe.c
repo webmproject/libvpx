@@ -985,12 +985,7 @@ static void update_state(VP9_COMP *cpi, PICK_MODE_CONTEXT *ctx,
 #endif
   if (!frame_is_intra_only(cm)) {
     if (is_inter_block(mbmi)) {
-      if (mbmi->sb_type < BLOCK_8X8 || mbmi->mode == NEWMV) {
-        MV best_mv[2];
-        for (i = 0; i < 1 + has_second_ref(mbmi); ++i)
-          best_mv[i] = mbmi->ref_mvs[mbmi->ref_frame[i]][0].as_mv;
-        vp9_update_mv_count(cm, xd, best_mv);
-      }
+      vp9_update_mv_count(cm, xd);
 
       if (cm->interp_filter == SWITCHABLE) {
         const int ctx = vp9_get_pred_context_switchable_interp(xd);
@@ -1462,7 +1457,6 @@ static int sb_has_motion(const VP9_COMMON *cm, MODE_INFO **prev_mi_8x8) {
 
 static void update_state_rt(VP9_COMP *cpi, const PICK_MODE_CONTEXT *ctx,
                             int mi_row, int mi_col, int bsize) {
-  int i;
   VP9_COMMON *const cm = &cpi->common;
   MACROBLOCK *const x = &cpi->mb;
   MACROBLOCKD *const xd = &x->e_mbd;
@@ -1480,14 +1474,8 @@ static void update_state_rt(VP9_COMP *cpi, const PICK_MODE_CONTEXT *ctx,
     vp9_init_plane_quantizers(cpi, x);
   }
 
-
   if (is_inter_block(mbmi)) {
-    if (mbmi->sb_type < BLOCK_8X8 || mbmi->mode == NEWMV) {
-      MV best_mv[2];
-      for (i = 0; i < 1 + has_second_ref(mbmi); ++i)
-        best_mv[i] = mbmi->ref_mvs[mbmi->ref_frame[i]][0].as_mv;
-      vp9_update_mv_count(cm, xd, best_mv);
-    }
+    vp9_update_mv_count(cm, xd);
 
     if (cm->interp_filter == SWITCHABLE) {
       const int pred_ctx = vp9_get_pred_context_switchable_interp(xd);
