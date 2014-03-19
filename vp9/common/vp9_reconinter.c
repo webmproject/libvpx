@@ -293,24 +293,40 @@ static void dec_build_inter_predictors(MACROBLOCKD *xd, int plane, int block,
       ref_frame = plane == 1 ? ref_buf->u_buffer : ref_buf->v_buffer;
     }
 
-    // Get block position in current frame.
-    x0 = (-xd->mb_to_left_edge >> (3 + pd->subsampling_x)) + x;
-    y0 = (-xd->mb_to_top_edge >> (3 + pd->subsampling_y)) + y;
-
-    // Precision of x0_16 and y0_16 is 1/16th pixel.
-    x0_16 = x0 << SUBPEL_BITS;
-    y0_16 = y0 << SUBPEL_BITS;
-
     if (vp9_is_scaled(sf)) {
+      // Co-ordinate of containing block to pixel precision.
+      int x_start = (-xd->mb_to_left_edge >> (3 + pd->subsampling_x));
+      int y_start = (-xd->mb_to_top_edge >> (3 + pd->subsampling_y));
+
+      // Co-ordinate of the block to 1/16th pixel precision.
+      x0_16 = (x_start + x) << SUBPEL_BITS;
+      y0_16 = (y_start + y) << SUBPEL_BITS;
+
+      // Co-ordinate of current block in reference frame
+      // to 1/16th pixel precision.
+      x0_16 = sf->scale_value_x(x0_16, sf);
+      y0_16 = sf->scale_value_y(y0_16, sf);
+
+      // Map the top left corner of the block into the reference frame.
+      // NOTE: This must be done in this way instead of
+      // sf->scale_value_x(x_start + x, sf).
+      x0 = sf->scale_value_x(x_start, sf) + sf->scale_value_x(x, sf);
+      y0 = sf->scale_value_y(y_start, sf) + sf->scale_value_y(y, sf);
+
+      // Scale the MV and incorporate the sub-pixel offset of the block
+      // in the reference frame.
       scaled_mv = vp9_scale_mv(&mv_q4, mi_x + x, mi_y + y, sf);
       xs = sf->x_step_q4;
       ys = sf->y_step_q4;
-      // Map the top left corner of the block into the reference frame.
-      x0 = sf->scale_value_x(x0, sf);
-      y0 = sf->scale_value_y(y0, sf);
-      x0_16 = sf->scale_value_x(x0_16, sf);
-      y0_16 = sf->scale_value_y(y0_16, sf);
     } else {
+      // Co-ordinate of containing block to pixel precision.
+      x0 = (-xd->mb_to_left_edge >> (3 + pd->subsampling_x)) + x;
+      y0 = (-xd->mb_to_top_edge >> (3 + pd->subsampling_y)) + y;
+
+      // Co-ordinate of the block to 1/16th pixel precision.
+      x0_16 = x0 << SUBPEL_BITS;
+      y0_16 = y0 << SUBPEL_BITS;
+
       scaled_mv.row = mv_q4.row;
       scaled_mv.col = mv_q4.col;
       xs = ys = 16;
@@ -354,9 +370,10 @@ static void dec_build_inter_predictors(MACROBLOCKD *xd, int plane, int block,
           y0 < 0 || y0 > frame_height - 1 || y1 < 0 || y1 > frame_height - 1) {
         uint8_t *buf_ptr1 = ref_frame + y0 * pre_buf->stride + x0;
         // Extend the border.
-        build_mc_border(buf_ptr1, pre_buf->stride, xd->mc_buf, x1 - x0,
-                        x0, y0, x1 - x0, y1 - y0, frame_width, frame_height);
-        buf_stride = x1 - x0;
+        build_mc_border(buf_ptr1, pre_buf->stride, xd->mc_buf, x1 - x0 + 1,
+                        x0, y0, x1 - x0 + 1, y1 - y0 + 1, frame_width,
+                        frame_height);
+        buf_stride = x1 - x0 + 1;
         buf_ptr = xd->mc_buf + y_pad * 3 * buf_stride + x_pad * 3;
       }
     }
