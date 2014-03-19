@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//xhg\u003d",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 4
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2014-03-19T23:13:28Z",
+      "side": 1,
+      "message": "This function internally uses boarder size 32 which will generate confusion. Its behavior is actually different from the C version in non 32 border size. If people do not know the code, it will take a while to find a bug like this.  So I prefer to change the name to reflect this.",
+      "parentUuid": "AAAAdn//xig\u003d",
+      "revId": "31167d9f9e124f1505b29523b65901868eb4e90d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//xic\u003d",
         "filename": "/COMMIT_MSG",
         "patchSetId": 4
@@ -30,6 +48,24 @@
       "writtenOn": "2014-03-19T22:23:21Z",
       "side": 1,
       "message": "have vp9 call the C version exclusively",
+      "revId": "31167d9f9e124f1505b29523b65901868eb4e90d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//xhU\u003d",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 4
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2014-03-19T23:13:28Z",
+      "side": 1,
+      "message": "Consider border size 32, neon version is two times faster than C code. We may add the neon optimization for 160 later. Should we add a new function at that time?",
+      "parentUuid": "AAAAdn//xic\u003d",
       "revId": "31167d9f9e124f1505b29523b65901868eb4e90d",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
