@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//xoI\u003d",
+        "filename": "vp9/encoder/vp9_firstpass.c",
+        "patchSetId": 13
+      },
+      "lineNbr": 177,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-03-19T18:43:21Z",
+      "side": 1,
+      "message": "Just because of curiosity. You are adding new member to FIRSTPASS_STATS which contains frame statistics. New member \u0027spatial_layer_id\u0027 doesn\u0027t look like statistics value. Is it really necessary to modify this struct?",
+      "revId": "d205335060940b527639a69a2ea15eaaf263a821",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//xoE\u003d",
+        "filename": "vp9/encoder/vp9_firstpass.c",
+        "patchSetId": 13
+      },
+      "lineNbr": 183,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-03-19T18:43:21Z",
+      "side": 1,
+      "message": "That also looks weird, you are just overriding the value instead of accumulating.",
+      "revId": "d205335060940b527639a69a2ea15eaaf263a821",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
