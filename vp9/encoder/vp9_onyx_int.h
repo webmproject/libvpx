@@ -938,6 +938,10 @@ int vp9_compute_qdelta(const VP9_COMP *cpi, double qstart, double qtarget);
 int vp9_compute_qdelta_by_rate(VP9_COMP *cpi, int base_q_index,
                                double rate_target_ratio);
 
+void vp9_scale_references(VP9_COMP *cpi);
+
+void vp9_update_reference_frames(VP9_COMP *cpi);
+
 static int get_token_alloc(int mb_rows, int mb_cols) {
   return mb_rows * mb_cols * (48 * 16 + 4);
 }

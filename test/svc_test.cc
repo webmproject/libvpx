@@ -362,4 +362,39 @@ TEST_F(SvcTest, GetLayerResolution) {
   EXPECT_EQ(kHeight * 8 / 16, layer_height);
 }
 
+TEST_F(SvcTest, FirstPassEncode) {
+  svc_.spatial_layers = 2;
+  codec_enc_.g_pass = VPX_RC_FIRST_PASS;
+  vpx_svc_set_scale_factors(&svc_, "4/16,16/16");
+  vpx_svc_set_quantizers(&svc_, "40,30", 0);
+
+  vpx_codec_err_t res =
+      vpx_svc_init(&svc_, &codec_, vpx_codec_vp9_cx(), &codec_enc_);
+  ASSERT_EQ(VPX_CODEC_OK, res);
+  codec_initialized_ = true;
+
+  libvpx_test::I420VideoSource video(test_file_name_, kWidth, kHeight,
+                                     codec_enc_.g_timebase.den,
+                                     codec_enc_.g_timebase.num, 0, 30);
+  // FRAME 0
+  video.Begin();
+  res = vpx_svc_encode(&svc_, &codec_, video.img(), video.pts(),
+                       video.duration(), VPX_DL_GOOD_QUALITY);
+  ASSERT_EQ(VPX_CODEC_OK, res);
+  EXPECT_GT(vpx_svc_get_rc_stats_buffer_size(&svc_), 0U);
+
+  // FRAME 1
+  video.Next();
+  res = vpx_svc_encode(&svc_, &codec_, video.img(), video.pts(),
+                       video.duration(), VPX_DL_GOOD_QUALITY);
+  ASSERT_EQ(VPX_CODEC_OK, res);
+  EXPECT_GT(vpx_svc_get_rc_stats_buffer_size(&svc_), 0U);
+
+  // Flush encoder and test EOS packet
+  res = vpx_svc_encode(&svc_, &codec_, NULL, video.pts(),
+                       video.duration(), VPX_DL_GOOD_QUALITY);
+  ASSERT_EQ(VPX_CODEC_OK, res);
+  EXPECT_GT(vpx_svc_get_rc_stats_buffer_size(&svc_), 0U);
+}
+
 }  // namespace
