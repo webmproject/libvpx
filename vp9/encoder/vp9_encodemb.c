@@ -424,6 +424,7 @@ static void encode_block(int plane, int block, BLOCK_SIZE plane_bsize,
       assert(0 && "Invalid transform size");
   }
 }
+
 static void encode_block_pass1(int plane, int block, BLOCK_SIZE plane_bsize,
                                TX_SIZE tx_size, void *arg) {
   MACROBLOCK *const x = (MACROBLOCK *)arg;

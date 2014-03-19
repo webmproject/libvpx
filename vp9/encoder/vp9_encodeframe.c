@@ -1469,7 +1469,10 @@ static void update_state_rt(VP9_COMP *cpi, const PICK_MODE_CONTEXT *ctx,
   MB_MODE_INFO *const mbmi = &xd->mi_8x8[0]->mbmi;
   const struct segmentation *const seg = &cm->seg;
 
-  x->skip = ctx->skip;
+  // TODO(jingning) We might need PICK_MODE_CONTEXT to buffer coding modes
+  // associated with variable block sizes. Otherwise, remove this ctx
+  // from argument list.
+  (void)ctx;
 
   // Check for reseting segment_id and update cyclic map.
   if (cpi->oxcf.aq_mode == CYCLIC_REFRESH_AQ && seg->enabled) {
@@ -1477,39 +1480,18 @@ static void update_state_rt(VP9_COMP *cpi, const PICK_MODE_CONTEXT *ctx,
     vp9_init_plane_quantizers(cpi, x);
   }
 
-#if CONFIG_INTERNAL_STATS
-  if (frame_is_intra_only(cm)) {
-    static const int kf_mode_index[] = {
-      THR_DC /*DC_PRED*/,
-      THR_V_PRED /*V_PRED*/,
-      THR_H_PRED /*H_PRED*/,
-      THR_D45_PRED /*D45_PRED*/,
-      THR_D135_PRED /*D135_PRED*/,
-      THR_D117_PRED /*D117_PRED*/,
-      THR_D153_PRED /*D153_PRED*/,
-      THR_D207_PRED /*D207_PRED*/,
-      THR_D63_PRED /*D63_PRED*/,
-      THR_TM /*TM_PRED*/,
-    };
-    ++cpi->mode_chosen_counts[kf_mode_index[mbmi->mode]];
-  } else {
-    // Note how often each mode chosen as best
-    ++cpi->mode_chosen_counts[ctx->best_mode_index];
-  }
-#endif
-  if (!frame_is_intra_only(cm)) {
-    if (is_inter_block(mbmi)) {
-      if (mbmi->sb_type < BLOCK_8X8 || mbmi->mode == NEWMV) {
-        MV best_mv[2];
-        for (i = 0; i < 1 + has_second_ref(mbmi); ++i)
-          best_mv[i] = mbmi->ref_mvs[mbmi->ref_frame[i]][0].as_mv;
-        vp9_update_mv_count(cm, xd, best_mv);
-      }
 
-      if (cm->interp_filter == SWITCHABLE) {
-        const int pred_ctx = vp9_get_pred_context_switchable_interp(xd);
-        ++cm->counts.switchable_interp[pred_ctx][mbmi->interp_filter];
-      }
+  if (is_inter_block(mbmi)) {
+    if (mbmi->sb_type < BLOCK_8X8 || mbmi->mode == NEWMV) {
+      MV best_mv[2];
+      for (i = 0; i < 1 + has_second_ref(mbmi); ++i)
+        best_mv[i] = mbmi->ref_mvs[mbmi->ref_frame[i]][0].as_mv;
+      vp9_update_mv_count(cm, xd, best_mv);
+    }
+
+    if (cm->interp_filter == SWITCHABLE) {
+      const int pred_ctx = vp9_get_pred_context_switchable_interp(xd);
+      ++cm->counts.switchable_interp[pred_ctx][mbmi->interp_filter];
     }
   }
 }
