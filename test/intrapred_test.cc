@@ -26,11 +26,7 @@ using libvpx_test::ACMRandom;
 
 class IntraPredBase {
  public:
-  virtual ~IntraPredBase() {}
-
-  virtual void TearDown() {
-    libvpx_test::ClearSystemState();
-  }
+  virtual ~IntraPredBase() { libvpx_test::ClearSystemState(); }
 
  protected:
   void SetupMacroblock(MACROBLOCKD *mbptr,
@@ -227,8 +223,9 @@ typedef void (*intra_pred_y_fn_t)(MACROBLOCKD *x,
                                   uint8_t *ypred_ptr,
                                   int y_stride);
 
-class IntraPredYTest : public ::testing::TestWithParam<intra_pred_y_fn_t>,
-    protected IntraPredBase {
+class IntraPredYTest
+    : public IntraPredBase,
+      public ::testing::TestWithParam<intra_pred_y_fn_t> {
  public:
   static void SetUpTestCase() {
     mb_ = reinterpret_cast<MACROBLOCKD*>(
@@ -308,8 +305,9 @@ typedef void (*intra_pred_uv_fn_t)(MACROBLOCKD *x,
                                    uint8_t *vpred_ptr,
                                    int pred_stride);
 
-class IntraPredUVTest : public ::testing::TestWithParam<intra_pred_uv_fn_t>,
-    protected IntraPredBase {
+class IntraPredUVTest
+    : public IntraPredBase,
+      public ::testing::TestWithParam<intra_pred_uv_fn_t> {
  public:
   static void SetUpTestCase() {
     mb_ = reinterpret_cast<MACROBLOCKD*>(
