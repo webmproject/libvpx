@@ -105,6 +105,24 @@
       "revId": "31167d9f9e124f1505b29523b65901868eb4e90d",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//xgk\u003d",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 4
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2014-03-19T23:37:57Z",
+      "side": 1,
+      "message": "If you are going to have 2 functions (with pretty much duped code) then why not just name them vpx_scale_yv12_extend_frame_borders_32 and vpx_scale_yv12_extend_frame_borders_160. Then the c code will match the assembly.",
+      "parentUuid": "AAAAdn//xg0\u003d",
+      "revId": "31167d9f9e124f1505b29523b65901868eb4e90d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
