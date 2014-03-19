@@ -18,15 +18,6 @@
 
 static int update_bits[255];
 
-static int split_index(int i, int n, int modulus) {
-  int max1 = (n - 1 - modulus / 2) / modulus + 1;
-  if (i % modulus == modulus / 2)
-    i = i / modulus;
-  else
-    i = max1 + i - (i + modulus - modulus / 2) / modulus;
-  return i;
-}
-
 static int recenter_nonneg(int v, int m) {
   if (v > (m << 1))
     return v;

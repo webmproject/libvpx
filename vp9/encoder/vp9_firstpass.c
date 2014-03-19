@@ -69,13 +69,6 @@ static int gfboost_qadjust(int qindex) {
                (1.32 * q) + 79.3);
 }
 
-static int kfboost_qadjust(int qindex) {
-  const double q = vp9_convert_qindex_to_q(qindex);
-  return (int)((0.00000973 * q * q * q) +
-               (-0.00613 * q * q) +
-               (1.316 * q) + 121.2);
-}
-
 // Resets the first pass file to the given position using a relative seek from
 // the current position.
 static void reset_fpf_position(struct twopass_rc *p,
@@ -824,12 +817,6 @@ void vp9_first_pass(VP9_COMP *cpi) {
   }
 
   ++cm->current_video_frame;
-}
-
-// Estimate a cost per mb attributable to overheads such as the coding of modes
-// and motion vectors. This currently makes simplistic assumptions for testing.
-static double bitcost(double prob) {
-  return -(log(prob) / log(2.0));
 }
 
 static double calc_correction_factor(double err_per_mb,
@@ -2131,7 +2118,7 @@ void vp9_rc_get_first_pass_params(VP9_COMP *cpi) {
   VP9_COMMON *const cm = &cpi->common;
   if (!cpi->refresh_alt_ref_frame &&
       (cm->current_video_frame == 0 ||
-       cm->frame_flags & FRAMEFLAGS_KEY)) {
+       (cm->frame_flags & FRAMEFLAGS_KEY))) {
     cm->frame_type = KEY_FRAME;
   } else {
     cm->frame_type = INTER_FRAME;

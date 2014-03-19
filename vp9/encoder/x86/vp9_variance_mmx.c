@@ -13,7 +13,6 @@
 #include "vp9/common/vp9_pragmas.h"
 #include "vpx_ports/mem.h"
 
-extern unsigned int vp9_get_mb_ss_mmx(const int16_t *src_ptr);
 extern unsigned int vp9_get8x8var_mmx
 (
   const unsigned char *src_ptr,
