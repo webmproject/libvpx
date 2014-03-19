@@ -233,11 +233,15 @@ int64_t vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
   int64_t best_rd = INT64_MAX;
   int64_t this_rd = INT64_MAX;
 
-  const int64_t inter_mode_thresh = 300;
-  const int64_t intra_mode_cost = 50;
-
   int rate = INT_MAX;
   int64_t dist = INT64_MAX;
+
+  VP9_COMMON *cm = &cpi->common;
+  int intra_cost_penalty = 20 * vp9_dc_quant(cm->base_qindex, cm->y_dc_delta_q);
+
+  const int64_t inter_mode_thresh = RDCOST(x->rdmult, x->rddiv,
+                                           intra_cost_penalty, 0);
+  const int64_t intra_mode_cost = 50;
 
   x->skip_encode = cpi->sf.skip_encode_frame && x->q_index < QIDX_SKIP_THRESH;
 
@@ -345,6 +349,7 @@ int64_t vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
 
       model_rd_for_sb_y(cpi, bsize, x, xd, &rate, &dist);
       rate += x->mbmode_cost[this_mode];
+      rate += intra_cost_penalty;
       this_rd = RDCOST(x->rdmult, x->rddiv, rate, dist);
 
       if (this_rd + intra_mode_cost < best_rd) {

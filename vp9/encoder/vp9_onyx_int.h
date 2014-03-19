@@ -213,6 +213,8 @@ typedef enum {
   // determined based on source variance
   VAR_BASED_FIXED_PARTITION = 2,
 
+  REFERENCE_PARTITION = 3,
+
   // Use an arbitrary partitioning scheme based on source variance within
   // a 64X64 SB
   VAR_BASED_PARTITION
@@ -356,6 +358,10 @@ typedef struct {
   // sizes less than 8x8, 1 means we check all filter modes if no 8x8 filter
   // was selected, and 2 means we use 8 tap if no 8x8 filter mode was selected.
   int adaptive_pred_interp_filter;
+
+  // Search through variable block partition types in non-RD mode decision
+  // encoding process for RTC.
+  int partition_check;
 
   // Implements various heuristics to skip searching modes
   // The heuristics selected are based on  flags

@@ -874,8 +874,11 @@ static void set_rt_speed_feature(VP9_COMMON *cm,
     sf->max_intra_bsize = BLOCK_32X32;
   }
   if (speed >= 6) {
-    sf->partition_search_type = VAR_BASED_FIXED_PARTITION;
-    sf->search_method = HEX;
+    sf->partition_check =
+        (cm->current_video_frame % sf->last_partitioning_redo_frequency == 1);
+    sf->partition_search_type = REFERENCE_PARTITION;
+    sf->use_nonrd_pick_mode = 1;
+    sf->search_method = FAST_DIAMOND;
   }
   if (speed >= 7) {
     sf->partition_search_type = VAR_BASED_FIXED_PARTITION;
