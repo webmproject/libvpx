@@ -821,8 +821,6 @@ static void set_rt_speed_feature(VP9_COMMON *cm,
   }
   if (speed >= 3) {
     sf->use_square_partition_only = 1;
-    sf->tx_size_search_method = USE_LARGESTALL;
-
     if (MIN(cm->width, cm->height) >= 720)
       sf->disable_split_mask = DISABLE_ALL_SPLIT;
     else
