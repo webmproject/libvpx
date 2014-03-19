@@ -161,11 +161,9 @@ for t in ${all_targets}; do
     [ -f ${source_path}/${t}.mk ] && enable_feature ${t}
 done
 
-for util in make perl; do
-    if ! ${util} --version >/dev/null; then
-        die "${util} is required to build."
-    fi
-done
+if ! perl --version >/dev/null; then
+    die "Perl is required to build"
+fi
 
 
 if [ "`cd ${source_path} && pwd`" != "`pwd`" ]; then
