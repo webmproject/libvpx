@@ -2424,36 +2424,6 @@ void write_cx_frame_to_file(YV12_BUFFER_CONFIG *frame, int this_frame) {
 }
 #endif
 
-static double compute_edge_pixel_proportion(YV12_BUFFER_CONFIG *frame) {
-#define EDGE_THRESH 128
-  int i, j;
-  int num_edge_pels = 0;
-  int num_pels = (frame->y_height - 2) * (frame->y_width - 2);
-  uint8_t *prev = frame->y_buffer + 1;
-  uint8_t *curr = frame->y_buffer + 1 + frame->y_stride;
-  uint8_t *next = frame->y_buffer + 1 + 2 * frame->y_stride;
-  for (i = 1; i < frame->y_height - 1; i++) {
-    for (j = 1; j < frame->y_width - 1; j++) {
-      /* Sobel hor and ver gradients */
-      int v = 2 * (curr[1] - curr[-1]) + (prev[1] - prev[-1]) +
-              (next[1] - next[-1]);
-      int h = 2 * (prev[0] - next[0]) + (prev[1] - next[1]) +
-              (prev[-1] - next[-1]);
-      h = (h < 0 ? -h : h);
-      v = (v < 0 ? -v : v);
-      if (h > EDGE_THRESH || v > EDGE_THRESH)
-        num_edge_pels++;
-      curr++;
-      prev++;
-      next++;
-    }
-    curr += frame->y_stride - frame->y_width + 2;
-    prev += frame->y_stride - frame->y_width + 2;
-    next += frame->y_stride - frame->y_width + 2;
-  }
-  return (double)num_edge_pels / num_pels;
-}
-
 // Function to test for conditions that indicate we should loop
 // back and recode a frame.
 static int recode_loop_test(const VP9_COMP *cpi,
