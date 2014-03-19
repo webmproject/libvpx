@@ -28,8 +28,7 @@ void vp9_encode_mv(VP9_COMP *cpi, vp9_writer* w, const MV* mv, const MV* ref,
 void vp9_build_nmv_cost_table(int *mvjoint, int *mvcost[2],
                               const nmv_context* mvctx, int usehp);
 
-void vp9_update_mv_count(VP9_COMMON *cm, const MACROBLOCKD *xd,
-                         const MV best_ref_mv[2]);
+void vp9_update_mv_count(VP9_COMMON *cm, const MACROBLOCKD *xd);
 
 #ifdef __cplusplus
 }  // extern "C"
