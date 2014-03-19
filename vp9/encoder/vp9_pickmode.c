@@ -227,6 +227,12 @@ int64_t vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
                                            intra_cost_penalty, 0);
   const int64_t intra_mode_cost = 50;
 
+  unsigned char segment_id = mbmi->segment_id;
+  const int *const rd_threshes = cpi->rd_threshes[segment_id][bsize];
+  const int *const rd_thresh_freq_fact = cpi->rd_thresh_freq_fact[bsize];
+  // Mode index conversion form THR_MODES to MB_PREDICTION_MODE for a ref frame.
+  int mode_idx[MB_MODE_COUNT] = {0};
+
   x->skip_encode = cpi->sf.skip_encode_frame && x->q_index < QIDX_SKIP_THRESH;
 
   x->skip = 0;
@@ -270,11 +276,24 @@ int64_t vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
 
     mbmi->ref_frame[0] = ref_frame;
 
+    // Set conversion index for LAST_FRAME.
+    if (ref_frame == LAST_FRAME) {
+      mode_idx[NEARESTMV] = THR_NEARESTMV;   // LAST_FRAME, NEARESTMV
+      mode_idx[NEARMV] = THR_NEARMV;         // LAST_FRAME, NEARMV
+      mode_idx[ZEROMV] = THR_ZEROMV;         // LAST_FRAME, ZEROMV
+      mode_idx[NEWMV] = THR_NEWMV;           // LAST_FRAME, NEWMV
+    }
+
     for (this_mode = NEARESTMV; this_mode <= NEWMV; ++this_mode) {
       int rate_mv = 0;
 
       if (cpi->sf.disable_inter_mode_mask[bsize] &
           (1 << INTER_OFFSET(this_mode)))
+        continue;
+
+      if (best_rd < ((int64_t)rd_threshes[mode_idx[this_mode]] *
+          rd_thresh_freq_fact[this_mode] >> 5) ||
+          rd_threshes[mode_idx[this_mode]] == INT_MAX)
         continue;
 
       if (this_mode == NEWMV) {
