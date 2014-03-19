@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//xig\u003d",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 4
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2014-03-19T22:23:21Z",
+      "side": 1,
+      "message": "Don\u0027t rename. Continue to call vp8_* functions from vp8",
+      "revId": "31167d9f9e124f1505b29523b65901868eb4e90d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//xic\u003d",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 4
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2014-03-19T22:23:21Z",
+      "side": 1,
+      "message": "have vp9 call the C version exclusively",
+      "revId": "31167d9f9e124f1505b29523b65901868eb4e90d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
