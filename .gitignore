@@ -30,11 +30,11 @@
 /examples/decode_with_partial_drops
 /examples/example_xma
 /examples/postproc
+/examples/set_maps
 /examples/simple_decoder
 /examples/simple_encoder
 /examples/twopass_encoder
 /examples/vp8_multi_resolution_encoder
-/examples/vp8_set_maps
 /examples/vp8cx_set_ref
 /examples/vp9_spatial_scalable_encoder
 /examples/vpx_temporal_scalable_patterns
