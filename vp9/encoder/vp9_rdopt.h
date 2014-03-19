@@ -23,11 +23,6 @@ extern "C" {
   (((128 + ((int64_t)R) * (RM)) >> 8) + (D << DM))
 #define QIDX_SKIP_THRESH     115
 
-#define RD_THRESH_MAX_FACT 64
-#define RD_THRESH_INC      1
-#define RD_THRESH_POW      1.25
-#define RD_MULT_EPB_RATIO  64
-
 #define MV_COST_WEIGHT      108
 #define MV_COST_WEIGHT_SUB  120
 
