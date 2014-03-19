@@ -37,6 +37,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//xg4\u003d",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 4
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2014-03-19T23:22:37Z",
+      "side": 1,
+      "message": "vp8 already has a check for this:\n#if HAVE_NEON\n/* vp8_yv12_extend_frame_borders_neon makes several assumptions based on this */\nct_assert(VP8BORDERINPIXELS_VAL, VP8BORDERINPIXELS \u003d\u003d 32)\n#endif",
+      "parentUuid": "AAAAdn//xhg\u003d",
+      "revId": "31167d9f9e124f1505b29523b65901868eb4e90d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//xic\u003d",
         "filename": "/COMMIT_MSG",
         "patchSetId": 4
@@ -66,6 +84,24 @@
       "side": 1,
       "message": "Consider border size 32, neon version is two times faster than C code. We may add the neon optimization for 160 later. Should we add a new function at that time?",
       "parentUuid": "AAAAdn//xic\u003d",
+      "revId": "31167d9f9e124f1505b29523b65901868eb4e90d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//xg0\u003d",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 4
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2014-03-19T23:22:37Z",
+      "side": 1,
+      "message": "Yes. Make a different function for VP9. I don\u0027t know who created this initially, but it was wrong to re-use this.",
+      "parentUuid": "AAAAdn//xhU\u003d",
       "revId": "31167d9f9e124f1505b29523b65901868eb4e90d",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
