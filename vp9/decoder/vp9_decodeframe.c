@@ -206,13 +206,6 @@ static void alloc_tile_storage(VP9D_COMP *pbi, int tile_rows, int tile_cols) {
                             i * sizeof(*pbi->above_context[0]) *
                             2 * aligned_mi_cols;
   }
-
-  // This is sized based on the entire frame. Each tile operates within its
-  // column bounds.
-  CHECK_MEM_ERROR(cm, pbi->above_seg_context,
-                  vpx_realloc(pbi->above_seg_context,
-                              sizeof(*pbi->above_seg_context) *
-                              aligned_mi_cols));
 }
 
 static void inverse_transform_block(MACROBLOCKD* xd, int plane, int block,
@@ -722,7 +715,7 @@ static void setup_tile_context(VP9D_COMP *const pbi, MACROBLOCKD *const xd,
     xd->above_context[i] = pbi->above_context[i];
 
   // see note in alloc_tile_storage().
-  xd->above_seg_context = pbi->above_seg_context;
+  xd->above_seg_context = pbi->common.above_seg_context;
 }
 
 static void decode_tile(VP9D_COMP *pbi, const TileInfo *const tile,
@@ -850,8 +843,8 @@ static const uint8_t *decode_tiles(VP9D_COMP *pbi, const uint8_t *data) {
   vpx_memset(pbi->above_context[0], 0,
              sizeof(*pbi->above_context[0]) * MAX_MB_PLANE * 2 * aligned_cols);
 
-  vpx_memset(pbi->above_seg_context, 0,
-             sizeof(*pbi->above_seg_context) * aligned_cols);
+  vpx_memset(cm->above_seg_context, 0,
+             sizeof(*cm->above_seg_context) * aligned_cols);
 
   // Load tile data into tile_buffers
   for (tile_row = 0; tile_row < tile_rows; ++tile_row) {
@@ -977,8 +970,8 @@ static const uint8_t *decode_tiles_mt(VP9D_COMP *pbi, const uint8_t *data) {
   vpx_memset(pbi->above_context[0], 0,
              sizeof(*pbi->above_context[0]) * MAX_MB_PLANE *
              2 * aligned_mi_cols);
-  vpx_memset(pbi->above_seg_context, 0,
-             sizeof(*pbi->above_seg_context) * aligned_mi_cols);
+  vpx_memset(cm->above_seg_context, 0,
+             sizeof(*cm->above_seg_context) * aligned_mi_cols);
 
   // Load tile data into tile_buffers
   for (n = 0; n < tile_cols; ++n) {

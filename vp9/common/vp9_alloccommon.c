@@ -108,6 +108,9 @@ void vp9_free_frame_buffers(VP9_COMMON *cm) {
 
   vpx_free(cm->last_frame_seg_map);
   cm->last_frame_seg_map = NULL;
+
+  vpx_free(cm->above_seg_context);
+  cm->above_seg_context = NULL;
 }
 
 int vp9_resize_frame_buffers(VP9_COMMON *cm, int width, int height) {
@@ -132,6 +135,13 @@ int vp9_resize_frame_buffers(VP9_COMMON *cm, int width, int height) {
   vpx_free(cm->last_frame_seg_map);
   cm->last_frame_seg_map = (uint8_t *)vpx_calloc(cm->mi_rows * cm->mi_cols, 1);
   if (!cm->last_frame_seg_map)
+    goto fail;
+
+  vpx_free(cm->above_seg_context);
+  cm->above_seg_context =
+     (PARTITION_CONTEXT *)vpx_calloc(mi_cols_aligned_to_sb(cm->mi_cols),
+                                     sizeof(*cm->above_seg_context));
+  if (!cm->above_seg_context)
     goto fail;
 
   return 0;
@@ -180,6 +190,13 @@ int vp9_alloc_frame_buffers(VP9_COMMON *cm, int width, int height) {
   // Create the segmentation map structure and set to 0.
   cm->last_frame_seg_map = (uint8_t *)vpx_calloc(cm->mi_rows * cm->mi_cols, 1);
   if (!cm->last_frame_seg_map)
+    goto fail;
+
+
+  cm->above_seg_context =
+      (PARTITION_CONTEXT *)vpx_calloc(mi_cols_aligned_to_sb(cm->mi_cols),
+                                      sizeof(*cm->above_seg_context));
+  if (!cm->above_seg_context)
     goto fail;
 
   return 0;

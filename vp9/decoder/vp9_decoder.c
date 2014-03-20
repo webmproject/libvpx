@@ -190,7 +190,7 @@ void vp9_remove_decompressor(VP9D_COMP *pbi) {
   }
 
   vpx_free(pbi->above_context[0]);
-  vpx_free(pbi->above_seg_context);
+  vpx_free(pbi->common.above_seg_context);
   vpx_free(pbi);
 }
 

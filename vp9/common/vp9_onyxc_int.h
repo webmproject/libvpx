@@ -202,6 +202,8 @@ typedef struct VP9Common {
 
   // Handles memory for the codec.
   InternalFrameBufferList int_frame_buffers;
+
+  PARTITION_CONTEXT *above_seg_context;
 } VP9_COMMON;
 
 static INLINE YV12_BUFFER_CONFIG *get_frame_new_buffer(VP9_COMMON *cm) {

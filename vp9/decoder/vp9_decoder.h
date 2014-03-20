@@ -74,7 +74,6 @@ typedef struct VP9Decompressor {
   VP9LfSync lf_row_sync;
 
   ENTROPY_CONTEXT *above_context[MAX_MB_PLANE];
-  PARTITION_CONTEXT *above_seg_context;
 } VP9D_COMP;
 
 void vp9_initialize_dec();
