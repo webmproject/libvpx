@@ -23,6 +23,7 @@
 #include "vp9/common/vp9_entropymode.h"
 #include "vp9/common/vp9_onyxc_int.h"
 
+#include "vp9/encoder/vp9_craq.h"
 #include "vp9/encoder/vp9_encodemb.h"
 #include "vp9/encoder/vp9_firstpass.h"
 #include "vp9/encoder/vp9_lookahead.h"
@@ -430,32 +431,6 @@ typedef enum {
   USAGE_CONSTANT_QUALITY    = 3,
 } END_USAGE;
 
-typedef struct {
-  // Target percentage of blocks per frame that are cyclicly refreshed.
-  int max_mbs_perframe;
-  // Maximum q-delta as percentage of base q.
-  int max_qdelta_perc;
-  // Block size below which we don't apply cyclic refresh.
-  BLOCK_SIZE min_block_size;
-  // Macroblock starting index (unit of 8x8) for cycling through the frame.
-  int mb_index;
-  // Controls how long a block will need to wait to be refreshed again.
-  int time_for_refresh;
-  // Actual number of blocks that were applied delta-q (segment 1).
-  int num_seg_blocks;
-  // Actual encoding bits for segment 1.
-  int actual_seg_bits;
-  // RD mult. parameters for segment 1.
-  int rdmult;
-  // Cyclic refresh map.
-  signed char *map;
-  // Projected rate and distortion for the current superblock.
-  int64_t projected_rate_sb;
-  int64_t projected_dist_sb;
-  // Thresholds applied to projected rate/distortion of the superblock.
-  int64_t thresh_rate_sb;
-  int64_t thresh_dist_sb;
-} CYCLIC_REFRESH;
 typedef enum {
   // Good Quality Fast Encoding. The encoder balances quality with the
   // amount of time it takes to encode the output. (speed setting
