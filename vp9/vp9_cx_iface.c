@@ -963,8 +963,8 @@ static vpx_codec_err_t vp9e_update_entropy(vpx_codec_alg_priv_t *ctx,
 static vpx_codec_err_t vp9e_update_reference(vpx_codec_alg_priv_t *ctx,
                                              int ctr_id,
                                              va_list args) {
-  const int update = va_arg(args, int);
-  vp9_update_reference(ctx->cpi, update);
+  const int ref_frame_flags = va_arg(args, int);
+  vp9_update_reference(ctx->cpi, ref_frame_flags);
   return VPX_CODEC_OK;
 }
 

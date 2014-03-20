@@ -294,9 +294,10 @@ static void setup_in_frame_q_adj(VP9_COMP *cpi) {
 }
 static void configure_static_seg_features(VP9_COMP *cpi) {
   VP9_COMMON *const cm = &cpi->common;
+  const RATE_CONTROL *const rc = &cpi->rc;
   struct segmentation *const seg = &cm->seg;
 
-  int high_q = (int)(cpi->rc.avg_q > 48.0);
+  int high_q = (int)(rc->avg_q > 48.0);
   int qi_delta;
 
   // Disable and clear down for KF
@@ -334,9 +335,8 @@ static void configure_static_seg_features(VP9_COMP *cpi) {
       seg->update_map = 1;
       seg->update_data = 1;
 
-      qi_delta = vp9_compute_qdelta(
-          cpi, cpi->rc.avg_q, (cpi->rc.avg_q * 0.875));
-      vp9_set_segdata(seg, 1, SEG_LVL_ALT_Q, (qi_delta - 2));
+      qi_delta = vp9_compute_qdelta(cpi, rc->avg_q, rc->avg_q * 0.875);
+      vp9_set_segdata(seg, 1, SEG_LVL_ALT_Q, qi_delta - 2);
       vp9_set_segdata(seg, 1, SEG_LVL_ALT_LF, -2);
 
       vp9_enable_segfeature(seg, 1, SEG_LVL_ALT_Q);
@@ -349,16 +349,15 @@ static void configure_static_seg_features(VP9_COMP *cpi) {
     // All other frames if segmentation has been enabled
 
     // First normal frame in a valid gf or alt ref group
-    if (cpi->rc.frames_since_golden == 0) {
+    if (rc->frames_since_golden == 0) {
       // Set up segment features for normal frames in an arf group
-      if (cpi->rc.source_alt_ref_active) {
+      if (rc->source_alt_ref_active) {
         seg->update_map = 0;
         seg->update_data = 1;
         seg->abs_delta = SEGMENT_DELTADATA;
 
-        qi_delta = vp9_compute_qdelta(cpi, cpi->rc.avg_q,
-                                      (cpi->rc.avg_q * 1.125));
-        vp9_set_segdata(seg, 1, SEG_LVL_ALT_Q, (qi_delta + 2));
+        qi_delta = vp9_compute_qdelta(cpi, rc->avg_q, rc->avg_q * 1.125);
+        vp9_set_segdata(seg, 1, SEG_LVL_ALT_Q, qi_delta + 2);
         vp9_enable_segfeature(seg, 1, SEG_LVL_ALT_Q);
 
         vp9_set_segdata(seg, 1, SEG_LVL_ALT_LF, -2);
@@ -383,7 +382,7 @@ static void configure_static_seg_features(VP9_COMP *cpi) {
 
         vp9_clearall_segfeatures(seg);
       }
-    } else if (cpi->rc.is_src_frame_alt_ref) {
+    } else if (rc->is_src_frame_alt_ref) {
       // Special case where we are coding over the top of a previous
       // alt ref frame.
       // Segment coding disabled for compred testing
@@ -1211,6 +1210,7 @@ static void set_tile_limits(VP9_COMP *cpi) {
 
 static void init_config(struct VP9_COMP *cpi, VP9_CONFIG *oxcf) {
   VP9_COMMON *const cm = &cpi->common;
+  RATE_CONTROL *const rc = &cpi->rc;
   int i;
 
   cpi->oxcf = *oxcf;
@@ -1238,32 +1238,32 @@ static void init_config(struct VP9_COMP *cpi, VP9_CONFIG *oxcf) {
 
   // Initialize active best and worst q and average q values.
   if (cpi->pass == 0 && cpi->oxcf.end_usage == USAGE_STREAM_FROM_SERVER) {
-    cpi->rc.avg_frame_qindex[0] = cpi->oxcf.worst_allowed_q;
-    cpi->rc.avg_frame_qindex[1] = cpi->oxcf.worst_allowed_q;
-    cpi->rc.avg_frame_qindex[2] = cpi->oxcf.worst_allowed_q;
+    rc->avg_frame_qindex[0] = cpi->oxcf.worst_allowed_q;
+    rc->avg_frame_qindex[1] = cpi->oxcf.worst_allowed_q;
+    rc->avg_frame_qindex[2] = cpi->oxcf.worst_allowed_q;
   } else {
-    cpi->rc.avg_frame_qindex[0] = (cpi->oxcf.worst_allowed_q +
-                                   cpi->oxcf.best_allowed_q) / 2;
-    cpi->rc.avg_frame_qindex[1] = (cpi->oxcf.worst_allowed_q +
-                                   cpi->oxcf.best_allowed_q) / 2;
-    cpi->rc.avg_frame_qindex[2] = (cpi->oxcf.worst_allowed_q +
-                                   cpi->oxcf.best_allowed_q) / 2;
+    rc->avg_frame_qindex[0] = (cpi->oxcf.worst_allowed_q +
+                                  cpi->oxcf.best_allowed_q) / 2;
+    rc->avg_frame_qindex[1] = (cpi->oxcf.worst_allowed_q +
+                                  cpi->oxcf.best_allowed_q) / 2;
+    rc->avg_frame_qindex[2] = (cpi->oxcf.worst_allowed_q +
+                                  cpi->oxcf.best_allowed_q) / 2;
   }
-  cpi->rc.last_q[0]                 = cpi->oxcf.best_allowed_q;
-  cpi->rc.last_q[1]                 = cpi->oxcf.best_allowed_q;
-  cpi->rc.last_q[2]                 = cpi->oxcf.best_allowed_q;
+  rc->last_q[0] = cpi->oxcf.best_allowed_q;
+  rc->last_q[1] = cpi->oxcf.best_allowed_q;
+  rc->last_q[2] = cpi->oxcf.best_allowed_q;
 
   // Initialise the starting buffer levels
-  cpi->rc.buffer_level              = cpi->oxcf.starting_buffer_level;
-  cpi->rc.bits_off_target           = cpi->oxcf.starting_buffer_level;
+  rc->buffer_level    = cpi->oxcf.starting_buffer_level;
+  rc->bits_off_target = cpi->oxcf.starting_buffer_level;
 
-  cpi->rc.rolling_target_bits       = cpi->rc.av_per_frame_bandwidth;
-  cpi->rc.rolling_actual_bits       = cpi->rc.av_per_frame_bandwidth;
-  cpi->rc.long_rolling_target_bits  = cpi->rc.av_per_frame_bandwidth;
-  cpi->rc.long_rolling_actual_bits  = cpi->rc.av_per_frame_bandwidth;
+  rc->rolling_target_bits      = rc->av_per_frame_bandwidth;
+  rc->rolling_actual_bits      = rc->av_per_frame_bandwidth;
+  rc->long_rolling_target_bits = rc->av_per_frame_bandwidth;
+  rc->long_rolling_actual_bits = rc->av_per_frame_bandwidth;
 
-  cpi->rc.total_actual_bits         = 0;
-  cpi->rc.total_target_vs_actual    = 0;
+  rc->total_actual_bits = 0;
+  rc->total_target_vs_actual = 0;
 
   cpi->static_mb_pct = 0;
 
@@ -1606,8 +1606,9 @@ static void free_pick_mode_context(MACROBLOCK *x) {
 
 VP9_COMP *vp9_create_compressor(VP9_CONFIG *oxcf) {
   int i, j;
-  VP9_COMP *cpi = vpx_memalign(32, sizeof(VP9_COMP));
-  VP9_COMMON *cm = cpi != NULL ? &cpi->common : NULL;
+  VP9_COMP *const cpi = vpx_memalign(32, sizeof(VP9_COMP));
+  VP9_COMMON *const cm = cpi != NULL ? &cpi->common : NULL;
+  RATE_CONTROL *const rc = cpi != NULL ? &cpi->rc : NULL;
 
   if (!cm)
     return NULL;
@@ -1637,7 +1638,7 @@ VP9_COMP *vp9_create_compressor(VP9_CONFIG *oxcf) {
   // Set reference frame sign bias for ALTREF frame to 1 (for now)
   cm->ref_frame_sign_bias[ALTREF_FRAME] = 1;
 
-  cpi->rc.baseline_gf_interval = DEFAULT_GF_INTERVAL;
+  rc->baseline_gf_interval = DEFAULT_GF_INTERVAL;
 
   cpi->gold_is_last = 0;
   cpi->alt_is_last = 0;
@@ -1675,12 +1676,12 @@ VP9_COMP *vp9_create_compressor(VP9_CONFIG *oxcf) {
   cpi->activity_avg = 90 << 12;
   cpi->key_frame_frequency = cpi->oxcf.key_freq;
 
-  cpi->rc.frames_since_key = 8;  // Sensible default for first frame.
-  cpi->rc.this_key_frame_forced = 0;
-  cpi->rc.next_key_frame_forced = 0;
+  rc->frames_since_key = 8;  // Sensible default for first frame.
+  rc->this_key_frame_forced = 0;
+  rc->next_key_frame_forced = 0;
 
-  cpi->rc.source_alt_ref_pending = 0;
-  cpi->rc.source_alt_ref_active = 0;
+  rc->source_alt_ref_pending = 0;
+  rc->source_alt_ref_active = 0;
   cpi->refresh_alt_ref_frame = 0;
 
 #if CONFIG_MULTIPLE_ARF
@@ -1736,17 +1737,17 @@ VP9_COMP *vp9_create_compressor(VP9_CONFIG *oxcf) {
 
   cpi->first_time_stamp_ever = INT64_MAX;
 
-  cpi->rc.frames_till_gf_update_due      = 0;
+  rc->frames_till_gf_update_due = 0;
 
-  cpi->rc.ni_av_qi                     = cpi->oxcf.worst_allowed_q;
-  cpi->rc.ni_tot_qi                    = 0;
-  cpi->rc.ni_frames                   = 0;
-  cpi->rc.tot_q = 0.0;
-  cpi->rc.avg_q = vp9_convert_qindex_to_q(cpi->oxcf.worst_allowed_q);
+  rc->ni_av_qi = cpi->oxcf.worst_allowed_q;
+  rc->ni_tot_qi = 0;
+  rc->ni_frames = 0;
+  rc->tot_q = 0.0;
+  rc->avg_q = vp9_convert_qindex_to_q(cpi->oxcf.worst_allowed_q);
 
-  cpi->rc.rate_correction_factor         = 1.0;
-  cpi->rc.key_frame_rate_correction_factor = 1.0;
-  cpi->rc.gf_rate_correction_factor  = 1.0;
+  rc->rate_correction_factor = 1.0;
+  rc->key_frame_rate_correction_factor = 1.0;
+  rc->gf_rate_correction_factor = 1.0;
 
   cal_nmvjointsadcost(cpi->mb.nmvjointsadcost);
   cpi->mb.nmvcost[0] = &cpi->mb.nmvcosts[0][MV_MAX];
@@ -2155,25 +2156,11 @@ int vp9_use_as_reference(VP9_COMP *cpi, int ref_frame_flags) {
   return 0;
 }
 
-int vp9_update_reference(VP9_COMP *cpi, int ref_frame_flags) {
-  if (ref_frame_flags > 7)
-    return -1;
-
-  cpi->ext_refresh_golden_frame = 0;
-  cpi->ext_refresh_alt_ref_frame = 0;
-  cpi->ext_refresh_last_frame   = 0;
-
-  if (ref_frame_flags & VP9_LAST_FLAG)
-    cpi->ext_refresh_last_frame = 1;
-
-  if (ref_frame_flags & VP9_GOLD_FLAG)
-    cpi->ext_refresh_golden_frame = 1;
-
-  if (ref_frame_flags & VP9_ALT_FLAG)
-    cpi->ext_refresh_alt_ref_frame = 1;
-
+void vp9_update_reference(VP9_COMP *cpi, int ref_frame_flags) {
+  cpi->ext_refresh_golden_frame = (ref_frame_flags & VP9_GOLD_FLAG) != 0;
+  cpi->ext_refresh_alt_ref_frame = (ref_frame_flags & VP9_ALT_FLAG) != 0;
+  cpi->ext_refresh_last_frame = (ref_frame_flags & VP9_LAST_FLAG) != 0;
   cpi->ext_refresh_frame_flags_pending = 1;
-  return 0;
 }
 
 static YV12_BUFFER_CONFIG *get_vp9_ref_frame_buffer(VP9_COMP *cpi,
