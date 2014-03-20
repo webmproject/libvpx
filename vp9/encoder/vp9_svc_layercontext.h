@@ -27,6 +27,7 @@ typedef struct {
   int64_t maximum_buffer_size;
   double framerate;
   int avg_frame_size;
+  struct twopass_rc twopass;
 } LAYER_CONTEXT;
 
 typedef struct {
@@ -34,9 +35,10 @@ typedef struct {
   int temporal_layer_id;
   int number_spatial_layers;
   int number_temporal_layers;
-  // Layer context used for rate control in CBR mode, only defined for
-  // temporal layers for now.
-  LAYER_CONTEXT layer_context[VPX_TS_MAX_LAYERS];
+  // Layer context used for rate control in temporal CBR mode or spatial
+  // two pass mode. Defined for temporal or spatial layers for now.
+  // Does not support temporal combined with spatial RC.
+  LAYER_CONTEXT layer_context[MAX(VPX_TS_MAX_LAYERS, VPX_SS_MAX_LAYERS)];
 } SVC;
 
 struct VP9_COMP;

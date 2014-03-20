@@ -49,7 +49,7 @@ extern "C" {
 #define VPX_SS_MAX_LAYERS       5
 
 /*! Spatial Scalability: Default number of coding layers */
-#define VPX_SS_DEFAULT_LAYERS       3
+#define VPX_SS_DEFAULT_LAYERS       1
 
   /*!\brief Current ABI version number
    *

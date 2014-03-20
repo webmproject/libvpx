@@ -264,6 +264,7 @@ int main(int argc, const char **argv) {
   int pts = 0;            /* PTS starts at 0 */
   int frame_duration = 1; /* 1 timebase tick per frame */
   FILE *infile = NULL;
+  int end_of_stream = 0;
 
   memset(&svc_ctx, 0, sizeof(svc_ctx));
   svc_ctx.log_print = 1;
@@ -305,12 +306,15 @@ int main(int argc, const char **argv) {
     vpx_img_read(&raw, infile);
 
   // Encode frames
-  while (frame_cnt < app_input.frames_to_code) {
-    if (!vpx_img_read(&raw, infile))
-      break;
+  while (!end_of_stream) {
+    if (frame_cnt >= app_input.frames_to_code || !vpx_img_read(&raw, infile)) {
+      // We need one extra vpx_svc_encode call at end of stream to flush
+      // encoder and get remaining data
+      end_of_stream = 1;
+    }
 
-    res = vpx_svc_encode(&svc_ctx, &codec, &raw, pts, frame_duration,
-                         VPX_DL_REALTIME);
+    res = vpx_svc_encode(&svc_ctx, &codec, (end_of_stream ? NULL : &raw),
+                         pts, frame_duration, VPX_DL_REALTIME);
     printf("%s", vpx_svc_get_message(&svc_ctx));
     if (res != VPX_CODEC_OK) {
       die_codec(&codec, "Failed to encode frame");
@@ -328,8 +332,10 @@ int main(int argc, const char **argv) {
                   vpx_svc_get_rc_stats_buffer(&svc_ctx),
                   vpx_svc_get_rc_stats_buffer_size(&svc_ctx));
     }
-    ++frame_cnt;
-    pts += frame_duration;
+    if (!end_of_stream) {
+      ++frame_cnt;
+      pts += frame_duration;
+    }
   }
 
   printf("Processed %d frames\n", frame_cnt);
