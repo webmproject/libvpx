@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//xco\u003d",
+        "filename": "webmenc.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1002174
+      },
+      "writtenOn": "2014-03-20T20:47:33Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//xiI\u003d",
+      "revId": "78ac2b2be8a36e508c30a80a3cba15b2f5e25951",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//xh4\u003d",
         "filename": "webmenc.cc",
         "patchSetId": 2
@@ -30,6 +48,24 @@
       "writtenOn": "2014-03-19T23:06:52Z",
       "side": 1,
       "message": "could be reinterpret",
+      "revId": "78ac2b2be8a36e508c30a80a3cba15b2f5e25951",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//xck\u003d",
+        "filename": "webmenc.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1002174
+      },
+      "writtenOn": "2014-03-20T20:47:33Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//xh4\u003d",
       "revId": "78ac2b2be8a36e508c30a80a3cba15b2f5e25951",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//xcg\u003d",
+        "filename": "webmenc.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1002174
+      },
+      "writtenOn": "2014-03-20T20:47:33Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//xh0\u003d",
+      "revId": "78ac2b2be8a36e508c30a80a3cba15b2f5e25951",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//xhw\u003d",
         "filename": "webmenc.cc",
         "patchSetId": 2
@@ -64,6 +118,24 @@
       "writtenOn": "2014-03-19T23:06:52Z",
       "side": 1,
       "message": "the debug check was important so you could produce deterministic output between checkouts",
+      "revId": "78ac2b2be8a36e508c30a80a3cba15b2f5e25951",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//xcc\u003d",
+        "filename": "webmenc.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1002174
+      },
+      "writtenOn": "2014-03-20T20:47:33Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//xhw\u003d",
       "revId": "78ac2b2be8a36e508c30a80a3cba15b2f5e25951",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//xcY\u003d",
+        "filename": "webmenc.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 1002174
+      },
+      "writtenOn": "2014-03-20T20:47:33Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//xhs\u003d",
+      "revId": "78ac2b2be8a36e508c30a80a3cba15b2f5e25951",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//xhk\u003d",
         "filename": "webmenc.cc",
         "patchSetId": 2
@@ -98,6 +188,24 @@
       "writtenOn": "2014-03-19T23:06:52Z",
       "side": 1,
       "message": "no way to set the track uid? not sure why this is in the footer and not header call; this will break -D (debug) mode output",
+      "revId": "78ac2b2be8a36e508c30a80a3cba15b2f5e25951",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//xcU\u003d",
+        "filename": "webmenc.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 70,
+      "author": {
+        "id": 1002174
+      },
+      "writtenOn": "2014-03-20T20:47:33Z",
+      "side": 1,
+      "message": "I think this is done in the footer because hash is computed based on each encoded packet.\n\nAnyway, libwebm has it\u0027s own way of generating UID. So moving this to header so that debug mode behavior is retained.\n\nDone.",
+      "parentUuid": "AAAAdn//xhk\u003d",
       "revId": "78ac2b2be8a36e508c30a80a3cba15b2f5e25951",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
