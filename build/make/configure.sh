@@ -1102,12 +1102,12 @@ EOF
         esac
 
         soft_enable runtime_cpu_detect
-        soft_enable mmx
-        soft_enable sse
-        soft_enable sse2
-        soft_enable sse3
         # We can't use 'check_cflags' until the compiler is configured and CC is
         # populated.
+        check_gcc_machine_option mmx
+        check_gcc_machine_option sse
+        check_gcc_machine_option sse2
+        check_gcc_machine_option sse3
         check_gcc_machine_option ssse3
         check_gcc_machine_option sse4 sse4_1
         check_gcc_machine_option avx
