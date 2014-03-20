@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//xfg\u003d",
+        "filename": "test/tool_tests.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-03-20T00:41:26Z",
+      "side": 1,
+      "message": "if you want this to be shell compatible changing this to /bin/sh and then using checkbashisms would be a good place to start",
+      "revId": "1c7847de876b801d25723ab79d0acb26631ec615",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
