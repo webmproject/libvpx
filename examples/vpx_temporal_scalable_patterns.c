@@ -18,6 +18,8 @@
 #include <string.h>
 
 #define VPX_CODEC_DISABLE_COMPAT 1
+#include "./vpx_config.h"
+#include "vpx_ports/vpx_timer.h"
 #include "vpx/vp8cx.h"
 #include "vpx/vpx_encoder.h"
 
@@ -449,6 +451,7 @@ int main(int argc, char **argv) {
   const VpxInterface *encoder = NULL;
   FILE *infile = NULL;
   struct RateControlMetrics rc;
+  int64_t cx_time = 0;
 
   exec_name = argv[0];
   // Check usage and arguments.
@@ -583,6 +586,7 @@ int main(int argc, char **argv) {
 
   frame_avail = 1;
   while (frame_avail || got_data) {
+    struct vpx_usec_timer timer;
     vpx_codec_iter_t iter = NULL;
     const vpx_codec_cx_pkt_t *pkt;
     // Update the temporal layer_id. No spatial layers in this test.
@@ -596,10 +600,13 @@ int main(int argc, char **argv) {
     frame_avail = vpx_img_read(&raw, infile);
     if (frame_avail)
       ++rc.layer_input_frames[layer_id.temporal_layer_id];
+    vpx_usec_timer_start(&timer);
     if (vpx_codec_encode(&codec, frame_avail? &raw : NULL, pts, 1, flags,
         VPX_DL_REALTIME)) {
       die_codec(&codec, "Failed to encode frame");
     }
+    vpx_usec_timer_mark(&timer);
+    cx_time += vpx_usec_timer_elapsed(&timer);
     // Reset KF flag.
     if (layering_mode != 7) {
       layer_flags[0] &= ~VPX_EFLAG_FORCE_KF;
@@ -635,6 +642,11 @@ int main(int argc, char **argv) {
   }
   fclose(infile);
   printout_rate_control_summary(&rc, &cfg, frame_cnt);
+  printf("\n");
+  printf("Frame cnt and encoding time/FPS stats for encoding: %d %f %f \n",
+          frame_cnt,
+          1000 * (float)cx_time / (double)(frame_cnt * 1000000),
+          1000000 * (double)frame_cnt / (double)cx_time);
 
   if (vpx_codec_destroy(&codec))
     die_codec(&codec, "Failed to destroy codec");
