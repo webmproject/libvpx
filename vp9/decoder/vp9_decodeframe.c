@@ -193,19 +193,7 @@ static void setup_plane_dequants(VP9_COMMON *cm, MACROBLOCKD *xd, int q_index) {
 static void alloc_tile_storage(VP9D_COMP *pbi, int tile_rows, int tile_cols) {
   VP9_COMMON *const cm = &pbi->common;
   const int aligned_mi_cols = mi_cols_aligned_to_sb(cm->mi_cols);
-  int i, tile_row, tile_col;
-
-  CHECK_MEM_ERROR(cm, cm->mi_streams,
-                  vpx_realloc(cm->mi_streams, tile_rows * tile_cols *
-                              sizeof(*cm->mi_streams)));
-  for (tile_row = 0; tile_row < tile_rows; ++tile_row) {
-    for (tile_col = 0; tile_col < tile_cols; ++tile_col) {
-      TileInfo tile;
-      vp9_tile_init(&tile, cm, tile_row, tile_col);
-      cm->mi_streams[tile_row * tile_cols + tile_col] =
-          &cm->mi[tile.mi_row_start * cm->mode_info_stride + tile.mi_col_start];
-    }
-  }
+  int i;
 
   // 2 contexts per 'mi unit', so that we have one context per 4x4 txfm
   // block where mi unit size is 8x8.
@@ -339,13 +327,11 @@ static void set_offsets(VP9_COMMON *const cm, MACROBLOCKD *const xd,
   const int x_mis = MIN(bw, cm->mi_cols - mi_col);
   const int y_mis = MIN(bh, cm->mi_rows - mi_row);
   const int offset = mi_row * cm->mode_info_stride + mi_col;
-  const int tile_offset = tile->mi_row_start * cm->mode_info_stride +
-                          tile->mi_col_start;
   int x, y;
 
   xd->mi_8x8 = cm->mi_grid_visible + offset;
   xd->prev_mi_8x8 = cm->prev_mi_grid_visible + offset;
-  xd->mi_8x8[0] = xd->mi_stream + offset - tile_offset;
+  xd->mi_8x8[0] = &cm->mi[offset];
   xd->mi_8x8[0]->mbmi.sb_type = bsize;
   for (y = 0; y < y_mis; ++y)
     for (x = !y; x < x_mis; ++x)
@@ -730,15 +716,11 @@ static void setup_frame_size_with_refs(VP9D_COMP *pbi,
 
 static void setup_tile_context(VP9D_COMP *const pbi, MACROBLOCKD *const xd,
                                int tile_row, int tile_col) {
-  VP9_COMMON *const cm = &pbi->common;
-  const int tile_cols = 1 << cm->log2_tile_cols;
   int i;
 
-  xd->mi_stream = cm->mi_streams[tile_row * tile_cols + tile_col];
-
-  for (i = 0; i < MAX_MB_PLANE; ++i) {
+  for (i = 0; i < MAX_MB_PLANE; ++i)
     xd->above_context[i] = pbi->above_context[i];
-  }
+
   // see note in alloc_tile_storage().
   xd->above_seg_context = pbi->above_seg_context;
 }
