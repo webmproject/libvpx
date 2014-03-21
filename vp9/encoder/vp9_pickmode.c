@@ -172,6 +172,8 @@ static void sub_pixel_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
     for (i = 0; i < MAX_MB_PLANE; i++)
       xd->plane[i].pre[0] = backup_yv12[i];
   }
+
+  x->pred_mv[ref].as_mv = *tmp_mv;
 }
 
 static void model_rd_for_sb_y(VP9_COMP *cpi, BLOCK_SIZE bsize,
