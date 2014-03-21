@@ -2699,8 +2699,8 @@ static void nonrd_use_partition(VP9_COMP *cpi,
   const int mis = cm->mode_info_stride;
   PARTITION_TYPE partition;
   BLOCK_SIZE subsize;
-  int rate;
-  int64_t dist;
+  int rate = INT_MAX;
+  int64_t dist = INT64_MAX;
 
   if (mi_row >= cm->mi_rows || mi_col >= cm->mi_cols)
     return;
@@ -2747,7 +2747,6 @@ static void nonrd_use_partition(VP9_COMP *cpi,
       break;
     case PARTITION_SPLIT:
       subsize = get_subsize(bsize, PARTITION_SPLIT);
-
       *get_sb_index(x, subsize) = 0;
       nonrd_use_partition(cpi, tile, mi_8x8, tp, mi_row, mi_col,
                           subsize, output_enabled, totrate, totdist);
@@ -2804,8 +2803,8 @@ static void encode_nonrd_sb_row(VP9_COMP *cpi, const TileInfo *const tile,
   // Code each SB in the row
   for (mi_col = tile->mi_col_start; mi_col < tile->mi_col_end;
        mi_col += MI_BLOCK_SIZE) {
-    int dummy_rate;
-    int64_t dummy_dist;
+    int dummy_rate = 0;
+    int64_t dummy_dist = 0;
     const int idx_str = cm->mode_info_stride * mi_row + mi_col;
     MODE_INFO **mi_8x8 = cm->mi_grid_visible + idx_str;
     MODE_INFO **prev_mi_8x8 = cm->prev_mi_grid_visible + idx_str;
@@ -2822,8 +2821,8 @@ static void encode_nonrd_sb_row(VP9_COMP *cpi, const TileInfo *const tile,
     else if (cpi->sf.partition_search_type == REFERENCE_PARTITION) {
       if (cpi->sf.partition_check) {
         MACROBLOCK *x = &cpi->mb;
-        int rate1, rate2, rate3;
-        int64_t dist1, dist2, dist3;
+        int rate1 = 0, rate2 = 0, rate3 = 0;
+        int64_t dist1 = 0, dist2 = 0, dist3 = 0;
         set_fixed_partitioning(cpi, tile, mi_8x8, mi_row, mi_col, BLOCK_8X8);
         nonrd_use_partition(cpi, tile, mi_8x8, tp, mi_row, mi_col, BLOCK_64X64,
                             0, &rate1, &dist1);
