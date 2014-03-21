@@ -1328,10 +1328,16 @@ void vp9_change_config(struct VP9_COMP *cpi, VP9_CONFIG *oxcf) {
   cpi->oxcf.cq_level = q_trans[cpi->oxcf.cq_level];
 
   cpi->oxcf.lossless = oxcf->lossless;
-  cpi->mb.e_mbd.itxm_add = cpi->oxcf.lossless ? vp9_iwht4x4_add
-                                              : vp9_idct4x4_add;
+  if (cpi->oxcf.lossless) {
+    // In lossless mode, make sure right quantizer range and correct transform
+    // is set.
+    cpi->oxcf.worst_allowed_q = 0;
+    cpi->oxcf.best_allowed_q = 0;
+    cpi->mb.e_mbd.itxm_add = vp9_iwht4x4_add;
+  } else {
+    cpi->mb.e_mbd.itxm_add = vp9_idct4x4_add;
+  }
   cpi->rc.baseline_gf_interval = DEFAULT_GF_INTERVAL;
-
   cpi->ref_frame_flags = VP9_ALT_FLAG | VP9_GOLD_FLAG | VP9_LAST_FLAG;
 
   cpi->refresh_golden_frame = 0;
