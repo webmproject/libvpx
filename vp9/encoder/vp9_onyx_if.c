@@ -197,9 +197,6 @@ static void dealloc_compressor_data(VP9_COMP *cpi) {
 
   vpx_free(cpi->above_context[0]);
   cpi->above_context[0] = NULL;
-
-  vpx_free(cpi->above_seg_context);
-  cpi->above_seg_context = NULL;
 }
 
 // Computes a q delta (in "q index" terms) to get from a starting q value
@@ -1071,11 +1068,6 @@ void vp9_alloc_compressor_data(VP9_COMP *cpi) {
                   vpx_calloc(2 * mi_cols_aligned_to_sb(cm->mi_cols) *
                              MAX_MB_PLANE,
                              sizeof(*cpi->above_context[0])));
-
-  vpx_free(cpi->above_seg_context);
-  CHECK_MEM_ERROR(cm, cpi->above_seg_context,
-                  vpx_calloc(mi_cols_aligned_to_sb(cm->mi_cols),
-                             sizeof(*cpi->above_seg_context)));
 }
 
 
@@ -1115,6 +1107,7 @@ static void update_frame_size(VP9_COMP *cpi) {
       cpi->above_context[i] = cpi->above_context[0] +
                               i * sizeof(*cpi->above_context[0]) * 2 *
                               mi_cols_aligned_to_sb(cm->mi_cols);
+      cpi->mb.e_mbd.above_seg_context = cpi->common.above_seg_context;
     }
   }
 }

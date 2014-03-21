@@ -1217,10 +1217,10 @@ static void restore_context(VP9_COMP *cpi, int mi_row, int mi_col,
         (sizeof(ENTROPY_CONTEXT) * num_4x4_blocks_high) >>
         xd->plane[p].subsampling_y);
   }
-  vpx_memcpy(cpi->above_seg_context + mi_col, sa,
-             sizeof(*cpi->above_seg_context) * mi_width);
-  vpx_memcpy(cpi->left_seg_context + (mi_row & MI_MASK), sl,
-             sizeof(cpi->left_seg_context[0]) * mi_height);
+  vpx_memcpy(xd->above_seg_context + mi_col, sa,
+             sizeof(*xd->above_seg_context) * mi_width);
+  vpx_memcpy(xd->left_seg_context + (mi_row & MI_MASK), sl,
+             sizeof(xd->left_seg_context[0]) * mi_height);
 }
 static void save_context(VP9_COMP *cpi, int mi_row, int mi_col,
                          ENTROPY_CONTEXT a[16 * MAX_MB_PLANE],
@@ -1249,10 +1249,10 @@ static void save_context(VP9_COMP *cpi, int mi_row, int mi_col,
         (sizeof(ENTROPY_CONTEXT) * num_4x4_blocks_high) >>
         xd->plane[p].subsampling_y);
   }
-  vpx_memcpy(sa, cpi->above_seg_context + mi_col,
-             sizeof(*cpi->above_seg_context) * mi_width);
-  vpx_memcpy(sl, cpi->left_seg_context + (mi_row & MI_MASK),
-             sizeof(cpi->left_seg_context[0]) * mi_height);
+  vpx_memcpy(sa, xd->above_seg_context + mi_col,
+             sizeof(*xd->above_seg_context) * mi_width);
+  vpx_memcpy(sl, xd->left_seg_context + (mi_row & MI_MASK),
+             sizeof(xd->left_seg_context[0]) * mi_height);
 }
 
 static void encode_b(VP9_COMP *cpi, const TileInfo *const tile,
@@ -1284,6 +1284,8 @@ static void encode_sb(VP9_COMP *cpi, const TileInfo *const tile,
                       int output_enabled, BLOCK_SIZE bsize) {
   VP9_COMMON *const cm = &cpi->common;
   MACROBLOCK *const x = &cpi->mb;
+  MACROBLOCKD *const xd = &x->e_mbd;
+
   const int bsl = b_width_log2(bsize), hbs = (1 << bsl) / 4;
   int ctx;
   PARTITION_TYPE partition;
@@ -1293,7 +1295,7 @@ static void encode_sb(VP9_COMP *cpi, const TileInfo *const tile,
     return;
 
   if (bsize >= BLOCK_8X8) {
-    ctx = partition_plane_context(cpi->above_seg_context, cpi->left_seg_context,
+    ctx = partition_plane_context(xd->above_seg_context, xd->left_seg_context,
                                  mi_row, mi_col, bsize);
     subsize = *get_sb_partitioning(x, bsize);
   } else {
@@ -1349,7 +1351,7 @@ static void encode_sb(VP9_COMP *cpi, const TileInfo *const tile,
   }
 
   if (partition != PARTITION_SPLIT || bsize == BLOCK_8X8)
-    update_partition_context(cpi->above_seg_context, cpi->left_seg_context,
+    update_partition_context(xd->above_seg_context, xd->left_seg_context,
                              mi_row, mi_col, subsize, bsize);
 }
 
@@ -1510,6 +1512,8 @@ static void encode_sb_rt(VP9_COMP *cpi, const TileInfo *const tile,
                          int output_enabled, BLOCK_SIZE bsize) {
   VP9_COMMON *const cm = &cpi->common;
   MACROBLOCK *const x = &cpi->mb;
+  MACROBLOCKD *const xd = &x->e_mbd;
+
   const int bsl = b_width_log2(bsize), hbs = (1 << bsl) / 4;
   int ctx;
   PARTITION_TYPE partition;
@@ -1522,7 +1526,7 @@ static void encode_sb_rt(VP9_COMP *cpi, const TileInfo *const tile,
     MACROBLOCKD *const xd = &cpi->mb.e_mbd;
     const int idx_str = xd->mode_info_stride * mi_row + mi_col;
     MODE_INFO ** mi_8x8 = cm->mi_grid_visible + idx_str;
-    ctx = partition_plane_context(cpi->above_seg_context, cpi->left_seg_context,
+    ctx = partition_plane_context(xd->above_seg_context, xd->left_seg_context,
                                  mi_row, mi_col, bsize);
     subsize = mi_8x8[0]->mbmi.sb_type;
   } else {
@@ -1582,7 +1586,7 @@ static void encode_sb_rt(VP9_COMP *cpi, const TileInfo *const tile,
   }
 
   if (partition != PARTITION_SPLIT || bsize == BLOCK_8X8)
-    update_partition_context(cpi->above_seg_context, cpi->left_seg_context,
+    update_partition_context(xd->above_seg_context, xd->left_seg_context,
                              mi_row, mi_col, subsize, bsize);
 }
 
@@ -1594,6 +1598,7 @@ static void rd_use_partition(VP9_COMP *cpi,
                              int do_recon) {
   VP9_COMMON *const cm = &cpi->common;
   MACROBLOCK *const x = &cpi->mb;
+  MACROBLOCKD *const xd = &x->e_mbd;
   const int mis = cm->mode_info_stride;
   const int bsl = b_width_log2(bsize);
   const int num_4x4_blocks_wide = num_4x4_blocks_wide_lookup[bsize];
@@ -1667,8 +1672,8 @@ static void rd_use_partition(VP9_COMP *cpi,
       rd_pick_sb_modes(cpi, tile, mi_row, mi_col, &none_rate, &none_dist, bsize,
                        get_block_context(x, bsize), INT64_MAX);
 
-      pl = partition_plane_context(cpi->above_seg_context,
-                                   cpi->left_seg_context,
+      pl = partition_plane_context(xd->above_seg_context,
+                                   xd->left_seg_context,
                                    mi_row, mi_col, bsize);
 
       if (none_rate < INT_MAX) {
@@ -1769,7 +1774,7 @@ static void rd_use_partition(VP9_COMP *cpi,
       assert(0);
   }
 
-  pl = partition_plane_context(cpi->above_seg_context, cpi->left_seg_context,
+  pl = partition_plane_context(xd->above_seg_context, xd->left_seg_context,
                                mi_row, mi_col, bsize);
   if (last_part_rate < INT_MAX) {
     last_part_rate += x->partition_cost[pl][partition];
@@ -1823,13 +1828,13 @@ static void rd_use_partition(VP9_COMP *cpi,
         encode_sb(cpi, tile, tp,  mi_row + y_idx, mi_col + x_idx, 0,
                   split_subsize);
 
-      pl = partition_plane_context(cpi->above_seg_context,
-                                   cpi->left_seg_context,
+      pl = partition_plane_context(xd->above_seg_context,
+                                   xd->left_seg_context,
                                    mi_row + y_idx, mi_col + x_idx,
                                    split_subsize);
       chosen_rate += x->partition_cost[pl][PARTITION_NONE];
     }
-    pl = partition_plane_context(cpi->above_seg_context, cpi->left_seg_context,
+    pl = partition_plane_context(xd->above_seg_context, xd->left_seg_context,
                                  mi_row, mi_col, bsize);
     if (chosen_rate < INT_MAX) {
       chosen_rate += x->partition_cost[pl][PARTITION_SPLIT];
@@ -2023,6 +2028,7 @@ static void rd_pick_partition(VP9_COMP *cpi, const TileInfo *const tile,
                               int64_t *dist, int do_recon, int64_t best_rd) {
   VP9_COMMON *const cm = &cpi->common;
   MACROBLOCK *const x = &cpi->mb;
+  MACROBLOCKD *const xd = &x->e_mbd;
   const int ms = num_8x8_blocks_wide_lookup[bsize] / 2;
   ENTROPY_CONTEXT l[16 * MAX_MB_PLANE], a[16 * MAX_MB_PLANE];
   PARTITION_CONTEXT sl[8], sa[8];
@@ -2104,8 +2110,8 @@ static void rd_pick_partition(VP9_COMP *cpi, const TileInfo *const tile,
                      ctx, best_rd);
     if (this_rate != INT_MAX) {
       if (bsize >= BLOCK_8X8) {
-        pl = partition_plane_context(cpi->above_seg_context,
-                                     cpi->left_seg_context,
+        pl = partition_plane_context(xd->above_seg_context,
+                                     xd->left_seg_context,
                                      mi_row, mi_col, bsize);
         this_rate += x->partition_cost[pl][PARTITION_NONE];
       }
@@ -2176,8 +2182,8 @@ static void rd_pick_partition(VP9_COMP *cpi, const TileInfo *const tile,
       }
     }
     if (sum_rd < best_rd && i == 4) {
-      pl = partition_plane_context(cpi->above_seg_context,
-                                   cpi->left_seg_context,
+      pl = partition_plane_context(xd->above_seg_context,
+                                   xd->left_seg_context,
                                    mi_row, mi_col, bsize);
       sum_rate += x->partition_cost[pl][PARTITION_SPLIT];
       sum_rd = RDCOST(x->rdmult, x->rddiv, sum_rate, sum_dist);
@@ -2234,8 +2240,8 @@ static void rd_pick_partition(VP9_COMP *cpi, const TileInfo *const tile,
       }
     }
     if (sum_rd < best_rd) {
-      pl = partition_plane_context(cpi->above_seg_context,
-                                   cpi->left_seg_context,
+      pl = partition_plane_context(xd->above_seg_context,
+                                   xd->left_seg_context,
                                    mi_row, mi_col, bsize);
       sum_rate += x->partition_cost[pl][PARTITION_HORZ];
       sum_rd = RDCOST(x->rdmult, x->rddiv, sum_rate, sum_dist);
@@ -2287,8 +2293,8 @@ static void rd_pick_partition(VP9_COMP *cpi, const TileInfo *const tile,
       }
     }
     if (sum_rd < best_rd) {
-      pl = partition_plane_context(cpi->above_seg_context,
-                                   cpi->left_seg_context,
+      pl = partition_plane_context(xd->above_seg_context,
+                                   xd->left_seg_context,
                                    mi_row, mi_col, bsize);
       sum_rate += x->partition_cost[pl][PARTITION_VERT];
       sum_rd = RDCOST(x->rdmult, x->rddiv, sum_rate, sum_dist);
@@ -2338,11 +2344,12 @@ static void rd_pick_partition(VP9_COMP *cpi, const TileInfo *const tile,
 static void encode_rd_sb_row(VP9_COMP *cpi, const TileInfo *const tile,
                              int mi_row, TOKENEXTRA **tp) {
   VP9_COMMON *const cm = &cpi->common;
+  MACROBLOCKD *const xd = &cpi->mb.e_mbd;
   int mi_col;
 
   // Initialize the left context for the new SB row
   vpx_memset(&cpi->left_context, 0, sizeof(cpi->left_context));
-  vpx_memset(cpi->left_seg_context, 0, sizeof(cpi->left_seg_context));
+  vpx_memset(xd->left_seg_context, 0, sizeof(xd->left_seg_context));
 
   // Code each SB in the row
   for (mi_col = tile->mi_col_start; mi_col < tile->mi_col_end;
@@ -2471,8 +2478,8 @@ static void init_encode_frame_mb_context(VP9_COMP *cpi) {
   vpx_memset(cpi->above_context[0], 0,
              sizeof(*cpi->above_context[0]) *
              2 * aligned_mi_cols * MAX_MB_PLANE);
-  vpx_memset(cpi->above_seg_context, 0,
-             sizeof(*cpi->above_seg_context) * aligned_mi_cols);
+  vpx_memset(xd->above_seg_context, 0,
+             sizeof(*xd->above_seg_context) * aligned_mi_cols);
 }
 
 static void switch_lossless_mode(VP9_COMP *cpi, int lossless) {
@@ -2794,11 +2801,12 @@ static void nonrd_use_partition(VP9_COMP *cpi,
 static void encode_nonrd_sb_row(VP9_COMP *cpi, const TileInfo *const tile,
                                 int mi_row, TOKENEXTRA **tp) {
   VP9_COMMON *cm = &cpi->common;
+  MACROBLOCKD *xd = &cpi->mb.e_mbd;
   int mi_col;
 
   // Initialize the left context for the new SB row
   vpx_memset(&cpi->left_context, 0, sizeof(cpi->left_context));
-  vpx_memset(cpi->left_seg_context, 0, sizeof(cpi->left_seg_context));
+  vpx_memset(xd->left_seg_context, 0, sizeof(xd->left_seg_context));
 
   // Code each SB in the row
   for (mi_col = tile->mi_col_start; mi_col < tile->mi_col_end;
