@@ -9,8 +9,8 @@
  */
 
 
-#ifndef VP9_ENCODER_VP9_CRAQ_H_
-#define VP9_ENCODER_VP9_CRAQ_H_
+#ifndef VP9_ENCODER_VP9_AQ_CYCLICREFRESH_H_
+#define VP9_ENCODER_VP9_AQ_CYCLICREFRESH_H_
 
 #include "vp9/common/vp9_blockd.h"
 
@@ -64,4 +64,4 @@ void vp9_setup_cyclic_refresh_aq(struct VP9_COMP *const cpi);
 }  // extern "C"
 #endif
 
-#endif  // VP9_ENCODER_VP9_CRAQ_H_
+#endif  // VP9_ENCODER_VP9_AQ_CYCLICREFRESH_H_

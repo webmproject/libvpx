@@ -9,8 +9,8 @@
  */
 
 
-#ifndef VP9_ENCODER_VP9_VAQ_H_
-#define VP9_ENCODER_VP9_VAQ_H_
+#ifndef VP9_ENCODER_VP9_AQ_VARIANCE_H_
+#define VP9_ENCODER_VP9_AQ_VARIANCE_H_
 
 #include "vp9/encoder/vp9_onyx_int.h"
 
@@ -31,4 +31,4 @@ int vp9_block_energy(VP9_COMP *cpi, MACROBLOCK *x, BLOCK_SIZE bs);
 }  // extern "C"
 #endif
 
-#endif  // VP9_ENCODER_VP9_VAQ_H_
+#endif  // VP9_ENCODER_VP9_AQ_VARIANCE_H_

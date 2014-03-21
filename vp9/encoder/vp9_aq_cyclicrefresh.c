@@ -11,7 +11,7 @@
 #include <limits.h>
 #include <math.h>
 
-#include "vp9/encoder/vp9_craq.h"
+#include "vp9/encoder/vp9_aq_cyclicrefresh.h"
 
 #include "vp9/common/vp9_seg_common.h"
 

@@ -68,10 +68,10 @@ VP9_CX_SRCS-$(CONFIG_INTERNAL_STATS) += encoder/vp9_ssim.c
 VP9_CX_SRCS-yes += encoder/vp9_tokenize.c
 VP9_CX_SRCS-yes += encoder/vp9_treewriter.c
 VP9_CX_SRCS-yes += encoder/vp9_variance.c
-VP9_CX_SRCS-yes += encoder/vp9_vaq.c
-VP9_CX_SRCS-yes += encoder/vp9_vaq.h
-VP9_CX_SRCS-yes += encoder/vp9_craq.c
-VP9_CX_SRCS-yes += encoder/vp9_craq.h
+VP9_CX_SRCS-yes += encoder/vp9_aq_variance.c
+VP9_CX_SRCS-yes += encoder/vp9_aq_variance.h
+VP9_CX_SRCS-yes += encoder/vp9_aq_cyclicrefresh.c
+VP9_CX_SRCS-yes += encoder/vp9_aq_cyclicrefresh.h
 ifeq ($(CONFIG_VP9_POSTPROC),yes)
 VP9_CX_SRCS-$(CONFIG_INTERNAL_STATS) += common/vp9_postproc.h
 VP9_CX_SRCS-$(CONFIG_INTERNAL_STATS) += common/vp9_postproc.c
