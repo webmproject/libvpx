@@ -16,6 +16,24 @@
       "revId": "dae56c9d4ec841b6e0b60c82d4ee99fb7e25f57c",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//xU4\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 2708,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2014-03-21T16:19:19Z",
+      "side": 1,
+      "message": "Thanks, done as suggested in patch#2",
+      "parentUuid": "AAAAdn//xV4\u003d",
+      "revId": "dae56c9d4ec841b6e0b60c82d4ee99fb7e25f57c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
