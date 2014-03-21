@@ -76,8 +76,11 @@ static void full_pixel_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
       return;
     }
   }
-
-  mvp_full = mbmi->ref_mvs[ref][x->mv_best_ref_index[ref]].as_mv;
+  assert(x->mv_best_ref_index[ref] <= 2);
+  if (x->mv_best_ref_index[ref] < 2)
+    mvp_full = mbmi->ref_mvs[ref][x->mv_best_ref_index[ref]].as_mv;
+  else
+    mvp_full = x->pred_mv[ref].as_mv;
 
   mvp_full.col >>= 3;
   mvp_full.row >>= 3;
