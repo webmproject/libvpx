@@ -119,7 +119,7 @@ static void init_macroblockd(VP9D_COMP *const pbi) {
     pd[i].dqcoeff = pbi->dqcoeff[i];
 }
 
-VP9D_COMP *vp9_create_decompressor(VP9D_CONFIG *oxcf) {
+VP9D_COMP *vp9_create_decompressor(const VP9D_CONFIG *oxcf) {
   VP9D_COMP *const pbi = vpx_memalign(32, sizeof(VP9D_COMP));
   VP9_COMMON *const cm = pbi ? &pbi->common : NULL;
 
@@ -227,17 +227,15 @@ vpx_codec_err_t vp9_copy_reference_dec(VP9D_COMP *pbi,
 }
 
 
-vpx_codec_err_t vp9_set_reference_dec(VP9D_COMP *pbi,
+vpx_codec_err_t vp9_set_reference_dec(VP9_COMMON *cm,
                                       VP9_REFFRAME ref_frame_flag,
                                       YV12_BUFFER_CONFIG *sd) {
-  VP9_COMMON *cm = &pbi->common;
   RefBuffer *ref_buf = NULL;
 
-  /* TODO(jkoleszar): The decoder doesn't have any real knowledge of what the
-   * encoder is using the frame buffers for. This is just a stub to keep the
-   * vpxenc --test-decode functionality working, and will be replaced in a
-   * later commit that adds VP9-specific controls for this functionality.
-   */
+  // TODO(jkoleszar): The decoder doesn't have any real knowledge of what the
+  // encoder is using the frame buffers for. This is just a stub to keep the
+  // vpxenc --test-decode functionality working, and will be replaced in a
+  // later commit that adds VP9-specific controls for this functionality.
   if (ref_frame_flag == VP9_LAST_FLAG) {
     ref_buf = &cm->frame_refs[0];
   } else if (ref_frame_flag == VP9_GOLD_FLAG) {
@@ -245,13 +243,13 @@ vpx_codec_err_t vp9_set_reference_dec(VP9D_COMP *pbi,
   } else if (ref_frame_flag == VP9_ALT_FLAG) {
     ref_buf = &cm->frame_refs[2];
   } else {
-    vpx_internal_error(&pbi->common.error, VPX_CODEC_ERROR,
+    vpx_internal_error(&cm->error, VPX_CODEC_ERROR,
                        "Invalid reference frame");
-    return pbi->common.error.error_code;
+    return cm->error.error_code;
   }
 
   if (!equal_dimensions(ref_buf->buf, sd)) {
-    vpx_internal_error(&pbi->common.error, VPX_CODEC_ERROR,
+    vpx_internal_error(&cm->error, VPX_CODEC_ERROR,
                        "Incorrect buffer dimensions");
   } else {
     int *ref_fb_ptr = &ref_buf->idx;
@@ -268,7 +266,7 @@ vpx_codec_err_t vp9_set_reference_dec(VP9D_COMP *pbi,
     vp8_yv12_copy_frame(sd, ref_buf->buf);
   }
 
-  return pbi->common.error.error_code;
+  return cm->error.error_code;
 }
 
 
@@ -310,29 +308,21 @@ static void swap_frame_buffers(VP9D_COMP *pbi) {
 int vp9_receive_compressed_data(VP9D_COMP *pbi,
                                 size_t size, const uint8_t **psource,
                                 int64_t time_stamp) {
-  VP9_COMMON *cm = NULL;
+  VP9_COMMON *const cm = &pbi->common;
   const uint8_t *source = *psource;
   int retcode = 0;
 
-  /*if(pbi->ready_for_new_data == 0)
-      return -1;*/
-
-  if (!pbi)
-    return -1;
-
-  cm = &pbi->common;
   cm->error.error_code = VPX_CODEC_OK;
 
   if (size == 0) {
-    /* This is used to signal that we are missing frames.
-     * We do not know if the missing frame(s) was supposed to update
-     * any of the reference buffers, but we act conservative and
-     * mark only the last buffer as corrupted.
-     *
-     * TODO(jkoleszar): Error concealment is undefined and non-normative
-     * at this point, but if it becomes so, [0] may not always be the correct
-     * thing to do here.
-     */
+    // This is used to signal that we are missing frames.
+    // We do not know if the missing frame(s) was supposed to update
+    // any of the reference buffers, but we act conservative and
+    // mark only the last buffer as corrupted.
+    //
+    // TODO(jkoleszar): Error concealment is undefined and non-normative
+    // at this point, but if it becomes so, [0] may not always be the correct
+    // thing to do here.
     if (cm->frame_refs[0].idx != INT_MAX)
       cm->frame_refs[0].buf->corrupted = 1;
   }
@@ -346,14 +336,13 @@ int vp9_receive_compressed_data(VP9D_COMP *pbi,
   if (setjmp(cm->error.jmp)) {
     cm->error.setjmp = 0;
 
-    /* We do not know if the missing frame(s) was supposed to update
-     * any of the reference buffers, but we act conservative and
-     * mark only the last buffer as corrupted.
-     *
-     * TODO(jkoleszar): Error concealment is undefined and non-normative
-     * at this point, but if it becomes so, [0] may not always be the correct
-     * thing to do here.
-     */
+    // We do not know if the missing frame(s) was supposed to update
+    // any of the reference buffers, but we act conservative and
+    // mark only the last buffer as corrupted.
+    //
+    // TODO(jkoleszar): Error concealment is undefined and non-normative
+    // at this point, but if it becomes so, [0] may not always be the correct
+    // thing to do here.
     if (cm->frame_refs[0].idx != INT_MAX)
       cm->frame_refs[0].buf->corrupted = 1;
 
