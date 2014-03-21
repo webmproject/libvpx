@@ -16,6 +16,24 @@
       "revId": "931cbc3c7ea64430799ee262391e867052b9e5c3",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//xVQ\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 2892,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2014-03-21T16:11:58Z",
+      "side": 1,
+      "message": "trying to make a nonrd_pick_partition() function to replace everything in case REFERENCE_PARTITION, so that when using fixed partition types, call nonrd_use_partition(), otherwise call nonrd_pick_partition().",
+      "parentUuid": "AAAAdn//xYg\u003d",
+      "revId": "931cbc3c7ea64430799ee262391e867052b9e5c3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
