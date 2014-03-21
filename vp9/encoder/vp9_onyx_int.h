@@ -419,12 +419,6 @@ typedef enum {
 } VPX_SCALING;
 
 typedef enum {
-  VP9_LAST_FLAG = 1 << 0,
-  VP9_GOLD_FLAG = 1 << 1,
-  VP9_ALT_FLAG = 1 << 2,
-} VP9_REFFRAME;
-
-typedef enum {
   USAGE_LOCAL_FILE_PLAYBACK = 0,
   USAGE_STREAM_FROM_SERVER  = 1,
   USAGE_CONSTRAINED_QUALITY = 2,

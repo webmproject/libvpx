@@ -37,12 +37,6 @@ typedef struct {
   int input_partition;
 } VP9D_CONFIG;
 
-typedef enum {
-  VP9_LAST_FLAG = 1,
-  VP9_GOLD_FLAG = 2,
-  VP9_ALT_FLAG = 4
-} VP9_REFFRAME;
-
 typedef struct VP9Decompressor {
   DECLARE_ALIGNED(16, MACROBLOCKD, mb);
 
