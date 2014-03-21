@@ -308,10 +308,8 @@ static void dec_build_inter_predictors(MACROBLOCKD *xd, int plane, int block,
       y0_16 = sf->scale_value_y(y0_16, sf);
 
       // Map the top left corner of the block into the reference frame.
-      // NOTE: This must be done in this way instead of
-      // sf->scale_value_x(x_start + x, sf).
-      x0 = sf->scale_value_x(x_start, sf) + sf->scale_value_x(x, sf);
-      y0 = sf->scale_value_y(y_start, sf) + sf->scale_value_y(y, sf);
+      x0 = sf->scale_value_x(x_start + x, sf);
+      y0 = sf->scale_value_y(y_start + y, sf);
 
       // Scale the MV and incorporate the sub-pixel offset of the block
       // in the reference frame.
