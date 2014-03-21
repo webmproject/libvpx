@@ -16,6 +16,24 @@
       "revId": "0e53d520886bbc633fb552c92572f9238fc74397",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//xTw\u003d",
+        "filename": "vp9/encoder/vp9_pickmode.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 80,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2014-03-21T16:57:35Z",
+      "side": 1,
+      "message": "the fix looks good to me.\n\nI am trying to get nonrd_pick_partition function work. This issue should be resolved inline there.",
+      "parentUuid": "AAAAdn//xUg\u003d",
+      "revId": "0e53d520886bbc633fb552c92572f9238fc74397",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
