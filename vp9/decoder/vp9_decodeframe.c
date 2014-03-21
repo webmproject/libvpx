@@ -830,7 +830,9 @@ typedef struct TileBuffer {
   int col;  // only used with multi-threaded decoding
 } TileBuffer;
 
-static const uint8_t *decode_tiles(VP9D_COMP *pbi, const uint8_t *data) {
+static const uint8_t *decode_tiles(VP9D_COMP *pbi,
+                                   const uint8_t *data,
+                                   const uint8_t *data_end) {
   VP9_COMMON *const cm = &pbi->common;
   MACROBLOCKD *const xd = &pbi->mb;
   const int aligned_cols = mi_cols_aligned_to_sb(cm->mi_cols);
@@ -838,7 +840,6 @@ static const uint8_t *decode_tiles(VP9D_COMP *pbi, const uint8_t *data) {
   const int tile_rows = 1 << cm->log2_tile_rows;
   TileBuffer tile_buffers[4][1 << 6];
   int tile_row, tile_col;
-  const uint8_t *const data_end = pbi->source + pbi->source_sz;
   const uint8_t *end = NULL;
   vp9_reader r;
 
@@ -931,10 +932,11 @@ static int compare_tile_buffers(const void *a, const void *b) {
   }
 }
 
-static const uint8_t *decode_tiles_mt(VP9D_COMP *pbi, const uint8_t *data) {
+static const uint8_t *decode_tiles_mt(VP9D_COMP *pbi,
+                                      const uint8_t *data,
+                                      const uint8_t *data_end) {
   VP9_COMMON *const cm = &pbi->common;
   const uint8_t *bit_reader_end = NULL;
-  const uint8_t *const data_end = pbi->source + pbi->source_sz;
   const int aligned_mi_cols = mi_cols_aligned_to_sb(cm->mi_cols);
   const int tile_cols = 1 << cm->log2_tile_cols;
   const int tile_rows = 1 << cm->log2_tile_rows;
@@ -1314,13 +1316,12 @@ static void debug_check_frame_counts(const VP9_COMMON *const cm) {
 }
 #endif  // NDEBUG
 
-int vp9_decode_frame(VP9D_COMP *pbi, const uint8_t **p_data_end) {
+int vp9_decode_frame(VP9D_COMP *pbi,
+                     const uint8_t *data, const uint8_t *data_end,
+                     const uint8_t **p_data_end) {
   int i;
   VP9_COMMON *const cm = &pbi->common;
   MACROBLOCKD *const xd = &pbi->mb;
-
-  const uint8_t *data = pbi->source;
-  const uint8_t *const data_end = pbi->source + pbi->source_sz;
 
   struct vp9_read_bit_buffer rb = { data, data_end, 0, cm, error_handler };
   const size_t first_partition_size = read_uncompressed_header(pbi, &rb);
@@ -1378,9 +1379,9 @@ int vp9_decode_frame(VP9D_COMP *pbi, const uint8_t **p_data_end) {
   // single-frame tile decoding.
   if (pbi->oxcf.max_threads > 1 && tile_rows == 1 && tile_cols > 1 &&
       cm->frame_parallel_decoding_mode) {
-    *p_data_end = decode_tiles_mt(pbi, data + first_partition_size);
+    *p_data_end = decode_tiles_mt(pbi, data + first_partition_size, data_end);
   } else {
-    *p_data_end = decode_tiles(pbi, data + first_partition_size);
+    *p_data_end = decode_tiles(pbi, data + first_partition_size, data_end);
   }
 
   new_fb->corrupted |= xd->corrupted;

@@ -323,10 +323,7 @@ int vp9_receive_compressed_data(VP9D_COMP *pbi,
   cm = &pbi->common;
   cm->error.error_code = VPX_CODEC_OK;
 
-  pbi->source = source;
-  pbi->source_sz = size;
-
-  if (pbi->source_sz == 0) {
+  if (size == 0) {
     /* This is used to signal that we are missing frames.
      * We do not know if the missing frame(s) was supposed to update
      * any of the reference buffers, but we act conservative and
@@ -368,7 +365,7 @@ int vp9_receive_compressed_data(VP9D_COMP *pbi,
 
   cm->error.setjmp = 1;
 
-  retcode = vp9_decode_frame(pbi, psource);
+  retcode = vp9_decode_frame(pbi, source, source + size, psource);
 
   if (retcode < 0) {
     cm->error.error_code = VPX_CODEC_ERROR;
@@ -430,7 +427,6 @@ int vp9_receive_compressed_data(VP9D_COMP *pbi,
 
   pbi->ready_for_new_data = 0;
   pbi->last_time_stamp = time_stamp;
-  pbi->source_sz = 0;
 
   cm->error.setjmp = 0;
   return retcode;
