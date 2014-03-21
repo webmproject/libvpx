@@ -16,6 +16,24 @@
       "revId": "a49ce83b3c98fe2c93bca8f36522a97f21e37152",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//xUw\u003d",
+        "filename": "vp9/encoder/vp9_pickmode.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 79,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2014-03-21T16:22:32Z",
+      "side": 1,
+      "message": "Thanks, changed in patch#2 to get the correct vector.",
+      "parentUuid": "AAAAdn//xVw\u003d",
+      "revId": "a49ce83b3c98fe2c93bca8f36522a97f21e37152",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
