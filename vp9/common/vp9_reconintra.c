@@ -347,6 +347,8 @@ static void build_intra_predictors(const MACROBLOCKD *xd, const uint8_t *ref,
   x0 = (-xd->mb_to_left_edge >> (3 + pd->subsampling_x)) + x;
   y0 = (-xd->mb_to_top_edge >> (3 + pd->subsampling_y)) + y;
 
+  vpx_memset(left_col, 129, 64);
+
   // left
   if (left_available) {
     if (xd->mb_to_bottom_edge < 0) {
@@ -366,8 +368,6 @@ static void build_intra_predictors(const MACROBLOCKD *xd, const uint8_t *ref,
       for (i = 0; i < bs; ++i)
         left_col[i] = ref[i * ref_stride - 1];
     }
-  } else {
-    vpx_memset(left_col, 129, bs);
   }
 
   // TODO(hkuang) do not extend 2*bs pixels for all modes.
