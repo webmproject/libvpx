@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//xV4\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 2708,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2014-03-21T15:17:45Z",
+      "side": 1,
+      "message": "I think this one should be INT_MAX, and next should be INT64_MAX.   \n\nThe only reason this should have solved anything is that nonrd_pick_sb_modes returns without setting rate or distortion.   \n\nIn that case you\u0027d want the if clause catching INT_MAX \u0026\u0026 INT64_MAX to be taken...",
+      "revId": "dae56c9d4ec841b6e0b60c82d4ee99fb7e25f57c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
