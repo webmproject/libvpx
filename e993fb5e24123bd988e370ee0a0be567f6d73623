@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//xT8\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 2708,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2014-03-21T16:55:07Z",
+      "side": 1,
+      "message": "Seems better to use 0 here. The returned values are totrate and totdist, which are currently used to determine block size per 64x64 block.\n\nIdeally rate and dist should never be used if not assigned. But if this happens, setting them to be INT_MAX will trigger integer overflow in later *totrate +\u003d rate statment (?)",
+      "revId": "e993fb5e24123bd988e370ee0a0be567f6d73623",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//xT4\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 2812,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2014-03-21T16:55:07Z",
+      "side": 1,
+      "message": "These look good to me.",
+      "revId": "e993fb5e24123bd988e370ee0a0be567f6d73623",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
