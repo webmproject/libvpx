@@ -395,9 +395,7 @@ static void write_modes_b(VP9_COMP *cpi, const TileInfo *const tile,
 static void write_partition(VP9_COMMON *cm, MACROBLOCKD *xd,
                             int hbs, int mi_row, int mi_col,
                             PARTITION_TYPE p, BLOCK_SIZE bsize, vp9_writer *w) {
-  const int ctx = partition_plane_context(xd->above_seg_context,
-                                          xd->left_seg_context,
-                                          mi_row, mi_col, bsize);
+  const int ctx = partition_plane_context(xd, mi_row, mi_col, bsize);
   const vp9_prob *const probs = get_partition_probs(cm, ctx);
   const int has_rows = (mi_row + hbs) < cm->mi_rows;
   const int has_cols = (mi_col + hbs) < cm->mi_cols;
@@ -468,8 +466,7 @@ static void write_modes_sb(VP9_COMP *cpi,
   // update partition context
   if (bsize >= BLOCK_8X8 &&
       (bsize == BLOCK_8X8 || partition != PARTITION_SPLIT))
-    update_partition_context(xd->above_seg_context, xd->left_seg_context,
-                             mi_row, mi_col, subsize, bsize);
+    update_partition_context(xd, mi_row, mi_col, subsize, bsize);
 }
 
 static void write_modes(VP9_COMP *cpi,
