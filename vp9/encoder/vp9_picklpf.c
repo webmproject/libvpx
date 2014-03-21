@@ -10,16 +10,18 @@
 
 #include <assert.h>
 #include <limits.h>
+
+#include "./vpx_scale_rtcd.h"
+
+#include "vpx_mem/vpx_mem.h"
+
+#include "vp9/common/vp9_loopfilter.h"
 #include "vp9/common/vp9_onyxc_int.h"
+#include "vp9/common/vp9_quant_common.h"
+
 #include "vp9/encoder/vp9_onyx_int.h"
 #include "vp9/encoder/vp9_picklpf.h"
 #include "vp9/encoder/vp9_quantize.h"
-#include "vp9/common/vp9_quant_common.h"
-#include "vpx_mem/vpx_mem.h"
-#include "vpx_scale/vpx_scale.h"
-#include "vp9/common/vp9_alloccommon.h"
-#include "vp9/common/vp9_loopfilter.h"
-#include "./vpx_scale_rtcd.h"
 
 static int get_max_filter_level(VP9_COMP *cpi) {
   return cpi->twopass.section_intra_rating > 8 ? MAX_LOOP_FILTER * 3 / 4
@@ -28,11 +30,11 @@ static int get_max_filter_level(VP9_COMP *cpi) {
 
 
 static int try_filter_frame(const YV12_BUFFER_CONFIG *sd, VP9_COMP *const cpi,
-                            MACROBLOCKD *const xd, VP9_COMMON *const cm,
                             int filt_level, int partial_frame) {
+  VP9_COMMON *const cm = &cpi->common;
   int filt_err;
 
-  vp9_loop_filter_frame(cm, xd, filt_level, 1, partial_frame);
+  vp9_loop_filter_frame(cm, &cpi->mb.e_mbd, filt_level, 1, partial_frame);
   filt_err = vp9_calc_ss_err(sd, cm->frame_to_show);
 
   // Re-instate the unfiltered frame
@@ -43,7 +45,6 @@ static int try_filter_frame(const YV12_BUFFER_CONFIG *sd, VP9_COMP *const cpi,
 
 static void search_filter_level(const YV12_BUFFER_CONFIG *sd, VP9_COMP *cpi,
                                 int partial_frame) {
-  MACROBLOCKD *const xd = &cpi->mb.e_mbd;
   VP9_COMMON *const cm = &cpi->common;
   struct loopfilter *const lf = &cm->lf;
   const int min_filter_level = 0;
@@ -64,7 +65,7 @@ static void search_filter_level(const YV12_BUFFER_CONFIG *sd, VP9_COMP *cpi,
   //  Make a copy of the unfiltered / processed recon buffer
   vpx_yv12_copy_y(cm->frame_to_show, &cpi->last_frame_uf);
 
-  best_err = try_filter_frame(sd, cpi, xd, cm, filt_mid, partial_frame);
+  best_err = try_filter_frame(sd, cpi, filt_mid, partial_frame);
   filt_best = filt_mid;
   ss_err[filt_mid] = best_err;
 
@@ -86,7 +87,7 @@ static void search_filter_level(const YV12_BUFFER_CONFIG *sd, VP9_COMP *cpi,
     if (filt_direction <= 0 && filt_low != filt_mid) {
       // Get Low filter error score
       if (ss_err[filt_low] < 0) {
-        filt_err = try_filter_frame(sd, cpi, xd, cm, filt_low, partial_frame);
+        filt_err = try_filter_frame(sd, cpi, filt_low, partial_frame);
         ss_err[filt_low] = filt_err;
       } else {
         filt_err = ss_err[filt_low];
@@ -105,7 +106,7 @@ static void search_filter_level(const YV12_BUFFER_CONFIG *sd, VP9_COMP *cpi,
     // Now look at filt_high
     if (filt_direction >= 0 && filt_high != filt_mid) {
       if (ss_err[filt_high] < 0) {
-        filt_err = try_filter_frame(sd, cpi, xd, cm, filt_high, partial_frame);
+        filt_err = try_filter_frame(sd, cpi, filt_high, partial_frame);
         ss_err[filt_high] = filt_err;
       } else {
         filt_err = ss_err[filt_high];
@@ -119,7 +120,7 @@ static void search_filter_level(const YV12_BUFFER_CONFIG *sd, VP9_COMP *cpi,
 
     // Half the step distance if the best filter value was the same as last time
     if (filt_best == filt_mid) {
-      filter_step = filter_step / 2;
+      filter_step /= 2;
       filt_direction = 0;
     } else {
       filt_direction = (filt_best < filt_mid) ? -1 : 1;
@@ -143,9 +144,8 @@ void vp9_pick_filter_level(const YV12_BUFFER_CONFIG *sd, VP9_COMP *cpi,
     const int max_filter_level = get_max_filter_level(cpi);
     const int q = vp9_ac_quant(cm->base_qindex, 0);
     // These values were determined by linear fitting the result of the
-    // searched level
-    // filt_guess = q * 0.316206 + 3.87252
-    int filt_guess = (q * 20723 + 1015158 + (1 << 17)) >> 18;
+    // searched level, filt_guess = q * 0.316206 + 3.87252
+    int filt_guess = ROUND_POWER_OF_TWO(q * 20723 + 1015158, 18);
     if (cm->frame_type == KEY_FRAME)
       filt_guess -= 4;
     lf->filter_level = clamp(filt_guess, min_filter_level, max_filter_level);
