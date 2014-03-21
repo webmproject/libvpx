@@ -774,7 +774,6 @@ typedef struct VP9_COMP {
   unsigned int activity_avg;
   unsigned int *mb_activity_map;
   int *mb_norm_activity_map;
-  int output_partition;
 
   // Force next frame to intra when kf_auto says so.
   int force_next_frame_intra;
