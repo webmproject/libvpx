@@ -31,10 +31,8 @@ typedef struct {
   int width;
   int height;
   int version;
-  int postprocess;
   int max_threads;
   int inv_tile_order;
-  int input_partition;
 } VP9D_CONFIG;
 
 typedef struct VP9Decompressor {
