@@ -840,7 +840,7 @@ static void set_rt_speed_feature(VP9_COMMON *cm,
   if (speed >= 4) {
     sf->optimize_coefficients = 0;
     sf->disable_split_mask = DISABLE_ALL_SPLIT;
-    sf->use_fast_lpf_pick = 2;
+    sf->lpf_pick = LPF_PICK_FROM_Q;
     sf->encode_breakout_thresh = 700;
   }
   if (speed >= 5) {
@@ -939,7 +939,7 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
   sf->use_rd_breakout = 0;
   sf->skip_encode_sb = 0;
   sf->use_uv_intra_rd_estimate = 0;
-  sf->use_fast_lpf_pick = 0;
+  sf->lpf_pick = LPF_PICK_FROM_FULL_IMAGE;
   sf->use_fast_coef_updates = 0;
   sf->use_fast_coef_costing = 0;
   sf->mode_skip_start = MAX_MODES;  // Mode index at which mode skip mask set
@@ -2518,7 +2518,7 @@ static void loopfilter_frame(VP9_COMP *cpi, VP9_COMMON *cm) {
 
     vpx_usec_timer_start(&timer);
 
-    vp9_pick_filter_level(cpi->Source, cpi, cpi->sf.use_fast_lpf_pick);
+    vp9_pick_filter_level(cpi->Source, cpi, cpi->sf.lpf_pick);
 
     vpx_usec_timer_mark(&timer);
     cpi->time_pick_lpf += vpx_usec_timer_elapsed(&timer);

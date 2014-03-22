@@ -210,6 +210,15 @@ typedef enum {
   VAR_BASED_PARTITION
 } PARTITION_SEARCH_TYPE;
 
+typedef enum {
+  // Try the full image with different values.
+  LPF_PICK_FROM_FULL_IMAGE,
+  // Try a small portion of the image with different values.
+  LPF_PICK_FROM_SUBIMAGE,
+  // Estimate the level based on quantizer and frame type
+  LPF_PICK_FROM_Q,
+} LPF_PICK_METHOD;
+
 typedef struct {
   // Frame level coding parameter update
   int frame_parameter_update;
@@ -380,11 +389,8 @@ typedef struct {
   // final encode.
   int use_uv_intra_rd_estimate;
 
-  // This feature controls how the loop filter level is determined:
-  // 0: Try the full image with different values.
-  // 1: Try a small portion of the image with different values.
-  // 2: Estimate the level based on quantizer and frame type
-  int use_fast_lpf_pick;
+  // This feature controls how the loop filter level is determined.
+  LPF_PICK_METHOD lpf_pick;
 
   // This feature limits the number of coefficients updates we actually do
   // by only looking at counts from 1/2 the bands.
