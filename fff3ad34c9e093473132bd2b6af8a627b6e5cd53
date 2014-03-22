@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//xMA\u003d",
+        "filename": "examples/vp9_spatial_scalable_encoder.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 245,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-03-22T00:24:58Z",
+      "side": 1,
+      "message": "LL shouldn\u0027t strictly be necessary here with bitrates given in kbps, but ok",
+      "revId": "fff3ad34c9e093473132bd2b6af8a627b6e5cd53",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//xMI\u003d",
+        "filename": "examples/vp9_spatial_scalable_encoder.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 246,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-03-22T00:24:58Z",
+      "side": 1,
+      "message": "align this with the rest of the expression; best to use 4 space indent when you break at \u0027\u003d\u0027",
+      "revId": "fff3ad34c9e093473132bd2b6af8a627b6e5cd53",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//xME\u003d",
+        "filename": "examples/vp9_spatial_scalable_encoder.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 249,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-03-22T00:24:58Z",
+      "side": 1,
+      "message": "ditto",
+      "revId": "fff3ad34c9e093473132bd2b6af8a627b6e5cd53",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
