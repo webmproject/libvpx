@@ -16,14 +16,14 @@
 namespace libvpx_test {
 
 #if CONFIG_VP8_DECODER
-const int kNumVp8TestVectors = 62;
-extern const char *kVP8TestVectors[kNumVp8TestVectors];
+const int kNumVP8TestVectors = 62;
+extern const char *kVP8TestVectors[kNumVP8TestVectors];
 #endif
 
 #if CONFIG_VP9_DECODER
-const int kNumVp9TestVectors = 223;
+const int kNumVP9TestVectors = 223;
 
-extern const char *kVP9TestVectors[kNumVp9TestVectors];
+extern const char *kVP9TestVectors[kNumVP9TestVectors];
 #endif  // CONFIG_VP9_DECODER
 
 }  // namespace libvpx_test

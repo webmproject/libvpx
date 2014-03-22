@@ -210,7 +210,7 @@ class ExternalFrameBufferMD5Test
       ASSERT_TRUE(fb_list_.CreateBufferList(num_buffers_));
       ASSERT_EQ(VPX_CODEC_OK,
                 decoder->SetFrameBufferFunctions(
-                    GetVp9FrameBuffer, ReleaseVP9FrameBuffer, this));
+                    GetVP9FrameBuffer, ReleaseVP9FrameBuffer, this));
     }
   }
 
@@ -242,7 +242,7 @@ class ExternalFrameBufferMD5Test
 
   // Callback to get a free external frame buffer. Return value < 0 is an
   // error.
-  static int GetVp9FrameBuffer(void *user_priv, size_t min_size,
+  static int GetVP9FrameBuffer(void *user_priv, size_t min_size,
                                vpx_codec_frame_buffer_t *fb) {
     ExternalFrameBufferMD5Test *const md5Test =
         reinterpret_cast<ExternalFrameBufferMD5Test*>(user_priv);

@@ -68,7 +68,7 @@ void reference_idct4x4(const int16_t *input, int16_t *output) {
 
 using libvpx_test::ACMRandom;
 
-TEST(Vp8FdctTest, SignBiasCheck) {
+TEST(VP8FdctTest, SignBiasCheck) {
   ACMRandom rnd(ACMRandom::DeterministicSeed());
   int16_t test_input_block[16];
   int16_t test_output_block[16];
@@ -127,7 +127,7 @@ TEST(Vp8FdctTest, SignBiasCheck) {
     << "Error: 4x4 FDCT has a sign bias > 10% for input range [-15, 15]";
 };
 
-TEST(Vp8FdctTest, RoundTripErrorCheck) {
+TEST(VP8FdctTest, RoundTripErrorCheck) {
   ACMRandom rnd(ACMRandom::DeterministicSeed());
   int max_error = 0;
   double total_error = 0;
