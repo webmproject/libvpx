@@ -17,16 +17,15 @@
 #include "vp9/common/vp9_onyxc_int.h"
 #include "vp9/common/vp9_systemdependent.h"
 
-void vp9_update_mode_info_border(VP9_COMMON *cm, MODE_INFO *mi) {
-  const int stride = cm->mode_info_stride;
+static void clear_mi_border(const VP9_COMMON *cm, MODE_INFO *mi) {
   int i;
 
-  // Clear down top border row
-  vpx_memset(mi, 0, sizeof(MODE_INFO) * stride);
+  // Top border row
+  vpx_memset(mi, 0, sizeof(*mi) * cm->mode_info_stride);
 
-  // Clear left border column
-  for (i = 1; i < cm->mi_rows + 1; i++)
-    vpx_memset(&mi[i * stride], 0, sizeof(MODE_INFO));
+  // Left border column
+  for (i = 1; i < cm->mi_rows + 1; ++i)
+    vpx_memset(&mi[i * cm->mode_info_stride], 0, sizeof(*mi));
 }
 
 static void set_mb_mi(VP9_COMMON *cm, int aligned_width, int aligned_height) {
@@ -52,7 +51,7 @@ static void setup_mi(VP9_COMMON *cm) {
              cm->mode_info_stride * (cm->mi_rows + 1) *
              sizeof(*cm->mi_grid_base));
 
-  vp9_update_mode_info_border(cm, cm->prev_mip);
+  clear_mi_border(cm, cm->prev_mip);
 }
 
 static int alloc_mi(VP9_COMMON *cm, int mi_size) {
