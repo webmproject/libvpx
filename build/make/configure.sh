@@ -274,6 +274,7 @@ TMP_ASM="${TMPDIRx}/vpx-conf-$$-${RAND}.asm"
 
 clean_temp_files() {
     rm -f ${TMP_C} ${TMP_CC} ${TMP_H} ${TMP_O} ${TMP_X} ${TMP_ASM}
+    enabled gcov && rm -f ${TMP_C%.c}.gcno ${TMP_CC%.cc}.gcno
 }
 
 #
