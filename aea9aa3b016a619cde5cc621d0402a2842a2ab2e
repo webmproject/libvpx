@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//xPI\u003d",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 8,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2014-03-22T20:54:53Z",
+      "side": 1,
+      "message": "keep summary line within 52 chars",
+      "revId": "aea9aa3b016a619cde5cc621d0402a2842a2ab2e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
