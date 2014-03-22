@@ -27,8 +27,9 @@
 #include "vp9/common/vp9_systemdependent.h"
 #include "vp9/common/vp9_tile_common.h"
 
+#include "vp9/encoder/vp9_aq_cyclicrefresh.h"
+#include "vp9/encoder/vp9_aq_variance.h"
 #include "vp9/encoder/vp9_bitstream.h"
-#include "vp9/encoder/vp9_craq.h"
 #include "vp9/encoder/vp9_encodeframe.h"
 #include "vp9/encoder/vp9_encodemv.h"
 #include "vp9/encoder/vp9_firstpass.h"
@@ -39,7 +40,6 @@
 #include "vp9/encoder/vp9_rdopt.h"
 #include "vp9/encoder/vp9_segmentation.h"
 #include "vp9/encoder/vp9_temporal_filter.h"
-#include "vp9/encoder/vp9_vaq.h"
 #include "vp9/encoder/vp9_resize.h"
 #include "vp9/encoder/vp9_svc_layercontext.h"
 

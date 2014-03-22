@@ -23,6 +23,7 @@
 #include "vp9/common/vp9_reconinter.h"  // vp9_setup_dst_planes()
 #include "vp9/common/vp9_systemdependent.h"
 
+#include "vp9/encoder/vp9_aq_variance.h"
 #include "vp9/encoder/vp9_block.h"
 #include "vp9/encoder/vp9_encodeframe.h"
 #include "vp9/encoder/vp9_encodemb.h"
@@ -34,7 +35,6 @@
 #include "vp9/encoder/vp9_quantize.h"
 #include "vp9/encoder/vp9_ratectrl.h"
 #include "vp9/encoder/vp9_rdopt.h"
-#include "vp9/encoder/vp9_vaq.h"
 #include "vp9/encoder/vp9_variance.h"
 
 #define OUTPUT_FPF 0

@@ -30,6 +30,8 @@
 #include "vp9/common/vp9_systemdependent.h"
 #include "vp9/common/vp9_tile_common.h"
 
+#include "vp9/encoder/vp9_aq_cyclicrefresh.h"
+#include "vp9/encoder/vp9_aq_variance.h"
 #include "vp9/encoder/vp9_encodeframe.h"
 #include "vp9/encoder/vp9_encodemb.h"
 #include "vp9/encoder/vp9_encodemv.h"
@@ -38,8 +40,6 @@
 #include "vp9/encoder/vp9_rdopt.h"
 #include "vp9/encoder/vp9_segmentation.h"
 #include "vp9/encoder/vp9_tokenize.h"
-#include "vp9/encoder/vp9_vaq.h"
-#include "vp9/encoder/vp9_craq.h"
 
 #define GF_ZEROMV_ZBIN_BOOST 0
 #define LF_ZEROMV_ZBIN_BOOST 0
