@@ -803,48 +803,25 @@ static vpx_codec_err_t vp9e_encode(vpx_codec_alg_priv_t  *ctx,
         if (cpi->droppable)
           pkt.data.frame.flags |= VPX_FRAME_IS_DROPPABLE;
 
-        /*if (cpi->output_partition)
-        {
-            int i;
-            const int num_partitions = 1;
-
-            pkt.data.frame.flags |= VPX_FRAME_IS_FRAGMENT;
-
-            for (i = 0; i < num_partitions; ++i)
-            {
-                pkt.data.frame.buf = cx_data;
-                pkt.data.frame.sz = cpi->partition_sz[i];
-                pkt.data.frame.partition_id = i;
-                // don't set the fragment bit for the last partition
-                if (i == (num_partitions - 1))
-                    pkt.data.frame.flags &= ~VPX_FRAME_IS_FRAGMENT;
-                vpx_codec_pkt_list_add(&ctx->pkt_list.head, &pkt);
-                cx_data += cpi->partition_sz[i];
-                cx_data_sz -= cpi->partition_sz[i];
-            }
+        if (ctx->pending_cx_data) {
+          ctx->pending_frame_sizes[ctx->pending_frame_count++] = size;
+          ctx->pending_frame_magnitude |= size;
+          ctx->pending_cx_data_sz += size;
+          size += write_superframe_index(ctx);
+          pkt.data.frame.buf = ctx->pending_cx_data;
+          pkt.data.frame.sz  = ctx->pending_cx_data_sz;
+          ctx->pending_cx_data = NULL;
+          ctx->pending_cx_data_sz = 0;
+          ctx->pending_frame_count = 0;
+          ctx->pending_frame_magnitude = 0;
+        } else {
+          pkt.data.frame.buf = cx_data;
+          pkt.data.frame.sz  = size;
         }
-        else*/
-        {
-          if (ctx->pending_cx_data) {
-            ctx->pending_frame_sizes[ctx->pending_frame_count++] = size;
-            ctx->pending_frame_magnitude |= size;
-            ctx->pending_cx_data_sz += size;
-            size += write_superframe_index(ctx);
-            pkt.data.frame.buf = ctx->pending_cx_data;
-            pkt.data.frame.sz  = ctx->pending_cx_data_sz;
-            ctx->pending_cx_data = NULL;
-            ctx->pending_cx_data_sz = 0;
-            ctx->pending_frame_count = 0;
-            ctx->pending_frame_magnitude = 0;
-          } else {
-            pkt.data.frame.buf = cx_data;
-            pkt.data.frame.sz  = size;
-          }
-          pkt.data.frame.partition_id = -1;
-          vpx_codec_pkt_list_add(&ctx->pkt_list.head, &pkt);
-          cx_data += size;
-          cx_data_sz -= size;
-        }
+        pkt.data.frame.partition_id = -1;
+        vpx_codec_pkt_list_add(&ctx->pkt_list.head, &pkt);
+        cx_data += size;
+        cx_data_sz -= size;
       }
     }
   }
@@ -1172,8 +1149,7 @@ static vpx_codec_enc_cfg_map_t vp9e_usage_cfg_map[] = {
 CODEC_INTERFACE(vpx_codec_vp9_cx) = {
   "WebM Project VP9 Encoder" VERSION_STRING,
   VPX_CODEC_INTERNAL_ABI_VERSION,
-  VPX_CODEC_CAP_ENCODER | VPX_CODEC_CAP_PSNR |
-  VPX_CODEC_CAP_OUTPUT_PARTITION,
+  VPX_CODEC_CAP_ENCODER | VPX_CODEC_CAP_PSNR,
   /* vpx_codec_caps_t          caps; */
   vp9e_init,          /* vpx_codec_init_fn_t       init; */
   vp9e_destroy,       /* vpx_codec_destroy_fn_t    destroy; */
