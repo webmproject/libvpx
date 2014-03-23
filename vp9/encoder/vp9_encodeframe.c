@@ -1295,8 +1295,7 @@ static void encode_sb(VP9_COMP *cpi, const TileInfo *const tile,
     return;
 
   if (bsize >= BLOCK_8X8) {
-    ctx = partition_plane_context(xd->above_seg_context, xd->left_seg_context,
-                                 mi_row, mi_col, bsize);
+    ctx = partition_plane_context(xd, mi_row, mi_col, bsize);
     subsize = *get_sb_partitioning(x, bsize);
   } else {
     ctx = 0;
@@ -1351,8 +1350,7 @@ static void encode_sb(VP9_COMP *cpi, const TileInfo *const tile,
   }
 
   if (partition != PARTITION_SPLIT || bsize == BLOCK_8X8)
-    update_partition_context(xd->above_seg_context, xd->left_seg_context,
-                             mi_row, mi_col, subsize, bsize);
+    update_partition_context(xd, mi_row, mi_col, subsize, bsize);
 }
 
 // Check to see if the given partition size is allowed for a specified number
@@ -1526,8 +1524,7 @@ static void encode_sb_rt(VP9_COMP *cpi, const TileInfo *const tile,
     MACROBLOCKD *const xd = &cpi->mb.e_mbd;
     const int idx_str = xd->mode_info_stride * mi_row + mi_col;
     MODE_INFO ** mi_8x8 = cm->mi_grid_visible + idx_str;
-    ctx = partition_plane_context(xd->above_seg_context, xd->left_seg_context,
-                                 mi_row, mi_col, bsize);
+    ctx = partition_plane_context(xd, mi_row, mi_col, bsize);
     subsize = mi_8x8[0]->mbmi.sb_type;
   } else {
     ctx = 0;
@@ -1586,8 +1583,7 @@ static void encode_sb_rt(VP9_COMP *cpi, const TileInfo *const tile,
   }
 
   if (partition != PARTITION_SPLIT || bsize == BLOCK_8X8)
-    update_partition_context(xd->above_seg_context, xd->left_seg_context,
-                             mi_row, mi_col, subsize, bsize);
+    update_partition_context(xd, mi_row, mi_col, subsize, bsize);
 }
 
 static void rd_use_partition(VP9_COMP *cpi,
@@ -1672,9 +1668,7 @@ static void rd_use_partition(VP9_COMP *cpi,
       rd_pick_sb_modes(cpi, tile, mi_row, mi_col, &none_rate, &none_dist, bsize,
                        get_block_context(x, bsize), INT64_MAX);
 
-      pl = partition_plane_context(xd->above_seg_context,
-                                   xd->left_seg_context,
-                                   mi_row, mi_col, bsize);
+      pl = partition_plane_context(xd, mi_row, mi_col, bsize);
 
       if (none_rate < INT_MAX) {
         none_rate += x->partition_cost[pl][PARTITION_NONE];
@@ -1774,8 +1768,7 @@ static void rd_use_partition(VP9_COMP *cpi,
       assert(0);
   }
 
-  pl = partition_plane_context(xd->above_seg_context, xd->left_seg_context,
-                               mi_row, mi_col, bsize);
+  pl = partition_plane_context(xd, mi_row, mi_col, bsize);
   if (last_part_rate < INT_MAX) {
     last_part_rate += x->partition_cost[pl][partition];
     last_part_rd = RDCOST(x->rdmult, x->rddiv, last_part_rate, last_part_dist);
@@ -1828,14 +1821,11 @@ static void rd_use_partition(VP9_COMP *cpi,
         encode_sb(cpi, tile, tp,  mi_row + y_idx, mi_col + x_idx, 0,
                   split_subsize);
 
-      pl = partition_plane_context(xd->above_seg_context,
-                                   xd->left_seg_context,
-                                   mi_row + y_idx, mi_col + x_idx,
+      pl = partition_plane_context(xd, mi_row + y_idx, mi_col + x_idx,
                                    split_subsize);
       chosen_rate += x->partition_cost[pl][PARTITION_NONE];
     }
-    pl = partition_plane_context(xd->above_seg_context, xd->left_seg_context,
-                                 mi_row, mi_col, bsize);
+    pl = partition_plane_context(xd, mi_row, mi_col, bsize);
     if (chosen_rate < INT_MAX) {
       chosen_rate += x->partition_cost[pl][PARTITION_SPLIT];
       chosen_rd = RDCOST(x->rdmult, x->rddiv, chosen_rate, chosen_dist);
@@ -2110,9 +2100,7 @@ static void rd_pick_partition(VP9_COMP *cpi, const TileInfo *const tile,
                      ctx, best_rd);
     if (this_rate != INT_MAX) {
       if (bsize >= BLOCK_8X8) {
-        pl = partition_plane_context(xd->above_seg_context,
-                                     xd->left_seg_context,
-                                     mi_row, mi_col, bsize);
+        pl = partition_plane_context(xd, mi_row, mi_col, bsize);
         this_rate += x->partition_cost[pl][PARTITION_NONE];
       }
       sum_rd = RDCOST(x->rdmult, x->rddiv, this_rate, this_dist);
@@ -2182,9 +2170,7 @@ static void rd_pick_partition(VP9_COMP *cpi, const TileInfo *const tile,
       }
     }
     if (sum_rd < best_rd && i == 4) {
-      pl = partition_plane_context(xd->above_seg_context,
-                                   xd->left_seg_context,
-                                   mi_row, mi_col, bsize);
+      pl = partition_plane_context(xd, mi_row, mi_col, bsize);
       sum_rate += x->partition_cost[pl][PARTITION_SPLIT];
       sum_rd = RDCOST(x->rdmult, x->rddiv, sum_rate, sum_dist);
       if (sum_rd < best_rd) {
@@ -2240,9 +2226,7 @@ static void rd_pick_partition(VP9_COMP *cpi, const TileInfo *const tile,
       }
     }
     if (sum_rd < best_rd) {
-      pl = partition_plane_context(xd->above_seg_context,
-                                   xd->left_seg_context,
-                                   mi_row, mi_col, bsize);
+      pl = partition_plane_context(xd, mi_row, mi_col, bsize);
       sum_rate += x->partition_cost[pl][PARTITION_HORZ];
       sum_rd = RDCOST(x->rdmult, x->rddiv, sum_rate, sum_dist);
       if (sum_rd < best_rd) {
@@ -2293,9 +2277,7 @@ static void rd_pick_partition(VP9_COMP *cpi, const TileInfo *const tile,
       }
     }
     if (sum_rd < best_rd) {
-      pl = partition_plane_context(xd->above_seg_context,
-                                   xd->left_seg_context,
-                                   mi_row, mi_col, bsize);
+      pl = partition_plane_context(xd, mi_row, mi_col, bsize);
       sum_rate += x->partition_cost[pl][PARTITION_VERT];
       sum_rd = RDCOST(x->rdmult, x->rddiv, sum_rate, sum_dist);
       if (sum_rd < best_rd) {

@@ -407,9 +407,7 @@ static void decode_block(VP9_COMMON *const cm, MACROBLOCKD *const xd,
 static PARTITION_TYPE read_partition(VP9_COMMON *cm, MACROBLOCKD *xd, int hbs,
                                      int mi_row, int mi_col, BLOCK_SIZE bsize,
                                      vp9_reader *r) {
-  const int ctx = partition_plane_context(xd->above_seg_context,
-                                          xd->left_seg_context,
-                                          mi_row, mi_col, bsize);
+  const int ctx = partition_plane_context(xd, mi_row, mi_col, bsize);
   const vp9_prob *const probs = get_partition_probs(cm, ctx);
   const int has_rows = (mi_row + hbs) < cm->mi_rows;
   const int has_cols = (mi_col + hbs) < cm->mi_cols;
@@ -474,8 +472,7 @@ static void decode_partition(VP9_COMMON *const cm, MACROBLOCKD *const xd,
   // update partition context
   if (bsize >= BLOCK_8X8 &&
       (bsize == BLOCK_8X8 || partition != PARTITION_SPLIT))
-    update_partition_context(xd->above_seg_context, xd->left_seg_context,
-                             mi_row, mi_col, subsize, bsize);
+    update_partition_context(xd, mi_row, mi_col, subsize, bsize);
 }
 
 static void setup_token_decoder(const uint8_t *data,
