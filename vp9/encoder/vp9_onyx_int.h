@@ -825,7 +825,7 @@ void vp9_initialize_enc();
 struct VP9_COMP *vp9_create_compressor(VP9_CONFIG *oxcf);
 void vp9_remove_compressor(VP9_COMP *cpi);
 
-void vp9_change_config(VP9_COMP *cpi, VP9_CONFIG *oxcf);
+void vp9_change_config(VP9_COMP *cpi, const VP9_CONFIG *oxcf);
 
   // receive a frames worth of data. caller can assume that a copy of this
   // frame is made and not just a copy of the pointer..

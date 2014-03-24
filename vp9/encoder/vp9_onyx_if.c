@@ -1202,9 +1202,39 @@ static void set_tile_limits(VP9_COMP *cpi) {
   cm->log2_tile_rows = cpi->oxcf.tile_rows;
 }
 
+static void init_rate_control(const VP9_CONFIG *oxcf, int pass,
+                              RATE_CONTROL *rc) {
+  if (pass == 0 && oxcf->end_usage == USAGE_STREAM_FROM_SERVER) {
+    rc->avg_frame_qindex[0] = oxcf->worst_allowed_q;
+    rc->avg_frame_qindex[1] = oxcf->worst_allowed_q;
+    rc->avg_frame_qindex[2] = oxcf->worst_allowed_q;
+  } else {
+    rc->avg_frame_qindex[0] = (oxcf->worst_allowed_q +
+                                   oxcf->best_allowed_q) / 2;
+    rc->avg_frame_qindex[1] = (oxcf->worst_allowed_q +
+                                   oxcf->best_allowed_q) / 2;
+    rc->avg_frame_qindex[2] = (oxcf->worst_allowed_q +
+                                   oxcf->best_allowed_q) / 2;
+  }
+
+  rc->last_q[0] = oxcf->best_allowed_q;
+  rc->last_q[1] = oxcf->best_allowed_q;
+  rc->last_q[2] = oxcf->best_allowed_q;
+
+  rc->buffer_level =    oxcf->starting_buffer_level;
+  rc->bits_off_target = oxcf->starting_buffer_level;
+
+  rc->rolling_target_bits      = rc->av_per_frame_bandwidth;
+  rc->rolling_actual_bits      = rc->av_per_frame_bandwidth;
+  rc->long_rolling_target_bits = rc->av_per_frame_bandwidth;
+  rc->long_rolling_actual_bits = rc->av_per_frame_bandwidth;
+
+  rc->total_actual_bits = 0;
+  rc->total_target_vs_actual = 0;
+}
+
 static void init_config(struct VP9_COMP *cpi, VP9_CONFIG *oxcf) {
   VP9_COMMON *const cm = &cpi->common;
-  RATE_CONTROL *const rc = &cpi->rc;
   int i;
 
   cpi->oxcf = *oxcf;
@@ -1230,35 +1260,6 @@ static void init_config(struct VP9_COMP *cpi, VP9_CONFIG *oxcf) {
   // change includes all joint functionality
   vp9_change_config(cpi, oxcf);
 
-  // Initialize active best and worst q and average q values.
-  if (cpi->pass == 0 && cpi->oxcf.end_usage == USAGE_STREAM_FROM_SERVER) {
-    rc->avg_frame_qindex[0] = cpi->oxcf.worst_allowed_q;
-    rc->avg_frame_qindex[1] = cpi->oxcf.worst_allowed_q;
-    rc->avg_frame_qindex[2] = cpi->oxcf.worst_allowed_q;
-  } else {
-    rc->avg_frame_qindex[0] = (cpi->oxcf.worst_allowed_q +
-                                  cpi->oxcf.best_allowed_q) / 2;
-    rc->avg_frame_qindex[1] = (cpi->oxcf.worst_allowed_q +
-                                  cpi->oxcf.best_allowed_q) / 2;
-    rc->avg_frame_qindex[2] = (cpi->oxcf.worst_allowed_q +
-                                  cpi->oxcf.best_allowed_q) / 2;
-  }
-  rc->last_q[0] = cpi->oxcf.best_allowed_q;
-  rc->last_q[1] = cpi->oxcf.best_allowed_q;
-  rc->last_q[2] = cpi->oxcf.best_allowed_q;
-
-  // Initialise the starting buffer levels
-  rc->buffer_level    = cpi->oxcf.starting_buffer_level;
-  rc->bits_off_target = cpi->oxcf.starting_buffer_level;
-
-  rc->rolling_target_bits      = rc->av_per_frame_bandwidth;
-  rc->rolling_actual_bits      = rc->av_per_frame_bandwidth;
-  rc->long_rolling_target_bits = rc->av_per_frame_bandwidth;
-  rc->long_rolling_actual_bits = rc->av_per_frame_bandwidth;
-
-  rc->total_actual_bits = 0;
-  rc->total_target_vs_actual = 0;
-
   cpi->static_mb_pct = 0;
 
   cpi->lst_fb_idx = 0;
@@ -1272,15 +1273,11 @@ static void init_config(struct VP9_COMP *cpi, VP9_CONFIG *oxcf) {
     cpi->fixed_divide[i] = 0x80000 / i;
 }
 
-void vp9_change_config(struct VP9_COMP *cpi, VP9_CONFIG *oxcf) {
+void vp9_change_config(struct VP9_COMP *cpi, const VP9_CONFIG *oxcf) {
   VP9_COMMON *const cm = &cpi->common;
 
-  if (!cpi || !oxcf)
-    return;
-
-  if (cm->version != oxcf->version) {
+  if (cm->version != oxcf->version)
     cm->version = oxcf->version;
-  }
 
   cpi->oxcf = *oxcf;
 
@@ -1631,6 +1628,7 @@ VP9_COMP *vp9_create_compressor(VP9_CONFIG *oxcf) {
   cpi->use_svc = 0;
 
   init_config(cpi, oxcf);
+  init_rate_control(&cpi->oxcf, cpi->pass, &cpi->rc);
   init_pick_mode_context(cpi);
 
   cm->current_video_frame = 0;
