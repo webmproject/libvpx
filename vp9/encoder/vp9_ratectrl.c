@@ -183,25 +183,6 @@ void vp9_restore_coding_context(VP9_COMP *cpi) {
   cm->fc = cc->fc;
 }
 
-void vp9_setup_key_frame(VP9_COMP *cpi) {
-  VP9_COMMON *cm = &cpi->common;
-
-  vp9_setup_past_independence(cm);
-
-  /* All buffers are implicitly updated on key frames. */
-  cpi->refresh_golden_frame = 1;
-  cpi->refresh_alt_ref_frame = 1;
-}
-
-void vp9_setup_inter_frame(VP9_COMP *cpi) {
-  VP9_COMMON *cm = &cpi->common;
-  if (cm->error_resilient_mode || cm->intra_only)
-    vp9_setup_past_independence(cm);
-
-  assert(cm->frame_context_idx < FRAME_CONTEXTS);
-  cm->fc = cm->frame_contexts[cm->frame_context_idx];
-}
-
 static int estimate_bits_at_q(int frame_kind, int q, int mbs,
                               double correction_factor) {
   const int bpm = (int)(vp9_rc_bits_per_mb(frame_kind, q, correction_factor));

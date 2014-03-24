@@ -144,6 +144,22 @@ static void set_high_precision_mv(VP9_COMP *cpi, int allow_high_precision_mv) {
   }
 }
 
+static void setup_key_frame(VP9_COMP *cpi) {
+  vp9_setup_past_independence(&cpi->common);
+
+  // All buffers are implicitly updated on key frames.
+  cpi->refresh_golden_frame = 1;
+  cpi->refresh_alt_ref_frame = 1;
+}
+
+static void setup_inter_frame(VP9_COMMON *cm) {
+  if (cm->error_resilient_mode || cm->intra_only)
+    vp9_setup_past_independence(cm);
+
+  assert(cm->frame_context_idx < FRAME_CONTEXTS);
+  cm->fc = cm->frame_contexts[cm->frame_context_idx];
+}
+
 void vp9_initialize_enc() {
   static int init_done = 0;
 
@@ -2657,12 +2673,12 @@ static void encode_without_recode_loop(VP9_COMP *cpi,
   // other inter-frames the encoder currently uses only two contexts;
   // context 1 for ALTREF frames and context 0 for the others.
   if (cm->frame_type == KEY_FRAME) {
-    vp9_setup_key_frame(cpi);
+    setup_key_frame(cpi);
   } else {
-    if (!cm->intra_only && !cm->error_resilient_mode && !cpi->use_svc) {
+    if (!cm->intra_only && !cm->error_resilient_mode && !cpi->use_svc)
       cpi->common.frame_context_idx = cpi->refresh_alt_ref_frame;
-    }
-    vp9_setup_inter_frame(cpi);
+
+    setup_inter_frame(cm);
   }
   // Variance adaptive and in frame q adjustment experiments are mutually
   // exclusive.
@@ -2715,12 +2731,12 @@ static void encode_with_recode_loop(VP9_COMP *cpi,
       // other inter-frames the encoder currently uses only two contexts;
       // context 1 for ALTREF frames and context 0 for the others.
       if (cm->frame_type == KEY_FRAME) {
-        vp9_setup_key_frame(cpi);
+        setup_key_frame(cpi);
       } else {
-        if (!cm->intra_only && !cm->error_resilient_mode && !cpi->use_svc) {
+        if (!cm->intra_only && !cm->error_resilient_mode && !cpi->use_svc)
           cpi->common.frame_context_idx = cpi->refresh_alt_ref_frame;
-        }
-        vp9_setup_inter_frame(cpi);
+
+        setup_inter_frame(cm);
       }
     }
 
@@ -3005,7 +3021,7 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
 
   // Set various flags etc to special state if it is a key frame.
   if (frame_is_intra_only(cm)) {
-    vp9_setup_key_frame(cpi);
+    setup_key_frame(cpi);
     // Reset the loop filter deltas and segmentation map.
     vp9_reset_segment_features(&cm->seg);
 
