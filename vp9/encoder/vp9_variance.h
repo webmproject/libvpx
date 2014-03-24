@@ -100,21 +100,9 @@ typedef struct vp9_variance_vtable {
   vp9_sad_multi_d_fn_t       sdx4df;
 } vp9_variance_fn_ptr_t;
 
-static void comp_avg_pred(uint8_t *comp_pred, const uint8_t *pred, int width,
-                          int height, const uint8_t *ref, int ref_stride) {
-  int i, j;
+void vp9_comp_avg_pred(uint8_t *comp_pred, const uint8_t *pred, int width,
+                       int height, const uint8_t *ref, int ref_stride);
 
-  for (i = 0; i < height; i++) {
-    for (j = 0; j < width; j++) {
-      int tmp;
-      tmp = pred[j] + ref[j];
-      comp_pred[j] = (tmp + 1) >> 1;
-    }
-    comp_pred += width;
-    pred += width;
-    ref += ref_stride;
-  }
-}
 #ifdef __cplusplus
 }  // extern "C"
 #endif

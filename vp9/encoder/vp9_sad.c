@@ -44,7 +44,7 @@ unsigned int vp9_sad##m##x##n##_avg_c(const uint8_t *src_ptr, int src_stride, \
                                       const uint8_t *second_pred, \
                                       unsigned int max_sad) { \
   uint8_t comp_pred[m * n]; \
-  comp_avg_pred(comp_pred, second_pred, m, n, ref_ptr, ref_stride); \
+  vp9_comp_avg_pred(comp_pred, second_pred, m, n, ref_ptr, ref_stride); \
   return sad(src_ptr, src_stride, comp_pred, m, m, n); \
 }
 

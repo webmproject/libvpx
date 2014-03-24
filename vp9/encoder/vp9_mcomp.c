@@ -399,7 +399,7 @@ int vp9_find_best_sub_pixel_comp_tree(const MACROBLOCK *x,
   // calculate central point error
   // TODO(yunqingwang): central pointer error was already calculated in full-
   // pixel search, and can be passed in this function.
-  comp_avg_pred(comp_pred, second_pred, w, h, y, y_stride);
+  vp9_comp_avg_pred(comp_pred, second_pred, w, h, y, y_stride);
   besterr = vfp->vf(comp_pred, w, z, src_stride, sse1);
   *distortion = besterr;
   besterr += mv_err_cost(bestmv, ref_mv, mvjcost, mvcost, error_per_bit);
