@@ -150,7 +150,7 @@ void vp9_setup_cyclic_refresh_aq(VP9_COMP *const cpi) {
     int qindex_delta = 0;
     int mbs_in_frame = cm->mi_rows * cm->mi_cols;
     int i, x, y, block_count, bl_index, bl_index2;
-    int sum_map, new_value, mi_row, mi_col, xmis, ymis, qindex2;
+    int sum_map, mi_row, mi_col, xmis, ymis, qindex2;
 
     // Rate target ratio to set q delta.
     float rate_ratio_qdelta = 2.0;
@@ -249,9 +249,9 @@ void vp9_setup_cyclic_refresh_aq(VP9_COMP *const cpi) {
             bl_index2 = bl_index + y * cm->mi_cols + x;
                sum_map += seg_map[bl_index2];
           }
-        new_value = 0;
         // If segment is partial over superblock, reset.
         if (sum_map > 0 && sum_map < xmis * ymis) {
+          int new_value;
           if (sum_map < xmis * ymis / 2)
             new_value = 0;
           else
