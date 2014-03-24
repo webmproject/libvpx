@@ -80,7 +80,7 @@ vpx_codec_err_t vp9_copy_reference_dec(struct VP9Decompressor *pbi,
                                        VP9_REFFRAME ref_frame_flag,
                                        YV12_BUFFER_CONFIG *sd);
 
-vpx_codec_err_t vp9_set_reference_dec(struct VP9Decompressor *pbi,
+vpx_codec_err_t vp9_set_reference_dec(VP9_COMMON *cm,
                                       VP9_REFFRAME ref_frame_flag,
                                       YV12_BUFFER_CONFIG *sd);
 
@@ -88,7 +88,7 @@ int vp9_get_reference_dec(struct VP9Decompressor *pbi,
                           int index, YV12_BUFFER_CONFIG **fb);
 
 
-struct VP9Decompressor *vp9_create_decompressor(VP9D_CONFIG *oxcf);
+struct VP9Decompressor *vp9_create_decompressor(const VP9D_CONFIG *oxcf);
 
 void vp9_remove_decompressor(struct VP9Decompressor *pbi);
 

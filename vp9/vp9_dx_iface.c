@@ -568,14 +568,14 @@ static vpx_codec_err_t vp9_xma_set_mmap(vpx_codec_ctx_t *ctx,
 
 static vpx_codec_err_t set_reference(vpx_codec_alg_priv_t *ctx, int ctr_id,
                                      va_list args) {
-  vpx_ref_frame_t *data = va_arg(args, vpx_ref_frame_t *);
+  vpx_ref_frame_t *const data = va_arg(args, vpx_ref_frame_t *);
 
   if (data) {
-    vpx_ref_frame_t *frame = (vpx_ref_frame_t *)data;
+    vpx_ref_frame_t *const frame = (vpx_ref_frame_t *)data;
     YV12_BUFFER_CONFIG sd;
 
     image2yuvconfig(&frame->img, &sd);
-    return vp9_set_reference_dec(ctx->pbi,
+    return vp9_set_reference_dec(&ctx->pbi->common,
                                  (VP9_REFFRAME)frame->frame_type, &sd);
   } else {
     return VPX_CODEC_INVALID_PARAM;
