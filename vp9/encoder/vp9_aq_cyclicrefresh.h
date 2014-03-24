@@ -51,10 +51,10 @@ struct VP9_COMP;
 // check if we should reset the segment_id, and update the cyclic_refresh map
 // and segmentation map.
 void vp9_update_segment_aq(struct VP9_COMP *const cpi,
-                           MODE_INFO *const mi,
+                           MB_MODE_INFO *const mbmi,
                            int mi_row,
                            int mi_col,
-                           int bsize,
+                           BLOCK_SIZE bsize,
                            int use_rd);
 
 // Setup cyclic background refresh: set delta q and segmentation map.
