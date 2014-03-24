@@ -2504,87 +2504,15 @@ static int get_skip_flag(MODE_INFO **mi_8x8, int mis, int ymbs, int xmbs) {
   return 1;
 }
 
-static void set_txfm_flag(MODE_INFO **mi_8x8, int mis, int ymbs, int xmbs,
-                          TX_SIZE tx_size) {
-  int x, y;
-
-  for (y = 0; y < ymbs; y++) {
-    for (x = 0; x < xmbs; x++)
-      mi_8x8[y * mis + x]->mbmi.tx_size = tx_size;
-  }
-}
-
-static void reset_skip_txfm_size_b(const VP9_COMMON *cm, int mis,
-                                   TX_SIZE max_tx_size, int bw, int bh,
-                                   int mi_row, int mi_col,
-                                   MODE_INFO **mi_8x8) {
-  if (mi_row >= cm->mi_rows || mi_col >= cm->mi_cols) {
-    return;
-  } else {
-    const MB_MODE_INFO *const mbmi = &mi_8x8[0]->mbmi;
-    if (mbmi->tx_size > max_tx_size) {
-      const int ymbs = MIN(bh, cm->mi_rows - mi_row);
-      const int xmbs = MIN(bw, cm->mi_cols - mi_col);
-
-      assert(vp9_segfeature_active(&cm->seg, mbmi->segment_id, SEG_LVL_SKIP) ||
-             get_skip_flag(mi_8x8, mis, ymbs, xmbs));
-      set_txfm_flag(mi_8x8, mis, ymbs, xmbs, max_tx_size);
-    }
-  }
-}
-
-static void reset_skip_txfm_size_sb(VP9_COMMON *cm, MODE_INFO **mi_8x8,
-                                    TX_SIZE max_tx_size, int mi_row, int mi_col,
-                                    BLOCK_SIZE bsize) {
-  const int mis = cm->mode_info_stride;
-  int bw, bh;
-  const int bs = num_8x8_blocks_wide_lookup[bsize], hbs = bs / 2;
-
-  if (mi_row >= cm->mi_rows || mi_col >= cm->mi_cols)
-    return;
-
-  bw = num_8x8_blocks_wide_lookup[mi_8x8[0]->mbmi.sb_type];
-  bh = num_8x8_blocks_high_lookup[mi_8x8[0]->mbmi.sb_type];
-
-  if (bw == bs && bh == bs) {
-    reset_skip_txfm_size_b(cm, mis, max_tx_size, bs, bs, mi_row, mi_col,
-                           mi_8x8);
-  } else if (bw == bs && bh < bs) {
-    reset_skip_txfm_size_b(cm, mis, max_tx_size, bs, hbs, mi_row, mi_col,
-                           mi_8x8);
-    reset_skip_txfm_size_b(cm, mis, max_tx_size, bs, hbs, mi_row + hbs,
-                           mi_col, mi_8x8 + hbs * mis);
-  } else if (bw < bs && bh == bs) {
-    reset_skip_txfm_size_b(cm, mis, max_tx_size, hbs, bs, mi_row, mi_col,
-                           mi_8x8);
-    reset_skip_txfm_size_b(cm, mis, max_tx_size, hbs, bs, mi_row,
-                           mi_col + hbs, mi_8x8 + hbs);
-  } else {
-    const BLOCK_SIZE subsize = subsize_lookup[PARTITION_SPLIT][bsize];
-    int n;
-
-    assert(bw < bs && bh < bs);
-
-    for (n = 0; n < 4; n++) {
-      const int mi_dc = hbs * (n & 1);
-      const int mi_dr = hbs * (n >> 1);
-
-      reset_skip_txfm_size_sb(cm, &mi_8x8[mi_dr * mis + mi_dc], max_tx_size,
-                              mi_row + mi_dr, mi_col + mi_dc, subsize);
-    }
-  }
-}
-
 static void reset_skip_txfm_size(VP9_COMMON *cm, TX_SIZE txfm_max) {
   int mi_row, mi_col;
   const int mis = cm->mode_info_stride;
-  MODE_INFO **mi_8x8, **mi_ptr = cm->mi_grid_visible;
+  MODE_INFO **mi_ptr = cm->mi_grid_visible;
 
-  for (mi_row = 0; mi_row < cm->mi_rows; mi_row += 8, mi_ptr += 8 * mis) {
-    mi_8x8 = mi_ptr;
-    for (mi_col = 0; mi_col < cm->mi_cols; mi_col += 8, mi_8x8 += 8) {
-      reset_skip_txfm_size_sb(cm, mi_8x8, txfm_max, mi_row, mi_col,
-                              BLOCK_64X64);
+  for (mi_row = 0; mi_row < cm->mi_rows; ++mi_row, mi_ptr += mis) {
+    for (mi_col = 0; mi_col < cm->mi_cols; ++mi_col) {
+      if (mi_ptr[mi_col]->mbmi.tx_size > txfm_max)
+        mi_ptr[mi_col]->mbmi.tx_size = txfm_max;
     }
   }
 }
