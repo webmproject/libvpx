@@ -874,8 +874,8 @@ void vp9_set_svc(VP9_COMP *cpi, int use_svc);
 
 int vp9_get_quantizer(struct VP9_COMP *cpi);
 
-static int get_ref_frame_idx(const VP9_COMP *cpi,
-                             MV_REFERENCE_FRAME ref_frame) {
+static INLINE int get_ref_frame_idx(const VP9_COMP *cpi,
+                                    MV_REFERENCE_FRAME ref_frame) {
   if (ref_frame == LAST_FRAME) {
     return cpi->lst_fb_idx;
   } else if (ref_frame == GOLDEN_FRAME) {
@@ -885,14 +885,24 @@ static int get_ref_frame_idx(const VP9_COMP *cpi,
   }
 }
 
-static YV12_BUFFER_CONFIG *get_ref_frame_buffer(VP9_COMP *cpi,
-                                                MV_REFERENCE_FRAME ref_frame) {
-  VP9_COMMON *const cm = &cpi->common;
-  return &cm->frame_bufs[cm->ref_frame_map[get_ref_frame_idx(cpi,
-                                                             ref_frame)]].buf;
+static INLINE YV12_BUFFER_CONFIG *get_ref_frame_buffer(
+    VP9_COMP *cpi, MV_REFERENCE_FRAME ref_frame) {
+  VP9_COMMON * const cm = &cpi->common;
+  return &cm->frame_bufs[cm->ref_frame_map[get_ref_frame_idx(cpi, ref_frame)]]
+      .buf;
 }
 
 void vp9_set_speed_features(VP9_COMP *cpi);
+
+static INLINE int get_token_alloc(int mb_rows, int mb_cols) {
+  // TODO(JBB): make this work for alpha channel and double check we can't
+  // exceed this token count if we have a 32x32 transform crossing a boundary
+  // at a multiple of 16.
+  // mb_rows, cols are in units of 16 pixels. We assume 3 planes all at full
+  // resolution. We assume up to 1 token per pixel, and then allow
+  // a head room of 4.
+  return mb_rows * mb_cols * (16 * 16 * 3 + 4);
+}
 
 int vp9_calc_ss_err(const YV12_BUFFER_CONFIG *source,
                     const YV12_BUFFER_CONFIG *reference);
@@ -908,16 +918,13 @@ void vp9_scale_references(VP9_COMP *cpi);
 
 void vp9_update_reference_frames(VP9_COMP *cpi);
 
-static int get_token_alloc(int mb_rows, int mb_cols) {
-  return mb_rows * mb_cols * (48 * 16 + 4);
-}
-
 extern const int q_trans[];
 
 int64_t vp9_rescale(int64_t val, int64_t num, int denom);
 
-static void set_ref_ptrs(VP9_COMMON *cm, MACROBLOCKD *xd,
-                         MV_REFERENCE_FRAME ref0, MV_REFERENCE_FRAME ref1) {
+static INLINE void set_ref_ptrs(VP9_COMMON *cm, MACROBLOCKD *xd,
+                                MV_REFERENCE_FRAME ref0,
+                                MV_REFERENCE_FRAME ref1) {
   xd->block_refs[0] = &cm->frame_refs[ref0 >= LAST_FRAME ? ref0 - LAST_FRAME
                                                          : 0];
   xd->block_refs[1] = &cm->frame_refs[ref1 >= LAST_FRAME ? ref1 - LAST_FRAME
