@@ -903,7 +903,8 @@ static void update_state(VP9_COMP *cpi, PICK_MODE_CONTEXT *ctx,
       output_enabled) {
     // Check for reseting segment_id and update cyclic map.
     if (cpi->oxcf.aq_mode == CYCLIC_REFRESH_AQ && seg->enabled) {
-      vp9_update_segment_aq(cpi, xd->mi_8x8[0], mi_row, mi_col, bsize, 1);
+      vp9_update_segment_aq(cpi, &xd->mi_8x8[0]->mbmi,
+                            mi_row, mi_col, bsize, 1);
       vp9_init_plane_quantizers(cpi, x);
     }
     mi->mbmi.segment_id = xd->mi_8x8[0]->mbmi.segment_id;
@@ -1470,7 +1471,7 @@ static void update_state_rt(VP9_COMP *cpi, const PICK_MODE_CONTEXT *ctx,
 
   // Check for reseting segment_id and update cyclic map.
   if (cpi->oxcf.aq_mode == CYCLIC_REFRESH_AQ && seg->enabled) {
-    vp9_update_segment_aq(cpi, xd->mi_8x8[0], mi_row, mi_col, bsize, 1);
+    vp9_update_segment_aq(cpi, &xd->mi_8x8[0]->mbmi, mi_row, mi_col, bsize, 1);
     vp9_init_plane_quantizers(cpi, x);
   }
 
