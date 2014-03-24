@@ -210,10 +210,6 @@ void vp9_remove_common(VP9_COMMON *cm) {
   vp9_free_internal_frame_buffers(&cm->int_frame_buffers);
 }
 
-void vp9_initialize_common() {
-  vp9_init_neighbors();
-}
-
 void vp9_update_frame_size(VP9_COMMON *cm) {
   const int aligned_width = ALIGN_POWER_OF_TWO(cm->width, MI_SIZE_LOG2);
   const int aligned_height = ALIGN_POWER_OF_TWO(cm->height, MI_SIZE_LOG2);

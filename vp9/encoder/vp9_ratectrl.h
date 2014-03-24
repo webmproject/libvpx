@@ -92,8 +92,7 @@ void vp9_setup_inter_frame(struct VP9_COMP *cpi);
 
 double vp9_convert_qindex_to_q(int qindex);
 
-// initialize luts for minq
-void vp9_rc_init_minq_luts(void);
+void vp9_rc_init_minq_luts();
 
 // Generally at the high level, the following flow is expected
 // to be enforced for rate control:

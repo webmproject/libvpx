@@ -55,10 +55,9 @@ static int kf_low = 400;
 // formulaic approach to facilitate easier adjustment of the Q tables.
 // The formulae were derived from computing a 3rd order polynomial best
 // fit to the original data (after plotting real maxq vs minq (not q index))
-static int calculate_minq_index(double maxq,
-                                double x3, double x2, double x1, double c) {
+static int get_minq_index(double maxq, double x3, double x2, double x1) {
   int i;
-  const double minqtarget = MIN(((x3 * maxq + x2) * maxq + x1) * maxq + c,
+  const double minqtarget = MIN(((x3 * maxq + x2) * maxq + x1) * maxq,
                                 maxq);
 
   // Special case handling to deal with the step from q2.0
@@ -66,57 +65,26 @@ static int calculate_minq_index(double maxq,
   if (minqtarget <= 2.0)
     return 0;
 
-  for (i = 0; i < QINDEX_RANGE; i++) {
+  for (i = 0; i < QINDEX_RANGE; i++)
     if (minqtarget <= vp9_convert_qindex_to_q(i))
       return i;
-  }
 
   return QINDEX_RANGE - 1;
 }
 
-void vp9_rc_init_minq_luts(void) {
+void vp9_rc_init_minq_luts() {
   int i;
 
   for (i = 0; i < QINDEX_RANGE; i++) {
     const double maxq = vp9_convert_qindex_to_q(i);
 
-
-    kf_low_motion_minq[i] = calculate_minq_index(maxq,
-                                                 0.000001,
-                                                 -0.0004,
-                                                 0.15,
-                                                 0.0);
-    kf_high_motion_minq[i] = calculate_minq_index(maxq,
-                                                  0.000002,
-                                                  -0.0012,
-                                                  0.50,
-                                                  0.0);
-
-    gf_low_motion_minq[i] = calculate_minq_index(maxq,
-                                                 0.0000015,
-                                                 -0.0009,
-                                                 0.32,
-                                                 0.0);
-    gf_high_motion_minq[i] = calculate_minq_index(maxq,
-                                                  0.0000021,
-                                                  -0.00125,
-                                                  0.50,
-                                                  0.0);
-    afq_low_motion_minq[i] = calculate_minq_index(maxq,
-                                                  0.0000015,
-                                                  -0.0009,
-                                                  0.33,
-                                                  0.0);
-    afq_high_motion_minq[i] = calculate_minq_index(maxq,
-                                                   0.0000021,
-                                                   -0.00125,
-                                                   0.55,
-                                                   0.0);
-    inter_minq[i] = calculate_minq_index(maxq,
-                                         0.00000271,
-                                         -0.00113,
-                                         0.75,
-                                         0.0);
+    kf_low_motion_minq[i] = get_minq_index(maxq, 0.000001, -0.0004, 0.15);
+    kf_high_motion_minq[i] = get_minq_index(maxq, 0.000002, -0.0012, 0.50);
+    gf_low_motion_minq[i] = get_minq_index(maxq, 0.0000015, -0.0009, 0.32);
+    gf_high_motion_minq[i] = get_minq_index(maxq, 0.0000021, -0.00125, 0.50);
+    afq_low_motion_minq[i] = get_minq_index(maxq, 0.0000015, -0.0009, 0.33);
+    afq_high_motion_minq[i] = get_minq_index(maxq, 0.0000021, -0.00125, 0.55);
+    inter_minq[i] = get_minq_index(maxq, 0.00000271, -0.00113, 0.75);
   }
 }
 
