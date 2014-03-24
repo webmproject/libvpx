@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//xIo\u003d",
+        "filename": "vp9/encoder/vp9_craq.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 240,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2014-03-24T09:42:49Z",
+      "side": 1,
+      "message": "Minor nit. I sort of feel that in situations like this where there is a block of code spanning multiple lines even if it is only one for{...} that having { and } braces marking it makes things clearer.",
+      "revId": "dc8927bca5c2d5e59c907c0eab8e4ac5223ba1c5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//xIk\u003d",
+        "filename": "vp9/encoder/vp9_craq.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 261,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2014-03-24T09:42:49Z",
+      "side": 1,
+      "message": "ditto as above",
+      "revId": "dc8927bca5c2d5e59c907c0eab8e4ac5223ba1c5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
