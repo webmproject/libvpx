@@ -16,6 +16,24 @@
       "revId": "0f06d0b6cd155bbb4382f3fc3e4fec1f62dfbee9",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//xGA\u003d",
+        "filename": "vp9/encoder/vp9_onyx_int.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 898,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2014-03-24T15:55:46Z",
+      "side": 1,
+      "message": "They\u0027ve always been magic numbers I just added the word INLINE to the list..   :) but ok",
+      "parentUuid": "AAAAdn//xGw\u003d",
+      "revId": "0f06d0b6cd155bbb4382f3fc3e4fec1f62dfbee9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
