@@ -104,7 +104,7 @@ void vp9_initialize_dec() {
   static int init_done = 0;
 
   if (!init_done) {
-    vp9_initialize_common();
+    vp9_init_neighbors();
     vp9_init_quant_tables();
     init_done = 1;
   }

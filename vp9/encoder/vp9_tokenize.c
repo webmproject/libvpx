@@ -108,7 +108,7 @@ void vp9_coef_tree_initialize() {
   vp9_tokens_from_tree(vp9_coef_encodings, vp9_coef_tree);
 }
 
-static void fill_value_tokens() {
+void vp9_tokenize_initialize() {
   TOKENVALUE *const t = dct_value_tokens + DCT_MAX_VALUE;
   const vp9_extra_bit *const e = vp9_extra_bits;
 
@@ -331,8 +331,4 @@ void vp9_tokenize_sb(VP9_COMP *cpi, TOKENEXTRA **t, int dry_run,
     vp9_foreach_transformed_block(xd, bsize, set_entropy_context_b, &arg);
     *t = t_backup;
   }
-}
-
-void vp9_tokenize_initialize() {
-  fill_value_tokens();
 }
