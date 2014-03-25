@@ -853,17 +853,6 @@ static const uint8_t *decode_tiles(VP9D_COMP *pbi,
   return end;
 }
 
-static void setup_tile_macroblockd(TileWorkerData *const tile_data) {
-  MACROBLOCKD *xd = &tile_data->xd;
-  struct macroblockd_plane *const pd = xd->plane;
-  int i;
-
-  for (i = 0; i < MAX_MB_PLANE; ++i) {
-    pd[i].dqcoeff = tile_data->dqcoeff[i];
-    vpx_memset(xd->plane[i].dqcoeff, 0, 64 * 64 * sizeof(int16_t));
-  }
-}
-
 static int tile_worker_hook(void *arg1, void *arg2) {
   TileWorkerData *const tile_data = (TileWorkerData*)arg1;
   const TileInfo *const tile = (TileInfo*)arg2;
@@ -990,8 +979,10 @@ static const uint8_t *decode_tiles_mt(VP9D_COMP *pbi,
 
       setup_token_decoder(buf->data, data_end, buf->size, &cm->error,
                           &tile_data->bit_reader);
+
       setup_tile_context(cm, &tile_data->xd, 0, buf->col);
-      setup_tile_macroblockd(tile_data);
+      init_macroblockd(&tile_data->xd);
+      vp9_zero(tile_data->xd.dqcoeff);
 
       worker->had_error = 0;
       if (i == num_workers - 1 || n == tile_cols - 1) {
@@ -1281,7 +1272,6 @@ static void debug_check_frame_counts(const VP9_COMMON *const cm) {
 int vp9_decode_frame(VP9D_COMP *pbi,
                      const uint8_t *data, const uint8_t *data_end,
                      const uint8_t **p_data_end) {
-  int i;
   VP9_COMMON *const cm = &pbi->common;
   MACROBLOCKD *const xd = &pbi->mb;
 
@@ -1330,8 +1320,7 @@ int vp9_decode_frame(VP9D_COMP *pbi,
 
   cm->fc = cm->frame_contexts[cm->frame_context_idx];
   vp9_zero(cm->counts);
-  for (i = 0; i < MAX_MB_PLANE; ++i)
-    vpx_memset(xd->plane[i].dqcoeff, 0, 64 * 64 * sizeof(int16_t));
+  vp9_zero(xd->dqcoeff);
 
   xd->corrupted = 0;
   new_fb->corrupted = read_compressed_header(pbi, data, first_partition_size);
