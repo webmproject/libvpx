@@ -63,7 +63,7 @@ static TX_SIZE read_selected_tx_size(VP9_COMMON *cm, MACROBLOCKD *xd,
                                      TX_SIZE max_tx_size, vp9_reader *r) {
   const int ctx = vp9_get_tx_size_context(xd);
   const vp9_prob *tx_probs = get_tx_probs(max_tx_size, ctx, &cm->fc.tx_probs);
-  TX_SIZE tx_size = (TX_SIZE)vp9_read(r, tx_probs[0]);
+  int tx_size = vp9_read(r, tx_probs[0]);
   if (tx_size != TX_4X4 && max_tx_size >= TX_16X16) {
     tx_size += vp9_read(r, tx_probs[1]);
     if (tx_size != TX_8X8 && max_tx_size >= TX_32X32)
@@ -72,7 +72,7 @@ static TX_SIZE read_selected_tx_size(VP9_COMMON *cm, MACROBLOCKD *xd,
 
   if (!cm->frame_parallel_decoding_mode)
     ++get_tx_counts(max_tx_size, ctx, &cm->counts.tx)[tx_size];
-  return tx_size;
+  return (TX_SIZE)tx_size;
 }
 
 static TX_SIZE read_tx_size(VP9_COMMON *cm, MACROBLOCKD *xd, TX_MODE tx_mode,
@@ -237,14 +237,15 @@ static int read_mv_component(vp9_reader *r,
 static INLINE void read_mv(vp9_reader *r, MV *mv, const MV *ref,
                            const nmv_context *ctx,
                            nmv_context_counts *counts, int allow_hp) {
-  const MV_JOINT_TYPE j = vp9_read_tree(r, vp9_mv_joint_tree, ctx->joints);
+  const MV_JOINT_TYPE joint_type =
+      (MV_JOINT_TYPE)vp9_read_tree(r, vp9_mv_joint_tree, ctx->joints);
   const int use_hp = allow_hp && vp9_use_mv_hp(ref);
   MV diff = {0, 0};
 
-  if (mv_joint_vertical(j))
+  if (mv_joint_vertical(joint_type))
     diff.row = read_mv_component(r, &ctx->comps[0], use_hp);
 
-  if (mv_joint_horizontal(j))
+  if (mv_joint_horizontal(joint_type))
     diff.col = read_mv_component(r, &ctx->comps[1], use_hp);
 
   vp9_inc_mv(&diff, counts);
@@ -276,7 +277,8 @@ static void read_ref_frames(VP9_COMMON *const cm, MACROBLOCKD *const xd,
   FRAME_COUNTS *const counts = &cm->counts;
 
   if (vp9_segfeature_active(&cm->seg, segment_id, SEG_LVL_REF_FRAME)) {
-    ref_frame[0] = vp9_get_segdata(&cm->seg, segment_id, SEG_LVL_REF_FRAME);
+    ref_frame[0] = (MV_REFERENCE_FRAME)vp9_get_segdata(&cm->seg, segment_id,
+                                                       SEG_LVL_REF_FRAME);
     ref_frame[1] = NONE;
   } else {
     const REFERENCE_MODE mode = read_block_reference_mode(cm, xd, r);

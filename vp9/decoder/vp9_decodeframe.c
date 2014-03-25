@@ -214,7 +214,7 @@ static void inverse_transform_block(MACROBLOCKD* xd, int plane, int block,
   struct macroblockd_plane *const pd = &xd->plane[plane];
   if (eob > 0) {
     TX_TYPE tx_type;
-    const int plane_type = pd->plane_type;
+    const PLANE_TYPE plane_type = pd->plane_type;
     int16_t *const dqcoeff = BLOCK_OFFSET(pd->dqcoeff, block);
     switch (tx_size) {
       case TX_4X4:
@@ -262,7 +262,7 @@ struct intra_args {
 static void predict_and_reconstruct_intra_block(int plane, int block,
                                                 BLOCK_SIZE plane_bsize,
                                                 TX_SIZE tx_size, void *arg) {
-  struct intra_args *const args = arg;
+  struct intra_args *const args = (struct intra_args *)arg;
   VP9_COMMON *const cm = args->cm;
   MACROBLOCKD *const xd = args->xd;
   struct macroblockd_plane *const pd = &xd->plane[plane];
@@ -298,7 +298,7 @@ struct inter_args {
 static void reconstruct_inter_block(int plane, int block,
                                     BLOCK_SIZE plane_bsize,
                                     TX_SIZE tx_size, void *arg) {
-  struct inter_args *args = arg;
+  struct inter_args *args = (struct inter_args *)arg;
   VP9_COMMON *const cm = args->cm;
   MACROBLOCKD *const xd = args->xd;
   struct macroblockd_plane *const pd = &xd->plane[plane];
@@ -414,7 +414,7 @@ static PARTITION_TYPE read_partition(VP9_COMMON *cm, MACROBLOCKD *xd, int hbs,
   PARTITION_TYPE p;
 
   if (has_rows && has_cols)
-    p = vp9_read_tree(r, vp9_partition_tree, probs);
+    p = (PARTITION_TYPE)vp9_read_tree(r, vp9_partition_tree, probs);
   else if (!has_rows && has_cols)
     p = vp9_read(r, probs[1]) ? PARTITION_SPLIT : PARTITION_HORZ;
   else if (has_rows && !has_cols)
@@ -1108,7 +1108,7 @@ static size_t read_uncompressed_header(VP9D_COMP *pbi,
   if (cm->frame_type == KEY_FRAME) {
     check_sync_code(cm, rb);
 
-    cm->color_space = vp9_rb_read_literal(rb, 3);  // colorspace
+    cm->color_space = (COLOR_SPACE)vp9_rb_read_literal(rb, 3);
     if (cm->color_space != SRGB) {
       vp9_rb_read_bit(rb);  // [16,235] (including xvycc) vs [0,255] range
       if (cm->version == 1) {
