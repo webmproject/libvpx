@@ -619,9 +619,7 @@ static void setup_display_size(VP9_COMMON *cm, struct vp9_read_bit_buffer *rb) {
     read_frame_size(rb, &cm->display_width, &cm->display_height);
 }
 
-static void apply_frame_size(VP9D_COMP *pbi, int width, int height) {
-  VP9_COMMON *cm = &pbi->common;
-
+static void apply_frame_size(VP9_COMMON *cm, int width, int height) {
   if (cm->width != width || cm->height != height) {
     // Change in frame size.
     // TODO(agrange) Don't test width/height, check overall size.
@@ -648,18 +646,15 @@ static void apply_frame_size(VP9D_COMP *pbi, int width, int height) {
   }
 }
 
-static void setup_frame_size(VP9D_COMP *pbi,
-                             struct vp9_read_bit_buffer *rb) {
+static void setup_frame_size(VP9_COMMON *cm, struct vp9_read_bit_buffer *rb) {
   int width, height;
   read_frame_size(rb, &width, &height);
-  apply_frame_size(pbi, width, height);
-  setup_display_size(&pbi->common, rb);
+  apply_frame_size(cm, width, height);
+  setup_display_size(cm, rb);
 }
 
-static void setup_frame_size_with_refs(VP9D_COMP *pbi,
+static void setup_frame_size_with_refs(VP9_COMMON *cm,
                                        struct vp9_read_bit_buffer *rb) {
-  VP9_COMMON *const cm = &pbi->common;
-
   int width, height;
   int found = 0, i;
   for (i = 0; i < REFS_PER_FRAME; ++i) {
@@ -679,13 +674,12 @@ static void setup_frame_size_with_refs(VP9D_COMP *pbi,
     vpx_internal_error(&cm->error, VPX_CODEC_CORRUPT_FRAME,
                        "Referenced frame with invalid size");
 
-  apply_frame_size(pbi, width, height);
+  apply_frame_size(cm, width, height);
   setup_display_size(cm, rb);
 }
 
-static void setup_tile_context(VP9D_COMP *const pbi, MACROBLOCKD *const xd,
+static void setup_tile_context(VP9_COMMON *cm, MACROBLOCKD *const xd,
                                int tile_row, int tile_col) {
-  VP9_COMMON *const cm = &pbi->common;
   int i;
 
   for (i = 0; i < MAX_MB_PLANE; ++i)
@@ -849,7 +843,7 @@ static const uint8_t *decode_tiles(VP9D_COMP *pbi,
 
       vp9_tile_init(&tile, cm, tile_row, col);
       setup_token_decoder(buf->data, data_end, buf->size, &cm->error, &r);
-      setup_tile_context(pbi, xd, tile_row, col);
+      setup_tile_context(cm, xd, tile_row, col);
       decode_tile(pbi, &tile, &r);
 
       if (last_tile)
@@ -997,7 +991,7 @@ static const uint8_t *decode_tiles_mt(VP9D_COMP *pbi,
 
       setup_token_decoder(buf->data, data_end, buf->size, &cm->error,
                           &tile_data->bit_reader);
-      setup_tile_context(pbi, &tile_data->xd, 0, buf->col);
+      setup_tile_context(cm, &tile_data->xd, 0, buf->col);
       setup_tile_macroblockd(tile_data);
 
       worker->had_error = 0;
@@ -1114,7 +1108,7 @@ static size_t read_uncompressed_header(VP9D_COMP *pbi,
       cm->frame_refs[i].buf = get_frame_new_buffer(cm);
     }
 
-    setup_frame_size(pbi, rb);
+    setup_frame_size(cm, rb);
   } else {
     cm->intra_only = cm->show_frame ? 0 : vp9_rb_read_bit(rb);
 
@@ -1125,7 +1119,7 @@ static size_t read_uncompressed_header(VP9D_COMP *pbi,
       check_sync_code(cm, rb);
 
       pbi->refresh_frame_flags = vp9_rb_read_literal(rb, REF_FRAMES);
-      setup_frame_size(pbi, rb);
+      setup_frame_size(cm, rb);
     } else {
       pbi->refresh_frame_flags = vp9_rb_read_literal(rb, REF_FRAMES);
 
@@ -1137,7 +1131,7 @@ static size_t read_uncompressed_header(VP9D_COMP *pbi,
         cm->ref_frame_sign_bias[LAST_FRAME + i] = vp9_rb_read_bit(rb);
       }
 
-      setup_frame_size_with_refs(pbi, rb);
+      setup_frame_size_with_refs(cm, rb);
 
       cm->allow_high_precision_mv = vp9_rb_read_bit(rb);
       cm->interp_filter = read_interp_filter(rb);

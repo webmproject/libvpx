@@ -324,6 +324,8 @@ static vpx_codec_err_t decode_one(vpx_codec_alg_priv_t *ctx,
   }
 
   if (!res && ctx->pbi) {
+    VP9D_COMP *const pbi = ctx->pbi;
+    VP9_COMMON *const cm = &pbi->common;
     YV12_BUFFER_CONFIG sd;
     int64_t time_stamp = 0, time_end_stamp = 0;
     vp9_ppflags_t flags = {0};
@@ -348,15 +350,11 @@ static vpx_codec_err_t decode_one(vpx_codec_alg_priv_t *ctx,
 #endif
     }
 
-    if (vp9_receive_compressed_data(ctx->pbi, data_sz, data, deadline)) {
-      VP9D_COMP *pbi = (VP9D_COMP*)ctx->pbi;
-      res = update_error_state(ctx, &pbi->common.error);
-    }
+    if (vp9_receive_compressed_data(pbi, data_sz, data, deadline))
+      res = update_error_state(ctx, &cm->error);
 
-    if (!res && 0 == vp9_get_raw_frame(ctx->pbi, &sd, &time_stamp,
+    if (!res && 0 == vp9_get_raw_frame(pbi, &sd, &time_stamp,
                                        &time_end_stamp, &flags)) {
-      VP9D_COMP *const pbi = (VP9D_COMP*)ctx->pbi;
-      VP9_COMMON *const cm = &pbi->common;
       yuvconfig2image(&ctx->img, &sd, user_priv);
 
       ctx->img.fb_priv = cm->frame_bufs[cm->new_fb_idx].raw_frame_buffer.priv;
@@ -653,12 +651,13 @@ static vpx_codec_err_t set_dbg_options(vpx_codec_alg_priv_t *ctx, int ctrl_id,
 
 static vpx_codec_err_t get_last_ref_updates(vpx_codec_alg_priv_t *ctx,
                                             int ctrl_id, va_list args) {
-  int *update_info = va_arg(args, int *);
-  VP9D_COMP *pbi = (VP9D_COMP*)ctx->pbi;
+  int *const update_info = va_arg(args, int *);
 
   if (update_info) {
-    *update_info = pbi->refresh_frame_flags;
-
+    if (ctx->pbi)
+      *update_info = ctx->pbi->refresh_frame_flags;
+    else
+      return VPX_CODEC_ERROR;
     return VPX_CODEC_OK;
   } else {
     return VPX_CODEC_INVALID_PARAM;
@@ -671,9 +670,8 @@ static vpx_codec_err_t get_frame_corrupted(vpx_codec_alg_priv_t *ctx,
   int *corrupted = va_arg(args, int *);
 
   if (corrupted) {
-    VP9D_COMP *pbi = (VP9D_COMP*)ctx->pbi;
-    if (pbi)
-      *corrupted = pbi->common.frame_to_show->corrupted;
+    if (ctx->pbi)
+      *corrupted = ctx->pbi->common.frame_to_show->corrupted;
     else
       return VPX_CODEC_ERROR;
     return VPX_CODEC_OK;
@@ -687,10 +685,10 @@ static vpx_codec_err_t get_display_size(vpx_codec_alg_priv_t *ctx,
   int *const display_size = va_arg(args, int *);
 
   if (display_size) {
-    const VP9D_COMP *const pbi = (VP9D_COMP*)ctx->pbi;
-    if (pbi) {
-      display_size[0] = pbi->common.display_width;
-      display_size[1] = pbi->common.display_height;
+    if (ctx->pbi) {
+      const VP9_COMMON *const cm = &ctx->pbi->common;
+      display_size[0] = cm->display_width;
+      display_size[1] = cm->display_height;
     } else {
       return VPX_CODEC_ERROR;
     }
