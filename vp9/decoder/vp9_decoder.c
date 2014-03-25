@@ -164,12 +164,10 @@ VP9D_COMP *vp9_create_decompressor(const VP9D_CONFIG *oxcf) {
 }
 
 void vp9_remove_decompressor(VP9D_COMP *pbi) {
+  VP9_COMMON *const cm = &pbi->common;
   int i;
 
-  if (!pbi)
-    return;
-
-  vp9_remove_common(&pbi->common);
+  vp9_remove_common(cm);
   vp9_worker_end(&pbi->lf_worker);
   vpx_free(pbi->lf_worker.data1);
   for (i = 0; i < pbi->num_tile_workers; ++i) {
@@ -181,15 +179,11 @@ void vp9_remove_decompressor(VP9D_COMP *pbi) {
   vpx_free(pbi->tile_workers);
 
   if (pbi->num_tile_workers) {
-    VP9_COMMON *const cm = &pbi->common;
     const int sb_rows =
         mi_cols_aligned_to_sb(cm->mi_rows) >> MI_BLOCK_SIZE_LOG2;
-    VP9LfSync *const lf_sync = &pbi->lf_row_sync;
-
-    vp9_loop_filter_dealloc(lf_sync, sb_rows);
+    vp9_loop_filter_dealloc(&pbi->lf_row_sync, sb_rows);
   }
 
-  vpx_free(pbi->common.above_seg_context);
   vpx_free(pbi);
 }
 

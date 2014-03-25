@@ -132,7 +132,8 @@ static vpx_codec_err_t vp9_init(vpx_codec_ctx_t *ctx,
 static vpx_codec_err_t vp9_destroy(vpx_codec_alg_priv_t *ctx) {
   int i;
 
-  vp9_remove_decompressor(ctx->pbi);
+  if (ctx->pbi)
+    vp9_remove_decompressor(ctx->pbi);
 
   for (i = NELEMENTS(ctx->mmaps) - 1; i >= 0; i--) {
     if (ctx->mmaps[i].dtor)
