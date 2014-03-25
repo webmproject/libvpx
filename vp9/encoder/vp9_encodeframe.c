@@ -896,21 +896,16 @@ static void update_state(VP9_COMP *cpi, PICK_MODE_CONTEXT *ctx,
 
   assert(mi->mbmi.sb_type == bsize);
 
-  // For in frame adaptive Q copy over the chosen segment id into the
-  // mode innfo context for the chosen mode / partition.
-  if ((cpi->oxcf.aq_mode == COMPLEXITY_AQ ||
-      cpi->oxcf.aq_mode == CYCLIC_REFRESH_AQ) &&
-      output_enabled) {
-    // Check for reseting segment_id and update cyclic map.
-    if (cpi->oxcf.aq_mode == CYCLIC_REFRESH_AQ && seg->enabled) {
-      vp9_update_segment_aq(cpi, &xd->mi_8x8[0]->mbmi,
-                            mi_row, mi_col, bsize, 1);
-      vp9_init_plane_quantizers(cpi, x);
-    }
-    mi->mbmi.segment_id = xd->mi_8x8[0]->mbmi.segment_id;
-  }
-
   *mi_addr = *mi;
+
+  // For in frame adaptive Q, check for reseting the segment_id and updating
+  // the cyclic refresh map.
+  if ((cpi->oxcf.aq_mode == CYCLIC_REFRESH_AQ) && seg->enabled &&
+      output_enabled) {
+    vp9_update_segment_aq(cpi, &xd->mi_8x8[0]->mbmi,
+                          mi_row, mi_col, bsize, 1);
+    vp9_init_plane_quantizers(cpi, x);
+  }
 
   max_plane = is_inter_block(mbmi) ? MAX_MB_PLANE : 1;
   for (i = 0; i < max_plane; ++i) {
