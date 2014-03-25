@@ -87,9 +87,6 @@ struct VP9_COMP;
 void vp9_save_coding_context(struct VP9_COMP *cpi);
 void vp9_restore_coding_context(struct VP9_COMP *cpi);
 
-void vp9_setup_key_frame(struct VP9_COMP *cpi);
-void vp9_setup_inter_frame(struct VP9_COMP *cpi);
-
 double vp9_convert_qindex_to_q(int qindex);
 
 void vp9_rc_init_minq_luts();
