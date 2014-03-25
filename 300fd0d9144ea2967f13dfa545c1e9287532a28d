@@ -1,0 +1,106 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//w9s\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 851,
+      "author": {
+        "id": 1003234
+      },
+      "writtenOn": "2014-03-25T00:47:31Z",
+      "side": 1,
+      "message": "This block of code is repeated many times across this patch. The duplication can be removed with a helper function  RATE_CONTROL *get_rate_control(VP9_COMP *cpi)",
+      "revId": "300fd0d9144ea2967f13dfa545c1e9287532a28d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//w9o\u003d",
+        "filename": "vp9/encoder/vp9_firstpass.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 1093,
+      "author": {
+        "id": 1003234
+      },
+      "writtenOn": "2014-03-25T00:47:31Z",
+      "side": 1,
+      "message": "... move position out of conditional - set value once after twopass is set.",
+      "revId": "300fd0d9144ea2967f13dfa545c1e9287532a28d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//w8E\u003d",
+        "filename": "vp9/encoder/vp9_firstpass.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 1477,
+      "author": {
+        "id": 1003234
+      },
+      "writtenOn": "2014-03-25T00:47:31Z",
+      "side": 1,
+      "message": "A get_twopass_rc helper function will remove the duplication of this block of code.",
+      "revId": "300fd0d9144ea2967f13dfa545c1e9287532a28d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//w9E\u003d",
+        "filename": "vp9/encoder/vp9_firstpass.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 1910,
+      "author": {
+        "id": 1003234
+      },
+      "writtenOn": "2014-03-25T00:47:31Z",
+      "side": 1,
+      "message": "use get_twopass_rc helper.\nextract start_pos once after twopass variable is set.",
+      "revId": "300fd0d9144ea2967f13dfa545c1e9287532a28d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//w84\u003d",
+        "filename": "vp9/encoder/vp9_firstpass.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 2336,
+      "author": {
+        "id": 1003234
+      },
+      "writtenOn": "2014-03-25T00:47:31Z",
+      "side": 1,
+      "message": "nit: period at end of sentence.",
+      "revId": "300fd0d9144ea2967f13dfa545c1e9287532a28d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//w78\u003d",
+        "filename": "vp9/encoder/vp9_onyx_if.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 226,
+      "author": {
+        "id": 1003234
+      },
+      "writtenOn": "2014-03-25T00:47:31Z",
+      "side": 1,
+      "message": "This will be a lot cleaner with a get_rate_control helper\nconst RATE_CONTROL *rc \u003d get_rate_control(cpi);\nint start_index \u003d rc-\u003eworst_quality;\nint target_index \u003d rc-\u003eworst_quality;\n\nThis comment applies for many of the changes in this file.",
+      "revId": "300fd0d9144ea2967f13dfa545c1e9287532a28d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
