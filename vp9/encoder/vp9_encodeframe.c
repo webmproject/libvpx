@@ -1617,6 +1617,7 @@ static void rd_use_partition(VP9_COMP *cpi,
   BLOCK_SIZE sub_subsize = BLOCK_4X4;
   int splits_below = 0;
   BLOCK_SIZE bs_type = mi_8x8[0]->mbmi.sb_type;
+  int do_partition_search = 1;
 
   if (mi_row >= cm->mi_rows || mi_col >= cm->mi_cols)
     return;
@@ -1640,12 +1641,23 @@ static void rd_use_partition(VP9_COMP *cpi,
   }
   save_context(cpi, mi_row, mi_col, a, l, sa, sl, bsize);
 
+  set_offsets(cpi, tile, mi_row, mi_col, bsize);
   if (bsize == BLOCK_16X16) {
-    set_offsets(cpi, tile, mi_row, mi_col, bsize);
     x->mb_energy = vp9_block_energy(cpi, x, bsize);
   }
 
-  if (cpi->sf.partition_search_type == SEARCH_PARTITION &&
+  if (!x->in_active_map) {
+    do_partition_search = 0;
+    if (mi_row + (mi_step >> 1) < cm->mi_rows &&
+        mi_col + (mi_step >> 1) < cm->mi_cols) {
+      *(get_sb_partitioning(x, bsize)) = bsize;
+      bs_type = mi_8x8[0]->mbmi.sb_type = bsize;
+      subsize = bsize;
+      partition = PARTITION_NONE;
+    }
+  }
+  if (do_partition_search &&
+      cpi->sf.partition_search_type == SEARCH_PARTITION &&
       cpi->sf.adjust_partitioning_from_last_frame) {
     // Check if any of the sub blocks are further split.
     if (partition == PARTITION_SPLIT && subsize > BLOCK_8X8) {
@@ -1775,7 +1787,8 @@ static void rd_use_partition(VP9_COMP *cpi,
     last_part_rd = RDCOST(x->rdmult, x->rddiv, last_part_rate, last_part_dist);
   }
 
-  if (cpi->sf.adjust_partitioning_from_last_frame
+  if (do_partition_search
+      && cpi->sf.adjust_partitioning_from_last_frame
       && cpi->sf.partition_search_type == SEARCH_PARTITION
       && partition != PARTITION_SPLIT && bsize > BLOCK_8X8
       && (mi_row + mi_step < cm->mi_rows ||
