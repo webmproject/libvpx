@@ -2783,8 +2783,7 @@ static void nonrd_pick_partition(VP9_COMP *cpi, const TileInfo *const tile,
   }
 
   // store estimated motion vector
-  if (cpi->sf.adaptive_motion_search)
-    store_pred_mv(x, ctx);
+  store_pred_mv(x, ctx);
 
   // PARTITION_SPLIT
   sum_rd = 0;
@@ -2802,8 +2801,7 @@ static void nonrd_pick_partition(VP9_COMP *cpi, const TileInfo *const tile,
         continue;
 
       *get_sb_index(x, subsize) = i;
-      if (cpi->sf.adaptive_motion_search)
-        load_pred_mv(x, ctx);
+      load_pred_mv(x, ctx);
 
       nonrd_pick_partition(cpi, tile, tp, mi_row + y_idx, mi_col + x_idx,
                            subsize, &this_rate, &this_dist, 0, INT64_MAX);
@@ -2847,8 +2845,7 @@ static void nonrd_pick_partition(VP9_COMP *cpi, const TileInfo *const tile,
     if (sum_rd < best_rd && mi_row + ms < cm->mi_rows) {
       *get_sb_index(x, subsize) = 1;
 
-      if (cpi->sf.adaptive_motion_search)
-        load_pred_mv(x, ctx);
+      load_pred_mv(x, ctx);
 
       nonrd_pick_sb_modes(cpi, tile, mi_row + ms, mi_col,
                           &this_rate, &this_dist, subsize);
@@ -2890,8 +2887,7 @@ static void nonrd_pick_partition(VP9_COMP *cpi, const TileInfo *const tile,
     if (sum_rd < best_rd && mi_col + ms < cm->mi_cols) {
       *get_sb_index(x, subsize) = 1;
 
-      if (cpi->sf.adaptive_motion_search)
-        load_pred_mv(x, ctx);
+      load_pred_mv(x, ctx);
 
       nonrd_pick_sb_modes(cpi, tile, mi_row, mi_col + ms,
                           &this_rate, &this_dist, subsize);
