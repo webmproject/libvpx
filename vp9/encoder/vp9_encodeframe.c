@@ -3454,11 +3454,9 @@ static void encode_superblock(VP9_COMP *cpi, TOKENEXTRA **t, int output_enabled,
   const int mi_height = num_8x8_blocks_high_lookup[bsize];
 
   x->skip_recode = !x->select_txfm_size && mbmi->sb_type >= BLOCK_8X8 &&
-                   (cpi->oxcf.aq_mode != COMPLEXITY_AQ &&
-                    cpi->oxcf.aq_mode != CYCLIC_REFRESH_AQ) &&
-                   !cpi->sf.use_nonrd_pick_mode &&
-                   !cpi->sf.use_uv_intra_rd_estimate &&
-                   !cpi->sf.skip_encode_sb;
+                   cpi->oxcf.aq_mode != COMPLEXITY_AQ &&
+                   cpi->oxcf.aq_mode != CYCLIC_REFRESH_AQ &&
+                   cpi->sf.allow_skip_recode;
 
   x->skip_optimize = ctx->is_coded;
   ctx->is_coded = 1;
