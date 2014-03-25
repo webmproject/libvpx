@@ -204,13 +204,16 @@ sym(vp8_mbpost_proc_down_mmx):
             and         rcx,        15
             movd        DWORD PTR   [rsp+rcx*4], mm1 ;d[rcx*4]
 
+            cmp         edx,        8
+            jl          .skip_assignment
+
             mov         rcx,        rdx
             sub         rcx,        8
-
             and         rcx,        15
             movd        mm1,        DWORD PTR [rsp+rcx*4] ;d[rcx*4]
-
             movd        [rsi],      mm1
+
+.skip_assignment
             lea         rsi,        [rsi+rax]
 
             lea         rdi,        [rdi+rax]

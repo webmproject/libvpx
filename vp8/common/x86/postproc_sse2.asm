@@ -425,13 +425,16 @@ sym(vp8_mbpost_proc_down_xmm):
             and         rcx,        15
             movq        QWORD PTR   [rsp + rcx*8], xmm1 ;d[rcx*8]
 
+            cmp         edx,        8
+            jl          .skip_assignment
+
             mov         rcx,        rdx
             sub         rcx,        8
-
             and         rcx,        15
             movq        mm0,        [rsp + rcx*8] ;d[rcx*8]
-
             movq        [rsi],      mm0
+
+.skip_assignment
             lea         rsi,        [rsi+rax]
 
             lea         rdi,        [rdi+rax]

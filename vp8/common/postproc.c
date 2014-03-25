@@ -303,8 +303,8 @@ void vp8_mbpost_proc_down_c(unsigned char *dst, int pitch, int rows, int cols, i
             {
                 d[r&15] = (rv2[r&127] + sum + s[0]) >> 4;
             }
-
-            s[-8*pitch] = d[(r-8)&15];
+            if (r >= 8)
+              s[-8*pitch] = d[(r-8)&15];
             s += pitch;
         }
     }
