@@ -1450,9 +1450,9 @@ static void choose_intra_uv_mode(VP9_COMP *cpi, PICK_MODE_CONTEXT *ctx,
   *mode_uv = x->e_mbd.mi_8x8[0]->mbmi.uv_mode;
 }
 
-static int cost_mv_ref(VP9_COMP *cpi, MB_PREDICTION_MODE mode,
+static int cost_mv_ref(const VP9_COMP *cpi, MB_PREDICTION_MODE mode,
                        int mode_context) {
-  MACROBLOCK *const x = &cpi->mb;
+  const MACROBLOCK *const x = &cpi->mb;
   const int segment_id = x->e_mbd.mi_8x8[0]->mbmi.segment_id;
 
   // Don't account for mode here if segment skip is enabled.
