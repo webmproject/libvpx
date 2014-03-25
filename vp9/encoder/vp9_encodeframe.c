@@ -2748,9 +2748,7 @@ static void nonrd_pick_partition(VP9_COMP *cpi, const TileInfo *const tile,
     ctx->mic.mbmi = xd->mi_8x8[0]->mbmi;
 
     if (this_rate != INT_MAX) {
-      int pl = partition_plane_context(xd->above_seg_context,
-                                   xd->left_seg_context,
-                                   mi_row, mi_col, bsize);
+      int pl = partition_plane_context(xd, mi_row, mi_col, bsize);
       this_rate += x->partition_cost[pl][PARTITION_NONE];
       sum_rd = RDCOST(x->rdmult, x->rddiv, this_rate, this_dist);
       if (sum_rd < best_rd) {
@@ -2788,9 +2786,7 @@ static void nonrd_pick_partition(VP9_COMP *cpi, const TileInfo *const tile,
   // PARTITION_SPLIT
   sum_rd = 0;
   if (do_split) {
-    int pl = partition_plane_context(xd->above_seg_context,
-                                     xd->left_seg_context,
-                                     mi_row, mi_col, bsize);
+    int pl = partition_plane_context(xd, mi_row, mi_col, bsize);
     sum_rate += x->partition_cost[pl][PARTITION_SPLIT];
     subsize = get_subsize(bsize, PARTITION_SPLIT);
     for (i = 0; i < 4; ++i) {
@@ -2855,9 +2851,7 @@ static void nonrd_pick_partition(VP9_COMP *cpi, const TileInfo *const tile,
       if (this_rate == INT_MAX) {
         sum_rd = INT64_MAX;
       } else {
-        int pl = partition_plane_context(xd->above_seg_context,
-                                         xd->left_seg_context,
-                                         mi_row, mi_col, bsize);
+        int pl = partition_plane_context(xd, mi_row, mi_col, bsize);
         this_rate += x->partition_cost[pl][PARTITION_HORZ];
         sum_rate += this_rate;
         sum_dist += this_dist;
@@ -2897,9 +2891,7 @@ static void nonrd_pick_partition(VP9_COMP *cpi, const TileInfo *const tile,
       if (this_rate == INT_MAX) {
         sum_rd = INT64_MAX;
       } else {
-        int pl = partition_plane_context(xd->above_seg_context,
-                                         xd->left_seg_context,
-                                         mi_row, mi_col, bsize);
+        int pl = partition_plane_context(xd, mi_row, mi_col, bsize);
         this_rate += x->partition_cost[pl][PARTITION_VERT];
         sum_rate += this_rate;
         sum_dist += this_dist;
