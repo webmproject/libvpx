@@ -207,7 +207,7 @@ static void set_offsets(VP9_COMP *cpi, const TileInfo *const tile,
   const int idx_map = mb_row * cm->mb_cols + mb_col;
   const struct segmentation *const seg = &cm->seg;
 
-  set_skip_context(xd, cpi->above_context, cpi->left_context, mi_row, mi_col);
+  set_skip_context(xd, xd->above_context, xd->left_context, mi_row, mi_col);
 
   // Activity map pointer
   x->mb_activity_ptr = &cpi->mb_activity_map[idx_map];
@@ -1207,12 +1207,12 @@ static void restore_context(VP9_COMP *cpi, int mi_row, int mi_col,
   int mi_height = num_8x8_blocks_high_lookup[bsize];
   for (p = 0; p < MAX_MB_PLANE; p++) {
     vpx_memcpy(
-        cpi->above_context[p] + ((mi_col * 2) >> xd->plane[p].subsampling_x),
+        xd->above_context[p] + ((mi_col * 2) >> xd->plane[p].subsampling_x),
         a + num_4x4_blocks_wide * p,
         (sizeof(ENTROPY_CONTEXT) * num_4x4_blocks_wide) >>
         xd->plane[p].subsampling_x);
     vpx_memcpy(
-        cpi->left_context[p]
+        xd->left_context[p]
             + ((mi_row & MI_MASK) * 2 >> xd->plane[p].subsampling_y),
         l + num_4x4_blocks_high * p,
         (sizeof(ENTROPY_CONTEXT) * num_4x4_blocks_high) >>
@@ -1240,12 +1240,12 @@ static void save_context(VP9_COMP *cpi, int mi_row, int mi_col,
   for (p = 0; p < MAX_MB_PLANE; ++p) {
     vpx_memcpy(
         a + num_4x4_blocks_wide * p,
-        cpi->above_context[p] + (mi_col * 2 >> xd->plane[p].subsampling_x),
+        xd->above_context[p] + (mi_col * 2 >> xd->plane[p].subsampling_x),
         (sizeof(ENTROPY_CONTEXT) * num_4x4_blocks_wide) >>
         xd->plane[p].subsampling_x);
     vpx_memcpy(
         l + num_4x4_blocks_high * p,
-        cpi->left_context[p]
+        xd->left_context[p]
             + ((mi_row & MI_MASK) * 2 >> xd->plane[p].subsampling_y),
         (sizeof(ENTROPY_CONTEXT) * num_4x4_blocks_high) >>
         xd->plane[p].subsampling_y);
@@ -2346,7 +2346,7 @@ static void encode_rd_sb_row(VP9_COMP *cpi, const TileInfo *const tile,
   int mi_col;
 
   // Initialize the left context for the new SB row
-  vpx_memset(&cpi->left_context, 0, sizeof(cpi->left_context));
+  vpx_memset(&xd->left_context, 0, sizeof(xd->left_context));
   vpx_memset(xd->left_seg_context, 0, sizeof(xd->left_seg_context));
 
   // Code each SB in the row
@@ -2473,8 +2473,8 @@ static void init_encode_frame_mb_context(VP9_COMP *cpi) {
 
   // Note: this memset assumes above_context[0], [1] and [2]
   // are allocated as part of the same buffer.
-  vpx_memset(cpi->above_context[0], 0,
-             sizeof(*cpi->above_context[0]) *
+  vpx_memset(xd->above_context[0], 0,
+             sizeof(*xd->above_context[0]) *
              2 * aligned_mi_cols * MAX_MB_PLANE);
   vpx_memset(xd->above_seg_context, 0,
              sizeof(*xd->above_seg_context) * aligned_mi_cols);
@@ -3052,7 +3052,7 @@ static void encode_nonrd_sb_row(VP9_COMP *cpi, const TileInfo *const tile,
   int mi_col;
 
   // Initialize the left context for the new SB row
-  vpx_memset(&cpi->left_context, 0, sizeof(cpi->left_context));
+  vpx_memset(&xd->left_context, 0, sizeof(xd->left_context));
   vpx_memset(xd->left_seg_context, 0, sizeof(xd->left_seg_context));
 
   // Code each SB in the row

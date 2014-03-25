@@ -108,6 +108,9 @@ void vp9_free_frame_buffers(VP9_COMMON *cm) {
   vpx_free(cm->last_frame_seg_map);
   cm->last_frame_seg_map = NULL;
 
+  vpx_free(cm->above_context);
+  cm->above_context = NULL;
+
   vpx_free(cm->above_seg_context);
   cm->above_seg_context = NULL;
 }
@@ -136,6 +139,14 @@ int vp9_resize_frame_buffers(VP9_COMMON *cm, int width, int height) {
   if (!cm->last_frame_seg_map)
     goto fail;
 
+  vpx_free(cm->above_context);
+  cm->above_context =
+      (ENTROPY_CONTEXT *)vpx_calloc(2 * mi_cols_aligned_to_sb(cm->mi_cols) *
+                                        MAX_MB_PLANE,
+                                    sizeof(*cm->above_context));
+  if (!cm->above_context)
+    goto fail;
+
   vpx_free(cm->above_seg_context);
   cm->above_seg_context =
      (PARTITION_CONTEXT *)vpx_calloc(mi_cols_aligned_to_sb(cm->mi_cols),
@@ -151,12 +162,11 @@ int vp9_resize_frame_buffers(VP9_COMMON *cm, int width, int height) {
 }
 
 int vp9_alloc_frame_buffers(VP9_COMMON *cm, int width, int height) {
-  int i;
-
   const int aligned_width = ALIGN_POWER_OF_TWO(width, MI_SIZE_LOG2);
   const int aligned_height = ALIGN_POWER_OF_TWO(height, MI_SIZE_LOG2);
   const int ss_x = cm->subsampling_x;
   const int ss_y = cm->subsampling_y;
+  int i;
 
   vp9_free_frame_buffers(cm);
 
@@ -191,6 +201,12 @@ int vp9_alloc_frame_buffers(VP9_COMMON *cm, int width, int height) {
   if (!cm->last_frame_seg_map)
     goto fail;
 
+  cm->above_context =
+      (ENTROPY_CONTEXT *)vpx_calloc(2 * mi_cols_aligned_to_sb(cm->mi_cols) *
+                                        MAX_MB_PLANE,
+                                    sizeof(*cm->above_context));
+  if (!cm->above_context)
+    goto fail;
 
   cm->above_seg_context =
       (PARTITION_CONTEXT *)vpx_calloc(mi_cols_aligned_to_sb(cm->mi_cols),

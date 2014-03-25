@@ -814,10 +814,6 @@ typedef struct VP9_COMP {
   // Debug / test stats
   int64_t mode_test_hits[BLOCK_SIZES];
 #endif
-
-  // Y,U,V,(A)
-  ENTROPY_CONTEXT *above_context[MAX_MB_PLANE];
-  ENTROPY_CONTEXT left_context[MAX_MB_PLANE][16];
 } VP9_COMP;
 
 void vp9_initialize_enc();

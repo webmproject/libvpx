@@ -187,27 +187,6 @@ static void setup_plane_dequants(VP9_COMMON *cm, MACROBLOCKD *xd, int q_index) {
     xd->plane[i].dequant = cm->uv_dequant[q_index];
 }
 
-// Allocate storage for each tile column.
-// TODO(jzern): when max_threads <= 1 the same storage could be used for each
-// tile.
-static void alloc_tile_storage(VP9D_COMP *pbi, int tile_rows, int tile_cols) {
-  VP9_COMMON *const cm = &pbi->common;
-  const int aligned_mi_cols = mi_cols_aligned_to_sb(cm->mi_cols);
-  int i;
-
-  // 2 contexts per 'mi unit', so that we have one context per 4x4 txfm
-  // block where mi unit size is 8x8.
-  CHECK_MEM_ERROR(cm, pbi->above_context[0],
-                  vpx_realloc(pbi->above_context[0],
-                              sizeof(*pbi->above_context[0]) * MAX_MB_PLANE *
-                              2 * aligned_mi_cols));
-  for (i = 1; i < MAX_MB_PLANE; ++i) {
-    pbi->above_context[i] = pbi->above_context[0] +
-                            i * sizeof(*pbi->above_context[0]) *
-                            2 * aligned_mi_cols;
-  }
-}
-
 static void inverse_transform_block(MACROBLOCKD* xd, int plane, int block,
                                     TX_SIZE tx_size, uint8_t *dst, int stride,
                                     int eob) {
@@ -706,13 +685,14 @@ static void setup_frame_size_with_refs(VP9D_COMP *pbi,
 
 static void setup_tile_context(VP9D_COMP *const pbi, MACROBLOCKD *const xd,
                                int tile_row, int tile_col) {
+  VP9_COMMON *const cm = &pbi->common;
   int i;
 
   for (i = 0; i < MAX_MB_PLANE; ++i)
-    xd->above_context[i] = pbi->above_context[i];
+    xd->above_context[i] = cm->above_context +
+        i * sizeof(*cm->above_context) * 2 * mi_cols_aligned_to_sb(cm->mi_cols);
 
-  // see note in alloc_tile_storage().
-  xd->above_seg_context = pbi->common.above_seg_context;
+  xd->above_seg_context = cm->above_seg_context;
 }
 
 static void decode_tile(VP9D_COMP *pbi, const TileInfo *const tile,
@@ -838,8 +818,8 @@ static const uint8_t *decode_tiles(VP9D_COMP *pbi,
 
   // Note: this memset assumes above_context[0], [1] and [2]
   // are allocated as part of the same buffer.
-  vpx_memset(pbi->above_context[0], 0,
-             sizeof(*pbi->above_context[0]) * MAX_MB_PLANE * 2 * aligned_cols);
+  vpx_memset(cm->above_context, 0,
+             sizeof(*cm->above_context) * MAX_MB_PLANE * 2 * aligned_cols);
 
   vpx_memset(cm->above_seg_context, 0,
              sizeof(*cm->above_seg_context) * aligned_cols);
@@ -966,9 +946,8 @@ static const uint8_t *decode_tiles_mt(VP9D_COMP *pbi,
 
   // Note: this memset assumes above_context[0], [1] and [2]
   // are allocated as part of the same buffer.
-  vpx_memset(pbi->above_context[0], 0,
-             sizeof(*pbi->above_context[0]) * MAX_MB_PLANE *
-             2 * aligned_mi_cols);
+  vpx_memset(cm->above_context, 0,
+             sizeof(*cm->above_context) * MAX_MB_PLANE * 2 * aligned_mi_cols);
   vpx_memset(cm->above_seg_context, 0,
              sizeof(*cm->above_seg_context) * aligned_mi_cols);
 
@@ -1346,8 +1325,6 @@ int vp9_decode_frame(VP9D_COMP *pbi,
                          "Loop filter thread creation failed");
     }
   }
-
-  alloc_tile_storage(pbi, tile_rows, tile_cols);
 
   xd->mode_info_stride = cm->mode_info_stride;
   if (cm->coding_use_prev_mi)

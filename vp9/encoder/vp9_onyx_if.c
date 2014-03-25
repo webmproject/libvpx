@@ -194,9 +194,6 @@ static void dealloc_compressor_data(VP9_COMP *cpi) {
   cpi->mb_activity_map = 0;
   vpx_free(cpi->mb_norm_activity_map);
   cpi->mb_norm_activity_map = 0;
-
-  vpx_free(cpi->above_context[0]);
-  cpi->above_context[0] = NULL;
 }
 
 // Computes a q delta (in "q index" terms) to get from a starting q value
@@ -1062,19 +1059,12 @@ void vp9_alloc_compressor_data(VP9_COMP *cpi) {
   CHECK_MEM_ERROR(cm, cpi->mb_norm_activity_map,
                   vpx_calloc(sizeof(unsigned int),
                              cm->mb_rows * cm->mb_cols));
-
-  // 2 contexts per 'mi unit', so that we have one context per 4x4 txfm
-  // block where mi unit size is 8x8.
-  vpx_free(cpi->above_context[0]);
-  CHECK_MEM_ERROR(cm, cpi->above_context[0],
-                  vpx_calloc(2 * mi_cols_aligned_to_sb(cm->mi_cols) *
-                             MAX_MB_PLANE,
-                             sizeof(*cpi->above_context[0])));
 }
 
 
 static void update_frame_size(VP9_COMP *cpi) {
-  VP9_COMMON *cm = &cpi->common;
+  VP9_COMMON *const cm = &cpi->common;
+  MACROBLOCKD *const xd = &cpi->mb.e_mbd;
 
   vp9_update_frame_size(cm);
 
@@ -1105,13 +1095,13 @@ static void update_frame_size(VP9_COMP *cpi) {
 
   {
     int i;
-    for (i = 1; i < MAX_MB_PLANE; ++i) {
-      cpi->above_context[i] = cpi->above_context[0] +
-                              i * sizeof(*cpi->above_context[0]) * 2 *
-                              mi_cols_aligned_to_sb(cm->mi_cols);
-      cpi->mb.e_mbd.above_seg_context = cpi->common.above_seg_context;
-    }
+
+    for (i = 0; i < MAX_MB_PLANE; ++i)
+      xd->above_context[i] = cm->above_context +
+        i * sizeof(*cm->above_context) * 2 * mi_cols_aligned_to_sb(cm->mi_cols);
   }
+
+  xd->above_seg_context = cpi->common.above_seg_context;
 }
 
 // Table that converts 0-63 Q range values passed in outside to the Qindex
