@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//wvo\u003d",
+        "filename": "test/tools_common.sh",
+        "patchSetId": 12
+      },
+      "lineNbr": 437,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-03-26T05:27:19Z",
+      "side": 1,
+      "message": "This nonsense is because \u0027mktemp -d\u0027 doesn\u0027t work on OS X: You have to pass a pattern. Otherwise it fails. If it\u0027s preferred, I can check the target for darwin and special case based on that instead.",
+      "revId": "8aac887d2aac37497e95306abbf6c72d49cbdff1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
