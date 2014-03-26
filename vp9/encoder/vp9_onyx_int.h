@@ -781,9 +781,6 @@ typedef struct VP9_COMP {
   unsigned int *mb_activity_map;
   int *mb_norm_activity_map;
 
-  // Force next frame to intra when kf_auto says so.
-  int force_next_frame_intra;
-
   int droppable;
 
   int dummy_packing;    /* flag to indicate if packing is dummy */
