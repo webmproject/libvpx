@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//wt4\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 3460,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2014-03-26T16:37:31Z",
+      "side": 0,
+      "message": "i thought by the time we enabled skip_recode feature, it should have taken use_uv_intra_rd_estimate into account(?)",
+      "revId": "de8fd6f48addd94034cdfd9170bdfe52d9481e30",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
