@@ -164,7 +164,6 @@ static INLINE void set_modeinfo_offsets(VP9_COMMON *const cm,
                                         int mi_col) {
   const int idx_str = xd->mode_info_stride * mi_row + mi_col;
   xd->mi_8x8 = cm->mi_grid_visible + idx_str;
-  xd->prev_mi_8x8 = cm->prev_mi_grid_visible + idx_str;
   xd->mi_8x8[0] = cm->mi + idx_str;
 }
 
@@ -1946,21 +1945,20 @@ static const BLOCK_SIZE next_square_size[BLOCK_SIZES] = {
 // Look at neighboring blocks and set a min and max partition size based on
 // what they chose.
 static void rd_auto_partition_range(VP9_COMP *cpi, const TileInfo *const tile,
-                                    int row, int col,
+                                    int mi_row, int mi_col,
                                     BLOCK_SIZE *min_block_size,
                                     BLOCK_SIZE *max_block_size) {
-  VP9_COMMON * const cm = &cpi->common;
+  VP9_COMMON *const cm = &cpi->common;
   MACROBLOCKD *const xd = &cpi->mb.e_mbd;
-  MODE_INFO ** mi_8x8 = xd->mi_8x8;
-  MODE_INFO ** prev_mi_8x8 = xd->prev_mi_8x8;
+  MODE_INFO **mi_8x8 = xd->mi_8x8;
   const int left_in_image = xd->left_available && mi_8x8[-1];
   const int above_in_image = xd->up_available &&
                              mi_8x8[-xd->mode_info_stride];
-  MODE_INFO ** above_sb64_mi_8x8;
-  MODE_INFO ** left_sb64_mi_8x8;
+  MODE_INFO **above_sb64_mi_8x8;
+  MODE_INFO **left_sb64_mi_8x8;
 
-  int row8x8_remaining = tile->mi_row_end - row;
-  int col8x8_remaining = tile->mi_col_end - col;
+  int row8x8_remaining = tile->mi_row_end - mi_row;
+  int col8x8_remaining = tile->mi_col_end - mi_col;
   int bh, bw;
   BLOCK_SIZE min_size = BLOCK_4X4;
   BLOCK_SIZE max_size = BLOCK_64X64;
@@ -1974,8 +1972,9 @@ static void rd_auto_partition_range(VP9_COMP *cpi, const TileInfo *const tile,
     // passed in values for min and max as a starting point.
     // Find the min and max partition used in previous frame at this location
     if (cm->frame_type != KEY_FRAME) {
-      get_sb_partition_size_range(cpi, prev_mi_8x8,
-                                  &min_size, &max_size);
+      MODE_INFO **const prev_mi =
+          &cm->prev_mi_grid_visible[mi_row * xd->mode_info_stride + mi_col];
+      get_sb_partition_size_range(cpi, prev_mi, &min_size, &max_size);
     }
     // Find the min and max partition sizes used in the left SB64
     if (left_in_image) {

@@ -193,11 +193,14 @@ static void find_mv_refs_idx(const VP9_COMMON *cm, const MACROBLOCKD *xd,
                              int block, int mi_row, int mi_col) {
   const int *ref_sign_bias = cm->ref_frame_sign_bias;
   int i, refmv_count = 0;
-  const MODE_INFO *prev_mi = cm->coding_use_prev_mi && cm->prev_mi ?
-                                 xd->prev_mi_8x8[0] : NULL;
+  const MODE_INFO *prev_mi = cm->coding_use_prev_mi && cm->prev_mi
+        ? cm->prev_mi_grid_visible[mi_row * xd->mode_info_stride + mi_col]
+        : NULL;
+  const MB_MODE_INFO *const prev_mbmi = prev_mi ? &prev_mi->mbmi : NULL;
+
+
   const POSITION *const mv_ref_search = mv_ref_blocks[mi->mbmi.sb_type];
-  const MB_MODE_INFO *const prev_mbmi = cm->coding_use_prev_mi && prev_mi ?
-      &prev_mi->mbmi : NULL;
+
   int different_ref_found = 0;
   int context_counter = 0;
 
