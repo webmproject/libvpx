@@ -27,6 +27,7 @@
 #include "vp9/common/vp9_systemdependent.h"
 #include "vp9/common/vp9_tile_common.h"
 
+#include "vp9/encoder/vp9_aq_complexity.h"
 #include "vp9/encoder/vp9_aq_cyclicrefresh.h"
 #include "vp9/encoder/vp9_aq_variance.h"
 #include "vp9/encoder/vp9_bitstream.h"
@@ -102,9 +103,6 @@ FILE *keyfile;
 #endif
 
 void vp9_init_quantizer(VP9_COMP *cpi);
-
-static const double in_frame_q_adj_ratio[MAX_SEGMENTS] =
-  {1.0, 2.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0};
 
 static INLINE void Scale2Ratio(VPX_SCALING mode, int *hr, int *hs) {
   switch (mode) {
@@ -264,46 +262,6 @@ int vp9_compute_qdelta_by_rate(VP9_COMP *cpi, int base_q_index,
   return target_index - base_q_index;
 }
 
-// This function sets up a set of segments with delta Q values around
-// the baseline frame quantizer.
-static void setup_in_frame_q_adj(VP9_COMP *cpi) {
-  VP9_COMMON *const cm = &cpi->common;
-  struct segmentation *const seg = &cm->seg;
-
-  // Make SURE use of floating point in this function is safe.
-  vp9_clear_system_state();
-
-  if (cm->frame_type == KEY_FRAME ||
-      cpi->refresh_alt_ref_frame ||
-      (cpi->refresh_golden_frame && !cpi->rc.is_src_frame_alt_ref)) {
-    int segment;
-
-    // Clear down the segment map
-    vpx_memset(cpi->segmentation_map, 0, cm->mi_rows * cm->mi_cols);
-
-    // Clear down the complexity map used for rd
-    vpx_memset(cpi->complexity_map, 0, cm->mi_rows * cm->mi_cols);
-
-    vp9_enable_segmentation(seg);
-    vp9_clearall_segfeatures(seg);
-
-    // Select delta coding method
-    seg->abs_delta = SEGMENT_DELTADATA;
-
-    // Segment 0 "Q" feature is disabled so it defaults to the baseline Q
-    vp9_disable_segfeature(seg, 0, SEG_LVL_ALT_Q);
-
-    // Use some of the segments for in frame Q adjustment
-    for (segment = 1; segment < 2; segment++) {
-      const int qindex_delta =
-          vp9_compute_qdelta_by_rate(cpi,
-                                     cm->base_qindex,
-                                     in_frame_q_adj_ratio[segment]);
-      vp9_enable_segfeature(seg, segment, SEG_LVL_ALT_Q);
-      vp9_set_segdata(seg, segment, SEG_LVL_ALT_Q, qindex_delta);
-    }
-  }
-}
 static void configure_static_seg_features(VP9_COMP *cpi) {
   VP9_COMMON *const cm = &cpi->common;
   const RATE_CONTROL *const rc = &cpi->rc;
@@ -2679,7 +2637,7 @@ static void encode_without_recode_loop(VP9_COMP *cpi,
   if (cpi->oxcf.aq_mode == VARIANCE_AQ) {
     vp9_vaq_frame_setup(cpi);
   } else if (cpi->oxcf.aq_mode == COMPLEXITY_AQ) {
-    setup_in_frame_q_adj(cpi);
+    vp9_setup_in_frame_q_adj(cpi);
   } else if (cpi->oxcf.aq_mode == CYCLIC_REFRESH_AQ) {
     vp9_cyclic_refresh_setup(cpi);
   }
@@ -2739,7 +2697,7 @@ static void encode_with_recode_loop(VP9_COMP *cpi,
     if (cpi->oxcf.aq_mode == VARIANCE_AQ) {
       vp9_vaq_frame_setup(cpi);
     } else if (cpi->oxcf.aq_mode == COMPLEXITY_AQ) {
-      setup_in_frame_q_adj(cpi);
+      vp9_setup_in_frame_q_adj(cpi);
     }
 
     // transform / motion compensation build reconstruction frame
