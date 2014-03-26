@@ -240,13 +240,6 @@ typedef struct {
   // Control when to stop subpel search
   int subpel_force_stop;
 
-  // Thresh_mult is used to set a threshold for the rd score. A higher value
-  // means that we will accept the best mode so far more often. This number
-  // is used in combination with the current block size, and thresh_freq_fact
-  // to pick a threshold.
-  int thresh_mult[MAX_MODES];
-  int thresh_mult_sub8x8[MAX_REFS];
-
   // This parameter controls the number of steps we'll do in a diamond
   // search.
   int max_step_search_steps;
@@ -648,6 +641,13 @@ typedef struct VP9_COMP {
 
   // Ambient reconstruction err target for force key frames
   int ambient_err;
+
+  // Thresh_mult is used to set a threshold for the rd score. A higher value
+  // means that we will accept the best mode so far more often. This number
+  // is used in combination with the current block size, and thresh_freq_fact
+  // to pick a threshold.
+  int rd_thresh_mult[MAX_MODES];
+  int rd_thresh_mult_sub8x8[MAX_REFS];
 
   int rd_threshes[MAX_SEGMENTS][BLOCK_SIZES][MAX_MODES];
   int rd_thresh_freq_fact[BLOCK_SIZES][MAX_MODES];

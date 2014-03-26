@@ -465,120 +465,118 @@ static int is_slowest_mode(int mode) {
 }
 
 static void set_rd_speed_thresholds(VP9_COMP *cpi) {
-  SPEED_FEATURES *sf = &cpi->sf;
   int i;
 
   // Set baseline threshold values
   for (i = 0; i < MAX_MODES; ++i)
-    sf->thresh_mult[i] = is_slowest_mode(cpi->oxcf.mode) ? -500 : 0;
+  cpi->rd_thresh_mult[i] = is_slowest_mode(cpi->oxcf.mode) ? -500 : 0;
 
-  sf->thresh_mult[THR_NEARESTMV] = 0;
-  sf->thresh_mult[THR_NEARESTG] = 0;
-  sf->thresh_mult[THR_NEARESTA] = 0;
+  cpi->rd_thresh_mult[THR_NEARESTMV] = 0;
+  cpi->rd_thresh_mult[THR_NEARESTG] = 0;
+  cpi->rd_thresh_mult[THR_NEARESTA] = 0;
 
-  sf->thresh_mult[THR_DC] += 1000;
+  cpi->rd_thresh_mult[THR_DC] += 1000;
 
-  sf->thresh_mult[THR_NEWMV] += 1000;
-  sf->thresh_mult[THR_NEWA] += 1000;
-  sf->thresh_mult[THR_NEWG] += 1000;
+  cpi->rd_thresh_mult[THR_NEWMV] += 1000;
+  cpi->rd_thresh_mult[THR_NEWA] += 1000;
+  cpi->rd_thresh_mult[THR_NEWG] += 1000;
 
-  sf->thresh_mult[THR_NEARMV] += 1000;
-  sf->thresh_mult[THR_NEARA] += 1000;
-  sf->thresh_mult[THR_COMP_NEARESTLA] += 1000;
-  sf->thresh_mult[THR_COMP_NEARESTGA] += 1000;
+  cpi->rd_thresh_mult[THR_NEARMV] += 1000;
+  cpi->rd_thresh_mult[THR_NEARA] += 1000;
+  cpi->rd_thresh_mult[THR_COMP_NEARESTLA] += 1000;
+  cpi->rd_thresh_mult[THR_COMP_NEARESTGA] += 1000;
 
-  sf->thresh_mult[THR_TM] += 1000;
+  cpi->rd_thresh_mult[THR_TM] += 1000;
 
-  sf->thresh_mult[THR_COMP_NEARLA] += 1500;
-  sf->thresh_mult[THR_COMP_NEWLA] += 2000;
-  sf->thresh_mult[THR_NEARG] += 1000;
-  sf->thresh_mult[THR_COMP_NEARGA] += 1500;
-  sf->thresh_mult[THR_COMP_NEWGA] += 2000;
+  cpi->rd_thresh_mult[THR_COMP_NEARLA] += 1500;
+  cpi->rd_thresh_mult[THR_COMP_NEWLA] += 2000;
+  cpi->rd_thresh_mult[THR_NEARG] += 1000;
+  cpi->rd_thresh_mult[THR_COMP_NEARGA] += 1500;
+  cpi->rd_thresh_mult[THR_COMP_NEWGA] += 2000;
 
-  sf->thresh_mult[THR_ZEROMV] += 2000;
-  sf->thresh_mult[THR_ZEROG] += 2000;
-  sf->thresh_mult[THR_ZEROA] += 2000;
-  sf->thresh_mult[THR_COMP_ZEROLA] += 2500;
-  sf->thresh_mult[THR_COMP_ZEROGA] += 2500;
+  cpi->rd_thresh_mult[THR_ZEROMV] += 2000;
+  cpi->rd_thresh_mult[THR_ZEROG] += 2000;
+  cpi->rd_thresh_mult[THR_ZEROA] += 2000;
+  cpi->rd_thresh_mult[THR_COMP_ZEROLA] += 2500;
+  cpi->rd_thresh_mult[THR_COMP_ZEROGA] += 2500;
 
-  sf->thresh_mult[THR_H_PRED] += 2000;
-  sf->thresh_mult[THR_V_PRED] += 2000;
-  sf->thresh_mult[THR_D45_PRED ] += 2500;
-  sf->thresh_mult[THR_D135_PRED] += 2500;
-  sf->thresh_mult[THR_D117_PRED] += 2500;
-  sf->thresh_mult[THR_D153_PRED] += 2500;
-  sf->thresh_mult[THR_D207_PRED] += 2500;
-  sf->thresh_mult[THR_D63_PRED] += 2500;
+  cpi->rd_thresh_mult[THR_H_PRED] += 2000;
+  cpi->rd_thresh_mult[THR_V_PRED] += 2000;
+  cpi->rd_thresh_mult[THR_D45_PRED ] += 2500;
+  cpi->rd_thresh_mult[THR_D135_PRED] += 2500;
+  cpi->rd_thresh_mult[THR_D117_PRED] += 2500;
+  cpi->rd_thresh_mult[THR_D153_PRED] += 2500;
+  cpi->rd_thresh_mult[THR_D207_PRED] += 2500;
+  cpi->rd_thresh_mult[THR_D63_PRED] += 2500;
 
   /* disable frame modes if flags not set */
   if (!(cpi->ref_frame_flags & VP9_LAST_FLAG)) {
-    sf->thresh_mult[THR_NEWMV    ] = INT_MAX;
-    sf->thresh_mult[THR_NEARESTMV] = INT_MAX;
-    sf->thresh_mult[THR_ZEROMV   ] = INT_MAX;
-    sf->thresh_mult[THR_NEARMV   ] = INT_MAX;
+    cpi->rd_thresh_mult[THR_NEWMV    ] = INT_MAX;
+    cpi->rd_thresh_mult[THR_NEARESTMV] = INT_MAX;
+    cpi->rd_thresh_mult[THR_ZEROMV   ] = INT_MAX;
+    cpi->rd_thresh_mult[THR_NEARMV   ] = INT_MAX;
   }
   if (!(cpi->ref_frame_flags & VP9_GOLD_FLAG)) {
-    sf->thresh_mult[THR_NEARESTG ] = INT_MAX;
-    sf->thresh_mult[THR_ZEROG    ] = INT_MAX;
-    sf->thresh_mult[THR_NEARG    ] = INT_MAX;
-    sf->thresh_mult[THR_NEWG     ] = INT_MAX;
+    cpi->rd_thresh_mult[THR_NEARESTG ] = INT_MAX;
+    cpi->rd_thresh_mult[THR_ZEROG    ] = INT_MAX;
+    cpi->rd_thresh_mult[THR_NEARG    ] = INT_MAX;
+    cpi->rd_thresh_mult[THR_NEWG     ] = INT_MAX;
   }
   if (!(cpi->ref_frame_flags & VP9_ALT_FLAG)) {
-    sf->thresh_mult[THR_NEARESTA ] = INT_MAX;
-    sf->thresh_mult[THR_ZEROA    ] = INT_MAX;
-    sf->thresh_mult[THR_NEARA    ] = INT_MAX;
-    sf->thresh_mult[THR_NEWA     ] = INT_MAX;
+    cpi->rd_thresh_mult[THR_NEARESTA ] = INT_MAX;
+    cpi->rd_thresh_mult[THR_ZEROA    ] = INT_MAX;
+    cpi->rd_thresh_mult[THR_NEARA    ] = INT_MAX;
+    cpi->rd_thresh_mult[THR_NEWA     ] = INT_MAX;
   }
 
   if ((cpi->ref_frame_flags & (VP9_LAST_FLAG | VP9_ALT_FLAG)) !=
       (VP9_LAST_FLAG | VP9_ALT_FLAG)) {
-    sf->thresh_mult[THR_COMP_ZEROLA   ] = INT_MAX;
-    sf->thresh_mult[THR_COMP_NEARESTLA] = INT_MAX;
-    sf->thresh_mult[THR_COMP_NEARLA   ] = INT_MAX;
-    sf->thresh_mult[THR_COMP_NEWLA    ] = INT_MAX;
+    cpi->rd_thresh_mult[THR_COMP_ZEROLA   ] = INT_MAX;
+    cpi->rd_thresh_mult[THR_COMP_NEARESTLA] = INT_MAX;
+    cpi->rd_thresh_mult[THR_COMP_NEARLA   ] = INT_MAX;
+    cpi->rd_thresh_mult[THR_COMP_NEWLA    ] = INT_MAX;
   }
   if ((cpi->ref_frame_flags & (VP9_GOLD_FLAG | VP9_ALT_FLAG)) !=
       (VP9_GOLD_FLAG | VP9_ALT_FLAG)) {
-    sf->thresh_mult[THR_COMP_ZEROGA   ] = INT_MAX;
-    sf->thresh_mult[THR_COMP_NEARESTGA] = INT_MAX;
-    sf->thresh_mult[THR_COMP_NEARGA   ] = INT_MAX;
-    sf->thresh_mult[THR_COMP_NEWGA    ] = INT_MAX;
+    cpi->rd_thresh_mult[THR_COMP_ZEROGA   ] = INT_MAX;
+    cpi->rd_thresh_mult[THR_COMP_NEARESTGA] = INT_MAX;
+    cpi->rd_thresh_mult[THR_COMP_NEARGA   ] = INT_MAX;
+    cpi->rd_thresh_mult[THR_COMP_NEWGA    ] = INT_MAX;
   }
 }
 
 static void set_rd_speed_thresholds_sub8x8(VP9_COMP *cpi) {
-  SPEED_FEATURES *sf = &cpi->sf;
+  const SPEED_FEATURES *const sf = &cpi->sf;
   int i;
 
   for (i = 0; i < MAX_REFS; ++i)
-    sf->thresh_mult_sub8x8[i] = is_slowest_mode(cpi->oxcf.mode)  ? -500 : 0;
+    cpi->rd_thresh_mult_sub8x8[i] = is_slowest_mode(cpi->oxcf.mode)  ? -500 : 0;
 
-  sf->thresh_mult_sub8x8[THR_LAST] += 2500;
-  sf->thresh_mult_sub8x8[THR_GOLD] += 2500;
-  sf->thresh_mult_sub8x8[THR_ALTR] += 2500;
-  sf->thresh_mult_sub8x8[THR_INTRA] += 2500;
-  sf->thresh_mult_sub8x8[THR_COMP_LA] += 4500;
-  sf->thresh_mult_sub8x8[THR_COMP_GA] += 4500;
+  cpi->rd_thresh_mult_sub8x8[THR_LAST] += 2500;
+  cpi->rd_thresh_mult_sub8x8[THR_GOLD] += 2500;
+  cpi->rd_thresh_mult_sub8x8[THR_ALTR] += 2500;
+  cpi->rd_thresh_mult_sub8x8[THR_INTRA] += 2500;
+  cpi->rd_thresh_mult_sub8x8[THR_COMP_LA] += 4500;
+  cpi->rd_thresh_mult_sub8x8[THR_COMP_GA] += 4500;
 
   // Check for masked out split cases.
-  for (i = 0; i < MAX_REFS; i++) {
+  for (i = 0; i < MAX_REFS; i++)
     if (sf->disable_split_mask & (1 << i))
-      sf->thresh_mult_sub8x8[i] = INT_MAX;
-  }
+      cpi->rd_thresh_mult_sub8x8[i] = INT_MAX;
 
   // disable mode test if frame flag is not set
   if (!(cpi->ref_frame_flags & VP9_LAST_FLAG))
-    sf->thresh_mult_sub8x8[THR_LAST] = INT_MAX;
+    cpi->rd_thresh_mult_sub8x8[THR_LAST] = INT_MAX;
   if (!(cpi->ref_frame_flags & VP9_GOLD_FLAG))
-    sf->thresh_mult_sub8x8[THR_GOLD] = INT_MAX;
+    cpi->rd_thresh_mult_sub8x8[THR_GOLD] = INT_MAX;
   if (!(cpi->ref_frame_flags & VP9_ALT_FLAG))
-    sf->thresh_mult_sub8x8[THR_ALTR] = INT_MAX;
+    cpi->rd_thresh_mult_sub8x8[THR_ALTR] = INT_MAX;
   if ((cpi->ref_frame_flags & (VP9_LAST_FLAG | VP9_ALT_FLAG)) !=
       (VP9_LAST_FLAG | VP9_ALT_FLAG))
-    sf->thresh_mult_sub8x8[THR_COMP_LA] = INT_MAX;
+    cpi->rd_thresh_mult_sub8x8[THR_COMP_LA] = INT_MAX;
   if ((cpi->ref_frame_flags & (VP9_GOLD_FLAG | VP9_ALT_FLAG)) !=
       (VP9_GOLD_FLAG | VP9_ALT_FLAG))
-    sf->thresh_mult_sub8x8[THR_COMP_GA] = INT_MAX;
+    cpi->rd_thresh_mult_sub8x8[THR_COMP_GA] = INT_MAX;
 }
 
 static void set_good_speed_feature(VP9_COMMON *cm,

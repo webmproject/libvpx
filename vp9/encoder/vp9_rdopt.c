@@ -244,7 +244,6 @@ void vp9_initialize_me_consts(VP9_COMP *cpi, int qindex) {
 
 static void set_block_thresholds(VP9_COMP *cpi) {
   const VP9_COMMON *const cm = &cpi->common;
-  const SPEED_FEATURES *const sf = &cpi->sf;
   int i, bsize, segment_id;
 
   for (segment_id = 0; segment_id < MAX_SEGMENTS; ++segment_id) {
@@ -261,13 +260,13 @@ static void set_block_thresholds(VP9_COMP *cpi) {
 
       for (i = 0; i < MAX_MODES; ++i)
         cpi->rd_threshes[segment_id][bsize][i] =
-            sf->thresh_mult[i] < thresh_max ? sf->thresh_mult[i] * t / 4
+            cpi->rd_thresh_mult[i] < thresh_max ? cpi->rd_thresh_mult[i] * t / 4
                                             : INT_MAX;
 
       for (i = 0; i < MAX_REFS; ++i) {
         cpi->rd_thresh_sub8x8[segment_id][bsize][i] =
-            sf->thresh_mult_sub8x8[i] < thresh_max
-                ? sf->thresh_mult_sub8x8[i] * t / 4
+            cpi->rd_thresh_mult_sub8x8[i] < thresh_max
+                ? cpi->rd_thresh_mult_sub8x8[i] * t / 4
                 : INT_MAX;
       }
     }
