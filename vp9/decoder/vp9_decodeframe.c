@@ -302,7 +302,6 @@ static void set_offsets(VP9_COMMON *const cm, MACROBLOCKD *const xd,
   int x, y;
 
   xd->mi_8x8 = cm->mi_grid_visible + offset;
-  xd->prev_mi_8x8 = cm->prev_mi_grid_visible + offset;
   xd->mi_8x8[0] = &cm->mi[offset];
   xd->mi_8x8[0]->mbmi.sb_type = bsize;
   for (y = 0; y < y_mis; ++y)
