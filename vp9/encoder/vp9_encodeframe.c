@@ -902,8 +902,8 @@ static void update_state(VP9_COMP *cpi, PICK_MODE_CONTEXT *ctx,
   // the cyclic refresh map.
   if ((cpi->oxcf.aq_mode == CYCLIC_REFRESH_AQ) && seg->enabled &&
       output_enabled) {
-    vp9_update_segment_aq(cpi, &xd->mi_8x8[0]->mbmi,
-                          mi_row, mi_col, bsize, 1);
+    vp9_cyclic_refresh_update_segment(cpi, &xd->mi_8x8[0]->mbmi,
+                                      mi_row, mi_col, bsize, 1);
     vp9_init_plane_quantizers(cpi, x);
   }
 
@@ -1102,7 +1102,7 @@ static void rd_pick_sb_modes(VP9_COMP *cpi, const TileInfo *const tile,
         : cm->last_frame_seg_map;
     // If segment 1, use rdmult for that segment.
     if (vp9_get_segment_id(cm, map, bsize, mi_row, mi_col))
-      x->rdmult = cpi->cyclic_refresh.rdmult;
+      x->rdmult = vp9_cyclic_refresh_get_rdmult(cpi->cyclic_refresh);
   }
 
   // Find best coding mode & reconstruct the MB so it is available
@@ -1466,7 +1466,8 @@ static void update_state_rt(VP9_COMP *cpi, const PICK_MODE_CONTEXT *ctx,
 
   // Check for reseting segment_id and update cyclic map.
   if (cpi->oxcf.aq_mode == CYCLIC_REFRESH_AQ && seg->enabled) {
-    vp9_update_segment_aq(cpi, &xd->mi_8x8[0]->mbmi, mi_row, mi_col, bsize, 1);
+    vp9_cyclic_refresh_update_segment(cpi, &xd->mi_8x8[0]->mbmi,
+                                      mi_row, mi_col, bsize, 1);
     vp9_init_plane_quantizers(cpi, x);
   }
 
@@ -1877,10 +1878,10 @@ static void rd_use_partition(VP9_COMP *cpi,
       select_in_frame_q_segment(cpi, mi_row, mi_col,
                                 output_enabled, chosen_rate);
     }
-    if (cpi->oxcf.aq_mode == CYCLIC_REFRESH_AQ) {
-      cpi->cyclic_refresh.projected_rate_sb = chosen_rate;
-      cpi->cyclic_refresh.projected_dist_sb = chosen_dist;
-    }
+
+    if (cpi->oxcf.aq_mode == CYCLIC_REFRESH_AQ)
+      vp9_cyclic_refresh_set_rate_and_dist_sb(cpi->cyclic_refresh,
+                                              chosen_rate, chosen_dist);
 
     encode_sb(cpi, tile, tp, mi_row, mi_col, output_enabled, bsize);
   }
@@ -2318,10 +2319,10 @@ static void rd_pick_partition(VP9_COMP *cpi, const TileInfo *const tile,
     if ((cpi->oxcf.aq_mode == COMPLEXITY_AQ) && cm->seg.update_map) {
       select_in_frame_q_segment(cpi, mi_row, mi_col, output_enabled, best_rate);
     }
-    if (cpi->oxcf.aq_mode == CYCLIC_REFRESH_AQ) {
-      cpi->cyclic_refresh.projected_rate_sb = best_rate;
-      cpi->cyclic_refresh.projected_dist_sb = best_dist;
-    }
+
+    if (cpi->oxcf.aq_mode == CYCLIC_REFRESH_AQ)
+      vp9_cyclic_refresh_set_rate_and_dist_sb(cpi->cyclic_refresh,
+                                              best_rate, best_dist);
 
     encode_sb(cpi, tile, tp, mi_row, mi_col, output_enabled, bsize);
   }
@@ -2925,10 +2926,10 @@ static void nonrd_pick_partition(VP9_COMP *cpi, const TileInfo *const tile,
     if ((cpi->oxcf.aq_mode == COMPLEXITY_AQ) && cm->seg.update_map) {
       select_in_frame_q_segment(cpi, mi_row, mi_col, output_enabled, best_rate);
     }
-    if (cpi->oxcf.aq_mode == CYCLIC_REFRESH_AQ) {
-      cpi->cyclic_refresh.projected_rate_sb = best_rate;
-      cpi->cyclic_refresh.projected_dist_sb = best_dist;
-    }
+
+    if (cpi->oxcf.aq_mode == CYCLIC_REFRESH_AQ)
+      vp9_cyclic_refresh_set_rate_and_dist_sb(cpi->cyclic_refresh,
+                                              best_rate, best_dist);
 
     encode_sb(cpi, tile, tp, mi_row, mi_col, output_enabled, bsize);
   }
@@ -3039,10 +3040,9 @@ static void nonrd_use_partition(VP9_COMP *cpi,
   }
 
   if (bsize == BLOCK_64X64 && output_enabled) {
-    if (cpi->oxcf.aq_mode == CYCLIC_REFRESH_AQ) {
-      cpi->cyclic_refresh.projected_rate_sb = *totrate;
-      cpi->cyclic_refresh.projected_dist_sb = *totdist;
-    }
+    if (cpi->oxcf.aq_mode == CYCLIC_REFRESH_AQ)
+      vp9_cyclic_refresh_set_rate_and_dist_sb(cpi->cyclic_refresh,
+                                              *totrate, *totdist);
     encode_sb_rt(cpi, tile, tp, mi_row, mi_col, 1, bsize);
   }
 }

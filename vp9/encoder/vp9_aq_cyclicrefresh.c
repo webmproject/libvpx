@@ -19,6 +19,51 @@
 #include "vp9/encoder/vp9_rdopt.h"
 #include "vp9/encoder/vp9_segmentation.h"
 
+struct CYCLIC_REFRESH {
+  // Target percentage of blocks per frame that are cyclicly refreshed.
+  int max_mbs_perframe;
+  // Maximum q-delta as percentage of base q.
+  int max_qdelta_perc;
+  // Block size below which we don't apply cyclic refresh.
+  BLOCK_SIZE min_block_size;
+  // Macroblock starting index (unit of 8x8) for cycling through the frame.
+  int mb_index;
+  // Controls how long a block will need to wait to be refreshed again.
+  int time_for_refresh;
+  // Actual number of blocks that were applied delta-q (segment 1).
+  int num_seg_blocks;
+  // Actual encoding bits for segment 1.
+  int actual_seg_bits;
+  // RD mult. parameters for segment 1.
+  int rdmult;
+  // Cyclic refresh map.
+  signed char *map;
+  // Projected rate and distortion for the current superblock.
+  int64_t projected_rate_sb;
+  int64_t projected_dist_sb;
+  // Thresholds applied to projected rate/distortion of the superblock.
+  int64_t thresh_rate_sb;
+  int64_t thresh_dist_sb;
+};
+
+CYCLIC_REFRESH *vp9_cyclic_refresh_alloc(int mi_rows, int mi_cols) {
+  CYCLIC_REFRESH *const cr = vpx_calloc(1, sizeof(*cr));
+  if (cr == NULL)
+    return NULL;
+
+  cr->map = vpx_calloc(mi_rows * mi_cols, sizeof(*cr->map));
+  if (cr->map == NULL) {
+    vpx_free(cr);
+    return NULL;
+  }
+
+  return cr;
+}
+
+void vp9_cyclic_refresh_free(CYCLIC_REFRESH *cr) {
+  vpx_free(cr->map);
+  vpx_free(cr);
+}
 
 // Check if we should turn off cyclic refresh based on bitrate condition.
 static int apply_cyclic_refresh_bitrate(const VP9_COMMON *cm,
@@ -73,14 +118,12 @@ static int candidate_refresh_aq(const CYCLIC_REFRESH *cr,
 // Prior to coding a given prediction block, of size bsize at (mi_row, mi_col),
 // check if we should reset the segment_id, and update the cyclic_refresh map
 // and segmentation map.
-void vp9_update_segment_aq(VP9_COMP *const cpi,
-                           MB_MODE_INFO *const mbmi,
-                           int mi_row,
-                           int mi_col,
-                           BLOCK_SIZE bsize,
-                           int use_rd) {
+void vp9_cyclic_refresh_update_segment(VP9_COMP *const cpi,
+                                       MB_MODE_INFO *const mbmi,
+                                       int mi_row, int mi_col,
+                                       BLOCK_SIZE bsize, int use_rd) {
   const VP9_COMMON *const cm = &cpi->common;
-  CYCLIC_REFRESH *const cr = &cpi->cyclic_refresh;
+  CYCLIC_REFRESH *const cr = cpi->cyclic_refresh;
   const int bw = num_8x8_blocks_wide_lookup[bsize];
   const int bh = num_8x8_blocks_high_lookup[bsize];
   const int xmis = MIN(cm->mi_cols - mi_col, bw);
@@ -126,10 +169,10 @@ void vp9_update_segment_aq(VP9_COMP *const cpi,
 }
 
 // Setup cyclic background refresh: set delta q and segmentation map.
-void vp9_setup_cyclic_refresh_aq(VP9_COMP *const cpi) {
+void vp9_cyclic_refresh_setup(VP9_COMP *const cpi) {
   VP9_COMMON *const cm = &cpi->common;
   const RATE_CONTROL *const rc = &cpi->rc;
-  CYCLIC_REFRESH *const cr = &cpi->cyclic_refresh;
+  CYCLIC_REFRESH *const cr = cpi->cyclic_refresh;
   struct segmentation *const seg = &cm->seg;
   unsigned char *const seg_map = cpi->segmentation_map;
   const int apply_cyclic_refresh  = apply_cyclic_refresh_bitrate(cm, rc);
@@ -252,4 +295,14 @@ void vp9_setup_cyclic_refresh_aq(VP9_COMP *const cpi) {
         }
       }
   }
+}
+
+void vp9_cyclic_refresh_set_rate_and_dist_sb(CYCLIC_REFRESH *cr,
+                                             int64_t rate_sb, int64_t dist_sb) {
+  cr->projected_rate_sb = rate_sb;
+  cr->projected_dist_sb = dist_sb;
+}
+
+int vp9_cyclic_refresh_get_rdmult(const CYCLIC_REFRESH *cr) {
+  return cr->rdmult;
 }
