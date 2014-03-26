@@ -762,7 +762,6 @@ static void set_rt_speed_feature(VP9_COMMON *cm,
                                  int speed) {
   sf->static_segmentation = 0;
   sf->adaptive_rd_thresh = 1;
-  sf->recode_loop = ((speed < 1) ? ALLOW_RECODE : ALLOW_RECODE_KFMAXBW);
   sf->encode_breakout_thresh = 1;
   sf->use_fast_coef_costing = 1;
 
@@ -783,7 +782,6 @@ static void set_rt_speed_feature(VP9_COMMON *cm,
     sf->adaptive_pred_interp_filter = 1;
     sf->auto_mv_step_size = 1;
     sf->adaptive_rd_thresh = 2;
-    sf->recode_loop = ALLOW_RECODE_KFARFGF;
     sf->intra_y_mode_mask[TX_32X32] = INTRA_DC_H_V;
     sf->intra_uv_mode_mask[TX_32X32] = INTRA_DC_H_V;
     sf->intra_uv_mode_mask[TX_16X16] = INTRA_DC_H_V;
@@ -820,7 +818,6 @@ static void set_rt_speed_feature(VP9_COMMON *cm,
     sf->last_partitioning_redo_frequency = 3;
 
     sf->adaptive_rd_thresh = 2;
-    sf->recode_loop = ALLOW_RECODE_KFARFGF;
     sf->use_lp32x32fdct = 1;
     sf->mode_skip_start = 11;
     sf->intra_y_mode_mask[TX_32X32] = INTRA_DC_H_V;
