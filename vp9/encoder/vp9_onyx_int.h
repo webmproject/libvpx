@@ -284,6 +284,9 @@ typedef struct {
   // blocks and the q is less than a threshold.
   int skip_encode_sb;
   int skip_encode_frame;
+  // Speed feature to allow or disallow skipping of recode at block
+  // level within a frame.
+  int allow_skip_recode;
 
   // This variable allows us to reuse the last frames partition choices
   // (64x64 v 32x32 etc) for this frame. It can be set to only use the last

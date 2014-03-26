@@ -587,6 +587,7 @@ static void set_good_speed_feature(VP9_COMMON *cm,
   int i;
   sf->adaptive_rd_thresh = 1;
   sf->recode_loop = ((speed < 1) ? ALLOW_RECODE : ALLOW_RECODE_KFMAXBW);
+  sf->allow_skip_recode = 1;
   if (speed == 1) {
     sf->use_square_partition_only = !frame_is_intra_only(cm);
     sf->less_rectangular_check  = 1;
@@ -598,7 +599,6 @@ static void set_good_speed_feature(VP9_COMMON *cm,
         DISABLE_ALL_SPLIT : DISABLE_ALL_INTER_SPLIT;
     else
       sf->disable_split_mask = DISABLE_COMPOUND_SPLIT;
-
     sf->use_rd_breakout = 1;
     sf->adaptive_motion_search = 1;
     sf->adaptive_pred_interp_filter = 1;
@@ -630,7 +630,6 @@ static void set_good_speed_feature(VP9_COMMON *cm,
     sf->adaptive_pred_interp_filter = 2;
     sf->reference_masking = 1;
     sf->auto_mv_step_size = 1;
-
     sf->disable_filter_search_var_thresh = 50;
     sf->comp_inter_joint_search_thresh = BLOCK_SIZES;
 
@@ -676,9 +675,9 @@ static void set_good_speed_feature(VP9_COMMON *cm,
     sf->use_lastframe_partitioning = LAST_FRAME_PARTITION_ALL;
     sf->adjust_partitioning_from_last_frame = 1;
     sf->last_partitioning_redo_frequency = 3;
-
     sf->use_uv_intra_rd_estimate = 1;
     sf->skip_encode_sb = 1;
+    sf->allow_skip_recode = 0;
     sf->use_lp32x32fdct = 1;
     sf->subpel_iters_per_step = 1;
     sf->use_fast_coef_updates = 2;
@@ -716,6 +715,7 @@ static void set_good_speed_feature(VP9_COMMON *cm,
 
     sf->use_uv_intra_rd_estimate = 1;
     sf->skip_encode_sb = 1;
+    sf->allow_skip_recode = 0;
     sf->use_lp32x32fdct = 1;
     sf->subpel_iters_per_step = 1;
     sf->use_fast_coef_updates = 2;
@@ -754,6 +754,7 @@ static void set_good_speed_feature(VP9_COMMON *cm,
     sf->use_fast_coef_costing = 1;
     sf->adaptive_rd_thresh = 4;
     sf->mode_skip_start = 6;
+    sf->allow_skip_recode = 1;
   }
 }
 
@@ -846,6 +847,7 @@ static void set_rt_speed_feature(VP9_COMMON *cm,
     sf->adaptive_rd_thresh = 4;
     sf->mode_skip_start = 6;
     sf->encode_breakout_thresh = 400;
+    sf->allow_skip_recode = 0;
   }
   if (speed >= 4) {
     sf->optimize_coefficients = 0;
@@ -876,6 +878,7 @@ static void set_rt_speed_feature(VP9_COMMON *cm,
     sf->disable_inter_mode_mask[BLOCK_64X32] = ~(1 << INTER_OFFSET(NEARESTMV));
     sf->disable_inter_mode_mask[BLOCK_64X64] = ~(1 << INTER_OFFSET(NEARESTMV));
     sf->max_intra_bsize = BLOCK_32X32;
+    sf->allow_skip_recode = 1;
   }
   if (speed >= 6) {
     sf->max_partition_size = BLOCK_32X32;
@@ -885,6 +888,7 @@ static void set_rt_speed_feature(VP9_COMMON *cm,
     sf->partition_search_type = REFERENCE_PARTITION;
     sf->use_nonrd_pick_mode = 1;
     sf->search_method = FAST_DIAMOND;
+    sf->allow_skip_recode = 0;
   }
   if (speed >= 7) {
     sf->partition_search_type = VAR_BASED_FIXED_PARTITION;
@@ -951,6 +955,7 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
   sf->use_rd_breakout = 0;
   sf->skip_encode_sb = 0;
   sf->use_uv_intra_rd_estimate = 0;
+  sf->allow_skip_recode = 0;
   sf->lpf_pick = LPF_PICK_FROM_FULL_IMAGE;
   sf->use_fast_coef_updates = 0;
   sf->use_fast_coef_costing = 0;
