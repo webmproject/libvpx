@@ -25,7 +25,7 @@ typedef void (*post_proc_func_t)(unsigned char *src_ptr,
 
 namespace {
 
-class Vp8PostProcessingFilterTest
+class VP8PostProcessingFilterTest
     : public ::testing::TestWithParam<post_proc_func_t> {
  public:
   virtual void TearDown() {
@@ -36,7 +36,7 @@ class Vp8PostProcessingFilterTest
 // Test routine for the VP8 post-processing function
 // vp8_post_proc_down_and_across_mb_row_c.
 
-TEST_P(Vp8PostProcessingFilterTest, FilterOutputCheck) {
+TEST_P(VP8PostProcessingFilterTest, FilterOutputCheck) {
   // Size of the underlying data block that will be filtered.
   const int block_width  = 16;
   const int block_height = 16;
@@ -91,7 +91,7 @@ TEST_P(Vp8PostProcessingFilterTest, FilterOutputCheck) {
   for (int i = 0; i < block_height; ++i) {
     for (int j = 0; j < block_width; ++j) {
       EXPECT_EQ(expected_data[i], pixel_ptr[j])
-          << "Vp8PostProcessingFilterTest failed with invalid filter output";
+          << "VP8PostProcessingFilterTest failed with invalid filter output";
     }
     pixel_ptr += output_stride;
   }
@@ -101,11 +101,11 @@ TEST_P(Vp8PostProcessingFilterTest, FilterOutputCheck) {
   vpx_free(flimits);
 };
 
-INSTANTIATE_TEST_CASE_P(C, Vp8PostProcessingFilterTest,
+INSTANTIATE_TEST_CASE_P(C, VP8PostProcessingFilterTest,
     ::testing::Values(vp8_post_proc_down_and_across_mb_row_c));
 
 #if HAVE_SSE2
-INSTANTIATE_TEST_CASE_P(SSE2, Vp8PostProcessingFilterTest,
+INSTANTIATE_TEST_CASE_P(SSE2, VP8PostProcessingFilterTest,
     ::testing::Values(vp8_post_proc_down_and_across_mb_row_sse2));
 #endif
 

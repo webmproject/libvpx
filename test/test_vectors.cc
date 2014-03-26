@@ -13,7 +13,7 @@
 namespace libvpx_test {
 
 #if CONFIG_VP8_DECODER
-const char *kVP8TestVectors[kNumVp8TestVectors] = {
+const char *kVP8TestVectors[kNumVP8TestVectors] = {
   "vp80-00-comprehensive-001.ivf",
   "vp80-00-comprehensive-002.ivf", "vp80-00-comprehensive-003.ivf",
   "vp80-00-comprehensive-004.ivf", "vp80-00-comprehensive-005.ivf",
@@ -49,7 +49,7 @@ const char *kVP8TestVectors[kNumVp8TestVectors] = {
 };
 #endif  // CONFIG_VP8_DECODER
 #if CONFIG_VP9_DECODER
-const char *kVP9TestVectors[kNumVp9TestVectors] = {
+const char *kVP9TestVectors[kNumVP9TestVectors] = {
   "vp90-2-00-quantizer-00.webm", "vp90-2-00-quantizer-01.webm",
   "vp90-2-00-quantizer-02.webm", "vp90-2-00-quantizer-03.webm",
   "vp90-2-00-quantizer-04.webm", "vp90-2-00-quantizer-05.webm",

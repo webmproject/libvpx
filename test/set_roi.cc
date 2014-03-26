@@ -26,7 +26,7 @@ using libvpx_test::ACMRandom;
 
 namespace {
 
-TEST(Vp8RoiMapTest, ParameterCheck) {
+TEST(VP8RoiMapTest, ParameterCheck) {
   ACMRandom rnd(ACMRandom::DeterministicSeed());
   int delta_q[MAX_MB_SEGMENTS] = { -2, -25, 0, 31 };
   int delta_lf[MAX_MB_SEGMENTS] = { -2, -25, 0, 31 };
