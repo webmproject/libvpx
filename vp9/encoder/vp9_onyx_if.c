@@ -189,11 +189,13 @@ static void dealloc_compressor_data(VP9_COMP *cpi) {
   cpi->coding_context.last_frame_seg_map_copy = NULL;
 
   vpx_free(cpi->complexity_map);
-  cpi->complexity_map = 0;
-  vpx_free(cpi->cyclic_refresh.map);
-  cpi->cyclic_refresh.map = 0;
+  cpi->complexity_map = NULL;
+
+  vp9_cyclic_refresh_free(cpi->cyclic_refresh);
+  cpi->cyclic_refresh = NULL;
+
   vpx_free(cpi->active_map);
-  cpi->active_map = 0;
+  cpi->active_map = NULL;
 
   vp9_free_frame_buffers(cm);
 
@@ -1661,8 +1663,8 @@ VP9_COMP *vp9_create_compressor(VP9_CONFIG *oxcf) {
                   vpx_calloc(cm->mi_rows * cm->mi_cols, 1));
 
   // Create a map used for cyclic background refresh.
-  CHECK_MEM_ERROR(cm, cpi->cyclic_refresh.map,
-                  vpx_calloc(cm->mi_rows * cm->mi_cols, 1));
+  CHECK_MEM_ERROR(cm, cpi->cyclic_refresh,
+                  vp9_cyclic_refresh_alloc(cm->mi_rows, cm->mi_cols));
 
   // And a place holder structure is the coding context
   // for use if we want to save and restore it
@@ -2679,7 +2681,7 @@ static void encode_without_recode_loop(VP9_COMP *cpi,
   } else if (cpi->oxcf.aq_mode == COMPLEXITY_AQ) {
     setup_in_frame_q_adj(cpi);
   } else if (cpi->oxcf.aq_mode == CYCLIC_REFRESH_AQ) {
-    vp9_setup_cyclic_refresh_aq(cpi);
+    vp9_cyclic_refresh_setup(cpi);
   }
   // transform / motion compensation build reconstruction frame
   vp9_encode_frame(cpi);

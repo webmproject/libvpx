@@ -725,7 +725,7 @@ typedef struct VP9_COMP {
   unsigned char *active_map;
   unsigned int active_map_enabled;
 
-  CYCLIC_REFRESH cyclic_refresh;
+  CYCLIC_REFRESH *cyclic_refresh;
 
   fractional_mv_step_fp *find_fractional_mv_step;
   fractional_mv_step_comp_fp *find_fractional_mv_step_comp;

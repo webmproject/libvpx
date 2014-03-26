@@ -18,47 +18,30 @@
 extern "C" {
 #endif
 
-typedef struct {
-  // Target percentage of blocks per frame that are cyclicly refreshed.
-  int max_mbs_perframe;
-  // Maximum q-delta as percentage of base q.
-  int max_qdelta_perc;
-  // Block size below which we don't apply cyclic refresh.
-  BLOCK_SIZE min_block_size;
-  // Macroblock starting index (unit of 8x8) for cycling through the frame.
-  int mb_index;
-  // Controls how long a block will need to wait to be refreshed again.
-  int time_for_refresh;
-  // Actual number of blocks that were applied delta-q (segment 1).
-  int num_seg_blocks;
-  // Actual encoding bits for segment 1.
-  int actual_seg_bits;
-  // RD mult. parameters for segment 1.
-  int rdmult;
-  // Cyclic refresh map.
-  signed char *map;
-  // Projected rate and distortion for the current superblock.
-  int64_t projected_rate_sb;
-  int64_t projected_dist_sb;
-  // Thresholds applied to projected rate/distortion of the superblock.
-  int64_t thresh_rate_sb;
-  int64_t thresh_dist_sb;
-} CYCLIC_REFRESH;
-
 struct VP9_COMP;
+
+struct CYCLIC_REFRESH;
+typedef struct CYCLIC_REFRESH CYCLIC_REFRESH;
+
+CYCLIC_REFRESH *vp9_cyclic_refresh_alloc(int mi_rows, int mi_cols);
+
+void vp9_cyclic_refresh_free(CYCLIC_REFRESH *cr);
 
 // Prior to coding a given prediction block, of size bsize at (mi_row, mi_col),
 // check if we should reset the segment_id, and update the cyclic_refresh map
 // and segmentation map.
-void vp9_update_segment_aq(struct VP9_COMP *const cpi,
-                           MB_MODE_INFO *const mbmi,
-                           int mi_row,
-                           int mi_col,
-                           BLOCK_SIZE bsize,
-                           int use_rd);
+void vp9_cyclic_refresh_update_segment(struct VP9_COMP *const cpi,
+                                       MB_MODE_INFO *const mbmi,
+                                       int mi_row, int mi_col,
+                                       BLOCK_SIZE bsize, int use_rd);
 
 // Setup cyclic background refresh: set delta q and segmentation map.
-void vp9_setup_cyclic_refresh_aq(struct VP9_COMP *const cpi);
+void vp9_cyclic_refresh_setup(struct VP9_COMP *const cpi);
+
+void vp9_cyclic_refresh_set_rate_and_dist_sb(CYCLIC_REFRESH *cr,
+                                             int64_t rate_sb, int64_t dist_sb);
+
+int vp9_cyclic_refresh_get_rdmult(const CYCLIC_REFRESH *cr);
 
 #ifdef __cplusplus
 }  // extern "C"
