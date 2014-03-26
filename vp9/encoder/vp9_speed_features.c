@@ -207,15 +207,6 @@ static void set_rt_speed_feature(VP9_COMMON *cm,
   }
   if (speed >= 3) {
     sf->use_square_partition_only = 1;
-    if (MIN(cm->width, cm->height) >= 720)
-      sf->disable_split_mask = DISABLE_ALL_SPLIT;
-    else
-      sf->disable_split_mask = DISABLE_ALL_INTER_SPLIT;
-
-    sf->mode_search_skip_flags = FLAG_SKIP_INTRA_DIRMISMATCH
-        | FLAG_SKIP_INTRA_BESTINTER | FLAG_SKIP_COMP_BESTINTRA
-        | FLAG_SKIP_INTRA_LOWVAR;
-
     sf->disable_filter_search_var_thresh = 100;
     sf->use_lastframe_partitioning = LAST_FRAME_PARTITION_ALL;
     sf->use_uv_intra_rd_estimate = 1;
@@ -224,16 +215,13 @@ static void set_rt_speed_feature(VP9_COMMON *cm,
     sf->use_fast_coef_updates = 2;
     sf->adaptive_rd_thresh = 4;
     sf->mode_skip_start = 6;
-    sf->encode_breakout_thresh = 400;
     sf->allow_skip_recode = 0;
-  }
-  if (speed >= 4) {
     sf->optimize_coefficients = 0;
     sf->disable_split_mask = DISABLE_ALL_SPLIT;
     sf->lpf_pick = LPF_PICK_FROM_Q;
     sf->encode_breakout_thresh = 700;
   }
-  if (speed >= 5) {
+  if (speed >= 4) {
     int i;
     sf->last_partitioning_redo_frequency = 4;
     sf->adaptive_rd_thresh = 5;
@@ -258,7 +246,7 @@ static void set_rt_speed_feature(VP9_COMMON *cm,
     sf->max_intra_bsize = BLOCK_32X32;
     sf->allow_skip_recode = 1;
   }
-  if (speed >= 6) {
+  if (speed >= 5) {
     sf->max_partition_size = BLOCK_32X32;
     sf->min_partition_size = BLOCK_8X8;
     sf->partition_check =
@@ -268,12 +256,12 @@ static void set_rt_speed_feature(VP9_COMMON *cm,
     sf->search_method = FAST_DIAMOND;
     sf->allow_skip_recode = 0;
   }
-  if (speed >= 7) {
+  if (speed >= 6) {
     sf->partition_search_type = VAR_BASED_FIXED_PARTITION;
     sf->use_nonrd_pick_mode = 1;
     sf->search_method = FAST_DIAMOND;
   }
-  if (speed >= 8) {
+  if (speed >= 7) {
     int i;
     for (i = 0; i < BLOCK_SIZES; ++i)
       sf->disable_inter_mode_mask[i] = 14;    // only search NEARESTMV (0)
