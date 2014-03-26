@@ -1469,6 +1469,8 @@ static void update_state_rt(VP9_COMP *cpi, const PICK_MODE_CONTEXT *ctx,
   // from argument list.
   (void)ctx;
 
+  *(xd->mi_8x8[0]) = ctx->mic;
+
   // Check for reseting segment_id and update cyclic map.
   if (cpi->oxcf.aq_mode == CYCLIC_REFRESH_AQ && seg->enabled) {
     vp9_update_segment_aq(cpi, &xd->mi_8x8[0]->mbmi, mi_row, mi_col, bsize, 1);
@@ -1486,8 +1488,8 @@ static void update_state_rt(VP9_COMP *cpi, const PICK_MODE_CONTEXT *ctx,
 }
 
 static void encode_b_rt(VP9_COMP *cpi, const TileInfo *const tile,
-                     TOKENEXTRA **tp, int mi_row, int mi_col,
-                     int output_enabled, BLOCK_SIZE bsize) {
+                        TOKENEXTRA **tp, int mi_row, int mi_col,
+                        int output_enabled, BLOCK_SIZE bsize) {
   MACROBLOCK *const x = &cpi->mb;
 
   if (bsize < BLOCK_8X8) {
@@ -2935,7 +2937,7 @@ static void nonrd_pick_partition(VP9_COMP *cpi, const TileInfo *const tile,
       cpi->cyclic_refresh.projected_dist_sb = best_dist;
     }
 
-    encode_sb(cpi, tile, tp, mi_row, mi_col, output_enabled, bsize);
+    encode_sb_rt(cpi, tile, tp, mi_row, mi_col, output_enabled, bsize);
   }
 
   if (bsize == BLOCK_64X64) {
@@ -2956,6 +2958,7 @@ static void nonrd_use_partition(VP9_COMP *cpi,
                                 int *totrate, int64_t *totdist) {
   VP9_COMMON *const cm = &cpi->common;
   MACROBLOCK *const x = &cpi->mb;
+  MACROBLOCKD *const xd = &x->e_mbd;
   const int bsl = b_width_log2(bsize), hbs = (1 << bsl) / 4;
   const int mis = cm->mode_info_stride;
   PARTITION_TYPE partition;
@@ -2977,14 +2980,17 @@ static void nonrd_use_partition(VP9_COMP *cpi,
   switch (partition) {
     case PARTITION_NONE:
       nonrd_pick_sb_modes(cpi, tile, mi_row, mi_col, totrate, totdist, subsize);
+      (get_block_context(x, subsize))->mic.mbmi = xd->mi_8x8[0]->mbmi;
       break;
     case PARTITION_VERT:
       *get_sb_index(x, subsize) = 0;
       nonrd_pick_sb_modes(cpi, tile, mi_row, mi_col, totrate, totdist, subsize);
+      (get_block_context(x, subsize))->mic.mbmi = xd->mi_8x8[0]->mbmi;
       if (mi_col + hbs < cm->mi_cols) {
         *get_sb_index(x, subsize) = 1;
         nonrd_pick_sb_modes(cpi, tile, mi_row, mi_col + hbs,
                             &rate, &dist, subsize);
+        (get_block_context(x, subsize))->mic.mbmi = xd->mi_8x8[0]->mbmi;
         if (rate != INT_MAX && dist != INT64_MAX &&
             *totrate != INT_MAX && *totdist != INT64_MAX) {
           *totrate += rate;
@@ -2995,10 +3001,12 @@ static void nonrd_use_partition(VP9_COMP *cpi,
     case PARTITION_HORZ:
       *get_sb_index(x, subsize) = 0;
       nonrd_pick_sb_modes(cpi, tile, mi_row, mi_col, totrate, totdist, subsize);
+      (get_block_context(x, subsize))->mic.mbmi = xd->mi_8x8[0]->mbmi;
       if (mi_row + hbs < cm->mi_rows) {
         *get_sb_index(x, subsize) = 1;
         nonrd_pick_sb_modes(cpi, tile, mi_row + hbs, mi_col,
                             &rate, &dist, subsize);
+        (get_block_context(x, subsize))->mic.mbmi = xd->mi_8x8[0]->mbmi;
         if (rate != INT_MAX && dist != INT64_MAX &&
             *totrate != INT_MAX && *totdist != INT64_MAX) {
           *totrate += rate;
@@ -3076,6 +3084,7 @@ static void encode_nonrd_sb_row(VP9_COMP *cpi, const TileInfo *const tile,
         get_nonrd_var_based_fixed_partition(cpi, mi_row, mi_col);
 
     cpi->mb.source_variance = UINT_MAX;
+    vp9_zero(cpi->mb.pred_mv);
 
     // Set the partition type of the 64X64 block
     switch (cpi->sf.partition_search_type) {
@@ -3091,16 +3100,11 @@ static void encode_nonrd_sb_row(VP9_COMP *cpi, const TileInfo *const tile,
                             1, &dummy_rate, &dummy_dist);
         break;
       case REFERENCE_PARTITION:
-        if (cpi->sf.partition_check) {
-          vp9_zero(cpi->mb.pred_mv);
+        if (cpi->sf.partition_check || sb_has_motion(cm, prev_mi_8x8)) {
           nonrd_pick_partition(cpi, tile, tp, mi_row, mi_col, BLOCK_64X64,
                                &dummy_rate, &dummy_dist, 1, INT64_MAX);
         } else {
-          if (!sb_has_motion(cm, prev_mi_8x8))
-            copy_partitioning(cm, mi_8x8, prev_mi_8x8);
-          else
-            set_fixed_partitioning(cpi, tile, mi_8x8, mi_row, mi_col, bsize);
-
+          copy_partitioning(cm, mi_8x8, prev_mi_8x8);
           nonrd_use_partition(cpi, tile, mi_8x8, tp, mi_row, mi_col,
                               BLOCK_64X64, 1, &dummy_rate, &dummy_dist);
         }
