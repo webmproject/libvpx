@@ -42,8 +42,7 @@ int vp9_get_mvpred_var(const MACROBLOCK *x,
                        const vp9_variance_fn_ptr_t *vfp,
                        int use_mvcost);
 int vp9_get_mvpred_av_var(const MACROBLOCK *x,
-                          MV *best_mv,
-                          const MV *center_mv,
+                          const MV *best_mv, const MV *center_mv,
                           const uint8_t *second_pred,
                           const vp9_variance_fn_ptr_t *vfp,
                           int use_mvcost);
