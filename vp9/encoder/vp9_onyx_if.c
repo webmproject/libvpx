@@ -1230,7 +1230,8 @@ static void init_config(struct VP9_COMP *cpi, VP9_CONFIG *oxcf) {
 
   if ((cpi->svc.number_temporal_layers > 1 &&
       cpi->oxcf.end_usage == USAGE_STREAM_FROM_SERVER) ||
-      (cpi->svc.number_spatial_layers > 1 && cpi->pass == 2)) {
+      (cpi->svc.number_spatial_layers > 1 &&
+      cpi->oxcf.mode == MODE_SECONDPASS_BEST)) {
     vp9_init_layer_context(cpi);
   }
 
@@ -1795,13 +1796,15 @@ VP9_COMP *vp9_create_compressor(VP9_CONFIG *oxcf) {
           ++stats_copy[layer_id];
         }
       }
+
+      vp9_init_second_pass_spatial_svc(cpi);
     } else {
       cpi->twopass.stats_in_start = oxcf->two_pass_stats_in.buf;
       cpi->twopass.stats_in = cpi->twopass.stats_in_start;
       cpi->twopass.stats_in_end = &cpi->twopass.stats_in[packets - 1];
-    }
 
-    vp9_init_second_pass(cpi);
+      vp9_init_second_pass(cpi);
+    }
   }
 
   vp9_set_speed_features(cpi);
@@ -3242,6 +3245,15 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
     // Don't increment frame counters if this was an altref buffer
     // update not a real frame
     ++cm->current_video_frame;
+    if (cpi->use_svc) {
+      LAYER_CONTEXT *lc;
+      if (cpi->svc.number_temporal_layers > 1) {
+        lc = &cpi->svc.layer_context[cpi->svc.temporal_layer_id];
+      } else {
+        lc = &cpi->svc.layer_context[cpi->svc.spatial_layer_id];
+      }
+      ++lc->current_video_frame_in_layer;
+    }
   }
 
   // restore prev_mi
@@ -3396,6 +3408,10 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
 
   if (!cpi)
     return -1;
+
+  if (cpi->svc.number_spatial_layers > 1 && cpi->pass == 2) {
+    vp9_restore_layer_context(cpi);
+  }
 
   vpx_usec_timer_start(&cmptimer);
 
@@ -3589,7 +3605,8 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
   if (cpi->pass == 1 &&
       (!cpi->use_svc || cpi->svc.number_temporal_layers == 1)) {
     Pass1Encode(cpi, size, dest, frame_flags);
-  } else if (cpi->pass == 2 && !cpi->use_svc) {
+  } else if (cpi->pass == 2 &&
+      (!cpi->use_svc || cpi->svc.number_temporal_layers == 1)) {
     Pass2Encode(cpi, size, dest, frame_flags);
   } else if (cpi->use_svc) {
     SvcEncode(cpi, size, dest, frame_flags);
@@ -3611,8 +3628,9 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
   }
 
   // Save layer specific state.
-  if (cpi->svc.number_temporal_layers > 1 &&
-      cpi->oxcf.end_usage == USAGE_STREAM_FROM_SERVER) {
+  if ((cpi->svc.number_temporal_layers > 1 &&
+      cpi->oxcf.end_usage == USAGE_STREAM_FROM_SERVER) ||
+      (cpi->svc.number_spatial_layers > 1 && cpi->pass == 2)) {
     vp9_save_layer_context(cpi);
   }
 

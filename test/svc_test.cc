@@ -419,9 +419,52 @@ TEST_F(SvcTest, SecondPassEncode) {
   fclose(stats_file);
   codec_enc_.rc_twopass_stats_in = stats_buf;
 
-  const vpx_codec_err_t res =
+  vpx_codec_err_t res =
       vpx_svc_init(&svc_, &codec_, vpx_codec_vp9_cx(), &codec_enc_);
   ASSERT_EQ(VPX_CODEC_OK, res);
+  codec_initialized_ = true;
+
+  libvpx_test::I420VideoSource video(test_file_name_, kWidth, kHeight,
+                                     codec_enc_.g_timebase.den,
+                                     codec_enc_.g_timebase.num, 0, 30);
+  // FRAME 0
+  video.Begin();
+  // This frame is a keyframe.
+  res = vpx_svc_encode(&svc_, &codec_, video.img(), video.pts(),
+                       video.duration(), VPX_DL_GOOD_QUALITY);
+  ASSERT_EQ(VPX_CODEC_OK, res);
+  EXPECT_EQ(1, vpx_svc_is_keyframe(&svc_));
+
+  vpx_codec_err_t res_dec = decoder_->DecodeFrame(
+      static_cast<const uint8_t *>(vpx_svc_get_buffer(&svc_)),
+      vpx_svc_get_frame_size(&svc_));
+  ASSERT_EQ(VPX_CODEC_OK, res_dec) << decoder_->DecodeError();
+
+  // FRAME 1
+  video.Next();
+  // This is a P-frame.
+  res = vpx_svc_encode(&svc_, &codec_, video.img(), video.pts(),
+                       video.duration(), VPX_DL_GOOD_QUALITY);
+  ASSERT_EQ(VPX_CODEC_OK, res);
+  EXPECT_EQ(0, vpx_svc_is_keyframe(&svc_));
+
+  res_dec = decoder_->DecodeFrame(
+      static_cast<const uint8_t *>(vpx_svc_get_buffer(&svc_)),
+      vpx_svc_get_frame_size(&svc_));
+  ASSERT_EQ(VPX_CODEC_OK, res_dec) << decoder_->DecodeError();
+
+  // FRAME 2
+  video.Next();
+  // This is a P-frame.
+  res = vpx_svc_encode(&svc_, &codec_, video.img(), video.pts(),
+                       video.duration(), VPX_DL_GOOD_QUALITY);
+  ASSERT_EQ(VPX_CODEC_OK, res);
+  EXPECT_EQ(0, vpx_svc_is_keyframe(&svc_));
+
+  res_dec = decoder_->DecodeFrame(
+      static_cast<const uint8_t *>(vpx_svc_get_buffer(&svc_)),
+      vpx_svc_get_frame_size(&svc_));
+  ASSERT_EQ(VPX_CODEC_OK, res_dec) << decoder_->DecodeError();
 
   free(stats_buf.buf);
 }

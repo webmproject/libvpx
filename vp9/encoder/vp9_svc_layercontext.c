@@ -30,9 +30,8 @@ void vp9_init_layer_context(VP9_COMP *const cpi) {
   for (layer = 0; layer < layer_end; ++layer) {
     LAYER_CONTEXT *const lc = &cpi->svc.layer_context[layer];
     RATE_CONTROL *const lrc = &lc->rc;
-
+    lc->current_video_frame_in_layer = 0;
     lrc->avg_frame_qindex[INTER_FRAME] = q_trans[oxcf->worst_allowed_q];
-    lrc->last_q[INTER_FRAME] = q_trans[oxcf->worst_allowed_q];
     lrc->ni_av_qi = q_trans[oxcf->worst_allowed_q];
     lrc->total_actual_bits = 0;
     lrc->total_target_vs_actual = 0;
@@ -47,8 +46,12 @@ void vp9_init_layer_context(VP9_COMP *const cpi) {
 
     if (cpi->svc.number_temporal_layers > 1) {
       lc->target_bandwidth = oxcf->ts_target_bitrate[layer] * 1000;
+      lrc->last_q[INTER_FRAME] = q_trans[oxcf->worst_allowed_q];
     } else {
       lc->target_bandwidth = oxcf->ss_target_bitrate[layer] * 1000;
+      lrc->last_q[0] = q_trans[oxcf->best_allowed_q];
+      lrc->last_q[1] = q_trans[oxcf->best_allowed_q];
+      lrc->last_q[2] = q_trans[oxcf->best_allowed_q];
     }
 
     lrc->buffer_level = vp9_rescale((int)(oxcf->starting_buffer_level),
@@ -105,14 +108,16 @@ void vp9_update_layer_context_change_config(VP9_COMP *const cpi,
   }
 }
 
-static LAYER_CONTEXT *get_temporal_layer_context(SVC *svc) {
-  return &svc->layer_context[svc->temporal_layer_id];
+static LAYER_CONTEXT *get_layer_context(SVC *svc) {
+  return svc->number_temporal_layers > 1 ?
+         &svc->layer_context[svc->temporal_layer_id] :
+         &svc->layer_context[svc->spatial_layer_id];
 }
 
 void vp9_update_temporal_layer_framerate(VP9_COMP *const cpi) {
   const int layer = cpi->svc.temporal_layer_id;
   const VP9_CONFIG *const oxcf = &cpi->oxcf;
-  LAYER_CONTEXT *const lc = get_temporal_layer_context(&cpi->svc);
+  LAYER_CONTEXT *const lc = get_layer_context(&cpi->svc);
   RATE_CONTROL *const lrc = &lc->rc;
 
   lc->framerate = oxcf->framerate / oxcf->ts_rate_decimator[layer];
@@ -133,9 +138,8 @@ void vp9_update_temporal_layer_framerate(VP9_COMP *const cpi) {
 }
 
 void vp9_update_spatial_layer_framerate(VP9_COMP *const cpi, double framerate) {
-  int layer = cpi->svc.spatial_layer_id;
   const VP9_CONFIG *const oxcf = &cpi->oxcf;
-  LAYER_CONTEXT *const lc = &cpi->svc.layer_context[layer];
+  LAYER_CONTEXT *const lc = get_layer_context(&cpi->svc);
   RATE_CONTROL *const lrc = &lc->rc;
 
   lc->framerate = framerate;
@@ -145,14 +149,28 @@ void vp9_update_spatial_layer_framerate(VP9_COMP *const cpi, double framerate) {
   lrc->max_frame_bandwidth = (int)(((int64_t)lrc->av_per_frame_bandwidth *
                                    oxcf->two_pass_vbrmax_section) / 100);
   lrc->max_gf_interval = 16;
+
+  lrc->static_scene_max_gf_interval = cpi->key_frame_frequency >> 1;
+
+  if (oxcf->play_alternate && oxcf->lag_in_frames) {
+    if (lrc->max_gf_interval > oxcf->lag_in_frames - 1)
+      lrc->max_gf_interval = oxcf->lag_in_frames - 1;
+
+    if (lrc->static_scene_max_gf_interval > oxcf->lag_in_frames - 1)
+      lrc->static_scene_max_gf_interval = oxcf->lag_in_frames - 1;
+  }
+
+  if (lrc->max_gf_interval > lrc->static_scene_max_gf_interval)
+    lrc->max_gf_interval = lrc->static_scene_max_gf_interval;
 }
 
 void vp9_restore_layer_context(VP9_COMP *const cpi) {
-  LAYER_CONTEXT *const lc = get_temporal_layer_context(&cpi->svc);
+  LAYER_CONTEXT *const lc = get_layer_context(&cpi->svc);
   const int old_frame_since_key = cpi->rc.frames_since_key;
   const int old_frame_to_key = cpi->rc.frames_to_key;
 
   cpi->rc = lc->rc;
+  cpi->twopass = lc->twopass;
   cpi->oxcf.target_bandwidth = lc->target_bandwidth;
   cpi->oxcf.starting_buffer_level = lc->starting_buffer_level;
   cpi->oxcf.optimal_buffer_level = lc->optimal_buffer_level;
@@ -160,18 +178,35 @@ void vp9_restore_layer_context(VP9_COMP *const cpi) {
   cpi->output_framerate = lc->framerate;
   // Reset the frames_since_key and frames_to_key counters to their values
   // before the layer restore. Keep these defined for the stream (not layer).
-  cpi->rc.frames_since_key = old_frame_since_key;
-  cpi->rc.frames_to_key = old_frame_to_key;
+  if (cpi->svc.number_temporal_layers > 1) {
+    cpi->rc.frames_since_key = old_frame_since_key;
+    cpi->rc.frames_to_key = old_frame_to_key;
+  }
 }
 
 void vp9_save_layer_context(VP9_COMP *const cpi) {
   const VP9_CONFIG *const oxcf = &cpi->oxcf;
-  LAYER_CONTEXT *const lc = get_temporal_layer_context(&cpi->svc);
+  LAYER_CONTEXT *const lc = get_layer_context(&cpi->svc);
 
   lc->rc = cpi->rc;
+  lc->twopass = cpi->twopass;
   lc->target_bandwidth = (int)oxcf->target_bandwidth;
   lc->starting_buffer_level = oxcf->starting_buffer_level;
   lc->optimal_buffer_level = oxcf->optimal_buffer_level;
   lc->maximum_buffer_size = oxcf->maximum_buffer_size;
   lc->framerate = cpi->output_framerate;
+}
+
+void vp9_init_second_pass_spatial_svc(VP9_COMP *cpi) {
+  int i;
+  for (i = 0; i < cpi->svc.number_spatial_layers; ++i) {
+    struct twopass_rc *const twopass = &cpi->svc.layer_context[i].twopass;
+
+    cpi->svc.spatial_layer_id = i;
+    vp9_init_second_pass(cpi);
+
+    twopass->total_stats.spatial_layer_id = i;
+    twopass->total_left_stats.spatial_layer_id = i;
+  }
+  cpi->svc.spatial_layer_id = 0;
 }

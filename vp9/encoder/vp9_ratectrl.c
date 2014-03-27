@@ -933,7 +933,7 @@ static int rc_pick_q_and_bounds_two_pass(const VP9_COMP *cpi,
                           active_best_quality, active_worst_quality);
     if (q > *top_index) {
       // Special case when we are targeting the max allowed rate.
-      if (cpi->rc.this_frame_target >= cpi->rc.max_frame_bandwidth)
+      if (rc->this_frame_target >= rc->max_frame_bandwidth)
         *top_index = q;
       else
         q = *top_index;

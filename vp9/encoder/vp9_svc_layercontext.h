@@ -29,6 +29,7 @@ typedef struct {
   int avg_frame_size;
   struct twopass_rc twopass;
   struct vpx_fixed_buf rc_twopass_stats_in;
+  unsigned int current_video_frame_in_layer;
 } LAYER_CONTEXT;
 
 typedef struct {
@@ -36,8 +37,8 @@ typedef struct {
   int temporal_layer_id;
   int number_spatial_layers;
   int number_temporal_layers;
-  // Layer context used for rate control in temporal CBR mode or spatial
-  // two pass mode. Defined for temporal or spatial layers for now.
+  // Layer context used for rate control in one pass temporal CBR mode or
+  // two pass spatial mode. Defined for temporal or spatial layers for now.
   // Does not support temporal combined with spatial RC.
   LAYER_CONTEXT layer_context[MAX(VPX_TS_MAX_LAYERS, VPX_SS_MAX_LAYERS)];
 } SVC;
@@ -65,6 +66,9 @@ void vp9_restore_layer_context(struct VP9_COMP *const cpi);
 
 // Save the layer context after encoding the frame.
 void vp9_save_layer_context(struct VP9_COMP *const cpi);
+
+// Initialize second pass rc for spatial svc.
+void vp9_init_second_pass_spatial_svc(struct VP9_COMP *cpi);
 
 #ifdef __cplusplus
 }  // extern "C"
