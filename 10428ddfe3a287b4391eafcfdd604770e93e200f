@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//wj0\u003d",
+        "filename": "vp9/encoder/vp9_onyx_if.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 3297,
+      "author": {
+        "id": 1129385
+      },
+      "writtenOn": "2014-03-27T18:15:17Z",
+      "side": 1,
+      "message": "I can do it here.",
+      "parentUuid": "AAAAdn//wkc\u003d",
+      "revId": "10428ddfe3a287b4391eafcfdd604770e93e200f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//wkg\u003d",
         "filename": "vp9/encoder/vp9_svc_layercontext.c",
         "patchSetId": 10
@@ -30,6 +48,24 @@
       "writtenOn": "2014-03-27T17:44:21Z",
       "side": 1,
       "message": "We can set these (i.e., for all 3 frame-types) for temporal layer case as well, so can you place these 3 lines on top, maybe after line 34. And then remove line 49.",
+      "revId": "10428ddfe3a287b4391eafcfdd604770e93e200f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//wjw\u003d",
+        "filename": "vp9/encoder/vp9_svc_layercontext.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 1129385
+      },
+      "writtenOn": "2014-03-27T18:15:17Z",
+      "side": 1,
+      "message": "There\u0027s a difference that we use worst_allowed_q for temporal layer but best_allowed_q in spatial layer case.",
+      "parentUuid": "AAAAdn//wkg\u003d",
       "revId": "10428ddfe3a287b4391eafcfdd604770e93e200f",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
