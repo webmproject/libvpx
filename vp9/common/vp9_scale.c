@@ -13,11 +13,11 @@
 #include "vp9/common/vp9_scale.h"
 
 static INLINE int scaled_x(int val, const struct scale_factors *sf) {
-  return val * sf->x_scale_fp >> REF_SCALE_SHIFT;
+  return (int)((int64_t)val * sf->x_scale_fp >> REF_SCALE_SHIFT);
 }
 
 static INLINE int scaled_y(int val, const struct scale_factors *sf) {
-  return val * sf->y_scale_fp >> REF_SCALE_SHIFT;
+  return (int)((int64_t)val * sf->y_scale_fp >> REF_SCALE_SHIFT);
 }
 
 static int unscaled_value(int val, const struct scale_factors *sf) {
