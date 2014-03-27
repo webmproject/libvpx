@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//wjA\u003d",
+        "filename": "vp9/encoder/vp9_pickmode.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 249,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2014-03-27T19:45:44Z",
+      "side": 1,
+      "message": "mbmi was reset here. we need to restore the assigned segment_id in line 258.",
+      "revId": "4a42047b4e8daa2265c2f82096b4c07834044ae2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
