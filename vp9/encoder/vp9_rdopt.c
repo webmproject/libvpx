@@ -595,7 +595,7 @@ static INLINE int cost_coeffs(MACROBLOCK *x,
   int c, cost;
   // Check for consistency of tx_size with mode info
   assert(type == PLANE_TYPE_Y ? mbmi->tx_size == tx_size
-                              : get_uv_tx_size(mbmi) == tx_size);
+                              : get_uv_tx_size(mbmi, pd) == tx_size);
 
   if (eob == 0) {
     // single eob token
@@ -1330,7 +1330,7 @@ static void super_block_uvrd(const VP9_COMP *cpi, MACROBLOCK *x,
                              int64_t ref_best_rd) {
   MACROBLOCKD *const xd = &x->e_mbd;
   MB_MODE_INFO *const mbmi = &xd->mi[0]->mbmi;
-  const TX_SIZE uv_tx_size = get_uv_tx_size(mbmi);
+  const TX_SIZE uv_tx_size = get_uv_tx_size(mbmi, &xd->plane[1]);
   int plane;
   int pnrate = 0, pnskip = 1;
   int64_t pndist = 0, pnsse = 0;
@@ -2928,6 +2928,7 @@ void vp9_rd_pick_intra_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
                                PICK_MODE_CONTEXT *ctx, int64_t best_rd) {
   VP9_COMMON *const cm = &cpi->common;
   MACROBLOCKD *const xd = &x->e_mbd;
+  struct macroblockd_plane *const pd = xd->plane;
   int rate_y = 0, rate_uv = 0, rate_y_tokenonly = 0, rate_uv_tokenonly = 0;
   int y_skip = 0, uv_skip = 0;
   int64_t dist_y = 0, dist_uv = 0, tx_cache[TX_MODES] = { 0 };
@@ -2943,7 +2944,9 @@ void vp9_rd_pick_intra_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
       *returnrate = INT_MAX;
       return;
     }
-    max_uv_tx_size = get_uv_tx_size_impl(xd->mi[0]->mbmi.tx_size, bsize);
+    max_uv_tx_size = get_uv_tx_size_impl(xd->mi[0]->mbmi.tx_size, bsize,
+                                         pd[1].subsampling_x,
+                                         pd[1].subsampling_y);
     rd_pick_intra_sbuv_mode(cpi, x, ctx, &rate_uv, &rate_uv_tokenonly,
                             &dist_uv, &uv_skip, bsize, max_uv_tx_size);
   } else {
@@ -2953,7 +2956,9 @@ void vp9_rd_pick_intra_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
       *returnrate = INT_MAX;
       return;
     }
-    max_uv_tx_size = get_uv_tx_size_impl(xd->mi[0]->mbmi.tx_size, bsize);
+    max_uv_tx_size = get_uv_tx_size_impl(xd->mi[0]->mbmi.tx_size, bsize,
+                                         pd[1].subsampling_x,
+                                         pd[1].subsampling_y);
     rd_pick_intra_sbuv_mode(cpi, x, ctx, &rate_uv, &rate_uv_tokenonly,
                             &dist_uv, &uv_skip, BLOCK_8X8, max_uv_tx_size);
   }
@@ -3015,6 +3020,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
   MACROBLOCKD *const xd = &x->e_mbd;
   MB_MODE_INFO *const mbmi = &xd->mi[0]->mbmi;
   const struct segmentation *const seg = &cm->seg;
+  struct macroblockd_plane *const pd = xd->plane;
   PREDICTION_MODE this_mode;
   MV_REFERENCE_FRAME ref_frame, second_ref_frame;
   unsigned char segment_id = mbmi->segment_id;
@@ -3304,7 +3310,8 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
       if (rate_y == INT_MAX)
         continue;
 
-      uv_tx = get_uv_tx_size_impl(mbmi->tx_size, bsize);
+      uv_tx = get_uv_tx_size_impl(mbmi->tx_size, bsize, pd[1].subsampling_x,
+                                  pd[1].subsampling_y);
       if (rate_uv_intra[uv_tx] == INT_MAX) {
         choose_intra_uv_mode(cpi, ctx, bsize, uv_tx,
                              &rate_uv_intra[uv_tx], &rate_uv_tokenonly[uv_tx],
@@ -3549,7 +3556,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
     if (vp9_mode_order[best_mode_index].ref_frame[0] == INTRA_FRAME) {
       TX_SIZE uv_tx_size;
       *mbmi = best_mbmode;
-      uv_tx_size = get_uv_tx_size(mbmi);
+      uv_tx_size = get_uv_tx_size(mbmi, &xd->plane[1]);
       rd_pick_intra_sbuv_mode(cpi, x, ctx, &rate_uv_intra[uv_tx_size],
                               &rate_uv_tokenonly[uv_tx_size],
                               &dist_uv[uv_tx_size],

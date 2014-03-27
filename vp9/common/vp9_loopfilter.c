@@ -502,7 +502,7 @@ static void build_masks(const loop_filter_info_n *const lfi_n,
   const MB_MODE_INFO *mbmi = &mi->mbmi;
   const BLOCK_SIZE block_size = mbmi->sb_type;
   const TX_SIZE tx_size_y = mbmi->tx_size;
-  const TX_SIZE tx_size_uv = get_uv_tx_size(mbmi);
+  const TX_SIZE tx_size_uv = get_uv_tx_size_impl(tx_size_y, block_size, 1, 1);
   const int filter_level = get_filter_level(lfi_n, mbmi);
   uint64_t *const left_y = &lfm->left_y[tx_size_y];
   uint64_t *const above_y = &lfm->above_y[tx_size_y];
@@ -939,7 +939,7 @@ static void filter_block_plane_non420(VP9_COMMON *cm,
           !(r & (num_8x8_blocks_high_lookup[sb_type] - 1)) : 1;
       const int skip_this_r = skip_this && !block_edge_above;
       const TX_SIZE tx_size = (plane->plane_type == PLANE_TYPE_UV)
-                            ? get_uv_tx_size(&mi[0].mbmi)
+                            ? get_uv_tx_size(&mi[0].mbmi, plane)
                             : mi[0].mbmi.tx_size;
       const int skip_border_4x4_c = ss_x && mi_col + c == cm->mi_cols - 1;
       const int skip_border_4x4_r = ss_y && mi_row + r == cm->mi_rows - 1;
