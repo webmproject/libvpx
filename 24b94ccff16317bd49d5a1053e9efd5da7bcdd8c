@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//wgw\u003d",
+        "filename": "examples/vpx_temporal_scalable_patterns.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 507,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-03-27T22:51:08Z",
+      "side": 1,
+      "message": "remove space at end of line and add a period.",
+      "revId": "24b94ccff16317bd49d5a1053e9efd5da7bcdd8c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//wfk\u003d",
+        "filename": "examples/vpx_temporal_scalable_patterns.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 572,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-03-27T22:51:08Z",
+      "side": 1,
+      "message": "Doesn\u0027t this result in 2 calls in the case of VP9, the first with the wrong speed setting? Maybe add as an \"else\" or \"else if\".",
+      "revId": "24b94ccff16317bd49d5a1053e9efd5da7bcdd8c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
