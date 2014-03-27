@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//we8\u003d",
+        "filename": "webmenc.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-03-27T23:06:56Z",
+      "side": 1,
+      "message": "// namespace\n\nhttp://google-styleguide.googlecode.com/svn/trunk/cppguide.xml#Namespace_Formatting",
+      "revId": "3b841f03f703635474a66881df5c7dc435844f8b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//we4\u003d",
+        "filename": "webmenc.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-03-27T23:06:56Z",
+      "side": 1,
+      "message": "you could do the new here and avoid the reinterpret altogether given the other assignment will be to void*",
+      "revId": "3b841f03f703635474a66881df5c7dc435844f8b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
