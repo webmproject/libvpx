@@ -221,14 +221,43 @@ static vpx_codec_err_t validate_config(vpx_codec_alg_priv_t      *ctx,
     if (cfg->rc_twopass_stats_in.sz % packet_sz)
       ERROR("rc_twopass_stats_in.sz indicates truncated packet.");
 
-    if (cfg->rc_twopass_stats_in.sz < 2 * packet_sz)
-      ERROR("rc_twopass_stats_in requires at least two packets.");
+    if (cfg->ss_number_layers > 1) {
+      int i;
+      unsigned int n_packets_per_layer[VPX_SS_MAX_LAYERS] = {0};
 
-    stats =
-        (const FIRSTPASS_STATS *)cfg->rc_twopass_stats_in.buf + n_packets - 1;
+      stats = cfg->rc_twopass_stats_in.buf;
+      for (i = 0; i < n_packets; ++i) {
+        const int layer_id = stats[i].spatial_layer_id;
+        if (layer_id >= 0 && layer_id < (int)cfg->ss_number_layers) {
+          ++n_packets_per_layer[layer_id];
+        }
+      }
 
-    if ((int)(stats->count + 0.5) != n_packets - 1)
-      ERROR("rc_twopass_stats_in missing EOS stats packet");
+      for (i = 0; i < (int)cfg->ss_number_layers; ++i) {
+        unsigned int layer_id;
+        if (n_packets_per_layer[i] < 2) {
+          ERROR("rc_twopass_stats_in requires at least two packets for each "
+                "layer.");
+        }
+
+        stats = (const FIRSTPASS_STATS *)cfg->rc_twopass_stats_in.buf +
+                n_packets - cfg->ss_number_layers + i;
+        layer_id = stats->spatial_layer_id;
+
+        if (layer_id >= cfg->ss_number_layers
+            ||(int)(stats->count + 0.5) != n_packets_per_layer[layer_id] - 1)
+          ERROR("rc_twopass_stats_in missing EOS stats packet");
+      }
+    } else {
+      if (cfg->rc_twopass_stats_in.sz < 2 * packet_sz)
+        ERROR("rc_twopass_stats_in requires at least two packets.");
+
+      stats =
+          (const FIRSTPASS_STATS *)cfg->rc_twopass_stats_in.buf + n_packets - 1;
+
+      if ((int)(stats->count + 0.5) != n_packets - 1)
+        ERROR("rc_twopass_stats_in missing EOS stats packet");
+    }
   }
 
   return VPX_CODEC_OK;
@@ -990,9 +1019,12 @@ static vpx_codec_err_t vp9e_set_svc(vpx_codec_alg_priv_t *ctx, int ctr_id,
                                     va_list args) {
   int data = va_arg(args, int);
   vp9_set_svc(ctx->cpi, data);
-  // CBR mode for SVC with both temporal and spatial layers not yet supported.
+  // CBR or two pass mode for SVC with both temporal and spatial layers
+  // not yet supported.
   if (data == 1 &&
-      ctx->cfg.rc_end_usage == VPX_CBR &&
+      (ctx->cfg.rc_end_usage == VPX_CBR ||
+       ctx->cfg.g_pass == VPX_RC_FIRST_PASS ||
+       ctx->cfg.g_pass == VPX_RC_LAST_PASS) &&
       ctx->cfg.ss_number_layers > 1 &&
       ctx->cfg.ts_number_layers > 1) {
     return VPX_CODEC_INVALID_PARAM;
