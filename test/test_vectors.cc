@@ -12,8 +12,10 @@
 
 namespace libvpx_test {
 
+#define NELEMENTS(x) static_cast<int>(sizeof(x) / sizeof(x[0]))
+
 #if CONFIG_VP8_DECODER
-const char *kVP8TestVectors[kNumVP8TestVectors] = {
+const char *const kVP8TestVectors[] = {
   "vp80-00-comprehensive-001.ivf",
   "vp80-00-comprehensive-002.ivf", "vp80-00-comprehensive-003.ivf",
   "vp80-00-comprehensive-004.ivf", "vp80-00-comprehensive-005.ivf",
@@ -47,9 +49,10 @@ const char *kVP8TestVectors[kNumVP8TestVectors] = {
   "vp80-05-sharpness-1440.ivf", "vp80-05-sharpness-1443.ivf",
   "vp80-06-smallsize.ivf"
 };
+const int kNumVP8TestVectors = NELEMENTS(kVP8TestVectors);
 #endif  // CONFIG_VP8_DECODER
 #if CONFIG_VP9_DECODER
-const char *kVP9TestVectors[kNumVP9TestVectors] = {
+const char *const kVP9TestVectors[] = {
   "vp90-2-00-quantizer-00.webm", "vp90-2-00-quantizer-01.webm",
   "vp90-2-00-quantizer-02.webm", "vp90-2-00-quantizer-03.webm",
   "vp90-2-00-quantizer-04.webm", "vp90-2-00-quantizer-05.webm",
@@ -163,6 +166,7 @@ const char *kVP9TestVectors[kNumVP9TestVectors] = {
   "vp90-2-12-droppable_2.ivf", "vp90-2-12-droppable_3.ivf",
   "vp91-2-04-yv444.webm"
 };
+const int kNumVP9TestVectors = NELEMENTS(kVP9TestVectors);
 #endif  // CONFIG_VP9_DECODER
 
 }  // namespace libvpx_test

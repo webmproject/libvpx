@@ -462,5 +462,7 @@ TEST_F(ExternalFrameBufferTest, SetAfterDecode) {
 }
 
 VP9_INSTANTIATE_TEST_CASE(ExternalFrameBufferMD5Test,
-                          ::testing::ValuesIn(libvpx_test::kVP9TestVectors));
+                          ::testing::ValuesIn(libvpx_test::kVP9TestVectors,
+                                              libvpx_test::kVP9TestVectors +
+                                              libvpx_test::kNumVP9TestVectors));
 }  // namespace
