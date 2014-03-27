@@ -1405,7 +1405,7 @@ static int sb_has_motion(const VP9_COMMON *cm, MODE_INFO **prev_mi_8x8) {
   return 0;
 }
 
-static void update_state_rt(VP9_COMP *cpi, const PICK_MODE_CONTEXT *ctx,
+static void update_state_rt(VP9_COMP *cpi, PICK_MODE_CONTEXT *ctx,
                             int mi_row, int mi_col, int bsize) {
   VP9_COMMON *const cm = &cpi->common;
   MACROBLOCK *const x = &cpi->mb;
@@ -1413,15 +1413,11 @@ static void update_state_rt(VP9_COMP *cpi, const PICK_MODE_CONTEXT *ctx,
   MB_MODE_INFO *const mbmi = &xd->mi_8x8[0]->mbmi;
   const struct segmentation *const seg = &cm->seg;
 
-  // TODO(jingning) We might need PICK_MODE_CONTEXT to buffer coding modes
-  // associated with variable block sizes. Otherwise, remove this ctx
-  // from argument list.
-  (void)ctx;
-
   *(xd->mi_8x8[0]) = ctx->mic;
 
-  // Check for reseting segment_id and update cyclic map.
-  if (cpi->oxcf.aq_mode == CYCLIC_REFRESH_AQ && seg->enabled) {
+  // For in frame adaptive Q, check for reseting the segment_id and updating
+  // the cyclic refresh map.
+  if ((cpi->oxcf.aq_mode == CYCLIC_REFRESH_AQ) && seg->enabled) {
     vp9_cyclic_refresh_update_segment(cpi, &xd->mi_8x8[0]->mbmi,
                                       mi_row, mi_col, bsize, 1);
     vp9_init_plane_quantizers(cpi, x);
@@ -1448,6 +1444,7 @@ static void encode_b_rt(VP9_COMP *cpi, const TileInfo *const tile,
     if (x->ab_index > 0)
       return;
   }
+
   set_offsets(cpi, tile, mi_row, mi_col, bsize);
   update_state_rt(cpi, get_block_context(x, bsize), mi_row, mi_col, bsize);
 

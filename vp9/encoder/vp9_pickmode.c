@@ -255,7 +255,7 @@ int64_t vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
   mbmi->interp_filter = cpi->common.interp_filter == SWITCHABLE ?
                         EIGHTTAP : cpi->common.interp_filter;
   mbmi->skip = 0;
-  mbmi->segment_id = 0;
+  mbmi->segment_id = segment_id;
   xd->interp_kernel = vp9_get_interp_kernel(mbmi->interp_filter);
 
   for (ref_frame = LAST_FRAME; ref_frame <= LAST_FRAME ; ++ref_frame) {
