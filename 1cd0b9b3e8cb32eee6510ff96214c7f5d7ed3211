@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//wgY\u003d",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-03-27T22:26:13Z",
+      "side": 1,
+      "message": "sounds like it would be a general use of the API fix, maybe better to describe the order of ops",
+      "revId": "1cd0b9b3e8cb32eee6510ff96214c7f5d7ed3211",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
