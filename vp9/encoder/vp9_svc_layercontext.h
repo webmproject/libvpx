@@ -52,8 +52,12 @@ void vp9_update_layer_context_change_config(struct VP9_COMP *const cpi,
                                             const int target_bandwidth);
 
 // Prior to encoding the frame, update framerate-related quantities
-// for the current layer.
-void vp9_update_layer_framerate(struct VP9_COMP *const cpi);
+// for the current temporal layer.
+void vp9_update_temporal_layer_framerate(struct VP9_COMP *const cpi);
+
+// Update framerate-related quantities for the current spatial layer.
+void vp9_update_spatial_layer_framerate(struct VP9_COMP *const cpi,
+                                        double framerate);
 
 // Prior to encoding the frame, set the layer context, for the current layer
 // to be encoded, to the cpi struct.

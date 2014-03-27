@@ -257,12 +257,21 @@ static void avg_stats(FIRSTPASS_STATS *section) {
 // harder frames.
 static double calculate_modified_err(const VP9_COMP *cpi,
                                      const FIRSTPASS_STATS *this_frame) {
-  const struct twopass_rc *const twopass = &cpi->twopass;
-  const FIRSTPASS_STATS *const stats = &twopass->total_stats;
-  const double av_err = stats->ssim_weighted_pred_err / stats->count;
-  double modified_error = av_err * pow(this_frame->ssim_weighted_pred_err /
-                                           DOUBLE_DIVIDE_CHECK(av_err),
-                                       cpi->oxcf.two_pass_vbrbias / 100.0);
+  const struct twopass_rc *twopass = &cpi->twopass;
+  const FIRSTPASS_STATS *stats;
+  double av_err;
+  double modified_error;
+
+  if (cpi->svc.number_spatial_layers > 1 &&
+      cpi->svc.number_temporal_layers == 1) {
+    twopass = &cpi->svc.layer_context[cpi->svc.spatial_layer_id].twopass;
+  }
+
+  stats = &twopass->total_stats;
+  av_err = stats->ssim_weighted_pred_err / stats->count;
+  modified_error = av_err * pow(this_frame->ssim_weighted_pred_err /
+                   DOUBLE_DIVIDE_CHECK(av_err),
+                   cpi->oxcf.two_pass_vbrbias / 100.0);
 
   return fclamp(modified_error,
                 twopass->modified_error_min, twopass->modified_error_max);
@@ -933,80 +942,108 @@ extern void vp9_new_framerate(VP9_COMP *cpi, double framerate);
 void vp9_init_second_pass(VP9_COMP *cpi) {
   FIRSTPASS_STATS this_frame;
   const FIRSTPASS_STATS *start_pos;
-  struct twopass_rc *const twopass = &cpi->twopass;
+  struct twopass_rc *twopass = &cpi->twopass;
   const VP9_CONFIG *const oxcf = &cpi->oxcf;
+  const int is_spatial_svc = (cpi->svc.number_spatial_layers > 1) &&
+                             (cpi->svc.number_temporal_layers == 1);
+  int layer = 0;
+  int layer_end = 1;
+  double frame_rate;
 
-  zero_stats(&twopass->total_stats);
-  zero_stats(&twopass->total_left_stats);
-
-  if (!twopass->stats_in_end)
-    return;
-
-  twopass->total_stats = *twopass->stats_in_end;
-  twopass->total_left_stats = twopass->total_stats;
-
-  // Each frame can have a different duration, as the frame rate in the source
-  // isn't guaranteed to be constant. The frame rate prior to the first frame
-  // encoded in the second pass is a guess. However, the sum duration is not.
-  // It is calculated based on the actual durations of all frames from the
-  // first pass.
-  vp9_new_framerate(cpi, 10000000.0 * twopass->total_stats.count /
-                        twopass->total_stats.duration);
-
-  cpi->output_framerate = oxcf->framerate;
-  twopass->bits_left = (int64_t)(twopass->total_stats.duration *
-                                 oxcf->target_bandwidth / 10000000.0);
-
-  // Calculate a minimum intra value to be used in determining the IIratio
-  // scores used in the second pass. We have this minimum to make sure
-  // that clips that are static but "low complexity" in the intra domain
-  // are still boosted appropriately for KF/GF/ARF.
-  twopass->kf_intra_err_min = KF_MB_INTRA_MIN * cpi->common.MBs;
-  twopass->gf_intra_err_min = GF_MB_INTRA_MIN * cpi->common.MBs;
-
-  // This variable monitors how far behind the second ref update is lagging.
-  twopass->sr_update_lag = 1;
-
-  // Scan the first pass file and calculate an average Intra / Inter error score
-  // ratio for the sequence.
-  {
-    double sum_iiratio = 0.0;
-    start_pos = twopass->stats_in;
-
-    while (input_stats(twopass, &this_frame) != EOF) {
-      const double iiratio = this_frame.intra_error /
-                                 DOUBLE_DIVIDE_CHECK(this_frame.coded_error);
-      sum_iiratio += fclamp(iiratio, 1.0, 20.0);
-    }
-
-    twopass->avg_iiratio = sum_iiratio /
-        DOUBLE_DIVIDE_CHECK((double)twopass->total_stats.count);
-
-    reset_fpf_position(twopass, start_pos);
+  if (is_spatial_svc) {
+    layer_end = cpi->svc.number_spatial_layers;
   }
 
-  // Scan the first pass file and calculate a modified total error based upon
-  // the bias/power function used to allocate bits.
-  {
-    double av_error = twopass->total_stats.ssim_weighted_pred_err /
-                      DOUBLE_DIVIDE_CHECK(twopass->total_stats.count);
-
-    start_pos = twopass->stats_in;
-
-    twopass->modified_error_total = 0.0;
-    twopass->modified_error_min =
-      (av_error * oxcf->two_pass_vbrmin_section) / 100;
-    twopass->modified_error_max =
-      (av_error * oxcf->two_pass_vbrmax_section) / 100;
-
-    while (input_stats(twopass, &this_frame) != EOF) {
-      twopass->modified_error_total +=
-          calculate_modified_err(cpi, &this_frame);
+  for (layer = 0; layer < layer_end; ++layer) {
+    if (is_spatial_svc) {
+      twopass = &cpi->svc.layer_context[layer].twopass;
+      cpi->svc.spatial_layer_id = layer;
     }
-    twopass->modified_error_left = twopass->modified_error_total;
+    zero_stats(&twopass->total_stats);
+    zero_stats(&twopass->total_left_stats);
+    twopass->total_stats.spatial_layer_id = layer;
+    twopass->total_left_stats.spatial_layer_id = layer;
 
-    reset_fpf_position(twopass, start_pos);
+    if (!twopass->stats_in_end)
+      continue;
+
+    twopass->total_stats = *twopass->stats_in_end;
+    twopass->total_left_stats = twopass->total_stats;
+
+    frame_rate = 10000000.0 * twopass->total_stats.count /
+                 twopass->total_stats.duration;
+    // Each frame can have a different duration, as the frame rate in the source
+    // isn't guaranteed to be constant. The frame rate prior to the first frame
+    // encoded in the second pass is a guess. However, the sum duration is not.
+    // It is calculated based on the actual durations of all frames from the
+    // first pass.
+    if (layer == 0) {
+      vp9_new_framerate(cpi, frame_rate);
+    }
+    if (is_spatial_svc) {
+      vp9_update_spatial_layer_framerate(cpi, frame_rate);
+      twopass->bits_left = (int64_t)(twopass->total_stats.duration *
+                           cpi->svc.layer_context[layer].target_bandwidth /
+                           10000000.0);
+    } else {
+      twopass->bits_left = (int64_t)(twopass->total_stats.duration *
+                                     oxcf->target_bandwidth / 10000000.0);
+    }
+
+    cpi->output_framerate = oxcf->framerate;
+
+    // Calculate a minimum intra value to be used in determining the IIratio
+    // scores used in the second pass. We have this minimum to make sure
+    // that clips that are static but "low complexity" in the intra domain
+    // are still boosted appropriately for KF/GF/ARF.
+    twopass->kf_intra_err_min = KF_MB_INTRA_MIN * cpi->common.MBs;
+    twopass->gf_intra_err_min = GF_MB_INTRA_MIN * cpi->common.MBs;
+
+    // This variable monitors how far behind the second ref update is lagging.
+    twopass->sr_update_lag = 1;
+
+    // Scan the first pass file and calculate an average Intra / Inter error
+    // score ratio for the sequence.
+    {
+      double sum_iiratio = 0.0;
+      start_pos = twopass->stats_in;
+
+      while (input_stats(twopass, &this_frame) != EOF) {
+        const double iiratio = this_frame.intra_error /
+                                   DOUBLE_DIVIDE_CHECK(this_frame.coded_error);
+        sum_iiratio += fclamp(iiratio, 1.0, 20.0);
+      }
+
+      twopass->avg_iiratio = sum_iiratio /
+          DOUBLE_DIVIDE_CHECK((double)twopass->total_stats.count);
+
+      reset_fpf_position(twopass, start_pos);
+    }
+
+    // Scan the first pass file and calculate a modified total error based upon
+    // the bias/power function used to allocate bits.
+    {
+      double av_error = twopass->total_stats.ssim_weighted_pred_err /
+                        DOUBLE_DIVIDE_CHECK(twopass->total_stats.count);
+
+      start_pos = twopass->stats_in;
+
+      twopass->modified_error_total = 0.0;
+      twopass->modified_error_min =
+        (av_error * oxcf->two_pass_vbrmin_section) / 100;
+      twopass->modified_error_max =
+        (av_error * oxcf->two_pass_vbrmax_section) / 100;
+
+      while (input_stats(twopass, &this_frame) != EOF) {
+        twopass->modified_error_total +=
+            calculate_modified_err(cpi, &this_frame);
+      }
+      twopass->modified_error_left = twopass->modified_error_total;
+
+      reset_fpf_position(twopass, start_pos);
+    }
   }
+  cpi->svc.spatial_layer_id = 0;
 }
 
 // This function gives an estimate of how badly we believe the prediction
