@@ -524,9 +524,6 @@ vpx_codec_err_t vpx_svc_init(SvcContext *svc_ctx, vpx_codec_ctx_t *codec_ctx,
             svc_ctx->spatial_layers);
     return VPX_CODEC_INVALID_PARAM;
   }
-  // use SvcInternal value for number of layers to enable forcing single layer
-  // for first frame
-  si->layers = svc_ctx->spatial_layers;
 
   res = parse_quantizer_values(svc_ctx, si->quantizers, 0);
   if (res != VPX_CODEC_OK) return res;
@@ -538,9 +535,12 @@ vpx_codec_err_t vpx_svc_init(SvcContext *svc_ctx, vpx_codec_ctx_t *codec_ctx,
   res = parse_scale_factors(svc_ctx, si->scale_factors);
   if (res != VPX_CODEC_OK) return res;
 
-  // parse aggregate command line options
+  // Parse aggregate command line options. Options must start with
+  // "layers=xx" then followed by other options
   res = parse_options(svc_ctx, si->options);
   if (res != VPX_CODEC_OK) return res;
+
+  si->layers = svc_ctx->spatial_layers;
 
   // Assign target bitrate for each layer. We calculate the ratio
   // from the resolution for now.
