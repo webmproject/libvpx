@@ -148,28 +148,30 @@ static INLINE int_mv scale_mv(const MB_MODE_INFO *mbmi, int ref,
 // This macro is used to add a motion vector mv_ref list if it isn't
 // already in the list.  If it's the second motion vector it will also
 // skip all additional processing and jump to done!
-#define ADD_MV_REF_LIST(MV) \
+#define ADD_MV_REF_LIST(mv) \
   do { \
     if (refmv_count) { \
-      if ((MV).as_int != mv_ref_list[0].as_int) { \
-        mv_ref_list[refmv_count] = (MV); \
+      if ((mv).as_int != mv_ref_list[0].as_int) { \
+        mv_ref_list[refmv_count] = (mv); \
         goto Done; \
       } \
     } else { \
-      mv_ref_list[refmv_count++] = (MV); \
+      mv_ref_list[refmv_count++] = (mv); \
     } \
   } while (0)
 
 // If either reference frame is different, not INTRA, and they
 // are different from each other scale and add the mv to our list.
-#define IF_DIFF_REF_FRAME_ADD_MV(CANDIDATE) \
+#define IF_DIFF_REF_FRAME_ADD_MV(mbmi) \
   do { \
-    if ((CANDIDATE)->ref_frame[0] != ref_frame) \
-      ADD_MV_REF_LIST(scale_mv((CANDIDATE), 0, ref_frame, ref_sign_bias)); \
-    if ((CANDIDATE)->ref_frame[1] != ref_frame && \
-        has_second_ref(CANDIDATE) && \
-        (CANDIDATE)->mv[1].as_int != (CANDIDATE)->mv[0].as_int) \
-      ADD_MV_REF_LIST(scale_mv((CANDIDATE), 1, ref_frame, ref_sign_bias)); \
+    if (is_inter_block(mbmi)) { \
+      if ((mbmi)->ref_frame[0] != ref_frame) \
+        ADD_MV_REF_LIST(scale_mv((mbmi), 0, ref_frame, ref_sign_bias)); \
+      if (has_second_ref(mbmi) && \
+          (mbmi)->ref_frame[1] != ref_frame && \
+          (mbmi)->mv[1].as_int != (mbmi)->mv[0].as_int) \
+        ADD_MV_REF_LIST(scale_mv((mbmi), 1, ref_frame, ref_sign_bias)); \
+    } \
   } while (0)
 
 
@@ -265,14 +267,13 @@ static void find_mv_refs_idx(const VP9_COMMON *cm, const MACROBLOCKD *xd,
                                               * xd->mode_info_stride]->mbmi;
 
         // If the candidate is INTRA we don't want to consider its mv.
-        if (is_inter_block(candidate))
-          IF_DIFF_REF_FRAME_ADD_MV(candidate);
+        IF_DIFF_REF_FRAME_ADD_MV(candidate);
       }
     }
   }
 
   // Since we still don't have a candidate we'll try the last frame.
-  if (prev_mbmi && is_inter_block(prev_mbmi))
+  if (prev_mbmi)
     IF_DIFF_REF_FRAME_ADD_MV(prev_mbmi);
 
  Done:
