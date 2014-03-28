@@ -24,7 +24,6 @@ typedef struct TileWorkerData {
   struct VP9Common *cm;
   vp9_reader bit_reader;
   DECLARE_ALIGNED(16, struct macroblockd, xd);
-  DECLARE_ALIGNED(16, int16_t, dqcoeff[MAX_MB_PLANE][64 * 64]);
 
   // Row-based parallel loopfilter data
   LFWorkerData lfdata;

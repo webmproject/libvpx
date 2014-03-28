@@ -235,7 +235,8 @@ typedef struct macroblockd {
 
   int corrupted;
 
-  /* Y,U,V,(A) */
+  DECLARE_ALIGNED(16, int16_t, dqcoeff[MAX_MB_PLANE][64 * 64]);
+
   ENTROPY_CONTEXT *above_context[MAX_MB_PLANE];
   ENTROPY_CONTEXT left_context[MAX_MB_PLANE][16];
 
@@ -243,7 +244,12 @@ typedef struct macroblockd {
   PARTITION_CONTEXT left_seg_context[8];
 } MACROBLOCKD;
 
+static INLINE void init_macroblockd(MACROBLOCKD *xd) {
+  int i;
 
+  for (i = 0; i < MAX_MB_PLANE; ++i)
+    xd->plane[i].dqcoeff = xd->dqcoeff[i];
+}
 
 static INLINE BLOCK_SIZE get_subsize(BLOCK_SIZE bsize,
                                      PARTITION_TYPE partition) {
