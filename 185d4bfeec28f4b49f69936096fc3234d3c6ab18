@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//wTk\u003d",
+        "filename": "test/android/scrape_gtest_log.py",
+        "patchSetId": 2
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-03-28T22:44:41Z",
+      "side": 1,
+      "message": "you should use raw strings here.",
+      "revId": "185d4bfeec28f4b49f69936096fc3234d3c6ab18",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
