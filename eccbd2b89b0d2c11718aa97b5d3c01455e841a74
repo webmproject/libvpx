@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//wUY\u003d",
+        "filename": "vp9/common/vp9_scale.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-03-28T21:29:45Z",
+      "side": 1,
+      "message": "I assume the result will fit in an int, you\u0027ll need a cast here to avoid warnings",
+      "revId": "eccbd2b89b0d2c11718aa97b5d3c01455e841a74",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
