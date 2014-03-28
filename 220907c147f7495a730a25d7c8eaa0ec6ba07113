@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//wXQ\u003d",
+        "filename": "vp9/encoder/vp9_firstpass.c",
+        "patchSetId": 11
+      },
+      "lineNbr": 2253,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2014-03-28T18:40:32Z",
+      "side": 1,
+      "message": "is this code (above 3 lines) specific for svc case?\ndoesn\u0027t seem like it was here before.",
+      "revId": "220907c147f7495a730a25d7c8eaa0ec6ba07113",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//wXM\u003d",
+        "filename": "vp9/encoder/vp9_onyx_if.c",
+        "patchSetId": 11
+      },
+      "lineNbr": 1765,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2014-03-28T18:40:32Z",
+      "side": 1,
+      "message": "in another patch if you like, can we move this code (lines 1767 - 1800) into a function in svc_layercontext?",
+      "revId": "220907c147f7495a730a25d7c8eaa0ec6ba07113",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
