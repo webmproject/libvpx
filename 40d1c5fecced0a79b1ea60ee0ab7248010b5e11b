@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//wV4\u003d",
+        "filename": "test/android/scrape_gtest_log.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-03-28T20:25:06Z",
+      "side": 1,
+      "message": "It seems it could be just one line of code, something like this:\njson \u003d \"[\" + \",\".join([\"{\" + x + \"}\" for x in re.findall(\"\\{([^}]*.?)\\}\", blob)]) + \"]\"",
+      "revId": "40d1c5fecced0a79b1ea60ee0ab7248010b5e11b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//wV8\u003d",
+        "filename": "test/android/scrape_gtest_log.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-03-28T20:25:06Z",
+      "side": 1,
+      "message": "You should use print(smth), i.e. parens around the argument.",
+      "revId": "40d1c5fecced0a79b1ea60ee0ab7248010b5e11b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
