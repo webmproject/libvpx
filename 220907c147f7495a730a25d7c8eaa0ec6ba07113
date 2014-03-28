@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//wXA\u003d",
+        "filename": "vp9/encoder/vp9_firstpass.c",
+        "patchSetId": 11
+      },
+      "lineNbr": 2253,
+      "author": {
+        "id": 1129385
+      },
+      "writtenOn": "2014-03-28T20:38:30Z",
+      "side": 1,
+      "message": "Yes. It\u0027s only for svc. I added \"is_spatial_svc\" here.",
+      "parentUuid": "AAAAdn//wXQ\u003d",
+      "revId": "220907c147f7495a730a25d7c8eaa0ec6ba07113",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//wXM\u003d",
         "filename": "vp9/encoder/vp9_onyx_if.c",
         "patchSetId": 11
@@ -30,6 +48,24 @@
       "writtenOn": "2014-03-28T18:40:32Z",
       "side": 1,
       "message": "in another patch if you like, can we move this code (lines 1767 - 1800) into a function in svc_layercontext?",
+      "revId": "220907c147f7495a730a25d7c8eaa0ec6ba07113",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//wW8\u003d",
+        "filename": "vp9/encoder/vp9_onyx_if.c",
+        "patchSetId": 11
+      },
+      "lineNbr": 1765,
+      "author": {
+        "id": 1129385
+      },
+      "writtenOn": "2014-03-28T20:38:30Z",
+      "side": 1,
+      "message": "OK. I will do it in another CL.",
+      "parentUuid": "AAAAdn//wXM\u003d",
       "revId": "220907c147f7495a730a25d7c8eaa0ec6ba07113",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
