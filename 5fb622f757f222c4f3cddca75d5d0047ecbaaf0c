@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//wVM\u003d",
+        "filename": "vp9/encoder/vp9_firstpass.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-03-28T20:56:07Z",
+      "side": 1,
+      "message": "this is incompatible with older visual studio builds (and others). you\u0027ll need to use int64_t",
+      "revId": "5fb622f757f222c4f3cddca75d5d0047ecbaaf0c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
