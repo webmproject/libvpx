@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//wcQ\u003d",
+        "filename": "test/test_vectors.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 163,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2014-03-28T02:09:05Z",
+      "side": 1,
+      "message": "If we remove the invalid one, shall we add valid ones?",
+      "revId": "dc05a479f76107dc707a38ef3b4784b4cabe3b88",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//wcY\u003d",
+        "filename": "vp9/common/vp9_loopfilter.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 505,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2014-03-28T02:09:05Z",
+      "side": 1,
+      "message": "Is this function only called for 420 case?",
+      "revId": "dc05a479f76107dc707a38ef3b4784b4cabe3b88",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
