@@ -437,6 +437,7 @@ int main(int argc, char **argv) {
   vpx_codec_err_t res;
   unsigned int width;
   unsigned int height;
+  int speed;
   int frame_avail;
   int got_data;
   int flags = 0;
@@ -457,7 +458,7 @@ int main(int argc, char **argv) {
   // Check usage and arguments.
   if (argc < 11) {
     die("Usage: %s <infile> <outfile> <codec_type(vp8/vp9)> <width> <height> "
-        "<rate_num> <rate_den>  <frame_drop_threshold> <mode> "
+        "<rate_num> <rate_den> <speed> <frame_drop_threshold> <mode> "
         "<Rate_0> ... <Rate_nlayers-1> \n", argv[0]);
   }
 
@@ -473,12 +474,12 @@ int main(int argc, char **argv) {
     die("Invalid resolution: %d x %d", width, height);
   }
 
-  layering_mode = strtol(argv[9], NULL, 0);
+  layering_mode = strtol(argv[10], NULL, 0);
   if (layering_mode < 0 || layering_mode > 12) {
-    die("Invalid mode (0..12) %s", argv[9]);
+    die("Invalid layering mode (0..12) %s", argv[10]);
   }
 
-  if (argc != 10 + mode_to_num_layers[layering_mode]) {
+  if (argc != 11 + mode_to_num_layers[layering_mode]) {
     die("Invalid number of arguments");
   }
 
@@ -501,12 +502,17 @@ int main(int argc, char **argv) {
   cfg.g_timebase.num = strtol(argv[6], NULL, 0);
   cfg.g_timebase.den = strtol(argv[7], NULL, 0);
 
-  for (i = 10; (int)i < 10 + mode_to_num_layers[layering_mode]; ++i) {
-    cfg.ts_target_bitrate[i - 10] = strtol(argv[i], NULL, 0);
+  speed = strtol(argv[8], NULL, 0);
+  if (speed < 0) {
+    die("Invalid speed setting: must be positive");
+  }
+
+  for (i = 11; (int)i < 11 + mode_to_num_layers[layering_mode]; ++i) {
+    cfg.ts_target_bitrate[i - 11] = strtol(argv[i], NULL, 0);
   }
 
   // Real time parameters.
-  cfg.rc_dropframe_thresh = strtol(argv[8], NULL, 0);
+  cfg.rc_dropframe_thresh = strtol(argv[9], NULL, 0);
   cfg.rc_end_usage = VPX_CBR;
   cfg.rc_resize_allowed = 0;
   cfg.rc_min_quantizer = 2;
@@ -563,14 +569,15 @@ int main(int argc, char **argv) {
   if (vpx_codec_enc_init(&codec, encoder->interface(), &cfg, 0))
     die_codec(&codec, "Failed to initialize encoder");
 
-  vpx_codec_control(&codec, VP8E_SET_CPUUSED, -6);
-  vpx_codec_control(&codec, VP8E_SET_NOISE_SENSITIVITY, 1);
-  if (strncmp(encoder->name, "vp9", 3) == 0) {
-    vpx_codec_control(&codec, VP8E_SET_CPUUSED, 5);
-    vpx_codec_control(&codec, VP9E_SET_AQ_MODE, 3);
-    vpx_codec_control(&codec, VP8E_SET_NOISE_SENSITIVITY, 0);
-    if (vpx_codec_control(&codec, VP9E_SET_SVC, 1)) {
-      die_codec(&codec, "Failed to set SVC");
+  if (strncmp(encoder->name, "vp8", 3) == 0) {
+    vpx_codec_control(&codec, VP8E_SET_CPUUSED, -speed);
+    vpx_codec_control(&codec, VP8E_SET_NOISE_SENSITIVITY, 1);
+  } else if (strncmp(encoder->name, "vp9", 3) == 0) {
+      vpx_codec_control(&codec, VP8E_SET_CPUUSED, speed);
+      vpx_codec_control(&codec, VP9E_SET_AQ_MODE, 3);
+      vpx_codec_control(&codec, VP8E_SET_NOISE_SENSITIVITY, 0);
+      if (vpx_codec_control(&codec, VP9E_SET_SVC, 1)) {
+        die_codec(&codec, "Failed to set SVC");
     }
   }
   vpx_codec_control(&codec, VP8E_SET_STATIC_THRESHOLD, 1);
