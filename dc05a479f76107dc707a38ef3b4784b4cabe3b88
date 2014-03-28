@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//wYY\u003d",
+        "filename": "test/test_vectors.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 163,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2014-03-28T17:29:44Z",
+      "side": 1,
+      "message": "I agree. Once we decide to go down this road I can upload a new test vector. I don\u0027t want to speculatively add data to the already large out-of-tree testset.",
+      "parentUuid": "AAAAdn//wcQ\u003d",
+      "revId": "dc05a479f76107dc707a38ef3b4784b4cabe3b88",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//wcY\u003d",
         "filename": "vp9/common/vp9_loopfilter.c",
         "patchSetId": 1
@@ -30,6 +48,24 @@
       "writtenOn": "2014-03-28T02:09:05Z",
       "side": 1,
       "message": "Is this function only called for 420 case?",
+      "revId": "dc05a479f76107dc707a38ef3b4784b4cabe3b88",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//wYg\u003d",
+        "filename": "vp9/common/vp9_loopfilter.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 505,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2014-03-28T17:29:44Z",
+      "side": 1,
+      "message": "Yes, see the TODO above",
+      "parentUuid": "AAAAdn//wcY\u003d",
       "revId": "dc05a479f76107dc707a38ef3b4784b4cabe3b88",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
