@@ -1767,7 +1767,7 @@ VP9_COMP *vp9_create_compressor(VP9_CONFIG *oxcf) {
       for (i = 0; i < oxcf->ss_number_layers; ++i) {
         FIRSTPASS_STATS *const last_packet_for_layer =
             &stats[packets - oxcf->ss_number_layers + i];
-        const int layer_id = last_packet_for_layer->spatial_layer_id;
+        const int layer_id = (int)last_packet_for_layer->spatial_layer_id;
         const int packets_in_layer = (int)last_packet_for_layer->count + 1;
         if (layer_id >= 0 && layer_id < oxcf->ss_number_layers) {
           LAYER_CONTEXT *const lc = &cpi->svc.layer_context[layer_id];
@@ -1786,7 +1786,7 @@ VP9_COMP *vp9_create_compressor(VP9_CONFIG *oxcf) {
       }
 
       for (i = 0; i < packets; ++i) {
-        const int layer_id = stats[i].spatial_layer_id;
+        const int layer_id = (int)stats[i].spatial_layer_id;
         if (layer_id >= 0 && layer_id < oxcf->ss_number_layers
             && stats_copy[layer_id] != NULL) {
           *stats_copy[layer_id] = stats[i];
