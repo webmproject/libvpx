@@ -34,6 +34,24 @@
       "revId": "8aac887d2aac37497e95306abbf6c72d49cbdff1",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//wSw\u003d",
+        "filename": "test/tools_common.sh",
+        "patchSetId": 12
+      },
+      "lineNbr": 437,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-03-28T23:30:05Z",
+      "side": 1,
+      "message": "Did something based on what configure.sh does.",
+      "parentUuid": "AAAAdn//wvI\u003d",
+      "revId": "8aac887d2aac37497e95306abbf6c72d49cbdff1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
