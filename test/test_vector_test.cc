@@ -89,8 +89,12 @@ TEST_P(TestVectorTest, MD5Match) {
 }
 
 VP8_INSTANTIATE_TEST_CASE(TestVectorTest,
-                          ::testing::ValuesIn(libvpx_test::kVP8TestVectors));
+                          ::testing::ValuesIn(libvpx_test::kVP8TestVectors,
+                                              libvpx_test::kVP8TestVectors +
+                                              libvpx_test::kNumVP8TestVectors));
 VP9_INSTANTIATE_TEST_CASE(TestVectorTest,
-                          ::testing::ValuesIn(libvpx_test::kVP9TestVectors));
+                          ::testing::ValuesIn(libvpx_test::kVP9TestVectors,
+                                              libvpx_test::kVP9TestVectors +
+                                              libvpx_test::kNumVP9TestVectors));
 
 }  // namespace
