@@ -17,12 +17,30 @@
 extern "C" {
 #endif
 
+typedef struct {
+  DECLARE_ALIGNED(16, int16_t, y_quant[QINDEX_RANGE][8]);
+  DECLARE_ALIGNED(16, int16_t, y_quant_shift[QINDEX_RANGE][8]);
+  DECLARE_ALIGNED(16, int16_t, y_zbin[QINDEX_RANGE][8]);
+  DECLARE_ALIGNED(16, int16_t, y_round[QINDEX_RANGE][8]);
+
+  DECLARE_ALIGNED(16, int16_t, uv_quant[QINDEX_RANGE][8]);
+  DECLARE_ALIGNED(16, int16_t, uv_quant_shift[QINDEX_RANGE][8]);
+  DECLARE_ALIGNED(16, int16_t, uv_zbin[QINDEX_RANGE][8]);
+  DECLARE_ALIGNED(16, int16_t, uv_round[QINDEX_RANGE][8]);
+
+#if CONFIG_ALPHA
+  DECLARE_ALIGNED(16, int16_t, a_quant[QINDEX_RANGE][8]);
+  DECLARE_ALIGNED(16, int16_t, a_quant_shift[QINDEX_RANGE][8]);
+  DECLARE_ALIGNED(16, int16_t, a_zbin[QINDEX_RANGE][8]);
+  DECLARE_ALIGNED(16, int16_t, a_round[QINDEX_RANGE][8]);
+#endif
+} QUANTS;
+
 void vp9_regular_quantize_b_4x4(MACROBLOCK *x, int plane, int block,
                                 const int16_t *scan, const int16_t *iscan);
 
 struct VP9_COMP;
-
-void vp9_set_quantizer(struct VP9_COMP *cpi, int q);
+struct VP9Common;
 
 void vp9_frame_init_quantizer(struct VP9_COMP *cpi);
 
@@ -31,6 +49,8 @@ void vp9_update_zbin_extra(struct VP9_COMP *cpi, MACROBLOCK *x);
 void vp9_init_plane_quantizers(struct VP9_COMP *cpi, MACROBLOCK *x);
 
 void vp9_init_quantizer(struct VP9_COMP *cpi);
+
+void vp9_set_quantizer(struct VP9Common *cm, int q);
 
 #ifdef __cplusplus
 }  // extern "C"
