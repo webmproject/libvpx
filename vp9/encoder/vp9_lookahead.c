@@ -28,8 +28,8 @@ struct lookahead_ctx {
 
 
 /* Return the buffer at the given absolute index and increment the index */
-static struct lookahead_entry * pop(struct lookahead_ctx *ctx,
-                                    unsigned int *idx) {
+static struct lookahead_entry *pop(struct lookahead_ctx *ctx,
+                                   unsigned int *idx) {
   unsigned int index = *idx;
   struct lookahead_entry *buf = ctx->buf + index;
 
@@ -55,15 +55,18 @@ void vp9_lookahead_destroy(struct lookahead_ctx *ctx) {
 }
 
 
-struct lookahead_ctx * vp9_lookahead_init(unsigned int width,
-                                          unsigned int height,
-                                          unsigned int subsampling_x,
-                                          unsigned int subsampling_y,
-                                          unsigned int depth) {
+struct lookahead_ctx *vp9_lookahead_init(unsigned int width,
+                                         unsigned int height,
+                                         unsigned int subsampling_x,
+                                         unsigned int subsampling_y,
+                                         unsigned int depth) {
   struct lookahead_ctx *ctx = NULL;
 
   // Clamp the lookahead queue depth
   depth = clamp(depth, 1, MAX_LAG_BUFFERS);
+
+  // Allocate memory to keep previous source frames available.
+  depth += MAX_PRE_FRAMES;
 
   // Allocate the lookahead structures
   ctx = calloc(1, sizeof(*ctx));
@@ -96,7 +99,7 @@ int vp9_lookahead_push(struct lookahead_ctx *ctx, YV12_BUFFER_CONFIG   *src,
   int mb_cols = (src->y_width + 15) >> 4;
 #endif
 
-  if (ctx->sz + 1 > ctx->max_sz)
+  if (ctx->sz + 1  + MAX_PRE_FRAMES > ctx->max_sz)
     return 1;
   ctx->sz++;
   buf = pop(ctx, &ctx->write_idx);
@@ -159,11 +162,11 @@ int vp9_lookahead_push(struct lookahead_ctx *ctx, YV12_BUFFER_CONFIG   *src,
 }
 
 
-struct lookahead_entry * vp9_lookahead_pop(struct lookahead_ctx *ctx,
-                                           int drain) {
+struct lookahead_entry *vp9_lookahead_pop(struct lookahead_ctx *ctx,
+                                          int drain) {
   struct lookahead_entry *buf = NULL;
 
-  if (ctx->sz && (drain || ctx->sz == ctx->max_sz)) {
+  if (ctx->sz && (drain || ctx->sz == ctx->max_sz - MAX_PRE_FRAMES)) {
     buf = pop(ctx, &ctx->read_idx);
     ctx->sz--;
   }
@@ -171,16 +174,28 @@ struct lookahead_entry * vp9_lookahead_pop(struct lookahead_ctx *ctx,
 }
 
 
-struct lookahead_entry * vp9_lookahead_peek(struct lookahead_ctx *ctx,
-                                            int index) {
+struct lookahead_entry *vp9_lookahead_peek(struct lookahead_ctx *ctx,
+                                           int index) {
   struct lookahead_entry *buf = NULL;
 
-  if (index < (int)ctx->sz) {
-    index += ctx->read_idx;
-    if (index >= (int)ctx->max_sz)
-      index -= ctx->max_sz;
-    buf = ctx->buf + index;
+  if (index >= 0) {
+    // Forward peek
+    if (index < (int)ctx->sz) {
+      index += ctx->read_idx;
+      if (index >= (int)ctx->max_sz)
+        index -= ctx->max_sz;
+      buf = ctx->buf + index;
+    }
+  } else if (index < 0) {
+    // Backward peek
+    if (-index <= MAX_PRE_FRAMES) {
+      index += ctx->read_idx;
+      if (index < 0)
+        index += ctx->max_sz;
+      buf = ctx->buf + index;
+    }
   }
+
   return buf;
 }
 
