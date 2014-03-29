@@ -35,7 +35,7 @@ typedef struct {
   double new_mv_count;
   double duration;
   double count;
-  int spatial_layer_id;
+  int64_t spatial_layer_id;
 } FIRSTPASS_STATS;
 
 struct twopass_rc {

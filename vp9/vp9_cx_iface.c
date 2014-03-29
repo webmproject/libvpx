@@ -227,7 +227,7 @@ static vpx_codec_err_t validate_config(vpx_codec_alg_priv_t      *ctx,
 
       stats = cfg->rc_twopass_stats_in.buf;
       for (i = 0; i < n_packets; ++i) {
-        const int layer_id = stats[i].spatial_layer_id;
+        const int layer_id = (int)stats[i].spatial_layer_id;
         if (layer_id >= 0 && layer_id < (int)cfg->ss_number_layers) {
           ++n_packets_per_layer[layer_id];
         }
@@ -242,7 +242,7 @@ static vpx_codec_err_t validate_config(vpx_codec_alg_priv_t      *ctx,
 
         stats = (const FIRSTPASS_STATS *)cfg->rc_twopass_stats_in.buf +
                 n_packets - cfg->ss_number_layers + i;
-        layer_id = stats->spatial_layer_id;
+        layer_id = (int)stats->spatial_layer_id;
 
         if (layer_id >= cfg->ss_number_layers
             ||(int)(stats->count + 0.5) != n_packets_per_layer[layer_id] - 1)
