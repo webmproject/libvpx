@@ -1377,6 +1377,7 @@ static void copy_partitioning(VP9_COMMON *cm, MODE_INFO **mi_8x8,
     for (block_col = 0; block_col < 8; ++block_col) {
       MODE_INFO *const prev_mi = prev_mi_8x8[block_row * mis + block_col];
       const BLOCK_SIZE sb_type = prev_mi ? prev_mi->mbmi.sb_type : 0;
+
       if (prev_mi) {
         const ptrdiff_t offset = prev_mi - cm->prev_mi;
         mi_8x8[block_row * mis + block_col] = cm->mi + offset;

@@ -985,6 +985,9 @@ int vp9_rc_pick_q_and_bounds(const VP9_COMP *cpi,
       q /= 3;
     if (q == 0)
       q++;
+    if (cpi->sf.partition_check == 1)
+      q -= 10;
+
     if (q < *bottom_index)
       *bottom_index = q;
     else if (q > *top_index)
