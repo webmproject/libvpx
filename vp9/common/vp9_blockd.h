@@ -120,23 +120,23 @@ static INLINE int mi_width_log2(BLOCK_SIZE sb_type) {
 
 // This structure now relates to 8x8 block regions.
 typedef struct {
-  MB_PREDICTION_MODE mode, uv_mode;
-  MV_REFERENCE_FRAME ref_frame[2];
-  TX_SIZE tx_size;
-  int_mv mv[2];                // for each reference frame used
-  int_mv ref_mvs[MAX_REF_FRAMES][MAX_MV_REF_CANDIDATES];
-
-  uint8_t mode_context[MAX_REF_FRAMES];
-
-  unsigned char skip;    // 0=need to decode coeffs, 1=no coefficients
-  unsigned char segment_id;    // Segment id for this block.
-
-  // Flags used for prediction status of various bit-stream signals
-  unsigned char seg_id_predicted;
-
-  INTERP_FILTER interp_filter;
-
+  // Common for both INTER and INTRA blocks
   BLOCK_SIZE sb_type;
+  MB_PREDICTION_MODE mode;
+  TX_SIZE tx_size;
+  uint8_t skip;
+  uint8_t segment_id;
+  uint8_t seg_id_predicted;  // valid only when temporal_update is enabled
+
+  // Only for INTRA blocks
+  MB_PREDICTION_MODE uv_mode;
+
+  // Only for INTER blocks
+  MV_REFERENCE_FRAME ref_frame[2];
+  int_mv mv[2];
+  int_mv ref_mvs[MAX_REF_FRAMES][MAX_MV_REF_CANDIDATES];
+  uint8_t mode_context[MAX_REF_FRAMES];
+  INTERP_FILTER interp_filter;
 } MB_MODE_INFO;
 
 typedef struct {
