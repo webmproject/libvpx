@@ -1005,28 +1005,14 @@ void vp9_rc_compute_frame_size_bounds(const VP9_COMP *cpi,
     *frame_under_shoot_limit = 0;
     *frame_over_shoot_limit  = INT_MAX;
   } else {
-    if (cpi->common.frame_type == KEY_FRAME) {
-      *frame_over_shoot_limit  = this_frame_target * 9 / 8;
-      *frame_under_shoot_limit = this_frame_target * 7 / 8;
-    } else {
-      if (cpi->refresh_alt_ref_frame || cpi->refresh_golden_frame) {
-        *frame_over_shoot_limit  = this_frame_target * 9 / 8;
-        *frame_under_shoot_limit = this_frame_target * 7 / 8;
-      } else {
-        // Strong overshoot limit for constrained quality
-        if (cpi->oxcf.end_usage == USAGE_CONSTRAINED_QUALITY) {
-          *frame_over_shoot_limit  = this_frame_target * 11 / 8;
-          *frame_under_shoot_limit = this_frame_target * 2 / 8;
-        } else {
-          *frame_over_shoot_limit  = this_frame_target * 11 / 8;
-          *frame_under_shoot_limit = this_frame_target * 5 / 8;
-        }
-      }
-    }
+    int recode_tolerance =
+      (cpi->sf.recode_tolerance * this_frame_target) / 100;
+
+    *frame_over_shoot_limit = this_frame_target + recode_tolerance;
+    *frame_under_shoot_limit = this_frame_target - recode_tolerance;
 
     // For very small rate targets where the fractional adjustment
-    // (eg * 7/8) may be tiny make sure there is at least a minimum
-    // range.
+    // may be tiny make sure there is at least a minimum range.
     *frame_over_shoot_limit += 200;
     *frame_under_shoot_limit -= 200;
     if (*frame_under_shoot_limit < 0)
