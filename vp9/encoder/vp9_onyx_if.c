@@ -40,6 +40,7 @@
 #include "vp9/encoder/vp9_ratectrl.h"
 #include "vp9/encoder/vp9_rdopt.h"
 #include "vp9/encoder/vp9_segmentation.h"
+#include "vp9/encoder/vp9_speed_features.h"
 #include "vp9/encoder/vp9_temporal_filter.h"
 #include "vp9/encoder/vp9_resize.h"
 #include "vp9/encoder/vp9_svc_layercontext.h"
