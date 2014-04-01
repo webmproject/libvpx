@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//wLU\u003d",
+        "filename": "test/tools_common.sh",
+        "patchSetId": 15
+      },
+      "lineNbr": 249,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-04-01T01:59:14Z",
+      "side": 1,
+      "message": "Should I bother making this consistent? The use of --output\u003dpath/to/output instead of \"-o ...\" is because msys is getting confused by these two args in succession (I think):\n\n    -o /tmp/vpx_test_1451/vp8.ivf -\n\nUsing that results in vpxenc.exe saying this:\n\n    Error: Unrecognized option -D:/src/_tools/apps/Git/vp8.i☻\n\n(That\u0027s direct c/p, including the fun magic char at the end)",
+      "revId": "778be72ded9472f566cd8d484b4f8c3476544fd2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//wLQ\u003d",
+        "filename": "test/tools_common.sh",
+        "patchSetId": 15
+      },
+      "lineNbr": 417,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-04-01T01:59:14Z",
+      "side": 1,
+      "message": "No more mktemp because hp/ux mktemp is evil. No, I don\u0027t have a good excuse for why I was reading mktemp docs over the weekend... It just happened.\n\nAlso, this is basically what libvpx configure.sh does... except I don\u0027t think it ever creates directories directly. Make (or the tools that it\u0027s running) must be taking care of that.",
+      "revId": "778be72ded9472f566cd8d484b4f8c3476544fd2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
