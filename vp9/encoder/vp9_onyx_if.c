@@ -661,15 +661,7 @@ static void update_frame_size(VP9_COMP *cpi) {
     }
   }
 
-  {
-    int i;
-
-    for (i = 0; i < MAX_MB_PLANE; ++i)
-      xd->above_context[i] = cm->above_context +
-        i * sizeof(*cm->above_context) * 2 * mi_cols_aligned_to_sb(cm->mi_cols);
-  }
-
-  xd->above_seg_context = cpi->common.above_seg_context;
+  init_macroblockd(cm, xd);
 }
 
 // Table that converts 0-63 Q range values passed in outside to the Qindex

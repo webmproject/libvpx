@@ -217,7 +217,7 @@ static void set_offsets(VP9_COMP *cpi, const TileInfo *const tile,
   const int idx_map = mb_row * cm->mb_cols + mb_col;
   const struct segmentation *const seg = &cm->seg;
 
-  set_skip_context(xd, xd->above_context, xd->left_context, mi_row, mi_col);
+  set_skip_context(xd, mi_row, mi_col);
 
   // Activity map pointer
   x->mb_activity_ptr = &cpi->mb_activity_map[idx_map];
@@ -2406,8 +2406,6 @@ static void init_encode_frame_mb_context(VP9_COMP *cpi) {
 
   x->act_zbin_adj = 0;
   cpi->seg0_idx = 0;
-
-  xd->mode_info_stride = cm->mode_info_stride;
 
   // Copy data over into macro block data structures.
   vp9_setup_src_planes(x, cpi->Source, 0, 0);

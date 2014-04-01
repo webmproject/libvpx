@@ -308,7 +308,7 @@ static void set_offsets(VP9_COMMON *const cm, MACROBLOCKD *const xd,
     for (x = !y; x < x_mis; ++x)
       xd->mi_8x8[y * cm->mode_info_stride + x] = xd->mi_8x8[0];
 
-  set_skip_context(xd, xd->above_context, xd->left_context, mi_row, mi_col);
+  set_skip_context(xd, mi_row, mi_col);
 
   // Distance of Mb to the various image edges. These are specified to 8th pel
   // as they are always compared to values that are in 1/8th pel units
@@ -677,17 +677,6 @@ static void setup_frame_size_with_refs(VP9_COMMON *cm,
   setup_display_size(cm, rb);
 }
 
-static void setup_tile_context(VP9_COMMON *cm, MACROBLOCKD *const xd,
-                               int tile_row, int tile_col) {
-  int i;
-
-  for (i = 0; i < MAX_MB_PLANE; ++i)
-    xd->above_context[i] = cm->above_context +
-        i * sizeof(*cm->above_context) * 2 * mi_cols_aligned_to_sb(cm->mi_cols);
-
-  xd->above_seg_context = cm->above_seg_context;
-}
-
 static void decode_tile(VP9D_COMP *pbi, const TileInfo *const tile,
                         vp9_reader *r) {
   const int num_threads = pbi->oxcf.max_threads;
@@ -797,7 +786,6 @@ static const uint8_t *decode_tiles(VP9D_COMP *pbi,
                                    const uint8_t *data,
                                    const uint8_t *data_end) {
   VP9_COMMON *const cm = &pbi->common;
-  MACROBLOCKD *const xd = &pbi->mb;
   const int aligned_cols = mi_cols_aligned_to_sb(cm->mi_cols);
   const int tile_cols = 1 << cm->log2_tile_cols;
   const int tile_rows = 1 << cm->log2_tile_rows;
@@ -842,7 +830,6 @@ static const uint8_t *decode_tiles(VP9D_COMP *pbi,
 
       vp9_tile_init(&tile, cm, tile_row, col);
       setup_token_decoder(buf->data, data_end, buf->size, &cm->error, &r);
-      setup_tile_context(cm, xd, tile_row, col);
       decode_tile(pbi, &tile, &r);
 
       if (last_tile)
@@ -976,12 +963,9 @@ static const uint8_t *decode_tiles_mt(VP9D_COMP *pbi,
       tile_data->xd = pbi->mb;
       tile_data->xd.corrupted = 0;
       vp9_tile_init(tile, tile_data->cm, 0, buf->col);
-
       setup_token_decoder(buf->data, data_end, buf->size, &cm->error,
                           &tile_data->bit_reader);
-
-      setup_tile_context(cm, &tile_data->xd, 0, buf->col);
-      init_macroblockd(&tile_data->xd);
+      init_macroblockd(cm, &tile_data->xd);
       vp9_zero(tile_data->xd.dqcoeff);
 
       worker->had_error = 0;
@@ -1309,7 +1293,8 @@ int vp9_decode_frame(VP9D_COMP *pbi,
     }
   }
 
-  xd->mode_info_stride = cm->mode_info_stride;
+  init_macroblockd(cm, &pbi->mb);
+
   if (cm->coding_use_prev_mi)
     set_prev_mi(cm);
   else

@@ -237,24 +237,33 @@ static INLINE int mi_cols_aligned_to_sb(int n_mis) {
   return ALIGN_POWER_OF_TWO(n_mis, MI_BLOCK_SIZE_LOG2);
 }
 
+static INLINE void init_macroblockd(VP9_COMMON *cm, MACROBLOCKD *xd) {
+  int i;
+
+  for (i = 0; i < MAX_MB_PLANE; ++i) {
+    xd->plane[i].dqcoeff = xd->dqcoeff[i];
+    xd->above_context[i] = cm->above_context +
+        i * sizeof(*cm->above_context) * 2 * mi_cols_aligned_to_sb(cm->mi_cols);
+  }
+
+  xd->above_seg_context = cm->above_seg_context;
+  xd->mode_info_stride = cm->mode_info_stride;
+}
+
 static INLINE const vp9_prob* get_partition_probs(const VP9_COMMON *cm,
                                                   int ctx) {
   return cm->frame_type == KEY_FRAME ? vp9_kf_partition_probs[ctx]
                                      : cm->fc.partition_prob[ctx];
 }
 
-static INLINE void set_skip_context(
-    MACROBLOCKD *xd,
-    ENTROPY_CONTEXT *above_context[MAX_MB_PLANE],
-    ENTROPY_CONTEXT left_context[MAX_MB_PLANE][16],
-    int mi_row, int mi_col) {
+static INLINE void set_skip_context(MACROBLOCKD *xd, int mi_row, int mi_col) {
   const int above_idx = mi_col * 2;
   const int left_idx = (mi_row * 2) & 15;
   int i;
-  for (i = 0; i < MAX_MB_PLANE; i++) {
+  for (i = 0; i < MAX_MB_PLANE; ++i) {
     struct macroblockd_plane *const pd = &xd->plane[i];
-    pd->above_context = above_context[i] + (above_idx >> pd->subsampling_x);
-    pd->left_context = left_context[i] + (left_idx >> pd->subsampling_y);
+    pd->above_context = &xd->above_context[i][above_idx >> pd->subsampling_x];
+    pd->left_context = &xd->left_context[i][left_idx >> pd->subsampling_y];
   }
 }
 

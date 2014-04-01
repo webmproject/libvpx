@@ -244,13 +244,6 @@ typedef struct macroblockd {
   PARTITION_CONTEXT left_seg_context[8];
 } MACROBLOCKD;
 
-static INLINE void init_macroblockd(MACROBLOCKD *xd) {
-  int i;
-
-  for (i = 0; i < MAX_MB_PLANE; ++i)
-    xd->plane[i].dqcoeff = xd->dqcoeff[i];
-}
-
 static INLINE BLOCK_SIZE get_subsize(BLOCK_SIZE bsize,
                                      PARTITION_TYPE partition) {
   const BLOCK_SIZE subsize = subsize_lookup[partition][bsize];
