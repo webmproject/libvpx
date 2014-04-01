@@ -2,6 +2,125 @@
   "comments": [
     {
       "key": {
+        "uuid": "AAAAdn//wEU\u003d",
+        "filename": "test/tools_common.sh",
+        "patchSetId": 15
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-04-01T22:49:18Z",
+      "side": 1,
+      "message": "this isn\u0027t guaranteed to contain anything (./configure); you could use config.mk to pull the toolchain out",
+      "revId": "778be72ded9472f566cd8d484b4f8c3476544fd2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//wEM\u003d",
+        "filename": "test/tools_common.sh",
+        "patchSetId": 15
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-04-01T22:49:18Z",
+      "side": 1,
+      "message": "awk works on files and can match specific lines, so this could be \u0027awk -F... \u0027/target\u003d/ {print $NF}\u0027. you could get creative with match/split here too, but that might be excessive",
+      "revId": "778be72ded9472f566cd8d484b4f8c3476544fd2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//wEI\u003d",
+        "filename": "test/tools_common.sh",
+        "patchSetId": 15
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-04-01T22:49:18Z",
+      "side": 1,
+      "message": "quote the second ${VPX_TOOL_TEST}",
+      "revId": "778be72ded9472f566cd8d484b4f8c3476544fd2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//wEg\u003d",
+        "filename": "test/tools_common.sh",
+        "patchSetId": 15
+      },
+      "lineNbr": 59,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-04-01T22:49:18Z",
+      "side": 1,
+      "message": "ditto on the joining",
+      "revId": "778be72ded9472f566cd8d484b4f8c3476544fd2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//wEE\u003d",
+        "filename": "test/tools_common.sh",
+        "patchSetId": 15
+      },
+      "lineNbr": 81,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-04-01T22:49:18Z",
+      "side": 1,
+      "message": "...does not match...",
+      "revId": "778be72ded9472f566cd8d484b4f8c3476544fd2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//wEA\u003d",
+        "filename": "test/tools_common.sh",
+        "patchSetId": 15
+      },
+      "lineNbr": 94,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-04-01T22:49:18Z",
+      "side": 1,
+      "message": "...they /all/ evaluate...",
+      "revId": "778be72ded9472f566cd8d484b4f8c3476544fd2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//wDs\u003d",
+        "filename": "test/tools_common.sh",
+        "patchSetId": 15
+      },
+      "lineNbr": 126,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-04-01T22:49:18Z",
+      "side": 1,
+      "message": "break before the final \u0027|\u0027",
+      "revId": "778be72ded9472f566cd8d484b4f8c3476544fd2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//wLU\u003d",
         "filename": "test/tools_common.sh",
         "patchSetId": 15
@@ -19,6 +138,40 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//wDc\u003d",
+        "filename": "test/tools_common.sh",
+        "patchSetId": 15
+      },
+      "lineNbr": 365,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-04-01T22:49:18Z",
+      "side": 1,
+      "message": "--bin-path)",
+      "revId": "778be72ded9472f566cd8d484b4f8c3476544fd2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//wDU\u003d",
+        "filename": "test/tools_common.sh",
+        "patchSetId": 15
+      },
+      "lineNbr": 399,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-04-01T22:49:18Z",
+      "side": 1,
+      "message": "what else is mandatory? it\u0027d be nice to be able to have it run from a build dir with no args",
+      "revId": "778be72ded9472f566cd8d484b4f8c3476544fd2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//wLQ\u003d",
         "filename": "test/tools_common.sh",
         "patchSetId": 15
@@ -30,6 +183,58 @@
       "writtenOn": "2014-04-01T01:59:14Z",
       "side": 1,
       "message": "No more mktemp because hp/ux mktemp is evil. No, I don\u0027t have a good excuse for why I was reading mktemp docs over the weekend... It just happened.\n\nAlso, this is basically what libvpx configure.sh does... except I don\u0027t think it ever creates directories directly. Make (or the tools that it\u0027s running) must be taking care of that.",
+      "revId": "778be72ded9472f566cd8d484b4f8c3476544fd2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//wC8\u003d",
+        "filename": "test/tools_common.sh",
+        "patchSetId": 15
+      },
+      "lineNbr": 417,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-04-01T22:49:18Z",
+      "side": 1,
+      "message": "it just writes to $TMP",
+      "parentUuid": "AAAAdn//wLQ\u003d",
+      "revId": "778be72ded9472f566cd8d484b4f8c3476544fd2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//wC4\u003d",
+        "filename": "test/tools_common.sh",
+        "patchSetId": 15
+      },
+      "lineNbr": 427,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-04-01T22:49:18Z",
+      "side": 1,
+      "message": "quote; could use cat \u003c\u003cEOF",
+      "revId": "778be72ded9472f566cd8d484b4f8c3476544fd2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//wC0\u003d",
+        "filename": "test/vpxdec.sh",
+        "patchSetId": 15
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-04-01T22:49:18Z",
+      "side": 1,
+      "message": "you could condense common code with an eval on the first arg",
       "revId": "778be72ded9472f566cd8d484b4f8c3476544fd2",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
