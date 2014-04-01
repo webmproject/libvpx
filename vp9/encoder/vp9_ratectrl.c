@@ -986,7 +986,7 @@ int vp9_rc_pick_q_and_bounds(const VP9_COMP *cpi,
     if (q == 0)
       q++;
     if (cpi->sf.force_ref_frame == 1)
-      q -= 15;
+      q -= cpi->sf.max_delta_qindex;
 
     if (q < *bottom_index)
       *bottom_index = q;

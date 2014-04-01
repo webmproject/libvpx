@@ -256,6 +256,9 @@ typedef struct {
   // partition type search.
   int force_ref_frame;
 
+  // Maximally allowed base quantization index fluctuation.
+  int max_delta_qindex;
+
   // Implements various heuristics to skip searching modes
   // The heuristics selected are based on  flags
   // defined in the MODE_SEARCH_SKIP_HEURISTICS enum
