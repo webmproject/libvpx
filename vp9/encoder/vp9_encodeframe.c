@@ -168,9 +168,9 @@ static INLINE void set_modeinfo_offsets(VP9_COMMON *const cm,
   xd->mi_8x8[0] = cm->mi + idx_str;
 }
 
-static int is_block_in_mb_map(VP9_COMP *cpi, int mi_row, int mi_col,
+static int is_block_in_mb_map(const VP9_COMP *cpi, int mi_row, int mi_col,
                               BLOCK_SIZE bsize) {
-  VP9_COMMON *const cm = &cpi->common;
+  const VP9_COMMON *const cm = &cpi->common;
   const int mb_rows = cm->mb_rows;
   const int mb_cols = cm->mb_cols;
   const int mb_row = mi_row >> 1;
@@ -194,6 +194,16 @@ static int is_block_in_mb_map(VP9_COMP *cpi, int mi_row, int mi_col,
   return 0;
 }
 
+static int check_active_map(const VP9_COMP *cpi, const MACROBLOCK *x,
+                            int mi_row, int mi_col,
+                            BLOCK_SIZE bsize) {
+  if (cpi->active_map_enabled && !x->e_mbd.lossless) {
+    return is_block_in_mb_map(cpi, mi_row, mi_col, bsize);
+  } else {
+    return 1;
+  }
+}
+
 static void set_offsets(VP9_COMP *cpi, const TileInfo *const tile,
                         int mi_row, int mi_col, BLOCK_SIZE bsize) {
   MACROBLOCK *const x = &cpi->mb;
@@ -211,12 +221,7 @@ static void set_offsets(VP9_COMP *cpi, const TileInfo *const tile,
 
   // Activity map pointer
   x->mb_activity_ptr = &cpi->mb_activity_map[idx_map];
-
-  if (cpi->active_map_enabled && !x->e_mbd.lossless) {
-    x->in_active_map = is_block_in_mb_map(cpi, mi_row, mi_col, bsize);
-  } else {
-    x->in_active_map = 1;
-  }
+  x->in_active_map = check_active_map(cpi, x, mi_row, mi_col, bsize);
 
   set_modeinfo_offsets(cm, xd, mi_row, mi_col);
 
@@ -1432,6 +1437,8 @@ static void update_state_rt(VP9_COMP *cpi, PICK_MODE_CONTEXT *ctx,
       ++cm->counts.switchable_interp[pred_ctx][mbmi->interp_filter];
     }
   }
+
+  x->skip = ctx->skip;
 }
 
 static void encode_b_rt(VP9_COMP *cpi, const TileInfo *const tile,
@@ -1591,9 +1598,11 @@ static void rd_use_partition(VP9_COMP *cpi,
   }
   save_context(cpi, mi_row, mi_col, a, l, sa, sl, bsize);
 
-  set_offsets(cpi, tile, mi_row, mi_col, bsize);
   if (bsize == BLOCK_16X16) {
+    set_offsets(cpi, tile, mi_row, mi_col, bsize);
     x->mb_energy = vp9_block_energy(cpi, x, bsize);
+  } else {
+    x->in_active_map = check_active_map(cpi, x, mi_row, mi_col, bsize);
   }
 
   if (!x->in_active_map) {
@@ -2025,6 +2034,8 @@ static void rd_pick_partition(VP9_COMP *cpi, const TileInfo *const tile,
   if (bsize == BLOCK_16X16) {
     set_offsets(cpi, tile, mi_row, mi_col, bsize);
     x->mb_energy = vp9_block_energy(cpi, x, bsize);
+  } else {
+    x->in_active_map = check_active_map(cpi, x, mi_row, mi_col, bsize);
   }
 
   // Determine partition types in search according to the speed features.
@@ -2674,6 +2685,8 @@ static void nonrd_pick_partition(VP9_COMP *cpi, const TileInfo *const tile,
 
   assert(num_8x8_blocks_wide_lookup[bsize] ==
              num_8x8_blocks_high_lookup[bsize]);
+
+  x->in_active_map = check_active_map(cpi, x, mi_row, mi_col, bsize);
 
   // Determine partition types in search according to the speed features.
   // The threshold set here has to be of square block size.
