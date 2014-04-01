@@ -175,7 +175,7 @@ static INLINE int get_entropy_context(TX_SIZE tx_size, const ENTROPY_CONTEXT *a,
 
 static const INLINE scan_order *get_scan(const MACROBLOCKD *xd, TX_SIZE tx_size,
                                          PLANE_TYPE type, int block_idx) {
-  const MODE_INFO *const mi = xd->mi_8x8[0];
+  const MODE_INFO *const mi = xd->mi[0];
 
   if (is_inter_block(&mi->mbmi) || type != PLANE_TYPE_Y || xd->lossless) {
     return &vp9_default_scan_orders[tx_size];

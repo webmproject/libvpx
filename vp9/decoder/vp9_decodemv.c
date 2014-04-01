@@ -104,7 +104,7 @@ static int read_intra_segment_id(VP9_COMMON *const cm, MACROBLOCKD *const xd,
                                  int mi_row, int mi_col,
                                  vp9_reader *r) {
   struct segmentation *const seg = &cm->seg;
-  const BLOCK_SIZE bsize = xd->mi_8x8[0]->mbmi.sb_type;
+  const BLOCK_SIZE bsize = xd->mi[0]->mbmi.sb_type;
   int segment_id;
 
   if (!seg->enabled)
@@ -121,7 +121,7 @@ static int read_intra_segment_id(VP9_COMMON *const cm, MACROBLOCKD *const xd,
 static int read_inter_segment_id(VP9_COMMON *const cm, MACROBLOCKD *const xd,
                                  int mi_row, int mi_col, vp9_reader *r) {
   struct segmentation *const seg = &cm->seg;
-  MB_MODE_INFO *const mbmi = &xd->mi_8x8[0]->mbmi;
+  MB_MODE_INFO *const mbmi = &xd->mi[0]->mbmi;
   const BLOCK_SIZE bsize = mbmi->sb_type;
   int predicted_segment_id, segment_id;
 
@@ -161,10 +161,10 @@ static int read_skip(VP9_COMMON *cm, const MACROBLOCKD *xd,
 static void read_intra_frame_mode_info(VP9_COMMON *const cm,
                                        MACROBLOCKD *const xd,
                                        int mi_row, int mi_col, vp9_reader *r) {
-  MODE_INFO *const mi = xd->mi_8x8[0];
+  MODE_INFO *const mi = xd->mi[0];
   MB_MODE_INFO *const mbmi = &mi->mbmi;
-  const MODE_INFO *above_mi = xd->mi_8x8[-cm->mode_info_stride];
-  const MODE_INFO *left_mi  = xd->left_available ? xd->mi_8x8[-1] : NULL;
+  const MODE_INFO *above_mi = xd->mi[-cm->mi_stride];
+  const MODE_INFO *left_mi  = xd->left_available ? xd->mi[-1] : NULL;
   const BLOCK_SIZE bsize = mbmi->sb_type;
   int i;
 
@@ -515,7 +515,7 @@ static void read_inter_frame_mode_info(VP9_COMMON *const cm,
                                        MACROBLOCKD *const xd,
                                        const TileInfo *const tile,
                                        int mi_row, int mi_col, vp9_reader *r) {
-  MODE_INFO *const mi = xd->mi_8x8[0];
+  MODE_INFO *const mi = xd->mi[0];
   MB_MODE_INFO *const mbmi = &mi->mbmi;
   int inter_block;
 

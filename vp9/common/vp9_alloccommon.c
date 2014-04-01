@@ -21,17 +21,17 @@ static void clear_mi_border(const VP9_COMMON *cm, MODE_INFO *mi) {
   int i;
 
   // Top border row
-  vpx_memset(mi, 0, sizeof(*mi) * cm->mode_info_stride);
+  vpx_memset(mi, 0, sizeof(*mi) * cm->mi_stride);
 
   // Left border column
   for (i = 1; i < cm->mi_rows + 1; ++i)
-    vpx_memset(&mi[i * cm->mode_info_stride], 0, sizeof(*mi));
+    vpx_memset(&mi[i * cm->mi_stride], 0, sizeof(*mi));
 }
 
 static void set_mb_mi(VP9_COMMON *cm, int aligned_width, int aligned_height) {
   cm->mi_cols = aligned_width >> MI_SIZE_LOG2;
   cm->mi_rows = aligned_height >> MI_SIZE_LOG2;
-  cm->mode_info_stride = cm->mi_cols + MI_BLOCK_SIZE;
+  cm->mi_stride = cm->mi_cols + MI_BLOCK_SIZE;
 
   cm->mb_cols = (cm->mi_cols + 1) >> 1;
   cm->mb_rows = (cm->mi_rows + 1) >> 1;
@@ -39,17 +39,15 @@ static void set_mb_mi(VP9_COMMON *cm, int aligned_width, int aligned_height) {
 }
 
 static void setup_mi(VP9_COMMON *cm) {
-  cm->mi = cm->mip + cm->mode_info_stride + 1;
-  cm->prev_mi = cm->prev_mip + cm->mode_info_stride + 1;
-  cm->mi_grid_visible = cm->mi_grid_base + cm->mode_info_stride + 1;
-  cm->prev_mi_grid_visible = cm->prev_mi_grid_base + cm->mode_info_stride + 1;
+  cm->mi = cm->mip + cm->mi_stride + 1;
+  cm->prev_mi = cm->prev_mip + cm->mi_stride + 1;
+  cm->mi_grid_visible = cm->mi_grid_base + cm->mi_stride + 1;
+  cm->prev_mi_grid_visible = cm->prev_mi_grid_base + cm->mi_stride + 1;
 
-  vpx_memset(cm->mip, 0,
-             cm->mode_info_stride * (cm->mi_rows + 1) * sizeof(*cm->mip));
+  vpx_memset(cm->mip, 0, cm->mi_stride * (cm->mi_rows + 1) * sizeof(*cm->mip));
 
-  vpx_memset(cm->mi_grid_base, 0,
-             cm->mode_info_stride * (cm->mi_rows + 1) *
-             sizeof(*cm->mi_grid_base));
+  vpx_memset(cm->mi_grid_base, 0, cm->mi_stride * (cm->mi_rows + 1) *
+                                      sizeof(*cm->mi_grid_base));
 
   clear_mi_border(cm, cm->prev_mip);
 }
@@ -128,7 +126,7 @@ int vp9_resize_frame_buffers(VP9_COMMON *cm, int width, int height) {
   set_mb_mi(cm, aligned_width, aligned_height);
 
   free_mi(cm);
-  if (alloc_mi(cm, cm->mode_info_stride * (cm->mi_rows + MI_BLOCK_SIZE)))
+  if (alloc_mi(cm, cm->mi_stride * (cm->mi_rows + MI_BLOCK_SIZE)))
     goto fail;
 
   setup_mi(cm);
@@ -191,7 +189,7 @@ int vp9_alloc_frame_buffers(VP9_COMMON *cm, int width, int height) {
 
   set_mb_mi(cm, aligned_width, aligned_height);
 
-  if (alloc_mi(cm, cm->mode_info_stride * (cm->mi_rows + MI_BLOCK_SIZE)))
+  if (alloc_mi(cm, cm->mi_stride * (cm->mi_rows + MI_BLOCK_SIZE)))
     goto fail;
 
   setup_mi(cm);
@@ -248,8 +246,8 @@ void vp9_swap_mi_and_prev_mi(VP9_COMMON *cm) {
   cm->mi_grid_base = temp2;
 
   // Update the upper left visible macroblock ptrs.
-  cm->mi = cm->mip + cm->mode_info_stride + 1;
-  cm->prev_mi = cm->prev_mip + cm->mode_info_stride + 1;
-  cm->mi_grid_visible = cm->mi_grid_base + cm->mode_info_stride + 1;
-  cm->prev_mi_grid_visible = cm->prev_mi_grid_base + cm->mode_info_stride + 1;
+  cm->mi = cm->mip + cm->mi_stride + 1;
+  cm->prev_mi = cm->prev_mip + cm->mi_stride + 1;
+  cm->mi_grid_visible = cm->mi_grid_base + cm->mi_stride + 1;
+  cm->prev_mi_grid_visible = cm->prev_mi_grid_base + cm->mi_stride + 1;
 }

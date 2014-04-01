@@ -192,7 +192,7 @@ static void write_segment_id(vp9_writer *w, const struct segmentation *seg,
 static void write_ref_frames(const VP9_COMP *cpi, vp9_writer *w) {
   const VP9_COMMON *const cm = &cpi->common;
   const MACROBLOCKD *const xd = &cpi->mb.e_mbd;
-  const MB_MODE_INFO *const mbmi = &xd->mi_8x8[0]->mbmi;
+  const MB_MODE_INFO *const mbmi = &xd->mi[0]->mbmi;
   const int is_compound = has_second_ref(mbmi);
   const int segment_id = mbmi->segment_id;
 
@@ -336,7 +336,7 @@ static void write_mb_modes_kf(const VP9_COMP *cpi, MODE_INFO **mi_8x8,
   const MACROBLOCKD *const xd = &cpi->mb.e_mbd;
   const struct segmentation *const seg = &cm->seg;
   const MODE_INFO *const mi = mi_8x8[0];
-  const MODE_INFO *const above_mi = mi_8x8[-xd->mode_info_stride];
+  const MODE_INFO *const above_mi = mi_8x8[-xd->mi_stride];
   const MODE_INFO *const left_mi = xd->left_available ? mi_8x8[-1] : NULL;
   const MB_MODE_INFO *const mbmi = &mi->mbmi;
   const BLOCK_SIZE bsize = mbmi->sb_type;
@@ -375,15 +375,15 @@ static void write_modes_b(VP9_COMP *cpi, const TileInfo *const tile,
   MACROBLOCKD *const xd = &cpi->mb.e_mbd;
   MODE_INFO *m;
 
-  xd->mi_8x8 = cm->mi_grid_visible + (mi_row * cm->mode_info_stride + mi_col);
-  m = xd->mi_8x8[0];
+  xd->mi = cm->mi_grid_visible + (mi_row * cm->mi_stride + mi_col);
+  m = xd->mi[0];
 
   set_mi_row_col(xd, tile,
                  mi_row, num_8x8_blocks_high_lookup[m->mbmi.sb_type],
                  mi_col, num_8x8_blocks_wide_lookup[m->mbmi.sb_type],
                  cm->mi_rows, cm->mi_cols);
   if (frame_is_intra_only(cm)) {
-    write_mb_modes_kf(cpi, xd->mi_8x8, w);
+    write_mb_modes_kf(cpi, xd->mi, w);
   } else {
     pack_inter_mode_mvs(cpi, m, w);
   }
@@ -424,7 +424,7 @@ static void write_modes_sb(VP9_COMP *cpi,
   const int bs = (1 << bsl) / 4;
   PARTITION_TYPE partition;
   BLOCK_SIZE subsize;
-  MODE_INFO *m = cm->mi_grid_visible[mi_row * cm->mode_info_stride + mi_col];
+  MODE_INFO *m = cm->mi_grid_visible[mi_row * cm->mi_stride + mi_col];
 
   if (mi_row >= cm->mi_rows || mi_col >= cm->mi_cols)
     return;

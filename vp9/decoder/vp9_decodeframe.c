@@ -245,7 +245,7 @@ static void predict_and_reconstruct_intra_block(int plane, int block,
   VP9_COMMON *const cm = args->cm;
   MACROBLOCKD *const xd = args->xd;
   struct macroblockd_plane *const pd = &xd->plane[plane];
-  MODE_INFO *const mi = xd->mi_8x8[0];
+  MODE_INFO *const mi = xd->mi[0];
   const MB_PREDICTION_MODE mode = (plane == 0) ? get_y_mode(mi, block)
                                                : mi->mbmi.uv_mode;
   int x, y;
@@ -298,15 +298,15 @@ static void set_offsets(VP9_COMMON *const cm, MACROBLOCKD *const xd,
   const int bh = num_8x8_blocks_high_lookup[bsize];
   const int x_mis = MIN(bw, cm->mi_cols - mi_col);
   const int y_mis = MIN(bh, cm->mi_rows - mi_row);
-  const int offset = mi_row * cm->mode_info_stride + mi_col;
+  const int offset = mi_row * cm->mi_stride + mi_col;
   int x, y;
 
-  xd->mi_8x8 = cm->mi_grid_visible + offset;
-  xd->mi_8x8[0] = &cm->mi[offset];
-  xd->mi_8x8[0]->mbmi.sb_type = bsize;
+  xd->mi = cm->mi_grid_visible + offset;
+  xd->mi[0] = &cm->mi[offset];
+  xd->mi[0]->mbmi.sb_type = bsize;
   for (y = 0; y < y_mis; ++y)
     for (x = !y; x < x_mis; ++x)
-      xd->mi_8x8[y * cm->mode_info_stride + x] = xd->mi_8x8[0];
+      xd->mi[y * cm->mi_stride + x] = xd->mi[0];
 
   set_skip_context(xd, mi_row, mi_col);
 
@@ -319,7 +319,7 @@ static void set_offsets(VP9_COMMON *const cm, MACROBLOCKD *const xd,
 
 static void set_ref(VP9_COMMON *const cm, MACROBLOCKD *const xd,
                     int idx, int mi_row, int mi_col) {
-  MB_MODE_INFO *const mbmi = &xd->mi_8x8[0]->mbmi;
+  MB_MODE_INFO *const mbmi = &xd->mi[0]->mbmi;
   RefBuffer *ref_buffer = &cm->frame_refs[mbmi->ref_frame[idx] - LAST_FRAME];
   xd->block_refs[idx] = ref_buffer;
   if (!vp9_is_valid_scale(&ref_buffer->sf))
@@ -344,7 +344,7 @@ static void decode_block(VP9_COMMON *const cm, MACROBLOCKD *const xd,
     bsize = BLOCK_8X8;
 
   // Has to be called after set_offsets
-  mbmi = &xd->mi_8x8[0]->mbmi;
+  mbmi = &xd->mi[0]->mbmi;
 
   if (mbmi->skip) {
     reset_skip_context(xd, bsize);

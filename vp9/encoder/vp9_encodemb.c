@@ -111,7 +111,7 @@ static void optimize_b(int plane, int block, BLOCK_SIZE plane_bsize,
   MACROBLOCKD *const xd = &mb->e_mbd;
   struct macroblock_plane *p = &mb->plane[plane];
   struct macroblockd_plane *pd = &xd->plane[plane];
-  const int ref = is_inter_block(&xd->mi_8x8[0]->mbmi);
+  const int ref = is_inter_block(&xd->mi[0]->mbmi);
   vp9_token_state tokens[1025][2];
   unsigned best_index[1025][2];
   const int16_t *coeff = BLOCK_OFFSET(mb->plane[plane].coeff, block);
@@ -139,7 +139,7 @@ static void optimize_b(int plane, int block, BLOCK_SIZE plane_bsize,
 
   /* Now set up a Viterbi trellis to evaluate alternative roundings. */
   rdmult = mb->rdmult * err_mult;
-  if (!is_inter_block(&mb->e_mbd.mi_8x8[0]->mbmi))
+  if (!is_inter_block(&mb->e_mbd.mi[0]->mbmi))
     rdmult = (rdmult * 9) >> 4;
   rddiv = mb->rddiv;
   /* Initialize the sentinel node of the trellis. */
@@ -452,7 +452,7 @@ void vp9_encode_sby_pass1(MACROBLOCK *x, BLOCK_SIZE bsize) {
 void vp9_encode_sb(MACROBLOCK *x, BLOCK_SIZE bsize) {
   MACROBLOCKD *const xd = &x->e_mbd;
   struct optimize_ctx ctx;
-  MB_MODE_INFO *mbmi = &xd->mi_8x8[0]->mbmi;
+  MB_MODE_INFO *mbmi = &xd->mi[0]->mbmi;
   struct encode_b_args arg = {x, &ctx, &mbmi->skip};
   int plane;
 
@@ -477,7 +477,7 @@ static void encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
   struct encode_b_args* const args = arg;
   MACROBLOCK *const x = args->x;
   MACROBLOCKD *const xd = &x->e_mbd;
-  MB_MODE_INFO *mbmi = &xd->mi_8x8[0]->mbmi;
+  MB_MODE_INFO *mbmi = &xd->mi[0]->mbmi;
   struct macroblock_plane *const p = &x->plane[plane];
   struct macroblockd_plane *const pd = &xd->plane[plane];
   int16_t *coeff = BLOCK_OFFSET(p->coeff, block);
@@ -562,7 +562,7 @@ static void encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
     case TX_4X4:
       tx_type = get_tx_type_4x4(pd->plane_type, xd, block);
       scan_order = &vp9_scan_orders[TX_4X4][tx_type];
-      mode = plane == 0 ? get_y_mode(xd->mi_8x8[0], block) : mbmi->uv_mode;
+      mode = plane == 0 ? get_y_mode(xd->mi[0], block) : mbmi->uv_mode;
       vp9_predict_intra_block(xd, block, bwl, TX_4X4, mode,
                               x->skip_encode ? src : dst,
                               x->skip_encode ? src_stride : dst_stride,
@@ -608,14 +608,14 @@ void vp9_encode_block_intra(MACROBLOCK *x, int plane, int block,
 
 void vp9_encode_intra_block_plane(MACROBLOCK *x, BLOCK_SIZE bsize, int plane) {
   const MACROBLOCKD *const xd = &x->e_mbd;
-  struct encode_b_args arg = {x, NULL, &xd->mi_8x8[0]->mbmi.skip};
+  struct encode_b_args arg = {x, NULL, &xd->mi[0]->mbmi.skip};
 
   vp9_foreach_transformed_block_in_plane(xd, bsize, plane, encode_block_intra,
                                          &arg);
 }
 
 int vp9_encode_intra(MACROBLOCK *x, int use_16x16_pred) {
-  MB_MODE_INFO * mbmi = &x->e_mbd.mi_8x8[0]->mbmi;
+  MB_MODE_INFO * mbmi = &x->e_mbd.mi[0]->mbmi;
   x->skip_encode = 0;
   mbmi->mode = DC_PRED;
   mbmi->ref_frame[0] = INTRA_FRAME;

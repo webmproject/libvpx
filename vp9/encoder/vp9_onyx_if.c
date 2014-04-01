@@ -414,7 +414,7 @@ static void update_reference_segmentation_map(VP9_COMP *cpi) {
     uint8_t *cache = cache_ptr;
     for (col = 0; col < cm->mi_cols; col++, mi_8x8++, cache++)
       cache[0] = mi_8x8[0]->mbmi.segment_id;
-    mi_8x8_ptr += cm->mode_info_stride;
+    mi_8x8_ptr += cm->mi_stride;
     cache_ptr += cm->mi_cols;
   }
 }
@@ -2846,8 +2846,8 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
   }
 
   // restore prev_mi
-  cm->prev_mi = cm->prev_mip + cm->mode_info_stride + 1;
-  cm->prev_mi_grid_visible = cm->prev_mi_grid_base + cm->mode_info_stride + 1;
+  cm->prev_mi = cm->prev_mip + cm->mi_stride + 1;
+  cm->prev_mi_grid_visible = cm->prev_mi_grid_base + cm->mi_stride + 1;
 }
 
 static void SvcEncode(VP9_COMP *cpi, size_t *size, uint8_t *dest,

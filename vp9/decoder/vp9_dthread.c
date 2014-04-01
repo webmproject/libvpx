@@ -99,7 +99,7 @@ static void loop_filter_rows_mt(const YV12_BUFFER_CONFIG *const frame_buffer,
 
   for (r = start; r < stop; r += num_lf_workers) {
     const int mi_row = r << MI_BLOCK_SIZE_LOG2;
-    MODE_INFO **mi_8x8 = cm->mi_grid_visible + mi_row * cm->mode_info_stride;
+    MODE_INFO **mi_8x8 = cm->mi_grid_visible + mi_row * cm->mi_stride;
 
     for (c = 0; c < sb_cols; ++c) {
       const int mi_col = c << MI_BLOCK_SIZE_LOG2;
@@ -108,8 +108,7 @@ static void loop_filter_rows_mt(const YV12_BUFFER_CONFIG *const frame_buffer,
       sync_read(lf_sync, r, c);
 
       vp9_setup_dst_planes(xd, frame_buffer, mi_row, mi_col);
-      vp9_setup_mask(cm, mi_row, mi_col, mi_8x8 + mi_col, cm->mode_info_stride,
-                     &lfm);
+      vp9_setup_mask(cm, mi_row, mi_col, mi_8x8 + mi_col, cm->mi_stride, &lfm);
 
       for (plane = 0; plane < num_planes; ++plane) {
         vp9_filter_block_plane(cm, &xd->plane[plane], mi_row, &lfm);

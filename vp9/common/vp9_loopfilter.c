@@ -909,7 +909,7 @@ static void filter_block_plane_non420(VP9_COMMON *cm,
   const int ss_y = plane->subsampling_y;
   const int row_step = 1 << ss_x;
   const int col_step = 1 << ss_y;
-  const int row_step_stride = cm->mode_info_stride * row_step;
+  const int row_step_stride = cm->mi_stride * row_step;
   struct buf_2d *const dst = &plane->dst;
   uint8_t* const dst0 = dst->buf;
   unsigned int mask_16x16[MI_BLOCK_SIZE] = {0};
@@ -1201,7 +1201,7 @@ void vp9_loop_filter_rows(const YV12_BUFFER_CONFIG *frame_buffer,
       xd->plane[1].subsampling_x == 1);
 
   for (mi_row = start; mi_row < stop; mi_row += MI_BLOCK_SIZE) {
-    MODE_INFO **mi_8x8 = cm->mi_grid_visible + mi_row * cm->mode_info_stride;
+    MODE_INFO **mi_8x8 = cm->mi_grid_visible + mi_row * cm->mi_stride;
 
     for (mi_col = 0; mi_col < cm->mi_cols; mi_col += MI_BLOCK_SIZE) {
       int plane;
@@ -1210,8 +1210,8 @@ void vp9_loop_filter_rows(const YV12_BUFFER_CONFIG *frame_buffer,
 
       // TODO(JBB): Make setup_mask work for non 420.
       if (use_420)
-        vp9_setup_mask(cm, mi_row, mi_col, mi_8x8 + mi_col,
-                       cm->mode_info_stride, &lfm);
+        vp9_setup_mask(cm, mi_row, mi_col, mi_8x8 + mi_col, cm->mi_stride,
+                       &lfm);
 
       for (plane = 0; plane < num_planes; ++plane) {
         if (use_420)

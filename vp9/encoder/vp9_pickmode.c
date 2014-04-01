@@ -31,7 +31,7 @@ static void full_pixel_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
                                     BLOCK_SIZE bsize, int mi_row, int mi_col,
                                     int_mv *tmp_mv) {
   MACROBLOCKD *xd = &x->e_mbd;
-  MB_MODE_INFO *mbmi = &xd->mi_8x8[0]->mbmi;
+  MB_MODE_INFO *mbmi = &xd->mi[0]->mbmi;
   struct buf_2d backup_yv12[MAX_MB_PLANE] = {{0}};
   int step_param;
   int sadpb = x->sadperbit16;
@@ -135,7 +135,7 @@ static void sub_pixel_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
                                     BLOCK_SIZE bsize, int mi_row, int mi_col,
                                     MV *tmp_mv, int *rate_mv) {
   MACROBLOCKD *xd = &x->e_mbd;
-  MB_MODE_INFO *mbmi = &xd->mi_8x8[0]->mbmi;
+  MB_MODE_INFO *mbmi = &xd->mi[0]->mbmi;
   struct buf_2d backup_yv12[MAX_MB_PLANE] = {{0}};
   int ref = mbmi->ref_frame[0];
   MV ref_mv = mbmi->ref_mvs[ref][0].as_mv;
@@ -209,7 +209,7 @@ int64_t vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
                             int64_t *returndistortion,
                             BLOCK_SIZE bsize) {
   MACROBLOCKD *xd = &x->e_mbd;
-  MB_MODE_INFO *mbmi = &xd->mi_8x8[0]->mbmi;
+  MB_MODE_INFO *mbmi = &xd->mi[0]->mbmi;
   struct macroblock_plane *const p = &x->plane[0];
   struct macroblockd_plane *const pd = &xd->plane[0];
   const BLOCK_SIZE block_size = get_plane_block_size(bsize, &xd->plane[0]);
@@ -343,7 +343,7 @@ int64_t vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
   mbmi->mode = best_mode;
   mbmi->ref_frame[0] = best_ref_frame;
   mbmi->mv[0].as_int = frame_mv[best_mode][best_ref_frame].as_int;
-  xd->mi_8x8[0]->bmi[0].as_mv[0].as_int = mbmi->mv[0].as_int;
+  xd->mi[0]->bmi[0].as_mv[0].as_int = mbmi->mv[0].as_int;
 
   // Perform intra prediction search, if the best SAD is above a certain
   // threshold.

@@ -384,7 +384,7 @@ static unsigned int zz_motion_search(const MACROBLOCK *x) {
   const uint8_t *const ref = xd->plane[0].pre[0].buf;
   const int ref_stride = xd->plane[0].pre[0].stride;
   unsigned int sse;
-  vp9_variance_fn_t fn = get_block_variance_fn(xd->mi_8x8[0]->mbmi.sb_type);
+  vp9_variance_fn_t fn = get_block_variance_fn(xd->mi[0]->mbmi.sb_type);
   fn(src, src_stride, ref, ref_stride, &sse);
   return sse;
 }
@@ -398,7 +398,7 @@ static void first_pass_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
   int num00, tmp_err, n, sr = 0;
   int step_param = 3;
   int further_steps = (MAX_MVSEARCH_STEPS - 1) - step_param;
-  const BLOCK_SIZE bsize = xd->mi_8x8[0]->mbmi.sb_type;
+  const BLOCK_SIZE bsize = xd->mi[0]->mbmi.sb_type;
   vp9_variance_fn_ptr_t v_fn_ptr = cpi->fn_ptr[bsize];
   int new_mv_mode_penalty = 256;
   const int quart_frm = MIN(cpi->common.width, cpi->common.height);
@@ -542,8 +542,8 @@ void vp9_first_pass(VP9_COMP *cpi) {
   vp9_setup_pre_planes(xd, 0, first_ref_buf, 0, 0, NULL);
   vp9_setup_dst_planes(xd, new_yv12, 0, 0);
 
-  xd->mi_8x8 = cm->mi_grid_visible;
-  xd->mi_8x8[0] = cm->mi;
+  xd->mi = cm->mi_grid_visible;
+  xd->mi[0] = cm->mi;
 
   vp9_setup_block_planes(&x->e_mbd, cm->subsampling_x, cm->subsampling_y);
 
@@ -591,8 +591,8 @@ void vp9_first_pass(VP9_COMP *cpi) {
       xd->plane[1].dst.buf = new_yv12->u_buffer + recon_uvoffset;
       xd->plane[2].dst.buf = new_yv12->v_buffer + recon_uvoffset;
       xd->left_available = (mb_col != 0);
-      xd->mi_8x8[0]->mbmi.sb_type = bsize;
-      xd->mi_8x8[0]->mbmi.ref_frame[0] = INTRA_FRAME;
+      xd->mi[0]->mbmi.sb_type = bsize;
+      xd->mi[0]->mbmi.ref_frame[0] = INTRA_FRAME;
       set_mi_row_col(xd, &tile,
                      mb_row << 1, num_8x8_blocks_high_lookup[bsize],
                      mb_col << 1, num_8x8_blocks_wide_lookup[bsize],
@@ -711,11 +711,11 @@ void vp9_first_pass(VP9_COMP *cpi) {
           mv.as_mv.row *= 8;
           mv.as_mv.col *= 8;
           this_error = motion_error;
-          xd->mi_8x8[0]->mbmi.mode = NEWMV;
-          xd->mi_8x8[0]->mbmi.mv[0] = mv;
-          xd->mi_8x8[0]->mbmi.tx_size = TX_4X4;
-          xd->mi_8x8[0]->mbmi.ref_frame[0] = LAST_FRAME;
-          xd->mi_8x8[0]->mbmi.ref_frame[1] = NONE;
+          xd->mi[0]->mbmi.mode = NEWMV;
+          xd->mi[0]->mbmi.mv[0] = mv;
+          xd->mi[0]->mbmi.tx_size = TX_4X4;
+          xd->mi[0]->mbmi.ref_frame[0] = LAST_FRAME;
+          xd->mi[0]->mbmi.ref_frame[1] = NONE;
           vp9_build_inter_predictors_sby(xd, mb_row << 1, mb_col << 1, bsize);
           vp9_encode_sby_pass1(x, bsize);
           sum_mvr += mv.as_mv.row;

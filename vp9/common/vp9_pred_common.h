@@ -19,11 +19,11 @@ extern "C" {
 #endif
 
 static INLINE const MODE_INFO *get_above_mi(const MACROBLOCKD *const xd) {
-  return xd->up_available ? xd->mi_8x8[-xd->mode_info_stride] : NULL;
+  return xd->up_available ? xd->mi[-xd->mi_stride] : NULL;
 }
 
 static INLINE const MODE_INFO *get_left_mi(const MACROBLOCKD *const xd) {
-  return xd->left_available ? xd->mi_8x8[-1] : NULL;
+  return xd->left_available ? xd->mi[-1] : NULL;
 }
 
 int vp9_get_segment_id(VP9_COMMON *cm, const uint8_t *segment_ids,
