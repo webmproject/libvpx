@@ -147,8 +147,6 @@ VP9D_COMP *vp9_create_decompressor(const VP9D_CONFIG *oxcf) {
   cm->error.setjmp = 0;
   pbi->decoded_key_frame = 0;
 
-  init_macroblockd(&pbi->mb);
-
   vp9_worker_init(&pbi->lf_worker);
 
   return pbi;
