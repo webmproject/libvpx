@@ -193,9 +193,8 @@ static void model_rd_for_sb_y(VP9_COMP *cpi, BLOCK_SIZE bsize,
   int var = cpi->fn_ptr[bs].vf(p->src.buf, p->src.stride,
                                pd->dst.buf, pd->dst.stride, &sse);
 
-  vp9_model_rd_from_var_lapndz(var + sse, 1 << num_pels_log2_lookup[bs],
+  vp9_model_rd_from_var_lapndz(sse + var, 1 << num_pels_log2_lookup[bs],
                                pd->dequant[1] >> 3, &rate, &dist);
-
   *out_rate_sum = rate;
   *out_dist_sum = dist << 3;
 }
