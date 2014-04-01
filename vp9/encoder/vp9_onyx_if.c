@@ -189,6 +189,7 @@ static void dealloc_compressor_data(VP9_COMP *cpi) {
 
   vp9_free_frame_buffer(&cpi->last_frame_uf);
   vp9_free_frame_buffer(&cpi->scaled_source);
+  vp9_free_frame_buffer(&cpi->scaled_last_source);
   vp9_free_frame_buffer(&cpi->alt_ref_buffer);
   vp9_lookahead_destroy(cpi->lookahead);
 
@@ -595,6 +596,13 @@ void vp9_alloc_compressor_data(VP9_COMP *cpi) {
     vpx_internal_error(&cm->error, VPX_CODEC_MEM_ERROR,
                        "Failed to allocate scaled source buffer");
 
+  if (vp9_alloc_frame_buffer(&cpi->scaled_last_source,
+                             cm->width, cm->height,
+                             cm->subsampling_x, cm->subsampling_y,
+                             VP9_ENC_BORDER_IN_PIXELS))
+    vpx_internal_error(&cm->error, VPX_CODEC_MEM_ERROR,
+                       "Failed to allocate scaled last source buffer");
+
   vpx_free(cpi->tok);
 
   {
@@ -635,6 +643,13 @@ static void update_frame_size(VP9_COMP *cpi) {
                                VP9_ENC_BORDER_IN_PIXELS, NULL, NULL, NULL))
     vpx_internal_error(&cm->error, VPX_CODEC_MEM_ERROR,
                        "Failed to reallocate scaled source buffer");
+
+  if (vp9_realloc_frame_buffer(&cpi->scaled_last_source,
+                               cm->width, cm->height,
+                               cm->subsampling_x, cm->subsampling_y,
+                               VP9_ENC_BORDER_IN_PIXELS, NULL, NULL, NULL))
+    vpx_internal_error(&cm->error, VPX_CODEC_MEM_ERROR,
+                       "Failed to reallocate scaled last source buffer");
 
   {
     int y_stride = cpi->scaled_source.y_stride;
@@ -2554,6 +2569,19 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
   } else {
     cpi->Source = cpi->un_scaled_source;
   }
+
+  // Scale the last source buffer, if required.
+  if (cpi->unscaled_last_source != NULL) {
+    if (cm->mi_cols * MI_SIZE != cpi->unscaled_last_source->y_width ||
+        cm->mi_rows * MI_SIZE != cpi->unscaled_last_source->y_height) {
+      scale_and_extend_frame_nonnormative(cpi->unscaled_last_source,
+                                          &cpi->scaled_last_source);
+      cpi->Last_Source = &cpi->scaled_last_source;
+    } else {
+      cpi->Last_Source = cpi->unscaled_last_source;
+    }
+  }
+
   vp9_scale_references(cpi);
 
   vp9_clear_system_state();
@@ -2985,6 +3013,7 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
   vpx_usec_timer_start(&cmptimer);
 
   cpi->source = NULL;
+  cpi->last_source = NULL;
 
   set_high_precision_mv(cpi, ALTREF_HIGH_PRECISION_MV);
 
@@ -3047,6 +3076,13 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
 #if CONFIG_MULTIPLE_ARF
     int i;
 #endif
+
+    // Get last frame source.
+    if (cm->current_video_frame > 0) {
+      if ((cpi->last_source = vp9_lookahead_peek(cpi->lookahead, -1)) == NULL)
+        return -1;
+    }
+
     if ((cpi->source = vp9_lookahead_pop(cpi->lookahead, flush))) {
       cm->show_frame = 1;
       cm->intra_only = 0;
@@ -3085,6 +3121,13 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
   if (cpi->source) {
     cpi->un_scaled_source = cpi->Source = force_src_buffer ? force_src_buffer
                                                            : &cpi->source->img;
+
+  if (cpi->last_source != NULL) {
+    cpi->unscaled_last_source = &cpi->last_source->img;
+  } else {
+    cpi->unscaled_last_source = NULL;
+  }
+
     *time_stamp = cpi->source->ts_start;
     *time_end = cpi->source->ts_end;
     *frame_flags = cpi->source->flags;
