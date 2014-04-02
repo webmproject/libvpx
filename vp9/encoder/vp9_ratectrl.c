@@ -977,12 +977,9 @@ int vp9_rc_pick_q_and_bounds(const VP9_COMP *cpi,
     q = rc_pick_q_and_bounds_two_pass(cpi, bottom_index, top_index);
   }
 
-  // JBB : This is realtime mode.  In real time mode the first frame
-  // should be larger. Q of 0 is disabled because we force tx size to be
+  // Q of 0 is disabled because we force tx size to be
   // 16x16...
   if (cpi->sf.use_nonrd_pick_mode) {
-    if (cpi->common.current_video_frame == 0)
-      q /= 3;
     if (q == 0)
       q++;
     if (cpi->sf.partition_check == 1)
