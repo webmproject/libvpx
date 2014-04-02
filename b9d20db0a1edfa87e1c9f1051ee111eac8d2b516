@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//v0o\u003d",
+        "filename": "test/tools_common.sh",
+        "patchSetId": 16
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-04-02T22:58:47Z",
+      "side": 1,
+      "message": "Agreed; Using \u0027:\u003d\u0027 and consuming the spaces with tr.",
+      "parentUuid": "AAAAdn//v40\u003d",
+      "revId": "b9d20db0a1edfa87e1c9f1051ee111eac8d2b516",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//v4o\u003d",
         "filename": "test/tools_common.sh",
         "patchSetId": 16
@@ -30,6 +48,24 @@
       "writtenOn": "2014-04-02T18:35:47Z",
       "side": 1,
       "message": "maybe just print the version string as a whole; in a non-dev tree this won\u0027t contain -g",
+      "revId": "b9d20db0a1edfa87e1c9f1051ee111eac8d2b516",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//vzc\u003d",
+        "filename": "test/tools_common.sh",
+        "patchSetId": 16
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-04-02T22:58:47Z",
+      "side": 1,
+      "message": "Done, but printing the version string only when there\u0027s no git hash (so that check_git_hashes() can go unchanged)...\n\nMaybe this and check_git_hashes() need a revisit in a follow up patch.",
+      "parentUuid": "AAAAdn//v4o\u003d",
       "revId": "b9d20db0a1edfa87e1c9f1051ee111eac8d2b516",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//v0c\u003d",
+        "filename": "test/tools_common.sh",
+        "patchSetId": 16
+      },
+      "lineNbr": 62,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-04-02T22:58:47Z",
+      "side": 1,
+      "message": "Using pushd/popd: Probably doesn\u0027t matter, but would you prefer \n\n(cd $(dirname $0) git rev-parse ...)\n\n?\n\nThe only complaint I can think of re pushd/popd is the echoing to stdout, and I already have that getting sent to /dev/null.  Shrug.",
+      "parentUuid": "AAAAdn//v4k\u003d",
+      "revId": "b9d20db0a1edfa87e1c9f1051ee111eac8d2b516",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//v4Q\u003d",
         "filename": "test/tools_common.sh",
         "patchSetId": 16
@@ -64,6 +118,24 @@
       "writtenOn": "2014-04-02T18:35:47Z",
       "side": 1,
       "message": "test_configuration_target",
+      "revId": "b9d20db0a1edfa87e1c9f1051ee111eac8d2b516",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//v0Y\u003d",
+        "filename": "test/tools_common.sh",
+        "patchSetId": 16
+      },
+      "lineNbr": 112,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-04-02T22:58:47Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//v4Q\u003d",
       "revId": "b9d20db0a1edfa87e1c9f1051ee111eac8d2b516",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//v0Q\u003d",
+        "filename": "test/tools_common.sh",
+        "patchSetId": 16
+      },
+      "lineNbr": 115,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-04-02T22:58:47Z",
+      "side": 1,
+      "message": "But... darwin32 could come out any day now!\n\nDone.",
+      "parentUuid": "AAAAdn//v4Y\u003d",
+      "revId": "b9d20db0a1edfa87e1c9f1051ee111eac8d2b516",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//v4I\u003d",
         "filename": "test/tools_common.sh",
         "patchSetId": 16
@@ -98,6 +188,24 @@
       "writtenOn": "2014-04-02T18:35:47Z",
       "side": 1,
       "message": "not necessary to change, but $1 / $2 is ok too",
+      "revId": "b9d20db0a1edfa87e1c9f1051ee111eac8d2b516",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//v0E\u003d",
+        "filename": "test/tools_common.sh",
+        "patchSetId": 16
+      },
+      "lineNbr": 168,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-04-02T22:58:47Z",
+      "side": 1,
+      "message": "OK/future doc comments will be shorter.",
+      "parentUuid": "AAAAdn//v4I\u003d",
       "revId": "b9d20db0a1edfa87e1c9f1051ee111eac8d2b516",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -121,6 +229,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//vz4\u003d",
+        "filename": "test/tools_common.sh",
+        "patchSetId": 16
+      },
+      "lineNbr": 171,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-04-02T22:58:47Z",
+      "side": 1,
+      "message": "Might be useful... added a TODO; will consider as a followup or remove it in my next pass.",
+      "parentUuid": "AAAAdn//v3U\u003d",
+      "revId": "b9d20db0a1edfa87e1c9f1051ee111eac8d2b516",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//v4E\u003d",
         "filename": "test/tools_common.sh",
         "patchSetId": 16
@@ -132,6 +258,24 @@
       "writtenOn": "2014-04-02T18:35:47Z",
       "side": 1,
       "message": "prefer to \"\" variables",
+      "revId": "b9d20db0a1edfa87e1c9f1051ee111eac8d2b516",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//vz0\u003d",
+        "filename": "test/tools_common.sh",
+        "patchSetId": 16
+      },
+      "lineNbr": 219,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-04-02T22:58:47Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//v4E\u003d",
       "revId": "b9d20db0a1edfa87e1c9f1051ee111eac8d2b516",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -155,6 +299,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//vzk\u003d",
+        "filename": "test/tools_common.sh",
+        "patchSetId": 16
+      },
+      "lineNbr": 237,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-04-02T22:58:47Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//v4U\u003d",
+      "revId": "b9d20db0a1edfa87e1c9f1051ee111eac8d2b516",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//v4A\u003d",
         "filename": "test/tools_common.sh",
         "patchSetId": 16
@@ -166,6 +328,24 @@
       "writtenOn": "2014-04-02T18:35:47Z",
       "side": 1,
       "message": "Functions",
+      "revId": "b9d20db0a1edfa87e1c9f1051ee111eac8d2b516",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//vzw\u003d",
+        "filename": "test/tools_common.sh",
+        "patchSetId": 16
+      },
+      "lineNbr": 280,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-04-02T22:58:47Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//v4A\u003d",
       "revId": "b9d20db0a1edfa87e1c9f1051ee111eac8d2b516",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -189,6 +369,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//vzs\u003d",
+        "filename": "test/tools_common.sh",
+        "patchSetId": 16
+      },
+      "lineNbr": 339,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-04-02T22:58:47Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//v3Y\u003d",
+      "revId": "b9d20db0a1edfa87e1c9f1051ee111eac8d2b516",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//v38\u003d",
         "filename": "test/tools_common.sh",
         "patchSetId": 16
@@ -200,6 +398,24 @@
       "writtenOn": "2014-04-02T18:35:47Z",
       "side": 1,
       "message": "noted offline, this means the reason for failure will be hidden",
+      "revId": "b9d20db0a1edfa87e1c9f1051ee111eac8d2b516",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//vzo\u003d",
+        "filename": "test/tools_common.sh",
+        "patchSetId": 16
+      },
+      "lineNbr": 345,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-04-02T22:58:47Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//v38\u003d",
       "revId": "b9d20db0a1edfa87e1c9f1051ee111eac8d2b516",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -223,6 +439,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//vzY\u003d",
+        "filename": "test/vpxdec.sh",
+        "patchSetId": 16
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-04-02T22:58:47Z",
+      "side": 1,
+      "message": "OK; didn\u0027t ever really check into my style failures. Wasn\u0027t aware/removed the step.",
+      "parentUuid": "AAAAdn//v3s\u003d",
+      "revId": "b9d20db0a1edfa87e1c9f1051ee111eac8d2b516",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//v3o\u003d",
         "filename": "test/vpxdec.sh",
         "patchSetId": 16
@@ -234,6 +468,24 @@
       "writtenOn": "2014-04-02T18:35:47Z",
       "side": 1,
       "message": "not needed",
+      "revId": "b9d20db0a1edfa87e1c9f1051ee111eac8d2b516",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//vzU\u003d",
+        "filename": "test/vpxdec.sh",
+        "patchSetId": 16
+      },
+      "lineNbr": 68,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-04-02T22:58:47Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//v3o\u003d",
       "revId": "b9d20db0a1edfa87e1c9f1051ee111eac8d2b516",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
