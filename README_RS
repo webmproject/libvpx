@@ -1,0 +1,37 @@
+Welcome to read this page!
+
+How to run renderscript in VP9 decode
+
+  1. Compile RenderScript Kernel(We use zero copy this version,
+                                 if ndk rs module don't support this,
+                                 it can't pass compile)
+  Because RenderScript need g++, but VP9 use gcc.
+  So we need to compile rs alone as a so library. Then VP9 project load/use it.
+  RS code is in vp9/common/kernel/rs/, there is a compile.sh in that folder,
+  We can use sh to compile rs kernel.(need NDK-r9b or higher, we need to config ndk in path).
+  If compile success, it will gen:
+  vp9_rs_packing.so(vp9/common/kernel/rs/)
+  librs.inter_rs.so(vp9/common/kernel/rs/obj/)
+  libstlport_shared.so(vp9/common/kernel/rs/obj/)
+
+  2. Compile VP9 project
+  Just Compile it normally.
+
+  3. Run vpxdec with RenderScript(We use zero copy this version,
+                                  if system RS module don't support this,
+                                  it won't work)
+  [1]: push vp9_rs_packing.so to /data/local/tmp/(or /vendor/lib, /system/lib,
+       need adb remount)
+  [2]: push librs.inter_rs.so to /data/local/tmp/(or /vendor/lib, /system/lib,
+       need adb remount)
+  [3]: push libstlport_shared.so to /data/local/tmp/(or /vendor/lib, /system/lib,
+       need adb remount)
+  [4]: push vpxdec to /data/local/tmp
+  [5]: adb shell          (as root)
+  [6]: cd /data/local/tmp (on device)
+  [7]: export RSENABLE=1  (on device, if not, it won't use RS)
+  [8]: export QCTENABLE=1 (on device, enable qct kernel)
+  [9]: export OPENABLE=1  (on device, enable optimized kernel, dependence on system and driver)
+  [10]:export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/data/local/tmp (on device,
+       if we push .so file to /data/local/tmp, we need set this)
+  [11]:run vpxdec normally(on device)
