@@ -258,22 +258,6 @@ static void set_offsets(VP9_COMP *cpi, const TileInfo *const tile,
     }
     vp9_init_plane_quantizers(cpi, x);
 
-    if (seg->enabled && cpi->seg0_cnt > 0 &&
-        !vp9_segfeature_active(seg, 0, SEG_LVL_REF_FRAME) &&
-        vp9_segfeature_active(seg, 1, SEG_LVL_REF_FRAME)) {
-      cpi->seg0_progress = (cpi->seg0_idx << 16) / cpi->seg0_cnt;
-    } else {
-      const int y = mb_row & ~3;
-      const int x = mb_col & ~3;
-      const int p16 = ((mb_row & 1) << 1) + (mb_col & 1);
-      const int p32 = ((mb_row & 2) << 2) + ((mb_col & 2) << 1);
-      const int tile_progress = tile->mi_col_start * cm->mb_rows >> 1;
-      const int mb_cols = (tile->mi_col_end - tile->mi_col_start) >> 1;
-
-      cpi->seg0_progress = ((y * mb_cols + x * 4 + p32 + p16 + tile_progress)
-          << 16) / cm->MBs;
-    }
-
     x->encode_breakout = cpi->segment_encode_breakout[mbmi->segment_id];
   } else {
     mbmi->segment_id = 0;
@@ -2404,7 +2388,6 @@ static void init_encode_frame_mb_context(VP9_COMP *cpi) {
   const int aligned_mi_cols = mi_cols_aligned_to_sb(cm->mi_cols);
 
   x->act_zbin_adj = 0;
-  cpi->seg0_idx = 0;
 
   // Copy data over into macro block data structures.
   vp9_setup_src_planes(x, cpi->Source, 0, 0);

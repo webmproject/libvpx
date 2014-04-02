@@ -370,7 +370,6 @@ static void separate_arf_mbs(VP9_COMP *cpi) {
     else
       cpi->static_mb_pct = 0;
 
-    cpi->seg0_cnt = ncnt[0];
     vp9_enable_segmentation(&cm->seg);
   } else {
     cpi->static_mb_pct = 0;
