@@ -16,6 +16,24 @@
       "revId": "8b8606a7374026d561a2c9596df772b5854e3654",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//v24\u003d",
+        "filename": "vp9/encoder/vp9_speed_features.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 71,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2014-04-02T19:21:54Z",
+      "side": 0,
+      "message": "Not in a later patch because we are considering reverting this to intra only frames for speed reasons. That is why I left it as a separate item.",
+      "parentUuid": "AAAAdn//v30\u003d",
+      "revId": "8b8606a7374026d561a2c9596df772b5854e3654",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
