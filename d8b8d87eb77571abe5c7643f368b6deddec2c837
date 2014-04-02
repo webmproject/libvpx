@@ -16,6 +16,24 @@
       "revId": "d8b8d87eb77571abe5c7643f368b6deddec2c837",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//v50\u003d",
+        "filename": "vp9/encoder/vp9_speed_features.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 257,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2014-04-02T17:57:21Z",
+      "side": 1,
+      "message": "threw in a quick test. seems this helps for about 0.3 dB gains when enabled in speed 6. although not as much significant as in speed 5. perhaps we want to leave it on for speed 6 and 7 too?",
+      "parentUuid": "AAAAdn//v6E\u003d",
+      "revId": "d8b8d87eb77571abe5c7643f368b6deddec2c837",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
