@@ -301,6 +301,10 @@ typedef struct {
   // calculation in the rd coefficient costing loop.
   int use_fast_coef_costing;
 
+  // This feature controls the tolerence vs target used in deciding whether to
+  // recode a frame. It has no meaning if recode is disabled.
+  int recode_tolerance;
+
   // This variable controls the maximum block size where intra blocks can be
   // used in inter frames.
   // TODO(aconverse): Fold this into one of the other many mode skips
