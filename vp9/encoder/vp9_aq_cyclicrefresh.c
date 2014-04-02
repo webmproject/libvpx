@@ -204,7 +204,7 @@ void vp9_cyclic_refresh_setup(VP9_COMP *const cpi) {
     // Some of these parameters may be set via codec-control function later.
     cr->max_sbs_perframe = 10;
     cr->max_qdelta_perc = 50;
-    cr->min_block_size = BLOCK_16X16;
+    cr->min_block_size = BLOCK_8X8;
     cr->time_for_refresh = 1;
     // Set rate threshold to some fraction of target (and scaled by 256).
     cr->thresh_rate_sb = (rc->sb64_target_rate * 256) >> 2;
