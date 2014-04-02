@@ -512,6 +512,8 @@ typedef struct VP9_COMP {
 
   SVC svc;
 
+  int use_large_partition_rate;
+
 #if CONFIG_MULTIPLE_ARF
   // ARF tracking variables.
   int multi_arf_enabled;

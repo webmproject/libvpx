@@ -257,7 +257,11 @@ static void set_rt_speed_feature(VP9_COMMON *cm,
     sf->allow_skip_recode = 0;
   }
   if (speed >= 6) {
-    sf->partition_search_type = VAR_BASED_FIXED_PARTITION;
+    // Adaptively switch between SOURCE_VAR_BASED_PARTITION and FIXED_PARTITION.
+    sf->partition_search_type = SOURCE_VAR_BASED_PARTITION;
+    sf->search_type_check_frequency = 50;
+    sf->source_var_thresh = 360;
+
     sf->use_nonrd_pick_mode = 1;
     sf->search_method = FAST_DIAMOND;
   }
@@ -325,6 +329,8 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
   // This setting only takes effect when partition_search_type is set
   // to FIXED_PARTITION.
   sf->always_this_block_size = BLOCK_16X16;
+  sf->search_type_check_frequency = 50;
+  sf->source_var_thresh = 100;
 
   switch (cpi->oxcf.mode) {
     case MODE_BESTQUALITY:

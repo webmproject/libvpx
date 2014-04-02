@@ -20,6 +20,12 @@ struct macroblock;
 struct yv12_buffer_config;
 struct VP9_COMP;
 
+typedef struct {
+  unsigned int sse;
+  int sum;
+  unsigned int var;
+} diff;
+
 void vp9_setup_src_planes(struct macroblock *x,
                           const struct yv12_buffer_config *src,
                           int mi_row, int mi_col);
