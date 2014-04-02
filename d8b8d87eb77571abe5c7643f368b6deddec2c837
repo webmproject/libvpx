@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//v6E\u003d",
+        "filename": "vp9/encoder/vp9_speed_features.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 257,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2014-04-02T17:47:25Z",
+      "side": 1,
+      "message": "should we turn this off for speed 6 and 7, since they do not have any partition search frames? For CBR mode, it would be preferable to control this outside, for the case/speed where they are no special frames to boost.",
+      "revId": "d8b8d87eb77571abe5c7643f368b6deddec2c837",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
