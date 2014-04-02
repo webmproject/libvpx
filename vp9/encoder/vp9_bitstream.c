@@ -1186,7 +1186,7 @@ static size_t write_compressed_header(VP9_COMP *cpi, uint8_t *data) {
 
 void vp9_pack_bitstream(VP9_COMP *cpi, uint8_t *dest, size_t *size) {
   uint8_t *data = dest;
-  size_t first_part_size;
+  size_t first_part_size, uncompressed_hdr_size;
   struct vp9_write_bit_buffer wb = {data, 0};
   struct vp9_write_bit_buffer saved_wb;
 
@@ -1194,7 +1194,8 @@ void vp9_pack_bitstream(VP9_COMP *cpi, uint8_t *dest, size_t *size) {
   saved_wb = wb;
   vp9_wb_write_literal(&wb, 0, 16);  // don't know in advance first part. size
 
-  data += vp9_rb_bytes_written(&wb);
+  uncompressed_hdr_size = vp9_rb_bytes_written(&wb);
+  data += uncompressed_hdr_size;
 
   vp9_compute_update_table();
 

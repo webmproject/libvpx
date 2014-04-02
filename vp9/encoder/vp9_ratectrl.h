@@ -58,7 +58,7 @@ typedef struct {
   int ni_av_qi;
   int ni_tot_qi;
   int ni_frames;
-  int avg_frame_qindex[3];  // 0 - KEY, 1 - INTER, 2 - ARF/GF
+  int avg_frame_qindex[3];        // 0 - KEY, 1 - INTER, 2 - ARF/GF
   double tot_q;
   double avg_q;
 
@@ -75,7 +75,8 @@ typedef struct {
   int long_rolling_actual_bits;
 
   int64_t total_actual_bits;
-  int total_target_vs_actual;        // debug stats
+  int64_t total_target_bits;
+  int64_t total_target_vs_actual;
 
   int worst_quality;
   int best_quality;

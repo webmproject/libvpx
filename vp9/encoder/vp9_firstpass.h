@@ -95,8 +95,7 @@ int vp9_twopass_worst_quality(struct VP9_COMP *cpi, FIRSTPASS_STATS *fpstats,
                               int section_target_bandwitdh);
 
 // Post encode update of the rate control parameters for 2-pass
-void vp9_twopass_postencode_update(struct VP9_COMP *cpi,
-                                   uint64_t bytes_used);
+void vp9_twopass_postencode_update(struct VP9_COMP *cpi);
 #ifdef __cplusplus
 }  // extern "C"
 #endif

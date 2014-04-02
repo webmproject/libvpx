@@ -54,8 +54,6 @@
 
 #define MIN_KF_BOOST        300
 
-#define DISABLE_RC_LONG_TERM_MEM 0
-
 #if CONFIG_MULTIPLE_ARF
 // Set MIN_GF_INTERVAL to 1 for the full decomposition.
 #define MIN_GF_INTERVAL             2
@@ -1736,10 +1734,6 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   {
     // Adjust KF group bits and error remaining.
     twopass->kf_group_error_left -= (int64_t)gf_group_err;
-    twopass->kf_group_bits -= twopass->gf_group_bits;
-
-    if (twopass->kf_group_bits < 0)
-      twopass->kf_group_bits = 0;
 
     // If this is an arf update we want to remove the score for the overlay
     // frame at the end which will usually be very cheap to code.
@@ -1756,11 +1750,6 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
       twopass->gf_group_error_left = (int64_t)gf_group_err;
     }
 
-    twopass->gf_group_bits -= twopass->gf_bits;
-
-    if (twopass->gf_group_bits < 0)
-      twopass->gf_group_bits = 0;
-
     // This condition could fail if there are two kfs very close together
     // despite MIN_GF_INTERVAL and would cause a divide by 0 in the
     // calculation of alt_extra_bits.
@@ -1769,8 +1758,9 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
 
       if (boost >= 150) {
         const int pct_extra = MIN(20, (boost - 100) / 50);
-        const int alt_extra_bits = (int)((twopass->gf_group_bits * pct_extra) /
-                                       100);
+        const int alt_extra_bits = (int)((
+            MAX(twopass->gf_group_bits - twopass->gf_bits, 0) *
+            pct_extra) / 100);
         twopass->gf_group_bits -= alt_extra_bits;
       }
     }
@@ -1823,10 +1813,6 @@ static void assign_std_frame_bits(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
 
   // Adjust error and bits remaining.
   cpi->twopass.gf_group_error_left -= (int64_t)modified_err;
-  cpi->twopass.gf_group_bits -= target_frame_size;
-
-  if (cpi->twopass.gf_group_bits < 0)
-    cpi->twopass.gf_group_bits = 0;
 
   // Per frame bit target for this frame.
   vp9_rc_set_frame_target(cpi, target_frame_size);
@@ -2343,23 +2329,20 @@ void vp9_rc_get_second_pass_params(VP9_COMP *cpi) {
   subtract_stats(&twopass->total_left_stats, &this_frame);
 }
 
-void vp9_twopass_postencode_update(VP9_COMP *cpi, uint64_t bytes_used) {
-#ifdef DISABLE_RC_LONG_TERM_MEM
-  cpi->twopass.bits_left -=  cpi->rc.this_frame_target;
-#else
-  cpi->twopass.bits_left -= 8 * bytes_used;
+void vp9_twopass_postencode_update(VP9_COMP *cpi) {
+  const uint64_t bits_used = cpi->rc.projected_frame_size;
+  cpi->twopass.bits_left -= bits_used;
+  cpi->twopass.bits_left = MAX(cpi->twopass.bits_left, 0);
   // Update bits left to the kf and gf groups to account for overshoot or
   // undershoot on these frames.
-  if (cm->frame_type == KEY_FRAME) {
-    cpi->twopass.kf_group_bits += cpi->rc.this_frame_target -
-        cpi->rc.projected_frame_size;
-
-    cpi->twopass.kf_group_bits = MAX(cpi->twopass.kf_group_bits, 0);
-  } else if (cpi->refresh_golden_frame || cpi->refresh_alt_ref_frame) {
-    cpi->twopass.gf_group_bits += cpi->rc.this_frame_target -
-        cpi->rc.projected_frame_size;
-
+  if (cpi->common.frame_type == KEY_FRAME) {
+    // For key frames kf_group_bits already had the target bits subtracted out.
+    // So now update to the correct value based on the actual bits used.
+    cpi->twopass.kf_group_bits += cpi->rc.this_frame_target - bits_used;
+  } else {
+    cpi->twopass.kf_group_bits -= bits_used;
+    cpi->twopass.gf_group_bits -= bits_used;
     cpi->twopass.gf_group_bits = MAX(cpi->twopass.gf_group_bits, 0);
   }
-#endif
+  cpi->twopass.kf_group_bits = MAX(cpi->twopass.kf_group_bits, 0);
 }
