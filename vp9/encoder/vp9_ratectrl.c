@@ -1013,7 +1013,7 @@ void vp9_rc_compute_frame_size_bounds(const VP9_COMP *cpi,
         *frame_over_shoot_limit  = this_frame_target * 9 / 8;
         *frame_under_shoot_limit = this_frame_target * 7 / 8;
       } else {
-        // Stron overshoot limit for constrained quality
+        // Strong overshoot limit for constrained quality
         if (cpi->oxcf.end_usage == USAGE_CONSTRAINED_QUALITY) {
           *frame_over_shoot_limit  = this_frame_target * 11 / 8;
           *frame_under_shoot_limit = this_frame_target * 2 / 8;

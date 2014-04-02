@@ -911,6 +911,7 @@ int vp9_twopass_worst_quality(VP9_COMP *cpi, FIRSTPASS_STATS *fpstats,
 
   const double section_err = fpstats->coded_error / fpstats->count;
   const double err_per_mb = section_err / num_mbs;
+  const double speed_term = 1.0 + ((double)cpi->speed * 0.04);
 
   if (section_target_bandwitdh <= 0)
     return rc->worst_quality;          // Highest value allowed
@@ -924,8 +925,8 @@ int vp9_twopass_worst_quality(VP9_COMP *cpi, FIRSTPASS_STATS *fpstats,
   for (q = rc->best_quality; q < rc->worst_quality; ++q) {
     const double err_correction_factor = calc_correction_factor(err_per_mb,
                                              ERR_DIVISOR, 0.5, 0.90, q);
-    const int bits_per_mb_at_this_q = vp9_rc_bits_per_mb(INTER_FRAME, q,
-                                                         err_correction_factor);
+    const int bits_per_mb_at_this_q =
+      vp9_rc_bits_per_mb(INTER_FRAME, q, (err_correction_factor * speed_term));
     if (bits_per_mb_at_this_q <= target_norm_bits_per_mb)
       break;
   }
