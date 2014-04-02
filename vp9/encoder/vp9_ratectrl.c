@@ -1191,15 +1191,15 @@ static int test_for_kf_one_pass(VP9_COMP *cpi) {
 
 static int calc_pframe_target_size_one_pass_vbr(const VP9_COMP *const cpi) {
   static const int af_ratio = 10;
-  const RATE_CONTROL *rc = &cpi->rc;
+  const RATE_CONTROL *const rc = &cpi->rc;
   int target;
 #if USE_ALTREF_FOR_ONE_PASS
   target = (!rc->is_src_frame_alt_ref &&
             (cpi->refresh_golden_frame || cpi->refresh_alt_ref_frame)) ?
-      (rc->av_per_frame_bandwidth * cpi->rc.baseline_gf_interval * af_ratio) /
-      (cpi->rc.baseline_gf_interval + af_ratio - 1) :
-      (rc->av_per_frame_bandwidth * cpi->rc.baseline_gf_interval) /
-      (cpi->rc.baseline_gf_interval + af_ratio - 1);
+      (rc->av_per_frame_bandwidth * rc->baseline_gf_interval * af_ratio) /
+      (rc->baseline_gf_interval + af_ratio - 1) :
+      (rc->av_per_frame_bandwidth * rc->baseline_gf_interval) /
+      (rc->baseline_gf_interval + af_ratio - 1);
 #else
   target = rc->av_per_frame_bandwidth;
 #endif
@@ -1299,13 +1299,14 @@ static int calc_iframe_target_size_one_pass_cbr(const VP9_COMP *cpi) {
 
 void vp9_rc_get_svc_params(VP9_COMP *cpi) {
   VP9_COMMON *const cm = &cpi->common;
-  int target = cpi->rc.av_per_frame_bandwidth;
+  RATE_CONTROL *const rc = &cpi->rc;
+  int target = rc->av_per_frame_bandwidth;
   if ((cm->current_video_frame == 0) ||
       (cm->frame_flags & FRAMEFLAGS_KEY) ||
-      (cpi->oxcf.auto_key && (cpi->rc.frames_since_key %
+      (cpi->oxcf.auto_key && (rc->frames_since_key %
                               cpi->key_frame_frequency == 0))) {
     cm->frame_type = KEY_FRAME;
-    cpi->rc.source_alt_ref_active = 0;
+    rc->source_alt_ref_active = 0;
     if (cpi->pass == 0 && cpi->oxcf.end_usage == USAGE_STREAM_FROM_SERVER) {
       target = calc_iframe_target_size_one_pass_cbr(cpi);
     }
@@ -1316,8 +1317,8 @@ void vp9_rc_get_svc_params(VP9_COMP *cpi) {
     }
   }
   vp9_rc_set_frame_target(cpi, target);
-  cpi->rc.frames_till_gf_update_due = INT_MAX;
-  cpi->rc.baseline_gf_interval = INT_MAX;
+  rc->frames_till_gf_update_due = INT_MAX;
+  rc->baseline_gf_interval = INT_MAX;
 }
 
 void vp9_rc_get_one_pass_cbr_params(VP9_COMP *cpi) {

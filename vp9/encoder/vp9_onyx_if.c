@@ -237,27 +237,27 @@ int vp9_compute_qdelta(const VP9_COMP *cpi, double qstart, double qtarget) {
 
 // Computes a q delta (in "q index" terms) to get from a starting q value
 // to a value that should equate to the given rate ratio.
-int vp9_compute_qdelta_by_rate(VP9_COMP *cpi, int base_q_index,
+int vp9_compute_qdelta_by_rate(VP9_COMP *cpi, int qindex,
                                double rate_target_ratio) {
+  const FRAME_TYPE frame_type = cpi->common.frame_type;
+  const RATE_CONTROL *const rc = &cpi->rc;
+  int target_index = rc->worst_quality;
   int i;
-  int target_index = cpi->rc.worst_quality;
 
   // Look up the current projected bits per block for the base index
-  const int base_bits_per_mb = vp9_rc_bits_per_mb(cpi->common.frame_type,
-                                            base_q_index, 1.0);
+  const int base_bits_per_mb = vp9_rc_bits_per_mb(frame_type, qindex, 1.0);
 
   // Find the target bits per mb based on the base value and given ratio.
   const int target_bits_per_mb = (int)(rate_target_ratio * base_bits_per_mb);
 
   // Convert the q target to an index
-  for (i = cpi->rc.best_quality; i < cpi->rc.worst_quality; ++i) {
+  for (i = rc->best_quality; i < rc->worst_quality; ++i) {
     target_index = i;
-    if (vp9_rc_bits_per_mb(cpi->common.frame_type, i, 1.0) <=
-            target_bits_per_mb )
+    if (vp9_rc_bits_per_mb(frame_type, i, 1.0) <= target_bits_per_mb )
       break;
   }
 
-  return target_index - base_q_index;
+  return target_index - qindex;
 }
 
 static void configure_static_seg_features(VP9_COMP *cpi) {
@@ -829,6 +829,7 @@ static void init_config(struct VP9_COMP *cpi, VP9_CONFIG *oxcf) {
 
 void vp9_change_config(struct VP9_COMP *cpi, const VP9_CONFIG *oxcf) {
   VP9_COMMON *const cm = &cpi->common;
+  RATE_CONTROL *const rc = &cpi->rc;
 
   if (cm->version != oxcf->version)
     cm->version = oxcf->version;
@@ -881,7 +882,7 @@ void vp9_change_config(struct VP9_COMP *cpi, const VP9_CONFIG *oxcf) {
   } else {
     cpi->mb.e_mbd.itxm_add = vp9_idct4x4_add;
   }
-  cpi->rc.baseline_gf_interval = DEFAULT_GF_INTERVAL;
+  rc->baseline_gf_interval = DEFAULT_GF_INTERVAL;
   cpi->ref_frame_flags = VP9_ALT_FLAG | VP9_GOLD_FLAG | VP9_LAST_FLAG;
 
   cpi->refresh_golden_frame = 0;
@@ -930,17 +931,15 @@ void vp9_change_config(struct VP9_COMP *cpi, const VP9_CONFIG *oxcf) {
                     cpi->oxcf.target_bandwidth, 1000);
   // Under a configuration change, where maximum_buffer_size may change,
   // keep buffer level clipped to the maximum allowed buffer size.
-  cpi->rc.bits_off_target = MIN(cpi->rc.bits_off_target,
-                                cpi->oxcf.maximum_buffer_size);
-  cpi->rc.buffer_level = MIN(cpi->rc.buffer_level,
-                             cpi->oxcf.maximum_buffer_size);
+  rc->bits_off_target = MIN(rc->bits_off_target, cpi->oxcf.maximum_buffer_size);
+  rc->buffer_level = MIN(rc->buffer_level, cpi->oxcf.maximum_buffer_size);
 
   // Set up frame rate and related parameters rate control values.
   vp9_new_framerate(cpi, cpi->oxcf.framerate);
 
   // Set absolute upper and lower quality limits
-  cpi->rc.worst_quality = cpi->oxcf.worst_allowed_q;
-  cpi->rc.best_quality = cpi->oxcf.best_allowed_q;
+  rc->worst_quality = cpi->oxcf.worst_allowed_q;
+  rc->best_quality = cpi->oxcf.best_allowed_q;
 
   // active values should only be modified if out of new range
 
@@ -983,7 +982,7 @@ void vp9_change_config(struct VP9_COMP *cpi, const VP9_CONFIG *oxcf) {
 #else
   cpi->alt_ref_source = NULL;
 #endif
-  cpi->rc.is_src_frame_alt_ref = 0;
+  rc->is_src_frame_alt_ref = 0;
 
 #if 0
   // Experimental RD Code
@@ -2989,8 +2988,9 @@ void adjust_frame_rate(VP9_COMP *cpi) {
 int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
                             size_t *size, uint8_t *dest,
                             int64_t *time_stamp, int64_t *time_end, int flush) {
-  VP9_COMMON *cm = &cpi->common;
-  MACROBLOCKD *xd = &cpi->mb.e_mbd;
+  VP9_COMMON *const cm = &cpi->common;
+  MACROBLOCKD *const xd = &cpi->mb.e_mbd;
+  RATE_CONTROL *const rc = &cpi->rc;
   struct vpx_usec_timer  cmptimer;
   YV12_BUFFER_CONFIG *force_src_buffer = NULL;
   MV_REFERENCE_FRAME ref_frame;
@@ -3017,7 +3017,7 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
   cpi->refresh_alt_ref_frame = 0;
 
   // Should we code an alternate reference frame.
-  if (cpi->oxcf.play_alternate && cpi->rc.source_alt_ref_pending) {
+  if (cpi->oxcf.play_alternate && rc->source_alt_ref_pending) {
     int frames_to_arf;
 
 #if CONFIG_MULTIPLE_ARF
@@ -3029,9 +3029,9 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
           - cpi->next_frame_in_order;
     else
 #endif
-      frames_to_arf = cpi->rc.frames_till_gf_update_due;
+      frames_to_arf = rc->frames_till_gf_update_due;
 
-    assert(frames_to_arf <= cpi->rc.frames_to_key);
+    assert(frames_to_arf <= rc->frames_to_key);
 
     if ((cpi->source = vp9_lookahead_peek(cpi->lookahead, frames_to_arf))) {
 #if CONFIG_MULTIPLE_ARF
@@ -3043,7 +3043,7 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
       if (cpi->oxcf.arnr_max_frames > 0) {
         // Produce the filtered ARF frame.
         // TODO(agrange) merge these two functions.
-        vp9_configure_arnr_filter(cpi, frames_to_arf, cpi->rc.gfu_boost);
+        vp9_configure_arnr_filter(cpi, frames_to_arf, rc->gfu_boost);
         vp9_temporal_filter_prepare(cpi, frames_to_arf);
         vp9_extend_frame_borders(&cpi->alt_ref_buffer);
         force_src_buffer = &cpi->alt_ref_buffer;
@@ -3053,14 +3053,14 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
       cpi->refresh_alt_ref_frame = 1;
       cpi->refresh_golden_frame = 0;
       cpi->refresh_last_frame = 0;
-      cpi->rc.is_src_frame_alt_ref = 0;
+      rc->is_src_frame_alt_ref = 0;
 
 #if CONFIG_MULTIPLE_ARF
       if (!cpi->multi_arf_enabled)
 #endif
-        cpi->rc.source_alt_ref_pending = 0;
+        rc->source_alt_ref_pending = 0;
     } else {
-      cpi->rc.source_alt_ref_pending = 0;
+      rc->source_alt_ref_pending = 0;
     }
   }
 
@@ -3081,19 +3081,19 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
 
 #if CONFIG_MULTIPLE_ARF
       // Is this frame the ARF overlay.
-      cpi->rc.is_src_frame_alt_ref = 0;
+      rc->is_src_frame_alt_ref = 0;
       for (i = 0; i < cpi->arf_buffered; ++i) {
         if (cpi->source == cpi->alt_ref_source[i]) {
-          cpi->rc.is_src_frame_alt_ref = 1;
+          rc->is_src_frame_alt_ref = 1;
           cpi->refresh_golden_frame = 1;
           break;
         }
       }
 #else
-      cpi->rc.is_src_frame_alt_ref = cpi->alt_ref_source
-          && (cpi->source == cpi->alt_ref_source);
+      rc->is_src_frame_alt_ref = cpi->alt_ref_source &&
+                                 (cpi->source == cpi->alt_ref_source);
 #endif
-      if (cpi->rc.is_src_frame_alt_ref) {
+      if (rc->is_src_frame_alt_ref) {
         // Current frame is an ARF overlay frame.
 #if CONFIG_MULTIPLE_ARF
         cpi->alt_ref_source[i] = NULL;
@@ -3125,8 +3125,8 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
     *frame_flags = cpi->source->flags;
 
 #if CONFIG_MULTIPLE_ARF
-    if ((cm->frame_type != KEY_FRAME) && (cpi->pass == 2))
-      cpi->rc.source_alt_ref_pending = is_next_frame_arf(cpi);
+    if (cm->frame_type != KEY_FRAME && cpi->pass == 2)
+      rc->source_alt_ref_pending = is_next_frame_arf(cpi);
 #endif
   } else {
     *size = 0;
