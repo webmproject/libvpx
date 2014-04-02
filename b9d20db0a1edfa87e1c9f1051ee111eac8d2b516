@@ -72,6 +72,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//vzE\u003d",
+        "filename": "test/tools_common.sh",
+        "patchSetId": 16
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-04-02T22:59:59Z",
+      "side": 1,
+      "message": "Actually, check_git_hashes() probably didn\u0027t need to be changed, but I was being lazy and didn\u0027t want to think about it. :)",
+      "parentUuid": "AAAAdn//vzc\u003d",
+      "revId": "b9d20db0a1edfa87e1c9f1051ee111eac8d2b516",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//v4k\u003d",
         "filename": "test/tools_common.sh",
         "patchSetId": 16
