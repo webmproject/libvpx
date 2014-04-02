@@ -153,6 +153,7 @@ static void invert_quant(int16_t *quant, int16_t *shift, int d) {
 
 void vp9_init_quantizer(VP9_COMP *cpi) {
   VP9_COMMON *const cm = &cpi->common;
+  QUANTS *const quants = &cpi->quants;
   int i, q, quant;
 
   for (q = 0; q < QINDEX_RANGE; q++) {
@@ -163,48 +164,49 @@ void vp9_init_quantizer(VP9_COMP *cpi) {
       // y
       quant = i == 0 ? vp9_dc_quant(q, cm->y_dc_delta_q)
                      : vp9_ac_quant(q, 0);
-      invert_quant(&cpi->y_quant[q][i], &cpi->y_quant_shift[q][i], quant);
-      cpi->y_zbin[q][i] = ROUND_POWER_OF_TWO(qzbin_factor * quant, 7);
-      cpi->y_round[q][i] = (qrounding_factor * quant) >> 7;
+      invert_quant(&quants->y_quant[q][i], &quants->y_quant_shift[q][i], quant);
+      quants->y_zbin[q][i] = ROUND_POWER_OF_TWO(qzbin_factor * quant, 7);
+      quants->y_round[q][i] = (qrounding_factor * quant) >> 7;
       cm->y_dequant[q][i] = quant;
 
       // uv
       quant = i == 0 ? vp9_dc_quant(q, cm->uv_dc_delta_q)
                      : vp9_ac_quant(q, cm->uv_ac_delta_q);
-      invert_quant(&cpi->uv_quant[q][i], &cpi->uv_quant_shift[q][i], quant);
-      cpi->uv_zbin[q][i] = ROUND_POWER_OF_TWO(qzbin_factor * quant, 7);
-      cpi->uv_round[q][i] = (qrounding_factor * quant) >> 7;
+      invert_quant(&quants->uv_quant[q][i],
+                   &quants->uv_quant_shift[q][i], quant);
+      quants->uv_zbin[q][i] = ROUND_POWER_OF_TWO(qzbin_factor * quant, 7);
+      quants->uv_round[q][i] = (qrounding_factor * quant) >> 7;
       cm->uv_dequant[q][i] = quant;
 
 #if CONFIG_ALPHA
       // alpha
       quant = i == 0 ? vp9_dc_quant(q, cm->a_dc_delta_q)
                      : vp9_ac_quant(q, cm->a_ac_delta_q);
-      invert_quant(&cpi->a_quant[q][i], &cpi->a_quant_shift[q][i], quant);
-      cpi->a_zbin[q][i] = ROUND_POWER_OF_TWO(qzbin_factor * quant, 7);
-      cpi->a_round[q][i] = (qrounding_factor * quant) >> 7;
+      invert_quant(&quants->a_quant[q][i], &quants->a_quant_shift[q][i], quant);
+      quants->a_zbin[q][i] = ROUND_POWER_OF_TWO(qzbin_factor * quant, 7);
+      quants->a_round[q][i] = (qrounding_factor * quant) >> 7;
       cm->a_dequant[q][i] = quant;
 #endif
     }
 
     for (i = 2; i < 8; i++) {
-      cpi->y_quant[q][i] = cpi->y_quant[q][1];
-      cpi->y_quant_shift[q][i] = cpi->y_quant_shift[q][1];
-      cpi->y_zbin[q][i] = cpi->y_zbin[q][1];
-      cpi->y_round[q][i] = cpi->y_round[q][1];
+      quants->y_quant[q][i] = quants->y_quant[q][1];
+      quants->y_quant_shift[q][i] = quants->y_quant_shift[q][1];
+      quants->y_zbin[q][i] = quants->y_zbin[q][1];
+      quants->y_round[q][i] = quants->y_round[q][1];
       cm->y_dequant[q][i] = cm->y_dequant[q][1];
 
-      cpi->uv_quant[q][i] = cpi->uv_quant[q][1];
-      cpi->uv_quant_shift[q][i] = cpi->uv_quant_shift[q][1];
-      cpi->uv_zbin[q][i] = cpi->uv_zbin[q][1];
-      cpi->uv_round[q][i] = cpi->uv_round[q][1];
+      quants->uv_quant[q][i] = quants->uv_quant[q][1];
+      quants->uv_quant_shift[q][i] = quants->uv_quant_shift[q][1];
+      quants->uv_zbin[q][i] = quants->uv_zbin[q][1];
+      quants->uv_round[q][i] = quants->uv_round[q][1];
       cm->uv_dequant[q][i] = cm->uv_dequant[q][1];
 
 #if CONFIG_ALPHA
-      cpi->a_quant[q][i] = cpi->a_quant[q][1];
-      cpi->a_quant_shift[q][i] = cpi->a_quant_shift[q][1];
-      cpi->a_zbin[q][i] = cpi->a_zbin[q][1];
-      cpi->a_round[q][i] = cpi->a_round[q][1];
+      quants->a_quant[q][i] = quants->a_quant[q][1];
+      quants->a_quant_shift[q][i] = quants->a_quant_shift[q][1];
+      quants->a_zbin[q][i] = quants->a_zbin[q][1];
+      quants->a_round[q][i] = quants->a_round[q][1];
       cm->a_dequant[q][i] = cm->a_dequant[q][1];
 #endif
     }
@@ -213,7 +215,8 @@ void vp9_init_quantizer(VP9_COMP *cpi) {
 
 void vp9_init_plane_quantizers(VP9_COMP *cpi, MACROBLOCK *x) {
   const VP9_COMMON *const cm = &cpi->common;
-  MACROBLOCKD *xd = &x->e_mbd;
+  MACROBLOCKD *const xd = &x->e_mbd;
+  QUANTS *const quants = &cpi->quants;
   const int segment_id = xd->mi_8x8[0]->mbmi.segment_id;
   const int qindex = vp9_get_qindex(&cm->seg, segment_id, cm->base_qindex);
   const int rdmult = vp9_compute_rd_mult(cpi, qindex + cm->y_dc_delta_q);
@@ -221,19 +224,19 @@ void vp9_init_plane_quantizers(VP9_COMP *cpi, MACROBLOCK *x) {
   int i;
 
   // Y
-  x->plane[0].quant = cpi->y_quant[qindex];
-  x->plane[0].quant_shift = cpi->y_quant_shift[qindex];
-  x->plane[0].zbin = cpi->y_zbin[qindex];
-  x->plane[0].round = cpi->y_round[qindex];
+  x->plane[0].quant = quants->y_quant[qindex];
+  x->plane[0].quant_shift = quants->y_quant_shift[qindex];
+  x->plane[0].zbin = quants->y_zbin[qindex];
+  x->plane[0].round = quants->y_round[qindex];
   x->plane[0].zbin_extra = (int16_t)((cm->y_dequant[qindex][1] * zbin) >> 7);
   xd->plane[0].dequant = cm->y_dequant[qindex];
 
   // UV
   for (i = 1; i < 3; i++) {
-    x->plane[i].quant = cpi->uv_quant[qindex];
-    x->plane[i].quant_shift = cpi->uv_quant_shift[qindex];
-    x->plane[i].zbin = cpi->uv_zbin[qindex];
-    x->plane[i].round = cpi->uv_round[qindex];
+    x->plane[i].quant = quants->uv_quant[qindex];
+    x->plane[i].quant_shift = quants->uv_quant_shift[qindex];
+    x->plane[i].zbin = quants->uv_zbin[qindex];
+    x->plane[i].round = quants->uv_round[qindex];
     x->plane[i].zbin_extra = (int16_t)((cm->uv_dequant[qindex][1] * zbin) >> 7);
     xd->plane[i].dequant = cm->uv_dequant[qindex];
   }
@@ -273,9 +276,7 @@ void vp9_frame_init_quantizer(VP9_COMP *cpi) {
   vp9_init_plane_quantizers(cpi, &cpi->mb);
 }
 
-void vp9_set_quantizer(struct VP9_COMP *cpi, int q) {
-  VP9_COMMON *const cm = &cpi->common;
-
+void vp9_set_quantizer(VP9_COMMON *cm, int q) {
   // quantizer has to be reinitialized with vp9_init_quantizer() if any
   // delta_q changes.
   cm->base_qindex = q;

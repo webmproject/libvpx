@@ -280,23 +280,7 @@ typedef struct {
 } VP9_CONFIG;
 
 typedef struct VP9_COMP {
-  DECLARE_ALIGNED(16, int16_t, y_quant[QINDEX_RANGE][8]);
-  DECLARE_ALIGNED(16, int16_t, y_quant_shift[QINDEX_RANGE][8]);
-  DECLARE_ALIGNED(16, int16_t, y_zbin[QINDEX_RANGE][8]);
-  DECLARE_ALIGNED(16, int16_t, y_round[QINDEX_RANGE][8]);
-
-  DECLARE_ALIGNED(16, int16_t, uv_quant[QINDEX_RANGE][8]);
-  DECLARE_ALIGNED(16, int16_t, uv_quant_shift[QINDEX_RANGE][8]);
-  DECLARE_ALIGNED(16, int16_t, uv_zbin[QINDEX_RANGE][8]);
-  DECLARE_ALIGNED(16, int16_t, uv_round[QINDEX_RANGE][8]);
-
-#if CONFIG_ALPHA
-  DECLARE_ALIGNED(16, int16_t, a_quant[QINDEX_RANGE][8]);
-  DECLARE_ALIGNED(16, int16_t, a_quant_shift[QINDEX_RANGE][8]);
-  DECLARE_ALIGNED(16, int16_t, a_zbin[QINDEX_RANGE][8]);
-  DECLARE_ALIGNED(16, int16_t, a_round[QINDEX_RANGE][8]);
-#endif
-
+  QUANTS quants;
   MACROBLOCK mb;
   VP9_COMMON common;
   VP9_CONFIG oxcf;

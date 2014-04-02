@@ -2242,7 +2242,7 @@ static void encode_without_recode_loop(VP9_COMP *cpi,
                                        int q) {
   VP9_COMMON *const cm = &cpi->common;
   vp9_clear_system_state();
-  vp9_set_quantizer(cpi, q);
+  vp9_set_quantizer(cm, q);
 
   // Set up entropy context depending on frame type. The decoder mandates
   // the use of the default context, index 0, for keyframes and inter
@@ -2253,7 +2253,7 @@ static void encode_without_recode_loop(VP9_COMP *cpi,
     setup_key_frame(cpi);
   } else {
     if (!cm->intra_only && !cm->error_resilient_mode && !cpi->use_svc)
-      cpi->common.frame_context_idx = cpi->refresh_alt_ref_frame;
+      cm->frame_context_idx = cpi->refresh_alt_ref_frame;
 
     setup_inter_frame(cm);
   }
@@ -2299,7 +2299,7 @@ static void encode_with_recode_loop(VP9_COMP *cpi,
   do {
     vp9_clear_system_state();
 
-    vp9_set_quantizer(cpi, q);
+    vp9_set_quantizer(cm, q);
 
     if (loop_count == 0) {
       // Set up entropy context depending on frame type. The decoder mandates
@@ -2873,7 +2873,7 @@ static void Pass1Encode(VP9_COMP *cpi, size_t *size, uint8_t *dest,
   (void) frame_flags;
 
   vp9_rc_get_first_pass_params(cpi);
-  vp9_set_quantizer(cpi, find_fp_qindex());
+  vp9_set_quantizer(&cpi->common, find_fp_qindex());
   vp9_first_pass(cpi);
 }
 
