@@ -2419,17 +2419,6 @@ static void init_encode_frame_mb_context(VP9_COMP *cpi) {
   xd->mi[0]->mbmi.mode = DC_PRED;
   xd->mi[0]->mbmi.uv_mode = DC_PRED;
 
-  vp9_zero(cm->counts.y_mode);
-  vp9_zero(cm->counts.uv_mode);
-  vp9_zero(cm->counts.inter_mode);
-  vp9_zero(cm->counts.partition);
-  vp9_zero(cm->counts.intra_inter);
-  vp9_zero(cm->counts.comp_inter);
-  vp9_zero(cm->counts.single_ref);
-  vp9_zero(cm->counts.comp_ref);
-  vp9_zero(cm->counts.tx);
-  vp9_zero(cm->counts.skip);
-
   // Note: this memset assumes above_context[0], [1] and [2]
   // are allocated as part of the same buffer.
   vpx_memset(xd->above_context[0], 0,
@@ -3085,16 +3074,12 @@ static void encode_frame_internal(VP9_COMP *cpi) {
 //           cpi->common.current_video_frame, cpi->common.show_frame,
 //           cm->frame_type);
 
-  vp9_zero(cm->counts.switchable_interp);
-  vp9_zero(cpi->tx_stepdown_count);
-
   xd->mi = cm->mi_grid_visible;
-  // required for vp9_frame_init_quantizer
   xd->mi[0] = cm->mi;
 
-  vp9_zero(cm->counts.mv);
+  vp9_zero(cm->counts);
   vp9_zero(cpi->coef_counts);
-  vp9_zero(cm->counts.eob_branch);
+  vp9_zero(cpi->tx_stepdown_count);
 
   // Set frame level transform size use case
   cm->tx_mode = select_tx_mode(cpi);
