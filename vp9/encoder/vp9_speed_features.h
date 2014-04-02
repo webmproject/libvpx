@@ -252,6 +252,10 @@ typedef struct {
   // encoding process for RTC.
   int partition_check;
 
+  // Use finer quantizer in every other few frames that run variable block
+  // partition type search.
+  int force_ref_frame;
+
   // Implements various heuristics to skip searching modes
   // The heuristics selected are based on  flags
   // defined in the MODE_SEARCH_SKIP_HEURISTICS enum

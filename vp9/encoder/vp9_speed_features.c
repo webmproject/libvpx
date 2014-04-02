@@ -244,6 +244,9 @@ static void set_rt_speed_feature(VP9_COMMON *cm,
     sf->min_partition_size = BLOCK_8X8;
     sf->partition_check =
         (cm->current_video_frame % sf->last_partitioning_redo_frequency == 1);
+    sf->force_ref_frame =
+        (cm->current_video_frame %
+            (sf->last_partitioning_redo_frequency << 1) == 1);
     sf->partition_search_type = REFERENCE_PARTITION;
     sf->use_nonrd_pick_mode = 1;
     sf->search_method = FAST_DIAMOND;
@@ -296,6 +299,7 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
   sf->last_partitioning_redo_frequency = 4;
   sf->disable_split_mask = 0;
   sf->mode_search_skip_flags = 0;
+  sf->force_ref_frame = 0;
   sf->disable_split_var_thresh = 0;
   sf->disable_filter_search_var_thresh = 0;
   for (i = 0; i < TX_SIZES; i++) {

@@ -982,8 +982,8 @@ int vp9_rc_pick_q_and_bounds(const VP9_COMP *cpi,
   if (cpi->sf.use_nonrd_pick_mode) {
     if (q == 0)
       q++;
-    if (cpi->sf.partition_check == 1)
-      q -= 10;
+    if (cpi->sf.force_ref_frame == 1)
+      q -= 15;
 
     if (q < *bottom_index)
       *bottom_index = q;
