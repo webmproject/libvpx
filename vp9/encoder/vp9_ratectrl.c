@@ -1136,10 +1136,9 @@ void vp9_rc_postencode_update(VP9_COMP *cpi, uint64_t bytes_used) {
 
   // Actual bits spent
   rc->total_actual_bits += rc->projected_frame_size;
+  rc->total_target_bits += (cm->show_frame ? rc->av_per_frame_bandwidth : 0);
 
-  // Debug stats
-  rc->total_target_vs_actual += (rc->this_frame_target -
-                                 rc->projected_frame_size);
+  rc->total_target_vs_actual = rc->total_actual_bits - rc->total_target_bits;
 
   if (cpi->oxcf.play_alternate && cpi->refresh_alt_ref_frame &&
       (cm->frame_type != KEY_FRAME))
