@@ -147,15 +147,6 @@ $(BUILD_PFX)%.cc.o: %.cc
 	$(if $(quiet),@echo "    [CXX] $@")
 	$(qexec)$(CXX) $(INTERNAL_CFLAGS) $(CXXFLAGS) -c -o $@ $<
 
-$(BUILD_PFX)%.cpp.d: %.cpp
-	$(if $(quiet),@echo "    [DEP] $@")
-	$(qexec)mkdir -p $(dir $@)
-	$(qexec)$(CXX) $(INTERNAL_CFLAGS) $(CXXFLAGS) -M $< | $(fmt_deps) > $@
-
-$(BUILD_PFX)%.cpp.o: %.cpp
-	$(if $(quiet),@echo "    [CXX] $@")
-	$(qexec)$(CXX) $(INTERNAL_CFLAGS) $(CXXFLAGS) -c -o $@ $<
-
 $(BUILD_PFX)%.asm.d: %.asm
 	$(if $(quiet),@echo "    [DEP] $@")
 	$(qexec)mkdir -p $(dir $@)
@@ -227,7 +218,7 @@ cond_enabled=$(if $(filter yes,$($(1))), $(call enabled,$(2)))
 
 find_file1=$(word 1,$(wildcard $(subst //,/,$(addsuffix /$(1),$(2)))))
 find_file=$(foreach f,$(1),$(call find_file1,$(strip $(f)),$(strip $(2))) )
-obj_pats=.c=.c.o $(AS_SFX)=$(AS_SFX).o .cc=.cc.o .cpp=.cpp.o
+obj_pats=.c=.c.o $(AS_SFX)=$(AS_SFX).o .cc=.cc.o
 objs=$(addprefix $(BUILD_PFX),$(foreach p,$(obj_pats),$(filter %.o,$(1:$(p))) ))
 
 install_map_templates=$(eval $(call install_map_template,$(1),$(2)))
