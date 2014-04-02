@@ -291,9 +291,9 @@ static void reconstruct_inter_block(int plane, int block,
   *args->eobtotal += eob;
 }
 
-static void set_offsets(VP9_COMMON *const cm, MACROBLOCKD *const xd,
-                        const TileInfo *const tile,
-                        BLOCK_SIZE bsize, int mi_row, int mi_col) {
+static MB_MODE_INFO *set_offsets(VP9_COMMON *const cm, MACROBLOCKD *const xd,
+                                 const TileInfo *const tile,
+                                 BLOCK_SIZE bsize, int mi_row, int mi_col) {
   const int bw = num_8x8_blocks_wide_lookup[bsize];
   const int bh = num_8x8_blocks_high_lookup[bsize];
   const int x_mis = MIN(bw, cm->mi_cols - mi_col);
@@ -315,6 +315,7 @@ static void set_offsets(VP9_COMMON *const cm, MACROBLOCKD *const xd,
   set_mi_row_col(xd, tile, mi_row, bh, mi_col, bw, cm->mi_rows, cm->mi_cols);
 
   vp9_setup_dst_planes(xd, get_frame_new_buffer(cm), mi_row, mi_col);
+  return &xd->mi[0]->mbmi;
 }
 
 static void set_ref(VP9_COMMON *const cm, MACROBLOCKD *const xd,
@@ -335,16 +336,11 @@ static void decode_block(VP9_COMMON *const cm, MACROBLOCKD *const xd,
                          int mi_row, int mi_col,
                          vp9_reader *r, BLOCK_SIZE bsize) {
   const int less8x8 = bsize < BLOCK_8X8;
-  MB_MODE_INFO *mbmi;
-
-  set_offsets(cm, xd, tile, bsize, mi_row, mi_col);
+  MB_MODE_INFO *mbmi = set_offsets(cm, xd, tile, bsize, mi_row, mi_col);
   vp9_read_mode_info(cm, xd, tile, mi_row, mi_col, r);
 
   if (less8x8)
     bsize = BLOCK_8X8;
-
-  // Has to be called after set_offsets
-  mbmi = &xd->mi[0]->mbmi;
 
   if (mbmi->skip) {
     reset_skip_context(xd, bsize);
