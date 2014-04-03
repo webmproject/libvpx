@@ -1606,75 +1606,64 @@ int vp9_refining_search_sadx4(const MACROBLOCK *x,
                               int *mvjcost, int *mvcost[2],
                               const MV *center_mv) {
   const MACROBLOCKD *const xd = &x->e_mbd;
-  MV neighbors[4] = {{ -1, 0}, {0, -1}, {0, 1}, {1, 0}};
-  int i, j;
-
-  const int what_stride = x->plane[0].src.stride;
-  const int in_what_stride = xd->plane[0].pre[0].stride;
-  const uint8_t *what = x->plane[0].src.buf;
-  const uint8_t *best_address = xd->plane[0].pre[0].buf +
-                          (ref_mv->row * xd->plane[0].pre[0].stride) +
-                          ref_mv->col;
-
+  const MV neighbors[4] = {{ -1, 0}, {0, -1}, {0, 1}, {1, 0}};
+  const struct buf_2d *const what = &x->plane[0].src;
+  const struct buf_2d *const in_what = &xd->plane[0].pre[0];
   const MV fcenter_mv = {center_mv->row >> 3, center_mv->col >> 3};
-
   const int *mvjsadcost = x->nmvjointsadcost;
   int *mvsadcost[2] = {x->nmvsadcost[0], x->nmvsadcost[1]};
-
-  unsigned int bestsad = fn_ptr->sdf(what, what_stride, best_address,
-                                    in_what_stride, 0x7fffffff) +
+  const uint8_t *best_address = get_buf_from_mv(in_what, ref_mv);
+  unsigned int best_sad = fn_ptr->sdf(what->buf, what->stride, best_address,
+                                    in_what->stride, 0x7fffffff) +
       mvsad_err_cost(ref_mv, &fcenter_mv, mvjsadcost, mvsadcost, error_per_bit);
+  int i, j;
 
   for (i = 0; i < search_range; i++) {
     int best_site = -1;
-    int all_in = ((ref_mv->row - 1) > x->mv_row_min) &
-                 ((ref_mv->row + 1) < x->mv_row_max) &
-                 ((ref_mv->col - 1) > x->mv_col_min) &
-                 ((ref_mv->col + 1) < x->mv_col_max);
+    const int all_in = ((ref_mv->row - 1) > x->mv_row_min) &
+                       ((ref_mv->row + 1) < x->mv_row_max) &
+                       ((ref_mv->col - 1) > x->mv_col_min) &
+                       ((ref_mv->col + 1) < x->mv_col_max);
 
     if (all_in) {
-      unsigned int sad_array[4];
-      uint8_t const *block_offset[4] = {
-        best_address - in_what_stride,
+      unsigned int sads[4];
+      const uint8_t *const positions[4] = {
+        best_address - in_what->stride,
         best_address - 1,
         best_address + 1,
-        best_address + in_what_stride
+        best_address + in_what->stride
       };
 
-      fn_ptr->sdx4df(what, what_stride, block_offset, in_what_stride,
-                     sad_array);
+      fn_ptr->sdx4df(what->buf, what->stride, positions, in_what->stride, sads);
 
-      for (j = 0; j < 4; j++) {
-        if (sad_array[j] < bestsad) {
-          const MV this_mv = {ref_mv->row + neighbors[j].row,
-                              ref_mv->col + neighbors[j].col};
-          sad_array[j] += mvsad_err_cost(&this_mv, &fcenter_mv,
+      for (j = 0; j < 4; ++j) {
+        if (sads[j] < best_sad) {
+          const MV mv = {ref_mv->row + neighbors[j].row,
+                         ref_mv->col + neighbors[j].col};
+          sads[j] += mvsad_err_cost(&mv, &fcenter_mv,
                                          mvjsadcost, mvsadcost, error_per_bit);
 
-          if (sad_array[j] < bestsad) {
-            bestsad = sad_array[j];
+          if (sads[j] < best_sad) {
+            best_sad = sads[j];
             best_site = j;
           }
         }
       }
     } else {
-      for (j = 0; j < 4; j++) {
-        const MV this_mv = {ref_mv->row + neighbors[j].row,
-                            ref_mv->col + neighbors[j].col};
+      for (j = 0; j < 4; ++j) {
+        const MV mv = {ref_mv->row + neighbors[j].row,
+                       ref_mv->col + neighbors[j].col};
 
-        if (is_mv_in(x, &this_mv)) {
-          const uint8_t *check_here = neighbors[j].row * in_what_stride +
-                                      neighbors[j].col + best_address;
-          unsigned int thissad = fn_ptr->sdf(what, what_stride,
-                                             check_here, in_what_stride,
-                                             bestsad);
+        if (is_mv_in(x, &mv)) {
+          unsigned int sad = fn_ptr->sdf(what->buf, what->stride,
+                                         get_buf_from_mv(in_what, &mv),
+                                         in_what->stride, best_sad);
+          if (sad < best_sad) {
+            sad += mvsad_err_cost(&mv, &fcenter_mv,
+                                  mvjsadcost, mvsadcost, error_per_bit);
 
-          if (thissad < bestsad) {
-            thissad += mvsad_err_cost(&this_mv, &fcenter_mv,
-                                      mvjsadcost, mvsadcost, error_per_bit);
-
-            if (thissad < bestsad) {
-              bestsad = thissad;
+            if (sad < best_sad) {
+              best_sad = sad;
               best_site = j;
             }
           }
@@ -1687,12 +1676,11 @@ int vp9_refining_search_sadx4(const MACROBLOCK *x,
     } else {
       ref_mv->row += neighbors[best_site].row;
       ref_mv->col += neighbors[best_site].col;
-      best_address += (neighbors[best_site].row) * in_what_stride +
-                      neighbors[best_site].col;
+      best_address = get_buf_from_mv(in_what, ref_mv);
     }
   }
 
-  return bestsad;
+  return best_sad;
 }
 
 // This function is called when we do joint motion search in comp_inter_inter
