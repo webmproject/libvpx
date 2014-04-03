@@ -13,17 +13,32 @@
 #include "vp9/encoder/vp9_onyx_int.h"
 #include "vp9/encoder/vp9_speed_features.h"
 
-#define ALL_INTRA_MODES 0x3FF
-#define INTRA_DC_ONLY 0x01
-#define INTRA_DC_TM ((1 << TM_PRED) | (1 << DC_PRED))
-#define INTRA_DC_H_V ((1 << DC_PRED) | (1 << V_PRED) | (1 << H_PRED))
+#define ALL_INTRA_MODES ((1 << DC_PRED) | \
+                         (1 << V_PRED) | (1 << H_PRED) | \
+                         (1 << D45_PRED) | (1 << D135_PRED) | \
+                         (1 << D117_PRED) | (1 << D153_PRED) | \
+                         (1 << D207_PRED) | (1 << D63_PRED) | \
+                         (1 << TM_PRED))
+#define INTRA_DC_ONLY   (1 << DC_PRED)
+#define INTRA_DC_TM     ((1 << TM_PRED) | (1 << DC_PRED))
+#define INTRA_DC_H_V    ((1 << DC_PRED) | (1 << V_PRED) | (1 << H_PRED))
 #define INTRA_DC_TM_H_V (INTRA_DC_TM | (1 << V_PRED) | (1 << H_PRED))
 
 // Masks for partially or completely disabling split mode
-#define DISABLE_ALL_SPLIT         0x3F
-#define DISABLE_ALL_INTER_SPLIT   0x1F
-#define DISABLE_COMPOUND_SPLIT    0x18
-#define LAST_AND_INTRA_SPLIT_ONLY 0x1E
+#define DISABLE_ALL_INTER_SPLIT   ((1 << THR_COMP_GA) | \
+                                   (1 << THR_COMP_LA) | \
+                                   (1 << THR_ALTR) | \
+                                   (1 << THR_GOLD) | \
+                                   (1 << THR_LAST))
+
+#define DISABLE_ALL_SPLIT         ((1 << THR_INTRA) | DISABLE_ALL_INTER_SPLIT)
+
+#define DISABLE_COMPOUND_SPLIT    ((1 << THR_COMP_GA) | (1 << THR_COMP_LA))
+
+#define LAST_AND_INTRA_SPLIT_ONLY ((1 << THR_COMP_GA) | \
+                                   (1 << THR_COMP_LA) | \
+                                   (1 << THR_ALTR) | \
+                                   (1 << THR_GOLD))
 
 static void set_good_speed_feature(VP9_COMP *cpi,
                                    VP9_COMMON *cm,
