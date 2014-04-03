@@ -22,10 +22,12 @@
 #endif
 
 #if defined(_MSC_VER)
-/* MSVS doesn't define off_t, and uses _f{seek,tell}i64. */
-typedef __int64 off_t;
+/* MSVS uses _f{seek,tell}i64. */
 #define fseeko _fseeki64
 #define ftello _ftelli64
+typedef long _off_t;  // NOLINT - MSVS compatible type
+typedef __int64 off_t;  // fseeki64 compatible type
+#define _OFF_T_DEFINED
 #elif defined(_WIN32)
 /* MinGW defines off_t as long and uses f{seek,tell}o64/off64_t for large
  * files. */
