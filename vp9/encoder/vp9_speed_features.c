@@ -244,10 +244,10 @@ static void set_rt_speed_feature(VP9_COMMON *cm,
     sf->min_partition_size = BLOCK_8X8;
     sf->partition_check =
         (cm->current_video_frame % sf->last_partitioning_redo_frequency == 1);
-    sf->force_ref_frame =
+    sf->force_ref_frame = cm->frame_type == KEY_FRAME ||
         (cm->current_video_frame %
             (sf->last_partitioning_redo_frequency << 1) == 1);
-    sf->max_delta_qindex = 15;
+    sf->max_delta_qindex = (cm->frame_type == KEY_FRAME) ? 20 : 15;
     sf->partition_search_type = REFERENCE_PARTITION;
     sf->use_nonrd_pick_mode = 1;
     sf->search_method = FAST_DIAMOND;
