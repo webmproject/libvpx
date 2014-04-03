@@ -1559,6 +1559,8 @@ static int64_t encode_inter_mb_segment(VP9_COMP *cpi,
   int thisrate = 0, ref;
   const scan_order *so = &vp9_default_scan_orders[TX_4X4];
   const int is_compound = has_second_ref(&mi->mbmi);
+  const InterpKernel *kernel = vp9_get_interp_kernel(mi->mbmi.interp_filter);
+
   for (ref = 0; ref < 1 + is_compound; ++ref) {
     const uint8_t *pre = &pd->pre[ref].buf[raster_block_offset(BLOCK_8X8, i,
                                                pd->pre[ref].stride)];
@@ -1566,7 +1568,7 @@ static int64_t encode_inter_mb_segment(VP9_COMP *cpi,
                               dst, pd->dst.stride,
                               &mi->bmi[i].as_mv[ref].as_mv,
                               &xd->block_refs[ref]->sf, width, height, ref,
-                              xd->interp_kernel, MV_PRECISION_Q3,
+                              kernel, MV_PRECISION_Q3,
                               mi_col * MI_SIZE + 4 * (i % 2),
                               mi_row * MI_SIZE + 4 * (i / 2));
   }
@@ -2544,6 +2546,7 @@ static void joint_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
   int ite, ref;
   // Prediction buffer from second frame.
   uint8_t *second_pred = vpx_memalign(16, pw * ph * sizeof(uint8_t));
+  const InterpKernel *kernel = vp9_get_interp_kernel(mbmi->interp_filter);
 
   // Do joint motion search in compound mode to get more accurate mv.
   struct buf_2d backup_yv12[2][MAX_MB_PLANE];
@@ -2597,7 +2600,7 @@ static void joint_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
                               &frame_mv[refs[!id]].as_mv,
                               &xd->block_refs[!id]->sf,
                               pw, ph, 0,
-                              xd->interp_kernel, MV_PRECISION_Q3,
+                              kernel, MV_PRECISION_Q3,
                               mi_col * MI_SIZE, mi_row * MI_SIZE);
 
     // Compound motion search on first ref frame.
@@ -2812,7 +2815,6 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
         int j;
         int64_t rs_rd;
         mbmi->interp_filter = i;
-        xd->interp_kernel = vp9_get_interp_kernel(mbmi->interp_filter);
         rs = get_switchable_rate(x);
         rs_rd = RDCOST(x->rdmult, x->rddiv, rs, 0);
 
@@ -2883,7 +2885,6 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
   // Set the appropriate filter
   mbmi->interp_filter = cm->interp_filter != SWITCHABLE ?
       cm->interp_filter : *best_filter;
-  xd->interp_kernel = vp9_get_interp_kernel(mbmi->interp_filter);
   rs = cm->interp_filter == SWITCHABLE ? get_switchable_rate(x) : 0;
 
   if (pred_exists) {
@@ -3394,7 +3395,6 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
                                                           : cm->interp_filter;
     x->skip = 0;
     set_ref_ptrs(cm, xd, ref_frame, second_ref_frame);
-    xd->interp_kernel = vp9_get_interp_kernel(mbmi->interp_filter);
 
     // Select prediction reference frames.
     for (i = 0; i < MAX_MB_PLANE; i++) {
@@ -3938,7 +3938,6 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
     // them for this frame.
     mbmi->interp_filter = cm->interp_filter == SWITCHABLE ? EIGHTTAP
                                                           : cm->interp_filter;
-    xd->interp_kernel = vp9_get_interp_kernel(mbmi->interp_filter);
 
     if (comp_pred) {
       if (!(cpi->ref_frame_flags & flag_list[second_ref_frame]))
@@ -4061,7 +4060,6 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
             int newbest, rs;
             int64_t rs_rd;
             mbmi->interp_filter = switchable_filter_index;
-            xd->interp_kernel = vp9_get_interp_kernel(mbmi->interp_filter);
             tmp_rd = rd_pick_best_mbsegmentation(cpi, x, tile,
                                                  &mbmi->ref_mvs[ref_frame][0],
                                                  second_ref,
@@ -4126,7 +4124,6 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
 
       mbmi->interp_filter = (cm->interp_filter == SWITCHABLE ?
                              tmp_best_filter : cm->interp_filter);
-      xd->interp_kernel = vp9_get_interp_kernel(mbmi->interp_filter);
       if (!pred_exists) {
         // Handles the special case when a filter that is not in the
         // switchable list (bilinear, 6-tap) is indicated at the frame level

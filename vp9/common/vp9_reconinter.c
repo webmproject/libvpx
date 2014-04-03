@@ -146,6 +146,7 @@ static void build_inter_predictors(MACROBLOCKD *xd, int plane, int block,
   struct macroblockd_plane *const pd = &xd->plane[plane];
   const MODE_INFO *mi = xd->mi[0];
   const int is_compound = has_second_ref(&mi->mbmi);
+  const InterpKernel *kernel = vp9_get_interp_kernel(mi->mbmi.interp_filter);
   int ref;
 
   for (ref = 0; ref < 1 + is_compound; ++ref) {
@@ -193,8 +194,7 @@ static void build_inter_predictors(MACROBLOCKD *xd, int plane, int block,
            + (scaled_mv.col >> SUBPEL_BITS);
 
     inter_predictor(pre, pre_buf->stride, dst, dst_buf->stride,
-                    subpel_x, subpel_y, sf, w, h, ref, xd->interp_kernel,
-                    xs, ys);
+                    subpel_x, subpel_y, sf, w, h, ref, kernel, xs, ys);
   }
 }
 
@@ -250,6 +250,7 @@ static void dec_build_inter_predictors(MACROBLOCKD *xd, int plane, int block,
   struct macroblockd_plane *const pd = &xd->plane[plane];
   const MODE_INFO *mi = xd->mi[0];
   const int is_compound = has_second_ref(&mi->mbmi);
+  const InterpKernel *kernel = vp9_get_interp_kernel(mi->mbmi.interp_filter);
   int ref;
 
   for (ref = 0; ref < 1 + is_compound; ++ref) {
@@ -377,7 +378,7 @@ static void dec_build_inter_predictors(MACROBLOCKD *xd, int plane, int block,
     }
 
     inter_predictor(buf_ptr, buf_stride, dst, dst_buf->stride, subpel_x,
-                    subpel_y, sf, w, h, ref, xd->interp_kernel, xs, ys);
+                    subpel_y, sf, w, h, ref, kernel, xs, ys);
   }
 }
 
