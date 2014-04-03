@@ -400,13 +400,17 @@ static const arg_def_t frame_parallel_decoding = ARG_DEF(
     NULL, "frame-parallel", 1, "Enable frame parallel decodability features");
 static const arg_def_t aq_mode = ARG_DEF(
     NULL, "aq-mode", 1,
-    "Adaptive q mode (0: off (by default), 1: variance 2: complexity)");
+    "Adaptive q mode (0: off (by default), 1: variance 2: complexity, "
+    "3: cyclic refresh)");
+static const arg_def_t frame_periodic_boost = ARG_DEF(
+    NULL, "frame_boost", 1,
+    "Enable frame periodic boost (0: off (by default), 1: on)");
 
 static const arg_def_t *vp9_args[] = {
   &cpu_used, &auto_altref, &noise_sens, &sharpness, &static_thresh,
   &tile_cols, &tile_rows, &arnr_maxframes, &arnr_strength, &arnr_type,
   &tune_ssim, &cq_level, &max_intra_rate_pct, &lossless,
-  &frame_parallel_decoding, &aq_mode,
+  &frame_parallel_decoding, &aq_mode, &frame_periodic_boost,
   NULL
 };
 static const int vp9_arg_ctrl_map[] = {
@@ -416,6 +420,7 @@ static const int vp9_arg_ctrl_map[] = {
   VP8E_SET_ARNR_MAXFRAMES, VP8E_SET_ARNR_STRENGTH, VP8E_SET_ARNR_TYPE,
   VP8E_SET_TUNING, VP8E_SET_CQ_LEVEL, VP8E_SET_MAX_INTRA_BITRATE_PCT,
   VP9E_SET_LOSSLESS, VP9E_SET_FRAME_PARALLEL_DECODING, VP9E_SET_AQ_MODE,
+  VP9E_SET_FRAME_PERIODIC_BOOST,
   0
 };
 #endif

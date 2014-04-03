@@ -244,7 +244,7 @@ static void set_rt_speed_feature(VP9_COMMON *cm,
     sf->min_partition_size = BLOCK_8X8;
     sf->partition_check =
         (cm->current_video_frame % sf->last_partitioning_redo_frequency == 1);
-    sf->force_ref_frame = cm->frame_type == KEY_FRAME ||
+    sf->force_frame_boost = cm->frame_type == KEY_FRAME ||
         (cm->current_video_frame %
             (sf->last_partitioning_redo_frequency << 1) == 1);
     sf->max_delta_qindex = (cm->frame_type == KEY_FRAME) ? 20 : 15;
@@ -300,7 +300,7 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
   sf->last_partitioning_redo_frequency = 4;
   sf->disable_split_mask = 0;
   sf->mode_search_skip_flags = 0;
-  sf->force_ref_frame = 0;
+  sf->force_frame_boost = 0;
   sf->max_delta_qindex = 0;
   sf->disable_split_var_thresh = 0;
   sf->disable_filter_search_var_thresh = 0;
@@ -368,4 +368,8 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
 
   if (sf->disable_split_mask == DISABLE_ALL_SPLIT)
     sf->adaptive_pred_interp_filter = 0;
+
+  if (!cpi->oxcf.frame_periodic_boost) {
+    sf->max_delta_qindex = 0;
+  }
 }
