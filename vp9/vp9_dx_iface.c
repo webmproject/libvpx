@@ -23,27 +23,10 @@
 #define VP9_CAP_POSTPROC (CONFIG_VP9_POSTPROC ? VPX_CODEC_CAP_POSTPROC : 0)
 typedef vpx_codec_stream_info_t  vp9_stream_info_t;
 
-/* Structures for handling memory allocations */
-typedef enum {
-  VP9_SEG_ALG_PRIV = 256,
-  VP9_SEG_MAX
-} mem_seg_id_t;
-#define NELEMENTS(x) ((int)(sizeof(x)/sizeof(x[0])))
-
-static unsigned long priv_sz(const vpx_codec_dec_cfg_t *si,
-                             vpx_codec_flags_t flags);
-
-static const mem_req_t vp9_mem_req_segs[] = {
-  {VP9_SEG_ALG_PRIV, 0, 8, VPX_CODEC_MEM_ZERO, priv_sz},
-  {VP9_SEG_MAX, 0, 0, 0, NULL}
-};
-
 struct vpx_codec_alg_priv {
   vpx_codec_priv_t        base;
-  vpx_codec_mmap_t        mmaps[NELEMENTS(vp9_mem_req_segs) - 1];
   vpx_codec_dec_cfg_t     cfg;
   vp9_stream_info_t       si;
-  int                     defer_alloc;
   int                     decoder_init;
   struct VP9Decompressor *pbi;
   int                     postproc_cfg_set;
@@ -66,79 +49,37 @@ struct vpx_codec_alg_priv {
   vpx_release_frame_buffer_cb_fn_t release_ext_fb_cb;
 };
 
-static unsigned long priv_sz(const vpx_codec_dec_cfg_t *si,
-                             vpx_codec_flags_t flags) {
-  /* Although this declaration is constant, we can't use it in the requested
-   * segments list because we want to define the requested segments list
-   * before defining the private type (so that the number of memory maps is
-   * known)
-   */
-  (void)si;
-  return sizeof(vpx_codec_alg_priv_t);
-}
-
-static void vp9_init_ctx(vpx_codec_ctx_t *ctx, const vpx_codec_mmap_t *mmap) {
-  int i;
-
-  ctx->priv = (vpx_codec_priv_t *)mmap->base;
-  ctx->priv->sz = sizeof(*ctx->priv);
-  ctx->priv->iface = ctx->iface;
-  ctx->priv->alg_priv = (struct vpx_codec_alg_priv *)mmap->base;
-
-  for (i = 0; i < NELEMENTS(ctx->priv->alg_priv->mmaps); i++)
-    ctx->priv->alg_priv->mmaps[i].id = vp9_mem_req_segs[i].id;
-
-  ctx->priv->alg_priv->mmaps[0] = *mmap;
-  ctx->priv->alg_priv->si.sz = sizeof(ctx->priv->alg_priv->si);
-  ctx->priv->init_flags = ctx->init_flags;
-
-  if (ctx->config.dec) {
-    /* Update the reference to the config structure to an internal copy. */
-    ctx->priv->alg_priv->cfg = *ctx->config.dec;
-    ctx->config.dec = &ctx->priv->alg_priv->cfg;
-  }
-}
-
-static void vp9_finalize_mmaps(vpx_codec_alg_priv_t *ctx) {
-  /* nothing to clean up */
-}
-
 static vpx_codec_err_t vp9_init(vpx_codec_ctx_t *ctx,
                                 vpx_codec_priv_enc_mr_cfg_t *data) {
-  vpx_codec_err_t res = VPX_CODEC_OK;
-
   // This function only allocates space for the vpx_codec_alg_priv_t
   // structure. More memory may be required at the time the stream
   // information becomes known.
   if (!ctx->priv) {
-    vpx_codec_mmap_t mmap;
+    void *base = vpx_memalign(32, sizeof(vpx_codec_alg_priv_t));
+    if (base == NULL)
+      return VPX_CODEC_MEM_ERROR;
 
-    mmap.id = vp9_mem_req_segs[0].id;
-    mmap.sz = sizeof(vpx_codec_alg_priv_t);
-    mmap.align = vp9_mem_req_segs[0].align;
-    mmap.flags = vp9_mem_req_segs[0].flags;
+    memset(base, 0, sizeof(vpx_codec_alg_priv_t));
+    ctx->priv = (vpx_codec_priv_t *)base;
+    ctx->priv->sz = sizeof(*ctx->priv);
+    ctx->priv->iface = ctx->iface;
+    ctx->priv->alg_priv = (vpx_codec_alg_priv_t *)base;
+    ctx->priv->alg_priv->si.sz = sizeof(ctx->priv->alg_priv->si);
+    ctx->priv->init_flags = ctx->init_flags;
 
-    res = vpx_mmap_alloc(&mmap);
-    if (!res) {
-      vp9_init_ctx(ctx, &mmap);
-
-      ctx->priv->alg_priv->defer_alloc = 1;
+    if (ctx->config.dec) {
+      // Update the reference to the config structure to an internal copy.
+      ctx->priv->alg_priv->cfg = *ctx->config.dec;
+      ctx->config.dec = &ctx->priv->alg_priv->cfg;
     }
   }
 
-  return res;
+  return VPX_CODEC_OK;
 }
 
 static vpx_codec_err_t vp9_destroy(vpx_codec_alg_priv_t *ctx) {
-  int i;
-
   if (ctx->pbi)
     vp9_remove_decompressor(ctx->pbi);
-
-  for (i = NELEMENTS(ctx->mmaps) - 1; i >= 0; i--) {
-    if (ctx->mmaps[i].dtor)
-      ctx->mmaps[i].dtor(&ctx->mmaps[i]);
-  }
 
   return VPX_CODEC_OK;
 }
@@ -231,94 +172,59 @@ static vpx_codec_err_t decode_one(vpx_codec_alg_priv_t *ctx,
 
   ctx->img_avail = 0;
 
-  /* Determine the stream parameters. Note that we rely on peek_si to
-   * validate that we have a buffer that does not wrap around the top
-   * of the heap.
-   */
+  // Determine the stream parameters. Note that we rely on peek_si to
+  // validate that we have a buffer that does not wrap around the top
+  // of the heap.
   if (!ctx->si.h)
     res = ctx->base.iface->dec.peek_si(*data, data_sz, &ctx->si);
 
-
-  /* Perform deferred allocations, if required */
-  if (!res && ctx->defer_alloc) {
-    int i;
-
-    for (i = 1; !res && i < NELEMENTS(ctx->mmaps); i++) {
-      vpx_codec_dec_cfg_t cfg;
-
-      cfg.w = ctx->si.w;
-      cfg.h = ctx->si.h;
-      ctx->mmaps[i].id = vp9_mem_req_segs[i].id;
-      ctx->mmaps[i].sz = vp9_mem_req_segs[i].sz;
-      ctx->mmaps[i].align = vp9_mem_req_segs[i].align;
-      ctx->mmaps[i].flags = vp9_mem_req_segs[i].flags;
-
-      if (!ctx->mmaps[i].sz)
-        ctx->mmaps[i].sz = vp9_mem_req_segs[i].calc_sz(&cfg,
-                                                       ctx->base.init_flags);
-
-      res = vpx_mmap_alloc(&ctx->mmaps[i]);
-    }
-
-    if (!res)
-      vp9_finalize_mmaps(ctx);
-
-    ctx->defer_alloc = 0;
-  }
-
   /* Initialize the decoder instance on the first frame*/
   if (!res && !ctx->decoder_init) {
-    res = vpx_validate_mmaps(&ctx->si, ctx->mmaps,
-                             vp9_mem_req_segs, NELEMENTS(vp9_mem_req_segs),
-                             ctx->base.init_flags);
+    VP9D_CONFIG oxcf;
+    struct VP9Decompressor *optr;
 
-    if (!res) {
-      VP9D_CONFIG oxcf;
-      struct VP9Decompressor *optr;
+    vp9_initialize_dec();
 
-      vp9_initialize_dec();
+    oxcf.width = ctx->si.w;
+    oxcf.height = ctx->si.h;
+    oxcf.version = 9;
+    oxcf.max_threads = ctx->cfg.threads;
+    oxcf.inv_tile_order = ctx->invert_tile_order;
+    optr = vp9_create_decompressor(&oxcf);
 
-      oxcf.width = ctx->si.w;
-      oxcf.height = ctx->si.h;
-      oxcf.version = 9;
-      oxcf.max_threads = ctx->cfg.threads;
-      oxcf.inv_tile_order = ctx->invert_tile_order;
-      optr = vp9_create_decompressor(&oxcf);
+    // If postprocessing was enabled by the application and a
+    // configuration has not been provided, default it.
+    if (!ctx->postproc_cfg_set &&
+        (ctx->base.init_flags & VPX_CODEC_USE_POSTPROC)) {
+      ctx->postproc_cfg.post_proc_flag = VP8_DEBLOCK | VP8_DEMACROBLOCK;
+      ctx->postproc_cfg.deblocking_level = 4;
+      ctx->postproc_cfg.noise_level = 0;
+    }
 
-      // If postprocessing was enabled by the application and a
-      // configuration has not been provided, default it.
-      if (!ctx->postproc_cfg_set &&
-          (ctx->base.init_flags & VPX_CODEC_USE_POSTPROC)) {
-        ctx->postproc_cfg.post_proc_flag = VP8_DEBLOCK | VP8_DEMACROBLOCK;
-        ctx->postproc_cfg.deblocking_level = 4;
-        ctx->postproc_cfg.noise_level = 0;
-      }
+    if (!optr) {
+      res = VPX_CODEC_ERROR;
+    } else {
+      VP9D_COMP *const pbi = (VP9D_COMP*)optr;
+      VP9_COMMON *const cm = &pbi->common;
 
-      if (!optr) {
-        res = VPX_CODEC_ERROR;
+      // Set index to not initialized.
+      cm->new_fb_idx = -1;
+
+      if (ctx->get_ext_fb_cb != NULL && ctx->release_ext_fb_cb != NULL) {
+        cm->get_fb_cb = ctx->get_ext_fb_cb;
+        cm->release_fb_cb = ctx->release_ext_fb_cb;
+        cm->cb_priv = ctx->ext_priv;
       } else {
-        VP9D_COMP *const pbi = (VP9D_COMP*)optr;
-        VP9_COMMON *const cm = &pbi->common;
+        cm->get_fb_cb = vp9_get_frame_buffer;
+        cm->release_fb_cb = vp9_release_frame_buffer;
 
-        // Set index to not initialized.
-        cm->new_fb_idx = -1;
-
-        if (ctx->get_ext_fb_cb != NULL && ctx->release_ext_fb_cb != NULL) {
-          cm->get_fb_cb = ctx->get_ext_fb_cb;
-          cm->release_fb_cb = ctx->release_ext_fb_cb;
-          cm->cb_priv = ctx->ext_priv;
-        } else {
-          cm->get_fb_cb = vp9_get_frame_buffer;
-          cm->release_fb_cb = vp9_release_frame_buffer;
-
-          if (vp9_alloc_internal_frame_buffers(&cm->int_frame_buffers))
-            vpx_internal_error(&cm->error, VPX_CODEC_MEM_ERROR,
-                               "Failed to initialize internal frame buffers");
-          cm->cb_priv = &cm->int_frame_buffers;
-        }
-
-        ctx->pbi = optr;
+        if (vp9_alloc_internal_frame_buffers(&cm->int_frame_buffers))
+          vpx_internal_error(&cm->error, VPX_CODEC_MEM_ERROR,
+                             "Failed to initialize internal frame buffers");
+        cm->cb_priv = &cm->int_frame_buffers;
       }
+
+      ctx->pbi = optr;
     }
 
     ctx->decoder_init = 1;
@@ -496,75 +402,6 @@ static vpx_codec_err_t vp9_set_fb_fn(
   return VPX_CODEC_ERROR;
 }
 
-static vpx_codec_err_t vp9_xma_get_mmap(const vpx_codec_ctx_t *ctx,
-                                        vpx_codec_mmap_t *mmap,
-                                        vpx_codec_iter_t *iter) {
-  vpx_codec_err_t res;
-  const mem_req_t *seg_iter = (const mem_req_t *)*iter;
-
-  /* Get address of next segment request */
-  do {
-    if (!seg_iter)
-      seg_iter = vp9_mem_req_segs;
-    else if (seg_iter->id != VP9_SEG_MAX)
-      seg_iter++;
-
-    *iter = (vpx_codec_iter_t)seg_iter;
-
-    if (seg_iter->id != VP9_SEG_MAX) {
-      mmap->id = seg_iter->id;
-      mmap->sz = seg_iter->sz;
-      mmap->align = seg_iter->align;
-      mmap->flags = seg_iter->flags;
-
-      if (!seg_iter->sz)
-        mmap->sz = seg_iter->calc_sz(ctx->config.dec, ctx->init_flags);
-
-      res = VPX_CODEC_OK;
-    } else {
-      res = VPX_CODEC_LIST_END;
-    }
-  } while (!mmap->sz && res != VPX_CODEC_LIST_END);
-
-  return res;
-}
-
-static vpx_codec_err_t vp9_xma_set_mmap(vpx_codec_ctx_t *ctx,
-                                        const vpx_codec_mmap_t  *mmap) {
-  vpx_codec_err_t res = VPX_CODEC_MEM_ERROR;
-  int i, done;
-
-  if (!ctx->priv) {
-    if (mmap->id == VP9_SEG_ALG_PRIV) {
-      if (!ctx->priv) {
-        vp9_init_ctx(ctx, mmap);
-        res = VPX_CODEC_OK;
-      }
-    }
-  }
-
-  done = 1;
-
-  if (!res && ctx->priv->alg_priv) {
-    for (i = 0; i < NELEMENTS(ctx->priv->alg_priv->mmaps); i++) {
-      if (ctx->priv->alg_priv->mmaps[i].id == mmap->id)
-        if (!ctx->priv->alg_priv->mmaps[i].base) {
-          ctx->priv->alg_priv->mmaps[i] = *mmap;
-          res = VPX_CODEC_OK;
-        }
-
-      done &= (ctx->priv->alg_priv->mmaps[i].base != NULL);
-    }
-  }
-
-  if (done && !res) {
-    vp9_finalize_mmaps(ctx->priv->alg_priv);
-    res = ctx->iface->init(ctx, NULL);
-  }
-
-  return res;
-}
-
 static vpx_codec_err_t set_reference(vpx_codec_alg_priv_t *ctx, int ctr_id,
                                      va_list args) {
   vpx_ref_frame_t *const data = va_arg(args, vpx_ref_frame_t *);
@@ -735,8 +572,8 @@ CODEC_INTERFACE(vpx_codec_vp9_dx) = {
   vp9_init,         /* vpx_codec_init_fn_t       init; */
   vp9_destroy,      /* vpx_codec_destroy_fn_t    destroy; */
   ctf_maps,         /* vpx_codec_ctrl_fn_map_t  *ctrl_maps; */
-  vp9_xma_get_mmap, /* vpx_codec_get_mmap_fn_t   get_mmap; */
-  vp9_xma_set_mmap, /* vpx_codec_set_mmap_fn_t   set_mmap; */
+  NOT_IMPLEMENTED,  /* vpx_codec_get_mmap_fn_t   get_mmap; */
+  NOT_IMPLEMENTED,  /* vpx_codec_set_mmap_fn_t   set_mmap; */
   { // NOLINT
     vp9_peek_si,      /* vpx_codec_peek_si_fn_t    peek_si; */
     vp9_get_si,       /* vpx_codec_get_si_fn_t     get_si; */
