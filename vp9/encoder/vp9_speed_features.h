@@ -254,7 +254,7 @@ typedef struct {
 
   // Use finer quantizer in every other few frames that run variable block
   // partition type search.
-  int force_ref_frame;
+  int force_frame_boost;
 
   // Maximally allowed base quantization index fluctuation.
   int max_delta_qindex;

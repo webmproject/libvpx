@@ -982,7 +982,7 @@ int vp9_rc_pick_q_and_bounds(const VP9_COMP *cpi,
   if (cpi->sf.use_nonrd_pick_mode) {
     if (q == 0)
       q++;
-    if (cpi->sf.force_ref_frame == 1)
+    if (cpi->sf.force_frame_boost == 1)
       q -= cpi->sf.max_delta_qindex;
 
     if (q < *bottom_index)
