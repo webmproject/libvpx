@@ -19,21 +19,23 @@
 #include "vp9/encoder/vp9_segmentation.h"
 
 struct CYCLIC_REFRESH {
-  // Percentage of super-blocks per frame that are targeted as candidates
+  // Percentage of blocks per frame that are targeted as candidates
   // for cyclic refresh.
-  int max_sbs_perframe;
+  int percent_refresh;
   // Maximum q-delta as percentage of base q.
   int max_qdelta_perc;
   // Block size below which we don't apply cyclic refresh.
   BLOCK_SIZE min_block_size;
   // Superblock starting index for cycling through the frame.
   int sb_index;
-  // Controls how long a block will need to wait to be refreshed again.
+  // Controls how long block will need to wait to be refreshed again, in
+  // excess of the cycle time, i.e., in the case of all zero motion, block
+  // will be refreshed every (100/percent_refresh + time_for_refresh) frames.
   int time_for_refresh;
+  // // Target number of (8x8) blocks that are set for delta-q (segment 1).
+  int target_num_seg_blocks;
   // Actual number of (8x8) blocks that were applied delta-q (segment 1).
-  int num_seg_blocks;
-  // Actual encoding bits for segment 1.
-  int actual_seg_bits;
+  int actual_num_seg_blocks;
   // RD mult. parameters for segment 1.
   int rdmult;
   // Cyclic refresh map.
@@ -41,6 +43,8 @@ struct CYCLIC_REFRESH {
   // Thresholds applied to projected rate/distortion of the superblock.
   int64_t thresh_rate_sb;
   int64_t thresh_dist_sb;
+  // Rate target ratio to set q delta.
+  double rate_ratio_qdelta;
 };
 
 CYCLIC_REFRESH *vp9_cyclic_refresh_alloc(int mi_rows, int mi_cols) {
@@ -117,6 +121,73 @@ static int candidate_refresh_aq(const CYCLIC_REFRESH *cr,
   }
 }
 
+// Compute delta-q for the segment.
+static int compute_deltaq(const VP9_COMP *cpi, int q) {
+  const CYCLIC_REFRESH *const cr = cpi->cyclic_refresh;
+  const RATE_CONTROL *const rc = &cpi->rc;
+  int deltaq = vp9_compute_qdelta_by_rate(rc, cpi->common.frame_type,
+                                          q, cr->rate_ratio_qdelta,
+                                          cpi->common.bit_depth);
+  if ((-deltaq) > cr->max_qdelta_perc * q / 100) {
+    deltaq = -cr->max_qdelta_perc * q / 100;
+  }
+  return deltaq;
+}
+
+// For the just encoded frame, estimate the bits, incorporating the delta-q
+// from segment 1. This function is called in the postencode (called from
+// rc_update_rate_correction_factors()).
+int vp9_cyclic_refresh_estimate_bits_at_q(const VP9_COMP *cpi,
+                                          double correction_factor) {
+  const VP9_COMMON *const cm = &cpi->common;
+  const CYCLIC_REFRESH *const cr = cpi->cyclic_refresh;
+  int estimated_bits;
+  int mbs = cm->MBs;
+  int num8x8bl = mbs << 2;
+  // Weight for segment 1: use actual number of blocks refreshed in
+  // previous/just encoded frame. Note number of blocks here is in 8x8 units.
+  double weight_segment = (double)cr->actual_num_seg_blocks / num8x8bl;
+  // Compute delta-q that was used in the just encoded frame.
+  int deltaq = compute_deltaq(cpi, cm->base_qindex);
+  // Take segment weighted average for estimated bits.
+  estimated_bits = (int)((1.0 - weight_segment) *
+      vp9_estimate_bits_at_q(cm->frame_type, cm->base_qindex, mbs,
+                             correction_factor, cm->bit_depth) +
+                             weight_segment *
+      vp9_estimate_bits_at_q(cm->frame_type, cm->base_qindex + deltaq, mbs,
+                             correction_factor, cm->bit_depth));
+  return estimated_bits;
+}
+
+// Prior to encoding the frame, estimate the bits per mb, for a given q = i and
+// a corresponding delta-q (for segment 1). This function is called in the
+// rc_regulate_q() to set the base qp index.
+int vp9_cyclic_refresh_rc_bits_per_mb(const VP9_COMP *cpi, int i,
+                                      double correction_factor) {
+  const VP9_COMMON *const cm = &cpi->common;
+  CYCLIC_REFRESH *const cr = cpi->cyclic_refresh;
+  int bits_per_mb;
+  int num8x8bl = cm->MBs << 2;
+  // Weight for segment 1 prior to encoding: take the target number for the
+  // frame to be encoded. Number of blocks here is in 8x8 units.
+  // Note that this is called in rc_regulate_q, which is called before the
+  // cyclic_refresh_setup (which sets cr->target_num_seg_blocks). So a mismatch
+  // may occur between the cr->target_num_seg_blocks value here and the
+  // cr->target_num_seg_block set for encoding the frame. For the current use
+  // case of fixed cr->percent_refresh and cr->time_for_refresh = 0, mismatch
+  // does not occur/is very small.
+  double weight_segment = (double)cr->target_num_seg_blocks / num8x8bl;
+  // Compute delta-q corresponding to qindex i.
+  int deltaq = compute_deltaq(cpi, i);
+  // Take segment weighted average for bits per mb.
+  bits_per_mb = (int)((1.0 - weight_segment) *
+      vp9_rc_bits_per_mb(cm->frame_type, i, correction_factor, cm->bit_depth) +
+      weight_segment *
+      vp9_rc_bits_per_mb(cm->frame_type, i + deltaq, correction_factor,
+                         cm->bit_depth));
+  return bits_per_mb;
+}
+
 // Prior to coding a given prediction block, of size bsize at (mi_row, mi_col),
 // check if we should reset the segment_id, and update the cyclic_refresh map
 // and segmentation map.
@@ -167,10 +238,85 @@ void vp9_cyclic_refresh_update_segment(VP9_COMP *const cpi,
       cpi->segmentation_map[block_index + y * cm->mi_cols + x] =
           mbmi->segment_id;
     }
-  // Keep track of actual number (in units of 8x8) of blocks in segment 1 used
-  // for encoding this frame.
-  if (mbmi->segment_id)
-    cr->num_seg_blocks += xmis * ymis;
+}
+
+// Update the actual number of blocks that were applied the segment delta q.
+void vp9_cyclic_refresh_update_actual_count(struct VP9_COMP *const cpi) {
+  VP9_COMMON *const cm = &cpi->common;
+  CYCLIC_REFRESH *const cr = cpi->cyclic_refresh;
+  unsigned char *const seg_map = cpi->segmentation_map;
+  int mi_row, mi_col;
+  cr->actual_num_seg_blocks = 0;
+  for (mi_row = 0; mi_row < cm->mi_rows; mi_row++)
+  for (mi_col = 0; mi_col < cm->mi_cols; mi_col++) {
+    if (seg_map[mi_row * cm->mi_cols + mi_col] == 1)
+      cr->actual_num_seg_blocks++;
+  }
+}
+
+// Update the segmentation map, and related quantities: cyclic refresh map,
+// refresh sb_index, and target number of blocks to be refreshed.
+void vp9_cyclic_refresh_update_map(VP9_COMP *const cpi) {
+  VP9_COMMON *const cm = &cpi->common;
+  CYCLIC_REFRESH *const cr = cpi->cyclic_refresh;
+  unsigned char *const seg_map = cpi->segmentation_map;
+  int i, block_count, bl_index, sb_rows, sb_cols, sbs_in_frame;
+  int xmis, ymis, x, y;
+  vpx_memset(seg_map, 0, cm->mi_rows * cm->mi_cols);
+  sb_cols = (cm->mi_cols + MI_BLOCK_SIZE - 1) / MI_BLOCK_SIZE;
+  sb_rows = (cm->mi_rows + MI_BLOCK_SIZE - 1) / MI_BLOCK_SIZE;
+  sbs_in_frame = sb_cols * sb_rows;
+  // Number of target blocks to get the q delta (segment 1).
+  block_count = cr->percent_refresh * cm->mi_rows * cm->mi_cols / 100;
+  // Set the segmentation map: cycle through the superblocks, starting at
+  // cr->mb_index, and stopping when either block_count blocks have been found
+  // to be refreshed, or we have passed through whole frame.
+  assert(cr->sb_index < sbs_in_frame);
+  i = cr->sb_index;
+  cr->target_num_seg_blocks = 0;
+  do {
+    int sum_map = 0;
+    // Get the mi_row/mi_col corresponding to superblock index i.
+    int sb_row_index = (i / sb_cols);
+    int sb_col_index = i - sb_row_index * sb_cols;
+    int mi_row = sb_row_index * MI_BLOCK_SIZE;
+    int mi_col = sb_col_index * MI_BLOCK_SIZE;
+    assert(mi_row >= 0 && mi_row < cm->mi_rows);
+    assert(mi_col >= 0 && mi_col < cm->mi_cols);
+    bl_index = mi_row * cm->mi_cols + mi_col;
+    // Loop through all 8x8 blocks in superblock and update map.
+    xmis = MIN(cm->mi_cols - mi_col,
+               num_8x8_blocks_wide_lookup[BLOCK_64X64]);
+    ymis = MIN(cm->mi_rows - mi_row,
+               num_8x8_blocks_high_lookup[BLOCK_64X64]);
+    for (y = 0; y < ymis; y++) {
+      for (x = 0; x < xmis; x++) {
+        const int bl_index2 = bl_index + y * cm->mi_cols + x;
+        // If the block is as a candidate for clean up then mark it
+        // for possible boost/refresh (segment 1). The segment id may get
+        // reset to 0 later if block gets coded anything other than ZEROMV.
+        if (cr->map[bl_index2] == 0) {
+          sum_map++;
+        } else if (cr->map[bl_index2] < 0) {
+          cr->map[bl_index2]++;
+        }
+      }
+    }
+    // Enforce constant segment over superblock.
+    // If segment is at least half of superblock, set to 1.
+    if (sum_map >= xmis * ymis / 2) {
+      for (y = 0; y < ymis; y++)
+        for (x = 0; x < xmis; x++) {
+          seg_map[bl_index + y * cm->mi_cols + x] = 1;
+        }
+      cr->target_num_seg_blocks += xmis * ymis;
+    }
+    i++;
+    if (i == sbs_in_frame) {
+      i = 0;
+    }
+  } while (cr->target_num_seg_blocks < block_count && i != cr->sb_index);
+  cr->sb_index = i;
 }
 
 // Setup cyclic background refresh: set delta q and segmentation map.
@@ -179,7 +325,6 @@ void vp9_cyclic_refresh_setup(VP9_COMP *const cpi) {
   const RATE_CONTROL *const rc = &cpi->rc;
   CYCLIC_REFRESH *const cr = cpi->cyclic_refresh;
   struct segmentation *const seg = &cm->seg;
-  unsigned char *const seg_map = cpi->segmentation_map;
   const int apply_cyclic_refresh  = apply_cyclic_refresh_bitrate(cm, rc);
   // Don't apply refresh on key frame or enhancement layer frames.
   if (!apply_cyclic_refresh ||
@@ -187,6 +332,7 @@ void vp9_cyclic_refresh_setup(VP9_COMP *const cpi) {
       (cpi->svc.temporal_layer_id > 0) ||
       (cpi->svc.spatial_layer_id > 0)) {
     // Set segmentation map to 0 and disable.
+    unsigned char *const seg_map = cpi->segmentation_map;
     vpx_memset(seg_map, 0, cm->mi_rows * cm->mi_cols);
     vp9_disable_segmentation(&cm->seg);
     if (cm->frame_type == KEY_FRAME)
@@ -194,18 +340,15 @@ void vp9_cyclic_refresh_setup(VP9_COMP *const cpi) {
     return;
   } else {
     int qindex_delta = 0;
-    int i, block_count, bl_index, sb_rows, sb_cols, sbs_in_frame;
-    int xmis, ymis, x, y, qindex2;
-
-    // Rate target ratio to set q delta.
-    const float rate_ratio_qdelta = 2.0;
+    int qindex2;
     const double q = vp9_convert_qindex_to_q(cm->base_qindex, cm->bit_depth);
     vp9_clear_system_state();
     // Some of these parameters may be set via codec-control function later.
-    cr->max_sbs_perframe = 10;
+    cr->percent_refresh = 10;
+    cr->rate_ratio_qdelta = 2.0;
     cr->max_qdelta_perc = 50;
     cr->min_block_size = BLOCK_8X8;
-    cr->time_for_refresh = 1;
+    cr->time_for_refresh = 0;
     // Set rate threshold to some fraction of target (and scaled by 256).
     cr->thresh_rate_sb = (rc->sb64_target_rate * 256) >> 2;
     // Distortion threshold, quadratic in Q, scale factor to be adjusted.
@@ -217,10 +360,8 @@ void vp9_cyclic_refresh_setup(VP9_COMP *const cpi) {
       cr->thresh_dist_sb = 16 * (int)(q * q);
     }
 
-    cr->num_seg_blocks = 0;
     // Set up segmentation.
     // Clear down the segment map.
-    vpx_memset(seg_map, 0, cm->mi_rows * cm->mi_cols);
     vp9_enable_segmentation(&cm->seg);
     vp9_clearall_segfeatures(seg);
     // Select delta coding method.
@@ -239,14 +380,7 @@ void vp9_cyclic_refresh_setup(VP9_COMP *const cpi) {
     vp9_enable_segfeature(seg, 1, SEG_LVL_ALT_Q);
 
     // Set the q delta for segment 1.
-    qindex_delta = vp9_compute_qdelta_by_rate(rc, cm->frame_type,
-                                              cm->base_qindex,
-                                              rate_ratio_qdelta,
-                                              cm->bit_depth);
-    // TODO(marpan): Incorporate the actual-vs-target rate over/undershoot from
-    // previous encoded frame.
-    if (-qindex_delta > cr->max_qdelta_perc * cm->base_qindex / 100)
-      qindex_delta = -cr->max_qdelta_perc * cm->base_qindex / 100;
+    qindex_delta = compute_deltaq(cpi, cm->base_qindex);
 
     // Compute rd-mult for segment 1.
     qindex2 = clamp(cm->base_qindex + cm->y_dc_delta_q + qindex_delta, 0, MAXQ);
@@ -254,61 +388,8 @@ void vp9_cyclic_refresh_setup(VP9_COMP *const cpi) {
 
     vp9_set_segdata(seg, 1, SEG_LVL_ALT_Q, qindex_delta);
 
-    sb_cols = (cm->mi_cols + MI_BLOCK_SIZE - 1) / MI_BLOCK_SIZE;
-    sb_rows = (cm->mi_rows + MI_BLOCK_SIZE - 1) / MI_BLOCK_SIZE;
-    sbs_in_frame = sb_cols * sb_rows;
-    // Number of target superblocks to get the q delta (segment 1).
-    block_count = cr->max_sbs_perframe * sbs_in_frame / 100;
-    // Set the segmentation map: cycle through the superblocks, starting at
-    // cr->mb_index, and stopping when either block_count blocks have been found
-    // to be refreshed, or we have passed through whole frame.
-    assert(cr->sb_index < sbs_in_frame);
-    i = cr->sb_index;
-    do {
-      int sum_map = 0;
-      // Get the mi_row/mi_col corresponding to superblock index i.
-      int sb_row_index = (i / sb_cols);
-      int sb_col_index = i - sb_row_index * sb_cols;
-      int mi_row = sb_row_index * MI_BLOCK_SIZE;
-      int mi_col = sb_col_index * MI_BLOCK_SIZE;
-      assert(mi_row >= 0 && mi_row < cm->mi_rows);
-      assert(mi_col >= 0 && mi_col < cm->mi_cols);
-      bl_index = mi_row * cm->mi_cols + mi_col;
-      // Loop through all 8x8 blocks in superblock and update map.
-      xmis = MIN(cm->mi_cols - mi_col,
-                 num_8x8_blocks_wide_lookup[BLOCK_64X64]);
-      ymis = MIN(cm->mi_rows - mi_row,
-                 num_8x8_blocks_high_lookup[BLOCK_64X64]);
-      for (y = 0; y < ymis; y++) {
-        for (x = 0; x < xmis; x++) {
-          const int bl_index2 = bl_index + y * cm->mi_cols + x;
-          // If the block is as a candidate for clean up then mark it
-          // for possible boost/refresh (segment 1). The segment id may get
-          // reset to 0 later if block gets coded anything other than ZEROMV.
-          if (cr->map[bl_index2] == 0) {
-            seg_map[bl_index2] = 1;
-            sum_map++;
-          } else if (cr->map[bl_index2] < 0) {
-            cr->map[bl_index2]++;
-          }
-        }
-      }
-      // Enforce constant segment over superblock.
-      // If segment is partial over superblock, reset to either all 1 or 0.
-      if (sum_map > 0 && sum_map < xmis * ymis) {
-        const int new_value = (sum_map >= xmis * ymis / 2);
-        for (y = 0; y < ymis; y++)
-          for (x = 0; x < xmis; x++)
-            seg_map[bl_index + y * cm->mi_cols + x] = new_value;
-      }
-      i++;
-      if (i == sbs_in_frame) {
-        i = 0;
-      }
-      if (sum_map >= xmis * ymis /2)
-        block_count--;
-    } while (block_count && i != cr->sb_index);
-    cr->sb_index = i;
+    // Update the segmentation and refresh map.
+    vp9_cyclic_refresh_update_map(cpi);
   }
 }
 
