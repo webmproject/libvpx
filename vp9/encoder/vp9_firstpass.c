@@ -61,6 +61,8 @@
 #define MIN_GF_INTERVAL             4
 #endif
 
+#define DISABLE_RC_LONG_TERM_MEM
+
 static void swap_yv12(YV12_BUFFER_CONFIG *a, YV12_BUFFER_CONFIG *b) {
   YV12_BUFFER_CONFIG temp = *a;
   *a = *b;
@@ -2330,7 +2332,11 @@ void vp9_rc_get_second_pass_params(VP9_COMP *cpi) {
 }
 
 void vp9_twopass_postencode_update(VP9_COMP *cpi) {
+#ifdef DISABLE_RC_LONG_TERM_MEM
+  const uint64_t bits_used = cpi->rc.this_frame_target;
+#else
   const uint64_t bits_used = cpi->rc.projected_frame_size;
+#endif
   cpi->twopass.bits_left -= bits_used;
   cpi->twopass.bits_left = MAX(cpi->twopass.bits_left, 0);
   // Update bits left to the kf and gf groups to account for overshoot or
