@@ -43,15 +43,13 @@ LIBVPX_TEST_SRCS-yes                   += encode_test_driver.h
 
 ## WebM Parsing
 ifeq ($(CONFIG_WEBM_IO), yes)
-NESTEGG_SRCS                           += ../third_party/nestegg/halloc/halloc.h
-NESTEGG_SRCS                           += ../third_party/nestegg/halloc/src/align.h
-NESTEGG_SRCS                           += ../third_party/nestegg/halloc/src/halloc.c
-NESTEGG_SRCS                           += ../third_party/nestegg/halloc/src/hlist.h
-NESTEGG_SRCS                           += ../third_party/nestegg/include/nestegg/nestegg.h
-NESTEGG_SRCS                           += ../third_party/nestegg/src/nestegg.c
-LIBVPX_TEST_SRCS-$(CONFIG_DECODERS)    += $(NESTEGG_SRCS)
+LIBWEBM_PARSER_SRCS                    += ../third_party/libwebm/mkvparser.cpp
+LIBWEBM_PARSER_SRCS                    += ../third_party/libwebm/mkvreader.cpp
+LIBWEBM_PARSER_SRCS                    += ../third_party/libwebm/mkvparser.hpp
+LIBWEBM_PARSER_SRCS                    += ../third_party/libwebm/mkvreader.hpp
+LIBVPX_TEST_SRCS-$(CONFIG_DECODERS)    += $(LIBWEBM_PARSER_SRCS)
 LIBVPX_TEST_SRCS-$(CONFIG_DECODERS)    += ../tools_common.h
-LIBVPX_TEST_SRCS-$(CONFIG_DECODERS)    += ../webmdec.c
+LIBVPX_TEST_SRCS-$(CONFIG_DECODERS)    += ../webmdec.cc
 LIBVPX_TEST_SRCS-$(CONFIG_DECODERS)    += ../webmdec.h
 LIBVPX_TEST_SRCS-$(CONFIG_DECODERS)    += webm_video_source.h
 endif
