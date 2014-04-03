@@ -856,13 +856,22 @@ static void update_state(VP9_COMP *cpi, PICK_MODE_CONTEXT *ctx,
 
   *mi_addr = *mi;
 
-  // For in frame adaptive Q, check for reseting the segment_id and updating
-  // the cyclic refresh map.
-  if ((cpi->oxcf.aq_mode == CYCLIC_REFRESH_AQ) && seg->enabled &&
-      output_enabled) {
-    vp9_cyclic_refresh_update_segment(cpi, &xd->mi[0]->mbmi,
-                                      mi_row, mi_col, bsize, 1);
-    vp9_init_plane_quantizers(cpi, x);
+  // If segmentation in use
+  if (seg->enabled && output_enabled) {
+    // For in frame complexity AQ copy the segment id from the segment map.
+    if (cpi->oxcf.aq_mode == COMPLEXITY_AQ) {
+      const uint8_t *const map = seg->update_map ? cpi->segmentation_map
+                                                 : cm->last_frame_seg_map;
+      mi_addr->mbmi.segment_id =
+        vp9_get_segment_id(cm, map, bsize, mi_row, mi_col);
+    }
+    // Else for cyclic refresh mode update the segment map, set the segment id
+    // and then update the quantizer.
+    else if (cpi->oxcf.aq_mode == CYCLIC_REFRESH_AQ) {
+      vp9_cyclic_refresh_update_segment(cpi, &xd->mi[0]->mbmi,
+                                        mi_row, mi_col, bsize, 1);
+      vp9_init_plane_quantizers(cpi, x);
+    }
   }
 
   max_plane = is_inter_block(mbmi) ? MAX_MB_PLANE : 1;
