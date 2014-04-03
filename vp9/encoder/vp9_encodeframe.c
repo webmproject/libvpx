@@ -1064,9 +1064,9 @@ static void rd_pick_sb_modes(VP9_COMP *cpi, const TileInfo *const tile,
                         (mi_col <= 1) || (mi_col >= (cm->mi_cols - 2));
     if (!is_edge && (complexity > 128))
       x->rdmult += ((x->rdmult * (complexity - 128)) / 256);
-  } else if (cpi->oxcf.aq_mode == CYCLIC_REFRESH_AQ) {
+  } else if (aq_mode == CYCLIC_REFRESH_AQ) {
     const uint8_t *const map = cm->seg.update_map ? cpi->segmentation_map
-        : cm->last_frame_seg_map;
+                                                  : cm->last_frame_seg_map;
     // If segment 1, use rdmult for that segment.
     if (vp9_get_segment_id(cm, map, bsize, mi_row, mi_col))
       x->rdmult = vp9_cyclic_refresh_get_rdmult(cpi->cyclic_refresh);
@@ -1092,8 +1092,7 @@ static void rd_pick_sb_modes(VP9_COMP *cpi, const TileInfo *const tile,
       vp9_clear_system_state();
       *totalrate = (int)round(*totalrate * rdmult_ratio);
     }
-  } else if ((cpi->oxcf.aq_mode == COMPLEXITY_AQ) ||
-      (cpi->oxcf.aq_mode == CYCLIC_REFRESH_AQ)) {
+  } else if (aq_mode == COMPLEXITY_AQ || aq_mode == CYCLIC_REFRESH_AQ) {
     x->rdmult = orig_rdmult;
   }
 }
@@ -2313,6 +2312,7 @@ static void encode_rd_sb_row(VP9_COMP *cpi, const TileInfo *const tile,
                              int mi_row, TOKENEXTRA **tp) {
   VP9_COMMON *const cm = &cpi->common;
   MACROBLOCKD *const xd = &cpi->mb.e_mbd;
+  SPEED_FEATURES *const sf = &cpi->sf;
   int mi_col;
 
   // Initialize the left context for the new SB row
@@ -2328,7 +2328,7 @@ static void encode_rd_sb_row(VP9_COMP *cpi, const TileInfo *const tile,
     BLOCK_SIZE i;
     MACROBLOCK *x = &cpi->mb;
 
-    if (cpi->sf.adaptive_pred_interp_filter) {
+    if (sf->adaptive_pred_interp_filter) {
       for (i = BLOCK_4X4; i < BLOCK_8X8; ++i) {
         const int num_4x4_w = num_4x4_blocks_wide_lookup[i];
         const int num_4x4_h = num_4x4_blocks_high_lookup[i];
@@ -2342,48 +2342,48 @@ static void encode_rd_sb_row(VP9_COMP *cpi, const TileInfo *const tile,
 
     vp9_zero(cpi->mb.pred_mv);
 
-    if ((cpi->sf.partition_search_type == SEARCH_PARTITION &&
-         cpi->sf.use_lastframe_partitioning) ||
-        cpi->sf.partition_search_type == FIXED_PARTITION ||
-        cpi->sf.partition_search_type == VAR_BASED_PARTITION ||
-        cpi->sf.partition_search_type == VAR_BASED_FIXED_PARTITION) {
+    if ((sf->partition_search_type == SEARCH_PARTITION &&
+         sf->use_lastframe_partitioning) ||
+         sf->partition_search_type == FIXED_PARTITION ||
+         sf->partition_search_type == VAR_BASED_PARTITION ||
+         sf->partition_search_type == VAR_BASED_FIXED_PARTITION) {
       const int idx_str = cm->mi_stride * mi_row + mi_col;
       MODE_INFO **mi_8x8 = cm->mi_grid_visible + idx_str;
       MODE_INFO **prev_mi_8x8 = cm->prev_mi_grid_visible + idx_str;
       cpi->mb.source_variance = UINT_MAX;
-      if (cpi->sf.partition_search_type == FIXED_PARTITION) {
+      if (sf->partition_search_type == FIXED_PARTITION) {
         set_offsets(cpi, tile, mi_row, mi_col, BLOCK_64X64);
         set_fixed_partitioning(cpi, tile, mi_8x8, mi_row, mi_col,
-                               cpi->sf.always_this_block_size);
+                               sf->always_this_block_size);
         rd_use_partition(cpi, tile, mi_8x8, tp, mi_row, mi_col, BLOCK_64X64,
                          &dummy_rate, &dummy_dist, 1);
-      } else if (cpi->sf.partition_search_type == VAR_BASED_FIXED_PARTITION) {
+      } else if (sf->partition_search_type == VAR_BASED_FIXED_PARTITION) {
         BLOCK_SIZE bsize;
         set_offsets(cpi, tile, mi_row, mi_col, BLOCK_64X64);
         bsize = get_rd_var_based_fixed_partition(cpi, mi_row, mi_col);
         set_fixed_partitioning(cpi, tile, mi_8x8, mi_row, mi_col, bsize);
         rd_use_partition(cpi, tile, mi_8x8, tp, mi_row, mi_col, BLOCK_64X64,
                          &dummy_rate, &dummy_dist, 1);
-      } else if (cpi->sf.partition_search_type == VAR_BASED_PARTITION) {
+      } else if (sf->partition_search_type == VAR_BASED_PARTITION) {
         choose_partitioning(cpi, tile, mi_row, mi_col);
         rd_use_partition(cpi, tile, mi_8x8, tp, mi_row, mi_col, BLOCK_64X64,
                          &dummy_rate, &dummy_dist, 1);
       } else {
         if ((cm->current_video_frame
-            % cpi->sf.last_partitioning_redo_frequency) == 0
+            % sf->last_partitioning_redo_frequency) == 0
             || cm->prev_mi == 0
             || cm->show_frame == 0
             || cm->frame_type == KEY_FRAME
             || cpi->rc.is_src_frame_alt_ref
-            || ((cpi->sf.use_lastframe_partitioning ==
+            || ((sf->use_lastframe_partitioning ==
                  LAST_FRAME_PARTITION_LOW_MOTION) &&
                  sb_has_motion(cm, prev_mi_8x8))) {
           // If required set upper and lower partition size limits
-          if (cpi->sf.auto_min_max_partition_size) {
+          if (sf->auto_min_max_partition_size) {
             set_offsets(cpi, tile, mi_row, mi_col, BLOCK_64X64);
             rd_auto_partition_range(cpi, tile, mi_row, mi_col,
-                                    &cpi->sf.min_partition_size,
-                                    &cpi->sf.max_partition_size);
+                                    &sf->min_partition_size,
+                                    &sf->max_partition_size);
           }
           rd_pick_partition(cpi, tile, tp, mi_row, mi_col, BLOCK_64X64,
                             &dummy_rate, &dummy_dist, 1, INT64_MAX);
@@ -2395,11 +2395,11 @@ static void encode_rd_sb_row(VP9_COMP *cpi, const TileInfo *const tile,
       }
     } else {
       // If required set upper and lower partition size limits
-      if (cpi->sf.auto_min_max_partition_size) {
+      if (sf->auto_min_max_partition_size) {
         set_offsets(cpi, tile, mi_row, mi_col, BLOCK_64X64);
         rd_auto_partition_range(cpi, tile, mi_row, mi_col,
-                                &cpi->sf.min_partition_size,
-                                &cpi->sf.max_partition_size);
+                                &sf->min_partition_size,
+                                &sf->max_partition_size);
       }
       rd_pick_partition(cpi, tile, tp, mi_row, mi_col, BLOCK_64X64,
                         &dummy_rate, &dummy_dist, 1, INT64_MAX);
@@ -2463,19 +2463,6 @@ static int check_dual_ref_flags(VP9_COMP *cpi) {
     return (!!(ref_flags & VP9_GOLD_FLAG) + !!(ref_flags & VP9_LAST_FLAG)
         + !!(ref_flags & VP9_ALT_FLAG)) >= 2;
   }
-}
-
-static int get_skip_flag(MODE_INFO **mi_8x8, int mis, int ymbs, int xmbs) {
-  int x, y;
-
-  for (y = 0; y < ymbs; y++) {
-    for (x = 0; x < xmbs; x++) {
-      if (!mi_8x8[y * mis + x]->mbmi.skip)
-        return 0;
-    }
-  }
-
-  return 1;
 }
 
 static void reset_skip_txfm_size(VP9_COMMON *cm, TX_SIZE txfm_max) {
@@ -2928,12 +2915,7 @@ static void nonrd_use_partition(VP9_COMP *cpi,
   if (mi_row >= cm->mi_rows || mi_col >= cm->mi_cols)
     return;
 
-  if (bsize >= BLOCK_8X8) {
-    subsize = mi_8x8[0]->mbmi.sb_type;
-  } else {
-    subsize = BLOCK_4X4;
-  }
-
+  subsize = (bsize >= BLOCK_8X8) ? mi_8x8[0]->mbmi.sb_type : BLOCK_4X4;
   partition = partition_lookup[bsl][subsize];
 
   switch (partition) {
@@ -3218,33 +3200,31 @@ void vp9_encode_frame(VP9_COMP *cpi) {
 
   if (cpi->sf.frame_parameter_update) {
     int i;
-    REFERENCE_MODE reference_mode;
-    /*
-     * This code does a single RD pass over the whole frame assuming
-     * either compound, single or hybrid prediction as per whatever has
-     * worked best for that type of frame in the past.
-     * It also predicts whether another coding mode would have worked
-     * better that this coding mode. If that is the case, it remembers
-     * that for subsequent frames.
-     * It does the same analysis for transform size selection also.
-     */
+
+    // This code does a single RD pass over the whole frame assuming
+    // either compound, single or hybrid prediction as per whatever has
+    // worked best for that type of frame in the past.
+    // It also predicts whether another coding mode would have worked
+    // better that this coding mode. If that is the case, it remembers
+    // that for subsequent frames.
+    // It does the same analysis for transform size selection also.
     const MV_REFERENCE_FRAME frame_type = get_frame_type(cpi);
     const int64_t *mode_thresh = cpi->rd_prediction_type_threshes[frame_type];
     const int64_t *filter_thresh = cpi->rd_filter_threshes[frame_type];
 
     /* prediction (compound, single or hybrid) mode selection */
-    if (frame_type == 3 || !cm->allow_comp_inter_inter)
-      reference_mode = SINGLE_REFERENCE;
+    if (frame_type == ALTREF_FRAME || !cm->allow_comp_inter_inter)
+      cm->reference_mode = SINGLE_REFERENCE;
     else if (mode_thresh[COMPOUND_REFERENCE] > mode_thresh[SINGLE_REFERENCE] &&
              mode_thresh[COMPOUND_REFERENCE] >
                  mode_thresh[REFERENCE_MODE_SELECT] &&
              check_dual_ref_flags(cpi) &&
              cpi->static_mb_pct == 100)
-      reference_mode = COMPOUND_REFERENCE;
+      cm->reference_mode = COMPOUND_REFERENCE;
     else if (mode_thresh[SINGLE_REFERENCE] > mode_thresh[REFERENCE_MODE_SELECT])
-      reference_mode = SINGLE_REFERENCE;
+      cm->reference_mode = SINGLE_REFERENCE;
     else
-      reference_mode = REFERENCE_MODE_SELECT;
+      cm->reference_mode = REFERENCE_MODE_SELECT;
 
     if (cm->interp_filter == SWITCHABLE) {
       if (frame_type != ALTREF_FRAME &&
@@ -3259,9 +3239,6 @@ void vp9_encode_frame(VP9_COMP *cpi) {
         cm->interp_filter = EIGHTTAP;
       }
     }
-
-    cpi->mb.e_mbd.lossless = cpi->oxcf.lossless;
-    cm->reference_mode = reference_mode;
 
     encode_frame_internal(cpi);
 
@@ -3341,7 +3318,6 @@ void vp9_encode_frame(VP9_COMP *cpi) {
       }
     }
   } else {
-    cpi->mb.e_mbd.lossless = cpi->oxcf.lossless;
     cm->reference_mode = SINGLE_REFERENCE;
     // Force the usage of the BILINEAR interp_filter.
     cm->interp_filter = BILINEAR;
