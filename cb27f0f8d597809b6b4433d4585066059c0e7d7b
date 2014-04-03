@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//vmw\u003d",
+        "filename": "vp9/vp9_dx_iface.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 232,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2014-04-03T22:44:23Z",
+      "side": 1,
+      "message": "Why not put the initialization code into its own function?",
+      "revId": "cb27f0f8d597809b6b4433d4585066059c0e7d7b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
