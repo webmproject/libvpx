@@ -385,7 +385,6 @@ typedef struct VP9_COMP {
 
   vp9_coeff_count coef_counts[TX_SIZES][PLANE_TYPES];
   vp9_coeff_probs_model frame_coef_probs[TX_SIZES][PLANE_TYPES];
-  vp9_coeff_stats frame_branch_ct[TX_SIZES][PLANE_TYPES];
 
   struct vpx_codec_pkt_list  *output_pkt_list;
 
