@@ -1002,7 +1002,7 @@ static void cal_nmvjointsadcost(int *mvjointsadcost) {
   mvjointsadcost[0] = 600;
   mvjointsadcost[1] = 300;
   mvjointsadcost[2] = 300;
-  mvjointsadcost[0] = 300;
+  mvjointsadcost[3] = 300;
 }
 
 static void cal_nmvsadcosts(int *mvsadcost[2]) {
