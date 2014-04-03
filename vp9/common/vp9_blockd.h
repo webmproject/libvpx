@@ -231,8 +231,6 @@ typedef struct macroblockd {
   /* Inverse transform function pointers. */
   void (*itxm_add)(const int16_t *input, uint8_t *dest, int stride, int eob);
 
-  const InterpKernel *interp_kernel;
-
   int corrupted;
 
   DECLARE_ALIGNED(16, int16_t, dqcoeff[MAX_MB_PLANE][64 * 64]);

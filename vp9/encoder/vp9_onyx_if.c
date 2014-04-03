@@ -3198,8 +3198,6 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
   }
 
   set_ref_ptrs(cm, xd, LAST_FRAME, LAST_FRAME);
-  xd->interp_kernel = vp9_get_interp_kernel(
-      DEFAULT_INTERP_FILTER == SWITCHABLE ? EIGHTTAP : DEFAULT_INTERP_FILTER);
 
   if (cpi->oxcf.aq_mode == VARIANCE_AQ) {
     vp9_vaq_init();

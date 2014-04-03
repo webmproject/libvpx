@@ -360,8 +360,6 @@ static void decode_block(VP9_COMMON *const cm, MACROBLOCKD *const xd,
     if (has_second_ref(mbmi))
       set_ref(cm, xd, 1, mi_row, mi_col);
 
-    xd->interp_kernel = vp9_get_interp_kernel(mbmi->interp_filter);
-
     // Prediction
     vp9_dec_build_inter_predictors_sb(xd, mi_row, mi_col, bsize);
 
