@@ -188,12 +188,11 @@ static void model_rd_for_sb_y(VP9_COMP *cpi, BLOCK_SIZE bsize,
 
   struct macroblock_plane *const p = &x->plane[0];
   struct macroblockd_plane *const pd = &xd->plane[0];
-  const BLOCK_SIZE bs = get_plane_block_size(bsize, pd);
 
-  int var = cpi->fn_ptr[bs].vf(p->src.buf, p->src.stride,
-                               pd->dst.buf, pd->dst.stride, &sse);
+  int var = cpi->fn_ptr[bsize].vf(p->src.buf, p->src.stride,
+                                  pd->dst.buf, pd->dst.stride, &sse);
 
-  vp9_model_rd_from_var_lapndz(sse + var, 1 << num_pels_log2_lookup[bs],
+  vp9_model_rd_from_var_lapndz(sse + var, 1 << num_pels_log2_lookup[bsize],
                                pd->dequant[1] >> 3, &rate, &dist);
   *out_rate_sum = rate;
   *out_dist_sum = dist << 3;
@@ -211,7 +210,6 @@ int64_t vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
   MB_MODE_INFO *mbmi = &xd->mi[0]->mbmi;
   struct macroblock_plane *const p = &x->plane[0];
   struct macroblockd_plane *const pd = &xd->plane[0];
-  const BLOCK_SIZE block_size = get_plane_block_size(bsize, &xd->plane[0]);
   MB_PREDICTION_MODE this_mode, best_mode = ZEROMV;
   MV_REFERENCE_FRAME ref_frame, best_ref_frame = LAST_FRAME;
   int_mv frame_mv[MB_MODE_COUNT][MAX_REF_FRAMES];
@@ -261,7 +259,7 @@ int64_t vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
     x->pred_mv_sad[ref_frame] = INT_MAX;
     if (cpi->ref_frame_flags & flag_list[ref_frame]) {
       vp9_setup_buffer_inter(cpi, x, tile,
-                             ref_frame, block_size, mi_row, mi_col,
+                             ref_frame, bsize, mi_row, mi_col,
                              frame_mv[NEARESTMV], frame_mv[NEARMV], yv12_mb);
     }
     frame_mv[NEWMV][ref_frame].as_int = INVALID_MV;
