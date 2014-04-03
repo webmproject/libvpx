@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//vuw\u003d",
+        "filename": "test/tools_common.sh",
+        "patchSetId": 18
+      },
+      "lineNbr": 59,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-04-03T07:29:36Z",
+      "side": 1,
+      "message": "Not in config.mk as far as I can tell.\n\nI renamed the misleading variable (forgot to in the last pass).",
+      "parentUuid": "AAAAdn//vu8\u003d",
+      "revId": "b3ed09e3b9ae1536f9f8ccb6d339d7b21ebde2cb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//vu4\u003d",
         "filename": "test/tools_common.sh",
         "patchSetId": 18
@@ -30,6 +48,41 @@
       "writtenOn": "2014-04-03T06:45:12Z",
       "side": 1,
       "message": "quote your $vars",
+      "revId": "b3ed09e3b9ae1536f9f8ccb6d339d7b21ebde2cb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//vt4\u003d",
+        "filename": "test/tools_common.sh",
+        "patchSetId": 18
+      },
+      "lineNbr": 117,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-04-03T07:29:36Z",
+      "side": 1,
+      "message": "Done... quoted/braced a ton of stuff. Might have overdone it a tad...",
+      "parentUuid": "AAAAdn//vu4\u003d",
+      "revId": "b3ed09e3b9ae1536f9f8ccb6d339d7b21ebde2cb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//vt0\u003d",
+        "filename": "test/tools_common.sh",
+        "patchSetId": 18
+      },
+      "lineNbr": 376,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-04-03T07:29:36Z",
+      "side": 1,
+      "message": "Oops/fixed.",
       "revId": "b3ed09e3b9ae1536f9f8ccb6d339d7b21ebde2cb",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
