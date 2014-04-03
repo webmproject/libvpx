@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//vts\u003d",
+        "filename": "tools_common.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-04-03T07:31:40Z",
+      "side": 1,
+      "message": "yay for msvc and posix fun",
+      "revId": "dae4cfcb70c0294b99f1f9ee70c8b4cb49d18bb2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
