@@ -34,6 +34,24 @@
       "revId": "3a6e7a162527eca52692aea99aa0b90131244c57",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//vlM\u003d",
+        "filename": "vp9/encoder/vp9_speed_features.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 116,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2014-04-04T00:44:52Z",
+      "side": 1,
+      "message": "suggested text:\nTWO_LOOP: does a dry run to see if any of the contexts need to be updated or not, before the final run.\nONE_LOOP: no dry run conducted.\nONE_LOOP_REDUCED: no dry run, also only half the coef contexts and bands are updated. The rest are not updated at all.",
+      "parentUuid": "AAAAdn//vlY\u003d",
+      "revId": "3a6e7a162527eca52692aea99aa0b90131244c57",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
