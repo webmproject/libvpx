@@ -565,11 +565,18 @@ static int rc_pick_q_and_bounds_one_pass_cbr(const VP9_COMP *cpi,
 
 #if LIMIT_QRANGE_FOR_ALTREF_AND_KEY
   // Limit Q range for the adaptive loop.
-  if (cm->frame_type == KEY_FRAME && !rc->this_key_frame_forced) {
-    if (!(cm->current_video_frame == 0))
-      *top_index = (active_worst_quality + active_best_quality * 3) / 4;
+  if (cm->frame_type == KEY_FRAME &&
+      !rc->this_key_frame_forced  &&
+      !(cm->current_video_frame == 0)) {
+    int qdelta = 0;
+    vp9_clear_system_state();
+    qdelta = vp9_compute_qdelta_by_rate(&cpi->rc, cm->frame_type,
+                                        active_worst_quality, 2.0);
+    *top_index = active_worst_quality + qdelta;
+    *top_index = (*top_index > *bottom_index) ? *top_index : *bottom_index;
   }
 #endif
+
   // Special case code to try and match quality with forced key frames
   if (cm->frame_type == KEY_FRAME && rc->this_key_frame_forced) {
     q = rc->last_boosted_qindex;
@@ -725,15 +732,26 @@ static int rc_pick_q_and_bounds_one_pass_vbr(const VP9_COMP *cpi,
   *bottom_index = active_best_quality;
 
 #if LIMIT_QRANGE_FOR_ALTREF_AND_KEY
-  // Limit Q range for the adaptive loop.
-  if (cm->frame_type == KEY_FRAME && !rc->this_key_frame_forced) {
-    if (!(cm->current_video_frame == 0))
-      *top_index = (active_worst_quality + active_best_quality * 3) / 4;
-  } else if (!rc->is_src_frame_alt_ref &&
-             (cpi->refresh_golden_frame || cpi->refresh_alt_ref_frame)) {
-    *top_index = (active_worst_quality + active_best_quality) / 2;
+  {
+    int qdelta = 0;
+    vp9_clear_system_state();
+
+    // Limit Q range for the adaptive loop.
+    if (cm->frame_type == KEY_FRAME &&
+        !rc->this_key_frame_forced &&
+        !(cm->current_video_frame == 0)) {
+      qdelta = vp9_compute_qdelta_by_rate(&cpi->rc, cm->frame_type,
+                                          active_worst_quality, 2.0);
+    } else if (!rc->is_src_frame_alt_ref &&
+               (cpi->refresh_golden_frame || cpi->refresh_alt_ref_frame)) {
+      qdelta = vp9_compute_qdelta_by_rate(&cpi->rc, cm->frame_type,
+                                          active_worst_quality, 1.75);
+    }
+    *top_index = active_worst_quality + qdelta;
+    *top_index = (*top_index > *bottom_index) ? *top_index : *bottom_index;
   }
 #endif
+
   if (oxcf->end_usage == USAGE_CONSTANT_QUALITY) {
     q = active_best_quality;
   // Special case code to try and match quality with forced key frames
@@ -907,13 +925,22 @@ static int rc_pick_q_and_bounds_two_pass(const VP9_COMP *cpi,
   *bottom_index = active_best_quality;
 
 #if LIMIT_QRANGE_FOR_ALTREF_AND_KEY
-  // Limit Q range for the adaptive loop.
-  if (cm->frame_type == KEY_FRAME && !rc->this_key_frame_forced) {
-    *top_index = (active_worst_quality + active_best_quality * 3) / 4;
-  } else if (!rc->is_src_frame_alt_ref &&
-             (oxcf->end_usage != USAGE_STREAM_FROM_SERVER) &&
-             (cpi->refresh_golden_frame || cpi->refresh_alt_ref_frame)) {
-    *top_index = (active_worst_quality + active_best_quality) / 2;
+  {
+    int qdelta = 0;
+    vp9_clear_system_state();
+
+    // Limit Q range for the adaptive loop.
+    if (cm->frame_type == KEY_FRAME && !rc->this_key_frame_forced) {
+      qdelta = vp9_compute_qdelta_by_rate(&cpi->rc, cm->frame_type,
+                                          active_worst_quality, 2.0);
+    } else if (!rc->is_src_frame_alt_ref &&
+               (oxcf->end_usage != USAGE_STREAM_FROM_SERVER) &&
+               (cpi->refresh_golden_frame || cpi->refresh_alt_ref_frame)) {
+      qdelta = vp9_compute_qdelta_by_rate(&cpi->rc, cm->frame_type,
+                                          active_worst_quality, 1.75);
+    }
+    *top_index = active_worst_quality + qdelta;
+    *top_index = (*top_index > *bottom_index) ? *top_index : *bottom_index;
   }
 #endif
 
