@@ -165,111 +165,122 @@ static vpx_codec_err_t update_error_state(vpx_codec_alg_priv_t *ctx,
   return error->error_code;
 }
 
+static void init_buffer_callbacks(vpx_codec_alg_priv_t *ctx) {
+  VP9_COMMON *const cm = &ctx->pbi->common;
+
+  cm->new_fb_idx = -1;  // Set index to not initialized.
+
+  if (ctx->get_ext_fb_cb != NULL && ctx->release_ext_fb_cb != NULL) {
+    cm->get_fb_cb = ctx->get_ext_fb_cb;
+    cm->release_fb_cb = ctx->release_ext_fb_cb;
+    cm->cb_priv = ctx->ext_priv;
+  } else {
+    cm->get_fb_cb = vp9_get_frame_buffer;
+    cm->release_fb_cb = vp9_release_frame_buffer;
+
+    if (vp9_alloc_internal_frame_buffers(&cm->int_frame_buffers))
+      vpx_internal_error(&cm->error, VPX_CODEC_MEM_ERROR,
+                         "Failed to initialize internal frame buffers");
+
+    cm->cb_priv = &cm->int_frame_buffers;
+  }
+}
+
+static void set_default_ppflags(vp8_postproc_cfg_t *cfg) {
+  cfg->post_proc_flag = VP8_DEBLOCK | VP8_DEMACROBLOCK;
+  cfg->deblocking_level = 4;
+  cfg->noise_level = 0;
+}
+
+static void set_ppflags(const vpx_codec_alg_priv_t *ctx,
+                        vp9_ppflags_t *flags) {
+  flags->post_proc_flag =
+#if CONFIG_POSTPROC_VISUALIZER
+      (ctx->dbg_color_ref_frame_flag ? VP9D_DEBUG_CLR_FRM_REF_BLKS : 0) |
+      (ctx->dbg_color_mb_modes_flag ? VP9D_DEBUG_CLR_BLK_MODES : 0) |
+      (ctx->dbg_color_b_modes_flag ? VP9D_DEBUG_CLR_BLK_MODES : 0) |
+      (ctx->dbg_display_mv_flag ? VP9D_DEBUG_DRAW_MV : 0) |
+#endif
+      ctx->postproc_cfg.post_proc_flag;
+
+  flags->deblocking_level = ctx->postproc_cfg.deblocking_level;
+  flags->noise_level = ctx->postproc_cfg.noise_level;
+#if CONFIG_POSTPROC_VISUALIZER
+  flags->display_ref_frame_flag = ctx->dbg_color_ref_frame_flag;
+  flags->display_mb_modes_flag = ctx->dbg_color_mb_modes_flag;
+  flags->display_b_modes_flag = ctx->dbg_color_b_modes_flag;
+  flags->display_mv_flag = ctx->dbg_display_mv_flag;
+#endif
+}
+
+static void init_decoder(vpx_codec_alg_priv_t *ctx) {
+  VP9D_CONFIG oxcf;
+  oxcf.width = ctx->si.w;
+  oxcf.height = ctx->si.h;
+  oxcf.version = 9;
+  oxcf.max_threads = ctx->cfg.threads;
+  oxcf.inv_tile_order = ctx->invert_tile_order;
+
+  ctx->pbi = vp9_create_decompressor(&oxcf);
+  if (ctx->pbi == NULL)
+    return;
+
+  vp9_initialize_dec();
+
+  // If postprocessing was enabled by the application and a
+  // configuration has not been provided, default it.
+  if (!ctx->postproc_cfg_set &&
+      (ctx->base.init_flags & VPX_CODEC_USE_POSTPROC))
+    set_default_ppflags(&ctx->postproc_cfg);
+
+  init_buffer_callbacks(ctx);
+}
+
 static vpx_codec_err_t decode_one(vpx_codec_alg_priv_t *ctx,
                                   const uint8_t **data, unsigned int data_sz,
                                   void *user_priv, int64_t deadline) {
-  vpx_codec_err_t res = VPX_CODEC_OK;
+  YV12_BUFFER_CONFIG sd = { 0 };
+  int64_t time_stamp = 0, time_end_stamp = 0;
+  vp9_ppflags_t flags = {0};
+  VP9_COMMON *cm = NULL;
 
   ctx->img_avail = 0;
 
   // Determine the stream parameters. Note that we rely on peek_si to
   // validate that we have a buffer that does not wrap around the top
   // of the heap.
-  if (!ctx->si.h)
-    res = ctx->base.iface->dec.peek_si(*data, data_sz, &ctx->si);
+  if (!ctx->si.h) {
+    const vpx_codec_err_t res =
+        ctx->base.iface->dec.peek_si(*data, data_sz, &ctx->si);
+    if (res != VPX_CODEC_OK)
+      return res;
+  }
 
-  /* Initialize the decoder instance on the first frame*/
-  if (!res && !ctx->decoder_init) {
-    VP9D_CONFIG oxcf;
-    struct VP9Decompressor *optr;
-
-    vp9_initialize_dec();
-
-    oxcf.width = ctx->si.w;
-    oxcf.height = ctx->si.h;
-    oxcf.version = 9;
-    oxcf.max_threads = ctx->cfg.threads;
-    oxcf.inv_tile_order = ctx->invert_tile_order;
-    optr = vp9_create_decompressor(&oxcf);
-
-    // If postprocessing was enabled by the application and a
-    // configuration has not been provided, default it.
-    if (!ctx->postproc_cfg_set &&
-        (ctx->base.init_flags & VPX_CODEC_USE_POSTPROC)) {
-      ctx->postproc_cfg.post_proc_flag = VP8_DEBLOCK | VP8_DEMACROBLOCK;
-      ctx->postproc_cfg.deblocking_level = 4;
-      ctx->postproc_cfg.noise_level = 0;
-    }
-
-    if (!optr) {
-      res = VPX_CODEC_ERROR;
-    } else {
-      VP9D_COMP *const pbi = (VP9D_COMP*)optr;
-      VP9_COMMON *const cm = &pbi->common;
-
-      // Set index to not initialized.
-      cm->new_fb_idx = -1;
-
-      if (ctx->get_ext_fb_cb != NULL && ctx->release_ext_fb_cb != NULL) {
-        cm->get_fb_cb = ctx->get_ext_fb_cb;
-        cm->release_fb_cb = ctx->release_ext_fb_cb;
-        cm->cb_priv = ctx->ext_priv;
-      } else {
-        cm->get_fb_cb = vp9_get_frame_buffer;
-        cm->release_fb_cb = vp9_release_frame_buffer;
-
-        if (vp9_alloc_internal_frame_buffers(&cm->int_frame_buffers))
-          vpx_internal_error(&cm->error, VPX_CODEC_MEM_ERROR,
-                             "Failed to initialize internal frame buffers");
-        cm->cb_priv = &cm->int_frame_buffers;
-      }
-
-      ctx->pbi = optr;
-    }
+  // Initialize the decoder instance on the first frame
+  if (!ctx->decoder_init) {
+    init_decoder(ctx);
+    if (ctx->pbi == NULL)
+      return VPX_CODEC_ERROR;
 
     ctx->decoder_init = 1;
   }
 
-  if (!res && ctx->pbi) {
-    VP9D_COMP *const pbi = ctx->pbi;
-    VP9_COMMON *const cm = &pbi->common;
-    YV12_BUFFER_CONFIG sd;
-    int64_t time_stamp = 0, time_end_stamp = 0;
-    vp9_ppflags_t flags = {0};
+  cm = &ctx->pbi->common;
 
-    if (ctx->base.init_flags & VPX_CODEC_USE_POSTPROC) {
-      flags.post_proc_flag =
-#if CONFIG_POSTPROC_VISUALIZER
-          (ctx->dbg_color_ref_frame_flag ? VP9D_DEBUG_CLR_FRM_REF_BLKS : 0) |
-          (ctx->dbg_color_mb_modes_flag ? VP9D_DEBUG_CLR_BLK_MODES : 0) |
-          (ctx->dbg_color_b_modes_flag ? VP9D_DEBUG_CLR_BLK_MODES : 0) |
-          (ctx->dbg_display_mv_flag ? VP9D_DEBUG_DRAW_MV : 0) |
-#endif
-          ctx->postproc_cfg.post_proc_flag;
+  if (vp9_receive_compressed_data(ctx->pbi, data_sz, data, deadline))
+    return update_error_state(ctx, &cm->error);
 
-      flags.deblocking_level = ctx->postproc_cfg.deblocking_level;
-      flags.noise_level = ctx->postproc_cfg.noise_level;
-#if CONFIG_POSTPROC_VISUALIZER
-      flags.display_ref_frame_flag = ctx->dbg_color_ref_frame_flag;
-      flags.display_mb_modes_flag = ctx->dbg_color_mb_modes_flag;
-      flags.display_b_modes_flag = ctx->dbg_color_b_modes_flag;
-      flags.display_mv_flag = ctx->dbg_display_mv_flag;
-#endif
-    }
+  if (ctx->base.init_flags & VPX_CODEC_USE_POSTPROC)
+    set_ppflags(ctx, &flags);
 
-    if (vp9_receive_compressed_data(pbi, data_sz, data, deadline))
-      res = update_error_state(ctx, &cm->error);
+  if (vp9_get_raw_frame(ctx->pbi, &sd, &time_stamp, &time_end_stamp, &flags))
+    return update_error_state(ctx, &cm->error);
 
-    if (!res && 0 == vp9_get_raw_frame(pbi, &sd, &time_stamp,
-                                       &time_end_stamp, &flags)) {
-      yuvconfig2image(&ctx->img, &sd, user_priv);
+  yuvconfig2image(&ctx->img, &sd, user_priv);
+  ctx->img.fb_priv = cm->frame_bufs[cm->new_fb_idx].raw_frame_buffer.priv;
+  ctx->img_avail = 1;
 
-      ctx->img.fb_priv = cm->frame_bufs[cm->new_fb_idx].raw_frame_buffer.priv;
-      ctx->img_avail = 1;
-    }
-  }
-
-  return res;
+  return VPX_CODEC_OK;
 }
 
 static void parse_superframe_index(const uint8_t *data, size_t data_sz,
