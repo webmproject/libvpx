@@ -111,7 +111,7 @@ static void set_good_speed_feature(VP9_COMP *cpi,
 
     sf->adaptive_rd_thresh = 3;
     sf->mode_skip_start = 6;
-    sf->use_fast_coef_updates = 2;
+    sf->use_fast_coef_updates = ONE_LOOP_REDUCED;
     sf->use_fast_coef_costing = 1;
   }
   // Additions or changes for speed 3 and above
@@ -220,7 +220,7 @@ static void set_rt_speed_feature(VP9_COMMON *cm,
     sf->use_uv_intra_rd_estimate = 1;
     sf->skip_encode_sb = 1;
     sf->subpel_iters_per_step = 1;
-    sf->use_fast_coef_updates = 2;
+    sf->use_fast_coef_updates = ONE_LOOP_REDUCED;
     sf->adaptive_rd_thresh = 4;
     sf->mode_skip_start = 6;
     sf->allow_skip_recode = 0;
@@ -328,7 +328,7 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
   sf->use_uv_intra_rd_estimate = 0;
   sf->allow_skip_recode = 0;
   sf->lpf_pick = LPF_PICK_FROM_FULL_IMAGE;
-  sf->use_fast_coef_updates = 0;
+  sf->use_fast_coef_updates = TWO_LOOP;
   sf->use_fast_coef_costing = 0;
   sf->mode_skip_start = MAX_MODES;  // Mode index at which mode skip mask set
   sf->use_nonrd_pick_mode = 0;

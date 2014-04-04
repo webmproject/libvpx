@@ -521,7 +521,7 @@ static void update_coef_probs_common(vp9_writer* const bc, VP9_COMP *cpi,
   const int entropy_nodes_update = UNCONSTRAINED_NODES;
   int i, j, k, l, t;
   switch (cpi->sf.use_fast_coef_updates) {
-    case 0: {
+    case TWO_LOOP: {
       /* dry run to see if there is any udpate at all needed */
       int savings = 0;
       int update[2] = {0, 0};
@@ -596,14 +596,14 @@ static void update_coef_probs_common(vp9_writer* const bc, VP9_COMP *cpi,
       return;
     }
 
-    case 1:
-    case 2: {
+    case ONE_LOOP:
+    case ONE_LOOP_REDUCED: {
       const int prev_coef_contexts_to_update =
-          cpi->sf.use_fast_coef_updates == 2 ? COEFF_CONTEXTS >> 1
-                                             : COEFF_CONTEXTS;
+          cpi->sf.use_fast_coef_updates == ONE_LOOP_REDUCED ?
+              COEFF_CONTEXTS >> 1 : COEFF_CONTEXTS;
       const int coef_band_to_update =
-          cpi->sf.use_fast_coef_updates == 2 ? COEF_BANDS >> 1
-                                             : COEF_BANDS;
+          cpi->sf.use_fast_coef_updates == ONE_LOOP_REDUCED ?
+              COEF_BANDS >> 1 : COEF_BANDS;
       int updates = 0;
       int noupdates_before_first = 0;
       for (i = 0; i < PLANE_TYPES; ++i) {
