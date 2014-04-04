@@ -113,6 +113,19 @@ typedef enum {
   VAR_BASED_PARTITION
 } PARTITION_SEARCH_TYPE;
 
+typedef enum {
+  // Does a dry run to see if any of the contexts need to be updated or not,
+  // before the final run.
+  TWO_LOOP = 0,
+
+  // No dry run conducted.
+  ONE_LOOP = 1,
+
+  // No dry run, also only half the coef contexts and bands are updated.
+  // The rest are not updated at all.
+  ONE_LOOP_REDUCED = 2
+} FAST_COEFF_UPDATE;
+
 typedef struct {
   // Frame level coding parameter update
   int frame_parameter_update;
@@ -291,7 +304,7 @@ typedef struct {
 
   // This feature limits the number of coefficients updates we actually do
   // by only looking at counts from 1/2 the bands.
-  int use_fast_coef_updates;  // 0: 2-loop, 1: 1-loop, 2: 1-loop reduced
+  FAST_COEFF_UPDATE use_fast_coef_updates;
 
   // This flag controls the use of non-RD mode decision.
   int use_nonrd_pick_mode;
