@@ -210,6 +210,51 @@ static void dealloc_compressor_data(VP9_COMP *cpi) {
   }
 }
 
+static void save_coding_context(VP9_COMP *cpi) {
+  CODING_CONTEXT *const cc = &cpi->coding_context;
+  VP9_COMMON *cm = &cpi->common;
+
+  // Stores a snapshot of key state variables which can subsequently be
+  // restored with a call to vp9_restore_coding_context. These functions are
+  // intended for use in a re-code loop in vp9_compress_frame where the
+  // quantizer value is adjusted between loop iterations.
+  vp9_copy(cc->nmvjointcost,  cpi->mb.nmvjointcost);
+  vp9_copy(cc->nmvcosts,  cpi->mb.nmvcosts);
+  vp9_copy(cc->nmvcosts_hp,  cpi->mb.nmvcosts_hp);
+
+  vp9_copy(cc->segment_pred_probs, cm->seg.pred_probs);
+
+  vpx_memcpy(cpi->coding_context.last_frame_seg_map_copy,
+             cm->last_frame_seg_map, (cm->mi_rows * cm->mi_cols));
+
+  vp9_copy(cc->last_ref_lf_deltas, cm->lf.last_ref_deltas);
+  vp9_copy(cc->last_mode_lf_deltas, cm->lf.last_mode_deltas);
+
+  cc->fc = cm->fc;
+}
+
+static void restore_coding_context(VP9_COMP *cpi) {
+  CODING_CONTEXT *const cc = &cpi->coding_context;
+  VP9_COMMON *cm = &cpi->common;
+
+  // Restore key state variables to the snapshot state stored in the
+  // previous call to vp9_save_coding_context.
+  vp9_copy(cpi->mb.nmvjointcost, cc->nmvjointcost);
+  vp9_copy(cpi->mb.nmvcosts, cc->nmvcosts);
+  vp9_copy(cpi->mb.nmvcosts_hp, cc->nmvcosts_hp);
+
+  vp9_copy(cm->seg.pred_probs, cc->segment_pred_probs);
+
+  vpx_memcpy(cm->last_frame_seg_map,
+             cpi->coding_context.last_frame_seg_map_copy,
+             (cm->mi_rows * cm->mi_cols));
+
+  vp9_copy(cm->lf.last_ref_deltas, cc->last_ref_lf_deltas);
+  vp9_copy(cm->lf.last_mode_deltas, cc->last_mode_lf_deltas);
+
+  cm->fc = cc->fc;
+}
+
 // Computes a q delta (in "q index" terms) to get from a starting q value
 // to a target q value
 int vp9_compute_qdelta(const VP9_COMP *cpi, double qstart, double qtarget) {
@@ -2334,13 +2379,13 @@ static void encode_with_recode_loop(VP9_COMP *cpi,
     // accurate estimate of output frame size to determine if we need
     // to recode.
     if (cpi->sf.recode_loop >= ALLOW_RECODE_KFARFGF) {
-      vp9_save_coding_context(cpi);
+      save_coding_context(cpi);
       cpi->dummy_packing = 1;
       if (!cpi->sf.use_nonrd_pick_mode)
         vp9_pack_bitstream(cpi, dest, size);
 
       rc->projected_frame_size = (int)(*size) << 3;
-      vp9_restore_coding_context(cpi);
+      restore_coding_context(cpi);
 
       if (frame_over_shoot_limit == 0)
         frame_over_shoot_limit = 1;
