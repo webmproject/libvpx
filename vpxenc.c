@@ -1503,7 +1503,7 @@ static void print_time(const char *label, int64_t etl) {
     etl -= mins * 60;
     secs = etl;
 
-    fprintf(stderr, "[%3s %2"PRId64":%02"PRId64": % 02"PRId64"] ",
+    fprintf(stderr, "[%3s %2"PRId64":%02"PRId64":%02"PRId64"] ",
             label, hours, mins, secs);
   } else {
     fprintf(stderr, "[%3s  unknown] ", label);
