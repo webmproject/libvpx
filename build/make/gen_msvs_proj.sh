@@ -162,7 +162,8 @@ generate_filter() {
                         done
                     done
                 fi
-                if [ "$pat" == "c" ] || [ "$pat" == "cc" ] ; then
+                if [ "$pat" == "c" ] || \
+                   [ "$pat" == "cc" ] || [ "$pat" == "cpp" ]; then
                     for plat in "${platforms[@]}"; do
                         for cfg in Debug Release; do
                             open_tag FileConfiguration \
@@ -561,7 +562,7 @@ generate_vcproj() {
     close_tag Configurations
 
     open_tag Files
-    generate_filter srcs   "Source Files"   "c;cc;def;odl;idl;hpj;bat;asm;asmx"
+    generate_filter srcs   "Source Files"   "c;cc;cpp;def;odl;idl;hpj;bat;asm;asmx"
     generate_filter hdrs   "Header Files"   "h;hm;inl;inc;xsd"
     generate_filter resrcs "Resource Files" "rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav"
     generate_filter resrcs "Build Files"    "mk"

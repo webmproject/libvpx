@@ -174,7 +174,8 @@ generate_filter() {
                         done
                     done
                     close_tag CustomBuild
-                elif [ "$pat" == "c" ] || [ "$pat" == "cc" ] ; then
+                elif [ "$pat" == "c" ] || \
+                     [ "$pat" == "cc" ] || [ "$pat" == "cpp" ]; then
                     open_tag ClCompile \
                         Include=".\\$f"
                     # Separate file names with Condition?
@@ -524,7 +525,7 @@ generate_vcxproj() {
     done
 
     open_tag ItemGroup
-    generate_filter "Source Files"   "c;cc;def;odl;idl;hpj;bat;asm;asmx;s"
+    generate_filter "Source Files"   "c;cc;cpp;def;odl;idl;hpj;bat;asm;asmx;s"
     close_tag ItemGroup
     open_tag ItemGroup
     generate_filter "Header Files"   "h;hm;inl;inc;xsd"
