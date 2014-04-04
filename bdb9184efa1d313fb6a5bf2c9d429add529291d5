@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//vag\u003d",
+        "filename": "vp9/encoder/vp9_pickmode.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 296,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2014-04-04T22:40:03Z",
+      "side": 1,
+      "message": "I probably leave the lookup to the original place since there are many break out condition, to save the reading of the value here because the \"continue\"s lead to the value never used.",
+      "revId": "bdb9184efa1d313fb6a5bf2c9d429add529291d5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
