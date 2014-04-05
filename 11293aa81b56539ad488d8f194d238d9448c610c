@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//vZA\u003d",
+        "filename": "vp9/decoder/vp9_decoder.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 104,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-04-05T00:10:43Z",
+      "side": 0,
+      "message": "We could have *several* decoder instances but this code should be called really once, so this check is a valid one.",
+      "revId": "11293aa81b56539ad488d8f194d238d9448c610c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
