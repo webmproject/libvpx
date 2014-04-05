@@ -152,11 +152,7 @@ static int estimate_bits_at_q(int frame_kind, int q, int mbs,
                               double correction_factor) {
   const int bpm = (int)(vp9_rc_bits_per_mb(frame_kind, q, correction_factor));
 
-  // Attempt to retain reasonable accuracy without overflow. The cutoff is
-  // chosen such that the maximum product of Bpm and MBs fits 31 bits. The
-  // largest Bpm takes 20 bits.
-  return (mbs > (1 << 11)) ? (bpm >> BPER_MB_NORMBITS) * mbs
-                           : (bpm * mbs) >> BPER_MB_NORMBITS;
+  return ((uint64_t)bpm * mbs) >> BPER_MB_NORMBITS;
 }
 
 int vp9_rc_clamp_pframe_target_size(const VP9_COMP *const cpi, int target) {
@@ -368,11 +364,8 @@ int vp9_rc_regulate_q(const VP9_COMP *cpi, int target_bits_per_frame,
 
   // Calculate required scaling factor based on target frame size and size of
   // frame produced using previous Q.
-  if (target_bits_per_frame >= (INT_MAX >> BPER_MB_NORMBITS))
-    // Case where we would overflow int
-    target_bits_per_mb = (target_bits_per_frame / cm->MBs) << BPER_MB_NORMBITS;
-  else
-    target_bits_per_mb = (target_bits_per_frame << BPER_MB_NORMBITS) / cm->MBs;
+    target_bits_per_mb =
+        ((uint64_t)target_bits_per_frame << BPER_MB_NORMBITS) / cm->MBs;
 
   i = active_best_quality;
 
