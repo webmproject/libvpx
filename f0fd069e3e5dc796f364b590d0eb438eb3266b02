@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//vXo\u003d",
+        "filename": "test/android/scrape_gtest_log.py",
+        "patchSetId": 2
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-04-05T03:38:17Z",
+      "side": 1,
+      "message": "Should this check be right at the beginning of main() function?",
+      "revId": "f0fd069e3e5dc796f364b590d0eb438eb3266b02",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//vXg\u003d",
+        "filename": "test/android/scrape_gtest_log.py",
+        "patchSetId": 2
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-04-05T03:38:17Z",
+      "side": 1,
+      "message": "I think it should be called after json generation (i.e. after \u0027print output\u0027).",
+      "revId": "f0fd069e3e5dc796f364b590d0eb438eb3266b02",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//vXc\u003d",
+        "filename": "test/android/scrape_gtest_log.py",
+        "patchSetId": 2
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-04-05T03:38:17Z",
+      "side": 1,
+      "message": "I still think that parentheses are better here :-) Especially because this is a syntax error in python 3.",
+      "revId": "f0fd069e3e5dc796f364b590d0eb438eb3266b02",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
