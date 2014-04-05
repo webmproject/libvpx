@@ -272,6 +272,7 @@ static double get_rate_correction_factor(const VP9_COMP *cpi) {
     return cpi->rc.key_frame_rate_correction_factor;
   } else {
     if ((cpi->refresh_alt_ref_frame || cpi->refresh_golden_frame) &&
+        !cpi->rc.is_src_frame_alt_ref &&
         !(cpi->use_svc && cpi->oxcf.end_usage == USAGE_STREAM_FROM_SERVER))
       return cpi->rc.gf_rate_correction_factor;
     else
@@ -284,6 +285,7 @@ static void set_rate_correction_factor(VP9_COMP *cpi, double factor) {
     cpi->rc.key_frame_rate_correction_factor = factor;
   } else {
     if ((cpi->refresh_alt_ref_frame || cpi->refresh_golden_frame) &&
+        !cpi->rc.is_src_frame_alt_ref &&
         !(cpi->use_svc && cpi->oxcf.end_usage == USAGE_STREAM_FROM_SERVER))
       cpi->rc.gf_rate_correction_factor = factor;
     else
