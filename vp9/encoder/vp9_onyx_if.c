@@ -782,6 +782,26 @@ static void init_rate_control(const VP9_CONFIG *oxcf, int pass,
 
   rc->total_actual_bits = 0;
   rc->total_target_vs_actual = 0;
+
+  rc->baseline_gf_interval = DEFAULT_GF_INTERVAL;
+  rc->frames_since_key = 8;  // Sensible default for first frame.
+  rc->this_key_frame_forced = 0;
+  rc->next_key_frame_forced = 0;
+  rc->source_alt_ref_pending = 0;
+  rc->source_alt_ref_active = 0;
+
+  rc->frames_till_gf_update_due = 0;
+
+  rc->ni_av_qi = oxcf->worst_allowed_q;
+  rc->ni_tot_qi = 0;
+  rc->ni_frames = 0;
+
+  rc->tot_q = 0.0;
+  rc->avg_q = vp9_convert_qindex_to_q(oxcf->worst_allowed_q);
+
+  rc->rate_correction_factor = 1.0;
+  rc->key_frame_rate_correction_factor = 1.0;
+  rc->gf_rate_correction_factor = 1.0;
 }
 
 static void init_config(struct VP9_COMP *cpi, VP9_CONFIG *oxcf) {
@@ -1158,7 +1178,6 @@ VP9_COMP *vp9_create_compressor(VP9_CONFIG *oxcf) {
   int i, j;
   VP9_COMP *const cpi = vpx_memalign(32, sizeof(VP9_COMP));
   VP9_COMMON *const cm = cpi != NULL ? &cpi->common : NULL;
-  RATE_CONTROL *const rc = cpi != NULL ? &cpi->rc : NULL;
 
   if (!cm)
     return NULL;
@@ -1188,8 +1207,6 @@ VP9_COMP *vp9_create_compressor(VP9_CONFIG *oxcf) {
 
   // Set reference frame sign bias for ALTREF frame to 1 (for now)
   cm->ref_frame_sign_bias[ALTREF_FRAME] = 1;
-
-  rc->baseline_gf_interval = DEFAULT_GF_INTERVAL;
 
   cpi->gold_is_last = 0;
   cpi->alt_is_last = 0;
@@ -1226,13 +1243,6 @@ VP9_COMP *vp9_create_compressor(VP9_CONFIG *oxcf) {
   /*Initialize the feed-forward activity masking.*/
   cpi->activity_avg = 90 << 12;
   cpi->key_frame_frequency = cpi->oxcf.key_freq;
-
-  rc->frames_since_key = 8;  // Sensible default for first frame.
-  rc->this_key_frame_forced = 0;
-  rc->next_key_frame_forced = 0;
-
-  rc->source_alt_ref_pending = 0;
-  rc->source_alt_ref_active = 0;
   cpi->refresh_alt_ref_frame = 0;
 
 #if CONFIG_MULTIPLE_ARF
@@ -1287,18 +1297,6 @@ VP9_COMP *vp9_create_compressor(VP9_CONFIG *oxcf) {
 #endif
 
   cpi->first_time_stamp_ever = INT64_MAX;
-
-  rc->frames_till_gf_update_due = 0;
-
-  rc->ni_av_qi = cpi->oxcf.worst_allowed_q;
-  rc->ni_tot_qi = 0;
-  rc->ni_frames = 0;
-  rc->tot_q = 0.0;
-  rc->avg_q = vp9_convert_qindex_to_q(cpi->oxcf.worst_allowed_q);
-
-  rc->rate_correction_factor = 1.0;
-  rc->key_frame_rate_correction_factor = 1.0;
-  rc->gf_rate_correction_factor = 1.0;
 
   cal_nmvjointsadcost(cpi->mb.nmvjointsadcost);
   cpi->mb.nmvcost[0] = &cpi->mb.nmvcosts[0][MV_MAX];
