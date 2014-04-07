@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//vR8\u003d",
+        "filename": "vp9/decoder/vp9_decoder.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 134,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-04-07T17:39:04Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//vSs\u003d",
+      "revId": "23c47c9a7d095009b0c59bdc041e271827edb03f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//vSk\u003d",
         "filename": "vp9/vp9_cx_iface.c",
         "patchSetId": 2
@@ -30,6 +48,24 @@
       "writtenOn": "2014-04-07T16:31:08Z",
       "side": 1,
       "message": "set and get was a pair of copy operations with different directions, renaming to copy can be a bit confusing here..",
+      "revId": "23c47c9a7d095009b0c59bdc041e271827edb03f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//vSA\u003d",
+        "filename": "vp9/vp9_cx_iface.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1064,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-04-07T17:39:04Z",
+      "side": 1,
+      "message": "No rename here, we had both VP8_SET_REFERENCE and VP8_COPY_REFERENCE.",
+      "parentUuid": "AAAAdn//vSk\u003d",
       "revId": "23c47c9a7d095009b0c59bdc041e271827edb03f",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
