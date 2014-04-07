@@ -16,6 +16,41 @@
       "revId": "9848d67bb319678ea0d6013bddfe28e03e0db5fa",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//vVE\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 3263,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-04-07T08:59:54Z",
+      "side": 0,
+      "message": "It is set inside encode_frame_internal() which is called right after this assignment:\n\ncpi-\u003emb.e_mbd.lossless \u003d cm-\u003ebase_qindex \u003d\u003d 0 \u0026\u0026 cm-\u003ey_dc_delta_q \u003d\u003d 0\n      \u0026\u0026 cm-\u003euv_dc_delta_q \u003d\u003d 0 \u0026\u0026 cm-\u003euv_ac_delta_q \u003d\u003d 0;",
+      "parentUuid": "AAAAdn//vV0\u003d",
+      "revId": "9848d67bb319678ea0d6013bddfe28e03e0db5fa",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//vVA\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 3344,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-04-07T08:59:54Z",
+      "side": 0,
+      "message": "The same here, mb.e_mbd.lossless is set in encode_frame_internal().",
+      "revId": "9848d67bb319678ea0d6013bddfe28e03e0db5fa",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
