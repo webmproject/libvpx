@@ -798,57 +798,6 @@ static void set_tile_limits(VP9_COMP *cpi) {
   cm->log2_tile_rows = cpi->oxcf.tile_rows;
 }
 
-static void init_rate_control(const VP9_CONFIG *oxcf, int pass,
-                              RATE_CONTROL *rc) {
-  if (pass == 0 && oxcf->end_usage == USAGE_STREAM_FROM_SERVER) {
-    rc->avg_frame_qindex[0] = oxcf->worst_allowed_q;
-    rc->avg_frame_qindex[1] = oxcf->worst_allowed_q;
-    rc->avg_frame_qindex[2] = oxcf->worst_allowed_q;
-  } else {
-    rc->avg_frame_qindex[0] = (oxcf->worst_allowed_q +
-                                   oxcf->best_allowed_q) / 2;
-    rc->avg_frame_qindex[1] = (oxcf->worst_allowed_q +
-                                   oxcf->best_allowed_q) / 2;
-    rc->avg_frame_qindex[2] = (oxcf->worst_allowed_q +
-                                   oxcf->best_allowed_q) / 2;
-  }
-
-  rc->last_q[0] = oxcf->best_allowed_q;
-  rc->last_q[1] = oxcf->best_allowed_q;
-  rc->last_q[2] = oxcf->best_allowed_q;
-
-  rc->buffer_level =    oxcf->starting_buffer_level;
-  rc->bits_off_target = oxcf->starting_buffer_level;
-
-  rc->rolling_target_bits      = rc->av_per_frame_bandwidth;
-  rc->rolling_actual_bits      = rc->av_per_frame_bandwidth;
-  rc->long_rolling_target_bits = rc->av_per_frame_bandwidth;
-  rc->long_rolling_actual_bits = rc->av_per_frame_bandwidth;
-
-  rc->total_actual_bits = 0;
-  rc->total_target_vs_actual = 0;
-
-  rc->baseline_gf_interval = DEFAULT_GF_INTERVAL;
-  rc->frames_since_key = 8;  // Sensible default for first frame.
-  rc->this_key_frame_forced = 0;
-  rc->next_key_frame_forced = 0;
-  rc->source_alt_ref_pending = 0;
-  rc->source_alt_ref_active = 0;
-
-  rc->frames_till_gf_update_due = 0;
-
-  rc->ni_av_qi = oxcf->worst_allowed_q;
-  rc->ni_tot_qi = 0;
-  rc->ni_frames = 0;
-
-  rc->tot_q = 0.0;
-  rc->avg_q = vp9_convert_qindex_to_q(oxcf->worst_allowed_q);
-
-  rc->rate_correction_factor = 1.0;
-  rc->key_frame_rate_correction_factor = 1.0;
-  rc->gf_rate_correction_factor = 1.0;
-}
-
 static void init_config(struct VP9_COMP *cpi, VP9_CONFIG *oxcf) {
   VP9_COMMON *const cm = &cpi->common;
   int i;
@@ -1245,7 +1194,7 @@ VP9_COMP *vp9_create_compressor(VP9_CONFIG *oxcf) {
   cpi->use_svc = 0;
 
   init_config(cpi, oxcf);
-  init_rate_control(&cpi->oxcf, cpi->pass, &cpi->rc);
+  vp9_rc_init(&cpi->oxcf, cpi->pass, &cpi->rc);
   init_pick_mode_context(cpi);
 
   cm->current_video_frame = 0;
