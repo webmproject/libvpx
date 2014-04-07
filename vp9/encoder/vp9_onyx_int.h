@@ -394,7 +394,6 @@ typedef struct VP9_COMP {
   MBGRAPH_FRAME_STATS mbgraph_stats[MAX_LAG_BUFFERS];
   int mbgraph_n_frames;             // number of frames filled in the above
   int static_mb_pct;                // % forced skip mbs by segmentation
-  int seg0_progress, seg0_idx, seg0_cnt;
 
   // for real time encoding
   int speed;
