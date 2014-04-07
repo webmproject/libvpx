@@ -19,6 +19,23 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//vQc\u003d",
+        "filename": "vp9/decoder/vp9_decodeframe.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 1011,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2014-04-07T19:43:33Z",
+      "side": 1,
+      "message": "Unnecessary ( )",
+      "revId": "1ed42c511977a2b14e1a914e25689fb8d8e2b6d6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//vX4\u003d",
         "filename": "vp9/encoder/vp9_bitstream.c",
         "patchSetId": 3
@@ -30,6 +47,40 @@
       "writtenOn": "2014-04-05T03:20:36Z",
       "side": 1,
       "message": "May be add enumeration with profile names?",
+      "revId": "1ed42c511977a2b14e1a914e25689fb8d8e2b6d6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//vQg\u003d",
+        "filename": "vp9/encoder/vp9_bitstream.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 1048,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2014-04-07T19:43:33Z",
+      "side": 1,
+      "message": "Why the conditional and not just:\nvp9_wb_write_bit(wb, version \u0026 1);\nvp9_wb_write_bit(wb, version \u003e\u003e 1);",
+      "revId": "1ed42c511977a2b14e1a914e25689fb8d8e2b6d6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//vQY\u003d",
+        "filename": "vp9/encoder/vp9_bitstream.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 1068,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2014-04-07T19:43:33Z",
+      "side": 1,
+      "message": "So this means its impossible to put 8-bit in version 2 syntax? How about an assert?",
       "revId": "1ed42c511977a2b14e1a914e25689fb8d8e2b6d6",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
