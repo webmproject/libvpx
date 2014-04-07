@@ -605,8 +605,7 @@ static INLINE int get_token_alloc(int mb_rows, int mb_cols) {
   return mb_rows * mb_cols * (16 * 16 * 3 + 4);
 }
 
-int vp9_calc_ss_err(const YV12_BUFFER_CONFIG *source,
-                    const YV12_BUFFER_CONFIG *reference);
+int vp9_get_y_sse(const YV12_BUFFER_CONFIG *a, const YV12_BUFFER_CONFIG *b);
 
 void vp9_alloc_compressor_data(VP9_COMP *cpi);
 
