@@ -40,24 +40,21 @@
                                    (1 << THR_ALTR) | \
                                    (1 << THR_GOLD))
 
-static void set_good_speed_feature(VP9_COMP *cpi,
-                                   VP9_COMMON *cm,
-                                   SPEED_FEATURES *sf,
-                                   int speed) {
-  int i;
+static void set_good_speed_feature(VP9_COMP *cpi, VP9_COMMON *cm,
+                                   SPEED_FEATURES *sf, int speed) {
   sf->adaptive_rd_thresh = 1;
-  sf->recode_loop = ((speed < 1) ? ALLOW_RECODE : ALLOW_RECODE_KFMAXBW);
+  sf->recode_loop = (speed < 1) ? ALLOW_RECODE : ALLOW_RECODE_KFMAXBW;
   sf->allow_skip_recode = 1;
 
   if (speed >= 1) {
     sf->use_square_partition_only = !frame_is_intra_only(cm);
     sf->less_rectangular_check  = 1;
-    sf->tx_size_search_method = vp9_frame_is_boosted(cpi)
-      ? USE_FULL_RD : USE_LARGESTALL;
+    sf->tx_size_search_method = vp9_frame_is_boosted(cpi) ? USE_FULL_RD
+                                                          : USE_LARGESTALL;
 
     if (MIN(cm->width, cm->height) >= 720)
-      sf->disable_split_mask = cm->show_frame ?
-        DISABLE_ALL_SPLIT : DISABLE_ALL_INTER_SPLIT;
+      sf->disable_split_mask = cm->show_frame ? DISABLE_ALL_SPLIT
+                                              : DISABLE_ALL_INTER_SPLIT;
     else
       sf->disable_split_mask = DISABLE_COMPOUND_SPLIT;
     sf->use_rd_breakout = 1;
@@ -74,19 +71,18 @@ static void set_good_speed_feature(VP9_COMP *cpi,
     sf->intra_y_mode_mask[TX_16X16] = INTRA_DC_H_V;
     sf->intra_uv_mode_mask[TX_16X16] = INTRA_DC_H_V;
   }
-  // Additions or changes from speed 1 for speed >= 2.
+
   if (speed >= 2) {
-    sf->tx_size_search_method = vp9_frame_is_boosted(cpi)
-      ? USE_FULL_RD : USE_LARGESTALL;
+    sf->tx_size_search_method = vp9_frame_is_boosted(cpi) ? USE_FULL_RD
+                                                          : USE_LARGESTALL;
 
     if (MIN(cm->width, cm->height) >= 720)
-      sf->disable_split_mask = cm->show_frame ?
-        DISABLE_ALL_SPLIT : DISABLE_ALL_INTER_SPLIT;
+      sf->disable_split_mask = cm->show_frame ? DISABLE_ALL_SPLIT
+                                              : DISABLE_ALL_INTER_SPLIT;
     else
       sf->disable_split_mask = LAST_AND_INTRA_SPLIT_ONLY;
 
     sf->adaptive_pred_interp_filter = 2;
-
     sf->reference_masking = 1;
     sf->mode_search_skip_flags = FLAG_SKIP_INTRA_DIRMISMATCH |
                                  FLAG_SKIP_INTRA_BESTINTER |
@@ -94,13 +90,12 @@ static void set_good_speed_feature(VP9_COMP *cpi,
                                  FLAG_SKIP_INTRA_LOWVAR;
     sf->disable_filter_search_var_thresh = 100;
     sf->comp_inter_joint_search_thresh = BLOCK_SIZES;
-
     sf->auto_min_max_partition_size = RELAXED_NEIGHBORING_MIN_MAX;
     sf->use_lastframe_partitioning = LAST_FRAME_PARTITION_LOW_MOTION;
     sf->adjust_partitioning_from_last_frame = 1;
     sf->last_partitioning_redo_frequency = 3;
   }
-  // Additions or changes for speed 3 and above
+
   if (speed >= 3) {
     if (MIN(cm->width, cm->height) >= 720)
       sf->disable_split_mask = DISABLE_ALL_SPLIT;
@@ -108,35 +103,32 @@ static void set_good_speed_feature(VP9_COMP *cpi,
       sf->disable_split_mask = DISABLE_ALL_INTER_SPLIT;
 
     sf->recode_loop = ALLOW_RECODE_KFMAXBW;
-
     sf->adaptive_rd_thresh = 3;
     sf->mode_skip_start = 6;
     sf->use_fast_coef_updates = ONE_LOOP_REDUCED;
     sf->use_fast_coef_costing = 1;
   }
-  // Additions or changes for speed 3 and above
+
   if (speed >= 4) {
     sf->use_square_partition_only = 1;
     sf->tx_size_search_method = USE_LARGESTALL;
     sf->disable_split_mask = DISABLE_ALL_SPLIT;
-
     sf->adaptive_rd_thresh = 4;
-
-    // Add a couple more skip flags
     sf->mode_search_skip_flags |= FLAG_SKIP_COMP_REFMISMATCH |
                                   FLAG_EARLY_TERMINATE;
-
     sf->disable_filter_search_var_thresh = 200;
-
     sf->use_lastframe_partitioning = LAST_FRAME_PARTITION_ALL;
     sf->use_lp32x32fdct = 1;
   }
+
   if (speed >= 5) {
+    int i;
+
     sf->partition_search_type = FIXED_PARTITION;
     sf->optimize_coefficients = 0;
     sf->search_method = HEX;
     sf->disable_filter_search_var_thresh = 500;
-    for (i = 0; i < TX_SIZES; i++) {
+    for (i = 0; i < TX_SIZES; ++i) {
       sf->intra_y_mode_mask[i] = INTRA_DC_ONLY;
       sf->intra_uv_mode_mask[i] = INTRA_DC_ONLY;
     }
@@ -144,8 +136,7 @@ static void set_good_speed_feature(VP9_COMP *cpi,
   }
 }
 
-static void set_rt_speed_feature(VP9_COMMON *cm,
-                                 SPEED_FEATURES *sf,
+static void set_rt_speed_feature(VP9_COMMON *cm, SPEED_FEATURES *sf,
                                  int speed) {
   sf->static_segmentation = 0;
   sf->adaptive_rd_thresh = 1;
@@ -155,12 +146,12 @@ static void set_rt_speed_feature(VP9_COMMON *cm,
   if (speed == 1) {
     sf->use_square_partition_only = !frame_is_intra_only(cm);
     sf->less_rectangular_check = 1;
-    sf->tx_size_search_method =
-        frame_is_intra_only(cm) ? USE_FULL_RD : USE_LARGESTALL;
+    sf->tx_size_search_method = frame_is_intra_only(cm) ? USE_FULL_RD
+                                                        : USE_LARGESTALL;
 
     if (MIN(cm->width, cm->height) >= 720)
-      sf->disable_split_mask = cm->show_frame ?
-        DISABLE_ALL_SPLIT : DISABLE_ALL_INTER_SPLIT;
+      sf->disable_split_mask = cm->show_frame ? DISABLE_ALL_SPLIT
+                                              : DISABLE_ALL_INTER_SPLIT;
     else
       sf->disable_split_mask = DISABLE_COMPOUND_SPLIT;
 
@@ -174,22 +165,22 @@ static void set_rt_speed_feature(VP9_COMMON *cm,
     sf->intra_uv_mode_mask[TX_16X16] = INTRA_DC_H_V;
     sf->encode_breakout_thresh = 8;
   }
+
   if (speed >= 2) {
     sf->use_square_partition_only = !frame_is_intra_only(cm);
     sf->less_rectangular_check = 1;
-    sf->tx_size_search_method =
-        frame_is_intra_only(cm) ? USE_FULL_RD : USE_LARGESTALL;
-
+    sf->tx_size_search_method = frame_is_intra_only(cm) ? USE_FULL_RD
+                                                        : USE_LARGESTALL;
     if (MIN(cm->width, cm->height) >= 720)
       sf->disable_split_mask = cm->show_frame ?
         DISABLE_ALL_SPLIT : DISABLE_ALL_INTER_SPLIT;
     else
       sf->disable_split_mask = LAST_AND_INTRA_SPLIT_ONLY;
 
-    sf->mode_search_skip_flags = FLAG_SKIP_INTRA_DIRMISMATCH
-        | FLAG_SKIP_INTRA_BESTINTER | FLAG_SKIP_COMP_BESTINTRA
-        | FLAG_SKIP_INTRA_LOWVAR;
-
+    sf->mode_search_skip_flags = FLAG_SKIP_INTRA_DIRMISMATCH |
+                                 FLAG_SKIP_INTRA_BESTINTER |
+                                 FLAG_SKIP_COMP_BESTINTRA |
+                                 FLAG_SKIP_INTRA_LOWVAR;
     sf->use_rd_breakout = 1;
     sf->adaptive_motion_search = 1;
     sf->adaptive_pred_interp_filter = 2;
@@ -213,6 +204,7 @@ static void set_rt_speed_feature(VP9_COMMON *cm,
     sf->intra_uv_mode_mask[TX_16X16] = INTRA_DC_H_V;
     sf->encode_breakout_thresh = 200;
   }
+
   if (speed >= 3) {
     sf->use_square_partition_only = 1;
     sf->disable_filter_search_var_thresh = 100;
@@ -229,6 +221,7 @@ static void set_rt_speed_feature(VP9_COMMON *cm,
     sf->lpf_pick = LPF_PICK_FROM_Q;
     sf->encode_breakout_thresh = 700;
   }
+
   if (speed >= 4) {
     int i;
     sf->last_partitioning_redo_frequency = 4;
@@ -254,6 +247,7 @@ static void set_rt_speed_feature(VP9_COMMON *cm,
     sf->max_intra_bsize = BLOCK_32X32;
     sf->allow_skip_recode = 1;
   }
+
   if (speed >= 5) {
     sf->max_partition_size = BLOCK_32X32;
     sf->min_partition_size = BLOCK_8X8;
@@ -268,21 +262,24 @@ static void set_rt_speed_feature(VP9_COMMON *cm,
     sf->search_method = FAST_DIAMOND;
     sf->allow_skip_recode = 0;
   }
+
   if (speed >= 6) {
     sf->partition_search_type = VAR_BASED_FIXED_PARTITION;
     sf->use_nonrd_pick_mode = 1;
     sf->search_method = FAST_DIAMOND;
   }
+
   if (speed >= 7) {
     int i;
     for (i = 0; i < BLOCK_SIZES; ++i)
-      sf->disable_inter_mode_mask[i] = 14;    // only search NEARESTMV (0)
+      sf->disable_inter_mode_mask[i] = ~(1 << INTER_OFFSET(NEARESTMV));
   }
 }
 
 void vp9_set_speed_features(VP9_COMP *cpi) {
   SPEED_FEATURES *const sf = &cpi->sf;
   VP9_COMMON *const cm = &cpi->common;
+  const VP9_CONFIG *const oxcf = &cpi->oxcf;
   const int speed = cpi->speed < 0 ? -cpi->speed : cpi->speed;
   int i;
 
@@ -293,7 +290,7 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
   sf->subpel_search_method = SUBPEL_TREE;
   sf->subpel_iters_per_step = 2;
   sf->subpel_force_stop = 0;
-  sf->optimize_coefficients = !cpi->oxcf.lossless;
+  sf->optimize_coefficients = !oxcf->lossless;
   sf->reduce_first_step_size = 0;
   sf->auto_mv_step_size = 0;
   sf->max_step_search_steps = MAX_MVSEARCH_STEPS;
@@ -343,7 +340,7 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
   // Recode loop tolerence %.
   sf->recode_tolerance = 25;
 
-  switch (cpi->oxcf.mode) {
+  switch (oxcf->mode) {
     case MODE_BESTQUALITY:
     case MODE_SECONDPASS_BEST:  // This is the best quality mode.
       cpi->diamond_search_sad = vp9_full_range_search;
@@ -360,9 +357,8 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
 
   // Slow quant, dct and trellis not worthwhile for first pass
   // so make sure they are always turned off.
-  if (cpi->pass == 1) {
+  if (cpi->pass == 1)
     sf->optimize_coefficients = 0;
-  }
 
   // No recode for 1 pass.
   if (cpi->pass == 0) {
@@ -370,14 +366,14 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
     sf->optimize_coefficients = 0;
   }
 
-  if (cpi->sf.subpel_search_method == SUBPEL_TREE) {
+  if (sf->subpel_search_method == SUBPEL_TREE) {
     cpi->find_fractional_mv_step = vp9_find_best_sub_pixel_tree;
     cpi->find_fractional_mv_step_comp = vp9_find_best_sub_pixel_comp_tree;
   }
 
-  cpi->mb.optimize = cpi->sf.optimize_coefficients == 1 && cpi->pass != 1;
+  cpi->mb.optimize = sf->optimize_coefficients == 1 && cpi->pass != 1;
 
-  if (cpi->encode_breakout && cpi->oxcf.mode == MODE_REALTIME &&
+  if (cpi->encode_breakout && oxcf->mode == MODE_REALTIME &&
       sf->encode_breakout_thresh > cpi->encode_breakout)
     cpi->encode_breakout = sf->encode_breakout_thresh;
 
