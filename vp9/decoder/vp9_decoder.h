@@ -84,9 +84,9 @@ int vp9_get_reference_dec(struct VP9Decompressor *pbi,
                           int index, YV12_BUFFER_CONFIG **fb);
 
 
-struct VP9Decompressor *vp9_create_decompressor(const VP9D_CONFIG *oxcf);
+struct VP9Decompressor *vp9_decoder_create(const VP9D_CONFIG *oxcf);
 
-void vp9_remove_decompressor(struct VP9Decompressor *pbi);
+void vp9_decoder_remove(struct VP9Decompressor *pbi);
 
 #ifdef __cplusplus
 }  // extern "C"

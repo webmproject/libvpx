@@ -33,10 +33,12 @@ typedef struct {
   int post_proc_flag;
   int deblocking_level;
   int noise_level;
+#if CONFIG_POSTPROC_VISUALIZER
   int display_ref_frame_flag;
   int display_mb_modes_flag;
   int display_b_modes_flag;
   int display_mv_flag;
+#endif  // CONFIG_POSTPROC_VISUALIZER
 } vp9_ppflags_t;
 
 #ifdef __cplusplus
